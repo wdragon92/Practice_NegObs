@@ -1,0 +1,94 @@
+{
+  "grid": {
+    "shape": [
+      601,
+      601
+    ],
+    "cell": 0.05,
+    "size_m": 30.0
+  },
+  "height": {
+    "min": -1.377167194664464,
+    "max": 0.22991538974859374
+  },
+  "base_relief": {
+    "low_freq_amp_measured": 0.3,
+    "low_freq_p2p": 0.5152376708150253,
+    "micro_amp_measured": 0.02,
+    "spec": "amp 0.2~0.3m / micro 0.01~0.03m"
+  },
+  "ditch_depth": {
+    "max_along_centerline": 1.3186876797440596,
+    "mean_interior": 1.150598666323666,
+    "spec": "1.2m +-20%"
+  },
+  "depth_modulation": {
+    "depth_s_min_interior": 0.96,
+    "depth_s_max_interior": 1.2898990915923352,
+    "ratio_range": [
+      0.8,
+      1.0749159096602794
+    ],
+    "spec": "+-20%"
+  },
+  "top_width": {
+    "stations_s": [
+      7.87,
+      8.23,
+      8.6
+    ],
+    "widths": [
+      2.73,
+      2.61,
+      2.69
+    ],
+    "mean": 2.676666666666667,
+    "min": 2.6100000000000003,
+    "max": 2.7300000000000004,
+    "note": "carve>2cm 지표 교차폭 실측 — 판정 A2/A5 대응으로 립 라운딩 스커트가 공칭 상단반폭 밖 lip_round(0.2m)까지 확장되므로 공칭 2.2보다 양쪽 ~0.3m씩 넓게 읽히는 것이 정상 (사다리꼴 본체 공칭 폭은 2.2 유지, 유효 벽각 ≈60°)",
+    "spec": "2.2m 기반 +-20% 변조 + 립 노이즈"
+  },
+  "meander": {
+    "amp_measured": 1.0,
+    "wavelength_measured": 6.219566333308848,
+    "spec": "+-1.0m / 5~8m"
+  },
+  "collapse": {
+    "centers_s": [
+      4.56,
+      10.41
+    ],
+    "zone_width": 2.0,
+    "lip_carve_at_collapse": [
+      0.183,
+      0.208
+    ],
+    "lip_carve_reference": 0.024,
+    "lip_drop_measured": [
+      0.16,
+      0.185
+    ],
+    "spec": "2곳, 립 0.1~0.2m 낮아짐"
+  },
+  "face_class": {
+    "top_pct": 95.62708333333333,
+    "wall_pct": 2.6930555555555555,
+    "bottom_pct": 1.6798611111111112,
+    "n_faces": 720000
+  },
+  "dither_band": {
+    "top_wall_band_m": 0.216,
+    "top_wall_n_faces": 565,
+    "wall_bottom_band_m": 0.227,
+    "wall_bottom_n_faces": 528,
+    "spec": "0.2~0.4m"
+  },
+  "normals": {
+    "max_len_error": 2.220446049250313e-16,
+    "min_z": 0.4068084111319547,
+    "all_upward": true
+  },
+  "reproducibility": {
+    "same_seed_identical": true
+  }
+}

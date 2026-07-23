@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# Logs / outputs
+logs/
+outputs/
+runs/
+wandb/
+*.log
+
+# Look-check screenshots (regenerated per run, ~1.5GB)
+look_check/
+
+# Downloadable heavy assets (re-fetch with assets/download_assets.py)
+assets/*.exr
+assets/*.jpg
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store

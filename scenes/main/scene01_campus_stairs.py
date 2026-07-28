@@ -712,61 +712,25 @@ def main():
                     collider=True)
 
     def build_tree(prefix, cx, cy, gz):
-        """[v5.1 현실성 — 공용 나무 v2 동형] 줄기(2단 테이퍼 + 미세 기울기)
-        + 수관(불규칙 타원 블롭 8개, 나무별 결정적 변형) + 지지대 3본.
+        """[사실화 v1] `scene_common.build_tree` 로 위임.
 
-        scene01 은 `scene_common` 빌더를 쓰지 않는 독립 파일이라 공용
-        `sc.build_tree`(v2)가 자동 적용되지 않는다. 그렇다고 sc 로 갈아타면
-        v4-B3 로 차단해 둔 지지대(성목에 신식재 지지대는 모순)가 되살아나므로,
-        **알고리즘만 동일하게 이식**하고 stakes 게이트는 유지한다.
-        좌표 해시 시드 → 재실행 시 동일, 나무마다 수형·크기·기울기가 달라
-        '막대사탕 복제' 인상이 사라진다."""
-        import random as _random
+        scene01 은 이 라이브러리의 첫 씬이라 나무 빌더도 자체 사본을 갖고
+        있었다(`make_pbr`·캡처 블록과 같은 패턴). 그 결과 **공용 계층 개선이
+        scene01 만 비껴갔다** — 사실화 라운드에서 `sc.build_tree` 내부를 실제
+        식생 USD 에셋으로 교체했는데 scene01 의 나무만 여전히 구(sphere) 블롭
+        이었다.
+
+        옛 주석은 "sc 로 갈아타면 v4-B3 로 차단한 지지대가 되살아난다"고 적혀
+        있었으나, 공용 함수는 v6 판정에서 이미 `stakes=False` 가 기본값이 됐다.
+        차단 사유가 사라졌으므로 위임한다.
+        """
         tr = PARAMS["tree"]
-        rnd = _random.Random((int(round(cx * 100)) * 73856093)
-                             ^ (int(round(cy * 100)) * 19349663))
-        th = tr["trunk_h"] * rnd.uniform(0.85, 1.25)
-        lean_a = rnd.uniform(0.0, 2 * math.pi)
-        lean = rnd.uniform(0.0, 4.0)                    # 기울기(도)
-        lx, ly = math.cos(lean_a), math.sin(lean_a)
-        off = th * math.sin(math.radians(lean))
-        add_cylinder(f"{prefix}/Trunk", (cx, cy, gz + th * 0.35),
-                     tr["trunk_r"], th * 0.7, M["wood"],
-                     rotX=lean * ly, rotY=-lean * lx)
-        add_cylinder(f"{prefix}/TrunkUp",
-                     (cx + lx * off * 0.5, cy + ly * off * 0.5, gz + th * 0.78),
-                     tr["trunk_r"] * 0.7, th * 0.55, M["wood"],
-                     rotX=lean * ly, rotY=-lean * lx)
-        cs = rnd.uniform(0.85, 1.25)                    # 수관 전체 스케일
-        ccx, ccy = cx + lx * off, cy + ly * off
-        czb = gz + th
-        add_sphere(f"{prefix}/Canopy_0", (ccx, ccy, czb + 0.35 * cs),
-                   (0.72 * cs, 0.72 * cs, 0.58 * cs),
-                   M["canopy_a"] if rnd.random() < 0.5 else M["canopy_b"])
-        for i in range(7):
-            a = rnd.uniform(0, 2 * math.pi)
-            d = rnd.uniform(0.15, 0.55) * cs
-            dz = rnd.uniform(0.05, 0.85) * cs
-            r = rnd.uniform(0.30, 0.55) * cs
-            mtl = M["canopy_a"] if rnd.random() < 0.5 else M["canopy_b"]
-            add_sphere(f"{prefix}/Canopy_{i + 1}",
-                       (ccx + d * math.cos(a), ccy + d * math.sin(a), czb + dz),
-                       (r, r * rnd.uniform(0.85, 1.0), r * rnd.uniform(0.7, 0.85)),
-                       mtl)
-        # 지지대 3본: 방위 a에서 줄기 쪽으로 기울임 (F9, 소각 근사, 도 단위):
-        #   rotY = −tilt*cos(a),  rotX = tilt*sin(a)
-        # v4-B3: 성목(수관 완성)에 신식재 지지대는 모순 → tree["stakes"]로 차단.
-        if not tr.get("stakes", True):
-            return
-        tilt = 15.0
-        for i, a in enumerate((90.0, 210.0, 330.0)):
-            rad = math.radians(a)
-            bx = cx + tr["stake_off"] * math.cos(rad)
-            by = cy + tr["stake_off"] * math.sin(rad)
-            add_cylinder(f"{prefix}/Stake_{i}",
-                         (bx, by, gz + tr["stake_h"] / 2.0),
-                         tr["stake_r"], tr["stake_h"], M["wood"],
-                         rotY=-tilt * math.cos(rad), rotX=tilt * math.sin(rad))
+        sc.build_tree(stage, prefix, cx, cy, gz,
+                      M["wood"], M["canopy_a"], M["canopy_b"],
+                      trunk_r=tr["trunk_r"], trunk_h=tr["trunk_h"],
+                      stake_r=tr["stake_r"], stake_h=tr["stake_h"],
+                      stake_off=tr["stake_off"],
+                      stakes=bool(tr.get("stakes", False)))
 
     def build_planters(M):
         pl = PARAMS["planter"]

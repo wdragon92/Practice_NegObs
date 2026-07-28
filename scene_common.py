@@ -362,7 +362,7 @@ def look_report():
             f"const={r['const']} skip={r['skipped']} | 베벨={r['bevel']} "
             f"디테일={r['detail']} 스킨={r['skin']} "
             f"승격={r.get('promoted', 0)} 상수MDL={r.get('const_mdl', 0)} "
-            f"웨더={r.get('weather', 0)} | 역할 "
+            f"웨더={r.get('weather', 0)} 나무={r.get('veg_asset', 0)} | 역할 "
             + ", ".join(f"{k}:{v}" for k, v in top))
 
 
@@ -1616,6 +1616,67 @@ def build_tactile(stage, path, x0, x1, y0, y1, mtl, z=0.0, proud=0.004):
                    (abs(x1 - x0), abs(y1 - y0), z_top - z_bot), mtl)
 
 
+# ===========================================================================
+# [5b] 실제 식생 에셋 (NVIDIA S3, `assets/vegetation/`)
+#
+# **왜 필요한가**: 종전 `build_tree` 는 실린더 줄기 + 구(sphere) 블롭 수관이라
+# 아무리 텍스처를 입혀도 "솜사탕"으로 읽혔다. 사실화 조사가 지목한
+# "표현 원자가 Cube/Cylinder/Sphere 3종뿐" 의 가장 눈에 띄는 사례다.
+# 재질 계층만 손대는 것으로는 이 문제를 못 고친다 — **기하를 바꿔야 한다.**
+#
+# 함정 (조달 조사 실측):
+#   · 에셋 `metersPerUnit = 0.01`(cm). USD reference 는 **단위 변환을 하지 않는다**
+#     → 스케일 안 걸면 벚나무가 464 m 로 들어온다.
+#   · 참조가 상대 경로라 S3 디렉터리 구조(`Trees/`·`Shrub/`)를 그대로 유지해야 한다.
+#   · 이 4종은 잎이 **실제 모델링 지오메트리**이고 알파 채널이 없다 →
+#     `enable_opacity` 를 켜면 오히려 망가진다(ZZ §10.2 적용 범위 정정).
+# ===========================================================================
+VEG_DIR = os.path.join(ASSETS_DIR, "vegetation")
+
+# (상대경로, 네이티브 높이[m], 가중치) — 한국 가로수 빈도 반영.
+# 은행·느티는 S3 에 없다(전수 확인). 벚나무가 한국 가로수 최다 수종 중 하나라 주력.
+VEG_TREES = [
+    ("Trees/Japanese_Cherry.usd", 4.64, 5),   # 벚나무
+    ("Trees/White_Pine.usd", 2.35, 2),        # 소나무류(소형)
+    ("Trees/Yellow_Pine.usd", 26.99, 1),      # 소나무류(대형) — 원경·배후림용
+]
+VEG_SHRUB = [("Shrub/Boxwood.usd", 0.74, 1)]  # 회양목
+
+
+def veg_available():
+    """식생 에셋이 실제로 있는지. 없으면 절차 블롭으로 폴백한다."""
+    return all(os.path.isfile(os.path.join(VEG_DIR, r))
+               for r, _, _ in VEG_TREES[:1])
+
+
+def add_vegetation(stage, prim_path, usd_rel, pos_m, yaw_deg=0.0,
+                   target_h=None, native_h=None):
+    """식생 USD 를 reference 로 붙인다. cm→m 단위 변환 자동.
+
+    target_h 지정 시 그 높이가 되도록 스케일한다 — 씬이 `trunk_h` 로 의도한
+    수고(樹高)를 유지해야 그림자·차폐 구성이 안 깨진다.
+    """
+    from pxr import Usd, UsdGeom, Gf
+    asset = os.path.join(VEG_DIR, usd_rel)
+    if not os.path.isfile(asset):
+        return None
+    unit = 0.01                                # 에셋 metersPerUnit (실측)
+    try:
+        src = Usd.Stage.Open(asset)
+        unit = (UsdGeom.GetStageMetersPerUnit(src)
+                / UsdGeom.GetStageMetersPerUnit(stage))
+    except Exception:
+        pass
+    xf = UsdGeom.Xform.Define(stage, prim_path)
+    xf.GetPrim().GetReferences().AddReference(asset)
+    xf.AddTranslateOp().Set(Gf.Vec3d(*[float(v) for v in pos_m]))
+    xf.AddRotateZOp().Set(float(yaw_deg))      # 순서 중요: T → R → S
+    s = unit * ((float(target_h) / float(native_h))
+                if (target_h and native_h) else 1.0)
+    xf.AddScaleOp().Set(Gf.Vec3f(s, s, s))
+    return xf
+
+
 def build_tree(stage, prefix, cx, cy, gz, wood_mtl, canopy_a_mtl, canopy_b_mtl,
                trunk_r=0.09, trunk_h=2.2, stake_r=0.015, stake_h=1.5,
                stake_off=0.5, stakes=False, canopy_blobs=10,
@@ -1629,10 +1690,29 @@ def build_tree(stage, prefix, cx, cy, gz, wood_mtl, canopy_a_mtl, canopy_b_mtl,
     실루엣을 깨뜨린다. `canopy_spread` 로 씬별 미세조정(1.0 = 기본).
     [mod6 §1(c)] `trunk_r` 기본 0.06 → 0.09(지름 18 cm) — 과세 줄기 보정.
     (명시 지정 호출은 영향 없음.)
+    [사실화 v1] `NEGOBS_LOOK_V1=1` 이고 식생 에셋이 있으면 **실제 나무 USD**로
+    교체된다. 시그니처가 같아 30개 씬이 수정 없이 그대로 바뀐다.
+    에셋이 없으면 아래 절차 블롭으로 폴백한다(회귀 0).
+
     반환: None(프림은 prefix 하위에 생성)."""
     import random as _random
     rnd = _random.Random((int(round(cx * 100)) * 73856093)
                          ^ (int(round(cy * 100)) * 19349663))
+
+    if LOOK_V1 and veg_available():
+        # 수종은 좌표 해시로 결정 — 같은 씬 재실행 시 동일하고, 나무마다 다르다.
+        pool = [t for t in VEG_TREES for _ in range(t[2])]
+        rel, native, _ = pool[rnd.randrange(len(pool))]
+        # 씬이 의도한 수고를 유지한다. trunk_h 는 '줄기 높이'라 전체 수고는 그보다 크다.
+        target = float(trunk_h) * rnd.uniform(1.45, 1.85)
+        try:
+            if add_vegetation(stage, prefix, rel, (cx, cy, gz),
+                              yaw_deg=rnd.uniform(0, 360),
+                              target_h=target, native_h=native) is not None:
+                LOOK_STATS["veg_asset"] = LOOK_STATS.get("veg_asset", 0) + 1
+                return
+        except Exception as e:
+            print(f"[룩v1][경고] 식생 에셋 배치 실패 {prefix}: {e} — 블롭 폴백")
     th = trunk_h * rnd.uniform(0.85, 1.25)
     lean_a = rnd.uniform(0.0, 2 * math.pi)
     lean = rnd.uniform(0.0, 4.0)               # 기울기(도)

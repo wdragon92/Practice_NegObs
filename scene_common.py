@@ -363,7 +363,8 @@ def look_report():
             f"디테일={r['detail']} 스킨={r['skin']} "
             f"승격={r.get('promoted', 0)} 상수MDL={r.get('const_mdl', 0)} "
             f"웨더={r.get('weather', 0)} 나무={r.get('veg_asset', 0)} "
-            f"간살={r.get('baluster', 0)} | 역할 "
+            f"간살={r.get('baluster', 0)} 관목={r.get('shrub', 0)} "
+            f"산포={r.get('debris', 0)} | 역할 "
             + ", ".join(f"{k}:{v}" for k, v in top))
 
 
@@ -1737,6 +1738,24 @@ VEG_DEBRIS = [
 # (상대경로, 대표 폭[m], **원점에서 바닥까지 깊이[m]**)
 #   Rocks 는 원점이 바위 *중심* 이라 지면 z 에 그대로 놓으면 절반이 묻힌다.
 #   z_min 만큼 띄워야 앉고, 일부러 묻을 때는 그만큼 덜 띄운다.
+# (상대경로, 네이티브 폭[m], 원점→바닥 깊이[m], 삼각형 수)
+#   한국 조경 실사종. Privet(쥐똥나무)=생울타리 표준종, Forsythia(개나리)·
+#   Rhododendron(철쭉)·Burning_Bush(화살나무)=화단 관목 표준.
+#   **삼각형이 비싸다**(5.5만~40만/주) — 근경에만 쓰고 원경은 블롭을 유지한다.
+VEG_SHRUBS = [
+    ("Shrub/Privet.usd",        1.70, 0.067, 147000),
+    ("Shrub/Boxwood.usd",       1.01, 0.019, 178000),
+    ("Shrub/Juniper.usd",       0.46, 0.013, 200000),
+    ("Shrub/Rhododendron.usd",  2.55, 0.416,  55000),
+    ("Shrub/Burning_Bush.usd",  2.64, 0.193, 141000),
+    ("Shrub/Forsythia.usd",     3.54, 0.007, 404000),
+]
+# 다듬은 생울타리는 실제로 상자 형태가 맞다(전정). 블롭이 틀린 것은
+# **화단의 다듬지 않은 관목**이다 — 거기를 실물로 바꾼다.
+SHRUB_HEDGE = ["Shrub/Privet.usd", "Shrub/Boxwood.usd"]
+SHRUB_ORNAMENT = ["Shrub/Rhododendron.usd", "Shrub/Burning_Bush.usd",
+                  "Shrub/Forsythia.usd", "Shrub/Juniper.usd"]
+
 VEG_ROCKS = [
     ("Rocks/rock_small_01.usda", 0.314, 0.128),
     ("Rocks/rock_small_08.usda", 0.196, 0.072),
@@ -1954,6 +1973,20 @@ def build_planter(stage, prefix, cx, cy, base_z, curb_mtl, grass_mtl,
                  sy + 2 * over if sy <= sx else sy, cap_h), curb_mtl)
     add_box(stage, f"{prefix}/Grass", (cx, cy, base_z + gh / 2.0),
             (S - 2 * t, S - 2 * t, gh), grass_mtl)
+    # 화단 관목 — 다듬지 않은 화단 관목이야말로 "솜사탕"의 본체다.
+    # (다듬은 생울타리가 상자 형태인 건 전정 결과라 오히려 맞다.)
+    # 나무가 있으면 중앙을 비우고 모서리 쪽에 앉힌다.
+    if LOOK_V1 and veg_available():
+        inner = S / 2.0 - t - 0.25
+        if inner > 0.35:
+            r = inner * 0.62
+            pts = [(cx + r, cy + r, base_z + gh), (cx - r, cy - r, base_z + gh)]
+            if tree_mtls is None:
+                pts.append((cx, cy, base_z + gh))
+            place_shrubs(stage, f"{prefix}/Shrub", pts,
+                         target_h=min(0.85, max(0.45, inner * 0.9)),
+                         pool=SHRUB_ORNAMENT,
+                         seed=zlib.crc32(f"{cx:.2f}_{cy:.2f}".encode()))
     if tree_mtls is not None:
         build_tree(stage, prefix, cx, cy, base_z + gh, *tree_mtls)
 
@@ -2087,6 +2120,54 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
                              (ox, oy, base + hh + 0.5 + ph_h + 0.09),
                              (ph_w + 0.24, ph_d + 0.24, 0.18), parapet_mtl))
     return prims
+
+
+def place_shrubs(stage, prefix, pts, target_h, pool=None, seed=1234,
+                 overlap=0.0, tag="Sh"):
+    """[사실화 v1] 지정 좌표들에 실물 관목 USD 를 세운다.
+
+    pts: [(x, y, z_ground), ...]
+    target_h: 목표 수고[m]. **랜덤화 폭은 ±8% 로 묶는다** — 관목 높이는
+      스케일 앵커라서 크게 흔들면 단서가 지워진다(수고 매직넘버 사고 재발 방지).
+    overlap: >0 이면 인접 개체가 겹치도록 폭 기준 배치를 호출부가 계산했다고 보고
+      크기만 키운다. 생울타리용.
+    반환: 배치 개수.
+    """
+    if not (LOOK_V1 and veg_available()):
+        return 0
+    names = pool or SHRUB_ORNAMENT
+    avail = [s for s in VEG_SHRUBS
+             if s[0] in names and os.path.isfile(os.path.join(VEG_DIR, s[0]))]
+    if not avail:
+        return 0
+    import random as _random
+    rnd = _random.Random(int(seed) & 0x7FFFFFFF)
+    placed = 0
+    for i, (px, py, pz) in enumerate(pts):
+        rel, nat_w, zmin, _tri = avail[rnd.randrange(len(avail))]
+        # 네이티브 '폭'만 실측돼 있어 높이 스케일은 폭 기준으로 근사한다.
+        # 관목은 대체로 폭≈높이라 이 근사가 타당하다. [추정]
+        s = (float(target_h) * (1.0 + overlap) / max(nat_w, 1e-6)
+             * rnd.uniform(0.92, 1.08))
+        try:
+            # zmin 은 네이티브 치수라 같은 배율로 늘려야 바닥이 지면에 붙는다.
+            # 이걸 빼먹으면 Rhododendron(zmin −0.416)은 41cm 가 땅에 묻힌다.
+            xf = add_vegetation(stage, f"{prefix}/{tag}_{i}", rel,
+                                (px, py, float(pz) + zmin * s),
+                                yaw_deg=rnd.uniform(0, 360),
+                                scale_mul=s)
+            if xf is not None:
+                try:
+                    stage.GetPrimAtPath(f"{prefix}/{tag}_{i}").SetInstanceable(True)
+                except Exception:
+                    pass
+                placed += 1
+        except Exception as e:
+            print(f"[룩v1][경고] 관목 배치 실패 {prefix}/{tag}_{i}: {e}")
+            break
+    if placed:
+        LOOK_STATS["shrub"] = LOOK_STATS.get("shrub", 0) + placed
+    return placed
 
 
 def build_hedge(stage, prefix, x0, y0, x1, y1, h, mtl=None, base_z=0.0,

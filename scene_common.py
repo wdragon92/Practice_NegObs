@@ -367,6 +367,60 @@ _LOOK_RULES = [
 ]
 
 
+
+# --- 채도 자기교정 ------------------------------------------------------
+# 역할별 계수만으로는 부족하다. Phase0 에서 이미 확인했듯 scene01 은 sat_mu 가
+# 0.146 으로 **이미 목표 하한(0.15) 미달**인데, 역할 계수는 씬 상태를 모르므로
+# 그대로 걸면 더 탈색된다(실측: 0.146 → 0.134). 과채도는 석재·흙·초목 계열의
+# **국소 현상**이지 전역이 아니다.
+# → 재질 **자신의 채도**를 보고 과채도일 때만 낮춘다. 자기교정이라 씬 정보가
+#   필요 없고, 이미 저채도인 재질은 건드리지 않는다.
+_SAT_KNEE = 0.30          # 이 값을 넘는 재질만 하향 대상
+_TEXSAT_CACHE = {}
+
+
+def _rgb_sat(rgb):
+    mx, mn = max(rgb), min(rgb)
+    return 0.0 if mx <= 1e-6 else (mx - mn) / mx
+
+
+def _texture_sat(path):
+    """텍스처 평균 채도. PIL 로 축소 로드해 계산하고 캐시한다(씬당 수 개)."""
+    if path in _TEXSAT_CACHE:
+        return _TEXSAT_CACHE[path]
+    v = None
+    try:
+        from PIL import Image
+        with Image.open(path) as im:
+            im = im.convert("RGB")
+            im.thumbnail((64, 64))
+            a = np.asarray(im).astype(np.float64) / 255.0
+        mx = a.max(-1)
+        mn = a.min(-1)
+        v = float(np.where(mx > 1e-6, (mx - mn) / np.maximum(mx, 1e-6), 0).mean())
+    except Exception:
+        v = None
+    _TEXSAT_CACHE[path] = v
+    return v
+
+
+def _effective_sat(spec, diff, base_color):
+    """역할 계수를 **과채도일 때만** 적용한 실효 채도 계수.
+
+    반환 1.0 = 원본 유지. 재질 채도를 모르면 보수적으로 1.0(무영향).
+    """
+    coef = float(spec.get("sat", 1.0))
+    if coef >= 0.999:
+        return 1.0
+    cur = (_rgb_sat(base_color) if base_color is not None
+           else (_texture_sat(diff) if diff else None))
+    if cur is None or cur <= _SAT_KNEE:
+        return 1.0                          # 이미 저채도 → 손대지 않는다
+    # knee 를 넘은 만큼만 비례 적용 (급격한 계단 방지)
+    t = min(1.0, (cur - _SAT_KNEE) / 0.20)
+    return 1.0 + (coef - 1.0) * t
+
+
 def _look_spec(path):
     """프림 경로에서 룩 사양을 얻는다. `.../Looks/Paving` → paving 사양.
 
@@ -891,7 +945,8 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
     sh.CreateInput("macro_amp_a", F).Set(0.07 if diff is None else 0.12)
     sh.CreateInput("macro_wavelength_a", F).Set(14.0)
     sh.CreateInput("desat_bright_a", F).Set(0.0 if diff is None else 0.30)
-    sh.CreateInput("saturation_a", F).Set(float(spec.get("sat", 1.0)))
+    sh.CreateInput("saturation_a", F).Set(
+        _effective_sat(spec, diff, base_color))
     sh.CreateInput("rough_noise_a", F).Set(0.22)
     sh.CreateInput("rough_noise_wavelength_a", F).Set(1.2)
     # 상수색 모드는 텍스처가 없어 축 전환 스트리크가 발생하지 않는다 →

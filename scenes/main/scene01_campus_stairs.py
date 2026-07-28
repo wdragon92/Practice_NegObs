@@ -504,57 +504,23 @@ def main():
     def make_pbr(path, diff=None, nor=None, rough=None, scale_m=1.0,
                  tint=None, metallic=0.0, roughness_const=None,
                  diffuse_color=None, bump=1.0):
-        """OmniPBR 재질. diff 지정 시 월드 투영 텍스처, 아니면 상수 컬러."""
-        mtl = UsdShade.Material.Define(stage, path)
-        sh = UsdShade.Shader.Define(stage, path + "/Shader")
-        sh.CreateImplementationSourceAttr(UsdShade.Tokens.sourceAsset)
-        sh.SetSourceAsset(Sdf.AssetPath(OMNIPBR_PATH), "mdl")
-        sh.SetSourceAssetSubIdentifier("OmniPBR", "mdl")
-        F = Sdf.ValueTypeNames.Float
-        C3 = Sdf.ValueTypeNames.Color3f
-        A = Sdf.ValueTypeNames.Asset
-        B = Sdf.ValueTypeNames.Bool
-        F2 = Sdf.ValueTypeNames.Float2
+        """[사실화 v1] scene_common 으로 위임.
 
-        def _tex(name, path_, cs):
-            i = sh.CreateInput(name, A)
-            i.Set(path_)
-            try:                                   # normalmap 은 raw 필수 (v1 패턴)
-                i.GetAttr().SetColorSpace(cs)
-            except Exception:
-                pass
+        scene01 은 이 라이브러리의 **첫 씬**이라 재질 팩토리를 자체 구현했고,
+        이후 그 코드가 `scene_common.make_pbr` 로 추출됐다. 그런데 scene01 만
+        로컬 사본을 계속 쓰는 바람에 **33씬 중 유일하게 공용 계층을 타지 않는
+        씬**이 됐다. 사실화 룩 레이어(역할별 처방·MDL 교체·베벨·채도)가
+        `scene_common.make_pbr` 에 들어가면서 scene01 에만 아무것도 적용되지
+        않는 문제가 드러나 여기서 정리한다.
 
-        if diff is not None:
-            _tex("diffuse_texture", diff, "auto")
-            if nor is not None:
-                _tex("normalmap_texture", nor, "raw")
-            if rough is not None:
-                _tex("reflectionroughness_texture", rough, "raw")
-                sh.CreateInput("reflection_roughness_texture_influence",
-                               F).Set(1.0)
-            # 월드 스페이스 투영 (축정렬 박스 → 늘어남 없음). world_or_object=True 가
-            # 월드 스페이스("uses world space for projection"). False(오브젝트 스페이스)면
-            # Cube 를 xformOp 스케일로 키운 프림에서 텍스처가 스케일에 끌려 늘어난다.
-            # enable_ORM_texture 는 건드리지 않음.
-            sh.CreateInput("project_uvw", B).Set(True)
-            sh.CreateInput("world_or_object", B).Set(True)
-            s = 1.0 / float(scale_m)               # texture_scale = 1/타일크기[m]
-            sh.CreateInput("texture_scale", F2).Set(Gf.Vec2f(s, s))
-            sh.CreateInput("bump_factor", F).Set(float(bump))
-        if diffuse_color is not None:
-            sh.CreateInput("diffuse_color_constant",
-                           C3).Set(Gf.Vec3f(*diffuse_color))
-        if tint is not None:
-            sh.CreateInput("diffuse_tint", C3).Set(Gf.Vec3f(*tint))
-        sh.CreateInput("metallic_constant", F).Set(float(metallic))
-        if roughness_const is not None:
-            sh.CreateInput("reflection_roughness_constant",
-                           F).Set(float(roughness_const))
-        for out in ("surface", "displacement", "volume"):
-            mtl.CreateOutput(f"mdl:{out}",
-                             Sdf.ValueTypeNames.Token).ConnectToSource(
-                sh.ConnectableAPI(), "out")
-        return mtl
+        위임 전후로 동작은 동일하다 — 로컬 사본은 `sc.make_pbr` 의 기능적
+        부분집합이었고(specular_level·emission·uv_mode 없음), 호출부도 그
+        인자만 쓴다. 검증: 룩 레이어 OFF 로 렌더해 기존 산출과 대조.
+        """
+        return sc.make_pbr(stage, path, diff=diff, nor=nor, rough=rough,
+                           scale_m=scale_m, tint=tint, metallic=metallic,
+                           roughness_const=roughness_const,
+                           diffuse_color=diffuse_color, bump=bump)
 
     def setup_materials():
         sc = mp["scale"]
@@ -1227,65 +1193,16 @@ def main():
     # 자동 캡처 모드 (headless 검증 파이프라인 — noon 전용)
     # ===================================================================
     if capture_mode:
-        out_dir = os.environ.get("NEGOBS_CAPTURE_DIR",
-                                 os.path.join(LOOKCHECK_DIR, "auto"))
-        os.makedirs(out_dir, exist_ok=True)
-        mode_sel = os.environ.get("NEGOBS_CAPTURE_MODE", "rt")
-        modes = ["rt", "pt"] if mode_sel == "both" else [mode_sel]
-
-        VIEWS = build_views()
-        view_f = os.environ.get("NEGOBS_VIEWS", "")
-        if view_f:
-            keep = {v.strip() for v in view_f.split(",") if v.strip()}
-            VIEWS = {k: v for k, v in VIEWS.items() if k in keep}
-
-        manifest = []
-        print(f"[캡처] 모드={modes} 뷰={list(VIEWS)}")
-        for _ in range(30):                        # 초기 로딩 워밍업
-            simulation_app.update()
-
-        for mode in modes:
-            set_render_mode("PathTracing" if mode == "pt"
-                            else "RaytracedLighting")
-            warm = int(os.environ.get(
-                "NEGOBS_WARMUP", str(pt_spp + 60 if mode == "pt" else 90)))
-            for vname, v in VIEWS.items():
-                look_from(v["eye"], target=v["tgt"])
-                for _ in range(warm):              # 워밍업 없으면 검은 이미지
-                    simulation_app.update()
-                fp = os.path.join(out_dir, f"{mode}_noon_{vname}.png")
-                capture(fp)
-                # 캡처는 비동기 → 파일 크기가 안정될 때까지 대기
-                ok, prev_sz = False, -1
-                for _ in range(40):
-                    simulation_app.update()
-                    if os.path.isfile(fp):
-                        sz = os.path.getsize(fp)
-                        if sz > 0 and sz == prev_sz:
-                            ok = True
-                            break
-                        prev_sz = sz
-                manifest.append(dict(file=fp, mode=mode, sky="noon",
-                                     view=vname, ok=ok))
-                print(f"[캡처] {os.path.basename(fp)} {'OK' if ok else 'FAIL'}")
-
-        # manifest 병합 (조각 실행 간 — 같은 file 항목은 갱신)
-        mf_path = os.path.join(out_dir, "manifest.json")
-        prev = dict(views={}, shots=[])
-        if os.path.isfile(mf_path):
-            try:
-                with open(mf_path) as f:
-                    prev = json.load(f)
-            except Exception:
-                pass
-        shots = {s["file"]: s for s in prev.get("shots", [])}
-        for s in manifest:
-            shots[s["file"]] = s
-        prev.get("views", {}).update({k: v for k, v in VIEWS.items()})
-        with open(mf_path, "w") as f:
-            json.dump(dict(views=prev.get("views", VIEWS),
-                           shots=list(shots.values())),
-                      f, indent=2, ensure_ascii=False)
+        # [사실화 v1] 자체 캡처 블록 → `scene_common.capture_pipeline` 위임.
+        # 이 블록이 바로 capture_pipeline 의 원본이었고(여기서 추출됨), 이후
+        # 나머지 32씬은 공용 함수를 쓰는데 scene01 만 사본을 유지해 갈라져 있었다.
+        # 그 결과 PT 가속(NEGOBS_PT_FAST)·룩 레이어 계측 리포트 같은 공용 계층
+        # 개선이 scene01 에만 적용되지 않았다.
+        sc.capture_pipeline(
+            simulation_app, build_views(),
+            os.path.join(LOOKCHECK_DIR, "auto"),
+            set_render_mode,
+            lambda eye, tgt: look_from(eye, target=tgt))
         simulation_app.close()
         return
 

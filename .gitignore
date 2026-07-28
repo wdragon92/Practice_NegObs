@@ -15,12 +15,18 @@ runs/
 wandb/
 *.log
 
-# Look-check screenshots (regenerated per run, ~1.5GB)
+# Render outputs (regenerated per run, ~11GB)
 look_check/
 
-# Downloadable heavy assets (re-fetch with assets/download_assets.py)
+# Heavy binary assets (~800MB) — 재현 방법:
+#   python assets/download_assets.py                  # qwantani HDRI + 룩데브 v1 텍스처
+#   python assets/scene01/download_scene01_assets.py  # 본편/배치1 전 텍스처 + overcast HDRI + 점자블록
+# (noon HDRI의 _lookfix 파생본은 scene_common.ensure_noon_lookfix 가 첫 실행 시 자동 생성)
 assets/*.exr
 assets/*.jpg
+assets/scene01/*
+!assets/scene01/download_scene01_assets.py
+# assets/signs/*.png 은 92KB로 작아 추적 유지(생성기: assets/signs/gen_signs.py)
 
 # Editors / OS
 .vscode/

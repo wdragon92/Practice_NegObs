@@ -32,3 +32,8 @@ assets/scene01/*
 .vscode/
 .idea/
 .DS_Store
+
+# NVIDIA Omniverse 식생 USD (~128MB) — **재배포 금지 라이선스**.
+# 렌더 이미지 공개는 가능하나 USD 자체는 배포 불가(ZZ_synthesis §9.2).
+# 재현: python assets/download_vegetation.py
+assets/vegetation/

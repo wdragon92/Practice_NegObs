@@ -544,29 +544,33 @@ def _promote_const_to_texture(spec, diffuse_color):
     if not cands or diffuse_color is None:
         return None, None, None, diffuse_color
     try:
-        # [밝기 분기] 의도색 휘도에 **가장 가까운 텍스처**를 고른다.
+        # [밝기 분기] **1순위(의미) 우선, 예산 초과 시에만 대안**.
+        #   휘도만으로 고르면 낙엽에 잔디 텍스처가 붙는 등 재질 의미가 깨진다.
         #   종전에는 역할당 텍스처가 하나라, 밝은 파라펫(0.9)에 어두운
         #   concrete_floor(선형휘도 0.115)를 씌우면 배율이 7.8배가 되어
         #   클램프(2.5)에 포화 → **의도 대비 2.5~4.8배 어둡고 색까지 편향**됐다.
         #   ("색은 그대로, 결만 얻는다"는 주석이 사실과 반대였다.)
         #   가까운 텍스처를 고르면 배율이 1 근처로 내려가 클램프가 안 걸린다.
-        want = (0.2126 * diffuse_color[0] + 0.7152 * diffuse_color[1]
-                + 0.0722 * diffuse_color[2])
-        best, best_d = None, None
-        for r in cands:
+        gain_max = float(spec.get("max_gain", _PROMOTE_MAX_GAIN))
+        # 후보 순서 = 의미 우선순위. tex 를 맨 앞에 놓는다.
+        prim = spec.get("tex")
+        order = ([prim] if prim in cands else []) + [r for r in cands if r != prim]
+        role = None
+        for r in order:
             pth = tex_path(r, "diff")
             if not os.path.isfile(pth):
                 continue
             tm = _texture_mean(pth)
             if tm is None or min(tm) < 1e-4:
                 continue
-            lum = 0.2126 * tm[0] + 0.7152 * tm[1] + 0.0722 * tm[2]
-            d = abs(math.log(max(want, 1e-4) / max(lum, 1e-4)))
-            if best_d is None or d < best_d:
-                best, best_d = r, d
-        if best is None:
+            ratio = [float(c) / m for c, m in zip(diffuse_color, tm)]
+            # 채널 배율 편차가 크면 색 변동이 특정 채널로 쏠린다(잡음 증폭).
+            spread = max(ratio) / max(min(ratio), 1e-6)
+            if max(ratio) <= gain_max and spread <= 4.0:
+                role = r
+                break
+        if role is None:
             return None, None, None, diffuse_color
-        role = best
         diff = tex_path(role, "diff")
         nor = tex_path(role, "nor") if "nor" in TEX[role] else None
         rough = tex_path(role, "rough") if "rough" in TEX[role] else None
@@ -580,9 +584,6 @@ def _promote_const_to_texture(spec, diffuse_color):
         # 의도 알베도 / 텍스처 평균(선형). 배율이 과하면 텍스처 잡음까지 증폭되고
         # 하이라이트가 클리핑되므로, **클램프에 걸릴 정도면 승격을 포기**하고
         # 상수색 MDL 로 되돌린다. 색을 틀리게 만드느니 결을 포기하는 편이 낫다.
-        ratio = [float(c) / m for c, m in zip(diffuse_color, tm)]
-        if max(ratio) > float(spec.get("max_gain", _PROMOTE_MAX_GAIN)):
-            return None, None, None, diffuse_color
         bc = tuple(max(0.05, r) for r in ratio)
         return diff, nor, rough, bc
     except Exception as e:

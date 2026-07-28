@@ -362,7 +362,8 @@ def look_report():
             f"const={r['const']} skip={r['skipped']} | 베벨={r['bevel']} "
             f"디테일={r['detail']} 스킨={r['skin']} "
             f"승격={r.get('promoted', 0)} 상수MDL={r.get('const_mdl', 0)} "
-            f"웨더={r.get('weather', 0)} 나무={r.get('veg_asset', 0)} | 역할 "
+            f"웨더={r.get('weather', 0)} 나무={r.get('veg_asset', 0)} "
+            f"간살={r.get('baluster', 0)} | 역할 "
             + ", ".join(f"{k}:{v}" for k, v in top))
 
 
@@ -1312,8 +1313,9 @@ def build_nosing(stage, prefix, x0, y0, y1, riser, tread, n, base_z=0.0,
 
 
 def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
-                       mtl, rail_h=0.9, post_r=0.02, spacing=1.2, rail_r=0.03,
-                       rail_mid_r=0.018, rail_mid_drop=0.45):
+                       mtl, rail_h=1.1, post_r=0.02, spacing=2.0, rail_r=0.03,
+                       rail_mid_r=0.018, rail_mid_drop=0.45,
+                       baluster_r=0.009, baluster_gap=0.098):
     """레일 1선(scene01 build_cues 일반화). 상단 레일 + 중간 레일 + 포스트.
       y        : 레일 Y 위치
       x_start  : 수평 연장 시작 x  (x_start..x_top 구간은 수평)
@@ -1342,11 +1344,34 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
 
     _seg("RailTop", rail_r, 0.0)
     _seg("RailMid", rail_mid_r, rail_mid_drop)
+    x_end = x_top + run
+
+    # 세로 간살 — 「도로안전시설 지침」난간 표준. 안목(살 사이 빈틈) 100mm 이하가
+    # 법정 요건이라 실제 한국 난간은 예외 없이 촘촘하다. 경사 구간에서도 살은
+    # **연직**(레일만 기울고 살은 서 있음)이라 실루엣이 확연히 다르다.
+    # LOOK_V1 게이트 안 — A/B 대조군 보존.
+    if LOOK_V1 and baluster_r > 0:
+        pitch = 2.0 * baluster_r + baluster_gap
+        xb = x_start + pitch * 0.5
+        b = 0
+        while xb <= x_end - pitch * 0.25:
+            t = max(0.0, min((xb - x_top) / run, 1.0)) if run > 1e-9 else 0.0
+            ztop = top0 - drop * t - rail_r          # 상단 레일 밑면
+            zbot = top0 - drop * t - rail_mid_drop   # 중간 레일 중심까지
+            gz = float(ground_fn(xb))
+            zbot = max(zbot, gz)                     # 계단코 아래로 뚫지 않게
+            h = ztop - zbot
+            if h > 0.05:
+                prims.append(add_cylinder(
+                    stage, f"{prefix}/Bal_{b}", (xb, y, zbot + h / 2.0),
+                    baluster_r, h, mtl))
+            xb += pitch
+            b += 1
+        LOOK_STATS["baluster"] = LOOK_STATS.get("baluster", 0) + b
 
     # 포스트: 실제 지면(ground_fn)에 착지, 상단=레일선.
     xp = x_start
     p = 0
-    x_end = x_top + run
     while xp <= x_end + 1e-6:
         gz = float(ground_fn(xp))
         t = max(0.0, min((xp - x_top) / run, 1.0)) if run > 1e-9 else 0.0

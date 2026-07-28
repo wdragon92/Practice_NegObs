@@ -328,29 +328,39 @@ def verify(keys):
             continue
         with open(path, "rb") as f:
             head8 = f.read(8)
-        if key.endswith(".usd") and not (head8.startswith(b"PXR-USDC")
-                                         or head8.startswith(b"#usda")):
+        if key.endswith((".usd", ".usda")) and not (
+                head8.startswith(b"PXR-USDC") or head8.startswith(b"#usda")):
             bad.append(f"{key} (USD 헤더 아님: {head8!r})")
         elif key.endswith(".png") and not head8.startswith(b"\x89PNG\r\n\x1a\n"):
             bad.append(f"{key} (PNG 헤더 아님: {head8!r})")
+        elif key.endswith(".jpg") and not head8.startswith(b"\xff\xd8\xff"):
+            bad.append(f"{key} (JPEG 헤더 아님: {head8!r})")
         elif key.endswith(".mdl") and not head8.startswith(b"mdl "):
             bad.append(f"{key} (MDL 헤더 아님: {head8!r})")
     return bad
 
 
-def main():
-    only_required = "--required-only" in sys.argv
-    failures = []
-    fetched = []
+# ── 카테고리 조달 함수 ───────────────────────────────────────────────────────
+def fetch_category(name, only_required=False, fetched=None, failures=None):
+    """카테고리 하나를 조달한다. 감독이 개별 호출할 수 있게 함수로 분리.
 
-    for label, required, keys in SETS:
+        python -c "import download_vegetation as d; d.fetch_category('rocks')"
+
+    fetched/failures 를 넘기면 여러 카테고리에 걸쳐 중복 다운로드를 막는다.
+    반환: (fetched, failures)."""
+    if name not in CATEGORIES:
+        raise KeyError(f"모르는 카테고리 {name!r} — {sorted(CATEGORIES)}")
+    fetched = [] if fetched is None else fetched
+    failures = [] if failures is None else failures
+    print(f"══ 카테고리 {name} ══")
+    for label, required, keys in CATEGORIES[name]:
         if only_required and not required:
             print(f"[skip set] {label} (--required-only)")
             continue
         print(f"[set] {label}")
         for key in keys:
             if key in fetched:
-                continue  # 공유 재질(bark3 등)은 한 번만
+                continue  # 공유 재질(bark3·fallleaves 등)은 한 번만
             url = BASE + key
             size, md5 = head(url)
             if size is None:
@@ -360,6 +370,134 @@ def main():
                 fetched.append(key)
             else:
                 failures.append(f"{key} ({url})")
+    return fetched, failures
+
+
+def discover(usd_key):
+    """S3 의 USD 하나에서 종속(MDL·텍스처) 키 목록을 **기계적으로** 도출한다.
+
+    남은 39 수종·32 관목을 MANIFEST 에 추가할 때 쓴다. 추측 금지.
+    pxr 필요 (`pip install usd-core`, Isaac 불필요). 결과를 그대로 붙여넣으면 된다.
+
+        python assets/download_vegetation.py --discover Shrub/Holly.usd
+    """
+    import posixpath
+    import re
+    import tempfile
+    try:
+        from pxr import Sdf
+    except ImportError:
+        print("[discover] pxr 가 없다. Isaac 은 필요 없고 아래로 충분하다:\n"
+              "  python3 -m venv /tmp/usdvenv && /tmp/usdvenv/bin/pip install usd-core\n"
+              "  /tmp/usdvenv/bin/python assets/download_vegetation.py "
+              "--discover " + usd_key)
+        sys.exit(2)
+
+    def _norm(base_key, rel):
+        return posixpath.normpath(posixpath.join(
+            posixpath.dirname(base_key), rel.lstrip("./") if
+            rel.startswith("./") else rel))
+
+    tmpdir = tempfile.mkdtemp(prefix="negobs_discover_")
+    local = os.path.join(tmpdir, os.path.basename(usd_key))
+    size, md5 = head(BASE + usd_key)
+    if not download(BASE + usd_key, local, size, md5):
+        print(f"[discover] {usd_key} 받기 실패")
+        return []
+
+    lay = Sdf.Layer.FindOrOpen(local)
+    mdls, direct = [], []
+
+    def walk(spec):
+        for a in spec.attributes:
+            v = a.default
+            vals = ([v] if isinstance(v, Sdf.AssetPath)
+                    else list(v) if isinstance(v, Sdf.AssetPathArray) else [])
+            for p in vals:
+                if not p.path:
+                    continue
+                k = _norm(usd_key, p.path)
+                (mdls if k.endswith(".mdl") else direct).append(k)
+        for c in spec.nameChildren:
+            walk(c)
+    for c in lay.rootPrims:
+        walk(c)
+
+    keys = [usd_key]
+    for m in sorted(set(mdls)):
+        if m.count("/") == 0:      # @OmniPBR.mdl@ 등 검색경로 MDL — 조달 불필요
+            print(f"[discover] 검색경로 MDL(조달 불필요): {m}")
+            continue
+        keys.append(m)
+        mlocal = os.path.join(tmpdir, m.replace("/", "_"))
+        s2, h2 = head(BASE + m)
+        if s2 is None or not download(BASE + m, mlocal, s2, h2):
+            print(f"[discover] MDL 받기 실패: {m}")
+            continue
+        with open(mlocal, "r", errors="replace") as f:
+            body = f.read()
+        for t in sorted(set(re.findall(r'texture_2d\("([^"]+)"', body))):
+            keys.append(_norm(m, t))
+    keys.extend(sorted(set(direct)))
+
+    out, seen = [], set()
+    for k in keys:
+        if k not in seen:
+            seen.add(k)
+            out.append(k)
+    print(f"\n# --- {usd_key} 종속 {len(out)}개 (그대로 CATEGORIES 에 붙여넣기) ---")
+    for k in out:
+        s, _ = head(BASE + k)
+        print(f'    "{k}",'.ljust(72) + f"# {(s or 0) / 1e6:.2f} MB")
+    return out
+
+
+USAGE = """사용법:
+  python assets/download_vegetation.py                 # 전 카테고리 조달
+  python assets/download_vegetation.py --only leaf_litter,rocks
+  python assets/download_vegetation.py --only trees --required-only
+  python assets/download_vegetation.py --list          # 카테고리·용량 표
+  python assets/download_vegetation.py --discover Shrub/Holly.usd
+카테고리: """ + ", ".join(CATEGORIES)
+
+
+def main():
+    argv = sys.argv[1:]
+    if "-h" in argv or "--help" in argv:
+        print(USAGE)
+        return
+    if "--discover" in argv:
+        i = argv.index("--discover")
+        if i + 1 >= len(argv):
+            print("--discover 뒤에 S3 키가 필요하다 (예: Shrub/Holly.usd)")
+            sys.exit(2)
+        discover(argv[i + 1])
+        return
+    if "--list" in argv:
+        for name, sets in CATEGORIES.items():
+            print(f"{name}:")
+            for label, required, keys in sets:
+                mark = "필수" if required else "선택"
+                print(f"  [{mark}] {label}  ({len(keys)} 파일)")
+        return
+
+    only_required = "--required-only" in argv
+    if "--only" in argv:
+        i = argv.index("--only")
+        if i + 1 >= len(argv):
+            print("--only 뒤에 카테고리가 필요하다.\n" + USAGE)
+            sys.exit(2)
+        names = [n.strip() for n in argv[i + 1].split(",") if n.strip()]
+        unknown = [n for n in names if n not in CATEGORIES]
+        if unknown:
+            print(f"모르는 카테고리: {unknown}\n" + USAGE)
+            sys.exit(2)
+    else:
+        names = list(CATEGORIES)
+
+    fetched, failures = [], []
+    for name in names:
+        fetch_category(name, only_required, fetched, failures)
 
     print()
     bad = verify(fetched)

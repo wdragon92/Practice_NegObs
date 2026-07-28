@@ -206,12 +206,21 @@ _GROUND_SCALE_FIX = 1.0        # E10 2차 실측 확정 (비율 1.0001)
 #   grime 을 켜면 밴드 안에 통째로 들어가 **지면 전체가 균일 암화**된다(전역 회귀).
 #   → 지면 계열(paving/asphalt/soil/gravel)은 grime/splash 를 **반드시 0** 으로.
 #   밴드는 지면 위에 **서 있는 수직 구조물**(옹벽·기단·파라펫·연석·계단 챌면)에만.
-_W_STRUCT = dict(grime=0.35, grime_desat=0.35, grime_h=0.40, splash=0.18,
-                 streak=0.12, wrough=0.15)
-_W_STONE = dict(grime=0.25, grime_desat=0.25, grime_h=0.30, splash=0.12,
-                streak=0.08, wrough=0.12)
-_W_EDGE = dict(grime=0.22, grime_desat=0.30, grime_h=0.12, splash=0.14,
-               wrough=0.10)
+# [치명 C4 수정] **월드 z 기반 웨더링(grime·splash)을 전면 비활성**한다.
+#   `grime_z0` 기본값이 0.0 이고 scene_common 이 이를 한 번도 설정하지 않아,
+#   m_grime = 1 - smoothstep(0, h, z) 가 **z ≤ 0 인 모든 면**에 균일하게 걸렸다.
+#   클래스로만 막으려 했으나 concrete 가 215종 중 46종을 흡수하며
+#   `Slab`·`LowerFloor`·`Lower`·`Trough` 같은 **수평 지면**까지 포함해 방어가 뚫렸다.
+#
+#   단순한 룩 버그가 아니다 — sceneD3 측구(깊이 0.80·인버트 −1.05)처럼 **낙차가
+#   깊을수록 어두워지는 결정론적 알베도 규칙**이 되어, GT 낙차와 상관된
+#   **합성 지름길**을 만든다. 이 프로젝트가 가장 경계하는 실패 모드다.
+#
+#   재활성 조건: 프림별 발치 z 를 `grime_z0` 로 넘길 통로가 생긴 뒤.
+#   노멀 기반 항목(streak = 수직면 흘러내림, dust = 상향면 먼지)은 z 와 무관하므로 유지.
+_W_STRUCT = dict(grime=0.0, splash=0.0, streak=0.12, wrough=0.15)
+_W_STONE = dict(grime=0.0, splash=0.0, streak=0.08, wrough=0.12)
+_W_EDGE = dict(grime=0.0, splash=0.0, wrough=0.10)
 
 LOOK_CLASS = {
     #                    bevel   sat   mdl        patch  detail
@@ -228,8 +237,8 @@ LOOK_CLASS = {
                      # (음영부는 밝기가 아니라 노멀 대비로만 결이 산다)
     "brick":    dict(bevel=0.006, sat=0.88, mdl="ground", patch=0.0, detail=True,
                      tex="brick_red", bump=1.4,
-                     weather=dict(grime=0.30, grime_desat=0.30, grime_h=0.35,
-                                  splash=0.15, streak=0.10, wrough=0.15)),
+                     weather=dict(grime=0.0, splash=0.0, streak=0.10,
+                                  wrough=0.15)),
     "stone":    dict(bevel=0.004, sat=0.66, mdl="ground", patch=1.0, detail=True,
                      weather=_W_STONE, tex="stone_flag", bump=1.5),
                      # 베벨 [근거 없음] 보수적 하향
@@ -244,8 +253,7 @@ LOOK_CLASS = {
                      tex="asphalt", spec=0.20, bump=1.4),
     # 노징 12 mm 는 **IBC 1.6~14.3 mm 상단**이다. 국내 규정은 존재하지 않음(전수 확인).
     "nosing":   dict(bevel=0.012, sat=1.00, mdl="ground", patch=0.0, detail=True,
-                     weather=dict(grime=0.18, grime_desat=0.25, grime_h=0.15,
-                                  splash=0.10, wrough=0.10)),
+                     weather=dict(grime=0.0, splash=0.0, wrough=0.10)),
     "curb":     dict(bevel=0.010, sat=1.00, mdl="ground", patch=0.0, detail=True,
                      weather=_W_EDGE),   # 연석 수직형 R=10 (예규 321호 그림2.17)
     "metal":    dict(bevel=0.002, sat=1.00, mdl="omni",   detail=True),
@@ -258,6 +266,12 @@ LOOK_CLASS = {
     # 미상 역할 — 보수적으로. MDL 교체·채도 변경·디테일 노멀 전부 없음.
     # 분류기가 215종 중 208종을 잡으므로 여기 떨어지는 건 진짜 미상이고,
     # 그런 재질에 콘크리트 그레인 노멀을 씌우는 건 개선이 아니라 훼손이다.
+    # 눈: 반사율이 높아 베벨·채도 조정 대상이 아니다. 텍스처만 얹는다.
+    # **주의(조사 경고)**: 현 의도색 0.72~0.78 은 표시 sRGB 221~229 로 톤매핑
+    # 상단에서 클리핑돼 텍스처를 붙여도 국소표준편차가 다시 0 이 된다.
+    # 승격 전에 의도 알베도를 0.55~0.62 로 낮춰야 실효가 있다(TODO: 조달 후 적용).
+    "snow":     dict(bevel=0.000, sat=1.00, mdl="ground", patch=1.0, detail=True,
+                     tex="snow", bump=1.3),
     "misc":     dict(bevel=0.003, sat=1.00, mdl="omni",   detail=False),
 }
 
@@ -305,6 +319,7 @@ LOOK_ROLE = {
     # 의도적으로 misc = 최소 처방 — 알 수 없는 재질에 콘크리트 그레인을
     # 씌우는 것이 더 나쁘다)
     "Line": "paint", "CutLine": "paint", "Pot_": "concrete",
+    "Snow": "snow", "Panel": "metal", "Iron": "metal",
     "Sign": "sign", "SignFace": "sign", "SignBack": "sign",
 }
 
@@ -340,13 +355,21 @@ def look_report():
 _LOOK_RULES = [
     # 발광·투명 — 룩 레이어에서 제외해야 하는 것부터
     ("glass", ("glass", "window", "lens", "shopglass", "cityglass")),
-    ("sign", ("sign", "placard", "panel", "plaque", "lbox", "mailbox")),
+    # "panel" 단독은 사인이 아니다 — 실체는 난간 패널·쉘터 지붕이었다
+    # (scene11 6.0% · scene06 5.4%). 사인은 sign/placard 계열로 한정한다.
+    ("sign", ("sign", "placard", "plaque", "lbox", "mailbox")),
     # 도색·표지 — 상수색이 물리적으로 옳다(텍스처화 금지 대상)
+    # joint/cutline = 줄눈 실런트. 종전에는 asphalt 로 분류돼 **줄눈에 아스팔트
+    # 결이 얹히고** 있었다. 도색 계열이 옳다.
     ("paint", ("paint", "linewhite", "lineyellow", "roadpaint", "tactile",
-               "warn", "tape", "band", "stripe", "gauge")),
+               "warn", "tape", "band", "stripe", "gauge", "joint", "cutline",
+               "lane")),   # **"lane" 은 여기(도로 표시)** — asphalt 보다 먼저 잡는다
     # 식생
     ("veg", ("grass", "leaf", "canopy", "hedge", "shrub", "foliage", "reed",
-             "tuft", "tree", "moss", "treeline", "treepit")),
+             "tuft", "tree", "moss", "treeline", "treepit", "verge")),
+    # 눈 — 33씬 통틀어 **단일 재질 최대 면적**(sceneC1 88.5%)인데 misc 에 갇혀
+    # 상수색 MDL 도 텍스처 승격도 못 받고 있었다.
+    ("snow", ("snow", "frost")),
     # 물
     ("water", ("water", "sea", "tide", "wet")),
     # 금속
@@ -359,7 +382,9 @@ _LOOK_RULES = [
               "stringer", "carton", "door")),
     # 낙차 에지 — 승인된 노징 12 mm / 연석 12 mm
     ("nosing", ("nosing", "tread", "step")),
-    ("curb", ("curb", "coping", "cope", "verge", "kerb")),
+    # **"verge" 제거** — scene04 의 Verge* 는 잔디 갓길(식생)인데 연석 처방을
+    # 받고 있었다(면적 13.4%). 영어 verge 는 갓길·풀밭 가장자리이지 연석이 아니다.
+    ("curb", ("curb", "coping", "cope", "kerb")),
     # 석재
     ("stone", ("stone", "granite", "marble", "rock", "flag", "cobble",
                "polish", "lightstone")),
@@ -369,7 +394,10 @@ _LOOK_RULES = [
     ("soil", ("soil", "dirt", "earth", "mud", "leafbed")),
     ("gravel", ("gravel", "ballast", "debris", "rubble")),
     # 아스팔트·차도
-    ("asphalt", ("asphalt", "road", "lane", "patch", "seam", "joint")),
+    # "lane"·"joint" 는 paint 로 이동(차선 파선·줄눈 실런트).
+    # 종전에는 차선이 asphalt 로 분류돼 **아스팔트 텍스처 승격 대상**이 됐다 —
+    # v5.1 §4 상수색 불가침 정면 위반이다(도색은 균일해야 단서로 기능한다).
+    ("asphalt", ("asphalt", "road", "patch")),
     # 포장
     ("paving", ("pav", "plaza", "walk", "sidewalk", "tile", "block",
                 "apron", "alley", "podium", "platform")),
@@ -391,7 +419,12 @@ _LOOK_RULES = [
 # **국소 현상**이지 전역이 아니다.
 # → 재질 **자신의 채도**를 보고 과채도일 때만 낮춘다. 자기교정이라 씬 정보가
 #   필요 없고, 이미 저채도인 재질은 건드리지 않는다.
-_SAT_KNEE = 0.30          # 이 값을 넘는 재질만 하향 대상
+# [중대 M5] 종전 0.30 은 **텍스처 채도 분포보다 위**라 stone(0.66)·asphalt(0.90)·
+# paving 계수가 사실상 한 번도 발동하지 않았다. 게다가 렌더 공간 sat_mu 임계를
+# 텍스처 공간에 그대로 옮겨 쓴 단위 불일치였다.
+# 실사 n=54 의 sat_mu 는 0.232±0.071 이고 텍스처 자체 채도는 그보다 낮게 나온다.
+# → knee 를 텍스처 공간 기준으로 낮춘다.
+_SAT_KNEE = 0.18
 _TEXSAT_CACHE = {}
 
 
@@ -708,14 +741,21 @@ def _ground_skin(stage, path, center, size, mtl, amp_m=0.010,
     ny = max(4, min(int(2 * hy / spacing), max_n))
     x0, x1 = cx - hx, cx + hx
     y0, y1 = cy - hy, cy + hy
-    ztop = cz + sz / 2.0 + 0.0015          # 1.5 mm 부상 — z-fighting 회피
+    # [중대 M3] 부상 1.5 mm 인데 변위 진폭이 ±9.8 mm 라 스킨의 25~29% 가 슬래브
+    # 상면 **아래로 침투**해 원 Cube 평면이 드러나고 교차 컨투어가 생겼다.
+    # 부상량을 진폭보다 크게 잡아 스킨이 항상 위에 있게 한다.
+    ztop = cz + sz / 2.0 + max(0.0015, amp_m * 1.15)
 
     rng = np.random.default_rng(seed)
     xs = np.linspace(x0, x1, nx + 1)
     ys = np.linspace(y0, y1, ny + 1)
     XX, YY = np.meshgrid(xs, ys, indexing="ij")
     ZZ = np.full_like(XX, ztop)
-    for oi, wl in enumerate((0.55, 0.19, 0.07)):
+    # [중대 M4] 최고주파 옥타브(0.07 m)가 메시 간격(0.12~0.24 m)보다 촘촘해
+    # **항상 앨리어싱**됐다(나이퀴스트 위반) → 노멀에 고주파 잡음. 간격의 2.5배
+    # 이상인 파장만 쓴다.
+    _wl_min = spacing * 2.5
+    for oi, wl in enumerate(w for w in (0.55, 0.19, 0.07) if w >= _wl_min):
         gx = max(2, int((x1 - x0) / wl) + 1)
         gy = max(2, int((y1 - y0) / wl) + 1)
         g = rng.random((gx + 1, gy + 1)) - 0.5
@@ -763,9 +803,12 @@ def _ground_skin(stage, path, center, size, mtl, amp_m=0.010,
 # 제외: paint(차선·반사띠·점자블록) · sign · glass · water · misc
 #   → 이들은 **상수색이 물리적으로 옳다**(v5.1 §4). 텍스처·노이즈를 얹으면
 #     오히려 규약 위반이고, 특히 도색 표지는 균일해야 단서로 기능한다.
+# [중대 M1 + 정책 정합] 보고서 §2.2 의 3단 재질 정책은 "식생·금속·목재 = OmniPBR"
+# 인데 코드는 이 집합에 셋 다 넣어 상수색이면 MDL 로 보내고 있었다(59종 불일치).
+# 특히 **금속은 MDL 에 metallic 입력이 아예 없어 금속성이 소실**된다.
+# 정책대로 지면·구조물 계열만 남긴다.
 _CONST_MDL_CLASSES = {"paving", "concrete", "brick", "stone", "soil",
-                      "gravel", "asphalt", "nosing", "curb", "wood", "metal",
-                      "veg"}
+                      "gravel", "asphalt", "nosing", "curb", "snow"}
 
 # 변위 스킨을 붙일 역할 클래스 (지면 계열만). 계단·연석·노징은 제외 —
 # 낙차 에지 기하이므로 승용 조건②에 따라 손대지 않는다.
@@ -984,7 +1027,7 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
 
 def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
                      tint=None, roughness_const=None, specular_level=None,
-                     bump=1.0, base_color=None):
+                     bump=1.0, base_color=None, metallic=0.0):
     """[사실화 v1] NegObsGround.mdl 재질 — 지면·사면 계열 전용.
 
     OmniPBR 의 `project_uvw` 는 트라이플래너가 아니라 **큐빅 투영**이라 경사면에서
@@ -1024,8 +1067,16 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
         _tex("normalmap_texture_a", nor, "raw")
     if rough is not None:
         _tex("roughness_texture_a", rough, "raw")
-    if base_color is not None:
-        sh.CreateInput("base_color", C3).Set(Gf.Vec3f(*base_color))
+    # [치명 C1 수정] MDL 에는 diffuse_tint 입력이 없어 종전에는 씬이 준 tint 를
+    # **경고만 찍고 통째로 버렸다**. 실측 77 호출 / 30 씬이 영향받았고,
+    # sceneD4 Facade 는 tint (0.14,0.14,0.15) 가 사라져 알베도가 **7.1배**로
+    # 렌더되고 있었다. OmniPBR 의 diffuse_tint 는 albedo 곱셈이므로
+    # base_color 에 접어 넣으면 **수학적으로 동일**하다.
+    _bc = list(base_color) if base_color is not None else [1.0, 1.0, 1.0]
+    if tint is not None:
+        _bc = [c * t for c, t in zip(_bc, tint)]
+    if base_color is not None or tint is not None:
+        sh.CreateInput("base_color", C3).Set(Gf.Vec3f(*_bc))
     s = _GROUND_SCALE_FIX / float(scale_m)
     sh.CreateInput("texture_scale_a", F2).Set(Gf.Vec2f(s, s))
     sh.CreateInput("bump_factor_a", F).Set(
@@ -1067,15 +1118,14 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
                          ("weather_rough", w.get("wrough", 0.0))):
             sh.CreateInput(key, F).Set(float(val))
         LOOK_STATS["weather"] = LOOK_STATS.get("weather", 0) + 1
+    # [중대 M1] NegObsGround 는 metalness=0 경로만 이식된 축약형이라 metallic
+    # 입력이 없다. 상수색 금속(난간·볼라드·셔터·펜스 — 금속 37종·113 호출)이
+    # 이 경로로 오면 **금속성이 소실**된다. → 금속은 MDL 로 보내지 않는다.
     if spec.get("bevel", 0.0) > 0.0:
         sh.CreateInput("round_edges_radius", F).Set(float(spec["bevel"]))
         sh.CreateInput("round_edges_roundness", F).Set(1.0)
         sh.CreateInput("round_edges_across_materials", B).Set(False)
-    if tint is not None:
-        # MDL 에 diffuse_tint 입력이 없다 → 씬이 준 틴트는 무시되지 않도록
-        # albedo 경로 대신 macro 진폭으로 근사하지 않고, 경고만 남긴다.
-        # (실측 대상 역할에 tint 를 쓰는 호출이 있으면 게이트에서 잡힌다.)
-        print(f"[룩v1][경고] {path}: NegObsGround 는 tint 미지원 — 무시됨 {tint}")
+    # tint 는 위에서 base_color 에 접어 넣었다(아래 참조).
     for out in ("surface", "displacement", "volume"):
         mtl.CreateOutput(f"mdl:{out}",
                          Sdf.ValueTypeNames.Token).ConnectToSource(
@@ -1626,7 +1676,11 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
     # → **층별 연속 띠**로 대체한다. 창마다가 아니라 층마다 1개라 파사드당 층수
     #   (총 약 200 프림, 무시 가능)이면서, 한국 아파트·오피스 파사드의 실제 관행
     #   (층간 띠)이고 파사드 전체의 평면 읽힘을 깬다. 유리는 띠 대비 물러나 보인다.
-    ins = float(wd.get("inset", 0.0))
+    # [치명 C3 수정] 종전에는 이 띠가 LOOK_V1 게이트 **밖**에 있었다. 기본
+    # `window` 자체가 inset=0.15 라 **룩 레이어를 꺼도 층마다 새 박스가 생겼고**,
+    # 그 결과 "LOOK_V1=0 에서 회귀 0" 규약이 깨지고 off/on A/B 통제와 Phase0
+    # 기준선 대조가 모두 무효화됐다. 게이트 안으로 넣는다.
+    ins = float(wd.get("inset", 0.0)) if LOOK_V1 else 0.0
     band_t = min(max(ins, 0.0), 0.15)          # 돌출 깊이 상한(간섭 방지)
     band_h = 0.12
     if bd.get("axis", "y") == "y":

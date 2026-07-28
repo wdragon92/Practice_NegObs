@@ -16,6 +16,7 @@ scene01_campus_stairs.py의 검증된 블록을 함수화·일반화한 것.
 import os
 import math
 import json
+import zlib
 
 import numpy as np
 
@@ -500,8 +501,12 @@ def add_box(stage, path, center, size, mtl=None, collider=False):
     # 슬래브 자체는 건드리지 않으므로 낙차 에지 실루엣은 그대로다(승용 조건②).
     if LOOK_V1 and _skin_wanted(path, size, mtl):
         try:
+            # 시드는 **반드시 결정적**이어야 한다. Python 내장 hash() 는
+            # PYTHONHASHSEED 로 프로세스마다 무작위화되므로 매 렌더마다 지형
+            # 기복이 달라진다(이 프로젝트는 RNG 100% 결정적이 원칙). crc32 사용.
             if _ground_skin(stage, f"{path}_Skin", center, size, mtl,
-                            seed=abs(hash(str(path))) % 100000) is not None:
+                            seed=zlib.crc32(str(path).encode()) % 100000
+                            ) is not None:
                 LOOK_STATS["skin"] += 1
         except Exception as e:                 # 스킨 실패가 씬을 죽이면 안 된다
             print(f"[룩v1][경고] 지면 스킨 생성 실패 {path}: {e}")
@@ -889,7 +894,9 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
     sh.CreateInput("saturation_a", F).Set(float(spec.get("sat", 1.0)))
     sh.CreateInput("rough_noise_a", F).Set(0.22)
     sh.CreateInput("rough_noise_wavelength_a", F).Set(1.2)
-    sh.CreateInput("tri_dither", F).Set(0.35)
+    # 상수색 모드는 텍스처가 없어 축 전환 스트리크가 발생하지 않는다 →
+    # 디더링 노이즈 6회가 순수 낭비다. 0 으로 꺼서 비용을 줄인다.
+    sh.CreateInput("tri_dither", F).Set(0.0 if diff is None else 0.35)
     sh.CreateInput("tri_dither_wavelength", F).Set(0.15)
     sh.CreateInput("tri_weight_exp", F).Set(6.0)
     if roughness_const is not None:            # 상수 roughness 요구 → floor 로 이식

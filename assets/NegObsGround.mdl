@@ -334,6 +334,35 @@ NegObsLayer negobs_layer(
         diff_tex, nor_tex, rough_tex, tex_scale, tex_rotate,
         float2(0.0, 0.0), bump, flip_u, flip_v, tri_dither, tri_dither_wl,
         wexp);
+
+    // [사실화 v1 · 성능] **patch_mix=0 이면 s2 는 결과에 기여하지 않는데도
+    // 종전에는 항상 계산했다.** s2 는 triplanar 2기저 × 3평면 × 3맵 = 최대 18회
+    // 텍스처 페치 + 노이즈 다수라 레이어 비용의 절반이다.
+    // 모듈형 포장·상수색 재질은 전부 patch_mix=0 이므로 여기서 통째로 건너뛴다.
+    // (게이트 3차에서 sceneD3 가 22s → 404s 로 18배 느려진 주 원인.)
+    // patch_mix 는 uniform 이라 이 분기는 컴파일 타임에 접힌다.
+    if (patch_mix <= 0.0) {
+        NegObsLayer L0;
+        color alb0 = s1.alb * color(math::clamp(
+            1.0 + macro_amp * (negobs_noise(macro_wavelength, 2, 0.0) * 2.0 - 1.0),
+            0.0, 2.0));
+        float lum0 = math::luminance(alb0);
+        alb0 = math::lerp(color(lum0), alb0, math::clamp(
+            1.0 + macro_amp * (negobs_noise(macro_wavelength, 2, 5.1) * 2.0 - 1.0),
+            0.0, 1.3));
+        alb0 = math::lerp(alb0, color(lum0),
+                          desat_bright * math::smoothstep(0.45, 0.75, lum0));
+        alb0 = math::lerp(color(lum0), alb0, saturation);
+        L0.albedo = alb0;
+        L0.rough = math::clamp(
+            rough_floor + rough_mult * s1.rough +
+            rough_noise * (negobs_noise(rough_noise_wavelength, 2, 11.3) * 2.0 - 1.0),
+            0.02, 1.0);
+        L0.nrm = s1.nrm;
+        L0.spec = spec;
+        return L0;
+    }
+
     NegObsTexSample s2 = negobs_sample_tri(
         diff_tex, nor_tex, rough_tex, tex_scale, tex_rotate + 90.0,
         float2(0.37, 0.61), bump, flip_u, flip_v, tri_dither, tri_dither_wl,
@@ -635,7 +664,7 @@ export material NegObsGround(
     anno::display_name("NegObs Ground"),
     anno::description("Triplanar-projected PBR with primvar cross-fade blending and anti-tiling"),
     anno::author("NegObs look-check pipeline"),
-    anno::version(1, 7, 0)
+    anno::version(1, 8, 0)
 ]] = let {
 
     NegObsLayer A = negobs_layer(

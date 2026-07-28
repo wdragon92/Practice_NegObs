@@ -552,55 +552,93 @@ def build_gully(kit, prefix, cx, cy, top_z, grate_mtl, pit_mtl=None,
     연석 **바로 안쪽(차도측)**. L형 측구를 함께 쓰면 측구 팬 안에 앉힌다.
     `along` 축이 연석선과 평행이다(`yaw_deg` 로 연석 방위에 맞춘다).
 
-    ### 프림 수
-    기본 **3**(피트 1 + 틀 1 + 그레이팅 1). `frame=False` → 2.
-    `lid=False`(무개구) → 피트만 **1**. `slats=n` → +n.
-    슬랫은 기본 **0** — 격자는 재질(노멀/알베도)로 표현하는 것이 프림 예산상
-    옳다. 근접뷰 씬에서만 `slats=8~12` 를 켜라(20~25 m 간격이라 씬당 2~4개가
-    보통이므로 근접 1개만 켜는 식으로).
+    ### 3개 모드와 프림 수
+    | 모드 | 구성 | 프림 |
+    |---|---|---|
+    | `lid=True, slats=0` **(기본)** | 틀 솔리드 1 + 그레이팅 솔리드 1 | **2** |
+    | `lid=True, slats=n` (근접뷰) | 피트 1 + 틀 링 4 + 슬랫 n | **5+n** |
+    | `lid=False` (무개구) | 피트 벽 4 + 바닥 1 + 틀 링 4 | **9** |
+
+    기본 모드에서 피트를 만들지 않는 이유: 솔리드 그레이팅이 덮으므로 **절대
+    보이지 않는다**. 프림 1개도 공짜가 아니다. 격자는 재질(노멀/알베도)로 낸다.
+    슬랫 모드에서는 틀을 **솔리드 판이 아니라 4변 링**으로 만든다 — 솔리드 판을
+    쓰면 슬롯 아래가 막혀 격자가 검게 읽히지 않는다.
+    `seat=0.002`: 틀 상면을 그레이팅보다 2 mm 낮춘다. 두 면을 같은 z 에 두면
+    **동일평면 z-fighting** 이 난다(실제 제품도 뚜껑이 틀 안에 앉으므로 물리적으로도 맞다).
 
     GT: `lid=True` → **낙차 아님**(포장면과 flush, 편의증진법 별표1 1-라(3)
         "접근로와 동일한 높이"). `lid=False` → **낙차 = `body_h`(0.64 m)** 이며
-        GT 라벨 대상이다. 무개구 빗물받이는 실재하지만(조사 §1.3g "뚜껑없이
-        바닥이 그대로 노출되는 측구가 많이 설치") 도심 씬에서는 예외 처리로 쓸 것.
+        GT 라벨 대상이다. 무개구 모드는 벽 4장 + 바닥으로 **실제로 뚫린 상자**를
+        만들므로 낙차 기하가 진짜다. 무개구 빗물받이는 실재하지만(조사 §1.3g
+        "뚜껑없이 바닥이 그대로 노출되는 측구가 많이 설치") 도심 씬에서는 예외로 쓸 것.
     """
     m0 = kit.mark()
-    z_grate_top = float(top_z)
+    z = float(top_z)
+    pmtl = pit_mtl if pit_mtl is not None else grate_mtl
+    fmtl = frame_mtl if frame_mtl is not None else grate_mtl
     prims = {}
 
-    # ── 피트(집수정 내부) — 어둡게. 슬랫 사이로 보이는 심연 ──────────────
-    pit_top = z_grate_top - (grate_t if lid else 0.0)
-    pit_c = (float(cx), float(cy), pit_top - body_h / 2.0)
-    prims["pit"] = f"{prefix}/Pit"
-    kit.B(prims["pit"], pit_c, (body_across, body_along, body_h),
-          pit_mtl if pit_mtl is not None else grate_mtl,
-          rotz=yaw_deg, col=False)
-
-    if lid:
-        # ── 틀(프레임 링) — 그레이팅보다 frame_w 만큼 큰 판. 링만 보인다 ──
+    if lid and not slats:
+        # ── 기본: 틀 솔리드(2 mm 낮음) + 그레이팅 솔리드(flush) ──────────
         if frame:
             prims["frame"] = f"{prefix}/Frame"
             kit.B(prims["frame"],
-                  (float(cx), float(cy), z_grate_top - (grate_t + 0.03) / 2.0),
+                  (float(cx), float(cy),
+                   z - seat - (grate_t + 0.03) / 2.0),
                   (across + 2 * frame_w, along + 2 * frame_w, grate_t + 0.03),
-                  frame_mtl if frame_mtl is not None else grate_mtl,
-                  rotz=yaw_deg, col=collider)
-        # ── 그레이팅 본체 (flush) ────────────────────────────────────────
+                  fmtl, rotz=yaw_deg, col=collider)
         prims["grate"] = f"{prefix}/Grate"
-        kit.B(prims["grate"], (float(cx), float(cy), z_grate_top - grate_t / 2.0),
+        kit.B(prims["grate"], (float(cx), float(cy), z - grate_t / 2.0),
               (across, along, grate_t), grate_mtl, rotz=yaw_deg, col=collider)
-        # ── 선택: 실제 슬랫 (근접뷰 전용) ───────────────────────────────
-        if slats and slats > 0:
-            bar_w = across / (2.0 * slats + 1.0)   # 슬랫폭 = 슬롯폭
-            for i in range(int(slats)):
-                u = -across / 2.0 + bar_w * (2 * i + 1.5)
-                a = math.radians(yaw_deg)
-                px = cx + u * math.cos(a)
-                py = cy + u * math.sin(a)
-                kit.B(f"{prefix}/Slat_{i:02d}",
-                      (px, py, z_grate_top - grate_t / 2.0),
-                      (bar_w, along, grate_t), grate_mtl,
-                      rotz=yaw_deg, col=False)
+
+    elif lid:
+        # ── 슬랫 모드: 피트가 보여야 하므로 틀은 링 ──────────────────────
+        prims["pit"] = f"{prefix}/Pit"
+        kit.B(prims["pit"],
+              (float(cx), float(cy), z - grate_t - body_h / 2.0),
+              (body_across, body_along, body_h), pmtl, rotz=yaw_deg, col=False)
+        if frame:
+            prims["frame"] = _ring4(kit, prefix, cx, cy, z - seat,
+                                    across, along, frame_w, grate_t + 0.03,
+                                    fmtl, yaw_deg, collider)
+        bar_w = across / (2.0 * int(slats) + 1.0)      # 슬랫폭 = 슬롯폭
+        a = math.radians(float(yaw_deg))
+        bars = []
+        for i in range(int(slats)):
+            u = -across / 2.0 + bar_w * (2 * i + 1.5)
+            p = f"{prefix}/Slat_{i:02d}"
+            kit.B(p, (cx + u * math.cos(a), cy + u * math.sin(a),
+                      z - grate_t / 2.0),
+                  (bar_w, along, grate_t), grate_mtl, rotz=yaw_deg, col=False)
+            bars.append(p)
+        prims["slats"] = bars
+
+    else:
+        # ── 무개구: 진짜 뚫린 상자 (벽 4 + 바닥 1) ──────────────────────
+        a = math.radians(float(yaw_deg))
+        ca, sa = math.cos(a), math.sin(a)
+        ox = (body_across + wall_t) / 2.0
+        oy = (body_along + wall_t) / 2.0
+        walls = []
+        for tag, lx, ly, sx, sy in (
+                ("Xn", -ox, 0.0, wall_t, body_along + 2 * wall_t),
+                ("Xp", +ox, 0.0, wall_t, body_along + 2 * wall_t),
+                ("Yn", 0.0, -oy, body_across, wall_t),
+                ("Yp", 0.0, +oy, body_across, wall_t)):
+            p = f"{prefix}/Wall_{tag}"
+            kit.B(p, (cx + lx * ca - ly * sa, cy + lx * sa + ly * ca,
+                      z - body_h / 2.0), (sx, sy, body_h), pmtl,
+                  rotz=yaw_deg, col=collider)
+            walls.append(p)
+        prims["walls"] = walls
+        prims["floor"] = f"{prefix}/Floor"
+        kit.B(prims["floor"], (float(cx), float(cy), z - body_h - wall_t / 2.0),
+              (body_across + 2 * wall_t, body_along + 2 * wall_t, wall_t),
+              pmtl, rotz=yaw_deg, col=collider)
+        if frame:
+            prims["frame"] = _ring4(kit, prefix, cx, cy, z, across, along,
+                                    frame_w, grate_t + 0.03, fmtl, yaw_deg,
+                                    collider)
 
     return dict(prims=prims, gt_drop=(0.0 if lid else float(body_h)),
                 is_gt_hazard=(not lid), prim_count=kit.count_since(m0))
@@ -611,7 +649,7 @@ def build_gully(kit, prefix, cx, cy, top_z, grate_mtl, pit_mtl=None,
 # ===========================================================================
 def build_manhole(kit, prefix, cx, cy, top_z, lid_mtl, frame_mtl=None,
                   d_frame=0.648, d_lid=None, frame_w=0.045, thick=0.110,
-                  lid_t=0.055, flush_tol=0.010, proud=None,
+                  lid_t=0.055, flush_tol=0.010, proud=None, seat=0.002,
                   lid=True, pit_depth=1.20, pit_mtl=None, boss=False,
                   collider=True, seed_tag="manhole"):
     """**맨홀 뚜껑 + 틀.** 차도·보도 공통.
@@ -635,13 +673,25 @@ def build_manhole(kit, prefix, cx, cy, top_z, lid_mtl, frame_mtl=None,
     `U(-flush_tol, +flush_tol)` 를 뽑는다 — 여러 개를 깔았을 때 전부 정확히
     같은 높이면 오히려 CG 로 읽힌다(조사 §3.1 시공 허용오차).
 
+    `seat=0.002`: 틀 상면을 뚜껑보다 2 mm 낮춘다. 같은 z 로 두면 두 원판이
+    **동일평면 z-fighting** 을 낸다(실물도 뚜껑이 틀 턱에 앉으므로 물리적으로 맞다).
+
     ### 프림 수
-    기본 **2**(틀 1 + 뚜껑 1). `boss=True` → 3. `lid=False` → 피트 1 추가.
+    기본 **2**(틀 1 + 뚜껑 1). `boss=True` → 3. `lid=False` → **1**.
     맨홀 하나 = 원형 디스크 1~2장. 조사 §7 P1-7 이 "비용 대비 효과 최고"라 평가.
+
+    ### `lid=False` 는 **근사**다 — 읽고 쓸 것
+    Cube/Cylinder 조합으로는 **원형 관통 구멍을 만들 수 없다**(감산 불가).
+    이 모드는 상면이 `top_z` 인 **암색 원통**(심연 근사) 1개만 놓는다.
+    위에서 내려다보면 열린 맨홀로 읽히지만, **스침각(h0.3 로봇 시점)에서는
+    평면 원판으로 읽힌다.** 낙차 라벨이 걸린 진짜 개구가 필요하면
+    ① 각형이어도 되면 `build_gully(lid=False)`(벽 4 + 바닥 = 진짜 뚫린 상자)를
+    쓰거나 ② 호출자가 포장 슬래브를 개구 주위로 분할해 짓고 이 원통을
+    수직 벽면으로 쓸 것. sceneD2(바닥 개구부)가 후자의 선례다.
 
     GT: `lid=True` → **낙차 아님**(±10 mm 는 minor-step 임계 0.10 m 미만).
         `lid=False` → **낙차 = `pit_depth`** 이며 GT 라벨 대상(산안규칙 §43
-        무방호 개구부 재현). 기본은 닫힘.
+        무방호 개구부 재현). 단 위 근사 한계를 확인하고 쓸 것. 기본은 닫힘.
     """
     m0 = kit.mark()
     if proud is None:
@@ -652,13 +702,13 @@ def build_manhole(kit, prefix, cx, cy, top_z, lid_mtl, frame_mtl=None,
     z0 = float(top_z) + proud
     prims = {}
 
-    # 틀(링) — 두께 110t 를 그대로 쓰되 상면만 노면에 맞춘다.
-    prims["frame"] = f"{prefix}/Frame"
-    kit.C(prims["frame"], (float(cx), float(cy), z0 - float(thick) / 2.0),
-          float(d_frame) / 2.0, float(thick),
-          frame_mtl if frame_mtl is not None else lid_mtl, col=collider)
-
     if lid:
+        # 틀(링) — 두께 110t. 상면은 뚜껑보다 `seat` 만큼 낮다(z-fighting 회피).
+        prims["frame"] = f"{prefix}/Frame"
+        kit.C(prims["frame"],
+              (float(cx), float(cy), z0 - float(seat) - float(thick) / 2.0),
+              float(d_frame) / 2.0, float(thick),
+              frame_mtl if frame_mtl is not None else lid_mtl, col=collider)
         prims["lid"] = f"{prefix}/Lid"
         kit.C(prims["lid"], (float(cx), float(cy), z0 - float(lid_t) / 2.0),
               float(d_lid) / 2.0, float(lid_t), lid_mtl, col=collider)
@@ -668,9 +718,10 @@ def build_manhole(kit, prefix, cx, cy, top_z, lid_mtl, frame_mtl=None,
             kit.C(prims["boss"], (float(cx), float(cy), z0 + 0.004),
                   0.045, 0.010, lid_mtl, col=False)
     else:
+        # 무개구 근사 — 상면 = 노면. 틀을 놓으면 구멍을 도로 덮으므로 놓지 않는다.
         prims["pit"] = f"{prefix}/Pit"
         kit.C(prims["pit"],
-              (float(cx), float(cy), z0 - float(thick) - float(pit_depth) / 2.0),
+              (float(cx), float(cy), z0 - float(pit_depth) / 2.0),
               float(d_lid) / 2.0, float(pit_depth),
               pit_mtl if pit_mtl is not None else lid_mtl, col=False)
 
@@ -1254,14 +1305,17 @@ def _selfcheck():
     print("\n[3] build_gully")
     k = dry_kit()
     r1 = build_gully(k, "/W/Gully_A", 22.0, -3.75, 0.0, None)
-    chk("닫힘 = 3 프림", r1["prim_count"] == 3, str(r1["prim_count"]))
-    chk("닫힘 = GT 낙차 아님", not r1["is_gt_hazard"])
+    chk("기본(솔리드) = 2 프림", r1["prim_count"] == 2, str(r1["prim_count"]))
+    chk("기본 = GT 낙차 아님", not r1["is_gt_hazard"])
     k = dry_kit()
     r2 = build_gully(k, "/W/Gully_B", 44.0, -3.75, 0.0, None, lid=False)
     chk("무개구 = GT 0.64 m", r2["is_gt_hazard"] and abs(r2["gt_drop"] - 0.64) < 1e-9)
+    chk("무개구 = 벽4+바닥1+링4 = 9 프림", r2["prim_count"] == 9,
+        str(r2["prim_count"]))
     k = dry_kit()
     r3 = build_gully(k, "/W/Gully_C", 0.0, 0.0, 0.0, None, slats=10)
-    chk("슬랫 10 = 13 프림", r3["prim_count"] == 13, str(r3["prim_count"]))
+    chk("슬랫 10 = 피트1+링4+슬랫10 = 15 프림", r3["prim_count"] == 15,
+        str(r3["prim_count"]))
 
     # ── 맨홀 ────────────────────────────────────────────────────────────
     print("\n[4] build_manhole")
@@ -1278,6 +1332,10 @@ def _selfcheck():
     chk("재실행 동일", abs(m1["proud"] - m1b["proud"]) < 1e-12)
     chk("뚜껑 φ558 (틀 648 해석)", abs(m1["d_lid"] - 0.558) < 1e-9,
         f"{m1['d_lid'] * 1000:.0f} mm")
+    k3 = dry_kit()
+    m3 = build_manhole(k3, "/W/MH_C", 3.0, 1.0, 0.0, None, lid=False)
+    chk("무개구 근사 = 1 프림", m3["prim_count"] == 1, str(m3["prim_count"]))
+    chk("무개구 = GT 1.20 m", m3["is_gt_hazard"] and abs(m3["gt_drop"] - 1.2) < 1e-9)
 
     # ── 램프 연석 ───────────────────────────────────────────────────────
     print("\n[5] build_ramp_curb — scene13 램프 프로파일")

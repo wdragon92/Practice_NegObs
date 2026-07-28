@@ -21,6 +21,7 @@ import zlib
 import numpy as np
 
 import facade_kit as fk        # 파사드 저층부 키트(scene_common 을 import 하지 않음)
+import stair_kit as sk        # 계단 법규 키트(동일 — 프리미티브 주입식)
 
 
 # ===========================================================================
@@ -366,6 +367,7 @@ def look_report():
             f"승격={r.get('promoted', 0)} 상수MDL={r.get('const_mdl', 0)} "
             f"웨더={r.get('weather', 0)} 나무={r.get('veg_asset', 0)} "
             f"간살={r.get('baluster', 0)} 관목={r.get('shrub', 0)} "
+            f"손잡이={r.get('handrail', 0)} "
             f"산포={r.get('debris', 0)} | 역할 "
             + ", ".join(f"{k}:{v}" for k, v in top))
 
@@ -1318,7 +1320,7 @@ def build_nosing(stage, prefix, x0, y0, y1, riser, tread, n, base_z=0.0,
 def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
                        mtl, rail_h=1.1, post_r=0.02, spacing=2.0, rail_r=0.03,
                        rail_mid_r=0.018, rail_mid_drop=0.45,
-                       baluster_r=0.009, baluster_gap=0.098):
+                       baluster_r=0.009, baluster_gap=0.098, handrail=True):
     """레일 1선(scene01 build_cues 일반화). 상단 레일 + 중간 레일 + 포스트.
       y        : 레일 Y 위치
       x_start  : 수평 연장 시작 x  (x_start..x_top 구간은 수평)
@@ -1386,6 +1388,21 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
                 post_r, ph, mtl))
         xp += spacing
         p += 1
+
+    # ── 손잡이(handrail) ───────────────────────────────────────────────
+    # 피난·방화구조 규칙 §15④. **33씬 전부 미구현**이었다.
+    # φ32~38 · 높이 850 · **끝단 수평 연장 ≥300** — 이 끝단 갈고리가
+    # 한국 계단 실루엣의 특징인데 우리는 레일이 그냥 뚝 끊겨 있었다.
+    # GT 무영향: 계단면 위 수직/수평 부재라 z(x,y) 를 바꾸지 않는다.
+    if LOOK_V1 and handrail and run > 0.3:
+        try:
+            prims += sk.build_handrail(
+                stage, f"{prefix}/Handrail", y, x_top, run, drop, mtl,
+                add_cylinder, z_top=ground_ref, ground_fn=ground_fn,
+                strict=False)
+            LOOK_STATS["handrail"] = LOOK_STATS.get("handrail", 0) + 1
+        except Exception as e:
+            print(f"[룩v1][경고] 손잡이 실패 {prefix}: {e}")
     return prims
 
 

@@ -115,3 +115,100 @@ USD→MDL→텍스처 3단 참조 해석 확인 완료.
 
 부족분(특히 은행·느티)은 별도 조달 또는 절차 생성이 필요하다.
 `ZZ_synthesis.md` §10.1 의 "목록이 온대 서구종 중심"이라는 정직한 한계 서술과 일치한다.
+
+---
+
+## 실사 레퍼런스 사진 — 한국 보행환경 54장 (담당: 실사 레퍼런스 확보, 2026-07-28)
+
+저장 위치 `Docs/reference_photos/expanded/` · 기계판독 대장 `Docs/reference_photos/expanded/LICENSES.csv` · 보고서 `Docs/reports/real_reference_expansion.md`
+
+### 출처
+
+**Wikimedia Commons** (https://commons.wikimedia.org) 단일 출처. MediaWiki API `action=query&prop=imageinfo&iiprop=extmetadata` 로 **파일별 라이선스·저작자·촬영일을 이미지와 함께 수집**했다. 각 파일의 Commons 파일설명 페이지 URL 이 대장 CSV 의 `commons_page` 컬럼에 있다.
+
+수집 대상은 **한국 도시 보행환경**(보도·계단·골목·광장·공원·하천 제방·캠퍼스), 주간·보행자 눈높이·옥외로 한정했다. 후보 2,637장 → 라이선스/해상도/메타 필터 1,860장 → 상위 150장 다운로드 → **육안 전수 심사** → 54장. 심사에서 실내·야간·항공부감·박무·설경·과보정(HDR)·일출/황혼·인물사진, 그리고 검색질의에 섞여 들어온 **일본 사진 3장**을 배제했다.
+
+**로드뷰(구글·네이버·카카오)는 한 장도 사용하지 않았다** — 3사 모두 약관상 저장·DB화 금지(근거: `Docs/surveys/realism_gap_2026-07-28/E_realism_measurement_protocol.md` §5.2).
+
+### 라이선스 — **CC-BY-SA 포함. 이 문서 서두 원칙의 예외다**
+
+서두 원칙은 "CC0 / MIT-0 / CC-BY 만" 이지만, 아래 54장 중 **35장이 CC BY-SA(동일조건변경허락)** 다. 식생 에셋 절과 동일하게 **명시적 예외**로 기록한다.
+
+| 라이선스 | 장수 | 재배포 | 비고 |
+|---|---|---|---|
+| CC BY-SA 4.0 | 30 | ✅ | SA — 2차적저작물은 동일 조건 |
+| CC0 | 8 | ✅ | 제약 없음 |
+| CC BY 4.0 | 7 | ✅ | 출처표시 |
+| CC BY-SA 3.0 | 3 | ✅ | SA |
+| KOGL Type 1 | 2 | ✅ | 공공누리 1유형 — 출처표시, 상업이용 가능 |
+| CC BY 2.0 | 1 | ✅ | 출처표시 |
+| CC BY-SA 2.0 kr | 1 | ✅ | SA (한국 포팅) |
+| CC BY-SA 2.5 | 1 | ✅ | SA |
+| CC BY-SA 2.0 | 1 | ✅ | SA |
+
+- 비상업(NC)·변경금지(ND)·라이선스 불명 파일은 **0장**이다. 수집 단계에서 화이트리스트 정규식으로 선차단하고 `Restrictions` 필드가 비어있지 않은 파일도 전부 폐기했다.
+
+- ⚠️ **취급 주의**: (a) 통계량 측정은 2차적저작물 작성이 아니므로 SA 조항이 발동하지 않는다. (b) 그러나 수집본은 Commons 가 생성한 **리사이즈본(장변 1600px)** 이므로 엄밀히는 2차적저작물이며, 재배포 시 BY-SA 로 배포해야 한다. (c) **논문 figure 게재 시 BY-SA 표기 의무**가 있다.
+
+- **권고**: 공개 배포·논문 figure 에는 **CC0/CC BY/KOGL 18장만** 사용하고 BY-SA 36장은 내부 측정 참조용으로 둔다. 이 분리가 측정 결론을 바꾸지 않음은 보고서 §2.4 에서 확인했다.
+
+### 사용 파일 (54장)
+
+`LICENSES.csv` 가 정본이며 아래는 사람이 읽기 위한 요약이다. `original_url` 컬럼으로 전량 재수집이 가능하다.
+
+| 파일 (`Docs/reference_photos/expanded/`) | 라이선스 | 저작자 | 촬영일 |
+|---|---|---|---|
+| `wc001_ccby20_3a419a_Korea_Damyang_Juknogwon_Bamboo_Garden_04.jpg` | CC BY 2.0 | Byungjoon Kim | 2008-11-01 0… |
+| `wc005_ccby40_caddc6_삼일공원_1.jpg` | CC BY 4.0 | 씽푸미니 | Taken on 31 … |
+| `wc007_ccbysa40_276551_Korean_War_Veterans_Plaza_1.jpg` | CC BY-SA 4.0 | Louis Minsky | 2023-10-25 0… |
+| `wc010_cc0_120ca9_Hwaseong_City_Hwaseong_ro_Road_Crosswalk_Sign_20240803.jpg` | CC0 | LandAndTree | Taken on 3 A… |
+| `wc011_cc0_00294c_20200806_164648_things_places_in_south_korea_IMG_9615.jpg` | CC0 | Choi Kwang-mo | 2020-08-07 1… |
+| `wc012_ccbysa40_48846b_Stairs_of_Pyeongchon_Central_Park.jpg` | CC BY-SA 4.0 | BoeunKim | 2018-04-21 1… |
+| `wc015_ccbysa40_948e17_Stairs_of_Pyeongchon_Central_Park4.jpg` | CC BY-SA 4.0 | BoeunKim | 2018-04-21 1… |
+| `wc016_ccbysa40_bf9d96_Stairs_of_Pyeongchon_Central_Park5.jpg` | CC BY-SA 4.0 | BoeunKim | 2018-04-21 1… |
+| `wc018_ccbysa40_0bbb83_Stairs_of_Pyeongchon_Central_Park7.jpg` | CC BY-SA 4.0 | BoeunKim | 2018-04-21 1… |
+| `wc022_ccbysa20kr_67222d_보성체육공원_축구경기장_02.jpg` | CC BY-SA 2.0 kr | Hwan | Taken on 19 … |
+| `wc023_ccby40_d30a1d_행당역_대현산공원_4.jpg` | CC BY 4.0 | kepper | Taken on 20 … |
+| `wc024_ccby40_f9b447_행당역_대현산공원_5.jpg` | CC BY 4.0 | kepper | Taken on 20 … |
+| `wc025_ccby40_2bb71b_행당역_대현산공원_8.jpg` | CC BY 4.0 | kepper | Taken on 20 … |
+| `wc026_cc0_88f760_20200806_165202_things_places_in_south_korea_IMG_9627.jpg` | CC0 | Choi Kwang-mo | 2020-08-07 1… |
+| `wc036_ccbysa40_ebeedb_Seoul_7017_Skypark_East_Entrance.jpg` | CC BY-SA 4.0 | Keneckert | Taken on 21 … |
+| `wc040_ccbysa40_e3e016_Jeongdong_gil_정동길_One_of_the_most_popular_pedestrian_alleys.jpg` | CC BY-SA 4.0 | Joongwon Lee - SKKU DOA | 2019-06-24 1… |
+| `wc041_cc0_6c17b1_Jeongwangsingil_ro_Singil_dong_20240719.jpg` | CC0 | LandAndTree | 2024-07-19 |
+| `wc042_cc0_52052e_Okcheon_County_Jungang_ro_Okcheon_Bridge_20240730_02.jpg` | CC0 | LandAndTree | 2024-07-30 |
+| `wc043_cc0_ead8bb_Okcheon_County_Jungang_ro_Okcheon_Bridge_20240730_03.jpg` | CC0 | LandAndTree | 2024-07-30 |
+| `wc047_cc0_a694ef_Row_of_trees_on_sidewalk.jpg` | CC0 | 최광모 | 2015-04-18 1… |
+| `wc048_ccby40_7937de_Yeonamyulgeum_ro_Sidewalk_in_Cheonan_City_20270720.jpg` | CC BY 4.0 | LandAndTree | 2024-07-20 |
+| `wc049_ccbysa25_52ecfd_Around_Samneung_Park.jpg` | CC BY-SA 2.5 | Jérôme Banal ( Eden2004 ) | 2005-09-10 |
+| `wc055_cc0_45a890_Cheonggyecheon_Seoul_Cheonggyecheon2321.jpg` | CC0 | lumoplank | 2024-09-28 |
+| `wc065_ccbysa40_d5e921_Daejeon_Seo_gu_Munjeong_ro_20260315_01.jpg` | CC BY-SA 4.0 | Treeinkr | 2026-03-15 |
+| `wc067_ccbysa40_5b6998_Gwanghwamun_Square_4.jpg` | CC BY-SA 4.0 | kallerna | 2022-11-29 1… |
+| `wc072_ccbysa40_74112b_Insa_dong_인사동_October_1_2020_10.jpg` | CC BY-SA 4.0 | S h y numis | 2020-10-01 1… |
+| `wc073_ccbysa40_2a296b_Insa_dong_인사동_October_1_2020_16.jpg` | CC BY-SA 4.0 | S h y numis | 2020-10-01 1… |
+| `wc074_ccbysa40_6f92aa_Insa_dong_인사동_October_1_2020_21.jpg` | CC BY-SA 4.0 | S h y numis | 2020-10-01 1… |
+| `wc076_ccbysa40_44b4a5_Insa_dong_인사동_October_1_2020_6.jpg` | CC BY-SA 4.0 | S h y numis | 2020-10-01 1… |
+| `wc077_ccbysa40_a08cf2_Insa_dong_인사동_October_1_2020_7.jpg` | CC BY-SA 4.0 | S h y numis | 2020-10-01 1… |
+| `wc078_ccbysa40_f07bff_Insa_dong_인사동_October_1_2020_8.jpg` | CC BY-SA 4.0 | S h y numis | 2020-10-01 1… |
+| `wc080_ccbysa40_dbd180_Bukchon_Hanok_Village_북촌_한옥마을_October_1_2020_15.jpg` | CC BY-SA 4.0 | S h y numis | 2020-10-01 1… |
+| `wc081_ccbysa40_19851c_Hongdae_Main_Road_Seoul.jpg` | CC BY-SA 4.0 | Ken Eckert | 2015-06-12 1… |
+| `wc083_ccbysa30_86f14b_Korea_Seoul_Changdeokgung_Donginmun_01.jpg` | CC BY-SA 3.0 | Alain Seguin at Flickr , from Ottawa, Canada | 2008-04-15 |
+| `wc084_ccbysa40_ee344e_A_paper_wholesaler_in_Euljiro_printing_alley_paper_delivery.jpg` | CC BY-SA 4.0 | Aaaatu | 2021-10-21 1… |
+| `wc087_ccbysa40_2cb04a_Bukchon_Hanok_Village_북촌_한옥마을_October_1_2020_10.jpg` | CC BY-SA 4.0 | S h y numis | 2020-10-01 1… |
+| `wc088_ccbysa40_08f8b7_Bukchon_Hanok_Village_북촌_한옥마을_October_1_2020_11.jpg` | CC BY-SA 4.0 | S h y numis | 2020-10-01 1… |
+| `wc091_ccbysa40_323022_Bukchon_Hanok_Village_북촌_한옥마을_October_1_2020_16.jpg` | CC BY-SA 4.0 | S h y numis | 2020-10-01 1… |
+| `wc093_ccbysa40_2dd1ca_Bukchon_Hanok_Village_북촌_한옥마을_October_1_2020_18.jpg` | CC BY-SA 4.0 | S h y numis | 2020-10-01 1… |
+| `wc107_ccbysa40_c20150_KAIST_s_campus_road.jpg` | CC BY-SA 4.0 | AhmadElq | 2019-09-08 1… |
+| `wc108_ccbysa30_1c35fa_Buildings_near_konkuk_university_01.jpg` | CC BY-SA 3.0 | myself ( User:Piotrus ) | 2013-04-11 1… |
+| `wc110_ccbysa20_8fdc88_Street_in_Seoul_unidentified.jpg` | CC BY-SA 2.0 | Korea.net / Korean Culture and Information Servi… | 2010-10-15 1… |
+| `wc115_ccbysa30_f0a0bb_Plastic_bottles_on_wooden_road.jpg` | CC BY-SA 3.0 | Clementina | 2010-09-16 |
+| `wc129_ccbysa40_60c8e4_Bukchon_ro_11_gil_03.jpg` | CC BY-SA 4.0 | Tristan Surtel | 2019-08-01 1… |
+| `wc130_ccbysa40_39482f_Bukchon_ro_11_gil_04.jpg` | CC BY-SA 4.0 | Tristan Surtel | 2019-08-01 1… |
+| `wc131_ccbysa40_faa870_Bukchon_ro_11_gil.jpg` | CC BY-SA 4.0 | Tristan Surtel | 2019-08-01 1… |
+| `wc133_ccbysa40_a2faea_Stairs_in_the_Gamcheon_Culture_Village_1.jpg` | CC BY-SA 4.0 | Christophe95 | 2018-09-28 0… |
+| `wc134_ccbysa40_f87edc_Stairs_in_the_Gamcheon_Culture_Village_2.jpg` | CC BY-SA 4.0 | Christophe95 | 2018-09-28 0… |
+| `wc135_ccby40_6b9f08_Lee_Han_Yeol_Memorial_on_Yonsei_Campus.jpg` | CC BY 4.0 | Thinkinglex | 2024-12-17 2… |
+| `wc136_ccbysa40_09e976_Yonsei_University_campus.jpg` | CC BY-SA 4.0 | Christian Bolz | 2015-12-13 1… |
+| `wc137_ccby40_f7669b_Yonsei_University_International_Campus_Underwood_Memorial_Li.jpg` | CC BY 4.0 | 기나ㅏㄴ | 2024-05-20 1… |
+| `wc140_ccbysa40_a31fec_Sidewalk_and_Yeomgokdong_Guryongsa_BS_in_Yangjaedaero_Yeomgo.jpg` | CC BY-SA 4.0 | Jhcbs1019 | 2019-07-12 1… |
+| `wc144_kogltype1_2f9c2b_Jongno_Seoul_South_Korea_01.jpg` | KOGL Type 1 | KOREA TOURISM ORGANIZATION (한국관광공사) | 2016-06-18 |
+| `wc145_kogltype1_dfb314_Jongno_Seoul_South_Korea_02.jpg` | KOGL Type 1 | KOREA TOURISM ORGANIZATION (한국관광공사) | 2016-06-18 |

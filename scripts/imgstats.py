@@ -36,8 +36,37 @@ from PIL import Image
 METRICS = ("slope", "grad_k", "flat_pct", "flat_sky", "flat_gnd", "hf", "sat_mu", "sat_sd",
            "chroma_sd", "ori_axis")
 
-# T1 게이트 [ZZ_synthesis §6 T1 "목표 수치"]
+# T1 게이트 [ZZ_synthesis §6 T1 "목표 수치"] — 승용 승인 기준. **변경하지 않는다.**
 GATE = dict(flat_pct=(None, 8.0), slope=(-2.2, -2.0), sat_mu=(0.15, 0.22))
+
+# ---------------------------------------------------------------------------
+# [실사 분포 기반 재산정] `Docs/reports/real_reference_expansion.md` (n=54)
+#
+# 기존 목표치는 **실사 사진 2장**에서 유도됐다. 표본을 54장으로 늘려 재측정하니
+# **목표 4개 중 3개를 실사 자신이 통과하지 못한다**:
+#     flat_pct<8    실사 통과율 44%
+#     slope -2.2~-2.0  44% (문헌 구간이면 91%)
+#     sat_mu 0.15~0.22 33%
+#     flat_gnd<3.0     54%  ← 수치는 우연히 타당하나 근거("실사 0.1")는 이상치였다
+#
+# 실사 n=54 실측: slope -2.033±0.184 / flat_pct 10.23±8.83 /
+#                flat_gnd 3.881±5.005(중앙값 1.79) / sat_mu 0.232±0.071
+#
+# 판별력(실사54 vs 렌더114 AUC 분리도):
+#     grad_k 0.354 > slope 0.338 > ori_axis 0.168 > chroma_sd 0.138 > sat_mu 0.098
+#   → **sat_mu 는 전 지표 최하위인데 게이트에 들어가 있다**(렌더가 실사 분포
+#     한가운데). ori_axis 는 감독이 n=2 근거로 폐기했으나 sat_mu 보다 판별력이
+#     높아 **폐기가 부당**했다. grad_k 는 분리도 1위인데 게이트에 없다.
+#
+# 아래는 **참고용 병기**다. 게이트 변경은 승용 승인 사항이므로 GATE 는 그대로 둔다.
+REAL_N54 = dict(slope=(-2.033, 0.184), flat_pct=(10.23, 8.83),
+                flat_gnd=(3.881, 5.005), sat_mu=(0.232, 0.071),
+                grad_k=(None, None), ori_axis=(0.252, 0.074))
+GATE_ALT = dict(flat_gnd=(None, 3.0),      # 중앙값 1.79 ~ 평균 3.88 사이 — 유지 가능
+                slope=(-2.40, -1.75),      # 실사 평균 ±2SD
+                grad_k=(None, 20.0))       # 분리도 1위 지표를 대신 넣는다
+# CV 가 큰 지표(flat_sky 94% · flat_gnd 129% · hf 115% · flat_pct 86%)는
+# **평균이 아니라 중앙값**으로 판정해야 한다(왜도 +2.38 우편향).
 # 하단 2/3(지면·구조물) 보조 게이트 — 실사 실측 0.1%. 하늘 교체만으로 헤드라인
 # 지표를 통과하는 것을 막는 진짜 기준선이다. [P1 감독 실측 2026-07-28]
 GATE_GND = dict(flat_gnd=(None, 3.0))
@@ -236,6 +265,9 @@ def main(argv):
         if rows:
             agg[gname] = {k: float(np.mean([r[k] for r in rows]))
                           for k in METRICS}
+            # 왜도가 큰 지표는 평균이 이상치에 끌린다 → 중앙값 병기(실사 n=54 근거)
+            agg[gname].update({k + "_med": float(np.median([r[k] for r in rows]))
+                               for k in METRICS})
             agg[gname]["n"] = len(rows)
             detail[gname] = rows
 
@@ -249,10 +281,30 @@ def main(argv):
               f"{a['hf']:>6.3f} {a['sat_mu']:>7.3f} {a['chroma_sd']:>7.4f} "
               f"{a['ori_axis']:>6.3f}")
 
-    print("\nT1 게이트 판정 [ZZ_synthesis §6]")
+    print("\n중앙값 (왜도 큰 지표는 이쪽이 대표값 — 실사 n=54 근거)")
+    for gname, a in agg.items():
+        print(f"  [{gname}] flat%={a['flat_pct_med']:5.1f} "
+              f"gnd%={a['flat_gnd_med']:5.1f} slope={a['slope_med']:+.2f} "
+              f"grad_k={a['grad_k_med']:5.1f} sat={a['sat_mu_med']:.3f} "
+              f"ori={a['ori_axis_med']:.3f}")
+
+    print("\nT1 게이트 판정 [ZZ_synthesis §6 — 승용 승인 기준, 불변]")
     for gname, a in agg.items():
         ok, lines = gate_verdict(a)
         print(f"  [{gname}] {'통과' if ok else '미달'} — " + " / ".join(lines))
+
+    print("\n[참고] 실사 n=54 분포 기반 재산정 게이트 (승인 전 — 판정에 쓰지 말 것)")
+    for gname, a in agg.items():
+        out, ok_all = [], True
+        for k, (lo, hi) in GATE_ALT.items():
+            v = a.get(k + "_med", a.get(k))
+            if v is None:
+                continue
+            ok = (lo is None or v >= lo) and (hi is None or v <= hi)
+            ok_all = ok_all and ok
+            rng = (f"< {hi}" if lo is None else f"{lo} ~ {hi}")
+            out.append(f"{k}={v:.3f}({rng}){'O' if ok else 'X'}")
+        print(f"  [{gname}] {'통과' if ok_all else '미달'} — " + " / ".join(out))
 
     if json_out:
         with open(json_out, "w") as f:

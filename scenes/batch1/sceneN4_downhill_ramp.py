@@ -714,6 +714,29 @@ def main():
                  hh - DROP - dep / 2.0),
                 (wl["x_end"] - rp["run"] + 0.02, t, dep), M["wall"], col=True)
 
+            # [사실화 v1] 옹벽 상세 — 배수공 · 신축/수축이음 · 갓돌.
+            # 조사 지적: 이 씬 옹벽 51건이 전부 **민짜 벽**이었다. 실제 옹벽은
+            # 배수공 φ100 을 약 4m 마다 뚫고(도로설계요령 3권 8-7편), 캔틸레버는
+            # 15~20m 마다 신축이음으로 끊어지며, 수축이음 홈이 9m 이하 간격으로
+            # 들어간다. 이 반복 분절선이 벽면의 스케일을 읽게 해준다.
+            # GT 무영향: 벽면 부착물이라 지면 z(x,y) 를 바꾸지 않는다.
+            if sc.LOOK_V1:
+                try:
+                    import infra_kit as ik
+                    kit = ik.Kit(
+                        box=lambda pth, c, sz, m=None, col=False: sc.add_box(
+                            stage, pth, c, sz, m, collider=col),
+                        cyl=lambda pth, c, r, h, m=None, rotY=0.0, rotX=0.0,                             col=False: sc.add_cylinder(
+                                stage, pth, c, r, h, m, rotY=rotY),
+                        stage=stage)
+                    ik.build_retaining_wall_details(
+                        kit, f"{ROOT}/WallDet_{tag}",
+                        ap["x0"], wl["x_end"], ya, 0.0, hh,
+                        M["wall"], axis="x", normal_sign=-sgn,
+                        wall_t=t, wall_type="cantilever", coping=False)
+                except Exception as e:
+                    print(f"[룩v1][경고] 옹벽 상세 실패 {tag}: {e}")
+
     # -------------------------------------------------------------------
     # cue — 옹벽 상단 파이프 레일(옵션)
     # -------------------------------------------------------------------

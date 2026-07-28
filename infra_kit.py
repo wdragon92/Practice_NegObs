@@ -231,12 +231,52 @@ class Kit:
     def mark(self):
         return len(self.prims)
 
+    # -- facade_kit 호환 생성자 ------------------------------------------
+    @classmethod
+    def from_sc_helpers(cls, stage, add_box, add_cylinder=None,
+                        oriented_box=None, build_slope=None):
+        """`facade_kit.Kit` 과 같은 스타일 — **stage 를 안 감은 원함수**를 받는다.
+
+        `facade_kit.Kit(add_box, add_cylinder, _oriented_box)` 처럼 쓰던 사람이
+        헷갈리지 않게 두는 대체 생성자다. 기대 시그니처는 scene_common 현행:
+
+            add_box(stage, path, center, size, mtl=None, collider=False)
+            add_cylinder(stage, path, center, r, h, mtl=None,
+                         rotY=0.0, rotX=0.0, collider=False)
+            oriented_box(stage, path, center, size, mtl=None, collider=False,
+                         rotz=0.0, rotx=0.0)
+            build_slope(stage, path, x0, z0, run, drop, y0, y1, thick, mtl,
+                        margin=0.3, collider=True)
+        """
+        def _b(path, center, size, mtl=None, col=False):
+            return add_box(stage, path, center, size, mtl, col)
+
+        def _c(path, center, r, h, mtl=None, rotY=0.0, rotX=0.0, col=False):
+            return add_cylinder(stage, path, center, r, h, mtl,
+                                rotY=rotY, rotX=rotX, collider=col)
+
+        def _o(path, center, size, mtl=None, rotz=0.0, rotx=0.0, col=False):
+            return oriented_box(stage, path, center, size, mtl,
+                                collider=col, rotz=rotz, rotx=rotx)
+
+        def _s(path, x0, z0, run, drop, y0, y1, thick, mtl,
+               margin=0.0, col=True):
+            return build_slope(stage, path, x0, z0, run, drop, y0, y1,
+                               thick, mtl, margin=margin, collider=col)
+
+        return cls(_b,
+                   _c if add_cylinder is not None else None,
+                   _o if oriented_box is not None else None,
+                   _s if build_slope is not None else None,
+                   stage=stage)
+
 
 def kit_from_scene_common(sc, stage):
-    """이미 import 된 `scene_common` 모듈 객체(`sc`)에서 Kit 을 만든다.
+    """이미 import 된 `scene_common` 모듈 객체(`sc`)에서 Kit 을 만든다. **권장 경로.**
 
     **이 함수는 import 를 하지 않는다** — 호출자가 넘긴 모듈 객체를 쓸 뿐이다.
     씬에서:  `kit = infra_kit.kit_from_scene_common(sc, stage)`
+    (원함수를 직접 넘기고 싶으면 `Kit.from_sc_helpers(stage, ...)` — facade_kit 스타일)
     """
     def _box(path, center, size, mtl=None, col=False):
         return sc.add_box(stage, path, center, size, mtl, collider=col)
@@ -348,6 +388,8 @@ def build_gutter_L(kit, prefix, x0, y0, x1, y1, top_z, mtl,
     - `top_z`: **차도측(바깥) 상단 모서리 z** — 아스팔트와 flush.
       연석측 모서리는 `top_z - width*sin(atan(cross_slope))` 로 낮아진다.
     - `road_side`: 진행방향 기준 `"left"`(+법선) / `"right"`(−법선).
+    - **`Kit(obox=...)` 가 필요하다** — 횡단경사 때문에 팬이 항상 기울기 때문.
+      `cross_slope=0.0` 이고 선분이 축평행이면 obox 없이도 동작한다(평탄 측구).
     - `jitter`: 줄눈 위치 지터 [m]. 기본 0 (줄눈은 실제로 정확히 등간격이다 —
       §3.4 의 지터 권고는 볼라드·수목 같은 **배치물**에 대한 것이지 시공 줄눈이
       아니다). 마감 불량 재현이 필요할 때만 0.02~0.05 를 준다.

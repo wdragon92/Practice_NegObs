@@ -618,3 +618,24 @@ print(len(rows), 'rows;', 'diff:', disk ^ {r['file'] for r in rows})
 - https://policies.google.com/terms/generative-ai/archive/20230809
 - https://ai.google.dev/gemini-api/terms
 - https://www.kogl.or.kr/info/license.do
+
+---
+
+## [해소] B. `look_refs/` 17장 — 사용자 확인으로 종결 (2026-07-28)
+
+**사용자 확인: Google AI Studio(`aistudio.google.com`)를 통해 생성. 소비자앱 아님, API 아님.**
+
+감사 §1-B 가 판정을 두 갈래로 남긴 항목이 이로써 닫힌다.
+
+| 표면 | 해당 조항 | 우리 사용에 대한 판정 |
+|---|---|---|
+| `gemini.google.com` (소비자앱) | 생성형 AI 추가 서비스 약관: *"You may not use the Services to **develop machine learning models** or related technology."* | 저촉 — 이 프로젝트 목적 자체가 ML 학습 데이터 생성 |
+| **AI Studio / API (실제 사용 표면)** | 개발자 약관: *"models that **compete with** the Services"* 로 한정 | **무관** — 우리 모델은 로봇 비가시 낙차 추정기로 Gemini 와 경쟁 관계가 아니다 |
+
+**결론: `look_refs/` 17장은 현행대로 유지·공개 가능.**
+
+부기 — 이 판정의 근거는 "AI Studio 는 개발자 표면이므로 소비자앱 조항이 아니라
+개발자 약관이 적용된다"는 것이다. 약관은 개정되므로 **논문 투고 시점에 재확인**할 것.
+또한 나노바나나 산출물은 **레퍼런스(재질·조명·미장센 참고)로만 쓰였고 학습 데이터에
+직접 들어가지 않는다** — 시점·기하·GT 는 전부 Isaac 에서 결정된다(README 규약).
+이 점이 판정을 한층 더 안전하게 만든다.

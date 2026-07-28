@@ -20,6 +20,8 @@ import zlib
 
 import numpy as np
 
+import facade_kit as fk        # 파사드 저층부 키트(scene_common 을 import 하지 않음)
+
 
 # ===========================================================================
 # [0] 경로·에셋 상수
@@ -1991,6 +1993,27 @@ def build_planter(stage, prefix, cx, cy, base_z, curb_mtl, grass_mtl,
         build_tree(stage, prefix, cx, cy, base_z + gh, *tree_mtls)
 
 
+_FIRE_MTL_CACHE = {}
+
+
+def _fire_decal_mtl(stage, prefix):
+    """소방관 진입창 표식 재질 — **씬당 1개만** 만든다.
+    동마다 만들면 82개 건물 × 재질이 되어 재질 테이블이 터진다.
+    적색은 v5.1 §4 상수색 불가침 대상이라 텍스처 승격에서 제외되도록
+    이름을 `Looks/FkFireSignRed` 로 준다(역할 분류기 sign 규칙에 걸린다).
+    """
+    root = prefix.split("/Looks")[0].rsplit("/", 2)[0] if "/Looks" in prefix \
+        else "/".join(prefix.split("/")[:3])
+    key = (id(stage), root)
+    m = _FIRE_MTL_CACHE.get(key)
+    if m is None:
+        m = make_pbr(stage, f"{root}/Looks/FkFireSignRed",
+                     diffuse_color=(0.55, 0.045, 0.035),
+                     roughness_const=0.55)
+        _FIRE_MTL_CACHE[key] = m
+    return m
+
+
 def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
                    window=None):
     """건물 1동. bd 딕셔너리(x0,x1,y0,y1,h,floors,axis,facade_*,face_dir).
@@ -2037,7 +2060,28 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
         usable = Ly - 2 * wd["margin"]
     ncols = max(1, int(usable / wd["col_step"]))
 
-    for f in range(bd["floors"]):
+    # ── 창 상한 ────────────────────────────────────────────────────────
+    # 측정: 33씬에 창 프림이 **4,173개인데 그 대부분이 프레임 밖**이다.
+    # 판정 1순위 시점(h0.3·pitch −10°·vFOV 36°)에서 프레임 상단은 지평 위
+    # +8.0° 뿐이라, 거리 d 에서 보이는 최고 높이는 0.3 + 0.14·d 다.
+    #   d=20m → 3.1m · d=34m → 5.1m · d=90m → 12.9m
+    # 즉 34m 짜리 아파트 파사드도 **지상 5.1m = 1.7개 층만** 화면에 들어온다.
+    # 프림의 19%를 안 보이는 곳에 쓰면서, 화면을 채우는 지상 0~5m 구간에는
+    # 셸 박스 한 면 말고 아무것도 없었다.
+    # → 안 보이는 층의 창을 만들지 않고, 그 예산을 저층부에 재투자한다.
+    nrows = bd["floors"]
+    if LOOK_V1:
+        try:
+            nrows = fk.window_rows_visible(
+                float(bd.get("lod_dist",
+                             abs(bd["facade_y"] if axis_y else bd["facade_x"]))),
+                fstep, bd["floors"], base_z=base,
+                near_dist=20.0, min_rows=2)
+        except Exception as e:
+            print(f"[룩v1][경고] 창 상한 계산 실패 {prefix}: {e}")
+            nrows = bd["floors"]
+
+    for f in range(nrows):
         zc = base + fstep * f + fstep * 0.5
         if band_t > 1e-4:
             zb = zc - wd["h"] / 2.0 - band_h / 2.0
@@ -2063,11 +2107,39 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
                                      (gx, yc, zc), (0.03, wd["w"], wd["h"]),
                                      glass_mtl))
 
-    prims.append(add_box(stage, f"{prefix}/Parapet", (cx, cy, base + hh + 0.25),
-                         (Lx + 0.2, Ly + 0.2, 0.5), parapet_mtl))
+    # 파라펫: 건축법 시행령 §40 은 옥상 난간을 **1.2 m 이상**으로 규정한다.
+    # 종전 0.5 는 규정 미달이었고, 원경 실루엣도 그만큼 납작했다.
+    par_h = 1.20 if LOOK_V1 else 0.5
+    prims.append(add_box(stage, f"{prefix}/Parapet",
+                         (cx, cy, base + hh + par_h / 2.0),
+                         (Lx + 0.2, Ly + 0.2, par_h), parapet_mtl))
 
     if not LOOK_V1:
         return prims
+
+    # ── ⓪ 기단 석재 띠 ────────────────────────────────────────────────
+    # **동당 프림 1개**인데 h0.3 프레임 하단을 직격한다 — 최대 ROI.
+    # 한국 건물 저층부는 예외 없이 화강석·타일 기단으로 마감돼 있다.
+    try:
+        fac = fk.facade_from_bd(bd)
+        K = fk.Kit(add_box, add_cylinder)
+        prims += fk.build_plinth(K, stage, prefix, bd["x0"], bd["x1"],
+                                 bd["y0"], bd["y1"], base, parapet_mtl,
+                                 height=1.10)
+        # 에어컨 실외기 — 조사가 꼽은 **한국 식별 최대 단서**이고
+        # 설치 높이 1.5~2.6m = 로봇 시점 정면이다.
+        prims += fk.build_aircon_units(K, stage, prefix, fac,
+                                       parapet_mtl, parapet_mtl,
+                                       mode="eaves", count=4,
+                                       seed=zlib.crc32(prefix.encode()))
+        # 소방관 진입창 붉은 역삼각형 — 2~11층 법정 의무라 실제로 100% 있고
+        # **얇은 쿼드라 사실상 프림 비용이 없다**. 가장 값싼 한국 신호.
+        lv = fk.floor_levels(bd["floors"], fstep, base_z=base)
+        prims += fk.build_fire_access_marks(stage, prefix, fac, lv,
+                                            _fire_decal_mtl(stage, prefix),
+                                            max_floors=nrows)
+    except Exception as e:
+        print(f"[룩v1][경고] 파사드 저층부 실패 {prefix}: {e}")
 
     # ── ① 저층부: 출입문 ──────────────────────────────────────────────
     # 문 높이 2.1 m 는 **스케일 앵커**를 겸한다. 사람·차량이 0건인 라이브러리에서

@@ -205,8 +205,10 @@ LOOK_CLASS = {
     "glass":    dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
     "paint":    dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
     "sign":     dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
-    # 미상 역할 — 보수적으로. MDL 교체·채도 변경 없음, 최소 베벨만.
-    "misc":     dict(bevel=0.003, sat=1.00, mdl="omni",   detail=True),
+    # 미상 역할 — 보수적으로. MDL 교체·채도 변경·디테일 노멀 전부 없음.
+    # 분류기가 215종 중 208종을 잡으므로 여기 떨어지는 건 진짜 미상이고,
+    # 그런 재질에 콘크리트 그레인 노멀을 씌우는 건 개선이 아니라 훼손이다.
+    "misc":     dict(bevel=0.003, sat=1.00, mdl="omni",   detail=False),
 }
 
 # --- `Looks/<이름>` → 클래스 -------------------------------------------------
@@ -249,21 +251,107 @@ LOOK_ROLE = {
     "Band": "paint", "Tactile": "paint",
     # 유리·사인·발광
     "Glass": "glass", "Window": "glass", "Panel": "sign",
+    # 분류기 잔여 7종 중 명확한 것만 명시(나머지 Bag/Emit/Rubber/Snow 는
+    # 의도적으로 misc = 최소 처방 — 알 수 없는 재질에 콘크리트 그레인을
+    # 씌우는 것이 더 나쁘다)
+    "Line": "paint", "CutLine": "paint", "Pot_": "concrete",
     "Sign": "sign", "SignFace": "sign", "SignBack": "sign",
 }
+
+
+# 룩 레이어 적용 계측 — 무엇이 실제로 걸렸는지 눈으로 확인하기 위한 카운터.
+# (게이트 1차에서 "룩 레이어를 켰는데 수치가 안 움직인다"를 진단한 도구다.
+#  원인은 상수색 재질을 통째로 건너뛰고 있었던 것 — 그게 flat% 의 주범인데.)
+LOOK_STATS = dict(ground=0, omni_tex=0, const=0, bevel=0, detail=0, skin=0,
+                  skipped=0, roles={})
+
+
+def look_report():
+    """룩 레이어 적용 요약 한 줄. capture_pipeline 시작 시 출력."""
+    if not LOOK_V1:
+        return "[룩v1] OFF"
+    r = LOOK_STATS
+    top = sorted(r["roles"].items(), key=lambda kv: -kv[1])[:8]
+    return (f"[룩v1] 재질 ground={r['ground']} omni_tex={r['omni_tex']} "
+            f"const={r['const']} skip={r['skipped']} | 베벨={r['bevel']} "
+            f"디테일={r['detail']} 지면스킨={r['skin']} | 역할 "
+            + ", ".join(f"{k}:{v}" for k, v in top))
+
+
+# --- 키워드 규칙 분류기 --------------------------------------------------
+# 저장소 전수 실측 결과 `Looks/` 이름이 **약 200종**이고 대부분이 1~2회만 쓰이는
+# 롱테일이다(WetRock, StoneMoss, CityParapet, LboxFrame …). 정확 일치 표만으로는
+# 게이트 1차에서 재질의 절반 이상이 "misc" 로 떨어졌다(scene07 33개 중 21개).
+# → **부분문자열 규칙**을 순서대로 적용해 롱테일을 흡수한다.
+#   규칙은 위에서부터 검사하므로 **더 구체적인 것을 먼저** 둔다
+#   (예: "roadpaint" 는 paint, 그냥 "road" 는 asphalt).
+_LOOK_RULES = [
+    # 발광·투명 — 룩 레이어에서 제외해야 하는 것부터
+    ("glass", ("glass", "window", "lens", "shopglass", "cityglass")),
+    ("sign", ("sign", "placard", "panel", "plaque", "lbox", "mailbox")),
+    # 도색·표지 — 상수색이 물리적으로 옳다(텍스처화 금지 대상)
+    ("paint", ("paint", "linewhite", "lineyellow", "roadpaint", "tactile",
+               "warn", "tape", "band", "stripe", "gauge")),
+    # 식생
+    ("veg", ("grass", "leaf", "canopy", "hedge", "shrub", "foliage", "reed",
+             "tuft", "tree", "moss", "treeline", "treepit")),
+    # 물
+    ("water", ("water", "sea", "tide", "wet")),
+    # 금속
+    ("metal", ("rail", "steel", "iron", "metal", "pole", "post", "lamp",
+               "bollard", "gate", "fence", "grate", "grating", "galv",
+               "rebar", "wire", "cable", "hvac", "crane", "gear", "shutter",
+               "mullion", "frame", "bin", "lid", "duck", "tool", "beak")),
+    # 목재
+    ("wood", ("wood", "deck", "bench", "seat", "sleeper", "pallet",
+              "stringer", "carton", "door")),
+    # 낙차 에지 — 승인된 노징 12 mm / 연석 12 mm
+    ("nosing", ("nosing", "tread", "step")),
+    ("curb", ("curb", "coping", "cope", "verge", "kerb")),
+    # 석재
+    ("stone", ("stone", "granite", "marble", "rock", "flag", "cobble",
+               "polish", "lightstone")),
+    # 벽돌·회벽
+    ("brick", ("brick", "plaster")),
+    # 흙·자갈
+    ("soil", ("soil", "dirt", "earth", "mud", "leafbed")),
+    ("gravel", ("gravel", "ballast", "debris", "rubble")),
+    # 아스팔트·차도
+    ("asphalt", ("asphalt", "road", "lane", "patch", "seam", "joint")),
+    # 포장
+    ("paving", ("pav", "plaza", "walk", "sidewalk", "tile", "block",
+                "apron", "alley", "podium", "platform")),
+    # 콘크리트 구조물 — 가장 넓은 그물이므로 마지막
+    ("concrete", ("concrete", "conc", "wall", "parapet", "shell", "slab",
+                  "stair", "riser", "skirt", "fascia", "ceiling", "facade",
+                  "bldg", "city", "house", "shed", "tunnel", "bridge",
+                  "pier", "abutment", "crest", "ridge", "trough", "valley",
+                  "container", "stage", "upper", "lower", "roof", "canopy",
+                  "awning", "trim", "grime", "dark", "skyline", "far")),
+]
 
 
 def _look_spec(path):
     """프림 경로에서 룩 사양을 얻는다. `.../Looks/Paving` → paving 사양.
 
-    미등재·비정형 경로는 "misc"(보수적 기본)로 떨어져 회귀 위험이 없다.
+    ① 정확 일치 표(LOOK_ROLE) → ② 접미 변형 제거 후 재시도
+    → ③ 키워드 부분문자열 규칙 → ④ "misc"(보수적 기본).
+    미상은 최소 처방만 받으므로 회귀 위험이 없다.
     반환: (클래스명, 사양 dict)
     """
     name = str(path).rstrip("/").split("/")[-1]
     cls = LOOK_ROLE.get(name)
-    if cls is None:                            # 접미 숫자·변형 이름 흡수
+    if cls is None:
         base = name.rstrip("0123456789_")
-        cls = LOOK_ROLE.get(base, "misc")
+        cls = LOOK_ROLE.get(base)
+    if cls is None:
+        low = name.lower()
+        for c, keys in _LOOK_RULES:
+            if any(k in low for k in keys):
+                cls = c
+                break
+    if cls is None:
+        cls = "misc"
     return cls, LOOK_CLASS[cls]
 
 
@@ -377,8 +465,9 @@ def add_box(stage, path, center, size, mtl=None, collider=False):
     # 슬래브 자체는 건드리지 않으므로 낙차 에지 실루엣은 그대로다(승용 조건②).
     if LOOK_V1 and _skin_wanted(path, size, mtl):
         try:
-            _ground_skin(stage, f"{path}_Skin", center, size, mtl,
-                         seed=abs(hash(str(path))) % 100000)
+            if _ground_skin(stage, f"{path}_Skin", center, size, mtl,
+                            seed=abs(hash(str(path))) % 100000) is not None:
+                LOOK_STATS["skin"] += 1
         except Exception as e:                 # 스킨 실패가 씬을 죽이면 안 된다
             print(f"[룩v1][경고] 지면 스킨 생성 실패 {path}: {e}")
     return cube
@@ -587,17 +676,24 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
     """
     from pxr import UsdShade, Sdf, Gf
 
-    if LOOK_V1 and diff is not None and not uv_mode and emission_color is None:
+    _look_omni = None
+    if LOOK_V1 and not uv_mode and emission_color is None:
         cls, spec = _look_spec(path)
-        if spec["mdl"] == "ground":
+        LOOK_STATS["roles"][cls] = LOOK_STATS["roles"].get(cls, 0) + 1
+        if diff is not None and spec["mdl"] == "ground":
+            LOOK_STATS["ground"] += 1
             return _make_ground_pbr(stage, path, diff, nor, rough, scale_m,
                                     spec, tint=tint,
                                     roughness_const=roughness_const,
                                     specular_level=specular_level, bump=bump)
-        # OmniPBR 계열 — 베벨·디테일 노멀만 얹는다(재질 종류는 그대로).
+        # 텍스처 재질 → 베벨 + 디테일 노멀.
+        # **상수색 재질도 베벨은 받는다** — 게이트 1차에서 상수색을 통째로
+        # 건너뛰고 있었고, 상수색이야말로 flat% 의 주범이다. 텍스처화는 별도
+        # 항목(브리프 2-7, 전수 감사 대기)이지만 베벨은 텍스처가 필요 없다.
+        LOOK_STATS["omni_tex" if diff is not None else "const"] += 1
         _look_omni = spec
-    else:
-        _look_omni = None
+    elif LOOK_V1:
+        LOOK_STATS["skipped"] += 1
 
     mtl = UsdShade.Material.Define(stage, path)
     sh = UsdShade.Shader.Define(stage, path + "/Shader")
@@ -656,12 +752,15 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
     if _look_omni is not None:
         # 가짜 베벨 — Kit 106.1+ 정식 구현, RT·PT 양쪽 동작 확인(Phase1 E1).
         if _look_omni["bevel"] > 0.0:
+            LOOK_STATS["bevel"] += 1
             sh.CreateInput("round_edges_radius", F).Set(
                 float(_look_omni["bevel"]))
             sh.CreateInput("round_edges_roundness", F).Set(1.0)
             sh.CreateInput("round_edges_across_materials", B).Set(False)
         # 디테일 노멀 — 근접 텍셀 뭉개짐 완화(Phase1 E3)
-        if _look_omni.get("detail") and os.path.isfile(_DETAIL_NOR):
+        if (_look_omni.get("detail") and diff is not None
+                and os.path.isfile(_DETAIL_NOR)):
+            LOOK_STATS["detail"] += 1
             _tex("detail_normalmap_texture", _DETAIL_NOR, "raw")
             sh.CreateInput("detail_bump_factor", F).Set(0.45)
             ds = 1.0 / 0.08                    # 8 cm 주기 미세 그레인
@@ -1501,7 +1600,14 @@ def ensure_noon_lookfix(src_path):
             return out_path
         os.environ.setdefault("OPENCV_IO_ENABLE_OPENEXR", "1")
         import cv2
-        rgb = cv2.imread(src_path, cv2.IMREAD_UNCHANGED)[..., ::-1]
+        # [사실화 v1 · 버그 수정] **4채널(RGBA) EXR 처리 오류.**
+        # 종전 `[..., ::-1]` 은 BGRA 를 뒤집어 [A,R,G,B] 를 만든다 → 알파가 R
+        # 자리에 들어가고 이후 지평 리프트에서 브로드캐스트 예외 → except 가
+        # 삼키고 **원본 경로를 반환**한다. 그러면 태양 캡이 적용되지 않은 채
+        # DistantLight 가 추가되어 **이중 태양**이 된다(조용한 실패라 더 위험).
+        # 기존 qwantani 는 3채널이라 잠복했고, overcast 는 lookfix=False 라
+        # 우회돼 있었다. PolyHaven puresky 계열은 대부분 RGBA 다.
+        rgb = cv2.imread(src_path, cv2.IMREAD_UNCHANGED)[..., :3][..., ::-1]
         rgb = rgb.astype(np.float64)
         h, w = rgb.shape[:2]
         lum = (0.2126 * rgb[..., 0] + 0.7152 * rgb[..., 1]
@@ -1517,9 +1623,15 @@ def ensure_noon_lookfix(src_path):
         s = np.array([dx[iy, ix], dy[iy, ix], dz[iy, ix]])
         ang = np.degrees(np.arccos(
             np.clip(dx * s[0] + dy * s[1] + dz * s[2], -1.0, 1.0)))
-        ring = (ang > 1.5) & (ang < 2.5)
+        # 태양 캡 각반경. 실제 태양 각반경은 0.27° 인데 1.5° 를 통째로 클램프하면
+        # **구름 하늘에서 "잘린 원반"** 이 보인다(지름 3° 균일 밴드 + 테두리).
+        # 구름 HDRI 는 0.6° 권장(제거 직달에너지 보존 98.3~99.3% — 조사 실측이라
+        # DistantLight 재튜닝 없이 전환 가능). 기본값은 **1.5 유지** — 기존 33씬
+        # 조명이 미세하게라도 바뀌면 이번 라운드의 A/B 통제가 깨진다.
+        cap_deg = float(os.environ.get("NEGOBS_SUN_CAP_DEG", "1.5"))
+        ring = (ang > cap_deg) & (ang < cap_deg + 1.0)
         cap = np.percentile(lum[ring], 90)
-        mask = (ang < 1.5) & (lum > cap)
+        mask = (ang < cap_deg) & (lum > cap)
         scl = np.ones_like(lum)
         scl[mask] = cap / lum[mask]
         out = rgb * scl[..., None]
@@ -1636,6 +1748,7 @@ def capture_pipeline(sim_app, views, out_dir_default, set_render_mode_fn,
         capture_viewport_to_file(vp, file_path=fp)
 
     manifest = []
+    print(look_report())
     print(f"[캡처] 모드={modes} 뷰={list(VIEWS)}")
     for _ in range(30):                        # 초기 로딩 워밍업
         sim_app.update()

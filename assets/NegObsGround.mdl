@@ -353,6 +353,27 @@ export material NegObsGround(
         anno::description("경계 프랙탈화 강도 — w(1-w) 가중이라 0/1 고정점 유지") ]],
     uniform float blend_edge_wavelength = 0.09,
 
+    //  [사실화 v1] 반복 파괴 강도 — 역할별 제어  //
+    // 종전에는 negobs_layer 호출부에 리터럴 1.0 으로 박혀 있어 **끌 수가 없었다**.
+    // 90° 회전 패치 혼합은 자연 지면(흙·자갈·풀)에는 옳지만, 인터로킹 보도블록·
+    // 타일처럼 **모듈 방향성이 있는 포장**에서는 패턴을 조각내 "파손된 보도"로
+    // 보이게 만든다(감독 E9 실측). 모듈형 포장은 0.0, 자연 지면은 1.0.
+    uniform float patch_mix_a = 1.0 [[
+        anno::display_name("Patch Mix A"),
+        anno::description("90도 회전 패치 혼합 강도. 모듈형 포장=0, 자연 지면=1") ]],
+    uniform float patch_mix_b = 1.0 [[
+        anno::display_name("Patch Mix B") ]],
+
+    //  [사실화 v1] 가짜 베벨 — OmniPBR round_edges 동등 기능  //
+    // 3단 재질 정책에서 지면·사면은 이 MDL 을 쓰는데, 연석·계단 코처럼 모서리가
+    // 있는 지면 계열 프림이 OmniPBR 의 round_edges 를 못 쓰게 되는 문제가 있었다.
+    // radius=0 이면 state::normal() 과 동일해 완전한 무영향(기존 씬 회귀 0).
+    uniform float round_edges_radius = 0.0 [[
+        anno::display_name("Round Edges Radius"),
+        anno::description("모서리 반올림 반경 [m]. 0 = 끔") ]],
+    uniform float round_edges_roundness = 1.0,
+    uniform bool round_edges_across_materials = false,
+
     //  공통  //
     uniform float bump_factor = 1.0,
     uniform bool flip_tangent_u = false,
@@ -370,14 +391,14 @@ export material NegObsGround(
     anno::display_name("NegObs Ground"),
     anno::description("Triplanar-projected PBR with primvar cross-fade blending and anti-tiling"),
     anno::author("NegObs look-check pipeline"),
-    anno::version(1, 3, 0)
+    anno::version(1, 4, 0)
 ]] = let {
 
     NegObsLayer A = negobs_layer(
         diffuse_texture_a, normalmap_texture_a, roughness_texture_a,
         texture_scale_a, texture_rotate_a, rough_floor_a, rough_mult_a,
         bump_factor * bump_factor_a, flip_tangent_u, flip_tangent_v,
-        1.0, patch_wavelength_a, macro_amp_a, macro_wavelength_a,
+        patch_mix_a, patch_wavelength_a, macro_amp_a, macro_wavelength_a,
         desat_bright_a, rough_noise_a, rough_noise_wavelength_a,
         specular_level_a, tri_dither, tri_dither_wavelength, tri_weight_exp);
 
@@ -385,7 +406,7 @@ export material NegObsGround(
         diffuse_texture_b, normalmap_texture_b, roughness_texture_b,
         texture_scale_b, texture_rotate_b, rough_floor_b, rough_mult_b,
         bump_factor * bump_factor_b, flip_tangent_u, flip_tangent_v,
-        1.0, patch_wavelength_b, macro_amp_b, macro_wavelength_b,
+        patch_mix_b, patch_wavelength_b, macro_amp_b, macro_wavelength_b,
         desat_bright_b, rough_noise_b, rough_noise_wavelength_b,
         specular_level_b, tri_dither, tri_dither_wavelength, tri_weight_exp);
 
@@ -405,9 +426,22 @@ export material NegObsGround(
 
     color albedo = use_blend ? math::lerp(A.albedo, B.albedo, w) : A.albedo;
     float rough = use_blend ? math::lerp(A.rough, B.rough, w) : A.rough;
-    float3 nrm = use_blend
+    float3 nrm_tex = use_blend
         ? math::normalize(math::lerp(A.nrm, B.nrm, w)) : A.nrm;
     float spec = use_blend ? math::lerp(A.spec, B.spec, w) : A.spec;
+
+    // [사실화 v1] 가짜 베벨 합성.
+    // state::rounded_corner_normal 은 **기하 노멀을 대체**하는 값이라 노멀맵
+    // 섭동과 곱셈 합성이 안 된다. 대신 기하 노멀 대비 **편차를 1차로 가산**한다:
+    //   final = normalize(nrm_tex + (rc - state::normal()))
+    // radius=0 이면 rc == state::normal() 이므로 편차 0 = 완전 무영향이고,
+    // 모서리 근방에서만 노멀이 반올림 방향으로 회전하면서 텍스처 디테일은 남는다.
+    float3 rc = round_edges_radius > 0.0
+        ? state::rounded_corner_normal(round_edges_radius,
+                                       round_edges_across_materials,
+                                       round_edges_roundness)
+        : state::normal();
+    float3 nrm = math::normalize(nrm_tex + (rc - state::normal()));
 
     //  BSDF — OmniPBRBase(metalness=0, coat 없음) 경로 축약 이식  //
     bsdf diffuse_bsdf = df::weighted_layer(

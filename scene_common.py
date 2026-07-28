@@ -1264,11 +1264,16 @@ def capture_pipeline(sim_app, views, out_dir_default, set_render_mode_fn,
             # **그 뒤에** 덮어써야 한다 (호출 순서가 핵심).
             import carb
             st = carb.settings.get_settings()
+            # 씬별 상향 노브 — 간접광만으로 사는 어두운 씬(D4 등)은 64 로 부족할
+            # 수 있다. `NEGOBS_PT_TOTAL_SPP=256` 처럼 씬 단위로 올린다.
+            tot = int(os.environ.get("NEGOBS_PT_TOTAL_SPP",
+                                     PT_FAST["total_spp"]))
             st.set("/rtx/pathtracing/spp", PT_FAST["spp"])
-            st.set("/rtx/pathtracing/totalSpp", PT_FAST["total_spp"])
+            st.set("/rtx/pathtracing/totalSpp", tot)
             st.set("/app/renderer/rtSubframes", PT_FAST["subframes"])
-            warm_default = PT_FAST["warmup"]
-            print(f"[렌더] PT 가속 적용 (warmup {warm_default})")
+            warm_default = max(PT_FAST["warmup"],
+                               -(-tot // (PT_FAST["spp"] * PT_FAST["subframes"])))
+            print(f"[렌더] PT 가속 적용 (totalSpp {tot}, warmup {warm_default})")
         warm = int(os.environ.get("NEGOBS_WARMUP", str(warm_default)))
         for vname, v in VIEWS.items():
             look_from_fn(v["eye"], v["tgt"])

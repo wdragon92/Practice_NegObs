@@ -187,17 +187,36 @@ _GROUND_SCALE_FIX = 1.0        # E10 2차 실측 확정 (비율 1.0001)
 #            하한 미달이다. 과채도는 석재·초목·흙 계열의 국소 현상.
 # mdl      : "ground" = NegObsGround / "omni" = OmniPBR
 # patch    : NegObsGround 패치 회전 강도. 모듈형 포장 0(패턴 파손 방지), 자연 1.
+# 웨더링(MDL v1.6.0) 역할별 값 — 키가 없으면 전부 0(무영향).
+#   **치명 주의**: 기단 오염 밴드는 **월드 Z 절대 기준**이다. 지면 프림은 z≈0 이라
+#   grime 을 켜면 밴드 안에 통째로 들어가 **지면 전체가 균일 암화**된다(전역 회귀).
+#   → 지면 계열(paving/asphalt/soil/gravel)은 grime/splash 를 **반드시 0** 으로.
+#   밴드는 지면 위에 **서 있는 수직 구조물**(옹벽·기단·파라펫·연석·계단 챌면)에만.
+_W_STRUCT = dict(grime=0.35, grime_desat=0.35, grime_h=0.40, splash=0.18,
+                 streak=0.12, wrough=0.15)
+_W_STONE = dict(grime=0.25, grime_desat=0.25, grime_h=0.30, splash=0.12,
+                streak=0.08, wrough=0.12)
+_W_EDGE = dict(grime=0.22, grime_desat=0.30, grime_h=0.12, splash=0.14,
+               wrough=0.10)
+
 LOOK_CLASS = {
     #                    bevel   sat   mdl        patch  detail
     "paving":   dict(bevel=0.010, sat=1.00, mdl="ground", patch=0.0, detail=True),
-    "concrete": dict(bevel=0.010, sat=1.00, mdl="ground", patch=0.0, detail=True),
-    "brick":    dict(bevel=0.006, sat=0.88, mdl="ground", patch=0.0, detail=True),
-    "stone":    dict(bevel=0.006, sat=0.66, mdl="ground", patch=1.0, detail=True),
+    "concrete": dict(bevel=0.010, sat=1.00, mdl="ground", patch=0.0, detail=True,
+                     weather=_W_STRUCT),
+    "brick":    dict(bevel=0.006, sat=0.88, mdl="ground", patch=0.0, detail=True,
+                     weather=dict(grime=0.30, grime_desat=0.30, grime_h=0.35,
+                                  splash=0.15, streak=0.10, wrough=0.15)),
+    "stone":    dict(bevel=0.006, sat=0.66, mdl="ground", patch=1.0, detail=True,
+                     weather=_W_STONE),
     "soil":     dict(bevel=0.000, sat=0.74, mdl="ground", patch=1.0, detail=True),
     "gravel":   dict(bevel=0.000, sat=0.78, mdl="ground", patch=1.0, detail=True),
     "asphalt":  dict(bevel=0.006, sat=0.90, mdl="ground", patch=1.0, detail=True),
-    "nosing":   dict(bevel=0.012, sat=1.00, mdl="ground", patch=0.0, detail=True),
-    "curb":     dict(bevel=0.012, sat=1.00, mdl="ground", patch=0.0, detail=True),
+    "nosing":   dict(bevel=0.012, sat=1.00, mdl="ground", patch=0.0, detail=True,
+                     weather=dict(grime=0.18, grime_desat=0.25, grime_h=0.15,
+                                  splash=0.10, wrough=0.10)),
+    "curb":     dict(bevel=0.012, sat=1.00, mdl="ground", patch=0.0, detail=True,
+                     weather=_W_EDGE),
     "metal":    dict(bevel=0.002, sat=1.00, mdl="omni",   detail=True),
     "wood":     dict(bevel=0.004, sat=0.88, mdl="omni",   detail=True),
     "veg":      dict(bevel=0.000, sat=0.76, mdl="omni",   detail=False),
@@ -274,7 +293,8 @@ def look_report():
     top = sorted(r["roles"].items(), key=lambda kv: -kv[1])[:8]
     return (f"[룩v1] 재질 ground={r['ground']} omni_tex={r['omni_tex']} "
             f"const={r['const']} skip={r['skipped']} | 베벨={r['bevel']} "
-            f"디테일={r['detail']} 지면스킨={r['skin']} | 역할 "
+            f"디테일={r['detail']} 스킨={r['skin']} "
+            f"상수MDL={r.get('const_mdl', 0)} 웨더={r.get('weather', 0)} | 역할 "
             + ", ".join(f"{k}:{v}" for k, v in top))
 
 
@@ -586,6 +606,14 @@ def _ground_skin(stage, path, center, size, mtl, amp_m=0.010,
     return m
 
 
+# 상수색 재질을 NegObsGround(base_color 모드)로 태울 클래스.
+# 제외: paint(차선·반사띠·점자블록) · sign · glass · water · misc
+#   → 이들은 **상수색이 물리적으로 옳다**(v5.1 §4). 텍스처·노이즈를 얹으면
+#     오히려 규약 위반이고, 특히 도색 표지는 균일해야 단서로 기능한다.
+_CONST_MDL_CLASSES = {"paving", "concrete", "brick", "stone", "soil",
+                      "gravel", "asphalt", "nosing", "curb", "wood", "metal",
+                      "veg"}
+
 # 변위 스킨을 붙일 역할 클래스 (지면 계열만). 계단·연석·노징은 제외 —
 # 낙차 에지 기하이므로 승용 조건②에 따라 손대지 않는다.
 _SKIN_CLASSES = {"paving", "concrete", "asphalt", "soil", "gravel", "stone"}
@@ -686,6 +714,21 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
                                     spec, tint=tint,
                                     roughness_const=roughness_const,
                                     specular_level=specular_level, bump=bump)
+        # [사실화 v1] **상수색 재질도 MDL 로 태운다.**
+        # 33씬 make_pbr 호출의 절반 이상이 diffuse_color 상수색인데, 상수색은
+        # 정의상 완전 평탄이라 flat% 의 최대 발생원이다. 텍스처를 새로 조달하지
+        # 않고도 MDL 의 월드 macro 변조·roughness 노이즈·웨더링을 상수색 위에
+        # 얹으면 "평탄한 단색"이 아니게 된다(MDL v1.7.0 `base_color`).
+        # 단 **상수색이 물리적으로 옳은 역할은 제외**한다 — 차선 도색·반사띠·
+        # 점자블록·사인·유리·수면. v5.1 §4 가 이들을 상수색으로 못박았다.
+        if (diff is None and diffuse_color is not None
+                and cls in _CONST_MDL_CLASSES):
+            LOOK_STATS["const_mdl"] = LOOK_STATS.get("const_mdl", 0) + 1
+            return _make_ground_pbr(stage, path, None, None, None, scale_m,
+                                    spec, tint=tint,
+                                    roughness_const=roughness_const,
+                                    specular_level=specular_level, bump=bump,
+                                    base_color=diffuse_color)
         # 텍스처 재질 → 베벨 + 디테일 노멀.
         # **상수색 재질도 베벨은 받는다** — 게이트 1차에서 상수색을 통째로
         # 건너뛰고 있었고, 상수색이야말로 flat% 의 주범이다. 텍스처화는 별도
@@ -775,7 +818,7 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
 
 def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
                      tint=None, roughness_const=None, specular_level=None,
-                     bump=1.0):
+                     bump=1.0, base_color=None):
     """[사실화 v1] NegObsGround.mdl 재질 — 지면·사면 계열 전용.
 
     OmniPBR 의 `project_uvw` 는 트라이플래너가 아니라 **큐빅 투영**이라 경사면에서
@@ -807,11 +850,16 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
         except Exception:
             pass
 
-    _tex("diffuse_texture_a", diff, "auto")
+    # diff=None 이면 텍스처를 바인딩하지 않는다 → MDL 이 흰색을 반환하고
+    # base_color 곱셈으로 상수색이 복원된다(v1.7.0 상수색 모드).
+    if diff is not None:
+        _tex("diffuse_texture_a", diff, "auto")
     if nor is not None:
         _tex("normalmap_texture_a", nor, "raw")
     if rough is not None:
         _tex("roughness_texture_a", rough, "raw")
+    if base_color is not None:
+        sh.CreateInput("base_color", C3).Set(Gf.Vec3f(*base_color))
     s = _GROUND_SCALE_FIX / float(scale_m)
     sh.CreateInput("texture_scale_a", F2).Set(Gf.Vec2f(s, s))
     sh.CreateInput("bump_factor_a", F).Set(float(bump))
@@ -819,9 +867,10 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
     # 반복 파괴 — 모듈형 포장은 patch 0(패턴 파손 방지), 자연 지면은 1
     sh.CreateInput("patch_mix_a", F).Set(float(spec.get("patch", 1.0)))
     sh.CreateInput("patch_wavelength_a", F).Set(4.0)
-    sh.CreateInput("macro_amp_a", F).Set(0.12)
+    # 상수색 모드는 텍스처 고주파가 없어 macro 를 강하게 주면 얼룩으로 보인다.
+    sh.CreateInput("macro_amp_a", F).Set(0.07 if diff is None else 0.12)
     sh.CreateInput("macro_wavelength_a", F).Set(14.0)
-    sh.CreateInput("desat_bright_a", F).Set(0.30)
+    sh.CreateInput("desat_bright_a", F).Set(0.0 if diff is None else 0.30)
     sh.CreateInput("saturation_a", F).Set(float(spec.get("sat", 1.0)))
     sh.CreateInput("rough_noise_a", F).Set(0.22)
     sh.CreateInput("rough_noise_wavelength_a", F).Set(1.2)
@@ -833,6 +882,19 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
         sh.CreateInput("rough_floor_a", F).Set(float(roughness_const))
     if specular_level is not None:
         sh.CreateInput("specular_level_a", F).Set(float(specular_level))
+    # 웨더링 (MDL v1.6.0). spec 에 weather 키가 없으면 전부 0 = 무영향.
+    w = spec.get("weather") or {}
+    if w:
+        for key, val in (("grime_strength", w.get("grime", 0.0)),
+                         ("grime_desat", w.get("grime_desat", 0.0)),
+                         ("grime_height", w.get("grime_h", 0.35)),
+                         ("splash_strength", w.get("splash", 0.0)),
+                         ("streak_strength", w.get("streak", 0.0)),
+                         ("dust_strength", w.get("dust", 0.0)),
+                         ("dust_desat", w.get("dust_desat", 0.0)),
+                         ("weather_rough", w.get("wrough", 0.0))):
+            sh.CreateInput(key, F).Set(float(val))
+        LOOK_STATS["weather"] = LOOK_STATS.get("weather", 0) + 1
     if spec.get("bevel", 0.0) > 0.0:
         sh.CreateInput("round_edges_radius", F).Set(float(spec["bevel"]))
         sh.CreateInput("round_edges_roundness", F).Set(1.0)

@@ -232,7 +232,9 @@ LOOK_CLASS = {
     "paving":   dict(bevel=0.006, sat=1.00, mdl="ground", patch=0.0, detail=True,
                      tex="paving_interlock", bump=1.4),
     "concrete": dict(bevel=0.020, sat=1.00, mdl="ground", patch=0.0, detail=True,
-                     weather=_W_STRUCT, tex="concrete_wall", bump=1.6),
+                     weather=_W_STRUCT, tex="concrete_floor", bump=1.6),
+                     # concrete_wall(c@1/16 0.0345) → concrete_floor(0.129, x3.7).
+                     # 진단: 승격 텍스처의 국소대비가 낮으면 승격해도 결이 안 산다.
                      # 현장타설 20~30 mm (KCS 21 50 05). bump 1.6 = 진단 P3
                      # (음영부는 밝기가 아니라 노멀 대비로만 결이 산다)
     "brick":    dict(bevel=0.006, sat=0.88, mdl="ground", patch=0.0, detail=True,
@@ -257,8 +259,10 @@ LOOK_CLASS = {
     "curb":     dict(bevel=0.010, sat=1.00, mdl="ground", patch=0.0, detail=True,
                      weather=_W_EDGE),   # 연석 수직형 R=10 (예규 321호 그림2.17)
     "metal":    dict(bevel=0.002, sat=1.00, mdl="omni",   detail=True),
-    "wood":     dict(bevel=0.004, sat=0.88, mdl="omni",   detail=True),
-    "veg":      dict(bevel=0.000, sat=0.76, mdl="omni",   detail=False),
+    "wood":     dict(bevel=0.004, sat=0.88, mdl="omni",   detail=True,
+                     tex="wood_dark", bump=1.3),
+    "veg":      dict(bevel=0.000, sat=0.76, mdl="omni",   detail=False,
+                     tex="leaf_ground", bump=1.2),
     "water":    dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
     "glass":    dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
     "paint":    dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
@@ -320,6 +324,10 @@ LOOK_ROLE = {
     # 씌우는 것이 더 나쁘다)
     "Line": "paint", "CutLine": "paint", "Pot_": "concrete",
     "Snow": "snow", "Panel": "metal", "Iron": "metal",
+    # 오분류 정정(진단 2차): Roof 는 산사 목조 기와라 금속이 아니고,
+    # Ridge/Crest 는 자연 능선이라 콘크리트가 아니다.
+    "Roof": "wood", "Roof_": "wood", "Ridge": "soil", "Ridge_": "soil",
+    "Crest_": "soil", "Crest": "soil",
     "Sign": "sign", "SignFace": "sign", "SignBack": "sign",
 }
 
@@ -444,10 +452,12 @@ def _texture_sat(path):
             im = im.convert("RGB")
             im.thumbnail((64, 64))
             a = np.asarray(im).astype(np.float64) / 255.0
+        a = np.where(a <= 0.04045, a / 12.92, ((a + 0.055) / 1.055) ** 2.4)
         mx = a.max(-1)
         mn = a.min(-1)
         v = float(np.where(mx > 1e-6, (mx - mn) / np.maximum(mx, 1e-6), 0).mean())
-    except Exception:
+    except Exception as e:
+        print(f"[룩v1][경고] 텍스처 채도 계산 실패 {os.path.basename(path)}: {e}")
         v = None
     _TEXSAT_CACHE[path] = v
     return v
@@ -484,8 +494,16 @@ def _texture_mean(path):
             im = im.convert("RGB")
             im.thumbnail((64, 64))
             a = np.asarray(im).astype(np.float64) / 255.0
-        v = tuple(float(x) for x in a.reshape(-1, 3).mean(0))
-    except Exception:
+        # [치명 · 색공간] MDL 은 diffuse 를 colorSpace="auto" 로 읽어 **선형으로
+        # 디코딩**한 뒤 base_color 를 곱한다. 그런데 종전에는 여기서 JPEG 를
+        # **sRGB 인코딩 값 그대로** 평균내 base_color = 의도색 / sRGB평균 을 냈다.
+        # 두 공간을 섞은 셈이라 승격 재질이 **2.06~3.64배 어두워졌다**.
+        # scene07 이 9.51 → 10.00 으로 역행한 직접 원인이다.
+        # → sRGB → 선형 변환 후 평균낸다 (IEC 61966-2-1).
+        lin = np.where(a <= 0.04045, a / 12.92, ((a + 0.055) / 1.055) ** 2.4)
+        v = tuple(float(x) for x in lin.reshape(-1, 3).mean(0))
+    except Exception as e:
+        print(f"[룩v1][경고] 텍스처 평균 계산 실패 {os.path.basename(path)}: {e}")
         v = None
     _TEXMEAN_CACHE[path] = v
     return v
@@ -807,8 +825,12 @@ def _ground_skin(stage, path, center, size, mtl, amp_m=0.010,
 # 인데 코드는 이 집합에 셋 다 넣어 상수색이면 MDL 로 보내고 있었다(59종 불일치).
 # 특히 **금속은 MDL 에 metallic 입력이 아예 없어 금속성이 소실**된다.
 # 정책대로 지면·구조물 계열만 남긴다.
+# metal 만 제외하면 된다 — MDL 이 metalness=0 축약형이라 **금속성만** 소실된다.
+# 식생·목재는 금속성이 없으므로 MDL 로 보내도 무방하고, scene07 진단에서
+# 상수색 식생 2.26%p·상수색 목재 1.61%p 가 죽은 픽셀 상위였다.
 _CONST_MDL_CLASSES = {"paving", "concrete", "brick", "stone", "soil",
-                      "gravel", "asphalt", "nosing", "curb", "snow"}
+                      "gravel", "asphalt", "nosing", "curb", "snow",
+                      "veg", "wood"}
 
 # 변위 스킨을 붙일 역할 클래스 (지면 계열만). 계단·연석·노징은 제외 —
 # 낙차 에지 기하이므로 승용 조건②에 따라 손대지 않는다.

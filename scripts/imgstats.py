@@ -18,8 +18,13 @@ JSON 출력·하늘 제외 모드·그룹 비교를 추가했다. 의존성은 n
 T1 목표치 [ZZ_synthesis §6]: flat% < 8 · slope -2.0~-2.2 · sat_mu 0.15~0.22
 
 사용법:
-  python scripts/imgstats.py @render 'look_check/scene01/v7_pt/pt_*.png' \
-                            @real   'Docs/reference_photos/*.jpg'
+  # 실사 기준군은 **배포 안전 세트**를 쓴다(라이선스 감사 조치).
+  #   REAL=$(sed '/^#/d;/^$/d' Docs/reference_photos/real_set_safe.txt | tr '\n' ' ')
+  python scripts/imgstats.py @render 'look_check/scene01/v7_pt/pt_*.png' @real $REAL
+  #
+  # ⚠ 종전 `@real 'Docs/reference_photos/*.jpg'` (n=2) 는 쓰지 말 것 —
+  #   2장 중 1장이 라이선스 근거 없는 제3자 사진이라 격리됐고,
+  #   나머지 1장만으로는 표본이 성립하지 않는다.
   # 하늘(상단 1/3) 제외 — 지면·구조물만 보고 싶을 때
   python scripts/imgstats.py --lower @render '...'
   # 기계 판독용

@@ -1,0 +1,31 @@
+# 배포 안전 실사 레퍼런스 세트 (license_audit_v1.md 조치)
+#
+# 사실화 라운드의 기준선 @real 은 원래 사진 2장이었고 그중 1장이
+# 라이선스 근거 없는 제3자 사진이었다(격리 완료). 기준선이 무허락
+# 저작물 위에 서 있으면 논문이 그 수치를 인용하는 순간 문제가 된다.
+#
+# 여기 목록은 **CC0 / CC BY / KOGL Type1 만** — share-alike(BY-SA)와
+# NC/ND 는 제외했다. 실측 구성: CC0 8 · CC BY 8 · KOGL 2 = 18장.
+# 파일 실체는 .gitignore 대상이며 LICENSES.csv 로 재수집한다.
+#
+# 사용:  python scripts/imgstats.py @real $(sed '/^#/d' Docs/reference_photos/real_set_safe.txt | tr '\n' ' ')
+
+Docs/reference_photos/expanded/wc001_ccby20_3a419a_Korea_Damyang_Juknogwon_Bamboo_Garden_04.jpg
+Docs/reference_photos/expanded/wc005_ccby40_caddc6_삼일공원_1.jpg
+Docs/reference_photos/expanded/wc010_cc0_120ca9_Hwaseong_City_Hwaseong_ro_Road_Crosswalk_Sign_20240803.jpg
+Docs/reference_photos/expanded/wc011_cc0_00294c_20200806_164648_things_places_in_south_korea_IMG_9615.jpg
+Docs/reference_photos/expanded/wc023_ccby40_d30a1d_행당역_대현산공원_4.jpg
+Docs/reference_photos/expanded/wc024_ccby40_f9b447_행당역_대현산공원_5.jpg
+Docs/reference_photos/expanded/wc025_ccby40_2bb71b_행당역_대현산공원_8.jpg
+Docs/reference_photos/expanded/wc026_cc0_88f760_20200806_165202_things_places_in_south_korea_IMG_9627.jpg
+Docs/reference_photos/expanded/wc041_cc0_6c17b1_Jeongwangsingil_ro_Singil_dong_20240719.jpg
+Docs/reference_photos/expanded/wc042_cc0_52052e_Okcheon_County_Jungang_ro_Okcheon_Bridge_20240730_02.jpg
+Docs/reference_photos/expanded/wc043_cc0_ead8bb_Okcheon_County_Jungang_ro_Okcheon_Bridge_20240730_03.jpg
+Docs/reference_photos/expanded/wc047_cc0_a694ef_Row_of_trees_on_sidewalk.jpg
+Docs/reference_photos/expanded/wc048_ccby40_7937de_Yeonamyulgeum_ro_Sidewalk_in_Cheonan_City_20270720.jpg
+Docs/reference_photos/expanded/wc055_cc0_45a890_Cheonggyecheon_Seoul_Cheonggyecheon2321.jpg
+Docs/reference_photos/expanded/wc135_ccby40_6b9f08_Lee_Han_Yeol_Memorial_on_Yonsei_Campus.jpg
+Docs/reference_photos/expanded/wc137_ccby40_f7669b_Yonsei_University_International_Campus_Underwood_Memorial_Li.jpg
+Docs/reference_photos/expanded/wc144_kogltype1_2f9c2b_Jongno_Seoul_South_Korea_01.jpg
+Docs/reference_photos/expanded/wc145_kogltype1_dfb314_Jongno_Seoul_South_Korea_02.jpg
+Docs/reference_photos/1784886529634.jpg

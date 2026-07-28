@@ -101,17 +101,50 @@ split-face로 같은 평면(6×14 m)과 같은 38° 경사면을 좌 OmniPBR / �
 split-face에서 근접 그레인이 개선된다. `detail_bump_factor` 0.5 / `detail_texture_scale`
 0.08 m로 확인. OmniPBR 전용 기능이라 MDL 쪽엔 없다(§4에서 처방).
 
-### 2.4 E4 — subdiv: 반영되지만 **우리 기하엔 부적합**. 다만 부산물이 있다
+### 2.4 E4 — subdiv: **감독 1차 판정을 정정한다.** 기본값에서는 세분이 안 일어난다
 
-`subdivisionScheme=catmullClark`가 RTX에 실제로 반영된다(박스가 눈에 띄게 둥글어짐).
-crease를 4.0으로 줘도 완전히 각을 보존하지는 못했다.
+**1차 판정(오독)**: "박스가 눈에 띄게 둥글어짐 → 세분이 RTX에 반영된다."
+**확정 실험**(`scripts/rtx_probe.py`, `look_check/spike_probe/`)으로 뒤집혔다.
 
-**판정**: 우리 형상은 계단·연석·파사드 등 건축형이라 세분은 **원치 않는 둥글림**을 만든다.
-브리프가 "권장"으로 분류한 것이 옳았다. **채택하지 않는다.**
+`/rtx/hydra/subdivision/refinementLevel` 을 0/1/2/4 로 스윕:
 
-**부산물**: crease + subdiv는 **실제 지오메트리 베벨**을 만들 수 있는 유일한 검증된 경로다.
-E1의 가짜 베벨은 셰이딩 노멀만 바꾸므로 실루엣은 여전히 날카롭다. 근접 컷에서 실루엣까지
-필요해지면 이 경로를 쓴다 — 지금은 **불필요**(비용 대비 효과 낮음).
+| refinementLevel | 결과 |
+|---|---|
+| **0 (기본값 — 실측 확인)** | **기하 세분 없음.** 큐브 실루엣 그대로. 바뀌는 건 **셰이딩 노멀뿐**(면법선 → 스무스) |
+| 1 | 진짜 Catmull-Clark 세분 — 큐브가 둥근 다면체로. refine0 대비 화면의 **53.5%** 픽셀이 바뀜 |
+| 2 / 4 | 1과 거의 동일 (`adaptiveRefinement=False` — 균일 세분) |
+
+**즉 E4에서 내가 "둥글어졌다"고 본 것은 세분이 아니라 스무스 노멀 셰이딩이었다.**
+
+**부수 확정 — crease 는 존중된다**: 12 모서리 전부에 crease 10.0 을 준 박스는
+refinementLevel=1 에서도 **박스 실루엣을 유지**했다. H 보고서가 "미확인"으로 남긴 항목이
+이로써 닫힌다. → crease + subdiv 는 **실제 지오메트리 베벨**의 검증된 경로다.
+
+**판정 (결론은 유지)**: **채택하지 않는다.** 우리 형상은 건축형이라 세분은 원치 않는
+둥글림을 만들고, 필요한 모서리 효과는 E1의 가짜 베벨(비용 0)로 충분하다.
+
+**그러나 이 실험은 실재하는 지뢰를 하나 찾아냈다 — 아래 §2.6.**
+
+### 2.6 발견된 지뢰 — `subdivisionScheme` 미저작 = 조용한 스무스 노멀
+
+USD의 `subdivisionScheme` **기본값은 `catmullClark`** 이다. 명시 저작이 없으면 그 메시는
+`refinementLevel=0` 에서도 **저작한 `normals` 가 무시되고 스무스 셰이딩**이 걸리며,
+refinementLevel 이 켜지는 순간 **형상 자체가 바뀐다**.
+
+저장소 전수 확인 결과:
+
+| 위치 | 상태 |
+|---|---|
+| `scene09` 각뿔 메시 | ✅ `"none"` 저작 (주석으로 이 함정을 이미 문서화해 둠) |
+| `sceneN3` 메시 | ✅ `"none"` 저작 |
+| **`scene_common.build_sign` 의 `/Panel` 쿼드** | ❌ **미저작 — 기본값 catmullClark 로 방치** |
+
+사인 패널은 `uv_mode=True` 로 st(0..1) 1:1 정합에 의존한다. 쿼드의 Catmull-Clark 극한면은
+모서리 정점을 중심 쪽으로 당기므로, refinementLevel 이 켜지면 **패널이 축소되고 글자가
+어긋난다**. 현재는 기본 0이라 잠복 상태다.
+
+→ **수정 완료** (`scene_common.py`, `mesh.CreateSubdivisionSchemeAttr("none")`).
+비용 0, 회귀 위험 0. Phase 2 이후 새 메시를 만들 때도 이 저작을 규약으로 삼는다.
 
 ### 2.5 E9 — 풀스택 예측 실험 (브리프 외 · 감독 추가)
 
@@ -257,6 +290,38 @@ Phase 1 실측에 근거해 다음을 제안한다.
 | RTX 기능 문서 근거 | 진행 중 (`Docs/surveys/realism_gap_2026-07-28/H_rtx_capability_verification.md`) |
 | 연석·계단 모따기 국내 표준 | `[추정]` 상태 — Phase 2에서 KS 원문 확인 필요 |
 | RT 워밍업 32 프로덕션 실측 | 미측정 (§3.4 제안이 채택되면 불필요) |
+
+## 6.5 RTX 능력 근거 조사 결과 — 기존 조사 정정 5건
+
+별도 조사(`Docs/surveys/realism_gap_2026-07-28/H_rtx_capability_verification.md`, 1,109줄,
+로컬 MDL 소스·RTX 바이너리 문자열 + 웹 교차검증)와 감독 런타임 실측(`scripts/rtx_probe.py`,
+`look_check/spike_probe/rtx_settings.json`)이 **ZZ_synthesis 의 서술 5건을 정정**한다.
+
+| 기존 서술 | 정정 | 근거 |
+|---|---|---|
+| ZZ §10.3 "`/rtx/pathtracing/spp` **기본값이 1**이라 512프레임 누적" | **틀렸다. 기본값은 64다.** 우리 **씬 코드가 명시적으로 1로 낮추고 있었다**(`scene01:1211` 등 전 씬 공통). 즉 낭비는 엔진 기본값 탓이 아니라 우리 코드 탓 | 감독 런타임 덤프 |
+| ZZ §2 "MDL displacement **RTX 미지원**" | 지원된다(Kit 106.1, RT·PT 양쪽). 단 **OmniPBR 에 displacement 입력 자체가 없어** 결론(정점 변위로 우회)은 유지 — 이유만 바뀜 | H §4 (릴리스노트+로컬 셰이더) |
+| ZZ §2 "`cameraFStop`/`cameraISO` 가 106.5에 없음" | 이름이 다를 뿐 **노출 3요소 전부 존재**: `/rtx/post/tonemap/{filmIso=100, cameraShutter=50, fNumber=5.0}`. 톤매핑 `op=6`(ACES)가 **이미 기본 활성** | 감독 런타임 덤프 |
+| ZZ §2 "카메라 ISP 확장 **자체가 없음**" | `librtx.cameraisp.plugin.so` 는 **존재하고 로드된다**. 공개 API 가 없을 뿐 | H §1 |
+| ZZ §10.2 알파 컷아웃 원인 = `opacity_threshold` 기본 0.0 | 진범은 **`enable_opacity=false`**. 추가 함정: `opacity_mode` 기본값 `mono_average` | H §4 |
+
+**추가로 확인된 사실 (Phase 2·이후에 영향)**
+
+- **`round_edges_radius` 는 Kit 106.1 부터 정식 구현**(RT·PT 양쪽). MDL 코드 경로 끊김 없음.
+  → E1 실측(작동)과 문서 근거가 일치한다. 공식 문서에 항목이 없을 뿐이다.
+- **`/rtx/domeLight/upperLowerStrategy` 가 이미 0**. ZZ §10.8이 "`ensure_noon_lookfix` 의
+  numpy HDRI 수술이 불필요했을 가능성"으로 제기한 항목 — 기본값이 이미 정답 쪽이다.
+  Phase 2 하늘 작업에서 lookfix 우회를 함께 검토한다.
+- **`NegObsGround.mdl` 전역 승격은 불가**로 확정. 깨지는 기능 14개 중 치명 3개:
+  ① **UV 파이프라인 전무**(월드 트라이플래너 강제 → 사인 st 정합·잎 아틀라스 파괴)
+  ② **opacity 전무**(나무 임포트와 정면 충돌) ③ round_edges 전무.
+  또 텍스처 페치가 최대 **72회**(OmniPBR 3회).
+  → §4.2에서 감독이 제안한 "역할별 선택 적용"과 결론이 독립적으로 수렴했다.
+  **3단 재질 정책**으로 확정: 지면·사면 = NegObsGround / 구조물·식생·사인 = OmniPBR /
+  발광·불투명 = OmniPBR. 더불어 **NegObsGround 에 round_edges 를 8줄로 추가** 권고.
+- **`α<1` 픽셀이 semantic GT 에서 빠진다**(공식 문서). 이 지시서 범위 밖(GT는 "다음 일")이나,
+  나무 임포트 이후의 라벨 신뢰성에 직결되므로 **기록해 둔다** — 잎 카드를 넣는 순간
+  세그멘테이션 라벨에 구멍이 생긴다.
 
 ## 7. 승인 요청
 

@@ -1076,6 +1076,12 @@ def build_sign(stage, prefix, cx, cy, base_z, yaw_deg, panel_mtl,
     mesh.CreatePointsAttr(pts)
     mesh.CreateFaceVertexCountsAttr([4])
     mesh.CreateFaceVertexIndicesAttr([0, 1, 2, 3])
+    # [사실화 P1] subdivisionScheme 미저작 = USD 기본값 catmullClark. 쿼드의
+    # Catmull-Clark 극한면은 모서리 정점을 중심으로 당기므로 패널이 축소되고
+    # st(0..1) 정합이 깨진다. 현재는 refinementLevel 기본 0 이라 잠복 상태지만
+    # 그 설정이 바뀌는 순간 전 사인이 어긋난다. 명시 저작으로 못박는다.
+    # (scene09·sceneN3 는 이미 같은 이유로 "none" 을 저작해 두었다.)
+    mesh.CreateSubdivisionSchemeAttr("none")
     mesh.CreateDoubleSidedAttr(True)
     pv = UsdGeom.PrimvarsAPI(mesh.GetPrim()).CreatePrimvar(
         "st", Sdf.ValueTypeNames.TexCoord2fArray, UsdGeom.Tokens.vertex)

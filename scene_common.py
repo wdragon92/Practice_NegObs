@@ -182,7 +182,16 @@ _GROUND_SCALE_FIX = 1.0        # E10 2차 실측 확정 (비율 1.0001)
 # --- 클래스별 룩 사양 -------------------------------------------------------
 # bevel[m] : round_edges_radius. Phase1 §2.1 실측 — 화면상 폭 ≈ 24·(r/d)·57.3 px.
 #            브리프 원안(콘크리트 3mm)은 로봇 시점 2~10 m 에서 서브픽셀이라
-#            비용만 들고 보이지 않는다. 승인된 상향값 사용.
+#            비용만 들고 보이지 않는다.
+#   **국내 규격 조사 반영** (`Docs/surveys/.../I_ks_dimension_verification.md`):
+#     · 현장타설 콘크리트 모서리 **20~30 mm** — KCS 21 50 05:2023 3.3(10) 원문.
+#       우리 콘크리트는 옹벽·계단 챌면·제방 = 대부분 현장타설이므로 **0.020**.
+#       (감독 잠정 10 mm 는 1/2~1/3 과소였다. 프리캐스트라면 10 mm 가 맞다.)
+#     · 연석 수직형 **R=10** — 국토부 예규 제321호 보도 설치 지침 그림 2.17
+#     · 금속 **2 mm** — KS B 0403 모떼기 수열 2열 정규값 (잠정값 유지 확인)
+#     · 계단 노징 — **국내 규정 없음**(법정문서 4건 전수 확인). 값은 IBC
+#       1.6~14.3 mm 상단을 쓰되 **출처가 국내가 아님을 명시**한다.
+#     · 일반 석재 — **근거 없음**. 보수적으로 낮게 둔다.
 # sat      : 채도 계수(MDL 전용). 전역 하향은 금지 — scene01 은 이미 0.146 으로
 #            하한 미달이다. 과채도는 석재·초목·흙 계열의 국소 현상.
 # mdl      : "ground" = NegObsGround / "omni" = OmniPBR
@@ -201,22 +210,28 @@ _W_EDGE = dict(grime=0.22, grime_desat=0.30, grime_h=0.12, splash=0.14,
 
 LOOK_CLASS = {
     #                    bevel   sat   mdl        patch  detail
-    "paving":   dict(bevel=0.010, sat=1.00, mdl="ground", patch=0.0, detail=True),
-    "concrete": dict(bevel=0.010, sat=1.00, mdl="ground", patch=0.0, detail=True,
-                     weather=_W_STRUCT),
+    # 보도블록 개별 모따기는 **국내 공개 규정에 수치가 없다**(KS F 4419 본문 유료,
+    # 이를 인용하는 공개 문서 전수에서 모따기 조항 0건 — 조사 결론 "추정 금지").
+    # 게다가 round_edges 는 개별 블록이 아니라 **슬래브 프림 경계**에 걸린다.
+    # 개별 블록 모따기는 텍스처 노멀맵이 이미 담당하므로, 여기 값은 슬래브 경계용
+    # 이며 연석(10 mm)보다 낮게 둔다. [근거 없음 — 보수적 선택]
+    "paving":   dict(bevel=0.006, sat=1.00, mdl="ground", patch=0.0, detail=True),
+    "concrete": dict(bevel=0.020, sat=1.00, mdl="ground", patch=0.0, detail=True,
+                     weather=_W_STRUCT),   # 현장타설 20~30 mm (KCS 21 50 05)
     "brick":    dict(bevel=0.006, sat=0.88, mdl="ground", patch=0.0, detail=True,
                      weather=dict(grime=0.30, grime_desat=0.30, grime_h=0.35,
                                   splash=0.15, streak=0.10, wrough=0.15)),
-    "stone":    dict(bevel=0.006, sat=0.66, mdl="ground", patch=1.0, detail=True,
-                     weather=_W_STONE),
+    "stone":    dict(bevel=0.004, sat=0.66, mdl="ground", patch=1.0, detail=True,
+                     weather=_W_STONE),   # [근거 없음] 보수적으로 하향
     "soil":     dict(bevel=0.000, sat=0.74, mdl="ground", patch=1.0, detail=True),
     "gravel":   dict(bevel=0.000, sat=0.78, mdl="ground", patch=1.0, detail=True),
     "asphalt":  dict(bevel=0.006, sat=0.90, mdl="ground", patch=1.0, detail=True),
+    # 노징 12 mm 는 **IBC 1.6~14.3 mm 상단**이다. 국내 규정은 존재하지 않음(전수 확인).
     "nosing":   dict(bevel=0.012, sat=1.00, mdl="ground", patch=0.0, detail=True,
                      weather=dict(grime=0.18, grime_desat=0.25, grime_h=0.15,
                                   splash=0.10, wrough=0.10)),
-    "curb":     dict(bevel=0.012, sat=1.00, mdl="ground", patch=0.0, detail=True,
-                     weather=_W_EDGE),
+    "curb":     dict(bevel=0.010, sat=1.00, mdl="ground", patch=0.0, detail=True,
+                     weather=_W_EDGE),   # 연석 수직형 R=10 (예규 321호 그림2.17)
     "metal":    dict(bevel=0.002, sat=1.00, mdl="omni",   detail=True),
     "wood":     dict(bevel=0.004, sat=0.88, mdl="omni",   detail=True),
     "veg":      dict(bevel=0.000, sat=0.76, mdl="omni",   detail=False),

@@ -1677,6 +1677,79 @@ def add_vegetation(stage, prim_path, usd_rel, pos_m, yaw_deg=0.0,
     return xf
 
 
+
+# --- 3D 산포물 (낙엽·자갈·잔해·바위) ---------------------------------------
+# **왜 필요한가**: 낙엽·자갈·잔해를 평면에 텍스처로 깔면 "장판 깐 것"으로 읽힌다.
+# 사용자 지적: *"낙엽도 장판 깐 것처럼 만드는거에서 탈피시켜주고"*
+# 아스팔트·콘크리트는 평면이 옳지만, **입체물을 평면으로 때운 것**은 3D 여야 한다.
+# S3 `Assets/Vegetation/` 에 Debris 26 · Leaves 16 · Rocks 75 종이 있다.
+VEG_DEBRIS = [
+    ("Debris/fallcluster1.usd", 1.2),   # (상대경로, 대략 덮는 지름[m] — 조달 후 실측 반영)
+    ("Debris/fallcluster2.usd", 1.2),
+    ("Debris/maplefall1.usd", 1.0),
+    ("Debris/oakfall1.usd", 1.0),
+    ("Debris/oakfall2.usd", 1.0),
+]
+
+
+def scatter_debris(stage, prefix, x0, y0, x1, y1, z, density=0.35,
+                   pool=None, seed=1234, scale_jitter=(0.7, 1.3),
+                   edge_falloff=0.0, max_count=400):
+    """[사실화 v1] 영역에 3D 산포물을 뿌린다 — 낙엽·잔해·자갈.
+
+    density: 제곱미터당 개수. 낙엽 두껍게 = 0.6~1.0, 성기게 = 0.15~0.3.
+    edge_falloff: 가장자리로 갈수록 밀도를 낮출 폭[m] — 실제 낙엽은 바람에
+      쓸려 가장자리·구석에 몰리고 통행 동선은 비는데, 균일 산포는 그 반대라
+      오히려 부자연스럽다. 0 이면 균일.
+    seed 는 **반드시 결정적**(zlib.crc32 계열)이어야 한다 — 이 프로젝트는
+    RNG 100% 결정적이 원칙이다.
+
+    반환: 배치한 개수.
+    """
+    pool = pool or VEG_DEBRIS
+    avail = [(r, d) for r, d in pool
+             if os.path.isfile(os.path.join(VEG_DIR, r))]
+    if not avail:
+        return 0
+    rng = np.random.default_rng(int(seed) & 0x7FFFFFFF)
+    w, h = abs(x1 - x0), abs(y1 - y0)
+    n = int(min(max_count, max(0, w * h * float(density))))
+    if n <= 0:
+        return 0
+    placed = 0
+    for i in range(n):
+        u, v = rng.random(), rng.random()
+        px = min(x0, x1) + u * w
+        py = min(y0, y1) + v * h
+        if edge_falloff > 1e-6:
+            # 가장자리 쪽에 더 몰리게 (통행 동선은 비고 구석에 쌓인다)
+            dx = min(px - min(x0, x1), max(x0, x1) - px)
+            dy = min(py - min(y0, y1), max(y0, y1) - py)
+            near = min(dx, dy) / max(edge_falloff, 1e-6)
+            if near > 1.0 and rng.random() > 0.35:
+                continue                    # 안쪽은 65% 확률로 건너뛴다
+        rel, _cov = avail[int(rng.integers(len(avail)))]
+        sc_ = float(rng.uniform(*scale_jitter))
+        try:
+            if add_vegetation(stage, f"{prefix}/Deb_{i}", rel,
+                              (px, py, float(z)),
+                              yaw_deg=float(rng.uniform(0, 360)),
+                              target_h=None, native_h=None) is not None:
+                from pxr import UsdGeom, Gf
+                xf = UsdGeom.Xformable(stage.GetPrimAtPath(f"{prefix}/Deb_{i}"))
+                for op in xf.GetOrderedXformOps():
+                    if op.GetOpType() == UsdGeom.XformOp.TypeScale:
+                        cur = op.Get()
+                        op.Set(Gf.Vec3f(cur[0] * sc_, cur[1] * sc_, cur[2] * sc_))
+                placed += 1
+        except Exception as e:
+            print(f"[룩v1][경고] 산포물 배치 실패 {prefix}/Deb_{i}: {e}")
+            break
+    if placed:
+        LOOK_STATS["debris"] = LOOK_STATS.get("debris", 0) + placed
+    return placed
+
+
 def build_tree(stage, prefix, cx, cy, gz, wood_mtl, canopy_a_mtl, canopy_b_mtl,
                trunk_r=0.09, trunk_h=2.2, stake_r=0.015, stake_h=1.5,
                stake_off=0.5, stakes=False, canopy_blobs=10,
@@ -1703,12 +1776,26 @@ def build_tree(stage, prefix, cx, cy, gz, wood_mtl, canopy_a_mtl, canopy_b_mtl,
         # 수종은 좌표 해시로 결정 — 같은 씬 재실행 시 동일하고, 나무마다 다르다.
         pool = [t for t in VEG_TREES for _ in range(t[2])]
         rel, native, _ = pool[rnd.randrange(len(pool))]
-        # 씬이 의도한 수고를 유지한다. trunk_h 는 '줄기 높이'라 전체 수고는 그보다 크다.
-        target = float(trunk_h) * rnd.uniform(1.45, 1.85)
+        # **수고는 단서다.** 단서 4계열 ③(스케일 앵커)이 "수관 꼭대기 절대높이"를
+        # 쓰므로, 이걸 큰 폭으로 랜덤화하면 정작 학습해야 할 축을 지운다.
+        # 종전 uniform(1.45,1.85) 는 근거 없는 매직넘버였다(레드팀 지적 — 수용).
+        # → 고정 비율 1.60(줄기높이 대비 전체 수고)에 ±8% 개체차만 준다.
+        target = float(trunk_h) * 1.60 * rnd.uniform(0.92, 1.08)
         try:
-            if add_vegetation(stage, prefix, rel, (cx, cy, gz),
-                              yaw_deg=rnd.uniform(0, 360),
-                              target_h=target, native_h=native) is not None:
+            # **자식 경로에 붙인다.** prefix 자신에 붙이면 `build_planter` 처럼
+            # 같은 prefix 아래에 이미 만들어 둔 형제 프림(Curb/Cap/Grass)에
+            # 스케일(약 0.0078)이 함께 걸려 **화단이 0.8% 크기로 수축**한다.
+            # 12개 씬이 이 경로를 탄다(레드팀 적발 — 감독 버그).
+            vx = add_vegetation(stage, f"{prefix}/Veg", rel, (cx, cy, gz),
+                                yaw_deg=rnd.uniform(0, 360),
+                                target_h=target, native_h=native)
+            if vx is not None:
+                # 같은 에셋을 여러 번 참조하므로 인스턴싱으로 메모리·시간 절약.
+                # (33씬 합계 약 30 M 삼각형 추가 — 레드팀 추산)
+                try:
+                    vx.GetPrim().SetInstanceable(True)
+                except Exception:
+                    pass
                 LOOK_STATS["veg_asset"] = LOOK_STATS.get("veg_asset", 0) + 1
                 return
         except Exception as e:
@@ -1796,7 +1883,19 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
     axis="y"→파사드 y평면(창문 x배열), "x"→x평면(창문 y배열). scene01 이식.
     bd["base_z"](선택, 기본 0.0): 건물 기단 월드 z — 지반이 z=0이 아닌 씬에서
     부유 방지(h·창문·파라펫 z는 base_z 기준 상대).
-    반환: 생성 프림 리스트."""
+    반환: 생성 프림 리스트.
+
+    [사실화 v1 · 구성 감사] 종전 구성은 **박스 + 유리 쿼드 + 파라펫**이 전부라
+    24개 씬에서 화면 상단 30~50%를 "파사드 빌보드"가 차지했다. 감사 지적:
+      · 출입구 0 · 창틀 0 · 옥탑 0 · 선홈통 0
+      · **33씬 통틀어 사람이 드나드는 문이 사실상 0개** →
+        "무대는 있는데 아무도 살지 않는다"의 직접 원인
+    LOOK_V1 에서 아래 3단 구성을 얹는다(전부 기능 필수물이라 v5.2 §6 통과):
+      ① 저층부 — 출입문(h2.1, 스케일 앵커 겸함)·기단 마감
+      ② 기준층 — 창대(sill)·층간 띠
+      ③ 옥탑 — 계단실 박스·난간(원경 실루엣을 직선 뚜껑에서 해방)
+    선홈통(세로 홈통)은 파사드 수직 분절을 만들어 빌보드 인상을 깬다.
+    """
     if window is None:
         window = dict(w=1.2, h=1.6, inset=0.15, col_step=2.5, margin=2.0)
     wd = window
@@ -1807,63 +1906,105 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
     Ly = bd["y1"] - bd["y0"]
     hh = bd["h"]
     prims = []
-    # 셸을 base_z−1.0까지 연장(기초 부유 방지). 파라펫·창문 z는 불변.
     prims.append(add_box(stage, f"{prefix}/Shell",
                          (cx, cy, base + (hh - 1.0) / 2.0),
                          (Lx, Ly, hh + 1.0), shell_mtl, collider=True))
     fstep = hh / bd["floors"]
-    # [사실화 v1] `window["inset"]` 은 정의만 되고 **한 번도 읽히지 않았다**
-    # (브리프 2-10). 10개 씬이 inset 을 넘기는데 전부 무시돼 창이 파사드 밖으로
-    # 5 mm 떠 있었고, 조사가 지적한 "파사드에 붙인 납작한 파란 사각형"의 실체다.
-    #
-    # 진짜 리세스는 셸을 뚫어야 하는데(솔리드 박스라 유리를 안으로 밀면 가려짐)
-    # 창마다 4개 박스가 필요해 +17,656 프림(라이브러리 총량 +77%)이다. 과하다.
-    # → **층별 연속 띠**로 대체한다. 창마다가 아니라 층마다 1개라 파사드당 층수
-    #   (총 약 200 프림, 무시 가능)이면서, 한국 아파트·오피스 파사드의 실제 관행
-    #   (층간 띠)이고 파사드 전체의 평면 읽힘을 깬다. 유리는 띠 대비 물러나 보인다.
-    # [치명 C3 수정] 종전에는 이 띠가 LOOK_V1 게이트 **밖**에 있었다. 기본
-    # `window` 자체가 inset=0.15 라 **룩 레이어를 꺼도 층마다 새 박스가 생겼고**,
-    # 그 결과 "LOOK_V1=0 에서 회귀 0" 규약이 깨지고 off/on A/B 통제와 Phase0
-    # 기준선 대조가 모두 무효화됐다. 게이트 안으로 넣는다.
     ins = float(wd.get("inset", 0.0)) if LOOK_V1 else 0.0
-    band_t = min(max(ins, 0.0), 0.15)          # 돌출 깊이 상한(간섭 방지)
+    band_t = min(max(ins, 0.0), 0.15)
     band_h = 0.12
-    if bd.get("axis", "y") == "y":
-        gy = bd["facade_y"] + bd["face_dir"] * 0.005
+    axis_y = bd.get("axis", "y") == "y"
+    fdir = bd["face_dir"]
+    if axis_y:
+        gy = bd["facade_y"] + fdir * 0.005
         usable = Lx - 2 * wd["margin"]
-        ncols = max(1, int(usable / wd["col_step"]))
-        for f in range(bd["floors"]):
-            zc = base + fstep * f + fstep * 0.5
-            if band_t > 1e-4:                  # 창 하단 높이의 층간 띠
-                zb = zc - wd["h"] / 2.0 - band_h / 2.0
+    else:
+        gx = bd["facade_x"] + fdir * 0.005
+        usable = Ly - 2 * wd["margin"]
+    ncols = max(1, int(usable / wd["col_step"]))
+
+    for f in range(bd["floors"]):
+        zc = base + fstep * f + fstep * 0.5
+        if band_t > 1e-4:
+            zb = zc - wd["h"] / 2.0 - band_h / 2.0
+            if axis_y:
                 prims.append(add_box(
                     stage, f"{prefix}/SillBand_{f}",
-                    (cx, gy + bd["face_dir"] * band_t / 2.0, zb),
+                    (cx, gy + fdir * band_t / 2.0, zb),
                     (Lx - 0.4, band_t, band_h), parapet_mtl))
-            for c in range(ncols):
+            else:
+                prims.append(add_box(
+                    stage, f"{prefix}/SillBand_{f}",
+                    (gx + fdir * band_t / 2.0, cy, zb),
+                    (band_t, Ly - 0.4, band_h), parapet_mtl))
+        for c in range(ncols):
+            if axis_y:
                 xc = bd["x0"] + wd["margin"] + (c + 0.5) * (usable / ncols)
                 prims.append(add_box(stage, f"{prefix}/Win_{f}_{c}",
                                      (xc, gy, zc), (wd["w"], 0.03, wd["h"]),
                                      glass_mtl))
-    else:
-        gx = bd["facade_x"] + bd["face_dir"] * 0.005
-        usable = Ly - 2 * wd["margin"]
-        ncols = max(1, int(usable / wd["col_step"]))
-        for f in range(bd["floors"]):
-            zc = base + fstep * f + fstep * 0.5
-            if band_t > 1e-4:
-                zb = zc - wd["h"] / 2.0 - band_h / 2.0
-                prims.append(add_box(
-                    stage, f"{prefix}/SillBand_{f}",
-                    (gx + bd["face_dir"] * band_t / 2.0, cy, zb),
-                    (band_t, Ly - 0.4, band_h), parapet_mtl))
-            for c in range(ncols):
+            else:
                 yc = bd["y0"] + wd["margin"] + (c + 0.5) * (usable / ncols)
                 prims.append(add_box(stage, f"{prefix}/Win_{f}_{c}",
                                      (gx, yc, zc), (0.03, wd["w"], wd["h"]),
                                      glass_mtl))
+
     prims.append(add_box(stage, f"{prefix}/Parapet", (cx, cy, base + hh + 0.25),
                          (Lx + 0.2, Ly + 0.2, 0.5), parapet_mtl))
+
+    if not LOOK_V1:
+        return prims
+
+    # ── ① 저층부: 출입문 ──────────────────────────────────────────────
+    # 문 높이 2.1 m 는 **스케일 앵커**를 겸한다. 사람·차량이 0건인 라이브러리에서
+    # 절대 크기를 읽을 단서가 거의 없다는 것이 구성 감사의 핵심 지적이었다.
+    DW, DH = 1.8, 2.1
+    if axis_y:
+        prims.append(add_box(stage, f"{prefix}/Door",
+                             (cx, gy + fdir * 0.02, base + DH / 2.0),
+                             (DW, 0.06, DH), glass_mtl))
+        prims.append(add_box(stage, f"{prefix}/DoorHead",
+                             (cx, gy + fdir * 0.10, base + DH + 0.12),
+                             (DW + 0.5, 0.22, 0.24), parapet_mtl))
+    else:
+        prims.append(add_box(stage, f"{prefix}/Door",
+                             (gx + fdir * 0.02, cy, base + DH / 2.0),
+                             (0.06, DW, DH), glass_mtl))
+        prims.append(add_box(stage, f"{prefix}/DoorHead",
+                             (gx + fdir * 0.10, cy, base + DH + 0.12),
+                             (0.22, DW + 0.5, 0.24), parapet_mtl))
+
+    # ── ② 선홈통(세로 홈통) — 파사드 수직 분절 ─────────────────────────
+    # 빌보드 인상을 깨는 가장 싼 수단. 한국 건물에 예외 없이 있다.
+    span = Lx if axis_y else Ly
+    ndp = max(2, int(span / 12.0) + 1)
+    for i in range(ndp):
+        t = (i + 0.5) / ndp
+        if axis_y:
+            px = bd["x0"] + t * Lx
+            prims.append(add_cylinder(stage, f"{prefix}/Downpipe_{i}",
+                                      (px, gy + fdir * 0.09, base + hh / 2.0),
+                                      0.055, hh, parapet_mtl))
+        else:
+            py = bd["y0"] + t * Ly
+            prims.append(add_cylinder(stage, f"{prefix}/Downpipe_{i}",
+                                      (gx + fdir * 0.09, py, base + hh / 2.0),
+                                      0.055, hh, parapet_mtl))
+
+    # ── ③ 옥탑 — 계단실 + 물탱크대 ────────────────────────────────────
+    # 원경 실루엣이 "흰 뚜껑 얹은 상자"에서 벗어난다. 한국 건물 옥상의 기본 구성.
+    ph_w = min(4.2, Lx * 0.34)
+    ph_d = min(3.4, Ly * 0.34)
+    if ph_w > 1.2 and ph_d > 1.2:
+        ph_h = 2.6
+        ox = cx - Lx * 0.18
+        oy = cy + Ly * 0.12
+        prims.append(add_box(stage, f"{prefix}/Penthouse",
+                             (ox, oy, base + hh + 0.5 + ph_h / 2.0),
+                             (ph_w, ph_d, ph_h), shell_mtl))
+        prims.append(add_box(stage, f"{prefix}/PenthouseCap",
+                             (ox, oy, base + hh + 0.5 + ph_h + 0.09),
+                             (ph_w + 0.24, ph_d + 0.24, 0.18), parapet_mtl))
     return prims
 
 

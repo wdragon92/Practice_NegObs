@@ -5,6 +5,19 @@
 지목한 대로 NVIDIA 콘텐츠 S3 버킷에 실제 나무 에셋(나무 44종 + 관목 37종)이 있고
 **인증 없이** 받을 수 있다. 이 스크립트가 그 최소 세트를 조달한다.
 
+[에셋 감사 v1 확장 — 2026-07-28]
+  나무만이 아니다. 낙엽·자갈·바위·관목도 전부 **평면 텍스처**로 때우고 있었고
+  (`leaf_ground` 텍스처를 깐 `build_slope` 판 = 장판, `_oriented_box` 잡석,
+   `build_hedge` 박스+블롭 = 관목), S3 에 대응하는 실제 3D 에셋이 있다.
+  카탈로그 실측(`Docs/reports/asset_audit_v1.md`):
+      Debris  5 USD   낙엽 낱장·클러스터   ← "장판" 을 끝내는 핵심 에셋
+      Leaves  5 USD   Debris 와 **동일 지오메트리**, 재질만 다름(아래 주의)
+      Rocks  15 USDA  0.13~0.31 m 잡석/호박돌
+      Shrub  37 USD   관목 (한국 조경 대응종 다수)
+      Trees  44 USD   교목
+      Plant_Tropical 17 USD  야자·바나나·고사리 — **한국 환경 부적합, 조달 안 함**
+  이 스크립트는 이제 카테고리별로 나뉘어 있고 `--only` 로 선택 조달한다.
+
 Re-runnable: 이미 받았고 크기가 맞는 파일은 skip 한다 (`download_assets.py` 와 동일 규약).
 각 다운로드는 3회까지 재시도하고 S3 HEAD 의 `Content-Length` 로 검증한다.
 ETag 가 멀티파트("-" 포함)가 아니면 MD5 로 한 번 더 검증한다.
@@ -40,6 +53,28 @@ MANIFEST 는 아래 절차로 기계적으로 도출했다(재현 가능, pxr �
      → `info:mdl:sourceAsset` 두 개가 나온다.
   2. 그 `.mdl` 을 텍스트로 받아 `texture_2d("...")` 를 grep.
   3. MDL 의 `./textures/...` 는 **MDL 파일 위치 기준** 상대 경로다.
+`--discover Shrub/Holly.usd` 로 이 절차를 그대로 자동 실행할 수 있다(아래 참조).
+남은 39 수종·32 관목을 추가할 때 추측하지 말고 이걸 쓸 것.
+
+────────────────────────────────────────────────────────────────────────────
+카테고리별 함정 (감사 v1 실측)
+────────────────────────────────────────────────────────────────────────────
+· **Debris vs Leaves**: 두 폴더의 5개 USD 는 바운딩박스가 **바이트 단위로 같다**
+  (동일 지오메트리). 차이는 재질뿐이다.
+    Debris/*.usd  → ./materials/fallleaves.mdl  + 3 텍스처(BaseColor/Normal/Rough)
+    Leaves/*.usd  → ./material.mdl              + basecolor.png/normal.jpg/roughness.jpg
+  그런데 `Leaves/cluster_2.usd` 는 `./basecolor.jpg` 를 참조하는데 그 파일은
+  **S3 에 존재하지 않는다**(있는 건 basecolor.png). 게다가 normal/roughness 슬롯이
+  서로 바뀌어 있다. → **Debris/ 쪽만 쓴다.** Leaves/ 는 조달하지 않는다.
+· **Rocks**: `@OmniPBR.mdl@` 를 검색 경로로 참조한다(상대 경로 아님). Isaac 이
+  기본 제공하므로 MDL 은 받을 필요가 없다 — `.usda` + 텍스처 3장이면 끝.
+  원점이 **바위 중심**이라 z 최소가 음수다(예: rock_small_01 은 −0.128 m).
+  지면에 놓을 때 z 를 그만큼 올려야 반쯤 묻히지 않는다.
+· **Shrub 의 줄기 재질은 전부 `../Trees/materials/` 를 참조한다**(Boxwood·Privet·
+  Forsythia·Juniper·Burning_Bush = bark3, Rhododendron = TreeBark_01).
+  즉 Shrub 만 받으면 줄기가 깨진다. 아래 SHRUB 세트는 그 종속을 포함한다.
+· `bark3_*.png` 는 Trees/ 와 Shrub/ 양쪽에 있으나 **크기가 동일**(같은 파일)이라
+  어느 쪽을 받아도 되지만, hollyprivet 은 아니다(위 함정 참조).
 """
 import hashlib
 import os
@@ -79,8 +114,39 @@ PINE_MATS = [
     "Trees/materials/textures/alter49_tree10_roughness.png",
 ]
 
-SETS = [
-    # (라벨, 필수 여부, [키...])
+TREEBARK_01 = [                       # Rhododendron 줄기 (Shrub → ../Trees)
+    "Trees/materials/TreeBark_01.mdl",
+    "Trees/materials/textures/alter49_tree1_basecolor.png",
+    "Trees/materials/textures/alter49_tree1_normal.png",
+    "Trees/materials/textures/alter49_tree1_roughness.png",
+]
+# 낙엽 재질 1종을 Debris 의 5개 USD 가 전부 공유한다. Normal 이 47 MB 로 큰데
+# 이게 낙엽 낱장의 잎맥·말림을 만드는 성분이라 줄이면 다시 '무늬'가 된다.
+FALLLEAVES_MAT = [
+    "Debris/materials/fallleaves.mdl",
+    "Debris/materials/textures/fallleaves_1_BaseColor.png",
+    "Debris/materials/textures/deadleaves_1_Normal.png",
+    "Debris/materials/textures/deadleaves_1_Roughness.png",
+]
+
+
+def _rock(idx):
+    """rock_small_NN 한 개의 키 목록. MDL 은 OmniPBR(검색경로) 라 불필요."""
+    n = f"{idx:02d}"
+    return [f"Rocks/rock_small_{n}.usda",
+            f"Rocks/textures/rock_small_{n}_basecolor.jpg",
+            f"Rocks/textures/rock_small_{n}_normal.jpg",
+            f"Rocks/textures/rock_small_{n}_orm.jpg"]
+
+
+# ── 카테고리 ────────────────────────────────────────────────────────────────
+# CATEGORIES[이름] = [(라벨, 필수, [S3 키...]), ...]
+#   `--only 이름[,이름...]` 으로 선택 조달. 인자 없으면 전 카테고리.
+#   `--required-only` 는 선택된 카테고리 안에서 required=True 만 받는다.
+CATEGORIES = {}
+
+# --- trees: 교목 (기존 세트 — 하위호환 유지) --------------------------------
+CATEGORIES["trees"] = [
     ("벚나무 Japanese_Cherry (한국 가로수 상위 수종)", True, [
         "Trees/Japanese_Cherry.usd",
         "Trees/materials/JapaneseCherry_blossom_Mat.mdl",
@@ -92,8 +158,58 @@ SETS = [
 
     ("소나무 White_Pine (848 KB, 원경/LOD용 — 재질은 Yellow_Pine 과 공유)", False,
      ["Trees/White_Pine.usd"] + PINE_MATS),
+]
 
-    ("관목 Boxwood 회양목 (보도 화단·연석 가림 — 낙차 폐색 실험용)", False, [
+# --- leaf_litter: 낙엽 (Debris) ---------------------------------------------
+# **최우선 카테고리.** sceneC2·07·10·D3 의 낙엽은 지금 `leaf_ground` 텍스처를
+# 입힌 평판(build_slope)과 두께 6 mm 짜리 납작 타원체 900개다. 위에서 보면
+# 무늬, 옆에서 보면 판 — 감독이 지적한 "장판".  아래 5종은 실제 잎 지오메트리다.
+# 네이티브 치수(실측, metersPerUnit=0.01):
+#   fallcluster1  0.419 × 0.395 × 0.042 m   ← 덩어리(약 40 cm 사방)
+#   fallcluster2  0.241 × 0.266 × 0.042 m   ← 작은 덩어리
+#   maplefall1    0.103 × 0.172 × 0.023 m   ← 단풍 낱장
+#   oakfall1      0.080 × 0.175 × 0.023 m   ← 참나무 낱장
+#   oakfall2      0.094 × 0.190 × 0.018 m   ← 참나무 낱장(다른 말림)
+CATEGORIES["leaf_litter"] = [
+    ("낙엽 클러스터 fallcluster1 (0.42 m 사방 — 퇴적 바탕 깔개)", True,
+     ["Debris/fallcluster1.usd"] + FALLLEAVES_MAT),
+    ("낙엽 클러스터 fallcluster2 (0.24×0.27 m — 성긴 산포)", True,
+     ["Debris/fallcluster2.usd"] + FALLLEAVES_MAT),
+    ("낙엽 낱장 maplefall1 (단풍, 10×17 cm)", True,
+     ["Debris/maplefall1.usd"] + FALLLEAVES_MAT),
+    ("낙엽 낱장 oakfall1 (참나무, 8×18 cm)", True,
+     ["Debris/oakfall1.usd"] + FALLLEAVES_MAT),
+    ("낙엽 낱장 oakfall2 (참나무, 9×19 cm)", True,
+     ["Debris/oakfall2.usd"] + FALLLEAVES_MAT),
+]
+
+# --- rocks: 잡석·호박돌 ------------------------------------------------------
+# scene12 호안 잡석 96개 = 랜덤 회전 박스, scene03 riprap = 평판.
+# 아래 5종은 크기 대역을 고르게 덮도록 15종 실측치에서 뽑았다(장변 기준):
+#   rock_small_01  0.314 × 0.302 × 0.253 m  (최대)
+#   rock_small_15  0.228 × 0.224 × 0.173 m
+#   rock_small_08  0.223 × 0.197 × 0.162 m
+#   rock_small_10  0.162 × 0.151 × 0.116 m
+#   rock_small_09  0.128 × 0.113 × 0.067 m  (최소, 자갈)
+# 나머지 10종(02~07,11~14)은 0.16~0.24 m 대역에 몰려 있어 대표성이 낮다.
+CATEGORIES["rocks"] = [
+    ("잡석 rock_small_01 (0.31 m — 호안 대석)", True, _rock(1)),
+    ("잡석 rock_small_15 (0.23 m)", True, _rock(15)),
+    ("잡석 rock_small_08 (0.22 m)", True, _rock(8)),
+    ("잡석 rock_small_10 (0.16 m)", True, _rock(10)),
+    ("자갈 rock_small_09 (0.13 m — 최소)", True, _rock(9)),
+]
+
+# --- shrub: 관목 (한국 조경 대응종) -----------------------------------------
+# 네이티브 치수(실측, 폭X × 폭Y × 높이Z):
+#   Boxwood       1.01 × 1.01 × 0.74 m   회양목
+#   Juniper       0.46 × 0.45 × 0.90 m   향나무류(직립 소형)
+#   Privet        1.70 × 1.64 × 1.11 m   쥐똥나무 — 생울타리 최다종
+#   Rhododendron  2.55 × 2.37 × 2.01 m   철쭉/진달래  (z 최소 −0.42 m 주의!)
+#   Burning_Bush  2.64 × 2.60 × 1.60 m   화살나무(가을 홍엽)
+#   Forsythia     3.54 × 3.65 × 2.32 m   개나리
+CATEGORIES["shrub"] = [
+    ("관목 Boxwood 회양목 (보도 화단·연석 가림 — 낙차 폐색 실험용)", True, [
         "Shrub/Boxwood.usd",
         "Shrub/materials/Boxwood_leaf_Mat.mdl",
         "Shrub/materials/textures/hollyprivet_basecolor.png",
@@ -101,7 +217,44 @@ SETS = [
         "Shrub/materials/textures/hollyprivet_roughness.png",
         # Boxwood 의 줄기는 ../Trees/materials/bark3.mdl 을 참조한다.
     ] + BARK3),
+
+    ("관목 Privet 쥐똥나무 (한국 생울타리 1위 — build_hedge 직접 대체)", True, [
+        "Shrub/Privet.usd",
+        "Shrub/materials/HollyPrivet_Mat.mdl",
+        "Shrub/materials/textures/hollyprivet_basecolor.png",
+        "Shrub/materials/textures/hollyprivet_normal.png",
+        "Shrub/materials/textures/hollyprivet_roughness.png",
+    ] + BARK3),
+
+    ("관목 Rhododendron 철쭉 (공원·아파트 화단 최다)", True, [
+        "Shrub/Rhododendron.usd",
+        "Shrub/materials/Rhododendron.mdl",
+        "Shrub/materials/textures/rhododendron_basecolor.png",
+        "Shrub/materials/textures/rhododendron_normal.png",
+        "Shrub/materials/textures/rhododendron_roughness.png",
+    ] + TREEBARK_01),
+
+    ("관목 Juniper 향나무 (상록 — 겨울 씬 C1 에서 유일하게 안 죽는 식생)", True,
+     ["Shrub/Juniper.usd"] + PINE_MATS[:2] + BARK3),
+
+    ("관목 Burning_Bush 화살나무 (가을 홍엽 — 낙엽 씬 C2 와 계절 정합)", True, [
+        "Shrub/Burning_Bush.usd",
+        "Shrub/materials/BurningBush_leaf_Mat.mdl",
+        "Shrub/materials/textures/burningbush_leaf_basecolor.png",
+        "Shrub/materials/textures/burningbush_leaf_normal.png",
+        "Shrub/materials/textures/burningbush_leaf_roughness.png",
+    ] + BARK3),
+
+    ("관목 Forsythia 개나리 (사면 녹화·봄 — 3.5 m 로 크다, 스케일 필수)", False, [
+        "Shrub/Forsythia.usd",
+        "Shrub/materials/Meadowlark_flowers.mdl",
+        "Shrub/materials/textures/forsythiaflower_basecolor.png",
+        "Shrub/materials/textures/forsythiaflower_normal.png",
+    ] + BARK3),
 ]
+
+# 하위호환: 예전에 `from download_vegetation import SETS` 를 쓴 코드가 있을 수 있다.
+SETS = CATEGORIES["trees"] + CATEGORIES["shrub"][:1]
 
 
 def head(url):

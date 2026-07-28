@@ -230,22 +230,26 @@ LOOK_CLASS = {
     # 개별 블록 모따기는 텍스처 노멀맵이 이미 담당하므로, 여기 값은 슬래브 경계용
     # 이며 연석(10 mm)보다 낮게 둔다. [근거 없음 — 보수적 선택]
     "paving":   dict(bevel=0.006, sat=1.00, mdl="ground", patch=0.0, detail=True,
-                     tex="paving_interlock", bump=1.4),
+                     tex="paving_interlock", bump=1.4,
+                     tex_alts=("stone_flag", "paving_interlock", "plaster")),
     "concrete": dict(bevel=0.020, sat=1.00, mdl="ground", patch=0.0, detail=True,
-                     weather=_W_STRUCT, tex="concrete_floor", bump=1.6),
+                     weather=_W_STRUCT, tex="concrete_floor", bump=1.6,
+                     tex_alts=("concrete_floor", "concrete_wall", "plaster")),
                      # concrete_wall(c@1/16 0.0345) → concrete_floor(0.129, x3.7).
                      # 진단: 승격 텍스처의 국소대비가 낮으면 승격해도 결이 안 산다.
                      # 현장타설 20~30 mm (KCS 21 50 05). bump 1.6 = 진단 P3
                      # (음영부는 밝기가 아니라 노멀 대비로만 결이 산다)
     "brick":    dict(bevel=0.006, sat=0.88, mdl="ground", patch=0.0, detail=True,
-                     tex="brick_red", bump=1.4,
+                     tex="brick_red", bump=1.4, tex_alts=("brick_red", "plaster"),
                      weather=dict(grime=0.0, splash=0.0, streak=0.10,
                                   wrough=0.15)),
     "stone":    dict(bevel=0.004, sat=0.66, mdl="ground", patch=1.0, detail=True,
-                     weather=_W_STONE, tex="stone_flag", bump=1.5),
+                     weather=_W_STONE, tex="stone_flag", bump=1.5,
+                     tex_alts=("stone_flag", "marble_light")),
                      # 베벨 [근거 없음] 보수적 하향
     "soil":     dict(bevel=0.000, sat=0.74, mdl="ground", patch=1.0, detail=True,
-                     tex="dirt_park", bump=1.4),
+                     tex="dirt_park", bump=1.4,
+                     tex_alts=("dirt_park", "gravel")),
     "gravel":   dict(bevel=0.000, sat=0.78, mdl="ground", patch=1.0, detail=True,
                      tex="gravel", bump=1.4),
     # tex: 상수색 재질을 이 TEX 역할의 텍스처로 승격한다(의도 알베도는 보존).
@@ -259,10 +263,16 @@ LOOK_CLASS = {
     "curb":     dict(bevel=0.010, sat=1.00, mdl="ground", patch=0.0, detail=True,
                      weather=_W_EDGE),   # 연석 수직형 R=10 (예규 321호 그림2.17)
     "metal":    dict(bevel=0.002, sat=1.00, mdl="omni",   detail=True),
+    # 목재는 라이브러리에 어두운 wood_dark(선형휘도 0.061) 하나뿐이라 밝은
+    # 목재는 배율이 커진다. 목재 결은 방향성이 강해 증폭해도 잡음이 덜 튀므로
+    # 이 클래스만 상한을 높인다.
     "wood":     dict(bevel=0.004, sat=0.88, mdl="omni",   detail=True,
-                     tex="wood_dark", bump=1.3),
+                     tex="wood_dark", bump=1.3, max_gain=7.0),
     "veg":      dict(bevel=0.000, sat=0.76, mdl="omni",   detail=False,
-                     tex="leaf_ground", bump=1.2),
+                     tex="grass", bump=1.2, max_gain=7.0,
+                     tex_alts=("grass", "leaf_ground")),
+                     # 낙엽(갈색 0.042)만으로는 잔디(초록)에 못 씌운다 —
+                     # 라이브러리의 grass 를 1순위로.
     "water":    dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
     "glass":    dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
     "paint":    dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
@@ -480,6 +490,9 @@ def _effective_sat(spec, diff, base_color):
     return 1.0 + (coef - 1.0) * t
 
 
+# 승격 배율 상한. 넘으면 승격을 포기한다(색 왜곡 < 결 획득).
+# 밝기 분기가 배율을 1 근처로 낮추므로 실제로 걸리는 경우는 드물다.
+_PROMOTE_MAX_GAIN = 4.0
 _TEXMEAN_CACHE = {}
 
 
@@ -526,13 +539,35 @@ def _promote_const_to_texture(spec, diffuse_color):
 
     반환: (diff, nor, rough, base_color) — 승격 불가 시 (None, None, None, 원색)
     """
-    role = spec.get("tex")
-    if not role or role not in TEX or diffuse_color is None:
+    cands = [r for r in (spec.get("tex_alts") or (spec.get("tex"),))
+             if r and r in TEX]
+    if not cands or diffuse_color is None:
         return None, None, None, diffuse_color
     try:
-        diff = tex_path(role, "diff")
-        if not os.path.isfile(diff):
+        # [밝기 분기] 의도색 휘도에 **가장 가까운 텍스처**를 고른다.
+        #   종전에는 역할당 텍스처가 하나라, 밝은 파라펫(0.9)에 어두운
+        #   concrete_floor(선형휘도 0.115)를 씌우면 배율이 7.8배가 되어
+        #   클램프(2.5)에 포화 → **의도 대비 2.5~4.8배 어둡고 색까지 편향**됐다.
+        #   ("색은 그대로, 결만 얻는다"는 주석이 사실과 반대였다.)
+        #   가까운 텍스처를 고르면 배율이 1 근처로 내려가 클램프가 안 걸린다.
+        want = (0.2126 * diffuse_color[0] + 0.7152 * diffuse_color[1]
+                + 0.0722 * diffuse_color[2])
+        best, best_d = None, None
+        for r in cands:
+            pth = tex_path(r, "diff")
+            if not os.path.isfile(pth):
+                continue
+            tm = _texture_mean(pth)
+            if tm is None or min(tm) < 1e-4:
+                continue
+            lum = 0.2126 * tm[0] + 0.7152 * tm[1] + 0.0722 * tm[2]
+            d = abs(math.log(max(want, 1e-4) / max(lum, 1e-4)))
+            if best_d is None or d < best_d:
+                best, best_d = r, d
+        if best is None:
             return None, None, None, diffuse_color
+        role = best
+        diff = tex_path(role, "diff")
         nor = tex_path(role, "nor") if "nor" in TEX[role] else None
         rough = tex_path(role, "rough") if "rough" in TEX[role] else None
         if nor and not os.path.isfile(nor):
@@ -542,9 +577,13 @@ def _promote_const_to_texture(spec, diffuse_color):
         tm = _texture_mean(diff)
         if tm is None or min(tm) < 1e-4:
             return None, None, None, diffuse_color
-        # 의도 알베도 / 텍스처 평균. 과도한 증폭은 클램프(포화 방지).
-        bc = tuple(min(2.5, max(0.05, float(c) / m))
-                   for c, m in zip(diffuse_color, tm))
+        # 의도 알베도 / 텍스처 평균(선형). 배율이 과하면 텍스처 잡음까지 증폭되고
+        # 하이라이트가 클리핑되므로, **클램프에 걸릴 정도면 승격을 포기**하고
+        # 상수색 MDL 로 되돌린다. 색을 틀리게 만드느니 결을 포기하는 편이 낫다.
+        ratio = [float(c) / m for c, m in zip(diffuse_color, tm)]
+        if max(ratio) > float(spec.get("max_gain", _PROMOTE_MAX_GAIN)):
+            return None, None, None, diffuse_color
+        bc = tuple(max(0.05, r) for r in ratio)
         return diff, nor, rough, bc
     except Exception as e:
         print(f"[룩v1][경고] 텍스처 승격 실패({role}): {e}")

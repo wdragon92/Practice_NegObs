@@ -455,6 +455,27 @@ if want("e9"):
         v[f"e9_{tag}_near"] = dict(eye=[xc, y - 1.5, 0.60], tgt=[xc, y + 0.6, 0.02])
     lane("e9", y, pads=[t for t, _ in PADS], views=v)
 
+# --- E10: texture_scale 의미 캘리브레이션 (감독 추가) ------------------------
+# OmniPBR(큐빅)과 NegObsGround(트라이플래너)는 같은 texture_scale 값에서
+# 타일 크기가 같지 않을 수 있다. 이 값을 틀리면 전 지면의 타일 스케일이
+# 어긋나는 **전역 회귀**가 되므로 추정 금지 — 직접 잰다.
+# 강한 주기성을 가진 인터로킹 보도블록을 같은 scale_m 으로 좌/우에 깔고
+# **정사영에 가까운 하향 뷰**로 찍어 픽셀 주기를 비교한다.
+if want("e10"):
+    y = 180.0
+    M_O = pbr(f"{ROOT}/Looks/CalOmni", *PAVING, scale_m=1.0)
+    M_M = ground_mdl(f"{ROOT}/Looks/CalMdl", *PAVING, scale_m=1.0,
+                     macro_amp=0.0, desat_bright=0.0, rough_noise=0.0,
+                     tri_dither=0.0)
+    for tag, m, xc in (("omni", M_O, -4.0), ("mdl", M_M, 4.0)):
+        sc.add_box(stage, f"{ROOT}/E10_Pad_{tag}", (xc, y, 0.01),
+                   (7.6, 7.6, 0.02), m)
+    lane("e10", y, views={
+        # 거의 수직 하향 — 원근 왜곡 최소화(주기 측정용)
+        "e10_cal_omni": dict(eye=[-4.0, y - 0.01, 6.0], tgt=[-4.0, y, 0.02]),
+        "e10_cal_mdl": dict(eye=[4.0, y - 0.01, 6.0], tgt=[4.0, y, 0.02]),
+    })
+
 print(f"[랩] 레인 {list(LANES)} 조립 완료")
 
 sc.setup_lighting(stage, LIGHT, SUN_AZ_OFFSET)

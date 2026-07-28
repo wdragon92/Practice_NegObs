@@ -141,6 +141,132 @@ def tex_path(role, kind):
     return os.path.join(TEX[role]["dir"], TEX[role][kind])
 
 
+# ===========================================================================
+# [1b] 사실화 v1 룩 레이어 — `NEGOBS_LOOK_V1=1` 로 활성화 (기본 OFF)
+#
+# 지시서 `Docs/briefs/realism_brief_v1.md` + 개정 이력 rev.1.
+# **씬 파일은 한 줄도 고치지 않는다**(불변 3종). 대신 `make_pbr` 에 이미 들어오는
+# 프림 경로(`{ROOT}/Looks/Paving` 등)에서 역할을 읽어 룩 사양을 주입한다.
+#
+# 왜 경로 이름인가: 33씬 전 재질이 `make_pbr` 단일 경유이고, `Looks/` 하위 이름이
+# 의미 있게 붙어 있다(Wood 20 · Grass 20 · Rail 17 · Parapet 15 · Glass 15 …).
+# 씬 무수정으로 역할별 처방을 거는 유일한 통로다.
+#
+# 3단 재질 정책 [Phase1 §6.5 — H 보고서와 감독 실측이 독립 수렴]:
+#   지면·사면 계열       → NegObsGround.mdl (소프트 트라이플래너. 경사면 필수)
+#   구조물·식생·사인     → OmniPBR (uv_mode·opacity·detail normal 필요)
+#   발광·유리            → OmniPBR (MDL 에 emission 입력 없음)
+# NegObsGround 전역 승격은 불가로 확정: UV 파이프라인·opacity 부재 + 텍스처 페치 72회.
+# ===========================================================================
+LOOK_V1 = os.environ.get("NEGOBS_LOOK_V1", "") == "1"
+MDL_GROUND = os.path.join(ASSETS_DIR, "NegObsGround.mdl")
+
+# 디테일 노멀(근접 텍셀 뭉개짐 완화) 공용 소스 — 미세 그레인용 범용 맵.
+_DETAIL_NOR = os.path.join(S1_DIR, "concrete_wall_nor_dx.jpg")
+
+# OmniPBR(큐빅 투영) ↔ NegObsGround(트라이플래너) 의 texture_scale 의미 차이 보정.
+# 틀리면 **전 지면의 타일 스케일이 어긋나는 전역 회귀**가 되므로 추정 금지 —
+# 전용 캘리브레이션 렌더(스파이크 랩 E10: 인터로킹 보도블록을 같은 scale_m 으로
+# 좌/우에 깔고 수직 하향 뷰에서 자기상관 픽셀 주기 비교)로 실측했다.
+#
+#   1차 측정(MDL v1.4.0): OmniPBR 23.163/23.164 px vs MDL 26.454/32.764 px
+#     → 비율이 축마다 다르고(이방성) 육안으로 **패턴이 45° 돌아가 있었다**.
+#       원인은 스케일이 아니라 MDL 의 기저 선택 버그였다(아래 참조).
+#   2차 측정(MDL v1.5.0, 버그 수정 후): 23.163/23.164 vs 23.154/23.177
+#     → **비율 1.0001. 보정 불요.**
+#
+# 즉 "스케일이 다르다"는 1차 관찰은 **오진**이었고, 진짜 원인은 수평면에서
+# 45° 보조 기저가 50:50 으로 섞여 들어가던 축퇴였다(MDL v1.5.0 에서 수정).
+_GROUND_SCALE_FIX = 1.0        # E10 2차 실측 확정 (비율 1.0001)
+
+# --- 클래스별 룩 사양 -------------------------------------------------------
+# bevel[m] : round_edges_radius. Phase1 §2.1 실측 — 화면상 폭 ≈ 24·(r/d)·57.3 px.
+#            브리프 원안(콘크리트 3mm)은 로봇 시점 2~10 m 에서 서브픽셀이라
+#            비용만 들고 보이지 않는다. 승인된 상향값 사용.
+# sat      : 채도 계수(MDL 전용). 전역 하향은 금지 — scene01 은 이미 0.146 으로
+#            하한 미달이다. 과채도는 석재·초목·흙 계열의 국소 현상.
+# mdl      : "ground" = NegObsGround / "omni" = OmniPBR
+# patch    : NegObsGround 패치 회전 강도. 모듈형 포장 0(패턴 파손 방지), 자연 1.
+LOOK_CLASS = {
+    #                    bevel   sat   mdl        patch  detail
+    "paving":   dict(bevel=0.010, sat=1.00, mdl="ground", patch=0.0, detail=True),
+    "concrete": dict(bevel=0.010, sat=1.00, mdl="ground", patch=0.0, detail=True),
+    "brick":    dict(bevel=0.006, sat=0.88, mdl="ground", patch=0.0, detail=True),
+    "stone":    dict(bevel=0.006, sat=0.66, mdl="ground", patch=1.0, detail=True),
+    "soil":     dict(bevel=0.000, sat=0.74, mdl="ground", patch=1.0, detail=True),
+    "gravel":   dict(bevel=0.000, sat=0.78, mdl="ground", patch=1.0, detail=True),
+    "asphalt":  dict(bevel=0.006, sat=0.90, mdl="ground", patch=1.0, detail=True),
+    "nosing":   dict(bevel=0.012, sat=1.00, mdl="ground", patch=0.0, detail=True),
+    "curb":     dict(bevel=0.012, sat=1.00, mdl="ground", patch=0.0, detail=True),
+    "metal":    dict(bevel=0.002, sat=1.00, mdl="omni",   detail=True),
+    "wood":     dict(bevel=0.004, sat=0.88, mdl="omni",   detail=True),
+    "veg":      dict(bevel=0.000, sat=0.76, mdl="omni",   detail=False),
+    "water":    dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
+    "glass":    dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
+    "paint":    dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
+    "sign":     dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
+    # 미상 역할 — 보수적으로. MDL 교체·채도 변경 없음, 최소 베벨만.
+    "misc":     dict(bevel=0.003, sat=1.00, mdl="omni",   detail=True),
+}
+
+# --- `Looks/<이름>` → 클래스 -------------------------------------------------
+# 실측된 이름 빈도 상위부터. 미등재 이름은 "misc"(보수적 기본)로 떨어진다.
+LOOK_ROLE = {
+    # 포장·광장
+    "Paving": "paving", "PlazaLight": "paving", "PlazaLower": "paving",
+    "Plaza": "paving", "Deck": "wood", "Tile": "paving",
+    # 콘크리트 구조물
+    "Concrete": "concrete", "ConcreteWall": "concrete", "Wall": "concrete",
+    "Shell": "concrete", "ShellB": "concrete", "Parapet": "concrete",
+    "Stage": "concrete", "Upper": "concrete", "Lower": "concrete",
+    "Stair": "concrete", "Riser": "concrete", "Slab": "concrete",
+    "Fascia": "concrete", "Pier": "concrete", "Abutment": "concrete",
+    # 석재
+    "Granite": "stone", "GraniteDark": "stone", "Marble": "stone",
+    "Rock": "stone", "Stone": "stone", "Sandstone": "stone",
+    "RockWall": "stone", "Flag": "stone",
+    # 벽돌·회벽
+    "Brick": "brick", "Plaster": "brick",
+    # 지면 자연물
+    "Soil": "soil", "Dirt": "soil", "Gravel": "gravel", "Sand": "soil",
+    "Asphalt": "asphalt",
+    # 낙차 에지 — 브리프 §2.1 승인값(노징 12 mm)
+    "Nosing": "nosing", "Curb": "curb", "Edge": "nosing",
+    # 금속
+    "Rail": "metal", "Steel": "metal", "Pole": "metal", "Post": "metal",
+    "Lamp": "metal", "Bollard": "metal", "BollardBand": "paint",
+    "Grate": "metal", "Grating": "metal", "Gear": "metal", "Roof": "metal",
+    # 목재
+    "Wood": "wood", "WoodDark": "wood", "SeatWood": "wood", "Bench": "wood",
+    # 식생
+    "Grass": "veg", "GrassB": "veg", "CanopyA": "veg", "CanopyB": "veg",
+    "Leaf": "veg", "LeafA": "veg", "LeafB": "veg", "Hedge": "veg",
+    "Shrub": "veg", "Reed": "veg", "Moss": "veg",
+    # 물
+    "Water": "water",
+    # 도색·표지 — 상수색이 물리적으로 옳다(텍스처화 금지 대상)
+    "Paint": "paint", "LineWhite": "paint", "LineYellow": "paint",
+    "Band": "paint", "Tactile": "paint",
+    # 유리·사인·발광
+    "Glass": "glass", "Window": "glass", "Panel": "sign",
+    "Sign": "sign", "SignFace": "sign", "SignBack": "sign",
+}
+
+
+def _look_spec(path):
+    """프림 경로에서 룩 사양을 얻는다. `.../Looks/Paving` → paving 사양.
+
+    미등재·비정형 경로는 "misc"(보수적 기본)로 떨어져 회귀 위험이 없다.
+    반환: (클래스명, 사양 dict)
+    """
+    name = str(path).rstrip("/").split("/")[-1]
+    cls = LOOK_ROLE.get(name)
+    if cls is None:                            # 접미 숫자·변형 이름 흡수
+        base = name.rstrip("0123456789_")
+        cls = LOOK_ROLE.get(base, "misc")
+    return cls, LOOK_CLASS[cls]
+
+
 def check_assets(roles, hdri=None):
     """지정 역할의 텍스처 존재만 검사. 누락 시 목록 출력 후 sys.exit(1).
 
@@ -246,7 +372,137 @@ def add_box(stage, path, center, size, mtl=None, collider=False):
     _bind_mtl(prim, mtl)
     if collider:
         UsdPhysics.CollisionAPI.Apply(prim)
+    # [사실화 v1] 대면적 수평 지면 슬래브에 미세 기복 스킨을 덮는다.
+    # Phase1 E9 에서 **정점 변위가 최대 시각 기여**였다(MDL 교체보다 큼).
+    # 슬래브 자체는 건드리지 않으므로 낙차 에지 실루엣은 그대로다(승용 조건②).
+    if LOOK_V1 and _skin_wanted(path, size, mtl):
+        try:
+            _ground_skin(stage, f"{path}_Skin", center, size, mtl,
+                         seed=abs(hash(str(path))) % 100000)
+        except Exception as e:                 # 스킨 실패가 씬을 죽이면 안 된다
+            print(f"[룩v1][경고] 지면 스킨 생성 실패 {path}: {e}")
     return cube
+
+
+def _skin_wanted(path, size, mtl):
+    """변위 스킨 대상 판정 — 대면적·수평·지면 계열만.
+
+    승용 조건②("낙차 에지 실루엣은 변위로 흔들리지 않게 보존")에 따라 계단·연석·
+    노징·데크 등 낙차 기하는 경로 토큰으로 전면 제외한다. 판정이 애매하면 **제외**가
+    기본값이다 — 변위는 개선 항목이지 필수가 아니므로 위험을 지지 않는다.
+    """
+    if mtl is None:
+        return False
+    sx, sy, sz = [float(v) for v in size]
+    if sx < 4.0 or sy < 4.0:                   # 대면적만 (소품·연석 제외)
+        return False
+    if sz > 0.8 or sz >= min(sx, sy) * 0.5:    # 수평 슬래브만 (벽·기둥 제외)
+        return False
+    low = str(path).lower()
+    if any(t in low for t in _SKIN_DENY):
+        return False
+    # 역할은 **바인딩된 재질 경로**(`.../Looks/Paving`)로 판정한다.
+    # 지오메트리 경로(`.../Ground`)에는 역할 이름이 없다.
+    try:
+        mpath = str(mtl.GetPath())
+    except Exception:
+        return False
+    if any(t in mpath.lower() for t in _SKIN_DENY):
+        return False
+    cls, _spec = _look_spec(mpath)
+    return cls in _SKIN_CLASSES
+
+
+def _ground_skin(stage, path, center, size, mtl, amp_m=0.010,
+                 spacing=0.12, taper=0.60, max_n=170, seed=17):
+    """[사실화 v1] 지면 슬래브 위에 얹는 **미세 기복 스킨** 메시.
+
+    왜 스킨인가 — 슬래브 자체(Cube)를 변위 메시로 갈아치우면 측면 4면이 사라지고
+    **낙차 에지의 실루엣이 흔들린다**(승용 조건②: "낙차 에지는 변위로 흔들리지
+    않게 보존"). 그래서 원래 Cube 는 **그대로 두고**, 상면보다 아주 살짝 위에
+    변위 스킨을 덮는다. 결과적으로
+      · 슬래브의 외곽 실루엣·낙차 에지 = 원래 Cube 가 그대로 결정 (변경 0)
+      · 상면 안쪽만 기복 → h0.3 스침각에서 지면이 평면으로 안 읽힘
+    이 방식은 GT 낙차 기하도 건드리지 않는다.
+
+    추가 안전장치 2개:
+      ① 스킨을 슬래브 경계에서 `edge` 만큼 **안쪽으로 들여** 깐다 → 슬래브 rim 은
+         원본 그대로 보이고, 스킨 자신의 rim 은 시야에서 죽는다.
+      ② 변위 진폭에 **경계 테이퍼**를 곱해 스킨 가장자리에서 0 으로 수렴 →
+         들여깐 경계에서도 단차가 생기지 않는다.
+
+    Phase1 E5 실측: 노멀을 저작하지 않으면 Hydra 가 면법선으로 그려 각져 보인다
+    → 유한차분으로 정점 노멀을 직접 계산해 넣는다. `subdivisionScheme="none"` 도
+    명시 저작(미저작 시 USD 기본값 catmullClark — Phase1 §2.6 지뢰).
+    """
+    from pxr import UsdGeom, UsdShade, Gf
+    cx, cy, cz = [float(v) for v in center]
+    sx, sy, sz = [float(v) for v in size]
+    edge = 0.05
+    hx, hy = sx / 2.0 - edge, sy / 2.0 - edge
+    if hx <= 0.5 or hy <= 0.5:
+        return None
+    nx = max(4, min(int(2 * hx / spacing), max_n))
+    ny = max(4, min(int(2 * hy / spacing), max_n))
+    x0, x1 = cx - hx, cx + hx
+    y0, y1 = cy - hy, cy + hy
+    ztop = cz + sz / 2.0 + 0.0015          # 1.5 mm 부상 — z-fighting 회피
+
+    rng = np.random.default_rng(seed)
+    xs = np.linspace(x0, x1, nx + 1)
+    ys = np.linspace(y0, y1, ny + 1)
+    XX, YY = np.meshgrid(xs, ys, indexing="ij")
+    ZZ = np.full_like(XX, ztop)
+    for oi, wl in enumerate((0.55, 0.19, 0.07)):
+        gx = max(2, int((x1 - x0) / wl) + 1)
+        gy = max(2, int((y1 - y0) / wl) + 1)
+        g = rng.random((gx + 1, gy + 1)) - 0.5
+        fi = np.clip((XX - x0) / (x1 - x0) * gx, 0, gx - 1e-6)
+        fj = np.clip((YY - y0) / (y1 - y0) * gy, 0, gy - 1e-6)
+        i0, j0 = fi.astype(int), fj.astype(int)
+        tx, ty = fi - i0, fj - j0
+        sxs, sys_ = tx * tx * (3 - 2 * tx), ty * ty * (3 - 2 * ty)
+        v = ((g[i0, j0] * (1 - sxs) + g[i0 + 1, j0] * sxs) * (1 - sys_)
+             + (g[i0, j0 + 1] * (1 - sxs) + g[i0 + 1, j0 + 1] * sxs) * sys_)
+        ZZ += v * amp_m * (0.6 ** oi)
+    # 경계 테이퍼 — 스킨 가장자리에서 변위 0
+    tx_ = np.clip((np.minimum(XX - x0, x1 - XX)) / max(taper, 1e-6), 0, 1)
+    ty_ = np.clip((np.minimum(YY - y0, y1 - YY)) / max(taper, 1e-6), 0, 1)
+    t = (tx_ * tx_ * (3 - 2 * tx_)) * (ty_ * ty_ * (3 - 2 * ty_))
+    ZZ = ztop + (ZZ - ztop) * t
+
+    pts = [Gf.Vec3f(float(XX[i, j]), float(YY[i, j]), float(ZZ[i, j]))
+           for i in range(nx + 1) for j in range(ny + 1)]
+    idx, cnt = [], []
+    for i in range(nx):
+        for j in range(ny):
+            a = i * (ny + 1) + j
+            idx += [a, a + 1, a + ny + 2, a + ny + 1]
+            cnt.append(4)
+    m = UsdGeom.Mesh.Define(stage, path)
+    m.CreatePointsAttr(pts)
+    m.CreateFaceVertexCountsAttr(cnt)
+    m.CreateFaceVertexIndicesAttr(idx)
+    m.CreateSubdivisionSchemeAttr("none")
+    m.CreateExtentAttr([Gf.Vec3f(x0, y0, float(ZZ.min())),
+                        Gf.Vec3f(x1, y1, float(ZZ.max()))])
+    gzx, gzy = np.gradient(ZZ, (x1 - x0) / nx, (y1 - y0) / ny)
+    nrm = np.stack([-gzx, -gzy, np.ones_like(ZZ)], axis=-1)
+    nrm /= np.linalg.norm(nrm, axis=-1, keepdims=True)
+    m.CreateNormalsAttr([Gf.Vec3f(*nrm[i, j])
+                         for i in range(nx + 1) for j in range(ny + 1)])
+    m.SetNormalsInterpolation(UsdGeom.Tokens.vertex)
+    if mtl is not None:
+        UsdShade.MaterialBindingAPI.Apply(m.GetPrim()).Bind(mtl)
+    return m
+
+
+# 변위 스킨을 붙일 역할 클래스 (지면 계열만). 계단·연석·노징은 제외 —
+# 낙차 에지 기하이므로 승용 조건②에 따라 손대지 않는다.
+_SKIN_CLASSES = {"paving", "concrete", "asphalt", "soil", "gravel", "stone"}
+# 경로에 이 토큰이 있으면 지면이어도 변위 금지 (낙차 기하·보행 안전 관련)
+_SKIN_DENY = ("stair", "step", "tread", "riser", "nosing", "curb", "ramp",
+              "landing", "deck", "platform", "edge", "lip", "sill")
 
 
 def add_cylinder(stage, path, center, radius, height, mtl=None,
@@ -324,8 +580,25 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
     씬(D4 등) 발광 패널용. RT 단일바운스 기여 미미, 판정은 PT 8바운스(교훈 7).
     uv_mode=True: 월드 투영 대신 메시 st(UV 0..1)로 샘플 — 사인 패널처럼
     텍스처가 면에 1:1 정합해야 하는 경우(build_sign 의 _sign_quad 전용).
+
+    [사실화 v1] `NEGOBS_LOOK_V1=1` 이면 프림 경로에서 역할을 읽어 룩 사양을
+    주입한다(§1b). 플래그가 꺼져 있으면 아래 코드 경로는 **전혀 타지 않으며**
+    종전 동작과 바이트 단위로 동일하다.
     """
     from pxr import UsdShade, Sdf, Gf
+
+    if LOOK_V1 and diff is not None and not uv_mode and emission_color is None:
+        cls, spec = _look_spec(path)
+        if spec["mdl"] == "ground":
+            return _make_ground_pbr(stage, path, diff, nor, rough, scale_m,
+                                    spec, tint=tint,
+                                    roughness_const=roughness_const,
+                                    specular_level=specular_level, bump=bump)
+        # OmniPBR 계열 — 베벨·디테일 노멀만 얹는다(재질 종류는 그대로).
+        _look_omni = spec
+    else:
+        _look_omni = None
+
     mtl = UsdShade.Material.Define(stage, path)
     sh = UsdShade.Shader.Define(stage, path + "/Shader")
     sh.CreateImplementationSourceAttr(UsdShade.Tokens.sourceAsset)
@@ -380,6 +653,96 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
         sh.CreateInput("enable_emission", B).Set(True)
         sh.CreateInput("emissive_color", C3).Set(Gf.Vec3f(*emission_color))
         sh.CreateInput("emissive_intensity", F).Set(float(emission_intensity))
+    if _look_omni is not None:
+        # 가짜 베벨 — Kit 106.1+ 정식 구현, RT·PT 양쪽 동작 확인(Phase1 E1).
+        if _look_omni["bevel"] > 0.0:
+            sh.CreateInput("round_edges_radius", F).Set(
+                float(_look_omni["bevel"]))
+            sh.CreateInput("round_edges_roundness", F).Set(1.0)
+            sh.CreateInput("round_edges_across_materials", B).Set(False)
+        # 디테일 노멀 — 근접 텍셀 뭉개짐 완화(Phase1 E3)
+        if _look_omni.get("detail") and os.path.isfile(_DETAIL_NOR):
+            _tex("detail_normalmap_texture", _DETAIL_NOR, "raw")
+            sh.CreateInput("detail_bump_factor", F).Set(0.45)
+            ds = 1.0 / 0.08                    # 8 cm 주기 미세 그레인
+            sh.CreateInput("detail_texture_scale", F2).Set(Gf.Vec2f(ds, ds))
+
+    for out in ("surface", "displacement", "volume"):
+        mtl.CreateOutput(f"mdl:{out}",
+                         Sdf.ValueTypeNames.Token).ConnectToSource(
+            sh.ConnectableAPI(), "out")
+    return mtl
+
+
+def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
+                     tint=None, roughness_const=None, specular_level=None,
+                     bump=1.0):
+    """[사실화 v1] NegObsGround.mdl 재질 — 지면·사면 계열 전용.
+
+    OmniPBR 의 `project_uvw` 는 트라이플래너가 아니라 **큐빅 투영**이라 경사면에서
+    텍스처가 낙하 방향으로 뭉개져 늘어난다(Phase1 E2 에서 38° 경사면 split-face 로
+    확인). 이 MDL 은 노멀 가중 소프트 트라이플래너 + 45° 보조 기저로 그 결함이
+    없다. 우리 씬은 계단 챌면·램프·제방으로 가득해 **낙차가 있는 바로 그 지점**에
+    결함이 집중돼 있었다.
+
+    주의 — `texture_scale` 의미가 OmniPBR 과 다르다(트라이플래너 ↔ 큐빅).
+    같은 scale_m 을 줘도 타일 크기가 달라지므로 `_GROUND_SCALE_FIX` 로 보정한다.
+    """
+    from pxr import UsdShade, Sdf, Gf
+    mtl = UsdShade.Material.Define(stage, path)
+    sh = UsdShade.Shader.Define(stage, path + "/Shader")
+    sh.CreateImplementationSourceAttr(UsdShade.Tokens.sourceAsset)
+    sh.SetSourceAsset(Sdf.AssetPath(MDL_GROUND), "mdl")
+    sh.SetSourceAssetSubIdentifier("NegObsGround", "mdl")
+    F = Sdf.ValueTypeNames.Float
+    C3 = Sdf.ValueTypeNames.Color3f
+    A = Sdf.ValueTypeNames.Asset
+    B = Sdf.ValueTypeNames.Bool
+    F2 = Sdf.ValueTypeNames.Float2
+
+    def _tex(name, p, cs):
+        i = sh.CreateInput(name, A)
+        i.Set(p)
+        try:
+            i.GetAttr().SetColorSpace(cs)
+        except Exception:
+            pass
+
+    _tex("diffuse_texture_a", diff, "auto")
+    if nor is not None:
+        _tex("normalmap_texture_a", nor, "raw")
+    if rough is not None:
+        _tex("roughness_texture_a", rough, "raw")
+    s = _GROUND_SCALE_FIX / float(scale_m)
+    sh.CreateInput("texture_scale_a", F2).Set(Gf.Vec2f(s, s))
+    sh.CreateInput("bump_factor_a", F).Set(float(bump))
+    sh.CreateInput("use_blend", B).Set(False)
+    # 반복 파괴 — 모듈형 포장은 patch 0(패턴 파손 방지), 자연 지면은 1
+    sh.CreateInput("patch_mix_a", F).Set(float(spec.get("patch", 1.0)))
+    sh.CreateInput("patch_wavelength_a", F).Set(4.0)
+    sh.CreateInput("macro_amp_a", F).Set(0.12)
+    sh.CreateInput("macro_wavelength_a", F).Set(14.0)
+    sh.CreateInput("desat_bright_a", F).Set(0.30)
+    sh.CreateInput("saturation_a", F).Set(float(spec.get("sat", 1.0)))
+    sh.CreateInput("rough_noise_a", F).Set(0.22)
+    sh.CreateInput("rough_noise_wavelength_a", F).Set(1.2)
+    sh.CreateInput("tri_dither", F).Set(0.35)
+    sh.CreateInput("tri_dither_wavelength", F).Set(0.15)
+    sh.CreateInput("tri_weight_exp", F).Set(6.0)
+    if roughness_const is not None:            # 상수 roughness 요구 → floor 로 이식
+        sh.CreateInput("rough_mult_a", F).Set(0.0)
+        sh.CreateInput("rough_floor_a", F).Set(float(roughness_const))
+    if specular_level is not None:
+        sh.CreateInput("specular_level_a", F).Set(float(specular_level))
+    if spec.get("bevel", 0.0) > 0.0:
+        sh.CreateInput("round_edges_radius", F).Set(float(spec["bevel"]))
+        sh.CreateInput("round_edges_roundness", F).Set(1.0)
+        sh.CreateInput("round_edges_across_materials", B).Set(False)
+    if tint is not None:
+        # MDL 에 diffuse_tint 입력이 없다 → 씬이 준 틴트는 무시되지 않도록
+        # albedo 경로 대신 macro 진폭으로 근사하지 않고, 경고만 남긴다.
+        # (실측 대상 역할에 tint 를 쓰는 호출이 있으면 게이트에서 잡힌다.)
+        print(f"[룩v1][경고] {path}: NegObsGround 는 tint 미지원 — 무시됨 {tint}")
     for out in ("surface", "displacement", "volume"):
         mtl.CreateOutput(f"mdl:{out}",
                          Sdf.ValueTypeNames.Token).ConnectToSource(
@@ -921,12 +1284,30 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
                          (cx, cy, base + (hh - 1.0) / 2.0),
                          (Lx, Ly, hh + 1.0), shell_mtl, collider=True))
     fstep = hh / bd["floors"]
+    # [사실화 v1] `window["inset"]` 은 정의만 되고 **한 번도 읽히지 않았다**
+    # (브리프 2-10). 10개 씬이 inset 을 넘기는데 전부 무시돼 창이 파사드 밖으로
+    # 5 mm 떠 있었고, 조사가 지적한 "파사드에 붙인 납작한 파란 사각형"의 실체다.
+    #
+    # 진짜 리세스는 셸을 뚫어야 하는데(솔리드 박스라 유리를 안으로 밀면 가려짐)
+    # 창마다 4개 박스가 필요해 +17,656 프림(라이브러리 총량 +77%)이다. 과하다.
+    # → **층별 연속 띠**로 대체한다. 창마다가 아니라 층마다 1개라 파사드당 층수
+    #   (총 약 200 프림, 무시 가능)이면서, 한국 아파트·오피스 파사드의 실제 관행
+    #   (층간 띠)이고 파사드 전체의 평면 읽힘을 깬다. 유리는 띠 대비 물러나 보인다.
+    ins = float(wd.get("inset", 0.0))
+    band_t = min(max(ins, 0.0), 0.15)          # 돌출 깊이 상한(간섭 방지)
+    band_h = 0.12
     if bd.get("axis", "y") == "y":
         gy = bd["facade_y"] + bd["face_dir"] * 0.005
         usable = Lx - 2 * wd["margin"]
         ncols = max(1, int(usable / wd["col_step"]))
         for f in range(bd["floors"]):
             zc = base + fstep * f + fstep * 0.5
+            if band_t > 1e-4:                  # 창 하단 높이의 층간 띠
+                zb = zc - wd["h"] / 2.0 - band_h / 2.0
+                prims.append(add_box(
+                    stage, f"{prefix}/SillBand_{f}",
+                    (cx, gy + bd["face_dir"] * band_t / 2.0, zb),
+                    (Lx - 0.4, band_t, band_h), parapet_mtl))
             for c in range(ncols):
                 xc = bd["x0"] + wd["margin"] + (c + 0.5) * (usable / ncols)
                 prims.append(add_box(stage, f"{prefix}/Win_{f}_{c}",
@@ -938,6 +1319,12 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
         ncols = max(1, int(usable / wd["col_step"]))
         for f in range(bd["floors"]):
             zc = base + fstep * f + fstep * 0.5
+            if band_t > 1e-4:
+                zb = zc - wd["h"] / 2.0 - band_h / 2.0
+                prims.append(add_box(
+                    stage, f"{prefix}/SillBand_{f}",
+                    (gx + bd["face_dir"] * band_t / 2.0, cy, zb),
+                    (band_t, Ly - 0.4, band_h), parapet_mtl))
             for c in range(ncols):
                 yc = bd["y0"] + wd["margin"] + (c + 0.5) * (usable / ncols)
                 prims.append(add_box(stage, f"{prefix}/Win_{f}_{c}",

@@ -211,7 +211,18 @@ NegObsTexSample negobs_sample_tri(
     float axy = math::max(math::length(float2(nw.x, nw.y)), 1.0e-4);
     float q_ax = math::max(math::abs(nw.x), math::abs(nw.y)) / axy;
     float q_di = math::max(math::abs(nr.x), math::abs(nr.y)) / axy;
-    float sel = math::smoothstep(-0.05, 0.05,
+    // [사실화 v1 · 버그 수정] **수평면에서 기저 선택이 축퇴한다.**
+    // nw=(0,0,1) 이면 axy→0 이라 q_ax = q_di = 0 → sel = smoothstep(...,0) = 0.5,
+    // 즉 축정렬 기저와 45° 회전 기저가 **50:50으로 섞인다**. 45° 보조 기저는
+    // 원래 '대각 방위 경사벽'의 늘어남을 잡으려고 만든 것이라 수평면에서는
+    // 이득이 0인데, 방향성 있는 모듈 패턴(인터로킹 보도블록 등)을 45° 돌려버린다.
+    // 한국 보도는 통행 방향과 나란히 깔린다 — 사선은 명백한 오류다.
+    //   (TerrainGen 은 침식 도랑 지형이라 평탄 수평면이 거의 없어 드러나지 않았다.)
+    // 처방: 경사도(axy = sin 경사각)로 게이팅해 수평면은 축정렬 기저만 쓴다.
+    //   axy < 0.05 (경사 < 2.9°)  → sel = 0 (순수 축정렬)
+    //   axy > 0.25 (경사 > 14.5°) → 종전 동작
+    float horiz_gate = math::smoothstep(0.05, 0.25, axy);
+    float sel = horiz_gate * math::smoothstep(-0.05, 0.05,
         q_di - q_ax +
         0.12 * tri_dither * (negobs_noise(tri_dither_wl, 2, 29.7) * 2.0 - 1.0));
 
@@ -249,6 +260,7 @@ NegObsLayer negobs_layer(
     uniform float macro_amp,
     uniform float macro_wavelength,
     uniform float desat_bright,
+    uniform float saturation,
     uniform float rough_noise,
     uniform float rough_noise_wavelength,
     uniform float spec,
@@ -285,6 +297,13 @@ NegObsLayer negobs_layer(
     float lum = math::luminance(alb);
     // 채도 macro 변조 (중립 회색 <-> 원색 사이 보간·소폭 과포화 허용)
     alb = math::lerp(color(lum), alb, sat_m);
+    // [사실화 v1] 역할별 채도 캘리브레이션.
+    // 실측: 렌더 전역 sat_mu 0.298 vs 실사 0.158. 단 **전역 하향은 틀렸다** —
+    // scene01 은 이미 0.146 으로 하한 미달이고, 과채도는 석재·초목·흙 계열의
+    // 국소 현상이다(scene07 0.320 / sceneD3 0.306). 그래서 역할별 계수로 준다.
+    // OmniPBR 에는 채도를 낮출 입력이 아예 없어 이 노브는 MDL 쪽에만 존재한다.
+    // 1.0 = 원본 유지(기존 씬 회귀 0).
+    alb = math::lerp(color(lum), alb, saturation);
     // 밝은 스페클(잔돌) 채도 억제 (B8): 밝은 픽셀일수록 회색 쪽으로
     alb = math::lerp(alb, color(lum),
                      desat_bright * math::smoothstep(0.45, 0.75, lum));
@@ -315,6 +334,9 @@ export material NegObsGround(
     uniform float macro_amp_a = 0.0,
     uniform float macro_wavelength_a = 14.0,
     uniform float desat_bright_a = 0.0,
+    uniform float saturation_a = 1.0 [[
+        anno::display_name("Saturation A"),
+        anno::description("역할별 채도 계수. 1.0=원본, <1=탈색") ]],
     uniform float rough_noise_a = 0.0,
     uniform float rough_noise_wavelength_a = 1.2,
     uniform float specular_level_a = 0.5,
@@ -337,6 +359,7 @@ export material NegObsGround(
     uniform float macro_amp_b = 0.0,
     uniform float macro_wavelength_b = 14.0,
     uniform float desat_bright_b = 0.0,
+    uniform float saturation_b = 1.0,
     uniform float rough_noise_b = 0.0,
     uniform float rough_noise_wavelength_b = 1.2,
     uniform float specular_level_b = 0.5,
@@ -391,7 +414,7 @@ export material NegObsGround(
     anno::display_name("NegObs Ground"),
     anno::description("Triplanar-projected PBR with primvar cross-fade blending and anti-tiling"),
     anno::author("NegObs look-check pipeline"),
-    anno::version(1, 4, 0)
+    anno::version(1, 5, 0)
 ]] = let {
 
     NegObsLayer A = negobs_layer(
@@ -399,7 +422,7 @@ export material NegObsGround(
         texture_scale_a, texture_rotate_a, rough_floor_a, rough_mult_a,
         bump_factor * bump_factor_a, flip_tangent_u, flip_tangent_v,
         patch_mix_a, patch_wavelength_a, macro_amp_a, macro_wavelength_a,
-        desat_bright_a, rough_noise_a, rough_noise_wavelength_a,
+        desat_bright_a, saturation_a, rough_noise_a, rough_noise_wavelength_a,
         specular_level_a, tri_dither, tri_dither_wavelength, tri_weight_exp);
 
     NegObsLayer B = negobs_layer(
@@ -407,7 +430,7 @@ export material NegObsGround(
         texture_scale_b, texture_rotate_b, rough_floor_b, rough_mult_b,
         bump_factor * bump_factor_b, flip_tangent_u, flip_tangent_v,
         patch_mix_b, patch_wavelength_b, macro_amp_b, macro_wavelength_b,
-        desat_bright_b, rough_noise_b, rough_noise_wavelength_b,
+        desat_bright_b, saturation_b, rough_noise_b, rough_noise_wavelength_b,
         specular_level_b, tri_dither, tri_dither_wavelength, tri_weight_exp);
 
     // 정점 primvar 크로스페이드 + 고주파 노이즈로 경계 프랙탈화

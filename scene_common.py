@@ -325,7 +325,8 @@ def look_report():
     return (f"[룩v1] 재질 ground={r['ground']} omni_tex={r['omni_tex']} "
             f"const={r['const']} skip={r['skipped']} | 베벨={r['bevel']} "
             f"디테일={r['detail']} 스킨={r['skin']} "
-            f"상수MDL={r.get('const_mdl', 0)} 웨더={r.get('weather', 0)} | 역할 "
+            f"승격={r.get('promoted', 0)} 상수MDL={r.get('const_mdl', 0)} "
+            f"웨더={r.get('weather', 0)} | 역할 "
             + ", ".join(f"{k}:{v}" for k, v in top))
 
 

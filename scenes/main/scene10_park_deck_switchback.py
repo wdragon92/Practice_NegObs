@@ -1016,7 +1016,10 @@ def main():
                     stage, f"{grp}/Rail_{tag}", y, f["x_top"], f["x_top"],
                     FLIGHT_RUN, FLIGHT_DROP, gfn, M["rail"], rail_h=r["h"],
                     post_r=r["post_r"], spacing=r["spacing"],
-                    rail_r=r["bar_t"] / 2.0)
+                    rail_r=r["bar_t"] / 2.0,
+                    # 이 씬은 **아래에 자체 세로살 루프**가 있다. 공통 간살을
+                    # 켜면 실린더가 이중 생성되어 관통한다(레드팀 적발: 48쌍).
+                    baluster_r=0.0)
                 # [v6] 경사 난간 세로 살 : 디딤면 → 상부 가로대. 세로살이 없으면
                 #      경사 레일 2본이 이웃 프레임 뒤로 겹쳐 '사선 브레이스'로
                 #      오독된다(판정 §4 ⑤ 가설 사다리틀).

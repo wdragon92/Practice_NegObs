@@ -1318,7 +1318,7 @@ def build_nosing(stage, prefix, x0, y0, y1, riser, tread, n, base_z=0.0,
 
 
 def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
-                       mtl, rail_h=1.1, post_r=0.02, spacing=2.0, rail_r=0.03,
+                       mtl, rail_h=None, post_r=0.02, spacing=None, rail_r=0.03,
                        rail_mid_r=0.018, rail_mid_drop=0.45,
                        baluster_r=0.009, baluster_gap=0.098, handrail=True):
     """레일 1선(scene01 build_cues 일반화). 상단 레일 + 중간 레일 + 포스트.
@@ -1328,6 +1328,15 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
       run,drop : 경사 구간 수평길이·낙차
       ground_fn: x→지면z 콜백 (포스트 하단 착지 높이). 단면(계단)이면 계단식.
     반환: 생성 프림 리스트."""
+    # 기본값은 **LOOK_V1 에서만** 법정값으로 바뀐다.
+    # 종전에 기본값 자체를 1.1/2.0 으로 바꿨더니, 이 두 값을 명시하지 않는
+    # 호출부(scene03/14/17/21)에서 **룩 레이어를 꺼도 포스트 개수가 바뀌었다**.
+    # 포스트 루프는 LOOK_V1 게이트 밖이라 대조군 기하가 오염된다 —
+    # bc87292 에서 스스로 "치명 C3" 로 명명하고 고쳤던 것과 동일 유형의 재발.
+    if rail_h is None:
+        rail_h = 1.1 if LOOK_V1 else 0.9       # 도로안전시설 지침 2.5
+    if spacing is None:
+        spacing = 2.0 if LOOK_V1 else 1.2
     ground_ref = float(ground_fn(x_top))       # 경사 상단 지면
     top0 = ground_ref + rail_h                 # x_top 에서의 레일 상면 z
     L = math.hypot(run, drop)
@@ -1362,9 +1371,12 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
         while xb <= x_end - pitch * 0.25:
             t = max(0.0, min((xb - x_top) / run, 1.0)) if run > 1e-9 else 0.0
             ztop = top0 - drop * t - rail_r          # 상단 레일 밑면
-            zbot = top0 - drop * t - rail_mid_drop   # 중간 레일 중심까지
             gz = float(ground_fn(xb))
-            zbot = max(zbot, gz)                     # 계단코 아래로 뚫지 않게
+            # 간살은 **지면 가까이까지** 내려와야 한다. 종전엔 중간 레일에서
+            # 멈춰 난간 높이의 43% 만 채웠고, 하부 0.45~0.60m 구간의 실제
+            # 빈틈이 인용한 법정 안목 100mm 를 11~28배로 위반했다.
+            # (법정 요건을 근거로 넣은 기하가 그 요건을 어기고 있었다.)
+            zbot = max(gz + 0.04, top0 - drop * t - rail_h + 0.04)
             h = ztop - zbot
             if h > 0.05:
                 prims.append(add_cylinder(
@@ -1839,12 +1851,17 @@ def scatter_debris(stage, prefix, x0, y0, x1, y1, z, cover=0.35,
         tilt = (0.0, 0.0)
         if ground_fn is not None:
             try:
-                d = 0.15
+                # d 는 **디딤면(0.24~0.34m)보다 작아야** 한다. 종전 0.15 는
+                # 반폭이 tread 의 절반에 육박해, 수평 디딤면 위 낙엽 89.5% 가
+                # 인접 단의 z 를 물고 평균 28° 기울어 6.6cm 뜨거나 파묻혔다.
+                d = 0.04
                 pz = float(ground_fn(px, py))
                 # 국소 기울기 → 개체를 비탈에 눕힌다
                 gx = (float(ground_fn(px + d, py)) - float(ground_fn(px - d, py))) / (2 * d)
                 gy = (float(ground_fn(px, py + d)) - float(ground_fn(px, py - d))) / (2 * d)
-                tilt = (math.degrees(math.atan(gy)), -math.degrees(math.atan(gx)))
+                # 불연속면(계단코·연석)에서 기울기가 폭발하므로 클램프한다.
+                _cl = lambda a: max(-15.0, min(15.0, math.degrees(math.atan(a))))
+                tilt = (_cl(gy), -_cl(gx))
             except Exception:
                 pass
         j = float(rng.uniform(-tilt_max, tilt_max))
@@ -1857,7 +1874,7 @@ def scatter_debris(stage, prefix, x0, y0, x1, y1, z, cover=0.35,
                               scale_mul=float(rng.uniform(*scale_jitter))) is not None:
                 # 산포물은 개수가 많아 인스턴싱이 필수 — 프로토타입 공유.
                 try:
-                    stage.GetPrimAtPath(f"{prefix}/Deb_{i}").SetInstanceable(True)
+                    stage.GetPrimAtPath(f"{prefix}/Deb_{i}/Asset").SetInstanceable(True)
                 except Exception:
                     pass
                 placed += 1
@@ -1911,8 +1928,15 @@ def build_tree(stage, prefix, cx, cy, gz, wood_mtl, canopy_a_mtl, canopy_b_mtl,
             if vx is not None:
                 # 같은 에셋을 여러 번 참조하므로 인스턴싱으로 메모리·시간 절약.
                 # (33씬 합계 약 30 M 삼각형 추가 — 레드팀 추산)
+                # 인스턴싱은 **참조가 붙은 프림**에 걸어야 한다. USD 는
+                # "a prim must use at least one composition arc in order to be
+                # eligible for instancing" 이므로, 참조를 /Asset 자식으로 내린
+                # 뒤에도 부모에 걸어 두면 **조용히 무동작**이다.
+                # (직전 커밋의 인스턴싱 조치가 다음 커밋에서 이렇게 무력화됐고,
+                #  육안으로는 원리적으로 확인할 수 없는 종류의 회귀다.)
                 try:
-                    vx.GetPrim().SetInstanceable(True)
+                    stage.GetPrimAtPath(f"{prefix}/Veg/Asset") \
+                        .SetInstanceable(True)
                 except Exception:
                     pass
                 LOOK_STATS["veg_asset"] = LOOK_STATS.get("veg_asset", 0) + 1
@@ -2247,7 +2271,7 @@ def place_shrubs(stage, prefix, pts, target_h, pool=None, seed=1234,
                                 scale_mul=s)
             if xf is not None:
                 try:
-                    stage.GetPrimAtPath(f"{prefix}/{tag}_{i}").SetInstanceable(True)
+                    stage.GetPrimAtPath(f"{prefix}/{tag}_{i}/Asset").SetInstanceable(True)
                 except Exception:
                     pass
                 placed += 1

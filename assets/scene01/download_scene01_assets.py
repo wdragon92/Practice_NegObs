@@ -187,6 +187,16 @@ POLYHAVEN_V3 = {
 POLYHAVEN_V4 = {
     "forest_leaves_03": "leaf_ground",       # 낙엽 지면(C2 낙엽 계단 마운드)
 }
+# [사실화 v1] 아스팔트 — **flat_gnd 최대 발생원 대응**.
+#   sceneD3 정밀 진단: 죽은 픽셀의 **89.8% 가 상수색 아스팔트 차도 한 장**이고
+#   국소표준편차 중앙값이 임계의 1/4000 이었다. 같은 평면·같은 광원의 잔디 버지는
+#   dead 0.0% — 유일한 차이가 디퓨즈 텍스처 유무였다.
+#   실측 스케일(PolyHaven API 확인): asphalt_02 = 3.0×3.0 m 로 텍셀 밀도가 가장 높다.
+#   (aerial_asphalt_01 은 30×30 m 라 137 texel/m 뿐 — 비권장.)
+#   아스팔트 상수색을 쓰는 씬이 14개라 한 번의 조달로 전부에 적용된다.
+POLYHAVEN_V5 = {
+    "asphalt_02": "asphalt",                 # 차도·주차장 노면 (3.0 m 타일)
+}
 # 배치1 HDRI — overcast(C1 눈·C4 젖은 석재 공유, 무태양 저대비 프로파일)
 HDRI_BATCH1 = ["kloofendal_overcast"]        # → assets/kloofendal_overcast_4k.exr
 # canonical 접미사 -> 후보 API 키(대소문자 혼재 대응; 'diffuse' 소문자 변형 포함)
@@ -436,6 +446,9 @@ def main():
         download_polyhaven(slug, prefix, failures)
 
     print("\n=== PolyHaven v4 (나노바나나 배치1 scene22~33) ===")
+    for slug, prefix in POLYHAVEN_V5.items():
+        download_polyhaven(slug, prefix, failures)
+
     for slug, prefix in POLYHAVEN_V4.items():
         download_polyhaven(slug, prefix, failures)
     for slug in HDRI_BATCH1:
@@ -450,7 +463,8 @@ def main():
         expected += [f"{prefix}_diff.jpg", f"{prefix}_nor.jpg",
                      f"{prefix}_rough.jpg"]
     for prefix in (list(POLYHAVEN.values()) + list(POLYHAVEN_V2.values())
-                   + list(POLYHAVEN_V3.values()) + list(POLYHAVEN_V4.values())):
+                   + list(POLYHAVEN_V3.values()) + list(POLYHAVEN_V4.values())
+                   + list(POLYHAVEN_V5.values())):
         expected += [f"{prefix}_diff.jpg", f"{prefix}_nor_dx.jpg",
                      f"{prefix}_rough.jpg"]
     expected += ["tactile_yellow_diff.png", "tactile_yellow_nor.png"]

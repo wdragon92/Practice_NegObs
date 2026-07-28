@@ -100,6 +100,10 @@ TEX = dict(
                    nor="rock_face_nor_dx.jpg",
                    rough="rock_face_rough.jpg"),            # 절벽 암반
     # --- 배치1 나노바나나(scene22~33) 신규 1역할 ---
+    # [사실화 v1] 아스팔트 — sceneD3 진단에서 죽은 픽셀의 89.8% 가 상수색
+    # 아스팔트 차도였다. PolyHaven asphalt_02(3.0 m 타일, CC0).
+    asphalt=dict(dir=S1_DIR, diff="asphalt_diff.jpg",
+                 nor="asphalt_nor_dx.jpg", rough="asphalt_rough.jpg"),
     leaf_ground=dict(dir=S1_DIR, diff="leaf_ground_diff.jpg",
                      nor="leaf_ground_nor_dx.jpg",
                      rough="leaf_ground_rough.jpg"),        # 낙엽 지면(C2)
@@ -216,17 +220,28 @@ LOOK_CLASS = {
     # 게다가 round_edges 는 개별 블록이 아니라 **슬래브 프림 경계**에 걸린다.
     # 개별 블록 모따기는 텍스처 노멀맵이 이미 담당하므로, 여기 값은 슬래브 경계용
     # 이며 연석(10 mm)보다 낮게 둔다. [근거 없음 — 보수적 선택]
-    "paving":   dict(bevel=0.006, sat=1.00, mdl="ground", patch=0.0, detail=True),
+    "paving":   dict(bevel=0.006, sat=1.00, mdl="ground", patch=0.0, detail=True,
+                     tex="paving_interlock", bump=1.4),
     "concrete": dict(bevel=0.020, sat=1.00, mdl="ground", patch=0.0, detail=True,
-                     weather=_W_STRUCT),   # 현장타설 20~30 mm (KCS 21 50 05)
+                     weather=_W_STRUCT, tex="concrete_wall", bump=1.6),
+                     # 현장타설 20~30 mm (KCS 21 50 05). bump 1.6 = 진단 P3
+                     # (음영부는 밝기가 아니라 노멀 대비로만 결이 산다)
     "brick":    dict(bevel=0.006, sat=0.88, mdl="ground", patch=0.0, detail=True,
+                     tex="brick_red", bump=1.4,
                      weather=dict(grime=0.30, grime_desat=0.30, grime_h=0.35,
                                   splash=0.15, streak=0.10, wrough=0.15)),
     "stone":    dict(bevel=0.004, sat=0.66, mdl="ground", patch=1.0, detail=True,
-                     weather=_W_STONE),   # [근거 없음] 보수적으로 하향
-    "soil":     dict(bevel=0.000, sat=0.74, mdl="ground", patch=1.0, detail=True),
-    "gravel":   dict(bevel=0.000, sat=0.78, mdl="ground", patch=1.0, detail=True),
-    "asphalt":  dict(bevel=0.006, sat=0.90, mdl="ground", patch=1.0, detail=True),
+                     weather=_W_STONE, tex="stone_flag", bump=1.5),
+                     # 베벨 [근거 없음] 보수적 하향
+    "soil":     dict(bevel=0.000, sat=0.74, mdl="ground", patch=1.0, detail=True,
+                     tex="dirt_park", bump=1.4),
+    "gravel":   dict(bevel=0.000, sat=0.78, mdl="ground", patch=1.0, detail=True,
+                     tex="gravel", bump=1.4),
+    # tex: 상수색 재질을 이 TEX 역할의 텍스처로 승격한다(의도 알베도는 보존).
+    # spec/bump: 진단 P1/P3 — 노면이 과하게 밝은 원인이 그레이징 광택이라
+    # specular_level 을 명시하고, 음영부 대비는 노멀 강도로 살린다.
+    "asphalt":  dict(bevel=0.006, sat=0.90, mdl="ground", patch=1.0, detail=True,
+                     tex="asphalt", spec=0.20, bump=1.4),
     # 노징 12 mm 는 **IBC 1.6~14.3 mm 상단**이다. 국내 규정은 존재하지 않음(전수 확인).
     "nosing":   dict(bevel=0.012, sat=1.00, mdl="ground", patch=0.0, detail=True,
                      weather=dict(grime=0.18, grime_desat=0.25, grime_h=0.15,
@@ -419,6 +434,69 @@ def _effective_sat(spec, diff, base_color):
     # knee 를 넘은 만큼만 비례 적용 (급격한 계단 방지)
     t = min(1.0, (cur - _SAT_KNEE) / 0.20)
     return 1.0 + (coef - 1.0) * t
+
+
+_TEXMEAN_CACHE = {}
+
+
+def _texture_mean(path):
+    """텍스처 평균 RGB (0~1). PIL 축소 로드 + 캐시."""
+    if path in _TEXMEAN_CACHE:
+        return _TEXMEAN_CACHE[path]
+    v = None
+    try:
+        from PIL import Image
+        with Image.open(path) as im:
+            im = im.convert("RGB")
+            im.thumbnail((64, 64))
+            a = np.asarray(im).astype(np.float64) / 255.0
+        v = tuple(float(x) for x in a.reshape(-1, 3).mean(0))
+    except Exception:
+        v = None
+    _TEXMEAN_CACHE[path] = v
+    return v
+
+
+def _promote_const_to_texture(spec, diffuse_color):
+    """[사실화 v1] 상수색 재질을 역할 텍스처로 승격.
+
+    왜 필요한가 — sceneD3 정밀 진단 결과 죽은 픽셀의 **89.8% 가 상수색
+    아스팔트 차도 한 장**이었고, 그 표면의 국소표준편차 중앙값은 임계의
+    **1/4000** 이었다. 결정적 대조군: 같은 z=0 평면·같은 광원·같은 거리의 잔디
+    버지는 dead **0.0%** 이며, 유일한 차이가 디퓨즈 텍스처의 유무였다.
+
+    상수색 MDL 모드(파장 14 m 명도 변조)로는 못 고친다 — `flat_gnd` 는 5×5 픽셀
+    창의 "결"을 보는데 macro 변조는 주파수 대역이 아예 다르다.
+
+    **의도 알베도 보존**: 씬 작성자가 고른 색을 그대로 살리기 위해, 텍스처를
+    바인딩하되 `base_color = 의도색 / 텍스처평균` 으로 곱해 평균 알베도를
+    유지한다. 즉 "색은 그대로, 결만 얻는다".
+
+    반환: (diff, nor, rough, base_color) — 승격 불가 시 (None, None, None, 원색)
+    """
+    role = spec.get("tex")
+    if not role or role not in TEX or diffuse_color is None:
+        return None, None, None, diffuse_color
+    try:
+        diff = tex_path(role, "diff")
+        if not os.path.isfile(diff):
+            return None, None, None, diffuse_color
+        nor = tex_path(role, "nor") if "nor" in TEX[role] else None
+        rough = tex_path(role, "rough") if "rough" in TEX[role] else None
+        if nor and not os.path.isfile(nor):
+            nor = None
+        if rough and not os.path.isfile(rough):
+            rough = None
+        tm = _texture_mean(diff)
+        if tm is None or min(tm) < 1e-4:
+            return None, None, None, diffuse_color
+        # 의도 알베도 / 텍스처 평균. 과도한 증폭은 클램프(포화 방지).
+        bc = tuple(min(2.5, max(0.05, float(c) / m))
+                   for c, m in zip(diffuse_color, tm))
+        return diff, nor, rough, bc
+    except Exception as e:
+        print(f"[룩v1][경고] 텍스처 승격 실패({role}): {e}")
+        return None, None, None, diffuse_color
 
 
 def _look_spec(path):
@@ -797,6 +875,19 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
         # 점자블록·사인·유리·수면. v5.1 §4 가 이들을 상수색으로 못박았다.
         if (diff is None and diffuse_color is not None
                 and cls in _CONST_MDL_CLASSES):
+            # 먼저 역할 텍스처로 **승격**을 시도한다(의도 알베도 보존).
+            # 승격되면 patch 혼합·tri_dither·macro·desat 까지 전부 켜지므로
+            # 상수색 모드보다 훨씬 강력하다.
+            pd, pn, pr, pbc = _promote_const_to_texture(spec, diffuse_color)
+            if pd is not None:
+                LOOK_STATS["promoted"] = LOOK_STATS.get("promoted", 0) + 1
+                return _make_ground_pbr(
+                    stage, path, pd, pn, pr,
+                    scale_m if scale_m != 1.0 else spec.get("tex_scale", 1.2),
+                    spec, tint=tint, roughness_const=None,
+                    specular_level=(specular_level if specular_level is not None
+                                    else spec.get("spec")),
+                    bump=spec.get("bump", 1.0), base_color=pbc)
             LOOK_STATS["const_mdl"] = LOOK_STATS.get("const_mdl", 0) + 1
             return _make_ground_pbr(stage, path, None, None, None, scale_m,
                                     spec, tint=tint,
@@ -936,7 +1027,8 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
         sh.CreateInput("base_color", C3).Set(Gf.Vec3f(*base_color))
     s = _GROUND_SCALE_FIX / float(scale_m)
     sh.CreateInput("texture_scale_a", F2).Set(Gf.Vec2f(s, s))
-    sh.CreateInput("bump_factor_a", F).Set(float(bump))
+    sh.CreateInput("bump_factor_a", F).Set(
+        float(spec.get("bump", bump)))
     sh.CreateInput("use_blend", B).Set(False)
     # 반복 파괴 — 모듈형 포장은 patch 0(패턴 파손 방지), 자연 지면은 1
     sh.CreateInput("patch_mix_a", F).Set(float(spec.get("patch", 1.0)))
@@ -955,6 +1047,8 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
     sh.CreateInput("tri_dither_wavelength", F).Set(0.15)
     sh.CreateInput("tri_weight_exp", F).Set(6.0)
     if roughness_const is not None:            # 상수 roughness 요구 → floor 로 이식
+        # **함정**: 이 경로는 rough_mult_a=0 이라 roughness 맵을 통째로 무시한다.
+        # 텍스처 승격 시에는 roughness_const 를 넘기지 않는 이유다(진단 P1).
         sh.CreateInput("rough_mult_a", F).Set(0.0)
         sh.CreateInput("rough_floor_a", F).Set(float(roughness_const))
     if specular_level is not None:

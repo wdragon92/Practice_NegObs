@@ -104,6 +104,9 @@ TEX = dict(
     # 아스팔트 차도였다. PolyHaven asphalt_02(3.0 m 타일, CC0).
     asphalt=dict(dir=S1_DIR, diff="asphalt_diff.jpg",
                  nor="asphalt_nor_dx.jpg", rough="asphalt_rough.jpg"),
+    # 눈 — sceneC1 최대 면적 재질(88.5%). PolyHaven snow_01(2.0 m 타일, CC0)
+    snow=dict(dir=S1_DIR, diff="snow_diff.jpg",
+              nor="snow_nor_dx.jpg", rough="snow_rough.jpg"),
     leaf_ground=dict(dir=S1_DIR, diff="leaf_ground_diff.jpg",
                      nor="leaf_ground_nor_dx.jpg",
                      rough="leaf_ground_rough.jpg"),        # 낙엽 지면(C2)

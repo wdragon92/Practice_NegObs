@@ -47,8 +47,9 @@ assets/                         텍스처·HDRI·MDL — 바이너리는 미추�
 assets/signs/                   표지판 텍스처 + 생성기 gen_signs.py
 look_check/sceneNN/<round>/     렌더 산출물 (미추적, ~11GB)
 look_refs/                      나노바나나 레퍼런스 이미지·프롬프트
-scripts/                        완료된 렌더 체인 스크립트 보관 + 컨택트 시트 생성기
-run_*.sh (루트)                 진행/대기 중 렌더 체인 — 종료 후 scripts/로 이동
+scripts/                        측정·검증 도구 + 시트 생성기
+scripts/rounds/                 완료된 렌더 체인 보관
+run_*.sh (루트)                 진행 중 렌더 체인 — 종료 후 scripts/rounds/ 로 이동
 Docs/                           문서 → Docs/INDEX.md
 ```
 
@@ -89,21 +90,28 @@ NEGOBS_CAPTURE_DIR=look_check/scene01/myrun \
   `NEGOBS_GEOCHECK` / `NEGOBS_SELFCHECK`(기하·보행 연속성 검산).
 - 회귀 방지 체크리스트: `Docs/briefs/multi_scene_brief_v3.md` §A.
 
-## 현 상태 (2026-07-28)
+## 현 상태
 
-**전 33씬 최종 렌더·판정 종료.** 본편 21/21 합격(v6→v7→v8 사이클), 배치1 12/12 합격.
-grazing 은닉 회귀 0, 클리핑 0. 21씬 컨택트 시트 = `Docs/audit_v4/library21_final_hq.png`
-(생성기 `scripts/make_hq_sheet.py` — 재렌더 후 재실행으로 갱신).
+**→ `Docs/STATUS.md` 를 먼저 읽으십시오.** 현재 상태·읽는 순서·다음 할 일이 20줄에 정리돼 있습니다.
 
-진행 중 과제는 **사실성 격차**다. 6팀 병렬 조사 결과 현 라이브러리는 실사성 L1(그레이박스)로,
-SYNTHIA(L2)·GTA5(L3) 아래로 판정됐다. 핵심 원인은 렌더러가 아니라 표면 미세구조의 전면 부재이며,
-가장 큰 리스크는 미학이 아니라 **지름길 학습**(카메라 9개 이산조합·조명조건 1종·사람/차량 0건)이다.
-전 보고서와 실행계획: `Docs/surveys/realism_gap_2026-07-28/` — `ZZ_synthesis.md` 부터 읽을 것.
+- 씬 라이브러리 **33씬** 전부 판정 합격 상태(v5 라운드).
+  21씬 컨택트 시트 = `Docs/audit_v4/library21_final_hq.png`
+- **사실화 v1 라운드 진행 중** — 6팀 격차 조사에서 실사성 **L1(그레이박스)** 판정을 받은 것에 대한 대응.
+  룩 레이어(재질·표면 미세구조)를 `scene_common.py`/MDL/에셋 계층에만 넣어 **씬 파일 무수정**으로 끌어올린다.
+  - 켜기: `NEGOBS_LOOK_V1=1` (기본 OFF) · PT 가속: `NEGOBS_PT_FAST=1`
+  - 총괄 보고: **`Docs/reports/realism_v1_final.md`**
+- 가장 큰 리스크는 미학이 아니라 **지름길 학습**(카메라 9개 이산조합·조명조건 1종·사람/차량 0건)이며,
+  이는 다음 지시서 범위다.
 
 ## 문서
 
-`Docs/INDEX.md` 참조. 새로 합류하는 경우 읽는 순서:
+읽는 순서:
 
-1. `Docs/audit_v4/user_feedback_v5_1.md` — 현실성 규약(전역 §1~5 + v5.2 원칙 §6~9). **필독 1순위**
-2. `Docs/briefs/multi_scene_brief_v5.md` — 본편 구현 사양
-3. `Docs/surveys/realism_gap_2026-07-28/ZZ_synthesis.md` — 사실성 격차 종합·실행계획
+1. **`Docs/STATUS.md`** — 현재 상태판 (20줄)
+2. **`Docs/reports/realism_v1_final.md`** — 사실화 v1 총괄. 인수인계 1순위
+3. `Docs/briefs/realism_brief_v1.md` — 지시서 + **개정 이력 rev.1**(충돌 시 rev.1 우선)
+4. `Docs/audit_v4/user_feedback_v5_1.md` — 현실성 규약(계속 유효)
+5. `Docs/INDEX.md` — 전체 문서 지도
+
+⚠ `Docs/surveys/realism_gap_2026-07-28/ZZ_synthesis.md` 는 격차 조사 **원안**이며
+서술 다수가 이후 정정됐습니다. `realism_v1_final.md` §3(정정 목록)을 먼저 보십시오.

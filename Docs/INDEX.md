@@ -1,16 +1,37 @@
 # Docs 색인
 
-신규 합류 시 읽는 순서: `audit_v4/user_feedback_v5_1.md` → `briefs/multi_scene_brief_v5.md`
-→ `surveys/realism_gap_2026-07-28/ZZ_synthesis.md`
+> **신규 합류는 `STATUS.md` 부터.** 현재 상태·읽는 순서·다음 할 일이 20줄에 있다.
 
-## 루트 (현행 기준 문서)
-- `scene_redesign_v5_proposal.md` — **v5 재설계**(사용자 전면 채택): 처분표(교체 7·재해석 3·유지) + 공통 레이어
-- `nanobanana_batch1_geometry_map.md` — 배치1(N/C/D 12씬) 기하 사양 + 판정 이력(§공통 3)
-- `scene_library_v3_status.md` — 21씬 상태표 (v3 시점 이력)
+읽는 순서: `STATUS.md` → `reports/realism_v1_final.md` → `briefs/realism_brief_v1.md`(+개정이력)
+→ `audit_v4/user_feedback_v5_1.md` → 이 색인
+
+⚠ `surveys/realism_gap_2026-07-28/ZZ_synthesis.md` 는 격차 조사 **원안**이며 서술 다수가
+이후 정정됐다. 반드시 `reports/realism_v1_final.md` §3(정정 목록)을 먼저 볼 것.
+
+## 루트
+- **`STATUS.md`** — 현재 상태판. 라운드마다 여기부터 갱신한다
+- `CREDITS.md` — 외부 에셋 출처·라이선스 (CC-BY 크레딧 포함)
+
+## reports/ — 사실화 v1 라운드 (2026-07-28)
+- **`realism_v1_final.md`** — **총괄·인수인계 1순위.** 결과 수치 · 구현 · 정정 · 버그 · 결정 대기
+- `realism_baseline.md` — Phase 0 기준선(측정 도구 정식화·3씬 기준선)
+- `realism_phase1.md` — Phase 1 "검증의 날"(스파이크 7종·렌더 예산·RTX 능력)
+- `realism_phase2.md` — Phase 2 룩 레이어(구현·게이트·MDL 이력)
+- 진단: `deadpixel_diag_d3.md`(D3 죽은 픽셀 89.8%가 상수색 아스팔트) ·
+  `deadpixel_diag_0701.md`(07/01 — 그늘에서 노멀맵이 원리적으로 무효인 이유)
+- 조달·매핑: `const_color_texture_map.md` · `sky_procurement_v1.md` · `real_reference_expansion.md`
+- 감사: `code_audit_realism_v1.md`(치명 4·중대 10) · `license_audit_v1.md` ·
+  `doc_consistency_audit_v1.md` · `regression_tool_v1.md`
+
+## legacy/ (이력 보존 — 현행 아님)
+- `scene_redesign_v5_proposal.md` · `nanobanana_batch1_geometry_map.md` ·
+  `scene_library_v3_status.md` · `multi_scene_brief_v3.md` · `realism_rubric_v1.md`
 
 ## briefs/ (설계 지시·사양)
-- `multi_scene_brief_v5.md` — **본편 21씬 현행 구현 사양**
-- `multi_scene_brief_v3.md` — 이전 사양 (§A 회귀 방지 체크리스트는 여전히 유효)
+- **`realism_brief_v1.md`** — **사실화 v1 지시서 + 개정 이력 rev.1.**
+  본문과 rev.1 이 충돌하면 **rev.1 이 우선**한다
+- `multi_scene_brief_v5.md` — 본편 21씬 구현 사양
+- `../legacy/multi_scene_brief_v3.md` — 이전 사양 (§A 회귀 체크리스트는 여전히 유효)
 - `multi_scene_brief_v2.md` — 이력
 - `scene01_design_brief.md` — scene01 설계·재질·점자블록 (텍스처 소스 슬러그 표)
 - `NegObs_인공씬1호_계단_구현지시서.md` — 최초 지시서 (편향 있음 — scene01_design_brief 가 교정본)
@@ -52,3 +73,17 @@
 
 ---
 호환 심링크: `Docs/multi_scene_brief_v3.md` → `briefs/`, `Docs/realism_rubric_v1.md` → `reports/`
+
+
+## surveys/realism_gap_2026-07-28/ (격차 조사 6팀 + 후속)
+- `ZZ_synthesis.md` — 종합·실행계획. **원안이며 정정 다수** (위 경고 참조)
+- `00`(감독 직접측정) `A`~`G`(6팀 원보고서)
+- `H_rtx_capability_verification.md` — RTX 능력 검증. ZZ 서술 5건 정정
+- `I_ks_dimension_verification.md` — 국내 규격(KS·KCS·법령 도면 판독). 베벨값 근거
+
+## scripts/
+- `imgstats.py` — **공식 측정 도구**(하늘/지면 분리·중앙값·실사 n=54 참고 게이트)
+- `regression_check.py` — 회귀 검증(478컷 23초, GPU 불요)
+- `spike_realism.py` · `rtx_probe.py` — Phase 1 스파이크 랩
+- `make_compare_sheet.py` — 전후 비교 시트 · `make_hq_sheet.py` — 21씬 HQ 시트
+- `rounds/` — 완료된 렌더 체인 보관

@@ -196,6 +196,12 @@ POLYHAVEN_V4 = {
 #   아스팔트 상수색을 쓰는 씬이 14개라 한 번의 조달로 전부에 적용된다.
 POLYHAVEN_V5 = {
     "asphalt_02": "asphalt",                 # 차도·주차장 노면 (3.0 m 타일)
+    # [사실화 v1] 눈 — sceneC1 의 `Snow` 는 **33씬 통틀어 단일 재질 최대 면적
+    # (88.5%)** 인데 텍스처가 없어 승격이 조용히 실패하고 있었다(C1 flat_gnd 88.3).
+    # 상수색 매핑 조사가 실측으로 고른 것: snow_01(2.0 m 타일, 선형평균
+    # 0.488/0.474/0.466, sd 0.074, 발자국 요철). Snow002/010A 는 순백 초과,
+    # Snow006 은 sd 0.027 로 개선 미미해 탈락.
+    "snow_01": "snow",
 }
 # 배치1 HDRI — overcast(C1 눈·C4 젖은 석재 공유, 무태양 저대비 프로파일)
 HDRI_BATCH1 = ["kloofendal_overcast"]        # → assets/kloofendal_overcast_4k.exr

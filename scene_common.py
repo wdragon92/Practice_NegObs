@@ -124,6 +124,17 @@ for _s in ("warn_fall", "caution_step", "exit", "info", "no_entry"):
 
 OVERCAST_HDRI = "kloofendal_overcast_4k.exr"
 
+# ---------------------------------------------------------------------------
+# [사실화 P1] PT 수정 설정 — `NEGOBS_PT_FAST=1` 로 활성화
+#   근거: ZZ_synthesis §10.3 (D팀) + 감독 스파이크 실측(2026-07-28)
+#   현행은 spp=1 · totalSpp=512 라 512프레임에 걸쳐 누적한다. spp 를 올리고
+#   rtSubframes 로 한 update 안에서 여러 서브프레임을 돌리면 8프레임에 수렴.
+#   실측(스파이크 랩, 2뷰): 4.89~5.14 → 0.08~0.31 s/컷. 두 설정의 출력 PNG 는
+#   **바이트 단위 동일**(PSNR 무한대) — 무손실 가속이다.
+#   RT 대비로도 빠르다(RT warmup 90 = 0.79~1.03 s/컷).
+# ---------------------------------------------------------------------------
+PT_FAST = dict(spp=16, total_spp=64, subframes=8, warmup=8)
+
 
 def tex_path(role, kind):
     """역할·종류(diff/nor/rough)의 절대 경로."""
@@ -187,6 +198,14 @@ def boot(headless):
     settings = carb.settings.get_settings()
     settings.set("/rtx/post/dlss/execMode", 2)     # DLSS Quality
     settings.set("/rtx/post/aa/op", 3)             # DLSS AA
+    # [사실화 P1] PT 가속 — /rtx/pathtracing/spp 기본값이 1이라 totalSpp 를
+    # 프레임 수만큼 누적하고 있었다(512spp = 512프레임). subframes 를 올리면
+    # 한 update 안에서 여러 샘플을 돌린다. 감독 실측: 4.89 → 0.08 s/컷(61배),
+    # 결과 이미지는 픽셀 단위 동일. 씬 파일은 이 키를 건드리지 않으므로
+    # 여기서 켜면 전 씬에 적용된다. 기본 OFF(회귀 방지) — env 로 명시 활성화.
+    if os.environ.get("NEGOBS_PT_FAST", "") == "1":
+        settings.set("/app/renderer/rtSubframes", PT_FAST["subframes"])
+        print(f"[렌더] PT 가속 ON — {PT_FAST}")
     # 뷰포트 그리드·축 가이드가 렌더에 찍히지 않게 (캡처 위생)
     settings.set("/app/viewport/grid/enabled", False)
     settings.set("/persistent/app/viewport/displayOptions", 0)
@@ -1228,11 +1247,23 @@ def capture_pipeline(sim_app, views, out_dir_default, set_render_mode_fn,
     for _ in range(30):                        # 초기 로딩 워밍업
         sim_app.update()
 
+    pt_fast = os.environ.get("NEGOBS_PT_FAST", "") == "1"
+
     for mode in modes:
         set_render_mode_fn("PathTracing" if mode == "pt"
                            else "RaytracedLighting")
-        warm = int(os.environ.get(
-            "NEGOBS_WARMUP", str(572 if mode == "pt" else 90)))
+        warm_default = 572 if mode == "pt" else 90
+        if pt_fast and mode == "pt":
+            # 씬의 set_render_mode 가 spp=1/totalSpp=512 를 되돌려 놓으므로
+            # **그 뒤에** 덮어써야 한다 (호출 순서가 핵심).
+            import carb
+            st = carb.settings.get_settings()
+            st.set("/rtx/pathtracing/spp", PT_FAST["spp"])
+            st.set("/rtx/pathtracing/totalSpp", PT_FAST["total_spp"])
+            st.set("/app/renderer/rtSubframes", PT_FAST["subframes"])
+            warm_default = PT_FAST["warmup"]
+            print(f"[렌더] PT 가속 적용 (warmup {warm_default})")
+        warm = int(os.environ.get("NEGOBS_WARMUP", str(warm_default)))
         for vname, v in VIEWS.items():
             look_from_fn(v["eye"], v["tgt"])
             for _ in range(warm):              # 워밍업 없으면 검은 이미지

@@ -33,11 +33,14 @@ import json
 import numpy as np
 from PIL import Image
 
-METRICS = ("slope", "grad_k", "flat_pct", "hf", "sat_mu", "sat_sd",
+METRICS = ("slope", "grad_k", "flat_pct", "flat_sky", "flat_gnd", "hf", "sat_mu", "sat_sd",
            "chroma_sd", "ori_axis")
 
 # T1 게이트 [ZZ_synthesis §6 T1 "목표 수치"]
 GATE = dict(flat_pct=(None, 8.0), slope=(-2.2, -2.0), sat_mu=(0.15, 0.22))
+# 하단 2/3(지면·구조물) 보조 게이트 — 실사 실측 0.1%. 하늘 교체만으로 헤드라인
+# 지표를 통과하는 것을 막는 진짜 기준선이다. [P1 감독 실측 2026-07-28]
+GATE_GND = dict(flat_gnd=(None, 3.0))
 
 
 def load(path, long_side=1024, lower=False):
@@ -151,12 +154,19 @@ def analyze(path, lower=False):
     mag = np.sqrt(gx ** 2 + gy ** 2)
     ls = local_std(g, 5)
     smu, ssd = sat_stats(rgb)
+    # [P1 발견] 죽은 픽셀의 67~74% 가 하늘이었다 (감독 실측, 2026-07-28).
+    # 전체 flat% 만 보면 하늘 교체만으로 목표를 "달성"할 수 있어 지표를 속이게
+    # 된다. 상단 1/3(대략 하늘)·하단 2/3(지면·구조물)을 항상 분리 보고한다.
+    # 실사 기준: 상단 11.6% / **하단 0.1%** — 하단이 진짜 기준이다.
+    h = g.shape[0]
     return dict(
         name=os.path.basename(path),
         path=path,
         slope=slope,
         grad_k=kurt(mag.ravel()),
         flat_pct=100.0 * float((ls < 1.0 / 255).mean()),
+        flat_sky=100.0 * float((ls[:h // 3] < 1.0 / 255).mean()),
+        flat_gnd=100.0 * float((ls[h // 3:] < 1.0 / 255).mean()),
         hf=hf_ratio(prof, n),
         sat_mu=smu, sat_sd=ssd,
         chroma_sd=chroma_local_sd(rgb),
@@ -167,7 +177,7 @@ def analyze(path, lower=False):
 def gate_verdict(agg):
     """T1 게이트 판정. 반환: (통과여부, 항목별 문자열)."""
     out, ok_all = [], True
-    for k, (lo, hi) in GATE.items():
+    for k, (lo, hi) in list(GATE.items()) + list(GATE_GND.items()):
         v = agg.get(k)
         if v is None:
             continue
@@ -178,15 +188,15 @@ def gate_verdict(agg):
     return ok_all, out
 
 
-HDR = (f"{'group':<10} {'image':<38} {'slope':>7} {'grad_k':>8} {'flat%':>7} "
-       f"{'hf':>6} {'sat_mu':>7} {'sat_sd':>7} {'chr_sd':>7} {'ori0/90':>8}")
+HDR = (f"{'group':<10} {'image':<34} {'slope':>7} {'grad_k':>7} {'flat%':>7} "
+       f"{'sky%':>6} {'gnd%':>6} {'hf':>6} {'sat_mu':>7} {'chr_sd':>7} {'ori':>6}")
 
 
 def _row(gname, r):
-    return (f"{gname:<10} {r['name'][:38]:<38} {r['slope']:>7.2f} "
-            f"{r['grad_k']:>8.1f} {r['flat_pct']:>7.1f} {r['hf']:>6.3f} "
-            f"{r['sat_mu']:>7.3f} {r['sat_sd']:>7.3f} {r['chroma_sd']:>7.4f} "
-            f"{r['ori_axis']:>8.3f}")
+    return (f"{gname:<10} {r['name'][:34]:<34} {r['slope']:>7.2f} "
+            f"{r['grad_k']:>7.1f} {r['flat_pct']:>7.1f} {r['flat_sky']:>6.1f} "
+            f"{r['flat_gnd']:>6.1f} {r['hf']:>6.3f} {r['sat_mu']:>7.3f} "
+            f"{r['chroma_sd']:>7.4f} {r['ori_axis']:>6.3f}")
 
 
 def main(argv):
@@ -234,9 +244,10 @@ def main(argv):
     print(HDR.replace("image", "n    "))
     for gname, a in agg.items():
         cnt = f"({a['n']} imgs)"
-        print(f"{gname:<10} {cnt:<38} {a['slope']:>7.2f} {a['grad_k']:>8.1f} "
-              f"{a['flat_pct']:>7.1f} {a['hf']:>6.3f} {a['sat_mu']:>7.3f} "
-              f"{a['sat_sd']:>7.3f} {a['chroma_sd']:>7.4f} {a['ori_axis']:>8.3f}")
+        print(f"{gname:<10} {cnt:<34} {a['slope']:>7.2f} {a['grad_k']:>7.1f} "
+              f"{a['flat_pct']:>7.1f} {a['flat_sky']:>6.1f} {a['flat_gnd']:>6.1f} "
+              f"{a['hf']:>6.3f} {a['sat_mu']:>7.3f} {a['chroma_sd']:>7.4f} "
+              f"{a['ori_axis']:>6.3f}")
 
     print("\nT1 게이트 판정 [ZZ_synthesis §6]")
     for gname, a in agg.items():

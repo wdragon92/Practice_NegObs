@@ -1675,7 +1675,8 @@ def veg_available():
 
 
 def add_vegetation(stage, prim_path, usd_rel, pos_m, yaw_deg=0.0,
-                   target_h=None, native_h=None):
+                   target_h=None, native_h=None, tilt_deg=(0.0, 0.0),
+                   scale_mul=1.0):
     """식생 USD 를 reference 로 붙인다. cm→m 단위 변환 자동.
 
     target_h 지정 시 그 높이가 되도록 스케일한다 — 씬이 `trunk_h` 로 의도한
@@ -1692,12 +1693,24 @@ def add_vegetation(stage, prim_path, usd_rel, pos_m, yaw_deg=0.0,
                 / UsdGeom.GetStageMetersPerUnit(stage))
     except Exception:
         pass
+    # 참조는 **자식**에 붙인다. Debris 계열 USD 는 루트에 자체 xformOp
+    # (translate/rotateXYZ/scale)를 갖고 있어서, 참조를 붙인 프림에 다시
+    # AddTranslateOp 하면 "already exists in xformOpOrder" 로 죽는다.
+    # (Trees 계열은 루트 op 이 없어 우연히 통과했을 뿐이다.)
     xf = UsdGeom.Xform.Define(stage, prim_path)
-    xf.GetPrim().GetReferences().AddReference(asset)
+    UsdGeom.Xform.Define(stage, prim_path + "/Asset") \
+        .GetPrim().GetReferences().AddReference(asset)
     xf.AddTranslateOp().Set(Gf.Vec3d(*[float(v) for v in pos_m]))
     xf.AddRotateZOp().Set(float(yaw_deg))      # 순서 중요: T → R → S
+    # 경사면 추종·개체 기울기. 낙엽·잡석은 이게 없으면 비탈에서 공중에 뜬 채
+    # 수평으로 눕는다 — 산포물에는 yaw 만으로 부족하다.
+    tx, ty = (float(tilt_deg[0]), float(tilt_deg[1])) if tilt_deg else (0.0, 0.0)
+    if abs(tx) > 1e-6:
+        xf.AddRotateXOp().Set(tx)
+    if abs(ty) > 1e-6:
+        xf.AddRotateYOp().Set(ty)
     s = unit * ((float(target_h) / float(native_h))
-                if (target_h and native_h) else 1.0)
+                if (target_h and native_h) else 1.0) * float(scale_mul)
     xf.AddScaleOp().Set(Gf.Vec3f(s, s, s))
     return xf
 
@@ -1708,64 +1721,107 @@ def add_vegetation(stage, prim_path, usd_rel, pos_m, yaw_deg=0.0,
 # 사용자 지적: *"낙엽도 장판 깐 것처럼 만드는거에서 탈피시켜주고"*
 # 아스팔트·콘크리트는 평면이 옳지만, **입체물을 평면으로 때운 것**은 3D 여야 한다.
 # S3 `Assets/Vegetation/` 에 Debris 26 · Leaves 16 · Rocks 75 종이 있다.
+# (상대경로, 1개가 덮는 유효 면적[m²], 삼각형 수)
+#   유효면적은 추정이 아니라 **삼각형을 XY 로 투영해 래스터화한 실측**이다.
+#   sceneC2 의 기존 낙엽은 두께 6mm 납작 타원체 900개였는데 총 피복이
+#   **0.96 m² 뿐**이라, 화면에 보이는 낙엽은 사실상 전부 텍스처 무늬였다.
+#   → "장판" 의 정확한 원인. 피복을 개수가 아니라 면적으로 다뤄야 하는 이유.
 VEG_DEBRIS = [
-    ("Debris/fallcluster1.usd", 1.2),   # (상대경로, 대략 덮는 지름[m] — 조달 후 실측 반영)
-    ("Debris/fallcluster2.usd", 1.2),
-    ("Debris/maplefall1.usd", 1.0),
-    ("Debris/oakfall1.usd", 1.0),
-    ("Debris/oakfall2.usd", 1.0),
+    ("Debris/fallcluster1.usd", 0.0628, 9175),
+    ("Debris/fallcluster2.usd", 0.0242, 2980),
+    ("Debris/maplefall1.usd",   0.0051,  631),
+    ("Debris/oakfall1.usd",     0.0030,  496),
+    ("Debris/oakfall2.usd",     0.0030,  520),
+]
+
+# (상대경로, 대표 폭[m], **원점에서 바닥까지 깊이[m]**)
+#   Rocks 는 원점이 바위 *중심* 이라 지면 z 에 그대로 놓으면 절반이 묻힌다.
+#   z_min 만큼 띄워야 앉고, 일부러 묻을 때는 그만큼 덜 띄운다.
+VEG_ROCKS = [
+    ("Rocks/rock_small_01.usda", 0.314, 0.128),
+    ("Rocks/rock_small_08.usda", 0.196, 0.072),
+    ("Rocks/rock_small_09.usda", 0.164, 0.061),
+    ("Rocks/rock_small_10.usda", 0.128, 0.044),
+    ("Rocks/rock_small_15.usda", 0.238, 0.031),
 ]
 
 
-def scatter_debris(stage, prefix, x0, y0, x1, y1, z, density=0.35,
-                   pool=None, seed=1234, scale_jitter=(0.7, 1.3),
-                   edge_falloff=0.0, max_count=400):
-    """[사실화 v1] 영역에 3D 산포물을 뿌린다 — 낙엽·잔해·자갈.
+def scatter_debris(stage, prefix, x0, y0, x1, y1, z, cover=0.35,
+                   pool=None, seed=1234, scale_jitter=(0.75, 1.25),
+                   edge_bias=0.0, max_count=400, ground_fn=None,
+                   tilt_max=8.0, sink=0.0):
+    """[사실화 v1] 영역에 3D 산포물을 뿌린다 — 낙엽·잔해·자갈·바위.
 
-    density: 제곱미터당 개수. 낙엽 두껍게 = 0.6~1.0, 성기게 = 0.15~0.3.
-    edge_falloff: 가장자리로 갈수록 밀도를 낮출 폭[m] — 실제 낙엽은 바람에
-      쓸려 가장자리·구석에 몰리고 통행 동선은 비는데, 균일 산포는 그 반대라
-      오히려 부자연스럽다. 0 이면 균일.
-    seed 는 **반드시 결정적**(zlib.crc32 계열)이어야 한다 — 이 프로젝트는
-    RNG 100% 결정적이 원칙이다.
+    cover: **목표 지면 피복률 0~1** (개수가 아니다). 무작위 산포는 겹치므로
+      필요 개수는 n = A·(−ln(1−cover)) / (개당 유효면적) 으로 역산한다
+      (겹침을 무시하고 면적을 그냥 나누면 실제 피복이 목표보다 낮게 나온다).
+      개당 유효면적은 VEG_DEBRIS 에 실측해 넣어 두었다.
+    edge_bias: >0 이면 가장자리·구석으로 몰아준다[m]. 실제 낙엽은 바람에
+      쓸려 구석에 쌓이고 통행 동선은 비는데, 균일 산포는 그 반대라 오히려
+      부자연스럽다. 0 이면 균일.
+    ground_fn: (x,y)→z 콜백. 주면 각 개체를 지면에 앉히고 국소 기울기를
+      따라 눕힌다 — 없으면 비탈에서 공중에 뜬 채 수평으로 눕는다.
+    sink: 지면 아래로 내릴 깊이[m]. 바위 반매입용.
+    seed 는 **반드시 결정적**이어야 한다 — 이 프로젝트는 RNG 100% 결정적이 원칙.
 
     반환: 배치한 개수.
     """
     pool = pool or VEG_DEBRIS
-    avail = [(r, d) for r, d in pool
-             if os.path.isfile(os.path.join(VEG_DIR, r))]
+    avail = [p for p in pool
+             if os.path.isfile(os.path.join(VEG_DIR, p[0]))]
     if not avail:
         return 0
     rng = np.random.default_rng(int(seed) & 0x7FFFFFFF)
     w, h = abs(x1 - x0), abs(y1 - y0)
-    n = int(min(max_count, max(0, w * h * float(density))))
+    area = w * h
+    cover = max(0.0, min(0.97, float(cover)))
+    mean_cov = sum(float(p[1]) for p in avail) / len(avail)
+    if area <= 0 or mean_cov <= 0 or cover <= 0:
+        return 0
+    n = int(round(area * (-math.log(1.0 - cover)) / mean_cov))
+    if n > max_count:
+        print(f"[룩v1] 산포 상한: {prefix} 목표피복 {cover:.2f} → {n}개 필요, "
+              f"{max_count}개로 자름(실제 피복 "
+              f"{1.0 - math.exp(-max_count * mean_cov / area):.2f})")
+        n = max_count
     if n <= 0:
         return 0
+    xa, ya = min(x0, x1), min(y0, y1)
     placed = 0
     for i in range(n):
-        u, v = rng.random(), rng.random()
-        px = min(x0, x1) + u * w
-        py = min(y0, y1) + v * h
-        if edge_falloff > 1e-6:
-            # 가장자리 쪽에 더 몰리게 (통행 동선은 비고 구석에 쌓인다)
-            dx = min(px - min(x0, x1), max(x0, x1) - px)
-            dy = min(py - min(y0, y1), max(y0, y1) - py)
-            near = min(dx, dy) / max(edge_falloff, 1e-6)
-            if near > 1.0 and rng.random() > 0.35:
+        px = xa + rng.random() * w
+        py = ya + rng.random() * h
+        if edge_bias > 1e-6:
+            dx = min(px - xa, xa + w - px)
+            dy = min(py - ya, ya + h - py)
+            if min(dx, dy) > edge_bias and rng.random() > 0.35:
                 continue                    # 안쪽은 65% 확률로 건너뛴다
-        rel, _cov = avail[int(rng.integers(len(avail)))]
-        sc_ = float(rng.uniform(*scale_jitter))
+        rel, _cov = avail[int(rng.integers(len(avail)))][:2]
+        pz = float(z)
+        tilt = (0.0, 0.0)
+        if ground_fn is not None:
+            try:
+                d = 0.15
+                pz = float(ground_fn(px, py))
+                # 국소 기울기 → 개체를 비탈에 눕힌다
+                gx = (float(ground_fn(px + d, py)) - float(ground_fn(px - d, py))) / (2 * d)
+                gy = (float(ground_fn(px, py + d)) - float(ground_fn(px, py - d))) / (2 * d)
+                tilt = (math.degrees(math.atan(gy)), -math.degrees(math.atan(gx)))
+            except Exception:
+                pass
+        j = float(rng.uniform(-tilt_max, tilt_max))
+        tilt = (tilt[0] + j, tilt[1] + float(rng.uniform(-tilt_max, tilt_max)))
         try:
             if add_vegetation(stage, f"{prefix}/Deb_{i}", rel,
-                              (px, py, float(z)),
+                              (px, py, pz - float(sink)),
                               yaw_deg=float(rng.uniform(0, 360)),
-                              target_h=None, native_h=None) is not None:
-                from pxr import UsdGeom, Gf
-                xf = UsdGeom.Xformable(stage.GetPrimAtPath(f"{prefix}/Deb_{i}"))
-                for op in xf.GetOrderedXformOps():
-                    if op.GetOpType() == UsdGeom.XformOp.TypeScale:
-                        cur = op.Get()
-                        op.Set(Gf.Vec3f(cur[0] * sc_, cur[1] * sc_, cur[2] * sc_))
+                              tilt_deg=tilt,
+                              scale_mul=float(rng.uniform(*scale_jitter))) is not None:
+                # 산포물은 개수가 많아 인스턴싱이 필수 — 프로토타입 공유.
+                try:
+                    stage.GetPrimAtPath(f"{prefix}/Deb_{i}").SetInstanceable(True)
+                except Exception:
+                    pass
                 placed += 1
         except Exception as e:
             print(f"[룩v1][경고] 산포물 배치 실패 {prefix}/Deb_{i}: {e}")

@@ -212,3 +212,77 @@ USD→MDL→텍스처 3단 참조 해석 확인 완료.
 | `wc140_ccbysa40_a31fec_Sidewalk_and_Yeomgokdong_Guryongsa_BS_in_Yangjaedaero_Yeomgo.jpg` | CC BY-SA 4.0 | Jhcbs1019 | 2019-07-12 1… |
 | `wc144_kogltype1_2f9c2b_Jongno_Seoul_South_Korea_01.jpg` | KOGL Type 1 | KOREA TOURISM ORGANIZATION (한국관광공사) | 2016-06-18 |
 | `wc145_kogltype1_dfb314_Jongno_Seoul_South_Korea_02.jpg` | KOGL Type 1 | KOREA TOURISM ORGANIZATION (한국관광공사) | 2016-06-18 |
+
+## 식생·잔해 에셋 확장 — 낙엽·잡석·관목 USD (담당: 에셋 전수 조사·조달, 2026-07-28)
+
+조달 스크립트 `assets/download_vegetation.py` (카테고리별 `--only` 지원) ·
+저장 위치 `assets/vegetation/` · 감사 보고 `Docs/reports/asset_audit_v1.md`
+
+### 출처 및 라이선스
+
+위 "식생 에셋" 절과 **동일한 NVIDIA Omniverse S3 버킷 · 동일한 라이선스 판정**이다.
+즉 ML 학습 데이터 생성 ✅ / 렌더 이미지 공개 ✅ / **USD·텍스처 원본 재배포 ❌**.
+`.gitignore` 의 `assets/vegetation/` 규칙이 신규 `Debris/`·`Rocks/` 하위도
+그대로 커버함을 `git check-ignore` 로 확인했다.
+
+### 추가 조달 파일
+
+**낙엽 (`Debris/`) — 평면 텍스처 `leaf_ground` 를 대체하는 실제 잎 지오메트리**
+
+| 파일 | 크기 | 네이티브 치수 (X×Y×Z, m) | 삼각형 | 유효 피복 |
+|---|---|---|---|---|
+| `Debris/fallcluster1.usd` | 0.51 MB | 0.419 × 0.395 × 0.042 | 9,175 | 0.0628 m² (15.9개/m²) |
+| `Debris/fallcluster2.usd` | 0.18 MB | 0.241 × 0.266 × 0.042 | 2,980 | 0.0242 m² (41.4개/m²) |
+| `Debris/maplefall1.usd` | 0.05 MB | 0.103 × 0.172 × 0.023 | 631 | 0.0051 m² |
+| `Debris/oakfall1.usd` | 0.04 MB | 0.080 × 0.175 × 0.023 | 496 | 0.0030 m² |
+| `Debris/oakfall2.usd` | 0.04 MB | 0.094 × 0.190 × 0.018 | 582 | 0.0038 m² |
+| `Debris/materials/fallleaves.mdl` + 텍스처 3 | 66.4 MB | — | | 5종 공유 |
+
+**잡석 (`Rocks/`) — `_oriented_box` 랜덤 박스를 대체**
+
+| 파일 | 네이티브 치수 (m) | z최소 | 삼각형 |
+|---|---|---|---|
+| `Rocks/rock_small_01.usda` | 0.314 × 0.302 × 0.253 | −0.128 | 268 |
+| `Rocks/rock_small_15.usda` | 0.228 × 0.224 × 0.173 | −0.084 | 410 |
+| `Rocks/rock_small_08.usda` | 0.223 × 0.197 × 0.162 | −0.086 | 438 |
+| `Rocks/rock_small_10.usda` | 0.162 × 0.151 × 0.116 | −0.055 | 374 |
+| `Rocks/rock_small_09.usda` | 0.128 × 0.113 × 0.067 | −0.031 | 426 |
+| `Rocks/textures/*.jpg` (15) | | | basecolor/normal/orm |
+
+`Rocks/*.usda` 는 재질을 `@OmniPBR.mdl@` 로 **검색 경로 참조**한다(상대 경로 아님).
+Isaac 이 동봉하므로 MDL 조달 불요. 원점이 **바위 중심**이라 z최소가 음수다 —
+지면 배치 시 보정 필요.
+
+**관목 (`Shrub/`) — `build_hedge`(20씬)·`build_planter`(17씬) 대체**
+
+| 파일 | 국명 | 크기 | 네이티브 치수 (m) | 삼각형 |
+|---|---|---|---|---|
+| `Shrub/Privet.usd` | 쥐똥나무 | 19.6 MB | 1.704 × 1.638 × 1.113 | 147,380 |
+| `Shrub/Rhododendron.usd` | 철쭉 | 7.15 MB | 2.547 × 2.372 × 2.013 | 54,704 |
+| `Shrub/Juniper.usd` | 향나무 | 29.7 MB | 0.455 × 0.451 × 0.898 | 199,580 |
+| `Shrub/Burning_Bush.usd` | 화살나무 | 18.7 MB | 2.642 × 2.601 × 1.604 | 140,570 |
+| `Shrub/Forsythia.usd` | 개나리 | 53.7 MB | 3.539 × 3.650 × 2.317 | 403,841 |
+| `Shrub/materials/*.mdl` (4 신규) + 텍스처 8 | | 25.4 MB | | |
+| `Trees/materials/TreeBark_01.mdl` + 텍스처 3 | | 16.4 MB | | Rhododendron 줄기 |
+
+관목 5종 전부 줄기 재질로 **`../Trees/materials/`** 를 참조한다
+(Privet·Juniper·Burning_Bush·Forsythia → `bark3.mdl`, Rhododendron → `TreeBark_01.mdl`).
+디렉터리 구조를 평평하게 펼치면 깨진다 — 위 절의 경고가 그대로 적용된다.
+
+### 합계
+
+`assets/vegetation/` = USD 19개 포함 **353 MB**
+(Debris 67.3 · Rocks 1.9 · Shrub 172.0 · Trees 111.4 MB).
+전 파일 헤더 검증(`PXR-USDC`/`#usda`/`\x89PNG`/`\xff\xd8\xff`/`mdl `) 통과.
+USD→MDL→텍스처 3단 참조 **113개 전부 해석 성공, 미해결 0건**.
+
+### 조달하지 않은 것과 그 사유
+
+| 대상 | 사유 |
+|---|---|
+| `Leaves/` 5종 | `Debris/` 와 **동일 지오메트리**인데 `cluster_2.usd` 가 S3 에 없는 `./basecolor.jpg` 를 참조하고 normal/roughness 슬롯이 교차돼 있다 |
+| `Plant_Tropical/` 17종 | 야자·바나나·열대 양치·용설란 — 한국 노지 환경 부적합 (종별 사유는 감사 보고 §3-b) |
+| `Shrub/Century`·`Thevetia`·`Oleander`·`Acacia` | 사막 다육 / 열대 / 남부 한정 / 사바나 아카시아(한국 아까시나무와 다른 나무) |
+| `Trees/` 41종 | 이번 범위 밖. 추가 우선순위는 감사 보고 §3-d (1위 `Sycamore` 7.8 MB, 2위 `Chinese_Juniper` 3.7 MB — 둘 다 초경량인데 미보유) |
+
+---

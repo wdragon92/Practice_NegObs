@@ -20,10 +20,10 @@
    화면의 낙엽은 사실상 전부 ①, 즉 무늬다.
 3. S3 `Debris/` 5종은 **실제 잎 지오메트리**다. 조달 완료.
    fallcluster1 은 0.42 m 사방 덩어리이고 **1 m² 완전 피복에 15.9개**가 필요하다.
-4. 조달 완료: 낙엽 5 · 바위 5 · 관목 5(신규) = **USD 19개, 337 MB, 참조 미해결 0건**.
+4. 조달 완료: 낙엽 5 · 바위 5 · 관목 5(신규) = **USD 19개, 353 MB, 참조 미해결 0건**.
 5. `.gitignore` 는 `assets/vegetation/` 전체를 이미 제외하고 있어 **누락 없음**
    (신규 `Debris/`·`Rocks/` 도 커버됨을 `git check-ignore` 로 확인). 단, 주석의
-   용량 표기 "~128MB" 가 이제 337 MB 라 사실과 어긋난다 — **보고만 하고 수정 안 함**.
+   용량 표기 "~128MB" 가 이제 353 MB 라 사실과 어긋난다 — **보고만 하고 수정 안 함**.
 
 ---
 
@@ -305,7 +305,7 @@ sceneC2 낙엽 밴드가 대략 6 m² 이므로 완전피복은 ~880k 삼각형.
 **참조 113개 전부 해결, 미해결 0건.** `Rocks/*.usda` 의 `@OmniPBR.mdl@` 는
 검색경로 MDL(Isaac 동봉)이라 조달 대상이 아니다.
 
-`assets/vegetation/` 총 **337 MB** (Debris 65 · Rocks 1.9 · Shrub 165 · Trees 107).
+`assets/vegetation/` 총 **353 MB** (Debris 67.3 · Rocks 1.9 · Shrub 172.0 · Trees 111.4).
 
 ---
 
@@ -457,7 +457,7 @@ def hedge_shrubs(stage, prefix, x0, y0, x1, y1, h, base_z=0.0, seed=None):
 3. **바위 크기 상한 0.31 m** — scene12 의 1.10 m 대석은 대체 불가(군집으로 우회).
 4. **`sandstone` 역할이 어느 씬에서도 안 쓰인다**(refs=0). `sign_warn_fall` ·
    `sign_caution_step` · `sign_no_entry` 도 refs=0 — 생성해 놓고 미사용.
-5. **`.gitignore` 주석 용량 표기**가 "~128MB" 인데 실제 337 MB.
+5. **`.gitignore` 주석 용량 표기**가 "~128MB" 인데 실제 353 MB.
    (수정 권한 밖이라 보고만 함.)
 6. Plant_Tropical 은 부적합이지만 **Windmill_Palm 은 제주 씬을 만들 경우** 유일한
    현실적 후보다. 현 33씬에 제주 시나리오가 없어 이번엔 제외했다.

@@ -129,7 +129,9 @@ PARAMS = dict(
     leaf_scatter=dict(count=900, seed=2702,
                       scale=(0.038, 0.028, 0.006), jitter=(0.75, 1.30),  # r1: 팬케이크화 → 축소
                       x0=-4.20, x_pad=3.00, y_wide=3.60, y_band=1.70,
-                      band_frac=0.70, lift=0.006),
+                      band_frac=0.70, lift=0.006,
+                      # 실물 USD 산포(룩v1) — 근경 밴드만. cover 는 목표 피복률.
+                      cover=0.55, y_near=2.20, x_pad_near=1.50, max_count=900),
 
     # --- cue ---
     rail=dict(y=1.45, x_start=-1.60, rail_h=0.90, post_r=0.022,
@@ -541,6 +543,31 @@ def main():
         x_lo = ls["x0"]
         x_hi = RUN + ls["x_pad"]
         n = int(ls["count"])
+        x_hi_near = RUN + ls.get("x_pad_near", 1.5)
+
+        # [사실화 v1] 실제 낙엽 USD 산포.
+        #   기존 납작 타원체 900개는 **총 피복이 0.96 m² 뿐**이라(실측),
+        #   화면에 보이는 낙엽은 사실상 전부 leaf_ground 텍스처 무늬였다.
+        #   = 사용자가 지적한 "장판". 피복률로 지정하고 실제 지오메트리를 깐다.
+        if sc.LOOK_V1 and sc.veg_available():
+            # 하이브리드: 3D 낙엽은 **근경 밴드에만**. 전역을 실물로 덮으면
+            # 0.55 피복에 3,500개(약 3천만 삼각형)가 필요해 감당이 안 된다.
+            # 원경은 텍스처로 두고, 카메라가 실제로 낱장을 분해하는 구간만
+            # 실물로 바꾼다 — 에셋 감사 권고.
+            # 큰 군집(fallcluster)만 쓴다: 개당 피복이 낱장의 12~20배라
+            # 같은 프림 수로 훨씬 넓게 덮인다.
+            got = sc.scatter_debris(
+                stage, f"{ROOT}/Leaves",
+                x_lo, -ls["y_near"], x_hi_near, ls["y_near"], 0.0,
+                cover=ls.get("cover", 0.55), seed=ls["seed"],
+                pool=[p for p in sc.VEG_DEBRIS if "fallcluster" in p[0]],
+                ground_fn=lambda x, y: surface_z(x, y) + ls["lift"],
+                edge_bias=0.0, max_count=int(ls.get("max_count", 900)),
+                tilt_max=10.0)
+            if got:
+                print(f"[낙엽] 실물 USD 산포 {got}개 "
+                      f"(목표피복 {ls.get('cover', 0.55):.2f}, seed={ls['seed']})")
+                return
         for i in range(n):
             x = rng.uniform(x_lo, x_hi)
             if rng.random() < ls["band_frac"]:

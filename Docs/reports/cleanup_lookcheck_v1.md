@@ -281,3 +281,171 @@ time they have had to be reconstructed (`w2_tools_v1.md` §5-7 flags the same ri
    Verified: `git status --porcelain -uall` lists exactly those two paths under
    `look_check/` and still ignores every PNG, `manifest.json`, log and
    `spike_results.json` `[measured]`. No commit was made.
+
+---
+
+## §5 extension — grouping the experimental artefacts (2026-07-30, same session)
+
+Supervisor follow-up: *"group the experimental stuff together; more structure."* No
+deletion in this pass — **65 directories moved, 2 symlinks created, 0 bytes lost.**
+`look_check/` stays at 12 070 MB.
+
+### E1. Structure adopted
+
+```
+look_check/
+  <scene>/<round>/            judgement grids · corpus members · anchors · baselines-of-record
+  _experiments/
+    t0_spike/<round>/         T0 spike tree (incl. its conc* throughput arms)
+    spike_p1/<dir>/           P1 realism spikes + the sample-count / time-budget probe
+    diag/<dir>/               dead-pixel and per-scene diagnostics
+    gates/<scene>/<round>/    gate probes and zoom crops
+    twins/<scene>/<round>/    A/B twin arms
+  _t0_spike   -> _experiments/t0_spike               (symlink)
+  spike_probe -> _experiments/spike_p1/spike_probe   (symlink)
+  logs/, *.log, spike_results.json                   render journals, left at root
+```
+
+| location | entries | MB |
+|---|---:|---:|
+| `<scene>/` — judgement · corpus · anchors · baselines | 223 | 9 981 |
+| `_experiments/t0_spike/` | 17 | 1 204 |
+| `_experiments/twins/` | 27 | 435 |
+| `_experiments/spike_p1/` | 9 | 243 |
+| `_experiments/gates/` | 24 | 212 |
+| `_experiments/diag/` | 4 | 139 |
+| **total** | **304** | **12 214** |
+
+Per-scene experimental rounds keep a scene level (`_experiments/twins/scene19/t1_mtl_on_s2/`)
+because round names collide across scenes — `wininset_gate` exists in both `scene02` and
+`sceneN3`, `t1_crop` in four scenes. A flat `<topic>/<original-name>` would have silently
+overwritten them.
+
+The suggested `throughput` topic was **not** created as a separate directory. Its members
+are `_t0_spike/conc{1,2,3}` — and `t0_spike_report_v1.md` cites
+`look_check/_t0_spike/conc1` and `conc2` by path. Splitting them out of the `_t0_spike`
+tree would have broken those citations for a cosmetic gain, so throughput lives inside
+`_experiments/t0_spike/` (and `spike_budget`, the PT sample-count / time-budget probe,
+sits in `spike_p1/`). Recorded rather than silently re-scoped.
+
+### E2. Corpus protection — 0 corpus rounds moved
+
+The move manifest was cross-checked against the status field of every round before any
+`mv` ran. Any round tagged `corpus`, `anchor` or `baseline-of-record` was refused:
+the checker reported **`blocked (corpus/anchor/baseline — NOT moved): 0`** `[measured]` —
+i.e. the pattern-based move set never even proposed one. All `p2*`, `ctx*`, `r*_on`,
+`v6_rt`/`v7_rt`/`v8_rt`, `v7_pt`/`v8_pt`, `*_ptfast`/`*_ptlegacy`, `p2dark_*` and the P4
+near-field rounds stayed physically in place, so **no corpus command needed a symlink**.
+
+Judgement-grade W2 grids also stayed at the scene root — `w2_pilot` (scene13/15/N5),
+`sceneC2/w2c_g2`, `sceneN4/wall`, `scene05/facade`, `shrub`, `sceneD3/p0_base_pt` — while
+their arms (`w2_pilot_r1`, `w2_pilot_hoff`, `w2c_c2_g{on,off}`, `t1_mtl_*`) and every
+`*_crop` moved out.
+
+### E3. Symlinks — 2, both root-level
+
+| symlink | target | why load-bearing | resolves |
+|---|---|---|---|
+| `look_check/_t0_spike` | `_experiments/t0_spike` | `t1_material_layer_spec_v1.md` §7 cites `_t0_spike/c2_A_base/` as the A/B baseline convention; `t0_spike_report_v1.md` cites `_harness`, `c2_B_mdl`, `c2_C_lookv1`, `conc1`, `conc2`, `stats_*.json`, `rtx_settings.json` | **OK**, 34 entries; `c2_A_base/` = 30 PNG |
+| `look_check/spike_probe` | `_experiments/spike_p1/spike_probe` | `lighting_camera_variation_spec_v1.md` §513 reads `spike_probe/rtx_settings.json` | **OK**, `rtx_settings.json` present |
+
+`find look_check -xtype l` returns **nothing** — no broken symlink anywhere `[measured]`.
+
+One symlink covers the whole `_t0_spike/*` citation set, which is why moving the tree
+wholesale was preferred over flattening its rounds into the topic directory.
+
+**Symlinks are deliberately root-level only.** A symlink inside a scene folder carries a
+*fresh* mtime, so it would land first in `ls -t <scene>/*/` and immediately re-break the
+latest-round hygiene this pass just fixed (§E4). Past-evidence paths were therefore moved
+without symlinks; `INDEX.md` §6 carries the complete old→new relocation map.
+
+### E4. Proof — latest-round discovery now surfaces judgement rounds
+
+`ls -t <scene>/*/ | head -1`, before vs after. **12 of 33 scenes changed, all in the
+improving direction; 0 regressed** `[measured]`:
+
+| scene | was | now |
+|---|---|---|
+| `scene01`, `scene04`, `scene10` | `veg_test` (prop twin, 2–3 cuts) | **`r2_on`** |
+| `scene19` | `t1_mtl_on_nodetail` (material arm) | **`r2_on`** |
+| `scene02`, `sceneN3` | `wininset_crop` (2–5 cut crop) | **`r2_on`** |
+| `scene07`, `scene14`, `sceneC2` | `t1_crop` (1–4 cut crop) | **`r2_on`** / **`w2c_g2`** |
+| `scene13`, `scene15`, `sceneN5` | `w2c_c2_crop` (5–12 cut crop) | **`w2_pilot`** |
+
+The remaining 21 scenes already resolved to `r2_on` / `r2b_on` / `facade` / `wall` and are
+unchanged. This was a real hazard, not a cosmetic one: `w2c_c2_crop` is a 5-cut zoom set
+with no `manifest.json` geometry, so adopting it as a regression baseline would have
+compared a crop against a 13-cut grid and produced `MISSING` FAILs across the board.
+
+### E5. Proof — corpora still reproduce, byte-identically
+
+The §4 driver was run a third time, after the moves. Both diffs are empty `[measured]`:
+
+```
+diff corpus_before.json corpus_after_move.json   -> identical (pre-cleanup baseline)
+diff corpus_after.json  corpus_after_move.json   -> identical (post-delete run)
+```
+
+False-positive set 156 cuts **FAIL 0 · WARN 0** · history set 94 cuts
+**FAIL 1 · WARN 2** · both T3 pairs **quiet** · the same three firings (scene18 spec 67.6,
+scene17 10.2, scene19 11.1) with identical values. Three runs, one number.
+
+### E6. Stray experimental scene files — none found
+
+`scenes/` and the repo root were scanned for untracked experimental scene files
+(`_t0_*.py`, `veg_test*`, spike copies, `*.bak`, `*.orig`, `*_copy*`) `[measured]`:
+
+- **`scenes/` is entirely tracked.** All 21 `scenes/main/scene*.py` and 12
+  `scenes/batch1/scene*.py` are in `git ls-files`; `assets`, `look_check`,
+  `scene_common.py` and the four `*_kit.py` entries are **tracked symlinks** to the repo
+  root (created by `scripts/reorg_scenes_main.sh`) and resolve correctly. Nothing untracked.
+- `scenes/archive_v3/` — 7 tracked v3 scene files, already segregated. **Not touched.**
+- `scripts/spike_realism.py` matched the `spike*` pattern but is **tracked** and is the
+  live driver for `scripts/rounds/run_p1_spike.sh` — a tool, not debris. Left alone.
+- **No `scenes/_experiments/` was created**, because there was nothing to put in it.
+- The only untracked non-`look_check` files in the repo are five
+  `Docs/reports/w2d_edit_g{1,2,3,b}.md` / `w2d_translation.md` — W2-D reports from another
+  session, not experimental scene files. **Not touched**, flagged here for the supervisor.
+
+Note that `scenes/main/look_check` and `scenes/batch1/look_check` are symlinks to the same
+`look_check/`, so the new structure is visible identically through all three paths.
+
+### E7. Docs updated
+
+- **`look_check/README.md`** — new §1 *Structure* (layout diagram, the scene-root-vs-
+  `_experiments` rule, the "do not render gates/crops into the scene root" rule, and the
+  symlink policy with its two constraints); §2 naming examples now show arms going
+  straight into `_experiments/`; the legacy decoder gained relocation columns.
+- **`look_check/INDEX.md`** — rebuilt: §0 layout + rules, §1 location rollup, §2 era
+  rollup, §3 the 223 scene rounds **with a `location` column**, §4 the 81 `_experiments`
+  entries by topic, §5 the before/after latest-round table, §6 the full old→new
+  **relocation map** for every path cited by a pre-07-30 report.
+
+### E8. Incidental find — two pre-existing broken symlinks, fixed
+
+A repo-wide `find . -xtype l` (run to verify E3) turned up two dangling symlinks that
+**predate this mission** (both stamped 2026-07-27 17:06, both tracked in git) `[measured]`:
+
+| symlink | was | now |
+|---|---|---|
+| `Docs/legacy/multi_scene_brief_v3.md` | `briefs/multi_scene_brief_v3.md` (dangling) | `../briefs/multi_scene_brief_v3.md` |
+| `Docs/legacy/realism_rubric_v1.md` | `reports/realism_rubric_v1.md` (dangling) | `../reports/realism_rubric_v1.md` |
+
+Both were missing the `../` hop out of `Docs/legacy/`; the real files were always present
+at `Docs/briefs/` and `Docs/reports/`. Fixed with `ln -sfn`; both now resolve
+(71 and 262 lines). **`find . -xtype l` over the whole repo now returns 0** — the two
+symlinks created in E3 are the only ones added by this mission and both resolve.
+
+### E9. Note on git state
+
+Between the two passes of this session a **concurrent session committed pass 1** as
+`0f4fced` ("look_check 정리 — 5.33GB 확보…"). `look_check/README.md` and `INDEX.md` are
+therefore now tracked (the `.gitignore` negation of §5-7 is what made that possible), and
+this pass leaves them as unstaged modifications. **This mission made no commit**, as
+instructed. Remaining unstaged/untracked, for the supervisor:
+
+- ` M look_check/README.md`, ` M look_check/INDEX.md` — this pass's rewrites
+- ` M Docs/legacy/{multi_scene_brief_v3,realism_rubric_v1}.md` — the symlink fixes (E8)
+- ` M Docs/reports/cleanup_lookcheck_v1.md` — this extension
+- `?? Docs/reports/w2d_edit_g{1,2,3,b}.md`, `?? Docs/reports/w2d_translation.md` — another
+  session's W2-D reports, untouched

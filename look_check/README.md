@@ -5,13 +5,70 @@
 carrying per-view `eye`/`tgt` and the render mode. Every tool in `scripts/` reads only
 those two things — no GPU, no Isaac.
 
-This directory is **gitignored** (see `.gitignore`, "Render outputs"). `INDEX.md` is
-therefore the only committed record of what actually exists on the render machine.
-Regenerate it whenever rounds are added or removed.
+This directory is **gitignored** (see `.gitignore`, "Render outputs") except for this file
+and `INDEX.md`. `INDEX.md` is therefore the only committed record of what actually exists
+on the render machine. Regenerate it whenever rounds are added, moved or removed.
 
 ---
 
-## 1. Naming convention for **new** rounds
+## 1. Structure
+
+```
+look_check/
+  <scene>/<round>/            judgement grids, corpus members, anchors, baselines-of-record
+  _experiments/
+    t0_spike/<round>/         T0 spike tree (incl. its conc* throughput arms)
+    spike_p1/<dir>/           P1 realism spikes + the sample-count / time-budget probe
+    diag/<dir>/               dead-pixel and per-scene diagnostics
+    gates/<scene>/<round>/    gate probes and zoom crops
+    twins/<scene>/<round>/    A/B twin arms
+  _t0_spike   -> _experiments/t0_spike               (symlink, load-bearing)
+  spike_probe -> _experiments/spike_p1/spike_probe   (symlink, spec-cited)
+  logs/, *.log, spike_results.json                   render journals, left at root
+```
+
+**The rule that decides where a round goes.** A round sits at the **scene root** if and
+only if it is one of:
+
+- a **judgement grid** (the full preset grid a supervisor verdict was read from),
+- a **corpus member** (§3 below),
+- a **published measurement anchor**, or
+- the scene's **baseline-of-record** (what the next regression run compares against).
+
+Everything else — zoom crops, gate probes, single-flag A/B arms, spikes, diagnostics —
+goes under `_experiments/<topic>/`. Per-scene experimental rounds keep their scene folder
+(`_experiments/twins/scene19/t1_mtl_on_s2/`) so that identically named rounds in different
+scenes cannot collide.
+
+**Why this matters more than tidiness.** `ls -t <scene>/*/ | head -1` is how "the latest
+round" gets found by eye and by script. Before the grouping that returned a *crop* for
+scene02/07/13/14/15/N3/N5/C2 and a *veg_test twin* for scene01/04/10/19 — i.e. picking any
+of those as a regression baseline would have compared a 2-cut zoom against a 13-cut grid.
+After the grouping every scene's latest is a judgement round. Keep it that way: **do not
+render a new gate/crop/twin into the scene root.**
+
+### Symlink policy
+
+Symlinks exist **only** for paths a *future* consumer resolves, and **only at root level**:
+
+| symlink | why |
+|---|---|
+| `_t0_spike/` → `_experiments/t0_spike/` | `t1_material_layer_spec_v1.md` §7 cites `_t0_spike/c2_A_base/` as the A/B baseline convention |
+| `spike_probe/` → `_experiments/spike_p1/spike_probe/` | `lighting_camera_variation_spec_v1.md` §513 reads `spike_probe/rtx_settings.json` |
+
+Two constraints follow, and both are deliberate:
+
+1. **Never put a symlink inside a scene folder.** A symlink carries a fresh mtime, so it
+   would immediately re-break the latest-round discovery this structure just fixed.
+2. **Corpus members are never symlinked** — they are never moved in the first place. The
+   corpus commands in `w2_tools_v1.md` §6 must keep resolving to real directories.
+
+Paths that were only *past* evidence were moved without a symlink; `INDEX.md` §6 carries
+the full old-path → new-path relocation map.
+
+---
+
+## 2. Naming convention for **new** rounds
 
 ```
 <yymmdd>_<wave>_<purpose>
@@ -24,11 +81,14 @@ Regenerate it whenever rounds are added or removed.
 | `purpose` | what the round is *for*, lowercase, `_`-joined, no version numbers | `judge`, `hoff`, `gate`, `base`, `crop` |
 
 ```
-look_check/scene13/260730_w2d_judge      # the W2-D judgement grid
-look_check/scene13/260730_w2d_hoff       # same build, ground-kit height off  (A/B twin)
-look_check/scene19/260730_t1ab_scene19   # t1 material A/B for scene19
-look_check/sceneC2/260730_w2d_crop       # zoom crops of the above, not a full grid
+look_check/scene13/260730_w2d_judge                        # the W2-D judgement grid  -> scene root
+look_check/_experiments/twins/scene13/260730_w2d_hoff      # same build, ground-kit height off (A/B arm)
+look_check/_experiments/twins/scene19/260730_t1ab_s2       # t1 material A/B arm
+look_check/_experiments/gates/sceneC2/260730_w2d_crop      # zoom crops, not a full grid
 ```
+
+The judgement grid goes to the scene root; **its arms and crops go straight into
+`_experiments/`** — do not render them into the scene root and move them later.
 
 **Twins must differ only in the trailing token** (`..._gon` / `..._goff`,
 `..._on` / `..._off`, `..._a` / `..._b`). `scripts/regression_check.py --before/--after`
@@ -40,11 +100,12 @@ mess. The date already orders the rounds, and the purpose already says what chan
 
 A crop-only round (a handful of zoomed PNGs rather than the full grid) gets the
 `_crop` suffix so that `INDEX.md` and the corpus drivers can skip it: it has no
-`manifest.json` geometry and cannot be regression-checked.
+`manifest.json` geometry and cannot be regression-checked. It belongs under
+`_experiments/gates/<scene>/`.
 
 ---
 
-## 2. Why the old names stay
+## 3. Why the old names stay
 
 The pre-2026-07-30 rounds keep their historical names — `final_pt`, `r1…r5`,
 `r1_on`/`r2_on`, `v5_rt`…`v8_pt`, `ctx1`/`ctx2`, `p2*`, `t1_*`, `w2*`. They are **not**
@@ -61,7 +122,7 @@ renamed, and must not be, because those exact strings are load-bearing in three 
 3. **Committed report evidence.** `Docs/audit_v4/judge_*.md`, `Docs/reports/*.md` cite
    round paths as the frames a verdict was read from.
 
-So: **old names are frozen, new names follow §1.** `INDEX.md` maps every surviving old
+So: **old names are frozen, new names follow §2.** `INDEX.md` maps every surviving old
 name onto its era, kind and role, which is what the old names fail to say by themselves.
 
 ### Legacy name decoder
@@ -78,13 +139,15 @@ name onto its era, kind and role, which is what the old names fail to say by the
 | `p2g*`, `p2rf_*`, `p2mat_*`, `p2c_*`, `p2ctrl_*`, `p2det_*` | 07-28 | look-layer A/B toggles — **look A/B corpus** |
 | `p2dark_*`, `*_ptfast`, `*_ptlegacy` | 07-28 | render-mode / PT-sample twins — **mode-swap corpus** |
 | `balust`, `leaf3d`, `handrail`, `fix1`, `shrub`, `facade`, `planterfix`, `wall` | 07-28/29 | named near-field fix rounds — **P4 near-field corpus** |
-| `t1_mtl_*`, `t1_crop` | 07-29 | W2 t1 material-layer twins |
-| `w2_pilot*`, `w2c_*`, `wininset_*` | 07-29 | W2 ground pilot / merge / gate rounds |
-| `_t0_spike/*`, `spike_*`, `diag_*` | 07-28/29 | throwaway experiment and diagnosis grids |
+| `t1_mtl_*`, `t1_crop` | 07-29 | W2 t1 material-layer twins — now under `_experiments/{twins,gates}/` |
+| `w2_pilot`, `w2c_g2` | 07-29 | W2 judgement grids — **scene root** |
+| `w2_pilot_{r1,hoff,crop}`, `w2c_c2_*`, `wininset_*`, `*_crop` | 07-29 | W2 arms / gate probes / crops — `_experiments/{twins,gates}/` |
+| `_t0_spike/*`, `spike_*`, `diag_*` | 07-28/29 | throwaway experiment and diagnosis grids — `_experiments/{t0_spike,spike_p1,diag}/` |
+| `veg_test`, `planterfix` | 07-28 | one-off prop checks — `_experiments/twins/` |
 
 ---
 
-## 3. Standing commands
+## 4. Standing commands
 
 ```bash
 cd /home/vislab/Desktop/work_sy/Practice_NegObs
@@ -96,7 +159,7 @@ python3 scripts/regression_check.py --scenes 'look_check/scene*' \
 
 # single A/B twin
 python3 scripts/regression_check.py \
-  --before look_check/scene13/260730_w2d_hoff \
+  --before look_check/_experiments/twins/scene13/260730_w2d_hoff \
   --after  look_check/scene13/260730_w2d_judge
 ```
 

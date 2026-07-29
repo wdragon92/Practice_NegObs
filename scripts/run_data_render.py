@@ -205,12 +205,22 @@ def drive(args):
     tot = time.time() - t_all
     n_cut = sum(v.get("cuts", 0) for v in mf["scenes"].values())
     mf["finished"] = datetime.datetime.now().isoformat(timespec="seconds")
-    mf["total_sec"] = round(tot, 1)
     mf["total_cuts"] = n_cut
-    mf["measured_t_cut"] = round(tot / n_cut, 3) if n_cut else None
+    # Per-INVOCATION, and named so. A resumed run's wall time divided by the
+    # cumulative cut count is a meaningless number (the first resume of this
+    # round produced "0.703 s/cut" for a 51 s pass over 8 new cuts); the honest
+    # per-cut figures are the per-scene ones, which the checker reports.
+    mf.setdefault("invocations", []).append(dict(
+        finished=mf["finished"], sec=round(tot, 1),
+        scenes=[s for s in scenes if s in mf["scenes"]],
+        cuts_after=n_cut))
+    mf["total_sec"] = round(sum(i["sec"] for i in mf["invocations"]), 1)
+    mf["t_cut_per_scene"] = {k: v.get("sec_per_cut")
+                             for k, v in mf["scenes"].items()}
     _save_manifest(manifest_path, mf)
-    print(f"\n=== {run}: {n_cut} cuts in {tot / 60:.1f} min "
-          f"(t_cut {mf['measured_t_cut']} s vs SP-3's {vk.T_CUT_DATA} s) ===")
+    print(f"\n=== {run}: {n_cut} cuts total, this pass {tot / 60:.1f} min · "
+          f"per-scene s/cut {mf['t_cut_per_scene']} "
+          f"vs SP-3's {vk.T_CUT_DATA} s ===")
     return 0
 
 

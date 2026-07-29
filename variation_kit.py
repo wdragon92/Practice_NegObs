@@ -476,9 +476,17 @@ def condition_allowed(scene, cond_id, role=ROLE_DATA):
     """(ok, reason). Refuses loudly rather than silently substituting."""
     c = CONDITIONS[cond_id]
     L = ledger(scene)
-    if L["az_free"] or c["sunless"]:
-        # Azimuth is meaningless (sealed indoor / sunless profile), so the
+    if L["az_free"]:
+        # Azimuth has NO measured effect on these three scenes (sceneD4 is the
+        # proof case: |Dmean| <= 0.22 LSB across the whole +-35 range), so the
         # ledger cannot exclude anything. Season still can.
+        #
+        # A "sunless" CONDITION does not earn the same bypass, and assuming it did
+        # was a bug this round's validator caught: spec §4.6 puts a widened 4 deg
+        # soft direct back at the readability floor, so an overcast condition still
+        # casts - soft - shadows, and rotating the dome still moves them. On
+        # sceneN1, whose LABEL is the shadow band, the wide draw put |Dz| up to
+        # 34 deg on a scene whose allowance is 0.
         pass
     else:
         allow = daz_allow(scene, cond_id, role)
@@ -508,10 +516,11 @@ def sample_daz(scene, cond_id, idx, base_seed, role=ROLE_DATA):
     """
     c = CONDITIONS[cond_id]
     L = ledger(scene)
-    if L["az_free"] or c["sunless"]:
-        # Azimuth has no physical consequence here, but the dome still rotates,
-        # so keep the draw wide - it varies the reflected sky on wet/indoor
-        # surfaces for free.
+    if L["az_free"]:
+        # Azimuth has no measured consequence on these scenes, but the dome still
+        # rotates, so keep the draw wide - it varies the sky reflected in wet or
+        # indoor surfaces for free. Sunless conditions are NOT bypassed here; see
+        # `condition_allowed`.
         lo, hi = -DAZ_SAMPLER_MAX, DAZ_SAMPLER_MAX
     else:
         allow = daz_allow(scene, cond_id, role)
@@ -1008,6 +1017,16 @@ def _selfcheck():
         f"|Dz| {min(abs(x) for x in dz5):.1f}-{max(abs(x) for x in dz5):.1f}")
     dzN = [sample_daz("sceneN1", "L0", i, 7) for i in range(50)]
     chk("sceneN1 L0 pinned to 0", all(x == 0.0 for x in dzN))
+    # Regression: a sunless condition must NOT unlock the azimuth on a
+    # label-shadow scene. The §4.6 readability floor leaves a visible soft sun,
+    # so overcast still casts (soft) shadows.
+    dzN7 = [sample_daz("sceneN1", "L7", i, 7) for i in range(50)]
+    chk("sceneN1 L7 pinned to 0 too (sunless is not azimuth-free)",
+        all(x == 0.0 for x in dzN7),
+        f"max |Dz| {max(abs(x) for x in dzN7):.1f}")
+    dzD4 = [sample_daz("sceneD4", "L0", i, 7) for i in range(50)]
+    chk("sceneD4 (measured azimuth-free) still draws the full range",
+        max(abs(x) for x in dzD4) > 20.0)
 
     print("\n[6] camera sampler")
     n = 4000

@@ -192,7 +192,83 @@ LOOK_GEO = os.environ.get("NEGOBS_LOOK_GEO", "1" if LOOK_V1 else "0") == "1"
 MDL_GROUND = os.path.join(ASSETS_DIR, "NegObsGround.mdl")
 
 # 디테일 노멀(근접 텍셀 뭉개짐 완화) 공용 소스 — 미세 그레인용 범용 맵.
+# **레거시**: Phase1 E3 가 OmniPBR 분기에만 걸어 둔 단일 맵. `concrete_wall_nor_dx`
+# 는 T1 §1.2 가 "디테일이 아니다"(macro 4.1 % · slope −0.71 = 저주파 벽면 요철)로
+# 판정한 소스이며, 아래 `_DETAIL_MAP` 이 그 자리를 대체한다. 절차 생성 맵 3장이
+# 모두 없을 때의 최후 폴백으로만 남긴다.
 _DETAIL_NOR = os.path.join(S1_DIR, "concrete_wall_nor_dx.jpg")
+
+# ===========================================================================
+# [1c] `[W2-C]` T1 §1.6(b) — 디테일 노멀을 **3단 재질 정책 양쪽**에 건다
+# ===========================================================================
+# 결손 ①(T1 §1.1)의 실체: 디테일 노멀이 `LOOK_CLASS` 에 `detail=True` 로 **설정만**
+# 돼 있고, 코드 경로는 OmniPBR 분기 한 곳뿐이었다. h0.3 프레임의 하단 2/3 을
+# 실제로 채우는 표면은 전부 `mdl="ground"`(NegObsGround) 계열이라 —
+# **지면 10 클래스에는 디테일 노멀이 한 번도 걸린 적이 없다.**
+# W2-A5 가 MDL v1.9.0 에 입력 4개를 뚫어 놨고(전부 불활성 기본값), 배선은
+# 아무 에이전트도 하지 않은 채 남아 있었다 [실측 — w2_materials_v1.md §0 "Nothing
+# was wired", w2_surgeon_v1.md 미언급]. 여기서 배선한다.
+#
+# 값은 §1.6(b) 표 그대로: (파일, bump, 1/타일[1/m]).
+_DETAIL_MAP = {
+    "mineral":  ("detail_grain_mineral_nor.png",  0.85, 12.5),  # 포장·콘크리트·석재·연석·노징
+    "granular": ("detail_grain_granular_nor.png", 0.70,  8.0),  # 흙·자갈·아스팔트·눈
+    "metal":    ("detail_grain_brushed_nor.png",  0.55, 25.0),  # 금속(이방 스크래치)
+}
+# 절차 생성 실패·미조달 시 — 저장소 보유분(조달 0). §3.2 가 두 계열 합격 확인.
+_DETAIL_FALLBACK = {
+    "mineral":  ("scene01/plaster_nor_dx.jpg", 0.85, 12.5),   # macro 3.9 · slope −0.89 · RMS 0.159
+    "granular": ("scene01/asphalt_nor_dx.jpg", 0.70,  8.0),   # macro 3.2 · slope −0.66 · RMS 0.294
+    "metal":    (None, 0.0, 0.0),                             # 보유분 전멸(§3.2)
+}
+# 클래스 → 계열. **여기 없는 클래스는 디테일 금지**가 명시적 처방이다:
+#   veg·water·glass·paint·sign·misc = 도색·사인은 균일해야 단서로 기능한다(v5.1 §4)
+#   wood = 결이 방향성이라 등방 그레인을 얹으면 오히려 결을 지운다(§1.6(b))
+_DETAIL_FAMILY = {"paving": "mineral", "concrete": "mineral", "brick": "mineral",
+                  "stone": "mineral", "curb": "mineral", "nosing": "mineral",
+                  "soil": "granular", "gravel": "granular", "asphalt": "granular",
+                  "snow": "granular", "metal": "metal"}
+
+# A/B 스윕 노브 — 렌더 라운드가 코드 수정 없이 팔을 바꿀 수 있어야 한다.
+#   `NEGOBS_DETAIL_SCALE`      : `detail_texture_scale` 전역 오버라이드 [1/m].
+#       근거 = w2_materials_v1.md §7 R1 — 사양 기본값 12.5(= 8 cm 타일)에서는
+#       텍셀이 0.078 mm 라 h0.3 d2 에서 **서브픽셀**(유효 미세경사 0.49°, §1.2 가
+#       "안 보인다"고 판정한 1.4°보다 아래). 2~4 로 낮추면 지배 대역이 0.5~3 mm
+#       (실제 콘크리트 골재 크기)로 올라온다.
+#   `NEGOBS_DETAIL_ROUGH_GAIN` : `detail_rough_gain`. 서브픽셀 미세구조를
+#       roughness 분산으로 전달하는 물리적으로 옳은 경로(§7 R1 (a) · MDL S5).
+def _envf(name, default=0.0):
+    try:
+        return float(os.environ.get(name, "") or default)
+    except ValueError:
+        return float(default)
+
+
+DETAIL_SCALE_OVERRIDE = _envf("NEGOBS_DETAIL_SCALE", 0.0)   # 0 = 표 값 사용
+DETAIL_ROUGH_GAIN = _envf("NEGOBS_DETAIL_ROUGH_GAIN", 0.0)  # 0 = 끔(MDL 기본)
+
+
+def detail_source(cls):
+    """클래스명 → `(절대경로, bump, 1/타일)`. 디테일 금지 클래스는 `(None, 0, 0)`.
+
+    1순위 절차 생성(§3.3) → 폴백 저장소 보유분(§3.2) → 없으면 무영향.
+    파일 부재 시 **조용히 생략**한다(§1.6(b) 주석 원문) — 배선 실패가 렌더를
+    죽이면 안 되고, 동시에 없는 파일을 바인딩하면 MDL 이 조기 반환이라 어차피
+    무영향이지만 USD 에 유령 경로가 남는다.
+    """
+    fam = _DETAIL_FAMILY.get(cls)
+    if fam is None:
+        return (None, 0.0, 0.0)
+    rel, bump, inv = _DETAIL_MAP.get(fam, (None, 0.0, 0.0))
+    p = os.path.join(ASSETS_DIR, rel) if rel else None
+    if not (p and os.path.isfile(p)):
+        rel, bump, inv = _DETAIL_FALLBACK.get(fam, (None, 0.0, 0.0))
+        p = os.path.join(ASSETS_DIR, rel) if rel else None
+        if not (p and os.path.isfile(p)):
+            return (None, 0.0, 0.0)
+    if DETAIL_SCALE_OVERRIDE > 0.0:
+        inv = DETAIL_SCALE_OVERRIDE
+    return (p, float(bump), float(inv))
 
 # OmniPBR(큐빅 투영) ↔ NegObsGround(트라이플래너) 의 texture_scale 의미 차이 보정.
 # 틀리면 **전 지면의 타일 스케일이 어긋나는 전역 회귀**가 되므로 추정 금지 —
@@ -1026,8 +1102,10 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
     from pxr import UsdShade, Sdf, Gf
 
     _look_omni = None
+    _look_cls = None
     if LOOK_MTL and not uv_mode and emission_color is None:
         cls, spec = _look_spec(path)
+        _look_cls = cls
         LOOK_STATS["roles"][cls] = LOOK_STATS["roles"].get(cls, 0) + 1
         if diff is not None and spec["mdl"] == "ground":
             LOOK_STATS["ground"] += 1
@@ -1035,7 +1113,7 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
                                     spec, tint=tint,
                                     roughness_const=roughness_const,
                                     specular_level=specular_level, bump=bump,
-                                    unit_cell=unit_cell)
+                                    unit_cell=unit_cell, cls=cls)
         # [사실화 v1] **상수색 재질도 MDL 로 태운다.**
         # 33씬 make_pbr 호출의 절반 이상이 diffuse_color 상수색인데, 상수색은
         # 정의상 완전 평탄이라 flat% 의 최대 발생원이다. 텍스처를 새로 조달하지
@@ -1058,14 +1136,14 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
                     specular_level=(specular_level if specular_level is not None
                                     else spec.get("spec")),
                     bump=spec.get("bump", 1.0), base_color=pbc,
-                    unit_cell=unit_cell)
+                    unit_cell=unit_cell, cls=cls)
             LOOK_STATS["const_mdl"] = LOOK_STATS.get("const_mdl", 0) + 1
             return _make_ground_pbr(stage, path, None, None, None, scale_m,
                                     spec, tint=tint,
                                     roughness_const=roughness_const,
                                     specular_level=specular_level, bump=bump,
                                     base_color=diffuse_color,
-                                    unit_cell=unit_cell)
+                                    unit_cell=unit_cell, cls=cls)
         # 텍스처 재질 → 베벨 + 디테일 노멀.
         # **상수색 재질도 베벨은 받는다** — 게이트 1차에서 상수색을 통째로
         # 건너뛰고 있었고, 상수색이야말로 flat% 의 주범이다. 텍스처화는 별도
@@ -1138,13 +1216,18 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
             sh.CreateInput("round_edges_roundness", F).Set(1.0)
             sh.CreateInput("round_edges_across_materials", B).Set(False)
         # 디테일 노멀 — 근접 텍셀 뭉개짐 완화(Phase1 E3)
-        if (_look_omni.get("detail") and diff is not None
-                and os.path.isfile(_DETAIL_NOR)):
-            LOOK_STATS["detail"] += 1
-            _tex("detail_normalmap_texture", _DETAIL_NOR, "raw")
-            sh.CreateInput("detail_bump_factor", F).Set(0.45)
-            ds = 1.0 / 0.08                    # 8 cm 주기 미세 그레인
-            sh.CreateInput("detail_texture_scale", F2).Set(Gf.Vec2f(ds, ds))
+        # [W2-C · T1 §1.6(b)] 단일 `_DETAIL_NOR` → **역할 계열별 표**.
+        # 구판은 전 클래스에 `concrete_wall_nor_dx`(§1.2 판정: 디테일 아님) 를
+        # 걸었다. 표에 없는 클래스(veg·water·glass·paint·sign·misc·wood)는
+        # 이제 **의도적으로** 디테일을 받지 않는다.
+        if _look_omni.get("detail") and diff is not None:
+            _dp, _db, _di = detail_source(_look_cls)
+            if _dp is not None:
+                LOOK_STATS["detail"] += 1
+                _tex("detail_normalmap_texture", _dp, "raw")
+                sh.CreateInput("detail_bump_factor", F).Set(float(_db))
+                sh.CreateInput("detail_texture_scale",
+                               F2).Set(Gf.Vec2f(_di, _di))
 
     for out in ("surface", "displacement", "volume"):
         mtl.CreateOutput(f"mdl:{out}",
@@ -1215,7 +1298,7 @@ def _vec2(a, b):
 def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
                      tint=None, roughness_const=None, specular_level=None,
                      bump=1.0, base_color=None, metallic=0.0,
-                     unit_cell=None):
+                     unit_cell=None, cls=None):
     """[사실화 v1] NegObsGround.mdl 재질 — 지면·사면 계열 전용.
 
     OmniPBR 의 `project_uvw` 는 트라이플래너가 아니라 **큐빅 투영**이라 경사면에서
@@ -1313,6 +1396,25 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
         sh.CreateInput("round_edges_radius", F).Set(float(spec["bevel"]))
         sh.CreateInput("round_edges_roundness", F).Set(1.0)
         sh.CreateInput("round_edges_across_materials", B).Set(False)
+    # ── [W2-C · T1 §1.1 결손 ① 해소] 디테일 노멀을 **지면 분기에도** 건다 ──
+    # 이 6줄이 T1 §1.6(b) 가 "defect ①의 요체"라고 지목한 배선이다. MDL v1.9.0 은
+    # 입력을 뚫어 놨을 뿐 어떤 호출자도 바인딩하지 않아, 지면 10 클래스는
+    # v1.8.0 과 픽셀 동일하게 렌더되고 있었다 `[실측 — round_stamp "detail_wired:
+    # false" · 렌더 로그 "디테일=0"]`.
+    #   · `detail_texture_scale` 은 MDL 에서 **float**(OmniPBR 는 float2) — 타입을
+    #     틀리면 조용히 무시된다.
+    #   · `detail_rough_gain` 은 기본 0(끔). §7 R1 이 제안한 "서브픽셀 미세구조를
+    #     roughness 분산으로 전달" 경로이며 A/B 노브로만 켠다.
+    if spec.get("detail"):
+        _dp, _db, _di = detail_source(cls)
+        if _dp is not None:
+            _tex("detail_normalmap_texture", _dp, "raw")
+            sh.CreateInput("detail_bump_factor", F).Set(float(_db))
+            sh.CreateInput("detail_texture_scale", F).Set(float(_di))
+            if DETAIL_ROUGH_GAIN != 0.0:
+                sh.CreateInput("detail_rough_gain",
+                               F).Set(float(DETAIL_ROUGH_GAIN))
+            LOOK_STATS["detail"] += 1
     _wire_unit_cell(sh, F, F2, unit_cell)
     # tint 는 위에서 base_color 에 접어 넣었다(아래 참조).
     for out in ("surface", "displacement", "volume"):

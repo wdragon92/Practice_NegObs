@@ -1,43 +1,44 @@
 # -*- coding: utf-8 -*-
 """
-sceneC1_snow_stairs.py — NegObs 인공씬 26호: 눈 덮인 계단 (Isaac Sim 4.5)
+sceneC1_snow_stairs.py - NegObs synthetic scene 26: snow-covered stairs (Isaac Sim 4.5)
 
-유형    : C1 조건 변주 — 기존 직선 계단 기하 + 적설 환경 레이어 (배치1 핵심 씬)
-사양서  : Docs/nanobanana_batch1_geometry_map.md §B sceneC1_snow_stairs
-룩 참조 : look_refs/c1_snow_stairs.jpg
-공통    : scene_common.py · scene16_canopy_shadow.py(표준 템플릿) ·
-          scene01_campus_stairs.py(직선 계단 기준형)
+Type    : C1 condition variant - existing straight-stair geometry + a snow environment layer (core batch1 scene)
+Spec    : Docs/nanobanana_batch1_geometry_map.md §B sceneC1_snow_stairs
+Look ref: look_refs/c1_snow_stairs.jpg
+Shared  : scene_common.py · scene16_canopy_shadow.py (standard template) ·
+          scene01_campus_stairs.py (straight-stair reference form)
 
-위험 본질: 기하는 평범한 직선 12단(riser 0.17 · tread 0.30 · 폭 2.5)인데,
-           5cm 적설이 트레드를 이어붙여 **모호한 백색 경사면**으로 만든다.
-           단 에지는 노징 오버행(눈 처마)이 만든 둥근 융기선으로만 암시되고,
-           고알베도·저대비 흐린 광 아래에서 그 융기선마저 뭉갠다.
-           GT는 기하 그대로 **낙차 양성(2.04m)** — cue가 매몰된 극한 케이스.
-목표     : 상부 테라스 → 계단 → 하부 평지의 보행 연속성을 유지한 채(교훈 9),
-           눈 레이어(트레드별 눈 박스 + 접근로 평판 + 난간 상단 스트립)를
-           올려 렌더로 판정 (렌더 전용).
+Hazard  : The geometry is an ordinary straight flight of 12 (riser 0.17 · tread 0.30 · width 2.5),
+          yet 5cm of snow bridges the treads into an **ambiguous white slope**.
+          The step edges are hinted at only by the rounded ridge line the nosing overhang
+          (snow eave) makes, and the high-albedo, low-contrast overcast light smears even
+          that ridge. GT follows the geometry as built - **drop positive (2.04m)** - an
+          extreme case with the cue buried.
+Goal    : Keeping the walking continuity of upper terrace -> stairs -> lower ground (lesson 9),
+          lay the snow layer (per-tread snow boxes + approach plates + railing top strip)
+          on top and judge from the render (render only).
 
-특색 성립 조건 [중요]:
-  **저대비 흐린 광(overcast)** 이 이 씬의 특색 성립 조건이다. 청천 정오광이면
-  경질 그림자가 단 에지를 또렷하게 재생성해 "은닉" 자체가 무너진다. 그래서
-  light 프로파일은 sc.OVERCAST_HDRI + lookfix=False + 무태양(DistantLight
-  비가시)이고, 직달광 손실분은 dome_intensity 상향으로 보상한다.
+Signature precondition [important]:
+  **Low-contrast overcast light** is the precondition for this scene's signature. Under clear
+  noon light, hard shadows re-create the step edges sharply and the "concealment" itself
+  collapses. So the light profile is sc.OVERCAST_HDRI + lookfix=False + sunless (DistantLight
+  invisible), and the lost direct light is compensated by raising dome_intensity.
 
-은닉도 조절 [감독 스윕용]:
-  PARAMS["snow"]의 thickness / nose_over / riser_cover 3개가 단 에지 가시성을
-  지배한다. 기본값은 기하맵 사양치(0.05 / 0.06 / 0.50)이며, 레퍼런스보다 더
-  매몰시키려면 (0.09 / 0.12 / 0.85) 방향으로 올린다. 세부는 PARAMS 주석 참조.
+Concealment control [for director sweeps]:
+  thickness / nose_over / riser_cover in PARAMS["snow"] govern step-edge visibility.
+  The defaults are the geometry-map spec values (0.05 / 0.06 / 0.50); to bury the edges further
+  than the reference, raise them toward (0.09 / 0.12 / 0.85). See the PARAMS comments for detail.
 
-실행 (GUI 룩 체크 — 기본):
+Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
     export PYTHONNOUSERSITE=1
     python sceneC1_snow_stairs.py
 
-자동 캡처 (headless):   NEGOBS_CAPTURE=1 python sceneC1_snow_stairs.py
-스모크 조기종료:        NEGOBS_SMOKE=1  python sceneC1_snow_stairs.py
+Auto capture (headless):  NEGOBS_CAPTURE=1 python sceneC1_snow_stairs.py
+Smoke early exit:         NEGOBS_SMOKE=1  python sceneC1_snow_stairs.py
 
-좌표계: Z-up, m, 진행축 +X, 낙차 시작 모서리 = x=0.
+Coordinates: Z-up, m, travel axis +X, drop start edge = x=0.
 """
 
 import os
@@ -52,21 +53,21 @@ import ground_kit as gk
 
 
 # ===========================================================================
-# [A] SCENE_CONFIG — 표준 7키 + 특색 토글 1키(snow_cover).
-#     hazard_stairs 만 기하 토글(False→전면 z=0 평지).
-#     snow_cover 는 이 씬의 특색 토글 — 사양상 "False → 눈 제거"이므로
-#     눈 레이어 프림이 사라지고 뱅크 표면이 적설 두께만큼 내려간다
-#     (계단 코어 기하 = GT 는 불변).
+# [A] SCENE_CONFIG - standard 7 keys + 1 signature toggle (snow_cover).
+#     Only hazard_stairs is a geometry toggle (False -> all-flat z=0 ground).
+#     snow_cover is this scene's signature toggle - per spec "False -> remove snow",
+#     so the snow-layer prims disappear and the bank surface drops by the snow depth
+#     (the stair core geometry = GT is unchanged).
 # ===========================================================================
 SCENE_CONFIG = {
-    "hazard_stairs":      True,   # False → 계단·뱅크·하부평지를 z=0 평지로 (기하 토글 유일 예외)
-    "cue_railing":        True,   # 편측(+Y) 파이프 난간 + 상단 눈 스트립
-    "cue_tactile":        True,   # 상단 경고 점자블록 — 적설 아래 완전 매몰(특색)
-    "cue_material_break": True,   # False → 계단도 접근로와 동일 콘크리트 톤
-    "cue_nosing":         True,   # 황색 논슬립 띠 — 눈 아래 매몰, 대응쌍에서만 노출
-    "cue_sign":           False,  # [선택] 미구현 — config 키만 예약
-    "cue_scene_dressing": True,   # 제설 눈더미·기둥·원경 건물 일괄
-    "snow_cover":         True,   # [특색] False → 눈 레이어 제거 = 대응쌍(맨 계단)
+    "hazard_stairs":      True,   # False -> stairs/banks/lower ground become z=0 flat (the one geometry-toggle exception)
+    "cue_railing":        True,   # one-sided (+Y) pipe railing + snow strip on top
+    "cue_tactile":        True,   # warning tactile paving at the top - fully buried under the snow (signature)
+    "cue_material_break": True,   # False -> stairs get the same concrete tone as the approach
+    "cue_nosing":         True,   # yellow anti-slip band - buried under snow, exposed only in the twin
+    "cue_sign":           False,  # [optional] not implemented - config key reserved only
+    "cue_scene_dressing": True,   # cleared snow piles, post and distant buildings together
+    "snow_cover":         True,   # [signature] False -> remove the snow layer = twin (bare stairs)
 }
 
 
@@ -74,144 +75,144 @@ SCENE_CONFIG = {
 # [B] PARAMS
 # ===========================================================================
 PARAMS = dict(
-    # 직선 12단 × riser 0.17 · tread 0.30 → 낙차 2.04m, run 3.60m, 폭 2.5
+    # straight 12 steps x riser 0.17 · tread 0.30 -> drop 2.04m, run 3.60m, width 2.5
     stairs=dict(x0=0.0, riser=0.17, tread=0.30, nsteps=12,
                 y0=-1.25, y1=1.25, z_top=0.0, base_z=-2.90),
 
-    # 상부 테라스(제방 상단). 두께 2.6 → 하부 평지 바닥보다 아래까지 솔리드.
+    # Upper terrace (top of the embankment). Thickness 2.6 -> solid down past the lower ground floor.
     terrace=dict(x0=-60.0, x1=0.0, y0=-60.0, y1=60.0, z_top=0.0, thick=2.60),
-    # 하부 평지. x0 는 계단 끝(run)보다 0.05 뒤에서 시작하고 상면을 2mm 낮춰
-    # 마지막 단 상면과의 동일평면(Z-파이팅)을 회피 — 겹침 5cm.
+    # Lower ground. x0 starts 0.05 behind the stair end (run) and its top face is 2mm lower
+    # to avoid a coplanar face (Z-fighting) with the last step top - 5cm overlap.
     lower=dict(x_back=0.05, x1=60.0, y0=-60.0, y1=60.0, z_gap=0.002,
                thick=0.70),
 
-    # 계단 양측 눈 뱅크(제방 사면). 상면 평면 z = lift − (riser/tread)·x
-    #   = "노징선"(단 앞모서리를 잇는 선)에 적설 두께만큼 얹힌 면.
-    #   → 상부 테라스 눈면(z=+t)과 하부 평지 눈면(z=−2.04+t)을 정확히 잇는다:
-    #     추가 낙차 에지 없음 = GT 오염 없음, 보행 연속성 유지(교훈 9).
-    #   y_in 은 계단 측면(±1.25)보다 0.02 안쪽 → 솔리드 겹침(동일평면 회피).
+    # Snow banks on both sides of the stair (embankment slope). Top plane z = lift - (riser/tread)·x
+    #   = the "nosing line" (the line joining the front edges of the steps) raised by the snow depth.
+    #   -> it joins the upper terrace snow face (z=+t) and the lower ground snow face (z=-2.04+t) exactly:
+    #     no extra drop edge = no GT contamination, walking continuity kept (lesson 9).
+    #   y_in sits 0.02 inside the stair flank (+-1.25) -> solid overlap (avoids a coplanar face).
     bank=dict(y_in_over=0.02, y_out=60.0, x_head=0.02, x_tail=0.20, thick=2.20),
-    # 계단 측면 노출 콘크리트 스트링어(레퍼런스의 유일한 비적설 요소).
-    # 상면 = 뱅크면 + proud(0.02) → 눈밭 속 가느다란 암색 에지선으로 잔존.
+    # Exposed concrete stringer on the stair flank (the only non-snow element in the reference).
+    # Top face = bank face + proud(0.02) -> survives as a thin dark edge line in the snow field.
     stringer=dict(y_in=1.20, y_out=1.45, proud=0.02, x_head=0.05, x_tail=0.10,
                   thick=0.60),
 
-    # ─── 눈 레이어 [특색 파라미터] ───────────────────────────────────────
-    #  thickness   적설 두께. ↑ 하면 트레드 상면이 두껍게 융기해 단 높이 대비
-    #              에지 대비가 낮아진다. 기하맵 사양 0.05. 스윕 0.05→0.09.
-    #  nose_over   노징 전방 오버행(눈 처마). ↑ 하면 다음 단 위를 덮어 단코가
-    #              둥글게 말리며 소실. 기하맵 사양 0.06. 스윕 0.06→0.12.
-    #  riser_cover 라이저 상반부 덮음 비율(0.5=상반부). ↑ 하면 라이저 수직면의
-    #              암부 띠가 줄어 프로파일이 램프에 근접. 스윕 0.50→0.85.
-    #  lip_recess  처마 핀을 슬래브 앞끝보다 안쪽으로 후퇴시키는 비율(라운딩감).
-    #  side_over   눈이 계단 측면으로 흘러넘치는 폭(동일평면 회피 겸용).
-    #  embed_*     아래 솔리드에 파묻는 깊이(Z-파이팅 방지, 시각 영향 없음).
+    # ─── snow layer [signature parameters] ──────────────────────────────
+    #  thickness   snow depth. Raising it thickens the ridge on the tread top so the
+    #              edge contrast falls against the step height. Geometry-map spec 0.05. Sweep 0.05->0.09.
+    #  nose_over   forward nosing overhang (snow eave). Raising it covers the next step so the
+    #              nosing curls round and vanishes. Geometry-map spec 0.06. Sweep 0.06->0.12.
+    #  riser_cover fraction of the upper riser covered (0.5=upper half). Raising it shrinks the
+    #              dark band on the riser face so the profile approaches a ramp. Sweep 0.50->0.85.
+    #  lip_recess  how far the eave fin is set back from the slab front edge (rounded look).
+    #  side_over   width by which the snow spills over the stair flank (doubles as coplanar avoidance).
+    #  embed_*     depth buried into the solid below (Z-fighting guard, no visual effect).
     # ────────────────────────────────────────────────────────────────────
     snow=dict(thickness=0.05, nose_over=0.06, riser_cover=0.50,
               lip_recess=0.15, side_over=0.010,
               embed_step=0.010, embed_plate=0.020,
               rail_strip_w=0.08, rail_strip_t=0.05, rail_strip_lift=0.04),
 
-    # 편측 난간 (레퍼런스 우측). 뱅크면 위에 서고, 경사는 계단과 동일.
+    # One-sided railing (right in the reference). Stands on the bank face, same pitch as the stairs.
     rail=dict(y=1.60, x_start=-1.20, rail_h=0.90, post_r=0.022, rail_r=0.03,
               rail_mid_r=0.018, rail_mid_drop=0.45, spacing=1.20),
 
-    #  점자블록 — [W2 §12.4] "ON 유지(현행)" 이되 **집행자를 ground_kit 으로
-    #  옮긴다**. 현행 `sc.build_tactile` 은 상수색 무돌기 평판이라 법정 36점
-    #  돌기의 음영이 화면에 0 이었다(§12.5 ③). 킷은 `build_tactile_pair` 로
-    #  규격(300 그리드·돌기 Ø25 mm·6 mm)을 그대로 낸다.
-    #  위치도 법정값으로 교정: 구 `x −0.30…0`(계단에 맞닿음) →
-    #  **`x −0.90…−0.30`** = "계단 첫 단 0.3 m 전, 세로폭 60 cm 표준"
-    #  `[법령 교통약자법 시행규칙 별표1 2호 차목 · 시방 국도 실무요령 7.5]`.
-    #  GT-E1′ 도 이 위치라야 통과한다 — 돌기 0.006 m × EDGE_K 40 = 0.24 m
-    #  이격 필요, 법정 0.30 m > 0.24 ✔ `[계산]`.
+    #  Tactile paving - [W2 §12.4] "keep ON (current)", but **move the enforcer to ground_kit**.
+    #  The current `sc.build_tactile` is a flat constant-colour plate with no dots, so the shading
+    #  of the statutory 36 dots was 0 on screen (§12.5 (3)). The kit emits the spec
+    #  (300 grid · dot Ø25 mm · 6 mm) as-is via `build_tactile_pair`.
+    #  The position is corrected to the statutory value too: old `x −0.30…0` (touching the stair) ->
+    #  **`x −0.90…−0.30`** = "0.3 m before the first step, 60 cm standard depth"
+    #  `[statute Enforcement Rule of the Mobility Convenience Act, Table 1, item 2(i) · spec National Road Practice Guide 7.5]`.
+    #  GT-E1′ passes only at this position too - dots 0.006 m x EDGE_K 40 = 0.24 m
+    #  clearance required, statutory 0.30 m > 0.24 ✔ `[computed]`.
     tactile=dict(ahead=0.30, depth=0.60, proud=0.004),
 
-    # ═══ [W2 ground_kit] P1 plaza_granite — 사양 §5.1 C1 행 ════════════════
-    #  ★ 조건 오버레이: **이 씬의 지면 요소는 눈 아래에 깔린다.**
-    #    적설 0.05 m 가 논슬립·점형블록을 매몰하는 것이 씬 특색이고
-    #    (§7.3 B12 `_inv_c1_snow`: 신규 요소 proud ≤ 0.05), 그래서 계획은
-    #    테라스 상면 z=0 에 세운다. `snow_cover=False` 대응쌍에서는 같은
-    #    요소가 그대로 드러난다 — 대응쌍의 정보량이 늘어난다.
-    #  ★ 잡초 상한을 0.045 로 캡한다(`caps.weed_h`). 기본 0.12 는 적설
-    #    두께를 넘어 눈 위로 솟으므로 B12 위반이다.
-    #  ★ 씬 고유 처방 "제설 흔적"(답압로·발자국)은 **눈 표면 z=LIFT** 에
-    #    별도로 얹는다 — 계획은 단일 z 라 같은 호출에 담을 수 없다.
+    # ═══ [W2 ground_kit] P1 plaza_granite - spec §5.1 C1 row ════════════════
+    #  * Conditional overlay: **the ground elements of this scene lie under the snow.**
+    #    Snow depth 0.05 m burying the anti-slip band and the dot tactile paving is the scene's
+    #    signature (§7.3 B12 `_inv_c1_snow`: new elements proud <= 0.05), so the plan is
+    #    built on the terrace top face z=0. In the `snow_cover=False` twin the same
+    #    elements are exposed as-is - the twin carries more information.
+    #  * Cap the weed height at 0.045 (`caps.weed_h`). The default 0.12 exceeds the snow
+    #    depth and would stick up above the snow, which violates B12.
+    #  * The scene-specific prescription "cleared-snow traces" (wear lane · footprints) is laid
+    #    separately on **the snow surface z=LIFT** - the plan is single-z so it cannot go in the same call.
     ground=dict(
         region=(-11.0, -3.0, 0.0, 3.0),
-        manhole=(-2.40, 0.60),          # W2 창(d5 X=2.6 m · 화면폭 21.6 %)
+        manhole=(-2.40, 0.60),          # W2 window (d5 X=2.6 m · 21.6 % of screen width)
         gully=(-6.00, 2.40),
         patches=[(-1.20, 0.10), (-8.80, -0.20)],
         weed_h=0.045,
-        #  제설 흔적 — 답압로 중앙 폭 1.0 m(사양 0.8~1.2), 알베도 ×0.75.
-        #  x 원단을 −0.10 에서 끊는다: proud 0.0006 이라 GT-E1′ 필요 이격은
-        #  0.024 m 뿐이지만, 에지에 붙은 밝은 종단선은 만들지 않는다.
+        #  Cleared-snow traces - wear lane 1.0 m wide at centre (spec 0.8~1.2), albedo x0.75.
+        #  The x far end stops at −0.10: proud is 0.0006 so GT-E1′ only needs 0.024 m
+        #  of clearance, but we still avoid a bright terminating line stuck to the edge.
         trace_lane=((-11.0, 0.0), (-0.10, 0.0)),
         trace_lane_w=1.0, trace_lane_gain=0.75,
         trace_steps=12,
         trace_path=[(-10.6, 0.30), (-0.30, 0.10)],
     ),
-    # 노징 y를 계단 폭보다 0.02 안쪽으로 → 눈 슬래브 내부에 완전 봉입.
+    # Set the nosing y 0.02 inside the stair width -> fully enclosed inside the snow slab.
     nosing=dict(color=(0.85, 0.72, 0.10), width=0.05, proud=0.001,
                 y_inset=0.02),
 
-    # 드레싱 — 제설 눈더미(찌그러진 구 3개/더미) · 표지기둥 · 원경 건물
+    # Dressing - cleared snow piles (3 squashed spheres/pile) · marker post · distant buildings
     piles=[dict(cx=-4.2, cy=3.6, s=1.0), dict(cx=-6.5, cy=-3.2, s=0.8),
            dict(cx=-2.6, cy=-5.4, s=0.9)],
     pile=dict(blobs=((0.00, 0.00, 1.30, 0.55), (0.75, 0.25, 1.05, 0.40),
                      (-0.60, -0.20, 0.95, 0.38))),
     pole=dict(cx=-3.4, cy=2.9, r=0.05, h=2.60, cap_t=0.06),
     buildings=dict(
-        # +X 원경 비스타 차단(하부 평지 레벨에 기단). 파사드 -X 평면.
+        # Blocks the +X distant vista (plinth at the lower ground level). Facade on the -X plane.
         C=dict(x0=26.0, x1=32.0, y0=-14.0, y1=14.0, h=12.0, floors=4,
                axis="x", facade_x=26.0, face_dir=-1.0),
-        # -X 원경(lower_lookback 용). 파사드 +X 평면, 테라스 레벨 기단.
+        # -X distance (for lower_lookback). Facade on the +X plane, plinth at terrace level.
         D=dict(x0=-46.0, x1=-40.0, y0=-14.0, y1=14.0, h=9.0, floors=3,
                axis="x", facade_x=-40.0, face_dir=1.0),
     ),
     window=dict(w=1.2, h=1.6, inset=0.15, col_step=2.5, margin=2.0),
 
-    # ═══ [맥락 드레싱 v2 · 07-27] "여기가 어디인지" 읽히는 겨울 주거지/캠퍼스 ═══
-    #  감사 v4 통합계획 §휑함 대응. 계단 코어·눈 레이어·조명 파라미터는 일절
-    #  건드리지 않고, 상부 테라스(x<0, 상면 z=LIFT)와 하부 평지(x>RUN, 상면
-    #  z=LOWER_TOP+LIFT) 위에만 신규 프림을 얹는다.
-    #  전 요소에 **눈 캡(백색 박판 0.03~0.05)** 을 씌워 적설 정합을 유지한다.
+    # ═══ [context dressing v2 · 07-27] a winter residential area/campus that reads as "where am I" ═══
+    #  Answers §emptiness of the audit v4 integrated plan. The stair core, snow layer and lighting
+    #  parameters are left completely untouched; new prims go only on the upper terrace (x<0, top
+    #  z=LIFT) and the lower ground (x>RUN, top z=LOWER_TOP+LIFT).
+    #  Every element gets a **snow cap (white thin plate 0.03~0.05)** to keep the snow consistent.
     #
-    #  [카메라 검산 — build_views() 8+4컷 전수, FOV 수평 ±30°/수직 ±18° 가정]
+    #  [camera check - all 8+4 shots of build_views(), assuming FOV horizontal +-30 deg / vertical +-18 deg]
     #   grid  eye(-2/-5/-10, 0, h) +X · approach eye(-6,0,1.65) ·
     #   grazing_top eye(-2.2,0,0.35) · rail_side eye(-3.0,3.2,1.5) az -29.1° ·
     #   lower_lookback eye(7.0,0.6,1.5) az 184.3°
-    #   → 아래 각 항목 주석에 (카메라, 방위각, 계단 가림 여부) 기재.
-    #   공통 원칙 ① 카메라 eye 반경 1.5 m 내 신규 솔리드 금지
-    #            ② 계단 방위각 밴드(각 시점별로 계산) 밖에 배치 = 특색 무가림
-    #            ③ 보행 회랑(|y|<1.6, 접근로 x<0 / 하부 x>RUN) 침범 금지
+    #   -> each item comment below records (camera, azimuth, whether it occludes the stairs).
+    #   Shared rules (1) no new solid within a 1.5 m radius of the camera eye
+    #            (2) placed outside the stair azimuth band (computed per viewpoint) = signature not occluded
+    #            (3) no intrusion into the walking corridor (|y|<1.6, approach x<0 / lower x>RUN)
     # ───────────────────────────────────────────────────────────────────────
-    # 눈 쌓인 벤치 2 — A(-1.0,-2.35)는 approach 우측 프레임 가장자리
-    #   (az -19.2..-32.9°, 계단 밴드 ±11.8° 밖) & lower_lookback 중경.
-    #   B(-6.9,3.9)는 lower_lookback 좌측. 제설더미 0번(x -5.75..-2.40)과
-    #   0.22 m 이격(자가감사 통과).
+    # 2 snow-covered benches - A(-1.0,-2.35) is at the right frame edge of approach
+    #   (az -19.2..-32.9 deg, outside the +-11.8 deg stair band) & mid ground of lower_lookback.
+    #   B(-6.9,3.9) is on the left of lower_lookback. 0.22 m clear of snow pile 0
+    #   (x -5.75..-2.40) - passes self-audit.
     benches=[dict(cx=-1.0, cy=-2.35, yaw=0.0, base="upper"),
              dict(cx=-6.9, cy=3.9, yaw=0.0, base="upper")],
     bench=dict(length=1.8, width=0.50, height=0.45, back_h=0.42, cap_t=0.04),
-    # 가로등 2본 — 연질 직달(elev 28°, 광 진행 (-0.879,+0.477,-0.469);
-    #   dome_rot -110+171.5=61.5° · rotX 62° 로부터 산출)에 긴 그림자.
-    #   A(-0.9,-3.10): h4.0 → 그림자 끝 (-7.5,+0.5). **전 구간 x<0 테라스에만
-    #   떨어져 계단 트레드 불간섭** = 은닉 조건 무변경, 근경 눈면 릴리프만 증가.
-    #   카메라: approach 헤드 az -23.3°(계단 ±11.8° 밖) · grid d5 헤드
-    #   az -28.2°(계단 ±14° 밖) · grid d10 헤드 az -13.6°(계단 ±7.1° 밖) ·
-    #   rail_side az -71°(프레임 -59..+1° 밖) · lookback az 203.9°(계단 뒤편).
+    # 2 street lamps - long shadows under the soft direct light (elev 28 deg, light travel
+    #   (-0.879,+0.477,-0.469); derived from dome_rot -110+171.5=61.5 deg · rotX 62 deg).
+    #   A(-0.9,-3.10): h4.0 -> shadow end (-7.5,+0.5). **Falls entirely on the x<0 terrace,
+    #   so it never touches the stair treads** = concealment condition unchanged, only more near-field snow relief.
+    #   Cameras: approach head az -23.3 deg (outside the stair +-11.8 deg) · grid d5 head
+    #   az -28.2 deg (outside the stair +-14 deg) · grid d10 head az -13.6 deg (outside the stair +-7.1 deg) ·
+    #   rail_side az -71 deg (outside the -59..+1 deg frame) · lookback az 203.9 deg (behind the stairs).
     lamps=[dict(cx=-0.9, cy=-3.10, arm=0.9, base="upper"),
            dict(cx=-8.4, cy=3.6, arm=-0.9, base="upper")],
     lamp=dict(pole_r=0.06, pole_h=4.0, arm_r=0.035, head_l=0.34, head_w=0.22,
               head_h=0.14, cap_t=0.04),
-    # 표지판 기둥 1 — lower_lookback 전용(az 201.4°). 전 정면 시점 프레임 밖.
+    # 1 signpost - lower_lookback only (az 201.4 deg). Outside the frame of every frontal viewpoint.
     signpost=dict(cx=-3.2, cy=-3.4, pole_r=0.045, pole_h=2.15,
                   panel_w=0.70, panel_h=0.50, panel_t=0.06, panel_z=1.72,
                   cap_t=0.035),
-    # 눈 쌓인 생울타리 라인 — 대지 경계 정의(휑함 1순위 해소).
-    #   상부 2줄(|y|=5.2, x -22..-4.5) : 제설더미 2번(x -3.8..-1.4) 회피 절단.
-    #   하부 2줄(|y|=7.0, x 6.5..12.5) + 직교 2줄(x 12.0..12.7) = 원경 정원 경계.
-    #   전부 보행 회랑(|y|<1.6) 밖 · 계단보다 멀어 가림 불가.
+    # Snow-covered hedge lines - define the site boundary (top fix for emptiness).
+    #   Upper 2 rows (|y|=5.2, x -22..-4.5): cut to clear snow pile 2 (x -3.8..-1.4).
+    #   Lower 2 rows (|y|=7.0, x 6.5..12.5) + 2 perpendicular rows (x 12.0..12.7) = distant garden boundary.
+    #   All outside the walking corridor (|y|<1.6) · farther than the stairs so they cannot occlude.
     hedges=[dict(x0=-22.0, x1=-4.5, y0=4.85, y1=5.55, h=0.75, base="upper"),
             dict(x0=-22.0, x1=-4.5, y0=-5.55, y1=-4.85, h=0.75, base="upper"),
             dict(x0=6.5, x1=12.5, y0=6.65, y1=7.35, h=0.80, base="lower"),
@@ -219,10 +220,10 @@ PARAMS = dict(
             dict(x0=11.4, x1=12.1, y0=7.00, y1=15.5, h=0.80, base="lower"),
             dict(x0=11.4, x1=12.1, y0=-15.5, y1=-7.00, h=0.80, base="lower")],
     hedge_cap=dict(over=0.05, t=0.05),
-    # 원경 저층 주택 4동(눈 캡 지붕 + 굴뚝) — 지평 폐쇄 + 주거지 판독.
-    #   하부 3동은 approach/grazing_top 중원경 프레임을 채우고(건물 C 앞),
-    #   상부 1동은 lower_lookback 좌측(az 161.4°)에서 건물 D와 함께 배경 형성.
-    #   상호·생울타리·기존 건물과 전부 비중첩(좌표 검산 완료).
+    # 4 distant low-rise houses (snow-capped roof + chimney) - horizon closure + reads as residential.
+    #   The lower 3 fill the mid/far frame of approach/grazing_top (in front of building C),
+    #   the upper 1 forms the background with building D on the left of lower_lookback (az 161.4 deg).
+    #   None overlap each other, the hedges or the existing buildings (coordinate check done).
     houses=[dict(x0=13.0, x1=19.0, y0=9.0, y1=15.0, h=5.0, base="lower",
                  face=-1.0),
             dict(x0=15.0, x1=20.0, y0=-18.0, y1=-11.0, h=4.5, base="lower",
@@ -238,50 +239,50 @@ PARAMS = dict(
     material=dict(
         scale=dict(concrete_floor=1.0, dirt_park=2.0, brick_red=2.0,
                    tactile=0.3),
-        # 눈: 고알베도라 sRGB 암색 규약(0.02~0.06) 대상 아님.
+        # Snow: high albedo, so it is not subject to the dark sRGB convention (0.02~0.06).
         snow_color=(0.72, 0.74, 0.78), snow_rough=0.95, snow_spec=0.1,
-        stair_tint=(0.92, 0.92, 0.95),      # cue_material_break 용 미세 색차
-        dirt_tint=(0.72, 0.68, 0.62),       # 눈 제거 시 뱅크(마사토)
+        stair_tint=(0.92, 0.92, 0.95),      # slight colour difference for cue_material_break
+        dirt_tint=(0.72, 0.68, 0.62),       # bank (decomposed granite) when the snow is removed
         rail_color=(0.72, 0.74, 0.78), rail_metallic=0.8, rail_rough=0.45,
         wall_tint=(0.88, 0.88, 0.90),
         glass_color=(0.05, 0.07, 0.10), glass_rough=0.12,
         parapet_color=(0.86, 0.87, 0.88), parapet_rough=0.7,
-        # ─ 맥락 드레싱 v2 상수 (sRGB 암색 규약 0.02~0.09 준수) ─
-        wood_color=(0.055, 0.036, 0.022), wood_rough=0.85,   # 벤치 목재
-        roof_color=(0.045, 0.042, 0.048), roof_rough=0.75,   # 주택 지붕 슬래브
-        hedge_color=(0.030, 0.048, 0.028), hedge_rough=1.0,  # 상록 생울타리
-        lamp_color=(0.88, 0.88, 0.84), lamp_rough=0.40,      # 램프 헤드(주간)
+        # ─ context dressing v2 constants (dark sRGB convention 0.02~0.09 observed) ─
+        wood_color=(0.055, 0.036, 0.022), wood_rough=0.85,   # bench timber
+        roof_color=(0.045, 0.042, 0.048), roof_rough=0.75,   # house roof slab
+        hedge_color=(0.030, 0.048, 0.028), hedge_rough=1.0,  # evergreen hedge
+        lamp_color=(0.88, 0.88, 0.84), lamp_rough=0.40,      # lamp head (daytime)
         pole_color=(0.24, 0.24, 0.26), pole_metallic=0.6, pole_rough=0.50,
-        sign_color=(0.045, 0.085, 0.19),                     # 표지판 패널(청)
+        sign_color=(0.045, 0.085, 0.19),                     # signpost panel (blue)
     ),
 
-    # ─── overcast 조명 프로파일 (sceneC4 와 동일) ────────────────────────
-    #  · hdri=sc.OVERCAST_HDRI : 청천 대신 흐린 하늘 → 태양 디스크 없음.
-    #  · lookfix=False         : lookfix는 "태양 캡 + 지평 리프트"용. 무태양
-    #                            HDRI에는 무의미(최대휘도 픽셀이 태양이 아님)
-    #                            하므로 원본 사용.
-    #  · noon_sun_enable=False : 보조 DistantLight 비가시 → 경질 그림자 제거.
-    #                            (setup_lighting 이 intensity/color 키를 항상
-    #                             읽으므로 키 자체는 남겨 둔다.)
-    #  · dome_intensity        : 직달 2450 을 잃은 만큼 상향. 기존 noon 1000
-    #                            기준 1500~2500 스윕 권장. 시작값 2000.
-    #                            눈(알베도 0.85)이라 과노출 시 1600 쪽으로,
-    #                            하이라이트가 죽으면 2400 쪽으로.
-    #  · hdri_sun_rotz_offset  : 무태양이라 무의미 → 0.0.
+    # ─── overcast lighting profile (same as sceneC4) ────────────────────
+    #  · hdri=sc.OVERCAST_HDRI : overcast sky instead of clear sky -> no sun disc.
+    #  · lookfix=False         : lookfix is for "sun cap + horizon lift". It is meaningless
+    #                            for a sunless HDRI (the peak-luminance pixel is not the sun),
+    #                            so the original is used.
+    #  · noon_sun_enable=False : auxiliary DistantLight invisible -> hard shadows removed.
+    #                            (setup_lighting always reads the intensity/color keys,
+    #                             so the keys themselves are kept.)
+    #  · dome_intensity        : raised by as much as the 2450 of direct light lost. Relative to
+    #                            the previous noon 1000, a 1500~2500 sweep is advised. Start at 2000.
+    #                            Snow (albedo 0.85), so move toward 1600 if overexposed,
+    #                            toward 2400 if the highlights die.
+    #  · hdri_sun_rotz_offset  : meaningless without a sun -> 0.0.
     # ────────────────────────────────────────────────────────────────────
     light=dict(
         hdri=sc.OVERCAST_HDRI,
-        dome_intensity=800.0,    # r2에도 포화 → 추가 감광. 무태양 돔 단독은 RT가 평면광 — 판정은 PT
+        dome_intensity=800.0,    # saturated even at r2 -> extra stop down. A sunless dome alone makes RT flat light - judge on PT
         noon_dome_rot=-110.0,
         lookfix=False,
-        noon_sun_enable=True, noon_sun_elev=28.0,   # r3: 완전 무방향광은 융기선 음영 불성립(화이트아웃) → 저강도 연질 직달로 릴리프 복원
+        noon_sun_enable=True, noon_sun_elev=28.0,   # r3: fully directionless light gives no shading on the ridge lines (whiteout) -> restore relief with low-intensity soft direct light
         noon_sun_intensity=420.0, noon_sun_color=(1.0, 0.985, 0.97),
         hdri_sun_rotz_offset=0.0,
         dome_rotation_step=15.0,
     ),
-    # ─── SUN_AZ_OFFSET: 무태양 프로파일이라 그림자 방위 의미가 없다. 돔 Z회전은
-    #     흐린 하늘의 완만한 휘도 구배·원경 반영 방향만 바꾼다. 하네스 일관성을
-    #     위해 브리프 v3 §A-7 기본값 171.5 유지, [ ]키로 스윕 가능. ───
+    # ─── SUN_AZ_OFFSET: the profile is sunless, so shadow azimuth is meaningless. Rotating the
+    #     dome in Z only changes the gentle luminance gradient of the overcast sky and the direction
+    #     of distant reflections. Kept at the brief v3 §A-7 default 171.5 for harness consistency; sweepable with the [ ] keys. ───
     SUN_AZ_OFFSET=171.5,
 
     render=dict(pt_total_spp=512, pt_max_bounces=8),
@@ -308,7 +309,7 @@ if _sc_ov:
 
 
 # ===========================================================================
-# [C] 경로 상수 + 필요 텍스처 역할
+# [C] path constants + required texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "sceneC1")
@@ -317,18 +318,18 @@ ASSET_ROLES = ["concrete_floor", "dirt_park", "brick_red", "tactile",
                "hdri", "mdl"]
 
 
-# --- 파생 치수 (여러 빌더가 공유) -------------------------------------------
+# --- derived dimensions (shared by several builders) -------------------------
 def _dims():
     st = PARAMS["stairs"]
     run = st["tread"] * st["nsteps"]
     drop = st["riser"] * st["nsteps"]
-    slope_k = st["riser"] / st["tread"]          # 노징선 기울기 (하강 +X)
+    slope_k = st["riser"] / st["tread"]          # nosing-line slope (descending +X)
     lift = PARAMS["snow"]["thickness"] if SCENE_CONFIG["snow_cover"] else 0.0
     return run, drop, slope_k, lift
 
 
 def ground_plans():
-    """[W2 ground_kit] 지면 계획 — 씬 조립부와 CPU 검산이 같은 함수를 쓴다."""
+    """[W2 ground_kit] Ground plan - the scene assembly and the CPU check use the same function."""
     g = PARAMS["ground"]
     st = PARAMS["stairs"]
     tc = PARAMS["tactile"]
@@ -351,15 +352,15 @@ def ground_plans():
 
 
 def build_views():
-    """카메라 프리셋: grid_views(gy=0.0) + 미장센 4컷."""
+    """Camera presets: grid_views(gy=0.0) + 4 mise-en-scene shots."""
     views = sc.grid_views(0.0)
-    # approach: 상부 테라스 보행 시점 — 백색 경사면 인상
+    # approach: walking viewpoint on the upper terrace - the white-slope impression
     views["approach"] = dict(eye=[-6.0, 0.0, 1.65], tgt=[2.0, 0.0, -0.90])
-    # grazing_top: 낮은 시점 — 단 에지가 융기선으로만 남는가(특색 1순위)
+    # grazing_top: low viewpoint - do the step edges survive only as ridge lines (top signature)
     views["grazing_top"] = dict(eye=[-2.2, 0.0, 0.35], tgt=[3.6, 0.0, -0.70])
-    # rail_side: 난간·스트링어 쪽 사선 — 유일한 잔존 단서 확인
+    # rail_side: oblique from the railing/stringer side - check the only surviving cue
     views["rail_side"] = dict(eye=[-3.0, 3.2, 1.50], tgt=[2.2, 0.30, -1.20])
-    # lower_lookback: 하부에서 되돌아봄 — 단 에지가 가장 잘 보이는 대조 시점
+    # lower_lookback: looking back from below - the contrast view where the step edges show best
     views["lower_lookback"] = dict(eye=[7.0, 0.60, 1.50], tgt=[-1.0, 0.0, 0.20])
     return views
 
@@ -413,7 +414,7 @@ def main():
         return sc.make_pbr(stage, path, *args, **kwargs)
 
     # -------------------------------------------------------------------
-    # 재질
+    # materials
     # -------------------------------------------------------------------
     def setup_materials():
         sca = mp["scale"]
@@ -438,7 +439,7 @@ def main():
         M["tactile"] = PBR(
             f"{ROOT}/Looks/Tactile", sc.tex_path("tactile", "diff"),
             sc.tex_path("tactile", "nor"), None, sca["tactile"])
-        # 눈: 상수 고알베도 + 초거친 + 낮은 스펙큘러 (기하맵 사양)
+        # Snow: constant high albedo + ultra rough + low specular (geometry-map spec)
         M["snow"] = PBR(f"{ROOT}/Looks/Snow",
                         diffuse_color=mp["snow_color"],
                         roughness_const=mp["snow_rough"], metallic=0.0,
@@ -451,15 +452,15 @@ def main():
         M["parapet"] = PBR(f"{ROOT}/Looks/Parapet",
                            diffuse_color=mp["parapet_color"],
                            roughness_const=mp["parapet_rough"])
-        # ─ 맥락 드레싱 v2 재질 (상수색만 — 신규 텍스처 의존 없음) ─
+        # ─ context dressing v2 materials (constant colours only - no new texture dependency) ─
         M["wood"] = PBR(f"{ROOT}/Looks/Wood", diffuse_color=mp["wood_color"],
                         roughness_const=mp["wood_rough"])
         M["roof"] = PBR(f"{ROOT}/Looks/Roof", diffuse_color=mp["roof_color"],
                         roughness_const=mp["roof_rough"])
-        # [v5.1 §4] 원경 주택 4동은 같은 지붕/벽 재질을 공유해 '복제 블록'
-        #   인상을 준다 → 동별 ±5% 결정적 틴트 지터.
-        #   · 지붕은 diffuse_color(알베도 0.045) → cap 무관.
-        #   · 벽은 brick 텍스처의 tint 배율만 흔든다(텍스처 자체는 공유).
+        # [v5.1 §4] The 4 distant houses share the same roof/wall material, which gives a
+        #   'cloned block' impression -> deterministic +-5% tint jitter per house.
+        #   · The roof uses diffuse_color (albedo 0.045) -> unaffected by the cap.
+        #   · The wall only shifts the tint multiplier of the brick texture (the texture itself is shared).
         for _i, _hd in enumerate(PARAMS["houses"]):
             _kx, _ky = _hd["x0"], _hd["y0"]
             M[f"roof_{_i}"] = PBR(
@@ -485,15 +486,15 @@ def main():
         return M
 
     # -------------------------------------------------------------------
-    # 지형 — 상부 테라스 / 하부 평지 / 양측 눈 뱅크 / 콘크리트 스트링어
-    #   개구(피트)가 없는 제방형이므로 4박스 분할 대상 없음. 대신 세 솔리드가
-    #   서로 겹치며 타일링 → 공동 위를 덮는 평면도, 부유 에지도 없다.
+    # Terrain - upper terrace / lower ground / snow banks on both sides / concrete stringers
+    #   It is an embankment form with no opening (pit), so there is nothing to split into 4 boxes. Instead the three
+    #   solids overlap and tile -> no plane covering a cavity and no floating edge.
     # -------------------------------------------------------------------
     def build_terrace(M):
         tr = PARAMS["terrace"]
-        # [W2-0 · P-A] 테라스 상면이 ground_kit 의 장식 대상이다 → 변위 스킨
-        #   OFF(**BOX 호출 전에** 등록). `snow_cover=False` 대응쌍에서 킷
-        #   요소가 스킨(+6.5~16.5 mm)에 묻히는 것을 막는다 `[사양 §1.1]`.
+        # [W2-0 · P-A] The terrace top face is what ground_kit decorates -> displacement skin
+        #   OFF (registered **before the BOX call**). This keeps the kit elements from being
+        #   swallowed by the skin (+6.5~16.5 mm) in the `snow_cover=False` twin `[spec §1.1]`.
         sc.skin_exclude(f"{ROOT}/Terrace")
         BOX(f"{ROOT}/Terrace",
             ((tr["x0"] + tr["x1"]) / 2.0, (tr["y0"] + tr["y1"]) / 2.0,
@@ -511,7 +512,7 @@ def main():
             M["concrete"], col=True)
 
     def build_banks(M):
-        """양측 사면. 상면 z = LIFT − SLOPE_K·x (노징선 + 적설 두께)."""
+        """Slopes on both sides. Top face z = LIFT − SLOPE_K·x (nosing line + snow depth)."""
         bk = PARAMS["bank"]
         st = PARAMS["stairs"]
         mtl = M["snow"] if cfg["snow_cover"] else M["dirt"]
@@ -519,14 +520,14 @@ def main():
         z0 = LIFT + SLOPE_K * bk["x_head"]
         run = RUN + bk["x_head"] + bk["x_tail"]
         for sgn, tag in ((1.0, "P"), (-1.0, "N")):
-            y_in = sgn * (st["y1"] - bk["y_in_over"])   # 계단 솔리드에 2cm 물림
+            y_in = sgn * (st["y1"] - bk["y_in_over"])   # 2cm bite into the stair solid
             y_out = sgn * bk["y_out"]
             sc.build_slope(stage, f"{ROOT}/Bank_{tag}", x0, z0, run,
                            run * SLOPE_K, min(y_in, y_out), max(y_in, y_out),
                            bk["thick"], mtl, margin=0.0, collider=True)
 
     def build_stringers(M):
-        """계단 측면 노출 스트링어 — 상면 = 뱅크면 + proud."""
+        """Exposed stringer on the stair flank - top face = bank face + proud."""
         sg = PARAMS["stringer"]
         st = PARAMS["stairs"]
         x0 = st["x0"] - sg["x_head"]
@@ -547,10 +548,10 @@ def main():
             z_top=st["z_top"], collider=True)
 
     def build_flat_fill(M):
-        """hazard_stairs=False 대조군: 전면 z=0 평지(+ 눈 평판)."""
+        """hazard_stairs=False control: z=0 flat throughout (+ a snow plate)."""
         tr = PARAMS["terrace"]
-        # [W2-0 · P-A] 대조군에서도 지면 요소는 그대로 놓인다(쌍둥이 비교의
-        #   유일한 차이는 **낙차 기하**여야 한다) → 평지 판도 스킨 OFF.
+        # [W2-0 · P-A] The ground elements are laid in the control too (the only difference in the
+        #   twin comparison must be the **drop geometry**) -> skin OFF on the flat plate as well.
         sc.skin_exclude(f"{ROOT}/FlatFill")
         lo = PARAMS["lower"]
         x0, x1 = tr["x0"], lo["x1"]
@@ -569,11 +570,11 @@ def main():
                 (x1 - x0, tr["y1"] - tr["y0"], z_hi - z_lo), M["snow"])
 
     # -------------------------------------------------------------------
-    # 눈 레이어 [특색] — 트레드별 눈 박스(+처마 핀) · 접근로 평판 · 난간 스트립
-    #   * 처마 핀은 슬래브 앞끝보다 lip_recess 만큼 후퇴하고 위로 5mm 파고들어
-    #     "둥근 노징" 프로파일을 근사한다(동일평면 없음).
-    #   * 상부 평판은 x0+nose_over 까지만 내밀어 첫 라이저를 덮는 처마가 되며,
-    #     그 아래 낙차 공간을 막지 않는다(회귀방지 §A-3 취지 준수).
+    # Snow layer [signature] - per-tread snow boxes (+eave fin) · approach plates · railing strip
+    #   * The eave fin is set back from the slab front edge by lip_recess and bites 5mm upward to
+    #     approximate a "rounded nosing" profile (no coplanar faces).
+    #   * The upper plate only reaches x0+nose_over, becoming an eave that covers the first riser
+    #     without blocking the drop space beneath it (honours the intent of regression guard §A-3).
     # -------------------------------------------------------------------
     def build_snow(M):
         sn = PARAMS["snow"]
@@ -586,31 +587,31 @@ def main():
         sy0, sy1 = st["y0"] - so, st["y1"] + so
         scy = (sy0 + sy1) / 2.0
         sLy = sy1 - sy0
-        fLy = sLy - 0.010                    # 처마 핀 폭(슬래브보다 좁게)
+        fLy = sLy - 0.010                    # eave fin width (narrower than the slab)
 
         def _slab(tag, xa, xb, ztop, lip):
             z_hi = ztop + t
             z_lo = ztop - sn["embed_step"]
-            # 뒤끝을 1cm 앞 솔리드(이전 단 / 상부 테라스)에 파묻어 x=xa 동일평면 회피
+            # Bury the trailing edge 1cm into the solid ahead (previous step / upper terrace) to avoid a coplanar face at x=xa
             xa_s = xa - 0.010
             xb_s = xb + (over if lip else 0.0)
             BOX(f"{ROOT}/Snow/Slab_{tag}",
                 ((xa_s + xb_s) / 2.0, scy, (z_hi + z_lo) / 2.0),
                 (xb_s - xa_s, sLy, z_hi - z_lo), M["snow"])
             if lip:
-                # 12mm 물림 — 다음 슬래브 뒤끝(10mm)과 다른 평면이어야 은닉도를
-                # 올린 스윕(riser_cover↑)에서도 동일평면이 생기지 않는다.
+                # 12mm bite - it must sit on a different plane from the next slab's trailing edge (10mm) so that
+                # no coplanar face appears even in sweeps that raise the concealment (riser_cover up).
                 fx0 = xb - 0.012
                 fx1 = xb + over * (1.0 - sn["lip_recess"])
-                fz_hi = ztop + 0.005                   # 슬래브 내부로 봉입
+                fz_hi = ztop + 0.005                   # enclosed inside the slab
                 fz_lo = ztop - st["riser"] * sn["riser_cover"]
                 BOX(f"{ROOT}/Snow/Lip_{tag}",
                     ((fx0 + fx1) / 2.0, scy, (fz_hi + fz_lo) / 2.0),
                     (fx1 - fx0, fLy, fz_hi - fz_lo), M["snow"])
 
-        # ① 상부 접근로 평판 + 계단 상단 모서리 처마.
-        #    대지 경계에서 0.1 인셋 — 테라스 박스 측면과의 동일평면 회피용
-        #    (인셋 에지는 60m 밖이라 화면에 들어오지 않는다).
+        # (1) Upper approach plate + eave at the stair top edge.
+        #    0.1 inset from the site boundary - to avoid a coplanar face with the terrace box flanks
+        #    (the inset edge is 60m away, so it never enters the frame).
         ins = 0.10
         z_hi = tr["z_top"] + t
         z_lo = tr["z_top"] - sn["embed_plate"]
@@ -623,20 +624,20 @@ def main():
             M["snow"])
         lz_hi = st["z_top"] + 0.005
         lz_lo = st["z_top"] - st["riser"] * sn["riser_cover"]
-        lx0 = st["x0"] - 0.012                  # Slab_1 뒤끝(10mm)과 다른 평면
+        lx0 = st["x0"] - 0.012                  # different plane from the trailing edge of Slab_1 (10mm)
         lx1 = st["x0"] + over * (1.0 - sn["lip_recess"])
         BOX(f"{ROOT}/Snow/LipTop",
             ((lx0 + lx1) / 2.0, scy, (lz_hi + lz_lo) / 2.0),
             (lx1 - lx0, fLy, lz_hi - lz_lo), M["snow"])
 
-        # ② 트레드별 눈 박스 (마지막 단은 하부 평지와 이어지므로 처마 없음)
+        # (2) Per-tread snow boxes (the last step joins the lower ground, so no eave)
         for i in range(1, st["nsteps"] + 1):
             xa = st["x0"] + st["tread"] * (i - 1)
             xb = xa + st["tread"]
             ztop = st["z_top"] - st["riser"] * i
             _slab(str(i), xa, xb, ztop, lip=(i < st["nsteps"]))
 
-        # ③ 하부 접근로 평판 (마지막 단 슬래브와 5cm 겹침 · 상면 2mm 낮음)
+        # (3) Lower approach plate (5cm overlap with the last step slab · top face 2mm lower)
         bx0 = RUN - lo["x_back"]
         bx1 = lo["x1"] - ins
         z_hi = LOWER_TOP + t
@@ -648,14 +649,14 @@ def main():
             M["snow"])
 
     def build_rail_snow(M):
-        """난간 상단 눈 스트립 — 수평 연장부(박스) + 경사부(build_slope 박판)."""
+        """Snow strip on top of the railing - horizontal extension (box) + sloped part (build_slope thin plate)."""
         sn = PARAMS["snow"]
         rl = PARAMS["rail"]
-        top0 = LIFT + rl["rail_h"]                     # x=0 에서의 레일 중심 z
+        top0 = LIFT + rl["rail_h"]                     # rail centre z at x=0
         z_top = top0 + rl["rail_r"] + sn["rail_strip_lift"]
         w = sn["rail_strip_w"]
         th = sn["rail_strip_t"]
-        # 수평부: x_start..x0+0.03 (경사부와 3cm 겹침, 상면 2mm 낮춤 → 동일평면 X)
+        # Horizontal part: x_start..x0+0.03 (3cm overlap with the sloped part, top face 2mm lower -> no coplanar face)
         hx1 = PARAMS["stairs"]["x0"] + 0.03
         BOX(f"{ROOT}/Snow/RailStripFlat",
             ((rl["x_start"] + hx1) / 2.0, rl["y"], z_top - 0.002 - th / 2.0),
@@ -665,7 +666,7 @@ def main():
                        th, M["snow"], margin=0.0, collider=False)
 
     # -------------------------------------------------------------------
-    # 단서 (cue) — nosing / tactile / railing
+    # cues - nosing / tactile / railing
     # -------------------------------------------------------------------
     def build_cues(M):
         st = PARAMS["stairs"]
@@ -677,14 +678,14 @@ def main():
                 st["riser"], st["tread"], st["nsteps"],
                 color=ns["color"], width=ns["width"], proud=ns["proud"],
                 z_top=st["z_top"])
-        # [W2 §12.4] 점자블록은 **ground_kit 이 집행**한다(`build_ground_kit`).
-        #   여기서 또 깔면 같은 자리에 2겹이 된다. 토글(`cue_tactile`)은
-        #   `ground_plans()` 가 그대로 읽으므로 소거 실험 경로는 불변이다.
+        # [W2 §12.4] The tactile paving is **enforced by ground_kit** (`build_ground_kit`).
+        #   Laying it again here would double it up in the same place. The toggle (`cue_tactile`) is
+        #   read as-is by `ground_plans()`, so the ablation path is unchanged.
         if cfg["cue_railing"]:
             rl = PARAMS["rail"]
 
             def bank_ground(x):
-                """뱅크 상면(난간 포스트 착지면)."""
+                """Bank top face (the landing surface for the railing posts)."""
                 if x <= 0.0:
                     return LIFT
                 return LIFT - SLOPE_K * min(x, RUN)
@@ -700,14 +701,14 @@ def main():
                 build_rail_snow(M)
 
     # -------------------------------------------------------------------
-    # [W2] ground_kit — P1 plaza_granite. **2층으로 나뉜다.**
-    #   ① 포장층(z = 테라스 상면 0.0) : 줄눈·맨홀·빗물받이·패치·균열·오염·
-    #      잡초·점자블록. 적설 0.05 아래라 `snow_cover=True` 에서는 전부 매몰
-    #      되고 대응쌍(False)에서 드러난다 — 그게 이 씬의 특색이다(§7.3 B12).
-    #   ② 눈 표면층(z = LIFT) : **제설 흔적** — 답압로 + 발자국.
-    #      계획은 단일 z 라 ①과 같은 호출에 담을 수 없어 빌더를 직접 부른다
-    #      (파일럿 #2 의 "꺾임 그룹 로컬 그레이팅"과 같은 예외 경로).
-    #      GT: proud 0.0006 m — 낙차 아님, B12 적설 상한 0.05 도 통과.
+    # [W2] ground_kit - P1 plaza_granite. **Split into 2 layers.**
+    #   (1) Paving layer (z = terrace top 0.0): joints · manhole · gully · patches · cracks · stains ·
+    #      weeds · tactile paving. It sits under 0.05 of snow, so with `snow_cover=True` it is all
+    #      buried and only shows in the twin (False) - that is this scene's signature (§7.3 B12).
+    #   (2) Snow surface layer (z = LIFT): **cleared-snow traces** - wear lane + footprints.
+    #      The plan is single-z so it cannot go in the same call as (1); the builders are called directly
+    #      (the same exception route as the "bend-group local grating" of pilot #2).
+    #      GT: proud 0.0006 m - not a drop, and it also passes the B12 snow cap of 0.05.
     # -------------------------------------------------------------------
     def build_ground_kit(M, lift):
         g = PARAMS["ground"]
@@ -722,8 +723,8 @@ def main():
                               skin_exclude=sc.skin_exclude,
                               scatter=sc.scatter_debris)
         n_trace = 0
-        # `NEGOBS_GKIT=0`(C2 A/B OFF 팔)에서는 계획 밖 직접 호출도 함께 꺼야
-        #   A/B 의 유일한 차이가 "킷 프림의 유무" 로 남는다 `[사양 §7.5 A3]`.
+        # With `NEGOBS_GKIT=0` (the C2 A/B OFF arm) the direct calls outside the plan must be turned off too,
+        #   so that the only A/B difference stays "kit prims present or not" `[spec §7.5 A3]`.
         if cfg["snow_cover"] and gk.GKIT_ON:
             (ax, ay), (bx, by) = g["trace_lane"]
             r1 = gk.build_wear_lane(kit, f"{ROOT}/GKit/SnowTrace/Lane",
@@ -741,11 +742,11 @@ def main():
         return res
 
     # -------------------------------------------------------------------
-    # 드레싱 — 제설 눈더미 · 표지기둥 · 원경 건물 2동(지평선 폐쇄 §A-4)
+    # Dressing - cleared snow piles · marker post · 2 distant buildings (horizon closure §A-4)
     # -------------------------------------------------------------------
     def build_dressing(M):
         pile_mtl = M["snow"] if cfg["snow_cover"] else M["dirt"]
-        # 드레싱은 전부 상부 테라스(x<0) 위 — 뱅크 사면 위 부유 방지.
+        # All the dressing sits on the upper terrace (x<0) - prevents floating over the bank slope.
         base_top = LIFT
         for i, pd in enumerate(PARAMS["piles"]):
             s = pd["s"]
@@ -763,7 +764,7 @@ def main():
                 (po["cx"], po["cy"], base_top + po["h"] + po["cap_t"] / 2.0
                  - 0.01),
                 (po["r"] * 2.4, po["r"] * 2.4, po["cap_t"]), M["snow"])
-        # 원경 건물 — C(+X)는 하부 평지, D(-X)는 테라스 레벨에 기단
+        # Distant buildings - C(+X) is plinthed on the lower ground, D(-X) at terrace level
         low_base = LOWER_TOP if cfg["hazard_stairs"] else 0.0
         for key, bd in PARAMS["buildings"].items():
             b = dict(bd)
@@ -774,11 +775,11 @@ def main():
         build_context(M)
 
     # -------------------------------------------------------------------
-    # 맥락 드레싱 v2 — 벤치 · 가로등 · 표지판 · 생울타리 · 저층 주택
-    #   전 요소가 "겨울 주거지/캠퍼스 뒷계단" 정황을 만든다. 계단·눈 레이어·
-    #   조명 파라미터는 불변이며, 신규 프림은 전부 평탄면(테라스 z=LIFT /
-    #   하부 평지 z=LOWER_TOP+LIFT) 위에만 선다(뱅크 사면 위 부유 없음).
-    #   눈 캡은 snow_cover 토글에 종속 → 대응쌍(맨 계단)에서도 기하 정합.
+    # Context dressing v2 - benches · street lamps · signpost · hedges · low-rise houses
+    #   Every element builds the "winter residential/campus back stair" situation. The stairs, snow layer
+    #   and lighting parameters are unchanged, and every new prim stands only on a flat face (terrace z=LIFT /
+    #   lower ground z=LOWER_TOP+LIFT) - nothing floats over the bank slope.
+    #   The snow caps follow the snow_cover toggle -> geometry stays consistent in the twin (bare stairs) too.
     # -------------------------------------------------------------------
     def build_context(M):
         low_top = (LOWER_TOP if cfg["hazard_stairs"] else 0.0) + LIFT
@@ -787,25 +788,25 @@ def main():
             return LIFT if kind == "upper" else low_top
 
         def cap(path, center, size):
-            """눈 캡 박판 — snow_cover ON 일 때만 생성(대응쌍 정합)."""
+            """Snow cap thin plate - created only when snow_cover is ON (twin consistency)."""
             if cfg["snow_cover"]:
                 BOX(path, center, size, M["snow"])
 
-        # ① 벤치 (좌판 + 다리 4 + 등받이) — 좌판·등받이 상단에 눈 캡
+        # (1) Bench (seat + 4 legs + back) - snow caps on the seat and the top of the back
         bs = PARAMS["bench"]
         for i, bd in enumerate(PARAMS["benches"]):
             bz = base_of(bd["base"])
             pfx = f"{ROOT}/Bench_{i}"
-            # [v5.1 §3] 축평행·정위치 해소. 벤치 0 은 제설더미·계단 어깨,
-            #   벤치 1 은 제설더미 0번 앵커 옆이라 지터폭을 0.18 로 제한해
-            #   기존 이격(0.22 m)을 잠식하지 않는다.
+            # [v5.1 §3] Fixes the axis-aligned/exact-position look. Bench 0 is by the snow pile and the stair
+            #   shoulder, bench 1 sits next to the snow pile 0 anchor, so the jitter is limited to 0.18
+            #   and does not eat into the existing clearance (0.22 m).
             _dx, _dy = bc.jit_pos(bd["cx"], bd["cy"], "benchC1", amp=0.18)
             _yaw = bc.jit_yaw(bd["cx"], bd["cy"], "benchC1", lo=3.0, hi=8.0,
                               base=bd["yaw"])
             sc.build_bench(stage, pfx, bd["cx"] + _dx, bd["cy"] + _dy, bz,
                            M["wood"], length=bs["length"], width=bs["width"],
                            height=bs["height"], yaw=_yaw)
-            # 이하 자식 프림은 build_bench 루트 Xform 로컬 좌표(회전 상속)
+            # The child prims below are in the build_bench root Xform local frame (rotation inherited)
             back_y = -(bs["width"] / 2.0 - 0.04)
             BOX(f"{pfx}/Back", (0.0, back_y, bs["height"] + bs["back_h"] / 2.0),
                 (bs["length"], 0.06, bs["back_h"]), M["wood"])
@@ -817,19 +818,19 @@ def main():
                  bs["height"] + bs["back_h"] + bs["cap_t"] / 2.0 - 0.012),
                 (bs["length"] + 0.04, 0.11, bs["cap_t"]))
 
-        # ② 가로등 (폴 + 편측 암 + 헤드) — 폴 상단·헤드에 눈 캡
+        # (2) Street lamp (pole + one-sided arm + head) - snow caps on the pole top and the head
         lm = PARAMS["lamp"]
         for i, ld in enumerate(PARAMS["lamps"]):
             bz = base_of(ld["base"])
             pfx = f"{ROOT}/Lamp_{i}"
-            # [v5.1 §3] 위치 ±0.15 m 지터. 그림자는 여전히 x<0 테라스에만
-            #   떨어지므로(그림자 방향 (−0.879,+0.477), 길이 8.5 m) 계단
-            #   트레드 은닉 조건은 불변.
+            # [v5.1 §3] Position jitter +-0.15 m. The shadow still falls only on the x<0 terrace
+            #   (shadow direction (−0.879,+0.477), length 8.5 m), so the concealment condition on the
+            #   stair treads is unchanged.
             _dx, _dy = bc.jit_pos(ld["cx"], ld["cy"], "lampC1", amp=0.15)
             cx, cy, arm = ld["cx"] + _dx, ld["cy"] + _dy, ld["arm"]
             CYL(f"{pfx}/Pole", (cx, cy, bz + lm["pole_h"] / 2.0),
                 lm["pole_r"], lm["pole_h"], M["pole"], col=True)
-            # 암은 +Y/−Y 로 뻗는 수평 실린더 → rotX 90° (축 Z→Y)
+            # The arm is a horizontal cylinder running +Y/−Y -> rotX 90 deg (axis Z->Y)
             CYL(f"{pfx}/Arm", (cx, cy + arm / 2.0, bz + lm["pole_h"] - 0.10),
                 lm["arm_r"], abs(arm), M["pole"], rotX=90.0)
             hy = cy + arm
@@ -843,7 +844,7 @@ def main():
                 (cx, cy, bz + lm["pole_h"] + lm["cap_t"] / 2.0 - 0.010),
                 (lm["pole_r"] * 2.6, lm["pole_r"] * 2.6, lm["cap_t"]))
 
-        # ③ 표지판 기둥 (안내 사인) — 패널 상단에 눈 캡
+        # (3) Signpost (information sign) - snow cap on top of the panel
         sp = PARAMS["signpost"]
         bz = base_of("upper")
         CYL(f"{ROOT}/SignPost/Pole", (sp["cx"], sp["cy"],
@@ -857,7 +858,7 @@ def main():
              - 0.008),
             (sp["panel_t"] + 0.05, sp["panel_w"] + 0.05, sp["cap_t"]))
 
-        # ④ 생울타리 라인 — 상단 눈 캡(오버행)으로 겨울 정합
+        # (4) Hedge lines - a top snow cap (overhang) keeps them consistent with winter
         hc = PARAMS["hedge_cap"]
         for i, hd in enumerate(PARAMS["hedges"]):
             bz = base_of(hd["base"])
@@ -871,7 +872,7 @@ def main():
                 (cx, cy, bz + hd["h"] + hc["t"] / 2.0 - 0.015),
                 (sx + 2.0 * hc["over"], sy + 2.0 * hc["over"], hc["t"]))
 
-        # ⑤ 원경 저층 주택 — 벽체 + 처마 지붕 슬래브 + 눈 캡 + 굴뚝 + 창
+        # (5) Distant low-rise houses - shell + eaved roof slab + snow cap + chimney + windows
         hs = PARAMS["house"]
         for i, hd in enumerate(PARAMS["houses"]):
             bz = base_of(hd["base"])
@@ -881,10 +882,10 @@ def main():
             sx = hd["x1"] - hd["x0"]
             sy = hd["y1"] - hd["y0"]
             h = hd["h"]
-            # 벽체: 기단을 foot 만큼 아래로 연장 → 지면 부유 방지
+            # Shell: extend the plinth down by foot -> prevents floating above the ground
             BOX(f"{pfx}/Shell", (cx, cy, bz + (h - hs["foot"]) / 2.0),
                 (sx, sy, h + hs["foot"]), M[f"brick_{i}"], col=True)
-            # 처마 지붕 슬래브(오버행) — 상면 z = bz+h+roof_t
+            # Eaved roof slab (overhang) - top face z = bz+h+roof_t
             BOX(f"{pfx}/Roof", (cx, cy, bz + h + hs["roof_t"] / 2.0),
                 (sx + 2.0 * hs["eave"], sy + 2.0 * hs["eave"], hs["roof_t"]),
                 M[f"roof_{i}"])
@@ -892,7 +893,7 @@ def main():
                 (cx, cy, bz + h + hs["roof_t"] + hs["cap_t"] / 2.0 - 0.02),
                 (sx + 2.0 * (hs["eave"] - hs["cap_inset"]),
                  sy + 2.0 * (hs["eave"] - hs["cap_inset"]), hs["cap_t"]))
-            # 굴뚝(지붕 한쪽) + 눈 캡
+            # Chimney (one side of the roof) + snow cap
             ch = hs["chimney_s"]
             chx = cx + sx * 0.28 * hd["face"]
             chy = cy + sy * 0.22
@@ -905,8 +906,8 @@ def main():
                  bz + h + hs["roof_t"] + hs["chimney_h"] + hs["cap_t"] / 2.0
                  - 0.02),
                 (ch + 0.06, ch + 0.06, hs["cap_t"]))
-            # 창 — 카메라를 향한 면(face=-1 → -X 파사드, +1 → +X 파사드)
-            # 창판(두께 0.04)을 벽면에 1cm 물려 동일평면 회피
+            # Windows - the face toward the camera (face=-1 -> -X facade, +1 -> +X facade)
+            # Bite the window plate (thickness 0.04) 1cm into the wall to avoid a coplanar face
             gx = (hd["x0"] if hd["face"] < 0 else hd["x1"]) \
                 + hd["face"] * 0.01
             for r in range(hs["win_rows"]):
@@ -920,7 +921,7 @@ def main():
               f"{len(PARAMS['hedges'])} · 저층 주택 {len(PARAMS['houses'])} "
               f"(눈 캡 {'ON' if cfg['snow_cover'] else 'OFF'})")
 
-    # ── 씬 조립 ──
+    # ── scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
     M = setup_materials()
     stair_mtl = M["stair"] if cfg["cue_material_break"] else M["concrete"]
@@ -938,7 +939,7 @@ def main():
         build_flat_fill(M)
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
-    build_ground_kit(M, LIFT)            # [W2] 지면 요소 — 드레싱 뒤(산포 규약)
+    build_ground_kit(M, LIFT)            # [W2] ground elements - after the dressing (scatter convention)
 
     print(f"[기하] run={RUN:.2f}m drop={DROP:.2f}m slope_k={SLOPE_K:.4f} "
           f"lower_top={LOWER_TOP:.3f} snow_lift={LIFT:.3f}")

@@ -1,34 +1,36 @@
 # -*- coding: utf-8 -*-
 """
-sceneN2_asphalt_patch.py — NegObs 인공씬 32호: 검은 아스팔트 패치 (Isaac Sim 4.5)
+sceneN2_asphalt_patch.py - NegObs synthetic scene 32: black asphalt patch (Isaac Sim 4.5)
 
-유형    : N2 Hard Negative — 평지 노면의 신설 아스팔트 패치 (GT = 전 픽셀 낙차 없음)
-사양서  : Docs/nanobanana_batch1_geometry_map.md §D sceneN2_asphalt_patch
-룩참조  : look_refs/n2_asphalt_patch.jpg (v2 재생성분)
-공통    : scene_common.py (검증된 API 헬퍼) · scene16_canopy_shadow.py (골격)
+Type    : N2 Hard Negative - a new asphalt patch on flat pavement (GT = no drop in any pixel)
+Spec    : Docs/nanobanana_batch1_geometry_map.md §D sceneN2_asphalt_patch
+Look ref: look_refs/n2_asphalt_patch.jpg (v2 regeneration)
+Shared  : scene_common.py (verified API helpers) · scene16_canopy_shadow.py (skeleton)
 
-위험 본질(반례): **낙차는 어디에도 없다.** 회색 풍화 노면 한복판에 크리스프 컷라인의
-           직사각 신설 아스팔트 패치가 완전 flush로 깔려 있다. 신설 아스팔트는
-           알베도 0.030 — 주변 콘크리트(0.42)의 1/14, 기존 아스팔트(0.16)의 1/5로
-           **"뚫린 구멍"처럼 읽히는 것**이 이 씬의 특색이다. sceneD2(공사장
-           1.5×2.0m 무방호 개구, 낙차 3.0m 양성)와 **검은 사각형 최강 혼동쌍**을
-           이루도록, 동일 치수(1.5×2.0m)의 소형 패치를 카메라 전방 x 2.6~4.6m에
-           같은 접근 구도(4m·h0.9)로 배치했다.
-목표     : 평탄 콘크리트 에이프런 + 신설 패치 2매(대형 4×5 / 소형 1.5×2.0) +
-           원경 구 아스팔트 차도·자갈 버지·건물을 조립, 렌더로 판정 (렌더 전용).
-           GT 낙차 맵 = 전 픽셀 0.
+Hazard (counter-example): **there is no drop anywhere.** A rectangular patch of
+           new asphalt with crisp cut lines is laid perfectly flush in the middle
+           of grey weathered pavement. The new asphalt has albedo 0.030 - 1/14 of
+           the surrounding concrete (0.42) and 1/5 of the existing asphalt (0.16)
+           - and **reading like a "punched hole"** is this scene's feature. To
+           form the **strongest black-rectangle confusion pair** with sceneD2 (a
+           1.5×2.0m unguarded construction opening, a positive with a 3.0m drop),
+           a small patch of the same size (1.5×2.0m) is placed at x 2.6~4.6m
+           ahead of the camera in the same approach framing (4m·h0.9).
+Goal     : assemble a flat concrete apron + 2 new patches (large 4×5 / small
+           1.5×2.0) + a far old-asphalt roadway, gravel verge and buildings, and
+           judge by render (render only). GT drop map = 0 in every pixel.
 
-실행 (GUI 룩 체크 — 기본):
+Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
     export PYTHONNOUSERSITE=1
     python sceneN2_asphalt_patch.py
 
-자동 캡처 (headless):   NEGOBS_CAPTURE=1 python sceneN2_asphalt_patch.py
-스모크 조기종료:        NEGOBS_SMOKE=1  python sceneN2_asphalt_patch.py
-도색·드레싱 검산:       NEGOBS_GEOCHECK=1 python3 sceneN2_asphalt_patch.py (Isaac 불요)
+Auto capture (headless):   NEGOBS_CAPTURE=1 python sceneN2_asphalt_patch.py
+Smoke early exit:          NEGOBS_SMOKE=1  python sceneN2_asphalt_patch.py
+Marking / dressing check:  NEGOBS_GEOCHECK=1 python3 sceneN2_asphalt_patch.py (no Isaac)
 
-좌표계: Z-up, m, 진행축 +X. 낙차 없음 — 특색(소형 패치)이 x=2.6~4.6 구간.
+Coordinates: Z-up, m, travel axis +X. No drop - the feature (small patch) is the x=2.6~4.6 stretch.
 """
 
 import os
@@ -44,18 +46,18 @@ import ground_kit as gk
 
 
 # ===========================================================================
-# [A] SCENE_CONFIG — 표준 7키. hard negative 씬이므로 hazard_* 는 낙차가 아니라
-#     "씬 특색 요소(아스팔트 패치)" 토글. 해당 없는 cue 키는 False + 사유 주석.
+# [A] SCENE_CONFIG - standard 7 keys. This is a hard negative scene, so hazard_* toggles not a drop but
+#     the "scene feature element (asphalt patch)". Cue keys that do not apply are False + a reason comment.
 # ===========================================================================
 SCENE_CONFIG = {
-    "hazard_asphalt_patch": True,  # False → 패치·컷라인 제거(균일 노면 대조군)
-    "cue_railing":        False,  # 낙차 없음 → 방호 난간 비관행. 키만 예약
-    "cue_tactile":        False,  # 차량 동선 노면 → 점자블록 비관행. 키만 예약
-    "cue_material_break": True,   # 컷라인 밝은 스트립 + 노면 줄눈. False → 경계
-                                  #   강조 없는 더 어려운 반례(패치만 덩그러니)
-    "cue_nosing":         False,  # 단이 없음 → 논슬립 띠 무의미. 키만 예약
-    "cue_sign":           False,  # [선택] 미구현 — config 키만 예약
-    "cue_scene_dressing": True,   # 차선 파선·볼라드·생울타리·원경 건물 일괄
+    "hazard_asphalt_patch": True,  # False -> remove patch and cut lines (uniform pavement control)
+    "cue_railing":        False,  # no drop -> guardrail not customary. Key reserved only
+    "cue_tactile":        False,  # vehicle-route pavement -> tactile paving not customary. Key reserved only
+    "cue_material_break": True,   # bright cut-line strip + pavement joints. False -> a harder
+                                  #   counter-example with no boundary emphasis (just the patch, bare)
+    "cue_nosing":         False,  # no step -> a non-slip strip is meaningless. Key reserved only
+    "cue_sign":           False,  # [optional] not implemented - config key reserved only
+    "cue_scene_dressing": True,   # lane dashes · bollards · hedge · backdrop buildings together
 }
 
 
@@ -63,99 +65,100 @@ SCENE_CONFIG = {
 # [B] PARAMS
 # ===========================================================================
 PARAMS = dict(
-    # ─ 노면 3대(전부 평탄, 개구 전무). 인접 평판은 z를 2mm씩 낮춰 동일평면 금지.
+    # ─ 3 pavement bodies (all flat, no opening at all). Adjacent plates drop z by 2mm each to bar coplanarity.
     apron=dict(x0=-70.0, x1=16.05, y0=-70.0, y1=70.0, z_top=0.0, thick=0.5),
     road=dict(x0=16.0, x1=30.05, y0=-70.0, y1=70.0, z_top=-0.002, thick=0.5),
     verge=dict(x0=30.0, x1=70.0, y0=-70.0, y1=70.0, z_top=-0.004, thick=0.5),
 
-    # ─ 신설 아스팔트 패치 (완전 flush: proud 0.002 ≤ 0.002 규약)
-    #   small : 맵 §D 대형과 별개 — sceneD2 개구 1.5×2.0m 와 동일 치수·구도
-    #   main  : 맵 §D 판독치 4(Y)×5(X) m. -Y로 비켜 배치(소형과 시각적 병합 방지)
+    # ─ new asphalt patches (perfectly flush: proud 0.002 <= 0.002 convention)
+    #   small : separate from the large one in map §D - same size and framing as the sceneD2 opening 1.5x2.0m
+    #   main  : map §D read-off 4(Y)x5(X) m. Offset to -Y (prevents visual merging with the small one)
     patches=[
         dict(name="small", x0=2.6, x1=4.6, y0=-0.75, y1=0.75),   # 2.0 × 1.5
         dict(name="main",  x0=7.0, x1=12.0, y0=-4.8, y1=-0.8),   # 5.0 × 4.0
     ],
     patch=dict(proud=0.0020, thick=0.05,
                cut_w=0.08, cut_proud=0.0012, cut_thick=0.02),
-    # ─ 노면 줄눈(콘크리트 슬래브 경계) — 최하층 proud
+    # ─ pavement joints (concrete slab boundaries) - the lowest proud layer
     joints=dict(spacing=4.0, width=0.03, proud=0.0006,
                 x0=-20.0, x1=16.0, y0=-20.0, y1=20.0),
-    # ─ 원경 차도 차선 파선 (도로가 Y방향 주행 → 파선도 Y로 나열)
+    # ─ lane dashes on the far roadway (the road runs along Y -> the dashes line up along Y too)
     lane=dict(x=23.0, y0=-30.0, y1=30.0, dash=3.0, gap=6.0,
               width=0.12, proud=0.002, thick=0.01),
-    # ─ 차도 가장자리 실선 2줄(파선과 함께 "2차로 도로" 확정). 파선과 동일 층.
+    # ─ 2 solid edge lines on the roadway (with the dashes they fix it as a "2-lane road"). Same layer as the dashes.
     edge_lines=[dict(name="W", x=17.0), dict(name="E", x=29.2)],
     edge_line=dict(y0=-30.0, y1=30.0, width=0.15),
 
-    # ═══ 노면 도색 문양 (cue_scene_dressing) — "주차장 → 차도" 용도 확정 ═══
-    #  ★ 재포장 리얼리즘 [사용자 지시]: 구획선은 패치(+컷라인 폭 clear)와 겹치는
-    #    구간이 **삭제**된다 → 선이 패치 아래로 사라졌다가 반대편에서 이어진다.
-    #    paint_line_segments() 가 PARAMS["patches"] 로부터 자동 절단.
-    #  ★ z 층서: 줄눈 0.0006 < 도색 0.0010 < 컷라인 0.0012 < 패치 0.0020
-    #            < 맨홀 프레임 0.0026 < 뚜껑 0.0032 < 보스 0.0038 (동일평면 없음)
+    # ═══ road markings (cue_scene_dressing) - use: "car park -> roadway" ═══
+    #  * repaving realism [user instruction]: the stall lines are **deleted** where they overlap
+    #    a patch (+ cut line width and clear margin) -> the line vanishes under the patch and resumes beyond it.
+    #    paint_line_segments() cuts them automatically from PARAMS["patches"].
+    #  * z stratigraphy: joint 0.0006 < marking 0.0010 < cut line 0.0012 < patch 0.0020
+    #            < manhole frame 0.0026 < lid 0.0032 < boss 0.0038 (nothing coplanar)
     marking=dict(proud=0.0010, thick=0.012, clear=0.030,
                  tile=0.90, gap_prob=0.10, seed=20260727),
-    #   근열/원열 주차 구획선(진행축 X를 따라 뻗음). 소형 패치가 y=0 선을,
-    #   대형 패치가 원열 y=−2.5 선을 끊는다.
-    #   ★ [W2 §5.3 N2] `near` 시점 0.4 → **−4.6**. "요소는 충분한데 좌표가
-    #     프레임 밖" 이 이 씬의 역설이다 — 근열 구획선이 x 0.4 에서 시작하면
-    #     h0.3 근경 창(d2 = x −1.436…0 · d5 = −4.436…−3 · d10 = −9.436…−8)
-    #     **어느 것에도 걸리지 않는다** `[실측 — 사양 §5.3 "N2 역설"]`.
-    #     −4.6 으로 늘리면 d5 창을 관통하고 d2 창까지 이어진다. 열 끝선
-    #     (stall_heads N x=5.6)은 그대로라 구획 길이만 10.2 m 로 늘어난다.
+    #   near/far parking stall lines (running along the travel axis X). The small patch cuts the y=0 line,
+    #   the large patch cuts the far row's y=−2.5 line.
+    #   * [W2 §5.3 N2] `near` start 0.4 -> **−4.6**. "Plenty of elements, but the coordinates
+    #     are outside the frame" is this scene's paradox - if the near stall lines start at x 0.4
+    #     they hit **none of the h0.3 near windows** (d2 = x −1.436…0 · d5 = −4.436…−3 ·
+    #     d10 = −9.436…−8) `[measured - spec §5.3 "the N2 paradox"]`.
+    #     Extending to −4.6 runs through the d5 window and reaches the d2 window. The row head line
+    #     (stall_heads N x=5.6) is unchanged, so only the stall length grows to 10.2 m.
     stall=dict(ys=(-5.0, -2.5, 0.0, 2.5, 5.0), width=0.12,
                near=(-4.6, 5.6), far=(9.0, 13.6)),
-    #   구획 끝선(폐단부) — 각 열의 +X 끝을 가로지르는 선
+    #   stall head line (closed end) - the line crossing the +X end of each row
     stall_heads=[dict(name="N", x=5.6), dict(name="F", x=13.6)],
     stall_head=dict(y0=-5.0, y1=5.0, width=0.12),
-    #   정지선(주차장 → 차도 진출부) + 통로 진행 화살표 1개(+Y 일방통행)
+    #   stop line (car park -> roadway exit) + 1 aisle direction arrow (+Y one-way)
     stopline=dict(x=15.2, y0=-6.0, y1=6.0, width=0.45),
     arrow=dict(cx=7.3, cy=3.2, yaw=90.0, shaft_len=2.0, shaft_w=0.22,
                head_len=0.85, head_w=0.20, head_ang=32.0),
-    #   소형 맨홀 1기(통로부, flush)
+    #   1 small manhole (in the aisle, flush)
     manhole=dict(cx=6.3, cy=1.4, r_frame=0.36, r_lid=0.30, r_boss=0.08,
                  h=0.03, proud_frame=0.0026, proud_lid=0.0032,
                  proud_boss=0.0038),
 
-    # ═══ [W2 ground_kit] P4 street_asphalt — 사양 §5.3 N2 행 ═══════════════
-    #  이 씬의 진단은 "요소가 없다"가 아니라 **"요소는 충분한데 좌표가 근경
-    #  창 밖"** 이다 — 9종을 갖고도 σ_LF 1.36 인 정확한 기전 `[사양 §0-3]`.
-    #  따라서 킷의 역할은 **근경 창 충전**에 한정한다:
-    #    ① 맨홀 1기 추가(구 맨홀 x=6.3 은 유지 — 사양 "또는 1기 추가")
-    #    ② 근경 균열망 6본 · 보수 패치 3매 · 타이어/유류 얼룩 · 경계 잡초
-    #  금지·생략:
-    #    · **줄눈**: 씬이 이미 4 m 격자를 x −20…16 에 깔았고 3창을 전부
-    #      통과한다(d2 x=0 · d5 x=−4 · d10 x=−8 `[계산]`) → 킷 줄눈 0
-    #      (`street_asphalt` 는 애초에 `joint=None`). D6 이중 격자 회피.
-    #    · **L형 측구·차선 도색**: 연석(y=9.50)은 근경 창 밖이고 도색은
-    #      `build_markings()` 가 이미 담당한다 → `gutter_L=0`, `marking=()`.
+    # ═══ [W2 ground_kit] P4 street_asphalt - spec §5.3 N2 row ══════════════
+    #  the diagnosis for this scene is not "there are no elements" but **"there are plenty of
+    #  elements, but the coordinates are outside the near window"** - the exact
+    #  mechanism behind σ_LF 1.36 despite having 9 kinds `[spec §0-3]`.
+    #  so the kit's role is limited to **filling the near windows**:
+    #    (1) add 1 manhole (the old manhole at x=6.3 stays - spec "or add 1")
+    #    (2) 6 near-view cracks · 3 repair patches · tyre/oil stains · edge weeds
+    #  banned / omitted:
+    #    · **joints**: the scene already lays a 4 m grid over x −20…16 and it passes all 3
+    #      windows (d2 x=0 · d5 x=−4 · d10 x=−8 `[computed]`) -> 0 kit joints
+    #      (`street_asphalt` has `joint=None` to begin with). Avoids the D6 double grid.
+    #    · **L-shaped gutter and lane paint**: the kerb (y=9.50) is outside the near windows and
+    #      the paint is already handled by `build_markings()` -> `gutter_L=0`, `marking=()`.
     ground=dict(
         region=(-12.0, -4.0, 2.0, 4.0),
-        #  맨홀 — 파일럿 결재 M9-ⓑ 2차 정정 기준(면 요소 화면폭 ≤25 %)을
-        #  적용해 W2 창(2.00~3.00 m)에 둔다. x=−2.40 ⇒ d5 지면거리 2.60 m ·
-        #  화면폭 414 px = 21.6 % `[계산 — W_px = f·0.648/X]`.
-        #  y=+0.50: 근열 구획선 y ∈ {−5,−2.5,0,2.5,5} 사이 중앙이라 도색과
-        #  겹치지 않는다(Z-파이팅 0).
+        #  manhole - applying the criterion of the pilot-approved M9-(b) 2nd correction
+        #  (areal element screen width <=25 %), it is placed in the W2 window (2.00~3.00 m).
+        #  x=−2.40 ⇒ d5 ground distance 2.60 m · screen width 414 px = 21.6 % `[computed - W_px = f·0.648/X]`.
+        #  y=+0.50: it sits midway between the near stall lines y ∈ {−5,−2.5,0,2.5,5}, so it does not
+        #  overlap the paint (0 Z-fighting).
         manhole=(-2.40, 0.50),
-        #  패치 #1 이 d2 근경 창(x −1.436…0)을 담당. 씬 자체 패치(x 2.6…4.6 ·
-        #  7…12)와 x 로 완전 분리 → 시각적 병합·Z-파이팅 없음.
-        #  3매 = d2/d5/d10 근경 창(W1) 각 1매 — 사양 §2.2 처방 제1원칙
-        #  ("이산 요소는 세 창 각각에 최소 1개"). 프레임 반폭이 X=0.8 m 에서
-        #  0.46 m 뿐이라 **|y| ≤ 0.4** 여야 화면에 든다 `[계산]`.
-        #  d2 매는 y=0 구획선 위에 얹힌다 — 이 씬의 "재포장 패치가 구획선을
-        #  끊는다" 서사와 정확히 같은 사건이다(도색은 proud 0.0010, 패치는
-        #  0.0020 이라 Z-파이팅 없이 선이 패치 밑으로 사라진다).
+        #  patch #1 covers the d2 near window (x −1.436…0). It is fully separated in x from the
+        #  scene's own patches (x 2.6…4.6 · 7…12) -> no visual merging and no Z-fighting.
+        #  3 patches = 1 each for the d2/d5/d10 near windows (W1) - the 1st principle of the §2.2
+        #  prescription ("at least 1 discrete element in each of the three windows"). The frame half
+        #  width is only 0.46 m at X=0.8 m, so **|y| <= 0.4** is needed to be in frame `[computed]`.
+        #  the d2 one lands on the y=0 stall line - exactly the same event as this scene's narrative
+        #  "the repaving patch cuts the stall line" (the paint is proud 0.0010 and the patch
+        #  0.0020, so the line disappears under the patch with no Z-fighting).
         patches=[(-1.20, 0.00), (-3.80, 0.30), (-8.80, -0.30)],
         gullies=[(-3.0, -3.6), (-8.0, -3.6)],
         tactile_depth=0.60, tactile_setback=0.30,
     ),
 
-    # ═══ 맥락 드레싱 — 연석·보도 경계 / 가로등 / 가로수 / 원경 스카이라인 ═══
-    #  ★ GT 불변: 연석은 **평지 위에 솟은 z≥0 융기 스트립**(양측 지면 모두 z≈0)
-    #    → 실낙차 아님. 보도 슬래브도 proud 0.003 의 flush 판.
-    #  ★ 카메라 회랑: 전 뷰 eye 는 (x −6..−1.4, y 0) — 신규 입체물은 |y| ≥ 9.5
-    #    또는 x ≥ 14.5 에만 둔다(매몰·폐색 원천 배제).
-    curb=dict(x0=-30.0, x1=15.0, y=9.50, t=0.35, h=0.14),   # ±y 대칭 2본
+    # ═══ context dressing - kerb/sidewalk, streetlights, trees, skyline ═════
+    #  * GT unchanged: the kerb is a **raised z>=0 strip on flat ground** (ground on both sides is z~0)
+    #    -> not a real drop. The sidewalk slab is also a flush plate at proud 0.003.
+    #  * camera corridor: every view's eye is at (x −6..−1.4, y 0) - new solid objects go only at
+    #    |y| >= 9.5 or x >= 14.5 (rules out burial and occlusion at source).
+    curb=dict(x0=-30.0, x1=15.0, y=9.50, t=0.35, h=0.14),   # 2 runs, symmetric in +-y
     walk=dict(x0=-30.0, x1=15.0, y_in=9.85, y_out=14.0, z_top=0.0030),
     streetlights=[dict(name="A", cx=0.0, cy=11.6), dict(name="B", cx=-8.0, cy=11.6),
                   dict(name="C", cx=12.0, cy=-12.2)],
@@ -163,27 +166,27 @@ PARAMS = dict(
     planters=[dict(name="A", cx=4.0, cy=12.0), dict(name="B", cx=-4.0, cy=-12.0)],
     planter=dict(size=2.4, curb_h=0.42, curb_t=0.22, cap_over=0.05,
                  cap_h=0.05, grass_h=0.36),
-    # ── 볼라드 [v5.1 §2 · ctx2] ───────────────────────────────────────────
-    #   구(舊): y=8.5(=차도 한복판, 연석 y9.5 안쪽 1 m) · 간격 4.0 · h0.75 ·
-    #   반사띠/점형블록 없음 → 위치·규격 모두 비현실.
-    #   신(新): **보도-차도 접점 유지**하되 연석(y 9.50..9.85) **바깥쪽 보도 위**
-    #   y=10.30 (연석 전면에서 0.45 m 이격 = 관행)으로 이설. 간격 1.5 m.
-    #   점형블록은 **보도측(+Y)** 으로 flush (보행 유도 방향).
-    #   base_z = walk.z_top(0.0030) — 보도판 위에 세운다.
-    #   ★ 카메라 회랑 |y| ≥ 9.5 규약을 이제서야 충족(구 y=8.5는 위반이었다).
+    # ── bollards [v5.1 §2 · ctx2] ─────────────────────────────────────────
+    #   old: y=8.5 (= the middle of the roadway, 1 m inside the kerb y9.5) · spacing 4.0 · h0.75 ·
+    #   no reflective band or dot tactile paving -> both position and spec unrealistic.
+    #   new: **keep the sidewalk-roadway interface** but move them **onto the sidewalk outside**
+    #   the kerb (y 9.50..9.85), to y=10.30 (0.45 m clear of the kerb face = usual practice). Spacing 1.5 m.
+    #   the dot tactile paving is flush on the **sidewalk side (+Y)** (the walking guidance direction).
+    #   base_z = walk.z_top(0.0030) - they stand on the sidewalk plate.
+    #   * only now is the camera corridor |y| >= 9.5 convention satisfied (the old y=8.5 violated it).
     bollards=dict(y=10.30, x0=2.0, x1=14.0, spacing=1.5, r=0.06, h=0.90,
                   front=(0.0, 1.0)),
     hedge=dict(x0=31.0, x1=32.2, y0=-26.0, y1=26.0, h=0.9),
     buildings=dict(
-        # 원경 비스타 차단(+X 지평선): 파사드 -X평면
+        # blocks the far vista (+X horizon): facade on the -X plane
         C=dict(x0=40.0, x1=50.0, y0=-26.0, y1=26.0, h=11.0, floors=3,
                axis="x", facade_x=40.0, face_dir=-1.0, base_z=-0.004),
-        # ─ 스카이라인(실루엣 단차): C 뒤 고층 + 측면 중층 ─
+        # ─ skyline (silhouette steps): a tower behind C + mid-rise at the sides ─
         T=dict(x0=52.0, x1=64.0, y0=-18.0, y1=12.0, h=30.0, floors=9,
                axis="x", facade_x=52.0, face_dir=-1.0, base_z=-0.004),
         E=dict(x0=42.0, x1=52.0, y0=28.0, y1=44.0, h=20.0, floors=6,
                axis="x", facade_x=42.0, face_dir=-1.0, base_z=-0.004),
-        # ─ 보도 너머 가로 벽면(양측) : 파사드 y평면. x1=14.5 (차도 침범 금지) ─
+        # ─ street wall beyond the sidewalk (both sides) : facade on the y plane. x1=14.5 (no roadway intrusion) ─
         L=dict(x0=-24.0, x1=14.5, y0=15.0, y1=25.0, h=12.0, floors=4,
                axis="y", facade_y=15.0, face_dir=-1.0),
         R=dict(x0=-24.0, x1=14.5, y0=-25.0, y1=-15.0, h=12.0, floors=4,
@@ -194,26 +197,26 @@ PARAMS = dict(
     material=dict(
         scale=dict(plaza_lower=0.9, plaza_light=1.0, gravel=0.6, grass=1.4,
                    brick_red=2.0),
-        # ─ 노면: plaza_lower 원본 평균 sRGB 0.49(중성 회) + 풍화 틴트 → ~0.42
+        # ─ pavement: plaza_lower source mean sRGB 0.49 (neutral grey) + weathering tint -> ~0.42
         apron_tint=(0.86, 0.86, 0.84),
-        # ─ 신설 아스팔트: sRGB 지각 규약(0.02~0.06 대역)의 최암부.
-        #   기존 asphalt 상수색 0.16(scene11/17) 대비 1/5 → "구멍처럼 보임"이 특색
+        # ─ new asphalt: the darkest end of the sRGB perception convention (0.02~0.06 band).
+        #   1/5 of the existing asphalt constant colour 0.16 (scene11/17) -> "looks like a hole" is the feature
         patch_color=(0.030, 0.030, 0.033), patch_rough=0.92,
-        cut_color=(0.34, 0.33, 0.31), cut_rough=0.85,      # 컷라인 밝은 회색 립
+        cut_color=(0.34, 0.33, 0.31), cut_rough=0.85,      # bright grey lip of the cut line
         joint_color=(0.06, 0.06, 0.06), joint_rough=0.85,
-        asphalt_color=(0.16, 0.16, 0.17), asphalt_rough=0.90,  # 구 아스팔트(표준)
+        asphalt_color=(0.16, 0.16, 0.17), asphalt_rough=0.90,  # old asphalt (standard)
         lane_color=(0.55, 0.55, 0.53), lane_rough=0.70,
         glass_color=(0.06, 0.09, 0.12), glass_rough=0.08,
         parapet_color=(0.88, 0.86, 0.82), parapet_rough=0.6,
         hedge_tint=(0.35, 0.45, 0.28),
-        # ─ 노면 도색: 마모 3톤(신설→퇴색). 콘크리트 노면(~0.42)보다 밝아야
-        #   "백색 도색"으로 읽힌다. 퇴색톤은 노면과 거의 같아 결락처럼 보인다.
+        # ─ road markings: 3 wear tones (new -> faded). They must be brighter than the concrete
+        #   pavement (~0.42) to read as "white paint". The faded tone is close to the pavement, so it looks missing.
         paint_tints=((0.68, 0.67, 0.64), (0.56, 0.55, 0.53), (0.45, 0.45, 0.43)),
         paint_rough=0.72,
-        # ─ 맨홀(주철) : sRGB 0.02~0.06 암색 규약
+        # ─ manhole (cast iron) : sRGB 0.02~0.06 dark colour convention
         iron_color=(0.048, 0.048, 0.050), iron_rough=0.60, iron_metallic=0.4,
         lid_color=(0.040, 0.040, 0.045), lid_rough=0.50, lid_metallic=0.6,
-        # ─ 맥락 드레싱
+        # ─ context dressing
         walk_tint=(0.90, 0.89, 0.86),
         curb_color=(0.72, 0.72, 0.69), curb_rough=0.6,
         post_color=(0.55, 0.55, 0.58), post_metallic=0.5, post_rough=0.5,
@@ -222,8 +225,8 @@ PARAMS = dict(
         wood_color=(0.30, 0.20, 0.12), wood_rough=0.85,
         canopy_a=(0.025, 0.045, 0.015), canopy_b=(0.035, 0.060, 0.020),
         canopy_rough=1.0,
-        # ─ 볼라드 v5.1: 스테인리스 몸통 + 상단 백색 반사띠(소면적) +
-        #   전면 점형블록(황색). 반사띠는 본당 0.08 m² 라 "순백 대면적" 아님.
+        # ─ bollard v5.1: stainless body + white reflective band on top (small area) +
+        #   dot tactile paving at the front (yellow). The band is 0.08 m² per unit, so not a "large pure-white area".
         bollard_color=(0.78, 0.80, 0.83), bollard_metallic=0.85,
         bollard_rough=0.34,
         bollard_band_color=(0.88, 0.88, 0.86),
@@ -239,14 +242,14 @@ PARAMS = dict(
         hdri_sun_rotz_offset=233.5,
         dome_rotation_step=15.0,
     ),
-    # ─── SUN_AZ_OFFSET = 171.5 (v3 §A-7 표준 유지).
-    #     태양 매핑: 월드 태양 az ≈ 33.5 + 171.5 = 205° → 카메라(+X 주시) 뒤 좌측.
-    #     그림자 방위 az_s = 205 − 180 = 25° → 그림자가 +X(약간 +Y)로, 즉 물체
-    #     뒤편(카메라 반대쪽)으로 떨어진다.
-    #     ⇒ **정면광**이라 프레임 안으로 들어오는 긴 캐스트 섀도가 없다. 이 씬의
-    #        판정 대상은 "재질 암부(패치)"이므로, 그림자 암부와 섞이면 반례
-    #        해석이 오염된다 — 표준 방위를 그대로 쓰는 적극적 사유. (sceneN1이
-    #        146.5로 그림자를 특색화한 것과 정반대 목적.)
+    # ─── SUN_AZ_OFFSET = 171.5 (v3 §A-7 standard kept).
+    #     sun mapping: world sun az ~ 33.5 + 171.5 = 205 deg -> behind and left of the camera (facing +X).
+    #     shadow azimuth az_s = 205 − 180 = 25 deg -> shadows fall towards +X (slightly +Y), i.e.
+    #     behind the object (away from the camera).
+    #     ⇒ it is **front light**, so no long cast shadow reaches into the frame. What this scene
+    #        judges is the "material dark zone (the patch)", so mixing it with shadow dark zones would
+    #        contaminate the counter-example reading - an active reason to keep the standard azimuth. (The
+    #        exact opposite purpose to sceneN1, which made the shadow its feature with 146.5.)
     SUN_AZ_OFFSET=171.5,
 
     render=dict(pt_total_spp=512, pt_max_bounces=8),
@@ -273,7 +276,7 @@ if _sc_ov:
 
 
 # ===========================================================================
-# [C] 경로 상수 + 필요 텍스처 역할
+# [C] path constants + required texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "sceneN2")
@@ -283,18 +286,20 @@ ASSET_ROLES = ["plaza_lower", "plaza_light", "gravel", "grass", "brick_red",
 
 
 # ===========================================================================
-# [C2] 노면 도색 절단 — "재포장으로 구획선이 패치 아래로 사라진다"
-#      (stage 불필요 · 순수 기하 → markcheck() 와 공용)
+# [C2] cutting the road markings - "repaving makes the stall line vanish under the patch"
+#      (no stage needed · pure geometry -> shared with markcheck())
 # ===========================================================================
 def paint_line_segments(axis, fixed, a0, a1):
-    """직선 도색 [a0,a1] 에서 패치(+컷라인 폭 + clear 여유) 구간을 제거.
+    """Remove from a straight marking [a0,a1] the stretches taken by a patch (+ cut line width + clear margin).
 
-    axis="x": 선이 X를 따라 뻗고 `fixed` 는 그 선의 y 좌표.
-    axis="y": 선이 Y를 따라 뻗고 `fixed` 는 x 좌표.
-    반환: [(a, b), ...] (길이 0.05 m 미만 조각은 버림).
-    패치 밑은 신설 아스팔트로 덮여 도색이 존재하지 않으므로, 선은 패치 한쪽에서
-    끊기고 반대편에서 다시 나타난다 = 재포장 리얼리즘(사용자 지시).
-    동시에 도색(proud 0.0010)과 컷라인(0.0012)의 XY 겹침도 원천 제거된다.
+    axis="x": the line runs along X and `fixed` is that line's y coordinate.
+    axis="y": the line runs along Y and `fixed` is its x coordinate.
+    return: [(a, b), ...] (pieces shorter than 0.05 m are discarded).
+    Under a patch the surface is new asphalt and no marking exists, so the line
+    breaks on one side of the patch and reappears on the other = repaving realism
+    (user instruction).
+    At the same time any XY overlap between the marking (proud 0.0010) and the cut
+    line (0.0012) is removed at source.
     """
     m = float(PARAMS["patch"]["cut_w"]) + float(PARAMS["marking"]["clear"])
     segs = [(float(a0), float(a1))]
@@ -321,26 +326,26 @@ def paint_line_segments(axis, fixed, a0, a1):
 
 
 def build_views():
-    """카메라 프리셋: grid_views(gy=0.0) + 미장센 4컷."""
+    """Camera presets: grid_views(gy=0.0) + 4 mise-en-scene cuts."""
     views = sc.grid_views(0.0)
-    # approach: 에이프런에서 패치로 보행 접근 (두 패치가 함께 읽히는 인상)
+    # approach: walking from the apron towards the patch (how the two patches read together)
     views["approach"] = dict(eye=[-6.0, 0.0, 1.6], tgt=[5.0, 0.0, 0.1])
-    # patch_confusion: **sceneD2(개구부)와 동일 구도** — 소형 패치 근단
-    #   x=2.6 에서 4m 후퇴·h0.9. 두 씬 캡처를 나란히 놓고 혼동쌍 판정.
+    # patch_confusion: **same framing as sceneD2 (the opening)** - 4m back from the small patch's
+    #   near end x=2.6, h0.9. Put the two scenes' captures side by side to judge the confusion pair.
     views["patch_confusion"] = dict(eye=[-1.4, 0.0, 0.9], tgt=[4.6, 0.0, 0.05])
-    # patch_grazing: 저시점 grazing — flush 여부(두께 그림자 부재) 검증
+    # patch_grazing: low-viewpoint grazing - verifies flushness (no thickness shadow)
     views["patch_grazing"] = dict(eye=[-3.0, 0.0, 0.35], tgt=[6.0, 0.0, 0.1])
-    # beauty_oblique: 사선 부감 — 패치가 평면임을 드러내는 대조 컷
+    # beauty_oblique: oblique high angle - the contrast cut that reveals the patch is flat
     views["beauty_oblique"] = dict(eye=[-5.0, -4.5, 2.4], tgt=[6.0, -1.0, -0.2])
     return views
 
 
 # ===========================================================================
-# [C3b] 배치 비정형 (v5.1 §3) — 결정적 지터. 빌더·검산이 같은 함수를 쓴다.
-#   제외 대상(기능 반복열이라 정렬이 현실): 주차 구획선·차선 파선·줄눈·정지선.
+# [C3b] irregular placement (v5.1 §3) - deterministic jitter. Builder and check use the same function.
+#   Excluded (functional repeating rows, so alignment is realistic): stall lines · lane dashes · joints · stop line.
 # ===========================================================================
 def streetlight_placements():
-    """[(name, x, y, yaw), ...] — 가로등 위치 ±0.2 m · 암 방위 ±3~8° 지터."""
+    """[(name, x, y, yaw), ...] - streetlight position ±0.2 m · arm bearing ±3~8° jitter."""
     out = []
     for s in PARAMS["streetlights"]:
         dx, dy = bc.jit_pos(s["cx"], s["cy"], "slN2", amp=0.20)
@@ -350,7 +355,7 @@ def streetlight_placements():
 
 
 def planter_placements():
-    """[(name, x, y), ...] — 가로수 화단 위치 ±0.15 m 지터(축평행 유지: 연석)."""
+    """[(name, x, y), ...] - street-tree planter position ±0.15 m jitter (kept axis-aligned: the kerb)."""
     out = []
     for p in PARAMS["planters"]:
         dx, dy = bc.jit_pos(p["cx"], p["cy"], "plN2", amp=0.15)
@@ -359,17 +364,18 @@ def planter_placements():
 
 
 def bollard_points():
-    """[v5.1 §2] 보도-차도 접점 볼라드 열 중심 [(x, y), ...] (간격 1.5 m)."""
+    """[v5.1 §2] Centres of the bollard row at the sidewalk-roadway interface [(x, y), ...] (spacing 1.5 m)."""
     bo = PARAMS["bollards"]
     return bc.bollard_line(bo["x0"], bo["y"], bo["x1"], bo["y"],
                            spacing=bo["spacing"])
 
 
 def tactile_band_rect():
-    """[W2 §12.5 ②] 볼라드 열 전면 **연속 점형 띠** (x0, y0, x1, y1).
+    """[W2 §12.5 (2)] **Continuous dot tactile strip** in front of the bollard row (x0, y0, x1, y1).
 
-    법정 위치 "볼라드 전면 0.3 m" + 점형 세로폭 60 cm 표준. 이 씬의 전면은
-    +Y(보도측)라 띠는 볼라드 앞면에서 +Y 로 뻗는다. 좌표는 PARAMS 유도(§7.4).
+    Statutory position "0.3 m in front of the bollard" + the 60 cm dot depth
+    standard. In this scene the front is +Y (the sidewalk side), so the strip
+    extends in +Y from the bollards' front face. Coordinates derived from PARAMS (§7.4).
     """
     bo, g = PARAMS["bollards"], PARAMS["ground"]
     sb, dp = float(g["tactile_setback"]), float(g["tactile_depth"])
@@ -380,12 +386,12 @@ def tactile_band_rect():
 
 
 def ground_plans():
-    """[W2 ground_kit] 지면 계획 — 씬 조립부와 CPU 검산이 같은 함수를 쓴다."""
+    """[W2 ground_kit] Ground plan - the scene assembly and the CPU check use the same function."""
     g = PARAMS["ground"]
     gp = gk.plan_ground(
         "street_asphalt", region=tuple(g["region"]),
         z=float(PARAMS["apron"]["z_top"]), gy=0.0, origin=(0.0, 0.0, 0.0),
-        edges=(),                       # hard negative — 낙차 에지 0
+        edges=(),                       # hard negative - 0 drop edges
         dists=(2, 5, 10), scene="sceneN2",
         tactile=("bollard",) if SCENE_CONFIG["cue_scene_dressing"] else (),
         sites=dict(manhole=[tuple(g["manhole"])],
@@ -399,14 +405,15 @@ def ground_plans():
 
 
 # ===========================================================================
-# [C4] 검산 (Isaac 불요) — NEGOBS_GEOCHECK=1 python3 sceneN2_asphalt_patch.py
-#   ① 도색 절단표: 구획선이 패치에서 끊기고 반대편에서 이어지는가
-#   ② 카메라 매몰: 전 뷰 eye 가 신규 입체물 AABB(여유 0.35) 밖인가
-#   ③ 특색 폐색: 신규 입체물이 카메라–패치 사이 시야뿔(±30°)에 없는가
+# [C4] numeric checks (no Isaac) - NEGOBS_GEOCHECK=1 python3 sceneN2_asphalt_patch.py
+#   (1) marking cut table: does the stall line break at the patch and resume beyond it
+#   (2) camera burial: is every view's eye outside the new solid objects' AABBs (margin 0.35)
+#   (3) feature occlusion: is any new solid object inside the +-30 deg view cone between camera and patch
 # ===========================================================================
 def dressing_aabbs():
-    """신규/기존 **입체** 드레싱의 (name, xa, xb, ya, yb, z_top). 도색·맨홀 등
-    flush 요소는 폐색·매몰과 무관하므로 제외한다."""
+    """(name, xa, xb, ya, yb, z_top) for new and existing **solid** dressing. Flush
+    elements such as markings and manholes are irrelevant to occlusion and burial,
+    so they are excluded."""
     out = []
     cb, wk = PARAMS["curb"], PARAMS["walk"]
     for sgn, tag in ((1.0, "N"), (-1.0, "S")):
@@ -419,7 +426,7 @@ def dressing_aabbs():
                     max(w0, w1), wk["z_top"]))
     sl = PARAMS["streetlight"]
     ex = sl["arm_len"] + sl["head"] / 2.0
-    ey = ex * math.sin(math.radians(8.0)) + sl["head"] / 2.0   # yaw 지터 상계
+    ey = ex * math.sin(math.radians(8.0)) + sl["head"] / 2.0   # yaw jitter bound
     for name, sx, sy, _yaw in streetlight_placements():
         out.append((f"Streetlight_{name}", sx - ex, sx + ex,
                     sy - ey, sy + ey, sl["pole_h"]))
@@ -487,16 +494,16 @@ def geocheck():
     print("  최근접(수평) %s = %.2f m → %s"
           % (worst[0], worst[1], "합격" if hit == 0 else "불합격"))
     print("sceneN2 검산 ③ 특색(패치) 폐색 — 방위구간 중첩 × 패치보다 근접")
-    #   폐색 성립 조건 = ①물체의 수평 방위구간이 패치의 방위구간과 겹치고
-    #   ②물체가 패치보다 앞에 있을 것. (지면 위 물체이므로 방위가 안 겹치면
-    #    화면상 좌우로 비켜나 패치를 가릴 수 없다.)
+    #   occlusion holds when (1) the object's horizontal bearing span overlaps the patch's span and
+    #   (2) the object is nearer than the patch. (They sit on the ground, so if the bearings do not
+    #    overlap the object is off to one side on screen and cannot hide the patch.)
     def _bearing_span(ex_, ey_, vyaw, corners):
         rels = []
         for cx_, cy_ in corners:
             rels.append((math.degrees(math.atan2(cy_ - ey_, cx_ - ex_))
                          - vyaw + 540.0) % 360.0 - 180.0)
         lo, hi = min(rels), max(rels)
-        if hi - lo > 180.0:                 # 카메라를 감싸는 판(보도·연석 등)
+        if hi - lo > 180.0:                 # plates that wrap around the camera (sidewalk, kerb, etc.)
             return -180.0, 180.0
         return lo, hi
 
@@ -509,12 +516,12 @@ def geocheck():
         plo, phi = _bearing_span(ex_, ey_, vyaw, pc)
         d_far = max(math.hypot(px - ex_, py - ey_) for px, py in pc)
         for nm, xa, xb, ya, yb, zt in boxes:
-            if zt < 0.05:                   # flush 판(보도 슬래브)은 폐색 불가
+            if zt < 0.05:                   # a flush plate (sidewalk slab) cannot occlude
                 continue
             cor = [(cx_, cy_) for cx_ in (xa, xb) for cy_ in (ya, yb)]
             olo, ohi = _bearing_span(ex_, ey_, vyaw, cor)
             d_min = min(math.hypot(cx_ - ex_, cy_ - ey_) for cx_, cy_ in cor)
-            if ohi < plo or olo > phi:      # 방위 비중첩 → 좌우로 비켜남
+            if ohi < plo or olo > phi:      # bearings do not overlap -> off to one side
                 continue
             if d_min < d_far:
                 print("  %-20s ★폐색 위험★ %s (방위 %.1f..%.1f vs 패치 %.1f..%.1f,"
@@ -578,7 +585,7 @@ def main():
         return sc.make_pbr(stage, path, *args, **kwargs)
 
     def SLAB(path, p, mtl, col=True):
-        """z_top 상면·thick 두께의 축정렬 노면 평판."""
+        """Axis-aligned pavement plate with top face z_top and thickness thick."""
         return BOX(path,
                    ((p["x0"] + p["x1"]) / 2.0, (p["y0"] + p["y1"]) / 2.0,
                     p["z_top"] - p["thick"] / 2.0),
@@ -586,7 +593,7 @@ def main():
                    mtl, col=col)
 
     # -------------------------------------------------------------------
-    # 재질
+    # materials
     # -------------------------------------------------------------------
     def setup_materials():
         sca = mp["scale"]
@@ -622,7 +629,7 @@ def main():
         M["parapet"] = PBR(f"{ROOT}/Looks/Parapet",
                            diffuse_color=mp["parapet_color"],
                            roughness_const=mp["parapet_rough"])
-        # ─ 노면 도색 3톤(마모) ─
+        # ─ road markings, 3 tones (wear) ─
         M["paint"] = []
         for i, t in enumerate(mp["paint_tints"]):
             M["paint"].append(PBR(f"{ROOT}/Looks/Paint_{i}", diffuse_color=t,
@@ -634,7 +641,7 @@ def main():
         M["lid"] = PBR(f"{ROOT}/Looks/Lid", diffuse_color=mp["lid_color"],
                        metallic=mp["lid_metallic"],
                        roughness_const=mp["lid_rough"], specular_level=0.3)
-        # ─ 맥락 드레싱 ─
+        # ─ context dressing ─
         M["walk"] = PBR(
             f"{ROOT}/Looks/Walk", sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
@@ -660,7 +667,7 @@ def main():
                             diffuse_color=mp["canopy_b"],
                             roughness_const=mp["canopy_rough"],
                             specular_level=0.0)
-        # ─ 볼라드 v5.1 (몸통 / 반사띠 / 전면 점형블록) ─
+        # ─ bollard v5.1 (body / reflective band / front dot tactile paving) ─
         M["bollard_body"] = PBR(f"{ROOT}/Looks/BollardBody",
                                 diffuse_color=mp["bollard_color"],
                                 metallic=mp["bollard_metallic"],
@@ -673,22 +680,22 @@ def main():
         return M
 
     # -------------------------------------------------------------------
-    # 노면 — 에이프런 / 구 아스팔트 차도 / 자갈 버지 (전부 평탄, 개구 전무)
-    #   인접 평판은 X로 0.05 겹치되 z_top 을 2mm씩 낮춰 동일평면·틈 동시 회피.
+    # pavement - apron / old asphalt roadway / gravel verge (all flat, no opening at all)
+    #   Adjacent plates overlap by 0.05 in X but drop z_top by 2mm each, avoiding coplanarity and gaps at once.
     # -------------------------------------------------------------------
     def build_ground(M):
-        # [W2-0 · P-A] 에이프런 상면이 ground_kit 의 장식 대상이다 → 변위 스킨
-        #   OFF. `add_box` 가 그 자리에서 `_skin_wanted` 를 부르므로 **SLAB
-        #   호출 전에** 등록한다 `[사양 §1.2]`. 차도(Road)도 노면 도색·파선이
-        #   flush(0.002)라 같이 지킨다.
+        # [W2-0 · P-A] the apron top face is what ground_kit decorates -> displacement skin
+        #   OFF. `add_box` calls `_skin_wanted` right there, so register it **before the SLAB
+        #   call** `[spec §1.2]`. The roadway (Road) follows the same rule because its markings
+        #   and dashes are flush (0.002).
         sc.skin_exclude(f"{ROOT}/Apron", f"{ROOT}/Road")
         SLAB(f"{ROOT}/Apron", PARAMS["apron"], M["apron"])
         SLAB(f"{ROOT}/Road", PARAMS["road"], M["asphalt"])
         SLAB(f"{ROOT}/Verge", PARAMS["verge"], M["gravel"])
 
     # -------------------------------------------------------------------
-    # [W2] ground_kit — P4 street_asphalt. 근경 창 충전 전용(줄눈·측구·도색은
-    #   씬이 이미 갖고 있다). 낙차 에지 0 → GT-E1′/GT-E2 는 공허참.
+    # [W2] ground_kit - P4 street_asphalt. For filling the near windows only (joints, gutter and
+    #   markings are already in the scene). 0 drop edges -> GT-E1′/GT-E2 are vacuously true.
     # -------------------------------------------------------------------
     def build_ground_kit(M):
         (_tag, gp), = ground_plans()
@@ -707,8 +714,9 @@ def main():
         return res
 
     def build_joints(M):
-        """에이프런 슬래브 줄눈 — 최하층(proud 0.0006). 패치 아래로 들어가면
-        패치 박판(두께 0.05) 볼륨에 완전히 포함되어 자연히 은폐된다."""
+        """Apron slab joints - the lowest layer (proud 0.0006). Where they run under a
+        patch they are fully contained in the patch plate volume (0.05 thick) and
+        are naturally hidden."""
         j = PARAMS["joints"]
         w, pr = j["width"], j["proud"]
         thk = pr + 0.006
@@ -727,7 +735,7 @@ def main():
                 (w, Ly, thk), M["joint"])
 
     # -------------------------------------------------------------------
-    # 신설 아스팔트 패치 + 컷라인 (특색 — GT는 여전히 "낙차 없음")
+    # new asphalt patches + cut lines (the feature - GT is still "no drop")
     # -------------------------------------------------------------------
     def build_patches(M):
         pc = PARAMS["patch"]
@@ -740,7 +748,7 @@ def main():
                 (x1 - x0, y1 - y0, pc["thick"]), M["patch"])
             if not cfg["cue_material_break"]:
                 continue
-            # 컷라인: 패치 둘레 밖으로 cut_w 만큼 (패치와 XY 겹침 없음 + z도 분리)
+            # cut line: cut_w outside the patch perimeter (no XY overlap with the patch + separated in z too)
             w = pc["cut_w"]
             zc = PARAMS["apron"]["z_top"] + pc["cut_proud"] - pc["cut_thick"] / 2.0
             strips = (
@@ -754,11 +762,11 @@ def main():
                     (sx, sy, pc["cut_thick"]), M["cut"])
 
     # -------------------------------------------------------------------
-    # 노면 도색 문양 — 주차 구획선(마모·결락) + 정지선 + 통로 화살표 + 맨홀
-    #   ★ 구획선은 paint_line_segments() 로 패치 구간이 잘려 나간다:
-    #     "선이 패치 아래로 사라졌다가 반대편에서 이어짐"(재포장 리얼리즘).
-    #   ★ 마모 표현: 0.9 m 타일 분할 → 3톤 랜덤 틴트 + 10% 결락(seed 고정).
-    #     세그먼트의 첫/끝 타일은 결락시키지 않아 선의 시작·끝은 항상 읽힌다.
+    # road markings - parking stall lines (wear and gaps) + stop line + aisle arrow + manhole
+    #   * the stall lines have their patch stretches cut out by paint_line_segments():
+    #     "the line vanishes under the patch and resumes beyond it" (repaving realism).
+    #   * wear: split into 0.9 m tiles -> 3-tone random tint + 10% gaps (fixed seed).
+    #     The first and last tile of a segment are never dropped, so the line's start and end always read.
     # -------------------------------------------------------------------
     def build_markings(M):
         mk = PARAMS["marking"]
@@ -768,14 +776,14 @@ def main():
         n_tile = [0]
 
         def paint_run(tag, axis, fixed, a0, a1, width, wear=True):
-            """[a0,a1] 을 패치로 절단한 뒤 타일 분할해 도색 박판을 깐다."""
+            """Cut [a0,a1] with the patches, split into tiles and lay the marking plates."""
             for si, (a, b) in enumerate(paint_line_segments(axis, fixed, a0, a1)):
                 nt = max(1, int(round((b - a) / mk["tile"])))
                 for i in range(nt):
                     ta = a + (b - a) * i / nt
                     tb = a + (b - a) * (i + 1) / nt
                     if wear and 0 < i < nt - 1 and rng.random() < mk["gap_prob"]:
-                        continue                    # 결락(마모로 지워진 구간)
+                        continue                    # gap (stretch worn away)
                     mtl = M["paint"][rng.randrange(len(M["paint"]))] if wear \
                         else M["paint"][0]
                     if axis == "x":
@@ -797,7 +805,7 @@ def main():
         sl = PARAMS["stopline"]
         paint_run("StopLine", "y", sl["x"], sl["y0"], sl["y1"], sl["width"],
                   wear=False)
-        # 차도 가장자리 실선(원경·연속 — 타일 분할 불요)
+        # solid roadway edge lines (far and continuous - no tile split needed)
         el = PARAMS["edge_line"]
         zr = PARAMS["road"]["z_top"] + PARAMS["lane"]["proud"] \
             - PARAMS["lane"]["thick"] / 2.0
@@ -806,10 +814,10 @@ def main():
                 (ed["x"], (el["y0"] + el["y1"]) / 2.0, zr),
                 (el["width"], el["y1"] - el["y0"], PARAMS["lane"]["thick"]),
                 M["lane"])
-        # 통로 진행 화살표(+Y 일방통행) — 축(1) + 화살머리 사선 2 (총 3 프림)
+        # aisle direction arrow (+Y one-way) - shaft (1) + 2 oblique head strokes (3 prims total)
         ar = PARAMS["arrow"]
         a = math.radians(float(ar["yaw"]))
-        ux, uy = math.cos(a), math.sin(a)             # 화살 진행 방향
+        ux, uy = math.cos(a), math.sin(a)             # arrow travel direction
         BOX(f"{ROOT}/Mark/Arrow/Shaft",
             (ar["cx"], ar["cy"], zc),
             (ar["shaft_w"] if abs(ux) < 0.5 else ar["shaft_len"],
@@ -826,7 +834,7 @@ def main():
                              (cxh, cyh, zc),
                              (ar["head_len"], ar["head_w"], mk["thick"]),
                              M["paint"][0], rotz=ang)
-        # 소형 맨홀 1기(주철, flush). 3층 proud 는 도색·패치보다 위 [층서 참조]
+        # 1 small manhole (cast iron, flush). Its 3 proud layers sit above the markings and patch [see stratigraphy]
         mh = PARAMS["manhole"]
         for tag, r, pr, mtl in (("Frame", mh["r_frame"], mh["proud_frame"], M["iron"]),
                                 ("Lid", mh["r_lid"], mh["proud_lid"], M["lid"]),
@@ -839,8 +847,8 @@ def main():
               f"차도 실선 {len(PARAMS['edge_lines'])}")
 
     # -------------------------------------------------------------------
-    # 드레싱 — 차선 파선 + 연석·보도 + 가로등·가로수 + 볼라드 + 생울타리
-    #          + 원경 건물(스카이라인 + 보도 너머 가로 벽면)
+    # dressing - lane dashes + kerb and sidewalk + streetlights and street trees + bollards + hedge
+    #          + far buildings (skyline + street wall beyond the sidewalk)
     # -------------------------------------------------------------------
     def build_dressing(M):
         ln = PARAMS["lane"]
@@ -854,8 +862,8 @@ def main():
                 continue
             BOX(f"{ROOT}/LaneDash_{i}", (ln["x"], (ya + yb) / 2.0, zc),
                 (ln["width"], yb - ya, ln["thick"]), M["lane"])
-        # 연석 + 보도 (±Y 대칭). 연석은 평지 위 융기 스트립 — 양측 지면 모두
-        # z≈0 이므로 **낙차 아님**(GT 불변). 보도판은 proud 0.003 flush.
+        # kerb + sidewalk (symmetric in +-Y). The kerb is a raised strip on flat ground - the ground on
+        # both sides is z~0, so it is **not a drop** (GT unchanged). The sidewalk plate is flush at proud 0.003.
         cb, wk = PARAMS["curb"], PARAMS["walk"]
         for sgn, tag in ((1.0, "N"), (-1.0, "S")):
             BOX(f"{ROOT}/Curb_{tag}",
@@ -870,7 +878,7 @@ def main():
                 M["walk"], col=True)
         sl = PARAMS["streetlight"]
         for name, sx, sy, syaw in streetlight_placements():
-            # v5.1 §3: 암 방위를 축평행에서 살짝 틀어 복제 인상 제거
+            # v5.1 §3: rotate the arm bearing slightly off axis-parallel to remove the cloned look
             base = sc.build_rot_group(stage, f"{ROOT}/Streetlight_{name}",
                                       (sx, sy), syaw)
             CYL(f"{base}/Pole", (sx, sy, sl["pole_h"] / 2.0),
@@ -892,12 +900,12 @@ def main():
                 size=pl["size"], curb_h=pl["curb_h"], curb_t=pl["curb_t"],
                 cap_over=pl["cap_over"], cap_h=pl["cap_h"],
                 grass_h=pl["grass_h"])
-        # 볼라드 [v5.1 §2] — 보도-차도 접점, 연석 바깥 0.45 m, 간격 1.5 m,
-        #   상단 백색 반사띠 + 전면(보도측 +Y) 0.3 m 점형블록.
+        # bollards [v5.1 §2] - sidewalk-roadway interface, 0.45 m outside the kerb, spacing 1.5 m,
+        #   white reflective band on top + 0.3 m dot tactile paving at the front (sidewalk side +Y).
         bo = PARAMS["bollards"]
         for i, (bx, by) in enumerate(bollard_points()):
-            # [W2 §12.5 ②] 본당 소판 → ground_kit 의 **연속 띠 0.60 m** 로
-            #   대체(판독 가능성). 여기서 끄지 않으면 점형 대역이 0.9 m 가 된다.
+            # [W2 §12.5 (2)] the per-unit small plate -> replaced by ground_kit's
+            #   **continuous 0.60 m strip** (legibility). If not turned off here the dot band becomes 0.9 m.
             bc.build_bollard_v51(stage, f"{ROOT}/Bollard_{i}", bx, by,
                                  PARAMS["walk"]["z_top"], None,
                                  M["bollard_body"], M["bollard_band"],
@@ -913,7 +921,7 @@ def main():
                               M["brick"], M["glass"], M["parapet"],
                               window=PARAMS["window"])
 
-    # ── 씬 조립 ──
+    # ── scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
     M = setup_materials()
 
@@ -923,9 +931,9 @@ def main():
     if cfg["hazard_asphalt_patch"]:
         build_patches(M)
     if cfg["cue_scene_dressing"]:
-        build_markings(M)                # 노면 도색(패치가 구획선을 끊는다)
+        build_markings(M)                # road markings (the patch cuts the stall lines)
         build_dressing(M)
-    build_ground_kit(M)                  # [W2] 지면 요소 — 드레싱 뒤(산포 순서 규약)
+    build_ground_kit(M)                  # [W2] ground elements - after the dressing (scatter order convention)
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])
@@ -1020,6 +1028,6 @@ def main():
 
 if __name__ == "__main__":
     if os.environ.get("NEGOBS_GEOCHECK", "0") == "1":
-        geocheck()                     # Isaac 부팅 없이 도색·드레싱만 검산
+        geocheck()                     # check only markings and dressing, without booting Isaac
     else:
         main()

@@ -1,30 +1,32 @@
 # -*- coding: utf-8 -*-
 """
-scene20_diagonal_oblique.py — NegObs 인공씬 20호: 대각 사교 계단 (Isaac Sim 4.5)
+scene20_diagonal_oblique.py - NegObs synthetic scene 20: diagonal oblique stair (Isaac Sim 4.5)
 
-유형    : T8 대각 사교 (정렬 가정 붕괴)
-사양서  : Docs/multi_scene_brief_v3.md §D scene20_diagonal_oblique
-공통    : scene_common.py (검증된 API 헬퍼) · scene01/scene02 (도시계 골격)
+Type    : T8 diagonal oblique (alignment assumption breaks down)
+Spec    : Docs/multi_scene_brief_v3.md §D scene20_diagonal_oblique
+Shared  : scene_common.py (verified API helpers) · scene01/scene02 (urban skeleton)
 
-위험 본질: 광장 보행축(+X)에 대해 30° 틀어진 직선 계단. 정면 프리셋(축=보행축
-           +X, 고정)에서 낙차 경계가 화면을 사선으로 가로지른다 — 계단이 보행
-           방향과 정렬돼 있으리란 가정이 붕괴. 지평 폐쇄 건물은 축 정렬 그대로라
-           대비가 강조된다.
-목표     : 상부 광장(plaza_light+밴드, scene01 모티프 축소) + 30° rot_group 계단
-           14단(폭 5) + 사선 연장 쐐기(광장-계단 flush 접합) + 하부 광장
-           (plaza_lower 웜) + 잔디 채움(공동 없음) + 축정렬 건물 3·축정렬
-           소품(볼라드 열·화단·벤치·가로등)을 조립, 렌더로 판정 (렌더 전용).
+Hazard  : a straight stair rotated 30 deg relative to the plaza walk axis (+X). In the
+          frontal presets (axis = walk axis +X, fixed) the drop boundary cuts across the
+          frame diagonally - the assumption that a stair is aligned with the direction of
+          travel breaks down. The horizon-closing buildings stay axis-aligned, which
+          sharpens the contrast.
+Goal    : assemble an upper plaza (plaza_light + bands, a scaled-down scene01 motif), a
+          30 deg rot_group stair of 14 steps (width 5), the diagonal extension wedge
+          (flush plaza-to-stair joint), a lower plaza (warm plaza_lower), grass fill (no
+          cavity), 3 axis-aligned buildings and axis-aligned props (bollard rows, planters,
+          benches, street lamps), and judge it from renders (render only).
 
-실행 (GUI 룩 체크 — 기본):
+Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
     export PYTHONNOUSERSITE=1
     python scene20_diagonal_oblique.py
 
-자동 캡처 (headless):   NEGOBS_CAPTURE=1 python scene20_diagonal_oblique.py
-스모크 조기종료:        NEGOBS_SMOKE=1  python scene20_diagonal_oblique.py
+Auto capture (headless):  NEGOBS_CAPTURE=1 python scene20_diagonal_oblique.py
+Smoke early exit:         NEGOBS_SMOKE=1  python scene20_diagonal_oblique.py
 
-좌표계: Z-up, m, 보행축 +X(프리셋 고정), 낙차 시작 모서리 = 회전 전 x=0.
+Coordinates: Z-up, m, walk axis +X (fixed by the presets), drop start edge = x=0 before rotation.
 """
 
 import os
@@ -38,16 +40,16 @@ import ground_kit as gk
 
 
 # ===========================================================================
-# [A] SCENE_CONFIG — 표준 7키. hazard_stairs 만 기하 토글(False→평지 통일).
+# [A] SCENE_CONFIG - standard 7 keys. Only hazard_stairs is a geometry toggle (False -> unified flat ground).
 # ===========================================================================
 SCENE_CONFIG = {
-    "hazard_stairs":      True,   # False → 계단/하부광장 제거, 전체 z=0 평지
-    "cue_railing":        True,   # 계단 양측 경사 레일 (rot_group 내 — 사선 따라)
-    "cue_tactile":        False,  # [v5.2 사용자] 점자블록 현실에선 드묾 — 기본 OFF(소거 실험용 경로 유지)   # 상단 경고띠 (rot_group 내 — 사선 따라)
-    "cue_material_break": True,   # False → 계단·하부를 상부재(plaza_light)로 통일
-    "cue_nosing":         False,  # (키 예약)
-    "cue_sign":           False,  # [v5.2 사용자] 임의 경고 팻말 제거 — 배치 없음(키만 예약)
-    "cue_scene_dressing": True,   # 밴드·축정렬 건물·잔디 일괄
+    "hazard_stairs":      True,   # False -> remove stairs/lower plaza, whole scene flat at z=0
+    "cue_railing":        True,   # Sloped rails on both sides of the stair (inside rot_group - follows the diagonal)
+    "cue_tactile":        False,  # [v5.2 user] Tactile paving is rare in reality - OFF by default (ablation path kept)   # Top warning strip (inside rot_group - follows the diagonal)
+    "cue_material_break": True,   # False -> unify stair/lower with the upper material (plaza_light)
+    "cue_nosing":         False,  # (key reserved)
+    "cue_sign":           False,  # [v5.2 user] Arbitrary warning placards removed - nothing placed (key reserved only)
+    "cue_scene_dressing": True,   # Bands, axis-aligned buildings and grass in one go
 }
 
 
@@ -55,41 +57,41 @@ SCENE_CONFIG = {
 # [B] PARAMS
 # ===========================================================================
 PARAMS = dict(
-    # 상부 광장(메사): plaza_light, x -14..-4.5, y -8..8. 상면 z=0, 계곡까지 솔리드.
-    #   [감사v4 A2] x1 0.0 → -4.5. 축정렬 광장 에지가 계단 상단선(로컬 x=0 =
-    #   월드 x=-0.5774·y 사선)보다 동쪽으로 넘어가면 북측(y>0) 윗단이 광장
-    #   솔리드에 매몰돼 첫 단차가 최대 0.75 m까지 커진다. x1=-4.5 는
-    #     ① |y|≤8 전 구간에서 광장 에지가 사선 서쪽에 머무는 한계값
-    #        (사선 x = -0.5774·8 = -4.619 ≤ -4.5 는 y=8 에서만 0.12 m 초과 —
-    #         그 지점은 계단 폭(로컬 |y|≤2.5) 밖 순수 절벽이라 보행 무관),
-    #     ② 아래 wedge(로컬 |y|≤9)가 남는 영역을 빈틈없이 덮는 한계값
-    #        (메사점은 lx≤0 ⇒ y ≤ -1.732x ⇒ ly = -0.5x+0.866y ≤ -2x ≤ 9)
-    #   을 동시에 만족한다.
+    # Upper plaza (mesa): plaza_light, x -14..-4.5, y -8..8. Top face z=0, solid down to the valley.
+    #   [audit v4 A2] x1 0.0 -> -4.5. If the axis-aligned plaza edge runs east past the stair
+    #   top line (local x=0 = world x=-0.5774*y diagonal), the north (y>0) top steps get
+    #   buried in the plaza solid and the first step height grows to as much as 0.75 m. x1=-4.5
+    #   satisfies both limits at once:
+    #     (1) the value at which the plaza edge stays west of the diagonal over all |y|<=8
+    #        (diagonal x = -0.5774*8 = -4.619 <= -4.5 exceeds by only 0.12 m at y=8 - and that
+    #         point is outside the stair width (local |y|<=2.5), pure cliff, irrelevant to walking),
+    #     (2) the value at which the wedge below (local |y|<=9) still covers the remaining area
+    #        with no gap (mesa points have lx<=0 => y <= -1.732x => ly = -0.5x+0.866y <= -2x <= 9).
     upper=dict(x0=-14.0, x1=-4.5, y0=-8.0, y1=8.0, z_top=0.0, base_z=-2.2),
-    # 상부 광장 사선 연장 쐐기 (rot_group 내부 — 동측 면 = 계단 상단선)
+    # Diagonal extension wedge of the upper plaza (inside rot_group - east face = stair top line)
     wedge=dict(x0=-8.0, x1=0.0, y_half=9.0, z_top=0.0, base_z=-2.2),
-    # [W2-D · 사양 §5.1 scene20 행] 밴드 x 범위 −13…−5 → **−13…−0.5 연장**.
-    #   측정 근거: 현행 5본(−13/−11/−9/−7/−5)은 **d10 컷만 적중**한다 — d5 의
-    #   근경 창은 x −4.44…−3.0, d2 는 −1.44…0 이라 밴드가 한 본도 들지 않는다.
-    #   −3 · −1 두 본을 되살리면 세 컷 전부에 종단 구조선이 생긴다.
-    #   ★ 구 주석("밴드는 축정렬 광장 위에만")이 x1 을 −5.0 으로 당긴 이유는
-    #     실재한다: 메사는 축정렬 광장(x ≤ −4.5)과 30° 쐐기의 합집합이고,
-    #     쐐기의 동측 경계는 월드 직선 **x = −0.5774·y** 다. 전폭 y±8 밴드를
-    #     x=−3 에 그대로 두면 y > 5.196 구간이 공중에 뜬다.
-    #     → x1 은 사양대로 늘리되 **각 밴드의 +y 끝을 메사 경계로 클램프**한다
-    #       (`y_hi = min(y_half, 1.7321·|x|)`). −y 쪽은 쐐기 로컬 |ly| ≤ 9 안이라
-    #       y_half 그대로다 [계산]. 잘린 밴드가 사선을 따라 계단식으로 끝나므로
-    #       "축정렬 소품 vs 30° 사선" 이라는 이 씬의 주제는 오히려 강해진다.
+    # [W2-D, spec §5.1 scene20 row] Band x range -13...-5 -> **extended to -13...-0.5**.
+    #   Measurement basis: the current 5 bands (-13/-11/-9/-7/-5) **hit the d10 cut only** - the
+    #   near window of d5 is x -4.44...-3.0 and d2 is -1.44...0, so not one band falls inside.
+    #   Restoring the -3 and -1 bands gives all three cuts a longitudinal structure line.
+    #   * The old comment ("bands only over the axis-aligned plaza") pulled x1 back to -5.0 for a
+    #     real reason: the mesa is the union of the axis-aligned plaza (x <= -4.5) and the 30 deg
+    #     wedge, and the wedge's east boundary is the world line **x = -0.5774*y**. Leaving a
+    #     full-width y+-8 band at x=-3 would leave the y > 5.196 stretch floating in mid-air.
+    #     -> extend x1 as the spec says, but **clamp each band's +y end to the mesa boundary**
+    #       (`y_hi = min(y_half, 1.7321*|x|)`). The -y side stays at y_half since it is inside the
+    #       wedge local |ly| <= 9 [computed]. The clipped bands end in a staircase along the
+    #       diagonal, which if anything strengthens this scene's theme of "axis-aligned props vs 30 deg diagonal".
     band=dict(width=0.45, spacing=2.0, proud=0.0015, x0=-13.0, x1=-0.5,
               y_half=8.0, mesa_slope=1.7320508),   # cot(30°) = 1/tan(30°)
-    # 계단 14단 × riser 0.15 · tread 0.34 → 낙차 2.1m, run 4.76m. 폭 5 (y ±2.5).
+    # Stair 14 steps x riser 0.15, tread 0.34 -> drop 2.1 m, run 4.76 m. Width 5 (y +-2.5).
     stairs=dict(x0=0.0, riser=0.15, tread=0.34, nsteps=14,
                 y0=-2.5, y1=2.5, z_top=0.0, base_z=-2.6),
-    # rot_group: pivot (0,0), 30° — 계단·하부광장을 함께 회전(경계 정합)
+    # rot_group: pivot (0,0), 30 deg - rotates stair and lower plaza together (boundary stays aligned)
     rot=dict(pivot=(0.0, 0.0), deg=30.0),
-    # 하부 광장(웜) — rot_group 내, 계단 끝(local x=4.76, z=-2.1)에서 이어짐
+    # Lower plaza (warm) - inside rot_group, continues from the stair foot (local x=4.76, z=-2.1)
     lower=dict(x0=4.76, x1=18.0, y0=-2.5, y1=2.5, z_top=-2.1, thick=0.15),
-    # 하부 잔디 base — 계곡 채움(공동 없음). rot 계단/광장 아래 전면 솔리드.
+    # Lower grass base - fills the valley (no cavity). Fully solid under the rotated stair/plaza.
     valley=dict(size=100.0, z_top=-2.15, thick=1.0),
 
     stair_rail=dict(y=2.4, x_start=-0.4, rail_h=0.9, post_r=0.02,
@@ -97,7 +99,7 @@ PARAMS = dict(
                     spacing=1.3),
     tactile=dict(ahead=0.3, depth=0.3, proud=0.004),
 
-    # ═══ [W2-D ground_kit] P1 plaza_granite — 사양 §5.1 scene20 행 ══════════
+    # === [W2-D ground_kit] P1 plaza_granite - spec §5.1 scene20 row ========================
     #  The row's own prescription is the band extension (see `band` above);
     #  the P1 common set (6 m expansion + 1.8 m contraction joints, 1~2
     #  manholes with one in W1, repair patches, soiling decals, edge weeds)
@@ -109,7 +111,7 @@ PARAMS = dict(
     #    30 deg diagonal x = -0.5774*y, not the line x = 0 that the kit's frame
     #    model assumes. A rectangle is only entirely on the mesa if
     #    x1 <= -0.5774*|y|max; with y = +-3.0 that is x1 <= -1.73, and -2.0
-    #    keeps 0.27 m of margin at the worst corner [계산].
+    #    keeps 0.27 m of margin at the worst corner [computed].
     #    Consequence: the d2 near window (x -1.44..0) cannot be filled by the
     #    kit at all in this scene. That is geometry, not an omission — the d2
     #    window lies beyond the diagonal for most of the frame width.
@@ -120,9 +122,9 @@ PARAMS = dict(
         patches=[(-3.70, -0.55), (-8.60, 0.30)],
     ),
 
-    # 축정렬 지평 폐쇄 건물 3 (회전 안 함 — 정렬 대비 강조)
-    #   base_z=-2.15 : 계곡 잔디 상면. 미지정(0.0)이면 셸이 z=-1.0 까지만 내려와
-    #   1.15 m 부유했다(감사v4 B3).
+    # 3 axis-aligned horizon-closing buildings (not rotated - emphasises the alignment contrast)
+    #   base_z=-2.15 : top face of the valley grass. Left unset (0.0) the shell only reached down
+    #   to z=-1.0 and floated 1.15 m (audit v4 B3).
     buildings=dict(
         C=dict(x0=26.0, x1=32.0, y0=-14.0, y1=14.0, h=13.0, floors=4,
                axis="x", facade_x=26.0, face_dir=-1.0, base_z=-2.15),
@@ -133,20 +135,20 @@ PARAMS = dict(
     ),
     window=dict(w=1.2, h=1.6, inset=0.15, col_step=2.6, margin=2.0),
 
-    # --- 맥락 드레싱 (cue_scene_dressing) : "관공서·대학 앞 도시 광장" ---
-    #     축정렬 소품(밴드·건물·화단 열) vs 30° 사선 에지 대비가 이 씬의 주제다.
-    #     상부 소품은 전부 메사(축정렬 광장 ∪ 쐐기) 위 — 좌표 검산 fixlog_I5 참조.
-    # [v5.1 §2] 볼라드 규정화 — 구: x −1.2 에 y −7..1 을 2.0 m 등간격 5본 +
-    #   산발 3본 = 총 8본. **사선 낙차 에지(로컬 x=0) 바로 앞을 따라 늘어선
-    #   장식열**이라 §2(차량 진입 지점 한정)에 근거가 없고, 등간격 규약(§3)에도
-    #   어긋난다. 지시 "사선 에지 자체를 따라 줄 세우지 말 것" 그대로 폐기.
-    #   신: 실제 차량 접근 지점 2곳에만 **1열**씩(간격 1.5 m, 중앙 1.5 m 개구),
-    #   각 열 보행자 접근면에 전면 0.3 m 점형블록.
-    #     ① 메사 진입 램프 상단 (x −13.6, 램프 x −18..−14 폭 y ±2)
-    #        → 그리드 eye(x −2/−5/−10)·미장센 전 프리셋의 **후방**(x < −10)
-    #     ② 하부 광장 사선 복도 입구 (rot 로컬 lx 17.0, 광장 x1 18.0)
-    #        → 월드 (14.72, 8.50). 그리드 eye 기준 방위 19~27°·거리 18.7~26 m
-    #          원경, 판정 대상(사선 낙차 경계 x −4.6..0)과 무간섭.
+    # --- Context dressing (cue_scene_dressing): "civic / university-front urban plaza" ---
+    #     The contrast between axis-aligned props (bands, buildings, planter rows) and the 30 deg diagonal edge is this scene's theme.
+    #     All upper props sit on the mesa (axis-aligned plaza union wedge) - see fixlog_I5 for the coordinate check.
+    # [v5.1 §2] Bollards regularised - old: 5 bollards at 2.0 m spacing along x -1.2 over y -7..1
+    #   plus 3 scattered = 8 total. That is a **decorative row lined up right in front of the
+    #   diagonal drop edge (local x=0)**, which has no basis in §2 (vehicle entry points only) and
+    #   also violates the equal-spacing convention (§3). Dropped exactly as instructed: "do not line them up along the diagonal edge itself".
+    #   New: **one row** at each of the 2 actual vehicle approach points (1.5 m spacing, 1.5 m centre gap),
+    #   with a 0.3 m dot-tactile strip in front of each row on the pedestrian side.
+    #     (1) Top of the mesa entry ramp (x -13.6; ramp x -18..-14, width y +-2)
+    #        -> **behind** (x < -10) every grid eye (x -2/-5/-10) and every mise-en-scene preset
+    #     (2) Entrance to the lower plaza's diagonal corridor (rot local lx 17.0, plaza x1 18.0)
+    #        -> world (14.72, 8.50). From the grid eyes that is bearing 19-27 deg, distance 18.7-26 m,
+    #          i.e. background, with no interference with the judged region (diagonal drop boundary x -4.6..0).
     bollards=dict(x=-13.6, ys=(-2.25, -0.75, 0.75, 2.25),
                   block=dict(x0=-13.6, x1=-13.3, y0=-2.55, y1=2.55)),
     planters=[(-10.0, 5.5), (-10.0, -5.5), (-6.5, 6.2)],
@@ -157,12 +159,12 @@ PARAMS = dict(
     streetlight=dict(pole_h=5.5, pole_r=0.07, arm_len=1.0, arm_r=0.04,
                      head=0.25),
     hedges=[(-14.0, 7.4, -9.0, 8.0), (-14.0, -8.0, -9.0, -7.4)],
-    # 메사 진입 램프(서측) — "이 광장은 어떻게 올라가는가" (감사v4 A5)
+    # Mesa entry ramp (west side) - "how does one get up onto this plaza" (audit v4 A5)
     access_ramp=dict(x0=-18.0, x1=-14.0, y0=-2.0, y1=2.0, thick=2.6),
-    # [v5.2 사용자] 임의 경고 팻말 제거 — 계단주의 사인(PARAMS['signs']) 삭제.
-    # 하부 광장 소품 (rot_group 로컬 좌표, base_z=-2.1)
-    # [v5.1 §2] 구: 계단 발치(lx 5.6/9.0)에 좌우 2쌍 = 사선 복도를 따라 세운
-    #   장식 배치. → 복도 **입구**(lx 17.0) 1열로 이설 + 점형블록 전면 0.3 m.
+    # [v5.2 user] Arbitrary warning placards removed - stair-warning sign (PARAMS['signs']) deleted.
+    # Lower plaza props (rot_group local coordinates, base_z=-2.1)
+    # [v5.1 §2] Old: 2 pairs at the stair foot (lx 5.6/9.0) = decorative placement lining the
+    #   diagonal corridor. -> Moved to a single row at the corridor **entrance** (lx 17.0) plus a 0.3 m dot-tactile strip in front.
     lower_bollards=dict(x=17.0, ys=(-2.25, -0.75, 0.75, 2.25),
                         block=dict(x0=16.7, x1=17.0, y0=-2.55, y1=2.55)),
     lower_benches=[(12.0, -1.85, 0.0), (12.0, 1.85, 0.0)],
@@ -174,9 +176,9 @@ PARAMS = dict(
         grass_tint=(0.55, 0.68, 0.42),
         glass_color=(0.06, 0.09, 0.12), glass_rough=0.08,
         rail_color=(0.80, 0.82, 0.85), rail_metallic=0.9, rail_rough=0.35,
-        # [v5.1 §4] 파라펫 0.90 → 0.72 (순백 대면적 금지)
+        # [v5.1 §4] Parapet 0.90 -> 0.72 (no large pure-white areas)
         parapet_color=(0.72, 0.72, 0.69), parapet_rough=0.6,
-        # 드레싱용 (어두운 상수색 알베도 규약)
+        # For dressing (dark constant-colour albedo convention)
         curb_color=(0.75, 0.75, 0.72), curb_rough=0.6,
         wood_color=(0.30, 0.20, 0.12), wood_rough=0.85,
         canopy_a=(0.025, 0.045, 0.015), canopy_b=(0.035, 0.060, 0.020),
@@ -194,8 +196,8 @@ PARAMS = dict(
         hdri_sun_rotz_offset=233.5,
         dome_rotation_step=15.0,
     ),
-    SUN_AZ_OFFSET=171.5,   # 표준. 프리셋 정면광 유지(scene01 계승). 사선 낙차 경계에
-                           # 그림자가 얹혀 사교성을 강조(렌더에서 미세조정 가능).
+    SUN_AZ_OFFSET=171.5,   # Standard. Keeps the preset frontal light (inherited from scene01). Shadows fall on the
+                           # diagonal drop boundary and emphasise the obliqueness (can be fine-tuned at render time).
 
     render=dict(pt_total_spp=512, pt_max_bounces=8),
 )
@@ -221,26 +223,26 @@ if _sc_ov:
 
 
 # ===========================================================================
-# [C] 경로 상수 + 필요 텍스처 역할
+# [C] Path constants + required texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "scene20")
 
 ASSET_ROLES = ["plaza_light", "band_dark", "plaza_lower", "grass",
                "brick_red", "tactile",
-               "hdri", "mdl"]      # [v5.2 사용자] 임의 경고 팻말 제거
+               "hdri", "mdl"]      # [v5.2 user] Arbitrary warning placards removed
 
 
 def build_views():
-    """카메라 프리셋: grid_views(gy=0, 보행축 +X [고정]) + 미장센 4컷."""
-    views = sc.grid_views(0.0)               # 프리셋 축 = 보행축 +X (사양 §D 고정)
-    # oblique_overview: 사선 낙차 경계가 화면을 가로지름
+    """Camera presets: grid_views(gy=0, walk axis +X [fixed]) + 4 mise-en-scene cuts."""
+    views = sc.grid_views(0.0)               # Preset axis = walk axis +X (spec §D, fixed)
+    # oblique_overview: the diagonal drop boundary cuts across the frame
     views["oblique_overview"] = dict(eye=[-8.0, -4.0, 3.2], tgt=[3.0, 1.0, -1.0])
-    # walk_axis_front: 보행축 정면 — 경계가 사선으로 프레임을 자름
+    # walk_axis_front: head-on along the walk axis - the boundary slices the frame diagonally
     views["walk_axis_front"] = dict(eye=[-6.0, 0.0, 1.6], tgt=[4.0, 0.0, -0.8])
-    # along_diagonal: 계단 사선 축을 따라 내려봄(정렬 붕괴 확인)
+    # along_diagonal: looking down along the stair's diagonal axis (confirms the alignment breakdown)
     views["along_diagonal"] = dict(eye=[-3.0, -3.0, 1.5], tgt=[5.0, 1.6, -1.6])
-    # low_grazing: 낮은 시점 — 사선 경계 위 낙차 은닉
+    # low_grazing: low viewpoint - the drop is hidden above the diagonal boundary
     views["low_grazing"] = dict(eye=[-6.0, 0.0, 0.35], tgt=[4.0, 0.5, -0.3])
     return views
 
@@ -292,7 +294,7 @@ def main():
         return sc.make_pbr(stage, path, *args, **kwargs)
 
     # -------------------------------------------------------------------
-    # 재질
+    # Materials
     # -------------------------------------------------------------------
     def setup_materials():
         sca = mp["scale"]
@@ -325,8 +327,8 @@ def main():
         M["rail"] = PBR(f"{ROOT}/Looks/Rail", diffuse_color=mp["rail_color"],
                         metallic=mp["rail_metallic"],
                         roughness_const=mp["rail_rough"])
-        # [v5.1 §2/§4] 규정 볼라드용 재질 — 본체 3종(틴트 지터 ±5%) + 반사띠.
-        #   반사띠는 소면적이므로 고휘도 허용(순백 대면적 금지 규약과 무관).
+        # [v5.1 §2/§4] Materials for the regulation bollards - 3 body variants (tint jitter +-5%) + reflective band.
+        #   The band is small in area, so high luminance is allowed (unrelated to the no-large-pure-white-area rule).
         for _i, _f in enumerate((0.95, 1.0, 1.05)):
             M[f"bollard_{_i}"] = PBR(
                 f"{ROOT}/Looks/Bollard_{_i}",
@@ -357,7 +359,7 @@ def main():
         return M
 
     # -------------------------------------------------------------------
-    # 지면 — 계곡 잔디(전면 솔리드, 공동 없음) + 상부 메사
+    # Ground - valley grass (fully solid, no cavity) + upper mesa
     # -------------------------------------------------------------------
     def build_ground(M):
         v = PARAMS["valley"]
@@ -375,16 +377,16 @@ def main():
         BOX(f"{ROOT}/UpperPlaza", (cx, cy, (top + bot) / 2.0),
             (u["x1"] - u["x0"], u["y1"] - u["y0"], top - bot),
             M["upper"], col=True)
-        # 밴드(Y로 달리는 차콜 스트라이프, scene01 모티프 축소)
+        # Bands (charcoal stripes running along Y, a scaled-down scene01 motif)
         if cfg["cue_scene_dressing"]:
             bd = PARAMS["band"]
             x = bd["x0"]
             i = 0
             while x <= bd["x1"] + 1e-6:
-                # [W2-D] +y 끝을 메사(축정렬 광장 ∪ 30° 쐐기) 경계로 클램프.
+                # [W2-D] Clamp the +y end to the mesa boundary (axis-aligned plaza union 30 deg wedge).
                 y_hi = min(bd["y_half"], bd["mesa_slope"] * abs(x))
                 y_lo = -bd["y_half"]
-                if y_hi - y_lo > 0.30:      # 남는 길이가 없으면 그 본은 생략
+                if y_hi - y_lo > 0.30:      # Skip the band if no length remains
                     BOX(f"{ROOT}/Band_{i}",
                         (x, (y_lo + y_hi) / 2.0, top + bd["proud"] - 0.003),
                         (bd["width"], y_hi - y_lo, 0.02), M["band"])
@@ -392,7 +394,7 @@ def main():
                 i += 1
 
     # -------------------------------------------------------------------
-    # [W2-D] ground_kit — P1 plaza_granite (사양 §5.1 scene20 행)
+    # [W2-D] ground_kit - P1 plaza_granite (spec §5.1 scene20 row)
     # -------------------------------------------------------------------
     def build_ground_kit(M):
         g = PARAMS["gkit"]
@@ -422,8 +424,8 @@ def main():
         return res
 
     def build_flat_fill(M):
-        """hazard_stairs=False 대조군: 상부+계단+하부를 z=0 평지로 통일."""
-        sc.skin_exclude(f"{ROOT}/FlatPlaza")     # [W2-0 · P-A] 쌍둥이도 동일 조건
+        """hazard_stairs=False control: unify upper+stair+lower into flat ground at z=0."""
+        sc.skin_exclude(f"{ROOT}/FlatPlaza")     # [W2-0, P-A] The twin gets the same conditions
         u = PARAMS["upper"]
         v = PARAMS["valley"]
         x0, x1 = u["x0"], 20.0
@@ -433,22 +435,22 @@ def main():
             M["upper"], col=True)
 
     # -------------------------------------------------------------------
-    # 계단 + 하부 광장 (rot_group 30° — 경계 정합) + 사선 cue
+    # Stair + lower plaza (rot_group 30 deg - boundary stays aligned) + diagonal cue
     # -------------------------------------------------------------------
     def build_diagonal(M):
-        # 계단 톤은 상부 plaza_light 계열로 통일(하부 웜과 대비는 lower가 담당).
+        # Stair tone unified with the upper plaza_light family (the contrast with the warm lower level is lower's job).
         stair_mtl = M["upper"]
         r = PARAMS["rot"]
         grp = sc.build_rot_group(stage, f"{ROOT}/Diag", r["pivot"], r["deg"])
-        # [감사v4 S1] 상부 광장 사선 연장 쐐기 — 회전군 내부이므로 동측 면이
-        # 계단 상단 모서리(로컬 x=0)와 정확히 일치하는 30° 사선 에지가 된다.
-        # 축정렬 광장(x ≤ -4.5)과 겹쳐 하나의 연속 상면(z=0)을 이루므로
-        #   · A1 남측 쐐기 트렌치(수평 틈 최대 1.25 m, 낙차 2.15 m) 소멸,
-        #   · A2 북측 상단 매몰(첫 단차 최대 0.75 m) 소멸 → 첫 단차 전 폭 0.15 m,
-        #   · B1 점자띠(로컬 x -0.3..0)·B2 남측 난간 시작부(로컬 x -0.4) 접지,
-        #   · 낙차 경계가 원점 1점이 아니라 30° 직선 전체가 되어 씬 특색은 강화.
-        # 겹침부는 두 박스 모두 상면 0 / 저면 -2.2 이고 재질·월드투영 텍스처가
-        # 동일하므로 Z파이팅이 발생해도 화면상 차이가 없다.
+        # [audit v4 S1] Diagonal extension wedge of the upper plaza - being inside the rotation group,
+        # its east face becomes a 30 deg diagonal edge exactly coincident with the stair top edge (local x=0).
+        # It overlaps the axis-aligned plaza (x <= -4.5) to form one continuous top face (z=0), so
+        #   * A1, the south wedge trench (horizontal gap up to 1.25 m, drop 2.15 m), disappears,
+        #   * A2, the north top-step burial (first step up to 0.75 m), disappears -> first step 0.15 m across the full width,
+        #   * B1 the tactile strip (local x -0.3..0) and B2 the south railing start (local x -0.4) sit on the ground,
+        #   * the drop boundary becomes the whole 30 deg line instead of a single point at the origin, so the scene's character is reinforced.
+        # In the overlap both boxes have top 0 / bottom -2.2 with identical material and world-projected
+        # texture, so any Z-fighting makes no visible difference on screen.
         wg = PARAMS["wedge"]
         BOX(f"{grp}/UpperWedge",
             ((wg["x0"] + wg["x1"]) / 2.0, 0.0,
@@ -460,7 +462,7 @@ def main():
             stage, f"{grp}/Stairs", st["x0"], st["y0"], st["y1"],
             st["riser"], st["tread"], st["nsteps"], st["base_z"], stair_mtl,
             z_top=st["z_top"], collider=True)
-        # 하부 광장(웜) — 잔디 위 얇은 판(proud). 같은 30° 그룹 → 경계 정합.
+        # Lower plaza (warm) - a thin slab proud of the grass. Same 30 deg group -> boundary stays aligned.
         lo = PARAMS["lower"]
         lower_mtl = M["lower"] if cfg["cue_material_break"] else M["upper"]
         BOX(f"{grp}/LowerPlaza",
@@ -469,7 +471,7 @@ def main():
             (lo["x1"] - lo["x0"], lo["y1"] - lo["y0"], lo["thick"]),
             lower_mtl, col=True)
 
-        # 사선 cue (rot_group 내부 — 낙차 사선을 따라 회전)
+        # Diagonal cue (inside rot_group - rotates along the drop diagonal)
         if cfg["cue_tactile"]:
             tc = PARAMS["tactile"]
             sc.build_tactile(stage, f"{grp}/Tactile_Top",
@@ -496,10 +498,10 @@ def main():
                     rail_mid_r=sr["rail_mid_r"],
                     rail_mid_drop=sr["rail_mid_drop"])
 
-        # 하부 광장 소품 (회전군 로컬 — 사선 복도를 따라 정렬)
+        # Lower plaza props (rotation-group local - aligned along the diagonal corridor)
         if cfg["cue_scene_dressing"]:
             lz = lo["z_top"]
-            # [v5.1 §2] 복도 입구 규정 볼라드 1열 + 점형블록 (rot 로컬 좌표)
+            # [v5.1 §2] One row of regulation bollards + dot tactile at the corridor entrance (rot local coordinates)
             lb = PARAMS["lower_bollards"]
             for i, ly in enumerate(lb["ys"]):
                 build_bollard_std(M, f"{grp}/LowBollard_{i}", lb["x"], ly, lz,
@@ -515,16 +517,18 @@ def main():
                                M["wood"], yaw=yaw)
 
     # -------------------------------------------------------------------
-    # 드레싱 — 축정렬 건물 3 + 축정렬 소품(볼라드 열·화단·벤치·가로등·
-    #          생울타리) + 메사 진입 램프
+    # Dressing - 3 axis-aligned buildings + axis-aligned props (bollard rows, planters, benches,
+    #          street lamps, hedges) + mesa entry ramp
     # -------------------------------------------------------------------
     def build_bollard_std(M, prefix, cx, cy, bz, k=0):
-        """[v5.1 §2] 규정 볼라드 1본 — 높이 0.90 m · 지름 0.15 m(r 0.075) +
-        상단 백색 반사띠(폭 0.09). 근거: 교통약자의 이동편의 증진법 시행규칙
-        별표2(높이 0.8~1.0 · 지름 0.1~0.2 · 간격 1.5 m 내외 · 밝은 반사띠).
-        구 sc.build_bollard 기본값(r 0.06 · h 0.75)은 규정 하한 미달이라
-        여기서 치수를 명시한다(scene_common 미수정). 본체 재질은 인스턴스별
-        틴트 지터(bollard_0..2)로 '동일 복제' 인상을 뺀다."""
+        """[v5.1 §2] One regulation bollard - height 0.90 m · diameter 0.15 m (r 0.075) +
+        white reflective band at the top (width 0.09). Basis: Enforcement Rule of the
+        Act on Promotion of Mobility Convenience for the Mobility Impaired, Table 2
+        (height 0.8-1.0 · diameter 0.1-0.2 · spacing around 1.5 m · bright reflective band).
+        The old sc.build_bollard defaults (r 0.06 · h 0.75) fall short of the regulatory
+        minimum, so the dimensions are stated explicitly here (scene_common untouched).
+        The body material uses per-instance tint jitter (bollard_0..2) to remove the
+        'identical clones' impression."""
         h, r = 0.90, 0.075
         sc.build_bollard(stage, f"{prefix}/Post", cx, cy, bz,
                          mtl=M[f"bollard_{k % 3}"], radius=r, height=h)
@@ -536,7 +540,7 @@ def main():
             sc.build_building(stage, f"{ROOT}/Building_{key}", bd,
                               M["brick"], M["glass"], M["parapet"],
                               window=PARAMS["window"])
-        # [v5.1 §2] 메사 진입 램프 상단 규정 볼라드 1열 + 점형블록
+        # [v5.1 §2] One row of regulation bollards + dot tactile at the top of the mesa entry ramp
         bl = PARAMS["bollards"]
         for i, by in enumerate(bl["ys"]):
             build_bollard_std(M, f"{ROOT}/Bollard_{i}", bl["x"], by, 0.0, k=i)
@@ -569,8 +573,8 @@ def main():
         for i, (hx0, hy0, hx1, hy1) in enumerate(PARAMS["hedges"]):
             sc.build_hedge(stage, f"{ROOT}/Hedge_{i}", hx0, hy0, hx1, hy1,
                            0.9, base_z=0.0)
-        # 메사 진입 램프 (서측, 잔디 -2.15 → 광장 0). drop 음수 = +X로 상승.
-        # margin=0 이라 상단 모서리가 광장 서면(x=-14, z=0)과 정확히 flush.
+        # Mesa entry ramp (west side, grass -2.15 -> plaza 0). Negative drop = rising towards +X.
+        # margin=0, so the top edge is exactly flush with the plaza west face (x=-14, z=0).
         ar = PARAMS["access_ramp"]
         vz = PARAMS["valley"]["z_top"]
         sc.build_slope(stage, f"{ROOT}/AccessRamp", ar["x0"], vz,
@@ -578,9 +582,9 @@ def main():
                        ar["y0"], ar["y1"], ar["thick"], M["upper"],
                        margin=0.0, collider=True)
 
-    # [v5.2 사용자] 임의 경고 팻말 제거 — build_signs() 삭제.
+    # [v5.2 user] Arbitrary warning placards removed - build_signs() deleted.
 
-    # ── 씬 조립 ──
+    # -- Scene assembly --
     print("[씬] 재질·지오메트리 조립 중 ...")
     M = setup_materials()
 
@@ -592,8 +596,8 @@ def main():
         build_flat_fill(M)
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
-    build_ground_kit(M)             # [W2-D] 지면 요소 — 드레싱 뒤(산포 순서 규약)
-    # [v5.2 사용자] 임의 경고 팻말 제거 — cue_sign 배치 삭제.
+    build_ground_kit(M)             # [W2-D] Ground elements - after dressing (scatter-order convention)
+    # [v5.2 user] Arbitrary warning placards removed - cue_sign placement deleted.
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])

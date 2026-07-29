@@ -1,39 +1,43 @@
 # -*- coding: utf-8 -*-
 """
-sceneC4_wet_stairs.py — NegObs 인공씬 28호: 비 온 직후 젖은 석재 계단 (Isaac Sim 4.5)
+sceneC4_wet_stairs.py — NegObs synthetic scene 28: wet stone stairs right after rain (Isaac Sim 4.5)
 
-유형    : C4 조건 변주 — 광폭 화강암 계단 기하 + 젖음(재질) 레이어
-사양서  : Docs/nanobanana_batch1_geometry_map.md §B sceneC4_wet_stairs
-룩 참조 : look_refs/c4_wet_stairs.jpg
-공통    : scene_common.py · scene16_canopy_shadow.py(표준 템플릿) ·
-          scene01_campus_stairs.py(직선 계단 기준형)
+Type    : C4 condition variant — wide granite stair geometry + a wetness (material) layer
+Spec    : Docs/nanobanana_batch1_geometry_map.md §B sceneC4_wet_stairs
+Look ref: look_refs/c4_wet_stairs.jpg
+Shared  : scene_common.py · scene16_canopy_shadow.py (standard template) ·
+          scene01_campus_stairs.py (straight-stair reference)
 
-위험 본질: 기하는 광폭 직선 14단(riser 0.15 · tread 0.35 · 폭 6.0)인데,
-           비에 젖은 트레드 상면이 **거울처럼 흐린 하늘을 반사**한다.
-           밝은 하늘 반사가 인접 단의 라이저 음영을 씻어내 단 에지가 서로
-           **병합**되고, 수막이 고인 트레드는 아예 수평 거울면이 된다.
-           GT는 기하 그대로 **낙차 양성(2.10m)** — C1(눈)과 함께 "재질 변주 축".
-목표     : 상부 광장 → 광폭 계단 → 하부 광장의 보행 연속성을 유지한 채,
-           젖음을 **재질 레이어(트레드 전용 저러프니스 박판)** 로 구현하고
-           수막(build_water 박판)을 얹어 렌더로 판정 (렌더 전용).
+Hazard  : The geometry is a plain wide straight 14-step flight (riser 0.15 ·
+          tread 0.35 · width 6.0), but the rain-soaked tread tops **mirror the
+          overcast sky**. The bright sky reflection washes the riser shading off
+          the adjacent step so the step edges **merge**, and treads holding a
+          water film turn into outright horizontal mirrors.
+          GT follows the geometry — **drop positive (2.10m)** — and with C1 (snow)
+          this forms the "material variation axis".
+Goal    : Keep walking continuity upper plaza -> wide stairs -> lower plaza while
+          building the wetness as a **material layer (a low-roughness thin plate
+          on the treads only)**, laying water films (build_water thin plates) on
+          top and judging it by render (render only).
 
-특색 성립 조건 [중요]:
-  **흐린 하늘 dome(overcast)** 이 이 씬의 성립 조건이다. 경면이 반사할 대상이
-  밝고 균질한 하늘이어야 "단 에지 병합"이 성립한다. 청천 정오광이면 태양
-  하이라이트가 점으로 찍히고 경질 그림자가 에지를 되살려 특색이 무너진다.
-  → light 프로파일 = sc.OVERCAST_HDRI + lookfix=False + 무태양(sceneC1 공유).
-  또한 경면 반사는 단일바운스 RT에서 과소평가되므로 **판정은 PT** 로 한다.
+Feature precondition [IMPORTANT]:
+  An **overcast sky dome** is what makes this scene work. The specular faces need
+  a bright, uniform sky to reflect for "step edge merging" to happen. Under clear
+  noon light the sun prints a point highlight and hard shadows revive the edges,
+  and the feature collapses.
+  -> light profile = sc.OVERCAST_HDRI + lookfix=False + no sun (shared with sceneC1).
+  Specular reflection is also underestimated by single-bounce RT, so **judge with PT**.
 
-실행 (GUI 룩 체크 — 기본):
+Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
     export PYTHONNOUSERSITE=1
     python sceneC4_wet_stairs.py
 
-자동 캡처 (headless):   NEGOBS_CAPTURE=1 python sceneC4_wet_stairs.py
-스모크 조기종료:        NEGOBS_SMOKE=1  python sceneC4_wet_stairs.py
+Auto capture (headless):  NEGOBS_CAPTURE=1 python sceneC4_wet_stairs.py
+Smoke early exit:         NEGOBS_SMOKE=1  python sceneC4_wet_stairs.py
 
-좌표계: Z-up, m, 진행축 +X, 낙차 시작 모서리 = x=0.
+Coordinates: Z-up, m, travel axis +X, drop start edge = x=0.
 """
 
 import os
@@ -49,21 +53,21 @@ import ground_kit as gk
 
 
 # ===========================================================================
-# [A] SCENE_CONFIG — 표준 7키 + 특색 토글 1키(wet_surface).
-#     hazard_stairs 만 기하 토글(False→전면 z=0 평지).
-#     wet_surface 는 재질 토글(기하 불변)이며, 물리적으로 성립하지 않는
-#     "마른 노면 위 수막"을 피하기 위해 수막 박판만 함께 제거된다.
+# [A] SCENE_CONFIG — standard 7 keys + 1 feature toggle (wet_surface).
+#     Only hazard_stairs is a geometry toggle (False -> whole site flat at z=0).
+#     wet_surface is a material toggle (geometry unchanged); the water-film
+#     plates are removed with it so we never get "water on a dry surface".
 # ===========================================================================
 SCENE_CONFIG = {
-    "hazard_stairs":      True,   # False → 계단·사면·하부 광장을 z=0 평지로 (기하 토글 유일 예외)
-    "cue_railing":        True,   # 양측 치크밴드 위 스테인리스 난간 2선
-    "cue_tactile":        True,   # 상단 경고 점자블록 (젖어도 잔존하는 유일 고대비 단서)
-    "cue_material_break": True,   # False → 계단도 광장 포장재로 통일
-    "cue_nosing":         False,  # 기본 off — 노징 도색은 '에지 병합' 특색을 무력화.
-                                  #            대조 실험 시 True 로 켜서 사용.
-    "cue_sign":           False,  # [선택] 미구현 — config 키만 예약
-    "cue_scene_dressing": True,   # 잔디 사면·볼라드·원경 건물 일괄
-    "wet_surface":        True,   # [특색] False → 건조 재질 + 수막 제거 = 대응쌍
+    "hazard_stairs":      True,   # False -> stairs · bank · lower plaza flat at z=0 (sole geometry toggle)
+    "cue_railing":        True,   # 2 stainless rails on top of both cheek bands
+    "cue_tactile":        True,   # top warning tactile paving (only high-contrast cue that survives the wet)
+    "cue_material_break": True,   # False -> stairs get the plaza paving too
+    "cue_nosing":         False,  # off by default — nosing paint defeats the 'edge merge' feature.
+                                  #            Set True for the ablation run.
+    "cue_sign":           False,  # [optional] not implemented — config key reserved only
+    "cue_scene_dressing": True,   # grass bank · bollards · distant buildings together
+    "wet_surface":        True,   # [feature] False -> dry materials + water films removed = twin
 }
 
 
@@ -71,78 +75,78 @@ SCENE_CONFIG = {
 # [B] PARAMS
 # ===========================================================================
 PARAMS = dict(
-    # 광폭 직선 14단 × riser 0.15 · tread 0.35 → 낙차 2.10m, run 4.90m, 폭 6.0
+    # Wide straight 14 steps x riser 0.15 · tread 0.35 -> drop 2.10m, run 4.90m, width 6.0
     stairs=dict(x0=0.0, riser=0.15, tread=0.35, nsteps=14,
                 y0=-3.0, y1=3.0, z_top=0.0, base_z=-3.00),
 
-    # 상부 광장(석재 포장). 두께 2.6 → 하부 광장 바닥보다 아래까지 솔리드.
+    # Upper plaza (stone paving). Thickness 2.6 -> solid down past the lower plaza floor.
     upper=dict(x0=-60.0, x1=0.0, y0=-60.0, y1=60.0, z_top=0.0, thick=2.60),
 
-    # ═══ [W2 ground_kit] P3 sidewalk_block — 사양 §5.2 C4 행 ═══════════════
-    #  처방: ① **젖음 패치를 근경 창으로 확장**(현행은 계단면에 집중돼 있어
-    #  h0.3 근경 창이 비어 있다) ② 물때·이끼 줄눈 ③ 경계 잡초.
-    #  ★ 조건 오버레이: 이 씬의 지면 요소는 **젖음 처리 아래**에 들어간다 —
-    #    패치는 `wet_surface` 토글을 따라 젖은 석재/마른 석재 재질을 받고,
-    #    줄눈·오염은 물때(`tide`)·반건조(`stone_damp`) 재질에 바인딩한다.
-    #    기하는 토글과 무관하게 동일하다(대응쌍 기하 불변 규약).
-    #  ★ 점자블록: §12.4 "ON 유지(현행)" + **부적정 재현 = 위치 오류**
-    #    (법정 0.3 m 가 아니라 0.6~1.0 m 전면). 시각장애인연합회 2023 실측이
-    #    적정 4.0 % / 부적정 77.3 % 이므로 "규정대로 놓으면 오히려 비현실"이다
-    #    `[통계 — 사양 §12.4 부적정 재현 규칙]`. setback 1.00 m 채택.
+    # ═══ [W2 ground_kit] P3 sidewalk_block — spec §5.2 row C4 ═══════════════
+    #  Prescription: (1) **extend the wet patches into the near window** (they are
+    #  crowded on the stair faces now, h0.3 window empty) (2) tide/moss joints (3) edge weeds.
+    #  * Condition overlay: this scene's ground elements go **under the wetness** —
+    #    patches take wet-stone / dry-stone material per the `wet_surface` toggle,
+    #    joints and grime bind to the tide (`tide`) / half-dry (`stone_damp`) materials.
+    #    Geometry is identical either way (twin geometry-invariance rule).
+    #  * Tactile paving: §12.4 "stays ON" + **non-compliance reproduced = wrong position**
+    #    (0.6~1.0 m in front, not the statutory 0.3 m). A 2023 blind-persons'
+    #    federation survey gives 4.0 % compliant / 77.3 % not, so "by-the-book
+    #    placement is unreal" `[statistic — spec §12.4 non-compliance rule]`. setback 1.00 m.
     gkit=dict(
         region=(-10.0, -2.90, 0.0, 2.90),
-        manhole=(-2.40, 0.60),          # W2 창(d5 X=2.6 m · 화면폭 21.6 %)
+        manhole=(-2.40, 0.60),          # W2 window (d5 X=2.6 m · 21.6 % of frame width)
         gullies=[(-3.60, 2.50), (-7.00, -2.50)],
-        #  젖음 패치 2매 — d2 근경 창(x −1.436…0)과 사양 지정 대역
-        #  (x −4.4…0) 각 1매. |y| ≤ 0.4 여야 d2 프레임 반폭 안이다.
+        #  2 wet patches — one in the d2 near window (x −1.436…0) and one in
+        #  the spec band (x −4.4…0). |y| <= 0.4 keeps them inside the d2 half-width.
         wet_patches=[(-1.20, 0.10), (-4.40, -1.20)],
-        tactile_setback=1.00,           # ← 부적정(위치 오류). 법정은 0.30
+        tactile_setback=1.00,           # ← non-compliant (misplaced). Statutory is 0.30
         tactile_depth=0.60,
     ),
-    # 하부 광장. x0 는 계단 끝(run)보다 0.05 뒤에서 시작하고 상면을 2mm 낮춰
-    # 마지막 단 상면과의 동일평면(Z-파이팅)을 회피 — 겹침 5cm.
+    # Lower plaza. x0 starts 0.05 behind the stair end (run) and its top is 2mm
+    # lower, avoiding coplanarity (Z-fighting) with the last tread — 5cm overlap.
     lower=dict(x_back=0.05, x1=60.0, y0=-60.0, y1=60.0, z_gap=0.002,
                thick=0.70),
 
-    # 계단 측면 석재 치크밴드(노출 스트링어). 상면 = 노징선 + proud.
+    # Stone cheek band on the stair flank (exposed stringer). Top = nosing line + proud.
     cheek=dict(y_in=2.94, y_out=3.60, proud=0.06, x_head=0.05, x_tail=0.10,
                thick=0.70),
-    # 치크 바깥 잔디 사면 — 상부 광장 에지와 하부 광장을 잇는 제방.
-    #   상면 평면 z = −(riser/tread)·x → 추가 낙차 에지 없음(GT 오염 없음),
-    #   보행 연속성 유지(교훈 9). 램프 대비쌍(scene17)과 달리 주행로 아님.
+    # Grass bank outside the cheek — an embankment tying the upper plaza edge to the lower.
+    #   Top plane z = −(riser/tread)·x -> no extra drop edge (no GT contamination),
+    #   walking continuity kept (lesson 9). Unlike the scene17 ramp pair, not a drive path.
     bank=dict(y_in=3.55, y_out=60.0, x_head=0.05, x_tail=0.20, thick=2.40),
 
-    # ─── 젖음 레이어 [특색 파라미터] ─────────────────────────────────────
-    #  film_*      트레드 상면 전용 박판(젖은 막). 이 박판만 저러프니스 재질을
-    #              받아 "트레드는 경면 / 라이저·측면은 반건조" 대비를 만든다.
-    #              proud 는 규약 0.001~0.004 내(0.003). x/y 로 3~5mm 내밀어
-    #              단 솔리드 면과의 동일평면을 회피한다.
-    #  wet_rough   경면 러프니스. 낮을수록 하늘 반사가 선명 → 에지 병합 강화.
-    #              사양 0.06~0.12. 시작값 0.08. 스윕 0.06(거울)~0.12(무광젖음).
-    #  damp_rough  라이저·측면 반건조 러프니스(사양 0.4).
-    #  wet_tint / damp_tint : 젖으면 알베도가 어두워지는 물리 근사.
-    #  water_films : 수막을 얹을 단 인덱스와 부분 폭(랜덤 금지 — 고정 테이블).
+    # ─── Wetness layer [feature parameters] ─────────────────────────────────────
+    #  film_*      thin plate on the tread tops only (the wet film). Only this plate
+    #              takes the low-roughness material: "specular tread vs half-dry riser·flank".
+    #              proud is inside the 0.001~0.004 convention (0.003). It overhangs
+    #              3~5mm in x/y to avoid coplanarity with the step solid faces.
+    #  wet_rough   specular roughness. Lower = sharper sky reflection -> stronger merge.
+    #              spec 0.06~0.12. Start 0.08. Sweep 0.06 (mirror)~0.12 (matte wet).
+    #  damp_rough  half-dry roughness for risers and flanks (spec 0.4).
+    #  wet_tint / damp_tint : physical approximation of albedo darkening when wet.
+    #  water_films : step index and partial width per film (no randomness — fixed table).
     # ────────────────────────────────────────────────────────────────────
     wet=dict(film_t=0.012, film_proud=0.003, film_over_x=0.003,
              film_over_y=0.005,
-             wet_rough=0.14, wet_spec=0.9,   # r1: 0.08은 완전 거울면 → 경면 완화
+             wet_rough=0.14, wet_spec=0.9,   # r1: 0.08 was a full mirror -> specular eased
              plaza_rough=0.12, plaza_spec=0.8,
              damp_rough=0.40,
              wet_tint=(0.55, 0.56, 0.60), plaza_tint=(0.56, 0.57, 0.61),
              damp_tint=(0.74, 0.75, 0.79),
              water_t=0.005, water_lift=0.006,
-             # ─── [비 직후 패키지 v2 · 07-27] ────────────────────────────
-             #  사용자 지적: "비가 온 상황이 덜 느껴진다 / 밝은 돌에 광만 난다".
-             #  ① 패치워크: 트레드 젖음을 단일 재질 → 3단 tier 의 **트레드 내
-             #     부분 폭 박판**으로 분해(트레드 단위 경계 제거).
-             #  ② 다크닝: 마른 기준(damp_tint 0.74) 대비 강젖음 0.36 = 51% 감광
-             #     (지시 30~40% 이상 확보), 중간 0.47, 반건조 패치 0.62.
-             #     동시에 B 채널을 상대 상향(젖은 석재의 채도 상승 근사).
-             #  ③ 러프니스는 tier 별 0.10 / 0.20 / 0.35 — 강젖음은 경면을 유지해
-             #     "에지 병합" 특색(하늘 반사)이 무너지지 않게 한다.
-             #  ④ 기하 불변: 박판 envelope(트레드 상면 proud 0.003 · 두께
-             #     0.012)은 그대로. y 분할만 도입하고 인접 패치는 patch_overlap
-             #     만큼 겹치며 proud 를 patch_step 씩 층지게 해 동일평면 회피.
+             # ─── [just-after-rain package v2 · 07-27] ────────────────────────────
+             #  User note: "the rain does not read / it is just glare on bright stone".
+             #  (1) Patchwork: tread wetness goes from one material to **partial-width
+             #     plates within the tread** across 3 tiers (kills the per-tread boundary).
+             #  (2) Darkening: strong wet 0.36 vs the dry reference (damp_tint 0.74) = 51% down
+             #     (the brief asked for 30~40%+), mid 0.47, half-dry patch 0.62.
+             #     B channel is raised relatively (approximates wet stone's saturation rise).
+             #  (3) Roughness per tier 0.10 / 0.20 / 0.35 — strong wet stays specular so
+             #     the "edge merge" feature (sky reflection) does not collapse.
+             #  (4) Geometry unchanged: the plate envelope (tread-top proud 0.003 ·
+             #     thickness 0.012) stays. Only a y split is added; adjacent patches
+             #     overlap by patch_overlap and stagger proud by patch_step (no coplanarity).
              patch_tiers=[dict(name="Strong", rough=0.10, spec=0.95,
                                tint=(0.352, 0.362, 0.398)),
                           dict(name="Mid", rough=0.20, spec=0.85,
@@ -151,29 +155,29 @@ PARAMS = dict(
                                tint=(0.605, 0.615, 0.645))],
              patch_seed=2804, patch_min=3, patch_max=5, patch_bias=0.62,
              patch_overlap=0.006, patch_step=0.0004,
-             # 웅덩이 다크닝 링(젖어 번진 둘레) — 수막보다 낮은 proud.
+             # Puddle darkening ring (the damp halo) — proud lower than the water film.
              ring_proud=0.0045, ring_grow_x=0.022, ring_grow_y=0.075,
-             # tide mark(수위선) · 치크 러노프 · 라이저 흘러내림 스트릭
-             #  ※ 치크밴드 외측면은 잔디 뱅크(y_in 3.55)에 6cm만 노출되므로
-             #    긴 수위 밴드가 파묻힌다 → 노출분(0.10)만 밴드로 두고, 실제
-             #    "비 온 티"는 **치크 상면 러노프 스트라이프**가 담당한다.
+             # tide mark (water line) · cheek runoff · riser run-down streaks
+             #  Note: the cheek band's outer face shows only 6cm above the grass bank
+             #    (y_in 3.55), so a tall tide band would be buried -> only the exposed
+             #    0.10 is banded; the **cheek-top runoff stripe** carries the "it rained" look.
              tide_h=0.34, tide_h_cheek=0.10, tide_drop=0.005, tide_proud=0.012,
              runoff_w=0.24, runoff_in=0.02, runoff_proud=0.003, runoff_t=0.05,
              streak_seed=2811, streak_n=14, streak_w=0.11, streak_proud=0.003),
-    # 수막: (단 인덱스 1~n, y0, y1) — 트레드 부분 폭에만 고임.
-    #   v2: 사각 1매 → **불규칙 lobe 3~4매 겹침 + 다크닝 링**(고정 시드 산출).
+    # Water films: (step index 1~n, y0, y1) — pooled on part of the tread width only.
+    #   v2: 1 rectangle -> **3~4 overlapping irregular lobes + darkening ring** (fixed seed).
     water_films=[dict(step=3, y0=-2.40, y1=0.30),
                  dict(step=6, y0=0.10, y1=2.55),
                  dict(step=9, y0=-2.60, y1=-0.20),
                  dict(step=12, y0=-1.20, y1=2.40)],
-    # 광장 수막 2매 (하부 = 계단 발치 큰 시트 · 상부 = 접근로 얕은 시트)
-    #   v2: 회전 lobe 3매 겹침으로 사각 윤곽 제거 + 다크닝 링.
+    # 2 plaza sheets (lower = big sheet at the stair foot · upper = shallow approach sheet)
+    #   v2: 3 overlapping rotated lobes kill the rectangular outline + darkening ring.
     water_sheets=[dict(name="Lower", x0=0.15, x1=5.60, y0=-2.20, y1=2.60,
                        where="lower"),
                   dict(name="Upper", x0=-4.80, x1=-1.40, y0=-1.60, y1=1.90,
                        where="upper")],
 
-    # 양측 난간 (치크밴드 위). 경사는 계단과 동일.
+    # Railings on both sides (on the cheek bands). Same slope as the stairs.
     rail=dict(y=3.27, x_start=-1.20, rail_h=0.90, post_r=0.022, rail_r=0.03,
               rail_mid_r=0.018, rail_mid_drop=0.45, spacing=1.50),
 
@@ -181,33 +185,33 @@ PARAMS = dict(
     nosing=dict(color=(0.85, 0.72, 0.10), width=0.05, proud=0.001,
                 y_inset=0.02),
 
-    # ── 볼라드 [v5.1 §2 · ctx2] 상부 광장 진입부 1열 ───────────────────────
-    #   구(舊): (−2.6/−5.6, ±4.6) 2×2 장식 배열 · φ0.16·h0.80 · 반사띠/
-    #   점형블록 없음 → 장식적 볼라드 열 금지(v5.1 §2)에 저촉.
-    #   신(新): **광장 진입부(x=−6.0) 횡단 1열** · 규격 φ0.12·h0.90 ·
-    #   간격 1.5 m · 상단 백색 반사띠 · 전면(−X 접근측) 0.3 m 점형블록.
-    #   중앙 |y| < 2.8 (폭 5.6 m ≈ 계단 폭 6.4 m)은 **보행·소방 진입 개구**로
-    #   비운다 — 광폭 대계단으로 향하는 주 동선이라 실제로도 막지 않는다.
-    #   ★ 특색(젖은 계단) 보존 좌표 검산:
-    #     · d10(eye −10) 기준 최내측 볼라드 실루엣 방위 34.4°, 점형블록 최내측
-    #       모서리 33.4° — 둘 다 프레임 반각 30° 밖 → 계단 폐색 0.
+    # ── Bollards [v5.1 §2 · ctx2] one row at the upper plaza entrance ───────────────────────
+    #   Old: a 2x2 decorative array at (−2.6/−5.6, +-4.6) · φ0.16·h0.80 · no band /
+    #   no dot tactile paving -> breaks the ban on decorative bollard rows (v5.1 §2).
+    #   New: **one transverse row at the plaza entrance (x=−6.0)** · φ0.12·h0.90 ·
+    #   spacing 1.5 m · white band on top · 0.3 m dot tactile in front (−X approach).
+    #   The centre |y| < 2.8 (5.6 m wide ~ stair width 6.4 m) is left open as a
+    #   **pedestrian/fire access gap** — the main line to the grand stair is never blocked.
+    #   * Numeric check that the feature (wet stairs) is preserved:
+    #     · From d10 (eye −10) the innermost bollard silhouette bears 34.4 deg and the
+    #       innermost tactile corner 33.4 deg — both beyond the 30 deg half-frame -> no occlusion.
     #     · approach(eye −7)·grazing_mirror(eye −2.4)·film_closeup(eye −0.8)
-    #       에서는 각각 방위 70° 밖 / 카메라 후방 → 무간섭.
-    #     · lower_lookback(eye +8.5)에서는 계단보다 **원거리**라 폐색 불가.
-    #   ★ 점형블록은 젖음 틴트 미적용(감독 지시): 소판 x −6.06..−6.36 은
-    #     상부 수막 시트(x −4.80..−1.40) 밖이라 물리적으로도 정합.
+    #       are each 70 deg off azimuth or behind the camera -> no interference.
+    #     · From lower_lookback (eye +8.5) they are **farther** than the stairs, so cannot occlude.
+    #   * No wet tint on the dot tactile (supervisor's call): the small slabs at
+    #     x −6.06..−6.36 lie outside the upper water sheet (x −4.80..−1.40), so it is physical too.
     bollard_rows=[dict(name="N", x=-6.0, y0=2.8, y1=5.8),
                   dict(name="S", x=-6.0, y0=-2.8, y1=-5.8)],
     bollard=dict(radius=0.06, height=0.90, spacing=1.5, front=(-1.0, 0.0)),
     buildings=dict(
-        # +X 원경 비스타 차단(하부 광장 레벨 기단). 파사드 -X 평면.
+        # +X distant vista blocker (plinth at lower plaza level). Facade on the -X plane.
         C=dict(x0=28.0, x1=34.0, y0=-16.0, y1=16.0, h=14.0, floors=4,
                axis="x", facade_x=28.0, face_dir=-1.0, level="lower"),
-        # -X 원경(lower_lookback 용). 파사드 +X 평면, 상부 광장 레벨 기단.
+        # -X distant block (for lower_lookback). Facade +X plane, plinth at upper plaza level.
         D=dict(x0=-48.0, x1=-42.0, y0=-16.0, y1=16.0, h=10.0, floors=3,
                axis="x", facade_x=-42.0, face_dir=1.0, level="upper"),
-        # [맥락 v2] 파사드 폭 확장 — C 좌우 저층 익동 2동으로 관공서 가구(街區)
-        #   느낌. C(y ±16)와 y 구간이 분리되어 중첩 없음. 전부 x≥30 원경.
+        # [context v2] Wider facade front — two low wings flanking C give a civic block
+        #   feel. Their y ranges are disjoint from C (y +-16), no overlap. All distant, x>=30.
         E=dict(x0=30.0, x1=36.0, y0=17.0, y1=40.0, h=11.0, floors=3,
                axis="x", facade_x=30.0, face_dir=-1.0, level="lower"),
         F=dict(x0=30.0, x1=36.0, y0=-40.0, y1=-17.0, h=12.0, floors=3,
@@ -215,34 +219,34 @@ PARAMS = dict(
     ),
     window=dict(w=1.2, h=1.6, inset=0.15, col_step=2.5, margin=2.0),
 
-    # ═══ [맥락 드레싱 v2 · 07-27] 관공서/문화시설 앞 대계단의 장소성 ═══
-    #  감사 v4 통합계획 §휑함 대응. 계단 기하·젖음 레이어 파라미터 불변.
-    #  신규 프림은 상부 광장(x<0, z=0)과 하부 광장(x>RUN, z=LOWER_TOP)의
-    #  평탄면 위에만 서고, 잔디 뱅크(x -0.05..5.10, |y|>3.55)에는 얹지 않는다.
+    # ═══ [context dressing v2 · 07-27] sense of place: a grand stair before a civic hall ═══
+    #  Answers audit v4 master plan §emptiness. Stair geometry and wetness params unchanged.
+    #  New prims stand only on the flat tops of the upper plaza (x<0, z=0) and
+    #  the lower plaza (x>RUN, z=LOWER_TOP), never on the grass bank (x -0.05..5.10, |y|>3.55).
     #
-    #  [카메라 검산 — build_views() 8+4컷, FOV 수평 ±30°/수직 ±18° 가정]
+    #  [camera check — build_views() 8+4 shots, FOV assumed +-30 deg H / +-18 deg V]
     #   grid eye(-2/-5/-10, 0, h) +X · approach eye(-7,0,1.65) az 0 ·
-    #   grazing_mirror eye(-2.4,0,0.32) az 0(수직 -27.1..+8.9°) ·
-    #   film_closeup eye(-0.8,-1.2,0.75) az 23.6(프레임 -6.4..53.6) ·
-    #   lower_lookback eye(8.5,1.0,1.5) az 186.0(프레임 156..216)
-    #   원칙 ① 카메라 eye 반경 1.5 m 내 신규 솔리드 금지
-    #        ② **하부 광장 소품은 전부 x>5.5 → 계단(x 0..4.9)보다 멀어
-    #           경면 병합 특색을 가릴 수 없다**(가림 불가 증명)
-    #        ③ 수직 요소(가로등·게양대·주두)는 젖은 노면 반사에 걸리도록
-    #           grazing_mirror/approach 프레임 안(az |·|<30°)에 배치
+    #   grazing_mirror eye(-2.4,0,0.32) az 0 (vertical -27.1..+8.9 deg) ·
+    #   film_closeup eye(-0.8,-1.2,0.75) az 23.6 (frame -6.4..53.6) ·
+    #   lower_lookback eye(8.5,1.0,1.5) az 186.0 (frame 156..216)
+    #   Rules (1) no new solid within 1.5 m of a camera eye
+    #         (2) **every lower-plaza prop is at x>5.5, farther than the stairs
+    #            (x 0..4.9), so none can hide the specular-merge feature** (no-occlusion proof)
+    #         (3) vertical elements (lamps · flagpoles · capitals) sit inside the
+    #            grazing_mirror/approach frame (az |·|<30 deg) to catch the wet reflection
     # ───────────────────────────────────────────────────────────────────────
-    # 대형 화분 쌍 2조 — 상부는 계단 어깨(lookback az 159.6°), 하부는 계단
-    #   발치 좌우(grazing az ±25.5° · approach ±14.7°)에서 계단을 액자화.
-    #   상부 화분(x -2.1..-0.3)은 기존 볼라드(x -2.68..-2.52)와 0.42 m 이격.
+    # 2 large planter pairs — upper at the stair shoulder (lookback az 159.6 deg),
+    #   lower flanking the stair foot (grazing az +-25.5 · approach +-14.7), framing the stairs.
+    #   Upper planters (x -2.1..-0.3) clear the existing bollards (x -2.68..-2.52) by 0.42 m.
     planters=[dict(cx=-1.2, cy=4.6, size=1.8, base="upper"),
               dict(cx=-1.2, cy=-4.6, size=1.8, base="upper"),
               dict(cx=6.6, cy=4.3, size=2.0, base="lower"),
               dict(cx=6.6, cy=-4.3, size=2.0, base="lower")],
     planter=dict(curb_h=0.52, curb_t=0.22, cap_over=0.05, cap_h=0.06,
                  soil_h=0.44, shrub_r=0.42),
-    # 가로등 4본 — 하부 광장 좌우 2쌍. 젖은 포장 경면에 수직 반사를 만든다.
-    #   (9.2,±4.8) / (15.0,±4.8): 화분(x 5.6..7.6)·조형물(x 10.8..13.2)과 비중첩.
-    #   lower_lookback 에서는 az 79.6°(프레임 밖) → 근접 가림 없음.
+    # 4 plaza lamps — 2 pairs on the lower plaza, casting vertical reflections on wet paving.
+    #   (9.2,+-4.8) / (15.0,+-4.8): clear of planters (x 5.6..7.6) and sculpture (x 10.8..13.2).
+    #   From lower_lookback they sit at az 79.6 deg (out of frame) -> no near occlusion.
     plazalamps=[dict(cx=9.2, cy=4.8, base="lower"),
                 dict(cx=9.2, cy=-4.8, base="lower"),
                 dict(cx=15.0, cy=4.8, base="lower"),
@@ -251,17 +255,17 @@ PARAMS = dict(
                 dict(cx=-3.5, cy=-5.6, base="upper")],
     plazalamp=dict(pole_r=0.075, pole_h=4.60, base_r=0.16, base_h=0.45,
                    head_r=0.24, head_h=0.30),
-    # 국기게양대 3본 + 화강암 기단 — 상부 광장 +Y. lower_lookback 전용
-    #   (프레임 +Y 한계: x=-8 에서 y≤8.35 → 5.8/7.0 in, 8.2 경계).
-    #   정면 시점(approach/grazing/grid)에서는 전부 프레임 밖 = 특색 무간섭.
+    # 3 flagpoles + granite plinth — upper plaza +Y. For lower_lookback only
+    #   (frame +Y limit: y<=8.35 at x=-8 -> 5.8/7.0 inside, 8.2 on the edge).
+    #   All out of frame from the frontal views (approach/grazing/grid) = feature untouched.
     flag=dict(cx=-8.0, cys=(5.8, 7.0, 8.2), pole_r=0.055, pole_h=8.0,
               finial_r=0.09, plinth_pad=0.75, plinth_h=0.35),
-    # 조형물 기단 + 모놀리스 — 하부 광장 +Y. grazing_mirror az 20.9°,
-    #   approach az 16.1° 로 **전체가 프레임 안**(원경 파사드 앞 실루엣).
+    # Sculpture plinth + monolith — lower plaza +Y. grazing_mirror az 20.9 deg,
+    #   approach az 16.1 deg, so **fully in frame** (silhouette against the distant facade).
     sculpture=dict(cx=12.0, cy=5.5, plinth=2.4, plinth_h=0.55,
                    mono_w=0.85, mono_h=3.20, base="lower"),
-    # 원경 열주(콜로네이드) — 건물 C 파사드(x=28) 앞 0.2 m 이격.
-    #   civic 파사드 폭 확장 지시의 "열주 힌트". 전부 x≥25.4 원경.
+    # Distant colonnade — 0.2 m clear of the building C facade (x=28).
+    #   The "colonnade hint" from the civic facade-widening brief. All distant, x>=25.4.
     colonnade=dict(x_c=26.6, y0=-9.6, y1=9.6, step=2.4, col_r=0.42,
                    col_h=6.60, sty_x0=25.4, sty_x1=27.8, sty_pad=1.9,
                    sty_h=0.50, beam_t=0.90, beam_pad=0.6, base="lower"),
@@ -269,37 +273,37 @@ PARAMS = dict(
     material=dict(
         scale=dict(granite_dark=1.2, stone_flag=0.9, grass=1.4,
                    brick_red=2.0, tactile=0.3),
-        grass_tint=(0.42, 0.52, 0.34),      # 비 맞은 잔디 — 표준 톤보다 어둡게
+        grass_tint=(0.42, 0.52, 0.34),      # rain-soaked grass — darker than the standard tone
         water_color=(0.03, 0.05, 0.06), water_rough=0.02, water_spec=1.0,
-        dry_rough_hint=0.55,                # 건조 대응쌍(텍스처 러프니스 사용)
+        dry_rough_hint=0.55,                # dry twin (uses the roughness texture)
         rail_color=(0.78, 0.80, 0.83), rail_metallic=0.9, rail_rough=0.30,
-        # 볼라드 v5.1 상단 반사띠(백색, 소면적). 몸통은 rail 재질 공유.
+        # Bollard v5.1 top reflective band (white, small area). Body shares the rail material.
         bollard_band_color=(0.88, 0.88, 0.86),
         wall_tint=(0.86, 0.86, 0.88),
         glass_color=(0.05, 0.07, 0.10), glass_rough=0.12,
         parapet_color=(0.84, 0.85, 0.86), parapet_rough=0.7,
-        # ─ 비 패키지 v2 / 맥락 v2 상수 (sRGB 암색 규약 0.02~0.09) ─
+        # ─ rain package v2 / context v2 constants (sRGB dark-tone rule 0.02~0.09) ─
         tide_color=(0.062, 0.066, 0.078), tide_rough=0.22, tide_spec=0.9,
         shrub_color=(0.032, 0.050, 0.030),
     ),
 
-    # ─── overcast 조명 프로파일 (sceneC1 과 동일) ────────────────────────
-    #  · hdri=sc.OVERCAST_HDRI : 경면이 반사할 균질한 흐린 하늘.
-    #  · lookfix=False         : lookfix는 "태양 캡 + 지평 리프트"용. 무태양
-    #                            HDRI에는 무의미하므로 원본 사용.
-    #  · noon_sun_enable=False : 보조 DistantLight 비가시 → 경질 그림자 제거.
-    #                            (setup_lighting 이 intensity/color 키를 항상
-    #                             읽으므로 키 자체는 남겨 둔다.)
-    #  · dome_intensity        : 직달 2450 을 잃은 만큼 상향. 기존 noon 1000
-    #                            기준 1500~2500 스윕 권장. 시작값 2000
-    #                            (sceneC1 과 동일값으로 시작 — 화강암은 눈보다
-    #                             어두우므로 어두우면 2400 쪽으로 올린다).
-    #  · hdri_sun_rotz_offset  : 무태양이라 무의미 → 0.0.
+    # ─── overcast lighting profile (same as sceneC1) ────────────────────────
+    #  · hdri=sc.OVERCAST_HDRI : the uniform overcast sky the mirrors reflect.
+    #  · lookfix=False         : lookfix is for "sun cap + horizon lift". Meaningless
+    #                            on a sunless HDRI, so the original is used.
+    #  · noon_sun_enable=False : auxiliary DistantLight invisible -> no hard shadows.
+    #                            (setup_lighting always reads the intensity/color
+    #                             keys, so the keys themselves stay.)
+    #  · dome_intensity        : raised to make up for losing 2450 of direct light.
+    #                            Sweep 1500~2500 against the old noon 1000. Start 2000
+    #                            (same start as sceneC1 — granite is darker than snow,
+    #                             so push toward 2400 if it renders dark).
+    #  · hdri_sun_rotz_offset  : meaningless without a sun -> 0.0.
     # ────────────────────────────────────────────────────────────────────
     light=dict(
         hdri=sc.OVERCAST_HDRI,
-        # r1: 2000→1500 과노출 완화 / [비 패키지 v2] 1500→1150 소나기 직후
-        #   어둑함. lookfix=False · 무태양 프로파일은 그대로(특색 성립 조건).
+        # r1: 2000->1500 to ease overexposure / [rain package v2] 1500->1150 for the
+        #   gloom after a shower. lookfix=False · sunless profile kept (feature precondition).
         dome_intensity=1150.0,
         noon_dome_rot=-110.0,
         lookfix=False,
@@ -308,9 +312,9 @@ PARAMS = dict(
         hdri_sun_rotz_offset=0.0,
         dome_rotation_step=15.0,
     ),
-    # ─── SUN_AZ_OFFSET: 무태양 프로파일이라 그림자 방위 의미가 없다. 돔 Z회전은
-    #     흐린 하늘의 완만한 휘도 구배(=경면에 비치는 밝기 분포)만 바꾼다.
-    #     하네스 일관성을 위해 브리프 v3 §A-7 기본값 171.5 유지, [ ]키로 스윕. ─
+    # ─── SUN_AZ_OFFSET: sunless profile, so shadow azimuth means nothing. Dome Z rotation
+    #     only changes the overcast sky's gentle luminance gradient (= the brightness
+    #     mirrored by the specular faces). Kept at brief v3 §A-7 default 171.5; sweep with [ ]. ─
     SUN_AZ_OFFSET=171.5,
 
     render=dict(pt_total_spp=512, pt_max_bounces=8),
@@ -337,7 +341,7 @@ if _sc_ov:
 
 
 # ===========================================================================
-# [C] 경로 상수 + 필요 텍스처 역할
+# [C] Path constants + required texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "sceneC4")
@@ -346,17 +350,17 @@ ASSET_ROLES = ["granite_dark", "stone_flag", "grass", "brick_red", "tactile",
                "hdri", "mdl"]
 
 
-# --- 파생 치수 (여러 빌더가 공유) -------------------------------------------
+# --- Derived dimensions (shared by builders) -------------------------------------------
 def _dims():
     st = PARAMS["stairs"]
     run = st["tread"] * st["nsteps"]
     drop = st["riser"] * st["nsteps"]
-    slope_k = st["riser"] / st["tread"]          # 노징선 기울기 (하강 +X)
+    slope_k = st["riser"] / st["tread"]          # nosing-line slope (descending +X)
     return run, drop, slope_k
 
 
 def bollard_points():
-    """[v5.1 §2] 광장 진입부 볼라드 중심 [(name, x, y), ...] (간격 1.5 m)."""
+    """[v5.1 §2] Plaza-entrance bollard centres [(name, x, y), ...] (spacing 1.5 m)."""
     out = []
     sp = PARAMS["bollard"]["spacing"]
     for row in PARAMS["bollard_rows"]:
@@ -367,7 +371,7 @@ def bollard_points():
 
 
 def civic_placements():
-    """[v5.1 §3] 화분·광장 가로등 위치 지터 (좌우 완전대칭 해소)."""
+    """[v5.1 §3] Position jitter for planters and plaza lamps (breaks exact L/R symmetry)."""
     pls = []
     for i, pd in enumerate(PARAMS["planters"]):
         dx, dy = bc.jit_pos(pd["cx"], pd["cy"], "plC4", amp=0.15)
@@ -380,7 +384,7 @@ def civic_placements():
 
 
 def ground_plans():
-    """[W2 ground_kit] 지면 계획 — 씬 조립부와 CPU 검산이 같은 함수를 쓴다."""
+    """[W2 ground_kit] Ground plan — scene assembly and the CPU check share this function."""
     g = PARAMS["gkit"]
     st = PARAMS["stairs"]
     x_edge = float(st["x0"])
@@ -396,22 +400,22 @@ def ground_plans():
                    gully=[tuple(p) for p in g["gullies"]],
                    patch=[tuple(p) for p in g["wet_patches"]],
                    tactile=dict(stair_top=band)),
-        #  L형 측구는 차도 접점 요소다 — 관공서 앞 대계단 광장에는 없다.
+        #  L-shaped gutters belong at a carriageway edge — not on a civic grand-stair plaza.
         overrides=dict(infra=dict(manhole=1, gully=2, gutter_L=0)),
         seed=28)
     return [("upper", gp)]
 
 
 def build_views():
-    """카메라 프리셋: grid_views(gy=0.0) + 미장센 4컷. 중앙 난간 없음."""
+    """Camera presets: grid_views(gy=0.0) + 4 mise-en-scene shots. No centre railing."""
     views = sc.grid_views(0.0)
-    # approach: 상부 광장 보행 시점 — 광폭 계단 전경
+    # approach: pedestrian view on the upper plaza — the wide stairs in full
     views["approach"] = dict(eye=[-7.0, 0.0, 1.65], tgt=[2.5, 0.0, -1.00])
-    # grazing_mirror: 낮은 시점 — 하늘 반사로 단 에지가 병합되는가(특색 1순위)
+    # grazing_mirror: low eye — do sky reflections merge the step edges (feature check 1)
     views["grazing_mirror"] = dict(eye=[-2.4, 0.0, 0.32], tgt=[4.6, 0.0, -0.80])
-    # film_closeup: 수막 트레드 근접 — 경면에 하늘·건물이 비치는가
+    # film_closeup: close on a water-film tread — do sky and buildings show in the mirror
     views["film_closeup"] = dict(eye=[-0.8, -1.2, 0.75], tgt=[2.4, 0.20, -1.10])
-    # lower_lookback: 하부에서 되돌아봄 — 젖은 라이저 대비 확인
+    # lower_lookback: looking back from below — check the wet riser contrast
     views["lower_lookback"] = dict(eye=[8.5, 1.0, 1.50], tgt=[-1.0, 0.0, 0.20])
     return views
 
@@ -466,11 +470,11 @@ def main():
         return sc.make_pbr(stage, path, *args, **kwargs)
 
     # -------------------------------------------------------------------
-    # 재질
-    #   젖음 재질은 러프니스 텍스처를 **주지 않는다**: OmniPBR 은
-    #   reflection_roughness_texture_influence=1.0 이면 상수를 무시하므로,
-    #   경면(0.08)을 강제하려면 diff+nor 만 쓰고 상수 러프니스를 걸어야 한다.
-    #   (건조 대응쌍은 러프니스 텍스처를 그대로 사용 = 원래의 석재 룩)
+    # Materials
+    #   Wet materials get **no** roughness texture: with OmniPBR,
+    #   reflection_roughness_texture_influence=1.0 ignores the constant, so to force
+    #   a mirror (0.08) we use diff+nor only and set a constant roughness.
+    #   (the dry twin keeps the roughness texture = the original stone look)
     # -------------------------------------------------------------------
     def setup_materials():
         sca = mp["scale"]
@@ -490,12 +494,12 @@ def main():
                        sc.tex_path(role, "nor"), sc.tex_path(role, "rough"),
                        s, metallic=0.0)
 
-        # 트레드 젖음 박판(경면) / 단 솔리드·라이저(반건조) / 광장 포장
+        # tread wet plate (specular) / step solid and riser (half-dry) / plaza paving
         M["tread_wet"] = stone("TreadWet", gd, wt["wet_rough"],
                                wt["wet_spec"], wt["wet_tint"])
-        # [비 패키지 v2] 젖음 3단 tier — 건조 대응쌍에서는 stone() 이 텍스처
-        #   러프니스 경로로 떨어져 3종이 모두 동일한 마른 석재가 된다(기하·룩
-        #   양쪽 모두 대응쌍 정합 유지).
+        # [rain package v2] 3 wetness tiers — in the dry twin stone() falls back to the
+        #   texture-roughness path and all three become the same dry stone (twin
+        #   consistency held in both geometry and look).
         for ti, td in enumerate(wt["patch_tiers"]):
             M[f"tread_p{ti}"] = stone(f"TreadP{td['name']}", gd, td["rough"],
                                       td["spec"], td["tint"])
@@ -523,7 +527,7 @@ def main():
         M["rail"] = PBR(f"{ROOT}/Looks/Rail", diffuse_color=mp["rail_color"],
                         metallic=mp["rail_metallic"],
                         roughness_const=mp["rail_rough"])
-        # 볼라드 v5.1 상단 백색 반사띠 — 본당 0.08 m² 로 소면적(v5.1 §4 준수)
+        # Bollard v5.1 white top band — 0.08 m² each, a small area (complies with v5.1 §4)
         M["bollard_band"] = PBR(f"{ROOT}/Looks/BollardBand",
                                 diffuse_color=mp["bollard_band_color"],
                                 roughness_const=0.30)
@@ -532,26 +536,26 @@ def main():
         M["parapet"] = PBR(f"{ROOT}/Looks/Parapet",
                            diffuse_color=mp["parapet_color"],
                            roughness_const=mp["parapet_rough"])
-        # [비 패키지 v2] tide mark · 웅덩이 다크닝 링 · 라이저 흘러내림 공용
-        #   암색 젖음 재질 (sRGB 암색 규약 0.02~0.09 준수, 경면기 유지)
+        # [rain package v2] shared by tide mark · puddle darkening ring · riser run-down
+        #   dark wet material (sRGB dark-tone rule 0.02~0.09, specularity kept)
         M["tide"] = PBR(f"{ROOT}/Looks/Tide", diffuse_color=mp["tide_color"],
                         roughness_const=mp["tide_rough"], metallic=0.0,
                         specular_level=mp["tide_spec"])
-        # [맥락 v2] 화분 관목 — 젖은 잎(암색 + 약한 스펙큘러)
+        # [context v2] planter shrubs — wet leaves (dark + weak specular)
         M["shrub"] = PBR(f"{ROOT}/Looks/Shrub", diffuse_color=mp["shrub_color"],
                          roughness_const=0.65, specular_level=0.5)
         return M
 
     # -------------------------------------------------------------------
-    # 지형 — 상부 광장 / 하부 광장 / 치크밴드 / 잔디 사면
-    #   개구(피트)가 없는 제방형이므로 4박스 분할 대상 없음. 네 솔리드가 서로
-    #   겹치며 타일링 → 공동 위를 덮는 평면도, 부유 에지도 없다.
+    # Terrain — upper plaza / lower plaza / cheek band / grass bank
+    #   Embankment type with no opening (pit), so no 4-box split is needed. The four
+    #   solids tile with overlap -> no plane covering a cavity and no floating edge.
     # -------------------------------------------------------------------
     def build_upper(M):
         up = PARAMS["upper"]
-        # [W2-0 · P-A] 상부 광장 상면이 ground_kit 의 장식 대상이다 → 변위
-        #   스킨 OFF(**BOX 호출 전에** 등록). 젖음 패치(+2 mm)·점자블록
-        #   (돌기 6 mm)이 스킨(+6.5~16.5 mm) 아래로 사라지는 것을 막는다.
+        # [W2-0 · P-A] The upper plaza top is what ground_kit dresses -> displacement
+        #   skin OFF (registered **before the BOX call**). Keeps the wet patches (+2 mm)
+        #   and tactile paving (6 mm studs) from vanishing under the skin (+6.5~16.5 mm).
         sc.skin_exclude(f"{ROOT}/UpperPlaza")
         BOX(f"{ROOT}/UpperPlaza",
             ((up["x0"] + up["x1"]) / 2.0, (up["y0"] + up["y1"]) / 2.0,
@@ -569,7 +573,7 @@ def main():
             M["plaza"], col=True)
 
     def build_cheeks(M):
-        """계단 측면 석재 치크밴드 — 상면 = 노징선 + proud."""
+        """Stone cheek band on the stair flank — top = nosing line + proud."""
         ck = PARAMS["cheek"]
         x0 = -ck["x_head"]
         z0 = SLOPE_K * ck["x_head"] + ck["proud"]
@@ -581,7 +585,7 @@ def main():
                            M["cheek"], margin=0.0, collider=True)
 
     def build_banks(M):
-        """치크 바깥 잔디 사면 — 상면 = 노징선(추가 낙차 에지 없음)."""
+        """Grass bank outside the cheek — top = nosing line (no extra drop edge)."""
         bk = PARAMS["bank"]
         x0 = -bk["x_head"]
         z0 = SLOPE_K * bk["x_head"]
@@ -600,9 +604,9 @@ def main():
             z_top=st["z_top"], collider=True)
 
     def build_flat_fill(M):
-        """hazard_stairs=False 대조군: 전면 z=0 평지."""
+        """hazard_stairs=False control: the whole site flat at z=0."""
         up = PARAMS["upper"]
-        # [W2-0 · P-A] 대조군에서도 지면 요소는 그대로 놓인다 → 스킨 OFF.
+        # [W2-0 · P-A] Ground elements are laid in the control too -> skin OFF.
         sc.skin_exclude(f"{ROOT}/FlatFill")
         lo = PARAMS["lower"]
         x0, x1 = up["x0"], lo["x1"]
@@ -613,18 +617,20 @@ def main():
             M["plaza"], col=True)
 
     # -------------------------------------------------------------------
-    # 젖음 레이어 [특색] — 트레드 전용 박판 + 수막
-    #   박판은 단 솔리드 안으로 파묻히고(x/y 로 3~5mm 내밀어) 상면만 proud
-    #   3mm 로 노출 → 동일평면 없음. 재질만 경면(러프니스 0.08)이다.
+    # Wetness layer [feature] — tread-only thin plates + water films
+    #   The plates bury into the step solid (overhanging 3~5mm in x/y) and only the
+    #   top shows, proud 3mm -> no coplanarity. Only the material is specular (roughness 0.08).
     # -------------------------------------------------------------------
     def build_tread_films(M):
-        """[비 패키지 v2] 트레드 젖음 박판을 **트레드 내 부분 폭 패치 3~5매**로
-        분해한다. 기하 envelope(상면 proud 0.003 · 두께 0.012 · x ±3mm 오버)는
-        불변이고 y 절단선만 고정 시드로 흩뿌려 '트레드 단위 젖음' 인상을 지운다.
-        인접 패치는 patch_overlap(6mm) 겹치고 proud 를 patch_step(0.4mm)씩
-        층지게(j%3) 해 겹침 구간에 동일평면(Z-파이팅)이 생기지 않는다.
-        건조 대응쌍(wet_surface=False)에서는 3 tier 재질이 모두 동일한 마른
-        석재로 떨어져 **기하·룩 양쪽 모두 대응쌍 정합**이 유지된다."""
+        """[rain package v2] Break the tread wet plate into **3~5 partial-width patches
+        inside each tread**. The geometric envelope (top proud 0.003 · thickness 0.012 ·
+        x +-3mm overhang) is unchanged; only the y cut lines are scattered from a fixed
+        seed, erasing the "wetness per tread" impression.
+        Adjacent patches overlap by patch_overlap (6mm) and their proud is staggered by
+        patch_step (0.4mm) on a j%3 ladder, so no coplanarity (Z-fighting) appears in
+        the overlap zones.
+        In the dry twin (wet_surface=False) all 3 tier materials collapse to the same
+        dry stone, so **twin consistency holds in both geometry and look**."""
         st = PARAMS["stairs"]
         ox, oy = wt["film_over_x"], wt["film_over_y"]
         y_lo, y_hi = st["y0"] - oy, st["y1"] + oy
@@ -656,21 +662,22 @@ def main():
               f"{len(wt['patch_tiers'])}단 (seed={wt['patch_seed']})")
 
     def build_water(M):
-        """수막 — [비 패키지 v2] 사각 1매 → **불규칙 lobe 겹침 + 다크닝 링**.
-        고정 시드(patch_seed+1). z 층위 규약:
-          트레드 필름 상면 0.0030~0.0038 < 다크닝 링 0.0045~0.0051
-          < 수면 0.0060~0.0068  → 3층 모두 동일평면 없음.
-        트레드 웅덩이 lobe 는 회전 없이 x 인셋·y 분할만으로 윤곽을 들쭉날쭉하게
-        만든다(회전 시 노징 밖으로 삐져나옴). 광장 시트는 제약이 없으므로
-        _oriented_box rotZ 로 3매를 비스듬히 겹쳐 사각 윤곽을 지운다."""
+        """Water films — [rain package v2] one rectangle -> **overlapping irregular lobes
+        + a darkening ring**. Fixed seed (patch_seed+1). z ladder rule:
+          tread film top 0.0030~0.0038 < darkening ring 0.0045~0.0051
+          < water surface 0.0060~0.0068  -> none of the 3 layers is coplanar.
+        Tread puddle lobes are made ragged by x inset and y splits alone, without
+        rotation (rotating them would poke past the nosing). The plaza sheets have no
+        such constraint, so 3 of them are overlapped at an angle with _oriented_box
+        rotZ to erase the rectangular outline."""
         st = PARAMS["stairs"]
         ox = wt["film_over_x"]
         rng = random.Random(int(wt["patch_seed"]) + 1)
         k = 0
         for f in PARAMS["water_films"]:
             i = int(f["step"])
-            x_lo = st["x0"] + st["tread"] * (i - 1) - ox     # 필름 앞끝
-            x_hi = x_lo + st["tread"] + 2.0 * ox             # 필름 뒷끝
+            x_lo = st["x0"] + st["tread"] * (i - 1) - ox     # film leading edge
+            x_hi = x_lo + st["tread"] + 2.0 * ox             # film trailing edge
             xa = st["x0"] + st["tread"] * (i - 1) + 0.010
             xb = xa + st["tread"] - 0.030
             ztop = st["z_top"] - st["riser"] * i
@@ -684,7 +691,7 @@ def main():
                 lx1 = xb - rng.uniform(0.0, 0.045)
                 ly0 = edges[j] - (0.05 if j > 0 else 0.0)
                 ly1 = edges[j + 1] + (0.05 if j < 2 else 0.0)
-                # ① 다크닝 링(젖어 번진 둘레) — 트레드 필름 폭 안으로 클램프
+                # (1) darkening ring (the damp halo) — clamped inside the tread film width
                 rx0 = max(x_lo + 0.002, lx0 - wt["ring_grow_x"])
                 rx1 = min(x_hi - 0.002, lx1 + wt["ring_grow_x"])
                 rz = ztop + wt["ring_proud"] + j * 0.0003
@@ -692,14 +699,14 @@ def main():
                     ((rx0 + rx1) / 2.0, (ly0 + ly1) / 2.0, rz - 0.005),
                     (rx1 - rx0, (ly1 - ly0) + 2.0 * wt["ring_grow_y"], 0.010),
                     M["tide"])
-                # ② 수면 lobe
+                # (2) water-surface lobe
                 sc.build_water(stage, f"{ROOT}/Water/Tread_{k}", lx0, ly0,
                                lx1, ly1,
                                ztop + wt["water_lift"] + j * 0.0004,
                                thick=wt["water_t"], mtl=M["water"])
                 k += 1
-        # 광장 시트 — 회전 lobe 3매(+링). 계단 회랑(x≥0)을 침범하지 않도록
-        #   상부 시트 lobe 최대 x = −0.97 (검산치) 로 유지된다.
+        # Plaza sheets — 3 rotated lobes (+ ring). To stay out of the stair corridor
+        #   (x>=0) the upper sheet's lobes stop at x = −0.97 (checked value).
         lobes = ((0.82, 0.70, -0.06, 0.10, 9.0),
                  (0.66, 0.92, 0.14, -0.08, -13.0),
                  (0.90, 0.52, 0.02, 0.16, 4.0))
@@ -724,9 +731,9 @@ def main():
                     (Lx * fx, Ly * fy, 0.010), M["water"], rotz=rz_deg)
 
     # -------------------------------------------------------------------
-    # [비 패키지 v2] tide mark(수위선) + 라이저 흘러내림 스트릭
-    #   젖음의 "증거"이므로 wet_surface 토글에 종속 — 건조 대응쌍에서는
-    #   생성하지 않는다(기하 대응쌍 정합은 계단 본체·필름이 담당).
+    # [rain package v2] tide mark (water line) + riser run-down streaks
+    #   They are the "evidence" of wetness, so they follow the wet_surface toggle
+    #   and are not built for the dry twin (stair body and films carry twin geometry).
     # -------------------------------------------------------------------
     def build_rain_marks(M):
         st = PARAMS["stairs"]
@@ -734,13 +741,13 @@ def main():
         th = wt["tide_h"]
         x0 = -ck["x_head"]
         run = RUN + ck["x_head"] + ck["x_tail"]
-        z_ck = SLOPE_K * ck["x_head"] + ck["proud"]      # x=x0 에서 치크 상면
-        # ① 치크밴드 **상면 러노프 스트라이프** — 계단쪽 안쪽 모서리를 따라
-        #    물이 흘러내린 암색 젖은 띠. proud 3mm(규약 내), 폭 0.24.
-        #    치크 상면은 노징선 +0.06 이라 잔디 뱅크 위로 노출된 유일한 넓은
-        #    경사면 → approach az 23.2° · grazing az 22.3° 로 프레임 안.
-#    y 3.02..3.26 : 계단 측면(±3.00) 바깥 · 치크(2.94..3.60) 안쪽
-#    → 노징 지점에서도 판이 치크 솔리드에 물려 부유 슬릿이 없다.
+        z_ck = SLOPE_K * ck["x_head"] + ck["proud"]      # cheek top at x=x0
+        # (1) cheek band **top runoff stripe** — a dark wet band along the inner edge
+        #    on the stair side where water ran down. proud 3mm (within rule), width 0.24.
+        #    The cheek top sits at nosing line +0.06, the only broad slope exposed above
+        #    the grass bank -> in frame at approach az 23.2 deg · grazing az 22.3 deg.
+#    y 3.02..3.26 : outside the stair flank (+-3.00) · inside the cheek (2.94..3.60)
+#    -> even at the nosing the plate bites into the cheek solid, so no floating slit.
         for sgn, tag in ((1.0, "P"), (-1.0, "N")):
             a = sgn * (ck["y_in"] + wt["runoff_in"])
             b = sgn * (ck["y_in"] + wt["runoff_in"] + wt["runoff_w"])
@@ -748,7 +755,7 @@ def main():
                            z_ck + wt["runoff_proud"], run, run * SLOPE_K,
                            min(a, b), max(a, b), wt["runoff_t"], M["tide"],
                            margin=0.0, collider=False)
-        # ② 치크밴드 외측면 tide — 잔디 뱅크 위로 노출된 0.10 만 밴드로.
+        # (2) cheek outer-face tide — only the 0.10 exposed above the bank is banded.
         for sgn, tag in ((1.0, "P"), (-1.0, "N")):
             a = sgn * (ck["y_out"] - 0.002)
             b = sgn * (ck["y_out"] + wt["tide_proud"])
@@ -756,22 +763,22 @@ def main():
                            z_ck - wt["tide_drop"], run, run * SLOPE_K,
                            min(a, b), max(a, b), wt["tide_h_cheek"],
                            M["tide"], margin=0.0, collider=False)
-        # ③ 원경 파사드 기부 tide — 건물 C 파사드(x=28) 하단 밴드
+        # (3) distant facade base tide — band at the foot of building C's facade (x=28)
         bC = PARAMS["buildings"]["C"]
         BOX(f"{ROOT}/Tide/FacadeC",
             (bC["facade_x"] - 0.012, (bC["y0"] + bC["y1"]) / 2.0,
              LOWER_TOP + th / 2.0),
             (0.030, bC["y1"] - bC["y0"], th), M["tide"])
-        # ④ 라이저 흘러내림 스트릭 — 라이저 수직면에서 3mm 돌출한 세로 띠.
-        #    proud 를 k%3 로 층지게 해 같은 단에서 겹쳐도 동일평면 없음.
+        # (4) riser run-down streaks — vertical bands standing 3mm proud of the riser face.
+        #    proud is staggered by k%3 so overlaps on the same step are never coplanar.
         rng = random.Random(int(wt["streak_seed"]))
         for k in range(int(wt["streak_n"])):
             i = rng.randint(2, st["nsteps"] - 1)
             y = rng.uniform(st["y0"] + 0.25, st["y1"] - 0.25)
             xa = st["x0"] + st["tread"] * (i - 1)
             zt = st["z_top"] - st["riser"] * i
-            z_lo = zt + 0.005                    # 트레드 필름과 이격
-            z_hi = zt + st["riser"] - 0.025      # 윗단 필름 밑면과 이격
+            z_lo = zt + 0.005                    # clear of the tread film
+            z_hi = zt + st["riser"] - 0.025      # clear of the film above
             pr = wt["streak_proud"] + (k % 3) * 0.0005
             w = wt["streak_w"] * rng.uniform(0.55, 1.45)
             BOX(f"{ROOT}/Tide/Streak_{k}",
@@ -782,7 +789,7 @@ def main():
               f"(seed={wt['streak_seed']})")
 
     # -------------------------------------------------------------------
-    # 단서 (cue) — nosing / tactile / railing
+    # Cue — nosing / tactile / railing
     # -------------------------------------------------------------------
     def build_cues(M):
         st = PARAMS["stairs"]
@@ -794,21 +801,22 @@ def main():
                 st["riser"], st["tread"], st["nsteps"],
                 color=ns["color"], width=ns["width"], proud=ns["proud"],
                 z_top=st["z_top"])
-        # [W2 §12.4] 점자블록은 **ground_kit 이 집행**한다(`build_ground_kit`).
-        #   ① 현행 `sc.build_tactile` 은 상수색 무돌기 평판이라 법정 36점
-        #      돌기의 음영이 화면에 0 이었다(§12.5 ③).
-        #   ② 위치도 바뀐다 — 법정 0.3 m 가 아니라 **1.0 m 전면**(부적정
-        #      재현). 두 곳에서 깔면 2겹이 되므로 여기서는 만들지 않는다.
-        #   토글(`cue_tactile`)은 `ground_plans()` 가 그대로 읽는다.
+        # [W2 §12.4] Tactile paving is **executed by ground_kit** (`build_ground_kit`).
+        #   (1) today's `sc.build_tactile` is a flat constant-colour plate with no studs,
+        #      so the statutory 36 studs cast zero shading on screen (§12.5 (3)).
+        #   (2) the position changes too — **1.0 m in front**, not the statutory 0.3 m
+        #      (non-compliance reproduced). Laying it twice would double it, so not here.
+        #   The toggle (`cue_tactile`) is read as-is by `ground_plans()`.
         if cfg["cue_railing"]:
             rl = PARAMS["rail"]
             ck = PARAMS["cheek"]
 
             def cheek_ground(x):
-                """포스트 착지면: x<=0 은 상부 광장 상면, x>0 은 치크밴드 상면.
-                (치크밴드는 계단 구간에만 있으므로 수평 연장부 포스트는 광장에
-                 착지 — 그 결과 레일 상면은 치크밴드보다 proud 만큼 낮은
-                 0.84m, 광장 기준으로는 규정 0.9m 가 된다.)"""
+                """Post landing surface: upper plaza top for x<=0, cheek band top for x>0.
+                (The cheek band exists only along the stair run, so the posts on the
+                 level extension land on the plaza — the rail top therefore sits proud
+                 lower than the cheek band at 0.84m, which is the statutory 0.9m when
+                 measured from the plaza.)"""
                 if x <= 0.0:
                     return 0.0
                 return ck["proud"] - SLOPE_K * min(x, RUN)
@@ -823,9 +831,9 @@ def main():
                     rail_mid_drop=rl["rail_mid_drop"])
 
     # -------------------------------------------------------------------
-    # [W2] ground_kit — P3 sidewalk_block. 조건 오버레이(젖음)를 존중해
-    #   패치는 `wet_surface` 토글의 재질을, 줄눈·오염은 물때/반건조 재질을
-    #   받는다. **기하는 토글과 무관하게 동일**하다(대응쌍 기하 불변).
+    # [W2] ground_kit — P3 sidewalk_block. Honouring the condition overlay (wetness),
+    #   patches take the `wet_surface` toggle's material while joints and grime take
+    #   the tide / half-dry materials. **Geometry is identical either way** (twin rule).
     # -------------------------------------------------------------------
     def build_ground_kit(M):
         (_tag, gp), = ground_plans()
@@ -846,11 +854,11 @@ def main():
         return res
 
     # -------------------------------------------------------------------
-    # 드레싱 — 볼라드 4 + 원경 건물 2동(지평선 폐쇄 §A-4)
+    # Dressing — 4 bollards + 2 distant buildings (horizon closure §A-4)
     # -------------------------------------------------------------------
     def build_dressing(M):
-        # 볼라드 [v5.1 §2] — 광장 진입부 1열(중앙 5.6 m 개구), 반사띠 +
-        #   전면(−X) 점형블록. 점형블록은 젖음 틴트 미적용(수막 시트 밖).
+        # Bollards [v5.1 §2] — one row at the plaza entrance (5.6 m gap at centre), band +
+        #   dot tactile in front (−X). No wet tint on it (outside the water sheets).
         bo = PARAMS["bollard"]
         for name, bx, by in bollard_points():
             bc.build_bollard_v51(stage, f"{ROOT}/Bollard_{name}", bx, by, 0.0,
@@ -860,7 +868,7 @@ def main():
         low_base = LOWER_TOP if cfg["hazard_stairs"] else 0.0
         for key, bd in PARAMS["buildings"].items():
             b = dict(bd)
-            # level="lower"(하부 광장 기단) / "upper"(상부 광장 기단)
+            # level="lower" (plinth at lower plaza) / "upper" (plinth at upper plaza)
             b["base_z"] = low_base if bd.get("level", "upper") == "lower" \
                 else 0.0
             sc.build_building(stage, f"{ROOT}/Building_{key}", b,
@@ -869,12 +877,12 @@ def main():
         build_civic(M)
 
     # -------------------------------------------------------------------
-    # 맥락 드레싱 v2 — 관공서/문화시설 앞 대계단의 장소성
-    #   화분 쌍 · 광장 가로등 · 국기게양대 · 조형물 · 원경 열주.
-    #   전 요소가 평탄면(상부 광장 z=0 / 하부 광장 z=LOWER_TOP) 위에 서며,
-    #   하부 소품은 전부 x>5.5 → 계단(x 0..4.9)보다 원거리 = 특색 무가림.
-    #   수직 요소(가로등·게양대·주두)는 젖은 포장 경면 반사에 걸리도록
-    #   grazing_mirror/approach 프레임 안에 배치했다.
+    # Context dressing v2 — sense of place: a grand stair before a civic hall
+    #   planter pairs · plaza lamps · flagpoles · sculpture · distant colonnade.
+    #   Everything stands on flat ground (upper plaza z=0 / lower plaza z=LOWER_TOP),
+    #   and every lower prop sits at x>5.5, farther than the stairs (x 0..4.9) = no occlusion.
+    #   Vertical elements (lamps · flagpoles · capitals) were placed inside the
+    #   grazing_mirror/approach frames so they catch the wet-paving reflection.
     # -------------------------------------------------------------------
     def build_civic(M):
         wet = cfg["wet_surface"]
@@ -884,7 +892,7 @@ def main():
             return low if kind == "lower" else 0.0
 
         def tide_band(path, cx, cy, sx, sy, z_base):
-            """[비 패키지] 수직 구조물 기부 젖음 밴드(proud 12mm)."""
+            """[rain package] Wet band at the base of vertical structures (proud 12mm)."""
             if not wet:
                 return
             h = wt["tide_h"] * 0.8
@@ -892,9 +900,9 @@ def main():
                 (sx + 2.0 * wt["tide_proud"], sy + 2.0 * wt["tide_proud"], h),
                 M["tide"])
 
-        # ① 대형 화분 쌍 (경계석 + 캡 + 식재 + 관목 3구)
+        # (1) large planter pairs (kerb + cap + soil + 3 shrubs)
         pl = PARAMS["planter"]
-        _pls, _lms = civic_placements()                # v5.1 §3 배치 지터
+        _pls, _lms = civic_placements()                # v5.1 §3 placement jitter
         for i, pcx, pcy, pd in _pls:
             bz = base_of(pd["base"])
             pfx = f"{ROOT}/Planter_{i}"
@@ -915,7 +923,7 @@ def main():
             tide_band(f"{pfx}/Tide", pcx, pcy, pd["size"],
                       pd["size"], bz)
 
-        # ② 광장 가로등 — 젖은 포장에 수직 반사를 만드는 핵심 요소
+        # (2) plaza lamps — the key element making vertical reflections on wet paving
         lm = PARAMS["plazalamp"]
         for i, lcx, lcy, ld in _lms:
             bz = base_of(ld["base"])
@@ -932,7 +940,7 @@ def main():
             tide_band(f"{pfx}/Tide", lcx, lcy, lm["base_r"] * 2.0,
                       lm["base_r"] * 2.0, bz)
 
-        # ③ 국기게양대 3본 + 화강암 기단 (상부 광장 +Y · lookback 전용)
+        # (3) 3 flagpoles + granite plinth (upper plaza +Y · lookback only)
         fl = PARAMS["flag"]
         cy_mid = sum(fl["cys"]) / len(fl["cys"])
         py = (max(fl["cys"]) - min(fl["cys"])) + 2.0 * fl["plinth_pad"]
@@ -951,7 +959,7 @@ def main():
         tide_band(f"{ROOT}/Flag/Tide", fl["cx"], cy_mid,
                   2.0 * fl["plinth_pad"], py, 0.0)
 
-        # ④ 조형물 기단 + 모놀리스 (하부 광장 +Y · grazing/approach 프레임 안)
+        # (4) sculpture plinth + monolith (lower plaza +Y · in the grazing/approach frames)
         sp = PARAMS["sculpture"]
         bz = base_of(sp["base"])
         BOX(f"{ROOT}/Sculpture/Plinth",
@@ -964,7 +972,7 @@ def main():
         tide_band(f"{ROOT}/Sculpture/Tide", sp["cx"], sp["cy"], sp["plinth"],
                   sp["plinth"], bz)
 
-        # ⑤ 원경 열주 — 기단(스타일로베이트) + 원주 열 + 엔타블러처
+        # (5) distant colonnade — stylobate + column row + entablature
         co = PARAMS["colonnade"]
         bz = base_of(co["base"])
         sty_cx = (co["sty_x0"] + co["sty_x1"]) / 2.0
@@ -997,7 +1005,7 @@ def main():
               f"조형물 1 · 열주 {n_col}주 · 파사드 "
               f"{len(PARAMS['buildings'])}동")
 
-    # ── 씬 조립 ──
+    # ── Scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
     M = setup_materials()
     stair_mtl = M["stone_damp"] if cfg["cue_material_break"] else M["plaza"]
@@ -1008,7 +1016,7 @@ def main():
         build_banks(M)
         build_cheeks(M)
         build_stairs(stair_mtl)
-        build_tread_films(M)          # 기하는 항상 동일 — 재질만 젖음/건조
+        build_tread_films(M)          # geometry always identical — only the material is wet/dry
         build_cues(M)
         if cfg["wet_surface"]:
             build_water(M)
@@ -1017,7 +1025,7 @@ def main():
         build_flat_fill(M)
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
-    build_ground_kit(M)                  # [W2] 지면 요소 — 드레싱 뒤(산포 규약)
+    build_ground_kit(M)                  # [W2] ground elements — after dressing (scatter rule)
 
     print(f"[기하] run={RUN:.2f}m drop={DROP:.2f}m slope_k={SLOPE_K:.4f} "
           f"lower_top={LOWER_TOP:.3f} wet={cfg['wet_surface']} "

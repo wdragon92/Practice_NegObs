@@ -1,72 +1,79 @@
 # -*- coding: utf-8 -*-
 """
-scene17_ramp_pair_hangang.py — NegObs 인공씬 17호 (v5.1 재구성):
-한강 제방 단면 — 둑길 → 잔디 사면 → 둔치 → 강 (Isaac Sim 4.5)
+scene17_ramp_pair_hangang.py — NegObs synthetic scene 17 (v5.1 rebuild):
+Han river levee section — levee path -> grass bank -> terrace -> river (Isaac Sim 4.5)
 
-유형    : T21 램프-계단 대비쌍 (같은 낙차 3.2 m — 계단 vs 주행 가능 경사)
-사양서  : Docs/audit_v4/user_feedback_v5_1.md §씬별 지시 17행
-공통    : scene_common.py (build_slope/build_straight_stairs/build_rot_group/
-          build_water/build_building/build_tree/add_sphere) · scene16 구조 준거
-          (v6: 억새는 build_hedge 박스 → 대 군락·블롭으로 교체하며 호출 폐기)
+Type    : T21 ramp-stair contrast pair (same 3.2 m drop — stairs vs drivable grade)
+Spec    : Docs/audit_v4/user_feedback_v5_1.md §per-scene instructions, row 17
+Shared  : scene_common.py (build_slope/build_straight_stairs/build_rot_group/
+          build_water/build_building/build_tree/add_sphere) · follows scene16 structure
+          (v6: silver grass moved from build_hedge boxes to stalk clumps and blobs,
+          so that call is retired)
 
-[v5.1] 재구성 사유 (사용자: "정체 불명 · 억지 지형")
-  구 버전은 옹벽 개구에서 계단과 **지그재그 2절 램프(페어레인 + 분리 파라펫)**
-  가 튀어나오는 정체 불명의 구조물이었다. 실제 한강 제방에는 그런 형태가 없다.
-  실제 단면은 단순하다:
-      제방 마루(보도+자전거도로 폭 6) → **잔디 사면(구배 1:2, 높이 3.2)**
-      → 둔치(산책로+잔디+벤치) → 호안 사석 → 넓은 수면 → 건너편 아파트·교량
-  그 사면을 (a) **직선으로 관통하는 콘크리트 계단**(폭 3, 무난간 관행)과
-  (b) **사면을 비스듬히 가로지르는 사선 단일 램프**(폭 2.5, 경사 8%)가
-  같은 낙차 3.2 m 를 서로 다른 경사로 내려간다 — 대비쌍 학습 의도는 그대로,
-  지형만 실제 한강으로 갈아엎었다.
-  폐기: 지그재그 2절 · 페어레인(레인 A/B) · 분리 파라펫 · 옹벽 개구 3구간.
+[v5.1] Why it was rebuilt (user: "unidentifiable · forced terrain")
+  In the old version, stairs and a **zigzag 2-flight ramp (paired lanes + a separate
+  parapet)** burst out of an opening in a retaining wall — an unidentifiable structure.
+  No real Han river levee looks like that. The real section is simple:
+      levee crest (sidewalk + bike road, width 6) -> **grass bank (1:2 grade, height 3.2)**
+      -> terrace (promenade + grass + benches) -> riprap revetment -> broad water
+      -> apartments and bridge on the far bank
+  Down that bank go (a) **concrete stairs cutting straight through** (width 3, unrailed
+  by custom) and (b) **a single diagonal ramp crossing the bank obliquely** (width 2.5,
+  grade 8%), taking the same 3.2 m drop at different grades — the contrast-pair intent
+  is unchanged, only the terrain was replaced with a real Han river section.
+  Dropped: the zigzag 2 flights · paired lanes (lane A/B) · separate parapet ·
+  the 3 retaining-wall opening segments.
 
-위험 본질
-  둑길(z=0)에서 로봇 눈높이 h0.3 로 +X 를 보면, 마루 어깨(x=0)를 스치는 시선이
-  사면(평균 50%)보다 훨씬 완만해 **사면·계단·둔치가 전부 시야에서 사라지고**
-  둔치 원측(x ≥ 21)만 지평으로 남는다 → 근측 잔디와 연속 평면으로 읽힌다.
-  방호는 없다(한강 제방 계단은 무난간이 관행). 사선 램프의 강측 가장자리도
-  높이 1.5 m 석축 위 연석(h0.15)뿐이다 — 규정 미달의 현실.
+Hazard
+  Looking +X from the levee path (z=0) at robot eye height h0.3, the sight line grazing
+  the crest shoulder (x=0) is far gentler than the bank (50% average), so **the bank,
+  the stairs and the terrace all disappear from view** and only the far side of the
+  terrace (x >= 21) is left on the horizon -> it reads as one continuous plane with the
+  near grass. There is no guard (Han river levee stairs are unrailed by custom). The
+  river-side edge of the diagonal ramp is only a kerb (h0.15) on a 1.5 m stone
+  revetment — a below-code reality.
 
-목표
-  ① 제방 마루(보도 3 + 자전거도로 3) + 마루 연석
-  ② 잔디 사면 7세그 폴리라인(어깨 라운딩 25.7% → 하부 60%, 평균 50% = 1:2),
-     계단 폭(y ±1.5)만 비우는 2 Y밴드 구성 — 세그 간 margin 겹침으로 틈 금지
-  ③ 계단 20단(riser 0.16 · tread 0.32 · 폭 3) 사면 직선 관통
-  ④ 사선 램프: rot_group(yaw 80.7931°) 안에서 build_slope 1장 — 길이 40 m,
-     경사 8%, 폭 2.5, 상류측 절토면(최대 0.30 m) · 강측 석축(최대 1.53 m)
-  ⑤ 둔치(산책로 폭 3 + 잔디 + 벤치 + 억새) · 호안 사석 · 넓은 수면 ·
-     건너편 아파트 4동 · 교량 (기존 PARAMS 재사용)
+Goal
+  (1) levee crest (sidewalk 3 + bike road 3) + crest kerb
+  (2) grass bank as a 7-segment polyline (shoulder rounding 25.7% -> 60% at the
+      bottom, 50% average = 1:2), built as 2 Y bands that leave only the stair width
+      (y +-1.5) open — segments overlap by margin so no gap can open
+  (3) 20 stair steps (riser 0.16 · tread 0.32 · width 3) cutting straight through
+  (4) diagonal ramp: a single build_slope inside rot_group (yaw 80.7931 deg) — length
+      40 m, grade 8%, width 2.5, uphill cut face (max 0.30 m) · river-side stone
+      revetment (max 1.53 m)
+  (5) terrace (promenade width 3 + grass + benches + silver grass) · riprap revetment ·
+      broad water · 4 apartment blocks across · bridge (existing PARAMS reused)
 
-보행 연속성 자가 검증표 (두 경로 모두 둑길 z=0 → 둔치 z=−3.2)
-  ┌ #  구간              좌표(x, y, z)              단차/판정
-  │ A0 둑길 자전거도로   (−1.50,  −6.00,  0.000)    평탄
-  │ A1 마루 어깨(연단)   ( 0.00,   0.00,  0.000)    ← **낙차 3.20 무난간**
-  │ A2 계단 1단          ( 0.32,   0.00, −0.160)    0.160
-  │ A3 계단 20단         ( 6.40,   0.00, −3.200)    0.160 × 19
-  │ A4 둔치 잔디         ( 7.20,   0.00, −3.200)    평탄 (계단 하단 flush)
-  │ A5 산책로            (13.00,   0.00, −3.200)    평탄
-  ├ B0 둑길 마루         (−0.60,   4.10,  0.000)    평탄
-  │ B1 램프 상류 시단    ( 0.59,   3.90,  0.000)    마루 끝 대비 문턱 0.152
-  │                                                 ([v7] 구 apron 프림 제거 —
-  │                                                  PARAMS["ramp"]["apron"] 참조)
-  │ B2 램프 s=10         ( 3.43,  13.58, −0.800)    경사 8%
-  │ B3 램프 s=25         ( 5.83,  28.38, −2.000)    경사 8%
-  │ B4 램프 종점 s=40    ( 8.23,  43.19, −3.200)    경사 8% → 둔치 flush
-  └ B5 산책로 합류       (13.00,  43.00, −3.200)    평탄
-  * 두 경로의 낙차가 같다(3.20) — 대비쌍의 근거. 계단 50% vs 램프 8%.
+Walking-continuity self-check table (both routes: levee path z=0 -> terrace z=−3.2)
+  ┌ #  section               coord (x, y, z)            step / verdict
+  │ A0 levee bike road       (−1.50,  −6.00,  0.000)    flat
+  │ A1 crest shoulder (edge) ( 0.00,   0.00,  0.000)    ← **drop 3.20, no railing**
+  │ A2 stair step 1          ( 0.32,   0.00, −0.160)    0.160
+  │ A3 stair step 20         ( 6.40,   0.00, −3.200)    0.160 x 19
+  │ A4 terrace grass         ( 7.20,   0.00, −3.200)    flat (flush with stair foot)
+  │ A5 promenade             (13.00,   0.00, −3.200)    flat
+  ├ B0 levee crest           (−0.60,   4.10,  0.000)    flat
+  │ B1 ramp uphill start     ( 0.59,   3.90,  0.000)    0.152 threshold vs crest end
+  │                                                     ([v7] old apron prim removed —
+  │                                                      see PARAMS["ramp"]["apron"])
+  │ B2 ramp s=10             ( 3.43,  13.58, −0.800)    grade 8%
+  │ B3 ramp s=25             ( 5.83,  28.38, −2.000)    grade 8%
+  │ B4 ramp end s=40         ( 8.23,  43.19, −3.200)    grade 8% -> flush with terrace
+  └ B5 promenade merge       (13.00,  43.00, −3.200)    flat
+  * Both routes drop the same 3.20 — the basis of the contrast pair. Stairs 50% vs ramp 8%.
 
-실행 (GUI 룩 체크 — 기본):
+Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
     export PYTHONNOUSERSITE=1
     python scene17_ramp_pair_hangang.py
 
-자동 캡처 (headless):   NEGOBS_CAPTURE=1 python scene17_ramp_pair_hangang.py
-스모크(부팅 없음):      NEGOBS_SMOKE=1  python scene17_ramp_pair_hangang.py
+Auto capture (headless):  NEGOBS_CAPTURE=1 python scene17_ramp_pair_hangang.py
+Smoke (no boot):          NEGOBS_SMOKE=1  python scene17_ramp_pair_hangang.py
 
-좌표계: Z-up, m, 진행축 +X(둑길 → 사면 → 물). **낙차 시작 모서리 x=0.**
-  둑길 z=0 · 둔치 z=−3.2 · 수면 z=−3.42 · 건너편 둔치 z=−3.1.
+Coordinates: Z-up, m, travel axis +X (levee path -> bank -> water). **Drop start edge x=0.**
+  levee path z=0 · terrace z=−3.2 · water z=−3.42 · far-bank terrace z=−3.1.
 """
 
 import os
@@ -74,41 +81,41 @@ import sys
 import math
 import json
 import datetime
-import random as _random          # [v6] 억새 군락·건너편 블롭 시드 고정 지터
+import random as _random          # [v6] fixed-seed jitter for silver-grass clumps and far-bank blobs
 
 import scene_common as sc
 import ground_kit as gk
 
 
 # ===========================================================================
-# [A] SCENE_CONFIG — 표준 7키. hazard_stairs 만 위험 기하 토글.
+# [A] SCENE_CONFIG — standard 7 keys. Only hazard_stairs toggles hazard geometry.
 # ===========================================================================
 SCENE_CONFIG = {
-    "hazard_stairs":      True,    # False → 사면·계단·램프를 z=0 평지로 (기하 토글 유일 예외)
-    "cue_railing":        False,   # 한강 제방 계단은 **무난간이 관행**. True → 계단 우측 파이프 레일 1선
-    "cue_tactile":        False,   # 비관행(하천 시설) — 코드 경로만 예약
-    "cue_material_break": True,    # 둑길 잔디/아스팔트 vs 계단·램프 콘크리트 대비
-    "cue_sign":           False,   # [선택] 미구현 — config 키만 예약
-    "cue_scene_dressing": True,    # 산책로·벤치·억새·가로등·아파트·교량
-    "cue_nosing":         False,   # True → 전 단 단코 띠
+    "hazard_stairs":      True,    # False -> bank · stairs · ramp become flat z=0 (sole geometry toggle)
+    "cue_railing":        False,   # Han river levee stairs are **customarily unrailed**. True -> 1 pipe rail on the stair's right
+    "cue_tactile":        False,   # not customary for river works — code path reserved only
+    "cue_material_break": True,    # levee grass/asphalt vs stair and ramp concrete contrast
+    "cue_sign":           False,   # [optional] not implemented — config key reserved only
+    "cue_scene_dressing": True,    # promenade · benches · silver grass · lamps · apartments · bridge
+    "cue_nosing":         False,   # True -> nosing band on every step
 }
 
 
 # ===========================================================================
 # [B] PARAMS
 # ===========================================================================
-_SLOPE_RUN = 6.4          # 사면 수평 (구배 1:2 · 높이 3.2)
-_SLOPE_H = 3.2            # 사면 높이 = GT 낙차 (계단·램프 공통)
-_TERRACE_Z = -_SLOPE_H    # 둔치 상면 -3.2
+_SLOPE_RUN = 6.4          # bank run (grade 1:2 · height 3.2)
+_SLOPE_H = 3.2            # bank height = GT drop (shared by stairs and ramp)
+_TERRACE_Z = -_SLOPE_H    # terrace top -3.2
 
 PARAMS = dict(
-    # --- 제방 마루(둑길) : 잔디 성토체 위 보도(폭 3) + 녹지대 0.5 + 자전거도로 4 ---
-    #  [W2-D · 사양 §5.9 17 ②] Cross section re-cut. The old crown was
+    # --- Levee crest (levee path) : sidewalk 3 + planting strip 0.5 + bike road 4 on grass fill ---
+    #  [W2-D · spec §5.9 17 (2)] Cross section re-cut. The old crown was
     #  walk 3.0 (x -6..-3) + bike 3.0 (x -3..0) with the two hard surfaces
     #  butted together. §5.9 prescribes **bike 3.0 -> 4.0, walk relocated,
     #  0.5 m planting strip between them**; the Han-river levee bikeway is the
     #  one place the supervisor left the bike road valid (§5.7 ruling, 07-29:
-    #  "scene03 자연 유지, 자전거도로는 scene17 제방만 유효").
+    #  "scene03 stays natural, the bike road is valid only on the scene17 levee").
     #    bike  x -4.0 .. 0.0   (4.0, asphalt)   <- crest side
     #    green x -4.5 .. -4.0  (0.5, grass)     <- separation strip
     #    walk  x -7.5 .. -4.5  (3.0, interlock) <- landward
@@ -118,15 +125,15 @@ PARAMS = dict(
     #    2 mm below the surface they belong to and read as buried.
     #  ★ `crown_line.x` -1.5 -> **-2.0** = centre of the widened bike road.
     levee=dict(x0=-24.0, x1=0.0, y0=-30.0, y1=48.0, z_top=0.0, thick=3.6),
-    crown_walk=dict(x0=-7.5, x1=-4.5, proud=0.006, embed=0.06),   # 보도(인터로킹)
-    crown_green=dict(x0=-4.5, x1=-4.0, top=0.000, embed=0.10),    # 분리 녹지대 0.5
-    crown_bike=dict(x0=-4.0, x1=0.0, proud=0.006, embed=0.06),    # 자전거도로(아스팔트)
-    crown_line=dict(x=-2.0, w=0.10, seg=2.4, gap=2.0, z=0.008),   # 자전거도로 중앙 파선
+    crown_walk=dict(x0=-7.5, x1=-4.5, proud=0.006, embed=0.06),   # sidewalk (interlocking)
+    crown_green=dict(x0=-4.5, x1=-4.0, top=0.000, embed=0.10),    # 0.5 planting separation strip
+    crown_bike=dict(x0=-4.0, x1=0.0, proud=0.006, embed=0.06),    # bike road (asphalt)
+    crown_line=dict(x=-2.0, w=0.10, seg=2.4, gap=2.0, z=0.008),   # bike road centre dashed line
 
-    # ═══ [W2-D ground_kit] P13 levee_paved — 사양 §5.9 scene17 행 ═══════════
-    #  ③ 시공이음 3 m + 패치 · ④ 인터로킹 줄눈 음각 2 mm(프로파일 기본) ·
-    #  ⑥ 배수 + 빗물받이 · ⑦ 맨홀 1기(W1) · ⑩ 답압 마모대.
-    #  ★ Deviation from ⑥ "L형 측구": `build_gutter_L` is a **carriageway edge**
+    # ═══ [W2-D ground_kit] P13 levee_paved — spec §5.9 scene17 row ═══════════
+    #  (3) construction joints 3 m + patches · (4) interlock joints incised 2 mm (profile default) ·
+    #  (6) drainage + gullies · (7) 1 manhole (W1) · (10) tread-wear lane.
+    #  * Deviation from (6) "L-shaped gutter": `build_gutter_L` is a **carriageway edge**
     #    detail and `_compose_ops` always lays it at y = const spanning x0..x1,
     #    i.e. **across** the crown. Here the road runs along **Y** (the levee),
     #    so a y=const gutter would be perpendicular to the road it drains.
@@ -136,86 +143,86 @@ PARAMS = dict(
     #    GT-E2 check: the trench sits 4.15 m in front of the crest, so at d5 it
     #    is at X=0.85 and at d10 at X=5.85 — both **outside** the E band
     #    [0.7d, 2.2d], i.e. it is never judged as a near-edge transverse line
-    #    [계산].
-    #  ★ ⑤ "블록 침하 ±3 mm (2x2 단위)" is **not** placed here: it is a per-unit
+    #    [computed].
+    #  * (5) "block settlement +-3 mm (2x2 units)" is **not** placed here: it is a per-unit
     #    perturbation of the paving cell, which §4.4 assigns to T1 (MDL unit
     #    jitter). The kit's job is the ledger — unit_cell 0.200 / origin (0,0)
     #    is handed over by `plan_ground`.
     gkit=dict(
         region=(-7.5, -6.0, 0.0, 6.0),        # crown hard surface only
-        manholes=[(-2.00, 1.20)],             # 1기, d5 근경 창
+        manholes=[(-2.00, 1.20)],             # 1 unit, d5 near window
         gullies=[(-4.15, -5.50), (-4.15, 5.50)],
         trench=(-4.15, -4.80, 4.80),          # bike/green boundary drain
         patches=[(-1.15, -0.55), (-5.60, 2.20), (-3.10, -3.40), (-6.40, -1.10)],
-        wear_lane=((-6.00, -6.0), (-6.00, 6.0)),   # 보도 답압 축선(Y 진행)
+        wear_lane=((-6.00, -6.0), (-6.00, 6.0)),   # sidewalk wear axis (runs in Y)
     ),
-    # 마루 끝 연석 — 계단 개구(y ±1.5)와 램프 진입 apron(y 2.6..4.4)은 비운다
+    # Crest-end kerb — open at the stair gap (y +-1.5) and the ramp entry apron (y 2.6..4.4)
     cope=dict(x0=-0.20, x1=0.05, h=0.05,
               y_segs=((-30.0, -1.5), (1.5, 2.6), (4.4, 48.0))),
-    # --- 잔디 사면: 7세그 폴리라인 (어깨 라운딩 → 하부 직선, 평균 50%) ---
-    #     검증 규약: 각 세그 종점이 계단 현(z = −0.5x) **위**여야 계단이
-    #     사면에 파묻히지 않는다(스모크 자동 검산).
+    # --- Grass bank: 7-segment polyline (rounded shoulder -> straight below, 50% average) ---
+    #     Check rule: each segment end must sit **above** the stair chord (z = −0.5x)
+    #     or the stairs get buried in the bank (auto-checked in the smoke run).
     slope=dict(segs=((0.7, 0.18), (0.8, 0.34), (0.9, 0.50), (1.0, 0.58),
                      (1.0, 0.60), (1.0, 0.50), (1.0, 0.50)),
                thick=3.0, margin=0.25, y0=-30.0, y1=48.0),
-    # --- 계단 20단 : 사면 직선 관통 (폭 3, 콘크리트, 무난간) ---
+    # --- 20 stair steps : straight through the bank (width 3, concrete, no railing) ---
     stairs=dict(x0=0.0, riser=0.16, tread=0.32, nsteps=20,
                 y0=-1.5, y1=1.5, z_top=0.0, base_z=-4.6),
-    # --- 사선 단일 램프 : 사면을 비스듬히 가로지른다 ---
-    #     길이 40 m · 경사 8% · 폭 2.5. 진행방위 yaw = acos(6.4/40) = 80.7931°
-    #     (수평 40 m 중 X 로 6.4 m 만 전진 → 사면 구배 50% 를 8% 로 늘여 탄다)
-    #     오프셋 e : 노면 상류(uphill) 가장자리를 사면-현 접선에서 강측으로
-    #     e_up 만큼 민 값. e_up=0.6 이면 상류 절토면 0.07~0.30 m(매몰 0) 확보.
-    #     [v6 판정 ㉠] 성토 노출면 처리: 강측 절단면(최대 1.53 m)이 "사면에 얹은
-    #       콘크리트 블록"으로 읽혔다(judge_v6_rt_mod6 §6 — 현 시점 최대 억지 요소).
-    #       원인은 ㉠ 재질 불연속(석축 rock_wall vs 주변 잔디) + ㉡ 평평한 상면 +
-    #       수직 절단면. 램프 노면·경사·폭·시종점(= 위험 기하 GT)은 **불변**으로 두고
-    #       마감만 바꾼다: Fill 재질을 사면 잔디와 동재질로 + 강측에 계단식 잔디
-    #       배터(batter) 3단을 덧대 수직면을 분절한다.
-    #       batter: n 단 × 폭 w × 낙차 dz (사면 구배 1:1.19 ≈ 40° — 잔디 성토
-    #       어깨 관행). 3단 = 폭 1.50 · 낙차 1.26 로 노면 밑 최대 노출
-    #       (1.53 − deck_t 0.35 = 1.18 m)를 전부 덮는다.
-    #     [v7 판정 ⑪-1 — 수정 미반영 원인 규명] W-5 는 `Fill` 을 잔디로 바꿨는데
-    #       판정은 "갈색 매스가 v6와 동일"이었다. levee_walk 카메라로 프림을
-    #       역투영한 결과 그 매스는 **`Fill` 도 `Deck` 도 아닌 `Ramp/Apron`**
-    #       이었다. 원인은 rot_group 안에서의 **로컬/월드 축 혼동**:
-    #         · apron 은 "로컬 −X = 램프 뒤 = 마루 안쪽"이라고 가정하고
-    #           local x ∈ [−1.4, 0], y ∈ [0.9, 5.2], 두께 2.8 m 로 놓였다.
-    #         · 그러나 rot_group yaw = 80.793° 라 로컬 −X 는 월드 −X 가 아니라
-    #           거의 월드 −Y 다. 실제 월드 풋프린트는 네 꼭짓점
+    # --- Single diagonal ramp : crosses the bank obliquely ---
+    #     length 40 m · grade 8% · width 2.5. Heading yaw = acos(6.4/40) = 80.7931 deg
+    #     (only 6.4 m of X progress over 40 m of run -> the 50% bank grade stretched to 8%)
+    #     offset e : how far the deck's uphill edge is pushed riverward from the
+    #     bank-chord tangent. e_up=0.6 gives an uphill cut face of 0.07~0.30 m (0 buried).
+    #     [v6 judgment (a)] Exposed fill face: the river-side cut (max 1.53 m) read as a
+    #       "concrete block laid on the bank" (judge_v6_rt_mod6 §6 — worst forced element).
+    #       Causes: (a) material break (rock_wall vs surrounding grass) + (b) flat top +
+    #       a vertical cut. Ramp deck · grade · width · endpoints (= hazard GT) stay **unchanged**;
+    #       only the finish changes: Fill takes the same grass material as the bank, and a
+    #       3-step grass batter is added river-side to break up the vertical face.
+    #       batter: n steps x width w x drop dz (grade 1:1.19 ~ 40 deg — customary for a
+    #       grass fill shoulder). 3 steps = width 1.50 · drop 1.26, covering the whole
+    #       maximum exposure under the deck (1.53 − deck_t 0.35 = 1.18 m).
+    #     [v7 judgment (11)-1 — why the fix did not show] W-5 did change `Fill` to grass,
+    #       yet the judgment said "the brown mass is the same as v6". Back-projecting the
+    #       prims through the levee_walk camera showed the mass was **`Ramp/Apron`, neither
+    #       `Fill` nor `Deck`**. The cause is **local/world axis confusion** inside rot_group:
+    #         · the apron assumed "local −X = behind the ramp = inland of the crest" and
+    #           was placed at local x ∈ [−1.4, 0], y ∈ [0.9, 5.2], thickness 2.8 m.
+    #         · but with rot_group yaw = 80.793 deg, local −X is not world −X but almost
+    #           world −Y. The real world footprint has four corners
     #           (3.06,3.50) (2.84,2.12) (−1.41,2.81) (−1.18,4.19) —
-    #           **월드 x 가 +3.06 까지 사면 위로 튀어나온다.**
-    #         · 그 지점 사면 상면은 z −1.40 인데 apron 상면은 −0.015 →
-    #           사면 위로 **1.39 m 솟은 두께 2.8 m 콘크리트 블록**이 되고,
-    #           수직 절단면이 프레임을 지배했다(= 판정이 말한 갈색 매스).
-    #       → apron 을 rot_group 밖 **월드 정렬 마루 참**으로 재작성한다
-    #         (아래 build_ramp_apron). 여기 파라미터는 그 월드 사각형이다.
-    #         두께도 2.8 → 노면 두께 0.35 로 줄여 블록성을 제거.
-    #     [v7 판정 ⑪-1 ㉠] 배터가 "인공 계단 3단"으로 읽힌 건 단 높이 0.42 m 가
-    #       17 m 거리에서 또렷했기 때문. **폭·낙차 총량(1.50 × 1.26)은 그대로 두고**
-    #       9단으로 잘게 쪼개 단 높이 0.14 m(판정 권고 ≤0.15)로 낮춘다 = 연속 사면.
+    #           and **world x juts out over the bank as far as +3.06.**
+    #         · the bank top there is z −1.40 while the apron top is −0.015 ->
+    #           a **2.8 m thick concrete block standing 1.39 m above the bank**,
+    #           whose vertical cut dominated the frame (= the brown mass in the judgment).
+    #       -> the apron is rewritten outside rot_group as a **world-aligned crest landing**
+    #         (build_ramp_apron below). The parameters here are that world rectangle.
+    #         Thickness also drops 2.8 -> 0.35 (deck thickness) to remove the blockiness.
+    #     [v7 judgment (11)-1 (a)] The batter read as "3 artificial steps" because a step
+    #       height of 0.42 m is distinct at 17 m. **Keeping total width and drop (1.50 x 1.26)**,
+    #       it splits into 9 steps at 0.14 m each (advised <=0.15) = a continuous slope.
     ramp=dict(p0=(0.0, 4.0), length=40.0, width=2.5, e_up=0.60,
               deck_t=0.35, fill_t=2.0, fill_out=0.10,
               curb_w=0.15, curb_h=0.15,
               batter=dict(n=9, w=0.1667, dz=0.14, margin=0.30),
               apron=dict(build=False, x0=-1.60, x1=0.05, y0=0.60, y1=5.40,
                          t=0.35, drop=0.015)),
-    # --- 둔치(고수부지) : 잔디 + 산책로(폭 3, 강 평행) ---
+    # --- Terrace (riverside flat) : grass + promenade (width 3, parallel to the river) ---
     terrace=dict(x0=6.4, x1=27.5, y0=-30.0, y1=48.0, z_top=_TERRACE_Z,
                  thick=1.0),
     promenade=dict(x0=11.5, x1=14.5, proud=0.004, line_w=0.10, line_in=0.18),
-    # --- 호안 사석 + 수면 + 건너편 ---
+    # --- Riprap revetment + water + far bank ---
     bank=dict(x0=27.5, run=2.0, drop=0.45, thick=1.2, margin=0.2),
     water=dict(x0=28.6, x1=72.0, y0=-42.0, y1=60.0, z=-3.42),
     far_bank=dict(x0=72.0, x1=100.0, y0=-42.0, y1=60.0, z_top=-3.1, thick=0.5),
-    # [v6 판정 ㉡] 건너편 억새 띠 — build_hedge 직육면체 → 편평 타원체 열(블롭).
-    #   spacing 간격으로 심고 크기·위치에 시드 지터(§3 등간격 금지).
-    #   [v7 판정 ⑪-2] 구 구성은 **1열 · 등간격(spacing 1.55, y지터 ±0.3 뿐)**
-    #     이라 76 m 원경에서 "동일 크기 카키 구슬 목걸이"로 읽혔다(§3 등간격 금지).
-    #     → ① 밴드 폭 방향 3열 엇갈림(dx 로 전후 배치, 열마다 y 위상 어긋남)
-    #        ② 간격을 spacing × U(0.55, 1.60) 으로 **랜덤 보행**(등간격 소멸)
-    #        ③ 크기 0.60~1.45× · 높이 0.70~1.25× 지터(판정 권고 대역)
-    #        ④ 뒷열을 크고 높게, 앞열을 작고 낮게 → 띠에 깊이가 생긴다.
+    # [v6 judgment (b)] Far-bank silver-grass band — build_hedge boxes -> flat ellipsoid blobs.
+    #   Planted at spacing with seeded size/position jitter (§3 bans even spacing).
+    #   [v7 judgment (11)-2] the old layout was **1 row · evenly spaced (spacing 1.55,
+    #     y jitter +-0.3 only)**, reading at 76 m as a "necklace of equal khaki beads" (§3).
+    #     -> (1) 3 staggered rows across the band (dx sets fore/aft, y phase differs per row)
+    #        (2) spacing becomes a **random walk** of spacing x U(0.55, 1.60) (even spacing gone)
+    #        (3) size 0.60~1.45x · height 0.70~1.25x jitter (band advised by the judgment)
+    #        (4) back row bigger and taller, front row smaller and lower -> the band gains depth.
     far_hedge=dict(cx=76.0, sx=1.2, length=26.0, h=1.7, spacing=1.55,
                    rad=0.80,
                    rows=((-1.15, 1.18, 0.00), (0.00, 1.00, 0.37),
@@ -223,14 +230,14 @@ PARAMS = dict(
     far_hedges=[dict(cy=-26.0), dict(cy=3.0), dict(cy=32.0)],
     far_trees=[dict(cx=80.4, cy=-19.0), dict(cx=79.1, cy=7.0),
                dict(cx=80.9, cy=34.0)],
-    # [v6 판정 ㉢] 건너편 아파트 — "4동 동일 형상·동일 간격 격자 정렬" 해소.
-    #   구: x0 88.0 고정(H만 89.5) · 폭 20/20/18/16 · 이격 8/6/6 · 높이 42/48/38/44
-    #       → 파사드가 한 평면에 늘어서고 실루엣이 반복 격자로 읽혔다(§3 위반 인상).
-    #   신: ① 후퇴(x0) 85.5~90.5 로 3.0 m 편차 → 파사드 평면 해체(원근 깊이 생성)
-    #       ② 폭 17/23/15/17, 이격 8/5/11 → 반복 주기 소멸
-    #       ③ 높이 36/49/41/30.5 · 층수 12/16/14/10 (층고 2.93~3.06 m 실제 대역)
-    #       ④ 틴트 4종 순환(shell / shell_c / shell_b / shell_d) — 인접 동 색 상이
-    #   전부 원경 배경물이라 위험 기하·보행 연속성과 무관. far_bank x 72..100 내.
+    # [v6 judgment (c)] Far-bank apartments — fixes "4 identical blocks on an even grid".
+    #   Old: x0 fixed at 88.0 (only H 89.5) · width 20/20/18/16 · gaps 8/6/6 · height 42/48/38/44
+    #       -> facades lined up on one plane and the silhouette read as a repeating grid (§3).
+    #   New: (1) setback (x0) 85.5~90.5, a 3.0 m spread -> facade plane broken up (depth)
+    #       (2) width 17/23/15/17, gaps 8/5/11 -> no repeat period
+    #       (3) height 36/49/41/30.5 · floors 12/16/14/10 (floor height 2.93~3.06 m, real band)
+    #       (4) 4 tints cycled (shell / shell_c / shell_b / shell_d) — neighbours differ
+    #   All far backdrop; no bearing on hazard geometry or continuity. Within far_bank x 72..100.
     far_buildings=dict(
         E=dict(x0=86.5, x1=94.5, y0=-38.0, y1=-21.0, h=36.0, floors=12,
                axis="x", facade_x=86.5, face_dir=-1.0, base_z=-3.1),
@@ -246,12 +253,12 @@ PARAMS = dict(
                 deck_t=1.2, pier_r=1.2, pier_x=44.0,
                 pier_ys=(-30.0, -10.0, 12.0, 34.0, 54.0), pier_base=-3.7),
 
-    # --- 드레싱 (배치 비정형: 등간격 금지, 앵커 옆, yaw 지터) ---
-    #     램프 풋프린트(사선 스트립)와 계단 폭은 피해서 배치한다.
-    # [v6 판정 ㉡] 억새 띠 — build_hedge 직육면체(카키 박스 = 볏짚더미/컨테이너
-    #   인상)를 **대(stalk) 군락**으로 교체. scene09 build_reeds 규약 이식
-    #   (얇은 원기둥 r0.022 · 높이 지터 · 소각 기울기 · 씨앗 고정 재현).
-    #   밴드 사각형은 그대로 두고 그 안에 density[본/m²] 로 흩뿌린다.
+    # --- Dressing (irregular placement: no even spacing, beside anchors, yaw jitter) ---
+    #     Placed clear of the ramp footprint (the diagonal strip) and the stair width.
+    # [v6 judgment (b)] Silver-grass band — build_hedge boxes (khaki boxes reading as
+    #   straw bales / containers) replaced by **stalk clumps**, porting the scene09
+    #   build_reeds rule (thin cylinders r0.022 · height jitter · slight tilt · fixed seed).
+    #   The band rectangle stays; stalks are scattered inside it at density [stalks/m²].
     reeds=[dict(x0=24.6, y0=-18.0, x1=26.4, y1=-6.5, h=1.35, seed=171),
            dict(x0=24.9, y0=5.0, x1=26.6, y1=15.8, h=1.25, seed=172),
            dict(x0=25.2, y0=26.0, x1=26.8, y1=33.4, h=1.40, seed=173),
@@ -277,13 +284,13 @@ PARAMS = dict(
         scale=dict(concrete_floor=0.9, paving_interlock=1.2, grass=1.4,
                    rock_wall=1.6, asphalt=3.0),          # [W2-D §5.9 ①]
         grass_tint=(0.54, 0.66, 0.41),
-        grass_tint_b=(0.49, 0.62, 0.38),          # 사면 잔디(틴트 지터 −5%)
-        # [v7 판정 ⑪-1] `concrete_floor` diff 평균은 sRGB (115.7,102.2,77.0) =
-        #   난색 갈토다. 구 틴트 (0.80,0.79,0.76) 은 채널비를 그대로 두어
-        #   렌더 결과가 sRGB (98,87,69) — **갈색**. 램프 노면·연석·마루 연석·
-        #   계단이 전부 이 재질이라 "갈색 매스" 인상의 절반은 색이었다.
-        #   → 선형 채널 등화(scene06/11 W-1 규약과 동일): 최저 채널(B) 기준으로
-        #   R·G 를 눌러 sRGB (80,79,78) ≈ 중성 회색 콘크리트로 만든다.
+        grass_tint_b=(0.49, 0.62, 0.38),          # bank grass (tint jitter −5%)
+        # [v7 judgment (11)-1] The `concrete_floor` diff average is sRGB (115.7,102.2,77.0) =
+        #   a warm brown earth. The old tint (0.80,0.79,0.76) kept the channel ratio, so the
+        #   render came out sRGB (98,87,69) — **brown**. Ramp deck · kerb · crest kerb ·
+        #   stairs all use this material, so half of the "brown mass" impression was colour.
+        #   -> linear channel equalisation (same as the scene06/11 W-1 rule): R and G are
+        #   pulled down to the lowest channel (B), giving sRGB (80,79,78) ~ neutral grey concrete.
         conc_tint=(0.53, 0.66, 1.00),
         paving_tint=(0.84, 0.83, 0.81),
         rock_tint=(0.72, 0.71, 0.68),
@@ -291,7 +298,7 @@ PARAMS = dict(
         # [W2-D §5.9 ①] tint for the textured asphalt — keeps the old
         #   constant-colour value as the target mean (albedo well under 0.30).
         asphalt_tint=(0.42, 0.42, 0.45),
-        paint_color=(0.70, 0.70, 0.66), paint_rough=0.62,   # 순백 금지(<0.8)
+        paint_color=(0.70, 0.70, 0.66), paint_rough=0.62,   # no pure white (<0.8)
         water_color=(0.05, 0.10, 0.11), water_rough=0.06,
         rail_color=(0.66, 0.68, 0.70), rail_metallic=0.7, rail_rough=0.4,
         wood_color=(0.28, 0.19, 0.12), wood_rough=0.85,
@@ -299,7 +306,7 @@ PARAMS = dict(
         glass_color=(0.055, 0.075, 0.10), glass_rough=0.08,
         parapet_color=(0.60, 0.60, 0.58), parapet_rough=0.62,
         shell_tint=(0.84, 0.82, 0.79), shell_tint_b=(0.78, 0.77, 0.76),
-        # [v6 판정 ㉢] 아파트 동별 틴트 4종 순환용 추가 2종
+        # [v6 judgment (c)] 2 extra tints so the apartment blocks can cycle 4
         shell_tint_c=(0.80, 0.77, 0.71), shell_tint_d=(0.73, 0.74, 0.73),
         bridge_color=(0.045, 0.045, 0.050), bridge_rough=0.7,
         lamp_color=(0.78, 0.78, 0.74), lamp_rough=0.4,
@@ -343,7 +350,7 @@ if _sc_ov:
 
 
 # ===========================================================================
-# [C] 경로 + 텍스처 역할
+# [C] Paths + texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "scene17")
@@ -352,10 +359,10 @@ ASSET_ROLES = ["concrete_floor", "paving_interlock", "grass", "rock_wall",
 
 
 # ===========================================================================
-# [C2] 사면·램프 기하 — 전 함수 공용 단일 진실원
+# [C2] Bank and ramp geometry — the single source of truth for all functions
 # ===========================================================================
 def slope_nodes():
-    """사면 폴리라인 절점 [(x, z), ...] (x=0,z=0 시작)."""
+    """Bank polyline vertices [(x, z), ...] (starting at x=0, z=0)."""
     x, z = 0.0, 0.0
     nodes = [(0.0, 0.0)]
     for run, drop in PARAMS["slope"]["segs"]:
@@ -366,7 +373,7 @@ def slope_nodes():
 
 
 def slope_z(xq):
-    """사면 표면 z(x). x<0 은 마루(0), x>사면끝은 둔치."""
+    """Bank surface z(x). Crest (0) for x<0, terrace beyond the bank end."""
     if xq <= 0.0:
         return 0.0
     x, z = 0.0, 0.0
@@ -379,12 +386,12 @@ def slope_z(xq):
 
 
 def ramp_geom():
-    """사선 램프의 방위·단위벡터. 반환 dict:
-      yaw   : rot_group 회전각(도). 로컬 +X → 진행방향 d, 로컬 +Y → −n(상류측)
-      d     : 진행 단위벡터(평면), n : 강측(하류) 법선 단위벡터
-      length/drop/grade, e_up/e_dn : 상·하류 가장자리 오프셋(강측 +)
-    수식: 노면이 사면 현(구배 50%)을 8% 로 늘여 타려면 진행 1 m 당 X 전진이
-      dx = grade/0.5 = 0.16 m 여야 한다 → cos(yaw) = 0.16."""
+    """Heading and unit vectors of the diagonal ramp. Returned dict:
+      yaw   : rot_group rotation (deg). Local +X -> travel direction d, local +Y -> −n (uphill)
+      d     : travel unit vector (in plan), n : river-side (downhill) normal unit vector
+      length/drop/grade, e_up/e_dn : uphill / downhill edge offsets (riverward +)
+    Derivation: for the deck to stretch the bank chord (50% grade) out to 8%, every 1 m
+      of travel must advance dx = grade/0.5 = 0.16 m in X -> cos(yaw) = 0.16."""
     rp = PARAMS["ramp"]
     L = float(rp["length"])
     drop = float(_SLOPE_H)
@@ -398,7 +405,7 @@ def ramp_geom():
 
 
 def ramp_point(s, e):
-    """램프 경로 매개변수 (s: 진행거리, e: 강측 횡오프셋) → 월드 (x, y, z)."""
+    """Ramp path parameters (s: distance travelled, e: riverward lateral offset) -> world (x, y, z)."""
     g = ramp_geom()
     px, py = PARAMS["ramp"]["p0"]
     x = px + g["d"][0] * s + g["n"][0] * e
@@ -407,7 +414,7 @@ def ramp_point(s, e):
 
 
 # ===========================================================================
-# [C3] 스모크 — 부팅 전 기하 자기검증 (조기종료)
+# [C3] Smoke — pre-boot geometry self-check (early exit)
 # ===========================================================================
 def _smoke_report():
     st = PARAMS["stairs"]
@@ -421,7 +428,7 @@ def _smoke_report():
     print("scene17_ramp_pair_hangang — SMOKE 기하 자기검증 (부팅 없음, v5.1)")
     print("=" * 74)
 
-    # ── 사면 폴리라인 (구배 1:2) ──
+    # ── Bank polyline (grade 1:2) ──
     nodes = slope_nodes()
     print(f"  [잔디 사면 폴리라인]  {len(sl['segs'])}세그 · 두께 "
           f"{sl['thick']:.1f} · 세그 margin {sl['margin']:.2f}(겹침)")
@@ -442,7 +449,7 @@ def _smoke_report():
     print(f"    계단 매몰 방지(전 절점이 현 위): "
           f"{'OK' if ok_chord else 'FAIL'}")
 
-    # ── 대비쌍 ──
+    # ── Contrast pair ──
     sdrop = st["nsteps"] * st["riser"]
     srun = st["nsteps"] * st["tread"]
     print("  [대비쌍: 같은 낙차 · 다른 경사]")
@@ -458,7 +465,7 @@ def _smoke_report():
     print(f"    낙차 검증: {sdrop:.2f} ≥ 0.3 m → "
           f"{'OK' if sdrop >= 0.3 else 'FAIL'}")
 
-    # ── 램프 사선 배치 · 절토/성토 검산 ──
+    # ── Ramp diagonal placement · cut/fill check ──
     p_end = ramp_point(g["length"], (g["e_up"] + g["e_dn"]) / 2.0)
     print("  [사선 램프 배치]")
     print(f"    yaw {g['yaw']:.4f}° (cos = {_SLOPE_RUN}/{g['length']:.0f} = "
@@ -486,7 +493,7 @@ def _smoke_report():
           f"(노면 밑 {fill_bot:.2f} m 까지 솔리드) → "
           f"{'OK (부유 없음)' if worst_face < fill_bot else 'FAIL'}")
 
-    # ── [v6 판정 ㉠] 강측 잔디 배터 검산 ──
+    # ── [v6 judgment (a)] river-side grass batter check ──
     bt = rp["batter"]
     n_bt, w_bt, dz_bt = int(bt["n"]), float(bt["w"]), float(bt["dz"])
     e_toe = g["e_dn"] + rp["fill_out"] + w_bt * n_bt
@@ -516,9 +523,9 @@ def _smoke_report():
           f"y ≥ {y_toe_min:.2f} > 계단 y1 {st['y1']:.1f} → "
           f"{'OK (계단 무간섭)' if y_toe_min > st['y1'] else 'FAIL'}")
 
-    # ── [v7 판정 ⑪-1] 진입 apron 풋프린트 검산 (갈색 매스 재발 방지) ──
-    #   구 apron 은 rot_group(yaw) 안에 있어 로컬 좌표를 월드로 착각한 결과
-    #   월드 x +3.06 까지 사면 위로 나갔다. 그 재현 계산을 남겨 대조한다.
+    # ── [v7 judgment (11)-1] entry apron footprint check (guards against the brown mass) ──
+    #   The old apron sat inside rot_group(yaw), so local coordinates were mistaken for
+    #   world and it reached world x +3.06 over the bank. The calculation is kept here.
     cy_, sy_ = (math.cos(math.radians(g["yaw"])),
                 math.sin(math.radians(g["yaw"])))
     px0, py0 = rp["p0"]
@@ -545,7 +552,7 @@ def _smoke_report():
     print(f"      프레임 갈색 매스 잔존 가능 프림: "
           f"{'없음 → OK' if not ap['build'] else 'Apron 재빌드됨 → 확인 요'}")
 
-    # ── [v6 판정 ㉢] 건너편 아파트 변주 검산 ──
+    # ── [v6 judgment (c)] far-bank apartment variation check ──
     fb2 = PARAMS["far_buildings"]
     print("  [건너편 아파트 4동 — 격자/동일 인상 해소]")
     prev_y1 = None
@@ -565,7 +572,7 @@ def _smoke_report():
           f"{len(set(gaps)) == len(gaps)}) · far_bank "
           f"[{fbk['x0']:.0f},{fbk['x1']:.0f}] 내 {inside}")
 
-    # ── [v6 판정 ㉡] 억새 군락 검산 ──
+    # ── [v6 judgment (b)] silver-grass clump check ──
     rd = PARAMS["reed"]
     tot_stalk = sum(int(round((r["x1"] - r["x0"]) * (r["y1"] - r["y0"])
                               * rd["density"])) for r in PARAMS["reeds"])
@@ -594,7 +601,7 @@ def _smoke_report():
           f"(구: 1열 등간격 {fh['spacing']:.2f} 고정) → "
           f"{'OK (등간격 소멸)' if len(set(gaps_far)) > len(gaps_far) * 0.5 else 'FAIL'}")
 
-    # ── z 위계 플레이트 표 ──
+    # ── z ladder plate table ──
     lv = PARAMS["levee"]
     fb = PARAMS["far_bank"]
     plates = [
@@ -633,12 +640,12 @@ def _smoke_report():
           f"아래로 잠김) → "
           f"{'OK' if te['z_top'] - PARAMS['bank']['drop'] < wt['z'] else 'FAIL'}")
 
-    # ── grazing 은닉 검산 ──
+    # ── grazing concealment check ──
     print("  [h0.3/h0.9 grazing 은닉 검산] 마루 어깨(x=0,z=0) 스치는 시선")
     for h in (0.3, 0.9):
         for d in (2.0, 5.0, 10.0):
-            k = h / d                                   # 시선 하강 기울기
-            x_hit = te["z_top"] / -k                    # 둔치(-3.2)에 닿는 x
+            k = h / d                                   # sight-line descent slope
+            x_hit = te["z_top"] / -k                    # x where it meets the terrace (-3.2)
             hid = x_hit > tot_run
             print(f"    h{h:.1f} d{d:4.1f} → 시선이 −3.20 에 닿는 x = "
                   f"{x_hit:6.1f} vs 사면 끝 {tot_run:.1f} → "
@@ -649,29 +656,29 @@ def _smoke_report():
 
 
 # ===========================================================================
-# [D] 카메라 프리셋
+# [D] Camera presets
 # ===========================================================================
 def build_views():
     views = sc.grid_views(0.0)
-    # pair_compare: 계단(y 0)과 사선 램프(y 4 → 43)를 한 화면에 — 대비쌍 핵심.
-    #   [v5.1 재조준] 지그재그 폐기로 램프가 +Y 로 40 m 뻗는다 → 남서 고각
-    #   부감으로 재조준. 검산(eye −20,−13,15): 계단 중심 오프축 14.6°,
-    #   램프 s=20 13.8°, 램프 종점 21.1° (전부 hFOV 30° 이내), 부각은
-    #   계단 32.0° · 종점 16.3° 로 카메라 피치 24.6° ±17.5° 안.
+    # pair_compare: stairs (y 0) and diagonal ramp (y 4 -> 43) in one frame — the pair's core.
+    #   [v5.1 re-aim] dropping the zigzag lets the ramp run 40 m in +Y -> re-aimed as a
+    #   high south-west overhead. Check (eye −20,−13,15): stair centre off-axis 14.6 deg,
+    #   ramp s=20 13.8 deg, ramp end 21.1 deg (all within hFOV 30 deg); depression is
+    #   32.0 deg at the stairs · 16.3 deg at the end, inside camera pitch 24.6 +-17.5 deg.
     views["pair_compare"] = dict(eye=[-20.0, -13.0, 15.0], tgt=[7.0, 13.0, -2.2])
-    # levee_walk: 둑길 종주(+Y) — 사면·계단·둔치가 전부 소실되는 grazing
+    # levee_walk: along the levee path (+Y) — grazing view where bank, stairs, terrace vanish
     views["levee_walk"] = dict(eye=[-1.5, -14.0, 1.50], tgt=[-1.3, 6.0, 0.90])
-    # ramp_run: 사선 램프 종주 (노면 위 눈높이)
+    # ramp_run: along the diagonal ramp (eye height above the deck)
     views["ramp_run"] = dict(eye=[2.15, 5.68, 1.39], tgt=[5.35, 25.40, -1.50])
-    # across_river: 둑길에서 계단·둔치·강·건너편 스카이라인 조망
+    # across_river: from the levee path over stairs, terrace, river and far skyline
     views["across_river"] = dict(eye=[-4.0, 0.5, 1.60], tgt=[22.0, 2.0, -2.60])
-    # toe_lookup: 둔치에서 사면·계단을 올려봄 (계단 실체 확인 컷)
+    # toe_lookup: looking up the bank and stairs from the terrace (proves the stairs exist)
     views["toe_lookup"] = dict(eye=[14.0, -6.0, -1.60], tgt=[3.5, -0.3, -1.20])
     return views
 
 
 # ===========================================================================
-# [E] 메인
+# [E] Main
 # ===========================================================================
 BANNER = """\
 [조작] 우클릭+WASD 비행 · P 패스트레이싱 토글 · C 스크린샷 · [ ] 태양 방위
@@ -732,7 +739,7 @@ def main():
         return sc.make_pbr(stage, path, *args, **kwargs)
 
     # -------------------------------------------------------------------
-    # 재질 (틴트 지터 변종 포함)
+    # Materials (including tint-jitter variants)
     # -------------------------------------------------------------------
     def setup_materials():
         sca = mp["scale"]
@@ -759,7 +766,7 @@ def main():
             f"{ROOT}/Looks/Rock", sc.tex_path("rock_wall", "diff"),
             sc.tex_path("rock_wall", "nor"), sc.tex_path("rock_wall", "rough"),
             sca["rock_wall"], tint=mp["rock_tint"])
-        # [W2-D · 사양 §5.9 17 ①] Constant colour -> **real PBR**. The asphalt
+        # [W2-D · spec §5.9 17 (1)] Constant colour -> **real PBR**. The asphalt
         #   texture set has been in `assets/scene01` all along and this scene
         #   simply never bound it, which is why the worst frame of the whole
         #   batch (d2 flat 99.78 %) was flat: a constant-colour road has no
@@ -826,7 +833,7 @@ def main():
         return M
 
     # -------------------------------------------------------------------
-    # 제방 마루(둑길) — 성토체 + 보도/자전거도로 밴드 + 마루 연석
+    # Levee crest (levee path) — fill body + sidewalk/bike-road bands + crest kerb
     # -------------------------------------------------------------------
     def build_levee(M):
         lv = PARAMS["levee"]
@@ -845,15 +852,15 @@ def main():
             BOX(f"{ROOT}/{key.split('_')[1].capitalize()}Band",
                 ((b["x0"] + b["x1"]) / 2.0, cy, (z_hi + z_lo) / 2.0),
                 (b["x1"] - b["x0"], Ly, z_hi - z_lo), mtl, col=True)
-        # [W2-D §5.9 ②] 분리 녹지대 0.5 m — 보도와 자전거도로 사이. 상면은
-        #   두 포장 상면(+0.006)보다 6 mm 낮은 z=0 이라 식재대로 읽힌다.
+        # [W2-D §5.9 (2)] 0.5 m planting strip — between sidewalk and bike road. Its top
+        #   sits at z=0, 6 mm below the two paved tops (+0.006), so it reads as a planting bed.
         gb = PARAMS["crown_green"]
         BOX(f"{ROOT}/GreenStrip",
             ((gb["x0"] + gb["x1"]) / 2.0, cy,
              (gb["top"] + lv["z_top"] - gb["embed"]) / 2.0),
             (gb["x1"] - gb["x0"], Ly, gb["top"] - lv["z_top"] + gb["embed"]),
             M["grass_b"], col=True)
-        # 자전거도로 중앙 파선
+        # bike road centre dashed line
         cl = PARAMS["crown_line"]
         step = cl["seg"] + cl["gap"]
         n = int(Ly / step)
@@ -863,7 +870,7 @@ def main():
                 break
             BOX(f"{ROOT}/CrownLine_{i}", (cl["x"], yy, cl["z"] - 0.01),
                 (cl["w"], cl["seg"], 0.02), M["paint"])
-        # 마루 끝 연석 — 계단 개구·램프 apron 구간은 비움
+        # Crest-end kerb — left open at the stair gap and the ramp apron
         cp = PARAMS["cope"]
         for i, (y0, y1) in enumerate(cp["y_segs"]):
             BOX(f"{ROOT}/Cope_{i}",
@@ -872,7 +879,7 @@ def main():
                 (cp["x1"] - cp["x0"], y1 - y0, cp["h"] + 0.20), M["conc"])
 
     # -------------------------------------------------------------------
-    # [W2-D] ground_kit — P13 levee_paved (사양 §5.9 scene17 행)
+    # [W2-D] ground_kit — P13 levee_paved (spec §5.9 scene17 row)
     #   Drop edge = levee crest x=0 (PARAMS["stairs"]["x0"], §7.4).
     #   The crown hard surface sits at z = levee.z_top + crown_bike.proud, so
     #   the plan is laid on that plane, not on z=0.
@@ -912,7 +919,7 @@ def main():
         return res
 
     # -------------------------------------------------------------------
-    # 잔디 사면 — 7세그 × 2 Y밴드 (계단 폭만 비움). 세그는 margin 으로 겹친다.
+    # Grass bank — 7 segments x 2 Y bands (stair width left open). Segments overlap by margin.
     # -------------------------------------------------------------------
     def build_slope_faces(M):
         sl = PARAMS["slope"]
@@ -930,7 +937,7 @@ def main():
                     margin=mg, collider=True)
 
     # -------------------------------------------------------------------
-    # 계단 20단 — 사면 직선 관통 (무난간)
+    # 20 stair steps — straight through the bank (no railing)
     # -------------------------------------------------------------------
     def build_stairs(M, stair_mtl):
         st = PARAMS["stairs"]
@@ -940,8 +947,8 @@ def main():
             z_top=st["z_top"], collider=True)
 
     # -------------------------------------------------------------------
-    # 사선 램프 — rot_group(yaw) 안에서 build_slope 1장 + 성토(석축) + 연석
-    #   로컬 규약: +X = 진행(하강), +Y = 상류측(= −n). 로컬 y = p0y − e.
+    # Diagonal ramp — one build_slope inside rot_group(yaw) + fill (revetment) + kerb
+    #   Local convention: +X = travel (descending), +Y = uphill side (= −n). Local y = p0y − e.
     # -------------------------------------------------------------------
     def build_ramp(M, ramp_mtl):
         rp = PARAMS["ramp"]
@@ -949,23 +956,23 @@ def main():
         px, py = rp["p0"]
         grp = sc.build_rot_group(stage, f"{ROOT}/Ramp", (px, py), g["yaw"])
         L, drop = g["length"], g["drop"]
-        y_up = py - g["e_up"]                       # 상류측 가장자리(로컬 y 큼)
-        y_dn = py - g["e_dn"]                       # 강측 가장자리
-        # ① 성토 — 노면 밑면부터 아래로. 강측으로 fill_out 만큼 더 나온다.
-        #   [v6 판정 ㉠] 재질 M["rock"](석축) → M["grass_b"](사면 잔디와 동재질).
-        #   갈색 석축면이 초록 사면 위에서 이물(콘크리트 블록)로 읽히던 원인 제거.
+        y_up = py - g["e_up"]                       # uphill edge (larger local y)
+        y_dn = py - g["e_dn"]                       # river-side edge
+        # (1) fill — from the deck underside downward, projecting fill_out riverward.
+        #   [v6 judgment (a)] material M["rock"] (revetment) -> M["grass_b"] (as the bank grass).
+        #   Removes the cause of the brown revetment reading as a foreign concrete block.
         sc.build_slope(stage, f"{grp}/Fill", px, -rp["deck_t"], L, drop,
                        y_dn - rp["fill_out"], y_up, rp["fill_t"], M["grass_b"],
                        margin=0.0, collider=True)
-        # ①-b [v6 판정 ㉠] 강측 잔디 배터 — 수직 절단면을 계단식 잔디 성토
-        #   어깨로 분절한다. k 단째: 폭 w 만큼 강측으로 물러나며 dz 씩 내려간다.
-        #   노면 밑 최대 노출 1.18 m 를 9단(낙차 1.26)이 덮는다.
-        #   [v7 판정 ⑪-1 ㉠] 구 3단(단 높이 0.42)은 17 m 거리에서 **인공 계단**
-        #   으로 읽혔다 → 폭·낙차 총량(1.50 × 1.26)은 유지한 채 9단으로 세분해
-        #   단 높이 0.14(≤0.15 권고)로 낮췄다. 또 구 구성은 grass/grass_b 를
-        #   교대해 **단 경계가 줄무늬**로 도드라졌으므로, 성토체(`Fill`)와
-        #   **동일한 grass_b 단일 재질**로 통일해 지형 접힘으로만 읽히게 한다.
-        #   margin 으로 상·하단을 조금 늘여 성토체와의 이음 틈을 막는다.
+        # (1)-b [v6 judgment (a)] river-side grass batter — breaks the vertical cut into
+        #   stepped grass-fill shoulders. Step k retreats w riverward and drops dz.
+        #   9 steps (total drop 1.26) cover the 1.18 m maximum exposure under the deck.
+        #   [v7 judgment (11)-1 (a)] the old 3 steps (0.42 each) read as **artificial stairs**
+        #   at 17 m -> total width and drop (1.50 x 1.26) are kept but split into 9 steps,
+        #   lowering step height to 0.14 (advised <=0.15). The old build also alternated
+        #   grass/grass_b, making **the step boundaries stripe**, so it now uses the same
+        #   **single grass_b material as the fill body (`Fill`)** and reads as a terrain fold.
+        #   margin stretches top and bottom slightly to close the joint with the fill.
         bt = rp["batter"]
         for k in range(int(bt["n"])):
             y_hi = y_dn - rp["fill_out"] - bt["w"] * k
@@ -974,14 +981,14 @@ def main():
                            y_hi - bt["w"], y_hi, rp["fill_t"],
                            M["grass_b"],
                            margin=bt["margin"], collider=True)
-        # ② 노면(콘크리트 포장)
+        # (2) deck (concrete paving)
         sc.build_slope(stage, f"{grp}/Deck", px, 0.0, L, drop, y_dn, y_up,
                        rp["deck_t"], ramp_mtl, margin=0.0, collider=True)
-        # ③ 강측 연석(h0.15) — 난간 없음(규정 미달의 현실)
+        # (3) river-side kerb (h0.15) — no railing (a below-code reality)
         sc.build_slope(stage, f"{grp}/Curb", px, rp["curb_h"], L, drop,
                        y_dn, y_dn + rp["curb_w"], rp["curb_h"] + 0.35,
                        M["conc"], margin=0.0, collider=True)
-        # ④ 진입 apron — [v7 판정 ⑪-1] **빌드 생략**(사유는 아래 주석).
+        # (4) entry apron — [v7 judgment (11)-1] **build skipped** (reason in the note below).
         if PARAMS["ramp"]["apron"]["build"]:
             ap = PARAMS["ramp"]["apron"]
             BOX(f"{ROOT}/RampApron",
@@ -989,23 +996,23 @@ def main():
                  -ap["drop"] - ap["t"] / 2.0),
                 (ap["x1"] - ap["x0"], ap["y1"] - ap["y0"], ap["t"]),
                 ramp_mtl, col=True)
-        # ── [v7 판정 ⑪-1] 왜 없앴는가 ────────────────────────────────────
-        #  구 apron 은 rot_group(yaw 80.793°) **안**에서 "로컬 −X = 마루 안쪽"
-        #  이라고 가정한 박스였다. 로컬 −X 는 월드 −X 가 아니라 거의 월드 −Y 라
-        #  실제로는 월드 x +3.06 까지 사면 위로 돌아나갔고, 그 지점 사면 상면
-        #  −1.40 보다 1.39 m 솟은 **두께 2.8 m 콘크리트 블록**이 됐다.
-        #  v6·v7 판정이 "램프 성토 갈색 매스"로 지목한 것이 바로 이 프림이다
-        #  (W-5 가 고친 `Fill` 은 이미 잔디였고 프레임에서 잔디로 렌더된다).
-        #  기능적으로도 불필요하다: 진입 참이 메워야 할 "마루 ↔ 램프 시점"
-        #  단차는 마루 슬래브(levee x −24…0, 상면 0.000, 두께 3.6)와 자전거도로
-        #  (x −3…0, 상면 +0.004)가 마루 끝까지 이미 채우고 있고, 남는 것은
-        #  마루 끝(x 0) ~ 램프 상류 시단(x 0.59) 사이 **최대 0.152 m 문턱**
-        #  (스모크 [사선 램프 배치] s0.0 절토 +0.152)뿐이다. 이는 계단 riser
-        #  0.16 보다도 낮은 시공 이음이라 별도 프림이 필요 없다.
-        #  PARAMS 는 v5.2 규약(scene05 스피커 선례)대로 **이력 보존용 잔존**.
+        # ── [v7 judgment (11)-1] why it was removed ────────────────────────────────────
+        #  The old apron was a box **inside** rot_group (yaw 80.793 deg) that assumed
+        #  "local −X = inland of the crest". Local −X is not world −X but almost world −Y,
+        #  so it actually swung over the bank to world x +3.06, where the bank top is
+        #  −1.40 — a **2.8 m thick concrete block** standing 1.39 m above it.
+        #  This prim is exactly the "brown ramp-fill mass" the v6 and v7 judgments named
+        #  (the `Fill` that W-5 fixed was already grass and renders as grass in frame).
+        #  It is functionally unnecessary too: the "crest <-> ramp start" step that an
+        #  entry landing would fill is already covered by the crest slab (levee x −24…0,
+        #  top 0.000, thickness 3.6) and the bike road (x −3…0, top +0.004) out to the crest
+        #  end; what remains is a **0.152 m threshold at most** between the crest end (x 0)
+        #  and the ramp's uphill start (x 0.59) (smoke [ramp diagonal placement] s0.0 cut
+        #  +0.152) — a construction joint below the 0.16 stair riser, so no prim is needed.
+        #  PARAMS **remains for history** per the v5.2 rule (scene05 speaker precedent).
 
     # -------------------------------------------------------------------
-    # 둔치 + 산책로 + 호안 사석
+    # Terrace + promenade + riprap revetment
     # -------------------------------------------------------------------
     def build_terrace(M):
         te = PARAMS["terrace"]
@@ -1015,7 +1022,7 @@ def main():
         BOX(f"{ROOT}/Terrace",
             ((te["x0"] + te["x1"]) / 2.0, cy, te["z_top"] - te["thick"] / 2.0),
             (te["x1"] - te["x0"], Ly, te["thick"]), M["grass"], col=True)
-        # 산책로(강 평행 = Y 방향 밴드)
+        # promenade (parallel to the river = a Y-direction band)
         z_hi = te["z_top"] + pm["proud"]
         BOX(f"{ROOT}/Promenade",
             ((pm["x0"] + pm["x1"]) / 2.0, cy, z_hi - 0.06),
@@ -1024,14 +1031,14 @@ def main():
                         ("E", pm["x1"] - pm["line_in"])):
             BOX(f"{ROOT}/PromLine_{tag}", (xc, cy, z_hi + 0.004),
                 (pm["line_w"], Ly, 0.02), M["paint"])
-        # 호안 사석 사면 (둔치 → 수면 아래)
+        # riprap revetment slope (terrace -> below the waterline)
         bk = PARAMS["bank"]
         sc.build_slope(stage, f"{ROOT}/Bank", bk["x0"], te["z_top"], bk["run"],
                        bk["drop"], te["y0"], te["y1"], bk["thick"], M["rock"],
                        margin=bk["margin"], collider=True)
 
     # -------------------------------------------------------------------
-    # 강 + 건너편 (넓은 수면 유지 — 사행 없음)
+    # River + far bank (broad water kept — no meander)
     # -------------------------------------------------------------------
     def build_river(M):
         wt = PARAMS["water"]
@@ -1043,14 +1050,14 @@ def main():
              fb["z_top"] - fb["thick"] / 2.0),
             (fb["x1"] - fb["x0"], fb["y1"] - fb["y0"], fb["thick"]),
             M["grass"], col=True)
-        # [v6 판정 ㉡ · v7 판정 ⑪-2] 건너편 억새 띠 — 편평 타원체 군락.
-        #   76 m 원경이라 대(stalk) 단위는 소실되므로 블롭으로 실루엣만 흐트린다.
-        #   구 구현은 **1열 · 균등분할 y + ±0.3 지터**라 등간격이 남아
-        #   "동일 크기 구슬 목걸이"로 읽혔다(§3 저촉 인상). 이번엔
-        #     · rows = (dx, size_k, phase) 3열 — dx 로 전후, phase 로 열 간 위상차
-        #     · y 를 **랜덤 보행**(spacing × U(0.55,1.60))으로 전진 → 등간격 소멸
-        #     · 크기 0.60~1.45× · 높이 0.70~1.25× 지터
-        #   접지: 중심 z = z_top + hh*0.42, rz = hh*0.60 → 하단이 지면 아래 0.18hh.
+        # [v6 judgment (b) · v7 (11)-2] far-bank silver-grass band — flat ellipsoid clumps.
+        #   At 76 m individual stalks are lost, so blobs only break up the silhouette.
+        #   The old build was **1 row · evenly divided y + +-0.3 jitter**, so even spacing
+        #   survived and it read as a "necklace of equal beads" (§3 violation). Now:
+        #     · rows = (dx, size_k, phase), 3 rows — dx sets fore/aft, phase the row offset
+        #     · y advances by a **random walk** (spacing x U(0.55,1.60)) -> even spacing gone
+        #     · size 0.60~1.45x · height 0.70~1.25x jitter
+        #   Grounding: centre z = z_top + hh*0.42, rz = hh*0.60 -> base 0.18hh below grade.
         fh = PARAMS["far_hedge"]
         for i, h in enumerate(PARAMS["far_hedges"]):
             y_lo = h["cy"] - fh["length"] / 2.0
@@ -1075,7 +1082,7 @@ def main():
                           fb["z_top"], M["wood"], M["canopy_a"], M["canopy_b"])
 
     def build_flat_fill(M):
-        """hazard_stairs=False 대조군: 마루~둔치를 z=0 잔디 평지로 통일."""
+        """hazard_stairs=False control: crest to terrace unified as flat grass at z=0."""
         lv = PARAMS["levee"]
         te = PARAMS["terrace"]
         BOX(f"{ROOT}/FlatFill",
@@ -1085,10 +1092,10 @@ def main():
             M["grass"], col=True)
 
     # -------------------------------------------------------------------
-    # 원경 드레싱 — 건너편 아파트 스카이라인 + 교량 (한강 판독의 8할)
+    # Distant dressing — far-bank apartment skyline + bridge (80% of reading it as the Han)
     # -------------------------------------------------------------------
     def build_skyline(M):
-        # [v6 판정 ㉢] 2종 교대 → 4종 순환. 인접 동이 같은 톤으로 반복되지 않게.
+        # [v6 judgment (c)] 2 alternating tints -> 4 cycled, so neighbours never repeat a tone.
         tones = (M["shell"], M["shell_c"], M["shell_b"], M["shell_d"])
         for i, (key, bd) in enumerate(PARAMS["far_buildings"].items()):
             sc.build_building(stage, f"{ROOT}/FarBuilding_{key}", bd,
@@ -1109,12 +1116,12 @@ def main():
                 br["pier_r"], ph, M["bridge"], col=True)
 
     # -------------------------------------------------------------------
-    # 근경 드레싱 — 억새·벤치·수목·가로등·이정표 (배치 비정형)
+    # Near dressing — silver grass · benches · trees · lamps · signposts (irregular)
     # -------------------------------------------------------------------
     def build_dressing(M):
         tz = PARAMS["terrace"]["z_top"]
-        # [v6 판정 ㉡] 억새 = 대(stalk) 군락. 밴드 사각형 안에 density 본/m² 로
-        #   시드 고정 산포(scene09 build_reeds 규약). 높이·기울기 개체 지터.
+        # [v6 judgment (b)] silver grass = stalk clumps, scattered inside the band rectangle
+        #   at density stalks/m² with a fixed seed (scene09 build_reeds rule). Height/tilt jitter.
         rd = PARAMS["reed"]
         for i, r in enumerate(PARAMS["reeds"]):
             rnd = _random.Random(int(r["seed"]))
@@ -1158,7 +1165,7 @@ def main():
             ks["panel"], M["sign"])
 
     # -------------------------------------------------------------------
-    # 단서 (cue) — railing / nosing (기본 OFF: 무난간 관행)
+    # Cue — railing / nosing (OFF by default: unrailed is the custom)
     # -------------------------------------------------------------------
     def build_cues(M):
         st = PARAMS["stairs"]
@@ -1182,7 +1189,7 @@ def main():
                 stage, f"{ROOT}/Nosing", st["x0"], st["y0"], st["y1"],
                 st["riser"], st["tread"], st["nsteps"], z_top=st["z_top"])
 
-    # ── 씬 조립 ──
+    # ── Scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
     M = setup_materials()
     hard_mtl = M["conc"] if cfg["cue_material_break"] else M["paving"]
@@ -1196,12 +1203,12 @@ def main():
         build_cues(M)
     else:
         build_flat_fill(M)
-    build_river(M)                  # 강·건너편은 상시 (지평 폐쇄)
+    build_river(M)                  # river and far bank always on (horizon closure)
     if cfg["cue_scene_dressing"]:
-        build_skyline(M)            # 아파트·교량은 대조군(평지)에서도 유지
+        build_skyline(M)            # apartments and bridge stay even in the flat control
         if cfg["hazard_stairs"]:
             build_dressing(M)
-    build_ground_kit(M)             # [W2-D] 지면 요소 — 드레싱 뒤(산포 순서 규약)
+    build_ground_kit(M)             # [W2-D] ground elements — after dressing (scatter order rule)
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])

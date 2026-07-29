@@ -1,31 +1,32 @@
 # -*- coding: utf-8 -*-
 """
-scene14_grandstair_illusion.py — NegObs 인공씬 14호: 착시 기념계단 (Isaac Sim 4.5)
+scene14_grandstair_illusion.py - NegObs synthetic scene 14: illusory monumental stair (Isaac Sim 4.5)
 
-유형    : T14 포템킨형 착시 대계단 (40단, 참 3개, 폭 점증 tapered)
-사양서  : Docs/multi_scene_brief_v3.md §D scene14_grandstair_illusion + 감독 보충
-공통    : scene_common.py (build_straight_stairs width_pairs) · scene02 골격
+Type    : T14 Potemkin-style illusory grand stair (40 steps, 3 landings, tapered widening)
+Spec    : Docs/multi_scene_brief_v3.md §D scene14_grandstair_illusion + director addendum
+Shared  : scene_common.py (build_straight_stairs width_pairs) · scene02 skeleton
 
-위험 본질: 상부 전망 소광장에서 진행하면 40단 계단의 '참(landing)'만 눈에 들어와
-           평탄한 테라스로 오독된다. 실제로는 낙차 6.0 m가 참 사이에 숨는다.
-           폭이 상부 y±3 → 하부 y±5 로 벌어지는 원근 착시가 은닉을 강화.
-목표     : 상부 소광장(화강암) + 40단(참 3개, width_pairs 연속) + 측면 경사
-           파라펫 + 하부 대광장(분수 힌트) + 원경 건물 2동을 조립.
+Hazard  : Walking forward from the small upper viewing plaza, only the landings of the 40-step
+          stair are visible and it is misread as a flat terrace. In reality a 6.0 m drop hides
+          between the landings. The perspective illusion of the width opening from upper y+-3 to
+          lower y+-5 strengthens the concealment.
+Goal    : Assemble the small upper plaza (granite) + 40 steps (3 landings, continuous width_pairs)
+          + sloped side parapets + the lower grand plaza (fountain hint) + 2 distant buildings.
 
-실행 (GUI 룩 체크 — 기본):
+Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
     export PYTHONNOUSERSITE=1
     python scene14_grandstair_illusion.py
 
-자동 캡처 모드 (headless 검증용):
+Auto capture mode (for headless verification):
     NEGOBS_CAPTURE=1 python scene14_grandstair_illusion.py
-스모크(부팅 전 기하 자기검증·조기종료):
+Smoke (pre-boot geometry self-verification, early exit):
     NEGOBS_SMOKE=1 python scene14_grandstair_illusion.py
 
-좌표계: Z-up, m, 진행축 +X, 낙차 시작 모서리 = x=0. 총 낙차 6.0 m.
+Coordinates: Z-up, m, travel axis +X, drop start edge = x=0. Total drop 6.0 m.
 
-대리석: scene_common.TEX `marble_light` 역할(실재질).
+Marble: the scene_common.TEX `marble_light` role (real material).
 """
 
 import os
@@ -41,19 +42,19 @@ import ground_kit as gk
 
 
 # ===========================================================================
-# [A] SCENE_CONFIG — 7키. hazard_stairs 만 위험 기하 토글.
+# [A] SCENE_CONFIG - 7 keys. Only hazard_stairs toggles the hazard geometry.
 # ===========================================================================
 SCENE_CONFIG = {
-    "hazard_stairs":      True,    # False → 계단/참을 z=0 평지로 (기하 토글 유일 예외)
-    "cue_railing":        False,   # 기념계단은 개방형 — True → 측면 파라펫 위 파이프 레일
-    # [v5 공통 레이어] 도시 관행 씬(01/02/05/13/14/16/20/21) cue_tactile 기본 True.
-    #   구 주석의 '미관행'은 v5 무대 명확화(시청/문화회관 앞 광장 대계단)로 무효 —
-    #   관공서 대계단 진입부 점자블록은 국내 표준 관행이다. 실제 지오메트리 생성.
-    "cue_tactile":        False,  # [v5.2 사용자] 점자블록 현실에선 드묾 — 기본 OFF(소거 실험용 경로 유지)    # 상단 진입 경고 점자띠 (x −0.4..0, 계단 상부 폭)
-    "cue_material_break": True,    # False → 상·하부 광장도 대리석으로 통일(경계 흡수)
-    "cue_sign":           True,    # [v5 공통 레이어] sign_info(광장 안내) 1매
-    "cue_scene_dressing": True,    # 가로등·파라펫 연석·분수 힌트·원경 건물
-    "cue_nosing":         False,   # [신규] True → 전 단 단코 띠
+    "hazard_stairs":      True,    # False -> stairs/landings become z=0 flat (the one geometry-toggle exception)
+    "cue_railing":        False,   # A monumental stair is open-sided - True -> pipe rail on top of the side parapets
+    # [v5 shared layer] Urban-practice scenes (01/02/05/13/14/16/20/21) default cue_tactile to True.
+    #   The old comment's 'not customary' is void after the v5 setting was clarified (plaza grand stair in front of a city hall / cultural centre) -
+    #   tactile paving at the entry of a public-building grand stair is standard domestic practice. Real geometry is generated.
+    "cue_tactile":        False,  # [v5.2 user] Tactile paving is rare in reality - default OFF (the ablation path is kept)    # top entry warning tactile band (x −0.4..0, stair upper width)
+    "cue_material_break": True,    # False -> the upper and lower plazas become marble too (the boundary is absorbed)
+    "cue_sign":           True,    # [v5 shared layer] 1 sign_info (plaza information)
+    "cue_scene_dressing": True,    # street lamps · parapet kerb · fountain hint · distant buildings
+    "cue_nosing":         False,   # [new] True -> nosing band on every step
 }
 
 
@@ -61,18 +62,18 @@ SCENE_CONFIG = {
 # [B] PARAMS
 # ===========================================================================
 PARAMS = dict(
-    # --- 대계단: 40단, riser 0.15 (낙차 6.0), tread 0.34, 참 3개(깊이 2.4) ---
+    # --- Grand stair: 40 steps, riser 0.15 (drop 6.0), tread 0.34, 3 landings (depth 2.4) ---
     stairs=dict(x0=0.0, riser=0.15, tread=0.34, nsteps=40, z_top=0.0,
                 base_z=-6.7, seg_len=10, landing_depth=2.4,
-                w_top=3.0, w_bot=5.0),            # 반폭: 상부 y±3 → 하부 y±5
-    landings=(10, 20, 30),                        # 참 삽입 위치(단 뒤)
-    # --- 상부 전망 소광장(대리석 계단머리, 화강암 대신 marble) ---
+                w_top=3.0, w_bot=5.0),            # half width: upper y+-3 -> lower y+-5
+    landings=(10, 20, 30),                        # landing insertion points (after step n)
+    # --- Upper viewing plaza (marble stair head, marble instead of granite) ---
     upper=dict(x0=-9.0, x1=0.0, y0=-8.0, y1=8.0, z_top=0.0, thick=0.5),
-    # --- 대형 상부 광장 (감독 D-14 r3①): 테라스 뒤 -X로 20m × y±20, plaza_light.
-    #     계단이 상·하 두 레벨을 잇는 구조로 읽히게 (고립 제거). 테라스 구멍 3박스.
+    # --- Large upper plaza (director D-14 r3(1)): 20m in -X behind the terrace x y+-20, plaza_light.
+    #     So the stair reads as a structure joining two levels (isolation removed). 3 boxes leaving a terrace hole.
     upper_big=dict(x0=-29.0, x1=0.0, y0=-20.0, y1=20.0, z_top=0.0, thick=0.5),
 
-    # ═══ [W2-D ground_kit] P1 plaza_granite — 사양 §5.1 scene14 행 ═══════════
+    # ═══ [W2-D ground_kit] P1 plaza_granite - spec §5.1 scene14 row ═══════════
     #  Row prescription: "marble_light module 600 is already correct -> joints
     #  only; stair-head transverse trench; 2 gullies (v1.1); marble water
     #  staining that follows the joints; manhole (-8.7, +1.2)".
@@ -85,7 +86,7 @@ PARAMS = dict(
     #    lip -2.40, drow = 16.05 rows @1080 >= 16 at d10). The builder frames
     #    the cover: `build_trench_drain` adds `trench_frame_w` 0.040 on each
     #    side, so the real near lip of a trench centred at -2.55 is -2.36 and
-    #    drow(-2.36, 10) = **15.70 < 16 = FAIL** [계산].  Centre -2.59 puts the
+    #    drow(-2.36, 10) = **15.70 < 16 = FAIL** [computed].  Centre -2.59 puts the
     #    frame lip back on -2.40 exactly (16.05 rows). This is the same class
     #    of correction scene13 applied to its entry trench (0.35 -> 0.52).
     #  ★ Gullies: row says `|y| = stair width/2 - 0.40`; `stairs.w_top` is the
@@ -104,23 +105,23 @@ PARAMS = dict(
     ),
     streetlight=dict(pole_h=5.0, pole_r=0.06, arm_len=1.0, arm_r=0.04,
                      head=0.25, xs=(-6.0, -14.0, -22.0), ys=(-6.0, 6.0)),
-    # --- 하부 대광장 (plaza_lower + band_dark 밴드) + 분수 힌트 ---
-    #     x1 40→75 : 원경 건물 발치까지 지면을 깔아 5 m 부유 해소 [B-14-1 치명]
+    # --- Lower grand plaza (plaza_lower + band_dark bands) + fountain hint ---
+    #     x1 40->75 : ground laid out to the foot of the distant buildings, fixing the 5 m float [B-14-1 critical]
     lower=dict(x1=75.0, y0=-20.0, y1=20.0, z_top=-6.0, thick=0.5),
-    # --- 계단 좌우 경사 잔디 사면 (감독 D-14 r3②): 파라펫 바깥 y±5.2..±20 상→하 ---
-    #     thick 0.5→3.0 : 얇은 판이 허공에 뜬 채 보이던 문제 해소(솔리드 사면 매시프)
-    #     run_ext 3.2   : 하단 끝단면(경사 절단 쐐기)을 하부 광장 아래로 숨김
+    # --- Sloped grass banks either side of the stair (director D-14 r3(2)): outside the parapet y+-5.2..+-20, upper->lower ---
+    #     thick 0.5->3.0 : fixes the thin plate that appeared to hang in mid air (solid slope massif)
+    #     run_ext 3.2   : hides the lower end face (the slope cut wedge) under the lower plaza
     side_slope=dict(y_out=20.0, thick=3.0, run_ext=3.2),
     fountain=dict(cx=30.0, cy=0.0, r_out=3.0, r_in=2.4, h=0.4,
                   nozzles=5, nozzle_r=0.06, nozzle_h=0.5),
-    # --- 측면 파라펫 (폭 0.5) ---
-    #     thick 0.4→1.6 : 계단식 어깨면(build_shoulder)에 전 구간 매입시켜 부유 제거
-    #     [v5.1] cap_t : 상단 경사 헌치(사선 솔리드) 슬래브 두께 — build_parapets
-    #       docstring 의 물림 검산(수직 환산 1.530 > 필요 0.43+0.03) 참조.
+    # --- Side parapets (width 0.5) ---
+    #     thick 0.4->1.6 : embedded into the stepped shoulder (build_shoulder) over the whole run to remove the float
+    #     [v5.1] cap_t : slab thickness of the sloped top haunch (oblique solid) - see the bite check in the
+    #       build_parapets docstring (vertical equivalent 1.530 > required 0.43+0.03).
     parapet=dict(width=0.5, z0=0.35, thick=1.6, cap_t=1.4),
-    # --- 계단 밖 어깨면(구 소핏 대체) — build_shoulder 참조 ---
+    # --- Shoulder outside the stair (replaces the old soffit) - see build_shoulder ---
     shoulder=dict(y_out=5.2, offset=0.03, lap=0.05),
-    # --- 원경 건물 5동 (지평 폐쇄, 하부 광장 위 — base_z 로 접지) ---
+    # --- 5 distant buildings (horizon closure, on the lower plaza - grounded via base_z) ---
     buildings=dict(
         B=dict(x0=42.0, x1=48.0, y0=-14.0, y1=14.0, h=12.0, floors=5,
                axis="x", facade_x=42.0, face_dir=-1.0, base_z=-6.0),
@@ -134,76 +135,76 @@ PARAMS = dict(
                axis="x", facade_x=56.0, face_dir=-1.0, base_z=-6.0),
     ),
     window=dict(w=1.2, h=1.6, inset=0.15, col_step=2.5, margin=2.0),
-    # --- 맥락 드레싱 (기념광장 즉독) — 전부 기존 빌더 조합, cue_scene_dressing 소속 ---
+    # --- Context dressing (instant read as a monumental plaza) - all combinations of existing builders, owned by cue_scene_dressing ---
     dressing=dict(
-        # 하부 대광장(z −6.0)
+        # lower grand plaza (z −6.0)
         trees_low=((24.0, 7.0), (24.0, -7.0), (24.0, 13.0), (24.0, -13.0),
                    (33.0, 10.0), (33.0, -10.0)),
         planters_low=((25.5, 4.0), (25.5, -4.0), (34.5, 4.0), (34.5, -4.0)),
         benches_low=((22.5, 5.0), (22.5, -5.0), (22.5, 10.0), (22.5, -10.0),
                      (22.5, 15.0), (22.5, -15.0)),
-        # [v5.1 §2] 볼라드 — 구: x 21.6 에 y −12..12 를 2.0 m 등간격 13본
-        #   (①등간격 장식열 ②**y=0 본이 계단 축선 위**). 규정 배치로 교체:
-        #   간격 1.5 m · 축선(y=0)을 비운 좌우 대칭 10본 = 계단 진입 전면
-        #   차량 차단선(§2 허용 위치). 높이/지름/반사띠는 build_bollard_std 참조.
-        #   점형블록은 이 씬에서 **의도적으로 생략** — 계단 발치(x 21.6)에
-        #   토글되지 않는 황색 경고띠를 두면 '참만 보여 평탄해 보인다'는 본 씬의
-        #   은닉 착시에 상시 단서가 섞인다(cue_tactile 토글 무결성 위반).
+        # [v5.1 §2] Bollards - old: 13 units at x 21.6, y −12..12 at 2.0 m even spacing
+        #   ((1) an evenly spaced decorative row, (2) **the y=0 unit sits on the stair axis**). Replaced with a compliant layout:
+        #   spacing 1.5 m · 10 units symmetric about an empty axis (y=0) = the vehicle barrier line
+        #   in front of the stair entry (§2 permitted position). Height/diameter/reflective band: see build_bollard_std.
+        #   Dot tactile paving is **deliberately omitted** in this scene - putting an untoggleable yellow
+        #   warning band at the stair foot (x 21.6) would mix a permanent cue into this scene's
+        #   concealment illusion of 'only the landings show, so it looks flat' (violates cue_tactile toggle integrity).
         bollard_x=21.6,
         bollard_ys=(-6.75, -5.25, -3.75, -2.25, -0.75,
                     0.75, 2.25, 3.75, 5.25, 6.75),
-        # [v6 판정 §3-2] 깃대 4본 — 구 x 24.5 · y ±6/±10 은 **3라운드 연속**
-        #   beauty_overview(eye 28,−14,4 → tgt 6,0,−2.5, 시선 방위 147.5°) 전경을
-        #   침범했다. 역산: (24.5,−10) 은 카메라에서 수평 5.31 m · 방위차 −16.3°
-        #   (화각 ±30° 한복판, 화면 우측), 깃대 상단 z 3.0 이 아이레벨 4.0 바로
-        #   아래라 세로로 화면을 관통하고 흑색 깃발이 계단면을 가렸다.
-        #   (24.5,−6) 도 8.73 m · −33.9° 로 프레임 경계.
-        #   판정 대안 "eye 를 +Y 1.5 m" 는 **역효과** — eye y −14→−12.5 이면
-        #   (24.5,−10) 방위차가 −16.3° → −5.9° 로 오히려 중앙에 온다. 따라서
-        #   **깃대 이설**을 택한다: 분수(30, 0, r_out 3.0) 를 좌우로 끼는
-        #   x 30.0 · y ±7 / ±12 — 기념광장 분수단 깃대열(실존 관행).
-        #   카메라 검산(화각 ±30°, 반수직 ±18°):
-        #     beauty_overview : −73.5° / −102.5° / −63.0° / −61.9°  = 전부 밖
-        #     lower_lookup(eye 26,0 → tgt 8,0, 방위 180°) : ±119.7° / ±108.4° 밖
-        #     side_reveal(방위 42.5°) : −13.9°(37.6 m) · −7.6°(40.2 m) 원경만,
-        #                               −Y 2본은 −35.6° / −44.2° 밖
-        #     terrace_read(방위 0°)   : ±11.6° / ±19.4°, 34.7~36 m 원경(앙각 3.5°)
-        #     grid preset(eye x −2..−10) : ±12.3° 내외, 32.8 m 원경 — 착시 무영향
-        #   이격 : 분수 림 4.0 m · 가로수(33,±10) 3.61 m · 화단(34.5,±4) 5.41 m
+        # [v6 review §3-2] 4 flagpoles - the old x 24.5 · y +-6/+-10 intruded into the foreground of
+        #   beauty_overview (eye 28,−14,4 -> tgt 6,0,−2.5, sight-line azimuth 147.5 deg) for **3 rounds
+        #   running**. Back-calculation: (24.5,−10) is 5.31 m horizontally from the camera at an azimuth
+        #   difference of −16.3 deg (dead centre of the +-30 deg FOV, right of screen), and the flagpole top
+        #   z 3.0 sits just below the eye level 4.0, so it ran vertically through the frame and the black flag hid the stair face.
+        #   (24.5,−6) is also at the frame boundary, 8.73 m · −33.9 deg.
+        #   The review's alternative "move the eye +Y 1.5 m" is **counterproductive** - with eye y −14->−12.5
+        #   the azimuth difference of (24.5,−10) goes −16.3 deg -> −5.9 deg, i.e. even closer to centre. So
+        #   **relocating the flagpoles** is chosen: flanking the fountain (30, 0, r_out 3.0) at
+        #   x 30.0 · y +-7 / +-12 - a flagpole row on the fountain terrace of a monumental plaza (real practice).
+        #   Camera check (FOV +-30 deg, vertical half +-18 deg):
+        #     beauty_overview : −73.5 deg / −102.5 deg / −63.0 deg / −61.9 deg  = all outside
+        #     lower_lookup (eye 26,0 -> tgt 8,0, azimuth 180 deg) : +-119.7 deg / +-108.4 deg, outside
+        #     side_reveal (azimuth 42.5 deg) : −13.9 deg (37.6 m) · −7.6 deg (40.2 m), distance only,
+        #                               the 2 −Y units are outside at −35.6 deg / −44.2 deg
+        #     terrace_read (azimuth 0 deg)   : +-11.6 deg / +-19.4 deg, 34.7~36 m distance (elevation 3.5 deg)
+        #     grid preset (eye x −2..−10) : about +-12.3 deg, 32.8 m distance - no effect on the illusion
+        #   Clearances : fountain rim 4.0 m · street tree (33,+-10) 3.61 m · planter (34.5,+-4) 5.41 m
         flags=((30.0, 7.0), (30.0, -7.0), (30.0, 12.0), (30.0, -12.0)),
-        # 상부 광장(z 0)
+        # upper plaza (z 0)
         trees_up=((-20.0, 14.0), (-20.0, -14.0), (-26.0, 14.0), (-26.0, -14.0)),
         benches_up=((-12.0, 5.0), (-12.0, -5.0), (-20.0, 5.0), (-20.0, -5.0)),
-        # [v5.1] 축선 비움 — 구 (−15.0, 0.0) 은 상부 광장 중심축 위여서
-        #   lower_lookup(eye 26,0,−5.2) 에서 샤프트 상단(z 9.8, 앙각 20.1°)이
-        #   계단 마루선(앙각 11.3°) 위로 솟아 **축선 소실점을 막았다**.
-        #   측면(y −6.5)으로 이설 — 생울타리 S(y −10.5..−9.0) 안쪽 1.0 m,
-        #   벤치(−12,−5)/(−20,−5) 에서 3.35 m 이격.
+        # [v5.1] Axis cleared - the old (−15.0, 0.0) sat on the centre axis of the upper plaza, so from
+        #   lower_lookup (eye 26,0,−5.2) the top of the shaft (z 9.8, elevation 20.1 deg) rose above the
+        #   stair ridge line (elevation 11.3 deg) and **blocked the axial vanishing point**.
+        #   Moved to the side (y −6.5) - 1.0 m inside hedge S (y −10.5..−9.0), and
+        #   3.35 m clear of the benches (−12,−5)/(−20,−5).
         monument=(-15.0, -6.5),
         hedges=(("N", -29.0, 9.0, -9.0, 10.5), ("S", -29.0, -10.5, -9.0, -9.0),
                 ("W", -29.0, -9.0, -27.5, 9.0)),
-        curb_gap=2.5,                     # 상부 경계석 중앙 개구 반폭 [A-14-5]
+        curb_gap=2.5,                     # half width of the central opening in the upper kerb [A-14-5]
     ),
-    # [v5 공통 레이어] 점자블록 — 계단 상단 모서리(x=0) 앞 0.4 m, 상부 폭 y ±3.
-    #   대리석 테라스(x −9..0, z 0) 위. 위험 기하(계단·참) 트랜스폼 불변.
+    # [v5 shared layer] Tactile paving - 0.4 m before the stair top edge (x=0), upper width y +-3.
+    #   On the marble terrace (x −9..0, z 0). The hazard geometry (stairs, landings) transform is unchanged.
     tactile=dict(ahead=0.4, proud=0.004),
-    # [v5 공통 레이어] 한글 사인 — (태그, TEX 키, cx, cy, base_z, yaw, w, h)
-    #   Info(−6.5, −4.2): 상부 대리석 테라스(x −9..0, y ±8) 위 광장 안내판.
-    #     계단 상단 모서리 최근접점 (0, −3) 까지 6.61 m — 이격 ≥0.5 m 충족.
-    #     상부 경계석(x −9.0..−8.5) 동측 2.0 m, 가로등(−6.0, −6.0) 에서 1.80 m.
-    #   카메라 검산(그리드 gy=0, eye x −2/−5/−10, 화각 ±30°):
-    #     −2/−5 → 후방, −10 → −50.2° (프레임 밖)
-    #     terrace_read(−4,0) 후방 · side_reveal(−3,−11) 74.7° 밖
-    #     lower_lookup(26,0) 7.4°(32.8 m 원경·계단 매시프 뒤) ·
-    #     beauty_overview(28,−14) 16.6°(35.9 m 원경) → 근접 차폐 0
+    # [v5 shared layer] Korean sign - (tag, TEX key, cx, cy, base_z, yaw, w, h)
+    #   Info(−6.5, −4.2): plaza information plate on the upper marble terrace (x −9..0, y +-8).
+    #     6.61 m to the nearest point of the stair top edge (0, −3) - meets the >=0.5 m clearance.
+    #     2.0 m east of the upper kerb (x −9.0..−8.5), 1.80 m from the street lamp (−6.0, −6.0).
+    #   Camera check (grid gy=0, eye x −2/−5/−10, FOV +-30 deg):
+    #     −2/−5 -> behind, −10 -> −50.2 deg (outside the frame)
+    #     terrace_read(−4,0) behind · side_reveal(−3,−11) 74.7 deg, outside
+    #     lower_lookup(26,0) 7.4 deg (32.8 m distance, behind the stair massif) ·
+    #     beauty_overview(28,−14) 16.6 deg (35.9 m distance) -> 0 near-field occlusion
     signs=[("Info", "sign_info", -6.5, -4.2, 0.0, 180.0, 1.0, 0.75)],
 
     material=dict(
         scale=dict(marble_light=1.2, granite_dark=1.0, plaza_lower=0.7,
                    band_dark=0.5, brick_red=2.0, plaza_light=1.80, grass=1.4,
-                   tactile=0.3),                      # [v5 공통 레이어]
+                   tactile=0.3),                      # [v5 shared layer]
         grass_tint=(0.55, 0.68, 0.42),
-        # B-14-5: 전 화면 고명도 몰림 해소 — 파사드 0.56→0.30, 파라펫 0.90→0.62
+        # B-14-5: fixes the high-brightness clustering across the frame - facade 0.56->0.30, parapet 0.90->0.62
         bldg_color=(0.30, 0.30, 0.33), bldg_rough=0.6,
         glass_color=(0.06, 0.09, 0.12), glass_rough=0.08,
         parapet_color=(0.62, 0.62, 0.60), parapet_rough=0.6,
@@ -250,28 +251,28 @@ if _sc_ov:
 
 
 # ===========================================================================
-# [C] 경로 + 텍스처 역할
+# [C] paths + texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "scene14")
 ASSET_ROLES = ["marble_light", "granite_dark", "plaza_lower", "band_dark",
                "brick_red", "plaza_light", "grass",
-               "tactile", "sign_info",                # [v5 공통 레이어]
+               "tactile", "sign_info",                # [v5 shared layer]
                "hdri", "mdl"]
 
 
 # ===========================================================================
-# [C2] 폭 점증(width_pairs) — 전 단 i(1..n)의 반폭 선형 보간 (참 포함 연속)
+# [C2] Widening (width_pairs) - linear interpolation of the half width of every step i(1..n) (continuous across landings)
 # ===========================================================================
 def _half_width(i, n, w_top, w_bot):
-    """단 i(1-based)의 반폭. i=1→w_top, i=n→w_bot 선형."""
+    """Half width of step i (1-based). Linear from i=1->w_top to i=n->w_bot."""
     if n <= 1:
         return w_top
     return w_top + (w_bot - w_top) * (i - 1) / (n - 1)
 
 
 # ===========================================================================
-# [C3] 스모크 — 부팅 전 기하 자기검증 (조기종료)
+# [C3] Smoke - pre-boot geometry self-verification (early exit)
 # ===========================================================================
 def _smoke_report():
     st = PARAMS["stairs"]
@@ -291,7 +292,7 @@ def _smoke_report():
         hw = _half_width(i, n, st["w_top"], st["w_bot"])
         print(f"    단 {i:2d}: 반폭 {hw:.3f}  (y ±{hw:.3f}, 전폭 {2*hw:.2f})")
     print(f"  낙차 검증: {drop:.2f} ≥ 0.3 m → {'OK' if drop >= 0.3 else 'FAIL'}")
-    # ── 레벨 z 표 (감독 D-14 r3④) ──
+    # ── level z table (director D-14 r3(4)) ──
     ub = PARAMS["upper_big"]
     lo = PARAMS["lower"]
     z_bot = lo["z_top"] - 0.3
@@ -314,24 +315,24 @@ def _smoke_report():
 
 
 # ===========================================================================
-# [D] 카메라 프리셋
+# [D] camera presets
 # ===========================================================================
 def build_views():
-    views = sc.grid_views(0.0)                    # preset_h0.9_d5 = 착시 확인 지점
-    # terrace_read: 상부에서 참만 보여 평탄 테라스로 읽힘 (h0.9, 약한 부감)
+    views = sc.grid_views(0.0)                    # preset_h0.9_d5 = the illusion check point
+    # terrace_read: from above, only the landings show so it reads as a flat terrace (h0.9, slight high angle)
     views["terrace_read"] = dict(eye=[-4.0, 0.0, 0.9], tgt=[6.0, 0.0, 0.1])
-    # side_reveal: 측면 사선 — 실제 낙차 폭로
+    # side_reveal: oblique from the side - exposes the real drop
     views["side_reveal"] = dict(eye=[-3.0, -11.0, 3.5], tgt=[9.0, 0.0, -3.0])
-    # lower_lookup: 하부 대광장에서 계단 올려봄
+    # lower_lookup: looking up at the stair from the lower grand plaza
     views["lower_lookup"] = dict(eye=[26.0, 0.0, -5.2], tgt=[8.0, 0.0, -2.0])
-    # beauty_overview: 하부 광장 모서리 부감 (감독 D-14③, d≈18/h4 — 미장센 밴드
-    #   예외). 40단 전폭 + 참 3개 + 상부 테라스가 한 프레임에.
+    # beauty_overview: high angle from the lower plaza corner (director D-14(3), d~18/h4 - mise-en-scene band
+    #   exception). The full width of 40 steps + 3 landings + the upper terrace in one frame.
     views["beauty_overview"] = dict(eye=[28.0, -14.0, 4.0], tgt=[6.0, 0.0, -2.5])
     return views
 
 
 # ===========================================================================
-# [E] 메인
+# [E] main
 # ===========================================================================
 BANNER = """\
 [조작] 우클릭+WASD 비행 · P 패스트레이싱 토글 · C 스크린샷 · [ ] 태양 방위
@@ -381,7 +382,7 @@ def main():
         return sc.make_pbr(stage, path, *args, **kwargs)
 
     # -------------------------------------------------------------------
-    # 재질
+    # materials
     # -------------------------------------------------------------------
     def setup_materials():
         sca = mp["scale"]
@@ -424,8 +425,8 @@ def main():
         M["rail"] = PBR(f"{ROOT}/Looks/Rail", diffuse_color=mp["rail_color"],
                         metallic=mp["rail_metallic"],
                         roughness_const=mp["rail_rough"])
-        # [v5.1 §2/§4] 규정 볼라드용 재질 — 본체 3종(틴트 지터 ±5%) + 반사띠.
-        #   반사띠는 소면적이므로 고휘도 허용(순백 대면적 금지 규약과 무관).
+        # [v5.1 §2/§4] Materials for the compliant bollards - 3 body variants (tint jitter +-5%) + reflective band.
+        #   The reflective band is small in area, so high luminance is allowed (unrelated to the ban on large pure-white areas).
         for _i, _f in enumerate((0.95, 1.0, 1.05)):
             M[f"bollard_{_i}"] = PBR(
                 f"{ROOT}/Looks/Bollard_{_i}",
@@ -442,7 +443,7 @@ def main():
                         roughness_const=mp["pole_rough"])
         M["water"] = PBR(f"{ROOT}/Looks/Water", diffuse_color=mp["water_color"],
                          roughness_const=mp["water_rough"], metallic=0.0)
-        # 드레싱 수목(어두운 상수색 0.02~0.06 규약)
+        # dressing trees (dark constant colour, 0.02~0.06 convention)
         M["wood"] = PBR(f"{ROOT}/Looks/Wood", diffuse_color=mp["wood_color"],
                         roughness_const=0.85)
         M["canopy_a"] = PBR(f"{ROOT}/Looks/CanopyA",
@@ -451,7 +452,7 @@ def main():
         M["canopy_b"] = PBR(f"{ROOT}/Looks/CanopyB",
                             diffuse_color=mp["canopy_b"],
                             roughness_const=1.0, specular_level=0.0)
-        # [v5 공통 레이어] 점형 점자블록(황색) — diff+nor 만(rough 없음)
+        # [v5 shared layer] dot tactile paving (yellow) - diff+nor only (no rough)
         M["tactile"] = PBR(f"{ROOT}/Looks/Tactile",
                            sc.tex_path("tactile", "diff"),
                            sc.tex_path("tactile", "nor"), None,
@@ -459,19 +460,19 @@ def main():
         return M
 
     # -------------------------------------------------------------------
-    # 대계단 — 40단을 참 3개로 4구간 분할. width_pairs 로 참 전후 연속 폭 점증.
+    # Grand stair - 40 steps split into 4 sections by 3 landings. width_pairs keeps the widening continuous across each landing.
     # -------------------------------------------------------------------
     def build_stairs(stair_mtl):
         st = PARAMS["stairs"]
         n = st["nsteps"]
         wt, wb = st["w_top"], st["w_bot"]
         landings = list(PARAMS["landings"])
-        # 구간 경계(전역 단 인덱스): [0,10,20,30,40] → 4구간 각 10단
+        # Section bounds (global step index): [0,10,20,30,40] -> 4 sections of 10 steps each
         bounds = [0] + landings + [n]
         x_cur = st["x0"]
         z_cur = st["z_top"]
         for si in range(len(bounds) - 1):
-            i0, i1 = bounds[si], bounds[si + 1]     # 전역 단 [i0+1 .. i1]
+            i0, i1 = bounds[si], bounds[si + 1]     # global steps [i0+1 .. i1]
             wp = []
             for gi in range(i0 + 1, i1 + 1):
                 hw = _half_width(gi, n, wt, wb)
@@ -482,9 +483,9 @@ def main():
                 z_top=z_cur, collider=True, width_pairs=wp)
             x_cur += (i1 - i0) * st["tread"]
             z_cur -= (i1 - i0) * st["riser"]
-            # 참 삽입 (마지막 구간 뒤엔 없음)
+            # Insert a landing (none after the last section)
             if si < len(bounds) - 2:
-                hw = _half_width(i1, n, wt, wb)      # 참 폭 = 그 지점 단 폭
+                hw = _half_width(i1, n, wt, wb)      # landing width = step width at that point
                 xa, xb = x_cur, x_cur + st["landing_depth"]
                 BOX(f"{ROOT}/Landing_{si}",
                     ((xa + xb) / 2.0, 0.0, (z_cur + st["base_z"]) / 2.0),
@@ -492,9 +493,9 @@ def main():
                 x_cur = xb
 
     def _profile():
-        """계단 프로파일: 구간별 (kind, x_a, x_b, 대표 z, 전역 단 인덱스) 나열.
-        kind='step' 이면 z 는 그 단의 디딤면, 'land' 면 참 상면. build_stairs 와
-        동일한 누적식을 쓰므로 계단 본체와 정확히 같은 좌표를 재현한다."""
+        """Stair profile: lists (kind, x_a, x_b, representative z, global step index) per section.
+        With kind='step', z is that step's tread; with 'land' it is the landing top face. It uses the
+        same accumulation as build_stairs, so it reproduces exactly the same coordinates as the stair body."""
         st = PARAMS["stairs"]
         n = st["nsteps"]
         bounds = [0] + list(PARAMS["landings"]) + [n]
@@ -515,30 +516,30 @@ def main():
         return rows
 
     def build_shoulder(M):
-        """계단 밖 **어깨면 매시프** — 구 `build_soffit`(단일 경사 슬래브) 대체.
+        """**Shoulder massif** outside the stair - replaces the old `build_soffit` (a single sloped slab).
 
-        [감사 A-14-1/2/3 치명] 구 소핏 상면은 z = −0.3 − 0.2885x 인 **단일 평면**
-        이었다. 1구간 계단선(z = −0.441x)과 x = 1.967 에서 교차 → x>1.967 부터
-        소핏이 계단보다 높아져 1구간 마지막 4~5단이 매몰(+0.219 @x=3.4), 2구간도
-        x>8.905 에서 1단 매몰. 반대로 참 끝(x=5.8/11.6/17.4)에서는 계단보다
-        0.47/0.65/0.82 m 낮아 계단 폭 밖(|y| hw..5.2)에 전 길이 세로 도랑이 생겼다.
-        (감사 D5 는 '구간별 4장 분할'을 권고했으나, 경사 슬래브는 rotateY 절단면
-         때문에 구간 이음부에 측면이 열린 쐐기 공동이 남는다 → 아래 방식 채택.)
+        [audit A-14-1/2/3 critical] The old soffit top face was a **single plane** z = −0.3 − 0.2885x.
+        It crossed the section-1 stair line (z = −0.441x) at x = 1.967, so from x>1.967 the soffit
+        rose above the stair and buried the last 4~5 steps of section 1 (+0.219 @x=3.4); section 2
+        had 1 step buried from x>8.905. Conversely at the landing ends (x=5.8/11.6/17.4) it sat
+        0.47/0.65/0.82 m below the stair, creating a full-length longitudinal trench outside the stair width (|y| hw..5.2).
+        (Audit D5 recommended 'splitting into 4 sheets by section', but a sloped slab leaves a wedge
+         cavity with an open flank at each section joint because of the rotateY cut face -> the method below was adopted.)
 
-        신 구조: **단(段)별 축정렬 박스 2장**(±Y 측대)을 계단과 동일한 x 구간에
-        깔고 상면을 그 단의 디딤면 −offset(0.03) 에 맞춘다. 참 구간도 동일.
-          · 계단 모서리 → 어깨면 단차 = 전 구간 균일 0.03 m (구 0.13~0.82 m 도랑)
-          · 계단 매몰 0 (어깨면이 계단보다 높아지는 지점이 원리적으로 없음)
-          · 수직 박스만 쓰므로 절단 쐐기 공동이 발생하지 않음
-          · 상부 테라스(z 0)에서 어깨면 1단(−0.18)으로의 첫 단차 0.18 < 0.2 기준
-        계단·참(위험 기하) 트랜스폼은 **불변** — 착시(terrace_read)는 보존."""
+        New structure: **2 axis-aligned boxes per step** (the +-Y side bands) are laid over the same x
+        range as the stair, with their top face set to that step's tread −offset(0.03). The landing sections are identical.
+          · stair edge -> shoulder level difference = a uniform 0.03 m throughout (old: a 0.13~0.82 m trench)
+          · stair burial 0 (there is no point at which the shoulder can rise above the stair, by construction)
+          · only vertical boxes are used, so no cut wedge cavity occurs
+          · the first level difference from the upper terrace (z 0) down to shoulder step 1 (−0.18) is 0.18 < the 0.2 criterion
+        The stair/landing (hazard geometry) transform is **unchanged** - the illusion (terrace_read) is preserved."""
         st = PARAMS["stairs"]
         sh = PARAMS["shoulder"]
         n, yb = st["nsteps"], sh["y_out"]
         off, lap = sh["offset"], sh["lap"]
         for k, (kind, xa, xb, z, gi) in enumerate(_profile()):
             hw = _half_width(gi, n, st["w_top"], st["w_bot"])
-            y_in = max(hw - lap, 0.0)              # 계단 밑으로 lap 만큼 물림
+            y_in = max(hw - lap, 0.0)              # bite lap under the stair
             top = z - off
             for tag, y0, y1 in (("N", y_in, yb), ("S", -yb, -y_in)):
                 BOX(f"{ROOT}/Shoulder_{kind}{k}_{tag}",
@@ -548,24 +549,24 @@ def main():
                     M["marble"], col=True)
 
     def build_side_slopes(M):
-        """계단 좌우 경사 잔디 사면 (감독 D-14 r3②): 어깨면 바깥(y±5.2)에서 부지
-        가장자리(y±20)까지, 상부 광장(z0)→하부 광장(-6.0) 경사. 계단 고립 제거.
-        thick 3.0 솔리드 + run_ext 로 하단 절단면을 하부 광장 밑으로 숨긴다."""
+        """Sloped grass banks either side of the stair (director D-14 r3(2)): from outside the shoulder
+        (y+-5.2) to the site edge (y+-20), sloping from the upper plaza (z0) to the lower plaza (-6.0). Removes the stair's isolation.
+        A thick 3.0 solid + run_ext hides the lower cut face under the lower plaza."""
         st = PARAMS["stairs"]
         ss = PARAMS["side_slope"]
         total_x = st["nsteps"] * st["tread"] \
             + len(PARAMS["landings"]) * st["landing_depth"]
         drop = st["nsteps"] * st["riser"]
         run = total_x + ss["run_ext"]
-        drop_ext = drop * run / total_x           # 기울기 유지한 채 하단 연장
-        yb = PARAMS["shoulder"]["y_out"]          # 5.2 (어깨면/파라펫 바깥)
+        drop_ext = drop * run / total_x           # extend the lower end while keeping the pitch
+        yb = PARAMS["shoulder"]["y_out"]          # 5.2 (outside the shoulder / parapet)
         for tag, y0, y1 in (("N", yb, ss["y_out"]), ("S", -ss["y_out"], -yb)):
             sc.build_slope(stage, f"{ROOT}/SideSlope_{tag}", st["x0"], -0.05,
                            run, drop_ext, y0, y1, ss["thick"], M["grass"],
                            margin=0.0, collider=True)
 
     def build_flat_fill(stair_mtl):
-        """hazard_stairs=False 대조군: 계단 풋프린트를 z=0 평지로 통일."""
+        """hazard_stairs=False control: flattens the stair footprint to z=0."""
         st = PARAMS["stairs"]
         x1 = st["x0"] + st["nsteps"] * st["tread"] \
             + len(PARAMS["landings"]) * st["landing_depth"]
@@ -574,50 +575,50 @@ def main():
             (x1 - st["x0"], 2 * st["w_bot"], 0.5), stair_mtl, col=True)
 
     # -------------------------------------------------------------------
-    # 상부 전망 소광장 (화강암) + 하부 대광장 (plaza_lower + 밴드)
+    # Upper viewing plaza (granite) + lower grand plaza (plaza_lower + bands)
     # -------------------------------------------------------------------
     def build_plazas(M):
         up = PARAMS["upper"]
         ub = PARAMS["upper_big"]
         lo = PARAMS["lower"]
-        z_bot = lo["z_top"] - 0.3                   # 기단 바닥 (하부 광장보다 살짝 아래)
-        pl_bot = ub["z_top"] - ub["thick"]          # 상부 판 밑면 = 기단 상면 (-0.5)
-        # ── 상부 레벨 전체 기단 매시프 (감독 D-14①②): 대형 상부 광장+테라스 풋프린트
-        #    전체를 z_bot 까지 채우는 솔리드(marble 측벽) — 상부 레벨 부유 제거.
+        z_bot = lo["z_top"] - 0.3                   # plinth floor (slightly below the lower plaza)
+        pl_bot = ub["z_top"] - ub["thick"]          # underside of the upper slab = plinth top (-0.5)
+        # ── Whole-plinth massif for the upper level (director D-14(1)(2)): the large upper plaza + terrace footprint,
+        #    filled solid down to z_bot (marble side walls) - removes the float of the upper level.
         BOX(f"{ROOT}/UpperPlinth",
             ((ub["x0"] + ub["x1"]) / 2.0, (ub["y0"] + ub["y1"]) / 2.0,
              (z_bot + pl_bot) / 2.0),
             (ub["x1"] - ub["x0"], ub["y1"] - ub["y0"], pl_bot - z_bot),
             M["marble"], col=True)
-        # ── 대형 상부 광장 (plaza_light) — 테라스 구멍(x up.x0..0, y up.y0..y1)을
-        #    비운 3박스 (테라스가 채움, 동일평면 겹침 없음).
+        # ── Large upper plaza (plaza_light) - 3 boxes leaving the terrace hole (x up.x0..0, y up.y0..y1)
+        #    empty (the terrace fills it, no coplanar overlap).
         cz = ub["z_top"] - ub["thick"] / 2.0
         # [W2-0 · P-A] Register the ground_kit stages **before** the BOX calls —
         #   `add_box` evaluates `_skin_wanted` on the spot, so a later call is
         #   too late. Without this the flush kit elements (joint tone plates
         #   +0.6 mm, manhole +-10 mm, trench cover -2 mm) are swallowed by the
-        #   displacement skin, whose crown is +6.5..16.5 mm [사양 §1.1].
+        #   displacement skin, whose crown is +6.5..16.5 mm [spec §1.1].
         sc.skin_exclude(f"{ROOT}/UpperPlazaW", f"{ROOT}/UpperPlazaS",
                         f"{ROOT}/UpperPlazaN", f"{ROOT}/UpperPlaza")
-        BOX(f"{ROOT}/UpperPlazaW",              # 서: x0..up.x0 전폭
+        BOX(f"{ROOT}/UpperPlazaW",              # west: x0..up.x0, full width
             ((ub["x0"] + up["x0"]) / 2.0, (ub["y0"] + ub["y1"]) / 2.0, cz),
             (up["x0"] - ub["x0"], ub["y1"] - ub["y0"], ub["thick"]),
             M["plaza_light"], col=True)
-        BOX(f"{ROOT}/UpperPlazaS",              # 남: up.x0..0, y0..up.y0
+        BOX(f"{ROOT}/UpperPlazaS",              # south: up.x0..0, y0..up.y0
             ((up["x0"] + ub["x1"]) / 2.0, (ub["y0"] + up["y0"]) / 2.0, cz),
             (ub["x1"] - up["x0"], up["y0"] - ub["y0"], ub["thick"]),
             M["plaza_light"], col=True)
-        BOX(f"{ROOT}/UpperPlazaN",              # 북: up.x0..0, up.y1..y1
+        BOX(f"{ROOT}/UpperPlazaN",              # north: up.x0..0, up.y1..y1
             ((up["x0"] + ub["x1"]) / 2.0, (up["y1"] + ub["y1"]) / 2.0, cz),
             (ub["x1"] - up["x0"], ub["y1"] - up["y1"], ub["thick"]),
             M["plaza_light"], col=True)
-        # ── 대리석 테라스(계단머리) — 구멍 채움
+        # ── Marble terrace (stair head) - fills the hole
         BOX(f"{ROOT}/UpperPlaza",
             ((up["x0"] + up["x1"]) / 2.0, (up["y0"] + up["y1"]) / 2.0,
              up["z_top"] - up["thick"] / 2.0),
             (up["x1"] - up["x0"], up["y1"] - up["y0"], up["thick"]),
             M["marble"], col=True)
-        # 하부 대광장
+        # lower grand plaza
         st = PARAMS["stairs"]
         x0 = st["x0"] + st["nsteps"] * st["tread"] \
             + len(PARAMS["landings"]) * st["landing_depth"]
@@ -626,14 +627,14 @@ def main():
              lo["z_top"] - lo["thick"] / 2.0),
             (lo["x1"] - x0, lo["y1"] - lo["y0"], lo["thick"]),
             M["plaza_lower"], col=True)
-        # 차콜 밴드 2줄 (계단 발치 대광장 경계 강조)
+        # 2 charcoal bands (emphasise the plaza boundary at the stair foot)
         for k, xb in enumerate((x0 + 1.0, x0 + 2.0)):
             BOX(f"{ROOT}/LowerBand_{k}",
                 (xb, (lo["y0"] + lo["y1"]) / 2.0, lo["z_top"] - 0.02),
                 (0.4, lo["y1"] - lo["y0"], 0.06), M["band"])
 
     # -------------------------------------------------------------------
-    # [W2-D] ground_kit — P1 plaza_granite (사양 §5.1 scene14 행)
+    # [W2-D] ground_kit - P1 plaza_granite (spec §5.1 scene14 row)
     #   Drop edge = stair head x=0 (PARAMS["stairs"]["x0"], §7.4 single source).
     #   The x=0 contraction joint is dropped automatically by
     #   `_edge_guard_ticks` (GT-E2). Tactile stays empty: scene14 is a
@@ -675,13 +676,13 @@ def main():
         return res
 
     # -------------------------------------------------------------------
-    # 측면 경사 파라펫 (build_slope, 폭 0.5, 대리석) — 계단 양측
+    # Side sloped parapets (build_slope, width 0.5, marble) - both sides of the stair
     # -------------------------------------------------------------------
     def _rake_segments():
-        """[v5.1] 파라펫 상단 헌치의 **폴리라인** — 구간(사선) / 참(수평) 교대.
-        반환: (kind, x_a, x_b, z_a, z_b). 사선의 끝 z 와 다음 참의 z 가 정확히
-        같고, 참의 z 와 다음 사선의 시작 z 도 같으므로 **이음부 단차 0**.
-        z 는 그 x 에서의 **노징선**(라이저 상단 앞모서리를 잇는 선)이다."""
+        """[v5.1] The **polyline** of the parapet top haunch - alternating section (rake) / landing (level).
+        Returns: (kind, x_a, x_b, z_a, z_b). The end z of a rake equals the z of the next landing
+        exactly, and the landing z equals the start z of the next rake, so **the joints have 0 level difference**.
+        z is the **nosing line** at that x (the line joining the front edges of the riser tops)."""
         st = PARAMS["stairs"]
         n = st["nsteps"]
         bounds = [0] + list(PARAMS["landings"]) + [n]
@@ -700,78 +701,78 @@ def main():
         return out
 
     def build_parapets(M):
-        """측면 파라펫 — [v5.1 현실성] **계단식 난간벽 → 경사 상단 솔리드 헌치**.
+        """Side parapets - [v5.1 realism] **stepped balustrade -> sloped solid top haunch**.
 
-        피드백: "계단 좋음. 양쪽 하얀 난간의 계단층(스텝 파라펫) 제거."
-        구 구현은 어깨면 프로파일을 그대로 따라가 상면이 40단 + 참 3개의
-        **계단 모양 실루엣**을 만들었다(대계단 양측에 흰 톱니 2줄). 실제
-        기념계단의 측벽(헌치)은 단이 아니라 **구간별 직선 레이크 + 참에서만
-        수평**인 폴리라인이다. 이를 두 층으로 재구성한다:
+        Feedback: "stairs are good. Remove the stepping (stepped parapet) of the white railings on both sides."
+        The old implementation followed the shoulder profile exactly, so the top face made a
+        **stair-shaped silhouette** of 40 steps + 3 landings (two white saw-tooth lines flanking the
+        grand stair). The side wall (haunch) of a real monumental stair is not stepped but a polyline of
+        **straight rakes per section, level only at the landings**. It is rebuilt in two layers:
 
-          ① 본체 — 단별 박스(구 구조 유지). 다만 상면을 어깨면과 **동일**
-             (z − offset)하게 낮춰 실루엣에서 완전히 사라지게 한다.
-             (어깨면 86박스는 유지 가능 — 어깨면 자체는 계단 밖 바닥이라
-              상부 실루엣을 만들지 않는다.)
-          ② 헌치 — 구간별 `sc.build_slope` 사선 슬래브 + 참 구간 수평 박스.
-             상면 = 노징선 + rail_h(0.95). 이음부 z 연속 → **단차 0의 사선**.
+          (1) Body - per-step boxes (old structure kept). But the top face is lowered to be **level**
+             with the shoulder (z − offset) so it disappears from the silhouette completely.
+             (The 86 shoulder boxes can stay - the shoulder itself is floor outside the stair
+              and makes no upper silhouette.)
+          (2) Haunch - a `sc.build_slope` oblique slab per section + a level box over each landing.
+             Top face = nosing line + rail_h(0.95). z is continuous at the joints -> **an oblique line with 0 level difference**.
 
-        헌치가 본체 위에 항상 얹히는지(공극 0) 검산:
-          · 사선 두께 cap_t=1.4 (수직 환산 1.4/cos(23.83°) = 1.530)
-          · 노징선은 그 단의 디딤면보다 최대 riser(0.15) 위 → 헌치 밑면은
-            최대 z_step + 0.15 + 0.95 − 1.530 = z_step − 0.430
-          · 본체 상면 = z_step − offset = z_step − 0.03
-          → 밑면이 본체 상면보다 항상 0.40 m 이상 **아래** → 전 구간 물림.
-        유효 난간 높이(어깨면 대비) = 0.95 ~ 1.10 m — 방호 성능도 구보다 상승.
-        계단·참(위험 기하) 트랜스폼은 불변.
+        Check that the haunch always sits on the body (0 gap):
+          · rake thickness cap_t=1.4 (vertical equivalent 1.4/cos(23.83 deg) = 1.530)
+          · the nosing line is at most riser(0.15) above that step's tread -> the haunch underside is at most
+            z_step + 0.15 + 0.95 − 1.530 = z_step − 0.430
+          · body top face = z_step − offset = z_step − 0.03
+          -> the underside is always at least 0.40 m **below** the body top face -> bite over the whole run.
+        Effective railing height (relative to the shoulder) = 0.95 ~ 1.10 m - the guarding performance is better than the old one too.
+        The stair/landing (hazard geometry) transform is unchanged.
 
-        ── [v6 판정 §3-1] 이음부 쐐기 슬릿 봉합 ──────────────────────────
-        v6 RT 가 `lower_lookup` 400 % 크롭에서 참 3곳(좌 x≈310/740/935, 우 대칭)
-        마다 폭 3~6 px 의 어두운 삼각 슬릿을 관측했다. **원인은 판정이 추정한
-        '확폭(3.0→5.0)에 따른 ±Y 조그'가 아니다** — 파라펫 밴드 y 는
-        (w_bot+0.05, +width) 로 전 구간 상수라 Y 조그 자체가 없다.
+        ── [v6 review §3-1] Sealing the wedge slits at the joints ──────────────────────────
+        The v6 RT observed a dark triangular slit 3~6 px wide at each of the 3 landings (left x~310/740/935,
+        right symmetric) in a 400 % crop of `lower_lookup`. **The cause is not the '+-Y jog from the
+        widening (3.0->5.0)' that the review assumed** - the parapet band y is (w_bot+0.05, +width),
+        constant over the whole run, so there is no Y jog at all.
 
-        진짜 원인은 `sc.build_slope` 사선 슬래브의 **끝면이 사면에 수직**이라는
-        것이다. 상면 길이 = hypot(run,drop) + margin 이므로 끝면은 상단 모서리가
-        margin/2 만큼 내리막으로 튀어나오고, 두께 cap_t 를 따라 내려가면서
-        **오르막으로 cap_t·sin(ang) 만큼 후퇴**한다. 즉 사선의 내리막 끝은
-        높이 rail_h 에 가까운 삼각 쐐기로 얇아진다:
-          ang = atan(0.15/0.34) = 23.830°, sin = 0.4042, cos = 0.9147
-          끝면 하단 x = x_b + margin/2·cos − cap_t·sin
+        The real cause is that the end face of the `sc.build_slope` oblique slab is **perpendicular to the
+        slope**. The top face length is hypot(run,drop) + margin, so the end face has its top edge
+        protruding downhill by margin/2 and, going down through the thickness cap_t, it **retreats
+        uphill by cap_t·sin(ang)**. That is, the downhill end of the rake thins into a triangular wedge
+        close to height rail_h:
+          ang = atan(0.15/0.34) = 23.830 deg, sin = 0.4042, cos = 0.9147
+          end face bottom x = x_b + margin/2·cos − cap_t·sin
                       = x_b + 0.027 − 0.566 = x_b − 0.538
-        참 헌치 박스는 x_b 부터 시작(수직 끝면)하므로 x ∈ [x_b−0.538, x_b] 구간의
-        끝면 아래가 **비어 있다**(밑에는 본체 상면 ≈ z_step−0.03 뿐 → 최대 0.9 m
-        높이의 삼각 공동). fixlog 의 "이음부 Δz = 0.0" 검산은 상면 z 만 본 것이라
-        이 평면 방향 공백을 잡지 못했다.
+        The landing haunch box starts at x_b (a vertical end face), so under the end face the range
+        x ∈ [x_b−0.538, x_b] is **empty** (below it there is only the body top face ~ z_step−0.03 -> a
+        triangular cavity up to 0.9 m high). The fixlog's "joint delta z = 0.0" check only looked at the
+        top face z, so it could not catch this in-plane gap.
 
-        봉합(판정 수정안 ①) — 참 헌치 박스를 오르막으로 lap 만큼 연장한다:
-          lap = cap_t·sin(ang) + 0.15 = 0.566 + 0.15 = 0.716 m  (> 0.538 필요분)
-        연장부 상면은 참 높이(z_a + rail_h) 그대로이고, 같은 x 에서 사선 상면은
-        z_a + rail_h + (x_a − x)·tan(ang) 로 **항상 더 높다** → 연장부는 사선
-        슬래브 내부에 완전히 매몰되어 실루엣을 만들지 않는다. 매몰 조건도 성립:
-          연장부 상면이 사선 밑면(상면 − 1.530)보다 위여야 하므로
-          lap·tan(ang) = 0.716 × 0.4419 = 0.316 < 1.530  ✓
-        연장부의 ±Y 면은 사선 슬래브의 ±Y 면과 정확히 동일 평면·동일 법선·동일
-        재질이라 Z 파이팅이 있어도 음영 차가 0 이다.
+        Seal (review fix (1)) - extend the landing haunch box uphill by lap:
+          lap = cap_t·sin(ang) + 0.15 = 0.566 + 0.15 = 0.716 m  (> the 0.538 needed)
+        The extension keeps the landing top face height (z_a + rail_h), and at the same x the rake top
+        face is z_a + rail_h + (x_a − x)·tan(ang), i.e. **always higher** -> the extension is completely
+        buried inside the oblique slab and makes no silhouette. The burial condition also holds:
+          the extension top face must be above the rake underside (top face − 1.530), so
+          lap·tan(ang) = 0.716 x 0.4419 = 0.316 < 1.530  ✓
+        The +-Y faces of the extension are exactly coplanar with, share the normal of and use the same
+        material as the +-Y faces of the oblique slab, so even with Z-fighting the shading difference is 0.
 
-        반대쪽(참 → 사선) 이음부는 사선의 오르막 끝이 참 박스 안으로
-        cap_t·sin + margin/2·cos = 0.594 m 파고들므로 원래부터 공백이 없다.
+        The opposite joint (landing -> rake) has no gap in the first place, because the uphill end of the
+        rake digs cap_t·sin + margin/2·cos = 0.594 m into the landing box.
 
-        같은 결함이 폴리라인 양 끝에도 있어 함께 봉합한다:
-          · 머리 끝(x=0, 상부 테라스) — v6 [잔여] "terrace_read 좌·우 하단 헌치
-            끝단 백색 삼각 매스" 가 이 쐐기다. 엄지기둥(端柱) 박스로 대체.
-          · 발치 끝(계단 최하단) — 수직 마구리 박스로 대체.
-        둘 다 |y| ≥ 5.05 로 계단 폭(w_bot 5.0) 밖 → 위험 기하·착시 불변."""
+        The same defect exists at both ends of the polyline and is sealed together:
+          · Head end (x=0, upper terrace) - the v6 [remaining] item "white triangular mass at the lower
+            end of the left/right haunches in terrace_read" is this wedge. Replaced with a newel box.
+          · Toe end (bottom of the stair) - replaced with a vertical end-cap box.
+        Both are at |y| >= 5.05, outside the stair width (w_bot 5.0) -> hazard geometry and illusion unchanged."""
         st = PARAMS["stairs"]
         pa = PARAMS["parapet"]
         sh = PARAMS["shoulder"]
-        yb = st["w_bot"] + 0.05                     # 5.05 — 하부 최대폭 바로 바깥
-        rail_h = pa["z0"] + 0.6                     # 0.95 m (노징선 위 유효 높이)
+        yb = st["w_bot"] + 0.05                     # 5.05 - just outside the maximum lower width
+        rail_h = pa["z0"] + 0.6                     # 0.95 m (effective height above the nosing line)
         bands = (("N", yb, yb + pa["width"]),
                  ("S", -yb - pa["width"], -yb))
-        # [v6] 사선 슬래브 끝면(사면 수직) 후퇴량 + 여유 = 평면 오버랩 lap
+        # [v6] setback of the oblique slab end face (perpendicular to the slope) + margin = plan overlap lap
         _ang = math.atan2(st["riser"], st["tread"])
         lap = pa["cap_t"] * math.sin(_ang) + 0.15   # 0.716 m
-        # ① 본체 — 상면을 어깨면과 동일하게 (구: +rail_h → 계단 실루엣)
+        # (1) Body - top face level with the shoulder (old: +rail_h -> stair silhouette)
         for k, (kind, xa, xb, z, gi) in enumerate(_profile()):
             top = z - sh["offset"]
             for tag, y0, y1 in bands:
@@ -780,7 +781,7 @@ def main():
                      (top + st["base_z"]) / 2.0),
                     (xb - xa, y1 - y0, top - st["base_z"]),
                     M["parapet"], col=True)
-        # ② 상단 헌치 — 사선(구간) + 수평(참), 이음부 단차 0 · 평면 오버랩 lap
+        # (2) Top haunch - oblique (sections) + horizontal (landings), 0 level difference at the joints · plan overlap lap
         segs = _rake_segments()
         for j, (kind, xa, xb, za, zb) in enumerate(segs):
             for tag, y0, y1 in bands:
@@ -791,8 +792,8 @@ def main():
                         pa["cap_t"], M["parapet"], margin=0.06,
                         collider=True)
                 else:
-                    # [v6] 오르막으로 lap 연장 → 직전 사선 슬래브 끝면 아래의
-                    #      삼각 공동을 채운다(연장부는 사선 내부에 매몰).
+                    # [v6] Extend uphill by lap -> fills the triangular cavity under the end
+                    #      face of the preceding oblique slab (the extension is buried inside the oblique slab).
                     x_a2 = xa - lap
                     top = za + rail_h
                     BOX(f"{ROOT}/ParapetHaunch_{j}_{tag}",
@@ -800,18 +801,18 @@ def main():
                          (top + st["base_z"]) / 2.0),
                         (xb - x_a2, y1 - y0, top - st["base_z"]),
                         M["parapet"], col=True)
-        # [v6] 폴리라인 양 끝 쐐기 봉합 — 머리 엄지기둥 + 발치 마구리
+        # [v6] Seal the wedges at both ends of the polyline - head newel + toe end cap
         x_head, z_head = segs[0][1], segs[0][3]          # (0.0, z_top)
-        x_toe, z_toe = segs[-1][2], segs[-1][4]          # 최하단 노징 끝
+        x_toe, z_toe = segs[-1][2], segs[-1][4]          # lowest nosing end
         for tag, y0, y1 in bands:
-            # 머리 엄지기둥 : 상부 테라스(z_top) 위 lap × width × rail_h 솔리드.
-            #   상면이 사선 상단(z_head + rail_h)과 정확히 일치 → 연속 어깨.
+            # Head newel: a lap x width x rail_h solid on the upper terrace (z_top).
+            #   Its top face matches the top of the oblique slab (z_head + rail_h) exactly -> continuous shoulder.
             top_h = z_head + rail_h
-            bot_h = st["z_top"] - 0.30                    # 테라스 슬래브에 매입
+            bot_h = st["z_top"] - 0.30                    # embedded into the terrace slab
             BOX(f"{ROOT}/ParapetNewel_{tag}",
                 ((x_head - lap / 2.0), (y0 + y1) / 2.0, (top_h + bot_h) / 2.0),
                 (lap, y1 - y0, top_h - bot_h), M["parapet"], col=True)
-            # 발치 마구리 : 최하단 사선 끝을 수직면으로 닫는다.
+            # Toe end cap: closes the end of the lowest oblique slab with a vertical face.
             top_t = z_toe + rail_h
             BOX(f"{ROOT}/ParapetEndCap_{tag}",
                 ((x_toe - lap / 2.0), (y0 + y1) / 2.0,
@@ -819,15 +820,16 @@ def main():
                 (lap, y1 - y0, top_t - st["base_z"]), M["parapet"], col=True)
 
     # -------------------------------------------------------------------
-    # 드레싱 — 가로등 2 + 파라펫 연석(상부 광장 뒤) + 분수 힌트 + 원경 건물
+    # Dressing - 2 street lamps + parapet kerb (behind the upper plaza) + fountain hint + distant buildings
     # -------------------------------------------------------------------
     def build_bollard_std(M, prefix, cx, cy, bz, k=0):
-        """[v5.1 §2] 규정 볼라드 1본 — 높이 0.90 m · 지름 0.15 m(r 0.075) +
-        상단 백색 반사띠(폭 0.09). 근거: 교통약자의 이동편의 증진법 시행규칙
-        별표2(높이 0.8~1.0 · 지름 0.1~0.2 · 간격 1.5 m 내외 · 밝은 반사띠).
-        구 sc.build_bollard 기본값(r 0.06 · h 0.75)은 규정 하한 미달이라
-        여기서 치수를 명시한다(scene_common 미수정). 본체 재질은 인스턴스별
-        틴트 지터(bollard_0..2)로 '동일 복제' 인상을 뺀다."""
+        """[v5.1 §2] 1 compliant bollard - height 0.90 m · diameter 0.15 m (r 0.075) +
+        a white reflective band on top (width 0.09). Basis: Enforcement Rule of the Act on Promotion
+        of Mobility Convenience for the Mobility Impaired, Table 2 (height 0.8~1.0 · diameter 0.1~0.2 ·
+        spacing about 1.5 m · bright reflective band).
+        The old sc.build_bollard defaults (r 0.06 · h 0.75) fall below the statutory minimum, so the
+        dimensions are stated explicitly here (scene_common is not modified). The body material uses a
+        per-instance tint jitter (bollard_0..2) to remove the 'identical clones' impression."""
         h, r = 0.90, 0.075
         sc.build_bollard(stage, f"{prefix}/Post", cx, cy, bz,
                          mtl=M[f"bollard_{k % 3}"], radius=r, height=h)
@@ -835,12 +837,12 @@ def main():
                         r * 1.05, 0.09, M["bollard_band"])
 
     def build_dressing(M):
-        """맥락 드레싱 — 판독어 "기념광장". 전부 기존 빌더/프리미티브 조합.
-        구 인벤토리는 40×40 하부 광장에 분수 1개뿐이어서 휑함 5/5 였다."""
+        """Context dressing - the read word is "monumental plaza". All combinations of existing builders/primitives.
+        The old inventory was a single fountain on a 40x40 lower plaza, which scored emptiness 5/5."""
         dr = PARAMS["dressing"]
-        z_lo = PARAMS["lower"]["z_top"]                # -6.0 (하부 광장 상면)
+        z_lo = PARAMS["lower"]["z_top"]                # -6.0 (lower plaza top face)
         tree_mtls = (M["wood"], M["canopy_a"], M["canopy_b"])
-        # 가로등 3×2 (상부 광장) — xs 확장으로 광장 축선을 만든다
+        # Street lamps 3x2 (upper plaza) - the extended xs create the plaza axis
         sl = PARAMS["streetlight"]
         for jx, x in enumerate(sl["xs"]):
             for j, y in enumerate(sl["ys"]):
@@ -854,16 +856,16 @@ def main():
                     hx = x + sgn * sl["arm_len"]
                     BOX(f"{base}/Head_{tag}", (hx, y, sl["pole_h"] - 0.15),
                         (sl["head"], sl["head"], 0.12), M["lamp"])
-        # 상부 광장 뒤 파라펫 연석 — 중앙 개구 2*curb_gap 을 비운 2박스 [A-14-5]
-        #   구 구조는 폭 0.5 × 높이 0.5 가 y −8..8 전폭을 막아 테라스 진입이
-        #   0.5 m 턱 넘기였다.
+        # Parapet kerb behind the upper plaza - 2 boxes leaving a central opening of 2*curb_gap [A-14-5]
+        #   The old structure was width 0.5 x height 0.5 blocking the full y −8..8, so entering the terrace
+        #   meant stepping over a 0.5 m kerb.
         up = PARAMS["upper"]
         g = dr["curb_gap"]
         for tag, y0, y1 in (("S", up["y0"], -g), ("N", g, up["y1"])):
             BOX(f"{ROOT}/UpperCurb_{tag}",
                 (up["x0"] + 0.25, (y0 + y1) / 2.0, 0.25),
                 (0.5, y1 - y0, 0.5), M["parapet"], col=True)
-        # 분수: 수반 2단 + 얕은 수면 + 노즐 (구 '간이 수영장' 완화) [B-14-4]
+        # Fountain: 2-tier basin + shallow water + nozzles (softens the old 'paddling pool') [B-14-4]
         fo = PARAMS["fountain"]
         CYL(f"{ROOT}/FountainRingO", (fo["cx"], fo["cy"], z_lo + fo["h"] / 2.0),
             fo["r_out"], fo["h"], M["parapet"], col=True)
@@ -879,7 +881,7 @@ def main():
                 (fo["cx"] + 1.4 * math.cos(a), fo["cy"] + 1.4 * math.sin(a),
                  z_lo + fo["h"] + fo["nozzle_h"] / 2.0),
                 fo["nozzle_r"], fo["nozzle_h"], M["parapet"])
-        # ── 하부 대광장: 가로수·화단·벤치·볼라드·깃대 ──
+        # ── Lower grand plaza: street trees · planters · benches · bollards · flagpoles ──
         for k, (cx, cy) in enumerate(dr["trees_low"]):
             sc.build_tree(stage, f"{ROOT}/TreeLow_{k}", cx, cy, z_lo, *tree_mtls)
         for k, (cx, cy) in enumerate(dr["planters_low"]):
@@ -888,7 +890,7 @@ def main():
         for k, (cx, cy) in enumerate(dr["benches_low"]):
             sc.build_bench(stage, f"{ROOT}/BenchLow_{k}", cx, cy, z_lo,
                            M["parapet"], yaw=90.0)
-        for k, by in enumerate(dr["bollard_ys"]):      # [v5.1 §2] 규정 볼라드
+        for k, by in enumerate(dr["bollard_ys"]):      # [v5.1 §2] compliant bollards
             build_bollard_std(M, f"{ROOT}/BollardLow_{k}",
                               dr["bollard_x"], by, z_lo, k=k)
         for k, (cx, cy) in enumerate(dr["flags"]):
@@ -896,7 +898,7 @@ def main():
                 M["rail"], col=True)
             BOX(f"{ROOT}/Flag_{k}", (cx + 0.02, cy + 0.6, z_lo + 8.2),
                 (0.03, 1.2, 0.8), M["band"])
-        # ── 상부 광장: 기념비 + 생울타리 테두리 + 가로수·벤치 ──
+        # ── Upper plaza: monument + hedge border + street trees and benches ──
         mx, my = dr["monument"]
         BOX(f"{ROOT}/MonumentBase", (mx, my, 0.4), (3.0, 3.0, 0.8),
             M["marble"], col=True)
@@ -909,18 +911,18 @@ def main():
         for k, (cx, cy) in enumerate(dr["benches_up"]):
             sc.build_bench(stage, f"{ROOT}/BenchUp_{k}", cx, cy, 0.0,
                            M["parapet"], yaw=90.0)
-        # 원경 건물 5동 (지평 폐쇄) — bd["base_z"]=-6.0 로 하부 광장에 접지 [B-14-1]
+        # 5 distant buildings (horizon closure) - grounded on the lower plaza via bd["base_z"]=-6.0 [B-14-1]
         for key, bd in PARAMS["buildings"].items():
             sc.build_building(stage, f"{ROOT}/Building_{key}", bd,
                               M["bldg"], M["glass"], M["parapet"],
                               window=PARAMS["window"])
 
     # -------------------------------------------------------------------
-    # 단서 (cue) — nosing / railing (기본 OFF)
+    # cues - nosing / railing (OFF by default)
     # -------------------------------------------------------------------
     def build_signs():
-        """[v5 공통 레이어] 한글 사인(sc.build_sign). 좌표·카메라 검산은
-        PARAMS['signs'] 주석. 위험 기하(계단·참) 트랜스폼 불변."""
+        """[v5 shared layer] Korean sign (sc.build_sign). For the coordinate and camera checks see the
+        PARAMS['signs'] comment. The hazard geometry (stairs, landings) transform is unchanged."""
         back = PBR(f"{ROOT}/Looks/SignBack", diffuse_color=(0.16, 0.17, 0.18),
                    metallic=0.6, roughness_const=0.5)
         for tag, key, cx, cy, bz, yaw, w, h in PARAMS["signs"]:
@@ -932,9 +934,9 @@ def main():
 
     def build_cues(M):
         st = PARAMS["stairs"]
-        # [v5 공통 레이어] 점자블록 — 예약만 돼 있던 경로를 실제 지오메트리로.
-        #   상단 모서리(x=0) 앞 ahead(0.4) m, 계단 상부 폭(y ±w_top) 밴드.
-        #   대리석 테라스 상면(z=0)에서 4 mm 돌출 — 계단 트랜스폼 불변.
+        # [v5 shared layer] Tactile paving - the path that was only reserved becomes real geometry.
+        #   ahead(0.4) m in front of the top edge (x=0), a band of the stair upper width (y +-w_top).
+        #   Proud 4 mm above the marble terrace top face (z=0) - the stair transform is unchanged.
         if cfg["cue_tactile"]:
             tc = PARAMS["tactile"]
             sc.build_tactile(stage, f"{ROOT}/Tactile_Top",
@@ -942,7 +944,7 @@ def main():
                              -st["w_top"], st["w_top"], M["tactile"],
                              z=st["z_top"], proud=tc["proud"])
         if cfg["cue_nosing"]:
-            # 참 무시한 근사 단코 띠 (연속 40단 기준 — 대표 표기)
+            # Approximate nosing band ignoring the landings (based on a continuous 40 steps - representative marking)
             sc.build_nosing(
                 stage, f"{ROOT}/Nosing", st["x0"], -st["w_top"], st["w_top"],
                 st["riser"], st["tread"], st["nsteps"], z_top=st["z_top"])
@@ -956,8 +958,8 @@ def main():
             rail_h = pa["z0"] + 0.6
 
             def para_ground(x):
-                """[v5.1] 헌치 상면(= 노징선 + rail_h) — 레일 포스트 착지면.
-                구 계단식 상면 대신 사선/수평 폴리라인을 그대로 보간한다."""
+                """[v5.1] Haunch top face (= nosing line + rail_h) - the landing surface for the rail posts.
+                Instead of the old stepped top face it interpolates the rake/level polyline directly."""
                 for kind, xa, xb, za, zb in segs:
                     if x < xb:
                         t = 0.0 if xb <= xa else (max(x, xa) - xa) / (xb - xa)
@@ -970,18 +972,18 @@ def main():
                     sgn * (st["w_bot"] + 0.3), st["x0"] - 0.5, st["x0"],
                     run, drop, para_ground, M["rail"], rail_h=0.9)
 
-    # ── 씬 조립 ──
+    # ── scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
     M = setup_materials()
     stair_mtl = M["marble"]
     if not cfg["cue_material_break"]:
-        # 재질 경계 제거: 광장도 대리석(코드 경로 — plazas 는 별도이므로 계단만 유지)
+        # Material boundary removed: the plazas are marble too (code path - plazas are separate, so only the stair is kept)
         stair_mtl = M["marble"]
 
     build_plazas(M)
     if cfg["hazard_stairs"]:
-        build_shoulder(M)           # 계단 밖 어깨면 매시프 (구 소핏) — 계단보다 먼저
-        build_side_slopes(M)        # 계단 좌우 경사 잔디 사면 (고립 제거)
+        build_shoulder(M)           # shoulder massif outside the stair (old soffit) - before the stair
+        build_side_slopes(M)        # sloped grass banks either side of the stair (isolation removed)
         build_stairs(stair_mtl)
         build_parapets(M)
         build_cues(M)
@@ -989,9 +991,9 @@ def main():
         build_flat_fill(stair_mtl)
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
-    build_ground_kit(M)             # [W2-D] 지면 요소 — 드레싱 뒤(산포 순서 규약)
+    build_ground_kit(M)             # [W2-D] ground elements - after the dressing (scatter order convention)
     if cfg["cue_sign"]:
-        build_signs()               # [v5 공통 레이어]
+        build_signs()               # [v5 shared layer]
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])

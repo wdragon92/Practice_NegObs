@@ -1,32 +1,36 @@
 # -*- coding: utf-8 -*-
 """
-sceneN1_shadow_band.py — NegObs 인공씬 22호: 건물 그림자 띠 (Isaac Sim 4.5)
+sceneN1_shadow_band.py - NegObs synthetic scene 22: building shadow band (Isaac Sim 4.5)
 
-유형    : N1 Hard Negative — 평지 광장을 횡단하는 암 밴드 (GT = 전 픽셀 낙차 없음)
-사양서  : Docs/nanobanana_batch1_geometry_map.md §A sceneN1_shadow_band
-룩참조  : look_refs/n1_shadow.jpg
-공통    : scene_common.py (검증된 API 헬퍼) · scene16_canopy_shadow.py (골격)
+Type    : N1 Hard Negative - a dark band crossing a flat plaza (GT = no drop in any pixel)
+Spec    : Docs/nanobanana_batch1_geometry_map.md §A sceneN1_shadow_band
+Look ref: look_refs/n1_shadow.jpg
+Shared  : scene_common.py (verified API helpers) · scene16_canopy_shadow.py (skeleton)
 
-위험 본질(반례): **낙차는 어디에도 없다.** 완전 평탄한 대형 콘크리트 타일 광장을
-           공중 슬래브(스카이브리지형)의 그림자가 폭 4m 띠로 횡단하고, 그 양쪽은
-           모두 밝다. 양 에지가 선명한 암 밴드는 T3(하부 암부)·T20(캐노피 암부)의
-           양성 단서와 **화소 수준에서 구별 불가**에 가깝다 — 모델이 "어두운 띠 =
-           낙차"라는 지름길을 학습했는지 검사하는 첫 반례. 밴드 안에서도 포장
-           텍스처·줄눈이 연속으로 읽혀야 한다(완전 흑이면 반례로서 무의미).
-목표     : 평탄 광장(줄눈 격자 3m) + 프레임 밖 공중 슬래브 1매 + 드레싱을 조립,
-           렌더로 판정 (렌더 전용). GT 낙차 맵 = 전 픽셀 0.
+Hazard (counter-example): **there is no drop anywhere.** The shadow of an
+           elevated slab (skybridge type) crosses a perfectly flat, large
+           concrete-tile plaza as a 4m wide band, and both sides of it are
+           bright. A dark band with two crisp edges is close to **pixel-level
+           indistinguishable** from the positive cues of T3 (underside dark zone)
+           and T20 (canopy dark zone) - the first counter-example that tests
+           whether the model learned the shortcut "dark band = drop". Even inside
+           the band the paving texture and joints must read continuously (pure
+           black would make it useless as a counter-example).
+Goal     : assemble a flat plaza (3m joint grid) + 1 elevated slab outside the
+           frame + dressing, and judge by render (render only). GT drop map = 0
+           in every pixel.
 
-실행 (GUI 룩 체크 — 기본):
+Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
     export PYTHONNOUSERSITE=1
     python sceneN1_shadow_band.py
 
-자동 캡처 (headless):   NEGOBS_CAPTURE=1 python sceneN1_shadow_band.py
-스모크 조기종료:        NEGOBS_SMOKE=1  python sceneN1_shadow_band.py
-슬래브 프레임인 검산:   NEGOBS_GEOCHECK=1 python3 sceneN1_shadow_band.py  (Isaac 불요)
+Auto capture (headless):   NEGOBS_CAPTURE=1 python sceneN1_shadow_band.py
+Smoke early exit:          NEGOBS_SMOKE=1  python sceneN1_shadow_band.py
+Slab frame-in check:       NEGOBS_GEOCHECK=1 python3 sceneN1_shadow_band.py  (no Isaac)
 
-좌표계: Z-up, m, 진행축 +X. 낙차 없음 — 특색(그림자 밴드)이 x=0..4 구간.
+Coordinates: Z-up, m, travel axis +X. No drop - the feature (shadow band) is the x=0..4 stretch.
 """
 
 import os
@@ -41,17 +45,17 @@ import ground_kit as gk
 
 
 # ===========================================================================
-# [A] SCENE_CONFIG — 표준 7키. hard negative 씬이므로 hazard_* 는 낙차가 아니라
-#     "씬 특색 요소(오클루더 슬래브)" 토글. 해당 없는 cue 키는 False + 사유 주석.
+# [A] SCENE_CONFIG - standard 7 keys. This is a hard negative scene, so hazard_* toggles not a drop but
+#     the "scene feature element (occluder slab)". Cue keys that do not apply are False + a reason comment.
 # ===========================================================================
 SCENE_CONFIG = {
-    "hazard_shadow_band": True,   # False → 공중 슬래브 제거(밴드 없는 균일광 대조군)
-    "cue_railing":        False,  # 낙차 없음 → 난간 비관행. 키만 예약
-    "cue_tactile":        False,  # 낙차 없음 → 경고 점자블록 비관행. 키만 예약
-    "cue_material_break": True,   # 포장 줄눈 격자(타일 경계 스트립). False → 무줄눈
-    "cue_nosing":         False,  # 단이 없음 → 논슬립 띠 무의미. 키만 예약
-    "cue_sign":           False,  # [선택] 미구현 — config 키만 예약
-    "cue_scene_dressing": True,   # 화단·벤치·볼라드·원경 건물(지평선 폐쇄) 일괄
+    "hazard_shadow_band": True,   # False -> remove the elevated slab (uniform-light control with no band)
+    "cue_railing":        False,  # no drop -> railing not customary. Key reserved only
+    "cue_tactile":        False,  # no drop -> warning tactile paving not customary. Key reserved only
+    "cue_material_break": True,   # paving joint grid (tile boundary strips). False -> no joints
+    "cue_nosing":         False,  # no step -> a non-slip strip is meaningless. Key reserved only
+    "cue_sign":           False,  # [optional] not implemented - config key reserved only
+    "cue_scene_dressing": True,   # planters · benches · bollards · backdrop buildings (horizon closure) together
 }
 
 
@@ -59,137 +63,137 @@ SCENE_CONFIG = {
 # [B] PARAMS
 # ===========================================================================
 PARAMS = dict(
-    # 평탄 광장 1매 (개구 없음 → 4박스 분할 불요). 상면 z=0.
+    # 1 flat plaza slab (no opening -> no 4-box split needed). Top face z=0.
     plaza=dict(size=140.0, z_top=0.0, thick=0.5),
 
-    # 목표 그림자 밴드 (지면 X구간). 슬래브 위치는 여기서 역산 — _slab_x() 참조.
+    # target shadow band (ground X range). The slab position is back-computed from this - see _slab_x().
     band=dict(x0=0.0, x1=4.0),
-    # 오클루더: 프레임 밖 공중 슬래브(스카이브리지형). H=고도(밑면), half_y=반길이.
+    # occluder: elevated slab outside the frame (skybridge type). H=height (soffit), half_y=half length.
     slab=dict(H=12.0, thick=0.8, half_y=30.0),
 
-    # ═══ 줄눈 — [W2 §5.1 N1] 단일 3 m 격자 → **2단화** ════════════════════
-    #  구(舊): spacing 3.0 단일 격자. 실물 화강석 판석 광장은 **신축줄눈(폭
-    #    20~30 mm)** 과 **시공줄눈(폭 3 mm 급)** 이 서로 다른 주기로 겹친다.
-    #  신(新): 신축 `exp_spacing` 6.0 m + 시공 `con_spacing` 1.8 m 의 2단.
-    #    ★ 1.8 m 는 **판석 셀 0.600 의 3배**다 — 사양 §4.5 U2(줄눈 주기는
-    #      유닛 셀의 정수배)에 걸린다. v1 표기 "1.5~2 m" 는 2.5배라 T1 MDL
-    #      유닛 지터와 **이중 격자**를 만든다 `[사양 §4.5 U2·§5.1]`.
-    #    ★ 두 주기가 겹치는 눈금(18 m 주기)에서는 시공줄눈을 드롭한다 —
-    #      동일 위치 2프림 = Z-파이팅.
-    #  ★ ground_kit 은 이 씬에서 **줄눈을 만들지 않는다**(`pave.joint=None`
-    #    오버라이드). 킷 줄눈(1.8/6.0)과 씬 격자가 같은 면에 겹치면
-    #    파일럿 결함 D6(sceneN5 이중 줄눈 격자)이 재발한다 `[W2-B §7 D-list]`.
+    # ═══ joints - [W2 §5.1 N1] single 3 m grid -> **two tiers** ═══════════
+    #  old: spacing 3.0, one grid. A real granite flagstone plaza has **expansion joints (width
+    #    20~30 mm)** and **construction joints (width ~3 mm)** overlapping at different periods.
+    #  new: two tiers - expansion `exp_spacing` 6.0 m + construction `con_spacing` 1.8 m.
+    #    * 1.8 m is **3x the flagstone cell 0.600** - it satisfies spec §4.5 U2 (the joint period
+    #      must be an integer multiple of the unit cell). The v1 note "1.5~2 m" is 2.5x, which
+    #      makes a **double grid** with the T1 MDL unit jitter `[spec §4.5 U2·§5.1]`.
+    #    * at ticks where the two periods coincide (18 m period) the construction joint is dropped -
+    #      2 prims at the same position = Z-fighting.
+    #  * in this scene ground_kit **makes no joints** (`pave.joint=None`
+    #    override). If the kit joints (1.8/6.0) overlap the scene grid on the same face,
+    #    pilot defect D6 (sceneN5 double joint grid) recurs `[W2-B §7 D-list]`.
     joints=dict(exp_spacing=6.0, exp_width=0.045, con_spacing=1.8,
                 con_width=0.022, proud=0.001,
                 x0=-21.0, x1=30.0, y0=-21.0, y1=21.0),
 
-    # ═══ [W2 ground_kit] P1 plaza_granite — 사양 §5.1 N1 행 ════════════════
-    #  씬 고유 처방: ① 줄눈 2단화(위 `joints` 에서 씬이 직접 집행)
-    #                ② 맨홀 1기 — **밴드 보존 불변식 통과 필수**(§7.3)
-    #  ★ 밴드 보존(§7.3 B12, `ground_kit._inv_n1_band`): 이 씬의 오클루더는
-    #    공중 슬래브 **단 하나**여야 한다. 태양 그림자는 순수 +X, 길이
-    #    0.84536·h 이므로 신규 요소는
-    #      (앞배치) `xb + 0.84536·h < band.x0`  또는  (뒤배치) `xa > band.x1`
-    #    를 만족해야 한다. region 원단을 `band.x0 − 0.60` 으로 잘라 두면
-    #    잡초(클램프 후 h ≤ 0.12)까지 포함해 앞배치 조건이 자동 성립한다
-    #    `[계산 — −0.60 + 0.84536×0.12 = −0.499 < 0]`.
-    #  ★ 점자블록: §12.4 "N1 볼라드 전면 유지 + 형태 교정(§12.5 ②)" —
-    #    소판 0.40×0.30(본당 0.12 ㎡)은 approach 뷰에서 212 px/본이라
-    #    판독 불가였다. 볼라드 열 전면 **연속 띠 0.60 m** 로 바꾼다
-    #    (`relief="normal"` 이라 프림 1). 볼라드 열은 x 11…17 = **뒤배치**
-    #    (xa = 11 > 4.0) 라 밴드 불변식을 통과한다.
+    # ═══ [W2 ground_kit] P1 plaza_granite - spec §5.1 N1 row ═══════════════
+    #  scene-specific prescription: (1) two-tier joints (enforced by the scene in `joints` above)
+    #                (2) 1 manhole - **must pass the band-preservation invariant** (§7.3)
+    #  * band preservation (§7.3 B12, `ground_kit._inv_n1_band`): the occluder in this scene
+    #    must be the elevated slab and **nothing else**. The sun shadow is pure +X with length
+    #    0.84536·h, so any new element must satisfy
+    #      (in front) `xb + 0.84536·h < band.x0`  or  (behind) `xa > band.x1`
+    #    Cropping the region blank at `band.x0 − 0.60` makes the in-front condition hold
+    #    automatically, weeds (h <= 0.12 after clamping) included
+    #    `[computed - −0.60 + 0.84536x0.12 = −0.499 < 0]`.
+    #  * tactile paving: §12.4 "keep the N1 bollard frontage + correct the form (§12.5 (2))" -
+    #    the small plates 0.40x0.30 (0.12 ㎡ each) are 212 px per unit in the approach view, so
+    #    they were illegible. Replace them with a **continuous 0.60 m strip** along the bollard row
+    #    frontage (`relief="normal"`, so 1 prim). The bollard row is x 11…17 = **behind**
+    #    (xa = 11 > 4.0), so it passes the band invariant.
     ground=dict(
-        region_pad_x=0.60,                  # 밴드 앞 여유 (위 계산)
+        region_pad_x=0.60,                  # clearance in front of the band (computed above)
         region_x0=-12.0, region_y=4.0,
-        #  맨홀 — 사양 §5.1 표기는 (−1.0, +0.4) 이지만 **파일럿 결재
-        #  M9-ⓑ 2차 정정**(scene15)이 세운 기준 "면 요소 1개가 근경 창을
-        #  독점하지 않는다(화면폭 ≤ 25 %)"를 그대로 적용해 이설한다:
-        #    x=−1.0 → d2 에서 지면거리 1.0 m · 화면폭 f·0.648/1.0 = **1,078 px
-        #    = 56.1 %** `[계산]`. W1(0.564~2.00 m) 안에서는 원단 X=2.00 에서도
-        #    28.1 % 라 ≤25 % 가 **원리적으로 불가**하다.
-        #    → 2순위 창 W2(2.00~3.00 m) 로: x=−2.40 ⇒ d5 X=2.60 m ·
-        #      414 px = **21.6 %**, d10 X=7.60 m · 7.4 % `[계산]`.
-        #      d2 는 눈 뒤(X=−0.40)라 비가시 → d2 창은 패치 #1 이 담당한다.
-        #  2기 — 사양 §5.1 "맨홀 1~2기(1기는 반드시 W1)". W1 은 패치가 맡고
-        #  맨홀은 W2 창에 둔다(위 화면폭 계산). 2기째는 d10 의 W2 창
-        #  (X=3.4 m · 317 px = 16.5 %)에 두어 원경 컷의 면 요소를 채운다.
+        #  manhole - spec §5.1 states (−1.0, +0.4), but it is relocated by applying the
+        #  criterion set by the **pilot-approved M9-(b) 2nd correction** (scene15):
+        #  "one areal element must not monopolise the near window (screen width <= 25 %)":
+        #    x=−1.0 -> ground distance 1.0 m at d2 · screen width f·0.648/1.0 = **1,078 px
+        #    = 56.1 %** `[computed]`. Inside W1 (0.564~2.00 m), even at the far end X=2.00 it is
+        #    28.1 %, so <=25 % is **impossible in principle**.
+        #    -> move to the 2nd-priority window W2 (2.00~3.00 m): x=−2.40 ⇒ d5 X=2.60 m ·
+        #      414 px = **21.6 %**, d10 X=7.60 m · 7.4 % `[computed]`.
+        #      at d2 it is behind the eye (X=−0.40) and invisible -> patch #1 covers the d2 window.
+        #  2 units - spec §5.1 "1~2 manholes (1 must be in W1)". The patch takes W1 and
+        #  the manhole goes in the W2 window (screen-width computation above). The 2nd goes in
+        #  d10's W2 window (X=3.4 m · 317 px = 16.5 %) to fill the areal element of the far cut.
         manholes=[(-2.40, 0.40), (-6.60, -1.50)],
-        #  패치 #1 = d2 근경 창(W1 = x −1.436…0.0) 담당. 평면 톤 변화라
-        #  원판(맨홀)과 달리 근경 독점의 시각적 부담이 작다 `[파일럿 #2]`.
-        #  패치 2매 = d2·d10 근경 창(W1) 담당. d5 W1 은 빗물받이가 맡는다.
+        #  patch #1 covers the d2 near window (W1 = x −1.436…0.0). It is a flat tone change, so
+        #  unlike a disc (the manhole) it carries little visual burden of monopolising the near view `[pilot #2]`.
+        #  2 patches cover the d2 and d10 near windows (W1). The d5 W1 is taken by a gully.
         #    d2  W1 = x −1.436…0.0   → (−1.20, +0.10)
         #    d10 W1 = x −9.436…−8.0  → (−8.80, −0.20)
-        #  프레임 반폭이 X=0.8 m 에서 0.46 m 뿐이라 **|y| ≤ 0.4** 여야 화면에
-        #  든다 `[계산 — 반폭 0.5774·X]`.
+        #  the frame half width is only 0.46 m at X=0.8 m, so **|y| <= 0.4** is required to be
+        #  in frame `[computed - half width 0.5774·X]`.
         patches=[(-1.20, 0.10), (-8.80, -0.20)],
-        #  빗물받이 — 1기는 d5 W1(x −4.436…−3.0)에, 1기는 광장 가장자리에.
+        #  gullies - one in the d5 W1 (x −4.436…−3.0), one at the plaza edge.
         gullies=[(-3.80, 0.40), (-9.00, 2.60)],
-        tactile_depth=0.60,                 # 국도 실무요령 7.5 — 점형 60 cm 표준
-        tactile_setback=0.30,               # 법정 볼라드 전면 0.3 m
+        tactile_depth=0.60,                 # national highway practice guide 7.5 - dot tactile 60 cm standard
+        tactile_setback=0.30,               # statutory 0.3 m in front of the bollard
     ),
 
-    # ═══ 드레싱 (cue_scene_dressing) — "도심 광장" 맥락 ═══════════════════
-    #  ★ 밴드 보존 불변식 [이 씬의 특색 = 오클루더가 공중 슬래브 단 하나]
-    #    태양 월드 az = 180.0 · elev 49.79 → 그림자는 **순수 +X**(y 이동 0),
-    #    길이 = 0.84536·h. 따라서 월드 AABB x∈[xa,xb]·상단높이 h 인 요소는
-    #       (앞배치)  xb + 0.84536·h < band.x0 (=0.0)      … 그림자가 밴드 앞에서 끝
-    #       (뒤배치)  xa > band.x1 (=4.0)                   … 그림자가 밴드 뒤로만
-    #    둘 중 하나를 만족해야 밴드에 신규 그림자가 닿지 않는다.
-    #    전 요소를 dresscheck()(NEGOBS_GEOCHECK=1)로 자동 검산한다.
-    #  ★ 보행 회랑 보존: grid_views 카메라 eye = (−10/−5/−2, 0, h). 신규 프림은
-    #    |y| ≥ 5.0 또는 x ≥ 6.0 만 쓴다 → 카메라 매몰·밴드 폐색 원천 배제.
+    # ═══ dressing (cue_scene_dressing) - "urban plaza" context ════════════
+    #  * band-preservation invariant [this scene's feature = the elevated slab is the only occluder]
+    #    sun world az = 180.0 · elev 49.79 -> the shadow is **pure +X** (0 y shift),
+    #    length = 0.84536·h. So an element with world AABB x∈[xa,xb] and top height h must satisfy
+    #       (in front)  xb + 0.84536·h < band.x0 (=0.0)      … shadow ends before the band
+    #       (behind)    xa > band.x1 (=4.0)                   … shadow falls only behind the band
+    #    one of the two, or a new shadow reaches the band.
+    #    every element is checked automatically by dresscheck() (NEGOBS_GEOCHECK=1).
+    #  * walk corridor preserved: grid_views camera eye = (−10/−5/−2, 0, h). New prims use
+    #    only |y| >= 5.0 or x >= 6.0 -> camera burial and band occlusion ruled out at source.
     #
-    # 화단 — 광장 코너 4곳. tree=False 는 밴드 앞(-X)측(수관 그림자 여유 확보용).
+    # planters - the 4 plaza corners. tree=False is on the band's front (-X) side (to leave canopy shadow clearance).
     planters=[dict(name="A", cx=-6.0, cy=-9.0, base_z=0.0, tree=False),
               dict(name="B", cx=12.0, cy=10.0, base_z=0.0, tree=True),
               dict(name="C", cx=17.0, cy=-13.0, base_z=0.0, tree=True),
               dict(name="D", cx=9.0, cy=15.0, base_z=0.0, tree=True)],
     planter=dict(size=3.0, curb_h=0.45, curb_t=0.25, cap_over=0.05,
                  cap_h=0.05, grass_h=0.40),
-    # 벤치 — 전부 앵커(화단·생울타리) 인접. yaw/위치는 v5.1 §3 결정적 지터
-    #   (bc.jit_yaw/jit_pos, 좌표 해시 시드)로 축평행·등간격 인상을 없앤다.
-    benches=[dict(name="A", cx=-6.0, cy=-6.6, yaw=0.0),     # 화단 A 앞 0.9 m
-             dict(name="B", cx=12.0, cy=7.6, yaw=0.0),      # 화단 B 앞 0.9 m
-             dict(name="C", cx=8.0, cy=-7.4, yaw=0.0),      # 가로등 B 옆 0.6 m
-             dict(name="D", cx=17.0, cy=-10.6, yaw=0.0),    # 화단 C 앞 0.9 m
-             dict(name="E", cx=-9.0, cy=10.3, yaw=0.0)],    # 생울타리 A 앞 1.2 m
+    # benches - all next to an anchor (planter or hedge). yaw and position use the v5.1 §3 deterministic jitter
+    #   (bc.jit_yaw/jit_pos, coordinate hash seed) to remove the axis-parallel, evenly-spaced impression.
+    benches=[dict(name="A", cx=-6.0, cy=-6.6, yaw=0.0),     # 0.9 m in front of planter A
+             dict(name="B", cx=12.0, cy=7.6, yaw=0.0),      # 0.9 m in front of planter B
+             dict(name="C", cx=8.0, cy=-7.4, yaw=0.0),      # 0.6 m beside streetlight B
+             dict(name="D", cx=17.0, cy=-10.6, yaw=0.0),    # 0.9 m in front of planter C
+             dict(name="E", cx=-9.0, cy=10.3, yaw=0.0)],    # 1.2 m in front of hedge A
     bench_jitter=dict(yaw_lo=3.0, yaw_hi=8.0, pos_amp=0.22),
-    # ── 볼라드 [v5.1 §2 · ctx2 재배치] ────────────────────────────────────
-    #   구(舊): 광장 가장자리 y=±9 장식 2열 12본(간격 4 m·규격 h0.75·반사띠/
-    #   점형블록 없음) → **전면 제거**. 장식적 볼라드 열 금지(v5.1 §2).
-    #   신(新): 차량 진입 우려 지점 = 광장 남측 **상가 앞 보도 ↔ 광장 접점의
-    #   진입 목** 1열만. 규격 h0.90·φ0.12·간격 1.5 m·상단 백색 반사띠·
-    #   전면(보도측 −Y) 0.3 m 점형블록 소판.
-    #   ★ 밴드 보존: xa = 11.0−0.062 = 10.94 > band.x1(4.0) → **뒤배치**로
-    #     그림자가 밴드에 닿을 수 없다(그림자는 순수 +X 방향).
-    #   ★ 프레임인: approach(eye −8) 기준 x=11 은 19 m 전방, 수평 반폭 11.0 m
-    #     > |y|=7 → 열 전체가 화면 안. band_grazing(eye −3, z0.35)에서도
-    #     14 m 전방·반폭 8.1 m → 보인다. 밴드(x 0..4)보다 **뒤**라 폐색 없음.
+    # ── bollards [v5.1 §2 · ctx2 relocation] ──────────────────────────────
+    #   old: 12 decorative bollards in 2 rows at the plaza edge y=+-9 (spacing 4 m · h0.75 · no reflective
+    #   band or dot tactile paving) -> **removed entirely**. Decorative bollard rows are banned (v5.1 §2).
+    #   new: a single row only where vehicle entry is a risk = the **entry throat where the
+    #   shopfront sidewalk meets the plaza** on the south side. h0.90 · φ0.12 · spacing 1.5 m ·
+    #   white reflective band on top · 0.3 m dot tactile plate at the front (sidewalk side −Y).
+    #   * band preservation: xa = 11.0−0.062 = 10.94 > band.x1(4.0) -> **behind**, so
+    #     the shadow cannot reach the band (shadows run in pure +X).
+    #   * frame-in: from approach (eye −8), x=11 is 19 m ahead with a horizontal half width of 11.0 m
+    #     > |y|=7 -> the whole row is in frame. From band_grazing (eye −3, z0.35) too,
+    #     14 m ahead · half width 8.1 m -> visible. It is **behind** the band (x 0..4), so no occlusion.
     bollard_entry=dict(y=-7.0, x0=11.0, x1=17.0, spacing=1.5,
-                       front=(0.0, -1.0)),   # 점형블록 = 보도(−Y)측
+                       front=(0.0, -1.0)),   # dot tactile paving = sidewalk (−Y) side
     bollard=dict(r=0.06, h=0.90),
-    # 가로등 — 폴 5.2 m(그림자 4.40 m). A만 밴드 앞: 헤드 최대 x −6.6 → −2.20 < 0.
+    # streetlights - pole 5.2 m (shadow 4.40 m). Only A is in front of the band: head max x −6.6 -> −2.20 < 0.
     streetlights=[dict(name="A", cx=-7.5, cy=7.5), dict(name="B", cx=8.0, cy=-8.0),
                   dict(name="C", cx=15.0, cy=8.5), dict(name="D", cx=21.0, cy=-9.0)],
     streetlight=dict(pole_h=5.2, pole_r=0.075, arm_len=0.9, arm_r=0.04, head=0.26),
-    # 광장 수경(반사지) — build_planter 재사용(잔디 슬래브 자리에 수면 재질)
+    # plaza water feature (reflecting pool) - build_planter reused (water material in place of the grass slab)
     pool=dict(cx=19.0, cy=6.0, size=4.4, curb_h=0.45, curb_t=0.28,
               cap_over=0.06, cap_h=0.06, water_h=0.30),
-    # 생울타리 — 광장 외곽 경계 지시
+    # hedges - mark the outer boundary of the plaza
     hedges=[dict(name="A", x0=-14.0, y0=11.5, x1=-4.0, y1=12.3, h=0.85),
             dict(name="B", x0=14.0, y0=-16.3, x1=24.0, y1=-15.5, h=0.85)],
     buildings=dict(
-        # 원경 비스타 차단(+X 지평선): 파사드 -X평면
+        # blocks the far vista (+X horizon): facade on the -X plane
         C=dict(x0=34.0, x1=44.0, y0=-22.0, y1=22.0, h=16.0, floors=5,
                axis="x", facade_x=34.0, face_dir=-1.0),
-        # ─ 스카이라인(실루엣 단차) : C 뒤 고층 1 + 좌우 중층 2 ─
+        # ─ skyline (silhouette steps) : 1 tower behind C + 2 mid-rise left and right ─
         T=dict(x0=54.0, x1=66.0, y0=-14.0, y1=10.0, h=38.0, floors=10,
                axis="x", facade_x=54.0, face_dir=-1.0),
         E=dict(x0=40.0, x1=50.0, y0=24.0, y1=42.0, h=24.0, floors=7,
                axis="x", facade_x=40.0, face_dir=-1.0),
         W=dict(x0=38.0, x1=48.0, y0=-44.0, y1=-24.0, h=21.0, floors=6,
                axis="x", facade_x=38.0, face_dir=-1.0),
-        # ─ 광장 양측 저층 상가(가로 벽면) : 파사드 y평면. x0=6.0 > band.x1 ─
+        # ─ low-rise shops flanking the plaza (street wall) : facade on the y plane. x0=6.0 > band.x1 ─
         L=dict(x0=6.0, x1=30.0, y0=18.0, y1=30.0, h=10.0, floors=3,
                axis="y", facade_y=18.0, face_dir=-1.0),
         R=dict(x0=6.0, x1=30.0, y0=-30.0, y1=-18.0, h=10.0, floors=3,
@@ -199,25 +203,25 @@ PARAMS = dict(
 
     material=dict(
         scale=dict(plaza_light=1.1, grass=1.4, brick_red=2.0),
-        # ─ sRGB 지각 규약: plaza_light 원본 평균 sRGB 0.714(중성 백회) →
-        #   웜 틴트로 0.65 전후. 레퍼런스(n1)의 밝은 웜 콘크리트 광장 대응. ─
+        # ─ sRGB perception convention: plaza_light source mean sRGB 0.714 (neutral off-white) ->
+        #   about 0.65 with a warm tint. Matches the bright warm concrete plaza of the reference (n1). ─
         plaza_tint=(0.92, 0.88, 0.82),
-        joint_color=(0.05, 0.05, 0.05), joint_rough=0.85,   # 암색 줄눈(0.02~0.06대)
-        slab_color=(0.55, 0.55, 0.56), slab_rough=0.75,     # 슬래브(프레임 밖·무관)
+        joint_color=(0.05, 0.05, 0.05), joint_rough=0.85,   # dark joints (0.02~0.06 band)
+        slab_color=(0.55, 0.55, 0.56), slab_rough=0.75,     # slab (outside the frame · irrelevant)
         grass_tint=(0.55, 0.68, 0.42),
         curb_color=(0.75, 0.75, 0.72), curb_rough=0.6,
         wood_color=(0.30, 0.20, 0.12), wood_rough=0.85,
         glass_color=(0.06, 0.09, 0.12), glass_rough=0.08,
         parapet_color=(0.90, 0.90, 0.87), parapet_rough=0.6,
-        # ─ 드레싱 신규 ─ (수관 암색은 sRGB 0.02~0.06 규약 대역)
+        # ─ new dressing ─ (the dark canopy colour sits in the sRGB 0.02~0.06 convention band)
         canopy_a=(0.025, 0.045, 0.015), canopy_b=(0.035, 0.060, 0.020),
         canopy_rough=1.0,
         post_color=(0.55, 0.55, 0.58), post_metallic=0.5, post_rough=0.5,
         lamp_color=(0.88, 0.88, 0.84), lamp_rough=0.40,
         water_color=(0.05, 0.10, 0.11), water_rough=0.05,
         hedge_tint=(0.35, 0.45, 0.28),
-        # ─ 볼라드 v5.1 ─ 반사띠는 밝은 백색이되 총면적 0.08 m²/본(소면적)이라
-        #   "순백 대면적 금지"(v5.1 §4)에 저촉하지 않는다.
+        # ─ bollard v5.1 ─ the reflective band is bright white but totals only 0.08 m²/unit (small area), so
+        #   it does not breach "no pure white over large areas" (v5.1 §4).
         bollard_color=(0.78, 0.80, 0.83), bollard_metallic=0.85,
         bollard_rough=0.34,
         bollard_band_color=(0.88, 0.88, 0.86),
@@ -233,15 +237,15 @@ PARAMS = dict(
         hdri_sun_rotz_offset=233.5,
         dome_rotation_step=15.0,
     ),
-    # ─── SUN_AZ_OFFSET = 146.5 [이 씬의 특색을 결정하는 핵심 파라미터]
-    #     태양 매핑(scene16 확정 규약): 월드 태양 az ≈ 33.5 + offset = 180.0
-    #       → 그림자 방위 az_s = 태양az − 180 = 0.0 = **정확히 +X**.
-    #     ⇒ 그림자 이동이 +X 순수 성분이므로, Y로 긴 슬래브의 그림자 밴드는
-    #        에지가 x=const 인 직선 2개 = **카메라 시축(+X)과 직교**. (요구사항)
-    #     ⇒ 태양은 −X(카메라 뒤)에 있어 정면광 — 레퍼런스 n1처럼 광장이 밝고
-    #        밴드만 어둡다(역광 실루엣 아님).
-    #     [ ]키(dome_rotation_step 15°)로 GUI 스윕 시 밴드가 X로 평행이동하며
-    #     동시에 사선으로 기울어진다 — 판정 시 오프셋 0(기본) 유지할 것.
+    # ─── SUN_AZ_OFFSET = 146.5 [the key parameter that defines this scene's feature]
+    #     sun mapping (convention fixed in scene16): world sun az ~ 33.5 + offset = 180.0
+    #       -> shadow azimuth az_s = sun az − 180 = 0.0 = **exactly +X**.
+    #     ⇒ the shadow displacement is a pure +X component, so the shadow band of a Y-long slab has
+    #        2 straight edges at x=const = **orthogonal to the camera axis (+X)**. (requirement)
+    #     ⇒ the sun is at −X (behind the camera), i.e. front light - as in reference n1 the plaza is
+    #        bright and only the band is dark (not a back-lit silhouette).
+    #     sweeping in the GUI with the [ ] keys (dome_rotation_step 15 deg) translates the band along X
+    #     and tilts it obliquely at the same time - keep offset 0 (default) when judging.
     SUN_AZ_OFFSET=146.5,
 
     render=dict(pt_total_spp=512, pt_max_bounces=8),
@@ -268,7 +272,7 @@ if _sc_ov:
 
 
 # ===========================================================================
-# [C] 경로 상수 + 필요 텍스처 역할
+# [C] path constants + required texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "sceneN1")
@@ -277,24 +281,27 @@ ASSET_ROLES = ["plaza_light", "grass", "brick_red", "hdri", "mdl"]
 
 
 # ===========================================================================
-# [D] 오클루더 슬래브 위치 역산 (밴드 사양 → 슬래브 X구간)
+# [D] back-compute the occluder slab position (band spec -> slab X range)
 # ===========================================================================
 def _slab_x():
-    """목표 밴드[x0,x1] · 고도 H · 두께 t 로부터 슬래브 X구간을 역산.
+    """Back-compute the slab X range from the target band [x0,x1] · height H · thickness t.
 
-    유도 (태양 고도 e=49.79°, 그림자 방위 +X 순수 — SUN_AZ_OFFSET 주석 참조):
-      지면 z=0 위의 점 p=(x,z)는 그림자로 x + z·cot(e) 로 투영된다.
-      슬래브(솔리드 박스) x∈[sx0,sx1], z∈[H,H+t] 의 그림자(umbra) 구간은
-        시작 = min(x + z·cot) = sx0 + H·cot      (밑면 −X 모서리)
-        끝   = max(x + z·cot) = sx1 + (H+t)·cot  (상면 +X 모서리)
-      ⇒ 밴드 폭 = (sx1−sx0) + t·cot  ⇒ W_s = 밴드폭 − t·cot
-        *맵 §A의 W_s ≈ 밴드폭·sin(e) 식은 광선에 수직한 판 가정 — 수평 슬래브는
-         그림자가 순수 평행이동이라 위 식이 정확하다(감독 검산 요청 사항).*
-      기본값(H=12, t=0.8, 밴드 0..4): cot=0.84536 → W_s=3.3237,
-        슬래브 x=[-10.1444, -6.8207], 밴드 x=[0.0000, 4.0000] (검산 일치).
-      반그림자(태양 각지름 0.53°): 광로 H/sin(e)=15.71m → 지면 X방향 폭 0.190m
-        — 레퍼런스급 선명 에지(완전 하드는 아님, PT에서 판정).
-    반환: (sx0, sx1, cot_e)
+    Derivation (sun elevation e=49.79°, shadow azimuth pure +X - see the
+    SUN_AZ_OFFSET comment):
+      a point p=(x,z) above the ground z=0 projects into shadow at x + z·cot(e).
+      For a slab (solid box) x∈[sx0,sx1], z∈[H,H+t] the shadow (umbra) range is
+        start = min(x + z·cot) = sx0 + H·cot      (soffit −X corner)
+        end   = max(x + z·cot) = sx1 + (H+t)·cot  (top face +X corner)
+      ⇒ band width = (sx1−sx0) + t·cot  ⇒ W_s = band width − t·cot
+        *The W_s ≈ band width·sin(e) formula in map §A assumes a plate normal to
+         the rays - for a horizontal slab the shadow is a pure translation, so the
+         formula above is the exact one (requested by the director's check).*
+      defaults (H=12, t=0.8, band 0..4): cot=0.84536 → W_s=3.3237,
+        slab x=[-10.1444, -6.8207], band x=[0.0000, 4.0000] (check agrees).
+      penumbra (sun angular diameter 0.53°): light path H/sin(e)=15.71m → width
+        0.190m along ground X - a reference-grade crisp edge (not perfectly hard;
+        judged in PT).
+    return: (sx0, sx1, cot_e)
     """
     e = math.radians(float(PARAMS["light"]["noon_sun_elev"]))
     cot = 1.0 / math.tan(e)
@@ -305,25 +312,25 @@ def _slab_x():
 
 
 def build_views():
-    """카메라 프리셋: grid_views(gy=0.0) + 미장센 4컷."""
+    """Camera presets: grid_views(gy=0.0) + 4 mise-en-scene cuts."""
     views = sc.grid_views(0.0)
-    # approach: 밝은 광장에서 밴드로 보행 접근 (밴드가 낙차처럼 읽히는지)
+    # approach: walking towards the band across the bright plaza (does the band read as a drop)
     views["approach"] = dict(eye=[-8.0, 0.0, 1.6], tgt=[4.0, 0.0, 0.2])
-    # band_grazing: 저시점 grazing — 밴드가 지평 압축되어 "단"처럼 보이는 극단
+    # band_grazing: low-viewpoint grazing - the extreme where horizon compression makes the band look like a "step"
     views["band_grazing"] = dict(eye=[-3.0, 0.0, 0.35], tgt=[7.0, 0.0, 0.15])
-    # band_edge_close: 밴드 진입 직전 근접 — 에지 선명도·밴드 내부 텍스처 판독
+    # band_edge_close: close up just before entering the band - edge sharpness, legibility of the texture inside
     views["band_edge_close"] = dict(eye=[-1.2, 0.0, 1.1], tgt=[3.0, 0.0, -0.4])
-    # beauty_oblique: 사선 부감 — 밴드가 평면임을 드러내는 대조 컷
+    # beauty_oblique: oblique high angle - the contrast cut that reveals the band is flat
     views["beauty_oblique"] = dict(eye=[-7.0, -6.0, 2.6], tgt=[3.0, 1.0, -0.2])
     return views
 
 
 # ===========================================================================
-# [D1b] 배치 비정형 (v5.1 §3) — 결정적 지터 배치 산출.
-#       빌더와 검산이 **동일 함수**를 호출하므로 AABB 가 항상 실제와 일치한다.
+# [D1b] irregular placement (v5.1 §3) - computes the deterministic jittered layout.
+#       The builder and the numeric check call the **same function**, so the AABBs always match reality.
 # ===========================================================================
 def bench_placements():
-    """[(name, x, y, yaw), ...] — 벤치 5기의 지터 후 최종 배치."""
+    """[(name, x, y, yaw), ...] - final placement of the 5 benches after jitter."""
     j = PARAMS["bench_jitter"]
     out = []
     for b in PARAMS["benches"]:
@@ -335,7 +342,7 @@ def bench_placements():
 
 
 def streetlight_placements():
-    """[(name, x, y, yaw), ...] — 가로등 4기의 지터 후 배치(암 방위 비정렬)."""
+    """[(name, x, y, yaw), ...] - placement of the 4 streetlights after jitter (arm bearings unaligned)."""
     out = []
     for s in PARAMS["streetlights"]:
         dx, dy = bc.jit_pos(s["cx"], s["cy"], "slN1", amp=0.20)
@@ -345,24 +352,28 @@ def streetlight_placements():
 
 
 def bollard_entry_points():
-    """[v5.1 §2] 진입부 1열 볼라드 중심 좌표 [(x, y), ...] (간격 1.5 m 균등)."""
+    """[v5.1 §2] Centre coordinates of the single entry bollard row [(x, y), ...] (even 1.5 m spacing)."""
     e = PARAMS["bollard_entry"]
     return bc.bollard_line(e["x0"], e["y"], e["x1"], e["y"],
                            spacing=e["spacing"])
 
 
 def tactile_band_rect():
-    """[W2 §12.5 ②] 볼라드 열 전면 **연속 점형 띠** 사각형 (x0, y0, x1, y1).
+    """[W2 §12.5 (2)] Rectangle of the **continuous dot tactile strip** in front of
+    the bollard row (x0, y0, x1, y1).
 
-    법정 위치는 "볼라드 전면 0.3 m"(교통약자법 시행규칙 별표1 2호 차목),
-    세로폭은 국도 실무요령 7.5 의 점형 표준 60 cm. `front_dir` 이 −Y 이므로
-    띠는 볼라드 몸통 앞면에서 −Y 로 setback 만큼 떨어져 depth 만큼 뻗는다.
-    좌표는 **PARAMS 에서 유도**한다(문서 좌표 하드코드 금지 — 사양 §7.4).
+    The statutory position is "0.3 m in front of the bollard" (Enforcement Rule of
+    the Act on Promotion of Mobility Convenience for the Mobility Impaired,
+    Table 1, item 2, sub-item (cha)); the depth is the 60 cm dot standard of
+    national highway practice guide 7.5. `front_dir` is −Y, so the strip stands
+    off the bollard body's front face by setback in −Y and extends by depth.
+    The coordinates are **derived from PARAMS** (no hard-coded document
+    coordinates - spec §7.4).
     """
     e, bo, g = PARAMS["bollard_entry"], PARAMS["bollard"], PARAMS["ground"]
     fx, fy = e["front"]
     sb, dp = float(g["tactile_setback"]), float(g["tactile_depth"])
-    if abs(fy) > abs(fx):                       # 전면이 ±Y (이 씬: −Y)
+    if abs(fy) > abs(fx):                       # front faces +-Y (this scene: −Y)
         y_face = e["y"] + fy * bo["r"]
         ya, yb = y_face + fy * sb, y_face + fy * (sb + dp)
         return (e["x0"] - 0.15, min(ya, yb), e["x1"] + 0.15, max(ya, yb))
@@ -372,10 +383,11 @@ def tactile_band_rect():
 
 
 def ground_plans():
-    """[W2 ground_kit] 지면 계획 — 씬 조립부와 CPU 검산이 **같은 함수**를 쓴다.
+    """[W2 ground_kit] Ground plan - the scene assembly and the CPU check use the
+    **same function**.
 
-    반환 `[(tag, GroundPlan), ...]`. `plan_ground` 는 USD 를 만들지 않으므로
-    Isaac 없이 게이트(B6~B12)를 그대로 돌릴 수 있다 `[사양 §3.3]`.
+    Returns `[(tag, GroundPlan), ...]`. `plan_ground` creates no USD, so the gates
+    (B6~B12) can be run as they are without Isaac `[spec §3.3]`.
     """
     g = PARAMS["ground"]
     b = PARAMS["band"]
@@ -385,46 +397,47 @@ def ground_plans():
         region=(float(g["region_x0"]), -float(g["region_y"]),
                 x1, float(g["region_y"])),
         z=float(PARAMS["plaza"]["z_top"]), gy=0.0, origin=(0.0, 0.0, 0.0),
-        edges=(),                       # hard negative — 낙차 에지 0
+        edges=(),                       # hard negative - 0 drop edges
         dists=(2, 5, 10), scene="sceneN1",
-        # ★ `cue_tactile` 이 아니라 `cue_scene_dressing` 에 건다 — 이 씬의
-        #   `cue_tactile` 은 "계단 경고 점자블록"용 예약 키(낙차가 없어 상시
-        #   False)이고, 볼라드 전면 점형블록은 **볼라드와 한 몸**이라
-        #   드레싱 토글을 따라야 한다 `[사양 §12.4 — N1 볼라드 전면 유지]`.
+        # * hung on `cue_scene_dressing`, not `cue_tactile` - in this scene
+        #   `cue_tactile` is the key reserved for "stair warning tactile paving" (always
+        #   False, since there is no drop), while the dot tactile paving in front of the
+        #   bollards is **one body with the bollard** and must follow the dressing
+        #   toggle `[spec §12.4 - keep the N1 bollard frontage]`.
         tactile=("bollard",) if SCENE_CONFIG["cue_scene_dressing"] else (),
         sites=dict(manhole=[tuple(p) for p in g["manholes"]],
                    gully=[tuple(p) for p in g["gullies"]],
                    patch=[tuple(p) for p in g["patches"]],
                    tactile=dict(bollard=tactile_band_rect())),
-        # 줄눈은 씬 `build_joints()` 가 2단으로 집행한다(위 PARAMS 주석 · D6)
+        # joints are enforced in two tiers by the scene's `build_joints()` (PARAMS comment above · D6)
         overrides=dict(pave=dict(joint=None)),
         seed=22)
     return [("plaza", gp)]
 
 
 # ===========================================================================
-# [D2] 맥락 드레싱 AABB 목록 (보수적 상계) — 밴드 그림자·카메라 매몰 검산 전용.
-#      build_dressing() 이 실제로 만드는 프림의 **외접 상자**를 PARAMS 에서
-#      재계산한다(빌더 내부 치수는 scene_common 주석 기준으로 상계를 잡음).
+# [D2] context dressing AABB list (conservative upper bound) - for the band shadow and camera burial checks only.
+#      Recomputes from PARAMS the **bounding box** of the prims build_dressing() actually
+#      creates (dimensions inside the builder are bounded from the scene_common comments).
 # ===========================================================================
 def dressing_aabbs():
-    """[(name, xa, xb, ya, yb, z_top), ...] 반환. z_top = 그림자 투영에 쓰는 최고점."""
+    """Returns [(name, xa, xb, ya, yb, z_top), ...]. z_top = highest point used for the shadow projection."""
     out = []
     pl = PARAMS["planter"]
     half = pl["size"] / 2.0
     top_curb = pl["curb_h"] + pl["cap_h"]
-    # build_tree 상계: 잔디면(grass_h) + trunk_h 2.2 + 최고 blob(dz .85 + r .30*0.8)
+    # build_tree bound: grass surface (grass_h) + trunk_h 2.2 + highest blob (dz .85 + r .30*0.8)
     top_tree = pl["grass_h"] + 2.2 + 0.85 + 0.24
     for p in PARAMS["planters"]:
         t = top_tree if p.get("tree") else top_curb
         out.append((f"Planter_{p['name']}", p["cx"] - half, p["cx"] + half,
                     p["cy"] - half, p["cy"] + half, t))
-    # 벤치 1.8(x)×0.4(y)×h0.45 — yaw 지터(≤8°) 상계로 반폭을 확장
-    #   회전 후 반폭 ≤ (0.9·cos8 + 0.2·sin8, 0.9·sin8 + 0.2·cos8) = (0.92, 0.32)
+    # bench 1.8(x) x 0.4(y) x h0.45 - half widths widened by the yaw jitter (<=8 deg) bound
+    #   after rotation half width <= (0.9·cos8 + 0.2·sin8, 0.9·sin8 + 0.2·cos8) = (0.92, 0.32)
     for name, bx, by, _yaw in bench_placements():
         out.append((f"Bench_{name}", bx - 0.92, bx + 0.92,
                     by - 0.32, by + 0.32, 0.45))
-    # 볼라드 v5.1 (몸통+반사띠 / 점형블록 소판) — 진입부 1열
+    # bollard v5.1 (body + reflective band / dot tactile plate) - the single entry row
     bo = PARAMS["bollard"]
     e = PARAMS["bollard_entry"]
     for i, (bx, by) in enumerate(bollard_entry_points()):
@@ -432,7 +445,7 @@ def dressing_aabbs():
                                         front_dir=e["front"],
                                         radius=bo["r"], height=bo["h"]))
     sl = PARAMS["streetlight"]
-    # 암 ±X + 헤드 반폭. yaw 지터(≤8°) 상계 → x 반폭 ex, y 반폭 ex·sin8+head/2
+    # arms +-X + head half width. yaw jitter (<=8 deg) bound -> x half width ex, y half width ex·sin8+head/2
     for name, sx, sy, _yaw in streetlight_placements():
         ex = sl["arm_len"] + sl["head"] / 2.0
         ey = ex * math.sin(math.radians(8.0)) + sl["head"] / 2.0
@@ -447,16 +460,16 @@ def dressing_aabbs():
                     h["h"]))
     for k, bd in PARAMS["buildings"].items():
         out.append((f"Building_{k}", bd["x0"], bd["x1"], bd["y0"], bd["y1"],
-                    bd["h"] + 0.5))                  # +파라펫
+                    bd["h"] + 0.5))                  # + parapet
     return out
 
 
 def dresscheck():
-    """드레싱 검산 2종.
-      ① 밴드 그림자 침입: 태양 az=180 → 그림자는 순수 +X, 길이 0.84536·z.
-         요소가 밴드[x0,x1]에 그림자를 드리우지 않을 조건 =
-           xb + cot·z_top < band.x0   (앞배치)   또는   xa > band.x1 (뒤배치)
-      ② 카메라 매몰: 전 뷰 eye 가 어떤 AABB(여유 0.35 m 팽창) 안에도 없을 것.
+    """Two dressing checks.
+      (1) band shadow intrusion: sun az=180 → shadows are pure +X, length 0.84536·z.
+          The condition for an element not to cast into the band [x0,x1] is
+            xb + cot·z_top < band.x0   (in front)   or   xa > band.x1 (behind)
+      (2) camera burial: no view's eye may lie inside any AABB (dilated by 0.35 m).
     """
     cot = 1.0 / math.tan(math.radians(float(PARAMS["light"]["noon_sun_elev"])))
     b0, b1 = float(PARAMS["band"]["x0"]), float(PARAMS["band"]["x1"])
@@ -466,7 +479,7 @@ def dresscheck():
           % (b0, b1, cot))
     bad = 0
     for name, xa, xb, ya, yb, zt in boxes:
-        sh_end = xb + cot * zt                       # 그림자 최원단(+X)
+        sh_end = xb + cot * zt                       # far end of the shadow (+X)
         if xa > b1:
             verdict = "뒤배치 OK (xa %.2f > %.1f)" % (xa, b1)
         elif sh_end < b0:
@@ -499,30 +512,30 @@ def dresscheck():
     print("-" * 68)
 
 
-# ─── 슬래브 프레임인 검산 (요구사항: 전 프리셋·미장센 컷에서 슬래브 불가시) ───
-#  Isaac 기본 퍼스펙 카메라 = 초점 18.147mm / 수평 어퍼처 20.955mm, 16:9
-#    → 수평 FOV 60.0°, 수직 FOV 35.98°. 검사는 안전마진 포함 h70°/v46°로 수행.
-#  결과 (기본 PARAMS, NEGOBS_GEOCHECK=1 재현):
+# ─── slab frame-in check (requirement: slab invisible in all cuts) ────────────
+#  Isaac's default perspective camera = focal 18.147mm / horizontal aperture 20.955mm, 16:9
+#    -> horizontal FOV 60.0 deg, vertical FOV 35.98 deg. The check runs at h70/v46 deg with safety margin.
+#  results (default PARAMS, reproduce with NEGOBS_GEOCHECK=1):
 #    · preset_h*_d2 / d5, approach, band_grazing, band_edge_close
-#        → 슬래브(x≤−6.82)가 **전부 카메라 후방** → 원천적 불가시
-#    · preset_h0.3/0.9/1.8_d10 (eye x=−10, 슬래브 바로 아래)
-#        → 전방 잔여부의 최소 수직각 84.8°/84.0°/82.7° ≫ 프레임 상단 23°
+#        -> the slab (x<=−6.82) is **entirely behind the camera** -> invisible by construction
+#    · preset_h0.3/0.9/1.8_d10 (eye x=−10, directly under the slab)
+#        -> min vertical angle of the part still ahead 84.8/84.0/82.7 deg ≫ frame top 23 deg
 #    · beauty_oblique (eye −7,−6,2.6)
-#        → 최소 수평각 58.3° ≫ 프레임 측단 35°  (수직 최소 37.3°도 초과)
-#    ⇒ 전 컷 OUT. 밴드만 보이고 오클루더는 화면 밖 = N1 사양 충족.
-#  ─ 맥락 드레싱 검산(dresscheck) 결과 요약 [ctx2 재검산, 07-27] ─
-#    ① 밴드 그림자 침입 0건 — 앞배치 요소는 Planter_A(여유 4.08 m)·Bench_A
-#       (4.85)·Bench_E(7.63)·Hedge_A(3.28)·Streetlight_A(2.13) 5개뿐이고,
-#       나머지(볼라드 진입열 5본 + 점형블록 포함)는 전부 xa > 4.0 뒤배치.
-#       ★ 볼라드 h0.75→0.90 상향분은 전량 뒤배치라 불변식에 무영향.
-#    ② 카메라 매몰 0건 — 최근접 수평 0.23 m(beauty_oblique eye vs Bench_A).
-#       eye z 2.60 · 프레임 하단광선 접지 4.3 m 전방 ⇒ 근접분은 화면 밖.
+#        -> min horizontal angle 58.3 deg ≫ frame side 35 deg  (vertical min 37.3 deg also exceeds)
+#    ⇒ every cut OUT. Only the band is visible and the occluder is off screen = N1 spec met.
+#  ─ summary of the context dressing check (dresscheck) [ctx2 re-check, 07-27] ─
+#    (1) 0 band shadow intrusions - the in-front elements are only Planter_A (clearance 4.08 m),
+#       Bench_A (4.85), Bench_E (7.63), Hedge_A (3.28) and Streetlight_A (2.13) - 5 in all,
+#       and all the rest (including the 5 entry bollards and the dot tactile paving) are behind, xa > 4.0.
+#       * the bollard raise h0.75->0.90 is entirely in the behind group, so it does not affect the invariant.
+#    (2) 0 camera burials - closest horizontal 0.23 m (beauty_oblique eye vs Bench_A).
+#       eye z 2.60 · the bottom frame ray meets the ground 4.3 m ahead ⇒ the near part is off screen.
 def geocheck():
-    """슬래브 AABB를 뷰 프러스텀에 투영해 프레임인 여부 검산 (Isaac 불요)."""
+    """Project the slab AABB into the view frustum and check whether it is in frame (no Isaac needed)."""
     sx0, sx1, cot = _slab_x()
     s = PARAMS["slab"]
     z0, z1, hy = float(s["H"]), float(s["H"]) + float(s["thick"]), float(s["half_y"])
-    hfov, vfov = 70.0, 46.0                      # 실 60/36 + 안전마진
+    hfov, vfov = 70.0, 46.0                      # actual 60/36 + safety margin
     print("=" * 68)
     print("sceneN1 오클루더 슬래브 프레임인 검산")
     print("  cot(elev)=%.5f  슬래브 x=[%.4f, %.4f] (폭 %.4f) z=[%.2f, %.2f] "
@@ -629,7 +642,7 @@ def main():
         return sc.make_pbr(stage, path, *args, **kwargs)
 
     # -------------------------------------------------------------------
-    # 재질
+    # materials
     # -------------------------------------------------------------------
     def setup_materials():
         sca = mp["scale"]
@@ -660,7 +673,7 @@ def main():
         M["parapet"] = PBR(f"{ROOT}/Looks/Parapet",
                            diffuse_color=mp["parapet_color"],
                            roughness_const=mp["parapet_rough"])
-        # ─ 맥락 드레싱 신규 ─
+        # ─ new context dressing ─
         M["canopy_a"] = PBR(f"{ROOT}/Looks/CanopyA",
                             diffuse_color=mp["canopy_a"],
                             roughness_const=mp["canopy_rough"],
@@ -676,7 +689,7 @@ def main():
                         roughness_const=mp["lamp_rough"])
         M["water"] = PBR(f"{ROOT}/Looks/Water", diffuse_color=mp["water_color"],
                          roughness_const=mp["water_rough"], metallic=0.0)
-        # ─ 볼라드 v5.1 (몸통 스테인리스 / 상단 반사띠 / 전면 점형블록) ─
+        # ─ bollard v5.1 (stainless body / top reflective band / front dot tactile paving) ─
         M["bollard_body"] = PBR(f"{ROOT}/Looks/BollardBody",
                                 diffuse_color=mp["bollard_color"],
                                 metallic=mp["bollard_metallic"],
@@ -689,31 +702,33 @@ def main():
         return M
 
     # -------------------------------------------------------------------
-    # 광장 — 완전 평탄 단일 슬래브 (공동·개구 전무: GT 낙차 0)
+    # plaza - a single perfectly flat slab (no cavity or opening at all: GT drop 0)
     # -------------------------------------------------------------------
     def build_plaza(M):
         p = PARAMS["plaza"]
-        # [W2-0 · P-A] 광장 상면이 ground_kit 의 장식 대상이다 → 변위 스킨 OFF.
-        #   `add_box` 가 그 자리에서 `_skin_wanted` 를 부르므로 **BOX 호출 전에**
-        #   등록해야 한다. 안 끄면 맨홀(±10 mm)·데칼(0.6 mm)이 스킨
-        #   (+6.5~16.5 mm) 아래로 통째로 묻힌다 `[실측 — 사양 §1.1]`.
+        # [W2-0 · P-A] the plaza top face is what ground_kit decorates -> displacement skin OFF.
+        #   `add_box` calls `_skin_wanted` right there, so it must be registered **before the BOX**
+        #   call. If it is left on, the manhole (+-10 mm) and decals (0.6 mm) are buried whole
+        #   under the skin (+6.5~16.5 mm) `[measured - spec §1.1]`.
         sc.skin_exclude(f"{ROOT}/Plaza")
         BOX(f"{ROOT}/Plaza",
             (0.0, 0.0, p["z_top"] - p["thick"] / 2.0),
             (p["size"], p["size"], p["thick"]), M["plaza"], col=True)
 
     def build_joints(M):
-        """[W2 §5.1 N1] **2단 줄눈** — 신축 6.0 m + 시공 1.8 m.
+        """[W2 §5.1 N1] **Two-tier joints** - expansion 6.0 m + construction 1.8 m.
 
-        암색 박판 proud 0.001 (밴드 내부 판독의 기준 단서)은 불변. 바뀐 것은
-        주기 하나가 아니라 **두 주기의 층위**다 — 실물 판석 광장이 그렇고,
-        1.8 m 는 판석 셀 0.600 의 정수배라 T1 유닛 지터와 위상이 맞는다
-        `[사양 §4.5 U2]`. 두 주기가 겹치는 눈금에서는 시공줄눈을 드롭한다.
+        The dark thin plate at proud 0.001 (the reference cue for reading inside
+        the band) is unchanged. What changed is not one period but **the layering
+        of two periods** - that is how a real flagstone plaza looks, and 1.8 m is
+        an integer multiple of the flagstone cell 0.600, so it stays in phase with
+        the T1 unit jitter `[spec §4.5 U2]`. At the ticks where the two periods
+        coincide the construction joint is dropped.
         """
         j = PARAMS["joints"]
         p = PARAMS["plaza"]
         pr = j["proud"]
-        thk = pr + 0.006                        # 일부 매입 + proud 돌출
+        thk = pr + 0.006                        # partly embedded + proud protrusion
         cz = p["z_top"] + pr - thk / 2.0
         Lx = j["x1"] - j["x0"]
         Ly = j["y1"] - j["y0"]
@@ -727,18 +742,18 @@ def main():
         exp_xs = set(round(v, 4) for v in exp_x)
         exp_ys = set(round(v, 4) for v in exp_y)
         n = 0
-        # X축 방향 줄눈(=y=const 선) : 카메라 시축과 평행
+        # joints along the X axis (= y=const lines) : parallel to the camera axis
         for yy in exp_y:
             BOX(f"{ROOT}/JointX_{n}", ((j["x0"] + j["x1"]) / 2.0, yy, cz),
                 (Lx, j["exp_width"], thk), M["joint"])
             n += 1
         for yy in ticks(j["y0"], j["y1"], j["con_spacing"]):
-            if round(yy, 4) in exp_ys:          # 동일 위치 2프림 = Z-파이팅
+            if round(yy, 4) in exp_ys:          # 2 prims at the same position = Z-fighting
                 continue
             BOX(f"{ROOT}/JointX_{n}", ((j["x0"] + j["x1"]) / 2.0, yy, cz),
                 (Lx, j["con_width"], thk), M["joint"])
             n += 1
-        # Y축 방향 줄눈(=x=const 선) : 밴드 에지와 평행 — 혼동 강화 요소
+        # joints along the Y axis (= x=const lines) : parallel to the band edges - reinforces the confusion
         m = 0
         for xx in exp_x:
             BOX(f"{ROOT}/JointY_{m}", (xx, (j["y0"] + j["y1"]) / 2.0, cz),
@@ -754,9 +769,9 @@ def main():
               f"{j['con_spacing']} m · X {n}본 · Y {m}본")
 
     # -------------------------------------------------------------------
-    # [W2] ground_kit — P1 plaza_granite. 낙차 에지가 없는 hard negative 라
-    #   GT-E1′/GT-E2 는 공허참이고, 판정은 **B12 밴드 보존 불변식**(§7.3)과
-    #   프림 예산·알베도가 한다. 줄눈은 씬이 직접 집행한다(D6 회피).
+    # [W2] ground_kit - P1 plaza_granite. This is a hard negative with no drop edge, so
+    #   GT-E1′/GT-E2 are vacuously true and the verdict rests on the **B12 band-preservation
+    #   invariant** (§7.3), the prim budget and albedo. Joints are enforced by the scene itself (avoids D6).
     # -------------------------------------------------------------------
     def build_ground_kit(M):
         (_tag, gp), = ground_plans()
@@ -775,7 +790,7 @@ def main():
         return res
 
     # -------------------------------------------------------------------
-    # 오클루더 — 프레임 밖 공중 슬래브 (스카이브리지형). 위치는 _slab_x() 역산.
+    # occluder - elevated slab outside the frame (skybridge type). Position back-computed by _slab_x().
     # -------------------------------------------------------------------
     def build_occluder(M):
         s = PARAMS["slab"]
@@ -789,16 +804,16 @@ def main():
                  sx0 + s["H"] * cot, sx1 + (s["H"] + s["thick"]) * cot))
 
     # -------------------------------------------------------------------
-    # 드레싱 — "여기가 어디인지"를 렌더만으로 읽히게 하는 도심 광장 맥락:
-    #   화단 4(코너 식재) + 벤치 5 + 볼라드 진입 1열(v5.1 규격) + 가로등 4 + 수경 1 +
-    #   생울타리 2 + 건물 6동(원경 스카이라인 + 광장 양측 상가 가로벽).
-    #   전 요소는 dresscheck() 로 ①밴드 그림자 무침입 ②카메라 무매몰 검산.
+    # dressing - the urban plaza context that makes "where this is" readable from the render alone:
+    #   4 planters (corner planting) + 5 benches + 1 entry bollard row (v5.1 spec) + 4 streetlights +
+    #   1 water feature + 2 hedges + 6 buildings (far skyline + shop street walls flanking the plaza).
+    #   Every element is checked by dresscheck() for (1) no band shadow intrusion (2) no camera burial.
     # -------------------------------------------------------------------
     def build_dressing(M):
         pl = PARAMS["planter"]
         tree_mtls = (M["wood"], M["canopy_a"], M["canopy_b"])
         for pdef in PARAMS["planters"]:
-            # tree=False(밴드 앞 -X측): 수관 그림자 여유를 넉넉히 남긴다.
+            # tree=False (band front, -X side): leaves ample clearance for the canopy shadow.
             sc.build_planter(
                 stage, f"{ROOT}/Planter_{pdef['name']}", pdef["cx"], pdef["cy"],
                 pdef["base_z"], M["curb"], M["grass"],
@@ -806,20 +821,20 @@ def main():
                 size=pl["size"], curb_h=pl["curb_h"], curb_t=pl["curb_t"],
                 cap_over=pl["cap_over"], cap_h=pl["cap_h"],
                 grass_h=pl["grass_h"])
-        # 벤치 — 앵커(화단·생울타리) 인접 + yaw/위치 결정적 지터 (v5.1 §3)
+        # benches - next to an anchor (planter or hedge) + deterministic yaw/position jitter (v5.1 §3)
         for name, bx, by, byaw in bench_placements():
             sc.build_bench(stage, f"{ROOT}/Bench_{name}", bx, by, 0.0,
                            M["wood"], yaw=byaw)
-        # 볼라드 [v5.1 §2] — 광장 남측 보도 접점 진입부 1열(간격 1.5 m).
-        #   장식 2열(y=±9, 12본)은 제거. 점형블록은 보도측(−Y)에 flush.
+        # bollards [v5.1 §2] - a single entry row where the south sidewalk meets the plaza (spacing 1.5 m).
+        #   The 2 decorative rows (y=+-9, 12 units) are removed. Dot tactile paving sits flush on the sidewalk side (−Y).
         bo = PARAMS["bollard"]
         e = PARAMS["bollard_entry"]
         for i, (bx, by) in enumerate(bollard_entry_points()):
-            # [W2 §12.5 ②] 본당 소판(0.40×0.30)은 **ground_kit 의 연속 띠
-            #   0.60 m 로 대체**한다 — 소판은 approach 뷰에서 212 px/본,
-            #   5본 합계도 프레임의 0.05 % 미만이라 판독이 불가능했다
-            #   `[실측 — 사양 §12.5 ②]`. 여기서 끄지 않으면 띠와 소판이
-            #   맞닿아 점형 대역이 0.9 m 로 늘어난다(법정 0.60 초과).
+            # [W2 §12.5 (2)] the per-unit small plate (0.40x0.30) is **replaced by
+            #   ground_kit's continuous 0.60 m strip** - the small plate is 212 px per unit
+            #   in the approach view, and even all 5 together are under 0.05 % of the frame,
+            #   so it was illegible `[measured - spec §12.5 (2)]`. If it is not turned off
+            #   here, strip and plate touch and the dot band grows to 0.9 m (over the statutory 0.60).
             bc.build_bollard_v51(stage, f"{ROOT}/Bollard_{i}", bx, by, 0.0,
                                  None, M["bollard_body"], M["bollard_band"],
                                  M["tactile"], front_dir=e["front"],
@@ -827,7 +842,7 @@ def main():
                                  tactile=False)
         sl = PARAMS["streetlight"]
         for name, sx, sy, syaw in streetlight_placements():
-            # 암 방위를 축평행에서 살짝 틀어 '복제 배치' 인상 제거 (v5.1 §3)
+            # rotate the arm bearing slightly off axis-parallel to remove the 'cloned placement' look (v5.1 §3)
             base = sc.build_rot_group(stage, f"{ROOT}/Streetlight_{name}",
                                       (sx, sy), syaw)
             CYL(f"{base}/Pole", (sx, sy, sl["pole_h"] / 2.0),
@@ -841,8 +856,8 @@ def main():
                     (sx + sgn * sl["arm_len"], sy,
                      sl["pole_h"] - 0.15),
                     (sl["head"], sl["head"], 0.12), M["lamp"])
-        # 수경(반사지) — build_planter 의 "잔디 슬래브"를 수면 재질로 대체.
-        #   수면 상단 z = water_h(0.30) < 경계석 0.45 → 전 기하 z ≥ 0 (GT 불변)
+        # water feature (reflecting pool) - the "grass slab" of build_planter replaced by a water material.
+        #   water top z = water_h(0.30) < kerb 0.45 -> all geometry z >= 0 (GT unchanged)
         po = PARAMS["pool"]
         sc.build_planter(stage, f"{ROOT}/Pool", po["cx"], po["cy"], 0.0,
                          M["curb"], M["water"], tree_mtls=None,
@@ -858,7 +873,7 @@ def main():
                               M["brick"], M["glass"], M["parapet"],
                               window=PARAMS["window"])
 
-    # ── 씬 조립 ──
+    # ── scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
     M = setup_materials()
 
@@ -869,7 +884,7 @@ def main():
         build_occluder(M)
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
-    build_ground_kit(M)                  # [W2] 지면 요소 — 드레싱 뒤(산포 순서 규약)
+    build_ground_kit(M)                  # [W2] ground elements - after the dressing (scatter order convention)
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])
@@ -964,6 +979,6 @@ def main():
 
 if __name__ == "__main__":
     if os.environ.get("NEGOBS_GEOCHECK", "0") == "1":
-        geocheck()                     # Isaac 부팅 없이 슬래브 프레임인만 검산
+        geocheck()                     # check only the slab frame-in, without booting Isaac
     else:
         main()

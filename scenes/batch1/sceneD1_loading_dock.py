@@ -1,33 +1,33 @@
 # -*- coding: utf-8 -*-
 """
-sceneD1_loading_dock.py — NegObs 인공씬 33호: 하역장 ㄷ자 플랫폼 엣지 (Isaac Sim 4.5)
+sceneD1_loading_dock.py — NegObs synthetic scene 33: loading dock U-shaped platform edge (Isaac Sim 4.5)
 
-유형    : D1 비계단 낙차 — 물류 하역 플랫폼 연단 (낙차 1.2 m)
-사양서  : Docs/nanobanana_batch1_geometry_map.md §D sceneD1_loading_dock
-룩 근거 : look_refs/d1_loading_dock.jpg (v3, 온플랫폼 시점 — 주 구도)
-          look_refs/d1_loading_dock_v2_overview.jpg (외부 부감 — 치수 참조)
-공통    : scene_common.py (검증된 API 헬퍼) · scene16_canopy_shadow.py (표준 템플릿)
+Type    : D1 non-stair drop - logistics loading platform dock edge (drop 1.2 m)
+Spec    : Docs/nanobanana_batch1_geometry_map.md §D sceneD1_loading_dock
+Look ref: look_refs/d1_loading_dock.jpg (v3, on-platform viewpoint - main composition)
+          look_refs/d1_loading_dock_v2_overview.jpg (exterior high angle - dimension reference)
+Shared  : scene_common.py (verified API helpers) · scene16_canopy_shadow.py (standard template)
 
-위험 본질: 플랫폼 위를 걷는 시점에서 **황·흑 사선 경고 도색 밴드가 시야를 횡단**
-           하고, 그 너머 트럭 에이프런 바닥(z −1.2)은 그레이징 각에서 완전히
-           은닉된다. 도색 밴드는 "여기서 끝"이 아니라 "바닥이 계속된다"는
-           오독을 유발 — 낙차의 유일한 시각 단서가 **평면 도색**뿐인 케이스.
-           ㄷ자 만입 베이(폭 6 × 깊이 4)가 엣지선을 90° 두 번 꺾어, 직선 연단
-           가정(단일 소실선)을 무너뜨린다.
-목표     : 플랫폼 슬래브(ㄷ자 베이 절개 — 3박스 분할) + 에이프런 + 베이 3면
-           벽체 + 경고 도색 밴드 + 도크 범퍼 + 셔터 도어 벽·볼라드를 조립,
-           렌더로 판정 (렌더 전용).
+Hazard  : Walking on the platform, a **yellow·black diagonal warning paint band crosses the
+          view**, and the truck apron floor beyond it (z −1.2) is completely hidden at grazing
+          angles. The paint band induces the misreading "the floor continues" rather than "it
+          ends here" - a case where the drop's only visual cue is **flat paint**. The U-shaped
+          recessed bay (width 6 x depth 4) bends the edge line through 90 deg twice, breaking
+          the straight-edge assumption (a single vanishing line).
+Goal    : Assemble the platform slab (U-shaped bay cut - split into 3 boxes) + apron + the
+          bay's 3 wall faces + warning paint band + dock bumpers + shutter door wall·bollards,
+          and judge it by render (render only).
 
-실행 (GUI 룩 체크 — 기본):
+Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
     export PYTHONNOUSERSITE=1
     python sceneD1_loading_dock.py
 
-자동 캡처 (headless):   NEGOBS_CAPTURE=1 python sceneD1_loading_dock.py
-스모크 조기종료:        NEGOBS_SMOKE=1  python sceneD1_loading_dock.py
+Auto capture (headless):  NEGOBS_CAPTURE=1 python sceneD1_loading_dock.py
+Smoke early exit:         NEGOBS_SMOKE=1  python sceneD1_loading_dock.py
 
-좌표계: Z-up, m, 진행축 +X, 낙차 시작 모서리 = x=0 (플랫폼 주 연단).
+Coordinates: Z-up, m, travel axis +X, drop start edge = x=0 (the platform's main dock edge).
 """
 
 import os
@@ -42,16 +42,16 @@ import ground_kit as gk
 
 
 # ===========================================================================
-# [A] SCENE_CONFIG — 표준 7키
+# [A] SCENE_CONFIG - standard 7 keys
 # ===========================================================================
 SCENE_CONFIG = {
-    "hazard_stairs":      True,   # False → 베이·연단을 메워 z=0 평지 (대조군)
-    "cue_railing":        False,  # 베이 둘레 안전 난간 — 기본 OFF(무방호가 현실)
-    "cue_tactile":        False,  # 해당 없음(산업 하역장) — 키만 예약
-    "cue_material_break": True,   # False → 에이프런도 콘크리트(재질 대비 소거)
-    "cue_nosing":         True,   # ★ 황·흑 45° 경고 도색 밴드 — 이 씬의 핵심 cue
-    "cue_sign":           False,  # [선택] 미구현 — 키만 예약
-    "cue_scene_dressing": True,   # 셔터 도어 벽·창고 벽·볼라드·단부 파라펫
+    "hazard_stairs":      True,   # False -> bay·dock edge filled in for a z=0 flat (control)
+    "cue_railing":        False,  # Safety railing around the bay - default OFF (unguarded is the reality)
+    "cue_tactile":        False,  # not applicable (industrial loading dock) - key reserved only
+    "cue_material_break": True,   # False -> the apron is concrete too (removes the material contrast)
+    "cue_nosing":         True,   # * yellow·black 45 deg warning paint band - the core cue of this scene
+    "cue_sign":           False,  # [optional] not implemented - key reserved only
+    "cue_scene_dressing": True,   # shutter door wall·warehouse wall·bollards·end parapets
 }
 
 
@@ -59,165 +59,165 @@ SCENE_CONFIG = {
 # [B] PARAMS
 # ===========================================================================
 PARAMS = dict(
-    # 플랫폼 데크(상판). 상면 z=0, 두께 0.20. 주 연단 = x 0 (낙차 시작 모서리).
+    # Platform deck (top slab). Top face z=0, thickness 0.20. Main dock edge = x 0 (drop start edge).
     deck=dict(x_w=-16.0, x_e=0.0, y_s=-14.0, y_n=14.0, z_top=0.0, thick=0.20),
 
-    # ★ ㄷ자 만입 베이: 폭 6.0(y) × 깊이 4.0(x). +X 로 열려 트럭이 후진 진입.
-    #   엣지선은 (0,−14)→(0,−3)→(−4,−3)→(−4,+3)→(0,+3)→(0,+14) 의 ㄷ자.
+    # * U-shaped recessed bay: width 6.0(y) x depth 4.0(x). Opens toward +X so a truck backs in.
+    #   The edge line is the U of (0,−14)->(0,−3)->(−4,−3)->(−4,+3)->(0,+3)->(0,+14).
     bay=dict(x0=-4.0, x1=0.0, y0=-3.0, y1=3.0),
 
-    # 플랫폼 매스(연단 벽체). 데크보다 setback 만큼 뒤로 물려 데크 립이
-    # 3 cm 돌출 → ① 수직 동일평면 제거(Z-파이팅) ② 립 아래 그림자선 생성.
+    # Platform mass (dock-edge wall). Set back from the deck by setback so the deck lip
+    # projects 3 cm -> (1) removes the vertical coplanar face (Z-fighting) (2) makes a shadow line under the lip.
     mass=dict(z_bot=-1.35, z_top=-0.19, setback=0.03),
 
-    # 트럭 에이프런(하부 야드). 상면 z −1.2 → 낙차 1.2 m [GT].
+    # Truck apron (lower yard). Top face z −1.2 -> drop 1.2 m [GT].
     apron=dict(z_top=-1.2, thick=0.6, half=40.0),
 
-    # 경고 도색 밴드 (폭 0.35). 흑 베이스 띠(연속) + 황 45° 박판 교호.
-    #   45° 회전 직사각형의 AABB 는 ((L+w)/√2)² → L = W·√2 − w 로 두면
-    #   밴드 폭 W 에 정확히 내접 → **공동 위로 튀어나가는 부유 기하 0**.
-    #   lip_inset: 흑 베이스 띠를 **낙차 쪽 모서리에서만** 3 mm 물려, 데크
-    #   수직 절단면과의 동일평면(Z-파이팅)을 제거. 황 박판은 45° 면이라
-    #   원 사각 그대로 두어도 데크 면과 평행하지 않아 안전하다.
+    # Warning paint band (width 0.35). Continuous black base strip + alternating yellow 45 deg plates.
+    #   The AABB of a 45 deg rotated rectangle is ((L+w)/√2)² -> setting L = W·√2 − w makes it
+    #   exactly inscribed in the band width W -> **zero floating geometry sticking out over the void**.
+    #   lip_inset: the black base strip is pulled back 3 mm **on the drop-side edge only**, removing the
+    #   coplanar face (Z-fighting) with the deck's vertical cut. The yellow plates sit on a 45 deg face,
+    #   so leaving them as plain rectangles is safe - they are not parallel to the deck face.
     band=dict(width=0.35, pitch=0.38, stripe_w=0.15,
               base_proud=0.0015, base_t=0.010, lip_inset=0.003,
               stripe_proud=0.0035, stripe_t=0.006,
               seed=3301, drop_ratio=0.10, y_end=13.7),
 
-    # 도크 범퍼 (흑 고무). 벽면 상단 부착, 간격 1.2 m.
+    # Dock bumpers (black rubber). Fixed to the top of the wall face, spacing 1.2 m.
     bumper=dict(w=0.30, proud=0.15, h=0.60, z_top=-0.30, spacing=1.2),
 
-    # ── 볼라드 2본 (베이 코너 보호, 황색) [v5.1 §2 · ctx2] ────────────────
-    #   위치 유지: 베이 코너는 트럭이 후진 진입하는 실제 충돌 우려 지점이라
-    #   "차량 진입 우려 지점만" 규약에 정확히 부합한다(감독 판정).
-    #   치수는 이미 규격 내(φ0.18 ∈ 0.10~0.20 · h0.95 ∈ 0.80~1.00) → 유지.
-    #   추가: **상단 백색 반사띠**(야간 하역장 시인성 — 산업 관행에도 정합).
-    #   ★ 점형블록은 **미설치**: 교통약자법 별표2는 보도(보행자 통행로) 규정이고
-    #     여기는 차량 하역 야드다. 게다가 황색 소판이 데크 위 **경고 도색 밴드**
-    #     (황흑 45°)와 색·위치가 겹쳐 판정 요소를 오염시킨다 → tactile=False.
-    #   ★ 몸통은 황색 유지(v5.1 §2 "기능·관행 기반" — 산업 볼라드 표준색).
+    # ── 2 bollards (bay corner protection, yellow) [v5.1 §2 · ctx2] ───────
+    #   Position kept: the bay corner is a real collision-risk point where trucks back in, so it
+    #   matches the "only at vehicle-entry risk points" convention exactly (director's verdict).
+    #   Dimensions are already within spec (φ0.18 ∈ 0.10~0.20 · h0.95 ∈ 0.80~1.00) -> kept.
+    #   Added: **white reflective band on top** (night visibility on a loading dock - also matches industrial practice).
+    #   * Dot tactile paving **not installed**: the Mobility Impaired Act Table 2 governs sidewalks
+    #     (pedestrian ways) and this is a vehicle loading yard. Besides, the yellow tiles clash in
+    #     colour·position with the deck's **warning paint band** (yellow-black 45 deg) and pollute the judgment element -> tactile=False.
+    #   * The body stays yellow (v5.1 §2 "function·practice based" - the standard colour of an industrial bollard).
     bollards=[dict(cx=-0.75, cy=-3.9), dict(cx=-0.75, cy=3.9)],
     bollard=dict(radius=0.09, height=0.95, base_z=-0.04, tactile=False),
 
-    # 플랫폼 단부 파라펫(±Y) — 연단 외 무방호 낙차를 없애 GT를 베이·주연단으로 한정
+    # Platform end parapets (+-Y) - removing the unguarded drop away from the dock edge confines the GT to the bay·main edge
     parapet=dict(t=0.30, h=0.90, base_z=-0.05, outer_inset=0.02),
 
-    # ═══ [W2 ground_kit] P14 yard_industrial — 사양 §5.8 D1 행 ═════════════
-    #  이 씬은 **면이 두 개**다. 계획도 두 개로 나눈다(단일 계획은 단일 z).
-    #   ① 데크(z=0) — h0.3 프리셋의 **근경 창이 여기다**(gy=−4.0 회랑).
-    #      줄눈 격자 6.0×4.5 · 지게차 타이어 자국 · 유압유 얼룩 · 흙 유입 ·
-    #      보수 패치 2매(d2·d5 창).
-    #   ② 야드(에이프런 z=−1.2) — "도크 앞 선형 트렌치(립에서 6.0 m)" ·
-    #      후진 유도 실선 2본 · 정지선 1본 · 야드 줄눈 격자.
-    #      h0.3 에서는 경고 밴드 너머로 은닉되지만 h0.9/h1.8·미장센 컷의
-    #      무대다(이 씬의 판정 1순위가 "에이프런이 밴드 너머로 은닉"이다).
-    #  ★ 점자블록 **미설치**: 교통약자법 별표2 는 보행자 통행로 규정이고
-    #    여기는 차량 하역 야드다(p ≈ 0, §12.4 "비대상"). 게다가 황색 소판이
-    #    데크 위 황흑 경고 밴드와 색·위치가 겹쳐 판정 요소를 오염시킨다.
-    #    `TACTILE_OFF_REASON["sceneD1"]` 이 같은 사유를 코드에 기억한다.
-    #  ★ 황흑 경고밴드는 **현행 유지** — ground_kit 은 손대지 않는다.
+    # ═══ [W2 ground_kit] P14 yard_industrial - spec §5.8 row D1 ════════════
+    #  This scene has **two surfaces**, so the plan is split in two as well (one plan = one z).
+    #   (1) Deck (z=0) - **this is where the h0.3 preset's near window is** (gy=−4.0 corridor).
+    #      joint grid 6.0x4.5 · forklift tyre marks · hydraulic oil stains · dirt ingress ·
+    #      2 repair patches (d2·d5 windows).
+    #   (2) Yard (apron z=−1.2) - "linear trench in front of the dock (6.0 m from the lip)" ·
+    #      2 backing guide solid lines · 1 stop line · yard joint grid.
+    #      At h0.3 it hides beyond the warning band, but it is the stage for the h0.9/h1.8 and
+    #      mise-en-scene shots (this scene's first judgment point is "the apron hides beyond the band").
+    #  * Tactile paving **not installed**: the Mobility Impaired Act Table 2 governs pedestrian ways
+    #    and this is a vehicle loading yard (p ~ 0, §12.4 "out of scope"). Besides, the yellow tiles
+    #    clash in colour·position with the deck's yellow-black warning band and pollute the judgment element.
+    #    `TACTILE_OFF_REASON["sceneD1"]` records the same reason in the code.
+    #  * The yellow-black warning band is **left as is** - ground_kit does not touch it.
     gkit=dict(
-        #  데크 남측(카메라 회랑 gy=−4.0). ㄷ자 베이(y −3…3)를 **피해서**
-        #  잡아 GT-V(개구 위 요소 금지)를 구조적으로 만족시킨다.
+        #  Deck south side (camera corridor gy=−4.0). Taken so as to **avoid** the U-shaped bay
+        #  (y −3…3), which satisfies GT-V (no element over an opening) structurally.
         deck_region=(-12.0, -13.0, 0.0, -3.0),
         deck_patches=[(-1.10, -4.00), (-3.80, -4.20)],
-        #  야드 — 베이 입구를 포함한 에이프런. 립(x=0)에서 +X.
+        #  Yard - the apron including the bay mouth. +X from the lip (x=0).
         yard_region=(0.5, -13.0, 16.0, 13.0),
-        yard_trench_x=6.0,              # "립에서 6.0 m" [F]
-        #  후진 유도 실선 2본(베이 폭 6.0 을 좌우에서 잡는다) + 정지선 1본.
+        yard_trench_x=6.0,              # "6.0 m from the lip" [F]
+        #  2 backing guide solid lines (bracketing the 6.0 bay width from both sides) + 1 stop line.
         yard_lines=[(2.0, -2.50, 0.0), (2.0, 2.50, 0.0), (10.0, 0.0, 90.0)],
     ),
 
-    # 배경: 셔터 도어 벽(+X 지평 폐쇄) + 창고 벽(-X, 플랫폼 배후)
+    # Background: shutter door wall (+X horizon closure) + warehouse wall (-X, behind the platform)
     shutter=dict(x0=22.0, t=1.4, y_half=30.0, z_top=7.0,
                  door_w=3.6, door_h=4.2, door_embed=0.03, door_proud=0.10,
                  door_ys=[-12.0, -4.0, 4.0, 12.0],
                  rib_w=0.05, rib_proud=0.02, rib_step=0.30),
-    #   x1 −15.6: 데크 서단(−16)보다 0.4 안쪽까지 물려 벽 전면과 데크/매스
-    #   서측면의 동일평면(3면 맞댐 → Z-파이팅)을 제거한다.
+    #   x1 −15.6: pulled 0.4 inside the deck's west end (−16) so the wall front is not coplanar
+    #   with the west faces of the deck/mass (a 3-face butt -> Z-fighting).
     warehouse=dict(x1=-15.6, t=1.4, y_half=20.0, z_top=6.0),
 
-    # ─── 맥락 드레싱 v2 (2026-07-27, 휑함 해소) ────────────────────────────
-    #   목적: "여기가 물류창고 하역장"이 한눈에 읽히게. 전 요소 cue_scene_dressing
-    #   소속. 낙차 기하(데크·베이·에이프런)·경고 도색·범퍼는 **일절 불변**.
-    #   ★ 배치 원칙(카메라 검산은 build_yard_dressing docstring 참조):
-    #     ① 데크 위 **엣지 접근 동선(x −10..0 × y −5..−3)** 에는 어떤 입체도 두지
-    #        않는다(도색은 flush 이므로 허용 — 오히려 통로 판독을 돕는다).
-    #     ② 판정 3컷(edge_graze / edge_walk / bay_corner)의 시야에 들어가는
-    #        입체는 **엣지선 너머(x>0, 에이프런)** 이거나 **베이 북측(y>6.5)** 뿐.
-    #     ③ 원경(컨테이너·창고동·조명탑)은 전부 x>6 → 데크 위 어떤 시선도
-    #        가리지 못한다(에이프런 은닉 한계 x=8.2 밖이라 그레이징에서 보인다).
+    # ─── Context dressing v2 (2026-07-27, curing the emptiness) ────────────
+    #   Purpose: make "this is a logistics warehouse loading dock" readable at a glance. Every element
+    #   belongs to cue_scene_dressing. The drop geometry (deck·bay·apron)·warning paint·bumpers are **wholly unchanged**.
+    #   * Placement principle (for the camera check see the build_yard_dressing docstring):
+    #     (1) No solid whatsoever is placed on the deck's **edge approach path (x −10..0 x y −5..−3)**
+    #        (paint is flush, so it is allowed - it actually helps read the walkway).
+    #     (2) The only solids that enter the view of the 3 judgment shots (edge_graze / edge_walk /
+    #        bay_corner) are **beyond the edge line (x>0, apron)** or **north of the bay (y>6.5)**.
+    #     (3) The far field (containers·warehouse blocks·light masts) is all x>6 -> it cannot block
+    #        any sight line on the deck (being outside the apron hiding limit x=8.2 it stays visible in grazing).
     yard=dict(
-        # 목재 팔레트 스택 3곳. cx,cy=스택 중심, yaw=방위(도)
+        # 3 timber pallet stacks. cx,cy=stack centre, yaw=bearing (deg)
         stacks=[dict(tag="N1", cx=-2.55, cy=7.80, yaw=7.0, n_pallet=3, n_box=3),
                 dict(tag="N2", cx=-5.60, cy=10.20, yaw=-14.0,
                      n_pallet=2, n_box=2),
-                # S1: 그리드 d10 우측 하단에만 걸리는 **저스택**(총고 0.48)
+                # S1: a **low stack** (total height 0.48) that only clips the lower right of grid d10
                 dict(tag="S1", cx=-3.60, cy=-7.40, yaw=21.0,
                      n_pallet=1, n_box=1)],
         pallet=dict(w=1.20, d=1.00, h=0.145, top_t=0.030, bot_t=0.022,
                     string_w=0.10, string_h=0.090),
         carton=dict(w=0.54, d=0.44, h=0.34, seed=5107),
-        # 지게차 통행 도색(황색 마모) — 종주 아일 2쌍 + 횡단 아일 1쌍.
-        #   dash/gap + seed 결락으로 마모 연출. 전부 flush(proud ≤ 0.0019).
+        # Forklift traffic paint (worn yellow) - 2 pairs of longitudinal aisles + 1 pair of cross aisles.
+        #   Wear is staged with dash/gap + seeded dropout. All flush (proud <= 0.0019).
         lane=dict(w=0.11, t=0.010, proud_main=0.0012, proud_cross=0.0019,
                   dash=1.30, gap=0.55, seed=4407, drop=0.13,
                   main_ys=(-4.60, -7.10), north_ys=(4.30, 6.50),
                   x0=-15.0, x1=-0.90,
                   cross_xs=(-11.0, -13.2), cy0=-7.10, cy1=6.50),
-        # 도크 번호 표지 박판 (셔터 도어 옆, 무텍스트 색면)
+        # Dock number sign plate (beside the shutter door, textless colour field)
         docksign=dict(w=0.70, h=0.90, z_c=2.85, off=0.62, t=0.05,
                       fw=0.40, fh=0.46),
-        # 벽면 외등 박스 (주간이므로 발광 없음 — 형상·그림자만)
+        # Wall-mounted exterior lamp box (daytime, so no emission - shape·shadow only)
         lamp=dict(w=0.34, d=0.30, h=0.24, lens_t=0.035,
                   shutter_ys=(-9.0, 0.0, 9.0), shutter_z=5.30,
                   wh_ys=(-7.0, 5.0), wh_z=4.40),
-        # 에이프런 위 컨테이너 (원경 실루엣 — 은닉 한계 x=8.2 밖)
+        # Containers on the apron (far-field silhouette - outside the hiding limit x=8.2)
         container=dict(L=12.19, W=2.44, H=2.59, gap=0.06),
-        #   ★ 전 컨테이너의 **근단(min x) ≥ 8.91** — edge_graze 에이프런 은닉
-        #     한계 8.23 m 밖(아래 C2 는 장축 x 방향이라 근단이 cx−L/2 임에 주의)
+        #   * Every container's **near end (min x) >= 8.91** - outside the edge_graze apron hiding
+        #     limit of 8.23 m (note C2 below has its long axis along x, so its near end is cx−L/2)
         containers=[dict(cx=12.60, cy=-16.0, yaw=90.0, tier=1, tone=0),
                     dict(cx=16.00, cy=13.5, yaw=90.0, tier=2, tone=1),
                     dict(cx=15.00, cy=-30.0, yaw=0.0, tier=1, tone=2)],
-        # 야드 조명탑 (셔터 벽 z_top 7.0 위로 솟는 실루엣)
+        # Yard light masts (silhouettes rising above the shutter wall z_top 7.0)
         masts=[dict(cx=7.40, cy=-21.0), dict(cx=8.20, cy=18.0)],
         mast=dict(r=0.10, h=8.0, head_w=0.90, head_d=0.45, head_h=0.20),
-        # 원경 창고동 2동 — 셔터 벽(z 7.0) 너머로 상부만 보이는 실루엣
+        # 2 distant warehouse blocks - silhouettes showing only their tops over the shutter wall (z 7.0)
         sheds=[dict(x0=25.0, x1=38.0, y0=-33.0, y1=-8.0, z_top=10.6, tone=0),
                dict(x0=26.5, x1=39.5, y0=6.0, y1=31.0, z_top=9.4, tone=1)],
         shed=dict(z_bot=-1.60, band_h=0.50, band_proud=0.12,
                   vent_w=0.90, vent_h=0.70, vent_n=3),
     ),
 
-    # 베이 둘레 난간 (cue_railing=True 일 때만)
+    # Railing around the bay (only when cue_railing=True)
     bay_rail=dict(rail_h=1.05, post_r=0.030, rail_r=0.025, mid_h=0.52,
                   offset=0.35, spacing=1.5),
 
     material=dict(
         scale=dict(concrete_floor=1.4, concrete_wall=2.2, wood_dark=0.55),
-        deck_tint=(0.86, 0.85, 0.83),        # 빗자루 마감 콘크리트(밝은 회)
-        wall_tint=(0.80, 0.79, 0.77),        # 연단 벽체(약간 어둡게)
-        # 아스팔트 상수색 — scene11/17 규약과 동일
+        deck_tint=(0.86, 0.85, 0.83),        # broom-finished concrete (light grey)
+        wall_tint=(0.80, 0.79, 0.77),        # dock-edge wall (slightly darker)
+        # Constant asphalt colour - same convention as scene11/17
         asphalt_color=(0.16, 0.16, 0.17), asphalt_rough=0.90,
-        # 경고 도색: 흑은 sRGB 암색 대역 0.02~0.06 [교훈 1]
+        # Warning paint: black sits in the sRGB dark band 0.02~0.06 [lesson 1]
         band_black=(0.045, 0.045, 0.047), band_black_rough=0.88,
-        #   황 3단(신품→중간→마모) — 마모는 채도·명도 저하로 연출
+        #   3 yellow grades (new->mid->worn) - wear is staged by lowering saturation·brightness
         band_yellow=[(0.85, 0.72, 0.10), (0.70, 0.60, 0.14),
                      (0.52, 0.46, 0.20)],
         band_yellow_w=[0.45, 0.35, 0.20],
         band_yellow_rough=[0.75, 0.85, 0.92],
-        # 흑 고무 범퍼
+        # black rubber bumper
         rubber_color=(0.035, 0.035, 0.037), rubber_rough=0.90,
         bollard_color=(0.72, 0.60, 0.08), bollard_metallic=0.1,
         bollard_rough=0.65,
-        # 상단 반사띠(백색, 본당 0.11 m² — 소면적이라 v5.1 §4 대면적 금지 무관)
+        # Top reflective band (white, 0.11 m² each - small area, so the v5.1 §4 large-area ban does not apply)
         bollard_band_color=(0.88, 0.88, 0.86),
         shutter_color=(0.44, 0.45, 0.47), shutter_metallic=0.30,
         shutter_rough=0.48,
         rail_color=(0.80, 0.82, 0.85), rail_metallic=0.9, rail_rough=0.35,
-        # ── 맥락 드레싱 v2 ── (소품 중간톤 0.18~0.35 규약 — 교훈 ②
-        #    "회색 잔해 0.55는 백색 지각". 암색 대역 0.02~0.09 는 개구·고무만.)
-        pallet_tint=(1.00, 0.94, 0.86),          # wood_dark(≈0.18) × → 목재 팔레트
+        # ── Context dressing v2 ── (props keep the mid-tone 0.18~0.35 convention - lesson (2)
+        #    "grey debris at 0.55 is perceived as white". The dark band 0.02~0.09 is for openings·rubber only.)
+        pallet_tint=(1.00, 0.94, 0.86),          # wood_dark(~0.18) x -> timber pallet
         pallet_rough=0.90,
         carton_colors=[(0.32, 0.25, 0.16), (0.27, 0.21, 0.14),
                        (0.35, 0.29, 0.20)],
@@ -229,7 +229,7 @@ PARAMS = dict(
         container_colors=[(0.34, 0.15, 0.11), (0.13, 0.26, 0.32),
                           (0.30, 0.31, 0.29)],
         container_metallic=0.35, container_rough=0.62,
-        container_door_mul=0.82,                 # 도어단 = 본체 × 0.82 (음영차)
+        container_door_mul=0.82,                 # door end = body x 0.82 (shading difference)
         shed_colors=[(0.42, 0.43, 0.45), (0.38, 0.40, 0.42)],
         shed_band=(0.52, 0.53, 0.54),
         shed_metallic=0.25, shed_rough=0.55,
@@ -245,18 +245,18 @@ PARAMS = dict(
         hdri_sun_rotz_offset=233.5,
         dome_rotation_step=15.0,
     ),
-    # ─── SUN_AZ_OFFSET 근거 (씬별 재정의 — 브리프 v3 §A-7) ───
-    #   태양 매핑 월드 az ≈ 33.5 + offset = 205  →  그림자 az = az−180 = 25°
-    #   (기본값 171.5 를 그대로 채택하되, 아래 근거로 이 씬에 최적임을 확인)
-    #   ① 태양이 카메라 등 뒤(-X 측) → 플랫폼 데크가 정면광, **경고 도색 밴드의
-    #      황·흑 대비가 최대**로 읽힌다(밴드가 이 씬의 유일한 cue).
-    #   ② 그림자가 +X 로 25° 기울어 뻗음. 주 연단(x=0, 높이 1.2 m)이
-    #      에이프런에 1.2/tan(49.79°) = 1.02 m 폭의 **암대(暗帶)** 를 드리워,
-    #      밴드 너머 에이프런 근경이 어두워진다 → 은닉 효과 강화.
-    #   ③ 베이 내부: 배면 벽(x=−4)이 +X 성분(0.92 m), 남측 벽(y=−3)이
-    #      +Y 성분(0.43 m)으로 각각 그림자를 던져 **베이 바닥 하부가 L자로
-    #      어두워진다** — 만입부가 '더 깊은 구멍'으로 읽히는 방위.
-    #   [ ]키(dome_rotation_step 15°)로 GUI 추가 스윕 가능.
+    # ─── Rationale for SUN_AZ_OFFSET (redefined per scene - brief v3 §A-7) ───
+    #   Sun mapping world az ~ 33.5 + offset = 205  ->  shadow az = az−180 = 25 deg
+    #   (the default 171.5 is adopted as is, but the rationale below confirms it is optimal here)
+    #   (1) The sun is behind the camera (-X side) -> the platform deck is frontlit and the **yellow·black
+    #      contrast of the warning paint band reads at its maximum** (the band is this scene's only cue).
+    #   (2) Shadows lean 25 deg toward +X. The main dock edge (x=0, height 1.2 m) casts a
+    #      **dark band** 1.2/tan(49.79 deg) = 1.02 m wide onto the apron,
+    #      darkening the near apron beyond the band -> the hiding effect is reinforced.
+    #   (3) Inside the bay: the back wall (x=−4) throws a +X component (0.92 m) and the south wall (y=−3)
+    #      a +Y component (0.43 m), so **the lower part of the bay floor darkens in an L shape** -
+    #      the bearing at which the recess reads as 'a deeper hole'.
+    #   The [ ] keys (dome_rotation_step 15 deg) allow a further GUI sweep.
     SUN_AZ_OFFSET=171.5,
 
     render=dict(pt_total_spp=512, pt_max_bounces=8),
@@ -283,24 +283,24 @@ if _sc_ov:
 
 
 # ===========================================================================
-# [C] 경로 상수 + 필요 텍스처 역할
+# [C] Path constants + required texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "sceneD1")
 
 ASSET_ROLES = ["concrete_floor", "concrete_wall", "wood_dark", "hdri", "mdl"]
 
-# grid_views 기준선: 베이(y ±3)를 피해 데크 위에 서는 y. −4.0 이면
-#   · 카메라가 항상 Deck_S(y −14..−3) 위 → 허공 배치 없음
-#   · d2 에서도 베이 코너(0,−3)가 시축에서 26.6° → hfov 60° 프레임 안
+# grid_views baseline: the y at which the camera stands on the deck clear of the bay (y +-3). At −4.0
+#   · the camera is always over Deck_S (y −14..−3) -> nothing is placed in mid-air
+#   · even at d2 the bay corner (0,−3) is 26.6 deg off the view axis -> inside the hfov 60 deg frame
 GRID_GY = -4.0
 
 
 def ground_plans():
-    """[W2 ground_kit] 지면 계획 2매 — 씬 조립부와 CPU 검산이 같은 함수를 쓴다.
+    """[W2 ground_kit] 2 ground plans - the scene assembly and the CPU check use the same function.
 
-    ① `deck`  : 플랫폼 상판 z=0 (h0.3 근경 창)
-    ② `yard`  : 트럭 에이프런 z=−1.2 (트렌치·후진 유도선·정지선)
+    (1) `deck`  : platform top slab z=0 (h0.3 near window)
+    (2) `yard`  : truck apron z=−1.2 (trench·backing guide lines·stop line)
     """
     g = PARAMS["gkit"]
     d, by, ap = PARAMS["deck"], PARAMS["bay"], PARAMS["apron"]
@@ -312,10 +312,10 @@ def ground_plans():
         edges=[("dock_lip", float(by["x1"]))],
         voids=(void_bay,),
         dists=(2, 5, 10), scene="sceneD1",
-        tactile=(),                     # §12.4 — 비대상(산업 야드)
+        tactile=(),                     # §12.4 - out of scope (industrial yard)
         sites=dict(patch=[tuple(p) for p in g["deck_patches"]]),
-        #  데크에는 트렌치·도색을 두지 않는다(야드 계획 담당). 대신 보수
-        #  패치 2매를 넣어 근경 창의 면 요소를 확보한다.
+        #  No trench or paint is put on the deck (the yard plan handles those). Instead 2 repair
+        #  patches secure surface elements for the near window.
         overrides=dict(infra=dict(trench=0, marking=()),
                        surface=(("patch", 2),
                                 ("stain", ("tire", "oil", "dirt")))),
@@ -323,7 +323,7 @@ def ground_plans():
     yard = gk.plan_ground(
         "yard_industrial", region=tuple(g["yard_region"]),
         z=float(ap["z_top"]), gy=GRID_GY, origin=(0.0, 0.0, 0.0),
-        edges=(),                       # 에이프런 전방에 낙차 없음
+        edges=(),                       # no drop in front of the apron
         dists=(2, 5, 10), scene="sceneD1",
         tactile=(),
         sites=dict(trench=[(float(g["yard_trench_x"]),
@@ -337,23 +337,23 @@ def ground_plans():
 
 
 def build_views():
-    """카메라 프리셋: grid_views(gy=−4.0, **엣지 직교 접근**) + 미장센 4컷.
+    """Camera presets: grid_views(gy=−4.0, **orthogonal approach to the edge**) + 4 mise-en-scene shots.
 
-    사양서 §D 카메라: 플랫폼 위 h0.9 종주 + 직교 접근 + 베이 코너 미장센.
-    판정 포인트 = edge_graze 에서 에이프런 바닥이 경고 밴드 너머로 완전 은닉.
+    Spec §D cameras: h0.9 walk along the platform + orthogonal approach + bay corner mise-en-scene.
+    Judgment point = in edge_graze the apron floor is completely hidden beyond the warning band.
     """
     views = sc.grid_views(GRID_GY)
-    # edge_approach: 보행자가 연단으로 직교 접근 (h0.9) — 밴드가 시야를 횡단
+    # edge_approach: a pedestrian approaching the dock edge head-on (h0.9) - the band crosses the view
     views["edge_approach"] = dict(eye=[-4.0, -4.0, 0.9],
                                   tgt=[1.0, -3.4, -0.40])
-    # edge_walk: 엣지 평행 종주 — 밴드가 소실점으로 수렴, ㄷ자 꺾임이 드러남
+    # edge_walk: walking parallel to the edge - the band converges on the vanishing point, the U-bend shows
     views["edge_walk"] = dict(eye=[-1.25, -9.0, 0.9], tgt=[-0.75, 0.5, 0.30])
-    # edge_graze: 저시점 그레이징 — 에이프런이 밴드 너머로 은닉(v3 레퍼런스 재현)
-    #   eye z 0.35 · 엣지까지 2.4 m → 은닉 한계 x = 1.2·2.4/0.35 = 8.2 m
+    # edge_graze: low-eye grazing - the apron hides beyond the band (reproduces the v3 reference)
+    #   eye z 0.35 · 2.4 m to the edge -> hiding limit x = 1.2·2.4/0.35 = 8.2 m
     views["edge_graze"] = dict(eye=[-2.4, -5.2, 0.35], tgt=[1.6, -3.0, 0.05])
-    # bay_corner: 베이 코너 미장센 — 도색 90° 꺾임 + 범퍼 열 + 만입 깊이
+    # bay_corner: bay corner mise-en-scene - the 90 deg bend in the paint + bumper row + recess depth
     views["bay_corner"] = dict(eye=[-1.10, -5.0, 1.55], tgt=[-2.8, -0.6, -0.85])
-    # beauty_overview: 사선 부감 — ㄷ자 전모
+    # beauty_overview: oblique high angle - the whole U
     views["beauty_overview"] = dict(eye=[-9.0, -9.5, 3.8], tgt=[-1.5, 0.0, -0.7])
     return views
 
@@ -409,12 +409,12 @@ def main():
         return sc.make_pbr(stage, path, *args, **kwargs)
 
     def RECT(path, x0, y0, x1, y1, z_c, hz, mtl=None, col=False):
-        """평면 사각(x0..x1, y0..y1) → 중심·크기 변환 박스."""
+        """A plan rectangle (x0..x1, y0..y1) -> a box converted to centre·size."""
         return BOX(path, ((x0 + x1) / 2.0, (y0 + y1) / 2.0, z_c),
                    (x1 - x0, y1 - y0, hz), mtl, col=col)
 
     # -------------------------------------------------------------------
-    # 재질
+    # Materials
     # -------------------------------------------------------------------
     def setup_materials():
         sca = mp["scale"]
@@ -456,7 +456,7 @@ def main():
         M["rail"] = PBR(f"{ROOT}/Looks/Rail", diffuse_color=mp["rail_color"],
                         metallic=mp["rail_metallic"],
                         roughness_const=mp["rail_rough"])
-        # ── 맥락 드레싱 v2 재질 ──
+        # ── Context dressing v2 materials ──
         M["pallet"] = PBR(
             f"{ROOT}/Looks/Pallet", sc.tex_path("wood_dark", "diff"),
             sc.tex_path("wood_dark", "nor"), sc.tex_path("wood_dark", "rough"),
@@ -501,14 +501,14 @@ def main():
         return M
 
     # -------------------------------------------------------------------
-    # 에이프런(하부 야드) — 4박스 분할.
-    #   S/N 은 데크 밑으로 under(0.30) 만큼 들어가 립 아래 틈을 막고,
-    #   중앙 스트립(Apron_C)과 베이 바닥(Apron_Bay)은 x=0 에서 **정확히 맞닿아**
-    #   상면 겹침(동일평면 Z-파이팅) 없이 이어진다.
+    # Apron (lower yard) - split into 4 boxes.
+    #   S/N reach under(0.30) beneath the deck to close the gap under the lip, and the
+    #   centre strip (Apron_C) and the bay floor (Apron_Bay) **meet exactly** at x=0 so they
+    #   join with no top-face overlap (coplanar Z-fighting).
     # -------------------------------------------------------------------
     def build_apron(M, mtl):
         ap = PARAMS["apron"]
-        # [W2-0 · P-A] 에이프런도 킷 장식 대상(트렌치·후진 유도선·정지선).
+        # [W2-0 · P-A] The apron is a kit-dressing target too (trench·backing guide lines·stop line).
         sc.skin_exclude(f"{ROOT}/Apron_S", f"{ROOT}/Apron_N",
                         f"{ROOT}/Apron_C", f"{ROOT}/Apron_Bay")
         by = PARAMS["bay"]
@@ -516,7 +516,7 @@ def main():
         H, th = ap["half"], ap["thick"]
         cz = ap["z_top"] - th / 2.0
         sb = ms["setback"]
-        # 베이 벽면(y ±(3+sb), x −4−sb)보다 0.05 더 파고들어 벽 안쪽에 매입
+        # Bites 0.05 deeper than the bay wall faces (y +-(3+sb), x −4−sb) so it is buried inside the wall
         ye = by["y1"] + sb + 0.05
         xb = by["x0"] - sb - 0.05
         RECT(f"{ROOT}/Apron_S", -H, -H, H, -ye, cz, th, mtl, col=True)
@@ -525,8 +525,8 @@ def main():
         RECT(f"{ROOT}/Apron_Bay", xb, -ye, by["x1"], ye, cz, th, mtl, col=True)
 
     # -------------------------------------------------------------------
-    # 플랫폼 — **ㄷ자 베이 절개: 데크 3박스 + 매스 3박스 분할** (교훈 5)
-    #   베이 공동 위를 어떤 박스도 덮지 않는다.
+    # Platform - **U-shaped bay cut: deck split into 3 boxes + mass into 3 boxes** (lesson 5)
+    #   No box covers the bay void.
     # -------------------------------------------------------------------
     def build_platform(M):
         d = PARAMS["deck"]
@@ -537,23 +537,23 @@ def main():
         sb = ms["setback"]
         czm = (ms["z_bot"] + ms["z_top"]) / 2.0
         hzm = ms["z_top"] - ms["z_bot"]
-        # [W2-0 · P-A] 데크 상판이 ground_kit 의 장식 대상이다 → 변위 스킨
-        #   OFF(**RECT 호출 전에** 등록). 안 끄면 줄눈·패치·오염 데칼이
-        #   스킨(+6.5~16.5 mm) 아래로 통째로 묻힌다 `[사양 §1.1]`.
+        # [W2-0 · P-A] The deck top slab is a ground_kit dressing target -> displacement skin
+        #   OFF (registered **before the RECT calls**). Without it the joint·patch·stain decals are
+        #   buried wholesale under the skin (+6.5~16.5 mm) `[spec §1.1]`.
         sc.skin_exclude(f"{ROOT}/Deck_W", f"{ROOT}/Deck_S", f"{ROOT}/Deck_N")
-        # ── 데크 상판 3분할 ──
+        # ── Deck top slab split in 3 ──
         RECT(f"{ROOT}/Deck_W", d["x_w"], d["y_s"], by["x0"], d["y_n"],
              czd, th, M["deck"], col=True)
         RECT(f"{ROOT}/Deck_S", by["x0"], d["y_s"], d["x_e"], by["y0"],
              czd, th, M["deck"], col=True)
         RECT(f"{ROOT}/Deck_N", by["x0"], by["y1"], d["x_e"], d["y_n"],
              czd, th, M["deck"], col=True)
-        # ── 매스(연단 벽체) 3분할 — 노출면을 setback 만큼 물림 ──
-        #    Mass_S/N 은 Mass_W 와 0.07 겹쳐 내부 맞댐면 제거
+        # ── Mass (dock-edge wall) split in 3 - exposed faces pulled back by setback ──
+        #    Mass_S/N overlap Mass_W by 0.07 to remove the internal butt face
         RECT(f"{ROOT}/Mass_W", d["x_w"], d["y_s"] + sb, by["x0"] - sb,
              d["y_n"] - sb, czm, hzm, M["wall"], col=True)
-        #    ±Y 외곽면은 Mass_W 보다 0.02 안쪽, z 범위도 0.005/0.01 안쪽 →
-        #    코너 겹침부의 외벽면·상하면 동일평면 제거
+        #    The +-Y outer faces sit 0.02 inside Mass_W and the z range 0.005/0.01 inside ->
+        #    removes the coplanar outer-wall and top/bottom faces at the corner overlap
         czs, hzs = czm + 0.0025, hzm - 0.015
         RECT(f"{ROOT}/Mass_S", by["x0"] - sb - 0.07, d["y_s"] + sb + 0.02,
              d["x_e"] - sb, by["y0"] - sb, czs, hzs, M["wall"], col=True)
@@ -561,19 +561,19 @@ def main():
              d["x_e"] - sb, d["y_n"] - sb - 0.02, czs, hzs, M["wall"], col=True)
 
     def build_flat_fill(M):
-        """hazard_stairs=False 대조군: 베이·연단을 메워 전 영역 z=0 평지."""
+        """hazard_stairs=False control: bay·dock edge filled in, the whole area a z=0 flat."""
         d = PARAMS["deck"]
         ap = PARAMS["apron"]
         H = ap["half"]
-        # [W2-0 · P-A] 대조군 평지 데크도 킷 장식 대상 → 스킨 OFF.
+        # [W2-0 · P-A] The control's flat deck is a kit-dressing target too -> skin OFF.
         sc.skin_exclude(f"{ROOT}/FlatDeck")
         RECT(f"{ROOT}/FlatDeck", d["x_w"], -H, H, H,
              d["z_top"] - 0.5, 1.0, M["deck"], col=True)
 
     # -------------------------------------------------------------------
-    # 경고 도색 밴드 — 흑 베이스 띠 + 황 45° 박판 교호 (마모 = 틴트 3단 + 결락)
-    #   ㄷ자 엣지선을 **서로 겹치지 않는 5개 사각 구간**으로 분해해
-    #   코너에서 베이스 띠가 겹치는 동일평면(Z-파이팅)을 원천 제거한다.
+    # Warning paint band - black base strip + alternating yellow 45 deg plates (wear = 3 tint grades + dropout)
+    #   The U-shaped edge line is decomposed into **5 mutually non-overlapping rectangular spans**
+    #   so base strips overlapping at a corner (coplanar Z-fighting) are eliminated at source.
     # -------------------------------------------------------------------
     def band_segments():
         by = PARAMS["bay"]
@@ -581,23 +581,23 @@ def main():
         W = bd["width"]
         ye = bd["y_end"]
         x0, x1, y0, y1 = by["x0"], by["x1"], by["y0"], by["y1"]
-        # (이름, x0, y0, x1, y1, 장축, 낙차 쪽 모서리들)
+        # (name, x0, y0, x1, y1, long axis, drop-side edges)
         return [
-            # 주 연단 남 구간 (베이 코너 도색과 겹치지 않게 y −3−W 에서 시작)
+            # Main dock edge, south span (starts at y −3−W so it does not overlap the bay corner paint)
             ("MainS", x1 - W, -ye, x1, y0 - W, "y", ("x1",)),
             ("MainN", x1 - W, y1 + W, x1, ye, "y", ("x1",)),
-            # 베이 남·북 벽 상단 (코너 정사각까지 포함해 x 방향으로 연장)
-            #   동단(x1=0)도 주 연단 낙차면이므로 함께 물린다
+            # Top of the bay south·north walls (extended along x to include the corner square)
+            #   the east end (x1=0) is a main dock edge drop face too, so it is pulled back as well
             ("BayS", x0 - W, y0 - W, x1, y0, "x", ("y1", "x1")),
             ("BayN", x0 - W, y1, x1, y1 + W, "x", ("y0", "x1")),
-            # 베이 배면 벽 상단 (남·북 구간과 y=±3 에서 맞닿음)
+            # Top of the bay back wall (meets the south·north spans at y=+-3)
             ("BayBack", x0 - W, y0, x0, y1, "y", ("x1",)),
         ]
 
     def build_band(M):
         bd = PARAMS["band"]
         W, w = bd["width"], bd["stripe_w"]
-        # 45° 회전 직사각형이 폭 W 밴드에 정확히 내접하는 장변 길이
+        # Long-side length at which a 45 deg rotated rectangle is exactly inscribed in a band of width W
         L = W * math.sqrt(2.0) - w
         cz_base = bd["base_proud"] - bd["base_t"] / 2.0
         cz_st = bd["stripe_proud"] - bd["stripe_t"] / 2.0
@@ -629,7 +629,7 @@ def main():
             for i in range(n):
                 a = a0 + (i + 0.5) * (a1 - a0) / n
                 if rng.random() < bd["drop_ratio"]:
-                    continue                       # 도색 결락(마모)
+                    continue                       # paint dropout (wear)
                 mtl = rng.choices(yell, weights=wts, k=1)[0]
                 cx, cy = (cc, a) if axis == "y" else (a, cc)
                 OBOX(f"{ROOT}/Band_{name}_S_{i}", (cx, cy, cz_st),
@@ -638,8 +638,8 @@ def main():
         return n_stripe
 
     # -------------------------------------------------------------------
-    # 도크 범퍼 — 흑 고무 박스, 벽면 상단 부착(간격 1.2 m). 데크 립보다
-    #   앞으로 돌출해 연단 아래 그림자에 리듬을 만든다(레퍼런스 재현).
+    # Dock bumpers - black rubber boxes fixed to the top of the wall face (spacing 1.2 m). They project
+    #   further forward than the deck lip, giving rhythm to the shadow under the dock edge (reference reproduction).
     # -------------------------------------------------------------------
     def build_bumpers(M):
         bp = PARAMS["bumper"]
@@ -650,12 +650,12 @@ def main():
         idx = [0]
 
         def row(face_c, a0, a1, axis, sgn):
-            """axis='y': 벽면이 x=face_c, 범퍼가 sgn·x 로 돌출 / 'x': 그 반대."""
+            """axis='y': the wall face is at x=face_c and the bumper projects along sgn·x / 'x': the reverse."""
             span = a1 - a0
             n = max(int(span / bp["spacing"]), 1)
             for i in range(n):
                 a = a0 + (i + 0.5) * span / n
-                # 벽면에 0.03 매입 + proud 만큼 돌출
+                # 0.03 embedded into the wall face + projecting by proud
                 c_off = sgn * (bp["proud"] / 2.0 - 0.015)
                 if axis == "y":
                     ctr = (face_c + c_off, a, cz)
@@ -666,26 +666,26 @@ def main():
                 BOX(f"{ROOT}/Bumper_{idx[0]}", ctr, size, M["rubber"])
                 idx[0] += 1
 
-        # 베이 배면 벽 (x = −4−sb, +X 로 돌출)
+        # Bay back wall (x = −4−sb, projecting +X)
         row(by["x0"] - sb, by["y0"], by["y1"], "y", +1.0)
-        # 베이 남·북 벽 (y = ∓(3+sb), 베이 안쪽으로 돌출)
+        # Bay south·north walls (y = ∓(3+sb), projecting into the bay)
         row(by["y0"] - sb, by["x0"], by["x1"], "x", +1.0)
         row(by["y1"] + sb, by["x0"], by["x1"], "x", -1.0)
-        # 주 연단 (x = −sb, +X 로 돌출) — 베이 바깥 남·북 구간
+        # Main dock edge (x = −sb, projecting +X) - the south·north spans outside the bay
         row(d["x_e"] - sb, d["y_s"] + 1.0, by["y0"] - 0.6, "y", +1.0)
         row(d["x_e"] - sb, by["y1"] + 0.6, d["y_n"] - 1.0, "y", +1.0)
         return idx[0]
 
     # -------------------------------------------------------------------
-    # 단부 파라펫(±Y) — 플랫폼 단부의 무방호 낙차 제거 (GT를 ㄷ자 엣지로 한정)
+    # End parapets (+-Y) - remove the unguarded drop at the platform ends (confines the GT to the U-shaped edge)
     # -------------------------------------------------------------------
     def build_parapets(M):
         d = PARAMS["deck"]
         pp = PARAMS["parapet"]
         cz = (pp["base_z"] + pp["h"]) / 2.0
         hz = pp["h"] - pp["base_z"]
-        # 연단 쪽 끝을 0.05, 외곽(±Y)면을 outer_inset 만큼 물려
-        # 데크 절단면과의 동일평면 회피
+        # The dock-edge end is pulled back 0.05 and the outer (+-Y) face by outer_inset to
+        # avoid a coplanar face with the deck's cut face
         xe = d["x_e"] - 0.05
         oi = pp["outer_inset"]
         RECT(f"{ROOT}/Parapet_S", d["x_w"], d["y_s"] + oi, xe,
@@ -694,25 +694,25 @@ def main():
              d["y_n"] - oi, cz, hz, M["wall"], col=True)
 
     # -------------------------------------------------------------------
-    # 배경 드레싱 — 셔터 도어 벽(+X 지평 폐쇄) · 창고 벽(-X) · 볼라드 2본
+    # Background dressing - shutter door wall (+X horizon closure) · warehouse wall (-X) · 2 bollards
     # -------------------------------------------------------------------
     def build_dressing(M):
         sh = PARAMS["shutter"]
         ap = PARAMS["apron"]
         zb = ap["z_top"] - 0.3
-        # +X 셔터 도어 벽 — 주 카메라 축 정면 지평 폐쇄 (브리프 §A-4)
+        # +X shutter door wall - closes the horizon straight down the main camera axis (brief §A-4)
         RECT(f"{ROOT}/ShutterWall", sh["x0"], -sh["y_half"],
              sh["x0"] + sh["t"], sh["y_half"],
              (zb + sh["z_top"]) / 2.0, sh["z_top"] - zb, M["wall"], col=True)
         dw, dh = sh["door_w"], sh["door_h"]
-        dz0 = ap["z_top"] - 0.05          # 하단을 에이프런에 0.05 매입(동일평면 회피)
+        dz0 = ap["z_top"] - 0.05          # bottom embedded 0.05 into the apron (avoids a coplanar face)
         for j, dy in enumerate(sh["door_ys"]):
-            # 도어 패널: 벽면(x0)에 door_embed 매입 + door_proud 돌출
+            # Door panel: door_embed into the wall face (x0) + door_proud projecting
             px0 = sh["x0"] - sh["door_proud"]
             px1 = sh["x0"] + sh["door_embed"]
             RECT(f"{ROOT}/Door_{j}", px0, dy - dw / 2.0, px1, dy + dw / 2.0,
                  dz0 + dh / 2.0, dh, M["shutter"])
-            # 세로 리브 (패널 앞면에 proud)
+            # Vertical ribs (proud of the panel front)
             nr = max(int(dw / sh["rib_step"]), 1)
             for k in range(nr):
                 ry = dy - dw / 2.0 + (k + 0.5) * dw / nr
@@ -720,13 +720,13 @@ def main():
                      px0 - sh["rib_proud"], ry - sh["rib_w"] / 2.0,
                      px0 + 0.02, ry + sh["rib_w"] / 2.0,
                      dz0 + 0.03 + (dh - 0.09) / 2.0, dh - 0.09, M["shutter"])
-        # -X 창고 벽 (플랫폼 배후) — 부지 폐쇄
+        # -X warehouse wall (behind the platform) - site closure
         wh = PARAMS["warehouse"]
         RECT(f"{ROOT}/Warehouse", wh["x1"] - wh["t"], -wh["y_half"],
              wh["x1"], wh["y_half"],
              (zb + wh["z_top"]) / 2.0, wh["z_top"] - zb, M["wall"], col=True)
-        # 황색 볼라드 2본 (베이 코너 보호) — v5.1 규격 + 상단 반사띠,
-        #   점형블록은 산업 야드라 미설치(PARAMS 주석 참조).
+        # 2 yellow bollards (bay corner protection) - v5.1 spec + top reflective band,
+        #   dot tactile paving not installed as this is an industrial yard (see the PARAMS comment).
         bo = PARAMS["bollard"]
         for i, bd in enumerate(PARAMS["bollards"]):
             bc.build_bollard_v51(stage, f"{ROOT}/Bollard_{i}", bd["cx"],
@@ -736,15 +736,15 @@ def main():
                                  tactile=bo["tactile"])
 
     # -------------------------------------------------------------------
-    # 맥락 드레싱 v2 — 팔레트 스택 · 지게차 통행 도색 · 도크 번호 표지 ·
-    #                  벽면 외등 · 에이프런 컨테이너 · 조명탑 · 원경 창고동
+    # Context dressing v2 - pallet stacks · forklift traffic paint · dock number signs ·
+    #                       wall lamps · apron containers · light masts · distant warehouse blocks
     # -------------------------------------------------------------------
     def build_ground_kit(M, yard=True):
-        """[W2] ground_kit — P14 yard_industrial, **데크 + 야드 2계획**.
+        """[W2] ground_kit - P14 yard_industrial, **2 plans: deck + yard**.
 
-        하나의 `plan_ground` 는 단일 z 로 세워지므로 z=0(데크)과 z=−1.2
-        (에이프런)를 한 호출에 담을 수 없다. 두 계획은 프림 예산(≤60)과
-        게이트를 각각 통과한다.
+        A single `plan_ground` is raised at one z, so z=0 (deck) and z=−1.2
+        (apron) cannot be held in one call. The two plans each pass the prim
+        budget (<=60) and the gates.
         """
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
@@ -768,33 +768,33 @@ def main():
         return total
 
     def build_yard_dressing(M):
-        """물류창고 하역장 맥락 요소. **낙차 기하·도색 밴드·범퍼·에이프런 불변.**
+        """Logistics-warehouse loading dock context elements. **Drop geometry·paint band·bumpers·apron unchanged.**
 
-        ── 카메라 검산 (전 뷰, 좌표 계산 근거) ─────────────────────────────
-        시야: grid_views hfov 60°(half tan 0.577) · pitch −10° · 16:9 → vfov 36°.
-        1) 데크 위 신규 입체는 팔레트 스택 3곳뿐.
-           N1(−2.55, 7.80) / N2(−5.60, 10.20): **베이 북립(y=3) 너머**.
-             · grid(gy=−4): 프레임 좌한 y ≤ −4+0.577·(x+10) → x=−2.55 에서 y ≤ 0.30
-               → y 7.8/10.2 는 **프레임 밖**(가림 0).
-             · edge_walk(eye −1.25,−9 → tgt −0.75,0.5): 축에서 9.6°(프레임 안)이나
-               베이·주연단 도색(y ≤ 3.35)보다 **먼 쪽**이라 원리상 가림 불가.
-             · bay_corner(eye −1.10,−5.0,1.55, 하향 27°): 수평 24.8°/수직 −4.3° →
-               vfov 상한(−27+18=−9°) 위 → 프레임 밖.
-           S1(−3.60, −7.40, 총고 0.48): 남측 스테이징.
-             · grid d10(eye −10,−4): 프레임 우한 y ≥ −4−0.577·6.4 = −7.69 → 걸침.
-               이 스택이 가리는 주연단 지점 = y −4+(10/6.4)(−3.4) = −9.31 ..
-               프레임 우한 −9.77 사이의 **최우측 코너 0.46 m 구간뿐**(판정 대상인
-               중앙부 밴드·베이 코너는 전혀 가리지 않음).
-             · d5/d2·edge_approach·edge_graze: 축 밖 또는 카메라 뒤 → 무관.
-             · beauty_overview(eye −9,−9.5,3.8): 시축에서 30.4° → 프레임 경계 밖.
-        2) 통행 도색은 flush(proud ≤ 0.0019) — 은닉·가림에 영향 없음.
-           엣지 접근 동선(x −10..0 × y −5..−3)에는 **입체 0**(도색만).
-        3) 원경(컨테이너·조명탑·창고동)은 전부 x ≥ 7.4 = 낙차 너머.
-           edge_graze(eye z 0.35, 엣지까지 2.4 m) 은닉 한계 x = 1.2·2.4/0.35
-           = 8.23 m → 컨테이너 근단 min x = 8.91(C2) 로 **은닉 한계 밖**이라
-           에이프런 근경 은닉을 깨지 않으면서 원경 맥락만 준다.
-        4) 카메라 위치(전 뷰 eye) 최근접 신규 프림 = S1 스택(−3.60,−7.40) ↔
-           beauty_overview eye(−9.0,−9.5,3.8): 수평 6.0 m·수직 3.3 m → 매몰 없음.
+        ── Camera check (all views, basis for the coordinates) ─────────────
+        View: grid_views hfov 60 deg (half tan 0.577) · pitch −10 deg · 16:9 -> vfov 36 deg.
+        1) The only new solids on the deck are the 3 pallet stacks.
+           N1(−2.55, 7.80) / N2(−5.60, 10.20): **beyond the bay north lip (y=3)**.
+             · grid(gy=−4): frame left bound y <= −4+0.577·(x+10) -> at x=−2.55, y <= 0.30
+               -> y 7.8/10.2 are **outside the frame** (0 occlusion).
+             · edge_walk(eye −1.25,−9 -> tgt −0.75,0.5): 9.6 deg off axis (inside the frame) but
+               **farther away** than the bay·main-edge paint (y <= 3.35), so occlusion is impossible in principle.
+             · bay_corner(eye −1.10,−5.0,1.55, 27 deg down): horizontal 24.8 deg/vertical −4.3 deg ->
+               above the vfov upper bound (−27+18=−9 deg) -> outside the frame.
+           S1(−3.60, −7.40, total height 0.48): south staging.
+             · grid d10(eye −10,−4): frame right bound y >= −4−0.577·6.4 = −7.69 -> it clips.
+               The main-edge points this stack hides run from y −4+(10/6.4)(−3.4) = −9.31 ..
+               to the frame right bound −9.77, i.e. **only the 0.46 m rightmost corner span** (it hides
+               none of the central band·bay corner that are being judged).
+             · d5/d2·edge_approach·edge_graze: off axis or behind the camera -> irrelevant.
+             · beauty_overview(eye −9,−9.5,3.8): 30.4 deg off the view axis -> outside the frame border.
+        2) The traffic paint is flush (proud <= 0.0019) - no effect on hiding·occlusion.
+           The edge approach path (x −10..0 x y −5..−3) carries **0 solids** (paint only).
+        3) The far field (containers·light masts·warehouse blocks) is all x >= 7.4 = beyond the drop.
+           edge_graze(eye z 0.35, 2.4 m to the edge) hiding limit x = 1.2·2.4/0.35
+           = 8.23 m -> the containers' near end min x = 8.91(C2) is **outside the hiding limit**, so
+           they give far-field context without breaking the near-apron hiding.
+        4) The new prim closest to a camera position (eye of any view) = stack S1(−3.60,−7.40) <->
+           beauty_overview eye(−9.0,−9.5,3.8): horizontal 6.0 m·vertical 3.3 m -> not buried.
         """
         yd = PARAMS["yard"]
         sh = PARAMS["shutter"]
@@ -802,10 +802,10 @@ def main():
         cnt = dict(pallet=0, carton=0, lane=0, sign=0, lamp=0,
                    container=0, mast=0, shed=0)
 
-        # ── ① 목재 팔레트 스택 (박스 적층 근사) ──
+        # ── (1) Timber pallet stacks (approximated by stacked boxes) ──
         pl = yd["pallet"]
         ct = yd["carton"]
-        ph = pl["bot_t"] + pl["string_h"] + pl["top_t"]      # 실높이(무공극)
+        ph = pl["bot_t"] + pl["string_h"] + pl["top_t"]      # actual height (no voids)
         crng = random.Random(ct["seed"])
         ncar = len(mp["carton_colors"])
         for st in yd["stacks"]:
@@ -844,12 +844,12 @@ def main():
                      rotz=yaw + crng.uniform(-9.0, 9.0))
                 cnt["carton"] += 1
 
-        # ── ② 지게차 통행 도색 (황색 마모 파선) ──
+        # ── (2) Forklift traffic paint (worn yellow dashes) ──
         ln = yd["lane"]
         lrng = random.Random(ln["seed"])
         ymtl = [M["band_y1"], M["band_y2"]]
         cz_m = ln["proud_main"] - ln["t"] / 2.0
-        cz_c = ln["proud_cross"] - ln["t"] / 2.0     # 교차부는 0.7 mm 위 → 코플래너 0
+        cz_c = ln["proud_cross"] - ln["t"] / 2.0     # the crossing sits 0.7 mm higher -> 0 coplanar
 
         def dashed(tag, a0, a1, fixed, axis, cz):
             step = ln["dash"] + ln["gap"]
@@ -877,9 +877,9 @@ def main():
         for i, lx in enumerate(ln["cross_xs"]):
             dashed(f"CX{i}", ln["cy0"], ln["cy1"], lx, "y", cz_c)
 
-        # ── ③ 도크 번호 표지 박판 (셔터 도어 옆, 무텍스트 색면) ──
+        # ── (3) Dock number sign plates (beside the shutter door, textless colour field) ──
         ds = yd["docksign"]
-        px1 = sh["x0"] + 0.01                     # 벽면(22.0)에 1 cm 물림
+        px1 = sh["x0"] + 0.01                     # 1 cm bite into the wall face (22.0)
         px0 = px1 - ds["t"]
         for j, dy in enumerate(sh["door_ys"]):
             sy = dy - sh["door_w"] / 2.0 - ds["off"]
@@ -890,7 +890,7 @@ def main():
                  ds["fh"], M["sign_field"])
             cnt["sign"] += 1
 
-        # ── ④ 벽면 외등 박스 (주간 — 발광 없음) ──
+        # ── (4) Wall-mounted exterior lamp boxes (daytime - no emission) ──
         lp = yd["lamp"]
         wh = PARAMS["warehouse"]
         for j, ly in enumerate(lp["shutter_ys"]):
@@ -914,7 +914,7 @@ def main():
                  lp["h"] - 0.09, M["lens"])
             cnt["lamp"] += 1
 
-        # ── ⑤ 에이프런 컨테이너 (원경 실루엣 — 은닉 한계 8.2 m 밖) ──
+        # ── (5) Apron containers (far-field silhouette - outside the 8.2 m hiding limit) ──
         cn = yd["container"]
         for j, cd in enumerate(yd["containers"]):
             a = math.radians(cd["yaw"])
@@ -924,7 +924,7 @@ def main():
                 OBOX(f"{ROOT}/Container_{j}_{t}", (cd["cx"], cd["cy"], zc),
                      (cn["L"], cn["W"], cn["H"]), M[f"cont{cd['tone']}"],
                      rotz=cd["yaw"])
-                # 도어단: 본체보다 1 cm 돌출·1.5 cm 넓게·상하 3 cm 안쪽 → 코플래너 0
+                # Door end: 1 cm proud of the body·1.5 cm wider·3 cm inside top and bottom -> 0 coplanar
                 ex = cd["cx"] + math.cos(a) * (cn["L"] / 2.0 - 0.05)
                 ey = cd["cy"] + math.sin(a) * (cn["L"] / 2.0 - 0.05)
                 OBOX(f"{ROOT}/Container_{j}_{t}_D", (ex, ey, zc),
@@ -932,10 +932,10 @@ def main():
                      M[f"cont{cd['tone']}_d"], rotz=cd["yaw"])
                 cnt["container"] += 1
 
-        # ── ⑥ 야드 조명탑 (셔터 벽 z 7.0 위로 솟는 실루엣) ──
+        # ── (6) Yard light masts (silhouettes rising above the shutter wall z 7.0) ──
         ms = yd["mast"]
         for j, md in enumerate(yd["masts"]):
-            zb = ap["z_top"] - 0.10                # 에이프런에 0.10 매입
+            zb = ap["z_top"] - 0.10                # 0.10 embedded into the apron
             CYL(f"{ROOT}/Mast_{j}", (md["cx"], md["cy"], zb + ms["h"] / 2.0),
                 ms["r"], ms["h"], M["galv"])
             BOX(f"{ROOT}/Mast_{j}_Head",
@@ -943,7 +943,7 @@ def main():
                 (ms["head_w"], ms["head_d"], ms["head_h"]), M["lamp"])
             cnt["mast"] += 1
 
-        # ── ⑦ 원경 창고동 (셔터 벽 너머 상부만 노출) ──
+        # ── (7) Distant warehouse blocks (only the tops exposed above the shutter wall) ──
         shd = yd["shed"]
         for j, sd in enumerate(yd["sheds"]):
             z0 = shd["z_bot"]
@@ -968,13 +968,13 @@ def main():
         return cnt
 
     # -------------------------------------------------------------------
-    # cue — 베이 둘레 안전 난간 (기본 OFF: 무방호가 이 씬의 위험 본질)
+    # cue - safety railing around the bay (default OFF: unguarded is this scene's hazard essence)
     # -------------------------------------------------------------------
     def build_railing(M):
         by = PARAMS["bay"]
         rr = PARAMS["bay_rail"]
         o = rr["offset"]
-        # ㄷ자 난간선: (x1,y0−o) → (x0−o,y0−o) → (x0−o,y1+o) → (x1,y1+o)
+        # U-shaped railing line: (x1,y0−o) -> (x0−o,y0−o) -> (x0−o,y1+o) -> (x1,y1+o)
         pts = [(by["x1"], by["y0"] - o), (by["x0"] - o, by["y0"] - o),
                (by["x0"] - o, by["y1"] + o), (by["x1"], by["y1"] + o)]
         nid = [0]
@@ -1000,10 +1000,10 @@ def main():
                     rr["post_r"], rr["rail_h"] + 0.10, M["rail"])
                 nid[0] += 1
 
-    # ── 씬 조립 ──
+    # ── Scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
     M = setup_materials()
-    # 재질 대비 토글: OFF 면 에이프런도 콘크리트(아스팔트/콘크리트 대비 소거)
+    # Material contrast toggle: when OFF the apron is concrete too (removes the asphalt/concrete contrast)
     apron_mtl = M["asphalt"] if cfg["cue_material_break"] else M["deck"]
 
     n_stripe, n_bumper = 0, 0
@@ -1022,15 +1022,15 @@ def main():
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
         yard_cnt = build_yard_dressing(M)
-    #  [W2] 지면 요소 — 드레싱 뒤(산포 규약). **데크 계획은 대조군에서도**
-    #  돈다(쌍둥이의 유일한 차이는 낙차 기하여야 한다). 야드 계획은 z=−1.2
-    #  라 평지 대조군(FlatDeck 상면 z=0)에서는 지면 아래로 묻히므로 뺀다.
+    #  [W2] Ground elements - after the dressing (scatter convention). **The deck plan runs in the
+    #  control arm too** (the twins' only difference must be the drop geometry). The yard plan is at
+    #  z=−1.2, so in the flat control (FlatDeck top face z=0) it would be buried and is left out.
     build_ground_kit(M, yard=bool(cfg["hazard_stairs"]))
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])
 
-    # 기하 자기검증 프린트 (감독 재검산용)
+    # Geometry self-verification print (for the director's re-check)
     by, bd, ap = PARAMS["bay"], PARAMS["band"], PARAMS["apron"]
     drop = PARAMS["deck"]["z_top"] - ap["z_top"]
     L = bd["width"] * math.sqrt(2.0) - bd["stripe_w"]
@@ -1045,12 +1045,12 @@ def main():
           f"(에이프런 근경 암대)")
 
     if yard_cnt is not None:
-        # 맥락 드레싱 자기검산 — 데크 위 신규 입체의 카메라 간섭 수치 확인
+        # Context dressing self-check - the camera interference numbers for new solids on the deck
         yd = PARAMS["yard"]
         gy = GRID_GY
         lines = []
         for st in yd["stacks"]:
-            # grid d10(eye −10, gy) 기준: 프레임 반폭 0.577·Δx, 가림 도달 y@x=0
+            # Against grid d10 (eye −10, gy): frame half width 0.577·dx, occlusion reach y@x=0
             dx = st["cx"] + 10.0
             half = 0.577 * dx
             inframe = abs(st["cy"] - gy) <= half

@@ -1,88 +1,103 @@
 # -*- coding: utf-8 -*-
 """
-sceneD3_drainage_channel.py — NegObs 인공씬 30호: 도시 콘크리트 측구
-                              (Isaac Sim 4.5)
+sceneD3_drainage_channel.py - NegObs synthetic scene 30: urban concrete roadside
+                              channel (Isaac Sim 4.5)
 
-유형    : D3 비계단 낙차 (클래스 확장 — 도로변 종주형 개거)
-사양서  : Docs/nanobanana_batch1_geometry_map.md §C sceneD3_drainage_channel
-          Docs/multi_scene_brief_v3.md §A 회귀 방지 체크리스트
-공통    : scene_common.py · 골격 관례 scene16_canopy_shadow.py
-          아스팔트 상수색 패턴 scene17_ramp_pair_hangang.py
-룩 참조 : look_refs/d3_drainage_channel.jpg
+Type     : D3 non-stair drop (class extension - a roadside longitudinal open channel)
+Spec     : Docs/nanobanana_batch1_geometry_map.md §C sceneD3_drainage_channel
+           Docs/multi_scene_brief_v3.md §A regression-prevention checklist
+Shared   : scene_common.py · skeleton convention scene16_canopy_shadow.py
+           asphalt constant-colour pattern scene17_ramp_pair_hangang.py
+Look ref : look_refs/d3_drainage_channel.jpg
 
-위험 본질: 교외 아스팔트 차도 옆에 **무방호 건식 콘크리트 측구**(상폭 1.0 ·
-           깊이 0.8 · 하폭 0.5 사다리꼴)가 **카메라 진행축(+X)과 평행하게 종주**
-           한다. 보행자는 복개(슬래브 덮개) 구간 위를 걷다가 x=0 에서 개거를
-           만난다. 종주 시점의 그레이징에서 개구는 폭 1.0 m 의 가는 띠로 축소
-           되고, 버지측 마른 잔디가 에지를 오버행으로 덮어 **낙차 경계가 소실**
-           된다. 도로측 콘크리트 립은 노면과 flush 라 단차 단서도 없다.
-목표     : 차도(중앙 파선·가장자리 실선) + 측구(경사 내벽 2매·바닥판·립·풀
-           오버행·바닥 낙엽) + 원거리 박스 컬버트 + 울타리·주택·수목을 조립.
-GT       : **측구 영역 낙차 0.8 m 양성** (그 외 전 픽셀 낙차 없음).
-           근거 = 도로이탈 ditch/culvert 사망(시나리오 조사 v1 최강 근거).
-           룩체크 v1 자연 도랑(S2)의 **도시 대응쌍**.
+Hazard   : beside a suburban asphalt roadway an **unguarded dry concrete channel**
+           (trapezoid: top width 1.0 · depth 0.8 · bottom width 0.5) **runs
+           parallel to the camera travel axis (+X)**. The pedestrian walks over the
+           covered (slab-lidded) stretch and meets the open channel at x=0. Under
+           grazing from the longitudinal viewpoint the opening shrinks to a thin
+           band 1.0 m wide, and dry grass on the verge side overhangs the edge, so
+           **the drop boundary disappears**. The road-side concrete lip is flush
+           with the road surface, so there is no level-difference cue either.
+Goal     : assemble the roadway (centre dashes · edge line) + the channel (2 sloped
+           inner walls · bed slab · lip · grass overhang · bed leaves) + a distant
+           box culvert + fence, houses and trees.
+GT       : **drop 0.8 m positive over the channel area** (no drop on any other pixel).
+           Basis = run-off-road ditch/culvert fatalities (the strongest evidence in
+           scenario survey v1). The **urban counterpart** of the natural ditch (S2)
+           in look check v1.
 
-실행 (GUI 룩 체크 — 기본):
+Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
     export PYTHONNOUSERSITE=1
     python sceneD3_drainage_channel.py
 
-자동 캡처 (headless):   NEGOBS_CAPTURE=1 python sceneD3_drainage_channel.py
-스모크 조기종료:        NEGOBS_SMOKE=1  python sceneD3_drainage_channel.py
+Auto capture (headless):   NEGOBS_CAPTURE=1 python sceneD3_drainage_channel.py
+Smoke early exit:          NEGOBS_SMOKE=1  python sceneD3_drainage_channel.py
 
-좌표계: Z-up, m, 진행축 +X.
-  ※ 규약 보정: 이 씬의 낙차 경계는 +X 와 **평행한 종주선**(y=±0.50)이라
-    "낙차 시작 모서리 = x=0" 을 종주축에 그대로 적용할 수 없다. 대신
-    **복개 슬래브가 x=0 에서 끝나고 개거가 시작**하도록 배치해 (x<0 = 보행
-    가능 복개 / x≥0 = 개구) 규약의 의미(전방 x=0 에서 낙차 개시)를 보존한다.
-    측구 중심선 y=0 → grid_views(gy=0.0) 가 그대로 종주 시점이 된다.
+Coordinates: Z-up, m, travel axis +X.
+  ※ convention adjustment: this scene's drop boundary is a **longitudinal line
+    parallel to +X** (y=±0.50), so "drop start edge = x=0" cannot be applied to the
+    longitudinal axis as it stands. Instead the layout makes **the cover slab end
+    at x=0 and the open channel start there** (x<0 = walkable cover / x≥0 =
+    opening), preserving the meaning of the convention (the drop begins ahead at
+    x=0). Channel centre line y=0 → grid_views(gy=0.0) is itself the longitudinal
+    viewpoint.
 
 ────────────────────────────────────────────────────────────────────────────
-기하 핵심 — 사다리꼴 단면 경사 내벽 (_oriented_box rotX) 유도
-  단면: 상폭 2·0.50, 하폭 2·0.25, 깊이 0.80 → 내벽 수평후퇴 0.25
-        벽 기울기(연직 대비) = atan2(0.25, 0.80) = 17.354°  (사양 ~17° 부합)
-  _oriented_box 의 rotX(θ) 는 로컬축을 다음으로 사상(row-vector 규약):
-        로컬 +Y → 월드 (y,z) = ( cosθ,  sinθ)      … 판 두께 방향(법선)
-        로컬 +Z → 월드 (y,z) = (−sinθ,  cosθ)      … 판 길이 방향(사면 방향)
-  +Y측 벽: 내면이 위 (0.50, 0) → 아래 (0.25, −0.80) 이어야 하므로
-        사면 상향 단위벡터 u = (+sinφ, +cosφ), φ=17.354°.
-        로컬 +Z = u 를 만족하려면 −sinθ = +sinφ ⇒ **θ = −φ**(부호 주의:
-        +φ 를 쓰면 상·하폭이 뒤집힌 역사다리꼴이 된다 — 수치 검산으로 확인).
-        이때 로컬 +Y = (cosφ, −sinφ) = 바깥 법선 n (채널 반대쪽·아래) ✓
-        내면 중점 (0.375, −0.40) 기준
+Geometry core - deriving the sloped inner walls of the trapezoidal section (_oriented_box rotX)
+  Section: top width 2·0.50, bottom width 2·0.25, depth 0.80 → inner wall setback 0.25
+        wall tilt (from vertical) = atan2(0.25, 0.80) = 17.354°  (matches the spec's ~17°)
+  rotX(θ) in _oriented_box maps the local axes as follows (row-vector convention):
+        local +Y → world (y,z) = ( cosθ,  sinθ)      … plate thickness direction (normal)
+        local +Z → world (y,z) = (−sinθ,  cosθ)      … plate length direction (slope direction)
+  +Y wall: its inner face must run from (0.50, 0) above to (0.25, −0.80) below, so
+        the up-slope unit vector is u = (+sinφ, +cosφ), φ=17.354°.
+        Satisfying local +Z = u requires −sinθ = +sinφ ⇒ **θ = −φ** (mind the sign:
+        using +φ gives an inverted trapezoid with top and bottom widths swapped —
+        confirmed by numeric check).
+        Then local +Y = (cosφ, −sinφ) = the outward normal n (away from the channel, downward) ✓
+        Relative to the inner-face mid-point (0.375, −0.40)
           center = mid + (t/2)·n − (ext/2)·u − (0, edge_sink)
-        길이 L = hypot(0.25,0.80)·1.10 = 0.9220 (연장분 ext 는 **하단으로만**)
-        검산: 상단 내면 (0.5000, −0.0040) / z=−0.80 에서 내면 y=0.2513 /
-              하단 외면 y=0.3109 < 인버트 반폭 0.60(밀폐) /
-              상단 외면 y=0.5859 > 버지 시작 0.50(상면 스트립 은폐)
-  −Y측 벽: θ=+17.354°, center_y 부호 반전(대칭). center_z 는 동일.
-  개구 상단 모서리는 edge_sink=0.004 만큼 침하 → 버지/립 상면(z=0/+0.002)과
-  **동일평면 회피**(Z-파이팅 금지 규약).
+        length L = hypot(0.25,0.80)·1.10 = 0.9220 (the extension ext goes **downward only**)
+        check: top inner face (0.5000, −0.0040) / at z=−0.80 the inner face is y=0.2513 /
+              bottom outer face y=0.3109 < invert half-width 0.60 (sealed) /
+              top outer face y=0.5859 > verge start 0.50 (hides the top strip)
+  −Y wall: θ=+17.354°, center_y sign flipped (symmetric). center_z is the same.
+  The top edge of the opening sinks by edge_sink=0.004 → it **avoids being coplanar**
+  with the verge/lip top faces (z=0/+0.002) (the no-Z-fighting convention).
 
 ────────────────────────────────────────────────────────────────────────────
-[v6 맥락 드레싱] 감사 v4 "휑함" 지적 반영 — 교외 주택가 도로임이 읽히게.
-  **측구 기하(개구 y −0.50..+0.50 · 오버행 · 복개 슬래브 · 립 · 컬버트)는
-    한 줄도 건드리지 않았다.** 신규 요소는 전부 버지 바깥(y ≥ 4.2) 또는
-    차도 건너편(y ≤ −8.05) 또는 원경(x ≥ 52) 에만 놓았다.
-  ① 전신주 4본(x 13·33·53·73, y=+4.20) + 전선 3선(스팬별 2세그 새그 근사).
-     y=+4.2 는 개구 에지(y=0.5) 에서 3.7 m 이격 — 종주 뷰에서 항상 개구선
-     **왼쪽 바깥**에 서고, 시선 연장 레이캐스트로 개구 가림 0 을 검산(§검산).
-     그림자는 태양 방위상 **+Y(펜스쪽)로만** 뻗어 측구에 닿지 않는다.
-  ② 주택 진입로(driveway) 콘크리트 패치 1곳 — **차도 건너편**(y −13.65..−8.05,
-     x 12.5..16.5), 주택 A 파사드로 이어짐. 측구(y ≥ −0.65)와 7.4 m 이격.
-  ③ 우편함 1 + 수거함(쓰레기통) 1 — 진입로 좌우 갓길(y ≈ −8.6).
-  ④ 원경 보강: 주택 C(건너편 x 56..68) · 주택 E(펜스 너머 x 52..62) ·
-     수목 3본 · **수림대(treeline) 5세그(x 74..76.4)** — r5 렌더에서 지평을
-     막던 '거대 백색 벽'(능선)을 수림대로 분절하고, 능선에 대기원근
-     (가까울수록 짙게: 0.135 → 0.175 → 0.215) 색을 부여.
-  ⑤ GT 불변: 신규 요소는 전부 지면 위 기립·박판 — 개구·낙차 신설 없음.
+[v6 context dressing] answers the audit v4 note about "barrenness" — so the place reads
+as a suburban residential road.
+  **The channel geometry (opening y −0.50..+0.50 · overhang · cover slab · lip ·
+    culvert) was not touched by a single line.** Every new element sits either
+    outside the verge (y ≥ 4.2), across the road (y ≤ −8.05) or in the distance (x ≥ 52).
+  (1) 4 utility poles (x 13·33·53·73, y=+4.20) + 3 wires (per-span 2-segment sag
+      approximation). y=+4.2 is 3.7 m clear of the opening edge (y=0.5) — in the
+      longitudinal view it always stands **outside the opening line, to the left**,
+      and an extended sight-line ray cast checks zero occlusion of the opening (§check).
+      Given the sun azimuth the shadows reach **only toward +Y (the fence side)** and
+      never touch the channel.
+  (2) one concrete driveway patch — **across the road** (y −13.65..−8.05,
+      x 12.5..16.5), running up to the house A facade. 7.4 m clear of the channel (y ≥ −0.65).
+  (3) 1 mailbox + 1 wheelie bin (litter bin) — on the shoulders either side of the
+      driveway (y ≈ −8.6).
+  (4) distance reinforced: house C (across the road, x 56..68) · house E (beyond the
+      fence, x 52..62) · 3 trees · **a treeline of 5 segments (x 74..76.4)** — the
+      'huge white wall' (the ridge) that blocked the horizon in the r5 render is
+      broken up by the treeline, and the ridge is given aerial-perspective colour
+      (darker when nearer: 0.135 → 0.175 → 0.215).
+  (5) GT unchanged: every new element is an upright or thin plate above ground —
+      no new opening and no new drop.
 ────────────────────────────────────────────────────────────────────────────
 
-개구 분할 규약(교훈 5 — 주변 지면이 공동을 덮는 버그 3회 재발 이력):
-  지면 평판을 y 로 4분할하여 개구대(y −0.50..+0.50, x≥0)를 **어느 평판도
-  덮지 않는다**: [원측 갓길 | 차도 | 립] · 개구 · [버지 | 뒷마당]
-  x<0 은 복개 슬래브가 의도적으로 덮는다(= 보행 연속성의 원천, 낙차 개시점).
+Opening-split convention (lesson 5 — the bug where the surrounding ground covers the
+cavity has recurred 3 times):
+  the ground plates are split into 4 along y so that **no plate covers** the opening
+  band (y −0.50..+0.50, x≥0): [far shoulder | roadway | lip] · opening · [verge | back yard]
+  x<0 is deliberately covered by the cover slab (= the source of walking continuity,
+  the drop-start point).
 ────────────────────────────────────────────────────────────────────────────
 """
 
@@ -99,20 +114,20 @@ import ground_kit as gk
 
 
 # ===========================================================================
-# [A] SCENE_CONFIG — 표준 7키 + 씬 특색 1키(grass_overhang)
+# [A] SCENE_CONFIG - the standard 7 keys + 1 scene-specific key (grass_overhang)
 # ===========================================================================
 SCENE_CONFIG = {
-    "hazard_stairs":      True,    # 씬 낙차 기하 = **측구 개거**.
-                                   # False → 개구를 메워 z=0 평지 (기하 토글)
-    "cue_railing":        False,   # **무방호가 정체성** — True면 버지측 파이프
-                                   # 난간 1선(코드 경로 구현됨)
-    "cue_tactile":        False,   # 도로변 측구엔 미관행(코드 경로만)
-    "cue_material_break": True,    # 콘크리트 립·측구 vs 아스팔트 노면 대비
-                                   # False → 립도 아스팔트 재질(단서 제거)
-    "cue_nosing":         False,   # 계단 전용 — 미사용(키만 예약)
-    "cue_sign":           False,   # [선택] 미구현 — 키만 예약
-    "cue_scene_dressing": True,    # 울타리·주택·수목·원경 일괄
-    # ─ 특색 토글: False → 풀 오버행 제거 = 에지 완전 노출 대응쌍 ─
+    "hazard_stairs":      True,    # the scene's drop geometry = **the open roadside channel**.
+                                   # False -> the opening is filled to a flat z=0 (geometry toggle)
+    "cue_railing":        False,   # **being unguarded is the identity** - True adds one pipe
+                                   # railing line on the verge side (code path implemented)
+    "cue_tactile":        False,   # not customary on a roadside channel (code path only)
+    "cue_material_break": True,    # concrete lip and channel vs asphalt road contrast
+                                   # False -> the lip is asphalt too (cue removed)
+    "cue_nosing":         False,   # stairs only - unused (key reserved only)
+    "cue_sign":           False,   # [optional] not implemented - key reserved only
+    "cue_scene_dressing": True,    # fence, houses, trees and distant scenery together
+    # ─ scene-specific toggle: False -> no grass overhang = the fully exposed edge twin ─
     "grass_overhang":     True,
 }
 
@@ -121,79 +136,79 @@ SCENE_CONFIG = {
 # [B] PARAMS
 # ===========================================================================
 PARAMS = dict(
-    # --- 측구 단면/연장 ---
+    # --- channel section / extent ---
     ch=dict(x_open=0.0, x_end=38.0, x_back=-22.0,
             top_half=0.50, bot_half=0.25, depth=0.80,
             wall_t=0.18, wall_ext=1.10, edge_sink=0.004,
             invert_half=0.60, invert_t=0.25),
-    # --- 복개(덮개) 슬래브 : x −22..0, 상면 +0.004 (보행면·낙차 개시 에지) ---
-    #  ★ [W2 §5.7 D3] 줄눈 집행자를 **ground_kit 으로 옮긴다.** 사양의 처방은
-    #    "줄눈 심화 — 현행 **양각 1 mm → 음각 3 mm**" 다. 구 코드는 암색 박판을
-    #    proud +0.001 로 얹어 "음각 대용" 을 했는데, 스침각(h0.3)에서는 융기와
-    #    음각의 음영이 반대로 읽힌다. 킷의 `build_joint_grid` 는 명목 음각
-    #    −0.003 을 원장(`recess_nominal`)에 남기고 상면은 `surface_top_z`
-    #    (+0.6 mm)로 올려 **솔리드 슬래브 매몰**을 피한다(파일럿 #2 결함).
-    #    주기(2.5 m)·폭(0.04)은 그대로 승계해 씬 리듬을 바꾸지 않는다.
-    #    `joint_proud` 는 더 이상 쓰이지 않는다(원장 보존용으로만 남긴다).
+    # --- cover slab : x −22..0, top +0.004 (walking surface, drop-start edge) ---
+    #  * [W2 §5.7 D3] the joint owner **moves to ground_kit.** The spec prescribes
+    #    "deepen the joints - current **+1 mm proud -> 3 mm recessed**". The old code laid a dark
+    #    thin plate proud +0.001 as a "stand-in for a recess", but at a grazing angle (h0.3) a ridge
+    #    and a recess shade the opposite way. The kit's `build_joint_grid` keeps the nominal recess
+    #    −0.003 in the ledger (`recess_nominal`) and lifts the surface to `surface_top_z`
+    #    (+0.6 mm), avoiding **burial in the solid slab** (pilot #2 defect).
+    #    the pitch (2.5 m) and width (0.04) are inherited as-is, so the scene rhythm is unchanged.
+    #    `joint_proud` is no longer used (kept only to preserve the ledger).
     cover=dict(y0=-0.65, y1=0.66, top=0.004, thick=0.20,
                joint_step=2.5, joint_w=0.04, joint_proud=0.001),
 
-    # ═══ [W2 ground_kit] P17 verge_rural — 사양 §5.7 D3 행 ═════════════════
-    #  ★ **자연 씬**이다(`natural=True`). 도시 인프라(맨홀·빗물받이·L형 측구·
-    #    차선 도색·점자블록·볼라드) **0건**을 `plan_ground` 가 코드로 강제한다.
-    #    D3 의 **U형 개거 정체성**(복개 슬래브 + 사다리꼴 개거 + 컬버트)은
-    #    씬 기하 그대로이며 ground_kit 은 여기에 손대지 않는다 — 단면 변경 0건.
-    #  ★ 면이 둘이라 계획도 둘이다(단일 계획 = 단일 z):
-    #     ① `cover` 복개 슬래브 상면 z=+0.004 — h0.3 근경 창이 여기다.
-    #        줄눈 심화 · 보수 패치 · 균열 · **복개면 토사 퇴적 띠** · 경계 잡초.
-    #     ② `road`  아스팔트 차도 z=0.0 — **차도 패치/균열** · 흙 퇴적 · 갓길 잡초.
+    # ═══ [W2 ground_kit] P17 verge_rural - spec §5.7 row D3 ═════════════════
+    #  * this is a **natural scene** (`natural=True`). `plan_ground` enforces in code that urban
+    #    infrastructure (manhole · gully · L-type gutter · lane paint · tactile paving · bollard) is **zero**.
+    #    D3's **U-channel identity** (cover slab + trapezoidal open channel + culvert) stays exactly
+    #    as the scene geometry has it, and ground_kit never touches it - zero section changes.
+    #  * there are two surfaces, so there are two plans (one plan = one z):
+    #     (1) `cover` cover slab top z=+0.004 - this is where the h0.3 near window sits.
+    #        deepened joints · repair patches · cracks · **a silt band on the cover** · edge weeds.
+    #     (2) `road`  asphalt roadway z=0.0 - **roadway patches/cracks** · soil deposits · shoulder weeds.
     gkit=dict(
         cover_x0=-12.0,
         cover_patches=[(-1.20, 0.00), (-3.80, 0.00), (-8.80, 0.00)],
-        #  차도 — 개거 립(y=−0.65)·가장자리선(y=−0.95±0.05)을 피해 y ≤ −1.10.
+        #  the roadway - kept to y <= −1.10, clear of the channel lip (y=−0.65) and the edge line (y=−0.95 +-0.05).
         road_region=(-12.0, -8.00, 2.0, -1.10),
     ),
-    # --- 도로측 콘크리트 립 (노면과 flush, 폭 0.15) ---
+    # --- road-side concrete lip (flush with the road surface, width 0.15) ---
     lip=dict(y0=-0.65, y1=-0.50, top=0.002, x0=-0.30, base_z=-1.60),
-    # --- 아스팔트 차도 ---
-    # x1 96 : 원경 능선(x 77..94)까지 지면이 이어져야 지면 끝 허공이 안 생긴다
+    # --- asphalt roadway ---
+    # x1 96 : the ground has to reach the distant ridge (x 77..94), otherwise a void opens at its end
     road=dict(y0=-8.20, y1=-0.65, x0=-22.0, x1=96.0, top=0.0, thick=1.60),
     dash=dict(y=-4.40, w=0.15, length=3.0, period=8.0, proud=0.002),
     edge_line=dict(y=-0.95, w=0.10, proud=0.002),
-    # --- 버지(마른 잔디) / 뒷마당 / 원측 갓길 ---
+    # --- verge (dry grass) / back yard / far shoulder ---
     verge=dict(y0=0.50, y1=6.40, top=0.0, thick=1.60),
-    # 대지 횡폭 y −42..+20 (브리프 §A-4: 부지 가장자리 허공 금지)
+    # site width y −42..+20 (brief §A-4: no void at the site edge)
     yard=dict(y0=6.40, y1=20.0, top=0.0, thick=1.60),
     farside=dict(y0=-42.0, y1=-8.20, top=0.0, thick=1.60),
-    # 컬버트 이후 개거선 매립 구간(x>헤드월) — 개구대를 여기서만 덮는다.
-    #   lid = 암색 후퇴부(CulvertDark) 위를 지나는 **얇은 뚜껑**(두께 0.05):
-    #   두껍게 하면 암색 박스와 볼륨이 겹쳐 개구 정면에서 동일평면 Z-파이팅.
-    #   main = 그 이후 정상 두께. 뚜껑 아래 공동은 헤드월·립·버지·main 으로 밀폐.
+    # the buried stretch of the channel line past the culvert (x > headwall) - the only place the opening band is covered.
+    #   lid = a **thin cover** (thickness 0.05) passing over the dark recess (CulvertDark):
+    #   making it thicker would overlap the dark box in volume and give coplanar Z-fighting head-on at the opening.
+    #   main = normal thickness after that. The cavity under the lid is sealed by headwall · lip · verge · main.
     beyond=dict(y0=-0.65, y1=0.50, top=0.0, thick=1.60,
                 lid_x0=38.40, lid_x1=44.20, lid_t=0.05),
 
-    # --- 풀 오버행 : build_hedge 저고 스트립을 개구 에지에 걸쳐 배치 ---
+    # --- grass overhang : low build_hedge strips laid across the opening edge ---
     overhang=dict(count=12, seed=3001, x0=0.4, x_span=36.0,
                   len_lo=2.9, len_hi=3.1, over_lo=0.0, over_hi=0.05,
-                  out_lo=0.32, out_hi=0.55, h_lo=0.05, h_hi=0.08),  # r2: 개구 돌출 거의 0, 연속 저고 잔디 립으로
-    # --- 측구 바닥 낙엽 (판 + 산포) ---
+                  out_lo=0.32, out_hi=0.55, h_lo=0.05, h_hi=0.08),  # r2: almost no projection over the opening, a continuous low grass lip instead
+    # --- fallen leaves on the channel bed (plate + scatter) ---
     bed_leaf=dict(patches=6, seed=3002, y_half=0.22, thick=0.05,
                   sink=0.025, len_lo=0.9, len_hi=2.4, x0=1.0, x_span=34.0,
                   scatter=160, scale=(0.06, 0.045, 0.008),
                   jitter=(0.75, 1.30), lift=0.006),
 
-    # --- 박스 컬버트 (원거리 지평 앵커 + 암색 후퇴) ---
+    # --- box culvert (distant horizon anchor + dark recess) ---
     culvert=dict(x0=38.0, x1=38.6, y_half=0.72, z_top=0.08, z_bot=-1.05,
                  op_half=0.45, op_top=-0.10, sill_top=-0.79,
                  dark_x1=44.0, dark_half=0.48, dark_top=-0.06),
 
-    # --- cue (기본 OFF — 무방호가 정체성) ---
+    # --- cue (default OFF - being unguarded is the identity) ---
     rail=dict(y=0.72, x0=0.0, x1=38.0, rail_h=0.90, post_r=0.024,
               rail_r=0.030, rail_mid_r=0.018, rail_mid_drop=0.42,
               spacing=1.60),
     tactile=dict(depth=0.30, proud=0.004),
 
-    # --- 드레싱 / 지평 폐쇄 ---
+    # --- dressing / horizon closure ---
     fence=dict(y=6.40, t=0.12, h=1.75, x0=-22.0, x1=96.0,
                cap_h=0.08, cap_over=0.04),
     trees=[dict(cx=-6.0, cy=9.0), dict(cx=5.0, cy=8.4),
@@ -205,8 +220,8 @@ PARAMS = dict(
                axis="y", facade_y=-13.5, face_dir=1.0),
         B=dict(x0=32.0, x1=44.0, y0=-19.0, y1=-13.5, h=4.2, floors=1,
                axis="y", facade_y=-13.5, face_dir=1.0),
-        # [v6-④] 원경 주택 열 보강. C = 건너편 3번째 집(주택가 리듬),
-        #        E = 펜스 너머 뒷집(버지쪽 원경 — 펜스 상단 1.83 위로 노출).
+        # [v6-(4)] distant house row reinforced. C = the third house across the road (residential rhythm),
+        #        E = the house behind the fence (verge-side distance - showing above the fence top 1.83).
         C=dict(x0=56.0, x1=68.0, y0=-19.0, y1=-13.5, h=4.2, floors=1,
                axis="y", facade_y=-13.5, face_dir=1.0),
         E=dict(x0=52.0, x1=62.0, y0=13.6, y1=19.5, h=4.0, floors=1,
@@ -215,51 +230,51 @@ PARAMS = dict(
     window=dict(w=1.2, h=1.3, inset=0.15, col_step=3.0, margin=2.0),
     back_hedge=dict(cy=12.6, sy=1.4, length=26.0),
     back_hedges=[dict(cx=-8.0), dict(cx=18.0), dict(cx=44.0), dict(cx=68.0)],
-    # 원경 비스타 차단(+X 지평선): 능선 박스 2단. cy/sy 는 대지 y −42..+20 안쪽.
-    # [v6-④] 대기원근 색 부여 — r5 렌더의 '백색 벽' 해소(가까울수록 짙게).
+    # distant vista block (+X horizon): 2 ridge boxes. cy/sy stay inside the site y −42..+20.
+    # [v6-(4)] aerial-perspective colour added - clears the 'white wall' of the r5 render (darker when nearer).
     ridge=[dict(cx=80.0, cy=-8.0, h=6.0, sy=56.0, t=6.0,
                 color=(0.155, 0.175, 0.150)),
            dict(cx=90.0, cy=-8.0, h=9.0, sy=56.0, t=8.0,
                 color=(0.205, 0.220, 0.235))],
-    # [v6-④] 수림대 — 능선(x≥77) 앞 x 74..76.4. 높이 변주로 상면 동일평면 회피.
-    #   y 는 대지(−42..+20) 안쪽으로만. base_z −0.05(지면 상면 동일평면 회피).
+    # [v6-(4)] treeline - x 74..76.4 in front of the ridge (x>=77). Varied heights avoid coplanar top faces.
+    #   y stays inside the site (−42..+20). base_z −0.05 (avoids being coplanar with the ground top face).
     treeline=dict(x0=74.0, x1=76.4, span=13.0, base_z=-0.05,
                   cys=(-30.0, -18.0, -6.0, 6.0, 13.2),
                   hs=(3.4, 2.9, 3.8, 3.1, 3.5),
                   tint=(0.150, 0.205, 0.120)),
 
-    # ─── [v6] 맥락 드레싱 (측구 기하 불변 — 전부 y≥4.2 / y≤−8.05 / x≥52) ───
-    # ① 전신주 + 전선. y=+4.20 은 개구 에지(0.50)에서 3.70 m, 펜스(6.40)에서
-    #    2.20 m — 버지 한가운데. 스팬 20 m, 새그 0.35(중점 2세그 근사).
+    # ─── [v6] context dressing (channel geometry unchanged - all at y>=4.2 / y<=−8.05 / x>=52) ───
+    # (1) utility poles + wires. y=+4.20 is 3.70 m from the opening edge (0.50) and
+    #    2.20 m from the fence (6.40) - mid verge. Span 20 m, sag 0.35 (2-segment mid-point approximation).
     poles=[13.0, 33.0, 53.0, 73.0],
     pole=dict(y=4.20, r=0.115, h=8.50, arm_len=1.80, arm_t=0.10, arm_h=0.09,
               wire_r=0.016, wire_z=7.620, wire_dy=(-0.75, 0.0, 0.75),
               sag=0.35, stub_x=-12.0, stub_z=7.30),
-    # ② 주택 진입로 — 차도 건너편. y1 −8.05 는 노면(y0 −8.20) 위로 0.15 겹쳐
-    #    동일평면 회피(상면 +0.002 proud), y0 −13.65 는 주택 A 셸 밑으로 0.15 매입.
+    # (2) house driveway - across the road. y1 −8.05 overlaps the road surface (y0 −8.20) by 0.15 to
+    #    avoid coplanarity (top +0.002 proud); y0 −13.65 is buried 0.15 under the house A shell.
     driveway=dict(x0=12.5, x1=16.5, y0=-13.65, y1=-8.05, top=0.002,
                   thick=0.20),
-    # ③ 우편함 · 수거함 (진입로 좌우 갓길)
+    # (3) mailbox · wheelie bin (shoulders either side of the driveway)
     mailbox=dict(cx=17.4, cy=-8.55, post_r=0.05, post_h=1.05,
                  w=0.34, d=0.24, h=0.26),
     binbox=dict(cx=11.4, cy=-8.60, w=0.58, d=0.72, h=1.02, lid_t=0.06),
-    # ④ 원경 수목 3본 추가 (yard/farside 지면 위)
+    # (4) 3 more distant trees (on the yard / farside ground)
     trees_v6=[dict(cx=66.0, cy=15.5), dict(cx=34.0, cy=16.5),
               dict(cx=64.0, cy=-22.0)],
 
     material=dict(
         scale=dict(concrete_wall=1.6, concrete_floor=1.2, grass=1.4,
                    leaf_ground=0.8, wood_dark=1.0, brick_red=2.0),
-        asphalt_color=(0.16, 0.16, 0.17), asphalt_rough=0.85,  # scene17 상수
+        asphalt_color=(0.16, 0.16, 0.17), asphalt_rough=0.85,  # scene17 constant
         paint_color=(0.72, 0.72, 0.68), paint_rough=0.60,
-        wall_tint=(0.55, 0.53, 0.50),        # 측구 내벽 풍화 암화(텍스처 배율)
-        lip_tint=(0.82, 0.81, 0.78),         # 립·복개 슬래브(밝은 콘크리트)
-        dry_grass_tint=(0.62, 0.58, 0.34),   # 마른 잔디 버지
+        wall_tint=(0.55, 0.53, 0.50),        # weathered darkening of the channel inner walls (texture multiplier)
+        lip_tint=(0.82, 0.81, 0.78),         # lip and cover slab (light concrete)
+        dry_grass_tint=(0.62, 0.58, 0.34),   # dry grass verge
         leaf_tex_tint=(0.95, 0.72, 0.48),
         leaf_tints=((0.30, 0.14, 0.05), (0.38, 0.20, 0.06),
                     (0.25, 0.10, 0.04), (0.42, 0.28, 0.10)),
         leaf_rough=0.90,
-        # 컬버트 내부 암색 상수 — sRGB 감마 규칙(암색은 0.02~0.06 대역)
+        # dark constant inside the culvert - sRGB gamma rule (dark colours in the 0.02~0.06 band)
         dark_color=(0.030, 0.030, 0.032), dark_rough=0.95,
         rail_color=(0.80, 0.82, 0.85), rail_metallic=0.9, rail_rough=0.35,
         wood_color=(0.30, 0.20, 0.12), wood_rough=0.85,
@@ -267,13 +282,13 @@ PARAMS = dict(
         canopy_rough=1.0,
         glass_color=(0.06, 0.09, 0.12), glass_rough=0.08,
         parapet_color=(0.86, 0.85, 0.82), parapet_rough=0.60,
-        ridge_color=(0.26, 0.28, 0.26),          # (폴백 — 능선별 color 우선)
-        # --- [v6] 드레싱 상수색 ---
-        pole_color=(0.30, 0.27, 0.23), pole_rough=0.88,   # 풍화 목재 전신주
+        ridge_color=(0.26, 0.28, 0.26),          # (fallback - the per-ridge color wins)
+        # --- [v6] dressing constant colours ---
+        pole_color=(0.30, 0.27, 0.23), pole_rough=0.88,   # weathered timber utility pole
         wire_color=(0.045, 0.045, 0.048), wire_rough=0.60,
         mailbox_color=(0.38, 0.40, 0.42), mailbox_metallic=0.25,
         mailbox_rough=0.45,
-        bin_color=(0.055, 0.075, 0.050), bin_rough=0.70,  # 진녹 수거함(암색 규약)
+        bin_color=(0.055, 0.075, 0.050), bin_rough=0.70,  # dark-green wheelie bin (dark-colour convention)
         bin_lid_color=(0.42, 0.38, 0.06), bin_lid_rough=0.65,
     ),
 
@@ -286,24 +301,24 @@ PARAMS = dict(
         hdri_sun_rotz_offset=233.5,
         dome_rotation_step=15.0,
     ),
-    # ─── SUN_AZ_OFFSET 근거(씬별 재정의): 월드 태양 az ≈ 33.5+201.5 = **235°**
-    #     → 그림자 az = 55° (측구 종주축 +X 와 **55° 사각** — 사양 "종주축과
-    #       사각" 충족. 90°(직교)면 한쪽 벽 전면 직사/전면 음영으로 단조,
-    #       0/180°(축방향)면 양 벽이 동등해 부분 음영이 성립하지 않음).
-    #     정량 검산(elev 49.79 → 깊이 1 m 당 수평 그림자 0.8455 m):
-    #       도로측 상단 모서리(y=−0.50)의 그림자는 깊이 0.80 m 에서
+    # ─── SUN_AZ_OFFSET rationale (redefined per scene): world sun az ~ 33.5+201.5 = **235 deg**
+    #     -> shadow az = 55 deg (**55 deg oblique** to the channel's long axis +X - satisfies the spec's
+    #       "oblique to the long axis". At 90 deg (perpendicular) one wall is all direct sun and the
+    #       other all shade - monotonous; at 0/180 deg (axial) both walls are equal and no partial shading forms).
+    #     quantitative check (elev 49.79 -> 0.8455 m of horizontal shadow per 1 m of depth):
+    #       at a depth of 0.80 m the shadow of the road-side top edge (y=−0.50) lands at
     #       y = −0.50 + 0.8455·sin55°·0.80 = **+0.054**
-    #       ⇒ 도로측 내벽 = 전면 음영 / 바닥 y<0.054 음영·y>0.054 직사 /
-    #          버지측 내벽 = 직사.  개구 내부가 단일 흑색이 아니라 **부분 음영**
-    #          으로 읽혀 그레이징 은닉(특색)이 성립한다.
-    #     또한 태양이 카메라(+X 주시) 뒤쪽에 있어 노면·버지는 정면광.
-    #     [v6 신규 요소 그림자 검산] 그림자 변위(높이 h 당) = (+0.485h, +0.6925h)
-    #       — **+Y 방향(펜스쪽)** 이므로 y > 0.5 에 놓인 신규 요소의 그림자는
-    #       측구에서 더 멀어진다. 전신주(y=4.20, h=8.50)의 최대 변위도
-    #       y = 4.20 + 5.89 = +10.09 (펜스 6.40 너머 뒷마당) → **개구 도달 0**.
-    #       차도 건너편 소품(우편함·수거함 y≈−8.6, h≤1.05)은 Δy ≤ +0.73 →
-    #       y ≤ −7.87 로 갓길·노면 가장자리에 머문다(개구까지 7.2 m 남음).
-    #       진입로는 평면 패치라 그림자 없음. ⇒ 측구 부분 음영 프로파일 불변. ───
+    #       => road-side inner wall = fully shaded / bed y<0.054 shaded, y>0.054 in direct sun /
+    #          verge-side inner wall = direct sun.  The inside of the opening reads as **partial shade**
+    #          rather than a single black, which is what makes the grazing concealment (the scene trait) work.
+    #     the sun is also behind the camera (which looks +X), so road surface and verge are front-lit.
+    #     [v6 shadow check of the new elements] shadow displacement (per height h) = (+0.485h, +0.6925h)
+    #       - **toward +Y (the fence side)**, so shadows of new elements placed at y > 0.5 move
+    #       further away from the channel. Even the largest displacement, from the utility pole
+    #       (y=4.20, h=8.50), is y = 4.20 + 5.89 = +10.09 (back yard beyond the fence at 6.40) -> **zero reach into the opening**.
+    #       props across the road (mailbox · bin y~−8.6, h<=1.05) get delta y <= +0.73 ->
+    #       y <= −7.87, so they stay at the shoulder / road edge (7.2 m short of the opening).
+    #       the driveway is a flat patch and casts no shadow. => the channel's partial-shade profile is unchanged. ───
     SUN_AZ_OFFSET=201.5,
 
     render=dict(pt_total_spp=512, pt_max_bounces=8),
@@ -330,7 +345,7 @@ if _sc_ov:
 
 
 # ===========================================================================
-# [C] 경로 상수 + 필요 텍스처 역할
+# [C] path constants + required texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "sceneD3")
@@ -340,14 +355,14 @@ ASSET_ROLES = ["concrete_wall", "concrete_floor", "grass", "leaf_ground",
 
 
 # ===========================================================================
-# [D] 카메라 프리셋: grid_views(gy=0.0 = 측구 중심선) + 미장센 4컷
-#     gy 를 측구 중심선에 두어 그리드 프리셋 전부가 **종주 시점**이 된다.
+# [D] camera presets: grid_views (gy=0.0 = the channel centre line) + 4 mise-en-scene cuts
+#     putting gy on the channel centre line makes every grid preset a **longitudinal view**.
 # ===========================================================================
 def ground_plans():
-    """[W2 ground_kit] 지면 계획 2매 — 씬 조립부와 CPU 검산이 같은 함수를 쓴다.
+    """[W2 ground_kit] two ground plans - the scene assembly and the CPU numeric check use the same function.
 
-    ① `cover` : 복개 슬래브(보행면) — 낙차 개시 에지 x=0 을 안고 있다.
-    ② `road`  : 아스팔트 차도 — 전방 낙차 없음(`edges=()`).
+    (1) `cover` : the cover slab (walking surface) - it holds the drop-start edge x=0.
+    (2) `road`  : the asphalt roadway - no drop ahead (`edges=()`).
     """
     g = PARAMS["gkit"]
     cv, ch = PARAMS["cover"], PARAMS["ch"]
@@ -358,9 +373,9 @@ def ground_plans():
         z=float(cv["top"]), gy=0.0, origin=(0.0, 0.0, 0.0),
         edges=[("channel_open", float(ch["x_open"]))],
         dists=(2, 5, 10), scene="sceneD3",
-        tactile=(),                     # §12.4 — 비대상(농촌 도로변)
+        tactile=(),                     # §12.4 - not applicable (rural roadside)
         sites=dict(patch=[tuple(p) for p in g["cover_patches"]]),
-        #  주기·폭은 씬 승계, 음각만 −3 mm 로 심화(§5.7).
+        #  pitch and width inherited from the scene, only the recess deepened to −3 mm (§5.7).
         overrides=dict(pave=dict(joint="contraction",
                                  step_x=float(cv["joint_step"]),
                                  groove_w=float(cv["joint_w"]),
@@ -369,10 +384,10 @@ def ground_plans():
     road = gk.plan_ground(
         "verge_rural", region=tuple(g["road_region"]),
         z=float(PARAMS["road"]["top"]), gy=0.0, origin=(0.0, 0.0, 0.0),
-        edges=(),                       # 차도 전방에 낙차 없음
+        edges=(),                       # no drop ahead on the roadway
         dists=(2, 5, 10), scene="sceneD3",
         tactile=(),
-        #  아스팔트에는 수축줄눈이 없다 → 줄눈 0.
+        #  asphalt has no contraction joints -> zero joints.
         overrides=dict(pave=dict(joint=None)),
         seed=302)
     return [("cover", cover), ("road", road)]
@@ -380,33 +395,33 @@ def ground_plans():
 
 def build_views():
     views = sc.grid_views(0.0)                 # h{0.3,0.9,1.8}×d{2,5,10}, +X
-    # verge_walk: 버지를 따라 걷다 측구로 사교 접근 — 오버행이 에지를 덮는가
+    # verge_walk: walking along the verge, approaching the channel obliquely - does the overhang cover the edge
     views["verge_walk"] = dict(eye=[-6.0, 1.70, 1.60], tgt=[6.0, 0.35, -0.20])
-    # grazing_low: 종주 그레이징 저시점 — 개구가 가는 띠로 축소되는 극한
+    # grazing_low: low longitudinal grazing view - the extreme where the opening shrinks to a thin band
     views["grazing_low"] = dict(eye=[-4.0, 0.12, 0.35], tgt=[9.0, 0.05, -0.05])
-    # oblique_cross: 차도쪽에서 30° 사교 접근(미장센 사교 컷)
+    # oblique_cross: 30 deg oblique approach from the road side (the mise-en-scene oblique cut)
     views["oblique_cross"] = dict(eye=[-3.0, -5.20, 1.50],
                                   tgt=[6.0, 0.55, -0.35])
-    # channel_reveal: 근접 부감 — 사다리꼴 단면·부분 음영·바닥 낙엽 확인
+    # channel_reveal: close high angle - checks the trapezoidal section, partial shading and bed leaves
     views["channel_reveal"] = dict(eye=[1.20, 2.60, 1.90],
                                    tgt=[10.0, 0.00, -0.60])
-    # culvert_far: 원거리 컬버트 입구(암색 후퇴) 확인
+    # culvert_far: checks the distant culvert mouth (dark recess)
     views["culvert_far"] = dict(eye=[30.0, 1.10, 1.55], tgt=[40.0, 0.0, -0.40])
     return views
 
 
 # ===========================================================================
-# [D2] 카메라 검산 (v6 맥락 드레싱) — 순수 수학, SMOKE 에서 출력.
-#   Isaac 기본 카메라(focal 18.14756 / aperture 20.955) → hFOV 60°,
-#   1920×1080 → vFOV 36°. 반각 30°/18°.
-#   ① 카메라-신규프림 근접 충돌  ② **측구 시야 가림 = 0** (연장 시선 레이캐스트)
+# [D2] camera numeric check (v6 context dressing) - pure maths, printed under SMOKE.
+#   Isaac default camera (focal 18.14756 / aperture 20.955) -> hFOV 60 deg,
+#   1920x1080 -> vFOV 36 deg. Half-angles 30 deg/18 deg.
+#   (1) camera vs new-prim near collision  (2) **channel occlusion = 0** (extended sight-line ray cast)
 # ===========================================================================
 HFOV_HALF = 30.0
 VFOV_HALF = 18.0
 
 
 def _cam_angles(view, p):
-    """(yaw_rel°, elev_rel°, dist, in_frame) — 카메라 광축 기준 정확 변환."""
+    """(yaw_rel°, elev_rel°, dist, in_frame) - exact transform relative to the camera optical axis."""
     ex, ey, ez = view["eye"]
     tx, ty, tz = view["tgt"]
     fx, fy, fz = tx - ex, ty - ey, tz - ez
@@ -425,9 +440,10 @@ def _cam_angles(view, p):
 
 
 def _channel_hit(eye, p, t_max=60.0, step=0.02):
-    """eye→p 시선을 p **너머**로 연장해 측구 시야대(복개·립·개구·오버행 포함:
-    |y| ≤ 0.66, x ∈ [x_back, x_end], z ≥ −depth) 를 통과하는지 판정.
-    통과하면 (x, y) 반환 = 그 프림이 측구 픽셀을 가린다는 뜻. 아니면 None."""
+    """Extend the eye→p sight line **beyond** p and decide whether it passes through the
+    channel view band (cover · lip · opening · overhang included: |y| ≤ 0.66,
+    x ∈ [x_back, x_end], z ≥ −depth).
+    If it does, return (x, y) = that prim hides channel pixels. Otherwise None."""
     ex, ey, ez = eye
     dx, dy, dz = p[0] - ex, p[1] - ey, p[2] - ez
     ch = PARAMS["ch"]
@@ -444,22 +460,23 @@ def _channel_hit(eye, p, t_max=60.0, step=0.02):
 
 
 def pole_xs():
-    """[v5.1 §3] 전신주 x ±0.5 m 결정적 지터. 배전 전주는 지형·부지 사정으로
-    정확히 20 m 등간격이 되지 않는다 — 스팬 새그는 build_utility_line 이
-    실제 스팬 중점에서 계산하므로 지터 후에도 정합한다.
-    y(+4.20, 버지 중앙)는 불변 — 개구 이격 3.70 m 불변식 보존."""
+    """[v5.1 §3] deterministic x ±0.5 m jitter on the utility poles. Distribution poles
+    never land on an exact 20 m pitch because of terrain and site conditions - the
+    span sag is computed by build_utility_line at the real span mid-point, so it
+    stays consistent after the jitter.
+    y (+4.20, mid verge) is unchanged - it preserves the 3.70 m opening clearance invariant."""
     return [x + bc.jit_scalar(x, PARAMS["pole"]["y"], "poleD3", -0.5, 0.5)
             for x in PARAMS["poles"]]
 
 
 def back_hedge_xs():
-    """[v5.1 §3] 배경 생울타리 4구간 cx ±1.0 m 지터 (26 m 등간격 완화)."""
+    """[v5.1 §3] cx ±1.0 m jitter on the 4 background hedge stretches (relaxes the even 26 m pitch)."""
     return [h["cx"] + bc.jit_scalar(h["cx"], 0.0, "bhD3", -1.0, 1.0)
             for h in PARAMS["back_hedges"]]
 
 
 def _dressing_probes():
-    """검산 대상점: (이름, (x,y,z)) — v6 신규 드레싱의 대표 극단점."""
+    """Points to check: (name, (x,y,z)) - representative extreme points of the new v6 dressing."""
     P = []
     pl = PARAMS["pole"]
     for x in pole_xs():
@@ -527,7 +544,7 @@ def _dressing_report():
         names = [nm for nm, p in probes if _cam_angles(vw, p)[3]]
         print(f"  ③ {vn:15s} 프레임 내 {len(names):2d}종: "
               f"{', '.join(names[:5])}{' …' if len(names) > 5 else ''}")
-    # ④ 측구 불변식 · 지면 경계 여유
+    # (4) channel invariants · ground boundary margins
     ch = PARAMS["ch"]
     pl = PARAMS["pole"]
     dw = PARAMS["driveway"]
@@ -598,7 +615,7 @@ def main():
     ROOT = "/World/Scene30"
 
     ch = PARAMS["ch"]
-    # 벽 기울기(연직 대비) — 사다리꼴 단면에서 유도
+    # wall tilt (from vertical) - derived from the trapezoidal section
     TILT = math.degrees(math.atan2(ch["top_half"] - ch["bot_half"],
                                    ch["depth"]))
     SLOPE_LEN = math.hypot(ch["top_half"] - ch["bot_half"], ch["depth"])
@@ -614,7 +631,7 @@ def main():
         return sc.make_pbr(stage, path, *args, **kwargs)
 
     # -------------------------------------------------------------------
-    # 재질
+    # materials
     # -------------------------------------------------------------------
     def setup_materials():
         sca = mp["scale"]
@@ -665,13 +682,13 @@ def main():
         M["parapet"] = PBR(f"{ROOT}/Looks/Parapet",
                            diffuse_color=mp["parapet_color"],
                            roughness_const=mp["parapet_rough"])
-        # [v6-④] 능선은 대기원근 색을 개별 부여(폴백 = ridge_color)
+        # [v6-(4)] each ridge gets its own aerial-perspective colour (fallback = ridge_color)
         for i, r in enumerate(PARAMS["ridge"]):
             M[f"ridge_{i}"] = PBR(
                 f"{ROOT}/Looks/Ridge_{i}",
                 diffuse_color=r.get("color", mp["ridge_color"]),
                 roughness_const=0.95, specular_level=0.0)
-        # --- [v6] 드레싱 재질 ---
+        # --- [v6] dressing materials ---
         tl = PARAMS["treeline"]
         M["treeline"] = tex("grass", f"{ROOT}/Looks/Treeline", sca["grass"],
                             tint=tl["tint"])
@@ -691,7 +708,7 @@ def main():
         return M
 
     # -------------------------------------------------------------------
-    # 두 점 사이 원기둥(전선) — scene15 관례. Z축 실린더를 yaw/pitch 로 정렬.
+    # cylinder between two points (wire) - scene15 convention. A Z-axis cylinder aligned by yaw/pitch.
     # -------------------------------------------------------------------
     def _wire(path, a, b, r, mtl):
         from pxr import UsdGeom, UsdShade, Gf
@@ -714,8 +731,8 @@ def main():
         return cyl
 
     # -------------------------------------------------------------------
-    # 지면 — **개구대(y ±0.50, x≥0)를 덮지 않도록 y 로 분할** (교훈 5)
-    #   [원측 갓길 | 차도 | 립] · 개구 · [버지 | 뒷마당]
+    # ground - **split along y so that no plate covers the opening band (y +-0.50, x>=0)** (lesson 5)
+    #   [far shoulder | roadway | lip] · opening · [verge | back yard]
     # -------------------------------------------------------------------
     def build_ground(M):
         rd = PARAMS["road"]
@@ -734,21 +751,21 @@ def main():
                                    top - thick / 2.0),
                 (xb - xa, y1 - y0, thick), mtl, col=True)
 
-        # [W2-0 · P-A] 차도가 ground_kit 의 장식 대상이다 → 변위 스킨 OFF.
-        #   **plate() 호출 전에** 등록해야 한다(`add_box` 가 그 자리에서 판정).
+        # [W2-0 · P-A] the roadway is a decoration target of ground_kit -> displacement skin OFF.
+        #   it has to be registered **before plate() is called** (`add_box` decides on the spot).
         sc.skin_exclude(f"{ROOT}/Road")
-        # 차도(아스팔트) + 원측 갓길 + 버지 + 뒷마당
+        # roadway (asphalt) + far shoulder + verge + back yard
         plate("Road", rd["y0"], rd["y1"], rd["top"], rd["thick"], M["asphalt"])
         plate("FarSide", fs["y0"], fs["y1"], fs["top"], fs["thick"], M["grass"])
         plate("Verge", vg["y0"], vg["y1"], vg["top"], vg["thick"], M["grass"])
         plate("Yard", yd["y0"], yd["y1"], yd["top"], yd["thick"], M["grass"])
-        # 도로측 립 (노면과 flush, proud 0.002) — x는 개거 구간 + 복개 밑 0.30
+        # road-side lip (flush with the road, proud 0.002) - x spans the open stretch + 0.30 under the cover
         lip_mtl = M["conc"] if cfg["cue_material_break"] else M["asphalt"]
         plate("Lip", lp["y0"], lp["y1"], lp["top"], lp["top"] - lp["base_z"],
               lip_mtl, xa=lp["x0"], xb=cv["x1"])
-        # 컬버트 이후 매립 구간 — 개구대를 덮는 유일한 +X측 평판(뚜껑 + 본체).
-        # hazard_stairs=False(평지 대조군)에서는 FlatFill 이 개구선을 통째로
-        # 메우므로 여기서 만들면 상면 동일평면(Z-파이팅) → 위험 기하일 때만.
+        # buried stretch past the culvert - the only +X plate that covers the opening band (lid + main body).
+        # with hazard_stairs=False (the flat control) FlatFill fills the whole opening line, so
+        # building it here would make the top faces coplanar (Z-fighting) -> hazard geometry only.
         if cfg["hazard_stairs"]:
             plate("BeyondLid", by["y0"], by["y1"], by["top"], by["lid_t"],
                   M["grass"], xa=by["lid_x0"], xb=by["lid_x1"])
@@ -756,36 +773,36 @@ def main():
                   M["grass"], xa=by["lid_x1"], xb=x1)
 
     def build_cover(M):
-        """복개 슬래브 (x −22..0) — 보행 연속성의 원천이자 낙차 개시 에지.
+        """Cover slab (x −22..0) - the source of walking continuity and the drop-start edge.
 
-        [W2 §5.7] **줄눈은 여기서 만들지 않는다** — ground_kit 이 음각 −3 mm
-        로 다시 깐다(`build_ground_kit`). 구 코드의 양각 +1 mm 박판을 남겨
-        두면 같은 면에 두 격자가 겹친다(파일럿 결함 D6).
+        [W2 §5.7] **the joints are not made here** - ground_kit lays them again as a
+        −3 mm recess (`build_ground_kit`). Leaving the old code's +1 mm proud thin
+        plate would put two grids on the same surface (pilot defect D6).
         """
         cvr = PARAMS["cover"]
-        # [W2-0 · P-A] 복개 슬래브 상면이 ground_kit 의 무대다 → 스킨 OFF.
+        # [W2-0 · P-A] the cover slab top face is ground_kit's stage -> skin OFF.
         sc.skin_exclude(f"{ROOT}/CoverSlab")
         BOX(f"{ROOT}/CoverSlab",
             ((ch["x_back"] + ch["x_open"]) / 2.0,
              (cvr["y0"] + cvr["y1"]) / 2.0, cvr["top"] - cvr["thick"] / 2.0),
             (ch["x_open"] - ch["x_back"], cvr["y1"] - cvr["y0"],
              cvr["thick"]), M["conc"], col=True)
-        # (줄눈은 ground_kit `build_joint_grid` 로 이관 — 위 docstring 참조)
+        # (the joints moved to ground_kit `build_joint_grid` - see the docstring above)
 
     # -------------------------------------------------------------------
-    # 측구 — 경사 내벽 2매(_oriented_box rotX) + 바닥판
+    # channel - 2 sloped inner walls (_oriented_box rotX) + bed slab
     # -------------------------------------------------------------------
     def build_channel(M):
-        ph = math.radians(TILT)               # φ (연직 대비 벽 기울기)
+        ph = math.radians(TILT)               # φ (wall tilt from vertical)
         t = ch["wall_t"]
         mid_y = (ch["top_half"] + ch["bot_half"]) / 2.0     # 0.375
-        uy, uz = math.sin(ph), math.cos(ph)   # u: 사면 상향 단위벡터
-        ny, nz = math.cos(ph), -math.sin(ph)  # n: 바깥 법선(로컬 +Y, θ=−φ)
-        ext = SLOPE_LEN * (ch["wall_ext"] - 1.0)   # 연장분(하단으로만)
+        uy, uz = math.sin(ph), math.cos(ph)   # u: up-slope unit vector
+        ny, nz = math.cos(ph), -math.sin(ph)  # n: outward normal (local +Y, θ=−φ)
+        ext = SLOPE_LEN * (ch["wall_ext"] - 1.0)   # the extension (downwards only)
         cy = mid_y + (t / 2.0) * ny - 0.5 * ext * uy
         cz = -ch["depth"] / 2.0 + (t / 2.0) * nz - 0.5 * ext * uz
-        cz -= ch["edge_sink"]                 # 상단 모서리 침하(동일평면 회피)
-        xa, xb = ch["x_back"], ch["x_end"] + 0.30      # 헤드월 안으로 0.30 매입
+        cz -= ch["edge_sink"]                 # top edge sinks (avoids coplanarity)
+        xa, xb = ch["x_back"], ch["x_end"] + 0.30      # buried 0.30 into the headwall
         cx = (xa + xb) / 2.0
         for tag, sgn in (("N", 1.0), ("S", -1.0)):
             sc._oriented_box(
@@ -793,12 +810,12 @@ def main():
                 (cx, sgn * cy, cz),
                 (xb - xa, t, SLOPE_LEN * ch["wall_ext"]), M["chwall"],
                 collider=True, rotx=-sgn * TILT)
-        # 바닥판(인버트) — 벽 하단을 받아 밀폐. 노출 폭은 벽 사이 2·bot_half.
+        # bed slab (invert) - carries the wall bottoms and seals. Exposed width between the walls is 2·bot_half.
         BOX(f"{ROOT}/ChInvert",
             (cx, 0.0, -ch["depth"] - ch["invert_t"] / 2.0),
             (xb - xa, 2.0 * ch["invert_half"], ch["invert_t"]),
             M["chwall"], col=True)
-        # 복개 구간 후단 마감(원경 광 누출 차단)
+        # rear cap of the covered stretch (blocks distant light leaks)
         BOX(f"{ROOT}/ChBackCap",
             (ch["x_back"] - 0.15, 0.0, -ch["depth"] / 2.0),
             (0.30, 2.0 * ch["invert_half"], ch["depth"] + 0.4), M["dark"])
@@ -807,7 +824,7 @@ def main():
               f"내벽 기울기 {TILT:.3f}° · 사면장 {SLOPE_LEN:.4f} m")
 
     def build_road_paint(M):
-        """백색 중앙 파선 + 노측 실선 (paint 박스, proud 0.002)."""
+        """White centre dashes + edge line on the road side (paint boxes, proud 0.002)."""
         rd = PARAMS["road"]
         ds = PARAMS["dash"]
         n = 0
@@ -824,28 +841,28 @@ def main():
             (rd["x1"] - rd["x0"], el["w"], 0.02), M["paint"])
 
     # -------------------------------------------------------------------
-    # 풀 오버행 — build_hedge 저고 스트립이 개구 에지(y=+0.50)를 걸침
+    # grass overhang - low build_hedge strips straddling the opening edge (y=+0.50)
     # -------------------------------------------------------------------
     def build_overhang(M):
         ov = PARAMS["overhang"]
         rng = random.Random(int(ov["seed"]))
         step = ov["x_span"] / float(ov["count"])
         for i in range(int(ov["count"])):
-            xa = ov["x0"] + i * step   # r4: 지터 제거 — 간극 없는 연속 잔디 립(끊긴 판재감 해소)
+            xa = ov["x0"] + i * step   # r4: jitter removed - a continuous grass lip with no gaps (fixes the broken-plank look)
             xb = xa + rng.uniform(ov["len_lo"], ov["len_hi"])
             y_in = ch["top_half"] - rng.uniform(ov["over_lo"], ov["over_hi"])
             y_out = ch["top_half"] + rng.uniform(ov["out_lo"], ov["out_hi"])
             h = rng.uniform(ov["h_lo"], ov["h_hi"])
             sc.build_hedge(stage, f"{ROOT}/Overhang_{i}", xa, y_in, xb, y_out,
-                           h, mtl=M["grass"], base_z=-0.04)  # r1: 버지면 매입(부유 해소)
+                           h, mtl=M["grass"], base_z=-0.04)  # r1: sunk into the verge surface (fixes floating)
 
     # -------------------------------------------------------------------
-    # 측구 바닥 낙엽 — 패치 판 + 산포 타원체(고정 시드)
+    # fallen leaves on the channel bed - patch plates + scattered ellipsoids (fixed seed)
     # -------------------------------------------------------------------
     def build_bed_leaf(M):
         bl = PARAMS["bed_leaf"]
         rng = random.Random(int(bl["seed"]))
-        z_top = -ch["depth"] + bl["sink"]      # 바닥판 상면 위 2.5cm
+        z_top = -ch["depth"] + bl["sink"]      # 2.5 cm above the bed slab top face
         step = bl["x_span"] / float(bl["patches"])
         for i in range(int(bl["patches"])):
             xa = bl["x0"] + i * step + rng.uniform(0.0, step * 0.5)
@@ -870,29 +887,29 @@ def main():
                           mats[rng.randrange(len(mats))])
 
     # -------------------------------------------------------------------
-    # 박스 컬버트 입구 — 개구 4분할(교훈 5) + 암색 후퇴
+    # box culvert mouth - the opening split into 4 (lesson 5) + dark recess
     # -------------------------------------------------------------------
     def build_culvert(M):
         cv = PARAMS["culvert"]
         cx = (cv["x0"] + cv["x1"]) / 2.0
         lx = cv["x1"] - cv["x0"]
-        # ① 좌 ② 우 (개구 y ±op_half 바깥, 전 높이)
+        # (1) left (2) right (outside the opening y +-op_half, full height)
         for tag, ya, yb in (("N", cv["op_half"], cv["y_half"]),
                             ("S", -cv["y_half"], -cv["op_half"])):
             BOX(f"{ROOT}/Culvert_{tag}",
                 (cx, (ya + yb) / 2.0, (cv["z_top"] + cv["z_bot"]) / 2.0),
                 (lx, yb - ya, cv["z_top"] - cv["z_bot"]), M["conc"], col=True)
-        # ③ 상인방 (개구 상단 ~ 헤드월 천단)
+        # (3) lintel (from the opening top to the headwall crown)
         BOX(f"{ROOT}/Culvert_Top",
             (cx, 0.0, (cv["op_top"] + cv["z_top"]) / 2.0),
             (lx, 2.0 * cv["op_half"], cv["z_top"] - cv["op_top"]),
             M["conc"], col=True)
-        # ④ 하부 문턱 (인버트보다 1cm 융기 → 동일평면 회피 + 입구 단차 연출)
+        # (4) lower sill (1 cm above the invert -> avoids coplanarity + stages an entry step)
         BOX(f"{ROOT}/Culvert_Sill",
             (cx, 0.0, (cv["z_bot"] + cv["sill_top"]) / 2.0),
             (lx, 2.0 * cv["op_half"], cv["sill_top"] - cv["z_bot"]),
             M["conc"], col=True)
-        # 암색 후퇴부 (개구 뒤 어둠) — 완전 흑 금지: 상수 0.030 + 개구 통과광
+        # dark recess (the darkness behind the opening) - never pure black: constant 0.030 + light through the opening
         BOX(f"{ROOT}/CulvertDark",
             ((cv["x1"] + cv["dark_x1"]) / 2.0, 0.0,
              (cv["z_bot"] + cv["dark_top"]) / 2.0),
@@ -900,7 +917,7 @@ def main():
              cv["dark_top"] - cv["z_bot"]), M["dark"])
 
     # -------------------------------------------------------------------
-    # 단서 (cue) — 기본 OFF
+    # cues (cue) - default OFF
     # -------------------------------------------------------------------
     def build_cues(M):
         if cfg["cue_railing"]:
@@ -920,7 +937,7 @@ def main():
                              z=PARAMS["cover"]["top"], proud=tc["proud"])
 
     # -------------------------------------------------------------------
-    # 드레싱 + 지평 폐쇄
+    # dressing + horizon closure
     # -------------------------------------------------------------------
     def build_dressing(M):
         fc = PARAMS["fence"]
@@ -943,22 +960,22 @@ def main():
         build_kerb_props(M)
 
     # -------------------------------------------------------------------
-    # [v6-①] 전신주 4본 + 전선 3선 — 버지 y=+4.20 (개구 에지에서 3.70 m).
-    #   그림자는 +Y(펜스쪽)로만 뻗어 측구 부분 음영 프로파일에 영향 없음.
-    #   스팬은 중점 새그(2세그 절선)로 근사 — 곡선 프림 없이 처짐 실루엣 확보.
+    # [v6-(1)] 4 utility poles + 3 wires - verge y=+4.20 (3.70 m from the opening edge).
+    #   the shadows run only toward +Y (the fence side), so the channel's partial-shade profile is unaffected.
+    #   each span is approximated by a mid-point sag (2-segment polyline) - a droop silhouette without curved prims.
     # -------------------------------------------------------------------
     def build_utility_line(M):
         pl = PARAMS["pole"]
-        xs = pole_xs()                          # v5.1 §3 등간격 지터
+        xs = pole_xs()                          # v5.1 §3 even-spacing jitter
         for i, x in enumerate(xs):
             base = f"{ROOT}/Pole_{i}"
             CYL(f"{base}/Shaft", (x, pl["y"], pl["h"] / 2.0),
                 pl["r"], pl["h"], M["pole"], col=True)
-            # 완목(crossarm) — 상면이 전선 하단(wire_z − wire_r)에 접함
+            # crossarm - its top face touches the underside of the wires (wire_z − wire_r)
             arm_top = pl["wire_z"] - pl["wire_r"]
             BOX(f"{base}/Arm", (x, pl["y"], arm_top - pl["arm_h"] / 2.0),
                 (pl["arm_t"], pl["arm_len"], pl["arm_h"]), M["pole"])
-        # 전선: 스팬(pole→pole) + 진행 반대편 스텁(전 카메라 후방에서 종단)
+        # wires: the spans (pole->pole) + a stub on the far side (terminating behind every camera)
         spans = [(pl["stub_x"], xs[0], pl["stub_z"], pl["wire_z"])]
         spans += [(xs[k], xs[k + 1], pl["wire_z"], pl["wire_z"])
                   for k in range(len(xs) - 1)]
@@ -973,8 +990,8 @@ def main():
                       pl["wire_r"], M["wire"])
 
     # -------------------------------------------------------------------
-    # [v6-②] 주택 진입로 — **차도 건너편**(측구와 7.4 m 이격). 노면 위 0.15 겹침
-    #   + 상면 proud 0.002 → 동일평면 Z-파이팅 회피. 주택 A 셸 밑 0.15 매입.
+    # [v6-(2)] house driveway - **across the road** (7.4 m from the channel). Overlaps the road by 0.15
+    #   + top proud 0.002 -> avoids coplanar Z-fighting. Buried 0.15 under the house A shell.
     # -------------------------------------------------------------------
     def build_driveway(M):
         dw = PARAMS["driveway"]
@@ -985,7 +1002,7 @@ def main():
             M["conc"], col=True)
 
     # -------------------------------------------------------------------
-    # [v6-③] 우편함 · 수거함 — 진입로 좌우 갓길(y ≈ −8.6, 차도 건너편).
+    # [v6-(3)] mailbox · wheelie bin - shoulders either side of the driveway (y ~ −8.6, across the road).
     # -------------------------------------------------------------------
     def build_kerb_props(M):
         mb = PARAMS["mailbox"]
@@ -1001,9 +1018,9 @@ def main():
             (bn["w"] + 0.02, bn["d"] + 0.02, bn["lid_t"]), M["bin_lid"])
 
     # -------------------------------------------------------------------
-    # [W2] ground_kit — P17 verge_rural(**자연 씬**). 복개 슬래브 + 차도
-    #   2계획. 도시 인프라 0건은 `plan_ground` 가 코드로 강제한다(§3.4).
-    #   개거 단면·컬버트·립 등 U형 개거 정체성 기하는 일절 손대지 않는다.
+    # [W2] ground_kit - P17 verge_rural (**natural scene**). Two plans: the cover slab
+    #   and the roadway. Zero urban infrastructure is enforced in code by `plan_ground` (§3.4).
+    #   the U-channel identity geometry (channel section, culvert, lip) is not touched at all.
     # -------------------------------------------------------------------
     def build_ground_kit(M):
         kit = gk.kit_from_scene_common(sc, stage)
@@ -1027,9 +1044,9 @@ def main():
 
     def build_horizon(M):
         bh = PARAMS["back_hedge"]
-        # [v5.1 §3·§4] 등간격 26 m → ±1.0 m 지터 + 구간별 ±5% 틴트 지터.
-        #   (동일 재질 4연속 = '복제 벽' 인상. 실제 생울타리는 수종·관리
-        #    상태 차로 구간마다 녹색이 갈린다.)
+        # [v5.1 §3·§4] even 26 m spacing -> +-1.0 m jitter + +-5% tint jitter per stretch.
+        #   (4 identical materials in a row = a 'cloned wall' look. Real hedges differ in green
+        #    from stretch to stretch through species and upkeep.)
         for i, hx in enumerate(back_hedge_xs()):
             sc.build_hedge(stage, f"{ROOT}/BackHedge_{i}",
                            hx - bh["length"] / 2.0,
@@ -1041,7 +1058,7 @@ def main():
         for i, r in enumerate(PARAMS["ridge"]):
             BOX(f"{ROOT}/Ridge_{i}", (r["cx"], r["cy"], r["h"] / 2.0),
                 (r["t"], r["sy"], r["h"]), M[f"ridge_{i}"], col=True)
-        # [v6-④] 수림대 — 능선 앞 절단선을 수관 실루엣으로 분절(백색 벽 해소).
+        # [v6-(4)] treeline - breaks the cut line in front of the ridge with canopy silhouettes (clears the white wall).
         tl = PARAMS["treeline"]
         for i, (cy, h) in enumerate(zip(tl["cys"], tl["hs"])):
             sc.build_hedge(stage, f"{ROOT}/TreeLine_{i}",
@@ -1050,9 +1067,9 @@ def main():
                            mtl=M["treeline"], base_z=tl["base_z"])
 
     def build_flat_fill(M):
-        """hazard_stairs=False 대조군 : 개구를 메워 전 구간 z=0 평지."""
+        """hazard_stairs=False control : the opening is filled, flat z=0 throughout."""
         by = PARAMS["beyond"]
-        # [W2-0 · P-A] 대조군에서도 복개면 요소가 그대로 놓인다 → 스킨 OFF.
+        # [W2-0 · P-A] cover-surface elements are placed in the control too -> skin OFF.
         sc.skin_exclude(f"{ROOT}/FlatFill")
         rd = PARAMS["road"]
         BOX(f"{ROOT}/FlatFill",
@@ -1061,7 +1078,7 @@ def main():
             (rd["x1"] - rd["x0"], by["y1"] - by["y0"], by["thick"]),
             M["grass"], col=True)
 
-    # ── 씬 조립 ──
+    # ── scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
     M = setup_materials()
 
@@ -1080,7 +1097,7 @@ def main():
 
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
-    build_ground_kit(M)                  # [W2] 지면 요소 — 드레싱 뒤(산포 규약)
+    build_ground_kit(M)                  # [W2] ground elements - after the dressing (scatter convention)
     build_horizon(M)
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],

@@ -1,54 +1,57 @@
 # -*- coding: utf-8 -*-
 """
-sceneN4_downhill_ramp.py — NegObs 인공씬 24호: 내리막 완경사로 (Isaac Sim 4.5)
+sceneN4_downhill_ramp.py - NegObs synthetic scene 24: downhill gentle ramp (Isaac Sim 4.5)
 
-유형    : N4 hard negative — 보행 가능 완경사(5%) · **GT = 전 픽셀 "낙차 없음"**
-사양서  : Docs/nanobanana_batch1_geometry_map.md §A sceneN4_downhill_ramp
-룩 레퍼 : look_refs/n4_ramp.jpg (콘크리트 옹벽 사이 폭 4 m 직선로)
-공통    : scene_common.py (build_slope / add_box / 드레싱·조명 하네스)
+Type    : N4 hard negative - a walkable gentle slope (5%) · **GT = "no drop" on every pixel**
+Spec    : Docs/nanobanana_batch1_geometry_map.md §A sceneN4_downhill_ramp
+Look ref: look_refs/n4_ramp.jpg (a 4 m wide straight road between concrete retaining walls)
+Shared  : scene_common.py (build_slope / add_box / dressing and lighting harness)
 
-위험 본질(반례): 노면이 시야에서 아래로 사라지고 좌우 옹벽이 수렴하는 구도는
-           "노면 끝 = 낙차"라는 오검출을 유발한다. 그러나 실제 기하는 5%(1:20)
-           완경사 — 주행·보행 모두 가능하고 낙차는 **어디에도 없다**.
-           S1(노변 이탈) 갈래의 반례이자 T21(램프-계단 대비쌍)의 단독 버전.
-목표     : 진입 평지(x<0) → 5% 경사 30 m(낙차 1.5) → 평탄 착지 → 원경 지면·수목·
-           건물로 지평 폐쇄. 좌우 콘크리트 옹벽(노면 위 1.6 m)이 경사를 추종.
+Hazard (counter-example): a composition where the road surface disappears downward out of view
+          and the two retaining walls converge invites the false positive "end of road = drop".
+          But the real geometry is a 5% (1:20) gentle slope - drivable and walkable, and there is
+          **no drop anywhere**. It is the counter-example of the S1 (roadside departure) branch
+          and the standalone version of T21 (ramp-vs-stair contrast pair).
+Goal    : Entry flat (x<0) -> 5% slope over 30 m (drop 1.5) -> flat landing -> horizon closed by
+          distant ground, trees and buildings. Concrete retaining walls on both sides (1.6 m above
+          the road) follow the slope.
 
-GT 규약  : 낙차 없음(전 픽셀 0). **대지도 노면과 함께 5%로 하강**시켜 옹벽 뒤편에
-           단차가 생기지 않게 했다(옹벽은 옹벽이 아니라 경사면 위 자립 방호벽).
-           → 프레임 어디에도 실제 수직 낙차가 존재하지 않는다. 미장센 컷도 회랑
-           내부에서만 잡아 이 불변식을 깨지 않는다.
+GT rule  : No drop (0 on every pixel). **The site descends at 5% together with the road** so that no
+          level difference appears behind the walls (they are not retaining walls but free-standing
+          guard walls on a slope).
+          -> No real vertical drop exists anywhere in the frame. The mise-en-scene shots are also
+          framed only from inside the corridor so they do not break this invariant.
 
 ────────────────────────────────────────────────────────────────────────────
-[v6 맥락 드레싱] 감사 v4 "휑함" 지적 반영 — "여기가 어디인지" 읽히게.
-  ① 노면 재질 교정: concrete_floor 텍스처가 난색(황토)이라 r1 렌더에서 흙길로
-     읽혔다 → road_tint (0.80,0.86,0.94) 를 걸어 중성 회색 콘크리트로 냉각.
-     (텍스처 평균 R:G:B ≈ 1:0.89:0.74 → 완전 중성화 틴트는 (0.74,0.83,1.00).
-      실물 콘크리트는 미세 난색이 자연스러워 70% 만 보정 = 잔류비 1:0.96:0.87)
-     + 신축이음 횡줄눈(4 m 간격, 폭 0.06, proud 0.001) 으로 '포장 램프' 확정.
-  ② 옹벽 상단 가드레일 1선(양측) — build_railing_line, 경사 추종 + 착지 평구간
-     연장. 상부 여백(휑한 하늘/벽면)을 채우고 보행 통로임을 확정.
-  ③ 가로등 3본 — **-Y(남) 측 잔디에만** 배치. 태양 방위상 그림자가 −Y 로만
-     뻗어 노면에 신규 그림자가 **0** 이다(§검산). 암(arm)이 회랑 상공으로 뻗어
-     '차도/보도 조명'의 도시 리듬을 준다.
-  ④ 옹벽면 안내판 3매(남측 = 직사광 면) + 진입부 안내 사인 1본(한글 텍스처).
-  ⑤ 진입 볼라드 2 → 4 (2열) — 보행 진입부 리듬.
-  ⑥ 원경 저층 건물 2동(L1·L2) — 기존 원경 건물 F(h12) 앞에 h5.0/4.2 지붕을
-     깔아 스카이라인 층위 형성. 회랑 시야각 안(|y| 작음)에 두어 옹벽에 가리지
-     않는 x·y 로 검산 배치.
-  ⑦ GT 불변: 신규 요소는 전부 지면 위 기립물 — 수직 낙차·개구·단차 신설 없음.
+[v6 context dressing] Answers the "emptiness" finding of audit v4 - make it read as "where am I".
+  (1) Road material correction: the concrete_floor texture is warm (ochre) and read as a dirt track
+     in the r1 render -> apply road_tint (0.80,0.86,0.94) to cool it to neutral grey concrete.
+     (Texture mean R:G:B ~ 1:0.89:0.74 -> a fully neutralising tint would be (0.74,0.83,1.00).
+      Real concrete looks natural slightly warm, so only 70% is corrected = residual ratio 1:0.96:0.87)
+     + transverse expansion joints (4 m spacing, width 0.06, proud 0.001) confirm it as a 'paved ramp'.
+  (2) 1 guardrail line on top of each wall - build_railing_line, follows the slope + extends over the
+     flat landing. Fills the empty upper area (bare sky/wall face) and confirms it as a walkway.
+  (3) 3 street lamps - placed **only on the -Y (south) grass**. Given the sun azimuth the shadows fall
+     only toward −Y, so new shadows on the road are **0** (§check). The arms reach out over the
+     corridor, giving the urban rhythm of 'roadway/sidewalk lighting'.
+  (4) 3 plates on the wall face (south side = the sunlit face) + 1 information sign at the entry (Korean texture).
+  (5) Entry bollards 2 -> 4 (2 rows) - rhythm at the pedestrian entry.
+  (6) 2 distant low-rise buildings (L1·L2) - h5.0/4.2 roofs laid in front of the existing distant
+     building F (h12) to form skyline tiers. Placed by calculation at x·y that keep them inside the
+     corridor view angle (small |y|) and unoccluded by the walls.
+  (7) GT invariant: every new element is an object standing on the ground - no new vertical drop, opening or level difference.
 ────────────────────────────────────────────────────────────────────────────
 
-실행 (GUI 룩 체크 — 기본):
+Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
     export PYTHONNOUSERSITE=1
     python sceneN4_downhill_ramp.py
 
-자동 캡처 (headless):   NEGOBS_CAPTURE=1 python sceneN4_downhill_ramp.py
-스모크 조기종료:        NEGOBS_SMOKE=1  python sceneN4_downhill_ramp.py
+Auto capture (headless):  NEGOBS_CAPTURE=1 python sceneN4_downhill_ramp.py
+Smoke early exit:         NEGOBS_SMOKE=1  python sceneN4_downhill_ramp.py
 
-좌표계: Z-up, m, 진행축 +X, 경사 시작(크레스트) = x=0.
+Coordinates: Z-up, m, travel axis +X, slope start (crest) = x=0.
 """
 
 import os
@@ -63,23 +66,23 @@ import ground_kit as gk
 
 
 # ===========================================================================
-# [A] SCENE_CONFIG — 표준 7키.
-#     낙차가 없는 씬이므로 hazard_stairs 키는 **특색 요소(경사) 토글**로 재정의.
+# [A] SCENE_CONFIG - standard 7 keys.
+#     The scene has no drop, so the hazard_stairs key is redefined as the **signature-element (slope) toggle**.
 # ===========================================================================
 SCENE_CONFIG = {
-    # False → 경사 제거, 전 구간 z=0 평지(옹벽 높이 일정). 기하 토글 유일 예외.
+    # False -> remove the slope, z=0 flat throughout (retaining wall height constant). The one geometry-toggle exception.
     "hazard_stairs":      True,
-    # 옹벽 자체가 방호 — True면 옹벽 상단에 '연속 파이프 1선'(포스트 없음) 추가.
-    # [v6] 맥락 드레싱이 켜지면 정식 가드레일(포스트+상·중단 2선)이 같은 y·z 에
-    #      이미 서므로 중복(동축 실린더 = Z-파이팅)을 피해 cue 레일은 생략한다.
-    #      → cue_scene_dressing=False 인 순수 기하 컷에서만 cue 레일이 나온다.
+    # The retaining wall itself is the guard - if True, add a 'single continuous pipe' (no posts) on top of the wall.
+    # [v6] When the context dressing is on, the proper guardrail (posts + top/mid rails) already stands at the
+    #      same y·z, so the cue rail is skipped to avoid duplication (coaxial cylinders = Z-fighting).
+    #      -> the cue rail only appears in pure-geometry shots with cue_scene_dressing=False.
     "cue_railing":        False,
-    "cue_tactile":        False,  # 미관행 — 코드 경로만 예약
-    "cue_material_break": True,   # True → 진입 평지 아스팔트 vs 경사 콘크리트
-                                  # False → 전 구간 콘크리트(경사 시작 경계 소실)
-    "cue_nosing":         False,  # [선택] 계단 없음 — 키만 예약
-    "cue_sign":           False,  # [선택] 미구현 — 키만 예약
-    "cue_scene_dressing": True,   # 볼라드·원경 수목/생울타리/건물 일괄
+    "cue_tactile":        False,  # not customary - code path reserved only
+    "cue_material_break": True,   # True -> asphalt on the entry flat vs concrete on the slope
+                                  # False -> concrete throughout (the slope-start boundary disappears)
+    "cue_nosing":         False,  # [optional] no stairs - key reserved only
+    "cue_sign":           False,  # [optional] not implemented - key reserved only
+    "cue_scene_dressing": True,   # bollards and distant trees/hedges/buildings together
 }
 
 
@@ -87,126 +90,126 @@ SCENE_CONFIG = {
 # [B] PARAMS
 # ===========================================================================
 PARAMS = dict(
-    # --- 경사: run 30 · drop 1.5 → 5.0%(1:20). 크레스트 x=0, 착지 x=30 ---
+    # --- Slope: run 30 · drop 1.5 -> 5.0% (1:20). Crest x=0, landing x=30 ---
     ramp=dict(x0=0.0, run=30.0, drop=1.5, y0=-2.0, y1=2.0, thick=0.6),
-    # --- 진입 평지(x<0) : 보행 연속성(교훈 9) 시작 구간 ---
+    # --- Entry flat (x<0): the start section for walking continuity (lesson 9) ---
     approach=dict(x0=-14.0, x1=0.02, z_top=0.0, thick=0.6),
-    # --- 평탄 착지 + 하부 평야 (경사 끝 z=-1.5) ---
+    # --- Flat landing + lower plain (slope end z=-1.5) ---
     landing=dict(x0=29.98, x1=60.0, z_top=-1.5, thick=0.6),
-    # --- 옹벽(방호벽): 노면 위 wall_h, 두께 t, 내면 y=±y_in ---
+    # --- Retaining wall (guard wall): wall_h above the road, thickness t, inner face y=+-y_in ---
     wall=dict(y_in=2.0, thick=0.35, wall_h=1.6, depth=3.2, x_end=45.0),
-    # --- 대지: 회랑 밖 잔디. **노면과 동일하게 5% 하강**(옹벽 뒤 단차 0) ---
+    # --- Site: grass outside the corridor. **Descends 5% exactly like the road** (0 level difference behind the wall) ---
     ground=dict(half_y=60.0, x_w=-60.0, x_e=130.0, thick=1.0),
-    # --- 원경(지평 폐쇄) ---
+    # --- Distance (horizon closure) ---
     far=dict(hedge_x=72.0, hedge_h=1.8, hedge_len=30.0,
              hedge_cys=(-30.0, 0.0, 30.0),
              tree_x=80.0, tree_cys=(-16.0, 0.0, 16.0),
              ridge=dict(x0=100.0, x1=118.0, y0=-60.0, y1=60.0, h=6.0)),
     buildings=dict(
-        # 정면(+X) 비스타 차단 — 파사드 -X평면. 상면 z = -1.5+12 = 10.5
-        # → 카메라(h0.9, x-5)에서 +5.8° (지평선 위) → 하늘 노출 차단 검증됨.
+        # Blocks the frontal (+X) vista - facade on the -X plane. Top face z = -1.5+12 = 10.5
+        # -> +5.8 deg from the camera (h0.9, x-5) (above the horizon) -> sky exposure verified as blocked.
         F=dict(x0=90.0, x1=98.0, y0=-16.0, y1=16.0, h=12.0, floors=4,
                axis="x", facade_x=90.0, face_dir=-1.0, base_z=-1.5),
-        # [v6-⑥] 저층 지붕 2동 — 착지부 너머 스카이라인 층위.
-        #   옹벽(h1.6, x_end 45)이 만드는 가림 쐐기 때문에 |y| 가 크면 전부 가려
-        #   진다: 시선이 y=±2.0 을 넘는 x 에서 옹벽 상단보다 높아야 보인다.
-        #   L1(y 4..10, x 62..70): 시선이 y=2 를 x≈30.5 에서 통과 → 그 지점 옹벽
-        #     상단 z=0.1, 시선 z=2.45 → 가림 없음(검산 OK).
-        #   L2(y −12..−5, x 56..64): y=−2 통과 x≈21.8, 옹벽 상단 0.51,
-        #     시선 z=1.82 → 가림 없음.
-        #   둘 다 원경 하늘 폐쇄용 F(상단 10.5) 앞에 있어 하늘 틈을 만들지 않음.
+        # [v6-(6)] 2 low-rise roofs - a skyline tier beyond the landing.
+        #   Because of the occlusion wedge made by the retaining wall (h1.6, x_end 45), anything at large |y|
+        #   is fully hidden: the sight line must be above the wall top at the x where it crosses y=+-2.0.
+        #   L1 (y 4..10, x 62..70): the sight line crosses y=2 at x~30.5 -> wall top there is
+        #     z=0.1, sight line z=2.45 -> not occluded (check OK).
+        #   L2 (y −12..−5, x 56..64): crosses y=−2 at x~21.8, wall top 0.51,
+        #     sight line z=1.82 -> not occluded.
+        #   Both sit in front of F (top 10.5), the distant sky closure, so they open no gap of sky.
         L1=dict(x0=62.0, x1=70.0, y0=4.0, y1=10.0, h=5.0, floors=2,
                 axis="x", facade_x=62.0, face_dir=-1.0, base_z=-1.5),
         L2=dict(x0=56.0, x1=64.0, y0=-12.0, y1=-5.0, h=4.2, floors=1,
                 axis="x", facade_x=56.0, face_dir=-1.0, base_z=-1.5),
     ),
     window=dict(w=1.2, h=1.6, inset=0.15, col_step=2.5, margin=2.0),
-    # --- 소품 ---
-    # ── 볼라드 [v6-⑤ → v5.1 §2 · ctx2] 램프 진입부(x<0 평지) 2열 ──────────
-    #   구(舊): y=±1.55 (간격 3.10 m) · h0.75 · 반사띠/점형블록 없음.
-    #   신(新): 규격 h0.90·φ0.12 + 상단 백색 반사띠 + 전면(−X = 보행 접근측)
-    #   0.3 m 점형블록. **간격 1.5 m 내외로 재배열**: y=±0.80
-    #     · 볼라드↔볼라드 1.60 m  · 볼라드↔옹벽내면(y=±2.0) 1.20 m
-    #     둘 다 "1.5 m 내외" 대역이고, 최대 개구 1.60 m < 승용차 폭(1.8 m)
-    #     이므로 차량 진입 차단이라는 기능도 성립한다.
-    #   ★ 특색 보존 검산(_dressing_report 실측, hFOV60/vFOV36):
-    #     −0.9 열 |yaw| = 37.1°(h0.3_d2) / 34.6°(h0.9_d2) / 31.3°(h1.8_d2)
-    #       → 전부 프레임 반각 30° 밖. h1.8_d2 는 수평 여유가 1.3° 로 얇지만
-    #         el −36.4° 로 **수직 반각 18° 를 크게 벗어나** 이중으로 안전.
-    #         h0.9_d2 는 실루엣 반각(0.06/1.43 = 2.4°)을 빼도 32.2° > 30°.
-    #     −3.6 열은 d2 에서 |yaw| ≈ 150° = 카메라 후방.
-    #     ramp_head(eye −1.0)에서도 |yaw| 79.5° 로 화면 밖.
-    #     점형블록 소판은 더 바깥(|yaw| 43.9~52.0°) → 판정 요소 무간섭.
-    #     d5·d10 에서만 프레임 안에 들어오며, 소실선(x ≥ 20) 레이캐스트 가림
-    #     0건 · 프레임 내 최근접 1.67 m 로 검산 통과.
-    #   ★ 중앙 1.6 m 는 완전히 비어 있어 보행축·판정 시선 무간섭.
+    # --- Props ---
+    # ── Bollards [v6-(5) -> v5.1 §2 · ctx2] 2 rows at the ramp entry (x<0 flat) ──────────
+    #   Old: y=+-1.55 (spacing 3.10 m) · h0.75 · no reflective band / dot tactile paving.
+    #   New: spec h0.90·φ0.12 + white reflective band on top + 0.3 m dot tactile paving on the
+    #   front face (−X = the pedestrian approach side). **Re-spaced to about 1.5 m**: y=+-0.80
+    #     · bollard<->bollard 1.60 m  · bollard<->wall inner face (y=+-2.0) 1.20 m
+    #     Both are in the "about 1.5 m" band, and the largest opening 1.60 m < car width (1.8 m),
+    #     so it also works as a vehicle barrier.
+    #   * Signature-preservation check (_dressing_report measured, hFOV60/vFOV36):
+    #     −0.9 row |yaw| = 37.1 deg (h0.3_d2) / 34.6 deg (h0.9_d2) / 31.3 deg (h1.8_d2)
+    #       -> all outside the 30 deg frame half-angle. h1.8_d2 has only 1.3 deg of horizontal margin, but
+    #         at el −36.4 deg it is **well outside the 18 deg vertical half-angle**, so it is doubly safe.
+    #         h0.9_d2 is still 32.2 deg > 30 deg after subtracting the silhouette half-angle (0.06/1.43 = 2.4 deg).
+    #     The −3.6 row is at |yaw| ~ 150 deg at d2 = behind the camera.
+    #     Even from ramp_head (eye −1.0) it is off screen at |yaw| 79.5 deg.
+    #     The dot tactile plates are further out (|yaw| 43.9~52.0 deg) -> no interference with the judged elements.
+    #     They only enter the frame at d5·d10, and the ray-cast occlusion of the vanishing line (x >= 20) is
+    #     0 cases · nearest in frame 1.67 m, so the check passes.
+    #   * The central 1.6 m is completely empty, so the walk axis and the judging sight line are untouched.
     bollards=[dict(cx=-0.9, cy=-0.80), dict(cx=-0.9, cy=0.80),
               dict(cx=-3.6, cy=-0.80), dict(cx=-3.6, cy=0.80)],
     bollard=dict(r=0.06, h=0.90, front=(-1.0, 0.0)),
 
-    # --- [v6-②] 옹벽 상단 가드레일 (양측, 노면 경사 추종) ---
-    #   지면함수 = 옹벽 상단 z = road_z(x) + wall_h. 착지 평구간(x 30..44.9)은
-    #   로컬 평행 연장(포스트 rhythm 2.75 유지, x=30 중복 포스트 회피).
+    # --- [v6-(2)] Guardrail on top of the retaining wall (both sides, follows the road slope) ---
+    #   Ground function = wall top z = road_z(x) + wall_h. The flat landing section (x 30..44.9) is a
+    #   local parallel extension (post rhythm 2.75 kept, duplicate post at x=30 avoided).
     guard=dict(rail_h=0.95, post_r=0.022, rail_r=0.028, rail_mid_r=0.016,
                rail_mid_drop=0.42, spacing=2.75, x_land_end=44.9),
-    # --- [v6-③] 가로등 3본 : -Y(남) 잔디 위. 그림자는 −Y 로만 → 노면 영향 0 ---
+    # --- [v6-(3)] 3 street lamps: on the -Y (south) grass. Shadows go only to −Y -> 0 effect on the road ---
     streetlight=dict(pole_h=4.6, pole_r=0.07, arm_len=1.30, arm_r=0.04,
                      head=0.24, y=-2.90),
     streetlights=[4.0, 15.0, 26.0],
-    # --- [v6-④] 옹벽 안내판(남측 내면 = 직사광 면). y=−2.0 에서 +Y로 proud ---
+    # --- [v6-(4)] Wall plates (south inner face = the sunlit face). proud toward +Y from y=−2.0 ---
     wall_plates=[dict(x=9.0), dict(x=18.0), dict(x=27.0)],
     wall_plate=dict(w=0.55, h=0.38, t=0.03, z_off=1.05,
                     face_w=0.42, face_h=0.26, face_t=0.012),
-    # --- [v6-④] 진입 안내 사인 1본 (한글 텍스처, -X 를 바라봄) ---
-    #   yaw=180 이면 판 폭(w)이 **Y축**으로 펼쳐진다: y 1.13..1.91
-    #   → 옹벽 내면(y=2.0)과 0.09 이격(관통 없음), 노면 안(|y|<2) 유지.
-    #   x=−4.2: d2·d5·ramp_head·beauty 는 후방/화각 밖, d10 에서 yaw 14.7° 정면.
+    # --- [v6-(4)] 1 entry information sign (Korean texture, faces -X) ---
+    #   With yaw=180 the plate width (w) spreads along the **Y axis**: y 1.13..1.91
+    #   -> 0.09 clear of the wall inner face (y=2.0) (no penetration), stays within the road (|y|<2).
+    #   x=−4.2: d2·d5·ramp_head·beauty are behind/outside the FOV; at d10 it is frontal at yaw 14.7 deg.
     entry_sign=dict(x=-4.2, y=1.52, yaw=180.0, pole_h=2.30, pole_r=0.045,
                     w=0.78, h=0.78),
-    # --- [v6-①] 노면 신축이음 횡줄눈 (평판 proud 0.001, 경사 추종) ---
+    # --- [v6-(1)] Road expansion-joint transverse lines (flat plates proud 0.001, follow the slope) ---
     joints=dict(x0=4.0, x1=44.0, step=4.0, w=0.06, proud=0.001),
 
-    # ═══ [W2 ground_kit] P8 ramp_road — 사양 §5.8 N4 행 ════════════════════
-    #  처방: 양측 L형 측구 300(y=±1.85) · 빗물받이 · 가장자리 실선 2본 ·
-    #        개별 균열(텍스처 반복 파괴) · 저점 패치 · 타이어/흙 오염 · 잡초.
-    #  ★ **평지 진입부(x −14…0)에만 놓는다.** `plan_ground` 는 계획 전체를
-    #    단일 z 로 세우는데(`z_fn` 은 아직 소비되지 않는다) 이 씬의 노면은
-    #    x>0 에서 5 % 로 내려간다 — 경사 위에 z=0 요소를 얹으면 x=6 에서
-    #    0.30 m 부유한다 `[계산 — road_z(6) = −0.30]`. 경사 구간의 요소는
-    #    씬이 이미 가진 신축이음 횡줄눈(경사 추종)이 담당한다.
-    #  ★ `edges` 의 "ramp_crest" 는 **GT 낙차가 아니라 구배 변화점**이다.
-    #    이 씬은 hard negative(전 픽셀 낙차 0)다. 크레스트를 에지로 선언하는
-    #    이유는 두 가지뿐: ① 표면 요소를 크레스트 전방 0.8 m 밖으로 물려
-    #    실루엣 오염을 막고(§6.2 GT-E1′) ② 크레스트 너머 가시성 판정
-    #    (`beyond_grade`)을 계획에 남기기 위해서다.
-    #    구배 = drop/run = 1.5/30 = 0.050 → 광선기울기 h/d 와 비교하면
-    #    d2(0.150)·d5(0.060) 가시 · **d10(0.030) 은닉** `[계산]`.
+    # ═══ [W2 ground_kit] P8 ramp_road - spec §5.8 N4 row ════════════════════
+    #  Prescription: L-shaped gutters 300 on both sides (y=+-1.85) · gully · 2 edge lines ·
+    #        individual cracks (breaks the texture repeat) · low-point patch · tyre/dirt stains · weeds.
+    #  * **Placed only on the flat entry section (x −14…0).** `plan_ground` builds the whole plan
+    #    at a single z (`z_fn` is not consumed yet) while this scene's road
+    #    descends 5 % for x>0 - a z=0 element laid on the slope would float
+    #    0.30 m at x=6 `[computed - road_z(6) = −0.30]`. Elements on the slope section are
+    #    handled by the expansion-joint transverse lines the scene already has (they follow the slope).
+    #  * The "ramp_crest" in `edges` is **not a GT drop but a grade change point**.
+    #    This scene is a hard negative (drop 0 on every pixel). There are only two reasons to
+    #    declare the crest an edge: (1) to pull surface elements 0.8 m clear ahead of the crest and
+    #    prevent silhouette contamination (§6.2 GT-E1′), and (2) to keep the beyond-the-crest
+    #    visibility judgement (`beyond_grade`) in the plan.
+    #    Grade = drop/run = 1.5/30 = 0.050 -> compared with the ray slope h/d,
+    #    d2(0.150)·d5(0.060) visible · **d10(0.030) hidden** `[computed]`.
     gkit=dict(
         region=(-14.0, -2.0, 0.0, 2.0),
-        #  패치 3매 = d2/d5/d10 근경 창(W1) 각 1매. 회랑 반폭이 X=0.8 m 에서
-        #  0.46 m 뿐이라 |y| ≤ 0.4 여야 프레임 안이다 `[계산]`.
+        #  3 patches = 1 each for the d2/d5/d10 near window (W1). The corridor half width is only
+        #  0.46 m at X=0.8 m, so |y| <= 0.4 is needed to stay in frame `[computed]`.
         patches=[(-1.20, 0.00), (-3.80, 0.30), (-8.80, -0.30)],
-        #  빗물받이 — 크레스트 직전 1기(경사 유입 차단) + 진입부 1기.
-        #  `lid=True` 고정(무개구 금지 규약), flush 라 GT-E1′ 이격 0 ✔.
+        #  Gully - 1 just before the crest (blocks inflow onto the slope) + 1 at the entry.
+        #  `lid=True` fixed (no-open-hole convention); it is flush so the GT-E1′ clearance is 0 ✔.
         gullies=[(-1.20, -1.70), (-7.00, 1.70)],
-        #  가장자리 실선 2본 — 길이는 계획이 회랑에서 유도(최대 6.0 m).
+        #  2 edge lines - the length is derived by the plan from the corridor (max 6.0 m).
         edge_lines=[(-11.0, -1.60, 0.0), (-11.0, 1.60, 0.0)],
         tactile_depth=0.60, tactile_setback=0.30,
-        tactile_row_x=-3.6,             # 보행 접근측(−X) 첫 볼라드 열
+        tactile_row_x=-3.6,             # first bollard row on the pedestrian approach side (−X)
     ),
 
     material=dict(
         scale=dict(concrete_floor=0.9, concrete_wall=1.2, grass=1.4),
         grass_tint=(0.55, 0.68, 0.42),
-        wall_tint=(0.92, 0.92, 0.90),                 # 밝은 노출 콘크리트
-        # [v6-①] 노면 냉각 틴트 — concrete_floor 난색(황토) 제거. 흙길 오독 해소.
+        wall_tint=(0.92, 0.92, 0.90),                 # bright exposed concrete
+        # [v6-(1)] Road cooling tint - removes the warm (ochre) cast of concrete_floor. Fixes the dirt-track misread.
         road_tint=(0.80, 0.86, 0.94),
-        joint_color=(0.055, 0.055, 0.058),            # 줄눈 (sRGB 암색 규약 내)
+        joint_color=(0.055, 0.055, 0.058),            # joints (within the dark sRGB convention)
         joint_rough=0.92,
         asphalt_color=(0.16, 0.16, 0.17), asphalt_rough=0.85,
         bollard_color=(0.33, 0.33, 0.36), bollard_metallic=0.4,
         bollard_rough=0.5,
-        # ─ 볼라드 v5.1 부속: 상단 백색 반사띠(본당 0.08 m²) + 전면 점형블록 ─
+        # ─ Bollard v5.1 fittings: white reflective band on top (0.08 m² each) + dot tactile paving in front ─
         bollard_band_color=(0.88, 0.88, 0.86),
         tactile_color=(0.80, 0.66, 0.14), tactile_rough=0.70,
         rail_color=(0.80, 0.82, 0.85), rail_metallic=0.9, rail_rough=0.35,
@@ -216,11 +219,11 @@ PARAMS = dict(
         wood_color=(0.30, 0.20, 0.12), wood_rough=0.85,
         canopy_a=(0.025, 0.045, 0.015), canopy_b=(0.035, 0.060, 0.020),
         canopy_rough=1.0,
-        # [v6] 드레싱 상수색
+        # [v6] dressing constant colours
         pole_color=(0.24, 0.24, 0.26), pole_metallic=0.6, pole_rough=0.5,
         lamp_color=(0.88, 0.88, 0.84), lamp_rough=0.4,
-        sign_color=(0.045, 0.085, 0.19), sign_rough=0.55,   # 안내판 남색 바탕
-        sign_face=(0.58, 0.59, 0.56),                       # 판면(문자대)
+        sign_color=(0.045, 0.085, 0.19), sign_rough=0.55,   # sign navy background
+        sign_face=(0.58, 0.59, 0.56),                       # plate face (lettering area)
     ),
 
     light=dict(
@@ -232,24 +235,24 @@ PARAMS = dict(
         hdri_sun_rotz_offset=233.5,
         dome_rotation_step=15.0,
     ),
-    # ─── SUN_AZ_OFFSET: 171.5(기본) → **81.5**. 근거:
-    #     태양 월드 az ≈ 33.5 + offset = 115° (그림자 az = az−180 = 295°).
-    #     그림자 벡터 ≈ (cos295, sin295) = (+0.42, −0.91), 길이 =
+    # ─── SUN_AZ_OFFSET: 171.5 (default) -> **81.5**. Rationale:
+    #     sun world az ~ 33.5 + offset = 115 deg (shadow az = az−180 = 295 deg).
+    #     shadow vector ~ (cos295, sin295) = (+0.42, −0.91), length =
     #     wall_h/tan(elev 49.79°) = 1.6/1.181 = 1.355 m
-    #     → +Y 옹벽 그림자가 노면을 y=2.0 → y=0.77 까지, 폭 1.23 m 만 덮는다
-    #        (노면 폭 4.0 의 31% — "좌우 옹벽 그림자가 노면을 완전히 덮지 않는
-    #         방위" 요건 충족). 나머지 69%는 직달광 → 노면 질감·경사 음영 유지.
-    #     [v6 신규 요소 그림자 검산] 그림자 변위(높이 h 당) = (+0.3577h, −0.7675h).
-    #       · 가로등(y=−2.90, h≤4.60): 지주 그림자 y ≤ −2.90 → **노면(|y|≤2.0)
-    #         밖**. 암 끝/헤드(y=−1.60, h=4.45~4.50)도 y = −1.60−3.42 = −5.02 →
-    #         노면 밖.  ⇒ 신규 노면 그림자 면적 **0**(소실선 구간 무영향).
-    #       · 진입 사인(y=+1.52, 판 상단 z 2.25): 그림자 y = 1.52−1.73 = −0.21,
-    #         x −4.2 → −3.4. 그중 y 0.77..1.52 는 이미 옹벽 그림자대 → 순증가는
-    #         **진입 평지(x<0)** 위 폭 0.98 의 가는 띠뿐 — 경사 구간 무영향.
-    #       · 가드레일(파이프 r0.028, 옹벽 상단): 그림자 폭 ≈0.03 m 의 실선 1~2
-    #         본이 기존 옹벽 그림자대(y 0.77..2.0) 안쪽에 겹쳐 떨어짐.
-    #       · 옹벽 안내판(proud 0.03): 자기 벽면에만 투영, 노면 도달 없음.
-    #     [ ]키(15° step)로 GUI에서 재스윕 가능. ───
+    #     -> the +Y wall shadow covers the road only from y=2.0 to y=0.77, a width of 1.23 m
+    #        (31% of the 4.0 road width - meets the requirement of "an azimuth where the two wall
+    #         shadows do not fully cover the road"). The other 69% stays in direct light -> road texture and slope shading kept.
+    #     [v6 new-element shadow check] shadow displacement (per height h) = (+0.3577h, −0.7675h).
+    #       · Street lamps (y=−2.90, h<=4.60): pole shadow y <= −2.90 -> **outside the road (|y|<=2.0)**.
+    #         The arm end/head (y=−1.60, h=4.45~4.50) also gives y = −1.60−3.42 = −5.02 ->
+    #         off the road.  => new road shadow area **0** (no effect on the vanishing-line section).
+    #       · Entry sign (y=+1.52, plate top z 2.25): shadow y = 1.52−1.73 = −0.21,
+    #         x −4.2 -> −3.4. Of that, y 0.77..1.52 is already in the wall shadow band -> the net gain is
+    #         only a thin 0.98-wide strip on the **entry flat (x<0)** - no effect on the slope section.
+    #       · Guardrail (pipe r0.028, on the wall top): 1~2 solid lines of shadow ~0.03 m wide
+    #         fall inside the existing wall shadow band (y 0.77..2.0).
+    #       · Wall plates (proud 0.03): projected only onto their own wall face, never reaching the road.
+    #     Re-sweepable in the GUI with the [ ] keys (15 deg step). ───
     SUN_AZ_OFFSET=81.5,
 
     render=dict(pt_total_spp=512, pt_max_bounces=8),
@@ -276,7 +279,7 @@ if _sc_ov:
 
 
 # ===========================================================================
-# [C] 경로 상수 + 필요 텍스처 역할
+# [C] path constants + required texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "sceneN4")
@@ -286,16 +289,16 @@ ASSET_ROLES = ["concrete_floor", "concrete_wall", "grass", "brick_red",
 
 
 # ===========================================================================
-# [C1] 노면 종단 프로파일 — 드레싱 요소의 착지 z 를 노면/대지에 정합시킨다.
-#      (대지도 동일 프로파일로 하강하므로 옹벽 밖 잔디 z 도 같은 함수)
+# [C1] Road longitudinal profile - aligns the landing z of dressing elements to the road/site.
+#      (The site descends on the same profile, so the grass z outside the wall uses the same function)
 # ===========================================================================
 def tactile_band_rect():
-    """[W2 §12.5 ②] 볼라드 열 전면 **연속 점형 띠** (x0, y0, x1, y1).
+    """[W2 §12.5 (2)] **Continuous dot tactile band** in front of the bollard row (x0, y0, x1, y1).
 
-    전면이 −X(보행 접근측)이므로 띠는 볼라드 앞면에서 −X 로 setback 만큼
-    떨어져 depth 만큼 뻗는다. 열은 2열이지만 법정 대상은 **보행자가 먼저
-    만나는 열**(x = tactile_row_x) 하나다 — §12.4 의 (씬, 지점) 등록도
-    "bollard" 1개소다. 좌표는 PARAMS 유도(§7.4).
+    The front is −X (the pedestrian approach side), so the band sits setback away from the bollard
+    front face toward −X and runs for depth. There are 2 rows, but the statutory subject is the
+    single **row the pedestrian meets first** (x = tactile_row_x) - the (scene, site) registration
+    in §12.4 is likewise a single "bollard" site. The coordinates are derived from PARAMS (§7.4).
     """
     g, bo = PARAMS["gkit"], PARAMS["bollard"]
     ys = [b["cy"] for b in PARAMS["bollards"]
@@ -306,7 +309,7 @@ def tactile_band_rect():
 
 
 def ground_plans():
-    """[W2 ground_kit] 지면 계획 — 씬 조립부와 CPU 검산이 같은 함수를 쓴다."""
+    """[W2 ground_kit] Ground plan - the scene assembly and the CPU check use the same function."""
     g = PARAMS["gkit"]
     rp = PARAMS["ramp"]
     grade = float(rp["drop"]) / float(rp["run"])
@@ -320,8 +323,8 @@ def ground_plans():
                    patch=[tuple(p) for p in g["patches"]],
                    marking=[tuple(m) for m in g["edge_lines"]],
                    tactile=dict(bollard=tactile_band_rect())),
-        #  빗물받이 6개소는 30 m 램프 전장 기준이다. 진입 평지(14 m)에는
-        #  22 m 간격으로 2기가 상한이다 `[시방 20~25 m/개]`.
+        #  The 6 gully sites are based on the full 30 m ramp length. On the 14 m entry flat
+        #  2 units at 22 m spacing is the cap `[spec 20~25 m each]`.
         overrides=dict(infra=dict(gully=2, gutter_L=2,
                                   marking=("line", "line")),
                        surface=(("patch", 3), ("crack", 6),
@@ -340,7 +343,7 @@ def road_z(x, drop):
 
 
 # ===========================================================================
-# [C2] 기하 자기검증 리포트 (순수 수학 — SMOKE 조기종료에서 출력)
+# [C2] Geometry self-verification report (pure maths - printed on the SMOKE early exit)
 # ===========================================================================
 def _geometry_report():
     rp = PARAMS["ramp"]
@@ -359,13 +362,13 @@ def _geometry_report():
     print(f"    이음 겹침: 진입/경사 {ap['x1'] - rp['x0']:+.3f} m, "
           f"경사/착지 {rp['x0'] + rp['run'] - ld['x0']:+.3f} m "
           f"(쐐기 틈 방지 ≥0.02 · 상면이 서로 교차 발산 → Z-파이팅 없음)")
-    # 옹벽 상단(노면 추종) — 경사 세그먼트 근사 없이 build_slope 1개로 처리
+    # Wall top (follows the road) - handled by a single build_slope, with no stepped segment approximation
     print(f"  옹벽: 내면 y=±{wl['y_in']:.2f} 두께 {wl['thick']:.2f} · "
           f"상단 = 노면 +{wl['wall_h']:.2f} 일정 (build_slope 1개 = 계단식 근사 불요)")
     print(f"    상단 z: x=0 {wl['wall_h']:+.2f} → x={rp['run']:.0f} "
           f"{wl['wall_h'] - rp['drop']:+.2f} · 하단 z {-wl['depth'] + wl['wall_h']:+.2f}"
           f" (노면 아래 {wl['depth'] - wl['wall_h']:.2f} m 매입 → 부유 없음)")
-    # 시선 검산: 노면 소실선이 지평선 아래인가 + 지평 폐쇄
+    # Sight-line check: is the road vanishing line below the horizon + horizon closure
     print("  [시선 검산] 카메라 h=0.9 · 노면 소실선 = atan(-grade) = "
           f"{-math.degrees(math.atan(grade)):+.2f}° → 지평선(0°) 아래 OK")
     bd = PARAMS["buildings"]["F"]
@@ -382,32 +385,32 @@ def _geometry_report():
 
 
 def build_views():
-    """카메라 프리셋: grid_views(gy=0.0) + 미장센 4컷(모두 회랑 내부)."""
+    """Camera presets: grid_views(gy=0.0) + 4 mise-en-scene shots (all inside the corridor)."""
     views = sc.grid_views(0.0)
-    # ramp_head: 크레스트 직전 — 노면이 아래로 사라지는 오검출 구도(특색)
+    # ramp_head: just before the crest - the false-positive composition where the road vanishes downward (signature)
     views["ramp_head"] = dict(eye=[-1.0, 0.0, 0.9], tgt=[12.0, 0.0, -0.5])
-    # wall_run: 경사 중간, 편측 옹벽 그림자가 노면 일부를 덮는 구도
+    # wall_run: mid-slope, the composition where one wall's shadow covers part of the road
     views["wall_run"] = dict(eye=[6.0, -1.2, 0.6], tgt=[26.0, 0.6, -1.2])
-    # landing_lookback: 착지에서 되돌아봄 — 오르막으로 연속(보행 가능 증명)
+    # landing_lookback: looking back from the landing - continuous as an uphill (proof it is walkable)
     views["landing_lookback"] = dict(eye=[33.0, 0.0, 0.9], tgt=[16.0, 0.0, 0.1])
-    # beauty_overview: 사선 부감(회랑 내부 상공) — 경사 전개 인상
+    # beauty_overview: oblique high angle (above the corridor interior) - the impression of the slope unfolding
     views["beauty_overview"] = dict(eye=[-6.0, -1.7, 3.0], tgt=[16.0, 0.4, -1.0])
     return views
 
 
 # ===========================================================================
-# [D2] 카메라 검산 (v6 맥락 드레싱) — 순수 수학. SMOKE 에서 출력.
-#   Isaac 기본 카메라: focal 18.14756 / horiz aperture 20.955 → hFOV 60.0°,
-#   1920×1080 → vFOV = 2·atan(tan30°·9/16) = 36.0°. 반각 30° / 18°.
-#   판정: ① 전 뷰에서 신규 프림이 카메라와 근접 충돌(<0.6 m)하지 않는가
-#         ② 프레임 안에 들어오는 경우 노면 소실선(중앙 저각)을 가리지 않는가
+# [D2] Camera check (v6 context dressing) - pure maths. Printed on SMOKE.
+#   Isaac default camera: focal 18.14756 / horiz aperture 20.955 -> hFOV 60.0 deg,
+#   1920x1080 -> vFOV = 2·atan(tan30 deg·9/16) = 36.0 deg. Half-angles 30 deg / 18 deg.
+#   Judgement: (1) in every view, does a new prim avoid a near collision with the camera (<0.6 m)
+#         (2) if it enters the frame, does it avoid occluding the road vanishing line (low centre angle)
 # ===========================================================================
 HFOV_HALF = 30.0
 VFOV_HALF = 18.0
 
 
 def _cam_angles(view, p):
-    """(yaw_rel°, elev_rel°, dist, in_frame) — 카메라 광축 기준 정확 변환."""
+    """(yaw_rel deg, elev_rel deg, dist, in_frame) - exact transform relative to the camera optical axis."""
     ex, ey, ez = view["eye"]
     tx, ty, tz = view["tgt"]
     fx, fy, fz = tx - ex, ty - ey, tz - ez
@@ -415,7 +418,7 @@ def _cam_angles(view, p):
     pitch = math.atan2(fz, math.hypot(fx, fy))
     dx, dy, dz = p[0] - ex, p[1] - ey, p[2] - ez
     u = dx * math.cos(yaw) + dy * math.sin(yaw)
-    v = -dx * math.sin(yaw) + dy * math.cos(yaw)          # 카메라 좌측 +
+    v = -dx * math.sin(yaw) + dy * math.cos(yaw)          # camera left +
     u2 = u * math.cos(pitch) + dz * math.sin(pitch)
     w2 = -u * math.sin(pitch) + dz * math.cos(pitch)
     yaw_r = math.degrees(math.atan2(v, u2))
@@ -426,9 +429,9 @@ def _cam_angles(view, p):
 
 
 def _road_hit(eye, p, drop, t_max=40.0, step=0.02):
-    """eye→p 시선을 p 너머(t>1)로 연장해 노면 상면과 만나는 (x,y) 반환.
-    노면 = |y| ≤ 2.0, x ∈ [approach.x0, landing.x1], z = road_z(x).
-    만나지 않으면 None. (프림이 그 지점의 노면 픽셀을 가린다는 뜻)"""
+    """Extend the eye->p sight line past p (t>1) and return the (x,y) where it meets the road top face.
+    Road = |y| <= 2.0, x in [approach.x0, landing.x1], z = road_z(x).
+    None if there is no hit. (A hit means the prim occludes the road pixel at that point.)"""
     ap, ld = PARAMS["approach"], PARAMS["landing"]
     rp = PARAMS["ramp"]
     ex, ey, ez = eye
@@ -449,22 +452,22 @@ def _road_hit(eye, p, drop, t_max=40.0, step=0.02):
 
 
 def streetlight_xs():
-    """[v5.1 §3] 가로등 x 좌표 ±0.3 m 결정적 지터 — 11 m 등간격 인상 제거.
-    y(=−2.90)는 **불변**: 그림자가 −Y 로만 뻗어 노면 기여 0 이라는 조명 검산
-    전제와, 암(+Y 1.30)이 회랑 상공에 걸치는 기능 조건을 깨지 않기 위함."""
+    """[v5.1 §3] Deterministic +-0.3 m jitter on the street lamp x - removes the 11 m even-spacing look.
+    y(=−2.90) is **fixed**: it must not break the lighting-check premise that the shadows run only
+    to −Y and contribute 0 to the road, nor the functional condition that the arm (+Y 1.30) reaches over the corridor."""
     return [x + bc.jit_scalar(x, PARAMS["streetlight"]["y"], "slN4",
                               -0.30, 0.30)
             for x in PARAMS["streetlights"]]
 
 
 def wall_plate_xs():
-    """[v5.1 §3] 옹벽 안내판 x ±0.25 m 지터 (9 m 등간격 완화)."""
+    """[v5.1 §3] Wall plate x jitter +-0.25 m (relaxes the 9 m even spacing)."""
     return [d["x"] + bc.jit_scalar(d["x"], 0.0, "wpN4", -0.25, 0.25)
             for d in PARAMS["wall_plates"]]
 
 
 def _dressing_probes(drop):
-    """검산 대상점: (이름, (x,y,z)). 신규 드레싱의 대표 극단점만."""
+    """Check points: (name, (x,y,z)). Only the representative extreme points of the new dressing."""
     P = []
     sl = PARAMS["streetlight"]
     for x in streetlight_xs():
@@ -483,7 +486,7 @@ def _dressing_probes(drop):
     for b in PARAMS["bollards"]:
         P.append((f"볼라드({b['cx']:+.1f},{b['cy']:+.1f})",
                   (b["cx"], b["cy"], bo["h"] / 2.0)))
-        # 전면 점형블록 소판의 **가장 카메라쪽 모서리**(축방향 원단 × 측방 외단)
+        # **The corner nearest the camera** of the front dot tactile plate (axial far end x lateral outer end)
         fx, fy = bo["front"]
         P.append((f"점형블록({b['cx']:+.1f},{b['cy']:+.1f})",
                   (b["cx"] + fx * (bo["r"] + 0.30),
@@ -510,7 +513,7 @@ def _dressing_report(drop):
     probes = _dressing_probes(drop)
     print("-" * 64)
     print("[검산] v6 맥락 드레싱 × 카메라 (hFOV 60° / vFOV 36°)")
-    # ① 카메라 근접 충돌
+    # (1) near collision with the camera
     worst = None
     worst_in = None
     for vn, vw in views.items():
@@ -526,10 +529,10 @@ def _dressing_report(drop):
     print(f"    최근접(프레임 내) = {worst_in[0]:.2f} m "
           f"({worst_in[1]} ↔ {worst_in[2]}) → "
           f"{'OK(근접 점유 없음)' if ok else 'FAIL(<1.0)'}")
-    # ② 특색(노면 소실선) 가림 — **정확 판정**: 프레임 안 프림에 대해 eye→프림
-    #    시선을 프림 너머로 연장해 노면(|y|≤2, x −14..60)에 닿는지 레이캐스트.
-    #    닿는 지점 x_h 가 소실선 구간(x ≥ 20, 즉 경사 하부~착지 전이)이면 경고.
-    #    (프림 대표점 기준 근사 — 실루엣 전체가 아니라 극단점 표본)
+    # (2) Occlusion of the signature (road vanishing line) - **exact test**: for prims inside the frame, extend
+    #    the eye->prim sight line past the prim and ray-cast whether it lands on the road (|y|<=2, x −14..60).
+    #    Warn if the hit x_h is in the vanishing-line section (x >= 20, i.e. lower slope to landing transition).
+    #    (Approximate, based on prim representative points - an extreme-point sample, not the full silhouette)
     warn = []
     for vn, vw in views.items():
         for nm, p in probes:
@@ -546,7 +549,7 @@ def _dressing_report(drop):
     else:
         print("  ② 소실선 구간(x≥20) 노면 가림 프림 없음 → OK "
               "(연장 시선 레이캐스트 판정)")
-    # ③ 주요 미장센 뷰별 프레임 내 신규 프림 요약
+    # (3) Per-view summary of new prims in frame for the main mise-en-scene views
     for vn in ("ramp_head", "wall_run", "beauty_overview",
                "landing_lookback", "preset_h0.9_d5"):
         vw = views.get(vn)
@@ -555,12 +558,12 @@ def _dressing_report(drop):
         names = [nm for nm, p in probes if _cam_angles(vw, p)[3]]
         print(f"  ③ {vn:18s} 프레임 내 {len(names):2d}종: "
               f"{', '.join(names[:6])}{' …' if len(names) > 6 else ''}")
-    # ④ 기하 여유(관통·부유) 검산
+    # (4) Geometric margin (penetration / floating) check
     wl = PARAMS["wall"]
     es = PARAMS["entry_sign"]
     sl = PARAMS["streetlight"]
     g = PARAMS["guard"]
-    sy1 = es["y"] + es["w"] / 2.0                   # yaw180 → 판 폭이 Y축
+    sy1 = es["y"] + es["w"] / 2.0                   # yaw180 -> plate width along the Y axis
     print(f"  ④ 진입사인 판 y [{es['y'] - es['w'] / 2.0:+.2f}, {sy1:+.2f}] vs "
           f"옹벽 내면 {wl['y_in']:+.2f} → 여유 {wl['y_in'] - sy1:+.3f} m "
           f"{'OK' if sy1 < wl['y_in'] else 'FAIL(관통)'}")
@@ -625,17 +628,17 @@ def main():
     def PBR(path, *args, **kwargs):
         return sc.make_pbr(stage, path, *args, **kwargs)
 
-    # 경사 토글: OFF면 drop=0 (전 구간 평지) — 기하 트랜스폼만 바뀐다.
+    # Slope toggle: if OFF, drop=0 (flat throughout) - only the geometry transform changes.
     DROP = PARAMS["ramp"]["drop"] if cfg["hazard_stairs"] else 0.0
 
     # -------------------------------------------------------------------
-    # 재질
+    # materials
     # -------------------------------------------------------------------
     def setup_materials():
         sca = mp["scale"]
         M = {}
-        # [v6-①] road_tint 로 concrete_floor 의 난색(황토)을 중성 회색으로 냉각
-        #        — r1 렌더에서 "흙길"로 읽히던 원인. 기하·스케일은 불변.
+        # [v6-(1)] road_tint cools the warm (ochre) cast of concrete_floor to a neutral grey
+        #        - the reason it read as a "dirt track" in the r1 render. Geometry and scale unchanged.
         M["road"] = PBR(
             f"{ROOT}/Looks/Road", sc.tex_path("concrete_floor", "diff"),
             sc.tex_path("concrete_floor", "nor"),
@@ -684,7 +687,7 @@ def main():
                             diffuse_color=mp["canopy_b"],
                             roughness_const=mp["canopy_rough"],
                             specular_level=0.0)
-        # --- [v6] 드레싱 재질 ---
+        # --- [v6] dressing materials ---
         M["pole"] = PBR(f"{ROOT}/Looks/Pole", diffuse_color=mp["pole_color"],
                         metallic=mp["pole_metallic"],
                         roughness_const=mp["pole_rough"])
@@ -695,7 +698,7 @@ def main():
         M["sign_face"] = PBR(f"{ROOT}/Looks/SignFace",
                              diffuse_color=mp["sign_face"],
                              roughness_const=mp["sign_rough"])
-        # 한글 안내 사인 패널 — uv_mode(메시 st 1:1 정합, build_sign 전용)
+        # Korean information sign panel - uv_mode (1:1 match to the mesh st, build_sign only)
         M["sign_panel"] = PBR(f"{ROOT}/Looks/SignPanel",
                               sc.tex_path("sign_info", "diff"), uv_mode=True,
                               roughness_const=0.45)
@@ -704,9 +707,9 @@ def main():
         return M
 
     # -------------------------------------------------------------------
-    # 대지 — 회랑 밖 잔디. 노면과 동일 경사로 하강(옹벽 뒤 단차 0 = GT 불변식)
-    #   상부 평지 / 경사면(남·북) / 하부 평야 3구간. 이음은 0.02 겹침 + 상면이
-    #   서로 교차 발산하므로 동일평면 Z-파이팅이 생기지 않는다.
+    # Site - grass outside the corridor. Descends on the same slope as the road (0 level difference behind the wall = GT invariant)
+    #   3 sections: upper flat / slope face (south·north) / lower plain. The joints have 0.02 overlap and the top
+    #   faces diverge across each other, so no coplanar Z-fighting occurs.
     # -------------------------------------------------------------------
     def build_ground(M):
         g = PARAMS["ground"]
@@ -715,52 +718,52 @@ def main():
         y_out = wl["y_in"] + wl["thick"]              # 2.35
         th = g["thick"]
         run = rp["run"]
-        # ① 상부 평지 (x_w .. 0.02) 전폭
+        # (1) upper flat (x_w .. 0.02), full width
         BOX(f"{ROOT}/Land_Upper",
             ((g["x_w"] + 0.02) / 2.0, 0.0, -th / 2.0),
             (0.02 - g["x_w"], 2.0 * g["half_y"], th), M["grass"], col=True)
-        # ② 경사 대지 (0 .. run) — 회랑(±y_out) 밖 남·북 2매
+        # (2) sloped site (0 .. run) - 2 sheets south and north, outside the corridor (+-y_out)
         for sgn, tag in ((-1.0, "S"), (1.0, "N")):
             ya = sgn * y_out
             yb = sgn * g["half_y"]
             sc.build_slope(stage, f"{ROOT}/Land_Slope_{tag}", rp["x0"], 0.0,
                            run, DROP, min(ya, yb), max(ya, yb), th, M["grass"],
                            margin=0.0, collider=True)
-        # ③ 하부 평야 (run-0.02 .. x_e) 전폭
+        # (3) lower plain (run-0.02 .. x_e), full width
         BOX(f"{ROOT}/Land_Lower",
             ((run - 0.02 + g["x_e"]) / 2.0, 0.0, -DROP - th / 2.0),
             (g["x_e"] - run + 0.02, 2.0 * g["half_y"], th), M["grass"],
             col=True)
 
     # -------------------------------------------------------------------
-    # 노면 — 진입 평지 + 5% 경사 + 평탄 착지 (연속 보행면)
+    # Road - entry flat + 5% slope + flat landing (continuous walking surface)
     # -------------------------------------------------------------------
     def build_road(M):
         rp = PARAMS["ramp"]
         ap = PARAMS["approach"]
         ld = PARAMS["landing"]
         appr_mtl = M["asphalt"] if cfg["cue_material_break"] else M["road"]
-        # [W2-0 · P-A] 진입 평지가 ground_kit 의 무대다 → 변위 스킨 OFF.
-        #   **BOX 호출 전에** 등록해야 한다(`add_box` 가 그 자리에서 판정).
+        # [W2-0 · P-A] The entry flat is the stage for ground_kit -> displacement skin OFF.
+        #   It must be registered **before the BOX call** (`add_box` decides on the spot).
         sc.skin_exclude(f"{ROOT}/Road_Approach")
-        # 진입 평지
+        # entry flat
         BOX(f"{ROOT}/Road_Approach",
             ((ap["x0"] + ap["x1"]) / 2.0, 0.0, ap["z_top"] - ap["thick"] / 2.0),
             (ap["x1"] - ap["x0"], rp["y1"] - rp["y0"], ap["thick"]),
             appr_mtl, col=True)
-        # 경사 본체
+        # slope body
         sc.build_slope(stage, f"{ROOT}/Road_Slope", rp["x0"], 0.0, rp["run"],
                        DROP, rp["y0"], rp["y1"], rp["thick"], M["road"],
                        margin=0.0, collider=True)
-        # 평탄 착지
+        # flat landing
         BOX(f"{ROOT}/Road_Landing",
             ((ld["x0"] + ld["x1"]) / 2.0, 0.0, -DROP - ld["thick"] / 2.0),
             (ld["x1"] - ld["x0"], rp["y1"] - rp["y0"], ld["thick"]),
             M["road"], col=True)
 
     # -------------------------------------------------------------------
-    # [W2] ground_kit — P8 ramp_road. **진입 평지 전용**(경사 구간은 단일 z
-    #   계획으로 덮을 수 없다 — PARAMS["gkit"] 주석 참조).
+    # [W2] ground_kit - P8 ramp_road. **Entry flat only** (the slope section cannot be covered
+    #   by a single-z plan - see the PARAMS["gkit"] comment).
     # -------------------------------------------------------------------
     def build_ground_kit(M):
         (_tag, gp), = ground_plans()
@@ -779,8 +782,8 @@ def main():
         return res
 
     # -------------------------------------------------------------------
-    # 옹벽 — 상단이 노면을 그대로 추종(build_slope 1매). 진입·착지 구간은 평벽.
-    #   세그먼트 계단식 근사를 쓰지 않으므로 쐐기 틈(교훈 4)이 원천 차단된다.
+    # Retaining wall - the top follows the road exactly (1 build_slope). The entry and landing sections are flat wall.
+    #   No stepped segment approximation is used, so wedge gaps (lesson 4) are ruled out at source.
     # -------------------------------------------------------------------
     def build_walls(M):
         rp = PARAMS["ramp"]
@@ -793,27 +796,27 @@ def main():
             yb = sgn * (y_in + t)
             y0, y1 = min(ya, yb), max(ya, yb)
             yc = (y0 + y1) / 2.0
-            # 진입 구간 평벽 (상단 z=hh) — 경사벽과 0.02 겹침
+            # entry section flat wall (top z=hh) - 0.02 overlap with the sloped wall
             BOX(f"{ROOT}/Wall_Appr_{tag}",
                 ((ap["x0"] + ap["x1"]) / 2.0, yc, hh - dep / 2.0),
                 (ap["x1"] - ap["x0"], t, dep), M["wall"], col=True)
-            # 경사 구간 — 상면이 (0,hh)→(run, hh-DROP)
+            # slope section - the top face runs (0,hh)->(run, hh-DROP)
             sc.build_slope(stage, f"{ROOT}/Wall_Slope_{tag}", rp["x0"], hh,
                            rp["run"], DROP, y0, y1, dep, M["wall"],
                            margin=0.0, collider=True)
-            # 착지 구간 평벽 (상단 z=hh-DROP)
+            # landing section flat wall (top z=hh-DROP)
             BOX(f"{ROOT}/Wall_Land_{tag}",
                 ((rp["run"] - 0.02 + wl["x_end"]) / 2.0, yc,
                  hh - DROP - dep / 2.0),
                 (wl["x_end"] - rp["run"] + 0.02, t, dep), M["wall"], col=True)
 
-            # [사실화 v1] 옹벽 상세 — 배수공 · 신축/수축이음 · 갓돌.
-            # 조사 지적: 이 씬 옹벽 51건이 전부 **민짜 벽**이었다. 실제 옹벽은
-            # 배수공 φ100 을 약 4m 마다 뚫고(도로설계요령 3권 8-7편), 캔틸레버는
-            # 15~20m 마다 신축이음으로 끊어지며, 수축이음 홈이 9m 이하 간격으로
-            # 들어간다. 이 반복 분절선이 벽면의 스케일을 읽게 해준다.
-            # GT 무영향: 벽면 부착물이라 지면 z(x,y) 를 바꾸지 않는다.
-            if sc.LOOK_GEO:            # 배수공·신축이음 = 프림 신설(기하)
+            # [realism v1] Retaining wall detail - weep holes · expansion/contraction joints · coping.
+            # Survey finding: all 51 retaining walls in this scene were **plain blank walls**. A real retaining wall
+            # has φ100 weep holes about every 4m (Road Design Guide vol.3, part 8-7), a cantilever wall is
+            # broken by an expansion joint every 15~20m, and contraction joint grooves go in at 9m or less
+            # spacing. These repeated division lines are what let the wall face read at scale.
+            # No GT effect: they are wall-face fittings, so they do not change the ground z(x,y).
+            if sc.LOOK_GEO:            # weep holes / expansion joints = new prims (geometry)
                 try:
                     import infra_kit as ik
                     kit = ik.Kit(
@@ -831,12 +834,12 @@ def main():
                     print(f"[룩v1][경고] 옹벽 상세 실패 {tag}: {e}")
 
     # -------------------------------------------------------------------
-    # cue — 옹벽 상단 파이프 레일(옵션)
+    # cue - pipe rail on top of the retaining wall (optional)
     # -------------------------------------------------------------------
     def build_cues(M):
         if not cfg["cue_railing"]:
             return
-        # [v6] 드레싱 가드레일(포스트+2선)과 동일 y·z 이므로 동축 중복 방지.
+        # [v6] Same y·z as the dressing guardrail (posts + 2 rails), so avoid the coaxial duplicate.
         if cfg["cue_scene_dressing"]:
             print("[cue] cue_railing 생략 — 드레싱 가드레일이 이미 동일 선상에 "
                   "있음(동축 실린더 Z-파이팅 회피)")
@@ -854,19 +857,19 @@ def main():
                     0.03, seg * 1.02, M["rail"], rotY=90.0)
 
     # -------------------------------------------------------------------
-    # [v6-②] 옹벽 상단 가드레일 — 노면 경사 추종(진입 평지 + 5% 경사)
-    #   build_railing_line 의 ground_fn = 옹벽 상단 z = road_z(x) + wall_h.
-    #   착지 평구간(x 30..44.9)은 로컬 평행 연장(포스트 리듬 2.75 유지).
-    #   포스트 하단이 옹벽 천단에 착지하므로 부유·매몰 없음.
+    # [v6-(2)] Guardrail on top of the retaining wall - follows the road slope (entry flat + 5% slope)
+    #   ground_fn of build_railing_line = wall top z = road_z(x) + wall_h.
+    #   The flat landing section (x 30..44.9) is a local parallel extension (post rhythm 2.75 kept).
+    #   The post bases land on the wall crown, so nothing floats or is buried.
     # -------------------------------------------------------------------
     def build_guard(M):
         rp = PARAMS["ramp"]
         wl = PARAMS["wall"]
         ap = PARAMS["approach"]
         g = PARAMS["guard"]
-        yg = wl["y_in"] + wl["thick"] / 2.0            # 옹벽 두께 중앙
+        yg = wl["y_in"] + wl["thick"] / 2.0            # centre of the wall thickness
         top_of_wall = lambda x: road_z(x, DROP) + wl["wall_h"]   # noqa: E731
-        z_land = wl["wall_h"] - DROP                   # 착지 구간 천단 z
+        z_land = wl["wall_h"] - DROP                   # crown z of the landing section
         for sgn, tag in ((-1.0, "S"), (1.0, "N")):
             y = sgn * yg
             sc.build_railing_line(
@@ -875,7 +878,7 @@ def main():
                 rail_h=g["rail_h"], post_r=g["post_r"], spacing=g["spacing"],
                 rail_r=g["rail_r"], rail_mid_r=g["rail_mid_r"],
                 rail_mid_drop=g["rail_mid_drop"])
-            # 착지 평구간 연장: 상·중단 레일 2본 + 포스트(2.75 리듬, x=30 중복 X)
+            # Landing flat extension: 2 rails (top·mid) + posts (2.75 rhythm, no duplicate at x=30)
             xa, xb = rp["x0"] + rp["run"], g["x_land_end"]
             if xb - xa > 0.1:
                 for nm, r, zo in (("Top", g["rail_r"], 0.0),
@@ -893,17 +896,17 @@ def main():
                     k += 1
 
     # -------------------------------------------------------------------
-    # [v6-③] 가로등 3본 — **-Y 잔디에만**. 그림자가 −Y 로만 뻗어 노면 영향 0.
-    #   지주는 옹벽(천단 = 노면+1.6) 뒤에 서고 암이 회랑 상공으로 뻗는다.
+    # [v6-(3)] 3 street lamps - **on the -Y grass only**. Shadows run only to −Y -> 0 effect on the road.
+    #   The poles stand behind the wall (crown = road+1.6) and the arms reach out over the corridor.
     # -------------------------------------------------------------------
     def build_streetlights(M):
         sl = PARAMS["streetlight"]
-        for i, x in enumerate(streetlight_xs()):    # v5.1 §3 등간격 지터
-            gz = road_z(x, DROP)                       # 잔디 = 노면 동일 프로파일
+        for i, x in enumerate(streetlight_xs()):    # v5.1 §3 even-spacing jitter
+            gz = road_z(x, DROP)                       # grass = same profile as the road
             base = f"{ROOT}/Streetlight_{i}"
             CYL(f"{base}/Pole", (x, sl["y"], gz + sl["pole_h"] / 2.0),
                 sl["pole_r"], sl["pole_h"], M["pole"], col=True)
-            ay = sl["y"] + sl["arm_len"] / 2.0          # 암은 +Y(회랑쪽)로만
+            ay = sl["y"] + sl["arm_len"] / 2.0          # the arm goes +Y (corridor side) only
             CYL(f"{base}/Arm", (x, ay, gz + sl["pole_h"] - 0.10),
                 sl["arm_r"], sl["arm_len"], M["pole"], rotX=90.0)
             BOX(f"{base}/Head",
@@ -911,16 +914,16 @@ def main():
                 (sl["head"], sl["head"], 0.12), M["lamp"])
 
     # -------------------------------------------------------------------
-    # [v6-④] 옹벽 안내판 3매 — 남측(-Y) 내면 = 직사광 면이라 판독된다.
-    #   내면 y=-y_in 에서 +Y 로 proud. 바탕판 + 판면 2박스(scene02 패턴).
+    # [v6-(4)] 3 wall plates - the south (-Y) inner face is the sunlit face, so they read.
+    #   proud toward +Y from the inner face y=-y_in. Backing plate + face plate, 2 boxes (scene02 pattern).
     # -------------------------------------------------------------------
     def build_wall_plates(M):
         wl = PARAMS["wall"]
         wp = PARAMS["wall_plate"]
-        y_face = -wl["y_in"]                           # 남측 옹벽 내면
-        for i, x in enumerate(wall_plate_xs()):     # v5.1 §3 등간격 지터
+        y_face = -wl["y_in"]                           # south wall inner face
+        for i, x in enumerate(wall_plate_xs()):     # v5.1 §3 even-spacing jitter
             zc = road_z(x, DROP) + wp["z_off"]
-            yb = y_face + wp["t"] / 2.0                # 바탕판 중심
+            yb = y_face + wp["t"] / 2.0                # backing plate centre
             BOX(f"{ROOT}/WallPlate_{i}/Back", (x, yb, zc),
                 (wp["w"], wp["t"], wp["h"]), M["sign"])
             BOX(f"{ROOT}/WallPlate_{i}/Face",
@@ -928,8 +931,8 @@ def main():
                 (wp["face_w"], wp["face_t"], wp["face_h"]), M["sign_face"])
 
     # -------------------------------------------------------------------
-    # [v6-④] 진입 안내 사인 1본 — 한글 텍스처 패널(sign_info). -X 를 바라봄.
-    #   GT 규약상 '낙차 경고'가 아닌 **안내(info)** 사인만 쓴다(오라벨 금지).
+    # [v6-(4)] 1 entry information sign - Korean texture panel (sign_info). Faces -X.
+    #   Per the GT convention only an **information (info)** sign is used, never a 'drop warning' (mislabelling banned).
     # -------------------------------------------------------------------
     def build_entry_sign(M):
         es = PARAMS["entry_sign"]
@@ -939,9 +942,9 @@ def main():
                       pole_mtl=M["pole"], back_mtl=M["sign"])
 
     # -------------------------------------------------------------------
-    # [v6-①] 노면 신축이음 횡줄눈 — 경사면을 따라가는 얇은 암색 띠.
-    #   상자 두께 0.02, 상면이 국소 노면 +0.001. 줄눈 폭 0.06 구간의 경사 편차는
-    #   0.05·0.06 = 0.003 m < 반두께 0.01 → 관통·부유 없음(Z-파이팅 회피).
+    # [v6-(1)] Road expansion-joint transverse lines - thin dark bands following the slope.
+    #   Box thickness 0.02, top face at local road +0.001. Over the 0.06 joint width the slope deviation is
+    #   0.05·0.06 = 0.003 m < half thickness 0.01 -> no penetration or floating (avoids Z-fighting).
     # -------------------------------------------------------------------
     def build_joints(M):
         jt = PARAMS["joints"]
@@ -950,24 +953,24 @@ def main():
         x = jt["x0"]
         while x <= jt["x1"] + 1e-6:
             zc = road_z(x, DROP) + jt["proud"] - 0.01
-            # 폭은 노면보다 0.04 좁게 — 노면 측면(y=±2.0, 옹벽 내면과 접함)에
-            # 세 번째 동일평면을 만들지 않는다.
+            # Width 0.04 narrower than the road - so no third coplanar face is created at the road flanks
+            # (y=+-2.0, where it meets the wall inner face).
             BOX(f"{ROOT}/RoadJoint_{n}", (x, 0.0, zc),
                 (jt["w"], rp["y1"] - rp["y0"] - 0.04, 0.02), M["joint"])
             x += jt["step"]
             n += 1
 
     # -------------------------------------------------------------------
-    # 드레싱 — 볼라드 + 원경(생울타리·수목·능선·건물)로 지평 폐쇄
+    # Dressing - bollards + horizon closure by the distance (hedges · trees · ridge · buildings)
     # -------------------------------------------------------------------
     def build_dressing(M):
-        # 볼라드 [v5.1 §2] — 램프 진입부 2열, 규격 h0.90·간격 1.5 m 내외,
-        #   상단 백색 반사띠 + 전면(−X 접근측) 0.3 m 점형블록.
+        # Bollards [v5.1 §2] - 2 rows at the ramp entry, spec h0.90 · spacing about 1.5 m,
+        #   white reflective band on top + 0.3 m dot tactile paving on the front (−X approach side).
         bo = PARAMS["bollard"]
         for i, bd in enumerate(PARAMS["bollards"]):
-            # [W2 §12.5 ②] 본당 소판 → ground_kit 의 **연속 띠 0.60 m** 로
-            #   대체한다(소판 0.12 ㎡/본은 판독 불가). 2열 중 보행 접근측
-            #   1열 전면에만 놓는 것이 법정 취지(§12.4 등록 1개소)다.
+            # [W2 §12.5 (2)] The per-unit small plate is replaced by ground_kit's **continuous 0.60 m band**
+            #   (a 0.12 m² plate per unit cannot be read). Of the 2 rows, placing it only in front of the
+            #   row on the pedestrian approach side is the statutory intent (§12.4 registers 1 site).
             bc.build_bollard_v51(stage, f"{ROOT}/Bollard_{i}", bd["cx"],
                                  bd["cy"], 0.0, None, M["bollard"],
                                  M["bollard_band"], M["tactile"],
@@ -999,7 +1002,7 @@ def main():
                               M["brick"], M["glass"], M["parapet"],
                               window=PARAMS["window"])
 
-    # ── 씬 조립 ──
+    # ── scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
     M = setup_materials()
     build_ground(M)
@@ -1008,7 +1011,7 @@ def main():
     build_cues(M)
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
-    build_ground_kit(M)                  # [W2] 지면 요소 — 드레싱 뒤(산포 순서 규약)
+    build_ground_kit(M)                  # [W2] ground elements - after the dressing (scatter order convention)
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])

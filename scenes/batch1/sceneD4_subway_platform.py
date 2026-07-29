@@ -1,66 +1,70 @@
 # -*- coding: utf-8 -*-
 """
-sceneD4_subway_platform.py — NegObs 인공씬 31호: D4 지하철 승강장 연단
-(Isaac Sim 4.5) — **라이브러리 최초의 완전 실내 씬**
+sceneD4_subway_platform.py — NegObs synthetic scene 31: D4 subway platform edge
+(Isaac Sim 4.5) — **the library's first fully indoor scene**
 
-유형    : D4 비계단 낙차 (승강장 연단 → 궤도부, 낙차 1.15 m)
-사양서  : Docs/nanobanana_batch1_geometry_map.md §C sceneD4_subway_platform
-룩 레퍼: look_refs/d4_subway_platform.jpg
-공통    : scene_common.py (검증 API) · scene16_canopy_shadow.py (표준 골격)
-          · scene02_underpass.py (반실내 콘크리트) · scene06_spiral_towerstone.py
-            (실내 암부 교훈의 진원지 — 아래 [조명 규약] 참조)
+Type    : D4 non-stair drop (platform edge → track bed, drop 1.15 m)
+Spec    : Docs/nanobanana_batch1_geometry_map.md §C sceneD4_subway_platform
+Look ref: look_refs/d4_subway_platform.jpg
+Shared  : scene_common.py (check API) · scene16_canopy_shadow.py (standard skeleton)
+          · scene02_underpass.py (semi-indoor concrete) · scene06_spiral_towerstone.py
+            (origin of the indoor-shadow lesson — see [Lighting convention] below)
 
-위험 본질: 승강장 보행면(z=0)이 궤도 골 위에서 아무 방호 없이 끊긴다. 연단
-           수직면 1.15 m 아래는 암색 발라스트라 **낮은 시점(grazing)에서 궤도
-           골이 통째로 은닉**되고, 승강장이 건너편까지 이어진 하나의 바닥처럼
-           읽힌다. 유일한 단서는 연단 0.3 m 안쪽 황색 점자블록 2열 + 연단선.
-GT       : 궤도 영역(y −2.0..+2.0) 낙차 1.15 m 양성. 승강장 상면 전역 = 낙차 없음.
-           근거 = 승강장 추락(시나리오 조사 v1, 국내 통계).
+Hazard   : the platform walking surface (z=0) breaks off over the track trough with no
+           guard at all. Below the 1.15 m edge face is dark ballast, so **from a low
+           (grazing) viewpoint the track trough is concealed entirely** and the platform
+           reads as one floor running through to the far side. The only cues are the two
+           rows of yellow tactile paving 0.3 m inside the edge, plus the edge line.
+GT       : the track area (y −2.0..+2.0) is positive with a 1.15 m drop. The whole platform top = no drop.
+           Basis = platform falls (scenario survey v1, national statistics).
 
 ──────────────────────────────────────────────────────────────────────────
-[조명 규약 — 이 씬의 최대 난제. 반드시 읽을 것]
-  이 씬은 **창·개구가 하나도 없는 완전 밀폐 셸**이다(승강장 슬래브+발라스트 바닥,
-  측벽 2, 천장, 단부 벽 2, 터널 보어까지 back cap 으로 봉함). 따라서 DomeLight/
-  HDRI 기여는 **구조적으로 0**이며, 씬의 광원은 천장 발광 패널 30장이 전부다.
+[Lighting convention — the hardest problem in this scene. Read it.]
+  This scene is a **fully sealed shell with no window or opening at all** (platform slab
+  + ballast floor, 2 side walls, ceiling, 2 end walls, and the tunnel bore capped at the
+  back). DomeLight / HDRI contribution is therefore **structurally 0**, and the only
+  light in the scene is the 30 emissive ceiling panels.
 
-  ★ **RT(RaytracedLighting) 단일바운스에서는 발광 기여가 거의 잡히지 않는다.**
-    RT 렌더는 형상·배치 확인용으로만 쓰고, **밝기·암부 판정은 반드시
-    PathTracing 8바운스(PARAMS["render"]["pt_max_bounces"]=8)** 로 한다.
-    (scene06 교훈 7 — 실내 암부는 PT 로만 판정)
+  * **A single RT (RaytracedLighting) bounce barely picks up emissive contribution.**
+    Use the RT render only to check form and layout; **brightness and shadow must always
+    be judged in PathTracing with 8 bounces (PARAMS["render"]["pt_max_bounces"]=8)**.
+    (scene06 lesson 7 — indoor shadow is judged under PT only)
 
-  ★ 밝기 튜닝은 PARAMS["panel"]["intensity"] 단일 노브. 시작값 1500.
-    감독 스윕 권장(파일 수정 불필요):
+  * Brightness tuning is the single knob PARAMS["panel"]["intensity"]. Start value 1500.
+    A supervisor sweep is recommended (no file edit needed):
       NEGOBS_PARAMS_OVERRIDE='{"panel":{"intensity":400}}'  python sceneD4_...py
-      ... 400 / 800 / 1500 / 3000 을 PT 로 비교.
-    scene06 감사 B-06-2 는 "실내 가독이면 150~300 이면 충분"이라 했으나 그것은
-    **정오 태양이 노출을 지배하던 반옥외 씬**의 값이다. 본 씬은 직달·천공광이
-    전무해 같은 표시 밝기를 얻으려면 한 자릿수 더 큰 값이 필요하다고 보고
-    1500 에서 출발한다(패널 자체가 조명기구이므로 약한 백색 클리핑은 허용).
+      ... compare 400 / 800 / 1500 / 3000 under PT.
+    scene06 audit B-06-2 said "150~300 is enough for indoor legibility", but that was the
+    value for a **semi-outdoor scene where the noon sun dominated the exposure**. This
+    scene has no direct or sky light at all, so an order of magnitude more is expected to
+    reach the same displayed brightness, hence the start at 1500 (the panels are
+    luminaires themselves, so mild white clipping is acceptable).
 
-  ★ 궤도부 상대 암부(설계 근거): 패널 열은 승강장 상부(y=±5.0)에만 두고 궤도
-    상공(|y|<2)에는 **한 장도 두지 않는다**. 승강장 보행면 바로 위 패널까지
-    거리 3.35 m, 궤도면까지 최근접 거리 6.7 m·입사각 48° →
-    직달 조도비 ≈ (0.669²/45.3)/(1/11.2) ≈ 0.26. 여기에 알베도가
-    발라스트 0.05 vs 콘크리트 0.35 로 7배 차 → 궤도부 표시 휘도는 승강장의
-    수 % 수준. 그러나 **0 은 아니다**: 백색 타일 벽·천장의 간접 바운스가
-    궤도 골로 유입되므로 PT 에서 침목·레일 두부가 겨우 읽혀야 정상이다.
-    (완전 흑이면 intensity 를 올리는 게 아니라 벽 알베도/바운스를 의심할 것)
+  * Relative darkness of the track bed (design basis): the panel rows sit only above the
+    platforms (y=±5.0) and **not one** is placed above the track (|y|<2). The distance to
+    the panel directly above the platform walking surface is 3.35 m, while the nearest
+    distance to the track surface is 6.7 m at an incidence of 48° →
+    direct illuminance ratio ≈ (0.669²/45.3)/(1/11.2) ≈ 0.26. Add albedo, ballast 0.05 vs
+    concrete 0.35, a factor of 7 → the displayed luminance of the track bed is a few % of
+    the platform. But it is **not 0**: indirect bounce off the white tile walls and ceiling
+    flows into the track trough, so under PT the sleepers and rail heads should be barely
+    readable. (If it is fully black, do not raise intensity - suspect the wall albedo / bounces)
 ──────────────────────────────────────────────────────────────────────────
 
-실행 (GUI 룩 체크 — 기본):
+Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
     export PYTHONNOUSERSITE=1
     python sceneD4_subway_platform.py
 
-자동 캡처 (headless):   NEGOBS_CAPTURE=1 NEGOBS_CAPTURE_MODE=pt python sceneD4_...py
-      ※ 실내 발광 단독 조명은 PT 수렴이 느리다. 노이즈가 남으면
-        NEGOBS_WARMUP=900 (+ pt_total_spp 768) 로 올릴 것.
-스모크 조기종료:        NEGOBS_SMOKE=1  python sceneD4_subway_platform.py
+Auto capture (headless):   NEGOBS_CAPTURE=1 NEGOBS_CAPTURE_MODE=pt python sceneD4_...py
+      * indoor emissive-only lighting converges slowly under PT. If noise remains,
+        raise NEGOBS_WARMUP=900 (+ pt_total_spp 768).
+Smoke early exit:       NEGOBS_SMOKE=1  python sceneD4_subway_platform.py
 
-좌표계: Z-up, m. **승강장 종주축 = +X**(카메라 진행축), 승강장 보행면 z=0.
-        낙차 시작 모서리 = 연단선 **y=−2.0**(근측) / **y=+2.0**(건너편, 대칭).
-        x=0 은 역 중앙 기준점(종주축이므로 x 원점에 위험 기하가 걸리지 않음).
+Coordinates: Z-up, m. **Platform run axis = +X** (the camera travel axis), platform walking surface z=0.
+        The drop starts at the edge line **y=−2.0** (near side) / **y=+2.0** (far side, symmetric).
+        x=0 is the station centre datum (it is the run axis, so no hazard geometry sits at the x origin).
 """
 
 import os
@@ -76,79 +80,79 @@ import batch1_common as bc
 
 
 # ===========================================================================
-# [A] SCENE_CONFIG — 표준 7키. hazard_track 대신 관례상 hazard_stairs 키 유지
-#     (기하 토글 유일 예외: False → 궤도 골을 z=0 으로 메워 평지화).
+# [A] SCENE_CONFIG - standard 7 keys. The hazard_stairs key is kept by convention instead of hazard_track
+#     (the one geometry-toggle exception: False -> fill the track trough to z=0, making it flat).
 # ===========================================================================
 SCENE_CONFIG = {
-    "hazard_stairs":      True,   # False → 궤도 골 매립(전면 z=0 평지, 낙차 0)
-    "cue_railing":        True,   # 승강장 끝(터널측) 차단 난간 — 연단에는 무방호[고정]
-    "cue_tactile":        True,   # 황색 점자블록 2열 × 양 승강장 (연단 0.3m 이격)
-    "cue_material_break": True,   # 연단 수직면 암색 오염 파세이드(밝은 코핑 6cm 잔존)
-    "cue_nosing":         True,   # 연단 황색 경계선 (보행면, proud 0.002)
-    "cue_sign":           False,  # [예약] 미구현 — config 키만
-    "cue_scene_dressing": True,   # 벤치·벽 도어·걸레받이/코니스 띠 일괄
+    "hazard_stairs":      True,   # False -> track trough filled (all z=0 flat, drop 0)
+    "cue_railing":        True,   # barrier railing at the platform end (tunnel side) - the edge itself stays unguarded [fixed]
+    "cue_tactile":        True,   # 2 rows of yellow tactile paving x both platforms (0.3m back from the edge)
+    "cue_material_break": True,   # dark soiled fascia on the platform edge face (bright 6cm coping remains)
+    "cue_nosing":         True,   # yellow platform edge line (walking surface, proud 0.002)
+    "cue_sign":           False,  # [reserved] not implemented - config key only
+    "cue_scene_dressing": True,   # benches·wall doors·skirting / cornice bands together
 }
 
 
 # ===========================================================================
-# [B] PARAMS — 치수표. NEGOBS_PARAMS_OVERRIDE 로 머지 가능.
+# [B] PARAMS - dimension table. Mergeable via NEGOBS_PARAMS_OVERRIDE.
 # ===========================================================================
 PARAMS = dict(
-    seed=31,                                  # 침목 지터 고정 시드 (재현성)
+    seed=31,                                  # fixed seed for sleeper jitter (reproducibility)
 
-    # ── 홀 셸 ──────────────────────────────────────────────────────────
-    #  x: 승강장 종주 62 m (−16..46), 그 너머 터널 보어 46..56
-    #  y: 근측 승강장 −8..−2 / 궤도 골 −2..+2 / 건너편 승강장 +2..+8
+    # ── hall shell ─────────────────────────────────────────────────────
+    #  x: platform run 62 m (−16..46), tunnel bore beyond it 46..56
+    #  y: near platform −8..−2 / track trough −2..+2 / far platform +2..+8
     hall=dict(x0=-16.0, x1=46.0,
-              plat_out=8.0,                   # 승강장 바깥 끝 (벽 앞면)
-              edge=2.0,                       # 연단선 |y| (낙차 시작 모서리)
-              z_walk=0.0,                     # 승강장 보행면
-              z_base=-1.60,                   # 슬래브 하단(비가시)
-              wall_in=7.98, wall_out=8.40,    # 측벽 (0.02 는 슬래브 물림)
+              plat_out=8.0,                   # outer end of the platform (wall front face)
+              edge=2.0,                       # platform edge line |y| (the edge where the drop starts)
+              z_walk=0.0,                     # platform walking surface
+              z_base=-1.60,                   # slab underside (not visible)
+              wall_in=7.98, wall_out=8.40,    # side walls (0.02 is the slab embedment)
               wall_top=3.70,
               ceil_z0=3.40, ceil_z1=3.72,
-              end_t=0.42),                    # 단부 벽 두께
+              end_t=0.42),                    # end wall thickness
 
-    # ── 궤도부 ────────────────────────────────────────────────────────
-    #  발라스트 상면 z=−1.15 → **GT 낙차 1.15 m 의 기준면**
+    # ── track bed ─────────────────────────────────────────────────────
+    #  ballast top z=−1.15 -> **the reference plane for the 1.15 m GT drop**
     track=dict(x0=-16.0, x1=55.5,
-               half_w=2.05,                   # 슬래브에 0.05 물림(코플래너 회피)
-               # ballast_bot 은 슬래브 하단(−1.60)보다 2 cm 더 내림 —
-               # 셸 최하면(비가시)이지만 코플래너 자체를 남기지 않는다(§8).
+               half_w=2.05,                   # embedded 0.05 into the slab (avoids coplanarity)
+               # ballast_bot drops 2 cm below the slab underside (−1.60) -
+               # it is the shell's lowest face (not visible) but leaves no coplanarity at all (§8).
                ballast_top=-1.15, ballast_bot=-1.62,
-               gauge=1.435,                   # 표준궤 — 레일 중심 y=±0.7175
+               gauge=1.435,                   # standard gauge - rail centres y=+-0.7175
                sleeper_step=0.65, sleeper_len=2.60,
                sleeper_w=0.24, sleeper_h=0.16, sleeper_top=-1.06,
                jitter_x=0.03, jitter_y=0.03, jitter_z=0.012,
-               rail_w=0.070, rail_h=0.15,     # 레일 몸통 (침목 상면에서 기립)
+               rail_w=0.070, rail_h=0.15,     # rail web (rises from the sleeper top)
                head_w=0.075, head_z0=-0.925, head_z1=-0.900),
 
-    # ── 터널 포탈 · 보어 (원경 폐쇄 + 암부 소실점) ──────────────────────
-    portal=dict(half_w=2.40, top_z=1.58),     # 단부 벽 개구
+    # ── tunnel portal · bore (far closure, dark vanishing point) ────────
+    portal=dict(half_w=2.40, top_z=1.58),     # end wall opening
     bore=dict(x0=46.30, x1=56.00, half_in=2.38, half_out=2.82,
               z0=-1.92, z1=1.92, cap_t=0.40),
 
-    # ── 천장 발광 패널 (이 씬의 유일 광원) ──────────────────────────────
-    #   승강장 중앙 상부 2열(y=±5.0), 간격 4.0 m, 열당 15장 = 총 30장
+    # ── ceiling emissive panels (the scene's only light) ────────────────
+    #   2 rows above the platform centres (y=+-5.0), 4.0 m pitch, 15 per row = 30 total
     panel=dict(rows=(-5.0, 5.0), x0=-14.0, step=4.0, n=15,
                size_x=1.60, size_y=0.55, z0=3.32, z1=3.41,
                color=(0.90, 0.90, 0.86), rough=0.35,
-               emis=(1.0, 1.0, 0.95), intensity=12000.0),  # r1: 1500은 승강장 암흑 → 8배 상향
+               emis=(1.0, 1.0, 0.95), intensity=12000.0),  # r1: 1500 left the platform pitch dark -> raised 8x
 
     # ── cue ──────────────────────────────────────────────────────────
-    #  점자블록: 연단에서 0.30 이격 → 1열 |y| 2.30..2.60, 2열 2.62..2.92
+    #  tactile paving: 0.30 back from the edge -> row 1 |y| 2.30..2.60, row 2 2.62..2.92
     tactile=dict(offset=0.30, width=0.30, gap=0.02, proud=0.004),
-    #  연단 황색 경계선: 연단선 안쪽 0.02..0.14
+    #  yellow platform edge line: 0.02..0.14 inside the edge line
     nosing=dict(color=(0.85, 0.72, 0.10), inset=0.02, width=0.12, proud=0.002),
-    #  연단 수직면 오염 파세이드 (상단 6 cm 는 밝은 코핑으로 잔존)
+    #  soiled fascia on the platform edge face (the top 6 cm remains bright coping)
     facade=dict(y_in=2.06, y_out=1.99, z0=-1.25, z1=-0.06),
-    #  승강장 끝 차단 난간 (터널측) — 연단에는 난간 없음이 위험 본질[고정]
+    #  barrier railing at the platform end (tunnel side) - the hazard is that the edge has no railing [fixed]
     endrail=dict(x=45.40, rail_r=0.030, post_r=0.040,
                  top_h=1.05, mid_h=0.55, nposts=5),
-    #  보행면 줄눈 (횡방향, 3 m 간격)
+    #  walking-surface joints (transverse, 3 m pitch)
     joint=dict(step=3.0, width=0.03, proud=0.001),
 
-    # ── 드레싱 ────────────────────────────────────────────────────────
+    # ── dressing ──────────────────────────────────────────────────────
     bench=dict(ys=(-7.40, 7.40), xs_near=(-2.0, 10.0, 22.0, 34.0),
                xs_far=(4.0, 16.0, 28.0),
                length=1.80, width=0.40, height=0.45),
@@ -156,33 +160,33 @@ PARAMS = dict(
     trim=dict(skirt_z0=-0.005, skirt_z1=0.22,
               cornice_z0=3.08, cornice_z1=3.41, proud=0.02),
 
-    # ── 사이니지 맥락 v2 (2026-07-27, 휑함 해소 — **소폭**) ────────────────
-    #   ★ 불변: 연단(|y|=2.0)·궤도·발라스트·점자블록·연단 경계선·천장 발광 패널
-    #     ·조명 파라미터. 신규 요소는 전부 **측벽면(|y| ≥ 7.958)** 또는
-    #     **천장 걸이(z ≥ 2.44)** 에만 둔다 → 보행면·연단·궤도 기하 0 변경.
-    #   ★ 조도 균형: 광고 라이트박스 발광은 천장 패널(12000)의 1/5 = 2400 으로
-    #     상한(1/4=3000) 이내. 총 2장(면적 2.86 m²)뿐이라 승강장/궤도 조도비에
-    #     주는 영향은 패널 30장 대비 수 % 미만(궤도 상대 암부 특색 유지).
+    # ── signage context v2 (2026-07-27, less barren - **modest**) ──────────
+    #   * invariant: platform edge (|y|=2.0)·track·ballast·tactile paving·edge line·ceiling panels
+    #     ·lighting parameters. Every new element goes only on the **side wall faces (|y| >= 7.958)**
+    #     or **ceiling hangers (z >= 2.44)** -> zero change to walking surface, edge and track geometry.
+    #   * illumination balance: the ad lightbox emission is 1/5 of the ceiling panels (12000) = 2400,
+    #     within the cap (1/4=3000). With only 2 of them (area 2.86 m²) their effect on the
+    #     platform / track illumination ratio is under a few % of the 30 panels (the track stays relatively dark).
     signage=dict(
-        # 노선 색 밴드 — 양 측벽 종주. 도어(h 2.10)·역명판(≤2.05)·라이트박스
-        # (≤2.15) 위, 코니스(3.08) 아래 대역에 둔다.
+        # line colour band - runs along both side walls. Placed above the doors (h 2.10)·station
+        # name panels (<=2.05)·lightboxes (<=2.15) and below the cornice (3.08).
         band=dict(z0=2.30, z1=2.55, proud=0.022, embed=0.005),
-        # 역명판(무텍스트 색면 박판) — 근측벽 x{-4,10,30} / 대측벽 x{2,26}
-        #   도어 x{-8,6,20,34}·라이트박스 x{16,12} 와 x 구간이 겹치지 않는다.
+        # station name panels (textless colour-field plates) - near wall x{-4,10,30} / far wall x{2,26}
+        #   their x ranges do not overlap the doors x{-8,6,20,34} or the lightboxes x{16,12}.
         nameplates=[dict(x=-4.0, sgn=-1.0), dict(x=10.0, sgn=-1.0),
                     dict(x=30.0, sgn=-1.0), dict(x=2.0, sgn=1.0),
                     dict(x=26.0, sgn=1.0)],
         nameplate=dict(w=1.60, h=0.50, z_c=1.80, proud=0.030, embed=0.005,
                        bar_h=0.14, bar_w=1.10, bar_proud=0.012),
-        # 광고 라이트박스 2 (약한 발광)
+        # 2 ad lightboxes (weak emission)
         lightboxes=[dict(x=16.0, sgn=-1.0), dict(x=12.0, sgn=1.0)],
-        #   face_proud > frame_proud 여야 발광면이 프레임 슬래브에 묻히지 않는다
-        #   (프레임은 솔리드 박스 — 면적이 w+2·frame 이라 테두리로 읽힌다).
+        #   face_proud > frame_proud is required so the emissive face is not buried in the frame slab
+        #   (the frame is a solid box - it spans w+2·frame, so it reads as a border).
         lightbox=dict(w=2.20, h=1.30, z_c=1.50, frame=0.09,
                       face_proud=0.095, frame_proud=0.075, embed=0.005,
                       emis=(1.0, 0.96, 0.88), intensity=2400.0),
-        # 천장 걸이 역명 사인 4 — 연단 안쪽 |y|=2.6, 최고 카메라(z 1.85) 위
-        #   0.59 m 여유. 판 하단 2.44 / 상단 3.05, 걸이봉 → 천장 3.40.
+        # 4 ceiling-hung station signs - |y|=2.6 inside the edge, 0.59 m above the highest
+        #   camera (z 1.85). Panel bottom 2.44 / top 3.05, hanger rod -> ceiling 3.40.
         hangers=[dict(x=0.0, sgn=-1.0), dict(x=24.0, sgn=-1.0),
                  dict(x=12.0, sgn=1.0), dict(x=36.0, sgn=1.0)],
         hanger=dict(y=2.60, w=2.20, t=0.07, z0=2.44, z1=3.05,
@@ -193,12 +197,12 @@ PARAMS = dict(
     material=dict(
         scale=dict(concrete_floor=1.5, concrete_wall=2.0, plaster=1.2,
                    gravel=0.5, wood_dark=0.5, tactile=0.3),
-        # ─ sRGB 감마 규약(§A-1): "어두운 색"은 0.02~0.06 대역.
-        #   텍스처 틴트는 곱셈이므로 (원본 알베도 × 틴트) 가 그 대역에 들도록.
-        ballast_tint=(0.155, 0.150, 0.145),   # gravel(≈0.35) × → ≈0.052 [암화]
+        # ─ sRGB gamma convention (§A-1): "dark colours" live in 0.02~0.06.
+        #   texture tints multiply, so (source albedo x tint) must land in that band.
+        ballast_tint=(0.155, 0.150, 0.145),   # gravel (~0.35) x -> ~0.052 [darkened]
         sleeper_tint=(0.30, 0.28, 0.26),      # wood_dark(≈0.18) × → ≈0.052
         facade_tint=(0.14, 0.14, 0.15),       # concrete_wall(≈0.45) × → ≈0.063
-        wall_tint=(0.90, 0.90, 0.88),         # 백색 타일 벽 (밝음 — 간접광 담당)
+        wall_tint=(0.90, 0.90, 0.88),         # white tile wall (bright - carries the indirect light)
         rail_color=(0.045, 0.042, 0.038), rail_metallic=0.55, rail_rough=0.75,
         head_color=(0.42, 0.42, 0.44), head_metallic=0.85, head_rough=0.14,
         ceil_color=(0.20, 0.20, 0.21), ceil_rough=0.85,
@@ -208,31 +212,31 @@ PARAMS = dict(
         door_color=(0.28, 0.30, 0.32), door_metallic=0.35, door_rough=0.45,
         bench_color=(0.22, 0.23, 0.25), bench_metallic=0.25, bench_rough=0.50,
         fence_color=(0.45, 0.46, 0.48), fence_metallic=0.70, fence_rough=0.35,
-        # ── 사이니지 v2 ── (실내 저조도라 중간~고채도로. 암색 대역은 미사용)
-        line_band=(0.72, 0.30, 0.06), line_band_rough=0.55,   # 노선 색(주황)
-        sign_field=(0.06, 0.10, 0.24), sign_rough=0.50,       # 역명판 감청 색면
-        sign_bar=(0.78, 0.78, 0.76),                          # 백색 색면 바
+        # ── signage v2 ── (mid to high saturation for the dim interior. The dark band is unused)
+        line_band=(0.72, 0.30, 0.06), line_band_rough=0.55,   # line colour (orange)
+        sign_field=(0.06, 0.10, 0.24), sign_rough=0.50,       # station name panel, deep blue colour field
+        sign_bar=(0.78, 0.78, 0.76),                          # white colour-field bar
         lbox_frame=(0.12, 0.12, 0.13), lbox_frame_rough=0.45,
         lbox_face=(0.85, 0.82, 0.75), lbox_face_rough=0.30,
     ),
 
-    # ── 조명 ──────────────────────────────────────────────────────────
-    #  완전 실내: 돔·태양 모두 사실상 무효화. hdri 는 check_assets 통과 및
-    #  setup_lighting 계약 유지를 위해 기본값 그대로 둔다(밀폐 셸이라 기여 0).
+    # ── lighting ──────────────────────────────────────────────────────
+    #  fully indoors: both dome and sun are effectively disabled. The hdri is left at its
+    #  default to pass check_assets and honour the setup_lighting contract (sealed shell, contribution 0).
     light=dict(
         hdri="qwantani_noon_puresky_4k.exr",
-        lookfix=False,          # 실내 — 태양 캡/지평 리프트 무의미(cv2 비용 절약)
-        dome_intensity=8.0,     # 사실상 차단. 셸이 밀폐라 실제 기여는 0
+        lookfix=False,          # indoors - sun cap / horizon lift are meaningless (saves cv2 cost)
+        dome_intensity=8.0,     # effectively cut off. The shell is sealed, so the real contribution is 0
         noon_dome_rot=0.0,
-        noon_sun_enable=False,  # 실내 — 직달 태양 없음(프림은 invisible 처리)
+        noon_sun_enable=False,  # indoors - no direct sun (the prim is set invisible)
         noon_sun_elev=49.79,
         noon_sun_intensity=0.0, noon_sun_color=(1.0, 1.0, 1.0),
         hdri_sun_rotz_offset=0.0,
         dome_rotation_step=15.0,
     ),
-    # ─── SUN_AZ_OFFSET: 규약 기본 171.5 에서 **0.0 으로 이탈**.
-    #     사유 = 완전 밀폐 실내라 태양 방위가 화면에 아무 영향을 주지 않으며,
-    #     노출 판정을 흐리는 잔여 변수를 제거하기 위함. [ ]키 스윕도 무의미. ───
+    # ─── SUN_AZ_OFFSET: **departs to 0.0** from the convention default 171.5.
+    #     Reason = in a fully sealed interior the sun azimuth affects nothing on screen,
+    #     and it removes a residual variable that clouds exposure judgement. The [ ] sweep is moot too. ───
     SUN_AZ_OFFSET=0.0,
 
     render=dict(pt_total_spp=512, pt_max_bounces=8),
@@ -259,29 +263,29 @@ if _sc_ov:
 
 
 # ===========================================================================
-# [C] 경로 상수 + 필요 텍스처 역할
+# [C] path constants + required texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "sceneD4")
 
-# 발라스트는 신규 에셋 없이 기존 gravel + 암화 틴트 재사용(감독 결정, 맵 §공통-1).
+# ballast reuses the existing gravel + a darkening tint with no new asset (supervisor decision, map §shared-1).
 ASSET_ROLES = ["concrete_floor", "concrete_wall", "plaster", "gravel",
                "wood_dark", "tactile", "hdri", "mdl"]
 
 
 def build_views():
-    """카메라 프리셋: grid_views(gy=−3.6, 근측 승강장 위 종주) + 미장센 4컷.
+    """Camera presets: grid_views (gy=−3.6, running above the near platform) + 4 mise-en-scene shots.
 
-    gy=−3.6 은 연단(y=−2.0)에서 1.6 m 안쪽 = 점자블록 바로 뒤 보행 동선.
-    +X 를 보므로 연단·궤도 골은 **화면 좌측**, 측벽은 우측에 온다."""
+    gy=−3.6 is 1.6 m inside the edge (y=−2.0) = the walking line just behind the tactile paving.
+    Looking toward +X puts the edge and the track trough on the **left of the image** and the side wall on the right."""
     views = sc.grid_views(-3.6)
-    # edge_graze: 연단 바로 옆·저시점 종주 — 궤도 골이 통째로 은닉되는 핵심 컷
+    # edge_graze: low viewpoint running right beside the edge - the key shot where the track trough is wholly hidden
     views["edge_graze"] = dict(eye=[-6.0, -2.55, 0.32], tgt=[9.0, -2.25, 0.02])
-    # edge_approach: 연단 **직교 접근**(보행자가 승강장 안쪽에서 연단으로)
+    # edge_approach: **perpendicular approach** to the edge (a pedestrian walking from inside the platform toward it)
     views["edge_approach"] = dict(eye=[8.0, -6.60, 1.60], tgt=[8.6, -1.20, -0.85])
-    # track_reveal: 궤도 골·레일·건너편 승강장이 함께 읽히는 판독 컷
+    # track_reveal: reading shot where the track trough, rails and far platform read together
     views["track_reveal"] = dict(eye=[-3.0, -4.80, 1.85], tgt=[9.0, -0.60, -0.95])
-    # tunnel_vista: 종주 소실점 + 터널 포탈 암부 (실내 스케일 인상)
+    # tunnel_vista: the vanishing point of the run + the dark tunnel portal (impression of interior scale)
     views["tunnel_vista"] = dict(eye=[6.0, -3.40, 1.70], tgt=[44.0, -1.40, 0.10])
     return views
 
@@ -336,12 +340,12 @@ def main():
         return sc.make_pbr(stage, path, *args, **kwargs)
 
     def SPAN(path, x0, x1, y0, y1, z0, z1, mtl=None, col=False):
-        """AABB(x0..x1, y0..y1, z0..z1) 박스 — 셸 조립용 가독 래퍼."""
+        """AABB(x0..x1, y0..y1, z0..z1) box — readability wrapper for shell assembly."""
         return BOX(path, ((x0 + x1) / 2.0, (y0 + y1) / 2.0, (z0 + z1) / 2.0),
                    (abs(x1 - x0), abs(y1 - y0), abs(z1 - z0)), mtl, col=col)
 
     # -------------------------------------------------------------------
-    # 재질
+    # materials
     # -------------------------------------------------------------------
     def setup_materials():
         sca = mp["scale"]
@@ -350,13 +354,13 @@ def main():
             f"{ROOT}/Looks/Platform", sc.tex_path("concrete_floor", "diff"),
             sc.tex_path("concrete_floor", "nor"),
             sc.tex_path("concrete_floor", "rough"), sca["concrete_floor"])
-        # 연단 수직면: 콘크리트 벽 텍스처 + 강한 암화 틴트(분진·제륜자 오염)
+        # platform edge face: concrete wall texture + strong darkening tint (dust and brake-shoe soiling)
         M["facade"] = PBR(
             f"{ROOT}/Looks/Facade", sc.tex_path("concrete_wall", "diff"),
             sc.tex_path("concrete_wall", "nor"),
             sc.tex_path("concrete_wall", "rough"), sca["concrete_wall"],
             tint=mp["facade_tint"])
-        # 발라스트: 신규 에셋 없이 gravel + 암화 틴트 (감독 결정)
+        # ballast: gravel + a darkening tint, no new asset (supervisor decision)
         M["ballast"] = PBR(
             f"{ROOT}/Looks/Ballast", sc.tex_path("gravel", "diff"),
             sc.tex_path("gravel", "nor"), sc.tex_path("gravel", "rough"),
@@ -365,7 +369,7 @@ def main():
             f"{ROOT}/Looks/Sleeper", sc.tex_path("wood_dark", "diff"),
             sc.tex_path("wood_dark", "nor"), sc.tex_path("wood_dark", "rough"),
             sca["wood_dark"], tint=mp["sleeper_tint"])
-        # 백색 타일 측벽 — 실내 간접광의 주 반사체이므로 밝게 유지
+        # white tile side walls - the main reflector for indirect light, so kept bright
         M["wall"] = PBR(
             f"{ROOT}/Looks/Wall", sc.tex_path("plaster", "diff"),
             sc.tex_path("plaster", "nor"), sc.tex_path("plaster", "rough"),
@@ -373,7 +377,7 @@ def main():
         M["tactile"] = PBR(
             f"{ROOT}/Looks/Tactile", sc.tex_path("tactile", "diff"),
             sc.tex_path("tactile", "nor"), None, sca["tactile"])
-        # ── 상수색 ──
+        # ── constant colours ──
         M["rail"] = PBR(f"{ROOT}/Looks/Rail", diffuse_color=mp["rail_color"],
                         metallic=mp["rail_metallic"],
                         roughness_const=mp["rail_rough"])
@@ -403,7 +407,7 @@ def main():
         M["fence"] = PBR(f"{ROOT}/Looks/Fence", diffuse_color=mp["fence_color"],
                          metallic=mp["fence_metallic"],
                          roughness_const=mp["fence_rough"])
-        # ── 사이니지 v2 재질 ──
+        # ── signage v2 materials ──
         M["line_band"] = PBR(f"{ROOT}/Looks/LineBand",
                              diffuse_color=mp["line_band"],
                              roughness_const=mp["line_band_rough"])
@@ -423,7 +427,7 @@ def main():
                              metallic=0.0,
                              emission_color=lb["emis"],
                              emission_intensity=lb["intensity"])
-        # 천장 발광 패널 — make_pbr 의 emission 인자 사용(scene_common 07-27 추가)
+        # ceiling emissive panels - uses the emission argument of make_pbr (added to scene_common 07-27)
         pn = PARAMS["panel"]
         M["panel"] = PBR(f"{ROOT}/Looks/Panel", diffuse_color=pn["color"],
                          roughness_const=pn["rough"], metallic=0.0,
@@ -432,9 +436,9 @@ def main():
         return M
 
     # -------------------------------------------------------------------
-    # 승강장 슬래브 2면 — **궤도 골(|y|<2.0)을 덮지 않는다** (교훈 5 준수).
-    #   근측/건너편을 완전히 분리된 2박스로 만들어 개구 분할 규약을 구조적으로
-    #   만족시킨다(사각 개구 4박스 분할의 종주형 축약: 종방향은 단부 벽이 폐쇄).
+    # the 2 platform slabs - **they do not cover the track trough (|y|<2.0)** (lesson 5 observed).
+    #   making near and far two fully separate boxes satisfies the opening-split convention
+    #   structurally (the longitudinal reduction of the 4-box square-opening split: the end walls close the long direction).
     # -------------------------------------------------------------------
     def build_platforms(M):
         for i, sgn in enumerate((-1.0, 1.0)):
@@ -445,7 +449,7 @@ def main():
                  HA["z_base"], HA["z_walk"], M["platform"], col=True)
 
     def build_joints(M):
-        """보행면 횡방향 줄눈 — 대형 슬래브 판 경계(스케일 단서)."""
+        """Transverse joints in the walking surface — large slab panel boundaries (a scale cue)."""
         jt = PARAMS["joint"]
         w = jt["width"]
         n = int((HA["x1"] - HA["x0"]) / jt["step"]) + 1
@@ -464,10 +468,10 @@ def main():
                 k += 1
 
     def build_facade(M):
-        """연단 수직면 오염 파세이드 (cue_material_break).
-        z1=−0.06 → 상단 6 cm 는 슬래브 본체(밝은 콘크리트) 코핑으로 잔존.
-        y 범위는 슬래브 안쪽으로 0.06 물려 코플래너 Z-파이팅을 회피하고
-        궤도 쪽으로 0.01 만 돌출시킨다."""
+        """Soiled fascia on the platform edge face (cue_material_break).
+        z1=−0.06 → the top 6 cm remains as coping of the slab body (bright concrete).
+        The y range is embedded 0.06 into the slab to avoid coplanar Z-fighting and
+        projects only 0.01 toward the track."""
         fa = PARAMS["facade"]
         for i, sgn in enumerate((-1.0, 1.0)):
             y_a = sgn * fa["y_in"]
@@ -476,14 +480,14 @@ def main():
                  min(y_a, y_b), max(y_a, y_b), fa["z0"], fa["z1"], M["facade"])
 
     # -------------------------------------------------------------------
-    # 궤도부 — 발라스트 평판 + 침목 + 레일 2본
+    # track bed - ballast slab + sleepers + 2 rails
     # -------------------------------------------------------------------
     def build_track(M):
         hw = TR["half_w"]
         SPAN(f"{ROOT}/Ballast", TR["x0"], TR["x1"], -hw, hw,
              TR["ballast_bot"], TR["ballast_top"], M["ballast"], col=True)
 
-        rs = np.random.RandomState(int(PARAMS["seed"]))     # 고정 시드
+        rs = np.random.RandomState(int(PARAMS["seed"]))     # fixed seed
         step = TR["sleeper_step"]
         n = int((TR["x1"] - TR["x0"] - 0.4) / step) + 1
         sz = (TR["sleeper_w"], TR["sleeper_len"], TR["sleeper_h"])
@@ -495,7 +499,7 @@ def main():
             z = zc + rs.uniform(-TR["jitter_z"], TR["jitter_z"])
             BOX(f"{ROOT}/Sleeper_{i}", (x, y, z), sz, M["sleeper"])
 
-        # 레일 2본: 몸통(암색 강재) + 두부(연마면, metallic 0.85)
+        # 2 rails: web (dark steel) + head (polished, metallic 0.85)
         rz0 = TR["sleeper_top"]
         rz1 = rz0 + TR["rail_h"]
         for i, sgn in enumerate((-1.0, 1.0)):
@@ -503,39 +507,39 @@ def main():
             SPAN(f"{ROOT}/Rail_{i}/Body", TR["x0"], TR["x1"],
                  yc - TR["rail_w"] / 2.0, yc + TR["rail_w"] / 2.0,
                  rz0, rz1, M["rail"])
-            # 두부는 몸통 상단에 0.015 물리고 0.01 돌출 (코플래너 회피)
+            # the head is embedded 0.015 into the web top and projects 0.01 (avoids coplanarity)
             SPAN(f"{ROOT}/Rail_{i}/Head", TR["x0"], TR["x1"],
                  yc - TR["head_w"] / 2.0, yc + TR["head_w"] / 2.0,
                  TR["head_z0"], TR["head_z1"], M["head"])
 
     def build_flat_fill(M):
-        """hazard_stairs=False 대조군: 궤도 골을 z=0 까지 메워 전면 평지화.
-        (연단 파세이드·궤도 일체 미생성 — 낙차 0)"""
+        """hazard_stairs=False control: the track trough is filled to z=0, making it all flat.
+        (no edge fascia and no track built at all — drop 0)"""
         SPAN(f"{ROOT}/FlatFill", HA["x0"], HA["x1"],
              -TR["half_w"], TR["half_w"], HA["z_base"], HA["z_walk"],
              M["platform"], col=True)
 
     # -------------------------------------------------------------------
-    # 셸 — 측벽 2 · 천장 · 단부 벽 2(+터널 포탈) · 터널 보어
-    #   완전 밀폐가 목적: 어느 면에도 돔 유입 경로를 남기지 않는다.
+    # shell - 2 side walls · ceiling · 2 end walls (+tunnel portal) · tunnel bore
+    #   the goal is a full seal: no face leaves a path for the dome light to enter.
     # -------------------------------------------------------------------
     def build_shell(M):
-        # 측벽 (백색 타일). 안쪽 면 |y|=7.98 — 슬래브(±8.0)에 0.02 물림.
+        # side walls (white tile). Inner face |y|=7.98 - embedded 0.02 into the slab (+-8.0).
         for i, sgn in enumerate((-1.0, 1.0)):
             y_a = sgn * HA["wall_in"]
             y_b = sgn * HA["wall_out"]
             SPAN(f"{ROOT}/SideWall_{i}", HA["x0"] - HA["end_t"],
                  HA["x1"] + HA["end_t"], min(y_a, y_b), max(y_a, y_b),
                  HA["z_base"], HA["wall_top"], M["wall"], col=True)
-        # 천장 슬래브 (벽 상단을 0.30 물고 덮음)
+        # ceiling slab (covers the wall tops with 0.30 of embedment)
         SPAN(f"{ROOT}/Ceiling", HA["x0"] - HA["end_t"], HA["x1"] + HA["end_t"],
              -HA["wall_out"], HA["wall_out"], HA["ceil_z0"], HA["ceil_z1"],
              M["ceiling"])
-        # 단부 벽 W (승강장 시작단) — 전면 폐쇄
+        # end wall W (platform start end) - fully closed
         SPAN(f"{ROOT}/EndWall_W", HA["x0"] - HA["end_t"], HA["x0"] + 0.02,
              -HA["wall_out"], HA["wall_out"], HA["z_base"], HA["ceil_z1"],
              M["wall"], col=True)
-        # 단부 벽 E (터널측) — 궤도 개구(포탈)를 남기고 3분할
+        # end wall E (tunnel side) - split into 3, leaving the track opening (portal)
         po = PARAMS["portal"]
         ex0, ex1 = HA["x1"] - 0.02, HA["x1"] + HA["end_t"]
         SPAN(f"{ROOT}/EndWall_E_0", ex0, ex1, -HA["wall_out"], -po["half_w"],
@@ -546,8 +550,8 @@ def main():
              -po["half_w"] - 0.02, po["half_w"] + 0.02,
              po["top_z"], HA["ceil_z1"], M["wall"], col=True)
 
-        # 터널 보어 — 5면(측벽2·천장·바닥·back cap) 암색 박스로 봉함.
-        #   "터널 입구 암부"가 목표값이므로 재질은 0.022 대의 극암색 상수.
+        # tunnel bore - sealed with 5 dark boxes (2 side walls·ceiling·floor·back cap).
+        #   "dark tunnel mouth" is the target, so the material is an extremely dark constant around 0.022.
         bo = PARAMS["bore"]
         for i, sgn in enumerate((-1.0, 1.0)):
             y_a = sgn * bo["half_in"]
@@ -564,7 +568,7 @@ def main():
              -bo["half_out"], bo["half_out"], bo["z0"], bo["z1"], M["tunnel"])
 
     # -------------------------------------------------------------------
-    # 천장 발광 패널 — 승강장 상부 2열만. 궤도 상공은 의도적 미배치.
+    # ceiling emissive panels - only the 2 rows above the platforms. Nothing above the track, deliberately.
     # -------------------------------------------------------------------
     def build_panels(M):
         pn = PARAMS["panel"]
@@ -582,7 +586,7 @@ def main():
               f"emissive_intensity={pn['intensity']}) — 궤도 상공 미배치")
 
     # -------------------------------------------------------------------
-    # cue — 점자블록 / 연단 경계선 / 승강장 끝 차단 난간
+    # cues - tactile paving / platform edge line / barrier railing at the platform end
     # -------------------------------------------------------------------
     def build_cues(M):
         if cfg["cue_tactile"]:
@@ -609,7 +613,7 @@ def main():
                      HA["z_walk"] - 0.01, HA["z_walk"] + ns["proud"],
                      M["nosing"])
         if cfg["cue_railing"]:
-            # 승강장 끝(터널측) 차단 난간. **연단에는 난간 없음**이 위험 본질.
+            # barrier railing at the platform end (tunnel side). The hazard is that **the edge has no railing**.
             er = PARAMS["endrail"]
             k = 0
             for sgn in (-1.0, 1.0):
@@ -631,15 +635,15 @@ def main():
                 k += 1
 
     # -------------------------------------------------------------------
-    # 드레싱 — 벤치 · 벽 도어 · 걸레받이/코니스 띠 (맥락 판독 보강)
+    # dressing - benches · wall doors · skirting / cornice bands (reinforces the context reading)
     # -------------------------------------------------------------------
     def build_dressing(M):
         bn = PARAMS["bench"]
         k = 0
-        # [v5.1 §3] 12 m 등간격·완전 축평행 해소. 고정식 승강장 의자이므로
-        #   각도는 시공 오차 대역(3~5°)·위치는 ±0.12 m 로 **작게** 준다
-        #   (산업 정렬 관행 제외 대상인 천장 패널·침목·점자블록은 불변).
-        #   |y| = 7.40 ± 0.12 → 연단(|y| 2.0)·측벽(7.958)과 여유 유지.
+        # [v5.1 §3] breaks the 12 m even spacing and the perfect axis alignment. These are fixed
+        #   platform seats, so the jitter is **small**: angle within the installation tolerance (3~5 deg), position +-0.12 m
+        #   (the ceiling panels, sleepers and tactile paving are exempt as industrially aligned, so unchanged).
+        #   |y| = 7.40 +- 0.12 -> clearance kept from the edge (|y| 2.0) and the side wall (7.958).
         for ys, xs in ((bn["ys"][0], bn["xs_near"]), (bn["ys"][1], bn["xs_far"])):
             for x in xs:
                 dx, dy = bc.jit_pos(x, ys, "benchD4", amp=0.12)
@@ -653,7 +657,7 @@ def main():
         k = 0
         for sgn in (-1.0, 1.0):
             wi = sgn * HA["wall_in"]
-            wo = sgn * (HA["wall_in"] - tm["proud"])    # 벽면에서 실내측 돌출
+            wo = sgn * (HA["wall_in"] - tm["proud"])    # projects from the wall into the room
             y0, y1 = sorted((wi, wo))
             SPAN(f"{ROOT}/Skirt_{k}", HA["x0"], HA["x1"], y0, y1,
                  tm["skirt_z0"], tm["skirt_z1"], M["trim"])
@@ -671,46 +675,46 @@ def main():
                 k += 1
 
     # -------------------------------------------------------------------
-    # 사이니지 맥락 v2 — 노선 색 밴드 · 역명판 · 광고 라이트박스 · 천장 걸이 사인
+    # signage context v2 - line colour band · station name panels · ad lightboxes · ceiling-hung signs
     # -------------------------------------------------------------------
     def build_signage(M):
-        """승강장 사이니지. **연단·궤도·점자블록·발광 패널·조명 일절 불변.**
+        """Platform signage. **The edge, track, tactile paving, emissive panels and lighting are all unchanged.**
 
-        ── 카메라 검산 (PT 판정 씬이므로 좌표 검산으로 대체) ────────────────
-        전 뷰 eye: grid(gy −3.6) (−2/−5/−10, −3.6, 0.3~1.8) ·
+        ── Camera check (a PT-judged scene, so replaced by a coordinate check) ─────────
+        Eyes of all views: grid(gy −3.6) (−2/−5/−10, −3.6, 0.3~1.8) ·
           edge_graze(−6, −2.55, 0.32) · edge_approach(8, −6.60, 1.60) ·
           track_reveal(−3, −4.80, 1.85) · tunnel_vista(6, −3.40, 1.70).
-        1) 벽면 요소(밴드·역명판·라이트박스): 최대 돌출 y = ±(7.98−0.095)
-           = ±7.885. 카메라 최대 |y| = 6.60(edge_approach) → **1.29 m 여유**,
-           매몰·간섭 0. 보행면(z 0)·연단(|y|=2.0)과는 5.9 m 이격.
-        2) 천장 걸이 사인: |y| = 2.60(연단 안쪽 0.6 m, 점자블록 2.30~2.92 직상),
-           판 하단 z 2.44. 카메라 최고 z = 1.85(track_reveal) →
-           **수직 여유 0.59 m**, 최근접 카메라 edge_graze(y −2.55, z 0.32)
-           와는 x 6 m 이상 이격 → 매몰 0.
-           · 시야 검산: edge_graze 에서 x=0 사인은 앙각 19.5° > vfov half 18°
-             → 프레임 위로 벗어나고, x=24 사인은 4.0° → 프레임 안(원경).
-             어느 쪽도 **연단선·궤도 골 시선(하향)** 을 가리지 않는다.
-           · track_reveal 에서 x=0 사인은 시축 위 23° → 프레임 밖,
-             x=24 사인은 13.8° → 프레임 안(상부). 궤도 시선은 하향이라 무간섭.
-        3) x 구간 충돌 검산: 도어 x{−8,6,20,34}(±0.50) / 역명판 x{−4,10,30}
-           근측·{2,26} 대측(±0.80) / 라이트박스 x{16}근측·{12}대측(±1.10)
-           → 동일 벽면에서 서로 겹치는 구간 없음. 벤치(근 −2,10,22,34 /
-           대 4,16,28)는 y=±7.40 이라 벽면 요소(|y| ≥ 7.905)와 z·y 모두 이격.
-        4) 노선 색 밴드 z 2.30~2.55 — 도어 상단 2.10 / 역명판 상단 2.05 /
-           라이트박스 상단 2.15 위, 코니스 하단 3.08 아래 → 코플래너 0.
+        1) Wall elements (band·name panel·lightbox): max projection y = ±(7.98−0.095)
+           = ±7.885. Max camera |y| = 6.60 (edge_approach) → **1.29 m clearance**,
+           zero burial or interference. 5.9 m clear of the walking surface (z 0) and the edge (|y|=2.0).
+        2) Ceiling-hung signs: |y| = 2.60 (0.6 m inside the edge, directly above the tactile paving 2.30~2.92),
+           panel bottom z 2.44. Max camera z = 1.85 (track_reveal) →
+           **vertical clearance 0.59 m**; the nearest camera, edge_graze (y −2.55, z 0.32),
+           is more than 6 m away in x → burial 0.
+           · FOV check: from edge_graze the x=0 sign is at elevation 19.5° > vfov half 18°
+             → it leaves the top of the frame, while the x=24 sign at 4.0° → in frame (distant).
+             Neither obstructs the **downward sight line to the edge line and track trough**.
+           · From track_reveal the x=0 sign is 23° above the optical axis → out of frame,
+             the x=24 sign 13.8° → in frame (upper). The track sight line is downward, so no interference.
+        3) x-range collision check: doors x{−8,6,20,34}(±0.50) / name panels x{−4,10,30}
+           near·{2,26} far (±0.80) / lightboxes x{16} near·{12} far (±1.10)
+           → no overlapping ranges on the same wall face. The benches (near −2,10,22,34 /
+           far 4,16,28) sit at y=±7.40, clear of the wall elements (|y| ≥ 7.905) in both z and y.
+        4) Line colour band z 2.30~2.55 — above the door tops 2.10 / name panel tops 2.05 /
+           lightbox tops 2.15, below the cornice bottom 3.08 → coplanarity 0.
         """
         sg = PARAMS["signage"]
         wi = HA["wall_in"]
         cnt = dict(band=0, plate=0, lbox=0, hanger=0)
 
         def wall_slab(path, x0, x1, sgn, z0, z1, proud, mtl, embed=0.005):
-            """측벽 내면 부착 박판. sgn=−1 근측 / +1 대측.
-            뒷면은 벽체 안으로 embed 만큼 물려 벽면과의 코플래너를 제거한다."""
+            """Thin plate fixed to the inner face of a side wall. sgn=−1 near / +1 far.
+            The back is embedded into the wall by `embed`, removing coplanarity with the wall face."""
             y_a = sgn * (wi + embed)
             y_b = sgn * (wi - proud)
             SPAN(path, x0, x1, min(y_a, y_b), max(y_a, y_b), z0, z1, mtl)
 
-        # ── ① 노선 색 밴드 (양 측벽 종주) ──
+        # ── (1) line colour band (runs along both side walls) ──
         bd = sg["band"]
         for i, sgn in enumerate((-1.0, 1.0)):
             wall_slab(f"{ROOT}/LineBand_{i}", HA["x0"], HA["x1"], sgn,
@@ -718,7 +722,7 @@ def main():
                       bd["embed"])
             cnt["band"] += 1
 
-        # ── ② 역명판 (무텍스트 색면 박판) ──
+        # ── (2) station name panels (textless colour-field plates) ──
         np_ = sg["nameplate"]
         for i, pl in enumerate(sg["nameplates"]):
             x, sgn = pl["x"], pl["sgn"]
@@ -726,7 +730,7 @@ def main():
                       x + np_["w"] / 2.0, sgn,
                       np_["z_c"] - np_["h"] / 2.0, np_["z_c"] + np_["h"] / 2.0,
                       np_["proud"], M["sign_field"], np_["embed"])
-            # 백색 색면 바 — 판 앞면에서 다시 bar_proud 만큼 돌출(코플래너 0)
+            # white colour-field bar - projects a further bar_proud from the panel face (coplanarity 0)
             y_a = sgn * (wi - np_["proud"] + 0.008)
             y_b = sgn * (wi - np_["proud"] - np_["bar_proud"])
             SPAN(f"{ROOT}/NamePlate_{i}_Bar", x - np_["bar_w"] / 2.0,
@@ -735,7 +739,7 @@ def main():
                  np_["z_c"] + np_["bar_h"] / 2.0, M["sign_bar"])
             cnt["plate"] += 1
 
-        # ── ③ 광고 라이트박스 (약발광 — 패널의 1/5) ──
+        # ── (3) ad lightboxes (weak emission - 1/5 of the panels) ──
         lb = sg["lightbox"]
         for i, bx in enumerate(sg["lightboxes"]):
             x, sgn = bx["x"], bx["sgn"]
@@ -743,8 +747,8 @@ def main():
             wall_slab(f"{ROOT}/LightBox_{i}_Frame", x - fw / 2.0, x + fw / 2.0,
                       sgn, lb["z_c"] - fh / 2.0, lb["z_c"] + fh / 2.0,
                       lb["frame_proud"], M["lbox_frame"], lb["embed"])
-            # 발광면: 뒷면은 프레임 슬래브 안에 0.010 물리고 앞면은 프레임보다
-            #   0.020 돌출 → 코플래너 0 + 프레임이 폭 0.09 테두리로 남는다.
+            # emissive face: the back is embedded 0.010 into the frame slab and the front projects
+            #   0.020 past the frame -> coplanarity 0, and the frame remains as a 0.09 wide border.
             y_a = sgn * (wi - lb["face_proud"])
             y_b = sgn * (wi - lb["face_proud"] + 0.030)
             SPAN(f"{ROOT}/LightBox_{i}_Face", x - lb["w"] / 2.0,
@@ -753,7 +757,7 @@ def main():
                  M["lbox_face"])
             cnt["lbox"] += 1
 
-        # ── ④ 천장 걸이 역명 사인 ──
+        # ── (4) ceiling-hung station signs ──
         hg = sg["hanger"]
         for i, hd in enumerate(sg["hangers"]):
             x, sgn = hd["x"], hd["sgn"]
@@ -761,7 +765,7 @@ def main():
             SPAN(f"{ROOT}/HangSign_{i}", x - hg["w"] / 2.0, x + hg["w"] / 2.0,
                  yc - hg["t"] / 2.0, yc + hg["t"] / 2.0, hg["z0"], hg["z1"],
                  M["sign_field"])
-            # 양면 색면 바 (승강장 양방향에서 읽히게 2매)
+            # double-sided colour-field bars (2 of them so they read from both directions)
             for s, sy in enumerate((-1.0, 1.0)):
                 y_a = yc + sy * hg["t"] / 2.0 - sy * 0.008
                 y_b = yc + sy * (hg["t"] / 2.0 + hg["bar_proud"])
@@ -777,7 +781,7 @@ def main():
             cnt["hanger"] += 1
         return cnt
 
-    # ── 씬 조립 ──
+    # ── scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ... (완전 실내 · 발광 패널 단독 조명)")
     M = setup_materials()
 
@@ -803,7 +807,7 @@ def main():
           "밝기·암부 판정은 PathTracing(P키, 8바운스)로만 할 것.")
 
     if sign_cnt is not None:
-        # 사이니지 자기검산 (PT 씬 — RT 로 확인 불가한 요소는 좌표로 검산)
+        # signage self-check (a PT scene - elements RT cannot confirm are checked by coordinates)
         sg = PARAMS["signage"]
         lb, hg = sg["lightbox"], sg["hanger"]
         eyes = [(-2.0, -3.6, 1.8), (-5.0, -3.6, 1.8), (-10.0, -3.6, 1.8),

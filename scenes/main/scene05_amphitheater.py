@@ -1,54 +1,61 @@
 # -*- coding: utf-8 -*-
 """
-scene05_amphitheater.py — NegObs 인공씬 5호: 근린공원 야외공연장
+scene05_amphitheater.py — NegObs synthetic scene 5: neighbourhood-park outdoor theatre
 (Isaac Sim 4.5)
 
-사양서 : Docs/briefs/multi_scene_brief_v5.md §재해석(scene05) — v2 §C 를 대체
-공통 라이브러리 : scene_common.py (§A) — boot·make_pbr·build_arc_steps·조명·캡처
-모티프 참조 : scene01_campus_stairs.py (main 골격·차콜 밴드·화단·건물)
+Spec    : Docs/briefs/multi_scene_brief_v5.md §reinterpretation(scene05) — replaces v2 §C
+Shared  : scene_common.py (§A) — boot·make_pbr·build_arc_steps·lighting·capture
+Motif   : scene01_campus_stairs.py (main skeleton·charcoal bands·planters·buildings)
 
-[v5 채택] 무대 재해석: 전주 원형 sunken 보울 → **반원(200° = 180°+여유 20°)
-  야외공연장**. 티어·좌석·립 호를 θ 80..280° 로 절단하고, 절단 단면은 측벽
-  (cut_wall, 파라펫 상면 z=+1.0)으로 마감한다. 무대 배후벽(shell) 뒤 동측
-  (θ 9..79 / 281..349)은 **잔디 마당**(top −0.06)이 되어 광장 링(−0.002)과
-  평지로 접속한다 — 근린공원 야외공연장 전형. 기존 아크 진입 계단(θ ±9°)·
-  스테이지·목재 좌석은 그대로 유지, riser/tread/z 는 전부 불변.
+[v5 adopted] Stage reinterpretation: the fully circular sunken bowl becomes a
+  **half-round (200° = 180° + 20° margin) outdoor theatre**. The tier, seat and
+  lip arcs are cut to θ 80..280°, and the cut section is finished with a side
+  wall (cut_wall, parapet top face z=+1.0). East of the stage backdrop wall
+  (shell), θ 9..79 / 281..349 becomes a **grass yard** (top −0.06) that meets
+  the plaza ring (−0.002) at grade — the archetype of a neighbourhood-park
+  outdoor theatre. The existing entry arc stair (θ ±9°), stage and timber
+  seating are kept as they are; riser/tread/z are all unchanged.
 
-유형 정체성: 대단차(−1.2m) × 곡률(반원 보울) × 관행 최소 설비.
-  낮은 시점(h0.3)에서 보울이 통째로 소실되는 grazing 은닉이 판정 포인트.
-  [v5 공통 레이어] cue_tactile 기본 True(도시 관행 씬) + sign_info 1매.
+Type identity: large drop (−1.2m) × curvature (half-round bowl) × minimal
+  conventional facilities. The judging point is the grazing concealment in
+  which the whole bowl vanishes from a low viewpoint (h0.3).
+  [v5 shared layer] cue_tactile default True (urban-convention scene) + 1 sign_info.
 
-실행 (GUI 룩 체크 — 기본):
+Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
     export PYTHONNOUSERSITE=1
     python scene05_amphitheater.py
 
-[v7 판정 재수정] judge_v7_rt_B §4 — 잔여 3건 전부 담당.
-  ① 신설 배후 관목이 **"이끼 낀 바위 등간격 열"**(scene04 v6 verge 와 동일
-     실패 모드 = 덩이 크기 × 확대 텍스처). → 상수색 tuft 3종 + **작은 로브
-     스택**(개체 ≤0.46 m, 군락 상단 1.28 m 유지) + 2열·지터·결측.
-     검산 `backdrop_selfcheck()`.
-  ② 승강 계단 아크의 **예각 쐐기**. 원인은 build_arc_steps 현길이(r_out 기준)
-     가 r_in 까지 내려오는 데서 오는 초승달 틈(15.3 mm)과 호끝 슬리버(42 mm).
-     → seg 3→12(틈 1.05 mm · 돌출 10.6 mm) + **마구리(치크) 2장/조**.
-     검산 `podium_step_selfcheck()`. 반경·각도·상면 z 불변 = 기하 GT 불변.
-  ③ **림 스카이라인 백색 포스트 등간격 열**의 실체 = 서측 볼라드 10본
-     (간격 2.67 m · 폭 24 m 장식 열). → 진입축 게이트 **4본 · 규정 1.5 m**,
-     재질 도장 강재. v5.1 §2/§3 동시 해소.
-  ④ (공통) §4 순백 대면적 자가검사 `albedo_selfcheck()` 신설 — 광장 포장은
-     전 씬 공통 항목이라 WAIVED(감독 전역 결정 대기)로 명시 기록.
+[v7 judgment re-fix] judge_v7_rt_B §4 — covers all 3 remaining items.
+  ① The new backdrop shrubs read as **"an even row of mossy boulders"** (the
+     same failure mode as scene04 v6 verge = blob size × magnified texture).
+     → 3 constant-colour tufts + **small lobe stacks** (each ≤0.46 m, clump top
+     kept at 1.28 m) + 2 rows·jitter·dropouts.
+     Check `backdrop_selfcheck()`.
+  ② **Acute wedge** on the access stair arc. The cause is that the
+     build_arc_steps chord length (based on r_out) reaches down to r_in, giving
+     a crescent gap (15.3 mm) and an arc-end sliver (42 mm).
+     → seg 3→12 (gap 1.05 mm · protrusion 10.6 mm) + **2 end caps (cheeks) per set**.
+     Check `podium_step_selfcheck()`. Radii·angles·top-face z unchanged = geometry GT unchanged.
+  ③ The **even row of white posts on the rim skyline** turned out to be the 10
+     west bollards (a decorative row, spacing 2.67 m · width 24 m). → **4 posts
+     at the entry-axis gate · regulation 1.5 m**, material painted steel.
+     Resolves v5.1 §2/§3 at once.
+  ④ (shared) New §4 large-pure-white-area self-check `albedo_selfcheck()` — the
+     plaza paving is a shared item across all scenes, so it is explicitly
+     recorded as WAIVED (awaiting a global decision by the director).
 
-자가검사 (부팅 없음, 렌더 없음):
+Self-check (no boot, no render):
     NEGOBS_SMOKE=1 python scene05_amphitheater.py
 
-자동 캡처 모드 (headless 검증용):
+Auto capture mode (for headless verification):
     NEGOBS_CAPTURE=1 python scene05_amphitheater.py
-      NEGOBS_CAPTURE_DIR  : 저장 폴더 (기본 look_check/scene05/auto)
-      NEGOBS_CAPTURE_MODE : rt | pt | both (기본 rt)
-      NEGOBS_VIEWS        : 쉼표로 뷰 이름 필터 (기본 전부)
+      NEGOBS_CAPTURE_DIR  : output folder (default look_check/scene05/auto)
+      NEGOBS_CAPTURE_MODE : rt | pt | both (default rt)
+      NEGOBS_VIEWS        : comma-separated view-name filter (default all)
 
-좌표계: Z-up, m, 진행축 +X. 보울 중심 (6, 0). 광장 상면 z=0.
+Coordinates: Z-up, m, travel axis +X. Bowl centre (6, 0). Plaza top face z=0.
 """
 
 import os
@@ -65,29 +72,29 @@ import ground_kit as gk
 
 
 # ===========================================================================
-# [A] SCENE_CONFIG — scene01 동일 6키 + cue_nosing(신규).
-#     hazard_stairs 만 위험 기하 토글(보울 ↔ 평지). 나머지는 기하 불변.
-#     ** cue_railing·cue_tactile 기본 False = 설비 전무 유형 정체성 **
+# [A] SCENE_CONFIG - same 6 keys as scene01 + cue_nosing (new).
+#     Only hazard_stairs toggles hazard geometry (bowl <-> flat). The rest keep geometry fixed.
+#     ** cue_railing·cue_tactile default False = the "no facilities at all" type identity **
 # ===========================================================================
 SCENE_CONFIG = {
-    "hazard_stairs":      True,    # 선큰 보울 기하 (False → z=0 평지로 통일)
-    "cue_railing":        False,   # True → 립 부분 호 난간(선택 구현)
-    # [v5 공통 레이어] 도시 관행 씬(01/02/05/13/14/16/20/21) cue_tactile 기본 True
-    "cue_tactile":        False,  # [v5.2 사용자] 점자블록 현실에선 드묾 — 기본 OFF(소거 실험용 경로 유지)    # −X 접근 경고 점자띠 (립 밖 x −2.3..−1.9)
-    "cue_material_break": True,    # 립 연석 링(다크) + 티어(밝은 화강암) vs 스테이지(회청)
-    "cue_nosing":         False,   # [신규 예약] True → 곡선 단코 논슬립 아크 밴드(선택 구현)
-    "cue_sign":           False,  # [v5.2] 팻말 제거    # [v5 공통 레이어] 한글 사인 (sc.build_sign)
-    "cue_scene_dressing": True,    # 화단·생울타리·벤치·가로등·건물 일괄
+    "hazard_stairs":      True,    # sunken bowl geometry (False -> all flat at z=0)
+    "cue_railing":        False,   # True -> partial-arc railing at the lip (optional)
+    # [v5 shared layer] urban-convention scenes (01/02/05/13/14/16/20/21) default cue_tactile True
+    "cue_tactile":        False,  # [v5.2 user] tactile paving is rare in reality - default OFF (ablation path kept)    # −X approach warning tactile strip (outside the lip, x −2.3..−1.9)
+    "cue_material_break": True,    # lip kerb ring (dark) + tiers (light granite) vs stage (blue-grey)
+    "cue_nosing":         False,   # [new, reserved] True -> curved non-slip nosing arc band (optional)
+    "cue_sign":           False,  # [v5.2] signboard removed    # [v5 shared layer] Korean sign (sc.build_sign)
+    "cue_scene_dressing": True,    # planters·hedges·benches·streetlights·buildings as a set
 }
 
 
 # ===========================================================================
-# [B] PARAMS — 치수표 + 재질/조명/캡처. NEGOBS_PARAMS_OVERRIDE 로 머지 가능.
+# [B] PARAMS - dimension table + material/lighting/capture. Mergeable via NEGOBS_PARAMS_OVERRIDE.
 # ===========================================================================
 PARAMS = dict(
-    # --- 상부 광장 (x −18..18, y −14..14, z=0) ---
+    # --- upper plaza (x −18..18, y −14..14, z=0) ---
     plaza=dict(x0=-18.0, x1=18.0, y0=-14.0, y1=14.0, z_top=0.0, thick=0.5),
-    # 차콜 밴드: Y 방향으로 달리는 granite_dark 띠, X 간격 3.2, 1.5mm 돌출
+    # charcoal bands: granite_dark strips running along Y, X spacing 3.2, 1.5mm proud
     band=dict(width=0.45, spacing=3.2, proud=0.0015, embed=0.05),
 
     # === [W2-D ground_kit] P1 plaza_granite (spec §5.1 row 05) =============
@@ -129,315 +136,315 @@ PARAMS = dict(
               gully=[(-10.00, 0.00), (-6.00, -3.00)],
               patch=[(-2.60, -0.45), (-3.35, 1.20)]),
 
-    # --- 선큰 보울 (중심 (6,0), [v5 채택] 반원 200°) ---
-    #   3티어 × riser 0.40 · tread 0.85(좌석 규격) — build_arc_steps 3회 호출.
-    #   [v5 채택] a0=80..a1=280 (200° = 180°+여유 20°). 서측(θ=180) 관람석 반원 +
-    #     동측(무대 배후벽 뒤)은 잔디 마당. seg 32(360°) → 18(200°) 으로 조정해
-    #     세그 각폭 11.25° → 11.11° 유지(현길이·쐐기 여유 규약 동일).
-    #   위험 기하 불변: r_in/r_out/top_z/base_z/riser(0.40)·tread(0.85) 전부 동일.
+    # --- sunken bowl (centre (6,0), [v5 adopted] half-round 200 deg) ---
+    #   3 tiers x riser 0.40 · tread 0.85 (seating spec) - three build_arc_steps calls.
+    #   [v5 adopted] a0=80..a1=280 (200 deg = 180 deg + 20 deg margin). West (θ=180) seating half +
+    #     east (behind the stage backdrop wall) is a grass yard. seg 32 (360 deg) -> 18 (200 deg) so
+    #     the segment angular width stays 11.25 deg -> 11.11 deg (same chord·wedge-margin convention).
+    #   hazard geometry unchanged: r_in/r_out/top_z/base_z/riser(0.40)·tread(0.85) all identical.
     bowl=dict(
         cx=6.0, cy=0.0, base_z=-1.6, seg=18, a0=80.0, a1=280.0, open_r=7.5,
-        tiers=[dict(r_in=6.65, r_out=7.5,  top_z=-0.40),   # 티어1 (상연)
-               dict(r_in=5.8,  r_out=6.65, top_z=-0.80),   # 티어2
-               dict(r_in=5.0,  r_out=5.8,  top_z=-1.20)],  # 티어3 (스테이지 접연)
+        tiers=[dict(r_in=6.65, r_out=7.5,  top_z=-0.40),   # tier 1 (top edge)
+               dict(r_in=5.8,  r_out=6.65, top_z=-0.80),   # tier 2
+               dict(r_in=5.0,  r_out=5.8,  top_z=-1.20)],  # tier 3 (adjoining the stage)
     ),
-    # 광장 링 슬래브: 원형 개구를 박스로 못 뚫으므로 보울 둘레는 아크 링으로 근사.
-    #   top_z=-0.002 : 프레임 박스(z=0)와의 동일평면 Z파이팅 회피용 1~2mm 오프셋.
+    # plaza ring slab: a box cannot cut a round opening, so the bowl rim is approximated by an arc ring.
+    #   top_z=-0.002 : 1~2mm offset to avoid coplanar Z-fighting with the frame boxes (z=0).
     ring=dict(r_in=7.5, r_out=12.0, seg=48, top_z=-0.002, base_z=-0.5),
-    # === v4-A1 [치명] 스테이지-티어3 관통 공극 수정 ===
-    #   기존: UsdGeom.Cylinder(r=5.0) 단독. Cylinder 는 뷰포트 refinement 에 따라
-    #   저폴리 다각형으로 테셀레이션돼 면 중앙 반경이 5.0·cos(π/n) 로 안쪽으로
-    #   들어가고, 티어3 내면은 세그 끝에서 5.0/cos(5.625°)=5.0242 로 바깥으로
-    #   물러난다 → 겹치는 지점에서 폭 최대 0.25 m 의 관통 공극(실제 낙차).
-    #   해결: '내부 원반(4.9) + 32세그 아크 림(4.2..5.22)' 2중 구조.
-    #     · 림 외경 최소 반경 5.22 > 티어3 내면 최대 5.0242 → 겹침 0.196 보장
-    #       (테셀레이션 무관하게 공극 0).
-    #     · 림이 32세그이므로 스테이지 외곽 실루엣의 '다각형' 인상(B-2)도 해소.
-    #     · z 캐스케이드 −1.200(티어3) > −1.203(림) > −1.207(원반) 으로
-    #       동일평면 Z파이팅 회피(단차는 3~4 mm — 시각적으로 불가시).
+    # === v4-A1 [critical] fix for the through-gap between stage and tier 3 ===
+    #   was: UsdGeom.Cylinder(r=5.0) alone. Depending on viewport refinement the Cylinder
+    #   tessellates to a low-poly polygon, pulling the face-centre radius inward to 5.0·cos(π/n),
+    #   while the tier-3 inner face recedes outward to 5.0/cos(5.625 deg)=5.0242 at the segment ends
+    #   -> a through-gap up to 0.25 m wide where they meet (a real drop).
+    #   fix: a two-layer structure, "inner disc (4.9) + 32-seg arc rim (4.2..5.22)".
+    #     · rim outer min radius 5.22 > tier-3 inner max 5.0242 -> 0.196 overlap guaranteed
+    #       (gap 0 regardless of tessellation).
+    #     · with a 32-seg rim the "polygonal" look of the stage outline (B-2) is also gone.
+    #     · z cascade −1.200 (tier 3) > −1.203 (rim) > −1.207 (disc) avoids
+    #       coplanar Z-fighting (the step height is 3~4 mm - visually invisible).
     stage=dict(radius=4.9, top_z=-1.207, height=0.4,
                rim=dict(r_in=4.2, r_out=5.22, seg=32, top_z=-1.203,
                         base_z=-1.6)),
-    # === [v5.1 현실성] 원형 무대 단(podium) — "무대부가 더 솟아야 한다" ===
-    #   구: 보울 바닥(−1.207) 전체가 무대 → 관람석 최하단(티어3 상면 −1.20)과
-    #     사실상 동일 레벨이라 '무대'로 읽히지 않고 바닥 원반으로만 보였다.
-    #   신: 보울과 **동심**인 원형 단을 0.70 m 솟게 한다(상면 −0.507).
-    #     · 티어3 착석면(−1.20) 대비 유효 무대고 0.693 m → 실제 야외무대의
-    #       표준 무대고(0.6~0.9 m) 대역. 피드백 지시 h 0.6~0.9 충족.
-    #     · 반경 3.0 → 단 둘레에 폭 1.9 m 의 에이프런(−1.203)이 남아 진입
-    #       아크 계단(r 4.99 착지)에서 무대 앞까지 평지 접속이 유지된다.
-    #       **진입 계단·티어(위험 기하)는 트랜스폼 불변.**
-    #     · 무대 라인(원호)을 배후벽 shell(r 4.75..5.25, θ 9..80/280..351,
-    #       N-4 에서 호벽으로 확장 완료)과 동심으로 맞춰 '직선 슬라브' 잔재는
-    #       현재 코드에 남아 있지 않음을 확인했다(build_bowl/build_halfbowl_finish
-    #       전부 build_arc_steps 기반, 직사각 슬라브는 광장·지반 전용).
-    #   보행 연속성(에이프런 → 무대): −1.203 → −1.032 → −0.857 → −0.682 →
-    #     −0.507. 단차 0.171 / 0.175 ×3 — 0.2 m 초과 없음.
-    # [v5.2 사용자] 단 높이 0.70 → 0.35 — "가볍게 폴짝 올라갈 수 있을 정도".
-    #   상면 −1.203+0.35 = −0.853, 승강 계단은 1중간단(0.175×2)으로 축소.
-    # === [v7 판정 §4 잔여2] 승강 계단 아크의 **예각 쐐기 / 나이프 에지** ===
-    #   증상(judge_v6 §4 ③ → v7 미해소): `rim_view`·`side_arc` 400 % 크롭에서
-    #     호 안쪽 반경이 급격히 좁아져 나이프 에지 삼각 조각이 보인다.
-    #   원인 2개(build_arc_steps 규약을 좌표로 추적):
-    #     ⓐ 세그 박스의 현길이는 **r_out 기준**(2·r_out·sin(dθ/2)·1.03)인데
-    #        같은 박스가 r_in 까지 내려온다. seg=3(dθ 10°)에서 r_in=3.0 의
-    #        모서리 반경은 √(3.0²+(현/2)²) = 3.0153 → 무대 단 원기둥(r 3.0)과
-    #        **최대 15 mm 의 초승달 틈**이 세그마다 생긴다(400 % 에서 검은 쐐기).
-    #     ⓑ 호 양끝 세그의 마구리면이 반경선이 아니라 a_mid 기준으로 5° 기울어
-    #        나온다 → 계단 끝에 **얇은 삼각 슬리버**가 돌출한다.
-    #   조치(판정 권고 ㉡ "각도범위 축소 또는 안쪽 반경 필렛/마구리"):
-    #     ㉠ seg 3 → **12**(dθ 2.5°). ⓐ 틈 15 mm → **0.9 mm**, ⓑ 돌출 0.042 →
-    #        0.011 m. 곡률만 세밀해질 뿐 반경 사다리·tops 는 불변 = **기하 GT 불변**.
-    #     ㉡ 양단에 **마구리(치크) 1장씩** 신설 — 반경 3.0..3.75 · 상면 = 무대 단
-    #        상면(−0.853) · 두께 3.2°(≈0.19 m). 실제 계단 치크월과 같은 마감이라
-    #        끝단이 '뾰족한 조각'이 아니라 **각진 마구리**로 읽힌다.
-    #        (에이프런 −1.203 대비 0.35 m = 무대 단과 동일 낙차 → 신규 위험 0)
-    #   승강 계단·무대 단은 위험 기하(티어·진입 아크 계단)가 아니며 반경·각도
-    #   범위·상면 z 는 전부 그대로다.
+    # === [v5.1 realism] circular stage podium - "the stage must rise more" ===
+    #   old: the whole bowl floor (−1.207) was the stage -> practically the same level as the
+    #     lowest seating (tier-3 top face −1.20), so it read as a floor disc, not a "stage".
+    #   new: raise a circular podium **concentric** with the bowl by 0.70 m (top face −0.507).
+    #     · effective stage height 0.693 m above the tier-3 seating face (−1.20) -> within the
+    #       standard band of real outdoor stages (0.6~0.9 m). Meets the feedback request h 0.6~0.9.
+    #     · radius 3.0 -> a 1.9 m wide apron (−1.203) remains around the podium, so level access
+    #       from the entry arc stair (landing at r 4.99) to the stage front is preserved.
+    #       **the entry stair and tiers (the hazard geometry) keep their transforms.**
+    #     · the stage line (arc) matches the backdrop shell (r 4.75..5.25, θ 9..80/280..351,
+    #       already extended to an arc wall in N-4) concentrically, and no "straight slab"
+    #       remnant was found in the current code (build_bowl/build_halfbowl_finish
+    #       are all build_arc_steps based; rectangular slabs are plaza/ground only).
+    #   walk continuity (apron -> podium): −1.203 -> −1.032 -> −0.857 -> −0.682 ->
+    #     −0.507. Step heights 0.171 / 0.175 x3 - none exceeds 0.2 m.
+    # [v5.2 user] podium height 0.70 -> 0.35 - "low enough to hop up lightly".
+    #   top face −1.203+0.35 = −0.853; the access stair shrinks to one intermediate step (0.175x2).
+    # === [v7 judgment §4 remaining 2] **acute wedge / knife edge** on the access stair arc ===
+    #   symptom (judge_v6 §4 (3) -> unresolved in v7): in `rim_view`·`side_arc` 400 % crops
+    #     the inner arc radius narrows sharply and a knife-edge triangular sliver shows.
+    #   two causes (traced through the build_arc_steps convention in coordinates):
+    #     (a) the segment box chord length is **based on r_out** (2·r_out·sin(dθ/2)·1.03), yet
+    #        the same box reaches down to r_in. At seg=3 (dθ 10 deg) the corner radius at
+    #        r_in=3.0 is √(3.0²+(chord/2)²) = 3.0153 -> against the podium cylinder (r 3.0)
+    #        a **crescent gap of up to 15 mm** opens per segment (a black wedge at 400 %).
+    #     (b) the cap faces of the two end segments come out tilted 5 deg off the radial line
+    #        (they follow a_mid) -> a **thin triangular sliver** juts out at the stair end.
+    #   action (judgment recommendation (ii) "narrow the angular range or fillet/cap the inner radius"):
+    #     (i) seg 3 -> **12** (dθ 2.5 deg). (a) gap 15 mm -> **0.9 mm**, (b) protrusion 0.042 ->
+    #        0.011 m. Only curvature gets finer; radius ladder·tops unchanged = **geometry GT unchanged**.
+    #     (ii) a new **end cap (cheek) at each end** - radius 3.0..3.75 · top face = podium
+    #        top face (−0.853) · thickness 3.2 deg (~0.19 m). Same finish as a real stair cheek wall, so
+    #        the end reads as a **squared-off cap**, not a "pointed sliver".
+    #        (0.35 m above the apron −1.203 = the same drop as the podium -> no new hazard)
+    #   the access stair and podium are not hazard geometry (tiers · entry arc stair), and their
+    #   radius / angular range / top-face z all stay as they were.
     podium=dict(r=3.0, top_z=-0.853, base_z=-1.607,
                 steps=dict(radii=(3.75, 3.375, 3.0),
                            tops=(-1.028, -0.853),
                            seg=12, base_z=-1.6,
                            arcs=((130.0, 160.0), (200.0, 230.0)),
                            cheek_deg=3.2, cheek_overlap=0.2)),
-    # === v4-A2/A3 [치명] 진입 계단 재설계 ===
-    #   기존: 직교 플라이트(x_top 13.5, tread 0.35). 단 경계 x 와 티어 경계
-    #   x(=6+r) 가 전혀 정렬되지 않아 실제 보행 프로파일의 디딤폭이
-    #   0.35/0.35/0.15/0.20/0.35/0.30/**0.05**/0.35 로 붕괴, 폭 5 cm 디딤면 +
-    #   0.40 m 단발 낙차(점프 구간)가 생겼다. 또 원호 에지 × 직사각 플라이트라
-    #   좌우에 최대 0.09 m 초승달 쐐기가 남았다.
-    #   해결: 계단을 **티어와 동심인 아크 계단**으로 교체. 반경 사다리를
-    #   티어 경계(7.5 / 6.65 / 5.8 / 5.0)를 정확히 포함하도록 0.425 간격으로
-    #   6등분 → 전 구간 riser 0.20 · tread(반경) 0.425 균일, 쐐기 0.
-    #     프로파일: 링(−0.002) → −0.197 → −0.397(=티어1+3mm) → −0.597
-    #               → −0.797(=티어2+3mm) → −0.997 → −1.197(=티어3+3mm) → 스테이지
-    # === [v5 판정 반영] 진입 아크 계단 라이저의 백색 사각 패치 제거 ===
-    #   증상: preset_h1.8_d2 (860,460–1010,560) 에서 석재 텍스처 라이저 위에
-    #     텍스처 없는 순백 직사각형이 좌우 대칭 1쌍씩, **한 단 걸러** 반복.
-    #   원인(추적): 흰 패치가 나타나는 단은 Step_1/3/5 뿐이고, 이 세 단의
-    #     내경(r_in)이 각각 6.65 / 5.8 / 5.0 으로 **티어1/2/3 의 내경과 정확히
-    #     동일**하다. 즉 계단 라이저면(진입 seg 4, dθ=4.5°)과 티어 내면
-    #     (seg 32, dθ=11.25°)이 같은 반경의 동일평면이면서 세그 분할만 달라
-    #     두 평면이 스치듯 교차한다 → 교차 근방에서 깊이 정밀도 이내로 붙어
-    #     Z-다툼. 위로 올라온 쪽이 티어 재질(plaza_light = 밝은 무늬 없는 화강암)
-    #     이라 '텍스처 없는 순백 사각형'으로 보인 것. 좌우 1쌍인 이유는
-    #     두 평면이 θ = ±(진입 seg 중앙과 티어 seg 중앙의 중점)에서 교차하기 때문.
-    #     (세그 간 겹침은 chord×1.03 로 이미 확보돼 있어 '틈'이 원인이 아니다.)
-    #   해결: 진입 계단 반경 사다리 전체를 **10 mm 안쪽으로 이동**(r-캐스케이드).
-    #     기존 z-캐스케이드(−1.200 > −1.203 > −1.207)와 같은 취지의 반경판.
-    #     · 진입 라이저면이 그리는 반경 범위 = r .. r/cos(2.25°) = r + 5.1 mm
-    #       → 6.640..6.6451 < 티어 내면 최소 6.650. 전 구간 4.9 mm 이상 이격.
-    #       (티어2 5.5 mm · 티어3 6.1 mm 이격 — 동일평면 소멸)
-    #     · 진입 단이 티어보다 10 mm 앞(안쪽)에 서므로 티어면이 확실히 가려진다.
-    #   위험 기하 불변 확인: tops(라이저 높이 0.20 × 6단 · 총 낙차 1.2 m)와
-    #     a0/a1/seg/base_z 전부 불변. 디딤폭도 최상단만 0.425→0.435, 나머지
-    #     0.425/0.375 그대로 — 보행 프로파일 동일.
+    # === v4-A2/A3 [critical] entry stair redesign ===
+    #   was: an orthogonal flight (x_top 13.5, tread 0.35). The step boundaries in x and the tier
+    #   boundaries x(=6+r) were not aligned at all, so the tread widths of the real walking profile
+    #   collapsed to 0.35/0.35/0.15/0.20/0.35/0.30/**0.05**/0.35 - a 5 cm wide tread plus a
+    #   single 0.40 m drop (a jump). Also, an arc edge x a rectangular flight left crescent
+    #   wedges of up to 0.09 m on both sides.
+    #   fix: replace it with an **arc stair concentric with the tiers**. The radius ladder is
+    #   divided into 6 at 0.425 spacing so that it contains the tier boundaries
+    #   (7.5 / 6.65 / 5.8 / 5.0) exactly -> uniform riser 0.20 · tread (radial) 0.425, wedges 0.
+    #     profile: ring (−0.002) -> −0.197 -> −0.397 (=tier1+3mm) -> −0.597
+    #               -> −0.797 (=tier2+3mm) -> −0.997 -> −1.197 (=tier3+3mm) -> stage
+    # === [v5 judgment applied] remove the white rectangular patches on the entry arc stair risers ===
+    #   symptom: in preset_h1.8_d2 (860,460–1010,560), untextured pure-white rectangles
+    #     appear over the stone-textured risers, one symmetric pair **every other step**.
+    #   cause (traced): only Step_1/3/5 show white patches, and their inner radii (r_in)
+    #     are 6.65 / 5.8 / 5.0 - **exactly the same as the inner radii of tiers 1/2/3**.
+    #     That is, the stair riser face (entry seg 4, dθ=4.5 deg) and the tier inner face
+    #     (seg 32, dθ=11.25 deg) are coplanar at the same radius but split differently,
+    #     so the two planes graze each other -> near the crossing they sit within depth precision
+    #     and Z-fight. The winner is the tier material (plaza_light = light, patternless granite),
+    #     hence the "untextured pure-white rectangle". It is a symmetric pair because the
+    #     two planes cross at θ = +-(midpoint of the entry seg centre and the tier seg centre).
+    #     (segment overlap is already secured by chord x1.03, so a "gap" is not the cause.)
+    #   fix: shift the whole entry-stair radius ladder **10 mm inward** (r-cascade).
+    #     The radial counterpart of the existing z-cascade (−1.200 > −1.203 > −1.207).
+    #     · radius range swept by the entry riser face = r .. r/cos(2.25 deg) = r + 5.1 mm
+    #       -> 6.640..6.6451 < tier inner face min 6.650. At least 4.9 mm clearance throughout.
+    #       (tier 2 clears by 5.5 mm · tier 3 by 6.1 mm - coplanarity gone)
+    #     · the entry step stands 10 mm ahead (inward) of the tier, so the tier face is firmly hidden.
+    #   hazard geometry verified unchanged: tops (riser 0.20 x 6 steps · total drop 1.2 m) and
+    #     a0/a1/seg/base_z all unchanged. Tread width changes only at the top step, 0.425->0.435;
+    #     the rest stay 0.425/0.375 - identical walking profile.
     entry=dict(a0=-9.0, a1=9.0, seg=4, base_z=-1.6,
                radii=(7.5, 7.065, 6.64, 6.215, 5.79, 5.365, 4.99),
                tops=(-0.197, -0.397, -0.597, -0.797, -0.997, -1.197)),
-    # v4-D5: 관람석 통로 계단 2 (극장 문법) — 진입 계단과 동일 반경 사다리
+    # v4-D5: 2 seating aisle stairs (theatre grammar) - same radius ladder as the entry stair
     aisles=[dict(a0=100.0, a1=112.0, seg=3), dict(a0=248.0, a1=260.0, seg=3)],
-    # 립 연석 링 (cue_material_break): 개구 밖 다크 화강암 링.
-    #   [v5 채택] 티어와 동일하게 200° 로 절단 (seg 48→27, 각폭 7.5°→7.41°).
+    # lip kerb ring (cue_material_break): dark granite ring outside the opening.
+    #   [v5 adopted] cut to 200 deg like the tiers (seg 48->27, angular width 7.5 deg->7.41 deg).
     lip=dict(r_in=7.5, r_out=7.8, seg=27, a0=80.0, a1=280.0,
              top_z=0.003, base_z=-0.1),
-    # === [v5 채택] 반원화 마감 3종 ===
-    #  ① cut_wall — 절단 단면 측벽(파라펫). θ 79..82 / 278..281 에 반경방향 벽.
-    #     r 5.0..7.85 로 티어 3단 절단면(z −0.40/−0.80/−1.20)과 립(7.8)까지 덮고,
-    #     상면 z=+1.00 → 잔디 마당(−0.06) 기준 1.06 m 방호벽 = 새 에지 낙차 방호.
-    #     (마당에서 티어3 상면까지 최대 낙차 1.14 m 를 이 벽이 전 구간 차단)
-    #  ② backyard — 무대 배후벽 뒤 잔디 마당. θ 11..79 / 281..349, r 5.25..7.5.
-    #     상면 −0.06(광장 링 −0.002 대비 0.058 m 단차 = 평지 접속), 저면 −1.6
-    #     (제거된 티어 볼륨을 그대로 채워 하부 공동 0). 내측 경계 r=5.25 는
-    #     shell(무대 배후벽, r 4.75..5.25)이 전 각도 구간에서 받친다.
-    #  ③ entry_cheek — 진입 아크 계단(θ ±9°) 양 옆 치크월. θ 9..11 / 349..351,
-    #     r 4.99..7.5, 상면 −0.06(마당과 플러시) → 마당–계단 사이 단면 폐합.
+    # === [v5 adopted] three half-round finishing elements ===
+    #  (1) cut_wall - side wall on the cut section (parapet). Radial wall at θ 79..82 / 278..281.
+    #     r 5.0..7.85 covers the three tier cut faces (z −0.40/−0.80/−1.20) and the lip (7.8),
+    #     top face z=+1.00 -> a 1.06 m guard wall above the grass yard (−0.06) = guards the new edge drop.
+    #     (this wall blocks the whole run of the max 1.14 m drop from the yard to the tier-3 top face)
+    #  (2) backyard - grass yard behind the stage backdrop wall. θ 11..79 / 281..349, r 5.25..7.5.
+    #     top face −0.06 (0.058 m step from the plaza ring −0.002 = level connection), bottom −1.6
+    #     (fills the removed tier volume, so no cavity underneath). The inner boundary r=5.25 is
+    #     supported by the shell (stage backdrop wall, r 4.75..5.25) over the whole angular range.
+    #  (3) entry_cheek - cheek walls flanking the entry arc stair (θ +-9 deg). θ 9..11 / 349..351,
+    #     r 4.99..7.5, top face −0.06 (flush with the yard) -> closes the section between yard and stair.
     cut_wall=dict(r_in=5.0, r_out=7.85, seg=1, top_z=1.00, base_z=-1.6,
                   arcs=((79.0, 82.0), (278.0, 281.0))),
     backyard=dict(r_in=5.25, r_out=7.5, seg=8, top_z=-0.06, base_z=-1.6,
                   arcs=((11.0, 79.0), (281.0, 349.0))),
     entry_cheek=dict(r_in=4.99, r_out=7.5, seg=1, top_z=-0.06, base_z=-1.6,
                      arcs=((9.0, 11.0), (349.0, 351.0))),
-    # [v5 공통 레이어] 한글 사인 — (태그, TEX 키, cx, cy, base_z, yaw, w, h)
-    #   Info(-4.2, 3.6): 게이트(x −3.6, y ±2.6) 옆 −X 접근축. 보울 중심(6,0)에서
-    #     10.82 m → 립(r 7.5) 밖 3.32 m (≥0.5 m 이격 충족).
-    #   카메라 검산: 그리드 eye=(−3.5/−6.5/−11.5, 0) → 각각 후방 / 57.4° / 26.3°,
-    #     plaza_approach 63.4°, rim_view 후방, side_arc 36.9°, stage_lookup 19.5°
-    #     (10.8 m 원경) — 어느 프리셋도 시선 근접 차폐 없음.
-    signs=[],  # [v5.2 사용자] 안내 팻말 제거 — 개방감
+    # [v5 shared layer] Korean sign - (tag, TEX key, cx, cy, base_z, yaw, w, h)
+    #   Info(-4.2, 3.6): on the −X approach axis beside the gate (x −3.6, y +-2.6). From the bowl
+    #     centre (6,0) it is 10.82 m -> 3.32 m outside the lip (r 7.5) (meets the >=0.5 m clearance).
+    #   camera check: grid eye=(−3.5/−6.5/−11.5, 0) -> behind / 57.4 deg / 26.3 deg respectively,
+    #     plaza_approach 63.4 deg, rim_view behind, side_arc 36.9 deg, stage_lookup 19.5 deg
+    #     (10.8 m away) - no preset has near-field sight-line occlusion.
+    signs=[],  # [v5.2 user] info signboard removed - openness
 
-    # --- 드레싱 ---
+    # --- dressing ---
     planters=[("A", -10.0, -9.0), ("B", -12.0, 8.0)],
-    # v4-D8: 립 둘레 가로수 열 — r=9.6 원주 45° 간격(진입축 0°·게이트 180° 제외)
-    # [v5 판정 반영] 270° 화단은 중심이 (6, −9.6) 이라 side_arc 카메라
-    #   eye(6, −10, 1.2) 와 0.4 m — 카메라가 화단 박스(2.2각) 안에 들어가고
-    #   줄기가 화면 전폭을 가려 컷 자체가 무효였다(rt_noon_side_arc 확인).
-    #   → 270° → 285°. 중심 (8.484, −9.273) 으로 카메라 밖으로 빠지고,
-    #     시선축(+Y)에서 화단 최근접 모서리가 37°(수평 화각 ±30° 밖)에 놓여
-    #     프레임에 들어오지 않는다. 벤치 원주(r=9.0, 250°)와도 간섭 없음.
-    #   (다른 5본은 side_arc 시선에서 측방 이격이 충분해 그대로 둔다.)
+    # v4-D8: tree row around the lip - r=9.6 circle at 45 deg (entry axis 0 deg · gate 180 deg excluded)
+    # [v5 judgment applied] the 270 deg planter is centred at (6, −9.6), only 0.4 m from the
+    #   side_arc camera eye(6, −10, 1.2) - the camera ended up inside the planter box (2.2 square)
+    #   and the trunk filled the frame, invalidating the shot (confirmed in rt_noon_side_arc).
+    #   -> 270 deg -> 285 deg. Centre (8.484, −9.273) moves clear of the camera, and
+    #     the nearest planter corner lies 37 deg off the sight axis (+Y), outside the +-30 deg FOV,
+    #     so it stays out of frame. No interference with the bench circle (r=9.0, 250 deg) either.
+    #   (the other 5 keep enough lateral clearance from the side_arc sight line and are left as is.)
     ring_planters=[45.0, 90.0, 135.0, 225.0, 285.0, 315.0],
     ring_planter=dict(r=9.6, size=2.2, base_z=-0.002),
-    # v4-B4/A4: 어긋난 생울타리 3장(y 12.0/12.4/12.0) 제거 → 광장 둘레
-    #   생울타리로 재편. 0.51 m 무방비 낙하 은폐 + 대지 종결 + 어긋남 소멸.
-    #   개구: −X 접근(서측 전체), 남측 x −3..3, 북측 x −8..−4(건물 출입).
+    # v4-B4/A4: the 3 misaligned hedges (y 12.0/12.4/12.0) are removed -> reorganised into a
+    #   perimeter hedge. Hides the 0.51 m unguarded fall + terminates the site + misalignment gone.
+    #   openings: −X approach (the whole west side), south x −3..3, north x −8..−4 (building entrance).
     hedges=[(-18.0, 13.4, -8.0, 14.0), (-4.0, 13.4, 18.0, 14.0),
             (17.4, -13.4, 18.0, 13.4),
             (-18.0, -14.0, -3.0, -13.4), (3.0, -14.0, 18.0, -13.4)],
     hedge_h=0.6,
-    # v4-A4: 광장 둘레 0.51 낙하를 잔디 뱅크(−0.26)로 2단 분할.
+    # v4-A4: split the 0.51 fall around the plaza into two steps with a grass berm (−0.26).
     berms=[("W", -19.2, -18.0, -15.2, 15.2), ("E", 18.0, 19.2, -15.2, 15.2),
            ("S", -18.0, 18.0, -15.2, -14.0)],
     berm=dict(top_z=-0.26, base_z=-0.9),
-    # 북측은 뱅크 대신 건물 앞 포장 에이프런 (건물 접지 개선)
+    # the north side uses a paved apron in front of the building instead of a berm (better grounding)
     apron=dict(x0=-18.0, x1=18.0, y0=14.0, y1=15.5, top_z=-0.26, base_z=-0.9),
     entry_canopy=dict(x0=-8.0, x1=-4.0, y0=14.2, y1=15.5, z_roof=3.2,
                       post_r=0.10, roof_t=0.14, base_z=-0.26),
-    # v4-A4: 서측(개방 접근면) 볼라드 열
-    # === [v7 판정 §4 잔여3] "림 스카이라인 백색 포스트 등간격 열 7본" ===
-    #   실체 추적: cue_railing 은 False 이므로 난간 포스트가 아니라 **서측 볼라드
-    #     열**이다. 구 (x −17.2, y −12..12, n 10)은 간격 2.67 m 로 광장 서변
-    #     24 m 를 통째로 두르는 **장식 열**이라 v5.1 §2("차량 진입 우려 지점만,
-    #     간격 1.5 m 내외, 장식적 볼라드 열 전면 제거")와 §3(등간격 금지) 동시
-    #     저촉. `stage_lookup`(eye 6,0 → −X)에서 지평선에 7본이 도열해 보였다.
-    #   조치: **진입축(y=0) 게이트 4본 · 규정 간격 1.5 m** 로 축소(y ±0.75, ±2.25).
-    #     scene01 이 백색 볼라드 6본을 전량 소거해 PT 진출한 선례와 같은 방향이되,
-    #     이 씬은 −X 가 실제 광장 보행 진입부라 기능 근거가 있으므로 존치한다.
-    #     재질도 백색 스테인리스(M["rail"]) → **도장 강재 다크그레이**(M["bollard"])
-    #     로 바꿔 "백색 포스트" 신호 자체를 없앤다(§4).
+    # v4-A4: bollard row on the west (open approach face)
+    # === [v7 judgment §4 remaining 3] "7 evenly spaced white posts on the rim skyline" ===
+    #   traced: cue_railing is False, so these are not railing posts but the **west bollard
+    #     row**. The old (x −17.2, y −12..12, n 10) spanned the whole 24 m west edge of the plaza
+    #     at 2.67 m spacing - a **decorative row**, violating both v5.1 §2 ("only where vehicle
+    #     intrusion is a concern, spacing around 1.5 m, remove all decorative bollard rows") and
+    #     §3 (no even spacing). In `stage_lookup` (eye 6,0 -> −X) 7 of them lined the horizon.
+    #   action: reduce to **4 gate posts on the entry axis (y=0) · regulation 1.5 m spacing** (y +-0.75, +-2.25).
+    #     Same direction as scene01, which cleared all 6 white bollards and reached PT, except that
+    #     here −X is the actual pedestrian entrance to the plaza, so they are kept on functional grounds.
+    #     The material also changes from white stainless (M["rail"]) to **painted steel, dark grey**
+    #     (M["bollard"]), removing the "white post" signal altogether (§4).
     bollards=dict(x=-17.2, spacing=1.5, n=4, base_z=0.0),
-    # v4-B5/D9: 벤치 2 → 6. 보울 중심 (6,0) 기준 r=9.0 원주에 접선 배치.
+    # v4-B5/D9: benches 2 -> 6. Placed tangentially on the r=9.0 circle about the bowl centre (6,0).
     bench_ring=dict(r=9.0, base_z=-0.002,
                     angles=(110.0, 135.0, 160.0, 200.0, 225.0, 250.0)),
-    # v4-D4: 좌석 목재 스트립 (티어를 좌석으로 읽히게 + 단 대비 확보).
-    #   진입(±9°)·통로(100~112 / 248~260) 구간은 비운다.
-    #   [v5 채택] 반원 절단(80..280)에 맞춰 재단: 80.5~99.5 / 112.5~247.5 /
-    #   260.5~279.5 (통로 100~112 · 248~260 은 그대로 비움).
+    # v4-D4: wooden seat strips (make the tiers read as seating + secure step contrast).
+    #   the entry (+-9 deg) and aisle (100~112 / 248~260) ranges are left empty.
+    #   [v5 adopted] trimmed to the half-round cut (80..280): 80.5~99.5 / 112.5~247.5 /
+    #   260.5~279.5 (the aisles 100~112 · 248~260 stay empty).
     seat=dict(width=0.45, inset=0.10, proud=0.012, drop=0.06,
               arcs=((80.5, 99.5, 3), (112.5, 247.5, 12), (260.5, 279.5, 3))),
-    # v4-D1 [최우선] 무대 배후벽(스테이지 셸) — 진입 아크(±9°)를 비운 2조각
-    #   [v5 채택] 14..76 / 284..346 → 9..80 / 280..351 로 확장.
-    #     · 하단 9/351 = 진입 계단 폭과 정확히 일치 → 문틀(jamb) 완성.
-    #     · 상단 80/280 = 티어 절단면(cut_wall)과 접합 → 마당 내측 경계 전 구간
-    #       방호(마당 −0.06 → 스테이지 −1.207 의 1.15 m 낙차를 벽이 차단).
-    # === [v6 판정 ㉠] 배후 아크벽 인하 1.40 → 0.70 (개방감 / v5.2 §6) ===
-    #   증상(judge_v6_rt_mod6 §4): plaza_approach·preset_h0.9_d5 에서 배후 아크벽이
-    #     "프레임 폭 100% 를 막는 무장식 콘크리트 옹벽(저수조/벙커)"으로 읽힘.
-    #   조치: 상단 z +1.40 → +0.70.
-    #     · 무대(−1.207) 기준 벽면 2.61 → 1.91 m (회색 면적 −27%, 실제 야외무대
-    #       배후벽 스케일). 마당(−0.06) 기준 0.76 m = 앉음벽/난간벽 높이.
-    #     · 실루엣 상단 1.40 → 1.04(관목 완충대 상단) 로 −0.36 m — 그 위로 하늘·녹지.
-    #   호 길이(9..80 / 280..351)는 **불변**: 이 벽이 마당(−0.06) 내측 경계 전
-    #     구간에서 무대(−1.207)로의 1.15 m 낙차를 받치는 옹벽이라, 호를 줄이면
-    #     방호 없는 낙차 에지가 생긴다. 대신 낮춘 만큼을 아래 backdrop_shrub
-    #     (관목 완충대)로 대체한다.
+    # v4-D1 [top priority] stage backdrop wall (stage shell) - 2 pieces leaving the entry arc (+-9 deg) open
+    #   [v5 adopted] extended 14..76 / 284..346 -> 9..80 / 280..351.
+    #     · the lower ends 9/351 match the entry stair width exactly -> completes the jamb.
+    #     · the upper ends 80/280 join the tier cut face (cut_wall) -> the whole inner boundary of
+    #       the yard is guarded (the wall blocks the 1.15 m drop from yard −0.06 to stage −1.207).
+    # === [v6 judgment (i)] lower the backdrop arc wall 1.40 -> 0.70 (openness / v5.2 §6) ===
+    #   symptom (judge_v6_rt_mod6 §4): in plaza_approach·preset_h0.9_d5 the backdrop arc wall read as
+    #     "an undecorated concrete retaining wall (cistern/bunker) blocking 100% of the frame width".
+    #   action: top z +1.40 -> +0.70.
+    #     · wall face above the stage (−1.207) 2.61 -> 1.91 m (grey area −27%, the scale of a real
+    #       outdoor-stage backdrop). Above the yard (−0.06) it is 0.76 m = a seat wall / parapet height.
+    #     · silhouette top 1.40 -> 1.04 (top of the shrub buffer), −0.36 m - sky and greenery above it.
+    #   the arc extent (9..80 / 280..351) is **unchanged**: this wall is the retaining wall carrying
+    #     the 1.15 m drop from the yard (−0.06) to the stage (−1.207) along its whole inner boundary,
+    #     so shortening the arc would leave an unguarded drop edge. Instead the height lost is
+    #     replaced by backdrop_shrub (the shrub buffer) below.
     shell=dict(r_in=4.75, r_out=5.25, top_z=0.70, base_z=-1.6, seg=12,
                arcs=((9.0, 80.0), (280.0, 351.0))),
-    # === [v6 판정 ㉠] 배후 관목 완충대 — 아크벽 인하분 대체 + "무대 뒤 녹지" ===
-    #   마당(top −0.06) 위, 아크벽 바로 뒤 r 5.25..6.05(폭 0.80) 밴드에 관목을
-    #   호를 따라 spacing 0.62 m 로 심는다(편평 타원체, 좌표 시드 지터 → §3
-    #   등간격·격자 인상 회피). 상단 ≈ +1.12 = 마당 기준 1.18 m.
-    #   낙차 방호(마당 −0.06 → 무대 −1.207, 1.15 m): 아크벽 0.76 m + 폭 0.80 m·
-    #     h1.18 관목 완충대 = 접근 억제. (규정 난간 1.1 m 를 벽 단독으로 만족하던
-    #     구 상태보다 방호는 약해지나, v5.2 §6 개방감 우선 + 공원 관행(낮은
-    #     옹벽 + 식재대) 조합. 감독 판단으로 top_z 만 되돌리면 원복 가능.)
-    #   호 범위는 마당(11..79 / 281..349) 안쪽으로 1° 여유.
-    # === [v7 판정 §4 잔여1] 신설 관목이 **"이끼 낀 바위 등간격 열"** 로 렌더 ===
-    #   증상(judge_v7_rt_B §4): `plaza_approach` 벽 상단 밴드 400 % 크롭에서
-    #     편평 타원체(rad 0.42 · h 1.10)에 확대 grass 텍스처(M["hedge"], uv 1.2)가
-    #     물려 **황록 이끼 바위 덩어리**로 읽히고, spacing 0.62 등간격 도열이
-    #     "벽 위에 얹은 돌"을 만든다. scene04 v6 verge 와 **동일 실패 모드**.
-    #   원인(판정 §15-2 일반화): **덩이 크기 × 확대 텍스처**. 둘 다 줄여야 한다.
-    #   조치 = scene04 W-4 해법 이식 + 이 씬 고유 제약(실루엣 높이) 보정:
-    #     ㉠ 재질 : grass 텍스처 폐기 → **상수색 tuft 3종**(±5 % 틴트 지터,
-    #               rough 1.0 · specular 0). 텍스처가 없으면 '암괴 요철' 신호 0.
-    #     ㉡ 크기 : 개체(로브) rz ≤ 0.25 = **0.5 m 이하**(판정 권고 ①).
-    #               단, 이 씬은 관목 상단이 아크벽(+0.70) 위로 나와야 "벽 위 녹지"
-    #               라는 v6 달성분이 유지되므로 **높이를 잃으면 안 된다** →
-    #               큰 타원체 1개가 아니라 **작은 로브 3~4개를 세로로 겹쳐 쌓아**
-    #               군락 상단 1.22 m 를 만든다(수관이 여러 덩이로 갈라진 관목).
-    #     ㉢ 배치 : 1열 등간격 → **3열**(r 5.62/5.98/6.32) · 열별 step 다름 +
-    #               간격 지터 ±35 % + 결측 12 % + 로브별 위치/크기 지터
-    #               → 등간격 도열 인상 소멸(§3).
-    #   행 정의 rows: (r, step, rx, rz, h_top, n_lobe)
-    #     · 2열(전열 1.02 / 후열 1.24) — 벽 위 실루엣이 한 덩이가 아니라 층진
-    #       녹지 밴드가 된다. 아크벽(+0.70)보다 낮은 지피층은 어느 컷에서도
-    #       보이지 않으므로(카메라가 전부 −X 광장측) 프림만 늘어 배제했다.
-    #     · 반경 검산: 최내측 5.85 − 0.075 − 0.36·1.15 = 5.36 ≥ 아크벽 5.25 ✓
-    #                  최외측 6.25 + 0.075 + 0.40·1.15 = 6.79 ≤ 마당 7.5 ✓
-    #     · 로브 겹침: 인접 로브 z 간격 ≤ 1.35·min(rz) 로 잡아 **분리 부유 0**
-    #       (검산 ⑦ 이 지터 최악 조합의 실측 최대비를 낸다).
-    #     · taper: 위 로브일수록 반경 ×(1−0.14t) → 수관 테이퍼(원기둥 인상 회피).
+    # === [v6 judgment (i)] backdrop shrub buffer - replaces the lowered arc wall + "greenery behind the stage" ===
+    #   shrubs are planted along the arc in an r 5.25..6.05 band (0.80 wide) on the yard (top −0.06),
+    #   just behind the arc wall, at spacing 0.62 m (flattened ellipsoids, coordinate-seeded jitter ->
+    #   avoids the §3 even-spacing / grid look). Top ~ +1.12 = 1.18 m above the yard.
+    #   drop guarding (yard −0.06 -> stage −1.207, 1.15 m): arc wall 0.76 m + a 0.80 m wide,
+    #     h1.18 shrub buffer = access deterrence. (Guarding is weaker than the old state, where the
+    #     wall alone met the 1.1 m statutory railing, but v5.2 §6 puts openness first and this is
+    #     park practice (low retaining wall + planting bed). Reverting top_z alone restores it.)
+    #   the arc range keeps 1 deg of margin inside the yard (11..79 / 281..349).
+    # === [v7 judgment §4 remaining 1] the new shrubs render as **"an even row of mossy boulders"** ===
+    #   symptom (judge_v7_rt_B §4): in the 400 % crop of the `plaza_approach` wall-top band,
+    #     the flattened ellipsoids (rad 0.42 · h 1.10) carrying a magnified grass texture
+    #     (M["hedge"], uv 1.2) read as **yellow-green mossy boulders**, and the even 0.62 spacing
+    #     makes "stones set on top of the wall". **The same failure mode** as scene04 v6 verge.
+    #   cause (generalised in judgment §15-2): **blob size x magnified texture**. Both must shrink.
+    #   action = port the scene04 W-4 solution + correct for this scene-specific constraint (silhouette height):
+    #     (i) material : drop the grass texture -> **3 constant-colour tufts** (+-5 % tint jitter,
+    #               rough 1.0 · specular 0). With no texture the "rock relief" cue is 0.
+    #     (ii) size : per lobe rz <= 0.25 = **0.5 m or less** (judgment recommendation (1)).
+    #               But here the shrub tops must clear the arc wall (+0.70) to keep the v6 gain
+    #               "greenery above the wall", so **height must not be lost** ->
+    #               instead of one big ellipsoid, **stack 3~4 small lobes vertically**
+    #               to reach a clump top of 1.22 m (a shrub whose crown splits into several blobs).
+    #     (iii) layout : one even row -> **3 rows** (r 5.62/5.98/6.32) · a different step per row +
+    #               spacing jitter +-35 % + 12 % dropouts + per-lobe position/size jitter
+    #               -> the even-row impression is gone (§3).
+    #   row definition rows: (r, step, rx, rz, h_top, n_lobe)
+    #     · 2 rows (front 1.02 / back 1.24) - the silhouette above the wall becomes a layered
+    #       green band rather than one blob. A ground-cover layer lower than the arc wall (+0.70)
+    #       is invisible in every shot (all cameras sit on the −X plaza side), so it was dropped.
+    #     · radius check: innermost 5.85 − 0.075 − 0.36·1.15 = 5.36 >= arc wall 5.25 ✓
+    #                     outermost 6.25 + 0.075 + 0.40·1.15 = 6.79 <= yard 7.5 ✓
+    #     · lobe overlap: adjacent lobe z gap kept <= 1.35·min(rz) -> **no detached floaters**
+    #       (check (7) reports the measured worst-case ratio over the jitter combinations).
+    #     · taper: higher lobes get radius x(1−0.14t) -> crown taper (avoids a cylinder look).
     backdrop_shrub=dict(base_z=-0.06, embed=0.5, taper=0.14,
                         jit_step=0.35, skip=0.12, jit_pos=0.075,
                         jit_scale=0.15, jit_h=0.12,
                         rows=((5.85, 0.44, 0.36, 0.19, 1.02, 6),
                               (6.25, 0.52, 0.40, 0.20, 1.24, 7)),
                         arcs=((12.0, 78.0), (282.0, 348.0))),
-    # v4-D2 조명 타워 2 / D3 스피커 스택 2
+    # v4-D2 2 lighting towers / D3 2 speaker stacks
     towers=[(10.5, -6.5), (10.5, 6.5)],
     tower=dict(pole_r=0.10, pole_h=5.5, head=(0.35, 0.35, 0.25),
                head_z=(3.5, 4.3, 5.1), base_z=-0.002),
     speakers=[(7.8, -3.2), (7.8, 3.2)],
     speaker=dict(size=(0.6, 0.5, 0.9), n=2, base_z=-1.207),
-    # v4-D7 입구 게이트 + 사인
+    # v4-D7 entrance gate + sign
     gate=dict(x=-3.6, y=2.6, post_r=0.10, post_h=3.0, base_z=-0.002,
               lintel_z0=2.6, lintel_z1=3.0, lintel_t=0.15, lintel_y=2.75),
     streetlight=dict(pole_h=6.0, pole_r=0.06,
                      arm_len=1.0, arm_r=0.04, head=0.25),
-    # v4-D10: 가로등 1 → 5. (x, y, base_z)
+    # v4-D10: streetlights 1 -> 5. (x, y, base_z)
     streetlights=[(-8.0, 10.0, 0.0), (-14.0, 10.0, 0.0), (-14.0, -10.0, 0.0),
                   (2.0, 12.0, 0.0), (14.0, -11.0, 0.0)],
     buildings=dict(
-        # R: scene01 R 배치를 y 15.5..20 으로 이동, x −18..12. 파사드 −Y(광장 향).
+        # R: the scene01 R block moved to y 15.5..20, x −18..12. Facade faces −Y (toward the plaza).
         R=dict(x0=-18.0, x1=12.0, y0=15.5, y1=20.0, h=14.0, floors=4,
                axis="y", facade_y=15.5, face_dir=-1.0),
-        # C: 원경 비스타 차단(+X 지평선). 파사드 −X(광장 향).
-        # [v6 판정 ㉠ 보조] h 12.0(4층) → 7.2(2층). 배후 아크벽을 낮춰도 그 위가
-        #   전부 이 건물 벽돌면이면 "하늘이 보이게" 라는 판정 목표가 달성되지
-        #   않는다(plaza_approach 검산: 파라펫 상단 12.5 m·거리 30 m → 앙각
-        #   21.2° > 프레임 상단 17.7° = 화면 위쪽 전부 벽돌).
-        #   7.2 로 낮추면 상단 7.7 m → 앙각 12.8° 로 프레임 상단까지 4.9°
-        #   (≈130 px) 의 하늘 띠가 열린다. 근린공원 연접 저층 근생 스케일이라
-        #   비스타 차단 기능(원경 지평선 폐쇄)은 그대로 유지된다.
+        # C: blocks the distant vista (+X horizon). Facade faces −X (toward the plaza).
+        # [v6 judgment (i), supporting] h 12.0 (4 floors) -> 7.2 (2 floors). Lowering the backdrop arc
+        #   wall achieves nothing if everything above it is this building's brick face - the judgment
+        #   goal "let the sky show" fails (plaza_approach check: parapet top 12.5 m · distance 30 m ->
+        #   elevation 21.2 deg > frame top 17.7 deg = the upper screen is all brick).
+        #   Lowered to 7.2 the top is 7.7 m -> elevation 12.8 deg, opening a 4.9 deg
+        #   (~130 px) sky band up to the frame top. It is the scale of low-rise neighbourhood retail
+        #   beside a park, so the vista-blocking function (closing the far horizon) is kept.
         C=dict(x0=24.0, x1=30.0, y0=-12.0, y1=12.0, h=7.2, floors=2,
                axis="x", facade_x=24.0, face_dir=-1.0),
     ),
 
-    # --- 재질: texture_scale 용 물리 크기[m/타일] + 틴트/상수 ---
+    # --- materials: physical size for texture_scale [m/tile] + tints/constants ---
     material=dict(
         scale=dict(plaza_light=1.80, band_dark=0.9, plaza_lower=0.7,
                    granite_dark=1.0, brick_red=2.0, grass=1.4, tactile=0.3),
-        lower_warm_tint=(1.06, 1.0, 0.94),        # 스테이지 웜 틴트
+        lower_warm_tint=(1.06, 1.0, 0.94),        # stage warm tint
         grass_tint=(0.55, 0.68, 0.42),
         glass_color=(0.06, 0.09, 0.12), glass_rough=0.08,
         rail_color=(0.80, 0.82, 0.85), rail_metallic=0.9, rail_rough=0.35,
         wood_color=(0.30, 0.20, 0.12), wood_rough=0.85,
-        # v4-B(공통): 수관 알베도 상향 (검은 얼룩 → 잎 실루엣)
+        # v4-B (shared): raise canopy albedo (black blotch -> leaf silhouette)
         canopy_a=(0.035, 0.052, 0.024), canopy_b=(0.042, 0.060, 0.030),
         canopy_rough=1.0,
-        hedge_tint=(0.50, 0.62, 0.36),                   # v4 둘레 생울타리
-        # [v7 판정 §4 잔여1] 배후 관목 = 상수색 tuft 3종 (scene04 W-4 이식).
-        #   grass 텍스처(uv 1.2)를 물리면 확대 노멀맵이 곧바로 '이끼 낀 바위'가
-        #   된다 → 텍스처를 아예 쓰지 않는다. 값은 scene04 verge 와 동일 계열
-        #   (밝은 초록 / 마른 초록 변주)로 21씬 식생 톤 통일.
+        hedge_tint=(0.50, 0.62, 0.36),                   # v4 perimeter hedge
+        # [v7 judgment §4 remaining 1] backdrop shrubs = 3 constant-colour tufts (ported from scene04 W-4).
+        #   binding the grass texture (uv 1.2) makes the magnified normal map read straight away as
+        #   "mossy rock" -> no texture is used at all. Values are the same family as scene04 verge
+        #   (bright green / dry green variants), unifying the vegetation tone across the 21 scenes.
         tuft=((0.070, 0.105, 0.042), (0.082, 0.112, 0.050),
               (0.078, 0.096, 0.038)), tuft_rough=1.0,
-        # [v7 판정 §4 잔여3] 볼라드 = 도장 강재(백색 스테인리스 폐기)
+        # [v7 judgment §4 remaining 3] bollards = painted steel (white stainless dropped)
         bollard_color=(0.33, 0.33, 0.36), bollard_metallic=0.4,
         bollard_rough=0.5,
-        seat_wood=(0.055, 0.036, 0.022), seat_wood_rough=0.8,  # v4-D4 좌면
-        gear_color=(0.055, 0.055, 0.058), gear_rough=0.6,  # v4-D2/D3 조명·스피커
-        # [v5.1 §4] 파라펫 0.90 → 0.72 (순백 대면적 금지)
+        seat_wood=(0.055, 0.036, 0.022), seat_wood_rough=0.8,  # v4-D4 seat face
+        gear_color=(0.055, 0.055, 0.058), gear_rough=0.6,  # v4-D2/D3 lighting·speakers
+        # [v5.1 §4] parapet 0.90 -> 0.72 (no large pure-white areas)
         parapet_color=(0.72, 0.72, 0.69), parapet_rough=0.6,
-        # [v7 §4] 0.88 → 0.78: 등기구 판면이 알베도 상한(0.80)을 넘었다(소면적
-        #   WARN 이었으나 자가검사가 잡은 항목은 남기지 않는다).
+        # [v7 §4] 0.88 -> 0.78: the luminaire face exceeded the albedo cap (0.80) (it was a small-area
+        #   WARN, but nothing the self-check flags is left standing).
         lamp_color=(0.78, 0.78, 0.75), lamp_rough=0.4,
         pole_color=(0.24, 0.24, 0.26), pole_metallic=0.6, pole_rough=0.5,
         nosing_color=(0.85, 0.72, 0.10), nosing_rough=0.7,
     ),
 
-    # --- 조명: scene01 light dict 그대로 + SUN_AZ_OFFSET=171.5 ---
+    # --- lighting: the scene01 light dict verbatim + SUN_AZ_OFFSET=171.5 ---
     light=dict(
         hdri="qwantani_noon_puresky_4k.exr",
         dome_intensity=1000.0,
@@ -462,9 +469,9 @@ def _deep_update(dst, src):
 
 
 # ===========================================================================
-# [C2] [v7 판정 §4 잔여1] 배후 관목 로브 생성기 — **조립기와 검산기가 같은
-#   좌표를 쓴다**(scene04 `verge_instances` 규약). 시드 결정적이므로 Isaac
-#   없이도 침범·부유·실루엣 높이를 실측할 수 있다.
+# [C2] [v7 judgment §4 remaining 1] backdrop shrub lobe generator - **builder and checker use
+#   the same coordinates** (scene04 `verge_instances` convention). The seed is deterministic, so
+#   intrusion, floating and silhouette height can be measured without Isaac.
 #   yield: (px, py, pz, ax, ay, az, row, k, lobe)
 # ===========================================================================
 def backdrop_instances():
@@ -474,26 +481,26 @@ def backdrop_instances():
     for r_i, (rr0, step, rx0, rz0, h_top, nlobe) in enumerate(sh["rows"]):
         for a_i, (a0, a1) in enumerate(sh["arcs"]):
             k, s = 0, 0.0
-            span = math.radians(a1 - a0) * rr0            # 호 길이[m]
+            span = math.radians(a1 - a0) * rr0            # arc length [m]
             while s <= span + 1e-6:
                 rnd = random.Random(int(r_i * 9176 + a_i * 3571 + k * 7919))
                 s_next = s + step * (1.0 + rnd.uniform(-sh["jit_step"],
                                                        sh["jit_step"]))
                 k += 1
-                if rnd.random() < sh["skip"]:             # 결측 → 군락/빈틈
+                if rnd.random() < sh["skip"]:             # dropout -> clumps/gaps
                     s = s_next
                     continue
                 a = math.radians(a0) + s / rr0
                 sc_ = 1.0 + rnd.uniform(-sh["jit_scale"], sh["jit_scale"])
                 hh = h_top * (1.0 + rnd.uniform(-sh["jit_h"], sh["jit_h"]))
                 rx, rz = rx0 * sc_, rz0 * sc_
-                z_lo = sh["base_z"] + rz * (1.0 - emb)     # 최하 로브 중심
-                z_hi = sh["base_z"] + hh - rz              # 최상 로브 중심
+                z_lo = sh["base_z"] + rz * (1.0 - emb)     # lowest lobe centre
+                z_hi = sh["base_z"] + hh - rz              # highest lobe centre
                 for j in range(nlobe):
                     t = j / float(nlobe - 1) if nlobe > 1 else 0.0
                     rr = rr0 + rnd.uniform(-sh["jit_pos"], sh["jit_pos"])
                     da = rnd.uniform(-sh["jit_pos"], sh["jit_pos"]) / rr0
-                    # 위로 갈수록 로브가 작아진다(수관 테이퍼)
+                    # lobes get smaller toward the top (crown taper)
                     f = 1.0 - sh["taper"] * t
                     yield (b["cx"] + rr * math.cos(a + da),
                            b["cy"] + rr * math.sin(a + da),
@@ -504,22 +511,22 @@ def backdrop_instances():
 
 
 def backdrop_selfcheck(verbose=True):
-    """[v7] 배후 관목 재작업 검산 — 아크벽 침범 0 · 부유 0 · 실루엣 높이 유지.
+    """[v7] Backdrop shrub rework check — 0 arc-wall intrusion · 0 floaters · silhouette height kept.
 
-    ① 반경 침범 : 최내측 로브가 아크벽 외경(shell.r_out 5.25) 안으로 들어가는가.
-    ② 마당 이탈 : 최외측 로브가 마당 외경(backyard.r_out 7.5)을 넘는가.
-    ③ 부유     : 최하 로브 하단(z − az)이 마당 상면(base_z) 아래로 물리는가.
-    ④ 실루엣   : 군락 최상단이 아크벽 상면(shell.top_z 0.70)보다 위인가
-                 (= v6 달성분 "벽 위로 녹지·하늘" 유지 조건).
-    ⑤ 개체 크기: 최대 로브 높이(2·az)가 판정 권고 0.5 m 이하인가.
-    ⑥ 카메라   : 전 프리셋 eye 가 로브 타원체 안에 들어가지 않는가.
-    ⑦ 로브 연속: 같은 군락의 인접 로브 z 간격 ≤ 1.35·min(az) 인가
-                 (넘으면 스택이 끊겨 '공중에 뜬 구슬'이 된다).
+    ① Radial intrusion : does the innermost lobe reach inside the arc wall outer radius (shell.r_out 5.25)?
+    ② Yard overrun     : does the outermost lobe pass the yard outer radius (backyard.r_out 7.5)?
+    ③ Floating         : does the bottom of the lowest lobe (z − az) reach below the yard top face (base_z)?
+    ④ Silhouette       : is the clump top above the arc wall top face (shell.top_z 0.70)?
+                         (= the condition that keeps the v6 gain "greenery and sky above the wall".)
+    ⑤ Individual size  : is the tallest lobe (2·az) within the recommended 0.5 m?
+    ⑥ Camera           : does every preset eye stay outside the lobe ellipsoids?
+    ⑦ Lobe continuity  : is the z gap between adjacent lobes of one clump ≤ 1.35·min(az)?
+                         (beyond that the stack breaks and turns into "beads floating in mid-air".)
     """
     b = PARAMS["bowl"]
     sh = PARAMS["backdrop_shrub"]
     inst = list(backdrop_instances())
-    # ⑦ 군락별 로브 스택 연속성
+    # (7) lobe stack continuity per clump
     stacks = {}
     for p in inst:
         stacks.setdefault((p[6], p[7]), []).append(p)
@@ -575,9 +582,10 @@ def backdrop_selfcheck(verbose=True):
 
 
 def podium_step_selfcheck(verbose=True):
-    """[v7 판정 §4 잔여2] 승강 계단 예각 쐐기 검산 — build_arc_steps 의
-    현길이 규약(2·r_out·sin(dθ/2)·1.03)을 그대로 써서 **세그 박스 모서리가
-    안쪽 원기둥 밖으로 얼마나 나가는지**(=초승달 틈)와 **호 끝 돌출**을 잰다."""
+    """[v7 judgment §4 remaining 2] Access stair acute-wedge check — using the
+    build_arc_steps chord convention (2·r_out·sin(dθ/2)·1.03) as is, it measures
+    **how far the segment box corner sticks out of the inner cylinder** (= the
+    crescent gap) and **the overrun at the arc ends**."""
     po = PARAMS["podium"]
     ps = po["steps"]
     rows = []
@@ -586,13 +594,13 @@ def podium_step_selfcheck(verbose=True):
         for a0, a1 in ps["arcs"]:
             dth = math.radians((a1 - a0) / float(ps["seg"]))
             half = r_out * math.sin(dth / 2.0) * 1.03
-            gap = math.hypot(r_in, half) - r_in        # 안쪽 초승달 틈
-            # 끝 세그 마구리면이 호 끝을 넘어가는 각(도) → r_in 에서의 호 길이
+            gap = math.hypot(r_in, half) - r_in        # inner crescent gap
+            # angle (deg) by which the end segment cap face overruns the arc end -> arc length at r_in
             over_a = math.degrees(math.atan2(half, r_in)) - (a1 - a0) / (
                 2.0 * ps["seg"])
             over = max(0.0, math.radians(over_a) * r_in)
             rows.append((i, a0, a1, r_in, r_out, gap, over))
-            break                                      # 두 호는 대칭 — 1회면 족함
+            break                                      # the two arcs are symmetric - once is enough
     gap_max = max(r[5] for r in rows)
     over_max = max(r[6] for r in rows)
     ok = gap_max <= 0.002 and over_max <= 0.020
@@ -615,23 +623,23 @@ def podium_step_selfcheck(verbose=True):
 
 
 # ===========================================================================
-# [C3] [v7 판정 §11-6] §4 "순백(>0.8) 대면적 금지" 알베도 상한 자가검사
-#   (scene05/09/12 공통 규약 — 이번 라운드 도입분)
+# [C3] [v7 judgment §11-6] §4 "no large pure-white (>0.8) area" albedo cap self-check
+#   (shared convention for scene05/09/12 - introduced this round)
 #
-#   판정 §11-6: "순백 대면적이 3씬(09 포장·18 광장·19 지붕/옥상)에서 동시
-#   발생. 개별 지적 대신 **알베도 상한 전역 검사 스크립트**를 스모크에 추가할 것."
+#   judgment §11-6: "large pure-white areas occur in 3 scenes at once (09 paving · 18 plaza ·
+#   19 roof/rooftop). Rather than flag them individually, add a **global albedo-cap check** to smoke."
 #
-#   두 기준을 함께 본다 — 하나만으로는 실제 실패를 못 잡는다.
-#     (A) 알베도 상한  : 유효 알베도 max 채널 > CAP(0.80) → v5.1 §4 문자 위반.
-#     (B) 렌더 예측    : **수평 대면적**(포장·데크·지붕 상면·잔디)에 한해
-#         예상 렌더 sRGB = sRGB(알베도 × GAIN) > PRED_CAP(0.87 ≒ 222) → 위반.
-#         GAIN 1.77 은 v7_rt 실측 역산 — scene09 `ghat_walk` 포장 알베도
-#         0.469×0.90 = 0.422 → 렌더 (223,222,221) = 선형 0.738.
-#         05/09/12 는 돔 1000 + 태양 2450 · elev 49.79 의 **동일 조명 리그**라
-#         한 값을 공유할 수 있다. 수직면은 일사·천공 가시율이 달라 (B) 미적용.
-#     PRED_CAP 0.87 은 판정관이 "순백 대면적"으로 지적한 실측(09 223 · 18 220)
-#     바로 아래로 잡았다 — 같은 렌더가 다시 나오면 스모크에서 걸린다.
-#   유효 알베도 = 상수색 그대로 | diff 텍스처 선형평균 × 틴트.
+#   two criteria are applied together - either one alone misses the real failures.
+#     (A) albedo cap   : max channel of the effective albedo > CAP(0.80) -> literal v5.1 §4 violation.
+#     (B) render forecast: for **large horizontal areas** only (paving · decks · roof tops · grass)
+#         expected render sRGB = sRGB(albedo x GAIN) > PRED_CAP(0.87 ~ 222) -> violation.
+#         GAIN 1.77 is back-solved from v7_rt measurements - scene09 `ghat_walk` paving albedo
+#         0.469x0.90 = 0.422 -> render (223,222,221) = linear 0.738.
+#         05/09/12 share the **same lighting rig** (dome 1000 + sun 2450 · elev 49.79), so
+#         one value serves all. Vertical faces differ in sun/sky visibility, so (B) is not applied.
+#     PRED_CAP 0.87 sits just below the measurements the judge called "large pure-white areas"
+#     (09 223 · 18 220) - if the same render appears again, smoke catches it.
+#   effective albedo = the constant colour as is | linear mean of the diff texture x tint.
 # ===========================================================================
 _ALBEDO_GAIN = 1.77
 _ALBEDO_CAP = 0.80
@@ -640,7 +648,7 @@ _TEXMEAN_CACHE = {}
 
 
 def _tex_lin_mean(role):
-    """diff 텍스처의 선형(sRGB 해제) 채널평균. PIL/파일 없으면 None."""
+    """Linear (de-sRGB) channel mean of a diff texture. None if PIL or the file is missing."""
     if role in _TEXMEAN_CACHE:
         return _TEXMEAN_CACHE[role]
     val = None
@@ -663,7 +671,7 @@ def _srgb(u):
     return 12.92 * u if u <= 0.0031308 else 1.055 * u ** (1 / 2.4) - 0.055
 
 
-# (라벨, 텍스처 role|None, material 키|None, 대면적, 수평면, 유예 사유|None)
+# (label, texture role|None, material key|None, large area, horizontal, waiver reason|None)
 _ALBEDO_TABLE = [
     ("광장·티어 포장",   "plaza_light", None,               True,  True,
      "v7 판정 [경] '§4 경계선' — 01/05/14/18/19 가 무틴트 plaza_light 를 "
@@ -680,13 +688,13 @@ _ALBEDO_TABLE = [
 
 
 def albedo_selfcheck(verbose=True):
-    """[v7 §4/§11-6] 순백 대면적 자가검사. (A) 알베도 > 0.80 또는
-    (B) 수평 대면적의 예상 렌더 sRGB > 0.87 이면 위반. 대면적은 FAIL,
-    소면적은 WARN, 유예 사유가 있으면 WAIVED. 반환 (ok, rows)."""
+    """[v7 §4/§11-6] Large-pure-white-area self-check. A violation is (A) albedo > 0.80
+    or (B) expected render sRGB > 0.87 for a large horizontal area. Large areas FAIL,
+    small areas WARN, and anything with a waiver reason is WAIVED. Returns (ok, rows)."""
     mp = PARAMS["material"]
     rows, fails, warns, waived = [], [], [], []
     for label, role, key, wide, horiz, waiver in _ALBEDO_TABLE:
-        if key == "tuft":                      # 상수색 리스트
+        if key == "tuft":                      # list of constant colours
             v = max(max(c) for c in mp["tuft"])
             base, tint = (1.0, 1.0, 1.0), (v, v, v)
         else:
@@ -742,7 +750,7 @@ def albedo_selfcheck(verbose=True):
     return ok, rows
 
 
-# 파라미터 / 토글 환경변수 오버라이드 (scene01 패턴 — 기본 실행엔 영향 없음)
+# parameter / toggle overrides via environment variables (scene01 pattern - no effect on a default run)
 _ov = os.environ.get("NEGOBS_PARAMS_OVERRIDE", "")
 if _ov:
     _deep_update(PARAMS, json.loads(_ov))
@@ -754,40 +762,41 @@ if _sc_ov:
 
 
 # ===========================================================================
-# [C] 경로
+# [C] paths
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "scene05")
 
 
 # ===========================================================================
-# [D] 카메라 프리셋 — grid_views(gy=0) + 미장센 4컷
+# [D] camera presets - grid_views(gy=0) + 4 mise-en-scene shots
 # ===========================================================================
 def build_views():
-    """h·d 그리드 9장 + 미장센 4컷.
-    그리드 d 프리셋 기준점 시프트: 보울 립이 x=−1.5(중심6−개구7.5)이므로
-    eye x = −1.5 − d 로 옮겨 "립까지 거리 d" 의미가 되게 한다."""
+    """9 h·d grid shots + 4 mise-en-scene shots.
+    Reference shift for the grid d presets: the bowl lip is at x=−1.5
+    (centre 6 − opening 7.5), so eye x is moved to −1.5 − d, making "d" mean
+    "distance to the lip"."""
     v = sc.grid_views(0.0)
     out = {}
     for k, val in v.items():
         e = list(val["eye"])
         t = list(val["tgt"])
-        e[0] -= 1.5            # 립(x=−1.5)까지의 거리로 재기준
+        e[0] -= 1.5            # re-based on the distance to the lip (x=−1.5)
         t[0] -= 1.5
         out[k] = dict(eye=e, tgt=t)
-    # 미장센
+    # mise-en-scene
     out["plaza_approach"] = dict(eye=[-6.0, 0.0, 0.9],  tgt=[2.0, 0.0, 0.6])
     out["rim_view"]       = dict(eye=[-0.5, 0.0, 1.6],  tgt=[6.0, 0.0, -1.0])
-    # [v5.1] 무대 단(상면 −0.507)이 생기면서 eye z −0.3 은 단 위 0.207 m 가 돼
-    #   시점이 무대 바닥에 파묻힌다 → 무대 상면 기준 눈높이 0.9 m 로 재설정.
-    #   (미장센 컷 — 위험 기하·그리드 프리셋과 무관)
+    # [v5.1] with the podium (top face −0.507) added, eye z −0.3 is only 0.207 m above it, so the
+    #   viewpoint is buried in the stage floor -> reset to eye height 0.9 m above the podium top.
+    #   (a mise-en-scene shot - unrelated to the hazard geometry or the grid presets)
     out["stage_lookup"]   = dict(eye=[6.0, 0.0, 0.40], tgt=[-1.0, 0.0, -0.3])
     out["side_arc"]       = dict(eye=[6.0, -10.0, 1.2], tgt=[6.0, -2.0, 0.5])
     return out
 
 
 # ===========================================================================
-# [E] 씬 조립 + 메인 (__main__ 전용)
+# [E] scene assembly + main (__main__ only)
 # ===========================================================================
 BANNER = """\
 [조작] 우클릭+WASD 비행 · P 패스트레이싱 토글 · C 스크린샷 · [ ] 태양 방위
@@ -812,8 +821,8 @@ BANNER = """\
 def main():
     capture_mode = os.environ.get("NEGOBS_CAPTURE", "0") == "1"
 
-    # [v7] 부팅 없이 도는 순수 파이썬 자가검사 — 배후 관목 · 승강 아크 예각 ·
-    #   §4 알베도 상한.  NEGOBS_SMOKE=1 (또는 NEGOBS_SELFCHECK=1) python scene05_...
+    # [v7] pure-Python self-checks that run without booting - backdrop shrubs · access arc wedge ·
+    #   §4 albedo cap.  NEGOBS_SMOKE=1 (or NEGOBS_SELFCHECK=1) python scene05_...
     if (os.environ.get("NEGOBS_SMOKE", "0") == "1"
             or os.environ.get("NEGOBS_SELFCHECK", "0") == "1"):
         ok = all([backdrop_selfcheck()[0], podium_step_selfcheck()[0],
@@ -822,13 +831,13 @@ def main():
               f"— 부팅 없이 조기 종료")
         sys.exit(0 if ok else 1)
 
-    # 에셋 검사 (누락 시 목록 출력 후 종료)
+    # asset check (prints the missing list, then exits)
     sc.check_assets(
         ["plaza_light", "plaza_lower", "granite_dark", "grass", "brick_red",
-         "tactile", "sign_info", "hdri", "mdl"],   # [v5] sign_info 추가
+         "tactile", "sign_info", "hdri", "mdl"],   # [v5] sign_info added
         hdri=PARAMS["light"]["hdri"])
 
-    # ── 부팅 (SimulationApp 먼저, 그 뒤 pxr/omni) ──
+    # ── boot (SimulationApp first, then pxr/omni) ──
     simulation_app = sc.boot(capture_mode)
 
     import carb
@@ -846,7 +855,7 @@ def main():
     mp = PARAMS["material"]
 
     # -------------------------------------------------------------------
-    # 재질
+    # materials
     # -------------------------------------------------------------------
     def setup_materials():
         scl = mp["scale"]
@@ -855,7 +864,7 @@ def main():
             stage, "/World/Looks/PlazaLight", sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
             scl["plaza_light"], tint=(0.72, 0.72, 0.72))   # [T1 T-1] x0.72
-        # 차콜 밴드 = 짙은 화강암 (scene01 모티프)
+        # charcoal bands = dark granite (scene01 motif)
         M["band"] = sc.make_pbr(
             stage, "/World/Looks/Band", sc.tex_path("granite_dark", "diff"),
             sc.tex_path("granite_dark", "nor"), sc.tex_path("granite_dark", "rough"),
@@ -864,7 +873,7 @@ def main():
             stage, "/World/Looks/GraniteDark", sc.tex_path("granite_dark", "diff"),
             sc.tex_path("granite_dark", "nor"), sc.tex_path("granite_dark", "rough"),
             scl["granite_dark"])
-        # 스테이지: cue_material_break 에 따라 회청 판석(웜) vs 밝은 화강암 (기하 불변)
+        # stage: blue-grey flagstone (warm) vs light granite depending on cue_material_break (geometry unchanged)
         if cfg["cue_material_break"]:
             M["stage"] = sc.make_pbr(
                 stage, "/World/Looks/Stage", sc.tex_path("plaza_lower", "diff"),
@@ -875,7 +884,7 @@ def main():
                 stage, "/World/Looks/Stage", sc.tex_path("plaza_light", "diff"),
                 sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
                 scl["plaza_light"], tint=(0.72, 0.72, 0.72))   # [T1 T-1] x0.72
-        # 진입 계단(통행용) — 좌석 티어와 대비되게 회청 판석
+        # entry stair (for circulation) - blue-grey flagstone to contrast with the seating tiers
         M["plaza_lower"] = sc.make_pbr(
             stage, "/World/Looks/PlazaLower", sc.tex_path("plaza_lower", "diff"),
             sc.tex_path("plaza_lower", "nor"), sc.tex_path("plaza_lower", "rough"),
@@ -891,7 +900,7 @@ def main():
         M["tactile"] = sc.make_pbr(
             stage, "/World/Looks/Tactile", sc.tex_path("tactile", "diff"),
             sc.tex_path("tactile", "nor"), None, scl["tactile"])
-        # 상수 컬러 재질
+        # constant-colour materials
         M["glass"] = sc.make_pbr(stage, "/World/Looks/Glass",
                                  diffuse_color=mp["glass_color"],
                                  roughness_const=mp["glass_rough"], metallic=0.0)
@@ -920,7 +929,7 @@ def main():
                                 diffuse_color=mp["pole_color"],
                                 metallic=mp["pole_metallic"],
                                 roughness_const=mp["pole_rough"])
-        # v4 드레싱 전용 재질
+        # v4 dressing-only materials
         M["hedge"] = sc.make_pbr(
             stage, "/World/Looks/Hedge", sc.tex_path("grass", "diff"),
             sc.tex_path("grass", "nor"), sc.tex_path("grass", "rough"),
@@ -931,14 +940,14 @@ def main():
         M["gear"] = sc.make_pbr(stage, "/World/Looks/Gear",
                                 diffuse_color=mp["gear_color"],
                                 roughness_const=mp["gear_rough"])
-        # [v7 판정 §4 잔여1] 배후 관목 = **상수색 tuft 3종**(텍스처 없음).
-        #   확대 텍스처가 곧 '이끼 낀 바위'의 절반이므로 아예 물리지 않는다.
+        # [v7 judgment §4 remaining 1] backdrop shrubs = **3 constant-colour tufts** (no texture).
+        #   a magnified texture is half of the "mossy rock" effect, so none is bound at all.
         M["tuft"] = [sc.make_pbr(
             stage, f"/World/Looks/Tuft{i}",
             diffuse_color=tuple(c * (1.0 + 0.05 * (i - 1)) for c in col),
             roughness_const=mp["tuft_rough"], specular_level=0.0)
             for i, col in enumerate(mp["tuft"])]
-        # [v7 판정 §4 잔여3] 볼라드 = 도장 강재(구: 백색 스테인리스 M["rail"])
+        # [v7 judgment §4 remaining 3] bollards = painted steel (was: white stainless M["rail"])
         M["bollard"] = sc.make_pbr(stage, "/World/Looks/Bollard",
                                    diffuse_color=mp["bollard_color"],
                                    metallic=mp["bollard_metallic"],
@@ -946,7 +955,7 @@ def main():
         return M
 
     # -------------------------------------------------------------------
-    # 상부 광장 — 보울 개구(원형) 정합. 링 슬래브 + 링 내접사각 밖 4박스.
+    # upper plaza - fits the circular bowl opening. Ring slab + 4 boxes outside the inscribed square.
     # -------------------------------------------------------------------
     def build_plaza(M, hazard):
         p = PARAMS["plaza"]
@@ -959,7 +968,7 @@ def main():
                         "/World/Scene05/Plaza_N", "/World/Scene05/Plaza_S",
                         "/World/Scene05/PlazaRing", "/World/Scene05/PlazaFlat")
         if not hazard:
-            # 평지 대조군: 전체 단일 슬래브(보울 구멍 없음)
+            # flat control: one single slab (no bowl hole)
             cx = (p["x0"] + p["x1"]) / 2.0
             cy = (p["y0"] + p["y1"]) / 2.0
             sc.add_box(stage, "/World/Scene05/PlazaFlat",
@@ -969,17 +978,17 @@ def main():
             return
         b = PARAMS["bowl"]
         rg = PARAMS["ring"]
-        # 링 슬래브(아크): 보울 개구 원(r=7.5)의 매끈한 원형 가장자리 담당
+        # ring slab (arc): provides the smooth circular edge of the bowl opening (r=7.5)
         sc.build_arc_steps(stage, "/World/Scene05/PlazaRing", b["cx"], b["cy"],
                            rg["r_in"], rg["r_out"], 0.0, 360.0, rg["seg"],
                            rg["top_z"], rg["base_z"], M["plaza_light"])
-        # 링 외곽 사각 밖을 4박스로. 링 outer 원에 **내접**하는 사각(반변=r_out/√2)
-        # 을 비워 두면 사각 전 영역이 r≤r_out → 링이 코너까지 덮어 코너 공극 0.
-        # (문언의 '외접 사각'은 코너 4곳에 원-밖 공극을 남겨 링-사각 이음이 뚫림.)
+        # 4 boxes fill outside the ring square. Leaving the square **inscribed** in the ring's outer
+        # circle (half side = r_out/√2) empty keeps the square at r<=r_out -> the ring covers the corners, gap 0.
+        # (a "circumscribed square" would leave outside-circle gaps at the 4 corners, opening the joint.)
         half = rg["r_out"] / math.sqrt(2.0)     # ≈ 8.485
         sx0, sx1 = b["cx"] - half, b["cx"] + half
         sy0, sy1 = b["cy"] - half, b["cy"] + half
-        ov = 0.05                               # 1mm↑ 겹침(동일 재질 → 티 안 남)
+        ov = 0.05                               # 1mm+ overlap (same material -> invisible)
 
         def slab(tag, x0, x1, y0, y1):
             sc.add_box(stage, f"/World/Scene05/Plaza_{tag}",
@@ -991,7 +1000,7 @@ def main():
         slab("S", sx0 - ov, sx1 + ov, p["y0"], sy0)
 
     # -------------------------------------------------------------------
-    # 차콜 밴드 — Y 방향, 간격 3.2. 보울 개구에 걸리는 밴드는 y를 두 조각으로 분할.
+    # charcoal bands - along Y, spacing 3.2. Bands crossing the bowl opening are split into two in y.
     # -------------------------------------------------------------------
     def build_bands(M, hazard):
         p = PARAMS["plaza"]
@@ -1008,7 +1017,7 @@ def main():
         while x < p["x1"] - 1e-6:
             dx = x - b["cx"]
             if hazard and abs(dx) < r:
-                # 보울 개구 X구간 → 북/남 두 조각으로 클립 (개구 밖 +0.2 여유)
+                # bowl opening x range -> clipped into north/south pieces (+0.2 margin outside the opening)
                 halfc = math.sqrt(r * r - dx * dx) + 0.2
                 sc.add_box(stage, f"/World/Scene05/Band_{n}_N",
                            (x, (halfc + p["y1"]) / 2.0, cz),
@@ -1037,7 +1046,7 @@ def main():
             origin=(g["lip_x"], 0.0, 0.0),       # grid is shifted by -1.5
             edges=[("bowl_lip", 0.0)],
             dists=(2, 5, 10), scene="scene05",
-            tactile=(),                 # §12.4 — p=0.24 공원, 미설치
+            tactile=(),                 # §12.4 - p=0.24 park, not installed
             overrides=dict(infra=dict(manhole=1, gully=2)),
             sites=dict(manhole=[tuple(v) for v in g["manhole"]],
                        gully=[tuple(v) for v in g["gully"]],
@@ -1058,19 +1067,19 @@ def main():
         return res
 
     # -------------------------------------------------------------------
-    # 선큰 보울 — 3티어(아크 × 3회) + 스테이지 원반 + 진입 계단
+    # sunken bowl - 3 tiers (3 arc calls) + stage disc + entry stair
     # -------------------------------------------------------------------
     def build_bowl(M):
         b = PARAMS["bowl"]
         stg = PARAMS["stage"]
-        # [v5 채택] 티어 호 = b["a0"]..b["a1"] (200°). 반경·z 는 불변.
+        # [v5 adopted] tier arc = b["a0"]..b["a1"] (200 deg). Radii and z unchanged.
         for i, t in enumerate(b["tiers"], 1):
             sc.build_arc_steps(stage, f"/World/Scene05/Tier_{i}", b["cx"], b["cy"],
                                t["r_in"], t["r_out"], b["a0"], b["a1"],
                                b["seg"], t["top_z"], b["base_z"],
                                M["plaza_light"])
-        # v4-A1: 스테이지 = 내부 원반(r 4.9) + 32세그 아크 림(4.2..5.22).
-        #   림 외경 최소 반경 5.22 > 티어3 내면 최대 5.0242 → 관통 공극 0.
+        # v4-A1: stage = inner disc (r 4.9) + 32-seg arc rim (4.2..5.22).
+        #   rim outer min radius 5.22 > tier-3 inner max 5.0242 -> through-gap 0.
         rim = stg["rim"]
         sc.add_cylinder(stage, "/World/Scene05/Stage/Disc",
                         (b["cx"], b["cy"], stg["top_z"] - stg["height"] / 2.0),
@@ -1078,7 +1087,7 @@ def main():
         sc.build_arc_steps(stage, "/World/Scene05/Stage/Rim", b["cx"], b["cy"],
                            rim["r_in"], rim["r_out"], 0.0, 360.0, rim["seg"],
                            rim["top_z"], rim["base_z"], M["stage"])
-        # [v5.1] 원형 무대 단 + 승강 계단 2조 — 좌표 근거는 PARAMS["podium"] 주석
+        # [v5.1] circular podium + 2 access stairs - coordinate rationale in the PARAMS["podium"] comment
         po = PARAMS["podium"]
         sc.add_cylinder(stage, "/World/Scene05/Stage/Podium",
                         (b["cx"], b["cy"],
@@ -1092,10 +1101,10 @@ def main():
                     stage, f"/World/Scene05/Stage/PodiumStep_{j}_{i}",
                     b["cx"], b["cy"], ps["radii"][i + 1], ps["radii"][i],
                     a0, a1, ps["seg"], ztop, ps["base_z"], M["stage"])
-            # [v7 판정 §4 잔여2] 마구리(치크) — 호 양단의 나이프 에지 은폐.
-            #   반경 전폭(3.0..3.75)을 덮는 두께 cheek_deg 의 짧은 아크 1장씩.
-            #   상면 = 무대 단 상면(−0.853) → 에이프런 대비 0.35 m(단과 동일
-            #   낙차, 신규 위험 0). overlap 만큼 계단 쪽으로 물려 틈을 없앤다.
+            # [v7 judgment §4 remaining 2] end caps (cheeks) - hide the knife edges at both arc ends.
+            #   one short arc of thickness cheek_deg each, covering the full radial width (3.0..3.75).
+            #   top face = the podium top face (−0.853) -> 0.35 m above the apron (the same
+            #   drop as the podium, no new hazard). Pushed toward the stair by overlap to close the gap.
             cd, ov = ps["cheek_deg"], ps["cheek_overlap"]
             for tag, ca0, ca1 in (("A", a0 - cd + ov, a0 + ov),
                                   ("B", a1 - ov, a1 + cd - ov)):
@@ -1105,8 +1114,9 @@ def main():
                     ca0, ca1, 1, po["top_z"], ps["base_z"], M["stage"])
 
     def build_flight(M, prefix, a0, a1, seg):
-        """v4-A2/A3: 티어와 동심인 아크 계단 1조. 반경 사다리가 티어 경계를
-        정확히 포함하므로 디딤폭 붕괴·쐐기 단차가 원리적으로 발생하지 않는다."""
+        """v4-A2/A3: one arc stair concentric with the tiers. Because the radius ladder
+        contains the tier boundaries exactly, tread-width collapse and wedge steps
+        cannot occur by construction."""
         e = PARAMS["entry"]
         b = PARAMS["bowl"]
         for i, ztop in enumerate(e["tops"]):
@@ -1115,7 +1125,7 @@ def main():
                                ztop, e["base_z"], M["plaza_lower"])
 
     def build_entry(M):
-        """진입 계단(+X 방사, a −9..+9°) + v4-D5 관람석 통로 계단 2조."""
+        """Entry stair (+X radial, a −9..+9°) + the 2 v4-D5 seating aisle stairs."""
         e = PARAMS["entry"]
         build_flight(M, "/World/Scene05/Entry", e["a0"], e["a1"], e["seg"])
         for k, a in enumerate(PARAMS["aisles"]):
@@ -1123,9 +1133,10 @@ def main():
                          a["seg"])
 
     def build_seat_strips(M):
-        """v4-D4: 각 티어 상연에 목재 좌면 밴드 — 티어가 '좌석'으로 읽히고
-        단 대비(riser 0.40 · tread 0.85 의 밋밋한 흰 곡면 벽)가 확보된다.
-        진입(±9°)·통로(100~112 / 248~260) 구간은 아크를 끊어 비운다."""
+        """v4-D4: a timber seat band on the top edge of every tier — the tiers read as
+        "seating" and step contrast is secured (against the flat white curved wall
+        of riser 0.40 · tread 0.85).
+        The entry (±9°) and aisle (100~112 / 248~260) ranges break the arc and stay empty."""
         b = PARAMS["bowl"]
         se = PARAMS["seat"]
         for i, t in enumerate(b["tiers"], 1):
@@ -1139,7 +1150,7 @@ def main():
                                    collider=False)
 
     def build_lip(M):
-        """립 연석 링 (cue_material_break): 개구 밖 다크 화강암 재질 경계 단서."""
+        """Lip kerb ring (cue_material_break): a dark granite material-break cue outside the opening."""
         l = PARAMS["lip"]
         b = PARAMS["bowl"]
         sc.build_arc_steps(stage, "/World/Scene05/LipCurb", b["cx"], b["cy"],
@@ -1147,20 +1158,20 @@ def main():
                            l["top_z"], l["base_z"], M["granite_dark"])
 
     def build_halfbowl_finish(M):
-        """[v5 채택] 반원화 마감 — 절단 측벽 + 배후 잔디 마당 + 진입 치크월.
+        """[v5 adopted] Half-round finish — cut side wall + grass backyard + entry cheek walls.
 
-        보행 연속성 자가 검증(광장 → 마당 → 무대):
-          광장/링 z −0.002 (r>7.5)
-            → 마당 z −0.06        단차 0.058  (평지 접속)
-            → 진입 계단 1단 −0.197 단차 0.137  (치크월 상면과 플러시 시작)
-            → −0.397 / −0.597 / −0.797 / −0.997 / −1.197  각 riser 0.200
-            → 스테이지 −1.207      단차 0.010
-          역방향(무대 → 마당)도 동일 프로파일. 0.2 m 초과 단차 없음.
-        새 에지 낙차 방호:
-          · 티어 절단면(θ 80/280) → cut_wall 상면 +1.00 (마당 대비 1.06 m)
-          · 마당 내측(r 5.25) → shell(θ 9..80 / 280..351) 전 구간 차단
-            [v6] 상면 +1.4 → +0.70 + 배후 관목 완충대(backdrop_shrub) 병용
-          · 진입 계단 측면(θ ±9) → entry_cheek(θ 9..11 / 349..351) 상면 −0.06
+        Walking-continuity self-verification (plaza → yard → stage):
+          plaza/ring z −0.002 (r>7.5)
+            → yard z −0.06        step 0.058  (level connection)
+            → entry stair step 1 −0.197 step 0.137  (starts flush with the cheek wall top)
+            → −0.397 / −0.597 / −0.797 / −0.997 / −1.197  riser 0.200 each
+            → stage −1.207        step 0.010
+          The reverse direction (stage → yard) has the same profile. No step exceeds 0.2 m.
+        Guarding of the new edge drops:
+          · tier cut face (θ 80/280) → cut_wall top face +1.00 (1.06 m above the yard)
+          · yard inner side (r 5.25) → blocked by the shell (θ 9..80 / 280..351) throughout
+            [v6] top face +1.4 → +0.70, used together with the shrub buffer (backdrop_shrub)
+          · entry stair flanks (θ ±9) → entry_cheek (θ 9..11 / 349..351) top face −0.06
         """
         b = PARAMS["bowl"]
         for key, mtl in (("backyard", M["grass"]),
@@ -1174,22 +1185,22 @@ def main():
                                    mtl)
 
     # -------------------------------------------------------------------
-    # 부지 바깥 잔디 대지 — 보울 개구를 비우는 4박스 분할(r1 수정).
-    #   단일 대지는 상면(-0.5)이 선큰 보울 내부를 관통해 티어2·3·스테이지를
-    #   매장시킴 → 개구(중심(6,0) r7.5)의 외접 사각+0.2 여유를 홀로 비운다.
-    #   홀 코너~원 사이는 광장 링(r7.5..12, base -0.5)이 위에서 덮어 무공극.
-    #   잔디 상면 -0.51 : 링 base(-0.5)와의 동일평면 Z파이팅 1cm 하강 회피.
+    # grass ground outside the site - split into 4 boxes leaving the bowl opening empty (r1 fixed).
+    #   a single slab would let its top face (-0.5) cut through the sunken bowl and bury tiers 2·3
+    #   and the stage -> the circumscribed square of the opening (centre (6,0) r7.5) +0.2 is left as a hole.
+    #   between hole corner and circle the plaza ring (r7.5..12, base -0.5) covers from above - no gap.
+    #   grass top face -0.51 : dropped 1 cm to avoid coplanar Z-fighting with the ring base (-0.5).
     # -------------------------------------------------------------------
     def build_ground(M):
         top = -0.51
         th = 1.0
         cz = top - th / 2.0
-        # 홀 사각: 보울 r=7.5 원의 외접 사각 + 0.2 여유 (중심 (6,0))
+        # hole square: the square circumscribing the bowl circle r=7.5 + 0.2 margin (centre (6,0))
         hx0, hx1 = -1.7, 13.7
         hy0, hy1 = -7.7, 7.7
-        gx0, gx1 = -117.0, 123.0     # 대지 전역 (중심 x=3, 폭 240)
+        gx0, gx1 = -117.0, 123.0     # whole site (centre x=3, width 240)
         gy0, gy1 = -120.0, 120.0
-        ov = 0.05                    # 조각 이음 겹침(동일 재질 → 티 안 남)
+        ov = 0.05                    # overlap at the piece joints (same material -> invisible)
 
         def slab(tag, x0, x1, y0, y1):
             sc.add_box(stage, f"/World/Scene05/Ground_{tag}",
@@ -1201,10 +1212,10 @@ def main():
         slab("S", hx0 - ov, hx1 + ov, gy0, hy0)
 
     # -------------------------------------------------------------------
-    # 드레싱 — 화단·생울타리·벤치·가로등·건물
+    # dressing - planters·hedges·benches·streetlights·buildings
     # -------------------------------------------------------------------
     def build_streetlight(M):
-        """v4-D10: PARAMS['streetlights'] 목록(x, y, base_z)으로 다본 배치."""
+        """v4-D10: places several streetlights from the PARAMS['streetlights'] list (x, y, base_z)."""
         sl = PARAMS["streetlight"]
         for k, (x, y, bz) in enumerate(PARAMS["streetlights"]):
             base = f"/World/Scene05/Streetlight_{k}"
@@ -1224,9 +1235,10 @@ def main():
                            (sl["head"], sl["head"], 0.12), M["lamp"])
 
     def build_surround(M):
-        """v4-A4: 광장 전 둘레 0.51 m 무방비 낙하 종결.
-        잔디 뱅크(상면 −0.26)로 0.51 → 0.26 + 0.25 두 단으로 분할하고,
-        북측은 건물 앞 포장 에이프런으로 대체해 건물 접지(B-6)도 개선한다."""
+        """v4-A4: terminates the 0.51 m unguarded fall around the whole plaza.
+        A grass berm (top face −0.26) splits 0.51 into two steps of 0.26 + 0.25, and
+        on the north side a paved apron in front of the building replaces it, which
+        also improves the building grounding (B-6)."""
         bm = PARAMS["berm"]
         for tag, x0, x1, y0, y1 in PARAMS["berms"]:
             sc.add_box(stage, f"/World/Scene05/Berm_{tag}",
@@ -1243,43 +1255,48 @@ def main():
                    M["plaza_light"], collider=True)
 
     def planter_no_stake(M, prefix, cx, cy, base_z, size=None):
-        """[v5 판정 반영] 화단 + 지지대 없는 성목.
+        """[v5 judgment applied] Planter + mature tree without stakes.
 
-        v4-B3 '나무 삼각 지지대 제거' 공통 수정이 scene01/03/04 에만 반영되고
-        scene05 만 누락돼(stage_lookup·side_arc·preset_h0.3_d10 에 지지대 노출)
-        다른 4씬과 일관성이 깨졌다. scene05 는 나무를 sc.build_planter 가
-        내부에서 심는데 이 함수는 stake 인자를 전달하지 않으므로,
-        화단만 먼저 세우고(tree_mtls=None) 나무는 직접 sc.build_tree 로 심어
-        지지대 치수를 0에 근접시켜 무력화한다(scene03/04 와 동일 규약).
-        (제안: scene_common.build_tree/build_planter 에 stakes=False 인자 추가)
+        The shared v4-B3 fix "remove the triangular tree stakes" was applied only to
+        scene01/03/04 and missed scene05 (stakes were visible in stage_lookup·side_arc·
+        preset_h0.3_d10), breaking consistency with the other 4 scenes. In scene05 the
+        tree is planted inside sc.build_planter, and that function does not forward a
+        stake argument, so the planter is built first (tree_mtls=None) and the tree is
+        planted directly with sc.build_tree, with the stake dimensions driven to nearly
+        zero to neutralise them (the same convention as scene03/04).
+        (Proposal: add a stakes=False argument to scene_common.build_tree/build_planter.)
         """
         kw = {} if size is None else dict(size=size)
         sc.build_planter(stage, prefix, cx, cy, base_z,
                          M["granite_dark"], M["grass"], tree_mtls=None, **kw)
-        # build_planter 기본 grass_h=0.40 상면에 식재 (내부 호출과 동일 높이)
+        # planted on the build_planter default grass_h=0.40 top face (same height as the internal call)
         sc.build_tree(stage, prefix, cx, cy, base_z + 0.40,
                       M["wood"], M["canopy_a"], M["canopy_b"],
                       stake_r=0.004, stake_h=0.02, stake_off=0.2)
 
     def build_backdrop_shrubs(M):
-        """[v6 판정 ㉠] 배후 관목 완충대 — 낮춘 아크벽(+0.70) 뒤 마당에 심는
-        관목 밴드. 목적 ① 마당→무대 1.15 m 낙차 접근 억제(벽 인하분 대체),
-        ② 무대 뒤가 '콘크리트 옹벽'이 아니라 **녹지**로 읽히게(개방감).
+        """[v6 judgment (i)] Backdrop shrub buffer — a shrub band planted in the yard
+        behind the lowered arc wall (+0.70). Purpose ① deter access to the 1.15 m
+        yard-to-stage drop (replacing the height taken off the wall), ② make the area
+        behind the stage read as **greenery** rather than a "concrete retaining wall"
+        (openness).
 
-        [v7 판정 §4 잔여1] 구 구현(편평 타원체 rad 0.42·h 1.10 1열 + grass
-        텍스처 uv 1.2 · spacing 0.62 등간격)이 **"이끼 낀 바위 등간격 열"** 로
-        렌더됐다(scene04 v6 verge 와 동일 실패 모드). scene04 W-4 해법 이식:
-          · 상수색 tuft 3종(텍스처 폐기) — '암괴 요철' 신호가 원천 제거된다.
-          · 큰 타원체 1개 → **작은 로브 3~4개의 세로 스택**. 개체(로브) 높이는
-            0.5 m 이하(판정 권고 ①)이면서 군락 상단은 1.22 m 를 유지해
-            "아크벽(+0.70) 위로 녹지" 라는 v6 달성분이 그대로 남는다.
-          · 3열 × 열별 step + 간격 지터 ±35 % + 결측 12 % + 로브별 위치/크기
-            지터 → 등간격 도열 소멸(§3).
-        좌표는 모듈 레벨 `backdrop_instances()` 단일 출처(검산기와 공유).
+        [v7 judgment §4 remaining 1] The old implementation (one row of flattened
+        ellipsoids rad 0.42·h 1.10 + grass texture uv 1.2 · even spacing 0.62) rendered
+        as **"an even row of mossy boulders"** (the same failure mode as scene04 v6
+        verge). The scene04 W-4 solution is ported:
+          · 3 constant-colour tufts (texture dropped) — the "rock relief" cue is removed at source.
+          · one big ellipsoid → **a vertical stack of 3~4 small lobes**. Each lobe stays
+            at 0.5 m or less (judgment recommendation ①) while the clump top holds at
+            1.22 m, so the v6 gain "greenery above the arc wall (+0.70)" survives intact.
+          · 3 rows × a different step per row + spacing jitter ±35 % + 12 % dropouts +
+            per-lobe position/size jitter → the even-row look is gone (§3).
+        The coordinates come from the single source `backdrop_instances()` at module
+        level (shared with the checker).
         """
-        # [v8 핫픽스] (r,k,j) 3중 키가 130건 중복(지터·결측 후 k 재사용) →
-        #   같은 프림 경로에 add_sphere 2회 = AddTranslateOp 충돌로 조립 크래시.
-        #   전역 순번(idx) 명명으로 교체. v2 씬이라 SMOKE 부재 — RT에서 발견됨.
+        # [v8 hotfix] the (r,k,j) triple key collided 130 times (k reused after jitter/dropout) ->
+        #   add_sphere twice on the same prim path = an AddTranslateOp clash, crashing assembly.
+        #   replaced with global-index (idx) naming. A v2 scene has no SMOKE - found in RT.
         n = 0
         for idx, (px, py, pz, ax, ay, az, r_i, k, j) in \
                 enumerate(backdrop_instances()):
@@ -1292,10 +1309,10 @@ def main():
 
     def build_dressing(M):
         b = PARAMS["bowl"]
-        # 화단 2 (림 주변)
+        # 2 planters (around the lip)
         for name, cx, cy in PARAMS["planters"]:
             planter_no_stake(M, f"/World/Scene05/Planter_{name}", cx, cy, 0.0)
-        # v4-D8 립 둘레 가로수 열 (r=9.6 원주, 45° 간격)
+        # v4-D8 tree row around the lip (r=9.6 circle, 45 deg spacing)
         rp = PARAMS["ring_planter"]
         for k, adeg in enumerate(PARAMS["ring_planters"]):
             a = math.radians(adeg)
@@ -1303,23 +1320,23 @@ def main():
                              b["cx"] + rp["r"] * math.cos(a),
                              b["cy"] + rp["r"] * math.sin(a), rp["base_z"],
                              size=rp["size"])
-        # v4-B4/A4 광장 둘레 생울타리 (어긋난 3장 → 둘레 5조각, 개구 3곳)
+        # v4-B4/A4 hedge around the plaza (3 misaligned pieces -> 5 perimeter pieces, 3 openings)
         for j, (x0, y0, x1, y1) in enumerate(PARAMS["hedges"]):
             sc.build_hedge(stage, f"/World/Scene05/Hedge_{j}", x0, y0, x1, y1,
                            PARAMS["hedge_h"], mtl=M["hedge"])
-        # [v7 판정 §4 잔여3] 서측 볼라드 — 장식 열 10본(간격 2.67 m, 폭 24 m)
-        #   → **진입축 게이트 4본**(규정 간격 1.5 m, 폭 4.5 m) · 도장 강재.
-        #   v5.1 §2 "차량 진입 우려 지점만 · 간격 1.5 m 내외 · 장식 열 제거".
+        # [v7 judgment §4 remaining 3] west bollards - a decorative row of 10 (spacing 2.67 m, width 24 m)
+        #   -> **4 gate posts on the entry axis** (regulation spacing 1.5 m, width 4.5 m) · painted steel.
+        #   v5.1 §2 "only where vehicle intrusion is a concern · spacing around 1.5 m · remove decorative rows".
         bl = PARAMS["bollards"]
         y0 = -bl["spacing"] * (bl["n"] - 1) / 2.0
         for k in range(bl["n"]):
             sc.build_bollard(stage, f"/World/Scene05/Bollard_{k}", bl["x"],
                              y0 + bl["spacing"] * k, bl["base_z"],
                              mtl=M["bollard"])
-        # [v5.2 사용자] 벤치 링 제거 — "개방감 악화, 깔끔하게 제거"
-        #   (bench_ring PARAMS 는 이력 보존용으로 잔존, 빌드는 생략)
-        # v4-D1 [최우선] 무대 배후벽(스테이지 셸) 2조각 — 보울이 있을 때만
-        #   [v6 판정 ㉠] 상면 1.40 → 0.70 (PARAMS 주석). 낮춘 방호는 관목 완충대로.
+        # [v5.2 user] bench ring removed - "hurts openness, remove it cleanly"
+        #   (the bench_ring PARAMS stay for the record; the build is skipped)
+        # v4-D1 [top priority] stage backdrop wall (stage shell), 2 pieces - only when the bowl exists
+        #   [v6 judgment (i)] top face 1.40 -> 0.70 (see the PARAMS comment). The lost guarding goes to the shrub buffer.
         sh = PARAMS["shell"]
         if cfg["hazard_stairs"]:
             for j, (a0, a1) in enumerate(sh["arcs"]):
@@ -1328,7 +1345,7 @@ def main():
                                    a0, a1, sh["seg"], sh["top_z"],
                                    sh["base_z"], M["granite_dark"])
             build_backdrop_shrubs(M)
-        # v4-D2 조명 타워 2 (기둥 + 헤드 3)
+        # v4-D2 2 lighting towers (mast + 3 heads)
         tw = PARAMS["tower"]
         for k, (tx, ty) in enumerate(PARAMS["towers"]):
             sc.add_cylinder(stage, f"/World/Scene05/Tower_{k}/Pole",
@@ -1338,13 +1355,13 @@ def main():
             for hi, hz in enumerate(tw["head_z"]):
                 sc.add_box(stage, f"/World/Scene05/Tower_{k}/Head_{hi}",
                            (tx, ty, tw["base_z"] + hz), tw["head"], M["gear"])
-        # [v6 판정 ㉡] v4-D3 스피커 스택 2 제거 — "무대 위 정체불명 회색 모놀리스".
-        #   그릴·거치대·기울기 없는 무텍스처 회색 판 2기가 무대 좌우에 서서
-        #   v5.2 §6 "이게 없으면 장면 판독이 안 되는가" 를 통과하지 못한다.
-        #   근린공원 야외무대에 상설 스피커는 관행도 아니다(행사 시 반입).
-        #   → 빌드 생략. PARAMS["speakers"]/["speaker"] 는 이력 보존용으로 잔존
-        #     (벤치 링 제거와 동일 규약).
-        # v4-D7 입구 게이트 + 사인 (−X 접근축)
+        # [v6 judgment (ii)] the 2 v4-D3 speaker stacks are removed - "unidentifiable grey monoliths on stage".
+        #   two untextured grey slabs with no grille, mount or tilt stood left and right of the stage,
+        #   failing the v5.2 §6 test "would the scene be unreadable without it?".
+        #   permanent speakers are not the norm on a neighbourhood-park stage either (brought in per event).
+        #   -> build skipped. PARAMS["speakers"]/["speaker"] stay for the record
+        #     (the same convention as the bench-ring removal).
+        # v4-D7 entrance gate + sign (−X approach axis)
         gt = PARAMS["gate"]
         for tag, sgn in (("P", 1.0), ("N", -1.0)):
             sc.add_cylinder(stage, f"/World/Scene05/Gate/Post_{tag}",
@@ -1357,28 +1374,28 @@ def main():
                     gt["base_z"] + (gt["lintel_z0"] + gt["lintel_z1"]) / 2.0),
                    (gt["lintel_t"], 2.0 * gt["lintel_y"],
                     gt["lintel_z1"] - gt["lintel_z0"]), M["granite_dark"])
-        # v4-B6 건물 R 출입 캐노피 (에이프런 위)
+        # v4-B6 entrance canopy for building R (over the apron)
         ec = PARAMS["entry_canopy"]
         sc.build_canopy(stage, "/World/Scene05/EntryCanopy", ec["x0"],
                         ec["x1"], ec["y0"], ec["y1"], ec["z_roof"],
                         ec["post_r"], M["parapet"], M["pole"],
                         roof_t=ec["roof_t"], base_z=ec["base_z"])
-        # 가로등 5
+        # 5 streetlights
         build_streetlight(M)
-        # 원경 건물 2동 (R/C)
+        # 2 distant buildings (R/C)
         for key, bd in PARAMS["buildings"].items():
             sc.build_building(stage, f"/World/Scene05/Building_{key}", bd,
                               M["brick"], M["glass"], M["parapet"])
 
     # -------------------------------------------------------------------
-    # 단서 토글 (기본 전부 False — 설비 전무 정체성). 선택 구현.
+    # cue toggles (all default False - the "no facilities" identity). Optional implementation.
     # -------------------------------------------------------------------
     def build_cues(M):
         b = PARAMS["bowl"]
-        # cue_railing: 립 둘레 부분 호 난간 — 포스트 체인 + 얇은 아크 상단 레일.
+        # cue_railing: partial-arc railing around the lip - post chain + a thin arc top rail.
         if cfg.get("cue_railing"):
             r_post = 7.9
-            a0, a1 = 120.0, 240.0            # −X 관람측 부분 호
+            a0, a1 = 120.0, 240.0            # partial arc on the −X audience side
             nposts = 9
             rail_h = 0.9
             for k in range(nposts):
@@ -1387,15 +1404,15 @@ def main():
                 py = b["cy"] + r_post * math.sin(a)
                 sc.add_cylinder(stage, f"/World/Scene05/Rail/Post_{k}",
                                 (px, py, rail_h / 2.0), 0.02, rail_h, M["rail"])
-            # 상단 레일: 얇은 아크 박스 링(세그 원기둥 체인 대용 — rotZ 미노출 회피)
+            # top rail: a thin arc box ring (stands in for a segmented cylinder chain - avoids exposing rotZ)
             sc.build_arc_steps(stage, "/World/Scene05/Rail/Top", b["cx"], b["cy"],
                                r_post - 0.03, r_post + 0.03, a0, a1, 12,
                                rail_h, rail_h - 0.04, M["rail"], collider=False)
-        # cue_tactile: −X 접근 경고 점자띠 (립 밖)
+        # cue_tactile: −X approach warning tactile strip (outside the lip)
         if cfg.get("cue_tactile"):
             sc.build_tactile(stage, "/World/Scene05/Tactile",
                              -2.3, -1.9, -2.0, 2.0, M["tactile"], z=0.0)
-        # cue_nosing: 각 티어 상연에 곡선 단코 논슬립 아크 밴드
+        # cue_nosing: curved non-slip nosing arc band on each tier top edge
         if cfg.get("cue_nosing"):
             nos = sc.make_pbr(stage, "/World/Looks/Nosing",
                               diffuse_color=mp["nosing_color"],
@@ -1403,16 +1420,17 @@ def main():
             for i, t in enumerate(b["tiers"], 1):
                 sc.build_arc_steps(stage, f"/World/Scene05/Nosing_{i}",
                                    b["cx"], b["cy"], t["r_out"] - 0.06, t["r_out"],
-                                   b["a0"], b["a1"], b["seg"],  # [v5] 반원 추종
+                                   b["a0"], b["a1"], b["seg"],  # [v5] follows the half-round
                                    t["top_z"] + 0.003,
                                    t["top_z"] - 0.02, nos, collider=False)
 
     # -------------------------------------------------------------------
-    # [v5 공통 레이어] 한글 사인 (cue_sign)
+    # [v5 shared layer] Korean sign (cue_sign)
     # -------------------------------------------------------------------
     def build_signs():
-        """PARAMS['signs'] 목록을 sc.build_sign 으로 배치.
-        경고/안내판은 낙차 인접 시설 단서(계열①) — 좌표 검산은 PARAMS 주석."""
+        """Places the PARAMS['signs'] list with sc.build_sign.
+        Warning/info boards are a facility cue adjacent to a drop (family ①) — the
+        coordinate check is in the PARAMS comment."""
         back = sc.make_pbr(stage, "/World/Looks/SignBack",
                            diffuse_color=(0.16, 0.17, 0.18),
                            metallic=0.6, roughness_const=0.5)
@@ -1423,7 +1441,7 @@ def main():
             sc.build_sign(stage, f"/World/Scene05/Sign_{tag}", cx, cy, bz,
                           yaw, panel, w=w, h=h, back_mtl=back)
 
-    # ── 씬 조립 ──
+    # ── scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
     M = setup_materials()
     hazard = cfg["hazard_stairs"]
@@ -1432,23 +1450,23 @@ def main():
     if hazard:
         build_bowl(M)
         build_entry(M)
-        build_halfbowl_finish(M)        # [v5 채택] 반원 절단 마감·배후 마당
+        build_halfbowl_finish(M)        # [v5 adopted] half-round cut finish · back yard
         if cfg["cue_material_break"]:
             build_lip(M)
     build_ground(M)
     build_ground_kit(M)             # [W2-D] both arms — GT-E4 twin parity
-    build_surround(M)               # v4-A4: 광장 둘레 종결 (상시 — 보행 안전)
+    build_surround(M)               # v4-A4: plaza perimeter termination (always - pedestrian safety)
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
         if hazard:
-            build_seat_strips(M)    # v4-D4: 티어가 있을 때만
+            build_seat_strips(M)    # v4-D4: only when tiers exist
     build_cues(M)
     if cfg.get("cue_sign"):
-        build_signs()               # [v5 공통 레이어]
+        build_signs()               # [v5 shared layer]
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])
 
-    # ── 카메라 + 렌더 모드 ──
+    # ── camera + render mode ──
     def look_from(eye, tgt):
         set_camera_view(eye=[float(e) for e in eye],
                         target=[float(t) for t in tgt])
@@ -1468,11 +1486,11 @@ def main():
 
     VIEWS = build_views()
     _v0 = VIEWS["plaza_approach"]
-    look_from(_v0["eye"], _v0["tgt"])              # 시작 카메라 = 미장센
+    look_from(_v0["eye"], _v0["tgt"])              # start camera = mise-en-scene
 
     os.makedirs(LOOKCHECK_DIR, exist_ok=True)
 
-    # ── 자동 캡처 모드 (headless) ──
+    # ── auto capture mode (headless) ──
     if capture_mode:
         sc.capture_pipeline(simulation_app, VIEWS,
                             os.path.join(LOOKCHECK_DIR, "auto"),
@@ -1480,7 +1498,7 @@ def main():
         simulation_app.close()
         return
 
-    # ── GUI 룩 체크 모드 (기본) ──
+    # ── GUI look check mode (default) ──
     from omni.kit.viewport.utility import get_active_viewport, \
         capture_viewport_to_file
 

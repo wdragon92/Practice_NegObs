@@ -1,74 +1,83 @@
 # -*- coding: utf-8 -*-
 """
-scene11_footbridge_stairs.py — NegObs 인공씬 11호: 보도육교(과선교) 철제 계단
-(Isaac Sim 4.5) · v5 신규(구 scene11_grating_fireescape → scenes/archive_v3/)
+scene11_footbridge_stairs.py - NegObs synthetic scene 11: steel stairs of a
+pedestrian overpass (Isaac Sim 4.5) · new in v5 (old scene11_grating_fireescape → scenes/archive_v3/)
 
-유형    : R6 왕복 6차로 위 보도육교 철제 계단 (개방 라이저·그레이팅 투과 축 계승)
-사양서  : Docs/briefs/multi_scene_brief_v5.md §R6 + 공통 레이어 절
-공통    : scene_common.py (build_open_riser_stairs / build_rot_group /
+Type    : R6 steel footbridge stairs over 6 lanes (inherits the open-riser ·
+          grating see-through axis)
+Spec    : Docs/briefs/multi_scene_brief_v5.md §R6 + the shared-layer section
+Shared  : scene_common.py (build_open_riser_stairs / build_rot_group /
           build_railing_line / build_canopy / build_sign / build_tactile)
-세계관  : scene06_overpass_spiral.py 와 육교 규약 공유
-          (차도 아스팔트 0.045 · 연석 0.15 · 보도 paving_interlock · 가로등)
+World   : shares the footbridge convention with scene06_overpass_spiral.py
+          (roadway asphalt 0.045 · kerb 0.15 · sidewalk paving_interlock · streetlights)
 
 ────────────────────────────────────────────────────────────────────────────
-위험 본질 (= 규정 미달의 현실)
-  왕복 6차로를 건너는 보도육교. 상판(z=+5.5)에서 동측 철제 계단 2련(22단×2,
-  중간참)이 보도로 내려간다. 디딤판은 그레이팅(슬릿 3) — 라이저가 없어
-  **아래가 그대로 투시**되고 정오광에서 슬릿 그림자가 노면에 스트라이프를
-  깔아 단코 경계를 지운다.
-  주 결함 — **동측 중간참(z=2.75)의 외측 난간 하부에 킥플레이트가 없다.**
-  로봇 눈높이(h0.3)에서는 난간 가로대가 시야 위로 지나가고 하부 0~0.35 m 대역이
-  통째로 열려 있어, 참 밖 2.755 m 낙차가 "바닥이 이어진 것"으로 읽힌다.
-  서측 중간참은 같은 기하에 킥플레이트가 **있어** 규정 준수 대조군이 된다
-  (동일 기하 × 설비 유무 = 단서 학습용 대비쌍).
-  셋째 — 상판·계단 상부의 측면은 차도면(−0.15)까지 5.65 m 낙차이며, 방음
-  패널이 시야를 막아 낙차의 깊이 단서(바닥 텍스처)가 소거된다.
+Hazard (= the reality of falling short of the code)
+  A footbridge crossing 6 lanes. From the deck (z=+5.5) two east steel flights
+  (22 steps × 2, with a mid landing) descend to the sidewalk. The treads are
+  grating (3 slits) - with no riser **you see straight through to below**, and in
+  noon light the slit shadows lay stripes on the road that erase the nosing edge.
+  Main defect - **the outer railing on the east mid landing (z=2.75) has no
+  kickplate below it.** At robot eye height (h0.3) the railing bars pass above the
+  field of view and the whole 0~0.35 m band below is open, so the 2.755 m drop
+  past the landing reads as "the floor continues".
+  The west mid landing has the same geometry but **does** have a kickplate, making
+  it the code-compliant control (same geometry × fitting present/absent = a
+  contrast pair for cue learning).
+  Third - the sides of the deck and the upper stair drop 5.65 m to the road
+  surface (−0.15), and the noise panels block the view, erasing the depth cue of
+  the drop (the floor texture).
 
-GT 낙차 불변 원칙: cue_* 토글은 난간·패널·킥플레이트·점자·사인 프림만 켜고
-  끈다. 상판·참·계단(riser 0.125 / tread 0.32 / 22단×2)의 트랜스폼은 불변.
+GT drop invariance: the cue_* toggles only switch railing · panel · kickplate ·
+  tactile · sign prims on and off. The transforms of the deck · landings · stairs
+  (riser 0.125 / tread 0.32 / 22 steps × 2) never change.
 
 ────────────────────────────────────────────────────────────────────────────
-보행 연속성 자가 검증표 (서측 보도 → 상행 → 상판 → 하행 → 동측 보도)
+Walking-continuity self-check table (west sidewalk → up → deck → down → east sidewalk)
 
-  #  구간                     좌표(월드, m)                          단차
+  #  section                  coordinates (world, m)                 step
   ─  ───────────────────────  ─────────────────────────────────────  ──────
-  1  서측 보도 접근           (x −45…−30.88, y ±0.9, z −0.005)       —
-  2  서측 계단 B 22단 상행    x −30.88…−23.84, z 0.000 → 2.750       0.125/단
-  3  서측 중간참              x −23.84…−22.04, z 2.750 (킥플레이트 有) 0.000
-  4  서측 계단 A 22단 상행    x −22.04…−15.00, z 2.750 → 5.500       0.125/단
-  5  서측 상부 참             x −15.00…−13.20, z 5.500               0.000
-  6  상판 종주                x −13.20…13.20, y −1.2…1.2, z 5.500    —
-     (차도 x −10.5…10.5 위 유효고 = 5.10 −(−0.15) = 5.25 m)
-  7  동측 상부 참             x 13.20…15.00, z 5.500                 0.000
-  8  동측 계단 A 22단 하행    x 15.00…22.04, z 5.500 → 2.750         0.125/단
-  9  동측 중간참              x 22.04…23.84, z 2.750 (킥플레이트 無)  0.000
- 10  동측 계단 B 22단 하행    x 23.84…30.88, z 2.750 → 0.000         0.125/단
- 11  동측 보도 탈출           (x 30.88…45, y ±0.9, z −0.005)         0.005
+  1  W sidewalk approach      (x −45…−30.88, y ±0.9, z −0.005)       —
+  2  W flight B 22 steps up   x −30.88…−23.84, z 0.000 → 2.750       0.125/step
+  3  W mid landing            x −23.84…−22.04, z 2.750 (kickplate Y) 0.000
+  4  W flight A 22 steps up   x −22.04…−15.00, z 2.750 → 5.500       0.125/step
+  5  W top landing            x −15.00…−13.20, z 5.500               0.000
+  6  deck run                 x −13.20…13.20, y −1.2…1.2, z 5.500    —
+     (clearance over the roadway x −10.5…10.5 = 5.10 −(−0.15) = 5.25 m)
+  7  E top landing            x 13.20…15.00, z 5.500                 0.000
+  8  E flight A 22 steps down x 15.00…22.04, z 5.500 → 2.750         0.125/step
+  9  E mid landing            x 22.04…23.84, z 2.750 (kickplate N)   0.000
+ 10  E flight B 22 steps down x 23.84…30.88, z 2.750 → 0.000         0.125/step
+ 11  E sidewalk exit          (x 30.88…45, y ±0.9, z −0.005)         0.005
 
-  총 상승 = 총 하강 = 5.500 m (= 44 × 0.125). 접속부 단차 ≤ 0.005 m.
-  경사 = atan(0.125/0.32) = 21.34° — 완경사 육교 계단(2R+T = 0.570).
+  total rise = total fall = 5.500 m (= 44 × 0.125). Step at the joints ≤ 0.005 m.
+  slope = atan(0.125/0.32) = 21.34° - a gentle footbridge stair (2R+T = 0.570).
 
 ────────────────────────────────────────────────────────────────────────────
-개구 4박스 규약: 지면을 관통하는 공동이 없다(상판·계단 전부 지상 구조물).
-  보도/차도 슬래브는 연속 박스로 깔아도 §A-3 위배가 아니다.
+4-box opening convention: no cavity pierces the ground (deck and stairs are all
+  above-ground structures). Sidewalk/roadway slabs may be laid as continuous boxes
+  without breaching §A-3.
 
-카메라 축 주석: 브리프 R6 은 "보도 접근 그리드"를 지시했으나, grid_views 는
-  **낙차 경계를 프레임 정면에 두는** 규약(eye_x = 원점 −d)이라 지상 접근으로
-  잡으면 로봇 정면이 상승 계단이 되어 낙차 GT 가 프레임에서 사라진다.
-  → 그리드는 **상판 종주축(+X, 원점 = 동측 계단 낙차 시작 x=15.0, z 5.5)** 으로
-  잡고, 브리프가 요구한 보도 접근은 미장센 `sidewalk_approach` 로 제공한다.
-  (판정 1순위 = 로봇 h0.3 에서 위험 은닉이 성립하는가 — 브리프 v5 공통 레이어 4)
+Camera axis note: brief R6 called for a "sidewalk approach grid", but grid_views
+  follows the convention of **putting the drop boundary head-on in frame**
+  (eye_x = origin −d), so taken as a ground-level approach the robot would face
+  the ascending stair and the drop GT would leave the frame.
+  → the grid is therefore taken on the **deck run axis (+X, origin = the east
+  stair drop start x=15.0, z 5.5)**, and the sidewalk approach the brief asked for
+  is provided as the mise-en-scene cut `sidewalk_approach`.
+  (Judging priority 1 = does hazard concealment hold at the robot's h0.3 - brief
+  v5 shared layer 4)
 
-실행 (GUI 룩 체크 — 기본):
+Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
     export PYTHONNOUSERSITE=1
     python scene11_footbridge_stairs.py
 
-자동 캡처 (headless):  NEGOBS_CAPTURE=1 python scene11_footbridge_stairs.py
-스모크(부팅 전 조기종료): NEGOBS_SMOKE=1 python scene11_footbridge_stairs.py
+Auto capture (headless):  NEGOBS_CAPTURE=1 python scene11_footbridge_stairs.py
+Smoke (early exit before boot): NEGOBS_SMOKE=1 python scene11_footbridge_stairs.py
 
-좌표계: Z-up, m. 보행축·상판축 +X · 차도축 +Y(왕복 6차로) · 보도 상면 −0.005.
+Coordinates: Z-up, m. Walk/deck axis +X · roadway axis +Y (6 lanes) · sidewalk top face −0.005.
 """
 
 import os
@@ -84,16 +93,16 @@ import ground_kit as gk
 
 
 # ===========================================================================
-# [A] SCENE_CONFIG — 표준 7키.
+# [A] SCENE_CONFIG - the standard 7 keys.
 # ===========================================================================
 SCENE_CONFIG = {
-    "hazard_stairs":      True,   # False → 상판·계단 제거(평탄 보도 대조군)
-    "cue_railing":        True,   # 계단·참 파이프 난간 + 상판 방음 패널
-    "cue_tactile":        False,  # [v5.2 사용자] 점자블록 현실에선 드묾 — 기본 OFF(소거 실험용 경로 유지)   # 도시 관행 씬 — 승강부 점자띠 기본 ON(브리프 v5)
-    "cue_material_break": True,   # 연석·차선 도색·계단 하부 노면 밴드
-    "cue_nosing":         True,   # 그레이팅 단코 황색 논슬립 띠(육교 관행)
-    "cue_sign":           True,   # 한글 사인 sign_info(육교 안내) — 공통 레이어
-    "cue_scene_dressing": True,   # 차도·버스 쉘터·가로등·가로수·원경 건물
+    "hazard_stairs":      True,   # False -> deck and stairs removed (flat sidewalk control)
+    "cue_railing":        True,   # pipe railings on stairs and landings + deck noise panels
+    "cue_tactile":        False,  # [v5.2 user] tactile paving is rare in reality - default OFF (ablation path kept)   # urban-practice scene - stair head/foot tactile bands default ON (brief v5)
+    "cue_material_break": True,   # kerb · lane paint · road band under the stair
+    "cue_nosing":         True,   # yellow non-slip nosing band on the grating (footbridge practice)
+    "cue_sign":           True,   # Korean sign sign_info (footbridge guidance) - shared layer
+    "cue_scene_dressing": True,   # roadway · bus shelter · streetlights · street trees · distant buildings
 }
 
 
@@ -101,65 +110,65 @@ SCENE_CONFIG = {
 # [B] PARAMS
 # ===========================================================================
 PARAMS = dict(
-    # --- 철제 계단 2련 (브리프 R6: 폭 1.8, 22단×2, 중간참, 그레이팅) ---
-    #   riser 0.125 = 5.5 / 44 (상판고를 44단으로 균등 분할 → 접속 단차 0).
-    #   tread 0.32 → 련당 run 7.04, 경사 21.34°, 2R+T = 0.570.
-    #   slits 3 : 디딤판을 4조각으로 쪼개 0.02 m 틈 3개 — 하부 투시·격자 그림자.
+    # --- two steel flights (brief R6: width 1.8, 22 steps x 2, mid landing, grating) ---
+    #   riser 0.125 = 5.5 / 44 (deck height split evenly into 44 steps -> zero step at the joints).
+    #   tread 0.32 -> run 7.04 per flight, slope 21.34 deg, 2R+T = 0.570.
+    #   slits 3 : the tread is cut into 4 pieces with three 0.02 m gaps - see-through below, grid shadows.
     stair=dict(riser=0.125, tread=0.32, n=22, y0=-0.90, y1=0.90,
                tread_t=0.045, gap=0.025, slits=3),
-    # --- 동측(주 위험측) 계단 배치 ---
-    #   상부 참 → 계단 A → 중간참 → 계단 B → 보도
-    #   참(상부·중간)은 상판과 같은 두께(deck.thick 0.40)의 강상판 박스로 만든다.
-    #   kickplate=False 가 이 씬의 주 결함(브리프 R6).
+    # --- east (main hazard side) stair layout ---
+    #   top landing -> flight A -> mid landing -> flight B -> sidewalk
+    #   the landings (top and mid) are steel-deck boxes as thick as the bridge deck (deck.thick 0.40).
+    #   kickplate=False is this scene's main defect (brief R6).
     east=dict(pad_x0=13.20, pad_x1=15.00, a_x0=15.00,
               mid_len=1.80, z_top=5.50, pad_y0=-1.20, pad_y1=1.20,
               kick_h=0.14, kickplate=False),
-    # --- 서측(규정 준수 대조군) — rot_group 180° 로 좌우 반전 ---
-    #   pivot (−7.5, 0) · 180° : 로컬 (x,y) → 월드 (−15 − x, −y).
-    #   로컬 x 0 → 월드 −15.00(상부 참 서단), 로컬 x 15.88 → 월드 −30.88(하단).
+    # --- west (code-compliant control) - mirrored with rot_group 180 deg ---
+    #   pivot (−7.5, 0) · 180 deg : local (x,y) -> world (−15 − x, −y).
+    #   local x 0 -> world −15.00 (top landing west end), local x 15.88 -> world −30.88 (foot).
     west=dict(pivot=(-7.5, 0.0), rot=180.0, kickplate=True),
-    # --- 육교 상판 (폭 2.4, x축 종주) ---
+    # --- footbridge deck (width 2.4, runs along x) ---
     deck=dict(x0=-13.20, x1=13.20, y0=-1.20, y1=1.20, z_top=5.50, thick=0.40,
               panel_h=1.80, panel_t=0.07, rail_z=1.95, rail_r=0.035),
-    #   [v6 판정 ⑤] 구 방음 난간 = **무분절 대형 판재 1매**(길이 26.4 m).
-    #   지주·조인트·상단 캡·투시 구간이 전무해 상판이 콘크리트 벙커 복도로
-    #   읽혔고, 그림자면이 그리드 컷의 30~45 %를 순흑으로 만들었다(④).
-    #   → 지주 2.2 m 분절 + **방음판/개방 베이 교대**. make_pbr 에 투명도
-    #   입력이 없으므로(“투명 폴리카보네이트”를 그대로 만들 수 없다) 투시
-    #   구간은 **세로 살 개방 베이**로 구현한다 — 투광·투시 목적은 동일하고
-    #   국내 육교의 실제 관행(부분 방음판)에도 부합한다.
-    #   post_h 1.98 = 상단 가로대 중심 rail_z 1.95 + 파이프 반경 0.035 → 지주가
-    #   가로대를 **받치는** 높이(구 구성처럼 레일이 떠 보이지 않게).
+    #   [v6 ruling (5)] the old noise railing = **one large unbroken panel** (26.4 m long).
+    #   with no posts, joints, top cap or see-through bays the deck read as a concrete
+    #   bunker corridor, and its shadow side turned 30~45 % of the grid cuts pure black ((4)).
+    #   -> posts every 2.2 m + **alternating noise-panel / open bays**. make_pbr has no
+    #   transparency input (a literal "clear polycarbonate" cannot be built), so the
+    #   see-through stretch is built as **open bays with vertical balusters** - the light
+    #   and sight purpose is identical, and it matches real Korean footbridge practice (partial noise panels).
+    #   post_h 1.98 = top rail centre rail_z 1.95 + pipe radius 0.035 -> the post
+    #   **carries** the rail (so the rail does not float as in the old build).
     rail_bay=dict(post_t=0.10, post_h=1.98, n_bay=12, joint=0.05,
                   kick_h=0.16, cap_h=0.07, cap_over=0.03,
                   baluster_r=0.018, n_baluster=6),
-    #   지지 기둥 — 연석(x ±10.5…11.1) 바깥 보도에 착지. 상판 저면까지.
+    #   support piers - they land on the sidewalk outside the kerb (x +-10.5…11.1). Up to the deck soffit.
     deck_posts=dict(xs=(-11.80, 11.80), y=0.0, r=0.40, z_bot=-0.30,
                     cap_sx=1.0, cap_sy=2.8, cap_h=0.36),
-    # --- 차도 (왕복 6차로, y축) ---
+    # --- roadway (6 lanes both ways, along y) ---
     road=dict(x0=-10.50, x1=10.50, y0=-60.0, y1=60.0, z_top=-0.15, thick=0.60),
-    #   차선: 중앙 황색 복선 + 편도 3차로 구분 백색 파선 2세트 (= "차선 3" 계열)
+    #   lane lines: double yellow centre + two sets of white dashes splitting 3 lanes each way (= the "3 lanes" family)
     lane=dict(center_xs=(-0.20, 0.20), dash_xs=(-7.10, -3.60, 3.60, 7.10),
               w=0.15, z=-0.142, t=0.02, seg=3.0, gap=5.0, y0=-58.0, y1=58.0),
-    # --- 보도(인터로킹) + 연석 ---
-    #   [v6 판정 C-2] 구 폭 34.5 m 보도는 개방감이 아니라 **공터**였고 잔디판이
-    #   하늘과 직선으로 맞닿았다. 보도를 29.5 m(계단 하단 30.88 + 사인 31.6 +
-    #   벤치 36 을 담는 최소치)로 줄이고 바깥을 식재대 + 가로수 열 + 원경 수목
-    #   띠로 경계한다.
+    # --- sidewalk (interlocking pavers) + kerb ---
+    #   [v6 ruling C-2] the old 34.5 m wide sidewalk read not as openness but as **waste ground**, and the
+    #   grass plate met the sky in a straight line. The sidewalk shrinks to 29.5 m (the minimum that holds
+    #   the stair foot 30.88 + the sign 31.6 + the bench 36) and outside it a planting strip + a street-tree
+    #   row + a distant tree band form the boundary.
     walk=dict(y0=-60.0, y1=60.0, xw0=-40.0, xw1=-10.50, xe0=10.50, xe1=40.0,
               z_top=-0.005, thick=0.50),
     curb=dict(w=0.60, z_top=0.0, thick=0.40),
-    # --- 식재대(보도 바깥 경계) : 화강암 경계석 + 지피 상면 ---
+    # --- planting strip (outer sidewalk boundary) : granite kerbstones + groundcover top ---
     verge=dict(w=2.40, curb_t=0.20, curb_top=0.14, soil_top=0.10,
                y0=-60.0, y1=60.0),
-    # --- 대지 (지평 폐쇄) : 차도 상면(−0.15)보다 1 cm 낮게 ---
+    # --- site ground (closes the horizon) : 1 cm below the road top face (−0.15) ---
     ground=dict(x0=-150.0, x1=150.0, y0=-150.0, y1=150.0, z_top=-0.16,
                 thick=1.40),
-    # --- 난간 (cue_railing) ---
-    #   rail_h 1.10 (육교 기준). 킥플레이트는 참에만 — 동측은 결손(위험).
+    # --- railings (cue_railing) ---
+    #   rail_h 1.10 (footbridge standard). Kickplates on the landings only - missing on the east side (the hazard).
     rail=dict(rail_h=1.10, post_r=0.026, rail_r=0.032, rail_mid_r=0.022,
               rail_mid_drop=0.52, spacing=1.00, y_inset=0.03),
-    # --- 점자블록 (cue_tactile) : 승강부 4개소 ---
+    # --- tactile paving (cue_tactile) : 4 stair head/foot locations ---
     #  [W2-D Sec.12.4] scene11 = registered sites `stair_top` / `stair_foot`,
     #  p = 0.54 (Seoul 2015: 430 of 797 km of footway conforming), statutory
     #  trigger "0.3 m before the first tread / after the last". Sec.12.4 keeps
@@ -189,30 +198,30 @@ PARAMS = dict(
         patches=((11.20, 0.30), (6.30, -0.35)),   # d5 / d10 near windows
         seed=11,
     ),
-    # --- 한글 사인 (cue_sign) : sign_info(육교 안내) 768×512 → w:h = 3:2 ---
-    #   동측 계단 하단 진입부 + 서측 하단. 그리드 시선축(y=0)과 2.6 m 이격.
-    #   [v6 판정 ④ — 원인 규명 완료] `sidewalk_approach`(eye 38,−5,0.9 →
-    #   tgt 26,−0.4,3.2) 프레임 정중앙의 "정체불명 순흑 사각 패널"은 **부유
-    #   결함이 아니라 이 사인의 뒷면**이다. 구 yaw 180° 는 패널 법선을 −X 로
-    #   두므로, 동측 보도(+X)에서 계단으로 접근하는 시점에는 배킹판만 보인다.
-    #   배킹 재질이 M["steel"](0.055,0.058,0.060)이라 순흑 사각형이 됐다.
-    #   → ① 동측 사인 yaw 0(=+X 향, 접근자를 마주봄) / 서측 yaw 180 으로 반전
-    #      ② 배킹을 알루미늄 회색(M["signback"], 0.44)으로 교체
-    #      ③ 시선축(y=0)에서 2.6 m 이격은 유지(회랑 청소 규약).
+    # --- Korean sign (cue_sign) : sign_info (footbridge guidance) 768x512 -> w:h = 3:2 ---
+    #   at the east stair foot approach + the west foot. 2.6 m clear of the grid sight axis (y=0).
+    #   [v6 ruling (4) - cause established] the "unidentified pure-black rectangular panel"
+    #   dead centre of `sidewalk_approach` (eye 38,−5,0.9 -> tgt 26,−0.4,3.2) is **not a
+    #   floating defect but the back of this sign**. The old yaw 180 deg put the panel
+    #   normal on −X, so approaching the stair from the east sidewalk (+X) only the backing shows.
+    #   The backing material was M["steel"](0.055,0.058,0.060), hence a pure-black rectangle.
+    #   -> (1) east sign yaw 0 (= facing +X, toward the approaching viewer) / west flipped to yaw 180
+    #      (2) backing swapped for aluminium grey (M["signback"], 0.44)
+    #      (3) keep the 2.6 m clearance from the sight axis (y=0) (corridor-clearing convention).
     sign=dict(w=0.90, h=0.60, pole_h=2.40,
               spots=((31.60, -2.60, 0.0), (-31.60, 2.60, 180.0))),
-    # --- 드레싱 ---
+    # --- dressing ---
     dress=dict(
-        # 버스 승차대 쉘터 1 (동측 보도) — 그리드 시선축 밖(y −9.6…−5.6)
-        #   [v6 판정 ⑤] 구 구성은 지붕판 + 기둥 4 뿐이라 "카포트"로 읽혔다.
-        #   실물 최소 구성 = 배면 유리벽 + **측벽 2** + 벤치 + **노선도 패널**.
+        # one bus shelter (east sidewalk) - off the grid sight axis (y −9.6…−5.6)
+        #   [v6 ruling (5)] the old build was just a roof slab + 4 posts, so it read as a "carport".
+        #   the real minimum = rear glass wall + **2 side walls** + bench + **route-map panel**.
         shelter=dict(x0=17.0, x1=23.0, y0=-9.60, y1=-5.60, z_roof=2.55,
                      post_r=0.08, bench_y=-8.6, side_t=0.05, side_h=2.20,
                      side_inset=0.9, route_w=0.90, route_h=1.10),
         bus_pole=(24.6, -7.60, 3.20),
         lamps=((16.0, -12.0), (16.0, 12.0), (-16.0, -12.0), (-16.0, 12.0)),
-        # 가로수 열 — [v6 판정 C-2] 식재대(x ±41.2) 위 1열, 간격 7.5 m ±지터.
-        #   보도–잔디 경계를 선으로 만든다. 계단 회랑(y −2.4…2.4)은 비운다.
+        # street-tree row - [v6 ruling C-2] one row on the planting strip (x +-41.2), spacing 7.5 m +- jitter.
+        #   it draws the sidewalk-grass boundary as a line. The stair corridor (y −2.4…2.4) is left empty.
         lamp=dict(pole_h=6.0, pole_r=0.10, arm_len=1.1, arm_r=0.055, head=0.32),
         trees=((41.2, -34.0), (41.2, -26.6), (41.2, -19.2), (41.2, -11.6),
                (41.2, 11.8), (41.2, 19.4), (41.2, 26.8), (41.2, 34.2),
@@ -220,23 +229,23 @@ PARAMS = dict(
                (-41.2, 11.6), (-41.2, 19.2), (-41.2, 26.6), (-41.2, 34.0),
                (14.0, -20.0), (14.0, 20.0), (26.0, -20.0), (26.0, 20.0),
                (-14.0, -20.0), (-14.0, 20.0), (-26.0, -20.0), (-26.0, 20.0)),
-        # [v5.1 §3] 벤치는 가로수 앵커 옆(등간격 금지 · yaw 지터)
+        # [v5.1 §3] benches sit beside street-tree anchors (no even spacing · yaw jitter)
         benches=((38.6, -19.2, 86.0), (-38.6, 19.2, -94.0)),
         bollards=((12.6, -4.0), (12.6, 4.0), (-12.6, -4.0), (-12.6, 4.0)),
-        # 계단 하부 노면 밴드(cue_material_break) — 그레이팅 그림자 대조면
+        # road band under the stair (cue_material_break) - contrast surface for the grating shadows
         band=dict(x0=15.0, x1=31.5, y0=-1.40, y1=1.40, z=0.004, t=0.03),
     ),
-    # [v6 판정 C-2/C-4] 원경 폐쇄 — 수목 실루엣 띠(원경 LOD, 능선형 블록 열)를
-    #   보도 바깥에 깔아 잔디판이 하늘과 직접 만나지 않게 한다. 개체 나무 도열이
-    #   아니므로 "롤리팝 반복"이 생기지 않는다. rows = (x0, x1, h).
-    #   [v7 판정 ⑥-2] 구 구성(세그 7.5 m × 폭 4 m × 높이 4.4~4.8 의 **속 찬 박스**
-    #   1개 + 그 위 작은 블롭 1개)은 상면이 평평한 연속 판이라 `midlanding`·
-    #   `deck_walk` 배경에서 **도색 방음벽(초록 슬래브)** 으로 읽혔다.
-    #   → ① 박스는 하부 임관(林床)만 담당하게 h·base_frac(0.36)로 낮추고
-    #      ② 상단은 세그당 blobs(3)개의 겹치는 수관 블롭이 만든다(높이 0.72~1.16×
-    #         지터 → 스카이라인 톱니) ③ 세그를 5.0 m 로 잘게 쪼개고 x 지터 ±1.7 로
-    #         전후 깊이를 준다 ④ 틴트는 근경 잎(진초록)이 아니라 **대기원근 반영
-    #         저채도 회록 3종**(leaf_far_*) 을 순환시켜 단색 판 인상을 지운다.
+    # [v6 ruling C-2/C-4] distant closure - a tree silhouette band (distant LOD, a ridge-like row of blocks)
+    #   is laid outside the sidewalk so the grass plate never meets the sky directly. It is not a file of
+    #   individual trees, so no "lollipop repetition" appears. rows = (x0, x1, h).
+    #   [v7 ruling (6)-2] the old build (one **solid box**, 7.5 m segment x 4 m wide x 4.4~4.8 high,
+    #   plus one small blob on top) was a continuous plate with a flat top, so against the `midlanding` ·
+    #   `deck_walk` background it read as a **painted noise wall (green slab)**.
+    #   -> (1) the box is lowered to h·base_frac(0.36) so it only carries the understorey,
+    #      (2) the top is made by blobs(3) overlapping canopy blobs per segment (height jittered
+    #         0.72~1.16x -> a saw-toothed skyline) (3) segments are cut down to 5.0 m and x jitter +-1.7
+    #         gives fore/aft depth (4) the tint is not near-field foliage (deep green) but **three
+    #         low-saturation grey-greens reflecting aerial perspective** (leaf_far_*), cycled to kill the flat-slab look.
     treeband=dict(rows=((44.5, 48.5, 4.8), (-48.5, -44.5, 4.4)),
                   y0=-58.0, y1=58.0, seg=5.0, jitter=1.2,
                   base_frac=0.36, blobs=3, x_jit=1.2),
@@ -254,8 +263,8 @@ PARAMS = dict(
         SE=dict(x0=18.0, x1=42.0, y0=-50.0, y1=-38.0, h=15.5, floors=5,
                 axis="y", facade_y=-38.0, face_dir=1.0, base_z=-0.16),
     ),
-    #   [v6 판정 ⑤] 창 데칼이 **정확한 격자로 반복**돼(deck_walk 배경) 타일링
-    #   티가 가장 심한 컷이 됐다 → 동별 창 규격·열 간격을 분리해 리듬을 깬다.
+    #   [v6 ruling (5)] the window decals **repeated on an exact grid** (deck_walk background), making it
+    #   the cut with the worst visible tiling -> window size and column spacing are split per building to break the rhythm.
     window=dict(w=1.3, h=1.7, inset=0.15, col_step=2.8, margin=2.5),
     window_by=dict(
         E=dict(w=1.5, h=1.55, inset=0.15, col_step=3.3, margin=3.4),
@@ -266,36 +275,36 @@ PARAMS = dict(
         SE=dict(w=1.45, h=1.6, inset=0.15, col_step=3.1, margin=2.8),
     ),
 
-    # --- 재질 (sRGB 감마: 어두운 상수색은 0.02~0.06 대역 — §A-1) ---
+    # --- materials (sRGB gamma: dark constant colours live in the 0.02~0.06 band - §A-1) ---
     material=dict(
-        # [v7 판정 ⑥-1 — 원인 규명] W-1 의 `metal_rust` UV 1.0 → 0.25 축소는
-        #   **실제로 반영됐다**(make_pbr 6번째 위치인자 scale_m 로 전달 →
-        #   texture_scale = 1/scale_m = 4.0; OmniPBR "Texture Tiling" 이므로
-        #   값이 클수록 반복↑ = 무늬 축소. `역작동` 아님. v6↔v7 midlanding
-        #   렌더의 수평 자기상관 반폭도 20 px → 10 px 로 실측 축소됐다).
-        #   그런데 판정이 반복된 이유는 **스케일이 아니라 대비·색상**이었다:
-        #     · metal_rust_diff 휘도 p5 29 / p95 130(sRGB) = 선형 18:1 대비.
-        #       타일을 줄여도 얼룩의 명암비는 그대로다(실측 std 33.2 → 34.7).
-        #     · 채널 등화 틴트 (0.61,0.80,1.00) 은 **평균만** 중성화한다.
-        #       화소 단위로는 어두운 녹 화소를 적갈(R 31.7 : B 11.0), 밝은
-        #       소지 화소를 청백(R 80.5 : B 127.0)으로 **더 갈라놓아**
-        #       "백·갈 고대비 얼룩"을 오히려 강화했다.
-        #   → 조치: ① 타일 0.25 → 0.55 m (1 m² 당 3.3 타일 = 판정 목표 "얼룩
-        #      3~5개/m²" 대역) ② OmniPBR albedo_add/brightness 로 알베도
-        #      레인지를 선형 0.045~0.090(2.0:1)으로 압축 ③ albedo_desaturation
-        #      으로 녹/소지 색분리 제거 ④ 틴트는 중성 냉회색만 담당.
-        #      법선·거칠기 텍스처는 그대로 두어 "무텍스처 스티로폼 판"(§4)은 회피.
-        #   [v6] concrete_floor(107,93,77 난색 갈토)를 쓰던 상판·교각이 "녹슨 철"로
-        #   읽혔다(under_grating) → 줄눈·타이홀이 있는 concrete_wall + 등화 틴트
-        #   (0.72,0.77,0.92) = 평균 102 ≈ 알베도 0.40 의 중성 콘크리트로 교체.
+        # [v7 ruling (6)-1 - cause established] W-1's `metal_rust` UV reduction 1.0 -> 0.25
+        #   **did take effect** (passed as make_pbr's 6th positional argument scale_m ->
+        #   texture_scale = 1/scale_m = 4.0; since this is OmniPBR "Texture Tiling", a larger
+        #   value means more repetition = a smaller pattern. Not `inverted`. The horizontal
+        #   autocorrelation half-width of the v6 vs v7 midlanding render also measured 20 px -> 10 px).
+        #   The ruling recurred because the cause was **contrast and colour, not scale**:
+        #     · metal_rust_diff luminance p5 29 / p95 130 (sRGB) = 18:1 linear contrast.
+        #       shrinking the tile leaves the blotch contrast untouched (measured std 33.2 -> 34.7).
+        #     · the channel-equalising tint (0.61,0.80,1.00) neutralises **only the mean**.
+        #       per pixel it pushes dark rust pixels to red-brown (R 31.7 : B 11.0) and bright
+        #       bare-metal pixels to blue-white (R 80.5 : B 127.0), **splitting them further**
+        #       and so reinforcing the "white/brown high-contrast blotching".
+        #   -> action: (1) tile 0.25 -> 0.55 m (3.3 tiles per 1 m² = the ruling's target band of
+        #      "3~5 blotches/m²") (2) compress the albedo range to linear 0.045~0.090 (2.0:1)
+        #      with OmniPBR albedo_add/brightness (3) remove the rust / bare-metal colour split
+        #      with albedo_desaturation (4) the tint carries a neutral cool grey only.
+        #      the normal and roughness textures stay as they are, avoiding a "textureless styrofoam slab" (§4).
+        #   [v6] the deck and piers using concrete_floor (107,93,77, a warm brown earth) read as
+        #   "rusted steel" (under_grating) -> swapped for concrete_wall (joints and tie holes) plus
+        #   an equalising tint (0.72,0.77,0.92) = mean 102 ~ albedo 0.40, a neutral concrete.
         scale=dict(paving_interlock=1.0, metal_rust=0.55, concrete_wall=2.0,
                    granite_dark=1.0, brick_red=2.0, grass=1.4, tactile=0.3),
         asphalt_color=(0.045, 0.045, 0.050), asphalt_rough=0.92,
-        metal_tint=(0.90, 0.94, 1.00),          # 도장 강재 톤(중성 냉회색)
-        # [v7 판정 ⑥-1] OmniPBR 알베도 보정 — 텍스처 룩업에
-        #   diffuse = tex*brightness + add 를 걸어 대비를 압축하고(선형
-        #   p5 0.0116/p95 0.216 → 0.045/0.090), desaturation 으로 색분리를 지운다.
-        #   결과 예상: 선형 중앙값 0.051 ≈ sRGB 63 = 도장 강재 다크그레이.
+        metal_tint=(0.90, 0.94, 1.00),          # painted-steel tone (neutral cool grey)
+        # [v7 ruling (6)-1] OmniPBR albedo correction - the texture lookup gets
+        #   diffuse = tex*brightness + add to compress the contrast (linear
+        #   p5 0.0116/p95 0.216 -> 0.045/0.090), and desaturation erases the colour split.
+        #   expected result: linear median 0.051 ~ sRGB 63 = painted-steel dark grey.
         metal_albedo=dict(brightness=0.220, add=0.0425, desaturation=0.55),
         concrete_tint=(0.72, 0.77, 0.92),
         parapet_tint=(0.78, 0.83, 0.99),
@@ -305,8 +314,8 @@ PARAMS = dict(
         rail_color=(0.050, 0.098, 0.108), rail_rough=0.55, rail_metallic=0.35,
         steel_color=(0.055, 0.058, 0.060), steel_rough=0.50,
         steel_metallic=0.45,
-        # [v6 판정 C-3 계열] panel_rough 0.18 = 준경면 → 하늘 반사로 대면적
-        #   백판처럼 보인다. 도장 강판 실물 광택(0.48)으로 낮춘다.
+        # [v6 ruling C-3 family] panel_rough 0.18 = near-specular -> sky reflection makes it look
+        #   like a large white board. Lowered to the real gloss of painted steel sheet (0.48).
         panel_color=(0.075, 0.095, 0.105), panel_rough=0.48,
         pole_color=(0.30, 0.31, 0.32), pole_metallic=0.75, pole_rough=0.35,
         lamp_color=(0.88, 0.88, 0.84), lamp_rough=0.40,
@@ -314,9 +323,9 @@ PARAMS = dict(
         parapet_color=(0.58, 0.58, 0.56), parapet_rough=0.60,
         wood_color=(0.30, 0.20, 0.12), wood_rough=0.85,
         leaf_a=(0.025, 0.045, 0.015), leaf_b=(0.035, 0.060, 0.020),
-        # [v7 판정 ⑥-2] 원경(44~48 m) 수목 띠 전용 — 대기원근으로 채도·대비가
-        #   떨어진 회록 3종. 근경 leaf_a/b(진초록)를 그대로 쓰면 원경이
-        #   "도색 판"으로 굳는다. sRGB 로 (76,89,70)/(66,79,61)/(86,96,79).
+        # [v7 ruling (6)-2] for the distant (44~48 m) tree band only - three grey-greens whose
+        #   saturation and contrast are dropped by aerial perspective. Reusing the near-field leaf_a/b
+        #   (deep green) freezes the distance into a "painted board". In sRGB (76,89,70)/(66,79,61)/(86,96,79).
         leaf_far_a=(0.075, 0.100, 0.062),
         leaf_far_b=(0.055, 0.078, 0.048),
         leaf_far_c=(0.095, 0.118, 0.082),
@@ -333,9 +342,9 @@ PARAMS = dict(
         hdri_sun_rotz_offset=233.5,
         dome_rotation_step=15.0,
     ),
-    # 브리프 R6 지정값. 그림자 방위 φ = 171.5 −110 +233.5 = 295° →
-    #   수평 그림자 방위 ≈ 25°(거의 +X = 상판 종주축). 그레이팅 슬릿 그림자가
-    #   계단 진행방향으로 길게 늘어나 노면 스트라이프(투과 단서)가 최대가 된다.
+    # value specified by brief R6. Shadow azimuth φ = 171.5 −110 +233.5 = 295 deg ->
+    #   horizontal shadow bearing ~25 deg (almost +X = the deck's long axis). The grating slit shadows
+    #   stretch along the stair direction, maximising the road stripes (the see-through cue).
     SUN_AZ_OFFSET=171.5,
 
     render=dict(pt_total_spp=512, pt_max_bounces=8),
@@ -362,7 +371,7 @@ if _sc_ov:
 
 
 # ===========================================================================
-# [C] 경로 + 텍스처 역할
+# [C] paths + texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "scene11")
@@ -382,7 +391,7 @@ def _flight_drop():
 
 
 def _east_x():
-    """동측 x 마디: (상부참 시작, A상단, A하단=중간참 시작, 중간참 끝, B하단)."""
+    """East x nodes: (top landing start, A head, A foot = mid landing start, mid landing end, B foot)."""
     e = PARAMS["east"]
     run = _flight_run()
     a1 = e["a_x0"] + run                       # 22.04
@@ -392,13 +401,13 @@ def _east_x():
 
 
 # ===========================================================================
-# [C1b] 카메라 검산 기반 — AABB 장애물 + 솔리드 조회(레이마칭 단일 출처)
-#   [v6 판정 지시] 재조준(`under_grating`)·사인 방위 수정의 근거를 좌표로
-#   검산한다. scene08 `_obstacle_boxes` / `_solid_at` 규약을 따른다.
-#   동·서 계단은 rot_group 180° 로 **x=0 대칭**이므로 ax=|x| 로 공통 처리.
+# [C1b] camera numeric-check base - AABB obstacles + solid lookup (single source for ray marching)
+#   [v6 ruling instruction] the grounds for the re-aim (`under_grating`) and the sign bearing fix
+#   are checked in coordinates. Follows the scene08 `_obstacle_boxes` / `_solid_at` convention.
+#   east and west stairs are **symmetric about x=0** through rot_group 180 deg, so ax=|x| serves both.
 # ===========================================================================
 def _stair_top(ax):
-    """|x| 에서의 계단·참 상면 z (계단 대역 밖이면 None). 폭 판정은 호출측."""
+    """Top-face z of the stair or landing at |x| (None outside the stair band). The width test is the caller's."""
     e = PARAMS["east"]
     st = PARAMS["stair"]
     run = _flight_run()
@@ -421,10 +430,10 @@ def _stair_top(ax):
 
 
 def _solid_at(x, y, z):
-    """점 (x,y,z)를 품는 지형·구조 솔리드 이름(없으면 None).
-    카메라 eye 매몰 + 시선 차단(ray march) 검사의 단일 출처.
-    그레이팅 디딤판은 두께 tread_t 의 얇은 슬래브로 모델링한다(슬릿은
-    무시 — 차단 판정을 보수적으로 잡기 위함)."""
+    """Name of the terrain / structure solid that contains the point (x,y,z), None if there is none.
+    Single source for the buried-camera-eye and sight-line (ray march) checks.
+    The grating tread is modelled as a thin slab of thickness tread_t (the slits
+    are ignored - to keep the occlusion test conservative)."""
     g = PARAMS["ground"]
     rd = PARAMS["road"]
     wk = PARAMS["walk"]
@@ -448,7 +457,7 @@ def _solid_at(x, y, z):
         if xa <= x <= xb and vg["y0"] <= y <= vg["y1"] \
                 and -0.30 <= z <= vg["curb_top"]:
             return tag
-    # ── 상판·지지 기둥·상판 난간 ──
+    # ── deck · support piers · deck railing ──
     if dk["x0"] <= x <= dk["x1"] and dk["y0"] <= y <= dk["y1"] \
             and dk["z_top"] - dk["thick"] <= z <= dk["z_top"]:
         return "Deck"
@@ -463,7 +472,7 @@ def _solid_at(x, y, z):
                 and dk["x0"] <= x <= dk["x1"] \
                 and dk["z_top"] <= z <= dk["z_top"] + rb["post_h"]:
             return f"DeckRail_{i}"
-    # ── 계단 2조(동·서 대칭) ──
+    # ── the two stair sets (east/west symmetric) ──
     ax = abs(x)
     top = _stair_top(ax)
     if top is not None:
@@ -478,16 +487,16 @@ def _solid_at(x, y, z):
                     return "StairPad"
             elif top - st["tread_t"] <= z <= top:
                 return "StairTread"
-    # ── 버스 쉘터(지붕판) ──
+    # ── bus shelter (roof slab) ──
     sh = PARAMS["dress"]["shelter"]
     if sh["x0"] <= x <= sh["x1"] and sh["y0"] <= y <= sh["y1"] \
             and sh["z_roof"] <= z <= sh["z_roof"] + 0.10:
         return "ShelterRoof"
-    # ── 원경 수목 띠 · 건물 ──
+    # ── distant tree band · buildings ──
     tb = PARAMS["treeband"]
-    #   [v7 판정 ⑥-2] 2층 구성(낮은 덤불 박스 + 수관 블롭)으로 바뀌면서
-    #   실루엣 상단이 h·1.04·1.16 까지 올라가고 x 확산도 ±3.1 로 커졌다.
-    #   차단 판정은 **보수적(= 실제보다 크게)** 이어야 하므로 봉투를 넓힌다.
+    #   [v7 ruling (6)-2] with the two-tier build (low shrub box + canopy blobs) the silhouette
+    #   top rises to h·1.04·1.16 and the x spread grows to +-3.1.
+    #   the occlusion test must be **conservative (= larger than reality)**, so the envelope is widened.
     for ri, (xa_, xb_, hh) in enumerate(tb["rows"]):
         if xa_ - 3.2 <= x <= xb_ + 3.2 and tb["y0"] <= y <= tb["y1"] \
                 and g["z_top"] <= z <= g["z_top"] \
@@ -502,8 +511,8 @@ def _solid_at(x, y, z):
 
 
 def _obstacle_boxes():
-    """카메라 충돌 검사용 드레싱·난간 AABB (name, x0,x1, y0,y1, z0,z1).
-    지형·구조 솔리드는 `_solid_at` 담당 — 여기엔 얇은 프림만."""
+    """Dressing and railing AABBs for the camera collision check (name, x0,x1, y0,y1, z0,z1).
+    Terrain and structure solids are `_solid_at`'s job - only thin prims here."""
     d = PARAMS["dress"]
     gz = PARAMS["walk"]["z_top"]
     boxes = []
@@ -533,7 +542,7 @@ def _obstacle_boxes():
 
 
 # ===========================================================================
-# [C2] 스모크 — 부팅 전 기하 자기검증 (조기종료)
+# [C2] smoke - geometry self-check before boot (early exit)
 # ===========================================================================
 def _smoke_report():
     st = PARAMS["stair"]
@@ -557,7 +566,7 @@ def _smoke_report():
     print(f"    낙차 ≥ 0.3 m → {'OK' if tot >= 0.3 else 'FAIL'}")
     print(f"  [동측 x 마디] 상부참 {pad0:.2f}…{a0:.2f} · A {a0:.2f}…{a1:.2f} "
           f"· 중간참 {a1:.2f}…{m1:.2f} · B {m1:.2f}…{b1:.2f}")
-    # ── 보행 연속성 표 ──
+    # ── walking continuity table ──
     z_mid = e["z_top"] - drop
     rows = [
         ("서측 보도 → 계단 B", gz, 0.0, "join"),
@@ -585,7 +594,7 @@ def _smoke_report():
         print(f"    {nm:22s} z {z0:+.3f} → {z1:+.3f}  Δ{d:+.3f}  "
               f"{'OK' if ok else 'FAIL'}")
     print(f"    연속성 판정: {'OK' if bad == 0 else f'FAIL({bad})'}")
-    # ── 위험: 중간참 킥플레이트 결손 ──
+    # ── hazard: missing kickplate on the mid landing ──
     print(f"  [위험①] 동측 중간참 킥플레이트 {'有' if e['kickplate'] else '無'} "
           f"— 참 상면 {z_mid:.3f} → 보도 {gz:+.3f} 낙차 {z_mid-gz:.3f} m")
     print(f"    로봇 h0.3 시야 하단이 난간 하부 개방대(0…"
@@ -598,7 +607,7 @@ def _smoke_report():
           f"{dk['z_top']-PARAMS['road']['z_top']:.3f} m (방음 패널이 바닥 단서 차단)")
     print(f"  [위험③] 그레이팅 투과: 디딤판 {st['slits']}슬릿 × 0.02 m + 전후 "
           f"gap {st['gap']} → 라이저 부재로 하부 직시")
-    # ── 상판 유효고 · 기둥 ──
+    # ── deck clearance · piers ──
     deck_bot = dk["z_top"] - dk["thick"]
     print(f"  [상판] 상면 {dk['z_top']:.2f} 저면 {deck_bot:.2f} · 차도 "
           f"{PARAMS['road']['z_top']:+.2f} → 유효고 "
@@ -610,7 +619,7 @@ def _smoke_report():
         print(f"    지지 기둥 x={px:+.2f} · 보도 위 {'OK' if on_walk else 'FAIL'} "
               f"· 연석(±{PARAMS['road']['x1']:.2f}) 바깥 "
               f"{'OK' if abs(px) > PARAMS['road']['x1'] else 'FAIL'}")
-    # ── rot_group 180° 좌표 검산 (서측) ──
+    # ── rot_group 180 deg coordinate check (west) ──
     w = PARAMS["west"]
     px, py = w["pivot"]
 
@@ -626,7 +635,7 @@ def _smoke_report():
     wxb, _ = _rot180(2*run + e["mid_len"], 0.0)
     print(f"    서측 하단 x {wxb:.2f} ⊂ 서측 보도 [{wk['xw0']:.1f}, "
           f"{wk['xw1']:.1f}] → {'OK' if wk['xw0'] <= wxb <= wk['xw1'] else 'FAIL'}")
-    # ── 그리드 카메라 vs 신설 기하 좌표 검산 ──
+    # ── grid camera vs new geometry coordinate check ──
     gx, gy, gzc = _grid_shift()
     print(f"  [그리드] 원점 = 동측 낙차 시작 (x {gx:.2f}, y {gy:.2f}, z {gzc:.2f})")
     for d in (2, 5, 10):
@@ -641,7 +650,7 @@ def _smoke_report():
     print(f"    시선 회랑(y −1.2…1.2, x {dk['x0']:.1f}…{b1:.1f}) 드레싱 침입: "
           f"{_corridor_hits()} 개 → {'OK' if _corridor_hits() == 0 else 'FAIL'}")
 
-    # ── 정면 프로파일(그리드 축 y=0, x 증가) — 낙차 GT 가 프레임에 있는가 ──
+    # ── front profile (grid axis y=0, increasing x) - is the drop GT in frame ──
     print("  [정면 프로파일] 그리드 축 y=0.00 · x 15.0 → 20.0 (0.25 m 간격)")
     prof = []
     xx = gx
@@ -664,7 +673,7 @@ def _smoke_report():
     print(f"    프로파일 최대 낙차 {dmax:.3f} m ≥ 0.3 → "
           f"{'OK(낙차 GT 프레임 내)' if dmax >= 0.3 else 'FAIL'}")
 
-    # ── h0.3 은닉 검산 (상판 연단 스침 시선) ──
+    # ── h0.3 concealment check (sight line grazing the deck edge) ──
     print("  [h0.3 은닉 검산] 상판 연단(x=15.0, z 5.500) 스치는 시선")
     for dd in (2.0, 5.0, 10.0):
         x_hit = gx + (gzc - gz) * dd / 0.3
@@ -672,7 +681,7 @@ def _smoke_report():
               f"{b1:.2f} → 계단 전 구간 은닉 "
               f"{'OK' if x_hit > b1 else 'FAIL'}")
 
-    # ── 카메라 충돌·시선 차단 검산 (scene08 규약) ──
+    # ── camera collision and sight-line occlusion check (scene08 convention) ──
     boxes = _obstacle_boxes()
     views = build_views()
     print(f"  [카메라 충돌 검산] 뷰 {len(views)}개 × AABB {len(boxes)}개")
@@ -711,12 +720,12 @@ def _smoke_report():
             blocked.append(name)
     print(f"      차단 컷: {blocked if blocked else '없음 → OK'}")
 
-    # ── under_grating 역광 축 검산 (v6 판정 ④ 재조준 근거) ──
+    # ── under_grating backlight axis check (grounds for the v6 ruling (4) re-aim) ──
     ug = build_views()["under_grating"]
     ve = np.array(ug["tgt"], dtype=float) - np.array(ug["eye"], dtype=float)
     ve /= np.linalg.norm(ve)
-    # 돔 회전 φ = SUN_AZ_OFFSET + noon_dome_rot + hdri_sun_rotz_offset,
-    #   수평 그림자 방위 = atan2(cosφ, −sinφ), 태양 방위 = 그림자 + 180°
+    # dome rotation φ = SUN_AZ_OFFSET + noon_dome_rot + hdri_sun_rotz_offset,
+    #   horizontal shadow bearing = atan2(cosφ, −sinφ), sun bearing = shadow + 180 deg
     phi = (PARAMS["SUN_AZ_OFFSET"] - 110.0 + 233.5) % 360.0
     shadow_az = math.degrees(math.atan2(math.cos(math.radians(phi)),
                                         -math.sin(math.radians(phi)))) % 360.0
@@ -729,11 +738,11 @@ def _smoke_report():
     print(f"    카메라 시선 방위 {cam_az:.1f}° · 고도 {cam_el:+.1f}° → 태양과 "
           f"방위차 {daz:.1f}° → {'OK(역광 = 슬릿 투광 최대)' if daz <= 45.0 else 'FAIL(순광/측광)'}")
 
-    # ── [v7 판정 ⑥-3] under_grating 프레임 점유 검산 ──
-    #   v6→v7 재조준이 실패한 이유가 "역광은 맞는데 하늘이 프레임을 먹는다"
-    #   였으므로, 축 검산만으로는 부족하다. `_solid_at` 를 단일 출처로
-    #   프레임을 성기게(32×18) 레이캐스트해 하늘 비율·주 피사체를 직접 잰다.
-    #   화각은 v6 렌더 역산치(hFOV 반각 32.6° / vFOV 반각 19.8°, 16:9).
+    # ── [v7 ruling (6)-3] under_grating frame occupancy check ──
+    #   the v6->v7 re-aim failed because "the backlight is right but the sky eats the frame",
+    #   so an axis check alone is not enough. With `_solid_at` as the single source the frame
+    #   is ray-cast coarsely (32x18) to measure the sky fraction and the main subject directly.
+    #   the FOV is back-computed from the v6 render (hFOV half-angle 32.6 deg / vFOV half-angle 19.8 deg, 16:9).
     def _frame_occupancy(eye, tgt, nx=32, ny=18, far=70.0):
         e = np.array(eye, dtype=float)
         fwd = np.array(tgt, dtype=float) - e
@@ -771,13 +780,13 @@ def _smoke_report():
 
 
 def _grid_shift():
-    """그리드 원점 = 동측 계단의 낙차 시작 모서리(상부 참 동단, 상판 레벨)."""
+    """Grid origin = the drop-start edge of the east stair (east end of the top landing, deck level)."""
     e = PARAMS["east"]
     return (e["a_x0"], 0.0, e["z_top"])
 
 
 def _corridor_hits():
-    """그리드 시선 회랑(y −1.2…1.2, x −13.2…30.88) 안의 드레싱 프림 수."""
+    """Number of dressing prims inside the grid sight corridor (y −1.2…1.2, x −13.2…30.88)."""
     d = PARAMS["dress"]
     _, _, _, _, b1 = _east_x()
     pts = list(d["trees"]) + list(d["lamps"]) + list(d["bollards"]) \
@@ -820,12 +829,13 @@ def ground_plan():
 
 
 # ===========================================================================
-# [D] 카메라 프리셋 — grid_views(상판 종주 +X) + 미장센 5컷
+# [D] camera presets - grid_views (along the deck, +X) + 5 mise-en-scene cuts
 # ===========================================================================
 def build_views():
-    """그리드 원점을 (동측 낙차 시작 x=15.0, 상판 z=5.5)로 시프트.
-    로봇 h0.3(= z 5.8)에서 그레이팅 투과·단코 소실·중간참 개방이 성립하는지가
-    판정 1순위. 지상 보도 접근은 sidewalk_approach 컷으로 별도 제공."""
+    """Shift the grid origin to (east drop start x=15.0, deck z=5.5).
+    Judging priority 1: at the robot's h0.3 (= z 5.8), do the grating see-through,
+    the vanishing nosing and the open mid landing hold? The ground-level sidewalk
+    approach is provided separately as the sidewalk_approach cut."""
     gx, gy, gz = _grid_shift()
     v = sc.grid_views(gy)
     out = {}
@@ -838,31 +848,31 @@ def build_views():
         out[k] = dict(eye=e, tgt=t)
     _, _, a1, m1, b1 = _east_x()
     z_mid = PARAMS["east"]["z_top"] - _flight_drop()
-    # under_grating: [v7 판정 ⑥-3 재조준 — 재실패 원인 규명]
-    #   v6→v7 에서 축(y=0 슬릿 정중앙·−X 상행·역광)은 옳게 잡았으나
-    #   **eye z 0.60 · 고도 +31°** 가 문제였다. 눈이 낮고 조준각이 얕으면
-    #   소핏은 전부 시선 **위쪽**에 걸린다(같은 눈에서 소핏의 앙각은 원단
-    #   x=15 에서 34°, 근단 x=22 에서 90°). 즉 프레임 중심이 계단 꼭대기
-    #   **너머 하늘**을 겨눈 셈이라 하늘이 64.7 %(_solid_at 레이캐스트 실측)
-    #   를 먹었다. 태양(방위 205°·고도 49.8°)도 차폐 없이 프레임 상단에
-    #   걸려 플레어까지 났다.
-    #   → 눈을 계단 A 소핏 바로 밑(x 21.70, 헤드룸 0.83 m)으로 올리고
-    #      조준 고도를 **+50°** 로 세운다. tgt 는 그 시선이 처음 만나는
-    #      **디딤판 저면 위의 점**(x 20.79, z 3.08 — 아래 스모크가 검산)으로
-    #      두어, 시선 차단 검사(첫 차단 ≥0.90)도 그대로 통과한다.
-    #   실측(동일 레이캐스트): 하늘 18.5 % · 프레임 피사체 100 % StairTread ·
-    #      태양은 디딤판에 **차폐**(직사 디스크 없음 = 슬릿 투광만 남음).
+    # under_grating: [v7 ruling (6)-3 re-aim - cause of the repeat failure]
+    #   v6->v7 got the axis right (dead centre of the y=0 slit · ascending −X · backlit) but
+    #   **eye z 0.60 · elevation +31 deg** was the problem. With a low eye and a shallow aim
+    #   the whole soffit hangs **above** the sight line (from that same eye the soffit rises at
+    #   34 deg at the far end x=15 and 90 deg at the near end x=22). The frame centre was
+    #   effectively aimed at the **sky beyond** the stair head, so the sky ate 64.7 %
+    #   (measured by the _solid_at ray cast). The sun (bearing 205 deg · elevation 49.8 deg) also
+    #   sat unoccluded at the top of the frame and threw flare.
+    #   -> raise the eye to just under the flight A soffit (x 21.70, headroom 0.83 m) and
+    #      pitch the aim up to **+50 deg**. tgt is set at the **point on the tread soffit**
+    #      that sight line first meets (x 20.79, z 3.08 - the smoke below checks it), so the
+    #      sight-line occlusion test (first block >=0.90) still passes unchanged.
+    #   measured (same ray cast): sky 18.5 % · frame subject 100 % StairTread ·
+    #      the sun is **occluded** by the tread (no direct disc = only slit light remains).
     out["under_grating"] = dict(eye=[21.70, 0.00, 2.00],
                                 tgt=[20.79, 0.00, 3.08])
-    # deck_walk: 상판 종주 보행자 시점(h1.6) — 방음 패널 사이 회랑
+    # deck_walk: pedestrian view along the deck (h1.6) - the corridor between the noise panels
     out["deck_walk"] = dict(eye=[-9.00, 0.00, 7.10], tgt=[8.00, 0.00, 6.30])
-    # midlanding: 동측 중간참 로봇 시점(h0.3) — 킥플레이트 결손 개방대 정면
+    # midlanding: robot view on the east mid landing (h0.3) - head-on at the open band left by the missing kickplate
     out["midlanding"] = dict(eye=[a1 + 0.30, 0.00, z_mid + 0.30],
                              tgt=[m1 + 1.60, -1.90, z_mid - 0.35])
-    # sidewalk_approach: 브리프 R6 "보도 접근" — 동측 보도에서 계단 하단으로
+    # sidewalk_approach: brief R6 "sidewalk approach" - from the east sidewalk toward the stair foot
     out["sidewalk_approach"] = dict(eye=[38.00, -5.00, 0.90],
                                     tgt=[26.00, -0.40, 3.20])
-    # overview: 육교 전경 부감(차도 6차로·상판·양측 계단 동시)
+    # overview: high-angle full view of the footbridge (6 lanes, deck and both stairs at once)
     out["overview"] = dict(eye=[44.00, -34.00, 17.00], tgt=[2.00, 0.00, 4.00])
     return out
 
@@ -888,7 +898,7 @@ BANNER = """\
 
 
 # ===========================================================================
-# [E] 메인
+# [E] main
 # ===========================================================================
 def main():
     capture_mode = os.environ.get("NEGOBS_CAPTURE", "0") == "1"
@@ -932,17 +942,17 @@ def main():
         return sc.make_pbr(stage, path, *a, **kw)
 
     def PBR_ALBEDO(path, *a, albedo=None, **kw):
-        """[v7 판정 ⑥-1] make_pbr + OmniPBR 알베도 레인지 보정 입력.
+        """[v7 ruling (6)-1] make_pbr + the OmniPBR albedo range correction inputs.
 
-        `scene_common.make_pbr` 는 albedo_add/brightness/desaturation 을
-        노출하지 않는다(그리고 scene_common 은 21씬 공용이라 무수정 원칙).
-        → 여기서는 make_pbr 이 만든 셰이더 프림에 **입력만 추가**한다.
-        OmniPBR.mdl 의 정의(파일 62·68·74행)상 셋 다 float 이고,
-        base::file_texture(color_offset=add, color_scale=brightness) →
-        lerp(tint, mono, desaturation) 순으로 적용된다. 즉
+        `scene_common.make_pbr` does not expose albedo_add/brightness/desaturation
+        (and scene_common is shared by 21 scenes, so the rule is not to modify it).
+        → here we only **add inputs** to the shader prim make_pbr created.
+        By the OmniPBR.mdl definition (file lines 62 · 68 · 74) all three are float,
+        and they apply in the order base::file_texture(color_offset=add,
+        color_scale=brightness) → lerp(tint, mono, desaturation), i.e.
             diffuse = lerp(tex*brightness + add,  mono(...),  desaturation)
-        이라 **텍스처의 명암 레인지 자체를 압축**할 수 있다(틴트는 곱셈이라
-        레인지를 못 줄인다 — v6/v7 재판정의 원인).
+        so **the tonal range of the texture itself can be compressed** (a tint is a
+        multiply and cannot narrow the range — the cause of the v6/v7 re-rulings).
         """
         mtl = sc.make_pbr(stage, path, *a, **kw)
         if albedo:
@@ -956,7 +966,7 @@ def main():
         return mtl
 
     # -------------------------------------------------------------------
-    # 재질
+    # materials
     # -------------------------------------------------------------------
     def setup_materials():
         s = mp["scale"]
@@ -966,9 +976,9 @@ def main():
                           sc.tex_path("paving_interlock", "nor"),
                           sc.tex_path("paving_interlock", "rough"),
                           s["paving_interlock"])
-        # 철제 계단·참 — [v7 판정 ⑥-1] metal_rust 를 **relief(법선·거칠기)** 로만
-        #   쓰고, 알베도는 add/brightness 로 레인지를 압축 + desaturation 으로
-        #   녹/소지 색분리 제거 → "도장 강판 + 국부 발청" 인상.
+        # steel stairs and landings - [v7 ruling (6)-1] metal_rust is used only as **relief (normal,
+        #   roughness)**, while the albedo range is compressed with add/brightness and the rust /
+        #   bare-metal colour split is removed with desaturation -> a "painted steel sheet with local rust" look.
         M["metal"] = PBR_ALBEDO(f"{ROOT}/Looks/Metal",
                                 sc.tex_path("metal_rust", "diff"),
                                 sc.tex_path("metal_rust", "nor"),
@@ -1023,8 +1033,8 @@ def main():
                         roughness_const=mp["lamp_rough"])
         M["glass"] = PBR(f"{ROOT}/Looks/Glass", diffuse_color=mp["glass_color"],
                          roughness_const=mp["glass_rough"])
-        # [v6 C-3 계열] 무텍스처 단색 판(스티로폼 인상) 회피 — 콘크리트 텍스처.
-        #   사인 배킹에도 재사용해 "순흑 부유 패널" 오독을 막는다.
+        # [v6 C-3 family] avoids a textureless flat slab (styrofoam look) - a concrete texture.
+        #   reused for the sign backing as well, to block the "pure-black floating panel" misreading.
         M["parapet"] = PBR(f"{ROOT}/Looks/Parapet",
                            sc.tex_path("concrete_wall", "diff"),
                            sc.tex_path("concrete_wall", "nor"),
@@ -1039,7 +1049,7 @@ def main():
                           roughness_const=1.0, specular_level=0.0)
         M["leaf_b"] = PBR(f"{ROOT}/Looks/LeafB", diffuse_color=mp["leaf_b"],
                           roughness_const=1.0, specular_level=0.0)
-        # [v7 판정 ⑥-2] 원경 수목 띠 전용 저채도 회록 3종(대기원근)
+        # [v7 ruling (6)-2] three low-saturation grey-greens for the distant tree band only (aerial perspective)
         for tag in ("a", "b", "c"):
             M[f"leaf_far_{tag}"] = PBR(
                 f"{ROOT}/Looks/LeafFar{tag.upper()}",
@@ -1048,14 +1058,14 @@ def main():
         M["nosing"] = PBR(f"{ROOT}/Looks/Nosing",
                           diffuse_color=mp["nosing_color"],
                           roughness_const=0.7)
-        # [v5 공통 레이어] 한글 사인 패널 — sign_info(육교 안내), uv_mode 1:1
+        # [v5 shared layer] Korean sign panel - sign_info (footbridge guidance), uv_mode 1:1
         M["sign"] = PBR(f"{ROOT}/Looks/SignPanel",
                         diff=sc.tex_path("sign_info", "diff"),
                         uv_mode=True, roughness_const=0.6)
         return M
 
     # -------------------------------------------------------------------
-    # 지반 · 차도 · 보도 · 연석 · 차선
+    # site ground · roadway · sidewalk · kerb · lane lines
     # -------------------------------------------------------------------
     def build_site(M):
         g = PARAMS["ground"]
@@ -1082,7 +1092,7 @@ def main():
             BOX(f"{ROOT}/Curb_{i}",
                 (xc, (wk["y0"]+wk["y1"])/2.0, cb["z_top"] - cb["thick"]/2.0),
                 (cb["w"], wk["y1"]-wk["y0"], cb["thick"]), M["curb"], col=True)
-        # [v6 판정 C-2] 식재대 — 보도 바깥 경계 1열(경계석 2줄 + 지피).
+        # [v6 ruling C-2] planting strip - one row on the outer sidewalk boundary (2 kerb lines + groundcover).
         vg = PARAMS["verge"]
         vy0, vy1 = vg["y0"], vg["y1"]
         for i, (xa, xb) in enumerate(((wk["xw0"] - vg["w"], wk["xw0"]),
@@ -1108,8 +1118,8 @@ def main():
                 yc = ln["y0"] + k*period + ln["seg"]/2.0
                 BOX(f"{ROOT}/Dash_{j}_{k}", (x, yc, ln["z"]),
                     (ln["w"], ln["seg"], ln["t"]), M["line_w"])
-        # 계단 하부 노면 밴드 — 그레이팅 슬릿 그림자를 받는 대조면
-        # 계단 하부 노면 밴드 2매(동/서 대칭) — 그레이팅 슬릿 그림자 대조면
+        # road band under the stair - the contrast surface catching the grating slit shadows
+        # two road bands under the stairs (east/west symmetric) - contrast surface for the grating slit shadows
         bd = PARAMS["dress"]["band"]
         xc = (bd["x0"] + bd["x1"]) / 2.0
         for i, sgn in enumerate((1.0, -1.0)):
@@ -1117,7 +1127,7 @@ def main():
                 (bd["x1"]-bd["x0"], bd["y1"]-bd["y0"], bd["t"]), M["band"])
 
     # -------------------------------------------------------------------
-    # 상판 + 지지 기둥
+    # deck + support piers
     # -------------------------------------------------------------------
     # -------------------------------------------------------------------
     # [W2-D] ground_kit - P9 bridge_deck on the footbridge deck.
@@ -1155,8 +1165,8 @@ def main():
                 (dp["cap_sx"], dp["cap_sy"], dp["cap_h"]), M["concrete"])
 
     # -------------------------------------------------------------------
-    # 계단 1조 (상부 참 → A → 중간참 → B). prefix 아래 로컬/월드 공용.
-    #   x0_pad : 상부 참 서단, 이후 전부 +X 하강. kick=킥플레이트 유무.
+    # one stair set (top landing -> A -> mid landing -> B). Serves local and world under prefix.
+    #   x0_pad : west end of the top landing, everything after it descends in +X. kick = kickplate or not.
     # -------------------------------------------------------------------
     def build_stair_set(M, prefix, x0_pad, x1_pad, kick, tag):
         a0 = x1_pad
@@ -1165,16 +1175,16 @@ def main():
         b1 = m1 + RUN
         py0, py1 = E["pad_y0"], E["pad_y1"]
         dk_t = PARAMS["deck"]["thick"]
-        # 상부 참 (상판과 같은 두께의 강상판)
+        # top landing (steel deck as thick as the bridge deck)
         BOX(f"{prefix}/PadTop",
             ((x0_pad+x1_pad)/2.0, (py0+py1)/2.0, E["z_top"] - dk_t/2.0),
             (x1_pad-x0_pad, py1-py0, dk_t), M["metal"], col=True)
-        # 계단 A (그레이팅 개방 라이저)
+        # flight A (grating, open risers)
         sc.build_open_riser_stairs(
             stage, f"{prefix}/FlightA", a0, st["y0"], st["y1"], st["riser"],
             st["tread"], st["n"], E["z_top"], M["metal"], M["metal"],
             tread_t=st["tread_t"], gap=st["gap"], slits=st["slits"])
-        # 중간참 (강상판 + 지지 기둥 4)
+        # mid landing (steel deck + 4 support posts)
         BOX(f"{prefix}/MidLanding",
             ((a1+m1)/2.0, (py0+py1)/2.0, Z_MID - dk_t/2.0),
             (m1-a1, py1-py0, dk_t), M["metal"], col=True)
@@ -1183,19 +1193,19 @@ def main():
             zt = Z_MID - dk_t
             CYL(f"{prefix}/MidPost_{i}", (lx, ly, (-0.30+zt)/2.0), 0.11,
                 zt+0.30, M["metal"], col=True)
-        # 계단 B
+        # flight B
         sc.build_open_riser_stairs(
             stage, f"{prefix}/FlightB", m1, st["y0"], st["y1"], st["riser"],
             st["tread"], st["n"], Z_MID, M["metal"], M["metal"],
             tread_t=st["tread_t"], gap=st["gap"], slits=st["slits"])
-        # 단코 논슬립 띠
+        # non-slip nosing band
         if cfg["cue_nosing"]:
             for j, (bx, ztop) in enumerate(((a0, E["z_top"]), (m1, Z_MID))):
                 sc.build_nosing(stage, f"{prefix}/Nosing_{j}", bx, st["y0"],
                                 st["y1"], st["riser"], st["tread"], st["n"],
                                 mtl=M["nosing"], width=0.06, proud=0.003,
                                 z_top=ztop)
-        # 난간 + 킥플레이트
+        # railing + kickplate
         if cfg["cue_railing"]:
             ra = PARAMS["rail"]
 
@@ -1222,13 +1232,13 @@ def main():
                     post_r=ra["post_r"], spacing=ra["spacing"],
                     rail_r=ra["rail_r"], rail_mid_r=ra["rail_mid_r"],
                     rail_mid_drop=ra["rail_mid_drop"])
-            # 킥플레이트(발끝막이판) — 중간참 양측. 동측은 **결손**이 위험 본질.
+            # kickplate (toe board) - both sides of the mid landing. Its **absence** on the east side is the hazard.
             if kick:
                 for k, ye in enumerate((py0, py1)):
                     BOX(f"{prefix}/Kick_{k}",
                         ((a1+m1)/2.0, ye, Z_MID + E["kick_h"]/2.0),
                         (m1-a1, 0.05, E["kick_h"]), M["rail"])
-        # 승강부 점자띠
+        # tactile bands at the stair head and foot
         if cfg["cue_tactile"]:
             tc = PARAMS["tactile"]
             # [W2-D Sec.12.4] non-conforming variant for scene11 = bearing off
@@ -1256,22 +1266,24 @@ def main():
                                E["kickplate"], 0)
 
     def build_west(M):
-        """rot_group 180° — 로컬 (x,y) → 월드 (−15 − x, −y). 로컬 상부 참은
-        x −1.8…0 (= 월드 −13.2…−15.0), 이후 로컬 +X 하강이 월드 −X 하강이 된다.
-        기하·설비는 동측과 동일하되 **킥플레이트만 有**(규정 준수 대조군)."""
+        """rot_group 180° — local (x,y) → world (−15 − x, −y). The local top landing is
+        x −1.8…0 (= world −13.2…−15.0), and from there a local +X descent becomes a
+        world −X descent. Geometry and fittings match the east side except that the
+        **kickplate is present** (the code-compliant control)."""
         w = PARAMS["west"]
         RG = sc.build_rot_group(stage, f"{ROOT}/WestGroup", w["pivot"], w["rot"])
         pad_len = E["pad_x1"] - E["pad_x0"]
         return build_stair_set(M, RG, -pad_len, 0.0, w["kickplate"], 1)
 
     # -------------------------------------------------------------------
-    # 상판 방음 패널 + 종주 난간 (cue_railing)
+    # deck noise panels + longitudinal railing (cue_railing)
     # -------------------------------------------------------------------
     def build_deck_rails(M):
-        """[v6 판정 ⑤] 방음 난간 — 지주 분절 + 방음판/개방 베이 교대.
-        구 구성(무분절 판재 1매)은 벙커 복도 + 그림자면 순흑(프레임 30~45 %)의
-        직접 원인이었다. 짝수 베이 = 방음판(+상단 캡), 홀수 베이 = 개방(하부
-        킥 밴드 + 세로 살 6본)으로 투광·투시를 만든다. GT 무관(난간 프림)."""
+        """[v6 ruling (5)] noise railing — segmented by posts + alternating noise-panel /
+        open bays. The old build (one unbroken panel) was the direct cause of the
+        bunker corridor and of the pure-black shadow side (30~45 % of the frame).
+        Even bays = noise panel (+ top cap), odd bays = open (a low kick band + 6
+        vertical balusters), which lets light and sight through. GT-neutral (railing prims)."""
         dk = PARAMS["deck"]
         rb = PARAMS["rail_bay"]
         x0, x1 = dk["x0"], dk["x1"]
@@ -1279,7 +1291,7 @@ def main():
         L = (x1 - x0) / float(nb)
         zt = dk["z_top"]
         for i, ye in enumerate((dk["y0"], dk["y1"])):
-            for k in range(nb + 1):                      # 지주
+            for k in range(nb + 1):                      # posts
                 BOX(f"{ROOT}/DeckRailPost_{i}_{k}",
                     (x0 + k*L, ye, zt + rb["post_h"]/2.0),
                     (rb["post_t"], rb["post_t"], rb["post_h"]), M["steel"])
@@ -1287,7 +1299,7 @@ def main():
                 xa = x0 + k*L + rb["post_t"]/2.0 + rb["joint"]
                 xb = x0 + (k+1)*L - rb["post_t"]/2.0 - rb["joint"]
                 xc, Lx = (xa + xb)/2.0, xb - xa
-                if k % 2 == 0:                           # 방음판 베이
+                if k % 2 == 0:                           # noise-panel bay
                     BOX(f"{ROOT}/DeckPanel_{i}_{k}",
                         (xc, ye, zt + dk["panel_h"]/2.0),
                         (Lx, dk["panel_t"], dk["panel_h"]), M["panel"])
@@ -1295,7 +1307,7 @@ def main():
                         (xc, ye, zt + dk["panel_h"] + rb["cap_h"]/2.0),
                         (Lx, dk["panel_t"] + 2*rb["cap_over"], rb["cap_h"]),
                         M["rail"])
-                else:                                    # 개방 베이(투시·투광)
+                else:                                    # open bay (see-through, light-through)
                     BOX(f"{ROOT}/DeckKick_{i}_{k}",
                         (xc, ye, zt + rb["kick_h"]/2.0),
                         (Lx, dk["panel_t"], rb["kick_h"]), M["panel"])
@@ -1312,7 +1324,7 @@ def main():
                 dk["rail_r"], dk["x1"]-dk["x0"], M["rail"], rotY=90.0)
 
     # -------------------------------------------------------------------
-    # 사인 (cue_sign) — 육교 안내 sign_info
+    # sign (cue_sign) - footbridge guidance sign_info
     # -------------------------------------------------------------------
     def build_signs(M):
         sg = PARAMS["sign"]
@@ -1323,7 +1335,7 @@ def main():
                           pole_mtl=M["pole"], back_mtl=M["signback"])
 
     # -------------------------------------------------------------------
-    # 드레싱
+    # dressing
     # -------------------------------------------------------------------
     def build_dressing(M):
         d = PARAMS["dress"]
@@ -1335,7 +1347,7 @@ def main():
         BOX(f"{ROOT}/ShelterBack",
             ((sh["x0"]+sh["x1"])/2.0, sh["y0"] + 0.10, gz + 1.10),
             (sh["x1"]-sh["x0"], 0.06, 2.20), M["glass"])
-        # [v6 판정 ⑤] 측벽 2 + 노선도 패널 — "다리 4개 카포트" 오독 제거.
+        # [v6 ruling (5)] 2 side walls + route-map panel - removes the "four-legged carport" misreading.
         for i, xe in enumerate((sh["x0"] + sh["side_inset"]/2.0,
                                 sh["x1"] - sh["side_inset"]/2.0)):
             BOX(f"{ROOT}/ShelterSide_{i}",
@@ -1366,7 +1378,7 @@ def main():
             BOX(f"{base}/Head", (lx + sgn*lp["arm_len"], ly,
                                  gz + lp["pole_h"] - 0.18),
                 (lp["head"]*1.5, lp["head"], 0.14), M["lamp"])
-        # 식재대 위 가로수는 지피 상면(0.10)에, 보도 위 가로수는 보도면에.
+        # trees on the planting strip sit on the groundcover top (0.10), trees on the sidewalk on the paving.
         vsoil = PARAMS["verge"]["soil_top"]
         vx = PARAMS["walk"]["xe1"] + 0.001
         for i, (tx, ty) in enumerate(d["trees"]):
@@ -1387,20 +1399,22 @@ def main():
                                   key, PARAMS["window"]))
 
     def build_treeband(M):
-        """[v6 판정 C-2/C-4 · v7 판정 ⑥-2] 원경 수목 실루엣 띠.
+        """[v6 ruling C-2/C-4 · v7 ruling (6)-2] distant tree silhouette band.
 
-        v6 구성(세그당 속 찬 박스 1 + 작은 블롭 1)은 **상단이 평평한 연속 판**
-        이라 "도색 방음벽(초록 슬래브)"으로 읽혔다. 구조를 2층으로 바꾼다.
-          · 하부 박스 = 임관 아래 덤불층. 높이 h·base_frac(0.36) 로 낮춰
-            **실루엣을 만들지 않는다**(스카이라인 담당에서 제외).
-          · 상부 수관 = 세그당 blobs 개의 겹치는 편구 블롭. 개체 높이를
-            0.72~1.16× 지터로 흩어 **상단선이 톱니**가 되게 하고, x 를
-            ±x_jit 흔들어 전후 깊이를 만든다.
-          · 재질은 대기원근 저채도 회록 3종을 좌표 해시로 순환(단색 판 방지).
-        접지 보증: 블롭 중심 z = gz + hj·0.62, rz = hj·0.42 →
-          하단 = gz + hj·0.20 ≤ gz + h·0.36 = 박스 상면(hj ≤ 1.16 h 이므로
-          0.20·1.16 h = 0.232 h < 0.36 h). 즉 **부유 블롭 0**.
-        결정적 지터(인덱스 해시) — 재현성 유지."""
+        The v6 build (one solid box + one small blob per segment) was a **continuous
+        plate with a flat top** and read as a "painted noise wall (green slab)". The
+        structure is changed to two tiers.
+          · lower box = the shrub layer below the canopy. Lowered to h·base_frac
+            (0.36) so it **makes no silhouette** (excluded from skyline duty).
+          · upper canopy = `blobs` overlapping oblate blobs per segment. Individual
+            heights are scattered by a 0.72~1.16× jitter so the **top line is
+            saw-toothed**, and x is shaken by ±x_jit to give fore/aft depth.
+          · the material cycles three aerial-perspective low-saturation grey-greens
+            by coordinate hash (prevents a flat monochrome slab).
+        Grounding guarantee: blob centre z = gz + hj·0.62, rz = hj·0.42 →
+          bottom = gz + hj·0.20 ≤ gz + h·0.36 = box top face (since hj ≤ 1.16 h,
+          0.20·1.16 h = 0.232 h < 0.36 h). So **zero floating blobs**.
+        Deterministic jitter (index hash) — reproducibility preserved."""
         tb = PARAMS["treeband"]
         import random as _random
         gz = PARAMS["ground"]["z_top"]
@@ -1422,9 +1436,9 @@ def main():
                     ((xb_ - xa_) * rnd.uniform(0.8, 1.25), yb - ya + 0.6,
                      h * bf),
                     far[(k + r) % 3])
-                # 수관 반경은 **띠 폭 기준**(높이 기준이 아니라) — 높이 지터가
-                #   커도 x 방향으로 번져 식재대·가로수 열(x ±41.2)을 침범하지
-                #   않게 한다. x 최대 확산 = x_jit 1.2 + rx 1.9 = 3.1 m.
+                # the canopy radius is based on **the band width** (not on height) - so that even a large
+                #   height jitter cannot spread in x and encroach on the planting strip / street-tree row
+                #   (x +-41.2). Maximum x spread = x_jit 1.2 + rx 1.9 = 3.1 m.
                 rw = (xb_ - xa_) * 0.5
                 for j in range(nb):
                     hj = h * rnd.uniform(0.72, 1.16)
@@ -1438,7 +1452,7 @@ def main():
                         (rx, rx * rnd.uniform(0.90, 1.60), hj * 0.42),
                         far[(k + r + j + 1) % 3])
 
-    # ── 씬 조립 ──
+    # ── scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
     M = setup_materials()
     build_site(M)

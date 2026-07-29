@@ -1,28 +1,29 @@
 # -*- coding: utf-8 -*-
 """
-scene16_canopy_shadow.py — NegObs 인공씬 16호: 캐노피 그림자 계단 (Isaac Sim 4.5)
+scene16_canopy_shadow.py — NegObs synthetic scene 16: canopy shadow stair (Isaac Sim 4.5)
 
-유형    : T20 캐노피 계단 (T3의 반전 — 상부 그림자 밴드가 위험 신호)
-사양서  : Docs/multi_scene_brief_v3.md §D scene16_canopy_shadow
-공통    : scene_common.py (검증된 API 헬퍼) · scene02_underpass.py (도시계 골격)
+Type    : T20 canopy stair (the inverse of T3 — the upper shadow band is the danger signal)
+Spec    : Docs/multi_scene_brief_v3.md §D scene16_canopy_shadow
+Shared  : scene_common.py (verified API helpers) · scene02_underpass.py (urban skeleton)
 
-위험 본질: 밝은 보도 한복판에 하강 계단(14단)이 있고, 그 위를 솔리드 캐노피가
-           덮는다. 정오광에서 계단 전체가 캐노피 그림자에 잠겨 어두운 밴드로
-           읽히고 — T3(하부 암부)의 반전으로, 위에 뜬 **상부 그림자 밴드**가
-           낙차의 위험 신호가 된다. cue_nosing 황색 띠가 암부 속 저대비로 잔존.
-목표     : 밝은 보도(plaza_lower) + 하강 계단(plaza_light) + 캐노피(솔리드 지붕
-           +기둥 4) + 하부 통로 + 화단·건물을 조립, 렌더로 판정 (렌더 전용).
+Hazard   : a descending stair (14 steps) sits in the middle of a bright sidewalk, with a solid
+           canopy over it. In noon light the whole stair is sunk in the canopy shadow and reads
+           as a dark band — the inverse of T3 (dark below): here the **upper shadow band** that
+           floats above is what signals the drop. The cue_nosing yellow strip survives inside
+           the shadow at low contrast.
+Goal     : assemble the bright sidewalk (plaza_lower) + descending stair (plaza_light) + canopy
+           (solid roof + 4 columns) + lower passage + planters·buildings, and judge by render (render only).
 
-실행 (GUI 룩 체크 — 기본):
+Run (GUI look check — default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
     export PYTHONNOUSERSITE=1
     python scene16_canopy_shadow.py
 
-자동 캡처 (headless):   NEGOBS_CAPTURE=1 python scene16_canopy_shadow.py
-스모크 조기종료:        NEGOBS_SMOKE=1  python scene16_canopy_shadow.py
+Auto capture (headless):  NEGOBS_CAPTURE=1 python scene16_canopy_shadow.py
+Smoke early exit:         NEGOBS_SMOKE=1  python scene16_canopy_shadow.py
 
-좌표계: Z-up, m, 진행축 +X, 낙차 시작 모서리 = x=0.
+Coordinates: Z-up, m, travel axis +X, drop start edge = x=0.
 """
 
 import os
@@ -37,20 +38,20 @@ import stair_kit as sk       # [realism v1] statutory handrail (§15(3)/(4))
 
 
 # ===========================================================================
-# [A] SCENE_CONFIG — 표준 7키. hazard_stairs 만 기하 토글(False→피트 평지 메움).
+# [A] SCENE_CONFIG - standard 7 keys. Only hazard_stairs toggles geometry (False->pit filled flat).
 # ===========================================================================
 SCENE_CONFIG = {
-    "hazard_stairs":      True,   # False → 피트/계단/통로를 z=0 평지로 (기하 토글 유일 예외)
+    "hazard_stairs":      True,   # False -> pit/stairs/passage become z=0 flat (only geometry toggle)
     # [realism v1] The four stair lines (west + east exit) are now statutory
-    #   **손잡이** (§15(3)/(4)) — one pipe per side, no mid rail, no balusters.
-    #   Both stairs are wall to wall, so §15(1)2 is met by "벽". The pit
+    #   **handrails** (§15(3)/(4)) - one pipe per side, no mid rail, no balusters.
+    #   Both stairs are wall to wall, so §15(1)2 is met by the "wall". The pit
     #   perimeter guard is unchanged. Docs/reports/scene15_railing_fix_v1.md §8.
-    "cue_railing":        True,   # 계단 양측 손잡이 1선씩 + 피트 지상 둘레 난간
-    "cue_tactile":        False,  # [v5.2 사용자] 점자블록 현실에선 드묾 — 기본 OFF(소거 실험용 경로 유지)   # 점형 점자블록: 상단 경고띠 + 하부 통로
-    "cue_material_break": True,   # False → 계단·통로도 보도재(plaza_lower)로 통일
-    "cue_nosing":         True,   # 전 단 황색 논슬립 띠 (암부 속 저대비 — 특색)
-    "cue_sign":           True,   # [v5 공통 레이어] sign_exit(지하보도 출구) 1매
-    "cue_scene_dressing": True,   # 화단·건물·원경 비스타 일괄
+    "cue_railing":        True,   # one handrail per stair side + guardrail around the pit at ground level
+    "cue_tactile":        False,  # [v5.2 user] tactile paving is rare in reality - OFF by default (path kept for ablation)   # dot tactile paving: top warning strip + lower passage
+    "cue_material_break": True,   # False -> stairs·passage also take the sidewalk material (plaza_lower)
+    "cue_nosing":         True,   # yellow non-slip strip on every step (low contrast inside the shadow - the signature)
+    "cue_sign":           True,   # [v5 shared layer] one sign_exit (underpass exit)
+    "cue_scene_dressing": True,   # planters·buildings·distant vista, all together
 }
 
 
@@ -59,34 +60,34 @@ SCENE_CONFIG = {
 # ===========================================================================
 PARAMS = dict(
     walk=dict(x_w=-12.0, x_e=22.0, y_s=-8.0, y_n=8.0, z_top=0.0, thick=0.5),
-    # 하강 피트(트렌치): 계단 폭 3 (y ±1.5), 벽 외면 ±1.8
+    # descending pit (trench): stair width 3 (y +-1.5), outer wall faces +-1.8
     pit=dict(x0=0.0, x1=4.48, y0=-1.5, y1=1.5),
-    # 계단 14단 × riser 0.15 · tread 0.32 → 낙차 2.1m, run 4.48m
+    # 14 steps x riser 0.15 · tread 0.32 -> drop 2.1m, run 4.48m
     stairs=dict(x0=0.0, riser=0.15, tread=0.32, nsteps=14,
                 y0=-1.5, y1=1.5, z_top=0.0, base_z=-2.6),
-    # 하부 통로 (plaza_lower), +X로 이어져 동측 출구 계단으로 올라온다.
+    # lower passage (plaza_lower), continuing +X and rising again at the east exit stair.
     passage=dict(x0=4.48, x1=14.0, z_top=-2.1, base_z=-2.6),
-    # [감사v4 A1] 동측 출구 계단 — 종전엔 x=14 에 전폭 막음벽(Wall_E)이 있어
-    #   2.1 m 내려가 9.5 m 걷고 탈출구가 없는 막다른 골목이었다.
-    #   rot_group 180°(pivot x=(14+18.48)/2) 안에 하강 계단을 지어 상승
-    #   계단으로 매핑: 로컬 x=14(z=0) → 월드 x=18.48, 로컬 x=18.48(z=-2.1) →
-    #   월드 x=14.0 (통로 상면과 flush). 이로써 씬이 "지하보도"로 완결된다.
+    # [audit v4 A1] east exit stair - there used to be a full-width blocking wall (Wall_E) at x=14,
+    #   so you went down 2.1 m, walked 9.5 m and hit a dead end with no way out.
+    #   A descending stair is built inside a rot_group 180 deg (pivot x=(14+18.48)/2) and maps
+    #   to an ascending stair: local x=14(z=0) -> world x=18.48, local x=18.48(z=-2.1) ->
+    #   world x=14.0 (flush with the passage top). This completes the scene as an "underpass".
     east_stairs=dict(x0=14.0, riser=0.15, tread=0.32, nsteps=14,
                      y0=-1.5, y1=1.5, z_top=0.0, base_z=-2.6),
     # [realism v1] `x_start` retired — it is now derived as x0 − ext_top.
     east_rail=dict(y=1.43),
-    # 벽·트렌치 동단 = 동측 계단 상단 (14.0 + 14*0.32 = 18.48)
+    # east end of wall·trench = top of the east stair (14.0 + 14*0.32 = 18.48)
     wall=dict(thick=0.3, y_in=1.5, parapet_top=0.15, base_z=-2.6, x1=18.48),
 
-    # 캐노피: 계단 전체(x 0..4.48) + 상단 1m(x -1) 덮음. 지붕 z=2.6, 기둥 4.
+    # canopy: covers the whole stair (x 0..4.48) + 1m past the head (x -1). Roof z=2.6, 4 columns.
     canopy=dict(x0=-1.0, x1=4.6, y0=-2.0, y1=2.0, z_roof=2.6, post_r=0.13,
                 roof_t=0.14, base_z=-0.05),
 
     # cue
-    # [감사v4 B1] perim_rail y 1.9 → 1.65. y=1.9 는 파라펫(y 1.5..1.8) 밖이라
-    #   포스트 하단(z=0.15)과 보도(z=0) 사이 15 cm 공극이 생겼다. y=1.65 는
-    #   파라펫 벽 중심선 → 포스트가 파라펫 상면(0.15)에 정확히 얹힌다.
-    #   x1 4.48 → 18.48 : 트렌치 전 구간(동측 출구 계단 포함) 방호.
+    # [audit v4 B1] perim_rail y 1.9 -> 1.65. y=1.9 sat outside the parapet (y 1.5..1.8), leaving
+    #   a 15 cm gap between the post foot (z=0.15) and the sidewalk (z=0). y=1.65 is the
+    #   parapet wall centreline -> the posts sit exactly on the parapet top (0.15).
+    #   x1 4.48 -> 18.48 : guards the whole trench (including the east exit stair).
     perim_rail=dict(y=1.65, x0=0.0, x1=18.48, x_rear=None,
                     parapet_top=0.15, rail_h=0.9, post_r=0.03,
                     rail_r=0.03, rail_mid_r=0.018, mid_h=0.45, spacing=1.2),
@@ -100,8 +101,8 @@ PARAMS = dict(
     #        `[measured]`.
     #  Both stairs are **wall to wall**: width 3.00 = 2 × `wall.y_in` 1.50, and
     #  the walls run x 0…18.48 (`Lx = wall.x1 − pit.x0`), covering every rail
-    #  span `[measured]`. So §15(1)2 is met by "벽" and §15(3) prescribes a
-    #  **손잡이** — one pipe per side, no infill.
+    #  span `[measured]`. So §15(1)2 is met by the "wall" and §15(3) prescribes
+    #  a **handrail** - one pipe per side, no infill.
     #  **Post-mounted, not wall-bracketed**, for the same measured reason as
     #  scene02: `wall.parapet_top` = +0.15, so the 850 mm rail line runs 0.70 m
     #  above the wall top at the stair head and only meets the wall from
@@ -115,7 +116,7 @@ PARAMS = dict(
     tactile=dict(ahead=0.3, depth=0.3, proud=0.004, land_depth=0.4),
     nosing=dict(color=(0.85, 0.72, 0.10), width=0.05, proud=0.001),
 
-    # ═══ [W2-D ground_kit] P3 sidewalk_block — 사양 §5.2 scene16 행 ══════════
+    # ═══ [W2-D ground_kit] P3 sidewalk_block - spec §5.2 scene16 row ══════════
     #  Row prescription: "edge weeds on both walk verges · 1 manhole · canopy
     #  drip staining band (eaves projection)"; manhole (-3.9, -0.8).
     #  ★ Tactile is **ON, newly installed** (§12.4, the only ON scene in this
@@ -133,7 +134,7 @@ PARAMS = dict(
     #  ★ The canopy eaves projection line (x = canopy.x0 = -1.0) is only 1.0 m
     #    in front of the drop; drow(-1.0, d10) = 5.65 rows @1080 against a
     #    16-row floor, so a continuous transverse drip band there is a GT-E2
-    #    violation [계산]. The drip is therefore carried as **decals**
+    #    violation [computed]. The drip is therefore carried as **decals**
     #    (`stain` kind "drip") inside the trimmed region instead of a line.
     gkit=dict(
         region=(-12.0, -2.5, 0.0, 2.5),
@@ -145,8 +146,8 @@ PARAMS = dict(
         wear_lane=((-12.0, 0.0), (-0.85, 0.0)),   # desire line to the stairs
     ),
 
-    # 주변 대지 / 드레싱
-    #   gx1 14.5 → 19.0 : 동측 출구 계단(x 14..18.48) 풋프린트도 잔디에서 비운다.
+    # surrounding ground / dressing
+    #   gx1 14.5 -> 19.0 : also clears the east exit stair footprint (x 14..18.48) from the grass.
     ground=dict(size=140.0, z_top=-0.03, gx0=-0.5, gx1=19.0, gy0=-1.85, gy1=1.85),
     planters=[dict(name="A", cx=-4.0, cy=4.0, base_z=0.0),
               dict(name="B", cx=8.0, cy=-4.5, base_z=0.0),
@@ -155,37 +156,37 @@ PARAMS = dict(
     planter=dict(size=3.0, curb_h=0.45, curb_t=0.25, cap_over=0.05,
                  cap_h=0.05, grass_h=0.40),
     buildings=dict(
-        # 원경 비스타 차단(+X 지평선): 파사드 -X평면
+        # blocks the distant vista (+X horizon): facade -X plane
         C=dict(x0=26.0, x1=32.0, y0=-12.0, y1=12.0, h=12.0, floors=4,
                axis="x", facade_x=26.0, face_dir=-1.0),
-        # -X 지평선도 폐쇄 (종전엔 한쪽만 막혀 반대편이 텅 빈 지평선)
+        # the -X horizon is closed too (only one side used to be blocked, leaving the other empty)
         D=dict(x0=-30.0, x1=-24.0, y0=-14.0, y1=14.0, h=15.0, floors=5,
                axis="x", facade_x=-24.0, face_dir=1.0),
     ),
     window=dict(w=1.2, h=1.6, inset=0.15, col_step=2.5, margin=2.0),
 
-    # --- 맥락 드레싱 (cue_scene_dressing) : "지하보도 입구가 있는 도심 광장" ---
-    # 출입구 사인 게이트 (문형 표지) — 개구 상단을 가로지른다
-    # [v5.1 현실성·치명] 피드백 "청색 사인 패널이 공중에 떠 있다 — 왜 위에?"
-    #   원인: 구 Gate/Beam 은 (x −1.2, **y 0**, z 2.55) 에 크기 (2.4, 0.15, 0.45)
-    #   인 박스였다. 즉 **X 방향으로 2.4 m 누운 판**이 개구 한복판 상공에 놓여
-    #   있었고, 기둥은 y ±2.0 이라 판과 기둥이 물리적으로 닿지 않는다 →
-    #   구조적 지지가 없는 부유 청색 패널.
-    #   해결: 보(beam)를 **기둥을 잇는 진짜 인방**으로 바꾼다. Y 로 4.12 m
-    #   (= 2·(y_half + post/2), 두 기둥 바깥면까지) 뻗고 두께는 X 0.22,
-    #   상면(z 2.60)을 기둥 머리와 플러시로 맞춘다 → 문형(portal) 폐합.
-    #   이 인방 자체가 개구 상단 부착형 표지 밴드(gate 재질=감청)가 되므로
-    #   별도 부유 패널은 두지 않는다. 한글 안내는 N-4 의 sign_exit(측면 지주식,
-    #   −1.6, 2.6) 1매로 통합 — 사인 중복 없음.
+    # --- context dressing (cue_scene_dressing) : "a downtown plaza with an underpass entrance" ---
+    # entrance sign gate (portal-type sign) - spans the top of the opening
+    # [v5.1 realism, critical] Feedback: "the blue sign panel floats in mid-air - why up there?"
+    #   Cause: the old Gate/Beam was a box of size (2.4, 0.15, 0.45) at (x −1.2, **y 0**, z 2.55).
+    #   That is, **a 2.4 m slab lying along X** hung above the middle of the opening,
+    #   and with the columns at y +-2.0 the slab never physically touched them ->
+    #   a floating blue panel with no structural support.
+    #   Fix: the beam becomes **a real lintel joining the columns**. It spans 4.12 m in Y
+    #   (= 2·(y_half + post/2), out to both column faces), is 0.22 thick in X, and its top
+    #   (z 2.60) is flush with the column heads -> the portal closes.
+    #   The lintel itself is the sign band mounted at the opening head (gate material = navy),
+    #   so no separate floating panel. Korean wayfinding is consolidated into the one N-4
+    #   sign_exit (side post-mounted, −1.6, 2.6) - no duplicate signage.
     gate=dict(x=-1.2, y_half=2.0, post=0.12, post_h=2.6,
               beam_t=0.22, beam_h=0.40, beam_top=2.60),
-    # [v5.1 §2] 볼라드 규정화 — 구: 트렌치 양옆 y ±3.2 에 x 2.5 m 간격 6본
-    #   (개구를 따라 늘어선 **장식열**. 차량 진입 지점과 무관, 간격 규정 위반).
-    #   신: 동측 출구 계단 상단(x 18.48) 밖 **보도 진입부 1열**(x 20.5)에
-    #   간격 1.5 m·중앙 1.5 m 개구(휠체어 통과)로 6본. 점형블록은 보행자
-    #   접근면(서측) 전면 0.3 m(x 20.2..20.5).
-    #   카메라: 전 프리셋(eye x ≤ −0.5, +X 응시)에서 21~30 m 원경 —
-    #   근접 차폐 0, 판정 대상(계단·캐노피 암부, x 0..4.6)과 무관.
+    # [v5.1 §2] bollards brought to code - old: 6 posts at 2.5 m x spacing on both trench sides (y +-3.2)
+    #   (a **decorative row** lining the opening; unrelated to any vehicle entry, spacing off code).
+    #   New: **one row at the sidewalk entry** (x 20.5) beyond the east exit stair head (x 18.48),
+    #   6 posts at 1.5 m spacing with a 1.5 m central gap (wheelchair passage). Dot tactile paving
+    #   runs 0.3 m across the pedestrian approach face (west, x 20.2..20.5).
+    #   Camera: 21~30 m away in every preset (eye x <= −0.5, looking +X) -
+    #   zero near occlusion, unrelated to the judging subject (stairs·canopy shadow, x 0..4.6).
     bollards=dict(x=20.5, ys=(-3.75, -2.25, -0.75, 0.75, 2.25, 3.75),
                   block=dict(x0=20.2, x1=20.5, y0=-4.05, y1=4.05)),
     benches=[(-5.0, 5.5, 180.0), (-5.0, -5.5, 0.0), (9.0, 5.0, 180.0)],
@@ -193,36 +194,36 @@ PARAMS = dict(
     streetlight=dict(pole_h=5.0, pole_r=0.07, arm_len=0.9, arm_r=0.04,
                      head=0.24),
     hedges=[(-12.0, 6.5, -9.0, 7.3), (14.0, -7.3, 18.0, -6.5)],
-    # 보도 포장 밴드 2줄 (광장 스케일 지시)
+    # 2 sidewalk paving bands (indicate the plaza scale)
     walk_bands=dict(ys=(-6.0, 6.0), width=0.45, z=0.007),
-    # [v5 공통 레이어] 한글 사인 — (태그, TEX 키, cx, cy, base_z, yaw, w, h)
-    #   Exit(−1.6, 2.6): 지하보도 진입부 출구 표지. 트렌치 개구(y ±1.5)에서
-    #     1.10 m, 옹벽 외면(y ±1.8)에서 0.80 m — 위험 기하 이격 ≥0.5 m 충족.
-    #     사인 게이트 기둥(x −1.2, y ±2.0, r 0.12) 에서 0.57 m, 볼라드
-    #     (−1.0, 3.2) 에서 0.92 m, 캐노피(x −1.0..4.6) 서측 밖.
-    #   카메라 검산(그리드 gy=0, eye x −2/−5/−10, 화각 ±30°):
-    #     −2 → 81.3° 밖(거리 2.63 m 측방) · −5 → 37.4° 밖 · −10 → 17.2°(8.81 m)
-    #     approach(−7,0) 25.7°(프레임 가장자리) · shadow_band(−5,0) 37.4° 밖 ·
-    #     under_canopy(−0.5,0) 후방 · beauty_overview(−7,−5) 23.6° 가장자리
-    #     → 계단·암부 판정 대상(화면 중앙)을 가리지 않는다.
+    # [v5 shared layer] Korean signs - (tag, TEX key, cx, cy, base_z, yaw, w, h)
+    #   Exit(−1.6, 2.6): the underpass entrance exit sign. From the trench opening (y +-1.5) it is
+    #     1.10 m, from the retaining wall face (y +-1.8) 0.80 m - meets the >=0.5 m hazard clearance.
+    #     0.57 m from the sign gate column (x −1.2, y +-2.0, r 0.12); from the bollard
+    #     (−1.0, 3.2) 0.92 m; outside the canopy (x −1.0..4.6) on the west.
+    #   Camera check (grid gy=0, eye x −2/−5/−10, FOV +-30 deg):
+    #     −2 -> outside at 81.3 deg (2.63 m to the side) · −5 -> outside at 37.4 deg · −10 -> 17.2 deg (8.81 m)
+    #     approach(−7,0) 25.7 deg (frame edge) · shadow_band(−5,0) outside at 37.4 deg ·
+    #     under_canopy(−0.5,0) behind · beauty_overview(−7,−5) 23.6 deg at the edge
+    #     -> none of them hides the judging subject (stairs·shadow) at frame centre.
     signs=[("Exit", "sign_exit", -1.6, 2.6, 0.0, 180.0, 0.9, 0.45)],
 
     material=dict(
         scale=dict(plaza_lower=0.7, plaza_light=1.80, grass=1.4,
                    brick_red=2.0, tactile=0.3),
         grass_tint=(0.55, 0.68, 0.42),
-        roof_color=(0.72, 0.72, 0.74), roof_rough=0.55,     # 밝은 회색 지붕
+        roof_color=(0.72, 0.72, 0.74), roof_rough=0.55,     # light grey roof
         post_color=(0.55, 0.55, 0.58), post_metallic=0.5, post_rough=0.5,
         wall_tint=(0.85, 0.85, 0.86),
         glass_color=(0.06, 0.09, 0.12), glass_rough=0.08,
         rail_color=(0.80, 0.82, 0.85), rail_metallic=0.9, rail_rough=0.35,
-        # [v5.1 §4] 파라펫 0.90 → 0.72 (순백 대면적 금지)
+        # [v5.1 §4] parapet 0.90 -> 0.72 (no large pure-white areas)
         parapet_color=(0.72, 0.72, 0.69), parapet_rough=0.6,
         curb_color=(0.75, 0.75, 0.72), curb_rough=0.6,
         wood_color=(0.30, 0.20, 0.12), wood_rough=0.85,
         canopy_a=(0.025, 0.045, 0.015), canopy_b=(0.035, 0.060, 0.020),
         canopy_rough=1.0,
-        # 드레싱용 어두운 상수색 (알베도 0.02~0.06 규약)
+        # dark constant colours for dressing (albedo 0.02~0.06 convention)
         band_color=(0.05, 0.05, 0.055), band_rough=0.7,
         gate_color=(0.03, 0.05, 0.09), gate_rough=0.45,
         lamp_color=(0.88, 0.88, 0.84), lamp_rough=0.4,
@@ -237,12 +238,12 @@ PARAMS = dict(
         hdri_sun_rotz_offset=233.5,
         dome_rotation_step=15.0,
     ),
-    # ─── SUN_AZ_OFFSET: 이 씬의 특색(캐노피 그림자가 계단을 덮음)을 좌우하는
-    #     핵심 파라미터. 감독 r1 C-16: 171.5→146.5. 태양 매핑 월드 az ≈
-    #     33.5+offset = 180 → 그림자 az = az−180 = 0 → 지붕(z=2.6, 정오 고도
-    #     elev≈49.79°) 그림자가 +X(계단 하강 방향)로 밀려 피트 개구·계단 전체를
-    #     덮는다. 그림자-계단 정합은 감독이 렌더로 재판정.
-    #     [ ]키(dome_rotation_step 15°)로 GUI에서 추가 스윕 가능. ───
+    # ─── SUN_AZ_OFFSET: the key parameter behind this scene's signature (the canopy
+    #     shadow covering the stairs). Supervisor r1 C-16: 171.5->146.5. Sun mapping world az ~
+    #     33.5+offset = 180 -> shadow az = az−180 = 0 -> the roof (z=2.6, noon elevation
+    #     elev~49.79 deg) casts its shadow toward +X (the stair descent direction), covering the pit
+    #     opening and the whole stair. Shadow-stair alignment is re-judged by the supervisor on renders.
+    #     The [ ] keys (dome_rotation_step 15 deg) allow a further sweep in the GUI. ───
     SUN_AZ_OFFSET=146.5,
 
     render=dict(pt_total_spp=512, pt_max_bounces=8),
@@ -269,7 +270,7 @@ if _sc_ov:
 
 
 # ===========================================================================
-# [C] 경로 상수 + 필요 텍스처 역할
+# [C] path constants + required texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "scene16")
@@ -279,15 +280,15 @@ ASSET_ROLES = ["plaza_lower", "plaza_light", "grass", "tactile",
 
 
 def build_views():
-    """카메라 프리셋: grid_views(gy=0.0) + 미장센 4컷."""
+    """Camera presets: grid_views(gy=0.0) + 4 mise-en-scene cuts."""
     views = sc.grid_views(0.0)
-    # approach: 밝은 보도에서 계단·캐노피로 접근 (상부 그림자 밴드 인상)
+    # approach: from the bright sidewalk toward stairs·canopy (impression of the upper shadow band)
     views["approach"] = dict(eye=[-7.0, 0.0, 1.6], tgt=[3.0, 0.0, -0.6])
-    # shadow_band: 낮은 시점 — 밝은 보도 위 계단만 어두운 밴드
+    # shadow_band: low viewpoint - only the stairs read as a dark band on the bright sidewalk
     views["shadow_band"] = dict(eye=[-5.0, 0.0, 0.35], tgt=[4.0, 0.0, -0.4])
-    # under_canopy: 계단 위에서 캐노피 아래 암부·하부 통로 내려봄
+    # under_canopy: from above the stairs, looking down into the canopy shadow and lower passage
     views["under_canopy"] = dict(eye=[-0.5, 0.0, 1.7], tgt=[4.5, 0.0, -1.6])
-    # beauty_overview: 사선 부감 인상
+    # beauty_overview: oblique high-angle impression
     views["beauty_overview"] = dict(eye=[-7.0, -5.0, 3.2], tgt=[3.0, 1.0, -1.0])
     return views
 
@@ -339,7 +340,7 @@ def main():
         return sc.make_pbr(stage, path, *args, **kwargs)
 
     # -------------------------------------------------------------------
-    # 재질
+    # materials
     # -------------------------------------------------------------------
     def setup_materials():
         sca = mp["scale"]
@@ -377,8 +378,8 @@ def main():
         M["rail"] = PBR(f"{ROOT}/Looks/Rail", diffuse_color=mp["rail_color"],
                         metallic=mp["rail_metallic"],
                         roughness_const=mp["rail_rough"])
-        # [v5.1 §2/§4] 규정 볼라드용 재질 — 본체 3종(틴트 지터 ±5%) + 반사띠.
-        #   반사띠는 소면적이므로 고휘도 허용(순백 대면적 금지 규약과 무관).
+        # [v5.1 §2/§4] materials for the code-compliant bollards - 3 body variants (tint jitter +-5%) + reflective band.
+        #   The band is small in area, so high luminance is allowed (the no-large-pure-white rule does not apply).
         for _i, _f in enumerate((0.95, 1.0, 1.05)):
             M[f"bollard_{_i}"] = PBR(
                 f"{ROOT}/Looks/Bollard_{_i}",
@@ -410,7 +411,7 @@ def main():
         return M
 
     # -------------------------------------------------------------------
-    # 대지 — 잔디 base(피트 풋프린트 4박스 제거) : 공동을 덮지 않음
+    # ground - grass base (4 boxes cut around the pit footprint) : never covers the cavity
     # -------------------------------------------------------------------
     def build_ground(M):
         g = PARAMS["ground"]
@@ -429,7 +430,7 @@ def main():
             (gx1 - gx0, H - gy1, th), M["grass"])
 
     # -------------------------------------------------------------------
-    # 지상 보도 — 트렌치(x 0..14, 벽 외면 ±1.8) 둘레: 서 + 남·북 플랭크
+    # ground-level sidewalk - around the trench (x 0..14, outer wall faces +-1.8): west + south·north flanks
     # -------------------------------------------------------------------
     def build_walk(M):
         w = PARAMS["walk"]
@@ -438,29 +439,29 @@ def main():
         top, th = w["z_top"], w["thick"]
         cz = top - th / 2.0
         y_out = p["y1"] + wl["thick"]            # 1.8
-        x_tr1 = wl["x1"]                          # 트렌치 동쪽 끝 18.48
+        x_tr1 = wl["x1"]                          # trench east end 18.48
         # [W2-0 · P-A] Walk_W is the ground_kit stage — register the skin
         #   exclusion **before** BOX (add_box calls `_skin_wanted` inline).
         sc.skin_exclude(f"{ROOT}/Walk_W")
-        # 서: x_w..0 전폭
+        # west: x_w..0, full width
         BOX(f"{ROOT}/Walk_W",
             ((w["x_w"] + p["x0"]) / 2.0, (w["y_s"] + w["y_n"]) / 2.0, cz),
             (p["x0"] - w["x_w"], w["y_n"] - w["y_s"], th), M["walk"], col=True)
-        # 남: 트렌치 x구간, y_s..-y_out
+        # south: trench x span, y_s..-y_out
         BOX(f"{ROOT}/Walk_S",
             ((p["x0"] + x_tr1) / 2.0, (w["y_s"] - y_out) / 2.0, cz),
             (x_tr1 - p["x0"], (-y_out) - w["y_s"], th), M["walk"], col=True)
-        # 북: 트렌치 x구간, +y_out..y_n
+        # north: trench x span, +y_out..y_n
         BOX(f"{ROOT}/Walk_N",
             ((p["x0"] + x_tr1) / 2.0, (y_out + w["y_n"]) / 2.0, cz),
             (x_tr1 - p["x0"], w["y_n"] - y_out, th), M["walk"], col=True)
-        # 동: 트렌치 끝(x18.48 = 동측 계단 상단)..x_e 전폭
+        # east: trench end (x18.48 = east stair head)..x_e, full width
         BOX(f"{ROOT}/Walk_E",
             ((x_tr1 + w["x_e"]) / 2.0, (w["y_s"] + w["y_n"]) / 2.0, cz),
             (w["x_e"] - x_tr1, w["y_n"] - w["y_s"], th), M["walk"], col=True)
 
     # -------------------------------------------------------------------
-    # [W2-D] ground_kit — P3 sidewalk_block (사양 §5.2 scene16 행)
+    # [W2-D] ground_kit - P3 sidewalk_block (spec §5.2 scene16 row)
     #   Drop edge = pit head x=0 (PARAMS["pit"]["x0"], §7.4). The pit itself is
     #   declared as a **void** so gate B8 (GT-V) refuses any element that would
     #   lay a ground plane over the opening (§6.3).
@@ -504,8 +505,8 @@ def main():
         return res
 
     def build_flat_fill(M):
-        """hazard_stairs=False 대조군: 트렌치를 메워 전체 z=0 평지."""
-        sc.skin_exclude(f"{ROOT}/FlatWalk")      # [W2-0 · P-A] 쌍둥이도 동일 조건
+        """hazard_stairs=False control: the trench is filled, everything flat at z=0."""
+        sc.skin_exclude(f"{ROOT}/FlatWalk")      # [W2-0 · P-A] the twin gets the same conditions
         w = PARAMS["walk"]
         BOX(f"{ROOT}/FlatWalk",
             ((w["x_w"] + w["x_e"]) / 2.0, (w["y_s"] + w["y_n"]) / 2.0,
@@ -514,7 +515,7 @@ def main():
             M["walk"], col=True)
 
     # -------------------------------------------------------------------
-    # 벽 + 계단 + 하부 통로
+    # walls + stairs + lower passage
     # -------------------------------------------------------------------
     def build_walls(M):
         p = PARAMS["pit"]
@@ -530,7 +531,7 @@ def main():
             BOX(f"{ROOT}/Wall_{tag}",
                 ((p["x0"] + wl["x1"]) / 2.0, sgn * y_ctr, cz),
                 (Lx, wl["thick"], hz), M["wall"], col=True)
-        # (감사v4 A1) 동쪽 막음벽 Wall_E 삭제 — 대신 동측 출구 계단이 선다.
+        # (audit v4 A1) east blocking wall Wall_E removed - the east exit stair stands there instead.
 
     def build_stairs(stair_mtl, passage_mtl):
         st = PARAMS["stairs"]
@@ -538,7 +539,7 @@ def main():
             stage, f"{ROOT}/Stairs", st["x0"], st["y0"], st["y1"],
             st["riser"], st["tread"], st["nsteps"], st["base_z"], stair_mtl,
             z_top=st["z_top"], collider=True)
-        # 하부 통로
+        # lower passage
         pa = PARAMS["passage"]
         st = PARAMS["stairs"]
         BOX(f"{ROOT}/Passage",
@@ -548,9 +549,9 @@ def main():
              pa["z_top"] - pa["base_z"]), passage_mtl, col=True)
 
     def build_east_exit(M, stair_mtl):
-        """동측 출구 계단(상승) — rot_group 180°로 하강 계단을 미러링.
-        로컬 x0(z=0)=14.0 → 월드 18.48(보도 상면), 로컬 끝(z=-2.1) → 월드
-        14.0(통로 상면)과 flush. 노징·점자·난간도 같은 그룹 안에서 미러."""
+        """East exit stair (ascending) — the descending stair mirrored by a rot_group 180°.
+        Local x0(z=0)=14.0 → world 18.48 (sidewalk top), local end (z=-2.1) → world
+        14.0, flush with the passage top. Nosing·tactile·railing mirror inside the same group."""
         es = PARAMS["east_stairs"]
         run = es["tread"] * es["nsteps"]
         px = es["x0"] + run / 2.0                      # 16.24
@@ -571,7 +572,7 @@ def main():
                              es["x0"] - tc["ahead"], es["x0"],
                              es["y0"], es["y1"], M["tactile"], z=0.0,
                              proud=tc["proud"])
-        # [realism v1] East exit stair: guardrail → 손잡이 (§15(3)), same
+        # [realism v1] East exit stair: guardrail -> handrail (§15(3)), same
         #   rationale as the west stair (PARAMS.stair_rail). Built in the
         #   rot_group's **local** frame; the 180° flip preserves |y|, so the
         #   wall inner faces are at local y = ±1.50 exactly as in world.
@@ -598,7 +599,7 @@ def main():
                     print(f"[cue_railing] 규정 미달(동측) — {w}")
 
     # -------------------------------------------------------------------
-    # 캐노피 (솔리드 지붕 + 기둥 4) — 계단 전체 + 상단 1m 덮음
+    # canopy (solid roof + 4 columns) - covers the whole stair + 1m past the head
     # -------------------------------------------------------------------
     def build_canopy(M):
         cp = PARAMS["canopy"]
@@ -608,11 +609,11 @@ def main():
                         base_z=cp["base_z"])
 
     # -------------------------------------------------------------------
-    # 단서 (cue) — nosing / tactile / railing
+    # cues - nosing / tactile / railing
     # -------------------------------------------------------------------
     def build_signs():
-        """[v5 공통 레이어] 한글 사인(sc.build_sign). 지하보도 진입부 출구 표지 =
-        낙차 인접 설비 역추론 단서(계열①). 좌표 검산은 PARAMS['signs'] 주석."""
+        """[v5 shared layer] Korean sign (sc.build_sign). The exit sign at the underpass entrance =
+        a cue for inferring a drop from adjacent infrastructure (series (1)). Coordinate checks are in the PARAMS['signs'] comment."""
         back = sc.make_pbr(stage, f"{ROOT}/Looks/SignBack",
                            diffuse_color=(0.16, 0.17, 0.18),
                            metallic=0.6, roughness_const=0.5)
@@ -669,7 +670,7 @@ def main():
             print(f"[cue_railing] 계단 손잡이 2선 (φ{sr['dia'] * 1000:.0f} · "
                   f"h{sr['height'] * 1000:.0f}) · 프림 {n_hr} — 방호는 좌우 "
                   f"옹벽 + 피트 둘레 난간")
-            # 피트 지상 둘레 난간(남·북 가장자리, 계단 폭 구간)
+            # ground-level guardrail around the pit (south·north edges, over the stair width)
             pr = PARAMS["perim_rail"]
             base_z = pr["parapet_top"]
             top_z = base_z + pr["rail_h"]
@@ -695,15 +696,16 @@ def main():
             hrail(f"{ROOT}/PerimRail_N", pr["y"], pr["x0"], pr["x1"])
 
     # -------------------------------------------------------------------
-    # 드레싱 — 화단 2 + 원경 건물
+    # dressing - 2 planters + distant buildings
     # -------------------------------------------------------------------
     def build_bollard_std(M, prefix, cx, cy, bz, k=0):
-        """[v5.1 §2] 규정 볼라드 1본 — 높이 0.90 m · 지름 0.15 m(r 0.075) +
-        상단 백색 반사띠(폭 0.09). 근거: 교통약자의 이동편의 증진법 시행규칙
-        별표2(높이 0.8~1.0 · 지름 0.1~0.2 · 간격 1.5 m 내외 · 밝은 반사띠).
-        구 sc.build_bollard 기본값(r 0.06 · h 0.75)은 규정 하한 미달이라
-        여기서 치수를 명시한다(scene_common 미수정). 본체 재질은 인스턴스별
-        틴트 지터(bollard_0..2)로 '동일 복제' 인상을 뺀다."""
+        """[v5.1 §2] One code-compliant bollard — height 0.90 m · diameter 0.15 m (r 0.075) +
+        a white reflective band on top (0.09 wide). Basis: Enforcement Rule of the Act on
+        Promotion of Mobility Convenience for the Mobility Impaired, Table 2 (height 0.8~1.0 ·
+        diameter 0.1~0.2 · spacing around 1.5 m · a bright reflective band).
+        The old sc.build_bollard defaults (r 0.06 · h 0.75) fall short of the statutory floor,
+        so the dimensions are stated here (scene_common unmodified). The body material takes a
+        per-instance tint jitter (bollard_0..2) to remove the 'identical copies' impression."""
         h, r = 0.90, 0.075
         sc.build_bollard(stage, f"{prefix}/Post", cx, cy, bz,
                          mtl=M[f"bollard_{k % 3}"], radius=r, height=h)
@@ -723,23 +725,23 @@ def main():
             sc.build_building(stage, f"{ROOT}/Building_{key}", bd,
                               M["brick"], M["glass"], M["parapet"],
                               window=PARAMS["window"])
-        # 출입구 사인 게이트 — 개구 상단을 가로지르는 문형 표지("지하보도 입구")
-        # [v5.1] 보를 기둥 사이를 실제로 잇는 인방으로 교체(부유 패널 제거).
+        # entrance sign gate - a portal sign spanning the opening head ("underpass entrance")
+        # [v5.1] The beam becomes a lintel that really joins the columns (floating panel removed).
         ga = PARAMS["gate"]
         for sgn, tag in ((-1.0, "S"), (1.0, "N")):
             BOX(f"{ROOT}/Gate/Post_{tag}",
                 (ga["x"], sgn * ga["y_half"], ga["post_h"] / 2.0),
                 (ga["post"], ga["post"], ga["post_h"]), M["gate"], col=True)
-        span = 2.0 * (ga["y_half"] + ga["post"] / 2.0)     # 4.12 (기둥 바깥면)
+        span = 2.0 * (ga["y_half"] + ga["post"] / 2.0)     # 4.12 (outer column faces)
         BOX(f"{ROOT}/Gate/Beam",
             (ga["x"], 0.0, ga["beam_top"] - ga["beam_h"] / 2.0),
             (ga["beam_t"], span, ga["beam_h"]), M["gate"], col=True)
-        # [v5.1 §2] 규정 볼라드 1열 (동측 보도 진입부) + 점형블록 0.3 m
+        # [v5.1 §2] one row of code-compliant bollards (east sidewalk entry) + 0.3 m dot tactile paving
         bl = PARAMS["bollards"]
         for i, by in enumerate(bl["ys"]):
             build_bollard_std(M, f"{ROOT}/Bollard_{i}", bl["x"], by, 0.0, k=i)
-        # 점형블록은 '점자블록' 단서 계열이므로 cue_tactile 토글에 묶는다
-        #   (OFF 컷에 토글 밖 황색 경고띠가 남지 않게 — 토글 무결성 유지).
+        # Dot tactile paving belongs to the 'tactile paving' cue family, so it is bound to cue_tactile
+        #   (so no yellow warning strip survives outside the toggle in an OFF cut - toggle integrity).
         if cfg["cue_tactile"]:
             bk = bl["block"]
             sc.build_tactile(stage, f"{ROOT}/Tactile_Bollard",
@@ -764,7 +766,7 @@ def main():
         for i, (hx0, hy0, hx1, hy1) in enumerate(PARAMS["hedges"]):
             sc.build_hedge(stage, f"{ROOT}/Hedge_{i}", hx0, hy0, hx1, hy1,
                            0.8, base_z=0.0)
-        # 보도 포장 밴드 2줄 (광장 스케일 지시) — 트렌치 밖 y=±6
+        # 2 sidewalk paving bands (indicate the plaza scale) - outside the trench at y=+-6
         w = PARAMS["walk"]
         wb = PARAMS["walk_bands"]
         for i, by in enumerate(wb["ys"]):
@@ -772,11 +774,11 @@ def main():
                 ((w["x_w"] + w["x_e"]) / 2.0, by, wb["z"] - 0.01),
                 (w["x_e"] - w["x_w"], wb["width"], 0.02), M["band"])
 
-    # ── 씬 조립 ──
+    # ── scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
     M = setup_materials()
     stair_mtl = M["stair"] if cfg["cue_material_break"] else M["walk"]
-    # 통로 재질: 밝은 보도재(plaza_lower)로 하부 톤 유지
+    # passage material: the bright sidewalk material (plaza_lower) keeps the lower tone
     passage_mtl = M["walk"]
 
     build_ground(M)
@@ -791,9 +793,9 @@ def main():
         build_flat_fill(M)
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
-    build_ground_kit(M)             # [W2-D] 지면 요소 — 드레싱 뒤(산포 순서 규약)
+    build_ground_kit(M)             # [W2-D] ground elements - after the dressing (scatter order convention)
     if cfg.get("cue_sign"):
-        build_signs()               # [v5 공통 레이어]
+        build_signs()               # [v5 shared layer]
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])

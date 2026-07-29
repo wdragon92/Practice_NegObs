@@ -1,33 +1,33 @@
 # -*- coding: utf-8 -*-
 """
-sceneD2_floor_opening.py — NegObs 인공씬 29호: 공사장 바닥 개구부 (Isaac Sim 4.5)
+sceneD2_floor_opening.py - NegObs synthetic scene 29: construction-site floor opening (Isaac Sim 4.5)
 
-유형    : D2 비계단 낙차 — 골조 공사 층 슬래브의 무방호 개구 (낙차 3.0 m)
-사양서  : Docs/nanobanana_batch1_geometry_map.md §C sceneD2_floor_opening
-룩 근거 : look_refs/d2_floor_opening.jpg
-공통    : scene_common.py (검증된 API 헬퍼) · scene16_canopy_shadow.py (표준 템플릿)
+Type     : D2 non-stair drop - an unguarded opening in a frame-stage floor slab (drop 3.0 m)
+Spec     : Docs/nanobanana_batch1_geometry_map.md §C sceneD2_floor_opening
+Look ref : look_refs/d2_floor_opening.jpg
+Shared   : scene_common.py (verified API helpers) · scene16_canopy_shadow.py (standard template)
 
-위험 본질: 골조 공사 층(콘크리트 슬래브, 거푸집 자국 벽)의 한복판에 1.5×2.0 m
-           무방호 개구가 뚫려 있고 그 아래는 지하층(z −3.0)이다. 개구 내부는
-           역광·자기폐색으로 "검은 사각형"으로만 읽히며 — 계단처럼 단코가
-           연속하는 단서가 전무해, RGB 맥락(철근 스터브·부스러기 링·거푸집
-           벽면 원근)만이 낙차의 존재를 알린다.
-주의     : sceneN2(신설 아스팔트 패치, GT 음성)와 **"검은 사각형" 최강 혼동쌍**.
-           개구 치수 1.5×2.0 [고정] — 혼동쌍 성립 조건.
-목표     : 슬래브(4박스 분할) + 지하실(바닥·거푸집 벽) + 철근 스터브 + 파쇄
-           부스러기 산포 + 거푸집 벽 2면 / 남측 기둥 개구부(채광원)를 조립,
-           렌더로 판정 (렌더 전용).
+Hazard   : in the middle of a frame-stage floor (concrete slab, form-marked walls) a 1.5x2.0 m
+           unguarded opening is cut through, and below it is the basement (z −3.0). The inside of the
+           opening reads only as a "black rectangle" under backlight and self-occlusion - with no
+           cue of running nosings as a stair would have, only the RGB context (rebar stubs, debris
+           ring, perspective of the formwork wall faces) announces that the drop exists.
+Note     : the **strongest "black rectangle" confusion pair** with sceneN2 (fresh asphalt patch, GT negative).
+           Opening dimensions 1.5x2.0 [fixed] - the condition for the confusion pair to hold.
+Goal     : assemble the slab (split into 4 boxes) + basement (floor, formwork walls) + rebar stubs +
+           crushed debris scatter + 2 formwork walls / south column openings (light source), and
+           adjudicate by render (render only).
 
-실행 (GUI 룩 체크 — 기본):
+Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
     export PYTHONNOUSERSITE=1
     python sceneD2_floor_opening.py
 
-자동 캡처 (headless):   NEGOBS_CAPTURE=1 python sceneD2_floor_opening.py
-스모크 조기종료:        NEGOBS_SMOKE=1  python sceneD2_floor_opening.py
+Auto capture (headless):  NEGOBS_CAPTURE=1 python sceneD2_floor_opening.py
+Smoke early exit:         NEGOBS_SMOKE=1  python sceneD2_floor_opening.py
 
-좌표계: Z-up, m, 진행축 +X, 낙차 시작 모서리 = x=0 (개구 서쪽 립).
+Coordinates: Z-up, m, travel axis +X, drop start edge = x=0 (west lip of the opening).
 """
 
 import os
@@ -42,17 +42,17 @@ import ground_kit as gk
 
 
 # ===========================================================================
-# [A] SCENE_CONFIG — 표준 7키. hazard_opening 대신 hazard_stairs 키를 유지
-#     (라이브러리 공통 규약: 기하 토글 유일 예외).
+# [A] SCENE_CONFIG - standard 7 keys. The key stays hazard_stairs rather than hazard_opening
+#     (shared library convention: the single exception for a geometry toggle).
 # ===========================================================================
 SCENE_CONFIG = {
-    "hazard_stairs":      True,   # False → 개구를 슬래브로 메워 z=0 평지 (대조군)
-    "cue_railing":        False,  # 임시 개구부 안전난간 — 기본 OFF(**무방호가 특색**)
-    "cue_tactile":        False,  # 해당 없음(공사장) — 키만 예약
-    "cue_material_break": True,   # False → 지하층도 슬래브와 동일 재질(대비 소거)
-    "cue_nosing":         False,  # 개구 둘레 황색 경고 도색 — 기본 OFF(무방호)
-    "cue_sign":           False,  # [선택] 미구현 — 키만 예약
-    "cue_scene_dressing": True,   # 거푸집 패널·잔토 더미·외부 흙무지·원경 능선
+    "hazard_stairs":      True,   # False -> the opening is filled with slab, giving flat z=0 (control)
+    "cue_railing":        False,  # temporary opening safety railing - OFF by default (**unguarded is the point**)
+    "cue_tactile":        False,  # not applicable (construction site) - key reserved only
+    "cue_material_break": True,   # False -> the basement gets the same material as the slab (contrast removed)
+    "cue_nosing":         False,  # yellow warning paint around the opening - OFF by default (unguarded)
+    "cue_sign":           False,  # [optional] not implemented - key reserved only
+    "cue_scene_dressing": True,   # formwork panels · spoil piles · outside earth mounds · distant ridge
 }
 
 
@@ -60,110 +60,110 @@ SCENE_CONFIG = {
 # [B] PARAMS
 # ===========================================================================
 PARAMS = dict(
-    # 골조 층 슬래브(=지상 레벨). 남·서는 외부 흙과 거의 flush(보행 연속),
-    # 동·북은 거푸집 벽으로 폐쇄 → 지평선 차단.
+    # Frame-stage floor slab (= ground level). South and west are nearly flush with the outside earth
+    # (walking continuity); east and north are closed off by formwork walls -> horizon blocked.
     deck=dict(x_w=-9.0, x_e=8.45, y_s=-6.5, y_n=6.5, z_top=0.0, thick=0.25),
 
-    # ★ 무방호 개구: 진행축 2.0 m × 폭 1.5 m. 서쪽 립이 낙차 시작 모서리 x=0.
-    #   [고정] sceneN2(4×5 m 아스팔트 패치)와의 혼동쌍 성립 조건.
+    # * Unguarded opening: 2.0 m along the travel axis x 1.5 m wide. Its west lip is the drop start edge x=0.
+    #   [fixed] the condition for the confusion pair with sceneN2 (4x5 m asphalt patch).
     opening=dict(x0=0.0, x1=2.0, y0=-0.75, y1=0.75),
 
-    # 개구 하단에 매달린 거푸집 다운스탠드(그을린 암색) — 립 바로 아래를
-    # 확실히 어둡게. 내면을 개구보다 0.01 바깥으로 물려 동일평면 회피.
-    #   z_top −0.24 = 슬래브 하면(−0.25)에 0.01 물림 → 수평 동일평면 회피.
+    # Formwork downstand hung under the opening (charred dark) - makes the area right below the lip
+    # reliably dark. Its inner face is set 0.01 outside the opening to avoid coplanarity.
+    #   z_top -0.24 = bites 0.01 into the slab underside (-0.25) -> avoids horizontal coplanarity.
     skirt=dict(inset=0.01, thick=0.35, z_top=-0.24, z_bot=-0.55),
 
-    # 지하층(개구 아래). 개구보다 넉넉히 넓어 통과광이 바닥에 착지 → 반사광이
-    # 동쪽 벽(카메라가 개구 너머로 보는 면)을 비춘다 = "어둡되 0 아님".
+    # Basement (below the opening). Generously wider than the opening so light through it lands on the
+    # floor -> the bounce lights the east wall (the face the camera sees past the opening) = "dark but not 0".
     lower=dict(x0=-5.0, x1=7.0, y0=-4.5, y1=4.5,
                z_floor=-3.0, floor_t=0.5, wall_t=0.35, z_ceil=-0.20),
 
-    # 거푸집 벽(동·북) — 층고 3.2, 지평선 폐쇄용.
-    #   벽 외곽면을 데크 가장자리보다 **엄격히 안쪽**에 두고(동 8.30<8.45,
-    #   북 6.45<6.50), 동·북 벽의 z 범위를 서로 다르게 해 코너 동일평면 제거.
+    # Formwork walls (east, north) - storey height 3.2, used to close the horizon.
+    #   The outer wall faces sit **strictly inside** the deck edges (east 8.30<8.45,
+    #   north 6.45<6.50), and the east and north walls get different z ranges to remove corner coplanarity.
     walls=dict(t=0.30, n_t=0.28, h=3.2, x_face=8.0, y_face=6.15,
                e_y0=-6.05, e_y1=6.45, n_x0=-8.65, n_x1=8.15,
                n_h_delta=0.06, n_base=-0.12, base=-0.09),
 
-    # 남측 기둥 개구부(콜로네이드) — 기둥 사이로 외부 흙·하늘이 보이는 채광원
+    # South column openings (colonnade) - a light source where outside earth and sky show between the columns
     colonnade=dict(y_c=-6.2, size=0.45, h=3.2,
                    xs=[-6.5, -3.5, -0.5, 2.5, 5.5]),
 
-    # 철근 스터브: 직선 6본(수직) + 굽은 것 2본(_oriented_box 근사) + 갈고리 1
+    # Rebar stubs: 6 straight (vertical) + 2 bent (_oriented_box approximation) + 1 hook
     rebar=dict(r=0.006, h=0.36, z_c=0.13,
                straight=[(-0.20, -0.55), (-0.20, 0.60), (0.70, -0.95),
                          (1.55, 0.96), (2.20, -0.30), (2.22, 0.62)],
                bent=[(0.05, -0.98, 32.0, 18.0), (2.32, 0.05, 27.0, -64.0)],
                bent_len=0.42, bent_t=0.013,
-               # 갈고리: (-0.20,-0.55) 직선 스터브 상단을 관통하도록 배치(부유 금지)
+               # hook: placed to pierce the top of the straight stub at (-0.20,-0.55) (no floating)
                hook=dict(cx=-0.20, cy=-0.42, z=0.293, lx=0.30, t=0.013,
                          yaw=90.0)),
 
-    # ═══ [W2 ground_kit] P15 slab_construction — 사양 §5.8 D2 행 ═══════════
-    #  처방: 개구 표시 도색의 **마모 잔흔**(황색 잔존 20~30 %) · 먹줄(부분
-    #  구간) · 콜드 조인트 · 백화 얼룩 · 발자국 8~15.
-    #  근거: 산안규칙 §43 은 "개구부임을 표시" 를 요구하는데, 실물은 팻말이
-    #  아니라 **노면 도색**이고 타설 후 통행으로 절반 이상 지워져 있다.
-    #  ★ GT-V(§6.3): 개구(x 0…2 · y ±0.75) 위에는 **어떤 요소도 걸치지
-    #    않는다**. region 원단을 개구 서립(x=0)에서 끊고 `voids` 로 개구를
-    #    넘겨 `plan_ground` 가 전 요소 AABB × 개구 교차를 어서션하게 한다.
-    #  ★ 개구 표시 도색은 **종방향 2본(y=±1.05) + 횡방향 1본(x=−3.00)** 의
-    #    ㄷ 자다. 종방향 2본은 GT-E1′ 때문에 서립에서 0.15 m 물린다
-    #    (도색 proud 0.003 × EDGE_K 40 = 0.12 m 필요 `[계산]`).
-    #  ★ [2026-07-30, 킷 결함 F1 수정 후] W2-D 라운드는 횡방향 띠를 **보류**
-    #    했었다 — `ground_kit._ik_marking` 이 요소 AABB 를 yaw 를 무시하고
-    #    +X 로 깔아서 횡단 띠가 "개구를 가로지르는 요소"로 오판정돼 B8/B6 에
-    #    걸렸기 때문이다. F1 이 고쳐진 지금 **그 두 게이트는 깨끗하다**
-    #    `[실측 — 서립 앞 x=−0.225 배치를 재현하면 B6·B8 은 통과하고 B7 만
-    #     남는다]`. 남은 것은 오판정이 아니라 진짜 규칙이다:
-    #      GT-E2 — 립 바로 앞의 전폭 횡단 단선은 GRAZE 에서 립과 융합한다.
-    #      x=−0.225 에서 Δ = 19.7/3.1/0.8 행@1080 (요구 32/32/16) `[실측]`.
-    #      d10 E 대역(7~22 m)을 통과하려면 근단이 **립에서 2.60 m** 물러나야
-    #      한다 `[계산]`.
-    #    → 띠를 종방향 2본의 서단(x=−3.00)에 놓아 도색 구역을 **개구 쪽으로
-    #      열린 ㄷ 자**로 닫는다. 립 쪽이 먼저 닳는 실물 마모 순서와 §5.8 의
-    #      "황색 잔존 20~30 %" 처방에 그대로 맞고, 전 컷에서 합법이다
-    #      (d2·d5 는 E 대역 밖, d10 은 Δ 21.0 ≥ 16 `[실측]`).
-    #      립을 감싸는 배치를 원한다면 점자블록과 같은 **GT-E2-x 등재**
-    #      (EXPECTED_FP) 가 필요하고 그건 GRAZE 판정자 소관이다 — 감독 안건.
+    # ═══ [W2 ground_kit] P15 slab_construction - spec §5.8 D2 row ═══════════
+    #  Prescription: **wear remnants** of the opening marking paint (20-30 % yellow left) · ink snap
+    #  lines (partial runs) · cold joints · efflorescence stains · 8-15 footprints.
+    #  Basis: Occupational Safety and Health Standards Rules §43 requires "marking that it is an
+    #  opening", and in reality that is **floor paint**, not a sign, and it is more than half worn away by traffic after the pour.
+    #  * GT-V (§6.3): **no element whatsoever** may overhang the opening (x 0…2 · y +-0.75).
+    #    The region far end is cut at the opening's west lip (x=0) and the opening is passed through
+    #    `voids` so that `plan_ground` asserts on every element AABB x opening intersection.
+    #  * The opening marking paint is a **U shape** of **2 longitudinal lines (y=+-1.05) + 1 transverse
+    #    line (x=-3.00)**. The 2 longitudinal lines are inset 0.15 m from the west lip because of GT-E1′
+    #    (paint proud 0.003 x EDGE_K 40 = 0.12 m required `[computed]`).
+    #  * [2026-07-30, after kit defect F1 was fixed] the W2-D round had **deferred** the transverse
+    #    band - `ground_kit._ik_marking` laid element AABBs along +X ignoring yaw, so a transverse
+    #    band was misjudged as "an element crossing the opening" and tripped B8/B6.
+    #    Now that F1 is fixed, **those two gates are clean**
+    #    `[measured - reproducing the x=-0.225 placement in front of the west lip, B6 and B8 pass and only B7
+    #     remains]`. What is left is not a misjudgement but a genuine rule:
+    #      GT-E2 - a full-width transverse line just in front of the lip merges with the lip under GRAZE.
+    #      At x=-0.225, delta = 19.7/3.1/0.8 rows@1080 (32/32/16 required) `[measured]`.
+    #      To pass the d10 E band (7-22 m) the near end must stand back **2.60 m from the lip**
+    #      `[computed]`.
+    #    -> the band is therefore placed at the west end of the 2 longitudinal lines (x=-3.00), closing
+    #      the painted zone into a **U that opens toward the opening**. That matches the real wear order
+    #      (the lip side wears first) and §5.8's "20-30 % yellow left" prescription exactly, and it is legal in every cut
+    #      (d2 and d5 are outside the E band, d10 has delta 21.0 >= 16 `[measured]`).
+    #      A layout wrapping the lip would need a **GT-E2-x listing** (EXPECTED_FP) like tactile paving,
+    #      and that is the GRAZE adjudicator's remit - a supervisor agenda item.
     gkit=dict(
         region=(-9.0, -6.0, 0.0, 6.0),
-        #  개구 표시 도색 잔흔 — (x0, y0, yaw, length). 서립에서 0.15 물림.
-        #  3본째는 yaw 90° 횡단 띠: x=−3.00 중심, y −1.125…+1.125 (종방향
-        #  2본의 폭 0.15 바깥선까지 덮어 모서리가 맞물린다).
+        #  Opening marking paint remnants - (x0, y0, yaw, length). Inset 0.15 from the west lip.
+        #  The third line is a yaw 90 deg transverse band: centred at x=-3.00, y -1.125…+1.125 (covering out to
+        #  the outer edge of the 2 longitudinal 0.15-wide lines so the corners interlock).
         mark_lines=[(-3.00, -1.05, 0.0, 2.85), (-3.00, 1.05, 0.0, 2.85),
                     (-3.00, -1.125, 90.0, 2.25)],
-        #  발자국 동선 — 개구를 향해 걸어온 흔적(개구 위는 지나지 않는다).
+        #  Footprint trail - traces of walking toward the opening (never across it).
         foot_path=[(-7.0, -0.90), (-1.2, -0.30)],
         foot_n=12,
     ),
 
-    # 파쇄 콘크리트 부스러기 산포 (seed 고정)
+    # Crushed concrete debris scatter (fixed seed)
     debris=dict(seed=2907, count=46, perim_ratio=0.6,
                 x0=-2.2, x1=4.2, y0=-2.6, y1=2.6,
                 ring_lo=0.03, ring_hi=0.55,
                 s_lo=0.030, s_hi=0.130, sink=0.35),
 
-    # cue (기본 OFF — 무방호가 이 씬의 위험 본질)
+    # cue (OFF by default - being unguarded is this scene's hazard essence)
     nosing=dict(width=0.15, proud=0.002, color=(0.85, 0.72, 0.10)),
     opening_rail=dict(rail_h=0.95, post_r=0.025, rail_r=0.022,
                       mid_h=0.48, offset=0.45),
 
-    # 외부 지면(흙) — 슬래브와 0.05 단차뿐 → 보행 연속성 확보(교훈 9)
-    #   overlap: 지면 4박스를 건물 풋프린트 안쪽으로 6 cm 밀어넣어 슬래브
-    #   측면과의 수직 동일평면(전/후면 맞댐 → Z-파이팅)을 제거한다.
+    # Outside ground (earth) - only a 0.05 level difference from the slab -> secures walking continuity (lesson 9)
+    #   overlap: the 4 ground boxes are pushed 6 cm inside the building footprint to remove vertical
+    #   coplanarity with the slab sides (front/back butt joint -> Z-fighting).
     ground=dict(z_top=-0.05, thick=1.0, half=60.0, overlap=0.06),
     dressing=dict(
-        # 거푸집 패널 3매(북벽에 기대 세움)
+        # 3 formwork panels (leaned against the north wall)
         panels=[dict(cx=3.0), dict(cx=4.4), dict(cx=5.8)],
         panel=dict(w=1.15, t=0.055, h=2.35, y_c=6.10, tilt=12.0),
-        # 잔토·자갈 더미 2
+        # 2 spoil / gravel piles
         piles=[dict(cx=6.1, cy=-4.6, sx=1.7, sy=1.15, sz=0.42),
                dict(cx=-6.8, cy=4.1, sx=1.2, sy=0.9, sz=0.30)],
-        # 외부 흙무지 2 + 원경 능선(-Y 지평 폐쇄)
-        #   v2(맥락 드레싱): r2 판정 "우측 마운드가 매끈한 조약돌로 이질적" →
-        #   **낮고 넓게 + 로브 3분할**로 잔토 더미화. 최고점 ≈ gz−sink+sz.
-        #   (예: −0.05−0.55+1.45 = 0.85 m 높이 × 18 m 폭 = 잔토 프로파일)
+        # 2 outside earth mounds + distant ridge (closes the -Y horizon)
+        #   v2 (context dressing): r2 verdict "the right mound reads as a smooth pebble, out of place" ->
+        #   made **low and wide + split into 3 lobes** to become a spoil pile. Peak ~ gz-sink+sz.
+        #   (e.g. -0.05-0.55+1.45 = 0.85 m high x 18 m wide = a spoil profile)
         mounds=[dict(cx=-16.0, cy=-26.0, sink=0.55,
                      lobes=[(0.0, 0.0, 9.0, 5.2, 1.45),
                             (7.5, 2.4, 5.6, 3.4, 1.05),
@@ -175,46 +175,46 @@ PARAMS = dict(
         ridge=dict(cy=-52.0, half_x=58.0, t=8.0, h=8.5),
     ),
 
-    # ─── 맥락 드레싱 v2 (2026-07-27, 휑함 해소) ────────────────────────────
-    #   목적: "여기가 골조 공사 현장"이 읽히게. 전 요소 cue_scene_dressing 소속.
-    #   ★ 불변: 개구(1.5×2.0)·철근 스터브·부스러기 산포·슬래브 4분할·스커트·지하층.
-    #   ★ 배치 원칙(검산은 build_site_dressing docstring):
-    #     ① grid_views(gy=0) 카메라 → 개구 시선 반폭 |y| ≤ 0.75·(x+10)/10.
-    #        신규 입체는 전부 그 웨지 **밖**(최소 이격 1.6 m 이상).
-    #     ② 개구 자체는 **무방호 유지** — 안전 펜스는 개구에서 3.9 m 이상 이격,
-    #        개구를 둘러싸지 않는 **직선 1열**(북측)로만 둔다.
-    #     ③ 원경 크레인은 동벽(x 8.15, h 3.2) 남단을 스치는 방위에만 성립 —
-    #        좌표 검산으로 시선 통과를 확인(주석 참조).
+    # ─── context dressing v2 (2026-07-27, fixing the barren look) ────────────────────────────
+    #   Purpose: make "this is a frame-stage construction site" legible. Every element belongs to cue_scene_dressing.
+    #   * Unchanged: opening (1.5x2.0) · rebar stubs · debris scatter · slab 4-way split · skirt · basement.
+    #   * Placement principles (numeric checks in the build_site_dressing docstring):
+    #     (1) grid_views(gy=0) cameras -> opening sight wedge half-width |y| <= 0.75·(x+10)/10.
+    #        Every new solid sits **outside** that wedge (clearance 1.6 m or more).
+    #     (2) the opening itself **stays unguarded** - the safety fence keeps 3.9 m or more from it and
+    #        is placed as a **single straight row** (north side) that does not surround the opening.
+    #     (3) the distant crane only works at a bearing that grazes the south end of the east wall (x 8.15, h 3.2) -
+    #        sight-line clearance confirmed by coordinate check (see comments).
     site=dict(
-        # 철근 다발(눕힘). 저프로파일(≤0.20 m)이라 어떤 시선도 가리지 않는다.
+        # Rebar bundle (laid down). Low profile (<=0.20 m), so it blocks no sight line.
         rebar_bundles=[dict(tag="A", cx=-3.40, cy=3.90, yaw=4.0, L=5.0,
                             rows=3, per_row=4),
                        dict(tag="B", cx=3.20, cy=-3.40, yaw=-7.0, L=4.2,
                             rows=2, per_row=5)],
         bundle=dict(r=0.010, batten_w=0.16, batten_h=0.085, batten_d=0.45,
                     strap_t=0.012),
-        # 시멘트 포대 팔레트
+        # Cement bag pallets
         bagpallets=[dict(tag="A", cx=-3.60, cy=-3.60, yaw=12.0, layers=4),
                     dict(tag="B", cx=4.60, cy=3.40, yaw=-8.0, layers=3)],
         bagpallet=dict(pw=1.20, pd=1.00, pt=0.14, bw=0.52, bd=0.34, bh=0.11,
                        seed=6203),
-        # 이동식 안전 펜스 3매 (북측 1열 — **개구는 무방호 유지가 특색**)
+        # 3 movable safety fences (single north row - **the opening staying unguarded is the point**)
         fences=[dict(cx=-1.00, cy=4.60), dict(cx=1.10, cy=4.60),
                 dict(cx=3.20, cy=4.60)],
         fence=dict(w=2.00, h=1.90, post_r=0.024, rail_r=0.018, bar_r=0.008,
                    n_bar=7, foot_d=0.62, foot_w=0.10, foot_h=0.06),
-        # 전선 릴 · 공구 상자
+        # Cable reel · tool boxes
         reel=dict(cx=-5.40, cy=2.40, flange_r=0.46, flange_t=0.05,
                   coil_r=0.40, coil_w=0.42),
         toolboxes=[dict(cx=-4.85, cy=1.70, yaw=15.0, w=0.72, d=0.40, h=0.36),
                    dict(cx=-5.95, cy=3.15, yaw=-22.0, w=0.55, d=0.34, h=0.30)],
-        # 기둥 안전 표어 박판(무텍스트 색면) — colonnade 인덱스 3(x 2.5)·4(x 5.5)
+        # Column safety-slogan panels (textless colour fields) - colonnade indices 3 (x 2.5) and 4 (x 5.5)
         placards=[dict(col=3, z=1.58), dict(col=4, z=1.66)],
         placard=dict(w=0.42, h=0.56, t=0.04, band_h=0.14, proud=0.010),
-        # 원경 타워크레인 (가는 박스 조합, 거리 ≈110 m)
-        #   cy=−40: 동벽 남단(y −6.05)·기둥(x 5.5, y −6.425..−5.975) 양쪽을
-        #   여유 있게 비껴가는 방위(검산치는 build_site_dressing docstring).
-        #   정점 15.4 m @ 거리 110 m → 앙각 7.5° < 프레임 상한 8.0°.
+        # Distant tower crane (assembly of thin boxes, distance ~110 m)
+        #   cy=-40: a bearing that clears both the east wall's south end (y -6.05) and the column
+        #   (x 5.5, y -6.425..-5.975) with margin (numbers in the build_site_dressing docstring).
+        #   Apex 15.4 m at 110 m -> elevation 7.5 deg < frame top limit 8.0 deg.
         crane=dict(cx=100.0, cy=-40.0, base_z=-1.20,
                    mast_w=1.15, mast_top=14.20,
                    apex_w=1.60, apex_top=15.40,
@@ -223,8 +223,8 @@ PARAMS = dict(
                    cw_w=1.60, cw_d=2.40, cw_h=1.80,
                    hook_dy=-14.0, hook_w=0.46, hook_h=0.85, hook_z0=6.60,
                    rope_w=0.07),
-        # 원경 지면 패드 — 기존 ground(half 60) 밖으로 시선이 빠지지 않게 폐쇄.
-        #   상면 −0.06 = 기존 지면(−0.05)보다 1 cm 아래 → 겹침부 코플래너 0.
+        # Distant ground pad - closes the view so it cannot escape past the existing ground (half 60).
+        #   Top face -0.06 = 1 cm below the existing ground (-0.05) -> zero coplanarity in the overlap.
         farpad=dict(x0=45.0, x1=420.0, y0=-260.0, y1=260.0,
                     z_top=-0.06, thick=1.0),
     ),
@@ -232,27 +232,27 @@ PARAMS = dict(
     material=dict(
         scale=dict(concrete_floor=1.2, concrete_wall=2.0,
                    dirt_park=3.0, gravel=0.9),
-        slab_tint=(0.88, 0.86, 0.82),       # 시멘트 먼지 틴트(밝은 회백)
-        lower_wall_tint=(0.58, 0.58, 0.57),  # 지하 거푸집 — 채도·명도 저하
+        slab_tint=(0.88, 0.86, 0.82),       # cement dust tint (light grey-white)
+        lower_wall_tint=(0.58, 0.58, 0.57),  # basement formwork - lower saturation and value
         lower_floor_tint=(0.52, 0.51, 0.49),
-        wall_tint=(0.92, 0.91, 0.89),        # 지상 거푸집 벽(밝음)
-        # 개구 하단 그을린 거푸집 — sRGB 암색 대역 0.02~0.06 [교훈 1]
+        wall_tint=(0.92, 0.91, 0.89),        # above-ground formwork wall (bright)
+        # Charred formwork under the opening - sRGB dark band 0.02-0.06 [lesson 1]
         skirt_color=(0.042, 0.042, 0.045), skirt_rough=0.95,
         rebar_color=(0.25, 0.12, 0.08), rebar_metallic=0.8, rebar_rough=0.6,
-        debris_colors=[(0.30, 0.29, 0.27), (0.24, 0.23, 0.22),   # r1: 0.55는 백색 지각 → 감광
+        debris_colors=[(0.30, 0.29, 0.27), (0.24, 0.23, 0.22),   # r1: 0.55 is perceived as white -> darkened
                        (0.18, 0.175, 0.17)],
         debris_rough=0.95,
-        panel_color=(0.46, 0.38, 0.27), panel_rough=0.88,   # 합판 거푸집
+        panel_color=(0.46, 0.38, 0.27), panel_rough=0.88,   # plywood formwork
         rail_color=(0.80, 0.60, 0.10), rail_metallic=0.6, rail_rough=0.5,
-        # ── 맥락 드레싱 v2 ── (소품 중간톤 0.18~0.35 규약 준수. 암색 0.02~0.09
-        #    대역은 개구 스커트·전선 코일처럼 '실제로 검은' 것에만.)
-        bag_color=(0.52, 0.49, 0.43), bag_rough=0.92,       # 시멘트 포대(종이)
+        # ── context dressing v2 ── (props keep to the 0.18-0.35 mid-tone convention. The 0.02-0.09 dark
+        #    band is only for things that are 'actually black', like the opening skirt and the cable coil.)
+        bag_color=(0.52, 0.49, 0.43), bag_rough=0.92,       # cement bag (paper)
         fence_color=(0.50, 0.51, 0.53), fence_metallic=0.60,
         fence_rough=0.38,
-        cable_color=(0.055, 0.055, 0.060), cable_rough=0.85,  # 전선 코일(암색)
+        cable_color=(0.055, 0.055, 0.060), cable_rough=0.85,  # cable coil (dark)
         tool_color=(0.34, 0.12, 0.09), tool_metallic=0.20, tool_rough=0.55,
         placard_color=(0.68, 0.68, 0.65), placard_rough=0.60,
-        placard_band=(0.09, 0.34, 0.18),                    # 안전 표어 색띠(녹)
+        placard_band=(0.09, 0.34, 0.18),                    # safety slogan colour band (green)
         crane_color=(0.40, 0.38, 0.33), crane_metallic=0.25,
         crane_rough=0.70,
     ),
@@ -266,17 +266,17 @@ PARAMS = dict(
         hdri_sun_rotz_offset=233.5,
         dome_rotation_step=15.0,
     ),
-    # ─── SUN_AZ_OFFSET 근거 (씬별 재정의 — 브리프 v3 §A-7) ───
-    #   태양 매핑 월드 az ≈ 33.5 + offset = 185.5  →  그림자 az = az−180 = 5.5°
-    #   ① 그림자가 거의 정 +X (카메라 등 뒤 태양) → 슬래브 상면·철근 스터브·
-    #      부스러기가 정면광으로 또렷하고, 개구는 상대적으로 더 검게 읽힌다.
-    #   ② 개구(x 0..2)를 통과한 직달광은 3.0 m 낙하하는 동안 수평으로
-    #      3.0/tan(49.79°) = 2.53 m 밀려 지하 바닥 x 2.53..4.53 에 착지.
-    #      그 광반의 반사광이 지하 동쪽 벽(x=7.0)을 비추고, 그 벽면이 바로
-    #      h0.9/d4~5 보행 시점에서 개구 너머로 보이는 영역(z −1.6..−0.8)이다.
-    #      → **"어둡되 완전 0 아님"** 목표(사양서 §C)를 기하학적으로 보장.
-    #   ③ +5.5°의 미세 요각으로 광반·그림자가 살짝 사선이 되어 평면적 인상 회피.
-    #   [ ]키(dome_rotation_step 15°)로 GUI 추가 스윕 가능.
+    # ─── basis for SUN_AZ_OFFSET (redefined per scene - brief v3 §A-7) ───
+    #   Sun mapping world az ~ 33.5 + offset = 185.5  ->  shadow az = az-180 = 5.5 deg
+    #   (1) shadows fall almost due +X (sun behind the camera) -> the slab top face, rebar stubs and
+    #      debris are crisp under frontal light, and the opening reads relatively blacker.
+    #   (2) direct light through the opening (x 0..2) drifts 3.0/tan(49.79 deg) = 2.53 m horizontally
+    #      while falling 3.0 m, landing on the basement floor at x 2.53..4.53.
+    #      The bounce off that light pool illuminates the basement east wall (x=7.0), and that wall face is
+    #      exactly the region (z -1.6..-0.8) visible past the opening from the h0.9/d4-5 walking eye.
+    #      -> geometrically guarantees the **"dark but not fully 0"** goal (spec §C).
+    #   (3) the slight +5.5 deg yaw puts the light pool and shadows a touch off-axis, avoiding a flat look.
+    #   The [ ] keys (dome_rotation_step 15 deg) allow a further GUI sweep.
     SUN_AZ_OFFSET=152.0,
 
     render=dict(pt_total_spp=512, pt_max_bounces=8),
@@ -284,10 +284,10 @@ PARAMS = dict(
 
 
 def fence_placements():
-    """[v5.1 §3] 이동식 안전 펜스 3매 — 등간격 2.1 m·축평행을 해소.
-    위치 ±0.18 m · yaw ±3~8° (좌표 해시 결정적). 실제 현장의 가설 펜스는
-    딱 맞춰 늘어서 있지 않다. ★ 개구(무방호 유지)와의 이격 3.9 m 는
-    지터폭(0.18)보다 압도적으로 커서 '개구 무방호' 특색 불변."""
+    """[v5.1 §3] 3 movable safety fences - breaks up the even 2.1 m spacing and axis-parallel look.
+    Position +-0.18 m · yaw +-3~8 deg (deterministic from a coordinate hash). Temporary fences on a real
+    site are not lined up exactly. * The 3.9 m clearance from the opening (which stays unguarded) is
+    overwhelmingly larger than the jitter width (0.18), so the 'unguarded opening' feature is unchanged."""
     out = []
     for i, fd in enumerate(PARAMS["site"]["fences"]):
         dx, dy = bc.jit_pos(fd["cx"], fd["cy"], "fenceD2", amp=0.18)
@@ -297,7 +297,7 @@ def fence_placements():
 
 
 def formpanel_xs():
-    """[v5.1 §3] 북벽에 기대 세운 거푸집 패널 3매의 x ±0.16 m 지터."""
+    """[v5.1 §3] x +-0.16 m jitter for the 3 formwork panels leaned against the north wall."""
     return [pd["cx"] + bc.jit_scalar(pd["cx"], 0.0, "panelD2", -0.16, 0.16)
             for pd in PARAMS["dressing"]["panels"]]
 
@@ -322,7 +322,7 @@ if _sc_ov:
 
 
 # ===========================================================================
-# [C] 경로 상수 + 필요 텍스처 역할
+# [C] path constants + required texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "sceneD2")
@@ -332,7 +332,7 @@ ASSET_ROLES = ["concrete_floor", "concrete_wall", "dirt_park", "gravel",
 
 
 def ground_plans():
-    """[W2 ground_kit] 지면 계획 — 씬 조립부와 CPU 검산이 같은 함수를 쓴다."""
+    """[W2 ground_kit] ground plan - the scene assembly and the CPU check use the same function."""
     g = PARAMS["gkit"]
     op = PARAMS["opening"]
     gp = gk.plan_ground(
@@ -342,7 +342,7 @@ def ground_plans():
         voids=((float(op["x0"]), float(op["y0"]),
                 float(op["x1"]), float(op["y1"])),),
         dists=(2, 5, 10), scene="sceneD2",
-        tactile=(),                     # §12.4 — 비대상(공사장)
+        tactile=(),                     # §12.4 - not applicable (construction site)
         sites=dict(marking=[tuple(m) for m in g["mark_lines"]]),
         overrides=dict(infra=dict(marking=("line", "line", "line")),
                        extras=(("footprints",
@@ -354,19 +354,19 @@ def ground_plans():
 
 
 def build_views():
-    """카메라 프리셋: grid_views(gy=0.0, 개구 정면 직교 접근) + 미장센 4컷.
+    """Camera presets: grid_views(gy=0.0, orthogonal approach head-on to the opening) + 4 mise-en-scene cuts.
 
-    사양서 §C 카메라: '보행 접근각 4 m · h0.9' → grid_views d5/h0.9 및
-    미장센 approach(d4·h0.9)가 모두 그 축에 정합한다.
+    Spec §C cameras: 'walking approach 4 m · h0.9' -> grid_views d5/h0.9 and the
+    mise-en-scene approach (d4·h0.9) both align to that axis.
     """
     views = sc.grid_views(0.0)
-    # approach: 사양서 명시 시점 — 보행자가 4 m 앞에서 개구를 마주함
+    # approach: the eye the spec calls for - a pedestrian facing the opening from 4 m away
     views["approach"] = dict(eye=[-4.0, 0.0, 0.9], tgt=[1.2, 0.0, -0.35])
-    # brink: 립 바로 앞에서 내려다봄 — 지하 바닥 광반·거푸집 벽 노출
+    # brink: looking down from just in front of the lip - basement floor light pool and formwork wall exposed
     views["brink"] = dict(eye=[-1.0, 0.0, 1.60], tgt=[1.6, 0.15, -2.30])
-    # graze: 저시점 — 개구가 얇은 검은 띠로 납작해지는 은닉 구도(위험 극대)
+    # graze: low eye - the concealment framing where the opening flattens into a thin black band (maximum hazard)
     views["graze"] = dict(eye=[-6.0, -0.25, 0.35], tgt=[2.5, 0.05, 0.02])
-    # beauty_overview: 사선 부감 — 개구·철근·거푸집 벽 코너 일괄 판독
+    # beauty_overview: oblique high angle - opening, rebar and formwork wall corner read together
     views["beauty_overview"] = dict(eye=[-5.2, -5.0, 3.4], tgt=[1.2, 0.4, -0.9])
     return views
 
@@ -424,7 +424,7 @@ def main():
         return sc.make_pbr(stage, path, *args, **kwargs)
 
     # -------------------------------------------------------------------
-    # 재질
+    # Materials
     # -------------------------------------------------------------------
     def setup_materials():
         sca = mp["scale"]
@@ -477,7 +477,7 @@ def main():
         M["rail"] = PBR(f"{ROOT}/Looks/Rail", diffuse_color=mp["rail_color"],
                         metallic=mp["rail_metallic"],
                         roughness_const=mp["rail_rough"])
-        # ── 맥락 드레싱 v2 재질 ──
+        # ── context dressing v2 materials ──
         M["bag"] = PBR(f"{ROOT}/Looks/Bag", diffuse_color=mp["bag_color"],
                        roughness_const=mp["bag_rough"])
         M["fence"] = PBR(f"{ROOT}/Looks/Fence", diffuse_color=mp["fence_color"],
@@ -500,7 +500,7 @@ def main():
         return M
 
     # -------------------------------------------------------------------
-    # 외부 지면(흙) — 건물 풋프린트를 비운 4박스 (지하 공동을 덮지 않음)
+    # Outside ground (earth) - 4 boxes with the building footprint left empty (does not cover the basement cavity)
     # -------------------------------------------------------------------
     def build_ground(M):
         g = PARAMS["ground"]
@@ -509,8 +509,8 @@ def main():
         th = g["thick"]
         cz = g["z_top"] - th / 2.0
         ov = g["overlap"]
-        # 건물 풋프린트 안쪽으로 ov 만큼 물린 경계(지면 상면 −0.05 는 슬래브
-        # 하면 −0.25 보다 위이므로, 물린 부분은 슬래브에 가려 보이지 않는다)
+        # Boundary pushed ov inside the building footprint (the ground top face -0.05 is above the slab
+        # underside -0.25, so the overlapping part is hidden behind the slab)
         xw, xe = d["x_w"] + ov, d["x_e"] - ov
         ys, yn = d["y_s"] + ov, d["y_n"] - ov
         BOX(f"{ROOT}/Ground_W", ((-H + xw) / 2.0, 0.0, cz),
@@ -523,37 +523,37 @@ def main():
             (xe - xw, H - yn, th), M["dirt"], col=True)
 
     # -------------------------------------------------------------------
-    # 슬래브 — **개구 4박스 분할** (브리프 v3 §A-3 / 교훈 5)
-    #   공동(개구) 위를 어떤 박스도 덮지 않는다.
+    # Slab - **split into 4 boxes around the opening** (brief v3 §A-3 / lesson 5)
+    #   No box covers the cavity (the opening).
     # -------------------------------------------------------------------
     def build_slab(M):
         d = PARAMS["deck"]
         op = PARAMS["opening"]
         th = d["thick"]
-        # [W2-0 · P-A] 슬래브 4분할 전체가 ground_kit 의 장식 대상이다 →
-        #   변위 스킨 OFF(**BOX 호출 전에** 등록). 콜드 조인트(음각 톤)·
-        #   도색 잔흔(+3 mm)·발자국(+0.6 mm)이 전부 스킨 아래로 사라진다.
+        # [W2-0 · P-A] the whole 4-way slab split is what ground_kit decorates ->
+        #   displacement skin OFF (registered **before the BOX call**). Otherwise the cold joints (engraved
+        #   tone), paint remnants (+3 mm) and footprints (+0.6 mm) all vanish under the skin.
         sc.skin_exclude(f"{ROOT}/Slab_W", f"{ROOT}/Slab_E",
                         f"{ROOT}/Slab_S", f"{ROOT}/Slab_N",
                         f"{ROOT}/Slab_Fill")
         cz = d["z_top"] - th / 2.0
         xw, xe, ys, yn = d["x_w"], d["x_e"], d["y_s"], d["y_n"]
         ox0, ox1, oy0, oy1 = op["x0"], op["x1"], op["y0"], op["y1"]
-        # ① 서: x_w..개구서립, 전폭
+        # (1) west: x_w..opening west lip, full width
         BOX(f"{ROOT}/Slab_W", ((xw + ox0) / 2.0, (ys + yn) / 2.0, cz),
             (ox0 - xw, yn - ys, th), M["slab"], col=True)
-        # ② 동: 개구동립..x_e, 전폭
+        # (2) east: opening east lip..x_e, full width
         BOX(f"{ROOT}/Slab_E", ((ox1 + xe) / 2.0, (ys + yn) / 2.0, cz),
             (xe - ox1, yn - ys, th), M["slab"], col=True)
-        # ③ 남: 개구 x구간, y_s..개구남립
+        # (3) south: opening x range, y_s..opening south lip
         BOX(f"{ROOT}/Slab_S", ((ox0 + ox1) / 2.0, (ys + oy0) / 2.0, cz),
             (ox1 - ox0, oy0 - ys, th), M["slab"], col=True)
-        # ④ 북: 개구 x구간, 개구북립..y_n
+        # (4) north: opening x range, opening north lip..y_n
         BOX(f"{ROOT}/Slab_N", ((ox0 + ox1) / 2.0, (oy1 + yn) / 2.0, cz),
             (ox1 - ox0, yn - oy1, th), M["slab"], col=True)
 
     def build_flat_fill(M):
-        """hazard_stairs=False 대조군: 개구를 슬래브로 메움(전 픽셀 낙차 없음)."""
+        """hazard_stairs=False control: the opening is filled with slab (no drop on any pixel)."""
         d = PARAMS["deck"]
         op = PARAMS["opening"]
         th = d["thick"]
@@ -563,9 +563,9 @@ def main():
             (op["x1"] - op["x0"], op["y1"] - op["y0"], th), M["slab"], col=True)
 
     # -------------------------------------------------------------------
-    # 개구 하단 거푸집 스커트 — 립 바로 아래 암부 확보(암색 상수 0.042)
-    #   내면을 개구보다 inset(0.01) 만큼 **바깥으로** 물려 슬래브 개구
-    #   리빌면과 동일평면이 되지 않게 한다 (Z-파이팅 금지, 브리프 §A-8).
+    # Formwork skirt under the opening - secures a dark zone right below the lip (dark constant colour 0.042)
+    #   Its inner face is set **outward** from the opening by inset (0.01) so it is never coplanar with
+    #   the slab opening reveal (no Z-fighting, brief §A-8).
     # -------------------------------------------------------------------
     def build_skirt(M):
         op = PARAMS["opening"]
@@ -573,72 +573,72 @@ def main():
         ins, t = sk["inset"], sk["thick"]
         z0, z1 = sk["z_bot"], sk["z_top"]
         cz, hz = (z0 + z1) / 2.0, z1 - z0
-        xa, xb = op["x0"] - ins, op["x1"] + ins       # 스커트 내면
+        xa, xb = op["x0"] - ins, op["x1"] + ins       # skirt inner face
         ya, yb = op["y0"] - ins, op["y1"] + ins
-        # 코너에서 W/E 와 S/N 이 서로 **엄격히 내부로** 겹치도록 e(0.02)를 준다
-        # → 4박스 프레임의 코너 맞댐면(동일평면) 제거.
+        # e (0.02) makes W/E and S/N overlap **strictly inward** at the corners
+        # -> removes the coplanar butt faces of the 4-box frame corners.
         e = 0.02
         BOX(f"{ROOT}/Skirt_W", (xa - t / 2.0, (ya + yb) / 2.0, cz),
             (t, yb - ya + 2.0 * e, hz), M["skirt"])
         BOX(f"{ROOT}/Skirt_E", (xb + t / 2.0, (ya + yb) / 2.0, cz),
             (t, yb - ya + 2.0 * e, hz), M["skirt"])
-        # S/N 은 z 를 2 mm 안쪽으로 물려 코너 겹침부의 상·하면 동일평면 제거
+        # S/N pull z 2 mm inward to remove top/bottom coplanarity in the corner overlaps
         BOX(f"{ROOT}/Skirt_S", ((xa + xb) / 2.0, ya - t / 2.0, cz),
             (xb - xa + 2.0 * (t + e), t, hz - 0.004), M["skirt"])
         BOX(f"{ROOT}/Skirt_N", ((xa + xb) / 2.0, yb + t / 2.0, cz),
             (xb - xa + 2.0 * (t + e), t, hz - 0.004), M["skirt"])
 
     # -------------------------------------------------------------------
-    # 지하층 — 바닥(z −3.0) + 거푸집 벽 4면. 천장은 슬래브(z −0.25)가 겸한다.
-    #   벽 상단 −0.20 으로 슬래브 하면(−0.25)과 0.05 겹침 → 틈 없음.
+    # Basement - floor (z -3.0) + 4 formwork walls. The slab (z -0.25) doubles as the ceiling.
+    #   Wall tops at -0.20 overlap the slab underside (-0.25) by 0.05 -> no gap.
     # -------------------------------------------------------------------
     def build_lower(M):
         lw = PARAMS["lower"]
         t = lw["wall_t"]
         x0, x1, y0, y1 = lw["x0"], lw["x1"], lw["y0"], lw["y1"]
         zf, ft = lw["z_floor"], lw["floor_t"]
-        # 바닥판: 벽 외곽보다 0.05 더 크게 → 벽 외곽면과의 동일평면 회피
+        # Floor plate: 0.05 larger than the wall outline -> avoids coplanarity with the outer wall faces
         BOX(f"{ROOT}/Lower_Floor",
             ((x0 + x1) / 2.0, (y0 + y1) / 2.0, zf - ft / 2.0),
             (x1 - x0 + 2.0 * t + 0.10, y1 - y0 + 2.0 * t + 0.10, ft),
             M["lower_floor"], col=True)
-        # 벽 하단을 바닥판 상면보다 0.10 낮춰 수평 동일평면(맞댐) 회피
+        # Wall bottoms are dropped 0.10 below the floor plate top to avoid horizontal coplanarity (butt joint)
         zwb = zf - 0.10
         czw = (zwb + lw["z_ceil"]) / 2.0
         hzw = lw["z_ceil"] - zwb
-        # 코너: W/E 는 y 를, S/N 은 x 를 각각 벽 두께 + 0.02 만큼 넘겨 겹침
-        # (4박스 프레임 코너 맞댐면 제거)
+        # Corners: W/E overrun in y and S/N in x by the wall thickness + 0.02 so they overlap
+        # (removes the coplanar butt faces of the 4-box frame corners)
         e = 0.02
         BOX(f"{ROOT}/Lower_Wall_W", (x0 - t / 2.0, (y0 + y1) / 2.0, czw),
             (t, y1 - y0 + 2.0 * t, hzw), M["lower_wall"], col=True)
         BOX(f"{ROOT}/Lower_Wall_E", (x1 + t / 2.0, (y0 + y1) / 2.0, czw),
             (t, y1 - y0 + 2.0 * t, hzw), M["lower_wall"], col=True)
-        ts = t - e                                   # S/N 두께(외곽면을 0.02 안쪽)
-        # S/N 은 z 도 2 cm 안쪽으로 물려 코너 겹침부의 상·하면 동일평면 제거
+        ts = t - e                                   # S/N thickness (outer face 0.02 inward)
+        # S/N also pull z 2 cm inward to remove top/bottom coplanarity in the corner overlaps
         BOX(f"{ROOT}/Lower_Wall_S", ((x0 + x1) / 2.0, y0 - ts / 2.0, czw),
             (x1 - x0 + 2.0 * ts, ts, hzw - 0.04), M["lower_wall"], col=True)
         BOX(f"{ROOT}/Lower_Wall_N", ((x0 + x1) / 2.0, y1 + ts / 2.0, czw),
             (x1 - x0 + 2.0 * ts, ts, hzw - 0.04), M["lower_wall"], col=True)
 
     # -------------------------------------------------------------------
-    # 지상 거푸집 벽 2면(동·북) + 남측 기둥 개구부(채광원)
+    # 2 above-ground formwork walls (east, north) + south column openings (light source)
     # -------------------------------------------------------------------
     def build_upper_walls(M):
         w = PARAMS["walls"]
         t, h = w["t"], w["h"]
         xf, yf = w["x_face"], w["y_face"]
-        # 동벽 — 주 카메라 축(+X) 정면 지평 폐쇄 (브리프 §A-4)
+        # East wall - closes the horizon head-on along the main camera axis (+X) (brief §A-4)
         ey0, ey1 = w["e_y0"], w["e_y1"]
         BOX(f"{ROOT}/Wall_E", (xf + t / 2.0, (ey0 + ey1) / 2.0,
                                (w["base"] + h) / 2.0),
             (t, ey1 - ey0, h - w["base"]), M["wall"], col=True)
-        # 북벽 — 동벽과 x 방향으로 겹치되 z 범위를 달리해 코너 동일평면 제거
+        # North wall - overlaps the east wall in x but with a different z range to remove corner coplanarity
         nx0, nx1 = w["n_x0"], w["n_x1"]
         hn, tn = h - w["n_h_delta"], w["n_t"]
         BOX(f"{ROOT}/Wall_N", ((nx0 + nx1) / 2.0, yf + tn / 2.0,
                                (w["n_base"] + hn) / 2.0),
             (nx1 - nx0, tn, hn - w["n_base"]), M["wall"], col=True)
-        # 남측 기둥열 — 사이 간극으로 외부 흙·하늘 노출 = 실내 암부 방지 채광원
+        # South colonnade - the gaps expose outside earth and sky = a light source preventing an indoor dark zone
         co = PARAMS["colonnade"]
         s = co["size"]
         for i, cx in enumerate(co["xs"]):
@@ -646,7 +646,7 @@ def main():
                 (s, s, co["h"] - w["base"]), M["wall"], col=True)
 
     # -------------------------------------------------------------------
-    # 철근 스터브 — 직선 6 + 굽은 것 2(_oriented_box) + 갈고리 1
+    # Rebar stubs - 6 straight + 2 bent (_oriented_box) + 1 hook
     # -------------------------------------------------------------------
     def build_rebar(M):
         rb = PARAMS["rebar"]
@@ -655,8 +655,8 @@ def main():
                 M["rebar"])
         L, t = rb["bent_len"], rb["bent_t"]
         for i, (cx, cy, tilt, yaw) in enumerate(rb["bent"]):
-            # 로컬 Z=철근 축. rotx로 기울이고 rotz로 방위를 준다.
-            # 기운 뒤 수직 길이 = L*cos(tilt) → 하단이 슬래브에 매입되도록 중심 z.
+            # Local Z = rebar axis. rotx tilts it and rotz gives the bearing.
+            # Vertical length after tilting = L*cos(tilt) -> centre z chosen so the bottom is embedded in the slab.
             zc = L * math.cos(math.radians(tilt)) / 2.0 - 0.055
             OBOX(f"{ROOT}/RebarBent_{i}", (cx, cy, zc), (t, t, L),
                  M["rebar"], rotz=yaw, rotx=tilt)
@@ -665,8 +665,8 @@ def main():
              (hk["lx"], hk["t"], hk["t"]), M["rebar"], rotz=hk["yaw"])
 
     # -------------------------------------------------------------------
-    # 파쇄 콘크리트 부스러기 — seed 고정 random (재현성). 개구 내부 배치 금지
-    #   (공동 위 부유 방지). 60%는 립 둘레 링에 몰아 '부스러기 테'를 만든다.
+    # Crushed concrete debris - fixed-seed random (reproducibility). No placement inside the opening
+    #   (prevents fragments floating over the cavity). 60 % is concentrated in a ring around the lip to form a 'debris rim'.
     # -------------------------------------------------------------------
     def build_debris(M):
         db = PARAMS["debris"]
@@ -681,22 +681,22 @@ def main():
             if rng.random() < db["perim_ratio"]:
                 off = rng.uniform(db["ring_lo"], db["ring_hi"])
                 side = rng.randrange(4)
-                if side == 0:                      # 서립 바깥
+                if side == 0:                      # outside the west lip
                     px = op["x0"] - off
                     py = rng.uniform(op["y0"] - 0.5, op["y1"] + 0.5)
-                elif side == 1:                    # 동립 바깥
+                elif side == 1:                    # outside the east lip
                     px = op["x1"] + off
                     py = rng.uniform(op["y0"] - 0.5, op["y1"] + 0.5)
-                elif side == 2:                    # 남립 바깥
+                elif side == 2:                    # outside the south lip
                     px = rng.uniform(op["x0"] - 0.5, op["x1"] + 0.5)
                     py = op["y0"] - off
-                else:                              # 북립 바깥
+                else:                              # outside the north lip
                     px = rng.uniform(op["x0"] - 0.5, op["x1"] + 0.5)
                     py = op["y1"] + off
             else:
                 px = rng.uniform(db["x0"], db["x1"])
                 py = rng.uniform(db["y0"], db["y1"])
-            # 개구 내부(공동 위) 배치 금지 — 부유 파편 방지
+            # No placement inside the opening (over the cavity) - prevents floating fragments
             if (op["x0"] - 0.02 < px < op["x1"] + 0.02
                     and op["y0"] - 0.02 < py < op["y1"] + 0.02):
                 continue
@@ -704,13 +704,13 @@ def main():
             mtl = mats[placed % n_mat]
             sink = db["sink"]
             if placed % 3 == 2:
-                # 납작 타원체: 반경 rz, 중심 z = rz*(1−2·sink) → 하단 매입
+                # Flattened ellipsoid: radius rz, centre z = rz*(1-2·sink) -> bottom buried
                 rz = s * 0.38
                 SPH(f"{ROOT}/Debris_{placed}",
                     (px, py, rz * (1.0 - 2.0 * sink)),
                     (s * 0.6, s * 0.5, rz), mtl)
             else:
-                # 박스: 높이 hz, 중심 z = hz*(0.5−sink) → 하단 −hz·sink (매입)
+                # Box: height hz, centre z = hz*(0.5-sink) -> bottom at -hz·sink (buried)
                 hz = s * rng.uniform(0.4, 0.8)
                 OBOX(f"{ROOT}/Debris_{placed}",
                      (px, py, hz * (0.5 - sink)),
@@ -720,7 +720,7 @@ def main():
         return placed
 
     # -------------------------------------------------------------------
-    # cue — 경고 도색 / 임시 난간 (기본 OFF: 무방호가 이 씬의 위험 본질)
+    # cue - warning paint / temporary railing (OFF by default: being unguarded is this scene's hazard essence)
     # -------------------------------------------------------------------
     def build_cues(M):
         op = PARAMS["opening"]
@@ -763,26 +763,26 @@ def main():
                             rr["rail_r"], length, M["rail"], rotX=90.0)
 
     # -------------------------------------------------------------------
-    # 드레싱 — 거푸집 패널·잔토 더미·외부 흙무지·원경 능선
+    # Dressing - formwork panels · spoil piles · outside earth mounds · distant ridge
     # -------------------------------------------------------------------
     def build_dressing(M):
         dr = PARAMS["dressing"]
         pn = dr["panel"]
         tilt = pn["tilt"]
-        # 기운 패널: 수직 반높이 = (h/2)*cos(tilt) → 하단이 슬래브(z=0)에 접지.
-        # y 중심을 북벽 안쪽(6.10)에 두어 상·하단 중 한쪽이 반드시 벽에 물린다.
+        # Tilted panel: vertical half-height = (h/2)*cos(tilt) -> the bottom sits on the slab (z=0).
+        # The y centre is set inside the north wall (6.10) so either the top or the bottom must bite into the wall.
         zc = pn["h"] * math.cos(math.radians(tilt)) / 2.0 - 0.03
-        for i, px in enumerate(formpanel_xs()):      # v5.1 §3 등간격 지터
+        for i, px in enumerate(formpanel_xs()):      # v5.1 §3 even-spacing jitter
             OBOX(f"{ROOT}/FormPanel_{i}", (px, pn["y_c"], zc),
                  (pn["w"], pn["t"], pn["h"]), M["panel"], rotx=tilt)
         for i, pl in enumerate(dr["piles"]):
-            # 하단이 슬래브 상면(0)보다 0.06 만 아래로 물리게 — 슬래브(두께 0.25)를
-            # 관통해 지하 천장으로 튀어나오지 않도록 sz 대비 얕게 매입한다.
+            # The bottom bites only 0.06 below the slab top face (0) - embedded shallowly relative to sz so it
+            # does not pierce the slab (0.25 thick) and poke through the basement ceiling.
             SPH(f"{ROOT}/Pile_{i}", (pl["cx"], pl["cy"], pl["sz"] - 0.06),
                 (pl["sx"], pl["sy"], pl["sz"]), M["gravel"])
         gz = PARAMS["ground"]["z_top"]
-        # 외부 흙무지 — v2: 로브 3분할·저편평(sink 로 하단을 지면에 묻어
-        #   '매끈한 조약돌' 실루엣을 깬다). 최고점 = gz − sink + sz.
+        # Outside earth mounds - v2: split into 3 lobes and flattened (sink buries the bottom in the ground,
+        #   breaking the 'smooth pebble' silhouette). Peak = gz - sink + sz.
         for i, mo in enumerate(dr["mounds"]):
             for j, (dx, dy, sx, sy, sz) in enumerate(mo["lobes"]):
                 SPH(f"{ROOT}/Mound_{i}_{j}",
@@ -793,19 +793,19 @@ def main():
             (2.0 * rg["half_x"], rg["t"], rg["h"]), M["dirt"])
 
     # -------------------------------------------------------------------
-    # 맥락 드레싱 v2 — 자재 더미(철근 다발·시멘트 포대) · 이동식 안전 펜스 ·
-    #                  전선 릴/공구 상자 · 기둥 표어 박판 · 원경 타워크레인
+    # Context dressing v2 - material piles (rebar bundle, cement bags) · movable safety fences ·
+    #                  cable reel / tool boxes · column slogan panels · distant tower crane
     # -------------------------------------------------------------------
     # -------------------------------------------------------------------
-    # [W2] ground_kit — P15 slab_construction. 개구(GT-V)와 서립(GT-E1′)을
-    #   모두 존중한다. 판정은 B8(개구 교차 0)·B6(에지 이격)가 한다.
+    # [W2] ground_kit - P15 slab_construction. Respects both the opening (GT-V) and the west lip
+    #   (GT-E1′). Adjudication is done by B8 (zero opening intersection) and B6 (edge standoff).
     # -------------------------------------------------------------------
     def build_ground_kit(M):
         (_tag, gp), = ground_plans()
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
         M2.update(joint=M["skirt"], crack=M["skirt"],
-                  marking=M["nosing"],           # 황색 개구 표시 도색
+                  marking=M["nosing"],           # yellow opening marking paint
                   stain_efflorescence=M["panel"], stain_dirt=M["dirt"])
         res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
                               skin_exclude=sc.skin_exclude,
@@ -815,50 +815,50 @@ def main():
         return res
 
     def build_site_dressing(M):
-        """골조 공사장 맥락 요소. **개구·철근 스터브·부스러기·슬래브 분할 불변.**
+        """Frame-stage construction-site context elements. **Opening, rebar stubs, debris and slab split unchanged.**
 
-        ── 카메라 검산 (전 뷰, 좌표 계산 근거) ─────────────────────────────
-        grid_views(gy=0) hfov 60°(half tan 0.577)·pitch −10°·16:9 → vfov 36°.
-        [개구 시선 웨지] 카메라 (−d,0) → 개구(x 0..2, |y| ≤ 0.75) 를 잇는 시선은
-          x=px 에서 |y| ≤ 0.75·(px+d)/(d+1)  (d=10 이 최대폭).
-          신규 입체 최근접 = 공구 상자(−4.85, 1.70) → 웨지 상한 0.39 →
-          **여유 1.31 m**. 나머지는 전부 3 m 이상. → 개구 가림 0.
-        [미장센 4컷]
-          approach(−4,0,0.9→1.2,0,−0.35): 신규 입체는 전부 카메라 뒤이거나
-            시축에서 51°+ (hfov half 30°) → 프레임 밖.
-          brink(−1,0,1.6→1.6,0.15,−2.3): 개구 직상 하향컷. 반경 3 m 내 신규 0.
-          graze(−6,−0.25,0.35→2.5,0.05,0.02): 릴 77°·공구 59°·포대팔레트 56°
-            → 전부 프레임 밖. **저시점 은닉 구도 불변**.
-          beauty_overview(−5.2,−5,3.4→1.2,0.4,−0.9): 포대팔레트 A 가 시축 26°
-            (프레임 좌하단)에 들어오나, 개구 근립을 향한 시선의 해당 지점 고도
-            z=2.40 m ≫ 팔레트 총고 0.55 m → **가림 0**(전경 소품으로만 작용).
-        [원경 타워크레인 — 동벽 남단 스치기]
-          크레인 (100, −40), 마스트 상단 14.2 / 정점 15.4.
-          · 시선각: eye(−10,0) 기준 방위 21.8° < hfov half 30° → 프레임 안.
-          · 동벽(x 8.15, y −6.05..6.45, h 3.2) 통과 검산: 마스트 방위선이
-            x=8.15 에서 y = −40·18.15/110 = −6.60 < −6.05 → **벽 남단 밖 통과**
-            (여유 0.55 m).
-          · 콜로네이드 기둥(x 2.5·5.5, y −6.425..−5.975) 검산:
-            x=2.5 에서 y=−4.55, x=5.5 에서 y=−5.64 → 둘 다 기둥 북측 → 무가림.
-          · 고도 검산: 정점 15.4 m·거리 ≈110 m → 앙각 7.5° < 프레임 상한
-            (pitch −10 + vfov half 18 = +8.0°) → **정점까지 프레임 안**.
-          · **가시 뷰 = grid h*_d10(가장 넓은 컷)**. d5/d2·graze 는 동벽
-            (앙각 9.9°/12.7°)에 가려 보이지 않는다 — 의도된 결과(근접 컷은
-            개구가 주인공이어야 하므로 원경 소품이 끼어들지 않는 편이 낫다).
-        [원경 지면 패드] 기존 ground half 60 m 밖(크레인 위치 100 m)의 허공을
-          폐쇄. 상면 −0.06 은 기존 지면 −0.05 아래라 겹침부 코플래너 0.
+        ── Camera checks (all views, basis of the coordinate calculations) ─────────────────────────────
+        grid_views(gy=0) hfov 60 deg (half tan 0.577) · pitch −10 deg · 16:9 -> vfov 36 deg.
+        [opening sight wedge] the sight lines from camera (−d,0) to the opening (x 0..2, |y| <= 0.75) satisfy
+          |y| <= 0.75·(px+d)/(d+1) at x=px  (d=10 is the widest).
+          Nearest new solid = tool box (−4.85, 1.70) -> wedge limit 0.39 ->
+          **clearance 1.31 m**. All the rest are 3 m or more. -> zero occlusion of the opening.
+        [4 mise-en-scene cuts]
+          approach(−4,0,0.9->1.2,0,−0.35): every new solid is either behind the camera or
+            51 deg+ off the view axis (hfov half 30 deg) -> out of frame.
+          brink(−1,0,1.6->1.6,0.15,−2.3): a downward cut directly over the opening. Nothing new within 3 m.
+          graze(−6,−0.25,0.35->2.5,0.05,0.02): reel 77 deg · tools 59 deg · bag pallet 56 deg
+            -> all out of frame. **The low-eye concealment framing is unchanged.**
+          beauty_overview(−5.2,−5,3.4->1.2,0.4,−0.9): bag pallet A enters at 26 deg off the view axis
+            (lower left of frame), but the sight line toward the opening's near lip is at z=2.40 m there,
+            far above the pallet's total height 0.55 m -> **zero occlusion** (it acts as a foreground prop only).
+        [distant tower crane - grazing the south end of the east wall]
+          Crane at (100, −40), mast top 14.2 / apex 15.4.
+          · Sight angle: bearing 21.8 deg from eye(−10,0) < hfov half 30 deg -> in frame.
+          · East wall (x 8.15, y −6.05..6.45, h 3.2) clearance check: the mast bearing line reaches
+            y = −40·18.15/110 = −6.60 < −6.05 at x=8.15 -> **passes outside the wall's south end**
+            (clearance 0.55 m).
+          · Colonnade columns (x 2.5·5.5, y −6.425..−5.975) check:
+            y=−4.55 at x=2.5, y=−5.64 at x=5.5 -> both north of the columns -> no occlusion.
+          · Elevation check: apex 15.4 m at ~110 m -> elevation 7.5 deg < frame top limit
+            (pitch −10 + vfov half 18 = +8.0 deg) -> **in frame all the way to the apex**.
+          · **Visible view = grid h*_d10 (the widest cut)**. In d5/d2 and graze it is hidden behind the
+            east wall (elevation 9.9 deg/12.7 deg) - an intended outcome (close cuts should have the
+            opening as their subject, so a distant prop is better kept out).
+        [distant ground pad] closes the void beyond the existing ground half 60 m (the crane is at 100 m).
+          Its top face −0.06 is below the existing ground −0.05, so the overlap is coplanar-free.
         """
         st = PARAMS["site"]
         cnt = dict(rebar=0, bag=0, fence=0, tool=0, placard=0, crane=0)
 
-        # ── ⓪ 원경 지면 패드 ──
+        # ── (0) distant ground pad ──
         fp = st["farpad"]
         BOX(f"{ROOT}/FarPad",
             ((fp["x0"] + fp["x1"]) / 2.0, (fp["y0"] + fp["y1"]) / 2.0,
              fp["z_top"] - fp["thick"] / 2.0),
             (fp["x1"] - fp["x0"], fp["y1"] - fp["y0"], fp["thick"]), M["dirt"])
 
-        # ── ① 철근 다발(눕힘) — 받침목 2 + 봉 rows×per_row + 결속 밴드 2 ──
+        # ── (1) rebar bundle (laid down) - 2 bearers + rows x per_row bars + 2 binding bands ──
         bu = st["bundle"]
         for rb in st["rebar_bundles"]:
             tag, cx, cy, yaw, L = rb["tag"], rb["cx"], rb["cy"], rb["yaw"], rb["L"]
@@ -877,16 +877,16 @@ def main():
             r = bu["r"]
             for row in range(int(rb["rows"])):
                 zc = bu["batten_h"] + r + row * (1.85 * r)
-                off = (row % 2) * r          # 층마다 반 피치 엇물림(적층 안정감)
+                off = (row % 2) * r          # half-pitch offset per layer (stacking stability)
                 for j in range(int(rb["per_row"])):
                     dy = (j - (rb["per_row"] - 1) / 2.0) * (2.2 * r) + off
                     px, py = put(0.0, dy)
-                    # add_cylinder 는 rotz 를 못 받으므로 방위가 필요한 봉은
-                    # _oriented_box 로(D20 굵기에서 원/각 단면 차는 비가시).
+                    # add_cylinder cannot take rotz, so bars that need a bearing are made
+                    # with _oriented_box (at D20 gauge the round/square section difference is invisible).
                     OBOX(f"{ROOT}/RebarBar_{tag}_{row}_{j}", (px, py, zc),
                          (L, 2.0 * r, 2.0 * r), M["rebar"], rotz=yaw)
                     cnt["rebar"] += 1
-            # 결속 밴드 2 (봉 다발을 감싸는 얇은 띠)
+            # 2 binding bands (thin straps wrapping the bar bundle)
             hz = bu["batten_h"] + 2.0 * r * int(rb["rows"]) + 0.02
             wy = rb["per_row"] * 2.2 * r + 0.05
             for k, dx in enumerate((-L / 4.0, L / 4.0)):
@@ -894,7 +894,7 @@ def main():
                 OBOX(f"{ROOT}/Strap_{tag}_{k}", (bx, by, hz / 2.0),
                      (bu["strap_t"], wy, hz), M["rail"], rotz=yaw)
 
-        # ── ② 시멘트 포대 팔레트 ──
+        # ── (2) cement bag pallets ──
         bp = st["bagpallet"]
         brng = random.Random(bp["seed"])
         for pd_ in st["bagpallets"]:
@@ -911,7 +911,7 @@ def main():
                 for q in range(4):
                     dx = (0.5 - (q % 2)) * (bp["bw"] * 0.52)
                     dy = (0.5 - (q // 2)) * (bp["bd"] * 1.02)
-                    if lay % 2:                      # 교호 적층
+                    if lay % 2:                      # alternating stack
                         dx, dy = dy * 0.9, dx * 1.1
                     px, py = put2(dx, dy)
                     OBOX(f"{ROOT}/Bag_{tag}_{lay}_{q}",
@@ -921,9 +921,9 @@ def main():
                          + brng.uniform(-4.0, 4.0))
                     cnt["bag"] += 1
 
-        # ── ③ 이동식 안전 펜스 (북측 1열 — 개구에서 3.85 m 이상 이격) ──
+        # ── (3) movable safety fences (single north row - 3.85 m or more from the opening) ──
         fc = st["fence"]
-        for i, cx, cy, fyaw in fence_placements():   # v5.1 §3 위치·yaw 지터
+        for i, cx, cy, fyaw in fence_placements():   # v5.1 §3 position/yaw jitter
             w, h = fc["w"], fc["h"]
             grp = sc.build_rot_group(stage, f"{ROOT}/Fence_{i}", (cx, cy),
                                      fyaw)
@@ -944,7 +944,7 @@ def main():
                     fc["bar_r"], z_hi - z_lo, M["fence"])
             cnt["fence"] += 1
 
-        # ── ④ 전선 릴 · 공구 상자 ──
+        # ── (4) cable reel · tool boxes ──
         rl = st["reel"]
         for s, sy in enumerate((-1.0, 1.0)):
             CYL(f"{ROOT}/Reel_F{s}",
@@ -959,10 +959,10 @@ def main():
                  (tb["w"], tb["d"], tb["h"]), M["tool"], rotz=tb["yaw"])
             cnt["tool"] += 1
 
-        # ── ⑤ 기둥 안전 표어 박판 (무텍스트 색면) ──
+        # ── (5) column safety-slogan panels (textless colour fields) ──
         co = PARAMS["colonnade"]
         pc = st["placard"]
-        y_face = co["y_c"] + co["size"] / 2.0        # 기둥 북면 (카메라 쪽)
+        y_face = co["y_c"] + co["size"] / 2.0        # column north face (camera side)
         for i, pl in enumerate(st["placards"]):
             cxp = co["xs"][int(pl["col"])]
             BOX(f"{ROOT}/Placard_{i}", (cxp, y_face + 0.010, pl["z"]),
@@ -973,7 +973,7 @@ def main():
                 (pc["w"], 0.030, pc["band_h"]), M["placard_band"])
             cnt["placard"] += 1
 
-        # ── ⑥ 원경 타워크레인 (가는 박스 조합) ──
+        # ── (6) distant tower crane (assembly of thin boxes) ──
         cr = st["crane"]
         cx, cy = cr["cx"], cr["cy"]
         BOX(f"{ROOT}/Crane_Mast",
@@ -1008,11 +1008,11 @@ def main():
         cnt["crane"] = 7
         return cnt
 
-    # ── 씬 조립 ──
+    # ── scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
     M = setup_materials()
     if not cfg["cue_material_break"]:
-        # 대비 소거 대조군: 지하층도 슬래브와 동일 재질
+        # Contrast-removed control: the basement gets the same material as the slab
         M["lower_wall"] = M["slab"]
         M["lower_floor"] = M["slab"]
 
@@ -1033,12 +1033,12 @@ def main():
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
         site_cnt = build_site_dressing(M)
-    build_ground_kit(M)                  # [W2] 지면 요소 — 드레싱 뒤(산포 규약)
+    build_ground_kit(M)                  # [W2] ground elements - after the dressing (scatter convention)
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])
 
-    # 기하 자기검증 프린트 (렌더 전 수치 확인 — 감독 재검산용)
+    # Geometry self-check printout (numbers confirmed before rendering - for supervisor re-checking)
     op, lw = PARAMS["opening"], PARAMS["lower"]
     drop = PARAMS["deck"]["z_top"] - lw["z_floor"]
     beam = drop / math.tan(math.radians(PARAMS["light"]["noon_sun_elev"]))
@@ -1051,7 +1051,7 @@ def main():
           f"{lw['x1'] - (op['x1'] + beam):.2f} m)")
 
     if site_cnt is not None:
-        # 맥락 드레싱 자기검산 — 개구 시선 웨지 여유 · 크레인 시선 통과
+        # Context dressing self-check - opening sight wedge clearance · crane sight-line clearance
         st = PARAMS["site"]
         props = ([(f"철근{b['tag']}", b["cx"], b["cy"]) for b in st["rebar_bundles"]]
                  + [(f"포대{b['tag']}", b["cx"], b["cy"])
@@ -1063,7 +1063,7 @@ def main():
                     for i, t in enumerate(st["toolboxes"])])
         worst = None
         for nm, px, py in props:
-            wedge = 0.75 * max(px + 10.0, 0.0) / 10.0     # d10 카메라 최대폭
+            wedge = 0.75 * max(px + 10.0, 0.0) / 10.0     # d10 camera maximum width
             margin = abs(py) - wedge
             if worst is None or margin < worst[1]:
                 worst = (nm, margin)

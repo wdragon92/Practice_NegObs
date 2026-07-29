@@ -1,134 +1,156 @@
 # -*- coding: utf-8 -*-
 """
-scene10_park_deck_switchback.py — NegObs 인공씬 10호(v5 R5): 공원 경사면 데크 갈지자
+scene10_park_deck_switchback.py — NegObs synthetic scene 10 (v5 R5): park slope deck switchback
 
-유형   : R5 (v5 재설계) — 목재 데크 지그재그 계단(open riser 투과 단서 계승)
-사양서 : Docs/briefs/multi_scene_brief_v5.md §R5 + Docs/scene_redesign_v5_proposal.md
-공통   : scene_common.py (무수정) / 골격 관례 : scenes/main/scene04_parktrail.py
-계승   : scenes/archive_v3/scene10_switchback_cliff.py
-         (rot_group 180° 반전 + **갈지자 병렬 Y 대역** 규약 · open_riser 빌더)
+Type   : R5 (v5 redesign) — timber deck zigzag stair (inherits the open-riser see-through cue)
+Spec   : Docs/briefs/multi_scene_brief_v5.md §R5 + Docs/scene_redesign_v5_proposal.md
+Shared : scene_common.py (unmodified) / skeleton convention : scenes/main/scene04_parktrail.py
+Legacy : scenes/archive_v3/scene10_switchback_cliff.py
+         (rot_group 180° reversal + the **parallel switchback Y band** convention · open_riser builder)
 
 ────────────────────────────────────────────────────────────────────────────
-[위험 본질]
-  근린공원 둘레길 경사면의 목재 데크 갈지자 계단. 위험은 **규정 미달의 현실**.
+[Hazard]
+  A timber deck switchback stair on the slope of a neighbourhood park trail. The
+  hazard is **the reality of falling short of code**.
 
-  ① 참 난간 1개소 파손 — 첫 참(z −1.65, x 4.4 외측 에지)의 가로대 2본이
-     탈락하고 포스트만 남았다. 그 아래 지면은 z −6.62 → **4.97 m 개방 낙차**.
-     포스트만 남은 난간은 로봇 시점에서 '난간 있음'으로 오검출되기 쉽다
-     (설비 역추론 단서의 함정 사례).
-  ② 라이저 부재(open riser) — 목재 디딤판 사이로 아래 플라이트·지면이 투시.
-     디딤면-라이저 명암 쌍이 없어 단코 절단선이 성립하지 않는다.
-  ③ 낙엽 퇴적 — 상단 2단(디딤판 1·2)의 에지를 leaf_ground 밴드가 물고 덮어
-     첫 단코를 지운다. 상부 접근 로봇 시점(h0.3)에서 '평탄한 데크 진입'으로
-     읽히는 것이 이 씬의 GT 양성 핵심.
-  ④ 트레일 남측(−Y) 30° 잔디 사면 무방호 — 둘레길 어깨(y −1.6) 밖은 30°로
-     떨어져 4 m 이내 2.3 m 하강. 난간·연석 없음(공원 흙길 비관행).
+  (1) One landing railing is broken — on the first landing (z −1.65, outer edge x 4.4)
+      two rails have come away and only the posts remain. The ground below is z −6.62
+      → a **4.97 m open drop**. A railing reduced to posts is easily mis-detected as
+      'railing present' from the robot's viewpoint (a trap case for the
+      equipment-inference cue).
+  (2) Open risers — the flight below and the ground show through between the timber
+      treads. With no tread/riser light-dark pair, the nosing cut line never forms.
+  (3) Leaf litter — a leaf_ground band bites over and covers the edges of the top two
+      steps (treads 1·2), erasing the first nosing. Reading that as 'a flat deck entry'
+      from the approaching robot's viewpoint (h0.3) is the GT-positive core of this scene.
+  (4) The 30° grass slope south of the trail (−Y) is unguarded — beyond the trail
+      shoulder (y −1.6) it falls at 30°, dropping 2.3 m within 4 m. No railing or kerb
+      (not the practice on a park dirt trail).
 
-[보행 연속성 자가 검증표]  — 진입 → 하강 → 탈출 (SMOKE 가 전수 재계산)
-  ┌ 구간 ──────────────────┬ 좌표(x, y대역, z) ────────────┬ 단차 ─────────┐
-  │ 상부 둘레길(진입)       │ x −40..−1.5, y −1.6..1.45, 0.0 │ 평탄          │
-  │ 진입 데크(옹벽 머리)    │ x −1.5..0,  y ±1.40,   −0.005  │ 0.005         │
-  │ 플라이트0 (+X, −Y대역)  │ x 0→3.0,   z 0→−1.65 (10단)    │ riser 0.165   │
-  │ 참0 (반전)              │ x 3.0..4.4, y ±1.40,   −1.65   │ 0 (플러시)    │
-  │ 플라이트1 (−X, +Y대역)  │ x 3.0→0.0, z −1.65→−3.30       │ riser 0.165   │
-  │ 참1                     │ x −1.4..0,  y ±1.40,   −3.30   │ 0             │
-  │ 플라이트2 (+X, −Y대역)  │ x 0→3.0,   z −3.30→−4.95       │ riser 0.165   │
-  │ 참2                     │ x 3.0..4.4, y ±1.40,   −4.95   │ 0             │
-  │ 플라이트3 (−X, +Y대역)  │ x 3.0→0.0, z −4.95→−6.60       │ riser 0.165   │
-  │ 참3                     │ x −1.4..0,  y ±1.40,   −6.60   │ 0             │
-  │ 하부 산책로(탈출)       │ 지면 z −6.62 (참3 2 cm 아래)   │ 0.02          │
+[Walking continuity self-check table]  — entry → descent → exit (SMOKE recomputes all of it)
+  ┌ Segment ────────────────┬ Coords (x, y band, z) ─────────┬ Step ─────────┐
+  │ Upper trail (entry)     │ x −40..−1.5, y −1.6..1.45, 0.0 │ level         │
+  │ Entry deck (wall head)  │ x −1.5..0,  y ±1.40,   −0.005  │ 0.005         │
+  │ Flight0 (+X, −Y band)   │ x 0→3.0,  z 0→−1.65 (10 steps) │ riser 0.165   │
+  │ Landing0 (reversal)     │ x 3.0..4.4, y ±1.40,   −1.65   │ 0 (flush)     │
+  │ Flight1 (−X, +Y band)   │ x 3.0→0.0, z −1.65→−3.30       │ riser 0.165   │
+  │ Landing1                │ x −1.4..0,  y ±1.40,   −3.30   │ 0             │
+  │ Flight2 (+X, −Y band)   │ x 0→3.0,   z −3.30→−4.95       │ riser 0.165   │
+  │ Landing2                │ x 3.0..4.4, y ±1.40,   −4.95   │ 0             │
+  │ Flight3 (−X, +Y band)   │ x 3.0→0.0, z −4.95→−6.60       │ riser 0.165   │
+  │ Landing3                │ x −1.4..0,  y ±1.40,   −6.60   │ 0             │
+  │ Lower path (exit)       │ ground z −6.62 (2 cm below L3) │ 0.02          │
   └─────────────────────────┴────────────────────────────────┴───────────────┘
-  · 참에서의 방향 전환 동선: (x_bot, y −0.70) → (참 중앙, y 0) → (x_bot, y +0.70)
-    — 두 폭 대역이 참 안(y ±1.40)에 모두 들어오므로 끊김 없음.
-  · 상·하 플라이트 연직 여유 = 2×1.65 − 0.29(스트링거+디딤판) = 3.01 m.
-  · 짝수 대역 y[−1.39,−0.01] / 홀수 대역 y[+0.01,+1.39] — 겹침 0(간극 0.02).
+  · turn path on a landing: (x_bot, y −0.70) → (landing centre, y 0) → (x_bot, y +0.70)
+    — both width bands fall inside the landing (y ±1.40), so there is no break.
+  · vertical clearance between flights = 2×1.65 − 0.29 (stringer+tread) = 3.01 m.
+  · even band y[−1.39,−0.01] / odd band y[+0.01,+1.39] — overlap 0 (gap 0.02).
 
-[기하 핵심]
-  · 플라이트 4 × 10단, riser 0.165 / tread 0.30 / 폭 1.38, 총 낙차 6.60.
-  · 순수 갈지자는 수평 진행이 없다(평면 x −1.4..4.4). 따라서 계단 구간의 지면은
-    사실상 연직이어야 하며, 이를 **공원 절토 석축 옹벽**(x=−1.5 머리 옹벽 +
-    y=1.45 측면 옹벽)으로 실체화했다. 브리프의 "경사 30°"는 그 **주변 사면**
-    (북측 +Y 30° 잔디 사면 / 남측 −Y 30° 잔디 사면)이 그대로 충족한다.
-  · 공동(계단 통로) 위를 덮는 지면 평면 없음 — 상부 트레일 플레이트는 x=−1.5
-    에서 끊기고, 그 앞(x −1.5..4.4)은 하부 산책로(z −6.62)만 존재.
+[Geometry core]
+  · 4 flights × 10 steps, riser 0.165 / tread 0.30 / width 1.38, total drop 6.60.
+  · A pure switchback makes no horizontal progress (plan x −1.4..4.4). The ground along
+    the stair must therefore be effectively vertical, and that is realised as a **park
+    cut stone retaining wall** (head wall at x=−1.5 + side wall at y=1.45). The brief's
+    "30° slope" is met by the **surrounding slopes** (the north +Y 30° grass slope /
+    the south −Y 30° grass slope).
+  · No ground plane covers the cavity (the stair passage) — the upper trail plate stops
+    at x=−1.5, and in front of it (x −1.5..4.4) only the lower path (z −6.62) exists.
 
-[v6 판정 재수정 — judge_v6_rt_new7.md §4 + 감독 결정 3항]
-  ① **태양 재선정**(감독 승인 — 개방측 순광). 구 `SUN_AZ_OFFSET=171.5`
-     (월드 az 205 = 태양이 −X·−Y 하늘)은 **머리 옹벽(x=−1.5, 상단 z 0)** 이
-     갈지자 통로를 통째로 그림자에 넣었다: 깊이 d 인 점의 그림자 경계는
-     x < −1.5 + 0.766·d 이므로 d 6.6 m 지점까지 x 3.56 이 암부 = 통로 전체.
-     `from_below`·`through_treads` 2컷 사망의 직접 원인.
-     → `SUN_AZ_OFFSET=216.5` (월드 az = 33.5+216.5 = **250**, 그림자 az 70).
-       이 씬에서 뚫린 방향은 **−Y(남측 하부 공원)** 과 +X 뿐이므로 태양을 −Y
-       쪽으로 크게 돌려 통로에 직사광을 넣는다. 태양 광선 역추적 검산:
-         (x 1.7, y −0.7, z −4.24) → z=0 도달점 (0.47, −4.07) : x=−1.5 평면을
-         가로지르지 않음 → 머리 옹벽·남측 사면 미차폐 = **직사광 도달**.
-       면별 lambert (고도 49.79 → 수평성분 0.6456):
-         −Y향(데크 스트링거·참 코·북측 옹벽면 = 4개 미장센 컷의 피사체) 0.607
-         −X향(그리드 축 정면·원경 능선)                                0.221
-         상면(트레일·참·디딤판·잔디)                                   0.763
-       그리드(+X 관람)의 −X향이 0.221 로 낮아지지만 그리드 화면은 대부분
-       **상면**(0.763)이라 판독 손실이 없다. 반대로 −Y향이 0.273→0.607 로 2.2배.
-     · 최하부(참3, x −1.4..0, z −6.60)는 머리 옹벽 바로 밑이라 어떤 서쪽 태양
-       에서도 그늘 — 6.6 m 절토 바닥의 물리적 사실로 남긴다(핵심 단서 컷 4개는
-       모두 직사광 구간).
-  ② **"성곽 옹벽" 인상 해소** (판정 ⑤ '재질·스케일 교체가 공원 판독의 핵심')
-     (a) `rock_wall` UV 3.0 m → **0.9 m** : 석괴 0.6 m급 성곽 조적 → 0.18 m급
-         **발파석 사석쌓기**(공원 절토면 관행).
-     (b) 인공 옹벽과 **자연 절개면을 재질로 분리** : 머리 옹벽·북측 옹벽만
-         조적(`rock_wall`), 남측 사면 몸체(x=−1.5 에서 하부 공원으로 떨어지는
-         절개면)는 `rock_face`(무줄눈 자연암) — 종전엔 이 면까지 조적이라
-         `from_below` 좌반부가 통째로 성벽이었다.
-     (c) **동측 옹벽 2단화**(x 5.2..44) : 6.62 m 단일 벽 → 하단 3.32 m + **소단
-         1.0 m(식재)** + 상단 3.30 m. 도시공원 절토 옹벽의 표준 단면이며,
-         데크 구간(x −1.5..5.2)은 단일 벽 그대로라 **위험 기하 불변**.
-     (d) 옹벽 상단 **갓돌(코핑) 밴드** — 벽두께보다 0.08 m 내민 콘크리트 띠.
-  ③ **난간이 가설 사다리틀/교수대** (판정 ⑤) → 상·중 가로대만 있던 난간에
-     **세로 살**(0.30 m 간격)을 넣었다. 공원 데크 난간의 표준이며, 세로살이
-     들어가면 인접 플라이트의 사선 레일이 '브레이스'로 오독되지 않는다.
-  ④ **낙엽·흙길 사각 데칼**(C-7)·**confetti 채도**(판정 ⑤) → 흙길 UV 3.0→1.1,
-     낙엽 1.8→1.05, 틴트 중성화, 지면 낙엽 패치를 3매 회전 중첩으로 경계 파괴.
-  ⑤ 관목이 사면 위에서 뜨는 문제 → 블롭 접지 z 를 **하류측 지면**으로 낮춤.
-  ⑥ 원경 롤리팝(C-4) → 원경 수목 줄기 반경·높이 지터 + 원경 능선 마루에
-     숲 실루엣 밴드(build_hedge 라운드 크라운).
+[v6 verdict revision — judge_v6_rt_new7.md §4 + supervisor decision, 3 items]
+  (1) **sun reselected** (supervisor approved — front lit on the open side). The old
+     `SUN_AZ_OFFSET=171.5` (world az 205 = sun in the −X·−Y sky) put the whole
+     switchback passage into the shadow of the **head wall (x=−1.5, top z 0)**: the
+     shadow boundary of a point at depth d is x < −1.5 + 0.766·d, so out to d 6.6 m
+     everything up to x 3.56 is dark = the entire passage. That directly killed the
+     `from_below` and `through_treads` shots.
+     → `SUN_AZ_OFFSET=216.5` (world az = 33.5+216.5 = **250**, shadow az 70).
+       The only open directions in this scene are **−Y (the south lower park)** and +X,
+       so the sun is swung far toward −Y to put direct light into the passage.
+       Back-tracing the sun ray as a check:
+         (x 1.7, y −0.7, z −4.24) → it reaches z=0 at (0.47, −4.07) : it does not cross
+         the x=−1.5 plane → no occlusion by the head wall or the south slope =
+         **direct sun arrives**.
+       lambert per face (elevation 49.79 → horizontal component 0.6456):
+         −Y faces (stringers·landing noses·north wall = the 4 shots)  0.607
+         −X faces (grid axis front·distant ridge)                     0.221
+         top faces (trail·landings·treads·grass)                      0.763
+       The −X faces of the grid (viewing +X) drop to 0.221, but the grid image is mostly
+       **top faces** (0.763), so no reading is lost. Conversely the −Y faces go
+       0.273→0.607, a factor of 2.2.
+     · The lowest point (landing3, x −1.4..0, z −6.60) is directly under the head wall and
+       stays shaded under any western sun — it is left as a physical fact of a 6.6 m cut
+       floor (all 4 key-cue shots are in direct sun).
+  (2) **dispelling the "fortress wall" impression** (verdict (5) 'material and scale
+     replacement is the key to reading this as a park')
+     (a) `rock_wall` UV 3.0 m → **0.9 m** : 0.6 m-class blocks of fortress masonry →
+         0.18 m-class **quarried rubble** (the practice on park cut faces).
+     (b) **separate the built wall from the natural cut face by material** : only the
+         head wall and the north wall are masonry (`rock_wall`); the body of the south
+         slope (the cut face dropping from x=−1.5 into the lower park) is `rock_face`
+         (jointless natural rock) — previously that face was masonry too, so the left
+         half of `from_below` was one solid rampart.
+     (c) **two-tier east wall** (x 5.2..44) : a single 6.62 m wall → lower 3.32 m +
+         **berm 1.0 m (planted)** + upper 3.30 m. This is the standard section for an
+         urban park cut wall, and the deck run (x −1.5..5.2) keeps the single wall, so
+         the **hazard geometry is unchanged**.
+     (d) **coping band on top of the wall** — a concrete strip projecting 0.08 m past
+         the wall face.
+  (3) **the railing read as a temporary ladder frame / gallows** (verdict (5)) →
+     **vertical bars** (0.30 m pitch) were added to a railing that had only top and mid
+     rails. This is the standard for a park deck railing, and with the bars in place the
+     raking rails of the adjacent flight are no longer misread as bracing.
+  (4) **leaf and dirt-trail square decals** (C-7) · **confetti saturation** (verdict (5))
+     → dirt UV 3.0→1.1, leaf 1.8→1.05, tints neutralised, ground leaf patches broken up
+     by overlaying 3 rotated copies.
+  (5) shrubs floating above the slope → the blob grounding z was lowered to the
+     **downhill ground**.
+  (6) distant lollipops (C-4) → jitter on distant tree trunk radius and height + a forest
+     silhouette band on the distant ridge crest (build_hedge round crowns).
 
-[v7 판정 재수정 — judge_v7_rt_A.md §7 "미장센 4컷이 공원으로 안 읽힌다"]
-  판정문 결론: **"남은 것은 코드가 아니라 카메라"** — 재질 수정(사석 축소·
-  자연암 분리·2단 옹벽·세로살)은 충분하나 4컷 전부가 데크 클로즈업이라
-  공원 신호(잔디·관목·수목·이용자 시설)가 한 컷에도 안 들어왔다. 반면
-  그리드 컷은 공원으로 읽힌다 = 기하가 아니라 프레이밍 문제.
-  ① **`from_below` 개방측(−Y) 미러**(㉡ 직접 지시) : 구 시선 129.6° 는 피사면의
-     절반이 +X향(머리 옹벽·절개면 = lambert −0.342)이라 mean 36.4·dark 66.3 %
-     였다. eye (8.0,−7.5)→**(5.2,−10.8)**, 시선 105.4°(법선 285.4° =
-     **lambert +0.527**), 피치 +6.6°. 프레임 하단 시선이 **하부 공원 흙길**에
-     착지하고 관목 3·북측 잔디사면 3·이정표·벤치 = **공원 앵커 8개**가 화각 안.
-  ② **`reversal` 후퇴·상승 재조준**(㉠) : eye (3.7,−3.2,−0.30)→**(6.6,−6.6,1.20)**,
-     피치 −24° → **−16°**. 프레임 상단(+2.0° 앙각)이 옹벽 갓돌 너머 **북측 30°
-     잔디 사면**을 담아 화면의 약 1/4 이 녹지가 된다(참0·플라이트0/1 유지).
-  ③ **`broken_rail` 남측 회전** : 시선 135°(lambert +0.273, 파손/정상 난간이
-     같은 어두운 대역) → 112°(**+0.480**). 하단 시선이 참0 아래 수직 공간을
-     지나 z −4.46 에 착지 → 낙차 깊이가 프레임에 남는다.
-  ④ **이정표 재축소**(㉢) : 방향판 0.72×0.11 → **0.58×0.09**, 높이 1.72/1.98 →
-     **1.80/2.06**, 기둥 r 0.065 → 0.080 · 전고 2.26 → 기둥 노출 79 %.
-  ⑤ 하부 공원 관목 1군락 추가(0.5,−5.5) — `from_below` 좌측 프레이밍용(§6
-     "판독에 필요한 최소" 통과: 이 컷의 공원 판독이 재수정 사유 그 자체).
-  검산: SMOKE `[v7 미장센]` — 컷별 시선/법선/**lambert**, 프레임 하단 시선의
-        지면 착지점, 화각(수평 ±30°·수직 ±18°) 안의 공원 앵커 열거.
-  미조치: `through_treads`(투과 클로즈업, v7 "개선 확정") 는 성격상 앵커 0 —
-        lambert +0.620 로 조도만 확인하고 구도 유지.
+[v7 verdict revision — judge_v7_rt_A.md §7 "the 4 mise-en-scene shots do not read as a park"]
+  Conclusion of the verdict: **"what is left is not the code but the camera"** — the
+  material fixes (smaller rubble, separated natural rock, two-tier wall, vertical bars)
+  are sufficient, but all 4 shots were deck close-ups, so no park signal (grass, shrubs,
+  trees, visitor furniture) entered a single frame. The grid shots, by contrast, do read
+  as a park = the problem is framing, not geometry.
+  (1) **mirror `from_below` to the open side (−Y)** (direct instruction (b)) : the old
+     sight line 129.6° had half its subject facing +X (head wall and cut face =
+     lambert −0.342), giving mean 36.4·dark 66.3 %. eye (8.0,−7.5)→**(5.2,−10.8)**,
+     sight 105.4° (normal 285.4° = **lambert +0.527**), pitch +6.6°. The bottom of the
+     frame lands on the **lower park dirt trail**, and 3 shrubs, 3 north grass slopes,
+     the waymarker and the bench = **8 park anchors** are inside the FOV.
+  (2) **`reversal` pulled back and raised** ((a)) : eye (3.7,−3.2,−0.30)→**(6.6,−6.6,1.20)**,
+     pitch −24° → **−16°**. The top of the frame (+2.0° elevation) now carries the
+     **north 30° grass slope** beyond the wall coping, so about a quarter of the image is
+     greenery (landing0 and flights 0/1 are kept).
+  (3) **`broken_rail` rotated south** : sight 135° (lambert +0.273, damaged and intact
+     railing in the same dark band) → 112° (**+0.480**). The bottom ray passes through the
+     vertical space under landing0 and lands at z −4.46 → the depth of the drop stays in
+     the frame.
+  (4) **waymarker shrunk again** ((c)) : blades 0.72×0.11 → **0.58×0.09**, heights
+     1.72/1.98 → **1.80/2.06**, post r 0.065 → 0.080 · total height 2.26 → post 79 % exposed.
+  (5) one shrub clump added in the lower park (0.5,−5.5) — for the left framing of
+     `from_below` (passes §6 "the minimum needed to read": the park reading of this shot
+     is the very reason for the revision).
+  Check: SMOKE `[v7 mise-en-scene]` — per shot the sight line / normal / **lambert**, the
+        ground point the bottom ray lands on, and the park anchors inside the FOV
+        (horizontal ±30° · vertical ±18°).
+  Not addressed: `through_treads` (a see-through close-up, "improvement confirmed" in v7)
+        has 0 anchors by nature — only its illumination is confirmed at lambert +0.620
+        and the composition is kept.
 ────────────────────────────────────────────────────────────────────────────
 
-실행 (GUI 룩 체크 — 기본):
+Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
     export PYTHONNOUSERSITE=1
     python scene10_park_deck_switchback.py
 
-자동 캡처 : NEGOBS_CAPTURE=1 python scene10_park_deck_switchback.py
-스모크    : NEGOBS_SMOKE=1 python3 scene10_park_deck_switchback.py  (부팅 없음)
+Auto capture : NEGOBS_CAPTURE=1 python scene10_park_deck_switchback.py
+Smoke        : NEGOBS_SMOKE=1 python3 scene10_park_deck_switchback.py  (no boot)
 
-좌표계: Z-up, m. 플라이트는 로컬 +X 하강(관례). 홀수 플라이트는 rot_group 180°
-        (피벗 = 플라이트 상단) → 월드에서 −X 방향. 그리드 축 = 상부 접근(+X).
+Coordinates: Z-up, m. Flights descend along local +X (convention). Odd flights use
+        rot_group 180° (pivot = top of the flight) → −X in world. Grid axis = upper approach (+X).
 """
 
 import os
@@ -143,16 +165,16 @@ import ground_kit as gk
 
 
 # ===========================================================================
-# [A] SCENE_CONFIG — 표준 7키. hazard_stairs 만 위험 기하 토글.
+# [A] SCENE_CONFIG - standard 7 keys. Only hazard_stairs toggles the hazard geometry.
 # ===========================================================================
 SCENE_CONFIG = {
-    "hazard_stairs":      True,    # False → 플라이트를 z=0 평판 데크로(낙차 제거)
-    "cue_railing":        True,    # 공원 데크 = 난간 관행. **단 참0 외측 1개소 파손**
-    "cue_tactile":        False,   # 공원 흙길 비관행(v5 브리프 §공통) — 코드 경로만
-    "cue_material_break": True,    # 목재 데크 vs 잔디/낙엽 지면 대비
-    "cue_sign":           False,   # [v5.2 사용자] 임의 경고 팻말 제거 — 배치 없음(키만 예약)
-    "cue_scene_dressing": True,    # 수목·관목·이정표·벤치·쉼터 정자
-    "cue_nosing":         False,   # 목재 데크 단코 띠는 비관행 — 코드 경로만
+    "hazard_stairs":      True,    # False -> flights become a flat z=0 deck (drop removed)
+    "cue_railing":        True,    # park deck = railing is the practice. **but one break at the landing0 outer edge**
+    "cue_tactile":        False,   # not the practice on a park dirt trail (v5 brief §shared) - code path only
+    "cue_material_break": True,    # timber deck vs grass / leaf ground contrast
+    "cue_sign":           False,   # [v5.2 user] arbitrary warning sign removed - nothing placed (key reserved only)
+    "cue_scene_dressing": True,    # trees·shrubs·waymarker·bench·shelter pavilion
+    "cue_nosing":         False,   # a nosing band on a timber deck is not the practice - code path only
 }
 
 
@@ -160,22 +182,22 @@ SCENE_CONFIG = {
 # [B] PARAMS
 # ===========================================================================
 PARAMS = dict(
-    # --- 갈지자 플라이트 (archive_v3/scene10 병렬 Y 대역 규약 계승) ---
-    #   half_w 0.69 → 폭 1.38 ≈ 브리프 1.4. y_off 0.70 → 두 대역 간극 0.02.
+    # --- switchback flights (inherits the parallel Y-band convention of archive_v3/scene10) ---
+    #   half_w 0.69 -> width 1.38 ~ the brief's 1.4. y_off 0.70 -> 0.02 gap between the two bands.
     flights=dict(n=4, steps=10, riser=0.165, tread=0.30, half_w=0.69,
                  y_off=0.70, tread_t=0.05, gap=0.02, z_top=0.0),
-    # 참 1.4(X) × 2.8(Y) — 두 폭 대역을 모두 덮는다
+    # landing 1.4 (X) x 2.8 (Y) - covers both width bands
     landing=dict(size=1.4, thick=0.12, y0=-1.40, y1=1.40),
-    # 진입 데크 : 옹벽 머리(x −1.5)에서 첫 단(x 0)까지 — 상부 트레일과 접속
+    # entry deck : from the retaining wall head (x −1.5) to the first step (x 0) - joins the upper trail
     entry=dict(x0=-1.5, x1=0.0, top=-0.005, thick=0.10),
-    # 데크 기둥 : 참 네 모서리(참 x 끝에서 0.15 안쪽) × y ±half_y.
-    #   실제 (x, z 구간)은 post_segments() 가 참 스택에서 산출한다.
+    # deck posts : the four landing corners (0.15 inside the landing x ends) x y +-half_y.
+    #   the actual (x, z range) is derived from the landing stack by post_segments().
     post=dict(r=0.075, half_y=1.25, inset=0.15),
-    # 난간 : 상부 가로대 h1.05 / 중간 h0.55, 포스트 간격 1.05
-    #   [v6] baluster = 세로 살(공원 데크 난간 표준). 가로대만 있으면 '가설
-    #   사다리틀'로 읽힌다(판정 §4 ⑤). 파손 개소(참0 외측)는 세로살도 탈락.
+    # railing : top rail h1.05 / mid rail h0.55, post spacing 1.05
+    #   [v6] baluster = vertical bar (the standard for park deck railings). Rails alone read
+    #   as a 'temporary ladder frame' (verdict §4 (5)). At the break (landing0 outer) the bars are gone too.
     rail=dict(h=1.05, mid=0.55, post_r=0.05, post_h=1.10, bar_t=0.06,
-              spacing=1.05, broken_landing=0,   # 참0 외측 = 파손 개소
+              spacing=1.05, broken_landing=0,   # landing0 outer = the break
               bal_r=0.022, bal_step=0.30, bal_top=1.02),
 
     # === [W2-D ground_kit] P18 `deck_trail_hybrid` - spec Sec.5.8 / Sec.13.4 =
@@ -206,15 +228,15 @@ PARAMS = dict(
         deck_gaps=9,                  # 10-3: 9 gaps over the 1.5 m entry deck
         seed=10,
     ),
-    # --- 지면 축정렬 플레이트 (name, x0, x1, y0, y1, z_top, thick, mtl) ---
-    #   v5 회귀 체크리스트 ③ : 상부 트레일은 x=−1.5 에서 **끊긴다**
-    #   (계단 공동 위를 덮지 않음). 그 앞은 하부 산책로(−6.60)만.
-    #   [Z-파이팅 회피] 하부 산책로 지면 상면은 −6.62 로, 데크 최하단(−6.60)
-    #   보다 2 cm 낮다 → 참3·플라이트3 마지막 디딤판이 지면과 동일평면이 되지
-    #   않는다(교훈 8). 보행 단차 0.02 m 는 연속성 표에서 검증.
-    #   [v6 ②(c)] BankCut(북측 옹벽)은 데크 구간 x −40..5.2 만 6.62 m 단일 벽으로
-    #   남기고, 동측 x 5.2..44 는 **하단벽 + 소단(1.0 m) + 상단벽** 2단으로 나눈다.
-    #   소단 상면 z −3.30, 상단벽은 y 2.45..2.60 으로 물러서 그림자선이 생긴다.
+    # --- axis-aligned ground plates (name, x0, x1, y0, y1, z_top, thick, mtl) ---
+    #   v5 regression checklist (3) : the upper trail **stops** at x=−1.5
+    #   (it does not cover the stair cavity). Beyond it there is only the lower path (−6.60).
+    #   [Z-fighting avoidance] the lower path ground top is −6.62, 2 cm below the deck's
+    #   lowest point (−6.60) -> landing3 and the last tread of flight3 never become coplanar
+    #   with the ground (lesson 8). The 0.02 m walking step is verified in the continuity table.
+    #   [v6 (2)(c)] BankCut (north retaining wall) stays a single 6.62 m wall only over the deck
+    #   run x −40..5.2; east of it (x 5.2..44) it splits into **lower wall + berm (1.0 m) + upper wall**.
+    #   berm top z −3.30; the upper wall steps back to y 2.45..2.60, which creates a shadow line.
     plates=[
         ("UpperTrail",   -40.0,  -1.5,  -1.60,  1.45,  0.00, 0.45, "grass"),
         ("UpperBody",    -40.0,  -1.5,  -1.60,  1.45, -0.45, 6.95, "rock"),
@@ -226,44 +248,44 @@ PARAMS = dict(
         ("LowerParkFar", -40.0,  44.0, -60.00, -13.00, -6.62, 1.50, "grass"),
         ("LowerPath",     -1.5,  44.0,  -4.40, -2.60, -6.618, 0.06, "dirt"),
         ("FarHill",      -40.0,  44.0,  15.00, 40.00,  7.16, 9.00, "grass"),
-        # 계곡 건너 원경 능선 (+X 지평 폐쇄)
+        # distant ridge across the valley (+X horizon closure)
         ("FarRidge",      44.0,  78.0, -60.00, 40.00,  3.50, 12.00, "grass"),
     ],
-    # --- Y 방향 사면(_ybank, rotX 슬래브) : (name, x0,x1, y_hi,z_hi, y_lo,z_lo,
-    #     thick, mtl). +Y 가 높고 −Y 로 하강.
+    # --- Y-direction slopes (_ybank, rotX slab) : (name, x0,x1, y_hi,z_hi, y_lo,z_lo,
+    #     thick, mtl). +Y is high and it falls toward −Y.
     ybanks=[
-        # 북측 공원 사면 (경사 30.0°) — 옹벽 상단(y2.60,z0) → 능선(y15,z7.16)
+        # north park slope (30.0 deg) - retaining wall top (y2.60,z0) -> ridge (y15,z7.16)
         ("NorthBank", -40.0, 44.0, 15.00, 7.16, 2.60, 0.00, 9.00, "grass"),
-        # 남측 무방호 사면 (경사 30.1°) — 트레일 어깨(y−1.6,z0) → 하부(y−13)
+        # south unguarded slope (30.1 deg) - trail shoulder (y−1.6,z0) -> lower ground (y−13)
         ("SouthBankCap", -40.0, -1.5, -1.60, 0.00, -13.00, -6.62, 0.50,
          "grass"),
-        # [v6 ②(b)] 몸체 재질 rock(조적) → rockface(무줄눈 자연암).
-        #   이 슬래브의 +X 끝면(x=−1.5, y −1.6..−13)이 하부 공원으로 떨어지는
-        #   **자연 절개면**이며 `from_below` 좌반부를 채운다. 조적이면 성벽.
+        # [v6 (2)(b)] body material rock (masonry) -> rockface (jointless natural rock).
+        #   the +X end face of this slab (x=−1.5, y −1.6..−13) is the **natural cut face**
+        #   dropping to the lower park, and it fills the left half of `from_below`. As masonry it is a rampart.
         ("SouthBankBody", -40.0, -1.5, -1.60, -0.50, -13.00, -7.12, 7.50,
          "rockface"),
     ],
-    # --- [v6] 옹벽 갓돌(코핑) 밴드 : (name, x0, x1, y0, y1, z_top, thick) ---
-    #     벽면보다 0.08 m 내밀어 상단에 그림자선을 만든다(토목 시설물 판독).
-    #   (머리 옹벽 상단은 진입 데크가 덮으므로 갓돌 없음 — 관통 회피)
+    # --- [v6] retaining wall coping band : (name, x0, x1, y0, y1, z_top, thick) ---
+    #     projects 0.08 m past the wall face to cast a shadow line at the top (reads as civil works).
+    #   (the head wall top is covered by the entry deck, so no coping - avoids interpenetration)
     copings=[("BankW", -40.0, 5.20, 1.41, 2.60, 0.02, 0.18),
              ("BankE", 5.20, 44.0, 2.37, 2.60, 0.02, 0.18),
              ("Tier", 5.20, 44.0, 1.37, 2.45, -3.28, 0.16)],
-    # --- [v6] 소단 식재 밴드 : (x0, x1) — 소단 상면(z −3.30) 위 관목 띠 ---
+    # --- [v6] berm planting band : (x0, x1) - shrub strip on the berm top (z −3.30) ---
     berm_hedges=[(5.6, 15.5), (19.0, 29.0), (33.0, 43.4)],
     berm=dict(y0=1.62, y1=2.34, h=0.85, base_z=-3.30),
 
-    # --- 낙엽 밴드 : 상단 2단 에지 가림(플라이트0 디딤판 1·2) + 지면 퇴적 ---
+    # --- leaf bands : hiding the top two step edges (flight0 treads 1·2) + ground litter ---
     leaf=dict(thick=0.02, proud=0.012, over=0.045),
-    # [v6 C-7] 지면 낙엽 패치 : 1매 사각 데칼 → 회전·크기 지터 3매 중첩
+    # [v6 C-7] ground leaf patch : one square decal -> 3 overlaid with rotation / size jitter
     leaf_patch=dict(seed=1007, subs=3, scale=(0.55, 0.90), off=0.42, rz=32.0),
     leaf_ground_patches=[(-3.2, -0.9, 1.6, 1.1, "trail"),
                          (-5.6, 0.7, 1.4, 1.0, "trail"),
                          (1.4, -3.4, 2.2, 1.6, "lower"),
                          (5.0, -1.9, 2.0, 1.5, "lower")],
 
-    # --- 드레싱 ---
-    # 수목 10 (cx, cy, zone, trunk_h) — zone: north/south/lower/trail
+    # --- dressing ---
+    # 10 trees (cx, cy, zone, trunk_h) - zone: north/south/lower/trail
     trees=[(-6.0, 5.5, "north", 3.6), (0.5, 8.0, "north", 4.0),
            (7.0, 6.0, "north", 3.4), (13.0, 9.5, "north", 3.8),
            (-14.0, 4.5, "north", 3.2), (-20.0, 7.5, "north", 3.6),
@@ -271,55 +293,55 @@ PARAMS = dict(
            (9.0, -9.0, "lower", 3.2), (16.0, -5.0, "lower", 3.6),
            (2.0, -11.5, "lower", 3.0), (21.0, -12.0, "lower", 3.4)],
     tree=dict(trunk_r=0.10),
-    # 관목 군락 (눌린 타원체 중첩 — scene04 v5 규약)
-    #   [v6] 남측 절개면(x=−1.5) 상단 모서리에 군락 4를 추가해 직선 절단선을
-    #        가린다(from_below 좌반부 '성벽' 인상 완화).
+    # shrub clumps (overlaid flattened ellipsoids - scene04 v5 convention)
+    #   [v6] clump 4 is added at the top corner of the south cut face (x=−1.5) to hide the
+    #        straight cut line (softens the 'rampart' impression in the left half of from_below).
     shrubs=[(-4.0, 3.3, "north"), (3.5, 4.0, "north"), (10.0, 3.6, "north"),
             (-12.0, 3.4, "north"), (-6.5, -4.2, "south"),
             (-14.0, -6.0, "south"), (6.0, -4.6, "lower"),
             (12.0, -2.6, "lower"),
             (-2.3, -2.7, "south"), (-2.6, -5.4, "south"),
             (-2.2, -8.2, "south"), (-2.9, -10.8, "south"),
-            # [v7 판정 §7 ㉠] from_below 프레임 좌측(yaw −26°)에 공원 관목을
-            #   하나 더 세워 데크를 식생으로 감싼다. 시선 회랑(카메라→데크)은
-            #   x 3.5 대역이라 침범 없음 — SMOKE [v7 미장센]이 검산.
+            # [v7 verdict §7 (a)] one more park shrub is set at the left of the from_below frame
+            #   (yaw −26 deg) so the deck is wrapped in planting. The sight corridor (camera->deck)
+            #   runs in the x 3.5 band, so there is no intrusion - checked by SMOKE [v7 mise-en-scene].
             (0.5, -5.5, "lower")],
     shrub=dict(embed=0.25,
                blobs=((0.00, 0.00, 0.75, 0.60, 0.35),
                       (0.54, 0.41, 0.51, 0.43, 0.26),
                       (-0.45, -0.37, 0.56, 0.39, 0.29))),
-    # 목재 이정표 (기둥 + 방향판 2 + 기둥 캡)
-    #   [v6] 구 사양(0.90×0.16 판 2매 @1.55/1.80)은 원거리에서 **피크닉 테이블**
-    #   로 읽혔다 → 판을 얇고 짧게(0.72×0.11), 높이를 벌리고(1.72/1.98) 상단에
-    #   캡을 씌워 '기둥형 이정표' 실루엣을 만든다.
-    #   [v7 판정 §7 ③] 0.72×0.11 두 판이 여전히 "상판 넓고 낮은 피크닉 테이블"
-    #   로 읽혔다 → 판을 **0.58×0.09** 로 더 줄이고, 두 판을 2.06/1.80 으로
-    #   올려 **기둥 노출을 1.80 m(전고의 79 %)** 로 키운다. 기둥은 0.065→0.080
-    #   으로 굵혀 원거리에서 '기둥형' 실루엣이 먼저 읽히게 한다.
+    # timber waymarker (post + 2 direction blades + post cap)
+    #   [v6] the old spec (two 0.90x0.16 blades @1.55/1.80) read as a **picnic table** at a
+    #   distance -> blades made thinner and shorter (0.72x0.11), heights spread (1.72/1.98)
+    #   and a cap added on top to give a 'post-type waymarker' silhouette.
+    #   [v7 verdict §7 (3)] the two 0.72x0.11 blades still read as a "low picnic table with a
+    #   wide top" -> blades shrunk further to **0.58x0.09** and lifted to 2.06/1.80, so the
+    #   **exposed post grows to 1.80 m (79 % of the total height)**. The post thickens
+    #   0.065 -> 0.080 so the 'post-type' silhouette reads first at a distance.
     signpost=dict(cx=-3.6, cy=1.00, post_r=0.080, post_h=2.26,
                   arm=(0.58, 0.05, 0.09), arm_off=0.34,
                   arms=((2.06, 15.0), (1.80, 195.0)),
                   cap=(0.20, 0.20, 0.07)),
-    # 벤치 1 (상부 트레일)
+    # bench 1 (upper trail)
     bench=dict(cx=-6.5, cy=0.90, yaw=180.0),
-    # 쉼터 정자 (하부 산책로). [v7] from_below 가 (5.2,−10.8)→(2.4,−0.6) 로
-    #   미러됐어도 정자(중심 11.5,−6.0)는 yaw 68° 로 화각 밖 — 시선 무간섭 유지.
+    # shelter pavilion (lower path). [v7] even after from_below is mirrored from
+    #   (5.2,−10.8) to (2.4,−0.6), the pavilion (centre 11.5,−6.0) sits at yaw 68 deg, outside the FOV - still no sight interference.
     pergola=dict(x0=10.0, x1=13.0, y0=-7.5, y1=-4.5, z_roof=-4.20, post_r=0.10,
                  roof_t=0.16),
-    # [v5.2 사용자] 임의 경고 팻말 제거 — 계단주의 표지(PARAMS['sign']) 삭제.
-    # 원경 폐쇄 : 하부 공원 너머 숲 밴드 + 상부 능선 수목
+    # [v5.2 user] arbitrary warning sign removed - the stair-caution sign (PARAMS['sign']) is deleted.
+    # distant closure : forest band beyond the lower park + trees on the upper ridge
     far_hedges=[dict(x0=-40.0, x1=6.0, y0=-40.0, y1=-37.0, h=4.0),
                 dict(x0=6.0, x1=44.0, y0=-40.0, y1=-37.0, h=4.0),
                 dict(x0=40.0, x1=43.0, y0=-33.0, y1=1.40, h=4.0)],
-    # [v6 C-4] 원경 능선(FarRidge 상면 z 3.50) 마루 숲 실루엣 밴드 —
-    #   개체 롤리팝 대신 라운드 크라운 띠로 지평을 닫는다.
-    #   + 북측 언덕(FarHill 상면 7.16)의 **직선 지평**(판정 ① '무대 배경막')도
-    #     마루 밴드로 요철화한다.
+    # [v6 C-4] forest silhouette band on the distant ridge crest (FarRidge top z 3.50) -
+    #   the horizon is closed with a round-crown strip instead of individual lollipops.
+    #   + the **straight horizon** of the north hill (FarHill top 7.16), verdict (1)'s 'stage
+    #     backdrop', is broken up by a crest band as well.
     ridge_crest=[dict(x0=46.0, x1=54.0, y0=-58.0, y1=-8.0, h=5.0, base=3.10),
                  dict(x0=49.0, x1=57.0, y0=-10.0, y1=38.0, h=6.0, base=3.10),
                  dict(x0=-40.0, x1=6.0, y0=13.6, y1=17.4, h=5.2, base=6.76),
                  dict(x0=6.0, x1=44.0, y0=13.6, y1=17.4, h=4.6, base=6.76)],
-    # (cx, cy, zone) — north = 북측 사면, far = 원경 능선(z 3.5), low = 하부
+    # (cx, cy, zone) - north = north slope, far = distant ridge (z 3.5), low = lower ground
     hill_trees=[dict(cx=-22.0, cy=20.0, zone="north"),
                 dict(cx=-8.0, cy=24.0, zone="north"),
                 dict(cx=6.0, cy=19.0, zone="north"),
@@ -333,28 +355,28 @@ PARAMS = dict(
                 dict(cx=10.0, cy=-38.5, zone="low"),
                 dict(cx=28.0, cy=-38.5, zone="low")],
 
-    # --- 재질 ---
+    # --- materials ---
     material=dict(
-        # [v6] rock_wall 3.0→0.9(성곽 조적 → 발파석 사석) · dirt 3.0→1.1
-        #      (confetti 채도) · leaf 1.8→1.05 · rock_face(자연 절개면) 추가
-        #      grass 4.0→2.6(사면 '퀼팅 무늬 반복' 완화)
+        # [v6] rock_wall 3.0->0.9 (fortress masonry -> quarried rubble) · dirt 3.0->1.1
+        #      (confetti saturation) · leaf 1.8->1.05 · rock_face (natural cut face) added
+        #      grass 4.0->2.6 (softens the 'quilt pattern' repetition on the slope)
         scale=dict(wood_dark=1.0, rock_wall=0.9, rock_face=2.2, grass=1.4,
                    leaf_ground=1.05, dirt_park=1.1, concrete_wall=2.4),
-        deck_tint=(1.00, 0.96, 0.90),          # 데크 목판(약간 바랜 톤)
-        stringer_tint=(0.72, 0.70, 0.66),      # 스트링거·기둥(어둡게)
+        deck_tint=(1.00, 0.96, 0.90),          # deck planks (slightly weathered tone)
+        stringer_tint=(0.72, 0.70, 0.66),      # stringers·posts (darker)
         grass_tint=(0.55, 0.68, 0.42),
         leaf_tint=(0.88, 0.85, 0.80),
-        dirt_tint=(0.78, 0.76, 0.72),          # [v6] 채도·명도 하향(색종이 방지)
-        rock_tint=(0.82, 0.82, 0.80),          # [v6] 사석 회색화(유럽 성벽 톤 제거)
+        dirt_tint=(0.78, 0.76, 0.72),          # [v6] saturation and value lowered (avoids confetti)
+        rock_tint=(0.82, 0.82, 0.80),          # [v6] rubble greyed (removes the European rampart tone)
         rockface_tint=(0.80, 0.80, 0.78),
         coping_tint=(0.78, 0.77, 0.74),
         shrub=(0.030, 0.047, 0.021), shrub_rough=1.0,
         canopy_a=(0.035, 0.052, 0.024), canopy_b=(0.042, 0.060, 0.030),
         canopy_rough=1.0,
         wood_color=(0.30, 0.20, 0.12), wood_rough=0.85,
-    ),   # [v5.2 사용자] 임의 경고 팻말 제거 — sign_back 색상 상수 삭제
+    ),   # [v5.2 user] arbitrary warning sign removed - sign_back colour constant deleted
 
-    # --- 조명: scene01 noon 검증 상수 + v5 §R5 지정 태양 ---
+    # --- lighting: scene01 noon verified constants + the sun specified in v5 §R5 ---
     light=dict(
         hdri="qwantani_noon_puresky_4k.exr",
         dome_intensity=1000.0,
@@ -364,10 +386,10 @@ PARAMS = dict(
         hdri_sun_rotz_offset=233.5,
         dome_rotation_step=15.0,
     ),
-    # [v6 판정 §4 ④ + 감독 결정 3항 — 재선정 승인(개방측 순광)]
-    #   구 171.5(az 205) → 머리 옹벽이 갈지자 통로 전체를 그림자에 넣음.
-    #   신 216.5 = 월드 az 250(태양이 −X·−Y 하늘, 그림자 az 70).
-    #   개방측(−Y 하부 공원)에서 직사광이 통로로 들어온다. 검산은 독스트링 ①.
+    # [v6 verdict §4 (4) + supervisor decision item 3 - reselection approved (front lit on the open side)]
+    #   old 171.5 (az 205) -> the head retaining wall put the whole switchback passage in shadow.
+    #   new 216.5 = world az 250 (sun in the −X·−Y sky, shadow az 70).
+    #   direct sun enters the passage from the open side (−Y lower park). Check in docstring (1).
     SUN_AZ_OFFSET=216.5,
 
     render=dict(pt_total_spp=512, pt_max_bounces=8),
@@ -394,26 +416,26 @@ if _sc_ov:
 
 
 # ===========================================================================
-# [C] 경로 / 에셋 역할
+# [C] paths / asset roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "scene10")
 
 ASSET_ROLES = ["wood_dark", "rock_wall", "rock_face", "concrete_wall",
                "grass", "leaf_ground", "dirt_park",
-               "hdri", "mdl"]     # [v5.2 사용자] 임의 경고 팻말 제거
+               "hdri", "mdl"]     # [v5.2 user] arbitrary warning sign removed
 
-DECK_BOT = -6.60                   # 데크 최하단(참3 상면 = 플라이트3 끝)
-GROUND_Z = -6.62                   # 하부 산책로 지면 상면(데크보다 2 cm 아래)
-TRAIL_Z = 0.0                      # 상부 둘레길
-HEAD_X = -1.5                      # 옹벽 머리 = 상부 플레이트 끝
-FAR_RIDGE_Z = 3.50                 # 원경 능선 상면
+DECK_BOT = -6.60                   # deck bottom (landing3 top = end of flight3)
+GROUND_Z = -6.62                   # lower path ground top (2 cm below the deck)
+TRAIL_Z = 0.0                      # upper trail
+HEAD_X = -1.5                      # retaining wall head = end of the upper plate
+FAR_RIDGE_Z = 3.50                 # distant ridge top
 NORTH_TAN = math.tan(math.radians(30.0))
-SOUTH_SLOPE = 6.62 / 11.40         # 남측 사면 기울기(= tan 30.14°)
+SOUTH_SLOPE = 6.62 / 11.40         # south slope gradient (= tan 30.14 deg)
 
 
 # ===========================================================================
-# [D] 플라이트 배치 사전계산 (부팅 불필요)
+# [D] flight layout precomputation (no boot needed)
 # ===========================================================================
 def compute_flights():
     fl = PARAMS["flights"]
@@ -428,14 +450,14 @@ def compute_flights():
         z_bot = z_top - fdrop
         if even:
             x_bot = x_top + run
-            lx0, lx1 = x_bot, x_bot + land      # 참은 진행 방향 앞으로 돌출
+            lx0, lx1 = x_bot, x_bot + land      # the landing juts forward along the travel direction
         else:
             x_bot = x_top - run
             lx0, lx1 = x_bot - land, x_bot
         seq.append(dict(k=k, x_top=x_top, z_top=z_top, x_bot=x_bot,
                         z_bot=z_bot, rot=rot, even=even, lx0=lx0, lx1=lx1))
-        # 다음 플라이트 상단 = 참의 먼 모서리가 아니라 **플라이트 하단 그 자리**
-        # (archive_v3/scene10 감사 A-10-2 — 참 밑 매몰 방지)
+        # next flight top = **exactly where the flight ended**, not the landing's far corner
+        # (archive_v3/scene10 audit A-10-2 - prevents burial under the landing)
         x_top, z_top = x_bot, z_bot
     return seq, run, fdrop
 
@@ -445,35 +467,35 @@ TOTAL_DROP = -SEQ[-1]["z_bot"]                  # 6.60
 
 
 def band(even):
-    """플라이트 폭 대역(월드 y). 짝수 = −Y 대역, 홀수 = +Y 대역."""
+    """Width band of a flight (world y). Even = −Y band, odd = +Y band."""
     fl = PARAMS["flights"]
     lo, hi = -fl["y_off"] - fl["half_w"], -fl["y_off"] + fl["half_w"]
     return (lo, hi) if even else (-hi, -lo)
 
 
 # ===========================================================================
-# [E] 지형 수학
+# [E] terrain maths
 # ===========================================================================
 def north_z(y):
-    """북측(+Y) 30° 잔디 사면 상면 z (옹벽 상단 y2.60 = 0)."""
+    """Top z of the north (+Y) 30° grass slope (retaining wall top y2.60 = 0)."""
     if y <= 2.60:
         return 0.0
     return min(7.16, (y - 2.60) * NORTH_TAN)
 
 
 def south_z(y):
-    """남측(−Y) 30° 무방호 사면 상면 z (트레일 어깨 y−1.60 = 0)."""
+    """Top z of the south (−Y) 30° unguarded slope (trail shoulder y−1.60 = 0)."""
     if y >= -1.60:
         return 0.0
     return max(GROUND_Z, (y + 1.60) * SOUTH_SLOPE)
 
 
 def ground_z(x, y):
-    """드레싱 접지용 지면 z."""
+    """Ground z used to seat dressing."""
     if y >= 2.60:
         return north_z(y)
     if y >= 1.45:
-        return 0.0                     # 측면 옹벽 상단
+        return 0.0                     # side retaining wall top
     if y >= -1.60:
         return TRAIL_Z if x <= HEAD_X else GROUND_Z
     if x <= HEAD_X:
@@ -496,30 +518,30 @@ def _zone_z(x, y, zone):
 
 
 # ===========================================================================
-# [F] 데크 기둥 배치 (기둥 하단이 반드시 지면/하부 참에 닿게)
+# [F] deck post layout (post bottoms must always meet the ground or the landing below)
 # ===========================================================================
 def post_segments():
-    """(name, cx, cy, z_lo, z_hi) 리스트 — z_hi 는 지지 대상 슬래브 밑면."""
+    """List of (name, cx, cy, z_lo, z_hi) — z_hi is the underside of the slab being supported."""
     ld = PARAMS["landing"]
     ent = PARAMS["entry"]
     hy = PARAMS["post"]["half_y"]
     ins = PARAMS["post"]["inset"]
     t = ld["thick"]
     segs = []
-    # 참별 지지 : 참 슬래브 밑면(z_bot − thick)까지, 하단은 지면 또는 아래 참 상면
+    # support per landing : up to the landing slab underside (z_bot − thick); the bottom is the ground or the landing top below
     for f in SEQ:
         cols = [f["lx0"] + ins, f["lx1"] - ins]
         for ci, cx in enumerate(cols):
             for tag, sgn in (("P", 1.0), ("N", -1.0)):
                 z_hi = f["z_bot"] - t
-                # 아래에 같은 x 대역의 참이 또 있으면 그 상면에서 시작
+                # if another landing shares the same x band below, start from its top face
                 below = [g["z_bot"] for g in SEQ
                          if g["k"] > f["k"] and abs(g["lx0"] - f["lx0"]) < 1e-6]
                 z_lo = max(below) if below else GROUND_Z
                 if z_hi - z_lo > 0.05:
                     segs.append((f"L{f['k']}_C{ci}_{tag}", cx, sgn * hy,
                                  z_lo, z_hi))
-    # 진입 데크 +X 끝 기둥 (아래 참1 상면 −3.30 에서 기립)
+    # post at the +X end of the entry deck (rises from landing1 top −3.30 below)
     z_hi = ent["top"] - ent["thick"]
     z_lo = SEQ[1]["z_bot"]
     for tag, sgn in (("P", 1.0), ("N", -1.0)):
@@ -593,56 +615,56 @@ def ground_plan_deck():
 
 
 # ===========================================================================
-# [G] 카메라 프리셋: grid_views(gy=0.0) + 미장센 5컷
+# [G] camera presets: grid_views (gy=0.0) + 5 mise-en-scene shots
 # ===========================================================================
 def build_views():
     views = sc.grid_views(0.0)          # h{0.3,0.9,1.8} × d{2,5,10}, +X
 
-    l0 = SEQ[0]                          # 참0 (z −1.65, x 3.0..4.4)
+    l0 = SEQ[0]                          # landing0 (z −1.65, x 3.0..4.4)
     lc = ((l0["lx0"] + l0["lx1"]) / 2.0, 0.0, l0["z_bot"])
-    # reversal : 참0 을 남측(개방측)에서 — 위(+X 하강)·아래(−X 반전) 동시.
-    #   [v7 판정 §7 ①·㉠] 구 컷(eye 3.70,−3.20,−0.30 / pitch −24°)은 프레임이
-    #   조적 옹벽 + 갈색 목구조로만 채워져 "근린공원"이 읽히지 않았다.
-    #   → **뒤로 3.6 m 물리고 1.5 m 올려 피치를 −16° 로 세운다**: 프레임 상단
-    #   (+2.0° 앙각)이 옹벽 갓돌 너머 **북측 30° 잔디 사면·관목 군락**을 담고,
-    #   하단(−34°)에 참0·플라이트0/1 이 그대로 남는다(SMOKE [v7 미장센] 검산).
+    # reversal : landing0 from the south (open side) - the flight above (+X down) and below (−X reversed) at once.
+    #   [v7 verdict §7 (1)·(a)] the old shot (eye 3.70,−3.20,−0.30 / pitch −24 deg) filled the
+    #   frame with masonry wall + brown timber only, so "neighbourhood park" did not read.
+    #   -> **pull back 3.6 m, rise 1.5 m and lift the pitch to −16 deg**: the frame top
+    #   (+2.0 deg elevation) catches the **north 30 deg grass slope and shrub clumps** past the coping,
+    #   while the bottom (−34 deg) keeps landing0 and flights 0/1 (SMOKE [v7 mise-en-scene] check).
     views["reversal"] = dict(eye=[6.60, -6.60, 1.20],
                              tgt=[2.90, -0.35, -0.88])
-    # through_treads : 개방 라이저 투과 — 디딤판 사이로 아래 플라이트·지면
+    # through_treads : open-riser see-through - the flight below and the ground between the treads
     views["through_treads"] = dict(eye=[1.5, -2.8, -1.10],
                                    tgt=[1.7, 0.30, -4.20])
-    # broken_rail : 참0 외측(x 4.4) 가로대 탈락 구간 클로즈 + 4.95 m 낙차
-    #   [v7 판정 §7 ②] 구 시선 135° 는 피사면 법선 315° → lambert +0.273 으로
-    #   파손·정상 난간이 같은 어두운 밝기 대역에 놓였다. 남측(개방측)으로
-    #   0.7 m 돌려 시선 111.9°(법선 291.9°) → **+0.480**. 프레임 하단(−38.5°)
-    #   시선은 참0 아래 수직 공간을 지나 옹벽면 z −4.46 에 착지 → 4.95 m
-    #   낙차의 **깊이 자체가 프레임에 남는다**(SMOKE 하단 시선 착지).
+    # broken_rail : close-up of the missing-rail run at the landing0 outer edge (x 4.4) + the 4.95 m drop
+    #   [v7 verdict §7 (2)] the old sight line 135 deg gave lit-face normal 315 deg -> lambert +0.273,
+    #   putting the broken and the intact railing in the same dark band. Rotating 0.7 m toward
+    #   the south (open side) gives sight 111.9 deg (normal 291.9 deg) -> **+0.480**. The frame
+    #   bottom (−38.5 deg) passes through the vertical space under landing0 and lands on the wall
+    #   face at z −4.46 -> **the depth of the 4.95 m drop itself stays in frame** (SMOKE bottom-ray landing).
     views["broken_rail"] = dict(eye=[5.60, -3.40, -0.30],
                                 tgt=[4.35, -0.30, -1.55])
-    # leaf_edge : 상단 2단 낙엽 가림 — 진입 로봇 시점 근접
+    # leaf_edge : leaves hiding the top two steps - close to the approaching robot's viewpoint
     views["leaf_edge"] = dict(eye=[-1.05, -1.55, 0.55],
                               tgt=[0.80, -0.70, -0.38])
-    # from_below : 하부 공원에서 갈지자 전경(참·기둥·낙차 앵커)
-    #   [v7 판정 §7 ②·㉡] 구 컷(eye 8.0,−7.5 → tgt 1.8,0)은 시선 방위 129.6° 라
-    #   **피사면의 절반이 +X향 절개면·머리 옹벽**(lambert −0.342 = 음영측)이었다
-    #   → mean 36.4 · dark 66.3 %. 태양 az 250 에서 순광인 면은 −Y향(0.607)
-    #   이므로 **개방측(−Y)으로 미러**해 데크를 정남에서 올려다본다.
-    #   시선 105.4° · 피사면 법선 285.4° → lambert +0.526.
-    #   피치 +6.6° 는 "하부 공원 잔디·흙길·관목이 하반에, 데크 스택이 상반에"
-    #   들어오는 값(전자는 7.5~10.6 m 대역, 후자는 앙각 +18.7°).
+    # from_below : the whole switchback from the lower park (landings·posts·drop anchors)
+    #   [v7 verdict §7 (2)·(b)] the old shot (eye 8.0,−7.5 -> tgt 1.8,0) had sight azimuth 129.6 deg,
+    #   so **half the subject was the +X-facing cut face and head wall** (lambert −0.342 = shaded side)
+    #   -> mean 36.4 · dark 66.3 %. At sun az 250 the front-lit faces are the −Y ones (0.607),
+    #   so the shot is **mirrored to the open side (−Y)** and looks up at the deck from due south.
+    #   sight 105.4 deg · lit-face normal 285.4 deg -> lambert +0.526.
+    #   pitch +6.6 deg is the value that puts "the lower park grass, dirt trail and shrubs in the
+    #   bottom half, the deck stack in the top half" (the former at 7.5~10.6 m, the latter at +18.7 deg elevation).
     views["from_below"] = dict(eye=[5.20, -10.80, GROUND_Z + 1.55],
                                tgt=[2.40, -0.60, -3.85])
     return views
 
 
 # ===========================================================================
-# [H] SMOKE — 부팅 없는 기하 자기검증
+# [H] SMOKE - geometry self-check without booting
 # ===========================================================================
 def _grid_obstacles():
-    """그리드 카메라(−d, 0, h) 충돌 검산용 AABB [(name,x0,x1,y0,y1,z0,z1)]."""
+    """AABBs for checking grid camera (−d, 0, h) collisions [(name,x0,x1,y0,y1,z0,z1)]."""
     sp = PARAMS["signpost"]
     bn = PARAMS["bench"]
-    # [v5.2 사용자] 임의 경고 팻말 제거 — Sign AABB 삭제(이정표·벤치만)
+    # [v5.2 user] arbitrary warning sign removed - Sign AABB deleted (waymarker and bench only)
     obs = [("SignPost", sp["cx"] - sp["arm"][0], sp["cx"] + sp["arm"][0],
             sp["cy"] - 0.4, sp["cy"] + 0.4, 0.0, sp["post_h"]),
            ("Bench", bn["cx"] - 0.95, bn["cx"] + 0.95, bn["cy"] - 0.25,
@@ -673,7 +695,7 @@ def _smoke_report():
           f"플라이트 경사 {math.degrees(math.atan2(fl['riser'], fl['tread'])):.1f}°"
           f" · 평면 x [{SEQ[1]['lx0']:.2f}, {SEQ[0]['lx1']:.2f}]")
 
-    # ── 플라이트·참 표 ──
+    # ── flight and landing table ──
     print("\n  [표] 플라이트/참 (월드 좌표)")
     print(f"    {'k':>2} {'rot':>4} {'대역 y':>16} {'x_top→x_bot':>14} "
           f"{'z_top→z_bot':>16} {'참 x범위':>14} 참 z")
@@ -693,7 +715,7 @@ def _smoke_report():
     print(f"    상·하 플라이트 연직 여유 = 2×{FLIGHT_DROP:.2f} − 0.29 = "
           f"{head:.2f} m ({'OK' if head > 2.0 else 'CHECK'})")
 
-    # ── 보행 연속성 전수 검사 ──
+    # ── exhaustive walking continuity check ──
     print("\n  [표] 보행 연속성 (구간 → 다음 구간, n단 분할 단차)")
     links = [("상부 트레일", TRAIL_Z, "진입 데크", ent["top"], 1)]
     prev_n, prev_z = "진입 데크", ent["top"]
@@ -721,7 +743,7 @@ def _smoke_report():
           f"→ 프라우드 {gap:+.3f} m "
           f"({'OK (동일평면 아님·보행 무해)' if 0.0 < gap <= 0.05 else 'CHECK'})")
 
-    # ── 지면 플레이트 / 사면 표 ──
+    # ── ground plate / slope table ──
     print("\n  [표] 축정렬 지면 플레이트")
     print(f"    {'이름':15s} {'x범위':>16s} {'y범위':>16s} {'상면z':>7s} 두께")
     for nm, x0, x1, y0, y1, zt, th, _m in P["plates"]:
@@ -741,14 +763,14 @@ def _smoke_report():
     print(f"    남측 무방호: 트레일 어깨(y−1.60) 기준 y−5.6 에서 "
           f"{-south_z(-5.6):.2f} m 하강 (브리프 2~3 m 대역)")
 
-    # ── 데크 기둥 접지 표 ──
+    # ── deck post grounding table ──
     print("\n  [표] 데크 기둥 접지 (하단 z / 상단 z / 길이)")
     for nm, cx, cy, z_lo, z_hi in post_segments():
         base = "지면" if abs(z_lo - GROUND_Z) < 1e-6 else "하부 참"
         print(f"    {nm:<12} ({cx:6.2f},{cy:+5.2f}) {z_lo:+7.3f} → "
               f"{z_hi:+7.3f}  L={z_hi - z_lo:5.3f}  하단={base}")
 
-    # ── 파손 난간 ──
+    # ── broken railing ──
     br = P["rail"]["broken_landing"]
     f = SEQ[br]
     print(f"\n  [파손 난간] 참{br} 외측 에지 x={f['lx1'] if f['even'] else f['lx0']:.2f}"
@@ -756,12 +778,12 @@ def _smoke_report():
     print(f"    개방 낙차 = {f['z_bot'] - GROUND_Z:.2f} m "
           f"(≥0.3 → {'OK' if f['z_bot'] - GROUND_Z >= 0.3 else 'FAIL'})")
 
-    # ── [v6] 태양 재선정 검산 : 면별 lambert + 통로 직사광 도달 ──
+    # ── [v6] sun reselection check : lambert per face + direct sun reaching the passage ──
     az = 33.5 + float(P["SUN_AZ_OFFSET"])
     el = math.radians(float(P["light"]["noon_sun_elev"]))
     ux, uy = math.cos(math.radians(az)), math.sin(math.radians(az))
     lx, ly, lz = ux * math.cos(el), uy * math.cos(el), math.sin(el)
-    hv = math.cos(el) / math.sin(el)          # 1 m 상승당 수평 이동
+    hv = math.cos(el) / math.sin(el)          # horizontal travel per 1 m of rise
     print(f"\n  [v6 태양] offset {P['SUN_AZ_OFFSET']:.1f} → 월드 az {az:.1f}° "
           f"(그림자 az {az - 180:.1f}°) · 고도 {math.degrees(el):.2f}°")
     for nm, N in (("−Y향(데크 측면·북측 옹벽면)", (0, -1, 0)),
@@ -779,13 +801,13 @@ def _smoke_report():
                            ("참2 상면", 3.70, -0.70, -4.95),
                            ("참3 상면(최하부)", -0.70, 0.70, -6.60)):
         rise = -pz
-        ex, ey = px + ux * hv * rise, py + uy * hv * rise   # 태양 쪽으로 역추적
-        ok = ex >= HEAD_X            # 보수적 판정(x=−1.5 평면을 넘으면 차폐 의심)
+        ex, ey = px + ux * hv * rise, py + uy * hv * rise   # trace back toward the sun
+        ok = ex >= HEAD_X            # conservative test (crossing the x=−1.5 plane means possible occlusion)
         print(f"    {nm:<16} ({px:+.2f},{py:+.2f},{pz:+.2f}) → "
               f"({ex:+.2f},{ey:+.2f}, 0.00)  "
               f"{'직사광 도달' if ok else '옹벽 그늘(설계상 허용)'}")
 
-    # ── [v6] 옹벽 2단화 정합 검산 ──
+    # ── [v6] two-tier retaining wall consistency check ──
     tiers = {nm: (x0, x1, y0, y1, zt, th)
              for nm, x0, x1, y0, y1, zt, th, _m in P["plates"]
              if nm in ("BankCut", "EastTierLow", "EastTierUp")}
@@ -805,7 +827,7 @@ def _smoke_report():
           f"{bm['y1']:.2f}] ⊂ 소단 y[{tl[2]:.2f},{tl[3]:.2f}] → "
           f"{'OK' if bm['y0'] >= tl[2] and bm['y1'] <= tl[3] else 'FAIL'}")
 
-    # ── 그리드 카메라 충돌 검산 ──
+    # ── grid camera collision check ──
     print("\n  [검산] 그리드 카메라(−d, 0, h) vs 기하 AABB")
     obs = _grid_obstacles()
     hit_any = False
@@ -828,12 +850,12 @@ def _smoke_report():
         print(f"    {vn:<15} eye={['%.2f' % e for e in vv['eye']]} "
               f"tgt={['%.2f' % t for t in vv['tgt']]}")
 
-    # ── [v7] 미장센 프레이밍 : 공원 앵커가 프레임에 들어오는가 + 컷별 순광 ──
-    #   판정 §7 ① "미장센 4컷 어디에도 공원 신호(잔디·관목·수목·이용자 시설)가
-    #   들어오지 않는다 — 문제는 기하가 아니라 프레이밍". 재조준을 **좌표로
-    #   검증**하기 위해 화각(수평 반각 30° · 수직 반각 18°) 안에 들어오는 공원
-    #   앵커를 열거하고, 동시에 컷별 피사면 lambert 를 붙인다(judge v7 교훈:
-    #   "재조준은 프레임 점유율로 검산되지만 조도는 검산되지 않는다").
+    # ── [v7] mise-en-scene framing : are the park anchors in frame + front lighting per shot ──
+    #   verdict §7 (1) "none of the 4 mise-en-scene shots carries a park signal (grass·shrubs·
+    #   trees·visitor furniture) - the problem is framing, not geometry". To **verify the
+    #   re-aim by coordinates**, the park anchors inside the FOV (horizontal half 30 deg ·
+    #   vertical half 18 deg) are enumerated, with the lit-face lambert per shot attached
+    #   (judge v7 lesson: "a re-aim is checked by frame coverage, illumination is not").
     anchors = []
     for cx, cy, zone in P["shrubs"]:
         if zone in ("lower", "south"):
@@ -881,7 +903,7 @@ def _smoke_report():
             elv = math.degrees(math.atan2(vz, math.hypot(vx, vy)))
             if abs(yaw) <= 30.0 and abs(elv - pit) <= 18.0:
                 seen.append(f"{nm}[yaw{yaw:+.0f}°]")
-        # 프레임 하단 중앙 시선이 닿는 지면 (하반 = 잔디/흙길인가)
+        # the ground hit by the bottom-centre ray (is the lower half grass / dirt trail)
         pr = math.radians(pit - 18.0)
         hit = None
         for i in range(1, 401):
@@ -898,10 +920,10 @@ def _smoke_report():
               f"{lam:+.3f} {'순광' if lam > 0.15 else '역광/터미네이터'} · "
               f"피치 {pit:+5.1f}°")
         print(f"      하단 시선 착지 : {hit if hit else '지면 미교차(하늘)'}")
-        # 판정 §7 ①은 "**전** 미장센 컷에 공원 신호가 없다"는 지적이었다.
-        #   재조준 대상(from_below·reversal)은 앵커를 반드시 물어야 하고,
-        #   클로즈업 컷(through_treads·broken_rail)은 면제 — 대신 lambert 와
-        #   하단 착지로 조도·낙차를 검산한다.
+        # verdict §7 (1) said "**every** mise-en-scene shot lacks a park signal".
+        #   the re-aimed shots (from_below·reversal) must catch an anchor, while the
+        #   close-ups (through_treads·broken_rail) are exempt - instead their illumination
+        #   and drop are checked by lambert and the bottom-ray landing point.
         need = vn in ("from_below", "reversal")
         verdict = ("OK" if seen else "FAIL ← 판정 §7 ① 재발") if need \
             else ("OK" if seen else "면제(클로즈업 — lambert·하단 착지로 판정)")
@@ -911,7 +933,7 @@ def _smoke_report():
 
 
 # ===========================================================================
-# [I] 메인
+# [I] main
 # ===========================================================================
 BANNER = """\
 [조작] 우클릭+WASD 비행 · P 패스트레이싱 · C 스크린샷 · [ ] 태양 방위
@@ -979,7 +1001,7 @@ def main():
                         tint=mp["deck_tint"])
         M["stringer"] = tex("wood_dark", "/World/Looks/Stringer",
                             sca["wood_dark"] * 1.6, tint=mp["stringer_tint"])
-        # [v6] 인공 옹벽(조적, 사석 스케일) / 자연 절개면(무줄눈) / 갓돌(콘크리트)
+        # [v6] built retaining wall (masonry, rubble scale) / natural cut face (jointless) / coping (concrete)
         M["rock"] = tex("rock_wall", "/World/Looks/Rock", sca["rock_wall"],
                         tint=mp["rock_tint"])
         M["rockface"] = tex("rock_face", "/World/Looks/RockFace",
@@ -1017,17 +1039,17 @@ def main():
                                     diffuse_color=mp["canopy_b"],
                                     roughness_const=mp["canopy_rough"],
                                     specular_level=0.0)
-        # [v5.2 사용자] 임의 경고 팻말 제거 — 사인 패널·배킹 재질 생성 삭제.
+        # [v5.2 user] arbitrary warning sign removed - sign panel and backing material creation deleted.
         M["tread"] = M["deck"] if cfg["cue_material_break"] else M["stringer"]
         return M
 
     # -------------------------------------------------------------------
-    # 지형 : 축정렬 플레이트 + Y 방향 사면(rotX 슬래브)
+    # terrain : axis-aligned plates + Y-direction slopes (rotX slabs)
     # -------------------------------------------------------------------
     def ybank(path, x0, x1, y_hi, z_hi, y_lo, z_lo, thick, mtl):
-        """+Y(높음) → −Y(낮음) 로 기우는 사면 슬래브. build_slope 의 Y 대응물.
-        rotX(θ): 로컬 +Y → (0, cosθ, sinθ) 이므로 θ>0 이면 −Y 로 하강.
-        로컬 −Z(두께 방향) → 월드 (0, sinθ, −cosθ)."""
+        """Slope slab tilting from +Y (high) → −Y (low). The Y counterpart of build_slope.
+        rotX(θ): local +Y → (0, cosθ, sinθ), so θ>0 descends toward −Y.
+        Local −Z (the thickness direction) → world (0, sinθ, −cosθ)."""
         dy, dz = (y_hi - y_lo), (z_hi - z_lo)
         ang = math.atan2(dz, dy)
         L = math.hypot(dy, dz)
@@ -1050,12 +1072,12 @@ def main():
                 (x1 - x0, y1 - y0, th), M[mk], col=True)
         for nm, x0, x1, yh, zh, yl, zl, th, mk in PARAMS["ybanks"]:
             ybank(f"{ROOT}/Bank_{nm}", x0, x1, yh, zh, yl, zl, th, M[mk])
-        # [v6] 옹벽 갓돌(코핑) — 벽면보다 내밀어 상단 그림자선을 만든다
+        # [v6] retaining wall coping - projects past the wall face to make a shadow line at the top
         for nm, x0, x1, y0, y1, zt, th in PARAMS["copings"]:
             BOX(f"{ROOT}/Coping_{nm}",
                 ((x0 + x1) / 2.0, (y0 + y1) / 2.0, zt - th / 2.0),
                 (x1 - x0, y1 - y0, th), M["coping"], col=True)
-        # [v6] 동측 2단 옹벽 소단(z −3.30) 식재 밴드 — '성곽' 인상 해소
+        # [v6] planting band on the east two-tier wall berm (z −3.30) - dispels the 'fortress' impression
         bm = PARAMS["berm"]
         for i, (x0, x1) in enumerate(PARAMS["berm_hedges"]):
             sc.build_hedge(stage, f"{ROOT}/BermHedge_{i}", x0, bm["y0"],
@@ -1099,7 +1121,7 @@ def main():
         return a
 
     def build_flat_fill(M):
-        """hazard_stairs=False 대조군 : 계단 구간을 z=0 평판 데크로."""
+        """hazard_stairs=False control : the stair run becomes a flat z=0 deck."""
         ld = PARAMS["landing"]
         x0, x1 = SEQ[1]["lx0"], SEQ[0]["lx1"]
         BOX(f"{ROOT}/FlatDeck",
@@ -1107,12 +1129,12 @@ def main():
             (x1 - x0, ld["y1"] - ld["y0"], 0.12), M["deck"], col=True)
 
     # -------------------------------------------------------------------
-    # 갈지자 데크 계단
+    # switchback deck stair
     # -------------------------------------------------------------------
     def deck_rail(prefix, x0, x1, y0, y1, z_top, broken=False):
-        """축정렬 난간 1선(포스트 + 상·중 가로대 + **세로 살**).
-        broken=True → 가로대·세로살 탈락, 포스트만 잔존(참0 파손 개소).
-        위험 기하는 불변."""
+        """One axis-aligned railing run (posts + top/mid rails + **vertical bars**).
+        broken=True → rails and bars gone, only the posts remain (the landing0 break).
+        The hazard geometry is unchanged."""
         r = PARAMS["rail"]
         horiz = abs(x1 - x0) >= abs(y1 - y0)
         L = math.hypot(x1 - x0, y1 - y0)
@@ -1123,7 +1145,7 @@ def main():
                 size = ((L, rr, rr) if horiz else (rr, L, rr))
                 BOX(f"{prefix}/Bar{tag}", (cx, cy, z_top + hh), size,
                     M["rail"])
-            # [v6] 세로 살 : 공원 데크 난간 표준. 상부 가로대 하면까지.
+            # [v6] vertical bars : standard for park deck railings. Up to the underside of the top rail.
             nb = max(1, int(round(L / r["bal_step"])) - 1)
             for i in range(nb):
                 t = (i + 1) / float(nb + 1)
@@ -1148,10 +1170,10 @@ def main():
         lsy = ld["y1"] - ld["y0"]
 
         def _flight_rails(grp, f, gy0, gy1):
-            """플라이트 양측 난간 — rot_group **내부**(로컬 +X 하강 규약).
-            대역 에지에서 0.04 안쪽으로 물려 세운다: 중앙(짝·홀 대역 경계)에서
-            두 플라이트의 내측 포스트(r 0.05)가 y=−0.05 / +0.05 로 접할 뿐
-            상호 관통하지 않는다."""
+            """Railings on both sides of a flight — **inside** the rot_group (local +X descent convention).
+            They stand 0.04 in from the band edge: at the centre (the even/odd band
+            boundary) the inner posts of the two flights (r 0.05) merely meet at
+            y=−0.05 / +0.05 and do not interpenetrate."""
             def gfn(x, _xt=f["x_top"], _zt=f["z_top"]):
                 if x <= _xt:
                     return _zt
@@ -1164,12 +1186,12 @@ def main():
                     FLIGHT_RUN, FLIGHT_DROP, gfn, M["rail"], rail_h=r["h"],
                     post_r=r["post_r"], spacing=r["spacing"],
                     rail_r=r["bar_t"] / 2.0,
-                    # 이 씬은 **아래에 자체 세로살 루프**가 있다. 공통 간살을
-                    # 켜면 실린더가 이중 생성되어 관통한다(레드팀 적발: 48쌍).
+                    # this scene has **its own vertical-bar loop below**. Turning on the shared
+                    # balusters would duplicate the cylinders and interpenetrate (red team found 48 pairs).
                     baluster_r=0.0)
-                # [v6] 경사 난간 세로 살 : 디딤면 → 상부 가로대. 세로살이 없으면
-                #      경사 레일 2본이 이웃 프레임 뒤로 겹쳐 '사선 브레이스'로
-                #      오독된다(판정 §4 ⑤ 가설 사다리틀).
+                # [v6] vertical bars on the raking railing : tread face -> top rail. Without them
+                #      the two raking rails overlap behind the neighbouring frame and are misread
+                #      as 'diagonal bracing' (verdict §4 (5), temporary ladder frame).
                 top0 = f["z_top"] + r["h"]
                 nb = max(1, int(round(FLIGHT_RUN / r["bal_step"])) - 1)
                 for i in range(nb):
@@ -1181,14 +1203,14 @@ def main():
                         CYL(f"{grp}/Bal_{tag}_{i}", (bx, y, zg + hh / 2.0),
                             r["bal_r"], hh, M["rail"])
 
-        # 진입 데크 (옹벽 머리 → 첫 단)
+        # entry deck (retaining wall head -> first step)
         BOX(f"{ROOT}/EntryDeck",
             ((ent["x0"] + ent["x1"]) / 2.0, lcy, ent["top"] - ent["thick"] / 2.0),
             (ent["x1"] - ent["x0"], lsy, ent["thick"]), M["deck"], col=True)
 
         for f in SEQ:
             k = f["k"]
-            lo, hi = band(True)              # 로컬 대역(짝수 기준) — rot180 이 미러
+            lo, hi = band(True)              # local band (even convention) - rot180 mirrors it
             grp = sc.build_rot_group(stage, f"{ROOT}/FlightGrp_{k}",
                                      (f["x_top"], 0.0), f["rot"])
             sc.build_open_riser_stairs(
@@ -1197,20 +1219,20 @@ def main():
                 M["stringer"], tread_t=fl["tread_t"], gap=fl["gap"])
             if cfg["cue_railing"]:
                 _flight_rails(grp, f, lo, hi)
-            # 참 (월드 좌표) — 두 대역을 모두 덮는 슬래브
+            # landing (world coordinates) - slab covering both bands
             BOX(f"{ROOT}/Landing_{k}",
                 ((f["lx0"] + f["lx1"]) / 2.0, lcy,
                  f["z_bot"] - ld["thick"] / 2.0),
                 (f["lx1"] - f["lx0"], lsy, ld["thick"]), M["deck"], col=True)
 
-        # 데크 기둥 (전부 지면 또는 하부 참에 접지)
+        # deck posts (all grounded on the ground or on the landing below)
         pp = PARAMS["post"]
         for nm, cx, cy, z_lo, z_hi in post_segments():
             h = z_hi - z_lo
             CYL(f"{ROOT}/Post_{nm}", (cx, cy, z_lo + h / 2.0), pp["r"], h,
                 M["stringer"], col=True)
 
-        # 참 난간 : 외측 에지 + 양 측면. 참0 외측만 **파손**(가로대 탈락).
+        # landing railing : outer edge + both sides. Only the landing0 outer run is **broken** (rails gone).
         if cfg["cue_railing"]:
             for f in SEQ:
                 k = f["k"]
@@ -1222,12 +1244,12 @@ def main():
                 for tag, yy in (("N", ld["y0"]), ("P", ld["y1"])):
                     deck_rail(f"{ROOT}/LandRail_{k}_{tag}", f["lx0"], f["lx1"],
                               yy, yy, z)
-            # 진입 데크 측면 난간 2
+            # 2 side railings on the entry deck
             for tag, yy in (("N", ld["y0"]), ("P", ld["y1"])):
                 deck_rail(f"{ROOT}/EntryRail_{tag}", ent["x0"], ent["x1"],
                           yy, yy, ent["top"])
 
-        # 낙엽 밴드 : 플라이트0 상단 2단 에지 가림
+        # leaf band : hides the top two step edges of flight0
         lf = PARAMS["leaf"]
         f0 = SEQ[0]
         blo, bhi = band(True)
@@ -1240,7 +1262,7 @@ def main():
             BOX(f"{ROOT}/LeafTread_{i}", (cx, (blo + bhi) / 2.0,
                                           zt - lf["thick"] / 2.0),
                 (sx, bhi - blo, lf["thick"]), M["leaf"])
-        # 지면 낙엽 퇴적 4 — [v6 C-7] 사각 데칼 → 회전 3매 중첩으로 경계 파괴
+        # 4 ground leaf drifts - [v6 C-7] square decal -> 3 rotated overlays break the boundary
         lp = PARAMS["leaf_patch"]
         rng = random.Random(int(lp["seed"]))
         for n, (cx, cy, sx, sy, zone) in enumerate(
@@ -1258,7 +1280,7 @@ def main():
                     rotz=rng.uniform(-lp["rz"], lp["rz"]))
 
     # -------------------------------------------------------------------
-    # 드레싱
+    # dressing
     # -------------------------------------------------------------------
     def build_nature(M):
         tr = PARAMS["tree"]
@@ -1268,8 +1290,8 @@ def main():
                           M["canopy_a"], M["canopy_b"], trunk_r=tr["trunk_r"],
                           trunk_h=th, stake_r=0.004, stake_h=0.02,
                           stake_off=0.2)
-        # [v6] 30° 사면 위 블롭은 중심 z 접지 시 하류측이 ry·tan30 (≈0.35 m) 뜬다
-        #      → 블롭 footprint 의 **최저 지면**을 기준으로 접지(부유 구조적 제거).
+        # [v6] a blob grounded by its centre z on a 30 deg slope floats ry·tan30 (~0.35 m) downhill
+        #      -> ground it on the **lowest ground** in the blob footprint (structurally removes floating).
         sh = PARAMS["shrub"]
         emb = sh["embed"]
         for n, (cx, cy, zone) in enumerate(PARAMS["shrubs"]):
@@ -1282,7 +1304,7 @@ def main():
                               (rx, ry, rz), M["shrub"])
 
     def build_props(M):
-        # 목재 이정표 (기둥 + 방향판 2 + 캡)
+        # timber waymarker (post + 2 direction blades + cap)
         sp = PARAMS["signpost"]
         CYL(f"{ROOT}/SignPost/Post",
             (sp["cx"], sp["cy"], sp["post_h"] / 2.0), sp["post_r"],
@@ -1295,11 +1317,11 @@ def main():
                                      (sp["cx"], sp["cy"]), yaw)
             BOX(f"{grp}/Box", (sp["cx"] + sp["arm_off"], sp["cy"], az),
                 sp["arm"], M["wood"])
-        # 벤치 1
+        # bench 1
         bn = PARAMS["bench"]
         sc.build_bench(stage, f"{ROOT}/Bench", bn["cx"], bn["cy"], 0.0,
                        M["deck"], yaw=bn["yaw"])
-        # 쉼터 정자 (하부 산책로)
+        # shelter pavilion (lower path)
         pg = PARAMS["pergola"]
         sc.build_canopy(stage, f"{ROOT}/Pergola", pg["x0"], pg["x1"], pg["y0"],
                         pg["y1"], pg["z_roof"], pg["post_r"], M["deck"],
@@ -1311,11 +1333,11 @@ def main():
                             (h["y0"] + h["y1"]) / 2.0)
             sc.build_hedge(stage, f"{ROOT}/FarHedge_{i}", h["x0"], h["y0"],
                            h["x1"], h["y1"], h["h"], base_z=base)
-        # [v6 C-4] 원경 능선 마루 숲 밴드 — 개체 롤리팝 대신 실루엣 띠로 폐쇄
+        # [v6 C-4] forest band on the distant ridge crest - closed with a silhouette strip, not lollipops
         for i, h in enumerate(PARAMS["ridge_crest"]):
             sc.build_hedge(stage, f"{ROOT}/RidgeCrest_{i}", h["x0"], h["y0"],
                            h["x1"], h["y1"], h["h"], base_z=h["base"])
-        # [v6 C-4] 원경 개체는 줄기 반경·높이를 키워 '가는 막대 + 구' 회피
+        # [v6 C-4] distant individuals get thicker trunks and more height to avoid 'thin stick + sphere'
         for i, t in enumerate(PARAMS["hill_trees"]):
             gz = _zone_z(t["cx"], t["cy"], t["zone"])
             sc.build_tree(stage, f"{ROOT}/HillTree_{i}", t["cx"], t["cy"], gz,
@@ -1323,10 +1345,10 @@ def main():
                           trunk_r=0.17, trunk_h=4.6 + 0.35 * (i % 4),
                           stake_r=0.004, stake_h=0.02, stake_off=0.2)
 
-    # [v5.2 사용자] 임의 경고 팻말 제거 — build_sign() 삭제.
+    # [v5.2 user] arbitrary warning sign removed - build_sign() deleted.
 
     def build_cues(M):
-        """비관행 설비 단서(코드 경로만)."""
+        """Non-standard equipment cue (code path only)."""
         if cfg["cue_tactile"]:
             # [W2 · ground_kit §12.5-3] texture-backed so the 36 dots shade.
             tac = sc.tactile_pbr(stage, "/World/Looks/Tactile")
@@ -1343,10 +1365,10 @@ def main():
                                 fl["riser"], fl["tread"], fl["steps"],
                                 base_z=f["z_bot"], z_top=f["z_top"])
 
-    # ── 씬 조립 ──
+    # ── scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
     M = setup_materials()
-    M["rail"] = M["stringer"]          # 목재 난간 (데크와 동일 목재)
+    M["rail"] = M["stringer"]          # timber railing (same timber as the deck)
     build_terrain(M)
     if cfg["hazard_stairs"]:
         build_deck(M)
@@ -1358,7 +1380,7 @@ def main():
     if cfg["cue_scene_dressing"]:
         build_nature(M)
         build_props(M)
-    # [v5.2 사용자] 임의 경고 팻말 제거 — cue_sign 배치 삭제.
+    # [v5.2 user] arbitrary warning sign removed - cue_sign placement deleted.
 
     print(f"[기하] 갈지자 {PARAMS['flights']['n']}플라이트 × "
           f"{PARAMS['flights']['steps']}단 총낙차 {TOTAL_DROP:.2f} "
@@ -1369,7 +1391,7 @@ def main():
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])
 
-    # ── 카메라 + 렌더 모드 ──
+    # ── camera + render mode ──
     def look_from(eye, tgt):
         set_camera_view(eye=[float(e) for e in eye],
                         target=[float(t) for t in tgt])
@@ -1404,7 +1426,7 @@ def main():
         simulation_app.close()
         return
 
-    # ── GUI 룩 체크 ──
+    # ── GUI look check ──
     input_iface = carb.input.acquire_input_interface()
     appwindow = omni.appwindow.get_default_app_window()
     K = carb.input.KeyboardInput

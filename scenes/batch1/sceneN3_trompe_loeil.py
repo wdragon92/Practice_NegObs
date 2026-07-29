@@ -1,60 +1,63 @@
 # -*- coding: utf-8 -*-
 """
-sceneN3_trompe_loeil.py — NegObs 인공씬 23호: 바닥 그림 계단 (Isaac Sim 4.5)
+sceneN3_trompe_loeil.py — NegObs synthetic scene 23: painted floor stairs (Isaac Sim 4.5)
 
-유형    : N3 hard negative — 아나모픽 트롱프뢰유 · **GT = 전 픽셀 "낙차 없음"**
-사양서  : Docs/nanobanana_batch1_geometry_map.md §A sceneN3_trompe_loeil
-룩 레퍼 : look_refs/n3_trompe_loeil.jpg (보행자 몰 + 하강 계단 아나모픽 그림)
-공통    : scene_common.py (add_box / 드레싱·조명 하네스) · scene14 착시 씬 선례
+Type    : N3 hard negative — anamorphic trompe-l'oeil · **GT = "no drop" in every pixel**
+Spec    : Docs/nanobanana_batch1_geometry_map.md §A sceneN3_trompe_loeil
+Look ref: look_refs/n3_trompe_loeil.jpg (pedestrian mall + anamorphic painting of a descending stair)
+Shared  : scene_common.py (add_box / dressing·lighting harness) · scene14 illusion-scene precedent
 
-위험 본질(반례): 보행자 몰 한복판 포장면에 "하강 계단정"이 그려져 있다. 기하는
-           전부 평면(두께 1 mm 페인트 박판) — 낙차는 **어디에도 없다**.
-           T1 캠퍼스 계단(양성)과 최강 대조쌍.
-판별 단서: ① 포장 줄눈이 그림 영역을 그대로 관통해 이어진다(실제 개구라면 끊긴다)
-           ② 가짜 "암부"는 페인트라 roughness가 주변 포장과 같아 스펙큘러가 남는다
-           ③ 실그림자 부재 — 반대로 **실제 가로등 기둥 그림자가 그림 위를 지나간다**
-           ④ 설계 시점(1점)을 벗어나면 원근이 붕괴한다(off_axis 컷)
+Hazard (counter-example): a "descending stair well" is painted on the paving in the
+           middle of a pedestrian mall. The geometry is entirely planar (1 mm thick
+           paint sheets) — there is **no drop anywhere**.
+           The strongest contrast pair with the T1 campus stairs (positive).
+Cues     : ① the paving joints run straight through the painted area (a real opening would break them)
+           ② the fake "dark areas" are paint, so their roughness matches the paving and the specular stays
+           ③ no real cast shadow — conversely **the real streetlight pole shadow crosses the painting**
+           ④ leaving the design viewpoint (a single point) collapses the perspective (off_axis shot)
 
-── 아나모픽 구성(핵심 수학) ─────────────────────────────────────────────
-가상 객체 = **침하 계단정**: 근접 림 x=0(z=0) → 바닥 z=-Dp(길이 floor_len) →
-n단이 +X로 상승 → 원격 림 z=0 (x=x_f). 설계 시점 E=(eye_x, 0, eye_h)에서
-가상 표면의 각 점 P=(xv, yv, z)를 지면 z=0으로 투영:
+── Anamorphic construction (core maths) ─────────────────────────────────
+Virtual object = **a sunken stair well**: near rim x=0 (z=0) → floor z=-Dp (length floor_len) →
+n steps rising in +X → far rim z=0 (at x=x_f). From the design viewpoint E=(eye_x, 0, eye_h),
+every point P=(xv, yv, z) of the virtual surface is projected onto the ground z=0:
       s(z) = eye_h / (eye_h - z)              (0 < s <= 1)
       Q_x  = eye_x + s * (xv - eye_x) ,  Q_y = s * yv
-근접·원격 림은 z=0 → s=1 → 자기 자신으로 사상 ⇒ **그림 풋프린트 = 계단정 개구
-[0, x_f] × [-W/2, W/2]** 가 정확히 채워진다(빈틈·중복 없음).
-양 측벽(yv=±W/2)은 |Q_y| = s*W/2 밖 영역 = 사다리꼴 측벽 밴드로 투영된다.
-밴드 순서(트레드/라이저/측벽)는 s와 xv가 함께 증가하므로 **단조** — 겹침 없음.
-Q_x <= 0 으로 투영되는 밴드는 근접 림에 가려 보이지 않는 부분(그레이징 폐색)이므로
-그리지 않는다: 낮은 시점(h 0.9)에서 계단정 하부가 안 보이는 물리를 그대로 반영.
+The near and far rims have z=0 → s=1 → they map onto themselves ⇒ **the painted footprint fills
+the stair-well opening [0, x_f] × [-W/2, W/2]** exactly (no gaps, no overlaps).
+Both side walls (yv=±W/2) project outside |Q_y| = s*W/2, as trapezoidal wall bands.
+The band order (tread/riser/wall) is **monotone** because s and xv increase together — no overlap.
+Bands projecting to Q_x <= 0 are hidden behind the near rim (grazing occlusion) and are therefore
+not drawn: this reproduces the physics of a low viewpoint (h 0.9) not seeing the lower part of
+the stair well.
 
-기본값(eye (-2, 0.9) · n 13 · riser 0.15 · tread 0.30 · floor 2.4 · W 3.0):
-      풋프린트 6.30 × 3.00 m (레퍼런스 ~3×6 m 정합) · 가시 단 10/13
-      단당 원근 축소 계수 k ≈ 0.75~0.87 (사양서 k≈0.88 대역)
-설계 시점은 grid_views preset_h0.9_d2 의 eye 와 동일 — 표준 프리셋에서 착시가
-성립하고, d5/d10/h1.8 로 갈수록 붕괴한다(의도된 데이터 다양성).
-사양 이탈: 사양서 설계 시점은 (x=-5, h=0.9) 였으나 **(x=-2, h=0.9)로 이동**했다.
-근거 — 낮은 시점에서 계단정 하부는 근접 림에 가려(그레이징 폐색) 그릴 면이 없다.
-같은 가상 계단으로 설계 시점만 바꿔 계산한 가시 단수·축소계수:
-      eye_x  -2.0 → 10/13 단, k 0.750~0.867   ← 채택(사양 k≈0.88 정합)
-      eye_x  -3.0 →  8/13 단, k 0.750~0.846
-      eye_x  -5.0 →  6/13 단, k 0.483~0.818   (그림 내용 희박·k 이탈)
-      eye_x -10.0 →  4/13 단, k 0.177~0.778
-x=-5 를 유지하려면 riser/tread 를 비현실적으로 낮춰야(riser 5 cm급) 하므로,
-"h0.9 표준 프리셋 중 하나"라는 성질은 지키면서 d2 로 옮기는 쪽을 택했다.
+Defaults (eye (-2, 0.9) · n 13 · riser 0.15 · tread 0.30 · floor 2.4 · W 3.0):
+      footprint 6.30 × 3.00 m (matches the ~3×6 m reference) · visible steps 10/13
+      per-step perspective reduction factor k ≈ 0.75~0.87 (spec band k≈0.88)
+The design viewpoint is the same eye as grid_views preset_h0.9_d2 — the illusion holds in a
+standard preset and collapses toward d5/d10/h1.8 (intended data diversity).
+Spec deviation: the spec placed the design viewpoint at (x=-5, h=0.9), but it was **moved to
+(x=-2, h=0.9)**. Reason — from a low viewpoint the lower part of the stair well is hidden by the
+near rim (grazing occlusion), leaving no surface to paint.
+Visible steps and reduction factors for the same virtual stair at different design viewpoints:
+      eye_x  -2.0 → 10/13 steps, k 0.750~0.867   ← adopted (matches spec k≈0.88)
+      eye_x  -3.0 →  8/13 steps, k 0.750~0.846
+      eye_x  -5.0 →  6/13 steps, k 0.483~0.818   (sparse painted content · k out of band)
+      eye_x -10.0 →  4/13 steps, k 0.177~0.778
+Keeping x=-5 would require unrealistically shallow riser/tread (riser around 5 cm), so moving to
+d2 was chosen while preserving the property "one of the standard h0.9 presets".
 ────────────────────────────────────────────────────────────────────────
 
-실행 (GUI 룩 체크 — 기본):
+Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
     export PYTHONNOUSERSITE=1
     python sceneN3_trompe_loeil.py
 
-자동 캡처 (headless):   NEGOBS_CAPTURE=1 python sceneN3_trompe_loeil.py
-스모크 조기종료:        NEGOBS_SMOKE=1  python sceneN3_trompe_loeil.py
-기하·드레싱 검산:       NEGOBS_GEOCHECK=1 python3 sceneN3_trompe_loeil.py (Isaac 불요)
+Auto capture (headless):  NEGOBS_CAPTURE=1 python sceneN3_trompe_loeil.py
+Smoke early exit:         NEGOBS_SMOKE=1  python sceneN3_trompe_loeil.py
+Geometry/dressing check:  NEGOBS_GEOCHECK=1 python3 sceneN3_trompe_loeil.py (no Isaac needed)
 
-좌표계: Z-up, m, 진행축 +X, 그림(가짜 낙차 에지) 시작 = x=0.
+Coordinates: Z-up, m, travel axis +X, painting (fake drop edge) starts at x=0.
 """
 
 import os
@@ -69,19 +72,19 @@ import ground_kit as gk
 
 
 # ===========================================================================
-# [A] SCENE_CONFIG — 표준 7키.
-#     낙차가 없는 씬이므로 hazard_stairs 키는 **특색 요소(그림) 토글**로 재정의.
+# [A] SCENE_CONFIG - the standard 7 keys.
+#     No drop exists here, so hazard_stairs is redefined as the **feature (painting) toggle**.
 # ===========================================================================
 SCENE_CONFIG = {
-    # False → 그림 제거, 순수 평지 몰(대조군). 기하 토글 유일 예외.
+    # False -> painting removed, a pure flat mall (control). The only exception among geometry toggles.
     "hazard_stairs":      True,
-    "cue_railing":        False,  # 그림에는 난간이 없다 — 키만 예약
-    "cue_tactile":        False,  # 미관행 — 키만 예약
-    "cue_material_break": True,   # True → 그림 틴트가 포장과 뚜렷이 대비
-                                  # False → 포장 톤에 근접(착시 약화 대조군)
-    "cue_nosing":         True,   # 각 트레드 앞단 밝은 단코 선(그려진 단코)
-    "cue_sign":           False,  # [선택] 미구현 — 키만 예약
-    "cue_scene_dressing": True,   # 가로등(실그림자 단서)·화단·벤치·볼라드·건물
+    "cue_railing":        False,  # a painting has no railing - key reserved only
+    "cue_tactile":        False,  # not conventional here - key reserved only
+    "cue_material_break": True,   # True -> the painting tint contrasts clearly with the paving
+                                  # False -> close to the paving tone (weakened-illusion control)
+    "cue_nosing":         True,   # a bright nosing line at the front of each tread (painted nosing)
+    "cue_sign":           False,  # [optional] not implemented - key reserved only
+    "cue_scene_dressing": True,   # streetlight (real-shadow cue)·planters·benches·bollards·buildings
 }
 
 
@@ -89,80 +92,80 @@ SCENE_CONFIG = {
 # [B] PARAMS
 # ===========================================================================
 PARAMS = dict(
-    # --- 가상 계단정(그림의 원본 객체) + 설계 시점 ---
-    illusion=dict(eye_x=-2.0, eye_h=0.9,         # 설계 1시점 (= preset_h0.9_d2)
+    # --- virtual stair well (the object the painting depicts) + design viewpoint ---
+    illusion=dict(eye_x=-2.0, eye_h=0.9,         # the single design viewpoint (= preset_h0.9_d2)
                   nsteps=13, riser=0.15, tread=0.30,
-                  floor_len=2.4,                  # 첫 라이저 앞 바닥 길이
-                  width=3.0,                      # 개구 폭(그림 풋프린트 폭)
-                  x_rim=0.0),                     # 근접 림 = 그림 시작 x
-    # --- 페인트 레이어 z 규약 (proud) ---
-    #   페인트 0.001 < 블록 줄눈 0.0015 < 외곽선 0.002 < 포장 줄눈 0.003
-    #   (전 층 0.5 mm 이상 이격 — 동일평면 Z-파이팅 없음)
+                  floor_len=2.4,                  # floor length before the first riser
+                  width=3.0,                      # opening width (painting footprint width)
+                  x_rim=0.0),                     # near rim = painting start x
+    # --- paint layer z convention (proud) ---
+    #   paint 0.001 < block joint 0.0015 < border line 0.002 < paving joint 0.003
+    #   (every layer at least 0.5 mm apart - no coplanar Z-fighting)
     paint=dict(z=0.001, border_z=0.002, border_w=0.06,
                border=True, nosing_w=0.035),
-    # --- 그림 내부 "석재 블록 줄눈" [v2 추가] : 레퍼런스의 블록 쌓기 재현 ---
-    #   tread_frac : 디딤면·바닥의 블록 경계 (반폭 대비 비율, ±0 이 중앙)
-    #   wall_frac  : 측벽 코스 줄눈 (내측 경계 0 → 외측 개구 경계 1 사이 비율)
+    # --- "stone block joints" inside the painting [v2] : reproduces the reference block coursing ---
+    #   tread_frac : block boundaries on the treads and floor (fraction of half width, +-0 is centre)
+    #   wall_frac  : side-wall course joints (fraction from inner boundary 0 to opening boundary 1)
     blocks=dict(enable=True, z=0.0015, w=0.020,
                 tread_frac=(-0.42, 0.02, 0.46), wall_frac=(0.45,)),
-    # --- 포장 ---
+    # --- paving ---
     plaza=dict(x0=-60.0, x1=100.0, y0=-60.0, y1=60.0, z_top=0.0, thick=0.6),
 
-    # ═══ [W2 ground_kit] P1 plaza_granite — 사양 §5.1 N3 행 ════════════════
-    #  씬 고유 처방은 두 줄이다: ① **줄눈이 그림을 관통**해 판별단서를 강화
-    #  ② **맨홀은 그림 밖**(`x ≤ −1.6`).
-    #  ①은 이미 씬이 집행한다(`build_joints()` 1.2 m 격자, x −12…24 = 그림
-    #  x 0…6.3 을 통과) → **킷 줄눈 0**(`pave.joint=None`). 킷이 같은 면에
-    #  1.8/6.0 격자를 얹으면 D6 이중 격자이고, 무엇보다 이 씬에서 줄눈은
-    #  **판별단서**라 주기가 흔들리면 안 된다.
-    #  ②는 region 원단을 `x_rim − 1.6` 으로 잘라 구조적으로 보장한다. 게다가
-    #  B12 불변식 `_inv_n3_painting`(면 요소 AABB ∩ 그림 사각형 = ∅)과
-    #  `_inv_hidden_illusion`(점자블록 0건·고대비 횡단선 금지)이 이중으로 건다.
-    #  ★ d2 근경 창(x −1.436…0)은 **그림이 차지한다** — 그게 이 씬이다.
-    #    따라서 d2 의 B1(면 요소 ≥1)은 원리적으로 미달이며 정상이다.
+    # ═══ [W2 ground_kit] P1 plaza_granite — spec §5.1 row N3 ═══════════════
+    #  two scene-specific prescriptions: (1) **joints run through the painting**, strengthening the cue
+    #  (2) **manholes stay outside the painting** (`x <= −1.6`).
+    #  (1) is already enforced by the scene (`build_joints()` 1.2 m grid, x −12…24 passes through
+    #  the painting x 0…6.3) -> **kit joints 0** (`pave.joint=None`). If the kit laid a
+    #  1.8/6.0 grid on the same surface that would be a D6 double grid, and above all the joints
+    #  here are a **discriminative cue**, so their period must not wobble.
+    #  (2) is guaranteed structurally by cutting the region stock at `x_rim − 1.6`. On top of that,
+    #  the B12 invariants `_inv_n3_painting` (surface-element AABB ∩ painting rectangle = ∅) and
+    #  `_inv_hidden_illusion` (0 tactile paving · no high-contrast crossing lines) lock it twice.
+    #  * the d2 near window (x −1.436…0) is **occupied by the painting** - that is this scene.
+    #    So d2's B1 (surface elements >=1) falls short by construction, and that is correct.
     ground=dict(
         region=(-12.0, -4.0, -1.6, 4.0),
         manholes=[(-2.00, 1.00), (-6.00, -1.00)],
-        #  패치 = d5·d10 근경 창(W1) 담당. |y| ≤ 0.4 여야 프레임 반폭 안이다.
+        #  patches cover the d5·d10 near windows (W1). |y| <= 0.4 keeps them inside the frame half-width.
         patches=[(-3.80, 0.20), (-8.80, -0.20)],
         gullies=[(-5.00, 3.40), (-10.00, -3.40)],
     ),
-    band=dict(y=5.0, width=0.8, proud=0.002, embed=0.06),   # 화강암 경계 밴드
+    band=dict(y=5.0, width=0.8, proud=0.002, embed=0.06),   # granite edge band
     joint=dict(x0=-12.0, x1=24.0, y0=-7.2, y1=7.2, step=1.2,
-               width=0.028, proud=0.003, embed=0.06),        # 포장 줄눈 격자
-    # --- 소품 ---
-    #   가로등: 태양 az 205° → 그림자 az 25° = (+0.906,+0.423),
-    #   길이 = 4.6/tan(49.79°) = 3.90 m → 그림자 끝 (4.13, -0.95) = 그림 내부.
+               width=0.028, proud=0.003, embed=0.06),        # paving joint grid
+    # --- props ---
+    #   streetlight: sun az 205 deg -> shadow az 25 deg = (+0.906,+0.423),
+    #   length = 4.6/tan(49.79 deg) = 3.90 m -> shadow tip (4.13, -0.95) = inside the painting.
     lamp=dict(cx=0.6, cy=-2.6, pole_r=0.07, pole_h=4.6,
               head=(0.55, 0.22, 0.14)),
     planters=[dict(name="A", cx=-4.5, cy=3.6), dict(name="B", cx=9.0, cy=-3.8),
               dict(name="C", cx=14.0, cy=3.4), dict(name="D", cx=18.5, cy=-3.6)],
     planter=dict(size=2.6, curb_h=0.42, curb_t=0.22, cap_over=0.05,
                  cap_h=0.05, grass_h=0.38),
-    # 벤치 — 전부 화단(수목) 앵커 인접. A 는 ctx2 에서 허허벌판(-3.0,-3.4)
-    #   → 화단 A 우측 0.3 m 로 이설. yaw/위치는 v5.1 §3 결정적 지터.
-    benches=[dict(name="A", cx=-2.0, cy=3.5, yaw=0.0),      # 화단 A 옆 0.3 m
-             dict(name="B", cx=6.5, cy=-3.6, yaw=0.0),      # 화단 B 옆 0.3 m
-             dict(name="C", cx=10.5, cy=3.6, yaw=0.0),      # 화단 C 앞 1.3 m
-             dict(name="D", cx=16.0, cy=3.5, yaw=0.0)],     # 화단 C 옆 0.2 m
-    # ── 볼라드 [v5.1 §2 · ctx2] ───────────────────────────────────────────
-    #   구(舊): (−6, ±1.4) 2본 h0.75 — 보행축(그림 중심선) 바로 옆이라
-    #   설계 시점 시야에 걸릴 수 있고 규격·간격·반사띠·점형블록 전무.
-    #   신(新): **몰 보행자전용거리 진입부**(x=−6) 횡단 1열. 규격 h0.90·φ0.12·
-    #   간격 1.5 m. 중앙 4.8 m 는 **소방차 진입 통로**(건축법상 소방활동
-    #   전용구역 최소폭 4 m)로 비워 둔다 — 실제 보행자전용거리 관행.
-    #   ★ 그림 보존: 볼라드는 전부 |y| ≥ 2.4 · x = −6 → 그림 풋프린트
-    #     (x 0..6.30 · |y| ≤ 1.50) 및 설계 시점(E=−2.0) **전방 시야 밖**.
-    #     (설계 시점보다 −X 후방이라 design_eye 컷에는 원천적으로 안 나온다.)
+    # benches - all anchored beside a planter (tree). A stood in open ground (-3.0,-3.4) in ctx2
+    #   -> moved 0.3 m to the right of planter A. yaw/position use the v5.1 §3 deterministic jitter.
+    benches=[dict(name="A", cx=-2.0, cy=3.5, yaw=0.0),      # 0.3 m beside planter A
+             dict(name="B", cx=6.5, cy=-3.6, yaw=0.0),      # 0.3 m beside planter B
+             dict(name="C", cx=10.5, cy=3.6, yaw=0.0),      # 1.3 m in front of planter C
+             dict(name="D", cx=16.0, cy=3.5, yaw=0.0)],     # 0.2 m beside planter C
+    # ── bollards [v5.1 §2 · ctx2] ─────────────────────────────────────────
+    #   old: 2 posts at (−6, +-1.4) h0.75 - right beside the walk axis (the painting centreline),
+    #   they could enter the design viewpoint's view, and had no spec, spacing, reflective band or dot paving.
+    #   new: one row across the **pedestrian-only street entrance of the mall** (x=−6). Spec h0.90·φ0.12·
+    #   spacing 1.5 m. The central 4.8 m is left open as a **fire-engine access lane** (the Building
+    #   Act sets a 4 m minimum width for firefighting zones) - real pedestrian-street practice.
+    #   * painting preserved: every bollard is at |y| >= 2.4 · x = −6 -> outside the painting
+    #     footprint (x 0..6.30 · |y| <= 1.50) and **outside the forward view** of the design eye (E=−2.0).
+    #     (they sit −X behind the design viewpoint, so they can never appear in the design_eye shot.)
     bollard_rows=[dict(name="N", x=-6.0, y0=2.4, y1=8.4),
                   dict(name="S", x=-6.0, y0=-2.4, y1=-8.4)],
     bollard=dict(r=0.06, h=0.90, spacing=1.5, front=(-1.0, 0.0)),
-    # ── 몰 맥락 [v2 추가] : 상점 파사드 밴드 (차양 + 쇼윈도 + 사인 밴드) ──
-    #   양측 상가(buildings L/R) 1층에 포디엄 벽을 덧대고 그 전면에 베이를 배열.
-    #   포디엄(y 9.55~10.05, z 0~3.6)은 build_building 의 1층 창(y 9.98~10.01,
-    #   z 0.60~2.40)을 **완전히 내포**하므로 동일평면 Z-파이팅이 발생하지 않는다.
-    #   podium_embed 0.05 = 포디엄을 셸 안쪽으로 물려 **동일평면 접촉 제거**.
-    #   podium_h 3.45 < 2층 창 하단 3.60 → 창과 상면 접촉도 없음.
+    # ── mall context [v2] : shopfront band (awning + shop window + fascia sign band) ──
+    #   a podium wall is added to the ground floor of buildings L/R, with bays arrayed across its front.
+    #   the podium (y 9.55~10.05, z 0~3.6) **fully encloses** the ground-floor windows of
+    #   build_building (y 9.98~10.01, z 0.60~2.40), so no coplanar Z-fighting occurs.
+    #   podium_embed 0.05 = the podium is pushed into the shell, **removing coplanar contact**.
+    #   podium_h 3.45 < the 2nd-floor window sill 3.60 -> no top-face contact with the windows either.
     shop=dict(x0=-10.0, x1=30.0, bay=4.0, gap=0.55,
               podium_t=0.50, podium_h=3.45, podium_embed=0.05,
               glass_z0=0.45, glass_z1=2.50, glass_t=0.10, glass_proud=0.05,
@@ -170,12 +173,12 @@ PARAMS = dict(
               fascia_z0=2.78, fascia_z1=3.36, fascia_t=0.18, fascia_proud=0.10),
     shop_facades=[dict(name="L", y=10.0, dir=-1.0),
                   dict(name="R", y=-10.0, dir=1.0)],
-    # 입간판(안내 사인 1본) — 몰 이용 안내. -X 를 바라봄(접근 카메라 정면).
-    #   GT 규약: '낙차 경고'가 아닌 **안내(info)** 사인만 사용(오라벨 금지).
+    # freestanding sign (1 info sign) - mall usage guidance. Faces -X (square to the approach camera).
+    #   GT convention: only **info** signs, never a "drop warning" (no mislabelling).
     entry_sign=dict(x=7.5, y=4.6, yaw=180.0, w=0.8, h=0.8,
                     pole_h=2.2, pole_r=0.045),
     buildings=dict(
-        # 몰 양측 상가 파사드 + 정면(+X) 비스타 차단
+        # retail facades on both sides of the mall + vista block ahead (+X)
         L=dict(x0=-14.0, x1=34.0, y0=10.0, y1=20.0, h=9.0, floors=3,
                axis="y", facade_y=10.0, face_dir=-1.0),
         R=dict(x0=-14.0, x1=34.0, y0=-20.0, y1=-10.0, h=9.0, floors=3,
@@ -188,35 +191,35 @@ PARAMS = dict(
     material=dict(
         scale=dict(stone_flag=1.2, band_dark=1.0, grass=1.4, plaza_light=1.80),
         grass_tint=(0.55, 0.68, 0.42),
-        # ══ 페인트 틴트 [v2 팔레트 교정 · 2026-07-27] ════════════════════
-        #   폐기 사유: v1 은 채도 0에 가까운 무채색 회색(0.40/0.385/0.355 계열)
-        #     이라 렌더가 "회색 줄무늬 추상 패턴"으로 읽혔다(사용자 지적).
-        #   교정 근거: look_refs/n3_trompe_loeil.jpg 판독 —
-        #     ① 디딤면은 **따뜻한 베이지·황갈 석재**(분필 파스텔의 웜톤)
-        #     ② 라이저·바닥 암부도 중성 회색이 아니라 **웜브라운 그늘**
-        #     ③ 측벽은 석재 블록 쌓기(웜 중간톤 + 암색 줄눈)
-        #     ④ 그림 외곽은 크림빛 분필 테두리
-        #   sRGB 지각 규약: 암부는 0.02~0.09 대역 유지하되 **색상은 남긴다**
-        #     (R:G:B ≈ 1.00:0.79:0.59 웜 비율 — 채도 있는 암부).
-        #   roughness 는 전 페인트가 paint_rough(포장과 동일) — "재질 함정" 유지.
+        # ══ paint tints [v2 palette correction · 2026-07-27] ═════════════
+        #   why v1 was dropped: it used near-zero-saturation neutral greys (0.40/0.385/0.355 family),
+        #     so the render read as a "grey striped abstract pattern" (the user pointed this out).
+        #   basis for the correction: reading look_refs/n3_trompe_loeil.jpg —
+        #     (1) treads are **warm beige / tan stone** (the warm tone of chalk pastel)
+        #     (2) the dark risers and floor are not neutral grey either but **warm brown shade**
+        #     (3) the side walls are stone block coursing (warm mid-tone + dark joints)
+        #     (4) the painting's outline is a cream chalk border
+        #   sRGB perceptual rule: dark areas stay in the 0.02~0.09 band but **keep their hue**
+        #     (R:G:B ~ 1.00:0.79:0.59 warm ratio - saturated darks).
+        #   every paint keeps roughness = paint_rough (same as the paving) - the "material trap" stays.
         paint_rough=0.55,
-        tread_tint=(0.520, 0.450, 0.340),      # 웜 스톤 디딤면(황갈 베이지)
-        riser_tint_a=(0.055, 0.043, 0.032),    # 웜브라운 암부 2톤(교대)
+        tread_tint=(0.520, 0.450, 0.340),      # warm stone tread (tan beige)
+        riser_tint_a=(0.055, 0.043, 0.032),    # warm brown darks, 2 tones (alternating)
         riser_tint_b=(0.088, 0.070, 0.053),
-        floor_tint=(0.040, 0.031, 0.023),      # 계단정 바닥(최심부·웜 암부)
-        wall_tint=(0.240, 0.200, 0.150),       # 석재 블록 측벽(웜 중간톤)
-        nosing_tint=(0.640, 0.565, 0.440),     # 그려진 단코(밝은 웜 스톤)
-        border_tint=(0.760, 0.710, 0.600),     # 그림 외곽 크림 분필 라인
-        block_tint=(0.130, 0.104, 0.078),      # 석재 블록 줄눈(웜 암색 박선)
-        # 대비 약화(cue_material_break=False) 시 섞는 포장 기준톤 — 웜으로 동조
+        floor_tint=(0.040, 0.031, 0.023),      # stair well floor (deepest · warm dark)
+        wall_tint=(0.240, 0.200, 0.150),       # stone block side wall (warm mid-tone)
+        nosing_tint=(0.640, 0.565, 0.440),     # painted nosing (light warm stone)
+        border_tint=(0.760, 0.710, 0.600),     # cream chalk line around the painting
+        block_tint=(0.130, 0.104, 0.078),      # stone block joint (warm dark hairline)
+        # paving reference tone mixed in when contrast is weakened (cue_material_break=False) - warm-matched
         flat_ref=(0.340, 0.315, 0.275),
         flat_mix=0.55,
         joint_color=(0.030, 0.030, 0.032), joint_rough=0.7,
         lamp_color=(0.42, 0.43, 0.45), lamp_metallic=0.6, lamp_rough=0.45,
         bollard_color=(0.33, 0.33, 0.36), bollard_metallic=0.4,
         bollard_rough=0.5,
-        # ─ 볼라드 v5.1 부속: 상단 백색 반사띠(본당 0.08 m² — 대면적 아님) +
-        #   전면 점형블록(황색). 몸통은 몰 관행대로 암회 유지.
+        # ─ bollard v5.1 fittings: white reflective band on top (0.08 m² each - not a large area) +
+        #   dot tactile paving in front (yellow). The body stays dark grey, as is mall practice.
         bollard_band_color=(0.88, 0.88, 0.86),
         tactile_color=(0.80, 0.66, 0.14), tactile_rough=0.70,
         curb_color=(0.75, 0.75, 0.72), curb_rough=0.6,
@@ -226,7 +229,7 @@ PARAMS = dict(
         wood_color=(0.30, 0.20, 0.12), wood_rough=0.85,
         canopy_a=(0.025, 0.045, 0.015), canopy_b=(0.035, 0.060, 0.020),
         canopy_rough=1.0,
-        # ── 몰 맥락(상점 파사드) ──
+        # ── mall context (shopfronts) ──
         podium_tint=(0.90, 0.87, 0.82),
         shopglass_color=(0.055, 0.070, 0.085), shopglass_rough=0.10,
         awning_a=(0.34, 0.10, 0.09), awning_b=(0.10, 0.22, 0.17),
@@ -245,13 +248,13 @@ PARAMS = dict(
         hdri_sun_rotz_offset=233.5,
         dome_rotation_step=15.0,
     ),
-    # ─── SUN_AZ_OFFSET: 기본 171.5 유지. 근거:
-    #     태양 월드 az ≈ 33.5 + 171.5 = 205° → 실그림자 az = 25°(+X,+Y).
-    #     그림의 "가짜 음영"은 라이저가 카메라를 향하는 면(즉 -X 향)이 어둡다는
-    #     전제라, 실제 태양(205°=서남서)이 만드는 음영 방향과 **상충한다**.
-    #     이 상충은 결함이 아니라 트롱프뢰유 판별 단서 — 그림은 자기 그림자를
-    #     못 만들고, 반대로 실제 가로등/화단 그림자는 그림 위를 그대로 지나간다.
-    #     [ ]키(15° step)로 GUI에서 재스윕 가능. ───
+    # ─── SUN_AZ_OFFSET: kept at the default 171.5. Rationale:
+    #     sun world az ~ 33.5 + 171.5 = 205 deg -> real shadow az = 25 deg (+X,+Y).
+    #     the "fake shading" of the painting assumes the riser faces turned toward the camera
+    #     (i.e. facing -X) are dark, which **conflicts** with the real sun (205 deg = WSW).
+    #     that conflict is not a defect but a trompe-l'oeil cue - the painting cannot cast its own
+    #     shadow, while the real streetlight/planter shadows pass straight over it.
+    #     Re-sweepable in the GUI with the [ ] keys (15 deg step). ───
     SUN_AZ_OFFSET=171.5,
 
     render=dict(pt_total_spp=512, pt_max_bounces=8),
@@ -278,7 +281,7 @@ if _sc_ov:
 
 
 # ===========================================================================
-# [C] 경로 상수 + 필요 텍스처 역할
+# [C] path constants + required texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "sceneN3")
@@ -288,25 +291,26 @@ ASSET_ROLES = ["stone_flag", "band_dark", "plaza_light", "grass", "brick_red",
 
 
 # ===========================================================================
-# [C2] 아나모픽 투영 — 순수 수학 (stage 불필요, SMOKE 리포트와 공용)
+# [C2] anamorphic projection - pure maths (no stage needed, shared with the SMOKE report)
 # ===========================================================================
 def project_bands(il):
-    """가상 침하 계단정의 가시 표면을 지면(z=0)에 투영한 밴드 목록.
+    """Bands obtained by projecting the visible surfaces of the virtual sunken stair well onto the ground (z=0).
 
-    il: PARAMS["illusion"] 딕셔너리.
-    반환: [dict(kind, idx, xa, xb, ha, hb, sa, sb, depth_frac), ...]
-      kind : "floor" | "riser" | "tread"   (근→원 순, xa < xb 단조)
-      xa,xb: 지면 투영 x (근/원)           ha,hb: 그 지점의 반폭 |Qy| 경계
-      sa,sb: 투영 계수 s                   depth_frac: 0(최심)~1(림) 깊이 비
-    Q_x<=0 으로 접히는(근접 림에 가린) 밴드는 제외하고, 걸친 밴드는 x=0에서
-    선형 보간해 자른다 — riser/tread 모두 Q 에 대해 s(따라서 반폭)가 선형이다.
+    il: the PARAMS["illusion"] dict.
+    returns: [dict(kind, idx, xa, xb, ha, hb, sa, sb, depth_frac), ...]
+      kind : "floor" | "riser" | "tread"  (near→far order, xa < xb monotone)
+      xa,xb: projected ground x (near/far) ha,hb: half-width |Qy| bounds there
+      sa,sb: projection factor s           depth_frac: 0(deepest)~1(rim) depth ratio
+    Bands that fold to Q_x<=0 (hidden by the near rim) are dropped, and a straddling band is
+    cut at x=0 by linear interpolation — for both riser and tread, s (and therefore the
+    half-width) is linear in Q.
     """
     ex, h = float(il["eye_x"]), float(il["eye_h"])
     n = int(il["nsteps"])
     r, t = float(il["riser"]), float(il["tread"])
     Lf, W = float(il["floor_len"]), float(il["width"])
     x_rim = float(il["x_rim"])
-    Dp = n * r                                   # 계단정 깊이
+    Dp = n * r                                   # stair well depth
     hw = W / 2.0
 
     def s_of(z):
@@ -316,9 +320,9 @@ def project_bands(il):
         return ex + s_of(z) * (xv - ex)
 
     raw = []
-    # ① 바닥판 (z=-Dp, x_rim .. x_rim+Lf)
+    # (1) floor slab (z=-Dp, x_rim .. x_rim+Lf)
     raw.append(("floor", 0, x_rim, x_rim + Lf, -Dp, -Dp))
-    # ② 단 i: 라이저(수직면) → 트레드(수평면)
+    # (2) step i: riser (vertical face) -> tread (horizontal face)
     for i in range(1, n + 1):
         xi = x_rim + Lf + (i - 1) * t
         zb = -Dp + (i - 1) * r
@@ -331,9 +335,9 @@ def project_bands(il):
         sa, sb = s_of(za), s_of(zb)
         xa, xb = qx(xva, za), qx(xvb, zb)
         ha, hb = sa * hw, sb * hw
-        if xb <= x_rim + 1e-9:                   # 전부 폐색 — 그리지 않음
+        if xb <= x_rim + 1e-9:                   # fully occluded - not drawn
             continue
-        if xa < x_rim:                           # 걸친 밴드 → x_rim 에서 절단
+        if xa < x_rim:                           # straddling band -> cut at x_rim
             u = (x_rim - xa) / (xb - xa)
             ha = ha + (hb - ha) * u
             sa = sa + (sb - sa) * u
@@ -345,7 +349,7 @@ def project_bands(il):
 
 
 def illusion_summary(il):
-    """SMOKE·문서용 요약: 풋프린트·가시 단수·단당 축소계수 k."""
+    """Summary for SMOKE and docs: footprint · visible step count · per-step reduction factor k."""
     b = project_bands(il)
     x_f = float(il["x_rim"]) + float(il["floor_len"]) \
         + int(il["nsteps"]) * float(il["tread"])
@@ -361,12 +365,12 @@ def illusion_summary(il):
 
 
 # ===========================================================================
-# [C3] 로컬 빌더 — 그림 계단(공용화 보류: 이 씬 전용)
+# [C3] local builders - the painted stairs (not shared yet: this scene only)
 # ===========================================================================
 def _paint_quad(stage, path, corners_xy, z, mtl):
-    """지면과 평행한 평면 사각형(사다리꼴) 1매. corners_xy 는 +Z 에서 볼 때
-    반시계(CCW) 순서 — 법선 +Z. 인접 밴드는 변을 공유할 뿐 겹치지 않으므로
-    동일평면 Z-파이팅이 발생하지 않는다."""
+    """One planar quad (trapezoid) parallel to the ground. corners_xy is in
+    counter-clockwise (CCW) order seen from +Z — normal +Z. Adjacent bands only share
+    an edge and never overlap, so no coplanar Z-fighting occurs."""
     from pxr import UsdGeom, UsdShade, Gf
     mesh = UsdGeom.Mesh.Define(stage, path)
     pts = [Gf.Vec3f(float(x), float(y), float(z)) for x, y in corners_xy]
@@ -377,9 +381,9 @@ def _paint_quad(stage, path, corners_xy, z, mtl):
     ys = [p[1] for p in pts]
     mesh.CreateExtentAttr([Gf.Vec3f(min(xs), min(ys), float(z)),
                            Gf.Vec3f(max(xs), max(ys), float(z))])
-    # TfToken 값은 문자열로 직접 지정(토큰 상수명 의존 제거).
-    mesh.CreateSubdivisionSchemeAttr("none")     # 폴리곤 그대로(세분 금지)
-    mesh.CreateDoubleSidedAttr(True)             # 후면 컬링 사고 방지
+    # TfToken values are given as plain strings (removes the dependence on token constant names).
+    mesh.CreateSubdivisionSchemeAttr("none")     # keep the polygon as is (no subdivision)
+    mesh.CreateDoubleSidedAttr(True)             # guard against back-face culling accidents
     mesh.CreateNormalsAttr([Gf.Vec3f(0.0, 0.0, 1.0)] * len(pts))
     mesh.SetNormalsInterpolation("vertex")
     UsdShade.MaterialBindingAPI.Apply(mesh.GetPrim()).Bind(mtl)
@@ -387,12 +391,13 @@ def _paint_quad(stage, path, corners_xy, z, mtl):
 
 
 def _block_joints(stage, prefix, tag, xa, xb, ha, hb, hw, bk, mtl, inner):
-    """그림 내부 "석재 블록 줄눈" 박선 (레퍼런스의 블록 쌓기 재현).
+    """Hairlines for the "stone block joints" inside the painting (reproducing the block coursing of the reference).
 
-    inner=True 면 디딤면·바닥의 블록 경계(반폭 대비 tread_frac 위치의 종방향
-    박선), 항상 측벽 코스 줄눈(내측→개구경계 사이 wall_frac 위치)도 함께 깐다.
-    선은 밴드와 같은 사다리꼴 원근을 따르므로(반폭이 ha→hb 로 변함) 투영이
-    깨지지 않는다. z 는 페인트(0.001)보다 0.5 mm 위 = Z-파이팅 없음.
+    With inner=True it lays the block boundaries of the treads and floor (longitudinal
+    hairlines at tread_frac of the half width); the side-wall course joints (at wall_frac
+    between the inner boundary and the opening boundary) are always laid as well.
+    The lines follow the same trapezoidal perspective as the band (half width varying
+    ha→hb), so the projection is not broken. z sits 0.5 mm above the paint (0.001) = no Z-fighting.
     """
     z = float(bk["z"])
     w = float(bk["w"]) / 2.0
@@ -417,15 +422,15 @@ def _block_joints(stage, prefix, tag, xa, xb, ha, hb, hw, bk, mtl, inner):
 
 def paint_fake_stairs(stage, prefix, il, pa, mtl_of, nosing=True,
                       blocks=None, block_mtl=None):
-    """아나모픽 "하강 계단" 페인트 배열을 지면 z=pa["z"] 에 깐다.
+    """Lays the anamorphic "descending stair" paint array on the ground at z=pa["z"].
 
     il      : PARAMS["illusion"],  pa: PARAMS["paint"]
-    mtl_of  : (kind, idx, depth_frac) -> UsdShade.Material 콜백
+    mtl_of  : (kind, idx, depth_frac) -> UsdShade.Material callback
               kind ∈ {"floor","riser","tread","wall","nosing","border"}
-    nosing  : True 면 각 트레드 앞단을 폭 pa["nosing_w"] 만큼 잘라 단코 색으로.
-    blocks  : PARAMS["blocks"] (enable 시 석재 블록 줄눈 박선 추가), block_mtl 필요.
-    밴드 = 내측 사다리꼴(바닥/라이저/트레드) + 좌우 측벽 사다리꼴 3매.
-    전체 합집합 = 개구 풋프린트 [x_rim, x_f] × [-W/2, W/2] 를 빈틈없이 덮는다.
+    nosing  : if True, cuts pa["nosing_w"] off the front of each tread and paints it in the nosing colour.
+    blocks  : PARAMS["blocks"] (adds stone block joint hairlines when enabled), block_mtl required.
+    A band = the inner trapezoid (floor/riser/tread) + the left and right side-wall trapezoids, 3 quads.
+    Their union covers the opening footprint [x_rim, x_f] × [-W/2, W/2] with no gaps.
     """
     z = float(pa["z"])
     hw = float(il["width"]) / 2.0
@@ -445,11 +450,11 @@ def paint_fake_stairs(stage, prefix, il, pa, mtl_of, nosing=True,
         for si, (xa, xb, ha, hb, kind) in enumerate(segs):
             tag = f"{bi:02d}_{si}"
             mtl = mtl_of(kind, b["idx"], b["depth_frac"])
-            # 내측(계단면)
+            # inner side (stair faces)
             _paint_quad(stage, f"{prefix}/Band_{tag}",
                         [(xa, -ha), (xb, -hb), (xb, hb), (xa, ha)], z, mtl)
             n_prim += 1
-            # 좌우 측벽 사다리꼴 (내측 경계 ~ 개구 경계)
+            # left/right side-wall trapezoids (inner boundary ~ opening boundary)
             wmtl = mtl_of("wall", b["idx"], b["depth_frac"])
             _paint_quad(stage, f"{prefix}/WallS_{tag}",
                         [(xa, -hw), (xb, -hw), (xb, -hb), (xa, -ha)], z, wmtl)
@@ -464,7 +469,7 @@ def paint_fake_stairs(stage, prefix, il, pa, mtl_of, nosing=True,
 
 
 # ===========================================================================
-# [C4] 기하 자기검증 리포트 (SMOKE 조기종료에서 출력)
+# [C4] geometry self-verification report (printed at the SMOKE early exit)
 # ===========================================================================
 def _geometry_report():
     il = PARAMS["illusion"]
@@ -473,7 +478,7 @@ def _geometry_report():
     Dp = il["nsteps"] * il["riser"]
     D = il["x_rim"] - il["eye_x"]
     i0 = min(s["steps"]) if s["steps"] else 0
-    z_seen = -Dp + (i0 - 1) * il["riser"]        # 최심 가시면 = 지각 낙차
+    z_seen = -Dp + (i0 - 1) * il["riser"]        # deepest visible face = the perceived drop
     print("-" * 68)
     print("[기하] sceneN3 아나모픽 자기검증")
     print(f"  설계 시점 E=({il['eye_x']:.2f}, 0, {il['eye_h']:.2f})  "
@@ -499,7 +504,7 @@ def _geometry_report():
     for b in s["bands"]:
         print(f"  {b['kind'] + str(b['idx']):>10s} {b['xa']:8.3f} {b['xb']:8.3f} "
               f"{b['xb'] - b['xa']:7.3f} {b['ha']:7.3f} {b['hb']:7.3f}")
-    # 밴드 단조성 = 겹침 없음 검증
+    # band monotonicity = proof of no overlap
     xs = [(b["xa"], b["xb"]) for b in s["bands"]]
     mono = all(abs(xs[i][1] - xs[i + 1][0]) < 1e-9 for i in range(len(xs) - 1))
     print(f"  밴드 인접성(겹침·틈 0): {'OK' if mono else 'FAIL'} · "
@@ -533,14 +538,14 @@ def _geometry_report():
 
 
 def ground_plans():
-    """[W2 ground_kit] 지면 계획 — 씬 조립부와 CPU 검산이 같은 함수를 쓴다."""
+    """[W2 ground_kit] Ground plan — scene assembly and the CPU check use the same function."""
     g = PARAMS["ground"]
     gp = gk.plan_ground(
         "plaza_granite", region=tuple(g["region"]),
         z=float(PARAMS["plaza"]["z_top"]), gy=0.0, origin=(0.0, 0.0, 0.0),
-        edges=(),                       # hard negative — 낙차 에지 0
+        edges=(),                       # hard negative - 0 drop edges
         dists=(2, 5, 10), scene="sceneN3",
-        tactile=(),                     # §12.4 — 은닉 착시 정체성 충돌로 OFF
+        tactile=(),                     # §12.4 - OFF, it clashes with the hidden-illusion identity
         sites=dict(manhole=[tuple(p) for p in g["manholes"]],
                    gully=[tuple(p) for p in g["gullies"]],
                    patch=[tuple(p) for p in g["patches"]]),
@@ -550,29 +555,29 @@ def ground_plans():
 
 
 def build_views():
-    """카메라 프리셋: grid_views(gy=0.0) + 미장센 4컷."""
+    """Camera presets: grid_views(gy=0.0) + 4 mise-en-scene shots."""
     views = sc.grid_views(0.0)
     il = PARAMS["illusion"]
-    # design_eye: 아나모픽 설계 1시점 — 착시가 성립하는 유일 지점
+    # design_eye: the single anamorphic design viewpoint - the only place the illusion holds
     views["design_eye"] = dict(eye=[il["eye_x"], 0.0, il["eye_h"]],
                                tgt=[3.5, 0.0, 0.0])
-    # off_axis: 측면 — 원근이 붕괴해 '납작한 그림'임이 드러남(판별 단서 ④)
+    # off_axis: side view - the perspective collapses and it shows as a "flat painting" (cue (4))
     views["off_axis"] = dict(eye=[1.5, -6.5, 1.7], tgt=[3.2, 0.0, 0.0])
-    # joint_cross: 저시점 근접 — 줄눈이 그림을 관통(단서 ①)·스펙큘러(단서 ②)
+    # joint_cross: low near view - joints run through the painting (cue (1)) · specular (cue (2))
     views["joint_cross"] = dict(eye=[-0.7, 0.0, 0.35], tgt=[4.5, 0.0, 0.02])
-    # beauty_overview: 사선 부감 — 몰 맥락 + 그림 전개
+    # beauty_overview: oblique high angle - mall context + the painting laid out
     views["beauty_overview"] = dict(eye=[-5.0, -5.5, 3.4], tgt=[3.5, 0.0, 0.0])
     return views
 
 
 # ===========================================================================
-# [C5] 드레싱 검산 (Isaac 불요) — NEGOBS_GEOCHECK=1 python3 sceneN3_trompe_loeil.py
-#   ① 카메라 매몰 : 전 뷰 eye 가 신규 입체물 AABB(여유 0.35) 밖인가
-#   ② 그림 폐색   : 신규 입체물이 카메라–그림 사이 방위구간을 침범하는가
+# [C5] dressing check (no Isaac needed) - NEGOBS_GEOCHECK=1 python3 sceneN3_trompe_loeil.py
+#   (1) camera burial : is every view's eye outside the new solid AABBs (0.35 margin)?
+#   (2) painting occlusion : do the new solids intrude into the camera-to-painting corridor?
 # ===========================================================================
 def placements():
-    """[v5.1 §3] 결정적 지터 배치. 빌더·검산이 공유한다.
-    반환 (benches[(name,x,y,yaw)], planters[(name,x,y)], bollards[(name,x,y)])."""
+    """[v5.1 §3] Deterministic jittered placement. Shared by the builder and the check.
+    Returns (benches[(name,x,y,yaw)], planters[(name,x,y)], bollards[(name,x,y)])."""
     bl = []
     for b in PARAMS["benches"]:
         dx, dy = bc.jit_pos(b["cx"], b["cy"], "benchN3", amp=0.18)
@@ -594,13 +599,13 @@ def placements():
 
 
 def dressing_aabbs():
-    """맥락 드레싱 **입체물**의 (name, xa, xb, ya, yb, z_top). 페인트는 flush."""
+    """(name, xa, xb, ya, yb, z_top) of the **solid** context dressing. The paint is flush."""
     out = []
     _benches, _planters, _bollards = placements()
     sp = PARAMS["shop"]
     for fd in PARAMS["shop_facades"]:
         fy, dr = float(fd["y"]), float(fd["dir"])
-        y_in = fy + dr * (sp["podium_t"] - sp["podium_embed"])   # 포디엄 전면
+        y_in = fy + dr * (sp["podium_t"] - sp["podium_embed"])   # podium front face
         y_aw = fy + dr * (sp["podium_t"] - sp["podium_embed"] + sp["awn_proj"])
         out.append((f"Shop_{fd['name']}", sp["x0"], sp["x1"],
                     min(fy, y_aw), max(fy, y_aw), sp["podium_h"]))
@@ -612,7 +617,7 @@ def dressing_aabbs():
     for name, px, py in _planters:
         out.append((f"Planter_{name}", px - ph, px + ph,
                     py - ph, py + ph, top_tree))
-    # 벤치 1.8×0.4×h0.45 — yaw 지터 ≤8° 상계로 반폭 (0.92, 0.32)
+    # bench 1.8x0.4xh0.45 - half extents (0.92, 0.32) as an upper bound for yaw jitter <=8 deg
     for name, bx, by, _yaw in _benches:
         out.append((f"Bench_{name}", bx - 0.92, bx + 0.92,
                     by - 0.32, by + 0.32, 0.45))
@@ -621,7 +626,7 @@ def dressing_aabbs():
         out.extend(bc.bollard_v51_aabbs(f"Bollard_{name}", bx, by, 0.0,
                                         front_dir=bo["front"],
                                         radius=bo["r"], height=bo["h"]))
-    lp = PARAMS["lamp"]                     # 기둥/헤드 분리(과대 상계 방지)
+    lp = PARAMS["lamp"]                     # pole/head kept separate (avoids an over-large bound)
     out.append(("LampPole", lp["cx"] - lp["pole_r"], lp["cx"] + lp["pole_r"],
                 lp["cy"] - lp["pole_r"], lp["cy"] + lp["pole_r"],
                 lp["pole_h"]))
@@ -635,11 +640,11 @@ def dressing_aabbs():
 
 
 def dresscheck():
-    """※ 기지 예외(허용): beauty_overview·off_axis 에서 **기존 가로등 기둥**
-    (r 0.07, x 0.6 / y −2.6)이 그림 샘플의 3~5 % 를 스친다. 이 가로등은 판별
-    단서 ③(실그림자가 그림 위를 지나감)의 광원 기하 자체라 이동 불가이며,
-    14 cm 기둥이 6.30×3.00 m 그림을 가로지르는 얇은 선이므로 특색 판독을
-    저해하지 않는다. **신규 맥락 드레싱은 전 뷰 0건**이어야 한다.
+    """※ Known, accepted exception: in beauty_overview·off_axis the **existing streetlight
+    pole** (r 0.07, x 0.6 / y −2.6) grazes 3~5 % of the painting samples. That streetlight
+    is the very light geometry behind cue ③ (a real shadow crossing the painting), so it
+    cannot be moved, and a 14 cm pole crossing a 6.30×3.00 m painting is a thin line that
+    does not hinder reading the feature. **New context dressing must be 0 in every view.**
     """
     il = PARAMS["illusion"]
     s = illusion_summary(il)
@@ -664,8 +669,8 @@ def dresscheck():
     print("  ① 카메라 매몰: %s (최근접 수평 %s = %.2f m)"
           % ("0건 합격" if hit == 0 else "%d건 불합격" % hit, worst[0], worst[1]))
 
-    # ② 시선 차단 검사 — 그림 풋프린트를 13×7 격자로 샘플하고 eye→샘플점
-    #    선분이 드레싱 AABB(0.01 축소)를 관통하는지 슬랩법으로 판정한다.
+    # (2) sight-blocking test - sample the painting footprint on a 13x7 grid and decide, by the
+    #    slab method, whether the eye->sample segment pierces a dressing AABB (shrunk by 0.01).
     def seg_hits_box(p0, p1, bmin, bmax):
         tmin, tmax = 0.0, 1.0
         for i in range(3):
@@ -782,7 +787,7 @@ def main():
         return sc.make_pbr(stage, path, *args, **kwargs)
 
     # -------------------------------------------------------------------
-    # 재질
+    # materials
     # -------------------------------------------------------------------
     def setup_materials():
         sca = mp["scale"]
@@ -840,10 +845,10 @@ def main():
                             diffuse_color=mp["canopy_b"],
                             roughness_const=mp["canopy_rough"],
                             specular_level=0.0)
-        # ─ 그림 내부 석재 블록 줄눈 ─
+        # ─ stone block joints inside the painting ─
         M["block"] = PBR(f"{ROOT}/Looks/Block", diffuse_color=mp["block_tint"],
                          roughness_const=mp["paint_rough"], metallic=0.0)
-        # ─ 몰 맥락(상점 파사드) ─
+        # ─ mall context (shopfronts) ─
         M["podium"] = PBR(
             f"{ROOT}/Looks/Podium", sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"),
@@ -865,15 +870,15 @@ def main():
                             roughness_const=mp["fascia_rough"])
         M["sign"] = PBR(f"{ROOT}/Looks/Sign", diffuse_color=mp["sign_color"],
                         roughness_const=mp["sign_rough"])
-        # 한글 안내 사인 패널 — uv_mode(메시 st 1:1 정합, build_sign 전용)
+        # Korean info sign panel - uv_mode (mesh st 1:1 fit, build_sign only)
         M["sign_panel"] = PBR(f"{ROOT}/Looks/SignPanel",
                               sc.tex_path("sign_info", "diff"), uv_mode=True,
                               roughness_const=0.45)
         return M
 
     # -------------------------------------------------------------------
-    # 페인트 재질 팩토리 — 깊이에 따라 톤을 낮춘 틴트를 캐시해 재사용.
-    #   roughness 는 전 페인트가 paint_rough(포장과 동일) — "재질 함정".
+    # paint material factory - caches and reuses tints darkened with depth.
+    #   every paint uses roughness = paint_rough (same as the paving) - the "material trap".
     # -------------------------------------------------------------------
     def make_paint_mtl_of():
         cache = {}
@@ -881,8 +886,8 @@ def main():
                     wall=mp["wall_tint"], nosing=mp["nosing_tint"],
                     border=mp["border_tint"],
                     riser_a=mp["riser_tint_a"], riser_b=mp["riser_tint_b"])
-        plaza_ref = tuple(mp["flat_ref"])       # 포장 평균 톤(대비 약화용·웜)
-        # 깊이 감쇠 하한: 라이저는 0.04~0.08 대역을 유지해야 하므로 얕게 감쇠
+        plaza_ref = tuple(mp["flat_ref"])       # mean paving tone (for weakened contrast · warm)
+        # depth attenuation floor: risers must stay in the 0.04~0.08 band, so they attenuate shallowly
         lo = dict(floor=1.0, tread=0.55, wall=0.45, riser=0.80,
                   nosing=0.70, border=1.0)
 
@@ -910,15 +915,15 @@ def main():
         return mtl_of, cache
 
     # -------------------------------------------------------------------
-    # 포장 — 대형 판석 평판 + 화강암 경계 밴드 (개구 없음 → 분할 불요)
+    # paving - a large flagstone slab + granite edge band (no opening -> no splitting needed)
     # -------------------------------------------------------------------
     def build_plaza(M):
         pz = PARAMS["plaza"]
         cz = pz["z_top"] - pz["thick"] / 2.0
-        # [W2-0 · P-A] 광장 상면이 ground_kit 의 장식 대상이다 → 변위 스킨 OFF.
-        #   **BOX 호출 전에** 등록해야 한다(`add_box` 가 그 자리에서 판정).
-        #   이 씬은 특히 중요하다 — 페인트 레이어가 전부 proud 0.001~0.003 이라
-        #   스킨(+6.5~16.5 mm)이 켜지면 **그림 자체가 묻힌다** `[사양 §1.1]`.
+        # [W2-0 · P-A] the plaza top face is what ground_kit decorates -> displacement skin OFF.
+        #   it must be registered **before the BOX call** (`add_box` decides on the spot).
+        #   this scene is especially sensitive - every paint layer is proud by only 0.001~0.003, so
+        #   turning the skin on (+6.5~16.5 mm) would **bury the painting itself** `[spec §1.1]`.
         sc.skin_exclude(f"{ROOT}/Plaza")
         BOX(f"{ROOT}/Plaza",
             ((pz["x0"] + pz["x1"]) / 2.0, (pz["y0"] + pz["y1"]) / 2.0, cz),
@@ -935,8 +940,8 @@ def main():
                 (jt["x1"] - jt["x0"], bd["width"], z_top - z_bot), M["band"])
 
     # -------------------------------------------------------------------
-    # 포장 줄눈 — 격자. **그림 영역을 관통**해 이어진다(판별 단서 ①).
-    #   페인트(z=0.001) 위 proud 0.003 → 2 mm 이격, Z-파이팅 없음.
+    # paving joints - a grid. They **run through the painting area** unbroken (cue (1)).
+    #   proud 0.003 above the paint (z=0.001) -> 2 mm clearance, no Z-fighting.
     # -------------------------------------------------------------------
     def build_joints(M):
         jt = PARAMS["joint"]
@@ -948,17 +953,17 @@ def main():
         Ly = jt["y1"] - jt["y0"]
         n_x = int(round(Lx / jt["step"])) + 1
         n_y = int(round(Ly / jt["step"])) + 1
-        for i in range(n_x):                     # 횡단 줄눈 (일정 x)
+        for i in range(n_x):                     # cross joints (constant x)
             x = jt["x0"] + i * jt["step"]
             BOX(f"{ROOT}/JointX_{i}", (x, (jt["y0"] + jt["y1"]) / 2.0, zc),
                 (jt["width"], Ly, hz), M["joint"])
-        for j in range(n_y):                     # 종단 줄눈 (일정 y)
+        for j in range(n_y):                     # longitudinal joints (constant y)
             y = jt["y0"] + j * jt["step"]
             BOX(f"{ROOT}/JointY_{j}", ((jt["x0"] + jt["x1"]) / 2.0, y, zc),
                 (Lx, jt["width"], hz), M["joint"])
 
     # -------------------------------------------------------------------
-    # 그림 — 아나모픽 페인트 배열 + 외곽 라인
+    # painting - the anamorphic paint array + border line
     # -------------------------------------------------------------------
     def build_painting(M):
         il = PARAMS["illusion"]
@@ -974,7 +979,7 @@ def main():
               f"× {il['width']:.2f} m · 가시 단 {len(s['steps'])}/{il['nsteps']}")
         if not pa["border"]:
             return
-        # 외곽 백색 라인 (그림 경계 — 레퍼런스의 분필 테두리)
+        # white border line (painting boundary - the chalk edging in the reference)
         bmtl = mtl_of("border", 0, 1.0)
         hw = il["width"] / 2.0
         w = pa["border_w"]
@@ -992,9 +997,9 @@ def main():
                          (cx - sx / 2.0, cy + sy / 2.0)], z, bmtl)
 
     # -------------------------------------------------------------------
-    # [W2] ground_kit — P1 plaza_granite. **그림 밖**(x ≤ −1.6)에만 놓는다.
-    #   낙차 에지 0 → GT-E1′/GT-E2 는 공허참. 판정은 B12 두 불변식
-    #   (`_inv_n3_painting` 면 요소 ∩ 그림 = ∅ · `_inv_hidden_illusion`)이 한다.
+    # [W2] ground_kit - P1 plaza_granite. Placed **outside the painting** only (x <= −1.6).
+    #   0 drop edges -> GT-E1′/GT-E2 are vacuously true. The verdict rests on the two B12
+    #   invariants (`_inv_n3_painting` surface elements ∩ painting = ∅ · `_inv_hidden_illusion`).
     # -------------------------------------------------------------------
     def build_ground_kit(M):
         (_tag, gp), = ground_plans()
@@ -1013,7 +1018,7 @@ def main():
         return res
 
     # -------------------------------------------------------------------
-    # 드레싱 — 가로등(실그림자 단서)·화단·벤치·볼라드·상가 건물
+    # dressing - streetlight (real-shadow cue)·planters·benches·bollards·retail buildings
     # -------------------------------------------------------------------
     def build_dressing(M):
         lp = PARAMS["lamp"]
@@ -1036,14 +1041,14 @@ def main():
         for name, bx, by, byaw in _benches:
             sc.build_bench(stage, f"{ROOT}/Bench_{name}", bx, by, 0.0,
                            M["wood"], yaw=byaw)
-        # 볼라드 [v5.1 §2] — 몰 진입부 횡단 1열(중앙 4.8 m 소방 통로 개방)
+        # bollards [v5.1 §2] - one row across the mall entrance (central 4.8 m left open as a fire lane)
         bo = PARAMS["bollard"]
         for name, bx, by in _bollards:
-            # [W2 §12.4] 이 씬은 **점자블록 미설치**다 — 은닉 착시 4씬
-            #   (14·20·21·N3)은 "상시 고대비 단서 금지"가 정체성이고,
-            #   §12.4 의 "볼라드 전면 유지 4씬" 목록에도 N3 은 없다.
-            #   `ground_kit._inv_hidden_illusion` 도 이 씬의 점자블록을
-            #   B12 로 막는다 → 씬 소판도 같은 판정을 따른다.
+            # [W2 §12.4] this scene has **no tactile paving** - for the 4 hidden-illusion
+            #   scenes (14·20·21·N3) "no permanent high-contrast cue" is the identity, and
+            #   N3 is not in the §12.4 list of "4 scenes that keep bollards throughout".
+            #   `ground_kit._inv_hidden_illusion` also blocks tactile paving in this
+            #   scene via B12 -> the scene's own fittings follow the same ruling.
             bc.build_bollard_v51(stage, f"{ROOT}/Bollard_{name}", bx, by, 0.0,
                                  None, M["bollard"], M["bollard_band"],
                                  M["tactile"], front_dir=bo["front"],
@@ -1061,12 +1066,12 @@ def main():
                       pole_mtl=M["lamp"], back_mtl=M["sign"])
 
     # -------------------------------------------------------------------
-    # 상점 파사드 밴드 — "보행자 몰"을 렌더만으로 읽히게 하는 핵심 맥락.
-    #   포디엄(1층 벽) + 베이별 쇼윈도·차양·사인 밴드. 전부 |y| ≥ 8.25 이므로
-    #   그림(|y| ≤ 1.5) 폐색·카메라 매몰과 무관 [shopcheck() 검산].
-    #   그림자: 태양 az 205 → 그림자 방위 25°(+X,+Y). L(y=+10) 차양 그림자는
-    #   +Y 로, R(y=−10) 차양 그림자는 y −8.25 → −6.8 부근까지만 이동 →
-    #   그림 영역(|y| ≤ 1.5)에 닿지 않는다.
+    # shopfront band - the key context that makes "pedestrian mall" readable from the render alone.
+    #   podium (ground-floor wall) + per-bay shop window · awning · fascia band. All at |y| >= 8.25,
+    #   so unrelated to occluding the painting (|y| <= 1.5) or burying a camera [shopcheck()].
+    #   shadows: sun az 205 -> shadow bearing 25 deg (+X,+Y). The L (y=+10) awning shadow goes
+    #   toward +Y, and the R (y=−10) awning shadow reaches only from y −8.25 to about −6.8 ->
+    #   neither touches the painting area (|y| <= 1.5).
     # -------------------------------------------------------------------
     def build_shopfronts(M):
         sp = PARAMS["shop"]
@@ -1075,14 +1080,14 @@ def main():
         for fd in PARAMS["shop_facades"]:
             fy, dr = float(fd["y"]), float(fd["dir"])
             base = f"{ROOT}/Shop_{fd['name']}"
-            # 포디엄(1층 벽) — 건물 1층 창을 완전히 내포(Z-파이팅 회피).
-            #   셸 안쪽으로 podium_embed 만큼 물려 배면 동일평면도 제거한다.
+            # podium (ground-floor wall) - fully encloses the ground-floor windows (avoids Z-fighting).
+            #   pushed into the shell by podium_embed, which also removes back-face coplanarity.
             py = fy + dr * (sp["podium_t"] / 2.0 - sp["podium_embed"])
             BOX(f"{base}/Podium",
                 ((sp["x0"] + sp["x1"]) / 2.0, py, sp["podium_h"] / 2.0),
                 (sp["x1"] - sp["x0"], sp["podium_t"], sp["podium_h"]),
                 M["podium"], col=True)
-            face = fy + dr * (sp["podium_t"] - sp["podium_embed"])   # 전면 y
+            face = fy + dr * (sp["podium_t"] - sp["podium_embed"])   # front y
             for i in range(nbay):
                 xc = sp["x0"] + (i + 0.5) * sp["bay"]
                 BOX(f"{base}/Glass_{i}",
@@ -1100,16 +1105,16 @@ def main():
                     (bw, sp["fascia_t"], sp["fascia_z1"] - sp["fascia_z0"]),
                     M["fascia_a"] if i % 2 == 0 else M["fascia_b"])
 
-    # ── 씬 조립 ──
+    # ── scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
     M = setup_materials()
     build_plaza(M)
     if cfg["hazard_stairs"]:
         build_painting(M)
-    build_joints(M)                              # 그림 위를 관통 — 그림 뒤에 배치
+    build_joints(M)                              # runs over the painting - built after it
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
-    build_ground_kit(M)                          # [W2] 지면 요소(그림 밖 전용)
+    build_ground_kit(M)                          # [W2] ground elements (outside the painting only)
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])
@@ -1205,6 +1210,6 @@ def main():
 
 if __name__ == "__main__":
     if os.environ.get("NEGOBS_GEOCHECK", "0") == "1":
-        geocheck()                     # Isaac 부팅 없이 아나모픽·드레싱 검산
+        geocheck()                     # anamorphic and dressing checks without booting Isaac
     else:
         main()

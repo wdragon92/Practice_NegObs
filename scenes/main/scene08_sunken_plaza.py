@@ -1,74 +1,77 @@
 # -*- coding: utf-8 -*-
 """
-scene08_sunken_plaza.py — NegObs 인공씬 8호 (v5 R3): 도심 선큰 광장 (Isaac Sim 4.5)
+scene08_sunken_plaza.py — NegObs synthetic scene 8 (v5 R3): downtown sunken plaza (Isaac Sim 4.5)
 
-유형    : 사방 하강 피트(구 T11 스텝웰 기하축 계승) — 무대만 '지하상가 연결
-          선큰 가든'으로 교체. 사양서: Docs/briefs/multi_scene_brief_v5.md §R3
-          (근거: Docs/scene_redesign_v5_proposal.md 처분표 08=교체)
-공통    : scene_common.py (build_straight_stairs/build_rot_group/build_planter/
+Type    : pit descending on all sides (inherits the old T11 stepwell geometry axis) — only the
+          stage is swapped for a 'sunken garden linked to an underground mall'. Spec:
+          Docs/briefs/multi_scene_brief_v5.md §R3
+          (basis: Docs/scene_redesign_v5_proposal.md disposition table 08=replace)
+Shared  : scene_common.py (build_straight_stairs/build_rot_group/build_planter/
           build_railing_line/build_sign/build_tactile) ·
-          구 scene08(scenes/archive_v3/scene08_stepwell_lattice.py)의
-          **개구 4박스 + 사광 60°** 사용례를 승계.
+          inherits the **4-box opening + 60° raking light** usage from the old
+          scene08 (scenes/archive_v3/scene08_stepwell_lattice.py).
 
-위험 본질
-  상부 보행 광장(인터로킹 40×30) 한복판에 12×9 사각 피트(깊이 4.498)가 뚫려
-  있다. 로봇 눈높이(h0.3)에서 피트는 **원리적으로 전부 은닉**된다 —
-  근측 연단(x=0, z=0)을 스치는 시선이 피트 바닥(−4.498)에 닿는 지점은
-  x = 4.498·d/0.3 = 15·d (d=2 m 에서 30 m) 로, 피트 동단 12 m 를 한참 넘는다.
-  즉 h0.3 에서는 원측 광장(x≥12.4, z=0)이 근측 지면과 **연속된 평면**으로
-  읽히고 그 사이 4.5 m 공동은 화면에서 사라진다(negative obstacle).
-  피트 둘레는 파라펫(h 1.0 — 현행 규정 1.1 미달)로 방호되지만, 접근측
-  파라펫 **1.8 m 구간이 공사로 철거**되고 임시 표지(안전봉 2 + 테이프 1선)만
-  남아 있다 → 그 개방 구간을 통해 무방호 낙차가 그대로 노출된다.
+Hazard
+  A 12×9 rectangular pit (depth 4.498) is cut into the middle of the upper pedestrian plaza
+  (interlocking block, 40×30). At robot eye height (h0.3) the pit is **hidden in principle,
+  entirely** — the sight line grazing the near rim (x=0, z=0) reaches the pit floor (−4.498)
+  at x = 4.498·d/0.3 = 15·d (30 m at d=2 m), far beyond the pit's east edge at 12 m.
+  So at h0.3 the far plaza (x≥12.4, z=0) reads as a **plane continuous** with the near
+  ground and the 4.5 m cavity between them vanishes from the frame (negative obstacle).
+  The pit perimeter is guarded by a parapet (h 1.0 — below the current statutory 1.1), but
+  on the approach side **a 1.8 m run of parapet has been demolished for works** and only a
+  temporary marking (2 safety posts + 1 tape line) remains → through that open gap the
+  unguarded drop is exposed as it is.
 
-목표
-  ① 광장 슬래브 4박스 + 지반 프레임 4박스(공동 위를 어떤 평면도 덮지 않음)
-  ② 남·북 광폭 계단(폭 4, riser 0.173 × 26 = 4.498) 2련 — 회전그룹 ±90°
-  ③ 피트 바닥 코트(화단 2·벤치 2) + 지하상가 유리 파사드(약발광)
-  ④ 접근측 파라펫 개방 구간 + 임시 표지(안전봉·테이프)
-  ⑤ 개구 둘레 점자블록(cue_tactile 기본 True — 도시 관행 씬)
+Goal
+  (1) plaza slab 4 boxes + ground frame 4 boxes (no plane covers the cavity)
+  (2) south·north wide stairs (width 4, riser 0.173 × 26 = 4.498), 2 flights — rotation groups ±90°
+  (3) pit floor court (2 planters·2 benches) + underground mall glass facade (weakly emissive)
+  (4) parapet open gap on the approach side + temporary marking (posts·tape)
+  (5) tactile paving around the opening (cue_tactile defaults True — urban-practice scene)
 
-[v5 브리프 대비 의도적 편차 1건]
-  브리프 §R3 는 개방 구간을 "동측 에지"로 지정했으나 **접근측(서측 x=0)** 으로
-  옮겼다. 사유: (a) v5 원칙 "grid h0.3 판정 1순위 — 위험 은닉이 로봇 시점에서
-  성립하는지"를 만족하려면 개방 구간이 그리드 축(+X, y=0) 위에 있어야 한다.
-  (b) 접근측 에지를 파라펫으로 완전히 막으면 h0.3/h0.9 그리드 9컷 중 6컷이
-  파라펫 벽면으로 채워져 판정 불능이 된다(scene19 d5 암흑 전례와 동형).
-  동측 에지에는 파라펫이 온전히 남아 대조군 역할을 한다.
+[1 deliberate deviation from the v5 brief]
+  Brief §R3 places the open gap on the "east edge", but it was moved to the **approach side
+  (west, x=0)**. Reasons: (a) to satisfy the v5 principle "grid h0.3 judgment first — does the
+  hazard concealment hold from the robot viewpoint", the open gap must sit on the grid axis
+  (+X, y=0). (b) sealing the approach edge with parapet would fill 6 of the 9 h0.3/h0.9 grid
+  shots with parapet wall and make judgment impossible (the same failure as the scene19 d5
+  blackout). The east edge keeps its parapet intact and serves as the control.
 
-보행 연속성 자가 검증표 (진입 → 하강 → 코트 → 상행 → 탈출; 전 구간 단차 ≤ 0.173)
-  ┌ # 구간            좌표(x, y, z)                  단차/판정
-  │ 0 광장 접근        (−10.0, 0.0, 0.00)            평탄(인터로킹)
-  │ 1 점자블록 띠      (−0.75, 0.0, 0.004)           0.004 (경고 단서)
-  │ 2 개방 구간 연단   ( 0.00, 0.0, 0.00)            ← **낙차 4.498 무방호**
-  │ 3 남측 계단 머리   ( 2.00, −4.70, 0.00)          평탄(문턱 슬래브)
-  │ 4 1단 디딤         ( 2.00, −4.35, −0.173)        0.173
-  │ 5 25단 디딤        ( 2.00, 2.85, −4.325)         0.173 × 24
-  │ 6 피트 바닥        ( 2.00, 3.30, −4.498)         0.173 (26번째 라이저)
-  │ 7 코트 진입        ( 4.20, 3.60, −4.498)         평탄 (x=4 경계 개방)
-  │ 8 코트 중앙        ( 6.00, 0.00, −4.498)         평탄 (화단·벤치·파사드)
-  │ 9 북측 계단 하부   ( 10.00, −3.60, −4.498)       평탄 (x=8 경계 개방)
-  │10 25단 디딤        ( 10.00, −2.85, −4.325)       0.173 (상행)
-  │11 북측 계단 머리   ( 10.00, 4.70, 0.00)          0.173 × 25
-  └12 광장 탈출        ( 10.00, 8.00, 0.00)          평탄
-  * 남측 계단 폭 4(x 0..4)·북측 계단 폭 4(x 8..12) — 코트 x 4..8(4×9)이 상시 개방.
-  * 계단 코트측 측면(x=4 / x=8)은 계단 하강선을 따르는 파이프 난간(cue_railing).
+Walk-continuity self-check table (enter → descend → court → ascend → exit; every step <= 0.173)
+  ┌ # section           coordinates (x, y, z)         step / judgment
+  │ 0 plaza approach    (−10.0, 0.0, 0.00)            flat (interlocking)
+  │ 1 tactile band      (−0.75, 0.0, 0.004)           0.004 (warning cue)
+  │ 2 open-gap rim      ( 0.00, 0.0, 0.00)            ← **drop 4.498, unguarded**
+  │ 3 south stair head  ( 2.00, −4.70, 0.00)          flat (threshold slab)
+  │ 4 tread 1           ( 2.00, −4.35, −0.173)        0.173
+  │ 5 tread 25          ( 2.00, 2.85, −4.325)         0.173 × 24
+  │ 6 pit floor         ( 2.00, 3.30, −4.498)         0.173 (26th riser)
+  │ 7 court entry       ( 4.20, 3.60, −4.498)         flat (x=4 boundary open)
+  │ 8 court centre      ( 6.00, 0.00, −4.498)         flat (planters·benches·facade)
+  │ 9 north stair foot  ( 10.00, −3.60, −4.498)       flat (x=8 boundary open)
+  │10 tread 25          ( 10.00, −2.85, −4.325)       0.173 (ascending)
+  │11 north stair head  ( 10.00, 4.70, 0.00)          0.173 × 25
+  └12 plaza exit        ( 10.00, 8.00, 0.00)          flat
+  * south stair width 4 (x 0..4) · north stair width 4 (x 8..12) — the court x 4..8 (4×9) is always open.
+  * the court-side flank of each stair (x=4 / x=8) carries a pipe railing following the stair descent line (cue_railing).
 
-실행 (GUI 룩 체크 — 기본):
+Run (GUI look check — default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
     export PYTHONNOUSERSITE=1
     python scene08_sunken_plaza.py
 
-자동 캡처 모드 (headless 검증용):
+Auto capture mode (for headless verification):
     NEGOBS_CAPTURE=1 python scene08_sunken_plaza.py
-스모크(부팅 전 기하·조명·카메라 자기검증·조기종료):
+Smoke (pre-boot geometry·lighting·camera self-check·early exit):
     NEGOBS_SMOKE=1 python scene08_sunken_plaza.py
 
-좌표계: Z-up, m, 진행축 +X(광장 접근 → 피트). **낙차 시작 모서리 x=0.**
-  피트 개구 x 0..12, y −4.5..4.5. 광장 상면 z=0, 피트 바닥 z=−4.498.
-  태양: SUN_AZ_OFFSET=60(사광, 구 scene08 승계) → 광선이 +Y 상공에서 −Y로
-  진행하므로 피트 **남측 절반이 직사, 북측이 암부** (스모크에서 수치 검산).
+Coordinates: Z-up, m, travel axis +X (plaza approach → pit). **Drop start edge x=0.**
+  Pit opening x 0..12, y −4.5..4.5. Plaza top z=0, pit floor z=−4.498.
+  Sun: SUN_AZ_OFFSET=60 (raking light, inherited from the old scene08) → rays travel from
+  above +Y toward −Y, so the **pit's south half is in direct sun and the north half in
+  shadow** (verified numerically in the smoke run).
 """
 
 import os
@@ -84,16 +87,16 @@ import ground_kit as gk
 
 
 # ===========================================================================
-# [A] SCENE_CONFIG — 7키. hazard_stairs 만 위험 기하 토글(피트 ↔ 평지).
+# [A] SCENE_CONFIG - 7 keys. Only hazard_stairs toggles the hazard geometry (pit <-> flat).
 # ===========================================================================
 SCENE_CONFIG = {
-    "hazard_stairs":      True,    # False → 피트/계단/코트를 z=0 평지로 (기하 토글 유일 예외)
-    "cue_railing":        True,    # 피트 둘레 파라펫(h1.0) + 계단 측면 난간. 개방 1.8 m 구간은 상시 결손
-    "cue_tactile":        False,  # [v5.2 사용자] 점자블록 현실에선 드묾 — 기본 OFF(소거 실험용 경로 유지)    # [v5 공통] 도시 관행 씬 — 개구 둘레 점자블록 띠
-    "cue_material_break": True,    # 광장 인터로킹 vs 피트 콘크리트/화강 대비. False → 계단도 인터로킹
-    "cue_sign":           True,    # [v5.2 사용자] 임의 경고 팻말 제거 — 임시 표지 + sign_exit(북측)
-    "cue_scene_dressing": True,    # 화단·가로수·벤치·가로등·볼라드·원경 건물
-    "cue_nosing":         False,   # True → 계단 단코 논슬립 띠
+    "hazard_stairs":      True,    # False -> pit/stairs/court become z=0 flat ground (the sole geometry-toggle exception)
+    "cue_railing":        True,    # parapet around the pit (h1.0) + stair flank railing. The 1.8 m open gap is always missing
+    "cue_tactile":        False,  # [v5.2 user] tactile paving is rare in reality - default OFF (ablation path kept)    # [v5 shared] urban-practice scene - tactile band around the opening
+    "cue_material_break": True,    # plaza interlocking vs pit concrete/granite contrast. False -> stairs are interlocking too
+    "cue_sign":           True,    # [v5.2 user] arbitrary warning signs removed - temporary marking + sign_exit (north)
+    "cue_scene_dressing": True,    # planters·street trees·benches·street lights·bollards·distant buildings
+    "cue_nosing":         False,   # True -> anti-slip strip on the stair nosing
 }
 
 
@@ -101,36 +104,36 @@ SCENE_CONFIG = {
 # [B] PARAMS
 # ===========================================================================
 _RISER = 0.173
-_NRISER = 26                       # 총 라이저 수 → 낙차 26 × 0.173 = 4.498
+_NRISER = 26                       # total riser count -> drop 26 × 0.173 = 4.498
 _FLOOR_Z = -round(_RISER * _NRISER, 4)          # -4.498
 
 PARAMS = dict(
-    # --- 피트 개구 (12 × 9, 깊이 4.498) ---
-    #     ring_t: 개구 테두리 콘크리트 코핑 겸 피트 옹벽 두께. 광장 슬래브는
-    #     이 링 **바깥**에서 끝난다 → 링 상면과 슬래브 상면이 겹치지 않아
-    #     동일평면 Z파이팅이 원천 차단된다(§A-8).
+    # --- pit opening (12 × 9, depth 4.498) ---
+    #     ring_t: thickness of the opening's concrete coping, which doubles as the pit
+    #     retaining wall. The plaza slab ends **outside** this ring -> ring top and slab top
+    #     never overlap, so coplanar Z-fighting is ruled out by construction (§A-8).
     pit=dict(x0=0.0, x1=12.0, y0=-4.5, y1=4.5, floor_z=_FLOOR_Z,
              ring_t=0.4, floor_thick=0.6, ring_bot=-5.0),
-    # --- 광장 슬래브 40 × 30 (개구를 4박스로 비움) ---
+    # --- plaza slab 40 × 30 (opening left empty by 4 boxes) ---
     plaza=dict(x0=-22.0, x1=18.0, y0=-15.0, y1=15.0, z_top=0.0, thick=0.8),
-    # --- 주변 지반 프레임(차도 아스팔트, 광장보다 0.15 낮음) 4박스 ---
+    # --- surrounding ground frame (roadway asphalt, 0.15 below the plaza), 4 boxes ---
     ground=dict(x0=-45.0, x1=45.0, y0=-45.0, y1=45.0, z_top=-0.15, thick=1.0),
-    # --- 남·북 광폭 계단 (폭 4, riser 0.173 × 26, tread 0.30) ---
-    #     n_geom = 25 : 26번째 라이저는 **피트 바닥 자체**. 26개를 다 세우면
-    #     마지막 단 상면(−4.498)이 바닥 슬래브 상면과 동일평면 → Z파이팅.
+    # --- south·north wide stairs (width 4, riser 0.173 × 26, tread 0.30) ---
+    #     n_geom = 25 : the 26th riser is **the pit floor itself**. Building all 26 would put
+    #     the last step top (−4.498) coplanar with the floor slab top -> Z-fighting.
     stair=dict(riser=_RISER, tread=0.30, n_riser=_NRISER, n_geom=_NRISER - 1,
                width=4.0, base_z=-4.9,
-               south_x0=0.0,        # 남측 계단 x 0..4  (y −4.5 → 3.0 하강)
-               north_x0=8.0),       # 북측 계단 x 8..12 (y +4.5 → −3.0 하강)
-    # --- 파라펫(h 1.0 = 현행 규정 1.1 미달 — "규정 미달의 현실") ---
-    #     gap: 접근측(서측 x=0) 철거 구간 1.8 m. 개방 구간만 무방호.
-    #     [v6 C-3] "무텍스처 순백 판 = 스티로폼" 지적 → 재질만 교체한다.
-    #       h·t·gap·ext(= 기하와 카메라 구도)는 **판정 보존 권고에 따라 불변**.
-    #       cope_h 는 h 안쪽에서 잘라 쓴다(몸통 h−cope_h + 코핑 cope_h = h).
+               south_x0=0.0,        # south stair x 0..4  (descends y −4.5 -> 3.0)
+               north_x0=8.0),       # north stair x 8..12 (descends y +4.5 -> −3.0)
+    # --- parapet (h 1.0 = below the current statutory 1.1 - "sub-code reality") ---
+    #     gap: 1.8 m demolished run on the approach side (west, x=0). Only that gap is unguarded.
+    #     [v6 C-3] the "untextured pure-white plate = styrofoam" note -> only the material is replaced.
+    #       h·t·gap·ext (= geometry and camera framing) are **unchanged, per the judgment-preservation advice**.
+    #       cope_h is carved out of h (body h−cope_h + coping cope_h = h).
     parapet=dict(h=1.0, t=0.25, gap_y0=-0.9, gap_y1=0.9, ext=0.25,
-                 cope_h=0.08, cope_over=0.03,     # 코핑(갓돌) — 상단 0.08 m
-                 grime_h=0.24, grime_over=0.008),  # 기단 오염 밴드 — 하단 0.24 m
-    # --- 개구 둘레 점자블록 띠 (파라펫 바깥 0.05 여유, 폭 0.6) ---
+                 cope_h=0.08, cope_over=0.03,     # coping (capstone) - top 0.08 m
+                 grime_h=0.24, grime_over=0.008),  # base grime band - bottom 0.24 m
+    # --- tactile paving band around the opening (0.05 clear outside the parapet, width 0.6) ---
     #  [W2-D Sec.12.4] scene08 = registered site `opening_ring`, p=0.51,
     #  statutory trigger "perimeter of an opening". It is **kept on the scene's
     #  own `build_tactile_ring` path** exactly as Sec.12.4 directs, so no
@@ -161,26 +164,26 @@ PARAMS = dict(
         #  mid-distance is only 0.43 m (d2), 0.81 m (d5/d10), so a patch
         #  offset by ~1 m falls out of frame and scores nothing [calc].
         patches=((-1.25, 0.20), (-3.60, -0.30), (-8.60, 0.40)),
-        # Sec.5.2 "gully mandatory at the sunken low point" [시방]. The court
+        # Sec.5.2 "gully mandatory at the sunken low point" [spec]. The court
         # floor is a different slab at z=-4.498, so it needs its own plan.
         pit_region=(2.0, -3.0, 10.0, 3.0),
         pit_gully=(6.0, -2.0),
         seed=8,
     ),
-    # --- 지하상가 유리 파사드 (피트 북벽 y=4.5, x 4..8) — 약발광 ---
-    #     북벽 내면 법선 −Y = 태양(+Y 상공) 반대 → 상시 암부 → 약발광이 읽힌다.
+    # --- underground mall glass facade (pit north wall y=4.5, x 4..8) - weakly emissive ---
+    #     the north wall inner normal −Y is opposite the sun (+Y overhead) -> always in shadow -> the weak emission reads.
     facade=dict(x0=4.0, x1=8.0, y=4.5, z0=-4.40, z1=-1.70, panels=6,
                 glass_t=0.06, mull_w=0.09, mull_t=0.10, sill_h=0.18,
                 emis=(0.86, 0.90, 0.82), emis_int=180.0),
-    # --- 피트 바닥 코트 드레싱 ---
+    # --- pit floor court dressing ---
     court_planters=[(6.0, -2.6), (6.0, 2.6)],
     court_planter=dict(size=2.4, curb_h=0.42),
     court_benches=[(4.85, -0.7, 90.0), (7.15, 0.7, 90.0)],
-    # --- 상부 광장 드레싱 ---
-    #     접근 회랑(x −22..0, |y| ≤ 1.5)은 **완전 비움** — 그리드 카메라 축.
-    gap_planters=[(-2.6, -3.0), (-2.6, 3.0)],       # 개방 구간 좌우(가림 요소)
+    # --- upper plaza dressing ---
+    #     the approach corridor (x −22..0, |y| <= 1.5) is **left completely empty** - it is the grid camera axis.
+    gap_planters=[(-2.6, -3.0), (-2.6, 3.0)],       # flanking the open gap (occluding elements)
     plaza_planters=[(-12.0, -10.5), (-12.0, 10.5),
-                    (15.0, -10.5), (15.0, 10.5)],   # 가로수 화단
+                    (15.0, -10.5), (15.0, 10.5)],   # street tree planters
     plaza_planter=dict(size=3.0),
     plaza_benches=[(-8.0, -7.0, 0.0), (-8.0, 7.0, 180.0),
                    (14.5, -6.0, 0.0), (14.5, 6.0, 180.0)],
@@ -189,21 +192,21 @@ PARAMS = dict(
                      head=0.26),
     bollards=[(-18.0, -2.4), (-18.0, 0.0), (-18.0, 2.4),
               (-18.0, -4.8), (-18.0, 4.8)],
-    # --- 임시 표지(개방 구간) : 안전봉 2 + 경고 테이프 1선 ---
-    #     [v6 C-6] 구 사양은 테이프가 두께 0.02 솔리드 각재라 **차단기 붐**으로
-    #     읽혔고, 안전봉은 무늬 없는 주황 단색이었다. → 테이프는 두께 4 mm
-    #     리본 + 처짐(양단 안전봉 결속), 안전봉은 적·백 교대 5밴드.
-    #     x·post_r·post_h·배치는 불변(기하·카메라 보존).
+    # --- temporary marking (open gap) : 2 safety posts + 1 warning tape line ---
+    #     [v6 C-6] in the old spec the tape was a 0.02-thick solid bar, so it read as a
+    #     **barrier boom**, and the safety posts were plain orange. -> the tape becomes a
+    #     4 mm ribbon with sag (tied to the posts at both ends), the posts get 5 alternating red·white bands.
+    #     x·post_r·post_h·placement are unchanged (geometry·camera preserved).
     tempbar=dict(x=-0.72, post_r=0.045, post_h=1.0,
                  nband=5, band_ov=1.02,
                  tape=dict(z_end=0.85, sag=0.11, nseg=8, w=0.09, t=0.004,
                            tie_h=0.05),
-                 post_color=(0.60, 0.14, 0.10),      # 적
-                 post_color_b=(0.78, 0.78, 0.75),    # 백(순백 <0.8 규약)
+                 post_color=(0.60, 0.14, 0.10),      # red
+                 post_color_b=(0.78, 0.78, 0.75),    # white (pure-white <0.8 convention)
                  tape_color=(0.75, 0.62, 0.10)),
-    # --- 사인 (cue_sign) --- [v5.2 사용자] 임의 경고 팻말 제거(fall·step)
+    # --- signs (cue_sign) --- [v5.2 user] arbitrary warning signs removed (fall·step)
     sign_exit=dict(cx=9.20, cy=5.75, yaw=90.0, w=0.62, h=0.62, pole_h=2.2),
-    # --- 원경(지평 폐쇄) : 동측 3동(주 카메라축 정면) + 남·북 2동 ---
+    # --- distant view (horizon closure) : 3 east buildings (head-on to the main camera axis) + 2 south·north ---
     far_buildings=dict(
         E1=dict(x0=24.0, x1=34.0, y0=-26.0, y1=-8.0, h=26.0, floors=8,
                 axis="x", facade_x=24.0, face_dir=-1.0, base_z=-0.15),
@@ -217,24 +220,24 @@ PARAMS = dict(
                 axis="y", facade_y=24.0, face_dir=-1.0, base_z=-0.15),
     ),
     window=dict(w=1.3, h=1.7, inset=0.15, col_step=2.8, margin=2.2),
-    # 차도 차선(지반 프레임 위) — "도심" 판독 보강
+    # roadway lane markings (on the ground frame) - reinforces the "downtown" reading
     road_lines=[dict(x0=-45.0, x1=45.0, y=-30.0), dict(x0=-45.0, x1=45.0, y=30.0)],
 
     material=dict(
-        # texture_scale = 타일 물리크기[m]. 인터로킹 블록 텍스처는 4K 패치가
-        # 대략 1.5 m 대역을 덮는다고 보고 1.5 로 둔다(과반복 방지).
+        # texture_scale = physical tile size [m]. The interlocking block texture's 4K patch is
+        # taken to cover roughly a 1.5 m span, so 1.5 is used (avoids over-repetition).
         scale=dict(paving_interlock=1.5, concrete_wall=2.0, concrete_floor=1.0,
                    granite_dark=1.2, grass=1.4, tactile=0.3),
         grass_tint=(0.55, 0.68, 0.42),
-        # sRGB 감마 규칙(§A-1): "어두운 색"은 0.02~0.06 대역.
+        # sRGB gamma rule (§A-1): a "dark colour" lives in the 0.02~0.06 band.
         asphalt_color=(0.045, 0.045, 0.050), asphalt_rough=0.88,
         paint_color=(0.72, 0.72, 0.68), paint_rough=0.6,
-        # [v6 C-3] 파라펫 = 상수색 단판 → **콘크리트 텍스처(diff+nor+rough)**.
-        #   틴트로 알베도를 0.55~0.65 대역에 묶는다(순백 >0.8 금지 §4).
+        # [v6 C-3] parapet = flat constant-colour panel -> **concrete texture (diff+nor+rough)**.
+        #   The tint pins albedo to the 0.55~0.65 band (pure white >0.8 forbidden, §4).
         parapet_color=(0.62, 0.61, 0.58), parapet_rough=0.65,
-        parapet_tint=(0.80, 0.79, 0.76),      # 콘크리트 diff × 틴트 → ≈0.58
-        cope_tint=(0.70, 0.69, 0.67),         # 코핑(갓돌) — 몸통보다 한 톤 낮게
-        grime_color=(0.24, 0.235, 0.225), grime_rough=0.82,   # 기단 오염 밴드
+        parapet_tint=(0.80, 0.79, 0.76),      # concrete diff x tint -> ~0.58
+        cope_tint=(0.70, 0.69, 0.67),         # coping (capstone) - one tone below the body
+        grime_color=(0.24, 0.235, 0.225), grime_rough=0.82,   # base grime band
         rail_color=(0.80, 0.82, 0.85), rail_metallic=0.9, rail_rough=0.35,
         wood_color=(0.30, 0.20, 0.12), wood_rough=0.85,
         bollard_color=(0.33, 0.33, 0.36), bollard_metallic=0.4,
@@ -256,10 +259,10 @@ PARAMS = dict(
         hdri_sun_rotz_offset=233.5,
         dome_rotation_step=15.0,
     ),
-    # 표준 171.5 → 60.0 (구 scene08 승계, 브리프 v5 §R3 명시). 깊이 4.5 의 좁은
-    #   피트는 정오 표준광에서 내부가 통째로 암부가 된다. 사광으로 피트 남측
-    #   절반·남측 계단 하부에 직사를 넣고 북측(유리 파사드측)을 암부로 남겨
-    #   명암 대비를 만든다. 태양고도(elev)는 정오 유지.
+    # standard 171.5 -> 60.0 (inherited from the old scene08, stated in brief v5 §R3). A narrow
+    #   pit 4.5 deep goes entirely dark inside under standard noon light. Raking light puts
+    #   direct sun on the pit's south half and the lower south stair while leaving the north
+    #   side (the glass facade side) dark, creating tonal contrast. Sun elevation (elev) stays at noon.
     SUN_AZ_OFFSET=60.0,
 
     render=dict(pt_total_spp=512, pt_max_bounces=8),
@@ -286,25 +289,25 @@ if _sc_ov:
 
 
 # ===========================================================================
-# [C] 경로 + 텍스처 역할
+# [C] paths + texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "scene08")
 ASSET_ROLES = ["paving_interlock", "concrete_wall", "concrete_floor",
                "granite_dark", "grass", "tactile",
-               "sign_exit",     # [v5.2 사용자] 임의 경고 팻말 제거
+               "sign_exit",     # [v5.2 user] arbitrary warning signs removed
                "hdri", "mdl"]
 
 
 # ===========================================================================
-# [C2] 기하 헬퍼 (스모크·조립 공용 — 좌표 정의의 단일 출처)
+# [C2] geometry helpers (shared by smoke·assembly - the single source of coordinate definitions)
 # ===========================================================================
 def _stair_local():
-    """회전그룹 로컬 좌표에서의 계단 정의.
-    남측: rot +90° @ (0,0) → world(x, y) = (−ly, lx)
-    북측: rot −90° @ (0,0) → world(x, y) = ( ly, −lx)
-    두 계단 모두 로컬 +X 하강(빌더 관례)이며 로컬 x0 = pit.y0 = −4.5.
-    반환: dict(x0, run, drop)"""
+    """Stair definition in rotation-group local coordinates.
+    south: rot +90° @ (0,0) → world(x, y) = (−ly, lx)
+    north: rot −90° @ (0,0) → world(x, y) = ( ly, −lx)
+    Both stairs descend along local +X (builder convention), with local x0 = pit.y0 = −4.5.
+    Returns: dict(x0, run, drop)"""
     st = PARAMS["stair"]
     return dict(x0=PARAMS["pit"]["y0"],
                 run=st["n_geom"] * st["tread"],
@@ -312,7 +315,7 @@ def _stair_local():
 
 
 def _stair_ground_fn():
-    """로컬 x → 계단 상면 z (난간 포스트 착지용 계단식 콜백)."""
+    """Local x → stair top-face z (stepped callback for landing the railing posts)."""
     st = PARAMS["stair"]
     L = _stair_local()
     x_top, run, n = L["x0"], L["run"], st["n_geom"]
@@ -328,11 +331,11 @@ def _stair_ground_fn():
 
 
 def _sun_dir():
-    """DistantLight 진행 방향 d(월드). setup_lighting 의 op 순서
-    (rotateZ(rz) → rotateX(90−elev), 기본 방향 −Z)를 그대로 역산한다.
+    """DistantLight travel direction d (world). Inverts setup_lighting's op order
+    (rotateZ(rz) → rotateX(90−elev), default direction −Z) exactly as applied.
       d0 = (0,0,−1) → rotX(rx): (0, sin rx, −cos rx) → rotZ(rz):
       (−sin rx · sin rz, sin rx · cos rz, −cos rx)
-    태양 위치 방향은 −d."""
+    The direction toward the sun is −d."""
     lp = PARAMS["light"]
     rz = math.radians(lp["noon_dome_rot"] + PARAMS["SUN_AZ_OFFSET"]
                       + lp["hdri_sun_rotz_offset"])
@@ -343,13 +346,13 @@ def _sun_dir():
 
 
 def _obstacle_boxes():
-    """카메라 충돌 검사용 장애물 AABB 목록 (name, x0,x1, y0,y1, z0,z1).
-    [브리프 v5 지시] 그리드/미장센 카메라가 파라펫·화단과 충돌하지 않는지
-    좌표로 검산한다(scene19 d5 암흑 전례)."""
+    """Obstacle AABB list for camera collision checks (name, x0,x1, y0,y1, z0,z1).
+    [brief v5 instruction] Verify by coordinates that the grid/mise-en-scene cameras
+    do not collide with a parapet·planter (the scene19 d5 blackout precedent)."""
     p = PARAMS["pit"]
     pr = PARAMS["parapet"]
     boxes = []
-    # 파라펫 4변 (개방 구간 제외)
+    # parapet, 4 sides (open gap excluded)
     for tag, (x0, x1, y0, y1) in (
             ("Parapet_W_S", (p["x0"] - pr["t"], p["x0"],
                              p["y0"] - pr["ext"], pr["gap_y0"])),
@@ -360,27 +363,27 @@ def _obstacle_boxes():
             ("Parapet_S", (4.0, p["x1"], p["y0"] - pr["ext"], p["y0"])),
             ("Parapet_N", (p["x0"], 8.0, p["y1"], p["y1"] + pr["ext"]))):
         boxes.append((tag, x0, x1, y0, y1, 0.0, pr["h"]))
-    # 화단(광장) — 경계석 상면 0.50
+    # planters (plaza) - kerb top 0.50
     ps = PARAMS["plaza_planter"]["size"] / 2.0
     for i, (cx, cy) in enumerate(PARAMS["gap_planters"]):
         boxes.append((f"GapPlanter_{i}", cx - ps, cx + ps, cy - ps, cy + ps,
                       0.0, 0.50))
     for i, (cx, cy) in enumerate(PARAMS["plaza_planters"]):
         boxes.append((f"PlazaPlanter_{i}", cx - ps, cx + ps, cy - ps, cy + ps,
-                      0.0, 3.40))          # 가로수 수관 포함
-    # 화단(코트)
+                      0.0, 3.40))          # includes the street tree canopy
+    # planters (court)
     cs = PARAMS["court_planter"]["size"] / 2.0
     for i, (cx, cy) in enumerate(PARAMS["court_planters"]):
         boxes.append((f"CourtPlanter_{i}", cx - cs, cx + cs, cy - cs, cy + cs,
                       p["floor_z"], p["floor_z"] + 0.50))
-    # 계단 솔리드 2련 (world AABB)
+    # 2 stair solids (world AABB)
     st = PARAMS["stair"]
     L = _stair_local()
     boxes.append(("Stair_S", st["south_x0"], st["south_x0"] + st["width"],
                   L["x0"], L["x0"] + L["run"], st["base_z"], 0.0))
     boxes.append(("Stair_N", st["north_x0"], st["north_x0"] + st["width"],
                   -(L["x0"] + L["run"]), -L["x0"], st["base_z"], 0.0))
-    # 광장 슬래브 4박스 (상면 아래로 카메라가 잠기는지 검사)
+    # plaza slab, 4 boxes (checks whether a camera sinks below the top face)
     pl = PARAMS["plaza"]
     for tag, x0, x1, y0, y1 in (
             ("Plaza_W", pl["x0"], p["x0"] - p["ring_t"], pl["y0"], pl["y1"]),
@@ -391,7 +394,7 @@ def _obstacle_boxes():
              p["y1"] + p["ring_t"] + 0.1, pl["y1"])):
         boxes.append((tag, x0, x1, y0, y1, pl["z_top"] - pl["thick"],
                       pl["z_top"]))
-    # 임시 안전봉·사인 지주
+    # temporary safety posts·sign poles
     tb = PARAMS["tempbar"]
     for i, gy in enumerate((pr["gap_y0"], pr["gap_y1"])):
         boxes.append((f"TempPost_{i}", tb["x"] - 0.06, tb["x"] + 0.06,
@@ -404,10 +407,10 @@ def _obstacle_boxes():
 
 
 def _solid_at(x, y, z):
-    """점 (x,y,z)를 품는 지형/구조 솔리드 이름(없으면 None).
-    카메라 eye 매몰 + **시선 차단(ray march)** 검사의 단일 출처.
-    포함: 광장 슬래브 4, 코핑 링 4(=피트 옹벽), 계단 머리 문턱 2, 피트 바닥,
-    지반 프레임 4, 남·북 계단 솔리드(회전 매핑을 역산한 계단식 상면), 파라펫."""
+    """Name of the terrain/structure solid containing point (x,y,z) (None if there is none).
+    Single source for the camera-eye burial check + the **sight-line blocking (ray march)** check.
+    Covers: plaza slab 4, coping ring 4 (= pit retaining wall), 2 stair-head thresholds, pit floor,
+    ground frame 4, south·north stair solids (stepped top face from the inverted rotation mapping), parapet."""
     p = PARAMS["pit"]
     pl = PARAMS["plaza"]
     gr = PARAMS["ground"]
@@ -416,7 +419,7 @@ def _solid_at(x, y, z):
     ox0, ox1, oy0, oy1 = p["x0"] - t, p["x1"] + t, p["y0"] - t, p["y1"] + t
     sx0, sx1 = st["south_x0"], st["south_x0"] + st["width"]
     nx0, nx1 = st["north_x0"], st["north_x0"] + st["width"]
-    # 광장 슬래브 4박스
+    # plaza slab, 4 boxes
     for tag, x0, x1, y0, y1 in (("Plaza_W", pl["x0"], ox0, pl["y0"], pl["y1"]),
                                 ("Plaza_E", ox1, pl["x1"], pl["y0"], pl["y1"]),
                                 ("Plaza_S", ox0, ox1, pl["y0"], oy0),
@@ -426,18 +429,18 @@ def _solid_at(x, y, z):
         if x0 <= x <= x1 and y0 <= y <= y1 \
                 and pl["z_top"] - pl["thick"] <= z < pl["z_top"]:
             return tag
-    # 코핑 링(= 피트 옹벽) 4박스
+    # coping ring (= pit retaining wall), 4 boxes
     for tag, x0, x1, y0, y1 in (("Ring_W", ox0, p["x0"], oy0, oy1),
                                 ("Ring_E", p["x1"], ox1, oy0, oy1),
                                 ("Ring_S", sx1, p["x1"], oy0, p["y0"]),
                                 ("Ring_N", p["x0"], nx0, p["y1"], oy1)):
         if x0 <= x <= x1 and y0 <= y <= y1 and p["ring_bot"] <= z < 0.0:
             return tag
-    # 피트 바닥 슬래브
+    # pit floor slab
     if ox0 <= x <= ox1 and oy0 <= y <= oy1 \
             and p["floor_z"] - p["floor_thick"] <= z < p["floor_z"]:
         return "PitFloor"
-    # 지반 프레임 4박스
+    # ground frame, 4 boxes
     for tag, x0, x1, y0, y1 in (("Ground_W", gr["x0"], pl["x0"], gr["y0"], gr["y1"]),
                                 ("Ground_E", pl["x1"], gr["x1"], gr["y0"], gr["y1"]),
                                 ("Ground_S", pl["x0"], pl["x1"], gr["y0"], pl["y0"]),
@@ -445,7 +448,7 @@ def _solid_at(x, y, z):
         if x0 <= x <= x1 and y0 <= y <= y1 \
                 and gr["z_top"] - gr["thick"] <= z < gr["z_top"]:
             return tag
-    # 계단 솔리드 — world y 기준 계단식 상면(회전 매핑 역산)
+    # stair solids - stepped top face in world y (rotation mapping inverted)
     L = _stair_local()
     n = st["n_geom"]
     if sx0 <= x <= sx1 and L["x0"] <= y <= L["x0"] + L["run"]:
@@ -456,7 +459,7 @@ def _solid_at(x, y, z):
         idx = min(int((-L["x0"] - y) / st["tread"]), n - 1)
         if st["base_z"] <= z < -st["riser"] * (idx + 1):
             return "Stair_N"
-    # 파라펫(개방 구간 제외) — _obstacle_boxes 와 동일 정의 재사용
+    # parapet (open gap excluded) - reuses the same definition as _obstacle_boxes
     for bn, x0, x1, y0, y1, z0, z1 in _obstacle_boxes():
         if bn.startswith("Parapet") and x0 <= x <= x1 and y0 <= y <= y1 \
                 and z0 <= z <= z1:
@@ -465,7 +468,7 @@ def _solid_at(x, y, z):
 
 
 # ===========================================================================
-# [C3] 스모크 — 부팅 전 기하·조명·카메라 자기검증 (조기종료)
+# [C3] smoke - pre-boot self-check of geometry·lighting·camera (early exit)
 # ===========================================================================
 def _smoke_report():
     p = PARAMS["pit"]
@@ -501,7 +504,7 @@ def _smoke_report():
           f"= {court*(p['y1']-p['y0']):.0f} m² → "
           f"{'OK' if court >= 3.0 else 'FAIL'}")
 
-    # ── 개구 4박스 + 지반 프레임: 공동 위를 덮는 평면이 없는지 ──
+    # ── opening 4 boxes + ground frame: is there no plane covering the cavity ──
     pl = PARAMS["plaza"]
     gr = PARAMS["ground"]
     plates = [
@@ -532,13 +535,13 @@ def _smoke_report():
               f"{z:+.3f}")
         if nm.startswith("PitFloor"):
             continue
-        # 개구(x 0..12, y −4.5..4.5)와 XY 로 겹치면서 상면이 바닥보다 높으면 = 공동을 덮음
+        # overlapping the opening (x 0..12, y −4.5..4.5) in XY with a top above the floor = covering the cavity
         if not (x1 <= p["x0"] or x0 >= p["x1"] or
                 y1 <= p["y0"] or y0 >= p["y1"]):
             bad.append(nm)
     print(f"    개구 위를 덮는 플레이트: {bad if bad else '없음 → OK'}")
 
-    # ── 파라펫·개방 구간 ──
+    # ── parapet · open gap ──
     gapw = pr["gap_y1"] - pr["gap_y0"]
     print("  [파라펫 / 개방 구간]")
     print(f"    파라펫 h {pr['h']:.2f} (현행 규정 1.1 미달 = '규정 미달의 현실')"
@@ -546,7 +549,7 @@ def _smoke_report():
     print(f"    접근측(x=0) 철거 구간 y [{pr['gap_y0']:+.1f},{pr['gap_y1']:+.1f}]"
           f" = {gapw:.1f} m → {'OK' if abs(gapw-1.8) < 1e-6 else 'FAIL'}"
           f"  (그리드 축 y=0 관통 → h0.3 판정 가능)")
-    # ── [v6 C-3/C-6] 재질 수정 검산 (기하·카메라는 판정 보존 권고에 따라 불변) ──
+    # ── [v6 C-3/C-6] material-fix numeric check (geometry·camera unchanged, per the judgment-preservation advice) ──
     _tb = PARAMS["tempbar"]
     _tp = _tb["tape"]
     print("  [v6 재질 수정 검산] — 치수 불변 확인")
@@ -565,7 +568,7 @@ def _smoke_report():
           f"[{pr['gap_y0']:+.1f},{pr['gap_y1']:+.1f}] 결속 → "
           f"{'OK(부유 없음)' if _tp['z_end'] < _tb['post_h'] else 'FAIL(봉 상단 초과)'}")
 
-    # ── grazing 은닉 검산 (연구 핵심) ──
+    # ── grazing concealment check (research core) ──
     print("  [h0.3 은닉 검산] 근측 연단(x=0,z=0) 스치는 시선이 바닥에 닿는 x")
     for d in (2.0, 5.0, 10.0):
         x_hit = abs(p["floor_z"]) * d / 0.3
@@ -575,7 +578,7 @@ def _smoke_report():
     print(f"    ⇒ h0.3 에서는 원측 광장(x≥{p['x1']+p['ring_t']:.1f}, z=0)이 "
           f"근측 지면과 연속 평면으로 읽힌다(negative obstacle 성립).")
 
-    # ── 사광 침투 검산 (scene19 d5 암흑 전례 방지) ──
+    # ── raking-light penetration check (prevents the scene19 d5 blackout precedent) ──
     d = _sun_dir()
     hxy = math.hypot(d[0], d[1])
     print("  [사광 침투 검산] SUN_AZ_OFFSET="
@@ -583,8 +586,8 @@ def _smoke_report():
     print(f"    광선 진행 d = ({d[0]:+.3f}, {d[1]:+.3f}, {d[2]:+.3f}) "
           f"→ 태양은 (−d) 방향 = "
           f"{'+Y(북) 상공' if -d[1] > 0 else '−Y(남) 상공'}")
-    reach = abs(p["floor_z"]) * hxy / abs(d[2])            # 바닥 도달 수평거리
-    dy = abs(p["floor_z"]) * d[1] / abs(d[2])              # 바닥 도달 시 Δy
+    reach = abs(p["floor_z"]) * hxy / abs(d[2])            # horizontal distance to reach the floor
+    dy = abs(p["floor_z"]) * d[1] / abs(d[2])              # Δy on reaching the floor
     y_edge = p["y1"] + dy if d[1] < 0 else p["y0"] + dy
     lit_lo, lit_hi = (p["y0"], y_edge) if d[1] < 0 else (y_edge, p["y1"])
     print(f"    림 통과 후 바닥(−{abs(p['floor_z']):.3f})까지 수평 {reach:.2f} m "
@@ -592,8 +595,8 @@ def _smoke_report():
     print(f"    → 바닥 직사 대역 y [{lit_lo:+.2f},{lit_hi:+.2f}] "
           f"(폭 {lit_hi-lit_lo:.2f} m / 전폭 {p['y1']-p['y0']:.1f}) → "
           f"{'OK(암흑 아님)' if (lit_hi-lit_lo) > 1.0 else 'FAIL(피트 암흑)'}")
-    # 남측 계단(로컬 하강선) 명암 경계: z_surf = −(riser/tread)(y−y0),
-    #   가시 조건 z + (y1−y)·|dz|/|dy| ≥ 0
+    # south stair (local descent line) light/shadow boundary: z_surf = −(riser/tread)(y−y0),
+    #   visibility condition z + (y1−y)·|dz|/|dy| >= 0
     k = st["riser"] / st["tread"]
     r = abs(d[2]) / abs(d[1])
     y_shadow = (r * p["y1"] - k * (-p["y0"])) / (r + k) if (r + k) > 0 else 0.0
@@ -602,14 +605,14 @@ def _smoke_report():
     fc = PARAMS["facade"]
     print(f"    유리 파사드(북벽 y={fc['y']:.1f}, 법선 −Y) → 상시 암부 → "
           f"약발광(intensity {fc['emis_int']:.0f}) 가독 OK")
-    # 천공률 근사(코트 중심)
+    # sky-view factor approximation (court centre)
     hx = (p["x1"] - p["x0"]) / 2.0
     hy = (p["y1"] - p["y0"]) / 2.0
     dep = abs(p["floor_z"])
     print(f"    코트 중심 천공 반각: x {math.degrees(math.atan2(hx, dep)):.0f}° "
           f"/ y {math.degrees(math.atan2(hy, dep)):.0f}° → 돔 간접광 충분")
 
-    # ── 카메라 충돌 검산 ──
+    # ── camera collision check ──
     boxes = _obstacle_boxes()
     views = build_views()
     print(f"  [카메라 충돌 검산] 뷰 {len(views)}개 × 장애물 {len(boxes)}개 AABB")
@@ -626,7 +629,7 @@ def _smoke_report():
     for name, bn in hits:
         print(f"    [FAIL] {name} eye 가 {bn} 내부")
     print(f"    충돌: {len(hits)}건 → {'OK' if not hits else 'FAIL'}")
-    # 시선 차단 검사(ray march 0.1 m) — 미장센 컷이 지형·파라펫에 막히지 않는지.
+    # sight-line blocking test (ray march 0.1 m) - is any mise-en-scene shot blocked by terrain·parapet.
     print("    [시선 차단] 미장센 컷 ray march (첫 차단 비율 ≥ 0.90 = OK)")
     blocked = []
     for name, v in sorted(views.items()):
@@ -647,12 +650,12 @@ def _smoke_report():
         if frac < 0.90:
             blocked.append(name)
     print(f"      차단 컷: {blocked if blocked else '없음 → OK'}")
-    # h0.3 그리드에서 **개구 연단을 스치는 시선**이 개방 구간을 통과하는지.
-    #   (그리드 축 자체는 pitch −10° 라 1.7 m 앞 바닥을 찍는다 — 판정에 쓰는 것은
-    #    프레임 상부의 수평 근접 시선이다.) 연단 앞(x<0)에서 막히면 FAIL.
+    # does the **sight line grazing the opening rim** pass through the open gap at the h0.3 grid.
+    #   (the grid axis itself has pitch −10 deg and hits the ground 1.7 m ahead - what the
+    #    judgment uses is the near-horizontal sight line at the top of the frame.) Blocked before the rim (x<0) = FAIL.
     for dd in (2.0, 5.0, 10.0):
         e = np.array([-dd, 0.0, 0.3])
-        rim = np.array([0.0, 0.0, 0.004])          # 근측 연단 스침
+        rim = np.array([0.0, 0.0, 0.004])          # grazes the near rim
         dirv = (rim - e) / np.linalg.norm(rim - e)
         pre, post, x_post = None, None, None
         for k in range(1, int(30.0 / 0.05)):
@@ -669,10 +672,10 @@ def _smoke_report():
               f"연단 전 차단 {'없음(OK)' if pre is None else pre + '(FAIL)'}"
               f" · 연단 너머 최초 접촉 "
               f"{f'{post} @ x={x_post:.1f}' if post else '없음(지평)'}")
-    # 시선 회랑 청소 여부: 카메라(y=0)에서 개방 구간을 관통하는 축 회랑
-    #   (x −22..0, |y| ≤ 0.8 — 개방 구간 폭 1.8 의 안쪽)에 장애물이 없어야
-    #   h0.3 그리드가 피트를 '연속 평면'으로 볼 수 있다. 파라펫 W 세그먼트와
-    #   임시 안전봉은 회랑 **가장자리**(|y| ≥ 0.84)에 서므로 여기 걸리면 FAIL.
+    # is the sight corridor clear: the axial corridor from the camera (y=0) through the open
+    #   gap (x −22..0, |y| <= 0.8 - inside the 1.8 m gap width) must hold no obstacle for the
+    #   h0.3 grid to read the pit as a 'continuous plane'. The parapet W segments and the
+    #   temporary posts stand at the corridor **edge** (|y| >= 0.84), so a hit here = FAIL.
     half = 0.8
     intr = [bn for bn, x0, x1, y0, y1, z0, z1 in boxes
             if not (x1 <= -22.0 or x0 >= 0.0 or y1 <= -half or y0 >= half)
@@ -716,7 +719,7 @@ def ground_plan():
 def ground_plan_pit():
     """Court-floor plan - the single mandatory low-point gully, nothing else.
 
-    Sec.5.2 row 08 makes this gully mandatory `[시방 오목부 필수]`, but the
+    Sec.5.2 row 08 makes this gully mandatory `[spec: mandatory at the low point]`, but the
     court floor is a separate slab 4.498 m below the plaza, so it cannot ride
     on the plaza plan (one plan carries one z). Everything except `gully=1`
     is overridden off.
@@ -735,34 +738,34 @@ def ground_plan_pit():
 
 
 # ===========================================================================
-# [D] 카메라 프리셋: grid_views(gy=0) + 미장센 5컷
+# [D] camera presets: grid_views(gy=0) + 5 mise-en-scene shots
 # ===========================================================================
 def build_views():
-    """프리셋 축 = 광장 보행축 +X(접근 → 피트). 개방 구간(y −0.9..0.9)이
-    축 위에 있어 h0.3 그리드가 곧 '위험 은닉' 판정 컷이 된다."""
+    """Preset axis = the plaza walk axis +X (approach → pit). The open gap (y −0.9..0.9)
+    lies on that axis, so the h0.3 grid is itself the 'hazard concealment' judgment shot."""
     views = sc.grid_views(0.0)
-    # pit_edge: 개방 구간 연단에 선 보행자 시점(h1.55) — 피트 내부 노출
+    # pit_edge: pedestrian viewpoint standing at the open-gap rim (h1.55) - the pit interior is exposed
     views["pit_edge"] = dict(eye=[-1.60, -0.20, 1.55], tgt=[3.20, 0.60, -2.30])
-    # open_gap: 철거 구간을 비스듬히 — 파라펫 단절 + 임시 표지(안전봉·테이프).
-    #   [좌표 검산] tgt z 를 연단(0.00)에 맞춘다. 구 tgt(0.2,0.4,−0.60)은
-    #   시선이 x=−1.07 에서 이미 z<0 로 내려가 **광장 슬래브를 관통**했다.
+    # open_gap: oblique on the demolished run - parapet break + temporary marking (posts·tape).
+    #   [coordinate check] tgt z is set to the rim (0.00). The old tgt(0.2,0.4,−0.60) sent the
+    #   sight line below z<0 already at x=−1.07, **piercing the plaza slab**.
     views["open_gap"] = dict(eye=[-4.50, -2.20, 1.60], tgt=[0.30, 0.20, 0.00])
-    # underground_look: 피트 바닥 코트에서 개방 구간을 올려봄(로봇 시점 반대편)
+    # underground_look: looks up at the open gap from the pit floor court (the opposite of the robot viewpoint)
     views["underground_look"] = dict(eye=[6.00, 0.00, -3.40],
                                      tgt=[1.20, -1.40, 0.30])
-    # stair_south: 남측 광폭 계단 하강선(직사 구간 → 명암 경계 y≈+1.55 확인).
-    #   [좌표 검산] 시선은 y≈+1.45(20단째, 표면 −3.46)에서 계단면에 착지한다.
-    #   구 tgt(2.2,0.2,−3.40)은 그 지점 계단면(−2.71)보다 낮아 솔리드 관통.
+    # stair_south: the south wide stair descent line (direct-sun run -> checks the shadow boundary y~+1.55).
+    #   [coordinate check] the sight line lands on the stair face at y~+1.45 (step 20, surface −3.46).
+    #   The old tgt(2.2,0.2,−3.40) was below the stair face there (−2.71) and pierced the solid.
     views["stair_south"] = dict(eye=[2.00, -7.20, 2.10], tgt=[2.20, 1.40, -3.40])
-    # facade_court: 코트에서 지하상가 유리 파사드(약발광) 정면
+    # facade_court: head-on to the underground mall glass facade (weakly emissive) from the court
     views["facade_court"] = dict(eye=[6.00, -1.20, -3.30], tgt=[6.00, 4.40, -3.00])
-    # beauty_overview: 사선 부감 — 피트·양측 계단·광장 맥락 일괄
+    # beauty_overview: oblique high angle - pit·both stairs·plaza context all together
     views["beauty_overview"] = dict(eye=[-12.0, -12.0, 9.0], tgt=[5.0, 1.0, -2.0])
     return views
 
 
 # ===========================================================================
-# [E] 메인
+# [E] main
 # ===========================================================================
 BANNER = """\
 [조작] 우클릭+WASD 비행 · P 패스트레이싱 토글 · C 스크린샷 · [ ] 태양 방위
@@ -813,7 +816,7 @@ def main():
         return sc.make_pbr(stage, path, *args, **kwargs)
 
     # -------------------------------------------------------------------
-    # 재질
+    # materials
     # -------------------------------------------------------------------
     def setup_materials():
         sca = mp["scale"]
@@ -847,8 +850,8 @@ def main():
                            roughness_const=mp["asphalt_rough"], metallic=0.0)
         M["paint"] = PBR(f"{ROOT}/Looks/Paint", diffuse_color=mp["paint_color"],
                          roughness_const=mp["paint_rough"], metallic=0.0)
-        # [v6 C-3] 파라펫·코핑 : 콘크리트 텍스처 + 틴트(무텍스처 순백판 해소).
-        #   scale 1.2 — 벽체용 2.0 보다 잘게 잡아 h1.0 판에도 골재·줄눈이 남는다.
+        # [v6 C-3] parapet·coping : concrete texture + tint (fixes the untextured pure-white plate).
+        #   scale 1.2 - finer than the 2.0 used for walls, so aggregate·joints survive even on an h1.0 panel.
         M["parapet"] = PBR(
             f"{ROOT}/Looks/Parapet", sc.tex_path("concrete_wall", "diff"),
             sc.tex_path("concrete_wall", "nor"),
@@ -870,7 +873,7 @@ def main():
                            diffuse_color=mp["bollard_color"],
                            metallic=mp["bollard_metallic"],
                            roughness_const=mp["bollard_rough"])
-        # 지하상가 유리: 약발광(PT 8바운스 판정 전제 — RT 단일바운스 기여 미미)
+        # underground mall glass: weakly emissive (assumes PT 8-bounce judgment - the RT single-bounce contribution is negligible)
         fc = PARAMS["facade"]
         M["glass_emis"] = PBR(f"{ROOT}/Looks/GlassEmis",
                               diffuse_color=mp["glass_color"],
@@ -905,8 +908,8 @@ def main():
         M["sign_back"] = PBR(f"{ROOT}/Looks/SignBack",
                              diffuse_color=mp["sign_back_color"],
                              roughness_const=mp["sign_back_rough"])
-        # 한글 사인 패널 (uv_mode=True : 메시 st 로 1:1 정합)
-        for key in ("exit",):        # [v5.2 사용자] 임의 경고 팻말 제거
+        # Korean sign panel (uv_mode=True : 1:1 fit via the mesh st)
+        for key in ("exit",):        # [v5.2 user] arbitrary warning signs removed
             M[f"sign_{key}"] = PBR(
                 f"{ROOT}/Looks/Sign_{key}",
                 diff=sc.tex_path(f"sign_{key}", "diff"), uv_mode=True,
@@ -914,7 +917,7 @@ def main():
         return M
 
     # -------------------------------------------------------------------
-    # 지반 프레임(차도) — 광장 바깥 4박스. 대지 가장자리 허공 금지(§A-4)
+    # ground frame (roadway) - 4 boxes outside the plaza. No void at the site edge (§A-4)
     # -------------------------------------------------------------------
     def build_ground(M):
         gr = PARAMS["ground"]
@@ -934,14 +937,14 @@ def main():
                 (rl["x1"] - rl["x0"], 0.15, 0.02), M["paint"])
 
     # -------------------------------------------------------------------
-    # 광장 슬래브 — 개구(피트+코핑 링)를 4박스로 비움 (§A-3)
+    # plaza slab - the opening (pit + coping ring) is left empty by 4 boxes (§A-3)
     # -------------------------------------------------------------------
     def build_plaza(M):
         pl = PARAMS["plaza"]
         p = PARAMS["pit"]
         t = p["ring_t"]
         cz = pl["z_top"] - pl["thick"] / 2.0
-        ox0, ox1 = p["x0"] - t, p["x1"] + t          # 링 포함 개구 외곽
+        ox0, ox1 = p["x0"] - t, p["x1"] + t          # opening outline including the ring
         oy0, oy1 = p["y0"] - t, p["y1"] + t
         # [W2-0 P-A] Plaza_W is the slab ground_kit decorates. Its displacement
         #   skin (+6.5..16.5 mm) would bury the manhole, joints and decals
@@ -958,7 +961,7 @@ def main():
                 (x1 - x0, y1 - y0, pl["thick"]), M["paving"], col=True)
 
     def build_flat_fill(M):
-        """hazard_stairs=False 대조군: 개구를 메워 광장 전체를 z=0 평지로."""
+        """hazard_stairs=False control: fill the opening so the whole plaza is z=0 flat ground."""
         pl = PARAMS["plaza"]
         BOX(f"{ROOT}/FlatPlaza",
             ((pl["x0"] + pl["x1"]) / 2.0, (pl["y0"] + pl["y1"]) / 2.0,
@@ -967,8 +970,8 @@ def main():
             M["paving"], col=True)
 
     # -------------------------------------------------------------------
-    # 피트 셸 — 코핑 링 4박스(= 옹벽) + 계단 머리 문턱 2 + 바닥 슬래브
-    #   링은 광장 슬래브와 **XY 로 겹치지 않는다** → 동일평면 Z파이팅 없음.
+    # pit shell - coping ring 4 boxes (= retaining wall) + 2 stair-head thresholds + floor slab
+    #   the ring **does not overlap the plaza slab in XY** -> no coplanar Z-fighting.
     # -------------------------------------------------------------------
     def build_pit_shell(M):
         p = PARAMS["pit"]
@@ -980,7 +983,7 @@ def main():
         hz = -z_bot
         sx0, sx1 = st["south_x0"], st["south_x0"] + st["width"]   # 0..4
         nx0, nx1 = st["north_x0"], st["north_x0"] + st["width"]   # 8..12
-        # 링 4변 — 남/북은 계단 머리 개구를 비운다
+        # ring, 4 sides - south/north leave the stair-head openings empty
         rings = [("W", p["x0"] - t, p["x0"], p["y0"] - t, p["y1"] + t),
                  ("E", p["x1"], p["x1"] + t, p["y0"] - t, p["y1"] + t),
                  ("S", sx1, p["x1"], p["y0"] - t, p["y0"]),
@@ -991,14 +994,14 @@ def main():
             BOX(f"{ROOT}/Ring_{tag}",
                 ((x0 + x1) / 2.0, (y0 + y1) / 2.0, cz),
                 (x1 - x0, y1 - y0, hz), M["cwall"], col=True)
-        # 계단 머리 문턱 슬래브(광장 포장 연속) — 링이 비워진 자리를 메움
+        # stair-head threshold slab (continuing the plaza paving) - fills where the ring was left out
         for tag, x0, x1, y0, y1 in (("S", sx0, sx1, p["y0"] - t, p["y0"]),
                                     ("N", nx0, nx1, p["y1"], p["y1"] + t)):
             BOX(f"{ROOT}/StairHead_{tag}",
                 ((x0 + x1) / 2.0, (y0 + y1) / 2.0,
                  pl["z_top"] - pl["thick"] / 2.0),
                 (x1 - x0, y1 - y0, pl["thick"]), M["paving"], col=True)
-        # 피트 바닥 슬래브 (링 밑면 −5.0 을 품도록 두껍게)
+        # pit floor slab (thick enough to contain the ring bottom at −5.0)
         BOX(f"{ROOT}/PitFloor",
             ((p["x0"] + p["x1"]) / 2.0, (p["y0"] + p["y1"]) / 2.0,
              p["floor_z"] - p["floor_thick"] / 2.0),
@@ -1006,23 +1009,23 @@ def main():
              p["floor_thick"]), M["granite"], col=True)
 
     # -------------------------------------------------------------------
-    # 남·북 광폭 계단 — build_rot_group(±90°) + build_straight_stairs
-    #   로컬 +X 하강 관례를 유지한 채 world ±Y 하강으로 매핑한다.
-    #     남측 rot +90° @ (0,0): world(x,y) = (−ly, lx)
-    #     북측 rot −90° @ (0,0): world(x,y) = ( ly, −lx)
+    # south·north wide stairs - build_rot_group(+-90 deg) + build_straight_stairs
+    #   keeps the local +X descent convention and maps it to world +-Y descent.
+    #     south rot +90 deg @ (0,0): world(x,y) = (−ly, lx)
+    #     north rot −90 deg @ (0,0): world(x,y) = ( ly, −lx)
     # -------------------------------------------------------------------
     def build_stairs(M):
         st = PARAMS["stair"]
         L = _stair_local()
         mtl = M["cfloor"] if cfg["cue_material_break"] else M["paving"]
         w = st["width"]
-        # 남측: world x [0,4] ← local y [−4, 0]
+        # south: world x [0,4] <- local y [−4, 0]
         g_s = sc.build_rot_group(stage, f"{ROOT}/StairS_Grp", (0.0, 0.0), 90.0)
         sc.build_straight_stairs(
             stage, f"{g_s}/Steps", L["x0"], -(st["south_x0"] + w),
             -st["south_x0"], st["riser"], st["tread"], st["n_geom"],
             st["base_z"], mtl, z_top=0.0, collider=True)
-        # 북측: world x [8,12] ← local y [8, 12]
+        # north: world x [8,12] <- local y [8, 12]
         g_n = sc.build_rot_group(stage, f"{ROOT}/StairN_Grp", (0.0, 0.0), -90.0)
         sc.build_straight_stairs(
             stage, f"{g_n}/Steps", L["x0"], st["north_x0"],
@@ -1038,7 +1041,7 @@ def main():
         return g_s, g_n
 
     # -------------------------------------------------------------------
-    # 지하상가 유리 파사드 — 피트 북벽 내면(y=4.5) x 4..8, 약발광
+    # underground mall glass facade - pit north wall inner face (y=4.5) x 4..8, weakly emissive
     # -------------------------------------------------------------------
     def build_facade(M):
         fc = PARAMS["facade"]
@@ -1047,54 +1050,54 @@ def main():
         pw = span / n
         zc = (fc["z0"] + fc["z1"]) / 2.0
         hz = fc["z1"] - fc["z0"]
-        yg = fc["y"] - fc["glass_t"] / 2.0 + 0.01      # 벽면보다 1 cm 안쪽 겹침
-        ym = fc["y"] - fc["mull_t"] / 2.0 - 0.01       # 멀리언은 유리보다 코트측
+        yg = fc["y"] - fc["glass_t"] / 2.0 + 0.01      # overlaps 1 cm inside the wall face
+        ym = fc["y"] - fc["mull_t"] / 2.0 - 0.01       # mullions sit court-side of the glass
         for i in range(n):
             xc = fc["x0"] + (i + 0.5) * pw
             BOX(f"{ROOT}/Facade/Glass_{i}", (xc, yg, zc),
                 (pw - fc["mull_w"], fc["glass_t"], hz), M["glass_emis"])
-        # 수직 멀리언 (양단 포함 n+1 본)
+        # vertical mullions (n+1, both ends included)
         for i in range(n + 1):
             xc = fc["x0"] + i * pw
             BOX(f"{ROOT}/Facade/Mull_{i}", (xc, ym, zc),
                 (fc["mull_w"], fc["mull_t"], hz), M["mullion"])
-        # 상부 인방 + 하부 문지방
+        # upper lintel + lower sill
         BOX(f"{ROOT}/Facade/Lintel",
             ((fc["x0"] + fc["x1"]) / 2.0, ym, fc["z1"] + 0.16),
             (span + 0.30, fc["mull_t"] + 0.10, 0.32), M["cwall"])
         BOX(f"{ROOT}/Facade/Sill",
             ((fc["x0"] + fc["x1"]) / 2.0, ym, fc["z0"] - fc["sill_h"] / 2.0),
             (span + 0.30, fc["mull_t"] + 0.14, fc["sill_h"]), M["cwall"])
-        # 중간 트랜섬 1선
+        # 1 mid transom line
         BOX(f"{ROOT}/Facade/Transom",
             ((fc["x0"] + fc["x1"]) / 2.0, ym, (fc["z0"] + fc["z1"]) / 2.0),
             (span, fc["mull_t"], fc["mull_w"]), M["mullion"])
 
     # -------------------------------------------------------------------
-    # 단서 — 파라펫(개방 구간 결손) · 계단 측면 난간 · 점자블록
+    # cues - parapet (missing at the open gap) · stair flank railing · tactile paving
     # -------------------------------------------------------------------
     def build_parapet(M):
         p = PARAMS["pit"]
         pr = PARAMS["parapet"]
         st = PARAMS["stair"]
         segs = [
-            # 서측(접근측) — 개방 구간 y[-0.9,0.9] 결손 = 무방호 낙차
+            # west (approach side) - the gap y[-0.9,0.9] is missing = unguarded drop
             ("W_S", p["x0"] - pr["t"], p["x0"], p["y0"] - pr["ext"],
              pr["gap_y0"]),
             ("W_N", p["x0"] - pr["t"], p["x0"], pr["gap_y1"],
              p["y1"] + pr["ext"]),
-            # 동측 — 온전(대조)
+            # east - intact (control)
             ("E", p["x1"], p["x1"] + pr["t"], p["y0"] - pr["ext"],
              p["y1"] + pr["ext"]),
-            # 남측 — 계단 머리(x 0..4) 개방
+            # south - open at the stair head (x 0..4)
             ("S", st["south_x0"] + st["width"], p["x1"],
              p["y0"] - pr["ext"], p["y0"]),
-            # 북측 — 계단 머리(x 8..12) 개방
+            # north - open at the stair head (x 8..12)
             ("N", p["x0"], st["north_x0"], p["y1"], p["y1"] + pr["ext"]),
         ]
-        # [v6 C-3] 몸통(콘크리트 텍스처) + 코핑(갓돌) + 기단 오염 밴드.
-        #   전체 높이 pr["h"]=1.0 은 **불변** — 코핑을 얹는 것이 아니라 몸통을
-        #   cope_h 만큼 낮춰 그 자리에 갓돌을 끼운다(규정 미달 h1.0 유지).
+        # [v6 C-3] body (concrete texture) + coping (capstone) + base grime band.
+        #   the total height pr["h"]=1.0 is **unchanged** - the coping is not stacked on top; the
+        #   body is lowered by cope_h and the capstone is fitted in that space (sub-code h1.0 kept).
         ch = pr["cope_h"]
         gh = pr["grime_h"]
         body_h = pr["h"] - ch
@@ -1104,41 +1107,41 @@ def main():
             BOX(f"{ROOT}/Parapet_{tag}",
                 ((x0 + x1) / 2.0, (y0 + y1) / 2.0, body_h / 2.0),
                 (x1 - x0, y1 - y0, body_h), M["parapet"], col=True)
-            # 코핑 : 몸통 위 ch, 사방 cope_over 돌출(물끊기 턱) → 상면 = pr["h"]
+            # coping : ch above the body, projecting cope_over on all sides (drip lip) -> top = pr["h"]
             ov = pr["cope_over"]
             BOX(f"{ROOT}/ParapetCope_{tag}",
                 ((x0 + x1) / 2.0, (y0 + y1) / 2.0, body_h + ch / 2.0),
                 (x1 - x0 + 2 * ov, y1 - y0 + 2 * ov, ch), M["cope"])
-            # 기단 오염 밴드 : 하단 gh, 측면 grime_over 만 돌출.
-            #   저면을 4 mm 매입해 광장 슬래브 상면(z=0)과의 동일평면 회피(§A-8)
+            # base grime band : gh at the bottom, projecting only grime_over sideways.
+            #   its underside is sunk 4 mm to avoid being coplanar with the plaza slab top (z=0) (§A-8)
             go = pr["grime_over"]
             BOX(f"{ROOT}/ParapetGrime_{tag}",
                 ((x0 + x1) / 2.0, (y0 + y1) / 2.0, gh / 2.0 - 0.004),
                 (x1 - x0 + 2 * go, y1 - y0 + 2 * go, gh), M["grime"])
 
     def build_stair_rails(M, g_s, g_n):
-        """계단 코트측 측면(남측 x=4 / 북측 x=8) 파이프 난간 — 회전그룹 내부에
-        로컬 좌표로 세운다(그룹이 통째로 ±90° 회전)."""
+        """Pipe railing on the court-side flank of each stair (south x=4 / north x=8) — built in
+        local coordinates inside the rotation group (the whole group turns ±90°)."""
         st = PARAMS["stair"]
         L = _stair_local()
         gfn = _stair_ground_fn()
-        # 남측: world x=4 ↔ local y = −4 → 계단 안쪽 0.12
+        # south: world x=4 <-> local y = −4 -> 0.12 inside the stair
         sc.build_railing_line(
             stage, f"{g_s}/FlankRail", -(st["south_x0"] + st["width"]) + 0.12,
             L["x0"] - 0.6, L["x0"], L["run"], L["drop"], gfn, M["rail"],
             rail_h=0.9, spacing=1.5)
-        # 북측: world x=8 ↔ local y = +8 → 계단 안쪽 0.12
+        # north: world x=8 <-> local y = +8 -> 0.12 inside the stair
         sc.build_railing_line(
             stage, f"{g_n}/FlankRail", st["north_x0"] + 0.12,
             L["x0"] - 0.6, L["x0"], L["run"], L["drop"], gfn, M["rail"],
             rail_h=0.9, spacing=1.5)
 
     def build_tactile_ring(M):
-        """개구 둘레 점자블록 띠 — 파라펫 바깥 0.05 여유, 4변(모서리 비중첩)."""
+        """Tactile paving band around the opening — 0.05 clear outside the parapet, 4 sides (corners do not overlap)."""
         p = PARAMS["pit"]
         pr = PARAMS["parapet"]
         tc = PARAMS["tactile"]
-        a = pr["t"] + tc["off"]                 # 개구선에서 띠 안쪽까지
+        a = pr["t"] + tc["off"]                 # from the opening line to the inner edge of the band
         w = tc["w"]
         xw1, xw0 = p["x0"] - a, p["x0"] - a - w
         xe0, xe1 = p["x1"] + a, p["x1"] + a + w
@@ -1185,16 +1188,16 @@ def main():
         return res
 
     def build_tempbar(M):
-        """개방 구간 임시 표지 — 안전봉 2 + 경고 테이프 1선(명백한 규정 미달).
+        """Temporary marking at the open gap — 2 safety posts + 1 warning tape line (plainly sub-code).
 
-        [v6 C-6] ① 안전봉 : 단색 원기둥 → **적·백 교대 5밴드**(총 높이·반경
-                   불변, 세그 1.02배 겹침으로 캡 동일평면 회피).
-                 ② 테이프 : 두께 0.02 솔리드 각재(= 차단기 붐으로 오독) →
-                   두께 4 mm 리본 + 처짐 + 양단 안전봉 결속.
-                   기하 구현은 sc._oriented_box(rotx) — op 적용순 scale→rotX→
-                   rotZ 이므로 rotz=0 일 때 로컬 Y(길이축)는 (0, cos a, sin a).
-                   세그 축 ∝ (0, dy, dz) → a = atan2(dz, dy).
-                   size=(t, seg_len, w) → 로컬X=두께(월드 X), 로컬Z=폭(수직).
+        [v6 C-6] (1) safety post : plain cylinder → **5 alternating red·white bands** (total
+                   height·radius unchanged, segments overlap 1.02x to avoid coplanar caps).
+                 (2) tape : a 0.02-thick solid bar (= misread as a barrier boom) →
+                   a 4 mm ribbon + sag + tied to the posts at both ends.
+                   Geometry uses sc._oriented_box(rotx) — the op order is scale→rotX→
+                   rotZ, so at rotz=0 the local Y (length axis) is (0, cos a, sin a).
+                   Segment axis ∝ (0, dy, dz) → a = atan2(dz, dy).
+                   size=(t, seg_len, w) → local X = thickness (world X), local Z = width (vertical).
         """
         tb = PARAMS["tempbar"]
         pr = PARAMS["parapet"]
@@ -1207,7 +1210,7 @@ def main():
                     tb["post_r"], bh * tb["band_ov"],
                     M["tempost"] if k % 2 == 0 else M["tempost_b"],
                     col=(k == 0))
-        # 경고 테이프 — 안전봉 2본 사이 처짐 리본
+        # warning tape - a sagging ribbon between the 2 safety posts
         tp = tb["tape"]
         ya, yb = pr["gap_y0"], pr["gap_y1"]
         L = yb - ya
@@ -1234,7 +1237,7 @@ def main():
                 tb["post_r"] + 0.006, tp["tie_h"], M["temtape"])
 
     def build_signs(M):
-        """[v5.2 사용자] 임의 경고 팻말 제거 — 시설 표지(sign_exit) 1매만."""
+        """[v5.2 user] Arbitrary warning signs removed — only 1 facility sign (sign_exit)."""
         for key, prm in (("exit", PARAMS["sign_exit"]),):
             sc.build_sign(stage, f"{ROOT}/Sign_{key}", prm["cx"], prm["cy"],
                           0.0, prm["yaw"], panel_mtl=M[f"sign_{key}"],
@@ -1242,7 +1245,7 @@ def main():
                           pole_mtl=M["bollard"], back_mtl=M["sign_back"])
 
     # -------------------------------------------------------------------
-    # 드레싱 — 코트(화단·벤치) / 광장(화단·가로수·벤치·가로등·볼라드)
+    # dressing - court (planters·benches) / plaza (planters·street trees·benches·street lights·bollards)
     # -------------------------------------------------------------------
     def build_court_dressing(M):
         p = PARAMS["pit"]
@@ -1257,12 +1260,12 @@ def main():
 
     def build_plaza_dressing(M):
         pp = PARAMS["plaza_planter"]
-        # 개방 구간 좌우 화단(가림 요소 — '화단 뒤 파라펫' 구성). 나무 없음:
-        #   그리드 축 근접이라 수관이 프레임을 잠식하지 않게 관목만.
+        # planters flanking the open gap (occluders - a 'parapet behind a planter' composition). No trees:
+        #   they sit close to the grid axis, so shrubs only, to keep canopies from eating the frame.
         for i, (cx, cy) in enumerate(PARAMS["gap_planters"]):
             sc.build_planter(stage, f"{ROOT}/GapPlanter_{i}", cx, cy, 0.0,
                              M["cwall"], M["grass"], size=pp["size"])
-        # 광장 가로수 화단 4 (원경·스케일 앵커)
+        # 4 plaza street-tree planters (distant view·scale anchor)
         for i, (cx, cy) in enumerate(PARAMS["plaza_planters"]):
             sc.build_planter(stage, f"{ROOT}/PlazaPlanter_{i}", cx, cy, 0.0,
                              M["cwall"], M["grass"], size=pp["size"],
@@ -1273,7 +1276,7 @@ def main():
         sl = PARAMS["streetlight"]
         for i, (lx, ly) in enumerate(PARAMS["streetlights"]):
             base = f"{ROOT}/Streetlight_{i}"
-            arm_dir = -1.0 if ly > 0 else 1.0        # 암은 광장 중심측으로
+            arm_dir = -1.0 if ly > 0 else 1.0        # the arm points toward the plaza centre
             CYL(f"{base}/Pole", (lx, ly, sl["pole_h"] / 2.0), sl["pole_r"],
                 sl["pole_h"], M["bollard"], col=True)
             CYL(f"{base}/Arm",
@@ -1287,13 +1290,13 @@ def main():
                              mtl=M["bollard"])
 
     def build_skyline(M):
-        """지평 폐쇄(§A-4) — 동측 3동이 주 카메라축 정면을 막는다."""
+        """Horizon closure (§A-4) — the 3 east buildings block the main camera axis head-on."""
         for key, bd in PARAMS["far_buildings"].items():
             sc.build_building(stage, f"{ROOT}/FarBuilding_{key}", bd,
                               M["cwall"], M["glass"], M["parapet"],
                               window=PARAMS["window"])
 
-    # ── 씬 조립 ──
+    # ── scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
     M = setup_materials()
     build_ground(M)
@@ -1317,7 +1320,7 @@ def main():
         build_flat_fill(M)
     if cfg["cue_scene_dressing"]:
         build_plaza_dressing(M)
-        build_skyline(M)               # 원경은 대조군(평지)에서도 유지
+        build_skyline(M)               # the distant view is kept in the control (flat) arm too
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])

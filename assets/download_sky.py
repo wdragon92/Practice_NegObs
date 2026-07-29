@@ -59,6 +59,29 @@ SKY_SLUGS = [
     "farm_field_puresky",
 ]
 
+# ---------------------------------------------------------------------------
+# 조명 라운드 — 고도 사다리 (조건 카탈로그 L3/L4/L5 전용)
+#   `Docs/briefs/lighting_camera_variation_spec_v1.md` §4.2 가 조달 대상으로
+#   지정한 15종 중, §4.3 의 8조건 카탈로그가 **실제로 쓰는** 3종만 받는다.
+#   나머지 6종은 사다리의 대체안이라 조건 카탈로그에 배선되지 않았다.
+#   `Docs/reports/lighting_spikes_v1.md` §3.4 가 "9종 부재 = 유일한 차단 요소"
+#   로 올린 항목의 해소분이다.
+#
+#   slug                                   조건  고도(스펙 실측)  f_dir  게이트
+#   kloofendal_38d_partly_cloudy_puresky   L3    37.96°          0.438  PASS
+#   kloofendal_28d_misty_puresky           L4    28.50°          0.049  SOFT
+#   qwantani_late_afternoon_puresky        L5    19.07°          0.645  PASS
+#
+#   ⚠ kloofendal_28d_misty 만 방위가 다르다(φ 169.15 vs 216 대). 씬 상수
+#     233.5 를 그대로 쓰면 그림자가 47° 틀어진다 — 카탈로그가 조건별
+#     `hdri_sun_rotz_offset` 을 들고 있는 이유다(spec §4.2).
+# ---------------------------------------------------------------------------
+LADDER_SLUGS = [
+    "kloofendal_38d_partly_cloudy_puresky",
+    "kloofendal_28d_misty_puresky",
+    "qwantani_late_afternoon_puresky",
+]
+
 
 def open_url(url):
     req = urllib.request.Request(url, headers=HEADERS)
@@ -208,8 +231,16 @@ def main():
     failures = []
     placed = []
 
+    # 기본은 종전 3종. `--ladder` 는 조명 라운드 고도 사다리(L3/L4/L5)를 함께,
+    # `--only-ladder` 는 사다리만 받는다(이미 있는 3종 재검증 생략).
+    slugs = list(SKY_SLUGS)
+    if "--ladder" in sys.argv:
+        slugs += LADDER_SLUGS
+    elif "--only-ladder" in sys.argv:
+        slugs = list(LADDER_SLUGS)
+
     print("=== PolyHaven 구름 하늘 HDRI (CC0) ===")
-    for slug in SKY_SLUGS:
+    for slug in slugs:
         print(f"[hdri] {slug}")
         data = fetch_json(API.format(slug=slug))
         if data is None:
@@ -232,7 +263,7 @@ def main():
 
     print("\n=== 검증 ===")
     total = 0
-    for slug in SKY_SLUGS:
+    for slug in slugs:
         p = os.path.join(ASSETS_DIR, f"{slug}_4k.exr")
         if os.path.exists(p) and os.path.getsize(p) > 0:
             total += os.path.getsize(p)
@@ -240,7 +271,7 @@ def main():
                   f"{os.path.getsize(p):>12,} bytes")
         else:
             print(f"  MISS {slug}_4k.exr")
-    print(f"\n총 {len(placed)}/{len(SKY_SLUGS)} 파일, {total:,} bytes "
+    print(f"\n총 {len(placed)}/{len(slugs)} 파일, {total:,} bytes "
           f"({total/1e6:.1f} MB)")
 
     if failures:
@@ -248,7 +279,7 @@ def main():
         for f in failures:
             print(f"  - {f}")
         sys.exit(1)
-    print("\n하늘 HDRI 3종 배치 완료. "
+    print(f"\n하늘 HDRI {len(slugs)}종 배치 완료. "
           "씬 적용은 light_params['hdri'] = '<파일명>'.")
 
 

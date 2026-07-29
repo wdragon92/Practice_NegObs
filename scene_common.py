@@ -14,6 +14,7 @@ Coordinate convention (all scenes): Z-up, metres, travel axis +X, drop start edg
 """
 
 import os
+import glob
 import math
 import json
 import zlib
@@ -813,12 +814,39 @@ def check_assets(roles, hdri=None):
 # ===========================================================================
 # [2] boot - SimulationApp + carb settings + stage units (as in scene01)
 # ===========================================================================
+def _variation():
+    """`variation_kit` on demand.
+
+    Imported lazily, not at module scope, so `scene_common` still imports inside
+    the mocked pxr-free harnesses. It is imported UNGUARDED on purpose: a gate
+    that disables itself when its module is missing is worse than no gate, and
+    this is the gate that stops a variation env silently contaminating the
+    regression baseline. `variation_kit.py` is symlinked into `scenes/main` and
+    `scenes/batch1` exactly like `ground_kit`/`stair_kit`; the realpath fallback
+    below covers an invocation from anywhere else.
+    """
+    try:
+        import variation_kit
+    except ImportError:
+        import sys as _s
+        root = os.path.dirname(os.path.realpath(__file__))
+        if root not in _s.path:
+            _s.path.insert(0, root)
+        import variation_kit
+    return variation_kit
+
+
 def boot(headless):
     """Boot Isaac Sim. SimulationApp is always created first, then everything else is imported.
     Applies the carb capture hygiene settings and the stage units (Z-up, metre) and returns
     sim_app. The scene can obtain stage again through
     omni.usd.get_context().get_stage().
     """
+    # [lighting round, D1/D2] Refuse a judge render that carries variation env
+    # BEFORE anything expensive happens. Checked here as well as in
+    # `capture_pipeline` because that is where a mistake is cheapest to catch and
+    # because the GUI path never reaches `capture_pipeline` at all.
+    _variation().assert_role_gate()
     from isaacsim import SimulationApp
     sim_app = SimulationApp(
         {"headless": bool(headless), "width": 1920, "height": 1080})
@@ -843,6 +871,30 @@ def boot(headless):
     settings.set("/persistent/app/viewport/displayOptions", 0)
     settings.set("/app/viewport/show/grid", False)
     settings.set("/app/viewport/outline/enabled", False)
+
+    # ------------------------------------------------------------------
+    # [lighting round §5.4] Tone-mapping / exposure freeze.
+    #
+    # Split in two on purpose. The keys below are RE-ASSERTIONS of values the
+    # runtime dump already carries (`t0_spike_report_v1.md` §7: histogram
+    # enabled=False i.e. auto-exposure OFF, colorcorr/colorgrad disabled;
+    # `look_check/_experiments/t0_spike/rtx_settings.json`: tonemap op=6 = ACES).
+    # Setting them cannot move a pixel, so they are safe on the judge channel and
+    # they nail down the one thing that would silently invalidate every A/B
+    # verdict this project has made if it ever flipped.
+    settings.set("/rtx/post/histogram/enabled", False)   # AE off - highest stake
+    settings.set("/rtx/post/tonemap/op", 6)              # ACES (already default)
+    settings.set("/rtx/post/colorcorr/enabled", False)
+    settings.set("/rtx/post/colorgrad/enabled", False)
+    # The rest of spec §5.4's block is data-only, because these ARE capable of
+    # moving pixels and the judge channel is bit-frozen (D2). `dither` in
+    # particular adds sub-LSB noise by design, and `colorMode`/`ecoMode` were
+    # never in a dump so their current values are unverified.
+    if os.environ.get("NEGOBS_RENDER_ROLE", "") == "data":
+        settings.set("/rtx/post/tonemap/colorMode", 0)   # sRGBLinear
+        settings.set("/rtx/post/tonemap/dither", 0.004)  # de-band
+        settings.set("/rtx/ecoMode/enabled", False)
+        print("[노출] data 역할 — §5.4 전체 고정 블록 적용")
 
     stage = omni.usd.get_context().get_stage()
     mpu = UsdGeom.GetStageMetersPerUnit(stage)
@@ -3033,11 +3085,143 @@ def ensure_noon_lookfix(src_path):
         return src_path
 
 
-def setup_lighting(stage, light_params, sun_az_offset):
+class LightingControl:
+    """The callback `setup_lighting` returns — a callable that is also an object.
+
+    Calling it is exactly the old `apply_dome_rot(user_off)`, so all 33 scene
+    files keep working unchanged (`apply_dome_rot = sc.setup_lighting(...)` then
+    `apply_dome_rot(off)`). Spec §6.3 asked for a second returned callback
+    `apply_light_cond`; returning a tuple instead would have broken every scene
+    file, and "no structural change to 33 scenes for one feature" is worth more
+    than matching the sketch literally. `.apply_cond()` is that callback.
+
+    Why the condition switch has to live here at all: putting lighting on the
+    process boundary multiplies `t_boot` by `N_light`. SP-4 measured a runtime
+    HDRI swap at **t_swap = 1.4 s** against a 30 s split threshold, and SP-2
+    measured the end-to-end saving of keeping the loop inside one boot at
+    **3.29x** (693 cuts: 44.2 min in-process vs 145.2 min as 7 rounds).
+    """
+
+    def __init__(self, dome, sun, rot_op, sun_rz, sun_rx, tex_attr,
+                 light_params, sun_az_offset, scene_key=None):
+        self._dome, self._sun = dome, sun
+        self._rot_op, self._sun_rz, self._sun_rx = rot_op, sun_rz, sun_rx
+        self._tex = tex_attr
+        self.lp = dict(light_params)
+        self.sun_az_offset = float(sun_az_offset)
+        self.scene_key = scene_key
+        self.user_off = 0.0
+        self.cond_id = "L0"
+        self._base = dict(
+            hdri=light_params.get("hdri", DEFAULT_HDRI),
+            dome_intensity=float(light_params["dome_intensity"]),
+            sun_intensity=float(light_params["noon_sun_intensity"]),
+            sun_elev=float(light_params["noon_sun_elev"]),
+            rotz=float(light_params["hdri_sun_rotz_offset"]),
+            lookfix=bool(light_params.get("lookfix", True)),
+            sun_enable=bool(light_params.get("noon_sun_enable", True)),
+        )
+
+    # -- the legacy interface, byte-for-byte ------------------------------
+    def __call__(self, user_off):
+        """Dome rotation = noon_dome_rot + sun_az_offset (scene) + [ ] key offset."""
+        self.user_off = float(user_off)
+        rot = (float(self.lp["noon_dome_rot"]) + self.sun_az_offset
+               + self.user_off)
+        self._rot_op.Set(rot)
+        self._sun_rz.Set(rot + float(self.lp["hdri_sun_rotz_offset"]))
+        return rot
+
+    apply_dome_rot = __call__
+
+    # -- the condition switch (role=data) --------------------------------
+    def apply_cond(self, cond, exposure=True):
+        """Swap sky, intensities, sun elevation, sun angle and exposure in one go.
+
+        A scene-specific lighting tuning always wins (spec §4.3): sceneC1 snow
+        800/420, sceneC4 wet 1150/600, sceneD4 indoor 8.0/0 are hand-balanced and
+        the catalogue must not overwrite them. What the catalogue still applies to
+        those scenes is the RELATIVE change - the condition's illuminance ratio
+        against the reference - so a snow scene under overcast still gets darker
+        without losing its own balance.
+        """
+        vk = _variation()
+        c = vk.CONDITIONS[cond] if isinstance(cond, str) else cond
+        self.cond_id = c["id"]
+        override = (self.scene_key in vk.SCENE_LIGHT_OVERRIDE_WINS)
+
+        # --- sky ---------------------------------------------------------
+        path = os.path.join(ASSETS_DIR, c["hdri"])
+        if c["lookfix"]:
+            # MUST be pre-generated: the first call per new sky costs 1.97-2.00 s
+            # of CPU and writes an 18 MB derivative (SP-4 §3.2). Inside a data run
+            # that shows up as a silent stall on the first cut of each condition.
+            path = ensure_noon_lookfix(path)
+        self._tex.Set(path)
+        self._dome.GetIntensityAttr().Set(
+            float(self._base["dome_intensity"] * c["dome_intensity"] / 1000.0)
+            if override else float(c["dome_intensity"]))
+
+        # --- sun ---------------------------------------------------------
+        self._sun.GetIntensityAttr().Set(
+            float(self._base["sun_intensity"] * c["sun_intensity"] / 2450.0)
+            if override else float(c["sun_intensity"]))
+        # Elevation must track the HDRI's own measured sun: the disc is baked into
+        # the dome, so a DistantLight at a different elevation gives two sets of
+        # shadows (spec §4.4, deviation ceiling +-3 deg).
+        self._sun_rx.Set(90.0 - float(c["sun_elev"]))
+        self._sun.GetAngleAttr().Set(float(c["sun_angle_deg"]))
+        # `lp` carries the condition's rotz so `__call__` keeps the dome and the
+        # DistantLight coherent for the rest of the run.
+        self.lp["hdri_sun_rotz_offset"] = float(c["hdri_sun_rotz_offset"])
+        vis = _cond_sun_visible(c)
+        from pxr import UsdGeom as _UG
+        img = _UG.Imageable(self._sun.GetPrim())
+        (img.MakeVisible if vis else img.MakeInvisible)()
+        self(self.user_off)                       # re-apply rotation coherently
+
+        if exposure:
+            self.apply_exposure(c["ev_comp"])
+        return c
+
+    def apply_exposure(self, ev, iso_base=100.0):
+        """Exposure compensation through `filmIso`.
+
+        Deviation from spec §5.4, declared: the spec drives exposure with
+        `exposureTime`, but the only exposure key MEASURED to work in this
+        repository is `filmIso` (`t0_spike_report_v1.md` §7: ISO 100 -> 800 moved
+        the frame mean 127 -> 214 with AE off). `exposureTime` does not appear in
+        any runtime dump - what the dump carries is the legacy alias
+        `cameraShutter = 50.0` - so writing 1/500 s to a key whose live name is
+        unverified risks a 100x exposure error. ISO is exact, monotone and
+        already validated, and exposure compensation is a pure stop offset, so
+        which of the three exposure controls carries it is immaterial to the
+        image. `fNumber` stays at 5.0 so no depth of field is introduced (§3.5).
+        """
+        import carb
+        st = carb.settings.get_settings()
+        st.set("/rtx/post/tonemap/filmIso", float(iso_base * (2.0 ** ev)))
+        st.set("/rtx/post/tonemap/fNumber", 5.0)
+        return iso_base * (2.0 ** ev)
+
+
+def _cond_sun_visible(c):
+    """Whether the DistantLight should be visible for this condition.
+
+    Sunless conditions keep a visible, WIDENED sun rather than none: a fully
+    non-directional dome makes relief shading vanish (a real phenomenon, but an
+    unjudgeable cut), so spec §4.6 substitutes a cloud-transmitted soft direct at
+    about 1/6 of clear-sky. sceneC1's own 420 is the precedent.
+    """
+    return bool(c["sun_intensity"] > 0.0)
+
+
+def setup_lighting(stage, light_params, sun_az_offset, scene_key=None):
     """DomeLight (noon HDRI lookfix) + a DistantLight aligned with the HDRI sun direction.
     light_params: hdri, dome_intensity, noon_dome_rot, noon_sun_enable,
       noon_sun_elev, noon_sun_intensity, noon_sun_color, hdri_sun_rotz_offset.
-    Returns: the apply_dome_rot(user_off) callback (updates the dome and auxiliary sun Z rotation)."""
+    Returns: a `LightingControl` — callable as the old apply_dome_rot(user_off),
+      and carrying .apply_cond(cond) for role=data condition switching."""
     from pxr import UsdGeom, UsdLux, Gf
     lp = light_params
     dome = UsdLux.DomeLight.Define(stage, "/World/DomeLight")
@@ -3064,19 +3248,15 @@ def setup_lighting(stage, light_params, sun_az_offset):
     sxf = UsdGeom.Xformable(sun.GetPrim())
     sun_rz = sxf.AddRotateZOp()
     sun_rz.Set(0.0)
-    sxf.AddRotateXOp().Set(90.0 - float(lp["noon_sun_elev"]))
+    sun_rx = sxf.AddRotateXOp()
+    sun_rx.Set(90.0 - float(lp["noon_sun_elev"]))
     if not lp.get("noon_sun_enable", True):
         UsdGeom.Imageable(sun.GetPrim()).MakeInvisible()
 
-    def apply_dome_rot(user_off):
-        # Dome rotation = noon_dome_rot + sun_az_offset (scene) + the [ ] key offset
-        rot = (float(lp["noon_dome_rot"]) + float(sun_az_offset)
-               + float(user_off))
-        rot_op.Set(rot)
-        sun_rz.Set(rot + float(lp["hdri_sun_rotz_offset"]))
-
-    apply_dome_rot(0.0)
-    return apply_dome_rot
+    ctl = LightingControl(dome, sun, rot_op, sun_rz, sun_rx, tex_attr,
+                          lp, sun_az_offset, scene_key=scene_key)
+    ctl(0.0)
+    return ctl
 
 
 # ===========================================================================
@@ -3110,6 +3290,11 @@ def capture_pipeline(sim_app, views, out_dir_default, set_render_mode_fn,
     look_from_fn(eye, tgt)  : camera placement callback (eye and target as positional arguments)."""
     from omni.kit.viewport.utility import (get_active_viewport,
                                            capture_viewport_to_file)
+    # [lighting round, D1] The judge channel is the regression baseline. A data
+    # render never reaches this function - `run_data_render.py` replaces it - so
+    # arriving here with variation env set means a judge round is about to be
+    # contaminated. Fail, do not proceed (spec §2.3).
+    _variation().assert_role_gate()
     out_dir = os.environ.get("NEGOBS_CAPTURE_DIR", out_dir_default)
     os.makedirs(out_dir, exist_ok=True)
     mode_sel = os.environ.get("NEGOBS_CAPTURE_MODE", "rt")
@@ -3263,5 +3448,143 @@ def _geometry_selfcheck():
     print("=" * 68)
 
 
+def _variation_selfcheck():
+    """Preset / reference-lighting freeze check — spec §2.6. Pure maths, no pxr.
+
+    Item 3 of the spec's list is the important one: "with NEGOBS_RENDER_ROLE
+    unset, the lighting and camera code paths return the same values as the old
+    code". That is the assertion that turns "the default reproduces today's
+    output" from an intention into a test.
+    """
+    import re
+    ok = True
+
+    def chk(tag, cond, msg=""):
+        nonlocal ok
+        ok = ok and bool(cond)
+        print(f"  [{'PASS' if cond else 'FAIL'}] {tag}"
+              + (f" — {msg}" if msg else ""))
+
+    print("=" * 74)
+    print("scene_common — lighting/camera freeze self-check (spec §2.6)")
+    print("=" * 74)
+
+    # (1) grid_views must be byte-identical to the hardcoded expectation.
+    print("\n[1] grid_views preset coordinates are frozen")
+    p = math.radians(-10)
+    exp = {}
+    for hh in (0.3, 0.9, 1.8):
+        for dd in (2, 5, 10):
+            eye = [-float(dd), 0.0, float(hh)]
+            exp[f"preset_h{hh}_d{dd}"] = (
+                eye, [eye[0] + 5.0 * math.cos(p), 0.0,
+                      eye[2] + 5.0 * math.sin(p)])
+    got = grid_views(0.0)
+    chk("9 keys, exact names", sorted(got) == sorted(exp), str(sorted(got)[:3]))
+    bad = [k for k in exp
+           if got[k]["eye"] != exp[k][0] or got[k]["tgt"] != exp[k][1]]
+    chk("all 9 eye/tgt bit-identical", not bad, str(bad))
+    # Two absolute anchors, independent of the generator above.
+    chk("preset_h0.3_d2 eye == [-2.0, 0.0, 0.3]",
+        got["preset_h0.3_d2"]["eye"] == [-2.0, 0.0, 0.3])
+    chk("preset_h0.3_d2 tgt x == 2.9240387650610398",
+        got["preset_h0.3_d2"]["tgt"][0] == 2.9240387650610398,
+        repr(got["preset_h0.3_d2"]["tgt"][0]))
+    chk("gy shifts y only",
+        grid_views(-2.75)["preset_h0.9_d5"]["eye"] == [-5.0, -2.75, 0.9])
+    chk("view names still carry the h token is_graze_view() greps for",
+        all("h0.3" in k for k in got if k.startswith("preset_h0.3")))
+
+    # (2) every scene's PARAMS["light"] must agree with catalogue L0, field by
+    #     field. This is what makes "L0 == today" checkable rather than asserted.
+    print("\n[2] all 33 scenes' light dict vs catalogue L0")
+    try:
+        import variation_kit as vk
+    except Exception as e:                      # pragma: no cover
+        chk("variation_kit importable", False, str(e))
+        return 1
+    L0 = vk.CONDITIONS["L0"]
+    root = os.path.dirname(os.path.abspath(__file__))
+    files = sorted(glob.glob(os.path.join(root, "scenes", "main", "scene*.py"))
+                   + glob.glob(os.path.join(root, "scenes", "batch1",
+                                            "scene*.py")))
+    files = [f for f in files if "scene_common" not in f]
+    pat = {
+        "hdri": re.compile(r'hdri\s*=\s*"([^"]+)"'),
+        "dome_intensity": re.compile(r"dome_intensity\s*=\s*([-\d.]+)"),
+        "noon_sun_elev": re.compile(r"noon_sun_elev\s*=\s*([-\d.]+)"),
+        "noon_sun_intensity": re.compile(r"noon_sun_intensity\s*=\s*([-\d.]+)"),
+        "noon_dome_rot": re.compile(r"noon_dome_rot\s*=\s*([-\d.]+)"),
+        "hdri_sun_rotz_offset": re.compile(
+            r"hdri_sun_rotz_offset\s*=\s*([-\d.]+)"),
+    }
+    n_match, diffs = 0, []
+    for f in files:
+        key = os.path.basename(f).split("_")[0]
+        src = open(f, encoding="utf-8").read()
+        got_v = {}
+        for k, rx in pat.items():
+            m = rx.search(src)
+            if m:
+                got_v[k] = m.group(1)
+        if got_v.get("hdri") != L0["hdri"]:
+            # C1/C4 use OVERCAST_HDRI, and the three override scenes carry their
+            # own balance — expected, listed, not a failure.
+            diffs.append(f"{key}: hdri {got_v.get('hdri')}")
+            continue
+        mism = []
+        if float(got_v.get("dome_intensity", -1)) != L0["dome_intensity"]:
+            mism.append(f"dome {got_v.get('dome_intensity')}")
+        if float(got_v.get("noon_sun_intensity", -1)) != L0["sun_intensity"]:
+            mism.append(f"sun {got_v.get('noon_sun_intensity')}")
+        if abs(float(got_v.get("noon_sun_elev", -1)) - L0["sun_elev"]) > 0.05:
+            mism.append(f"elev {got_v.get('noon_sun_elev')}")
+        if abs(float(got_v.get("hdri_sun_rotz_offset", -1))
+               - L0["hdri_sun_rotz_offset"]) > 0.4:
+            mism.append(f"rotz {got_v.get('hdri_sun_rotz_offset')}")
+        if mism:
+            diffs.append(f"{key}: " + ", ".join(mism))
+        else:
+            n_match += 1
+    chk(f"{n_match} scenes match L0 exactly", n_match >= 28, f"{n_match}/33")
+    expected_div = {"sceneC1", "sceneC2", "sceneC4", "sceneD4"}
+    unexpected = [d for d in diffs if d.split(":")[0] not in expected_div]
+    chk("only the 4 known-divergent scenes differ", not unexpected,
+        str(unexpected) if unexpected else f"divergent: {sorted(expected_div)}")
+    for d in diffs:
+        print(f"         · {d}")
+
+    # (3) role unset -> no variation applied anywhere.
+    print("\n[3] role unset reproduces the old code path")
+    keep = {k: os.environ.get(k)
+            for k in list(vk.VARIATION_ENV) + ["NEGOBS_RENDER_ROLE"]}
+    try:
+        for k in keep:
+            os.environ.pop(k, None)
+        chk("render_role() == judge", vk.render_role() == vk.ROLE_JUDGE)
+        chk("gate passes with a clean env",
+            vk.assert_role_gate() == vk.ROLE_JUDGE)
+        chk("L0 dome/sun are literally the 33-scene constants",
+            (L0["dome_intensity"], L0["sun_intensity"]) == (1000.0, 2450.0))
+        chk("L0 lookfix True and sun angle 0.53 (the current DistantLight)",
+            L0["lookfix"] is True and L0["sun_angle_deg"] == 0.53)
+        chk("_SUN_CAP_DEG_DEFAULT still 0.6 (W2 value)",
+            _SUN_CAP_DEG_DEFAULT == 0.6)
+    finally:
+        for k, v in keep.items():
+            os.environ.pop(k, None)
+            if v is not None:
+                os.environ[k] = v
+
+    print("\n" + "=" * 74)
+    print("FREEZE SELF-CHECK " + ("PASS" if ok else "FAIL"))
+    print("=" * 74)
+    return 0 if ok else 1
+
+
 if __name__ == "__main__":
+    import sys as _sys
+    if "--variation" in _sys.argv:
+        raise SystemExit(_variation_selfcheck())
     _geometry_selfcheck()
+    raise SystemExit(_variation_selfcheck())

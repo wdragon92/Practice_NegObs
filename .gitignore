@@ -54,3 +54,11 @@ Docs/reference_photos/quarantine/
 # 공개 배포 시에는 CC0/BY/KOGL 18장만 사용한다.
 Docs/reference_photos/expanded/*
 !Docs/reference_photos/expanded/LICENSES.csv
+
+# Data-render outputs (role=data). Separate tree from look_check/ by design:
+# `regression_check.py` is only ever pointed at `look_check/scene*`, so a data
+# run is structurally invisible to it (lighting_camera_variation_spec_v1.md D1).
+# The manifests ARE the record — they are small, but the PNGs are not, so the
+# whole tree is ignored and `dataset/<run>/manifest.json` is reproducible from
+# `scripts/run_data_render.py` + the run stamp.
+dataset/

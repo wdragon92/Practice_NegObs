@@ -918,14 +918,16 @@ def ground_plan():
 
 
 def ground_plan_deck():
-    """Plan B - plank gaps only, on a lifted z (recess-as-tone).
+    """Plan B - plank gaps only, at the deck's own z (recess-as-tone).
 
-    Same correction as scene10: `build_deck_planks` puts the gap strip top at
-    `z - 0.020`, and the deck slab is a solid 0.14 m box, so at the deck's own
-    z the 120 strips would be sealed inside it and render zero pixels - the
-    burial mode the scene15 pilot measured for joints and manholes. z is
-    lifted so the strip top lands at `surface_top_z(deck z_top)`; the walking
-    surface and therefore GT do not move, and the strips keep `exc="plank_gap"`.
+    Same history as scene10: the W2-D round had to pass a lifted z because
+    `build_deck_planks` put the gap strip top at `z - 0.020`, and the deck slab
+    is a solid 0.14 m box, so at the deck's own z the 120 strips were sealed
+    inside it and rendered zero pixels - the burial mode the scene15 pilot
+    measured for joints and manholes. The builder now applies `surface_top_z()`
+    itself (kit defect R1, fixed 2026-07-30), so the lift is removed and the
+    strips land unchanged. The walking surface and therefore GT do not move,
+    and the strips keep `exc="plank_gap"`.
     """
     g = PARAMS["gkit"]
     d, st = PARAMS["deck"], PARAMS["stair"]
@@ -933,7 +935,7 @@ def ground_plan_deck():
         "deck_timber",
         region=(float(d["x0"]), float(d["y0"]),
                 float(d["x1"]), float(d["y1"])),
-        z=gk.surface_top_z(float(d["z_top"])) + 0.020,
+        z=float(d["z_top"]),
         gy=0.0, origin=(0.0, 0.0, 0.0),
         edges=[("deck_end", float(st["x0"]))],
         dists=(2, 5, 10), scene="scene12", tactile=(),

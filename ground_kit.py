@@ -73,6 +73,7 @@ Check all 33 scene plans without Isaac: `python3 ground_kit.py`
 
 from __future__ import annotations
 
+import inspect
 import math
 import os
 import sys
@@ -94,7 +95,7 @@ __all__ = [
     "TACTILE_YELLOW",
     # Layer 1
     "GROUND_DIMENSIONS", "GROUND_PROFILES", "TACTILE_SITES", "EXPECTED_FP",
-    "GROUND_INVARIANTS", "SCENE_PLANS",
+    "GROUND_INVARIANTS", "SCENE_PLANS", "SCATTER_POOLS", "DECAL_Z_ORDER",
     "GROUND_PROUD_MIN", "GROUND_PROUD_FLOOR", "GT_DELTA", "EDGE_STANDOFF",
     "EDGE_K", "GRAZE_ROW_SEP", "GRAZE_ROW_SEP_WORK", "GRAZE_ROW_SEP_1080",
     "GRAZE_FOOTPRINT_WORK", "GRAZE_FOOTPRINT_1080", "GRAZE_WORK_H",
@@ -124,6 +125,51 @@ EDGE_K = 40.0                  # GT-E1' required clearance = EDGE_K * z_e  [comp
 GKIT_PATH_TOKEN = "GKit"       # Every prim lives under this path (§1.2 skin defence)
 ALBEDO_CAP = 0.30              # Convention hard clamp
 TACTILE_ALBEDO_CAP = 0.55      # Tactile paving exception (statutory yellow, small area) - §12.5 (4)
+
+# -- (v1.3, defect R3) Decal z ladder -------------------------------------
+#    Every soiling/wear/transition builder used to top out at exactly
+#    `z + stain_proud`, so wherever two of them overlap in XY the shared top plane is
+#    **coincident** and the renderer has no depth ordering left - classic z-fighting
+#    shimmer. Measured overlaps existed in the shipped plans (scene07 `Stain_dirt/dirt_1`
+#    y -0.19..0.31 and `Stain_water/water_1` y 0.01..0.75 both inside the wear lane
+#    y +-0.60) `[measured - w2d_edit_g2 §5 R3]`.
+#    -> Each decal **family** gets a fixed rank and is lifted by `rank * DECAL_Z_EPS`;
+#    inside `build_stain_field`, which is one builder emitting eight different materials,
+#    each `kind` gets a further `DECAL_Z_SUB` (a stain-vs-stain overlap is the commonest
+#    one there is - dirt over water, gum over dirt).
+#    The order is bottom-up by what physically lies under what: the ground transition band
+#    and the waterline film are surface tone, the trodden lane sits on them, footprints
+#    press into that, and discrete soiling is the last thing to land.
+#    Budget: 5 x 0.2 mm + 7 x 0.1 mm = **1.7 mm span**, inside the 2 mm ceiling and under
+#    a tenth of `GT_DELTA`. It is real relief, not an epsilon trick, so it is reported in
+#    `proud` - GT-E1' then needs `EDGE_K * 0.0023 = 0.092 m` of edge clearance at worst,
+#    against a measured minimum decal edge gap of 0.60 m `[measured]`.
+#    The smallest step in the ladder is the 0.1 mm between two stain kinds; that is the
+#    one the GPU round should confirm on the scene07/scene10 d2/d5 crops (redteam rider 3).
+DECAL_Z_EPS = 0.0002           # Step between decal families
+DECAL_Z_SUB = 0.0001           # Step between kinds inside one family (stains)
+DECAL_Z_ORDER = {
+    "edge_break":  0,          # material-boundary transition band (lowest - it *is* the ground)
+    "silt_band":   1,          # waterline film / silt drift
+    "edge_litter": 2,          # organic matter swept to the path edge
+    "wear_lane":   3,          # trodden band along the walking line
+    "footprint":   4,          # trace pressed into the trodden band
+    "stain":       5,          # discrete soiling decals, + DECAL_Z_SUB per kind
+}
+
+
+def decal_proud(family, sub=0):
+    """Relief [m] a decal family (and, for stains, `kind`) stands proud of the paving.
+
+    `z + decal_proud(...)` is the rendered top - the R3 ladder that keeps two overlapping
+    decals off a shared plane.
+    """
+    if family not in DECAL_Z_ORDER:
+        raise KeyError(f"ground_kit: DECAL_Z_ORDER 에 '{family}' 가 없다. "
+                       "데칼 계열을 새로 만들면 사다리 순서를 먼저 등재하라.")
+    return (_dim("stain_proud") + DECAL_Z_ORDER[family] * DECAL_Z_EPS
+            + int(sub) * DECAL_Z_SUB)
+
 
 # -- [W2-C, C2] Diagnostic switch - with `NEGOBS_GKIT=0`, **not a single** element is built.
 #    Purpose: shoot ground-kit ON/OFF A/B in the same session at the same HEAD, turning
@@ -271,6 +317,59 @@ def _dim(key):
         raise KeyError(f"ground_kit: GROUND_DIMENSIONS 에 '{key}' 가 없다. "
                        "원장에 근거와 함께 먼저 등재하라.")
     return GROUND_DIMENSIONS[key][0]
+
+
+# ===========================================================================
+# [1b] Scatter pools - `profile["scatter"]["kind"]` -> asset pool  (v1.3, defect D-5)
+#
+#   Until v1.2 `apply_ground` called the scatter callback with **no `pool`**, so every
+#   profile fell through to the callback default (`scene_common.VEG_DEBRIS` = 5 fallen-leaf
+#   assets). A "gravel" prescription - P11 scene04, P12 scene07, P18 scene10 - therefore
+#   rendered as **autumn leaves**, which is a seasonal-asset leak in every scene whose
+#   identity is not already leaves `[measured - w2d_edit_g1 §5 D-5]`.
+#
+#   Rows are `(path relative to the vegetation asset root, effective XY cover [m2],
+#   triangles)` - the same 3-tuple contract `scene_common.scatter_debris` reads, where the
+#   cover feeds the count formula `n = A*(-ln(1-cover)) / mean_cov`. The kit stores only
+#   **relative paths**, so §1.2 (no scene_common dependency) still holds.
+#
+#   Cover was measured, not estimated: every triangle of each `.usda` was projected onto
+#   XY and rasterised at 2048 px on the long side (the method
+#   `props_audit_w1/B_groundcover_debris.md` §6 used for VEG_DEBRIS)
+#   `[measured 2026-07-30 - scratchpad measure_rocks.py]`. `zmax` (top of the rock above
+#   its own origin, which is the rock **centre**) is carried so `apply_ground` can seat the
+#   pool at the profile's `expose` budget instead of letting half a rock stand proud.
+SCATTER_POOLS = {
+    # W2-A4 procured set (audit B C3: `Rocks/rock_small_02~07,11~14`, 10 assets).
+    #   rock_small_01/08/09/10/15 are the W1 five; 01 carries a root rotateXYZ, so its
+    #   silhouette is not measurable in point space and it is left out of the pool.
+    "gravel": [
+        # path                          cover_m2  tris   (zmax 0.086/0.077/... - see below)
+        ("Rocks/rock_small_02.usda",    0.0338,   460),
+        ("Rocks/rock_small_03.usda",    0.0301,   432),
+        ("Rocks/rock_small_04.usda",    0.0331,   378),
+        ("Rocks/rock_small_05.usda",    0.0221,   480),
+        ("Rocks/rock_small_06.usda",    0.0240,   392),
+        ("Rocks/rock_small_07.usda",    0.0119,   496),
+        ("Rocks/rock_small_11.usda",    0.0289,   436),
+        ("Rocks/rock_small_12.usda",    0.0310,   400),
+        ("Rocks/rock_small_13.usda",    0.0227,   398),
+        ("Rocks/rock_small_14.usda",    0.0330,   428),
+    ],
+    "leaf": None,          # -> the callback's own default pool (VEG_DEBRIS). sceneC2 only.
+}
+SCATTER_POOLS["rock"] = SCATTER_POOLS["gravel"]
+
+#   Mean top-of-rock above the asset origin over the gravel pool [m] `[measured]`. The
+#   origin is the rock centre, so dropping one straight onto the ground leaves ~72 mm
+#   standing proud - above the `scatter_expose_max` 0.06 m the trail statistics give. The
+#   sink that `apply_ground` passes is `mean_zmax - expose`, i.e. the pool is half-buried
+#   exactly as `[통계] 등산로 6/6 — φ≤0.12 반매몰` describes.
+#   Residual worth an eyes-on: one `sink` has to serve every draw, and the callback's own
+#   `scale_jitter` is (0.75, 1.25), so per-instance exposure spreads **0.023-0.095 m**
+#   around the 0.060 target and the pool's native width (0.16-0.24 m) is wider than the
+#   phi <= 0.12 the statistic describes - these are rubble, not pea gravel `[measured]`.
+SCATTER_POOL_ZMAX = {"gravel": 0.0721, "rock": 0.0721}
 
 
 # ===========================================================================
@@ -481,6 +580,22 @@ def _norm_region(region):
     return (min(x0, x1), min(y0, y1), max(x0, x1), max(y0, y1))
 
 
+def _grid_ticks(a0, a1, step, o):
+    """Periodic grid coordinates `o + i*step` inside `[a0, a1]`.
+
+    **One** generator for both the builder that lays the joints and the edge guard that
+    decides which of them to skip - if the two computed their ticks separately, a change
+    to one would silently stop the `skip_x`/`skip_y` coordinates from matching (the skip
+    lists are matched on the rounded coordinate, not on an index).
+    """
+    if not step or float(step) <= 0:
+        return []
+    step, o = float(step), float(o)
+    i0 = int(math.ceil((float(a0) - o) / step - 1e-9))
+    i1 = int(math.floor((float(a1) - o) / step + 1e-9))
+    return [o + i * step for i in range(i0, i1 + 1)]
+
+
 # ===========================================================================
 # [4] The 15 new small builders - all **geometry**. Materials belong to T1 (spec §4.4).
 #
@@ -525,16 +640,9 @@ def build_joint_grid(kit, path, region, z, mtl, step_x=3.0, step_y=None,
     n0 = kit.mark()
     elems = []
 
-    def _ticks(a0, a1, step, o):
-        if not step or step <= 0:
-            return []
-        i0 = int(math.ceil((a0 - o) / step - 1e-9))
-        i1 = int(math.floor((a1 - o) / step + 1e-9))
-        return [o + i * step for i in range(i0, i1 + 1)]
-
     skipx = set(round(float(v), 4) for v in skip_x)
     skipy = set(round(float(v), 4) for v in skip_y)
-    for i, xx in enumerate(_ticks(x0, x1, step_x, ox)):
+    for i, xx in enumerate(_grid_ticks(x0, x1, step_x, ox)):
         if round(xx, 4) in skipx:
             continue
         jx = xx + (rng.random() - 0.5) * 2.0 * jitter
@@ -546,7 +654,7 @@ def build_joint_grid(kit, path, region, z, mtl, step_x=3.0, step_y=None,
                            proud=GROUND_PROUD_MIN, mtl_key="joint",
                            recess_nominal=recess,
                            line="cross_periodic", albedo=0.12))
-    for i, yy in enumerate(_ticks(y0, y1, step_y, oy) if step_y else []):
+    for i, yy in enumerate(_grid_ticks(y0, y1, step_y, oy) if step_y else []):
         if round(yy, 4) in skipy:
             continue
         jy = yy + (rng.random() - 0.5) * 2.0 * jitter
@@ -866,12 +974,15 @@ def build_stain_field(kit, path, region, z, mtl, kind="dirt", n=6, seed=0,
     `grime_band` is the wall-to-floor junction band and covers **the floor side only**
     (the wall side waits for T1).
 
-    Prims: 1 each.  GT: +0.6 mm - not a drop.
+    Prims: 1 each.  GT: +1.6 to +2.3 mm - not a drop (R3 ladder rank 5 + kind).
     """
     if kind not in _STAIN_KINDS:
         raise ValueError(f"ground_kit: stain kind 는 {_STAIN_KINDS} 중 하나.")
     x0, y0, x1, y1 = _norm_region(region)
-    pr = _dim("stain_proud")
+    # R3 - decal z ladder. The per-kind sub-step is what keeps `Stain_dirt` off
+    # `Stain_water`'s plane where they overlap, which is the commonest coplanar pair in
+    # the shipped plans (9 of 18) `[measured]`.
+    pr = decal_proud("stain", _STAIN_KINDS.index(kind))
     am = _dim("stain_area_mean")
     albedo = 0.16 if albedo is None else float(albedo)
     rng = det_rng("gkit.stain", _seed_key(path), kind, seed)
@@ -909,9 +1020,9 @@ def build_footprints(kit, path, path_pts, z, mtl, n=10, seed=0, stride=0.62):
     """**Footprints and single-wheel tracks** (D2 poured slab). These are traces, not
     objects - unrelated to the "no person/vehicle placement" convention `[spec §11]`.
 
-    Prims: 1 each.  GT: +0.6 mm - not a drop.
+    Prims: 1 each.  GT: +1.4 mm - not a drop (R3 ladder rank 4).
     """
-    pr = _dim("stain_proud")
+    pr = decal_proud("footprint")      # R3 - decal z ladder
     rng = det_rng("gkit.foot", _seed_key(path), seed)
     n0 = kit.mark()
     elems = []
@@ -952,11 +1063,11 @@ def build_wear_lane(kit, path, centerline, z, mtl, width=None,
     """**Trampling wear band** - a lowered-albedo strip along the walking line.
     `[statistic]` 6/6 on hiking trails.
 
-    Prims: 1-3.  GT: unchanged (a decal on the surface).
+    Prims: 1-3.  GT: unchanged (a decal on the surface, R3 ladder rank 3).
     """
     width = _dim("wear_lane_w") if width is None else float(width)
     gain = _dim("wear_albedo_gain") if albedo_gain is None else float(albedo_gain)
-    pr = _dim("stain_proud")
+    pr = decal_proud("wear_lane")      # R3 - decal z ladder
     n0 = kit.mark()
     elems = []
     (ax, ay), (bx, by) = centerline
@@ -981,10 +1092,10 @@ def build_edge_litter(kit, path, centerline, z, mtl, width=None):
     """**Edge organic-matter band** - organic matter swept up along both edges of a path
     (season neutral).
 
-    Prims: 2.  GT: unchanged.
+    Prims: 2.  GT: unchanged (R3 ladder rank 2).
     """
     width = _dim("edge_litter_w") if width is None else float(width)
-    pr = _dim("stain_proud")
+    pr = decal_proud("edge_litter")    # R3 - decal z ladder
     n0 = kit.mark()
     elems = []
     (ax, ay), (bx, by) = centerline
@@ -1020,10 +1131,10 @@ def build_edge_break(kit, path, line, z, mtl, width=None, density=12.0,
     `scatter_debris` callback - the `edge_bias` argument already exists and connects
     directly `[measured - scene_common.py:1805]`).
 
-    Prims: 1 + scatter (delegated).  GT: unchanged.
+    Prims: 1 + scatter (delegated).  GT: unchanged (R3 ladder rank 0 - the floor).
     """
     width = _dim("edge_break_w") if width is None else float(width)
-    pr = _dim("stain_proud")
+    pr = decal_proud("edge_break")     # R3 - decal z ladder
     n0 = kit.mark()
     elems = []
     (ax, ay), (bx, by) = line
@@ -1053,7 +1164,21 @@ def build_deck_planks(kit, path, x0, y0, x1, y1, z, mtl, plank_w=None,
     are built.
 
     Plank width 0.145, gap 0.005 `[specification KCS 34 5-2-1 2.3.1]`. The gap is a 20 mm
-    recess (inside the plank thickness - **the top z is unchanged**, so it is not a GT drop).
+    recess (inside the plank thickness - **the walking surface z is unchanged**, so it is
+    not a GT drop).
+
+    Recess implementation **(v1.3 correction, defect R1)**: the top is `surface_top_z(z)`
+    = deck top +0.6 mm and the recess reads as a **dark material (tone)** - identical to
+    what `cb40ae8` did for joints and manholes. v1.2 put the strip top at `z - 0.020`,
+    i.e. **below** the deck surface; scene decks are solid boxes (scene12's slab spans
+    z -0.14..0), so every strip was sealed inside the slab and rendered **zero pixels** -
+    120 of scene12's 129 prims and 10 of scene10's 17 `[measured - w2d_edit_g2 §5 R1]`.
+    Both scenes worked around it by lifting the whole plan z; that lift is removed now
+    that the builder is correct, and the resulting USD is **bit-identical** to the
+    worked-around geometry (`surface_top_z(z)+0.020` fed to the old formula and `z` fed to
+    the new one both put the strip centre at `z - 0.0094`) `[calc]`.
+    The nominal recess stays in the ledger as `recess_nominal`, exactly as joints do, so
+    the GT and specification basis is not lost and B6/B7 keep treating it as a recess.
 
     Prims: 1 per gap (+ end grain).  GT: recess 20 mm - not a drop.
     """
@@ -1061,6 +1186,9 @@ def build_deck_planks(kit, path, x0, y0, x1, y1, z, mtl, plank_w=None,
     gap = _dim("deck_plank_gap") if gap is None else float(gap)
     butt_len = _dim("deck_butt_len") if butt is None else float(butt)
     x0, y0, x1, y1 = _norm_region((x0, y0, x1, y1))
+    thick = 0.020                      # Strip thickness (only the top is visible)
+    cz = surface_top_z(z) - thick / 2.0        # (v1.3) Prevents burial in the solid slab
+    recess = -thick                    # Nominal groove depth, kept for GT (§6.1)
     n0 = kit.mark()
     elems = []
     pitch = plank_w + gap
@@ -1072,24 +1200,24 @@ def build_deck_planks(kit, path, x0, y0, x1, y1, z, mtl, plank_w=None,
         if xx >= x1:
             break
         p = f"{path}/Gap_{i}"
-        kit.B(p, (xx, (y0 + y1) / 2.0, float(z) - 0.020 - 0.010),
-              (gap, y1 - y0, 0.020), mtl)
+        kit.B(p, (xx, (y0 + y1) / 2.0, cz), (gap, y1 - y0, thick), mtl)
         elems.append(_elem("plank_gap", p,
-                           _box_aabb(xx, (y0 + y1) / 2.0, float(z) - 0.030,
-                                     gap, y1 - y0, 0.020),
-                           proud=-0.020, mtl_key="deck_gap",
+                           _box_aabb(xx, (y0 + y1) / 2.0, cz,
+                                     gap, y1 - y0, thick),
+                           proud=GROUND_PROUD_MIN, mtl_key="deck_gap",
+                           recess_nominal=recess,
                            line="cross_periodic", exc="plank_gap",
                            deck=True, albedo=0.06))
     nb = max(0, int((y1 - y0) / butt_len) - 1)
     for i in range(nb):
         yy = y0 + (i + 1) * butt_len
         q = f"{path}/Butt_{i}"
-        kit.B(q, ((x0 + x1) / 2.0, yy, float(z) - 0.030),
-              (x1 - x0, gap, 0.020), mtl)
+        kit.B(q, ((x0 + x1) / 2.0, yy, cz), (x1 - x0, gap, thick), mtl)
         elems.append(_elem("plank_butt", q,
-                           _box_aabb((x0 + x1) / 2.0, yy, float(z) - 0.030,
-                                     x1 - x0, gap, 0.020),
-                           proud=-0.020, mtl_key="deck_gap", line="long",
+                           _box_aabb((x0 + x1) / 2.0, yy, cz,
+                                     x1 - x0, gap, thick),
+                           proud=GROUND_PROUD_MIN, mtl_key="deck_gap",
+                           recess_nominal=recess, line="long",
                            exc="plank_gap", deck=True, albedo=0.06))
     return dict(prim_count=kit.count_since(n0), elems=elems)
 
@@ -1099,11 +1227,11 @@ def build_silt_band(kit, path, region, waterline, z, mtl, width=None,
     """**Flood silt / water stain / sand drift band** - waterline traces at waterfronts
     (03/09/12/18).
 
-    Prims: 1-2.  GT: unchanged.
+    Prims: 1-2.  GT: unchanged (R3 ladder rank 1).
     """
     x0, y0, x1, y1 = _norm_region(region)
     width = _dim("silt_band_w") if width is None else float(width)
-    pr = _dim("stain_proud")
+    pr = decal_proud("silt_band")      # R3 - decal z ladder
     n0 = kit.mark()
     elems = []
     for i in range(int(n)):
@@ -1172,16 +1300,57 @@ def _ik_gutter_l(kit, path, x0, y0, x1, y1, z, mtl):
               albedo=0.20)], ik=r)
 
 
+def _marking_local_box(r, kw):
+    """Local-frame extent of a `build_road_marking` result: `(lx0, ly0, lx1, ly1)`.
+
+    `infra_kit` lays every marking with **+X = length, +Y = width** and then rotates the
+    whole thing about `(x0, y0)` by `yaw_deg`, so the exact world AABB is this box rotated
+    (see `_marking_aabb`). One entry per `kind` the builder supports.
+    """
+    kind = r.get("kind")
+    lw = float(kw.get("line_w", 0.15))
+    if kind == "parking":
+        total = float(r["n_stall"]) * float(r["stall"][0])
+        return (-lw / 2.0, -lw / 2.0, total + lw / 2.0,
+                float(r["stall"][1]) + lw / 2.0)
+    if kind == "crosswalk":
+        return (0.0, 0.0, float(kw.get("band_w", 4.00)),
+                float(r.get("walk_len", 8.00)))
+    # "line" - a single stripe of `length` along +X, `line_w` wide, centred on y = 0.
+    L = float(r.get("length", 3.0))
+    w = max(float(r.get("width", 0.15)), 0.15)
+    return (0.0, -w / 2.0, L, w / 2.0)
+
+
+def _marking_aabb(x0, y0, z, yaw_deg, local, t=0.003):
+    """Exact world AABB of a local-frame box rotated by `yaw_deg` about `(x0, y0)`.
+
+    (v1.3, defect F1) v1.2 built this as `_box_aabb(x0 + L/2, y0, ..., L, w, ...)` - it
+    laid the length along **+X regardless of `yaw_deg`** while the *same* function
+    classified the line as `cross`/`long` **using** the yaw. Any transverse marking was
+    therefore judged as if it ran along +X: sceneD2's opening-perimeter west leg tripped
+    B8 (void intersection) and B6 (edge standoff) on geometry that is clear of both, and
+    the leg had to be deferred `[measured - w2d_edit_gb §5 F1]`. scene13/N4/D1's yaw-0
+    lane lines never showed it, which is why it survived.
+    """
+    a = math.radians(float(yaw_deg))
+    ca, sa = math.cos(a), math.sin(a)
+    lx0, ly0, lx1, ly1 = local
+    xs, ys = [], []
+    for lx, ly in ((lx0, ly0), (lx1, ly0), (lx1, ly1), (lx0, ly1)):
+        xs.append(float(x0) + lx * ca - ly * sa)
+        ys.append(float(y0) + lx * sa + ly * ca)
+    return (min(xs), min(ys), float(z), max(xs), max(ys), float(z) + float(t))
+
+
 def _ik_marking(kit, path, kind, mtl, x0, y0, z, yaw_deg=0.0, **kw):
     n0 = kit.mark()
     r = ik.build_road_marking(kit, path, kind, mtl, x0, y0, z,
                               yaw_deg=yaw_deg, **kw)
-    L = float(r.get("length", 3.0))
-    w = float(r.get("width", 0.15))
     line = "cross" if 45.0 < (abs(yaw_deg) % 180.0) < 135.0 else "long"
     return dict(prim_count=kit.count_since(n0), elems=[
         _elem("marking", path,
-              _box_aabb(x0 + L / 2.0, y0, z + 0.0015, L, max(w, 0.15), 0.003),
+              _marking_aabb(x0, y0, z, yaw_deg, _marking_local_box(r, kw)),
               proud=ik.INFRA_DIMENSIONS["marking_proud"][0],
               mtl_key="marking", line=line, albedo=ALBEDO_CAP)], ik=r)
 
@@ -1240,6 +1409,11 @@ def _ik_ramp_curb(kit, path, profile, y_neg, y_pos, mtl, height=0.12,
 # ===========================================================================
 _URBAN_INFRA_KEYS = ("manhole", "gully", "gutter_L", "gutter_U", "marking",
                      "trench")
+
+# What `overrides[key] = None` clears a profile key **to** (§F2 explicit-clear semantic).
+# Keys absent from the table clear to `None`.
+_OVERRIDE_EMPTY = {"pave": dict, "infra": dict, "surface": tuple,
+                   "extras": tuple, "scatter": lambda: None}
 
 
 def _P(doc, natural=False, pave=None, infra=None, surface=(), extras=(),
@@ -1702,7 +1876,24 @@ def plan_ground(profile, region, *, z=0.0, z_fn=None, gy=0.0,
     prof = dict(GROUND_PROFILES[profile])
     if overrides:
         for k, v in dict(overrides).items():
-            if isinstance(v, dict) and isinstance(prof.get(k), dict):
+            if v is None:
+                # (v1.3, defect F2) **Explicit clear.** `infra=None` drops every key the
+                # profile declared. Before this there was no way to say "clear": a dict
+                # override is *merged*, so `infra=dict()` silently kept the whole urban
+                # infra set - sceneC2 asked for `infra=dict()` and still got 1 manhole +
+                # 2 gullies + 1 L-gutter, 12 prims, on a row whose spec says "urban
+                # infrastructure 0" `[measured - w2d_edit_gb §5 F2]`.
+                prof[k] = _OVERRIDE_EMPTY.get(k, lambda: None)()
+            elif isinstance(v, dict) and isinstance(prof.get(k), dict):
+                if not v:
+                    # An empty merge is a no-op, and it is a no-op that *looks* like a
+                    # clear. Refusing it is the whole point of F2 - staying silent is how
+                    # the defect shipped.
+                    raise ValueError(
+                        f"ground_kit: overrides['{k}'] = {{}} 는 아무 것도 하지 "
+                        f"않는다(사전 오버라이드는 **병합**이다). 프로파일 값을 "
+                        f"비우려면 `{k}=None`, 일부만 끄려면 0/() 를 명시하라 "
+                        "(예: infra=dict(manhole=0, gully=0, gutter_L=0)).")
                 d = dict(prof[k]); d.update(v); prof[k] = d
             else:
                 prof[k] = v
@@ -1769,6 +1960,12 @@ def plan_ground(profile, region, *, z=0.0, z_fn=None, gy=0.0,
     plan = dict(profile=profile, scene=scene, elements=elems,
                 materials_needed=mats, scatter_req=scat_reqs,
                 prims=prims, instances=inst, ops=ops,
+                # (v1.3, part of D-5) The **effective** scatter prescription, i.e. after
+                # `overrides`. `apply_ground` used to re-read `GROUND_PROFILES[...]`
+                # directly, so a scene that overrode the scatter got the plan's count in
+                # the B10 budget and the *profile's* count in the USD - scene10 planned
+                # 120 and applied with max_count 180 `[measured]`.
+                scatter=(dict(sc_spec) if sc_spec else None),
                 gt=dict(delta=GT_DELTA), gt_changes=gt_changes, ctx=ctx,
                 unit_cell=GROUND_DIMENSIONS["unit_cell"].get(profile))
     _assert_unit_cell(profile, prof)
@@ -2036,6 +2233,50 @@ def frame_budget(plan, *, h=0.3, dists=None, gy=None, origin=None):
 # ===========================================================================
 # [11] apply_ground - plan -> USD (layer 3)
 # ===========================================================================
+_MISSING = object()
+
+
+def _scatter_pool_kw(scatter_fn, spec):
+    """Extra kwargs that pin the scatter callback to the profile's asset pool (D-5).
+
+    Returns `{}` when the prescription names no kind, when the kind maps to the callback's
+    own default (`leaf`), or when the injected callback predates the `pool=` contract -
+    the kit must degrade to v1.2 behaviour rather than crash a render on a signature
+    mismatch.
+    """
+    kind = (spec or {}).get("kind")
+    pool = SCATTER_POOLS.get(kind) if kind else None
+    if not pool:
+        if kind and kind not in SCATTER_POOLS:
+            raise ValueError(
+                f"ground_kit: 산포 kind '{kind}' 가 SCATTER_POOLS 에 없다. "
+                f"등재: {sorted(SCATTER_POOLS)} — 계절 자산 유출을 막으려면 "
+                "풀을 먼저 등재하라(D-5).")
+        return {}
+    try:
+        params = inspect.signature(scatter_fn).parameters
+    except (TypeError, ValueError):             # builtins / C callables
+        return {}
+
+    def takes(name):
+        return (name in params
+                or any(p.kind is inspect.Parameter.VAR_KEYWORD
+                       for p in params.values()))
+
+    if not takes("pool"):
+        print("[ground_kit][경고] 산포 콜백이 pool= 을 받지 않는다 — "
+              f"kind '{kind}' 처방이 콜백 기본 풀로 떨어진다(D-5).")
+        return {}
+    kw = dict(pool=list(pool))
+    expose = (spec or {}).get("expose")
+    zmax = SCATTER_POOL_ZMAX.get(kind)
+    if expose is not None and zmax is not None and takes("sink"):
+        # The asset origin is the rock centre, so `sink = zmax - expose` leaves exactly
+        # the prescribed exposure standing proud (`scatter_expose_max` 0.06 m).
+        kw["sink"] = round(float(zmax) - float(expose), 6)
+    return kw
+
+
 def apply_ground(kit, prefix, plan, mtls, *, skin_exclude=None, scatter=None,
                  slabs=()):
     """Turn a plan into real USD prims.
@@ -2140,6 +2381,15 @@ def apply_ground(kit, prefix, plan, mtls, *, skin_exclude=None, scatter=None,
     n_inst = 0
     if scatter is not None:
         stage = getattr(kit, "stage", None)
+        # (v1.3, defect D-5) Resolve the profile's **scatter kind** to an asset pool.
+        #   Until v1.2 the callback was called with no `pool`, so every profile - gravel
+        #   included - fell through to `VEG_DEBRIS`, i.e. autumn leaves, and scenes 07/10
+        #   (P12/P18) shipped a seasonal-asset violation. `sink` seats the pool at the
+        #   profile's own `expose` budget instead of leaving half a rock proud.
+        sp = plan.get("scatter", _MISSING)
+        if sp is _MISSING:                      # Plan built before v1.3
+            sp = GROUND_PROFILES[plan["profile"]].get("scatter")
+        pool_kw = _scatter_pool_kw(scatter, sp)
         for i, s in enumerate(plan["scatter_req"]):
             (ax, ay), (bx, by) = s["line"]
             w = float(s["width"]) / 2.0
@@ -2149,15 +2399,14 @@ def apply_ground(kit, prefix, plan, mtls, *, skin_exclude=None, scatter=None,
                         plan["ctx"]["z"], cover=0.10,
                         seed=det_seed("gkit.scatter", prefix, i),
                         edge_bias=float(s.get("edge_bias", 0.0)),
-                        max_count=int(s["count"]))
+                        max_count=int(s["count"]), **pool_kw)
             n_inst += int(n or 0)
-        sp = GROUND_PROFILES[plan["profile"]].get("scatter")
         if sp:
             x0, y0, x1, y1 = plan["ctx"]["region"]
             n = scatter(stage, f"{prefix}/Scatter_Field", x0, y0, x1, y1,
                         plan["ctx"]["z"], cover=float(sp.get("cover", 0.15)),
                         seed=det_seed("gkit.scatter.field", prefix),
-                        max_count=int(sp.get("count", 0)))
+                        max_count=int(sp.get("count", 0)), **pool_kw)
             n_inst += int(n or 0)
 
     return dict(prims=n_prims, instances=n_inst,
@@ -2195,32 +2444,67 @@ def _op(name, fn, path, args=(), kw=None):
     return dict(name=name, fn=fn, path=path, args=tuple(args), kw=dict(kw or {}))
 
 
-def _edge_guard_ticks(ctx, step, origin_x):
-    """Filter out transverse joint coordinates in front of an edge that cannot meet GT-E2
-    (delta >= 16 rows).
+def _tick_guarded(ctx, s_tick, half_w=0.0):
+    """Would a transverse line at forward s = `s_tick` fail GT-E2 on any shot?
+
+    The arithmetic is **the same one `frame_budget` B7 runs**: an element counts only if
+    its ground distance sits inside the GRAZE E band `[0.7d, 2.2d]`, and it fails if its
+    row is closer to the edge row than `graze_row_sep_1080(d)`. `half_w` is half the joint
+    width, so the two rims are tested exactly as B7 tests `sa`/`sb`.
+    """
+    h0 = ctx["heights"][0]
+    for _n, se, _o in ctx["edges"]:
+        for d in ctx["dists"]:
+            Xm = d + s_tick
+            if not ((GRAZE_E_BAND[0] * d) <= Xm <= (GRAZE_E_BAND[1] * d)):
+                continue
+            r_edge = cam_row(d + se, h0)
+            worst = min(abs(cam_row(max(0.05, d + s_tick + o), h0) - r_edge)
+                        for o in (-half_w, +half_w))
+            if worst < graze_row_sep_1080(d, h0):
+                return True
+    return False
+
+
+def _edge_guard_ticks(ctx, step_x, step_y, origin_xy, width=0.0):
+    """Filter out the transverse joint coordinates in front of an edge that cannot meet
+    GT-E2. Returns `(skip_x, skip_y)` in **world** coordinates.
 
     A generalisation of spec §5.4 15-1 "exclude x=0 (edge forbidden zone)". Even in a
     periodic grid, **the one line stuck to the edge** contaminates the edge signal - only
     that line is dropped.
+
+    **(v1.3 correction, defect D-1/R4)** v1.2 had two frame bugs in three lines:
+
+    1. it fed the **world x** of each tick straight into `drow()`, which expects a
+       **forward-s offset**. On any scene whose grid origin is not the world origin the
+       comparison was meaningless - scene05 (origin -1.5) dropped the tick at x=-1.8 for
+       the wrong reason (it read drow 11.16 where the truth is 1.57) and **kept** x=-3.6
+       (read 28.54, true 13.51 < 16), which then raised B7 on `Joints/JX_5`; scene11
+       (origin x=15) dropped the joint 15 m *behind* the drop edge, leaving 2 joints where
+       the profile intends 3 `[measured - w2d_edit_g1 §5 D-1 / g2 §5 R4]`.
+    2. it always guarded the **X** family regardless of the travel axis, so on a -y scene
+       (06) the guard was applied to the joints that run *parallel* to travel and the
+       transverse family was never examined at all.
+
+    Both are fixed by converting each tick to forward s through the plan's own
+    `_View(origin, gy, axis)` and guarding the family perpendicular to the travel axis.
+    Because the test is now B7's own arithmetic, the guard can no longer drop a tick that
+    B7 would have passed (a content loss) nor keep one B7 will reject (a hard raise).
     """
-    if not step or not ctx["edges"]:
-        return []
-    x0, _y0, x1, _y1 = ctx["region"]
-    skip = []
-    i0 = int(math.ceil((x0 - origin_x) / step - 1e-9))
-    i1 = int(math.floor((x1 - origin_x) / step + 1e-9))
-    for i in range(i0, i1 + 1):
-        xx = origin_x + i * step
-        bad = False
-        for _n, se, _o in ctx["edges"]:
-            for d in ctx["dists"]:
-                h0 = ctx["heights"][0]
-                if abs(drow(xx - se, d, h0)) < graze_row_sep_1080(d, h0) \
-                        and (0.7 * d) <= (d + xx - se) <= (2.2 * d):
-                    bad = True
-        if bad:
-            skip.append(xx)
-    return skip
+    if not ctx["edges"]:
+        return [], []
+    view = _View(ctx["origin"], ctx["gy"], ctx["axis"])
+    x0, y0, x1, y1 = ctx["region"]
+    ox, oy = float(origin_xy[0]), float(origin_xy[1])
+    hw = abs(float(width)) / 2.0
+    if abs(view.fwd[0]) > 0.5:              # Travel axis = +-X -> the X ticks cross it
+        ym = (y0 + y1) / 2.0
+        return [xx for xx in _grid_ticks(x0, x1, step_x, ox)
+                if _tick_guarded(ctx, view.s_of(xx, ym), hw)], []
+    xm = (x0 + x1) / 2.0                    # Travel axis = +-Y -> the Y ticks cross it
+    return [], [yy for yy in _grid_ticks(y0, y1, step_y, oy)
+                if _tick_guarded(ctx, view.s_of(xm, yy), hw)]
 
 
 def _trim_region(ctx, region, standoff=EDGE_STANDOFF):
@@ -2273,10 +2557,15 @@ def _compose_ops(profile, prof, ctx, tactile_sites, sites, extras_args):
     pv = prof["pave"]
     jkind = pv.get("joint")
     if jkind in ("slab", "contraction", "expansion", "interlock"):
-        skip = _edge_guard_ticks(ctx, pv.get("step_x"), ox)
+        # The guard needs the same groove width the builder will use, so the two rims of
+        # the joint are tested exactly as `frame_budget` B7 tests them (D-1).
+        jw = float(pv.get("groove_w") or _dim("joint_%s_w" % jkind))
+        skip_x, skip_y = _edge_guard_ticks(ctx, pv.get("step_x"),
+                                           pv.get("step_y"), (ox, oy), width=jw)
         fn = build_slab_joints if jkind == "slab" else build_joint_grid
         kw = dict(step_x=pv.get("step_x"), step_y=pv.get("step_y"),
-                  seed=seed, origin_xy=(ox, oy), skip_x=skip)
+                  seed=seed, origin_xy=(ox, oy),
+                  skip_x=skip_x, skip_y=skip_y)
         if pv.get("groove_w"):
             kw["width"] = pv["groove_w"]
         if pv.get("recess"):
@@ -2472,9 +2761,24 @@ def _build_weed_band(kit, path, region, z, mtl, n=6, seed=0, h_max=None):
 def _S(profile, region, **kw):
     d = dict(profile=profile, region=region, z=0.0, gy=0.0,
              origin=(0.0, 0.0, 0.0), axis="+x", edges=(), voids=(),
-             dists=(2, 5, 10), tactile=(), sites={}, extras_args={}, caps={})
+             dists=(2, 5, 10), tactile=(), sites={}, extras_args={}, caps={},
+             overrides=None)
     d.update(kw)
     return d
+
+
+def _fixture_plan(scene, seed=7, **over):
+    """`SCENE_PLANS[scene]` -> `plan_ground(...)`. One call site so a new fixture field
+    cannot be wired into some of the self-check passes and not the others (`overrides` was
+    exactly that risk when D-6 was fixed)."""
+    sp = SCENE_PLANS[scene]
+    kw = dict(z=sp["z"], gy=sp["gy"], origin=sp["origin"], axis=sp["axis"],
+              edges=sp["edges"], voids=sp["voids"], dists=sp["dists"],
+              scene=scene, tactile=sp["tactile"], sites=sp["sites"],
+              caps=sp["caps"], extras_args=sp["extras_args"],
+              overrides=sp["overrides"], seed=seed)
+    kw.update(over)
+    return plan_ground(sp["profile"], sp["region"], **kw)
 
 
 _E0 = (("edge", 0.0),)                       # Standard drop edge = travel axis origin
@@ -2499,7 +2803,14 @@ SCENE_PLANS = {
                   tactile=("stair_top",),
                   sites=dict(manhole=[(-1.20, 0.35)],
                              gully=[(-0.95, -3.6), (-0.95, 3.6)])),
-    "scene03": _S("levee_paved", (-12.0, -3.0, 6.0, 3.0), edges=_E0),
+    # 03 - (v1.3, defect D-6) The fixture used to run plain `levee_paved`, so the CPU
+    #   self-check green-lit **manhole + 2 gullies + an L-gutter on a natural scene** - a
+    #   §5.7 violation the gate structurally cannot see, because `natural` is a *profile*
+    #   flag and the fixture never set it. The real scene forces `natural=True` and zeroes
+    #   the infra; the fixture now mirrors that (via the F2 explicit clear), so a
+    #   regression that puts urban infra back on 03 fails `python3 ground_kit.py`.
+    "scene03": _S("levee_paved", (-12.0, -3.0, 6.0, 3.0), edges=_E0,
+                  overrides=dict(natural=True, infra=None)),
     "scene04": _S("trail_soil", (-12.0, -1.6, 2.0, 1.6), edges=_E0),
     "scene05": _S("plaza_granite", (-12.0, -5.0, -0.5, 5.0), edges=_E0,
                   sites=dict(manhole=[(-3.5, -1.0), (-8.5, 0.0)],
@@ -2711,6 +3022,21 @@ def _selfcheck():
             for prof in GROUND_PROFILES.values() if prof["natural"]))
     chk("프로파일 tactile 전부 None (§3.4)",
         all(p["tactile"] is None for p in GROUND_PROFILES.values()))
+    # (v1.3, R3) The decal ladder must stay a tone separator, never relief.
+    _lad = [decal_proud(f, i if f == "stain" else 0)
+            for f in DECAL_Z_ORDER
+            for i in range(len(_STAIN_KINDS) if f == "stain" else 1)]
+    chk("R3 데칼 사다리 폭 ≤ 2 mm · 최대 양각 ≤ GT_DELTA/8",
+        (max(_lad) - min(_lad)) <= 0.0020 + 1e-12
+        and max(_lad) <= GT_DELTA / 8.0,
+        f"폭 {(max(_lad) - min(_lad)) * 1000:.1f} mm · 최대 {max(_lad) * 1000:.1f} mm")
+    # (v1.3, D-5) Every scatter kind a profile prescribes must have a pool, or the
+    # prescription silently renders as the callback default (= fallen leaves).
+    _kinds = {p["scatter"]["kind"] for p in GROUND_PROFILES.values()
+              if p.get("scatter") and p["scatter"].get("kind")}
+    chk("산포 kind 전부 SCATTER_POOLS 등재 (계절 자산 유출 방지)",
+        _kinds <= set(SCATTER_POOLS),
+        f"{sorted(_kinds)} ⊆ {sorted(SCATTER_POOLS)}")
 
     # -- (3) Tactile paving register -------------------------------------
     print("\n[3] 점자블록 등록부 (§12.4)")
@@ -2777,6 +3103,32 @@ def _selfcheck():
     chk("줄눈 양각 요청 → ValueError",
         raises(lambda: build_joint_grid(dry_kit(), "/T", (-4, -1, 0, 1), 0.0,
                                         None, recess=+0.003), "recess"))
+    # (v1.3, F2) A dict override is a **merge**, so an empty dict is a no-op that reads
+    # like a clear - that is how sceneC2 shipped a manhole on a "urban infra 0" row.
+    chk("빈 사전 오버라이드 → ValueError (F2 무언의 무동작 차단)",
+        raises(lambda: plan_ground("sidewalk_block", (-10, -2, 0, 2),
+                                   scene="scene16", edges=_E0,
+                                   overrides=dict(infra=dict())), "F2-empty"))
+    _p_clear = plan_ground("sidewalk_block", (-10, -2, 0, 2), scene="scene16",
+                           edges=_E0, overrides=dict(infra=None))
+    _p_zero = plan_ground("sidewalk_block", (-10, -2, 0, 2), scene="scene16",
+                          edges=_E0,
+                          overrides=dict(infra=dict(manhole=0, gully=0,
+                                                    gutter_L=0)))
+    chk("infra=None 명시 소거 = 명시 0 패턴 (F2 하위호환)",
+        _p_clear["prims"] == _p_zero["prims"]
+        and not ({e["kind"] for e in _p_clear["elements"]}
+                 & {"manhole", "gully", "gutter_l"}),
+        f"소거 {_p_clear['prims']} 프림 = 명시0 {_p_zero['prims']} 프림")
+    # (v1.3, D-5) An unregistered scatter kind must not fall back to the leaf pool.
+    chk("미등재 산포 kind → ValueError (D-5)",
+        raises(lambda: apply_ground(
+            dry_kit(), "/World/T/GKit",
+            plan_ground("trail_soil", (-10, -2, 0, 2), scene="scene04",
+                        edges=_E0,
+                        overrides=dict(scatter=dict(kind="snow", cover=0.1,
+                                                    count=10))),
+            {}, scatter=lambda *a, **k: 0), "D-5-kind"))
 
     # -- (5) Dry run of all 33 scenes ------------------------------------
     print("\n[5] 전 33씬 계획 dry 실행 (USD 미접촉)")
@@ -2789,13 +3141,7 @@ def _selfcheck():
     for scene in sorted(SCENE_PLANS):
         sp = SCENE_PLANS[scene]
         try:
-            plan = plan_ground(sp["profile"], sp["region"], z=sp["z"],
-                               gy=sp["gy"], origin=sp["origin"],
-                               axis=sp["axis"], edges=sp["edges"],
-                               voids=sp["voids"], dists=sp["dists"],
-                               scene=scene, tactile=sp["tactile"],
-                               sites=sp["sites"], caps=sp["caps"],
-                               extras_args=sp["extras_args"], seed=7)
+            plan = _fixture_plan(scene)
         except ValueError as ex:
             ok = False
             fails.append(f"{scene}: {ex}")
@@ -2852,14 +3198,7 @@ def _selfcheck():
     # -- (6) Pilot 3-scene detail ----------------------------------------
     print("\n[6] 파일럿 3씬 상세 (N5 · 15 · 13)")
     for scene in ("sceneN5", "scene15", "scene13"):
-        sp = SCENE_PLANS[scene]
-        plan = plan_ground(sp["profile"], sp["region"], z=sp["z"], gy=sp["gy"],
-                           origin=sp["origin"], axis=sp["axis"],
-                           edges=sp["edges"], voids=sp["voids"],
-                           dists=sp["dists"], scene=scene,
-                           tactile=sp["tactile"], sites=sp["sites"],
-                           caps=sp["caps"], extras_args=sp["extras_args"],
-                           seed=7)
+        plan = _fixture_plan(scene)
         print(f"  {scene} [{plan['profile']}] 프림 {plan['prims']} · "
               f"요소 {len(plan['elements'])} · δmax {plan['gt']['delta_max']:.4f}"
               f" · unit_cell {plan['unit_cell']}")
@@ -2896,15 +3235,8 @@ def _selfcheck():
     #   `[measured - sceneN5 pilot round 1]`.
     mtl_bad, prim_bad = [], []
     for scene in sorted(SCENE_PLANS):
-        sp = SCENE_PLANS[scene]
         try:
-            pl = plan_ground(sp["profile"], sp["region"], z=sp["z"],
-                             gy=sp["gy"], origin=sp["origin"], axis=sp["axis"],
-                             edges=sp["edges"], voids=sp["voids"],
-                             dists=sp["dists"], scene=scene,
-                             tactile=sp["tactile"], sites=sp["sites"],
-                             caps=sp["caps"], extras_args=sp["extras_args"],
-                             seed=7)
+            pl = _fixture_plan(scene)
             d2 = dry_kit()
             r2 = apply_ground(d2, f"/World/{scene}/GKit", pl, {},
                               skin_exclude=lambda *a: None)
@@ -2922,15 +3254,8 @@ def _selfcheck():
     _BURY_OK = {"deck_gap", "trench", "gutter", "groove"}
     buried = []
     for scene in sorted(SCENE_PLANS):
-        sp = SCENE_PLANS[scene]
         try:
-            pl = plan_ground(sp["profile"], sp["region"], z=sp["z"],
-                             gy=sp["gy"], origin=sp["origin"], axis=sp["axis"],
-                             edges=sp["edges"], voids=sp["voids"],
-                             dists=sp["dists"], scene=scene,
-                             tactile=sp["tactile"], sites=sp["sites"],
-                             caps=sp["caps"], extras_args=sp["extras_args"],
-                             seed=7)
+            pl = _fixture_plan(scene)
         except ValueError:
             continue
         for e in pl["elements"]:

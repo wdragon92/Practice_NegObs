@@ -563,13 +563,14 @@ def ground_plan():
 def ground_plan_deck():
     """Plan B - entry-deck plank gaps only (d2 near window).
 
-    z is raised by `surface_top_z(z) + 0.020` on purpose. `build_deck_planks`
-    puts the gap strip's top at `z - 0.020`, i.e. **below** the deck surface,
-    and the deck slab is a solid box - which is exactly the burial defect the
-    scene15 pilot measured for joints and manholes (rendered pixels = 0) and
-    the reason `surface_top_z()` exists. The standing ruling is
-    "recess-as-tone, never a plate below the pavement", so the strip is lifted
-    until its top lands at the pavement top + 0.6 mm and the gap reads as tone.
+    z is the deck top, plainly. The W2-D round had to pass
+    `surface_top_z(z_deck) + 0.020` here because `build_deck_planks` put the gap
+    strip's top at `z - 0.020`, i.e. **below** the deck surface, and the deck
+    slab is a solid box - the burial defect the scene15 pilot measured for
+    joints and manholes (rendered pixels = 0). The builder now applies
+    `surface_top_z()` itself (kit defect R1, fixed 2026-07-30), so the scene-side
+    lift is removed; the strips land in exactly the same place as before
+    (both routes put the strip centre at deck top - 0.0094 `[calc]`).
     GT is unaffected: the strips carry `exc="plank_gap"` and the walking
     surface z does not move.
     """
@@ -580,7 +581,7 @@ def ground_plan_deck():
         "deck_trail_hybrid",
         region=(float(ent["x0"]), float(ld["y0"]),
                 float(ent["x1"]), float(ld["y1"])),
-        z=gk.surface_top_z(z_deck) + 0.020,
+        z=z_deck,
         gy=0.0, origin=(0.0, 0.0, 0.0),
         edges=[("deck_far_edge", float(ent["x1"]))],
         dists=(2, 5, 10), scene="scene10", tactile=(),

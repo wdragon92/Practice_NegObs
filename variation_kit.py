@@ -456,6 +456,30 @@ SCENE_LIGHT_OVERRIDE_WINS = ("sceneC1", "sceneC4", "sceneD4")
 # high one.
 SCENE_SEASON = {"sceneC1": "winter", "sceneC2": "autumn"}
 SEASON_ELEV_BAND = {"winter": (0.0, 32.0), "autumn": (35.0, 45.0)}
+# Consequence of the season locks that the spec does not draw, and that an
+# admissibility sweep over all 8 x 33 pairs surfaced: **L0 is inadmissible on the
+# two season-marked scenes.** L0's sun sits at 49.83 deg, outside both the winter
+# band (<= 32) and the autumn band (35-45), so spec §4.3's "L0: all 33 scenes,
+# the judge reference" row cannot be satisfied as written.
+#
+# It is not a contradiction, it is the scenes already telling us so: sceneC1's own
+# light dict runs elev 28.0 and sceneC2's 42.0 — neither has ever used L0's 49.79.
+# The catalogue entry closest to each scene's own reference is therefore its
+# reference condition. Declared here rather than substituted at runtime, so a plan
+# that wants a reference arm asks for it explicitly (spec B6 forbids silent
+# substitution — a condition distribution that quietly bends per scene stops being
+# independent of the label).
+SCENE_REF_COND = {
+    "sceneC1": "L4",     # winter_noon 28.50 deg vs the scene's own 28.0 [snow]
+    "sceneC2": "L2",     # stratocumulus 43.01 deg vs the scene's own 42.0 [leaf]
+}
+
+
+def ref_cond_for(scene):
+    """The reference condition for this scene — L0 unless a season lock excludes
+    it. Use this for a data run's reference arm; using L0 blindly silently drops
+    sceneC1 and sceneC2 from it."""
+    return SCENE_REF_COND.get(scene, "L0")
 
 
 # ===========================================================================
@@ -1007,6 +1031,20 @@ def _selfcheck():
         condition_allowed("sceneC2", "L3")[0])
     chk("sceneC2 leaf x L0 refused (49.83 out of autumn band)",
         not condition_allowed("sceneC2", "L0")[0])
+    # Therefore every scene must have SOME admissible reference condition, or the
+    # reference arm of a data run silently loses scenes.
+    noref = [s for s in AZ_LEDGER
+             if not condition_allowed(s, ref_cond_for(s))[0]]
+    chk("every one of the 33 scenes has an admissible reference condition",
+        not noref, str(noref))
+    chk("the two season-locked scenes get their own reference",
+        ref_cond_for("sceneC1") == "L4" and ref_cond_for("sceneC2") == "L2"
+        and ref_cond_for("scene04") == "L0")
+    n_ok = sum(1 for s in AZ_LEDGER for c in COND_IDS
+               if condition_allowed(s, c)[0])
+    chk("admissible (scene, condition) pairs = 253 of 264", n_ok == 253,
+        f"{n_ok}/264 — 11 refusals, all from a season lock or the D6 low-sun "
+        f"floor, each with a stated reason")
     dz = [sample_daz("scene02", "L0", i, 7) for i in range(200)]
     chk("scene02 L0 draws stay in +-35", max(abs(x) for x in dz) <= 35.0,
         f"max |Dz| {max(abs(x) for x in dz):.1f}")

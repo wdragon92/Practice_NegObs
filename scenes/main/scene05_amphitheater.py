@@ -366,8 +366,8 @@ PARAMS = dict(
 
     # --- 재질: texture_scale 용 물리 크기[m/타일] + 틴트/상수 ---
     material=dict(
-        scale=dict(plaza_light=0.75, band_dark=0.9, plaza_lower=0.7,
-                   granite_dark=1.0, brick_red=2.0, grass=4.0, tactile=0.3),
+        scale=dict(plaza_light=1.80, band_dark=0.9, plaza_lower=0.7,
+                   granite_dark=1.0, brick_red=2.0, grass=1.4, tactile=0.3),
         lower_warm_tint=(1.06, 1.0, 0.94),        # 스테이지 웜 틴트
         grass_tint=(0.55, 0.68, 0.42),
         glass_color=(0.06, 0.09, 0.12), glass_rough=0.08,
@@ -814,7 +814,7 @@ def main():
         M["plaza_light"] = sc.make_pbr(
             stage, "/World/Looks/PlazaLight", sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
-            scl["plaza_light"])
+            scl["plaza_light"], tint=(0.72, 0.72, 0.72))   # [T1 T-1] x0.72
         # 차콜 밴드 = 짙은 화강암 (scene01 모티프)
         M["band"] = sc.make_pbr(
             stage, "/World/Looks/Band", sc.tex_path("granite_dark", "diff"),
@@ -834,7 +834,7 @@ def main():
             M["stage"] = sc.make_pbr(
                 stage, "/World/Looks/Stage", sc.tex_path("plaza_light", "diff"),
                 sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
-                scl["plaza_light"])
+                scl["plaza_light"], tint=(0.72, 0.72, 0.72))   # [T1 T-1] x0.72
         # 진입 계단(통행용) — 좌석 티어와 대비되게 회청 판석
         M["plaza_lower"] = sc.make_pbr(
             stage, "/World/Looks/PlazaLower", sc.tex_path("plaza_lower", "diff"),

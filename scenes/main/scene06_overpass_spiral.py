@@ -277,7 +277,7 @@ PARAMS = dict(
         #   tint (0.72,0.77,0.92) → 평균 (101,102,102) ≈ 알베도 0.40(§4 순백 금지·
         #   콘크리트 현실값). 페시아/파라펫은 조금 밝게(0.435) 잡아 층을 나눈다.
         scale=dict(paving_interlock=1.0, concrete_wall=2.0,
-                   granite_dark=1.0, brick_red=2.0, grass=4.0, tactile=0.3),
+                   granite_dark=1.0, brick_red=2.0, grass=1.4, tactile=0.3),
         asphalt_color=(0.045, 0.045, 0.050), asphalt_rough=0.92,
         concrete_tint=(0.72, 0.77, 0.92),
         deck_tint=(0.76, 0.81, 0.97),

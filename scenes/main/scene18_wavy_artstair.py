@@ -244,8 +244,8 @@ PARAMS = dict(
     ),
 
     material=dict(
-        scale=dict(concrete_floor=1.2, plaza_light=0.75, plaza_lower=0.8,
-                   brick_red=2.0, grass=4.0),
+        scale=dict(concrete_floor=1.2, plaza_light=1.80, plaza_lower=0.8,
+                   brick_red=2.0, grass=1.4),
         tread_tint=(1.15, 1.15, 1.12),            # 밝은 콘크리트 디딤면
         lower_warm_tint=(1.06, 1.0, 0.94),
         # 라이저 색 — [v6 판정 ㉡] 구 5색은 원색 솔리드(최대/최소 채널비 7~9)라
@@ -616,7 +616,7 @@ def main():
         M["upper"] = sc.make_pbr(
             stage, "/World/Looks/Upper", sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
-            scl["plaza_light"])
+            scl["plaza_light"], tint=(0.72, 0.72, 0.72))   # [T1 T-1] x0.72
         M["lower"] = sc.make_pbr(
             stage, "/World/Looks/Lower", sc.tex_path("plaza_lower", "diff"),
             sc.tex_path("plaza_lower", "nor"), sc.tex_path("plaza_lower", "rough"),
@@ -962,9 +962,8 @@ def main():
         yc, Wb = _seg_centers()
         # cue_tactile: 상단 접근 경고 점자띠
         if cfg.get("cue_tactile"):
-            tac = sc.make_pbr(stage, "/World/Looks/Tactile",
-                              diffuse_color=(0.85, 0.72, 0.10),
-                              roughness_const=0.7)
+            # [W2 · ground_kit §12.5-3] texture-backed so the 36 dots shade.
+            tac = sc.tactile_pbr(stage, "/World/Looks/Tactile")
             sc.build_tactile(stage, "/World/Scene18/Tactile",
                              -0.6, -0.2, s["y0"], s["y1"], tac, z=0.0)
         # cue_nosing: 물결 단코 논슬립(각 세그 전연 상수색 띠) — 기본 False

@@ -166,7 +166,7 @@ PARAMS = dict(
     window=dict(w=1.3, h=1.7, inset=0.15, col_step=3.0, margin=2.5),
 
     material=dict(
-        scale=dict(plaza_light=1.1, concrete_wall=2.0, grass=4.0,
+        scale=dict(plaza_light=1.1, concrete_wall=2.0, grass=1.4,
                    brick_red=2.0),
         # 보도: plaza_light 원본 평균 sRGB 0.714 + 약한 중성 틴트 → ~0.64
         pave_tint=(0.90, 0.89, 0.86),
@@ -704,6 +704,10 @@ def main():
         #   현행 상수색은 법정 36점 돌기의 음영이 화면에 0 이라, 룩 OFF 에서도
         #   소판이 "저채도 얼룩"으로만 읽혔다. 텍스처는 이미 등록돼 있었는데
         #   쓰지 않고 있었다 `[실측 — scene_common.TEX["tactile"]]`.
+        # [W2-C 병합] 감독 결재: 본 판(MAIN, 렌더 검증본)을 채택하고 w2-surgeon 의
+        #   `bc.tactile_mtl` 중복본은 폐기. 두 판은 기능 동치(같은 tactile_yellow
+        #   diff/nor · 같은 0.30 m 타일)이고, 이 판만이 실제 렌더로 검증됐다
+        #   `[실측 — w2_pilot_ground_v1.md §2, strong-yellow 118 → 12,149 px]`.
         M["tactile"] = PBR(f"{ROOT}/Looks/Tactile",
                            sc.tex_path("tactile", "diff"),
                            sc.tex_path("tactile", "nor"),

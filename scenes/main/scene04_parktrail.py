@@ -275,7 +275,7 @@ PARAMS = dict(
     # --- 재질: texture_scale용 물리 크기[m/타일] ---
     material=dict(
         # S4-4: dirt_park scale 2.0→3.0 (낙엽 입자 축소), 채도 낮춤 tint.
-        scale=dict(dirt_park=3.0, gravel=0.5, grass=4.0, wood_dark=1.0),
+        scale=dict(dirt_park=3.0, gravel=0.5, grass=1.4, wood_dark=1.0),
         dirt_tint=(0.92, 0.88, 0.80),           # 낙엽 과채도 완화 (기본 흙 지면)
         grass_tint=(0.55, 0.68, 0.42),          # 타일 반복 완화 + 초록 틴트
         hedge_tint=(0.46, 0.58, 0.32),          # v4-B2 생울타리 밴드(배경·하층식생)
@@ -562,9 +562,8 @@ def main():
                     diffuse_color=tint_jitter(base, 10 * i + j),
                     roughness_const=mp["canopy_rough"], specular_level=0.0))
         M["canopy_a"], M["canopy_b"] = M["canopy"][0], M["canopy"][2]
-        M["tactile"] = sc.make_pbr(stage, "/World/Looks/Tactile",
-                                   diffuse_color=mp["tactile_color"],
-                                   roughness_const=0.7, metallic=0.0)
+        # [W2 · ground_kit §12.5-3] texture-backed so the 36 dots shade.
+        M["tactile"] = sc.tactile_pbr(stage, "/World/Looks/Tactile")
         M["hedge"] = sc.make_pbr(
             stage, "/World/Looks/Hedge", sc.tex_path("grass", "diff"),
             sc.tex_path("grass", "nor"), sc.tex_path("grass", "rough"),

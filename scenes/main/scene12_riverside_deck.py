@@ -247,7 +247,7 @@ PARAMS = dict(
     material=dict(
         # [v6 판정 ④] rock_wall 1.4 → 0.7 : 타일 1.4 m 는 호안 사석을 "매끈한
         #   사고석 포장"으로 만든다. 0.7 로 줄여 개별 석괴 크기를 절반으로.
-        scale=dict(wood_dark=0.6, rock_wall=0.7, grass=4.0, gravel=0.6,
+        scale=dict(wood_dark=0.6, rock_wall=0.7, grass=1.4, gravel=0.6,
                    concrete_wall=2.0),
         # 물때(젖은 사석) — 청록 이끼기 + 저러프(젖은 반사)
         wet_tint=(0.34, 0.38, 0.30), wet_rough=0.28,

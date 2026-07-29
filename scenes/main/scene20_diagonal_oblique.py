@@ -133,8 +133,8 @@ PARAMS = dict(
     lower_benches=[(12.0, -1.85, 0.0), (12.0, 1.85, 0.0)],
 
     material=dict(
-        scale=dict(plaza_light=0.75, band_dark=0.6, plaza_lower=0.7,
-                   grass=4.0, brick_red=2.0, tactile=0.3),
+        scale=dict(plaza_light=1.80, band_dark=0.6, plaza_lower=0.7,
+                   grass=1.4, brick_red=2.0, tactile=0.3),
         lower_warm_tint=(1.06, 1.0, 0.94),
         grass_tint=(0.55, 0.68, 0.42),
         glass_color=(0.06, 0.09, 0.12), glass_rough=0.08,
@@ -265,7 +265,7 @@ def main():
         M["upper"] = PBR(
             f"{ROOT}/Looks/Upper", sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
-            sca["plaza_light"])
+            sca["plaza_light"], tint=(0.72, 0.72, 0.72))   # [T1 T-1] x0.72
         M["band"] = PBR(
             f"{ROOT}/Looks/Band", sc.tex_path("band_dark", "diff"),
             sc.tex_path("band_dark", "nor"), sc.tex_path("band_dark", "rough"),

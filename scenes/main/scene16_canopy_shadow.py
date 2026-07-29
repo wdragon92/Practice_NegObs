@@ -152,7 +152,7 @@ PARAMS = dict(
     signs=[("Exit", "sign_exit", -1.6, 2.6, 0.0, 180.0, 0.9, 0.45)],
 
     material=dict(
-        scale=dict(plaza_lower=0.7, plaza_light=0.75, grass=4.0,
+        scale=dict(plaza_lower=0.7, plaza_light=1.80, grass=1.4,
                    brick_red=2.0, tactile=0.3),
         grass_tint=(0.55, 0.68, 0.42),
         roof_color=(0.72, 0.72, 0.74), roof_rough=0.55,     # 밝은 회색 지붕
@@ -295,7 +295,7 @@ def main():
         M["stair"] = PBR(
             f"{ROOT}/Looks/Stair", sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
-            sca["plaza_light"])
+            sca["plaza_light"], tint=(0.72, 0.72, 0.72))   # [T1 T-1] x0.72
         M["wall"] = PBR(
             f"{ROOT}/Looks/Wall", sc.tex_path("plaza_lower", "diff"),
             sc.tex_path("plaza_lower", "nor"), sc.tex_path("plaza_lower", "rough"),

@@ -228,7 +228,7 @@ PARAMS = dict(
                  panel=(0.06, 0.7, 0.42), panel_z=1.95),
 
     material=dict(
-        scale=dict(concrete_floor=0.9, paving_interlock=1.2, grass=4.0,
+        scale=dict(concrete_floor=0.9, paving_interlock=1.2, grass=1.4,
                    rock_wall=1.6),
         grass_tint=(0.54, 0.66, 0.41),
         grass_tint_b=(0.49, 0.62, 0.38),          # 사면 잔디(틴트 지터 −5%)

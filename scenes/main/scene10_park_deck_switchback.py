@@ -309,7 +309,7 @@ PARAMS = dict(
         # [v6] rock_wall 3.0→0.9(성곽 조적 → 발파석 사석) · dirt 3.0→1.1
         #      (confetti 채도) · leaf 1.8→1.05 · rock_face(자연 절개면) 추가
         #      grass 4.0→2.6(사면 '퀼팅 무늬 반복' 완화)
-        scale=dict(wood_dark=1.0, rock_wall=0.9, rock_face=2.2, grass=2.6,
+        scale=dict(wood_dark=1.0, rock_wall=0.9, rock_face=2.2, grass=1.4,
                    leaf_ground=1.05, dirt_park=1.1, concrete_wall=2.4),
         deck_tint=(1.00, 0.96, 0.90),          # 데크 목판(약간 바랜 톤)
         stringer_tint=(0.72, 0.70, 0.66),      # 스트링거·기둥(어둡게)
@@ -1181,9 +1181,8 @@ def main():
     def build_cues(M):
         """비관행 설비 단서(코드 경로만)."""
         if cfg["cue_tactile"]:
-            tac = sc.make_pbr(stage, "/World/Looks/Tactile",
-                              diffuse_color=(0.85, 0.72, 0.10),
-                              roughness_const=0.7)
+            # [W2 · ground_kit §12.5-3] texture-backed so the 36 dots shade.
+            tac = sc.tactile_pbr(stage, "/World/Looks/Tactile")
             sc.build_tactile(stage, f"{ROOT}/Tactile", -2.10, -1.50,
                              PARAMS["landing"]["y0"], PARAMS["landing"]["y1"],
                              tac, z=0.0)

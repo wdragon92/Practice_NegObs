@@ -30,7 +30,6 @@ import math
 import json
 import datetime
 
-import numpy as np
 
 # [v5 공통 레이어] 한글 사인(build_sign)만 공통 라이브러리에서 가져온다.
 #   scene_common 은 SimulationApp 부팅 **전** import 해도 안전(pxr/omni 지연 import).
@@ -184,8 +183,8 @@ PARAMS = dict(
 
     # --- §3 재질: texture_scale용 물리 크기[m/타일] + 틴트/상수 ---
     material=dict(
-        scale=dict(plaza_light=0.75, band_dark=0.6, plaza_lower=0.7,
-                   granite_dark=1.0, brick_red=2.0, grass=4.0, tactile=0.3),  # R2-3: grass 2→4
+        scale=dict(plaza_light=1.80, band_dark=0.6, plaza_lower=0.7,
+                   granite_dark=1.0, brick_red=2.0, grass=1.4, tactile=0.3),  # R2-3: grass 2→4
         lower_warm_tint=(1.06, 1.0, 0.94),        # 하부 광장 웜 틴트 (§3)
         building_L_tint=(0.95, 0.92, 0.88),       # 건물 L 약간 다른 톤
         glass_color=(0.06, 0.09, 0.12), glass_rough=0.08,   # 유리창 (OmniGlass 금지)
@@ -260,27 +259,16 @@ OMNIPBR_PATH = os.path.expanduser(
     "~/miniconda3/envs/env_isaaclab/lib/python3.10/site-packages/"
     "omni/mdl/core/Base/OmniPBR.mdl")
 
-# 역할별 텍스처 세트 (dir + 파일명). 잔디·HDRI는 assets/ 루트 재사용.
-TEX = dict(
-    plaza_light=dict(dir=S1_DIR, diff="plaza_light_diff.jpg",
-                     nor="plaza_light_nor.jpg", rough="plaza_light_rough.jpg"),
-    band_dark=dict(dir=S1_DIR, diff="band_dark_diff.jpg",
-                   nor="band_dark_nor.jpg", rough="band_dark_rough.jpg"),
-    plaza_lower=dict(dir=S1_DIR, diff="plaza_lower_diff.jpg",
-                     nor="plaza_lower_nor.jpg", rough="plaza_lower_rough.jpg"),
-    granite_dark=dict(dir=S1_DIR, diff="granite_dark_diff.jpg",
-                      nor="granite_dark_nor_dx.jpg", rough="granite_dark_rough.jpg"),
-    brick_red=dict(dir=S1_DIR, diff="brick_red_diff.jpg",
-                   nor="brick_red_nor_dx.jpg", rough="brick_red_rough.jpg"),
-    grass=dict(dir=ASSETS_DIR, diff="aerial_grass_rock_diff_4k.jpg",
-               nor="aerial_grass_rock_nor_dx_4k.jpg",
-               rough="aerial_grass_rock_rough_4k.jpg"),
-    tactile=dict(dir=S1_DIR, diff="tactile_yellow_diff.png",
-                 nor="tactile_yellow_nor.png"),   # rough 없음
-    # [v5 공통 레이어] 한글 사인 패널 (assets/signs/gen_signs.py 생성, diff only)
-    sign_info=dict(dir=os.path.join(ASSETS_DIR, "signs"),
-                   diff="sign_info.png"),   # [v5.2 사용자] 임의 경고 팻말 제거
-)
+# 역할별 텍스처 세트 — [W2] the private copy of the registry is gone.
+# It was the last place still naming `aerial_grass_rock_*`, so the Grass001
+# swap (B-audit A1) would have reached 32 scenes and skipped scene01 alone,
+# leaving one scene at a 15 m grass tile while the other 32 moved to 1.4 m.
+# The role SUBSET is kept deliberately: `_check_assets` below iterates this
+# dict, and pulling in the full `sc.TEX` would make scene01 abort on textures
+# it never binds.
+_ROLES = ("plaza_light", "band_dark", "plaza_lower", "granite_dark",
+          "brick_red", "grass", "tactile", "sign_info")
+TEX = {r: dict(sc.TEX[r]) for r in _ROLES}
 
 
 def _tex_path(role, kind):
@@ -311,75 +299,28 @@ def _check_assets():
         sys.exit(1)
 
 
-def _ensure_noon_lookfix(src_path):
-    """noon HDRI 파생본(_lookfix.exr) 생성/캐시 — v1에서 그대로 이식.
-
-    ① 태양 디스크(각반경 1.5°)를 서컴솔라 링(1.5~2.5°) p90 휘도로 캡:
-       RTX 돔 샘플링의 태양 블러가 만드는 초연질 달걀형 캐스트 섀도 제거.
-       제거된 직달 성분은 HDRI 태양 방향에 정합한 DistantLight(0.53°)가 대체.
-    ② 지평 아래 -18°~0° 대역을 인접 하늘(elev 0.5~3.5°) 휘도로 리프트.
-    실패 시(예: cv2 부재) 원본 경로를 그대로 반환 (경고만).
-    """
-    out_path = src_path[:-4] + "_lookfix.exr"
-    try:
-        if (os.path.isfile(out_path)
-                and os.path.getmtime(out_path) >= os.path.getmtime(src_path)):
-            return out_path
-        os.environ.setdefault("OPENCV_IO_ENABLE_OPENEXR", "1")
-        import cv2
-        rgb = cv2.imread(src_path, cv2.IMREAD_UNCHANGED)[..., ::-1]
-        rgb = rgb.astype(np.float64)
-        h, w = rgb.shape[:2]
-        lum = (0.2126 * rgb[..., 0] + 0.7152 * rgb[..., 1]
-               + 0.0722 * rgb[..., 2])
-        iy, ix = np.unravel_index(np.argmax(lum), lum.shape)
-        vv = (np.arange(h) + 0.5) / h
-        th = np.pi * vv
-        ph = 2.0 * np.pi * (np.arange(w) + 0.5) / w
-        st, ct = np.sin(th)[:, None], np.cos(th)[:, None]
-        dx = st * np.cos(ph)[None, :]
-        dy = st * np.sin(ph)[None, :]
-        dz = np.broadcast_to(ct, (h, w))
-        s = np.array([dx[iy, ix], dy[iy, ix], dz[iy, ix]])
-        ang = np.degrees(np.arccos(
-            np.clip(dx * s[0] + dy * s[1] + dz * s[2], -1.0, 1.0)))
-        ring = (ang > 1.5) & (ang < 2.5)
-        cap = np.percentile(lum[ring], 90)
-        mask = (ang < 1.5) & (lum > cap)
-        scl = np.ones_like(lum)
-        scl[mask] = cap / lum[mask]
-        out = rgb * scl[..., None]
-        elev = 90.0 - 180.0 * vv
-        ref = out[(elev > 0.5) & (elev < 3.5)].mean(axis=0)      # (w, 3)
-        k = np.ones(129) / 129.0
-        ref = np.stack(
-            [np.convolve(np.r_[ref[-64:, c], ref[:, c], ref[:64, c]],
-                         k, mode="same")[64:-64] for c in range(3)], axis=-1)
-        t = np.clip((elev + 24.0) / 6.0, 0.0, 1.0) * (elev < 0.0)
-        lift = np.maximum(out, ref[None, :, :])
-        out += (lift - out) * t[:, None, None]
-        cv2.imwrite(out_path, out[..., ::-1].astype(np.float32),
-                    [cv2.IMWRITE_EXR_TYPE, cv2.IMWRITE_EXR_TYPE_HALF,
-                     cv2.IMWRITE_EXR_COMPRESSION, cv2.IMWRITE_EXR_COMPRESSION_ZIP])
-        print(f"[HDRI] noon lookfix 생성 (태양 캡 {int(mask.sum())}px, "
-              f"cap L={cap:.2f}): {out_path}")
-        return out_path
-    except Exception as e:                       # pragma: no cover
-        print(f"[HDRI][경고] lookfix 생성 실패({e}) — 원본 사용")
-        return src_path
+# [W2] The private `_ensure_noon_lookfix` copy has been DELETED, not patched.
+# It was RGBA-unsafe (`[..., ::-1]` on a 4-channel EXR yields [A,R,G,B]), and
+# because the failure was swallowed by a bare `except` that returns the source
+# path, an uncapped sun disc would have combined with the explicit DistantLight
+# into a silent double sun. It also hard-coded the 1.5 deg cap, so
+# `NEGOBS_SUN_CAP_DEG` did not reach this scene.
+# The single implementation now lives in `sc.ensure_noon_lookfix`
+# (`[..., :3][..., ::-1]` + env-driven cap) and scene01 routes through
+# `sc.setup_lighting`, which calls it.
+_ensure_noon_lookfix = sc.ensure_noon_lookfix    # back-compat alias only
 
 
 def build_views():
     """§6 카메라 프리셋: h·d 그리드 9장 + 미장센 4장."""
-    views = {}
-    # R2-1: 그리드 프리셋 y를 0→-2.75 (계단 좌반부 중심선)로 이동해 중앙 난간(y=0) 회피
-    gy = -2.75
-    for hh in (0.3, 0.9, 1.8):
-        for dd in (2, 5, 10):
-            eye = [-float(dd), gy, float(hh)]
-            p = math.radians(-10.0)              # 피치 -10°, +X를 봄
-            tgt = [eye[0] + 5.0 * math.cos(p), gy, eye[2] + 5.0 * math.sin(p)]
-            views[f"preset_h{hh}_d{dd}"] = dict(eye=eye, tgt=tgt)
+    # [W2] The 9-cut grid was an inline copy of `sc.grid_views`, so every change
+    # to the shared preset silently skipped scene01 alone. Delegated. gy is
+    # expressed as the argument it always was:
+    # R2-1 moved the grid y from 0 to -2.75 (left-half centre line of the
+    # stair) to keep the central handrail at y=0 out of frame.
+    # Verified byte-identical to the previous inline loop for all 9 cuts
+    # (eye/tgt compared as JSON, 2026-07-29).
+    views = sc.grid_views(-2.75)
     # 룩 r3: 더 낮고 가깝게 — 계단 밴드가 실루엣으로 걸리고 건물 C가 배경을 채움
     views["beauty_overview"] = dict(eye=[-9.0, -5.5, 3.0], tgt=[2.5, 2.0, -1.3])
     views["lower_lookback"] = dict(eye=[6.0, 1.5, 1.0], tgt=[-2.0, 0.0, 0.4])
@@ -415,7 +356,7 @@ def main():
     import carb.input
     import omni.usd
     import omni.appwindow
-    from pxr import UsdGeom, UsdShade, UsdLux, UsdPhysics, Sdf, Gf
+    from pxr import UsdGeom, UsdShade, UsdPhysics, Sdf, Gf
     from omni.kit.viewport.utility import get_active_viewport, \
         capture_viewport_to_file
     from isaacsim.core.utils.viewports import set_camera_view
@@ -525,10 +466,15 @@ def main():
     def setup_materials():
         sc = mp["scale"]
         M = {}
+        # [T1 T-1] plaza_light tone x0.72 — 9 scenes share this untinted material.
+        # Linear albedo 0.469 sits in the WHITE-cement band; grey portland paving
+        # is 0.35~0.40 new / 0.20~0.30 aged [LBNL Heat Island / ACPA RT3.05].
+        # x0.72 -> 0.338 lands at the low end of "new grey". Paired with
+        # scale_m 0.75->1.80 (same call, cannot be split; T1 §1.8-2).
         M["plaza_light"] = make_pbr(
             "/World/Looks/PlazaLight", _tex_path("plaza_light", "diff"),
             _tex_path("plaza_light", "nor"), _tex_path("plaza_light", "rough"),
-            sc["plaza_light"])
+            sc["plaza_light"], tint=(0.72, 0.72, 0.72))
         # 룩 r3: PavingStones127은 결이 강해 밴드가 나무 데크처럼 읽힘 →
         # 경계석과 같은 어두운 화강암 타일(granite_dark)로 교체 (조인트 0.9m)
         # v4-B2: 밴드도 granite_dark 계열 — 리프트 틴트로 검은 줄무늬 완화
@@ -544,10 +490,11 @@ def main():
                 _tex_path("plaza_lower", "rough"),
                 sc["plaza_lower"], tint=mp["lower_warm_tint"])
         else:
-            M["lower"] = make_pbr(
+            M["lower"] = make_pbr(                       # [T1 T-1] x0.72
                 "/World/Looks/PlazaLower", _tex_path("plaza_light", "diff"),
                 _tex_path("plaza_light", "nor"),
-                _tex_path("plaza_light", "rough"), sc["plaza_light"])
+                _tex_path("plaza_light", "rough"), sc["plaza_light"],
+                tint=(0.72, 0.72, 0.72))
         M["granite_dark"] = make_pbr(
             "/World/Looks/GraniteDark", _tex_path("granite_dark", "diff"),
             _tex_path("granite_dark", "nor"),
@@ -1060,42 +1007,19 @@ def main():
     # setup_lighting (§5: DomeLight + noon HDRI lookfix + 보조 태양)
     # -------------------------------------------------------------------
     def setup_lighting():
-        lp = PARAMS["light"]
-        dome = UsdLux.DomeLight.Define(stage, "/World/DomeLight")
-        dome.CreateIntensityAttr(float(lp["dome_intensity"]))
-        dome.CreateTextureFormatAttr("latlong")
-        tex_attr = dome.CreateTextureFileAttr()
-        hdri = os.path.join(ASSETS_DIR, lp["hdri"])
-        hdri = _ensure_noon_lookfix(hdri)          # 태양 캡 + 지평 헤이즈 리프트
-        print(f"[하늘] noon: {os.path.basename(hdri)} "
-              f"(exists={os.path.isfile(hdri)})")
-        tex_attr.Set(hdri)
-        # RTX 돔은 Z-up 스테이지에서 극축 +Z로 올바름(rotateX 불필요)
-        rot_op = UsdGeom.Xformable(dome.GetPrim()).AddRotateZOp()
-        rot_op.Set(0.0)
-
-        # HDRI 태양 방향에 정합한 명시적 DistantLight(0.53°) — 경질 그림자 담당
-        sun = UsdLux.DistantLight.Define(stage, "/World/NoonSun")
-        sun.CreateAngleAttr(0.53)
-        sun.CreateIntensityAttr(float(lp["noon_sun_intensity"]))
-        sun.CreateColorAttr(Gf.Vec3f(*[float(c) for c in lp["noon_sun_color"]]))
-        sxf = UsdGeom.Xformable(sun.GetPrim())
-        sun_rz = sxf.AddRotateZOp()
-        sun_rz.Set(0.0)
-        sxf.AddRotateXOp().Set(90.0 - float(lp["noon_sun_elev"]))
-        if not lp["noon_sun_enable"]:
-            UsdGeom.Imageable(sun.GetPrim()).MakeInvisible()
-
-        def apply_dome_rot(user_off):
-            # 돔 회전 = noon_dome_rot + SUN_AZ_OFFSET(사용자) + [ ]키 오프셋
-            rot = (float(lp["noon_dome_rot"]) + float(PARAMS["SUN_AZ_OFFSET"])
-                   + float(user_off))
-            rot_op.Set(rot)
-            # 보조 태양은 돔과 함께 회전 (그림자 방위 일치)
-            sun_rz.Set(rot + float(lp["hdri_sun_rotz_offset"]))
-
-        apply_dome_rot(0.0)
-        return apply_dome_rot
+        # [W2] Delegates to `sc.setup_lighting` — the local copy is gone.
+        # scene01 was the last scene still on a private lighting stack, and the
+        # divergence was not cosmetic: its private `_ensure_noon_lookfix` never
+        # got the RGBA patch, so any 4-channel EXR sky made `cv2.imread(...)
+        # [..., ::-1]` produce [A,R,G,B]; the horizon lift then raised a
+        # broadcast error, the bare `except` swallowed it and returned the
+        # ORIGINAL path. Result: an uncapped HDRI sun disc PLUS the explicit
+        # DistantLight = double sun, one warning line, render "passes".
+        # The three new skies are all RGBA, so this was live ammunition.
+        # Same signature, same param keys, same prim paths (/World/DomeLight,
+        # /World/NoonSun) -> byte-identical for the existing 3-channel sky.
+        return sc.setup_lighting(stage, PARAMS["light"],
+                                 PARAMS["SUN_AZ_OFFSET"])
 
     # ── 씬 조립 ──
     print("[씬] 재질·지오메트리 조립 중 ...")

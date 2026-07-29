@@ -131,7 +131,32 @@ PARAMS = dict(
                       x0=-4.20, x_pad=3.00, y_wide=3.60, y_band=1.70,
                       band_frac=0.70, lift=0.006,
                       # 실물 USD 산포(룩v1) — 근경 밴드만. cover 는 목표 피복률.
-                      cover=0.55, y_near=2.20, x_pad_near=1.50, max_count=900),
+                      cover=0.55, y_near=2.20, x_pad_near=1.50, max_count=900,
+                      # ── [W2] G2 leaf globalisation (leaf_globalization_budget_v2 §6-a) ──
+                      # The old near-band stopped at x −4.20, which leaves 69.0 %
+                      # of the h0.3_d10 lower frame as bare dirt [measured]: the
+                      # upstream rect must start BEHIND the farthest preset eye
+                      # (x −10.0), hence −10.60. Non-overlapping 5-way split;
+                      # inhomogeneity comes from splitting rects and varying
+                      # `cover`, never from `edge_bias` (which silently
+                      # under-covers — it drops interior samples after n is
+                      # fixed and never compensates, §3-e-1).
+                      # `max_count` is a truncation guard only, set at ~1.15n.
+                      # Rect 1 widened to |y| 2.60 (was 2.20) so mound A (2.40)
+                      # and drift (2.50) keep a 0.10 m margin — kills the
+                      # texture fringe of §4.
+                      g2=[
+                          dict(tag="core",  x0=-4.20, x1=6.26, y0=-2.60, y1=2.60,
+                               cover=0.55, max_count=1150),
+                          dict(tag="up",    x0=-10.60, x1=-4.20, y0=-3.60, y1=3.60,
+                               cover=0.32, max_count=470),
+                          dict(tag="sideN", x0=-4.20, x1=6.26, y0=2.60, y1=3.60,
+                               cover=0.32, max_count=110),
+                          dict(tag="sideS", x0=-4.20, x1=6.26, y0=-3.60, y1=-2.60,
+                               cover=0.32, max_count=110),
+                          dict(tag="down",  x0=6.26, x1=7.76, y0=-3.60, y1=3.60,
+                               cover=0.32, max_count=110),
+                      ]),
 
     # --- cue ---
     rail=dict(y=1.45, x_start=-1.60, rail_h=0.90, post_r=0.022,
@@ -204,7 +229,16 @@ PARAMS = dict(
                      lift=0.008),
 
     material=dict(
-        scale=dict(stone_worn=1.1, dirt_park=1.0, grass=4.0, leaf_ground=0.9),
+        # [W2 · leaf_globalization_budget_v2 §6-b] leaf_ground 0.9 -> 2.2.
+        # The texture plate cannot be deleted — `LeafMound_A/B/C` + `LeafDrift_N/S`
+        # ARE the burial geometry that hides the drop, so removing them removes
+        # the hazard. It is demoted to an UNDERLAYER instead: at 0.9 m the
+        # printed leaves rendered at 39 % of their real size against the 3D
+        # leaves now lying on top, and that size discontinuity is what read as
+        # "linoleum". 2.2 m matches the source texture's own physical scale, so
+        # the plate reads as ground tone under the scatter rather than as a
+        # competing second leaf layer.
+        scale=dict(stone_worn=1.1, dirt_park=1.0, grass=1.4, leaf_ground=2.2),
         stone_tint=(0.88, 0.92, 0.84),        # 석재 이끼 톤(약)
         grass_tint=(0.55, 0.62, 0.38),        # 표준 잔디 틴트 + 가을 건조
         leaf_tex_tint=(0.95, 0.72, 0.48),     # leaf_ground 텍스처 오텀 보정
@@ -549,24 +583,34 @@ def main():
         #   기존 납작 타원체 900개는 **총 피복이 0.96 m² 뿐**이라(실측),
         #   화면에 보이는 낙엽은 사실상 전부 leaf_ground 텍스처 무늬였다.
         #   = 사용자가 지적한 "장판". 피복률로 지정하고 실제 지오메트리를 깐다.
-        if sc.LOOK_V1 and sc.veg_available():
-            # 하이브리드: 3D 낙엽은 **근경 밴드에만**. 전역을 실물로 덮으면
-            # 0.55 피복에 3,500개(약 3천만 삼각형)가 필요해 감당이 안 된다.
-            # 원경은 텍스처로 두고, 카메라가 실제로 낱장을 분해하는 구간만
-            # 실물로 바꾼다 — 에셋 감사 권고.
-            # 큰 군집(fallcluster)만 쓴다: 개당 피복이 낱장의 12~20배라
-            # 같은 프림 수로 훨씬 넓게 덮인다.
-            got = sc.scatter_debris(
-                stage, f"{ROOT}/Leaves",
-                x_lo, -ls["y_near"], x_hi_near, ls["y_near"], 0.0,
-                cover=ls.get("cover", 0.55), seed=ls["seed"],
-                pool=[p for p in sc.VEG_DEBRIS if "fallcluster" in p[0]],
-                ground_fn=lambda x, y: surface_z(x, y) + ls["lift"],
-                edge_bias=0.0, max_count=int(ls.get("max_count", 900)),
-                tilt_max=10.0)
+        # 게이트는 `sc.LOOK_GEO` — 산포는 프림 신설이라 기하다. 재질 A/B 양팔에서
+        # 낙엽이 사라지면 §7.1 문턱표를 뽑은 렌더와 다른 씬이 된다(T1 §1.7.1 주).
+        if sc.LOOK_GEO and sc.veg_available():
+            # [W2 · G2] The 3D leaves go GLOBAL, not just to the near band.
+            # Only the large clusters (fallcluster) are used: per-instance
+            # coverage is 12~20x a single leaf, so the same prim budget covers
+            # far more ground. Instancing keeps the unique vertex data flat —
+            # the prototype is shared, only the instance table grows.
+            # One scatter call per rect, seed = base + k, so re-runs are
+            # deterministic and the rects stay independent.
+            pool = [p for p in sc.VEG_DEBRIS if "fallcluster" in p[0]]
+            gfn = lambda x, y: surface_z(x, y) + ls["lift"]
+            got = 0
+            for k, r in enumerate(ls["g2"]):
+                got += sc.scatter_debris(
+                    stage, f'{ROOT}/Leaves/{r["tag"]}',
+                    r["x0"], r["y0"], r["x1"], r["y1"], 0.0,
+                    cover=r["cover"], seed=int(ls["seed"]) + k, pool=pool,
+                    ground_fn=gfn, edge_bias=0.0,
+                    max_count=int(r["max_count"]), tilt_max=10.0)
             if got:
-                print(f"[낙엽] 실물 USD 산포 {got}개 "
-                      f"(목표피복 {ls.get('cover', 0.55):.2f}, seed={ls['seed']})")
+                # Budget doc predicted 1,689 with the pre-A3 coverage ledger
+                # (mean_cov 0.0435). B-audit A3 lowered the two cluster rows,
+                # so mean_cov is 0.04115 and the same target cover now needs
+                # ~1,784 instances (~10.8 M logical tris, under the 12 M cap of
+                # ground_kit §8.3). Count is printed, never assumed.
+                print(f"[낙엽] 실물 USD 전역 산포(G2) {got}개 / "
+                      f"{len(ls['g2'])} rect · seed={ls['seed']}+k")
                 return
         for i in range(n):
             x = rng.uniform(x_lo, x_hi)

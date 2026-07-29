@@ -166,7 +166,7 @@ PARAMS = dict(
     joints=dict(x0=4.0, x1=44.0, step=4.0, w=0.06, proud=0.001),
 
     material=dict(
-        scale=dict(concrete_floor=0.9, concrete_wall=1.2, grass=4.0),
+        scale=dict(concrete_floor=0.9, concrete_wall=1.2, grass=1.4),
         grass_tint=(0.55, 0.68, 0.42),
         wall_tint=(0.92, 0.92, 0.90),                 # 밝은 노출 콘크리트
         # [v6-①] 노면 냉각 틴트 — concrete_floor 난색(황토) 제거. 흙길 오독 해소.
@@ -593,9 +593,8 @@ def main():
         M["bollard_band"] = PBR(f"{ROOT}/Looks/BollardBand",
                                 diffuse_color=mp["bollard_band_color"],
                                 roughness_const=0.30)
-        M["tactile"] = PBR(f"{ROOT}/Looks/Tactile",
-                           diffuse_color=mp["tactile_color"],
-                           roughness_const=mp["tactile_rough"])
+        # [W2 · ground_kit §12.5-3] texture-backed so the 36 dots shade.
+        M["tactile"] = bc.tactile_mtl(stage, f"{ROOT}/Looks/Tactile")
         M["rail"] = PBR(f"{ROOT}/Looks/Rail", diffuse_color=mp["rail_color"],
                         metallic=mp["rail_metallic"],
                         roughness_const=mp["rail_rough"])
@@ -720,7 +719,7 @@ def main():
             # 15~20m 마다 신축이음으로 끊어지며, 수축이음 홈이 9m 이하 간격으로
             # 들어간다. 이 반복 분절선이 벽면의 스케일을 읽게 해준다.
             # GT 무영향: 벽면 부착물이라 지면 z(x,y) 를 바꾸지 않는다.
-            if sc.LOOK_V1:
+            if sc.LOOK_GEO:            # 배수공·신축이음 = 프림 신설(기하)
                 try:
                     import infra_kit as ik
                     kit = ik.Kit(

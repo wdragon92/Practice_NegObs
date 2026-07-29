@@ -38,6 +38,7 @@ import datetime
 
 import scene_common as sc
 import batch1_common as bc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -100,6 +101,32 @@ PARAMS = dict(
 
     # 플랫폼 단부 파라펫(±Y) — 연단 외 무방호 낙차를 없애 GT를 베이·주연단으로 한정
     parapet=dict(t=0.30, h=0.90, base_z=-0.05, outer_inset=0.02),
+
+    # ═══ [W2 ground_kit] P14 yard_industrial — 사양 §5.8 D1 행 ═════════════
+    #  이 씬은 **면이 두 개**다. 계획도 두 개로 나눈다(단일 계획은 단일 z).
+    #   ① 데크(z=0) — h0.3 프리셋의 **근경 창이 여기다**(gy=−4.0 회랑).
+    #      줄눈 격자 6.0×4.5 · 지게차 타이어 자국 · 유압유 얼룩 · 흙 유입 ·
+    #      보수 패치 2매(d2·d5 창).
+    #   ② 야드(에이프런 z=−1.2) — "도크 앞 선형 트렌치(립에서 6.0 m)" ·
+    #      후진 유도 실선 2본 · 정지선 1본 · 야드 줄눈 격자.
+    #      h0.3 에서는 경고 밴드 너머로 은닉되지만 h0.9/h1.8·미장센 컷의
+    #      무대다(이 씬의 판정 1순위가 "에이프런이 밴드 너머로 은닉"이다).
+    #  ★ 점자블록 **미설치**: 교통약자법 별표2 는 보행자 통행로 규정이고
+    #    여기는 차량 하역 야드다(p ≈ 0, §12.4 "비대상"). 게다가 황색 소판이
+    #    데크 위 황흑 경고 밴드와 색·위치가 겹쳐 판정 요소를 오염시킨다.
+    #    `TACTILE_OFF_REASON["sceneD1"]` 이 같은 사유를 코드에 기억한다.
+    #  ★ 황흑 경고밴드는 **현행 유지** — ground_kit 은 손대지 않는다.
+    gkit=dict(
+        #  데크 남측(카메라 회랑 gy=−4.0). ㄷ자 베이(y −3…3)를 **피해서**
+        #  잡아 GT-V(개구 위 요소 금지)를 구조적으로 만족시킨다.
+        deck_region=(-12.0, -13.0, 0.0, -3.0),
+        deck_patches=[(-1.10, -4.00), (-3.80, -4.20)],
+        #  야드 — 베이 입구를 포함한 에이프런. 립(x=0)에서 +X.
+        yard_region=(0.5, -13.0, 16.0, 13.0),
+        yard_trench_x=6.0,              # "립에서 6.0 m" [F]
+        #  후진 유도 실선 2본(베이 폭 6.0 을 좌우에서 잡는다) + 정지선 1본.
+        yard_lines=[(2.0, -2.50, 0.0), (2.0, 2.50, 0.0), (10.0, 0.0, 90.0)],
+    ),
 
     # 배경: 셔터 도어 벽(+X 지평 폐쇄) + 창고 벽(-X, 플랫폼 배후)
     shutter=dict(x0=22.0, t=1.4, y_half=30.0, z_top=7.0,
@@ -267,6 +294,46 @@ ASSET_ROLES = ["concrete_floor", "concrete_wall", "wood_dark", "hdri", "mdl"]
 #   · 카메라가 항상 Deck_S(y −14..−3) 위 → 허공 배치 없음
 #   · d2 에서도 베이 코너(0,−3)가 시축에서 26.6° → hfov 60° 프레임 안
 GRID_GY = -4.0
+
+
+def ground_plans():
+    """[W2 ground_kit] 지면 계획 2매 — 씬 조립부와 CPU 검산이 같은 함수를 쓴다.
+
+    ① `deck`  : 플랫폼 상판 z=0 (h0.3 근경 창)
+    ② `yard`  : 트럭 에이프런 z=−1.2 (트렌치·후진 유도선·정지선)
+    """
+    g = PARAMS["gkit"]
+    d, by, ap = PARAMS["deck"], PARAMS["bay"], PARAMS["apron"]
+    void_bay = (float(by["x0"]), float(by["y0"]),
+                float(by["x1"]), float(by["y1"]))
+    deck = gk.plan_ground(
+        "yard_industrial", region=tuple(g["deck_region"]),
+        z=float(d["z_top"]), gy=GRID_GY, origin=(0.0, 0.0, 0.0),
+        edges=[("dock_lip", float(by["x1"]))],
+        voids=(void_bay,),
+        dists=(2, 5, 10), scene="sceneD1",
+        tactile=(),                     # §12.4 — 비대상(산업 야드)
+        sites=dict(patch=[tuple(p) for p in g["deck_patches"]]),
+        #  데크에는 트렌치·도색을 두지 않는다(야드 계획 담당). 대신 보수
+        #  패치 2매를 넣어 근경 창의 면 요소를 확보한다.
+        overrides=dict(infra=dict(trench=0, marking=()),
+                       surface=(("patch", 2),
+                                ("stain", ("tire", "oil", "dirt")))),
+        seed=331)
+    yard = gk.plan_ground(
+        "yard_industrial", region=tuple(g["yard_region"]),
+        z=float(ap["z_top"]), gy=GRID_GY, origin=(0.0, 0.0, 0.0),
+        edges=(),                       # 에이프런 전방에 낙차 없음
+        dists=(2, 5, 10), scene="sceneD1",
+        tactile=(),
+        sites=dict(trench=[(float(g["yard_trench_x"]),
+                            float(g["yard_region"][1]),
+                            float(g["yard_region"][3]))],
+                   marking=[tuple(m) for m in g["yard_lines"]]),
+        overrides=dict(infra=dict(trench=1,
+                                  marking=("line", "line", "line"))),
+        seed=332)
+    return [("deck", deck), ("yard", yard)]
 
 
 def build_views():
@@ -441,6 +508,9 @@ def main():
     # -------------------------------------------------------------------
     def build_apron(M, mtl):
         ap = PARAMS["apron"]
+        # [W2-0 · P-A] 에이프런도 킷 장식 대상(트렌치·후진 유도선·정지선).
+        sc.skin_exclude(f"{ROOT}/Apron_S", f"{ROOT}/Apron_N",
+                        f"{ROOT}/Apron_C", f"{ROOT}/Apron_Bay")
         by = PARAMS["bay"]
         ms = PARAMS["mass"]
         H, th = ap["half"], ap["thick"]
@@ -467,6 +537,10 @@ def main():
         sb = ms["setback"]
         czm = (ms["z_bot"] + ms["z_top"]) / 2.0
         hzm = ms["z_top"] - ms["z_bot"]
+        # [W2-0 · P-A] 데크 상판이 ground_kit 의 장식 대상이다 → 변위 스킨
+        #   OFF(**RECT 호출 전에** 등록). 안 끄면 줄눈·패치·오염 데칼이
+        #   스킨(+6.5~16.5 mm) 아래로 통째로 묻힌다 `[사양 §1.1]`.
+        sc.skin_exclude(f"{ROOT}/Deck_W", f"{ROOT}/Deck_S", f"{ROOT}/Deck_N")
         # ── 데크 상판 3분할 ──
         RECT(f"{ROOT}/Deck_W", d["x_w"], d["y_s"], by["x0"], d["y_n"],
              czd, th, M["deck"], col=True)
@@ -491,6 +565,8 @@ def main():
         d = PARAMS["deck"]
         ap = PARAMS["apron"]
         H = ap["half"]
+        # [W2-0 · P-A] 대조군 평지 데크도 킷 장식 대상 → 스킨 OFF.
+        sc.skin_exclude(f"{ROOT}/FlatDeck")
         RECT(f"{ROOT}/FlatDeck", d["x_w"], -H, H, H,
              d["z_top"] - 0.5, 1.0, M["deck"], col=True)
 
@@ -663,6 +739,34 @@ def main():
     # 맥락 드레싱 v2 — 팔레트 스택 · 지게차 통행 도색 · 도크 번호 표지 ·
     #                  벽면 외등 · 에이프런 컨테이너 · 조명탑 · 원경 창고동
     # -------------------------------------------------------------------
+    def build_ground_kit(M, yard=True):
+        """[W2] ground_kit — P14 yard_industrial, **데크 + 야드 2계획**.
+
+        하나의 `plan_ground` 는 단일 z 로 세워지므로 z=0(데크)과 z=−1.2
+        (에이프런)를 한 호출에 담을 수 없다. 두 계획은 프림 예산(≤60)과
+        게이트를 각각 통과한다.
+        """
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["band_black"], crack=M["band_black"],
+                  patch=M["deck"], patch_cut=M["band_black"],
+                  trench=M["galv"], trench_frame=M["rail"],
+                  marking=M["sign_face"], weed=M["rubber"],
+                  stain_tire=M["rubber"], stain_oil=M["band_black"],
+                  stain_dirt=M["asphalt"])
+        total = 0
+        for tag, gp in ground_plans():
+            if tag == "yard" and not yard:
+                continue
+            res = gk.apply_ground(kit, f"{ROOT}/GKit/{tag.capitalize()}", gp, M2,
+                                  skin_exclude=sc.skin_exclude,
+                                  scatter=sc.scatter_debris)
+            total += res["prims"]
+            print(f"[ground_kit] sceneD1 P14/{tag} · 프림 {res['prims']} · "
+                  f"δmax {res['gt_delta_max']:.4f} · "
+                  f"unit_cell {res['unit_cell']}")
+        return total
+
     def build_yard_dressing(M):
         """물류창고 하역장 맥락 요소. **낙차 기하·도색 밴드·범퍼·에이프런 불변.**
 
@@ -918,6 +1022,10 @@ def main():
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
         yard_cnt = build_yard_dressing(M)
+    #  [W2] 지면 요소 — 드레싱 뒤(산포 규약). **데크 계획은 대조군에서도**
+    #  돈다(쌍둥이의 유일한 차이는 낙차 기하여야 한다). 야드 계획은 z=−1.2
+    #  라 평지 대조군(FlatDeck 상면 z=0)에서는 지면 아래로 묻히므로 뺀다.
+    build_ground_kit(M, yard=bool(cfg["hazard_stairs"]))
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])

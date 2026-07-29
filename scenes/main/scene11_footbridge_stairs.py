@@ -80,6 +80,7 @@ import datetime
 import numpy as np
 
 import scene_common as sc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -159,7 +160,35 @@ PARAMS = dict(
     rail=dict(rail_h=1.10, post_r=0.026, rail_r=0.032, rail_mid_r=0.022,
               rail_mid_drop=0.52, spacing=1.00, y_inset=0.03),
     # --- 점자블록 (cue_tactile) : 승강부 4개소 ---
-    tactile=dict(pad_len=0.40, low_len=0.40, proud=0.004),
+    #  [W2-D Sec.12.4] scene11 = registered sites `stair_top` / `stair_foot`,
+    #  p = 0.54 (Seoul 2015: 430 of 797 km of footway conforming), statutory
+    #  trigger "0.3 m before the first tread / after the last". Sec.12.4 keeps
+    #  it on **this** scene path, so no `gk` tactile op is emitted. The
+    #  non-conforming variant assigned to scene11 is "bearing off by 15 deg"
+    #  (mis-installation, 325 of 2,847 complaints) - `skew_deg`.
+    tactile=dict(pad_len=0.40, low_len=0.40, proud=0.004, skew_deg=15.0),
+
+    # === [W2-D ground_kit] P9 `bridge_deck` - spec Sec.5.3 rows 11 ==========
+    #  Grid origin is NOT the world origin: `_grid_shift()` puts it at the east
+    #  drop edge (x = east.a_x0 = 15.0, z = 5.50), travel +X. So the plan is
+    #  given `origin=(15,0,5.5)` and the edge at forward s = 0.
+    #  Prescription:
+    #    expansion joints across the deck, span-wise      -> profile step_x 9.0
+    #    trodden wear band, centre 0.6-0.9 m, albedo x0.85 -> wear_lane 0.75
+    #    rail-foot rundown bands at y = +-1.0             -> edge_break lines
+    #    concrete cracking + repair patches                -> crack / patch
+    #  `gully` is overridden to 0: `infra_kit.build_gully` sinks a 0.640 m body
+    #  and the deck slab is 0.400 m thick, so it would pierce the soffit -
+    #  which is the exact surface the `under_grating` preset looks at. A deck
+    #  scupper has no builder in the kit; carried as a rider, not faked.
+    gkit=dict(
+        deck_pad_x1=15.00,             # include the steel top landing for the
+                                       # longitudinal bands (d2 W1 sits on it)
+        wear_w=0.75,
+        drip_y=(-1.00, 1.00),          # rail-foot rundown, Sec.5.3
+        patches=((11.20, 0.30), (6.30, -0.35)),   # d5 / d10 near windows
+        seed=11,
+    ),
     # --- 한글 사인 (cue_sign) : sign_info(육교 안내) 768×512 → w:h = 3:2 ---
     #   동측 계단 하단 진입부 + 서측 하단. 그리드 시선축(y=0)과 2.6 m 이격.
     #   [v6 판정 ④ — 원인 규명 완료] `sidewalk_approach`(eye 38,−5,0.9 →
@@ -764,6 +793,33 @@ def _corridor_hits():
 
 
 # ===========================================================================
+# [C-2] ground_kit plan - pure CPU, no USD. Coordinates from PARAMS (Sec.7.4).
+# ===========================================================================
+def ground_plan():
+    """P9 `bridge_deck` plan for the footbridge deck (z = 5.50, travel +X)."""
+    g = PARAMS["gkit"]
+    dk = PARAMS["deck"]
+    gx, gy, gz = _grid_shift()
+    return gk.plan_ground(
+        "bridge_deck",
+        region=(float(dk["x0"]), float(dk["y0"]),
+                float(g["deck_pad_x1"]), float(dk["y1"])),
+        z=float(dk["z_top"]), gy=float(gy), origin=(gx, gy, gz), axis="+x",
+        edges=[("stair_head", 0.0)],
+        dists=(2, 5, 10), scene="scene11",
+        tactile=(),                 # Sec.12.4 - kept on the scene's own path
+        sites=dict(patch=[tuple(v) for v in g["patches"]]),
+        overrides=dict(
+            infra=dict(gully=0),    # see the PARAMS note: soffit pierce
+            surface=(("patch", 2), ("crack", 4),
+                     ("stain", ("water", "drip"))),
+            extras=(("wear_lane", dict(width=float(g["wear_w"]))),
+                    ("edge_break", dict(density=0.0,
+                                        lines=list(g["drip_y"]))))),
+        seed=int(g["seed"]))
+
+
+# ===========================================================================
 # [D] 카메라 프리셋 — grid_views(상판 종주 +X) + 미장센 5컷
 # ===========================================================================
 def build_views():
@@ -1063,8 +1119,27 @@ def main():
     # -------------------------------------------------------------------
     # 상판 + 지지 기둥
     # -------------------------------------------------------------------
+    # -------------------------------------------------------------------
+    # [W2-D] ground_kit - P9 bridge_deck on the footbridge deck.
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["steel"], crack=M["steel"], patch=M["concrete"],
+                  patch_cut=M["steel"], stain_water=M["band"],
+                  stain_drip=M["band"], wear=M["band"], edge_break=M["band"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", ground_plan(), M2,
+                              skin_exclude=sc.skin_exclude)
+        print(f"[ground_kit] scene11 P9 · 프림 {res['prims']} · "
+              f"δmax {res['gt_delta_max']:.4f} · unit_cell {res['unit_cell']}")
+        return res
+
     def build_deck(M):
         dk = PARAMS["deck"]
+        # [W2-0 P-A] The deck is what ground_kit decorates. `_SKIN_DENY`
+        #   already contains "deck", but the registration is explicit so the
+        #   guarantee does not rest on a path token.
+        sc.skin_exclude(f"{ROOT}/Deck")
         BOX(f"{ROOT}/Deck",
             ((dk["x0"]+dk["x1"])/2.0, (dk["y0"]+dk["y1"])/2.0,
              dk["z_top"] - dk["thick"]/2.0),
@@ -1156,12 +1231,24 @@ def main():
         # 승강부 점자띠
         if cfg["cue_tactile"]:
             tc = PARAMS["tactile"]
-            sc.build_tactile(stage, f"{prefix}/TactileTop_{tag}",
-                             a0 - tc["pad_len"], a0, st["y0"], st["y1"],
-                             M["tactile"], z=E["z_top"], proud=tc["proud"])
-            sc.build_tactile(stage, f"{prefix}/TactileLow_{tag}",
-                             b1, b1 + tc["low_len"], st["y0"], st["y1"],
-                             M["tactile"], z=0.0, proud=tc["proud"])
+            # [W2-D Sec.12.4] non-conforming variant for scene11 = bearing off
+            #   by `skew_deg`. The band is pulled back by half_w*sin(skew) so
+            #   that even the leading corner stops at the tread line - a skewed
+            #   band that overhangs the first tread would be a GT change, not a
+            #   mis-installation. skew_deg = 0 reproduces the old geometry.
+            skew = float(tc.get("skew_deg", 0.0))
+            hw = abs(st["y1"] - st["y0"]) / 2.0
+            back = abs(math.sin(math.radians(skew))) * hw
+            cy = (st["y0"] + st["y1"]) / 2.0
+            for nm, x_in, ln, zb, sgn in (
+                    ("TactileTop", a0, tc["pad_len"], E["z_top"], -1.0),
+                    ("TactileLow", b1, tc["low_len"], 0.0, +1.0)):
+                cx = x_in + sgn * (ln / 2.0 + back)
+                sc._oriented_box(
+                    stage, f"{prefix}/{nm}_{tag}",
+                    (cx, cy, zb + (tc["proud"] - 0.01) / 2.0),
+                    (ln, abs(st["y1"] - st["y0"]), tc["proud"] + 0.01),
+                    M["tactile"], rotz=skew)
         return b1
 
     def build_east(M):
@@ -1359,6 +1446,7 @@ def main():
         build_lanes(M)
     if cfg["hazard_stairs"]:
         build_deck(M)
+        build_ground_kit(M)          # [W2-D] deck ground elements
         build_east(M)
         build_west(M)
         if cfg["cue_railing"]:

@@ -77,6 +77,7 @@ import datetime
 import random as _random          # [v6] 억새 군락·건너편 블롭 시드 고정 지터
 
 import scene_common as sc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -101,11 +102,53 @@ _SLOPE_H = 3.2            # 사면 높이 = GT 낙차 (계단·램프 공통)
 _TERRACE_Z = -_SLOPE_H    # 둔치 상면 -3.2
 
 PARAMS = dict(
-    # --- 제방 마루(둑길) : 잔디 성토체 위 보도(폭 3) + 자전거도로(폭 3) ---
+    # --- 제방 마루(둑길) : 잔디 성토체 위 보도(폭 3) + 녹지대 0.5 + 자전거도로 4 ---
+    #  [W2-D · 사양 §5.9 17 ②] Cross section re-cut. The old crown was
+    #  walk 3.0 (x -6..-3) + bike 3.0 (x -3..0) with the two hard surfaces
+    #  butted together. §5.9 prescribes **bike 3.0 -> 4.0, walk relocated,
+    #  0.5 m planting strip between them**; the Han-river levee bikeway is the
+    #  one place the supervisor left the bike road valid (§5.7 ruling, 07-29:
+    #  "scene03 자연 유지, 자전거도로는 scene17 제방만 유효").
+    #    bike  x -4.0 .. 0.0   (4.0, asphalt)   <- crest side
+    #    green x -4.5 .. -4.0  (0.5, grass)     <- separation strip
+    #    walk  x -7.5 .. -4.5  (3.0, interlock) <- landward
+    #  ★ `crown_bike.proud` 0.004 -> **0.006** so the two hard bands share one
+    #    top plane z=+0.006. ground_kit lays its elements on that plane
+    #    (`plan_ground(z=...)`); with two different tops half of them would be
+    #    2 mm below the surface they belong to and read as buried.
+    #  ★ `crown_line.x` -1.5 -> **-2.0** = centre of the widened bike road.
     levee=dict(x0=-24.0, x1=0.0, y0=-30.0, y1=48.0, z_top=0.0, thick=3.6),
-    crown_walk=dict(x0=-6.0, x1=-3.0, proud=0.006, embed=0.06),   # 보도(인터로킹)
-    crown_bike=dict(x0=-3.0, x1=0.0, proud=0.004, embed=0.06),    # 자전거도로(아스팔트)
-    crown_line=dict(x=-1.5, w=0.10, seg=2.4, gap=2.0, z=0.010),   # 자전거도로 중앙 파선
+    crown_walk=dict(x0=-7.5, x1=-4.5, proud=0.006, embed=0.06),   # 보도(인터로킹)
+    crown_green=dict(x0=-4.5, x1=-4.0, top=0.000, embed=0.10),    # 분리 녹지대 0.5
+    crown_bike=dict(x0=-4.0, x1=0.0, proud=0.006, embed=0.06),    # 자전거도로(아스팔트)
+    crown_line=dict(x=-2.0, w=0.10, seg=2.4, gap=2.0, z=0.008),   # 자전거도로 중앙 파선
+
+    # ═══ [W2-D ground_kit] P13 levee_paved — 사양 §5.9 scene17 행 ═══════════
+    #  ③ 시공이음 3 m + 패치 · ④ 인터로킹 줄눈 음각 2 mm(프로파일 기본) ·
+    #  ⑥ 배수 + 빗물받이 · ⑦ 맨홀 1기(W1) · ⑩ 답압 마모대.
+    #  ★ Deviation from ⑥ "L형 측구": `build_gutter_L` is a **carriageway edge**
+    #    detail and `_compose_ops` always lays it at y = const spanning x0..x1,
+    #    i.e. **across** the crown. Here the road runs along **Y** (the levee),
+    #    so a y=const gutter would be perpendicular to the road it drains.
+    #    The same drainage function is carried by a **linear trench drain at
+    #    x = -4.15** (the bike road's landward edge, against the planting
+    #    strip) which the kit can orient correctly. `gutter_L` is set to 0.
+    #    GT-E2 check: the trench sits 4.15 m in front of the crest, so at d5 it
+    #    is at X=0.85 and at d10 at X=5.85 — both **outside** the E band
+    #    [0.7d, 2.2d], i.e. it is never judged as a near-edge transverse line
+    #    [계산].
+    #  ★ ⑤ "블록 침하 ±3 mm (2x2 단위)" is **not** placed here: it is a per-unit
+    #    perturbation of the paving cell, which §4.4 assigns to T1 (MDL unit
+    #    jitter). The kit's job is the ledger — unit_cell 0.200 / origin (0,0)
+    #    is handed over by `plan_ground`.
+    gkit=dict(
+        region=(-7.5, -6.0, 0.0, 6.0),        # crown hard surface only
+        manholes=[(-2.00, 1.20)],             # 1기, d5 근경 창
+        gullies=[(-4.15, -5.50), (-4.15, 5.50)],
+        trench=(-4.15, -4.80, 4.80),          # bike/green boundary drain
+        patches=[(-1.15, -0.55), (-5.60, 2.20), (-3.10, -3.40), (-6.40, -1.10)],
+        wear_lane=((-6.00, -6.0), (-6.00, 6.0)),   # 보도 답압 축선(Y 진행)
+    ),
     # 마루 끝 연석 — 계단 개구(y ±1.5)와 램프 진입 apron(y 2.6..4.4)은 비운다
     cope=dict(x0=-0.20, x1=0.05, h=0.05,
               y_segs=((-30.0, -1.5), (1.5, 2.6), (4.4, 48.0))),
@@ -220,7 +263,10 @@ PARAMS = dict(
     terrace_benches=[(16.2, -13.0, 96.0), (16.4, 9.8, -84.0),
                      (15.9, 29.2, 93.0), (10.6, -21.4, -86.0)],
     terrace_lights=[(15.1, -19.0), (15.1, 1.5), (15.1, 22.0), (15.1, 41.0)],
-    crown_lights=[(-6.4, -12.0), (-6.4, 9.5), (-6.4, 31.0)],
+    # [W2-D §5.9 ②] x -6.4 -> -7.9. The re-cut crown moved the walk to
+    #   x -7.5..-4.5, so -6.4 would put a lighting pole in the middle of
+    #   the footway. -7.9 is 0.4 m landward of the walk edge.
+    crown_lights=[(-7.9, -12.0), (-7.9, 9.5), (-7.9, 31.0)],
     streetlight=dict(pole_h=4.6, pole_r=0.075, arm_len=1.0, arm_r=0.045,
                      head=0.25),
     crown_trees=[(-11.2, -8.4), (-14.6, 12.7), (-9.8, 33.2), (-17.1, -19.6)],
@@ -229,7 +275,7 @@ PARAMS = dict(
 
     material=dict(
         scale=dict(concrete_floor=0.9, paving_interlock=1.2, grass=1.4,
-                   rock_wall=1.6),
+                   rock_wall=1.6, asphalt=3.0),          # [W2-D §5.9 ①]
         grass_tint=(0.54, 0.66, 0.41),
         grass_tint_b=(0.49, 0.62, 0.38),          # 사면 잔디(틴트 지터 −5%)
         # [v7 판정 ⑪-1] `concrete_floor` diff 평균은 sRGB (115.7,102.2,77.0) =
@@ -242,6 +288,9 @@ PARAMS = dict(
         paving_tint=(0.84, 0.83, 0.81),
         rock_tint=(0.72, 0.71, 0.68),
         asphalt_color=(0.145, 0.145, 0.155), asphalt_rough=0.86,
+        # [W2-D §5.9 ①] tint for the textured asphalt — keeps the old
+        #   constant-colour value as the target mean (albedo well under 0.30).
+        asphalt_tint=(0.42, 0.42, 0.45),
         paint_color=(0.70, 0.70, 0.66), paint_rough=0.62,   # 순백 금지(<0.8)
         water_color=(0.05, 0.10, 0.11), water_rough=0.06,
         rail_color=(0.66, 0.68, 0.70), rail_metallic=0.7, rail_rough=0.4,
@@ -710,9 +759,17 @@ def main():
             f"{ROOT}/Looks/Rock", sc.tex_path("rock_wall", "diff"),
             sc.tex_path("rock_wall", "nor"), sc.tex_path("rock_wall", "rough"),
             sca["rock_wall"], tint=mp["rock_tint"])
+        # [W2-D · 사양 §5.9 17 ①] Constant colour -> **real PBR**. The asphalt
+        #   texture set has been in `assets/scene01` all along and this scene
+        #   simply never bound it, which is why the worst frame of the whole
+        #   batch (d2 flat 99.78 %) was flat: a constant-colour road has no
+        #   spatial frequency at all at grazing angle. `scale=3.0` = 3 m of
+        #   texture per tile (§5.9 "3.0 m PBR").
         M["asphalt"] = PBR(f"{ROOT}/Looks/Asphalt",
-                           diffuse_color=mp["asphalt_color"],
-                           roughness_const=mp["asphalt_rough"])
+                           sc.tex_path("asphalt", "diff"),
+                           sc.tex_path("asphalt", "nor"),
+                           sc.tex_path("asphalt", "rough"),
+                           sca["asphalt"], tint=mp["asphalt_tint"])
         M["paint"] = PBR(f"{ROOT}/Looks/Paint", diffuse_color=mp["paint_color"],
                          roughness_const=mp["paint_rough"])
         M["water"] = PBR(f"{ROOT}/Looks/Water", diffuse_color=mp["water_color"],
@@ -783,9 +840,19 @@ def main():
             b = PARAMS[key]
             z_hi = lv["z_top"] + b["proud"]
             z_lo = lv["z_top"] - b["embed"]
+            # [W2-0 · P-A] The two hard crown bands are the ground_kit stage.
+            sc.skin_exclude(f"{ROOT}/{key.split('_')[1].capitalize()}Band")
             BOX(f"{ROOT}/{key.split('_')[1].capitalize()}Band",
                 ((b["x0"] + b["x1"]) / 2.0, cy, (z_hi + z_lo) / 2.0),
                 (b["x1"] - b["x0"], Ly, z_hi - z_lo), mtl, col=True)
+        # [W2-D §5.9 ②] 분리 녹지대 0.5 m — 보도와 자전거도로 사이. 상면은
+        #   두 포장 상면(+0.006)보다 6 mm 낮은 z=0 이라 식재대로 읽힌다.
+        gb = PARAMS["crown_green"]
+        BOX(f"{ROOT}/GreenStrip",
+            ((gb["x0"] + gb["x1"]) / 2.0, cy,
+             (gb["top"] + lv["z_top"] - gb["embed"]) / 2.0),
+            (gb["x1"] - gb["x0"], Ly, gb["top"] - lv["z_top"] + gb["embed"]),
+            M["grass_b"], col=True)
         # 자전거도로 중앙 파선
         cl = PARAMS["crown_line"]
         step = cl["seg"] + cl["gap"]
@@ -803,6 +870,46 @@ def main():
                 ((cp["x0"] + cp["x1"]) / 2.0, (y0 + y1) / 2.0,
                  cp["h"] / 2.0 - 0.10),
                 (cp["x1"] - cp["x0"], y1 - y0, cp["h"] + 0.20), M["conc"])
+
+    # -------------------------------------------------------------------
+    # [W2-D] ground_kit — P13 levee_paved (사양 §5.9 scene17 행)
+    #   Drop edge = levee crest x=0 (PARAMS["stairs"]["x0"], §7.4).
+    #   The crown hard surface sits at z = levee.z_top + crown_bike.proud, so
+    #   the plan is laid on that plane, not on z=0.
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        g = PARAMS["gkit"]
+        lv = PARAMS["levee"]
+        z_crown = float(lv["z_top"]) + float(PARAMS["crown_bike"]["proud"])
+        gp = gk.plan_ground(
+            "levee_paved", region=tuple(g["region"]), z=z_crown, gy=0.0,
+            origin=(0.0, 0.0, 0.0),
+            edges=[("levee_crest", float(PARAMS["stairs"]["x0"]))],
+            dists=(2, 5, 10), scene="scene17", tactile=(),
+            # §12.4 — 17 is OFF: p = 0.24 (park/riverside), below the 0.50 bar.
+            overrides=dict(infra=dict(manhole=1, gully=2, gutter_L=0,
+                                      trench=1)),
+            extras_args=dict(wear_lane=dict(centerline=tuple(g["wear_lane"]),
+                                            width=0.90)),
+            sites=dict(manhole=[tuple(v) for v in g["manholes"]],
+                       gully=[tuple(v) for v in g["gullies"]],
+                       trench=[tuple(g["trench"])],
+                       patch=[tuple(v) for v in g["patches"]]),
+            seed=17)
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["conc"], crack=M["conc"], patch=M["asphalt"],
+                  patch_cut=M["conc"], manhole=M["rail"], gully=M["rail"],
+                  gutter=M["conc"], gutter_cover=M["conc"],
+                  trench=M["rail"], trench_frame=M["rail"],
+                  marking=M["paint"], weed=M["grass_b"], wear=M["conc"],
+                  stain_dirt=M["conc"], stain_water=M["conc"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris)
+        print(f"[ground_kit] scene17 P13 · 프림 {res['prims']} · "
+              f"δmax {res['gt_delta_max']:.4f} · unit_cell {res['unit_cell']}")
+        return res
 
     # -------------------------------------------------------------------
     # 잔디 사면 — 7세그 × 2 Y밴드 (계단 폭만 비움). 세그는 margin 으로 겹친다.
@@ -1094,6 +1201,7 @@ def main():
         build_skyline(M)            # 아파트·교량은 대조군(평지)에서도 유지
         if cfg["hazard_stairs"]:
             build_dressing(M)
+    build_ground_kit(M)             # [W2-D] 지면 요소 — 드레싱 뒤(산포 순서 규약)
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])

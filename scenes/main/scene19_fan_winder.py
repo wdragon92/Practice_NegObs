@@ -67,6 +67,7 @@ import datetime
 import numpy as np
 
 import scene_common as sc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -121,6 +122,32 @@ PARAMS = dict(
     lower=dict(x0=-9.0, x1=4.0, y0=4.0, y1=17.0, top_z=-1.95),
     # 지반(잔디) 바닥 — [옥상 v3] 도로 레벨 −6.0 (상부 보도 z0 = 지상 6m 옥상)
     ground=dict(x0=-60.0, x1=60.0, y0=-60.0, y1=60.0, top_z=-6.0),
+
+    # ═══ [W2-D ground_kit] P6 roof_membrane — 사양 §5.6 scene19 행 ══════════
+    #  19-1 우레탄 도막방수(녹색) + 롤 이음 pitch 0.9~1.1 m, 알베도 **0.16~0.22**
+    #       (감독 결재 M2; 특수조 0.10~0.16 과 C4 소품조 0.20~0.35 의 교집합이
+    #        공집합이라 사양이 노후 도막 중간대로 판정) — 키트 원장 기본값 0.19.
+    #  19-2 파라펫 치켜올림 + 두겁  -> build_rooftop (위 `roof.turnup_h/coping_w`)
+    #  19-3 루프 드레인 2개소 (10.5, -0.6) [F 전 컷] · (6.0, -7.5)
+    #  19-4 도막 보수 덧칠 패치 4매 · 드레인 방사 물때 · 파라펫 하부 흘림
+    #  --   **줄눈 격자 금지** — P6 has `joint=None`, so the kit cannot emit one.
+    #  ★ Tactile **OFF** (§12.4): private rooftop, not a facility covered by the
+    #    accessibility act. The scene keeps a `cue_tactile` path for ablation
+    #    only; nothing is installed by default.
+    #  ★ Frame origin: `build_views` mirrors `grid_views` about xref 5.8, so the
+    #    preset grid origin is world x = 2*5.8 = **11.6** and the progression is
+    #    **-X**. `plan_ground(origin=...)` wants that grid origin (the frame
+    #    model puts the eye at s = -d), **not** the drop edge. The drop edge is
+    #    the roof deck's west lip `upper.x0` = 4.0, i.e. s = 11.6 - 4.0 = **7.6**.
+    #    dists are (2, 3.5, 5) to match `build_views` (d10 would be off-roof).
+    gkit=dict(
+        grid_origin_x=11.6,                    # = 2 * xref(5.8), build_views
+        region_inset=0.25,                     # = roof.pp_t (inside parapets)
+        drains=[(10.50, -0.60), (6.00, -7.50)],
+        patches=[(12.30, -0.60), (14.30, -0.25), (9.20, -3.40), (6.80, 1.90)],
+        seam_pitch=1.00,
+        wear_n=5,
+    ),
     # 지평 폐쇄 건물 (base_z=지반) — C 고층 + [옥상 v3] D/E 저층(지붕이 눈높이
     #   이하 −2.5/−1.5 = 옥상 스케일 앵커)
     # [옥상 v4] E 재배치: 구 x−28..−14·y8..22(북서)는 시선이 **하부 테라스
@@ -140,6 +167,8 @@ PARAMS = dict(
     ),
     # [옥상 v3] 옥상 파라펫(외곽 방호)·설비 소품·옥탑 문 — build_rooftop
     roof=dict(pp_t=0.25, pp_h=1.2, pp_h_inner=1.1,
+              # [W2-D §5.6 19-2] 치켜올림 0.30 m · 두겁 0.45~0.55 의 중앙 0.50
+              turnup_h=0.30, coping_w=0.50,
               hvac=[dict(cx=13.0, cy=-7.0), dict(cx=14.4, cy=-7.0)],
               hvac_size=(0.9, 0.35, 0.8),
               vent=dict(cx=8.0, cy=-5.5, r=0.15, h=0.8),
@@ -165,7 +194,16 @@ PARAMS = dict(
         wood_color=(0.30, 0.20, 0.12), wood_rough=0.85,
         canopy_a=(0.025, 0.045, 0.015), canopy_b=(0.035, 0.060, 0.020),
         canopy_rough=1.0,
-        parapet_color=(0.90, 0.90, 0.87), parapet_rough=0.6,
+        # [W2-D · 사양 §5.6 19-2] The near-white parapet constant is retired.
+        #   scene19 is the #1 near-white offender of the whole set and this
+        #   single constant is bound to every parapet, guard and gate post in
+        #   the scene. Weathered concrete coping measures 0.35~0.45; 0.40 is
+        #   the middle and is unambiguously not near-white.
+        parapet_color=(0.40, 0.40, 0.385), parapet_rough=0.66,
+        # 19-2 코팅 치켜올림: 파라펫 내면 하부 0.30 m 를 바닥 도막과 동색으로.
+        #   값은 감독 결재 M2 대역 0.16~0.22 의 중앙 (= ground_kit
+        #   GROUND_DIMENSIONS["membrane_albedo"] 0.19) 을 녹색으로 준 것.
+        coating_color=(0.115, 0.150, 0.120), coating_rough=0.72,
         nosing_color=(0.85, 0.72, 0.10), nosing_rough=0.7,
         hvac_color=(0.60, 0.61, 0.62), hvac_rough=0.5,      # [옥상 v3] 실외기
         # r5 판정: 암색 문이 암색 화강암벽에 매몰 → 도장 강판 회청색으로 대비 확보
@@ -677,6 +715,17 @@ def main():
         M["door"] = sc.make_pbr(stage, "/World/Looks/Door",
                                 diffuse_color=mp["door_color"], metallic=0.4,
                                 roughness_const=mp["door_rough"])
+        # [W2-D · §5.6] 우레탄 도막방수(녹색) — 바닥 도막 + 파라펫 치켜올림 동색.
+        #   `[시방]` 나라장터 R25BK00911379 "표면 색상은 녹색".
+        M["coating"] = sc.make_pbr(stage, "/World/Looks/Coating",
+                                   diffuse_color=mp["coating_color"],
+                                   roughness_const=mp["coating_rough"])
+        M["gk_iron"] = sc.make_pbr(stage, "/World/Looks/GKitIron",
+                                   diffuse_color=(0.09, 0.09, 0.095),
+                                   metallic=0.55, roughness_const=0.55)
+        M["gk_stain"] = sc.make_pbr(stage, "/World/Looks/GKitStain",
+                                    diffuse_color=(0.17, 0.19, 0.16),
+                                    roughness_const=0.88)
         return M
 
     # -------------------------------------------------------------------
@@ -705,6 +754,8 @@ def main():
         for name, mtl in (("upper", M["upper"]), ("lower", M["lower"])):
             w = PARAMS[name]
             top = w["top_z"] if hazard else 0.0    # 평탄 대조군은 전부 z=0
+            # [W2-0 · P-A] The upper roof deck is the ground_kit stage.
+            sc.skin_exclude(f"/World/Scene19/Walk_{name}")
             sc.add_box(stage, f"/World/Scene19/Walk_{name}",
                        ((w["x0"] + w["x1"]) / 2.0, (w["y0"] + w["y1"]) / 2.0,
                         (top + base) / 2.0),
@@ -720,6 +771,47 @@ def main():
                     (top + base) / 2.0),
                    (co["x1"] - co["x0"], co["y1"] - co["y0"], top - base),
                    M["lower"], collider=True)
+
+    # -------------------------------------------------------------------
+    # [W2-D] ground_kit — P6 roof_membrane (사양 §5.6 scene19 행)
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        g = PARAMS["gkit"]
+        up = PARAMS["upper"]
+        ins = float(g["region_inset"])
+        ox = float(g["grid_origin_x"])
+        s_edge = ox - float(up["x0"])          # axis "-x": s = origin_x - x
+        gp = gk.plan_ground(
+            "roof_membrane",
+            region=(up["x0"] + ins, up["y0"] + ins,
+                    up["x1"] - ins, up["y1"] - ins),
+            z=float(up["top_z"]), gy=0.0, origin=(ox, 0.0, 0.0), axis="-x",
+            edges=[("roof_edge", s_edge)], dists=(2, 3.5, 5),
+            scene="scene19", tactile=(),
+            overrides=dict(infra=dict(gully=2),
+                           surface=(("patch", 4),
+                                    ("stain", ("water", "drip", "dirt")))),
+            extras_args=dict(membrane=dict(seam_pitch=float(g["seam_pitch"]),
+                                           wear_n=int(g["wear_n"]))),
+            sites=dict(gully=[tuple(v) for v in g["drains"]],
+                       patch=[tuple(v) for v in g["patches"]]),
+            seed=19)
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(membrane=M["coating"], membrane_seam=M["gk_stain"],
+                  membrane_wear=M["coating"], patch=M["coating"],
+                  patch_cut=M["gk_stain"], gully=M["gk_iron"],
+                  manhole=M["gk_iron"], trench=M["gk_iron"],
+                  trench_frame=M["gk_iron"], joint=M["gk_stain"],
+                  crack=M["gk_stain"], weed=M["grass"], wear=M["gk_stain"],
+                  stain_water=M["gk_stain"], stain_drip=M["gk_stain"],
+                  stain_dirt=M["gk_stain"])
+        res = gk.apply_ground(kit, "/World/Scene19/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris)
+        print(f"[ground_kit] scene19 P6 · 프림 {res['prims']} · "
+              f"δmax {res['gt_delta_max']:.4f} · unit_cell {res['unit_cell']}")
+        return res
 
     # -------------------------------------------------------------------
     # winder 12단 + newel + 건물 L벽 + 외측 파라펫
@@ -809,12 +901,50 @@ def main():
         up, lo = PARAMS["upper"], PARAMS["lower"]
         t, h, hi = rf["pp_t"], rf["pp_h"], rf["pp_h_inner"]
 
-        def pp(tag, x0, x1, y0, y1, base, hh):
+        cw = rf["coping_w"]
+        tu = rf["turnup_h"]
+
+        def pp(tag, x0, x1, y0, y1, base, hh, ref=None):
             sc.add_box(stage, f"/World/Scene19/RoofPP_{tag}",
                        ((x0 + x1) / 2.0, (y0 + y1) / 2.0,
                         base - 0.05 + (hh + 0.05) / 2.0),
                        (x1 - x0, y1 - y0, hh + 0.05), M["parapet"],
                        collider=True)
+            ref = ref or up                    # deck this parapet belongs to
+            # [W2-D · 사양 §5.6 19-2] **치켜올림 + 두겁**.
+            #   ① turn-up: the waterproofing coat wraps the parapet's inner
+            #      face for `turnup_h` (0.30 m) — it is the same green as the
+            #      deck, not concrete. `[시방]` "내벽 및 상부까지 전체를 감아 도포".
+            #   ② coping: a cap `coping_w` (0.45~0.55) wide **centred** on the
+            #      parapet, so it overhangs 0.125 m each side with a drip edge
+            #      instead of cantilevering over the deck. Both are 12 mm
+            #      plates — no GT change, no camera occlusion (the roof_context
+            #      eye sits at z 1.9, above the 1.15~1.20 parapet crown).
+            #   Orientation is derived from the box: the long axis is the run,
+            #   the short axis is the thickness, and "inner" is the side that
+            #   faces the centre of the deck this parapet belongs to (`ref`) —
+            #   passing `ref` matters for the lower terrace ring, whose
+            #   east parapet has the deck on its **-X** side, the opposite of
+            #   the upper deck's.
+            sx, sy = x1 - x0, y1 - y0
+            cxm, cym = (x0 + x1) / 2.0, (y0 + y1) / 2.0
+            top = base - 0.05 + (hh + 0.05)
+            if sx <= sy:                       # runs along Y, thickness in X
+                inner = 1.0 if cxm < (ref["x0"] + ref["x1"]) / 2.0 else -1.0
+                sc.add_box(stage, f"/World/Scene19/RoofTurn_{tag}",
+                           (cxm + inner * (sx / 2.0 + 0.006), cym,
+                            base + tu / 2.0), (0.012, sy, tu), M["coating"])
+                sc.add_box(stage, f"/World/Scene19/RoofCope_{tag}",
+                           (cxm, cym, top + 0.006),
+                           (cw, sy, 0.012), M["parapet"])
+            else:                              # runs along X, thickness in Y
+                inner = 1.0 if cym < (ref["y0"] + ref["y1"]) / 2.0 else -1.0
+                sc.add_box(stage, f"/World/Scene19/RoofTurn_{tag}",
+                           (cxm, cym + inner * (sy / 2.0 + 0.006),
+                            base + tu / 2.0), (sx, 0.012, tu), M["coating"])
+                sc.add_box(stage, f"/World/Scene19/RoofCope_{tag}",
+                           (cxm, cym, top + 0.006),
+                           (sx, cw, 0.012), M["parapet"])
 
         # 상부 옥상(z0) 외곽: 동(x1)·남(y0)·서(x0, 남단..L벽 y0)·북(하부 테라스 경계)
         pp("U_E", up["x1"] - t, up["x1"], up["y0"], up["y1"], up["top_z"], h)
@@ -822,9 +952,9 @@ def main():
         pp("U_W", up["x0"], up["x0"] + t, up["y0"] + t, -1.0, up["top_z"], h)
         pp("U_N", up["x0"], up["x1"], up["y1"] - t, up["y1"], up["top_z"], hi)
         # 하부 테라스(−1.95) 외곽: 서(x0)·북(y1)·동(x1, 상부 몸체 밖 y>4)
-        pp("L_W", lo["x0"], lo["x0"] + t, lo["y0"], lo["y1"], lo["top_z"], h)
-        pp("L_N", lo["x0"] + t, lo["x1"], lo["y1"] - t, lo["y1"], lo["top_z"], h)
-        pp("L_E", lo["x1"] - t, lo["x1"], lo["y0"], lo["y1"] - t, lo["top_z"], h)
+        pp("L_W", lo["x0"], lo["x0"] + t, lo["y0"], lo["y1"], lo["top_z"], h, lo)
+        pp("L_N", lo["x0"] + t, lo["x1"], lo["y1"] - t, lo["y1"], lo["top_z"], h, lo)
+        pp("L_E", lo["x1"] - t, lo["x1"], lo["y0"], lo["y1"] - t, lo["top_z"], h, lo)
 
         # 실외기(기단 0.1 + 본체) + 거위목 환기구 + 배관 런 — 상부 옥상
         hs = rf["hvac_size"]
@@ -920,6 +1050,7 @@ def main():
         build_dressing(M)
     if hazard:
         build_cues(M)
+    build_ground_kit(M)             # [W2-D] 지면 요소 — 드레싱 뒤(산포 순서 규약)
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])
 

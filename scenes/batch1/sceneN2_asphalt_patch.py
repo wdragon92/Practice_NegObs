@@ -40,6 +40,7 @@ import datetime
 
 import scene_common as sc
 import batch1_common as bc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -96,8 +97,14 @@ PARAMS = dict(
                  tile=0.90, gap_prob=0.10, seed=20260727),
     #   근열/원열 주차 구획선(진행축 X를 따라 뻗음). 소형 패치가 y=0 선을,
     #   대형 패치가 원열 y=−2.5 선을 끊는다.
+    #   ★ [W2 §5.3 N2] `near` 시점 0.4 → **−4.6**. "요소는 충분한데 좌표가
+    #     프레임 밖" 이 이 씬의 역설이다 — 근열 구획선이 x 0.4 에서 시작하면
+    #     h0.3 근경 창(d2 = x −1.436…0 · d5 = −4.436…−3 · d10 = −9.436…−8)
+    #     **어느 것에도 걸리지 않는다** `[실측 — 사양 §5.3 "N2 역설"]`.
+    #     −4.6 으로 늘리면 d5 창을 관통하고 d2 창까지 이어진다. 열 끝선
+    #     (stall_heads N x=5.6)은 그대로라 구획 길이만 10.2 m 로 늘어난다.
     stall=dict(ys=(-5.0, -2.5, 0.0, 2.5, 5.0), width=0.12,
-               near=(0.4, 5.6), far=(9.0, 13.6)),
+               near=(-4.6, 5.6), far=(9.0, 13.6)),
     #   구획 끝선(폐단부) — 각 열의 +X 끝을 가로지르는 선
     stall_heads=[dict(name="N", x=5.6), dict(name="F", x=13.6)],
     stall_head=dict(y0=-5.0, y1=5.0, width=0.12),
@@ -109,6 +116,39 @@ PARAMS = dict(
     manhole=dict(cx=6.3, cy=1.4, r_frame=0.36, r_lid=0.30, r_boss=0.08,
                  h=0.03, proud_frame=0.0026, proud_lid=0.0032,
                  proud_boss=0.0038),
+
+    # ═══ [W2 ground_kit] P4 street_asphalt — 사양 §5.3 N2 행 ═══════════════
+    #  이 씬의 진단은 "요소가 없다"가 아니라 **"요소는 충분한데 좌표가 근경
+    #  창 밖"** 이다 — 9종을 갖고도 σ_LF 1.36 인 정확한 기전 `[사양 §0-3]`.
+    #  따라서 킷의 역할은 **근경 창 충전**에 한정한다:
+    #    ① 맨홀 1기 추가(구 맨홀 x=6.3 은 유지 — 사양 "또는 1기 추가")
+    #    ② 근경 균열망 6본 · 보수 패치 3매 · 타이어/유류 얼룩 · 경계 잡초
+    #  금지·생략:
+    #    · **줄눈**: 씬이 이미 4 m 격자를 x −20…16 에 깔았고 3창을 전부
+    #      통과한다(d2 x=0 · d5 x=−4 · d10 x=−8 `[계산]`) → 킷 줄눈 0
+    #      (`street_asphalt` 는 애초에 `joint=None`). D6 이중 격자 회피.
+    #    · **L형 측구·차선 도색**: 연석(y=9.50)은 근경 창 밖이고 도색은
+    #      `build_markings()` 가 이미 담당한다 → `gutter_L=0`, `marking=()`.
+    ground=dict(
+        region=(-12.0, -4.0, 2.0, 4.0),
+        #  맨홀 — 파일럿 결재 M9-ⓑ 2차 정정 기준(면 요소 화면폭 ≤25 %)을
+        #  적용해 W2 창(2.00~3.00 m)에 둔다. x=−2.40 ⇒ d5 지면거리 2.60 m ·
+        #  화면폭 414 px = 21.6 % `[계산 — W_px = f·0.648/X]`.
+        #  y=+0.50: 근열 구획선 y ∈ {−5,−2.5,0,2.5,5} 사이 중앙이라 도색과
+        #  겹치지 않는다(Z-파이팅 0).
+        manhole=(-2.40, 0.50),
+        #  패치 #1 이 d2 근경 창(x −1.436…0)을 담당. 씬 자체 패치(x 2.6…4.6 ·
+        #  7…12)와 x 로 완전 분리 → 시각적 병합·Z-파이팅 없음.
+        #  3매 = d2/d5/d10 근경 창(W1) 각 1매 — 사양 §2.2 처방 제1원칙
+        #  ("이산 요소는 세 창 각각에 최소 1개"). 프레임 반폭이 X=0.8 m 에서
+        #  0.46 m 뿐이라 **|y| ≤ 0.4** 여야 화면에 든다 `[계산]`.
+        #  d2 매는 y=0 구획선 위에 얹힌다 — 이 씬의 "재포장 패치가 구획선을
+        #  끊는다" 서사와 정확히 같은 사건이다(도색은 proud 0.0010, 패치는
+        #  0.0020 이라 Z-파이팅 없이 선이 패치 밑으로 사라진다).
+        patches=[(-1.20, 0.00), (-3.80, 0.30), (-8.80, -0.30)],
+        gullies=[(-3.0, -3.6), (-8.0, -3.6)],
+        tactile_depth=0.60, tactile_setback=0.30,
+    ),
 
     # ═══ 맥락 드레싱 — 연석·보도 경계 / 가로등 / 가로수 / 원경 스카이라인 ═══
     #  ★ GT 불변: 연석은 **평지 위에 솟은 z≥0 융기 스트립**(양측 지면 모두 z≈0)
@@ -323,6 +363,39 @@ def bollard_points():
     bo = PARAMS["bollards"]
     return bc.bollard_line(bo["x0"], bo["y"], bo["x1"], bo["y"],
                            spacing=bo["spacing"])
+
+
+def tactile_band_rect():
+    """[W2 §12.5 ②] 볼라드 열 전면 **연속 점형 띠** (x0, y0, x1, y1).
+
+    법정 위치 "볼라드 전면 0.3 m" + 점형 세로폭 60 cm 표준. 이 씬의 전면은
+    +Y(보도측)라 띠는 볼라드 앞면에서 +Y 로 뻗는다. 좌표는 PARAMS 유도(§7.4).
+    """
+    bo, g = PARAMS["bollards"], PARAMS["ground"]
+    sb, dp = float(g["tactile_setback"]), float(g["tactile_depth"])
+    fy = float(bo["front"][1])
+    y_face = bo["y"] + fy * bo["r"]
+    ya, yb = y_face + fy * sb, y_face + fy * (sb + dp)
+    return (bo["x0"] - 0.15, min(ya, yb), bo["x1"] + 0.15, max(ya, yb))
+
+
+def ground_plans():
+    """[W2 ground_kit] 지면 계획 — 씬 조립부와 CPU 검산이 같은 함수를 쓴다."""
+    g = PARAMS["ground"]
+    gp = gk.plan_ground(
+        "street_asphalt", region=tuple(g["region"]),
+        z=float(PARAMS["apron"]["z_top"]), gy=0.0, origin=(0.0, 0.0, 0.0),
+        edges=(),                       # hard negative — 낙차 에지 0
+        dists=(2, 5, 10), scene="sceneN2",
+        tactile=("bollard",) if SCENE_CONFIG["cue_scene_dressing"] else (),
+        sites=dict(manhole=[tuple(g["manhole"])],
+                   gully=[tuple(p) for p in g["gullies"]],
+                   patch=[tuple(p) for p in g["patches"]],
+                   tactile=dict(bollard=tactile_band_rect())),
+        overrides=dict(infra=dict(manhole=1, gully=2, gutter_L=0,
+                                  marking=())),
+        seed=32)
+    return [("apron", gp)]
 
 
 # ===========================================================================
@@ -604,9 +677,34 @@ def main():
     #   인접 평판은 X로 0.05 겹치되 z_top 을 2mm씩 낮춰 동일평면·틈 동시 회피.
     # -------------------------------------------------------------------
     def build_ground(M):
+        # [W2-0 · P-A] 에이프런 상면이 ground_kit 의 장식 대상이다 → 변위 스킨
+        #   OFF. `add_box` 가 그 자리에서 `_skin_wanted` 를 부르므로 **SLAB
+        #   호출 전에** 등록한다 `[사양 §1.2]`. 차도(Road)도 노면 도색·파선이
+        #   flush(0.002)라 같이 지킨다.
+        sc.skin_exclude(f"{ROOT}/Apron", f"{ROOT}/Road")
         SLAB(f"{ROOT}/Apron", PARAMS["apron"], M["apron"])
         SLAB(f"{ROOT}/Road", PARAMS["road"], M["asphalt"])
         SLAB(f"{ROOT}/Verge", PARAMS["verge"], M["gravel"])
+
+    # -------------------------------------------------------------------
+    # [W2] ground_kit — P4 street_asphalt. 근경 창 충전 전용(줄눈·측구·도색은
+    #   씬이 이미 갖고 있다). 낙차 에지 0 → GT-E1′/GT-E2 는 공허참.
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        (_tag, gp), = ground_plans()
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["joint"], crack=M["joint"], patch=M["patch"],
+                  patch_cut=M["cut"], manhole=M["lid"], gully=M["iron"],
+                  gutter=M["curb"], weed=M["grass"], tactile=M["tactile"],
+                  stain_tire=M["joint"], stain_oil=M["patch"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris)
+        print(f"[ground_kit] sceneN2 P4 · 프림 {res['prims']} · 산포 "
+              f"{res['instances']} · δmax {res['gt_delta_max']:.4f} · "
+              f"unit_cell {res['unit_cell']}")
+        return res
 
     def build_joints(M):
         """에이프런 슬래브 줄눈 — 최하층(proud 0.0006). 패치 아래로 들어가면
@@ -798,11 +896,14 @@ def main():
         #   상단 백색 반사띠 + 전면(보도측 +Y) 0.3 m 점형블록.
         bo = PARAMS["bollards"]
         for i, (bx, by) in enumerate(bollard_points()):
+            # [W2 §12.5 ②] 본당 소판 → ground_kit 의 **연속 띠 0.60 m** 로
+            #   대체(판독 가능성). 여기서 끄지 않으면 점형 대역이 0.9 m 가 된다.
             bc.build_bollard_v51(stage, f"{ROOT}/Bollard_{i}", bx, by,
                                  PARAMS["walk"]["z_top"], None,
                                  M["bollard_body"], M["bollard_band"],
                                  M["tactile"], front_dir=bo["front"],
-                                 radius=bo["r"], height=bo["h"])
+                                 radius=bo["r"], height=bo["h"],
+                                 tactile=False)
         hg = PARAMS["hedge"]
         sc.build_hedge(stage, f"{ROOT}/Hedge", hg["x0"], hg["y0"], hg["x1"],
                        hg["y1"], hg["h"], base_z=PARAMS["verge"]["z_top"],
@@ -824,6 +925,7 @@ def main():
     if cfg["cue_scene_dressing"]:
         build_markings(M)                # 노면 도색(패치가 구획선을 끊는다)
         build_dressing(M)
+    build_ground_kit(M)                  # [W2] 지면 요소 — 드레싱 뒤(산포 순서 규약)
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])

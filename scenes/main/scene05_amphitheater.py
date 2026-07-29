@@ -61,6 +61,7 @@ import datetime
 import numpy as np
 
 import scene_common as sc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -88,6 +89,45 @@ PARAMS = dict(
     plaza=dict(x0=-18.0, x1=18.0, y0=-14.0, y1=14.0, z_top=0.0, thick=0.5),
     # 차콜 밴드: Y 방향으로 달리는 granite_dark 띠, X 간격 3.2, 1.5mm 돌출
     band=dict(width=0.45, spacing=3.2, proud=0.0015, embed=0.05),
+
+    # === [W2-D ground_kit] P1 plaza_granite (spec §5.1 row 05) =============
+    # Stage, tiers, ring and lip are **not touched** (W3 owns them). Only the
+    # upper plaza west of the bowl lip is decorated.
+    #
+    # ORIGIN WARNING - spec §2.3 does not list scene05, but this scene *does*
+    # shift its grid: `build_views()` subtracts 1.5 from every preset eye/tgt
+    # so that "distance d" means "d to the bowl lip at x=-1.5", not to x=0.
+    # The plan therefore runs with origin=(-1.5, 0, 0) and edge s=0.
+    # Consequence: the §5.1 coordinates for this row are unusable as written -
+    # the manhole at x=-3.5 sits exactly on the d2 eye (eye_x = -1.5-2 = -3.5)
+    # and the sump at x=-8.5 is 1.5 m short of the d10 window. Re-derived here:
+    #   manhole (-3.90, -0.40) -> X = 2.60 m at d5, screen width 414 px =
+    #     21.6 % of frame. Same construction as the scene15 pilot fix (M9-b):
+    #     inside the W1 window a 0.648 m cover cannot stay under 25 % (28.1 %
+    #     even at the far end), so it goes to the 2nd-priority W2 window.
+    #   gullies (-10.00, 0.00) [d10 window, X=1.50] and (-6.00, -3.00).
+    #   patch sites (-2.60,-0.45) and (-3.35,+1.20) carry the d2 window: with
+    #     the joint grid cut back (below) they are the only kit elements left
+    #     in it, and `build_patch_field` honours explicit sites regardless of
+    #     the region.
+    # JOINT GRID stops at x=-3.70 rather than at the lip. That is a ground_kit
+    #   defect, not a design choice: `_edge_guard_ticks` feeds the **world** x
+    #   of each tick into `drow()`, which expects a forward-s offset, so on any
+    #   scene whose origin is not (0,0,0) it guards the wrong ticks. Measured
+    #   here at d10 (floor 16 rows @1080):
+    #     tick x=-1.8  true s=-0.3  drow  1.57  <- violation; guard reads
+    #                                             drow(-1.8)=11.16, drops it
+    #                                             for the wrong reason
+    #     tick x=-3.6  true s=-2.1  drow 13.51  <- violation; guard reads
+    #                                             drow(-3.6)=28.54, keeps it
+    #   With the region running to the lip, that second tick makes plan_ground
+    #   raise B7 ("Joints/JX_5 ... 13.5@1080 < 16"). x1=-3.70 keeps exactly the
+    #   tick set an origin-aware guard would keep: -5.4, -7.2, -9.0, -10.8,
+    #   -12.6. See Docs/reports/w2d_edit_g1.md §3 D-3.
+    gkit=dict(x0=-13.5, half_y=5.0, x1=-3.70, lip_x=-1.50,
+              manhole=[(-3.90, -0.40)],
+              gully=[(-10.00, 0.00), (-6.00, -3.00)],
+              patch=[(-2.60, -0.45), (-3.35, 1.20)]),
 
     # --- 선큰 보울 (중심 (6,0), [v5 채택] 반원 200°) ---
     #   3티어 × riser 0.40 · tread 0.85(좌석 규격) — build_arc_steps 3회 호출.
@@ -911,6 +951,13 @@ def main():
     def build_plaza(M, hazard):
         p = PARAMS["plaza"]
         top, th = p["z_top"], p["thick"]
+        # [W2-0 · P-A] Plaza_W is 9.5 x 28 x 0.5 m of `plaza_light`, i.e. it
+        # passes `_skin_wanted` and would carry a +6.5..16.5 mm displacement
+        # skin. That buries the manhole (+-10 mm) and the joint tone plates
+        # (+0.6 mm) outright (spec §1.1). Same for the flat control slab.
+        sc.skin_exclude("/World/Scene05/Plaza_W", "/World/Scene05/Plaza_E",
+                        "/World/Scene05/Plaza_N", "/World/Scene05/Plaza_S",
+                        "/World/Scene05/PlazaRing", "/World/Scene05/PlazaFlat")
         if not hazard:
             # 평지 대조군: 전체 단일 슬래브(보울 구멍 없음)
             cx = (p["x0"] + p["x1"]) / 2.0
@@ -975,6 +1022,40 @@ def main():
                            (bd["width"], p["y1"] - p["y0"], hz), M["band"])
             x += bd["spacing"]
             n += 1
+
+    # -------------------------------------------------------------------
+    # [W2-D] ground_kit — P1 plaza_granite, upper plaza west of the bowl lip.
+    #   Stage / tiers / ring / lip untouched (W3). Runs in both hazard arms
+    #   so the GT-E4 hazard-off twin carries identical ground elements.
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        g = PARAMS["gkit"]
+        gp = gk.plan_ground(
+            "plaza_granite",
+            region=(g["x0"], -g["half_y"], g["x1"], g["half_y"]),
+            z=PARAMS["plaza"]["z_top"], gy=0.0,
+            origin=(g["lip_x"], 0.0, 0.0),       # grid is shifted by -1.5
+            edges=[("bowl_lip", 0.0)],
+            dists=(2, 5, 10), scene="scene05",
+            tactile=(),                 # §12.4 — p=0.24 공원, 미설치
+            overrides=dict(infra=dict(manhole=1, gully=2)),
+            sites=dict(manhole=[tuple(v) for v in g["manhole"]],
+                       gully=[tuple(v) for v in g["gully"]],
+                       patch=[tuple(v) for v in g["patch"]]),
+            seed=5)
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["granite_dark"], crack=M["granite_dark"],
+                  patch=M["stage"], patch_cut=M["granite_dark"],
+                  manhole=M["bollard"], gully=M["bollard"], weed=M["hedge"],
+                  stain_dirt=M["granite_dark"], stain_water=M["granite_dark"])
+        res = gk.apply_ground(kit, "/World/Scene05/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris)
+        print(f"[ground_kit] scene05 P1 · prims {res['prims']} · "
+              f"delta_max {res['gt_delta_max']:.4f} · "
+              f"unit_cell {res['unit_cell']}")
+        return res
 
     # -------------------------------------------------------------------
     # 선큰 보울 — 3티어(아크 × 3회) + 스테이지 원반 + 진입 계단
@@ -1355,6 +1436,7 @@ def main():
         if cfg["cue_material_break"]:
             build_lip(M)
     build_ground(M)
+    build_ground_kit(M)             # [W2-D] both arms — GT-E4 twin parity
     build_surround(M)               # v4-A4: 광장 둘레 종결 (상시 — 보행 안전)
     if cfg["cue_scene_dressing"]:
         build_dressing(M)

@@ -95,6 +95,7 @@ import datetime
 
 import scene_common as sc
 import batch1_common as bc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -126,8 +127,32 @@ PARAMS = dict(
             wall_t=0.18, wall_ext=1.10, edge_sink=0.004,
             invert_half=0.60, invert_t=0.25),
     # --- 복개(덮개) 슬래브 : x −22..0, 상면 +0.004 (보행면·낙차 개시 에지) ---
+    #  ★ [W2 §5.7 D3] 줄눈 집행자를 **ground_kit 으로 옮긴다.** 사양의 처방은
+    #    "줄눈 심화 — 현행 **양각 1 mm → 음각 3 mm**" 다. 구 코드는 암색 박판을
+    #    proud +0.001 로 얹어 "음각 대용" 을 했는데, 스침각(h0.3)에서는 융기와
+    #    음각의 음영이 반대로 읽힌다. 킷의 `build_joint_grid` 는 명목 음각
+    #    −0.003 을 원장(`recess_nominal`)에 남기고 상면은 `surface_top_z`
+    #    (+0.6 mm)로 올려 **솔리드 슬래브 매몰**을 피한다(파일럿 #2 결함).
+    #    주기(2.5 m)·폭(0.04)은 그대로 승계해 씬 리듬을 바꾸지 않는다.
+    #    `joint_proud` 는 더 이상 쓰이지 않는다(원장 보존용으로만 남긴다).
     cover=dict(y0=-0.65, y1=0.66, top=0.004, thick=0.20,
                joint_step=2.5, joint_w=0.04, joint_proud=0.001),
+
+    # ═══ [W2 ground_kit] P17 verge_rural — 사양 §5.7 D3 행 ═════════════════
+    #  ★ **자연 씬**이다(`natural=True`). 도시 인프라(맨홀·빗물받이·L형 측구·
+    #    차선 도색·점자블록·볼라드) **0건**을 `plan_ground` 가 코드로 강제한다.
+    #    D3 의 **U형 개거 정체성**(복개 슬래브 + 사다리꼴 개거 + 컬버트)은
+    #    씬 기하 그대로이며 ground_kit 은 여기에 손대지 않는다 — 단면 변경 0건.
+    #  ★ 면이 둘이라 계획도 둘이다(단일 계획 = 단일 z):
+    #     ① `cover` 복개 슬래브 상면 z=+0.004 — h0.3 근경 창이 여기다.
+    #        줄눈 심화 · 보수 패치 · 균열 · **복개면 토사 퇴적 띠** · 경계 잡초.
+    #     ② `road`  아스팔트 차도 z=0.0 — **차도 패치/균열** · 흙 퇴적 · 갓길 잡초.
+    gkit=dict(
+        cover_x0=-12.0,
+        cover_patches=[(-1.20, 0.00), (-3.80, 0.00), (-8.80, 0.00)],
+        #  차도 — 개거 립(y=−0.65)·가장자리선(y=−0.95±0.05)을 피해 y ≤ −1.10.
+        road_region=(-12.0, -8.00, 2.0, -1.10),
+    ),
     # --- 도로측 콘크리트 립 (노면과 flush, 폭 0.15) ---
     lip=dict(y0=-0.65, y1=-0.50, top=0.002, x0=-0.30, base_z=-1.60),
     # --- 아스팔트 차도 ---
@@ -318,6 +343,41 @@ ASSET_ROLES = ["concrete_wall", "concrete_floor", "grass", "leaf_ground",
 # [D] 카메라 프리셋: grid_views(gy=0.0 = 측구 중심선) + 미장센 4컷
 #     gy 를 측구 중심선에 두어 그리드 프리셋 전부가 **종주 시점**이 된다.
 # ===========================================================================
+def ground_plans():
+    """[W2 ground_kit] 지면 계획 2매 — 씬 조립부와 CPU 검산이 같은 함수를 쓴다.
+
+    ① `cover` : 복개 슬래브(보행면) — 낙차 개시 에지 x=0 을 안고 있다.
+    ② `road`  : 아스팔트 차도 — 전방 낙차 없음(`edges=()`).
+    """
+    g = PARAMS["gkit"]
+    cv, ch = PARAMS["cover"], PARAMS["ch"]
+    cover = gk.plan_ground(
+        "verge_rural",
+        region=(float(g["cover_x0"]), float(cv["y0"]),
+                float(ch["x_open"]), float(cv["y1"])),
+        z=float(cv["top"]), gy=0.0, origin=(0.0, 0.0, 0.0),
+        edges=[("channel_open", float(ch["x_open"]))],
+        dists=(2, 5, 10), scene="sceneD3",
+        tactile=(),                     # §12.4 — 비대상(농촌 도로변)
+        sites=dict(patch=[tuple(p) for p in g["cover_patches"]]),
+        #  주기·폭은 씬 승계, 음각만 −3 mm 로 심화(§5.7).
+        overrides=dict(pave=dict(joint="contraction",
+                                 step_x=float(cv["joint_step"]),
+                                 groove_w=float(cv["joint_w"]),
+                                 recess=-0.003)),
+        seed=301)
+    road = gk.plan_ground(
+        "verge_rural", region=tuple(g["road_region"]),
+        z=float(PARAMS["road"]["top"]), gy=0.0, origin=(0.0, 0.0, 0.0),
+        edges=(),                       # 차도 전방에 낙차 없음
+        dists=(2, 5, 10), scene="sceneD3",
+        tactile=(),
+        #  아스팔트에는 수축줄눈이 없다 → 줄눈 0.
+        overrides=dict(pave=dict(joint=None)),
+        seed=302)
+    return [("cover", cover), ("road", road)]
+
+
 def build_views():
     views = sc.grid_views(0.0)                 # h{0.3,0.9,1.8}×d{2,5,10}, +X
     # verge_walk: 버지를 따라 걷다 측구로 사교 접근 — 오버행이 에지를 덮는가
@@ -674,6 +734,9 @@ def main():
                                    top - thick / 2.0),
                 (xb - xa, y1 - y0, thick), mtl, col=True)
 
+        # [W2-0 · P-A] 차도가 ground_kit 의 장식 대상이다 → 변위 스킨 OFF.
+        #   **plate() 호출 전에** 등록해야 한다(`add_box` 가 그 자리에서 판정).
+        sc.skin_exclude(f"{ROOT}/Road")
         # 차도(아스팔트) + 원측 갓길 + 버지 + 뒷마당
         plate("Road", rd["y0"], rd["y1"], rd["top"], rd["thick"], M["asphalt"])
         plate("FarSide", fs["y0"], fs["y1"], fs["top"], fs["thick"], M["grass"])
@@ -693,23 +756,21 @@ def main():
                   M["grass"], xa=by["lid_x1"], xb=x1)
 
     def build_cover(M):
-        """복개 슬래브 (x −22..0) — 보행 연속성의 원천이자 낙차 개시 에지."""
+        """복개 슬래브 (x −22..0) — 보행 연속성의 원천이자 낙차 개시 에지.
+
+        [W2 §5.7] **줄눈은 여기서 만들지 않는다** — ground_kit 이 음각 −3 mm
+        로 다시 깐다(`build_ground_kit`). 구 코드의 양각 +1 mm 박판을 남겨
+        두면 같은 면에 두 격자가 겹친다(파일럿 결함 D6).
+        """
         cvr = PARAMS["cover"]
+        # [W2-0 · P-A] 복개 슬래브 상면이 ground_kit 의 무대다 → 스킨 OFF.
+        sc.skin_exclude(f"{ROOT}/CoverSlab")
         BOX(f"{ROOT}/CoverSlab",
             ((ch["x_back"] + ch["x_open"]) / 2.0,
              (cvr["y0"] + cvr["y1"]) / 2.0, cvr["top"] - cvr["thick"] / 2.0),
             (ch["x_open"] - ch["x_back"], cvr["y1"] - cvr["y0"],
              cvr["thick"]), M["conc"], col=True)
-        # 슬래브 줄눈 (암색 대신 동일 재질 음각 대용 — 얇은 띠, proud 0.001)
-        n = 0
-        x = ch["x_back"] + cvr["joint_step"]
-        while x < ch["x_open"] - 1e-6:
-            BOX(f"{ROOT}/CoverJoint_{n}",
-                (x, (cvr["y0"] + cvr["y1"]) / 2.0,
-                 cvr["top"] + cvr["joint_proud"] - 0.01),
-                (cvr["joint_w"], cvr["y1"] - cvr["y0"], 0.02), M["dark"])
-            x += cvr["joint_step"]
-            n += 1
+        # (줄눈은 ground_kit `build_joint_grid` 로 이관 — 위 docstring 참조)
 
     # -------------------------------------------------------------------
     # 측구 — 경사 내벽 2매(_oriented_box rotX) + 바닥판
@@ -939,6 +1000,31 @@ def main():
         BOX(f"{ROOT}/Bin/Lid", (bn["cx"], bn["cy"], bn["h"] + bn["lid_t"] / 2.0),
             (bn["w"] + 0.02, bn["d"] + 0.02, bn["lid_t"]), M["bin_lid"])
 
+    # -------------------------------------------------------------------
+    # [W2] ground_kit — P17 verge_rural(**자연 씬**). 복개 슬래브 + 차도
+    #   2계획. 도시 인프라 0건은 `plan_ground` 가 코드로 강제한다(§3.4).
+    #   개거 단면·컬버트·립 등 U형 개거 정체성 기하는 일절 손대지 않는다.
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["dark"], crack=M["dark"], patch=M["conc"],
+                  patch_cut=M["dark"], weed=M["grass"],
+                  stain_dirt=M["leafbed"])
+        total = 0
+        for tag, gp in ground_plans():
+            if tag == "road":
+                M2 = dict(M2)
+                M2.update(patch=M["asphalt"], patch_cut=M["paint"])
+            res = gk.apply_ground(kit, f"{ROOT}/GKit/{tag.capitalize()}", gp, M2,
+                                  skin_exclude=sc.skin_exclude,
+                                  scatter=sc.scatter_debris)
+            total += res["prims"]
+            print(f"[ground_kit] sceneD3 P17/{tag} · 프림 {res['prims']} · "
+                  f"δmax {res['gt_delta_max']:.4f} · "
+                  f"unit_cell {res['unit_cell']}")
+        return total
+
     def build_horizon(M):
         bh = PARAMS["back_hedge"]
         # [v5.1 §3·§4] 등간격 26 m → ±1.0 m 지터 + 구간별 ±5% 틴트 지터.
@@ -966,6 +1052,8 @@ def main():
     def build_flat_fill(M):
         """hazard_stairs=False 대조군 : 개구를 메워 전 구간 z=0 평지."""
         by = PARAMS["beyond"]
+        # [W2-0 · P-A] 대조군에서도 복개면 요소가 그대로 놓인다 → 스킨 OFF.
+        sc.skin_exclude(f"{ROOT}/FlatFill")
         rd = PARAMS["road"]
         BOX(f"{ROOT}/FlatFill",
             ((rd["x0"] + rd["x1"]) / 2.0, (by["y0"] + by["y1"]) / 2.0,
@@ -992,6 +1080,7 @@ def main():
 
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
+    build_ground_kit(M)                  # [W2] 지면 요소 — 드레싱 뒤(산포 규약)
     build_horizon(M)
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],

@@ -102,6 +102,7 @@ import datetime
 import numpy as np
 
 import scene_common as sc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -130,6 +131,24 @@ PARAMS = dict(
     #     y0 −1.25 는 상부 둔치와 플러시(낙차 없음), y1 +1.25 가 강측 캔틸레버 에지.
     deck=dict(x0=-18.0, x1=0.0, y0=-1.25, y1=1.25, z_top=0.0, slab_t=0.14,
               fascia_t=0.03),
+    # === [W2-D ground_kit] P10 `deck_timber` - spec Sec.5.7 row 12 =========
+    #  Natural scene: `natural=True` blocks manhole / gutter / marking, which
+    #  matches the ruling "scene12 = deck facility, road infrastructure banned"
+    #  (deck railings and low lighting stay props, not ground_kit).
+    #  Two plans because the plank gaps need a different z (see below):
+    #    A `ground_plan()`      z = deck z_top, staining + shoreline film band
+    #    B `ground_plan_deck()` z lifted, plank gaps only
+    #  Prescription: plank width 0.145 / gap 0.005 (120 boards over 18 m),
+    #  butt joints staggered, gap detritus, shoreline film widened.
+    #  The film band is placed at y 0.65..1.25, i.e. the river-side cantilever
+    #  strip - `build_silt_band` runs bands parallel to +X at constant y, so
+    #  this is the one edge of the deck it can actually describe.
+    gkit=dict(
+        film_line=0.65,               # band start y -> covers 0.65..1.25
+        film_w=0.60,
+        deck_gaps=120,                # Sec.5.7 "120 boards over 18 m"
+        seed=12,
+    ),
     # 데크 하부 구조: 종보 2본(y −0.8 / 0.0) + 횡보 + 말뚝. 최외곽 지지선 y=0.0
     #   → 캔틸레버 내밈 = 1.25 m (호안 crest y=0.05 기준 1.20 m).
     deckframe=dict(beam_ys=(-0.8, 0.0), beam_w=0.16, beam_h=0.26,
@@ -877,6 +896,55 @@ def _smoke_report():
 
 
 # ===========================================================================
+# [C-2] ground_kit plans - pure CPU, no USD. Coordinates from PARAMS (Sec.7.4).
+# ===========================================================================
+def ground_plan():
+    """Plan A - staining and the shoreline film band on the deck surface."""
+    g = PARAMS["gkit"]
+    d, st = PARAMS["deck"], PARAMS["stair"]
+    return gk.plan_ground(
+        "deck_timber",
+        region=(float(d["x0"]), float(d["y0"]),
+                float(d["x1"]), float(d["y1"])),
+        z=float(d["z_top"]), gy=0.0, origin=(0.0, 0.0, 0.0),
+        edges=[("deck_end", float(st["x0"]))],
+        dists=(2, 5, 10), scene="scene12",
+        tactile=(),                    # Sec.12.4 OFF - natural / deck scene
+        overrides=dict(
+            surface=(("stain", ("dirt", "water")),),
+            extras=(("silt_band", dict(waterline=float(g["film_line"]),
+                                       width=float(g["film_w"]), n=1)),)),
+        seed=int(g["seed"]))
+
+
+def ground_plan_deck():
+    """Plan B - plank gaps only, on a lifted z (recess-as-tone).
+
+    Same correction as scene10: `build_deck_planks` puts the gap strip top at
+    `z - 0.020`, and the deck slab is a solid 0.14 m box, so at the deck's own
+    z the 120 strips would be sealed inside it and render zero pixels - the
+    burial mode the scene15 pilot measured for joints and manholes. z is
+    lifted so the strip top lands at `surface_top_z(deck z_top)`; the walking
+    surface and therefore GT do not move, and the strips keep `exc="plank_gap"`.
+    """
+    g = PARAMS["gkit"]
+    d, st = PARAMS["deck"], PARAMS["stair"]
+    return gk.plan_ground(
+        "deck_timber",
+        region=(float(d["x0"]), float(d["y0"]),
+                float(d["x1"]), float(d["y1"])),
+        z=gk.surface_top_z(float(d["z_top"])) + 0.020,
+        gy=0.0, origin=(0.0, 0.0, 0.0),
+        edges=[("deck_end", float(st["x0"]))],
+        dists=(2, 5, 10), scene="scene12", tactile=(),
+        overrides=dict(pave=dict(joint=None), surface=(),
+                       extras=(("deck_planks",
+                                dict(max_gaps=int(g["deck_gaps"]))),),
+                       scatter=None),
+        seed=int(g["seed"]) + 100)
+
+
+# ===========================================================================
 # [D] 카메라 프리셋: grid_views(gy=0, 데크 종주 +X) + 미장센 5컷
 # ===========================================================================
 def build_views():
@@ -1042,6 +1110,12 @@ def main():
                          roughness_const=mp["paint_rough"], metallic=0.0)
         M["water"] = PBR(f"{ROOT}/Looks/Water", diffuse_color=mp["water_color"],
                          roughness_const=mp["water_rough"], metallic=0.0)
+        # [W2-D ground_kit] plank-gap tone. With recess-as-tone the gap *is*
+        #   the material, so it needs a dark line colour rather than the deck
+        #   board texture (which would render the gap invisible).
+        M["gk_gap"] = PBR(f"{ROOT}/Looks/GkGap",
+                          diffuse_color=(0.026, 0.022, 0.018),
+                          roughness_const=0.95, specular_level=0.0)
         M["rail"] = PBR(f"{ROOT}/Looks/Rail", diffuse_color=mp["rail_color"],
                         metallic=mp["rail_metallic"],
                         roughness_const=mp["rail_rough"])
@@ -1179,10 +1253,30 @@ def main():
     # -------------------------------------------------------------------
     # 데크 — 슬래브 + 페시아 + 종보/횡보 + 말뚝 (캔틸레버 1.25 m)
     # -------------------------------------------------------------------
+    # -------------------------------------------------------------------
+    # [W2-D] ground_kit - P10 deck_timber (two plans, see ground_plan_deck).
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(deck=M["gk_gap"], stain_dirt=M["gravel"],
+                  stain_water=M["wetrock"], silt=M["wetrock"])
+        a = gk.apply_ground(kit, f"{ROOT}/GKit", ground_plan(), M2,
+                            skin_exclude=sc.skin_exclude)
+        b = gk.apply_ground(kit, f"{ROOT}/GKitPlanks", ground_plan_deck(), M2,
+                            skin_exclude=sc.skin_exclude)
+        print(f"[ground_kit] scene12 P10 · 프림 {a['prims']}+{b['prims']} · "
+              f"δmax {a['gt_delta_max']:.4f} · unit_cell {a['unit_cell']}")
+        return a
+
     def build_deck(M):
         d = PARAMS["deck"]
         df = PARAMS["deckframe"]
         mtl = M["deckwood"] if cfg["cue_material_break"] else M["gravel"]
+        # [W2-0 P-A] The deck slab is what ground_kit decorates. It is 2.5 m
+        #   wide so `_skin_wanted` rejects it anyway (>= 4.0 m on both axes)
+        #   and "deck" is in `_SKIN_DENY`; registered explicitly regardless.
+        sc.skin_exclude(f"{ROOT}/Deck")
         BOX(f"{ROOT}/Deck/Slab",
             ((d["x0"] + d["x1"]) / 2.0, (d["y0"] + d["y1"]) / 2.0,
              d["z_top"] - d["slab_t"] / 2.0),
@@ -1393,6 +1487,7 @@ def main():
     if cfg["hazard_stairs"]:
         build_terrain(M)
         build_deck(M)
+        build_ground_kit(M)          # [W2-D] deck ground elements
         build_stairs(M)
         if cfg["cue_railing"]:
             build_railing(M)

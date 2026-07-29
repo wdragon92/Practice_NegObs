@@ -68,6 +68,7 @@ import datetime
 import numpy as np
 
 import scene_common as sc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -103,6 +104,37 @@ PARAMS = dict(
     levee=dict(x0=-45.0, x1=0.0, y0=-40.0, y1=40.0, z_top=0.0, thick=0.5),
     levee_road=dict(x0=-4.0, x1=-1.0, proud=0.0015, embed=0.05),  # 자갈 도로(폭 3m, Y 전폭)
     levee_spur=dict(x0=-1.0, x1=0.0, y0=-1.2, y1=1.2),            # 계단 상단 접속 스퍼(gravel)
+
+    # === [W2-D ground_kit] P13 levee_paved, natural-forced (spec §5.7) =====
+    # The supervisor ruling of 07-29 put scene03's cycle track on hold ("03 은
+    # 자연 유지, 자전거도로는 scene17 제방만 유효"), so the whole paved half of
+    # profile P13 is inapplicable here. What is left is the levee crest as
+    # built: grass + a 3 m gravel road band + the stair-head spur.
+    #   -> `natural=True` is forced in `overrides`, which makes ground_kit
+    #      itself raise on any urban infra (manhole / gully / gutter / marking),
+    #      i.e. the §5.7 "도시 인프라 0건" rule is enforced by code, not by
+    #      discipline. Interlock joints are switched off as well: there is no
+    #      interlock paving on this crest, and the ledger's 200 mm unit cell
+    #      would draw a grid onto grass and gravel.
+    # z: elements sit on the **gravel band top** (levee_road proud, +1.5 mm).
+    #   Using the grass top (0.0) instead would bury every element on the road,
+    #   which is exactly the burial class the pilots found (spec §1.1).
+    # patches = 답압 노출토 (spec §5.7 "8~12"), bound to the dirt material -
+    # trampled bare soil at the gravel/grass margins, not asphalt repairs.
+    # wear lane runs **along the river (+-Y)**, i.e. along the walking route on
+    #   the crest, offset to x=-3.50 so it falls inside the d5 near window
+    #   (x -4.44..-3.00). Length is capped at |y| <= 10 because the band is
+    #   straight while the road follows the meander: |dx(10)| = 0.95 m and the
+    #   road is 3 m wide, so the straight band is still inside the road at the
+    #   ends; at |y| = 20 it would not be (|dx| = 3.52).
+    # NO silt band. Spec §5.7 lists one, but the crest top (z=0) is 3.35 m
+    #   above the water line (riprap bottom -3.35): silt deposition belongs to
+    #   the 둔치 at z=-3.2, which is outside every h0.3 near window.
+    gkit=dict(x0=-12.0, half_y=3.0, wear_x=-3.50, wear_y=10.0,
+              break_y=3.0,
+              patch=[(-1.10, 0.15), (-3.35, 0.55), (-2.15, -1.35),
+                     (-5.10, 1.85), (-8.60, -0.80), (-9.35, 1.50),
+                     (-4.30, -2.15), (-11.00, 0.40)]),
     slope=dict(x0=0.0, z0=0.0, run=7.0, drop=3.2, thick=0.4,   # 20단 정합: run 7.0
                y0=-40.0, y1=40.0),
     # 계단+측벽 테두리 회랑(사면 절개폭). [v5.1] band_gap = 사행 사면 밴드의
@@ -825,6 +857,12 @@ def main():
         폭 2.5 m 로 잘라 사면과의 겹침 lip 을 최소화하고, 배후 대지는 폭 12 m."""
         lv = PARAMS["levee"]
         top = lv["z_top"]
+        # [W2-0 · P-A] Crest slabs are what ground_kit decorates. river_band
+        # builds them through `sc.build_slope`, which carries no displacement
+        # skin today, so this is a forward guard (prefix match covers the
+        # per-segment rot groups).
+        sc.skin_exclude(f"{ROOT}/LeveeBack", f"{ROOT}/Levee",
+                        f"{ROOT}/LeveeRoad", f"{ROOT}/LeveeSpur")
         river_band(f"{ROOT}/LeveeBack", lv["x0"], -8.0, top, lv["thick"],
                    M["grass"], max_w=12.0)
         # 어깨측은 폭 2.5 — 사면과의 겹침 lip = (2.5+3.5)/2·(1/cos−cos)
@@ -845,6 +883,64 @@ def main():
                     (z_top + z_bot) / 2.0),
                    (ls["x1"] - ls["x0"], ls["y1"] - ls["y0"], z_top - z_bot),
                    M["gravel"], collider=True)
+
+    # -------------------------------------------------------------------
+    # [W2-D] ground_kit — P13 levee_paved forced natural (spec §5.7 row 03).
+    #   Runs in both hazard arms: the hazard-off twin must carry the same
+    #   ground elements for the GT-E4 comparison to mean anything.
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        g = PARAMS["gkit"]
+        lv, lr = PARAMS["levee"], PARAMS["levee_road"]
+        z = lv["z_top"] + lr["proud"]
+        gp = gk.plan_ground(
+            "levee_paved",
+            region=(g["x0"], -g["half_y"], lv["x1"], g["half_y"]),
+            z=z, gy=0.0, origin=(0.0, 0.0, 0.0),
+            edges=[("shoulder", float(lv["x1"]))],
+            dists=(2, 5, 10), scene="scene03",
+            tactile=(),                 # §12.4 — p=0.24 공원/둔치, 미설치
+            overrides=dict(
+                natural=True,           # code-enforced: no urban infra here
+                infra=dict(manhole=0, gully=0, gutter_L=0, marking=()),
+                pave=dict(module=(None, None), joint=None,
+                          step_x=None, step_y=None),
+                surface=(("patch", len(g["patch"])),
+                         ("stain", ("dirt", "water"))),
+                extras=(("wear_lane", dict(width=0.90)),)),
+            sites=dict(patch=[tuple(v) for v in g["patch"]]),
+            extras_args=dict(wear_lane=dict(
+                centerline=((g["wear_x"], -g["wear_y"]),
+                            (g["wear_x"], g["wear_y"])))),
+            seed=3)
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(patch=M["dirt"], patch_cut=M["dirt"], wear=M["dirt"],
+                  stain_dirt=M["dirt"], stain_water=M["concrete_dark"],
+                  edge_break=M["dirt"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris)
+        # 경계 파쇄 (spec §5.7 "경계 파쇄") — the seam that crosses the h0.3
+        #   frames is the gravel road edge, and it runs **along Y**, which
+        #   `_compose_ops` cannot express (its `lines` are constant-y).
+        #   Direct call, same builder, same z. |y| <= 3.0 keeps the straight
+        #   strip on the meandering seam: |dx(3.0)| = 0.088 m < the 0.10 m half
+        #   width of the transition band.
+        #   Only the **landward** seam (x=-4.0) is broken. The river-side seam
+        #   at x=-1.0 is 1.0 m in front of the shoulder: drow = 5.65 rows @1080
+        #   at d10 against a 16-row floor, i.e. exactly the band GT-E2 keeps
+        #   clear, and for |y| <= 1.2 it is gravel-on-gravel (LeveeSpur) so
+        #   there is no material boundary to break there anyway.
+        by = g["break_y"]
+        nb = 0
+        for tag, sx in (("W", lr["x0"]),):
+            nb += gk.build_edge_break(
+                kit, f"{ROOT}/GKit/EdgeBreak_{tag}",
+                ((sx, -by), (sx, by)), z, M["dirt"])["prim_count"]
+        print(f"[ground_kit] scene03 P13(natural) · prims {res['prims']} "
+              f"+ edge_break {nb} · delta_max {res['gt_delta_max']:.4f}")
+        return res
 
     def build_slopes(M):
         """사면 grass — 계단 회랑을 비우고 사행 밴드로 양측 조립.
@@ -1138,6 +1234,7 @@ def main():
         build_riprap(M)
     else:
         build_flat_fill(M)          # 대조군: z=0 평지 통일
+    build_ground_kit(M)             # [W2-D] both arms — GT-E4 twin parity
     build_river(M)                  # 수면·건너편 둔치는 상시 (원경 증거)
     if cfg["cue_scene_dressing"] and cfg["hazard_stairs"]:
         build_dressing(M)

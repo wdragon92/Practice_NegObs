@@ -131,6 +131,7 @@ import random
 import datetime
 
 import scene_common as sc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -173,6 +174,32 @@ PARAMS = dict(
               drop=(0.050, 0.080), off_y=0.33, thick=0.16),
     # --- 회랑(배석 사이 지면) : leaf_ground 사면 ---
     corridor=dict(y0=-1.7, y1=1.7, thick=0.60),
+
+    # === [W2-D ground_kit] P12 `courtyard_dg` - spec Sec.5.7 row 07 =========
+    #  Natural scene: `natural=True` makes plan_ground raise on any urban infra
+    #  (manhole / gully / gutter / marking), so the whole prescription is
+    #  tone + scatter. Three bands, exactly as Sec.5.7 asks for:
+    #    07-1  3.0 m decomposed-granite walking band  = region y +-1.50, and
+    #          `edge_break` on both band lines (the "3-band split" of the
+    #          24 x 45.7 m single plate).
+    #    07-2  trodden wear axis, width 1.20, albedo x0.85  -> `wear_lane`
+    #    07-3  exposed gravel 8/m^2  -> scatter 270 over 33.6 m^2 = 8.04/m^2
+    #    07-4  plinth moss band + soil staining -> stain(dirt, water)
+    #  region x1 = -0.80 (= EDGE_STANDOFF), NOT the plate edge x=0. Reason:
+    #  `apply_ground` runs the profile scatter over the **untrimmed** region,
+    #  so only the region itself can keep 6 cm gravel off the shoulder edge.
+    #  Surface elements are trimmed to the same -0.80 by `_trim_region`.
+    #  Dropped from the profile: `edge_litter`. `_compose_ops` forces its
+    #  width to the region span (3.0 m here, 12x the 0.25 m the ledger gives
+    #  it) and the two bands then cover y -3.0..3.0, which overlaps the wear
+    #  lane at an identical top z -> coplanar decals. Carried as a kit defect.
+    gkit=dict(
+        region=(-12.0, -1.50, -0.80, 1.50),
+        wear_w=1.20,                       # Sec.5.7 "trodden wear axis 1.2"
+        band_lines=(-1.50, 1.50),          # the 3.0 m granite-sand band edges
+        gravel_n=270,                      # 8/m^2 x 33.6 m^2 [calc]
+        seed=7,
+    ),
     # --- 축정렬 지면 플레이트 표 (name, x0, x1, y0, y1, z_top, thick, mtl) ---
     #     v5 회귀 체크리스트 ③ : 공동을 덮는 평면 없음 — 남측 낙차는 y=−1.7
     #     경계에서 플레이트가 **갈라져** 있다(연속 판이 걸쳐 있지 않음).
@@ -540,6 +567,45 @@ def stone_metrics():
     enter = 0.0 - tops[0]                        # 마당(z=0) → 1석 상면
     exit_ = tops[-1] - (-STAIR_DROP)             # 마지막 석 → 진입로(−4.2)
     return rises, gaps, enter, exit_
+
+
+# ===========================================================================
+# [E-2] ground_kit plan - pure CPU, no USD. Coordinates come from PARAMS
+#       (spec Sec.7.4: the scene, not the spec table, is the source of truth).
+# ===========================================================================
+def _plate(name):
+    """Axis-aligned ground plate row by name: (name,x0,x1,y0,y1,z_top,t,mtl)."""
+    for row in PARAMS["plates"]:
+        if row[0] == name:
+            return row
+    raise KeyError(f"scene07: plate '{name}' not in PARAMS['plates']")
+
+
+def ground_plan():
+    """P12 `courtyard_dg` plan for the temple forecourt (x -24..0, z=0).
+
+    The drop edge is the courtyard shoulder = the Courtyard plate's x1, which
+    is also where the discrete stepping stones start. Everything the profile
+    would emit as urban infrastructure is blocked by `natural=True`.
+    """
+    g = PARAMS["gkit"]
+    cy = _plate("Courtyard")
+    return gk.plan_ground(
+        "courtyard_dg",
+        region=tuple(float(v) for v in g["region"]),
+        z=float(cy[5]), gy=0.0, origin=(0.0, 0.0, 0.0),
+        edges=[("courtyard_shoulder", float(cy[2]))],
+        dists=(2, 5, 10), scene="scene07",
+        tactile=(),                    # Sec.12.4: natural scene -> not listed
+        overrides=dict(
+            # water = the plinth moss / damp band of Sec.5.7; dirt = tracked soil
+            surface=(("stain", ("dirt", "water")),),
+            extras=(("wear_lane", dict(width=float(g["wear_w"]))),
+                    ("edge_break", dict(density=10.0,
+                                        lines=list(g["band_lines"])))),
+            scatter=dict(kind="gravel", cover=0.14,
+                         count=int(g["gravel_n"]), expose=0.06)),
+        seed=int(g["seed"]))
 
 
 # ===========================================================================
@@ -949,6 +1015,16 @@ def main():
                                 diffuse_color=mp["rail_color"],
                                 metallic=mp["rail_metallic"],
                                 roughness_const=mp["rail_rough"])
+        # [W2-D ground_kit] tone-only materials for the kit's ground elements.
+        #   Sec.4.4 hands colour to T1, but a wear lane and a moss band *are*
+        #   tone by definition - bound to the plain courtyard gravel they would
+        #   render a zero-contrast null (the scene15 pilot measured exactly
+        #   that for patches). Both are tints of the gravel texture already in
+        #   use, so no new asset and no new texture role is introduced.
+        M["gk_wear"] = tex("gravel", "/World/Looks/GkWear", sca["gravel"],
+                           tint=tuple(c * 0.85 for c in mp["gravel_tint"]))
+        M["gk_moss"] = tex("gravel", "/World/Looks/GkMoss", sca["gravel"],
+                           tint=PARAMS["stone_mtl"]["tint_moss"])
         for tone in ("near", "mid", "far"):
             M[f"ridge_{tone}"] = sc.make_pbr(
                 stage, f"/World/Looks/Ridge_{tone}",
@@ -994,6 +1070,11 @@ def main():
     # 지형 : 축정렬 플레이트 표 + 사면 플레이트 표
     # -------------------------------------------------------------------
     def build_terrain(M):
+        # [W2-0 P-A] The courtyard plate is what ground_kit decorates, so its
+        #   displacement skin must be off *before* the box is created - the
+        #   skin top sits at +6.5..16.5 mm and would bury every 0.6 mm decal
+        #   (spec Sec.1.1). Registration is prefix-matched.
+        sc.skin_exclude(f"{ROOT}/Plate_Courtyard")
         for nm, x0, x1, y0, y1, zt, th, mk in PARAMS["plates"]:
             BOX(f"{ROOT}/Plate_{nm}",
                 ((x0 + x1) / 2.0, (y0 + y1) / 2.0, zt - th / 2.0),
@@ -1233,6 +1314,24 @@ def main():
                       pole_h=sg["pole_h"], pole_mtl=M["wood"],
                       back_mtl=M["sign_back"])
 
+    # -------------------------------------------------------------------
+    # [W2-D] ground_kit - P12 courtyard_dg. Runs after the dressing so the
+    #   scatter callback is invoked last (spec Sec.8.4 call-order rule).
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        gp = ground_plan()
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(stain_dirt=M["leaf"], stain_water=M["gk_moss"],
+                  wear=M["gk_wear"], edge_break=M["leaf"], litter=M["leaf"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris)
+        print(f"[ground_kit] scene07 P12 · 프림 {res['prims']} · "
+              f"산포 {res['instances']} · δmax {res['gt_delta_max']:.4f} · "
+              f"unit_cell {res['unit_cell']}")
+        return res
+
     def build_cues(M):
         """비관행 설비 단서(코드 경로만 — 기본 전부 False)."""
         if cfg["cue_railing"]:
@@ -1270,6 +1369,8 @@ def main():
         build_nature(M)
     if cfg["cue_sign"] and cfg["hazard_stairs"]:
         build_sign(M)
+    if cfg["hazard_stairs"]:
+        build_ground_kit(M)          # [W2-D] ground elements, dressing last
 
     rises, gaps, enter, exit_ = stone_metrics()
     print(f"[기하] 배석 {len(STONES)}석 run={STAIR_RUN:.2f} drop="

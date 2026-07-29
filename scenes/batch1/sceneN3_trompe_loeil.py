@@ -65,6 +65,7 @@ import datetime
 
 import scene_common as sc
 import batch1_common as bc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -106,6 +107,26 @@ PARAMS = dict(
                 tread_frac=(-0.42, 0.02, 0.46), wall_frac=(0.45,)),
     # --- 포장 ---
     plaza=dict(x0=-60.0, x1=100.0, y0=-60.0, y1=60.0, z_top=0.0, thick=0.6),
+
+    # ═══ [W2 ground_kit] P1 plaza_granite — 사양 §5.1 N3 행 ════════════════
+    #  씬 고유 처방은 두 줄이다: ① **줄눈이 그림을 관통**해 판별단서를 강화
+    #  ② **맨홀은 그림 밖**(`x ≤ −1.6`).
+    #  ①은 이미 씬이 집행한다(`build_joints()` 1.2 m 격자, x −12…24 = 그림
+    #  x 0…6.3 을 통과) → **킷 줄눈 0**(`pave.joint=None`). 킷이 같은 면에
+    #  1.8/6.0 격자를 얹으면 D6 이중 격자이고, 무엇보다 이 씬에서 줄눈은
+    #  **판별단서**라 주기가 흔들리면 안 된다.
+    #  ②는 region 원단을 `x_rim − 1.6` 으로 잘라 구조적으로 보장한다. 게다가
+    #  B12 불변식 `_inv_n3_painting`(면 요소 AABB ∩ 그림 사각형 = ∅)과
+    #  `_inv_hidden_illusion`(점자블록 0건·고대비 횡단선 금지)이 이중으로 건다.
+    #  ★ d2 근경 창(x −1.436…0)은 **그림이 차지한다** — 그게 이 씬이다.
+    #    따라서 d2 의 B1(면 요소 ≥1)은 원리적으로 미달이며 정상이다.
+    ground=dict(
+        region=(-12.0, -4.0, -1.6, 4.0),
+        manholes=[(-2.00, 1.00), (-6.00, -1.00)],
+        #  패치 = d5·d10 근경 창(W1) 담당. |y| ≤ 0.4 여야 프레임 반폭 안이다.
+        patches=[(-3.80, 0.20), (-8.80, -0.20)],
+        gullies=[(-5.00, 3.40), (-10.00, -3.40)],
+    ),
     band=dict(y=5.0, width=0.8, proud=0.002, embed=0.06),   # 화강암 경계 밴드
     joint=dict(x0=-12.0, x1=24.0, y0=-7.2, y1=7.2, step=1.2,
                width=0.028, proud=0.003, embed=0.06),        # 포장 줄눈 격자
@@ -511,6 +532,23 @@ def _geometry_report():
     print("-" * 68)
 
 
+def ground_plans():
+    """[W2 ground_kit] 지면 계획 — 씬 조립부와 CPU 검산이 같은 함수를 쓴다."""
+    g = PARAMS["ground"]
+    gp = gk.plan_ground(
+        "plaza_granite", region=tuple(g["region"]),
+        z=float(PARAMS["plaza"]["z_top"]), gy=0.0, origin=(0.0, 0.0, 0.0),
+        edges=(),                       # hard negative — 낙차 에지 0
+        dists=(2, 5, 10), scene="sceneN3",
+        tactile=(),                     # §12.4 — 은닉 착시 정체성 충돌로 OFF
+        sites=dict(manhole=[tuple(p) for p in g["manholes"]],
+                   gully=[tuple(p) for p in g["gullies"]],
+                   patch=[tuple(p) for p in g["patches"]]),
+        overrides=dict(pave=dict(joint=None)),
+        seed=23)
+    return [("plaza", gp)]
+
+
 def build_views():
     """카메라 프리셋: grid_views(gy=0.0) + 미장센 4컷."""
     views = sc.grid_views(0.0)
@@ -877,6 +915,11 @@ def main():
     def build_plaza(M):
         pz = PARAMS["plaza"]
         cz = pz["z_top"] - pz["thick"] / 2.0
+        # [W2-0 · P-A] 광장 상면이 ground_kit 의 장식 대상이다 → 변위 스킨 OFF.
+        #   **BOX 호출 전에** 등록해야 한다(`add_box` 가 그 자리에서 판정).
+        #   이 씬은 특히 중요하다 — 페인트 레이어가 전부 proud 0.001~0.003 이라
+        #   스킨(+6.5~16.5 mm)이 켜지면 **그림 자체가 묻힌다** `[사양 §1.1]`.
+        sc.skin_exclude(f"{ROOT}/Plaza")
         BOX(f"{ROOT}/Plaza",
             ((pz["x0"] + pz["x1"]) / 2.0, (pz["y0"] + pz["y1"]) / 2.0, cz),
             (pz["x1"] - pz["x0"], pz["y1"] - pz["y0"], pz["thick"]),
@@ -949,6 +992,27 @@ def main():
                          (cx - sx / 2.0, cy + sy / 2.0)], z, bmtl)
 
     # -------------------------------------------------------------------
+    # [W2] ground_kit — P1 plaza_granite. **그림 밖**(x ≤ −1.6)에만 놓는다.
+    #   낙차 에지 0 → GT-E1′/GT-E2 는 공허참. 판정은 B12 두 불변식
+    #   (`_inv_n3_painting` 면 요소 ∩ 그림 = ∅ · `_inv_hidden_illusion`)이 한다.
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        (_tag, gp), = ground_plans()
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["joint"], crack=M["joint"], patch=M["light_stone"],
+                  patch_cut=M["curb"], manhole=M["lamp"], gully=M["lamp"],
+                  gutter=M["curb"], weed=M["grass"], tactile=M["tactile"],
+                  stain_dirt=M["joint"], stain_water=M["joint"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris)
+        print(f"[ground_kit] sceneN3 P1 · 프림 {res['prims']} · 산포 "
+              f"{res['instances']} · δmax {res['gt_delta_max']:.4f} · "
+              f"unit_cell {res['unit_cell']}")
+        return res
+
+    # -------------------------------------------------------------------
     # 드레싱 — 가로등(실그림자 단서)·화단·벤치·볼라드·상가 건물
     # -------------------------------------------------------------------
     def build_dressing(M):
@@ -975,10 +1039,16 @@ def main():
         # 볼라드 [v5.1 §2] — 몰 진입부 횡단 1열(중앙 4.8 m 소방 통로 개방)
         bo = PARAMS["bollard"]
         for name, bx, by in _bollards:
+            # [W2 §12.4] 이 씬은 **점자블록 미설치**다 — 은닉 착시 4씬
+            #   (14·20·21·N3)은 "상시 고대비 단서 금지"가 정체성이고,
+            #   §12.4 의 "볼라드 전면 유지 4씬" 목록에도 N3 은 없다.
+            #   `ground_kit._inv_hidden_illusion` 도 이 씬의 점자블록을
+            #   B12 로 막는다 → 씬 소판도 같은 판정을 따른다.
             bc.build_bollard_v51(stage, f"{ROOT}/Bollard_{name}", bx, by, 0.0,
                                  None, M["bollard"], M["bollard_band"],
                                  M["tactile"], front_dir=bo["front"],
-                                 radius=bo["r"], height=bo["h"])
+                                 radius=bo["r"], height=bo["h"],
+                                 tactile=False)
         for key, bd in PARAMS["buildings"].items():
             sc.build_building(stage, f"{ROOT}/Building_{key}", bd,
                               M["brick"], M["glass"], M["parapet"],
@@ -1039,6 +1109,7 @@ def main():
     build_joints(M)                              # 그림 위를 관통 — 그림 뒤에 배치
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
+    build_ground_kit(M)                          # [W2] 지면 요소(그림 밖 전용)
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])

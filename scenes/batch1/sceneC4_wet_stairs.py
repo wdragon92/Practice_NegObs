@@ -45,6 +45,7 @@ import datetime
 
 import scene_common as sc
 import batch1_common as bc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -76,6 +77,28 @@ PARAMS = dict(
 
     # 상부 광장(석재 포장). 두께 2.6 → 하부 광장 바닥보다 아래까지 솔리드.
     upper=dict(x0=-60.0, x1=0.0, y0=-60.0, y1=60.0, z_top=0.0, thick=2.60),
+
+    # ═══ [W2 ground_kit] P3 sidewalk_block — 사양 §5.2 C4 행 ═══════════════
+    #  처방: ① **젖음 패치를 근경 창으로 확장**(현행은 계단면에 집중돼 있어
+    #  h0.3 근경 창이 비어 있다) ② 물때·이끼 줄눈 ③ 경계 잡초.
+    #  ★ 조건 오버레이: 이 씬의 지면 요소는 **젖음 처리 아래**에 들어간다 —
+    #    패치는 `wet_surface` 토글을 따라 젖은 석재/마른 석재 재질을 받고,
+    #    줄눈·오염은 물때(`tide`)·반건조(`stone_damp`) 재질에 바인딩한다.
+    #    기하는 토글과 무관하게 동일하다(대응쌍 기하 불변 규약).
+    #  ★ 점자블록: §12.4 "ON 유지(현행)" + **부적정 재현 = 위치 오류**
+    #    (법정 0.3 m 가 아니라 0.6~1.0 m 전면). 시각장애인연합회 2023 실측이
+    #    적정 4.0 % / 부적정 77.3 % 이므로 "규정대로 놓으면 오히려 비현실"이다
+    #    `[통계 — 사양 §12.4 부적정 재현 규칙]`. setback 1.00 m 채택.
+    gkit=dict(
+        region=(-10.0, -2.90, 0.0, 2.90),
+        manhole=(-2.40, 0.60),          # W2 창(d5 X=2.6 m · 화면폭 21.6 %)
+        gullies=[(-3.60, 2.50), (-7.00, -2.50)],
+        #  젖음 패치 2매 — d2 근경 창(x −1.436…0)과 사양 지정 대역
+        #  (x −4.4…0) 각 1매. |y| ≤ 0.4 여야 d2 프레임 반폭 안이다.
+        wet_patches=[(-1.20, 0.10), (-4.40, -1.20)],
+        tactile_setback=1.00,           # ← 부적정(위치 오류). 법정은 0.30
+        tactile_depth=0.60,
+    ),
     # 하부 광장. x0 는 계단 끝(run)보다 0.05 뒤에서 시작하고 상면을 2mm 낮춰
     # 마지막 단 상면과의 동일평면(Z-파이팅)을 회피 — 겹침 5cm.
     lower=dict(x_back=0.05, x1=60.0, y0=-60.0, y1=60.0, z_gap=0.002,
@@ -356,6 +379,29 @@ def civic_placements():
     return pls, lms
 
 
+def ground_plans():
+    """[W2 ground_kit] 지면 계획 — 씬 조립부와 CPU 검산이 같은 함수를 쓴다."""
+    g = PARAMS["gkit"]
+    st = PARAMS["stairs"]
+    x_edge = float(st["x0"])
+    band = (x_edge - g["tactile_setback"] - g["tactile_depth"],
+            float(st["y0"]), x_edge - g["tactile_setback"], float(st["y1"]))
+    gp = gk.plan_ground(
+        "sidewalk_block", region=tuple(g["region"]),
+        z=float(PARAMS["upper"]["z_top"]), gy=0.0, origin=(0.0, 0.0, 0.0),
+        edges=[("stair_top", x_edge)],
+        dists=(2, 5, 10), scene="sceneC4",
+        tactile=("stair_top",) if SCENE_CONFIG["cue_tactile"] else (),
+        sites=dict(manhole=[tuple(g["manhole"])],
+                   gully=[tuple(p) for p in g["gullies"]],
+                   patch=[tuple(p) for p in g["wet_patches"]],
+                   tactile=dict(stair_top=band)),
+        #  L형 측구는 차도 접점 요소다 — 관공서 앞 대계단 광장에는 없다.
+        overrides=dict(infra=dict(manhole=1, gully=2, gutter_L=0)),
+        seed=28)
+    return [("upper", gp)]
+
+
 def build_views():
     """카메라 프리셋: grid_views(gy=0.0) + 미장센 4컷. 중앙 난간 없음."""
     views = sc.grid_views(0.0)
@@ -503,6 +549,10 @@ def main():
     # -------------------------------------------------------------------
     def build_upper(M):
         up = PARAMS["upper"]
+        # [W2-0 · P-A] 상부 광장 상면이 ground_kit 의 장식 대상이다 → 변위
+        #   스킨 OFF(**BOX 호출 전에** 등록). 젖음 패치(+2 mm)·점자블록
+        #   (돌기 6 mm)이 스킨(+6.5~16.5 mm) 아래로 사라지는 것을 막는다.
+        sc.skin_exclude(f"{ROOT}/UpperPlaza")
         BOX(f"{ROOT}/UpperPlaza",
             ((up["x0"] + up["x1"]) / 2.0, (up["y0"] + up["y1"]) / 2.0,
              up["z_top"] - up["thick"] / 2.0),
@@ -552,6 +602,8 @@ def main():
     def build_flat_fill(M):
         """hazard_stairs=False 대조군: 전면 z=0 평지."""
         up = PARAMS["upper"]
+        # [W2-0 · P-A] 대조군에서도 지면 요소는 그대로 놓인다 → 스킨 OFF.
+        sc.skin_exclude(f"{ROOT}/FlatFill")
         lo = PARAMS["lower"]
         x0, x1 = up["x0"], lo["x1"]
         BOX(f"{ROOT}/FlatFill",
@@ -742,12 +794,12 @@ def main():
                 st["riser"], st["tread"], st["nsteps"],
                 color=ns["color"], width=ns["width"], proud=ns["proud"],
                 z_top=st["z_top"])
-        if cfg["cue_tactile"]:
-            tc = PARAMS["tactile"]
-            sc.build_tactile(stage, f"{ROOT}/Tactile_Top",
-                             st["x0"] - tc["ahead"], st["x0"],
-                             st["y0"], st["y1"], M["tactile"],
-                             z=st["z_top"], proud=tc["proud"])
+        # [W2 §12.4] 점자블록은 **ground_kit 이 집행**한다(`build_ground_kit`).
+        #   ① 현행 `sc.build_tactile` 은 상수색 무돌기 평판이라 법정 36점
+        #      돌기의 음영이 화면에 0 이었다(§12.5 ③).
+        #   ② 위치도 바뀐다 — 법정 0.3 m 가 아니라 **1.0 m 전면**(부적정
+        #      재현). 두 곳에서 깔면 2겹이 되므로 여기서는 만들지 않는다.
+        #   토글(`cue_tactile`)은 `ground_plans()` 가 그대로 읽는다.
         if cfg["cue_railing"]:
             rl = PARAMS["rail"]
             ck = PARAMS["cheek"]
@@ -769,6 +821,29 @@ def main():
                     spacing=rl["spacing"], rail_r=rl["rail_r"],
                     rail_mid_r=rl["rail_mid_r"],
                     rail_mid_drop=rl["rail_mid_drop"])
+
+    # -------------------------------------------------------------------
+    # [W2] ground_kit — P3 sidewalk_block. 조건 오버레이(젖음)를 존중해
+    #   패치는 `wet_surface` 토글의 재질을, 줄눈·오염은 물때/반건조 재질을
+    #   받는다. **기하는 토글과 무관하게 동일**하다(대응쌍 기하 불변).
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        (_tag, gp), = ground_plans()
+        kit = gk.kit_from_scene_common(sc, stage)
+        patch_mtl = M["tread_wet"] if cfg["wet_surface"] else M["plaza"]
+        M2 = dict(M)
+        M2.update(joint=M["stone_damp"], crack=M["stone_damp"],
+                  patch=patch_mtl, patch_cut=M["cheek"], manhole=M["rail"],
+                  gully=M["rail"], gutter=M["cheek"], weed=M["shrub"],
+                  tactile=M["tactile"], stain_dirt=M["tide"],
+                  stain_gum=M["tide"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris)
+        print(f"[ground_kit] sceneC4 P3 · 프림 {res['prims']} · 산포 "
+              f"{res['instances']} · δmax {res['gt_delta_max']:.4f} · "
+              f"wet={cfg['wet_surface']} · unit_cell {res['unit_cell']}")
+        return res
 
     # -------------------------------------------------------------------
     # 드레싱 — 볼라드 4 + 원경 건물 2동(지평선 폐쇄 §A-4)
@@ -942,6 +1017,7 @@ def main():
         build_flat_fill(M)
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
+    build_ground_kit(M)                  # [W2] 지면 요소 — 드레싱 뒤(산포 규약)
 
     print(f"[기하] run={RUN:.2f}m drop={DROP:.2f}m slope_k={SLOPE_K:.4f} "
           f"lower_top={LOWER_TOP:.3f} wet={cfg['wet_surface']} "

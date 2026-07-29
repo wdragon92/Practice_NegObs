@@ -39,6 +39,7 @@ import datetime
 import numpy as np
 
 import scene_common as sc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -82,6 +83,27 @@ PARAMS = dict(
     parapet=dict(width=0.5, over=0.85, thick=1.6, out_off=0.02),
     # --- 중앙 스테인리스 난간 2선 (y ±1.3) ---
     railing=dict(ys=(-1.3, 1.3), rail_h=0.9),
+
+    # ═══ [W2-D ground_kit] P1 plaza_granite — 사양 §5.1 scene21 행 ══════════
+    #  Row prescription: "axis water staining · plinth soiling · manholes
+    #  **2, to the side, off the central axis**"; manhole (-4.0, +-1.0).
+    #  ★ Tactile **OFF** (§12.4 identity conflict — hidden illusion). B12
+    #    `_inv_hidden_illusion` enforces it for scene21.
+    #  ★ The "axis water staining" is carried by a `wear_lane` centred on
+    #    y = 0: it is the one element the row explicitly wants **on** the axis,
+    #    and unlike the manholes it is a flat 0.6 mm tone band, not an object,
+    #    so v5.1 §21 ("remove objects from the central axis") is not violated.
+    #  ★ B1 stays 0 at d5 by construction: with the manholes held off-axis at
+    #    |y| = 1.0 the disc edge (1.0 + 0.324) is outside the d5 near-window
+    #    frame half width (0.577 m at X = 1.0). The identity rule wins over the
+    #    frame-fill soft gate; the near window is filled by repair patches.
+    gkit=dict(
+        region=(-12.0, -4.0, -0.5, 4.0),
+        manholes=[(-4.0, 1.0), (-4.0, -1.0)],   # 중앙축 회피 (v5.1 §21)
+        gullies=[(-2.0, -3.6), (-7.0, 3.6)],
+        patches=[(-1.25, 0.55), (-3.70, -0.60)],
+        axis_stain=((-12.0, 0.0), (-0.85, 0.0)),
+    ),
     # --- 상부 테라스 (대리석) : thick 0.5 → 3.7 로 석조 기단화(저면 -3.7,
     #     지반 -2.75 아래로 0.95 m 매입). 상면 z=0(위험 기하) 불변. ---
     #     [v5 판정 반영] x0 −12.0 → −15.2 : 아래 파사드 서측 이설에 맞춘 기단 확장.
@@ -420,6 +442,9 @@ def main():
             (gr["cx"], gr["cy"], gr["z_top"] - gr["thick"] / 2.0),
             (gr["size_x"], gr["size_y"], gr["thick"]), M["grass"], col=True)
         te = PARAMS["terrace"]
+        # [W2-0 · P-A] The marble terrace is the ground_kit stage — register
+        #   the skin exclusion before BOX (add_box tests it inline).
+        sc.skin_exclude(f"{ROOT}/Terrace")
         BOX(f"{ROOT}/Terrace",
             ((te["x0"] + te["x1"]) / 2.0, (te["y0"] + te["y1"]) / 2.0,
              te["z_top"] - te["thick"] / 2.0),
@@ -437,6 +462,39 @@ def main():
             BOX(f"{ROOT}/LowerBand_{k}",
                 (xb, (lo["y0"] + lo["y1"]) / 2.0, lo["z_top"] - 0.02),
                 (0.4, lo["y1"] - lo["y0"], 0.06), M["band"])
+
+    # -------------------------------------------------------------------
+    # [W2-D] ground_kit — P1 plaza_granite (사양 §5.1 scene21 행)
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        g = PARAMS["gkit"]
+        st = PARAMS["stairs"]
+        gp = gk.plan_ground(
+            "plaza_granite", region=tuple(g["region"]),
+            z=float(PARAMS["terrace"]["z_top"]), gy=0.0,
+            origin=(0.0, 0.0, 0.0),
+            edges=[("stair_top", float(st["x0"]))],
+            dists=(2, 5, 10), scene="scene21", tactile=(),
+            overrides=dict(extras=(("wear_lane", dict(width=0.90)),)),
+            extras_args=dict(wear_lane=dict(centerline=tuple(g["axis_stain"]))),
+            sites=dict(manhole=[tuple(v) for v in g["manholes"]],
+                       gully=[tuple(v) for v in g["gullies"]],
+                       patch=[tuple(v) for v in g["patches"]]),
+            seed=21)
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["band"], crack=M["band"], patch=M["marble"],
+                  patch_cut=M["band"], manhole=M["band"], gully=M["band"],
+                  gutter=M["band"], gutter_cover=M["band"],
+                  trench=M["band"], trench_frame=M["band"],
+                  marking=M["band"], weed=M["grass"], wear=M["granite"],
+                  stain_dirt=M["granite"], stain_water=M["granite"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris)
+        print(f"[ground_kit] scene21 P1 · 프림 {res['prims']} · "
+              f"δmax {res['gt_delta_max']:.4f} · unit_cell {res['unit_cell']}")
+        return res
 
     # -------------------------------------------------------------------
     # 대계단 18단 (대리석)
@@ -629,6 +687,7 @@ def main():
     if cfg["cue_scene_dressing"]:
         build_facade(M)
         build_dressing(M)
+    build_ground_kit(M)             # [W2-D] 지면 요소 — 드레싱 뒤(산포 순서 규약)
     if cfg.get("cue_sign"):
         build_signs()               # [v5 공통 레이어]
 

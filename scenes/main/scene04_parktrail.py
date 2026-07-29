@@ -48,6 +48,7 @@ import random
 import datetime
 
 import scene_common as sc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -92,6 +93,32 @@ PARAMS = dict(
                dirt_y=1.7, flank_y=25.0),
     # 계단 전후 3m dirt 접속부 (grass 지면 위 흙 트레일 랜딩)
     connect=dict(length=3.0, half_y=3.0),
+
+    # === [W2-D ground_kit] P11 trail_soil (spec §5.7 row 04) ===============
+    # Natural profile: ground_kit raises on any urban infra by itself.
+    # Element split follows the two constraints that actually bind here:
+    #  * scatter (exposed gravel, exposure <= 0.06 m) obeys the GT-E5 ramp,
+    #    |x_e| >= 40 * 0.06 = 2.40 m. The scatter field is driven by the plan
+    #    **region**, so the region stops at x=-2.40; the d5/d10 near windows
+    #    (x -4.44..-3.00 and -9.44..-8.00) sit fully inside it, and the d2
+    #    window is filled by the strip elements below instead.
+    #  * wear lane + edge litter are decals (+0.6 mm -> GT-E1' needs 0.024 m),
+    #    so they may run right up to the stair head. They are given an explicit
+    #    centreline on the ConnectU landing, which is the one straight piece of
+    #    trail in frame; the PathU polyline meanders out of the h0.3 frame
+    #    (at x=-9 its centre is y=-2.46 while the frame half width is 1.16).
+    #  * `build_edge_break` targets the real culprit named by spec §5.7 /
+    #    appendix A6: the 3.0 x 6.0 m ConnectU dirt box against the grass slab,
+    #    transition width 0 px, dE76 18.9. Its three seams are x=-3.0 (across
+    #    the frame) and y=+-3.0 (along it); the composer can only emit
+    #    constant-y lines, so the seams are built by direct calls.
+    #  * region y -3.0..+1.0 is not symmetric on purpose: it is the trail
+    #    corridor. The PathU centre line runs y -2.46 (x=-9.3) to -1.36
+    #    (x=-3.5), and the h0.3 frame half width is 1.16 m at X=2.0, so this
+    #    band covers both the trail and the frame centre without spending
+    #    scatter budget on lawn the camera never sees.
+    gkit=dict(x0=-12.0, y0=-3.0, y1=1.0, scatter_x1=-2.40,
+              wear=((-3.0, 0.0), (-0.6, 0.0)), wear_w=0.90),
     # 침목 계단: 폭 y −0.9..0.9, base_z=−1.8. 디딤면 gravel(마사토).
     stairs=dict(x0=0.0, y0=-0.9, y1=0.9, base_z=-1.8, z_top=0.0,
                 sleeper_thick=0.15, sleeper_over=0.02,
@@ -603,6 +630,9 @@ def main():
 
     def build_ground(M):
         """상부 평탄 (항상). 기본 지면 = grass (S4-1)."""
+        # [W2-0 · P-A] Slabs ground_kit decorates — keep the displacement skin
+        # off them so the +0.6..2 mm decals are not buried (spec §1.2).
+        sc.skin_exclude(f"{ROOT}/UpperFlat", f"{ROOT}/ConnectU")
         _flat(f"{ROOT}/UpperFlat", PARAMS["upper"], M["grass"])
 
     def build_slope_zone(M):
@@ -859,6 +889,51 @@ def main():
     # -------------------------------------------------------------------
     # cue — 통나무 손스침(railing) · 점자(tactile) · 논슬립(nosing)
     # -------------------------------------------------------------------
+    # -------------------------------------------------------------------
+    # [W2-D] ground_kit — P11 trail_soil (spec §5.7 row 04).
+    #   Runs in both hazard arms (GT-E4 twin parity).
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        g = PARAMS["gkit"]
+        st = PARAMS["stairs"]
+        z = PARAMS["upper"]["z_top"] + PARAMS["path"]["proud"]
+        gp = gk.plan_ground(
+            "trail_soil",
+            region=(g["x0"], g["y0"], g["scatter_x1"], g["y1"]),
+            z=z, gy=0.0, origin=(0.0, 0.0, 0.0),
+            edges=[("stair_top", float(st["x0"]))],
+            dists=(2, 5, 10), scene="scene04",
+            tactile=(),                 # §12.4 — 자연 씬, 미설치
+            extras_args=dict(
+                wear_lane=dict(centerline=tuple(g["wear"]),
+                               width=g["wear_w"]),
+                edge_litter=dict(centerline=tuple(g["wear"])),
+                # seams are built below (they are not constant-y lines)
+                edge_break=dict(lines=[])),
+            seed=4)
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(wear=M["dirt"], litter=M["dirt_path"], edge_break=M["dirt"],
+                  stain_dirt=M["dirt"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris)
+        # ConnectU seam breaking — the dE76 18.9 boundary of the 3.0 x 6.0 m
+        #   dirt landing against the grass slab (spec §5.7 / appendix A6).
+        cn = PARAMS["connect"]
+        x_w, hy = st["x0"] - cn["length"], cn["half_y"]
+        seams = (("W", ((x_w, -hy), (x_w, hy))),
+                 ("S", ((x_w, -hy), (st["x0"] - 0.05, -hy))),
+                 ("N", ((x_w, hy), (st["x0"] - 0.05, hy))))
+        nb = 0
+        for tag, line in seams:
+            nb += gk.build_edge_break(kit, f"{ROOT}/GKit/EdgeBreak_{tag}",
+                                      line, z, M["dirt"])["prim_count"]
+        print(f"[ground_kit] scene04 P11 · prims {res['prims']} "
+              f"+ edge_break {nb} · scatter {res['instances']} · "
+              f"delta_max {res['gt_delta_max']:.4f}")
+        return res
+
     def build_cues(M):
         st = PARAMS["stairs"]
         # 통나무 손스침 1선 (y=+1.0): 사면 프로파일 따라 기운 원기둥 + 나무 포스트
@@ -907,6 +982,7 @@ def main():
     else:
         build_flat_fill(M)          # 대조군: z=0 평지 통일 (grass)
     build_paths(M)                  # 길 띠 + 계단 전후 dirt 접속부
+    build_ground_kit(M)             # [W2-D] both arms — GT-E4 twin parity
     build_background(M)             # 원경 폐쇄 (배경 울타리·나무, 상시)
     if cfg["cue_scene_dressing"]:
         build_nature(M)

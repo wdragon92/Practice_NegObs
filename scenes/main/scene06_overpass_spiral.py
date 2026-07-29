@@ -110,6 +110,7 @@ import datetime
 import numpy as np
 
 import scene_common as sc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -163,6 +164,30 @@ PARAMS = dict(
     #   한다(그리드가 데크 종주축이 되었으므로 판정·학습 양쪽에 필수).
     deck=dict(x0=2.0, x1=5.0, y0=-13.0, y1=13.0, z_top=5.0, thick=0.35,
               parapet_h=1.25, parapet_t=0.08, panel_h=0.95),
+
+    # === [W2-D ground_kit] P9 bridge_deck (spec §5.3 row "06 데크") ========
+    # The h0.3 grid of this scene runs **along the deck**: origin = deck south
+    # end = spiral well rim (3.5, -13.0, 5.000), travel -Y (spec §2.3 lists 06
+    # explicitly). So the plan is given origin=(3.5,-13,5), axis="-y" and the
+    # drop edge at s=0; the deck itself is the decorated surface, z = 5.000.
+    #  * expansion joints at y = -9 / 0 / +9 (spec §5.3), driven by step_y=9.0.
+    #    step_x is switched off: on this axis a constant-x line is longitudinal,
+    #    not a bridge joint. NOTE - ground_kit tags constant-y lines "long" and
+    #    constant-x lines "cross" regardless of `axis`, so on a -Y scene the
+    #    line class is inverted and B7 does not see these joints. They are safe
+    #    anyway (measured: the y=-9 joint is 33 rows @1080 from the edge row at
+    #    d10, floor 16), but the mis-tagging is reported as a kit defect.
+    #  * 4 scuppers at the deck edges, 0.35 m in from the parapet face.
+    #  * the 논슬립 도막 밴드 (spec §5.3, width 2.0) is carried by `wear_lane`
+    #    with an explicit centre line: `build_membrane` is a P6 builder whose
+    #    region is the whole trimmed plan area, so it cannot express a 2.0 m
+    #    band on a 3.0 m deck. Its albedo target 0.14~0.22 is a T1 material
+    #    matter in any case (spec §4.4).
+    #  * NO tactile: spec §12.4 puts scene06 on **hold** (the "full width" of a
+    #    helical flight is undefined; supervisor call, filed with M10), so it is
+    #    absent from TACTILE_SITES and ground_kit would raise B11 on it.
+    gkit=dict(joint_step=9.0, wear=((3.5, -12.2), (3.5, -0.5)), wear_w=2.0,
+              gully=[(2.35, -11.0), (4.65, -11.0), (2.35, -4.0), (4.65, -4.0)]),
     rail_bay=dict(post_t=0.10, post_h=1.28, n_bay=13, joint=0.05,
                   kick_h=0.12, cap_h=0.06, cap_over=0.03,
                   baluster_r=0.018, n_baluster=5),
@@ -1210,8 +1235,46 @@ def main():
     # -------------------------------------------------------------------
     # 육교 데크 + 지지 기둥
     # -------------------------------------------------------------------
+    # -------------------------------------------------------------------
+    # [W2-D] ground_kit — P9 bridge_deck. Deck top (z=5.000), travel -Y.
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        g = PARAMS["gkit"]
+        dk = PARAMS["deck"]
+        gp = gk.plan_ground(
+            "bridge_deck",
+            region=(dk["x0"], dk["y0"], dk["x1"], dk["y1"]),
+            z=dk["z_top"], gy=0.0,
+            origin=(3.5, dk["y0"], dk["z_top"]), axis="-y",
+            edges=[("well_edge", 0.0)],
+            dists=(2, 5, 10), scene="scene06",
+            tactile=(),                 # §12.4 — 홀드(감독 판단, M10)
+            overrides=dict(pave=dict(module=(None, None), joint="expansion",
+                                     step_x=None, step_y=g["joint_step"]),
+                           infra=dict(gully=len(g["gully"]))),
+            sites=dict(gully=[tuple(v) for v in g["gully"]]),
+            extras_args=dict(wear_lane=dict(centerline=tuple(g["wear"]),
+                                            width=g["wear_w"])),
+            seed=6)
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["curb"], crack=M["curb"], gully=M["steel"],
+                  wear=M["curb"], stain_water=M["curb"], stain_drip=M["curb"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris,
+                              slabs=(f"{ROOT}/Deck",))
+        print(f"[ground_kit] scene06 P9 · prims {res['prims']} · "
+              f"delta_max {res['gt_delta_max']:.4f} · "
+              f"unit_cell {res['unit_cell']}")
+        return res
+
     def build_deck(M):
         dk = PARAMS["deck"]
+        # [W2-0 · P-A] Registered before the slab exists, because `_skin_wanted`
+        # is evaluated inside `sc.add_box`. (The deck is 3.0 m wide, i.e. under
+        # the 4.0 m skin threshold today, so this is a forward guard.)
+        sc.skin_exclude(f"{ROOT}/Deck")
         BOX(f"{ROOT}/Deck",
             ((dk["x0"]+dk["x1"])/2.0, (dk["y0"]+dk["y1"])/2.0,
              dk["z_top"] - dk["thick"]/2.0),
@@ -1507,6 +1570,7 @@ def main():
     if cfg["hazard_stairs"]:
         build_spiral(M)
         build_deck(M)
+        build_ground_kit(M)    # [W2-D] deck ground elements (deck must exist)
         build_north(M)
         build_cues(M)          # 기하가 없으면 난간도 없다(부유 방지)
     else:

@@ -35,6 +35,7 @@ import datetime
 #   scene_common 은 SimulationApp 부팅 **전** import 해도 안전(pxr/omni 지연 import).
 #   scene01 의 나머지 빌더·재질 헬퍼는 기존 로컬 구현을 그대로 쓴다(회귀 방지).
 import scene_common as sc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -60,6 +61,41 @@ PARAMS = dict(
     band=dict(width=0.45, spacing=2.7, proud=0.0015, embed=0.05),  # Y로 달리는 차콜 밴드(F5: 돌출 1.5mm)
     stairs=dict(x0=0.0, riser=0.15, tread=0.38, nsteps=4,          # 총 낙차 0.6 m
                 y0=-5.5, y1=5.5, base_z=-0.7),
+
+    # === [W2-D ground_kit] P1 plaza_granite (spec §5.1 row 01) =============
+    # The decorated surface is the upper plaza strip the h0.3 grid actually
+    # sees: x -12..0 (d10 eye sits at x=-10), y = stair width. Everything is
+    # read from PARAMS, never from the spec text (spec §7.4).
+    #
+    #  * manholes 2 - (-3.8, -2.4) is the spec coordinate, already corrected
+    #    for this scene's gy=-2.75 grid line. The second one is placed to land
+    #    inside the d10 near window (x -9.44..-8.00, |y-gy| <= 0.92 at X=1.6).
+    #  * gullies 2 - ruling C-1' (spec §5.0): the stair-head drainage is two
+    #    point gullies at x=-0.95, |y| = stair_width/2 - 0.40, NOT a full-width
+    #    trench. Flush (z_e = 0) so GT-E1' asks for 0 m stand-off.
+    #  * NO stair-head trench. Spec §5.1 still lists one at x=-2.55, but it
+    #    cannot be built here - two independent B7 failures, both measured with
+    #    `python3 ground_kit.py` arithmetic and reported in
+    #    Docs/reports/w2d_edit_g1.md §3:
+    #      (a) x=-2.55 puts the trench *frame* (lip 0.040 each side, ledger
+    #          "trench_frame_w") near edge at x=-2.36, i.e. drow=15.7 rows
+    #          @1080 < the 16-row floor for d10. C-1' sized the 0.30 m slot but
+    #          not the frame. x=-2.59 fixes that.
+    #      (b) even at x=-2.59 the trench and the statutory tactile band are
+    #          two singular full-width cross lines inside the d10 E band, which
+    #          GT-E2 caps at one; the tactile band holds that single slot by
+    #          GT-E2-x (spec §6.2). So the trench can only exist while
+    #          cue_tactile is OFF - a toggle-dependent hard gate is worse than
+    #          no trench, and C-1' already moved the drainage duty to gullies.
+    #  * tactile: spec §12.4 registers scene01 stair_top (p=0.51, defect
+    #    "faded/soiled -40 %"). Statutory band = 0.30 m set-back + 0.60 m depth
+    #    over the full stair width, i.e. x -0.90..-0.30 (ground_kit derives it
+    #    from the edge, so no coordinate is hard-coded here). It replaces the
+    #    old local `Tactile` box, which sat at x -0.30..0.00 and therefore
+    #    violated both the statute (no set-back) and GT-E1' (dot 6 mm needs
+    #    40*0.006 = 0.24 m of clearance, it had 0).
+    gkit=dict(x0=-12.0, manhole=[(-3.80, -2.40), (-8.40, -2.60)],
+              gully_x=-0.95, gully_inset=0.40),
     lower_plaza=dict(x0=1.52, x1=14.0, y0=-8.0, y1=8.0, z_top=-0.6, thick=0.5),
     # v4-A4: x1 2.0→1.52 (하부광장 서단과 플러시) — 하부광장 한복판 자유단 토막 제거
     flank=dict(y_out=0.5, x0=-0.5, x1=1.52, z_top=0.0, z_bot=-1.1),  # 계단 측벽 로우월
@@ -571,6 +607,12 @@ def main():
         Ly = up["y1"] - up["y0"]
         top = up["z_top"]
         th = up["thick"]
+        # [W2-0 · P-A] Register the plaza as a skin-excluded slab. scene01 owns
+        # a local `add_box` that never calls `_ground_skin`, so nothing is
+        # displaced today; the registration is what keeps the flush ground_kit
+        # elements (manhole +-10 mm, tactile 6 mm) safe if this scene is ever
+        # routed through `sc.add_box` (spec §1.2).
+        sc.skin_exclude("/World/Scene01/UpperPlaza")
         add_box("/World/Scene01/UpperPlaza", (cx, cy, top - th / 2.0),
                 (Lx, Ly, th), M["plaza_light"], collider=True)
         # 차콜 밴드: Y로 달리는 별도 박스(재질 분리), X방향 spacing 반복.
@@ -943,21 +985,50 @@ def main():
             sc.build_sign(stage, f"/World/Scene01/Sign_{tag}", cx, cy, bz,
                           yaw, panel, w=w, h=h, back_mtl=back)
 
+    # -------------------------------------------------------------------
+    # [W2-D] ground_kit — P1 plaza_granite. Upper plaza, x -12..0.
+    #   The drop edge is the stair nosing at x = stairs.x0 = 0. Joint ticks
+    #   that fall inside the edge guard band are dropped by ground_kit itself
+    #   (`_edge_guard_ticks`, GT-E2 delta >= 16 rows @1080).
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        g = PARAMS["gkit"]
+        st = PARAMS["stairs"]
+        # stair-head gullies: C-1' puts them 0.40 m inboard of each stair end.
+        gy_off = (st["y1"] - st["y0"]) / 2.0 - g["gully_inset"]
+        gp = gk.plan_ground(
+            "plaza_granite",
+            region=(g["x0"], st["y0"], st["x0"], st["y1"]),
+            z=PARAMS["upper_plaza"]["z_top"], gy=-2.75,
+            origin=(0.0, 0.0, 0.0),
+            edges=[("stair_top", float(st["x0"]))],
+            dists=(2, 5, 10), scene="scene01",
+            tactile=("stair_top",) if cfg["cue_tactile"] else (),
+            sites=dict(manhole=[tuple(v) for v in g["manhole"]],
+                       gully=[(g["gully_x"], -gy_off), (g["gully_x"], gy_off)]),
+            seed=1)
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["granite_dark"], crack=M["granite_dark"],
+                  patch=M["lower"], patch_cut=M["granite_dark"],
+                  manhole=M["rail"], gully=M["rail"], weed=M["hedge"],
+                  stain_dirt=M["granite_dark"], stain_water=M["granite_dark"],
+                  tactile=M["tactile"])
+        res = gk.apply_ground(kit, "/World/Scene01/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris,
+                              slabs=("/World/Scene01/UpperPlaza",))
+        print(f"[ground_kit] scene01 P1 · prims {res['prims']} · "
+              f"delta_max {res['gt_delta_max']:.4f} · "
+              f"unit_cell {res['unit_cell']}")
+        return res
+
     def build_cues(M):
-        # 점자블록: 상단 모서리 0.3m 앞, 계단 폭, 깊이 0.3m
-        if cfg["cue_tactile"]:
-            tc = PARAMS["tactile"]
-            st = PARAMS["stairs"]
-            x1 = st["x0"] - 0.0
-            x0 = st["x0"] - tc["ahead"]
-            cx = (x0 + x1) / 2.0
-            cy = (st["y0"] + st["y1"]) / 2.0
-            Ly = st["y1"] - st["y0"]
-            # F4: 상판(z=0)에서 4mm 돌출·1cm 매입 (거의 플러시, 돌기는 노멀맵)
-            z_top = 0.0 + tc["proud"]
-            z_bot = 0.0 - 0.01
-            add_box("/World/Scene01/Tactile", (cx, cy, (z_top + z_bot) / 2.0),
-                    (tc["ahead"], Ly, z_top - z_bot), M["tactile"])
+        # 점자블록: [W2-D] moved to ground_kit (spec §12.4 registry entry
+        #   scene01/stair_top). The old box sat at x -0.30..0.00 - no statutory
+        #   0.30 m set-back and a GT-E1' violation (6 mm dot needs 0.24 m).
+        #   `build_ground_kit` now emits the compliant band at x -0.90..-0.30,
+        #   still gated by cfg["cue_tactile"] so the ablation toggle is intact.
 
         # 핸드레일: 중앙 y=0 + 양측 y=±5.45. 계단 경사 따라 기운 상단 레일 +
         # 상단 1m 수평 연장 + 포스트(지름 4cm, 간격 ~1.2m, 높이 0.9m).
@@ -1041,6 +1112,7 @@ def main():
         build_buildings(M)
         build_streetlight(M)
         build_dressing_props(M)     # v4-D: 캠퍼스 맥락단서 일괄
+    build_ground_kit(M)             # [W2-D] ground elements (after dressing)
     build_cues(M)
     if cfg["cue_sign"]:
         build_signs()               # [v5 공통 레이어]

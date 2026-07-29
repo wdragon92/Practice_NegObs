@@ -32,6 +32,7 @@ import json
 import datetime
 
 import scene_common as sc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -88,6 +89,36 @@ PARAMS = dict(
                     spacing=1.2),
     tactile=dict(ahead=0.3, depth=0.3, proud=0.004, land_depth=0.4),
     nosing=dict(color=(0.85, 0.72, 0.10), width=0.05, proud=0.001),
+
+    # ═══ [W2-D ground_kit] P3 sidewalk_block — 사양 §5.2 scene16 행 ══════════
+    #  Row prescription: "edge weeds on both walk verges · 1 manhole · canopy
+    #  drip staining band (eaves projection)"; manhole (-3.9, -0.8).
+    #  ★ Tactile is **ON, newly installed** (§12.4, the only ON scene in this
+    #    batch): 0.6 m x full width in front of the **building entrance**,
+    #    i.e. deliberately at a spot with **no drop**. That is the point — this
+    #    scene is what fills the cue+/label- quadrant (§12.6). Defect type
+    #    applied: "obstruction/occupation" — ground_kit only leaves the space
+    #    clear, the pot/bicycle that occupies it belongs to the props team.
+    #  ★ Placed unconditionally, not under `cue_tactile`, following the
+    #    sceneN5 pilot: a band that is unrelated to the drop cannot leak a
+    #    hazard cue into a cue-OFF cut, so toggle integrity is not at stake.
+    #    The scene's own stair-head / bollard tactile paths stay toggle-bound.
+    #  ★ `gutter_L` is overridden to 0: an L gutter is a carriageway edge
+    #    detail and this walk has grass on both sides, no roadway (§4.2).
+    #  ★ The canopy eaves projection line (x = canopy.x0 = -1.0) is only 1.0 m
+    #    in front of the drop; drow(-1.0, d10) = 5.65 rows @1080 against a
+    #    16-row floor, so a continuous transverse drip band there is a GT-E2
+    #    violation [계산]. The drip is therefore carried as **decals**
+    #    (`stain` kind "drip") inside the trimmed region instead of a line.
+    gkit=dict(
+        region=(-12.0, -2.5, 0.0, 2.5),
+        manholes=[(-3.9, -0.8)],
+        gullies=[(-6.0, -2.2), (-1.5, 2.2)],
+        patches=[(-1.20, 0.35), (-8.60, -0.30)],
+        # entrance tactile band: 0.60 m deep, walk-corridor width
+        tactile_entrance=(-6.00, -2.5, -5.40, 2.5),
+        wear_lane=((-12.0, 0.0), (-0.85, 0.0)),   # desire line to the stairs
+    ),
 
     # 주변 대지 / 드레싱
     #   gx1 14.5 → 19.0 : 동측 출구 계단(x 14..18.48) 풋프린트도 잔디에서 비운다.
@@ -383,6 +414,9 @@ def main():
         cz = top - th / 2.0
         y_out = p["y1"] + wl["thick"]            # 1.8
         x_tr1 = wl["x1"]                          # 트렌치 동쪽 끝 18.48
+        # [W2-0 · P-A] Walk_W is the ground_kit stage — register the skin
+        #   exclusion **before** BOX (add_box calls `_skin_wanted` inline).
+        sc.skin_exclude(f"{ROOT}/Walk_W")
         # 서: x_w..0 전폭
         BOX(f"{ROOT}/Walk_W",
             ((w["x_w"] + p["x0"]) / 2.0, (w["y_s"] + w["y_n"]) / 2.0, cz),
@@ -400,8 +434,53 @@ def main():
             ((x_tr1 + w["x_e"]) / 2.0, (w["y_s"] + w["y_n"]) / 2.0, cz),
             (w["x_e"] - x_tr1, w["y_n"] - w["y_s"], th), M["walk"], col=True)
 
+    # -------------------------------------------------------------------
+    # [W2-D] ground_kit — P3 sidewalk_block (사양 §5.2 scene16 행)
+    #   Drop edge = pit head x=0 (PARAMS["pit"]["x0"], §7.4). The pit itself is
+    #   declared as a **void** so gate B8 (GT-V) refuses any element that would
+    #   lay a ground plane over the opening (§6.3).
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        g = PARAMS["gkit"]
+        p = PARAMS["pit"]
+        gp = gk.plan_ground(
+            "sidewalk_block", region=tuple(g["region"]),
+            z=float(PARAMS["walk"]["z_top"]), gy=0.0, origin=(0.0, 0.0, 0.0),
+            edges=[("stair_top", float(p["x0"]))],
+            voids=((p["x0"], p["y0"], p["x1"], p["y1"]),),
+            dists=(2, 5, 10), scene="scene16",
+            tactile=("entrance",),
+            overrides=dict(
+                infra=dict(manhole=1, gully=2, gutter_L=0),
+                # "drip" added to the stain kinds = canopy eaves run-off.
+                surface=(("patch", 2), ("crack", 4),
+                         ("stain", ("dirt", "gum", "drip")), ("weed", 8)),
+                extras=(("wear_lane", dict(width=0.90)),)),
+            extras_args=dict(wear_lane=dict(centerline=tuple(g["wear_lane"]))),
+            sites=dict(manhole=[tuple(v) for v in g["manholes"]],
+                       gully=[tuple(v) for v in g["gullies"]],
+                       patch=[tuple(v) for v in g["patches"]],
+                       tactile=dict(entrance=tuple(g["tactile_entrance"]))),
+            seed=16)
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["band"], crack=M["band"], patch=M["walk"],
+                  patch_cut=M["band"], manhole=M["band"], gully=M["band"],
+                  gutter=M["band"], gutter_cover=M["band"],
+                  trench=M["band"], trench_frame=M["band"],
+                  marking=M["band"], weed=M["grass"], wear=M["wall"],
+                  stain_dirt=M["wall"], stain_gum=M["band"],
+                  stain_drip=M["wall"], tactile=M["tactile"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris)
+        print(f"[ground_kit] scene16 P3 · 프림 {res['prims']} · "
+              f"δmax {res['gt_delta_max']:.4f} · unit_cell {res['unit_cell']}")
+        return res
+
     def build_flat_fill(M):
         """hazard_stairs=False 대조군: 트렌치를 메워 전체 z=0 평지."""
+        sc.skin_exclude(f"{ROOT}/FlatWalk")      # [W2-0 · P-A] 쌍둥이도 동일 조건
         w = PARAMS["walk"]
         BOX(f"{ROOT}/FlatWalk",
             ((w["x_w"] + w["x_e"]) / 2.0, (w["y_s"] + w["y_n"]) / 2.0,
@@ -674,6 +753,7 @@ def main():
         build_flat_fill(M)
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
+    build_ground_kit(M)             # [W2-D] 지면 요소 — 드레싱 뒤(산포 순서 규약)
     if cfg.get("cue_sign"):
         build_signs()               # [v5 공통 레이어]
 

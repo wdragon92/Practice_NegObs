@@ -48,6 +48,7 @@ import datetime
 
 import scene_common as sc
 import batch1_common as bc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -115,7 +116,41 @@ PARAMS = dict(
     rail=dict(y=1.60, x_start=-1.20, rail_h=0.90, post_r=0.022, rail_r=0.03,
               rail_mid_r=0.018, rail_mid_drop=0.45, spacing=1.20),
 
-    tactile=dict(ahead=0.30, proud=0.004),
+    #  점자블록 — [W2 §12.4] "ON 유지(현행)" 이되 **집행자를 ground_kit 으로
+    #  옮긴다**. 현행 `sc.build_tactile` 은 상수색 무돌기 평판이라 법정 36점
+    #  돌기의 음영이 화면에 0 이었다(§12.5 ③). 킷은 `build_tactile_pair` 로
+    #  규격(300 그리드·돌기 Ø25 mm·6 mm)을 그대로 낸다.
+    #  위치도 법정값으로 교정: 구 `x −0.30…0`(계단에 맞닿음) →
+    #  **`x −0.90…−0.30`** = "계단 첫 단 0.3 m 전, 세로폭 60 cm 표준"
+    #  `[법령 교통약자법 시행규칙 별표1 2호 차목 · 시방 국도 실무요령 7.5]`.
+    #  GT-E1′ 도 이 위치라야 통과한다 — 돌기 0.006 m × EDGE_K 40 = 0.24 m
+    #  이격 필요, 법정 0.30 m > 0.24 ✔ `[계산]`.
+    tactile=dict(ahead=0.30, depth=0.60, proud=0.004),
+
+    # ═══ [W2 ground_kit] P1 plaza_granite — 사양 §5.1 C1 행 ════════════════
+    #  ★ 조건 오버레이: **이 씬의 지면 요소는 눈 아래에 깔린다.**
+    #    적설 0.05 m 가 논슬립·점형블록을 매몰하는 것이 씬 특색이고
+    #    (§7.3 B12 `_inv_c1_snow`: 신규 요소 proud ≤ 0.05), 그래서 계획은
+    #    테라스 상면 z=0 에 세운다. `snow_cover=False` 대응쌍에서는 같은
+    #    요소가 그대로 드러난다 — 대응쌍의 정보량이 늘어난다.
+    #  ★ 잡초 상한을 0.045 로 캡한다(`caps.weed_h`). 기본 0.12 는 적설
+    #    두께를 넘어 눈 위로 솟으므로 B12 위반이다.
+    #  ★ 씬 고유 처방 "제설 흔적"(답압로·발자국)은 **눈 표면 z=LIFT** 에
+    #    별도로 얹는다 — 계획은 단일 z 라 같은 호출에 담을 수 없다.
+    ground=dict(
+        region=(-11.0, -3.0, 0.0, 3.0),
+        manhole=(-2.40, 0.60),          # W2 창(d5 X=2.6 m · 화면폭 21.6 %)
+        gully=(-6.00, 2.40),
+        patches=[(-1.20, 0.10), (-8.80, -0.20)],
+        weed_h=0.045,
+        #  제설 흔적 — 답압로 중앙 폭 1.0 m(사양 0.8~1.2), 알베도 ×0.75.
+        #  x 원단을 −0.10 에서 끊는다: proud 0.0006 이라 GT-E1′ 필요 이격은
+        #  0.024 m 뿐이지만, 에지에 붙은 밝은 종단선은 만들지 않는다.
+        trace_lane=((-11.0, 0.0), (-0.10, 0.0)),
+        trace_lane_w=1.0, trace_lane_gain=0.75,
+        trace_steps=12,
+        trace_path=[(-10.6, 0.30), (-0.30, 0.10)],
+    ),
     # 노징 y를 계단 폭보다 0.02 안쪽으로 → 눈 슬래브 내부에 완전 봉입.
     nosing=dict(color=(0.85, 0.72, 0.10), width=0.05, proud=0.001,
                 y_inset=0.02),
@@ -292,6 +327,29 @@ def _dims():
     return run, drop, slope_k, lift
 
 
+def ground_plans():
+    """[W2 ground_kit] 지면 계획 — 씬 조립부와 CPU 검산이 같은 함수를 쓴다."""
+    g = PARAMS["ground"]
+    st = PARAMS["stairs"]
+    tc = PARAMS["tactile"]
+    x_edge = float(st["x0"])
+    band = (x_edge - tc["ahead"] - tc["depth"], float(st["y0"]),
+            x_edge - tc["ahead"], float(st["y1"]))
+    gp = gk.plan_ground(
+        "plaza_granite", region=tuple(g["region"]),
+        z=float(PARAMS["terrace"]["z_top"]), gy=0.0, origin=(0.0, 0.0, 0.0),
+        edges=[("stair_top", x_edge)],
+        dists=(2, 5, 10), scene="sceneC1",
+        caps=dict(weed_h=float(g["weed_h"])),
+        tactile=("stair_top",) if SCENE_CONFIG["cue_tactile"] else (),
+        sites=dict(manhole=[tuple(g["manhole"])], gully=[tuple(g["gully"])],
+                   patch=[tuple(p) for p in g["patches"]],
+                   tactile=dict(stair_top=band)),
+        overrides=dict(infra=dict(manhole=1, gully=1)),
+        seed=26)
+    return [("terrace", gp)]
+
+
 def build_views():
     """카메라 프리셋: grid_views(gy=0.0) + 미장센 4컷."""
     views = sc.grid_views(0.0)
@@ -433,6 +491,10 @@ def main():
     # -------------------------------------------------------------------
     def build_terrace(M):
         tr = PARAMS["terrace"]
+        # [W2-0 · P-A] 테라스 상면이 ground_kit 의 장식 대상이다 → 변위 스킨
+        #   OFF(**BOX 호출 전에** 등록). `snow_cover=False` 대응쌍에서 킷
+        #   요소가 스킨(+6.5~16.5 mm)에 묻히는 것을 막는다 `[사양 §1.1]`.
+        sc.skin_exclude(f"{ROOT}/Terrace")
         BOX(f"{ROOT}/Terrace",
             ((tr["x0"] + tr["x1"]) / 2.0, (tr["y0"] + tr["y1"]) / 2.0,
              tr["z_top"] - tr["thick"] / 2.0),
@@ -487,6 +549,9 @@ def main():
     def build_flat_fill(M):
         """hazard_stairs=False 대조군: 전면 z=0 평지(+ 눈 평판)."""
         tr = PARAMS["terrace"]
+        # [W2-0 · P-A] 대조군에서도 지면 요소는 그대로 놓인다(쌍둥이 비교의
+        #   유일한 차이는 **낙차 기하**여야 한다) → 평지 판도 스킨 OFF.
+        sc.skin_exclude(f"{ROOT}/FlatFill")
         lo = PARAMS["lower"]
         x0, x1 = tr["x0"], lo["x1"]
         BOX(f"{ROOT}/FlatFill",
@@ -612,12 +677,9 @@ def main():
                 st["riser"], st["tread"], st["nsteps"],
                 color=ns["color"], width=ns["width"], proud=ns["proud"],
                 z_top=st["z_top"])
-        if cfg["cue_tactile"]:
-            tc = PARAMS["tactile"]
-            sc.build_tactile(stage, f"{ROOT}/Tactile_Top",
-                             st["x0"] - tc["ahead"], st["x0"],
-                             st["y0"], st["y1"], M["tactile"],
-                             z=st["z_top"], proud=tc["proud"])
+        # [W2 §12.4] 점자블록은 **ground_kit 이 집행**한다(`build_ground_kit`).
+        #   여기서 또 깔면 같은 자리에 2겹이 된다. 토글(`cue_tactile`)은
+        #   `ground_plans()` 가 그대로 읽으므로 소거 실험 경로는 불변이다.
         if cfg["cue_railing"]:
             rl = PARAMS["rail"]
 
@@ -636,6 +698,47 @@ def main():
                 rail_mid_drop=rl["rail_mid_drop"])
             if cfg["snow_cover"]:
                 build_rail_snow(M)
+
+    # -------------------------------------------------------------------
+    # [W2] ground_kit — P1 plaza_granite. **2층으로 나뉜다.**
+    #   ① 포장층(z = 테라스 상면 0.0) : 줄눈·맨홀·빗물받이·패치·균열·오염·
+    #      잡초·점자블록. 적설 0.05 아래라 `snow_cover=True` 에서는 전부 매몰
+    #      되고 대응쌍(False)에서 드러난다 — 그게 이 씬의 특색이다(§7.3 B12).
+    #   ② 눈 표면층(z = LIFT) : **제설 흔적** — 답압로 + 발자국.
+    #      계획은 단일 z 라 ①과 같은 호출에 담을 수 없어 빌더를 직접 부른다
+    #      (파일럿 #2 의 "꺾임 그룹 로컬 그레이팅"과 같은 예외 경로).
+    #      GT: proud 0.0006 m — 낙차 아님, B12 적설 상한 0.05 도 통과.
+    # -------------------------------------------------------------------
+    def build_ground_kit(M, lift):
+        g = PARAMS["ground"]
+        (_tag, gp), = ground_plans()
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["stair"], crack=M["stair"], patch=M["concrete"],
+                  patch_cut=M["stair"], manhole=M["rail"], gully=M["rail"],
+                  gutter=M["concrete"], weed=M["dirt"], tactile=M["tactile"],
+                  stain_dirt=M["dirt"], stain_water=M["stair"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris)
+        n_trace = 0
+        # `NEGOBS_GKIT=0`(C2 A/B OFF 팔)에서는 계획 밖 직접 호출도 함께 꺼야
+        #   A/B 의 유일한 차이가 "킷 프림의 유무" 로 남는다 `[사양 §7.5 A3]`.
+        if cfg["snow_cover"] and gk.GKIT_ON:
+            (ax, ay), (bx, by) = g["trace_lane"]
+            r1 = gk.build_wear_lane(kit, f"{ROOT}/GKit/SnowTrace/Lane",
+                                    ((ax, ay), (bx, by)), lift, M["concrete"],
+                                    width=float(g["trace_lane_w"]),
+                                    albedo_gain=float(g["trace_lane_gain"]))
+            r2 = gk.build_footprints(kit, f"{ROOT}/GKit/SnowTrace/Steps",
+                                     [tuple(p) for p in g["trace_path"]],
+                                     lift, M["dirt"],
+                                     n=int(g["trace_steps"]), seed=26)
+            n_trace = r1["prim_count"] + r2["prim_count"]
+        print(f"[ground_kit] sceneC1 P1 · 프림 {res['prims']} + 제설흔적 "
+              f"{n_trace} · δmax {res['gt_delta_max']:.4f} · "
+              f"unit_cell {res['unit_cell']}")
+        return res
 
     # -------------------------------------------------------------------
     # 드레싱 — 제설 눈더미 · 표지기둥 · 원경 건물 2동(지평선 폐쇄 §A-4)
@@ -835,6 +938,7 @@ def main():
         build_flat_fill(M)
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
+    build_ground_kit(M, LIFT)            # [W2] 지면 요소 — 드레싱 뒤(산포 규약)
 
     print(f"[기하] run={RUN:.2f}m drop={DROP:.2f}m slope_k={SLOPE_K:.4f} "
           f"lower_top={LOWER_TOP:.3f} snow_lift={LIFT:.3f}")

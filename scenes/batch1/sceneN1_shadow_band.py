@@ -37,6 +37,7 @@ import datetime
 
 import scene_common as sc
 import batch1_common as bc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -66,9 +67,66 @@ PARAMS = dict(
     # 오클루더: 프레임 밖 공중 슬래브(스카이브리지형). H=고도(밑면), half_y=반길이.
     slab=dict(H=12.0, thick=0.8, half_y=30.0),
 
-    # 줄눈: 3m 격자, 폭 0.04, 암색 스트립 proud 0.001 (밴드 안에서도 연속 판독)
-    joints=dict(spacing=3.0, width=0.04, proud=0.001,
+    # ═══ 줄눈 — [W2 §5.1 N1] 단일 3 m 격자 → **2단화** ════════════════════
+    #  구(舊): spacing 3.0 단일 격자. 실물 화강석 판석 광장은 **신축줄눈(폭
+    #    20~30 mm)** 과 **시공줄눈(폭 3 mm 급)** 이 서로 다른 주기로 겹친다.
+    #  신(新): 신축 `exp_spacing` 6.0 m + 시공 `con_spacing` 1.8 m 의 2단.
+    #    ★ 1.8 m 는 **판석 셀 0.600 의 3배**다 — 사양 §4.5 U2(줄눈 주기는
+    #      유닛 셀의 정수배)에 걸린다. v1 표기 "1.5~2 m" 는 2.5배라 T1 MDL
+    #      유닛 지터와 **이중 격자**를 만든다 `[사양 §4.5 U2·§5.1]`.
+    #    ★ 두 주기가 겹치는 눈금(18 m 주기)에서는 시공줄눈을 드롭한다 —
+    #      동일 위치 2프림 = Z-파이팅.
+    #  ★ ground_kit 은 이 씬에서 **줄눈을 만들지 않는다**(`pave.joint=None`
+    #    오버라이드). 킷 줄눈(1.8/6.0)과 씬 격자가 같은 면에 겹치면
+    #    파일럿 결함 D6(sceneN5 이중 줄눈 격자)이 재발한다 `[W2-B §7 D-list]`.
+    joints=dict(exp_spacing=6.0, exp_width=0.045, con_spacing=1.8,
+                con_width=0.022, proud=0.001,
                 x0=-21.0, x1=30.0, y0=-21.0, y1=21.0),
+
+    # ═══ [W2 ground_kit] P1 plaza_granite — 사양 §5.1 N1 행 ════════════════
+    #  씬 고유 처방: ① 줄눈 2단화(위 `joints` 에서 씬이 직접 집행)
+    #                ② 맨홀 1기 — **밴드 보존 불변식 통과 필수**(§7.3)
+    #  ★ 밴드 보존(§7.3 B12, `ground_kit._inv_n1_band`): 이 씬의 오클루더는
+    #    공중 슬래브 **단 하나**여야 한다. 태양 그림자는 순수 +X, 길이
+    #    0.84536·h 이므로 신규 요소는
+    #      (앞배치) `xb + 0.84536·h < band.x0`  또는  (뒤배치) `xa > band.x1`
+    #    를 만족해야 한다. region 원단을 `band.x0 − 0.60` 으로 잘라 두면
+    #    잡초(클램프 후 h ≤ 0.12)까지 포함해 앞배치 조건이 자동 성립한다
+    #    `[계산 — −0.60 + 0.84536×0.12 = −0.499 < 0]`.
+    #  ★ 점자블록: §12.4 "N1 볼라드 전면 유지 + 형태 교정(§12.5 ②)" —
+    #    소판 0.40×0.30(본당 0.12 ㎡)은 approach 뷰에서 212 px/본이라
+    #    판독 불가였다. 볼라드 열 전면 **연속 띠 0.60 m** 로 바꾼다
+    #    (`relief="normal"` 이라 프림 1). 볼라드 열은 x 11…17 = **뒤배치**
+    #    (xa = 11 > 4.0) 라 밴드 불변식을 통과한다.
+    ground=dict(
+        region_pad_x=0.60,                  # 밴드 앞 여유 (위 계산)
+        region_x0=-12.0, region_y=4.0,
+        #  맨홀 — 사양 §5.1 표기는 (−1.0, +0.4) 이지만 **파일럿 결재
+        #  M9-ⓑ 2차 정정**(scene15)이 세운 기준 "면 요소 1개가 근경 창을
+        #  독점하지 않는다(화면폭 ≤ 25 %)"를 그대로 적용해 이설한다:
+        #    x=−1.0 → d2 에서 지면거리 1.0 m · 화면폭 f·0.648/1.0 = **1,078 px
+        #    = 56.1 %** `[계산]`. W1(0.564~2.00 m) 안에서는 원단 X=2.00 에서도
+        #    28.1 % 라 ≤25 % 가 **원리적으로 불가**하다.
+        #    → 2순위 창 W2(2.00~3.00 m) 로: x=−2.40 ⇒ d5 X=2.60 m ·
+        #      414 px = **21.6 %**, d10 X=7.60 m · 7.4 % `[계산]`.
+        #      d2 는 눈 뒤(X=−0.40)라 비가시 → d2 창은 패치 #1 이 담당한다.
+        #  2기 — 사양 §5.1 "맨홀 1~2기(1기는 반드시 W1)". W1 은 패치가 맡고
+        #  맨홀은 W2 창에 둔다(위 화면폭 계산). 2기째는 d10 의 W2 창
+        #  (X=3.4 m · 317 px = 16.5 %)에 두어 원경 컷의 면 요소를 채운다.
+        manholes=[(-2.40, 0.40), (-6.60, -1.50)],
+        #  패치 #1 = d2 근경 창(W1 = x −1.436…0.0) 담당. 평면 톤 변화라
+        #  원판(맨홀)과 달리 근경 독점의 시각적 부담이 작다 `[파일럿 #2]`.
+        #  패치 2매 = d2·d10 근경 창(W1) 담당. d5 W1 은 빗물받이가 맡는다.
+        #    d2  W1 = x −1.436…0.0   → (−1.20, +0.10)
+        #    d10 W1 = x −9.436…−8.0  → (−8.80, −0.20)
+        #  프레임 반폭이 X=0.8 m 에서 0.46 m 뿐이라 **|y| ≤ 0.4** 여야 화면에
+        #  든다 `[계산 — 반폭 0.5774·X]`.
+        patches=[(-1.20, 0.10), (-8.80, -0.20)],
+        #  빗물받이 — 1기는 d5 W1(x −4.436…−3.0)에, 1기는 광장 가장자리에.
+        gullies=[(-3.80, 0.40), (-9.00, 2.60)],
+        tactile_depth=0.60,                 # 국도 실무요령 7.5 — 점형 60 cm 표준
+        tactile_setback=0.30,               # 법정 볼라드 전면 0.3 m
+    ),
 
     # ═══ 드레싱 (cue_scene_dressing) — "도심 광장" 맥락 ═══════════════════
     #  ★ 밴드 보존 불변식 [이 씬의 특색 = 오클루더가 공중 슬래브 단 하나]
@@ -291,6 +349,57 @@ def bollard_entry_points():
     e = PARAMS["bollard_entry"]
     return bc.bollard_line(e["x0"], e["y"], e["x1"], e["y"],
                            spacing=e["spacing"])
+
+
+def tactile_band_rect():
+    """[W2 §12.5 ②] 볼라드 열 전면 **연속 점형 띠** 사각형 (x0, y0, x1, y1).
+
+    법정 위치는 "볼라드 전면 0.3 m"(교통약자법 시행규칙 별표1 2호 차목),
+    세로폭은 국도 실무요령 7.5 의 점형 표준 60 cm. `front_dir` 이 −Y 이므로
+    띠는 볼라드 몸통 앞면에서 −Y 로 setback 만큼 떨어져 depth 만큼 뻗는다.
+    좌표는 **PARAMS 에서 유도**한다(문서 좌표 하드코드 금지 — 사양 §7.4).
+    """
+    e, bo, g = PARAMS["bollard_entry"], PARAMS["bollard"], PARAMS["ground"]
+    fx, fy = e["front"]
+    sb, dp = float(g["tactile_setback"]), float(g["tactile_depth"])
+    if abs(fy) > abs(fx):                       # 전면이 ±Y (이 씬: −Y)
+        y_face = e["y"] + fy * bo["r"]
+        ya, yb = y_face + fy * sb, y_face + fy * (sb + dp)
+        return (e["x0"] - 0.15, min(ya, yb), e["x1"] + 0.15, max(ya, yb))
+    x_face = e["x0"] + fx * bo["r"]
+    xa, xb = x_face + fx * sb, x_face + fx * (sb + dp)
+    return (min(xa, xb), e["y"] - 0.15, max(xa, xb), e["y"] + 0.15)
+
+
+def ground_plans():
+    """[W2 ground_kit] 지면 계획 — 씬 조립부와 CPU 검산이 **같은 함수**를 쓴다.
+
+    반환 `[(tag, GroundPlan), ...]`. `plan_ground` 는 USD 를 만들지 않으므로
+    Isaac 없이 게이트(B6~B12)를 그대로 돌릴 수 있다 `[사양 §3.3]`.
+    """
+    g = PARAMS["ground"]
+    b = PARAMS["band"]
+    x1 = float(b["x0"]) - float(g["region_pad_x"])
+    gp = gk.plan_ground(
+        "plaza_granite",
+        region=(float(g["region_x0"]), -float(g["region_y"]),
+                x1, float(g["region_y"])),
+        z=float(PARAMS["plaza"]["z_top"]), gy=0.0, origin=(0.0, 0.0, 0.0),
+        edges=(),                       # hard negative — 낙차 에지 0
+        dists=(2, 5, 10), scene="sceneN1",
+        # ★ `cue_tactile` 이 아니라 `cue_scene_dressing` 에 건다 — 이 씬의
+        #   `cue_tactile` 은 "계단 경고 점자블록"용 예약 키(낙차가 없어 상시
+        #   False)이고, 볼라드 전면 점형블록은 **볼라드와 한 몸**이라
+        #   드레싱 토글을 따라야 한다 `[사양 §12.4 — N1 볼라드 전면 유지]`.
+        tactile=("bollard",) if SCENE_CONFIG["cue_scene_dressing"] else (),
+        sites=dict(manhole=[tuple(p) for p in g["manholes"]],
+                   gully=[tuple(p) for p in g["gullies"]],
+                   patch=[tuple(p) for p in g["patches"]],
+                   tactile=dict(bollard=tactile_band_rect())),
+        # 줄눈은 씬 `build_joints()` 가 2단으로 집행한다(위 PARAMS 주석 · D6)
+        overrides=dict(pave=dict(joint=None)),
+        seed=22)
+    return [("plaza", gp)]
 
 
 # ===========================================================================
@@ -584,31 +693,86 @@ def main():
     # -------------------------------------------------------------------
     def build_plaza(M):
         p = PARAMS["plaza"]
+        # [W2-0 · P-A] 광장 상면이 ground_kit 의 장식 대상이다 → 변위 스킨 OFF.
+        #   `add_box` 가 그 자리에서 `_skin_wanted` 를 부르므로 **BOX 호출 전에**
+        #   등록해야 한다. 안 끄면 맨홀(±10 mm)·데칼(0.6 mm)이 스킨
+        #   (+6.5~16.5 mm) 아래로 통째로 묻힌다 `[실측 — 사양 §1.1]`.
+        sc.skin_exclude(f"{ROOT}/Plaza")
         BOX(f"{ROOT}/Plaza",
             (0.0, 0.0, p["z_top"] - p["thick"] / 2.0),
             (p["size"], p["size"], p["thick"]), M["plaza"], col=True)
 
     def build_joints(M):
-        """3m 격자 줄눈 — 암색 박판 proud 0.001 (밴드 내부 판독의 기준 단서)."""
+        """[W2 §5.1 N1] **2단 줄눈** — 신축 6.0 m + 시공 1.8 m.
+
+        암색 박판 proud 0.001 (밴드 내부 판독의 기준 단서)은 불변. 바뀐 것은
+        주기 하나가 아니라 **두 주기의 층위**다 — 실물 판석 광장이 그렇고,
+        1.8 m 는 판석 셀 0.600 의 정수배라 T1 유닛 지터와 위상이 맞는다
+        `[사양 §4.5 U2]`. 두 주기가 겹치는 눈금에서는 시공줄눈을 드롭한다.
+        """
         j = PARAMS["joints"]
         p = PARAMS["plaza"]
-        w, pr = j["width"], j["proud"]
+        pr = j["proud"]
         thk = pr + 0.006                        # 일부 매입 + proud 돌출
         cz = p["z_top"] + pr - thk / 2.0
         Lx = j["x1"] - j["x0"]
         Ly = j["y1"] - j["y0"]
+
+        def ticks(a0, a1, step):
+            n = int(math.floor((a1 - a0) / step + 1e-9)) + 1
+            return [a0 + i * step for i in range(n)]
+
+        exp_x = ticks(j["x0"], j["x1"], j["exp_spacing"])
+        exp_y = ticks(j["y0"], j["y1"], j["exp_spacing"])
+        exp_xs = set(round(v, 4) for v in exp_x)
+        exp_ys = set(round(v, 4) for v in exp_y)
+        n = 0
         # X축 방향 줄눈(=y=const 선) : 카메라 시축과 평행
-        n = int(round(Ly / j["spacing"])) + 1
-        for i in range(n):
-            yy = j["y0"] + i * j["spacing"]
-            BOX(f"{ROOT}/JointX_{i}", ((j["x0"] + j["x1"]) / 2.0, yy, cz),
-                (Lx, w, thk), M["joint"])
+        for yy in exp_y:
+            BOX(f"{ROOT}/JointX_{n}", ((j["x0"] + j["x1"]) / 2.0, yy, cz),
+                (Lx, j["exp_width"], thk), M["joint"])
+            n += 1
+        for yy in ticks(j["y0"], j["y1"], j["con_spacing"]):
+            if round(yy, 4) in exp_ys:          # 동일 위치 2프림 = Z-파이팅
+                continue
+            BOX(f"{ROOT}/JointX_{n}", ((j["x0"] + j["x1"]) / 2.0, yy, cz),
+                (Lx, j["con_width"], thk), M["joint"])
+            n += 1
         # Y축 방향 줄눈(=x=const 선) : 밴드 에지와 평행 — 혼동 강화 요소
-        m = int(round(Lx / j["spacing"])) + 1
-        for i in range(m):
-            xx = j["x0"] + i * j["spacing"]
-            BOX(f"{ROOT}/JointY_{i}", (xx, (j["y0"] + j["y1"]) / 2.0, cz),
-                (w, Ly, thk), M["joint"])
+        m = 0
+        for xx in exp_x:
+            BOX(f"{ROOT}/JointY_{m}", (xx, (j["y0"] + j["y1"]) / 2.0, cz),
+                (j["exp_width"], Ly, thk), M["joint"])
+            m += 1
+        for xx in ticks(j["x0"], j["x1"], j["con_spacing"]):
+            if round(xx, 4) in exp_xs:
+                continue
+            BOX(f"{ROOT}/JointY_{m}", (xx, (j["y0"] + j["y1"]) / 2.0, cz),
+                (j["con_width"], Ly, thk), M["joint"])
+            m += 1
+        print(f"[줄눈] 2단화 — 신축 {j['exp_spacing']} m · 시공 "
+              f"{j['con_spacing']} m · X {n}본 · Y {m}본")
+
+    # -------------------------------------------------------------------
+    # [W2] ground_kit — P1 plaza_granite. 낙차 에지가 없는 hard negative 라
+    #   GT-E1′/GT-E2 는 공허참이고, 판정은 **B12 밴드 보존 불변식**(§7.3)과
+    #   프림 예산·알베도가 한다. 줄눈은 씬이 직접 집행한다(D6 회피).
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        (_tag, gp), = ground_plans()
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["joint"], crack=M["joint"], patch=M["plaza"],
+                  patch_cut=M["curb"], manhole=M["post"], gully=M["post"],
+                  gutter=M["curb"], weed=M["grass"], tactile=M["tactile"],
+                  stain_dirt=M["joint"], stain_water=M["joint"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris)
+        print(f"[ground_kit] sceneN1 P1 · 프림 {res['prims']} · 산포 "
+              f"{res['instances']} · δmax {res['gt_delta_max']:.4f} · "
+              f"unit_cell {res['unit_cell']}")
+        return res
 
     # -------------------------------------------------------------------
     # 오클루더 — 프레임 밖 공중 슬래브 (스카이브리지형). 위치는 _slab_x() 역산.
@@ -651,10 +815,16 @@ def main():
         bo = PARAMS["bollard"]
         e = PARAMS["bollard_entry"]
         for i, (bx, by) in enumerate(bollard_entry_points()):
+            # [W2 §12.5 ②] 본당 소판(0.40×0.30)은 **ground_kit 의 연속 띠
+            #   0.60 m 로 대체**한다 — 소판은 approach 뷰에서 212 px/본,
+            #   5본 합계도 프레임의 0.05 % 미만이라 판독이 불가능했다
+            #   `[실측 — 사양 §12.5 ②]`. 여기서 끄지 않으면 띠와 소판이
+            #   맞닿아 점형 대역이 0.9 m 로 늘어난다(법정 0.60 초과).
             bc.build_bollard_v51(stage, f"{ROOT}/Bollard_{i}", bx, by, 0.0,
                                  None, M["bollard_body"], M["bollard_band"],
                                  M["tactile"], front_dir=e["front"],
-                                 radius=bo["r"], height=bo["h"])
+                                 radius=bo["r"], height=bo["h"],
+                                 tactile=False)
         sl = PARAMS["streetlight"]
         for name, sx, sy, syaw in streetlight_placements():
             # 암 방위를 축평행에서 살짝 틀어 '복제 배치' 인상 제거 (v5.1 §3)
@@ -699,6 +869,7 @@ def main():
         build_occluder(M)
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
+    build_ground_kit(M)                  # [W2] 지면 요소 — 드레싱 뒤(산포 순서 규약)
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])

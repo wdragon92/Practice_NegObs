@@ -34,6 +34,7 @@ import json
 import datetime
 
 import scene_common as sc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -67,9 +68,20 @@ PARAMS = dict(
     upper=dict(x0=-14.0, x1=-4.5, y0=-8.0, y1=8.0, z_top=0.0, base_z=-2.2),
     # 상부 광장 사선 연장 쐐기 (rot_group 내부 — 동측 면 = 계단 상단선)
     wedge=dict(x0=-8.0, x1=0.0, y_half=9.0, z_top=0.0, base_z=-2.2),
-    # 밴드는 축정렬 광장 위에만(x1 -0.6 → -5.0). 사선 에지와의 대비는 유지.
-    band=dict(width=0.45, spacing=2.0, proud=0.0015, x0=-13.0, x1=-5.0,
-              y_half=8.0),
+    # [W2-D · 사양 §5.1 scene20 행] 밴드 x 범위 −13…−5 → **−13…−0.5 연장**.
+    #   측정 근거: 현행 5본(−13/−11/−9/−7/−5)은 **d10 컷만 적중**한다 — d5 의
+    #   근경 창은 x −4.44…−3.0, d2 는 −1.44…0 이라 밴드가 한 본도 들지 않는다.
+    #   −3 · −1 두 본을 되살리면 세 컷 전부에 종단 구조선이 생긴다.
+    #   ★ 구 주석("밴드는 축정렬 광장 위에만")이 x1 을 −5.0 으로 당긴 이유는
+    #     실재한다: 메사는 축정렬 광장(x ≤ −4.5)과 30° 쐐기의 합집합이고,
+    #     쐐기의 동측 경계는 월드 직선 **x = −0.5774·y** 다. 전폭 y±8 밴드를
+    #     x=−3 에 그대로 두면 y > 5.196 구간이 공중에 뜬다.
+    #     → x1 은 사양대로 늘리되 **각 밴드의 +y 끝을 메사 경계로 클램프**한다
+    #       (`y_hi = min(y_half, 1.7321·|x|)`). −y 쪽은 쐐기 로컬 |ly| ≤ 9 안이라
+    #       y_half 그대로다 [계산]. 잘린 밴드가 사선을 따라 계단식으로 끝나므로
+    #       "축정렬 소품 vs 30° 사선" 이라는 이 씬의 주제는 오히려 강해진다.
+    band=dict(width=0.45, spacing=2.0, proud=0.0015, x0=-13.0, x1=-0.5,
+              y_half=8.0, mesa_slope=1.7320508),   # cot(30°) = 1/tan(30°)
     # 계단 14단 × riser 0.15 · tread 0.34 → 낙차 2.1m, run 4.76m. 폭 5 (y ±2.5).
     stairs=dict(x0=0.0, riser=0.15, tread=0.34, nsteps=14,
                 y0=-2.5, y1=2.5, z_top=0.0, base_z=-2.6),
@@ -84,6 +96,29 @@ PARAMS = dict(
                     rail_r=0.03, rail_mid_r=0.018, rail_mid_drop=0.45,
                     spacing=1.3),
     tactile=dict(ahead=0.3, depth=0.3, proud=0.004),
+
+    # ═══ [W2-D ground_kit] P1 plaza_granite — 사양 §5.1 scene20 행 ══════════
+    #  The row's own prescription is the band extension (see `band` above);
+    #  the P1 common set (6 m expansion + 1.8 m contraction joints, 1~2
+    #  manholes with one in W1, repair patches, soiling decals, edge weeds)
+    #  supplies the rest.
+    #  ★ Tactile **OFF** (§12.4 identity conflict — hidden illusion). Gate B12
+    #    `_inv_hidden_illusion` refuses a tactile element or any bright
+    #    (albedo > 0.28) full-width transverse line for scene20.
+    #  ★ Region x1 = **-2.0**, not -0.5. The drop edge of this scene is the
+    #    30 deg diagonal x = -0.5774*y, not the line x = 0 that the kit's frame
+    #    model assumes. A rectangle is only entirely on the mesa if
+    #    x1 <= -0.5774*|y|max; with y = +-3.0 that is x1 <= -1.73, and -2.0
+    #    keeps 0.27 m of margin at the worst corner [계산].
+    #    Consequence: the d2 near window (x -1.44..0) cannot be filled by the
+    #    kit at all in this scene. That is geometry, not an omission — the d2
+    #    window lies beyond the diagonal for most of the frame width.
+    gkit=dict(
+        region=(-13.0, -3.0, -2.0, 3.0),
+        manholes=[(-5.00, 1.40), (-10.00, -1.40)],
+        gullies=[(-3.00, -2.60), (-8.00, 2.60)],
+        patches=[(-3.70, -0.55), (-8.60, 0.30)],
+    ),
 
     # 축정렬 지평 폐쇄 건물 3 (회전 안 함 — 정렬 대비 강조)
     #   base_z=-2.15 : 계곡 잔디 상면. 미지정(0.0)이면 셸이 z=-1.0 까지만 내려와
@@ -335,6 +370,8 @@ def main():
         cx = (u["x0"] + u["x1"]) / 2.0
         cy = (u["y0"] + u["y1"]) / 2.0
         top, bot = u["z_top"], u["base_z"]
+        # [W2-0 · P-A] The mesa top is the ground_kit stage.
+        sc.skin_exclude(f"{ROOT}/UpperPlaza")
         BOX(f"{ROOT}/UpperPlaza", (cx, cy, (top + bot) / 2.0),
             (u["x1"] - u["x0"], u["y1"] - u["y0"], top - bot),
             M["upper"], col=True)
@@ -344,13 +381,49 @@ def main():
             x = bd["x0"]
             i = 0
             while x <= bd["x1"] + 1e-6:
-                BOX(f"{ROOT}/Band_{i}", (x, 0.0, top + bd["proud"] - 0.003),
-                    (bd["width"], 2.0 * bd["y_half"], 0.02), M["band"])
+                # [W2-D] +y 끝을 메사(축정렬 광장 ∪ 30° 쐐기) 경계로 클램프.
+                y_hi = min(bd["y_half"], bd["mesa_slope"] * abs(x))
+                y_lo = -bd["y_half"]
+                if y_hi - y_lo > 0.30:      # 남는 길이가 없으면 그 본은 생략
+                    BOX(f"{ROOT}/Band_{i}",
+                        (x, (y_lo + y_hi) / 2.0, top + bd["proud"] - 0.003),
+                        (bd["width"], y_hi - y_lo, 0.02), M["band"])
                 x += bd["spacing"]
                 i += 1
 
+    # -------------------------------------------------------------------
+    # [W2-D] ground_kit — P1 plaza_granite (사양 §5.1 scene20 행)
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        g = PARAMS["gkit"]
+        st = PARAMS["stairs"]
+        gp = gk.plan_ground(
+            "plaza_granite", region=tuple(g["region"]),
+            z=float(PARAMS["upper"]["z_top"]), gy=0.0, origin=(0.0, 0.0, 0.0),
+            edges=[("stair_top", float(st["x0"]))],
+            dists=(2, 5, 10), scene="scene20", tactile=(),
+            sites=dict(manhole=[tuple(v) for v in g["manholes"]],
+                       gully=[tuple(v) for v in g["gullies"]],
+                       patch=[tuple(v) for v in g["patches"]]),
+            seed=20)
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["band"], crack=M["band"], patch=M["upper"],
+                  patch_cut=M["band"], manhole=M["band"], gully=M["band"],
+                  gutter=M["band"], gutter_cover=M["band"],
+                  trench=M["band"], trench_frame=M["band"],
+                  marking=M["band"], weed=M["grass"], wear=M["curb"],
+                  stain_dirt=M["curb"], stain_water=M["curb"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris)
+        print(f"[ground_kit] scene20 P1 · 프림 {res['prims']} · "
+              f"δmax {res['gt_delta_max']:.4f} · unit_cell {res['unit_cell']}")
+        return res
+
     def build_flat_fill(M):
         """hazard_stairs=False 대조군: 상부+계단+하부를 z=0 평지로 통일."""
+        sc.skin_exclude(f"{ROOT}/FlatPlaza")     # [W2-0 · P-A] 쌍둥이도 동일 조건
         u = PARAMS["upper"]
         v = PARAMS["valley"]
         x0, x1 = u["x0"], 20.0
@@ -519,6 +592,7 @@ def main():
         build_flat_fill(M)
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
+    build_ground_kit(M)             # [W2-D] 지면 요소 — 드레싱 뒤(산포 순서 규약)
     # [v5.2 사용자] 임의 경고 팻말 제거 — cue_sign 배치 삭제.
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],

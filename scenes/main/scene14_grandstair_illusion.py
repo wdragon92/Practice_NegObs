@@ -37,6 +37,7 @@ import datetime
 import numpy as np
 
 import scene_common as sc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -70,6 +71,37 @@ PARAMS = dict(
     # --- 대형 상부 광장 (감독 D-14 r3①): 테라스 뒤 -X로 20m × y±20, plaza_light.
     #     계단이 상·하 두 레벨을 잇는 구조로 읽히게 (고립 제거). 테라스 구멍 3박스.
     upper_big=dict(x0=-29.0, x1=0.0, y0=-20.0, y1=20.0, z_top=0.0, thick=0.5),
+
+    # ═══ [W2-D ground_kit] P1 plaza_granite — 사양 §5.1 scene14 행 ═══════════
+    #  Row prescription: "marble_light module 600 is already correct -> joints
+    #  only; stair-head transverse trench; 2 gullies (v1.1); marble water
+    #  staining that follows the joints; manhole (-8.7, +1.2)".
+    #  Tactile is **OFF** here: §12.4 puts 14 in the hidden-illusion group
+    #  (identity conflict). Gate B12 `_inv_hidden_illusion` enforces it, so a
+    #  tactile band cannot be introduced by accident from this file.
+    #
+    #  ★ Trench centre -2.55 -> **-2.59** (this file's correction of the C-1'
+    #    figure). C-1' derives the centre from a **0.30 m wide** trench (near
+    #    lip -2.40, drow = 16.05 rows @1080 >= 16 at d10). The builder frames
+    #    the cover: `build_trench_drain` adds `trench_frame_w` 0.040 on each
+    #    side, so the real near lip of a trench centred at -2.55 is -2.36 and
+    #    drow(-2.36, 10) = **15.70 < 16 = FAIL** [계산].  Centre -2.59 puts the
+    #    frame lip back on -2.40 exactly (16.05 rows). This is the same class
+    #    of correction scene13 applied to its entry trench (0.35 -> 0.52).
+    #  ★ Gullies: row says `|y| = stair width/2 - 0.40`; `stairs.w_top` is the
+    #    half width, so |y| = 3.00 - 0.40 = 2.60 (read from PARAMS, §7.4).
+    ground=dict(
+        region=(-12.0, -4.0, -0.5, 4.0),      # terrace + west plaza corridor
+        trench_x=-2.59,                       # C-1' re-derived on the frame lip
+        gully_x=-0.95,                        # stair-head point gullies (C-1')
+        gully_inset=0.40,                     # |y| = w_top - inset
+        manholes=[(-8.7, 1.2), (-4.5, -1.5)],
+        # Near-window (W1) fillers. §2.2: a flat 2 mm repair patch carries the
+        # d2/d5 window far better than a manhole disc does (scene15 pilot: a
+        # disc at 56 % screen width is near-field monopoly, a patch at 87 % is
+        # not, because it is a tone change and not an object).
+        patches=[(-1.20, 0.00), (-3.70, 0.60)],
+    ),
     streetlight=dict(pole_h=5.0, pole_r=0.06, arm_len=1.0, arm_r=0.04,
                      head=0.25, xs=(-6.0, -14.0, -22.0), ys=(-6.0, 6.0)),
     # --- 하부 대광장 (plaza_lower + band_dark 밴드) + 분수 힌트 ---
@@ -560,6 +592,13 @@ def main():
         # ── 대형 상부 광장 (plaza_light) — 테라스 구멍(x up.x0..0, y up.y0..y1)을
         #    비운 3박스 (테라스가 채움, 동일평면 겹침 없음).
         cz = ub["z_top"] - ub["thick"] / 2.0
+        # [W2-0 · P-A] Register the ground_kit stages **before** the BOX calls —
+        #   `add_box` evaluates `_skin_wanted` on the spot, so a later call is
+        #   too late. Without this the flush kit elements (joint tone plates
+        #   +0.6 mm, manhole +-10 mm, trench cover -2 mm) are swallowed by the
+        #   displacement skin, whose crown is +6.5..16.5 mm [사양 §1.1].
+        sc.skin_exclude(f"{ROOT}/UpperPlazaW", f"{ROOT}/UpperPlazaS",
+                        f"{ROOT}/UpperPlazaN", f"{ROOT}/UpperPlaza")
         BOX(f"{ROOT}/UpperPlazaW",              # 서: x0..up.x0 전폭
             ((ub["x0"] + up["x0"]) / 2.0, (ub["y0"] + ub["y1"]) / 2.0, cz),
             (up["x0"] - ub["x0"], ub["y1"] - ub["y0"], ub["thick"]),
@@ -592,6 +631,48 @@ def main():
             BOX(f"{ROOT}/LowerBand_{k}",
                 (xb, (lo["y0"] + lo["y1"]) / 2.0, lo["z_top"] - 0.02),
                 (0.4, lo["y1"] - lo["y0"], 0.06), M["band"])
+
+    # -------------------------------------------------------------------
+    # [W2-D] ground_kit — P1 plaza_granite (사양 §5.1 scene14 행)
+    #   Drop edge = stair head x=0 (PARAMS["stairs"]["x0"], §7.4 single source).
+    #   The x=0 contraction joint is dropped automatically by
+    #   `_edge_guard_ticks` (GT-E2). Tactile stays empty: scene14 is a
+    #   hidden-illusion scene, gate B12 refuses a tactile element here.
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        g = PARAMS["ground"]
+        st = PARAMS["stairs"]
+        wy = float(st["w_top"]) - float(g["gully_inset"])      # 3.00-0.40=2.60
+        gp = gk.plan_ground(
+            "plaza_granite", region=tuple(g["region"]), z=float(st["z_top"]),
+            gy=0.0, origin=(0.0, 0.0, 0.0),
+            edges=[("stair_top", float(st["x0"]))],
+            dists=(2, 5, 10), scene="scene14", tactile=(),
+            overrides=dict(infra=dict(manhole=2, gully=2, trench=1)),
+            sites=dict(manhole=[tuple(v) for v in g["manholes"]],
+                       gully=[(float(g["gully_x"]), -wy),
+                              (float(g["gully_x"]), wy)],
+                       trench=[(float(g["trench_x"]),
+                                -float(st["w_top"]), float(st["w_top"]))],
+                       patch=[tuple(v) for v in g["patches"]]),
+            seed=14)
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        # Dark cast-iron / charcoal bindings. Defect D5 (w2_pilot §7) is that
+        # B9 gates a *declared* albedo while the scene binds whatever it likes —
+        # so bind band_dark/granite_dark, never marble, to the metal parts.
+        M2.update(joint=M["band"], crack=M["band"], patch=M["marble"],
+                  patch_cut=M["band"], manhole=M["band"], gully=M["band"],
+                  trench=M["band"], trench_frame=M["band"],
+                  gutter=M["band"], gutter_cover=M["band"],
+                  marking=M["band"], weed=M["grass"],
+                  stain_dirt=M["granite"], stain_water=M["granite"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris)
+        print(f"[ground_kit] scene14 P1 · 프림 {res['prims']} · "
+              f"δmax {res['gt_delta_max']:.4f} · unit_cell {res['unit_cell']}")
+        return res
 
     # -------------------------------------------------------------------
     # 측면 경사 파라펫 (build_slope, 폭 0.5, 대리석) — 계단 양측
@@ -908,6 +989,7 @@ def main():
         build_flat_fill(stair_mtl)
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
+    build_ground_kit(M)             # [W2-D] 지면 요소 — 드레싱 뒤(산포 순서 규약)
     if cfg["cue_sign"]:
         build_signs()               # [v5 공통 레이어]
 

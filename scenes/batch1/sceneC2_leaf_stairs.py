@@ -58,6 +58,7 @@ import datetime
 
 import scene_common as sc
 import batch1_common as bc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -87,6 +88,37 @@ PARAMS = dict(
     coping=dict(y_in=1.28, y_out=1.62, rise=0.12, ext=0.25, thick=0.55),
     # --- 상부 접근로 (흙길) : x −20 .. +0.02 (계단과 0.02 겹침 = 단1 라이저) ---
     upper=dict(x0=-20.0, x1=0.02, y_half=1.62, z_top=0.0, thick=0.60),
+
+    # ═══ [W2 ground_kit] P3 sidewalk_block — 사양 §5.2 C2 · §8.4 ═══════════
+    #  ★ **최소 개입이 처방이다.** 이 씬은 낙엽 전역화(G2)만으로 근경 창이
+    #    이미 차 있고 σ_LF 7.82 로 합격이다 — 그 위에 산포를 더하면 예산만
+    #    먹고 프레임은 안 바뀐다 `[사양 §8.3]`. 따라서:
+    #      · ground_kit **산포 배정 0** (`scatter` 콜백을 주입하지 않는다)
+    #      · 도시 인프라(맨홀·빗물받이·측구) **0건** — 공원 흙길이다
+    #      · 표면 난수 요소(패치·균열·오염·잡초) **0건**
+    #    남는 것은 두 가지, 합쳐 **5 프림**뿐이다.
+    #  ① 접근로 포장 분할 줄눈 — step 3.0 m, **폭 0.05**(§8.4 ② — 포아송
+    #     피복 0.32 에서 잎 1매 평균 0.0435 ㎡(한 변 0.21 m)이 선을 통째로
+    #     덮지 못하도록 0.04 → 0.05 로 올린 값). x 범위는 §8.4 ① 판정대로
+    #     **G2 상류 시단 x=−10.60 에 정렬**한다(구안 −11.00 의 앞 0.40 m 는
+    #     d10 eye(−10.0)보다 뒤 = 프레임 밖).
+    #     ★ 재질은 `stone` 에 바인딩한다 — 이 씬의 접근로는 `dirt_park`
+    #       흙길이라 "블록 줄눈"이 성립하지 않는다. 폭 50 mm 의 flush 석재
+    #       띠는 국내 공원 흙길의 실존 디테일(다짐 구간 분할 띠)이고,
+    #       사양 §8.4 가 요구한 **선의 가시성**도 그대로 만족한다.
+    #  ② 낙엽↔지면 **측방** 경계 파쇄 밴드 2매 — §8.4 ③ 판정. G2 는 진행축
+    #     경계를 d10 eye 뒤로 밀어냈으므로("프레임 안에 낙엽 밭 경계가 없다")
+    #     v1 의 진행축 밴드는 **없는 경계를 장식**하게 된다. 측방 경계
+    #     `|y| = 3.60` 으로 이설한다.
+    #     ★ x 범위는 §8.4 ③ 의 `−3.76…6.26` 을 **−3.76…0.00 으로 자른다**:
+    #       x>0 의 `\|y\|=3.60` 지점은 측면 잔디 **사면**(z = −0.4706·x)이라
+    #       z=0 평밴드를 얹으면 x=4.76 에서 2.24 m 부유한다 `[계산]`.
+    gkit=dict(
+        joint_x0=-10.60, joint_x1=-0.30, joint_step=3.0, joint_w=0.05,
+        joint_recess=-0.003,
+        edge_break_y=3.60, edge_break_x0=-3.76, edge_break_x1=0.0,
+        edge_break_w=0.20,
+    ),
     # --- 하부 진입로 : 계단 밑으로 1.0 언더랩 + 상면 0.002 침하(동일평면 금지) ---
     # x_pad 46 : 원경 능선(RUN+24 / RUN+33, 두께 6~8)까지 지면이 이어져야
     #            능선 기부 부유·지면 끝 허공이 안 생긴다(브리프 §A-4)
@@ -328,6 +360,36 @@ ASSET_ROLES = ["stone_worn", "leaf_ground", "dirt_park", "grass",
                "hdri", "mdl"]
 
 
+def ground_plans():
+    """[W2 ground_kit] 지면 계획 — 씬 조립부와 CPU 검산이 같은 함수를 쓴다.
+
+    최소 개입 프로파일: 줄눈만 남기고 인프라·표면·산포를 전부 끈다(§5.2·§8.3).
+    """
+    g = PARAMS["gkit"]
+    up = PARAMS["upper"]
+    gp = gk.plan_ground(
+        "sidewalk_block",
+        region=(float(g["joint_x0"]), -float(up["y_half"]),
+                float(g["joint_x1"]), float(up["y_half"])),
+        z=float(up["z_top"]), gy=0.0, origin=(0.0, 0.0, 0.0),
+        edges=[("stair_top", float(PARAMS["stairs"]["x0"]))],
+        dists=(2, 5, 10), scene="sceneC2",
+        tactile=(),                     # §12.4 — p=0.24 미달(공원) → 미설치
+        overrides=dict(
+            pave=dict(module=(0.300, 0.300), joint="interlock",
+                      step_x=float(g["joint_step"]),
+                      groove_w=float(g["joint_w"]),
+                      recess=float(g["joint_recess"])),
+            # ★ `infra=dict()` 로는 안 꺼진다 — `plan_ground` 의 오버라이드는
+            #   dict 끼리 **merge** 라 빈 dict 는 원본을 그대로 남긴다.
+            #   0 을 명시해야 도시 인프라가 실제로 사라진다.
+            infra=dict(manhole=0, gully=0, gutter_L=0, gutter_U=0,
+                       trench=0, marking=()),
+            surface=(), extras=(), scatter=None),
+        seed=27)
+    return [("approach", gp)]
+
+
 # ===========================================================================
 # [D] 카메라 프리셋: grid_views(gy=0.0) + 미장센 4컷
 # ===========================================================================
@@ -459,6 +521,10 @@ def main():
         path_mtl = M["dirt"] if cfg["cue_material_break"] else M["stone"]
 
         # ① 상부 접근로(흙길) — x1=+0.02 로 계단과 겹쳐 단1 라이저 면을 담당
+        # [W2-0 · P-A] 접근로 상면이 ground_kit 의 장식 대상이다 → 변위 스킨
+        #   OFF(**BOX 호출 전에** 등록). 폭 0.05 의 flush 띠는 스킨
+        #   (+6.5~16.5 mm) 아래로 통째로 사라진다 `[사양 §1.1]`.
+        sc.skin_exclude(f"{ROOT}/UpperPath")
         BOX(f"{ROOT}/UpperPath",
             ((up["x0"] + up["x1"]) / 2.0, 0.0, up["z_top"] - up["thick"] / 2.0),
             (up["x1"] - up["x0"], 2.0 * up["y_half"], up["thick"]),
@@ -812,6 +878,38 @@ def main():
               f"파고라 1 · 패치 {len(PARAMS['patches'])} · "
               f"소품 낙엽 {counter[0]}장 (seed={pl['seed']})")
 
+    # -------------------------------------------------------------------
+    # [W2] ground_kit — P3 sidewalk_block, **최소 개입**(사양 §5.2 · §8.4).
+    #   호출 순서 규약(§8.4 ④): 낙엽 산포 **뒤**에 온다. z 층서는
+    #   줄눈 상면 +0.6 mm < 낙엽 인스턴스(지면 위 산포)로 3.6 mm 이상 이격.
+    #   산포 콜백은 **주입하지 않는다** — C2 의 ground_kit 산포 배정은 0 이다.
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        g = PARAMS["gkit"]
+        (_tag, gp), = ground_plans()
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["stone"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude)   # scatter 미주입
+        # §8.4 ③ 측방 경계 파쇄 밴드 2매 — 계획의 `region`(접근로 폭 ±1.62)
+        #   밖이라 빌더를 직접 부른다. 프림 2, GT 무변(+0.6 mm 데칼).
+        n_eb = 0
+        # `NEGOBS_GKIT=0` OFF 팔에서는 계획 밖 직접 호출도 함께 끈다(§7.5 A3).
+        for tag, sgn in (("N", 1.0), ("S", -1.0)) if gk.GKIT_ON else ():
+            yy = sgn * float(g["edge_break_y"])
+            r = gk.build_edge_break(
+                kit, f"{ROOT}/GKit/EdgeBreak_{tag}",
+                ((float(g["edge_break_x0"]), yy),
+                 (float(g["edge_break_x1"]), yy)),
+                float(PARAMS["upper"]["z_top"]), M["leafbed"],
+                width=float(g["edge_break_w"]), scatter_only=False)
+            n_eb += r["prim_count"]
+        print(f"[ground_kit] sceneC2 P3 · 프림 {res['prims']} + 경계밴드 "
+              f"{n_eb} · 산포 0(낙엽 G2 가 담당) · "
+              f"δmax {res['gt_delta_max']:.4f} · unit_cell {res['unit_cell']}")
+        return res
+
     def build_horizon(M):
         bh = PARAMS["back_hedge"]
         for i, h in enumerate(PARAMS["back_hedges"]):
@@ -839,6 +937,8 @@ def main():
         lo = PARAMS["lower"]
         gr = PARAMS["ground"]
         x0, x1 = up["x0"], RUN + lo["x_pad"]
+        # [W2-0 · P-A] 대조군에서도 접근로 줄눈이 그대로 놓인다 → 스킨 OFF.
+        sc.skin_exclude(f"{ROOT}/FlatPath")
         BOX(f"{ROOT}/FlatFill", ((x0 + x1) / 2.0, 0.0, -gr["thick"] / 2.0),
             (x1 - x0, 2.0 * gr["y_edge"], gr["thick"]), M["grass"], col=True)
         BOX(f"{ROOT}/FlatPath", ((x0 + x1) / 2.0, 0.0, 0.002 - 0.30),
@@ -863,6 +963,7 @@ def main():
 
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
+    build_ground_kit(M)                  # [W2] 지면 요소 — 낙엽 뒤(층서 규약 §8.4 ④)
     build_horizon(M)
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],

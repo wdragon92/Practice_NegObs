@@ -45,6 +45,7 @@ import datetime
 import numpy as np
 
 import scene_common as sc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -104,6 +105,35 @@ PARAMS = dict(
     lower=dict(x0=5.05, x1=16.0, y0=-9.0, y1=9.0, top_z=-2.57),
     # 계단 폭 밖(|y| 4..9) 도랑 봉합 스커트 — 상부 보도 에지(x=0.5)~하부 보도 사이 [A5]
     skirt=dict(x0=0.5, y_in=4.0, y_out=9.0),
+
+    # ═══ [W2-D ground_kit] P1 plaza_granite — 사양 §5.1 scene18 행 ═══════════
+    #  Row prescription: "slab joints made geometric · sand drift band · salt
+    #  efflorescence (albedo cap 0.30 strictly) · patches 3 per 20 m";
+    #  drift band = "seaward edge of the paving".
+    #  ★ Tactile **OFF** (§12.4): "18 = wave-form, irregular — laying a 300 mm
+    #    grid on it is not practice". `TACTILE_OFF_REASON["scene18"]` records it.
+    #  ★ Edge s = **-amp (-0.245)**, not 0. The drop edge of this scene is the
+    #    wavy stair head `_front_x(-1, y) = amp*sin(...)`, i.e. a band between
+    #    -0.245 and +0.245, and GT-E1'/GT-E2 must be measured from its
+    #    **nearest** point or the standoff is optimistic by one amplitude.
+    #  ★ Drift band orientation: `build_silt_band` emits X-long strips at
+    #    y = const, so it cannot draw a band along the seaward (x = const)
+    #    edge — and that edge is the hazard edge anyway, inside the 0.80 m
+    #    exclusion. The two bands are therefore placed on the walkway's
+    #    **lee lateral margin** (y ~ -4.4/-3.9), which is where wind-driven
+    #    sand actually piles up against a kerb. Recorded as a deviation.
+    #  ★ "alley pole" (§5.4 15-10 analogue) is **allowed** in this scene but not
+    #    placed: the pole body is props-team scope and there is no pole in
+    #    PARAMS, and §7.4 forbids hard-coding a document coordinate. If props
+    #    add one, its base grime/weed band is a `stain`/`weed` site here.
+    gkit=dict(
+        region=(-12.0, -5.0, -0.5, 5.0),
+        edge_s=-0.245,                        # = -stair.amp (nearest wave trough)
+        manholes=[(-4.0, 1.0), (-9.0, -1.0)],
+        gullies=[(-2.5, -4.6), (-8.0, 4.6)],
+        patches=[(-1.30, 0.20), (-3.80, -0.55), (-8.70, 0.40)],
+        silt=dict(waterline=-4.60, width=0.45, n=2),
+    ),
     # [v6 판정 ㉠] 지반 동단이 **해안선**이다. 구 x1=50 + 수면 top −4.40 조합은
     #   지반 절단면 1.39 m 를 마을로 가려야 했고, 그 마을이 수평선을 통째로
     #   막았다(전 13컷 수평선 0). → 지반을 x1=34 에서 끊고 수면을 그 밑(31)부터
@@ -660,6 +690,24 @@ def main():
                                 diffuse_color=mp["pole_color"],
                                 metallic=mp["pole_metallic"],
                                 roughness_const=mp["pole_rough"])
+        # [W2-D ground_kit] Dedicated dark bindings. Defect D5 (w2_pilot §7):
+        #   gate B9 judges a *declared* albedo while the scene binds whatever
+        #   material it likes, so a manhole can pass B9 and still render near
+        #   white. These three keep the declared and the bound value together.
+        #   Salt efflorescence is the one that must stay under the 0.30 cap
+        #   even though it is a *bright* stain (§5.1 18 row, explicit).
+        M["gk_joint"] = sc.make_pbr(stage, "/World/Looks/GKitJoint",
+                                    diffuse_color=(0.12, 0.12, 0.12),
+                                    roughness_const=0.75)
+        M["gk_iron"] = sc.make_pbr(stage, "/World/Looks/GKitIron",
+                                   diffuse_color=(0.09, 0.09, 0.095),
+                                   metallic=0.55, roughness_const=0.55)
+        M["gk_stain"] = sc.make_pbr(stage, "/World/Looks/GKitStain",
+                                    diffuse_color=(0.20, 0.20, 0.19),
+                                    roughness_const=0.85)
+        M["gk_salt"] = sc.make_pbr(stage, "/World/Looks/GKitSalt",
+                                   diffuse_color=(0.29, 0.29, 0.28),
+                                   roughness_const=0.90)
         # [v5.1] 바닷가 언덕 정체성 — 수면·지붕·주택 벽. 인스턴스 틴트 지터(§4)는
         #   지붕·벽 각각 3종으로 준다(마을이 단일 색 복제로 보이지 않게).
         sea = PARAMS["seaside"]
@@ -707,6 +755,11 @@ def main():
     def _slab(path, x0, x1, y0, y1, top, mtl):
         """상면 top, 밑면 지반(−3.01) 까지 채우는 솔리드 슬래브 1장."""
         base = PARAMS["ground"]["top_z"]
+        # [W2-0 · P-A] The upper walkway slabs are the ground_kit stage; the
+        #   registration must precede `add_box`, which evaluates the skin test
+        #   inline. Prefix matching in `skin_exclude` covers every wave segment.
+        if path.startswith("/World/Scene18/Walk_upper"):
+            sc.skin_exclude(path)
         sc.add_box(stage, path,
                    ((x0 + x1) / 2.0, (y0 + y1) / 2.0, (top + base) / 2.0),
                    (x1 - x0, y1 - y0, top - base), mtl, collider=True)
@@ -764,6 +817,46 @@ def main():
             # 대조군(평탄): 계단 자리 공백을 z=0 으로 메움
             _slab("/World/Scene18/Walk_flat", up["x1"], lo["x0"],
                   lo["y0"], lo["y1"], 0.0, M["lower"])
+
+    # -------------------------------------------------------------------
+    # [W2-D] ground_kit — P1 plaza_granite (사양 §5.1 scene18 행)
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        g = PARAMS["gkit"]
+        up = PARAMS["upper"]
+        gp = gk.plan_ground(
+            "plaza_granite", region=tuple(g["region"]),
+            z=float(up["top_z"]), gy=0.0, origin=(0.0, 0.0, 0.0),
+            edges=[("stair_top", float(g["edge_s"]))],
+            dists=(2, 5, 10), scene="scene18", tactile=(),
+            overrides=dict(
+                infra=dict(manhole=2, gully=2),
+                # salt efflorescence replaces the generic "water" stain here.
+                surface=(("patch", 3), ("crack", 4),
+                         ("stain", ("dirt", "efflorescence")), ("weed", 6)),
+                extras=(("silt_band", dict(n=int(g["silt"]["n"]))),)),
+            extras_args=dict(silt_band=dict(
+                waterline=float(g["silt"]["waterline"]),
+                width=float(g["silt"]["width"]), n=int(g["silt"]["n"]))),
+            sites=dict(manhole=[tuple(v) for v in g["manholes"]],
+                       gully=[tuple(v) for v in g["gullies"]],
+                       patch=[tuple(v) for v in g["patches"]]),
+            seed=18)
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["gk_joint"], crack=M["gk_joint"], patch=M["upper"],
+                  patch_cut=M["gk_joint"], manhole=M["gk_iron"],
+                  gully=M["gk_iron"], gutter=M["gk_iron"],
+                  gutter_cover=M["gk_iron"], trench=M["gk_iron"],
+                  trench_frame=M["gk_iron"], marking=M["gk_stain"],
+                  weed=M["grass"], wear=M["gk_stain"], silt=M["gk_stain"],
+                  stain_dirt=M["gk_stain"], stain_efflorescence=M["gk_salt"])
+        res = gk.apply_ground(kit, "/World/Scene18/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris)
+        print(f"[ground_kit] scene18 P1 · 프림 {res['prims']} · "
+              f"δmax {res['gt_delta_max']:.4f} · unit_cell {res['unit_cell']}")
+        return res
 
     # -------------------------------------------------------------------
     # 물결 계단 — 단 i × 세그 j 박스 + 라이저 고채색 판
@@ -995,6 +1088,7 @@ def main():
         build_dressing(M)
     if hazard:
         build_cues(M)
+    build_ground_kit(M)             # [W2-D] 지면 요소 — 드레싱 뒤(산포 순서 규약)
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])
 

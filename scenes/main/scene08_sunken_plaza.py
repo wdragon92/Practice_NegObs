@@ -80,6 +80,7 @@ import datetime
 import numpy as np
 
 import scene_common as sc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -130,7 +131,42 @@ PARAMS = dict(
                  cope_h=0.08, cope_over=0.03,     # 코핑(갓돌) — 상단 0.08 m
                  grime_h=0.24, grime_over=0.008),  # 기단 오염 밴드 — 하단 0.24 m
     # --- 개구 둘레 점자블록 띠 (파라펫 바깥 0.05 여유, 폭 0.6) ---
-    tactile=dict(w=0.6, off=0.05, proud=0.004),
+    #  [W2-D Sec.12.4] scene08 = registered site `opening_ring`, p=0.51,
+    #  statutory trigger "perimeter of an opening". It is **kept on the scene's
+    #  own `build_tactile_ring` path** exactly as Sec.12.4 directs, so no
+    #  `gk` tactile op is emitted (that would duplicate the band). The
+    #  non-conforming variant assigned to this scene is "2-3 tiles missing",
+    #  applied to the approach-side (west) band only - `gap_tiles` below.
+    tactile=dict(w=0.6, off=0.05, proud=0.004, gap_tiles=2),
+
+    # === [W2-D ground_kit] P3 `sidewalk_block` - spec Sec.5.2 row 08 ========
+    #  Plaza slab is interlocking block; the pit opening at x=0 is the drop
+    #  edge and is also passed as a **void** so GT-V (B8) is asserted.
+    #  Near-window budget - one area element per preset cut, and the manhole
+    #  is deliberately NOT in W1:
+    #    d2  W1 x -1.436..0    -> patch #0 at x -1.25
+    #    d5  W1 x -4.436..-3.0 -> patch #1 at x -3.60
+    #    d10 W1 x -9.436..-8.0 -> patch #2 at x -8.60
+    #    manhole x -2.40 -> d5 W2 (X=2.60) = 414 px = 21.6 % frame width.
+    #      In W1 the phi 0.648 cover is >=28.1 % at any distance, which is the
+    #      near-window monopoly the scene15 pilot had to undo. W2 is the only
+    #      placement that satisfies both "1 manhole" and "<=25 %".
+    #  region x1 = -0.95: clears the tactile band (x -0.90..-0.30) and the
+    #  coping ring (x -0.40..0) while still overlapping the d2 W1 by 0.49 m.
+    gkit=dict(
+        region=(-12.0, -4.0, -0.95, 4.0),
+        manhole=(-2.40, 1.60),
+        gullies=((-1.75, -3.40), (-1.75, 3.40)),   # intercept before the pit
+        #  |y| is kept small on purpose: the frame half-width at the W1
+        #  mid-distance is only 0.43 m (d2), 0.81 m (d5/d10), so a patch
+        #  offset by ~1 m falls out of frame and scores nothing [calc].
+        patches=((-1.25, 0.20), (-3.60, -0.30), (-8.60, 0.40)),
+        # Sec.5.2 "gully mandatory at the sunken low point" [시방]. The court
+        # floor is a different slab at z=-4.498, so it needs its own plan.
+        pit_region=(2.0, -3.0, 10.0, 3.0),
+        pit_gully=(6.0, -2.0),
+        seed=8,
+    ),
     # --- 지하상가 유리 파사드 (피트 북벽 y=4.5, x 4..8) — 약발광 ---
     #     북벽 내면 법선 −Y = 태양(+Y 상공) 반대 → 상시 암부 → 약발광이 읽힌다.
     facade=dict(x0=4.0, x1=8.0, y=4.5, z0=-4.40, z1=-1.70, panels=6,
@@ -647,6 +683,58 @@ def _smoke_report():
 
 
 # ===========================================================================
+# [C-2] ground_kit plans - pure CPU, no USD. Coordinates from PARAMS (Sec.7.4).
+# ===========================================================================
+def ground_plan():
+    """P3 `sidewalk_block` plan for the upper plaza (approach corridor)."""
+    g = PARAMS["gkit"]
+    pl, pit = PARAMS["plaza"], PARAMS["pit"]
+    return gk.plan_ground(
+        "sidewalk_block",
+        region=tuple(float(v) for v in g["region"]),
+        z=float(pl["z_top"]), gy=0.0, origin=(0.0, 0.0, 0.0),
+        edges=[("pit_near_edge", float(pit["x0"]))],
+        voids=[(float(pit["x0"]), float(pit["y0"]),
+                float(pit["x1"]), float(pit["y1"]))],
+        dists=(2, 5, 10), scene="scene08",
+        tactile=(),                  # Sec.12.4 - kept on build_tactile_ring
+        sites=dict(manhole=[tuple(g["manhole"])],
+                   gully=[tuple(v) for v in g["gullies"]],
+                   patch=[tuple(v) for v in g["patches"]]),
+        # 3 patches, one per preset near-window (see PARAMS comment).
+        overrides=dict(
+            # step_y 3.0 adds the longitudinal leg of the 3 m granite-band
+            # grid over the block field (Sec.5.2 N5 row, same paving type).
+            # 3.0 / 0.300 cell = 10x, so U2 holds. Without it B4 has only
+            # the L-gutter line and cannot reach 2.
+            pave=dict(step_y=3.0),
+            surface=(("patch", 3), ("crack", 4),
+                     ("stain", ("dirt", "gum")), ("weed", 8))),
+        seed=int(g["seed"]))
+
+
+def ground_plan_pit():
+    """Court-floor plan - the single mandatory low-point gully, nothing else.
+
+    Sec.5.2 row 08 makes this gully mandatory `[시방 오목부 필수]`, but the
+    court floor is a separate slab 4.498 m below the plaza, so it cannot ride
+    on the plaza plan (one plan carries one z). Everything except `gully=1`
+    is overridden off.
+    """
+    g = PARAMS["gkit"]
+    return gk.plan_ground(
+        "sidewalk_block",
+        region=tuple(float(v) for v in g["pit_region"]),
+        z=float(PARAMS["pit"]["floor_z"]), gy=0.0, origin=(0.0, 0.0, 0.0),
+        edges=(), dists=(2, 5, 10), scene="scene08", tactile=(),
+        sites=dict(gully=[tuple(g["pit_gully"])]),
+        overrides=dict(pave=dict(joint=None),
+                       infra=dict(manhole=0, gully=1, gutter_L=0),
+                       surface=(), extras=()),
+        seed=int(g["seed"]) + 80)
+
+
+# ===========================================================================
 # [D] 카메라 프리셋: grid_views(gy=0) + 미장센 5컷
 # ===========================================================================
 def build_views():
@@ -855,6 +943,11 @@ def main():
         cz = pl["z_top"] - pl["thick"] / 2.0
         ox0, ox1 = p["x0"] - t, p["x1"] + t          # 링 포함 개구 외곽
         oy0, oy1 = p["y0"] - t, p["y1"] + t
+        # [W2-0 P-A] Plaza_W is the slab ground_kit decorates. Its displacement
+        #   skin (+6.5..16.5 mm) would bury the manhole, joints and decals
+        #   (0.6..3 mm), so it is excluded before the box exists (Sec.1.1/1.2).
+        #   Only the W segment - E/S/N carry no kit elements and keep the skin.
+        sc.skin_exclude(f"{ROOT}/Plaza_W")
         segs = [("W", pl["x0"], ox0, pl["y0"], pl["y1"]),
                 ("E", ox1, pl["x1"], pl["y0"], pl["y1"]),
                 ("S", ox0, ox1, pl["y0"], oy0),
@@ -1053,9 +1146,43 @@ def main():
         yn0, yn1 = p["y1"] + a, p["y1"] + a + w
         bands = [("W", xw0, xw1, ys1, yn0), ("E", xe0, xe1, ys1, yn0),
                  ("S", xw0, xe1, ys0, ys1), ("N", xw0, xe1, yn0, yn1)]
+        # [W2-D Sec.12.4] Non-conforming variant for scene08 = "2-3 tiles
+        #   missing". Measured reality is 4.0 % conforming / 77.3 %
+        #   non-conforming (KBUWEL 2023, n=337), so a perfectly continuous ring
+        #   is the unrealistic option. The gap is cut out of the **west** band
+        #   because that is the approach side the grid presets look along, and
+        #   it is centred on the walk axis (y=0) so it is actually in frame.
+        #   `gap_tiles` x 0.300 m statutory tile = gap length.
+        gap = float(tc.get("gap_tiles", 0)) * 0.300
         for tag, x0, x1, y0, y1 in bands:
+            if tag == "W" and gap > 0.0:
+                for k, (ya, yb) in enumerate(((y0, -gap / 2.0),
+                                              (gap / 2.0, y1))):
+                    sc.build_tactile(stage, f"{ROOT}/Tactile_{tag}{k}",
+                                     x0, x1, ya, yb, M["tactile"], z=0.0,
+                                     proud=tc["proud"])
+                continue
             sc.build_tactile(stage, f"{ROOT}/Tactile_{tag}", x0, x1, y0, y1,
                              M["tactile"], z=0.0, proud=tc["proud"])
+
+    # -------------------------------------------------------------------
+    # [W2-D] ground_kit - P3 sidewalk_block (plaza) + court-floor gully.
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["granite"], crack=M["granite"], patch=M["paving"],
+                  patch_cut=M["granite"], manhole=M["rail"], gully=M["rail"],
+                  gutter=M["cwall"], stain_dirt=M["grime"],
+                  stain_gum=M["grime"], weed=M["grass"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", ground_plan(), M2,
+                              skin_exclude=sc.skin_exclude)
+        pit = gk.apply_ground(kit, f"{ROOT}/GKitPit", ground_plan_pit(), M2,
+                              skin_exclude=sc.skin_exclude)
+        print(f"[ground_kit] scene08 P3 · 프림 {res['prims']} + 피트 "
+              f"{pit['prims']} · δmax {res['gt_delta_max']:.4f} · "
+              f"unit_cell {res['unit_cell']}")
+        return res
 
     def build_tempbar(M):
         """개방 구간 임시 표지 — 안전봉 2 + 경고 테이프 1선(명백한 규정 미달).
@@ -1175,6 +1302,7 @@ def main():
         build_pit_shell(M)
         g_s, g_n = build_stairs(M)
         build_facade(M)
+        build_ground_kit(M)            # [W2-D] ground elements
         if cfg["cue_railing"]:
             build_parapet(M)
             build_stair_rails(M, g_s, g_n)

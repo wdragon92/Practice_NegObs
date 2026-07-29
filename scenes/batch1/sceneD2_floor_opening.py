@@ -38,6 +38,7 @@ import datetime
 
 import scene_common as sc
 import batch1_common as bc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -97,6 +98,29 @@ PARAMS = dict(
                # 갈고리: (-0.20,-0.55) 직선 스터브 상단을 관통하도록 배치(부유 금지)
                hook=dict(cx=-0.20, cy=-0.42, z=0.293, lx=0.30, t=0.013,
                          yaw=90.0)),
+
+    # ═══ [W2 ground_kit] P15 slab_construction — 사양 §5.8 D2 행 ═══════════
+    #  처방: 개구 표시 도색의 **마모 잔흔**(황색 잔존 20~30 %) · 먹줄(부분
+    #  구간) · 콜드 조인트 · 백화 얼룩 · 발자국 8~15.
+    #  근거: 산안규칙 §43 은 "개구부임을 표시" 를 요구하는데, 실물은 팻말이
+    #  아니라 **노면 도색**이고 타설 후 통행으로 절반 이상 지워져 있다.
+    #  ★ GT-V(§6.3): 개구(x 0…2 · y ±0.75) 위에는 **어떤 요소도 걸치지
+    #    않는다**. region 원단을 개구 서립(x=0)에서 끊고 `voids` 로 개구를
+    #    넘겨 `plan_ground` 가 전 요소 AABB × 개구 교차를 어서션하게 한다.
+    #  ★ 개구 표시 도색은 **종방향 2본(y=±1.05)** 만 놓는다. 서립 전면의
+    #    횡방향 띠(yaw 90°)는 이번 라운드에서 보류다 — `ground_kit._ik_marking`
+    #    이 요소 AABB 를 **yaw 를 무시하고 +X 로** 계산해서, 횡단 띠가
+    #    "개구를 가로지르는 요소"로 오판정돼 B8/B6 에 걸린다(보고서 리스크
+    #    항목). 종방향 2본도 GT-E1′ 때문에 서립에서 0.15 m 물린다
+    #    (도색 proud 0.003 × EDGE_K 40 = 0.12 m 필요 `[계산]`).
+    gkit=dict(
+        region=(-9.0, -6.0, 0.0, 6.0),
+        #  개구 표시 도색 잔흔 — (x0, y0, yaw, length). 서립에서 0.15 물림.
+        mark_lines=[(-3.00, -1.05, 0.0, 2.85), (-3.00, 1.05, 0.0, 2.85)],
+        #  발자국 동선 — 개구를 향해 걸어온 흔적(개구 위는 지나지 않는다).
+        foot_path=[(-7.0, -0.90), (-1.2, -0.30)],
+        foot_n=12,
+    ),
 
     # 파쇄 콘크리트 부스러기 산포 (seed 고정)
     debris=dict(seed=2907, count=46, perim_ratio=0.6,
@@ -291,6 +315,28 @@ ASSET_ROLES = ["concrete_floor", "concrete_wall", "dirt_park", "gravel",
                "hdri", "mdl"]
 
 
+def ground_plans():
+    """[W2 ground_kit] 지면 계획 — 씬 조립부와 CPU 검산이 같은 함수를 쓴다."""
+    g = PARAMS["gkit"]
+    op = PARAMS["opening"]
+    gp = gk.plan_ground(
+        "slab_construction", region=tuple(g["region"]),
+        z=float(PARAMS["deck"]["z_top"]), gy=0.0, origin=(0.0, 0.0, 0.0),
+        edges=[("opening_lip", float(op["x0"]))],
+        voids=((float(op["x0"]), float(op["y0"]),
+                float(op["x1"]), float(op["y1"])),),
+        dists=(2, 5, 10), scene="sceneD2",
+        tactile=(),                     # §12.4 — 비대상(공사장)
+        sites=dict(marking=[tuple(m) for m in g["mark_lines"]]),
+        overrides=dict(infra=dict(marking=("line", "line")),
+                       extras=(("footprints",
+                                dict(n=int(g["foot_n"]),
+                                     path_pts=[tuple(p)
+                                               for p in g["foot_path"]])),)),
+        seed=29)
+    return [("slab", gp)]
+
+
 def build_views():
     """카메라 프리셋: grid_views(gy=0.0, 개구 정면 직교 접근) + 미장센 4컷.
 
@@ -468,6 +514,12 @@ def main():
         d = PARAMS["deck"]
         op = PARAMS["opening"]
         th = d["thick"]
+        # [W2-0 · P-A] 슬래브 4분할 전체가 ground_kit 의 장식 대상이다 →
+        #   변위 스킨 OFF(**BOX 호출 전에** 등록). 콜드 조인트(음각 톤)·
+        #   도색 잔흔(+3 mm)·발자국(+0.6 mm)이 전부 스킨 아래로 사라진다.
+        sc.skin_exclude(f"{ROOT}/Slab_W", f"{ROOT}/Slab_E",
+                        f"{ROOT}/Slab_S", f"{ROOT}/Slab_N",
+                        f"{ROOT}/Slab_Fill")
         cz = d["z_top"] - th / 2.0
         xw, xe, ys, yn = d["x_w"], d["x_e"], d["y_s"], d["y_n"]
         ox0, ox1, oy0, oy1 = op["x0"], op["x1"], op["y0"], op["y1"]
@@ -728,6 +780,24 @@ def main():
     # 맥락 드레싱 v2 — 자재 더미(철근 다발·시멘트 포대) · 이동식 안전 펜스 ·
     #                  전선 릴/공구 상자 · 기둥 표어 박판 · 원경 타워크레인
     # -------------------------------------------------------------------
+    # -------------------------------------------------------------------
+    # [W2] ground_kit — P15 slab_construction. 개구(GT-V)와 서립(GT-E1′)을
+    #   모두 존중한다. 판정은 B8(개구 교차 0)·B6(에지 이격)가 한다.
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        (_tag, gp), = ground_plans()
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["skirt"], crack=M["skirt"],
+                  marking=M["nosing"],           # 황색 개구 표시 도색
+                  stain_efflorescence=M["panel"], stain_dirt=M["dirt"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris)
+        print(f"[ground_kit] sceneD2 P15 · 프림 {res['prims']} · "
+              f"δmax {res['gt_delta_max']:.4f} · unit_cell {res['unit_cell']}")
+        return res
+
     def build_site_dressing(M):
         """골조 공사장 맥락 요소. **개구·철근 스터브·부스러기·슬래브 분할 불변.**
 
@@ -947,6 +1017,7 @@ def main():
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
         site_cnt = build_site_dressing(M)
+    build_ground_kit(M)                  # [W2] 지면 요소 — 드레싱 뒤(산포 규약)
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])

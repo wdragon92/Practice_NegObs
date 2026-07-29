@@ -115,6 +115,7 @@ import datetime
 import numpy as np
 
 import scene_common as sc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -146,8 +147,37 @@ PARAMS = dict(
                 landing_steps=[11, 23],        # 12·24단째(0-based) = 중간 참
                 landing_tread=1.2,             # 참 깊이
                 submerge_from_bottom=6,         # 하부 6단 침수(수위 산정 기준)
-                stain_band_steps=1.5),          # 수면 위 1.5단 대역 물때 틴트
+                # [W2-D Sec.5.7 row 09] "stair water-mark band 1.5 -> 3 steps".
+                #   The waterline is this scene's only fixed drop anchor, and a
+                #   1.5-step band is thinner than one riser at grazing angle.
+                stain_band_steps=3.0),          # 수면 위 3단 대역 물때 틴트
     water_extra=0.05,                          # 수면 z = 6단째 상면 + 0.05
+    # === [W2-D ground_kit] P2 `plaza_water` - spec Sec.5.7 row 09 ==========
+    #  Natural scene (`natural=True`): manhole / gully / gutter / marking all
+    #  raise. The whole near-window prescription is joints + slab loss + film.
+    #    09-1 slab joints made geometric, 5-9 mm wide, 1-2 mm recess-as-tone
+    #    09-2 slab loss ("판석 결손") 4-6 per 100 m^2 -> patch field
+    #    09-3 water film / algae decals
+    #  step_x/step_y = 1.80 m override. The P2 table ships step_x = 19.80 m
+    #  (`step_expansion_ghat`, the *expansion* joint period) and `_compose_ops`
+    #  emits exactly one joint op, so over an 11.2 m approach corridor the
+    #  profile default yields **zero** joint lines - the opposite of what
+    #  Sec.5.7 asks for. 1.80 m = 3 x the 0.600 granite cell, so Sec.4.5 U2
+    #  holds, and the 19.80 m expansion joint stays a multiple of it (11x).
+    #  Dropped from the profile: `silt_band` and `edge_break`. Neither has a
+    #  target here - the silt band belongs on the submerged steps (handled by
+    #  the scene's own stain/moss banding, widened above) and the terrace has
+    #  no material boundary inside the frame (the lawns start at |y| = 12,
+    #  outside the 5.77 m half-width at X = 10 m) [calc].
+    gkit=dict(
+        region=(-12.0, -5.0, -0.80, 5.0),
+        joint_step=1.80,                       # 3 x granite cell 0.600 [계산]
+        #  One slab-loss patch per preset near-window; |y| small because the
+        #  frame half-width in W1 is 0.43 m (d2) / 0.81 m (d5, d10) [계산].
+        patches=((-1.30, 0.20), (-3.70, -0.30), (-8.70, 0.40)),
+        patch_n=5,                             # 4-6 per 100 m^2 x 112 m^2
+        seed=9,
+    ),
     # 상부 테라스(사암 평탄, z=0). [A-09-2] x0 −12 → −30: d10 그리드 뷰(eye x=−10)
     #   뒤가 곧 허공이던 것을 해소.
     terrace=dict(x0=-30.0, x1=0.0, y0=-40.0, y1=40.0, z_top=0.0, thick=0.5),
@@ -794,6 +824,33 @@ def albedo_selfcheck(verbose=True):
 
 
 # ===========================================================================
+# [C-2] ground_kit plan - pure CPU, no USD. Coordinates from PARAMS (Sec.7.4).
+# ===========================================================================
+def ground_plan():
+    """P2 `plaza_water` plan for the upper granite terrace (z = 0).
+
+    Drop edge = terrace x1 = stairs x0, i.e. the head of the 36-step flight.
+    """
+    g = PARAMS["gkit"]
+    tr, st = PARAMS["terrace"], PARAMS["stairs"]
+    return gk.plan_ground(
+        "plaza_water",
+        region=tuple(float(v) for v in g["region"]),
+        z=float(tr["z_top"]), gy=0.0, origin=(0.0, 0.0, 0.0),
+        edges=[("stair_head", float(st["x0"]))],
+        dists=(2, 5, 10), scene="scene09",
+        tactile=(),                # Sec.12.4 OFF - p = 0.24 and natural scene
+        sites=dict(patch=[tuple(v) for v in g["patches"]]),
+        overrides=dict(
+            pave=dict(step_x=float(g["joint_step"]),
+                      step_y=float(g["joint_step"])),
+            surface=(("patch", int(g["patch_n"])), ("crack", 4),
+                     ("stain", ("water",))),
+            extras=()),
+        seed=int(g["seed"]))
+
+
+# ===========================================================================
 # [D] 카메라 프리셋
 # ===========================================================================
 def build_views(run, z_bot, water_z, water_x0):
@@ -1015,9 +1072,30 @@ def main():
         print(f"[기하] 가트 {len(steps)}단 run={run:.3f} z_bot={z_bot:.3f} "
               f"water_z={water_z:.3f} 물때단={n_stain} 참={st['landing_steps']}")
 
+    # -------------------------------------------------------------------
+    # [W2-D] ground_kit - P2 plaza_water on the upper terrace.
+    #   Materials are the scene's own granite tints: the joint / crack / film
+    #   tone is exactly the darker `stain` variant already authored for the
+    #   waterline band, so no new asset and no change to `_ALBEDO_TABLE`.
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["stain"], crack=M["seam"], patch=M["stone"],
+                  patch_cut=M["stain"], stain_water=M["moss"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", ground_plan(), M2,
+                              skin_exclude=sc.skin_exclude)
+        print(f"[ground_kit] scene09 P2 · 프림 {res['prims']} · "
+              f"δmax {res['gt_delta_max']:.4f} · unit_cell {res['unit_cell']}")
+        return res
+
     def build_terrace(M):
         """상부 사암 테라스 (z=0)."""
         tr = PARAMS["terrace"]
+        # [W2-0 P-A] The terrace is the slab ground_kit decorates. Its
+        #   displacement skin tops out at +16.5 mm and would bury the 1.5 mm
+        #   slab joints and 2 mm patches outright (spec Sec.1.1).
+        sc.skin_exclude(f"{ROOT}/Terrace")
         sc.add_box(stage, f"{ROOT}/Terrace",
                    ((tr["x0"] + tr["x1"]) / 2.0, (tr["y0"] + tr["y1"]) / 2.0,
                     tr["z_top"] - tr["thick"] / 2.0),
@@ -1404,6 +1482,7 @@ def main():
     if cfg["hazard_stairs"]:
         build_stairs(M)
         build_embankment(M)
+        build_ground_kit(M)             # [W2-D] terrace ground elements
     else:
         build_flat_fill(M)
     build_river(M)

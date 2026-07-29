@@ -139,6 +139,7 @@ import random
 import datetime
 
 import scene_common as sc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -177,6 +178,34 @@ PARAMS = dict(
               spacing=1.05, broken_landing=0,   # 참0 외측 = 파손 개소
               bal_r=0.022, bal_step=0.30, bal_top=1.02),
 
+    # === [W2-D ground_kit] P18 `deck_trail_hybrid` - spec Sec.5.8 / Sec.13.4 =
+    #  Sec.13 measured this scene's three h0.3 cuts and killed the provisional
+    #  P10 assignment: **d2 is entry deck, d5/d10 are park dirt trail + grass**.
+    #  Hence two plans, at two different z:
+    #    A `ground_plan()`      trail  z = TrailPath z_top (0.002)
+    #    B `ground_plan_deck()` entry deck z = entry top (-0.005)
+    #  Prescription (Sec.13.4):
+    #    10-1 edge_break on the dirt<->grass line y = +-0.85 (dE76 15.2, the
+    #         same "0 px transition" defect as scene04)
+    #    10-2 leaf-decal outline break - scatter ring around the two trail
+    #         decals (dE76 27.3, 1.8x stronger than 10-1)
+    #    10-3 entry-deck plank gaps, d2 only
+    #    10-4 trodden wear axis, width 0.90
+    #    10-5 exposed gravel scatter, expose <= 0.06
+    #  Dropped from the profile: `edge_litter` - `_compose_ops` forces its
+    #  width to the region span (1.70 m, ~7x the 0.25 m ledger value) and the
+    #  two bands then straddle the wear lane at an identical top z.
+    #  Sec.7.3 invariant for scene10 ("the upper trail is cut at x = -1.5") is
+    #  respected by construction: plan A stops at TrailPath x1 = -1.6, and
+    #  every element of plan B is flagged `deck`.
+    gkit=dict(
+        wear_w=0.90,
+        gravel_n=120,                 # 250 cap - 2 x 35 edge scatter - ring 30
+        leaf_ring_n=15,               # 10-2: 12-20 per decal, Sec.13.4
+        leaf_ring_pad=0.28,           # ring width around the decal outline
+        deck_gaps=9,                  # 10-3: 9 gaps over the 1.5 m entry deck
+        seed=10,
+    ),
     # --- 지면 축정렬 플레이트 (name, x0, x1, y0, y1, z_top, thick, mtl) ---
     #   v5 회귀 체크리스트 ③ : 상부 트레일은 x=−1.5 에서 **끊긴다**
     #   (계단 공동 위를 덮지 않음). 그 앞은 하부 산책로(−6.60)만.
@@ -496,6 +525,70 @@ def post_segments():
     for tag, sgn in (("P", 1.0), ("N", -1.0)):
         segs.append((f"Entry_{tag}", ent["x1"] - ins, sgn * hy, z_lo, z_hi))
     return segs
+
+
+# ===========================================================================
+# [F-2] ground_kit plans - pure CPU, no USD. Coordinates from PARAMS (Sec.7.4).
+# ===========================================================================
+def _plate(name):
+    """Axis-aligned ground plate row: (name,x0,x1,y0,y1,z_top,thick,mtl)."""
+    for row in PARAMS["plates"]:
+        if row[0] == name:
+            return row
+    raise KeyError(f"scene10: plate '{name}' not in PARAMS['plates']")
+
+
+def ground_plan():
+    """Plan A - the park dirt trail (d5 / d10 near windows)."""
+    g = PARAMS["gkit"]
+    tp = _plate("TrailPath")
+    ent = PARAMS["entry"]
+    return gk.plan_ground(
+        "deck_trail_hybrid",
+        region=(-12.0, float(tp[3]), float(tp[2]), float(tp[4])),
+        z=float(tp[5]), gy=0.0, origin=(0.0, 0.0, 0.0),
+        edges=[("deck_far_edge", float(ent["x1"]))],
+        dists=(2, 5, 10), scene="scene10",
+        tactile=(),                    # Sec.12.4 OFF - park, p = 0.24
+        overrides=dict(
+            surface=(("stain", ("dirt",)),),
+            extras=(("edge_break", dict(density=12.0,
+                                        lines=[float(tp[3]), float(tp[4])])),
+                    ("wear_lane", dict(width=float(g["wear_w"])))),
+            scatter=dict(kind="gravel", cover=0.12,
+                         count=int(g["gravel_n"]), expose=0.06)),
+        seed=int(g["seed"]))
+
+
+def ground_plan_deck():
+    """Plan B - entry-deck plank gaps only (d2 near window).
+
+    z is raised by `surface_top_z(z) + 0.020` on purpose. `build_deck_planks`
+    puts the gap strip's top at `z - 0.020`, i.e. **below** the deck surface,
+    and the deck slab is a solid box - which is exactly the burial defect the
+    scene15 pilot measured for joints and manholes (rendered pixels = 0) and
+    the reason `surface_top_z()` exists. The standing ruling is
+    "recess-as-tone, never a plate below the pavement", so the strip is lifted
+    until its top lands at the pavement top + 0.6 mm and the gap reads as tone.
+    GT is unaffected: the strips carry `exc="plank_gap"` and the walking
+    surface z does not move.
+    """
+    g = PARAMS["gkit"]
+    ent, ld = PARAMS["entry"], PARAMS["landing"]
+    z_deck = float(ent["top"])
+    return gk.plan_ground(
+        "deck_trail_hybrid",
+        region=(float(ent["x0"]), float(ld["y0"]),
+                float(ent["x1"]), float(ld["y1"])),
+        z=gk.surface_top_z(z_deck) + 0.020,
+        gy=0.0, origin=(0.0, 0.0, 0.0),
+        edges=[("deck_far_edge", float(ent["x1"]))],
+        dists=(2, 5, 10), scene="scene10", tactile=(),
+        overrides=dict(pave=dict(joint=None), surface=(),
+                       extras=(("deck_planks",
+                                dict(max_gaps=int(g["deck_gaps"]))),),
+                       scatter=None),
+        seed=int(g["seed"]) + 100)
 
 
 # ===========================================================================
@@ -898,6 +991,16 @@ def main():
                         sca["leaf_ground"], tint=mp["leaf_tint"])
         M["dirt"] = tex("dirt_park", "/World/Looks/Dirt", sca["dirt_park"],
                         tint=mp["dirt_tint"])
+        # [W2-D ground_kit] tone materials for kit ground elements.
+        #   gk_wear: the trodden axis is defined as albedo x0.85 of the trail,
+        #   so it must not be bound to the plain dirt material or it renders a
+        #   zero-contrast null. gk_gap: a plank gap reads as a dark line, and
+        #   with recess-as-tone the line *is* the material.
+        M["gk_wear"] = tex("dirt_park", "/World/Looks/GkWear", sca["dirt_park"],
+                           tint=tuple(c * 0.85 for c in mp["dirt_tint"]))
+        M["gk_gap"] = sc.make_pbr(stage, "/World/Looks/GkGap",
+                                  diffuse_color=(0.028, 0.024, 0.020),
+                                  roughness_const=0.95, specular_level=0.0)
         M["wood"] = sc.make_pbr(stage, "/World/Looks/Wood",
                                 diffuse_color=mp["wood_color"],
                                 roughness_const=mp["wood_rough"])
@@ -934,6 +1037,12 @@ def main():
                                 rotx=math.degrees(ang))
 
     def build_terrain(M):
+        # [W2-0 P-A] TrailPath is what plan A decorates. It is 1.70 m wide so
+        #   `_skin_wanted` already rejects it (needs >= 4.0 m on both axes),
+        #   but the registration is explicit so the guarantee does not depend
+        #   on a width that a later edit could change. Same for the entry deck
+        #   (also covered by the "deck" token in `_SKIN_DENY`).
+        sc.skin_exclude(f"{ROOT}/Plate_TrailPath", f"{ROOT}/EntryDeck")
         for nm, x0, x1, y0, y1, zt, th, mk in PARAMS["plates"]:
             BOX(f"{ROOT}/Plate_{nm}",
                 ((x0 + x1) / 2.0, (y0 + y1) / 2.0, zt - th / 2.0),
@@ -950,6 +1059,43 @@ def main():
         for i, (x0, x1) in enumerate(PARAMS["berm_hedges"]):
             sc.build_hedge(stage, f"{ROOT}/BermHedge_{i}", x0, bm["y0"],
                            x1, bm["y1"], bm["h"], base_z=bm["base_z"])
+
+    # -------------------------------------------------------------------
+    # [W2-D] ground_kit - P18 deck_trail_hybrid (two plans, two z levels).
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(stain_dirt=M["leaf"], wear=M["gk_wear"],
+                  edge_break=M["leaf"], litter=M["leaf"], deck=M["gk_gap"])
+        a = gk.apply_ground(kit, f"{ROOT}/GKit", ground_plan(), M2,
+                            skin_exclude=sc.skin_exclude,
+                            scatter=sc.scatter_debris)
+        b = gk.apply_ground(kit, f"{ROOT}/GKitDeck", ground_plan_deck(), M2,
+                            skin_exclude=sc.skin_exclude)
+        # 10-2 - break the straight outline the 3 stacked leaf decals still
+        #   leave behind (dE76 27.3, the strongest boundary Sec.13.3 found).
+        #   `scatter_debris(edge_bias=...)` skips 65 % of the interior, so the
+        #   debris lands on the outline instead of filling the rectangle.
+        g = PARAMS["gkit"]
+        tp = _plate("TrailPath")
+        pad = float(g["leaf_ring_pad"])
+        ring = 0
+        for i, (cx, cy, sx, sy, zone) in enumerate(
+                PARAMS["leaf_ground_patches"]):
+            if zone != "trail":
+                continue
+            ring += int(sc.scatter_debris(
+                stage, f"{ROOT}/GKit/LeafRing_{i}",
+                cx - sx / 2.0 - pad, cy - sy / 2.0 - pad,
+                cx + sx / 2.0 + pad, cy + sy / 2.0 + pad, float(tp[5]),
+                cover=0.10, seed=gk.det_seed("scene10.leafring", i),
+                edge_bias=pad,
+                max_count=int(g["leaf_ring_n"])) or 0)
+        print(f"[ground_kit] scene10 P18 · 프림 {a['prims']}+{b['prims']} · "
+              f"산포 {a['instances']}+{ring} · δmax {a['gt_delta_max']:.4f} · "
+              f"unit_cell {a['unit_cell']}")
+        return a
 
     def build_flat_fill(M):
         """hazard_stairs=False 대조군 : 계단 구간을 z=0 평판 데크로."""
@@ -1204,6 +1350,7 @@ def main():
     if cfg["hazard_stairs"]:
         build_deck(M)
         build_cues(M)
+        build_ground_kit(M)          # [W2-D] trail + entry-deck ground elements
     else:
         build_flat_fill(M)
     build_horizon(M)

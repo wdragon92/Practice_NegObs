@@ -59,6 +59,7 @@ import datetime
 
 import scene_common as sc
 import batch1_common as bc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -165,6 +166,35 @@ PARAMS = dict(
     # --- [v6-①] 노면 신축이음 횡줄눈 (평판 proud 0.001, 경사 추종) ---
     joints=dict(x0=4.0, x1=44.0, step=4.0, w=0.06, proud=0.001),
 
+    # ═══ [W2 ground_kit] P8 ramp_road — 사양 §5.8 N4 행 ════════════════════
+    #  처방: 양측 L형 측구 300(y=±1.85) · 빗물받이 · 가장자리 실선 2본 ·
+    #        개별 균열(텍스처 반복 파괴) · 저점 패치 · 타이어/흙 오염 · 잡초.
+    #  ★ **평지 진입부(x −14…0)에만 놓는다.** `plan_ground` 는 계획 전체를
+    #    단일 z 로 세우는데(`z_fn` 은 아직 소비되지 않는다) 이 씬의 노면은
+    #    x>0 에서 5 % 로 내려간다 — 경사 위에 z=0 요소를 얹으면 x=6 에서
+    #    0.30 m 부유한다 `[계산 — road_z(6) = −0.30]`. 경사 구간의 요소는
+    #    씬이 이미 가진 신축이음 횡줄눈(경사 추종)이 담당한다.
+    #  ★ `edges` 의 "ramp_crest" 는 **GT 낙차가 아니라 구배 변화점**이다.
+    #    이 씬은 hard negative(전 픽셀 낙차 0)다. 크레스트를 에지로 선언하는
+    #    이유는 두 가지뿐: ① 표면 요소를 크레스트 전방 0.8 m 밖으로 물려
+    #    실루엣 오염을 막고(§6.2 GT-E1′) ② 크레스트 너머 가시성 판정
+    #    (`beyond_grade`)을 계획에 남기기 위해서다.
+    #    구배 = drop/run = 1.5/30 = 0.050 → 광선기울기 h/d 와 비교하면
+    #    d2(0.150)·d5(0.060) 가시 · **d10(0.030) 은닉** `[계산]`.
+    gkit=dict(
+        region=(-14.0, -2.0, 0.0, 2.0),
+        #  패치 3매 = d2/d5/d10 근경 창(W1) 각 1매. 회랑 반폭이 X=0.8 m 에서
+        #  0.46 m 뿐이라 |y| ≤ 0.4 여야 프레임 안이다 `[계산]`.
+        patches=[(-1.20, 0.00), (-3.80, 0.30), (-8.80, -0.30)],
+        #  빗물받이 — 크레스트 직전 1기(경사 유입 차단) + 진입부 1기.
+        #  `lid=True` 고정(무개구 금지 규약), flush 라 GT-E1′ 이격 0 ✔.
+        gullies=[(-1.20, -1.70), (-7.00, 1.70)],
+        #  가장자리 실선 2본 — 길이는 계획이 회랑에서 유도(최대 6.0 m).
+        edge_lines=[(-11.0, -1.60, 0.0), (-11.0, 1.60, 0.0)],
+        tactile_depth=0.60, tactile_setback=0.30,
+        tactile_row_x=-3.6,             # 보행 접근측(−X) 첫 볼라드 열
+    ),
+
     material=dict(
         scale=dict(concrete_floor=0.9, concrete_wall=1.2, grass=1.4),
         grass_tint=(0.55, 0.68, 0.42),
@@ -259,6 +289,47 @@ ASSET_ROLES = ["concrete_floor", "concrete_wall", "grass", "brick_red",
 # [C1] 노면 종단 프로파일 — 드레싱 요소의 착지 z 를 노면/대지에 정합시킨다.
 #      (대지도 동일 프로파일로 하강하므로 옹벽 밖 잔디 z 도 같은 함수)
 # ===========================================================================
+def tactile_band_rect():
+    """[W2 §12.5 ②] 볼라드 열 전면 **연속 점형 띠** (x0, y0, x1, y1).
+
+    전면이 −X(보행 접근측)이므로 띠는 볼라드 앞면에서 −X 로 setback 만큼
+    떨어져 depth 만큼 뻗는다. 열은 2열이지만 법정 대상은 **보행자가 먼저
+    만나는 열**(x = tactile_row_x) 하나다 — §12.4 의 (씬, 지점) 등록도
+    "bollard" 1개소다. 좌표는 PARAMS 유도(§7.4).
+    """
+    g, bo = PARAMS["gkit"], PARAMS["bollard"]
+    ys = [b["cy"] for b in PARAMS["bollards"]
+          if abs(b["cx"] - g["tactile_row_x"]) < 1e-6]
+    sb, dp, r = g["tactile_setback"], g["tactile_depth"], bo["r"]
+    x_face = float(g["tactile_row_x"]) - r
+    return (x_face - sb - dp, min(ys) - 0.20, x_face - sb, max(ys) + 0.20)
+
+
+def ground_plans():
+    """[W2 ground_kit] 지면 계획 — 씬 조립부와 CPU 검산이 같은 함수를 쓴다."""
+    g = PARAMS["gkit"]
+    rp = PARAMS["ramp"]
+    grade = float(rp["drop"]) / float(rp["run"])
+    gp = gk.plan_ground(
+        "ramp_road", region=tuple(g["region"]),
+        z=float(PARAMS["approach"]["z_top"]), gy=0.0, origin=(0.0, 0.0, 0.0),
+        edges=[("ramp_crest", float(rp["x0"]), dict(beyond_grade=grade))],
+        dists=(2, 5, 10), scene="sceneN4",
+        tactile=("bollard",) if SCENE_CONFIG["cue_scene_dressing"] else (),
+        sites=dict(gully=[tuple(p) for p in g["gullies"]],
+                   patch=[tuple(p) for p in g["patches"]],
+                   marking=[tuple(m) for m in g["edge_lines"]],
+                   tactile=dict(bollard=tactile_band_rect())),
+        #  빗물받이 6개소는 30 m 램프 전장 기준이다. 진입 평지(14 m)에는
+        #  22 m 간격으로 2기가 상한이다 `[시방 20~25 m/개]`.
+        overrides=dict(infra=dict(gully=2, gutter_L=2,
+                                  marking=("line", "line")),
+                       surface=(("patch", 3), ("crack", 6),
+                                ("stain", ("tire", "dirt")), ("weed", 4))),
+        seed=24)
+    return [("approach", gp)]
+
+
 def road_z(x, drop):
     rp = PARAMS["ramp"]
     if x <= rp["x0"]:
@@ -669,6 +740,9 @@ def main():
         ap = PARAMS["approach"]
         ld = PARAMS["landing"]
         appr_mtl = M["asphalt"] if cfg["cue_material_break"] else M["road"]
+        # [W2-0 · P-A] 진입 평지가 ground_kit 의 무대다 → 변위 스킨 OFF.
+        #   **BOX 호출 전에** 등록해야 한다(`add_box` 가 그 자리에서 판정).
+        sc.skin_exclude(f"{ROOT}/Road_Approach")
         # 진입 평지
         BOX(f"{ROOT}/Road_Approach",
             ((ap["x0"] + ap["x1"]) / 2.0, 0.0, ap["z_top"] - ap["thick"] / 2.0),
@@ -683,6 +757,26 @@ def main():
             ((ld["x0"] + ld["x1"]) / 2.0, 0.0, -DROP - ld["thick"] / 2.0),
             (ld["x1"] - ld["x0"], rp["y1"] - rp["y0"], ld["thick"]),
             M["road"], col=True)
+
+    # -------------------------------------------------------------------
+    # [W2] ground_kit — P8 ramp_road. **진입 평지 전용**(경사 구간은 단일 z
+    #   계획으로 덮을 수 없다 — PARAMS["gkit"] 주석 참조).
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        (_tag, gp), = ground_plans()
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["joint"], crack=M["joint"], patch=M["asphalt"],
+                  patch_cut=M["joint"], gully=M["pole"], gutter=M["wall"],
+                  marking=M["parapet"], weed=M["grass"], tactile=M["tactile"],
+                  stain_tire=M["joint"], stain_dirt=M["joint"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris)
+        print(f"[ground_kit] sceneN4 P8 · 프림 {res['prims']} · 산포 "
+              f"{res['instances']} · δmax {res['gt_delta_max']:.4f} · "
+              f"unit_cell {res['unit_cell']}")
+        return res
 
     # -------------------------------------------------------------------
     # 옹벽 — 상단이 노면을 그대로 추종(build_slope 1매). 진입·착지 구간은 평벽.
@@ -871,11 +965,14 @@ def main():
         #   상단 백색 반사띠 + 전면(−X 접근측) 0.3 m 점형블록.
         bo = PARAMS["bollard"]
         for i, bd in enumerate(PARAMS["bollards"]):
+            # [W2 §12.5 ②] 본당 소판 → ground_kit 의 **연속 띠 0.60 m** 로
+            #   대체한다(소판 0.12 ㎡/본은 판독 불가). 2열 중 보행 접근측
+            #   1열 전면에만 놓는 것이 법정 취지(§12.4 등록 1개소)다.
             bc.build_bollard_v51(stage, f"{ROOT}/Bollard_{i}", bd["cx"],
                                  bd["cy"], 0.0, None, M["bollard"],
                                  M["bollard_band"], M["tactile"],
                                  front_dir=bo["front"], radius=bo["r"],
-                                 height=bo["h"])
+                                 height=bo["h"], tactile=False)
         build_guard(M)
         build_streetlights(M)
         build_wall_plates(M)
@@ -911,6 +1008,7 @@ def main():
     build_cues(M)
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
+    build_ground_kit(M)                  # [W2] 지면 요소 — 드레싱 뒤(산포 순서 규약)
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])

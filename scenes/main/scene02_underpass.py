@@ -94,6 +94,7 @@ import json
 import datetime
 
 import scene_common as sc
+import ground_kit as gk
 import stair_kit as sk           # 법정 계단참·중간난간 (좌표 계산 단일 진실원)
 
 
@@ -120,6 +121,33 @@ PARAMS = dict(
     walk=dict(x_w=-18.0, x_e=16.0, y_s=-8.0, y_n=8.0, z_top=0.0, thick=0.5),
     # 하강 피트 개구: 계단 폭 = 옹벽 내면 사이 3.5 (y ±1.75)
     pit=dict(x0=0.0, x1=7.0, y0=-1.75, y1=1.75),
+
+    # === [W2-D ground_kit] P3 sidewalk_block (spec §5.2 row "02 지상") ======
+    # Scope for this round is the **upper sidewalk only** (Walk_W, x -12..0).
+    # The pit, the stairs and the lower landing are untouched: the landing
+    # redesign is W4, and the underground branch (`tunnel_under` profile) is a
+    # different slab at z=-3.2 that this call deliberately does not touch.
+    #
+    #  * manhole 1 at (-1.20, +0.35) - spec coordinate, lands in the d2 near
+    #    window (X=0.80).
+    #  * gullies 2 at x=-0.95, y=+-3.60 - stair-head drainage per ruling C-1'
+    #    (spec §5.0). Flush, so GT-E1' stand-off is 0 m.
+    #  * gutter_L is switched OFF. Spec §5.2 puts scene02's L gutter on the
+    #    kerb line at x=7.85 (the road runs across +X at x 8..13), which is
+    #    behind the pit and outside every h0.3 near window; the composer would
+    #    otherwise draw it along the region's own y0 edge, i.e. across the open
+    #    sidewalk where no kerb exists.
+    #  * NO stair-head trench, for the two measured B7 reasons recorded in
+    #    Docs/reports/w2d_edit_g1.md §3 (frame lip pushes drow to 15.7 rows at
+    #    d10; and it would be a second singular cross line against the
+    #    statutory tactile band, which GT-E2 caps at one).
+    #  * tactile: spec §12.4 registers scene02 stair_top **and** stair_foot,
+    #    with "완전 적정" (no defect injection). ground_kit takes stair_top
+    #    (statutory x -0.90..-0.30, full opening width); the lower landing band
+    #    stays on the existing `sc.build_tactile` path because it lives at
+    #    z=-3.2, a different surface from this plan.
+    gkit=dict(x0=-12.0, half_y=4.0, manhole=[(-1.20, 0.35)],
+              gully_x=-0.95, gully_y=3.60),
     # 계단 20단 × riser 0.16 · tread 0.32 → 낙차 3.2m, run 6.4m. z_top=0
     stairs=dict(x0=0.0, riser=0.16, tread=0.32, nsteps=20,
                 y0=-1.75, y1=1.75, z_top=0.0, base_z=-3.5),
@@ -485,6 +513,11 @@ def main():
         top, th = w["z_top"], w["thick"]
         cz = top - th / 2.0
         y_out = p["y1"] + wl["thick"]        # 옹벽 외면 = 2.05 (보도 절단 위치)
+        # [W2-0 · P-A] Walk_W is the slab ground_kit decorates. Without the
+        # exclusion the displacement skin (+6.5..16.5 mm) buries every flush
+        # element on it - manhole (+-10 mm) and the 6 mm tactile dots (spec
+        # §1.1/§12.5-1).
+        sc.skin_exclude(f"{ROOT}/Walk_W")
         # 서: x_w..pit.x0 전폭
         BOX(f"{ROOT}/Walk_W",
             ((w["x_w"] + p["x0"]) / 2.0, (w["y_s"] + w["y_n"]) / 2.0, cz),
@@ -514,6 +547,44 @@ def main():
             ((p["x0"] + p["x1"]) / 2.0, (y_out + w["y_n"]) / 2.0, cz),
             (p["x1"] - p["x0"], w["y_n"] - y_out, th),
             M["sidewalk"], col=True)
+
+    # -------------------------------------------------------------------
+    # [W2-D] ground_kit — P3 sidewalk_block, upper sidewalk only.
+    #   Runs in **both** hazard arms on purpose: GT-E4 compares this scene
+    #   with its hazard-off twin, and that comparison is only meaningful if
+    #   the ground elements are byte-identical in the two arms.
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        g = PARAMS["gkit"]
+        p = PARAMS["pit"]
+        gp = gk.plan_ground(
+            "sidewalk_block",
+            region=(g["x0"], -g["half_y"], p["x0"], g["half_y"]),
+            z=PARAMS["walk"]["z_top"], gy=0.0, origin=(0.0, 0.0, 0.0),
+            edges=[("pit_edge", float(p["x0"]))],
+            dists=(2, 5, 10), scene="scene02",
+            tactile=("stair_top",) if cfg["cue_tactile"] else (),
+            overrides=dict(infra=dict(manhole=1, gully=2, gutter_L=0)),
+            sites=dict(manhole=[tuple(v) for v in g["manhole"]],
+                       gully=[(g["gully_x"], -g["gully_y"]),
+                              (g["gully_x"], g["gully_y"])]),
+            seed=2)
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["granite_dark"], crack=M["granite_dark"],
+                  patch=M["concrete_floor"], patch_cut=M["granite_dark"],
+                  manhole=M["rail"], gully=M["rail"], weed=M["hedge"],
+                  stain_dirt=M["granite_dark"], stain_gum=M["granite_dark"],
+                  tactile=M["tactile"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris,
+                              slabs=(f"{ROOT}/Walk_W", f"{ROOT}/FlatWalkA",
+                                     f"{ROOT}/FlatWalk"))
+        print(f"[ground_kit] scene02 P3 · prims {res['prims']} · "
+              f"delta_max {res['gt_delta_max']:.4f} · "
+              f"unit_cell {res['unit_cell']}")
+        return res
 
     def build_flat_fill(M):
         """hazard_stairs=False 대조군: 개구를 메워 전체를 z=0 평지로 통일.
@@ -644,15 +715,16 @@ def main():
                 color=ns["color"], width=ns["width"], proud=ns["proud"],
                 z_top=st["z_top"])
 
-        # ── cue_tactile: 상단 경고띠(x -0.3..0) + 하부 랜딩 ──
+        # ── cue_tactile: 하부 랜딩 ──
+        #   [W2-D] The **upper** band moved to ground_kit (spec §12.4 registry
+        #   scene02/stair_top). The old `Tactile_Top` sat at x -0.30..0.00:
+        #   no statutory 0.30 m set-back, and GT-E1' needs 40*0.006 = 0.24 m of
+        #   clearance for a 6 mm dot, so it was a B6 violation as built.
+        #   The landing band stays here - it is on the z=-3.2 surface, which is
+        #   not part of the upper-sidewalk plan.
         if cfg["cue_tactile"]:
             tc = PARAMS["tactile"]
             la = PARAMS["landing"]
-            # 상단: 개구 앞 0.3m 경고띠 (개구 폭)
-            sc.build_tactile(stage, f"{ROOT}/Tactile_Top",
-                             st["x0"] - tc["ahead"], st["x0"],
-                             st["y0"], st["y1"], M["tactile"],
-                             z=0.0, proud=tc["proud"])
             # 하부 랜딩: 포탈 진입 앞 경고띠
             sc.build_tactile(stage, f"{ROOT}/Tactile_Land",
                              la["x1"] - tc["land_depth"], la["x1"],
@@ -850,6 +922,7 @@ def main():
         build_cues(M, stair_mtl)
     else:
         build_flat_fill(M)          # 대조군: z=0 평지 통일 (단서는 위 피트 없음)
+    build_ground_kit(M)             # [W2-D] both arms — GT-E4 twin parity
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
     if cfg.get("cue_sign") and cfg["hazard_stairs"]:

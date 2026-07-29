@@ -229,7 +229,7 @@ PARAMS = dict(
     # --- 재질: texture_scale용 물리 크기[m/타일] + 틴트/상수 ---
     material=dict(
         scale=dict(plaza_lower=0.7, concrete_floor=1.0, concrete_wall=2.0,
-                   grass=4.0, brick_red=2.0, granite_dark=1.0, tactile=0.3),
+                   grass=1.4, brick_red=2.0, granite_dark=1.0, tactile=0.3),
         grass_tint=(0.55, 0.68, 0.42),
         hedge_tint=(0.50, 0.64, 0.38),            # v4-B2 생울타리 (검은 판 해소)
         tunnel_tint=(0.32, 0.32, 0.34),           # 터널 짙은 콘크리트 틴트

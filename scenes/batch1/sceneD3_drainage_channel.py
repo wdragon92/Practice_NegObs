@@ -223,7 +223,7 @@ PARAMS = dict(
               dict(cx=64.0, cy=-22.0)],
 
     material=dict(
-        scale=dict(concrete_wall=1.6, concrete_floor=1.2, grass=4.0,
+        scale=dict(concrete_wall=1.6, concrete_floor=1.2, grass=1.4,
                    leaf_ground=0.8, wood_dark=1.0, brick_red=2.0),
         asphalt_color=(0.16, 0.16, 0.17), asphalt_rough=0.85,  # scene17 상수
         paint_color=(0.72, 0.72, 0.68), paint_rough=0.60,

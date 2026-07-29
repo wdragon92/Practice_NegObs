@@ -275,7 +275,7 @@ PARAMS = dict(
     # --- 재질: texture_scale용 물리 크기[m/타일] ---
     material=dict(
         # S4-4: dirt_park scale 2.0→3.0 (낙엽 입자 축소), 채도 낮춤 tint.
-        scale=dict(dirt_park=3.0, gravel=0.5, grass=4.0, wood_dark=1.0),
+        scale=dict(dirt_park=3.0, gravel=0.5, grass=1.4, wood_dark=1.0),
         dirt_tint=(0.92, 0.88, 0.80),           # 낙엽 과채도 완화 (기본 흙 지면)
         grass_tint=(0.55, 0.68, 0.42),          # 타일 반복 완화 + 초록 틴트
         hedge_tint=(0.46, 0.58, 0.32),          # v4-B2 생울타리 밴드(배경·하층식생)

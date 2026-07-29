@@ -168,7 +168,7 @@ PARAMS = dict(
 
     material=dict(
         scale=dict(marble_light=1.2, granite_dark=1.0, plaza_lower=0.7,
-                   band_dark=0.5, brick_red=2.0, plaza_light=0.8, grass=4.0,
+                   band_dark=0.5, brick_red=2.0, plaza_light=1.80, grass=1.4,
                    tactile=0.3),                      # [v5 공통 레이어]
         grass_tint=(0.55, 0.68, 0.42),
         # B-14-5: 전 화면 고명도 몰림 해소 — 파사드 0.56→0.30, 파라펫 0.90→0.62
@@ -377,7 +377,7 @@ def main():
         M["plaza_light"] = PBR(
             f"{ROOT}/Looks/PlazaLight", sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
-            sca["plaza_light"])
+            sca["plaza_light"], tint=(0.72, 0.72, 0.72))   # [T1 T-1] x0.72
         M["grass"] = PBR(
             f"{ROOT}/Looks/Grass", sc.tex_path("grass", "diff"),
             sc.tex_path("grass", "nor"), sc.tex_path("grass", "rough"),

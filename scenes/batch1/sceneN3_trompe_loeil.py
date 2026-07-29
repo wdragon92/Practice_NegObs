@@ -165,7 +165,7 @@ PARAMS = dict(
     window=dict(w=1.4, h=1.8, inset=0.15, col_step=3.0, margin=2.0),
 
     material=dict(
-        scale=dict(stone_flag=1.2, band_dark=1.0, grass=4.0, plaza_light=0.75),
+        scale=dict(stone_flag=1.2, band_dark=1.0, grass=1.4, plaza_light=1.80),
         grass_tint=(0.55, 0.68, 0.42),
         # ══ 페인트 틴트 [v2 팔레트 교정 · 2026-07-27] ════════════════════
         #   폐기 사유: v1 은 채도 0에 가까운 무채색 회색(0.40/0.385/0.355 계열)
@@ -760,7 +760,8 @@ def main():
         M["light_stone"] = PBR(
             f"{ROOT}/Looks/LightStone", sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"),
-            sc.tex_path("plaza_light", "rough"), sca["plaza_light"])
+            sc.tex_path("plaza_light", "rough"), sca["plaza_light"],
+            tint=(0.72, 0.72, 0.72))                     # [T1 T-1] x0.72
         M["grass"] = PBR(
             f"{ROOT}/Looks/Grass", sc.tex_path("grass", "diff"),
             sc.tex_path("grass", "nor"), sc.tex_path("grass", "rough"),

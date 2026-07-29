@@ -308,7 +308,7 @@ PARAMS = dict(
     material=dict(
         # [v6] rock_face = 배석용 무줄눈 자연암 / granite = 석등·초석(화강암)
         scale=dict(rock_wall=3.5, rock_face=0.95,
-                   granite=3.2, leaf_ground=2.0, gravel=0.35, grass=4.0),
+                   granite=3.2, leaf_ground=2.0, gravel=0.35, grass=1.4),
         stone_moss_tint=(0.86, 0.95, 0.82),   # (구 배석 이끼 톤 — v6 미사용)
         leaf_tint=(0.95, 0.90, 0.82),
         gravel_tint=(0.84, 0.81, 0.76),       # [v6] 마당 고반사 베이지 완화

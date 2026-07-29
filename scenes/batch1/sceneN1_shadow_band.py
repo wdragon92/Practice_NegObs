@@ -140,7 +140,7 @@ PARAMS = dict(
     window=dict(w=1.2, h=1.6, inset=0.15, col_step=2.8, margin=2.5),
 
     material=dict(
-        scale=dict(plaza_light=1.1, grass=4.0, brick_red=2.0),
+        scale=dict(plaza_light=1.1, grass=1.4, brick_red=2.0),
         # ─ sRGB 지각 규약: plaza_light 원본 평균 sRGB 0.714(중성 백회) →
         #   웜 틴트로 0.65 전후. 레퍼런스(n1)의 밝은 웜 콘크리트 광장 대응. ─
         plaza_tint=(0.92, 0.88, 0.82),

@@ -184,8 +184,8 @@ PARAMS = dict(
 
     # --- §3 재질: texture_scale용 물리 크기[m/타일] + 틴트/상수 ---
     material=dict(
-        scale=dict(plaza_light=0.75, band_dark=0.6, plaza_lower=0.7,
-                   granite_dark=1.0, brick_red=2.0, grass=4.0, tactile=0.3),  # R2-3: grass 2→4
+        scale=dict(plaza_light=1.80, band_dark=0.6, plaza_lower=0.7,
+                   granite_dark=1.0, brick_red=2.0, grass=1.4, tactile=0.3),  # R2-3: grass 2→4
         lower_warm_tint=(1.06, 1.0, 0.94),        # 하부 광장 웜 틴트 (§3)
         building_L_tint=(0.95, 0.92, 0.88),       # 건물 L 약간 다른 톤
         glass_color=(0.06, 0.09, 0.12), glass_rough=0.08,   # 유리창 (OmniGlass 금지)
@@ -525,10 +525,15 @@ def main():
     def setup_materials():
         sc = mp["scale"]
         M = {}
+        # [T1 T-1] plaza_light tone x0.72 — 9 scenes share this untinted material.
+        # Linear albedo 0.469 sits in the WHITE-cement band; grey portland paving
+        # is 0.35~0.40 new / 0.20~0.30 aged [LBNL Heat Island / ACPA RT3.05].
+        # x0.72 -> 0.338 lands at the low end of "new grey". Paired with
+        # scale_m 0.75->1.80 (same call, cannot be split; T1 §1.8-2).
         M["plaza_light"] = make_pbr(
             "/World/Looks/PlazaLight", _tex_path("plaza_light", "diff"),
             _tex_path("plaza_light", "nor"), _tex_path("plaza_light", "rough"),
-            sc["plaza_light"])
+            sc["plaza_light"], tint=(0.72, 0.72, 0.72))
         # 룩 r3: PavingStones127은 결이 강해 밴드가 나무 데크처럼 읽힘 →
         # 경계석과 같은 어두운 화강암 타일(granite_dark)로 교체 (조인트 0.9m)
         # v4-B2: 밴드도 granite_dark 계열 — 리프트 틴트로 검은 줄무늬 완화
@@ -544,10 +549,11 @@ def main():
                 _tex_path("plaza_lower", "rough"),
                 sc["plaza_lower"], tint=mp["lower_warm_tint"])
         else:
-            M["lower"] = make_pbr(
+            M["lower"] = make_pbr(                       # [T1 T-1] x0.72
                 "/World/Looks/PlazaLower", _tex_path("plaza_light", "diff"),
                 _tex_path("plaza_light", "nor"),
-                _tex_path("plaza_light", "rough"), sc["plaza_light"])
+                _tex_path("plaza_light", "rough"), sc["plaza_light"],
+                tint=(0.72, 0.72, 0.72))
         M["granite_dark"] = make_pbr(
             "/World/Looks/GraniteDark", _tex_path("granite_dark", "diff"),
             _tex_path("granite_dark", "nor"),

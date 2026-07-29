@@ -260,7 +260,7 @@ PARAMS = dict(
         #   읽혔다(under_grating) → 줄눈·타이홀이 있는 concrete_wall + 등화 틴트
         #   (0.72,0.77,0.92) = 평균 102 ≈ 알베도 0.40 의 중성 콘크리트로 교체.
         scale=dict(paving_interlock=1.0, metal_rust=0.55, concrete_wall=2.0,
-                   granite_dark=1.0, brick_red=2.0, grass=4.0, tactile=0.3),
+                   granite_dark=1.0, brick_red=2.0, grass=1.4, tactile=0.3),
         asphalt_color=(0.045, 0.045, 0.050), asphalt_rough=0.92,
         metal_tint=(0.90, 0.94, 1.00),          # 도장 강재 톤(중성 냉회색)
         # [v7 판정 ⑥-1] OmniPBR 알베도 보정 — 텍스처 룩업에

@@ -244,7 +244,7 @@ PARAMS = dict(
                    sty_h=0.50, beam_t=0.90, beam_pad=0.6, base="lower"),
 
     material=dict(
-        scale=dict(granite_dark=1.2, stone_flag=0.9, grass=4.0,
+        scale=dict(granite_dark=1.2, stone_flag=0.9, grass=1.4,
                    brick_red=2.0, tactile=0.3),
         grass_tint=(0.42, 0.52, 0.34),      # 비 맞은 잔디 — 표준 톤보다 어둡게
         water_color=(0.03, 0.05, 0.06), water_rough=0.02, water_spec=1.0,

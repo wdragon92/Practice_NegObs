@@ -216,7 +216,7 @@ PARAMS = dict(
 
     material=dict(
         scale=dict(paving_interlock=1.2, concrete_floor=1.0,
-                   concrete_wall=1.4, grass=4.0, tactile=0.3, plaster=2.4),
+                   concrete_wall=1.4, grass=1.4, tactile=0.3, plaster=2.4),
         grass_tint=(0.52, 0.63, 0.40),
         grass_tint_b=(0.47, 0.60, 0.37),        # 화단 잔디(±5% 틴트 지터)
         paving_tint=(0.86, 0.85, 0.83),

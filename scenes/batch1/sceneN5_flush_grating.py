@@ -149,7 +149,7 @@ PARAMS = dict(
     window=dict(w=1.3, h=1.7, inset=0.15, col_step=3.0, margin=2.5),
 
     material=dict(
-        scale=dict(plaza_light=1.1, concrete_wall=2.0, grass=4.0,
+        scale=dict(plaza_light=1.1, concrete_wall=2.0, grass=1.4,
                    brick_red=2.0),
         # 보도: plaza_light 원본 평균 sRGB 0.714 + 약한 중성 틴트 → ~0.64
         pave_tint=(0.90, 0.89, 0.86),

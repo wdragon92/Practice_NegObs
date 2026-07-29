@@ -56,9 +56,16 @@ TEX = dict(
                       rough="granite_dark_rough.jpg"),
     brick_red=dict(dir=S1_DIR, diff="brick_red_diff.jpg",
                    nor="brick_red_nor_dx.jpg", rough="brick_red_rough.jpg"),
-    grass=dict(dir=ASSETS_DIR, diff="aerial_grass_rock_diff_4k.jpg",
-               nor="aerial_grass_rock_nor_dx_4k.jpg",
-               rough="aerial_grass_rock_rough_4k.jpg"),
+    # [W2 · B감사 A1] `aerial_grass_rock`(PolyHaven 항공 초지, 실측 타일 15 m)에서
+    # ambientCG **Grass001**(실측 타일 **1.40 m**, CC0, 태그 lawn/park/short/dense)로 교체.
+    #   · 픽셀 밀도 273 px/m → **2,926 px/m (×10.7)** — 들잔디 잎 나비 4~7 mm 가
+    #     12~20 px 로 **실제 해상**된다 [실측 — assets/veg_manifest_w2.json textures]
+    #   · 색상 초록 98.25 % · 선형 알베도 0.0932 · 순백 0 % → 계절 규약 통과
+    #   · **`scale_m` 은 반드시 1.4**(타일 실치수). 전 씬 `scale=dict(grass=…)` 동시 교정.
+    #   대안(씬 간 변주용) = `grass_lawn_b` (ambientCG Grass004, 동일 1.40 m).
+    grass=dict(dir=ASSETS_DIR, diff="grass_lawn_diff.jpg",
+               nor="grass_lawn_nor.jpg",
+               rough="grass_lawn_rough.jpg"),
     tactile=dict(dir=S1_DIR, diff="tactile_yellow_diff.png",
                  nor="tactile_yellow_nor.png"),        # rough 없음
     # --- §B 신규 7역할 ---
@@ -286,11 +293,21 @@ LOOK_CLASS = {
     # 이 클래스만 상한을 높인다.
     "wood":     dict(bevel=0.004, sat=0.88, mdl="omni",   detail=True,
                      tex="wood_dark", bump=1.3, max_gain=7.0),
+    # [W2 · B감사 A2] `tex_alts` 에서 **`leaf_ground` 제거** — 치명 계절 규약 위반 차단.
+    #   승격 채택 조건은 `max(ratio) ≤ max_gain` **그리고** `spread = max/min ≤ 4.0` 인데,
+    #   구 `grass`(aerial_grass_rock)는 청 채널이 비어 있어(적/청 7.03) 초록 수관
+    #   상수색에서 spread 4.22 로 탈락하고, 대신 `leaf_ground`(적/청 4.09 → spread 2.86)가
+    #   채택됐다. 전 33씬 시뮬레이션 결과 **`leaf_ground` 승격 50건 / 24씬** — 즉 24개 씬의
+    #   나무 수관에 **가을 낙엽 픽셀**이 칠해지고 있었다(원본 2.3 m 낙엽이 52 % 크기로)
+    #   [실측 — `B_groundcover_debris.md` §8].
+    #   A1(Grass001 교체)만으로도 spread 가 내려가 grass 가 채택되지만, `leaf_ground` 가
+    #   목록에 남는 한 **어두운 상수색에서는 여전히 그쪽으로 떨어진다.** A2 가 그 경로를
+    #   물리적으로 없앤다 — 둘 다 한다.
+    #   `tex_scale` 1.2 → **1.4**: 승격 경로도 Grass001 실측 타일을 따라야 한다.
+    #   `detail=False` 는 유지(잎은 실물 USD 담당 — §2.1).
     "veg":      dict(bevel=0.000, sat=0.76, mdl="omni",   detail=False,
-                     tex="grass", bump=1.2, max_gain=7.0,
-                     tex_alts=("grass", "leaf_ground")),
-                     # 낙엽(갈색 0.042)만으로는 잔디(초록)에 못 씌운다 —
-                     # 라이브러리의 grass 를 1순위로.
+                     tex="grass", bump=1.2, max_gain=7.0, tex_scale=1.4,
+                     tex_alts=("grass",)),
     "water":    dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
     "glass":    dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
     "paint":    dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
@@ -1707,20 +1724,80 @@ def build_tactile(stage, path, x0, x1, y0, y1, mtl, z=0.0, proud=0.004):
 # ===========================================================================
 VEG_DIR = os.path.join(ASSETS_DIR, "vegetation")
 
-# (상대경로, 네이티브 높이[m], 가중치) — 한국 가로수 빈도 반영.
-# 은행·느티는 S3 에 없다(전수 확인). 벚나무가 한국 가로수 최다 수종 중 하나라 주력.
+# (상대경로, **지상 노출 높이**[m], 가중치) — 서울 가로수 통계 반영. `[W2 재편]`
+#
+# **`Japanese_Cherry` 삭제(가중치 재분배가 아니라 삭제)** — A 감사 P0-1.
+#   ① 계절 규약: 잎 텍스처 **초록 화소 0.0 %**(만개 벚꽃 픽셀). 수종명이 아니라
+#      픽셀로 판정한 결과다 [실측 — `A_trees_shrubs.md` §9].
+#   ② 빈도: 서울 가로수 벚나무는 4위권 ≈7 % 인데 가중치가 **62.5 %** 였다 —
+#      서울 실태 대비 약 9배, 전국(18.6 %) 기준으로도 3.4배 과대 [통계 — 동 §5].
+#
+# 새 조합의 근거: 서울 2019(306,313주) 1·2위는 **은행 35.8 % · 양버즘 20.9 %** 인데
+# 둘 다 조달 불가다(은행 = S3 부재 확정 / 양버즘 = 잎 텍스처가 갈색 낙엽이라
+# 초록화 파생본 선행 필요). ⇒ **근연 대용종으로 활엽 우세 구성을 만든다**:
+#   Elm_Sapling(느릅나무과 = 느티나무 대용) · Shumard_Oak(참나무류 = 대왕참나무 대용)
+#   = 활엽 63.6 %, 침엽·상록 36.4 %. 현행 소나무류 37.5 % → **18.2 %** 로 하향.
+#   `[추정 — 가중치 배분]` 통계는 수종별 비율까지만 주고 대용종 매핑 비율은 주지 않는다.
+#
+# **높이는 `zmax`(지상 노출)를 쓴다 — 바운딩 전체 높이가 아니다.**
+#   `add_vegetation` 은 `s = target_h / native_h` 로 스케일하는데 `zmin < 0` 인 에셋에
+#   전체 높이를 넣으면 지상 노출이 그만큼 짧아진다(White_Pine 이 −15 % 로 겪던 결함,
+#   A §6-c). 신규 3종은 처음부터 `zmax` 로 넣어 같은 결함을 반복하지 않는다.
 VEG_TREES = [
-    ("Trees/Japanese_Cherry.usd", 4.64, 5),   # 벚나무
-    ("Trees/White_Pine.usd", 2.35, 2),        # 소나무류(소형)
-    ("Trees/Yellow_Pine.usd", 26.99, 1),      # 소나무류(대형) — 원경·배후림용
+    # 상대경로                       native_h  w   비고
+    ("Trees/Elm_Sapling.usd",         3.0867, 4),  # 느릅나무 묘목 — 느티/이팝 대용, 근경 3 m
+    ("Trees/Shumard_Oak.usd",        10.8989, 3),  # 참나무류 — 대왕참나무 대용, 중·원경
+    ("Trees/Chinese_Juniper.usd",     2.5164, 2),  # 향나무 — 사찰·관공서·학교 조경 최다
+    ("Trees/White_Pine.usd",          2.35,   1),  # 소나무류(소형) — zmin −0.351 미보정 [기지 결함 A §6-c]
+    ("Trees/Yellow_Pine.usd",        26.99,   1),  # 소나무류(대형) — 원경·배후림용
 ]
+# [실측 — `assets/veg_manifest_w2.json`(2026-07-29, usd-core 26.8 · UV 픽셀 판정)]
+#   Elm_Sapling     zmax 3.0867 · 113,268 tri · 잎 beech_leaf 초록 99.2 % · PASS
+#   Shumard_Oak     zmax 10.8989 · 99,509 tri · oakleaves 1~4 초록/올리브 100 % · PASS
+#   Chinese_Juniper zmax 2.5164 · 27,098 tri · pine_needles 초록 80.2 %+황록 19.8 % · PASS
 VEG_SHRUB = [("Shrub/Boxwood.usd", 0.74, 1)]  # 회양목
+
+
+def veg_pool():
+    """실제로 디스크에 있는 수종만 남긴 가중 풀.
+
+    `Japanese_Cherry` 삭제로 1행이 바뀌었으므로 "첫 행 존재"로 가용성을 판정하면
+    조달 상태에 따라 **30개 씬의 식생이 통째로 사라진다.** 존재하는 것만 쓴다.
+    """
+    return [t for t in VEG_TREES
+            if os.path.isfile(os.path.join(VEG_DIR, t[0]))]
 
 
 def veg_available():
     """식생 에셋이 실제로 있는지. 없으면 절차 블롭으로 폴백한다."""
-    return all(os.path.isfile(os.path.join(VEG_DIR, r))
-               for r, _, _ in VEG_TREES[:1])
+    return bool(veg_pool())
+
+
+def _deactivate_seasonal(stage, asset_path, usd_rel):
+    """Turn off season-specific sub-prims of a referenced vegetation asset.
+
+    The season convention is judged on leaf/flower TEXTURE PIXELS, not on the
+    species name. `Rhododendron` is a full-bloom scan (76.7 % of the basecolor
+    is magenta), so the shrub itself is season-neutral only once `/Root/Flowers`
+    is deactivated. Deactivation removes the prim from composition, so the
+    flower geometry is never drawn and costs nothing.
+    Silent no-op when the asset has no registered seasonal prims.
+    """
+    names = SEASONAL_SUBPRIMS.get(usd_rel)
+    if not names:
+        return 0
+    off = 0
+    for nm in names:
+        try:
+            p = stage.GetPrimAtPath(f"{asset_path}/{nm}")
+            if p and p.IsValid():
+                p.SetActive(False)
+                off += 1
+        except Exception as e:                 # never let this kill the scene
+            print(f"[룩v1][경고] 계절 프림 비활성 실패 {asset_path}/{nm}: {e}")
+    if off:
+        LOOK_STATS["seasonal_off"] = LOOK_STATS.get("seasonal_off", 0) + off
+    return off
 
 
 def add_vegetation(stage, prim_path, usd_rel, pos_m, yaw_deg=0.0,
@@ -1784,34 +1861,65 @@ def add_vegetation(stage, prim_path, usd_rel, pos_m, yaw_deg=0.0,
 #   ⚠ 낱장 maplefall1(실측 0.0081)·oakfall1(0.0048)·클러스터 2행(0.0584/0.0239)도
 #   계통 편차가 확인됐다 — sceneC2 개수식에 걸리는 fallcluster 행은 **렌더 영향이
 #   있으므로** W2 낙엽 전역화(G2)에서 렌더 게이트와 함께 일괄 교체한다(B 감사 A3).
+# [W2 · B감사 A3 — **5행 전면 교체**] 유효피복을 B조 독립 재래스터화 값으로 통일한다.
+#   구값의 출처(`asset_audit_v1.md`)는 계산 코드가 저장소에 없어 원인 규명이 불가하고,
+#   B조 값은 ① 래스터라이저 해석 검증(단위정사각 1.0000 / 원 0.7840 vs 이론 0.7854)
+#   ② N=256~2048 결과 불변 ③ 실루엣 PNG 육안 확인을 거쳤다 [실측 — B §6·§12 A3].
+#   삼각형 수는 5행 전부 이미 일치했다(정정 대상 아님).
+#   변화폭: 낱장 3종이 **40~60 % 과소평가**(maplefall1 +59 % · oakfall1 +60 %),
+#   클러스터 2종은 소폭 과대(−7.0 % · −1.2 %).
+#   ⇒ `scatter_debris` 의 `mean_cov` 가 바뀌므로 **산포 개수가 바뀐다**(재질 A/B 밖의
+#     before/after 항목 — 양팔에 동일하게 걸린다).
 VEG_DEBRIS = [
-    ("Debris/fallcluster1.usd", 0.0628, 9175),
-    ("Debris/fallcluster2.usd", 0.0242, 2980),
-    ("Debris/maplefall1.usd",   0.0051,  631),
-    ("Debris/oakfall1.usd",     0.0030,  496),
+    ("Debris/fallcluster1.usd", 0.0584, 9175),
+    ("Debris/fallcluster2.usd", 0.0239, 2980),
+    ("Debris/maplefall1.usd",   0.0081,  631),
+    ("Debris/oakfall1.usd",     0.0048,  496),
     ("Debris/oakfall2.usd",     0.0054,  582),
 ]
 
 # (상대경로, 대표 폭[m], **원점에서 바닥까지 깊이[m]**)
 #   Rocks 는 원점이 바위 *중심* 이라 지면 z 에 그대로 놓으면 절반이 묻힌다.
 #   z_min 만큼 띄워야 앉고, 일부러 묻을 때는 그만큼 덜 띄운다.
-# (상대경로, 네이티브 폭[m], 원점→바닥 깊이[m], 삼각형 수)
-#   한국 조경 실사종. Privet(쥐똥나무)=생울타리 표준종, Forsythia(개나리)·
-#   Rhododendron(철쭉)·Burning_Bush(화살나무)=화단 관목 표준.
+# (상대경로, 네이티브 폭[m], 원점→바닥 깊이[m], 삼각형 수, **네이티브 높이[m]**)
+#   한국 조경 실사종. Privet(쥐똥나무)=생울타리 표준종, Rhododendron(철쭉)·
+#   Juniper(향나무류)=화단 관목.
 #   **삼각형이 비싸다**(5.5만~40만/주) — 근경에만 쓰고 원경은 블롭을 유지한다.
+#
+# [W2 · A감사 6-b] **5번째 필드(네이티브 높이) 신설.** `place_shrubs` 가 높이 스케일을
+#   **폭 기준**으로 계산하고 있었는데, 실측 종횡비(높이/폭)가 **0.607~1.973 로 3.2배**
+#   흩어져 있어 `target_h=0.85` 요청 시 실제 수고가 **−39 %~+97 %** 로 어긋났다
+#   (Boxwood 0.62 m 와 Juniper 1.68 m 가 같은 화단에 선다) [실측 — A §6-b].
+#   같은 함수 docstring 이 "관목 높이는 스케일 앵커라 랜덤화는 ±8 %" 라고 못박아 놓고
+#   결정론적으로 그 12배 오차를 넣고 있었다 — **단서 축을 지우는 결함**이다.
 VEG_SHRUBS = [
-    ("Shrub/Privet.usd",        1.70, 0.067, 147000),
-    ("Shrub/Boxwood.usd",       1.01, 0.019, 178000),
-    ("Shrub/Juniper.usd",       0.46, 0.013, 200000),
-    ("Shrub/Rhododendron.usd",  2.55, 0.416,  55000),
-    ("Shrub/Burning_Bush.usd",  2.64, 0.193, 141000),
-    ("Shrub/Forsythia.usd",     3.54, 0.007, 404000),
+    # 상대경로                    폭     zmin    삼각형   높이[실측 A §6-b]
+    ("Shrub/Privet.usd",        1.704, 0.067, 147000, 1.114),
+    ("Shrub/Boxwood.usd",       1.009, 0.019, 178000, 0.741),
+    ("Shrub/Juniper.usd",       0.455, 0.013, 200000, 0.898),
+    ("Shrub/Rhododendron.usd",  2.547, 0.416,  55000, 2.013),
+    ("Shrub/Burning_Bush.usd",  2.642, 0.193, 141000, 1.604),
+    ("Shrub/Forsythia.usd",     3.539, 0.007, 404000, 2.317),
 ]
 # 다듬은 생울타리는 실제로 상자 형태가 맞다(전정). 블롭이 틀린 것은
 # **화단의 다듬지 않은 관목**이다 — 거기를 실물로 바꾼다.
 SHRUB_HEDGE = ["Shrub/Privet.usd", "Shrub/Boxwood.usd"]
-SHRUB_ORNAMENT = ["Shrub/Rhododendron.usd", "Shrub/Burning_Bush.usd",
-                  "Shrub/Forsythia.usd", "Shrub/Juniper.usd"]
+# [W2 · A감사 P0-2] `Forsythia`(개나리)·`Burning_Bush`(화살나무) **제거**.
+#   계절 규약은 수종명이 아니라 잎 텍스처 픽셀로 판정한다 [실측 — B §9]:
+#     · `forsythiaflower_basecolor.png` — 개화 전용 텍스처(초록 0.0 %). 개화기 3~4월.
+#     · `burningbush_leaf_basecolor.png` — **적색 30.2 %**(가을 단풍). C2 에는 맞아도
+#       여름·상시 씬에는 금지 대상이라 전역 풀에서 뺀다.
+#   `Rhododendron`(철쭉)은 **꽃 프림 비활성화를 전제로만** 잔류한다 —
+#   `rhododendron_basecolor.png` 픽셀의 **76.7 % 가 마젠타**(만개 스캔)라 그대로 두면
+#   봄 개화가 전 씬에 박힌다. `place_shrubs` 가 `/Asset/Flowers` 를 끈다(아래).
+SHRUB_ORNAMENT = ["Shrub/Rhododendron.usd", "Shrub/Juniper.usd"]
+
+# 계절 특정 프림 — 참조 직후 `SetActive(False)` 로 끈다. 에셋 루트(`/Root`)가
+# 참조 대상 프림으로 매핑되므로 `/Root/Flowers` 는 `{prim}/Asset/Flowers` 가 된다.
+# [실측 — `strings assets/vegetation/Shrub/Rhododendron.usd` = Branches·Flowers·Leaves]
+SEASONAL_SUBPRIMS = {
+    "Shrub/Rhododendron.usd": ("Flowers",),
+}
 
 VEG_ROCKS = [
     ("Rocks/rock_small_01.usda", 0.314, 0.128),
@@ -1936,7 +2044,7 @@ def build_tree(stage, prefix, cx, cy, gz, wood_mtl, canopy_a_mtl, canopy_b_mtl,
 
     if LOOK_GEO and veg_available():
         # 수종은 좌표 해시로 결정 — 같은 씬 재실행 시 동일하고, 나무마다 다르다.
-        pool = [t for t in VEG_TREES for _ in range(t[2])]
+        pool = [t for t in veg_pool() for _ in range(t[2])]
         rel, native, _ = pool[rnd.randrange(len(pool))]
         # **수고는 단서다.** 단서 4계열 ③(스케일 앵커)이 "수관 꼭대기 절대높이"를
         # 쓰므로, 이걸 큰 폭으로 랜덤화하면 정작 학습해야 할 축을 지운다.
@@ -2307,10 +2415,13 @@ def place_shrubs(stage, prefix, pts, target_h, pool=None, seed=1234,
     rnd = _random.Random(int(seed) & 0x7FFFFFFF)
     placed = 0
     for i, (px, py, pz) in enumerate(pts):
-        rel, nat_w, zmin, _tri = avail[rnd.randrange(len(avail))]
-        # 네이티브 '폭'만 실측돼 있어 높이 스케일은 폭 기준으로 근사한다.
-        # 관목은 대체로 폭≈높이라 이 근사가 타당하다. [추정]
-        s = (float(target_h) * (1.0 + overlap) / max(nat_w, 1e-6)
+        rel, nat_w, zmin, _tri, nat_h = avail[rnd.randrange(len(avail))]
+        # [W2 · A감사 6-b 교정] **높이 스케일은 네이티브 '높이' 기준**이다.
+        # 종전은 폭 기준이었고("관목은 대체로 폭≈높이" [추정]), 실측 종횡비가
+        # 0.607~1.973 로 흩어져 있어 요청 수고 대비 −39 %~+97 % 오차가 났다.
+        # `overlap` 은 **폭 방향 겹침**을 만들려는 인자이므로 높이 기준으로 옮긴
+        # 뒤에도 같은 배율로 걸어 종전 생울타리 밀도를 보존한다.
+        s = (float(target_h) * (1.0 + overlap) / max(nat_h, 1e-6)
              * rnd.uniform(0.92, 1.08))
         try:
             # zmin 은 네이티브 치수라 같은 배율로 늘려야 바닥이 지면에 붙는다.
@@ -2320,6 +2431,10 @@ def place_shrubs(stage, prefix, pts, target_h, pool=None, seed=1234,
                                 yaw_deg=rnd.uniform(0, 360),
                                 scale_mul=s)
             if xf is not None:
+                # Seasonal sub-prims off BEFORE instancing. Order matters:
+                # once SetInstanceable(True) is applied the descendants live in
+                # a shared prototype and per-instance edits are ignored.
+                _deactivate_seasonal(stage, f"{prefix}/{tag}_{i}/Asset", rel)
                 try:
                     stage.GetPrimAtPath(f"{prefix}/{tag}_{i}/Asset").SetInstanceable(True)
                 except Exception:

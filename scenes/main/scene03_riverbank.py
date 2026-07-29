@@ -232,7 +232,7 @@ PARAMS = dict(
 
     # --- 재질: texture_scale용 물리 크기[m/타일] + 상수 ---
     material=dict(
-        scale=dict(gravel=0.6, grass=4.0, concrete_floor=0.8,   # grass 4.0: 이끼 뭉침 완화
+        scale=dict(gravel=0.6, grass=1.4, concrete_floor=0.8,   # grass 4.0: 이끼 뭉침 완화
                    dirt_park=1.0, rock_wall=1.5, wood_dark=1.0),
         grass_tint=(0.55, 0.68, 0.42),        # 타일 반복 완화 + 초록 틴트 (유지)
         hedge_tint=(0.48, 0.60, 0.34),        # v4-B1 사면 관목

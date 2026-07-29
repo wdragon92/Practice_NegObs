@@ -204,7 +204,7 @@ PARAMS = dict(
                      lift=0.008),
 
     material=dict(
-        scale=dict(stone_worn=1.1, dirt_park=1.0, grass=4.0, leaf_ground=0.9),
+        scale=dict(stone_worn=1.1, dirt_park=1.0, grass=1.4, leaf_ground=0.9),
         stone_tint=(0.88, 0.92, 0.84),        # 석재 이끼 톤(약)
         grass_tint=(0.55, 0.62, 0.38),        # 표준 잔디 틴트 + 가을 건조
         leaf_tex_tint=(0.95, 0.72, 0.48),     # leaf_ground 텍스처 오텀 보정

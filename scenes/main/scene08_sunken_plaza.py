@@ -188,7 +188,7 @@ PARAMS = dict(
         # texture_scale = 타일 물리크기[m]. 인터로킹 블록 텍스처는 4K 패치가
         # 대략 1.5 m 대역을 덮는다고 보고 1.5 로 둔다(과반복 방지).
         scale=dict(paving_interlock=1.5, concrete_wall=2.0, concrete_floor=1.0,
-                   granite_dark=1.2, grass=4.0, tactile=0.3),
+                   granite_dark=1.2, grass=1.4, tactile=0.3),
         grass_tint=(0.55, 0.68, 0.42),
         # sRGB 감마 규칙(§A-1): "어두운 색"은 0.02~0.06 대역.
         asphalt_color=(0.045, 0.045, 0.050), asphalt_rough=0.88,

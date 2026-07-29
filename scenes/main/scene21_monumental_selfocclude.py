@@ -162,8 +162,8 @@ PARAMS = dict(
     signs=[("Info", "sign_info", -3.2, -5.4, 0.0, 180.0, 1.0, 0.75)],
 
     material=dict(
-        scale=dict(marble_light=1.2, plaza_light=0.8, granite_dark=1.0,
-                   band_dark=0.5, brick_red=2.0, tactile=0.3, grass=4.0),
+        scale=dict(marble_light=1.2, plaza_light=1.80, granite_dark=1.0,
+                   band_dark=0.5, brick_red=2.0, tactile=0.3, grass=1.4),
         grass_tint=(0.55, 0.68, 0.42),
         wood_color=(0.30, 0.20, 0.12), wood_rough=0.85,
         lamp_color=(0.88, 0.88, 0.84), lamp_rough=0.4,
@@ -357,7 +357,7 @@ def main():
         M["plaza"] = PBR(
             f"{ROOT}/Looks/Plaza", sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
-            sca["plaza_light"])
+            sca["plaza_light"], tint=(0.72, 0.72, 0.72))   # [T1 T-1] x0.72
         M["granite"] = PBR(
             f"{ROOT}/Looks/Granite", sc.tex_path("granite_dark", "diff"),
             sc.tex_path("granite_dark", "nor"),

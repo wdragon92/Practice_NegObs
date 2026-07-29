@@ -166,7 +166,7 @@ PARAMS = dict(
     joints=dict(x0=4.0, x1=44.0, step=4.0, w=0.06, proud=0.001),
 
     material=dict(
-        scale=dict(concrete_floor=0.9, concrete_wall=1.2, grass=4.0),
+        scale=dict(concrete_floor=0.9, concrete_wall=1.2, grass=1.4),
         grass_tint=(0.55, 0.68, 0.42),
         wall_tint=(0.92, 0.92, 0.90),                 # 밝은 노출 콘크리트
         # [v6-①] 노면 냉각 틴트 — concrete_floor 난색(황토) 제거. 흙길 오독 해소.

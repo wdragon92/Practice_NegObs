@@ -152,7 +152,7 @@ PARAMS = dict(
     window=dict(w=1.4, h=1.7, inset=0.15, col_step=3.2, margin=2.5),
 
     material=dict(
-        scale=dict(plaza_lower=0.9, plaza_light=1.0, gravel=0.6, grass=4.0,
+        scale=dict(plaza_lower=0.9, plaza_light=1.0, gravel=0.6, grass=1.4,
                    brick_red=2.0),
         # ─ 노면: plaza_lower 원본 평균 sRGB 0.49(중성 회) + 풍화 틴트 → ~0.42
         apron_tint=(0.86, 0.86, 0.84),

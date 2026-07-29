@@ -244,8 +244,8 @@ PARAMS = dict(
     ),
 
     material=dict(
-        scale=dict(concrete_floor=1.2, plaza_light=0.75, plaza_lower=0.8,
-                   brick_red=2.0, grass=4.0),
+        scale=dict(concrete_floor=1.2, plaza_light=1.80, plaza_lower=0.8,
+                   brick_red=2.0, grass=1.4),
         tread_tint=(1.15, 1.15, 1.12),            # 밝은 콘크리트 디딤면
         lower_warm_tint=(1.06, 1.0, 0.94),
         # 라이저 색 — [v6 판정 ㉡] 구 5색은 원색 솔리드(최대/최소 채널비 7~9)라
@@ -616,7 +616,7 @@ def main():
         M["upper"] = sc.make_pbr(
             stage, "/World/Looks/Upper", sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
-            scl["plaza_light"])
+            scl["plaza_light"], tint=(0.72, 0.72, 0.72))   # [T1 T-1] x0.72
         M["lower"] = sc.make_pbr(
             stage, "/World/Looks/Lower", sc.tex_path("plaza_lower", "diff"),
             sc.tex_path("plaza_lower", "nor"), sc.tex_path("plaza_lower", "rough"),

@@ -370,7 +370,7 @@ def main():
     import carb.input
     import omni.usd
     import omni.appwindow
-    from pxr import UsdGeom
+    from pxr import Usd, UsdGeom
     from omni.kit.viewport.utility import (get_active_viewport,
                                            capture_viewport_to_file)
     from isaacsim.core.utils.viewports import set_camera_view
@@ -871,6 +871,30 @@ def main():
     if smoke_mode:
         n = sum(1 for _ in stage.Traverse())
         print(f"[SMOKE] sceneC2 조립 완료 · 프림 {n}개 · 조기 종료")
+        # ── [W2-C · B12] G2 인스턴싱 런타임 검증 ────────────────────────
+        #   `leaf_globalization_budget_v2` 게이트 0. `SetInstanceable(True)` 는
+        #   조용히 실패할 수 있고(참조 없는 프림 등) CPU 정적 검사로는
+        #   프로토타입 공유 여부를 볼 방법이 없다 — pxr 런타임이 필요하다.
+        #   1,784개가 프로토타입을 **공유하지 않으면** 고유 정점이 그대로
+        #   1,784배로 늘어 §8.3 삼각형 예산이 무의미해진다.
+        protos = stage.GetPrototypes()
+        leaves, inst = [], 0
+        for p in stage.Traverse():
+            sp = str(p.GetPath())
+            if "/Leaves/" in sp and sp.endswith("/Asset"):
+                leaves.append(p)
+                if p.IsInstance():
+                    inst += 1
+        print(f"[B12] 프로토타입 {len(protos)}개 "
+              f"(≥1 필요) · 낙엽 Asset 프림 {len(leaves)}개 · "
+              f"IsInstance True {inst}개 "
+              f"({100.0 * inst / max(1, len(leaves)):.1f} %)")
+        for pr in protos:
+            print(f"       · 프로토타입 {pr.GetPath()} "
+                  f"자손 {sum(1 for _ in Usd.PrimRange(pr))}")
+        ok = (len(protos) >= 1 and leaves and inst == len(leaves))
+        print(f"[B12] {'PASS' if ok else 'FAIL'} — "
+              f"프로토타입 ≥1 ∧ 전 낙엽 인스턴스화")
         simulation_app.close()
         return
 

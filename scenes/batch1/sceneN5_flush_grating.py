@@ -40,6 +40,7 @@ import datetime
 
 import scene_common as sc
 import batch1_common as bc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -83,6 +84,22 @@ PARAMS = dict(
     # ─ 보도 슬래브 줄눈(최하층 proud 0.0006) — 드레인 회랑에서 잘라낸다
     joints=dict(spacing=3.0, width=0.03, proud=0.0006,
                 x0=-9.0, x1=15.0, y0=-9.0, y1=9.0),
+
+    # ═══ [W2 ground_kit] P-A 검증 씬 ══════════════════════════════════════
+    #  ★ 이 씬은 사양 §1.4 의 **P-A(스킨 OFF) A/B 증명 대상**이다. 요소가 이미
+    #    다 있는데 룩 ON 에서 매몰돼 있다 — 스킨만 끄면 결과가 즉시 보인다.
+    #    합격선: 맨홀 ROI(px 500–1100 × 350–750) 암부 화소 0.02 % → **≥ 4.5 %**,
+    #            |∇| p99 0.079 → **≥ 0.30**, approach 강황색 화소 **≥ 1,500 px**.
+    #  ★ 신설 맨홀 1기 — **근경 창 W1**(d2 에서 지면거리 0.564~2.00 m). 사선 드레인
+    #    축(pivot(3,0)·yaw 62°)에서 x 기준 4.3 m 이격이라 그레이팅 특색과 무간섭.
+    ground=dict(
+        region=(-12.0, -3.0, 2.0, 3.0),      # 보도 회랑(드레인 남측 대역)
+        manhole_w1=(-1.15, 0.30),            # [F d2] 화면폭 f·0.648/0.85 = 1,268 px
+        gullies=[(-4.0, -2.6), (-9.0, -2.6)],
+        # 볼라드 열 전면 연속 띠 — §12.5 ② "소판 0.40×0.30 → 폭 0.60 연속 띠"
+        #   면적 0.12 ㎡/본 × 5 → 4.2 ㎡ = 35배. relief="normal" 이라 프림 1.
+        tactile_band=(4.0, -5.70, 11.0, -5.10),
+    ),
 
     # ═══ 맥락 드레싱 — "차도 옆 도시 보도"를 렌더만으로 확정 ══════════════
     #  ★ GT 불변: 연석은 **평지 위 융기 스트립**(양측 지면 모두 z≈0) → 실낙차
@@ -683,8 +700,14 @@ def main():
         M["bollard_band"] = PBR(f"{ROOT}/Looks/BollardBand",
                                 diffuse_color=mp["bollard_band_color"],
                                 roughness_const=0.30)
+        # [W2 §12.5 ③] 상수색 → **`tactile_yellow` 텍스처 배선**.
+        #   현행 상수색은 법정 36점 돌기의 음영이 화면에 0 이라, 룩 OFF 에서도
+        #   소판이 "저채도 얼룩"으로만 읽혔다. 텍스처는 이미 등록돼 있었는데
+        #   쓰지 않고 있었다 `[실측 — scene_common.TEX["tactile"]]`.
         M["tactile"] = PBR(f"{ROOT}/Looks/Tactile",
-                           diffuse_color=mp["tactile_color"],
+                           sc.tex_path("tactile", "diff"),
+                           sc.tex_path("tactile", "nor"),
+                           None, 0.30,
                            roughness_const=mp["tactile_rough"])
         M["steel"] = PBR(f"{ROOT}/Looks/Steel", diffuse_color=mp["steel_color"],
                          metallic=mp["steel_metallic"],
@@ -724,11 +747,15 @@ def main():
         inner = d["pave_inner"]
         # 보도 평판 2매 (드레인 남/북)
         for tag, ya, yb in (("S", -ph, -inner), ("N", inner, ph)):
+            # [W2-0 · P-A] **BOX 호출 전에** 스킨 제외를 등록한다 — `add_box` 가
+            #   그 자리에서 `_skin_wanted` 를 부르므로 사후 등록은 늦다.
+            sc.skin_exclude(f"{grp}/Pave_{tag}")
             BOX(f"{grp}/Pave_{tag}",
                 ((x0 + x1) / 2.0, (ya + yb) / 2.0, -pt / 2.0),
                 (x1 - x0, yb - ya, pt), M["pave"], col=True)
         if not cfg["hazard_flush_grating"]:
             # 대조군: 드레인 없이 슬롯 폭까지 보도로 메움(민무늬 평지)
+            sc.skin_exclude(f"{grp}/Pave_Fill")
             BOX(f"{grp}/Pave_Fill",
                 ((x0 + x1) / 2.0, 0.0, -pt / 2.0 - 0.001),
                 (x1 - x0, 2.0 * inner + 0.01, pt), M["pave"], col=True)
@@ -810,6 +837,38 @@ def main():
                     r, mh["h"], mtl)
 
     # -------------------------------------------------------------------
+    # [W2] ground_kit — P3 sidewalk_block. 근경 창 맨홀 신설 + 볼라드 전면
+    #   점자블록 띠(§12 등록 지점 "bollard"). 낙차 에지가 없는 씬이라
+    #   GT-E1′/GT-E2 는 공허참이고, 판정은 프림 예산·알베도·B11 이 한다.
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        g = PARAMS["ground"]
+        gp = gk.plan_ground(
+            "sidewalk_block", region=g["region"], z=0.0,
+            gy=0.0, origin=(0.0, 0.0, 0.0),
+            edges=(),                     # hard negative — 낙차 에지 0
+            dists=(2, 5, 10), scene="sceneN5",
+            tactile=("bollard",),
+            sites=dict(manhole=[tuple(g["manhole_w1"])],
+                       gully=[tuple(p) for p in g["gullies"]],
+                       tactile=dict(bollard=tuple(g["tactile_band"]))),
+            seed=25)
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(manhole=M["lid"], gully=M["iron"], gutter=M["mframe"],
+                  joint=M["joint"], crack=M["joint"], patch=M["pave"],
+                  patch_cut=M["joint"], weed=M["grass"], marking=M["roadpaint"],
+                  stain_dirt=M["trough"], stain_gum=M["trough"],
+                  trench=M["iron"], trench_frame=M["mframe"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris)
+        print(f"[ground_kit] sceneN5 P3 · 프림 {res['prims']} · "
+              f"산포 {res['instances']} · δmax {res['gt_delta_max']:.4f} · "
+              f"unit_cell {res['unit_cell']}")
+        return res
+
+    # -------------------------------------------------------------------
     # 차도 + 연석 — "이 평면은 보도다"를 확정짓는 최상위 맥락 단서.
     #   차도는 보도 평판(z=0) 위 proud 0.0010 의 flush 판, 연석은 그 사이의
     #   융기 스트립(z 0~0.16). **양측 지면이 모두 z≈0 이므로 실낙차 없음**
@@ -817,6 +876,7 @@ def main():
     # -------------------------------------------------------------------
     def build_roadway(M):
         rd = PARAMS["road"]
+        sc.skin_exclude(f"{ROOT}/Roadway")     # [P-A] 차도 flush 도색 보존
         BOX(f"{ROOT}/Roadway",
             ((rd["x0"] + rd["x1"]) / 2.0, (rd["y0"] + rd["y1"]) / 2.0,
              rd["z_top"] - rd["thick"] / 2.0),
@@ -923,6 +983,8 @@ def main():
     if cfg["cue_scene_dressing"]:
         build_roadway(M)                 # 차도+연석 = "보도" 확정 단서
         build_dressing(M)
+    build_ground_kit(M)                  # [W2] 지면 요소 — 드레싱 뒤에 놓는다
+                                         #   (산포는 ground_kit 요소 생성 후 호출)
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])

@@ -746,6 +746,19 @@ def add_box(stage, path, center, size, mtl=None, collider=False):
     return cube
 
 
+# [W2-0 · P-A] ground_kit 이 장식하는 지면 슬래브의 변위 스킨을 끈다.
+#   스킨 상면은 +6.5~16.5 mm 인데(`_ground_skin` 재실측) flush 지면 요소의
+#   proud 는 0.6~4.0 mm 라 **통째로 묻힌다** — 맨홀 암부 화소 5.88 % → 0.02 %,
+#   점형블록 강황색 화소 2,090 → 118 px `[실측 — ground_kit_spec_v1 §1.1·§12.5]`.
+#   ground_kit 은 이 함수를 **콜백으로 주입받는다**(scene_common 미의존 원칙 유지).
+SKIN_EXCLUDE = set()
+
+
+def skin_exclude(*paths):
+    """스킨 제외 경로 등록. 접두 일치도 제외된다. 씬이 ground_kit 적용 전에 호출."""
+    SKIN_EXCLUDE.update(str(p) for p in paths)
+
+
 def _skin_wanted(path, size, mtl):
     """변위 스킨 대상 판정 — 대면적·수평·지면 계열만.
 
@@ -753,6 +766,9 @@ def _skin_wanted(path, size, mtl):
     노징·데크 등 낙차 기하는 경로 토큰으로 전면 제외한다. 판정이 애매하면 **제외**가
     기본값이다 — 변위는 개선 항목이지 필수가 아니므로 위험을 지지 않는다.
     """
+    if str(path) in SKIN_EXCLUDE or any(str(path).startswith(p)
+                                        for p in SKIN_EXCLUDE):
+        return False
     if mtl is None:
         return False
     sx, sy, sz = [float(v) for v in size]
@@ -885,8 +901,11 @@ _CONST_MDL_CLASSES = {"paving", "concrete", "brick", "stone", "soil",
 # 낙차 에지 기하이므로 승용 조건②에 따라 손대지 않는다.
 _SKIN_CLASSES = {"paving", "concrete", "asphalt", "soil", "gravel", "stone"}
 # 경로에 이 토큰이 있으면 지면이어도 변위 금지 (낙차 기하·보행 안전 관련)
+#   "gkit" — ground_kit 산출물은 전부 `{ROOT}/GKit/...` 아래다. 도막·마모 띠처럼
+#   4 m 이상 대면적을 만드는 빌더가 있어, 이 토큰이 없으면 ground_kit 요소가
+#   **자기 위에 2차 스킨을 뒤집어쓴다** [W2-0 · 사양 §1.2].
 _SKIN_DENY = ("stair", "step", "tread", "riser", "nosing", "curb", "ramp",
-              "landing", "deck", "platform", "edge", "lip", "sill")
+              "landing", "deck", "platform", "edge", "lip", "sill", "gkit")
 
 
 def add_cylinder(stage, path, center, radius, height, mtl=None,

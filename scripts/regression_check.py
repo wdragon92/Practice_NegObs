@@ -17,7 +17,7 @@
   [WHITE] 순백 대면적        — v5.1 §4 금지 규약 (절대치는 참고, 증가분이 판정)
   [OCCL]  카메라 차폐 회귀   — 이전 라운드 대비 **신규 암부**와 그 최대 연결 덩어리
   [FRAME] 프레임 점유율 급변 — 전역 톤 정규화 후 16×9 블록 점유율 이동
-  [GRAZE] grazing 은닉 의심  — h0.3 로봇 시점(판정 1순위) 지면대 구조량 변화
+  [GRAZE] grazing 은닉 의심  — **낙차 에지 투영 대역**의 수평 결맞음 변화 (지표 v2)
 
 사용법
   # 단일 씬 A/B
@@ -34,11 +34,17 @@
 
 의존성: numpy + PIL 뿐 (scipy·opencv 금지 — 배포 환경 가정).
 같은 계열 도구: `scripts/imgstats.py` (사실성 저수준 통계). 본 도구는 **회귀** 전용이다.
+
+지표 버전
+  GRAZE 만 v2 (2026-07-29 재캘리브레이션). 나머지 6종은 v1 그대로다.
+  근거·전후 비교표: `Docs/reports/graze_recalibration_v1.md`
 """
 import argparse
 import glob
 import json
+import math
 import os
+import re
 import sys
 from concurrent.futures import ProcessPoolExecutor
 
@@ -131,27 +137,72 @@ PHOTO_DMEAN_UP_WARN = 25.0     # 밝아짐 — 급변이므로 알리되 FAIL �
 PHOTO_DDARK_FAIL = 25.0
 PHOTO_DDARK_WARN = 12.0
 
-# --- [GRAZE] grazing 은닉 의심 (h0.3 로봇 시점 = 판정 1순위) ---------------
-# 완전 자동 판정은 불가하다. "낙차가 드러나면 지면대에 구조가 늘고, 과잉
-# 은닉·매몰이면 구조가 준다" 는 **근사**만 쓴다. 세 지표 중 2개 이상이
-# 대조군 밴드를 벗어날 때만 의심 플래그를 올린다.
-#   ① vgrad : 지면대(하단 55 %)를 **거시화(박스 블러)한 뒤** 세로 그래디언트
-#             평균 = 큰 구조량. 대조군(룩 A/B·모드 교체·소폭 수정 16컷)
-#             비율 0.94~1.05, 미세 텍스처만 크게 바뀐 라운드도 0.88~1.17.
-#             실구조 변화는 2.0~32.2.
-#   ② step_n: 행평균 단차 > 4 인 행의 비율 = 수평 에지(단코·낙차선) 밀도.
-#             대조군 |Δ| <= 1.7 pp / 실구조 변화 +22 ~ +81 pp
-#   ③ erow  : 최강 단차 행의 상대 위치. 대조군 |Δ| <= 0.01 (거의 완전 고정)
-# 전부 **전역 톤 정규화 후** 측정한다(재질만 밝아져도 흔들리지 않게).
-GRAZE_VG_WARN = (0.72, 1.40)
-GRAZE_VG_STRONG = (0.50, 2.00)
-GRAZE_STEPN_WARN = 5.0
-GRAZE_STEPN_STRONG = 15.0
-GRAZE_EROW_WARN = 0.12
-GRAZE_BAND_TOP = 0.45      # 지면대 = 프레임 하단 55 %
-GRAZE_ROWSTEP = 4.0        # 행평균 단차 "강함" 기준(0~255)
-GRAZE_BLUR_Y = 9           # 거시화 커널 (384 px 축소본 기준 ≈ 원본 45 px)
-GRAZE_BLUR_X = 25
+# ===========================================================================
+# --- [GRAZE] grazing 은닉 의심 — 지표 **v2** (2026-07-29 재캘리브레이션) -----
+# ===========================================================================
+# 전면 근거: `Docs/reports/graze_recalibration_v1.md`
+#
+# ■ v1 이 왜 틀렸나 (기하학적 오류, [기하])
+#   v1 은 "지면대 = 프레임 하단 55 %" 의 **거시 구조 총량**을 쟀다. 그런데
+#   지면점의 상 행은 카메라 기하로 결정된다 —
+#       row(X) = H/2 · (1 − tan(−atan(h/X) − pitch) / tan(vFOV/2))
+#   h0.3 · pitch −10° · vFOV 36° (1920×1080, hFOV 60°) 를 넣으면
+#       X = 1 m → 0.68H · 2 m → 0.46H · 5 m → 0.32H · 10 m → 0.28H · ∞ → 0.23H
+#   즉 **하단 55 %(row ≥ 0.45H)에 들어오는 지면은 X ≲ 2.05 m 뿐**이다.
+#   그런데 프리셋 `preset_h{h}_d{d}` 의 낙차 에지는 정의상 카메라에서
+#   수평거리 **정확히 d** 다(`scene_common.grid_views` + 씬별 기준점 시프트,
+#   예: scene05 "립까지 거리 d 의미가 되게" §build_views). 따라서
+#     · d5 · d10 의 에지는 v1 밴드 **바깥**(0.32H · 0.28H)에 있었고
+#     · v1 이 실제로 잰 것은 **근경 클러터 지대**(X < 2 m)였다.
+#   ground_kit 근경 충전은 바로 그 지대를 채운다 → 구조적 오탐 폭주가 예정.
+#
+# ■ 실측 뒷받침
+#   · 오탐: sceneC2 `balust`→`leaf3d`(3D 낙엽 산포 = 근경 충전 그 자체)에서
+#           v1 은 `h0.3_d5` GRAZE **FAIL**(vgrad ×1.46 · erow +0.50). 육안으로
+#           에지 대역은 불변이고 변화는 전량 근경이다.
+#   · 검출력: 낙차 노출을 물리 파라미터(노출 라이저 높이 · 면 대비)로 주입한
+#           844컷 중 v1 검출 **7.2 %**. v2 는 70.5 %(라이저 ≤0.4 m 78.5 %).
+#   · 판정 이력 정합: v6→v7·v7→v8 은 판정문이 "은닉(grazing) 회귀 0"
+#           (`judge_v8_rt.md` §46, `judge_v7_rt_B.md`)으로 확정한 라운드인데
+#           v1 은 92컷 중 FAIL 11 · WARN 7 을 냈다. v2 는 FAIL 1 · WARN 3.
+#
+# ■ v2 가 재는 것 — 에지 투영 대역의 **수평 결맞음 변화**
+#   E 대역(에지) = 지면거리 [0.7·d, 2.2·d] 의 투영 행 ± FOV 오차 여유
+#   G 대역(가드) = 라이저 0.5 m 가 드러났을 때 채울 행 (측정 제외)
+#   N 대역(근경) = 그 아래 전부 = 클러터 대조군
+#   신호 = (톤 정규화 후) 세로 단차장의 **열 평균**. 등방 클러터(낙엽·자갈·
+#   소품)는 열 평균에서 상쇄되고, 화면을 가로지르는 선(= 낙차 에지)만 남는다.
+#   판정치 spec = max|Δ|_E − max|Δ|_N  → "변화가 에지 대역에 **국소**한가".
+GRAZE_VER = "v2"
+GRAZE_HFOV = 60.0          # [코드] 1920×1080 뷰포트 수평 화각. 근거 다중:
+#   `scenes/main/facade_kit.py` §231 "pitch −10° · vFOV 36°"
+#   `scenes/main/scene19_fan_winder.py` `_cam_basis(hfov=60, aspect=16/9)`
+#   `sceneC2/C1` "[카메라 검산] FOV 수평 ±30°/수직 ±18° 가정"
+#   원출처는 `fixlog_W4.md` §155 · `fixlog_W5.md` §66 (v6 렌더 역산).
+#   W5 는 반각 32.6°/19.8° 라는 다른 역산치도 남겼다 → 수직 스케일 오차
+#   최대 11 % → 아래 GRAZE_FOV_TOL 로 흡수한다.
+GRAZE_KN = 0.7             # E 대역 근단 = 0.7·d  (에지보다 앞 30 %)
+GRAZE_KF = 2.2             # E 대역 원단 = 2.2·d  (에지 너머 배경 진입 직전)
+GRAZE_FOV_TOL = 0.13       # 화각 불확실성 여유 (프레임 중심 기준 오프셋의 13 %)
+GRAZE_GUARD_DZ = 0.5       # 가드 대역 = 라이저 0.5 m 노출분. 이만큼은 N 에서 뺀다
+#   (안 빼면 큰 노출이 N 까지 번져 spec 이 스스로 상쇄된다 — 실측:
+#    라이저 0.4 m 검출률 가드 없음 55 % → 가드 0.5 m 로 동일, 0.8 m 는 24 %.
+#    0.8 m 급 노출은 어차피 PHOTO/OCCL 관할이라 가드를 더 키우지 않는다.)
+# 판정 임계 — 대조군 157컷(모드교체·룩A/B·맥락ctx·사실화r2·P4근경) 실측
+#   spec p50 0.0~1.3 · p90 0.2~9.8 · max 24.8.  임계 8/20 에서 대조군 WARN 1.
+GRAZE_SPEC_WARN = 8.0
+GRAZE_SPEC_FAIL = 20.0
+GRAZE_AGREE_MIN = 0.70     # 변화의 **열 부호 일치율**. 0.5=난수(등방 클러터),
+#   1.0=화면 전폭 선. 실측: 낙엽 산포 0.5~0.6 / 주입 낙차선 0.9~1.0
+GRAZE_BAND_MU_MIN = 35.0   # E 대역 절대 휘도 하한. 이보다 어두우면 판정 유보
+#   (scene06 나선 내부 mean 2.7 · sceneD4 터널 12.9 — 톤 정규화가 잡음을 증폭)
+GRAZE_PHOTO_DMEAN = 20.0   # 프레임 측광이 이만큼 흔들리면 GRAZE 판정 유보
+GRAZE_PHOTO_DDARK = 12.0   #   (= PHOTO WARN 임계. 조명 회귀를 먼저 고칠 것)
+GRAZE_HW = 3               # 단차 정합 필터 반폭(행)
+GRAZE_SMOOTH = 3           # 프로파일 이동평균(행)
+GRAZE_SLACK = 2            # 행 오정합 허용 — 기존 에지가 1~2행 밀린 것은 변화 아님
+GRAZE_EDGE_GUARD = 6       # 프레임 상·하단 절단 구간(필터가 잘리는 곳)
+GRAZE_LONG = 960           # GRAZE 전용 작업 해상도 (d10 대역이 384 에선 13행뿐)
 
 # --- 이월 결함 판정 ---------------------------------------------------------
 # 절대 결함(DARK/BLOWN)이 이전 라운드에도 있었으면 회귀가 아니다. 이만큼
@@ -184,8 +235,12 @@ def _lum(a):
     return 0.2126 * a[..., 0] + 0.7152 * a[..., 1] + 0.0722 * a[..., 2]
 
 
-def _load(path):
-    """전해상도 RGB + 축소본 2종을 한 번에 만든다."""
+def _load(path, graze=False):
+    """전해상도 RGB + 축소본 2종(+GRAZE 전용 1종)을 한 번에 만든다.
+
+    GRAZE 축소본은 h0.3 컷에서만 만든다 — d10 의 에지 대역은 384 px 축소본에서
+    13행뿐이라 통계가 서지 않는다(960 px 에선 34행).
+    """
     im = Image.open(path).convert("RGB")
     w, h = im.size
     full = np.asarray(im).astype(np.float32)
@@ -194,7 +249,8 @@ def _load(path):
         s = n / max(w, h)
         return np.asarray(im.resize((max(1, int(w * s)), max(1, int(h * s))),
                                     Image.BOX)).astype(np.float32)
-    return full, rs(SMALL_LONG), rs(BLOB_LONG)
+    return full, rs(SMALL_LONG), rs(BLOB_LONG), (_lum(rs(GRAZE_LONG)) if graze
+                                                 else None)
 
 
 def photometry(full):
@@ -285,36 +341,130 @@ def largest_blob_pct(mask):
     return 100.0 * max(counts.values()) / mask.size
 
 
-def _boxblur(a, ky, kx):
-    """적분영상 박스 평균. 미세 텍스처를 지우고 거시 구조만 남기는 용도."""
-    py, px = ky // 2, kx // 2
-    p = np.pad(a, ((py, py), (px, px)), mode="edge")
-    c = np.pad(np.cumsum(np.cumsum(p, 0), 1), ((1, 0), (1, 0)))
-    H, W = a.shape
-    return (c[ky:ky + H, kx:kx + W] - c[0:H, kx:kx + W]
-            - c[ky:ky + H, 0:W] + c[0:H, 0:W]) / float(ky * kx)
+# ---------------------------------------------------------------------------
+# GRAZE v2 — 카메라 기하로 낙차 에지 대역을 특정하고 거기만 본다
+# ---------------------------------------------------------------------------
+def ground_row(X, h, pitch_deg, H, tanv):
+    """지면점(수평거리 X, 눈보다 h 아래)의 상 행. 행은 아래로 증가.
 
-
-def graze_feat(l):
-    """지면대(하단 55 %) **거시** 구조 지표. 톤 정규화된 휘도를 넣을 것.
-
-    거시화(박스 블러)가 핵심이다. 원본 그래디언트를 그대로 쓰면 룩 레이어가
-    넣는 **미세 텍스처(정점 변위·디테일 노멀)만으로 지표가 ×8.7 튀어**
-    전 씬이 오경보가 된다(실측: scene07 v8_pt→final_pt h0.3_d5,
-    raw ×8.72 vs 거시 ×0.88). 낙차 노출은 수십 픽셀 규모의 거시 구조다.
+    점의 앙각 = −atan(h/X), 광축 앙각 = pitch → 광축 위 오프셋 a = −atan(h/X) − pitch.
     """
-    h = l.shape[0]
-    gb = l[int(h * GRAZE_BAND_TOP):]
-    if gb.shape[0] < 4:
-        return dict(vgrad=0.0, step_n=0.0, erow=0.0)
-    macro = _boxblur(gb, GRAZE_BLUR_Y, GRAZE_BLUR_X)
-    r = gb.mean(1)
-    d = np.abs(np.diff(r))
-    return dict(
-        vgrad=float(np.abs(np.diff(macro, axis=0)).mean()),
-        step_n=100.0 * float((d > GRAZE_ROWSTEP).mean()),
-        erow=float(np.argmax(d)) / float(d.size),
-    )
+    X = max(float(X), 1e-6)
+    a = -math.atan2(h, X) - math.radians(pitch_deg)
+    return H / 2.0 * (1.0 - math.tan(a) / tanv)
+
+
+def graze_geom(view, eye, tgt):
+    """(지면 위 눈높이 h, 낙차 에지까지 수평거리 d, pitch°, 종류) 또는 None.
+
+    · `preset_h{h}_d{d}` — 이름이 곧 기하다. `grid_views` 규약상 eye 는
+      (−d, gy, h) 이고 낙차 에지는 원점(x=0)이므로 **에지까지 거리 = d**,
+      **지면 위 눈높이 = h**. 씬이 기준점을 옮겨도(scene05 −1.5, scene19 미러)
+      "립까지 거리 d" 의미가 유지되도록 옮긴 것이라 이 해석이 맞다.
+      manifest 의 eye z 는 **월드 절대 z** 라 여기 쓸 수 없다(도크스트링 §is_graze_view).
+    · 그 밖의 `*graz*` 미장센 컷 — 저자 관례상 **tgt 가 위험 기하**다.
+      그래서 지면 = tgt 의 z 평면, 에지 거리 = eye→tgt 수평거리로 푼다.
+    """
+    m = re.search(r"h([0-9.]+)_d([0-9.]+)", view)
+    e = [float(v) for v in eye]
+    t = [float(v) for v in tgt]
+    horiz = math.hypot(t[0] - e[0], t[1] - e[1])
+    if horiz < 1e-6:
+        return None
+    pitch = math.degrees(math.atan2(t[2] - e[2], horiz))
+    if m:
+        return dict(h=float(m.group(1)), d=float(m.group(2)), pitch=pitch,
+                    kind="preset")
+    h = e[2] - t[2]
+    if h <= 0.02 or horiz < 0.3:
+        return None                      # 수평·상향 시선 → 지면 대역이 안 잡힌다
+    return dict(h=h, d=horiz, pitch=pitch, kind="aimed")
+
+
+def graze_bands(g, H, W):
+    """에지(E) · 가드 · 근경(N) 대역의 행 범위."""
+    tanv = math.tan(math.radians(GRAZE_HFOV / 2.0)) * H / float(W)
+    h, d, p = g["h"], g["d"], g["pitch"]
+    y_hor = ground_row(1e9, h, p, H, tanv)         # 지평선
+    y_haz = ground_row(d, h, p, H, tanv)           # 낙차 에지
+    y_far = ground_row(d * GRAZE_KF, h, p, H, tanv)
+    y_near = ground_row(d * GRAZE_KN, h, p, H, tanv)
+    pad = GRAZE_FOV_TOL * max(abs(y_far - H / 2.0), abs(y_near - H / 2.0))
+    e_top = max(y_hor + 1.0, y_far - pad, float(GRAZE_EDGE_GUARD))
+    e_bot = min(H - GRAZE_EDGE_GUARD, max(e_top + 6.0, y_near + pad))
+    n_top = min(H - GRAZE_EDGE_GUARD,
+                max(e_bot, ground_row(d, h + GRAZE_GUARD_DZ, p, H, tanv)))
+    n_bot = H - GRAZE_EDGE_GUARD
+    if n_bot - n_top < 20:               # 가드가 근경을 다 먹었다(d2 + 깊은 낙차)
+        n_top = max(min(n_top, H * 0.80), e_bot)
+    return dict(e_top=e_top, e_bot=e_bot, n_top=n_top, n_bot=n_bot,
+                y_haz=y_haz, y_hor=y_hor, tanv=tanv)
+
+
+def step_field(l):
+    """화소별 세로 단차 응답 = (아래 GRAZE_HW행 평균) − (위 GRAZE_HW행 평균)."""
+    H = l.shape[0]
+    c = np.cumsum(np.pad(l, ((1, 0), (0, 0))), axis=0)
+    i = np.arange(H)
+    a0, a1 = np.clip(i - GRAZE_HW, 0, H), i
+    b0, b1 = np.clip(i + 1, 0, H), np.clip(i + 1 + GRAZE_HW, 0, H)
+    up = (c[a1] - c[a0]) / np.maximum(1, a1 - a0)[:, None]
+    dn = (c[b1] - c[b0]) / np.maximum(1, b1 - b0)[:, None]
+    return dn - up
+
+
+def graze_delta(Da, Db):
+    """행별 (|결맞음 변화|, 변화의 열 부호 일치율).
+
+    **열 평균이 핵심이다.** 낙엽·자갈·소품 같은 등방 클러터는 열마다 부호가
+    달라 평균에서 상쇄되고, 화면을 가로지르는 선(낙차 에지·단코)만 살아남는다.
+    행 슬랙은 "이미 있던 에지가 1~2행 밀린 것"을 변화로 세지 않기 위한 것이다.
+    """
+    k = np.ones(GRAZE_SMOOTH) / GRAZE_SMOOTH
+    best_c = best_a = None
+    for s in range(-GRAZE_SLACK, GRAZE_SLACK + 1):
+        dD = Db - np.roll(Da, s, axis=0)
+        c = np.convolve(dD.mean(1), k, mode="same")
+        a = np.maximum((dD > 0).mean(1), (dD < 0).mean(1))
+        if best_c is None:
+            best_c, best_a = c, a
+        else:
+            take = np.abs(c) < np.abs(best_c)
+            best_c = np.where(take, c, best_c)
+            best_a = np.where(take, a, best_a)
+    return np.abs(best_c), best_a
+
+
+def _band_peak(mag, agr, top, bot):
+    n = len(mag)
+    a = max(GRAZE_EDGE_GUARD, min(n - 1 - GRAZE_EDGE_GUARD, int(round(top))))
+    b = max(a + 1, min(n - GRAZE_EDGE_GUARD, int(round(bot))))
+    k = a + int(np.argmax(mag[a:b]))
+    return float(mag[k]), k, float(agr[k])
+
+
+def graze_v2(la, lbn, view, vw):
+    """la=이전, lbn=톤 정규화된 신규 (GRAZE_LONG 축소본 휘도). 없으면 None."""
+    if not vw or "eye" not in vw or "tgt" not in vw:
+        return None
+    g = graze_geom(view, vw["eye"], vw["tgt"])
+    if g is None:
+        return None
+    H, W = la.shape
+    B = graze_bands(g, H, W)
+    Da, Db = step_field(la), step_field(lbn)
+    mag, agr = graze_delta(Da, Db)
+    dE, rE, agE = _band_peak(mag, agr, B["e_top"], B["e_bot"])
+    dN = (_band_peak(mag, agr, B["n_top"], B["n_bot"])[0]
+          if B["n_bot"] - B["n_top"] > 4 else 0.0)
+    a, b = int(B["e_top"]), int(B["e_bot"])
+    ca = np.convolve(Da.mean(1), np.ones(GRAZE_SMOOTH) / GRAZE_SMOOTH, mode="same")
+    cb = np.convolve(Db.mean(1), np.ones(GRAZE_SMOOTH) / GRAZE_SMOOTH, mode="same")
+    return dict(spec=dE - dN, dE=dE, dN=dN, agree=agE, row=rE,
+                up=bool(abs(cb[rE]) > abs(ca[rE])),
+                band_mu=min(float(la[a:b].mean()), float(lbn[a:b].mean())),
+                d=g["d"], h=g["h"], kind=g["kind"],
+                e_top=B["e_top"], e_bot=B["e_bot"], y_haz=B["y_haz"])
 
 
 # ===========================================================================
@@ -329,10 +479,14 @@ def index_round(d, root):
     깨졌으면 파일명 `{mode}_{sky}_{view}.png` 규약으로 폴백한다.
     """
     out = {}
+    cams = {}
     mf = os.path.join(d, "manifest.json")
     if os.path.isfile(mf):
         try:
             j = json.load(open(mf))
+            # views[name] = dict(eye, tgt) — GRAZE v2 의 에지 대역 투영에 필수
+            cams = {k: v for k, v in (j.get("views") or {}).items()
+                    if isinstance(v, dict) and "eye" in v and "tgt" in v}
             for s in j.get("shots", []):
                 f = s.get("file", "")
                 p = f if os.path.isabs(f) else os.path.join(root, f)
@@ -341,13 +495,15 @@ def index_round(d, root):
                     p = p2 if os.path.isfile(p2) else p
                 if os.path.isfile(p):
                     out[s["view"]] = dict(path=p, mode=s.get("mode", "?"),
-                                          ok=bool(s.get("ok", True)))
+                                          ok=bool(s.get("ok", True)),
+                                          cam=cams.get(s["view"]))
         except Exception as e:                       # manifest 파손 → 폴백
             print(f"[경고] manifest 판독 실패 {mf}: {e}", file=sys.stderr)
     for p in sorted(glob.glob(os.path.join(d, "*.png"))):
         parts = os.path.basename(p)[:-4].split("_", 2)
         if len(parts) == 3 and parts[2] not in out:
-            out[parts[2]] = dict(path=p, mode=parts[0], ok=True)
+            out[parts[2]] = dict(path=p, mode=parts[0], ok=True,
+                                 cam=cams.get(parts[2]))
     return out
 
 
@@ -387,14 +543,15 @@ def check_view(scene, view, before, after):
         _add(iss, "INFO", "CAPTURE",
              "manifest ok=false — 캡처 폴링 조기 종료(파일은 정상인 경우가 대부분)")
 
-    fullB, smallB, blobB = _load(after["path"])
+    gz_want = is_graze_view(view)
+    fullB, smallB, blobB, grazB = _load(after["path"], gz_want)
     pb = photometry(fullB)
     r["metrics"].update({("after_" + k): v for k, v in pb.items()})
 
     # ---- 절대 검사 -------------------------------------------------------
     pa = None
     if before is not None:
-        fullA, smallA, blobA = _load(before["path"])
+        fullA, smallA, blobA, grazA = _load(before["path"], gz_want)
         pa = photometry(fullA)
         r["metrics"].update({("before_" + k): v for k, v in pa.items()})
         if before.get("mode", "?") != after.get("mode", "?"):
@@ -529,35 +686,50 @@ def check_view(scene, view, before, after):
                 _add(iss, "WARN", "FRAME",
                      f"프레임 점유율 이동 {shift:.0f} % (최대 편차 {mx:.0f}/255)")
 
-            # [GRAZE] h0.3 로봇 시점 은닉 의심
-            if is_graze_view(view):
-                fa = graze_feat(la)
-                fb = graze_feat(lbn)
-                ratio = fb["vgrad"] / max(fa["vgrad"], 1e-6)
-                dstep = fb["step_n"] - fa["step_n"]
-                derow = abs(fb["erow"] - fa["erow"])
-                r["metrics"].update(gz_vgrad_ratio=ratio, gz_dstep=dstep,
-                                    gz_derow=derow)
-                hits, strong = [], 0
-                if not (GRAZE_VG_WARN[0] <= ratio <= GRAZE_VG_WARN[1]):
-                    hits.append(f"지면 구조량 ×{ratio:.2f}")
-                    if not (GRAZE_VG_STRONG[0] <= ratio <= GRAZE_VG_STRONG[1]):
-                        strong += 1
-                if abs(dstep) > GRAZE_STEPN_WARN:
-                    hits.append(f"수평 단차 행 {dstep:+.1f} pp")
-                    if abs(dstep) > GRAZE_STEPN_STRONG:
-                        strong += 1
-                if derow > GRAZE_EROW_WARN:
-                    hits.append(f"최강 단차 위치 {derow:+.2f}")
-                if len(hits) >= 2:
-                    up = ratio > 1.0 or dstep > 0
-                    why = ("지면대 구조가 늘었다 → 숨어 있어야 할 낙차가 "
-                           "드러났을 가능성" if up else
-                           "지면대 구조가 줄었다 → 낙차가 과도하게 은폐·매몰됐을 가능성")
-                    sev = "FAIL" if (strong >= 2 or len(hits) == 3) else "WARN"
-                    _add(iss, sev, "GRAZE",
-                         f"[의심] h0.3 은닉 — {' · '.join(hits)}. {why}. "
-                         f"**육안 확인 필요**(자동 확정 불가)")
+            # [GRAZE v2] 낙차 에지 투영 대역의 수평 결맞음 변화
+            if gz_want:
+                gz = None
+                if grazA is not None and grazB is not None \
+                        and grazA.shape == grazB.shape:
+                    gz = graze_v2(grazA, tone_match(grazB, grazA), view,
+                                  (after.get("cam") or (before or {}).get("cam")))
+                if gz is None:
+                    _add(iss, "INFO", "GRAZE",
+                         f"[{GRAZE_VER}] 판정 유보 — manifest 에 이 뷰의 eye/tgt 가 "
+                         f"없거나 시선이 지면을 안 물어 에지 대역을 못 세웠다")
+                else:
+                    r["metrics"].update(
+                        gz_ver=GRAZE_VER, gz_spec=gz["spec"], gz_dE=gz["dE"],
+                        gz_dN=gz["dN"], gz_agree=gz["agree"], gz_row=gz["row"],
+                        gz_band=[round(gz["e_top"], 1), round(gz["e_bot"], 1)],
+                        gz_haz_row=round(gz["y_haz"], 1), gz_d=gz["d"],
+                        gz_band_mu=gz["band_mu"])
+                    band = (f"에지대역 y{gz['e_top']:.0f}~{gz['e_bot']:.0f}"
+                            f"/{grazA.shape[0]} (낙차 {gz['d']:.1f} m 지점 y"
+                            f"{gz['y_haz']:.0f})")
+                    if gz["band_mu"] < GRAZE_BAND_MU_MIN:
+                        _add(iss, "INFO", "GRAZE",
+                             f"[{GRAZE_VER}] 판정 유보 — 에지 대역이 너무 어둡다"
+                             f"(휘도 {gz['band_mu']:.0f} < {GRAZE_BAND_MU_MIN:.0f}). {band}")
+                    elif (abs(dmean) > GRAZE_PHOTO_DMEAN
+                          or abs(ddark) > GRAZE_PHOTO_DDARK):
+                        _add(iss, "INFO", "GRAZE",
+                             f"[{GRAZE_VER}] 판정 유보 — 프레임 측광이 흔들렸다"
+                             f"(Δmean {dmean:+.1f} · Δdark {ddark:+.1f} pp). "
+                             f"조명 회귀를 먼저 처리하고 재실행할 것. {band}")
+                    elif (gz["spec"] > GRAZE_SPEC_WARN
+                          and gz["agree"] >= GRAZE_AGREE_MIN):
+                        why = ("에지 대역에 화면을 가로지르는 선이 **생겼다** → "
+                               "숨어 있어야 할 낙차가 드러났을 가능성" if gz["up"] else
+                               "에지 대역의 선이 **약해졌다** → 낙차가 과도하게 "
+                               "은폐·매몰됐을 가능성")
+                        sev = "FAIL" if gz["spec"] > GRAZE_SPEC_FAIL else "WARN"
+                        _add(iss, sev, "GRAZE",
+                             f"[{GRAZE_VER}][의심] 은닉 — 국소도 {gz['spec']:.1f} "
+                             f"(에지 {gz['dE']:.1f} − 근경 {gz['dN']:.1f}) · "
+                             f"열 일치율 {gz['agree']:.2f} · 최대 변화 y{gz['row']}. "
+                             f"{why}. {band}. **그 대역만 잘라서 육안 확인**"
+                             f"(자동 확정 불가)")
 
     worst = max((SEV[i["sev"]] for i in iss), default=0)
     r["verdict"] = SEV_NAME[worst] if worst >= 2 else ("INFO" if worst else "PASS")

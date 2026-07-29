@@ -18,6 +18,33 @@ scene15_alley_labyrinth.py — NegObs 인공씬 15호: 감천/알파마형 골�
   본체 기하는 불변(트랜스폼 0 변경). 파스텔 팔레트는 순백 대면적 금지 규약에
   맞춰 최대 채널 ≤0.80 으로 낮추고, 파사드·지붕은 인스턴스별 ±5 % 틴트 지터.
 
+[realism v1 · railing] The scene carried a **code-standard freestanding guardrail**
+  (top + mid rail, posts @1.1 m, balusters @0.116 m, plus the LOOK_GEO handrail —
+  3 rail lines × 3 flights = 116 prims) standing at y=0.55, i.e. **10 mm off a
+  house facade at y=0.58**. A statutory fall barrier bolted onto a wall it does
+  not need to protect, eating half of a 1.2 m alley stair — the single most
+  artificial object in the scene.
+  Korean hillside alley stairs do not build that. A 12-photo tally (report §1)
+  found **0/12** two-sided code guardrails and **0/12** stairs railed on both
+  flanks; 1/12 had no rail at all and the rest carried a single minimal pipe on
+  slim posts, always one-sided or down the centre. And the NONE bucket is
+  under-counted — the ordinary-alley photos came from stair-retrofit news
+  coverage, which structurally over-samples stairs that just received a rail.
+  Two things settle it for this geometry:
+    · The corridor is walled on **both** sides for the whole descent, so the
+      walls carry the guard (evac/fire §15(1)2 admits a "벽" in place of a
+      railing — the same reading that passed scene05's arc stair on its cheek
+      walls, Docs/reports/stair_compliance_v1.md §1).
+    · §15(3) then states the matching rule outright: "양쪽에 벽 등이 있어 난간이
+      없는 경우에는 손잡이를 설치하여야 한다" — a both-sides-walled stair takes a
+      **handrail**, not a guardrail. The old geometry was the wrong part.
+  Redesign: guardrail deleted (116 prims → 0). `cue_railing` defaults **False**
+  (bare stair, walls guard); ON builds one wall-bracketed φ34 pipe handrail over
+  the upper flight + landing only, and the lower flight past the 25° bend stays
+  bare either way.
+  Rationale, photo tally and self-check: Docs/reports/scene15_railing_fix_v1.md.
+  GT invariant — rails create no terrain z, so the drop label is untouched.
+
 실행 (GUI 룩 체크 — 기본):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
@@ -39,6 +66,7 @@ import datetime
 
 import scene_common as sc
 import ground_kit as gk
+import stair_kit as sk       # [realism v1] wall-mounted handrail (§15(4))
 
 
 # ===========================================================================
@@ -46,7 +74,19 @@ import ground_kit as gk
 # ===========================================================================
 SCENE_CONFIG = {
     "hazard_stairs":      True,   # False → 계단·꺾임 제거, 상부 골목이 z=0로 평탄 연장
-    "cue_railing":        True,   # 계단 한쪽(우측) 단순 파이프 손잡이
+    # [realism v1] **Default flipped True → False**, and the semantics changed:
+    #   this key no longer builds a *guardrail* at all. OFF = bare stair, the
+    #   flanking walls carry the guard function (evac/fire §15(1)2 "벽"). ON =
+    #   one wall-bracketed φ34 pipe **handrail** (§15(4)) over the upper flight
+    #   and landing — never a guardrail, and never on both flanks.
+    #   Why OFF is the default `[survey N=12, report §1]`: 0/12 photographed
+    #   Korean hillside alley stairs carry a two-sided code guardrail, 0/12 rail
+    #   both flanks at once, and the "no rail at all" bucket is under-counted
+    #   because the ordinary-alley sample came from stair-retrofit news coverage
+    #   (Busan Ilbo, of a 147-location retrofit programme: "아직도 계단 손잡이가
+    #   없는 골목이 많아"). For an un-renovated 달동네 maze, bare is the modal
+    #   state. Ledger: scene15 leaves the "난간 있음" column — report §4.
+    "cue_railing":        False,  # 무난간(방호=좌우 벽). True → 북측 벽부착 파이프 1선
     "cue_tactile":        False,  # 노후 골목 — 점자블록 비관행(키 예약)
     "cue_material_break": True,   # False → 계단을 골목 바닥재로 통일
     "cue_nosing":         False,  # 도색 단코 비관행(키 예약)
@@ -70,8 +110,46 @@ PARAMS = dict(
     bend=dict(pivot=(5.1, 0.0), deg=25.0),
     # 하부 골목: 둘째 플라이트 끝(x≈9.0, z≈-4.25)에서 +X로 이어져 소실 (rot_group 내)
     lower_alley=dict(x0=9.0, x1=20.0, y0=-0.9, y1=0.9, z_top=-4.25, base_z=-6.0),
-    rail=dict(y_side=0.55, rail_h=0.92, post_r=0.02, rail_r=0.026,
-              rail_mid_r=0.02, rail_mid_drop=0.46, spacing=1.1),
+    # ═══ [realism v1] Railing — freestanding guardrail → wall-mounted pipe ═══
+    #  Old: `y_side=0.55, rail_h=0.92, post_r=0.02, rail_r=0.026,
+    #        rail_mid_r=0.02, rail_mid_drop=0.46, spacing=1.1` on THREE lines
+    #        (flight1 · landing · flight2). Under LOOK_GEO each line also grew
+    #        balusters @0.116 and a second, coaxial `stair_kit.build_handrail`
+    #        post line — 116 prims, 21 % of the scene, all of it inside the
+    #        30 mm slot between y=0.55 and the facade at y=0.58 `[measured]`.
+    #  New: nothing by default; one pipe **bracketed to the wall** when
+    #        `cue_railing` is ON. The wall-bracket form is what §15(3)
+    #        prescribes for a both-sides-walled stair, but note the honest gap:
+    #        the photo sample found **0/12** wall-bracketed pipes in alleys
+    #        (report §1.2) — field retrofits use slim posts, plausibly because
+    #        the flanking walls are private property. The highest-fidelity
+    #        alternative for exactly this geometry is a **single centre pipe**
+    #        (survey S10/S11, Choryang 180-stairs: walls both sides, one pipe
+    #        down the middle). Rejected here because a post line on the y=0
+    #        camera axis would sit in the centre of every h0.3 grazing frame
+    #        and is a live GRAZE-regression risk in a 1.2 m corridor.
+    #        Reversible — logged for 통람 v2 (report §6).
+    rail=dict(
+        wall_y=0.58,            # north house facade plane (House[4]/[5], face=-1)
+        wall_side=-1.0,         # the corridor is on the y < wall_y side
+        dia=0.034,              # φ34 — inside the statutory φ32~38 (§15(4)1)
+        height=0.85,            # 850 mm above the nosing line (§15(4)2)
+        wall_gap=0.050,         # 50 mm clear of the wall face (§15(4)2)
+        bracket_r=0.011, bracket_spacing=1.20,
+        # Top end extension 0. The flanking wall itself only starts at x=0 (the
+        #   drop edge: House[4] spans x 0..2.8), so there is no wall to bracket
+        #   to before it — the pipe physically cannot extend. Statutory minimum
+        #   is 300 mm (§15(4)3), so this is a deliberate **H3 shortfall**, i.e.
+        #   the "sub-code reality" this project studies. Bottom end runs 1.5 m
+        #   over the landing (x 3.6..5.1, wall continues on House[5]) → H3 met.
+        ext_top=0.0, ext_bot=1.50,
+        # Lower flight (past the 25° bend, inside the rot_group) gets **no**
+        #   rail by default: the piecemeal resident-installed pipe stops at the
+        #   landing. The walls (House[8]/[10] facades at local y=±0.58) still
+        #   guard it, and leaving the bend uncued is the scene's research
+        #   identity — the 2.21 m that the bend hides carries no cue at all.
+        lower_flight=False,
+    ),
 
     # 상부 골목 평탄 (x -12..0, z=0)
     upper_alley=dict(x0=-12.0, x1=0.0, y0=-0.9, y1=0.9, z_top=0.0, base_z=-6.0),
@@ -219,7 +297,17 @@ PARAMS = dict(
         window_color=(0.05, 0.06, 0.08), window_rough=0.2,    # 다크 유리
         frame_color=(0.72, 0.70, 0.66), frame_rough=0.65,     # 창·문 프레임
         skirt_color=(0.10, 0.10, 0.12), skirt_rough=0.8,      # 파사드 걸레받이
+        # `rail_*` is now used ONLY by the ground_kit metal parts (manhole lid,
+        #   gutter cover, trench frame) — the guardrail that used to own it is
+        #   gone. Kept as-is so the ground_kit wiring of pilot cb40ae8 is
+        #   untouched.
         rail_color=(0.30, 0.30, 0.32), rail_metallic=0.5, rail_rough=0.5,
+        # [realism v1] Alley wall pipe — painted mild steel gone chalky. Alley
+        #   pipes are painted (green/blue-grey is the common Korean choice) and
+        #   then weather, so this is NOT the bright half-metallic of `rail_*`:
+        #   low metallic + high roughness so it stays a dull line against the
+        #   pastel plaster instead of a specular highlight.
+        pipe_color=(0.31, 0.34, 0.31), pipe_metallic=0.2, pipe_rough=0.72,
         pot_color=(0.35, 0.12, 0.10), pot_rough=0.7,          # 토분(구 tank_color)
         gear_color=(0.045, 0.05, 0.045), gear_rough=0.7,      # 실외기
         valley_tint=(0.85, 0.85, 0.82),
@@ -333,7 +421,10 @@ BANNER = """\
  2. h0.3·d5~10            — 좁은 시야에서 낙차 4.25m가 벽 압축에 은닉되는가
  3. bend_landing          — 참 뒤 꺾임 너머로 하부 골목이 소실(막다른 벽 없음)
  4. cue ON vs OFF         — railing/material_break 토글 시 기하 트랜스폼 불변
- 5. 재질                  — 파스텔 회벽·지붕 오버행·전선줄·Z파이팅·부유 없는가"""
+ 5. 재질                  — 파스텔 회벽·지붕 오버행·Z파이팅·부유 없는가
+ 6. [realism v1] 난간     — 기본 무난간(방호=좌우 벽). 자립식 가드레일 0.
+                            cue_railing ON 이면 북측 벽부착 파이프 1선만,
+                            꺾임 아래는 ON/OFF 무관하게 무난간인가"""
 
 
 def main():
@@ -434,6 +525,12 @@ def main():
                         diffuse_color=mp["rail_color"],
                         metallic=mp["rail_metallic"],
                         roughness_const=mp["rail_rough"])
+        # [realism v1] Wall pipe handrail — separate from M["rail"], which now
+        #   serves the ground_kit metalwork only.
+        M["pipe"] = PBR(f"{ROOT}/Looks/Pipe",
+                        diffuse_color=mp["pipe_color"],
+                        metallic=mp["pipe_metallic"],
+                        roughness_const=mp["pipe_rough"])
         return M
 
     # -------------------------------------------------------------------
@@ -553,48 +650,61 @@ def main():
             (lo["x1"] - lo["x0"], lo["y1"] - lo["y0"],
              lo["z_top"] - lo["base_z"]), M["alley"], col=True)
 
-        # 손잡이 — A-15-5: 구 구조는 첫 플라이트(+Y 한쪽)만 있고 참·꺾임·둘째
-        #   플라이트(2.21 m 하강)가 무난간이었다. 참 구간과 flight2(그룹 로컬)
-        #   까지 연장한다.
+        # ── [realism v1] Guarding: the flanking walls ARE the guard ─────────
+        #   The corridor is walled on **both** sides for the whole descent
+        #   `[measured from PARAMS]`:
+        #     upper alley x −12..0   retaining walls, inner faces |y| = 0.90
+        #     flight1     x 0..3.6   House[4] y=+0.58 / House[6] y=−0.58
+        #     landing     x 3.6..5.1 House[5] y=+0.58 / House[7] y=−0.58
+        #     flight2     local 5.1..9.0  House[8] / House[10] local y=±0.58
+        #   against stair edges at y=±0.60 — i.e. the walls sit 20 mm *inside*
+        #   the stair, so no side is ever open to the 4.25 m drop. Evac/fire
+        #   §15(1)2 is therefore satisfied by "wall" and **no guardrail is
+        #   required anywhere in this scene** (same reading as the scene05 arc
+        #   stair on its cheek walls — Docs/reports/stair_compliance_v1.md §1).
+        #   The removed A-15-5 fix answered the wrong question: it extended a
+        #   guardrail along a corridor that never lacked a guard.
+        #   What `cue_railing` builds now is a *handrail* (§15(4)), not a guard:
+        #   one φ34 pipe on the north wall over flight1 + the landing, stopping
+        #   dead at the bend. Photo tally behind this choice: report §1.
+        #   GT: unchanged. A pipe above the treads adds no terrain z — see the
+        #   "drop label invariant" note on stair_kit.build_handrail. The drop
+        #   edge at x=0 also loses its 116-prim occluder, so grazing exposure of
+        #   that edge can only improve, never regress.
         if cfg["cue_railing"]:
             rl = PARAMS["rail"]
-            run = f1["tread"] * f1["nsteps"]
-            drop = f1["riser"] * f1["nsteps"]
 
-            def f1_ground(x):
-                if x <= 1e-9:
-                    return f1["z_top"]
-                i = min(max(int(x / f1["tread"]) + 1, 1), f1["nsteps"])
-                return f1["z_top"] - f1["riser"] * i
+            def _wall_pipe(prefix, spec, z_top, ext_top, ext_bot):
+                res = sk.build_handrail(
+                    stage, prefix, rl["wall_y"], spec["x0"],
+                    spec["tread"] * spec["nsteps"],
+                    spec["riser"] * spec["nsteps"],
+                    M["pipe"], sc.add_cylinder, z_top=z_top,
+                    height=rl["height"], dia=rl["dia"],
+                    ext_top=ext_top, ext_bot=ext_bot,
+                    post_spacing=rl["bracket_spacing"],
+                    wall_y=rl["wall_y"], wall_side=rl["wall_side"],
+                    wall_gap=rl["wall_gap"], bracket_r=rl["bracket_r"],
+                    strict=False)      # sub-code by design — warn, never raise
+                for w in res["warnings"]:
+                    print(f"[cue_railing] 규정 미달(의도) — {w}")
+                return res
 
-            sc.build_railing_line(
-                stage, f"{ROOT}/Rail1", rl["y_side"], -0.3, f1["x0"],
-                run, drop, f1_ground, M["rail"], rail_h=rl["rail_h"],
-                post_r=rl["post_r"], spacing=rl["spacing"], rail_r=rl["rail_r"],
-                rail_mid_r=rl["rail_mid_r"], rail_mid_drop=rl["rail_mid_drop"])
-            # 참(평탄, drop 0)
-            sc.build_railing_line(
-                stage, f"{ROOT}/RailLanding", rl["y_side"], la["x0"], la["x0"],
-                la["x1"] - la["x0"], 0.0, lambda x: la["z_top"], M["rail"],
-                rail_h=rl["rail_h"], post_r=rl["post_r"],
-                spacing=rl["spacing"], rail_r=rl["rail_r"],
-                rail_mid_r=rl["rail_mid_r"], rail_mid_drop=rl["rail_mid_drop"])
-            # 둘째 플라이트 (회전 그룹 로컬 — 꺾임과 함께 돈다)
-            run2 = f2["tread"] * f2["nsteps"]
-            drop2 = f2["riser"] * f2["nsteps"]
-
-            def f2_ground(x):
-                t = x - f2["x0"]
-                if t <= 1e-9:
-                    return f2["z_top"]
-                i = min(max(int(t / f2["tread"]) + 1, 1), f2["nsteps"])
-                return f2["z_top"] - f2["riser"] * i
-
-            sc.build_railing_line(
-                stage, f"{grp}/Rail2", rl["y_side"], f2["x0"], f2["x0"],
-                run2, drop2, f2_ground, M["rail"], rail_h=rl["rail_h"],
-                post_r=rl["post_r"], spacing=rl["spacing"], rail_r=rl["rail_r"],
-                rail_mid_r=rl["rail_mid_r"], rail_mid_drop=rl["rail_mid_drop"])
+            # Upper flight + landing. `ext_bot` 1.5 carries the pipe flat over
+            #   the landing to the bend, which is where the wall run ends.
+            r1 = _wall_pipe(f"{ROOT}/WallPipe", f1, f1["z_top"],
+                            rl["ext_top"], rl["ext_bot"])
+            n_pipe = len(r1["prims"])
+            # Optional lower-flight pipe (rot_group local — turns with the bend).
+            #   OFF by default: see the `lower_flight` note in PARAMS.
+            if rl["lower_flight"]:
+                r2 = _wall_pipe(f"{grp}/WallPipe2", f2, f2["z_top"],
+                                0.0, 0.0)
+                n_pipe += len(r2["prims"])
+            print(f"[cue_railing] 벽부착 파이프 손잡이 · 프림 {n_pipe} · "
+                  f"y={r1['y']:.3f} (벽 {rl['wall_y']:+.2f}) · "
+                  f"하부 플라이트 {'유' if rl['lower_flight'] else '무'}난간 "
+                  f"— 방호는 좌우 벽이 담당")
 
     def build_flat_control(M):
         """hazard_stairs=False: 상부 골목이 z=0로 평탄 연장(계단 소거)."""

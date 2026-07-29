@@ -82,6 +82,7 @@ import json
 import datetime
 
 import scene_common as sc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -136,6 +137,42 @@ PARAMS = dict(
     ground=dict(x0=-34.0, x1=46.0, y0=-26.0, y1=26.0, z_top=0.0, thick=1.2),
     # --- 포장 오버레이 (지반 위 proud) ---
     drive=dict(x0=-14.0, x1=0.0, flare_x0=-6.0, flare_y=4.2, proud=0.004),
+
+    # ═══ [W2 ground_kit] P7 ramp_parking — 법정 미이행 2건 해소 (사양 §5.5) ═══
+    #  ★ 13-1 **램프 양측 연석 h0.12·폭 0.30** = 주차장법 시행규칙 §6①5다 의무.
+    #    미관이 아니라 **낙차선이 하나 더 있어야 하는데 없는 것**이다.
+    #    감독 결재 M4 — GT 변경군은 W4 이월이나 **이 1건만 W2 집행**(기승인).
+    #    → W2 산출물에 **라벨 없는 낙차 1건**이 생긴다. `gt_changes` 로 기록해
+    #      W4 GT 낙차 맵이 회수한다(§6.4·§9.2 7단계).
+    #  ★ 13-2/3/5/6 램프 노면 요소는 **d2 전용**이다 `[계산 — §5.0 C-2]`:
+    #    크레스트 grazing 광선기울기 h/d 가 완화구간 구배 0.085 보다 커야 노면이
+    #    보인다 → d2(0.150) 가시 · d5(0.060)·d10(0.030) **은닉**.
+    #    3컷 충전 주력은 **진입 아스팔트 x −14…0**(13-8)으로 이설한다.
+    gkit=dict(
+        region=(-14.0, -3.3, 0.6, 3.3),
+        curb=dict(h=0.12, width=0.30),        # 벽면(y=±3.0) 접촉 → 차로측 면 ±2.70
+        #  13-3 진입부 우수차단 (d2 전용).
+        #  ★ [W2 사전점검 · 행축 정정] 0.35 → **0.52**. 트렌치 프레임 반폭이
+        #    0.19 m 라 근단이 크레스트 +0.16 m 에 있었고, 그때 d2 행 이격은
+        #    18.1 행 @1080 = **9.1 행 @540** 이다. GT-E2 의 유도 강도는
+        #    `(GRAZE_HW 3 + SMOOTH 3 + SLACK 2)×2 = 16 행` 인데 그 상수들은
+        #    GRAZE 작업본(960×540) 축이므로 **16 @540 = 32 @1080** 이 정본이다
+        #    (레드팀 G-1). 근단을 +0.33 m 로 물리면 34.7 @1080 = **17.4 @540**
+        #    `[계산]`. 크레스트 너머는 그대로라 C-2(램프 노면 d2 전용) 불변.
+        trench_entry=0.52,
+        trench_sump=23.4,                     # 13-4 램프 하단 집수 (미장센)
+        #  13-8 맨홀 1기 — **d5 창**. y=0 인 이유: d5 의 W1 원단(X=1.1 m)에서
+        #  프레임 반폭이 0.64 m 뿐이라 y=1.6 에 두면 화면 밖이다 `[계산 — 0.5774·X]`.
+        #  x=−3.90 은 DriveLine 파선(i=3 −6.05…−4.55 / i=4 −3.45…−1.95)과
+        #  윤적 폴리시 밴드(|y| 0.575…1.125) 양쪽을 비켜간다 → Z파이팅 0.
+        manhole_d5=(-3.90, 0.00),
+        #  13-5 램프 차로 경계 실선 — 시점 0.6 → **0.80**. 이설한 진입 트렌치
+        #  프레임 원단(0.71)보다 뒤에서 시작해야 도색이 강재 프레임 위를 타지
+        #  않는다(실무도 트렌치에서 끊는다). 길이는 6.0 유지.
+        lane_lines=[(0.80, -2.40), (0.80, 2.40)],
+        groove=(3.6, -3.0, 20.4, 3.0),        # 13-2 홈파기 — T1 스트라이프 위임
+        tactile_bollard=(-2.90, 4.35, -1.40, 4.65),   # §12.4 보도부만
+    ),
     walk_cross=dict(x0=-3.2, x1=-1.2, y_far=16.0, proud=0.007),   # 램프 횡단 보도
     walk_north=dict(y0=7.2, y1=9.2, x0=-14.0, x1=30.0, proud=0.007),
     walk_spur=dict(x0=11.4, x1=13.4, y0=3.3, y1=7.2, proud=0.007),
@@ -677,6 +714,7 @@ def main():
                 ("N3", sh["x0"], sh["x1"], sh["y1"], gr["y1"]),
                 ("E", x_p, gr["x1"], gr["y0"], gr["y1"])]
         for tag, x0, x1, y0, y1 in segs:
+            sc.skin_exclude(f"{ROOT}/Ground_{tag}")     # [W2-0 · P-A]
             BOX(f"{ROOT}/Ground_{tag}",
                 ((x0 + x1) / 2.0, (y0 + y1) / 2.0, cz),
                 (x1 - x0, y1 - y0, gr["thick"]), M["grass"], col=True)
@@ -702,6 +740,8 @@ def main():
         dr = PARAMS["drive"]
         z = PARAMS["ground"]["z_top"]
         # 차로: 직선부 + 진입 확폭(나팔형)
+        # [W2-0 · P-A] 진입 아스팔트가 13-8 의 3컷 충전 무대다 → 스킨 OFF.
+        sc.skin_exclude(f"{ROOT}/Drive_Main", f"{ROOT}/Drive_Flare")
         BOX(f"{ROOT}/Drive_Main",
             ((dr["x0"] + dr["flare_x0"]) / 2.0, 0.0, z + dr["proud"] - 0.05),
             (dr["flare_x0"] - dr["x0"], 6.6, 0.1), M["asphalt"], col=True)
@@ -746,6 +786,54 @@ def main():
             BOX(f"{ROOT}/Walk_{tag}",
                 ((x0 + x1) / 2.0, (y0 + y1) / 2.0, z + pr - 0.06),
                 (x1 - x0, y1 - y0, 0.12), M["paving"], col=True)
+
+    # -------------------------------------------------------------------
+    # [W2] ground_kit — P7 ramp_parking
+    # -------------------------------------------------------------------
+    def build_ground_kit(M):
+        g = PARAMS["gkit"]
+        segs, _total = ramp_profile()
+        rp = PARAMS["ramp"]
+        gp = gk.plan_ground(
+            "ramp_parking", region=tuple(g["region"]), z=0.0, gy=0.0,
+            origin=(0.0, 0.0, 0.0),
+            # 램프 크레스트 = 낙차 에지. 너머 노면구배 0.085 → d2 만 [F].
+            edges=[("ramp_crest", 0.0,
+                    dict(beyond_grade=float(rp["trans_grade"])))],
+            dists=(2, 5, 10), scene="scene13",
+            tactile=("bollard",) if cfg["cue_tactile"] else (),
+            sites=dict(
+                manhole=[tuple(g["manhole_d5"])],
+                trench=[(float(g["trench_entry"]), rp["y0"], rp["y1"]),
+                        (float(g["trench_sump"]), rp["y0"], rp["y1"])],
+                marking=[(x, y, 0.0, 6.0) for x, y in g["lane_lines"]],
+                tactile=dict(bollard=tuple(g["tactile_bollard"]))),
+            extras_args=dict(
+                ramp_curb=dict(profile=segs, y_neg=float(rp["y0"]),
+                               y_pos=float(rp["y1"]),
+                               height=float(g["curb"]["h"]),
+                               width=float(g["curb"]["width"])),
+                groove_band=dict(region=tuple(g["groove"]))),
+            seed=13)
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["dark"], crack=M["dark"], patch=M["asphalt"],
+                  patch_cut=M["dark"], manhole=M["dark"], marking=M["paint"],
+                  trench=M["dark"], trench_frame=M["dark"], curb=M["conc"],
+                  weed=M["grass_b"], stain_tire=M["polish"],
+                  groove=M["dark"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris)
+        # ── M4 인계 — **라벨 없는 낙차**를 씬 로그와 gt_changes 양쪽에 남긴다 ──
+        for chg in res["gt_changes"]:
+            print(f"[GT 인계 · W4] scene13 {chg['item']} 낙차 "
+                  f"{chg['drop']:.3f} m 신설 — 라벨 담당 {chg['label_owner']}. "
+                  f"{chg['note']}")
+        print(f"[ground_kit] scene13 P7 · 프림 {res['prims']} · "
+              f"δmax {res['gt_delta_max']:.4f} · "
+              f"재질요청 {len(res['materials_needed'])}건(T1)")
+        return res
 
     # -------------------------------------------------------------------
     # 램프 — 3세그(완화·본선·완화) + 측벽·코핑
@@ -1088,6 +1176,7 @@ def main():
     build_paving(M)
     if cfg["hazard_stairs"]:
         build_ramp(M, ramp_mtl)
+        build_ground_kit(M)          # [W2] 연석(M4)·진입 아스팔트·트렌치·도색
         build_trench_walls(M)
         build_stair(M, stair_mtl)
         build_underground(M)

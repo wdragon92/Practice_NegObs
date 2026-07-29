@@ -65,6 +65,7 @@ Isaac 없이 전 33씬 계획 검산: `python3 ground_kit.py`
 from __future__ import annotations
 
 import math
+import os
 import sys
 
 import infra_kit as ik
@@ -114,6 +115,15 @@ EDGE_K = 40.0                  # GT-E1′ 필요이격 = EDGE_K·z_e  [계산 �
 GKIT_PATH_TOKEN = "GKit"       # 전 프림이 이 경로 아래 (§1.2 스킨 방어)
 ALBEDO_CAP = 0.30              # 규약 하드클램프
 TACTILE_ALBEDO_CAP = 0.55      # 점자블록 예외(법정 노란색·소면적) — §12.5 ④
+
+# ── [W2-C · C2] 진단 스위치 — `NEGOBS_GKIT=0` 이면 요소를 **한 개도** 만들지 않는다.
+#    용도: 같은 세션·같은 HEAD 에서 지면키트 ON/OFF A/B 를 찍어 OCCL(카메라 매몰)을
+#    **귀속 가능한** 지표로 만드는 것. 파일럿 라운드의 FRAME/PHOTO/OCCL 판정이
+#    보류된 이유가 정확히 이 귀속 불가였다 [w2_pilot_ground_v1.md §5].
+#    P-A(`skin_exclude`)는 **양 팔에서 동일하게** 실행한다 — 변위 스킨(±6.5~16.5 mm)
+#    까지 팔 간에 달라지면 A/B 가 "키트 프림의 효과"를 재지 못한다.
+#    기본 ON. 프로덕션 렌더·자기검산은 이 스위치를 건드리지 않는다.
+GKIT_ON = os.environ.get("NEGOBS_GKIT", "1") != "0"
 
 # 카메라 상수 (하드코드 — 사양 §2.1. 검증 3건: N5 줄눈 −6 px · N1 그림자 4/10 px
 #              · scene18 지평선 행비)
@@ -1998,8 +2008,18 @@ def apply_ground(kit, prefix, plan, mtls, *, skin_exclude=None, scatter=None,
         raise ValueError(f"ground_kit: prefix 는 '{{ROOT}}/{GKIT_PATH_TOKEN}' "
                          f"이어야 한다(2차 스킨 방어, §1.2). 받은 값: {prefix}")
     # ── P-A: 대상 슬래브 스킨 OFF ─────────────────────────────────────
+    #    **GKIT_ON 보다 앞에 둔다** — OFF 팔에서도 스킨 상태는 동일해야
+    #    A/B 가 "키트 프림의 효과"만 잰다(§C2).
     if skin_exclude is not None and slabs:
         skin_exclude(*[str(s) for s in slabs])
+
+    # ── [W2-C · C2] 진단 OFF 팔 ───────────────────────────────────────
+    if not GKIT_ON:
+        print("[ground_kit] ** NEGOBS_GKIT=0 — 요소 0개 (C2 A/B OFF 팔) ** "
+              f"계획상 {len(plan['elements'])}요소 / {len(plan['ops'])}op 생략")
+        return {"prims": 0, "instances": 0, "elements": [],
+                "gt_delta_max": 0.0, "gt_changes": [],
+                "unit_cell": plan.get("unit_cell"), "gkit_off": True}
 
     # ── GT δ 사전 검사 — **생성 전에** 던진다 ─────────────────────────
     gmax, gchange_max = 0.0, 0.0

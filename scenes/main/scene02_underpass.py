@@ -104,7 +104,12 @@ import stair_kit as sk           # 법정 계단참·중간난간 (좌표 계산
 # ===========================================================================
 SCENE_CONFIG = {
     "hazard_stairs":      True,   # False → 피트/계단/옹벽/터널을 z=0 평지로 (기하 토글 유일 예외)
-    "cue_railing":        True,   # 계단 양측 벽부착 경사 레일 2선 + 피트 지상 둘레 3면 난간
+    # [realism v1] Semantics narrowed: the two stair lines are now statutory
+    #   **손잡이** (§15(3)/(4)) — one pipe per side, no mid rail, no balusters.
+    #   The stair is wall to wall, so §15(1)2 is met by "벽" and no stair
+    #   guardrail is required. The pit perimeter guard is unchanged.
+    #   See Docs/reports/scene15_railing_fix_v1.md §8.
+    "cue_railing":        True,   # 계단 양측 손잡이 1선씩 + 피트 지상 둘레 3면 난간
     "cue_tactile":        False,  # [v5.2 사용자] 점자블록 현실에선 드묾 — 기본 OFF(소거 실험용 경로 유지)   # 점형 점자블록: 상단 x=-0.3 경고띠 + 하부 랜딩
     "cue_material_break": True,   # False → 계단·랜딩도 보도블록재(plaza_lower)로 통일
     "cue_nosing":         True,   # [신규] 전 단 황색 논슬립 띠 (지하철 관행)
@@ -162,10 +167,32 @@ PARAMS = dict(
     perim_rail=dict(y=1.9, x0=0.0, x1=7.0, x_rear=7.15,
                     parapet_top=0.15, rail_h=0.9, post_r=0.03,
                     rail_r=0.03, rail_mid_r=0.018, mid_h=0.45, spacing=1.2),
-    # 계단 양측 벽부착 경사 레일: y=±1.65 (내면 0.1 안쪽), x_start=-0.5
-    stair_rail=dict(y=1.65, x_start=-0.5, rail_h=0.9, post_r=0.02,
-                    rail_r=0.03, rail_mid_r=0.018, rail_mid_drop=0.45,
-                    spacing=1.2),
+    # ═══ [realism v1] Stair rail → statutory handrail (§15(3)/(4)) ══════════
+    #  Old: `y=1.65, x_start=-0.5, rail_h=0.9, post_r=0.02, rail_r=0.03,
+    #        rail_mid_r=0.018, rail_mid_drop=0.45, spacing=1.2` through
+    #        `sc.build_railing_line` — a full **guardrail** per side (top rail +
+    #        mid rail + 59 balusters + 6 posts, plus a second coaxial LOOK_GEO
+    #        handrail with its own 6 posts) = 156 prims, **29.8 % of the whole
+    #        scene** `[measured]`.
+    #  The stair is **wall to wall**: width 3.50 = 2 × `wall.y_in` 1.75, so no
+    #  side is ever open and §15(1)2 ("양옆 난간") is satisfied by "벽" — the
+    #  scene05 cheek-wall reading, Docs/reports/stair_compliance_v1.md §1. No
+    #  guardrail is required on the stair at all. §15(3) states what *is*
+    #  required: "양쪽에 벽 등이 있어 난간이 없는 경우에는 **손잡이**를 설치하여야
+    #  한다." One pipe per side, no infill.
+    #  **Post-mounted, not wall-bracketed** — and that is a measured decision,
+    #  not a shortcut. Unlike scene15's 3~4 m house facades, the flanking walls
+    #  here are retaining walls capped at `wall.parapet_top` = +0.15, so the
+    #  850 mm rail line sits **0.70 m above the wall top** at the stair head and
+    #  does not meet the wall until x = 1.60 (step 5) `[computed]`. Brackets
+    #  would float over the first 25 % of the run. Posts also let the statutory
+    #  ≥300 mm end extensions actually exist (§15(4)3), which a wall mount here
+    #  could not provide — and a post-mounted stainless handrail is what open-cut
+    #  underpass entrances are actually built with.
+    #  y = `wall.y_in` − 0.07 → pipe face 53 mm and post face 50 mm clear of the
+    #  wall, both ≥ the statutory 50 mm (§15(4)2) `[computed]`.
+    stair_rail=dict(y=1.68, dia=0.034, height=0.85, post_r=0.020,
+                    post_spacing=1.20, ext_top=0.30, ext_bot=0.60),
     tactile=dict(ahead=0.3, depth=0.3, proud=0.004,   # 상단 경고띠 x=-0.3..0
                  land_depth=0.4),                      # 랜딩 점자 폭
     # v4-B1: width 0.05/proud 0.001 은 512spp 디노이즈에서 소실 → 20단이 램프로
@@ -731,14 +758,22 @@ def main():
                              st["y0"], st["y1"], M["tactile"],
                              z=la["z_top"], proud=tc["proud"])
 
-        # ── cue_railing: 계단 양측 벽부착 경사 레일 2선 + 피트 둘레 3면 난간 ──
+        # ── cue_railing: 계단 양측 손잡이(§15③) 1선씩 + 피트 둘레 3면 난간 ──
+        #   [realism v1] The two stair *guardrails* became two **handrails**.
+        #   Rationale and the wall-height measurement are in PARAMS.stair_rail.
+        #   The pit perimeter guard below is untouched — that one is the real
+        #   fall protection in this scene (a 3.2 m hole in a public sidewalk)
+        #   and it is also the scene's grazing-angle identity cue: from h0.3 at
+        #   distance the pit reads flat and only the perimeter rail floats.
+        #   The stair lines never carried that read — their rail line drops
+        #   below the sidewalk plane by x = 1.7 `[computed]`.
+        #   GT: handrails create no terrain z — no drop label change.
         if cfg["cue_railing"]:
             sr = PARAMS["stair_rail"]
 
-            # 계단식 지면 콜백 (x<0 → 0.0, 계단 구간 → 단 상면)
+            # 계단식 지면 콜백 — 포스트 발이 실제 단 상면에 앉는다
+            #   (x<0 = 지상 0.0, 계단 구간 = 단 상면, 하부 랜딩 = -3.2 클램프).
             def stair_ground(x):
-                # x<=0(접근/x_top)은 지상 0.0 → build_railing_line 기준
-                # ground_fn(x_top)+rail_h 가 0.9 로 정상. 첫 단(-0.16)은 x>0에서.
                 if x <= 1e-9:
                     return 0.0
                 return -st["riser"] * min(max(int(x / st["tread"]) + 1, 1),
@@ -746,14 +781,22 @@ def main():
 
             run = st["tread"] * st["nsteps"]          # 6.4
             drop = st["riser"] * st["nsteps"]         # 3.2
+            n_hr = 0
             for sgn, tag in ((-1.0, "S"), (1.0, "N")):
-                sc.build_railing_line(
+                res = sk.build_handrail(
                     stage, f"{ROOT}/StairRail_{tag}", sgn * sr["y"],
-                    sr["x_start"], st["x0"], run, drop, stair_ground,
-                    M["rail"], rail_h=sr["rail_h"], post_r=sr["post_r"],
-                    spacing=sr["spacing"], rail_r=sr["rail_r"],
-                    rail_mid_r=sr["rail_mid_r"],
-                    rail_mid_drop=sr["rail_mid_drop"])
+                    st["x0"], run, drop, M["rail"], sc.add_cylinder,
+                    z_top=st["z_top"], height=sr["height"], dia=sr["dia"],
+                    ext_top=sr["ext_top"], ext_bot=sr["ext_bot"],
+                    post_r=sr["post_r"], post_spacing=sr["post_spacing"],
+                    ground_fn=stair_ground, strict=False)
+                for w in res["warnings"]:
+                    print(f"[cue_railing] 규정 미달 — {w}")
+                n_hr += len(res["prims"])
+            print(f"[cue_railing] 계단 손잡이 2선 (φ{sr['dia'] * 1000:.0f} · "
+                  f"h{sr['height'] * 1000:.0f} · 끝단연장 "
+                  f"{sr['ext_top'] * 1000:.0f}/{sr['ext_bot'] * 1000:.0f}) · "
+                  f"프림 {n_hr} — 방호는 좌우 옹벽 + 피트 둘레 난간")
 
             # 피트 지상 둘레 난간 3면 (파라펫 위 수평 레일 — add_cylinder 직접)
             pr = PARAMS["perim_rail"]

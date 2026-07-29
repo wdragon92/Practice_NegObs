@@ -1,6 +1,8 @@
 # scene15 railing realism fix v1 — the alley stair had a code guardrail it never needed
 
-- Written 2026-07-30 · branch `feat/realism-v1` · **owns `scenes/main/scene15_alley_labyrinth.py` only**
+- Written 2026-07-30 · branch `feat/realism-v1`
+- Owned files: `scenes/main/scene15_alley_labyrinth.py` (§0–§7) and, after the §6 flags were assigned
+  back, `scenes/main/scene02_underpass.py` + `scenes/main/scene16_canopy_shadow.py` (**§8**).
 - **No GPU / no render / no SMOKE run.** Self-verification is byte-compile + `ground_kit.py` self-check +
   `scripts/geom_invariance_check.py` (fake-USD, GPU 0). The visual verdict rides the upcoming
   **33-scene W2-D round** — this fix is queued for it, not judged here (§5.4).
@@ -285,6 +287,12 @@ leaves the numerator:
 | Before | 17 | 18 | 0.9444 | — |
 | **After (default OFF — book this)** | 16 | 17 | **0.9412** | −0.0032 |
 | If the ON variant is rendered and counted as "any visible pipe" | 17 | 18 | 0.9444 | 0 |
+| After the §8 scene02 + scene16 conversion as well | 16 | 17 | **0.9412** | 0 further |
+
+> The last row is not a typo. scene02 and scene16 **keep** their pit perimeter guardrails, which are
+> genuine 난간 and are those scenes' primary cue, so only their *stair* lines changed and neither scene
+> leaves the numerator. The 15/16 figure anticipated when those scenes were assigned does not
+> materialise — see §8.4.
 
 **Do not oversell this.** −0.003 is a rounding error against a 0.25–0.35 target. The honest arithmetic
 `[computed]`: with 28 drop scenes and 5 no-drop scenes, reaching P ≤ 0.35 needs `k/(k+5) ≤ 0.35`, i.e.
@@ -405,6 +413,11 @@ engineered deck) · **WEAK** = the real place has a minimal rail, a wall doing t
 
 ### 6.2 Realism mismatches flagged for 통람 v2
 
+> **Both scene02 and scene16 were subsequently assigned to me and converted — see §8.**
+> §8 also corrects the prediction below: the conversion is **post-mounted, not wall-bracketed**,
+> because these scenes' flanking walls are low parapets, and the ledger impact predicted here
+> **does not materialise**. §6.2 is left as written so the reasoning trail stays honest.
+
 **scene02 underpass — same defect class as scene15, one flag.**
 `PARAMS.wall.y_in = 1.75` and the stair width is **3.50 = 2 × 1.75** `[measured]`, i.e. the stair runs
 **wall to wall**, exactly the §15(3) geometry. Its own `PARAMS` comment already says
@@ -452,3 +465,162 @@ re-confirms §4: the target is reachable only at the render-variation level, not
 5. Variation candidates logged, not built: φ42.4 field-stock pipe (§1.4), the single **centre** pipe
    for this exact geometry (§3.2, blocked on a GRAZE read), and a broken/aged segmented pipe per the
    v5 "난간 훼손" direction — all cheap once the W2-D round gives a render to judge against.
+
+---
+
+## 8. Extension — scene02 underpass + scene16 canopy shadow
+
+Assigned after §6 flagged them. Same constraints: English comments, evidence tags, **no render, no
+commit**. Files owned for this pass: `scenes/main/scene02_underpass.py`,
+`scenes/main/scene16_canopy_shadow.py`.
+
+### 8.1 The measurement that changed the fix
+
+§6.2 predicted a **wall-bracketed** conversion, on the scene15 model. Verifying the wall extent — the
+check the supervisor required for scene16, and which turns out to matter just as much for scene02 —
+falsified that prediction for **both** scenes.
+
+scene15's flanking walls are house facades 2.7–4.6 m tall. scene02's and scene16's are **retaining
+walls capped at `wall.parapet_top` = +0.15**, i.e. a low kerb at sidewalk level. They only become tall
+*relative to the descending stair*. So the 850 mm handrail line starts **0.70 m above the wall top** at
+the stair head `[computed]`:
+
+| | parapet top | rail line meets wall at | off-wall run | on-wall run |
+|---|---|---|---|---|
+| scene02 | +0.15 | nose_z ≤ −0.70 → step 5 → **x ≥ 1.60** | 1.60 m (**25 %** of 6.40) | 4.80 m (75 %) |
+| scene16 | +0.15 | nose_z ≤ −0.70 → step 5 → **x ≥ 1.60** | 1.60 m (**36 %** of 4.48) | 2.88 m (64 %) |
+
+Wall brackets would have floated in mid-air over the first quarter/third of every run — exactly the
+modelling error refused in scene15 §3.2. **Horizontal** extent was never the problem: scene16's walls
+span x 0…18.48 (`Lx = wall.x1 − pit.x0`) and cover every rail span, and scene02's span x 0…7.0 and
+cover the whole stair. The blocking dimension was vertical.
+
+**What was converted instead: a single-line, post-mounted statutory handrail.** The §15(3) reading from
+§0 still holds — both stairs are wall to wall (scene02 width 3.50 = 2 × `wall.y_in` 1.75; scene16
+width 3.00 = 2 × 1.50), so §15(1)2 is satisfied by "벽", no stair guardrail is required, and what is
+required is a **손잡이**. Only the mounting method differs from scene15, and post-mounting is also what
+open-cut underpass entrances are actually built with — a fabricated stainless line whose posts stand on
+the treads. Posts additionally make the statutory ≥300 mm end extensions *buildable*, which a wall
+mount here could not do; scene15 had to accept an H3 shortfall precisely because its wall stopped at
+the drop edge.
+
+### 8.2 What changed, per scene
+
+Both scenes replaced `sc.build_railing_line` with `stair_kit.build_handrail` (free-standing mode) at
+φ34 / h850 / ext 300, `y = wall.y_in − 0.07` → pipe face 53 mm and post face 50 mm clear of the wall,
+both ≥ the statutory 50 mm (§15(4)2) `[computed]`.
+
+| | scene02 | scene16 |
+|---|---|---|
+| Lines converted | 2 (stair S/N) | **4** (west stair S/N + east exit stair S/N, the latter in the 180° rot_group) |
+| Old per line | top + mid rail + **59** balusters + 6 posts + coaxial LOOK_GEO handrail (6 more posts) = 78 | same shape, **43** balusters = 60 |
+| Old total | **156 prims = 29.8 % of the scene** | **240 prims = 39.7 % of the scene** |
+| New per line | ExtTop + Slope + ExtBot + 7 posts = 10 | ExtTop + Slope + ExtBot + 5 posts = 8 |
+| New total | **20** | **32** |
+| Pit perimeter guard | **untouched** (19 prims) | **untouched** (34 prims) |
+
+Built geometry, from the fake-USD inventory `[measured]` — scene02 `StairRail_N`:
+
+```
+ExtTop  T=(−0.15, 1.68, +0.85) RY=90   h=0.30  r=0.017
+Slope   T=( 3.20, 1.68, −0.75) RY=116.565  h=7.1554  r=0.017
+ExtBot  T=( 6.70, 1.68, −2.35) RY=90   h=0.60  r=0.017
+Post_0..6  x = −0.3 / 0.9 / 2.1 / 3.3 / 4.5 / 5.7 / 6.9,  r=0.020
+```
+
+Post heights run 0.85–1.00 m: the rail follows the **linear nosing line** while the feet land on the
+**stepped** tread surface, so mid-tread posts are naturally taller. Correct, not a defect.
+
+**The pit perimeter guardrails were deliberately not touched.** In both scenes that rail is the real
+fall protection — a 3.2 m / 2.1 m hole in a public sidewalk — and in scene02 it is the scene's whole
+identity: the docstring's hazard is that from h0.3 at distance "피트가 완전한 평지로 보이고 난간·
+점자블록만 떠 있는 그림". The stair lines never carried that read: their rail line drops below the
+sidewalk plane by x = 1.7 `[computed]`, so only the perimeter rail is visible at grazing angle. Removing
+stair infill cannot damage the grazing cue.
+
+### 8.3 Statutory position, and the two clearances that improved
+
+All three handrails are **fully H1–H3 compliant** — `build_handrail(strict=False)` returns **zero**
+warnings for each (φ34 ∈ 32–38 · h850 · ext_top 300 · ext_bot 600/300) `[measured]`. `stair_compliance_v1.md`
+records handrails as "**33씬 전부 미구현**"; scene02 and scene16 are now the first two **fully compliant**
+implementations in the corpus (scene15's is deliberately partial).
+
+Two pre-existing defects were removed as a side effect:
+
+1. **Posts standing in the statutory tactile band.** scene02's ground_kit `stair_top` band occupies
+   x −0.90…−0.30 (spec §12.4). The old build put a guardrail post at **x = −0.50 — fully inside it** —
+   plus a LOOK_GEO handrail post at x = −0.30. The new build has a single post at x = −0.30, grazing
+   the downhill edge by 20 mm `[computed]`. Two intrusions → one graze. (The band is gated on
+   `cue_tactile`, default OFF, so this matters in the tactile-ON variant.)
+2. **The duplicate coaxial post line.** `build_railing_line` posts at 1.2 m from x = −0.5 *and* its
+   internal LOOK_GEO handrail posts at 1.2 m from x = −0.3 gave two parallel post rows a constant
+   0.20 m apart, same radius, on every line — "double posts" in silhouette. Gone; one row remains.
+
+**What was NOT fixed, and stays open.** scene02's `stair_compliance_v1.md` P0s are untouched and remain
+violations: **L1** (계단참 1개 부족, 낙차 3.20 직통) and **R1** (중간난간 1열 부족 — width 3.50 > 3.00 with
+riser 0.160 > 0.150, so the §15(1)3 AND-exemption fails). Converting the *side* lines to handrails does
+not satisfy R1, which requires a genuine **mid railing** at y = 0. The v8 landing + mid-rail design is
+already written into scene02's docstring and explicitly flagged there as not yet implemented; it is a
+separate work item and I did not touch it. Note the interaction: once that mid rail exists, each 1.75 m
+bay has a wall on one side and a railing on the other, and these wall-side handrails remain correct.
+
+### 8.4 Cue ledger — the expected 15/16 does not materialise
+
+**P(낙차 | 난간) stays at 16/17 = 0.941.** Neither scene leaves the numerator, because both **keep their
+pit perimeter guardrails** — unambiguously 난간 under the survey's own definition ("파이프 난간·가드레일·
+킥플레이트 계열"), visible in the default render, and in scene02's case the scene's primary cue. Only the
+stair lines converted, and a scene with any visible railing counts once.
+
+The 15/16 = 0.9375 figure anticipated at assignment assumed scene02 would drop out entirely. It cannot,
+unless its pit guard is deleted — which would be both a code violation (an unguarded 3.2 m opening in a
+public sidewalk) and the destruction of the scene's hazard concept. Not recommended.
+
+So the extension's ledger delta is **zero**. What it does buy is qualitative: cue *strength* fell
+sharply in both scenes (a guardrail with mid rail and 43–59 balusters per line → a single φ34 pipe),
+which matters if the ledger ever moves beyond binary presence to a weighted cue measure. §4's
+conclusion is unchanged and, if anything, reinforced: the scene-level target is unreachable by
+construction, and the render-variation route (M10 ⓐ) is the only one that reaches it.
+
+### 8.5 Self-verification
+
+| Check | Result |
+|---|---|
+| `py_compile` scene02 / scene16 | **exit 0** both |
+| `pyflakes` scene02 | 3 findings, all pre-existing — and **one fewer than baseline**: `stair_kit as sk` was an unused import at HEAD and is now used |
+| `pyflakes` scene16 | 2 findings (`sys`, `math`), **identical to baseline** |
+| `python3 ground_kit.py` | **exit 0** — 33/33 hard gates |
+| `scripts/geom_invariance_check.py` | **exit 0** · R-5 PASS · **R-4 33/33** · **R-6 33/33** |
+
+| Scene | Prims before | after | Δ | Hash before → after |
+|---|---|---|---|---|
+| scene02 | 523 | **387** | **−136** (−26.0 %) | `cb430e00` → `f9087314` |
+| scene15 | 545 | **429** | **−116** (−21.3 %) | `02611f19` → `e1e86da1` |
+| scene16 | 604 | **396** | **−208** (−34.4 %) | `b3f31a1c` → `a40275ae` |
+| **Total** | 1672 | 1212 | **−460** | — |
+
+All three arms (`MTL=0`, `MTL=1`, `V1=1`) agree per scene, and the other 30 scenes hold their prior
+hashes — confirming the edits stayed inside the three owned files.
+
+**GT invariant.** Handrails and guardrails alike are members above the walking surface; no `z(x,y)`
+changed in either scene. `stair_kit.build_handrail`'s documented "drop label invariant" applies, and the
+horizontal end extensions float over level ground outside the stair, contributing no pixel to the drop
+mask.
+
+**ground_kit wiring untouched.** scene02's `plan_ground("sidewalk_block", …)` call — region, `edges=[("pit_edge", pit.x0)]`,
+`manhole [(−1.20, 0.35)]`, the two gullies at x −0.95, `gutter_L=0`, the `tactile=("stair_top",) if
+cue_tactile` gate and the three `slabs` — is byte-identical, as is scene16's `tactile=("entrance",)`
+plan (its band sits at x −6.00…−5.40, nowhere near any rail `[measured]`). `M["rail"]` is still created
+and still feeds `manhole` / `gully` in both scenes.
+
+**Not verified — no render.** Whether a φ34 pipe reads at d5/d10, and whether removing 396 balusters
+across the two scenes moves the GRAZE band statistic (predicted neutral-to-better, since all of it sits
+below the sidewalk plane), are for the 33-scene W2-D round.
+
+### 8.6 Carry-over added by this extension
+
+6. `stair_compliance_v1.md` — scene02 and scene16 rows: R2 now satisfied by "벽" + compliant 손잡이;
+   the §1 note "손잡이 … 33씬 전부 미구현" is now wrong for three scenes.
+7. `geom_baseline_w2.json` — scene02 `cb430e00` → `f9087314`, scene16 `b3f31a1c` → `a40275ae`
+   (plus scene15 from §5.2).
+8. **scene02 P0 L1 + R1 remain open** — the landing and mid-rail design already drafted in the scene's
+   own docstring. Unowned by this pass.

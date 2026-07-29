@@ -275,6 +275,32 @@ def cam_row_z(X, z, h=0.3):
                                           - math.radians(-CAM_PITCH_DEG))
 
 
+def surface_top_z(z):
+    """음각(recess) 요소의 **실제 렌더 상면 z**.
+
+    ★ 파일럿 1회차 실측으로 드러난 구조적 결함의 수정 지점이다.
+
+    v1.1 의 음각 구현은 "상면을 `z + recess`(음수)에 둔 얇은 판" 이었다. 그
+    전제는 *포장이 얇은 표면* 이라는 것인데, 실제 씬의 포장은 **솔리드 박스**
+    다(scene15 UpperAlley = z −6.0…0.0, N5 Pave = 두께 60 mm). 상면이 슬래브
+    상면보다 낮은 판은 **슬래브 내부에 완전히 갇혀 화소를 0 개 낸다**
+    `[실측 — scene15 w2_pilot 1회차: 줄눈 x=−9 (지면거리 1.00 m, d10)
+     |Δ|max 9.5 = 무변화 · 맨홀 예측 사각형 안 |Δ| 0 · d5 σ_LF 0.76→0.80]`.
+    스킨(P-A)과 무관한 별개 원인이다 — 스킨을 꺼도 슬래브는 그대로 솔리드다.
+
+    감산(CSG)이 없는 이 파이프라인에서 음각을 **깊이**로 낼 방법은 슬래브를
+    홈 둘레로 분할해 짓는 것뿐이고, 그건 §6.3 GT-V 4박스 분할급 작업이다.
+    W2 는 사양 §4.4("면적·위치는 기하, **색차는 재질**")를 따라 음각을
+    **톤으로** 낸다 — 상면을 z-fighting 하한(`GROUND_PROUD_MIN` 0.6 mm)만큼
+    올리고 어두운 재질을 쓴다. 씬들이 자기 줄눈을 이미 그렇게 짓고 있고
+    (`sceneN5 PARAMS.joints.proud = +0.0006`) 그 줄눈은 렌더에 **보인다**.
+
+    명목 음각값은 요소 원장의 `recess_nominal` 에 남는다 — GT·시방 근거를
+    잃지 않기 위해서다.
+    """
+    return float(z) + GROUND_PROUD_MIN
+
+
 def cam_halfwidth(X):
     """지면거리 X 에서 프레임에 드는 횡방향 반폭 [m]. 0.5774·X."""
     return float(X) * math.tan(math.radians(CAM_HFOV_DEG / 2.0))
@@ -444,8 +470,12 @@ def build_joint_grid(kit, path, region, z, mtl, step_x=3.0, step_y=None,
     `step_y=None` → 횡방향(진행축 직교) 줄눈만. 텍스처 줄눈은 음영이 없어
     h0.3 스침각에서 죽는다 `[실측 — 09·18 sd 13~14]` → 기하로 낸다.
 
-    음각 구현: 상면을 `z + recess`(음수)에 두는 얇은 판. 슬래브 상면보다
-    낮으므로 홈으로 읽힌다. **P-A(스킨 OFF)가 선행되지 않으면 묻힌다.**
+    음각 구현 **(v1.2 정정)**: 상면은 `surface_top_z(z)` = 슬래브 상면 +0.6 mm
+    이고, 음각은 **어두운 재질(톤)** 로 읽힌다. v1.1 은 상면을 `z + recess`
+    (음수)에 뒀는데 포장 슬래브가 솔리드 박스라 판이 통째로 슬래브 안에 갇혀
+    **렌더 화소 0** 이었다 — 근거·실측은 `surface_top_z` docstring 참조.
+    명목 음각값은 `recess_nominal` 로 원장에 남는다.
+    **P-A(스킨 OFF)는 여전히 선행 조건이다**(스킨은 +6.5~16.5 mm).
 
     `origin_xy` 는 격자 원점 — **T1 MDL `unit_cell_origin` 과 같은 값이어야
     한다**(§4.5 U3). `skip_x/skip_y` 는 에지 금지대·개구로 드롭된 좌표.
@@ -460,7 +490,7 @@ def build_joint_grid(kit, path, region, z, mtl, step_x=3.0, step_y=None,
         raise ValueError("ground_kit: 줄눈은 음각이다(recess ≤ 0). "
                          f"받은 값 {recess}")
     thick = 0.030                      # 판 두께(상면만 보인다)
-    cz = float(z) + recess - thick / 2.0
+    cz = surface_top_z(z) - thick / 2.0        # (v1.2) 솔리드 슬래브 매몰 방지
     ox, oy = float(origin_xy[0]), float(origin_xy[1])
     rng = det_rng("gkit.joint", _seed_key(path), seed)
     n0 = kit.mark()
@@ -484,7 +514,8 @@ def build_joint_grid(kit, path, region, z, mtl, step_x=3.0, step_y=None,
         elems.append(_elem("joint", p,
                            _box_aabb(jx, (y0 + y1) / 2.0, cz,
                                      width, y1 - y0, thick),
-                           proud=recess, mtl_key="joint",
+                           proud=GROUND_PROUD_MIN, mtl_key="joint",
+                           recess_nominal=recess,
                            line="cross_periodic", albedo=0.12))
     for i, yy in enumerate(_ticks(y0, y1, step_y, oy) if step_y else []):
         if round(yy, 4) in skipy:
@@ -495,7 +526,8 @@ def build_joint_grid(kit, path, region, z, mtl, step_x=3.0, step_y=None,
         elems.append(_elem("joint", p,
                            _box_aabb((x0 + x1) / 2.0, jy, cz,
                                      x1 - x0, width, thick),
-                           proud=recess, mtl_key="joint",
+                           proud=GROUND_PROUD_MIN, mtl_key="joint",
+                           recess_nominal=recess,
                            line="long", albedo=0.12))
     return dict(prim_count=kit.count_since(n0), elems=elems)
 
@@ -594,13 +626,15 @@ def build_crack_lines(kit, path, region, z, mtl, n=4, seg=None, branch_p=0.25,
             sx = cx + math.cos(ang) * seg / 2.0
             sy = cy + math.sin(ang) * seg / 2.0
             p = f"{path}/Crack_{i}_{k}"
-            kit.B(p, (sx, sy, z + rec - 0.010), (seg, width, 0.020), mtl,
+            czc = surface_top_z(z) - 0.010      # (v1.2) 솔리드 슬래브 매몰 방지
+            kit.B(p, (sx, sy, czc), (seg, width, 0.020), mtl,
                   rotz=math.degrees(ang))
             elems.append(_elem("crack", p,
-                               _obb_aabb(sx, sy, z + rec - 0.010,
+                               _obb_aabb(sx, sy, czc,
                                          seg, width, 0.020,
                                          math.degrees(ang)),
-                               proud=rec, mtl_key="crack", albedo=0.08))
+                               proud=GROUND_PROUD_MIN, mtl_key="crack",
+                               recess_nominal=rec, albedo=0.08))
             cx = cx + math.cos(ang) * seg
             cy = cy + math.sin(ang) * seg
     return dict(prim_count=kit.count_since(n0), elems=elems)
@@ -1040,9 +1074,26 @@ def build_silt_band(kit, path, region, waterline, z, mtl, width=None,
 
 # ── infra_kit 재사용 6종 어댑터 (재구현 아님 — 계획용 Elem 을 붙일 뿐) ──────
 def _ik_manhole(kit, path, cx, cy, z, mtl, mtl_frame=None, d_frame=0.648):
+    """`infra_kit.build_manhole` 어댑터. **flush 오프셋을 접어서 비음수로 만든다.**
+
+    ★ (v1.2) `proud=None` 이면 `build_manhole` 이 KS D 4040 의 "노면과 동일면
+    ±10 mm" 를 결정적 난수 `U(−10, +10) mm` 로 뽑는다. 음수가 나오면 뚜껑
+    상면이 포장 상면보다 낮아지는데, 포장이 **솔리드 슬래브**라 뚜껑·틀이
+    통째로 슬래브 안에 갇혀 **렌더 화소 0** 이 된다
+    `[실측 — scene15 (−2.40,−0.15) 뽑기 −1.73 mm → d2/d5/d10/오버뷰 전 컷에서
+     맨홀 영역 |Δ| = 0. scene13 (−3.90,0.00) 뽑기 −9.07 mm 로 같은 상태]`.
+    33씬 전체로는 뽑기의 **약 절반**이 이 상태였다.
+
+    감산 기하가 없어 "가라앉은 뚜껑" 을 깊이로 낼 수 없으므로, 편차를
+    **접어서**(`|raw|`) 0.6~10 mm 의 **양각 편차**로 바꾼다 — 실물에서도
+    재포장·침하로 틀이 노면보다 약간 솟은 사례가 흔하고, "전부 정확히 같은
+    높이면 CG 로 읽힌다" 는 원 의도(편차의 존재)는 그대로 보존된다.
+    """
     n0 = kit.mark()
+    raw = ik.det_rng("manhole", path, cx, cy).uniform(-0.010, 0.010)
+    pr_use = GROUND_PROUD_MIN + abs(raw)
     r = ik.build_manhole(kit, path, cx, cy, z, mtl, frame_mtl=mtl_frame,
-                         d_frame=d_frame, lid=True, proud=None)
+                         d_frame=d_frame, lid=True, proud=pr_use)
     pr = float(r.get("proud", 0.0))
     return dict(prim_count=kit.count_since(n0), elems=[
         _elem("manhole", path,
@@ -1817,6 +1868,11 @@ def frame_budget(plan, *, h=0.3, dists=None, gy=None, origin=None):
             z_e = e["proud"]
             if m.get("exc") == "plank_gap":
                 z_e = 0.0            # 판재 틈 = 음각. §6.1 예외표 "필요 이격 0"
+            if m.get("recess_nominal") is not None:
+                # (v1.2) 명목 음각 요소 — 렌더 z 의 +0.6 mm 는 z-fighting
+                # 회피용 epsilon 이지 실재 융기가 아니다. GT-E1′ 은 실재
+                # 부조로 판정해야 하므로 명목값(≤0)을 쓴다.
+                z_e = min(0.0, float(m["recess_nominal"]))
             if gap is not None and z_e > 0:
                 need = EDGE_K * z_e
                 if gap + 1e-9 < need and m.get("exc") != "tactile":
@@ -1979,28 +2035,32 @@ def apply_ground(kit, prefix, plan, mtls, *, skin_exclude=None, scatter=None,
 
     n_prims = 0
     for op in plan["ops"]:
-        kw = dict(op.get("kw", {}))
+        raw_kw, raw_args = dict(op.get("kw", {})), tuple(op.get("args", ()))
+        kw, handled = dict(raw_kw), set()
         # mtl_key → 실제 재질 객체로 치환
         for k in list(kw):
             if k in ("mtl", "mtl_frame", "mtl_cover") and isinstance(kw[k], str):
-                kw[k] = mtls.get(kw[k])
+                kw[k] = mtls.get(kw[k]); handled.add(k)
             if k == "mtls" and isinstance(kw[k], dict):
                 kw[k] = {kk: mtls.get(vv) if isinstance(vv, str) else vv
                          for kk, vv in kw[k].items()}
+                handled.add(k)
         args = tuple(mtls.get(a[1:]) if (isinstance(a, str) and
                                          a.startswith("@")) else a
-                     for a in op.get("args", ()))
+                     for a in raw_args)
         # ── 미치환 재질 참조 가드 (파일럿 1회차 크래시 재발 방지) ────────
-        #    치환 후에도 "@" 문자열이나 **값이 전부 문자열인 사전**이 남아
-        #    있으면 그건 빌더가 그대로 `Bind()` 에 넘길 재질 키다 → 즉시 던진다.
-        #    `dry_kit` 은 Bind 를 하지 않아 CPU 자기검산이 이 결함을 못 본다.
-        def _unresolved(v):
-            if isinstance(v, str) and v.startswith("@"):
-                return True
-            return (isinstance(v, dict) and len(v) > 0
-                    and all(isinstance(x, str) for x in v.values()))
-        bad = [f"arg[{i}]={v!r}" for i, v in enumerate(args) if _unresolved(v)]
-        bad += [f"{k}={v!r}" for k, v in kw.items() if _unresolved(v)]
+        #    **op 정의(치환 전)** 를 본다 — 치환 결과를 타입으로 냄새 맡으면
+        #    `mtls` 값이 문자열인 테스트에서 오탐이 난다.
+        #    위치인자 재질 사전은 치환 규칙에 아예 없으므로 항상 결함이고,
+        #    처리되지 않은 `mtl*` 문자열 kw 도 결함이다. `dry_kit` 은 Bind 를
+        #    하지 않아 CPU 자기검산이 이 결함을 렌더 전에 볼 방법이 이것뿐이다.
+        bad = [f"arg[{i}]={v!r}" for i, v in enumerate(raw_args)
+               if isinstance(v, dict) and len(v) > 0
+               and all(isinstance(x, str) for x in v.values())]
+        bad += [f"{k}={v!r}" for k, v in raw_kw.items()
+                if k not in handled
+                and ((isinstance(v, str) and v.startswith("@"))
+                     or (k.startswith("mtl") and isinstance(v, (str, dict))))]
         if bad:
             raise ValueError(
                 f"ground_kit: op '{op['name']}' 에 미치환 재질 참조가 남았다 "
@@ -2785,6 +2845,29 @@ def _selfcheck():
         not mtl_bad, mtl_bad[0][:110] if mtl_bad else "0건")
     chk("33씬 apply 프림 = plan 프림", not prim_bad,
         "; ".join(prim_bad[:3]) or "33/33")
+
+    # ★ (v1.2) 솔리드 슬래브 매몰 가드 — 상면이 포장 상면보다 낮은 요소는
+    #   렌더 화소를 0 개 낸다(감산 기하 없음). 허용 예외는 진짜 기하 틈뿐이다.
+    _BURY_OK = {"deck_gap", "trench", "gutter", "groove"}
+    buried = []
+    for scene in sorted(SCENE_PLANS):
+        sp = SCENE_PLANS[scene]
+        try:
+            pl = plan_ground(sp["profile"], sp["region"], z=sp["z"],
+                             gy=sp["gy"], origin=sp["origin"], axis=sp["axis"],
+                             edges=sp["edges"], voids=sp["voids"],
+                             dists=sp["dists"], scene=scene,
+                             tactile=sp["tactile"], sites=sp["sites"],
+                             caps=sp["caps"], extras_args=sp["extras_args"],
+                             seed=7)
+        except ValueError:
+            continue
+        for e in pl["elements"]:
+            if e["proud"] < 0 and (e.get("mtl_key") or e["kind"]) \
+                    not in _BURY_OK and e["meta"].get("exc") != "plank_gap":
+                buried.append(f"{scene}/{e['path']} proud {e['proud']:+.4f}")
+    chk("음각 요소 매몰 0 (상면 < 포장 상면인 비예외 요소)",
+        not buried, "; ".join(buried[:3]) or "0건")
 
     print("\n" + "=" * 78)
     if ok:

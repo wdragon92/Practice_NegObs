@@ -38,6 +38,7 @@ import random
 import datetime
 
 import scene_common as sc
+import ground_kit as gk
 
 
 # ===========================================================================
@@ -74,6 +75,42 @@ PARAMS = dict(
 
     # 상부 골목 평탄 (x -12..0, z=0)
     upper_alley=dict(x0=-12.0, x1=0.0, y0=-0.9, y1=0.9, z_top=0.0, base_z=-6.0),
+
+    # ═══ [W2 ground_kit] P5 alley_concrete — 요소 0 → 전면 충전 (사양 §5.4) ═══
+    #  표본 대비 격차 최대 씬. 8요소를 한 번에 통과시킨다:
+    #   15-1 횡 시공줄눈 step 3.0·폭 0.010·음각 3 mm  (x=0 은 에지 금지대로 드롭)
+    #   15-2 맨홀 φ0.648  ★ **감독 결재 M9-ⓑ — d5 창으로 이설**
+    #        (구안 x=−1.15 는 d2 에서 화면폭 1,268 px = 프레임 66.0 % 로 근경 창을
+    #         한 요소가 독점했다 `[계산 — W_px=f·0.648/0.85]`. d5 창 x=−4.0 이면
+    #         화면폭 280 px = 14.6 % 로 정상. d2 창의 B1 은 15-4 패치 1매가 채운다.)
+    #   15-3 벽측 U형 측구(덮개) y=−0.75 · 15-4 보수 패치 2매
+    #   15-5 벽–바닥 오염 밴드 · 15-6 계단 발치 그레이팅(꺾임 그룹 로컬)
+    #   15-7 균열 3~5본 · 15-8 잡초 6~10 포기(GT-E5 램프로 에지 근방 자동 클램프)
+    #  금지: 무지 흙바닥(표본 0/12) · 낙엽 · **점자블록**(§12 — p≈0.05 미설치)
+    ground=dict(
+        region=(-12.0, -0.9, 0.0, 0.9),
+        #  15-2 맨홀 — M9-ⓑ 이설(구 −1.15) 의 **2차 정정**.
+        #  ★ [W2 사전점검] −4.00 은 d5 시점에서 지면거리 X=1.00 m 라 화면폭
+        #    f·0.648/1.00 = **1,078 px = 56.1 %** 였다 `[계산 — 레드팀 G-2]`.
+        #    M9 의 취지는 "근경 독점 해소"인데 66 %(구) → 56 %(신) 는 해소가
+        #    아니다. 게다가 **W1(지면거리 0.564~2.00 m) 안에서는 원리적으로
+        #    ≤25 % 가 불가능**하다 — W1 원단 X=2.00 에서도 539 px = 28.1 % 다.
+        #    → 2순위 창 **W2(2.00~3.00 m)** 로 내보낸다. x=−2.40 ⇒ d5 에서
+        #    X=2.60 m · **414 px = 21.6 %** `[계산]`. d2 에서는 눈 뒤(X=−0.40)라
+        #    비가시 → d2 창은 설계대로 패치 #1(x=−1.20)이 계속 담당한다.
+        #    d10 에서는 X=7.60 · 142 px = 7.4 %.
+        #  간섭 검사 `[계산]`: 반경 0.324 → x[−2.724,−2.076]·y[−0.474,0.174].
+        #    줄눈 JX_3(x=−3.00) 밖 · 패치#1(x −1.557…−0.843) 밖 ·
+        #    U측구(y −0.875…−0.625) 밖 · 그라임 밴드(|y|≥0.75) 밖 → Z파이팅 0.
+        manhole_d5=(-2.40, -0.15),
+        #  첫 매가 d2 창(W1 = x −1.436…0)의 B1·B2 를 담당한다. x=−1.20 이면
+        #  화면폭 1,663 px(86.6 %) — 구 맨홀 안(1,268 px)과 달리 **평면 톤 변화**라
+        #  근경 독점의 시각적 부담이 훨씬 작다.
+        patch_sites=[(-1.20, 0.10), (-7.60, -0.30)],
+        gutter_y=-0.75,
+        grating_local=(9.30, -0.90, 0.90),         # 꺾임 rot_group 로컬
+        grating_z=-4.25,
+    ),
     # 상부 골목 옹벽 (A-15-3 치명): 구 구조는 x −12..−0.5 좌우가 주택·옹벽 없이
     #   계곡(−4.35)까지 4.35 m 절벽인 폭 1.8 m 외줄 노두였다. 골목 양옆을
     #   상면 z=1.2 옹벽으로 막고 그 뒤에 주택 4동을 앉힌다.
@@ -413,6 +450,10 @@ def main():
         cx = (ua["x0"] + ua["x1"]) / 2.0
         cy = (ua["y0"] + ua["y1"]) / 2.0
         top, bot = ua["z_top"], v["z_top"]
+        # [W2-0 · P-A] 상부 골목 상면이 ground_kit 의 장식 대상이다 → 변위 스킨
+        #   OFF. 안 끄면 음각 줄눈(−3 mm)·맨홀(±10 mm)이 스킨(+6.5~16.5 mm)에
+        #   통째로 묻힌다 `[실측 — 사양 §1.1]`.
+        sc.skin_exclude(f"{ROOT}/UpperAlley")
         BOX(f"{ROOT}/UpperAlley", (cx, cy, (top + bot) / 2.0),
             (ua["x1"] - ua["x0"], ua["y1"] - ua["y0"], top - bot),
             M["alley"], col=True)
@@ -430,6 +471,46 @@ def main():
             sc.build_hedge(stage, f"{ROOT}/RetHedge_{tag}",
                            rw["x0"], y0 + 0.05, rw["x0"] + 8.0, y1 - 0.05,
                            0.5, base_z=rw["z_top"])
+
+    # -------------------------------------------------------------------
+    # [W2] ground_kit — P5 alley_concrete. 상부 골목(x −12…0) 전면 충전.
+    #   낙차 에지 = 첫 플라이트 시단 x=0. 줄눈 x=0 은 `_edge_guard_ticks` 가
+    #   자동 드롭한다(GT-E2 Δ≥16행). 계단 발치 그레이팅(15-6)만 꺾임 그룹
+    #   로컬 좌표라 별도 호출로 붙인다.
+    # -------------------------------------------------------------------
+    def build_ground_kit(M, grp):
+        g = PARAMS["ground"]
+        gp = gk.plan_ground(
+            "alley_concrete", region=tuple(g["region"]), z=0.0, gy=0.0,
+            origin=(0.0, 0.0, 0.0),
+            edges=[("stair_top", float(PARAMS["flight1"]["x0"]))],
+            dists=(2, 5, 10), scene="scene15",
+            tactile=(),                       # §12 — p≈0.05, 표본 0/12 → 미설치
+            sites=dict(manhole=[tuple(g["manhole_d5"])],
+                       gutter_U=[float(g["gutter_y"])],
+                       trench=[],             # 15-6 은 꺾임 그룹에서 따로
+                       patch=[tuple(v) for v in g["patch_sites"]]),
+            overrides=dict(infra=dict(manhole=1, gutter_U=1, trench=0)),
+            seed=15)
+        kit = gk.kit_from_scene_common(sc, stage)
+        M2 = dict(M)
+        M2.update(joint=M["stair"], crack=M["stair"], patch=M["alley"],
+                  patch_cut=M["stair"], manhole=M["rail"], gutter=M["stair"],
+                  gutter_cover=M["stair"], weed=M["foliage"],
+                  stain_grime_band=M["skirt"], stain_dirt=M["skirt"],
+                  trench=M["rail"], trench_frame=M["rail"])
+        res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
+                              skin_exclude=sc.skin_exclude,
+                              scatter=sc.scatter_debris)
+        # 15-6 계단 발치 선형 그레이팅 — 꺾임 rot_group **로컬** 좌표.
+        #   하부 골목 상면 z=−4.25 라 상부 골목 계획과 좌표계가 다르다.
+        gx, gy0, gy1 = g["grating_local"]
+        gk.build_trench_drain(kit, f"{grp}/GKit_Grating", gx, gy0, gx, gy1,
+                              float(g["grating_z"]), M["rail"],
+                              mtl_frame=M["rail"], width=0.20)
+        print(f"[ground_kit] scene15 P5 · 프림 {res['prims']} + 그레이팅 2 · "
+              f"δmax {res['gt_delta_max']:.4f} · unit_cell {res['unit_cell']}")
+        return res
 
     # -------------------------------------------------------------------
     # 계단 — 첫 플라이트 + 참 + 둘째 플라이트(25° 꺾임) + 하부 골목
@@ -626,6 +707,7 @@ def main():
         build_flat_control(M)
     if cfg["cue_scene_dressing"]:
         build_dressing(M, GRP)
+    build_ground_kit(M, GRP)             # [W2] 지면 요소 — 드레싱 뒤(산포 순서 규약)
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])

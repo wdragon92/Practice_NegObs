@@ -259,27 +259,16 @@ OMNIPBR_PATH = os.path.expanduser(
     "~/miniconda3/envs/env_isaaclab/lib/python3.10/site-packages/"
     "omni/mdl/core/Base/OmniPBR.mdl")
 
-# 역할별 텍스처 세트 (dir + 파일명). 잔디·HDRI는 assets/ 루트 재사용.
-TEX = dict(
-    plaza_light=dict(dir=S1_DIR, diff="plaza_light_diff.jpg",
-                     nor="plaza_light_nor.jpg", rough="plaza_light_rough.jpg"),
-    band_dark=dict(dir=S1_DIR, diff="band_dark_diff.jpg",
-                   nor="band_dark_nor.jpg", rough="band_dark_rough.jpg"),
-    plaza_lower=dict(dir=S1_DIR, diff="plaza_lower_diff.jpg",
-                     nor="plaza_lower_nor.jpg", rough="plaza_lower_rough.jpg"),
-    granite_dark=dict(dir=S1_DIR, diff="granite_dark_diff.jpg",
-                      nor="granite_dark_nor_dx.jpg", rough="granite_dark_rough.jpg"),
-    brick_red=dict(dir=S1_DIR, diff="brick_red_diff.jpg",
-                   nor="brick_red_nor_dx.jpg", rough="brick_red_rough.jpg"),
-    grass=dict(dir=ASSETS_DIR, diff="aerial_grass_rock_diff_4k.jpg",
-               nor="aerial_grass_rock_nor_dx_4k.jpg",
-               rough="aerial_grass_rock_rough_4k.jpg"),
-    tactile=dict(dir=S1_DIR, diff="tactile_yellow_diff.png",
-                 nor="tactile_yellow_nor.png"),   # rough 없음
-    # [v5 공통 레이어] 한글 사인 패널 (assets/signs/gen_signs.py 생성, diff only)
-    sign_info=dict(dir=os.path.join(ASSETS_DIR, "signs"),
-                   diff="sign_info.png"),   # [v5.2 사용자] 임의 경고 팻말 제거
-)
+# 역할별 텍스처 세트 — [W2] the private copy of the registry is gone.
+# It was the last place still naming `aerial_grass_rock_*`, so the Grass001
+# swap (B-audit A1) would have reached 32 scenes and skipped scene01 alone,
+# leaving one scene at a 15 m grass tile while the other 32 moved to 1.4 m.
+# The role SUBSET is kept deliberately: `_check_assets` below iterates this
+# dict, and pulling in the full `sc.TEX` would make scene01 abort on textures
+# it never binds.
+_ROLES = ("plaza_light", "band_dark", "plaza_lower", "granite_dark",
+          "brick_red", "grass", "tactile", "sign_info")
+TEX = {r: dict(sc.TEX[r]) for r in _ROLES}
 
 
 def _tex_path(role, kind):

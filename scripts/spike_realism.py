@@ -1,34 +1,39 @@
 #!/usr/bin/env python3
-"""Phase 1 "검증의 날" — 사실화 재료 실동작 스파이크 랩 (v2 split-face).
+"""Phase 1 "verification day" — spike lab exercising the realism ingredients
+for real (v2 split-face).
 
-`Docs/briefs/realism_brief_v1.md` Phase 1 의 실험을 **부팅 1회**로 수행한다.
+Runs the Phase 1 experiments of `Docs/briefs/realism_brief_v1.md` in **a single
+boot**.
 
-## v1 → v2 재설계 이유 (감독, 1차 렌더 후)
-v1 은 실험마다 별개의 오브젝트를 다른 위치에 놓고 각각 다른 카메라로 찍었다.
-결과적으로 ①프레임의 절반이 하늘이라 flat% 가 하늘로 오염되고 ②A/B 두 컷의
-조명·시점·거리가 서로 달라 통제가 안 됐다. v2 는 두 가지를 바꾼다:
+## Why v1 was redesigned into v2 (supervisor, after the first render)
+v1 placed a separate object per experiment at a different position and shot
+each with a different camera. As a result (1) half the frame was sky, so flat%
+was contaminated by the sky, and (2) the A/B pair differed in lighting,
+viewpoint and distance, so nothing was controlled. v2 changes two things:
 
-1. **split-face**: A/B 를 **하나의 연속된 면을 반으로 갈라** 배치한다. 이음매가
-   화면 중앙에 오는 한 컷에 두 조건이 동시에 들어가므로 조명·시점·거리·재질
-   스케일이 완전히 통제된다. 차이가 보이면 그건 재질 차이뿐이다.
-2. **지면 충전 프레이밍**: 진단 뷰는 하늘이 0 이 되도록 잡는다. 그래야
-   `scripts/imgstats.py` 의 flat%/slope 가 표면 미세구조만 반영한다.
-   거리는 판정 1순위 시점(h0.3 로봇 뷰)과 근접 뷰(0.5~1.2 m) 양쪽을 잡는다.
+1. **split-face**: A and B are laid out by **splitting one continuous surface
+   in half**. With the seam at frame centre, a single shot contains both
+   conditions, so lighting, viewpoint, distance and material scale are fully
+   controlled. Any visible difference is the material difference alone.
+2. **ground-filling framing**: diagnostic views are framed so the sky is zero.
+   Only then do `scripts/imgstats.py`'s flat%/slope reflect surface
+   microstructure alone. Distances cover both the primary judging viewpoint
+   (h0.3 robot view) and a close view (0.5~1.2 m).
 
-## 실험
-  E1 bevel   : `round_edges_radius` 0/1/2/5/10/20 mm            [ZZ §2 상충4 — 미검증]
-  E2 ground  : `NegObsGround.mdl` vs OmniPBR **split-face**      [ZZ §1 결정적 발견]
-  E3 detail  : `detail_normalmap_texture` split-face             [ZZ §2 — 로컬검증됨]
-  E4 subdiv  : `catmullClark` + crease                           [ZZ §6 T0-2 — 미검증]
-  E5 disp    : 정점 변위 그리드 0/5/10/20 mm                      [MDL displacement RTX 미지원]
-  **E9 stack : 풀스택 예측 실험 (브리프 외 — 감독 추가)**
-      P0 현행 프로덕션 레시피(평면 박스+OmniPBR) / P1 +NegObsGround /
-      P2 +정점변위 메시 / P3 +디테일노멀(OmniPBR 계열)
-      → Phase 2 게이트 통과 가능성을 **Phase 1 에서 미리 실측**한다.
-      셋을 같은 크기·같은 뷰로 찍으므로 flat%/slope 를 직접 비교할 수 있다.
-  E6/E7 budget : PT 수정설정 vs PT 512 vs RT90 vs RT32 s/컷 실측
+## Experiments
+  E1 bevel   : `round_edges_radius` 0/1/2/5/10/20 mm     [ZZ §2 conflict 4 — unverified]
+  E2 ground  : `NegObsGround.mdl` vs OmniPBR **split-face** [ZZ §1 decisive finding]
+  E3 detail  : `detail_normalmap_texture` split-face      [ZZ §2 — verified locally]
+  E4 subdiv  : `catmullClark` + crease                    [ZZ §6 T0-2 — unverified]
+  E5 disp    : vertex-displacement grid 0/5/10/20 mm      [MDL displacement unsupported on RTX]
+  **E9 stack : full-stack prediction experiment (outside the brief — supervisor addition)**
+      P0 current production recipe (flat box + OmniPBR) / P1 +NegObsGround /
+      P2 +vertex-displaced mesh / P3 +detail normal (OmniPBR family)
+      -> **measures during Phase 1** whether the Phase 2 gate can be passed.
+      All are shot at the same size and view, so flat%/slope compare directly.
+  E6/E7 budget : measured s/cut for the revised PT settings vs PT 512 vs RT90 vs RT32
 
-실행 (반드시 cd 포함 스크립트로 — 백그라운드 셸 cwd 리셋 함정):
+Run (always via a script that includes the cd — background shells reset cwd):
   bash run_p1_spike.sh --mode rt --only e1,e2,e3,e4,e5,e9
   bash run_p1_spike.sh --mode pt --only e9,e2 --bench
 """
@@ -58,7 +63,8 @@ BENCH = "--bench" in ARGS
 OUT_ROOT = os.path.join(_ROOT, "look_check")
 MDL_GROUND = os.path.join(sc.ASSETS_DIR, "NegObsGround.mdl")
 
-# 본편 21씬과 문자 단위로 같은 조명 조건 (scene01 §5) — A/B 의 통제 변인
+# Character-for-character the same lighting as the main 21 scenes (scene01 §5)
+# — the controlled variable for A/B
 LIGHT = dict(
     hdri=sc.DEFAULT_HDRI, dome_intensity=1000.0, noon_dome_rot=-110.0,
     noon_sun_enable=True, noon_sun_elev=49.79,
@@ -100,14 +106,14 @@ def note(msg):
 
 
 # ===========================================================================
-# 재질 팩토리
+# Material factories
 # ===========================================================================
 def pbr(path, diff=None, nor=None, rough=None, scale_m=1.0,
         diffuse_color=None, roughness_const=None, bump=1.0,
         round_edges_radius=None, round_edges_roundness=1.0,
         round_edges_across=False,
         detail_nor=None, detail_bump=None, detail_scale_m=None):
-    """OmniPBR — sc.make_pbr 과 동일 규약 + 베벨/디테일노멀 인자."""
+    """OmniPBR — same convention as sc.make_pbr, plus bevel / detail-normal args."""
     mtl = UsdShade.Material.Define(stage, path)
     sh = UsdShade.Shader.Define(stage, path + "/Shader")
     sh.CreateImplementationSourceAttr(UsdShade.Tokens.sourceAsset)
@@ -164,10 +170,11 @@ def ground_mdl(path, diff, nor, rough, scale_m=1.0,
                desat_bright=0.35, rough_noise=0.25, rough_noise_wl=1.2,
                tri_dither=0.35, tri_dither_wl=0.15, tri_weight_exp=6.0,
                bump=1.0, rough_floor=0.0, rough_mult=1.0):
-    """NegObsGround.mdl — 소프트 트라이플래너 + 반복파괴 (TerrainGen 사용례 이식).
+    """NegObsGround.mdl — soft triplanar + tiling breakup (ported from the
+    TerrainGen use case).
 
-    OmniPBR 의 project_uvw 는 트라이플래너가 아니라 **큐빅 투영**이라 경사면에서
-    축 전환 이음매가 난다 [ZZ §10.5]. 이 MDL 이 그 대체재다.
+    OmniPBR's project_uvw is not triplanar but a **cubic projection**, so
+    slopes show an axis-switch seam [ZZ §10.5]. This MDL replaces it.
     """
     mtl = UsdShade.Material.Define(stage, path)
     sh = UsdShade.Shader.Define(stage, path + "/Shader")
@@ -208,10 +215,10 @@ def ground_mdl(path, diff, nor, rough, scale_m=1.0,
 
 
 # ===========================================================================
-# 메시 유틸
+# Mesh utilities
 # ===========================================================================
 def mesh_box(path, center, size, mtl=None, subdiv=None, crease_sharp=None):
-    """8정점 박스 메시. crease_sharp 지정 시 12 모서리 전부에 crease."""
+    """8-vertex box mesh. If crease_sharp is given, all 12 edges get a crease."""
     m = UsdGeom.Mesh.Define(stage, path)
     hx, hy, hz = [s / 2.0 for s in size]
     pts = [(-hx, -hy, -hz), (hx, -hy, -hz), (hx, hy, -hz), (-hx, hy, -hz),
@@ -237,7 +244,8 @@ def mesh_box(path, center, size, mtl=None, subdiv=None, crease_sharp=None):
 
 
 def _value_noise(XX, YY, x0, y0, x1, y1, wl, rng):
-    """저해상도 격자 난수 → smoothstep 쌍선형 보간 (numpy 만으로 값노이즈)."""
+    """Low-resolution lattice of random values -> smoothstep bilinear
+    interpolation (value noise using numpy alone)."""
     gx = max(2, int((x1 - x0) / wl) + 1)
     gy = max(2, int((y1 - y0) / wl) + 1)
     g = rng.random((gx + 1, gy + 1)) - 0.5
@@ -252,12 +260,14 @@ def _value_noise(XX, YY, x0, y0, x1, y1, wl, rng):
 
 def mesh_grid(path, x0, y0, x1, y1, nx, ny, z0, amp_m=0.0, mtl=None,
               seed=7, wavelengths=(0.45, 0.16, 0.06), smooth_normals=True):
-    """정점 변위 지면 그리드. amp_m[m] 진폭의 3옥타브 값노이즈.
+    """Vertex-displaced ground grid. 3-octave value noise of amplitude amp_m [m].
 
-    MDL displacement 는 RTX 미지원 [ZZ §2 상충4] → 정점으로 우회한다.
-    노이즈는 결정적(seed 고정) — 재렌더 재현성 유지.
-    smooth_normals=True 면 정점 노멀을 유한차분으로 직접 계산해 넣는다
-    (안 넣으면 Hydra 가 face normal 로 그려 저폴리 각짐이 나온다).
+    MDL displacement is unsupported on RTX [ZZ §2 conflict 4] -> work around it
+    with vertices. The noise is deterministic (fixed seed) to keep re-renders
+    reproducible.
+    With smooth_normals=True the vertex normals are computed directly by finite
+    differences and written out (without them Hydra draws face normals, giving
+    a faceted low-poly look).
     """
     rng = np.random.default_rng(seed)
     xs = np.linspace(x0, x1, nx + 1)
@@ -298,7 +308,7 @@ def mesh_grid(path, x0, y0, x1, y1, nx, ny, z0, amp_m=0.0, mtl=None,
 
 
 # ===========================================================================
-# 스테이지 조립
+# Stage assembly
 # ===========================================================================
 print("[랩] 재질·기하 조립 중 ...")
 TP = sc.tex_path
@@ -309,7 +319,7 @@ GRANITE = (TP("granite_dark", "diff"), TP("granite_dark", "nor"),
 PAVING = (TP("paving_interlock", "diff"), TP("paving_interlock", "nor"),
           TP("paving_interlock", "rough"))
 
-# 랩 바닥 — v1 은 60x60 이라 y=60·80 레인이 바닥 밖으로 나갔다. 240 으로 확대.
+# Lab floor — v1 was 60x60, so the y=60 and y=80 lanes fell off it. Widened to 240.
 M_FLOOR = pbr(f"{ROOT}/Looks/Floor", *CONCRETE, scale_m=2.0)
 sc.add_box(stage, f"{ROOT}/Floor", (0, 60, -0.06), (240, 240, 0.1), M_FLOOR)
 
@@ -320,11 +330,12 @@ def lane(tag, y, views, **extra):
     LANES[tag] = dict(y=y, views=views, **extra)
 
 
-# --- E1: 가짜 베벨 -----------------------------------------------------------
-# 가시성 조건을 넓게 잡는다: ①거친 콘크리트(현장 재질) ②매끈한 화강암
-# (roughness 0.22 — 하이라이트가 서는 조건) 두 열을 동시에 놓고,
-# ③근접(0.5 m) ④로봇 시점 거리(2 m) 양쪽에서 본다. 어느 조건에서도 안 보이면
-# 미지원으로 판정할 근거가 된다.
+# --- E1: fake bevel ----------------------------------------------------------
+# Cast the visibility conditions wide: place two rows at once, (1) rough
+# concrete (the on-site material) and (2) smooth granite (roughness 0.22 — the
+# condition where a highlight forms), and view both from (3) close range
+# (0.5 m) and (4) robot-view distance (2 m). If it is invisible under every
+# condition, that is grounds for ruling it unsupported.
 if want("e1"):
     y = 0.0
     radii_mm = [0.0, 1.0, 2.0, 5.0, 10.0, 20.0]
@@ -339,34 +350,35 @@ if want("e1"):
         sc.add_box(stage, f"{ROOT}/E1_G_{k}", (x, y - 1.4, 0.45),
                    (1.6, 1.6, 0.9), m_g)
     lane("e1", y, radii_mm=radii_mm, views={
-        # 전열 조망 (전 반경 동시)
+        # whole-row view (every radius at once)
         "e1_row_concrete": dict(eye=[0.0, y + 7.5, 2.2], tgt=[0.0, y + 1.4, 0.7]),
         "e1_row_granite": dict(eye=[0.0, y - 7.5, 2.2], tgt=[0.0, y - 1.4, 0.7]),
-        # 근접 0.6 m — 상단 모서리를 화면 중앙 수평선에 (0 mm vs 20 mm)
+        # close 0.6 m — top edge on the frame's centre horizon (0 mm vs 20 mm)
         "e1_near_0mm_gran": dict(eye=[-7.0, y - 2.9, 1.05], tgt=[-7.0, y - 2.2, 0.88]),
         "e1_near_20mm_gran": dict(eye=[7.0, y - 2.9, 1.05], tgt=[7.0, y - 2.2, 0.88]),
         "e1_near_5mm_conc": dict(eye=[1.4, y + 2.9, 1.05], tgt=[1.4, y + 2.2, 0.88]),
-        # 로봇 시점 거리(2 m)·수직 모서리 — 실제 씬에서 보이는 조건
+        # robot-view distance (2 m), vertical edge — the condition seen in real scenes
         "e1_robot_vedge_0": dict(eye=[-8.6, y - 3.4, 0.30], tgt=[-7.4, y - 2.0, 0.45]),
         "e1_robot_vedge_20": dict(eye=[5.4, y - 3.4, 0.30], tgt=[6.6, y - 2.0, 0.45]),
     })
 
 # --- E2: NegObsGround.mdl vs OmniPBR — split-face ----------------------------
-# 같은 평면/같은 경사면을 x=0 에서 반으로 갈라 좌 OmniPBR / 우 NegObsGround.
-# 한 컷에 두 조건이 들어가므로 조명·시점·스케일이 완전히 통제된다.
+# Split the same plane / same slope in half at x=0: left OmniPBR, right
+# NegObsGround. One shot holds both conditions, so lighting, viewpoint and
+# scale are fully controlled.
 if want("e2"):
     y = 30.0
     M_OMNI = pbr(f"{ROOT}/Looks/GndOmni", *CONCRETE, scale_m=1.0)
     M_MDL = ground_mdl(f"{ROOT}/Looks/GndMdl", *CONCRETE, scale_m=1.0)
     for side, m, xc in (("omni", M_OMNI, -3.0), ("mdl", M_MDL, 3.0)):
-        # 평면 반쪽 (6 x 14)
+        # flat half (6 x 14)
         sc.add_box(stage, f"{ROOT}/E2_Flat_{side}", (xc, y, 0.01),
                    (6.0, 14.0, 0.02), m)
-        # 경사면 반쪽 — 큐빅 투영 최악 조건(대각 방위 + 급경사)
+        # slope half — worst case for cubic projection (diagonal bearing + steep grade)
         sc._oriented_box(stage, f"{ROOT}/E2_Ramp_{side}", (xc, y + 10.0, 1.10),
                          (6.0, 5.0, 0.25), m, rotz=0.0, rotx=38.0)
     lane("e2", y, views={
-        # 이음매를 화면 중앙에 두고 지면 충전 (하늘 0)
+        # seam at frame centre, ground-filling (zero sky)
         "e2_split_robot": dict(eye=[0.0, y - 6.2, 0.30], tgt=[0.0, y + 1.0, 0.02]),
         "e2_split_near": dict(eye=[0.0, y - 1.6, 0.55], tgt=[0.0, y + 0.6, 0.02]),
         "e2_split_top": dict(eye=[0.0, y - 3.0, 3.4], tgt=[0.0, y + 0.5, 0.02]),
@@ -374,7 +386,7 @@ if want("e2"):
         "e2_ramp_grazing": dict(eye=[0.0, y + 6.4, 0.42], tgt=[0.0, y + 10.5, 1.30]),
     })
 
-# --- E3: 디테일 노멀 — split-face -------------------------------------------
+# --- E3: detail normal — split-face -----------------------------------------
 if want("e3"):
     y = 60.0
     M_OFF = pbr(f"{ROOT}/Looks/DetOff", *CONCRETE, scale_m=1.5)
@@ -403,7 +415,7 @@ if want("e4"):
         "e4_near_cc": dict(eye=[0.0, y - 1.9, 1.1], tgt=[0.0, y - 0.7, 0.85]),
     })
 
-# --- E5: 정점 변위 그리드 -----------------------------------------------------
+# --- E5: vertex-displacement grid --------------------------------------------
 if want("e5"):
     y = 120.0
     M_G = ground_mdl(f"{ROOT}/Looks/DispGnd", *CONCRETE, scale_m=1.0)
@@ -415,19 +427,20 @@ if want("e5"):
                   seed=11 + k)
     lane("e5", y, amps_mm=amps_mm, views={
         "e5_row": dict(eye=[0.0, y - 6.5, 1.9], tgt=[0.0, y, 0.02]),
-        # 스침각 — 미세 기복은 여기서만 읽힌다 (h0.3 로봇 뷰와 같은 조건)
+        # grazing angle — fine relief only reads here (same condition as the h0.3 robot view)
         "e5_grazing_0mm": dict(eye=[-6.9, y - 3.0, 0.16], tgt=[-6.9, y + 2.0, 0.02]),
         "e5_grazing_10mm": dict(eye=[2.3, y - 3.0, 0.16], tgt=[2.3, y + 2.0, 0.02]),
         "e5_grazing_20mm": dict(eye=[6.9, y - 3.0, 0.16], tgt=[6.9, y + 2.0, 0.02]),
     })
 
-# --- E9: 풀스택 예측 실험 (브리프 외 — 감독 추가) ------------------------------
-# Phase 2 게이트("flat<8 / slope -2.0~-2.2")를 통과할 수 있는지를 지금 잰다.
-# 네 패드를 같은 크기·같은 카메라 오프셋으로 찍어 수치를 직접 비교한다.
-#   P0 현행 프로덕션 레시피  : 평면 박스 + OmniPBR(월드 큐빅)
-#   P1 + NegObsGround        : 평면 박스 + 소프트 트라이플래너·반복파괴
-#   P2 + 정점 변위           : 변위 메시(10 mm) + NegObsGround
-#   P3 + 디테일 노멀         : 변위 메시(10 mm) + OmniPBR + detail normal
+# --- E9: full-stack prediction experiment (outside the brief — supervisor addition) ---
+# Measure now whether the Phase 2 gate ("flat<8 / slope -2.0~-2.2") is passable.
+# Four pads are shot at the same size and camera offset so the numbers compare
+# directly.
+#   P0 current production recipe : flat box + OmniPBR (world cubic)
+#   P1 + NegObsGround            : flat box + soft triplanar, tiling breakup
+#   P2 + vertex displacement     : displaced mesh (10 mm) + NegObsGround
+#   P3 + detail normal           : displaced mesh (10 mm) + OmniPBR + detail normal
 if want("e9"):
     y = 150.0
     PADS = []
@@ -449,18 +462,20 @@ if want("e9"):
         PADS.append((tag, xc))
     v = {}
     for tag, xc in PADS:
-        # 지면 충전 · h0.3 로봇 시점 (판정 1순위와 동일 조건)
+        # ground-filling, h0.3 robot view (identical to the primary judging condition)
         v[f"e9_{tag}_robot"] = dict(eye=[xc, y - 5.4, 0.30], tgt=[xc, y + 1.5, 0.02])
-        # 지면 충전 · 근접 0.8 m
+        # ground-filling, close 0.8 m
         v[f"e9_{tag}_near"] = dict(eye=[xc, y - 1.5, 0.60], tgt=[xc, y + 0.6, 0.02])
     lane("e9", y, pads=[t for t, _ in PADS], views=v)
 
-# --- E10: texture_scale 의미 캘리브레이션 (감독 추가) ------------------------
-# OmniPBR(큐빅)과 NegObsGround(트라이플래너)는 같은 texture_scale 값에서
-# 타일 크기가 같지 않을 수 있다. 이 값을 틀리면 전 지면의 타일 스케일이
-# 어긋나는 **전역 회귀**가 되므로 추정 금지 — 직접 잰다.
-# 강한 주기성을 가진 인터로킹 보도블록을 같은 scale_m 으로 좌/우에 깔고
-# **정사영에 가까운 하향 뷰**로 찍어 픽셀 주기를 비교한다.
+# --- E10: calibrating what texture_scale means (supervisor addition) ---------
+# OmniPBR (cubic) and NegObsGround (triplanar) may not produce the same tile
+# size for the same texture_scale value. Getting this wrong is a **global
+# regression** that throws off tile scale across every ground surface, so no
+# guessing — measure it directly.
+# Lay strongly periodic interlocking paving on the left and right at the same
+# scale_m and shoot a **near-orthographic top-down view** to compare pixel
+# periods.
 if want("e10"):
     y = 180.0
     M_O = pbr(f"{ROOT}/Looks/CalOmni", *PAVING, scale_m=1.0)
@@ -471,7 +486,7 @@ if want("e10"):
         sc.add_box(stage, f"{ROOT}/E10_Pad_{tag}", (xc, y, 0.01),
                    (7.6, 7.6, 0.02), m)
     lane("e10", y, views={
-        # 거의 수직 하향 — 원근 왜곡 최소화(주기 측정용)
+        # nearly straight down — minimizes perspective distortion (for period measurement)
         "e10_cal_omni": dict(eye=[-4.0, y - 0.01, 6.0], tgt=[-4.0, y, 0.02]),
         "e10_cal_mdl": dict(eye=[4.0, y - 0.01, 6.0], tgt=[4.0, y, 0.02]),
     })
@@ -484,7 +499,7 @@ for _ in range(90):
 
 
 # ===========================================================================
-# 렌더 모드 · 캡처
+# Render modes and capture
 # ===========================================================================
 def set_pt(total_spp, spp=1, subframes=1):
     settings.set("/rtx/pathtracing/spp", int(spp))
@@ -525,7 +540,8 @@ PROFILES = []
 if MODE in ("rt", "both"):
     PROFILES.append(("rt", set_rt, 90))
 if MODE in ("pt", "both"):
-    # ZZ §10.3: spp=1 이라 512spp 를 512프레임에 걸쳐 누적 중 → 8프레임 수렴 설정
+    # ZZ §10.3: with spp=1, 512spp accumulates over 512 frames -> settings that
+    # converge in 8 frames instead
     PROFILES.append(("ptfast", lambda: set_pt(64, spp=16, subframes=8), 8))
 
 for tag, ln in LANES.items():
@@ -542,16 +558,17 @@ for tag, ln in LANES.items():
                 dict(profile=pname, view=vname, file=fp, sec=round(dt, 2), ok=ok))
 
 # ===========================================================================
-# E6/E7 — 렌더 예산 실측
+# E6/E7 — measured render budget
 # ===========================================================================
 if BENCH:
     ln = LANES.get("e9") or LANES.get("e2") or next(iter(LANES.values()), None)
     if ln is None:
         note("E6/E7: 벤치할 레인이 없다 — --only 에 e9 또는 e2 를 포함할 것")
     else:
-        # 벤치 뷰는 **고분산 뷰**를 골라야 한다. 평면+하늘 같은 저분산 뷰는
-        # 어떤 spp 로도 같은 이미지로 수렴해 "화질 동등"이 자명하게 참이 된다
-        # (1차 벤치에서 pt512 와 ptfast 가 비트 단위로 동일하게 나온 원인).
+        # The bench view must be a **high-variance view**. A low-variance view
+        # such as flat ground plus sky converges to the same image at any spp,
+        # making "equal image quality" trivially true (this is why pt512 and
+        # ptfast came out bit-identical in the first bench).
         bvname = _arg("--benchview", "")
         bview = ln["views"].get(bvname) or next(iter(ln["views"].values()))
         print(f"[예산] 벤치 뷰 = {bvname or list(ln['views'])[0]}")
@@ -567,7 +584,7 @@ if BENCH:
             for _ in range(12):
                 sim_app.update()
             secs = []
-            for rep in range(2):                       # 2회 중 최소(캐시 편향 제거)
+            for rep in range(2):                       # min of 2 runs (removes cache bias)
                 fp = os.path.join(out_dir, f"{bname}_rep{rep}.png")
                 dt, ok = capture(bview, fp, warm)
                 secs.append(dt)

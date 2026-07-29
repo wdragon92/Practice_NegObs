@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""21씬 컨택트 시트 생성 — 씬별 최신 디렉토리에서 대표 뷰 1장씩."""
+"""Build the 21-scene contact sheet — one representative view per scene, taken
+from each scene's most recent render directory."""
 import os, glob
 from PIL import Image, ImageDraw, ImageFont
 
@@ -18,7 +19,7 @@ NAMES = {
 DIR_PRI = ["v5_pt", "v5_rt", "final_pt_r2", "r5", "final_pt", "r4", "r3", "r2", "r1", "auto"]
 VIEW_PRI = ["beauty", "overview", "roof_context", "entry_gate", "facade",
             "h1.8_d10", "h1.8_d5", "h0.9_d10", "h0.9_d5"]
-# 씬별 오버라이드: 대표 컷이 유형 정체성을 보여주도록
+# Per-scene overrides, so the representative cut conveys the scene's identity
 DIR_OVR = {}
 VIEW_OVR = {7: ["stair_down", "temple_walk"], 12: ["walk_down", "across_gorge"],
             14: ["terrace_read", "beauty"], 18: ["color_front", "oblique_down"],
@@ -61,7 +62,7 @@ for i in range(1, 22):
     p = pick(i)
     if p:
         im = Image.open(p).convert("RGB")
-        # 중앙 크롭 → 16:9 타일
+        # center crop -> 16:9 tile
         w, h = im.size
         ar, tar = w / h, TW / TH
         if ar > tar:

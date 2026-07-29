@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""수정 완료 유지 씬 15종 — v5 PT 파이널 고화질 통합 시트 (960x540 타일)."""
+"""High-quality combined sheet for the finalized scenes — v5 PT final (960x540 tiles)."""
 import os, glob
 from PIL import Image, ImageDraw, ImageFont
 

@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
-"""RTX 설정 실측 덤프 + subdiv 확정 실험.
+"""Measured dump of RTX settings + subdiv confirmation experiment.
 
-Phase 1 후속. H_rtx_capability_verification.md 가 소스·바이너리 근거로 낸 결론
-중 **런타임 기본값에 의존하는 것들**을 실측으로 확정한다.
+Phase 1 follow-up. H_rtx_capability_verification.md drew its conclusions from
+source and binary evidence; this script pins down, by measurement, the subset
+of those conclusions that **depends on runtime defaults**.
 
-  ① `/rtx`·`/app/renderer` 설정 트리 덤프 → JSON (기본값 논쟁 종결)
-  ② subdiv 확정: 같은 catmullClark 박스를 refinementLevel 0/2/4 로 렌더.
-     - 이미지가 안 변하면 → 세분은 실제로 안 일어났고, E4 에서 본 "둥글어짐"은
-       **스무스 노멀 셰이딩**이었다 (Phase 1 보고 E4 판정 정정 필요).
-     - 변하면 → 진짜 세분이며 refinementLevel 을 켜야 동작한다.
+  (1) Dump the `/rtx` and `/app/renderer` setting trees to JSON (settles the
+      argument over what the defaults actually are).
+  (2) Subdiv confirmation: render the same catmullClark box at refinementLevel
+      0/2/4.
+      - If the image does not change -> no subdivision actually happened, and
+        the "rounding" seen in E4 was **smooth normal shading** (the Phase 1
+        report's E4 verdict then needs correcting).
+      - If it does change -> subdivision is real and requires refinementLevel
+        to be turned on.
 
-실행: bash run_p1_probe.sh
+Run: bash run_p1_probe.sh
 """
 import os
 import sys
@@ -38,7 +43,7 @@ stage = omni.usd.get_context().get_stage()
 settings = carb.settings.get_settings()
 
 # ---------------------------------------------------------------------------
-# ① 설정 덤프
+# (1) Settings dump
 # ---------------------------------------------------------------------------
 KEYS = [
     "/rtx/rendermode",
@@ -70,7 +75,7 @@ for k, v in dump.items():
     print(f"  {k:48} = {v!r}")
 
 # ---------------------------------------------------------------------------
-# ② subdiv 확정 실험
+# (2) Subdiv confirmation experiment
 # ---------------------------------------------------------------------------
 ROOT = "/World/Probe"
 UsdGeom.Xform.Define(stage, ROOT)

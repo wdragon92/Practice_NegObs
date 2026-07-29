@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
-"""사실화 v1 전후 비교 시트 — 33씬을 **개선 전 / 후** 두 칸으로 나란히.
+"""Realism v1 before/after comparison sheet — all 33 scenes laid out side by
+side in **before / after** columns.
 
-왜 필요한가: Phase1 E9 에서 확인했듯 **저수준 통계가 명백한 시각 차이를 거의
-잡지 못한다**. 그래서 게이트를 "수치 + 육안 병행"으로 이원화했고, 육안 판정의
-근거가 되는 물건이 이 시트다.
+Why this exists: as Phase1 E9 showed, **low-level statistics barely capture
+obvious visual differences**. The gate was therefore split into "numeric +
+visual side by side", and this sheet is the artifact the visual verdict rests
+on.
 
-  좌 = 개선 전 (기존 합격 라이브러리: 본편 v8_pt/v7_pt · 배치1 ctx2/ctx1)
-  우 = 개선 후 (사실화 룩 레이어 v1)
+  left  = before (existing passing library: main v8_pt/v7_pt, batch1 ctx2/ctx1)
+  right = after  (realism look layer v1)
 
-실행:
-  python scripts/make_compare_sheet.py <after_round_suffix> [출력경로]
-  예) python scripts/make_compare_sheet.py r2_on
+Run:
+  python scripts/make_compare_sheet.py <after_round_suffix> [output_path]
+  e.g. python scripts/make_compare_sheet.py r2_on
 """
 import os
 import sys
@@ -26,7 +28,7 @@ OUT = (sys.argv[2] if len(sys.argv) > 2
        else os.path.join(ROOT, "Docs", "reports",
                          f"realism_compare_{AFTER}.png"))
 
-# 개선 전 후보 (앞에서부터 존재하는 것을 씀)
+# "before" candidates (first one that exists wins)
 BEFORE_ROUNDS = ("v8_pt", "v7_pt", "final_pt", "ctx2_pt", "ctx2", "ctx1",
                  "v8_rt", "v7_rt", "r5")
 
@@ -44,12 +46,12 @@ BATCH1 = [("sceneN1", "그림자 띠"), ("sceneN2", "아스팔트 패치"),
           ("sceneD3", "측구"), ("sceneD4", "승강장")]
 SCENES = MAIN + BATCH1
 
-# 판정 1순위는 h0.3 로봇 시점 — 비교도 그 시점을 우선한다
+# The primary judging view is the h0.3 robot viewpoint — comparisons prefer it too
 VIEW_PRI = ["preset_h0.3_d2", "preset_h0.3_d5", "beauty", "overview"]
 
-TW, TH = 480, 270          # 타일 크기
+TW, TH = 480, 270          # tile size
 GAP, PAD = 8, 26
-COLS = 3                   # 씬 3개 × (전/후 2칸)
+COLS = 3                   # 3 scenes x (before/after = 2 cells)
 
 
 def _font(sz):

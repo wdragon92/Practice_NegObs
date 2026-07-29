@@ -1,33 +1,42 @@
 #!/usr/bin/env python3
-"""렌더 vs 실사 자연영상 통계 진단 — 사실화 라운드 공식 측정 도구.
+"""Natural-image statistics diagnostic, render vs photo — the official
+measurement tool for the realism rounds.
 
-출처: `Docs/surveys/realism_gap_2026-07-28/00_supervisor_direct_diagnosis.md`
-      (감독 직접측정) + `E_realism_measurement_protocol.md` (L1 저수준 통계).
-종전 `scratchpad/imgstats.py`(미추적)를 저장소에 정식 편입하면서
-JSON 출력·하늘 제외 모드·그룹 비교를 추가했다. 의존성은 numpy+PIL 뿐.
+Sources: `Docs/surveys/realism_gap_2026-07-28/00_supervisor_direct_diagnosis.md`
+      (supervisor's own measurements) + `E_realism_measurement_protocol.md`
+      (L1 low-level statistics).
+The former `scratchpad/imgstats.py` (untracked) was formally moved into the
+repository, gaining JSON output, a sky-excluded mode and group comparison.
+Dependencies are numpy + PIL only.
 
-측정 항목 (전부 자연영상 통계 문헌의 표준 지표):
-  slope    : 방사평균 파워스펙트럼 기울기 (log P vs log f). 자연영상 ≈ -2.0 ± 0.3
-  grad_k   : 그래디언트 크기 분포의 첨도. 자연영상은 heavy-tail (>> 3)
-  flat%    : 국소표준편차 < 1/255 인 픽셀 비율 (= 디테일이 전혀 없는 "죽은" 영역)
-  hf       : 고주파(>= f_nyq/4) 에너지 비율
-  sat_mu   : 평균 채도(HSV S 근사), sat_sd: 채도 표준편차
-  chroma_sd: 국소 색상 변동 — 실사는 같은 재질 안에서도 색이 흔들림
-  ori_axis : 에지 방향이 정확히 0/90도 축에 몰린 비율 (CG 티). 균등 기대치 0.111
+Metrics (all standard indicators from the natural-image statistics literature):
+  slope    : radially averaged power-spectrum slope (log P vs log f).
+             Natural images ~ -2.0 +- 0.3
+  grad_k   : kurtosis of the gradient-magnitude distribution. Natural images
+             are heavy-tailed (>> 3)
+  flat%    : share of pixels with local stddev < 1/255 (= "dead" regions with
+             no detail at all)
+  hf       : high-frequency (>= f_nyq/4) energy ratio
+  sat_mu   : mean saturation (approximating HSV S), sat_sd: its stddev
+  chroma_sd: local colour variation — in photos the colour wavers even within
+             one material
+  ori_axis : share of edge orientations sitting exactly on the 0/90-degree axes
+             (a CG tell). Uniform expectation is 0.111
 
-T1 목표치 [ZZ_synthesis §6]: flat% < 8 · slope -2.0~-2.2 · sat_mu 0.15~0.22
+T1 targets [ZZ_synthesis §6]: flat% < 8, slope -2.0~-2.2, sat_mu 0.15~0.22
 
-사용법:
-  # 실사 기준군은 **배포 안전 세트**를 쓴다(라이선스 감사 조치).
+Usage:
+  # The photo reference group uses the **distribution-safe set** (licensing
+  # audit remedy).
   #   REAL=$(sed '/^#/d;/^$/d' Docs/reference_photos/real_set_safe.txt | tr '\n' ' ')
   python scripts/imgstats.py @render 'look_check/scene01/v7_pt/pt_*.png' @real $REAL
   #
-  # ⚠ 종전 `@real 'Docs/reference_photos/*.jpg'` (n=2) 는 쓰지 말 것 —
-  #   2장 중 1장이 라이선스 근거 없는 제3자 사진이라 격리됐고,
-  #   나머지 1장만으로는 표본이 성립하지 않는다.
-  # 하늘(상단 1/3) 제외 — 지면·구조물만 보고 싶을 때
+  # WARNING: do not use the former `@real 'Docs/reference_photos/*.jpg'` (n=2) —
+  #   one of those two was a third-party photo with no licensing basis and has
+  #   been quarantined, and the single remaining image is not a valid sample.
+  # Exclude the sky (top 1/3) — when only ground and structures matter
   python scripts/imgstats.py --lower @render '...'
-  # 기계 판독용
+  # Machine-readable output
   python scripts/imgstats.py --json out.json @render '...'
 """
 import sys
@@ -41,44 +50,51 @@ from PIL import Image
 METRICS = ("slope", "grad_k", "flat_pct", "flat_sky", "flat_gnd", "hf", "sat_mu", "sat_sd",
            "chroma_sd", "ori_axis")
 
-# T1 게이트 [ZZ_synthesis §6 T1 "목표 수치"] — 승용 승인 기준. **변경하지 않는다.**
+# T1 gate [ZZ_synthesis §6 T1 "target figures"] — supervisor-approved
+# criterion. **Do not change.**
 GATE = dict(flat_pct=(None, 8.0), slope=(-2.2, -2.0), sat_mu=(0.15, 0.22))
 
 # ---------------------------------------------------------------------------
-# [실사 분포 기반 재산정] `Docs/reports/real_reference_expansion.md` (n=54)
+# [Recomputed from the photo distribution] `Docs/reports/real_reference_expansion.md` (n=54)
 #
-# 기존 목표치는 **실사 사진 2장**에서 유도됐다. 표본을 54장으로 늘려 재측정하니
-# **목표 4개 중 3개를 실사 자신이 통과하지 못한다**:
-#     flat_pct<8    실사 통과율 44%
-#     slope -2.2~-2.0  44% (문헌 구간이면 91%)
+# The original targets were derived from **two photographs**. Re-measuring with
+# the sample expanded to 54 shows that **the photos themselves fail 3 of the 4
+# targets**:
+#     flat_pct<8       photo pass rate 44%
+#     slope -2.2~-2.0  44% (91% if the literature's interval is used)
 #     sat_mu 0.15~0.22 33%
-#     flat_gnd<3.0     54%  ← 수치는 우연히 타당하나 근거("실사 0.1")는 이상치였다
+#     flat_gnd<3.0     54%  <- the number happens to be sound, but its basis
+#                              ("photos measure 0.1") was an outlier
 #
-# 실사 n=54 실측: slope -2.033±0.184 / flat_pct 10.23±8.83 /
-#                flat_gnd 3.881±5.005(중앙값 1.79) / sat_mu 0.232±0.071
+# Photos, n=54, measured: slope -2.033+-0.184 / flat_pct 10.23+-8.83 /
+#                flat_gnd 3.881+-5.005 (median 1.79) / sat_mu 0.232+-0.071
 #
-# 판별력(실사54 vs 렌더114 AUC 분리도):
+# Discriminative power (AUC separation, 54 photos vs 114 renders):
 #     grad_k 0.354 > slope 0.338 > ori_axis 0.168 > chroma_sd 0.138 > sat_mu 0.098
-#   → **sat_mu 는 전 지표 최하위인데 게이트에 들어가 있다**(렌더가 실사 분포
-#     한가운데). ori_axis 는 감독이 n=2 근거로 폐기했으나 sat_mu 보다 판별력이
-#     높아 **폐기가 부당**했다. grad_k 는 분리도 1위인데 게이트에 없다.
+#   -> **sat_mu ranks last of all metrics yet sits in the gate** (renders land
+#     mid-distribution for photos). ori_axis was dropped by the supervisor on
+#     n=2 evidence, but it discriminates better than sat_mu, so **dropping it
+#     was unjustified**. grad_k leads on separation yet is not in the gate.
 #
-# 아래는 **참고용 병기**다. 게이트 변경은 승용 승인 사항이므로 GATE 는 그대로 둔다.
+# The values below are **for reference alongside** the gate. Changing the gate
+# requires supervisor approval, so GATE is left as-is.
 REAL_N54 = dict(slope=(-2.033, 0.184), flat_pct=(10.23, 8.83),
                 flat_gnd=(3.881, 5.005), sat_mu=(0.232, 0.071),
                 grad_k=(None, None), ori_axis=(0.252, 0.074))
-GATE_ALT = dict(flat_gnd=(None, 3.0),      # 중앙값 1.79 ~ 평균 3.88 사이 — 유지 가능
-                slope=(-2.40, -1.75),      # 실사 평균 ±2SD
-                grad_k=(None, 20.0))       # 분리도 1위 지표를 대신 넣는다
-# CV 가 큰 지표(flat_sky 94% · flat_gnd 129% · hf 115% · flat_pct 86%)는
-# **평균이 아니라 중앙값**으로 판정해야 한다(왜도 +2.38 우편향).
-# 하단 2/3(지면·구조물) 보조 게이트 — 실사 실측 0.1%. 하늘 교체만으로 헤드라인
-# 지표를 통과하는 것을 막는 진짜 기준선이다. [P1 감독 실측 2026-07-28]
+GATE_ALT = dict(flat_gnd=(None, 3.0),      # between median 1.79 and mean 3.88 — can be kept
+                slope=(-2.40, -1.75),      # photo mean +-2SD
+                grad_k=(None, 20.0))       # substitutes the top-separation metric
+# Metrics with large CV (flat_sky 94%, flat_gnd 129%, hf 115%, flat_pct 86%)
+# must be judged on the **median, not the mean** (skew +2.38, right-tailed).
+# Auxiliary gate for the lower 2/3 (ground and structures) — photos measure
+# 0.1%. This is the real baseline that stops a headline metric from passing on
+# a sky swap alone. [P1 supervisor measurement 2026-07-28]
 GATE_GND = dict(flat_gnd=(None, 3.0))
 
 
 def load(path, long_side=1024, lower=False):
-    """긴 변 1024로 정규화해 로드. lower=True면 상단 1/3(하늘) 제외."""
+    """Load, normalizing the long side to 1024. lower=True drops the top 1/3
+    (the sky)."""
     im = Image.open(path).convert("RGB")
     w, h = im.size
     s = long_side / max(w, h)
@@ -95,7 +111,8 @@ def lum(rgb):
 
 
 def ps_slope(g):
-    """정사각 중앙 크롭 + 해닝 창 → 방사평균 파워스펙트럼 기울기."""
+    """Square centre crop + Hanning window -> radially averaged power-spectrum
+    slope."""
     n = min(g.shape)
     y0 = (g.shape[0] - n) // 2
     x0 = (g.shape[1] - n) // 2
@@ -109,7 +126,7 @@ def ps_slope(g):
     tot = np.bincount(r.ravel(), P.ravel())
     cnt = np.bincount(r.ravel())
     prof = tot / np.maximum(cnt, 1)
-    lo, hi = 3, n // 4                     # DC 근방·나이퀴스트 근방 제외
+    lo, hi = 3, n // 4                     # exclude the DC and Nyquist neighbourhoods
     f = np.arange(lo, hi)
     y = np.log(np.maximum(prof[lo:hi], 1e-20))
     A = np.vstack([np.log(f), np.ones_like(f, dtype=float)]).T
@@ -130,7 +147,7 @@ def kurt(x):
 
 
 def local_std(g, k=5):
-    """박스필터(적분영상) 기반 국소 표준편차."""
+    """Local standard deviation via a box filter (integral image)."""
     pad = k // 2
 
     def boxsum(a):
@@ -162,14 +179,15 @@ def sat_stats(rgb):
 
 
 def chroma_local_sd(rgb):
-    """대략적 색차 채널(opponent) 의 국소 변동."""
+    """Local variation of the approximate opponent (colour-difference) channels."""
     rg = rgb[..., 0] - rgb[..., 1]
     by = 0.5 * (rgb[..., 0] + rgb[..., 1]) - rgb[..., 2]
     return float((local_std(rg, 7).mean() + local_std(by, 7).mean()) / 2)
 
 
 def ori_axis_frac(g):
-    """상위 10% 에지 중 0/90도 ±5도에 몰린 비율. 균등분포 기대치 = 0.111."""
+    """Share of the top-10% edges falling within +-5 degrees of the 0/90-degree
+    axes. Uniform-distribution expectation = 0.111."""
     gx, gy = grads(g)
     mag = np.sqrt(gx ** 2 + gy ** 2)
     m = mag > np.percentile(mag, 90)
@@ -188,10 +206,11 @@ def analyze(path, lower=False):
     mag = np.sqrt(gx ** 2 + gy ** 2)
     ls = local_std(g, 5)
     smu, ssd = sat_stats(rgb)
-    # [P1 발견] 죽은 픽셀의 67~74% 가 하늘이었다 (감독 실측, 2026-07-28).
-    # 전체 flat% 만 보면 하늘 교체만으로 목표를 "달성"할 수 있어 지표를 속이게
-    # 된다. 상단 1/3(대략 하늘)·하단 2/3(지면·구조물)을 항상 분리 보고한다.
-    # 실사 기준: 상단 11.6% / **하단 0.1%** — 하단이 진짜 기준이다.
+    # [P1 finding] 67~74% of dead pixels were sky (supervisor measurement,
+    # 2026-07-28). Looking only at overall flat% lets a sky swap alone "meet"
+    # the target, which games the metric. Always report the top 1/3 (roughly
+    # sky) and the lower 2/3 (ground and structures) separately.
+    # Photo reference: top 11.6% / **bottom 0.1%** — the bottom is the real one.
     h = g.shape[0]
     return dict(
         name=os.path.basename(path),
@@ -209,7 +228,7 @@ def analyze(path, lower=False):
 
 
 def gate_verdict(agg):
-    """T1 게이트 판정. 반환: (통과여부, 항목별 문자열)."""
+    """T1 gate verdict. Returns: (passed, per-metric strings)."""
     out, ok_all = [], True
     for k, (lo, hi) in list(GATE.items()) + list(GATE_GND.items()):
         v = agg.get(k)
@@ -270,7 +289,8 @@ def main(argv):
         if rows:
             agg[gname] = {k: float(np.mean([r[k] for r in rows]))
                           for k in METRICS}
-            # 왜도가 큰 지표는 평균이 이상치에 끌린다 → 중앙값 병기(실사 n=54 근거)
+            # For heavily skewed metrics the mean is dragged by outliers ->
+            # report the median alongside (basis: photos, n=54)
             agg[gname].update({k + "_med": float(np.median([r[k] for r in rows]))
                                for k in METRICS})
             agg[gname]["n"] = len(rows)

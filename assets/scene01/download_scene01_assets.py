@@ -364,13 +364,18 @@ def download_polyhaven(slug, prefix, failures):
 # ---------------------------------------------------------------------------
 # 물리 치수는 여기 한 곳에만 둔다 — 픽셀 상수(`N/8.0` 같은)로 흩어 놓으면
 # "타일 300 mm 에서 돌기가 몇 mm 인가" 를 아무도 못 읽는다.
-TACTILE_TILE_MM = 300.0     # [법령] 교통약자법 시행규칙 별표1 2호 차목 — 300 mm 판
-TACTILE_DOT_D_MM = 25.0     # [결재 B7 · 2026-07-29] 38.1 → **25 mm**
-#   구판은 `dot_d = N/8.0` = 128 px = **37.5 mm**(외곽 림 포함 실측 38.1) 였다.
-#   국내·국제 관행 22~25 mm 대비 1.5~1.7배로, 돌기 면적률을 19.6 % → 45.6 % 로
-#   끌어올려 §12.5-4 의 "휘도 단차" 목표와 **정반대로** 작동했다
-#   [실측 — w2_surgeon_v1.md §3.5 · redteam_w2_foundations.md §4].
-#   25 mm 는 관행 상한이자 피치 50 mm 의 정확히 1/2 — 돌기 사이 간격 = 돌기 지름.
+TACTILE_TILE_MM = 300.0     # [law] 교통약자법 시행규칙 별표1 2호 차목 — 300 mm tile
+TACTILE_DOT_D_MM = 35.0     # [re-ruled 2026-07-30 — supersedes B7's 25 mm]
+TACTILE_DOT_H_MM = 6.0      # [law] dot height 6±1 mm (별표1)
+TACTILE_DOT_TOP_FRAC = 0.6  # [assumed] flat-top radius fraction (원뿔절단형; top Ø not fixed by sources)
+#   Verified KR geometry (TWO independent surveys converged, primary sources):
+#   dot Ø 35 mm / gap 15 mm / pitch 50 mm / truncated-cone flat top, h 6±1 mm
+#   — 한국시각장애인편의증진센터 2024 설치 매뉴얼 상세표준도 · 부산시 보도공사
+#   설계·시공 매뉴얼 ("지름 3.5cm, 간격 1.5cm") · era_consistency_survey_v1.md
+#   (KS F 4561 Ø35 @ 50 mm pitch). B7's "관행 22~25 mm" traces to JIS T 9251
+#   (Japan, 22 mm) — exactly the wrong-priors failure §12.1 warns about.
+#   Area fraction: π/4·(35/50)² = 38.5 % (vs 19.6 % @25 mm, 45.6 % @38.1 w/ rim).
+#   6×35 + 5×15 = 285 mm → 7.5 mm edge margin on a 300 mm tile.
 
 
 def build_tactile(failures, force=False):
@@ -400,8 +405,12 @@ def build_tactile(failures, force=False):
                 d = np.sqrt((xx - cx) ** 2 + (yy - cy) ** 2)
                 mask = d < dot_r
                 r_norm = np.clip(d / dot_r, 0.0, 1.0)
-                dome = np.sqrt(np.clip(1.0 - r_norm ** 2, 0.0, 1.0))
-                height = np.where(mask & (dome > height), dome, height)
+                # Truncated cone (원뿔절단형): flat top out to TOP_FRAC·r,
+                # then linear flank to the base rim — per KR manuals the dot
+                # is a shallow, broad, FLAT-TOPPED cone, not a hemisphere.
+                cone = np.clip((1.0 - r_norm) / (1.0 - TACTILE_DOT_TOP_FRAC),
+                               0.0, 1.0)
+                height = np.where(mask & (cone > height), cone, height)
 
         # ---- diff: 안전 황색 + 노이즈 + 모서리 마모 ----
         base = np.array([0xF5, 0xC4, 0x00], np.float32)  # #F5C400
@@ -435,7 +444,10 @@ def build_tactile(failures, force=False):
                     out += k[i, j] * p[i:i + N, j:j + N]
             return out
 
-        strength = 3.0
+        # Normal strength derived from statutory geometry (closes defect D10):
+        # height 1.0 ≡ TACTILE_DOT_H_MM; 1 px ≡ TILE/N mm; Sobel ≈ 8·∂h/∂px.
+        px_mm = TACTILE_TILE_MM / N
+        strength = (TACTILE_DOT_H_MM / px_mm) / 8.0   # ≈ 2.56 @ N=1024
         gx = conv3(height, kx) * strength
         gy = conv3(height, ky) * strength
         nx = -gx

@@ -2017,9 +2017,11 @@ def apply_ground(kit, prefix, plan, mtls, *, skin_exclude=None, scatter=None,
     if not GKIT_ON:
         print("[ground_kit] ** NEGOBS_GKIT=0 — 요소 0개 (C2 A/B OFF 팔) ** "
               f"계획상 {len(plan['elements'])}요소 / {len(plan['ops'])}op 생략")
-        return {"prims": 0, "instances": 0, "elements": [],
-                "gt_delta_max": 0.0, "gt_changes": [],
-                "unit_cell": plan.get("unit_cell"), "gkit_off": True}
+        # 키 집합은 정상 반환과 **동일**해야 한다 — 씬 통합부가 res[...] 를
+        # 직접 읽으므로 키가 빠지면 OFF 팔만 KeyError 로 죽는다(실제 발생).
+        return dict(prims=0, instances=0, elements=[], gt_delta_max=0.0,
+                    gt_change_max=0.0, gt_changes=[], materials_needed=[],
+                    unit_cell=plan["unit_cell"], gkit_off=True)
 
     # ── GT δ 사전 검사 — **생성 전에** 던진다 ─────────────────────────
     gmax, gchange_max = 0.0, 0.0

@@ -70,8 +70,24 @@ AMBIENTCG = {
     "PavingStones111": "plaza_lower",
 }
 # v5 §공통: 한국 보도 인터로킹 블록 — assets/ 루트에 배치(scene_common TEX dir=ASSETS_DIR)
+#
+# [W2-A4 식생 조달 · 2026-07-29] 잔디 2세트 추가 — `TEX["grass"]` 교체용.
+#   현행 grass 는 PolyHaven `aerial_grass_rock` 인데, 이건 **15 m 상공 이끼 암반
+#   항공 스캔**이지 잔디가 아니다(B_groundcover_debris.md §3-a [실측]).
+#   4096 px / 15 m = 273 px/m 이라 들잔디 잎 나비 4~7 mm 가 원본에서 1.1~1.9 px —
+#   **잎이 원본에 기록돼 있지 않아** 어떤 scale_m 을 줘도 잔디가 나오지 않는다.
+#   ambientCG Grass001/004 는 **1.40 × 1.40 m**(API dimensionX/Y = 140 cm [실측])
+#   이라 4K 에서 2926 px/m — 잎이 12~20 px 로 실제 해상된다(10.7배).
+#   덤으로 청 채널이 살아 있어 `LOOK_CLASS["veg"]` 승격의 spread ≤ 4.0 게이트를
+#   통과한다 → 24씬 수관에 가을 낙엽이 씌워지던 규약 위반(B §8)도 같이 죽는다.
+#   grass_lawn = 1순위(dark/dense/park), grass_lawn_b = 대안(lush/suburban).
+#   **scale_m 은 반드시 1.4** — 배선은 테이블 담당 에이전트 소관(본 조달은 파일만).
+#   Grass007(moss/weeds)은 API 가 dimension 0×0 을 반환해 물리 크기 미상 →
+#   scale_m 을 근거 있게 못 정하므로 **조달 제외**(같은 실수 반복 금지).
 AMBIENTCG_ROOT = {
     "PavingStones131": "paving_interlock",
+    "Grass001": "grass_lawn",
+    "Grass004": "grass_lawn_b",
 }
 # zip 내부 접미사 -> canonical 접미사
 ACG_SUFFIX = {

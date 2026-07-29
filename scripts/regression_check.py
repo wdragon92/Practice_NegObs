@@ -173,7 +173,28 @@ PHOTO_DDARK_WARN = 12.0
 #   신호 = (톤 정규화 후) 세로 단차장의 **열 평균**. 등방 클러터(낙엽·자갈·
 #   소품)는 열 평균에서 상쇄되고, 화면을 가로지르는 선(= 낙차 에지)만 남는다.
 #   판정치 spec = max|Δ|_E − max|Δ|_N  → "변화가 에지 대역에 **국소**한가".
-GRAZE_VER = "v2"
+#
+# ■ v2.1 (2026-07-29) — **2차 판별기 2종 추가**. 대역·신호·임계는 v2 그대로다.
+#   근거: `w2_gate_preflight.md` §3.4 (T3 잔여 WARN 2건 크롭 육안) +
+#         `graze_recalibration_v1.md` §11-2 (방향별 게이트 분리).
+#   T3 가 규명한 것: v2 의 잔여 발화 2건은 **은닉 회귀가 아니라 에지 양쪽 지면의
+#   알베도 교체**였다. `Δcoh` 는 단차장의 **절대 변화량**이라 그 둘을 못 가른다.
+#   부족한 것은 "그 변화가 은닉을 바꿨는가" 를 묻는 2차 판별이고, v2.1 이 그것이다.
+#
+#   (a) **에지 존속 게이트** — 낙차행 ±GRAZE_SLACK 에서 **before/after 각각의**
+#       세로 단차 절대값을 같이 재고, **둘 다** GRAZE_STEP_MIN 이상이면 spec 초과라도
+#       정숙(재질 변화)으로 내린다. 진짜 매몰이면 after 단차가 무너지므로(선이 없어짐)
+#       검출력은 유지된다. T3 실측: scene13 115.9→67.8 · scene07 109.6→86.4 (원해상 단일행).
+#   (b) **방향별 분리** — 노출 방향(선이 생김)은 v2 그대로 **변화의 열 일치율**로 게이트하고,
+#       매몰 방향(선이 약해짐)은 **단차비** `step_after / step_before` 로 게이트한다.
+#       물리적으로 매몰 = "있던 선이 사라짐" 이므로 이쪽이 정의에 맞다(§11-2).
+#       사실화 라운드의 알베도 교체는 비 0.5~0.9 대에 몰리고 진짜 매몰은 0 에 가깝다
+#       (T3 실측 0.585 · 0.788). 또 **이전 라운드에 선이 없었으면**(step_before 미달)
+#       매몰이라는 말 자체가 성립하지 않으므로 정숙으로 내린다.
+#   (c) `GRAZE_SLACK` 은 **2 유지**. T3 §3.4-3 의 "2→3" 안은 채택하지 않았다 —
+#       (a) 가 scene07 을 이미 정숙시키므로 슬랙을 건드릴 이유가 없고, 슬랙 변경은
+#       주입시험 전면 재산정을 요구한다(T3 스스로 단 조건).
+GRAZE_VER = "v2.1"
 GRAZE_HFOV = 60.0          # [코드] 1920×1080 뷰포트 수평 화각. 근거 다중:
 #   `scenes/main/facade_kit.py` §231 "pitch −10° · vFOV 36°"
 #   `scenes/main/scene19_fan_winder.py` `_cam_basis(hfov=60, aspect=16/9)`
@@ -203,6 +224,28 @@ GRAZE_SMOOTH = 3           # 프로파일 이동평균(행)
 GRAZE_SLACK = 2            # 행 오정합 허용 — 기존 에지가 1~2행 밀린 것은 변화 아님
 GRAZE_EDGE_GUARD = 6       # 프레임 상·하단 절단 구간(필터가 잘리는 곳)
 GRAZE_LONG = 960           # GRAZE 전용 작업 해상도 (d10 대역이 384 에선 13행뿐)
+# --- v2.1 2차 판별 상수 ----------------------------------------------------
+GRAZE_STEP_MIN = 25.0      # [v2.1a] "그 행에 선이 있다" 로 인정하는 세로 단차(계조).
+#   측정 위치는 최대 변화행 ±GRAZE_SLACK, 측정 대상은 **열 평균 단차 프로파일**
+#   (graze_delta 와 같은 평활을 거친 값). 임계 25 는 W2 지시값이며 T3 실측
+#   (before 115.9/109.6 · after 67.8/86.4, 원해상 단일행)의 한참 아래라
+#   "선이 존속한다" 를 넉넉히 인정한다. 진짜 매몰(선 소멸)은 after 가 0 근방이라 무영향.
+GRAZE_BURY_RATIO = 0.50    # [v2.1b] 매몰 방향 발화 상한 = step_after / step_before.
+#   T3 실측 0.585(scene13) · 0.788(scene07) = 알베도 교체 대역. 매몰은 0 근방.
+#   0.5 는 두 군 사이이며 T3 §3.4-2 가 제시한 "0.5~0.9 대 vs 0" 분리선을 따른다.
+# --- v2.1 검출력 보호 가드 2개 (T3 안에는 없던 **추가 조건**) -----------------
+# T3 §3.4-1 은 "진짜 매몰이면 after 단차가 무너지므로 검출력은 유지된다" 고 적었으나
+# 이는 **매몰 방향에 대해서만** 성립하는 논증이고, §6 주입시험(노출 방향)으로는
+# 검증되지 않았다. 실제로 존속 게이트를 무조건 적용하면 주입 검출이
+# **70.4 % → 46.8 %** 로 무너진다 `[실측 — w2_tools_v1.md §4.5]`. 원인은 §6 주입 모형이
+# 낙차행 **아래**를 어둡게 하므로 낙차행 단차가 오히려 **줄고**, 그 모습이 알베도 교체와
+# 구분되지 않기 때문이다. 아래 두 가드가 그 겹침을 걷어낸다(재현: 검출 65.8 % 유지).
+GRAZE_PERSIST_ROWTOL = 4   # 최대 변화행이 낙차행에서 이만큼 이내여야 "그 선의 변화" 다.
+#   T3 2건 실측 3.3 · 3.7 행(960 px 축소본). 이 밖의 변화는 E 대역의 **다른 지물**이므로
+#   존속 게이트를 적용할 근거가 없다(scene17 74.7 · scene18 36.7 · scene19 30.3 → 발화 유지).
+GRAZE_PERSIST_DOM = 3.5    # 존속 선이 변화량을 이만큼 압도해야 "알베도 교체" 로 읽는다.
+#   step_after / dE — T3 실측 3.97(scene13) · 6.41(scene07). 새로 드러난 라이저는
+#   변화량 자체가 선의 대비와 같은 급이라 이 비가 작다.
 
 # --- 이월 결함 판정 ---------------------------------------------------------
 # 절대 결함(DARK/BLOWN)이 이전 라운드에도 있었으면 회귀가 아니다. 이만큼
@@ -460,7 +503,25 @@ def graze_v2(la, lbn, view, vw):
     a, b = int(B["e_top"]), int(B["e_bot"])
     ca = np.convolve(Da.mean(1), np.ones(GRAZE_SMOOTH) / GRAZE_SMOOTH, mode="same")
     cb = np.convolve(Db.mean(1), np.ones(GRAZE_SMOOTH) / GRAZE_SMOOTH, mode="same")
+    # [v2.1] **낙차행 ±슬랙**에서 이전/신규 각각의 세로 단차 절대값과 그 비.
+    # v2 는 `Δcoh`(단차장의 변화량)만 봤기 때문에 "선이 존속하는데 양쪽 알베도가
+    # 바뀐 것"과 "선이 사라진 것"을 구분할 수단이 없었다 — 이 두 값이 그 자리를 메운다.
+    # 측정 위치는 **최대 변화행 rE 가 아니라 낙차행 y_haz** 다(T3 §3.4-1 축자).
+    # rE 로 재면 두꺼운 노출(라이저 0.4~0.8 m)에서 rE 가 밴드 **하단** 에지로 밀려
+    # 낙차행과 무관한 지물의 단차를 읽고, 그 결과 진탐이 조용해진다
+    # (실측: rE 기준이면 주입 검출 66.7 % → 55.9 %).
+    y_h = int(round(min(max(B["y_haz"], B["e_top"]), B["e_bot"])))
+    s0 = max(0, y_h - GRAZE_SLACK)
+    s1 = min(len(ca), y_h + GRAZE_SLACK + 1)
+    if s1 <= s0:
+        s0, s1 = max(0, y_h), max(1, y_h + 1)
+    step_b = float(np.abs(ca[s0:s1]).max())
+    step_a = float(np.abs(cb[s0:s1]).max())
+    ratio = step_a / step_b if step_b > 1e-6 else float("inf")
     return dict(spec=dE - dN, dE=dE, dN=dN, agree=agE, row=rE,
+                step_b=step_b, step_a=step_a, ratio=ratio,
+                row_off=abs(rE - y_h),
+                dom=(step_a / dE if dE > 1e-6 else float("inf")),
                 up=bool(abs(cb[rE]) > abs(ca[rE])),
                 band_mu=min(float(la[a:b].mean()), float(lbn[a:b].mean())),
                 d=g["d"], h=g["h"], kind=g["kind"],
@@ -703,7 +764,14 @@ def check_view(scene, view, before, after):
                         gz_dN=gz["dN"], gz_agree=gz["agree"], gz_row=gz["row"],
                         gz_band=[round(gz["e_top"], 1), round(gz["e_bot"], 1)],
                         gz_haz_row=round(gz["y_haz"], 1), gz_d=gz["d"],
-                        gz_band_mu=gz["band_mu"])
+                        gz_band_mu=gz["band_mu"],
+                        gz_step_b=round(gz["step_b"], 2),
+                        gz_step_a=round(gz["step_a"], 2),
+                        gz_step_ratio=(round(gz["ratio"], 3)
+                                       if math.isfinite(gz["ratio"]) else None),
+                        gz_step_off=gz["row_off"],
+                        gz_step_dom=(round(gz["dom"], 2)
+                                     if math.isfinite(gz["dom"]) else None))
                     band = (f"에지대역 y{gz['e_top']:.0f}~{gz['e_bot']:.0f}"
                             f"/{grazA.shape[0]} (낙차 {gz['d']:.1f} m 지점 y"
                             f"{gz['y_haz']:.0f})")
@@ -719,17 +787,56 @@ def check_view(scene, view, before, after):
                              f"조명 회귀를 먼저 처리하고 재실행할 것. {band}")
                     elif (gz["spec"] > GRAZE_SPEC_WARN
                           and gz["agree"] >= GRAZE_AGREE_MIN):
-                        why = ("에지 대역에 화면을 가로지르는 선이 **생겼다** → "
-                               "숨어 있어야 할 낙차가 드러났을 가능성" if gz["up"] else
-                               "에지 대역의 선이 **약해졌다** → 낙차가 과도하게 "
-                               "은폐·매몰됐을 가능성")
+                        # --- [v2.1] 2차 판별 ---------------------------------
+                        # 1차(v2)를 통과한 발화에 "그 변화가 은닉을 바꿨는가" 를 묻는다.
+                        # 조건은 T3 §3.4-1(존속) 과 §3.4-2·§11-2(방향별 단차비) 를
+                        # **하나로 합친 형태**다 — T3 스스로 "2번을 이 형태로 구현하면
+                        # 매몰 방향까지 함께 해결된다" 고 적었다.
                         sev = "FAIL" if gz["spec"] > GRAZE_SPEC_FAIL else "WARN"
-                        _add(iss, sev, "GRAZE",
-                             f"[{GRAZE_VER}][의심] 은닉 — 국소도 {gz['spec']:.1f} "
-                             f"(에지 {gz['dE']:.1f} − 근경 {gz['dN']:.1f}) · "
-                             f"열 일치율 {gz['agree']:.2f} · 최대 변화 y{gz['row']}. "
-                             f"{why}. {band}. **그 대역만 잘라서 육안 확인**"
-                             f"(자동 확정 불가)")
+                        step = (f"단차 {gz['step_b']:.1f}→{gz['step_a']:.1f}"
+                                f"(비 {gz['ratio']:.2f})"
+                                if math.isfinite(gz["ratio"])
+                                else f"단차 {gz['step_b']:.1f}→{gz['step_a']:.1f}")
+                        quiet = None
+                        # 적용 요건 — 전부 만족해야 2차 판별을 시도한다.
+                        #  · WARN 등급만(FAIL 은 절대 강등하지 않는다)
+                        #  · 낙차행에 이전·신규 모두 유의한 선이 있다
+                        #  · 최대 변화행이 그 선 위에 있다(다른 지물의 변화가 아니다)
+                        #  · 존속 선이 변화량을 압도한다(새 라이저가 아니다)
+                        eligible = (sev == "WARN"
+                                    and gz["step_b"] >= GRAZE_STEP_MIN
+                                    and gz["step_a"] >= GRAZE_STEP_MIN
+                                    and gz["row_off"] <= GRAZE_PERSIST_ROWTOL
+                                    and gz["dom"] >= GRAZE_PERSIST_DOM)
+                        if eligible:
+                            if gz["ratio"] > 1.0:
+                                # 노출 방향 — 선이 오히려 굵어졌다. v2 그대로 발화시킨다.
+                                pass
+                            elif gz["ratio"] > GRAZE_BURY_RATIO:
+                                quiet = ("에지 존속 — 낙차행의 선이 이전·신규 양쪽에 "
+                                         f"유의하게 남아 있고({step}) 변화량을 "
+                                         f"{gz['dom']:.1f}배 압도한다. 변화의 실체는 에지 "
+                                         "양쪽 **지면 알베도**이지 은닉 상태가 아니다")
+                        if quiet:
+                            _add(iss, "INFO", "GRAZE",
+                                 f"[{GRAZE_VER}] 정숙(2차 판별) — 국소도 "
+                                 f"{gz['spec']:.1f} 은 임계 초과지만 {quiet}. {band}")
+                        else:
+                            # 방향 표기는 **낙차행 단차비**로 읽는다(v2 의 `up` 은
+                            # 최대 변화행의 크기 비교라 낙차행과 어긋날 수 있다).
+                            grew = (gz["ratio"] > 1.0 if math.isfinite(gz["ratio"])
+                                    else gz["up"])
+                            why = ("에지 대역에 화면을 가로지르는 선이 **생겼다/굵어졌다** → "
+                                   "숨어 있어야 할 낙차가 드러났을 가능성" if grew
+                                   else "낙차행의 선이 **무너졌다** → 낙차가 과도하게 "
+                                        "은폐·매몰됐을 가능성")
+                            _add(iss, sev, "GRAZE",
+                                 f"[{GRAZE_VER}][의심] 은닉 — 국소도 {gz['spec']:.1f} "
+                                 f"(에지 {gz['dE']:.1f} − 근경 {gz['dN']:.1f}) · "
+                                 f"열 일치율 {gz['agree']:.2f} · {step} · "
+                                 f"최대 변화 y{gz['row']}. "
+                                 f"{why}. {band}. **그 대역만 잘라서 육안 확인**"
+                                 f"(자동 확정 불가)")
 
     worst = max((SEV[i["sev"]] for i in iss), default=0)
     r["verdict"] = SEV_NAME[worst] if worst >= 2 else ("INFO" if worst else "PASS")

@@ -253,6 +253,218 @@ CATEGORIES["shrub"] = [
     ] + BARK3),
 ]
 
+# ═══════════════════════════════════════════════════════════════════════════
+# [W2-A4 · 2026-07-29] 계절 중립 교체 세트 — **전부 픽셀 검증 통과분만 등재**
+# ═══════════════════════════════════════════════════════════════════════════
+# 위 `trees`/`shrub` 세트는 W1 감사(`Docs/surveys/props_audit_w1/A_trees_shrubs.md`)
+# 에서 **6종이 계절/이벤트 특정으로 불합격**했다(벚꽃·개나리·화살나무 단풍·철쭉 만개).
+# 아래 세트는 그 교체분이며, 등재 기준은 **수종명이 아니라 UV 샘플 픽셀**이다:
+#
+#   ① usd-core 로 메시별 재질 바인딩 → MDL → texture_2d() 추출
+#   ② 메시의 primvars:st 를 그 텍스처에 실제로 찍어 HSV 분포 산출
+#   ③ 목본 게이트: 초록(65~170°)+황록(40~65°) ≥ 0.75 AND 적+분홍+주황 ≤ 0.06
+#      잔디 게이트: 초록+황록 ≥ 0.75 AND 적+분홍 ≤ 0.02 AND 주황(마른 잎) ≤ 0.25
+#   ④ 황록 우세(>0.5)면 **선형 알베도 ≤ 0.55** 추가 요구 — 가을 황변 판별용
+#
+# ④ 가 없으면 통과했을 오탐이 실제로 있었다: `Trees/White_Ash.usd` 는 잎이
+# 황록 100 % 라 ①~③ 을 통과하는데, 물고 있는 텍스처가 **`ashleaves1_fall2.png`**
+# (선형 알베도 0.4045, 평균 sRGB (0.717,0.684,0.099))인 **가을 황엽**이다 [실측].
+# 같은 이유로 `Shrub/Barberry.usd`(황금 품종, 알베도 0.263)도 탈락시켰다.
+# `Shrub/Fountain_Grass_Short.usd` 는 잎은 초록 100 % 지만 이삭 메시가 전체
+# 삼각형의 60.3 % 이고 그 텍스처 `pampas_flower.png` 는 **선형휘도>0.8 화소가
+# 41.5 %** — **순백 대면적 금지 규약 위반**이라 제외했다 [실측].
+# 탈락 4종(White_Ash·Barberry·Grass_Trimmed_A~C·Fountain_Grass_Short)은 **여기
+# 등재하지 않는다** — 재실행해도 되살아나지 않게 하기 위해서다.
+#
+# 실측치 원장은 `assets/veg_manifest_w2.json` · 판정 근거는
+# `Docs/reports/w2_veg_procurement_v1.md`.
+
+# 참나무 4변형 잎 아틀라스(oakleaves1~4) — Shumard/Black/Scarlet 이 공유한다.
+OAK_LEAVES = [
+    "Trees/materials/textures/oakleaves1_basecolor.png",
+    "Trees/materials/textures/oakleaves1_normal.png",
+    "Trees/materials/textures/oakleaves1_roughness.png",
+    "Trees/materials/textures/oakleaves2_basecolor.png",
+    "Trees/materials/textures/oakleaves3_basecolor.png",
+    "Trees/materials/textures/oakleaves4_basecolor.png",
+]
+TREEBARK_07 = [                       # 참나무류 수피 (Shumard·Black·Scarlet 공유)
+    "Trees/materials/TreeBark_07.mdl",
+    "Trees/materials/textures/alter49_tree7_basecolor.png",
+    "Trees/materials/textures/alter49_tree7_normal.png",
+    "Trees/materials/textures/alter49_tree7_roughness.png",
+]
+
+# --- trees_neutral: 계절 중립 교목 (P1 조달) --------------------------------
+# 치수는 스테이지 전체 바운딩(PointInstancer 인스턴스 포함) 실측이다.
+# `tri_eff` = 인스턴스 전개 후 실삼각형 — **고유 삼각형과 최대 111배 다르다**.
+CATEGORIES["trees_neutral"] = [
+    ("향나무 Chinese_Juniper 1.08×1.06×2.54 m · 실tri 5.71 M (고유 27 k, 인스턴스 436) "
+     "— 관공서·학교·아파트 조경 최다, 사찰(07)", True, [
+        "Trees/Chinese_Juniper.usd",
+     ] + PINE_MATS),
+
+    ("느릅나무 묘목 Elm_Sapling 1.74×1.75×3.09 m · 실tri 113 k(인스턴스 없음) "
+     "— 느티나무 대용, h0.3 근경 1순위(가장 가벼움)", True, [
+        "Trees/Elm_Sapling.usd",
+        "Trees/materials/American_Beech_leaf.mdl",
+        "Trees/materials/textures/beech_leaf_basecolor.png",
+        "Trees/materials/textures/beech_leaf_normal.png",
+        "Trees/materials/textures/beech_leaf_roughness.png",
+     ] + BARK3),
+
+    ("대왕참나무류 Shumard_Oak 10.30×10.47×11.44 m · 실tri 4.55 M "
+     "— 가로수 활엽 주력. z최소 −0.539 m(접지 보정 필수)", True, [
+        "Trees/Shumard_Oak.usd",
+        "Trees/materials/Shumard_Oak_leaf_Mat2.mdl",
+        "Trees/materials/Shumard_Oak_leaf_v2_Mat2.mdl",
+        "Trees/materials/Shumard_Oak_leaf_v3_Mat2.mdl",
+        "Trees/materials/Shumard_Oak_leaf_v4_Mat2.mdl",
+     ] + OAK_LEAVES + TREEBARK_07),
+
+    ("물푸레나무속 Fraxinus 4.85×4.51×5.34 m · 실tri 1.25 M "
+     "— 이팝나무(물푸레과) 대용, 가로수 5위권", True, [
+        "Trees/Fraxinus.usd",
+        "Trees/materials/Fraxinus_leaves.mdl",
+        "Trees/materials/textures/fraxinus_basecolor.png",
+        "Trees/materials/textures/fraxinus_normal.png",
+        "Trees/materials/textures/fraxinus_roughness.png",
+        "Trees/materials/Apple_bark_Mat.mdl",
+        "Trees/materials/textures/bark2_basecolor.png",
+        "Trees/materials/textures/bark2_normal.png",
+        "Trees/materials/textures/bark2_roughness.png",
+     ]),
+
+    ("자작나무류 Gray_Birch 2.67×2.56×3.33 m · 실tri 257 k(인스턴스 없음) "
+     "— 공원·아파트 조경. 잎 텍스처가 Privet 과 동일(다양성 0, §6-d 확장)", True, [
+        "Trees/Gray_Birch.usd",
+        "Trees/materials/Gray_Birch_Leaves_Mat.mdl",
+        "Trees/materials/textures/hollyprivet_basecolor.png",
+        "Trees/materials/textures/hollyprivet_normal.png",
+        "Trees/materials/textures/hollyprivet_roughness.png",
+        "Trees/materials/Gray_Birch_Bark_Mat.mdl",
+        "Trees/materials/textures/alter49_tree4_basecolor.png",
+        "Trees/materials/textures/alter49_tree4_normal.png",
+        "Trees/materials/textures/alter49_tree4_roughness.png",
+     ]),
+
+    ("양버들 Lombardy_Poplar 4.84×4.49×13.67 m · 실tri 418 k "
+     "— 하천변(03·12·17) 수직 실루엣", True, [
+        "Trees/Lombardy_Poplar.usd",
+        "Trees/materials/LombardyPoplar_leaf_Mat.mdl",
+        "Trees/materials/textures/lombardypoplar_leaf_basecolor.png",
+        "Trees/materials/textures/lombardypoplar_leaf_normal.png",
+        "Trees/materials/textures/lombardypoplar_leaf_roughness.png",
+     ] + BARK3),
+
+    ("전나무류 Douglas_Fir 3.02×2.77×6.03 m · 실tri 1.23 M "
+     "— 사찰·산지 침엽. 3.6 MB 로 최경량 침엽", True, [
+        "Trees/Douglas_Fir.usd",
+     ] + PINE_MATS),
+
+    ("가문비 Colorado_Spruce 3.58×3.76×4.06 m · **실tri 15.6 M(전 에셋 최대)** "
+     "— 원경 전용. 근경 배치 금지(§8 예산)", False, [
+        "Trees/Colorado_Spruce.usd",
+        "Trees/materials/Spruce_needles.mdl",
+        "Trees/materials/textures/spruce_needles.png",
+        "Trees/materials/TreeBark_10.mdl",
+        "Trees/materials/textures/alter49_tree10_basecolor.png",
+        "Trees/materials/textures/alter49_tree10_normal.png",
+        "Trees/materials/textures/alter49_tree10_roughness.png",
+     ]),
+
+    ("참나무 Scarlet_Oak 10.41×10.26×12.75 m · 실tri 2.23 M "
+     "— 활엽 다양화. **`_fall` 쌍둥이가 따로 있으니 이름 혼동 금지**", False, [
+        "Trees/Scarlet_Oak.usd",
+        "Trees/materials/Scarlet_Oak_leaf_Mat.mdl",
+        "Trees/materials/Scarlet_Oak_leaf_v2_Mat.mdl",
+        "Trees/materials/Scarlet_Oak_leaf_v3_Mat.mdl",
+        "Trees/materials/Scarlet_Oak_leaf_v4_Mat.mdl",
+     ] + OAK_LEAVES + TREEBARK_07),
+
+    ("참나무 Black_Oak 25.42×24.07×19.74 m · 실tri 2.95 M(인스턴스 3,735) "
+     "— **25 m 성목이라 배후림·원경 전용**", False, [
+        "Trees/Black_Oak.usd",
+        "Trees/materials/Shumard_Oak_leaf_Mat2.mdl",
+        "Trees/materials/Shumard_Oak_leaf_v2_Mat2.mdl",
+        "Trees/materials/Shumard_Oak_leaf_v3_Mat2.mdl",
+        "Trees/materials/Shumard_Oak_leaf_v4_Mat2.mdl",
+     ] + OAK_LEAVES + TREEBARK_07),
+]
+
+# --- shrub_neutral: 계절 중립 관목 (SHRUB_ORNAMENT 3종 탈락분 대체) ----------
+# 현행 `SHRUB_ORNAMENT` 4종 중 3종(Rhododendron·Burning_Bush·Forsythia)이 계절
+# 특정이라 화단이 뽑히면 75 % 확률로 규약 위반이었다. 아래 3종은 **전부 상록**이라
+# 계절 축을 원천적으로 갖지 않는다 — 재검증 시에도 같은 결론이 나온다.
+CATEGORIES["shrub_neutral"] = [
+    ("관목 Holly 호랑가시/사철 2.32×2.38×1.53 m · 실tri 665 k "
+     "— 상록 생울타리·화단. 잎 hollyprivet 공유(초록 100 %)", True, [
+        "Shrub/Holly.usd",
+        "Shrub/materials/HollyPrivet_Mat.mdl",
+        "Shrub/materials/textures/hollyprivet_basecolor.png",
+        "Shrub/materials/textures/hollyprivet_normal.png",
+        "Shrub/materials/textures/hollyprivet_roughness.png",
+     ] + BARK3),
+
+    ("관목 Yew 주목 1.23×1.24×0.73 m · 실tri 144 k "
+     "— 상록 정형수. 화단 중경(높이 0.73 m 로 연석 가림에 적합)", True, [
+        "Shrub/Yew.usd",
+     ] + PINE_MATS),
+
+    ("관목 Cedar_Shrub 측백류 0.287×0.288×0.876 m · 실tri 186 k "
+     "— 상록 직립. 좁은 화단·경계식재", True, [
+        "Shrub/Cedar_Shrub.usd",
+        "Trees/materials/cypress_branches.mdl",
+        "Trees/materials/textures/cedar_atlas1_basecolor.png",
+        "Trees/materials/textures/cedar_atlas1_normal.png",
+        "Trees/materials/textures/cedar_atlas1_opacity.png",
+        "Trees/materials/textures/cedar_atlas1_roughness.png",
+        "Trees/materials/pinebark1.mdl",
+        "Trees/materials/textures/pinebark1_basecolor.png",
+        "Trees/materials/textures/pinebark1_normal.png",
+        "Trees/materials/textures/pinebark1_roughness.png",
+     ]),
+]
+
+# --- groundcover: 잔디 패치·잡초 (ground_kit §5 경계 잡초 밴드 · scene04 버지) --
+# 이 카테고리의 존재 이유: scene04 버지의 **구 블롭 121개**와 `build_hedge` 의
+# 최대 144구 크라운을 실물로 바꿀 때 쓸 최소 단위다(A §4 교체 대상 1순위).
+# 세 크기가 한 텍스처(lawngrass_a)를 공유하므로 **섞어 써도 재질이 1개**다.
+# **잡초 밴드용은 Grass_Short_C(0.279×0.304×0.125 m)** — ground_kit §5.4 15-8 의
+# `h ≤ 0.12` 에 스케일 0.96 만 곱하면 맞는다(§6.1 GT-E1′ 램프 클램프는 배치측 소관).
+# 주의: `Grass_Trimmed_A~C` 는 **같은 텍스처의 짚색 영역만 샘플**한다 —
+# 초록+황록 0.72 < 0.75 로 잔디 게이트 탈락(휴면기 특정) → 조달하지 않는다 [실측].
+CATEGORIES["groundcover"] = [
+    ("잔디 패치 Grass_Short_A 1.29×1.29×0.162 m · 실tri 32.5 k (버지 대면적)", True, [
+        "Shrub/Grass_Short_A.usd",
+        "Shrub/materials/lawngrass_a_mat.mdl",
+        "Shrub/materials/textures/lawngrass_a_basecolor.png",
+        "Shrub/materials/textures/lawngrass_a_normal.png",
+        "Shrub/materials/textures/lawngrass_a_roughness.png",
+     ]),
+    ("잔디 패치 Grass_Short_B 0.662×0.675×0.164 m · 실tri 11.1 k (중간 채움)", True,
+     ["Shrub/Grass_Short_B.usd"]),
+    ("잔디 포기 Grass_Short_C 0.279×0.304×0.125 m · 실tri 1.6 k "
+     "(**경계 잡초 밴드 전용** — 줄눈·측구 틈)", True,
+     ["Shrub/Grass_Short_C.usd"]),
+    ("억새류 Switchgrass 2.01×2.03×1.37 m · 실tri 8.9 k "
+     "— 하천변 억새 밴드(09 갈대 대체 후보). 꽃대 메시 없음(초록 100 %)", True, [
+        "Shrub/Switchgrass.usd",
+        "Shrub/materials/Switchgrass_Mat.mdl",
+        "Shrub/materials/textures/switchgrass_basecolor.png",
+        "Shrub/materials/textures/switchgrass_normal.png",
+        "Shrub/materials/textures/green1_basecolor.png",
+     ]),
+]
+
+# --- rocks_extra: 잡석 10종 추가 (B 감사 조치 C3) ----------------------------
+# 기존 5종은 0.13~0.31 m 대역의 대표점만 뽑은 것이라 scene12 호안 96개·scene03
+# riprap 에서 **같은 돌이 반복**된다. 나머지 10종을 채워 15/15 를 완성한다.
+CATEGORIES["rocks_extra"] = [
+    (f"잡석 rock_small_{i:02d}", True, _rock(i))
+    for i in (2, 3, 4, 5, 6, 7, 11, 12, 13, 14)
+]
+
 # 하위호환: 예전에 `from download_vegetation import SETS` 를 쓴 코드가 있을 수 있다.
 SETS = CATEGORIES["trees"] + CATEGORIES["shrub"][:1]
 
@@ -335,7 +547,10 @@ def verify(keys):
             bad.append(f"{key} (PNG 헤더 아님: {head8!r})")
         elif key.endswith(".jpg") and not head8.startswith(b"\xff\xd8\xff"):
             bad.append(f"{key} (JPEG 헤더 아님: {head8!r})")
-        elif key.endswith(".mdl") and not head8.startswith(b"mdl "):
+        # [W2-A4 정정] MDL 은 선행 공백/개행으로 시작하는 파일이 실재한다
+        # (`Trees/materials/Scarlet_Oak_leaf_Mat.mdl` 은 b"\nmdl 1.4" 로 시작).
+        # 종전 `startswith(b"mdl ")` 은 이런 정상 파일을 손상으로 오판했다 [실측].
+        elif key.endswith(".mdl") and not head8.lstrip().startswith(b"mdl"):
             bad.append(f"{key} (MDL 헤더 아님: {head8!r})")
     return bad
 

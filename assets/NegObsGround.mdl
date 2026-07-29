@@ -45,6 +45,38 @@
  *
  *   ※ v1.5.0 의 4건(patch_mix 노출 / round_edges / saturation /
  *      수평면 기저 축퇴 버그 수정 `horiz_gate`)은 일체 손대지 않았다.
+ *
+ * ---------------------------------------------------------------------------
+ * v1.9.0 (2026-07-29) — T1 재질층 §1.6(a) 디테일 노멀 + §1.8③ 유닛 셀 지터
+ *
+ *   근거 `Docs/briefs/t1_material_layer_spec_v1.md` v1.1 §1.1(결손 ①) ·
+ *   §1.6(a) · §1.8③(G3) · `Docs/briefs/ground_kit_spec_v1.md` v1.1 §4.5(역계약).
+ *
+ *   왜 필요한가 — 결손 ①: `LOOK_CLASS` 가 지면 10클래스에 `detail=True` 를
+ *   달아 뒀는데 `NegObsGround.mdl` 에는 디테일 노멀 입력이 **아예 없어서**
+ *   33씬 전 지면에서 그 설정이 죽어 있었다. 이 개정이 그 통로를 만든다.
+ *
+ *   추가 1. `negobs_hash2`      — 결정적 2D 셀 해시. §4.2 헥스 타일링이
+ *           같은 함수를 재사용한다(두 기능이 다른 해시를 쓰면 셀 경계가 어긋난다).
+ *   추가 2. `negobs_unit_gain`  — 유닛(모듈) 셀별 로그정규 알베도 지터.
+ *           텍스처 페치 0. 강조 유닛 7 % 는 지터를 ×2.5 로 준다.
+ *   추가 3. `negobs_detail_normal` — 미세 그레인 디테일 노멀. **지배 평면 1장만**
+ *           샘플한다(등방 고주파라 평면 전환 경계에 결맞은 패턴이 없다 →
+ *           3평면 샘플은 페치 3배에 얻는 것이 0). 부산물로 부호 있는
+ *           `grain`(평균 0)을 함께 돌려주어 roughness 로도 소량 전달할 수 있게 한다.
+ *
+ *   **회귀 위험 0 설계** (v1.6.0 웨더링과 동일 규약):
+ *     · 신규 파라미터 8개는 전부 **기존 목록 뒤에 덧붙인다** — 앞선 60개의
+ *       위치·기본값이 전부 불변이므로 이름 바인딩·위치 바인딩 양쪽 모두 무영향.
+ *     · `detail_bump_factor = 0` 이고 `detail_normalmap_texture` 기본값이
+ *       무효 텍스처라 `negobs_detail_normal` 이 조기 반환 → `nd == state::normal()`
+ *       → 합성항 `(nd - state::normal())` 이 **정확히 영벡터**(같은 값의 뺄셈).
+ *     · `unit_cell_m = float2(0)` 이라 `negobs_unit_gain` 이 조기 반환 → `1.0`
+ *       → `albedo * color(1.0)` 은 IEEE-754 곱셈 항등.
+ *     · `detail_rough_gain = 0` → `rough_w + 0.0 * grain == rough_w`,
+ *       그리고 재클램프는 이미 같은 구간으로 클램프된 값에 대해 멱등.
+ *     조건이 전부 uniform 이라 세 조기 반환은 **컴파일 타임에 접힌다** —
+ *     기본값에서는 텍스처 페치·노이즈 페치가 1회도 늘지 않는다.
  */
 
 mdl 1.7;
@@ -505,6 +537,117 @@ NegObsWeather negobs_weather(
     return W;
 }
 
+// ---------------------------------------------------------------------------
+// [v1.9.0] T1 재질층 — 유닛 셀 지터 · 디테일 그레인 노멀
+// ---------------------------------------------------------------------------
+
+// 결정적 2D 해시 (셀 좌표 → 난수 2개). §4.2 헥스 타일링이 재사용할 함수라
+// 지금 도입해 둔다 — 유닛 지터와 헥스가 서로 다른 해시를 쓰면 같은 면 위에
+// 주기가 다른 두 격자가 겹쳐 이중 격자로 읽힌다.
+float2 negobs_hash2(float2 p)
+{
+    float n1 = math::frac(math::sin(p.x * 127.1 + p.y * 311.7) * 43758.5453);
+    float n2 = math::frac(math::sin(p.x * 269.5 + p.y * 183.3) * 43758.5453);
+    return float2(n1, n2);
+}
+
+// [T1·G3] 유닛 셀 해시 알베도 지터 — 셀당 스칼라 1개, 텍스처 페치 0.
+//
+// 좌표는 **월드 (x, y) 고정**이다. 스펙 §1.8③ 은 "지배 평면 좌표"라고 적었지만,
+// 같은 절의 **지름길 안전성 논증이 "z 를 읽지 않는다"에 걸려 있다** — 지배 평면이
+// X·Y 인 수직면에서는 제2 좌표가 z 가 되어 그 논증이 깨진다. 유닛 지터의 적용
+// 대상은 애초에 수평 포장(ground_kit `unit_cell` 원장의 포장 프로파일)뿐이므로
+// (x, y) 고정이 사양의 의도이자 안전한 쪽이다. ⇒ **GT 낙차와 상관 0**.
+//   (수직면에 켜면 세로 기둥 무늬가 나온다. 켜는 주체인 ground_kit 이
+//    무모듈 프로파일에 지터를 걸지 않는다는 §4.5 U4 규칙으로 이미 차단된다.)
+//
+// `origin` 은 ground_kit 줄눈 격자의 원점 오프셋(§4.5 U3). 주기만 맞추고 위상을
+// 안 맞추면 반 칸 어긋난 이음매가 생긴다.
+float negobs_unit_gain(
+    float2 pw,                              // 월드 (x, y) [m]
+    uniform float2 cell,                    // 셀 주기 [m]. 0 = 끔
+    uniform float2 origin,                  // 격자 원점 오프셋 [m]
+    uniform float sigma,                    // 로그정규 지터 σ
+    uniform float accent)                   // 강조 유닛 비율 (0.07 = 7 %)
+{
+    // 무영향 조기 반환 — 조건이 전부 uniform 이라 컴파일 타임에 접힌다.
+    if (cell.x <= 0.0 || cell.y <= 0.0 || sigma <= 0.0)
+        return 1.0;
+    float2 c = math::floor(float2((pw.x - origin.x) / cell.x,
+                                  (pw.y - origin.y) / cell.y));
+    float2 h = negobs_hash2(c);
+    float g = (h.x - 0.5) * 2.0;                      // −1..1 균등
+    float s = (h.y < accent) ? sigma * 2.5 : sigma;   // 강조 유닛(색 다른 블록)
+    return math::exp(g * s);                          // 로그정규 = 알베도 비율 지터
+}
+
+struct NegObsDetail
+{
+    float3 nrm;      // 섭동된 노멀 (무영향 시 state::normal())
+    float  grain;    // 부호 있는 그레인 기울기 (평균 0, 무영향 시 정확히 0)
+};
+
+// [T1] 미세 그레인 디테일 노멀 — **지배 평면 1장만** 샘플한다.
+// 왜 1장인가: 등방 고주파 그레인이라 평면 전환 경계에 결맞은 패턴이 없다.
+// 3평면 전부 샘플하면 텍스처 페치가 3배가 되는데 얻는 것이 없다.
+// 지배 축은 하드 스위치로 고른다(등방 그레인이라 이음매가 안 보인다) —
+// negobs_sample_tri 의 소프트 블렌딩이 필요한 이유(방향성 있는 매크로 텍스처)가
+// 여기엔 없다.
+//
+// `grain` 은 섭동 벡터를 제1 접선축에 사영한 **부호 있는** 양이다. 접선 성분의
+// 평균이 0 인 노멀맵에서는 grain 의 평균도 0 이므로, roughness 에 가산해도
+// 평균 roughness 가 밀리지 않고 **대비만** 전달된다.
+NegObsDetail negobs_detail_normal(
+    uniform texture_2d det_tex,
+    uniform float det_scale,                // 1/타일 [1/m]. 12.5 = 8 cm 주기
+    uniform float det_bump,
+    uniform bool flip_u,
+    uniform bool flip_v)
+{
+    NegObsDetail D;
+    D.nrm = state::normal();
+    D.grain = 0.0;
+    // 무영향 조기 반환 — 두 조건 다 uniform. 기본값(bump 0 · 무효 텍스처)에서
+    // 텍스처 페치가 0 이고 반환값이 state::normal() 과 **같은 식**이다.
+    if (det_bump <= 0.0 || !tex::texture_isvalid(det_tex))
+        return D;
+
+    float3 pw = state::transform_point(
+        state::coordinate_internal, state::coordinate_world, state::position());
+    float3 nw = math::normalize(state::transform_normal(
+        state::coordinate_internal, state::coordinate_world, state::normal()));
+    float3 an = math::abs(nw);
+
+    // 노멀맵 탄젠트용 월드축(내부 좌표계로 변환) — negobs_sample_tri 와 동일 규약
+    float3 ex = state::transform_vector(
+        state::coordinate_world, state::coordinate_internal, float3(1.0, 0.0, 0.0));
+    float3 ey = state::transform_vector(
+        state::coordinate_world, state::coordinate_internal, float3(0.0, 1.0, 0.0));
+    float3 ez = state::transform_vector(
+        state::coordinate_world, state::coordinate_internal, float3(0.0, 0.0, 1.0));
+
+    bool dom_z = (an.z >= an.x && an.z >= an.y);
+    bool dom_x = (!dom_z) && (an.x >= an.y);
+    float2 uv = dom_z ? float2(pw.x, pw.y)
+              : (dom_x ? float2(pw.y, pw.z) : float2(pw.x, pw.z));
+    float3 tu = dom_z ? ex : (dom_x ? ey : ex);
+    float3 tv = dom_z ? ey : ez;
+
+    base::texture_coordinate_info ci = base::texture_coordinate_info(
+        position: float3(uv.x * det_scale, uv.y * det_scale, 0.0),
+        tangent_u: tu,
+        tangent_v: tv);
+
+    D.nrm = base::tangent_space_normal_texture(
+        texture: det_tex, factor: det_bump,
+        flip_tangent_u: flip_u, flip_tangent_v: flip_v, uvw: ci);
+    D.grain = math::clamp(
+        math::dot(D.nrm - state::normal(), math::normalize(tu))
+            / math::max(det_bump, 1.0e-4),
+        -1.0, 1.0);
+    return D;
+}
+
 export material NegObsGround(
     //  텍스처 세트 A (항상 사용)  //
     uniform texture_2d diffuse_texture_a = texture_2d() [[
@@ -658,13 +801,45 @@ export material NegObsGround(
         anno::description("가중치 디더 월드 파장 [m]") ]],
     // 판정 B2(r5): 투영 가중 지수 — 클수록 축 전환 크로스페이드 대역이 좁아짐
     uniform float tri_weight_exp = 6.0 [[
-        anno::description("triplanar |노멀| 가중 지수 (4=종전, 6~8 권장)") ]]
+        anno::description("triplanar |노멀| 가중 지수 (4=종전, 6~8 권장)") ]],
+
+    //  [T1 v1.9.0] 디테일 그레인 노멀 (§1.6(a))  //
+    // **신규 8개는 전부 여기(목록 맨 뒤)에 덧붙인다** — 앞선 파라미터의 순서·
+    // 기본값이 하나도 안 바뀌므로 기존 씬의 이름 바인딩·위치 바인딩이 모두 불변.
+    uniform texture_2d detail_normalmap_texture = texture_2d() [[
+        anno::display_name("Detail Normal"), anno::usage("normal"),
+        anno::description("미세 그레인 노멀. 미지정 = 완전 무영향") ]],
+    uniform float detail_bump_factor = 0.0 [[
+        anno::display_name("Detail Bump Factor"),
+        anno::description("그레인 강도. **0 = 완전 무영향(회귀 0 보장)**") ]],
+    uniform float detail_texture_scale = 12.5 [[
+        anno::display_name("Detail Texture Scale"),
+        anno::description("1/타일 [1/m]. 12.5 = 8 cm 주기") ]],
+    uniform float detail_rough_gain = 0.0 [[
+        anno::display_name("Detail Roughness Gain"),
+        anno::description("그레인 대비를 roughness 로도 전달(부호 있음·평균 0). 0 = 끔") ]],
+
+    //  [T1·G3 v1.9.0] 유닛 셀 알베도 지터 (§1.8③ · ground_kit §4.5 역계약)  //
+    // 값의 출처는 ground_kit 원장 `GROUND_DIMENSIONS["unit_cell"]` 이며,
+    // **주기와 원점을 함께** 받아야 줄눈 격자와 위상이 맞는다(§4.5 U3).
+    uniform float2 unit_cell_m = float2(0.0) [[
+        anno::display_name("Unit Cell [m]"),
+        anno::description("유닛(모듈) 치수 [m]. **0 = 완전 무영향(회귀 0)**") ]],
+    uniform float2 unit_cell_origin = float2(0.0) [[
+        anno::display_name("Unit Cell Origin [m]"),
+        anno::description("셀 격자 원점 오프셋 [m] — 줄눈 격자 원점과 동일해야 한다") ]],
+    uniform float unit_albedo_sigma = 0.10 [[
+        anno::display_name("Unit Albedo Sigma"),
+        anno::description("셀별 알베도 로그정규 지터 σ. unit_cell_m>0 일 때만 작동") ]],
+    uniform float unit_accent_frac = 0.07 [[
+        anno::display_name("Unit Accent Fraction"),
+        anno::description("강조 유닛 비율. 이 셀은 지터를 ×2.5 (색 다른 블록 한두 장)") ]]
 )
 [[
     anno::display_name("NegObs Ground"),
     anno::description("Triplanar-projected PBR with primvar cross-fade blending and anti-tiling"),
     anno::author("NegObs look-check pipeline"),
-    anno::version(1, 8, 0)
+    anno::version(1, 9, 0)
 ]] = let {
 
     NegObsLayer A = negobs_layer(
@@ -697,8 +872,22 @@ export material NegObsGround(
             w0 * (1.0 - w0),
         0.0, 1.0);
 
+    // [v1.9.0] 월드 위치·노멀 호이스트. 종전에는 negobs_weather 호출 인자로
+    // 인라인돼 있던 **같은 식**을 이름만 붙여 꺼낸 것이다(값 동일 · 순수 함수라
+    // 컴파일 DAG 도 동일 노드). 유닛 지터가 같은 위치를 필요로 해서 공유한다.
+    float3 pw_w = state::transform_point(
+        state::coordinate_internal, state::coordinate_world, state::position());
+    float3 nw_w = math::normalize(state::transform_normal(
+        state::coordinate_internal, state::coordinate_world, state::normal()));
+
+    // [T1·G3] 유닛 셀 알베도 지터 — 3샘플 블렌드가 끝난 **뒤**의 스칼라 곱이다.
+    // unit_cell_m = float2(0) (기본) 이면 정확히 1.0 → 곱셈 항등 → 픽셀 동일.
+    float unit_g = negobs_unit_gain(
+        float2(pw_w.x, pw_w.y), unit_cell_m, unit_cell_origin,
+        unit_albedo_sigma, unit_accent_frac);
+
     color albedo = (use_blend ? math::lerp(A.albedo, B.albedo, w) : A.albedo)
-                   * base_color;
+                   * base_color * color(unit_g);
     float rough = use_blend ? math::lerp(A.rough, B.rough, w) : A.rough;
     float3 nrm_tex = use_blend
         ? math::normalize(math::lerp(A.nrm, B.nrm, w)) : A.nrm;
@@ -717,12 +906,8 @@ export material NegObsGround(
     //      이미 같은 구간으로 clamp 되어 나오므로 재클램프가 멱등)
     //   → nrm 계열은 아예 건드리지 않는다.
     NegObsWeather WX = negobs_weather(
-        pw: state::transform_point(
-                state::coordinate_internal, state::coordinate_world,
-                state::position()),
-        nw: math::normalize(state::transform_normal(
-                state::coordinate_internal, state::coordinate_world,
-                state::normal())),
+        pw: pw_w,                          // [v1.9.0] 호이스트 — 값 동일
+        nw: nw_w,
         grime_z0: grime_z0,
         grime_height: grime_height,
         grime_strength: grime_strength,
@@ -756,7 +941,25 @@ export material NegObsGround(
                                        round_edges_across_materials,
                                        round_edges_roundness)
         : state::normal();
-    float3 nrm = math::normalize(nrm_tex + (rc - state::normal()));
+
+    // [T1 v1.9.0] 디테일 그레인 노멀 합성 — 베벨과 **같은 1차 편차 가산 규칙**.
+    // 두 항 모두 "기하 노멀 대비 편차"이므로 더하는 순서·개수와 무관하게
+    // 각 항이 0 이면 정확히 영벡터가 되어 부동소수점 항등이 유지된다:
+    //   detail_bump_factor = 0 (기본) → nd == state::normal() → (nd - n) == (0,0,0)
+    //   round_edges_radius = 0 (기본) → rc == state::normal() → (rc - n) == (0,0,0)
+    // ⇒ 기본값에서 nrm 은 v1.8.0 과 완전히 같은 normalize(nrm_tex) 이다.
+    NegObsDetail DET = negobs_detail_normal(
+        detail_normalmap_texture, detail_texture_scale, detail_bump_factor,
+        flip_tangent_u, flip_tangent_v);
+    float3 nrm = math::normalize(nrm_tex + (rc - state::normal())
+                                         + (DET.nrm - state::normal()));
+
+    // 그레인 대비를 roughness 로도 소량 전달(선택). DET.grain 은 부호 있고
+    // 평균이 0 이라 평균 roughness 를 밀지 않는다. gain=0 (기본) 이면
+    // rough_w + 0.0*grain == rough_w 이고, rough_w 는 이미 같은 구간으로
+    // 클램프돼 나오므로 재클램프가 멱등 — 픽셀 동일.
+    float rough_d = math::clamp(rough_w + detail_rough_gain * DET.grain,
+                                0.02, 1.0);
 
     //  BSDF — OmniPBRBase(metalness=0, coat 없음) 경로 축약 이식  //
     bsdf diffuse_bsdf = df::weighted_layer(
@@ -765,7 +968,7 @@ export material NegObsGround(
         base: bsdf(),
         normal: nrm);
 
-    float rough_sq = rough_w * rough_w;
+    float rough_sq = rough_d * rough_d;
     bsdf ggx_bsdf = df::microfacet_ggx_smith_bsdf(
         roughness_u: rough_sq,
         roughness_v: rough_sq,

@@ -1758,12 +1758,21 @@ def add_vegetation(stage, prim_path, usd_rel, pos_m, yaw_deg=0.0,
 #   sceneC2 의 기존 낙엽은 두께 6mm 납작 타원체 900개였는데 총 피복이
 #   **0.96 m² 뿐**이라, 화면에 보이는 낙엽은 사실상 전부 텍스처 무늬였다.
 #   → "장판" 의 정확한 원인. 피복을 개수가 아니라 면적으로 다뤄야 하는 이유.
+#   [정정 2026-07-29 · 레드팀 R8 → W1 재판정] `oakfall2` 는 (0.0030/520) →
+#   (0.0038/582) 로 1차 정정했으나, W1 지피 감사가 usd-core 독립 재래스터화로
+#   피복을 **0.0054 m²** 로 확정했다(래스터라이저 해석 검증·N 불변·실루엣 육안,
+#   `Docs/surveys/props_audit_w1/B_groundcover_debris.md` §6, redteam_w1_assets 승소 판정).
+#   **렌더 영향 0** — 유일한 호출부 `sceneC2_leaf_stairs.py:563` 이 `fallcluster` 만
+#   필터해 넘기므로 이 행은 산포 개수식 `n = A·(−ln(1−cover))/mean_cov` 에 안 들어간다.
+#   ⚠ 낱장 maplefall1(실측 0.0081)·oakfall1(0.0048)·클러스터 2행(0.0584/0.0239)도
+#   계통 편차가 확인됐다 — sceneC2 개수식에 걸리는 fallcluster 행은 **렌더 영향이
+#   있으므로** W2 낙엽 전역화(G2)에서 렌더 게이트와 함께 일괄 교체한다(B 감사 A3).
 VEG_DEBRIS = [
     ("Debris/fallcluster1.usd", 0.0628, 9175),
     ("Debris/fallcluster2.usd", 0.0242, 2980),
     ("Debris/maplefall1.usd",   0.0051,  631),
     ("Debris/oakfall1.usd",     0.0030,  496),
-    ("Debris/oakfall2.usd",     0.0030,  520),
+    ("Debris/oakfall2.usd",     0.0054,  582),
 ]
 
 # (상대경로, 대표 폭[m], **원점에서 바닥까지 깊이[m]**)
@@ -2091,13 +2100,33 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
     ins = float(wd.get("inset", 0.0)) if LOOK_V1 else 0.0
     band_t = min(max(ins, 0.0), 0.15)
     band_h = 0.12
+    # ── [T1-10] 창 리세스 — `window["inset"]` 이 정의만 되고 읽히지 않던 버그 ──
+    # 종전: 유리 슬래브(두께 WIN_T=0.03)의 중심을 파사드면 +5 mm 에 두어
+    #   **외면이 벽면보다 20 mm 바깥**에 있었다 = 벽에 유리판을 덧댄 모양.
+    #   실제 창은 벽면보다 뒤로 물러나 있고 그 리빌이 그림자선을 만든다.
+    # 그러나 **셸은 솔리드 박스**다 — 파사드면(facade_x/y)은 셸의 한 면이고
+    #   그 안쪽은 전부 채워져 있다(씬 101개 동 AST 전수 확인, 예외 0).
+    #   따라서 유리를 inset(=0.15) 만큼 그대로 밀어 넣으면 셸 내부에 묻혀
+    #   **23개 씬의 창이 전부 사라진다**. 개구(리빌) 기하 없이 표현 가능한
+    #   리세스의 상한은 "외면을 벽면까지 당기는 것"이고, 동일평면 Z-파이팅을
+    #   피하려면 WIN_EPS 는 남겨야 한다(씬01 주석의 현행 관례:
+    #   *"두께 0.03 패널을 파사드에서 2 cm 돌출·1 cm 매입 — 동일평면 Z파이팅
+    #   회피, 불리언 불필요"*).
+    # → 여기서는 **돌출 20 mm → 5 mm** 까지만 물린다. 잔여분(0.135)은 파사드
+    #   개구가 필요하므로 `building_kit` 스팬드럴 분해(T2) 몫이다.
+    # LOOK_V1=0 이면 ins=0 → recess=0 → 창 좌표는 종전과 **완전 동일**하다.
+    WIN_T = 0.03                                 # 유리 슬래브 두께(현행 값)
+    WIN_EPS = 0.005                              # 벽면 동일평면 회피 여유
+    recess = max(0.0, min(ins, 0.005 + WIN_T / 2.0 - WIN_EPS))
     axis_y = bd.get("axis", "y") == "y"
     fdir = bd["face_dir"]
     if axis_y:
         gy = bd["facade_y"] + fdir * 0.005
+        gy_win = (gy - fdir * recess) if recess > 1e-9 else gy
         usable = Lx - 2 * wd["margin"]
     else:
         gx = bd["facade_x"] + fdir * 0.005
+        gx_win = (gx - fdir * recess) if recess > 1e-9 else gx
         usable = Ly - 2 * wd["margin"]
     ncols = max(1, int(usable / wd["col_step"]))
 
@@ -2140,12 +2169,12 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
             if axis_y:
                 xc = bd["x0"] + wd["margin"] + (c + 0.5) * (usable / ncols)
                 prims.append(add_box(stage, f"{prefix}/Win_{f}_{c}",
-                                     (xc, gy, zc), (wd["w"], 0.03, wd["h"]),
+                                     (xc, gy_win, zc), (wd["w"], WIN_T, wd["h"]),
                                      glass_mtl))
             else:
                 yc = bd["y0"] + wd["margin"] + (c + 0.5) * (usable / ncols)
                 prims.append(add_box(stage, f"{prefix}/Win_{f}_{c}",
-                                     (gx, yc, zc), (0.03, wd["w"], wd["h"]),
+                                     (gx_win, yc, zc), (WIN_T, wd["w"], wd["h"]),
                                      glass_mtl))
 
     # 파라펫: 건축법 시행령 §40 은 옥상 난간을 **1.2 m 이상**으로 규정한다.

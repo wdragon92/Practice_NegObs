@@ -152,19 +152,30 @@ name onto its era, kind and role, which is what the old names fail to say by the
 ```bash
 cd /home/vislab/Desktop/work_sy/Practice_NegObs
 
-# regression of a new round against the standing baseline
+# regression of a new round against each scene's own latest judged round
 python3 scripts/regression_check.py --scenes 'look_check/scene*' \
-  --before-round r2_on --after-round 260730_w2d_judge \
-  --fail-only --json Docs/reports/regr_260730_w2d.json
+  --before-round 260730_w2d_judge,w2c_g2,w2_pilot,r2b_on,wall,facade,r2_on \
+  --after-round <new round> \
+  --fail-only --json Docs/reports/regr_<new round>.json
 
 # single A/B twin
 python3 scripts/regression_check.py \
-  --before look_check/_experiments/twins/scene13/260730_w2d_hoff \
-  --after  look_check/scene13/260730_w2d_judge
+  --before look_check/_experiments/twins/sceneC4/260730_w2d_goff \
+  --after  look_check/sceneC4/260730_w2d_judge
 ```
 
-> `Docs/reports/regression_tool_v1.md` and the `regression_check.py` module docstring
-> still show the older fallback chain `--before-round final_pt_r2,final_pt,ctx2_pt,ctx2`.
-> `final_pt` / `final_pt_r2` no longer exist (cleanup 07-30); the chain now resolves to
-> `ctx2_pt,ctx2` for batch1 and to nothing for the main scenes. Use `r2_on`, per
-> `Docs/reports/graze_recalibration_v1.md` §9, which supersedes it.
+> **Baseline chain.** The old `--before-round final_pt_r2,final_pt,ctx2_pt,ctx2` is dead:
+> `final_pt` / `final_pt_r2` were deleted by the 07-30 cleanup, so it resolved to
+> `ctx2_pt,ctx2` for batch1 and **to nothing at all for the 21 main scenes** — i.e. it
+> compared against no baseline. Fixed 07-30 in both `regression_check.py`'s docstring and
+> `Docs/reports/regression_tool_v1.md` §6/§7. The tail of the chain is `r2_on`
+> (`graze_recalibration_v1.md` §9); everything before it is a scene that has since been
+> re-judged, **newest first**, so each scene resolves to its own latest judged round.
+> **Add a newly judged round to the head, never the tail** — `260730_w2d_judge` (33/33)
+> is now the head and is the standing baseline-of-record.
+
+> **Edge integrity is never read from GRAZE alone** (`ground_kit_spec_v1.md` §7.5 A3).
+> A GRAZE firing against a baseline several waves old is unattributable; the instrument
+> that attributes it is a **same-session, same-HEAD `NEGOBS_GKIT=0` twin**, rendered into
+> `_experiments/twins/<scene>/<round>_goff/`. `w2d_round_v1.md` §3.2 is the worked example:
+> 8 GRAZE FAILs against the stale baselines, 2 attributable to the kit once the twin was run.

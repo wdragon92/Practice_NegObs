@@ -2812,20 +2812,40 @@ SCENE_PLANS = {
     "scene03": _S("levee_paved", (-12.0, -3.0, 6.0, 3.0), edges=_E0,
                   overrides=dict(natural=True, infra=None)),
     "scene04": _S("trail_soil", (-12.0, -1.6, 2.0, 1.6), edges=_E0),
-    "scene05": _S("plaza_granite", (-12.0, -5.0, -0.5, 5.0), edges=_E0,
-                  sites=dict(manhole=[(-3.5, -1.0), (-8.5, 0.0)],
-                             gully=[(-8.5, 0.4), (-6.0, -2.0)])),
+    # 05 - (v1.4, fixture drift) The fixture used origin (0,0,0) while the scene runs the
+    #   grid at the bowl lip (-1.5, 0, 0), because `build_views()` subtracts 1.5 from every
+    #   preset eye/tgt. That is why the fixture never exercised D-1 for scene05 at all
+    #   (`_edge_guard_ticks` only mixes frames on an origin-shifted scene). Now mirrors the
+    #   wired call: origin -1.5, region out to the lip, and the §5.1 coordinates re-derived
+    #   in the scene (the spec manhole -3.5 sits exactly on the d2 eye).
+    "scene05": _S("plaza_granite", (-13.5, -5.0, -1.5, 5.0), edges=(("bowl_lip", 0.0),),
+                  origin=(-1.5, 0.0, 0.0),
+                  overrides=dict(infra=dict(manhole=1, gully=2)),
+                  sites=dict(manhole=[(-3.90, -0.40)],
+                             gully=[(-10.00, 0.00), (-6.00, -3.00)],
+                             patch=[(-2.60, -0.45), (-3.35, 1.20)])),
     # 06 - origin (3.5, -13.0, 5.000), travel -Y. Deck width x 2-5, edge y=-13.
     #  Note: the 06 row W1 notation in spec §2.3 (y -12.44...-11.0 etc.) is off by +0.564 m
     #    from the §2.2 definition. The §2.2 geometric definition (X in [0.564,2.00]) is used here.
     "scene06": _S("bridge_deck", (2.0, -13.0, 5.0, 0.0),
                   origin=(3.5, -13.0, 5.0), axis="-y", edges=_E0),
     "scene07": _S("courtyard_dg", (-12.0, -3.0, 4.0, 3.0), edges=_E0),
-    "scene08": _S("sidewalk_block", (-12.0, -4.0, -0.5, 4.0), edges=_E0,
-                  tactile=("opening_ring",),
-                  sites=dict(manhole=[(-9.0, 1.5)],
-                             gully=[(-9.5, -1.2), (-2.0, 2.0)],
-                             tactile=dict(opening_ring=(-1.4, -3.0, -0.8, 3.0)))),
+    # 08 - (v1.4, fixture drift) The fixture declared a **kit-emitted** `opening_ring`
+    #   tactile band; the scene keeps that ring on its own `build_tactile_ring()` path and
+    #   passes `tactile=()`. A fixture that gates an element the kit never builds proves
+    #   nothing, so it is removed. The scene also runs a **second** plan (the pit floor at
+    #   z=-4.498, region (2,-3,10,3), gully x1, everything else cleared) which the fixture
+    #   does not model - one fixture entry per scene is the structure's limit, and the
+    #   recorder harness (`w2d_kitfix_v1.md` Sec.1) is what covers the second plan.
+    "scene08": _S("sidewalk_block", (-12.0, -4.0, -0.95, 4.0),
+                  edges=(("pit_near_edge", 0.0),),
+                  voids=((0.0, -4.5, 12.0, 4.5),),
+                  overrides=dict(pave=dict(step_y=3.0),
+                                 surface=(("patch", 3), ("crack", 4),
+                                          ("stain", ("dirt", "gum")), ("weed", 8))),
+                  sites=dict(manhole=[(-2.40, 1.60)],
+                             gully=[(-1.75, -3.40), (-1.75, 3.40)],
+                             patch=[(-1.25, 0.20), (-3.60, -0.30), (-8.60, 0.40)])),
     "scene09": _S("plaza_water", (-12.0, -6.0, -0.5, 6.0), edges=_E0),
     "scene10": _S("deck_trail_hybrid", (-12.0, -0.85, -1.5, 0.85), edges=_E0,
                   extras_args=dict(deck_planks=dict(region=(-1.5, -1.4, 0.0, 1.4)),
@@ -2877,11 +2897,22 @@ SCENE_PLANS = {
     "scene18": _S("plaza_granite", (-12.0, -5.0, -0.5, 5.0), edges=_E0,
                   sites=dict(manhole=[(-4.0, 1.0), (-9.0, -1.0)],
                              gully=[(-2.5, -4.6), (-8.0, 4.6)])),
-    # 19 - mirrored (x' = 2*5.8 - x), travel -X, dists (2, 3.5, 5). Edge x=9.04.
-    "scene19": _S("roof_membrane", (9.04, -4.0, 21.0, 4.0),
-                  origin=(9.04, 0.0, 0.0), axis="-x", edges=_E0,
-                  dists=(2, 3.5, 5),
-                  sites=dict(gully=[(10.5, -0.6), (15.0, -2.5)])),
+    # 19 - mirrored (x' = 2*5.8 - x), travel -X, dists (2, 3.5, 5).
+    #   (v1.4, fixture drift) The fixture used to claim grid origin 9.04 with the edge at
+    #   s=0, i.e. it gated a **phantom lip 5 m short of the real one**. `build_views()`
+    #   mirrors `sc.grid_views` about xref 5.8, so the grid origin is 2*5.8 = 11.6 and the
+    #   roof's west lip (x=4.0) is at forward s = 11.6 - 4.0 = 7.6. Now mirrors the wired
+    #   call, incl. the inset region and the membrane extras.
+    "scene19": _S("roof_membrane", (4.25, -8.75, 16.75, 3.75),
+                  origin=(11.6, 0.0, 0.0), axis="-x",
+                  edges=(("roof_edge", 7.6),), dists=(2, 3.5, 5),
+                  overrides=dict(infra=dict(gully=2),
+                                 surface=(("patch", 4),
+                                          ("stain", ("water", "drip", "dirt")))),
+                  extras_args=dict(membrane=dict(seam_pitch=1.0, wear_n=5)),
+                  sites=dict(gully=[(10.5, -0.6), (6.0, -7.5)],
+                             patch=[(12.3, -0.6), (14.3, -0.25),
+                                    (9.2, -3.4), (6.8, 1.9)])),
     "scene20": _S("plaza_granite", (-13.0, -4.0, -0.5, 4.0), edges=_E0,
                   sites=dict(manhole=[(-5.0, 1.4), (-10.0, -1.4)],
                              gully=[(-3.0, -3.6), (-8.0, 3.6)])),
@@ -2913,9 +2944,18 @@ SCENE_PLANS = {
     "sceneD4": _S("platform_indoor", (-12.0, -5.0, 0.0, -2.2), gy=-3.6,
                   edges=_E0, tactile=("platform_edge",),
                   sites=dict(tactile=dict(platform_edge=(-0.90, -5.0, -0.30, -2.2)))),
+    # N1 - (v1.4, fixture drift) The fixture still carried the **defective spec manhole**
+    #   (-1.0, 0.4): at d2 that is X=1.0 m = 1,077 px = 56.1 % of frame width, which the
+    #   scene itself had already moved to the W2 window per pilot ruling M9-(b). It also
+    #   missed the `pave=dict(joint=None)` clear (the scene owns its two-tier joint grid -
+    #   defect D6 class) and the bollard tactile band. Now mirrors the wired call.
     "sceneN1": _S("plaza_granite", (-12.0, -4.0, -0.6, 4.0),
-                  sites=dict(manhole=[(-1.0, 0.4)],
-                             gully=[(-4.0, -3.6), (-9.0, 3.6)])),
+                  tactile=("bollard",),
+                  overrides=dict(pave=dict(joint=None)),
+                  sites=dict(manhole=[(-2.40, 0.40), (-6.60, -1.50)],
+                             gully=[(-3.80, 0.40), (-9.00, 2.60)],
+                             patch=[(-1.20, 0.10), (-8.80, -0.20)],
+                             tactile=dict(bollard=(10.85, -7.96, 17.15, -7.36)))),
     "sceneN2": _S("street_asphalt", (-12.0, -4.0, 2.0, 4.0),
                   sites=dict(manhole=[(-1.0, 0.5)],
                              gully=[(-3.0, -3.6), (-8.0, -3.6),

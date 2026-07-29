@@ -36,11 +36,25 @@ v1 측정기는 scratchpad 세션 소멸로 부재했다 `[레드팀 §5·§8-1]
 > W2 에서는 WARN 만, FAIL 로 올리지 않는다" 로 못박았다(imgstats flat%/slope 게이트가
 > n=2 로 정해졌다 n=54 에서 뒤집힌 전례). 따라서 `--gate` 는 **종료코드 0**을 유지한다.
 
+> **σ_LF·sd 의 라운드 등급 (`ground_kit_spec_v1.md` §7.5 A1).** 두 지표는 **지면 전용
+> 라운드에서는 참고치(informative-only)**, **T1 재질층 반영 후 라운드부터 WARN 게이트**다.
+> scene15 파일럿이 근거다 — 요소 47프림을 넣어도 σ_LF 는 0.76 → 0.80 밖에 안 움직였다.
+> 보수 패치가 골목 바닥 재질에 바인딩돼 **색이 0** 이기 때문이며, 지면 전용 라운드에서
+> 이걸 WARN 으로 걸면 **T1 의 미도착을 ground_kit 의 결함으로 오귀속**하게 된다.
+> v1 은 이 등급 구분을 **코드에 담지 않아** 산문에만 있었다. 이제 `--round-class` 가 그
+> 선언을 받는다:
+>   * `post_t1` (**기본값**) — σ_LF ≥ 5.0 · sd ≥ 32 를 **WARN 으로 발화**한다.
+>     T1 재질층이 존재하는 라운드(W2-C `t1_mtl_on` 이후 = 260730_w2d_judge 부터)가 여기다.
+>   * `ground_only` — 두 지표를 `[i]` 접두로 **기록만** 하고 위반 목록에서 뺀다.
+> 값 자체는 어느 등급에서도 항상 계산·출력·JSON 기록된다(A1 "값은 계속 기록").
+
 의존성 numpy + PIL 뿐. **GPU 0 · 부작용 0.**
 
 사용:
     python3 scripts/near_ground_stats.py 'look_check/scene15/*/pt_noon_preset_h0.3_d*.png'
     python3 scripts/near_ground_stats.py 'look_check/scene14/r2_on/pt_noon_preset_h0.3_d*.png' --median
+    python3 scripts/near_ground_stats.py 'look_check/scene15/w2_pilot/*.png' \
+        --gate --round-class ground_only        # §7.5 A1 — 지면 전용 라운드
 """
 from __future__ import annotations
 
@@ -191,11 +205,23 @@ def stats(path):
     )
 
 
-def warns(s):
-    """게이트 위반 목록(전부 WARN — W2 규약)."""
+ROUND_CLASSES = ("post_t1", "ground_only")
+# §7.5 A1 이 재범위 지정한 두 지표. `ground_only` 등급에서만 위반 목록에서 빠진다.
+T1_SCOPED = ("sd", "σ_LF")
+
+
+def warns(s, round_class="post_t1"):
+    """게이트 위반 목록(전부 WARN — W2 규약).
+
+    `round_class="ground_only"` 면 §7.5 A1 대로 σ_LF·sd 를 위반으로 세지 않고
+    `[i]` 접두를 붙여 참고치로만 남긴다. 값은 어느 등급에서도 그대로 계산된다.
+    """
+    if round_class not in ROUND_CLASSES:
+        raise ValueError(f"round_class 는 {ROUND_CLASSES} 중 하나: {round_class!r}")
+    info_only = (round_class == "ground_only")
     out = []
     if s["sd"] < G_SD_WARN:
-        out.append(f"sd {s['sd']:.1f}<{G_SD_WARN:g}")
+        out.append(("[i] " if info_only else "") + f"sd {s['sd']:.1f}<{G_SD_WARN:g}")
     if s["mean"] > G_MEAN_MAX:
         out.append(f"mean {s['mean']:.0f}>{G_MEAN_MAX:g}")
     if s["gt224"] > G_GT224_MAX:
@@ -205,10 +231,16 @@ def warns(s):
     if s["flat"] >= G_FLAT_MAX:
         out.append(f"flat% {s['flat']:.1f}≥{G_FLAT_MAX:g}")
     if s["sigma_LF"] < G_SIGLF_WARN:
-        out.append(f"σ_LF {s['sigma_LF']:.2f}<{G_SIGLF_WARN:g}")
+        out.append(("[i] " if info_only else "")
+                   + f"σ_LF {s['sigma_LF']:.2f}<{G_SIGLF_WARN:g}")
     if s["flat_gnd"] >= G_FLATGND_MAX:
         out.append(f"flat_gnd {s['flat_gnd']:.1f}≥{G_FLATGND_MAX:g}")
     return out
+
+
+def n_warns(s, round_class="post_t1"):
+    """참고치 `[i]` 를 뺀 실제 WARN 개수 — 라운드 표에 세는 수치."""
+    return sum(1 for w in warns(s, round_class) if not w.startswith("[i] "))
 
 
 COLS = [("sd", "{:>7.1f}"), ("mean", "{:>6.0f}"), ("p99", "{:>6.0f}"),
@@ -221,12 +253,12 @@ KEYS = ["sd", "mean", "p99", "gt224", "flat", "edge",
         "flat5m", "wht5m", "flat_gnd"]
 
 
-def _row(label, s, gate):
+def _row(label, s, gate, round_class="post_t1"):
     line = f"{label[:44]:<45}"
     for (h, f), k in zip(COLS, KEYS):
         line += f.format(s[k])
     if gate:
-        w = warns(s)
+        w = warns(s, round_class)
         line += ("  " + ", ".join(w)) if w else "  ok"
     return line
 
@@ -240,6 +272,9 @@ def main(argv=None):
                     help="게이트 위반 표시(W2 규약상 WARN 만 — 종료코드는 항상 0)")
     ap.add_argument("--median", action="store_true",
                     help="입력 전체의 컷별 중앙값 1행만 낸다(t1 §2.2 의 'h0.3 3컷 중앙값')")
+    ap.add_argument("--round-class", default="post_t1", choices=ROUND_CLASSES,
+                    help="§7.5 A1 라운드 등급. post_t1(기본) = σ_LF·sd WARN 발화 · "
+                         "ground_only = 둘을 [i] 참고치로 격하")
     a = ap.parse_args(argv)
 
     paths = []
@@ -271,13 +306,13 @@ def main(argv=None):
         med.update(name="(median)", path="", H=rows[0]["H"], W=rows[0]["W"],
                    wht_min=float(np.median([r["wht_min"] for r in rows])),
                    w80=float(np.median([r["w80"] for r in rows])))
-        print(_row(f"(중앙값 · {len(rows)}컷)", med, a.gate))
+        print(_row(f"(중앙값 · {len(rows)}컷)", med, a.gate, a.round_class))
         rows = [med]
     else:
         for s in rows:
             lbl = os.path.join(os.path.basename(os.path.dirname(s["path"])),
                                s["name"])
-            print(_row(lbl, s, a.gate))
+            print(_row(lbl, s, a.gate, a.round_class))
 
     if a.json:
         os.makedirs(os.path.dirname(os.path.abspath(a.json)) or ".", exist_ok=True)

@@ -31,10 +31,21 @@ Usage
   python scripts/regression_check.py --before look_check/scene07/p2g2_off                                      --after  look_check/scene07/p2g2_on
 
   # all 33 scenes (round names fall back through commas - the first existing one is used)
-  python scripts/regression_check.py --scenes 'look_check/scene*'       --before-round final_pt_r2,final_pt,ctx2_pt,ctx2 --after-round v9_look       --json Docs/reports/regr_v9.json
+  python scripts/regression_check.py --scenes 'look_check/scene*'       --before-round w2c_g2,w2_pilot,r2b_on,wall,facade,r2_on --after-round <new round>       --fail-only --json Docs/reports/regr_<new round>.json
 
   # when rounds differ per scene, use a list file (scene path TAB before TAB after, # comments)
   python scripts/regression_check.py --list rounds.tsv
+
+**Baseline doctrine** (`graze_recalibration_v1.md` §9 · `look_check/README.md` §4).
+  The chain this docstring used to print - `final_pt_r2,final_pt,ctx2_pt,ctx2` - is dead:
+  `final_pt` and `final_pt_r2` were deleted by the 07-30 look_check cleanup, so it
+  resolved to `ctx2_pt,ctx2` for batch1 and to **nothing at all** for the main scenes,
+  i.e. it silently compared the new round against no baseline.
+  The standing baseline is **`r2_on`**, and the chain above is `r2_on` preceded by the
+  scenes that have since been re-judged, newest first - so each scene resolves to **its
+  own latest judged round**: `sceneC2 -> w2c_g2` · `scene13/15/N5 -> w2_pilot` ·
+  `sceneC1 -> r2b_on` · `sceneN4 -> wall` · `scene05 -> facade` · everything else
+  `-> r2_on`. Extend the head of the chain when a round is judged, never the tail.
 
 Dependencies: numpy + PIL only (scipy and opencv are banned - deployment environment
 assumption).
@@ -873,7 +884,7 @@ def _job(args):
 # [4] Scene pair collection
 # ===========================================================================
 def resolve_round(scene_dir, spec):
-    """Accepts a comma fallback such as `final_pt_r2,final_pt,ctx2` and returns the first folder that exists."""
+    """Accepts a comma fallback such as `w2c_g2,w2_pilot,r2_on` and returns the first folder that exists."""
     for name in [s.strip() for s in spec.split(",") if s.strip()]:
         d = name if os.path.isabs(name) else os.path.join(scene_dir, name)
         if os.path.isdir(d) and glob.glob(os.path.join(d, "*.png")):

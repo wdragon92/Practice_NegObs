@@ -117,21 +117,28 @@ PARAMS = dict(
     #     the joint grid cut back (below) they are the only kit elements left
     #     in it, and `build_patch_field` honours explicit sites regardless of
     #     the region.
-    # JOINT GRID stops at x=-3.70 rather than at the lip. That is a ground_kit
-    #   defect, not a design choice: `_edge_guard_ticks` feeds the **world** x
-    #   of each tick into `drow()`, which expects a forward-s offset, so on any
-    #   scene whose origin is not (0,0,0) it guards the wrong ticks. Measured
-    #   here at d10 (floor 16 rows @1080):
-    #     tick x=-1.8  true s=-0.3  drow  1.57  <- violation; guard reads
-    #                                             drow(-1.8)=11.16, drops it
-    #                                             for the wrong reason
-    #     tick x=-3.6  true s=-2.1  drow 13.51  <- violation; guard reads
-    #                                             drow(-3.6)=28.54, keeps it
-    #   With the region running to the lip, that second tick makes plan_ground
-    #   raise B7 ("Joints/JX_5 ... 13.5@1080 < 16"). x1=-3.70 keeps exactly the
-    #   tick set an origin-aware guard would keep: -5.4, -7.2, -9.0, -10.8,
-    #   -12.6. See Docs/reports/w2d_edit_g1.md §3 D-3.
-    gkit=dict(x0=-13.5, half_y=5.0, x1=-3.70, lip_x=-1.50,
+    # JOINT GRID runs out to the lip (x1 = lip_x = -1.50) since W2-D.
+    #   HISTORY - it used to stop at x=-3.70. That clamp was a workaround for a
+    #   ground_kit defect (D-1), not a design choice: `_edge_guard_ticks` fed
+    #   the **world** x of each tick into `drow()`, which expects a forward-s
+    #   offset, so on any scene whose origin is not (0,0,0) it guarded the wrong
+    #   ticks. Measured at d10 (floor 16 rows @1080):
+    #     tick x=-1.8  true s=-0.3  drow  1.57  <- violation; the v1.2 guard
+    #                                             read drow(-1.8)=11.16 and
+    #                                             dropped it for the wrong reason
+    #     tick x=-3.6  true s=-2.1  drow 13.51  <- violation; the v1.2 guard
+    #                                             read drow(-3.6)=28.54 and kept
+    #                                             it, so the plan raised B7
+    #                                             ("Joints/JX_5 ... 13.5 < 16")
+    #   ground_kit v1.3 (Docs/reports/w2d_kitfix_v1.md §2) converts ticks through
+    #   the plan's own view before guarding, so with the region at the lip it
+    #   drops exactly {-3.6, -1.8} and keeps {-5.4, -7.2, -9.0, -10.8, -12.6} -
+    #   the identical tick set the clamp was cut to preserve (6 joint prims).
+    #   Un-clamping therefore costs no joint and gains the surface elements
+    #   (patch/crack/stain/weed/scatter) 1.4 m of near field, because
+    #   `_trim_region` now cuts at -2.30 instead of -3.70.
+    #   See Docs/reports/w2d_edit_g1.md §3 D-3 and w2d_kitfix_v1.md §2/§9-4.
+    gkit=dict(x0=-13.5, half_y=5.0, x1=-1.50, lip_x=-1.50,
               manhole=[(-3.90, -0.40)],
               gully=[(-10.00, 0.00), (-6.00, -3.00)],
               patch=[(-2.60, -0.45), (-3.35, 1.20)]),

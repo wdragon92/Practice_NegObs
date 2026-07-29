@@ -217,15 +217,23 @@ python scripts/regression_check.py --before look_check/scene07/p2g2_off \
 
 # 전 33씬 (감독 상시 명령 — §7)
 python scripts/regression_check.py --scenes 'look_check/scene*' \
-    --before-round final_pt_r2,final_pt,ctx2_pt,ctx2 --after-round v9_look \
-    --fail-only --json Docs/reports/regr_v9.json
+    --before-round w2c_g2,w2_pilot,r2b_on,wall,facade,r2_on --after-round <신규라운드> \
+    --fail-only --json Docs/reports/regr_<신규라운드>.json
 
 # 씬마다 라운드가 다르면 목록 파일 (씬경로 <TAB> 이전 <TAB> 이후, # 주석 허용)
 python scripts/regression_check.py --list rounds.tsv
 ```
 
-- `--before-round` / `--after-round` 는 **쉼표 폴백**이다. 먼저 존재하는 폴더를
-  쓰므로 본편(`final_pt`)과 배치1(`ctx2`)이 한 명령에 들어간다.
+- `--before-round` / `--after-round` 는 **쉼표 폴백**이다. 먼저 존재하는 폴더를 쓴다.
+- **[W2-D 정정] 기준선 사슬.** 위 사슬은 `final_pt_r2,final_pt,ctx2_pt,ctx2` 를 대체한다.
+  `final_pt`·`final_pt_r2` 는 07-30 `look_check` 정리에서 **삭제**됐고, 남은 사슬은
+  배치1에서만 `ctx2_pt,ctx2` 로 풀리고 **본편 21씬에서는 아무 폴더로도 풀리지 않아**
+  기준선 없이 비교하는 상태였다(`look_check/README.md` §4). 상시 기준선은
+  **`r2_on`** 이며(`graze_recalibration_v1.md` §9), 그 앞에 **이후 판정된 라운드를
+  최신 순으로** 붙인 것이 위 사슬이다 — 씬마다 **자기 최신 판정 라운드**로 풀린다:
+  `sceneC2 → w2c_g2` · `scene13/15/N5 → w2_pilot` · `sceneC1 → r2b_on` ·
+  `sceneN4 → wall` · `scene05 → facade` · 나머지 전부 `→ r2_on`.
+  새 라운드가 판정되면 **사슬 머리에 추가**한다(꼬리에 붙이면 안 된다).
 - `--only h0.3,graz` — 뷰 이름 부분일치 필터(판정 1순위만 빠르게 볼 때).
 - `--fail-only` — FAIL/WARN 컷만 출력.
 - `--json out.json` — 전 지표·전 사유가 담긴 기계 판독본. 표에 안 보이는 INFO 도 전량.
@@ -240,9 +248,12 @@ python scripts/regression_check.py --list rounds.tsv
 
 ```bash
 python scripts/regression_check.py --scenes 'look_check/scene*' \
-  --before-round final_pt_r2,final_pt,ctx2_pt,ctx2 --after-round <신규라운드> \
+  --before-round w2c_g2,w2_pilot,r2b_on,wall,facade,r2_on --after-round <신규라운드> \
   --fail-only --json Docs/reports/regr_<신규라운드>.json
 ```
+
+> **기준선 사슬은 §6 의 [W2-D 정정]** 을 따른다 — 옛 `final_pt_r2,final_pt,ctx2_pt,ctx2`
+> 는 본편 21씬에서 아무것도 못 찾는 죽은 사슬이다.
 
 `<신규라운드>` 에 새 폴더명만 넣으면 된다. 33씬 478컷 기준 **23 초**.
 `씬 우선순위` 표의 위에서부터 보면 되고, `OCCL` 코드가 붙은 컷을 **먼저** 열 것 —

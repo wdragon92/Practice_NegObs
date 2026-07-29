@@ -362,18 +362,31 @@ def download_polyhaven(slug, prefix, failures):
 # ---------------------------------------------------------------------------
 # 점자블록 절차 생성 (브리프 §4)
 # ---------------------------------------------------------------------------
-def build_tactile(failures):
+# 물리 치수는 여기 한 곳에만 둔다 — 픽셀 상수(`N/8.0` 같은)로 흩어 놓으면
+# "타일 300 mm 에서 돌기가 몇 mm 인가" 를 아무도 못 읽는다.
+TACTILE_TILE_MM = 300.0     # [법령] 교통약자법 시행규칙 별표1 2호 차목 — 300 mm 판
+TACTILE_DOT_D_MM = 25.0     # [결재 B7 · 2026-07-29] 38.1 → **25 mm**
+#   구판은 `dot_d = N/8.0` = 128 px = **37.5 mm**(외곽 림 포함 실측 38.1) 였다.
+#   국내·국제 관행 22~25 mm 대비 1.5~1.7배로, 돌기 면적률을 19.6 % → 45.6 % 로
+#   끌어올려 §12.5-4 의 "휘도 단차" 목표와 **정반대로** 작동했다
+#   [실측 — w2_surgeon_v1.md §3.5 · redteam_w2_foundations.md §4].
+#   25 mm 는 관행 상한이자 피치 50 mm 의 정확히 1/2 — 돌기 사이 간격 = 돌기 지름.
+
+
+def build_tactile(failures, force=False):
     diff_path = os.path.join(ASSETS_DIR, "tactile_yellow_diff.png")
     nor_path = os.path.join(ASSETS_DIR, "tactile_yellow_nor.png")
-    if os.path.exists(diff_path) and os.path.exists(nor_path):
+    if (os.path.exists(diff_path) and os.path.exists(nor_path)
+            and not force):
         print("  [skip] tactile_yellow_* (존재)")
         return
-    print("[tactile] 6x6 반구 돌기 절차 생성 (1024^2)")
+    print("[tactile] 6x6 반구 돌기 절차 생성 (1024^2) "
+          f"— 돌기 Ø {TACTILE_DOT_D_MM:.0f} mm / 타일 {TACTILE_TILE_MM:.0f} mm")
     try:
         N = 1024
-        grid = 6                       # 6x6 돌기
-        cell = N / grid                # 셀 크기 ≈ 170.7 px
-        dot_d = N / 8.0                # 돌기 지름 ≈ 타일의 1/8
+        grid = 6                       # 6x6 돌기 [법령] 36점
+        cell = N / grid                # 셀 크기 ≈ 170.7 px = 피치 50.0 mm
+        dot_d = N * TACTILE_DOT_D_MM / TACTILE_TILE_MM     # 25 mm → 85.33 px
         dot_r = dot_d / 2.0
 
         yy, xx = np.meshgrid(np.arange(N), np.arange(N), indexing="ij")

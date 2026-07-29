@@ -1795,7 +1795,11 @@ def tactile_pbr(stage, path, scale_m=None, roughness=0.70):
     `tactile_yellow_*` — ground_kit and the vegetation agent address them by
     that exact name.
       texture [measured — assets/veg_manifest_w2.json]: 1024 px, 36 dots (6x6),
-      pitch 50.0 mm, linear albedo 0.4841 (below the 0.55 clamp of §12.5-4).
+      pitch 50.0 mm, dot Ø 25 mm nominal (area-equiv 25.7 measured, dot-area
+      share 20.8 %), linear albedo 0.4504 (below the 0.55 clamp of §12.5-4).
+      [W2-C · B7 ruling] Ø was 38.1 mm = 45.9 % dot area, which worked against
+      §12.5-4's own luminance-step goal. Source constant:
+      `assets/scene01/download_scene01_assets.py::TACTILE_DOT_D_MM`.
     Falls back to the constant colour when the texture is absent, because
     `assets/scene01/*` is git-ignored and a missing binding renders black —
     strictly worse than the flat yellow it replaces.

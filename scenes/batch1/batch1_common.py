@@ -56,11 +56,15 @@ _TACT_RGB = (0.80, 0.66, 0.14)      # 점형블록 황색 — 텍스처 부재 �
 # `tactile` / the files stay `tactile_yellow_*` because ground_kit and the
 # vegetation agent both address them by that name.
 #   texture [measured — assets/veg_manifest_w2.json]: 1024 px, 36 dots (6x6),
-#   pitch 50.0 mm, first-column centre 26.4 mm, linear albedo 0.4841
+#   pitch 50.0 mm, first-column centre 26.4 mm, linear albedo 0.4504
 #   (under the 0.55 clamp of ground_kit §12.5-4, so no extra tint is applied).
-#   Dot diameter 38.1 mm has NO figure in the spec table (which fixes count /
-#   pitch / height only) and is 1.5~1.7x the common 22~25 mm base — flagged in
-#   the manifest as pending a supervisor call. Geometry is untouched either way.
+#   [W2-C · B7 결재 2026-07-29] Dot diameter 38.1 -> **25 mm nominal**
+#   (area-equivalent 25.7 measured). The spec table fixes count / pitch /
+#   height only; 38.1 was 1.5~1.7x the common 22~25 mm base and pushed the
+#   dot-area share to 45.9 %, working AGAINST §12.5-4's luminance-step goal.
+#   Now 20.8 %. Source constant lives in the generator, not here:
+#   `assets/scene01/download_scene01_assets.py::TACTILE_DOT_D_MM`.
+#   Geometry (relief height 6 mm) is untouched either way.
 _TACT_TILE_M = 0.30                 # one statutory pad = 0.30 x 0.30 m
 _TACT_ROUGH = 0.70
 

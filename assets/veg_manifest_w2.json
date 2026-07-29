@@ -1,1363 +1,1365 @@
 {
- "schema": "negobs_veg_manifest",
- "version": "w2-a4-v1",
- "generated": "2026-07-29",
- "scope": "W2-A4 식생·텍스처 조달 + 픽셀 검증. 판정은 수종명이 아니라 메시 UV 가 실제로 샘플하는 픽셀로 한다.",
- "method": {
-  "geometry": "usd-core 26.8 (CPU). Σ(faceVertexCount−2); PointInstancer 는 protoIndices 를 전개해 tri_effective 산출. 치수는 스테이지 전체 월드 바운딩(default+render+proxy).",
-  "pixels": "UsdShade.MaterialBindingAPI → MDL → texture_2d() → 메시의 primvars:st 를 그 텍스처에 실제 샘플. HSV 색상각 분류, 채도>0.15 만 유채색. 텍스처 통계는 별도로 1024² LANCZOS 리샘플 전 픽셀.",
-  "albedo": "sRGB→선형 IEC 61966-2-1 후 Rec.709 휘도 평균.",
-  "gate_woody": "초록(65~170°)+황록(40~65°) ≥ 0.75 AND 적(0~25/340~360)+분홍(280~340)+주황(25~40) ≤ 0.06 AND (황록 우세면 선형 알베도 ≤ 0.55)",
-  "gate_turf": "초록+황록 ≥ 0.75 AND 적+분홍 ≤ 0.02 AND 주황(마른 잎) ≤ 0.25 — 잔디의 짚색은 계절이 아니라 연중 상존이라 별도 게이트 [추정]",
-  "gpu": "미사용. 렌더·Isaac·SMOKE 전부 미실행."
- },
- "assets": [
-  {
-   "asset": "Trees/Chinese_Juniper.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Trees/Chinese_Juniper.usd",
-   "exists": true,
-   "bytes": 3717280,
-   "role": "temple_office_evergreen",
-   "note": "향나무 — 사찰·관공서·학교 조경",
-   "gate": "woody",
-   "geometry": {
-    "size_m": [
-     1.0774,
-     1.0602,
-     2.5442
-    ],
-    "zmin_m": -0.0278,
-    "zmax_m": 2.5164,
-    "tri_unique": 27098,
-    "tri_effective": 5709460,
-    "n_instances": 436
-   },
-   "foliage_uv_hue": {
-    "green": 1.0,
-    "yellow_green": 0.0,
-    "orange": 0.0,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.4468,
-    "foliage_tri": 21260,
-    "foliage_frac_unique": 0.7846
-   },
-   "foliage_textures": [
-    {
-     "tex": "Trees/materials/textures/pine_needles.png",
-     "px": [
-      256,
-      256
-     ],
-     "green": 0.8018,
-     "yellow_green": 0.1982,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.1919,
-     "near_white_frac": 0.0
-    }
-   ],
-   "verdict": "PASS"
+  "schema": "negobs_veg_manifest",
+  "version": "w2-a4-v1",
+  "generated": "2026-07-29",
+  "scope": "W2-A4 식생·텍스처 조달 + 픽셀 검증. 판정은 수종명이 아니라 메시 UV 가 실제로 샘플하는 픽셀로 한다.",
+  "method": {
+    "geometry": "usd-core 26.8 (CPU). Σ(faceVertexCount−2); PointInstancer 는 protoIndices 를 전개해 tri_effective 산출. 치수는 스테이지 전체 월드 바운딩(default+render+proxy).",
+    "pixels": "UsdShade.MaterialBindingAPI → MDL → texture_2d() → 메시의 primvars:st 를 그 텍스처에 실제 샘플. HSV 색상각 분류, 채도>0.15 만 유채색. 텍스처 통계는 별도로 1024² LANCZOS 리샘플 전 픽셀.",
+    "albedo": "sRGB→선형 IEC 61966-2-1 후 Rec.709 휘도 평균.",
+    "gate_woody": "초록(65~170°)+황록(40~65°) ≥ 0.75 AND 적(0~25/340~360)+분홍(280~340)+주황(25~40) ≤ 0.06 AND (황록 우세면 선형 알베도 ≤ 0.55)",
+    "gate_turf": "초록+황록 ≥ 0.75 AND 적+분홍 ≤ 0.02 AND 주황(마른 잎) ≤ 0.25 — 잔디의 짚색은 계절이 아니라 연중 상존이라 별도 게이트 [추정]",
+    "gpu": "미사용. 렌더·Isaac·SMOKE 전부 미실행."
   },
-  {
-   "asset": "Trees/Elm_Sapling.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Trees/Elm_Sapling.usd",
-   "exists": true,
-   "bytes": 14793461,
-   "role": "street_nearfield",
-   "note": "느티나무 대용 소교목 — h0.3 근경 1순위",
-   "gate": "woody",
-   "geometry": {
-    "size_m": [
-     1.7421,
-     1.7501,
-     3.0871
-    ],
-    "zmin_m": -0.0004,
-    "zmax_m": 3.0867,
-    "tri_unique": 113268,
-    "tri_effective": 113268,
-    "n_instances": 0
-   },
-   "foliage_uv_hue": {
-    "green": 1.0,
-    "yellow_green": 0.0,
-    "orange": 0.0,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.3227,
-    "foliage_tri": 65934,
-    "foliage_frac_unique": 0.5821
-   },
-   "foliage_textures": [
+  "assets": [
     {
-     "tex": "Trees/materials/textures/beech_leaf_basecolor.png",
-     "px": [
-      512,
-      512
-     ],
-     "green": 1.0,
-     "yellow_green": 0.0,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.0781,
-     "near_white_frac": 0.0
-    }
-   ],
-   "verdict": "PASS"
-  },
-  {
-   "asset": "Trees/Shumard_Oak.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Trees/Shumard_Oak.usd",
-   "exists": true,
-   "bytes": 12851099,
-   "role": "street_broadleaf",
-   "note": "대왕참나무 대용 — 가로수 활엽 주력",
-   "gate": "woody",
-   "geometry": {
-    "size_m": [
-     10.3012,
-     10.4663,
-     11.4375
-    ],
-    "zmin_m": -0.5386,
-    "zmax_m": 10.8989,
-    "tri_unique": 99509,
-    "tri_effective": 4552624,
-    "n_instances": 450
-   },
-   "foliage_uv_hue": {
-    "green": 0.7537,
-    "yellow_green": 0.2463,
-    "orange": 0.0,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.4013,
-    "foliage_tri": 37839,
-    "foliage_frac_unique": 0.3803
-   },
-   "foliage_textures": [
-    {
-     "tex": "Trees/materials/textures/oakleaves1_basecolor.png",
-     "px": [
-      1024,
-      1024
-     ],
-     "green": 1.0,
-     "yellow_green": 0.0,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.1444,
-     "near_white_frac": 0.0
+      "asset": "Trees/Chinese_Juniper.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Trees/Chinese_Juniper.usd",
+      "exists": true,
+      "bytes": 3717280,
+      "role": "temple_office_evergreen",
+      "note": "향나무 — 사찰·관공서·학교 조경",
+      "gate": "woody",
+      "geometry": {
+        "size_m": [
+          1.0774,
+          1.0602,
+          2.5442
+        ],
+        "zmin_m": -0.0278,
+        "zmax_m": 2.5164,
+        "tri_unique": 27098,
+        "tri_effective": 5709460,
+        "n_instances": 436
+      },
+      "foliage_uv_hue": {
+        "green": 1.0,
+        "yellow_green": 0.0,
+        "orange": 0.0,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.4468,
+        "foliage_tri": 21260,
+        "foliage_frac_unique": 0.7846
+      },
+      "foliage_textures": [
+        {
+          "tex": "Trees/materials/textures/pine_needles.png",
+          "px": [
+            256,
+            256
+          ],
+          "green": 0.8018,
+          "yellow_green": 0.1982,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.1919,
+          "near_white_frac": 0.0
+        }
+      ],
+      "verdict": "PASS"
     },
     {
-     "tex": "Trees/materials/textures/oakleaves2_basecolor.png",
-     "px": [
-      1024,
-      1024
-     ],
-     "green": 0.0,
-     "yellow_green": 1.0,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.1272,
-     "near_white_frac": 0.0
+      "asset": "Trees/Elm_Sapling.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Trees/Elm_Sapling.usd",
+      "exists": true,
+      "bytes": 14793461,
+      "role": "street_nearfield",
+      "note": "느티나무 대용 소교목 — h0.3 근경 1순위",
+      "gate": "woody",
+      "geometry": {
+        "size_m": [
+          1.7421,
+          1.7501,
+          3.0871
+        ],
+        "zmin_m": -0.0004,
+        "zmax_m": 3.0867,
+        "tri_unique": 113268,
+        "tri_effective": 113268,
+        "n_instances": 0
+      },
+      "foliage_uv_hue": {
+        "green": 1.0,
+        "yellow_green": 0.0,
+        "orange": 0.0,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.3227,
+        "foliage_tri": 65934,
+        "foliage_frac_unique": 0.5821
+      },
+      "foliage_textures": [
+        {
+          "tex": "Trees/materials/textures/beech_leaf_basecolor.png",
+          "px": [
+            512,
+            512
+          ],
+          "green": 1.0,
+          "yellow_green": 0.0,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.0781,
+          "near_white_frac": 0.0
+        }
+      ],
+      "verdict": "PASS"
     },
     {
-     "tex": "Trees/materials/textures/oakleaves3_basecolor.png",
-     "px": [
-      1024,
-      1024
-     ],
-     "green": 1.0,
-     "yellow_green": 0.0,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.1351,
-     "near_white_frac": 0.0
+      "asset": "Trees/Shumard_Oak.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Trees/Shumard_Oak.usd",
+      "exists": true,
+      "bytes": 12851099,
+      "role": "street_broadleaf",
+      "note": "대왕참나무 대용 — 가로수 활엽 주력",
+      "gate": "woody",
+      "geometry": {
+        "size_m": [
+          10.3012,
+          10.4663,
+          11.4375
+        ],
+        "zmin_m": -0.5386,
+        "zmax_m": 10.8989,
+        "tri_unique": 99509,
+        "tri_effective": 4552624,
+        "n_instances": 450
+      },
+      "foliage_uv_hue": {
+        "green": 0.7537,
+        "yellow_green": 0.2463,
+        "orange": 0.0,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.4013,
+        "foliage_tri": 37839,
+        "foliage_frac_unique": 0.3803
+      },
+      "foliage_textures": [
+        {
+          "tex": "Trees/materials/textures/oakleaves1_basecolor.png",
+          "px": [
+            1024,
+            1024
+          ],
+          "green": 1.0,
+          "yellow_green": 0.0,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.1444,
+          "near_white_frac": 0.0
+        },
+        {
+          "tex": "Trees/materials/textures/oakleaves2_basecolor.png",
+          "px": [
+            1024,
+            1024
+          ],
+          "green": 0.0,
+          "yellow_green": 1.0,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.1272,
+          "near_white_frac": 0.0
+        },
+        {
+          "tex": "Trees/materials/textures/oakleaves3_basecolor.png",
+          "px": [
+            1024,
+            1024
+          ],
+          "green": 1.0,
+          "yellow_green": 0.0,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.1351,
+          "near_white_frac": 0.0
+        },
+        {
+          "tex": "Trees/materials/textures/oakleaves4_basecolor.png",
+          "px": [
+            1024,
+            1024
+          ],
+          "green": 1.0,
+          "yellow_green": 0.0,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.1294,
+          "near_white_frac": 0.0
+        }
+      ],
+      "verdict": "PASS"
     },
     {
-     "tex": "Trees/materials/textures/oakleaves4_basecolor.png",
-     "px": [
-      1024,
-      1024
-     ],
-     "green": 1.0,
-     "yellow_green": 0.0,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.1294,
-     "near_white_frac": 0.0
-    }
-   ],
-   "verdict": "PASS"
-  },
-  {
-   "asset": "Trees/Fraxinus.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Trees/Fraxinus.usd",
-   "exists": true,
-   "bytes": 13051521,
-   "role": "street_broadleaf",
-   "note": "물푸레나무속 — 이팝나무 대용",
-   "gate": "woody",
-   "geometry": {
-    "size_m": [
-     4.8509,
-     4.5103,
-     5.3409
-    ],
-    "zmin_m": -0.0001,
-    "zmax_m": 5.3408,
-    "tri_unique": 97528,
-    "tri_effective": 1251064,
-    "n_instances": 26
-   },
-   "foliage_uv_hue": {
-    "green": 1.0,
-    "yellow_green": 0.0,
-    "orange": 0.0,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.4496,
-    "foliage_tri": 92820,
-    "foliage_frac_unique": 0.9517
-   },
-   "foliage_textures": [
-    {
-     "tex": "Trees/materials/textures/fraxinus_basecolor.png",
-     "px": [
-      1024,
-      1024
-     ],
-     "green": 1.0,
-     "yellow_green": 0.0,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.1182,
-     "near_white_frac": 0.0
-    }
-   ],
-   "verdict": "PASS"
-  },
-  {
-   "asset": "Trees/Gray_Birch.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Trees/Gray_Birch.usd",
-   "exists": true,
-   "bytes": 33750350,
-   "role": "park_apartment",
-   "note": "자작나무류 — 공원·아파트 조경",
-   "gate": "woody",
-   "geometry": {
-    "size_m": [
-     2.6721,
-     2.5628,
-     3.3322
-    ],
-    "zmin_m": -0.0028,
-    "zmax_m": 3.3294,
-    "tri_unique": 256625,
-    "tri_effective": 256625,
-    "n_instances": 0
-   },
-   "foliage_uv_hue": {
-    "green": 1.0,
-    "yellow_green": 0.0,
-    "orange": 0.0,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.4258,
-    "foliage_tri": 138208,
-    "foliage_frac_unique": 0.5386
-   },
-   "foliage_textures": [
-    {
-     "tex": "Trees/materials/textures/hollyprivet_basecolor.png",
-     "px": [
-      1024,
-      1024
-     ],
-     "green": 1.0,
-     "yellow_green": 0.0,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.0678,
-     "near_white_frac": 0.0
-    }
-   ],
-   "verdict": "PASS"
-  },
-  {
-   "asset": "Trees/Lombardy_Poplar.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Trees/Lombardy_Poplar.usd",
-   "exists": true,
-   "bytes": 55478829,
-   "role": "riverside",
-   "note": "양버들 — 하천변 수직 실루엣(03·12·17)",
-   "gate": "woody",
-   "geometry": {
-    "size_m": [
-     4.8385,
-     4.4906,
-     13.6709
-    ],
-    "zmin_m": 0.0,
-    "zmax_m": 13.6709,
-    "tri_unique": 417906,
-    "tri_effective": 417906,
-    "n_instances": 0
-   },
-   "foliage_uv_hue": {
-    "green": 1.0,
-    "yellow_green": 0.0,
-    "orange": 0.0,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.3632,
-    "foliage_tri": 316776,
-    "foliage_frac_unique": 0.758
-   },
-   "foliage_textures": [
-    {
-     "tex": "Trees/materials/textures/lombardypoplar_leaf_basecolor.png",
-     "px": [
-      256,
-      256
-     ],
-     "green": 0.9997,
-     "yellow_green": 0.0003,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.1215,
-     "near_white_frac": 0.0
-    }
-   ],
-   "verdict": "PASS"
-  },
-  {
-   "asset": "Trees/Douglas_Fir.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Trees/Douglas_Fir.usd",
-   "exists": true,
-   "bytes": 3618827,
-   "role": "temple_mountain_conifer",
-   "note": "전나무류 — 사찰·산지 침엽(최경량)",
-   "gate": "woody",
-   "geometry": {
-    "size_m": [
-     3.0227,
-     2.7706,
-     6.0263
-    ],
-    "zmin_m": 0.0,
-    "zmax_m": 6.0263,
-    "tri_unique": 24336,
-    "tri_effective": 1232864,
-    "n_instances": 549
-   },
-   "foliage_uv_hue": {
-    "green": 1.0,
-    "yellow_green": 0.0,
-    "orange": 0.0,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.4425,
-    "foliage_tri": 17305,
-    "foliage_frac_unique": 0.7111
-   },
-   "foliage_textures": [
-    {
-     "tex": "Trees/materials/textures/pine_needles.png",
-     "px": [
-      256,
-      256
-     ],
-     "green": 0.8018,
-     "yellow_green": 0.1982,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.1919,
-     "near_white_frac": 0.0
-    }
-   ],
-   "verdict": "PASS"
-  },
-  {
-   "asset": "Trees/Colorado_Spruce.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Trees/Colorado_Spruce.usd",
-   "exists": true,
-   "bytes": 14472714,
-   "role": "far_background_conifer",
-   "note": "가문비 — 원경 전용(실tri 15.6M)",
-   "gate": "woody",
-   "geometry": {
-    "size_m": [
-     3.5785,
-     3.7631,
-     4.0605
-    ],
-    "zmin_m": -0.1892,
-    "zmax_m": 3.8713,
-    "tri_unique": 140587,
-    "tri_effective": 15597637,
-    "n_instances": 454
-   },
-   "foliage_uv_hue": {
-    "green": 1.0,
-    "yellow_green": 0.0,
-    "orange": 0.0,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.5255,
-    "foliage_tri": 136520,
-    "foliage_frac_unique": 0.9711
-   },
-   "foliage_textures": [
-    {
-     "tex": "Trees/materials/textures/spruce_needles.png",
-     "px": [
-      256,
-      256
-     ],
-     "green": 1.0,
-     "yellow_green": 0.0,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.2537,
-     "near_white_frac": 0.0
-    }
-   ],
-   "verdict": "PASS"
-  },
-  {
-   "asset": "Trees/Scarlet_Oak.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Trees/Scarlet_Oak.usd",
-   "exists": true,
-   "bytes": 6489493,
-   "role": "park_broadleaf",
-   "note": "참나무 — 활엽 다양화",
-   "gate": "woody",
-   "geometry": {
-    "size_m": [
-     10.4096,
-     10.2577,
-     12.7532
-    ],
-    "zmin_m": -0.3443,
-    "zmax_m": 12.4089,
-    "tri_unique": 49899,
-    "tri_effective": 2230425,
-    "n_instances": 270
-   },
-   "foliage_uv_hue": {
-    "green": 0.7428,
-    "yellow_green": 0.2572,
-    "orange": 0.0,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.3993,
-    "foliage_tri": 23448,
-    "foliage_frac_unique": 0.4699
-   },
-   "foliage_textures": [
-    {
-     "tex": "Trees/materials/textures/oakleaves1_basecolor.png",
-     "px": [
-      1024,
-      1024
-     ],
-     "green": 1.0,
-     "yellow_green": 0.0,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.1444,
-     "near_white_frac": 0.0
+      "asset": "Trees/Fraxinus.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Trees/Fraxinus.usd",
+      "exists": true,
+      "bytes": 13051521,
+      "role": "street_broadleaf",
+      "note": "물푸레나무속 — 이팝나무 대용",
+      "gate": "woody",
+      "geometry": {
+        "size_m": [
+          4.8509,
+          4.5103,
+          5.3409
+        ],
+        "zmin_m": -0.0001,
+        "zmax_m": 5.3408,
+        "tri_unique": 97528,
+        "tri_effective": 1251064,
+        "n_instances": 26
+      },
+      "foliage_uv_hue": {
+        "green": 1.0,
+        "yellow_green": 0.0,
+        "orange": 0.0,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.4496,
+        "foliage_tri": 92820,
+        "foliage_frac_unique": 0.9517
+      },
+      "foliage_textures": [
+        {
+          "tex": "Trees/materials/textures/fraxinus_basecolor.png",
+          "px": [
+            1024,
+            1024
+          ],
+          "green": 1.0,
+          "yellow_green": 0.0,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.1182,
+          "near_white_frac": 0.0
+        }
+      ],
+      "verdict": "PASS"
     },
     {
-     "tex": "Trees/materials/textures/oakleaves2_basecolor.png",
-     "px": [
-      1024,
-      1024
-     ],
-     "green": 0.0,
-     "yellow_green": 1.0,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.1272,
-     "near_white_frac": 0.0
+      "asset": "Trees/Gray_Birch.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Trees/Gray_Birch.usd",
+      "exists": true,
+      "bytes": 33750350,
+      "role": "park_apartment",
+      "note": "자작나무류 — 공원·아파트 조경",
+      "gate": "woody",
+      "geometry": {
+        "size_m": [
+          2.6721,
+          2.5628,
+          3.3322
+        ],
+        "zmin_m": -0.0028,
+        "zmax_m": 3.3294,
+        "tri_unique": 256625,
+        "tri_effective": 256625,
+        "n_instances": 0
+      },
+      "foliage_uv_hue": {
+        "green": 1.0,
+        "yellow_green": 0.0,
+        "orange": 0.0,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.4258,
+        "foliage_tri": 138208,
+        "foliage_frac_unique": 0.5386
+      },
+      "foliage_textures": [
+        {
+          "tex": "Trees/materials/textures/hollyprivet_basecolor.png",
+          "px": [
+            1024,
+            1024
+          ],
+          "green": 1.0,
+          "yellow_green": 0.0,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.0678,
+          "near_white_frac": 0.0
+        }
+      ],
+      "verdict": "PASS"
     },
     {
-     "tex": "Trees/materials/textures/oakleaves3_basecolor.png",
-     "px": [
-      1024,
-      1024
-     ],
-     "green": 1.0,
-     "yellow_green": 0.0,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.1351,
-     "near_white_frac": 0.0
+      "asset": "Trees/Lombardy_Poplar.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Trees/Lombardy_Poplar.usd",
+      "exists": true,
+      "bytes": 55478829,
+      "role": "riverside",
+      "note": "양버들 — 하천변 수직 실루엣(03·12·17)",
+      "gate": "woody",
+      "geometry": {
+        "size_m": [
+          4.8385,
+          4.4906,
+          13.6709
+        ],
+        "zmin_m": 0.0,
+        "zmax_m": 13.6709,
+        "tri_unique": 417906,
+        "tri_effective": 417906,
+        "n_instances": 0
+      },
+      "foliage_uv_hue": {
+        "green": 1.0,
+        "yellow_green": 0.0,
+        "orange": 0.0,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.3632,
+        "foliage_tri": 316776,
+        "foliage_frac_unique": 0.758
+      },
+      "foliage_textures": [
+        {
+          "tex": "Trees/materials/textures/lombardypoplar_leaf_basecolor.png",
+          "px": [
+            256,
+            256
+          ],
+          "green": 0.9997,
+          "yellow_green": 0.0003,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.1215,
+          "near_white_frac": 0.0
+        }
+      ],
+      "verdict": "PASS"
     },
     {
-     "tex": "Trees/materials/textures/oakleaves4_basecolor.png",
-     "px": [
-      1024,
-      1024
-     ],
-     "green": 1.0,
-     "yellow_green": 0.0,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.1294,
-     "near_white_frac": 0.0
-    }
-   ],
-   "verdict": "PASS"
-  },
-  {
-   "asset": "Trees/Black_Oak.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Trees/Black_Oak.usd",
-   "exists": true,
-   "bytes": 10573612,
-   "role": "far_background_broadleaf",
-   "note": "참나무 성목 25 m — 배후림 전용",
-   "gate": "woody",
-   "geometry": {
-    "size_m": [
-     25.4241,
-     24.0669,
-     19.7389
-    ],
-    "zmin_m": 0.0,
-    "zmax_m": 19.7389,
-    "tri_unique": 86878,
-    "tri_effective": 2953010,
-    "n_instances": 3735
-   },
-   "foliage_uv_hue": {
-    "green": 0.8696,
-    "yellow_green": 0.1304,
-    "orange": 0.0,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.4057,
-    "foliage_tri": 7360,
-    "foliage_frac_unique": 0.0847
-   },
-   "foliage_textures": [
-    {
-     "tex": "Trees/materials/textures/oakleaves1_basecolor.png",
-     "px": [
-      1024,
-      1024
-     ],
-     "green": 1.0,
-     "yellow_green": 0.0,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.1444,
-     "near_white_frac": 0.0
+      "asset": "Trees/Douglas_Fir.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Trees/Douglas_Fir.usd",
+      "exists": true,
+      "bytes": 3618827,
+      "role": "temple_mountain_conifer",
+      "note": "전나무류 — 사찰·산지 침엽(최경량)",
+      "gate": "woody",
+      "geometry": {
+        "size_m": [
+          3.0227,
+          2.7706,
+          6.0263
+        ],
+        "zmin_m": 0.0,
+        "zmax_m": 6.0263,
+        "tri_unique": 24336,
+        "tri_effective": 1232864,
+        "n_instances": 549
+      },
+      "foliage_uv_hue": {
+        "green": 1.0,
+        "yellow_green": 0.0,
+        "orange": 0.0,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.4425,
+        "foliage_tri": 17305,
+        "foliage_frac_unique": 0.7111
+      },
+      "foliage_textures": [
+        {
+          "tex": "Trees/materials/textures/pine_needles.png",
+          "px": [
+            256,
+            256
+          ],
+          "green": 0.8018,
+          "yellow_green": 0.1982,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.1919,
+          "near_white_frac": 0.0
+        }
+      ],
+      "verdict": "PASS"
     },
     {
-     "tex": "Trees/materials/textures/oakleaves2_basecolor.png",
-     "px": [
-      1024,
-      1024
-     ],
-     "green": 0.0,
-     "yellow_green": 1.0,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.1272,
-     "near_white_frac": 0.0
+      "asset": "Trees/Colorado_Spruce.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Trees/Colorado_Spruce.usd",
+      "exists": true,
+      "bytes": 14472714,
+      "role": "far_background_conifer",
+      "note": "가문비 — 원경 전용(실tri 15.6M)",
+      "gate": "woody",
+      "geometry": {
+        "size_m": [
+          3.5785,
+          3.7631,
+          4.0605
+        ],
+        "zmin_m": -0.1892,
+        "zmax_m": 3.8713,
+        "tri_unique": 140587,
+        "tri_effective": 15597637,
+        "n_instances": 454
+      },
+      "foliage_uv_hue": {
+        "green": 1.0,
+        "yellow_green": 0.0,
+        "orange": 0.0,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.5255,
+        "foliage_tri": 136520,
+        "foliage_frac_unique": 0.9711
+      },
+      "foliage_textures": [
+        {
+          "tex": "Trees/materials/textures/spruce_needles.png",
+          "px": [
+            256,
+            256
+          ],
+          "green": 1.0,
+          "yellow_green": 0.0,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.2537,
+          "near_white_frac": 0.0
+        }
+      ],
+      "verdict": "PASS"
     },
     {
-     "tex": "Trees/materials/textures/oakleaves3_basecolor.png",
-     "px": [
-      1024,
-      1024
-     ],
-     "green": 1.0,
-     "yellow_green": 0.0,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.1351,
-     "near_white_frac": 0.0
+      "asset": "Trees/Scarlet_Oak.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Trees/Scarlet_Oak.usd",
+      "exists": true,
+      "bytes": 6489493,
+      "role": "park_broadleaf",
+      "note": "참나무 — 활엽 다양화",
+      "gate": "woody",
+      "geometry": {
+        "size_m": [
+          10.4096,
+          10.2577,
+          12.7532
+        ],
+        "zmin_m": -0.3443,
+        "zmax_m": 12.4089,
+        "tri_unique": 49899,
+        "tri_effective": 2230425,
+        "n_instances": 270
+      },
+      "foliage_uv_hue": {
+        "green": 0.7428,
+        "yellow_green": 0.2572,
+        "orange": 0.0,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.3993,
+        "foliage_tri": 23448,
+        "foliage_frac_unique": 0.4699
+      },
+      "foliage_textures": [
+        {
+          "tex": "Trees/materials/textures/oakleaves1_basecolor.png",
+          "px": [
+            1024,
+            1024
+          ],
+          "green": 1.0,
+          "yellow_green": 0.0,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.1444,
+          "near_white_frac": 0.0
+        },
+        {
+          "tex": "Trees/materials/textures/oakleaves2_basecolor.png",
+          "px": [
+            1024,
+            1024
+          ],
+          "green": 0.0,
+          "yellow_green": 1.0,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.1272,
+          "near_white_frac": 0.0
+        },
+        {
+          "tex": "Trees/materials/textures/oakleaves3_basecolor.png",
+          "px": [
+            1024,
+            1024
+          ],
+          "green": 1.0,
+          "yellow_green": 0.0,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.1351,
+          "near_white_frac": 0.0
+        },
+        {
+          "tex": "Trees/materials/textures/oakleaves4_basecolor.png",
+          "px": [
+            1024,
+            1024
+          ],
+          "green": 1.0,
+          "yellow_green": 0.0,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.1294,
+          "near_white_frac": 0.0
+        }
+      ],
+      "verdict": "PASS"
     },
     {
-     "tex": "Trees/materials/textures/oakleaves4_basecolor.png",
-     "px": [
-      1024,
-      1024
-     ],
-     "green": 1.0,
-     "yellow_green": 0.0,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.1294,
-     "near_white_frac": 0.0
-    }
-   ],
-   "verdict": "PASS"
-  },
-  {
-   "asset": "Shrub/Holly.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Shrub/Holly.usd",
-   "exists": true,
-   "bytes": 47762853,
-   "role": "hedge_planter",
-   "note": "호랑가시/사철 — 상록 생울타리·화단",
-   "gate": "woody",
-   "geometry": {
-    "size_m": [
-     2.3163,
-     2.3778,
-     1.5262
-    ],
-    "zmin_m": -0.084,
-    "zmax_m": 1.4422,
-    "tri_unique": 361070,
-    "tri_effective": 664658,
-    "n_instances": 2
-   },
-   "foliage_uv_hue": {
-    "green": 1.0,
-    "yellow_green": 0.0,
-    "orange": 0.0,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.3139,
-    "foliage_tri": 303588,
-    "foliage_frac_unique": 0.8408
-   },
-   "foliage_textures": [
-    {
-     "tex": "Shrub/materials/textures/hollyprivet_basecolor.png",
-     "px": [
-      1024,
-      1024
-     ],
-     "green": 1.0,
-     "yellow_green": 0.0,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.086,
-     "near_white_frac": 0.0
-    }
-   ],
-   "verdict": "PASS"
-  },
-  {
-   "asset": "Shrub/Yew.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Shrub/Yew.usd",
-   "exists": true,
-   "bytes": 21213297,
-   "role": "planter_formal",
-   "note": "주목 — 상록 정형수(0.73 m)",
-   "gate": "woody",
-   "geometry": {
-    "size_m": [
-     1.2274,
-     1.2353,
-     0.7275
-    ],
-    "zmin_m": -0.0133,
-    "zmax_m": 0.7142,
-    "tri_unique": 144320,
-    "tri_effective": 144320,
-    "n_instances": 0
-   },
-   "foliage_uv_hue": {
-    "green": 1.0,
-    "yellow_green": 0.0,
-    "orange": 0.0,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.4442,
-    "foliage_tri": 100080,
-    "foliage_frac_unique": 0.6935
-   },
-   "foliage_textures": [
-    {
-     "tex": "Trees/materials/textures/pine_needles.png",
-     "px": [
-      256,
-      256
-     ],
-     "green": 0.8018,
-     "yellow_green": 0.1982,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.1919,
-     "near_white_frac": 0.0
-    }
-   ],
-   "verdict": "PASS"
-  },
-  {
-   "asset": "Shrub/Cedar_Shrub.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Shrub/Cedar_Shrub.usd",
-   "exists": true,
-   "bytes": 11345391,
-   "role": "planter_narrow",
-   "note": "측백류 — 좁은 화단·경계식재",
-   "gate": "woody",
-   "geometry": {
-    "size_m": [
-     0.2867,
-     0.2876,
-     0.8763
-    ],
-    "zmin_m": -0.0001,
-    "zmax_m": 0.8762,
-    "tri_unique": 186446,
-    "tri_effective": 186446,
-    "n_instances": 0
-   },
-   "foliage_uv_hue": {
-    "green": 0.9736,
-    "yellow_green": 0.0,
-    "orange": 0.0264,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.4321,
-    "foliage_tri": 119136,
-    "foliage_frac_unique": 0.639
-   },
-   "foliage_textures": [
-    {
-     "tex": "Trees/materials/textures/cedar_atlas1_basecolor.png",
-     "px": [
-      4096,
-      4096
-     ],
-     "green": 0.9721,
-     "yellow_green": 0.0193,
-     "orange": 0.0085,
-     "red": 0.0002,
-     "pink": 0.0,
-     "albedo_lin": 0.1689,
-     "near_white_frac": 0.0
-    }
-   ],
-   "verdict": "PASS"
-  },
-  {
-   "asset": "Shrub/Grass_Short_A.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Shrub/Grass_Short_A.usd",
-   "exists": true,
-   "bytes": 2457126,
-   "role": "verge_turf",
-   "note": "잔디 패치(대) — scene04 버지 블롭 대체",
-   "gate": "turf",
-   "geometry": {
-    "size_m": [
-     1.2893,
-     1.2939,
-     0.1618
-    ],
-    "zmin_m": -0.0228,
-    "zmax_m": 0.139,
-    "tri_unique": 32504,
-    "tri_effective": 32504,
-    "n_instances": 0
-   },
-   "foliage_uv_hue": {
-    "green": 0.5366,
-    "yellow_green": 0.2867,
-    "orange": 0.1767,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.5625,
-    "foliage_tri": 32504,
-    "foliage_frac_unique": 1.0
-   },
-   "foliage_textures": [
-    {
-     "tex": "Shrub/materials/textures/lawngrass_a_basecolor.png",
-     "px": [
-      2048,
-      2048
-     ],
-     "green": 0.2356,
-     "yellow_green": 0.3223,
-     "orange": 0.4377,
-     "red": 0.0043,
-     "pink": 0.0,
-     "albedo_lin": 0.3211,
-     "near_white_frac": 0.0
-    }
-   ],
-   "verdict": "PASS"
-  },
-  {
-   "asset": "Shrub/Grass_Short_B.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Shrub/Grass_Short_B.usd",
-   "exists": true,
-   "bytes": 845898,
-   "role": "verge_turf",
-   "note": "잔디 패치(중)",
-   "gate": "turf",
-   "geometry": {
-    "size_m": [
-     0.6615,
-     0.6752,
-     0.1636
-    ],
-    "zmin_m": -0.0172,
-    "zmax_m": 0.1464,
-    "tri_unique": 11137,
-    "tri_effective": 11137,
-    "n_instances": 0
-   },
-   "foliage_uv_hue": {
-    "green": 0.5347,
-    "yellow_green": 0.2861,
-    "orange": 0.1793,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.5623,
-    "foliage_tri": 11137,
-    "foliage_frac_unique": 1.0
-   },
-   "foliage_textures": [
-    {
-     "tex": "Shrub/materials/textures/lawngrass_a_basecolor.png",
-     "px": [
-      2048,
-      2048
-     ],
-     "green": 0.2356,
-     "yellow_green": 0.3223,
-     "orange": 0.4377,
-     "red": 0.0043,
-     "pink": 0.0,
-     "albedo_lin": 0.3211,
-     "near_white_frac": 0.0
-    }
-   ],
-   "verdict": "PASS"
-  },
-  {
-   "asset": "Shrub/Grass_Short_C.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Shrub/Grass_Short_C.usd",
-   "exists": true,
-   "bytes": 124868,
-   "role": "edge_weed",
-   "note": "잔디 포기 — ground_kit §5 경계 잡초 밴드(h 0.125)",
-   "gate": "turf",
-   "geometry": {
-    "size_m": [
-     0.2789,
-     0.3044,
-     0.125
-    ],
-    "zmin_m": -0.0021,
-    "zmax_m": 0.1229,
-    "tri_unique": 1598,
-    "tri_effective": 1598,
-    "n_instances": 0
-   },
-   "foliage_uv_hue": {
-    "green": 0.5417,
-    "yellow_green": 0.2812,
-    "orange": 0.1771,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.5611,
-    "foliage_tri": 1598,
-    "foliage_frac_unique": 1.0
-   },
-   "foliage_textures": [
-    {
-     "tex": "Shrub/materials/textures/lawngrass_a_basecolor.png",
-     "px": [
-      2048,
-      2048
-     ],
-     "green": 0.2356,
-     "yellow_green": 0.3223,
-     "orange": 0.4377,
-     "red": 0.0043,
-     "pink": 0.0,
-     "albedo_lin": 0.3211,
-     "near_white_frac": 0.0
-    }
-   ],
-   "verdict": "PASS"
-  },
-  {
-   "asset": "Shrub/Switchgrass.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Shrub/Switchgrass.usd",
-   "exists": true,
-   "bytes": 1208701,
-   "role": "riparian_grass",
-   "note": "억새류 — 하천변 밴드",
-   "gate": "woody",
-   "geometry": {
-    "size_m": [
-     2.009,
-     2.0268,
-     1.3717
-    ],
-    "zmin_m": -0.0005,
-    "zmax_m": 1.3712,
-    "tri_unique": 8934,
-    "tri_effective": 8934,
-    "n_instances": 0
-   },
-   "foliage_uv_hue": {
-    "green": 1.0,
-    "yellow_green": 0.0,
-    "orange": 0.0,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.4937,
-    "foliage_tri": 8934,
-    "foliage_frac_unique": 1.0
-   },
-   "foliage_textures": [
-    {
-     "tex": "Shrub/materials/textures/switchgrass_basecolor.png",
-     "px": [
-      512,
-      512
-     ],
-     "green": 1.0,
-     "yellow_green": 0.0,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.2087,
-     "near_white_frac": 0.0
-    }
-   ],
-   "verdict": "PASS"
-  }
- ],
- "rejected": [
-  {
-   "asset": "Trees/White_Ash.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Trees/White_Ash.usd",
-   "exists": false,
-   "bytes": null,
-   "role": null,
-   "note": null,
-   "gate": "woody",
-   "geometry": {
-    "size_m": [
-     7.6183,
-     7.6321,
-     9.5592
-    ],
-    "zmin_m": -0.0009,
-    "zmax_m": 9.5584,
-    "tri_unique": 66288,
-    "tri_effective": 2274960,
-    "n_instances": 74
-   },
-   "foliage_uv_hue": {
-    "green": 0.0,
-    "yellow_green": 1.0,
-    "orange": 0.0,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.6487,
-    "foliage_tri": 47433,
-    "foliage_frac_unique": 0.7156
-   },
-   "foliage_textures": [
-    {
-     "tex": "Trees/materials/textures/ashleaves1_fall2.png",
-     "px": [
-      2048,
-      2048
-     ],
-     "green": 0.0,
-     "yellow_green": 1.0,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.4045,
-     "near_white_frac": 0.003049
-    }
-   ],
-   "verdict": "REJECT",
-   "reject_reason": "잎 재질이 ashleaves1_fall2.png(가을 황엽). 황록 100 %/선형 알베도 0.4045 — 황록 우세 시 알베도 ≤0.55 게이트 위반이 아니라 **텍스처 자체가 fall 판본**"
-  },
-  {
-   "asset": "Shrub/Barberry.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Shrub/Barberry.usd",
-   "exists": false,
-   "bytes": null,
-   "role": null,
-   "note": null,
-   "gate": "woody",
-   "geometry": {
-    "size_m": [
-     1.0067,
-     0.9971,
-     1.1966
-    ],
-    "zmin_m": -0.06,
-    "zmax_m": 1.1365,
-    "tri_unique": 6748,
-    "tri_effective": 268870,
-    "n_instances": 120
-   },
-   "foliage_uv_hue": {
-    "green": 0.0,
-    "yellow_green": 1.0,
-    "orange": 0.0,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.6789,
-    "foliage_tri": 6748,
-    "foliage_frac_unique": 1.0
-   },
-   "foliage_textures": [
-    {
-     "tex": "Shrub/materials/textures/barberry_basecolor.png",
-     "px": [
-      512,
-      512
-     ],
-     "green": 0.0,
-     "yellow_green": 0.9989,
-     "orange": 0.0011,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.263,
-     "near_white_frac": 0.0
-    }
-   ],
-   "verdict": "REJECT",
-   "reject_reason": "잎 텍스처 barberry_basecolor.png 황록 99.9 %·선형 알베도 0.263·평균 sRGB (0.744,0.713,0.178) = 황금 품종. 계절 아니라 품종 특정이지만 초록 0 %"
-  },
-  {
-   "asset": "Shrub/Grass_Trimmed_A.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Shrub/Grass_Trimmed_A.usd",
-   "exists": false,
-   "bytes": null,
-   "role": null,
-   "note": null,
-   "gate": "turf",
-   "geometry": {
-    "size_m": [
-     1.2403,
-     1.2426,
-     0.113
-    ],
-    "zmin_m": -0.0107,
-    "zmax_m": 0.1023,
-    "tri_unique": 12418,
-    "tri_effective": 12418,
-    "n_instances": 0
-   },
-   "foliage_uv_hue": {
-    "green": 0.2884,
-    "yellow_green": 0.4283,
-    "orange": 0.2833,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.5882,
-    "foliage_tri": 12418,
-    "foliage_frac_unique": 1.0
-   },
-   "foliage_textures": [
-    {
-     "tex": "Shrub/materials/textures/lawngrass_a_basecolor.png",
-     "px": [
-      2048,
-      2048
-     ],
-     "green": 0.2356,
-     "yellow_green": 0.3223,
-     "orange": 0.4377,
-     "red": 0.0043,
-     "pink": 0.0,
-     "albedo_lin": 0.3211,
-     "near_white_frac": 0.0
-    }
-   ],
-   "verdict": "REJECT",
-   "reject_reason": "초록+황록 0.717 < 0.75 (짚색 우세) — 휴면기 잔디 특정"
-  },
-  {
-   "asset": "Shrub/Grass_Trimmed_B.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Shrub/Grass_Trimmed_B.usd",
-   "exists": false,
-   "bytes": null,
-   "role": null,
-   "note": null,
-   "gate": "turf",
-   "geometry": {
-    "size_m": [
-     0.618,
-     0.6353,
-     0.0981
-    ],
-    "zmin_m": -0.0109,
-    "zmax_m": 0.0872,
-    "tri_unique": 4238,
-    "tri_effective": 4238,
-    "n_instances": 0
-   },
-   "foliage_uv_hue": {
-    "green": 0.2843,
-    "yellow_green": 0.4301,
-    "orange": 0.2856,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.5893,
-    "foliage_tri": 4238,
-    "foliage_frac_unique": 1.0
-   },
-   "foliage_textures": [
-    {
-     "tex": "Shrub/materials/textures/lawngrass_a_basecolor.png",
-     "px": [
-      2048,
-      2048
-     ],
-     "green": 0.2356,
-     "yellow_green": 0.3223,
-     "orange": 0.4377,
-     "red": 0.0043,
-     "pink": 0.0,
-     "albedo_lin": 0.3211,
-     "near_white_frac": 0.0
-    }
-   ],
-   "verdict": "REJECT",
-   "reject_reason": "초록+황록 0.714 < 0.75 (짚색 우세) — 휴면기 잔디 특정"
-  },
-  {
-   "asset": "Shrub/Grass_Trimmed_C.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Shrub/Grass_Trimmed_C.usd",
-   "exists": false,
-   "bytes": null,
-   "role": null,
-   "note": null,
-   "gate": "turf",
-   "geometry": {
-    "size_m": [
-     0.2387,
-     0.2584,
-     0.0869
-    ],
-    "zmin_m": -0.0026,
-    "zmax_m": 0.0843,
-    "tri_unique": 610,
-    "tri_effective": 610,
-    "n_instances": 0
-   },
-   "foliage_uv_hue": {
-    "green": 0.2896,
-    "yellow_green": 0.4292,
-    "orange": 0.2812,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.5871,
-    "foliage_tri": 610,
-    "foliage_frac_unique": 1.0
-   },
-   "foliage_textures": [
-    {
-     "tex": "Shrub/materials/textures/lawngrass_a_basecolor.png",
-     "px": [
-      2048,
-      2048
-     ],
-     "green": 0.2356,
-     "yellow_green": 0.3223,
-     "orange": 0.4377,
-     "red": 0.0043,
-     "pink": 0.0,
-     "albedo_lin": 0.3211,
-     "near_white_frac": 0.0
-    }
-   ],
-   "verdict": "REJECT",
-   "reject_reason": "초록+황록 0.719 < 0.75 (짚색 우세) — 휴면기 잔디 특정"
-  },
-  {
-   "asset": "Shrub/Fountain_Grass_Short.usd",
-   "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
-   "local_path": "assets/vegetation/Shrub/Fountain_Grass_Short.usd",
-   "exists": false,
-   "bytes": null,
-   "role": null,
-   "note": null,
-   "gate": "woody",
-   "geometry": {
-    "size_m": [
-     2.0192,
-     2.0501,
-     1.4668
-    ],
-    "zmin_m": -0.2097,
-    "zmax_m": 1.2571,
-    "tri_unique": 211796,
-    "tri_effective": 211796,
-    "n_instances": 0
-   },
-   "foliage_uv_hue": {
-    "green": 0.3972,
-    "yellow_green": 0.6028,
-    "orange": 0.0,
-    "red": 0.0,
-    "pink": 0.0,
-    "luma": 0.727,
-    "foliage_tri": 211796,
-    "foliage_frac_unique": 1.0
-   },
-   "foliage_textures": [
-    {
-     "tex": "Shrub/materials/textures/fountaingrass_basecolor.png",
-     "px": [
-      64,
-      64
-     ],
-     "green": 1.0,
-     "yellow_green": 0.0,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.3629,
-     "near_white_frac": 0.0
+      "asset": "Trees/Black_Oak.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Trees/Black_Oak.usd",
+      "exists": true,
+      "bytes": 10573612,
+      "role": "far_background_broadleaf",
+      "note": "참나무 성목 25 m — 배후림 전용",
+      "gate": "woody",
+      "geometry": {
+        "size_m": [
+          25.4241,
+          24.0669,
+          19.7389
+        ],
+        "zmin_m": 0.0,
+        "zmax_m": 19.7389,
+        "tri_unique": 86878,
+        "tri_effective": 2953010,
+        "n_instances": 3735
+      },
+      "foliage_uv_hue": {
+        "green": 0.8696,
+        "yellow_green": 0.1304,
+        "orange": 0.0,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.4057,
+        "foliage_tri": 7360,
+        "foliage_frac_unique": 0.0847
+      },
+      "foliage_textures": [
+        {
+          "tex": "Trees/materials/textures/oakleaves1_basecolor.png",
+          "px": [
+            1024,
+            1024
+          ],
+          "green": 1.0,
+          "yellow_green": 0.0,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.1444,
+          "near_white_frac": 0.0
+        },
+        {
+          "tex": "Trees/materials/textures/oakleaves2_basecolor.png",
+          "px": [
+            1024,
+            1024
+          ],
+          "green": 0.0,
+          "yellow_green": 1.0,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.1272,
+          "near_white_frac": 0.0
+        },
+        {
+          "tex": "Trees/materials/textures/oakleaves3_basecolor.png",
+          "px": [
+            1024,
+            1024
+          ],
+          "green": 1.0,
+          "yellow_green": 0.0,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.1351,
+          "near_white_frac": 0.0
+        },
+        {
+          "tex": "Trees/materials/textures/oakleaves4_basecolor.png",
+          "px": [
+            1024,
+            1024
+          ],
+          "green": 1.0,
+          "yellow_green": 0.0,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.1294,
+          "near_white_frac": 0.0
+        }
+      ],
+      "verdict": "PASS"
     },
     {
-     "tex": "Shrub/materials/textures/pampas_flower.png",
-     "px": [
-      64,
-      64
-     ],
-     "green": 0.0,
-     "yellow_green": 1.0,
-     "orange": 0.0,
-     "red": 0.0,
-     "pink": 0.0,
-     "albedo_lin": 0.6408,
-     "near_white_frac": 0.414933
+      "asset": "Shrub/Holly.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Shrub/Holly.usd",
+      "exists": true,
+      "bytes": 47762853,
+      "role": "hedge_planter",
+      "note": "호랑가시/사철 — 상록 생울타리·화단",
+      "gate": "woody",
+      "geometry": {
+        "size_m": [
+          2.3163,
+          2.3778,
+          1.5262
+        ],
+        "zmin_m": -0.084,
+        "zmax_m": 1.4422,
+        "tri_unique": 361070,
+        "tri_effective": 664658,
+        "n_instances": 2
+      },
+      "foliage_uv_hue": {
+        "green": 1.0,
+        "yellow_green": 0.0,
+        "orange": 0.0,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.3139,
+        "foliage_tri": 303588,
+        "foliage_frac_unique": 0.8408
+      },
+      "foliage_textures": [
+        {
+          "tex": "Shrub/materials/textures/hollyprivet_basecolor.png",
+          "px": [
+            1024,
+            1024
+          ],
+          "green": 1.0,
+          "yellow_green": 0.0,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.086,
+          "near_white_frac": 0.0
+        }
+      ],
+      "verdict": "PASS"
+    },
+    {
+      "asset": "Shrub/Yew.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Shrub/Yew.usd",
+      "exists": true,
+      "bytes": 21213297,
+      "role": "planter_formal",
+      "note": "주목 — 상록 정형수(0.73 m)",
+      "gate": "woody",
+      "geometry": {
+        "size_m": [
+          1.2274,
+          1.2353,
+          0.7275
+        ],
+        "zmin_m": -0.0133,
+        "zmax_m": 0.7142,
+        "tri_unique": 144320,
+        "tri_effective": 144320,
+        "n_instances": 0
+      },
+      "foliage_uv_hue": {
+        "green": 1.0,
+        "yellow_green": 0.0,
+        "orange": 0.0,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.4442,
+        "foliage_tri": 100080,
+        "foliage_frac_unique": 0.6935
+      },
+      "foliage_textures": [
+        {
+          "tex": "Trees/materials/textures/pine_needles.png",
+          "px": [
+            256,
+            256
+          ],
+          "green": 0.8018,
+          "yellow_green": 0.1982,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.1919,
+          "near_white_frac": 0.0
+        }
+      ],
+      "verdict": "PASS"
+    },
+    {
+      "asset": "Shrub/Cedar_Shrub.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Shrub/Cedar_Shrub.usd",
+      "exists": true,
+      "bytes": 11345391,
+      "role": "planter_narrow",
+      "note": "측백류 — 좁은 화단·경계식재",
+      "gate": "woody",
+      "geometry": {
+        "size_m": [
+          0.2867,
+          0.2876,
+          0.8763
+        ],
+        "zmin_m": -0.0001,
+        "zmax_m": 0.8762,
+        "tri_unique": 186446,
+        "tri_effective": 186446,
+        "n_instances": 0
+      },
+      "foliage_uv_hue": {
+        "green": 0.9736,
+        "yellow_green": 0.0,
+        "orange": 0.0264,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.4321,
+        "foliage_tri": 119136,
+        "foliage_frac_unique": 0.639
+      },
+      "foliage_textures": [
+        {
+          "tex": "Trees/materials/textures/cedar_atlas1_basecolor.png",
+          "px": [
+            4096,
+            4096
+          ],
+          "green": 0.9721,
+          "yellow_green": 0.0193,
+          "orange": 0.0085,
+          "red": 0.0002,
+          "pink": 0.0,
+          "albedo_lin": 0.1689,
+          "near_white_frac": 0.0
+        }
+      ],
+      "verdict": "PASS"
+    },
+    {
+      "asset": "Shrub/Grass_Short_A.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Shrub/Grass_Short_A.usd",
+      "exists": true,
+      "bytes": 2457126,
+      "role": "verge_turf",
+      "note": "잔디 패치(대) — scene04 버지 블롭 대체",
+      "gate": "turf",
+      "geometry": {
+        "size_m": [
+          1.2893,
+          1.2939,
+          0.1618
+        ],
+        "zmin_m": -0.0228,
+        "zmax_m": 0.139,
+        "tri_unique": 32504,
+        "tri_effective": 32504,
+        "n_instances": 0
+      },
+      "foliage_uv_hue": {
+        "green": 0.5366,
+        "yellow_green": 0.2867,
+        "orange": 0.1767,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.5625,
+        "foliage_tri": 32504,
+        "foliage_frac_unique": 1.0
+      },
+      "foliage_textures": [
+        {
+          "tex": "Shrub/materials/textures/lawngrass_a_basecolor.png",
+          "px": [
+            2048,
+            2048
+          ],
+          "green": 0.2356,
+          "yellow_green": 0.3223,
+          "orange": 0.4377,
+          "red": 0.0043,
+          "pink": 0.0,
+          "albedo_lin": 0.3211,
+          "near_white_frac": 0.0
+        }
+      ],
+      "verdict": "PASS"
+    },
+    {
+      "asset": "Shrub/Grass_Short_B.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Shrub/Grass_Short_B.usd",
+      "exists": true,
+      "bytes": 845898,
+      "role": "verge_turf",
+      "note": "잔디 패치(중)",
+      "gate": "turf",
+      "geometry": {
+        "size_m": [
+          0.6615,
+          0.6752,
+          0.1636
+        ],
+        "zmin_m": -0.0172,
+        "zmax_m": 0.1464,
+        "tri_unique": 11137,
+        "tri_effective": 11137,
+        "n_instances": 0
+      },
+      "foliage_uv_hue": {
+        "green": 0.5347,
+        "yellow_green": 0.2861,
+        "orange": 0.1793,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.5623,
+        "foliage_tri": 11137,
+        "foliage_frac_unique": 1.0
+      },
+      "foliage_textures": [
+        {
+          "tex": "Shrub/materials/textures/lawngrass_a_basecolor.png",
+          "px": [
+            2048,
+            2048
+          ],
+          "green": 0.2356,
+          "yellow_green": 0.3223,
+          "orange": 0.4377,
+          "red": 0.0043,
+          "pink": 0.0,
+          "albedo_lin": 0.3211,
+          "near_white_frac": 0.0
+        }
+      ],
+      "verdict": "PASS"
+    },
+    {
+      "asset": "Shrub/Grass_Short_C.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Shrub/Grass_Short_C.usd",
+      "exists": true,
+      "bytes": 124868,
+      "role": "edge_weed",
+      "note": "잔디 포기 — ground_kit §5 경계 잡초 밴드(h 0.125)",
+      "gate": "turf",
+      "geometry": {
+        "size_m": [
+          0.2789,
+          0.3044,
+          0.125
+        ],
+        "zmin_m": -0.0021,
+        "zmax_m": 0.1229,
+        "tri_unique": 1598,
+        "tri_effective": 1598,
+        "n_instances": 0
+      },
+      "foliage_uv_hue": {
+        "green": 0.5417,
+        "yellow_green": 0.2812,
+        "orange": 0.1771,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.5611,
+        "foliage_tri": 1598,
+        "foliage_frac_unique": 1.0
+      },
+      "foliage_textures": [
+        {
+          "tex": "Shrub/materials/textures/lawngrass_a_basecolor.png",
+          "px": [
+            2048,
+            2048
+          ],
+          "green": 0.2356,
+          "yellow_green": 0.3223,
+          "orange": 0.4377,
+          "red": 0.0043,
+          "pink": 0.0,
+          "albedo_lin": 0.3211,
+          "near_white_frac": 0.0
+        }
+      ],
+      "verdict": "PASS"
+    },
+    {
+      "asset": "Shrub/Switchgrass.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Shrub/Switchgrass.usd",
+      "exists": true,
+      "bytes": 1208701,
+      "role": "riparian_grass",
+      "note": "억새류 — 하천변 밴드",
+      "gate": "woody",
+      "geometry": {
+        "size_m": [
+          2.009,
+          2.0268,
+          1.3717
+        ],
+        "zmin_m": -0.0005,
+        "zmax_m": 1.3712,
+        "tri_unique": 8934,
+        "tri_effective": 8934,
+        "n_instances": 0
+      },
+      "foliage_uv_hue": {
+        "green": 1.0,
+        "yellow_green": 0.0,
+        "orange": 0.0,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.4937,
+        "foliage_tri": 8934,
+        "foliage_frac_unique": 1.0
+      },
+      "foliage_textures": [
+        {
+          "tex": "Shrub/materials/textures/switchgrass_basecolor.png",
+          "px": [
+            512,
+            512
+          ],
+          "green": 1.0,
+          "yellow_green": 0.0,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.2087,
+          "near_white_frac": 0.0
+        }
+      ],
+      "verdict": "PASS"
     }
-   ],
-   "verdict": "REJECT",
-   "reject_reason": "이삭 메시가 전체 삼각형의 60.3 %, 텍스처 pampas_flower.png 의 **선형휘도>0.8 화소 41.5 %** = 순백 대면적 금지 규약 위반(+개화기 특정)"
-  }
- ],
- "textures": [
-  {
-   "asset": "grass_lawn",
-   "source": "ambientCG Grass001 (CC0)",
-   "local_path": "assets/grass_lawn_diff.jpg",
-   "bytes": 26284782,
-   "tile_m": 1.4,
-   "tile_m_evidence": "ambientCG API v2 dimensionX/Y [실측]",
-   "role": "TEX['grass'] 교체 1순위",
-   "note": "scale_m 은 반드시 1.4. 4K/1.4 m = 2926 px/m 로 들잔디 잎 나비 4~7 mm 가 12~20 px 로 해상된다(현행 aerial_grass_rock 273 px/m 의 10.7배).",
-   "px": [
-    4096,
-    4096
-   ],
-   "hue": {
-    "green": 0.9825,
-    "yellow_green": 0.0166,
-    "orange": 0.0008,
-    "red": 0.0001,
-    "pink": 0.0
-   },
-   "albedo_lin": 0.0932,
-   "near_white_frac": 0.0,
-   "verdict": "PASS"
-  },
-  {
-   "asset": "grass_lawn_b",
-   "source": "ambientCG Grass004 (CC0)",
-   "local_path": "assets/grass_lawn_b_diff.jpg",
-   "bytes": 28149083,
-   "tile_m": 1.4,
-   "tile_m_evidence": "ambientCG API v2 dimensionX/Y [실측]",
-   "role": "TEX['grass'] 대안 / 씬 간 변주",
-   "note": "lush·suburban 톤. 같은 1.4 m 타일.",
-   "px": [
-    4096,
-    4096
-   ],
-   "hue": {
-    "green": 0.7042,
-    "yellow_green": 0.2832,
-    "orange": 0.0111,
-    "red": 0.0015,
-    "pink": 0.0
-   },
-   "albedo_lin": 0.1465,
-   "near_white_frac": 0.0,
-   "verdict": "PASS"
-  },
-  {
-   "asset": "tactile_yellow",
-   "source": "절차 생성(PIL) — assets/scene01/download_scene01_assets.py:build_tactile",
-   "local_path": "assets/scene01/tactile_yellow_diff.png",
-   "bytes": 1771933,
-   "role": "§12 점자블록 배선(TEX['tactile'])",
-   "verdict": "PASS(조건부)",
-   "measured": {
-    "px": [
-     1024,
-     1024
-    ],
-    "dots": 36,
-    "grid": "6x6",
-    "pitch_mm": 50.0,
-    "first_col_center_mm": 26.4,
-    "dot_dia_mm": 38.1,
-    "albedo_lin": 0.4841
-   },
-   "spec_ref": "ground_kit_spec_v1.md §12.1 — 0.3×0.3 m, 36점, 피치 50 mm, 첫 열 중심 25 mm, 높이 6±1 mm",
-   "deviation": "돌기 지름 38.1 mm 는 사양표에 규정이 없다(사양표는 개수·피치·높이만 규정). 통용되는 점형 돌기 밑면 22~25 mm 기준으로 보면 1.5~1.7배 과대이며 돌기 면적비가 19.6 %→45.6 % 로 커져 §12.5 ④ GT-E3 휘도 단차에 불리하다. 감독 판단 요청."
-  }
- ]
+  ],
+  "rejected": [
+    {
+      "asset": "Trees/White_Ash.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Trees/White_Ash.usd",
+      "exists": false,
+      "bytes": null,
+      "role": null,
+      "note": null,
+      "gate": "woody",
+      "geometry": {
+        "size_m": [
+          7.6183,
+          7.6321,
+          9.5592
+        ],
+        "zmin_m": -0.0009,
+        "zmax_m": 9.5584,
+        "tri_unique": 66288,
+        "tri_effective": 2274960,
+        "n_instances": 74
+      },
+      "foliage_uv_hue": {
+        "green": 0.0,
+        "yellow_green": 1.0,
+        "orange": 0.0,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.6487,
+        "foliage_tri": 47433,
+        "foliage_frac_unique": 0.7156
+      },
+      "foliage_textures": [
+        {
+          "tex": "Trees/materials/textures/ashleaves1_fall2.png",
+          "px": [
+            2048,
+            2048
+          ],
+          "green": 0.0,
+          "yellow_green": 1.0,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.4045,
+          "near_white_frac": 0.003049
+        }
+      ],
+      "verdict": "REJECT",
+      "reject_reason": "잎 재질이 ashleaves1_fall2.png(가을 황엽). 황록 100 %/선형 알베도 0.4045 — 황록 우세 시 알베도 ≤0.55 게이트 위반이 아니라 **텍스처 자체가 fall 판본**"
+    },
+    {
+      "asset": "Shrub/Barberry.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Shrub/Barberry.usd",
+      "exists": false,
+      "bytes": null,
+      "role": null,
+      "note": null,
+      "gate": "woody",
+      "geometry": {
+        "size_m": [
+          1.0067,
+          0.9971,
+          1.1966
+        ],
+        "zmin_m": -0.06,
+        "zmax_m": 1.1365,
+        "tri_unique": 6748,
+        "tri_effective": 268870,
+        "n_instances": 120
+      },
+      "foliage_uv_hue": {
+        "green": 0.0,
+        "yellow_green": 1.0,
+        "orange": 0.0,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.6789,
+        "foliage_tri": 6748,
+        "foliage_frac_unique": 1.0
+      },
+      "foliage_textures": [
+        {
+          "tex": "Shrub/materials/textures/barberry_basecolor.png",
+          "px": [
+            512,
+            512
+          ],
+          "green": 0.0,
+          "yellow_green": 0.9989,
+          "orange": 0.0011,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.263,
+          "near_white_frac": 0.0
+        }
+      ],
+      "verdict": "REJECT",
+      "reject_reason": "잎 텍스처 barberry_basecolor.png 황록 99.9 %·선형 알베도 0.263·평균 sRGB (0.744,0.713,0.178) = 황금 품종. 계절 아니라 품종 특정이지만 초록 0 %"
+    },
+    {
+      "asset": "Shrub/Grass_Trimmed_A.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Shrub/Grass_Trimmed_A.usd",
+      "exists": false,
+      "bytes": null,
+      "role": null,
+      "note": null,
+      "gate": "turf",
+      "geometry": {
+        "size_m": [
+          1.2403,
+          1.2426,
+          0.113
+        ],
+        "zmin_m": -0.0107,
+        "zmax_m": 0.1023,
+        "tri_unique": 12418,
+        "tri_effective": 12418,
+        "n_instances": 0
+      },
+      "foliage_uv_hue": {
+        "green": 0.2884,
+        "yellow_green": 0.4283,
+        "orange": 0.2833,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.5882,
+        "foliage_tri": 12418,
+        "foliage_frac_unique": 1.0
+      },
+      "foliage_textures": [
+        {
+          "tex": "Shrub/materials/textures/lawngrass_a_basecolor.png",
+          "px": [
+            2048,
+            2048
+          ],
+          "green": 0.2356,
+          "yellow_green": 0.3223,
+          "orange": 0.4377,
+          "red": 0.0043,
+          "pink": 0.0,
+          "albedo_lin": 0.3211,
+          "near_white_frac": 0.0
+        }
+      ],
+      "verdict": "REJECT",
+      "reject_reason": "초록+황록 0.717 < 0.75 (짚색 우세) — 휴면기 잔디 특정"
+    },
+    {
+      "asset": "Shrub/Grass_Trimmed_B.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Shrub/Grass_Trimmed_B.usd",
+      "exists": false,
+      "bytes": null,
+      "role": null,
+      "note": null,
+      "gate": "turf",
+      "geometry": {
+        "size_m": [
+          0.618,
+          0.6353,
+          0.0981
+        ],
+        "zmin_m": -0.0109,
+        "zmax_m": 0.0872,
+        "tri_unique": 4238,
+        "tri_effective": 4238,
+        "n_instances": 0
+      },
+      "foliage_uv_hue": {
+        "green": 0.2843,
+        "yellow_green": 0.4301,
+        "orange": 0.2856,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.5893,
+        "foliage_tri": 4238,
+        "foliage_frac_unique": 1.0
+      },
+      "foliage_textures": [
+        {
+          "tex": "Shrub/materials/textures/lawngrass_a_basecolor.png",
+          "px": [
+            2048,
+            2048
+          ],
+          "green": 0.2356,
+          "yellow_green": 0.3223,
+          "orange": 0.4377,
+          "red": 0.0043,
+          "pink": 0.0,
+          "albedo_lin": 0.3211,
+          "near_white_frac": 0.0
+        }
+      ],
+      "verdict": "REJECT",
+      "reject_reason": "초록+황록 0.714 < 0.75 (짚색 우세) — 휴면기 잔디 특정"
+    },
+    {
+      "asset": "Shrub/Grass_Trimmed_C.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Shrub/Grass_Trimmed_C.usd",
+      "exists": false,
+      "bytes": null,
+      "role": null,
+      "note": null,
+      "gate": "turf",
+      "geometry": {
+        "size_m": [
+          0.2387,
+          0.2584,
+          0.0869
+        ],
+        "zmin_m": -0.0026,
+        "zmax_m": 0.0843,
+        "tri_unique": 610,
+        "tri_effective": 610,
+        "n_instances": 0
+      },
+      "foliage_uv_hue": {
+        "green": 0.2896,
+        "yellow_green": 0.4292,
+        "orange": 0.2812,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.5871,
+        "foliage_tri": 610,
+        "foliage_frac_unique": 1.0
+      },
+      "foliage_textures": [
+        {
+          "tex": "Shrub/materials/textures/lawngrass_a_basecolor.png",
+          "px": [
+            2048,
+            2048
+          ],
+          "green": 0.2356,
+          "yellow_green": 0.3223,
+          "orange": 0.4377,
+          "red": 0.0043,
+          "pink": 0.0,
+          "albedo_lin": 0.3211,
+          "near_white_frac": 0.0
+        }
+      ],
+      "verdict": "REJECT",
+      "reject_reason": "초록+황록 0.719 < 0.75 (짚색 우세) — 휴면기 잔디 특정"
+    },
+    {
+      "asset": "Shrub/Fountain_Grass_Short.usd",
+      "source": "NVIDIA Omniverse S3 (Assets/Vegetation/) — 원본 재배포 금지, 렌더 공개 가능",
+      "local_path": "assets/vegetation/Shrub/Fountain_Grass_Short.usd",
+      "exists": false,
+      "bytes": null,
+      "role": null,
+      "note": null,
+      "gate": "woody",
+      "geometry": {
+        "size_m": [
+          2.0192,
+          2.0501,
+          1.4668
+        ],
+        "zmin_m": -0.2097,
+        "zmax_m": 1.2571,
+        "tri_unique": 211796,
+        "tri_effective": 211796,
+        "n_instances": 0
+      },
+      "foliage_uv_hue": {
+        "green": 0.3972,
+        "yellow_green": 0.6028,
+        "orange": 0.0,
+        "red": 0.0,
+        "pink": 0.0,
+        "luma": 0.727,
+        "foliage_tri": 211796,
+        "foliage_frac_unique": 1.0
+      },
+      "foliage_textures": [
+        {
+          "tex": "Shrub/materials/textures/fountaingrass_basecolor.png",
+          "px": [
+            64,
+            64
+          ],
+          "green": 1.0,
+          "yellow_green": 0.0,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.3629,
+          "near_white_frac": 0.0
+        },
+        {
+          "tex": "Shrub/materials/textures/pampas_flower.png",
+          "px": [
+            64,
+            64
+          ],
+          "green": 0.0,
+          "yellow_green": 1.0,
+          "orange": 0.0,
+          "red": 0.0,
+          "pink": 0.0,
+          "albedo_lin": 0.6408,
+          "near_white_frac": 0.414933
+        }
+      ],
+      "verdict": "REJECT",
+      "reject_reason": "이삭 메시가 전체 삼각형의 60.3 %, 텍스처 pampas_flower.png 의 **선형휘도>0.8 화소 41.5 %** = 순백 대면적 금지 규약 위반(+개화기 특정)"
+    }
+  ],
+  "textures": [
+    {
+      "asset": "grass_lawn",
+      "source": "ambientCG Grass001 (CC0)",
+      "local_path": "assets/grass_lawn_diff.jpg",
+      "bytes": 26284782,
+      "tile_m": 1.4,
+      "tile_m_evidence": "ambientCG API v2 dimensionX/Y [실측]",
+      "role": "TEX['grass'] 교체 1순위",
+      "note": "scale_m 은 반드시 1.4. 4K/1.4 m = 2926 px/m 로 들잔디 잎 나비 4~7 mm 가 12~20 px 로 해상된다(현행 aerial_grass_rock 273 px/m 의 10.7배).",
+      "px": [
+        4096,
+        4096
+      ],
+      "hue": {
+        "green": 0.9825,
+        "yellow_green": 0.0166,
+        "orange": 0.0008,
+        "red": 0.0001,
+        "pink": 0.0
+      },
+      "albedo_lin": 0.0932,
+      "near_white_frac": 0.0,
+      "verdict": "PASS"
+    },
+    {
+      "asset": "grass_lawn_b",
+      "source": "ambientCG Grass004 (CC0)",
+      "local_path": "assets/grass_lawn_b_diff.jpg",
+      "bytes": 28149083,
+      "tile_m": 1.4,
+      "tile_m_evidence": "ambientCG API v2 dimensionX/Y [실측]",
+      "role": "TEX['grass'] 대안 / 씬 간 변주",
+      "note": "lush·suburban 톤. 같은 1.4 m 타일.",
+      "px": [
+        4096,
+        4096
+      ],
+      "hue": {
+        "green": 0.7042,
+        "yellow_green": 0.2832,
+        "orange": 0.0111,
+        "red": 0.0015,
+        "pink": 0.0
+      },
+      "albedo_lin": 0.1465,
+      "near_white_frac": 0.0,
+      "verdict": "PASS"
+    },
+    {
+      "asset": "tactile_yellow",
+      "source": "절차 생성(PIL) — assets/scene01/download_scene01_assets.py:build_tactile",
+      "local_path": "assets/scene01/tactile_yellow_diff.png",
+      "bytes": 1771933,
+      "role": "§12 점자블록 배선(TEX['tactile'])",
+      "verdict": "PASS(조건부)",
+      "measured": {
+        "px": [
+          1024,
+          1024
+        ],
+        "dots": 36,
+        "grid": "6x6",
+        "pitch_mm": 50.0,
+        "first_col_center_mm": 26.4,
+        "dot_dia_mm": 25.7,
+        "albedo_lin": 0.4504,
+        "dot_area_pct": 20.8,
+        "note_w2c": "[W2-C · B7 결재 2026-07-29] 돌기 지름 38.1 → 25 mm 공칭 (면적등가 실측 25.7). 생성기 상수 TACTILE_DOT_D_MM. 돌기 면적률 45.9 → 20.8 %, 선형 알베도 0.4841 → 0.4504."
+      },
+      "spec_ref": "ground_kit_spec_v1.md §12.1 — 0.3×0.3 m, 36점, 피치 50 mm, 첫 열 중심 25 mm, 높이 6±1 mm",
+      "deviation": "돌기 지름 38.1 mm 는 사양표에 규정이 없다(사양표는 개수·피치·높이만 규정). 통용되는 점형 돌기 밑면 22~25 mm 기준으로 보면 1.5~1.7배 과대이며 돌기 면적비가 19.6 %→45.6 % 로 커져 §12.5 ④ GT-E3 휘도 단차에 불리하다. 감독 판단 요청."
+    }
+  ]
 }

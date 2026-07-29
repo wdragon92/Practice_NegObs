@@ -153,7 +153,8 @@ def tex_path(role, kind):
 
 
 # ===========================================================================
-# [1b] 사실화 v1 룩 레이어 — `NEGOBS_LOOK_V1=1` 로 활성화 (기본 OFF)
+# [1b] 사실화 v1 룩 레이어 — `NEGOBS_LOOK_MTL` / `NEGOBS_LOOK_GEO` 2단 플래그
+#      (상위 호환 스위치 `NEGOBS_LOOK_V1=1` 은 둘 다 ON. 기본 전부 OFF)
 #
 # 지시서 `Docs/briefs/realism_brief_v1.md` + 개정 이력 rev.1.
 # **씬 파일은 한 줄도 고치지 않는다**(불변 3종). 대신 `make_pbr` 에 이미 들어오는
@@ -169,7 +170,18 @@ def tex_path(role, kind):
 #   발광·유리            → OmniPBR (MDL 에 emission 입력 없음)
 # NegObsGround 전역 승격은 불가로 확정: UV 파이프라인·opacity 부재 + 텍스처 페치 72회.
 # ===========================================================================
-LOOK_V1 = os.environ.get("NEGOBS_LOOK_V1", "") == "1"
+# --- 2단 플래그(T1 §1.7.2) — 재질 A/B 대조군 오염(치명 C3) 구조적 차단 ------
+# `NEGOBS_LOOK_V1` 단일 플래그는 재질뿐 아니라 **기하도** 바꾼다. 그 상태로
+# "V1=0 vs 1" 을 재질 A/B 로 쓰면 기하 변화가 섞여 재질 효과를 분리할 수 없다
+# (재발 2회 기록 — `redteam_verification_v1.md` R3).
+#   LOOK_MTL : 셰이더 입력·`UsdShade.Material` 정의만 바꾼다(프림 불변).
+#   LOOK_GEO : 프림 집합·타입·xform·points·extent 를 바꾼다.
+# 재질 A/B 대조군은 `LOOK_MTL=0, LOOK_GEO=1` 이다(규칙 R-2).
+# **아래 3줄이 `LOOK_V1` 토큰의 유일한 잔존 허용 지점**이다(규칙 R-5 —
+# `scripts/geom_invariance_check.py --assert-no-residual-lookv1` 가 검사한다).
+LOOK_V1 = os.environ.get("NEGOBS_LOOK_V1", "") == "1"          # 상위(종전 호환)
+LOOK_MTL = os.environ.get("NEGOBS_LOOK_MTL", "1" if LOOK_V1 else "0") == "1"
+LOOK_GEO = os.environ.get("NEGOBS_LOOK_GEO", "1" if LOOK_V1 else "0") == "1"
 MDL_GROUND = os.path.join(ASSETS_DIR, "NegObsGround.mdl")
 
 # 디테일 노멀(근접 텍셀 뭉개짐 완화) 공용 소스 — 미세 그레인용 범용 맵.
@@ -356,12 +368,16 @@ LOOK_STATS = dict(ground=0, omni_tex=0, const=0, bevel=0, detail=0, skin=0,
 
 
 def look_report():
-    """룩 레이어 적용 요약 한 줄. capture_pipeline 시작 시 출력."""
-    if not LOOK_V1:
-        return "[룩v1] OFF"
+    """룩 레이어 적용 요약 한 줄. capture_pipeline 시작 시 출력.
+
+    2단 플래그 도입 후 **양팔 각인**이 규칙 R-2 의 검증 수단이다 — 라운드
+    로그에 MTL/GEO 상태가 남아야 대조군을 사후에 확인할 수 있다."""
+    if not (LOOK_MTL or LOOK_GEO):
+        return "[룩v1] OFF (MTL=0 GEO=0)"
     r = LOOK_STATS
     top = sorted(r["roles"].items(), key=lambda kv: -kv[1])[:8]
-    return (f"[룩v1] 재질 ground={r['ground']} omni_tex={r['omni_tex']} "
+    return (f"[룩v1] MTL={int(LOOK_MTL)} GEO={int(LOOK_GEO)} | "
+            f"재질 ground={r['ground']} omni_tex={r['omni_tex']} "
             f"const={r['const']} skip={r['skipped']} | 베벨={r['bevel']} "
             f"디테일={r['detail']} 스킨={r['skin']} "
             f"승격={r.get('promoted', 0)} 상수MDL={r.get('const_mdl', 0)} "
@@ -732,7 +748,7 @@ def add_box(stage, path, center, size, mtl=None, collider=False):
     # [사실화 v1] 대면적 수평 지면 슬래브에 미세 기복 스킨을 덮는다.
     # Phase1 E9 에서 **정점 변위가 최대 시각 기여**였다(MDL 교체보다 큼).
     # 슬래브 자체는 건드리지 않으므로 낙차 에지 실루엣은 그대로다(승용 조건②).
-    if LOOK_V1 and _skin_wanted(path, size, mtl):
+    if LOOK_GEO and _skin_wanted(path, size, mtl):    # 메시 신설 = 기하
         try:
             # 시드는 **반드시 결정적**이어야 한다. Python 내장 hash() 는
             # PYTHONHASHSEED 로 프로세스마다 무작위화되므로 매 렌더마다 지형
@@ -965,14 +981,15 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
     uv_mode=True: 월드 투영 대신 메시 st(UV 0..1)로 샘플 — 사인 패널처럼
     텍스처가 면에 1:1 정합해야 하는 경우(build_sign 의 _sign_quad 전용).
 
-    [사실화 v1] `NEGOBS_LOOK_V1=1` 이면 프림 경로에서 역할을 읽어 룩 사양을
+    [사실화 v1] `NEGOBS_LOOK_MTL=1` 이면 프림 경로에서 역할을 읽어 룩 사양을
     주입한다(§1b). 플래그가 꺼져 있으면 아래 코드 경로는 **전혀 타지 않으며**
-    종전 동작과 바이트 단위로 동일하다.
+    종전 동작과 바이트 단위로 동일하다. 이 함수는 재질만 만들므로 **전부
+    `LOOK_MTL` 소속**이다(규칙 R-1 — 프림 집합을 바꾸지 않는다).
     """
     from pxr import UsdShade, Sdf, Gf
 
     _look_omni = None
-    if LOOK_V1 and not uv_mode and emission_color is None:
+    if LOOK_MTL and not uv_mode and emission_color is None:
         cls, spec = _look_spec(path)
         LOOK_STATS["roles"][cls] = LOOK_STATS["roles"].get(cls, 0) + 1
         if diff is not None and spec["mdl"] == "ground":
@@ -1015,7 +1032,7 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
         # 항목(브리프 2-7, 전수 감사 대기)이지만 베벨은 텍스처가 필요 없다.
         LOOK_STATS["omni_tex" if diff is not None else "const"] += 1
         _look_omni = spec
-    elif LOOK_V1:
+    elif LOOK_MTL:
         LOOK_STATS["skipped"] += 1
 
     mtl = UsdShade.Material.Define(stage, path)
@@ -1328,15 +1345,15 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
       run,drop : 경사 구간 수평길이·낙차
       ground_fn: x→지면z 콜백 (포스트 하단 착지 높이). 단면(계단)이면 계단식.
     반환: 생성 프림 리스트."""
-    # 기본값은 **LOOK_V1 에서만** 법정값으로 바뀐다.
+    # 기본값은 **LOOK_GEO 에서만** 법정값으로 바뀐다(포스트 개수 = 기하).
     # 종전에 기본값 자체를 1.1/2.0 으로 바꿨더니, 이 두 값을 명시하지 않는
     # 호출부(scene03/14/17/21)에서 **룩 레이어를 꺼도 포스트 개수가 바뀌었다**.
-    # 포스트 루프는 LOOK_V1 게이트 밖이라 대조군 기하가 오염된다 —
+    # 포스트 루프는 게이트 밖이라 대조군 기하가 오염된다 —
     # bc87292 에서 스스로 "치명 C3" 로 명명하고 고쳤던 것과 동일 유형의 재발.
     if rail_h is None:
-        rail_h = 1.1 if LOOK_V1 else 0.9       # 도로안전시설 지침 2.5
+        rail_h = 1.1 if LOOK_GEO else 0.9      # 도로안전시설 지침 2.5
     if spacing is None:
-        spacing = 2.0 if LOOK_V1 else 1.2
+        spacing = 2.0 if LOOK_GEO else 1.2
     ground_ref = float(ground_fn(x_top))       # 경사 상단 지면
     top0 = ground_ref + rail_h                 # x_top 에서의 레일 상면 z
     L = math.hypot(run, drop)
@@ -1363,8 +1380,8 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
     # 세로 간살 — 「도로안전시설 지침」난간 표준. 안목(살 사이 빈틈) 100mm 이하가
     # 법정 요건이라 실제 한국 난간은 예외 없이 촘촘하다. 경사 구간에서도 살은
     # **연직**(레일만 기울고 살은 서 있음)이라 실루엣이 확연히 다르다.
-    # LOOK_V1 게이트 안 — A/B 대조군 보존.
-    if LOOK_V1 and baluster_r > 0:
+    # LOOK_GEO 게이트 안 — A/B 대조군 보존.
+    if LOOK_GEO and baluster_r > 0:
         pitch = 2.0 * baluster_r + baluster_gap
         xb = x_start + pitch * 0.5
         b = 0
@@ -1406,7 +1423,7 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
     # φ32~38 · 높이 850 · **끝단 수평 연장 ≥300** — 이 끝단 갈고리가
     # 한국 계단 실루엣의 특징인데 우리는 레일이 그냥 뚝 끊겨 있었다.
     # GT 무영향: 계단면 위 수직/수평 부재라 z(x,y) 를 바꾸지 않는다.
-    if LOOK_V1 and handrail and run > 0.3:
+    if LOOK_GEO and handrail and run > 0.3:
         try:
             prims += sk.build_handrail(
                 stage, f"{prefix}/Handrail", y, x_top, run, drop, mtl,
@@ -1908,16 +1925,16 @@ def build_tree(stage, prefix, cx, cy, gz, wood_mtl, canopy_a_mtl, canopy_b_mtl,
     실루엣을 깨뜨린다. `canopy_spread` 로 씬별 미세조정(1.0 = 기본).
     [mod6 §1(c)] `trunk_r` 기본 0.06 → 0.09(지름 18 cm) — 과세 줄기 보정.
     (명시 지정 호출은 영향 없음.)
-    [사실화 v1] `NEGOBS_LOOK_V1=1` 이고 식생 에셋이 있으면 **실제 나무 USD**로
-    교체된다. 시그니처가 같아 30개 씬이 수정 없이 그대로 바뀐다.
-    에셋이 없으면 아래 절차 블롭으로 폴백한다(회귀 0).
+    [사실화 v1] `NEGOBS_LOOK_GEO=1` 이고 식생 에셋이 있으면 **실제 나무 USD**로
+    교체된다(프림 집합이 바뀌므로 기하 소속). 시그니처가 같아 30개 씬이
+    수정 없이 그대로 바뀐다. 에셋이 없으면 아래 절차 블롭으로 폴백한다(회귀 0).
 
     반환: None(프림은 prefix 하위에 생성)."""
     import random as _random
     rnd = _random.Random((int(round(cx * 100)) * 73856093)
                          ^ (int(round(cy * 100)) * 19349663))
 
-    if LOOK_V1 and veg_available():
+    if LOOK_GEO and veg_available():
         # 수종은 좌표 해시로 결정 — 같은 씬 재실행 시 동일하고, 나무마다 다르다.
         pool = [t for t in VEG_TREES for _ in range(t[2])]
         rel, native, _ = pool[rnd.randrange(len(pool))]
@@ -2028,7 +2045,7 @@ def build_planter(stage, prefix, cx, cy, base_z, curb_mtl, grass_mtl,
     # 화단 관목 — 다듬지 않은 화단 관목이야말로 "솜사탕"의 본체다.
     # (다듬은 생울타리가 상자 형태인 건 전정 결과라 오히려 맞다.)
     # 나무가 있으면 중앙을 비우고 모서리 쪽에 앉힌다.
-    if LOOK_V1 and veg_available():
+    if LOOK_GEO and veg_available():
         inner = S / 2.0 - t - 0.25
         if inner > 0.35:
             r = inner * 0.62
@@ -2077,7 +2094,7 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
       · 출입구 0 · 창틀 0 · 옥탑 0 · 선홈통 0
       · **33씬 통틀어 사람이 드나드는 문이 사실상 0개** →
         "무대는 있는데 아무도 살지 않는다"의 직접 원인
-    LOOK_V1 에서 아래 3단 구성을 얹는다(전부 기능 필수물이라 v5.2 §6 통과):
+    LOOK_GEO 에서 아래 3단 구성을 얹는다(전부 기능 필수물이라 v5.2 §6 통과):
       ① 저층부 — 출입문(h2.1, 스케일 앵커 겸함)·기단 마감
       ② 기준층 — 창대(sill)·층간 띠
       ③ 옥탑 — 계단실 박스·난간(원경 실루엣을 직선 뚜껑에서 해방)
@@ -2097,7 +2114,7 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
                          (cx, cy, base + (hh - 1.0) / 2.0),
                          (Lx, Ly, hh + 1.0), shell_mtl, collider=True))
     fstep = hh / bd["floors"]
-    ins = float(wd.get("inset", 0.0)) if LOOK_V1 else 0.0
+    ins = float(wd.get("inset", 0.0)) if LOOK_GEO else 0.0
     band_t = min(max(ins, 0.0), 0.15)
     band_h = 0.12
     # ── [T1-10] 창 리세스 — `window["inset"]` 이 정의만 되고 읽히지 않던 버그 ──
@@ -2114,7 +2131,7 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
     #   회피, 불리언 불필요"*).
     # → 여기서는 **돌출 20 mm → 5 mm** 까지만 물린다. 잔여분(0.135)은 파사드
     #   개구가 필요하므로 `building_kit` 스팬드럴 분해(T2) 몫이다.
-    # LOOK_V1=0 이면 ins=0 → recess=0 → 창 좌표는 종전과 **완전 동일**하다.
+    # LOOK_GEO=0 이면 ins=0 → recess=0 → 창 좌표는 종전과 **완전 동일**하다.
     WIN_T = 0.03                                 # 유리 슬래브 두께(현행 값)
     WIN_EPS = 0.005                              # 벽면 동일평면 회피 여유
     recess = max(0.0, min(ins, 0.005 + WIN_T / 2.0 - WIN_EPS))
@@ -2140,7 +2157,8 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
     # 셸 박스 한 면 말고 아무것도 없었다.
     # → 안 보이는 층의 창을 만들지 않고, 그 예산을 저층부에 재투자한다.
     nrows = bd["floors"]
-    if LOOK_V1:
+    # **창·SillBand 프림 개수**가 바뀌므로 기하다(T1 §1.7.1 #21 — v1 열거 누락 2곳 중 하나).
+    if LOOK_GEO:
         try:
             nrows = fk.window_rows_visible(
                 float(bd.get("lod_dist",
@@ -2179,12 +2197,15 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
 
     # 파라펫: 건축법 시행령 §40 은 옥상 난간을 **1.2 m 이상**으로 규정한다.
     # 종전 0.5 는 규정 미달이었고, 원경 실루엣도 그만큼 납작했다.
-    par_h = 1.20 if LOOK_V1 else 0.5
+    par_h = 1.20 if LOOK_GEO else 0.5
     prims.append(add_box(stage, f"{prefix}/Parapet",
                          (cx, cy, base + hh + par_h / 2.0),
                          (Lx + 0.2, Ly + 0.2, par_h), parapet_mtl))
 
-    if not LOOK_V1:
+    # 이 아래가 전부 게이트 안이다 — 기단 석재 띠·에어컨 실외기·저층부 파사드 킷
+    # 전체가 기하 신설이므로 `LOOK_GEO` 다(T1 §1.7.1 #23 — v1 열거 누락 2곳 중 하나.
+    # 이 한 줄을 놓치면 A/B **양팔에서** 건물 저층부가 통째로 사라진다).
+    if not LOOK_GEO:
         return prims
 
     # ── ⓪ 기단 석재 띠 ────────────────────────────────────────────────
@@ -2275,7 +2296,7 @@ def place_shrubs(stage, prefix, pts, target_h, pool=None, seed=1234,
       크기만 키운다. 생울타리용.
     반환: 배치 개수.
     """
-    if not (LOOK_V1 and veg_available()):
+    if not (LOOK_GEO and veg_available()):
         return 0
     names = pool or SHRUB_ORNAMENT
     avail = [s for s in VEG_SHRUBS

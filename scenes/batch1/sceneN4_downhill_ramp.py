@@ -720,7 +720,7 @@ def main():
             # 15~20m 마다 신축이음으로 끊어지며, 수축이음 홈이 9m 이하 간격으로
             # 들어간다. 이 반복 분절선이 벽면의 스케일을 읽게 해준다.
             # GT 무영향: 벽면 부착물이라 지면 z(x,y) 를 바꾸지 않는다.
-            if sc.LOOK_V1:
+            if sc.LOOK_GEO:            # 배수공·신축이음 = 프림 신설(기하)
                 try:
                     import infra_kit as ik
                     kit = ik.Kit(

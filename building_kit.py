@@ -1632,7 +1632,7 @@ def _scan_scenes(verbose=True):
         return None
 
     def cur_prims(bd, wd):
-        """현행 build_building(LOOK_V1=True) 프림 수 재현."""
+        """현행 build_building(LOOK_GEO=True) 프림 수 재현."""
         base = float(bd.get("base_z", 0.0) or 0.0)
         Lx, Ly = bd["x1"] - bd["x0"], bd["y1"] - bd["y0"]
         hh, nfl = float(bd["h"]), int(bd["floors"])

@@ -2697,6 +2697,9 @@ def build_sign(stage, prefix, cx, cy, base_z, yaw_deg, panel_mtl,
     return prims
 
 
+_SUN_CAP_DEG_DEFAULT = 0.6       # see ensure_noon_lookfix; env-overridable
+
+
 def ensure_noon_lookfix(src_path):
     """noon HDRI 파생본(_lookfix.exr) 생성/캐시 — scene01에서 그대로 이관.
 
@@ -2705,7 +2708,23 @@ def ensure_noon_lookfix(src_path):
        직달 성분은 HDRI 태양 방향에 정합한 DistantLight(0.53°)가 대체.
     ② 지평 아래 -18°~0° 대역을 인접 하늘(elev 0.5~3.5°) 휘도로 리프트.
     실패 시(예: cv2 부재) 원본 경로를 그대로 반환 (경고만)."""
-    out_path = src_path[:-4] + "_lookfix.exr"
+    # Solar cap angular radius. The true solar radius is 0.27 deg; clamping a
+    # full 1.5 deg leaves a visible "cut disc" (a 3 deg uniform patch with a
+    # rim) on cloudy skies. sky_procurement recommendation A: 0.6 deg, which
+    # preserves 98.3~99.3 % of the removed direct energy, so the DistantLight
+    # needs no retuning. [W2] Default moved 1.5 -> 0.6 per
+    # `lighting_camera_variation_spec_v1.md` §7 item 3, which requires the
+    # change to ride along in the W2 round so one regression pass covers it.
+    # `NEGOBS_SUN_CAP_DEG=1.5` restores the previous look exactly.
+    cap_deg = float(os.environ.get("NEGOBS_SUN_CAP_DEG",
+                                   str(_SUN_CAP_DEG_DEFAULT)))
+    # The cap radius MUST be part of the cache key. It was not, so setting the
+    # env var used to return the 1.5 deg derivative that was already on disk —
+    # the knob existed and did nothing. Legacy name is kept for 1.5 so the
+    # already-generated `*_lookfix.exr` files stay valid.
+    suffix = "_lookfix.exr" if abs(cap_deg - 1.5) < 1e-9 \
+        else f"_lookfix_cap{cap_deg:g}.exr"
+    out_path = src_path[:-4] + suffix
     try:
         if (os.path.isfile(out_path)
                 and os.path.getmtime(out_path) >= os.path.getmtime(src_path)):
@@ -2735,12 +2754,6 @@ def ensure_noon_lookfix(src_path):
         s = np.array([dx[iy, ix], dy[iy, ix], dz[iy, ix]])
         ang = np.degrees(np.arccos(
             np.clip(dx * s[0] + dy * s[1] + dz * s[2], -1.0, 1.0)))
-        # 태양 캡 각반경. 실제 태양 각반경은 0.27° 인데 1.5° 를 통째로 클램프하면
-        # **구름 하늘에서 "잘린 원반"** 이 보인다(지름 3° 균일 밴드 + 테두리).
-        # 구름 HDRI 는 0.6° 권장(제거 직달에너지 보존 98.3~99.3% — 조사 실측이라
-        # DistantLight 재튜닝 없이 전환 가능). 기본값은 **1.5 유지** — 기존 33씬
-        # 조명이 미세하게라도 바뀌면 이번 라운드의 A/B 통제가 깨진다.
-        cap_deg = float(os.environ.get("NEGOBS_SUN_CAP_DEG", "1.5"))
         ring = (ang > cap_deg) & (ang < cap_deg + 1.0)
         cap = np.percentile(lum[ring], 90)
         mask = (ang < cap_deg) & (lum > cap)

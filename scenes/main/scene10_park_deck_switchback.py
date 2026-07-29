@@ -222,7 +222,8 @@ PARAMS = dict(
     #  every element of plan B is flagged `deck`.
     gkit=dict(
         wear_w=0.90,
-        gravel_n=120,                 # 250 cap - 2 x 35 edge scatter - ring 30
+        gravel_n=85,                  # [W2 F2] 120 -> 85 (cover 0.12 -> 0.08 is the
+                                  #   binding lever here; the cap is not reached)
         leaf_ring_n=15,               # 10-2: 12-20 per decal, Sec.13.4
         leaf_ring_pad=0.28,           # ring width around the decal outline
         deck_gaps=9,                  # 10-3: 9 gaps over the 1.5 m entry deck
@@ -276,7 +277,9 @@ PARAMS = dict(
     berm=dict(y0=1.62, y1=2.34, h=0.85, base_z=-3.30),
 
     # --- leaf bands : hiding the top two step edges (flight0 treads 1·2) + ground litter ---
-    leaf=dict(thick=0.02, proud=0.012, over=0.045),
+    # [W2 F3] proud 0.012 -> 0.005 — the rim shadow that drew an outline round the
+    #   trail leaf patches.
+    leaf=dict(thick=0.02, proud=0.005, over=0.045),
     # [v6 C-7] ground leaf patch : one square decal -> 3 overlaid with rotation / size jitter
     leaf_patch=dict(seed=1007, subs=3, scale=(0.55, 0.90), off=0.42, rz=32.0),
     leaf_ground_patches=[(-3.2, -0.9, 1.6, 1.1, "trail"),
@@ -577,8 +580,9 @@ def ground_plan():
             extras=(("edge_break", dict(density=12.0,
                                         lines=[float(tp[3]), float(tp[4])])),
                     ("wear_lane", dict(width=float(g["wear_w"])))),
-            scatter=dict(kind="gravel", cover=0.12,
-                         count=int(g["gravel_n"]), expose=0.06)),
+            scatter=dict(kind="gravel", cover=0.08,
+                         count=int(g["gravel_n"]),
+                         scale_jitter=(0.38, 0.62), burial=0.38)),   # [W2 F2]
         seed=int(g["seed"]))
 
 
@@ -1021,6 +1025,12 @@ def main():
         #   with recess-as-tone the line *is* the material.
         M["gk_wear"] = tex("dirt_park", "/World/Looks/GkWear", sca["dirt_park"],
                            tint=tuple(c * 0.85 for c in mp["dirt_tint"]))
+        # [W2 fix batch F2] Scatter pool override. Bound over each scattered rock
+        #   with `strongerThanDescendants`, so the procured asset's own basecolor
+        #   (linear 0.23) is replaced by a real gravel texture dulled to 0.19 -
+        #   the middle of the "grey debris 0.18~0.30" convention.
+        M["gk_rock"] = tex("gravel", "/World/Looks/GkRock", 0.30,
+                           tint=(0.82, 0.81, 0.79))
         M["gk_gap"] = sc.make_pbr(stage, "/World/Looks/GkGap",
                                   diffuse_color=(0.028, 0.024, 0.020),
                                   roughness_const=0.95, specular_level=0.0)
@@ -1090,7 +1100,8 @@ def main():
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
         M2.update(stain_dirt=M["leaf"], wear=M["gk_wear"],
-                  edge_break=M["leaf"], litter=M["leaf"], deck=M["gk_gap"])
+                  edge_break=M["leaf"], litter=M["leaf"], deck=M["gk_gap"],
+                  debris=M["gk_rock"])
         a = gk.apply_ground(kit, f"{ROOT}/GKit", ground_plan(), M2,
                             skin_exclude=sc.skin_exclude,
                             scatter=sc.scatter_debris)

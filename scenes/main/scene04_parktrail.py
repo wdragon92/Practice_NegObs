@@ -567,6 +567,14 @@ def main():
             stage, "/World/Looks/DirtPath", sc.tex_path("dirt_park", "diff"),
             sc.tex_path("dirt_park", "nor"), sc.tex_path("dirt_park", "rough"),
             S["dirt_park"], tint=PARAMS["path"]["tint"])
+        # [W2 fix batch F2] Scatter pool override. Bound over each scattered rock
+        #   with `strongerThanDescendants`, so the procured asset's own basecolor
+        #   (linear 0.23) is replaced by a real gravel texture dulled to 0.19 -
+        #   the middle of the "grey debris 0.18~0.30" convention.
+        M["gk_rock"] = sc.make_pbr(
+            stage, "/World/Looks/GkRock", sc.tex_path("gravel", "diff"),
+            sc.tex_path("gravel", "nor"), sc.tex_path("gravel", "rough"),
+            0.30, tint=(0.82, 0.81, 0.79))
         M["gravel"] = sc.make_pbr(
             stage, "/World/Looks/Gravel", sc.tex_path("gravel", "diff"),
             sc.tex_path("gravel", "nor"), sc.tex_path("gravel", "rough"),
@@ -920,7 +928,7 @@ def main():
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
         M2.update(wear=M["dirt"], litter=M["dirt_path"], edge_break=M["dirt"],
-                  stain_dirt=M["dirt"])
+                  stain_dirt=M["dirt"], debris=M["gk_rock"])
         res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
                               skin_exclude=sc.skin_exclude,
                               scatter=sc.scatter_debris)

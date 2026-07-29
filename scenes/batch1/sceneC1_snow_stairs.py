@@ -444,6 +444,14 @@ def main():
                         diffuse_color=mp["snow_color"],
                         roughness_const=mp["snow_rough"], metallic=0.0,
                         specular_level=mp["snow_spec"])
+        # [W2 fix batch F5] Dark cast-iron for the kit's manhole / gully covers.
+        #   `ground_kit._ik_manhole` **declares** albedo 0.10 to gate B9, but B9 only
+        #   sees the declaration - the scene binds whatever it likes, and these scenes
+        #   bound the stainless handrail constant. A cover at 0.66~0.85 against dark
+        #   paving is the single brightest prop in the library (defect D5).
+        M["gk_iron"] = PBR(f"{ROOT}/Looks/GKitIron",
+                            diffuse_color=(0.10, 0.10, 0.105),
+                            metallic=0.55, roughness_const=0.55)
         M["rail"] = PBR(f"{ROOT}/Looks/Rail", diffuse_color=mp["rail_color"],
                         metallic=mp["rail_metallic"],
                         roughness_const=mp["rail_rough"])
@@ -716,7 +724,7 @@ def main():
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
         M2.update(joint=M["stair"], crack=M["stair"], patch=M["concrete"],
-                  patch_cut=M["stair"], manhole=M["rail"], gully=M["rail"],
+                  patch_cut=M["stair"], manhole=M["gk_iron"], gully=M["gk_iron"],
                   gutter=M["concrete"], weed=M["dirt"], tactile=M["tactile"],
                   stain_dirt=M["dirt"], stain_water=M["stair"])
         res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,

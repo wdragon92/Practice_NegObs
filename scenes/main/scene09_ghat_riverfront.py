@@ -984,6 +984,14 @@ def main():
                         sca["stone"], tint=mp["moss_tint"])
         M["deck"] = tex("wood_dark", "/World/Looks/Deck", sca["wood_dark"],
                         tint=mp["deck_tint"])
+        # [W2 fix batch F1] Ground-class decal materials for the kit — see the
+        #   `scripts/const_color_audit.py` rule: a *ground* prim may not carry a
+        #   texture-less constant. paint / metal / water / misc are excluded from
+        #   `_CONST_MDL_CLASSES` by design, so binding a kit crack or stain to one
+        #   left it as a dead flat ribbon.
+        M["gk_crack"] = sc.make_pbr(stage, "/World/Looks/GKitCrack",
+                                    diffuse_color=(0.055, 0.055, 0.056),
+                                    roughness_const=0.92)
         M["seam"] = sc.make_pbr(stage, "/World/Looks/Seam",
                                 diffuse_color=mp["seam_color"],
                                 roughness_const=0.9)
@@ -1082,7 +1090,7 @@ def main():
     def build_ground_kit(M):
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
-        M2.update(joint=M["stain"], crack=M["seam"], patch=M["stone"],
+        M2.update(joint=M["stain"], crack=M["gk_crack"], patch=M["stone"],
                   patch_cut=M["stain"], stain_water=M["moss"])
         res = gk.apply_ground(kit, f"{ROOT}/GKit", ground_plan(), M2,
                               skin_exclude=sc.skin_exclude)

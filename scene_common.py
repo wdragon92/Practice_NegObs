@@ -388,9 +388,15 @@ LOOK_CLASS = {
     #   physically - both are done.
     #   `tex_scale` 1.2 -> **1.4**: the promotion path must follow the measured Grass001 tile too.
     #   `detail=False` is kept (leaves are handled by the real USD asset - §2.1).
+    # [W2 fix batch F1] `max_spread` 3.0 - see `_promote_const_to_texture`. The grass
+    #   texture's blue channel is nearly empty, so a **low-saturation grey-green**
+    #   constant (scene11's `leaf_far_*` aerial-perspective band) promotes with a
+    #   2.9-3.8x blue multiplier: the mean colour is right but the per-pixel blue noise is
+    #   amplified, which is exactly the "grey-lilac granite-speckled ball clusters"
+    #   the eyes round read as a stone default (`tonglam_v2.md` §2.3).
     "veg":      dict(bevel=0.000, sat=0.76, mdl="omni",   detail=False,
                      tex="grass", bump=1.2, max_gain=7.0, tex_scale=1.4,
-                     tex_alts=("grass",)),
+                     max_spread=3.0, tex_alts=("grass",)),
     "water":    dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
     "glass":    dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
     "paint":    dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
@@ -546,12 +552,26 @@ _LOOK_RULES = [
     ("paving", ("pav", "plaza", "walk", "sidewalk", "tile", "block",
                 "apron", "alley", "podium", "platform")),
     # Concrete structures - the widest net, so it comes last
+    # [W2 fix batch F1] **Ground-decal vocabulary added.** The whole "constant-colour
+    #   family" the W2-D eyes round found (`tonglam_v2.md` §2.13-1) has a single cause:
+    #   the kit's ground-class decal materials - `Coating` (scene19 roof membrane),
+    #   `GKitStain` (18/19 stains, seams, wear, cracks), `GkWear` (07/10), `GKitSalt`
+    #   (18 efflorescence) - matched **no rule at all** and fell to `misc`, which is
+    #   excluded from `_CONST_MDL_CLASSES`, so every one of them rendered as a
+    #   texture-less OmniPBR constant. scene19's membrane is the extreme case
+    #   (`flat_gnd` 94.8, `edge%` 1.4 - an unlit CAD plane).
+    #   These are ground-class surfaces, so they belong in the concrete family: they get
+    #   texture promotion, the bevel and the detail normal like any other ground prim.
+    #   Ordering safety: `concrete` is the **last** rule, so more specific earlier rules
+    #   still win - `StoneStain` stays stone, `Asphalt` stays asphalt, `GkMoss` stays veg.
     ("concrete", ("concrete", "conc", "wall", "parapet", "shell", "slab",
                   "stair", "riser", "skirt", "fascia", "ceiling", "facade",
                   "bldg", "city", "house", "shed", "tunnel", "bridge",
                   "pier", "abutment", "crest", "ridge", "trough", "valley",
                   "container", "stage", "upper", "lower", "roof", "canopy",
-                  "awning", "trim", "grime", "dark", "skyline", "far")),
+                  "awning", "trim", "grime", "dark", "skyline", "far",
+                  "coating", "membrane", "stain", "wear", "crack", "silt",
+                  "efflor", "salt")),
 ]
 
 
@@ -682,6 +702,12 @@ def _promote_const_to_texture(spec, diffuse_color):
         #   (The comment saying "the colour stays and only the grain is gained" was the opposite of the truth.)
         #   Choosing a nearby texture keeps the multiplier near 1 and the clamp never fires.
         gain_max = float(spec.get("max_gain", _PROMOTE_MAX_GAIN))
+        # [W2 fix batch F1] Per-class spread cap, applied **only when the promotion
+        #   brightens** (max(ratio) > 1). A darkening promotion cannot amplify channel
+        #   noise, so autumn canopies (sceneC2 `CanopyA`, spread 3.34 but max ratio 0.94)
+        #   keep their texture; an amplifying promotion with a wide spread does amplify it,
+        #   which is the scene11 `leaf_far_*` defect. Default stays the old 4.0.
+        spread_max = float(spec.get("max_spread", 4.0))
         # Candidate order = meaning priority. tex goes first.
         prim = spec.get("tex")
         order = ([prim] if prim in cands else []) + [r for r in cands if r != prim]
@@ -696,7 +722,8 @@ def _promote_const_to_texture(spec, diffuse_color):
             ratio = [float(c) / m for c, m in zip(diffuse_color, tm)]
             # A large spread between per-channel multipliers pushes the colour shift into one channel (noise amplification).
             spread = max(ratio) / max(min(ratio), 1e-6)
-            if max(ratio) <= gain_max and spread <= 4.0:
+            lim = spread_max if max(ratio) > 1.0 else 4.0
+            if max(ratio) <= gain_max and spread <= lim:
                 role = r
                 break
         if role is None:
@@ -1052,6 +1079,55 @@ def add_cylinder(stage, path, center, radius, height, mtl=None,
     if collider:
         UsdPhysics.CollisionAPI.Apply(prim)
     return cyl
+
+
+# Manhole / drain disc silhouette segments. `UsdGeom.Cylinder` is an *analytic* gprim and
+# Hydra tessellates it at its own low default, which is what renders the library's manhole
+# covers as octagons and 12-gons (defect D4, `w2d_round_v1.md` §4.3). A polygonal prism
+# mesh puts the segment count under our control at **one prim per disc**, so no prim or
+# instance budget moves. 32 is comfortably above the F5 bar of 24 and matches the
+# precedent scene05 already set for its arc rims (`seg=32`).
+DISC_SEGMENTS = 32
+
+
+def add_disc(stage, path, center, radius, height, mtl=None, seg=DISC_SEGMENTS,
+             collider=False):
+    """N-gon prism (a 'cylinder' whose silhouette segment count is explicit).
+
+    Drop-in replacement for `add_cylinder` where the silhouette matters: same
+    (center, radius, height) contract, Z axis, origin at the prism centre.
+    Emits **one** `UsdGeom.Mesh` - side quads + two n-gon caps - with faceted side
+    normals left to the renderer (a manhole rim is a machined edge, not a smooth barrel).
+    """
+    from pxr import UsdGeom, UsdPhysics, Gf
+    n = max(3, int(seg))
+    r, hz = float(radius), float(height) / 2.0
+    ring = [(r * math.cos(2.0 * math.pi * k / n),
+             r * math.sin(2.0 * math.pi * k / n)) for k in range(n)]
+    pts = ([Gf.Vec3f(x, y, -hz) for x, y in ring]
+           + [Gf.Vec3f(x, y, hz) for x, y in ring])
+    counts, idx = [], []
+    for k in range(n):                          # side quads (outward winding)
+        k2 = (k + 1) % n
+        counts.append(4)
+        idx += [k, k2, k2 + n, k + n]
+    counts.append(n)                            # top cap (+Z)
+    idx += list(range(n, 2 * n))
+    counts.append(n)                            # bottom cap (-Z)
+    idx += list(range(n - 1, -1, -1))
+    m = UsdGeom.Mesh.Define(stage, path)
+    m.CreatePointsAttr(pts)
+    m.CreateFaceVertexCountsAttr(counts)
+    m.CreateFaceVertexIndicesAttr(idx)
+    m.CreateSubdivisionSchemeAttr("none")
+    m.CreateExtentAttr([Gf.Vec3f(-r, -r, -hz), Gf.Vec3f(r, r, hz)])
+    xf = UsdGeom.Xformable(m)
+    xf.AddTranslateOp().Set(Gf.Vec3d(*[float(c) for c in center]))
+    prim = m.GetPrim()
+    _bind_mtl(prim, mtl)
+    if collider:
+        UsdPhysics.CollisionAPI.Apply(prim)
+    return m
 
 
 def add_sphere(stage, path, center, scale3, mtl=None):
@@ -2178,7 +2254,7 @@ VEG_ROCKS = [
 def scatter_debris(stage, prefix, x0, y0, x1, y1, z, cover=0.35,
                    pool=None, seed=1234, scale_jitter=(0.75, 1.25),
                    edge_bias=0.0, max_count=400, ground_fn=None,
-                   tilt_max=8.0, sink=0.0):
+                   tilt_max=8.0, sink=0.0, mtl=None):
     """[realism v1] Scatter 3D objects over a region - leaves, debris, gravel, rocks.
 
     cover: **target ground cover fraction 0-1** (not a count). Random scatter overlaps, so the
@@ -2191,6 +2267,15 @@ def scatter_debris(stage, prefix, x0, y0, x1, y1, z, cover=0.35,
     ground_fn: (x,y) -> z callback. When given, each instance is seated on the ground and laid
       along the local slope - without it they float in mid-air and lie flat on a slope.
     sink: depth to lower below the ground [m]. For half-buried rocks.
+      **Sign**: the asset origin is the object centre, so `sink = 0` is exactly 50 %
+      buried; a *negative* sink lifts the instance and buries it less. `scale_mul` is
+      authored as a scale op **after** the translate, so `sink` is an absolute metre
+      offset and does not follow the instance size - which is why ground_kit computes it
+      from a burial *fraction* and the mean scale jitter (`_scatter_pool_kw`).
+    mtl: [W2 fix batch F2] optional material bound over the whole instance with
+      `strongerThanDescendants`, so it wins against the referenced asset's own binding
+      even though `/Asset` is instanceable. Used to bring the procured rock albedo onto
+      the project's grey-debris band. `None` keeps the asset's own material.
     seed **must be deterministic** - this project's rule is 100 % deterministic RNG.
 
     Returns: the number of instances placed.
@@ -2256,6 +2341,18 @@ def scatter_debris(stage, prefix, x0, y0, x1, y1, z, cover=0.35,
                     stage.GetPrimAtPath(f"{prefix}/Deb_{i}/Asset").SetInstanceable(True)
                 except Exception:
                     pass
+                if mtl is not None:
+                    # Bound on the Xform *above* `/Asset`; `strongerThanDescendants` is what
+                    # makes it beat the prototype's own mesh-level binding (a plain Bind
+                    # would lose). Failure is non-fatal - the asset keeps its own look.
+                    try:
+                        from pxr import UsdShade
+                        UsdShade.MaterialBindingAPI.Apply(
+                            stage.GetPrimAtPath(f"{prefix}/Deb_{i}")).Bind(
+                                mtl, UsdShade.Tokens.strongerThanDescendants)
+                    except Exception as e:
+                        if i == 0:
+                            print(f"[룩v1][경고] 산포 재질 상위 바인딩 실패 {prefix}: {e}")
                 placed += 1
         except Exception as e:
             print(f"[룩v1][경고] 산포물 배치 실패 {prefix}/Deb_{i}: {e}")

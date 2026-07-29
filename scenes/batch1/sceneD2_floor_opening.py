@@ -471,6 +471,14 @@ def main():
         M["panel"] = PBR(f"{ROOT}/Looks/Panel",
                          diffuse_color=mp["panel_color"],
                          roughness_const=mp["panel_rough"])
+        # [W2 fix batch F1] Ground-class decal materials for the kit — see the
+        #   `scripts/const_color_audit.py` rule: a *ground* prim may not carry a
+        #   texture-less constant. paint / metal / water / misc are excluded from
+        #   `_CONST_MDL_CLASSES` by design, so binding a kit crack or stain to one
+        #   left it as a dead flat ribbon.
+        M["gk_salt"] = PBR(f"{ROOT}/Looks/GKitSalt",
+                           diffuse_color=(0.28, 0.28, 0.275),
+                           roughness_const=0.92)
         M["nosing"] = PBR(f"{ROOT}/Looks/Nosing",
                           diffuse_color=PARAMS["nosing"]["color"],
                           roughness_const=0.75)
@@ -806,7 +814,7 @@ def main():
         M2 = dict(M)
         M2.update(joint=M["skirt"], crack=M["skirt"],
                   marking=M["nosing"],           # yellow opening marking paint
-                  stain_efflorescence=M["panel"], stain_dirt=M["dirt"])
+                  stain_efflorescence=M["gk_salt"], stain_dirt=M["dirt"])
         res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
                               skin_exclude=sc.skin_exclude,
                               scatter=sc.scatter_debris)

@@ -285,6 +285,18 @@ PARAMS = dict(
                    rock_wall=1.6, asphalt=3.0),          # [W2-D §5.9 ①]
         grass_tint=(0.54, 0.66, 0.41),
         grass_tint_b=(0.49, 0.62, 0.38),          # bank grass (tint jitter −5%)
+        # [W2 fix batch F4] Two more grass looks. At `h1.8_d10` about 70 % of the frame
+        #   is turf, and every turf prim carried one of two materials whose tints differ
+        #   by 5 % **along the same channel ratio** - a brightness step, not a hue step -
+        #   at one fixed `scale_m` 1.4. World-projected at a single tile size the 4096 px
+        #   source repeats on an exact grid, which is what reads as a printed leaf carpet.
+        #   These break the ratio (yellower / bluer-greyer) *and* the tile size, and are
+        #   dealt out per **large** prim - never between adjacent ramp steps, which is the
+        #   striping the v6 note at `build_ramp` warns about.
+        grass_tint_c=(0.57, 0.65, 0.36),          # sun-bleached, yellower
+        grass_tint_d=(0.46, 0.60, 0.42),          # shaded, bluer-greyer
+        grass_scale_c=1.05,
+        grass_scale_d=1.85,
         # [v7 judgment (11)-1] The `concrete_floor` diff average is sRGB (115.7,102.2,77.0) =
         #   a warm brown earth. The old tint (0.80,0.79,0.76) kept the channel ratio, so the
         #   render came out sRGB (98,87,69) — **brown**. Ramp deck · kerb · crest kerb ·
@@ -754,14 +766,32 @@ def main():
             sc.tex_path("paving_interlock", "nor"),
             sc.tex_path("paving_interlock", "rough"),
             sca["paving_interlock"], tint=mp["paving_tint"])
+        # [W2 fix batch F4, iteration 1] The turf materials are renamed into the
+        #   **soil** look class. `LOOK_CLASS["veg"]` is `mdl="omni"`, so every grass
+        #   plane took the plain OmniPBR branch and none of the MDL de-tiling ran:
+        #   no `unit_cell` albedo jitter, no `patch_mix` rotation, no `macro_amp`, no
+        #   `tri_dither`. A 4096 px source world-projected at one tile size onto a
+        #   24x78 m plane therefore repeats on an exact grid - which is the "billiard
+        #   leaf-print carpet" read, and it is a *repetition* defect that tint jitter
+        #   alone cannot touch. `TurfSoil*` classifies as soil (mdl="ground",
+        #   patch=1.0), so the same grass texture now goes through NegObsGround with
+        #   patch rotation and macro modulation. Only this scene is renamed.
         M["grass"] = PBR(
-            f"{ROOT}/Looks/Grass", sc.tex_path("grass", "diff"),
+            f"{ROOT}/Looks/TurfSoil", sc.tex_path("grass", "diff"),
             sc.tex_path("grass", "nor"), sc.tex_path("grass", "rough"),
             sca["grass"], tint=mp["grass_tint"])
         M["grass_b"] = PBR(
-            f"{ROOT}/Looks/GrassB", sc.tex_path("grass", "diff"),
+            f"{ROOT}/Looks/TurfSoilB", sc.tex_path("grass", "diff"),
             sc.tex_path("grass", "nor"), sc.tex_path("grass", "rough"),
             sca["grass"], tint=mp["grass_tint_b"])
+        M["grass_c"] = PBR(
+            f"{ROOT}/Looks/TurfSoilC", sc.tex_path("grass", "diff"),
+            sc.tex_path("grass", "nor"), sc.tex_path("grass", "rough"),
+            float(mp["grass_scale_c"]), tint=mp["grass_tint_c"])
+        M["grass_d"] = PBR(
+            f"{ROOT}/Looks/TurfSoilD", sc.tex_path("grass", "diff"),
+            sc.tex_path("grass", "nor"), sc.tex_path("grass", "rough"),
+            float(mp["grass_scale_d"]), tint=mp["grass_tint_d"])
         M["rock"] = PBR(
             f"{ROOT}/Looks/Rock", sc.tex_path("rock_wall", "diff"),
             sc.tex_path("rock_wall", "nor"), sc.tex_path("rock_wall", "rough"),
@@ -781,6 +811,14 @@ def main():
                          roughness_const=mp["paint_rough"])
         M["water"] = PBR(f"{ROOT}/Looks/Water", diffuse_color=mp["water_color"],
                          roughness_const=mp["water_rough"])
+        # [W2 fix batch F5] Dark cast-iron for the kit's manhole / gully covers.
+        #   `ground_kit._ik_manhole` **declares** albedo 0.10 to gate B9, but B9 only
+        #   sees the declaration - the scene binds whatever it likes, and these scenes
+        #   bound the stainless handrail constant. A cover at 0.66~0.85 against dark
+        #   paving is the single brightest prop in the library (defect D5).
+        M["gk_iron"] = PBR(f"{ROOT}/Looks/GKitIron",
+                            diffuse_color=(0.10, 0.10, 0.105),
+                            metallic=0.55, roughness_const=0.55)
         M["rail"] = PBR(f"{ROOT}/Looks/Rail", diffuse_color=mp["rail_color"],
                         metallic=mp["rail_metallic"],
                         roughness_const=mp["rail_rough"])
@@ -906,7 +944,7 @@ def main():
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
         M2.update(joint=M["conc"], crack=M["conc"], patch=M["asphalt"],
-                  patch_cut=M["conc"], manhole=M["rail"], gully=M["rail"],
+                  patch_cut=M["conc"], manhole=M["gk_iron"], gully=M["gk_iron"],
                   gutter=M["conc"], gutter_cover=M["conc"],
                   trench=M["rail"], trench_frame=M["rail"],
                   marking=M["paint"], weed=M["grass_b"], wear=M["conc"],
@@ -933,7 +971,7 @@ def main():
                 sc.build_slope(
                     stage, f"{ROOT}/Slope_{i}_{tag}", x0, z0, run, drop,
                     y0, y1, sl["thick"],
-                    M["grass"] if i % 2 == 0 else M["grass_b"],
+                    (M["grass"], M["grass_c"], M["grass_b"])[i % 3],
                     margin=mg, collider=True)
 
     # -------------------------------------------------------------------
@@ -1021,7 +1059,7 @@ def main():
         Ly = te["y1"] - te["y0"]
         BOX(f"{ROOT}/Terrace",
             ((te["x0"] + te["x1"]) / 2.0, cy, te["z_top"] - te["thick"] / 2.0),
-            (te["x1"] - te["x0"], Ly, te["thick"]), M["grass"], col=True)
+            (te["x1"] - te["x0"], Ly, te["thick"]), M["grass_c"], col=True)
         # promenade (parallel to the river = a Y-direction band)
         z_hi = te["z_top"] + pm["proud"]
         BOX(f"{ROOT}/Promenade",
@@ -1049,7 +1087,7 @@ def main():
             ((fb["x0"] + fb["x1"]) / 2.0, (fb["y0"] + fb["y1"]) / 2.0,
              fb["z_top"] - fb["thick"] / 2.0),
             (fb["x1"] - fb["x0"], fb["y1"] - fb["y0"], fb["thick"]),
-            M["grass"], col=True)
+            M["grass_d"], col=True)
         # [v6 judgment (b) · v7 (11)-2] far-bank silver-grass band — flat ellipsoid clumps.
         #   At 76 m individual stalks are lost, so blobs only break up the silhouette.
         #   The old build was **1 row · evenly divided y + +-0.3 jitter**, so even spacing
@@ -1089,7 +1127,7 @@ def main():
             ((lv["x0"] + te["x1"]) / 2.0, (lv["y0"] + lv["y1"]) / 2.0,
              lv["z_top"] - lv["thick"] / 2.0),
             (te["x1"] - lv["x0"], lv["y1"] - lv["y0"], lv["thick"]),
-            M["grass"], col=True)
+            M["grass_c"], col=True)
 
     # -------------------------------------------------------------------
     # Distant dressing — far-bank apartment skyline + bridge (80% of reading it as the Han)

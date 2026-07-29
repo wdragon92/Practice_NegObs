@@ -816,9 +816,31 @@ def main():
         M["joint"] = PBR(f"{ROOT}/Looks/Joint",
                          diffuse_color=mp["joint_color"],
                          roughness_const=mp["joint_rough"], metallic=0.0)
+        # [W2 fix batch F1] Ground-class decal materials for the kit.
+        #   Binding kit crack / stain / wear elements to the scene's joint-sealant
+        #   (`paint` class), steel (`metal`) or kerb constants is what rendered them
+        #   as flat texture-less ribbons and mats: those classes are excluded from
+        #   `_CONST_MDL_CLASSES` **by design** (a constant colour is physically right
+        #   for paint and metal), so a *ground* prim bound to one gets no texture at
+        #   all. `GKitCrack` / `GKitStain` classify as concrete, so they are promoted
+        #   to a real ground texture with the intended albedo preserved.
+        M["gk_crack"] = PBR(f"{ROOT}/Looks/GKitCrack",
+                            diffuse_color=(0.055, 0.055, 0.056),
+                            roughness_const=0.92)
+        M["gk_stain"] = PBR(f"{ROOT}/Looks/GKitStain",
+                            diffuse_color=(0.20, 0.20, 0.195),
+                            roughness_const=0.86)
         M["lamp"] = PBR(f"{ROOT}/Looks/Lamp", diffuse_color=mp["lamp_color"],
                         metallic=mp["lamp_metallic"],
                         roughness_const=mp["lamp_rough"])
+        # [W2 fix batch F5] Dark cast-iron for the kit's manhole / gully covers.
+        #   `ground_kit._ik_manhole` **declares** albedo 0.10 to gate B9, but B9 only
+        #   sees the declaration - the scene binds whatever it likes, and these scenes
+        #   bound the stainless handrail constant. A cover at 0.66~0.85 against dark
+        #   paving is the single brightest prop in the library (defect D5).
+        M["gk_iron"] = PBR(f"{ROOT}/Looks/GKitIron",
+                            diffuse_color=(0.10, 0.10, 0.105),
+                            metallic=0.55, roughness_const=0.55)
         M["bollard"] = PBR(f"{ROOT}/Looks/Bollard",
                            diffuse_color=mp["bollard_color"],
                            metallic=mp["bollard_metallic"],
@@ -1005,10 +1027,11 @@ def main():
         (_tag, gp), = ground_plans()
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
-        M2.update(joint=M["joint"], crack=M["joint"], patch=M["light_stone"],
-                  patch_cut=M["curb"], manhole=M["lamp"], gully=M["lamp"],
+        M2.update(joint=M["joint"], crack=M["gk_crack"], patch=M["light_stone"],
+                  patch_cut=M["gk_crack"], manhole=M["gk_iron"],
+                  gully=M["gk_iron"],
                   gutter=M["curb"], weed=M["grass"], tactile=M["tactile"],
-                  stain_dirt=M["joint"], stain_water=M["joint"])
+                  stain_dirt=M["gk_stain"], stain_water=M["gk_stain"])
         res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
                               skin_exclude=sc.skin_exclude,
                               scatter=sc.scatter_debris)

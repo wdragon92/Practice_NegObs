@@ -343,6 +343,17 @@ def main():
                            roughness_const=mp["parapet_rough"])
         M["curb"] = PBR(f"{ROOT}/Looks/Curb", diffuse_color=mp["curb_color"],
                         roughness_const=mp["curb_rough"])
+        # [W2 fix batch F1] Ground-class decal materials for the kit.
+        #   Binding kit crack / stain / wear elements to the scene's joint-sealant
+        #   (`paint` class), steel (`metal`) or kerb constants is what rendered them
+        #   as flat texture-less ribbons and mats: those classes are excluded from
+        #   `_CONST_MDL_CLASSES` **by design** (a constant colour is physically right
+        #   for paint and metal), so a *ground* prim bound to one gets no texture at
+        #   all. `GKitCrack` / `GKitStain` classify as concrete, so they are promoted
+        #   to a real ground texture with the intended albedo preserved.
+        M["gk_stain"] = PBR(f"{ROOT}/Looks/GKitStain",
+                            diffuse_color=(0.20, 0.20, 0.195),
+                            roughness_const=0.86)
         M["wood"] = PBR(f"{ROOT}/Looks/Wood", diffuse_color=mp["wood_color"],
                         roughness_const=mp["wood_rough"])
         M["canopy_a"] = PBR(f"{ROOT}/Looks/CanopyA",
@@ -414,8 +425,8 @@ def main():
                   patch_cut=M["band"], manhole=M["band"], gully=M["band"],
                   gutter=M["band"], gutter_cover=M["band"],
                   trench=M["band"], trench_frame=M["band"],
-                  marking=M["band"], weed=M["grass"], wear=M["curb"],
-                  stain_dirt=M["curb"], stain_water=M["curb"])
+                  marking=M["band"], weed=M["grass"], wear=M["gk_stain"],
+                  stain_dirt=M["gk_stain"], stain_water=M["gk_stain"])
         res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
                               skin_exclude=sc.skin_exclude,
                               scatter=sc.scatter_debris)

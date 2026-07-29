@@ -524,6 +524,14 @@ def main():
                          diffuse_color=mp["water_color"],
                          roughness_const=mp["water_rough"], metallic=0.0,
                          specular_level=mp["water_spec"])
+        # [W2 fix batch F5] Dark cast-iron for the kit's manhole / gully covers.
+        #   `ground_kit._ik_manhole` **declares** albedo 0.10 to gate B9, but B9 only
+        #   sees the declaration - the scene binds whatever it likes, and these scenes
+        #   bound the stainless handrail constant. A cover at 0.66~0.85 against dark
+        #   paving is the single brightest prop in the library (defect D5).
+        M["gk_iron"] = PBR(f"{ROOT}/Looks/GKitIron",
+                            diffuse_color=(0.10, 0.10, 0.105),
+                            metallic=0.55, roughness_const=0.55)
         M["rail"] = PBR(f"{ROOT}/Looks/Rail", diffuse_color=mp["rail_color"],
                         metallic=mp["rail_metallic"],
                         roughness_const=mp["rail_rough"])
@@ -538,6 +546,14 @@ def main():
                            roughness_const=mp["parapet_rough"])
         # [rain package v2] shared by tide mark · puddle darkening ring · riser run-down
         #   dark wet material (sRGB dark-tone rule 0.02~0.09, specularity kept)
+        # [W2 fix batch F1] Ground-class decal materials for the kit — see the
+        #   `scripts/const_color_audit.py` rule: a *ground* prim may not carry a
+        #   texture-less constant. paint / metal / water / misc are excluded from
+        #   `_CONST_MDL_CLASSES` by design, so binding a kit crack or stain to one
+        #   left it as a dead flat ribbon.
+        M["gk_stain"] = PBR(f"{ROOT}/Looks/GKitStain",
+                            diffuse_color=(0.20, 0.20, 0.195),
+                            roughness_const=0.86)
         M["tide"] = PBR(f"{ROOT}/Looks/Tide", diffuse_color=mp["tide_color"],
                         roughness_const=mp["tide_rough"], metallic=0.0,
                         specular_level=mp["tide_spec"])
@@ -841,10 +857,10 @@ def main():
         patch_mtl = M["tread_wet"] if cfg["wet_surface"] else M["plaza"]
         M2 = dict(M)
         M2.update(joint=M["stone_damp"], crack=M["stone_damp"],
-                  patch=patch_mtl, patch_cut=M["cheek"], manhole=M["rail"],
-                  gully=M["rail"], gutter=M["cheek"], weed=M["shrub"],
-                  tactile=M["tactile"], stain_dirt=M["tide"],
-                  stain_gum=M["tide"])
+                  patch=patch_mtl, patch_cut=M["cheek"], manhole=M["gk_iron"],
+                  gully=M["gk_iron"], gutter=M["cheek"], weed=M["shrub"],
+                  tactile=M["tactile"], stain_dirt=M["gk_stain"],
+                  stain_gum=M["gk_stain"])
         res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
                               skin_exclude=sc.skin_exclude,
                               scatter=sc.scatter_debris)

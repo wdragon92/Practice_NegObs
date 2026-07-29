@@ -635,6 +635,12 @@ def main():
         return sc.add_cylinder(stage, path, center, r, h, mtl,
                                rotY=rotY, rotX=rotX, collider=col)
 
+    def DISC(path, center, r, h, mtl=None, seg=32, col=False):
+        """[W2 fix batch F5] n-gon prism - the manhole silhouette. An analytic
+        `UsdGeom.Cylinder` is tessellated by Hydra at its own low default, which is
+        what renders these covers as an octagon / 12-gon at d2 (defect D4)."""
+        return sc.add_disc(stage, path, center, r, h, mtl, seg=seg, collider=col)
+
     def PBR(path, *args, **kwargs):
         return sc.make_pbr(stage, path, *args, **kwargs)
 
@@ -664,6 +670,20 @@ def main():
         M["joint"] = PBR(f"{ROOT}/Looks/Joint",
                          diffuse_color=mp["joint_color"],
                          roughness_const=mp["joint_rough"], metallic=0.0)
+        # [W2 fix batch F1] Ground-class decal materials for the kit.
+        #   Binding kit crack / stain / wear elements to the scene's joint-sealant
+        #   (`paint` class), steel (`metal`) or kerb constants is what rendered them
+        #   as flat texture-less ribbons and mats: those classes are excluded from
+        #   `_CONST_MDL_CLASSES` **by design** (a constant colour is physically right
+        #   for paint and metal), so a *ground* prim bound to one gets no texture at
+        #   all. `GKitCrack` / `GKitStain` classify as concrete, so they are promoted
+        #   to a real ground texture with the intended albedo preserved.
+        M["gk_crack"] = PBR(f"{ROOT}/Looks/GKitCrack",
+                            diffuse_color=(0.055, 0.055, 0.056),
+                            roughness_const=0.92)
+        M["gk_stain"] = PBR(f"{ROOT}/Looks/GKitStain",
+                            diffuse_color=(0.20, 0.20, 0.195),
+                            roughness_const=0.86)
         M["iron"] = PBR(f"{ROOT}/Looks/Iron", diffuse_color=mp["iron_color"],
                         metallic=mp["iron_metallic"],
                         roughness_const=mp["iron_rough"], specular_level=0.3)
@@ -836,7 +856,7 @@ def main():
                     ("Frame", mh["r_frame"], mh["proud_frame"], M["mframe"]),
                     ("Lid", mh["r_lid"], mh["proud_lid"], M["lid"]),
                     ("Boss", mh["r_boss"], mh["proud_boss"], M["lid"])):
-                CYL(f"{ROOT}/Manhole_{nm}/{tag}",
+                DISC(f"{ROOT}/Manhole_{nm}/{tag}",
                     (md["cx"], md["cy"], pr - mh["h"] / 2.0),
                     r, mh["h"], mtl)
 
@@ -860,8 +880,8 @@ def main():
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
         M2.update(manhole=M["lid"], gully=M["iron"], gutter=M["mframe"],
-                  joint=M["joint"], crack=M["joint"], patch=M["pave"],
-                  patch_cut=M["joint"], weed=M["grass"], marking=M["roadpaint"],
+                  joint=M["joint"], crack=M["gk_crack"], patch=M["pave"],
+                  patch_cut=M["gk_crack"], weed=M["grass"], marking=M["roadpaint"],
                   stain_dirt=M["trough"], stain_gum=M["trough"],
                   trench=M["iron"], trench_frame=M["mframe"])
         res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,

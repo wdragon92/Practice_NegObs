@@ -439,6 +439,17 @@ def main():
             M[f"band_y{i}"] = PBR(
                 f"{ROOT}/Looks/BandYellow_{i}", diffuse_color=c,
                 roughness_const=mp["band_yellow_rough"][i])
+        # [W2 fix batch F1] Ground-class decal materials for the kit — see the
+        #   `scripts/const_color_audit.py` rule: a *ground* prim may not carry a
+        #   texture-less constant. paint / metal / water / misc are excluded from
+        #   `_CONST_MDL_CLASSES` by design, so binding a kit crack or stain to one
+        #   left it as a dead flat ribbon.
+        M["gk_crack"] = PBR(f"{ROOT}/Looks/GKitCrack",
+                            diffuse_color=(0.055, 0.055, 0.056),
+                            roughness_const=0.92)
+        M["gk_stain"] = PBR(f"{ROOT}/Looks/GKitStain",
+                            diffuse_color=(0.20, 0.20, 0.195),
+                            roughness_const=0.86)
         M["rubber"] = PBR(f"{ROOT}/Looks/Rubber",
                           diffuse_color=mp["rubber_color"],
                           roughness_const=mp["rubber_rough"], metallic=0.0)
@@ -748,11 +759,11 @@ def main():
         """
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
-        M2.update(joint=M["band_black"], crack=M["band_black"],
-                  patch=M["deck"], patch_cut=M["band_black"],
+        M2.update(joint=M["band_black"], crack=M["gk_crack"],
+                  patch=M["deck"], patch_cut=M["gk_crack"],
                   trench=M["galv"], trench_frame=M["rail"],
                   marking=M["sign_face"], weed=M["rubber"],
-                  stain_tire=M["rubber"], stain_oil=M["band_black"],
+                  stain_tire=M["gk_stain"], stain_oil=M["gk_crack"],
                   stain_dirt=M["asphalt"])
         total = 0
         for tag, gp in ground_plans():

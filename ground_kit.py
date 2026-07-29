@@ -685,8 +685,8 @@ def build_slab_joints(kit, path, region, z, mtl, step_x=None, step_y=None,
 
 
 def build_patch_field(kit, path, region, z, mtls, n=2, area_mean=None,
-                      ar=(0.7, 1.6), cutline=True, seed=0, sites=None,
-                      cutline_n=1):
+                      ar=(0.7, 1.6), cutline=False, seed=0, sites=None,
+                      cutline_n=1, yaw_max=14.0):
     """**Repair patch + cut line.** Default 0.7x0.9 m (0.61-0.69 m2 per patch `[statistic]`).
 
     Area and position are geometry (here), colour difference is material (T1) - spec §4.4.
@@ -698,6 +698,18 @@ def build_patch_field(kit, path, region, z, mtls, n=2, area_mean=None,
     assumes 1 prim per patch.
 
     GT: +2 mm - not a drop.
+
+    [W2 fix batch F3] Two changes, both about the *boundary*:
+      `cutline` now defaults to **False**. The four 20 mm strokes it lays around the
+      patch perimeter are what the eyes round read as "a drawn dark outline frame"
+      on 10 / D3 / 03 (`tonglam_v2.md` §2.13-2) - real saw-cut lips are a tonal step in
+      the surface, not a ruled line, and at h0.3 the stroke reads as vector art. No
+      caller passed the flag, so this switches the whole library off at once; the
+      argument stays for a scene that wants it back.
+      `yaw_max` breaks the axis alignment. Every patch was emitted axis-aligned, so a
+      field of them reads as a set of rectangles laid on the ground rather than as
+      repairs cut into it. The AABB handed to `_elem` is the **exact** rotated one
+      (`_obb_aabb`), so region containment and the GT-E2 verdict see the true footprint.
     """
     x0, y0, x1, y1 = _norm_region(region)
     area_mean = _dim("patch_area_mean") if area_mean is None else float(area_mean)
@@ -718,10 +730,11 @@ def build_patch_field(kit, path, region, z, mtls, n=2, area_mean=None,
         else:
             cx = x0 + w / 2.0 + rng.random() * max(1e-6, (x1 - x0) - w)
             cy = y0 + h / 2.0 + rng.random() * max(1e-6, (y1 - y0) - h)
+        yaw = (rng.random() * 2.0 - 1.0) * float(yaw_max)
         p = f"{path}/Patch_{i}"
-        kit.B(p, (cx, cy, z + pr - 0.015), (w, h, 0.030), mtl)
+        kit.B(p, (cx, cy, z + pr - 0.015), (w, h, 0.030), mtl, rotz=yaw)
         elems.append(_elem("patch", p,
-                           _box_aabb(cx, cy, z + pr - 0.015, w, h, 0.030),
+                           _obb_aabb(cx, cy, z + pr - 0.015, w, h, 0.030, yaw),
                            proud=pr, mtl_key="patch", area=True, albedo=0.22))
         if cutline and i < int(cutline_n):
             for k, (dx, dy, sw, sh) in enumerate((
@@ -1006,10 +1019,17 @@ def build_stain_field(kit, path, region, z, mtl, kind="dirt", n=6, seed=0,
             cx = x0 + w / 2.0 + rng.random() * max(1e-6, (x1 - x0) - w)
             cy = y0 + h / 2.0 + rng.random() * max(1e-6, (y1 - y0) - h)
             line = None
+        # [W2 fix batch F3] Yaw jitter on the free-form stains only. `grime_band` and
+        #   `tire` are *directional* (a wall junction band, a wheel track) and must stay
+        #   axis-aligned; the soil / water / oil / gum blots have no axis, and emitting
+        #   them axis-aligned is half of the "photographic rectangles laid on the DG"
+        #   read at scene07 d5.
+        yaw = 0.0 if line is not None else (rng.random() * 2.0 - 1.0) * 22.0
         p = f"{path}/{kind}_{i}"
-        kit.B(p, (cx, cy, float(z) + pr - 0.004), (w, h, 0.008), mtl)
+        kit.B(p, (cx, cy, float(z) + pr - 0.004), (w, h, 0.008), mtl, rotz=yaw)
         elems.append(_elem("stain", p,
-                           _box_aabb(cx, cy, float(z) + pr - 0.004, w, h, 0.008),
+                           _obb_aabb(cx, cy, float(z) + pr - 0.004, w, h, 0.008,
+                                     yaw),
                            proud=pr, mtl_key="stain_%s" % kind,
                            decal=True, line=line, albedo=albedo,
                            stain_kind=kind))
@@ -1525,7 +1545,8 @@ GROUND_PROFILES = {
         surface=(("stain", ("dirt",)),),
         extras=(("wear_lane", dict()), ("edge_litter", dict()),
                 ("edge_break", dict(density=12.0)),),
-        scatter=dict(kind="gravel", cover=0.18, count=250, expose=0.06),
+        scatter=dict(kind="gravel", cover=0.10, count=150,
+                     scale_jitter=(0.38, 0.62), burial=0.38),   # [W2 F2]
         inst_cap=400,
     ),
     # ── P12 ───────────────────────────────────────────────────────────────
@@ -1536,7 +1557,8 @@ GROUND_PROFILES = {
         surface=(("stain", ("dirt",)),),
         extras=(("wear_lane", dict(width=1.2)), ("edge_litter", dict()),
                 ("edge_break", dict(density=10.0)),),
-        scatter=dict(kind="gravel", cover=0.14, count=330, expose=0.06),
+        scatter=dict(kind="gravel", cover=0.09, count=200,
+                     scale_jitter=(0.38, 0.62), burial=0.38),   # [W2 F2]
         inst_cap=400,
     ),
     # ── P13 ───────────────────────────────────────────────────────────────
@@ -1593,7 +1615,8 @@ GROUND_PROFILES = {
         extras=(("deck_planks", dict(max_gaps=9)),
                 ("edge_break", dict(density=12.0)),
                 ("wear_lane", dict()), ("edge_litter", dict()),),
-        scatter=dict(kind="gravel", cover=0.12, count=180, expose=0.06),
+        scatter=dict(kind="gravel", cover=0.08, count=110,
+                     scale_jitter=(0.38, 0.62), burial=0.38),   # [W2 F2]
     ),
     # -- P3 sub-variants -------------------------------------------------
     "tunnel_under": _P(
@@ -2270,7 +2293,26 @@ def _scatter_pool_kw(scatter_fn, spec):
     kw = dict(pool=list(pool))
     expose = (spec or {}).get("expose")
     zmax = SCATTER_POOL_ZMAX.get(kind)
-    if expose is not None and zmax is not None and takes("sink"):
+    # [W2 fix batch F2] Rock scale + burial, the two halves of the "boulder rubble" read.
+    #   `scale_jitter` halves the pool (0.75-1.25 -> 0.38-0.62), taking the native
+    #   0.16-0.24 m stones to phi 0.06-0.15 m, i.e. inside the `phi <= 0.12` the trail
+    #   statistic actually describes.
+    #   `burial` replaces the old `expose` arithmetic, which was the reason the scatter
+    #   could not be rescaled: `sink` is an absolute offset (the scale op is authored
+    #   after the translate), so shrinking the rocks under a fixed `sink = zmax - expose`
+    #   would have swallowed them. Since the asset origin is the rock centre,
+    #       burial = 0.5 + sink / (2 * zmax * scale)   ->   sink = (burial-0.5)*2*zmax*s
+    #   which is scale-aware by construction. `burial` 0.38 puts the pool at 12-42 %
+    #   buried (mean ~35 %) and, being a *lift* of only 4 mm, cannot float the smallest
+    #   stone (its half-height at the low end of the jitter is 11 mm).
+    sj = (spec or {}).get("scale_jitter")
+    if sj and takes("scale_jitter"):
+        kw["scale_jitter"] = (float(sj[0]), float(sj[1]))
+    burial = (spec or {}).get("burial")
+    if burial is not None and zmax is not None and takes("sink"):
+        s_mean = (sum(kw["scale_jitter"]) / 2.0) if "scale_jitter" in kw else 1.0
+        kw["sink"] = round((float(burial) - 0.5) * 2.0 * float(zmax) * s_mean, 6)
+    elif expose is not None and zmax is not None and takes("sink"):
         # The asset origin is the rock centre, so `sink = zmax - expose` leaves exactly
         # the prescribed exposure standing proud (`scatter_expose_max` 0.06 m).
         kw["sink"] = round(float(zmax) - float(expose), 6)
@@ -2390,6 +2432,17 @@ def apply_ground(kit, prefix, plan, mtls, *, skin_exclude=None, scatter=None,
         if sp is _MISSING:                      # Plan built before v1.3
             sp = GROUND_PROFILES[plan["profile"]].get("scatter")
         pool_kw = _scatter_pool_kw(scatter, sp)
+        # [W2 fix batch F2] Optional albedo/texture override for the scattered pool.
+        #   Bound only when the scene supplies a `debris` material **and** the callback
+        #   accepts it, so older callbacks and every scene that omits the key are
+        #   byte-identical to before.
+        _dbg = mtls.get("debris") if isinstance(mtls, dict) else None
+        if _dbg is not None:
+            try:
+                if "mtl" in inspect.signature(scatter).parameters:
+                    pool_kw["mtl"] = _dbg
+            except (TypeError, ValueError):
+                pass
         for i, s in enumerate(plan["scatter_req"]):
             (ax, ay), (bx, by) = s["line"]
             w = float(s["width"]) / 2.0

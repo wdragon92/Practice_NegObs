@@ -844,7 +844,7 @@ def main():
             seed=18)
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
-        M2.update(joint=M["gk_joint"], crack=M["gk_joint"], patch=M["upper"],
+        M2.update(joint=M["gk_joint"], crack=M["gk_stain"], patch=M["lower"],
                   patch_cut=M["gk_joint"], manhole=M["gk_iron"],
                   gully=M["gk_iron"], gutter=M["gk_iron"],
                   gutter_cover=M["gk_iron"], trench=M["gk_iron"],

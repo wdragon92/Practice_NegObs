@@ -559,6 +559,14 @@ def main():
         # constant-colour materials
         M["glass"] = make_pbr("/World/Looks/Glass", diffuse_color=mp["glass_color"],
                               roughness_const=mp["glass_rough"], metallic=0.0)
+        # [W2 fix batch F5] Dark cast-iron for the kit's manhole / gully covers.
+        #   `ground_kit._ik_manhole` **declares** albedo 0.10 to gate B9, but B9 only
+        #   sees the declaration - the scene binds whatever it likes, and these scenes
+        #   bound the stainless handrail constant. A cover at 0.66~0.85 against dark
+        #   paving is the single brightest prop in the library (defect D5).
+        M["gk_iron"] = make_pbr("/World/Looks/GKitIron",
+                            diffuse_color=(0.10, 0.10, 0.105),
+                            metallic=0.55, roughness_const=0.55)
         M["rail"] = make_pbr("/World/Looks/Rail", diffuse_color=mp["rail_color"],
                              metallic=mp["rail_metallic"],
                              roughness_const=mp["rail_rough"])
@@ -1025,7 +1033,7 @@ def main():
         M2 = dict(M)
         M2.update(joint=M["granite_dark"], crack=M["granite_dark"],
                   patch=M["lower"], patch_cut=M["granite_dark"],
-                  manhole=M["rail"], gully=M["rail"], weed=M["hedge"],
+                  manhole=M["gk_iron"], gully=M["gk_iron"], weed=M["hedge"],
                   stain_dirt=M["granite_dark"], stain_water=M["granite_dark"],
                   tactile=M["tactile"])
         res = gk.apply_ground(kit, "/World/Scene01/GKit", gp, M2,

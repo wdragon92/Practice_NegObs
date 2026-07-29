@@ -206,7 +206,12 @@ PARAMS = dict(
         # 19-2 coating turn-up: the lower 0.30 m of the parapet's inner face takes the same colour as the deck coat.
         #   The value is the middle of the director-approved M2 band 0.16~0.22 (= ground_kit
         #   GROUND_DIMENSIONS["membrane_albedo"] 0.19), given in green.
-        coating_color=(0.115, 0.150, 0.120), coating_rough=0.72,
+        #   [W2 fix batch F1/B3] The bound value was **0.1405 luminance** against the
+        #   0.16~0.22 band it cites - below its own declaration, which is why the
+        #   membrane collapsed to a single near-black blob in building shadow
+        #   (`entry_gate` mean -47, `upper_approach` -57). Rescaled to luminance 0.19,
+        #   the declared mid, keeping the green hue exactly.
+        coating_color=(0.155, 0.203, 0.162), coating_rough=0.72,
         nosing_color=(0.85, 0.72, 0.10), nosing_rough=0.7,
         hvac_color=(0.60, 0.61, 0.62), hvac_rough=0.5,      # [rooftop v3] HVAC unit
         # r5 judgment: a dark door was buried in the dark granite wall → painted steel plate in blue-grey for contrast

@@ -660,6 +660,14 @@ def main():
         M["asphalt"] = PBR(f"{ROOT}/Looks/Asphalt",
                            diffuse_color=mp["asphalt_color"],
                            roughness_const=mp["asphalt_rough"], metallic=0.0)
+        # [W2 fix batch F5] Dark cast-iron for the kit's manhole / gully covers.
+        #   `ground_kit._ik_manhole` **declares** albedo 0.10 to gate B9, but B9 only
+        #   sees the declaration - the scene binds whatever it likes, and these scenes
+        #   bound the stainless handrail constant. A cover at 0.66~0.85 against dark
+        #   paving is the single brightest prop in the library (defect D5).
+        M["gk_iron"] = PBR(f"{ROOT}/Looks/GKitIron",
+                            diffuse_color=(0.10, 0.10, 0.105),
+                            metallic=0.55, roughness_const=0.55)
         M["bollard"] = PBR(f"{ROOT}/Looks/Bollard",
                            diffuse_color=mp["bollard_color"],
                            metallic=mp["bollard_metallic"],
@@ -704,6 +712,20 @@ def main():
                               roughness_const=0.45)
         M["joint"] = PBR(f"{ROOT}/Looks/Joint", diffuse_color=mp["joint_color"],
                          roughness_const=mp["joint_rough"], specular_level=0.0)
+        # [W2 fix batch F1] Ground-class decal materials for the kit.
+        #   Binding kit crack / stain / wear elements to the scene's joint-sealant
+        #   (`paint` class), steel (`metal`) or kerb constants is what rendered them
+        #   as flat texture-less ribbons and mats: those classes are excluded from
+        #   `_CONST_MDL_CLASSES` **by design** (a constant colour is physically right
+        #   for paint and metal), so a *ground* prim bound to one gets no texture at
+        #   all. `GKitCrack` / `GKitStain` classify as concrete, so they are promoted
+        #   to a real ground texture with the intended albedo preserved.
+        M["gk_crack"] = PBR(f"{ROOT}/Looks/GKitCrack",
+                            diffuse_color=(0.055, 0.055, 0.056),
+                            roughness_const=0.92)
+        M["gk_stain"] = PBR(f"{ROOT}/Looks/GKitStain",
+                            diffuse_color=(0.20, 0.20, 0.195),
+                            roughness_const=0.86)
         return M
 
     # -------------------------------------------------------------------
@@ -769,10 +791,10 @@ def main():
         (_tag, gp), = ground_plans()
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
-        M2.update(joint=M["joint"], crack=M["joint"], patch=M["asphalt"],
-                  patch_cut=M["joint"], gully=M["pole"], gutter=M["wall"],
+        M2.update(joint=M["joint"], crack=M["gk_crack"], patch=M["asphalt"],
+                  patch_cut=M["gk_crack"], gully=M["gk_iron"], gutter=M["wall"],
                   marking=M["parapet"], weed=M["grass"], tactile=M["tactile"],
-                  stain_tire=M["joint"], stain_dirt=M["joint"])
+                  stain_tire=M["gk_stain"], stain_dirt=M["gk_stain"])
         res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
                               skin_exclude=sc.skin_exclude,
                               scatter=sc.scatter_debris)

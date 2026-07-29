@@ -404,6 +404,17 @@ def main():
                             roughness_const=mp["canopy_rough"])
         M["band"] = PBR(f"{ROOT}/Looks/Band", diffuse_color=mp["band_color"],
                         roughness_const=mp["band_rough"])
+        # [W2 fix batch F1] Ground-class decal materials for the kit — see the
+        #   `scripts/const_color_audit.py` rule: a *ground* prim may not carry a
+        #   texture-less constant. paint / metal / water / misc are excluded from
+        #   `_CONST_MDL_CLASSES` by design, so binding a kit crack or stain to one
+        #   left it as a dead flat ribbon.
+        M["gk_crack"] = PBR(f"{ROOT}/Looks/GKitCrack",
+                            diffuse_color=(0.055, 0.055, 0.056),
+                            roughness_const=0.92)
+        M["gk_stain"] = PBR(f"{ROOT}/Looks/GKitStain",
+                            diffuse_color=(0.20, 0.20, 0.195),
+                            roughness_const=0.86)
         M["gate"] = PBR(f"{ROOT}/Looks/Gate", diffuse_color=mp["gate_color"],
                         roughness_const=mp["gate_rough"])
         M["lamp"] = PBR(f"{ROOT}/Looks/Lamp", diffuse_color=mp["lamp_color"],
@@ -490,12 +501,12 @@ def main():
             seed=16)
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
-        M2.update(joint=M["band"], crack=M["band"], patch=M["walk"],
+        M2.update(joint=M["band"], crack=M["gk_crack"], patch=M["walk"],
                   patch_cut=M["band"], manhole=M["band"], gully=M["band"],
                   gutter=M["band"], gutter_cover=M["band"],
                   trench=M["band"], trench_frame=M["band"],
                   marking=M["band"], weed=M["grass"], wear=M["wall"],
-                  stain_dirt=M["wall"], stain_gum=M["band"],
+                  stain_dirt=M["wall"], stain_gum=M["gk_stain"],
                   stain_drip=M["wall"], tactile=M["tactile"])
         res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
                               skin_exclude=sc.skin_exclude,

@@ -198,11 +198,13 @@ def det_rng(*keys):
 class Kit:
     """Bundle of primitive helpers. The first argument of every build_* function."""
 
-    def __init__(self, box, cyl=None, obox=None, slope=None, stage=None):
+    def __init__(self, box, cyl=None, obox=None, slope=None, stage=None,
+                 disc=None):
         self.box = box
         self.cyl = cyl
         self.obox = obox
         self.slope = slope
+        self.disc = disc                      # [W2 F5] n-gon prism (silhouette-controlled)
         self.stage = stage
         self.prims = []                       # Log of created paths (for checking and prim counting)
 
@@ -225,6 +227,19 @@ class Kit:
             raise ValueError(
                 f"infra_kit: 실린더 헬퍼가 없다. Kit(cyl=...) 주입 필요. ({path})")
         return self.cyl(path, center, r, h, mtl, rotY, rotX, col)
+
+    def D(self, path, center, r, h, mtl=None, seg=32, col=False):
+        """[W2 fix batch F5] Disc whose **silhouette segment count is explicit**.
+
+        Same (center, r, h) contract as `C` and the same 1-prim cost, but the Hydra
+        default tessellation of an analytic `UsdGeom.Cylinder` (the octagon / 12-gon
+        of defect D4) is replaced by an n-gon prism mesh. Degrades to `C` when no
+        `disc` helper was injected, so any Kit built the old way still works.
+        """
+        if self.disc is None:
+            return self.C(path, center, r, h, mtl, col=col)
+        self.prims.append(path)
+        return self.disc(path, center, r, h, mtl, seg, col)
 
     def S(self, path, x0, z0, run, drop, y0, y1, thick, mtl,
           margin=0.0, col=True):
@@ -308,7 +323,12 @@ def kit_from_scene_common(sc, stage):
         return sc.build_slope(stage, path, x0, z0, run, drop, y0, y1,
                               thick, mtl, margin=margin, collider=col)
 
-    return Kit(_box, _cyl, _obox, _slope, stage=stage)
+    def _disc(path, center, r, h, mtl=None, seg=32, col=False):
+        return sc.add_disc(stage, path, center, r, h, mtl,
+                           seg=seg, collider=col)
+
+    return Kit(_box, _cyl, _obox, _slope, stage=stage,
+               disc=(_disc if hasattr(sc, "add_disc") else None))
 
 
 def dry_kit():
@@ -317,7 +337,8 @@ def dry_kit():
         def f(path, *a, **kw):
             return ("dry", kind, path, a, kw)
         return f
-    return Kit(_rec("box"), _rec("cyl"), _rec("obox"), _rec("slope"))
+    return Kit(_rec("box"), _rec("cyl"), _rec("obox"), _rec("slope"),
+               disc=_rec("disc"))
 
 
 # ===========================================================================
@@ -785,20 +806,26 @@ def build_manhole(kit, prefix, cx, cy, top_z, lid_mtl, frame_mtl=None,
     z0 = float(top_z) + proud
     prims = {}
 
+    # [W2 fix batch F5] Frame / lid / boss go through `kit.D` (n-gon prism, 32 segments)
+    #   instead of `kit.C` (analytic cylinder). Defect D4 - "polygonal manholes" - was
+    #   never a modelling choice: an analytic `UsdGeom.Cylinder` is tessellated by Hydra
+    #   at its own low default, which reads as an octagon / 12-gon at d2-d5. Same prim
+    #   count, same dimensions, same GT; only the silhouette changes. The pit keeps a
+    #   cylinder - it is a hole below the surface, never seen in silhouette.
     if lid:
         # Frame (ring) - thickness 110t. Its top is `seat` below the cover (avoids z-fighting).
         prims["frame"] = f"{prefix}/Frame"
-        kit.C(prims["frame"],
+        kit.D(prims["frame"],
               (float(cx), float(cy), z0 - float(seat) - float(thick) / 2.0),
               float(d_frame) / 2.0, float(thick),
               frame_mtl if frame_mtl is not None else lid_mtl, col=collider)
         prims["lid"] = f"{prefix}/Lid"
-        kit.C(prims["lid"], (float(cx), float(cy), z0 - float(lid_t) / 2.0),
+        kit.D(prims["lid"], (float(cx), float(cy), z0 - float(lid_t) / 2.0),
               float(d_lid) / 2.0, float(lid_t), lid_mtl, col=collider)
         if boss:
             # Central lifting boss - the minimum feature that stops the cover reading as a plain plate up close.
             prims["boss"] = f"{prefix}/Boss"
-            kit.C(prims["boss"], (float(cx), float(cy), z0 + 0.004),
+            kit.D(prims["boss"], (float(cx), float(cy), z0 + 0.004),
                   0.045, 0.010, lid_mtl, col=False)
     else:
         # Uncovered approximation - top = road surface. No frame, since a frame would cover the hole again.

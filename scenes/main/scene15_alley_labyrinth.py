@@ -526,6 +526,14 @@ def main():
                         roughness_const=mp["pot_rough"]) for i in range(3)]
         M["gear"] = PBR(f"{ROOT}/Looks/Gear", diffuse_color=mp["gear_color"],
                         roughness_const=mp["gear_rough"])
+        # [W2 fix batch F5] Dark cast-iron for the kit's manhole / gully covers.
+        #   `ground_kit._ik_manhole` **declares** albedo 0.10 to gate B9, but B9 only
+        #   sees the declaration - the scene binds whatever it likes, and these scenes
+        #   bound the stainless handrail constant. A cover at 0.66~0.85 against dark
+        #   paving is the single brightest prop in the library (defect D5).
+        M["gk_iron"] = PBR(f"{ROOT}/Looks/GKitIron",
+                            diffuse_color=(0.10, 0.10, 0.105),
+                            metallic=0.55, roughness_const=0.55)
         M["rail"] = PBR(f"{ROOT}/Looks/Rail",
                         diffuse_color=mp["rail_color"],
                         metallic=mp["rail_metallic"],
@@ -597,7 +605,7 @@ def main():
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
         M2.update(joint=M["stair"], crack=M["stair"], patch=M["alley"],
-                  patch_cut=M["stair"], manhole=M["rail"], gutter=M["stair"],
+                  patch_cut=M["stair"], manhole=M["gk_iron"], gutter=M["stair"],
                   gutter_cover=M["stair"], weed=M["foliage"],
                   stain_grime_band=M["skirt"], stain_dirt=M["skirt"],
                   trench=M["rail"], trench_frame=M["rail"])

@@ -202,7 +202,9 @@ PARAMS = dict(
         region=(-12.0, -1.50, -0.80, 1.50),
         wear_w=1.20,                       # Sec.5.7 "trodden wear axis 1.2"
         band_lines=(-1.50, 1.50),          # the 3.0 m granite-sand band edges
-        gravel_n=270,                      # 8/m^2 x 33.6 m^2 [calc]
+        gravel_n=180,                      # [W2 F2] 270 -> 180; the walked forecourt is
+                                           #   gravel, not a rubble yard (8/m^2 was the
+                                           #   boulder-era figure)
         seed=7,
     ),
     # --- axis-aligned ground plate table (name, x0, x1, y0, y1, z_top, thick, mtl) ---
@@ -234,7 +236,9 @@ PARAMS = dict(
     leaf_drifts=[(1.30, 0.55, 1.30, 0.95), (3.05, -0.60, 1.10, 1.00),
                  (5.40, 0.35, 1.40, 1.10), (7.20, -0.75, 1.00, 0.85),
                  (9.10, 0.50, 1.25, 1.00), (10.90, -0.40, 1.15, 0.90)],
-    leaf_band=dict(thick=0.05, proud=0.012, seed=7073, subs=3,
+    # [W2 F3] proud 0.012 -> 0.004. A 12 mm rim all the way round each drift is
+    #   the "edge shadow" that made the leaf drifts read as carpets laid on the DG.
+    leaf_band=dict(thick=0.05, proud=0.004, seed=7073, subs=3,
                    sub_scale=(0.55, 0.92), sub_off=0.42, sub_rz=26.0),
     # [v6] 3 leaf drifts on the yard (decomposed granite) - eases the 'large high-reflectance beige plane' (ruling (5)).
     #      A yard is flat by practice, so material variation, not curvature, breaks the monotony.
@@ -609,8 +613,9 @@ def ground_plan():
             extras=(("wear_lane", dict(width=float(g["wear_w"]))),
                     ("edge_break", dict(density=10.0,
                                         lines=list(g["band_lines"])))),
-            scatter=dict(kind="gravel", cover=0.14,
-                         count=int(g["gravel_n"]), expose=0.06)),
+            scatter=dict(kind="gravel", cover=0.09,
+                         count=int(g["gravel_n"]),
+                         scale_jitter=(0.38, 0.62), burial=0.38)),   # [W2 F2]
         seed=int(g["seed"]))
 
 
@@ -1029,6 +1034,12 @@ def main():
         #   use, so no new asset and no new texture role is introduced.
         M["gk_wear"] = tex("gravel", "/World/Looks/GkWear", sca["gravel"],
                            tint=tuple(c * 0.85 for c in mp["gravel_tint"]))
+        # [W2 fix batch F2] Scatter pool override. Bound over each scattered rock
+        #   with `strongerThanDescendants`, so the procured asset's own basecolor
+        #   (linear 0.23) is replaced by a real gravel texture dulled to 0.19 -
+        #   the middle of the "grey debris 0.18~0.30" convention.
+        M["gk_rock"] = tex("gravel", "/World/Looks/GkRock", 0.30,
+                           tint=(0.82, 0.81, 0.79))
         M["gk_moss"] = tex("gravel", "/World/Looks/GkMoss", sca["gravel"],
                            tint=PARAMS["stone_mtl"]["tint_moss"])
         for tone in ("near", "mid", "far"):
@@ -1329,7 +1340,8 @@ def main():
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
         M2.update(stain_dirt=M["leaf"], stain_water=M["gk_moss"],
-                  wear=M["gk_wear"], edge_break=M["leaf"], litter=M["leaf"])
+                  wear=M["gk_wear"], edge_break=M["leaf"], litter=M["leaf"],
+                  debris=M["gk_rock"])
         res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
                               skin_exclude=sc.skin_exclude,
                               scatter=sc.scatter_debris)

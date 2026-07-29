@@ -1021,6 +1021,20 @@ def main():
         M["rail"] = PBR(f"{ROOT}/Looks/Rail", diffuse_color=mp["rail_color"],
                         metallic=mp["rail_metallic"],
                         roughness_const=mp["rail_rough"])
+        # [W2 fix batch F1] Ground-class decal materials for the kit.
+        #   Binding kit crack / stain / wear elements to the scene's joint-sealant
+        #   (`paint` class), steel (`metal`) or kerb constants is what rendered them
+        #   as flat texture-less ribbons and mats: those classes are excluded from
+        #   `_CONST_MDL_CLASSES` **by design** (a constant colour is physically right
+        #   for paint and metal), so a *ground* prim bound to one gets no texture at
+        #   all. `GKitCrack` / `GKitStain` classify as concrete, so they are promoted
+        #   to a real ground texture with the intended albedo preserved.
+        M["gk_crack"] = PBR(f"{ROOT}/Looks/GKitCrack",
+                            diffuse_color=(0.055, 0.055, 0.056),
+                            roughness_const=0.92)
+        M["gk_stain"] = PBR(f"{ROOT}/Looks/GKitStain",
+                            diffuse_color=(0.20, 0.20, 0.195),
+                            roughness_const=0.86)
         M["steel"] = PBR(f"{ROOT}/Looks/Steel", diffuse_color=mp["steel_color"],
                          metallic=mp["steel_metallic"],
                          roughness_const=mp["steel_rough"])
@@ -1135,9 +1149,10 @@ def main():
     def build_ground_kit(M):
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
-        M2.update(joint=M["steel"], crack=M["steel"], patch=M["concrete"],
-                  patch_cut=M["steel"], stain_water=M["band"],
-                  stain_drip=M["band"], wear=M["band"], edge_break=M["band"])
+        M2.update(joint=M["steel"], crack=M["gk_crack"], patch=M["concrete"],
+                  patch_cut=M["gk_crack"], stain_water=M["gk_stain"],
+                  stain_drip=M["gk_stain"], wear=M["gk_stain"],
+                  edge_break=M["gk_stain"])
         res = gk.apply_ground(kit, f"{ROOT}/GKit", ground_plan(), M2,
                               skin_exclude=sc.skin_exclude)
         print(f"[ground_kit] scene11 P9 · 프림 {res['prims']} · "

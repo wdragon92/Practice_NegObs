@@ -246,6 +246,10 @@ def _envf(name, default=0.0):
 
 DETAIL_SCALE_OVERRIDE = _envf("NEGOBS_DETAIL_SCALE", 0.0)   # 0 = 표 값 사용
 DETAIL_ROUGH_GAIN = _envf("NEGOBS_DETAIL_ROUGH_GAIN", 0.0)  # 0 = 끔(MDL 기본)
+#   `NEGOBS_DETAIL=0` : 디테일 노멀만 끈다(나머지 재질층은 그대로). LOOK_MTL 의
+#       효과 중 **디테일 노멀의 몫이 얼마인지** 를 분리하는 3번째 팔 — 이게 없으면
+#       "재질층이 움직였다"를 "디테일이 움직였다"로 오귀속한다.
+DETAIL_ON = os.environ.get("NEGOBS_DETAIL", "1") != "0"
 
 
 def detail_source(cls):
@@ -256,6 +260,8 @@ def detail_source(cls):
     죽이면 안 되고, 동시에 없는 파일을 바인딩하면 MDL 이 조기 반환이라 어차피
     무영향이지만 USD 에 유령 경로가 남는다.
     """
+    if not DETAIL_ON:
+        return (None, 0.0, 0.0)
     fam = _DETAIL_FAMILY.get(cls)
     if fam is None:
         return (None, 0.0, 0.0)

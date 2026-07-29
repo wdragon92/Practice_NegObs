@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-scene_common.py — NegObs 인공씬 공통 라이브러리 (Isaac Sim 4.5)
+scene_common.py - NegObs synthetic scene common library (Isaac Sim 4.5)
 
-scene01_campus_stairs.py의 검증된 블록을 함수화·일반화한 것.
-브리프: Docs/multi_scene_brief_v2.md §A(API)·§B(신규 텍스처)·§C(사용 씬).
+The verified blocks of scene01_campus_stairs.py, turned into general functions.
+Brief: Docs/multi_scene_brief_v2.md §A (API), §B (new textures), §C (scenes using it).
 
-임포트 안전 규칙 (중요):
-  이 모듈은 SimulationApp 부팅 **전에** import 되어도 안전해야 한다.
-  → pxr / isaacsim / carb / omni 는 모듈 최상단에서 import 하지 않는다.
-    (전부 함수 내부 지연 import.)  최상단은 numpy/os/math/json 만.
+Import safety rule (important):
+  This module must be safe to import **before** SimulationApp has booted.
+  -> pxr / isaacsim / carb / omni are never imported at module top level
+    (all are deferred imports inside functions). Only numpy/os/math/json at top level.
 
-좌표계 관례(전 씬 공통): Z-up, m, 진행축 +X, 낙차 시작 모서리 x=0.
+Coordinate convention (all scenes): Z-up, metres, travel axis +X, drop start edge x=0.
 """
 
 import os
@@ -20,31 +20,31 @@ import zlib
 
 import numpy as np
 
-import facade_kit as fk        # 파사드 저층부 키트(scene_common 을 import 하지 않음)
-import stair_kit as sk        # 계단 법규 키트(동일 — 프리미티브 주입식)
+import facade_kit as fk        # Facade lower-storey kit (does not import scene_common)
+import stair_kit as sk        # Stair statute kit (same - primitives are injected)
 
 
 # ===========================================================================
-# [0] 경로·에셋 상수
+# [0] Path and asset constants
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(_HERE, "assets")
-S1_DIR = os.path.join(ASSETS_DIR, "scene01")     # 텍스처 세트는 scene01/ 로 통합
+S1_DIR = os.path.join(ASSETS_DIR, "scene01")     # The texture sets are consolidated under scene01/
 
 OMNIPBR_PATH = os.path.expanduser(
     "~/miniconda3/envs/env_isaaclab/lib/python3.10/site-packages/"
     "omni/mdl/core/Base/OmniPBR.mdl")
 
-# 기본 noon HDRI (씬은 light_params["hdri"]로 개별 지정 가능)
+# Default noon HDRI (a scene can override it via light_params["hdri"])
 DEFAULT_HDRI = "qwantani_noon_puresky_4k.exr"
 
 
 # ===========================================================================
-# [1] TEX 레지스트리 — scene01 기존 세트 + §B 신규 7역할 (canonical 파일명)
-#     nor 접미사: ambientCG 세트는 _nor, PolyHaven 세트는 _nor_dx.
+# [1] TEX registry - the existing scene01 set + the 7 new §B roles (canonical filenames)
+#     nor suffix: ambientCG sets use _nor, PolyHaven sets use _nor_dx.
 # ===========================================================================
 TEX = dict(
-    # --- scene01 기존 역할 ---
+    # --- Existing scene01 roles ---
     plaza_light=dict(dir=S1_DIR, diff="plaza_light_diff.jpg",
                      nor="plaza_light_nor.jpg", rough="plaza_light_rough.jpg"),
     band_dark=dict(dir=S1_DIR, diff="band_dark_diff.jpg",
@@ -56,83 +56,83 @@ TEX = dict(
                       rough="granite_dark_rough.jpg"),
     brick_red=dict(dir=S1_DIR, diff="brick_red_diff.jpg",
                    nor="brick_red_nor_dx.jpg", rough="brick_red_rough.jpg"),
-    # [W2 · B감사 A1] `aerial_grass_rock`(PolyHaven 항공 초지, 실측 타일 15 m)에서
-    # ambientCG **Grass001**(실측 타일 **1.40 m**, CC0, 태그 lawn/park/short/dense)로 교체.
-    #   · 픽셀 밀도 273 px/m → **2,926 px/m (×10.7)** — 들잔디 잎 나비 4~7 mm 가
-    #     12~20 px 로 **실제 해상**된다 [실측 — assets/veg_manifest_w2.json textures]
-    #   · 색상 초록 98.25 % · 선형 알베도 0.0932 · 순백 0 % → 계절 규약 통과
-    #   · **`scale_m` 은 반드시 1.4**(타일 실치수). 전 씬 `scale=dict(grass=…)` 동시 교정.
-    #   대안(씬 간 변주용) = `grass_lawn_b` (ambientCG Grass004, 동일 1.40 m).
+    # [W2, audit B A1] Replaced `aerial_grass_rock` (PolyHaven aerial grassland, measured tile 15 m)
+    # with ambientCG **Grass001** (measured tile **1.40 m**, CC0, tags lawn/park/short/dense).
+    #   - Pixel density 273 px/m -> **2,926 px/m (x10.7)** - a 4-7 mm blade of Korean lawn grass
+    #     is now **genuinely resolved** at 12-20 px [measured - assets/veg_manifest_w2.json textures]
+    #   - Green 98.25 %, linear albedo 0.0932, pure white 0 % -> passes the seasonal convention
+    #   - **`scale_m` must be 1.4** (the real tile size). Fix `scale=dict(grass=...)` in every scene at once.
+    #   Alternative (for variation between scenes) = `grass_lawn_b` (ambientCG Grass004, same 1.40 m).
     grass=dict(dir=ASSETS_DIR, diff="grass_lawn_diff.jpg",
                nor="grass_lawn_nor.jpg",
                rough="grass_lawn_rough.jpg"),
     tactile=dict(dir=S1_DIR, diff="tactile_yellow_diff.png",
-                 nor="tactile_yellow_nor.png"),        # rough 없음
-    # --- §B 신규 7역할 ---
+                 nor="tactile_yellow_nor.png"),        # No rough map
+    # --- The 7 new §B roles ---
     concrete_wall=dict(dir=S1_DIR, diff="concrete_wall_diff.jpg",
                        nor="concrete_wall_nor_dx.jpg",
-                       rough="concrete_wall_rough.jpg"),   # 지하도 옹벽·터널
+                       rough="concrete_wall_rough.jpg"),   # Underpass retaining wall, tunnel
     concrete_floor=dict(dir=S1_DIR, diff="concrete_floor_diff.jpg",
                         nor="concrete_floor_nor_dx.jpg",
-                        rough="concrete_floor_rough.jpg"),  # 지하도 계단·바닥
+                        rough="concrete_floor_rough.jpg"),  # Underpass stairs and floor
     wood_dark=dict(dir=S1_DIR, diff="wood_dark_diff.jpg",
                    nor="wood_dark_nor_dx.jpg",
-                   rough="wood_dark_rough.jpg"),            # 침목(목재)
+                   rough="wood_dark_rough.jpg"),            # Sleeper (timber)
     dirt_park=dict(dir=S1_DIR, diff="dirt_park_diff.jpg",
                    nor="dirt_park_nor_dx.jpg",
-                   rough="dirt_park_rough.jpg"),            # 공원 흙길
+                   rough="dirt_park_rough.jpg"),            # Park dirt path
     gravel=dict(dir=S1_DIR, diff="gravel_diff.jpg",
                 nor="gravel_nor_dx.jpg",
-                rough="gravel_rough.jpg"),                  # 마사토·자갈
+                rough="gravel_rough.jpg"),                  # Decomposed granite, gravel
     stone_flag=dict(dir=S1_DIR, diff="stone_flag_diff.jpg",
                     nor="stone_flag_nor_dx.jpg",
-                    rough="stone_flag_rough.jpg"),          # 자연석 판석
+                    rough="stone_flag_rough.jpg"),          # Natural stone flags
     rock_wall=dict(dir=S1_DIR, diff="rock_wall_diff.jpg",
                    nor="rock_wall_nor_dx.jpg",
-                   rough="rock_wall_rough.jpg"),            # 석축/사석
-    # --- §C v3 신규 6역할 (에셋 에이전트 다운로드 완료, canonical 슬러그) ---
+                   rough="rock_wall_rough.jpg"),            # Stone masonry / riprap
+    # --- The 6 new §C v3 roles (downloaded by the asset agent, canonical slugs) ---
     metal_rust=dict(dir=S1_DIR, diff="metal_rust_diff.jpg",
                     nor="metal_rust_nor_dx.jpg",
-                    rough="metal_rust_rough.jpg"),          # 녹슨 철(비상계단·잔도)
+                    rough="metal_rust_rough.jpg"),          # Rusted steel (fire escape, cliff walkway)
     plaster=dict(dir=S1_DIR, diff="plaster_diff.jpg",
                  nor="plaster_nor_dx.jpg",
-                 rough="plaster_rough.jpg"),                # 회벽(골목 주택)
+                 rough="plaster_rough.jpg"),                # Rendered wall (alley houses)
     marble_light=dict(dir=S1_DIR, diff="marble_light_diff.jpg",
                       nor="marble_light_nor_dx.jpg",
-                      rough="marble_light_rough.jpg"),      # 대리석/밝은 기념석
+                      rough="marble_light_rough.jpg"),      # Marble / bright memorial stone
     sandstone=dict(dir=S1_DIR, diff="sandstone_diff.jpg",
                    nor="sandstone_nor_dx.jpg",
-                   rough="sandstone_rough.jpg"),            # 사암(스텝웰·가트)
+                   rough="sandstone_rough.jpg"),            # Sandstone (stepwell, ghat)
     stone_worn=dict(dir=S1_DIR, diff="stone_worn_diff.jpg",
                     nor="stone_worn_nor_dx.jpg",
-                    rough="stone_worn_rough.jpg"),          # 사원 마모석
+                    rough="stone_worn_rough.jpg"),          # Temple worn stone
     rock_face=dict(dir=S1_DIR, diff="rock_face_diff.jpg",
                    nor="rock_face_nor_dx.jpg",
-                   rough="rock_face_rough.jpg"),            # 절벽 암반
-    # --- 배치1 나노바나나(scene22~33) 신규 1역할 ---
-    # [사실화 v1] 아스팔트 — sceneD3 진단에서 죽은 픽셀의 89.8% 가 상수색
-    # 아스팔트 차도였다. PolyHaven asphalt_02(3.0 m 타일, CC0).
+                   rough="rock_face_rough.jpg"),            # Cliff bedrock
+    # --- 1 new role for batch 1 nano-banana (scene22-33) ---
+    # [realism v1] Asphalt - in the sceneD3 diagnosis 89.8 % of dead pixels were the
+    # constant-colour asphalt carriageway. PolyHaven asphalt_02 (3.0 m tile, CC0).
     asphalt=dict(dir=S1_DIR, diff="asphalt_diff.jpg",
                  nor="asphalt_nor_dx.jpg", rough="asphalt_rough.jpg"),
-    # 눈 — sceneC1 최대 면적 재질(88.5%). PolyHaven snow_01(2.0 m 타일, CC0)
+    # Snow - the largest-area material of sceneC1 (88.5 %). PolyHaven snow_01 (2.0 m tile, CC0)
     snow=dict(dir=S1_DIR, diff="snow_diff.jpg",
               nor="snow_nor_dx.jpg", rough="snow_rough.jpg"),
     leaf_ground=dict(dir=S1_DIR, diff="leaf_ground_diff.jpg",
                      nor="leaf_ground_nor_dx.jpg",
-                     rough="leaf_ground_rough.jpg"),        # 낙엽 지면(C2)
+                     rough="leaf_ground_rough.jpg"),        # Fallen-leaf ground (C2)
 )
 
-# 배치1 overcast HDRI (C1 눈·C4 젖은 석재 공유) — light_params["hdri"]로 지정,
-# lookfix=False 권장(무태양이라 태양 캡 무의미, 원본 사용).
-# [v5 공통 레이어] 인터로킹 보도블록 + 한글 사인 텍스처(assets/signs/gen_signs.py 생성)
-# [v6 판정 C-1] 구 소스는 이끼 낀 유럽식 사고석이라 한국 보도가 아니었다 →
-#   ambientCG CC0 **PavingStones015**(2K-JPG, Color/NormalDX/Roughness)로 교체.
-#   정형 인터로킹 블록 바스켓위브·회색 콘크리트·모래 줄눈.
-#   타일당 반복 12(정사각 유닛 170 px/2048) → 블록(=2유닛) 장변이 씬 scale_m
-#   1.0/1.2/1.5 에서 각각 0.17/0.20/0.25 m (실물 보도블록 200×100 대역).
-#   구 사고석은 같은 scale_m 에서 석괴가 0.4 m급이라 화면을 지배했다.
-#   파일명·경로 불변 → 씬 파일 수정 불필요(C-1 의 "UV 스케일 축소"를 텍스처
-#   자체의 반복수로 달성).
+# Batch-1 overcast HDRI (shared by C1 snow and C4 wet stone) - selected via light_params["hdri"],
+# lookfix=False recommended (no sun, so the sun cap is meaningless; use the original).
+# [v5 common layer] Interlocking paving blocks + Korean sign textures (generated by assets/signs/gen_signs.py)
+# [v6 verdict C-1] The old source was mossy European sett paving, i.e. not a Korean sidewalk ->
+#   replaced with ambientCG CC0 **PavingStones015** (2K-JPG, Color/NormalDX/Roughness).
+#   Regular interlocking basketweave blocks, grey concrete, sand joints.
+#   12 repeats per tile (square unit 170 px/2048) -> the long side of a block (= 2 units) is
+#   0.17/0.20/0.25 m at scene scale_m 1.0/1.2/1.5 (real paving blocks are 200x100).
+#   With the old sett texture the stones were 0.4 m class at the same scale_m and dominated the frame.
+#   Filenames and paths are unchanged -> no scene file needs editing (the C-1 request to
+#   'reduce the UV scale' is achieved through the repeat count of the texture itself).
 TEX["paving_interlock"] = dict(dir=ASSETS_DIR, diff="paving_interlock_diff.jpg",
                                nor="paving_interlock_nor.jpg",
                                rough="paving_interlock_rough.jpg")
@@ -143,100 +143,100 @@ for _s in ("warn_fall", "caution_step", "exit", "info", "no_entry"):
 OVERCAST_HDRI = "kloofendal_overcast_4k.exr"
 
 # ---------------------------------------------------------------------------
-# [사실화 P1] PT 수정 설정 — `NEGOBS_PT_FAST=1` 로 활성화
-#   근거: ZZ_synthesis §10.3 (D팀) + 감독 스파이크 실측(2026-07-28)
-#   현행은 spp=1 · totalSpp=512 라 512프레임에 걸쳐 누적한다. spp 를 올리고
-#   rtSubframes 로 한 update 안에서 여러 서브프레임을 돌리면 8프레임에 수렴.
-#   실측(스파이크 랩, 2뷰): 4.89~5.14 → 0.08~0.31 s/컷. 두 설정의 출력 PNG 는
-#   **바이트 단위 동일**(PSNR 무한대) — 무손실 가속이다.
-#   RT 대비로도 빠르다(RT warmup 90 = 0.79~1.03 s/컷).
+# [realism P1] PT fix settings - enabled with `NEGOBS_PT_FAST=1`
+#   Basis: ZZ_synthesis §10.3 (team D) + supervisor spike measurements (2026-07-28)
+#   Currently spp=1 and totalSpp=512, so accumulation runs over 512 frames. Raising spp and
+#   running several subframes per update via rtSubframes converges in 8 frames.
+#   Measured (spike lab, 2 views): 4.89-5.14 -> 0.08-0.31 s/shot. The PNGs of the two settings are
+#   **byte-identical** (infinite PSNR) - this is lossless acceleration.
+#   It is also faster than RT (RT warmup 90 = 0.79-1.03 s/shot).
 # ---------------------------------------------------------------------------
 PT_FAST = dict(spp=16, total_spp=64, subframes=8, warmup=8)
 
 
 def tex_path(role, kind):
-    """역할·종류(diff/nor/rough)의 절대 경로."""
+    """Absolute path of a role and kind (diff/nor/rough)."""
     return os.path.join(TEX[role]["dir"], TEX[role][kind])
 
 
 # ===========================================================================
-# [1b] 사실화 v1 룩 레이어 — `NEGOBS_LOOK_MTL` / `NEGOBS_LOOK_GEO` 2단 플래그
-#      (상위 호환 스위치 `NEGOBS_LOOK_V1=1` 은 둘 다 ON. 기본 전부 OFF)
+# [1b] Realism v1 look layer - the 2-stage `NEGOBS_LOOK_MTL` / `NEGOBS_LOOK_GEO` flags
+#      (the umbrella switch `NEGOBS_LOOK_V1=1` turns both ON. All OFF by default)
 #
-# 지시서 `Docs/briefs/realism_brief_v1.md` + 개정 이력 rev.1.
-# **씬 파일은 한 줄도 고치지 않는다**(불변 3종). 대신 `make_pbr` 에 이미 들어오는
-# 프림 경로(`{ROOT}/Looks/Paving` 등)에서 역할을 읽어 룩 사양을 주입한다.
+# Directive `Docs/briefs/realism_brief_v1.md` plus revision history rev.1.
+# **Not a single line of any scene file is edited** (3 invariants). Instead the role is read from
+# the prim path already arriving at `make_pbr` (`{ROOT}/Looks/Paving` etc.) and a look spec is injected.
 #
-# 왜 경로 이름인가: 33씬 전 재질이 `make_pbr` 단일 경유이고, `Looks/` 하위 이름이
-# 의미 있게 붙어 있다(Wood 20 · Grass 20 · Rail 17 · Parapet 15 · Glass 15 …).
-# 씬 무수정으로 역할별 처방을 거는 유일한 통로다.
+# Why the path name: all materials in the 33 scenes go through the single `make_pbr` entry, and the
+# names under `Looks/` are meaningful (Wood 20, Grass 20, Rail 17, Parapet 15, Glass 15 ...).
+# It is the only channel for a per-role prescription without touching the scenes.
 #
-# 3단 재질 정책 [Phase1 §6.5 — H 보고서와 감독 실측이 독립 수렴]:
-#   지면·사면 계열       → NegObsGround.mdl (소프트 트라이플래너. 경사면 필수)
-#   구조물·식생·사인     → OmniPBR (uv_mode·opacity·detail normal 필요)
-#   발광·유리            → OmniPBR (MDL 에 emission 입력 없음)
-# NegObsGround 전역 승격은 불가로 확정: UV 파이프라인·opacity 부재 + 텍스처 페치 72회.
+# The 3-tier material policy [Phase1 §6.5 - the H report and the supervisor measurements converged independently]:
+#   ground and slope family    -> NegObsGround.mdl (soft triplanar. Required on slopes)
+#   structures, vegetation, signs -> OmniPBR (needs uv_mode, opacity, detail normal)
+#   emissive, glass            -> OmniPBR (the MDL has no emission input)
+# Promoting NegObsGround globally was ruled out: UV pipeline and opacity are missing, plus 72 texture fetches.
 # ===========================================================================
-# --- 2단 플래그(T1 §1.7.2) — 재질 A/B 대조군 오염(치명 C3) 구조적 차단 ------
-# `NEGOBS_LOOK_V1` 단일 플래그는 재질뿐 아니라 **기하도** 바꾼다. 그 상태로
-# "V1=0 vs 1" 을 재질 A/B 로 쓰면 기하 변화가 섞여 재질 효과를 분리할 수 없다
-# (재발 2회 기록 — `redteam_verification_v1.md` R3).
-#   LOOK_MTL : 셰이더 입력·`UsdShade.Material` 정의만 바꾼다(프림 불변).
-#   LOOK_GEO : 프림 집합·타입·xform·points·extent 를 바꾼다.
-# 재질 A/B 대조군은 `LOOK_MTL=0, LOOK_GEO=1` 이다(규칙 R-2).
-# **아래 3줄이 `LOOK_V1` 토큰의 유일한 잔존 허용 지점**이다(규칙 R-5 —
-# `scripts/geom_invariance_check.py --assert-no-residual-lookv1` 가 검사한다).
-LOOK_V1 = os.environ.get("NEGOBS_LOOK_V1", "") == "1"          # 상위(종전 호환)
+# --- The 2-stage flags (T1 §1.7.2) - structurally blocks contamination of the material A/B control (fatal C3) ---
+# The single `NEGOBS_LOOK_V1` flag changes **geometry as well as** materials. Using
+# "V1=0 vs 1" as a material A/B in that state mixes in geometry changes and the material effect cannot be isolated
+# (2 recorded recurrences - `redteam_verification_v1.md` R3).
+#   LOOK_MTL : changes only shader inputs and the `UsdShade.Material` definition (prims unchanged).
+#   LOOK_GEO : changes the prim set, types, xform, points and extent.
+# The material A/B control is `LOOK_MTL=0, LOOK_GEO=1` (rule R-2).
+# **The 3 lines below are the only place where the `LOOK_V1` token may still appear** (rule R-5 -
+# checked by `scripts/geom_invariance_check.py --assert-no-residual-lookv1`).
+LOOK_V1 = os.environ.get("NEGOBS_LOOK_V1", "") == "1"          # Umbrella (backwards compatible)
 LOOK_MTL = os.environ.get("NEGOBS_LOOK_MTL", "1" if LOOK_V1 else "0") == "1"
 LOOK_GEO = os.environ.get("NEGOBS_LOOK_GEO", "1" if LOOK_V1 else "0") == "1"
 MDL_GROUND = os.path.join(ASSETS_DIR, "NegObsGround.mdl")
 
-# 디테일 노멀(근접 텍셀 뭉개짐 완화) 공용 소스 — 미세 그레인용 범용 맵.
-# **레거시**: Phase1 E3 가 OmniPBR 분기에만 걸어 둔 단일 맵. `concrete_wall_nor_dx`
-# 는 T1 §1.2 가 "디테일이 아니다"(macro 4.1 % · slope −0.71 = 저주파 벽면 요철)로
-# 판정한 소스이며, 아래 `_DETAIL_MAP` 이 그 자리를 대체한다. 절차 생성 맵 3장이
-# 모두 없을 때의 최후 폴백으로만 남긴다.
+# Shared source for the detail normal (mitigates texel smearing up close) - a general-purpose micro-grain map.
+# **Legacy**: the single map Phase1 E3 attached to the OmniPBR branch only. `concrete_wall_nor_dx`
+# is the source T1 §1.2 judged "not a detail" (macro 4.1 %, slope -0.71 = low-frequency wall relief),
+# and `_DETAIL_MAP` below takes its place. It remains only as the last-resort fallback when all 3
+# procedurally generated maps are missing.
 _DETAIL_NOR = os.path.join(S1_DIR, "concrete_wall_nor_dx.jpg")
 
 # ===========================================================================
-# [1c] `[W2-C]` T1 §1.6(b) — 디테일 노멀을 **3단 재질 정책 양쪽**에 건다
+# [1c] `[W2-C]` T1 §1.6(b) - attach the detail normal to **both sides of the 3-tier material policy**
 # ===========================================================================
-# 결손 ①(T1 §1.1)의 실체: 디테일 노멀이 `LOOK_CLASS` 에 `detail=True` 로 **설정만**
-# 돼 있고, 코드 경로는 OmniPBR 분기 한 곳뿐이었다. h0.3 프레임의 하단 2/3 을
-# 실제로 채우는 표면은 전부 `mdl="ground"`(NegObsGround) 계열이라 —
-# **지면 10 클래스에는 디테일 노멀이 한 번도 걸린 적이 없다.**
-# W2-A5 가 MDL v1.9.0 에 입력 4개를 뚫어 놨고(전부 불활성 기본값), 배선은
-# 아무 에이전트도 하지 않은 채 남아 있었다 [실측 — w2_materials_v1.md §0 "Nothing
-# was wired", w2_surgeon_v1.md 미언급]. 여기서 배선한다.
+# The substance of defect (1) (T1 §1.1): the detail normal was **only configured** as `detail=True` in
+# `LOOK_CLASS`, and the code path existed in the OmniPBR branch alone. The surfaces that actually fill
+# the lower 2/3 of the h0.3 frame are all `mdl="ground"` (NegObsGround) family, so -
+# **the 10 ground classes had never once received a detail normal.**
+# W2-A5 opened 4 inputs in MDL v1.9.0 (all with inert defaults) and no agent ever did the wiring
+# [measured - w2_materials_v1.md §0 "Nothing was wired", not mentioned in w2_surgeon_v1.md].
+# It is wired here.
 #
-# 값은 §1.6(b) 표 그대로: (파일, bump, 1/타일[1/m]).
+# The values are exactly the §1.6(b) table: (file, bump, 1/tile [1/m]).
 _DETAIL_MAP = {
-    "mineral":  ("detail_grain_mineral_nor.png",  0.85, 12.5),  # 포장·콘크리트·석재·연석·노징
-    "granular": ("detail_grain_granular_nor.png", 0.70,  8.0),  # 흙·자갈·아스팔트·눈
-    "metal":    ("detail_grain_brushed_nor.png",  0.55, 25.0),  # 금속(이방 스크래치)
+    "mineral":  ("detail_grain_mineral_nor.png",  0.85, 12.5),  # Paving, concrete, stone, curb, nosing
+    "granular": ("detail_grain_granular_nor.png", 0.70,  8.0),  # Soil, gravel, asphalt, snow
+    "metal":    ("detail_grain_brushed_nor.png",  0.55, 25.0),  # Metal (anisotropic scratches)
 }
-# 절차 생성 실패·미조달 시 — 저장소 보유분(조달 0). §3.2 가 두 계열 합격 확인.
+# When procedural generation fails or nothing was procured - what the repository already holds (0 procurement). §3.2 confirmed both families pass.
 _DETAIL_FALLBACK = {
     "mineral":  ("scene01/plaster_nor_dx.jpg", 0.85, 12.5),   # macro 3.9 · slope −0.89 · RMS 0.159
     "granular": ("scene01/asphalt_nor_dx.jpg", 0.70,  8.0),   # macro 3.2 · slope −0.66 · RMS 0.294
-    "metal":    (None, 0.0, 0.0),                             # 보유분 전멸(§3.2)
+    "metal":    (None, 0.0, 0.0),                             # Nothing held at all (§3.2)
 }
-# 클래스 → 계열. **여기 없는 클래스는 디테일 금지**가 명시적 처방이다:
-#   veg·water·glass·paint·sign·misc = 도색·사인은 균일해야 단서로 기능한다(v5.1 §4)
-#   wood = 결이 방향성이라 등방 그레인을 얹으면 오히려 결을 지운다(§1.6(b))
+# Class -> family. **A class absent from here is explicitly prescribed no detail**:
+#   veg, water, glass, paint, sign, misc = paint and signs must stay uniform to work as cues (v5.1 §4)
+#   wood = the grain is directional, so an isotropic grain on top erases it instead (§1.6(b))
 _DETAIL_FAMILY = {"paving": "mineral", "concrete": "mineral", "brick": "mineral",
                   "stone": "mineral", "curb": "mineral", "nosing": "mineral",
                   "soil": "granular", "gravel": "granular", "asphalt": "granular",
                   "snow": "granular", "metal": "metal"}
 
-# A/B 스윕 노브 — 렌더 라운드가 코드 수정 없이 팔을 바꿀 수 있어야 한다.
-#   `NEGOBS_DETAIL_SCALE`      : `detail_texture_scale` 전역 오버라이드 [1/m].
-#       근거 = w2_materials_v1.md §7 R1 — 사양 기본값 12.5(= 8 cm 타일)에서는
-#       텍셀이 0.078 mm 라 h0.3 d2 에서 **서브픽셀**(유효 미세경사 0.49°, §1.2 가
-#       "안 보인다"고 판정한 1.4°보다 아래). 2~4 로 낮추면 지배 대역이 0.5~3 mm
-#       (실제 콘크리트 골재 크기)로 올라온다.
-#   `NEGOBS_DETAIL_ROUGH_GAIN` : `detail_rough_gain`. 서브픽셀 미세구조를
-#       roughness 분산으로 전달하는 물리적으로 옳은 경로(§7 R1 (a) · MDL S5).
+# A/B sweep knobs - a render round must be able to switch arms without editing code.
+#   `NEGOBS_DETAIL_SCALE`      : global override of `detail_texture_scale` [1/m].
+#       Basis = w2_materials_v1.md §7 R1 - at the spec default of 12.5 (= an 8 cm tile) a texel is
+#       0.078 mm, i.e. **sub-pixel** at h0.3 d2 (effective micro-slope 0.49 deg, below the 1.4 deg that §1.2
+#       judged "invisible"). Lowering it to 2-4 raises the dominant band to 0.5-3 mm
+#       (real concrete aggregate size).
+#   `NEGOBS_DETAIL_ROUGH_GAIN` : `detail_rough_gain`. The physically correct path for carrying
+#       sub-pixel microstructure through roughness variance (§7 R1 (a), MDL S5).
 def _envf(name, default=0.0):
     try:
         return float(os.environ.get(name, "") or default)
@@ -244,21 +244,22 @@ def _envf(name, default=0.0):
         return float(default)
 
 
-DETAIL_SCALE_OVERRIDE = _envf("NEGOBS_DETAIL_SCALE", 0.0)   # 0 = 표 값 사용
-DETAIL_ROUGH_GAIN = _envf("NEGOBS_DETAIL_ROUGH_GAIN", 0.0)  # 0 = 끔(MDL 기본)
-#   `NEGOBS_DETAIL=0` : 디테일 노멀만 끈다(나머지 재질층은 그대로). LOOK_MTL 의
-#       효과 중 **디테일 노멀의 몫이 얼마인지** 를 분리하는 3번째 팔 — 이게 없으면
-#       "재질층이 움직였다"를 "디테일이 움직였다"로 오귀속한다.
+DETAIL_SCALE_OVERRIDE = _envf("NEGOBS_DETAIL_SCALE", 0.0)   # 0 = use the table value
+DETAIL_ROUGH_GAIN = _envf("NEGOBS_DETAIL_ROUGH_GAIN", 0.0)  # 0 = off (MDL default)
+#   `NEGOBS_DETAIL=0` : turns off the detail normal only (the rest of the material layer stays). The third
+#       arm that isolates **how much of the LOOK_MTL effect belongs to the detail normal** - without it
+#       "the material layer moved" gets misattributed to "the detail moved".
 DETAIL_ON = os.environ.get("NEGOBS_DETAIL", "1") != "0"
 
 
 def detail_source(cls):
-    """클래스명 → `(절대경로, bump, 1/타일)`. 디테일 금지 클래스는 `(None, 0, 0)`.
+    """Class name -> `(absolute path, bump, 1/tile)`. Detail-forbidden classes get `(None, 0, 0)`.
 
-    1순위 절차 생성(§3.3) → 폴백 저장소 보유분(§3.2) → 없으면 무영향.
-    파일 부재 시 **조용히 생략**한다(§1.6(b) 주석 원문) — 배선 실패가 렌더를
-    죽이면 안 되고, 동시에 없는 파일을 바인딩하면 MDL 이 조기 반환이라 어차피
-    무영향이지만 USD 에 유령 경로가 남는다.
+    First choice is the procedural generation (§3.3), then the fallback held in the
+    repository (§3.2), then no effect.
+    A missing file is **silently skipped** (per the §1.6(b) comment) - a wiring failure must
+    not kill the render, and binding a nonexistent file would be harmless anyway since the
+    MDL returns early, but it would leave a ghost path in the USD.
     """
     if not DETAIL_ON:
         return (None, 0.0, 0.0)
@@ -276,66 +277,66 @@ def detail_source(cls):
         inv = DETAIL_SCALE_OVERRIDE
     return (p, float(bump), float(inv))
 
-# OmniPBR(큐빅 투영) ↔ NegObsGround(트라이플래너) 의 texture_scale 의미 차이 보정.
-# 틀리면 **전 지면의 타일 스케일이 어긋나는 전역 회귀**가 되므로 추정 금지 —
-# 전용 캘리브레이션 렌더(스파이크 랩 E10: 인터로킹 보도블록을 같은 scale_m 으로
-# 좌/우에 깔고 수직 하향 뷰에서 자기상관 픽셀 주기 비교)로 실측했다.
+# Corrects the difference in texture_scale meaning between OmniPBR (cubic projection) and NegObsGround (triplanar).
+# Getting this wrong is a **global regression that misaligns the tile scale of every ground surface**, so no guessing -
+# it was measured with a dedicated calibration render (spike lab E10: interlocking paving blocks laid left and right
+# at the same scale_m, comparing the autocorrelation pixel period in a vertical top-down view).
 #
-#   1차 측정(MDL v1.4.0): OmniPBR 23.163/23.164 px vs MDL 26.454/32.764 px
-#     → 비율이 축마다 다르고(이방성) 육안으로 **패턴이 45° 돌아가 있었다**.
-#       원인은 스케일이 아니라 MDL 의 기저 선택 버그였다(아래 참조).
-#   2차 측정(MDL v1.5.0, 버그 수정 후): 23.163/23.164 vs 23.154/23.177
-#     → **비율 1.0001. 보정 불요.**
+#   1st measurement (MDL v1.4.0): OmniPBR 23.163/23.164 px vs MDL 26.454/32.764 px
+#     -> the ratio differed per axis (anisotropic) and by eye **the pattern was rotated 45 deg**.
+#       The cause was not the scale but a basis-selection bug in the MDL (see below).
+#   2nd measurement (MDL v1.5.0, after the fix): 23.163/23.164 vs 23.154/23.177
+#     -> **ratio 1.0001. No correction needed.**
 #
-# 즉 "스케일이 다르다"는 1차 관찰은 **오진**이었고, 진짜 원인은 수평면에서
-# 45° 보조 기저가 50:50 으로 섞여 들어가던 축퇴였다(MDL v1.5.0 에서 수정).
-_GROUND_SCALE_FIX = 1.0        # E10 2차 실측 확정 (비율 1.0001)
+# So the first observation that "the scales differ" was a **misdiagnosis**; the real cause was a
+# degeneracy where a 45 deg auxiliary basis was mixed in 50:50 on horizontal surfaces (fixed in MDL v1.5.0).
+_GROUND_SCALE_FIX = 1.0        # Confirmed by the E10 2nd measurement (ratio 1.0001)
 
-# --- 클래스별 룩 사양 -------------------------------------------------------
-# bevel[m] : round_edges_radius. Phase1 §2.1 실측 — 화면상 폭 ≈ 24·(r/d)·57.3 px.
-#            브리프 원안(콘크리트 3mm)은 로봇 시점 2~10 m 에서 서브픽셀이라
-#            비용만 들고 보이지 않는다.
-#   **국내 규격 조사 반영** (`Docs/surveys/.../I_ks_dimension_verification.md`):
-#     · 현장타설 콘크리트 모서리 **20~30 mm** — KCS 21 50 05:2023 3.3(10) 원문.
-#       우리 콘크리트는 옹벽·계단 챌면·제방 = 대부분 현장타설이므로 **0.020**.
-#       (감독 잠정 10 mm 는 1/2~1/3 과소였다. 프리캐스트라면 10 mm 가 맞다.)
-#     · 연석 수직형 **R=10** — 국토부 예규 제321호 보도 설치 지침 그림 2.17
-#     · 금속 **2 mm** — KS B 0403 모떼기 수열 2열 정규값 (잠정값 유지 확인)
-#     · 계단 노징 — **국내 규정 없음**(법정문서 4건 전수 확인). 값은 IBC
-#       1.6~14.3 mm 상단을 쓰되 **출처가 국내가 아님을 명시**한다.
-#     · 일반 석재 — **근거 없음**. 보수적으로 낮게 둔다.
-# sat      : 채도 계수(MDL 전용). 전역 하향은 금지 — scene01 은 이미 0.146 으로
-#            하한 미달이다. 과채도는 석재·초목·흙 계열의 국소 현상.
+# --- Per-class look specs ---------------------------------------------------
+# bevel[m] : round_edges_radius. Phase1 §2.1 measurement - on-screen width ~= 24*(r/d)*57.3 px.
+#            The brief's original proposal (3 mm on concrete) is sub-pixel at the 2-10 m robot
+#            viewpoint, so it costs without being visible.
+#   **Domestic standards survey applied** (`Docs/surveys/.../I_ks_dimension_verification.md`):
+#     - cast-in-place concrete corner **20-30 mm** - KCS 21 50 05:2023 3.3(10), verbatim.
+#       Our concrete is retaining walls, stair risers and embankments = mostly cast in place, so **0.020**.
+#       (The supervisor's provisional 10 mm was 1/2 to 1/3 too small. 10 mm is right for precast.)
+#     - vertical curb **R=10** - MOLIT directive no. 321, sidewalk installation guideline, figure 2.17
+#     - metal **2 mm** - KS B 0403 chamfer series, 2nd column standard value (provisional value confirmed)
+#     - stair nosing - **no domestic rule** (all 4 statutory documents checked). The value uses the top of
+#       the IBC 1.6-14.3 mm range, **with the source explicitly noted as non-domestic**.
+#     - general stone - **no basis**. Kept conservatively low.
+# sat      : saturation coefficient (MDL only). A global reduction is banned - scene01 is already at 0.146,
+#            below the floor. Over-saturation is a local phenomenon of the stone, plant and soil families.
 # mdl      : "ground" = NegObsGround / "omni" = OmniPBR
-# patch    : NegObsGround 패치 회전 강도. 모듈형 포장 0(패턴 파손 방지), 자연 1.
-# 웨더링(MDL v1.6.0) 역할별 값 — 키가 없으면 전부 0(무영향).
-#   **치명 주의**: 기단 오염 밴드는 **월드 Z 절대 기준**이다. 지면 프림은 z≈0 이라
-#   grime 을 켜면 밴드 안에 통째로 들어가 **지면 전체가 균일 암화**된다(전역 회귀).
-#   → 지면 계열(paving/asphalt/soil/gravel)은 grime/splash 를 **반드시 0** 으로.
-#   밴드는 지면 위에 **서 있는 수직 구조물**(옹벽·기단·파라펫·연석·계단 챌면)에만.
-# [치명 C4 수정] **월드 z 기반 웨더링(grime·splash)을 전면 비활성**한다.
-#   `grime_z0` 기본값이 0.0 이고 scene_common 이 이를 한 번도 설정하지 않아,
-#   m_grime = 1 - smoothstep(0, h, z) 가 **z ≤ 0 인 모든 면**에 균일하게 걸렸다.
-#   클래스로만 막으려 했으나 concrete 가 215종 중 46종을 흡수하며
-#   `Slab`·`LowerFloor`·`Lower`·`Trough` 같은 **수평 지면**까지 포함해 방어가 뚫렸다.
+# patch    : NegObsGround patch rotation strength. 0 for modular paving (protects the pattern), 1 for natural.
+# Per-role weathering values (MDL v1.6.0) - a missing key means all 0 (no effect).
+#   **Critical warning**: the plinth grime band is referenced to **absolute world Z**. Ground prims sit at z~=0,
+#   so enabling grime puts them entirely inside the band and **darkens the whole ground uniformly** (a global regression).
+#   -> the ground family (paving/asphalt/soil/gravel) **must** have grime/splash at 0.
+#   The band belongs only to **vertical structures standing on the ground** (retaining walls, plinths, parapets, curbs, stair risers).
+# [fatal C4 fix] **World-z based weathering (grime, splash) is fully disabled.**
+#   The `grime_z0` default is 0.0 and scene_common never set it, so
+#   m_grime = 1 - smoothstep(0, h, z) applied uniformly to **every surface with z <= 0**.
+#   Blocking by class alone was attempted, but concrete absorbs 46 of the 215 kinds and includes
+#   **horizontal ground** such as `Slab`, `LowerFloor`, `Lower` and `Trough`, so the defence was breached.
 #
-#   단순한 룩 버그가 아니다 — sceneD3 측구(깊이 0.80·인버트 −1.05)처럼 **낙차가
-#   깊을수록 어두워지는 결정론적 알베도 규칙**이 되어, GT 낙차와 상관된
-#   **합성 지름길**을 만든다. 이 프로젝트가 가장 경계하는 실패 모드다.
+#   This is not a mere look bug - like the sceneD3 gutter (depth 0.80, invert -1.05) it becomes a
+#   **deterministic albedo rule where a deeper drop is darker**, creating a **synthetic shortcut**
+#   correlated with the GT drop. That is the failure mode this project guards against most.
 #
-#   재활성 조건: 프림별 발치 z 를 `grime_z0` 로 넘길 통로가 생긴 뒤.
-#   노멀 기반 항목(streak = 수직면 흘러내림, dust = 상향면 먼지)은 z 와 무관하므로 유지.
+#   Reactivation condition: once there is a channel to pass a per-prim foot z as `grime_z0`.
+#   Normal-based items (streak = run-down on vertical faces, dust = dust on upward faces) are z-independent and stay.
 _W_STRUCT = dict(grime=0.0, splash=0.0, streak=0.12, wrough=0.15)
 _W_STONE = dict(grime=0.0, splash=0.0, streak=0.08, wrough=0.12)
 _W_EDGE = dict(grime=0.0, splash=0.0, wrough=0.10)
 
 LOOK_CLASS = {
     #                    bevel   sat   mdl        patch  detail
-    # 보도블록 개별 모따기는 **국내 공개 규정에 수치가 없다**(KS F 4419 본문 유료,
-    # 이를 인용하는 공개 문서 전수에서 모따기 조항 0건 — 조사 결론 "추정 금지").
-    # 게다가 round_edges 는 개별 블록이 아니라 **슬래브 프림 경계**에 걸린다.
-    # 개별 블록 모따기는 텍스처 노멀맵이 이미 담당하므로, 여기 값은 슬래브 경계용
-    # 이며 연석(10 mm)보다 낮게 둔다. [근거 없음 — 보수적 선택]
+    # Individual chamfering of paving blocks **has no published domestic figure** (the body of KS F 4419 is paywalled,
+    # and an exhaustive check of public documents citing it found 0 chamfer clauses - the survey concluded "do not estimate").
+    # Moreover round_edges applies to the **slab prim boundary**, not to individual blocks.
+    # Individual block chamfers are already handled by the texture normal map, so the value here is for the slab
+    # boundary and is kept below the curb (10 mm). [no basis - conservative choice]
     "paving":   dict(bevel=0.006, sat=1.00, mdl="ground", patch=0.0, detail=True,
                      tex="paving_interlock", bump=1.4,
                      tex_alts=("stone_flag", "paving_interlock", "plaster")),
@@ -343,9 +344,9 @@ LOOK_CLASS = {
                      weather=_W_STRUCT, tex="concrete_floor", bump=1.6,
                      tex_alts=("concrete_floor", "concrete_wall", "plaster")),
                      # concrete_wall(c@1/16 0.0345) → concrete_floor(0.129, x3.7).
-                     # 진단: 승격 텍스처의 국소대비가 낮으면 승격해도 결이 안 산다.
-                     # 현장타설 20~30 mm (KCS 21 50 05). bump 1.6 = 진단 P3
-                     # (음영부는 밝기가 아니라 노멀 대비로만 결이 산다)
+                     # Diagnosis: if the local contrast of the promoted texture is low, promotion does not bring out the grain.
+                     # Cast in place 20-30 mm (KCS 21 50 05). bump 1.6 = diagnosis P3
+                     # (in shadow the grain only comes out through normal contrast, not brightness)
     "brick":    dict(bevel=0.006, sat=0.88, mdl="ground", patch=0.0, detail=True,
                      tex="brick_red", bump=1.4, tex_alts=("brick_red", "plaster"),
                      weather=dict(grime=0.0, splash=0.0, streak=0.10,
@@ -353,40 +354,40 @@ LOOK_CLASS = {
     "stone":    dict(bevel=0.004, sat=0.66, mdl="ground", patch=1.0, detail=True,
                      weather=_W_STONE, tex="stone_flag", bump=1.5,
                      tex_alts=("stone_flag", "marble_light")),
-                     # 베벨 [근거 없음] 보수적 하향
+                     # Bevel [no basis] conservatively lowered
     "soil":     dict(bevel=0.000, sat=0.74, mdl="ground", patch=1.0, detail=True,
                      tex="dirt_park", bump=1.4,
                      tex_alts=("dirt_park", "gravel")),
     "gravel":   dict(bevel=0.000, sat=0.78, mdl="ground", patch=1.0, detail=True,
                      tex="gravel", bump=1.4),
-    # tex: 상수색 재질을 이 TEX 역할의 텍스처로 승격한다(의도 알베도는 보존).
-    # spec/bump: 진단 P1/P3 — 노면이 과하게 밝은 원인이 그레이징 광택이라
-    # specular_level 을 명시하고, 음영부 대비는 노멀 강도로 살린다.
+    # tex: promote a constant-colour material to the texture of this TEX role (the intended albedo is preserved).
+    # spec/bump: diagnosis P1/P3 - the road surface is excessively bright because of grazing gloss, so
+    # specular_level is stated explicitly and shadow contrast is restored through normal strength.
     "asphalt":  dict(bevel=0.006, sat=0.90, mdl="ground", patch=1.0, detail=True,
                      tex="asphalt", spec=0.20, bump=1.4),
-    # 노징 12 mm 는 **IBC 1.6~14.3 mm 상단**이다. 국내 규정은 존재하지 않음(전수 확인).
+    # The 12 mm nosing is the **top of the IBC 1.6-14.3 mm range**. No domestic rule exists (exhaustively checked).
     "nosing":   dict(bevel=0.012, sat=1.00, mdl="ground", patch=0.0, detail=True,
                      weather=dict(grime=0.0, splash=0.0, wrough=0.10)),
     "curb":     dict(bevel=0.010, sat=1.00, mdl="ground", patch=0.0, detail=True,
-                     weather=_W_EDGE),   # 연석 수직형 R=10 (예규 321호 그림2.17)
+                     weather=_W_EDGE),   # Vertical curb R=10 (directive 321, figure 2.17)
     "metal":    dict(bevel=0.002, sat=1.00, mdl="omni",   detail=True),
-    # 목재는 라이브러리에 어두운 wood_dark(선형휘도 0.061) 하나뿐이라 밝은
-    # 목재는 배율이 커진다. 목재 결은 방향성이 강해 증폭해도 잡음이 덜 튀므로
-    # 이 클래스만 상한을 높인다.
+    # The library has only one dark wood (wood_dark, linear luminance 0.061), so bright
+    # wood gets a large multiplier. Wood grain is strongly directional and stays quiet under
+    # amplification, so the cap is raised for this class only.
     "wood":     dict(bevel=0.004, sat=0.88, mdl="omni",   detail=True,
                      tex="wood_dark", bump=1.3, max_gain=7.0),
-    # [W2 · B감사 A2] `tex_alts` 에서 **`leaf_ground` 제거** — 치명 계절 규약 위반 차단.
-    #   승격 채택 조건은 `max(ratio) ≤ max_gain` **그리고** `spread = max/min ≤ 4.0` 인데,
-    #   구 `grass`(aerial_grass_rock)는 청 채널이 비어 있어(적/청 7.03) 초록 수관
-    #   상수색에서 spread 4.22 로 탈락하고, 대신 `leaf_ground`(적/청 4.09 → spread 2.86)가
-    #   채택됐다. 전 33씬 시뮬레이션 결과 **`leaf_ground` 승격 50건 / 24씬** — 즉 24개 씬의
-    #   나무 수관에 **가을 낙엽 픽셀**이 칠해지고 있었다(원본 2.3 m 낙엽이 52 % 크기로)
-    #   [실측 — `B_groundcover_debris.md` §8].
-    #   A1(Grass001 교체)만으로도 spread 가 내려가 grass 가 채택되지만, `leaf_ground` 가
-    #   목록에 남는 한 **어두운 상수색에서는 여전히 그쪽으로 떨어진다.** A2 가 그 경로를
-    #   물리적으로 없앤다 — 둘 다 한다.
-    #   `tex_scale` 1.2 → **1.4**: 승격 경로도 Grass001 실측 타일을 따라야 한다.
-    #   `detail=False` 는 유지(잎은 실물 USD 담당 — §2.1).
+    # [W2, audit B A2] **`leaf_ground` removed from `tex_alts`** - blocks a fatal seasonal-convention violation.
+    #   Promotion is accepted when `max(ratio) <= max_gain` **and** `spread = max/min <= 4.0`, but
+    #   the old `grass` (aerial_grass_rock) has an empty blue channel (red/blue 7.03) and was rejected at
+    #   spread 4.22 on green canopy constant colours, so `leaf_ground` (red/blue 4.09 -> spread 2.86) was
+    #   chosen instead. Simulating all 33 scenes gives **50 `leaf_ground` promotions across 24 scenes** - i.e.
+    #   the tree canopies of 24 scenes were being painted with **autumn leaf pixels** (a 2.3 m leaf source at 52 % size)
+    #   [measured - `B_groundcover_debris.md` §8].
+    #   A1 (the Grass001 replacement) alone lowers the spread enough for grass to be chosen, but as long as
+    #   `leaf_ground` stays in the list **dark constant colours still fall to it.** A2 removes that path
+    #   physically - both are done.
+    #   `tex_scale` 1.2 -> **1.4**: the promotion path must follow the measured Grass001 tile too.
+    #   `detail=False` is kept (leaves are handled by the real USD asset - §2.1).
     "veg":      dict(bevel=0.000, sat=0.76, mdl="omni",   detail=False,
                      tex="grass", bump=1.2, max_gain=7.0, tex_scale=1.4,
                      tex_alts=("grass",)),
@@ -394,83 +395,84 @@ LOOK_CLASS = {
     "glass":    dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
     "paint":    dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
     "sign":     dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
-    # 미상 역할 — 보수적으로. MDL 교체·채도 변경·디테일 노멀 전부 없음.
-    # 분류기가 215종 중 208종을 잡으므로 여기 떨어지는 건 진짜 미상이고,
-    # 그런 재질에 콘크리트 그레인 노멀을 씌우는 건 개선이 아니라 훼손이다.
-    # 눈: 반사율이 높아 베벨·채도 조정 대상이 아니다. 텍스처만 얹는다.
-    # **주의(조사 경고)**: 현 의도색 0.72~0.78 은 표시 sRGB 221~229 로 톤매핑
-    # 상단에서 클리핑돼 텍스처를 붙여도 국소표준편차가 다시 0 이 된다.
-    # 승격 전에 의도 알베도를 0.55~0.62 로 낮춰야 실효가 있다(TODO: 조달 후 적용).
+    # Unknown role - conservative. No MDL swap, no saturation change, no detail normal.
+    # The classifier catches 208 of 215 kinds, so what falls here is genuinely unknown, and
+    # putting a concrete grain normal on such a material is damage, not improvement.
+    # Snow: high reflectance, so it is not a bevel or saturation target. Only the texture is applied.
+    # **Warning (survey)**: the current intended colour of 0.72-0.78 maps to display sRGB 221-229 and clips at
+    # the top of the tone mapping, so even with a texture the local standard deviation returns to 0.
+    # The intended albedo must be lowered to 0.55-0.62 before promotion for any effect (TODO: apply after procurement).
     "snow":     dict(bevel=0.000, sat=1.00, mdl="ground", patch=1.0, detail=True,
                      tex="snow", bump=1.3),
     "misc":     dict(bevel=0.003, sat=1.00, mdl="omni",   detail=False),
 }
 
-# --- `Looks/<이름>` → 클래스 -------------------------------------------------
-# 실측된 이름 빈도 상위부터. 미등재 이름은 "misc"(보수적 기본)로 떨어진다.
+# --- `Looks/<name>` -> class -------------------------------------------------
+# Ordered by measured name frequency. An unlisted name falls to "misc" (the conservative default).
 LOOK_ROLE = {
-    # 포장·광장
+    # Paving, plaza
     "Paving": "paving", "PlazaLight": "paving", "PlazaLower": "paving",
     "Plaza": "paving", "Deck": "wood", "Tile": "paving",
-    # 콘크리트 구조물
+    # Concrete structures
     "Concrete": "concrete", "ConcreteWall": "concrete", "Wall": "concrete",
     "Shell": "concrete", "ShellB": "concrete", "Parapet": "concrete",
     "Stage": "concrete", "Upper": "concrete", "Lower": "concrete",
     "Stair": "concrete", "Riser": "concrete", "Slab": "concrete",
     "Fascia": "concrete", "Pier": "concrete", "Abutment": "concrete",
-    # 석재
+    # Stone
     "Granite": "stone", "GraniteDark": "stone", "Marble": "stone",
     "Rock": "stone", "Stone": "stone", "Sandstone": "stone",
     "RockWall": "stone", "Flag": "stone",
-    # 벽돌·회벽
+    # Brick, rendered wall
     "Brick": "brick", "Plaster": "brick",
-    # 지면 자연물
+    # Natural ground cover
     "Soil": "soil", "Dirt": "soil", "Gravel": "gravel", "Sand": "soil",
     "Asphalt": "asphalt",
-    # 낙차 에지 — 브리프 §2.1 승인값(노징 12 mm)
+    # Drop edge - the brief §2.1 approved value (nosing 12 mm)
     "Nosing": "nosing", "Curb": "curb", "Edge": "nosing",
-    # 금속
+    # Metal
     "Rail": "metal", "Steel": "metal", "Pole": "metal", "Post": "metal",
     "Lamp": "metal", "Bollard": "metal", "BollardBand": "paint",
     "Grate": "metal", "Grating": "metal", "Gear": "metal", "Roof": "metal",
-    # 목재
+    # Wood
     "Wood": "wood", "WoodDark": "wood", "SeatWood": "wood", "Bench": "wood",
-    # 식생
+    # Vegetation
     "Grass": "veg", "GrassB": "veg", "CanopyA": "veg", "CanopyB": "veg",
     "Leaf": "veg", "LeafA": "veg", "LeafB": "veg", "Hedge": "veg",
     "Shrub": "veg", "Reed": "veg", "Moss": "veg",
-    # 물
+    # Water
     "Water": "water",
-    # 도색·표지 — 상수색이 물리적으로 옳다(텍스처화 금지 대상)
+    # Paint and markings - a constant colour is physically correct (not to be texturised)
     "Paint": "paint", "LineWhite": "paint", "LineYellow": "paint",
     "Band": "paint", "Tactile": "paint",
-    # 유리·사인·발광
+    # Glass, signs, emissive
     "Glass": "glass", "Window": "glass", "Panel": "sign",
-    # 분류기 잔여 7종 중 명확한 것만 명시(나머지 Bag/Emit/Rubber/Snow 는
-    # 의도적으로 misc = 최소 처방 — 알 수 없는 재질에 콘크리트 그레인을
-    # 씌우는 것이 더 나쁘다)
+    # Of the 7 remaining classifier kinds only the clear ones are listed (Bag/Emit/Rubber/Snow are
+    # deliberately left as misc = the minimal prescription - putting a concrete grain on an unknown
+    # material is worse)
     "Line": "paint", "CutLine": "paint", "Pot_": "concrete",
     "Snow": "snow", "Panel": "metal", "Iron": "metal",
-    # 오분류 정정(진단 2차): Roof 는 산사 목조 기와라 금속이 아니고,
-    # Ridge/Crest 는 자연 능선이라 콘크리트가 아니다.
+    # Misclassification fixes (2nd diagnosis): Roof is a temple timber tile roof, not metal, and
+    # Ridge/Crest is a natural ridge, not concrete.
     "Roof": "wood", "Roof_": "wood", "Ridge": "soil", "Ridge_": "soil",
     "Crest_": "soil", "Crest": "soil",
     "Sign": "sign", "SignFace": "sign", "SignBack": "sign",
 }
 
 
-# 룩 레이어 적용 계측 — 무엇이 실제로 걸렸는지 눈으로 확인하기 위한 카운터.
-# (게이트 1차에서 "룩 레이어를 켰는데 수치가 안 움직인다"를 진단한 도구다.
-#  원인은 상수색 재질을 통째로 건너뛰고 있었던 것 — 그게 flat% 의 주범인데.)
+# Look-layer application metering - a counter that lets one see what actually got applied.
+# (It is the tool that diagnosed "the look layer is on but the numbers do not move" in the first gate.
+#  The cause was that constant-colour materials were skipped entirely - and they are the main source of flat %.)
 LOOK_STATS = dict(ground=0, omni_tex=0, const=0, bevel=0, detail=0, skin=0,
                   skipped=0, roles={})
 
 
 def look_report():
-    """룩 레이어 적용 요약 한 줄. capture_pipeline 시작 시 출력.
+    """One-line summary of look layer application. Printed when capture_pipeline starts.
 
-    2단 플래그 도입 후 **양팔 각인**이 규칙 R-2 의 검증 수단이다 — 라운드
-    로그에 MTL/GEO 상태가 남아야 대조군을 사후에 확인할 수 있다."""
+    After the 2-stage flags were introduced, **stamping both arms** is the verification
+    means of rule R-2 - the MTL/GEO state must remain in the round log so the control can
+    be confirmed after the fact."""
     if not (LOOK_MTL or LOOK_GEO):
         return "[룩v1] OFF (MTL=0 GEO=0)"
     r = LOOK_STATS
@@ -487,63 +489,63 @@ def look_report():
             + ", ".join(f"{k}:{v}" for k, v in top))
 
 
-# --- 키워드 규칙 분류기 --------------------------------------------------
-# 저장소 전수 실측 결과 `Looks/` 이름이 **약 200종**이고 대부분이 1~2회만 쓰이는
-# 롱테일이다(WetRock, StoneMoss, CityParapet, LboxFrame …). 정확 일치 표만으로는
-# 게이트 1차에서 재질의 절반 이상이 "misc" 로 떨어졌다(scene07 33개 중 21개).
-# → **부분문자열 규칙**을 순서대로 적용해 롱테일을 흡수한다.
-#   규칙은 위에서부터 검사하므로 **더 구체적인 것을 먼저** 둔다
-#   (예: "roadpaint" 는 paint, 그냥 "road" 는 asphalt).
+# --- Keyword rule classifier --------------------------------------------
+# An exhaustive repository scan found **about 200 distinct** `Looks/` names, most of them a long tail
+# used only once or twice (WetRock, StoneMoss, CityParapet, LboxFrame ...). With an exact-match table alone,
+# more than half of all materials fell to "misc" in the first gate (21 of 33 in scene07).
+# -> **Substring rules** are applied in order to absorb the long tail.
+#   Rules are checked from the top, so **put the more specific ones first**
+#   (e.g. "roadpaint" is paint, plain "road" is asphalt).
 _LOOK_RULES = [
-    # 발광·투명 — 룩 레이어에서 제외해야 하는 것부터
+    # Emissive and transparent - starting with what must be excluded from the look layer
     ("glass", ("glass", "window", "lens", "shopglass", "cityglass")),
-    # "panel" 단독은 사인이 아니다 — 실체는 난간 패널·쉘터 지붕이었다
-    # (scene11 6.0% · scene06 5.4%). 사인은 sign/placard 계열로 한정한다.
+    # "panel" on its own is not a sign - in reality they were guardrail panels and shelter roofs
+    # (scene11 6.0 %, scene06 5.4 %). Signs are limited to the sign/placard family.
     ("sign", ("sign", "placard", "plaque", "lbox", "mailbox")),
-    # 도색·표지 — 상수색이 물리적으로 옳다(텍스처화 금지 대상)
-    # joint/cutline = 줄눈 실런트. 종전에는 asphalt 로 분류돼 **줄눈에 아스팔트
-    # 결이 얹히고** 있었다. 도색 계열이 옳다.
+    # Paint and markings - a constant colour is physically correct (not to be texturised)
+    # joint/cutline = joint sealant. It used to be classified as asphalt, so **an asphalt grain was being
+    # laid over the joints**. The paint family is correct.
     ("paint", ("paint", "linewhite", "lineyellow", "roadpaint", "tactile",
                "warn", "tape", "band", "stripe", "gauge", "joint", "cutline",
-               "lane")),   # **"lane" 은 여기(도로 표시)** — asphalt 보다 먼저 잡는다
-    # 식생
+               "lane")),   # **"lane" belongs here (road marking)** - caught before asphalt
+    # Vegetation
     ("veg", ("grass", "leaf", "canopy", "hedge", "shrub", "foliage", "reed",
              "tuft", "tree", "moss", "treeline", "treepit", "verge")),
-    # 눈 — 33씬 통틀어 **단일 재질 최대 면적**(sceneC1 88.5%)인데 misc 에 갇혀
-    # 상수색 MDL 도 텍스처 승격도 못 받고 있었다.
+    # Snow - the **largest single-material area across all 33 scenes** (sceneC1 88.5 %), yet it was stuck in misc
+    # and received neither the constant-colour MDL nor a texture promotion.
     ("snow", ("snow", "frost")),
-    # 물
+    # Water
     ("water", ("water", "sea", "tide", "wet")),
-    # 금속
+    # Metal
     ("metal", ("rail", "steel", "iron", "metal", "pole", "post", "lamp",
                "bollard", "gate", "fence", "grate", "grating", "galv",
                "rebar", "wire", "cable", "hvac", "crane", "gear", "shutter",
                "mullion", "frame", "bin", "lid", "duck", "tool", "beak")),
-    # 목재
+    # Wood
     ("wood", ("wood", "deck", "bench", "seat", "sleeper", "pallet",
               "stringer", "carton", "door")),
-    # 낙차 에지 — 승인된 노징 12 mm / 연석 12 mm
+    # Drop edge - approved nosing 12 mm / curb 12 mm
     ("nosing", ("nosing", "tread", "step")),
-    # **"verge" 제거** — scene04 의 Verge* 는 잔디 갓길(식생)인데 연석 처방을
-    # 받고 있었다(면적 13.4%). 영어 verge 는 갓길·풀밭 가장자리이지 연석이 아니다.
+    # **"verge" removed** - the Verge* materials of scene04 are grass verges (vegetation) yet were
+    # receiving the curb prescription (13.4 % of the area). English verge means a shoulder or grass margin, not a curb.
     ("curb", ("curb", "coping", "cope", "kerb")),
-    # 석재
+    # Stone
     ("stone", ("stone", "granite", "marble", "rock", "flag", "cobble",
                "polish", "lightstone")),
-    # 벽돌·회벽
+    # Brick, rendered wall
     ("brick", ("brick", "plaster")),
-    # 흙·자갈
+    # Soil, gravel
     ("soil", ("soil", "dirt", "earth", "mud", "leafbed")),
     ("gravel", ("gravel", "ballast", "debris", "rubble")),
-    # 아스팔트·차도
-    # "lane"·"joint" 는 paint 로 이동(차선 파선·줄눈 실런트).
-    # 종전에는 차선이 asphalt 로 분류돼 **아스팔트 텍스처 승격 대상**이 됐다 —
-    # v5.1 §4 상수색 불가침 정면 위반이다(도색은 균일해야 단서로 기능한다).
+    # Asphalt, carriageway
+    # "lane" and "joint" moved to paint (lane dashes, joint sealant).
+    # Previously lane markings were classified as asphalt and became **targets for asphalt texture promotion** -
+    # a head-on violation of the v5.1 §4 constant-colour rule (paint must stay uniform to work as a cue).
     ("asphalt", ("asphalt", "road", "patch")),
-    # 포장
+    # Paving
     ("paving", ("pav", "plaza", "walk", "sidewalk", "tile", "block",
                 "apron", "alley", "podium", "platform")),
-    # 콘크리트 구조물 — 가장 넓은 그물이므로 마지막
+    # Concrete structures - the widest net, so it comes last
     ("concrete", ("concrete", "conc", "wall", "parapet", "shell", "slab",
                   "stair", "riser", "skirt", "fascia", "ceiling", "facade",
                   "bldg", "city", "house", "shed", "tunnel", "bridge",
@@ -554,18 +556,18 @@ _LOOK_RULES = [
 
 
 
-# --- 채도 자기교정 ------------------------------------------------------
-# 역할별 계수만으로는 부족하다. Phase0 에서 이미 확인했듯 scene01 은 sat_mu 가
-# 0.146 으로 **이미 목표 하한(0.15) 미달**인데, 역할 계수는 씬 상태를 모르므로
-# 그대로 걸면 더 탈색된다(실측: 0.146 → 0.134). 과채도는 석재·흙·초목 계열의
-# **국소 현상**이지 전역이 아니다.
-# → 재질 **자신의 채도**를 보고 과채도일 때만 낮춘다. 자기교정이라 씬 정보가
-#   필요 없고, 이미 저채도인 재질은 건드리지 않는다.
-# [중대 M5] 종전 0.30 은 **텍스처 채도 분포보다 위**라 stone(0.66)·asphalt(0.90)·
-# paving 계수가 사실상 한 번도 발동하지 않았다. 게다가 렌더 공간 sat_mu 임계를
-# 텍스처 공간에 그대로 옮겨 쓴 단위 불일치였다.
-# 실사 n=54 의 sat_mu 는 0.232±0.071 이고 텍스처 자체 채도는 그보다 낮게 나온다.
-# → knee 를 텍스처 공간 기준으로 낮춘다.
+# --- Saturation self-correction -----------------------------------------
+# Per-role coefficients alone are not enough. As Phase0 already showed, scene01 has sat_mu of
+# 0.146, i.e. **already below the target floor (0.15)**, and the role coefficients know nothing about the
+# scene state, so applying them directly desaturates further (measured: 0.146 -> 0.134). Over-saturation is a
+# **local phenomenon** of the stone, soil and plant families, not a global one.
+# -> Look at **the material's own saturation** and lower it only when over-saturated. Being self-correcting,
+#   it needs no scene information and leaves already-desaturated materials alone.
+# [major M5] The old 0.30 was **above the texture saturation distribution**, so the stone (0.66), asphalt (0.90)
+# and paving coefficients effectively never fired. It was also a unit mismatch: a render-space sat_mu threshold
+# transplanted straight into texture space.
+# Real photographs (n=54) have sat_mu 0.232+-0.071 and texture saturation itself comes out lower than that.
+# -> The knee is lowered to a texture-space basis.
 _SAT_KNEE = 0.18
 _TEXSAT_CACHE = {}
 
@@ -576,7 +578,7 @@ def _rgb_sat(rgb):
 
 
 def _texture_sat(path):
-    """텍스처 평균 채도. PIL 로 축소 로드해 계산하고 캐시한다(씬당 수 개)."""
+    """Mean texture saturation. Computed from a downscaled PIL load and cached (a few per scene)."""
     if path in _TEXSAT_CACHE:
         return _TEXSAT_CACHE[path]
     v = None
@@ -598,9 +600,10 @@ def _texture_sat(path):
 
 
 def _effective_sat(spec, diff, base_color):
-    """역할 계수를 **과채도일 때만** 적용한 실효 채도 계수.
+    """Effective saturation coefficient, applying the role coefficient **only when over-saturated**.
 
-    반환 1.0 = 원본 유지. 재질 채도를 모르면 보수적으로 1.0(무영향).
+    A return of 1.0 keeps the original. If the material saturation is unknown, it is
+    conservatively 1.0 (no effect).
     """
     coef = float(spec.get("sat", 1.0))
     if coef >= 0.999:
@@ -608,20 +611,20 @@ def _effective_sat(spec, diff, base_color):
     cur = (_rgb_sat(base_color) if base_color is not None
            else (_texture_sat(diff) if diff else None))
     if cur is None or cur <= _SAT_KNEE:
-        return 1.0                          # 이미 저채도 → 손대지 않는다
-    # knee 를 넘은 만큼만 비례 적용 (급격한 계단 방지)
+        return 1.0                          # Already desaturated -> leave it alone
+    # Apply only in proportion to the excess over the knee (avoids an abrupt step)
     t = min(1.0, (cur - _SAT_KNEE) / 0.20)
     return 1.0 + (coef - 1.0) * t
 
 
-# 승격 배율 상한. 넘으면 승격을 포기한다(색 왜곡 < 결 획득).
-# 밝기 분기가 배율을 1 근처로 낮추므로 실제로 걸리는 경우는 드물다.
+# Upper bound of the promotion multiplier. Above it, promotion is abandoned (colour distortion < grain gained).
+# The brightness branch keeps the multiplier near 1, so it rarely triggers in practice.
 _PROMOTE_MAX_GAIN = 4.0
 _TEXMEAN_CACHE = {}
 
 
 def _texture_mean(path):
-    """텍스처 평균 RGB (0~1). PIL 축소 로드 + 캐시."""
+    """Mean texture RGB (0-1). Downscaled PIL load plus cache."""
     if path in _TEXMEAN_CACHE:
         return _TEXMEAN_CACHE[path]
     v = None
@@ -631,12 +634,12 @@ def _texture_mean(path):
             im = im.convert("RGB")
             im.thumbnail((64, 64))
             a = np.asarray(im).astype(np.float64) / 255.0
-        # [치명 · 색공간] MDL 은 diffuse 를 colorSpace="auto" 로 읽어 **선형으로
-        # 디코딩**한 뒤 base_color 를 곱한다. 그런데 종전에는 여기서 JPEG 를
-        # **sRGB 인코딩 값 그대로** 평균내 base_color = 의도색 / sRGB평균 을 냈다.
-        # 두 공간을 섞은 셈이라 승격 재질이 **2.06~3.64배 어두워졌다**.
-        # scene07 이 9.51 → 10.00 으로 역행한 직접 원인이다.
-        # → sRGB → 선형 변환 후 평균낸다 (IEC 61966-2-1).
+        # [fatal, colour space] The MDL reads diffuse with colorSpace="auto", i.e. **decodes it
+        # linearly**, and then multiplies base_color. Previously the JPEG was averaged here
+        # **in its sRGB-encoded values**, giving base_color = intended colour / sRGB mean.
+        # That mixes two spaces, so promoted materials came out **2.06 to 3.64 times darker**.
+        # It is the direct cause of scene07 regressing from 9.51 to 10.00.
+        # -> Convert sRGB to linear before averaging (IEC 61966-2-1).
         lin = np.where(a <= 0.04045, a / 12.92, ((a + 0.055) / 1.055) ** 2.4)
         v = tuple(float(x) for x in lin.reshape(-1, 3).mean(0))
     except Exception as e:
@@ -647,36 +650,39 @@ def _texture_mean(path):
 
 
 def _promote_const_to_texture(spec, diffuse_color):
-    """[사실화 v1] 상수색 재질을 역할 텍스처로 승격.
+    """[realism v1] Promote a constant-colour material to its role texture.
 
-    왜 필요한가 — sceneD3 정밀 진단 결과 죽은 픽셀의 **89.8% 가 상수색
-    아스팔트 차도 한 장**이었고, 그 표면의 국소표준편차 중앙값은 임계의
-    **1/4000** 이었다. 결정적 대조군: 같은 z=0 평면·같은 광원·같은 거리의 잔디
-    버지는 dead **0.0%** 이며, 유일한 차이가 디퓨즈 텍스처의 유무였다.
+    Why it is needed - a detailed sceneD3 diagnosis found that **89.8 % of dead pixels were
+    a single constant-colour asphalt carriageway**, and the median local standard deviation
+    of that surface was **1/4000** of the threshold. The decisive control: a grass verge on
+    the same z=0 plane, under the same light, at the same distance, had **0.0 %** dead
+    pixels, and the only difference was the presence of a diffuse texture.
 
-    상수색 MDL 모드(파장 14 m 명도 변조)로는 못 고친다 — `flat_gnd` 는 5×5 픽셀
-    창의 "결"을 보는데 macro 변조는 주파수 대역이 아예 다르다.
+    The constant-colour MDL mode (macro brightness modulation with a 14 m wavelength) cannot
+    fix it - `flat_gnd` looks at the grain in a 5x5 pixel window, and macro modulation is in
+    an entirely different frequency band.
 
-    **의도 알베도 보존**: 씬 작성자가 고른 색을 그대로 살리기 위해, 텍스처를
-    바인딩하되 `base_color = 의도색 / 텍스처평균` 으로 곱해 평균 알베도를
-    유지한다. 즉 "색은 그대로, 결만 얻는다".
+    **Preserving the intended albedo**: to keep the colour the scene author chose, the
+    texture is bound but multiplied by `base_color = intended colour / texture mean`, keeping
+    the average albedo. In other words, the colour stays and only the grain is gained.
 
-    반환: (diff, nor, rough, base_color) — 승격 불가 시 (None, None, None, 원색)
+    Returns: (diff, nor, rough, base_color) - (None, None, None, original colour) when
+    promotion is not possible.
     """
     cands = [r for r in (spec.get("tex_alts") or (spec.get("tex"),))
              if r and r in TEX]
     if not cands or diffuse_color is None:
         return None, None, None, diffuse_color
     try:
-        # [밝기 분기] **1순위(의미) 우선, 예산 초과 시에만 대안**.
-        #   휘도만으로 고르면 낙엽에 잔디 텍스처가 붙는 등 재질 의미가 깨진다.
-        #   종전에는 역할당 텍스처가 하나라, 밝은 파라펫(0.9)에 어두운
-        #   concrete_floor(선형휘도 0.115)를 씌우면 배율이 7.8배가 되어
-        #   클램프(2.5)에 포화 → **의도 대비 2.5~4.8배 어둡고 색까지 편향**됐다.
-        #   ("색은 그대로, 결만 얻는다"는 주석이 사실과 반대였다.)
-        #   가까운 텍스처를 고르면 배율이 1 근처로 내려가 클램프가 안 걸린다.
+        # [brightness branch] **Meaning comes first, alternatives only when the budget is exceeded**.
+        #   Choosing by luminance alone breaks material meaning, e.g. grass texture on fallen leaves.
+        #   Previously there was one texture per role, so putting the dark concrete_floor
+        #   (linear luminance 0.115) on a bright parapet (0.9) gave a multiplier of 7.8 that
+        #   saturated the clamp (2.5) -> **2.5-4.8x darker than intended, with a colour bias too**.
+        #   (The comment saying "the colour stays and only the grain is gained" was the opposite of the truth.)
+        #   Choosing a nearby texture keeps the multiplier near 1 and the clamp never fires.
         gain_max = float(spec.get("max_gain", _PROMOTE_MAX_GAIN))
-        # 후보 순서 = 의미 우선순위. tex 를 맨 앞에 놓는다.
+        # Candidate order = meaning priority. tex goes first.
         prim = spec.get("tex")
         order = ([prim] if prim in cands else []) + [r for r in cands if r != prim]
         role = None
@@ -688,7 +694,7 @@ def _promote_const_to_texture(spec, diffuse_color):
             if tm is None or min(tm) < 1e-4:
                 continue
             ratio = [float(c) / m for c, m in zip(diffuse_color, tm)]
-            # 채널 배율 편차가 크면 색 변동이 특정 채널로 쏠린다(잡음 증폭).
+            # A large spread between per-channel multipliers pushes the colour shift into one channel (noise amplification).
             spread = max(ratio) / max(min(ratio), 1e-6)
             if max(ratio) <= gain_max and spread <= 4.0:
                 role = r
@@ -705,9 +711,9 @@ def _promote_const_to_texture(spec, diffuse_color):
         tm = _texture_mean(diff)
         if tm is None or min(tm) < 1e-4:
             return None, None, None, diffuse_color
-        # 의도 알베도 / 텍스처 평균(선형). 배율이 과하면 텍스처 잡음까지 증폭되고
-        # 하이라이트가 클리핑되므로, **클램프에 걸릴 정도면 승격을 포기**하고
-        # 상수색 MDL 로 되돌린다. 색을 틀리게 만드느니 결을 포기하는 편이 낫다.
+        # Intended albedo / texture mean (linear). An excessive multiplier amplifies texture noise and
+        # clips highlights, so **if it would hit the clamp, promotion is abandoned** and the
+        # constant-colour MDL is used instead. Better to give up the grain than to get the colour wrong.
         bc = tuple(max(0.05, r) for r in ratio)
         return diff, nor, rough, bc
     except Exception as e:
@@ -716,12 +722,12 @@ def _promote_const_to_texture(spec, diffuse_color):
 
 
 def _look_spec(path):
-    """프림 경로에서 룩 사양을 얻는다. `.../Looks/Paving` → paving 사양.
+    """Get the look spec from a prim path. `.../Looks/Paving` -> the paving spec.
 
-    ① 정확 일치 표(LOOK_ROLE) → ② 접미 변형 제거 후 재시도
-    → ③ 키워드 부분문자열 규칙 → ④ "misc"(보수적 기본).
-    미상은 최소 처방만 받으므로 회귀 위험이 없다.
-    반환: (클래스명, 사양 dict)
+    (1) exact match table (LOOK_ROLE) -> (2) retry after stripping suffix variants
+    -> (3) keyword substring rules -> (4) "misc" (the conservative default).
+    An unknown gets only the minimal prescription, so there is no regression risk.
+    Returns: (class name, spec dict)
     """
     name = str(path).rstrip("/").split("/")[-1]
     cls = LOOK_ROLE.get(name)
@@ -740,11 +746,11 @@ def _look_spec(path):
 
 
 def check_assets(roles, hdri=None):
-    """지정 역할의 텍스처 존재만 검사. 누락 시 목록 출력 후 sys.exit(1).
+    """Check only that the textures of the given roles exist. On a miss, print the list and sys.exit(1).
 
-    roles: 텍스처 역할 이름 리스트. 특수 pseudo-role:
-        "hdri" → noon HDRI(기본 DEFAULT_HDRI, hdri 인자로 지정 가능),
-        "mdl"  → OmniPBR.mdl.
+    roles: list of texture role names. Special pseudo-roles:
+        "hdri" -> the noon HDRI (DEFAULT_HDRI by default, selectable via the hdri argument),
+        "mdl"  -> OmniPBR.mdl.
     """
     import sys
     missing = []
@@ -778,12 +784,13 @@ def check_assets(roles, hdri=None):
 
 
 # ===========================================================================
-# [2] boot — SimulationApp + carb 설정 + 스테이지 단위 (scene01 그대로)
+# [2] boot - SimulationApp + carb settings + stage units (as in scene01)
 # ===========================================================================
 def boot(headless):
-    """Isaac Sim 부팅. SimulationApp을 무조건 먼저 생성한 뒤 나머지 import.
-    carb 캡처 위생 설정 + 스테이지 단위(Z-up, meter)를 적용하고 sim_app 반환.
-    stage는 씬에서 omni.usd.get_context().get_stage()로 다시 얻으면 된다.
+    """Boot Isaac Sim. SimulationApp is always created first, then everything else is imported.
+    Applies the carb capture hygiene settings and the stage units (Z-up, metre) and returns
+    sim_app. The scene can obtain stage again through
+    omni.usd.get_context().get_stage().
     """
     from isaacsim import SimulationApp
     sim_app = SimulationApp(
@@ -796,15 +803,15 @@ def boot(headless):
     settings = carb.settings.get_settings()
     settings.set("/rtx/post/dlss/execMode", 2)     # DLSS Quality
     settings.set("/rtx/post/aa/op", 3)             # DLSS AA
-    # [사실화 P1] PT 가속 — /rtx/pathtracing/spp 기본값이 1이라 totalSpp 를
-    # 프레임 수만큼 누적하고 있었다(512spp = 512프레임). subframes 를 올리면
-    # 한 update 안에서 여러 샘플을 돌린다. 감독 실측: 4.89 → 0.08 s/컷(61배),
-    # 결과 이미지는 픽셀 단위 동일. 씬 파일은 이 키를 건드리지 않으므로
-    # 여기서 켜면 전 씬에 적용된다. 기본 OFF(회귀 방지) — env 로 명시 활성화.
+    # [realism P1] PT acceleration - /rtx/pathtracing/spp defaults to 1, so totalSpp was being
+    # accumulated over as many frames (512spp = 512 frames). Raising subframes runs several
+    # samples inside one update. Supervisor measurement: 4.89 -> 0.08 s/shot (61x), with the
+    # result image identical pixel for pixel. Scene files never touch this key, so enabling it
+    # here applies to every scene. OFF by default (regression prevention) - enable explicitly via env.
     if os.environ.get("NEGOBS_PT_FAST", "") == "1":
         settings.set("/app/renderer/rtSubframes", PT_FAST["subframes"])
         print(f"[렌더] PT 가속 ON — {PT_FAST}")
-    # 뷰포트 그리드·축 가이드가 렌더에 찍히지 않게 (캡처 위생)
+    # Keep the viewport grid and axis guides out of the render (capture hygiene)
     settings.set("/app/viewport/grid/enabled", False)
     settings.set("/persistent/app/viewport/displayOptions", 0)
     settings.set("/app/viewport/show/grid", False)
@@ -821,8 +828,8 @@ def boot(headless):
 
 
 # ===========================================================================
-# [3] 지오메트리 헬퍼 (stage 인자화) — UsdGeom.Cube/Cylinder/Sphere
-#     주의: UsdGeom.Cube는 size=2 기본(±1) → 스케일 = 원하는 치수/2
+# [3] Geometry helpers (stage passed in) - UsdGeom.Cube/Cylinder/Sphere
+#     Note: UsdGeom.Cube defaults to size=2 (+-1) -> scale = desired dimension / 2
 # ===========================================================================
 def _bind_mtl(prim, mtl):
     if mtl is not None:
@@ -844,42 +851,43 @@ def add_box(stage, path, center, size, mtl=None, collider=False):
     _bind_mtl(prim, mtl)
     if collider:
         UsdPhysics.CollisionAPI.Apply(prim)
-    # [사실화 v1] 대면적 수평 지면 슬래브에 미세 기복 스킨을 덮는다.
-    # Phase1 E9 에서 **정점 변위가 최대 시각 기여**였다(MDL 교체보다 큼).
-    # 슬래브 자체는 건드리지 않으므로 낙차 에지 실루엣은 그대로다(승용 조건②).
-    if LOOK_GEO and _skin_wanted(path, size, mtl):    # 메시 신설 = 기하
+    # [realism v1] Cover large horizontal ground slabs with a micro-relief skin.
+    # In Phase1 E9 **vertex displacement was the largest visual contributor** (bigger than the MDL swap).
+    # The slab itself is untouched, so the drop edge silhouette is unchanged (approval condition (2)).
+    if LOOK_GEO and _skin_wanted(path, size, mtl):    # A new mesh = geometry
         try:
-            # 시드는 **반드시 결정적**이어야 한다. Python 내장 hash() 는
-            # PYTHONHASHSEED 로 프로세스마다 무작위화되므로 매 렌더마다 지형
-            # 기복이 달라진다(이 프로젝트는 RNG 100% 결정적이 원칙). crc32 사용.
+            # The seed **must be deterministic**. Python's builtin hash() is randomised per process by
+            # PYTHONHASHSEED, which would change the terrain relief on every render (this project's rule is
+            # 100 % deterministic RNG). crc32 is used.
             if _ground_skin(stage, f"{path}_Skin", center, size, mtl,
                             seed=zlib.crc32(str(path).encode()) % 100000
                             ) is not None:
                 LOOK_STATS["skin"] += 1
-        except Exception as e:                 # 스킨 실패가 씬을 죽이면 안 된다
+        except Exception as e:                 # A skin failure must not kill the scene
             print(f"[룩v1][경고] 지면 스킨 생성 실패 {path}: {e}")
     return cube
 
 
-# [W2-0 · P-A] ground_kit 이 장식하는 지면 슬래브의 변위 스킨을 끈다.
-#   스킨 상면은 +6.5~16.5 mm 인데(`_ground_skin` 재실측) flush 지면 요소의
-#   proud 는 0.6~4.0 mm 라 **통째로 묻힌다** — 맨홀 암부 화소 5.88 % → 0.02 %,
-#   점형블록 강황색 화소 2,090 → 118 px `[실측 — ground_kit_spec_v1 §1.1·§12.5]`.
-#   ground_kit 은 이 함수를 **콜백으로 주입받는다**(scene_common 미의존 원칙 유지).
+# [W2-0, P-A] Turn off the displacement skin on ground slabs that ground_kit decorates.
+#   The skin top is +6.5 to 16.5 mm (re-measured in `_ground_skin`) while flush ground elements have
+#   proud of 0.6-4.0 mm, so they are **buried entirely** - manhole dark pixels 5.88 % -> 0.02 %,
+#   dot block deep-yellow pixels 2,090 -> 118 px `[measured - ground_kit_spec_v1 §1.1, §12.5]`.
+#   ground_kit receives this function **as an injected callback** (keeping the no-scene_common-dependency principle).
 SKIN_EXCLUDE = set()
 
 
 def skin_exclude(*paths):
-    """스킨 제외 경로 등록. 접두 일치도 제외된다. 씬이 ground_kit 적용 전에 호출."""
+    """Register paths excluded from skinning. Prefix matches are excluded too. Scenes call this before applying ground_kit."""
     SKIN_EXCLUDE.update(str(p) for p in paths)
 
 
 def _skin_wanted(path, size, mtl):
-    """변위 스킨 대상 판정 — 대면적·수평·지면 계열만.
+    """Decide whether a prim is a displacement skin target - only large, horizontal, ground-family surfaces.
 
-    승용 조건②("낙차 에지 실루엣은 변위로 흔들리지 않게 보존")에 따라 계단·연석·
-    노징·데크 등 낙차 기하는 경로 토큰으로 전면 제외한다. 판정이 애매하면 **제외**가
-    기본값이다 — 변위는 개선 항목이지 필수가 아니므로 위험을 지지 않는다.
+    Under approval condition (2) ("the drop edge silhouette must not be shaken by displacement"),
+    drop geometry such as stairs, curbs, nosings and decks is excluded wholesale by path token.
+    When the decision is ambiguous, **exclusion** is the default - displacement is an
+    improvement, not a requirement, so no risk is taken.
     """
     if str(path) in SKIN_EXCLUDE or any(str(path).startswith(p)
                                         for p in SKIN_EXCLUDE):
@@ -887,15 +895,15 @@ def _skin_wanted(path, size, mtl):
     if mtl is None:
         return False
     sx, sy, sz = [float(v) for v in size]
-    if sx < 4.0 or sy < 4.0:                   # 대면적만 (소품·연석 제외)
+    if sx < 4.0 or sy < 4.0:                   # Large areas only (props and curbs excluded)
         return False
-    if sz > 0.8 or sz >= min(sx, sy) * 0.5:    # 수평 슬래브만 (벽·기둥 제외)
+    if sz > 0.8 or sz >= min(sx, sy) * 0.5:    # Horizontal slabs only (walls and columns excluded)
         return False
     low = str(path).lower()
     if any(t in low for t in _SKIN_DENY):
         return False
-    # 역할은 **바인딩된 재질 경로**(`.../Looks/Paving`)로 판정한다.
-    # 지오메트리 경로(`.../Ground`)에는 역할 이름이 없다.
+    # The role is decided from the **bound material path** (`.../Looks/Paving`).
+    # The geometry path (`.../Ground`) carries no role name.
     try:
         mpath = str(mtl.GetPath())
     except Exception:
@@ -908,25 +916,27 @@ def _skin_wanted(path, size, mtl):
 
 def _ground_skin(stage, path, center, size, mtl, amp_m=0.010,
                  spacing=0.12, taper=0.60, max_n=170, seed=17):
-    """[사실화 v1] 지면 슬래브 위에 얹는 **미세 기복 스킨** 메시.
+    """[realism v1] The **micro-relief skin** mesh laid on top of a ground slab.
 
-    왜 스킨인가 — 슬래브 자체(Cube)를 변위 메시로 갈아치우면 측면 4면이 사라지고
-    **낙차 에지의 실루엣이 흔들린다**(승용 조건②: "낙차 에지는 변위로 흔들리지
-    않게 보존"). 그래서 원래 Cube 는 **그대로 두고**, 상면보다 아주 살짝 위에
-    변위 스킨을 덮는다. 결과적으로
-      · 슬래브의 외곽 실루엣·낙차 에지 = 원래 Cube 가 그대로 결정 (변경 0)
-      · 상면 안쪽만 기복 → h0.3 스침각에서 지면이 평면으로 안 읽힘
-    이 방식은 GT 낙차 기하도 건드리지 않는다.
+    Why a skin - replacing the slab itself (a Cube) with a displaced mesh would remove its 4
+    side faces and **shake the drop edge silhouette** (approval condition (2): "the drop edge
+    must not be shaken by displacement"). So the original Cube is **left alone** and a
+    displacement skin is laid just slightly above its top. As a result
+      - the slab outline and drop edge are still determined by the original Cube (0 change)
+      - only the interior of the top surface has relief -> the ground no longer reads as a
+        plane at the h0.3 grazing angle
+    This approach also leaves the GT drop geometry untouched.
 
-    추가 안전장치 2개:
-      ① 스킨을 슬래브 경계에서 `edge` 만큼 **안쪽으로 들여** 깐다 → 슬래브 rim 은
-         원본 그대로 보이고, 스킨 자신의 rim 은 시야에서 죽는다.
-      ② 변위 진폭에 **경계 테이퍼**를 곱해 스킨 가장자리에서 0 으로 수렴 →
-         들여깐 경계에서도 단차가 생기지 않는다.
+    Two extra safeguards:
+      (1) The skin is inset by `edge` from the slab boundary -> the slab rim stays original and
+         the skin's own rim dies out of sight.
+      (2) The displacement amplitude is multiplied by a **boundary taper** converging to 0 at
+         the skin edge -> no step appears even at the inset boundary.
 
-    Phase1 E5 실측: 노멀을 저작하지 않으면 Hydra 가 면법선으로 그려 각져 보인다
-    → 유한차분으로 정점 노멀을 직접 계산해 넣는다. `subdivisionScheme="none"` 도
-    명시 저작(미저작 시 USD 기본값 catmullClark — Phase1 §2.6 지뢰).
+    Phase1 E5 measurement: without authored normals, Hydra draws with face normals and the
+    result looks faceted -> vertex normals are computed directly by finite difference.
+    `subdivisionScheme="none"` is authored explicitly too (unauthored means the USD default
+    catmullClark - the Phase1 §2.6 landmine).
     """
     from pxr import UsdGeom, UsdShade, Gf
     cx, cy, cz = [float(v) for v in center]
@@ -939,9 +949,9 @@ def _ground_skin(stage, path, center, size, mtl, amp_m=0.010,
     ny = max(4, min(int(2 * hy / spacing), max_n))
     x0, x1 = cx - hx, cx + hx
     y0, y1 = cy - hy, cy + hy
-    # [중대 M3] 부상 1.5 mm 인데 변위 진폭이 ±9.8 mm 라 스킨의 25~29% 가 슬래브
-    # 상면 **아래로 침투**해 원 Cube 평면이 드러나고 교차 컨투어가 생겼다.
-    # 부상량을 진폭보다 크게 잡아 스킨이 항상 위에 있게 한다.
+    # [major M3] The lift was 1.5 mm while the displacement amplitude was +-9.8 mm, so 25-29 % of the skin
+    # **penetrated below the slab top**, exposing the original Cube plane and creating intersection contours.
+    # The lift is now larger than the amplitude so the skin is always above.
     ztop = cz + sz / 2.0 + max(0.0015, amp_m * 1.15)
 
     rng = np.random.default_rng(seed)
@@ -949,9 +959,9 @@ def _ground_skin(stage, path, center, size, mtl, amp_m=0.010,
     ys = np.linspace(y0, y1, ny + 1)
     XX, YY = np.meshgrid(xs, ys, indexing="ij")
     ZZ = np.full_like(XX, ztop)
-    # [중대 M4] 최고주파 옥타브(0.07 m)가 메시 간격(0.12~0.24 m)보다 촘촘해
-    # **항상 앨리어싱**됐다(나이퀴스트 위반) → 노멀에 고주파 잡음. 간격의 2.5배
-    # 이상인 파장만 쓴다.
+    # [major M4] The highest-frequency octave (0.07 m) was finer than the mesh spacing (0.12-0.24 m) and
+    # therefore **always aliased** (a Nyquist violation) -> high-frequency noise in the normals. Only
+    # wavelengths of at least 2.5x the spacing are used.
     _wl_min = spacing * 2.5
     for oi, wl in enumerate(w for w in (0.55, 0.19, 0.07) if w >= _wl_min):
         gx = max(2, int((x1 - x0) / wl) + 1)
@@ -965,7 +975,7 @@ def _ground_skin(stage, path, center, size, mtl, amp_m=0.010,
         v = ((g[i0, j0] * (1 - sxs) + g[i0 + 1, j0] * sxs) * (1 - sys_)
              + (g[i0, j0 + 1] * (1 - sxs) + g[i0 + 1, j0 + 1] * sxs) * sys_)
         ZZ += v * amp_m * (0.6 ** oi)
-    # 경계 테이퍼 — 스킨 가장자리에서 변위 0
+    # Boundary taper - displacement 0 at the skin edge
     tx_ = np.clip((np.minimum(XX - x0, x1 - XX)) / max(taper, 1e-6), 0, 1)
     ty_ = np.clip((np.minimum(YY - y0, y1 - YY)) / max(taper, 1e-6), 0, 1)
     t = (tx_ * tx_ * (3 - 2 * tx_)) * (ty_ * ty_ * (3 - 2 * ty_))
@@ -997,28 +1007,28 @@ def _ground_skin(stage, path, center, size, mtl, amp_m=0.010,
     return m
 
 
-# 상수색 재질을 NegObsGround(base_color 모드)로 태울 클래스.
-# 제외: paint(차선·반사띠·점자블록) · sign · glass · water · misc
-#   → 이들은 **상수색이 물리적으로 옳다**(v5.1 §4). 텍스처·노이즈를 얹으면
-#     오히려 규약 위반이고, 특히 도색 표지는 균일해야 단서로 기능한다.
-# [중대 M1 + 정책 정합] 보고서 §2.2 의 3단 재질 정책은 "식생·금속·목재 = OmniPBR"
-# 인데 코드는 이 집합에 셋 다 넣어 상수색이면 MDL 로 보내고 있었다(59종 불일치).
-# 특히 **금속은 MDL 에 metallic 입력이 아예 없어 금속성이 소실**된다.
-# 정책대로 지면·구조물 계열만 남긴다.
-# metal 만 제외하면 된다 — MDL 이 metalness=0 축약형이라 **금속성만** 소실된다.
-# 식생·목재는 금속성이 없으므로 MDL 로 보내도 무방하고, scene07 진단에서
-# 상수색 식생 2.26%p·상수색 목재 1.61%p 가 죽은 픽셀 상위였다.
+# Classes whose constant-colour materials are routed to NegObsGround (base_color mode).
+# Excluded: paint (lane markings, reflective bands, tactile paving), sign, glass, water, misc
+#   -> for these **a constant colour is physically correct** (v5.1 §4). Adding texture or noise
+#     violates the convention, and painted markings in particular must stay uniform to work as cues.
+# [major M1 + policy alignment] The 3-tier material policy of report §2.2 says "vegetation, metal, wood = OmniPBR",
+# yet the code put all three in this set and routed constant colours to the MDL (59 kinds mismatched).
+# In particular **metal has no metallic input in the MDL at all, so metallic character is lost**.
+# Per the policy, only the ground and structure families remain.
+# Only metal needs excluding - the MDL is a metalness=0 reduction, so **only metallic character** is lost.
+# Vegetation and wood have no metallic character and are fine in the MDL, and in the scene07
+# diagnosis constant-colour vegetation (2.26 pp) and constant-colour wood (1.61 pp) were top dead-pixel sources.
 _CONST_MDL_CLASSES = {"paving", "concrete", "brick", "stone", "soil",
                       "gravel", "asphalt", "nosing", "curb", "snow",
                       "veg", "wood"}
 
-# 변위 스킨을 붙일 역할 클래스 (지면 계열만). 계단·연석·노징은 제외 —
-# 낙차 에지 기하이므로 승용 조건②에 따라 손대지 않는다.
+# Role classes that get a displacement skin (ground family only). Stairs, curbs and nosings are excluded -
+# they are drop edge geometry and are left alone under approval condition (2).
 _SKIN_CLASSES = {"paving", "concrete", "asphalt", "soil", "gravel", "stone"}
-# 경로에 이 토큰이 있으면 지면이어도 변위 금지 (낙차 기하·보행 안전 관련)
-#   "gkit" — ground_kit 산출물은 전부 `{ROOT}/GKit/...` 아래다. 도막·마모 띠처럼
-#   4 m 이상 대면적을 만드는 빌더가 있어, 이 토큰이 없으면 ground_kit 요소가
-#   **자기 위에 2차 스킨을 뒤집어쓴다** [W2-0 · 사양 §1.2].
+# A path containing one of these tokens gets no displacement even if it is ground (drop geometry, walking safety)
+#   "gkit" - all ground_kit output lives under `{ROOT}/GKit/...`. Some builders create areas over
+#   4 m, such as coating and wear bands, so without this token a ground_kit element would
+#   **take on a second skin over itself** [W2-0, spec §1.2].
 _SKIN_DENY = ("stair", "step", "tread", "riser", "nosing", "curb", "ramp",
               "landing", "deck", "platform", "edge", "lip", "sill", "gkit")
 
@@ -1031,7 +1041,7 @@ def add_cylinder(stage, path, center, radius, height, mtl=None,
     cyl.CreateHeightAttr(float(height))
     cyl.CreateAxisAttr(UsdGeom.Tokens.z)
     xf = UsdGeom.Xformable(cyl)
-    # 순서: translate → rotate (프림 원점에서 회전 후 이동)
+    # Order: translate -> rotate (rotate about the prim origin, then move)
     xf.AddTranslateOp().Set(Gf.Vec3d(*[float(c) for c in center]))
     if abs(rotY) > 1e-9:
         xf.AddRotateYOp().Set(float(rotY))
@@ -1057,14 +1067,15 @@ def add_sphere(stage, path, center, scale3, mtl=None):
 
 def _oriented_box(stage, path, center, size, mtl=None, collider=False,
                   rotz=0.0, rotx=0.0):
-    """회전 가능한 솔리드 Cube. op 리스트 = translate→rotZ→rotX→scale.
-    USD row-vector 규약상 리스트 역순으로 점에 적용된다: scale → rotX → rotZ →
-    translate. 즉 rotX 는 (아직 방위로 안 돌린) 로컬 프레임에서 먼저 걸리고,
-    이어 rotZ 가 그 로컬 프레임 전체를 방위각으로 회전시킨다.
-      build_arc_steps 관례: 로컬 X=반경방향, Y=접선(현), Z=높이.
-      → rotZ 이전의 로컬 X 는 방위 0의 반경축이며, rotZ 후 실제 반경방향이 된다.
-        따라서 '접선방향 경사'(현을 따라 오르내림)는 **로컬 X축(rotX) 회전**이다.
-        (접선=로컬Y 이므로 접선을 기울이는 축은 그에 수직인 로컬X = 반경축.)"""
+    """Rotatable solid Cube. op list = translate -> rotZ -> rotX -> scale.
+    Under the USD row-vector convention the list applies to points in reverse: scale -> rotX ->
+    rotZ -> translate. So rotX acts first in the local frame (not yet rotated to its bearing),
+    and rotZ then rotates that whole local frame by the azimuth.
+      build_arc_steps convention: local X = radial, Y = tangential (chord), Z = height.
+      -> local X before rotZ is the radial axis at bearing 0, and becomes the true radial
+        direction after rotZ. A tangential slope (rising or falling along the chord) is
+        therefore a rotation about the **local X axis (rotX)**.
+        (The tangent is local Y, so the axis that tilts it is perpendicular to it = local X = radial.)"""
     from pxr import UsdGeom, UsdPhysics, Gf
     cube = UsdGeom.Cube.Define(stage, path)
     cube.CreateSizeAttr(2.0)
@@ -1086,24 +1097,25 @@ def _oriented_box(stage, path, center, size, mtl=None, collider=False,
 
 
 # ===========================================================================
-# [4] make_pbr — OmniPBR 월드투영 팩토리 (scene01 그대로 + specular_level)
+# [4] make_pbr - OmniPBR world-projection factory (as in scene01, plus specular_level)
 # ===========================================================================
 def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
              tint=None, metallic=0.0, roughness_const=None,
              diffuse_color=None, bump=1.0, specular_level=None,
              emission_color=None, emission_intensity=None, uv_mode=False,
              unit_cell=None):
-    """OmniPBR 재질. diff 지정 시 월드 스페이스 투영 텍스처, 아니면 상수 컬러.
-    specular_level 지정 시 sh.CreateInput("specular_level", Float).
-    emission_color+emission_intensity 지정 시 발광(enable_emission) — 실내
-    씬(D4 등) 발광 패널용. RT 단일바운스 기여 미미, 판정은 PT 8바운스(교훈 7).
-    uv_mode=True: 월드 투영 대신 메시 st(UV 0..1)로 샘플 — 사인 패널처럼
-    텍스처가 면에 1:1 정합해야 하는 경우(build_sign 의 _sign_quad 전용).
+    """OmniPBR material. With diff given it is a world-space projected texture, otherwise a constant colour.
+    With specular_level given it calls sh.CreateInput("specular_level", Float).
+    With emission_color + emission_intensity it is emissive (enable_emission) - for emissive
+    panels in interior scenes (D4 etc.). The RT single-bounce contribution is negligible;
+    verdicts use PT with 8 bounces (lesson 7).
+    uv_mode=True: sample by mesh st (UV 0..1) instead of world projection - for cases where the
+    texture must map 1:1 onto the face, such as a sign panel (used only by _sign_quad of build_sign).
 
-    [사실화 v1] `NEGOBS_LOOK_MTL=1` 이면 프림 경로에서 역할을 읽어 룩 사양을
-    주입한다(§1b). 플래그가 꺼져 있으면 아래 코드 경로는 **전혀 타지 않으며**
-    종전 동작과 바이트 단위로 동일하다. 이 함수는 재질만 만들므로 **전부
-    `LOOK_MTL` 소속**이다(규칙 R-1 — 프림 집합을 바꾸지 않는다).
+    [realism v1] With `NEGOBS_LOOK_MTL=1` the role is read from the prim path and a look spec is
+    injected (§1b). With the flag off, the code path below is **never taken** and behaviour is
+    byte-identical to before. This function only creates materials, so it belongs **entirely to
+    `LOOK_MTL`** (rule R-1 - it does not change the prim set).
     """
     from pxr import UsdShade, Sdf, Gf
 
@@ -1120,18 +1132,18 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
                                     roughness_const=roughness_const,
                                     specular_level=specular_level, bump=bump,
                                     unit_cell=unit_cell, cls=cls)
-        # [사실화 v1] **상수색 재질도 MDL 로 태운다.**
-        # 33씬 make_pbr 호출의 절반 이상이 diffuse_color 상수색인데, 상수색은
-        # 정의상 완전 평탄이라 flat% 의 최대 발생원이다. 텍스처를 새로 조달하지
-        # 않고도 MDL 의 월드 macro 변조·roughness 노이즈·웨더링을 상수색 위에
-        # 얹으면 "평탄한 단색"이 아니게 된다(MDL v1.7.0 `base_color`).
-        # 단 **상수색이 물리적으로 옳은 역할은 제외**한다 — 차선 도색·반사띠·
-        # 점자블록·사인·유리·수면. v5.1 §4 가 이들을 상수색으로 못박았다.
+        # [realism v1] **Constant-colour materials are routed through the MDL too.**
+        # More than half of all make_pbr calls in the 33 scenes pass a constant diffuse_color, and a
+        # constant colour is by definition perfectly flat, i.e. the largest source of flat %. Without
+        # procuring any new texture, laying the MDL world macro modulation, roughness noise and
+        # weathering over a constant colour stops it being a "flat solid colour" (MDL v1.7.0 `base_color`).
+        # But **roles where a constant colour is physically correct are excluded** - lane paint, reflective
+        # bands, tactile paving, signs, glass, water. v5.1 §4 fixed these as constant colours.
         if (diff is None and diffuse_color is not None
                 and cls in _CONST_MDL_CLASSES):
-            # 먼저 역할 텍스처로 **승격**을 시도한다(의도 알베도 보존).
-            # 승격되면 patch 혼합·tri_dither·macro·desat 까지 전부 켜지므로
-            # 상수색 모드보다 훨씬 강력하다.
+            # First try **promotion** to the role texture (preserving the intended albedo).
+            # Once promoted, patch blending, tri_dither, macro and desat all turn on as well, making it
+            # far stronger than constant-colour mode.
             pd, pn, pr, pbc = _promote_const_to_texture(spec, diffuse_color)
             if pd is not None:
                 LOOK_STATS["promoted"] = LOOK_STATS.get("promoted", 0) + 1
@@ -1150,10 +1162,10 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
                                     specular_level=specular_level, bump=bump,
                                     base_color=diffuse_color,
                                     unit_cell=unit_cell, cls=cls)
-        # 텍스처 재질 → 베벨 + 디테일 노멀.
-        # **상수색 재질도 베벨은 받는다** — 게이트 1차에서 상수색을 통째로
-        # 건너뛰고 있었고, 상수색이야말로 flat% 의 주범이다. 텍스처화는 별도
-        # 항목(브리프 2-7, 전수 감사 대기)이지만 베벨은 텍스처가 필요 없다.
+        # Textured material -> bevel + detail normal.
+        # **Constant-colour materials get the bevel too** - the first gate skipped constant colours
+        # entirely, and constant colours are precisely the main source of flat %. Texturising is a
+        # separate item (brief 2-7, awaiting a full audit) but the bevel needs no texture.
         LOOK_STATS["omni_tex" if diff is not None else "const"] += 1
         _look_omni = spec
     elif LOOK_MTL:
@@ -1173,7 +1185,7 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
     def _tex(name, path_, cs):
         i = sh.CreateInput(name, A)
         i.Set(path_)
-        try:                                   # normalmap 은 raw 필수
+        try:                                   # A normal map must be raw
             i.GetAttr().SetColorSpace(cs)
         except Exception:
             pass
@@ -1187,15 +1199,15 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
             sh.CreateInput("reflection_roughness_texture_influence",
                            F).Set(1.0)
         if uv_mode:
-            # [v5] 메시 st 샘플 — 텍스처가 면 UV 0..1에 1:1 정합(사인 패널)
+            # [v5] Mesh st sampling - the texture maps 1:1 to the face UV 0..1 (sign panel)
             sh.CreateInput("project_uvw", B).Set(False)
         else:
-            # 월드 스페이스 투영 (축정렬 박스 → 늘어남 없음). world_or_object=True 가
-            # 월드 스페이스. False(오브젝트 스페이스)면 스케일된 Cube에서 텍스처가
-            # 스케일에 끌려 늘어난다.
+            # World-space projection (axis-aligned box -> no stretching). world_or_object=True means
+            # world space. With False (object space) the texture on a scaled Cube gets dragged by the
+            # scale and stretches.
             sh.CreateInput("project_uvw", B).Set(True)
             sh.CreateInput("world_or_object", B).Set(True)
-            s = 1.0 / float(scale_m)           # texture_scale = 1/타일크기[m]
+            s = 1.0 / float(scale_m)           # texture_scale = 1/tile size [m]
             sh.CreateInput("texture_scale", F2).Set(Gf.Vec2f(s, s))
         sh.CreateInput("bump_factor", F).Set(float(bump))
     if diffuse_color is not None:
@@ -1214,18 +1226,18 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
         sh.CreateInput("emissive_color", C3).Set(Gf.Vec3f(*emission_color))
         sh.CreateInput("emissive_intensity", F).Set(float(emission_intensity))
     if _look_omni is not None:
-        # 가짜 베벨 — Kit 106.1+ 정식 구현, RT·PT 양쪽 동작 확인(Phase1 E1).
+        # Fake bevel - official implementation in Kit 106.1+, confirmed working in both RT and PT (Phase1 E1).
         if _look_omni["bevel"] > 0.0:
             LOOK_STATS["bevel"] += 1
             sh.CreateInput("round_edges_radius", F).Set(
                 float(_look_omni["bevel"]))
             sh.CreateInput("round_edges_roundness", F).Set(1.0)
             sh.CreateInput("round_edges_across_materials", B).Set(False)
-        # 디테일 노멀 — 근접 텍셀 뭉개짐 완화(Phase1 E3)
-        # [W2-C · T1 §1.6(b)] 단일 `_DETAIL_NOR` → **역할 계열별 표**.
-        # 구판은 전 클래스에 `concrete_wall_nor_dx`(§1.2 판정: 디테일 아님) 를
-        # 걸었다. 표에 없는 클래스(veg·water·glass·paint·sign·misc·wood)는
-        # 이제 **의도적으로** 디테일을 받지 않는다.
+        # Detail normal - mitigates texel smearing up close (Phase1 E3)
+        # [W2-C, T1 §1.6(b)] The single `_DETAIL_NOR` becomes a **per-family table**.
+        # The old version applied `concrete_wall_nor_dx` (§1.2 verdict: not a detail) to every
+        # class. Classes absent from the table (veg, water, glass, paint, sign, misc, wood)
+        # now **deliberately** receive no detail.
         if _look_omni.get("detail") and diff is not None:
             _dp, _db, _di = detail_source(_look_cls)
             if _dp is not None:
@@ -1305,16 +1317,16 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
                      tint=None, roughness_const=None, specular_level=None,
                      bump=1.0, base_color=None, metallic=0.0,
                      unit_cell=None, cls=None):
-    """[사실화 v1] NegObsGround.mdl 재질 — 지면·사면 계열 전용.
+    """[realism v1] NegObsGround.mdl material - for the ground and slope families only.
 
-    OmniPBR 의 `project_uvw` 는 트라이플래너가 아니라 **큐빅 투영**이라 경사면에서
-    텍스처가 낙하 방향으로 뭉개져 늘어난다(Phase1 E2 에서 38° 경사면 split-face 로
-    확인). 이 MDL 은 노멀 가중 소프트 트라이플래너 + 45° 보조 기저로 그 결함이
-    없다. 우리 씬은 계단 챌면·램프·제방으로 가득해 **낙차가 있는 바로 그 지점**에
-    결함이 집중돼 있었다.
+    The `project_uvw` of OmniPBR is not triplanar but a **cubic projection**, so on a slope the
+    texture smears and stretches down the fall line (confirmed in Phase1 E2 with a split-face
+    test on a 38 deg slope). This MDL uses a normal-weighted soft triplanar plus a 45 deg
+    auxiliary basis and has no such defect. Our scenes are full of stair risers, ramps and
+    embankments, so the defect was concentrated **exactly where the drops are**.
 
-    주의 — `texture_scale` 의미가 OmniPBR 과 다르다(트라이플래너 ↔ 큐빅).
-    같은 scale_m 을 줘도 타일 크기가 달라지므로 `_GROUND_SCALE_FIX` 로 보정한다.
+    Note - `texture_scale` means something different from OmniPBR (triplanar vs cubic). The same
+    scale_m gives a different tile size, so it is corrected by `_GROUND_SCALE_FIX`.
     """
     from pxr import UsdShade, Sdf, Gf
     mtl = UsdShade.Material.Define(stage, path)
@@ -1336,19 +1348,19 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
         except Exception:
             pass
 
-    # diff=None 이면 텍스처를 바인딩하지 않는다 → MDL 이 흰색을 반환하고
-    # base_color 곱셈으로 상수색이 복원된다(v1.7.0 상수색 모드).
+    # With diff=None no texture is bound -> the MDL returns white and the constant colour is
+    # restored by the base_color multiplication (v1.7.0 constant-colour mode).
     if diff is not None:
         _tex("diffuse_texture_a", diff, "auto")
     if nor is not None:
         _tex("normalmap_texture_a", nor, "raw")
     if rough is not None:
         _tex("roughness_texture_a", rough, "raw")
-    # [치명 C1 수정] MDL 에는 diffuse_tint 입력이 없어 종전에는 씬이 준 tint 를
-    # **경고만 찍고 통째로 버렸다**. 실측 77 호출 / 30 씬이 영향받았고,
-    # sceneD4 Facade 는 tint (0.14,0.14,0.15) 가 사라져 알베도가 **7.1배**로
-    # 렌더되고 있었다. OmniPBR 의 diffuse_tint 는 albedo 곱셈이므로
-    # base_color 에 접어 넣으면 **수학적으로 동일**하다.
+    # [fatal C1 fix] The MDL has no diffuse_tint input, so previously a tint given by a scene was
+    # **warned about and then discarded wholesale**. 77 calls across 30 scenes were affected, and
+    # the sceneD4 Facade lost its tint (0.14,0.14,0.15) and was rendering at **7.1x** the intended
+    # albedo. The diffuse_tint of OmniPBR is an albedo multiplication, so folding it into
+    # base_color is **mathematically identical**.
     _bc = list(base_color) if base_color is not None else [1.0, 1.0, 1.0]
     if tint is not None:
         _bc = [c * t for c, t in zip(_bc, tint)]
@@ -1359,10 +1371,10 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
     sh.CreateInput("bump_factor_a", F).Set(
         float(spec.get("bump", bump)))
     sh.CreateInput("use_blend", B).Set(False)
-    # 반복 파괴 — 모듈형 포장은 patch 0(패턴 파손 방지), 자연 지면은 1
+    # Repetition break-up - modular paving uses patch 0 (protects the pattern), natural ground 1
     sh.CreateInput("patch_mix_a", F).Set(float(spec.get("patch", 1.0)))
     sh.CreateInput("patch_wavelength_a", F).Set(4.0)
-    # 상수색 모드는 텍스처 고주파가 없어 macro 를 강하게 주면 얼룩으로 보인다.
+    # Constant-colour mode has no texture high frequencies, so a strong macro reads as blotching.
     sh.CreateInput("macro_amp_a", F).Set(0.07 if diff is None else 0.12)
     sh.CreateInput("macro_wavelength_a", F).Set(14.0)
     sh.CreateInput("desat_bright_a", F).Set(0.0 if diff is None else 0.30)
@@ -1370,19 +1382,19 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
         _effective_sat(spec, diff, base_color))
     sh.CreateInput("rough_noise_a", F).Set(0.22)
     sh.CreateInput("rough_noise_wavelength_a", F).Set(1.2)
-    # 상수색 모드는 텍스처가 없어 축 전환 스트리크가 발생하지 않는다 →
-    # 디더링 노이즈 6회가 순수 낭비다. 0 으로 꺼서 비용을 줄인다.
+    # Constant-colour mode has no texture, so no axis-transition streaking occurs ->
+    # 6 dithering noise taps are pure waste. Set to 0 to cut the cost.
     sh.CreateInput("tri_dither", F).Set(0.0 if diff is None else 0.35)
     sh.CreateInput("tri_dither_wavelength", F).Set(0.15)
     sh.CreateInput("tri_weight_exp", F).Set(6.0)
-    if roughness_const is not None:            # 상수 roughness 요구 → floor 로 이식
-        # **함정**: 이 경로는 rough_mult_a=0 이라 roughness 맵을 통째로 무시한다.
-        # 텍스처 승격 시에는 roughness_const 를 넘기지 않는 이유다(진단 P1).
+    if roughness_const is not None:            # Constant roughness requested -> transplanted to floor
+        # **Trap**: this path has rough_mult_a=0 and therefore ignores the roughness map entirely.
+        # That is why roughness_const is not passed when promoting a texture (diagnosis P1).
         sh.CreateInput("rough_mult_a", F).Set(0.0)
         sh.CreateInput("rough_floor_a", F).Set(float(roughness_const))
     if specular_level is not None:
         sh.CreateInput("specular_level_a", F).Set(float(specular_level))
-    # 웨더링 (MDL v1.6.0). spec 에 weather 키가 없으면 전부 0 = 무영향.
+    # Weathering (MDL v1.6.0). Without a weather key in the spec everything is 0 = no effect.
     w = spec.get("weather") or {}
     if w:
         for key, val in (("grime_strength", w.get("grime", 0.0)),
@@ -1395,22 +1407,22 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
                          ("weather_rough", w.get("wrough", 0.0))):
             sh.CreateInput(key, F).Set(float(val))
         LOOK_STATS["weather"] = LOOK_STATS.get("weather", 0) + 1
-    # [중대 M1] NegObsGround 는 metalness=0 경로만 이식된 축약형이라 metallic
-    # 입력이 없다. 상수색 금속(난간·볼라드·셔터·펜스 — 금속 37종·113 호출)이
-    # 이 경로로 오면 **금속성이 소실**된다. → 금속은 MDL 로 보내지 않는다.
+    # [major M1] NegObsGround is a reduction that only transplanted the metalness=0 path and has no
+    # metallic input. Constant-colour metals (guardrails, bollards, shutters, fences - 37 kinds,
+    # 113 calls) arriving here **lose their metallic character**. -> Metal is not routed to the MDL.
     if spec.get("bevel", 0.0) > 0.0:
         sh.CreateInput("round_edges_radius", F).Set(float(spec["bevel"]))
         sh.CreateInput("round_edges_roundness", F).Set(1.0)
         sh.CreateInput("round_edges_across_materials", B).Set(False)
-    # ── [W2-C · T1 §1.1 결손 ① 해소] 디테일 노멀을 **지면 분기에도** 건다 ──
-    # 이 6줄이 T1 §1.6(b) 가 "defect ①의 요체"라고 지목한 배선이다. MDL v1.9.0 은
-    # 입력을 뚫어 놨을 뿐 어떤 호출자도 바인딩하지 않아, 지면 10 클래스는
-    # v1.8.0 과 픽셀 동일하게 렌더되고 있었다 `[실측 — round_stamp "detail_wired:
-    # false" · 렌더 로그 "디테일=0"]`.
-    #   · `detail_texture_scale` 은 MDL 에서 **float**(OmniPBR 는 float2) — 타입을
-    #     틀리면 조용히 무시된다.
-    #   · `detail_rough_gain` 은 기본 0(끔). §7 R1 이 제안한 "서브픽셀 미세구조를
-    #     roughness 분산으로 전달" 경로이며 A/B 노브로만 켠다.
+    # -- [W2-C, T1 §1.1 defect (1) resolved] Attach the detail normal **to the ground branch too** --
+    # These 6 lines are the wiring T1 §1.6(b) called "the crux of defect (1)". MDL v1.9.0 merely
+    # opened the inputs and no caller bound them, so the 10 ground classes were rendering
+    # pixel-identically to v1.8.0 `[measured - round_stamp "detail_wired: false", render log
+    # "detail=0"]`.
+    #   - `detail_texture_scale` is a **float** in the MDL (OmniPBR uses float2) - the wrong type
+    #     is silently ignored.
+    #   - `detail_rough_gain` defaults to 0 (off). It is the path §7 R1 proposed for "carrying
+    #     sub-pixel microstructure through roughness variance" and is enabled only via the A/B knob.
     if spec.get("detail"):
         _dp, _db, _di = detail_source(cls)
         if _dp is not None:
@@ -1422,7 +1434,7 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
                                F).Set(float(DETAIL_ROUGH_GAIN))
             LOOK_STATS["detail"] += 1
     _wire_unit_cell(sh, F, F2, unit_cell)
-    # tint 는 위에서 base_color 에 접어 넣었다(아래 참조).
+    # The tint was folded into base_color above (see there).
     for out in ("surface", "displacement", "volume"):
         mtl.CreateOutput(f"mdl:{out}",
                          Sdf.ValueTypeNames.Token).ConnectToSource(
@@ -1431,12 +1443,12 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
 
 
 # ===========================================================================
-# [5] 계단·기하 빌더
+# [5] Stair and geometry builders
 # ===========================================================================
 def _stair_steps(x0, riser, tread, n, z_top, riser_list, tread_list):
-    """단별 (xa, xb, ztop) 리스트. 상면 z_top에서 +X로 하강.
-    riser_list/tread_list 지정 시 불규칙 단 (없으면 균일 riser/tread × n).
-    반환 단 수 = 두 리스트 중 존재하는 것의 길이(없으면 n)."""
+    """Per-step (xa, xb, ztop) list. Descends towards +X from the top surface z_top.
+    With riser_list/tread_list given, steps are irregular (otherwise uniform riser/tread x n).
+    The number of steps returned is the length of whichever list is present (n if neither)."""
     risers = list(riser_list) if riser_list else [riser] * n
     treads = list(tread_list) if tread_list else [tread] * n
     m = max(len(risers), len(treads))
@@ -1448,7 +1460,7 @@ def _stair_steps(x0, riser, tread, n, z_top, riser_list, tread_list):
     xa = float(x0)
     z = float(z_top)
     for i in range(m):
-        z = z - float(risers[i])           # i번째 단 상면(디딤면) 높이
+        z = z - float(risers[i])           # Top surface (tread) height of step i
         xb = xa + float(treads[i])
         steps.append((xa, xb, z))
         xa = xb
@@ -1458,12 +1470,12 @@ def _stair_steps(x0, riser, tread, n, z_top, riser_list, tread_list):
 def build_straight_stairs(stage, prefix, x0, y0, y1, riser, tread, n, base_z,
                           mtl, riser_list=None, tread_list=None, z_top=0.0,
                           collider=True, width_pairs=None):
-    """직선 계단(솔리드 적층). 각 단은 디딤면(tread)이 노출되는 박스.
-    riser_list/tread_list로 불규칙 단 지원(scene04). z_top=상단 시작 지면.
-    width_pairs: 단별 (y0_i,y1_i) 리스트(폭 점증 tapered 지원). None이면 전 단
-      공통 (y0,y1). 길이가 단 수보다 짧으면 마지막 값을 반복(안전 확장).
-      *기존 호출은 width_pairs 미지정 → 완전 무영향.*
-    반환: 생성 Cube 프림 리스트."""
+    """Straight stairs (stacked solids). Each step is a box whose tread is exposed.
+    riser_list/tread_list support irregular steps (scene04). z_top = the ground at the top start.
+    width_pairs: per-step (y0_i, y1_i) list (supports tapered widening). None means the common
+      (y0, y1) for every step. If shorter than the step count, the last value repeats (safe extension).
+      *Existing calls do not pass width_pairs -> entirely unaffected.*
+    Returns: list of created Cube prims."""
     prims = []
     steps = _stair_steps(x0, riser, tread, n, z_top, riser_list, tread_list)
     wp = list(width_pairs) if width_pairs else None
@@ -1484,17 +1496,17 @@ def build_straight_stairs(stage, prefix, x0, y0, y1, riser, tread, n, base_z,
 
 def build_arc_steps(stage, prefix, cx, cy, r_in, r_out, a0_deg, a1_deg, seg,
                     top_z, base_z, mtl, collider=True):
-    """호(a0..a1)를 seg개 사다리꼴(근사) 박스로 티어 1개분 생성.
-    각 세그 = rotZ(세그 중앙각) + translate 한 Cube. 반경 두께 = r_out-r_in,
-    현길이 = 2*r_mid*sin(dθ/2)*1.02 (세그 간 쐐기 틈 방지 겹침 여유).
-    반환: 생성 Cube 프림 리스트."""
+    """Build one tier of an arc (a0..a1) as seg approximate trapezoidal boxes.
+    Each segment = a Cube with rotZ (segment centre angle) + translate. Radial thickness = r_out-r_in,
+    chord length = 2*r_mid*sin(dtheta/2)*1.02 (overlap margin preventing wedge gaps between segments).
+    Returns: list of created Cube prims."""
     from pxr import UsdGeom, UsdPhysics, Gf
     r_mid = (r_in + r_out) / 2.0
     radial = r_out - r_in
     height = top_z - base_z
     cz = (top_z + base_z) / 2.0
     dth = math.radians((a1_deg - a0_deg) / float(seg))
-    chord = 2.0 * r_out * math.sin(dth / 2.0) * 1.03   # 외경 기준 커버(룩 r1: r_mid 기준은 외측 쐐기 틈)
+    chord = 2.0 * r_out * math.sin(dth / 2.0) * 1.03   # Cover based on the outer radius (look r1: an r_mid basis leaves an outer wedge gap)
     prims = []
     for k in range(seg):
         a_mid = math.radians(a0_deg) + (k + 0.5) * dth
@@ -1504,7 +1516,7 @@ def build_arc_steps(stage, prefix, cx, cy, r_in, r_out, a0_deg, a1_deg, seg,
         cube.CreateSizeAttr(2.0)
         cube.CreateExtentAttr([Gf.Vec3f(-1, -1, -1), Gf.Vec3f(1, 1, 1)])
         xf = UsdGeom.Xformable(cube)
-        # translate → rotZ → scale. 로컬 X=반경방향, Y=접선(현), Z=높이.
+        # translate -> rotZ -> scale. Local X = radial, Y = tangential (chord), Z = height.
         xf.AddTranslateOp().Set(Gf.Vec3d(float(px), float(py), float(cz)))
         xf.AddRotateZOp().Set(math.degrees(a_mid))
         xf.AddScaleOp().Set(Gf.Vec3f(float(radial) / 2.0,
@@ -1521,20 +1533,20 @@ def build_arc_steps(stage, prefix, cx, cy, r_in, r_out, a0_deg, a1_deg, seg,
 def build_nosing(stage, prefix, x0, y0, y1, riser, tread, n, base_z=0.0,
                  mtl=None, color=(0.85, 0.72, 0.10), width=0.05, proud=0.001,
                  riser_list=None, tread_list=None, z_top=0.0):
-    """단코 논슬립 띠. 각 단 상면(디딤면) 전연부(+X 끝 모서리)에 상수색 박스 띠.
-    mtl=None이면 color로 상수색 재질 내부 생성. width=띠 폭(X), proud=돌출.
-    build_straight_stairs와 동일한 단 정의(x0,y0,y1,riser,tread,n 또는 리스트).
-    반환: 생성 프림 리스트."""
+    """Nosing anti-slip strip. A constant-colour box strip on the front edge (+X end) of each tread.
+    With mtl=None a constant-colour material is created internally from color. width = strip width (X), proud = protrusion.
+    Same step definition as build_straight_stairs (x0, y0, y1, riser, tread, n or lists).
+    Returns: list of created prims."""
     if mtl is None:
         mtl = make_pbr(stage, prefix + "/NosingMtl",
                        diffuse_color=color, roughness_const=0.7, metallic=0.0)
     cy = (y0 + y1) / 2.0
     Ly = y1 - y0
-    thk = proud + 0.005                     # 얇은 띠 (일부 매입 + proud 돌출)
+    thk = proud + 0.005                     # Thin strip (partly embedded, protruding by proud)
     prims = []
     steps = _stair_steps(x0, riser, tread, n, z_top, riser_list, tread_list)
     for i, (xa, xb, ztop) in enumerate(steps, 1):
-        # 전연부(xb) 안쪽으로 width 만큼. 상면 위 proud 돌출.
+        # Inward from the front edge (xb) by width. Protrudes proud above the top surface.
         bx = xb - width / 2.0
         z_hi = ztop + proud
         cz = z_hi - thk / 2.0
@@ -1547,36 +1559,36 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
                        mtl, rail_h=None, post_r=0.02, spacing=None, rail_r=0.03,
                        rail_mid_r=0.018, rail_mid_drop=0.45,
                        baluster_r=0.009, baluster_gap=0.098, handrail=True):
-    """레일 1선(scene01 build_cues 일반화). 상단 레일 + 중간 레일 + 포스트.
-      y        : 레일 Y 위치
-      x_start  : 수평 연장 시작 x  (x_start..x_top 구간은 수평)
-      x_top    : 경사 시작 x       (여기서부터 +X로 drop 하강)
-      run,drop : 경사 구간 수평길이·낙차
-      ground_fn: x→지면z 콜백 (포스트 하단 착지 높이). 단면(계단)이면 계단식.
-    반환: 생성 프림 리스트."""
-    # 기본값은 **LOOK_GEO 에서만** 법정값으로 바뀐다(포스트 개수 = 기하).
-    # 종전에 기본값 자체를 1.1/2.0 으로 바꿨더니, 이 두 값을 명시하지 않는
-    # 호출부(scene03/14/17/21)에서 **룩 레이어를 꺼도 포스트 개수가 바뀌었다**.
-    # 포스트 루프는 게이트 밖이라 대조군 기하가 오염된다 —
-    # bc87292 에서 스스로 "치명 C3" 로 명명하고 고쳤던 것과 동일 유형의 재발.
+    """One guardrail line (a generalisation of scene01 build_cues). Top rail + mid rail + posts.
+      y        : rail Y position
+      x_start  : x where the horizontal extension starts (x_start..x_top is horizontal)
+      x_top    : x where the slope starts (descending by drop towards +X from here)
+      run,drop : horizontal length and drop of the sloped section
+      ground_fn: x -> ground z callback (landing height of the post foot). Stepped on stairs.
+    Returns: list of created prims."""
+    # The defaults change to the statutory values **only under LOOK_GEO** (post count = geometry).
+    # Previously the defaults themselves were changed to 1.1/2.0, and callers that do not state
+    # these two values (scene03/14/17/21) **saw the post count change even with the look layer off**.
+    # The post loop is outside the gate, so the control geometry gets contaminated -
+    # the same type of recurrence as the one named "fatal C3" and fixed in bc87292.
     if rail_h is None:
-        rail_h = 1.1 if LOOK_GEO else 0.9      # 도로안전시설 지침 2.5
+        rail_h = 1.1 if LOOK_GEO else 0.9      # Road safety facility guideline 2.5
     if spacing is None:
         spacing = 2.0 if LOOK_GEO else 1.2
-    ground_ref = float(ground_fn(x_top))       # 경사 상단 지면
-    top0 = ground_ref + rail_h                 # x_top 에서의 레일 상면 z
+    ground_ref = float(ground_fn(x_top))       # Ground at the top of the slope
+    top0 = ground_ref + rail_h                 # Rail top z at x_top
     L = math.hypot(run, drop)
-    ang = math.degrees(math.atan2(drop, run))  # 경사각(수평 대비)
+    ang = math.degrees(math.atan2(drop, run))  # Slope angle (relative to horizontal)
     prims = []
 
     def _seg(tag, r, z_off):
-        # 수평 연장 (x_start..x_top, z=top0-z_off) — Cylinder Z축을 X로
+        # Horizontal extension (x_start..x_top, z=top0-z_off) - the cylinder Z axis laid along X
         if x_top - x_start > 1e-6:
             prims.append(add_cylinder(
                 stage, f"{prefix}/{tag}Ext",
                 ((x_start + x_top) / 2.0, y, top0 - z_off),
                 r, x_top - x_start, mtl, rotY=90.0))
-        # 경사 (x_top..x_top+run), z: top0 → top0-drop
+        # Slope (x_top..x_top+run), z: top0 -> top0-drop
         prims.append(add_cylinder(
             stage, f"{prefix}/{tag}Slope",
             (x_top + run / 2.0, y, top0 - z_off - drop / 2.0),
@@ -1586,22 +1598,22 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
     _seg("RailMid", rail_mid_r, rail_mid_drop)
     x_end = x_top + run
 
-    # 세로 간살 — 「도로안전시설 지침」난간 표준. 안목(살 사이 빈틈) 100mm 이하가
-    # 법정 요건이라 실제 한국 난간은 예외 없이 촘촘하다. 경사 구간에서도 살은
-    # **연직**(레일만 기울고 살은 서 있음)이라 실루엣이 확연히 다르다.
-    # LOOK_GEO 게이트 안 — A/B 대조군 보존.
+    # Vertical balusters - the guardrail standard of the road safety facility guideline. A clear
+    # opening of 100 mm or less between balusters is a statutory requirement, so real Korean
+    # guardrails are dense without exception. On a slope the balusters stay **vertical** (only the
+    # rail tilts), which makes the silhouette markedly different. Inside the LOOK_GEO gate - A/B control preserved.
     if LOOK_GEO and baluster_r > 0:
         pitch = 2.0 * baluster_r + baluster_gap
         xb = x_start + pitch * 0.5
         b = 0
         while xb <= x_end - pitch * 0.25:
             t = max(0.0, min((xb - x_top) / run, 1.0)) if run > 1e-9 else 0.0
-            ztop = top0 - drop * t - rail_r          # 상단 레일 밑면
+            ztop = top0 - drop * t - rail_r          # Underside of the top rail
             gz = float(ground_fn(xb))
-            # 간살은 **지면 가까이까지** 내려와야 한다. 종전엔 중간 레일에서
-            # 멈춰 난간 높이의 43% 만 채웠고, 하부 0.45~0.60m 구간의 실제
-            # 빈틈이 인용한 법정 안목 100mm 를 11~28배로 위반했다.
-            # (법정 요건을 근거로 넣은 기하가 그 요건을 어기고 있었다.)
+            # The balusters must come down **close to the ground**. Previously they stopped at the mid
+            # rail and filled only 43 % of the guardrail height, and the actual opening in the lower
+            # 0.45-0.60 m violated the cited statutory 100 mm by 11 to 28 times.
+            # (Geometry justified by a statutory requirement was violating that requirement.)
             zbot = max(gz + 0.04, top0 - drop * t - rail_h + 0.04)
             h = ztop - zbot
             if h > 0.05:
@@ -1612,7 +1624,7 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
             b += 1
         LOOK_STATS["baluster"] = LOOK_STATS.get("baluster", 0) + b
 
-    # 포스트: 실제 지면(ground_fn)에 착지, 상단=레일선.
+    # Posts: landing on the real ground (ground_fn), top = the rail line.
     xp = x_start
     p = 0
     while xp <= x_end + 1e-6:
@@ -1627,11 +1639,11 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
         xp += spacing
         p += 1
 
-    # ── 손잡이(handrail) ───────────────────────────────────────────────
-    # 피난·방화구조 규칙 §15④. **33씬 전부 미구현**이었다.
-    # φ32~38 · 높이 850 · **끝단 수평 연장 ≥300** — 이 끝단 갈고리가
-    # 한국 계단 실루엣의 특징인데 우리는 레일이 그냥 뚝 끊겨 있었다.
-    # GT 무영향: 계단면 위 수직/수평 부재라 z(x,y) 를 바꾸지 않는다.
+    # -- Handrail -------------------------------------------------------
+    # Evac/fire structure rules §15(4). **Unimplemented in all 33 scenes.**
+    # dia 32-38, height 850, **horizontal end extension >=300** - that end hook is
+    # characteristic of the Korean stair silhouette, yet our rails simply stopped dead.
+    # No GT effect: a vertical/horizontal member above the stair surface, it does not change z(x,y).
     if LOOK_GEO and handrail and run > 0.3:
         try:
             prims += sk.build_handrail(
@@ -1645,8 +1657,8 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
 
 
 def build_water(stage, path, x0, y0, x1, y1, z, thick=0.2, mtl=None):
-    """수면 슬래브. 상수색 (0.05,0.10,0.11), roughness 0.03, metallic 0.
-    상면이 z에 오도록 얇은 박스. 반환: Cube 프림."""
+    """Water slab. Constant colour (0.05,0.10,0.11), roughness 0.03, metallic 0.
+    A thin box whose top sits at z. Returns: the Cube prim."""
     if mtl is None:
         mtl = make_pbr(stage, path + "_mtl",
                        diffuse_color=(0.05, 0.10, 0.11),
@@ -1659,16 +1671,16 @@ def build_water(stage, path, x0, y0, x1, y1, z, thick=0.2, mtl=None):
 
 def build_slope(stage, path, x0, z0, run, drop, y0, y1, thick, mtl,
                 margin=0.3, collider=True):
-    """rotateY 회전 박스 사면. 상면이 (x0,z0)→(x0+run, z0−drop) 평면이 되도록
-    중심·각도 계산. 각도=atan2(drop,run), 길이=hypot(run,drop)+양끝 여유(margin).
-    반환: Cube 프림."""
+    """A rotateY-rotated box slope. The centre and angle are computed so that the top surface is the
+    plane (x0,z0) -> (x0+run, z0-drop). Angle = atan2(drop,run), length = hypot(run,drop) + margin at both ends.
+    Returns: the Cube prim."""
     from pxr import UsdGeom, UsdPhysics, Gf
-    ang = math.atan2(drop, run)                # +면 +X로 하강
+    ang = math.atan2(drop, run)                # The + face descends towards +X
     length = math.hypot(run, drop) + margin
-    # 상면 중점 (x0,z0)→(x0+run,z0-drop) 의 중앙
+    # Midpoint of the top surface (x0,z0) -> (x0+run,z0-drop)
     sx = x0 + run / 2.0
     sz = z0 - drop / 2.0
-    # 로컬 -Z(두께 방향)의 월드 매핑: rotateY(+ang) → (-sin, 0, -cos)
+    # World mapping of local -Z (the thickness direction): rotateY(+ang) -> (-sin, 0, -cos)
     cx = sx - (thick / 2.0) * math.sin(ang)
     cz = sz - (thick / 2.0) * math.cos(ang)
     cy = (y0 + y1) / 2.0
@@ -1677,7 +1689,7 @@ def build_slope(stage, path, x0, z0, run, drop, y0, y1, thick, mtl,
     cube.CreateExtentAttr([Gf.Vec3f(-1, -1, -1), Gf.Vec3f(1, 1, 1)])
     xf = UsdGeom.Xformable(cube)
     xf.AddTranslateOp().Set(Gf.Vec3d(float(cx), float(cy), float(cz)))
-    xf.AddRotateYOp().Set(math.degrees(ang))   # +X 끝이 아래로
+    xf.AddRotateYOp().Set(math.degrees(ang))   # The +X end goes down
     xf.AddScaleOp().Set(Gf.Vec3f(float(length) / 2.0,
                                  float(abs(y1 - y0)) / 2.0,
                                  float(thick) / 2.0))
@@ -1689,22 +1701,22 @@ def build_slope(stage, path, x0, z0, run, drop, y0, y1, thick, mtl,
 
 
 # ===========================================================================
-# [5c] 신규 계단 빌더 v3 (나선·마모석·회전그룹·개방라이저·캐노피)
-#      수학 정의: Docs/stair_typology_survey_v2.md §3 / brief v3 §B
+# [5c] New stair builders v3 (helical, worn stone, rotation group, open riser, canopy)
+#      Mathematical definitions: Docs/stair_typology_survey_v2.md §3 / brief v3 §B
 # ===========================================================================
 def build_helix_steps(stage, prefix, cx, cy, r_in, r_out, a0_deg, step_deg, n,
                       riser, z0, mtl, ccw=True, collider=True, base_drop=0.5):
-    """나선/헬리컬 석계단(T9/winder 공용). 단 i(0-based):
-      중심각 a_i = a0_deg + (i+0.5)*step_deg*dir  (dir=+1 ccw, −1 cw)
-      환형 섹터 박스: 반경폭 = r_out−r_in, 현길이 = 2*r_mid*sin(rad(step_deg)/2)*1.02
-        (세그 간 쐐기 틈 방지 겹침 1.02 — build_arc_steps 재사용)
-      상면 z = z0 − (i+1)*riser  (하강), 바닥 = 상면 − base_drop (솔리드).
-    각 섹터는 translate→rotZ(a_i)→scale 로 배치(로컬 X=반경, Y=접선, Z=높이).
-    반환: 생성 Cube 프림 리스트."""
+    """Helical/spiral stone stairs (shared by T9 and winders). For step i (0-based):
+      centre angle a_i = a0_deg + (i+0.5)*step_deg*dir  (dir=+1 ccw, -1 cw)
+      annular sector box: radial width = r_out-r_in, chord length = 2*r_mid*sin(rad(step_deg)/2)*1.02
+        (1.02 overlap prevents wedge gaps between segments - reused from build_arc_steps)
+      top z = z0 - (i+1)*riser  (descending), bottom = top - base_drop (solid).
+    Each sector is placed by translate -> rotZ(a_i) -> scale (local X = radial, Y = tangential, Z = height).
+    Returns: list of created Cube prims."""
     r_mid = (r_in + r_out) / 2.0
     radial = r_out - r_in
     half_rad = math.radians(step_deg) / 2.0
-    chord = 2.0 * r_out * math.sin(half_rad) * 1.03    # 외경 기준 커버(룩 r1 수정)
+    chord = 2.0 * r_out * math.sin(half_rad) * 1.03    # Cover based on the outer radius (look r1 fix)
     direction = 1.0 if ccw else -1.0
     prims = []
     for i in range(n):
@@ -1722,20 +1734,22 @@ def build_helix_steps(stage, prefix, cx, cy, r_in, r_out, a0_deg, step_deg, n,
 
 def build_helix_ramp(stage, prefix, cx, cy, r_in, r_out, a0_deg, a1_deg, seg,
                      z0, z1, thick, mtl, collider=True):
-    """매끈한 나선 램프(T10 주차램프). 호 [a0,a1]를 seg개 현 세그로 근사.
-      세그 j(0-based): 중심각 a_j = a0 + (j+0.5)*dth_deg
-      z 선형보간: 세그 상면 중앙 z = z0 + (j+0.5)*dz_seg, dz_seg=(z1−z0)/seg
-      세그 현길이 L_c = 2*r_mid*sin(dth/2)
-      **로컬 접선축 경사**: 세그를 rotZ(a_j)로 방위 배치한 뒤, 현(=접선=로컬 Y)을
-        따라 dz_seg 만큼 오르내리게 기울인다. 접선을 기울이는 회전축은 그에 수직인
-        로컬 X(=반경축) → **rotX**(rotY 아님). 기울기각 = atan2(dz_seg, L_c).
-        유도: rotX(θ): z' = y·sinθ + z·cosθ ⇒ ∂z'/∂y = sinθ. +Y(진행=현 앞쪽)에서
-        높이변화율 dz_seg/L_c 를 만들려면 sinθ = dz_seg/L_c ⇒ θ=atan2(dz_seg,L_c).
-        dz_seg<0(하강)이면 θ<0 → +Y 끝이 내려간다(옳음).
-      op 순서 translate→rotZ→rotX→scale(=_oriented_box): 점 적용은 역순
-        scale→rotX(로컬,방위 전)→rotZ(방위)→translate 이므로 접선경사가 정확히
-        각 세그의 반경축을 중심으로 걸린다.
-    반환: (프림 리스트, 세그 기울기각[deg] — 균일 세그이므로 단일 값 리스트)."""
+    """A smooth helical ramp (T10 car park ramp). The arc [a0,a1] is approximated by seg chord segments.
+      Segment j (0-based): centre angle a_j = a0 + (j+0.5)*dth_deg
+      Linear z interpolation: segment top centre z = z0 + (j+0.5)*dz_seg, dz_seg = (z1-z0)/seg
+      Segment chord length L_c = 2*r_mid*sin(dth/2)
+      **Local tangential tilt**: after placing the segment at bearing rotZ(a_j), tilt it so it rises
+        or falls by dz_seg along the chord (= tangent = local Y). The rotation axis that tilts the
+        tangent is perpendicular to it, i.e. local X (= the radial axis) -> **rotX** (not rotY).
+        Tilt angle = atan2(dz_seg, L_c).
+        Derivation: rotX(theta): z' = y*sin(theta) + z*cos(theta), so dz'/dy = sin(theta). To get a
+        height change rate of dz_seg/L_c along +Y (forward along the chord), sin(theta) = dz_seg/L_c,
+        hence theta = atan2(dz_seg, L_c).
+        With dz_seg<0 (descending) theta<0 -> the +Y end goes down (correct).
+      op order translate -> rotZ -> rotX -> scale (= _oriented_box): points apply in reverse,
+        scale -> rotX (local, before bearing) -> rotZ (bearing) -> translate, so the tangential tilt is
+        applied exactly about each segment's radial axis.
+    Returns: (prim list, segment tilt angle [deg] - a single-element list since segments are uniform)."""
     r_mid = (r_in + r_out) / 2.0
     radial = r_out - r_in
     dth_deg = (a1_deg - a0_deg) / float(seg)
@@ -1743,9 +1757,9 @@ def build_helix_ramp(stage, prefix, cx, cy, r_in, r_out, a0_deg, a1_deg, seg,
     L_c = 2.0 * r_mid * math.sin(dth / 2.0)
     dz_seg = (z1 - z0) / float(seg)
     tilt_deg = math.degrees(math.atan2(dz_seg, L_c))
-    # [감사 v4 I-3] 세그 폭은 r_out 기준 현길이 ×1.03 — r_mid 기준(×1.02)은 외경부
-    #   에서 세그 간 관통 슬릿(scene13에서 0.21 m 실측). build_arc_steps 와 동일
-    #   규약(교훈 4). 경사(tilt)는 진행 경로 기준이므로 r_mid 현길이 L_c 유지.
+    # [audit v4 I-3] Segment width uses the r_out chord length x1.03 - an r_mid basis (x1.02) leaves
+    #   a through slit between segments at the outer radius (0.21 m measured in scene13). Same
+    #   convention as build_arc_steps (lesson 4). The tilt follows the travel path, so the r_mid chord L_c is kept.
     seg_len = 2.0 * r_out * math.sin(dth / 2.0) * 1.03
     prims = []
     for j in range(seg):
@@ -1753,7 +1767,7 @@ def build_helix_ramp(stage, prefix, cx, cy, r_in, r_out, a0_deg, a1_deg, seg,
         rad = math.radians(a_deg)
         px = cx + r_mid * math.cos(rad)
         py = cy + r_mid * math.sin(rad)
-        z_top = z0 + (j + 0.5) * dz_seg          # 세그 상면 중앙 높이
+        z_top = z0 + (j + 0.5) * dz_seg          # Centre height of the segment top surface
         cz = z_top - thick / 2.0
         prims.append(_oriented_box(
             stage, f"{prefix}/Seg_{j}", (px, py, cz),
@@ -1765,14 +1779,14 @@ def build_helix_ramp(stage, prefix, cx, cy, r_in, r_out, a0_deg, a1_deg, seg,
 def build_worn_stone_stairs(stage, prefix, x0, y0, y1, n, riser_mu, tread_mu,
                             blocks, seed, mtl, base_z, z_top=0.0, jr=0.03,
                             jt=0.10, jz=0.02, jyaw=3.0):
-    """마모 부정형 석단(T16). numpy RandomState(seed) 고정 → 재현.
-      단 i(0-based): riser_i = riser_mu + U(−jr,+jr), 상면 z 누적 하강,
-        x 는 tread_mu 로 누적(xa_i..xb_i).
-      각 단을 blocks개 가로 블록(공칭 폭 Wb=(y1−y0)/blocks, 이웃과 1mm 겹침)으로
-        분할, 블록별 지터:
-          상면 z += U(−jz,+jz),  앞/뒤 x 각 += U(−jt/2,+jt/2)(→ 단코 비직선),
-          yaw = U(−jyaw,+jyaw)°(rotZ).  바닥은 솔리드로 base_z 까지.
-    반환: (프림 리스트, 단별 평균 상면 z 리스트, 총 run[= n*tread_mu])."""
+    """Worn irregular stone steps (T16). numpy RandomState(seed) fixed -> reproducible.
+      Step i (0-based): riser_i = riser_mu + U(-jr,+jr), the top z descends cumulatively,
+        x accumulates by tread_mu (xa_i..xb_i).
+      Each step is split into blocks lateral blocks (nominal width Wb=(y1-y0)/blocks, overlapping
+        neighbours by 1 mm), with per-block jitter:
+          top z += U(-jz,+jz),  front/back x each += U(-jt/2,+jt/2) (-> a non-straight nosing),
+          yaw = U(-jyaw,+jyaw) deg (rotZ).  The bottom is solid down to base_z.
+    Returns: (prim list, per-step mean top z list, total run [= n*tread_mu])."""
     rng = np.random.RandomState(int(seed))
     Wb = (y1 - y0) / float(blocks)
     prims = []
@@ -1785,7 +1799,7 @@ def build_worn_stone_stairs(stage, prefix, x0, y0, y1, n, riser_mu, tread_mu,
         xb = xa + tread_mu
         block_tops = []
         for j in range(blocks):
-            by0 = y0 + j * Wb - 0.0005            # 1mm 겹침(양측 0.5mm)
+            by0 = y0 + j * Wb - 0.0005            # 1 mm overlap (0.5 mm each side)
             by1 = y0 + (j + 1) * Wb + 0.0005
             bz = top_i + float(rng.uniform(-jz, jz))
             bxa = xa + float(rng.uniform(-jt / 2.0, jt / 2.0))
@@ -1807,12 +1821,13 @@ def build_worn_stone_stairs(stage, prefix, x0, y0, y1, n, riser_mu, tread_mu,
 
 
 def build_rot_group(stage, path, pivot_xy, rot_deg):
-    """피벗 회전 Xform 그룹. 하위 경로에 기존 빌더를 배치하면 그 전체가
-    pivot_xy(월드 XY) 기준 rot_deg(도, +Z) 회전된다.
-      xformOps = [translate(+pivot), rotateZ, translate(−pivot)]  (op suffix로
-      두 translate 이름 충돌 회피). USD row-vector 규약상 점 적용은 리스트 역순:
-      (−pivot)→rotZ→(+pivot) = '피벗을 원점으로 → 회전 → 되돌림' = 정확한 피벗회전.
-    반환: Xform path(str) — 이후 f"{path}/..." 하위에 계단·드레싱 배치."""
+    """A pivoting rotation Xform group. Placing existing builders under its path rotates the whole
+    group by rot_deg (degrees, +Z) about pivot_xy (world XY).
+      xformOps = [translate(+pivot), rotateZ, translate(-pivot)]  (an op suffix avoids the name
+      clash between the two translates). Under the USD row-vector convention points apply in
+      reverse: (-pivot) -> rotZ -> (+pivot) = 'move the pivot to the origin, rotate, move back' =
+      an exact pivot rotation.
+    Returns: the Xform path (str) - place stairs and dressing under f"{path}/..." afterwards."""
     from pxr import UsdGeom, Gf
     xform = UsdGeom.Xform.Define(stage, path)
     xf = UsdGeom.Xformable(xform)
@@ -1826,16 +1841,16 @@ def build_rot_group(stage, path, pivot_xy, rot_deg):
 def build_open_riser_stairs(stage, prefix, x0, y0, y1, riser, tread, n, z_top,
                             mtl_tread, mtl_stringer, tread_t=0.04, gap=0.025,
                             slits=0):
-    """개방 라이저 계단(T11/T19 비상·그레이팅). 라이저 없음 — 아래 투시.
-      스트링거 2본: 단면 0.06(Y폭)×0.25(두께) 경사 박스(build_slope 재사용),
-        위치 y0+0.03 / y1−0.03, 상단 (x0,z_top)에서 run=n*tread·drop=n*riser 하강.
-      디딤판: 각 단 상면(z=z_top−i*riser)에 두께 tread_t 판, 전후 gap 만큼 안쪽.
-      slits>0: 판을 (slits+1)개 세로(y) 조각으로 분할, 조각 사이 0.02 틈(그레이팅).
-    반환: 생성 프림 리스트."""
+    """Open-riser stairs (T11/T19, fire escape and grating). No risers - you can see through.
+      2 stringers: a sloped box of section 0.06 (Y width) x 0.25 (thickness) (reusing build_slope),
+        at y0+0.03 / y1-0.03, descending from the top (x0, z_top) by run=n*tread and drop=n*riser.
+      Treads: a plate of thickness tread_t on each step top (z = z_top - i*riser), inset by gap front and back.
+      slits>0: the plate is split into (slits+1) strips along y with a 0.02 gap between them (grating).
+    Returns: list of created prims."""
     run = n * tread
     drop = n * riser
     prims = []
-    # 스트링거 2본 (경사 박스 — build_slope: y0,y1=Y폭 0.06, thick=0.25 깊이)
+    # 2 stringers (sloped boxes - build_slope: y0,y1 = 0.06 Y width, thick = 0.25 depth)
     for tag, yc in (("L", y0 + 0.03), ("R", y1 - 0.03)):
         prims.append(build_slope(
             stage, f"{prefix}/Stringer_{tag}", x0, z_top, run, drop,
@@ -1846,7 +1861,7 @@ def build_open_riser_stairs(stage, prefix, x0, y0, y1, riser, tread, n, z_top,
         xa = x0 + (i - 1) * tread
         xb = x0 + i * tread
         px = (xa + xb) / 2.0
-        plen = (xb - xa) - 2.0 * gap             # 전후 gap 안쪽
+        plen = (xb - xa) - 2.0 * gap             # Inset by gap front and back
         ztop = z_top - i * riser
         cz = ztop - tread_t / 2.0
         if slits > 0:
@@ -1867,9 +1882,9 @@ def build_open_riser_stairs(stage, prefix, x0, y0, y1, riser, tread, n, z_top,
 
 def build_canopy(stage, prefix, x0, x1, y0, y1, z_roof, post_r, mtl_roof,
                  mtl_post, roof_t=0.12, base_z=0.0):
-    """캐노피(T20): 지붕판 1 + 모서리 기둥 4. 지붕은 z_roof(밑면)에서 roof_t 두께.
-    기둥은 base_z(기본 지면 0)에서 z_roof 까지, 네 모서리(반경만큼 안쪽).
-    반환: 생성 프림 리스트."""
+    """Canopy (T20): 1 roof slab + 4 corner columns. The roof is roof_t thick from z_roof (underside).
+    The columns run from base_z (ground 0 by default) to z_roof at the four corners (inset by the radius).
+    Returns: list of created prims."""
     prims = []
     cx = (x0 + x1) / 2.0
     cy = (y0 + y1) / 2.0
@@ -1886,7 +1901,7 @@ def build_canopy(stage, prefix, x0, x1, y0, y1, z_roof, post_r, mtl_roof,
 
 
 # ===========================================================================
-# [5b] 씬 드레싱 빌더 (scene01 이식 — M 딕셔너리 대신 mtl 인자화)
+# [5b] Scene dressing builders (transplanted from scene01 - mtl as an argument instead of the M dict)
 # ===========================================================================
 TACTILE_TILE_M = 0.30        # one statutory pad = 0.30 x 0.30 m (36 dots, 6x6)
 TACTILE_RGB = (0.85, 0.72, 0.10)     # fallback constant only — see below
@@ -1926,8 +1941,8 @@ def tactile_pbr(stage, path, scale_m=None, roughness=0.70):
 
 
 def build_tactile(stage, path, x0, x1, y0, y1, mtl, z=0.0, proud=0.004):
-    """점형 점자블록 띠(황색). x0..x1 × y0..y1 사각 밴드. 상면 z에서 proud 돌출,
-    돌기는 노멀맵으로 표현(거의 플러시). 반환: Cube 프림."""
+    """A dot-type tactile paving strip (yellow). A rectangular band x0..x1 by y0..y1. Protrudes proud
+    above the top surface z, with the dots expressed by a normal map (near flush). Returns: the Cube prim."""
     cx = (x0 + x1) / 2.0
     cy = (y0 + y1) / 2.0
     z_top = z + proud
@@ -1937,68 +1952,69 @@ def build_tactile(stage, path, x0, x1, y0, y1, mtl, z=0.0, proud=0.004):
 
 
 # ===========================================================================
-# [5b] 실제 식생 에셋 (NVIDIA S3, `assets/vegetation/`)
+# [5b] Real vegetation assets (NVIDIA S3, `assets/vegetation/`)
 #
-# **왜 필요한가**: 종전 `build_tree` 는 실린더 줄기 + 구(sphere) 블롭 수관이라
-# 아무리 텍스처를 입혀도 "솜사탕"으로 읽혔다. 사실화 조사가 지목한
-# "표현 원자가 Cube/Cylinder/Sphere 3종뿐" 의 가장 눈에 띄는 사례다.
-# 재질 계층만 손대는 것으로는 이 문제를 못 고친다 — **기하를 바꿔야 한다.**
+# **Why it is needed**: the old `build_tree` was a cylinder trunk plus sphere blob canopy and read
+# as "candy floss" no matter what texture was applied. It is the most conspicuous instance of what
+# the realism survey called "only 3 representation atoms: Cube/Cylinder/Sphere".
+# Touching only the material layer cannot fix this - **the geometry has to change.**
 #
-# 함정 (조달 조사 실측):
-#   · 에셋 `metersPerUnit = 0.01`(cm). USD reference 는 **단위 변환을 하지 않는다**
-#     → 스케일 안 걸면 벚나무가 464 m 로 들어온다.
-#   · 참조가 상대 경로라 S3 디렉터리 구조(`Trees/`·`Shrub/`)를 그대로 유지해야 한다.
-#   · 이 4종은 잎이 **실제 모델링 지오메트리**이고 알파 채널이 없다 →
-#     `enable_opacity` 를 켜면 오히려 망가진다(ZZ §10.2 적용 범위 정정).
+# Traps (measured during procurement):
+#   - The assets have `metersPerUnit = 0.01` (cm). A USD reference **does not convert units**
+#     -> without a scale a cherry tree arrives at 464 m.
+#   - References are relative, so the S3 directory structure (`Trees/`, `Shrub/`) must be kept as is.
+#   - In these 4 species the leaves are **real modelled geometry** with no alpha channel ->
+#     turning on `enable_opacity` breaks them instead (ZZ §10.2 scope correction).
 # ===========================================================================
 VEG_DIR = os.path.join(ASSETS_DIR, "vegetation")
 
-# (상대경로, **지상 노출 높이**[m], 가중치) — 서울 가로수 통계 반영. `[W2 재편]`
+# (relative path, **height exposed above ground** [m], weight) - reflects Seoul street tree statistics. `[W2 rework]`
 #
-# **`Japanese_Cherry` 삭제(가중치 재분배가 아니라 삭제)** — A 감사 P0-1.
-#   ① 계절 규약: 잎 텍스처 **초록 화소 0.0 %**(만개 벚꽃 픽셀). 수종명이 아니라
-#      픽셀로 판정한 결과다 [실측 — `A_trees_shrubs.md` §9].
-#   ② 빈도: 서울 가로수 벚나무는 4위권 ≈7 % 인데 가중치가 **62.5 %** 였다 —
-#      서울 실태 대비 약 9배, 전국(18.6 %) 기준으로도 3.4배 과대 [통계 — 동 §5].
+# **`Japanese_Cherry` deleted (deleted, not reweighted)** - audit A P0-1.
+#   (1) Seasonal convention: the leaf texture is **0.0 % green pixels** (full-bloom blossom pixels). The
+#      verdict is by pixels, not by species name [measured - `A_trees_shrubs.md` §9].
+#   (2) Frequency: cherry is about 4th at ~7 % among Seoul street trees, yet its weight was **62.5 %** -
+#      about 9x the Seoul reality and 3.4x even the national figure (18.6 %) [statistic - same §5].
 #
-# 새 조합의 근거: 서울 2019(306,313주) 1·2위는 **은행 35.8 % · 양버즘 20.9 %** 인데
-# 둘 다 조달 불가다(은행 = S3 부재 확정 / 양버즘 = 잎 텍스처가 갈색 낙엽이라
-# 초록화 파생본 선행 필요). ⇒ **근연 대용종으로 활엽 우세 구성을 만든다**:
-#   Elm_Sapling(느릅나무과 = 느티나무 대용) · Shumard_Oak(참나무류 = 대왕참나무 대용)
-#   = 활엽 63.6 %, 침엽·상록 36.4 %. 현행 소나무류 37.5 % → **18.2 %** 로 하향.
-#   `[추정 — 가중치 배분]` 통계는 수종별 비율까지만 주고 대용종 매핑 비율은 주지 않는다.
+# Basis for the new mix: the top 2 in Seoul 2019 (306,313 trees) are **ginkgo 35.8 % and London plane 20.9 %**,
+# but neither can be procured (ginkgo = confirmed absent from S3 / London plane = the leaf texture is brown
+# autumn foliage and would need a greened derivative first). => **Build a broadleaf-dominant mix from close substitutes**:
+#   Elm_Sapling (Ulmaceae = substitute for zelkova), Shumard_Oak (oak = substitute for pin oak)
+#   = broadleaf 63.6 %, conifer/evergreen 36.4 %. The current pine family drops from 37.5 % to **18.2 %**.
+#   `[estimate - weight allocation]` The statistics give ratios per species but not the substitute mapping ratios.
 #
-# **높이는 `zmax`(지상 노출)를 쓴다 — 바운딩 전체 높이가 아니다.**
-#   `add_vegetation` 은 `s = target_h / native_h` 로 스케일하는데 `zmin < 0` 인 에셋에
-#   전체 높이를 넣으면 지상 노출이 그만큼 짧아진다(White_Pine 이 −15 % 로 겪던 결함,
-#   A §6-c). 신규 3종은 처음부터 `zmax` 로 넣어 같은 결함을 반복하지 않는다.
+# **The height used is `zmax` (exposure above ground), not the full bounding height.**
+#   `add_vegetation` scales by `s = target_h / native_h`, so feeding the full height for an asset with
+#   `zmin < 0` shortens the above-ground exposure by that much (the defect White_Pine suffered at -15 %,
+#   A §6-c). The 3 new species use `zmax` from the start so the same defect is not repeated.
 VEG_TREES = [
-    # 상대경로                       native_h  w   비고
-    ("Trees/Elm_Sapling.usd",         3.0867, 4),  # 느릅나무 묘목 — 느티/이팝 대용, 근경 3 m
-    ("Trees/Shumard_Oak.usd",        10.8989, 3),  # 참나무류 — 대왕참나무 대용, 중·원경
-    ("Trees/Chinese_Juniper.usd",     2.5164, 2),  # 향나무 — 사찰·관공서·학교 조경 최다
-    ("Trees/White_Pine.usd",          2.35,   1),  # 소나무류(소형) — zmin −0.351 미보정 [기지 결함 A §6-c]
-    ("Trees/Yellow_Pine.usd",        26.99,   1),  # 소나무류(대형) — 원경·배후림용
+    # relative path                  native_h  w   note
+    ("Trees/Elm_Sapling.usd",         3.0867, 4),  # Elm sapling - substitute for zelkova/fringe tree, near field 3 m
+    ("Trees/Shumard_Oak.usd",        10.8989, 3),  # Oak - substitute for pin oak, mid and far field
+    ("Trees/Chinese_Juniper.usd",     2.5164, 2),  # Juniper - most common in temple, government and school landscaping
+    ("Trees/White_Pine.usd",          2.35,   1),  # Pine (small) - zmin -0.351 uncorrected [known defect A §6-c]
+    ("Trees/Yellow_Pine.usd",        26.99,   1),  # Pine (large) - for the far field and backdrop woodland
 ]
-# [실측 — `assets/veg_manifest_w2.json`(2026-07-29, usd-core 26.8 · UV 픽셀 판정)]
-#   Elm_Sapling     zmax 3.0867 · 113,268 tri · 잎 beech_leaf 초록 99.2 % · PASS
-#   Shumard_Oak     zmax 10.8989 · 99,509 tri · oakleaves 1~4 초록/올리브 100 % · PASS
-#   Chinese_Juniper zmax 2.5164 · 27,098 tri · pine_needles 초록 80.2 %+황록 19.8 % · PASS
-VEG_SHRUB = [("Shrub/Boxwood.usd", 0.74, 1)]  # 회양목
+# [measured - `assets/veg_manifest_w2.json` (2026-07-29, usd-core 26.8, UV pixel verdict)]
+#   Elm_Sapling     zmax 3.0867, 113,268 tri, leaf beech_leaf green 99.2 % - PASS
+#   Shumard_Oak     zmax 10.8989, 99,509 tri, oakleaves 1-4 green/olive 100 % - PASS
+#   Chinese_Juniper zmax 2.5164, 27,098 tri, pine_needles green 80.2 % + yellow-green 19.8 % - PASS
+VEG_SHRUB = [("Shrub/Boxwood.usd", 0.74, 1)]  # Boxwood
 
 
 def veg_pool():
-    """실제로 디스크에 있는 수종만 남긴 가중 풀.
+    """Weighted pool containing only the species actually present on disk.
 
-    `Japanese_Cherry` 삭제로 1행이 바뀌었으므로 "첫 행 존재"로 가용성을 판정하면
-    조달 상태에 따라 **30개 씬의 식생이 통째로 사라진다.** 존재하는 것만 쓴다.
+    Deleting `Japanese_Cherry` changed one row, so judging availability by "the first row exists"
+    would **wipe the vegetation out of 30 scenes** depending on procurement state. Only what
+    exists is used.
     """
     return [t for t in VEG_TREES
             if os.path.isfile(os.path.join(VEG_DIR, t[0]))]
 
 
 def veg_available():
-    """식생 에셋이 실제로 있는지. 없으면 절차 블롭으로 폴백한다."""
+    """Whether the vegetation assets actually exist. If not, fall back to procedural blobs."""
     return bool(veg_pool())
 
 
@@ -2032,33 +2048,33 @@ def _deactivate_seasonal(stage, asset_path, usd_rel):
 def add_vegetation(stage, prim_path, usd_rel, pos_m, yaw_deg=0.0,
                    target_h=None, native_h=None, tilt_deg=(0.0, 0.0),
                    scale_mul=1.0):
-    """식생 USD 를 reference 로 붙인다. cm→m 단위 변환 자동.
+    """Attach a vegetation USD as a reference. The cm -> m unit conversion is automatic.
 
-    target_h 지정 시 그 높이가 되도록 스케일한다 — 씬이 `trunk_h` 로 의도한
-    수고(樹高)를 유지해야 그림자·차폐 구성이 안 깨진다.
+    With target_h given it is scaled to that height - the tree height the scene intended via
+    `trunk_h` must be preserved or the shadow and occlusion composition breaks.
     """
     from pxr import Usd, UsdGeom, Gf
     asset = os.path.join(VEG_DIR, usd_rel)
     if not os.path.isfile(asset):
         return None
-    unit = 0.01                                # 에셋 metersPerUnit (실측)
+    unit = 0.01                                # Asset metersPerUnit (measured)
     try:
         src = Usd.Stage.Open(asset)
         unit = (UsdGeom.GetStageMetersPerUnit(src)
                 / UsdGeom.GetStageMetersPerUnit(stage))
     except Exception:
         pass
-    # 참조는 **자식**에 붙인다. Debris 계열 USD 는 루트에 자체 xformOp
-    # (translate/rotateXYZ/scale)를 갖고 있어서, 참조를 붙인 프림에 다시
-    # AddTranslateOp 하면 "already exists in xformOpOrder" 로 죽는다.
-    # (Trees 계열은 루트 op 이 없어 우연히 통과했을 뿐이다.)
+    # The reference is attached to a **child**. The Debris family USDs carry their own xformOps
+    # (translate/rotateXYZ/scale) on the root, so calling AddTranslateOp again on the prim that
+    # holds the reference dies with "already exists in xformOpOrder".
+    # (The Trees family has no root op and merely passed by luck.)
     xf = UsdGeom.Xform.Define(stage, prim_path)
     UsdGeom.Xform.Define(stage, prim_path + "/Asset") \
         .GetPrim().GetReferences().AddReference(asset)
     xf.AddTranslateOp().Set(Gf.Vec3d(*[float(v) for v in pos_m]))
-    xf.AddRotateZOp().Set(float(yaw_deg))      # 순서 중요: T → R → S
-    # 경사면 추종·개체 기울기. 낙엽·잡석은 이게 없으면 비탈에서 공중에 뜬 채
-    # 수평으로 눕는다 — 산포물에는 yaw 만으로 부족하다.
+    xf.AddRotateZOp().Set(float(yaw_deg))      # Order matters: T -> R -> S
+    # Slope following and per-instance tilt. Without it, leaves and rubble lie flat and float in
+    # mid-air on a slope - yaw alone is not enough for scatter.
     tx, ty = (float(tilt_deg[0]), float(tilt_deg[1])) if tilt_deg else (0.0, 0.0)
     if abs(tx) > 1e-6:
         xf.AddRotateXOp().Set(tx)
@@ -2071,34 +2087,34 @@ def add_vegetation(stage, prim_path, usd_rel, pos_m, yaw_deg=0.0,
 
 
 
-# --- 3D 산포물 (낙엽·자갈·잔해·바위) ---------------------------------------
-# **왜 필요한가**: 낙엽·자갈·잔해를 평면에 텍스처로 깔면 "장판 깐 것"으로 읽힌다.
-# 사용자 지적: *"낙엽도 장판 깐 것처럼 만드는거에서 탈피시켜주고"*
-# 아스팔트·콘크리트는 평면이 옳지만, **입체물을 평면으로 때운 것**은 3D 여야 한다.
-# S3 `Assets/Vegetation/` 에 Debris 26 · Leaves 16 · Rocks 75 종이 있다.
-# (상대경로, 1개가 덮는 유효 면적[m²], 삼각형 수)
-#   유효면적은 추정이 아니라 **삼각형을 XY 로 투영해 래스터화한 실측**이다.
-#   sceneC2 의 기존 낙엽은 두께 6mm 납작 타원체 900개였는데 총 피복이
-#   **0.96 m² 뿐**이라, 화면에 보이는 낙엽은 사실상 전부 텍스처 무늬였다.
-#   → "장판" 의 정확한 원인. 피복을 개수가 아니라 면적으로 다뤄야 하는 이유.
-#   [정정 2026-07-29 · 레드팀 R8 → W1 재판정] `oakfall2` 는 (0.0030/520) →
-#   (0.0038/582) 로 1차 정정했으나, W1 지피 감사가 usd-core 독립 재래스터화로
-#   피복을 **0.0054 m²** 로 확정했다(래스터라이저 해석 검증·N 불변·실루엣 육안,
-#   `Docs/surveys/props_audit_w1/B_groundcover_debris.md` §6, redteam_w1_assets 승소 판정).
-#   **렌더 영향 0** — 유일한 호출부 `sceneC2_leaf_stairs.py:563` 이 `fallcluster` 만
-#   필터해 넘기므로 이 행은 산포 개수식 `n = A·(−ln(1−cover))/mean_cov` 에 안 들어간다.
-#   ⚠ 낱장 maplefall1(실측 0.0081)·oakfall1(0.0048)·클러스터 2행(0.0584/0.0239)도
-#   계통 편차가 확인됐다 — sceneC2 개수식에 걸리는 fallcluster 행은 **렌더 영향이
-#   있으므로** W2 낙엽 전역화(G2)에서 렌더 게이트와 함께 일괄 교체한다(B 감사 A3).
-# [W2 · B감사 A3 — **5행 전면 교체**] 유효피복을 B조 독립 재래스터화 값으로 통일한다.
-#   구값의 출처(`asset_audit_v1.md`)는 계산 코드가 저장소에 없어 원인 규명이 불가하고,
-#   B조 값은 ① 래스터라이저 해석 검증(단위정사각 1.0000 / 원 0.7840 vs 이론 0.7854)
-#   ② N=256~2048 결과 불변 ③ 실루엣 PNG 육안 확인을 거쳤다 [실측 — B §6·§12 A3].
-#   삼각형 수는 5행 전부 이미 일치했다(정정 대상 아님).
-#   변화폭: 낱장 3종이 **40~60 % 과소평가**(maplefall1 +59 % · oakfall1 +60 %),
-#   클러스터 2종은 소폭 과대(−7.0 % · −1.2 %).
-#   ⇒ `scatter_debris` 의 `mean_cov` 가 바뀌므로 **산포 개수가 바뀐다**(재질 A/B 밖의
-#     before/after 항목 — 양팔에 동일하게 걸린다).
+# --- 3D scatter (leaves, gravel, debris, rocks) -----------------------------
+# **Why it is needed**: leaves, gravel and debris laid on a plane as texture read as "lino".
+# User feedback: *"get the leaves out of looking like laid lino as well"*
+# Asphalt and concrete are correctly flat, but **a solid object faked as a plane** must be 3D.
+# S3 `Assets/Vegetation/` holds Debris 26, Leaves 16 and Rocks 75 kinds.
+# (relative path, effective area covered by one instance [m2], triangle count)
+#   The effective area is not an estimate but a **measurement made by projecting the triangles onto XY and rasterising**.
+#   The existing leaves of sceneC2 were 900 flattened ellipsoids 6 mm thick, yet the total cover
+#   was **only 0.96 m2**, so the leaves visible on screen were effectively all texture pattern.
+#   -> The exact cause of the "lino" look, and why cover must be handled as area, not count.
+#   [correction 2026-07-29, red team R8 -> W1 re-judgement] `oakfall2` was first corrected from (0.0030/520) to
+#   (0.0038/582), but the W1 ground-cover audit fixed the cover at **0.0054 m2** by independent
+#   re-rasterisation with usd-core (rasteriser interpretation validated, invariant in N, silhouette inspected;
+#   `Docs/surveys/props_audit_w1/B_groundcover_debris.md` §6, redteam_w1_assets ruled in favour).
+#   **0 render impact** - the only call site, `sceneC2_leaf_stairs.py:563`, filters for `fallcluster`
+#   only, so this row never enters the scatter count formula `n = A*(-ln(1-cover))/mean_cov`.
+#   Warning: single leaves maplefall1 (measured 0.0081) and oakfall1 (0.0048) and the 2 cluster rows (0.0584/0.0239)
+#   also show systematic deviation - the fallcluster rows that do enter the sceneC2 count formula **do affect
+#   the render**, so they are replaced together with the render gate in the W2 leaf globalisation (G2) (audit B A3).
+# [W2, audit B A3 - **all 5 rows replaced**] Effective cover is unified to team B's independent re-rasterisation.
+#   The source of the old values (`asset_audit_v1.md`) has no calculation code in the repository, so the cause cannot be established,
+#   whereas team B's values passed (1) rasteriser interpretation validation (unit square 1.0000 / circle 0.7840 vs theoretical 0.7854)
+#   (2) invariance for N=256-2048 and (3) visual inspection of silhouette PNGs [measured - B §6, §12 A3].
+#   The triangle counts already matched on all 5 rows (not subject to correction).
+#   Magnitude of change: the 3 single leaves were **underestimated by 40-60 %** (maplefall1 +59 %, oakfall1 +60 %),
+#   while the 2 clusters were slightly overestimated (-7.0 %, -1.2 %).
+#   => The `mean_cov` of `scatter_debris` changes, so **the scatter count changes** (a before/after item outside
+#     the material A/B - it applies identically to both arms).
 VEG_DEBRIS = [
     ("Debris/fallcluster1.usd", 0.0584, 9175),
     ("Debris/fallcluster2.usd", 0.0239, 2980),
@@ -2107,22 +2123,22 @@ VEG_DEBRIS = [
     ("Debris/oakfall2.usd",     0.0054,  582),
 ]
 
-# (상대경로, 대표 폭[m], **원점에서 바닥까지 깊이[m]**)
-#   Rocks 는 원점이 바위 *중심* 이라 지면 z 에 그대로 놓으면 절반이 묻힌다.
-#   z_min 만큼 띄워야 앉고, 일부러 묻을 때는 그만큼 덜 띄운다.
-# (상대경로, 네이티브 폭[m], 원점→바닥 깊이[m], 삼각형 수, **네이티브 높이[m]**)
-#   한국 조경 실사종. Privet(쥐똥나무)=생울타리 표준종, Rhododendron(철쭉)·
-#   Juniper(향나무류)=화단 관목.
-#   **삼각형이 비싸다**(5.5만~40만/주) — 근경에만 쓰고 원경은 블롭을 유지한다.
+# (relative path, representative width [m], **depth from the origin to the bottom [m]**)
+#   For Rocks the origin is the *centre* of the rock, so placing it directly at the ground z buries half of it.
+#   It must be lifted by z_min to sit properly, and lifted less when deliberate burial is wanted.
+# (relative path, native width [m], origin-to-bottom depth [m], triangle count, **native height [m]**)
+#   Species real to Korean landscaping. Privet = the standard hedge species; Rhododendron and
+#   Juniper = flower-bed shrubs.
+#   **Triangles are expensive** (55k-400k each) - use them in the near field only and keep blobs for the far field.
 #
-# [W2 · A감사 6-b] **5번째 필드(네이티브 높이) 신설.** `place_shrubs` 가 높이 스케일을
-#   **폭 기준**으로 계산하고 있었는데, 실측 종횡비(높이/폭)가 **0.607~1.973 로 3.2배**
-#   흩어져 있어 `target_h=0.85` 요청 시 실제 수고가 **−39 %~+97 %** 로 어긋났다
-#   (Boxwood 0.62 m 와 Juniper 1.68 m 가 같은 화단에 선다) [실측 — A §6-b].
-#   같은 함수 docstring 이 "관목 높이는 스케일 앵커라 랜덤화는 ±8 %" 라고 못박아 놓고
-#   결정론적으로 그 12배 오차를 넣고 있었다 — **단서 축을 지우는 결함**이다.
+# [W2, audit A 6-b] **A 5th field (native height) has been added.** `place_shrubs` was computing the height scale
+#   **from the width**, but the measured aspect ratio (height/width) is spread over **0.607-1.973, a factor of 3.2**,
+#   so a request of `target_h=0.85` came out **-39 % to +97 %** off
+#   (Boxwood at 0.62 m standing next to Juniper at 1.68 m in the same bed) [measured - A §6-b].
+#   The docstring of that very function states "shrub height is a scale anchor, so randomisation is +-8 %" while
+#   deterministically introducing 12x that error - **a defect that erases a cue axis**.
 VEG_SHRUBS = [
-    # 상대경로                    폭     zmin    삼각형   높이[실측 A §6-b]
+    # relative path               width  zmin    triangles  height [measured A §6-b]
     ("Shrub/Privet.usd",        1.704, 0.067, 147000, 1.114),
     ("Shrub/Boxwood.usd",       1.009, 0.019, 178000, 0.741),
     ("Shrub/Juniper.usd",       0.455, 0.013, 200000, 0.898),
@@ -2130,22 +2146,22 @@ VEG_SHRUBS = [
     ("Shrub/Burning_Bush.usd",  2.642, 0.193, 141000, 1.604),
     ("Shrub/Forsythia.usd",     3.539, 0.007, 404000, 2.317),
 ]
-# 다듬은 생울타리는 실제로 상자 형태가 맞다(전정). 블롭이 틀린 것은
-# **화단의 다듬지 않은 관목**이다 — 거기를 실물로 바꾼다.
+# A clipped hedge really is box-shaped (it is trimmed). What the blob gets wrong is the
+# **untrimmed shrubs of a flower bed** - those are what get replaced with real assets.
 SHRUB_HEDGE = ["Shrub/Privet.usd", "Shrub/Boxwood.usd"]
-# [W2 · A감사 P0-2] `Forsythia`(개나리)·`Burning_Bush`(화살나무) **제거**.
-#   계절 규약은 수종명이 아니라 잎 텍스처 픽셀로 판정한다 [실측 — B §9]:
-#     · `forsythiaflower_basecolor.png` — 개화 전용 텍스처(초록 0.0 %). 개화기 3~4월.
-#     · `burningbush_leaf_basecolor.png` — **적색 30.2 %**(가을 단풍). C2 에는 맞아도
-#       여름·상시 씬에는 금지 대상이라 전역 풀에서 뺀다.
-#   `Rhododendron`(철쭉)은 **꽃 프림 비활성화를 전제로만** 잔류한다 —
-#   `rhododendron_basecolor.png` 픽셀의 **76.7 % 가 마젠타**(만개 스캔)라 그대로 두면
-#   봄 개화가 전 씬에 박힌다. `place_shrubs` 가 `/Asset/Flowers` 를 끈다(아래).
+# [W2, audit A P0-2] `Forsythia` and `Burning_Bush` **removed**.
+#   The seasonal convention is judged by leaf texture pixels, not species names [measured - B §9]:
+#     - `forsythiaflower_basecolor.png` - a blossom-only texture (green 0.0 %). Flowering March-April.
+#     - `burningbush_leaf_basecolor.png` - **red 30.2 %** (autumn colour). Fine for C2, but banned in
+#       summer and all-season scenes, so it is dropped from the global pool.
+#   `Rhododendron` stays **only on the premise that the flower prims are disabled** -
+#   **76.7 % of the pixels** of `rhododendron_basecolor.png` **are magenta** (a full-bloom scan), so leaving it as is
+#   embeds spring flowering in every scene. `place_shrubs` disables `/Asset/Flowers` (below).
 SHRUB_ORNAMENT = ["Shrub/Rhododendron.usd", "Shrub/Juniper.usd"]
 
-# 계절 특정 프림 — 참조 직후 `SetActive(False)` 로 끈다. 에셋 루트(`/Root`)가
-# 참조 대상 프림으로 매핑되므로 `/Root/Flowers` 는 `{prim}/Asset/Flowers` 가 된다.
-# [실측 — `strings assets/vegetation/Shrub/Rhododendron.usd` = Branches·Flowers·Leaves]
+# Season-specific prims - disabled with `SetActive(False)` right after referencing. The asset root (`/Root`)
+# maps to the referencing prim, so `/Root/Flowers` becomes `{prim}/Asset/Flowers`.
+# [measured - `strings assets/vegetation/Shrub/Rhododendron.usd` = Branches, Flowers, Leaves]
 SEASONAL_SUBPRIMS = {
     "Shrub/Rhododendron.usd": ("Flowers",),
 }
@@ -2163,21 +2179,21 @@ def scatter_debris(stage, prefix, x0, y0, x1, y1, z, cover=0.35,
                    pool=None, seed=1234, scale_jitter=(0.75, 1.25),
                    edge_bias=0.0, max_count=400, ground_fn=None,
                    tilt_max=8.0, sink=0.0):
-    """[사실화 v1] 영역에 3D 산포물을 뿌린다 — 낙엽·잔해·자갈·바위.
+    """[realism v1] Scatter 3D objects over a region - leaves, debris, gravel, rocks.
 
-    cover: **목표 지면 피복률 0~1** (개수가 아니다). 무작위 산포는 겹치므로
-      필요 개수는 n = A·(−ln(1−cover)) / (개당 유효면적) 으로 역산한다
-      (겹침을 무시하고 면적을 그냥 나누면 실제 피복이 목표보다 낮게 나온다).
-      개당 유효면적은 VEG_DEBRIS 에 실측해 넣어 두었다.
-    edge_bias: >0 이면 가장자리·구석으로 몰아준다[m]. 실제 낙엽은 바람에
-      쓸려 구석에 쌓이고 통행 동선은 비는데, 균일 산포는 그 반대라 오히려
-      부자연스럽다. 0 이면 균일.
-    ground_fn: (x,y)→z 콜백. 주면 각 개체를 지면에 앉히고 국소 기울기를
-      따라 눕힌다 — 없으면 비탈에서 공중에 뜬 채 수평으로 눕는다.
-    sink: 지면 아래로 내릴 깊이[m]. 바위 반매입용.
-    seed 는 **반드시 결정적**이어야 한다 — 이 프로젝트는 RNG 100% 결정적이 원칙.
+    cover: **target ground cover fraction 0-1** (not a count). Random scatter overlaps, so the
+      required count is back-computed as n = A*(-ln(1-cover)) / (effective area per instance)
+      (dividing the area outright while ignoring overlap yields less cover than the target).
+      The effective area per instance is measured and stored in VEG_DEBRIS.
+    edge_bias: >0 pushes instances towards edges and corners [m]. Real leaves are swept into
+      corners by the wind while the walking line stays clear, and a uniform scatter does the
+      opposite, which looks unnatural. 0 means uniform.
+    ground_fn: (x,y) -> z callback. When given, each instance is seated on the ground and laid
+      along the local slope - without it they float in mid-air and lie flat on a slope.
+    sink: depth to lower below the ground [m]. For half-buried rocks.
+    seed **must be deterministic** - this project's rule is 100 % deterministic RNG.
 
-    반환: 배치한 개수.
+    Returns: the number of instances placed.
     """
     pool = pool or VEG_DEBRIS
     avail = [p for p in pool
@@ -2208,21 +2224,21 @@ def scatter_debris(stage, prefix, x0, y0, x1, y1, z, cover=0.35,
             dx = min(px - xa, xa + w - px)
             dy = min(py - ya, ya + h - py)
             if min(dx, dy) > edge_bias and rng.random() > 0.35:
-                continue                    # 안쪽은 65% 확률로 건너뛴다
+                continue                    # The interior is skipped with 65 % probability
         rel, _cov = avail[int(rng.integers(len(avail)))][:2]
         pz = float(z)
         tilt = (0.0, 0.0)
         if ground_fn is not None:
             try:
-                # d 는 **디딤면(0.24~0.34m)보다 작아야** 한다. 종전 0.15 는
-                # 반폭이 tread 의 절반에 육박해, 수평 디딤면 위 낙엽 89.5% 가
-                # 인접 단의 z 를 물고 평균 28° 기울어 6.6cm 뜨거나 파묻혔다.
+                # d must be **smaller than the tread (0.24-0.34 m)**. The old 0.15 gave a
+                # half-width approaching half the tread, so 89.5 % of the leaves on a horizontal tread
+                # picked up the z of the adjacent step and tilted by 28 deg on average, floating or sinking by 6.6 cm.
                 d = 0.04
                 pz = float(ground_fn(px, py))
-                # 국소 기울기 → 개체를 비탈에 눕힌다
+                # Local slope -> lay the instance along the slope
                 gx = (float(ground_fn(px + d, py)) - float(ground_fn(px - d, py))) / (2 * d)
                 gy = (float(ground_fn(px, py + d)) - float(ground_fn(px, py - d))) / (2 * d)
-                # 불연속면(계단코·연석)에서 기울기가 폭발하므로 클램프한다.
+                # The slope explodes at discontinuities (nosings, curbs), so it is clamped.
                 _cl = lambda a: max(-15.0, min(15.0, math.degrees(math.atan(a))))
                 tilt = (_cl(gy), -_cl(gx))
             except Exception:
@@ -2235,7 +2251,7 @@ def scatter_debris(stage, prefix, x0, y0, x1, y1, z, cover=0.35,
                               yaw_deg=float(rng.uniform(0, 360)),
                               tilt_deg=tilt,
                               scale_mul=float(rng.uniform(*scale_jitter))) is not None:
-                # 산포물은 개수가 많아 인스턴싱이 필수 — 프로토타입 공유.
+                # Scatter comes in large numbers, so instancing is essential - share the prototype.
                 try:
                     stage.GetPrimAtPath(f"{prefix}/Deb_{i}/Asset").SetInstanceable(True)
                 except Exception:
@@ -2253,50 +2269,52 @@ def build_tree(stage, prefix, cx, cy, gz, wood_mtl, canopy_a_mtl, canopy_b_mtl,
                trunk_r=0.09, trunk_h=2.2, stake_r=0.015, stake_h=1.5,
                stake_off=0.5, stakes=False, canopy_blobs=10,
                canopy_spread=1.0):
-    """[v5.1 현실성] 줄기(2단 테이퍼+미세 기울기) + 수관(불규칙 타원 블롭,
-    나무별 결정적 변형) + 지지대 3본(기본 OFF). 좌표 해시 시드 → 같은 씬
-    재실행 시 동일, 나무마다 수형·크기·기울기가 달라 '막대사탕 복제' 인상 제거.
+    """[v5.1 realism] Trunk (2-stage taper + slight lean) + canopy (irregular ellipsoid blobs,
+    deterministically varied per tree) + 3 stakes (OFF by default). Seeded by a coordinate hash,
+    so it is identical on re-running the same scene while each tree differs in form, size and
+    lean - removing the 'cloned lollipop' impression.
 
-    [v6 판정 C-4] 원경에서 '가는 줄기 + 구형 수관'(롤리팝)으로 뭉치는 문제 →
-    위성 블롭 7 → `canopy_blobs`(기본 10), 산포 반경·연직 분포 상향으로
-    실루엣을 깨뜨린다. `canopy_spread` 로 씬별 미세조정(1.0 = 기본).
-    [mod6 §1(c)] `trunk_r` 기본 0.06 → 0.09(지름 18 cm) — 과세 줄기 보정.
-    (명시 지정 호출은 영향 없음.)
-    [사실화 v1] `NEGOBS_LOOK_GEO=1` 이고 식생 에셋이 있으면 **실제 나무 USD**로
-    교체된다(프림 집합이 바뀌므로 기하 소속). 시그니처가 같아 30개 씬이
-    수정 없이 그대로 바뀐다. 에셋이 없으면 아래 절차 블롭으로 폴백한다(회귀 0).
+    [v6 verdict C-4] At distance it clumped into a 'thin trunk + spherical canopy' (lollipop) ->
+    satellite blobs 7 -> `canopy_blobs` (10 by default), with a larger scatter radius and vertical
+    distribution to break the silhouette. `canopy_spread` allows per-scene fine tuning (1.0 = default).
+    [mod6 §1(c)] `trunk_r` default 0.06 -> 0.09 (diameter 18 cm) - corrects an over-slender trunk.
+    (Calls that state it explicitly are unaffected.)
+    [realism v1] With `NEGOBS_LOOK_GEO=1` and the vegetation assets present, it is replaced by a
+    **real tree USD** (the prim set changes, so it belongs to geometry). The signature is unchanged,
+    so 30 scenes switch over with no edits. Without the assets it falls back to the procedural
+    blobs below (0 regression).
 
-    반환: None(프림은 prefix 하위에 생성)."""
+    Returns: None (prims are created under prefix)."""
     import random as _random
     rnd = _random.Random((int(round(cx * 100)) * 73856093)
                          ^ (int(round(cy * 100)) * 19349663))
 
     if LOOK_GEO and veg_available():
-        # 수종은 좌표 해시로 결정 — 같은 씬 재실행 시 동일하고, 나무마다 다르다.
+        # The species is decided by a coordinate hash - identical on re-running the same scene, and different per tree.
         pool = [t for t in veg_pool() for _ in range(t[2])]
         rel, native, _ = pool[rnd.randrange(len(pool))]
-        # **수고는 단서다.** 단서 4계열 ③(스케일 앵커)이 "수관 꼭대기 절대높이"를
-        # 쓰므로, 이걸 큰 폭으로 랜덤화하면 정작 학습해야 할 축을 지운다.
-        # 종전 uniform(1.45,1.85) 는 근거 없는 매직넘버였다(레드팀 지적 — 수용).
-        # → 고정 비율 1.60(줄기높이 대비 전체 수고)에 ±8% 개체차만 준다.
+        # **Tree height is a cue.** Cue family (3) (scale anchors) uses the "absolute height of the canopy top",
+        # so randomising it widely erases the very axis that must be learnt.
+        # The old uniform(1.45,1.85) was an unfounded magic number (red team finding - accepted).
+        # -> A fixed ratio of 1.60 (total height to trunk height) with only +-8 % per-instance variation.
         target = float(trunk_h) * 1.60 * rnd.uniform(0.92, 1.08)
         try:
-            # **자식 경로에 붙인다.** prefix 자신에 붙이면 `build_planter` 처럼
-            # 같은 prefix 아래에 이미 만들어 둔 형제 프림(Curb/Cap/Grass)에
-            # 스케일(약 0.0078)이 함께 걸려 **화단이 0.8% 크기로 수축**한다.
-            # 12개 씬이 이 경로를 탄다(레드팀 적발 — 감독 버그).
+            # **Attach to a child path.** Attaching to prefix itself would, as in `build_planter`,
+            # apply the scale (about 0.0078) to sibling prims already created under the same prefix
+            # (Curb/Cap/Grass) and **shrink the flower bed to 0.8 % of its size**.
+            # 12 scenes take this path (found by the red team - a supervisor bug).
             vx = add_vegetation(stage, f"{prefix}/Veg", rel, (cx, cy, gz),
                                 yaw_deg=rnd.uniform(0, 360),
                                 target_h=target, native_h=native)
             if vx is not None:
-                # 같은 에셋을 여러 번 참조하므로 인스턴싱으로 메모리·시간 절약.
-                # (33씬 합계 약 30 M 삼각형 추가 — 레드팀 추산)
-                # 인스턴싱은 **참조가 붙은 프림**에 걸어야 한다. USD 는
+                # The same asset is referenced many times, so instancing saves memory and time.
+                # (About 30 M extra triangles across the 33 scenes - red team estimate.)
+                # Instancing must be set on **the prim that holds the reference**. USD requires
                 # "a prim must use at least one composition arc in order to be
-                # eligible for instancing" 이므로, 참조를 /Asset 자식으로 내린
-                # 뒤에도 부모에 걸어 두면 **조용히 무동작**이다.
-                # (직전 커밋의 인스턴싱 조치가 다음 커밋에서 이렇게 무력화됐고,
-                #  육안으로는 원리적으로 확인할 수 없는 종류의 회귀다.)
+                # eligible for instancing", so once the reference was moved down to the /Asset child,
+                # leaving the flag on the parent is **silently inert**.
+                # (The instancing measure of one commit was neutralised this way by the next, and it is
+                #  the kind of regression that cannot in principle be spotted by eye.)
                 try:
                     stage.GetPrimAtPath(f"{prefix}/Veg/Asset") \
                         .SetInstanceable(True)
@@ -2308,12 +2326,12 @@ def build_tree(stage, prefix, cx, cy, gz, wood_mtl, canopy_a_mtl, canopy_b_mtl,
             print(f"[룩v1][경고] 식생 에셋 배치 실패 {prefix}: {e} — 블롭 폴백")
     th = trunk_h * rnd.uniform(0.85, 1.25)
     lean_a = rnd.uniform(0.0, 2 * math.pi)
-    lean = rnd.uniform(0.0, 4.0)               # 기울기(도)
+    lean = rnd.uniform(0.0, 4.0)               # Lean (degrees)
     lx, ly = math.cos(lean_a), math.sin(lean_a)
-    # 줄기 2단(테이퍼): 하단 r → 상단 0.7r, 상단은 기울기 방향으로 오프셋
+    # Trunk in 2 stages (taper): lower r -> upper 0.7r, the top offset in the lean direction
     off = th * math.sin(math.radians(lean))
-    # [v6 판정] 부호 수정: 상단 오프셋(+lx)과 정합하는 회전은 rotY=+lean*lx,
-    #   rotX=-lean*ly (구 부호는 어긋남 가산 → 줄기 두 동강 렌더)
+    # [v6 verdict] Sign fix: the rotation consistent with the top offset (+lx) is rotY=+lean*lx,
+    #   rotX=-lean*ly (the old signs added the mismatch -> the trunk rendered in two pieces)
     add_cylinder(stage, f"{prefix}/Trunk", (cx, cy, gz + th * 0.35),
                  trunk_r, th * 0.7, wood_mtl,
                  rotX=-lean * ly, rotY=lean * lx)
@@ -2321,12 +2339,12 @@ def build_tree(stage, prefix, cx, cy, gz, wood_mtl, canopy_a_mtl, canopy_b_mtl,
                  (cx + lx * off * 0.5, cy + ly * off * 0.5, gz + th * 0.78),
                  trunk_r * 0.7, th * 0.55, wood_mtl,
                  rotX=-lean * ly, rotY=lean * lx)
-    # 수관: 중심 대형 1 + 위성 블롭 canopy_blobs (반경·위치·납작률 랜덤, 2색 랜덤)
-    cs = rnd.uniform(0.85, 1.25)               # 수관 전체 스케일
+    # Canopy: 1 large central blob + canopy_blobs satellites (random radius, position and flatness, 2 random colours)
+    cs = rnd.uniform(0.85, 1.25)               # Overall canopy scale
     sp = float(canopy_spread)
     ccx, ccy = cx + lx * off, cy + ly * off
     czb = gz + th
-    # 중심 블롭도 축비를 지터(구형 실루엣 회피)
+    # The central blob also gets an axis-ratio jitter (avoids a spherical silhouette)
     add_sphere(stage, f"{prefix}/Canopy_0",
                (ccx, ccy, czb + 0.35 * cs),
                (0.74 * cs * sp * rnd.uniform(0.92, 1.08),
@@ -2335,15 +2353,15 @@ def build_tree(stage, prefix, cx, cy, gz, wood_mtl, canopy_a_mtl, canopy_b_mtl,
                canopy_a_mtl if rnd.random() < 0.5 else canopy_b_mtl)
     for i in range(int(canopy_blobs)):
         a = rnd.uniform(0, 2 * math.pi)
-        d = rnd.uniform(0.18, 0.68) * cs * sp   # 산포 반경 상향(구 0.15~0.55)
-        dz = rnd.uniform(-0.05, 0.95) * cs      # 연직 분포 확대(구 0.05~0.85)
-        r = rnd.uniform(0.30, 0.58) * cs * sp   # 블롭 반경 상향(구 0.30~0.55)
+        d = rnd.uniform(0.18, 0.68) * cs * sp   # Scatter radius raised (was 0.15-0.55)
+        dz = rnd.uniform(-0.05, 0.95) * cs      # Vertical distribution widened (was 0.05-0.85)
+        r = rnd.uniform(0.30, 0.58) * cs * sp   # Blob radius raised (was 0.30-0.55)
         mtl = canopy_a_mtl if rnd.random() < 0.5 else canopy_b_mtl
         add_sphere(stage, f"{prefix}/Canopy_{i + 1}",
                    (ccx + d * math.cos(a), ccy + d * math.sin(a), czb + dz),
                    (r, r * rnd.uniform(0.80, 1.0), r * rnd.uniform(0.65, 0.85)),
                    mtl)
-    # 지지대 3본 — [v6 판정] 기본 OFF("삼각대 버섯" 인상): stakes=True 시에만
+    # 3 stakes - [v6 verdict] OFF by default (the "tripod mushroom" impression): only with stakes=True
     if not stakes:
         return
     tilt = 15.0
@@ -2359,8 +2377,8 @@ def build_tree(stage, prefix, cx, cy, gz, wood_mtl, canopy_a_mtl, canopy_b_mtl,
 def build_planter(stage, prefix, cx, cy, base_z, curb_mtl, grass_mtl,
                   tree_mtls=None, size=3.0, curb_h=0.45, curb_t=0.25,
                   cap_over=0.05, cap_h=0.05, grass_h=0.40):
-    """화단: 경계석 4벽 + 캡(오버행) + 잔디 상면 (+옵션 나무).
-    tree_mtls=(wood, canopy_a, canopy_b) 지정 시 중앙에 나무. scene01 이식."""
+    """Flower bed: 4 kerb walls + cap (overhang) + grass top surface (+ an optional tree).
+    With tree_mtls=(wood, canopy_a, canopy_b) a tree is placed in the centre. Transplanted from scene01."""
     S, h, t = size, curb_h, curb_t
     over, gh = cap_over, grass_h
     half = S / 2.0
@@ -2379,9 +2397,9 @@ def build_planter(stage, prefix, cx, cy, base_z, curb_mtl, grass_mtl,
                  sy + 2 * over if sy <= sx else sy, cap_h), curb_mtl)
     add_box(stage, f"{prefix}/Grass", (cx, cy, base_z + gh / 2.0),
             (S - 2 * t, S - 2 * t, gh), grass_mtl)
-    # 화단 관목 — 다듬지 않은 화단 관목이야말로 "솜사탕"의 본체다.
-    # (다듬은 생울타리가 상자 형태인 건 전정 결과라 오히려 맞다.)
-    # 나무가 있으면 중앙을 비우고 모서리 쪽에 앉힌다.
+    # Bed shrubs - untrimmed bed shrubs are the real body of the "candy floss" problem.
+    # (A trimmed hedge being box-shaped is the result of clipping and is actually correct.)
+    # If there is a tree, keep the centre clear and seat them towards the corners.
     if LOOK_GEO and veg_available():
         inner = S / 2.0 - t - 0.25
         if inner > 0.35:
@@ -2401,10 +2419,11 @@ _FIRE_MTL_CACHE = {}
 
 
 def _fire_decal_mtl(stage, prefix):
-    """소방관 진입창 표식 재질 — **씬당 1개만** 만든다.
-    동마다 만들면 82개 건물 × 재질이 되어 재질 테이블이 터진다.
-    적색은 v5.1 §4 상수색 불가침 대상이라 텍스처 승격에서 제외되도록
-    이름을 `Looks/FkFireSignRed` 로 준다(역할 분류기 sign 규칙에 걸린다).
+    """Fire entry window marking material - **only one per scene**.
+    Creating one per building would give 82 buildings x materials and blow up the material table.
+    Red is inviolable constant colour under v5.1 §4, so the name is given as
+    `Looks/FkFireSignRed` to exclude it from texture promotion (it matches the sign rule of the
+    role classifier).
     """
     root = prefix.split("/Looks")[0].rsplit("/", 2)[0] if "/Looks" in prefix \
         else "/".join(prefix.split("/")[:3])
@@ -2420,22 +2439,25 @@ def _fire_decal_mtl(stage, prefix):
 
 def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
                    window=None):
-    """건물 1동. bd 딕셔너리(x0,x1,y0,y1,h,floors,axis,facade_*,face_dir).
-    axis="y"→파사드 y평면(창문 x배열), "x"→x평면(창문 y배열). scene01 이식.
-    bd["base_z"](선택, 기본 0.0): 건물 기단 월드 z — 지반이 z=0이 아닌 씬에서
-    부유 방지(h·창문·파라펫 z는 base_z 기준 상대).
-    반환: 생성 프림 리스트.
+    """One building. bd dictionary (x0,x1,y0,y1,h,floors,axis,facade_*,face_dir).
+    axis="y" -> the facade is a y plane (windows arrayed along x); "x" -> an x plane (windows along y).
+    Transplanted from scene01.
+    bd["base_z"] (optional, default 0.0): world z of the building plinth - prevents floating in
+    scenes whose ground is not at z=0 (h, window and parapet z are relative to base_z).
+    Returns: list of created prims.
 
-    [사실화 v1 · 구성 감사] 종전 구성은 **박스 + 유리 쿼드 + 파라펫**이 전부라
-    24개 씬에서 화면 상단 30~50%를 "파사드 빌보드"가 차지했다. 감사 지적:
-      · 출입구 0 · 창틀 0 · 옥탑 0 · 선홈통 0
-      · **33씬 통틀어 사람이 드나드는 문이 사실상 0개** →
-        "무대는 있는데 아무도 살지 않는다"의 직접 원인
-    LOOK_GEO 에서 아래 3단 구성을 얹는다(전부 기능 필수물이라 v5.2 §6 통과):
-      ① 저층부 — 출입문(h2.1, 스케일 앵커 겸함)·기단 마감
-      ② 기준층 — 창대(sill)·층간 띠
-      ③ 옥탑 — 계단실 박스·난간(원경 실루엣을 직선 뚜껑에서 해방)
-    선홈통(세로 홈통)은 파사드 수직 분절을 만들어 빌보드 인상을 깬다.
+    [realism v1, composition audit] The old composition was **box + glass quad + parapet** and
+    nothing else, so in 24 scenes a "facade billboard" occupied 30-50 % of the upper frame. The
+    audit found:
+      - 0 entrances, 0 window frames, 0 rooftop structures, 0 downpipes
+      - **essentially 0 doors a person could walk through across all 33 scenes** ->
+        the direct cause of "there is a stage but nobody lives there"
+    Under LOOK_GEO the following 3-tier composition is added (all functionally required, so it
+    passes v5.2 §6):
+      (1) lower storeys - entrance door (h2.1, doubling as a scale anchor), plinth finish
+      (2) typical floors - window sills, floor bands
+      (3) rooftop - stair-tower box, guardrail (frees the distant silhouette from a straight lid)
+    Downpipes create vertical facade articulation and break the billboard impression.
     """
     if window is None:
         window = dict(w=1.2, h=1.6, inset=0.15, col_step=2.5, margin=2.0)
@@ -2454,23 +2476,23 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
     ins = float(wd.get("inset", 0.0)) if LOOK_GEO else 0.0
     band_t = min(max(ins, 0.0), 0.15)
     band_h = 0.12
-    # ── [T1-10] 창 리세스 — `window["inset"]` 이 정의만 되고 읽히지 않던 버그 ──
-    # 종전: 유리 슬래브(두께 WIN_T=0.03)의 중심을 파사드면 +5 mm 에 두어
-    #   **외면이 벽면보다 20 mm 바깥**에 있었다 = 벽에 유리판을 덧댄 모양.
-    #   실제 창은 벽면보다 뒤로 물러나 있고 그 리빌이 그림자선을 만든다.
-    # 그러나 **셸은 솔리드 박스**다 — 파사드면(facade_x/y)은 셸의 한 면이고
-    #   그 안쪽은 전부 채워져 있다(씬 101개 동 AST 전수 확인, 예외 0).
-    #   따라서 유리를 inset(=0.15) 만큼 그대로 밀어 넣으면 셸 내부에 묻혀
-    #   **23개 씬의 창이 전부 사라진다**. 개구(리빌) 기하 없이 표현 가능한
-    #   리세스의 상한은 "외면을 벽면까지 당기는 것"이고, 동일평면 Z-파이팅을
-    #   피하려면 WIN_EPS 는 남겨야 한다(씬01 주석의 현행 관례:
-    #   *"두께 0.03 패널을 파사드에서 2 cm 돌출·1 cm 매입 — 동일평면 Z파이팅
-    #   회피, 불리언 불필요"*).
-    # → 여기서는 **돌출 20 mm → 5 mm** 까지만 물린다. 잔여분(0.135)은 파사드
-    #   개구가 필요하므로 `building_kit` 스팬드럴 분해(T2) 몫이다.
-    # LOOK_GEO=0 이면 ins=0 → recess=0 → 창 좌표는 종전과 **완전 동일**하다.
-    WIN_T = 0.03                                 # 유리 슬래브 두께(현행 값)
-    WIN_EPS = 0.005                              # 벽면 동일평면 회피 여유
+    # -- [T1-10] Window recess - the bug where `window["inset"]` was defined but never read --
+    # Previously: the centre of the glass slab (thickness WIN_T=0.03) sat 5 mm outside the facade plane,
+    #   so **its outer face was 20 mm proud of the wall** = a glass sheet stuck onto the wall.
+    #   A real window is set back from the wall and its reveal casts a shadow line.
+    # But **the shell is a solid box** - the facade plane (facade_x/y) is one face of the shell and
+    #   everything behind it is filled (verified by AST across all 101 buildings in the scenes, 0 exceptions).
+    #   So pushing the glass in by the full inset (=0.15) would bury it inside the shell and
+    #   **all the windows of 23 scenes would disappear**. Without opening (reveal) geometry, the
+    #   maximum expressible recess is "pull the outer face back to the wall plane", and to avoid
+    #   coplanar z-fighting WIN_EPS must remain (the current convention per the scene01 comment:
+    #   *"a 0.03 thick panel protruding 2 cm and embedded 1 cm from the facade - avoids coplanar
+    #   z-fighting, no boolean needed"*).
+    # -> Here it is pulled back only from **20 mm proud to 5 mm**. The remainder (0.135) requires a facade
+    #   opening and belongs to the `building_kit` spandrel decomposition (T2).
+    # With LOOK_GEO=0, ins=0 -> recess=0 -> the window coordinates are **exactly as before**.
+    WIN_T = 0.03                                 # Glass slab thickness (current value)
+    WIN_EPS = 0.005                              # Margin avoiding coplanarity with the wall
     recess = max(0.0, min(ins, 0.005 + WIN_T / 2.0 - WIN_EPS))
     axis_y = bd.get("axis", "y") == "y"
     fdir = bd["face_dir"]
@@ -2484,17 +2506,17 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
         usable = Ly - 2 * wd["margin"]
     ncols = max(1, int(usable / wd["col_step"]))
 
-    # ── 창 상한 ────────────────────────────────────────────────────────
-    # 측정: 33씬에 창 프림이 **4,173개인데 그 대부분이 프레임 밖**이다.
-    # 판정 1순위 시점(h0.3·pitch −10°·vFOV 36°)에서 프레임 상단은 지평 위
-    # +8.0° 뿐이라, 거리 d 에서 보이는 최고 높이는 0.3 + 0.14·d 다.
+    # -- Window cap -----------------------------------------------------
+    # Measured: the 33 scenes hold **4,173 window prims and most of them are off-frame**.
+    # At the primary evaluation viewpoint (h0.3, pitch -10 deg, vFOV 36 deg) the top of the frame is only
+    # +8.0 deg above the horizon, so the highest visible point at distance d is 0.3 + 0.14*d.
     #   d=20m → 3.1m · d=34m → 5.1m · d=90m → 12.9m
-    # 즉 34m 짜리 아파트 파사드도 **지상 5.1m = 1.7개 층만** 화면에 들어온다.
-    # 프림의 19%를 안 보이는 곳에 쓰면서, 화면을 채우는 지상 0~5m 구간에는
-    # 셸 박스 한 면 말고 아무것도 없었다.
-    # → 안 보이는 층의 창을 만들지 않고, 그 예산을 저층부에 재투자한다.
+    # In other words even a 34 m apartment facade only puts **5.1 m above ground = 1.7 floors** on screen.
+    # 19 % of all prims were spent where they cannot be seen, while the 0-5 m band that fills the
+    # frame had nothing but one face of a shell box.
+    # -> Windows on invisible floors are not built and that budget is reinvested in the lower storeys.
     nrows = bd["floors"]
-    # **창·SillBand 프림 개수**가 바뀌므로 기하다(T1 §1.7.1 #21 — v1 열거 누락 2곳 중 하나).
+    # The **number of window and SillBand prims** changes, so this is geometry (T1 §1.7.1 #21 - one of the 2 v1 enumeration omissions).
     if LOOK_GEO:
         try:
             nrows = fk.window_rows_visible(
@@ -2532,36 +2554,36 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
                                      (gx_win, yc, zc), (WIN_T, wd["w"], wd["h"]),
                                      glass_mtl))
 
-    # 파라펫: 건축법 시행령 §40 은 옥상 난간을 **1.2 m 이상**으로 규정한다.
-    # 종전 0.5 는 규정 미달이었고, 원경 실루엣도 그만큼 납작했다.
+    # Parapet: Building Act Enforcement Decree §40 requires a rooftop guardrail of **at least 1.2 m**.
+    # The old 0.5 fell short of the rule, and the distant silhouette was that much flatter.
     par_h = 1.20 if LOOK_GEO else 0.5
     prims.append(add_box(stage, f"{prefix}/Parapet",
                          (cx, cy, base + hh + par_h / 2.0),
                          (Lx + 0.2, Ly + 0.2, par_h), parapet_mtl))
 
-    # 이 아래가 전부 게이트 안이다 — 기단 석재 띠·에어컨 실외기·저층부 파사드 킷
-    # 전체가 기하 신설이므로 `LOOK_GEO` 다(T1 §1.7.1 #23 — v1 열거 누락 2곳 중 하나.
-    # 이 한 줄을 놓치면 A/B **양팔에서** 건물 저층부가 통째로 사라진다).
+    # Everything below this is inside the gate - the plinth stone band, AC outdoor units and the whole
+    # lower-storey facade kit are new geometry and therefore `LOOK_GEO` (T1 §1.7.1 #23 - the other of the 2 v1 enumeration omissions.
+    # Missing this one line makes the lower storeys of buildings disappear **in both A/B arms**).
     if not LOOK_GEO:
         return prims
 
-    # ── ⓪ 기단 석재 띠 ────────────────────────────────────────────────
-    # **동당 프림 1개**인데 h0.3 프레임 하단을 직격한다 — 최대 ROI.
-    # 한국 건물 저층부는 예외 없이 화강석·타일 기단으로 마감돼 있다.
+    # -- (0) Plinth stone band -------------------------------------------
+    # **1 prim per building** yet it lands directly on the bottom of the h0.3 frame - the best ROI.
+    # The lower storeys of Korean buildings are finished in granite or tile plinths without exception.
     try:
         fac = fk.facade_from_bd(bd)
         K = fk.Kit(add_box, add_cylinder)
         prims += fk.build_plinth(K, stage, prefix, bd["x0"], bd["x1"],
                                  bd["y0"], bd["y1"], base, parapet_mtl,
                                  height=1.10)
-        # 에어컨 실외기 — 조사가 꼽은 **한국 식별 최대 단서**이고
-        # 설치 높이 1.5~2.6m = 로봇 시점 정면이다.
+        # AC outdoor units - the **strongest Korean identification cue** named by the survey, and their
+        # mounting height of 1.5-2.6 m is straight ahead at the robot viewpoint.
         prims += fk.build_aircon_units(K, stage, prefix, fac,
                                        parapet_mtl, parapet_mtl,
                                        mode="eaves", count=4,
                                        seed=zlib.crc32(prefix.encode()))
-        # 소방관 진입창 붉은 역삼각형 — 2~11층 법정 의무라 실제로 100% 있고
-        # **얇은 쿼드라 사실상 프림 비용이 없다**. 가장 값싼 한국 신호.
+        # Fire entry window red inverted triangle - statutorily mandatory on floors 2-11, so present 100 % of the time,
+        # and **a thin quad, so effectively free in prims**. The cheapest Korean signal.
         lv = fk.floor_levels(bd["floors"], fstep, base_z=base)
         prims += fk.build_fire_access_marks(stage, prefix, fac, lv,
                                             _fire_decal_mtl(stage, prefix),
@@ -2569,9 +2591,9 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
     except Exception as e:
         print(f"[룩v1][경고] 파사드 저층부 실패 {prefix}: {e}")
 
-    # ── ① 저층부: 출입문 ──────────────────────────────────────────────
-    # 문 높이 2.1 m 는 **스케일 앵커**를 겸한다. 사람·차량이 0건인 라이브러리에서
-    # 절대 크기를 읽을 단서가 거의 없다는 것이 구성 감사의 핵심 지적이었다.
+    # -- (1) Lower storeys: entrance door ---------------------------------
+    # The 2.1 m door height doubles as a **scale anchor**. The composition audit's central point was that
+    # in a library with 0 people and 0 vehicles there is almost no cue for reading absolute size.
     DW, DH = 1.8, 2.1
     if axis_y:
         prims.append(add_box(stage, f"{prefix}/Door",
@@ -2588,8 +2610,8 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
                              (gx + fdir * 0.10, cy, base + DH + 0.12),
                              (0.22, DW + 0.5, 0.24), parapet_mtl))
 
-    # ── ② 선홈통(세로 홈통) — 파사드 수직 분절 ─────────────────────────
-    # 빌보드 인상을 깨는 가장 싼 수단. 한국 건물에 예외 없이 있다.
+    # -- (2) Downpipe - vertical facade articulation ----------------------
+    # The cheapest way to break the billboard impression. Present on Korean buildings without exception.
     span = Lx if axis_y else Ly
     ndp = max(2, int(span / 12.0) + 1)
     for i in range(ndp):
@@ -2605,8 +2627,8 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
                                       (gx + fdir * 0.09, py, base + hh / 2.0),
                                       0.055, hh, parapet_mtl))
 
-    # ── ③ 옥탑 — 계단실 + 물탱크대 ────────────────────────────────────
-    # 원경 실루엣이 "흰 뚜껑 얹은 상자"에서 벗어난다. 한국 건물 옥상의 기본 구성.
+    # -- (3) Rooftop - stair tower + water tank stand ---------------------
+    # The distant silhouette escapes being "a box with a white lid". The basic composition of a Korean rooftop.
     ph_w = min(4.2, Lx * 0.34)
     ph_d = min(3.4, Ly * 0.34)
     if ph_w > 1.2 and ph_d > 1.2:
@@ -2624,14 +2646,15 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
 
 def place_shrubs(stage, prefix, pts, target_h, pool=None, seed=1234,
                  overlap=0.0, tag="Sh"):
-    """[사실화 v1] 지정 좌표들에 실물 관목 USD 를 세운다.
+    """[realism v1] Stand real shrub USDs at the given coordinates.
 
     pts: [(x, y, z_ground), ...]
-    target_h: 목표 수고[m]. **랜덤화 폭은 ±8% 로 묶는다** — 관목 높이는
-      스케일 앵커라서 크게 흔들면 단서가 지워진다(수고 매직넘버 사고 재발 방지).
-    overlap: >0 이면 인접 개체가 겹치도록 폭 기준 배치를 호출부가 계산했다고 보고
-      크기만 키운다. 생울타리용.
-    반환: 배치 개수.
+    target_h: target height [m]. **Randomisation is bounded to +-8 %** - shrub height is a scale
+      anchor, so shaking it hard erases the cue (preventing a repeat of the tree-height magic
+      number incident).
+    overlap: >0 means the caller has computed a width-based placement so that neighbours overlap,
+      and only the size is increased. For hedges.
+    Returns: the number placed.
     """
     if not (LOOK_GEO and veg_available()):
         return 0
@@ -2645,16 +2668,16 @@ def place_shrubs(stage, prefix, pts, target_h, pool=None, seed=1234,
     placed = 0
     for i, (px, py, pz) in enumerate(pts):
         rel, nat_w, zmin, _tri, nat_h = avail[rnd.randrange(len(avail))]
-        # [W2 · A감사 6-b 교정] **높이 스케일은 네이티브 '높이' 기준**이다.
-        # 종전은 폭 기준이었고("관목은 대체로 폭≈높이" [추정]), 실측 종횡비가
-        # 0.607~1.973 로 흩어져 있어 요청 수고 대비 −39 %~+97 % 오차가 났다.
-        # `overlap` 은 **폭 방향 겹침**을 만들려는 인자이므로 높이 기준으로 옮긴
-        # 뒤에도 같은 배율로 걸어 종전 생울타리 밀도를 보존한다.
+        # [W2, audit A 6-b fix] **The height scale is based on the native 'height'.**
+        # It used to be based on width ("shrubs are roughly as wide as they are tall" [estimate]), and the measured
+        # aspect ratios spread over 0.607-1.973 gave -39 % to +97 % error against the requested height.
+        # `overlap` is an argument meant to create **overlap in the width direction**, so after moving to a
+        # height basis it is applied with the same factor to preserve the previous hedge density.
         s = (float(target_h) * (1.0 + overlap) / max(nat_h, 1e-6)
              * rnd.uniform(0.92, 1.08))
         try:
-            # zmin 은 네이티브 치수라 같은 배율로 늘려야 바닥이 지면에 붙는다.
-            # 이걸 빼먹으면 Rhododendron(zmin −0.416)은 41cm 가 땅에 묻힌다.
+            # zmin is a native dimension and must be scaled by the same factor for the bottom to sit on the ground.
+            # Forgetting this buries 41 cm of Rhododendron (zmin -0.416) underground.
             xf = add_vegetation(stage, f"{prefix}/{tag}_{i}", rel,
                                 (px, py, float(pz) + zmin * s),
                                 yaw_deg=rnd.uniform(0, 360),
@@ -2680,20 +2703,20 @@ def place_shrubs(stage, prefix, pts, target_h, pool=None, seed=1234,
 def build_hedge(stage, prefix, x0, y0, x1, y1, h, mtl=None, base_z=0.0,
                 scale_m=1.2, tint=(0.35, 0.45, 0.28), rounded=True,
                 crown_max=48, bulge=1.03):
-    """생울타리·억새 띠. mtl=None이면 grass 텍스처 진녹 틴트(0.35,0.45,0.28),
-    scale 1.2로 내부 생성.
+    """Hedge or pampas grass band. With mtl=None it is created internally from the grass texture with a
+    dark green tint (0.35,0.45,0.28) at scale 1.2.
 
-    [v6 판정 C-5] 단일 육면체는 '건초 더미/흙벽돌 상자'로 렌더된다(12 억새,
-    13 생울타리). rounded=True(기본)면 본체 박스를 h*0.72로 낮추고 그 상단에
-    눌린 타원체(crown blob) 열을 겹쳐 상단을 라운딩·요철화한다.
-      - 본체 박스 경로 `prefix/Box`(콜라이더 유지) — 기존 참조·시그니처 호환.
-      - crown 은 좌표 해시 시드라 재실행 시 동일, 띠마다 요철이 다르다.
-      - 덩이 크기 ≈ 수관 높이. 띠가 넓으면(억새 밴드 등) 단변 방향 2~3 열로
-        엇갈려 배치(`Crown_{열}_{i}`)해 가로 소시지 인상을 피한다.
-      - 상면 z ≈ base_z+h (블롭별 ±6 % 요철), 측면 돌출은 장변 ≤5 cm ·
-        단변 ≤ 0.1×열폭 — 벽 상단·개구 에지 배치에서도 부유 오독 없음.
-    rounded=False 또는 h·길이가 미소하면 구 동작(단일 박스) 그대로.
-    반환: Cube 프림(본체) — 기존과 동일."""
+    [v6 verdict C-5] A single cuboid renders as a 'haystack / mud brick box' (12 pampas grass,
+    13 hedge). With rounded=True (the default) the body box is lowered to h*0.72 and a row of
+    flattened ellipsoids (crown blobs) is overlaid on top to round and roughen the top.
+      - The body box path is `prefix/Box` (collider retained) - compatible with existing references and signatures.
+      - The crown is seeded by a coordinate hash, so it is identical on re-running and the relief differs per band.
+      - Blob size ~= the canopy height. For a wide band (e.g. a pampas grass band) they are staggered
+        over 2-3 rows in the short direction (`Crown_{row}_{i}`) to avoid a horizontal sausage look.
+      - Top z ~= base_z+h (+-6 % relief per blob), with side protrusion <=5 cm on the long side and
+        <= 0.1x the row width on the short side - no floating misread even on a wall top or opening edge.
+    With rounded=False, or when h or the length is tiny, the old behaviour (a single box) is kept.
+    Returns: the Cube prim (the body) - unchanged from before."""
     import random as _random
     if mtl is None:
         mtl = make_pbr(stage, prefix + "/HedgeMtl", tex_path("grass", "diff"),
@@ -2702,18 +2725,18 @@ def build_hedge(stage, prefix, x0, y0, x1, y1, h, mtl=None, base_z=0.0,
     cx = (x0 + x1) / 2.0
     cy = (y0 + y1) / 2.0
     sx, sy = abs(x1 - x0), abs(y1 - y0)
-    L, W = max(sx, sy), min(sx, sy)          # 장변·단변
+    L, W = max(sx, sy), min(sx, sy)          # Long and short sides
     if (not rounded) or h <= 0.06 or L <= 0.05 or W <= 1e-6:
         return add_box(stage, prefix + "/Box", (cx, cy, base_z + h / 2.0),
                        (sx, sy, h), mtl, collider=True)
 
-    body_h = h * 0.72                        # 본체(상단 라운딩분 0.28h 를 블롭이 담당)
+    body_h = h * 0.72                        # Body (the blobs take care of the 0.28h of top rounding)
     box = add_box(stage, prefix + "/Box", (cx, cy, base_z + body_h / 2.0),
                   (sx, sy, body_h), mtl, collider=True)
     rnd = _random.Random((int(round(cx * 100)) * 73856093)
                          ^ (int(round(cy * 100)) * 19349663)
                          ^ (int(round(L * 100)) * 83492791))
-    # 덩이 크기 ≈ 수관 높이(폭이 좁으면 폭) — 띠가 길면 개수로, 넓으면 열로 채운다
+    # Blob size ~= the canopy height (or the width if narrow) - a long band is filled by count, a wide one by rows
     pitch0 = max(0.30, min(W, h * 1.2)) * 0.9
     n = max(2, min(crown_max, int(round(L / max(pitch0, 1e-3)))))
     pitch = L / n
@@ -2721,13 +2744,13 @@ def build_hedge(stage, prefix, x0, y0, x1, y1, h, mtl=None, base_z=0.0,
     row_w = W / rows
     along_x = sx >= sy
     t0 = (cx - L / 2.0) if along_x else (cy - L / 2.0)
-    u0 = (cy - W / 2.0) if along_x else (cx - W / 2.0)   # 단변 방향 원점
+    u0 = (cy - W / 2.0) if along_x else (cx - W / 2.0)   # Origin in the short direction
     for j in range(rows):
         for i in range(n):
-            rz = h * rnd.uniform(0.26, 0.34)      # 정점 ≈ base_z + h (±6 %)
-            rl = pitch * rnd.uniform(0.56, 0.70)  # 장변 반경(이웃과 겹치도록)
+            rz = h * rnd.uniform(0.26, 0.34)      # Apex ~= base_z + h (+-6 %)
+            rl = pitch * rnd.uniform(0.56, 0.70)  # Long-side radius (so neighbours overlap)
             rw = (row_w / 2.0) * bulge * rnd.uniform(0.94, 1.06)
-            # 장변 끝단 돌출 ≤ 5 cm 로 클램프(벽 상단·에지 배치에서 부유 오독 방지)
+            # Long-side end protrusion clamped to <=5 cm (avoids a floating misread on wall tops and edges)
             t = min(max(t0 + (i + 0.5) * pitch + (0.5 * pitch if j % 2 else 0.0),
                         t0 + rl - 0.05), t0 + L - rl + 0.05)
             u = u0 + (j + 0.5) * row_w + rnd.uniform(-0.05, 0.05) * row_w
@@ -2740,8 +2763,8 @@ def build_hedge(stage, prefix, x0, y0, x1, y1, h, mtl=None, base_z=0.0,
 
 def build_bench(stage, prefix, cx, cy, base_z, mtl, length=1.8, width=0.4,
                 height=0.45, yaw=0.0):
-    """등받이 없는 벤치(좌판 + 다리 4). 기본 1.8×0.4×h0.45, weathered_planks.
-    yaw(도)로 배치 회전. 자식은 부모 Xform 로컬 좌표. 반환: 루트 Xform 프림."""
+    """A backless bench (seat + 4 legs). Default 1.8 x 0.4 x h0.45, weathered_planks.
+    Rotated on placement by yaw (degrees). Children are in the parent Xform local frame. Returns: the root Xform prim."""
     from pxr import UsdGeom, Gf
     root = UsdGeom.Xform.Define(stage, prefix)
     xf = UsdGeom.Xformable(root)
@@ -2763,7 +2786,7 @@ def build_bench(stage, prefix, cx, cy, base_z, mtl, length=1.8, width=0.4,
 
 def build_bollard(stage, path, cx, cy, base_z, mtl=None, radius=0.06,
                   height=0.75):
-    """볼라드 r0.06 h0.75 스테인리스. mtl=None이면 내부 생성. 반환: Cylinder 프림."""
+    """Bollard r0.06 h0.75, stainless. With mtl=None it is created internally. Returns: the Cylinder prim."""
     if mtl is None:
         mtl = make_pbr(stage, path + "/Mtl", diffuse_color=(0.80, 0.82, 0.85),
                        metallic=0.9, roughness_const=0.35)
@@ -2772,30 +2795,30 @@ def build_bollard(stage, path, cx, cy, base_z, mtl=None, radius=0.06,
 
 
 # ===========================================================================
-# [6] 조명 — noon HDRI lookfix + DomeLight + 보조 태양 (scene01 그대로)
+# [6] Lighting - noon HDRI lookfix + DomeLight + auxiliary sun (as in scene01)
 # ===========================================================================
 def build_sign(stage, prefix, cx, cy, base_z, yaw_deg, panel_mtl,
                w=0.8, h=0.8, panel_z=None, pole_h=2.2, pole_r=0.04,
                pole_mtl=None, back_mtl=None):
-    """[v5 공통 레이어] 한글 사인: 지주 1본 + st-UV 쿼드 패널(+박판 배킹).
-      panel_mtl 은 make_pbr(tex_path("sign_*","diff"), uv_mode=True) 로 생성할 것.
-      yaw_deg: 패널 법선 방위(0 = +X 를 바라봄). panel_z: 패널 중심 z
-      (기본 = base_z + pole_h − h/2 − 0.05, 지주 상단걸이).
-    반환: 생성 프림 리스트."""
+    """[v5 common layer] Korean sign: 1 post + an st-UV quad panel (+ a thin backing plate).
+      panel_mtl should be created with make_pbr(tex_path("sign_*","diff"), uv_mode=True).
+      yaw_deg: panel normal bearing (0 = facing +X). panel_z: panel centre z
+      (default = base_z + pole_h - h/2 - 0.05, hung at the top of the post).
+    Returns: list of created prims."""
     from pxr import UsdGeom, Gf, Sdf
     prims = []
     if panel_z is None:
         panel_z = base_z + pole_h - h / 2.0 - 0.05
-    # 지주
+    # Post
     prims.append(add_cylinder(stage, f"{prefix}/Pole",
                               (cx, cy, base_z + pole_h / 2.0),
                               pole_r, pole_h,
                               pole_mtl if pole_mtl is not None else back_mtl))
-    # 패널 쿼드 (월드 좌표 직접 — 접선 t = 법선의 좌측)
+    # Panel quad (direct world coordinates - tangent t = the left of the normal)
     a = math.radians(yaw_deg)
     nx, ny = math.cos(a), math.sin(a)
     tx, ty = -ny, nx
-    off = pole_r + 0.015                       # 지주 전면으로 살짝 돌출
+    off = pole_r + 0.015                       # Slightly proud of the front of the post
     cxp, cyp = cx + nx * off, cy + ny * off
     pts = [Gf.Vec3f(cxp - tx * w / 2, cyp - ty * w / 2, panel_z - h / 2),
            Gf.Vec3f(cxp + tx * w / 2, cyp + ty * w / 2, panel_z - h / 2),
@@ -2805,11 +2828,11 @@ def build_sign(stage, prefix, cx, cy, base_z, yaw_deg, panel_mtl,
     mesh.CreatePointsAttr(pts)
     mesh.CreateFaceVertexCountsAttr([4])
     mesh.CreateFaceVertexIndicesAttr([0, 1, 2, 3])
-    # [사실화 P1] subdivisionScheme 미저작 = USD 기본값 catmullClark. 쿼드의
-    # Catmull-Clark 극한면은 모서리 정점을 중심으로 당기므로 패널이 축소되고
-    # st(0..1) 정합이 깨진다. 현재는 refinementLevel 기본 0 이라 잠복 상태지만
-    # 그 설정이 바뀌는 순간 전 사인이 어긋난다. 명시 저작으로 못박는다.
-    # (scene09·sceneN3 는 이미 같은 이유로 "none" 을 저작해 두었다.)
+    # [realism P1] Not authoring subdivisionScheme means the USD default catmullClark. The
+    # Catmull-Clark limit surface of a quad pulls the corner vertices inward, so the panel shrinks
+    # and the st(0..1) alignment breaks. It is currently latent because refinementLevel defaults to 0,
+    # but the moment that setting changes every sign goes out of alignment. Pinned by authoring it explicitly.
+    # (scene09 and sceneN3 already authored "none" for the same reason.)
     mesh.CreateSubdivisionSchemeAttr("none")
     mesh.CreateDoubleSidedAttr(True)
     pv = UsdGeom.PrimvarsAPI(mesh.GetPrim()).CreatePrimvar(
@@ -2818,7 +2841,7 @@ def build_sign(stage, prefix, cx, cy, base_z, yaw_deg, panel_mtl,
     if panel_mtl is not None:
         _bind_mtl(mesh.GetPrim(), panel_mtl)
     prims.append(mesh.GetPrim())
-    # 배킹 박판 (뒷면 미러 텍스트 가림) — 패널과 동일 yaw 회전 박스
+    # Backing plate (hides mirrored text on the back) - a box with the same yaw as the panel
     if back_mtl is not None:
         prims.append(_oriented_box(stage, f"{prefix}/Back",
                                    (cxp - nx * 0.013, cyp - ny * 0.013,
@@ -2832,13 +2855,15 @@ _SUN_CAP_DEG_DEFAULT = 0.6       # see ensure_noon_lookfix; env-overridable
 
 
 def ensure_noon_lookfix(src_path):
-    """noon HDRI 파생본(_lookfix.exr) 생성/캐시 — scene01에서 그대로 이관.
+    """Create/cache the noon HDRI derivative (_lookfix.exr) - transplanted unchanged from scene01.
 
-    ① 태양 디스크(각반경 1.5°)를 서컴솔라 링(1.5~2.5°) p90 휘도로 캡:
-       RTX 돔 샘플링의 태양 블러가 만드는 초연질 캐스트 섀도 제거. 제거된
-       직달 성분은 HDRI 태양 방향에 정합한 DistantLight(0.53°)가 대체.
-    ② 지평 아래 -18°~0° 대역을 인접 하늘(elev 0.5~3.5°) 휘도로 리프트.
-    실패 시(예: cv2 부재) 원본 경로를 그대로 반환 (경고만)."""
+    (1) Cap the sun disc (angular radius 1.5 deg) at the p90 luminance of the circumsolar ring
+       (1.5-2.5 deg): removes the ultra-soft cast shadow produced by the sun blur of RTX dome
+       sampling. The removed direct component is replaced by a DistantLight (0.53 deg) aligned
+       with the HDRI sun direction.
+    (2) Lift the -18 deg to 0 deg band below the horizon to the luminance of the adjacent sky
+       (elev 0.5-3.5 deg).
+    On failure (e.g. cv2 missing) the original path is returned (with a warning only)."""
     # Solar cap angular radius. The true solar radius is 0.27 deg; clamping a
     # full 1.5 deg leaves a visible "cut disc" (a 3 deg uniform patch with a
     # rim) on cloudy skies. sky_procurement recommendation A: 0.6 deg, which
@@ -2862,13 +2887,13 @@ def ensure_noon_lookfix(src_path):
             return out_path
         os.environ.setdefault("OPENCV_IO_ENABLE_OPENEXR", "1")
         import cv2
-        # [사실화 v1 · 버그 수정] **4채널(RGBA) EXR 처리 오류.**
-        # 종전 `[..., ::-1]` 은 BGRA 를 뒤집어 [A,R,G,B] 를 만든다 → 알파가 R
-        # 자리에 들어가고 이후 지평 리프트에서 브로드캐스트 예외 → except 가
-        # 삼키고 **원본 경로를 반환**한다. 그러면 태양 캡이 적용되지 않은 채
-        # DistantLight 가 추가되어 **이중 태양**이 된다(조용한 실패라 더 위험).
-        # 기존 qwantani 는 3채널이라 잠복했고, overcast 는 lookfix=False 라
-        # 우회돼 있었다. PolyHaven puresky 계열은 대부분 RGBA 다.
+        # [realism v1, bug fix] **Error handling 4-channel (RGBA) EXR.**
+        # The old `[..., ::-1]` reverses BGRA into [A,R,G,B] -> the alpha lands in the R
+        # slot and the subsequent horizon lift raises a broadcast exception, which the except
+        # swallows before **returning the original path**. The sun cap is then never applied while
+        # a DistantLight is still added, giving **two suns** (all the more dangerous for being silent).
+        # The existing qwantani is 3-channel so it stayed latent, and overcast is bypassed with
+        # lookfix=False. Most of the PolyHaven puresky family are RGBA.
         rgb = cv2.imread(src_path, cv2.IMREAD_UNCHANGED)[..., :3][..., ::-1]
         rgb = rgb.astype(np.float64)
         h, w = rgb.shape[:2]
@@ -2912,10 +2937,10 @@ def ensure_noon_lookfix(src_path):
 
 
 def setup_lighting(stage, light_params, sun_az_offset):
-    """DomeLight(noon HDRI lookfix) + HDRI 태양 방향 정합 DistantLight.
+    """DomeLight (noon HDRI lookfix) + a DistantLight aligned with the HDRI sun direction.
     light_params: hdri, dome_intensity, noon_dome_rot, noon_sun_enable,
       noon_sun_elev, noon_sun_intensity, noon_sun_color, hdri_sun_rotz_offset.
-    반환: apply_dome_rot(user_off) 콜백 (돔+보조태양 Z회전 갱신)."""
+    Returns: the apply_dome_rot(user_off) callback (updates the dome and auxiliary sun Z rotation)."""
     from pxr import UsdGeom, UsdLux, Gf
     lp = light_params
     dome = UsdLux.DomeLight.Define(stage, "/World/DomeLight")
@@ -2924,17 +2949,17 @@ def setup_lighting(stage, light_params, sun_az_offset):
     tex_attr = dome.CreateTextureFileAttr()
     hdri = os.path.join(ASSETS_DIR, lp.get("hdri", DEFAULT_HDRI))
     if lp.get("lookfix", True):
-        hdri = ensure_noon_lookfix(hdri)       # 태양 캡 + 지평 헤이즈 리프트
+        hdri = ensure_noon_lookfix(hdri)       # Sun cap + horizon haze lift
     else:
         print("[하늘] lookfix 스킵(overcast 등 무태양 프로파일) — 원본 사용")
     print(f"[하늘] noon: {os.path.basename(hdri)} "
           f"(exists={os.path.isfile(hdri)})")
     tex_attr.Set(hdri)
-    # RTX 돔은 Z-up 스테이지에서 극축 +Z로 올바름 (rotateX 불필요)
+    # The RTX dome has its polar axis correctly at +Z on a Z-up stage (no rotateX needed)
     rot_op = UsdGeom.Xformable(dome.GetPrim()).AddRotateZOp()
     rot_op.Set(0.0)
 
-    # HDRI 태양 방향에 정합한 명시적 DistantLight(0.53°) — 경질 그림자 담당
+    # An explicit DistantLight (0.53 deg) aligned with the HDRI sun direction - responsible for hard shadows
     sun = UsdLux.DistantLight.Define(stage, "/World/NoonSun")
     sun.CreateAngleAttr(0.53)
     sun.CreateIntensityAttr(float(lp["noon_sun_intensity"]))
@@ -2947,7 +2972,7 @@ def setup_lighting(stage, light_params, sun_az_offset):
         UsdGeom.Imageable(sun.GetPrim()).MakeInvisible()
 
     def apply_dome_rot(user_off):
-        # 돔 회전 = noon_dome_rot + sun_az_offset(씬) + [ ]키 오프셋
+        # Dome rotation = noon_dome_rot + sun_az_offset (scene) + the [ ] key offset
         rot = (float(lp["noon_dome_rot"]) + float(sun_az_offset)
                + float(user_off))
         rot_op.Set(rot)
@@ -2958,11 +2983,11 @@ def setup_lighting(stage, light_params, sun_az_offset):
 
 
 # ===========================================================================
-# [7] 카메라 프리셋
+# [7] Camera presets
 # ===========================================================================
 def grid_views(gy, heights=(0.3, 0.9, 1.8), dists=(2, 5, 10), pitch=-10):
-    """h×d 그리드 프리셋 (scene01 build_views 그리드부). +X를 pitch°로 봄.
-    반환: {"preset_h{h}_d{d}": dict(eye, tgt)}. 미장센 컷은 씬별로 추가."""
+    """The h x d grid presets (the grid part of scene01 build_views). Looks along +X at pitch degrees.
+    Returns: {"preset_h{h}_d{d}": dict(eye, tgt)}. Mise-en-scene shots are added per scene."""
     views = {}
     p = math.radians(pitch)
     for hh in heights:
@@ -2975,17 +3000,17 @@ def grid_views(gy, heights=(0.3, 0.9, 1.8), dists=(2, 5, 10), pitch=-10):
 
 
 # ===========================================================================
-# [8] 헤드리스 캡처 파이프라인 (scene01 캡처 블록 일반화)
+# [8] Headless capture pipeline (a generalisation of the scene01 capture block)
 # ===========================================================================
 def capture_pipeline(sim_app, views, out_dir_default, set_render_mode_fn,
                      look_from_fn):
-    """NEGOBS_* env 기반 헤드리스 캡처.
-      NEGOBS_CAPTURE_DIR : 저장 폴더 (기본 out_dir_default)
-      NEGOBS_CAPTURE_MODE: rt | pt | both (기본 rt)
-      NEGOBS_VIEWS       : 쉼표 뷰 이름 필터 (기본 전부)
-      NEGOBS_WARMUP      : 워밍업 update 횟수 오버라이드
-    set_render_mode_fn(mode): "PathTracing"/"RaytracedLighting" 설정 콜백.
-    look_from_fn(eye, tgt)  : 카메라 배치 콜백 (eye, target 위치인자)."""
+    """Headless capture driven by NEGOBS_* env vars.
+      NEGOBS_CAPTURE_DIR : output folder (default out_dir_default)
+      NEGOBS_CAPTURE_MODE: rt | pt | both (default rt)
+      NEGOBS_VIEWS       : comma-separated view name filter (default all)
+      NEGOBS_WARMUP      : override for the number of warm-up updates
+    set_render_mode_fn(mode): callback setting "PathTracing"/"RaytracedLighting".
+    look_from_fn(eye, tgt)  : camera placement callback (eye and target as positional arguments)."""
     from omni.kit.viewport.utility import (get_active_viewport,
                                            capture_viewport_to_file)
     out_dir = os.environ.get("NEGOBS_CAPTURE_DIR", out_dir_default)
@@ -3006,7 +3031,7 @@ def capture_pipeline(sim_app, views, out_dir_default, set_render_mode_fn,
     manifest = []
     print(look_report())
     print(f"[캡처] 모드={modes} 뷰={list(VIEWS)}")
-    for _ in range(30):                        # 초기 로딩 워밍업
+    for _ in range(30):                        # Initial loading warm-up
         sim_app.update()
 
     pt_fast = os.environ.get("NEGOBS_PT_FAST", "") == "1"
@@ -3016,12 +3041,12 @@ def capture_pipeline(sim_app, views, out_dir_default, set_render_mode_fn,
                            else "RaytracedLighting")
         warm_default = 572 if mode == "pt" else 90
         if pt_fast and mode == "pt":
-            # 씬의 set_render_mode 가 spp=1/totalSpp=512 를 되돌려 놓으므로
-            # **그 뒤에** 덮어써야 한다 (호출 순서가 핵심).
+            # The scene's set_render_mode resets spp=1/totalSpp=512, so the override must come
+            # **after** it (the call order is the point).
             import carb
             st = carb.settings.get_settings()
-            # 씬별 상향 노브 — 간접광만으로 사는 어두운 씬(D4 등)은 64 로 부족할
-            # 수 있다. `NEGOBS_PT_TOTAL_SPP=256` 처럼 씬 단위로 올린다.
+            # Per-scene raise knob - a dark scene living on indirect light alone (D4 etc.) may find 64
+            # insufficient. Raise it per scene, e.g. `NEGOBS_PT_TOTAL_SPP=256`.
             tot = int(os.environ.get("NEGOBS_PT_TOTAL_SPP",
                                      PT_FAST["total_spp"]))
             st.set("/rtx/pathtracing/spp", PT_FAST["spp"])
@@ -3033,11 +3058,11 @@ def capture_pipeline(sim_app, views, out_dir_default, set_render_mode_fn,
         warm = int(os.environ.get("NEGOBS_WARMUP", str(warm_default)))
         for vname, v in VIEWS.items():
             look_from_fn(v["eye"], v["tgt"])
-            for _ in range(warm):              # 워밍업 없으면 검은 이미지
+            for _ in range(warm):              # Without warm-up the image is black
                 sim_app.update()
             fp = os.path.join(out_dir, f"{mode}_noon_{vname}.png")
             _capture(fp)
-            # 캡처는 비동기 → 파일 크기가 안정될 때까지 대기
+            # Capture is asynchronous -> wait until the file size stabilises
             ok, prev_sz = False, -1
             for _ in range(40):
                 sim_app.update()
@@ -3051,7 +3076,7 @@ def capture_pipeline(sim_app, views, out_dir_default, set_render_mode_fn,
                                  view=vname, ok=ok))
             print(f"[캡처] {os.path.basename(fp)} {'OK' if ok else 'FAIL'}")
 
-    # manifest 병합 (조각 실행 간 — 같은 file 항목은 갱신)
+    # Merge the manifest (across fragmented runs - entries with the same file are updated)
     mf_path = os.path.join(out_dir, "manifest.json")
     prev = dict(views={}, shots=[])
     if os.path.isfile(mf_path):
@@ -3071,15 +3096,15 @@ def capture_pipeline(sim_app, views, out_dir_default, set_render_mode_fn,
 
 
 # ===========================================================================
-# [9] 순수 수학 자기검증 (pxr 불필요 — 빌더 배치 수학만 재현·검산)
-#     실행: python3 scene_common.py
+# [9] Pure-maths self-verification (no pxr needed - reproduces and checks the builder placement maths only)
+#     Run: python3 scene_common.py
 # ===========================================================================
 def _geometry_selfcheck():
     print("=" * 68)
     print("scene_common v3 신규 빌더 — 순수 수학 자기검증")
     print("=" * 68)
 
-    # (1) build_helix_steps: 32단 × 22.5° = 2회전, 낙차 합
+    # (1) build_helix_steps: 32 steps x 22.5 deg = 2 turns, total drop
     n, step_deg, riser, z0 = 32, 22.5, 0.18, 0.0
     total_sweep = n * step_deg
     total_drop = n * riser
@@ -3090,14 +3115,14 @@ def _geometry_selfcheck():
           % (n, riser, total_drop, top_last))
     r_in, r_out = 0.5, 2.2
     r_mid = (r_in + r_out) / 2.0
-    chord = 2.0 * r_out * math.sin(math.radians(step_deg) / 2.0) * 1.03  # 외경 기준 커버(룩 r1 수정)
-    r_w = r_in + (2.0 / 3.0) * (r_out - r_in)     # walkline 반경(서베이 §3-1)
+    chord = 2.0 * r_out * math.sin(math.radians(step_deg) / 2.0) * 1.03  # Cover based on the outer radius (look r1 fix)
+    r_w = r_in + (2.0 / 3.0) * (r_out - r_in)     # Walkline radius (survey §3-1)
     print("    r_mid=%.3f 현길이=%.4f m  walkline r_w=%.3f (tread깊이 %.4f m)"
           % (r_mid, chord, r_w, r_w * math.radians(step_deg)))
 
-    # (2) build_helix_ramp: 세그 기울기각
+    # (2) build_helix_ramp: segment tilt angle
     ri, ro = 6.0, 9.5
-    a0, a1, seg = 0.0, 450.0, 36               # 1.25회전
+    a0, a1, seg = 0.0, 450.0, 36               # 1.25 turns
     z0r, z1r = 0.0, -3.2
     rm = (ri + ro) / 2.0
     dth = math.radians((a1 - a0) / seg)
@@ -3114,7 +3139,7 @@ def _geometry_selfcheck():
           % ((z1r - z0r) / (rm * math.radians(a1 - a0)),
              math.sin(math.radians(tilt))))
 
-    # (3) build_worn_stone_stairs: run 합 + 지터 재현(고정 시드)
+    # (3) build_worn_stone_stairs: total run + jitter reproduction (fixed seed)
     n, riser_mu, tread_mu, blocks, seed, jr = 18, 0.17, 0.38, 5, 77, 0.03
     rng = np.random.RandomState(seed)
     risers = [riser_mu + rng.uniform(-jr, jr) for _ in range(n)]
@@ -3126,7 +3151,7 @@ def _geometry_selfcheck():
           % (drop, drop / n))
     print("    처음 3단 riser = %s" % ["%.4f" % r for r in risers[:3]])
 
-    # (4) width_pairs 선형 보간 예시(tapered_grand W_i)
+    # (4) width_pairs linear interpolation example (tapered_grand W_i)
     n, w_top, w_bot = 40, 6.0, 10.0
     cyc = 0.0
     def _wp(i):

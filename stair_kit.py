@@ -1,51 +1,56 @@
 # -*- coding: utf-8 -*-
 """
-stair_kit.py — 한국 법정 계단 부재 키트 (계단참 · 광폭계단 중간난간 · 손잡이)
+stair_kit.py - Korean statutory stair component kit (landings, wide-stair mid rails, handrails)
 
-Isaac Sim 4.5 / USD 절차적 생성용. **좌표계 Z-up · 단위 m.**
-법령 원문 치수는 mm/cm 단위이므로 모든 상수를 이 파일 상단에서 **m 로 1회만**
-환산하고, 이후 코드에서는 mm 리터럴을 쓰지 않는다(환산 실수 차단).
-
---------------------------------------------------------------------------
-왜 이 파일이 필요한가 — 조사가 확정한 P0 위반 3건
---------------------------------------------------------------------------
-`Docs/surveys/korean_pedestrian_geometry.md` §2 / `_dimension_index.md`
-"미적용" 표가 지목한, **전부 법정 의무인데 33씬에 없는 것**:
-
-  P0-1  광폭 계단 중간난간 : 너비 3 m **초과** 계단은 3 m 이내마다 중간난간.
-        면제는 (단높이 ≤150 mm **그리고** 단너비 ≥300 mm) 둘 다 만족할 때뿐.
-        ※ "또는" 이 아니다. 이 파일의 `mid_rail_lines()` 가 유일한 판정 지점.
-  P0-2  계단참 : 높이 3 m 마다(주택단지 2 m 마다), 깊이 ≥1.20 m.
-        긴 직통 계단은 "한국에 존재할 수 없는 계단" 이다.
-  P0-3  옥외계단 규격 : 단높이 ≤200 mm · 단너비 ≥240 mm — **실내보다 가파르다.**
-        실내 기준(단높이 ≤180)으로 만든 옥외 계단은 너무 완만하다.
+For Isaac Sim 4.5 / procedural USD generation. **Z-up coordinate system, metres.**
+Statute text gives dimensions in mm/cm, so every constant is converted to metres
+**exactly once** at the top of this file; no mm literals appear later in the code
+(this blocks conversion mistakes).
 
 --------------------------------------------------------------------------
-설계 규약 (프로젝트 공통)
+Why this file exists - the 3 P0 violations the survey confirmed
 --------------------------------------------------------------------------
-· **scene_common 을 import 하지 않는다.** USD 프림을 만드는 함수는 생성 헬퍼
-  (`add_box` / `add_cylinder`)를 **인자로 주입**받는다. 주입 시그니처는
-  scene_common 의 것과 동일하다:
+The "not applied" table in `Docs/surveys/korean_pedestrian_geometry.md` §2 /
+`_dimension_index.md` lists items that are **legally mandatory yet absent from
+all 33 scenes**:
+
+  P0-1  Wide-stair mid rail: stairs wider than 3 m need a rail every 3 m.
+        Exemption applies only when (riser <=150 mm **and** tread >=300 mm).
+        Note: it is not "or". `mid_rail_lines()` is the single decision point.
+  P0-2  Landing: every 3 m of rise (2 m inside housing complexes), depth >=1.20 m.
+        A long uninterrupted flight is a "stair that cannot exist in Korea".
+  P0-3  Outdoor stair spec: riser <=200 mm, tread >=240 mm - **steeper than indoor.**
+        An outdoor stair built to the indoor rule (riser <=180) is too shallow.
+
+--------------------------------------------------------------------------
+Design conventions (project-wide)
+--------------------------------------------------------------------------
+- **Do not import scene_common.** Functions that create USD prims receive the
+  creation helpers (`add_box` / `add_cylinder`) **by injection**. The injected
+  signatures match scene_common:
       add_box(stage, path, center, size, mtl=None, collider=False)
       add_cylinder(stage, path, center, radius, height, mtl=None,
                    rotY=0.0, rotX=0.0, collider=False)
-· **RNG 결정적.** 이 모듈은 난수를 전혀 쓰지 않는다(`hash()` 도 쓰지 않는다).
-  지터가 필요하면 호출측에서 `random.Random(seed)` 로 만들어 인자로 넘길 것.
-· **근거 없는 수치 금지.** 색인에 없는 값은 `[추정]` / `[근거 없음]` 을 달았다.
-· 계단 하강 관례는 scene_common `_stair_steps` 와 동일:
-  **x0 에서 +X 방향으로 하강**, 상단 지면 z = z_top, i 번째 단 디딤면 =
-  z_top − riser·(i+1), 디딤면 x 구간 = [x0+i·tread, x0+(i+1)·tread].
+- **Deterministic RNG.** This module uses no randomness at all (not even `hash()`).
+  If jitter is needed, the caller builds `random.Random(seed)` and passes it in.
+- **No unsourced numbers.** Values absent from the index are tagged
+  `[estimate]` / `[no source]`.
+- Descent convention matches scene_common `_stair_steps`:
+  **descends from x0 towards +X**; ground at the top is z = z_top; tread i sits at
+  z_top - riser*(i+1) and spans x in [x0+i*tread, x0+(i+1)*tread].
 
 --------------------------------------------------------------------------
-GT (낙차 라벨) 총론 — 각 함수 docstring 의 `GT:` 줄도 반드시 읽을 것
+GT (drop label) overview - also read the `GT:` line in each function docstring
 --------------------------------------------------------------------------
-이 연구의 핵심 단서는 **계단코(nosing) 선**이다. 이 파일의 부재 중
-  · **중간난간 · 손잡이** 는 계단면 *위*에 서는 수직/사선 부재라 낙차 기하
-    z(x,y) 를 바꾸지 않는다 → **GT 불변**. (자기폐색·그림자만 바뀐다.)
-  · **계단참** 은 z(x) 프로파일 자체를 바꾼다 → **GT 변경**. 총 낙차는
-    보존되지만 run 이 (계단참 깊이 × 개수) 만큼 길어지고, 참 상면은 국지
-    낙차 0 인 평지 띠가 되며 **참 전연이 새 낙차 에지**로 추가된다.
-    → 계단참을 넣은 씬은 기존 낙차/뎁스 GT 캐시를 반드시 무효화해야 한다.
+The key cue for this research is the **nosing line**. Among the parts here:
+  - **Mid rails and handrails** are vertical/diagonal members standing *above* the
+    stair surface, so they do not change the drop geometry z(x,y) -> **GT invariant**
+    (only self-occlusion and shadows change).
+  - **Landings** change the z(x) profile itself -> **GT changes**. Total drop is
+    preserved, but the run grows by (landing depth x count), the landing top becomes
+    a flat band of zero local drop, and **the landing front edge becomes a new drop
+    edge**.
+    -> Any scene that gains a landing must invalidate its cached drop/depth GT.
 """
 
 import math
@@ -55,111 +60,114 @@ __all__ = [
     "build_handrail", "check_stair_compliance", "flight_nosing_lines",
 ]
 
-# 부동소수 비교 허용오차. 법정 임계(3.000 m, 0.150 m …)를 정확히 맞춘 씬이
-# 많아서(scene16 폭 3.0, scene14 riser 0.15) 이 값이 판정을 좌우한다.
+# Float comparison tolerance. Many scenes sit exactly on a statutory threshold
+# (3.000 m, 0.150 m ...) - scene16 width 3.0, scene14 riser 0.15 - so this value decides.
 TOL = 1e-9
 
 
 # ===========================================================================
-# [0] 법정 상수 — mm/cm 원문 → m 환산은 여기서 1회만
+# [0] Statutory constants - mm/cm statute text is converted to metres here, once
 # ===========================================================================
 class K:
-    """법정 치수 상수 (단위 m). 각 값의 조문 근거를 주석에 남긴다.
+    """Statutory dimension constants (metres). Each value cites its clause in a comment.
 
-    출처: 「건축물의 피난·방화구조 등의 기준에 관한 규칙」 §15 (이하 피난방화)
-          「주택건설기준 등에 관한 규정」 §16·§18 (이하 주택기준)
-          Docs/surveys/korean_pedestrian_geometry.md §2, §6.2
-          Docs/surveys/_dimension_index.md "미적용" 표
+    Sources: Rules on Evacuation and Fire Protection Structures of Buildings §15
+             (hereafter "evac/fire")
+             Regulations on Housing Construction Standards §16/§18 (hereafter "housing")
+             Docs/surveys/korean_pedestrian_geometry.md §2, §6.2
+             Docs/surveys/_dimension_index.md "not applied" table
     """
 
-    # --- 계단참 (피난방화 §15①1 / 주택기준 §16②1) ---
-    LANDING_MAX_RISE = 3.00          # 3 m 초과 계단 → 3 m 이내마다 참
-    LANDING_MAX_RISE_HOUSING = 2.00  # 주택단지 안 건축물·옥외계단
-    LANDING_MAX_RISE_ENTRY = 2.50    # 각 동 출입구 계단(1층 한정)
-    LANDING_DEPTH_MIN = 1.20         # "유효너비 120 cm" = 진행방향 깊이
+    # --- Landings (evac/fire §15(1)1 / housing §16(2)1) ---
+    LANDING_MAX_RISE = 3.00          # Stairs over 3 m rise -> a landing at least every 3 m
+    LANDING_MAX_RISE_HOUSING = 2.00  # Buildings and outdoor stairs inside a housing complex
+    LANDING_MAX_RISE_ENTRY = 2.50    # Entrance stairs of each building block (1st floor only)
+    LANDING_DEPTH_MIN = 1.20         # "effective width 120 cm" = depth along the direction of travel
 
-    # --- 광폭계단 중간난간 (피난방화 §15①3) ---
-    MIDRAIL_MAX_SPAN = 3.00          # "너비 3 m 를 넘는" → 3 m 이내마다
-    MIDRAIL_EXEMPT_RISER = 0.150     # 단서: 단높이 ≤15 cm  **그리고**
-    MIDRAIL_EXEMPT_TREAD = 0.300     #       단너비 ≥30 cm  둘 다일 때만 면제
+    # --- Wide-stair mid rail (evac/fire §15(1)3) ---
+    MIDRAIL_MAX_SPAN = 3.00          # "wider than 3 m" -> a rail every 3 m or less
+    MIDRAIL_EXEMPT_RISER = 0.150     # Proviso: riser <=15 cm  **and**
+    MIDRAIL_EXEMPT_TREAD = 0.300     #          tread >=30 cm  - exempt only if both hold
 
-    # --- 양옆 난간 (피난방화 §15①2) ---
-    RAIL_REQUIRED_DROP = 1.00        # 높이 1 m 를 넘는 계단·계단참 → 양옆 난간
-    #   → 낙차 ≤1.00 m(= 옥외 riser 0.20 기준 5단, riser 0.15 기준 6단) 계단은
-    #     **난간 의무가 없다.** 무난간 씬을 정당화하는 근거이기도 하다.
+    # --- Rails on both sides (evac/fire §15(1)2) ---
+    RAIL_REQUIRED_DROP = 1.00        # Stairs/landings over 1 m high -> rails on both sides
+    #   -> Stairs with drop <=1.00 m (5 steps at outdoor riser 0.20, 6 at riser 0.15)
+    #     **have no rail obligation.** This also justifies rail-free scenes.
 
-    # --- 계단 단면 (주택기준 §16①) ---
-    OUTDOOR_RISER_MAX = 0.200        # 건축물의 옥외계단 — 실내보다 가파르다
+    # --- Stair section (housing §16(1)) ---
+    OUTDOOR_RISER_MAX = 0.200        # Outdoor stairs of a building - steeper than indoor
     OUTDOOR_TREAD_MIN = 0.240
     OUTDOOR_WIDTH_MIN = 0.900
-    COMMON_RISER_MAX = 0.180         # 공동으로 사용하는 계단
+    COMMON_RISER_MAX = 0.180         # Stairs in shared use
     COMMON_TREAD_MIN = 0.260
     COMMON_WIDTH_MIN = 1.200
 
-    # --- 손잡이 (피난방화 §15④) ---
-    HANDRAIL_DIA_MIN = 0.032         # 최대지름 3.2 cm 이상
-    HANDRAIL_DIA_MAX = 0.038         #          3.8 cm 이하
-    HANDRAIL_H = 0.850               # 계단으로부터 85 cm
-    HANDRAIL_WALL_GAP = 0.050        # 벽등으로부터 5 cm 이상 이격
-    HANDRAIL_EXT_MIN = 0.300         # 끝나는 수평부분에서 바깥쪽 30 cm 이상
+    # --- Handrail (evac/fire §15(4)) ---
+    HANDRAIL_DIA_MIN = 0.032         # Max diameter >=3.2 cm
+    HANDRAIL_DIA_MAX = 0.038         #              <=3.8 cm
+    HANDRAIL_H = 0.850               # 85 cm above the stair
+    HANDRAIL_WALL_GAP = 0.050        # >=5 cm clear of the wall etc.
+    HANDRAIL_EXT_MIN = 0.300         # >=30 cm outward past the horizontal end section
 
-    # --- 관례/추정 (법정 아님 — 반드시 태그와 함께 쓸 것) ---
-    HANDRAIL_POST_SPACING = 1.20     # `[근거 없음]` 손잡이 지주 간격 규정 없음.
-    #   난간 지주 2.0 m(메쉬휀스 2.08 준용, _dimension_index)와 달리 손잡이는
-    #   더 촘촘한 것이 관행 → 1.2 m `[추정]`.
-    LANDING_CROSS_SLOPE = 0.02       # `[추정]` 보도 횡단경사 1/25 준용(1~2 %)
-    NOSING_BAND_W = 0.050            # 논슬립 폭 — 법정 수치 없음.
-    #   KS F 4527 호칭수 50 mm + 건축공사 표준시방서 관행 `[확인-비법정]`
+    # --- Convention/estimate (not statutory - always use with the tag) ---
+    HANDRAIL_POST_SPACING = 1.20     # `[no source]` No regulation on handrail post spacing.
+    #   Unlike guardrail posts at 2.0 m (mesh fence 2.08 applied by analogy,
+    #   _dimension_index), handrails are conventionally denser -> 1.2 m `[estimate]`.
+    LANDING_CROSS_SLOPE = 0.02       # `[estimate]` Sidewalk cross slope 1/25 applied by analogy (1-2 %)
+    NOSING_BAND_W = 0.050            # Non-slip strip width - no statutory figure.
+    #   KS F 4527 nominal 50 mm + standard building specification practice `[verified-nonstatutory]`
 
 
 # ===========================================================================
-# [1] 계단참 계획 — 순수 계산 (USD 무관 · 단위 테스트 가능)
+# [1] Landing planning - pure computation (USD-independent, unit testable)
 # ===========================================================================
 def stair_landings(total_drop, riser, tread,
                    max_rise=K.LANDING_MAX_RISE,
                    landing_depth=K.LANDING_DEPTH_MIN,
                    x0=0.0, z_top=0.0):
-    """총 낙차를 법정 주기로 쪼개 **flight / 계단참 분할 계획**을 반환한다.
+    """Split the total drop by the statutory period into a **flight / landing plan**.
 
-    피난방화 §15①1 : 높이 3 m 를 넘는 계단에는 3 m 이내마다 유효너비 1.2 m
-    이상의 계단참. 주택단지 안 건축물·옥외계단은 `max_rise=2.0`(주택기준
-    §16②1), 각 동 출입구 계단 1층은 `max_rise=2.5`.
+    Evac/fire §15(1)1: stairs rising more than 3 m need a landing at least every
+    3 m with effective width >=1.2 m. Buildings and outdoor stairs inside a housing
+    complex use `max_rise=2.0` (housing §16(2)1); 1st-floor block entrance stairs
+    use `max_rise=2.5`.
 
-    좌표 관례는 scene_common `_stair_steps` 와 동일: (x0, z_top) 에서
-    **+X 로 하강**. 계단참 상면은 그 직전 flight 마지막 디딤면과 **동일 z**
-    (= 마지막 디딤면이 landing_depth 만큼 연장된 형태)이므로 참을 넣어도
-    **단코 선의 z 사다리는 그대로 보존**된다.
+    The coordinate convention matches scene_common `_stair_steps`: descend from
+    (x0, z_top) **towards +X**. A landing top sits at the **same z** as the last
+    tread of the preceding flight (i.e. that tread extended by landing_depth), so
+    inserting landings **preserves the z ladder of the nosing line**.
 
-    인자
-      total_drop    : 총 낙차 [m] (양수)
-      riser         : 단높이 [m]
-      tread         : 단너비 [m]
-      max_rise      : flight 1개가 감당할 수 있는 최대 상승/하강 [m]
-      landing_depth : 계단참 깊이(진행방향) [m]. 1.20 미만이면 경고 기록
-      x0, z_top     : 계단 시작점
+    Args
+      total_drop    : total drop [m] (positive)
+      riser         : riser height [m]
+      tread         : tread depth [m]
+      max_rise      : maximum rise/fall a single flight may cover [m]
+      landing_depth : landing depth along travel [m]; below 1.20 a warning is logged
+      x0, z_top     : stair start point
 
-    반환 dict
-      n_steps       : 총 단 수(=round(total_drop/riser))
-      riser_eff     : total_drop/n_steps — 실제 균등 단높이
-      n_flights     : flight 개수
-      n_landings    : 계단참 개수 (= n_flights − 1)
+    Returns dict
+      n_steps       : total step count (= round(total_drop/riser))
+      riser_eff     : total_drop/n_steps - the actual uniform riser
+      n_flights     : number of flights
+      n_landings    : number of landings (= n_flights - 1)
       flights       : [{i, n_steps, x0, x1, z_top, z_bot, rise, run}]
       landings      : [{i, x0, x1, z, depth}]
-      total_run     : 계단참 포함 전체 X 길이
-      run_delta     : 계단참 때문에 늘어난 run (= n_landings × landing_depth)
-      compliant     : 이 계획 자체가 법정 주기·깊이를 만족하는가
-      notes         : 문자열 경고 목록
+      total_run     : total X length including landings
+      run_delta     : extra run caused by landings (= n_landings x landing_depth)
+      compliant     : whether the plan itself meets the statutory period and depth
+      notes         : list of warning strings
 
-    분배 규칙(결정적 — 난수 없음): flight 당 최대 단 수
-    m = floor(max_rise/riser) 로 n_flights = ceil(n_steps/m) 를 구한 뒤,
-    나머지를 **앞쪽 flight 부터 1단씩** 배분한다. 같은 입력이면 항상 같은 출력.
+    Distribution rule (deterministic - no randomness): with m = floor(max_rise/riser)
+    steps per flight, n_flights = ceil(n_steps/m); the remainder is handed out
+    **one step at a time starting from the first flight**. Same input, same output.
 
-    GT: **낙차 라벨을 바꾼다.** 총 낙차는 보존되지만 (a) run 이 run_delta 만큼
-        길어져 z(x) 프로파일이 평행이동·연장되고, (b) 참 상면 폭
-        landing_depth 구간은 **국지 낙차 0 인 평지 띠**가 되며, (c) 참 전연이
-        **새로운 낙차 에지**(잔여 낙차 = 하류 flight 합)로 추가된다.
-        → 이 계획을 적용한 씬은 기존 낙차/뎁스 GT 를 재생성해야 한다.
-        (중간난간·손잡이와 달리 계단참만이 GT 를 건드리는 부재다.)
+    GT: **changes the drop label.** Total drop is preserved, but (a) the run grows by
+        run_delta so the z(x) profile is translated and lengthened, (b) the
+        landing_depth band of the landing top is a **flat strip of zero local drop**,
+        and (c) the landing front edge becomes a **new drop edge** (residual drop =
+        sum of the downstream flights).
+        -> Scenes using this plan must regenerate their drop/depth GT.
+        (Unlike mid rails and handrails, the landing is the only part that touches GT.)
     """
     total_drop = float(total_drop)
     riser = float(riser)
@@ -189,7 +197,7 @@ def stair_landings(total_drop, riser, tread,
             "계단참 깊이 %.3f < 법정 최소 %.2f m (피난방화 §15①1)"
             % (landing_depth, K.LANDING_DEPTH_MIN))
 
-    # flight 당 최대 단 수 — 참 없이 감당 가능한 상승분
+    # Max steps per flight - the rise coverable without a landing
     m = int(math.floor(max_rise / riser_eff + TOL))
     if m < 1:
         m = 1
@@ -237,13 +245,13 @@ def stair_landings(total_drop, riser, tread,
 
 
 def flight_nosing_lines(plan):
-    """계획(plan)에서 **단코 선의 (x, z) 목록**만 뽑는다. GT 검산용.
+    """Extract only the **(x, z) list of the nosing line** from a plan. For GT checking.
 
-    각 원소 = (x_nose, z_tread) : 그 단 디딤면의 +X 끝(=단코)과 디딤면 z.
-    계단참 전연도 하나의 단코로 포함된다(참 전연 = 새 낙차 에지).
+    Each element = (x_nose, z_tread): the +X end of that tread (the nosing) and its z.
+    A landing front edge is included as a nosing too (landing front = new drop edge).
 
-    GT: 생성 함수가 아니다(프림 무생성). 계단참 도입 전후의 낙차 에지 집합을
-        **diff 해서 GT 변경 범위를 산출**하는 데 쓴다.
+    GT: not a generator (creates no prims). Used to **diff the drop-edge set before
+        and after landings are introduced**, yielding the GT change scope.
     """
     lines = []
     for f in plan["flights"]:
@@ -257,34 +265,35 @@ def flight_nosing_lines(plan):
 
 
 # ===========================================================================
-# [2] 계단참 판 생성
+# [2] Landing slab generation
 # ===========================================================================
 def build_stair_landing(stage, path, landing, y0, y1, base_z, mtl,
                         add_box, collider=True, edge_lip=0.0):
-    """`stair_landings()` 가 반환한 landing dict 1개를 솔리드 판으로 만든다.
+    """Turn one landing dict returned by `stair_landings()` into a solid slab.
 
-    인자
-      landing  : {"x0","x1","z","depth"} — stair_landings() 산출물 원소
-      y0, y1   : 계단 폭(Y). 법정 요건 "해당 계단의 유효폭 이상"(주택기준
-                 §16②1)이므로 **계단 폭과 동일하게** 주는 것이 기본이다.
-      base_z   : 판 밑면 z (계단 솔리드 base_z 와 맞출 것 — 부유 방지)
-      mtl      : 재질 (호출측 make_pbr 산출물)
-      add_box  : scene_common.add_box 와 동일 시그니처의 주입 헬퍼
-      edge_lip : 참 전연을 +X 로 더 내미는 양 [m]. 0 이면 계획 그대로.
-                 `[근거 없음]` — 참 전연 물끊기/코 돌출 규정 없음. 기본 0.
+    Args
+      landing  : {"x0","x1","z","depth"} - an element of the stair_landings() output
+      y0, y1   : stair width (Y). The statute requires "at least the effective width
+                 of that stair" (housing §16(2)1), so **matching the stair width** is
+                 the default.
+      base_z   : slab underside z (match the stair solid base_z to avoid floating)
+      mtl      : material (caller's make_pbr output)
+      add_box  : injected helper with the same signature as scene_common.add_box
+      edge_lip : extra +X protrusion of the landing front edge [m]. 0 keeps the plan.
+                 `[no source]` - no rule on landing drip edge/nose overhang. Default 0.
 
-    배수 구배는 **의도적으로 넣지 않았다.** 계단참 전용 구배 규정은 없고
-    보도 횡단경사 1/25 준용은 `[추정]`(K.LANDING_CROSS_SLOPE)이다. 구배를
-    주려면 회전 가능한 박스 헬퍼(scene_common `_oriented_box`)를 따로
-    주입해야 하므로, 이 함수는 **수평 판**만 만든다.
+    Drainage slope is **deliberately omitted.** There is no landing-specific slope
+    rule, and applying the sidewalk cross slope 1/25 by analogy is an `[estimate]`
+    (K.LANDING_CROSS_SLOPE). A slope would require injecting a rotatable box helper
+    (scene_common `_oriented_box`), so this function builds a **level slab** only.
 
-    반환: add_box 가 반환한 프림.
+    Returns: the prim returned by add_box.
 
-    GT: 이 판의 **상면(z)** 은 국지 낙차 0 인 평지, **+X 전연**은 새 낙차
-        에지가 된다(그 아래 flight 낙차 전부가 이 에지에 걸린다).
-        판 상면은 직전 flight 마지막 디딤면과 동일 z 이므로 **상류 단코 선의
-        z 사다리는 불변**이고, 새로 생기는 것은 "긴 디딤면 1개"뿐이다.
-        이 성질 덕에 계단참 삽입이 단코 실루엣 단서를 파괴하지 않는다.
+    GT: the slab **top (z)** is flat ground with zero local drop; the **+X front edge**
+        becomes a new drop edge (the entire flight drop below it hangs on that edge).
+        The slab top shares z with the last tread of the preceding flight, so the
+        **upstream nosing z ladder is unchanged**; all that appears is one long tread.
+        This property is why landing insertion does not destroy the nosing cue.
     """
     x0 = float(landing["x0"])
     x1 = float(landing["x1"]) + float(edge_lip)
@@ -301,38 +310,39 @@ def build_stair_landing(stage, path, landing, y0, y1, base_z, mtl,
 
 
 # ===========================================================================
-# [3] 광폭 계단 중간난간 위치 — P0-1 의 유일한 판정 지점
+# [3] Wide-stair mid rail positions - the single decision point for P0-1
 # ===========================================================================
 def mid_rail_lines(y0, y1, max_span=K.MIDRAIL_MAX_SPAN,
                    riser=None, tread=None):
-    """계단 폭에 따라 **중간난간이 들어갈 y 좌표 리스트**를 반환한다.
+    """Return the **list of y coordinates where mid rails belong**, given the stair width.
 
-    피난방화 §15①3 원문:
-      "너비가 3미터를 넘는 계단에는 계단의 중간에 너비 3미터 이내마다 난간을
-       설치할 것. 다만, 계단의 **단높이가 15센티미터 이하이고**, 계단의
-       **단너비가 30센티미터 이상인 경우**에는 그러하지 아니하다."
+    Evac/fire §15(1)3, verbatim:
+      "Stairs wider than 3 metres shall have a rail in the middle of the stair at
+       intervals of no more than 3 metres. This does not apply where the stair
+       **riser is 15 centimetres or less and** the **tread is 30 centimetres or more**."
 
-    ★ 면제 조건은 **AND** 다. riser ≤ 0.150 **그리고** tread ≥ 0.300 을
-      둘 다 만족할 때만 면제. 어느 한쪽만 만족하면 중간난간은 여전히 의무다.
-      (riser/tread 중 하나라도 None 이면 면제 판정을 하지 않는다 = 보수적)
+    Note: the exemption is an **AND**. Only riser <= 0.150 **and** tread >= 0.300
+      together exempt. If just one holds, the mid rail is still mandatory.
+      (If either riser or tread is None, no exemption is decided = conservative.)
 
-    ★ 임계는 **초과**(>)다. 폭이 정확히 3.000 m 면 "3 m 를 넘는" 이 아니므로
-      의무가 발생하지 않는다. scene16/17 이 정확히 이 경계에 있다.
+    Note: the threshold is **strictly greater** (>). A width of exactly 3.000 m is not
+      "wider than 3 m", so no obligation arises. scene16/17 sit exactly on this edge.
 
-    인자
-      y0, y1   : 계단 폭 구간(순서 무관)
-      max_span : 난간 간 최대 간격 [m]
-      riser    : 단높이 [m] (면제 판정용, None 이면 면제 미적용)
-      tread    : 단너비 [m] (면제 판정용, None 이면 면제 미적용)
+    Args
+      y0, y1   : stair width interval (order irrelevant)
+      max_span : maximum spacing between rails [m]
+      riser    : riser [m] (for the exemption test; None disables the exemption)
+      tread    : tread [m] (for the exemption test; None disables the exemption)
 
-    반환: y 좌표 리스트(오름차순). 의무 없음 → 빈 리스트.
-          간격은 폭을 ceil(폭/max_span) 등분한 **균등 분할**(결정적).
-          예) 폭 12 m → [ -3, 0, +3 ] 형태의 3열(각 span 3.0).
+    Returns: ascending list of y coordinates. No obligation -> empty list.
+          Spacing is an **even split** of the width into ceil(width/max_span) bays
+          (deterministic). E.g. width 12 m -> 3 lines at [-3, 0, +3] (span 3.0 each).
 
-    GT: **낙차 라벨 불변.** 중간난간은 계단면 위에 서는 수직 부재라 z(x,y)
-        지형을 건드리지 않는다. 다만 낙차 방향(+X)으로 길게 뻗은 선형
-        구조물이라 단코 선을 세로로 가르고 자기폐색·그림자를 만든다 →
-        RGB 맥락단서 정보량은 크게 늘고, 낙차 GT 는 그대로다.
+    GT: **drop label invariant.** A mid rail is a vertical member standing on the stair
+        surface and does not touch the z(x,y) terrain. It is however a linear structure
+        running along the drop direction (+X), cutting the nosing line lengthwise and
+        creating self-occlusion and shadow -> the RGB context cue gains a lot of
+        information while the drop GT stays as is.
     """
     a, b = float(y0), float(y1)
     lo, hi = (a, b) if a <= b else (b, a)
@@ -344,7 +354,7 @@ def mid_rail_lines(y0, y1, max_span=K.MIDRAIL_MAX_SPAN,
         if exempt:
             return []
 
-    if width <= float(max_span) + TOL:      # "넘는" = 초과. 3.000 은 미해당
+    if width <= float(max_span) + TOL:      # "wider than" = strictly greater. 3.000 does not qualify
         return []
 
     n_bays = int(math.ceil(width / float(max_span) - TOL))
@@ -352,7 +362,7 @@ def mid_rail_lines(y0, y1, max_span=K.MIDRAIL_MAX_SPAN,
 
 
 # ===========================================================================
-# [4] 손잡이 (핸드레일) — φ32~38 · h850 · 끝단 수평 연장 ≥300
+# [4] Handrail - dia 32-38, h 850, horizontal end extension >=300
 # ===========================================================================
 def build_handrail(stage, prefix, y, x_top, run, drop, mtl, add_cylinder,
                    z_top=0.0, height=K.HANDRAIL_H, dia=0.034,
@@ -361,41 +371,48 @@ def build_handrail(stage, prefix, y, x_top, run, drop, mtl, add_cylinder,
                    ground_fn=None, wall_y=None, wall_side=1.0,
                    wall_gap=K.HANDRAIL_WALL_GAP, bracket_r=0.012,
                    strict=True):
-    """법정 규격 손잡이 1선. 피난방화 §15④.
+    """One statutory handrail line. Evac/fire §15(4).
 
-      1. 최대지름 **32~38 mm** 원형/타원 단면      → `dia`
-      2. 벽등으로부터 **≥50 mm** 이격, 계단으로부터 높이 **850 mm** → `wall_gap`, `height`
-      3. 계단이 끝나는 수평부분에서 바깥쪽으로 **≥300 mm** → `ext_top`, `ext_bot`
+      1. Max diameter **32-38 mm**, round/oval section        -> `dia`
+      2. **>=50 mm** clear of the wall etc.; height **850 mm** above the stair
+         -> `wall_gap`, `height`
+      3. **>=300 mm** outward past the horizontal section where the stair ends
+         -> `ext_top`, `ext_bot`
 
-    ★ 끝단 수평 연장이 이 부재의 **실루엣상 한국적 특징**이다. 경사 레일이
-      계단 끝에서 그냥 끊기지 않고, 상·하단 각각 평지 위로 30 cm 이상
-      수평으로 더 나간 뒤 끝난다. 원경에서 "ㄱ자 꺾임 2개"로 읽힌다.
+    Note: the horizontal end extension is this part's **Korean signature in
+      silhouette**. The sloped rail does not simply stop at the stair end; at both top
+      and bottom it continues horizontally at least 30 cm over level ground before
+      terminating. At distance it reads as "two right-angle bends".
 
-    기하 (scene_common 하강 관례와 동일)
-      x_top          : 경사 시작 x (여기서 z=z_top)
-      run, drop      : 경사 구간 수평길이·낙차 → 경사 끝 x_top+run, z_top−drop
-      상단 수평 연장 : x_top−ext_top .. x_top,        z = z_top − drop·0 + height
-      하단 수평 연장 : x_top+run .. x_top+run+ext_bot, z = z_top − drop + height
-      높이 기준면    : **단코 연결선**(디딤면 코를 이은 사선). 조문의
-                       "계단으로부터의 높이"를 이렇게 해석한다 `[추정]` —
-                       조문이 측정 기준면을 명시하지 않는다 `[근거 없음]`.
+    Geometry (same descent convention as scene_common)
+      x_top          : x where the slope starts (z = z_top here)
+      run, drop      : horizontal length and drop of the sloped run -> ends at
+                       x_top+run, z_top-drop
+      top extension  : x_top-ext_top .. x_top,        z = z_top + height
+      bottom ext.    : x_top+run .. x_top+run+ext_bot, z = z_top - drop + height
+      height datum   : the **nosing connection line** (the diagonal through the tread
+                       noses). This is how we read the statute's "height from the
+                       stair" `[estimate]` - the statute does not name a measurement
+                       datum `[no source]`.
 
-    벽부착 모드 : `wall_y` 를 주면 y 는 무시되고
-      y_rail = wall_y + wall_side × (wall_gap + dia/2)
-    로 계산되며, 지주(post) 대신 **브래킷**(짧은 Y축 실린더)을 건다.
-    `wall_y=None` 이면 자립 모드로 지주를 세운다.
+    Wall-mounted mode: if `wall_y` is given, y is ignored and
+      y_rail = wall_y + wall_side x (wall_gap + dia/2)
+    and **brackets** (short Y-axis cylinders) are hung instead of posts.
+    With `wall_y=None` the rail is free-standing on posts.
 
-    지주 간격 `post_spacing` 기본 1.2 m 는 `[근거 없음]`(손잡이 지주 간격을
-    규정한 조문 없음) — 난간 지주 2.0 m 보다 촘촘한 관행 `[추정]`.
+    The default post spacing `post_spacing` of 1.2 m is `[no source]` (no clause
+    regulates handrail post spacing) - denser than the 2.0 m guardrail post
+    convention `[estimate]`.
 
-    strict=True 면 법정 하한 위반 시 ValueError. False 면 경고만 담아 반환.
+    With strict=True a statutory-minimum violation raises ValueError; with False it is
+    returned as a warning only.
 
-    반환 dict: {"prims": [...], "y": 실제 레일 y, "warnings": [...],
-                "x_start": 최상단 x, "x_end": 최하단 x}
+    Returns dict: {"prims": [...], "y": actual rail y, "warnings": [...],
+                "x_start": topmost x, "x_end": bottommost x}
 
-    GT: **낙차 라벨 불변.** 손잡이는 지형 z 를 만들지 않는다. 끝단 수평 연장
-        구간은 계단 밖 평지(낙차 0 영역) 위에 떠 있으므로 낙차 마스크에
-        어떤 화소도 추가하지 않는다. 실루엣·그림자만 바뀐다.
+    GT: **drop label invariant.** A handrail creates no terrain z. The horizontal end
+        extensions float over level ground outside the stair (a zero-drop area), so
+        they add no pixel to the drop mask. Only silhouette and shadow change.
     """
     warns = []
     dia = float(dia)
@@ -436,19 +453,19 @@ def build_handrail(stage, prefix, y, x_top, run, drop, mtl, add_cylinder,
     x_start = x_top - ext_top
     x_slope_end = x_top + run
     x_end = x_slope_end + ext_bot
-    z_rail_top = z_top + height              # 상단 수평부 레일 중심 z
-    z_rail_bot = z_top - drop + height       # 하단 수평부 레일 중심 z
+    z_rail_top = z_top + height              # Rail centre z of the top horizontal section
+    z_rail_bot = z_top - drop + height       # Rail centre z of the bottom horizontal section
 
     prims = []
 
-    # (a) 상단 수평 연장 — Cylinder 축(Z)을 X 로 눕힌다(rotY=90)
+    # (a) Top horizontal extension - lay the cylinder axis (Z) along X (rotY=90)
     if ext_top > TOL:
         prims.append(add_cylinder(
             stage, "%s/ExtTop" % prefix,
             ((x_start + x_top) / 2.0, y_rail, z_rail_top),
             r, ext_top, mtl, rotY=90.0))
 
-    # (b) 경사부
+    # (b) Sloped section
     if run > TOL or drop > TOL:
         L = math.hypot(run, drop)
         ang = math.degrees(math.atan2(drop, run))
@@ -457,16 +474,16 @@ def build_handrail(stage, prefix, y, x_top, run, drop, mtl, add_cylinder,
             (x_top + run / 2.0, y_rail, z_rail_top - drop / 2.0),
             r, L, mtl, rotY=90.0 + ang))
 
-    # (c) 하단 수평 연장
+    # (c) Bottom horizontal extension
     if ext_bot > TOL:
         prims.append(add_cylinder(
             stage, "%s/ExtBot" % prefix,
             ((x_slope_end + x_end) / 2.0, y_rail, z_rail_bot),
             r, ext_bot, mtl, rotY=90.0))
 
-    # (d) 지지 — 자립이면 지주, 벽부착이면 브래킷
+    # (d) Support - posts when free-standing, brackets when wall-mounted
     def _nose_z(x):
-        """단코 연결선 z (레일 높이 기준면)."""
+        """Nosing connection line z (the rail height datum)."""
         if x <= x_top:
             return z_top
         if x >= x_slope_end:
@@ -505,7 +522,7 @@ def build_handrail(stage, prefix, y, x_top, run, drop, mtl, add_cylinder,
 
 
 # ===========================================================================
-# [5] 적합성 판정
+# [5] Compliance decision
 # ===========================================================================
 def _v(code, sev, rule, expected, actual, msg):
     return dict(code=code, severity=sev, rule=rule,
@@ -516,29 +533,32 @@ def check_stair_compliance(riser, tread, width, total_drop, outdoor=True,
                            has_rail=None, n_mid_rails=0, n_landings=0,
                            landing_depth=None, housing_complex=False,
                            handrail=None, label="", note=""):
-    """계단 제원 1건을 법정 요건과 대조해 **위반 목록 dict** 를 반환한다.
+    """Check one stair specification against the statute and return a **violation dict**.
 
-    인자
-      riser, tread  : 단높이·단너비 [m]. 불균등이면 (최대 riser, 최소 tread)
-                      = **가장 불리한 값**을 넣을 것.
-      width         : 계단 유효폭 [m]
-      total_drop    : 총 낙차 [m]
-      outdoor       : True → 옥외계단 기준(riser ≤0.20 / tread ≥0.24 / 폭 ≥0.90)
-                      False → 공동사용 계단 기준(≤0.18 / ≥0.26 / ≥1.20)
-      has_rail      : "both" | "one" | "none" | True | False | None(불명)
-      n_mid_rails   : 현재 씬에 있는 **중간**난간 열 수(측면 난간은 제외)
-      n_landings    : 현재 씬에 있는 **중간** 계단참 수(상·하단 평지는 제외)
-      landing_depth : 현재 계단참 깊이 [m] (None → 판정 생략)
-      housing_complex : 주택단지 안 건축물·옥외계단 → 참 주기 2 m
-      handrail      : {"dia":…, "h":…, "ext":…} 또는 None(판정 생략)
+    Args
+      riser, tread  : riser and tread [m]. If non-uniform, pass (max riser, min tread)
+                      = **the worst case**.
+      width         : effective stair width [m]
+      total_drop    : total drop [m]
+      outdoor       : True -> outdoor stair rule (riser <=0.20 / tread >=0.24 /
+                      width >=0.90)
+                      False -> shared-use stair rule (<=0.18 / >=0.26 / >=1.20)
+      has_rail      : "both" | "one" | "none" | True | False | None (unknown)
+      n_mid_rails   : number of **mid** rail lines in the scene (side rails excluded)
+      n_landings    : number of **intermediate** landings in the scene (level ground at
+                      top and bottom excluded)
+      landing_depth : current landing depth [m] (None -> test skipped)
+      housing_complex : building/outdoor stair inside a housing complex -> 2 m period
+      handrail      : {"dia":..., "h":..., "ext":...} or None (test skipped)
 
-    반환 dict — 진단표 1행을 그대로 만들 수 있는 필드 구성.
+    Returns dict - fields shaped so one diagnostic-table row can be built directly.
       req_landings / have_landings / req_mid_rails / have_mid_rails /
       mid_rail_exempt / outdoor_ok / rail_required / violations / ok / p0
 
-    GT: **판정 전용. 프림을 만들지 않으므로 낙차 라벨과 무관하다.**
-        단, 이 함수가 P0-2(계단참) 위반을 낸 씬은 시정 시 GT 가 바뀐다
-        (stair_landings 의 GT: 줄 참조). 그 구분이 진단표의 핵심이다.
+    GT: **decision only. Creates no prims, so it is unrelated to the drop label.**
+        However, a scene flagged for P0-2 (landing) will have its GT change once fixed
+        (see the GT: line of stair_landings). That distinction is the point of the
+        diagnostic table.
     """
     riser = float(riser)
     tread = float(tread)
@@ -546,7 +566,7 @@ def check_stair_compliance(riser, tread, width, total_drop, outdoor=True,
     total_drop = float(total_drop)
     V = []
 
-    # --- 단면 규격 (P0-3) ---
+    # --- Section spec (P0-3) ---
     r_max = K.OUTDOOR_RISER_MAX if outdoor else K.COMMON_RISER_MAX
     t_min = K.OUTDOOR_TREAD_MIN if outdoor else K.COMMON_TREAD_MIN
     w_min = K.OUTDOOR_WIDTH_MIN if outdoor else K.COMMON_WIDTH_MIN
@@ -566,7 +586,7 @@ def check_stair_compliance(riser, tread, width, total_drop, outdoor=True,
                     "%s 유효폭 미달 (%.3f < %.3f)" % (kind, width, w_min)))
     outdoor_ok = not any(x["code"] in ("D1", "D2", "D3") for x in V)
 
-    # --- 계단참 (P0-2) ---
+    # --- Landings (P0-2) ---
     max_rise = (K.LANDING_MAX_RISE_HOUSING if housing_complex
                 else K.LANDING_MAX_RISE)
     if total_drop > max_rise + TOL:
@@ -586,7 +606,7 @@ def check_stair_compliance(riser, tread, width, total_drop, outdoor=True,
                     "%.3f" % float(landing_depth),
                     "계단참 깊이 미달"))
 
-    # --- 광폭 중간난간 (P0-1) ---
+    # --- Wide-stair mid rail (P0-1) ---
     lines = mid_rail_lines(-width / 2.0, width / 2.0,
                            riser=riser, tread=tread)
     exempt = (riser <= K.MIDRAIL_EXEMPT_RISER + TOL
@@ -600,7 +620,7 @@ def check_stair_compliance(riser, tread, width, total_drop, outdoor=True,
                     "(면제조건 riser≤0.15 AND tread≥0.30 미충족)"
                     % (width, req_mid - n_mid_rails)))
 
-    # --- 양옆 난간 (임계: 높이 1 m 초과) ---
+    # --- Rails on both sides (threshold: over 1 m high) ---
     rail_required = total_drop > K.RAIL_REQUIRED_DROP + TOL
     hr = has_rail
     if hr is True:
@@ -614,7 +634,7 @@ def check_stair_compliance(riser, tread, width, total_drop, outdoor=True,
                     "(교통약자법은 편측 허용이나 건축법 계열은 양옆)"
                     % total_drop))
 
-    # --- 손잡이 규격 ---
+    # --- Handrail spec ---
     if handrail:
         d = handrail.get("dia")
         h = handrail.get("h")
@@ -645,47 +665,47 @@ def check_stair_compliance(riser, tread, width, total_drop, outdoor=True,
 
 
 # ===========================================================================
-# [6] 자기검사 — GPU/USD 없이 순수 계산만 검증
+# [6] Self-check - pure computation, verified without GPU/USD
 # ===========================================================================
 def _selfcheck():
     ok = 0
 
-    # (1) 면제는 AND 다 — 이 4가지가 이 파일의 존재 이유
-    assert mid_rail_lines(-6, 6, riser=0.150, tread=0.300) == []      # 둘 다 O
+    # (1) The exemption is an AND - these 4 cases are why this file exists
+    assert mid_rail_lines(-6, 6, riser=0.150, tread=0.300) == []      # Both hold
     assert mid_rail_lines(-6, 6, riser=0.160, tread=0.340) != []      # riser X
     assert mid_rail_lines(-6, 6, riser=0.150, tread=0.280) != []      # tread X
     assert mid_rail_lines(-6, 6, riser=0.173, tread=0.300) != []      # riser X
     ok += 4
 
-    # (2) 임계는 "초과". 폭 3.000 은 의무 없음, 3.001 은 의무 발생
+    # (2) The threshold is "greater than". Width 3.000 -> no obligation, 3.001 -> obligation
     assert mid_rail_lines(-1.5, 1.5, riser=0.17, tread=0.30) == []
     assert len(mid_rail_lines(0.0, 3.001, riser=0.17, tread=0.30)) == 1
-    # 폭 12 → 3열, 간격 3.0
+    # Width 12 -> 3 lines, spacing 3.0
     L = mid_rail_lines(-6, 6, riser=0.17, tread=0.30)
     assert len(L) == 3 and abs(L[0] - (-3.0)) < 1e-9 and abs(L[1]) < 1e-9
-    # 폭 10 → 3열 (ceil(10/3)=4 bay, span 2.5)
+    # Width 10 -> 3 lines (ceil(10/3)=4 bays, span 2.5)
     assert len(mid_rail_lines(-5, 5, riser=0.20, tread=0.34)) == 3
     ok += 4
 
-    # (3) 계단참: 3 m 이하면 없음, 초과하면 균등 분할
+    # (3) Landings: none at 3 m or less, evenly split above
     p = stair_landings(3.0, 0.15, 0.30)
     assert p["n_landings"] == 0 and p["n_flights"] == 1
-    p = stair_landings(6.0, 0.15, 0.34)          # scene14 제원
+    p = stair_landings(6.0, 0.15, 0.34)          # scene14 specification
     assert p["n_steps"] == 40 and p["n_flights"] == 2 and p["n_landings"] == 1
     assert p["max_flight_rise"] <= K.LANDING_MAX_RISE + 1e-9
     assert abs(p["run_delta"] - 1.20) < 1e-9
-    assert abs(p["z_bottom"] + 6.0) < 1e-9       # 총 낙차 보존
-    p = stair_landings(6.12, 0.17, 0.34)         # scene09 제원(균등 근사)
+    assert abs(p["z_bottom"] + 6.0) < 1e-9       # Total drop preserved
+    p = stair_landings(6.12, 0.17, 0.34)         # scene09 specification (uniform approximation)
     assert p["n_flights"] == 3 and p["n_landings"] == 2
     assert all(f["rise"] <= K.LANDING_MAX_RISE + 1e-9 for f in p["flights"])
-    # 주택단지 2 m 주기
+    # Housing complex 2 m period
     p2 = stair_landings(6.0, 0.15, 0.34,
                         max_rise=K.LANDING_MAX_RISE_HOUSING)
     assert p2["n_flights"] == 4 and p2["n_landings"] == 3
     assert p2["max_flight_rise"] <= K.LANDING_MAX_RISE_HOUSING + 1e-9
     ok += 4
 
-    # (4) 계획의 기하 연속성 — flight 끝 z == 다음 참 z == 다음 flight 시작 z
+    # (4) Geometric continuity of the plan - flight end z == next landing z == next flight start z
     p = stair_landings(9.0, 0.18, 0.30)
     for i, l in enumerate(p["landings"]):
         assert abs(p["flights"][i]["z_bot"] - l["z"]) < 1e-9
@@ -696,14 +716,14 @@ def _selfcheck():
                                  + p["n_landings"] * 1.20)) < 1e-9
     ok += 1
 
-    # (5) 단코 선 — 계단참 도입은 단 수를 바꾸지 않는다(GT 총 에지 수 보존 +참)
+    # (5) Nosing line - landings do not change the step count (total GT edges preserved, plus landings)
     a = stair_landings(2.4, 0.15, 0.30)
     b = stair_landings(6.0, 0.15, 0.30)
     assert len(flight_nosing_lines(a)) == a["n_steps"]
     assert len(flight_nosing_lines(b)) == b["n_steps"] + b["n_landings"]
     ok += 1
 
-    # (6) 적합성 판정
+    # (6) Compliance decision
     r = check_stair_compliance(0.15, 0.38, 11.0, 0.60, outdoor=True,
                                has_rail="both", n_mid_rails=1)
     assert r["ok"] and r["req_mid_rails"] == 0 and r["mid_rail_exempt"]
@@ -718,14 +738,14 @@ def _selfcheck():
     r = check_stair_compliance(0.18, 0.30, 2.0, 1.10, outdoor=True,
                                has_rail="none")
     assert any(x["code"] == "R2" for x in r["violations"])
-    # 실내(공동사용) 기준에서는 riser 0.19 가 위반
+    # Under the indoor (shared-use) rule riser 0.19 is a violation
     assert not check_stair_compliance(0.19, 0.30, 2.0, 0.5,
                                       outdoor=False)["outdoor_ok"]
     assert check_stair_compliance(0.19, 0.30, 2.0, 0.5,
                                   outdoor=True)["outdoor_ok"]
     ok += 6
 
-    # (7) 손잡이 규격 검증 (프림 생성 없이 strict 예외만)
+    # (7) Handrail spec check (strict exception only, no prim creation)
     made = []
 
     def _fake_cyl(stage, path, center, radius, height, mtl=None,
@@ -746,13 +766,13 @@ def _selfcheck():
             raise AssertionError("strict 위반이 통과했다: %r" % bad)
         except ValueError:
             pass
-    # 벽부착: 이격 + 반지름만큼 벽에서 떨어진다
+    # Wall-mounted: offset from the wall by the gap plus the radius
     hw = build_handrail(None, "/S/W", 0.0, 0.0, 3.0, 1.5, None, _fake_cyl,
                         wall_y=2.0, wall_side=-1.0, dia=0.036)
     assert abs(hw["y"] - (2.0 - (0.050 + 0.018))) < 1e-9
     ok += 3
 
-    # (8) 계단참 판 — add_box 주입 검증
+    # (8) Landing slab - verify add_box injection
     boxes = []
 
     def _fake_box(stage, path, center, size, mtl=None, collider=False):
@@ -764,7 +784,7 @@ def _selfcheck():
                         -2.5, 2.5, -7.0, None, _fake_box)
     (_, ctr, siz) = boxes[0]
     assert abs(siz[0] - 1.20) < 1e-9 and abs(siz[1] - 5.0) < 1e-9
-    assert abs(ctr[2] + (7.0 + 3.0) / 2.0) < 1e-9   # 상면 −3.0, 밑면 −7.0
+    assert abs(ctr[2] + (7.0 + 3.0) / 2.0) < 1e-9   # Top -3.0, underside -7.0
     ok += 1
 
     print("stair_kit selfcheck: %d 그룹 통과 (USD/GPU 미사용)" % ok)

@@ -1,43 +1,49 @@
 #!/usr/bin/env python3
-"""렌더 라운드 회귀 자동 검사기 — 이미지 + manifest.json 만으로 동작.
+"""Automatic regression checker for render rounds - works from images + manifest.json alone.
 
-`Docs/briefs/multi_scene_brief_v3.md` §A 회귀 방지 체크리스트 중
-**렌더 산출물만으로 판정 가능한 항목**을 자동화한다. GPU·Isaac 불요.
+It automates the items of the §A regression-prevention checklist in
+`Docs/briefs/multi_scene_brief_v3.md` **that can be decided from render output alone**.
+No GPU, no Isaac.
 
-동기 (프로젝트 교훈, `Docs/audit_v4/fixlog_W7.md` §0):
-  "신설 기하가 프리셋 카메라를 삼키는 회귀가 4회 재발했다
-   (scene19 d5 암흑 · scene17 성토 매몰 · scene05 화단 매몰 · scene19 skyline 접선 차폐).
-   눈으로 한 차폐 검산은 차폐 주체 자체를 오진한다."
-  "프레이밍 검산은 앵커 **개수**가 아니라 **픽셀 점유율**로 걸 것"
+Motivation (project lesson, `Docs/audit_v4/fixlog_W7.md` §0):
+  "A regression where new geometry swallows a preset camera recurred 4 times
+   (scene19 d5 blackout, scene17 fill burial, scene05 planter burial, scene19 skyline
+   tangential occlusion).
+   Occlusion checks done by eye misdiagnose the occluding object itself."
+  "Gate framing checks on **pixel occupancy**, not on the anchor **count**"
    (`Docs/audit_v4/judge_v8_rt.md` §376)
 
-검사 6종
-  [DARK]  암흑 프레임        — 평균 휘도·암부 비율 (카메라가 기하에 삼켜짐의 주 증상)
-  [BLOWN] 과노출·255 클리핑
-  [WHITE] 순백 대면적        — v5.1 §4 금지 규약 (절대치는 참고, 증가분이 판정)
-  [OCCL]  카메라 차폐 회귀   — 이전 라운드 대비 **신규 암부**와 그 최대 연결 덩어리
-  [FRAME] 프레임 점유율 급변 — 전역 톤 정규화 후 16×9 블록 점유율 이동
-  [GRAZE] grazing 은닉 의심  — **낙차 에지 투영 대역**의 수평 결맞음 변화 (지표 v2)
+The 6 checks
+  [DARK]  black frame        - mean luminance and dark ratio (the main symptom of a
+                               camera swallowed by geometry)
+  [BLOWN] overexposure, 255 clipping
+  [WHITE] large pure-white area - the v5.1 §4 ban (the absolute value is a reference,
+                               the increase decides)
+  [OCCL]  camera occlusion regression - **new dark pixels** versus the previous round
+                               and their largest connected blob
+  [FRAME] abrupt frame occupancy change - 16x9 block occupancy shift after global tone
+                               normalisation
+  [GRAZE] suspected grazing concealment - horizontal coherence change in the **drop edge
+                               projection band** (metric v2)
 
-사용법
-  # 단일 씬 A/B
-  python scripts/regression_check.py --before look_check/scene07/p2g2_off \
-                                     --after  look_check/scene07/p2g2_on
+Usage
+  # single scene A/B
+  python scripts/regression_check.py --before look_check/scene07/p2g2_off                                      --after  look_check/scene07/p2g2_on
 
-  # 전 33씬 (라운드 이름은 쉼표 폴백 — 먼저 존재하는 것을 씀)
-  python scripts/regression_check.py --scenes 'look_check/scene*' \
-      --before-round final_pt_r2,final_pt,ctx2_pt,ctx2 --after-round v9_look \
-      --json Docs/reports/regr_v9.json
+  # all 33 scenes (round names fall back through commas - the first existing one is used)
+  python scripts/regression_check.py --scenes 'look_check/scene*'       --before-round final_pt_r2,final_pt,ctx2_pt,ctx2 --after-round v9_look       --json Docs/reports/regr_v9.json
 
-  # 씬별로 라운드가 제각각이면 목록 파일 (씬경로 TAB 이전 TAB 이후, # 주석)
+  # when rounds differ per scene, use a list file (scene path TAB before TAB after, # comments)
   python scripts/regression_check.py --list rounds.tsv
 
-의존성: numpy + PIL 뿐 (scipy·opencv 금지 — 배포 환경 가정).
-같은 계열 도구: `scripts/imgstats.py` (사실성 저수준 통계). 본 도구는 **회귀** 전용이다.
+Dependencies: numpy + PIL only (scipy and opencv are banned - deployment environment
+assumption).
+Related tool: `scripts/imgstats.py` (low-level realism statistics). This tool is for
+**regression** only.
 
-지표 버전
-  GRAZE 만 v2 (2026-07-29 재캘리브레이션). 나머지 6종은 v1 그대로다.
-  근거·전후 비교표: `Docs/reports/graze_recalibration_v1.md`
+Metric versions
+  Only GRAZE is v2 (recalibrated 2026-07-29). The other 6 are unchanged v1.
+  Basis and before/after comparison: `Docs/reports/graze_recalibration_v1.md`
 """
 import argparse
 import glob
@@ -52,237 +58,237 @@ import numpy as np
 from PIL import Image
 
 # ===========================================================================
-# 임계값 — 전부 여기 모아 둔다. 각 값의 근거를 주석으로 남긴다.
+# Thresholds - all collected here. The basis of each value is left as a comment.
 #
-# 근거의 출처는 3가지다.
-#   (a) 감독 판정문의 실측 대역 — `Docs/audit_v4/judge_v7_rt_A.md`,
-#       `judge_v8_rt.md` 는 프리셋 9컷을 "mean / dark<25 / 255 클리핑" 으로
-#       전수 측광했다. 본 도구는 **같은 정의**를 쓴다(호환).
-#   (b) 대조군 실측 — 룩 레이어 A/B 페어 4쌍(scene07/sceneD3 p2g1·p2g2 off↔on,
-#       총 56컷) + 소폭 수정 라운드(sceneD3 r2→r3) + 렌더 모드 교체
-#       (scene07 v8_rt→v8_pt). **회귀가 없어야 정상인 페어들**의 잡음 상한.
-#   (c) 실회귀 실측 — scene07 v6→v7, v7→v8 (판정문이 실제 차폐·암흑으로
-#       지적한 컷들)의 값.
-# 임계는 (b)의 상한과 (c)의 하한 사이에 둔다.
+# The bases come from three sources.
+#   (a) Measured bands from the supervisor verdicts - `Docs/audit_v4/judge_v7_rt_A.md`
+#       and `judge_v8_rt.md` photometered all 9 preset shots as "mean / dark<25 / 255
+#       clipping". This tool uses **the same definitions** (compatible).
+#   (b) Control measurements - 4 look-layer A/B pairs (scene07/sceneD3 p2g1/p2g2 off<->on,
+#       56 shots total) + a small-fix round (sceneD3 r2->r3) + a render mode swap
+#       (scene07 v8_rt->v8_pt). The noise ceiling of **pairs that should show no regression**.
+#   (c) Real regression measurements - scene07 v6->v7 and v7->v8 (the shots the verdicts
+#       actually flagged as occlusion or blackout).
+# Thresholds sit between the ceiling of (b) and the floor of (c).
 # ===========================================================================
 
-# --- [DARK] 절대 암흑 -------------------------------------------------------
-# judge_v7_rt_A §128: mean 26.3 · dark 81.3 % 를 "사실상 판정 불능" 으로 판정.
-# judge_v8_rt §78 : 합격 그리드는 mean 127~185 · dark 1.8~10.4 %.
-# judge_v8_rt §240: mean 49.4 · dark 53.4 % 를 "여전히 씬 최암부" 로 잔여 지적.
+# --- [DARK] absolute blackout ----------------------------------------------
+# judge_v7_rt_A §128: mean 26.3, dark 81.3 % was judged "effectively unjudgeable".
+# judge_v8_rt §78 : passing grids run mean 127-185, dark 1.8-10.4 %.
+# judge_v8_rt §240: mean 49.4, dark 53.4 % was left as a residual "still the darkest part of the scene".
 DARK_MEAN_FAIL = 30.0
 DARK_MEAN_WARN = 55.0
 DARK_PCT_FAIL = 70.0
 DARK_PCT_WARN = 45.0
-DARK_LEVEL = 25          # 암부 정의 — 감독 측광과 동일 (0~255 휘도 < 25)
+DARK_LEVEL = 25          # Dark definition - identical to the supervisor photometry (0-255 luminance < 25)
 
-# --- [BLOWN] 과노출 ---------------------------------------------------------
-# 합격 33씬 최종 라운드 412컷 전수 실측(본 도구): mean p95 = 188, max = 238.3
-# (scene14 h0.3_d10 — 실제로 정보가 죽은 백판 프레임). 255 클리핑은 max 0.35 %
-# 로 사실상 전무하므로 클리핑 임계는 낮게 잡아도 과탐지가 없다.
+# --- [BLOWN] overexposure ---------------------------------------------------
+# Measured over all 412 final-round shots of the 33 passing scenes (this tool): mean p95 = 188, max = 238.3
+# (scene14 h0.3_d10 - a genuinely blown white frame). 255 clipping peaks at 0.35 %,
+# i.e. effectively absent, so a low clipping threshold produces no over-detection.
 BLOWN_MEAN_FAIL = 235.0
 BLOWN_MEAN_WARN = 210.0
 CLIP_PCT_FAIL = 1.0
 CLIP_PCT_WARN = 0.2
-CLIP_LEVEL = 254         # 채널 최대값이 254 이상 = 255 클리핑
+CLIP_LEVEL = 254         # Channel maximum >= 254 counts as 255 clipping
 
-# --- [WHITE] 순백 대면적 (v5.1 §4 "순백(>0.8) 대면적 금지") -----------------
-# 픽셀값 > 0.8 은 **알베도 > 0.8 과 같지 않다**(정오광+ACES 톤매핑에서
-# 알베도 0.5 콘크리트도 쉽게 넘는다). 합격 33씬 중 12씬이 절대치로 걸린다.
-# → 절대치는 참고(WARN)로만 쓰고, **판정은 이전 라운드 대비 증가분**으로 한다.
-WHITE_LEVEL = 204        # = 0.8 × 255, 채널 최소값 기준(= 무채색 순백)
-WHITE_PCT_WARN = 60.0    # 하단 2/3 기준. 33씬 중앙값 0.97 %, p95 88.6 % (이봉분포)
-WHITE_DELTA_FAIL = 25.0  # 증가 pp. 대조군 A/B 최대 증가 +2.4 pp
+# --- [WHITE] large pure-white area (v5.1 §4 "no large pure-white (>0.8) areas") ---
+# A pixel value > 0.8 is **not the same as albedo > 0.8** (under noon sun plus ACES tone
+# mapping even albedo-0.5 concrete passes it easily). 12 of the 33 passing scenes trip the absolute value.
+# -> The absolute value is a reference (WARN) only, and **the verdict comes from the increase over the previous round**.
+WHITE_LEVEL = 204        # = 0.8 x 255, on the channel minimum (= achromatic pure white)
+WHITE_PCT_WARN = 60.0    # Measured over the lower 2/3. Median across 33 scenes 0.97 %, p95 88.6 % (bimodal)
+WHITE_DELTA_FAIL = 25.0  # Increase in pp. Maximum control A/B increase +2.4 pp
 WHITE_DELTA_WARN = 10.0
 
-# --- [OCCL] 카메라 차폐 회귀 ------------------------------------------------
-# newdark = (이전 휘도 >= 60) & (신규 휘도 < 25) 인 픽셀 비율.
-#   대조군 56컷 최대 0.67 % / 소폭 수정 0.26 % / 모드 교체 0.00 %
-#   실회귀     : 8.2 · 14.0 · 14.5 · 17.3 · 23.0 · 26.5 · 39.3 · 47.7 %
+# --- [OCCL] camera occlusion regression -------------------------------------
+# newdark = fraction of pixels with (previous luminance >= 60) & (new luminance < 25).
+#   56 control shots peak at 0.67 % / small fix 0.26 % / mode swap 0.00 %
+#   real regressions: 8.2, 14.0, 14.5, 17.3, 23.0, 26.5, 39.3, 47.7 %
 OCCL_NEWDARK_FAIL = 8.0
 OCCL_NEWDARK_WARN = 2.0
-# 최대 **연결** 신규암부(대면적 판정). 대조군 최대 0.05 %, 실회귀 2.3~41.6 %.
+# Largest **connected** new dark blob (large-area verdict). Control max 0.05 %, real regressions 2.3-41.6 %.
 OCCL_BLOB_FAIL = 5.0
 OCCL_BLOB_WARN = 1.5
-OCCL_BRIGHT_BEFORE = 60  # "원래 밝았다" 의 하한
-NEAR_BAND = 0.60         # 프레임 하단 40 % = 근거리대(카메라를 삼키는 기하가 앉는 곳)
+OCCL_BRIGHT_BEFORE = 60  # Floor for "it used to be bright"
+NEAR_BAND = 0.60         # Lower 40 % of the frame = the near band (where geometry that swallows the camera sits)
 
-# --- [FRAME] 프레임 점유율 급변 --------------------------------------------
-# 전역 톤(밝기·대비·하늘 교체·RT↔PT)을 백분위 매칭으로 제거한 뒤 16×9 블록
-# 평균을 비교한다. 톤 정규화가 없으면 **의도한 룩 변경만으로 전 컷이 경보**가 된다
-# (실측: scene07 v8_rt→v8_pt 는 정규화 전 변화픽셀 55 %, 정규화 후 블록이탈 0 %).
-#   대조군 A/B  : blk_shift 0.0~25.0 % (최대는 scene07 side_slope — 룩 레이어가
-#                 실제로 사면을 바꾼 컷이라 WARN 이 나는 게 맞다)
-#   소폭 수정   : 0.0~4.2 %
-#   모드 교체   : 0.0 %
-#   실회귀      : 36.8 ~ 97.9 %
+# --- [FRAME] abrupt frame occupancy change ---------------------------------
+# Global tone (brightness, contrast, sky swap, RT<->PT) is removed by percentile matching,
+# then 16x9 block means are compared. Without tone normalisation **an intended look change alone alarms every shot**
+# (measured: scene07 v8_rt->v8_pt has 55 % changed pixels before normalisation, 0 % block shift after).
+#   control A/B  : blk_shift 0.0-25.0 % (the maximum is scene07 side_slope - the look layer
+#                 really did change the slope there, so a WARN is correct)
+#   small fix    : 0.0-4.2 %
+#   mode swap    : 0.0 %
+#   real regress.: 36.8 - 97.9 %
 FRAME_SHIFT_FAIL = 40.0
 FRAME_SHIFT_WARN = 20.0
-FRAME_BLOCK_DELTA = 10.0   # 블록 평균이 이만큼(0~255) 어긋나면 "이동한 블록"
-# 최대 블록 편차. 룩레이어 A/B 대조군 최대 32.7 / 실회귀 78.8~207.
-# 배치1 ctx 라운드에서 46~64 대역이 무해하게 나오므로 WARN 을 55 로 둔다
-# (대조군의 1.7배, 실회귀 하한 78.8 아래).
+FRAME_BLOCK_DELTA = 10.0   # A block mean off by this much (0-255) counts as a "shifted block"
+# Maximum block deviation. Look-layer A/B control max 32.7, real regressions 78.8-207.
+# The batch-1 ctx rounds land harmlessly in the 46-64 band, so WARN is set at 55
+# (1.7x the control, below the real-regression floor of 78.8).
 FRAME_MAXBLK_FAIL = 100.0
 FRAME_MAXBLK_WARN = 55.0
 BLOCKS_Y, BLOCKS_X = 9, 16
 
-# --- [PHOTO] 휘도 분포 급변 (절대 mean/dark 의 변화량) ----------------------
-#   대조군 |Δmean| <= 7.0 · Δdark <= +0.0 pp
-#   모드 교체 |Δmean| <= 8.8
-#   실회귀 Δmean -25.0 / Δdark +15.8, +11.8 pp
-# 어두워지는 방향만 FAIL 로 본다(밝아지는 것은 회귀가 아니라 개선 방향이 대부분).
+# --- [PHOTO] abrupt luminance distribution change (change in absolute mean/dark) ---
+#   control |dmean| <= 7.0, ddark <= +0.0 pp
+#   mode swap |dmean| <= 8.8
+#   real regressions dmean -25.0 / ddark +15.8, +11.8 pp
+# Only the darkening direction counts as FAIL (getting brighter is usually an improvement, not a regression).
 PHOTO_DMEAN_FAIL = -45.0
 PHOTO_DMEAN_WARN = -20.0
-PHOTO_DMEAN_UP_WARN = 25.0     # 밝아짐 — 급변이므로 알리되 FAIL 로 올리지 않는다
+PHOTO_DMEAN_UP_WARN = 25.0     # Brightening - abrupt, so it is reported but not escalated to FAIL
 PHOTO_DDARK_FAIL = 25.0
 PHOTO_DDARK_WARN = 12.0
 
 # ===========================================================================
-# --- [GRAZE] grazing 은닉 의심 — 지표 **v2** (2026-07-29 재캘리브레이션) -----
+# --- [GRAZE] suspected grazing concealment - metric **v2** (recalibrated 2026-07-29) ---
 # ===========================================================================
-# 전면 근거: `Docs/reports/graze_recalibration_v1.md`
+# Full basis: `Docs/reports/graze_recalibration_v1.md`
 #
-# ■ v1 이 왜 틀렸나 (기하학적 오류, [기하])
-#   v1 은 "지면대 = 프레임 하단 55 %" 의 **거시 구조 총량**을 쟀다. 그런데
-#   지면점의 상 행은 카메라 기하로 결정된다 —
+# * Why v1 was wrong (a geometric error, [geometry])
+#   v1 measured the **macro-structure total** of "ground band = lower 55 % of the frame". But
+#   the image row of a ground point is fixed by the camera geometry -
 #       row(X) = H/2 · (1 − tan(−atan(h/X) − pitch) / tan(vFOV/2))
-#   h0.3 · pitch −10° · vFOV 36° (1920×1080, hFOV 60°) 를 넣으면
+#   plugging in h0.3, pitch -10 deg, vFOV 36 deg (1920x1080, hFOV 60 deg) gives
 #       X = 1 m → 0.68H · 2 m → 0.46H · 5 m → 0.32H · 10 m → 0.28H · ∞ → 0.23H
-#   즉 **하단 55 %(row ≥ 0.45H)에 들어오는 지면은 X ≲ 2.05 m 뿐**이다.
-#   그런데 프리셋 `preset_h{h}_d{d}` 의 낙차 에지는 정의상 카메라에서
-#   수평거리 **정확히 d** 다(`scene_common.grid_views` + 씬별 기준점 시프트,
-#   예: scene05 "립까지 거리 d 의미가 되게" §build_views). 따라서
-#     · d5 · d10 의 에지는 v1 밴드 **바깥**(0.32H · 0.28H)에 있었고
-#     · v1 이 실제로 잰 것은 **근경 클러터 지대**(X < 2 m)였다.
-#   ground_kit 근경 충전은 바로 그 지대를 채운다 → 구조적 오탐 폭주가 예정.
+#   i.e. **the only ground entering the lower 55 % (row >= 0.45H) is X <~ 2.05 m**.
+#   But by definition the drop edge of the preset `preset_h{h}_d{d}` is at a horizontal
+#   distance of **exactly d** from the camera (`scene_common.grid_views` plus the per-scene
+#   datum shift, e.g. scene05 "so that d means the distance to the lip" §build_views). Hence
+#     - the d5 and d10 edges were **outside** the v1 band (0.32H, 0.28H), and
+#     - what v1 actually measured was the **near clutter zone** (X < 2 m).
+#   ground_kit near-field filling fills exactly that zone -> a structural false-positive flood was guaranteed.
 #
-# ■ 실측 뒷받침
-#   · 오탐: sceneC2 `balust`→`leaf3d`(3D 낙엽 산포 = 근경 충전 그 자체)에서
-#           v1 은 `h0.3_d5` GRAZE **FAIL**(vgrad ×1.46 · erow +0.50). 육안으로
-#           에지 대역은 불변이고 변화는 전량 근경이다.
-#   · 검출력: 낙차 노출을 물리 파라미터(노출 라이저 높이 · 면 대비)로 주입한
-#           844컷 중 v1 검출 **7.2 %**. v2 는 70.5 %(라이저 ≤0.4 m 78.5 %).
-#   · 판정 이력 정합: v6→v7·v7→v8 은 판정문이 "은닉(grazing) 회귀 0"
-#           (`judge_v8_rt.md` §46, `judge_v7_rt_B.md`)으로 확정한 라운드인데
-#           v1 은 92컷 중 FAIL 11 · WARN 7 을 냈다. v2 는 FAIL 1 · WARN 3.
+# * Measured support
+#   - False positive: on sceneC2 `balust`->`leaf3d` (3D leaf scatter = near-field filling itself)
+#           v1 returned a `h0.3_d5` GRAZE **FAIL** (vgrad x1.46, erow +0.50). By eye the
+#           edge band is unchanged and the entire change is in the near field.
+#   - Detection power: of 844 shots with drop exposure injected via physical parameters
+#           (exposed riser height, surface contrast), v1 detected **7.2 %**. v2 detects 70.5 % (78.5 % for risers <=0.4 m).
+#   - Consistency with the verdict history: v6->v7 and v7->v8 are rounds the verdicts fixed as "0 concealment (grazing) regressions"
+#           (`judge_v8_rt.md` §46, `judge_v7_rt_B.md`), yet
+#           v1 returned 11 FAIL and 7 WARN out of 92 shots. v2 returns 1 FAIL and 3 WARN.
 #
-# ■ v2 가 재는 것 — 에지 투영 대역의 **수평 결맞음 변화**
-#   E 대역(에지) = 지면거리 [0.7·d, 2.2·d] 의 투영 행 ± FOV 오차 여유
-#   G 대역(가드) = 라이저 0.5 m 가 드러났을 때 채울 행 (측정 제외)
-#   N 대역(근경) = 그 아래 전부 = 클러터 대조군
-#   신호 = (톤 정규화 후) 세로 단차장의 **열 평균**. 등방 클러터(낙엽·자갈·
-#   소품)는 열 평균에서 상쇄되고, 화면을 가로지르는 선(= 낙차 에지)만 남는다.
-#   판정치 spec = max|Δ|_E − max|Δ|_N  → "변화가 에지 대역에 **국소**한가".
+# * What v2 measures - the **horizontal coherence change** in the edge projection band
+#   E band (edge) = projected rows of ground distance [0.7*d, 2.2*d] +- an FOV error margin
+#   G band (guard) = the rows a 0.5 m exposed riser would fill (excluded from measurement)
+#   N band (near) = everything below = the clutter control
+#   Signal = the **column mean** of the vertical step field (after tone normalisation). Isotropic clutter
+#   (leaves, gravel, props) cancels in the column mean and only lines crossing the screen (= drop edges) survive.
+#   The decision value spec = max|delta|_E - max|delta|_N -> "is the change **local** to the edge band?".
 #
-# ■ v2.1 (2026-07-29) — **2차 판별기 2종 추가**. 대역·신호·임계는 v2 그대로다.
-#   근거: `w2_gate_preflight.md` §3.4 (T3 잔여 WARN 2건 크롭 육안) +
-#         `graze_recalibration_v1.md` §11-2 (방향별 게이트 분리).
-#   T3 가 규명한 것: v2 의 잔여 발화 2건은 **은닉 회귀가 아니라 에지 양쪽 지면의
-#   알베도 교체**였다. `Δcoh` 는 단차장의 **절대 변화량**이라 그 둘을 못 가른다.
-#   부족한 것은 "그 변화가 은닉을 바꿨는가" 를 묻는 2차 판별이고, v2.1 이 그것이다.
+# * v2.1 (2026-07-29) - **two secondary discriminators added**. Bands, signal and thresholds stay as in v2.
+#   Basis: `w2_gate_preflight.md` §3.4 (visual inspection of the 2 residual T3 WARN crops) +
+#         `graze_recalibration_v1.md` §11-2 (separating the gate by direction).
+#   What T3 established: the 2 residual v2 firings were **not concealment regressions but albedo swaps
+#   of the ground on both sides of the edge**. `dcoh` is the **absolute change** of the step field and cannot tell them apart.
+#   What was missing is a secondary test asking "did that change alter the concealment?", and v2.1 is that test.
 #
-#   (a) **에지 존속 게이트** — 낙차행 ±GRAZE_SLACK 에서 **before/after 각각의**
-#       세로 단차 절대값을 같이 재고, **둘 다** GRAZE_STEP_MIN 이상이면 spec 초과라도
-#       정숙(재질 변화)으로 내린다. 진짜 매몰이면 after 단차가 무너지므로(선이 없어짐)
-#       검출력은 유지된다. T3 실측: scene13 115.9→67.8 · scene07 109.6→86.4 (원해상 단일행).
-#   (b) **방향별 분리** — 노출 방향(선이 생김)은 v2 그대로 **변화의 열 일치율**로 게이트하고,
-#       매몰 방향(선이 약해짐)은 **단차비** `step_after / step_before` 로 게이트한다.
-#       물리적으로 매몰 = "있던 선이 사라짐" 이므로 이쪽이 정의에 맞다(§11-2).
-#       사실화 라운드의 알베도 교체는 비 0.5~0.9 대에 몰리고 진짜 매몰은 0 에 가깝다
-#       (T3 실측 0.585 · 0.788). 또 **이전 라운드에 선이 없었으면**(step_before 미달)
-#       매몰이라는 말 자체가 성립하지 않으므로 정숙으로 내린다.
-#   (c) `GRAZE_SLACK` 은 **2 유지**. T3 §3.4-3 의 "2→3" 안은 채택하지 않았다 —
-#       (a) 가 scene07 을 이미 정숙시키므로 슬랙을 건드릴 이유가 없고, 슬랙 변경은
-#       주입시험 전면 재산정을 요구한다(T3 스스로 단 조건).
+#   (a) **Edge persistence gate** - measure the absolute vertical step of **before and after separately**
+#       at the drop row +-GRAZE_SLACK, and if **both** are at least GRAZE_STEP_MIN, demote the firing to
+#       quiet (a material change) even when spec is exceeded. On a real burial the after step collapses (the line vanishes),
+#       so detection power is retained. T3 measurements: scene13 115.9->67.8, scene07 109.6->86.4 (single row at native resolution).
+#   (b) **Direction separation** - the exposure direction (a line appears) is gated as in v2 by the **column agreement of the change**,
+#       while the burial direction (a line weakens) is gated by the **step ratio** `step_after / step_before`.
+#       Physically a burial is "a line that existed disappears", so this matches the definition (§11-2).
+#       Albedo swaps in the realism rounds cluster in the 0.5-0.9 ratio band while a real burial approaches 0
+#       (T3 measurements 0.585, 0.788). Also, **if there was no line in the previous round** (step_before below the floor)
+#       the word burial does not even apply, so it is demoted to quiet.
+#   (c) `GRAZE_SLACK` **stays at 2**. The "2->3" proposal of T3 §3.4-3 was not adopted -
+#       (a) already quiets scene07, so there is no reason to touch the slack, and changing it
+#       would require recomputing the whole injection test (a condition T3 set for itself).
 GRAZE_VER = "v2.1"
-GRAZE_HFOV = 60.0          # [코드] 1920×1080 뷰포트 수평 화각. 근거 다중:
+GRAZE_HFOV = 60.0          # [code] Horizontal field of view of the 1920x1080 viewport. Multiple bases:
 #   `scenes/main/facade_kit.py` §231 "pitch −10° · vFOV 36°"
 #   `scenes/main/scene19_fan_winder.py` `_cam_basis(hfov=60, aspect=16/9)`
-#   `sceneC2/C1` "[카메라 검산] FOV 수평 ±30°/수직 ±18° 가정"
-#   원출처는 `fixlog_W4.md` §155 · `fixlog_W5.md` §66 (v6 렌더 역산).
-#   W5 는 반각 32.6°/19.8° 라는 다른 역산치도 남겼다 → 수직 스케일 오차
-#   최대 11 % → 아래 GRAZE_FOV_TOL 로 흡수한다.
-GRAZE_KN = 0.7             # E 대역 근단 = 0.7·d  (에지보다 앞 30 %)
-GRAZE_KF = 2.2             # E 대역 원단 = 2.2·d  (에지 너머 배경 진입 직전)
-GRAZE_FOV_TOL = 0.13       # 화각 불확실성 여유 (프레임 중심 기준 오프셋의 13 %)
-GRAZE_GUARD_DZ = 0.5       # 가드 대역 = 라이저 0.5 m 노출분. 이만큼은 N 에서 뺀다
-#   (안 빼면 큰 노출이 N 까지 번져 spec 이 스스로 상쇄된다 — 실측:
-#    라이저 0.4 m 검출률 가드 없음 55 % → 가드 0.5 m 로 동일, 0.8 m 는 24 %.
-#    0.8 m 급 노출은 어차피 PHOTO/OCCL 관할이라 가드를 더 키우지 않는다.)
-# 판정 임계 — 대조군 157컷(모드교체·룩A/B·맥락ctx·사실화r2·P4근경) 실측
-#   spec p50 0.0~1.3 · p90 0.2~9.8 · max 24.8.  임계 8/20 에서 대조군 WARN 1.
+#   `sceneC2/C1` "[camera check] FOV assumed horizontal +-30 deg / vertical +-18 deg"
+#   The original source is `fixlog_W4.md` §155 and `fixlog_W5.md` §66 (back-computed from the v6 render).
+#   W5 also left a different back-computation of 32.6 deg / 19.8 deg half-angles -> a vertical scale
+#   error of up to 11 % -> absorbed by GRAZE_FOV_TOL below.
+GRAZE_KN = 0.7             # E band near end = 0.7*d  (30 % in front of the edge)
+GRAZE_KF = 2.2             # E band far end = 2.2*d  (just before the background begins beyond the edge)
+GRAZE_FOV_TOL = 0.13       # Field-of-view uncertainty margin (13 % of the offset from the frame centre)
+GRAZE_GUARD_DZ = 0.5       # Guard band = the exposure of a 0.5 m riser. This much is subtracted from N
+#   (without it a large exposure bleeds into N and spec cancels itself - measured:
+#    detection rate for a 0.4 m riser is 55 % with no guard, the same with a 0.5 m guard, and 24 % with 0.8 m.
+#    Exposures of the 0.8 m class fall under PHOTO/OCCL anyway, so the guard is not enlarged further.)
+# Decision thresholds - measured over 157 control shots (mode swap, look A/B, context ctx, realism r2, P4 near field)
+#   spec p50 0.0-1.3, p90 0.2-9.8, max 24.8.  At thresholds 8/20 the control yields 1 WARN.
 GRAZE_SPEC_WARN = 8.0
 GRAZE_SPEC_FAIL = 20.0
-GRAZE_AGREE_MIN = 0.70     # 변화의 **열 부호 일치율**. 0.5=난수(등방 클러터),
-#   1.0=화면 전폭 선. 실측: 낙엽 산포 0.5~0.6 / 주입 낙차선 0.9~1.0
-GRAZE_BAND_MU_MIN = 35.0   # E 대역 절대 휘도 하한. 이보다 어두우면 판정 유보
-#   (scene06 나선 내부 mean 2.7 · sceneD4 터널 12.9 — 톤 정규화가 잡음을 증폭)
-GRAZE_PHOTO_DMEAN = 20.0   # 프레임 측광이 이만큼 흔들리면 GRAZE 판정 유보
-GRAZE_PHOTO_DDARK = 12.0   #   (= PHOTO WARN 임계. 조명 회귀를 먼저 고칠 것)
-GRAZE_HW = 3               # 단차 정합 필터 반폭(행)
-GRAZE_SMOOTH = 3           # 프로파일 이동평균(행)
-GRAZE_SLACK = 2            # 행 오정합 허용 — 기존 에지가 1~2행 밀린 것은 변화 아님
-GRAZE_EDGE_GUARD = 6       # 프레임 상·하단 절단 구간(필터가 잘리는 곳)
-GRAZE_LONG = 960           # GRAZE 전용 작업 해상도 (d10 대역이 384 에선 13행뿐)
-# --- v2.1 2차 판별 상수 ----------------------------------------------------
-GRAZE_STEP_MIN = 25.0      # [v2.1a] "그 행에 선이 있다" 로 인정하는 세로 단차(계조).
-#   측정 위치는 최대 변화행 ±GRAZE_SLACK, 측정 대상은 **열 평균 단차 프로파일**
-#   (graze_delta 와 같은 평활을 거친 값). 임계 25 는 W2 지시값이며 T3 실측
-#   (before 115.9/109.6 · after 67.8/86.4, 원해상 단일행)의 한참 아래라
-#   "선이 존속한다" 를 넉넉히 인정한다. 진짜 매몰(선 소멸)은 after 가 0 근방이라 무영향.
-GRAZE_BURY_RATIO = 0.50    # [v2.1b] 매몰 방향 발화 상한 = step_after / step_before.
-#   T3 실측 0.585(scene13) · 0.788(scene07) = 알베도 교체 대역. 매몰은 0 근방.
-#   0.5 는 두 군 사이이며 T3 §3.4-2 가 제시한 "0.5~0.9 대 vs 0" 분리선을 따른다.
-# --- v2.1 검출력 보호 가드 2개 (T3 안에는 없던 **추가 조건**) -----------------
-# T3 §3.4-1 은 "진짜 매몰이면 after 단차가 무너지므로 검출력은 유지된다" 고 적었으나
-# 이는 **매몰 방향에 대해서만** 성립하는 논증이고, §6 주입시험(노출 방향)으로는
-# 검증되지 않았다. 실제로 존속 게이트를 무조건 적용하면 주입 검출이
-# **70.4 % → 46.8 %** 로 무너진다 `[실측 — w2_tools_v1.md §4.5]`. 원인은 §6 주입 모형이
-# 낙차행 **아래**를 어둡게 하므로 낙차행 단차가 오히려 **줄고**, 그 모습이 알베도 교체와
-# 구분되지 않기 때문이다. 아래 두 가드가 그 겹침을 걷어낸다(재현: 검출 65.8 % 유지).
-GRAZE_PERSIST_ROWTOL = 4   # 최대 변화행이 낙차행에서 이만큼 이내여야 "그 선의 변화" 다.
-#   T3 2건 실측 3.3 · 3.7 행(960 px 축소본). 이 밖의 변화는 E 대역의 **다른 지물**이므로
-#   존속 게이트를 적용할 근거가 없다(scene17 74.7 · scene18 36.7 · scene19 30.3 → 발화 유지).
-GRAZE_PERSIST_DOM = 3.5    # 존속 선이 변화량을 이만큼 압도해야 "알베도 교체" 로 읽는다.
-#   step_after / dE — T3 실측 3.97(scene13) · 6.41(scene07). 새로 드러난 라이저는
-#   변화량 자체가 선의 대비와 같은 급이라 이 비가 작다.
+GRAZE_AGREE_MIN = 0.70     # **Column sign agreement** of the change. 0.5 = random (isotropic clutter),
+#   1.0 = a line across the full width. Measured: leaf scatter 0.5-0.6 / injected drop line 0.9-1.0
+GRAZE_BAND_MU_MIN = 35.0   # Absolute luminance floor of the E band. Darker than this and the verdict is withheld
+#   (scene06 spiral interior mean 2.7, sceneD4 tunnel 12.9 - tone normalisation amplifies the noise)
+GRAZE_PHOTO_DMEAN = 20.0   # If the frame photometry moves this much, the GRAZE verdict is withheld
+GRAZE_PHOTO_DDARK = 12.0   #   (= the PHOTO WARN threshold. Fix the lighting regression first)
+GRAZE_HW = 3               # Half-width of the step matching filter (rows)
+GRAZE_SMOOTH = 3           # Profile moving average (rows)
+GRAZE_SLACK = 2            # Row misalignment tolerance - an existing edge shifted by 1-2 rows is not a change
+GRAZE_EDGE_GUARD = 6       # Truncated section at the top and bottom of the frame (where the filter is cut off)
+GRAZE_LONG = 960           # GRAZE-only working resolution (at 384 the d10 band is only 13 rows)
+# --- v2.1 secondary discriminator constants --------------------------------
+GRAZE_STEP_MIN = 25.0      # [v2.1a] The vertical step (levels) accepted as "there is a line on that row".
+#   It is measured at the maximum-change row +-GRAZE_SLACK, on the **column-mean step profile**
+#   (smoothed the same way as graze_delta). The threshold of 25 is the W2 directive and sits far below
+#   the T3 measurements (before 115.9/109.6, after 67.8/86.4, single row at native resolution), so
+#   "the line persists" is granted generously. A real burial (line gone) has after near 0 and is unaffected.
+GRAZE_BURY_RATIO = 0.50    # [v2.1b] Upper bound for firing in the burial direction = step_after / step_before.
+#   T3 measurements 0.585 (scene13) and 0.788 (scene07) = the albedo swap band. A burial is near 0.
+#   0.5 lies between the two groups and follows the "0.5-0.9 band vs 0" separation line proposed in T3 §3.4-2.
+# --- Two v2.1 detection-power protection guards (**extra conditions** absent from the T3 proposal) ---
+# T3 §3.4-1 wrote that "on a real burial the after step collapses, so detection power is retained", but
+# that argument holds **only for the burial direction** and was not validated against the §6 injection
+# test (the exposure direction). Applying the persistence gate unconditionally does in fact collapse
+# injection detection from **70.4 % to 46.8 %** `[measured - w2_tools_v1.md §4.5]`. The cause is that the §6
+# injection model darkens the area **below** the drop row, so the step at the drop row actually **shrinks**, and that
+# is indistinguishable from an albedo swap. The two guards below strip that overlap away (reproduced: detection stays at 65.8 %).
+GRAZE_PERSIST_ROWTOL = 4   # The maximum-change row must be within this many rows of the drop row to count as "a change of that line".
+#   The 2 T3 cases measured 3.3 and 3.7 rows (on the 960 px reduction). Anything beyond that is **a different object** in the E band,
+#   so there is no basis for applying the persistence gate (scene17 74.7, scene18 36.7, scene19 30.3 -> firing retained).
+GRAZE_PERSIST_DOM = 3.5    # The persisting line must dominate the change by this much to read as an "albedo swap".
+#   step_after / dE - T3 measurements 3.97 (scene13) and 6.41 (scene07). A newly exposed riser has
+#   a change magnitude of the same order as the line contrast, so this ratio is small.
 
-# --- 이월 결함 판정 ---------------------------------------------------------
-# 절대 결함(DARK/BLOWN)이 이전 라운드에도 있었으면 회귀가 아니다. 이만큼
-# 더 나빠졌을 때만 등급을 유지한다. 값은 대조군 A/B 잡음(|Δmean| <= 7.0,
-# Δdark <= 0.0 pp)의 약 1.5배.
+# --- Carried-over defect handling ------------------------------------------
+# An absolute defect (DARK/BLOWN) that already existed in the previous round is not a regression. The
+# grade is kept only when it got worse by at least this much. The value is about 1.5x the control A/B noise
+# (|dmean| <= 7.0, ddark <= 0.0 pp).
 CARRY_DMEAN = 10.0
 CARRY_DDARK = 10.0
 
-# --- [UNCHANGED] 무변화 감지 -----------------------------------------------
-# PT 표본 노이즈 상한. realism_phase1 §3.2 실측: PT legacy↔fast 의 평균차
-# 0.6~0.7/255. 최대차는 노이즈 한 픽셀로도 튀므로(무변화 컷 실측 max 89 LSB)
-# 최대치가 아니라 **평균차 + 유의차 픽셀 비율**로 본다.
-#   무변화 실측 : 평균차 0.017~0.235 · 4 LSB 초과 0.000~0.012 %
-#   룩레이어 변화: 평균차 15.3      · 4 LSB 초과 55.3 %
-IDENTICAL_MEAN = 0.5     # 평균 절대차 (0~255)
-IDENTICAL_FRAC = 0.1     # 4 LSB 초과 픽셀 비율 (%)
+# --- [UNCHANGED] no-change detection ---------------------------------------
+# Upper bound of PT sample noise. Measured in realism_phase1 §3.2: the mean difference between PT legacy and fast
+# is 0.6-0.7/255. The maximum difference spikes on a single noisy pixel (measured max 89 LSB on an unchanged shot),
+# so the test uses the **mean difference + the fraction of significantly changed pixels**, not the maximum.
+#   unchanged measurements : mean difference 0.017-0.235, above 4 LSB 0.000-0.012 %
+#   look-layer change      : mean difference 15.3     , above 4 LSB 55.3 %
+IDENTICAL_MEAN = 0.5     # Mean absolute difference (0-255)
+IDENTICAL_FRAC = 0.1     # Fraction of pixels above 4 LSB (%)
 
-# --- 처리 해상도 ------------------------------------------------------------
-SMALL_LONG = 384     # 구조 비교용 축소 (BOX = 면적 평균 → 평균값 보존)
-BLOB_LONG = 192      # 연결성분용 (대면적만 보므로 더 성겨도 된다)
+# --- Processing resolutions -------------------------------------------------
+SMALL_LONG = 384     # Reduction for structural comparison (BOX = area mean -> preserves the mean)
+BLOB_LONG = 192      # For connected components (only large areas matter, so it can be coarser)
 
 SEV = {"PASS": 0, "INFO": 1, "WARN": 2, "FAIL": 3}
 SEV_NAME = ["PASS", "INFO", "WARN", "FAIL"]
 
 
 # ===========================================================================
-# [1] 기본 측정
+# [1] Basic measurements
 # ===========================================================================
 def _lum(a):
     return 0.2126 * a[..., 0] + 0.7152 * a[..., 1] + 0.0722 * a[..., 2]
 
 
 def _load(path, graze=False):
-    """전해상도 RGB + 축소본 2종(+GRAZE 전용 1종)을 한 번에 만든다.
+    """Build the full-resolution RGB plus 2 reductions (+1 GRAZE-only reduction) in one pass.
 
-    GRAZE 축소본은 h0.3 컷에서만 만든다 — d10 의 에지 대역은 384 px 축소본에서
-    13행뿐이라 통계가 서지 않는다(960 px 에선 34행).
+    The GRAZE reduction is built for h0.3 shots only - in the 384 px reduction the d10
+    edge band is just 13 rows, too few for statistics (34 rows at 960 px).
     """
     im = Image.open(path).convert("RGB")
     w, h = im.size
@@ -297,7 +303,7 @@ def _load(path, graze=False):
 
 
 def photometry(full):
-    """감독 판정문과 동일 정의의 절대 측광 (전해상도에서)."""
+    """Absolute photometry with the same definitions as the supervisor verdicts (at full resolution)."""
     g = _lum(full)
     h = g.shape[0]
     return dict(
@@ -311,17 +317,18 @@ def photometry(full):
 
 
 def tone_match(src, ref):
-    """src 를 ref 의 휘도 분포에 백분위 매칭 — 전역 톤 변화를 제거한다.
+    """Percentile-match src to the luminance distribution of ref - removes global tone changes.
 
-    이것이 이 도구의 핵심 전제다. 룩 레이어 라운드는 **전 씬의 밝기·채도·
-    하늘이 동시에 바뀐다.** 정규화 없이 픽셀을 비교하면 의도한 변경이
-    전부 경보가 되어 도구가 무용지물이 된다(실측: 정규화 전 변화픽셀 55 % →
-    정규화 후 블록이탈 0 %, scene07 v8_rt→v8_pt).
+    This is the core premise of the tool. A look-layer round **changes brightness,
+    saturation and sky across every scene at once.** Comparing pixels without
+    normalisation turns every intended change into an alarm and makes the tool useless
+    (measured: 55 % changed pixels before normalisation -> 0 % block shift after,
+    scene07 v8_rt->v8_pt).
     """
     qs = np.linspace(0.0, 100.0, 33)
     xs = np.percentile(src, qs)
     ys = np.percentile(ref, qs)
-    xs = np.maximum.accumulate(xs) + np.arange(33) * 1e-6   # 단조 증가 보장
+    xs = np.maximum.accumulate(xs) + np.arange(33) * 1e-6   # Guarantee monotonic increase
     return np.interp(src, xs, ys)
 
 
@@ -333,7 +340,7 @@ def block_means(l):
 
 
 def largest_blob_pct(mask):
-    """4-이웃 최대 연결성분의 화면 비율 (%). 스캔라인 union-find, 순수 파이썬."""
+    """Screen fraction (%) of the largest 4-neighbour connected component. Scanline union-find, pure Python."""
     if not mask.any():
         return 0.0
     H, W = mask.shape
@@ -385,12 +392,13 @@ def largest_blob_pct(mask):
 
 
 # ---------------------------------------------------------------------------
-# GRAZE v2 — 카메라 기하로 낙차 에지 대역을 특정하고 거기만 본다
+# GRAZE v2 - locate the drop edge band from the camera geometry and look only there
 # ---------------------------------------------------------------------------
 def ground_row(X, h, pitch_deg, H, tanv):
-    """지면점(수평거리 X, 눈보다 h 아래)의 상 행. 행은 아래로 증가.
+    """Image row of a ground point (horizontal distance X, h below the eye). Rows increase downwards.
 
-    점의 앙각 = −atan(h/X), 광축 앙각 = pitch → 광축 위 오프셋 a = −atan(h/X) − pitch.
+    Point elevation = -atan(h/X), optical axis elevation = pitch -> offset above the axis
+    a = -atan(h/X) - pitch.
     """
     X = max(float(X), 1e-6)
     a = -math.atan2(h, X) - math.radians(pitch_deg)
@@ -398,15 +406,18 @@ def ground_row(X, h, pitch_deg, H, tanv):
 
 
 def graze_geom(view, eye, tgt):
-    """(지면 위 눈높이 h, 낙차 에지까지 수평거리 d, pitch°, 종류) 또는 None.
+    """(eye height h above the ground, horizontal distance d to the drop edge, pitch in degrees, kind) or None.
 
-    · `preset_h{h}_d{d}` — 이름이 곧 기하다. `grid_views` 규약상 eye 는
-      (−d, gy, h) 이고 낙차 에지는 원점(x=0)이므로 **에지까지 거리 = d**,
-      **지면 위 눈높이 = h**. 씬이 기준점을 옮겨도(scene05 −1.5, scene19 미러)
-      "립까지 거리 d" 의미가 유지되도록 옮긴 것이라 이 해석이 맞다.
-      manifest 의 eye z 는 **월드 절대 z** 라 여기 쓸 수 없다(도크스트링 §is_graze_view).
-    · 그 밖의 `*graz*` 미장센 컷 — 저자 관례상 **tgt 가 위험 기하**다.
-      그래서 지면 = tgt 의 z 평면, 에지 거리 = eye→tgt 수평거리로 푼다.
+    - `preset_h{h}_d{d}` - the name is the geometry. Under the `grid_views` convention the
+      eye is (-d, gy, h) and the drop edge is at the origin (x=0), so **the distance to the
+      edge = d** and **the eye height above the ground = h**. Even when a scene moves its
+      datum (scene05 -1.5, scene19 mirrored) it was moved precisely to keep the meaning
+      "distance to the lip = d", so this reading holds.
+      The eye z in the manifest is a **world absolute z** and cannot be used here
+      (see the §is_graze_view docstring).
+    - Other `*graz*` mise-en-scene shots - by author convention **tgt is the hazard
+      geometry**. So the ground is the z plane of tgt and the edge distance is the
+      eye->tgt horizontal distance.
     """
     m = re.search(r"h([0-9.]+)_d([0-9.]+)", view)
     e = [float(v) for v in eye]
@@ -420,16 +431,16 @@ def graze_geom(view, eye, tgt):
                     kind="preset")
     h = e[2] - t[2]
     if h <= 0.02 or horiz < 0.3:
-        return None                      # 수평·상향 시선 → 지면 대역이 안 잡힌다
+        return None                      # Horizontal or upward line of sight -> no ground band is captured
     return dict(h=h, d=horiz, pitch=pitch, kind="aimed")
 
 
 def graze_bands(g, H, W):
-    """에지(E) · 가드 · 근경(N) 대역의 행 범위."""
+    """Row ranges of the edge (E), guard and near (N) bands."""
     tanv = math.tan(math.radians(GRAZE_HFOV / 2.0)) * H / float(W)
     h, d, p = g["h"], g["d"], g["pitch"]
-    y_hor = ground_row(1e9, h, p, H, tanv)         # 지평선
-    y_haz = ground_row(d, h, p, H, tanv)           # 낙차 에지
+    y_hor = ground_row(1e9, h, p, H, tanv)         # Horizon
+    y_haz = ground_row(d, h, p, H, tanv)           # Drop edge
     y_far = ground_row(d * GRAZE_KF, h, p, H, tanv)
     y_near = ground_row(d * GRAZE_KN, h, p, H, tanv)
     pad = GRAZE_FOV_TOL * max(abs(y_far - H / 2.0), abs(y_near - H / 2.0))
@@ -438,14 +449,14 @@ def graze_bands(g, H, W):
     n_top = min(H - GRAZE_EDGE_GUARD,
                 max(e_bot, ground_row(d, h + GRAZE_GUARD_DZ, p, H, tanv)))
     n_bot = H - GRAZE_EDGE_GUARD
-    if n_bot - n_top < 20:               # 가드가 근경을 다 먹었다(d2 + 깊은 낙차)
+    if n_bot - n_top < 20:               # The guard has eaten the whole near band (d2 + a deep drop)
         n_top = max(min(n_top, H * 0.80), e_bot)
     return dict(e_top=e_top, e_bot=e_bot, n_top=n_top, n_bot=n_bot,
                 y_haz=y_haz, y_hor=y_hor, tanv=tanv)
 
 
 def step_field(l):
-    """화소별 세로 단차 응답 = (아래 GRAZE_HW행 평균) − (위 GRAZE_HW행 평균)."""
+    """Per-pixel vertical step response = (mean of the GRAZE_HW rows below) - (mean of the GRAZE_HW rows above)."""
     H = l.shape[0]
     c = np.cumsum(np.pad(l, ((1, 0), (0, 0))), axis=0)
     i = np.arange(H)
@@ -457,11 +468,13 @@ def step_field(l):
 
 
 def graze_delta(Da, Db):
-    """행별 (|결맞음 변화|, 변화의 열 부호 일치율).
+    """Per-row (|coherence change|, column sign agreement of the change).
 
-    **열 평균이 핵심이다.** 낙엽·자갈·소품 같은 등방 클러터는 열마다 부호가
-    달라 평균에서 상쇄되고, 화면을 가로지르는 선(낙차 에지·단코)만 살아남는다.
-    행 슬랙은 "이미 있던 에지가 1~2행 밀린 것"을 변화로 세지 않기 위한 것이다.
+    **The column mean is the key.** Isotropic clutter such as leaves, gravel and props has
+    a different sign in every column and cancels in the mean, while only lines crossing
+    the screen (drop edges, nosings) survive.
+    The row slack exists so that an edge that already existed but shifted by 1-2 rows is
+    not counted as a change.
     """
     k = np.ones(GRAZE_SMOOTH) / GRAZE_SMOOTH
     best_c = best_a = None
@@ -487,7 +500,7 @@ def _band_peak(mag, agr, top, bot):
 
 
 def graze_v2(la, lbn, view, vw):
-    """la=이전, lbn=톤 정규화된 신규 (GRAZE_LONG 축소본 휘도). 없으면 None."""
+    """la = before, lbn = tone-normalised new (luminance of the GRAZE_LONG reduction). None when absent."""
     if not vw or "eye" not in vw or "tgt" not in vw:
         return None
     g = graze_geom(view, vw["eye"], vw["tgt"])
@@ -503,13 +516,13 @@ def graze_v2(la, lbn, view, vw):
     a, b = int(B["e_top"]), int(B["e_bot"])
     ca = np.convolve(Da.mean(1), np.ones(GRAZE_SMOOTH) / GRAZE_SMOOTH, mode="same")
     cb = np.convolve(Db.mean(1), np.ones(GRAZE_SMOOTH) / GRAZE_SMOOTH, mode="same")
-    # [v2.1] **낙차행 ±슬랙**에서 이전/신규 각각의 세로 단차 절대값과 그 비.
-    # v2 는 `Δcoh`(단차장의 변화량)만 봤기 때문에 "선이 존속하는데 양쪽 알베도가
-    # 바뀐 것"과 "선이 사라진 것"을 구분할 수단이 없었다 — 이 두 값이 그 자리를 메운다.
-    # 측정 위치는 **최대 변화행 rE 가 아니라 낙차행 y_haz** 다(T3 §3.4-1 축자).
-    # rE 로 재면 두꺼운 노출(라이저 0.4~0.8 m)에서 rE 가 밴드 **하단** 에지로 밀려
-    # 낙차행과 무관한 지물의 단차를 읽고, 그 결과 진탐이 조용해진다
-    # (실측: rE 기준이면 주입 검출 66.7 % → 55.9 %).
+    # [v2.1] Absolute vertical step of before and after at the **drop row +- slack**, and their ratio.
+    # v2 looked only at `dcoh` (the change of the step field) and so had no way to separate "the line
+    # persists but the albedo on both sides changed" from "the line is gone" - these two values fill that gap.
+    # The measurement position is **the drop row y_haz, not the maximum-change row rE** (T3 §3.4-1, verbatim).
+    # Measuring at rE would, for a thick exposure (riser 0.4-0.8 m), push rE to the **lower** edge of the band and
+    # read the step of an object unrelated to the drop row, quieting a true positive as a result
+    # (measured: on the rE basis, injection detection falls from 66.7 % to 55.9 %).
     y_h = int(round(min(max(B["y_haz"], B["e_top"]), B["e_bot"])))
     s0 = max(0, y_h - GRAZE_SLACK)
     s1 = min(len(ca), y_h + GRAZE_SLACK + 1)
@@ -529,15 +542,16 @@ def graze_v2(la, lbn, view, vw):
 
 
 # ===========================================================================
-# [2] 뷰 인덱싱 — manifest.json 우선, 없으면 파일명 규약
+# [2] View indexing - manifest.json first, otherwise the filename convention
 # ===========================================================================
 def index_round(d, root):
-    """라운드 폴더 → {view: dict(path, mode, ok)}.
+    """Round folder -> {view: dict(path, mode, ok)}.
 
-    manifest.json 은 `scene_common.capture_pipeline` 이 쓴 구조를 가정한다
-    (views/shots, shots[i] = file·mode·sky·view·ok). file 경로는 저장소
-    루트 기준 상대경로로 기록되므로 root 를 붙여 푼다. manifest 가 없거나
-    깨졌으면 파일명 `{mode}_{sky}_{view}.png` 규약으로 폴백한다.
+    manifest.json is assumed to have the structure written by
+    `scene_common.capture_pipeline` (views/shots, shots[i] = file, mode, sky, view, ok).
+    The file path is recorded relative to the repository root, so root is prefixed to
+    resolve it. If the manifest is missing or corrupt, it falls back to the filename
+    convention `{mode}_{sky}_{view}.png`.
     """
     out = {}
     cams = {}
@@ -545,7 +559,7 @@ def index_round(d, root):
     if os.path.isfile(mf):
         try:
             j = json.load(open(mf))
-            # views[name] = dict(eye, tgt) — GRAZE v2 의 에지 대역 투영에 필수
+            # views[name] = dict(eye, tgt) - required for the GRAZE v2 edge band projection
             cams = {k: v for k, v in (j.get("views") or {}).items()
                     if isinstance(v, dict) and "eye" in v and "tgt" in v}
             for s in j.get("shots", []):
@@ -558,7 +572,7 @@ def index_round(d, root):
                     out[s["view"]] = dict(path=p, mode=s.get("mode", "?"),
                                           ok=bool(s.get("ok", True)),
                                           cam=cams.get(s["view"]))
-        except Exception as e:                       # manifest 파손 → 폴백
+        except Exception as e:                       # Corrupt manifest -> fallback
             print(f"[경고] manifest 판독 실패 {mf}: {e}", file=sys.stderr)
     for p in sorted(glob.glob(os.path.join(d, "*.png"))):
         parts = os.path.basename(p)[:-4].split("_", 2)
@@ -569,25 +583,27 @@ def index_round(d, root):
 
 
 def is_graze_view(view):
-    """grazing 판정 대상 뷰 = h0.3 프리셋(판정 1순위) + grazing 계열 미장센.
+    """Views subject to the grazing check = the h0.3 presets (primary evaluation) plus the
+    grazing mise-en-scene family.
 
-    manifest 의 eye z 는 **월드 절대 z** 라 지면이 하강하는 씬에서는 로봇
-    눈높이의 지표가 되지 못한다(scene07 side_slope 의 eye z 는 −2.67).
-    그래서 grid_views 가 만드는 이름 규약(`preset_h0.3_*`)으로 고른다.
+    The eye z in the manifest is a **world absolute z** and is therefore no indicator of
+    robot eye height in scenes where the ground descends (the eye z of scene07 side_slope
+    is -2.67). So the selection is made by the naming convention that grid_views produces
+    (`preset_h0.3_*`).
     """
     v = view.lower()
     return ("h0.3" in v) or ("graz" in v)
 
 
 # ===========================================================================
-# [3] 컷 1개 판정
+# [3] Verdict for one shot
 # ===========================================================================
 def _add(iss, sev, code, msg):
     iss.append(dict(sev=sev, code=code, msg=msg))
 
 
 def check_view(scene, view, before, after):
-    """(scene, view) 1건 판정. before/after 는 index_round 의 값 dict."""
+    """Verdict for one (scene, view). before/after are the value dicts from index_round."""
     r = dict(scene=scene, view=view, verdict="PASS", issues=[], metrics={})
     iss = r["issues"]
 
@@ -598,9 +614,9 @@ def check_view(scene, view, before, after):
         r["verdict"] = "FAIL"
         return r
     if not after.get("ok", True):
-        # `Docs/reports/realism_baseline.md` §알려진 무해한 현상 — capture_pipeline
-        # 의 파일 크기 안정화 폴링(40회)이 성급히 끝난 것으로, 파일 자체는 정상.
-        # 그래서 INFO 로만 남긴다.
+        # `Docs/reports/realism_baseline.md` §known harmless phenomena - the file-size
+        # stabilisation polling (40 attempts) of capture_pipeline finished prematurely; the file itself is fine.
+        # So it is recorded as INFO only.
         _add(iss, "INFO", "CAPTURE",
              "manifest ok=false — 캡처 폴링 조기 종료(파일은 정상인 경우가 대부분)")
 
@@ -609,7 +625,7 @@ def check_view(scene, view, before, after):
     pb = photometry(fullB)
     r["metrics"].update({("after_" + k): v for k, v in pb.items()})
 
-    # ---- 절대 검사 -------------------------------------------------------
+    # ---- Absolute checks -------------------------------------------------
     pa = None
     if before is not None:
         fullA, smallA, blobA, grazA = _load(before["path"], gz_want)
@@ -621,10 +637,11 @@ def check_view(scene, view, before, after):
                  f"톤 정규화로 흡수하지만 절대 측광 비교는 주의")
 
     def grade(bad, warn, was_bad, worsened):
-        """이 도구는 **회귀** 검사기다. 같은 결함이 이전 라운드에도 있었다면
-        (= 이월) 등급을 낮춘다. 그러지 않으면 원래 어두운 씬(scene06 나선
-        내부·scene13 지하·sceneD4 터널 등 합격 33씬 중 4씬)이 매 라운드
-        같은 경보를 쏟아내 표를 못 읽게 된다. 다만 **더 나빠졌으면** 유지한다."""
+        """This tool is a **regression** checker. If the same defect existed in the
+        previous round (= carried over), the grade is lowered. Otherwise the
+        inherently dark scenes (scene06 spiral interior, scene13 underground,
+        sceneD4 tunnel - 4 of the 33 passing scenes) would pour out the same alarm
+        every round and make the table unreadable. But **if it got worse** the grade is kept."""
         sev = "FAIL" if bad else ("WARN" if warn else None)
         if sev is None or not was_bad:
             return sev, "[신규]"
@@ -658,7 +675,7 @@ def check_view(scene, view, before, after):
             _add(iss, sev, "BLOWN",
                  f"과노출 mean {pb['mean']:.1f} · 255클리핑 {pb['clip']:.2f} %  {tag}")
 
-    # [WHITE] — 절대치는 참고, 증가분이 판정
+    # [WHITE] - the absolute value is a reference, the increase decides
     if pa is not None:
         dw = pb["white"] - pa["white"]
         r["metrics"]["d_white"] = dw
@@ -676,16 +693,16 @@ def check_view(scene, view, before, after):
     elif pb["white"] > WHITE_PCT_WARN:
         _add(iss, "WARN", "WHITE", f"순백 대면적 {pb['white']:.1f} %")
 
-    # ---- 회귀 검사 (before 있을 때만) ------------------------------------
+    # ---- Regression checks (only when before exists) ---------------------
     if before is not None:
         la, lb = _lum(smallA), _lum(smallB)
         if la.shape != lb.shape:
             _add(iss, "WARN", "SIZE",
                  f"해상도 불일치 {pa['w']}×{pa['h']} → {pb['w']}×{pb['h']} — 구조 비교 생략")
         else:
-            # PT 는 표본 노이즈로 ±1~2 LSB 가 항상 흔들린다. 그 이상 아무것도
-            # 안 바뀌었다면 **재렌더·토글이 반영되지 않은 것**이다. 실제로
-            # scene01 은 자체 캡처 블록을 쓰느라 공용 토글이 안 먹는 전례가 있다
+            # PT always wobbles by +-1-2 LSB from sample noise. If nothing beyond that
+            # changed, **the re-render or the toggle did not take effect**. There is a
+            # precedent: scene01 uses its own capture block, so the shared toggle has no effect
             # (`Docs/reports/realism_phase1.md` §3.4).
             if fullA.shape == fullB.shape:
                 d = np.abs(fullA - fullB)
@@ -698,7 +715,7 @@ def check_view(scene, view, before, after):
                          f"4 LSB 초과 픽셀 {dfr:.3f} %) — 재렌더·룩 토글이 "
                          f"이 컷에 반영되지 않았을 가능성")
 
-            # [PHOTO] 휘도 분포 급변
+            # [PHOTO] abrupt luminance distribution change
             dmean = pb["mean"] - pa["mean"]
             ddark = pb["dark"] - pa["dark"]
             r["metrics"].update(d_mean=dmean, d_dark=ddark)
@@ -714,7 +731,7 @@ def check_view(scene, view, before, after):
                      f"휘도 급상승 mean {pa['mean']:.1f}→{pb['mean']:.1f} "
                      f"({dmean:+.1f}) — 밝아지는 방향(대개 개선). 의도 확인")
 
-            # [OCCL] 신규 암부 = 카메라 차폐의 직접 증거
+            # [OCCL] new dark pixels = direct evidence of camera occlusion
             nd = (la >= OCCL_BRIGHT_BEFORE) & (lb < DARK_LEVEL)
             nd_pct = 100.0 * float(nd.mean())
             H = nd.shape[0]
@@ -731,7 +748,7 @@ def check_view(scene, view, before, after):
                      f"신규 암부 {nd_pct:.1f} % (근거리대 {nd_near:.1f} %) · "
                      f"덩어리 {blob:.1f} %")
 
-            # [FRAME] 전역 톤 정규화 후 블록 점유율 이동
+            # [FRAME] block occupancy shift after global tone normalisation
             lbn = tone_match(lb, la)
             bA, bB = block_means(la), block_means(lbn)
             dblk = np.abs(bA - bB)
@@ -747,7 +764,7 @@ def check_view(scene, view, before, after):
                 _add(iss, "WARN", "FRAME",
                      f"프레임 점유율 이동 {shift:.0f} % (최대 편차 {mx:.0f}/255)")
 
-            # [GRAZE v2] 낙차 에지 투영 대역의 수평 결맞음 변화
+            # [GRAZE v2] horizontal coherence change in the drop edge projection band
             if gz_want:
                 gz = None
                 if grazA is not None and grazB is not None \
@@ -787,22 +804,22 @@ def check_view(scene, view, before, after):
                              f"조명 회귀를 먼저 처리하고 재실행할 것. {band}")
                     elif (gz["spec"] > GRAZE_SPEC_WARN
                           and gz["agree"] >= GRAZE_AGREE_MIN):
-                        # --- [v2.1] 2차 판별 ---------------------------------
-                        # 1차(v2)를 통과한 발화에 "그 변화가 은닉을 바꿨는가" 를 묻는다.
-                        # 조건은 T3 §3.4-1(존속) 과 §3.4-2·§11-2(방향별 단차비) 를
-                        # **하나로 합친 형태**다 — T3 스스로 "2번을 이 형태로 구현하면
-                        # 매몰 방향까지 함께 해결된다" 고 적었다.
+                        # --- [v2.1] Secondary discrimination ------------------
+                        # Asks firings that passed the primary (v2) test "did that change alter the concealment?".
+                        # The conditions are T3 §3.4-1 (persistence) and §3.4-2 / §11-2 (direction-wise step ratio)
+                        # **merged into one** - T3 itself wrote that "implementing item 2 in this form
+                        # solves the burial direction at the same time".
                         sev = "FAIL" if gz["spec"] > GRAZE_SPEC_FAIL else "WARN"
                         step = (f"단차 {gz['step_b']:.1f}→{gz['step_a']:.1f}"
                                 f"(비 {gz['ratio']:.2f})"
                                 if math.isfinite(gz["ratio"])
                                 else f"단차 {gz['step_b']:.1f}→{gz['step_a']:.1f}")
                         quiet = None
-                        # 적용 요건 — 전부 만족해야 2차 판별을 시도한다.
-                        #  · WARN 등급만(FAIL 은 절대 강등하지 않는다)
-                        #  · 낙차행에 이전·신규 모두 유의한 선이 있다
-                        #  · 최대 변화행이 그 선 위에 있다(다른 지물의 변화가 아니다)
-                        #  · 존속 선이 변화량을 압도한다(새 라이저가 아니다)
+                        # Applicability conditions - all must hold before secondary discrimination is attempted.
+                        #  - WARN grade only (a FAIL is never demoted)
+                        #  - a significant line exists on the drop row both before and after
+                        #  - the maximum-change row lies on that line (it is not another object changing)
+                        #  - the persisting line dominates the change (it is not a new riser)
                         eligible = (sev == "WARN"
                                     and gz["step_b"] >= GRAZE_STEP_MIN
                                     and gz["step_a"] >= GRAZE_STEP_MIN
@@ -810,7 +827,7 @@ def check_view(scene, view, before, after):
                                     and gz["dom"] >= GRAZE_PERSIST_DOM)
                         if eligible:
                             if gz["ratio"] > 1.0:
-                                # 노출 방향 — 선이 오히려 굵어졌다. v2 그대로 발화시킨다.
+                                # Exposure direction - the line actually got stronger. Fire as in v2.
                                 pass
                             elif gz["ratio"] > GRAZE_BURY_RATIO:
                                 quiet = ("에지 존속 — 낙차행의 선이 이전·신규 양쪽에 "
@@ -822,8 +839,8 @@ def check_view(scene, view, before, after):
                                  f"[{GRAZE_VER}] 정숙(2차 판별) — 국소도 "
                                  f"{gz['spec']:.1f} 은 임계 초과지만 {quiet}. {band}")
                         else:
-                            # 방향 표기는 **낙차행 단차비**로 읽는다(v2 의 `up` 은
-                            # 최대 변화행의 크기 비교라 낙차행과 어긋날 수 있다).
+                            # The direction label is read from the **drop row step ratio** (the `up` of v2
+                            # compares magnitudes at the maximum-change row and can disagree with the drop row).
                             grew = (gz["ratio"] > 1.0 if math.isfinite(gz["ratio"])
                                     else gz["up"])
                             why = ("에지 대역에 화면을 가로지르는 선이 **생겼다/굵어졌다** → "
@@ -846,17 +863,17 @@ def check_view(scene, view, before, after):
 def _job(args):
     try:
         return check_view(*args)
-    except Exception as e:                          # 한 컷 실패로 전체가 죽지 않게
+    except Exception as e:                          # So one failed shot does not kill the whole run
         scene, view = args[0], args[1]
         return dict(scene=scene, view=view, verdict="FAIL", metrics={},
                     issues=[dict(sev="FAIL", code="ERROR", msg=f"검사 예외: {e}")])
 
 
 # ===========================================================================
-# [4] 씬 페어 수집
+# [4] Scene pair collection
 # ===========================================================================
 def resolve_round(scene_dir, spec):
-    """`final_pt_r2,final_pt,ctx2` 처럼 쉼표 폴백을 받아 존재하는 첫 폴더를 준다."""
+    """Accepts a comma fallback such as `final_pt_r2,final_pt,ctx2` and returns the first folder that exists."""
     for name in [s.strip() for s in spec.split(",") if s.strip()]:
         d = name if os.path.isabs(name) else os.path.join(scene_dir, name)
         if os.path.isdir(d) and glob.glob(os.path.join(d, "*.png")):
@@ -865,7 +882,7 @@ def resolve_round(scene_dir, spec):
 
 
 def collect_pairs(args, root):
-    """[(scene명, before_dir, after_dir)] 을 만든다."""
+    """Build [(scene name, before_dir, after_dir)]."""
     pairs = []
     if args.list:
         for ln in open(args.list, encoding="utf-8"):
@@ -886,7 +903,7 @@ def collect_pairs(args, root):
             b = resolve_round(sd, args.before_round or "")
             a = resolve_round(sd, args.after_round or "")
             if a is None:
-                continue                     # 신규 라운드가 아직 없는 씬은 건너뛴다
+                continue                     # Scenes with no new round yet are skipped
             pairs.append((os.path.basename(sd.rstrip("/")), b, a))
     else:
         a = args.after
@@ -897,7 +914,7 @@ def collect_pairs(args, root):
 
 
 # ===========================================================================
-# [5] 출력
+# [5] Output
 # ===========================================================================
 MARK = {"PASS": "  ", "INFO": "· ", "WARN": "! ", "FAIL": "✗ "}
 
@@ -915,8 +932,8 @@ def print_scene(scene, b, a, rows):
         head = (f"{MARK[r['verdict']]}{r['view'][:22]:<22}{r['verdict']:<6}"
                 f"{g('after_mean'):>7}{g('after_dark'):>7}{g('newdark'):>9}"
                 f"{g('newdark_blob'):>8}{g('blk_shift','{:.0f}'):>9}")
-        # FAIL/WARN 사유는 전부 보여 주고, INFO 는 개수만 (경보 피로 방지 —
-        # 전부 나열하면 우선순위를 못 읽는다. 전문은 --json 에 남는다).
+        # All FAIL/WARN reasons are shown, INFO only as a count (alarm fatigue prevention -
+        # listing everything makes priorities unreadable. The full text stays in --json).
         loud = [i for i in r["issues"] if SEV[i["sev"]] >= SEV["WARN"]]
         quiet = [i for i in r["issues"] if SEV[i["sev"]] < SEV["WARN"]]
         if not loud:
@@ -939,7 +956,7 @@ def print_summary(all_rows):
     print(f"\n{'='*100}\n총평 — {n} 컷 중 "
           f"FAIL {cnt['FAIL']} · WARN {cnt['WARN']} · INFO {cnt['INFO']} · "
           f"PASS {cnt['PASS']}\n{'='*100}")
-    # 이월 결함 — 회귀는 아니지만 감독이 알아야 하는 절대 상태
+    # Carried-over defects - not regressions, but absolute states the supervisor should know about
     carry = {}
     for r in all_rows:
         for i in r["issues"]:
@@ -1052,7 +1069,7 @@ def main(argv=None):
                 results=results), f, indent=2, ensure_ascii=False)
         print(f"\n[JSON] {a.json}")
 
-    # 종료코드: FAIL 있으면 1 (배치 스크립트에서 게이트로 쓸 수 있게)
+    # Exit code: 1 when there is a FAIL (so batch scripts can use it as a gate)
     return 1 if any(r["verdict"] == "FAIL" for r in results) else 0
 
 

@@ -1,54 +1,62 @@
 # -*- coding: utf-8 -*-
-"""ground_kit.py — 지면 요소 프로파일 오케스트레이터 (Isaac Sim 4.5 / USD)
+"""ground_kit.py - ground element profile orchestrator (Isaac Sim 4.5 / USD)
 
-작성 2026-07-29 · 대상: NegObs 33씬 (본편 21 + 배치1 12)
-유일 사양: `Docs/briefs/ground_kit_spec_v1.md` **v1.1**
+Written 2026-07-29, target: the 33 NegObs scenes (21 main + 12 batch 1)
+Sole specification: `Docs/briefs/ground_kit_spec_v1.md` **v1.1**
 
-## 이 파일이 무엇인가 (그리고 무엇이 아닌가)
+## What this file is (and is not)
 
-**아니다**: "새 요소 라이브러리". `infra_kit` 의 6빌더(측구·빗물받이·맨홀·램프연석·
-노면표시·옹벽상세)는 이미 구현·검산 완료인데 33씬 중 `sceneN4` 1건만 쓴다
-`[실측 — grep]`. 여기서 **재구현하지 않는다**. `import infra_kit as ik` 로 흡수한다.
+**Not**: "a new element library". The 6 builders of `infra_kit` (gutter, gully,
+manhole, ramp curb, road marking, retaining wall detail) are already implemented and
+checked, yet only 1 of the 33 scenes (`sceneN4`) uses them `[measured - grep]`. They are
+**not reimplemented** here; they are absorbed via `import infra_kit as ik`.
 
-**맞다**: "씬 유형 → 프로파일 → 배치 계획 → USD" 3계층 오케스트레이터 +
-사양 §4.3 이 요구한 **신규 소빌더 15종**(전부 기하).
+**Yes**: a 3-layer "scene type -> profile -> placement plan -> USD" orchestrator plus
+the **15 new small builders** required by spec §4.3 (all geometry).
 
-## 왜 필요한가 (측정된 사실 — 사양 §0)
+## Why it is needed (measured facts - spec §0)
 
-1. 채워야 할 곳은 카메라 앞 **0.56~2.00 m 띠 하나**다 — h0.3 프레임 세로의
-   **53.9 %** `[계산 — 사양 §2.2]`. 요소를 x ≥ 0(위험 기하 주변)에 두면 프레임
-   상위 8 % 에만 걸린다. `sceneN2` 가 요소 9종을 갖고도 σ_LF 1.36 인 기전이다.
-2. `_ground_skin`(룩 레이어)이 flush 지면 요소를 **묻는다**. 스킨 상면
-   **+6.5 ~ +16.5 mm** `[실측 — scene_common.py:820-841]` 아래로 맨홀(proud
-   2.0 mm)·점형블록(4.0 mm)이 통째로 사라진다. → **P-A: 대상 슬래브 스킨 OFF**
-   (`scene_common.skin_exclude` 콜백 주입, 사양 §1.2).
-3. ground_kit 산출물 자신이 2차 스킨을 뒤집어쓰는 사고는 경로 토큰 `"gkit"`
-   (= `GKIT_PATH_TOKEN` 소문자)이 `_SKIN_DENY` 에 들어가 구조적으로 막힌다.
+1. What must be filled is **a single band 0.56-2.00 m in front of the camera** -
+   **53.9 %** of the h0.3 frame height `[computed - spec §2.2]`. Elements placed at
+   x >= 0 (around the hazard geometry) fall in the top 8 % of the frame only. That is
+   the mechanism by which `sceneN2` scored sigma_LF 1.36 despite having 9 element types.
+2. `_ground_skin` (the look layer) **buries** flush ground elements. Manholes
+   (proud 2.0 mm) and dot blocks (4.0 mm) disappear entirely under a skin top of
+   **+6.5 to +16.5 mm** `[measured - scene_common.py:820-841]`. -> **P-A: skin OFF for
+   the target slabs** (inject the `scene_common.skin_exclude` callback, spec §1.2).
+3. The failure mode where ground_kit output takes on a second skin is structurally
+   prevented: the path token `"gkit"` (= `GKIT_PATH_TOKEN` lowercased) is in `_SKIN_DENY`.
 
-## 규약 (`infra_kit` 승계, 예외 없음 — 사양 §3.1)
+## Conventions (inherited from `infra_kit`, no exceptions - spec §3.1)
 
-- **Z-up · m · 진행축 +X**(씬별 진행축은 `axis` 인자로 회전).
-- **`scene_common` 미 import.** 프리미티브는 `Kit` 주입. `import infra_kit` 는
-  허용(역참조 없음). `Kit`·`det_seed`·`det_rng`·`_bay_joints`·
-  `kit_from_scene_common`·`dry_kit` 는 **재수출**(재구현 금지).
-- **RNG 100 % 결정적** — `hash()` 금지, `zlib.crc32 → random.Random` 만.
-- **모든 프림은 `{prefix}` 아래**, `prefix` 는 `{ROOT}/GKit` 고정(§1.2 스킨 방어).
-- 각 빌더 docstring 에 **`GT:` 줄** + 개당/미터당 프림 수.
-- 치수는 **`GROUND_DIMENSIONS` 원장에만**. 원장에 없는 수치를 기본값으로 넣지 않는다.
-- **알베도 하드클램프 ≤ 0.30**(점자블록만 0.55 — 법정 노란색·소면적). 초과는 `ValueError`.
-- **금지 API**: `lid=False` 계열(무개구) · 볼라드 신규 배치 · 사람/차량 오브젝트 ·
-  계절 특정 산포(04·07 갈변낙엽·C1 눈·C2 낙엽만 씬 정체성 예외).
-- **점자블록은 `TACTILE_SITES` 등재 (씬, 지점)에만**. 프로파일 플래그로는 못 켠다.
+- **Z-up, metres, travel axis +X** (per-scene travel axis is rotated via the `axis` arg).
+- **`scene_common` is not imported.** Primitives are injected via `Kit`.
+  `import infra_kit` is allowed (no back-reference). `Kit`, `det_seed`, `det_rng`,
+  `_bay_joints`, `kit_from_scene_common` and `dry_kit` are **re-exported**
+  (reimplementation forbidden).
+- **RNG 100 % deterministic** - `hash()` banned, only `zlib.crc32 -> random.Random`.
+- **Every prim lives under `{prefix}`**, and `prefix` is fixed to `{ROOT}/GKit`
+  (§1.2 skin defence).
+- Every builder docstring carries a **`GT:` line** plus prims per unit / per metre.
+- Dimensions live **only in the `GROUND_DIMENSIONS` ledger**. A number absent from the
+  ledger is never used as a default.
+- **Albedo hard clamp <= 0.30** (tactile paving only 0.55 - statutory yellow, small
+  area). Exceeding it raises `ValueError`.
+- **Forbidden APIs**: the `lid=False` family (uncovered), new bollard placement,
+  person/vehicle objects, season-specific scatter (04/07 browned leaves, C1 snow and
+  C2 leaves are the only scene-identity exceptions).
+- **Tactile paving only at (scene, site) pairs registered in `TACTILE_SITES`.** A
+  profile flag cannot enable it.
 
-## 3계층 공개 API
+## The 3-layer public API
 
-    계층1  GROUND_DIMENSIONS / GROUND_PROFILES / TACTILE_SITES / EXPECTED_FP
-           GROUND_INVARIANTS / GT_DELTA / EDGE_K / GRAZE_ROW_SEP ...
-    계층2  plan_ground(...) -> GroundPlan      (순수 계산, USD 미접촉)
-           frame_budget(plan, ...) -> dict     (렌더 없이 B1~B12 판정)
-    계층3  apply_ground(kit, prefix, plan, mtls, *, skin_exclude=None, scatter=None)
+    layer 1  GROUND_DIMENSIONS / GROUND_PROFILES / TACTILE_SITES / EXPECTED_FP
+             GROUND_INVARIANTS / GT_DELTA / EDGE_K / GRAZE_ROW_SEP ...
+    layer 2  plan_ground(...) -> GroundPlan      (pure computation, no USD contact)
+             frame_budget(plan, ...) -> dict     (B1-B12 decided without rendering)
+    layer 3  apply_ground(kit, prefix, plan, mtls, *, skin_exclude=None, scatter=None)
 
-씬 통합은 2줄이다:
+Scene integration is two lines:
 
     gp = gk.plan_ground("alley_concrete", region=(-12.0, -0.9, 0.0, 0.9), z=0.0,
                         edges=[("stair_top", 0.0)], scene="scene15",
@@ -56,10 +64,11 @@
     gk.apply_ground(gk.kit_from_scene_common(sc, stage), f"{ROOT}/GKit", gp, M,
                     skin_exclude=sc.skin_exclude, scatter=sc.scatter_debris)
 
-**좌표의 진실 원천(§7.4)**: 아래 `SCENE_PLANS` 는 **자기검산 픽스처**이지
-통합 코드의 좌표 원천이 아니다. 통합부는 씬 `PARAMS`/`build_views()` 에서 읽는다.
+**Source of truth for coordinates (§7.4)**: `SCENE_PLANS` below is a **self-check
+fixture**, not the coordinate source for integration code. Integration reads from the
+scene `PARAMS` / `build_views()`.
 
-Isaac 없이 전 33씬 계획 검산: `python3 ground_kit.py`
+Check all 33 scene plans without Isaac: `python3 ground_kit.py`
 """
 
 from __future__ import annotations
@@ -70,7 +79,7 @@ import sys
 
 import infra_kit as ik
 
-# ── infra_kit 재수출 (사양 §3.1 "재구현 금지, 재수출") ─────────────────────
+# -- infra_kit re-export (spec §3.1 "no reimplementation, re-export") ------
 Kit = ik.Kit
 det_seed = ik.det_seed
 det_rng = ik.det_rng
@@ -80,10 +89,10 @@ dry_kit = ik.dry_kit
 TACTILE_YELLOW = ik.TACTILE_YELLOW
 
 __all__ = [
-    # 재수출
+    # Re-export
     "Kit", "kit_from_scene_common", "dry_kit", "det_seed", "det_rng",
     "TACTILE_YELLOW",
-    # 계층 1
+    # Layer 1
     "GROUND_DIMENSIONS", "GROUND_PROFILES", "TACTILE_SITES", "EXPECTED_FP",
     "GROUND_INVARIANTS", "SCENE_PLANS",
     "GROUND_PROUD_MIN", "GROUND_PROUD_FLOOR", "GT_DELTA", "EDGE_STANDOFF",
@@ -92,10 +101,10 @@ __all__ = [
     "ROWS_1080_PER_WORK", "to_work_rows", "to_1080_rows", "graze_row_sep_1080",
     "GKIT_PATH_TOKEN", "ALBEDO_CAP",
     "TACTILE_ALBEDO_CAP", "CAM_F", "CAM_W", "CAM_H",
-    # 계층 2·3
+    # Layers 2 and 3
     "plan_ground", "frame_budget", "apply_ground",
     "region_from_params", "edges_from_params",
-    # 신규 소빌더 15종
+    # The 15 new small builders
     "build_joint_grid", "build_slab_joints", "build_patch_field",
     "build_crack_lines", "build_trench_drain", "build_gutter_U",
     "build_groove_band", "build_membrane", "build_stain_field",
@@ -105,69 +114,69 @@ __all__ = [
 
 
 # ===========================================================================
-# [0] 상수 — 전부 사양 §1.3·§6·§7 에서 온다. 여기 없는 수치를 기본값에 넣지 않는다.
+# [0] Constants - all from spec §1.3/§6/§7. No number absent from here goes into a default.
 # ===========================================================================
-GROUND_PROUD_MIN = 0.0006      # z-fighting 회피 실효 하한 [실측 — N5 줄눈]
-GROUND_PROUD_FLOOR = 0.018     # P-B 폴백 전용(평상시 미사용) [계산 — 16.5+1.5]
-GT_DELTA = 0.020               # 전 요소 |Δz| 상한 [실측 — minor-step 0.10 의 1/5]
-EDGE_STANDOFF = 0.80           # z_e=GT_DELTA 요소의 에지 전방 금지대 [m]
-EDGE_K = 40.0                  # GT-E1′ 필요이격 = EDGE_K·z_e  [계산 — 1.20·10/0.3]
-GKIT_PATH_TOKEN = "GKit"       # 전 프림이 이 경로 아래 (§1.2 스킨 방어)
-ALBEDO_CAP = 0.30              # 규약 하드클램프
-TACTILE_ALBEDO_CAP = 0.55      # 점자블록 예외(법정 노란색·소면적) — §12.5 ④
+GROUND_PROUD_MIN = 0.0006      # Effective lower bound for avoiding z-fighting [measured - N5 joints]
+GROUND_PROUD_FLOOR = 0.018     # P-B fallback only (normally unused) [computed - 16.5+1.5]
+GT_DELTA = 0.020               # Upper bound on |dz| for every element [measured - 1/5 of the 0.10 minor step]
+EDGE_STANDOFF = 0.80           # Forbidden zone in front of an edge for elements with z_e=GT_DELTA [m]
+EDGE_K = 40.0                  # GT-E1' required clearance = EDGE_K * z_e  [computed - 1.20*10/0.3]
+GKIT_PATH_TOKEN = "GKit"       # Every prim lives under this path (§1.2 skin defence)
+ALBEDO_CAP = 0.30              # Convention hard clamp
+TACTILE_ALBEDO_CAP = 0.55      # Tactile paving exception (statutory yellow, small area) - §12.5 (4)
 
-# ── [W2-C · C2] 진단 스위치 — `NEGOBS_GKIT=0` 이면 요소를 **한 개도** 만들지 않는다.
-#    용도: 같은 세션·같은 HEAD 에서 지면키트 ON/OFF A/B 를 찍어 OCCL(카메라 매몰)을
-#    **귀속 가능한** 지표로 만드는 것. 파일럿 라운드의 FRAME/PHOTO/OCCL 판정이
-#    보류된 이유가 정확히 이 귀속 불가였다 [w2_pilot_ground_v1.md §5].
-#    P-A(`skin_exclude`)는 **양 팔에서 동일하게** 실행한다 — 변위 스킨(±6.5~16.5 mm)
-#    까지 팔 간에 달라지면 A/B 가 "키트 프림의 효과"를 재지 못한다.
-#    기본 ON. 프로덕션 렌더·자기검산은 이 스위치를 건드리지 않는다.
+# -- [W2-C, C2] Diagnostic switch - with `NEGOBS_GKIT=0`, **not a single** element is built.
+#    Purpose: shoot ground-kit ON/OFF A/B in the same session at the same HEAD, turning
+#    OCCL (camera burial) into an **attributable** metric. The FRAME/PHOTO/OCCL verdicts
+#    of the pilot round were held back for exactly this lack of attribution [w2_pilot_ground_v1.md §5].
+#    P-A (`skin_exclude`) runs **identically in both arms** - if the displacement skin
+#    (+-6.5 to 16.5 mm) also differed between arms, the A/B would not measure the effect
+#    of the kit prims. ON by default. Production renders and self-checks leave it alone.
 GKIT_ON = os.environ.get("NEGOBS_GKIT", "1") != "0"
 
-# 카메라 상수 (하드코드 — 사양 §2.1. 검증 3건: N5 줄눈 −6 px · N1 그림자 4/10 px
-#              · scene18 지평선 행비)
+# Camera constants (hard-coded - spec §2.1. Three validations: N5 joints -6 px, N1 shadow
+#              4/10 px, scene18 horizon row ratio)
 CAM_W, CAM_H = 1920, 1080
 CAM_HFOV_DEG = 60.0
 CAM_F = (CAM_W / 2.0) / math.tan(math.radians(CAM_HFOV_DEG / 2.0))   # 1662.769
 CAM_PITCH_DEG = -10.0
 CAM_VFOV_DEG = 2.0 * math.degrees(math.atan((CAM_H / 2.0) / CAM_F))  # 35.98
-NEAR_W1 = (0.564, 2.00)        # 근경 창 W1 — 프레임 세로 53.9 %
-NEAR_W2 = (2.00, 3.00)         # 2순위 창 (+7.6 %p)
-GRAZE_E_BAND = (0.7, 2.2)      # GRAZE v2 E 대역 = 지면거리 [0.7d, 2.2d]
+NEAR_W1 = (0.564, 2.00)        # Near window W1 - 53.9 % of the frame height
+NEAR_W2 = (2.00, 3.00)         # Secondary window (+7.6 %p)
+GRAZE_E_BAND = (0.7, 2.2)      # GRAZE v2 E band = ground distance [0.7d, 2.2d]
 
-# ═══ 행 단위 규약 (v1.2 — 540 vs 1080 혼용 해소, 레드팀 G-1) ═══════════════
-#  **모든 행 수치는 접미사로 축을 명시한다. 접미사 없는 행 상수를 새로 만들지 말 것.**
+# === Row unit convention (v1.2 - resolves the 540 vs 1080 mix, red team G-1) ========
+#  **Every row figure states its axis in a suffix. Do not create a new row constant without one.**
 #
-#  · `_WORK`  = GRAZE 검사기 작업본 행 (`regression_check.GRAZE_LONG = 960`
-#               → 1920×1080 이 960×540 으로 축소된다). GRAZE 상수
-#               `GRAZE_HW 3 · GRAZE_SMOOTH 3 · GRAZE_SLACK 2` 는 **전부 이 축**이고,
-#               GRAZE JSON 의 `gz_row`·대역 표기도 이 축이다.
-#  · `_1080`  = `cam_row()` 가 돌려주는 원본 프레임 행. 사양 §2.1 Appendix B
-#               (`row(2.0)=497.35`) 와 워크드 예제 C-1′ 도 이 축이다.
+#  - `_WORK`  = the GRAZE checker working-copy rows (`regression_check.GRAZE_LONG = 960`
+#               shrinks 1920x1080 to 960x540). The GRAZE constants
+#               `GRAZE_HW 3, GRAZE_SMOOTH 3, GRAZE_SLACK 2` are **all on this axis**, as are
+#               the `gz_row` and band figures in the GRAZE JSON.
+#  - `_1080`  = the original frame rows returned by `cam_row()`. Spec §2.1 Appendix B
+#               (`row(2.0)=497.35`) and the worked example C-1' are on this axis too.
 #
-#  v1.1 의 결함: `GRAZE_ROW_SEP = 16` 은 **_WORK 축에서 유도**됐는데
-#  (`(HW+SMOOTH+SLACK)×2 = 16`) `cam_row`(_1080) 결과와 직접 비교됐다
-#  → 실제 집행 강도가 유도값의 **절반**(8 _WORK 행 = footprint 반경)이었다.
+#  The defect in v1.1: `GRAZE_ROW_SEP = 16` was **derived on the _WORK axis**
+#  (`(HW+SMOOTH+SLACK)*2 = 16`) yet compared directly against `cam_row` (_1080) results
+#  -> the enforced strength was in fact **half** the derived value (8 _WORK rows = the footprint radius).
 GRAZE_WORK_LONG = 960                                  # = regression_check.GRAZE_LONG
 GRAZE_WORK_H = CAM_H * GRAZE_WORK_LONG // CAM_W        # 540
 ROWS_1080_PER_WORK = CAM_H / float(GRAZE_WORK_H)       # 2.0
-GRAZE_FOOTPRINT_WORK = 8       # 단차응답 반경 = HW 3 + SMOOTH 3 + SLACK 2  [@540]
-GRAZE_ROW_SEP_WORK = 2 * GRAZE_FOOTPRINT_WORK          # 16 — 두 응답 완전분리 [@540]
+GRAZE_FOOTPRINT_WORK = 8       # Step response radius = HW 3 + SMOOTH 3 + SLACK 2  [@540]
+GRAZE_ROW_SEP_WORK = 2 * GRAZE_FOOTPRINT_WORK          # 16 - full separation of two responses [@540]
 GRAZE_FOOTPRINT_1080 = GRAZE_FOOTPRINT_WORK * ROWS_1080_PER_WORK   # 16.0
 GRAZE_ROW_SEP_1080 = GRAZE_ROW_SEP_WORK * ROWS_1080_PER_WORK       # 32.0
-# 하위호환 별칭 — 의미는 위 이름이 정본이다.
+# Backward-compatible aliases - the names above are canonical.
 GRAZE_ROW_SEP = GRAZE_ROW_SEP_1080      # [@1080]
-GRAZE_FOOTPRINT = GRAZE_FOOTPRINT_WORK  # [@540] (EXPECTED_FP 확장폭)
+GRAZE_FOOTPRINT = GRAZE_FOOTPRINT_WORK  # [@540] (EXPECTED_FP widening)
 
 
 # ===========================================================================
-# [1] 치수 원장 — `infra_kit.INFRA_DIMENSIONS` 와 동일 3튜플 형식
-#     (값, "확인|추정", 출처). 값을 바꾸려면 **먼저 출처를 갱신**하라.
-#     + (v1.1) "unit_cell" — T1 MDL 유닛 지터의 주기·원점 역방향 계약(§4.5)
+# [1] Dimension ledger - same 3-tuple format as `infra_kit.INFRA_DIMENSIONS`
+#     (value, "verified|estimate", source). To change a value, **update the source first**.
+#     + (v1.1) "unit_cell" - the reverse contract for T1 MDL unit jitter period/origin (§4.5)
 # ===========================================================================
 GROUND_DIMENSIONS = {
-    # ── 포장 모듈 ────────────────────────────────────────────────────────
+    # -- Paving module ---------------------------------------------------
     "module_granite_slab":  (0.600, "확인", "KCS 34 6-5-1 / scene14 실측 600"),
     "module_sidewalk_block": (0.300, "확인", "보도블록 300 그리드 [ZZ_synthesis §9.3]"),
     "module_interlock_l":   (0.200, "확인", "인터로킹 200×100 [규격]"),
@@ -175,7 +184,7 @@ GROUND_DIMENSIONS = {
     "module_deck_plank":    (0.145, "확인", "KCS 34 5-2-1 2.3.1 — 데크 판재 폭"),
     "deck_plank_gap":       (0.005, "추정", "업계 4~5 mm 이격 [추정]"),
     "deck_butt_len":        (1.25, "추정", "마구리 엇갈림 1.2~1.3 m 의 중앙 [추정]"),
-    # ── 줄눈 (전부 음각. 값은 사양 §1.3 proud/recess 원장) ────────────────
+    # -- Joints (all recessed. Values from the spec §1.3 proud/recess ledger) --
     "joint_slab_w":         (0.007, "시방", "KCS 34 6-5-1 3.1.11 — 판석 줄눈 5~9 mm 중앙"),
     "joint_slab_recess":    (-0.0015, "시방", "동 3.1.14 — 음각 1~2 mm"),
     "joint_contraction_w":  (0.003, "시방", "KCS 34 6-3 3.3.3⑸ — 수축줄눈 폭 3 mm"),
@@ -187,24 +196,24 @@ GROUND_DIMENSIONS = {
     "step_contraction_conc": (3.00, "시방", "콘크리트 포장 시공줄눈 3 m [통계 B 92 %]"),
     "step_contraction_plaza": (1.80, "계산", "판석 셀 0.600 의 3배 — §4.5 U2"),
     "step_expansion_plaza": (6.00, "시방", "광장 신축줄눈 6 m (셀 0.600 의 10배)"),
-    # ★ U2 정합 정정: 시방 원문은 "20 m" 지만 판석 셀 0.600 의 정수배가 아니다
-    #    (33.33배) → 이중 격자. 33배 = 19.80 m 로 내린다(규정은 "이하"이므로 만족).
+    # * U2 consistency fix: the specification text says "20 m", which is not an integer
+    #    multiple of the 0.600 slab cell (33.33x) -> a double grid. Lowered to 33x = 19.80 m
     "step_expansion_ghat":  (19.80, "계산", "KCS 34 6-3 3.3.3⑻ 20 m 이하 "
                                             "+ 판석 셀 0.600 의 33배 (§4.5 U2)"),
-    # ── 보수 패치·균열 ───────────────────────────────────────────────────
+    # -- Repair patches and cracks ---------------------------------------
     "patch_area_mean":      (0.63, "통계", "건당 0.61~0.69 ㎡ 표본 중앙"),
     "patch_proud":          (0.002, "실측", "sceneN2 PARAMS 계승"),
     "patch_cutline_proud":  (0.0012, "실측", "동"),
     "crack_w":              (0.012, "통계", "사진표본 3~15 mm 중앙"),
     "crack_recess":         (-0.006, "통계", "동 음각 3~10 mm 중앙"),
     "crack_seg":            (0.60, "추정", "폴리라인 세그 길이 [추정]"),
-    # ── 트렌치·측구 ──────────────────────────────────────────────────────
+    # -- Trenches and gutters --------------------------------------------
     "trench_w":             (0.30, "통계-산업", "진입부 우수차단 트렌치 표준 300"),
     "trench_frame_w":       (0.040, "추정", "틀 립 폭 [추정] — 측구 줄눈 8 mm 준용 아님"),
     "trench_seat":          (0.002, "실측", "infra_kit.build_gully(seat=0.002) 계승"),
     "gutter_U_w":           (0.25, "추정", "골목 덮개식 U형 측구 표본 관측 [추정]"),
     "gutter_U_cover_len":   (2.00, "추정", "덮개 1매 길이 [추정]"),
-    # ── 오염·마모 ────────────────────────────────────────────────────────
+    # -- Soiling and wear ------------------------------------------------
     "stain_proud":          (0.0006, "추정", "z-fighting 회피 최소값 = GROUND_PROUD_MIN"),
     "stain_area_mean":      (0.35, "추정", "데칼 1매 평균 면적 [추정]"),
     "wear_lane_w":          (0.90, "통계", "등산로 답압 마모 띠 6/6 표본"),
@@ -212,26 +221,26 @@ GROUND_DIMENSIONS = {
     "edge_litter_w":        (0.25, "통계", "가장자리 유기물 띠 폭"),
     "edge_break_w":         (0.20, "실측", "재질 경계 전이대 0.15~0.25 중앙 (scene04·10)"),
     "silt_band_w":          (0.60, "추정", "침수 실트·물때 띠 [추정]"),
-    # ── 도막 방수 (P6) ───────────────────────────────────────────────────
+    # -- Membrane waterproofing (P6) -------------------------------------
     "membrane_seam_pitch":  (1.00, "시방", "우레탄 도막 롤 이음 0.9~1.1 m 중앙"),
     "membrane_albedo":      (0.19, "결재", "감독 M2 — 0.16~0.22 승인, 중앙값"),
     "membrane_proud":       (0.0006, "추정", "도막 두께(시각) [추정]"),
-    # ── 논슬립 홈파기 (T1 1순위, ground_kit 폴백) ────────────────────────
+    # -- Anti-slip grooving (T1 first choice, ground_kit fallback) --------
     "groove_pitch":         (0.12, "법령", "주차장법 시행규칙 §6①5마 — 미끄럼방지 홈"),
     "groove_shade":         (0.72, "추정", "명도 ×0.72 [추정]"),
-    # ── 잡초 (식생 — GT-E5 램프 대상) ────────────────────────────────────
+    # -- Weeds (vegetation - subject to the GT-E5 ramp) ------------------
     "weed_h_max":           (0.12, "추정", "밟히면 눕는 종. 상한 [추정]"),
-    # ── 산포 노출 (GT-E5 램프 대상) ──────────────────────────────────────
+    # -- Scatter exposure (subject to the GT-E5 ramp) --------------------
     "scatter_expose_max":   (0.06, "통계", "등산로 6/6 — φ≤0.12 반매몰 노출 ≤0.06"),
-    # ── 점자블록 (법정) ──────────────────────────────────────────────────
+    # -- Tactile paving (statutory) --------------------------------------
     "tactile_tile":         (0.300, "법령", "교통약자법 시행규칙 별표1 2호 차목"),
     "tactile_band_depth":   (0.600, "시방", "국도 실무요령 7.5 — 점형 60 cm 표준(2줄)"),
     "tactile_setback":      (0.300, "법령", "계단 첫 단 0.3 m 전 / 볼라드 전면 0.3 m"),
     "tactile_dot_h":        (0.006, "법령", "점형 돌기 6±1 mm"),
     "tactile_bar_h":        (0.005, "법령", "선형 돌기 5±1 mm"),
 
-    # ── (v1.1) 역방향 계약 — T1 MDL 유닛 지터 원장 (§4.5) ────────────────
-    #    profile -> (cell_m, (ox, oy), 출처). cell_m=None 이면 무모듈(지터 금지 — U4)
+    # -- (v1.1) Reverse contract - T1 MDL unit jitter ledger (§4.5) ------
+    #    profile -> (cell_m, (ox, oy), source). cell_m=None means no module (jitter banned - U4)
     "unit_cell": {
         "plaza_granite":      (0.600, (0.0, 0.0), "판석 모듈 600 [규격]"),
         "plaza_water":        (0.600, (0.0, 0.0), "판석 모듈 600 [규격] — 09 동일"),
@@ -257,7 +266,7 @@ GROUND_DIMENSIONS = {
 
 
 def _dim(key):
-    """원장에서 값만 꺼낸다. 없는 키는 즉시 예외 — 지어낸 수치 유입 차단."""
+    """Fetch only the value from the ledger. A missing key raises immediately - this blocks invented numbers."""
     if key not in GROUND_DIMENSIONS:
         raise KeyError(f"ground_kit: GROUND_DIMENSIONS 에 '{key}' 가 없다. "
                        "원장에 근거와 함께 먼저 등재하라.")
@@ -265,13 +274,13 @@ def _dim(key):
 
 
 # ===========================================================================
-# [2] 카메라·프레임 기하 — 사양 §2.1 / 부록 B 와 1:1
+# [2] Camera and frame geometry - 1:1 with spec §2.1 / appendix B
 # ===========================================================================
 def cam_row(X, h=0.3):
-    """지면거리 X [m] 에 있는 지면점의 화상 행 **[@1080]**.
+    """Image row of a ground point at ground distance X [m] **[@1080]**.
 
-    row(2.0)=497.35 · row(10)=297.98. GRAZE JSON 과 비교하려면 반드시
-    `to_work_rows()` 로 축을 옮길 것 — 두 축은 정확히 2배 차이다.
+    row(2.0)=497.35, row(10)=297.98. To compare against the GRAZE JSON you must move
+    axes with `to_work_rows()` - the two axes differ by exactly a factor of 2.
     """
     X = max(float(X), 1e-6)
     return CAM_H / 2.0 + CAM_F * math.tan(math.atan(float(h) / X)
@@ -279,81 +288,88 @@ def cam_row(X, h=0.3):
 
 
 def cam_row_z(X, z, h=0.3):
-    """지면보다 z 만큼 높은(낮은) 점의 행. 램프처럼 지면이 꺼지는 경우에 쓴다."""
+    """Row of a point z above (below) the ground. Used where the ground drops away, e.g. a ramp."""
     X = max(float(X), 1e-6)
     return CAM_H / 2.0 + CAM_F * math.tan(math.atan((float(h) - float(z)) / X)
                                           - math.radians(-CAM_PITCH_DEG))
 
 
 def surface_top_z(z):
-    """음각(recess) 요소의 **실제 렌더 상면 z**.
+    """**Actual rendered top z** of a recessed element.
 
-    ★ 파일럿 1회차 실측으로 드러난 구조적 결함의 수정 지점이다.
+    This is where a structural defect revealed by the first pilot round is fixed.
 
-    v1.1 의 음각 구현은 "상면을 `z + recess`(음수)에 둔 얇은 판" 이었다. 그
-    전제는 *포장이 얇은 표면* 이라는 것인데, 실제 씬의 포장은 **솔리드 박스**
-    다(scene15 UpperAlley = z −6.0…0.0, N5 Pave = 두께 60 mm). 상면이 슬래브
-    상면보다 낮은 판은 **슬래브 내부에 완전히 갇혀 화소를 0 개 낸다**
-    `[실측 — scene15 w2_pilot 1회차: 줄눈 x=−9 (지면거리 1.00 m, d10)
-     |Δ|max 9.5 = 무변화 · 맨홀 예측 사각형 안 |Δ| 0 · d5 σ_LF 0.76→0.80]`.
-    스킨(P-A)과 무관한 별개 원인이다 — 스킨을 꺼도 슬래브는 그대로 솔리드다.
+    The v1.1 recess implementation was "a thin plate whose top sits at `z + recess`
+    (negative)". That assumed *paving is a thin surface*, whereas real scene paving is a
+    **solid box** (scene15 UpperAlley = z -6.0...0.0, N5 Pave = 60 mm thick). A plate
+    whose top is below the slab top is **completely trapped inside the slab and produces
+    zero pixels**
+    `[measured - scene15 w2_pilot round 1: joint at x=-9 (ground distance 1.00 m, d10)
+     |delta|max 9.5 = no change; |delta| 0 inside the predicted manhole rectangle;
+     d5 sigma_LF 0.76 -> 0.80]`.
+    This is a separate cause from the skin (P-A) - turning the skin off leaves the slab
+    just as solid.
 
-    감산(CSG)이 없는 이 파이프라인에서 음각을 **깊이**로 낼 방법은 슬래브를
-    홈 둘레로 분할해 짓는 것뿐이고, 그건 §6.3 GT-V 4박스 분할급 작업이다.
-    W2 는 사양 §4.4("면적·위치는 기하, **색차는 재질**")를 따라 음각을
-    **톤으로** 낸다 — 상면을 z-fighting 하한(`GROUND_PROUD_MIN` 0.6 mm)만큼
-    올리고 어두운 재질을 쓴다. 씬들이 자기 줄눈을 이미 그렇게 짓고 있고
-    (`sceneN5 PARAMS.joints.proud = +0.0006`) 그 줄눈은 렌더에 **보인다**.
+    In this pipeline, with no subtraction (CSG), the only way to express a recess as
+    **depth** is to build the slab split around the groove, and that is work on the scale
+    of the §6.3 GT-V 4-box split. W2 follows spec §4.4 ("area and position are geometry,
+    **colour difference is material**") and expresses the recess **as tone**: the top is
+    raised by the z-fighting lower bound (`GROUND_PROUD_MIN`, 0.6 mm) and a dark material
+    is used. The scenes already build their own joints that way
+    (`sceneN5 PARAMS.joints.proud = +0.0006`) and those joints **are visible** in renders.
 
-    명목 음각값은 요소 원장의 `recess_nominal` 에 남는다 — GT·시방 근거를
-    잃지 않기 위해서다.
+    The nominal recess value stays in the element ledger as `recess_nominal`, so the GT
+    and specification basis is not lost.
     """
     return float(z) + GROUND_PROUD_MIN
 
 
 def cam_halfwidth(X):
-    """지면거리 X 에서 프레임에 드는 횡방향 반폭 [m]. 0.5774·X."""
+    """Half-width [m] entering the frame laterally at ground distance X. 0.5774*X."""
     return float(X) * math.tan(math.radians(CAM_HFOV_DEG / 2.0))
 
 
 def cam_wpx(w, X):
-    """가로폭 w [m] 의 화면 폭 [px]."""
+    """Screen width [px] of a horizontal width w [m]."""
     return CAM_F * float(w) / max(float(X), 1e-6)
 
 
 def cam_lpx(L, X, h=0.3):
-    """진행축 길이 L [m] 의 세로 투영 [px]."""
+    """Vertical projection [px] of a length L [m] along the travel axis."""
     return CAM_F * float(L) * float(h) / max(float(X), 1e-6) ** 2
 
 
 def drow(x_e, d, h=0.3):
-    """에지(지면거리 d)와 그 전방 x_e [m, 음수] 요소의 행 이격 **[@1080]**."""
+    """Row separation **[@1080]** between an edge (ground distance d) and an element x_e [m, negative] in front of it."""
     return cam_row(d + float(x_e), h) - cam_row(d, h)
 
 
 def to_work_rows(rows_1080):
-    """`cam_row` 축(@1080) → GRAZE 검사기 작업본 축(@540). 나눗셈 2.0."""
+    """`cam_row` axis (@1080) -> GRAZE checker working-copy axis (@540). Division by 2.0."""
     return float(rows_1080) / ROWS_1080_PER_WORK
 
 
 def to_1080_rows(rows_work):
-    """GRAZE 작업본 축(@540) → `cam_row` 축(@1080)."""
+    """GRAZE working-copy axis (@540) -> `cam_row` axis (@1080)."""
     return float(rows_work) * ROWS_1080_PER_WORK
 
 
 def graze_row_sep_1080(d, h=0.3, band=None):
-    """이 컷에서 **집행 가능한 최강** GT-E2 행 이격 하한 [@1080].
+    """The **strongest enforceable** GT-E2 row separation lower bound for this shot [@1080].
 
-    유도 강도는 `GRAZE_ROW_SEP_WORK = 16` (@540 = 32 @1080, "두 단차응답 완전분리").
-    그러나 E 대역 자체가 그보다 얕으면 **대역 안 어떤 위치로도 달성 불가**다
-    `[계산]` — d10 의 E 대역은 지면거리 7~22 m = **24.80 행 @540** 뿐이고
-    에지행(297.97 @1080)에서 대역 양끝까지가 각각 10.87 / 13.92 행 @540 이라
-    16 행을 넘을 방법이 없다. 그런 컷에서 16 을 강제하면 "E 대역 안 횡단선 0본"
-    이 되어 §5.1 P1 의 주기 줄눈 처방과 GT-E2 자신의 "≤ 1본" 문언이 동시에 죽는다.
+    The derived strength is `GRAZE_ROW_SEP_WORK = 16` (@540 = 32 @1080, "full separation
+    of two step responses"). But if the E band itself is shallower than that, it is
+    **unachievable at any position within the band** `[computed]` - the d10 E band is
+    ground distance 7-22 m = only **24.80 rows @540**, and from the edge row (297.97
+    @1080) to each end of the band is 10.87 / 13.92 rows @540, so 16 rows cannot be
+    reached. Forcing 16 on such a shot yields "zero transverse lines inside the E band",
+    killing both the periodic-joint prescription of §5.1 P1 and GT-E2's own "<= 1 line"
+    wording at once.
 
-    → **달성 가능하면 완전분리(16 @540), 불가능하면 footprint(8 @540)** 를 건다.
-      footprint 미만은 두 응답이 실제로 융합해 에지를 감추므로 어느 컷에서도
-      하드 실패로 남는다. 판정 강도는 v1.1(항상 8 @540) 보다 **엄격해지기만 한다**.
+    -> **Enforce full separation (16 @540) where achievable, otherwise the footprint
+      (8 @540).** Below the footprint the two responses genuinely merge and hide the
+      edge, so that remains a hard failure on any shot. The verdict strength only
+      **becomes stricter** than v1.1 (which always used 8 @540).
     """
     lo, hi = band or GRAZE_E_BAND
     r_e = cam_row(d, h)
@@ -362,7 +378,7 @@ def graze_row_sep_1080(d, h=0.3, band=None):
         else GRAZE_FOOTPRINT_1080
 
 
-# 진행축 → (전방 단위벡터, 좌법선 단위벡터)
+# Travel axis -> (forward unit vector, left normal unit vector)
 _AXIS_FRAME = {
     "+x": ((1.0, 0.0), (0.0, 1.0)),
     "-x": ((-1.0, 0.0), (0.0, -1.0)),
@@ -372,7 +388,7 @@ _AXIS_FRAME = {
 
 
 class _View:
-    """씬 좌표 ↔ (전방 s, 횡 t) 변환. 그리드 원점이 다른 씬(§2.3) 대응."""
+    """Scene coordinates <-> (forward s, lateral t). Handles scenes whose grid origin differs (§2.3)."""
 
     def __init__(self, origin=(0.0, 0.0, 0.0), gy=0.0, axis="+x"):
         if axis not in _AXIS_FRAME:
@@ -392,7 +408,7 @@ class _View:
         return dx * self.lat[0] + dy * self.lat[1]
 
     def s_span(self, aabb):
-        """AABB 의 전방 s 구간 (진행축이 ±x/±y 축평행이므로 4모서리 중 2개면 충분)."""
+        """Forward s interval of an AABB (the travel axis is +-x/+-y parallel, so 2 of the 4 corners suffice)."""
         xs = (aabb[0], aabb[3])
         ys = (aabb[1], aabb[4])
         vals = [self.s_of(x, y) for x in xs for y in ys]
@@ -406,21 +422,21 @@ class _View:
 
 
 # ===========================================================================
-# [3] Elem — 계획의 원자. plan_ground 만으로 프림·GT·프레임 예산이 판정된다.
+# [3] Elem - the atom of a plan. plan_ground alone decides prims, GT and frame budget.
 # ===========================================================================
 def _elem(kind, path, aabb, proud=0.0, mtl_key=None, **meta):
-    """`dict(kind, path, aabb, proud, mtl_key, meta)` — 사양 §3.3.
+    """`dict(kind, path, aabb, proud, mtl_key, meta)` - spec §3.3.
 
-    meta 규약:
-      line     : None | "cross"(전폭 횡단 단선) | "cross_periodic"(주기 격자)
-                 | "long"(종단선)
-      area     : True 면 면 요소(B1·B2 대상)
-      decal    : True 면 오염 데칼(B5 대상)
-      exc      : GT 예외 등록 종류 — None | "tactile" | "scatter" | "weed"
-                 | "plank_gap"
-      albedo   : 알베도(B9). None 이면 미신고 = 검사 제외
-      surface_z: 요소가 얹히는 면의 z(램프처럼 지면이 꺼지는 경우)
-      beyond   : True 면 에지 너머(램프 노면 등) — 가시 컷이 제한된다
+    meta convention:
+      line     : None | "cross" (single full-width transverse line)
+                 | "cross_periodic" (periodic grid) | "long" (longitudinal line)
+      area     : True for an area element (subject to B1/B2)
+      decal    : True for a soiling decal (subject to B5)
+      exc      : kind of GT exception registration - None | "tactile" | "scatter"
+                 | "weed" | "plank_gap"
+      albedo   : albedo (B9). None means undeclared = excluded from the check
+      surface_z: z of the surface the element rests on (where the ground drops, e.g. a ramp)
+      beyond   : True for beyond-the-edge elements (ramp surface etc.) - visible shots are limited
     """
     return dict(kind=kind, path=path,
                 aabb=tuple(float(v) for v in aabb),
@@ -428,11 +444,12 @@ def _elem(kind, path, aabb, proud=0.0, mtl_key=None, **meta):
 
 
 def _seed_key(path):
-    """`{ROOT}/GKit/` 이후 부분만 시드 키로 쓴다.
+    """Use only the part after `{ROOT}/GKit/` as the seed key.
 
-    `plan_ground` 는 prefix 를 모르고(`"Crack"`), `apply_ground` 는 전체 경로
-    (`"/World/Scene15/GKit/Crack"`)를 넘긴다. 경로를 그대로 시드에 넣으면 두
-    단계가 **다른 난수열**을 뽑아 프림 수가 어긋난다(실제로 2 프림 어긋났다).
+    `plan_ground` does not know the prefix (`"Crack"`) while `apply_ground` passes the
+    full path (`"/World/Scene15/GKit/Crack"`). Seeding on the raw path makes the two
+    stages draw **different random sequences** and the prim counts diverge (they actually
+    diverged by 2 prims).
     """
     p = str(path)
     tok = "/" + GKIT_PATH_TOKEN + "/"
@@ -446,11 +463,11 @@ def _box_aabb(cx, cy, cz, sx, sy, sz):
 
 
 def _obb_aabb(cx, cy, cz, L, w, t, yaw_deg):
-    """yaw 회전한 박스의 **정확한** 축정렬 AABB.
+    """The **exact** axis-aligned AABB of a yaw-rotated box.
 
-    정사각 근사(`max(L,w)`)를 쓰면 전방 s 구간이 부풀어 GT-E2 판정과 가시 컷
-    판정이 통째로 틀어진다 — scene13 진입 트렌치가 d10 에서 "보인다"고 오판한
-    실제 버그가 여기서 나왔다.
+    A square approximation (`max(L,w)`) inflates the forward s interval and throws off
+    both the GT-E2 verdict and the visible-shot verdict - a real bug where the scene13
+    entry trench was wrongly judged "visible" at d10 came from exactly this.
     """
     c = abs(math.cos(math.radians(yaw_deg)))
     sn = abs(math.sin(math.radians(yaw_deg)))
@@ -465,32 +482,34 @@ def _norm_region(region):
 
 
 # ===========================================================================
-# [4] 신규 소빌더 15종 — 전부 **기하**. 재질은 T1 소관(사양 §4.4).
+# [4] The 15 new small builders - all **geometry**. Materials belong to T1 (spec §4.4).
 #
-#     공통 규약: `(kit, path, ...)` 첫 두 인자 고정. 반환은
-#     `dict(prim_count=int, elems=[Elem, ...])`. `kit` 에 `dry_kit()` 를 주면
-#     USD 접촉 없이 같은 계산을 한다 — plan_ground 가 이 성질을 쓴다.
+#     Shared convention: the first two arguments are fixed as `(kit, path, ...)`. The return
+#     is `dict(prim_count=int, elems=[Elem, ...])`. Passing `dry_kit()` as `kit` performs the
+#     same computation without touching USD - plan_ground relies on this property.
 # ===========================================================================
 def build_joint_grid(kit, path, region, z, mtl, step_x=3.0, step_y=None,
                      width=None, recess=None, jitter=0.0, seed=0,
                      origin_xy=(0.0, 0.0), skip_x=(), skip_y=(),
                      kind="contraction"):
-    """**포장 분할·수축·신축 줄눈 격자** (음각 홈).
+    """**Paving division / contraction / expansion joint grid** (recessed grooves).
 
-    `step_y=None` → 횡방향(진행축 직교) 줄눈만. 텍스처 줄눈은 음영이 없어
-    h0.3 스침각에서 죽는다 `[실측 — 09·18 sd 13~14]` → 기하로 낸다.
+    `step_y=None` -> transverse joints only (perpendicular to the travel axis). Texture
+    joints have no shading and die at the h0.3 grazing angle `[measured - 09/18 sd 13-14]`
+    -> they are made as geometry.
 
-    음각 구현 **(v1.2 정정)**: 상면은 `surface_top_z(z)` = 슬래브 상면 +0.6 mm
-    이고, 음각은 **어두운 재질(톤)** 로 읽힌다. v1.1 은 상면을 `z + recess`
-    (음수)에 뒀는데 포장 슬래브가 솔리드 박스라 판이 통째로 슬래브 안에 갇혀
-    **렌더 화소 0** 이었다 — 근거·실측은 `surface_top_z` docstring 참조.
-    명목 음각값은 `recess_nominal` 로 원장에 남는다.
-    **P-A(스킨 OFF)는 여전히 선행 조건이다**(스킨은 +6.5~16.5 mm).
+    Recess implementation **(v1.2 correction)**: the top is `surface_top_z(z)` = slab top
+    +0.6 mm, and the recess reads as a **dark material (tone)**. v1.1 put the top at
+    `z + recess` (negative), but because the paving slab is a solid box the plate was
+    trapped entirely inside it and produced **zero rendered pixels** - see the
+    `surface_top_z` docstring for the basis and measurements.
+    The nominal recess value stays in the ledger as `recess_nominal`.
+    **P-A (skin OFF) is still a precondition** (the skin is +6.5 to 16.5 mm).
 
-    `origin_xy` 는 격자 원점 — **T1 MDL `unit_cell_origin` 과 같은 값이어야
-    한다**(§4.5 U3). `skip_x/skip_y` 는 에지 금지대·개구로 드롭된 좌표.
+    `origin_xy` is the grid origin - **it must equal the T1 MDL `unit_cell_origin`**
+    (§4.5 U3). `skip_x/skip_y` are coordinates dropped by edge forbidden zones or openings.
 
-    프림: 1/줄눈.  GT: 음각 ≤3 mm — **낙차 아님**.
+    Prims: 1 per joint.  GT: recess <= 3 mm - **not a drop**.
     """
     x0, y0, x1, y1 = _norm_region(region)
     width = _dim("joint_%s_w" % kind) if width is None else float(width)
@@ -499,8 +518,8 @@ def build_joint_grid(kit, path, region, z, mtl, step_x=3.0, step_y=None,
     if recess > 0:
         raise ValueError("ground_kit: 줄눈은 음각이다(recess ≤ 0). "
                          f"받은 값 {recess}")
-    thick = 0.030                      # 판 두께(상면만 보인다)
-    cz = surface_top_z(z) - thick / 2.0        # (v1.2) 솔리드 슬래브 매몰 방지
+    thick = 0.030                      # Plate thickness (only the top is visible)
+    cz = surface_top_z(z) - thick / 2.0        # (v1.2) Prevents burial in the solid slab
     ox, oy = float(origin_xy[0]), float(origin_xy[1])
     rng = det_rng("gkit.joint", _seed_key(path), seed)
     n0 = kit.mark()
@@ -544,9 +563,9 @@ def build_joint_grid(kit, path, region, z, mtl, step_x=3.0, step_y=None,
 
 def build_slab_joints(kit, path, region, z, mtl, step_x=None, step_y=None,
                       seed=0, origin_xy=(0.0, 0.0), skip_x=(), skip_y=()):
-    """**판석 줄눈** — `build_joint_grid` 의 얇은 프리셋(폭 5~9 mm·음각 1~2 mm).
+    """**Flagstone joints** - the thin preset of `build_joint_grid` (5-9 mm wide, 1-2 mm recess).
 
-    프림: 1/줄눈.  GT: 음각 2 mm — 낙차 아님.
+    Prims: 1 per joint.  GT: recess 2 mm - not a drop.
     """
     step_x = _dim("module_granite_slab") * 3 if step_x is None else step_x
     return build_joint_grid(kit, path, region, z, mtl,
@@ -560,15 +579,17 @@ def build_slab_joints(kit, path, region, z, mtl, step_x=None, step_y=None,
 def build_patch_field(kit, path, region, z, mtls, n=2, area_mean=None,
                       ar=(0.7, 1.6), cutline=True, seed=0, sites=None,
                       cutline_n=1):
-    """**보수 패치 + 컷라인.** 기본 0.7×0.9 m (건당 0.61~0.69 ㎡ `[통계]`).
+    """**Repair patch + cut line.** Default 0.7x0.9 m (0.61-0.69 m2 per patch `[statistic]`).
 
-    면적·위치는 기하(여기), 색차는 재질(T1) — 사양 §4.4.
-    `sites` 를 주면 그 좌표에, 없으면 region 안 결정적 난수 배치.
+    Area and position are geometry (here), colour difference is material (T1) - spec §4.4.
+    With `sites` the patches go at those coordinates; otherwise they are placed by
+    deterministic random draw inside the region.
 
-    프림: 1/매 + 4/컷라인 매. `cutline_n` 매(기본 1 — **근경 1매만**)에만
-    컷라인을 붙인다 — §8.2 프로파일 견적이 1 프림/매를 전제하기 때문이다.
+    Prims: 1 per patch + 4 per patch with a cut line. Only `cutline_n` patches
+    (default 1 - **the near one only**) get a cut line, because the §8.2 profile estimate
+    assumes 1 prim per patch.
 
-    GT: +2 mm — 낙차 아님.
+    GT: +2 mm - not a drop.
     """
     x0, y0, x1, y1 = _norm_region(region)
     area_mean = _dim("patch_area_mean") if area_mean is None else float(area_mean)
@@ -611,12 +632,13 @@ def build_patch_field(kit, path, region, z, mtls, n=2, area_mean=None,
 
 def build_crack_lines(kit, path, region, z, mtl, n=4, seg=None, branch_p=0.25,
                       width=None, seed=0):
-    """**균열 폴리라인** (음각). 텍스처 균열은 반복 패턴이 근경에서 보인다
-    `[실측 — N4]` → 개별 기하로 낸다.
+    """**Crack polyline** (recessed). Texture cracks show their repeating pattern up close
+    `[measured - N4]` -> they are made as individual geometry.
 
-    프림: **3~5/본**(분기 시 5). §4.3 표기는 "4~6/본" 이지만 §8.2 프로파일
-    견적(P1 "2+12" = 균열 4본에 12 프림)은 3/본을 전제한다 — 예산표 쪽을 채택했다.
-    GT: 음각 ≤10 mm — 낙차 아님.
+    Prims: **3-5 per crack** (5 when branching). §4.3 states "4-6 per crack" but the §8.2
+    profile estimate (P1 "2+12" = 12 prims for 4 cracks) assumes 3 per crack - the budget
+    table was adopted.
+    GT: recess <= 10 mm - not a drop.
     """
     x0, y0, x1, y1 = _norm_region(region)
     seg = _dim("crack_seg") if seg is None else float(seg)
@@ -625,7 +647,7 @@ def build_crack_lines(kit, path, region, z, mtl, n=4, seg=None, branch_p=0.25,
     rng = det_rng("gkit.crack", _seed_key(path), seed)
     n0 = kit.mark()
     elems = []
-    span = seg * 3.0                      # 폴리라인이 영역을 벗어나지 않게 여유
+    span = seg * 3.0                      # Margin so the polyline does not leave the region
     for i in range(int(n)):
         cx = x0 + span + rng.random() * max(1e-6, (x1 - x0) - 2 * span)
         cy = y0 + span + rng.random() * max(1e-6, (y1 - y0) - 2 * span)
@@ -636,7 +658,7 @@ def build_crack_lines(kit, path, region, z, mtl, n=4, seg=None, branch_p=0.25,
             sx = cx + math.cos(ang) * seg / 2.0
             sy = cy + math.sin(ang) * seg / 2.0
             p = f"{path}/Crack_{i}_{k}"
-            czc = surface_top_z(z) - 0.010      # (v1.2) 솔리드 슬래브 매몰 방지
+            czc = surface_top_z(z) - 0.010      # (v1.2) Prevents burial in the solid slab
             kit.B(p, (sx, sy, czc), (seg, width, 0.020), mtl,
                   rotz=math.degrees(ang))
             elems.append(_elem("crack", p,
@@ -652,13 +674,13 @@ def build_crack_lines(kit, path, region, z, mtl, n=4, seg=None, branch_p=0.25,
 
 def build_trench_drain(kit, path, x0, y0, x1, y1, z, mtl, mtl_frame=None,
                        width=None, slats=0, flush=True):
-    """**선형 트렌치 그레이팅.** `sceneN5` 슬랫 로직의 일반화.
+    """**Linear trench grating.** A generalisation of the `sceneN5` slat logic.
 
-    구성: 틀(프레임) 1 + 커버 1 (+ 슬랫 n). 커버 상면은 틀 상면보다
-    `seat=2 mm` 낮다 — 동일평면 z-fighting 회피이자 물리적으로도 맞다
-    `[실측 — infra_kit.build_gully(seat=0.002)]`.
+    Composition: 1 frame + 1 cover (+ n slats). The cover top sits `seat=2 mm` below the
+    frame top - avoiding coplanar z-fighting, and physically correct too
+    `[measured - infra_kit.build_gully(seat=0.002)]`.
 
-    프림: 2 (슬랫 모드 2+n).  GT: flush — **낙차 아님**(무개구 금지).
+    Prims: 2 (2+n in slat mode).  GT: flush - **not a drop** (uncovered mode banned).
     """
     width = _dim("trench_w") if width is None else float(width)
     seat = _dim("trench_seat")
@@ -700,12 +722,13 @@ def build_trench_drain(kit, path, x0, y0, x1, y1, z, mtl, mtl_frame=None,
 
 def build_gutter_U(kit, path, x0, y0, x1, y1, z, mtl, mtl_cover=None,
                    width=None, cover=True, cover_len=None):
-    """**덮개식 U형 측구** (골목·터널). 벽측을 따라 종주한다.
+    """**Covered U-type gutter** (alleys, tunnels). Runs longitudinally along the wall side.
 
-    L형 측구(`infra_kit.build_gutter_L`)는 차도 가장자리용이고, 골목·지하보도는
-    **덮개식 U형**이 표본 관행이다 `[추정 — 표본 관측]`.
+    The L-type gutter (`infra_kit.build_gutter_L`) is for carriageway edges; in alleys and
+    underpasses the **covered U type** is the observed practice `[estimate - sample
+    observation]`.
 
-    프림: 1 + ceil(L/cover_len).  GT: flush — 낙차 아님.
+    Prims: 1 + ceil(L/cover_len).  GT: flush - not a drop.
     """
     width = _dim("gutter_U_w") if width is None else float(width)
     cover_len = (_dim("gutter_U_cover_len") if cover_len is None
@@ -741,13 +764,14 @@ def build_gutter_U(kit, path, x0, y0, x1, y1, z, mtl, mtl_cover=None,
 
 def build_groove_band(kit, path, region, z, mtl=None, pitch=None, width=0.006,
                       shade=None, geom_fallback=False):
-    """**논슬립 홈파기 명암 밴드** — 사양 §4.4 는 **T1(MDL 스트라이프) 1순위**.
+    """**Anti-slip grooving light/dark bands** - spec §4.4 makes **T1 (MDL stripes) the
+    first choice**.
 
-    기하로 만들면 17 m 램프에 140 프림이다 `[계산]`. 기본은 **프림 0** —
-    `materials_needed` 로 T1 에 스트라이프 요청만 남긴다.
-    `geom_fallback=True` 는 T1 미배선 시 폴백(프림 폭증 주의).
+    Built as geometry, a 17 m ramp costs 140 prims `[computed]`. The default is
+    **0 prims** - only a stripe request is left for T1 via `materials_needed`.
+    `geom_fallback=True` is the fallback when T1 is not wired (beware the prim explosion).
 
-    프림: **0**(재질 위임) / 폴백 시 1/홈.  GT: 무변.
+    Prims: **0** (delegated to material) / 1 per groove in fallback.  GT: unchanged.
     """
     x0, y0, x1, y1 = _norm_region(region)
     pitch = _dim("groove_pitch") if pitch is None else float(pitch)
@@ -775,12 +799,14 @@ def build_groove_band(kit, path, region, z, mtl=None, pitch=None, width=0.006,
 
 def build_membrane(kit, path, region, z, mtl, seam_pitch=None, wear_n=4,
                    seed=0, albedo=None):
-    """**도막 방수 / 논슬립 도막 + 마모 박리.** scene19(옥상)·scene06(육교).
+    """**Membrane waterproofing / anti-slip coating + wear peeling.** scene19 (rooftop),
+    scene06 (footbridge).
 
-    알베도는 감독 결재 M2 로 **0.16~0.22** 확정 — 순백 위반 1위 씬의 처방이다.
-    도막 마감에 **신축줄눈 격자는 금지**(실물에 없는 조합, §5.6).
+    The albedo was fixed at **0.16-0.22** by supervisor approval M2 - the prescription for
+    the worst pure-white offender. **An expansion joint grid is forbidden** on a coated
+    finish (a combination that does not exist in reality, §5.6).
 
-    프림: 1(도막면) + 이음 + 박리.  GT: +0.6 mm — 낙차 아님.
+    Prims: 1 (coated surface) + joints + peeling.  GT: +0.6 mm - not a drop.
     """
     x0, y0, x1, y1 = _norm_region(region)
     seam_pitch = (_dim("membrane_seam_pitch") if seam_pitch is None
@@ -831,13 +857,16 @@ _STAIN_KINDS = ("tire", "oil", "water", "efflorescence", "gum", "dirt",
 
 def build_stain_field(kit, path, region, z, mtl, kind="dirt", n=6, seed=0,
                       band_axis="long", albedo=None):
-    """**오염 데칼** — 타이어·유류·물때·백화·껌·흙·기단 밴드·낙수.
+    """**Soiling decals** - tyre, oil, water stain, efflorescence, gum, soil, plinth band,
+    dripping.
 
-    위치가 씬 논리에 종속(드레인 주변·통행선·기단)이라 MDL 절차 마스크로는
-    제어 불가 → **얇은 판 프림**으로 낸다(사양 §4.4).
-    `grime_band` 는 벽–바닥 접합 밴드로 **바닥면만** 담당한다(벽면은 T1 대기).
+    Their positions depend on scene logic (around drains, along traffic lines, at the
+    plinth) and cannot be controlled by an MDL procedural mask -> they are made as
+    **thin plate prims** (spec §4.4).
+    `grime_band` is the wall-to-floor junction band and covers **the floor side only**
+    (the wall side waits for T1).
 
-    프림: 1/개.  GT: +0.6 mm — 낙차 아님.
+    Prims: 1 each.  GT: +0.6 mm - not a drop.
     """
     if kind not in _STAIN_KINDS:
         raise ValueError(f"ground_kit: stain kind 는 {_STAIN_KINDS} 중 하나.")
@@ -877,10 +906,10 @@ def build_stain_field(kit, path, region, z, mtl, kind="dirt", n=6, seed=0,
 
 
 def build_footprints(kit, path, path_pts, z, mtl, n=10, seed=0, stride=0.62):
-    """**발자국·1륜차 자국** (D2 타설 슬래브). 흔적이지 객체가 아니다 —
-    "사람·차량 배치 금지" 규약과 무관 `[사양 §11]`.
+    """**Footprints and single-wheel tracks** (D2 poured slab). These are traces, not
+    objects - unrelated to the "no person/vehicle placement" convention `[spec §11]`.
 
-    프림: 1/개.  GT: +0.6 mm — 낙차 아님.
+    Prims: 1 each.  GT: +0.6 mm - not a drop.
     """
     pr = _dim("stain_proud")
     rng = det_rng("gkit.foot", _seed_key(path), seed)
@@ -920,9 +949,10 @@ def build_footprints(kit, path, path_pts, z, mtl, n=10, seed=0, stride=0.62):
 
 def build_wear_lane(kit, path, centerline, z, mtl, width=None,
                     albedo_gain=None, split=1):
-    """**답압 마모 띠** — 통행 동선의 알베도 저하대. `[통계]` 등산로 6/6.
+    """**Trampling wear band** - a lowered-albedo strip along the walking line.
+    `[statistic]` 6/6 on hiking trails.
 
-    프림: 1~3.  GT: 무변(면 위 데칼).
+    Prims: 1-3.  GT: unchanged (a decal on the surface).
     """
     width = _dim("wear_lane_w") if width is None else float(width)
     gain = _dim("wear_albedo_gain") if albedo_gain is None else float(albedo_gain)
@@ -948,9 +978,10 @@ def build_wear_lane(kit, path, centerline, z, mtl, width=None,
 
 
 def build_edge_litter(kit, path, centerline, z, mtl, width=None):
-    """**가장자리 유기물 띠** — 길 양연에 쓸려 쌓인 유기물(계절 중립).
+    """**Edge organic-matter band** - organic matter swept up along both edges of a path
+    (season neutral).
 
-    프림: 2.  GT: 무변.
+    Prims: 2.  GT: unchanged.
     """
     width = _dim("edge_litter_w") if width is None else float(width)
     pr = _dim("stain_proud")
@@ -976,16 +1007,20 @@ def build_edge_litter(kit, path, centerline, z, mtl, width=None):
 
 def build_edge_break(kit, path, line, z, mtl, width=None, density=12.0,
                      seed=0, scatter_only=False):
-    """**재질 경계 파쇄** — 직선 경계에 전이대를 얹어 "칼로 자른 경계"를 없앤다.
+    """**Material boundary break-up** - a transition band over a straight boundary removes
+    the "cut with a knife" look.
 
-    scene04 "잔디 사각 이음매"의 진범은 타일링이 아니라 **3.0×6.0 m dirt 박스와
-    grass 슬래브의 전이대 0 px 재질 경계**(ΔE76 18.9)다 `[실측 — B조 §3]`.
-    scene10 은 흙길↔잔디 ΔE76 15.2 · 낙엽 데칼 윤곽 27.3 `[실측 — 사양 §13.3]`.
+    The real culprit behind the "square grass seam" in scene04 was not tiling but the
+    **0 px transition between the 3.0x6.0 m dirt box and the grass slab** (deltaE76 18.9)
+    `[measured - team B §3]`.
+    scene10 has dirt path <-> grass deltaE76 15.2 and a leaf decal outline of 27.3
+    `[measured - spec §13.3]`.
 
-    구성: 전이대 띠 1 프림 + (산포는 `scatter_debris` 콜백에 위임 — `edge_bias`
-    인자가 이미 있어 직결된다 `[실측 — scene_common.py:1805]`).
+    Composition: 1 prim for the transition band + (scatter is delegated to the
+    `scatter_debris` callback - the `edge_bias` argument already exists and connects
+    directly `[measured - scene_common.py:1805]`).
 
-    프림: 1 + 산포(위임).  GT: 무변.
+    Prims: 1 + scatter (delegated).  GT: unchanged.
     """
     width = _dim("edge_break_w") if width is None else float(width)
     pr = _dim("stain_proud")
@@ -1004,8 +1039,8 @@ def build_edge_break(kit, path, line, z, mtl, width=None, density=12.0,
                                      L, width, 0.008, yaw),
                            proud=pr, mtl_key="edge_break", line="long",
                            albedo=0.17))
-    # 전이대 산포는 **프레임 유효 구간**만 의미가 있다 — 근경 창 밖으로 무한히
-    # 늘리면 예산만 먹는다. 라인당 상한 35(= 사양 §8.2 P18 산포 250 배분).
+    # Transition-band scatter only means anything **inside the effective frame** - extending it
+    # infinitely beyond the near window just eats budget. Cap of 35 per line (= the spec §8.2 P18 scatter allocation of 250).
     n_scat = min(35, int(round(L * float(density))))
     return dict(prim_count=kit.count_since(n0), elems=elems,
                 scatter_req=[dict(line=line, width=width * 2.0,
@@ -1014,12 +1049,13 @@ def build_edge_break(kit, path, line, z, mtl, width=None, density=12.0,
 
 def build_deck_planks(kit, path, x0, y0, x1, y1, z, mtl, plank_w=None,
                       gap=None, butt=None, seed=0, max_gaps=None):
-    """**데크 판재 분할** — 슬래브는 씬이 이미 갖고 있으므로 **틈 스트립만** 낸다.
+    """**Deck plank division** - the scene already owns the slab, so **only the gap strips**
+    are built.
 
-    판재 폭 0.145 · 틈 0.005 `[시방 KCS 34 5-2-1 2.3.1]`. 틈은 음각 20 mm
-    (판재 두께 내부 — **상면 z 불변**이라 GT 낙차가 아니다).
+    Plank width 0.145, gap 0.005 `[specification KCS 34 5-2-1 2.3.1]`. The gap is a 20 mm
+    recess (inside the plank thickness - **the top z is unchanged**, so it is not a GT drop).
 
-    프림: 1/틈 (+마구리).  GT: 음각 20 mm — 낙차 아님.
+    Prims: 1 per gap (+ end grain).  GT: recess 20 mm - not a drop.
     """
     plank_w = _dim("module_deck_plank") if plank_w is None else float(plank_w)
     gap = _dim("deck_plank_gap") if gap is None else float(gap)
@@ -1060,9 +1096,10 @@ def build_deck_planks(kit, path, x0, y0, x1, y1, z, mtl, plank_w=None,
 
 def build_silt_band(kit, path, region, waterline, z, mtl, width=None,
                     albedo_gain=0.80, n=2):
-    """**침수 실트·물때·모래 밀림 띠** — 수변(03·09·12·18)의 수위 흔적.
+    """**Flood silt / water stain / sand drift band** - waterline traces at waterfronts
+    (03/09/12/18).
 
-    프림: 1~2.  GT: 무변.
+    Prims: 1-2.  GT: unchanged.
     """
     x0, y0, x1, y1 = _norm_region(region)
     width = _dim("silt_band_w") if width is None else float(width)
@@ -1082,22 +1119,23 @@ def build_silt_band(kit, path, region, waterline, z, mtl, width=None,
     return dict(prim_count=kit.count_since(n0), elems=elems)
 
 
-# ── infra_kit 재사용 6종 어댑터 (재구현 아님 — 계획용 Elem 을 붙일 뿐) ──────
+# -- Adapters for the 6 reused infra_kit builders (not reimplementation - they only attach planning Elems) --
 def _ik_manhole(kit, path, cx, cy, z, mtl, mtl_frame=None, d_frame=0.648):
-    """`infra_kit.build_manhole` 어댑터. **flush 오프셋을 접어서 비음수로 만든다.**
+    """Adapter for `infra_kit.build_manhole`. **Folds the flush offset to be non-negative.**
 
-    ★ (v1.2) `proud=None` 이면 `build_manhole` 이 KS D 4040 의 "노면과 동일면
-    ±10 mm" 를 결정적 난수 `U(−10, +10) mm` 로 뽑는다. 음수가 나오면 뚜껑
-    상면이 포장 상면보다 낮아지는데, 포장이 **솔리드 슬래브**라 뚜껑·틀이
-    통째로 슬래브 안에 갇혀 **렌더 화소 0** 이 된다
-    `[실측 — scene15 (−2.40,−0.15) 뽑기 −1.73 mm → d2/d5/d10/오버뷰 전 컷에서
-     맨홀 영역 |Δ| = 0. scene13 (−3.90,0.00) 뽑기 −9.07 mm 로 같은 상태]`.
-    33씬 전체로는 뽑기의 **약 절반**이 이 상태였다.
+    (v1.2) With `proud=None`, `build_manhole` draws the KS D 4040 "level with the road
+    surface, +-10 mm" as a deterministic `U(-10, +10) mm`. A negative draw puts the cover
+    top below the paving top, and because the paving is a **solid slab** the cover and
+    frame are trapped entirely inside it, producing **zero rendered pixels**
+    `[measured - scene15 (-2.40,-0.15) drew -1.73 mm -> |delta| = 0 over the manhole area
+     in every shot d2/d5/d10/overview. scene13 (-3.90,0.00) drew -9.07 mm, same state]`.
+    Across all 33 scenes **about half** the draws were in this state.
 
-    감산 기하가 없어 "가라앉은 뚜껑" 을 깊이로 낼 수 없으므로, 편차를
-    **접어서**(`|raw|`) 0.6~10 mm 의 **양각 편차**로 바꾼다 — 실물에서도
-    재포장·침하로 틀이 노면보다 약간 솟은 사례가 흔하고, "전부 정확히 같은
-    높이면 CG 로 읽힌다" 는 원 의도(편차의 존재)는 그대로 보존된다.
+    With no subtraction geometry a "sunken cover" cannot be expressed as depth, so the
+    deviation is **folded** (`|raw|`) into a **proud deviation** of 0.6-10 mm. In reality
+    frames often sit slightly above the road after resurfacing or settlement, and the
+    original intent (that a deviation exists at all, since "all exactly the same height
+    reads as CG") is fully preserved.
     """
     n0 = kit.mark()
     raw = ik.det_rng("manhole", path, cx, cy).uniform(-0.010, 0.010)
@@ -1165,10 +1203,12 @@ def _ik_tactile(kit, path, kind, x0, y0, x1, y1, mtl, z=0.0, relief="normal",
 
 def _ik_ramp_curb(kit, path, profile, y_neg, y_pos, mtl, height=0.12,
                   width=0.30):
-    """**GT 변경 1건 — 감독 결재 M4 로 W2 집행**(라벨은 W4 GT 맵).
+    """**One GT change - executed in W2 under supervisor approval M4** (labels come with the
+    W4 GT map).
 
-    v1 표기의 `offset` 인자는 **존재하지 않는다** `[실측 — infra_kit.py:778-781]`.
-    벽에서 띄우려면 `width` 를 줄이고 `y_neg/y_pos` 를 직접 준다.
+    The `offset` argument in the v1 notation **does not exist**
+    `[measured - infra_kit.py:778-781]`. To stand the curb off the wall, reduce `width`
+    and set `y_neg/y_pos` directly.
     """
     n0 = kit.mark()
     r = ik.build_ramp_curb(kit, path, profile, y_neg, y_pos, mtl,
@@ -1192,11 +1232,11 @@ def _ik_ramp_curb(kit, path, profile, y_neg, y_pos, mtl, height=0.12,
 
 
 # ===========================================================================
-# [5] 프로파일 18종 — 사양 §4.1 / §5 매트릭스
+# [5] The 18 profiles - spec §4.1 / §5 matrix
 #
-#     스키마: doc · natural · pave · infra · surface · extras · scatter ·
-#             tactile(None 고정) · albedo_cap · prim_cap
-#     `natural=True` 에 도시 인프라를 넣으면 plan_ground 가 ValueError.
+#     Schema: doc, natural, pave, infra, surface, extras, scatter,
+#             tactile (fixed None), albedo_cap, prim_cap
+#     Putting urban infrastructure into a `natural=True` profile makes plan_ground raise ValueError.
 # ===========================================================================
 _URBAN_INFRA_KEYS = ("manhole", "gully", "gutter_L", "gutter_U", "marking",
                      "trench")
@@ -1253,7 +1293,7 @@ GROUND_PROFILES = {
         "골목 콘크리트 타설 포장 [통계 B 92 %]",
         pave=dict(module=(3.000, None), joint="contraction",
                   step_x=_dim("step_contraction_conc"), step_y=None,
-                  groove_w=0.010, recess=-0.003),   # §3.4 스키마 예·§5.4 15-1
+                  groove_w=0.010, recess=-0.003),   # §3.4 schema example, §5.4 15-1
         infra=dict(manhole=1, gutter_U=1, trench=1),
         surface=(("patch", 2), ("crack", 4),
                  ("stain", ("grime_band", "dirt")), ("weed", 8)),
@@ -1369,7 +1409,7 @@ GROUND_PROFILES = {
         surface=(("patch", 3), ("crack", 5), ("stain", ("dirt",)),
                  ("weed", 4)),
     ),
-    # ── P18 (v1.1 신설) ───────────────────────────────────────────────────
+    # -- P18 (new in v1.1) -----------------------------------------------
     "deck_trail_hybrid": _P(
         "데크 진입부 + 공원 흙길 [실측 — 사양 §13. P10 오배정 폐기]",
         natural=True,
@@ -1381,7 +1421,7 @@ GROUND_PROFILES = {
                 ("wear_lane", dict()), ("edge_litter", dict()),),
         scatter=dict(kind="gravel", cover=0.12, count=180, expose=0.06),
     ),
-    # ── P3 하위변종 ────────────────────────────────────────────────────────
+    # -- P3 sub-variants -------------------------------------------------
     "tunnel_under": _P(
         "지하보도(P3 하위변종) [추정 지하보도 관행]",
         pave=dict(module=(0.300, 0.300), joint="interlock",
@@ -1393,8 +1433,8 @@ GROUND_PROFILES = {
 
 
 # ===========================================================================
-# [6] 점자블록 등록부 — 사양 §12.4. **여기 없으면 설치 금지**(게이트 B11)
-#     GT 열은 전부 A(z 불변) — flush + 돌기 6 mm 는 낙차가 아니다 `[법령]`.
+# [6] Tactile paving register - spec §12.4. **Not listed here means installation is banned** (gate B11)
+#     The GT column is A (z unchanged) throughout - flush plus 6 mm dots is not a drop `[statute]`.
 # ===========================================================================
 def _T(kind, site, p, trigger, defect=None, relief="normal", walk_axis="x",
        note=""):
@@ -1403,7 +1443,7 @@ def _T(kind, site, p, trigger, defect=None, relief="normal", walk_axis="x",
 
 
 TACTILE_SITES = {
-    # 신설 6씬
+    # 6 newly added scenes
     "scene02": {"stair_top": _T("dot", "계단 상단 0.3 m 전 전폭", 0.54,
                                 "계단 첫 단", note="완전 적정(부적정 미적용)"),
                 "stair_foot": _T("dot", "하부 랜딩 대칭 1줄", 0.54, "계단 마지막 단")},
@@ -1423,7 +1463,7 @@ TACTILE_SITES = {
                 "stair_head": _T("dot", "보도 계단 상단", 0.54, "계단 첫 단",
                                  defect="부분 결손 2~3매"),
                 "stair_foot": _T("dot", "보도 계단 하단", 0.54, "계단 마지막 단")},
-    # 유지 3씬
+    # 3 retained scenes
     "sceneD4": {"platform_edge": _T("dot", "연단 0.30 m 이격 2열", 0.90,
                                     "승강장 연단", note="완전 적정")},
     "sceneC4": {"stair_top": _T("dot", "계단머리 경고 점형", 0.51, "계단 첫 단",
@@ -1431,23 +1471,23 @@ TACTILE_SITES = {
     "sceneC1": {"stair_top": _T("dot", "계단머리 경고 점형", 0.51, "계단 첫 단",
                                 defect="색 바램·오염 −40 %",
                                 note="적설 0.05 m 에 매몰되는 것이 씬 특색")},
-    # 볼라드 전면 유지 4씬(전부 무낙차 = cue+/label−)
+    # 4 scenes retained in front of bollards (all drop-free = cue+/label-)
     "sceneN1": {"bollard": _T("dot", "볼라드 전면 연속 띠 0.60", 0.54, "볼라드 전면")},
     "sceneN2": {"bollard": _T("dot", "볼라드 전면 연속 띠 0.60", 0.54, "볼라드 전면")},
     "sceneN4": {"bollard": _T("dot", "볼라드 전면 연속 띠 0.60", 0.54, "볼라드 전면")},
-    # ★ 사양 충돌 1건 — §12.5 ③ 은 N5 1개소에 relief="geom" 을 허용하지만,
-    #   dot geom 은 0.6×3.0 m 띠에 **721 프림**(§4.2)이고 N5 의 볼라드 열 전면
-    #   연속 띠는 7.0 m 라 **1,706 프림** = §8.1 절대 상한 200 의 8.5배다.
-    #   → W2 는 relief="normal"(프림 1) 로 집행하고, 36점 돌기의 음영은
-    #     §12.5 ③ 처방대로 `tactile_yellow_diff/nor` 텍스처 배선(T1)으로 낸다.
-    #     `relief_wanted` 에 원 의도를 남겨 감독 판단을 받는다.
+    # * One spec conflict - §12.5 (3) allows relief="geom" at one N5 site, but
+    #   dot geom costs **721 prims** for a 0.6x3.0 m strip (§4.2), and the continuous strip
+    #   in front of the N5 bollard row is 7.0 m -> **1,706 prims** = 8.5x the §8.1 absolute cap of 200.
+    #   -> W2 executes with relief="normal" (1 prim) and produces the shading of the 36 dots
+    #     via the `tactile_yellow_diff/nor` texture wiring (T1) as §12.5 (3) prescribes.
+    #     The original intent is left in `relief_wanted` for the supervisor to judge.
     "sceneN5": {"bollard": _T("dot", "볼라드 열 전면 연속 띠 0.60", 0.54,
                               "볼라드 전면", relief="normal",
                               note="§12.5 ③ 의 relief='geom' 의도는 프림 절대상한 "
                                    "200(§8.1)과 비양립 — 텍스처 배선으로 대체")},
 }
 
-# 미설치 사유 원장 — "왜 안 놓았는가"를 코드가 기억한다(B11 진단 메시지에 쓴다)
+# Ledger of non-installation reasons - the code remembers "why it was not placed" (used in the B11 diagnostic message)
 TACTILE_OFF_REASON = {
     "scene06": "홀드 — 나선 계단 '전폭' 정의 모호(감독 판단, M10 과 함께)",
     "scene17": "p=0.24 미달 (둔치 공원)",
@@ -1467,24 +1507,25 @@ TACTILE_OFF_REASON = {
 
 
 # ===========================================================================
-# [7] EXPECTED_FP — GT-E2-x 등재 예외의 오탐 사전등록 (사양 §12.3)
+# [7] EXPECTED_FP - pre-registration of false positives for GT-E2-x registered exceptions (spec §12.3)
 #
-#     라운드 판정기는 이 행 구간의 GRAZE 응답을 **신규 오탐으로 세지 않는다**.
-#     행은 하드코드하지 않고 **법정 기하에서 계산**한다 — 씬마다 계단 전폭·
-#     원점이 달라도 같은 규칙이 재현되도록.
-#     등록 범위 = [에지 행, **그 컷의 이격 하한에 미달한 가장 먼 경계선 행**].
-#     d2 는 자력 통과(Δ 42.9 @1080 = 21.4 @540 ≥ 16 @540)라 등재 불요.
+#     The round judge does **not count** GRAZE responses in these row ranges as new false positives.
+#     Rows are not hard-coded but **computed from the statutory geometry** - so the same rule
+#     reproduces even when stair width and origin differ per scene.
+#     Registered range = [edge row, **the farthest boundary row that fell short of that shot's separation bound**].
+#     d2 passes on its own (delta 42.9 @1080 = 21.4 @540 >= 16 @540) and needs no registration.
 #
-#     ★ (v1.2) **소비자 축 정합** — 레드팀 G-1 따름. 이 등록부의 소비자는
-#       GRAZE JSON(`gz_row`, 대역)이고 그쪽은 **@540** 이다. 등록부는 두 축을
-#       모두 내보낸다: `rows`(=@1080, 사양 §12.3 표기 유지) + `rows_work`(@540).
-#       라운드 판정기는 `rows_work` 를 쓸 것. 한 축만 보고 매칭하면 영원히
-#       한 행도 일치하지 않는다.
+#     * (v1.2) **Consumer axis alignment** - per red team G-1. The consumer of this register is
+#       the GRAZE JSON (`gz_row`, bands) and that is on **@540**. The register exports both axes:
+#       `rows` (=@1080, keeping the spec §12.3 notation) + `rows_work` (@540).
+#       The round judge must use `rows_work`. Matching on one axis alone would
+#       never align a single row.
 # ===========================================================================
 def tactile_fp_rows(dists=(2, 5, 10), h=0.3, setback=None, depth=None):
-    """법정 점자블록 띠(에지 전방 `setback`, 폭 `depth`)의 오탐 등록 행 구간.
+    """False-positive registration row range of a statutory tactile strip (`setback` in front of
+    the edge, `depth` wide).
 
-    반환 `{d: (lo_1080, hi_1080)}` — **@1080**. @540 은 `_fp_work()` 로 변환.
+    Returns `{d: (lo_1080, hi_1080)}` - **@1080**. Convert to @540 with `_fp_work()`.
     """
     setback = _dim("tactile_setback") if setback is None else float(setback)
     depth = _dim("tactile_band_depth") if depth is None else float(depth)
@@ -1504,13 +1545,13 @@ def tactile_fp_rows(dists=(2, 5, 10), h=0.3, setback=None, depth=None):
 
 
 def _fp_work(rows_1080):
-    """등록 구간을 GRAZE 소비자 축(@540)으로 옮기고 footprint 만큼 넓힌다."""
+    """Move the registered range onto the GRAZE consumer axis (@540) and widen it by the footprint."""
     lo, hi = rows_1080
     return (int(math.floor(to_work_rows(lo))) - GRAZE_FOOTPRINT_WORK,
             int(math.ceil(to_work_rows(hi))) + GRAZE_FOOTPRINT_WORK)
 
 
-# 낙차 에지를 동반하는 법정 트리거 — 이 지점만 GRAZE 오탐 사전등록이 필요하다
+# Statutory triggers accompanied by a drop edge - only these sites need GRAZE false-positive pre-registration
 _FP_TRIGGERS = ("계단 첫 단", "계단 마지막 단", "승강장 연단", "개구 둘레")
 
 
@@ -1520,11 +1561,11 @@ def _build_expected_fp():
     for scene, sites in TACTILE_SITES.items():
         for site, spec in sites.items():
             if spec["trigger"] not in _FP_TRIGGERS:
-                continue          # 볼라드 전면·주출입구는 낙차 에지가 없다
+                continue          # Bollard frontages and main entrances have no drop edge
             for d, (r0, r1) in rows.items():
                 fp[(scene, f"preset_h0.3_d{d}")] = dict(
-                    rows=(r0, r1), scale=CAM_H,          # @1080 (사양 §12.3)
-                    rows_work=_fp_work((r0, r1)),        # @540  (GRAZE 소비자)
+                    rows=(r0, r1), scale=CAM_H,          # @1080 (spec §12.3)
+                    rows_work=_fp_work((r0, r1)),        # @540  (GRAZE consumer)
                     scale_work=GRAZE_WORK_H,
                     src=f"tactile_{site}")
     return fp
@@ -1534,21 +1575,21 @@ EXPECTED_FP = _build_expected_fp()
 
 
 # ===========================================================================
-# [8] 씬 고유 불변식 등록부 — 게이트 B12 (사양 §7.3)
-#     `plan_ground` 가 전 요소 AABB 에 대해 호출하고, 하나라도 False 면 ValueError.
-#     씬이 자기 검사기를 갖고 있으면(예: sceneN1.dresscheck) **재구현하지 말고**
-#     `plan_ground(..., invariants=[...])` 로 주입받는다.
+# [8] Scene-specific invariant register - gate B12 (spec §7.3)
+#     `plan_ground` calls these over every element AABB; a single False raises ValueError.
+#     If a scene has its own checker (e.g. sceneN1.dresscheck), **do not reimplement it** -
+#     inject it via `plan_ground(..., invariants=[...])`.
 # ===========================================================================
 def _inv_n1_band(elem, ctx):
-    """N1 밴드 보존 — 오클루더는 공중 슬래브 단 하나여야 한다.
-    `xb + 0.84536·h < 0.0`(앞배치) 또는 `xa > 4.0`(뒤배치)."""
+    """N1 band preservation - the only occluder may be the single airborne slab.
+    `xb + 0.84536*h < 0.0` (front placement) or `xa > 4.0` (rear placement)."""
     xa, _, _, xb, _, z1 = elem["aabb"]
     h = max(0.0, z1 - ctx.get("z", 0.0))
     return (xb + 0.84536 * h < 0.0) or (xa > 4.0)
 
 
 def _inv_n3_painting(elem, ctx):
-    """N3 트롱프뢰유 그림면 x ∈ [0, 6.3] 위 **면 요소 금지**(줄눈 관통은 의도)."""
+    """N3 trompe-l'oeil: **no area elements** over the painted surface x in [0, 6.3] (joints crossing it are intended)."""
     if not elem["meta"].get("area"):
         return True
     xa, _, _, xb, _, _ = elem["aabb"]
@@ -1556,7 +1597,7 @@ def _inv_n3_painting(elem, ctx):
 
 
 def _inv_hidden_illusion(elem, ctx):
-    """14·20·21·N3 은닉 착시 무결성 — 상시 고대비 단서 금지."""
+    """14/20/21/N3 concealed-illusion integrity - no permanently high-contrast cue."""
     m = elem["meta"]
     if elem["kind"] == "tactile":
         return False
@@ -1566,14 +1607,14 @@ def _inv_hidden_illusion(elem, ctx):
 
 
 def _inv_13_ramp_d2only(elem, ctx):
-    """13 램프 크레스트 은닉 — 램프 위 요소는 d2 에서만 [F] 여야 한다."""
+    """13 ramp crest concealment - elements on the ramp must be [F] at d2 only."""
     if not elem["meta"].get("beyond"):
         return True
     return tuple(elem["meta"].get("vis_dists", ())) in ((), (2,), (2.0,))
 
 
 def _inv_10_trail_cut(elem, ctx):
-    """10 상부 트레일은 x = −1.5 에서 끊긴다(계단 공동 위 지면 평면 금지)."""
+    """10 upper trail stops at x = -1.5 (no ground plane over the stair void)."""
     xa, _, za, xb, _, zb = elem["aabb"]
     if xb <= -1.5:
         return True
@@ -1581,7 +1622,7 @@ def _inv_10_trail_cut(elem, ctx):
 
 
 def _inv_c1_snow(elem, ctx):
-    """C1 적설 매몰이 씬 특색 — 신규 요소 proud ≤ 눈 두께 0.05."""
+    """C1 snow burial is the scene identity - new elements must have proud <= the snow thickness 0.05."""
     return elem["proud"] <= 0.05 + 1e-9
 
 
@@ -1598,10 +1639,10 @@ GROUND_INVARIANTS = {
 
 
 # ===========================================================================
-# [9] plan_ground — 프로파일 → 계획 (순수 계산, USD 미접촉)
+# [9] plan_ground - profile -> plan (pure computation, no USD contact)
 # ===========================================================================
 def _edge_list(edges):
-    """edges 정규화 → [(name, s, opts)]."""
+    """Normalise edges -> [(name, s, opts)]."""
     out = []
     for e in edges or ():
         if isinstance(e, dict):
@@ -1614,14 +1655,14 @@ def _edge_list(edges):
 
 
 def _nearest_edge_gap(view, elem, edges):
-    """요소 전방 s 구간과 에지 사이의 최소 전방 이격 [m]. 없으면 None.
-    요소가 에지를 넘거나 걸치면 0.0."""
+    """Minimum forward clearance [m] between an element's forward s interval and an edge.
+    None if there is none. 0.0 if the element crosses or touches the edge."""
     if not edges:
         return None
     sa, sb = view.s_span(elem["aabb"])
     best = None
     for _n, se, _o in edges:
-        if sa >= se:                       # 에지 너머 요소 — GT-E1′ 대상 아님
+        if sa >= se:                       # Beyond-the-edge element - not subject to GT-E1'
             continue
         gap = max(0.0, se - sb)
         best = gap if best is None else min(best, gap)
@@ -1629,7 +1670,7 @@ def _nearest_edge_gap(view, elem, edges):
 
 
 def _vis_dists(view, elem, edges, dists, h):
-    """에지 너머(램프 노면 등) 요소의 가시 컷 판정. 광선기울기 h/d > 노면구배."""
+    """Visible-shot decision for beyond-the-edge elements (ramp surface etc.). Ray slope h/d > surface gradient."""
     sa, _sb = view.s_span(elem["aabb"])
     for _n, se, opts in edges:
         g = opts.get("beyond_grade")
@@ -1644,16 +1685,16 @@ def plan_ground(profile, region, *, z=0.0, z_fn=None, gy=0.0,
                 dists=(2, 5, 10), heights=(0.3,), overrides=None, seed=0,
                 scene=None, tactile=(), invariants=None, sites=None,
                 extras_args=None, caps=None):
-    """프로파일 + 영역 → **GroundPlan**. USD 를 만들지 않는다.
+    """Profile + region -> **GroundPlan**. Creates no USD.
 
-    이 함수만으로 프림 수·GT·프레임 예산이 전부 판정 가능해야 한다 —
-    `python3 ground_kit.py` 가 33씬 계획을 USD 접촉 전에 검산하기 위함이다.
+    This function alone must be able to decide prim count, GT and frame budget - so that
+    `python3 ground_kit.py` can check all 33 scene plans before touching USD.
 
-    위반 시 `ValueError`:
-      · `natural=True` 프로파일에 도시 인프라 (§3.4)
-      · GT δ 초과(예외 미등록 요소) · GT-E1′(B6) · GT-E2(B7) · GT-V(B8)
-      · 알베도 상한(B9) · 프림/인스턴스 예산(B10)
-      · `TACTILE_SITES` 미등재 점자블록(B11) · 씬 고유 불변식(B12)
+    Raises `ValueError` on:
+      - urban infrastructure in a `natural=True` profile (§3.4)
+      - GT delta exceeded (unregistered exception element), GT-E1' (B6), GT-E2 (B7), GT-V (B8)
+      - albedo cap (B9), prim/instance budget (B10)
+      - tactile paving not registered in `TACTILE_SITES` (B11), scene-specific invariants (B12)
     """
     if profile not in GROUND_PROFILES:
         raise ValueError(f"ground_kit: 미등록 프로파일 '{profile}'. "
@@ -1666,7 +1707,7 @@ def plan_ground(profile, region, *, z=0.0, z_fn=None, gy=0.0,
             else:
                 prof[k] = v
 
-    # ── §3.4 규약 강제: 자연 씬 도시 인프라 금지 ────────────────────────
+    # -- Enforce the §3.4 convention: no urban infrastructure in natural scenes --
     if prof["natural"]:
         bad = [k for k in _URBAN_INFRA_KEYS if prof["infra"].get(k)]
         if bad:
@@ -1688,7 +1729,7 @@ def plan_ground(profile, region, *, z=0.0, z_fn=None, gy=0.0,
                voids=[_norm_region(v) for v in (voids or ())],
                scene=scene, seed=int(seed), caps=dict(caps or {}))
 
-    # ── 계획 = ops 목록. dry 실행으로 elems·프림 수를 얻는다 ─────────────
+    # -- A plan is a list of ops. A dry run yields the elems and prim count --
     ops = _compose_ops(profile, prof, ctx, tactile, sites or {},
                        extras_args or {})
     dk = dry_kit()
@@ -1707,21 +1748,21 @@ def plan_ground(profile, region, *, z=0.0, z_fn=None, gy=0.0,
             g = dict(g); g["scene"] = scene
             gt_changes.append(g)
 
-    # 산포(프로파일 선언 + edge_break 요청) — `scatter_debris` 콜백 위임
+    # Scatter (profile declaration + edge_break request) - delegated to the `scatter_debris` callback
     inst = 0
     sc_spec = prof.get("scatter")
     if sc_spec:
         inst += int(sc_spec.get("count", 0))
     inst += sum(int(s.get("count", 0)) for s in scat_reqs)
 
-    # ── 가시 컷 · GT-E5 클램프 ─────────────────────────────────────────
+    # -- Visible shots, GT-E5 clamp -------------------------------------
     for e in elems:
         e["meta"]["vis_dists"] = _vis_dists(view, e, ed, dists, h0)
         e["meta"]["edge_gap"] = _nearest_edge_gap(view, e, ed)
         sa, _sb = view.s_span(e["aabb"])
         if any(o.get("beyond_grade") is not None and sa >= se - 1e-9
                for _n, se, o in ed):
-            e["meta"]["beyond"] = True         # 램프 노면 위 = d2 전용 (§5.0 C-2)
+            e["meta"]["beyond"] = True         # On the ramp surface = d2 only (§5.0 C-2)
 
     _clamp_gt_e5(elems, view, ed)
 
@@ -1732,7 +1773,7 @@ def plan_ground(profile, region, *, z=0.0, z_fn=None, gy=0.0,
                 unit_cell=GROUND_DIMENSIONS["unit_cell"].get(profile))
     _assert_unit_cell(profile, prof)
 
-    # ── 게이트 (B6~B12 하드) ───────────────────────────────────────────
+    # -- Gates (B6-B12, hard) -------------------------------------------
     b = frame_budget(plan, h=h0, dists=dists)
     plan["budget"] = b
     hard = [k for k in ("B6", "B7", "B8", "B9", "B10", "B11", "B12")
@@ -1742,7 +1783,7 @@ def plan_ground(profile, region, *, z=0.0, z_fn=None, gy=0.0,
         raise ValueError(f"ground_kit: plan_ground 게이트 위반 "
                          f"[{profile}/{scene}]\n  {msgs}")
 
-    # B12 — 씬 고유 불변식(등록부 + 씬 주입 콜백)
+    # B12 - scene-specific invariants (register + scene-injected callbacks)
     invs = list(GROUND_INVARIANTS.get(scene or "", ()))
     invs += list(invariants or ())
     for fn in invs:
@@ -1756,7 +1797,7 @@ def plan_ground(profile, region, *, z=0.0, z_fn=None, gy=0.0,
 
 
 def _assert_unit_cell(profile, prof):
-    """§4.5 U1~U4 — T1 유닛 지터 계약 정합. 위반은 ValueError."""
+    """§4.5 U1-U4 - T1 unit jitter contract consistency. A violation raises ValueError."""
     uc = GROUND_DIMENSIONS["unit_cell"].get(profile)
     if uc is None:
         raise ValueError(f"ground_kit: unit_cell 원장에 '{profile}' 미등재 "
@@ -1786,10 +1827,11 @@ def _assert_unit_cell(profile, prof):
 
 
 def _clamp_gt_e5(elems, view, edges):
-    """GT-E5 램프 — 식생·산포는 에지에 가까울수록 낮아진다(금지가 아니라 클램프).
+    """GT-E5 ramp - vegetation and scatter get lower the closer they are to the edge (a clamp,
+    not a ban).
 
-    `z_e ≤ min(요소종별 상한, |x_e| / EDGE_K)`. 클램프 후에도 종별 최소치를
-    못 맞추면 드롭 표시(`meta["dropped"]=True`).
+    `z_e <= min(per-kind cap, |x_e| / EDGE_K)`. If the per-kind minimum still cannot be met
+    after clamping, the element is marked dropped (`meta["dropped"]=True`).
     """
     for e in elems:
         exc = e["meta"].get("exc")
@@ -1809,17 +1851,18 @@ def _clamp_gt_e5(elems, view, edges):
 
 
 # ===========================================================================
-# [10] frame_budget — 렌더 없이 B1~B12 판정 (사양 §7.1)
+# [10] frame_budget - decide B1-B12 without rendering (spec §7.1)
 # ===========================================================================
 def _gate(ok, detail, hard=True):
     return dict(**{"pass": bool(ok)}, detail=detail, hard=bool(hard))
 
 
 def frame_budget(plan, *, h=0.3, dists=None, gy=None, origin=None):
-    """각 h0.3 컷의 요소 픽셀 점유·차폐·GT 규칙 위반을 렌더 없이 판정한다.
+    """Decide element pixel occupancy, occlusion and GT rule violations for each h0.3 shot
+    without rendering.
 
-    B1~B5 는 **프레임 충전 목표**(WARN — 최종 판정은 렌더 후 σ_LF/sd),
-    B6~B12 는 **하드 게이트**(위반 시 `plan_ground` 가 예외).
+    B1-B5 are **frame-fill targets** (WARN - the final verdict comes from sigma_LF/sd after
+    rendering); B6-B12 are **hard gates** (a violation makes `plan_ground` raise).
     """
     ctx = plan["ctx"]
     dists = tuple(dists or ctx["dists"])
@@ -1837,8 +1880,8 @@ def frame_budget(plan, *, h=0.3, dists=None, gy=None, origin=None):
     for d in dists:
         area_w1, area_wpx, cross_ok, long_ok, decal_n = 0, 0.0, 0, 0, 0
         e_lo, e_hi = GRAZE_E_BAND[0] * d, GRAZE_E_BAND[1] * d
-        # 에지의 지면거리 = d + s_edge (표준 규약에서 에지 s=0 → 정확히 d).
-        # 원점이 다른 씬도 `edges` 를 전방 s 로 주므로 같은 식이 성립한다.
+        # Ground distance of an edge = d + s_edge (with the standard convention edge s=0 -> exactly d).
+        # Scenes with a different origin also pass `edges` as forward s, so the same formula holds.
         r_edge = {name: cam_row(d + se, h) for name, se, _o in edges}
         singular = []
         for e in elems:
@@ -1853,9 +1896,9 @@ def frame_budget(plan, *, h=0.3, dists=None, gy=None, origin=None):
                 continue
             Xm = max(0.05, (Xa + Xb) / 2.0)
             hw = cam_halfwidth(Xm)
-            # 프레임 밖 판정은 **두 에지가 같은 쪽으로** 벗어난 경우만이다.
-            # `min(|ta|,|tb|) > hw` 로 쓰면 화면을 가로지르는 전폭 요소(트렌치·
-            # 점자블록 띠)가 통째로 탈락한다 — 실제로 scene13 d2 가 그랬다.
+            # An out-of-frame verdict requires **both edges off the same side**.
+            # Writing it as `min(|ta|,|tb|) > hw` drops full-width elements crossing the screen
+            # (trenches, tactile strips) entirely - which is exactly what happened to scene13 d2.
             if (ta - view.gy) > hw or (tb - view.gy) < -hw:
                 continue
             m = e["meta"]
@@ -1877,11 +1920,11 @@ def frame_budget(plan, *, h=0.3, dists=None, gy=None, origin=None):
             gap = m.get("edge_gap")
             z_e = e["proud"]
             if m.get("exc") == "plank_gap":
-                z_e = 0.0            # 판재 틈 = 음각. §6.1 예외표 "필요 이격 0"
+                z_e = 0.0            # Plank gap = recess. §6.1 exception table, "required clearance 0"
             if m.get("recess_nominal") is not None:
-                # (v1.2) 명목 음각 요소 — 렌더 z 의 +0.6 mm 는 z-fighting
-                # 회피용 epsilon 이지 실재 융기가 아니다. GT-E1′ 은 실재
-                # 부조로 판정해야 하므로 명목값(≤0)을 쓴다.
+                # (v1.2) Nominally recessed element - the +0.6 mm of the rendered z is a
+                # z-fighting epsilon, not real relief. GT-E1' must judge on real
+                # relief, so the nominal value (<=0) is used.
                 z_e = min(0.0, float(m["recess_nominal"]))
             if gap is not None and z_e > 0:
                 need = EDGE_K * z_e
@@ -1889,15 +1932,15 @@ def frame_budget(plan, *, h=0.3, dists=None, gy=None, origin=None):
                     e1_viol.append((e["path"], round(gap, 3), round(need, 3)))
                 elif m.get("exc") == "tactile" and gap + 1e-9 < need:
                     e1_viol.append((e["path"], round(gap, 3), round(need, 3)))
-            # ── B7 GT-E2 (E 대역 안 전폭 횡단선) ──────────────────────
+            # -- B7 GT-E2 (full-width transverse lines inside the E band) --------
             if m.get("line") in ("cross", "cross_periodic") and r_edge:
                 if m.get("exc") == "plank_gap":
-                    continue         # 음각 판재 틈은 GT-E2 대상이 아니다(§6.1)
+                    continue         # Recessed plank gaps are not subject to GT-E2 (§6.1)
                 if not (e_lo <= Xm <= e_hi):
                     continue
                 surf = m.get("surface_z", 0.0)
-                # 행은 전부 **@1080**(`cam_row` 축). 판정 하한도 같은 축으로
-                # 맞춘 뒤 비교한다 — v1.1 은 @540 유도값을 @1080 과 직접 비교했다.
+                # All rows are **@1080** (the `cam_row` axis). The verdict bound is converted
+                # to the same axis before comparing - v1.1 compared an @540 derivation directly against @1080.
                 rows = [cam_row_z(max(0.05, d + s), surf, h) for s in (sa, sb)]
                 worst = None
                 for _nm, se, _o in edges:
@@ -1929,7 +1972,7 @@ def frame_budget(plan, *, h=0.3, dists=None, gy=None, origin=None):
         b1 = max(b1, area_w1); b2 = max(b2, 100.0 * area_wpx / CAM_W)
         b3 = max(b3, cross_ok); b4 = max(b4, long_ok); b5 = max(b5, decal_n)
 
-    # ── B8 GT-V : 요소 AABB × 개구 교차 0 ────────────────────────────
+    # -- B8 GT-V: element AABB x opening intersection = 0 ----------------
     v_hits = []
     for e in elems:
         if e["meta"].get("dropped"):
@@ -1938,7 +1981,7 @@ def frame_budget(plan, *, h=0.3, dists=None, gy=None, origin=None):
         for vx0, vy0, vx1, vy1 in ctx["voids"]:
             if x1 > vx0 and x0 < vx1 and y1 > vy0 and y0 < vy1:
                 v_hits.append((e["path"], (vx0, vy0, vx1, vy1)))
-    # ── B9 알베도 ────────────────────────────────────────────────────
+    # -- B9 Albedo -------------------------------------------------------
     a_hits = []
     for e in elems:
         a = e["meta"].get("albedo")
@@ -1948,7 +1991,7 @@ def frame_budget(plan, *, h=0.3, dists=None, gy=None, origin=None):
             else prof["albedo_cap"]
         if a > cap + 1e-9:
             a_hits.append((e["path"], a, cap))
-    # ── B10 예산 ─────────────────────────────────────────────────────
+    # -- B10 Budget ------------------------------------------------------
     over = []
     if plan["prims"] > prof["prim_cap"]:
         over.append(f"기하 프림 {plan['prims']} > {prof['prim_cap']}")
@@ -1956,7 +1999,7 @@ def frame_budget(plan, *, h=0.3, dists=None, gy=None, origin=None):
         over.append(f"절대 상한 200 초과 ({plan['prims']})")
     if plan["instances"] > prof["inst_cap"]:
         over.append(f"산포 {plan['instances']} > {prof['inst_cap']}")
-    # ── B11 점자블록 무단 배치 ────────────────────────────────────────
+    # -- B11 Unauthorised tactile paving ---------------------------------
     t_hits = []
     for e in elems:
         if e["kind"] != "tactile":
@@ -1991,39 +2034,40 @@ def frame_budget(plan, *, h=0.3, dists=None, gy=None, origin=None):
 
 
 # ===========================================================================
-# [11] apply_ground — 계획 → USD (계층 3)
+# [11] apply_ground - plan -> USD (layer 3)
 # ===========================================================================
 def apply_ground(kit, prefix, plan, mtls, *, skin_exclude=None, scatter=None,
                  slabs=()):
-    """계획을 실제 USD 프림으로 만든다.
+    """Turn a plan into real USD prims.
 
-    `skin_exclude`: `scene_common.skin_exclude` 콜백 **주입**(scene_common
-      미의존 원칙 유지 — 사양 §1.2). ground_kit 이 장식하는 지면 슬래브 경로를
-      `slabs` 로 받아 스킨 대상에서 **명시 제외**한다(P-A). 이것이 선행되지
-      않으면 flush 요소(맨홀 2 mm·점형블록 4 mm)가 스킨(+6.5~16.5 mm)에 묻힌다.
+    `skin_exclude`: **inject** the `scene_common.skin_exclude` callback (keeping the
+      no-scene_common-dependency principle - spec §1.2). It takes the ground slab paths
+      that ground_kit decorates as `slabs` and **explicitly excludes** them from skinning
+      (P-A). Without this, flush elements (manhole 2 mm, dot block 4 mm) are buried by the
+      skin (+6.5 to 16.5 mm).
 
-    반환: `{"prims", "instances", "elements", "gt_delta_max", "gt_changes"}`
+    Returns: `{"prims", "instances", "elements", "gt_delta_max", "gt_changes"}`
     """
     if GKIT_PATH_TOKEN not in str(prefix):
         raise ValueError(f"ground_kit: prefix 는 '{{ROOT}}/{GKIT_PATH_TOKEN}' "
                          f"이어야 한다(2차 스킨 방어, §1.2). 받은 값: {prefix}")
-    # ── P-A: 대상 슬래브 스킨 OFF ─────────────────────────────────────
-    #    **GKIT_ON 보다 앞에 둔다** — OFF 팔에서도 스킨 상태는 동일해야
-    #    A/B 가 "키트 프림의 효과"만 잰다(§C2).
+    # -- P-A: skin OFF for the target slabs ------------------------------
+    #    **Placed before GKIT_ON** - the skin state must be identical in the OFF arm too,
+    #    so that the A/B measures only "the effect of the kit prims" (§C2).
     if skin_exclude is not None and slabs:
         skin_exclude(*[str(s) for s in slabs])
 
-    # ── [W2-C · C2] 진단 OFF 팔 ───────────────────────────────────────
+    # -- [W2-C, C2] Diagnostic OFF arm ----------------------------------
     if not GKIT_ON:
         print("[ground_kit] ** NEGOBS_GKIT=0 — 요소 0개 (C2 A/B OFF 팔) ** "
               f"계획상 {len(plan['elements'])}요소 / {len(plan['ops'])}op 생략")
-        # 키 집합은 정상 반환과 **동일**해야 한다 — 씬 통합부가 res[...] 를
-        # 직접 읽으므로 키가 빠지면 OFF 팔만 KeyError 로 죽는다(실제 발생).
+        # The key set must be **identical** to the normal return - scene integration reads
+        # res[...] directly, so a missing key kills the OFF arm alone with KeyError (this happened).
         return dict(prims=0, instances=0, elements=[], gt_delta_max=0.0,
                     gt_change_max=0.0, gt_changes=[], materials_needed=[],
                     unit_cell=plan["unit_cell"], gkit_off=True)
 
-    # ── GT δ 사전 검사 — **생성 전에** 던진다 ─────────────────────────
+    # -- GT delta pre-check - raised **before** creation -----------------
     gmax, gchange_max = 0.0, 0.0
     for e in plan["elements"]:
         if e["meta"].get("dropped"):
@@ -2034,9 +2078,9 @@ def apply_ground(kit, prefix, plan, mtls, *, skin_exclude=None, scatter=None,
             raise ValueError(f"ground_kit: GT δ 초과(예외 미등록) {e['path']} "
                              f"z={z:.4f} > {GT_DELTA}")
         if exc == "gt_change":
-            # **승인된 GT 변경**만 δ 를 넘을 수 있다(현재 대상: scene13 램프 연석
-            # h0.12, 감독 결재 M4). 반드시 `gt_changes` 원장에 실려 있어야 한다 —
-            # 라벨 없는 낙차를 조용히 만드는 것을 구조적으로 막는다(§6.4).
+            # Only an **approved GT change** may exceed delta (current target: the scene13 ramp curb
+            # h0.12, supervisor approval M4). It must be listed in the `gt_changes` ledger -
+            # this structurally prevents silently creating an unlabelled drop (§6.4).
             if not plan["gt_changes"]:
                 raise ValueError(
                     f"ground_kit: GT 변경 요소 {e['path']} 가 gt_changes 원장에 "
@@ -2045,7 +2089,7 @@ def apply_ground(kit, prefix, plan, mtls, *, skin_exclude=None, scatter=None,
             continue
         gmax = max(gmax, z)
 
-    # ── 알베도 하드클램프 (§3.1) ──────────────────────────────────────
+    # -- Albedo hard clamp (§3.1) ---------------------------------------
     prof = GROUND_PROFILES[plan["profile"]]
     for e in plan["elements"]:
         a = e["meta"].get("albedo")
@@ -2059,7 +2103,7 @@ def apply_ground(kit, prefix, plan, mtls, *, skin_exclude=None, scatter=None,
     for op in plan["ops"]:
         raw_kw, raw_args = dict(op.get("kw", {})), tuple(op.get("args", ()))
         kw, handled = dict(raw_kw), set()
-        # mtl_key → 실제 재질 객체로 치환
+        # mtl_key -> substituted with the real material object
         for k in list(kw):
             if k in ("mtl", "mtl_frame", "mtl_cover") and isinstance(kw[k], str):
                 kw[k] = mtls.get(kw[k]); handled.add(k)
@@ -2070,12 +2114,12 @@ def apply_ground(kit, prefix, plan, mtls, *, skin_exclude=None, scatter=None,
         args = tuple(mtls.get(a[1:]) if (isinstance(a, str) and
                                          a.startswith("@")) else a
                      for a in raw_args)
-        # ── 미치환 재질 참조 가드 (파일럿 1회차 크래시 재발 방지) ────────
-        #    **op 정의(치환 전)** 를 본다 — 치환 결과를 타입으로 냄새 맡으면
-        #    `mtls` 값이 문자열인 테스트에서 오탐이 난다.
-        #    위치인자 재질 사전은 치환 규칙에 아예 없으므로 항상 결함이고,
-        #    처리되지 않은 `mtl*` 문자열 kw 도 결함이다. `dry_kit` 은 Bind 를
-        #    하지 않아 CPU 자기검산이 이 결함을 렌더 전에 볼 방법이 이것뿐이다.
+        # -- Guard against unsubstituted material references (prevents a repeat of the pilot round-1 crash) --
+        #    It inspects the **op definition (before substitution)** - sniffing the substituted
+        #    result by type gives false positives in tests where the `mtls` values are strings.
+        #    A positional material dict is not covered by the substitution rules at all and is
+        #    therefore always a defect, and an unhandled `mtl*` string kw is a defect too. `dry_kit`
+        #    does not Bind, so this is the only way a CPU self-check can see the defect before rendering.
         bad = [f"arg[{i}]={v!r}" for i, v in enumerate(raw_args)
                if isinstance(v, dict) and len(v) > 0
                and all(isinstance(x, str) for x in v.values())]
@@ -2092,7 +2136,7 @@ def apply_ground(kit, prefix, plan, mtls, *, skin_exclude=None, scatter=None,
         op["fn"](kit, f"{prefix}/{op['path'].lstrip('/')}", *args, **kw)
         n_prims += kit.count_since(m0)
 
-    # ── 산포 — `scene_common.scatter_debris` 콜백 위임 (신규 함수 금지) ──
+    # -- Scatter - delegated to the `scene_common.scatter_debris` callback (no new function) --
     n_inst = 0
     if scatter is not None:
         stage = getattr(kit, "stage", None)
@@ -2125,10 +2169,10 @@ def apply_ground(kit, prefix, plan, mtls, *, skin_exclude=None, scatter=None,
 
 
 # ===========================================================================
-# [12] 씬 통합 보조 — §7.4 "좌표의 진실 원천은 씬 PARAMS"
+# [12] Scene integration helpers - §7.4 "the source of truth for coordinates is the scene PARAMS"
 # ===========================================================================
 def region_from_params(params, key, pad=0.0):
-    """씬 `PARAMS[key]` 의 x0/x1/y0/y1 을 region 으로. 문서 좌표 하드코드 금지."""
+    """Turn x0/x1/y0/y1 of the scene `PARAMS[key]` into a region. No hard-coded document coordinates."""
     d = params[key]
     return (float(d["x0"]) - pad, float(d["y0"]) - pad,
             float(d["x1"]) + pad, float(d["y1"]) + pad)
@@ -2145,17 +2189,19 @@ def edges_from_params(params, specs):
 
 
 # ===========================================================================
-# [13] ops 조립 — 프로파일 처방 → 빌더 호출 목록
+# [13] ops assembly - profile prescription -> builder call list
 # ===========================================================================
 def _op(name, fn, path, args=(), kw=None):
     return dict(name=name, fn=fn, path=path, args=tuple(args), kw=dict(kw or {}))
 
 
 def _edge_guard_ticks(ctx, step, origin_x):
-    """에지 전방에서 GT-E2(Δ≥16행)를 못 맞추는 횡단 줄눈 좌표를 걸러낸다.
+    """Filter out transverse joint coordinates in front of an edge that cannot meet GT-E2
+    (delta >= 16 rows).
 
-    사양 §5.4 15-1 "x=0 제외(에지 금지대)"의 일반화. 주기 격자라도 **에지에
-    붙은 한 줄**은 에지 신호를 오염시킨다 — 그 줄만 드롭한다.
+    A generalisation of spec §5.4 15-1 "exclude x=0 (edge forbidden zone)". Even in a
+    periodic grid, **the one line stuck to the edge** contaminates the edge signal - only
+    that line is dropped.
     """
     if not step or not ctx["edges"]:
         return []
@@ -2178,11 +2224,13 @@ def _edge_guard_ticks(ctx, step, origin_x):
 
 
 def _trim_region(ctx, region, standoff=EDGE_STANDOFF):
-    """에지 전방 금지대(GT-E1′ 기본 이격)만큼 **배치 영역 자체를** 자른다.
+    """Cut **the placement region itself** by the edge forbidden zone (the GT-E1' default
+    clearance).
 
-    난수 배치 요소(패치·균열·오염·잡초)가 에지에 우연히 붙는 것을 사후 게이트로
-    잡으면 계획이 통째로 깨진다. 사양 §2.2 처방 제1원칙("근경 창을 채운다")과도
-    맞으므로 **영역 단계에서** 잘라 둔다. 음각 요소(줄눈)는 이 함수를 안 쓴다.
+    Catching randomly placed elements (patches, cracks, soiling, weeds) that happen to land
+    on an edge with a post-hoc gate breaks the whole plan. It also matches the first
+    principle of the spec §2.2 prescription ("fill the near window"), so the cut is made
+    **at the region stage**. Recessed elements (joints) do not use this function.
     """
     x0, y0, x1, y1 = _norm_region(region)
     if not ctx["edges"]:
@@ -2190,14 +2238,14 @@ def _trim_region(ctx, region, standoff=EDGE_STANDOFF):
     view = _View(ctx["origin"], ctx["gy"], ctx["axis"])
     fx, fy = view.fwd
     for _n, se, _o in ctx["edges"]:
-        lim = se - float(standoff)          # 전방 s 상한
-        if abs(fx) > 0.5:                   # 진행축 = ±X
+        lim = se - float(standoff)          # Forward s upper bound
+        if abs(fx) > 0.5:                   # Travel axis = +-X
             wx = view.origin[0] + lim * fx
             if fx > 0:
                 x1 = min(x1, wx)
             else:
                 x0 = max(x0, wx)
-        else:                               # 진행축 = ±Y
+        else:                               # Travel axis = +-Y
             wy = view.origin[1] + lim * fy
             if fy > 0:
                 y1 = min(y1, wy)
@@ -2211,9 +2259,9 @@ def _trim_region(ctx, region, standoff=EDGE_STANDOFF):
 
 
 def _compose_ops(profile, prof, ctx, tactile_sites, sites, extras_args):
-    """프로파일 처방 → 빌더 호출 목록. 좌표는 region·edges 에서 유도한다."""
+    """Profile prescription -> builder call list. Coordinates are derived from region and edges."""
     x0, y0, x1, y1 = ctx["region"]
-    # 표면 요소(양각)는 에지 금지대를 뺀 영역에만 놓는다. 줄눈(음각)은 전 영역.
+    # Surface (proud) elements go only in the region minus the edge forbidden zone. Joints (recessed) use the whole region.
     sx0, sy0, sx1, sy1 = _trim_region(ctx, ctx["region"])
     z = ctx["z"]
     seed = ctx["seed"]
@@ -2221,7 +2269,7 @@ def _compose_ops(profile, prof, ctx, tactile_sites, sites, extras_args):
     uc = GROUND_DIMENSIONS["unit_cell"].get(profile) or (None, (0.0, 0.0), "")
     ox, oy = (uc[1] or (0.0, 0.0))
 
-    # ── 포장 줄눈 ─────────────────────────────────────────────────────
+    # -- Paving joints ---------------------------------------------------
     pv = prof["pave"]
     jkind = pv.get("joint")
     if jkind in ("slab", "contraction", "expansion", "interlock"):
@@ -2238,7 +2286,7 @@ def _compose_ops(profile, prof, ctx, tactile_sites, sites, extras_args):
         ops.append(_op("joints", fn, "Joints",
                        args=((x0, y0, x1, y1), z, "@joint"), kw=kw))
 
-    # ── infra (자연 씬은 위에서 이미 차단됨) ────────────────────────────
+    # -- infra (natural scenes are already blocked above) -----------------
     inf = prof["infra"]
     for i in range(int(inf.get("manhole", 0))):
         site = (sites.get("manhole") or [])[i:i + 1]
@@ -2277,15 +2325,15 @@ def _compose_ops(profile, prof, ctx, tactile_sites, sites, extras_args):
                        args=(kind, "@marking", mx, my, z),
                        kw=dict(yaw_deg=yaw, length=Lm)))
 
-    # ── 표면 처방 ─────────────────────────────────────────────────────
+    # -- Surface prescriptions -------------------------------------------
     for item in prof["surface"]:
         what = item[0]
         if what == "patch":
-            # ★ 재질 사전은 **반드시 kw `mtls=` 로** 넘긴다. 위치인자로 넘기면
-            #   `apply_ground` 의 치환 규칙(@문자열 / kw mtl* / kw mtls)에
-            #   걸리지 않아 빌더가 `"patch"` **문자열**을 그대로 Bind 에 넘긴다
-            #   — dry_kit 은 Bind 를 안 하므로 CPU 자기검산이 못 잡는다
-            #   `[실측 — sceneN5 파일럿 1회차 크래시]`.
+            # * The material dict **must** be passed as the kw `mtls=`. Passed positionally it
+            #   does not match the `apply_ground` substitution rules (@string / kw mtl* / kw mtls)
+            #   and the builder hands the **string** `"patch"` straight to Bind
+            #   - dry_kit does not Bind, so the CPU self-check cannot catch it
+            #   `[measured - sceneN5 pilot round 1 crash]`.
             ops.append(_op("patch", build_patch_field, "Patch",
                            args=((sx0, sy0, sx1, sy1), z),
                            kw=dict(mtls=dict(patch="patch",
@@ -2363,7 +2411,7 @@ def _compose_ops(profile, prof, ctx, tactile_sites, sites, extras_args):
                            args=(pts, z, "@stain_dirt"),
                            kw=dict(seed=seed, **kw)))
 
-    # ── 점자블록 — TACTILE_SITES 등재 지점만 (B11) ─────────────────────
+    # -- Tactile paving - only at sites registered in TACTILE_SITES (B11) --
     for site in tactile_sites:
         scene = ctx.get("scene")
         reg = TACTILE_SITES.get(scene or "", {})
@@ -2389,12 +2437,13 @@ def _compose_ops(profile, prof, ctx, tactile_sites, sites, extras_args):
 
 
 def _build_weed_band(kit, path, region, z, mtl, n=6, seed=0, h_max=None):
-    """**경계 잡초 밴드** — 줄눈선·측구 덮개 틈에 포기 단위로.
+    """**Boundary weed band** - clump by clump in joint lines and gutter cover gaps.
 
-    식생이지 지면이 아니다. **GT-E5 램프 대상**(`exc="weed"`) — 에지에 가까울수록
-    `_clamp_gt_e5` 가 높이를 깎는다. 계절 중립종 확보는 A조(식생) 이관.
+    This is vegetation, not ground. **Subject to the GT-E5 ramp** (`exc="weed"`) - the
+    closer to the edge, the more `_clamp_gt_e5` cuts the height. Securing season-neutral
+    species is handed to team A (vegetation).
 
-    프림: 1/포기.  GT: 예외 등록(h ≤ 0.12, 램프 클램프).
+    Prims: 1 per clump.  GT: registered exception (h <= 0.12, ramp clamp).
     """
     x0, y0, x1, y1 = _norm_region(region)
     h_max = _dim("weed_h_max") if h_max is None else float(h_max)
@@ -2415,10 +2464,10 @@ def _build_weed_band(kit, path, region, z, mtl, n=6, seed=0, h_max=None):
 
 
 # ===========================================================================
-# [14] SCENE_PLANS — **자기검산 픽스처** (통합 코드의 좌표 원천이 아니다, §7.4)
+# [14] SCENE_PLANS - **a self-check fixture** (not the coordinate source for integration code, §7.4)
 #
-#     통합부는 씬 `PARAMS`/`build_views()` 에서 좌표를 읽는다. 아래 값은
-#     §5 매트릭스·§2.3 원점표에서 옮긴 **검산용 근사**다.
+#     Integration reads coordinates from the scene `PARAMS` / `build_views()`. The values below
+#     are **check-only approximations** transcribed from the §5 matrix and the §2.3 origin table.
 # ===========================================================================
 def _S(profile, region, **kw):
     d = dict(profile=profile, region=region, z=0.0, gy=0.0,
@@ -2428,10 +2477,10 @@ def _S(profile, region, **kw):
     return d
 
 
-_E0 = (("edge", 0.0),)                       # 표준 낙차 에지 = 진행축 원점
+_E0 = (("edge", 0.0),)                       # Standard drop edge = travel axis origin
 
-# scene13 램프 종단 프로파일 — 씬 `ramp_profile()` 과 동일 규약(검산 픽스처).
-#   완화 3.6 m @8.5 % → 본선 @17 % → 완화 3.6 m @8.5 %, 총 낙차 4.4 m.
+# scene13 ramp longitudinal profile - same convention as the scene `ramp_profile()` (check fixture).
+#   transition 3.6 m @8.5 % -> main @17 % -> transition 3.6 m @8.5 %, total drop 4.4 m.
 _R13_TRUN, _R13_TG, _R13_DROP, _R13_MG = 3.6, 0.085, 4.4, 0.17
 _R13_TD = _R13_TRUN * _R13_TG
 _R13_MD = _R13_DROP - 2.0 * _R13_TD
@@ -2441,7 +2490,7 @@ _RAMP13_PROFILE = [(0.0, 0.0, _R13_TRUN, _R13_TD),
                     -(_R13_TD + _R13_MD), _R13_TRUN, _R13_TD)]
 
 SCENE_PLANS = {
-    # ── 본편 21 ───────────────────────────────────────────────────────
+    # -- Main 21 --------------------------------------------------------
     "scene01": _S("plaza_granite", (-12.0, -5.5, -0.5, 5.5), gy=-2.75,
                   edges=_E0, tactile=("stair_top",),
                   sites=dict(manhole=[(-3.8, -2.4), (-8.0, 1.6)],
@@ -2455,9 +2504,9 @@ SCENE_PLANS = {
     "scene05": _S("plaza_granite", (-12.0, -5.0, -0.5, 5.0), edges=_E0,
                   sites=dict(manhole=[(-3.5, -1.0), (-8.5, 0.0)],
                              gully=[(-8.5, 0.4), (-6.0, -2.0)])),
-    # 06 — 원점 (3.5, −13.0, 5.000), 진행 −Y. 데크 폭 x 2~5, 에지 y=−13.
-    #  ※ 사양 §2.3 의 06 행 W1 표기(y −12.44…−11.0 등)는 §2.2 정의보다 +0.564 m
-    #    어긋난다. 여기서는 §2.2 기하 정의(X∈[0.564,2.00])를 따른다.
+    # 06 - origin (3.5, -13.0, 5.000), travel -Y. Deck width x 2-5, edge y=-13.
+    #  Note: the 06 row W1 notation in spec §2.3 (y -12.44...-11.0 etc.) is off by +0.564 m
+    #    from the §2.2 definition. The §2.2 geometric definition (X in [0.564,2.00]) is used here.
     "scene06": _S("bridge_deck", (2.0, -13.0, 5.0, 0.0),
                   origin=(3.5, -13.0, 5.0), axis="-y", edges=_E0),
     "scene07": _S("courtyard_dg", (-12.0, -3.0, 4.0, 3.0), edges=_E0),
@@ -2475,8 +2524,8 @@ SCENE_PLANS = {
                   tactile=("stair_top", "stair_foot")),
     "scene12": _S("deck_timber", (-12.0, -1.6, 0.0, 1.6), edges=_E0,
                   extras_args=dict(deck_planks=dict(max_gaps=60))),
-    # 13 — 램프 크레스트 은닉(§5.0 C-2): 에지 너머 노면구배 0.085 → d2 만 [F].
-    #      점자블록은 **보도부만**(램프 내부 = 주차장 내부 = 비대상, §12.4).
+    # 13 - ramp crest concealment (§5.0 C-2): beyond-edge surface gradient 0.085 -> [F] at d2 only.
+    #      Tactile paving is **on the sidewalk part only** (inside the ramp = inside the car park = out of scope, §12.4).
     "scene13": _S("ramp_parking", (-14.0, -3.3, 0.6, 3.3),
                   edges=(("ramp_crest", 0.0, dict(beyond_grade=0.085)),),
                   tactile=("bollard",),
@@ -2485,25 +2534,25 @@ SCENE_PLANS = {
                                      y_pos=3.0, height=0.12, width=0.30),
                       groove_band=dict(region=(3.6, -3.0, 20.4, 3.0))),
                   sites=dict(manhole=[(-3.90, 0.00)],
-                             # 13-3 진입 트렌치(d2 전용) + 13-4 램프 하단
-                             # 집수 트렌치(미장센 — 크레스트 너머라 h0.3 밖)
-                             #  ★ (v1.2) 0.35 → 0.52. 프레임 반폭 0.19 라
-                             #    근단이 크레스트 +0.16 m 에 있었고 d2 이격이
-                             #    18.1 @1080 = 9.1 @540 — 유도 강도(16 @540)
-                             #    미달이었다. 근단 +0.33 m → 34.7 @1080
-                             #    = 17.4 @540 `[계산]`. 여전히 크레스트 너머라
-                             #    C-2(d2 전용) 불변.
+                             # 13-3 entry trench (d2 only) + 13-4 ramp foot
+                             # Collection trench (mise en scene - beyond the crest, so outside h0.3)
+                             #  * (v1.2) 0.35 -> 0.52. With a frame half-width of 0.19 the
+                             #    near end sat at crest +0.16 m and the d2 separation was
+                             #    18.1 @1080 = 9.1 @540 - short of the derived strength
+                             #    (16 @540). Near end +0.33 m -> 34.7 @1080
+                             #    = 17.4 @540 `[computed]`. Still beyond the crest, so
+                             #    C-2 (d2 only) is unchanged.
                              trench=[(0.52, -3.0, 3.0), (23.4, -3.0, 3.0)],
                              tactile=dict(bollard=(-2.90, 4.35, -1.40, 4.65)))),
     "scene14": _S("plaza_granite", (-12.0, -4.0, -0.5, 4.0), edges=_E0,
                   sites=dict(manhole=[(-8.7, 1.2), (-4.5, -1.5)],
                              gully=[(-0.95, -3.6), (-0.95, 3.6)])),
     "scene15": _S("alley_concrete", (-12.0, -0.9, 0.0, 0.9), edges=_E0,
-                  # (v1.2) 픽스처를 씬 실좌표에 맞춘다 — 구 −1.15 는 M9-ⓑ
-                  # 이설 전 값이었고 −4.00 은 d5 화면폭 56.1 % 였다(레드팀 G-2).
+                  # (v1.2) Fixture aligned to the real scene coordinates - the old -1.15 predated the M9-(b)
+                  # relocation and -4.00 gave 56.1 % of the d5 screen width (red team G-2).
                   sites=dict(manhole=[(-2.40, -0.15)], gutter_U=[-0.75],
-                             # 15-6 계단 발치 그레이팅 — 실제로는 꺾임
-                             # rot_group 로컬 x=9.3·z=−4.25. 픽스처는 공칭 좌표.
+                             # 15-6 grating at the stair foot - actually bent
+                             # rot_group local x=9.3, z=-4.25. The fixture uses nominal coordinates.
                              trench=[(9.3, -0.9, 0.9)],
                              patch=[(-4.2, 0.10), (-7.6, -0.30)])),
     "scene16": _S("sidewalk_block", (-12.0, -2.5, 2.0, 2.5), edges=_E0,
@@ -2517,7 +2566,7 @@ SCENE_PLANS = {
     "scene18": _S("plaza_granite", (-12.0, -5.0, -0.5, 5.0), edges=_E0,
                   sites=dict(manhole=[(-4.0, 1.0), (-9.0, -1.0)],
                              gully=[(-2.5, -4.6), (-8.0, 4.6)])),
-    # 19 — 미러(x' = 2·5.8 − x)·진행 −X·dists (2, 3.5, 5). 에지 x=9.04.
+    # 19 - mirrored (x' = 2*5.8 - x), travel -X, dists (2, 3.5, 5). Edge x=9.04.
     "scene19": _S("roof_membrane", (9.04, -4.0, 21.0, 4.0),
                   origin=(9.04, 0.0, 0.0), axis="-x", edges=_E0,
                   dists=(2, 3.5, 5),
@@ -2528,8 +2577,8 @@ SCENE_PLANS = {
     "scene21": _S("plaza_granite", (-12.0, -4.0, -0.5, 4.0), edges=_E0,
                   sites=dict(manhole=[(-4.0, 1.0), (-4.0, -1.0)],
                              gully=[(-2.0, -3.6), (-7.0, 3.6)])),
-    # ── 배치1 12 ──────────────────────────────────────────────────────
-    # C1 — §7.3 불변식: 신규 요소 proud ≤ 적설 0.05(매몰이 씬 특색).
+    # -- Batch 1, 12 -----------------------------------------------------
+    # C1 - §7.3 invariant: new elements must have proud <= the 0.05 snow cover (burial is the scene identity).
     "sceneC1": _S("plaza_granite", (-11.0, -3.0, -0.5, 3.0), edges=_E0,
                   caps=dict(weed_h=0.045), tactile=("stair_top",),
                   sites=dict(manhole=[(-3.0, 1.0)],
@@ -2577,7 +2626,7 @@ SCENE_PLANS = {
 
 
 # ===========================================================================
-# [15] 자기검산 — `python3 ground_kit.py` (Isaac·GPU 불요)
+# [15] Self-check - `python3 ground_kit.py` (no Isaac, no GPU)
 # ===========================================================================
 def _selfcheck():
     ok = True
@@ -2597,7 +2646,7 @@ def _selfcheck():
           f"VFOV {CAM_VFOV_DEG:.2f}° · {CAM_W}×{CAM_H}")
     print("=" * 78)
 
-    # ── ① 상수·기하 검산 (사양 부록 B 재현) ────────────────────────────
+    # -- (1) Constant and geometry check (reproduces spec appendix B) ----
     print("\n[1] 상수·기하 (사양 부록 B 재현)")
     chk("f = 1662.77 px", abs(CAM_F - 1662.769) < 0.01, f"{CAM_F:.3f}")
     chk("VFOV = 35.98°", abs(CAM_VFOV_DEG - 35.98) < 0.02,
@@ -2616,7 +2665,7 @@ def _selfcheck():
         abs(drow(-2.40, 10) - 16.05) < 0.02, f"{drow(-2.40, 10):.2f}")
     chk("drow(−0.30, 5) = 6.42 (법정 점자블록 → GT-E2-x 필요)",
         abs(drow(-0.30, 5) - 6.42) < 0.02, f"{drow(-0.30, 5):.2f}")
-    # ── 행 단위 규약 (v1.2) — 두 축이 섞이지 않는지 코드가 지킨다 ──────
+    # -- Row unit convention (v1.2) - the code enforces that the two axes never mix --
     chk("GRAZE 작업본 = 960×540 (regression_check.GRAZE_LONG)",
         (GRAZE_WORK_LONG, GRAZE_WORK_H) == (960, 540),
         f"{GRAZE_WORK_LONG}×{GRAZE_WORK_H}")
@@ -2628,7 +2677,7 @@ def _selfcheck():
         abs(GRAZE_ROW_SEP_1080 - 32.0) < 1e-12, f"{GRAZE_ROW_SEP_1080}")
     chk("축 왕복 무손실 to_work→to_1080",
         abs(to_1080_rows(to_work_rows(497.35)) - 497.35) < 1e-9)
-    # 컷별 집행 하한 — d2/d5 는 완전분리 달성 가능, d10 은 대역이 얕아 불가
+    # Per-shot enforcement bound - d2/d5 can reach full separation, d10 cannot because its band is shallow
     chk("d2 집행하한 = 32 @1080 (완전분리 달성 가능)",
         abs(graze_row_sep_1080(2) - 32.0) < 1e-9, f"{graze_row_sep_1080(2)}")
     chk("d5 집행하한 = 32 @1080", abs(graze_row_sep_1080(5) - 32.0) < 1e-9,
@@ -2644,7 +2693,7 @@ def _selfcheck():
         f"{cam_wpx(0.648, 0.85):.0f} px = 프레임 폭 "
         f"{100 * cam_wpx(0.648, 0.85) / CAM_W:.1f} %")
 
-    # ── ② 프로파일 원장 (18종 + U1~U4) ────────────────────────────────
+    # -- (2) Profile ledger (18 profiles + U1-U4) ------------------------
     print("\n[2] 프로파일 원장 · 유닛 셀 계약 (§4.1·§4.5)")
     chk("프로파일 18종 + 하위변종 1", len(GROUND_PROFILES) == 19,
         f"{len(GROUND_PROFILES)}")
@@ -2663,7 +2712,7 @@ def _selfcheck():
     chk("프로파일 tactile 전부 None (§3.4)",
         all(p["tactile"] is None for p in GROUND_PROFILES.values()))
 
-    # ── ③ 점자블록 등록부 ─────────────────────────────────────────────
+    # -- (3) Tactile paving register -------------------------------------
     print("\n[3] 점자블록 등록부 (§12.4)")
     k_h = len([s for s in TACTILE_SITES
                if s not in ("sceneN1", "sceneN2", "sceneN4", "sceneN5")])
@@ -2676,11 +2725,11 @@ def _selfcheck():
     fp_rows = tactile_fp_rows()
     chk("d2 는 Δ≥16 자력 통과 → EXPECTED_FP 미등재", 2 not in fp_rows,
         f"등재 컷 {sorted(fp_rows)}")
-    # ★ (v1.2) 사양 §12.3 의 d5 표본 (348, 356) 은 **행 축 결함의 산물**이었다.
-    #   그 값은 "Δ<16 @1080" 로 걸러 근단(355.03)만 담은 것이고, 유도 강도
-    #   (16 @540 = 32 @1080)에서는 원단(Δ 22.1 @1080 = 11.1 @540)도 융합 대역
-    #   안이라 함께 담긴다 → (348, 371). d10 표본 (297, 304) 는 불변.
-    #   **§12.3 d5 표본은 본 수정으로 대체된다** — 보고서에 명기.
+    # * (v1.2) The d5 sample (348, 356) in spec §12.3 was **an artefact of the row axis defect**.
+    #   That value filtered on "delta < 16 @1080" and kept only the near end (355.03); at the
+    #   derived strength (16 @540 = 32 @1080) the far end (delta 22.1 @1080 = 11.1 @540) is inside
+    #   the merge band too and is included -> (348, 371). The d10 sample (297, 304) is unchanged.
+    #   **The §12.3 d5 sample is superseded by this correction** - to be stated in the report.
     chk("scene02 d5 FP 행 = (348, 371)  [§12.3 (348,356) 대체 — 축 정정]",
         fp_rows.get(5) == (348, 371), f"{fp_rows.get(5)}")
     chk("scene02 d10 FP 행 = (297, 304)  [§12.3 표본 그대로]",
@@ -2698,7 +2747,7 @@ def _selfcheck():
         sum(1 for v in TACTILE_SITES.values() for s in v.values()
             if s["relief"] == "geom") == 0)
 
-    # ── ④ 규약 강제 (예외가 실제로 던져지는가) ────────────────────────
+    # -- (4) Convention enforcement (do the exceptions actually raise?) --
     print("\n[4] 규약 강제 — 예외 발생 검사")
 
     def raises(fn, tag):
@@ -2729,7 +2778,7 @@ def _selfcheck():
         raises(lambda: build_joint_grid(dry_kit(), "/T", (-4, -1, 0, 1), 0.0,
                                         None, recess=+0.003), "recess"))
 
-    # ── ⑤ 전 33씬 dry 실행 ────────────────────────────────────────────
+    # -- (5) Dry run of all 33 scenes ------------------------------------
     print("\n[5] 전 33씬 계획 dry 실행 (USD 미접촉)")
     hdr = (f"{'씬':<9}{'프로파일':<20}{'프림':>5}{'산포':>6}"
            f"{'δmax':>8}{'B1':>4}{'B2':>7}{'B3':>4}{'B4':>4}{'B5':>4}"
@@ -2771,7 +2820,7 @@ def _selfcheck():
             warn_rows.append((scene, b["warn"]))
         if not b["fail"]:
             n_ok += 1
-        # 요소 단위 하드 어서션
+        # Per-element hard assertions
         for e in plan["elements"]:
             if e["meta"].get("dropped"):
                 continue
@@ -2779,7 +2828,7 @@ def _selfcheck():
                     and abs(e["proud"]) > GT_DELTA + 1e-9:
                 ok = False
                 fails.append(f"{scene} GT δ: {e['path']} {e['proud']}")
-        # 개구 교차 0
+        # Zero opening intersections
         for e in plan["elements"]:
             x0, y0, _, x1, y1, _ = e["aabb"]
             for vx0, vy0, vx1, vy1 in plan["ctx"]["voids"]:
@@ -2800,7 +2849,7 @@ def _selfcheck():
         for scene, w in warn_rows:
             print(f"    · {scene:<9} {','.join(w)}")
 
-    # ── ⑥ 파일럿 3씬 상세 ─────────────────────────────────────────────
+    # -- (6) Pilot 3-scene detail ----------------------------------------
     print("\n[6] 파일럿 3씬 상세 (N5 · 15 · 13)")
     for scene in ("sceneN5", "scene15", "scene13"):
         sp = SCENE_PLANS[scene]
@@ -2823,7 +2872,7 @@ def _selfcheck():
                 print(f"      [GT 변경] {g['item']} drop={g['drop']:.3f} "
                       f"→ 라벨 {g['label_owner']}")
 
-    # ── ⑦ apply_ground dry 왕복 ───────────────────────────────────────
+    # -- (7) apply_ground dry round trip ---------------------------------
     print("\n[7] apply_ground dry 왕복 (USD 헬퍼 = dry_kit)")
     sp = SCENE_PLANS["scene15"]
     plan = plan_ground(sp["profile"], sp["region"], scene="scene15",
@@ -2841,10 +2890,10 @@ def _selfcheck():
         res["gt_delta_max"] <= max(GT_DELTA, _dim("weed_h_max")) + 1e-9,
         f"{res['gt_delta_max']:.4f}")
 
-    # ★ 전 33씬 apply 왕복 — 재질 치환 규칙 위반을 **CPU 에서** 잡는다.
-    #   `dry_kit` 은 Bind 를 안 하므로, 미치환 재질 키는 apply_ground 의
-    #   가드가 아니면 GPU 렌더에서야 `Bind(str)` 로 터진다
-    #   `[실측 — sceneN5 파일럿 1회차]`.
+    # * apply round trip over all 33 scenes - catches material substitution rule violations **on CPU**.
+    #   `dry_kit` does not Bind, so without the apply_ground guard an unsubstituted material key
+    #   would only blow up as `Bind(str)` during a GPU render
+    #   `[measured - sceneN5 pilot round 1]`.
     mtl_bad, prim_bad = [], []
     for scene in sorted(SCENE_PLANS):
         sp = SCENE_PLANS[scene]
@@ -2868,8 +2917,8 @@ def _selfcheck():
     chk("33씬 apply 프림 = plan 프림", not prim_bad,
         "; ".join(prim_bad[:3]) or "33/33")
 
-    # ★ (v1.2) 솔리드 슬래브 매몰 가드 — 상면이 포장 상면보다 낮은 요소는
-    #   렌더 화소를 0 개 낸다(감산 기하 없음). 허용 예외는 진짜 기하 틈뿐이다.
+    # * (v1.2) Solid-slab burial guard - an element whose top is below the paving top
+    #   produces zero rendered pixels (there is no subtraction geometry). The only allowed exception is a genuine geometric gap.
     _BURY_OK = {"deck_gap", "trench", "gutter", "groove"}
     buried = []
     for scene in sorted(SCENE_PLANS):

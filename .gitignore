@@ -15,8 +15,14 @@ runs/
 wandb/
 *.log
 
-# Render outputs (regenerated per run, ~11GB)
-look_check/
+# Render outputs (regenerated per run, ~12GB after the 2026-07-30 cleanup).
+# The two index documents ARE tracked: look_check/ is the only place the round
+# inventory exists, so INDEX.md is its sole committed record (cleanup_lookcheck_v1.md).
+# NOTE: a trailing-slash `look_check/` would stop git descending into the directory
+# at all and the negations below would never be seen — the `/*` form is required.
+look_check/*
+!look_check/README.md
+!look_check/INDEX.md
 
 # Heavy binary assets (~800MB) — 재현 방법:
 #   python assets/download_assets.py                  # qwantani HDRI + 룩데브 v1 텍스처

@@ -1243,9 +1243,8 @@ def main():
                                   rail_h=0.9, post_r=0.035, spacing=1.4,
                                   rail_r=0.035)
         if cfg["cue_tactile"]:
-            tac = sc.make_pbr(stage, "/World/Looks/Tactile",
-                              diffuse_color=(0.85, 0.72, 0.10),
-                              roughness_const=0.7)
+            # [W2 · ground_kit §12.5-3] texture-backed so the 36 dots shade.
+            tac = sc.tactile_pbr(stage, "/World/Looks/Tactile")
             sc.build_tactile(stage, f"{ROOT}/Tactile", -0.62, -0.02,
                              -1.6, 1.6, tac, z=0.0)
         if cfg["cue_nosing"]:

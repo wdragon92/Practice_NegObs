@@ -1181,9 +1181,8 @@ def main():
     def build_cues(M):
         """비관행 설비 단서(코드 경로만)."""
         if cfg["cue_tactile"]:
-            tac = sc.make_pbr(stage, "/World/Looks/Tactile",
-                              diffuse_color=(0.85, 0.72, 0.10),
-                              roughness_const=0.7)
+            # [W2 · ground_kit §12.5-3] texture-backed so the 36 dots shade.
+            tac = sc.tactile_pbr(stage, "/World/Looks/Tactile")
             sc.build_tactile(stage, f"{ROOT}/Tactile", -2.10, -1.50,
                              PARAMS["landing"]["y0"], PARAMS["landing"]["y1"],
                              tac, z=0.0)

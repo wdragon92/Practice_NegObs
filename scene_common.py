@@ -990,7 +990,8 @@ def _oriented_box(stage, path, center, size, mtl=None, collider=False,
 def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
              tint=None, metallic=0.0, roughness_const=None,
              diffuse_color=None, bump=1.0, specular_level=None,
-             emission_color=None, emission_intensity=None, uv_mode=False):
+             emission_color=None, emission_intensity=None, uv_mode=False,
+             unit_cell=None):
     """OmniPBR 재질. diff 지정 시 월드 스페이스 투영 텍스처, 아니면 상수 컬러.
     specular_level 지정 시 sh.CreateInput("specular_level", Float).
     emission_color+emission_intensity 지정 시 발광(enable_emission) — 실내
@@ -1014,7 +1015,8 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
             return _make_ground_pbr(stage, path, diff, nor, rough, scale_m,
                                     spec, tint=tint,
                                     roughness_const=roughness_const,
-                                    specular_level=specular_level, bump=bump)
+                                    specular_level=specular_level, bump=bump,
+                                    unit_cell=unit_cell)
         # [사실화 v1] **상수색 재질도 MDL 로 태운다.**
         # 33씬 make_pbr 호출의 절반 이상이 diffuse_color 상수색인데, 상수색은
         # 정의상 완전 평탄이라 flat% 의 최대 발생원이다. 텍스처를 새로 조달하지
@@ -1036,13 +1038,15 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
                     spec, tint=tint, roughness_const=None,
                     specular_level=(specular_level if specular_level is not None
                                     else spec.get("spec")),
-                    bump=spec.get("bump", 1.0), base_color=pbc)
+                    bump=spec.get("bump", 1.0), base_color=pbc,
+                    unit_cell=unit_cell)
             LOOK_STATS["const_mdl"] = LOOK_STATS.get("const_mdl", 0) + 1
             return _make_ground_pbr(stage, path, None, None, None, scale_m,
                                     spec, tint=tint,
                                     roughness_const=roughness_const,
                                     specular_level=specular_level, bump=bump,
-                                    base_color=diffuse_color)
+                                    base_color=diffuse_color,
+                                    unit_cell=unit_cell)
         # 텍스처 재질 → 베벨 + 디테일 노멀.
         # **상수색 재질도 베벨은 받는다** — 게이트 1차에서 상수색을 통째로
         # 건너뛰고 있었고, 상수색이야말로 flat% 의 주범이다. 텍스처화는 별도
@@ -1130,9 +1134,69 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
     return mtl
 
 
+# Unit-cell jitter defaults (T1 §1.8-3). sigma 0.10 / accent 7 % are the spec
+# values; they only take effect once ground_kit supplies a cell period.
+UNIT_CELL_DEFAULTS = dict(sigma=0.10, accent=0.07)
+
+
+def _wire_unit_cell(sh, F, F2, unit_cell):
+    """Pass the ground_kit unit-cell ledger through to the MDL. Default = OFF.
+
+    Contract: `ground_kit_spec_v1.md` §4.5 (U1~U4) / `t1_material_layer_spec_v1.md`
+    §1.8-3. The MDL quantises the dominant-plane coordinate into cells and gives
+    each cell one log-normal albedo scalar (zero texture fetches) — that scalar
+    is the principal component of sigma_LF for every paving profile.
+
+    `unit_cell` is `None` (default) or `(cell_m, (ox, oy))`, optionally
+    `(cell_m, (ox, oy), sigma, accent)`. Nothing is authored when it is None or
+    when cell_m <= 0, so the shader is byte-identical to before — the wiring
+    exists but the value injection waits on the ground_kit ledger (spec §8.1 P2).
+
+    U3 is why the ORIGIN is mandatory and not optional: the MDL's default grid
+    origin is the UV origin, not the scene origin, so a matching period with a
+    mismatched phase produces a half-cell offset seam under the engraved joints.
+    U4 (`unit_cell = None` profile + jitter on) is a T1-side FAIL, raised here:
+    unmodular paving (asphalt, membrane) has no cell to jitter.
+    """
+    if unit_cell is None:
+        return False
+    try:
+        cell = float(unit_cell[0])
+        origin = unit_cell[1]
+        sigma = float(unit_cell[2]) if len(unit_cell) > 2 else \
+            UNIT_CELL_DEFAULTS["sigma"]
+        accent = float(unit_cell[3]) if len(unit_cell) > 3 else \
+            UNIT_CELL_DEFAULTS["accent"]
+    except (TypeError, IndexError, ValueError) as e:
+        raise ValueError(f"unit_cell 형식 오류 {unit_cell!r}: {e}")
+    if cell <= 0.0:                       # U4 — explicitly "no module" profile
+        if sigma > 0.0:
+            raise ValueError(
+                "unit_cell 주기가 0 이하인데 지터가 켜져 있다(계약 U4 위반) — "
+                "무모듈 포장(아스팔트·도막)에 셀 지터는 물리적으로 틀렸다")
+        return False
+    if origin is None:                    # U3 — period without phase is not a contract
+        raise ValueError(
+            "unit_cell_origin 미제공(계약 U3 위반) — MDL 기본 원점은 UV 원점이지 "
+            "씬 원점이 아니라서, 주기가 맞아도 위상이 어긋나면 반 칸 이음매가 생긴다")
+    ox, oy = float(origin[0]), float(origin[1])
+    sh.CreateInput("unit_cell_m", F2).Set(_vec2(cell, cell))
+    sh.CreateInput("unit_cell_origin", F2).Set(_vec2(ox, oy))
+    sh.CreateInput("unit_albedo_sigma", F).Set(sigma)
+    sh.CreateInput("unit_accent_frac", F).Set(accent)
+    LOOK_STATS["unit_cell"] = LOOK_STATS.get("unit_cell", 0) + 1
+    return True
+
+
+def _vec2(a, b):
+    from pxr import Gf
+    return Gf.Vec2f(float(a), float(b))
+
+
 def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
                      tint=None, roughness_const=None, specular_level=None,
-                     bump=1.0, base_color=None, metallic=0.0):
+                     bump=1.0, base_color=None, metallic=0.0,
+                     unit_cell=None):
     """[사실화 v1] NegObsGround.mdl 재질 — 지면·사면 계열 전용.
 
     OmniPBR 의 `project_uvw` 는 트라이플래너가 아니라 **큐빅 투영**이라 경사면에서
@@ -1230,6 +1294,7 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
         sh.CreateInput("round_edges_radius", F).Set(float(spec["bevel"]))
         sh.CreateInput("round_edges_roundness", F).Set(1.0)
         sh.CreateInput("round_edges_across_materials", B).Set(False)
+    _wire_unit_cell(sh, F, F2, unit_cell)
     # tint 는 위에서 base_color 에 접어 넣었다(아래 참조).
     for out in ("surface", "displacement", "volume"):
         mtl.CreateOutput(f"mdl:{out}",
@@ -1696,6 +1761,39 @@ def build_canopy(stage, prefix, x0, x1, y0, y1, z_roof, post_r, mtl_roof,
 # ===========================================================================
 # [5b] 씬 드레싱 빌더 (scene01 이식 — M 딕셔너리 대신 mtl 인자화)
 # ===========================================================================
+TACTILE_TILE_M = 0.30        # one statutory pad = 0.30 x 0.30 m (36 dots, 6x6)
+TACTILE_RGB = (0.85, 0.72, 0.10)     # fallback constant only — see below
+
+
+def tactile_pbr(stage, path, scale_m=None, roughness=0.70):
+    """Canonical tactile-paving material — `tactile_yellow` texture, not flat colour.
+
+    ground_kit §12.5-3 traced "batch1 tactile pads render at 0.003 % of frame"
+    partly to this: the pads were authored as a CONSTANT colour, so the 36
+    statutory dots produce no shading whatsoever. `TEX["tactile"]` has held
+    `tactile_yellow_diff/nor` all along and simply was never bound at 8 of the
+    call sites. The role key and the file names stay `tactile` /
+    `tactile_yellow_*` — ground_kit and the vegetation agent address them by
+    that exact name.
+      texture [measured — assets/veg_manifest_w2.json]: 1024 px, 36 dots (6x6),
+      pitch 50.0 mm, linear albedo 0.4841 (below the 0.55 clamp of §12.5-4).
+    Falls back to the constant colour when the texture is absent, because
+    `assets/scene01/*` is git-ignored and a missing binding renders black —
+    strictly worse than the flat yellow it replaces.
+    """
+    sm = float(TACTILE_TILE_M if scale_m is None else scale_m)
+    diff = os.path.join(TEX["tactile"]["dir"], TEX["tactile"]["diff"])
+    nor = os.path.join(TEX["tactile"]["dir"], TEX["tactile"]["nor"])
+    if os.path.isfile(diff):
+        return make_pbr(stage, path, diff,
+                        nor if os.path.isfile(nor) else None, None, sm,
+                        metallic=0.0, roughness_const=roughness)
+    print("[점자블록][경고] tactile_yellow 텍스처 부재 — 상수색 폴백(돌기 음영 0). "
+          "assets/scene01/download_scene01_assets.py 실행 필요")
+    return make_pbr(stage, path, diffuse_color=TACTILE_RGB,
+                    metallic=0.0, roughness_const=roughness)
+
+
 def build_tactile(stage, path, x0, x1, y0, y1, mtl, z=0.0, proud=0.004):
     """점형 점자블록 띠(황색). x0..x1 × y0..y1 사각 밴드. 상면 z에서 proud 돌출,
     돌기는 노멀맵으로 표현(거의 플러시). 반환: Cube 프림."""

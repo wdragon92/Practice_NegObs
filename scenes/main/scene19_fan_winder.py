@@ -890,9 +890,8 @@ def main():
                                    top - 0.06, M["rail"], collider=False)
         # cue_tactile: 상부 접근 경고 점자띠(첫 단 앞)
         if cfg.get("cue_tactile"):
-            tac = sc.make_pbr(stage, "/World/Looks/Tactile",
-                              diffuse_color=(0.85, 0.72, 0.10),
-                              roughness_const=0.7)
+            # [W2 · ground_kit §12.5-3] texture-backed so the 36 dots shade.
+            tac = sc.tactile_pbr(stage, "/World/Looks/Tactile")
             sc.build_tactile(stage, "/World/Scene19/Tactile",
                              4.1, 4.5, -1.0, 1.0, tac, z=0.0)
         # cue_nosing: 방사형 단코 논슬립 아크 밴드

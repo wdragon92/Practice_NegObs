@@ -47,7 +47,35 @@ BOLLARD_V51 = dict(
 # 재질 기본색 (씬이 mtl 을 넘기지 않을 때만 사용)
 _BODY_RGB = (0.78, 0.80, 0.83)      # 스테인리스 헤어라인
 _BAND_RGB = (0.88, 0.88, 0.86)      # 밝은 백색 반사띠 — 소면적이므로 허용
-_TACT_RGB = (0.80, 0.66, 0.14)      # 점형블록 황색
+_TACT_RGB = (0.80, 0.66, 0.14)      # 점형블록 황색 — 텍스처 부재 시 폴백만
+# [W2 · ground_kit §12.5-3] Tactile paving was authored as a FLAT constant
+# colour, so the 36 statutory dots cast no shading at all and the batch1 pads
+# read as 0.003 % of frame (55 px) — "breaks the convention AND is invisible".
+# The `tactile_yellow_diff/nor` pair has been registered in `scene_common.TEX`
+# all along and was simply never bound. Wire it here; the role name stays
+# `tactile` / the files stay `tactile_yellow_*` because ground_kit and the
+# vegetation agent both address them by that name.
+#   texture [measured — assets/veg_manifest_w2.json]: 1024 px, 36 dots (6x6),
+#   pitch 50.0 mm, first-column centre 26.4 mm, linear albedo 0.4841
+#   (under the 0.55 clamp of ground_kit §12.5-4, so no extra tint is applied).
+#   Dot diameter 38.1 mm has NO figure in the spec table (which fixes count /
+#   pitch / height only) and is 1.5~1.7x the common 22~25 mm base — flagged in
+#   the manifest as pending a supervisor call. Geometry is untouched either way.
+_TACT_TILE_M = 0.30                 # one statutory pad = 0.30 x 0.30 m
+_TACT_ROUGH = 0.70
+
+
+def tactile_mtl(stage, path, scale_m=None):
+    """Tactile-paving material for batch1 call sites.
+
+    Thin alias over `scene_common.tactile_pbr` so there is exactly ONE place
+    that decides how tactile paving is shaded. Path token stays `...Tactile`,
+    which `_look_spec` maps to class `paint` (inviolable: OmniPBR, no MDL
+    promotion, no detail normal, bevel 0).
+    """
+    return sc.tactile_pbr(stage, path,
+                          _TACT_TILE_M if scale_m is None else scale_m,
+                          roughness=_TACT_ROUGH)
 
 
 def _norm_front(front_dir):
@@ -98,9 +126,7 @@ def build_bollard_v51(stage, prefix, cx, cy, base_z, yaw_todo_none=None,
                                diffuse_color=_BAND_RGB,
                                metallic=0.0, roughness_const=0.30)
     if mtl_tactile is None and tactile:
-        mtl_tactile = sc.make_pbr(stage, prefix + "/MtlTactile",
-                                  diffuse_color=_TACT_RGB,
-                                  metallic=0.0, roughness_const=0.70)
+        mtl_tactile = tactile_mtl(stage, prefix + "/MtlTactile")
 
     out = dict(body=None, band=None, tactile=None)
 

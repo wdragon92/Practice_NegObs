@@ -562,9 +562,8 @@ def main():
                     diffuse_color=tint_jitter(base, 10 * i + j),
                     roughness_const=mp["canopy_rough"], specular_level=0.0))
         M["canopy_a"], M["canopy_b"] = M["canopy"][0], M["canopy"][2]
-        M["tactile"] = sc.make_pbr(stage, "/World/Looks/Tactile",
-                                   diffuse_color=mp["tactile_color"],
-                                   roughness_const=0.7, metallic=0.0)
+        # [W2 · ground_kit §12.5-3] texture-backed so the 36 dots shade.
+        M["tactile"] = sc.tactile_pbr(stage, "/World/Looks/Tactile")
         M["hedge"] = sc.make_pbr(
             stage, "/World/Looks/Hedge", sc.tex_path("grass", "diff"),
             sc.tex_path("grass", "nor"), sc.tex_path("grass", "rough"),

@@ -595,9 +595,8 @@ def main():
         M["bollard_band"] = PBR(f"{ROOT}/Looks/BollardBand",
                                 diffuse_color=mp["bollard_band_color"],
                                 roughness_const=0.30)
-        M["tactile"] = PBR(f"{ROOT}/Looks/Tactile",
-                           diffuse_color=mp["tactile_color"],
-                           roughness_const=mp["tactile_rough"])
+        # [W2 · ground_kit §12.5-3] texture-backed so the 36 dots actually shade.
+        M["tactile"] = bc.tactile_mtl(stage, f"{ROOT}/Looks/Tactile")
         return M
 
     # -------------------------------------------------------------------

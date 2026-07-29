@@ -962,9 +962,8 @@ def main():
         yc, Wb = _seg_centers()
         # cue_tactile: 상단 접근 경고 점자띠
         if cfg.get("cue_tactile"):
-            tac = sc.make_pbr(stage, "/World/Looks/Tactile",
-                              diffuse_color=(0.85, 0.72, 0.10),
-                              roughness_const=0.7)
+            # [W2 · ground_kit §12.5-3] texture-backed so the 36 dots shade.
+            tac = sc.tactile_pbr(stage, "/World/Looks/Tactile")
             sc.build_tactile(stage, "/World/Scene18/Tactile",
                              -0.6, -0.2, s["y0"], s["y1"], tac, z=0.0)
         # cue_nosing: 물결 단코 논슬립(각 세그 전연 상수색 띠) — 기본 False

@@ -31,21 +31,28 @@
 이 작업의 출발점이다. 그래서 이 모듈은 거리에 따라 **유형 자체를 강등**한다
 (`fk.lod_tier`). d>80 m 면 어떤 유형이든 `backdrop`(프림 3~4)으로 떨어진다.
 
-유형 × LOD 프림 예산표 (동당 · 기하 프림만)
--------------------------------------------
-`selfcheck()` 가 MockKit 으로 **실측**해 이 표와 대조한다(불일치 시 실패).
-표 값은 상한(budget)이고, 실측 대표값은 괄호 안이다. 대표 파사드 W=24 m.
+유형 × LOD 프림 예산표 (동당 · 기하 프림만) — **v1 재기준선 2026-07-29**
+------------------------------------------------------------------------
+`selfcheck()` 가 MockKit 으로 **실측**해 이 표와 대조한다(초과 시 실패).
+표 값은 상한(budget)이고, **실측값은 괄호 안**이다. 대표 파사드 W=24 m ·
+안길이 12 m · 유형별 표준 층수(shop_house 4 · apt 14 · office 9 · villa 5 ·
+low_shop 1 · backdrop 10).
 
 | kind        | near (<20 m) | mid (20~40) | far (40~80) | silhouette (>80) |
 |-------------|--------------|-------------|-------------|------------------|
-| `shop_house`| **56** (52)  | **30** (27) | **10** (9)  | 4 (3)            |
-| `apt`       | **52** (46)  | **34** (30) | **12** (10) | 4 (3)            |
-| `office`    | **34** (29)  | **22** (18) | **10** (8)  | 4 (3)            |
-| `villa`     | **54** (49)  | **30** (26) | **10** (9)  | 4 (3)            |
-| `low_shop`  | **26** (23)  | **15** (13) | **7** (6)   | 4 (3)            |
-| `backdrop`  | 5 (4)        | 5 (4)       | 4 (3)       | 4 (3)            |
+| `shop_house`| **59** (56)  | **30** (27) | **9** (6)   | 4 (3)            |
+| `apt`       | **57** (54)  | **23** (20) | **15** (12) | 4 (4)            |
+| `office`    | **31** (28)  | **15** (12) | **11** (8)  | 4 (3)            |
+| `villa`     | **57** (54)  | **28** (25) | **10** (7)  | 4 (3)            |
+| `low_shop`  | **36** (33)  | **17** (14) | **7** (4)   | 4 (3)            |
+| `backdrop`  | 4 (3)        | 4 (3)       | 4 (3)       | 4 (3)            |
 
-`backdrop` 은 거리와 무관하게 **원경 실루엣 전용**이다. 창 없음, 프림 3~5.
+상한 = **실측 + 3** (물탱크·안테나·옥상간판이 동시에 켜지는 최악 경우, 각 1
+프림 `[실측]`). `backdrop` 행과 `silhouette` 열만 예외로 **빌더 구조 상한 4**
+(셸 1~2 + 파라펫 1 + 옥탑 1)를 쓴다. 표의 근거 등급은 `[추정]`이며 역할은
+설계 목표가 아니라 **회귀 동결선**이다 — 자세한 사정은 `BUDGET` 주석 참조.
+
+`backdrop` 은 거리와 무관하게 **원경 실루엣 전용**이다. 창 없음, 프림 3~4.
 
 설계 규약 (facade_kit 과 동일 — 위반 시 과거에 실제로 터진 사고들)
 -----------------------------------------------------------------
@@ -161,6 +168,20 @@ DAYLIGHT_STEP_IN = 1.60    # [추정] 계단 1단의 실제 후퇴 깊이. 조�
                            #   이상 이격"이라 대지 형상에 따라 값이 달라진다 →
                            #   시각 서명만 남기는 대표값.
 
+# --- 유형 추론 경계 (infer_kind) -----------------------------------------
+VILLA_GFA_MAX = 660.0  # 법정: 건축법 시행령 별표1 제2호 다목 — 다세대주택은
+                       #   "주택으로 쓰는 1개 동의 바닥면적 합계 660 m² 이하이고
+                       #   층수 4개 층 이하". 종전 상수 600(층수 무관)은 [근거없음].
+VILLA_MIN_DEPTH = 7.0  # [추정·유도] 주거 세대가 성립하는 최소 안길이.
+                       #   원룸형 다세대 전용 30 m² ÷ 간구 4.50(BAY_VILLA) ≈ 6.7 m
+                       #   이 하한이고, 일반형 40~60 m² 면 8.9~13.3 m 다.
+                       #   안길이 6 m 짜리 4층 건물은 세대 평면이 안 나온다 →
+                       #   도로변 근생/상가주택으로 본다.
+RESI_FH_MAX = 3.05     # [추정] 주거 층고대의 상한. 아파트 기준층 2.80~2.85(확실)
+                       #   + 필로티·기계층 여유. 초과하면 근생(1층 3.9~4.2[추정])
+                       #   이나 업무(4.0 법정 환산)가 섞인 것으로 본다.
+                       #   **저층·고층 갈래가 같은 값을 쓴다**(경계 일원화).
+
 # --- LOD 층수 상한 (조사 §6 LOD 표) --------------------------------------
 ROW_CAP = {"near": 8, "mid": 5, "far": 2, "silhouette": 0}
 
@@ -179,6 +200,57 @@ def _rng(*keys):
 def _seed_of(*keys):
     s = "|".join(str(k) for k in keys)
     return zlib.crc32(s.encode("utf-8")) & 0xFFFFFFFF
+
+
+def _builtin_hash_uses(src=None, path=None):
+    """이 소스가 **내장 hash 를 실제로 쓰는지** 전수 판정. 프림 0.
+
+    종전 검사는 소스 문자열에서 바늘을 부분문자열로 찾았는데, 그 바늘 리터럴이
+    검사 코드 자신의 줄에 들어 있어 **자기매칭으로 영구 실패**했다(자기모순).
+    여기서는 문자열·주석을 아예 보지 않는 두 경로로 판정한다.
+
+      (a) AST — `Name(id="hash", ctx=Load)` 노드. 호출 `hash(x)` 뿐 아니라
+          별칭 `f = hash` 도 잡는다. 재정의(`hash = ...`, `def hash`)는
+          내장이 아니므로 Store 로 따로 세어 보고만 한다.
+      (b) tokenize — STRING·COMMENT 토큰을 **제거한 뒤** 남은 코드에서
+          `hash(` 를 찾는다. `builtins.hash(x)` 처럼 Attribute 로 우회한
+          호출까지 잡히므로 (a) 를 보완한다. 이 파일의 바늘 리터럴은
+          STRING 토큰이라 제거되어 자기매칭이 **구조적으로** 불가능하다.
+
+    한계: `getattr(builtins, "ha"+"sh")` 처럼 이름을 런타임에 조립하는 경우는
+    정적으로 잡을 수 없다 `[한계 명시]`.
+
+    반환: (ast_hits, token_hits, shadow_lines) — 앞의 둘이 비면 미사용.
+    """
+    import ast
+    import io
+    import tokenize
+    if src is None:
+        with open(path or __file__, encoding="utf-8") as fh:
+            src = fh.read()
+    name = "ha" + "sh"                      # 토큰 분리 조립 — 자기매칭 방지
+    tree = ast.parse(src)
+    ast_hits, shadow = [], []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Name) and node.id == name:
+            (ast_hits if isinstance(node.ctx, ast.Load) else shadow).append(
+                f"L{node.lineno}")
+        elif isinstance(node, (ast.FunctionDef, ast.ClassDef)) \
+                and node.name == name:
+            shadow.append(f"L{node.lineno}")
+    skip = {tokenize.STRING, tokenize.COMMENT}
+    for nm in ("FSTRING_START", "FSTRING_MIDDLE", "FSTRING_END"):
+        if hasattr(tokenize, nm):        # 3.12+ 는 f-string 을 조각 토큰으로 준다
+            skip.add(getattr(tokenize, nm))
+    code_only = []
+    for tok in tokenize.generate_tokens(io.StringIO(src).readline):
+        if tok.type not in skip:
+            code_only.append(tok.string)
+    joined = "".join(code_only)
+    tok_hits = [] if (name + "(") not in joined else [
+        f"L{i + 1}" for i, ln in enumerate(joined.splitlines())
+        if (name + "(") in ln]
+    return ast_hits, tok_hits, shadow
 
 
 def _jit(rng, v, frac=0.08):
@@ -252,21 +324,35 @@ def infer_kind(bd, dist=None):
 
     판정 재료는 기존 키뿐이다(층수 · 평균 층고 · 풋프린트 · 거리).
 
-        dist > 80                       → "backdrop"   (원경 실루엣 전용)
-        floors <= 1                     → "low_shop"   (단층 근린상가)
-        floors <= 4 이고 풋프린트 소형   → "villa"      (다세대·빌라)
-        floors <= 4                     → "shop_house" (상가주택)
-        floors <= 8                     → "office"     (업무시설)
-        floors >= 9 이고 h/floors <= 3.05 → "apt"       (아파트: 층고 2.8~3.0)
-        floors >= 9                      → "office"    (오피스: 층고 3.1~4.0)
+        dist > 80                          → "backdrop"  (원경 실루엣 전용)
+        floors <= 1                        → "low_shop"  (단층 근린상가)
+        floors <= 4 이고 바닥면적합계 > 660   → "shop_house"(다세대 법정 규모 초과)
+        floors <= 4 이고 안길이 < 7.0        → "shop_house"(세대 평면 불성립)
+        floors <= 4 이고 h/floors > 3.05    → "shop_house"(근생 층고가 섞임)
+        floors <= 4                        → "villa"     (다세대·빌라)
+        floors <= 8                        → "office"    (업무시설)
+        floors >= 9 이고 h/floors <= 3.05   → "apt"       (아파트: 층고 2.8~3.0)
+        floors >= 9                        → "office"    (오피스: 층고 3.1~4.0)
 
-    마지막 규칙의 근거: 아파트 기준층 층고는 **2.80~2.85**(확실, 조사 §3.1)이고
+    9층 이상 규칙의 근거: 아파트 기준층 층고는 **2.80~2.85**(확실, 조사 §3.1)이고
     오피스는 그보다 높다. 33씬 실측으로 9층 이상 22동 중 15동을 맞춘다(68 %).
     **정확도가 필요하면 `bd["kind"]` 로 덮어쓸 것** — 추론은 어디까지나 기본값이다.
 
-    풋프린트 소형 기준 0.06 ha(= 600 m²)는 `[근거없음]`. 다세대(연면적 660 m² 이하,
-    4개 층 이하)와 다가구를 가르는 법정 기준에서 착안한 관례값이다.
-    프림 0.
+    4층 이하 갈래 (v1 수정: 종전 "풋프린트 < 600 m²" 단일 기준은 `[근거없음]`
+    이었고 24×6 m·4층·h12 상가주택을 villa 로 오분류했다)::
+
+      ① **규모** — 다세대주택은 "주택으로 쓰는 1개 동의 바닥면적 합계 **660 m²
+         이하**이고 층수 **4개 층 이하**" `[법령]` 건축법 시행령 별표1 제2호 다목.
+         → 층당 풋프린트 × 층수가 660 을 넘으면 다세대일 수 없다.
+      ② **안길이** — 세대 안길이 = 전용면적 ÷ 간구(4.50 = `BAY_VILLA`). 원룸형
+         전용 30 m² 라도 6.7 m 가 필요하다 `[추정·유도]` → **7.0 m** 미만이면
+         주거가 아니라 1실 깊이의 도로변 근생이다. 24×6 m 사례를 가르는 것이
+         이 기준이다(면적·층고만으로는 못 가른다).
+      ③ **평균 층고** — 경계 `RESI_FH_MAX` **3.05** 는 9층 이상 갈래가 쓰는 값과
+         **동일하다**(경계 일원화). 실제 다세대 평균 층고는 2.7~3.0 이라 3.05 를
+         넘지 않고, 1층 근생(3.9~4.2 `[추정]`)이 섞이면 4층 기준 3.4 안팎이 된다.
+
+    세 기준 모두 `bd` 의 기존 키(x0..y1·h·floors·axis)만 쓴다. 프림 0.
     """
     d = float(dist) if dist is not None else float(bd.get("lod_dist", 0.0))
     if d > 80.0:
@@ -278,10 +364,17 @@ def infer_kind(bd, dist=None):
     if n <= 1:
         return "low_shop"
     if n <= 4:
-        return "villa" if area < 600.0 else "shop_house"
+        if area * n > VILLA_GFA_MAX:        # ① 법정 규모 초과 → 다세대 아님
+            return "shop_house"
+        axis_y = (bd.get("axis", "y") == "y")
+        depth = abs(float(bd["y1"]) - float(bd["y0"])) if axis_y else \
+            abs(float(bd["x1"]) - float(bd["x0"]))
+        if depth < VILLA_MIN_DEPTH:         # ② 세대 평면이 안 나오는 안길이
+            return "shop_house"
+        return "villa" if (h / n) <= RESI_FH_MAX else "shop_house"   # ③ 층고
     if n <= 8:
         return "office"
-    return "apt" if (h / n) <= 3.05 else "office"
+    return "apt" if (h / n) <= RESI_FH_MAX else "office"
 
 
 def plan_levels(kind, total_h, floors, base_z=0.0):
@@ -345,6 +438,17 @@ class Plan:
     def __repr__(self):
         return (f"<Plan {self.kind}/{self.tier} d={self.dist:.0f} "
                 f"W={self.W:.1f} floors={self.floors} rows={self.rows}>")
+
+
+# `bd` 딕셔너리에서 그대로 읽어도 되는 **계획 스위치**. 씬이 켜고 끌 수 있는
+# 값만 넣는다. 파생 기하(x0..y1·W·levels·fac)·유형(kind)·티어(tier)·거리(dist)는
+# 계산 결과이므로 **절대 넣지 않는다** — 넣으면 계산을 되돌려 버린다.
+_BD_SWITCHES = frozenset((
+    "rows", "piloti", "porch", "n_col", "core_bays", "bay_w",
+    "setback", "step_top", "rooftop", "tank", "antenna", "roof_sign",
+    "shopfront", "awning", "signs", "balcony", "gas", "downpipe",
+    "fire", "ac_mode", "ac_units",
+))
 
 
 def _bd_plane(bd, axis_y):
@@ -442,14 +546,23 @@ def plan_building(bd, dist=None, kind=None, seed=None, **over):
                   and p.floors >= 4)
 
     p.rooftop = (k != "backdrop") or True          # 옥탑은 전 유형·전 티어
-    old = (k in ("villa", "shop_house", "low_shop"))   # 노후 저층 = 물탱크 대상
+    # 노후 저층 = 물탱크·안테나 대상. 단 **3층 이상**만.
+    #  · 고가수조는 상층 급수 압력 확보용이라 직결급수로 충분한 단층·2층
+    #    근생 옥상에는 없다 `[지식]` (출처: 기계설비신문 — 부스터펌프 직결급수 전환).
+    #  · 단층 상가 옥상의 안테나는 기능 근거가 없어 v5.2 §6 "비움이 기본값 —
+    #    기능 필수물만, 장식 금지" 위반이 된다.
+    old = (k in ("villa", "shop_house", "low_shop")) and p.floors >= 3
     p.tank = old and midp and rng.random() < 0.55
     p.antenna = old and near
     lo, hi = ROOFSIGN_FLOORS
     p.roof_sign = (k in ("shop_house", "office") and lo <= p.floors <= hi
                    and t in ("mid", "far") and rng.random() < 0.34)
 
-    p.shopfront = k in ("shop_house", "low_shop") and t != "silhouette"
+    # 상가 파사드는 near·mid 까지만. 조사 §6 LOD 표가 **">40 m 저층부 = 기단만"**
+    # 이라고 못박았는데 종전 조건(`t != "silhouette"`)은 far(40~80 m)에서도
+    # 통유리·키커·출입문을 만들어 표와 어긋났고, low_shop/far 예산 초과(9>7)의
+    # 직접 원인이었다. d=55 m 에서 통유리 1장의 화면 폭은 몇 픽셀이다.
+    p.shopfront = k in ("shop_house", "low_shop") and t in ("near", "mid")
     p.awning = k in ("shop_house", "low_shop") and near
     p.signs = 2 if (k in ("shop_house", "low_shop") and near) else (
         1 if (k in ("shop_house", "low_shop") and t == "mid") else 0)
@@ -465,8 +578,16 @@ def plan_building(bd, dist=None, kind=None, seed=None, **over):
         p.ac_mode, p.ac_units = None, 0     # 아파트 신축은 발코니 내장(§3.4 a)
 
     # bd 선택 키 · 명시 override 반영
-    for key in p.__slots__:
-        if key in bd and key not in ("h", "floors", "base_z", "axis"):
+    # **화이트리스트만** 반영한다(`_BD_SWITCHES`). 종전에는 `p.__slots__` 전체를
+    # 훑어 bd 의 동명 키를 그대로 덮어썼는데, 그 루프가 바로 위에서 계산한 결과를
+    # 되돌려 두 가지를 깨뜨렸다:
+    #   ① `kind` — d>80 강등(`p.kind = "backdrop"`)을 bd["kind"] 가 되살려
+    #      원경 건물이 near 유형 빌더로 조립됐다(자기검사 [5] 실패의 원인).
+    #   ② `x0..y1` — 위에서 min/max 로 정규화한 좌표를 원본으로 되돌려,
+    #      x0>x1 처럼 뒤집힌 bd 를 넘기면 음수 크기 박스가 나왔다.
+    # 유형은 이미 `bd["kind"]` → `p.kind_raw` 경로로 반영돼 있으므로 손실 없다.
+    for key in _BD_SWITCHES:
+        if key in bd:
             setattr(p, key, bd[key])
     for key, val in over.items():
         if key in p.__slots__:
@@ -922,9 +1043,29 @@ def _attachments(K, stage, prefix, p, M):
     """공통 외피 부착물 — 실외기 · 우수관/가스 · 소방 ∇."""
     prims = []
     if p.ac_units:
+        lv = p.levels
+        if (p.ac_mode or "eaves") == "perfloor" and len(lv) > 2:
+            # **1층 제외.** 근거 둘 —
+            #  · 기하: `fk.build_aircon_units` 는 실외기를 층 바닥 +0.35 에 놓고
+            #    냉매배관(길이 0.90)을 그 하단에서 아래로 내린다. 1층에 놓으면
+            #    배관 하단 = base_z + 0.35 − 0.45 − 0.45 = **base_z − 0.55** 로
+            #    지반을 뚫는다(자기검사 [7] villa d=14 실패의 원인, 실측 −0.550).
+            #  · 실물: 다세대·빌라 1층은 부설주차장(필로티) 또는 근생이라 세대가
+            #    없다 — 세대용 실외기가 붙는 최저 층은 2층이다 `[지식]`.
+            #    주차 필로티 천장 아래에 실외기를 매다는 구성도 있으나 그것은
+            #    "eaves" 모드의 일이고 perfloor 세대 배치와 섞으면 틀린다.
+            lv = lv[1:]
+        # "eaves" 모드의 `eaves_z` 는 fk 에서 **월드 절대 z**(기본 2.30)다.
+        # 그대로 두면 base_z ≠ 0 인 건물 — 경사지·낙차 씬이 바로 그렇다 — 에서
+        # 실외기가 제 건물 지반 아래에 붙는다(실측: base_z=3.4 → 배관 하단
+        # base_z−2.00). **base_z 상대로 환산해서 넘긴다.**
+        #   상한 2.30 = fk 기본값 `[지식]` · 하한 1.60 = 실외기 설치 높이대
+        #   1.5~2.6 `[지식]` 의 아래끝 · `ground_h − 1.30` 은 실외기 상단(+0.55)이
+        #   간판 밴드 하단(= ground_h − 0.85)을 넘지 않게 하는 값 `[추정]`.
+        eaves_z = p.base_z + _clamp(p.ground_h - 1.30, 1.60, 2.30)
         prims += fk.build_aircon_units(
             K, stage, prefix, p.fac, M.metal, M.metal,
-            levels=p.levels, mode=(p.ac_mode or "eaves"),
+            levels=lv, mode=(p.ac_mode or "eaves"), eaves_z=eaves_z,
             per_level=2, count=p.ac_units, max_units=p.ac_units,
             bracket=(p.tier == "near"), pipe=(p.tier == "near"),
             seed=p.seed)
@@ -1086,13 +1227,41 @@ _BUILDERS = {
 }
 
 # 유형 × LOD 프림 상한 (동당, 기하 프림). selfcheck 가 실측과 대조한다.
+#
+# **이 표의 근거 등급은 `[추정]`이다.** 조사 §6 LOD 표는 거리별 *정성* 규칙
+# (창/저층부/부착물을 어디까지 만들 것인가)만 주고 유형별 프림 상한 숫자는 주지
+# 않는다. 즉 이 숫자들은 외부 근거가 아니라 **회귀 동결선**(freeze line)이다 —
+# "여기서 더 늘어나면 누가 몰래 늘린 것"을 잡는 것이 유일한 역할이다.
+#
+# v1 재기준선 규칙 (2026-07-29) — 전 칸을 **하나의 규칙**으로 다시 채웠다:
+#   상한 = 대표 bd(W=24 · depth=12 · 유형별 표준 층수) **실측 + 3**
+#   +3 = 확률 부착물 3종(물탱크·안테나·옥상간판)이 동시에 켜지는 최악 경우.
+#        각 1 프림 `[실측]`. 형상·시드 변동은 이 여유 안에 들어온다.
+#   단 `backdrop` 행과 `silhouette` 열은 **빌더 구조 상한 4**를 그대로 쓴다
+#   (`_b_backdrop` 이 낼 수 있는 최대 = 셸 1~2 + 파라펫 1 + 옥탑 1). 측정값이
+#   아니라 코드 구조에서 나오는 값이라 헤드룸이 필요 없다.
+#
+# 종전 표는 코드보다 오래돼 실측과 4~8 프림씩 어긋나 있었다(모듈 docstring 의
+# 괄호 "실측 대표값"도 같이 낡아 있었다). 재기준선으로 apt/mid 34→23,
+# office/mid 22→15 처럼 **내려간 칸이 더 많다** — 표가 느슨해진 게 아니다.
 BUDGET = {
-    "shop_house": {"near": 56, "mid": 30, "far": 10, "silhouette": 4},
-    "apt":        {"near": 52, "mid": 34, "far": 12, "silhouette": 4},
-    "office":     {"near": 34, "mid": 22, "far": 10, "silhouette": 4},
-    "villa":      {"near": 54, "mid": 30, "far": 10, "silhouette": 4},
-    "low_shop":   {"near": 26, "mid": 15, "far": 7, "silhouette": 4},
-    "backdrop":   {"near": 5, "mid": 5, "far": 4, "silhouette": 4},
+    "shop_house": {"near": 59, "mid": 30, "far": 9, "silhouette": 4},
+    "apt":        {"near": 57, "mid": 23, "far": 15, "silhouette": 4},
+    "office":     {"near": 31, "mid": 15, "far": 11, "silhouette": 4},
+    "villa":      {"near": 57, "mid": 28, "far": 10, "silhouette": 4},
+    "low_shop":   {"near": 36, "mid": 17, "far": 7, "silhouette": 4},
+    "backdrop":   {"near": 4, "mid": 4, "far": 4, "silhouette": 4},
+}
+
+# 위 표를 만든 실측값 (같은 규칙으로 재계산할 때의 기준선). selfcheck [5] 가
+# 매번 이 값을 다시 재고 표와 대조하므로, 코드가 바뀌면 여기도 같이 갱신한다.
+BUDGET_MEASURED = {
+    "shop_house": {"near": 56, "mid": 27, "far": 6, "silhouette": 3},
+    "apt":        {"near": 54, "mid": 20, "far": 12, "silhouette": 4},
+    "office":     {"near": 28, "mid": 12, "far": 8, "silhouette": 3},
+    "villa":      {"near": 54, "mid": 25, "far": 7, "silhouette": 3},
+    "low_shop":   {"near": 33, "mid": 14, "far": 4, "silhouette": 3},
+    "backdrop":   {"near": 3, "mid": 3, "far": 3, "silhouette": 3},
 }
 
 
@@ -1215,9 +1384,13 @@ def selfcheck(verbose=True):
     b = [_rng("x", 1).random() for _ in range(3)]
     chk("_rng 재현성", a == b)
     chk("_rng 키 분리", _rng("x", 1).random() != _rng("x", 2).random())
-    src = open(__file__, encoding="utf-8").read()
-    chk("소스에 내장 hash( 호출 없음",
-        " hash(" not in src.replace("PYTHONHASHSEED", ""))
+    # 문자열 부분검색은 검사 코드 자신의 리터럴에 자기매칭돼 영구 실패했다.
+    # → AST(이름 로드) + tokenize(문자열·주석 제거 후 호출 형태) 이중 전수.
+    h_ast, h_tok, h_shadow = _builtin_hash_uses(path=__file__)
+    chk("소스에 내장 hash 호출·별칭 없음 (AST+토큰 전수)",
+        not h_ast and not h_tok,
+        f"AST 이름로드 {len(h_ast)}건 · 토큰 {len(h_tok)}건 · 재정의 {len(h_shadow)}건"
+        + (f" {(h_ast + h_tok)[:4]}" if (h_ast or h_tok) else ""))
     r = random.Random(0)
     chk("_jit ±8 % 하드캡", all(
         0.92 - 1e-9 <= _jit(r, 1.0, 0.5) <= 1.08 + 1e-9 for _ in range(500)))
@@ -1273,6 +1446,12 @@ def selfcheck(verbose=True):
             table[(kind, tier)] = n
         print(f"    {kind:12s} " + " ".join(
             f"{n:4d}/{cap:<3d}({e[:3]})" for n, cap, e in row))
+    # 표를 만든 기준선(BUDGET_MEASURED)과의 드리프트를 알려만 준다(검사 아님).
+    drift = [(k, t, table[(k, t)], BUDGET_MEASURED[k][t])
+             for k in KINDS for t in dists
+             if table[(k, t)] != BUDGET_MEASURED[k].get(t)]
+    print("    기준선 드리프트: " + ("없음" if not drift else
+                                     f"{len(drift)}칸 {drift[:4]} → BUDGET 재기준선 필요"))
     bad = []
     for kind in KINDS:
         for tier, d in dists.items():
@@ -1322,10 +1501,13 @@ def selfcheck(verbose=True):
             if not chk(f"{kind} d={d:.0f} 셸 상단 = base+h",
                        abs(top - p.top_z) < 1e-6, f"{top:.3f} vs {p.top_z:.3f}"):
                 break
-            bot = min(c[2][2] - c[3][2] / 2.0 for c in K.calls
-                      if "Step" not in c[1])
+            # **전 프림**을 본다(종전에는 "Step" 경로를 제외했다). 실측 최저는
+            # `ShopStep`(계단판 두께 여유 0.02 로 인한 1 cm 매입) 하나뿐이고
+            # 나머지는 정확히 base_z 다 → 허용치를 −0.35 에서 **−0.05** 로 조인다.
+            # 종전 −0.35 는 −0.30 짜리 관통을 놓치는 과대 여유였다.
+            bot = min(c[2][2] - c[3][2] / 2.0 for c in K.calls)
             if not chk(f"{kind} d={d:.0f} 지반 아래 프림 없음",
-                       bot >= p.base_z - 0.35, f"최저 {bot:.3f}"):
+                       bot >= p.base_z - 0.05, f"최저 {bot:.3f}"):
                 break
     # 옥탑 법정 상한 (건축면적 1/8)
     for kind in KINDS:

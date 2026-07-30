@@ -761,3 +761,63 @@ vocabulary argument rests on.
 **Not touched, by instruction**: every scene file · every kit but `ground_kit.py`'s one tuple ·
 every script · `look_check/INDEX.md` · every other lane's report ·
 `Docs/surveys/w3_intake_v2_images.md` (quoted, never edited).
+
+
+---
+
+## 12. K-micro closure batch — 2026-07-31 (kit defects + tooling)
+
+**What this is, and what it is not.** The K-micro lane closes the kit-side findings FANOUT A left
+routed (`redteam_fanout_a.md` §4 and the eight scene reports' "owed" tables). **It creates no GT
+row**: nothing it touches is a walked surface, a drop edge, a hazard/collision box or an element
+AABB that GT reads, and every kit edit is published with an isolated-arm prim-hash A/B showing
+**33/33 scenes unmoved**. This section exists for the one item that *does* owe a declaration under
+§0-1 — the **W9** fixture repair, which moves a **published number** (the `SCENE_PLANS` dry-run
+prim total) even though it moves no geometry.
+
+### 12-1 · W9 landing — `SCENE_PLANS` fixture drift, five instances closed
+
+`[K-micro, source: §7 **W9** · `w3_mb_patch_v1.md` §10 **MB-F2** · `w3_sb_v1.md` **SB-F2**]`
+
+The four fixture rows W9 routed to Lane-1 / `ground_kit` are synced to their wired calls
+(**scene09 was already synced** by its own lane, RT-A5). `SCENE_PLANS` is a **self-check fixture**
+and is read by nothing but `ground_kit._selfcheck` and `scripts/make_review_gallery.py` (profile
+name only) — verified by grep across the tree — so this is a fixture-only edit by construction.
+
+**The declared number (§0-1).** 33-scene dry-run geometric prims **1137 → 1109 (−28)**; scatter
+instances **670 → 670 (unchanged)**. Per scene:
+
+| scene | fixture prims before → after | what was added |
+|---|---|---|
+| scene03 | 35 → **22** (−13) | `surface=(("stain",("dirt","water")),("weed",8))` · `extras=(("wear_lane",…),)` |
+| scene16 | 43 → **45** (+2) | `infra` 1/2/0 · `surface` patch1·crack4·stain(dirt,gum,drip)·weed8 · `wear_lane` |
+| scene18 | 34 → **45** (+11) | `infra` 2/2 · `surface` patch3·crack4·stain(dirt,efflorescence)·weed6 · `silt_band` n=2 |
+| sceneC2 | 40 → **12** (−28) | `surface=()` · `extras=()` · `scatter=None` |
+
+**W9's own replacement text for scene03 is stale, and this batch does not follow it.** W9
+prescribes `surface=(("patch", 8), ("stain", ("dirt","water")))` from `scene03_riverbank.py:900-916`.
+The S03 rebuild that landed in FANOUT A **deleted the patch row** (§3(ii) rectangle ban; the census
+at HEAD shows `patch` gone) and carries `("weed", 8)`. The fixture mirrors the file **as it is at
+`4bae470`**, which is the doctrine W9 exists to enforce — *"no row may take a scope figure from
+`SCENE_PLANS` without reading the scene file that carries the profile."* W9's number is corrected
+here rather than transcribed.
+
+**Proof the drift is closed, not just edited**: the `surface=` literal was parsed out of each of
+the five scene files with `ast` and compared to `SCENE_PLANS[scene]["overrides"]["surface"]` —
+**5/5 MATCH** (03 · 16 · 18 · C2 · 09).
+
+**Residual, named rather than left to be discovered** (the S09 precedent, RT-A5): `region` /
+`edges` / `origin` are still fixture approximations, sceneC2's `infra` zeroing and its `pave`
+module override are **not** mirrored, and scene09's `pave` step override is still absent. Those
+move the dry-run **joint** count, which is a second declaration with its own number, and they stay
+with `ground_kit`'s owner. **W9's rule stands unchanged until they land.**
+
+### 12-2 · What else this batch touched, and why none of it is a GT row
+
+`props_kit` (railing bearing · chevron slant) · `scene_common` (`rotZ`/`rotX` primitives ·
+4 `VEG_SHRUBS` rows · loud shrub fallback · `build_planter(species=)`) · `building_kit`
+(`p.ridge` / `p.roof_allow` / opt-in `roof_under_ceil`) · `ground_kit` (`_gt24` gate tuple) ·
+`scripts/stamp_round.py` · `look_check/INDEX.md` · `look_check/README.md` §4 · one comment in
+`scene10`. Every one of them published `geom_invariance_check` **132/132 cells identical**
+(33 scenes × 3 arms + prim counts) against the isolated arm at `4bae470`. Detail and evidence:
+`Docs/reports/w3_kmicro_v1.md`.

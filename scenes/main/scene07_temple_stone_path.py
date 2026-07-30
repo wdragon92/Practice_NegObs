@@ -250,6 +250,62 @@ PARAMS = dict(
     # --- corridor (ground between the stones) : leaf_ground slope ---
     corridor=dict(y0=-1.7, y1=1.7, thick=0.60),
 
+    # =======================================================================
+    # [W3 S3-5 · GT-15] 야면석 kerb boulders — E7-3 / E7-4, spec §4.1-2
+    # =======================================================================
+    #  조경설계기준 2.6.2(6) 야면석 = "표면 미가공, 운반 가능한 비교적 큰 석괴" — the product
+    #  is named, not invented. Asset route first (spec §1.1 / §3.2): `rock_03_broken`
+    #  (1.318 x 1.714 x 0.640 m, 9,832 tri, PASS) is the big one, `rock_02` and `rock_01`
+    #  the fillers, all `instanceable=True` so 3 prototypes carry ~26 placements.
+    #
+    #  **Two deviations from §4.1-2, both forced by this scene's own geometry, both declared:**
+    #  1. The spec's fixed line `y = +-1.55` is replaced by "outer edge at `y_edge = +-1.68`",
+    #     i.e. `cy = +-(1.68 - across/2)` = +-1.23..+-1.48. Reason: at `y = +-1.55` a 0.6-0.9 m
+    #     boulder spans past the corridor edge `+-1.70`. On the SOUTH that overhangs the
+    #     unguarded 1.8 m drop, which is the scene's primary positive GT and H8 forbids
+    #     softening it; on the NORTH the `NorthWall` slope already occupies `y 1.70..2.15` at
+    #     `path_z + 0.75`, so the boulder would be inside a wall. Edge-anchoring keeps every
+    #     boulder wholly on the tread and still puts it far outboard of the walk line — the
+    #     nearest inner edge is 0.78 m, against the §6.5 floor of `foot_half + 0.10 = 0.32`.
+    #  2. §4.1-2's own two rows disagree: "mean 1.6 m centre-to-centre" against "12-16 per
+    #     flank over the 12.2 m run" (12.2 / 1.6 = 7.6). The **count** row is the visual one
+    #     (it is what G7 shows), so spacing is 0.46 m in the occupied stretches with one >=3.0 m
+    #     gap and two ~1.1 m gaps per flank -> 15 per flank, discontinuous.
+    #
+    #  F2 discipline (`tonglam_v2` §1 row 07 already failed 07 for "boulder-scale D-5 rocks in
+    #  dark sink-rings"): `z_mode='base'` and `sink <= 0.05`. A boulder that sits in a hole is
+    #  the defect; a boulder that sits ON the tread with a moss collar is the fix.
+    #  Native sizes are `[measured - assets/urban_manifest_w3.json]` and repeated here so the
+    #  layout stays boot-free; `build_kerb` asserts them against `urban_kit.spec()` at build
+    #  time, so a manifest drift is a loud failure and not a silently wrong boulder.
+    kerb=dict(seed=7078, y_edge=1.68, x0=0.30, x1=11.95,
+              pitch=0.46, pitch_jit=0.12, sink=0.035, tilt=7.0,
+              big_gap=3.2, small_gap=1.10, foot_clear=0.10,
+              # (asset_id, native sx, sy, sz, scale_lo, scale_hi, weight)
+              pool=(("rock_03_broken", 1.3176, 1.7142, 0.6396, 0.36, 0.52, 45),
+                    ("rock_02", 0.4035, 0.4629, 0.2851, 0.90, 1.20, 35),
+                    ("rock_01", 0.2413, 0.3164, 0.1639, 1.50, 2.10, 20))),
+
+    # --- [W3 S3-5 · GT-15] fern margins (E7-5 / E7-6) and the two framing trunks (B3) ---
+    #   Fern is gap **G2**: 0 hits across all 291 manifest rows and all 44 vegetation USDs.
+    #   `Shrub/Switchgrass.usd` (2.01 x 2.03 x 1.37, 8,934 tri, green 100 %) is the spec's
+    #   named stand-in — the arching-blade silhouette is the closest available read. Recorded
+    #   as a stand-in, not as a fern: the real fix is a CC0 fern atlas on crossed quads (R7-3).
+    ferns=dict(seed=7079, target_h=(0.62, 1.05),
+               north=dict(x=(0.4, 11.6), y=(2.32, 3.85), n=15),
+               south=dict(x=(0.4, 11.6), y=(-3.70, -2.15), n=11)),
+    #   G7's framing trunks are 0.6-1.2 m diameter old growth standing right at the margin,
+    #   not the 0.22 m courtyard pines 4-6 m off axis. Two are added at the corridor margins.
+    #   On the asset path `build_tree` scales the tree by `trunk_h * 1.60`, so `trunk_h` is
+    #   what makes a big trunk; `trunk_r` is carried for the procedural fallback arm.
+    frame_trees=[dict(name="F0", cx=2.30, cy=2.62, zone="north",
+                      trunk_h=6.4, trunk_r=0.36),
+                 dict(name="F1", cx=5.10, cy=-2.55, zone="south",
+                      trunk_h=6.8, trunk_r=0.30)],
+    #   Species is **pinned**, not hashed — see `build_ferns`. `native_h` is zmax
+    #   [measured — scene_common.VEG_TREES / veg_manifest_w2.json].
+    frame_tree_veg=dict(rel="Trees/Shumard_Oak.usd", native_h=10.8989),
+
     # === [W2-D ground_kit] P12 `courtyard_dg` - spec Sec.5.7 row 07 =========
     #  Natural scene: `natural=True` makes plan_ground raise on any urban infra
     #  (manhole / gully / gutter / marking), so the whole prescription is
@@ -515,6 +571,47 @@ if _sc_ov:
 
 
 # ===========================================================================
+# [B-2] PLACEMENT — the geometry-free declaration `scripts/placement_lint.py` reads
+#       (spec §10.4, expectations in `s3_scene07_10_rebuild_spec_v1.md` §6.6).
+#       Additive and static: it authors no prim and changes no coordinate. It is read as a
+#       module-level literal, so every value here must stay a literal.
+# ===========================================================================
+PLACEMENT = dict(
+    # **Deliberately empty, and this is a finding, not an omission.** `walk_edges` is read by
+    # LINT-5 as a *보도 footway boundary* and it applies PE-8 = 「도로의 구조·시설 기준에 관한
+    # 규칙」 제16조's 1.5 m effective-width floor to anything standing near it. Declaring the
+    # corridor shoulders `y = ∓1.70` as walk edges was tried and measured: it raises LINT-5 to
+    # **2 ERROR** against the two framing trunks, which stand 0.85 / 0.92 m outside the
+    # corridor — on the north bank and on the south terrace 1.8 m below, i.e. not in anybody's
+    # footway. 제16조 governs a 도로 보도; this is a mountain-temple 자연석 계단 whose south
+    # shoulder is a cliff edge (the scene's primary positive GT) and whose north shoulder is
+    # the foot of a retaining wall. Neither is a footway boundary, so the datum is declared
+    # absent rather than mis-declared — the same reasoning §4.0 F-1/F-3 used to refuse
+    # PIRAN-15 and HOUSE-18 on a trail deck.
+    walk_edges=[],
+    # §6.6: **there is no kerb line in a temple approach.** Declared empty on purpose — the
+    # 야면석 boulders are a discontinuous retaining/edging device on the shoulder, not a 연석,
+    # and LINT-1's tree-to-kerb rule is vacuous here rather than unmeasured.
+    kerb_lines=[],
+    # §6.6: the boulders are NOT furniture — a boulder has no build axis, the same reason
+    # §12-15 exempts `build_tree`'s yaw. They carry a full U(0, 360) yaw by design and are
+    # named `Kerb_*`, which matches no prop class in the linter's taxonomy, so no exemption
+    # entry is needed in T1's rules file (which S3 may not edit in any case).
+    anchors={
+        "gate_axis": dict(face_bearing_deg=0.0,
+                          props=["Lantern_.*"]),
+        "notice_face": dict(face_bearing_deg=180.0,
+                            props=["SignInfo.*"]),
+    },
+    # §6.6: 07's trees are a **courtyard group**, not a street route — the same call X4 made
+    # for scene13's apartment planting. Declaring a `route` here would import a 6-8 m pitch
+    # rule that no temple precinct has ever obeyed. Left empty deliberately; LINT-2/3/4 then
+    # report `nodata` plus inferred runs, and an inferred finding may never fail a build.
+    routes={},
+)
+
+
+# ===========================================================================
 # [C] paths / asset roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -713,6 +810,62 @@ def course_top(x):
     return COURSES[i]["top"]
 
 
+def kerb_layout():
+    """[W3 S3-5 · GT-15] 야면석 kerb boulders, both flanks, discontinuous.
+
+    Each entry: dict(name, asset, cx, cy, seat_z, scale, across, proud, yaw, tilt, flank)
+      · `cy` is **edge-anchored**: `sgn*(y_edge − across/2)`, so the boulder's outer edge
+        lands just inside the corridor and it never overhangs the south drop (H8) nor
+        intersects the north wall. See the PARAMS block for the two declared deviations.
+      · `seat_z` is `course_top(cx) − sink`, and `sink <= 0.05` is the F2 no-sink-ring rule.
+    """
+    kp = PARAMS["kerb"]
+    rng = random.Random(int(kp["seed"]))
+    pool = list(kp["pool"])
+    wts = [float(p[6]) for p in pool]
+    x0, x1 = float(kp["x0"]), float(kp["x1"])
+    out = []
+    span = x1 - x0
+    big, small = float(kp["big_gap"]), float(kp["small_gap"])
+    pitch = float(kp["pitch"])
+    # Station plan, per flank: `nb` stations spanning x0..x1 exactly, with ONE >=3 m gap and
+    # TWO ~1.1 m gaps inserted at drawn indices. The residual is spread over the *non-gap*
+    # increments only, so a deliberate gap keeps the length it was declared with instead of
+    # being scaled away — the earlier "advance and test" form could skip the big gap entirely
+    # when a small one had already jumped past its station.
+    nb = int(round((span - big - 2.0 * small) / pitch)) + 1
+    for flank, sgn in (("S", -1.0), ("N", 1.0)):
+        inc = [pitch + rng.uniform(-kp["pitch_jit"], kp["pitch_jit"])
+               for _ in range(nb - 1)]
+        gi = rng.sample(range(nb - 1), 3)
+        inc[gi[0]] += big
+        inc[gi[1]] += small
+        inc[gi[2]] += small
+        free = [j for j in range(nb - 1) if j not in gi]
+        resid = span - sum(inc)
+        for j in free:
+            inc[j] += resid / len(free)
+        x = x0
+        for k in range(nb):
+            a = pool[rng.choices(range(len(pool)), weights=wts)[0]]
+            sc_mul = rng.uniform(float(a[4]), float(a[5]))
+            across = max(float(a[1]), float(a[2])) * sc_mul
+            proud = float(a[3]) * sc_mul
+            cy = sgn * (float(kp["y_edge"]) - across / 2.0)
+            out.append(dict(name=f"{flank}{k}", asset=a[0], cx=x, cy=cy,
+                            seat_z=course_top(x) - float(kp["sink"]),
+                            scale=sc_mul, across=across, proud=proud,
+                            yaw=rng.uniform(0.0, 360.0),
+                            tilt=(rng.uniform(-kp["tilt"], kp["tilt"]),
+                                  rng.uniform(-kp["tilt"], kp["tilt"])),
+                            flank=flank))
+            if k < nb - 1:
+                x += inc[k]
+    return out
+
+
+KERB = kerb_layout()
+
 def leaf_patches():
     """Leaf carpets → **DEC-2 masks**. `(name, cx, cy, rx, ry)`, one entry per drift.
 
@@ -905,6 +1058,13 @@ def _grid_obstacles():
         gz = _zone_z(cx, cy, zone)
         obs.append((f"Pine_{name}", cx - 0.9, cx + 0.9, cy - 0.9, cy + 0.9,
                     gz, gz + th + 1.4))
+    # [S3-5] the two framing trunks stand close to the corridor, so they belong in the
+    #   grid-camera collision list even though the grid eyes sit at x −2 / −5 / −10.
+    for t in PARAMS["frame_trees"]:
+        gz = _zone_z(t["cx"], t["cy"], t["zone"])
+        r = 1.6
+        obs.append((f"FrameTree_{t['name']}", t["cx"] - r, t["cx"] + r,
+                    t["cy"] - r, t["cy"] + r, gz, gz + t["trunk_h"] * 1.6))
     return obs
 
 
@@ -1050,6 +1210,52 @@ def stone_course_selfcheck():
     print(f"    [S3-3] 노브 0프림(GT-16 삭제 유지) · 코스 측방 오프셋 0 (A6) · "
           f"판당 요 캡 ±{cp['jyaw']:.1f}° (J-14 ≤3.0 → "
           f"{'OK' if cp['jyaw'] <= 3.0 else 'FAIL'})")
+
+    # ── [S3-5 · GT-15] kerb boulders ──
+    kp = P["kerb"]
+    fh = float(cp["foot_half"])
+    clear = fh + float(kp["foot_clear"])
+    inner = min(abs(b["cy"]) - b["across"] / 2.0 for b in KERB)
+    outer = max(abs(b["cy"]) + b["across"] / 2.0 for b in KERB)
+    ns = sum(1 for b in KERB if b["flank"] == "S")
+    nn = len(KERB) - ns
+    xs_s = sorted(b["cx"] for b in KERB if b["flank"] == "S")
+    xs_n = sorted(b["cx"] for b in KERB if b["flank"] == "N")
+    gaps_s = [b - a for a, b in zip(xs_s, xs_s[1:])]
+    gaps_n = [b - a for a, b in zip(xs_n, xs_n[1:])]
+    prd = [b["proud"] - float(kp["sink"]) for b in KERB]
+    acr = [b["across"] for b in KERB]
+    print(f"\n  [S3-5 · GT-15] 야면석 연석 {len(KERB)}괴 (남 {ns} / 북 {nn}, "
+          f"목표 12~16/측 → "
+          f"{'OK' if 12 <= ns <= 16 and 12 <= nn <= 16 else 'CHECK'})")
+    print(f"    워크라인 이격: 최소 내측 |y| {inner:.3f} m "
+          f"(≥ foot_half+{kp['foot_clear']:.2f} = {clear:.2f} → "
+          f"{'OK' if inner >= clear - 1e-9 else 'FAIL'}) · 최대 외측 |y| "
+          f"{outer:.3f} m (≤ 회랑 가장자리 1.70 = 남측 낙차 위 돌출 없음 → "
+          f"{'OK' if outer <= 1.70 + 1e-9 else 'FAIL'})")
+    print(f"    크기 {min(acr):.3f}~{max(acr):.3f} m (§4.1-2 0.40~0.90 → "
+          f"{'OK' if min(acr) >= 0.40 - 1e-9 and max(acr) <= 0.90 + 1e-9 else 'CHECK'})"
+          f" · 트레드 위 돌출 {min(prd):.3f}~{max(prd):.3f} m "
+          f"(0.15~0.35 → "
+          f"{'OK' if min(prd) >= 0.15 - 1e-9 and max(prd) <= 0.35 + 1e-9 else 'CHECK'})"
+          f" · 매몰 {kp['sink']:.3f} m (F2 ≤0.05 = 검은 침하링 금지 → "
+          f"{'OK' if kp['sink'] <= 0.05 else 'FAIL'})")
+    print(f"    불연속: 남 최대 간격 {max(gaps_s):.2f} m / 북 "
+          f"{max(gaps_n):.2f} m (≥3.0 m 의도적 공백 1회 이상 → "
+          f"{'OK' if max(gaps_s) >= 3.0 and max(gaps_n) >= 3.0 else 'CHECK'}) · "
+          f"연속 연석이 아니어야 한다(장대석 소맷돌 오독 방지)")
+    print(f"    H8: 연석은 회랑 어깨(|y| {inner:.2f}~{outer:.2f})에 있고 테라스 "
+          f"가장자리 y −1.70 에는 없다 — 남측 1.8 m 무방호 낙차는 방호되지 않는다")
+
+    # ── [S3-5] fern margins + framing trunks ──
+    fp = P["ferns"]
+    print(f"  [S3-5] 고사리대 스탠드인 {fp['north']['n'] + fp['south']['n']}주 "
+          f"(북 {fp['north']['n']} y{fp['north']['y']} / 남 "
+          f"{fp['south']['n']} y{fp['south']['y']}) — G2 공백, "
+          f"Switchgrass 대체(실물 고사리 아틀라스는 R7-3 조달행) · "
+          f"프레이밍 노거수 {len(P['frame_trees'])}주 "
+          f"(trunk_h {'/'.join('%.1f' % t['trunk_h'] for t in P['frame_trees'])} "
+          f"→ 에셋 경로 총고 ×1.60)")
 
 
 def _smoke_report():
@@ -1539,6 +1745,118 @@ def main():
         print(f"[S3-4] 고임돌·틈메우기돌 {n_shim} 인스턴스 · 돌깔기 에이프런 "
               f"하단 {cp['apron_lo']:.2f} m / 상단 {cp['apron_up']:.2f} m")
 
+    def build_kerb(M):
+        """[S3-5 · GT-15] 야면석 kerb boulders on both corridor shoulders.
+
+        Asset route (spec §1.1 / §3.2). `urban_kit` is imported lazily and the whole block
+        degrades to a procedural boulder if the loader or the row is unavailable — the T2
+        `assets/urban/` tree is gitignored, so a clone without it must still build a scene.
+        """
+        kp = PARAMS["kerb"]
+        uk = None
+        try:
+            import urban_kit as _uk
+            uk = _uk
+            for a in kp["pool"]:                 # manifest-drift guard, see PARAMS
+                s = uk.spec(a[0])
+                for j, want in enumerate((a[1], a[2], a[3])):
+                    got = float(s.size_m[j])
+                    if abs(got - float(want)) > 0.002:
+                        raise ValueError(
+                            f"kerb pool {a[0]} size drift: PARAMS {want} vs manifest {got}")
+        except Exception as e:
+            print(f"[S3-5][경고] urban_kit 야면석 경로 불가 ({e}) — 절차적 폴백")
+            uk = None
+        n_asset = 0
+        for b in KERB:
+            path = f"{ROOT}/Kerb_{b['name']}"
+            if uk is not None:
+                try:
+                    uk.add_urban_asset(
+                        stage, path, b["asset"],
+                        pos_m=(b["cx"], b["cy"], b["seat_z"]),
+                        yaw_deg=b["yaw"], scale_mul=b["scale"],
+                        tilt_deg=b["tilt"], z_mode="base", scene="07",
+                        instanceable=True)
+                    n_asset += 1
+                    continue
+                except Exception as e:
+                    print(f"[S3-5][경고] {b['name']} {b['asset']}: {e} — 폴백")
+            # fallback: a flattened ellipsoid at the same footprint, moss-tinted
+            sc.add_sphere(stage, path,
+                          (b["cx"], b["cy"], b["seat_z"] + b["proud"] * 0.42),
+                          (b["across"] / 2.0, b["across"] / 2.4,
+                           b["proud"] * 0.85), M["gk_moss"])
+        print(f"[S3-5] 야면석 연석 {len(KERB)}괴 (에셋 {n_asset} · 남 "
+              f"{sum(1 for b in KERB if b['flank'] == 'S')} / 북 "
+              f"{sum(1 for b in KERB if b['flank'] == 'N')})")
+
+    def build_ferns(M):
+        """[S3-5 · GT-15] Fern-band stand-in on both margins + the two framing trunks."""
+        fp = PARAMS["ferns"]
+        rng = random.Random(int(fp["seed"]))
+        rel = "Shrub/Switchgrass.usd"
+        use_asset = sc.LOOK_GEO and sc.veg_available()
+        n_f = 0
+        for side in ("north", "south"):
+            b = fp[side]
+            for i in range(int(b["n"])):
+                fx = rng.uniform(*b["x"])
+                fy = rng.uniform(*b["y"])
+                th = rng.uniform(*fp["target_h"])
+                gz = _zone_z(fx, fy, side)
+                path = f"{ROOT}/Fern_{side[0].upper()}{i}"
+                if use_asset:
+                    vx = sc.add_vegetation(stage, path, rel, (fx, fy, gz),
+                                           yaw_deg=rng.uniform(0.0, 360.0),
+                                           target_h=th, native_h=1.37)
+                    if vx is not None:
+                        try:
+                            stage.GetPrimAtPath(path + "/Asset") \
+                                .SetInstanceable(True)
+                        except Exception:
+                            pass
+                        n_f += 1
+                        continue
+                # blob fallback keeps the margin populated on the GEO=0 arm
+                sc.add_sphere(stage, path, (fx, fy, gz + th * 0.42),
+                              (th * 0.62, th * 0.58, th * 0.50), M["shrub"])
+        # Framing trunks. **Not** `build_tree`: that draws its species from a coordinate hash
+        #   over `VEG_TREES`, and at these two coordinates it draws `Yellow_Pine`, which is a
+        #   LINT-4b **retired** species (rules `retired: [White_Pine, Yellow_Pine]`) — measured,
+        #   not guessed. The K4(b) `species=` kwarg does not exist yet, so the species is
+        #   pinned the way `build_tree`'s own docstring says to ("...or must call
+        #   `add_vegetation` itself"): `Shumard_Oak`, PASS, green/olive 100 %, and §3.2's named
+        #   canopy-tunnel primary for this scene. `native_h` is the asset's **zmax**, per the
+        #   §3.2 caution — the bbox height would scale it wrong.
+        fr = PARAMS["frame_tree_veg"]
+        tr = PARAMS["tree"]
+        for t in PARAMS["frame_trees"]:
+            gz = _zone_z(t["cx"], t["cy"], t["zone"])
+            path = f"{ROOT}/FrameTree_{t['name']}"
+            done = False
+            if use_asset:
+                vx = sc.add_vegetation(
+                    stage, f"{path}/Veg", fr["rel"], (t["cx"], t["cy"], gz),
+                    yaw_deg=rng.uniform(0.0, 360.0),
+                    target_h=float(t["trunk_h"]) * 1.60,
+                    native_h=float(fr["native_h"]))
+                if vx is not None:
+                    try:
+                        stage.GetPrimAtPath(f"{path}/Veg/Asset") \
+                            .SetInstanceable(True)
+                    except Exception:
+                        pass
+                    done = True
+            if not done:
+                sc.build_tree(stage, path, t["cx"], t["cy"], gz, M["wood"],
+                              M["canopy_a"], M["canopy_b"],
+                              trunk_r=float(t.get("trunk_r", tr["trunk_r"])),
+                              trunk_h=float(t["trunk_h"]), stake_r=0.004,
+                              stake_h=0.02, stake_off=0.2)
+        print(f"[S3-5] 고사리대 스탠드인 {n_f}주(Switchgrass, G2 대체) · "
+              f"프레이밍 노거수 {len(PARAMS['frame_trees'])}주")
+
     def build_leaf_masks(M):
         # [W3 F3 / DEC-2] leaf carpets - one irregular mask per drift, no rectangles.
         #   The corridor masks take `z_fn=path_z`, so every vertex sits on the 19 deg
@@ -1846,6 +2164,8 @@ def main():
         build_terrain(M)
         build_stones(M)
         build_stone_dressing(M)
+        build_kerb(M)
+        build_ferns(M)
         build_leaf_masks(M)
         build_cues(M)
     else:

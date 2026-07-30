@@ -61,6 +61,78 @@ meta:
       PLACEMENT is declared by 0 of 33 scenes, so LINT-1 / LINT-1b / LINT-3 (bearing half) /
       LINT-5 / LINT-9 are structurally inert and report nodata. Those five become live only when
       WINDOW 3's scene WPs add the declaration block.
+    determinism: >
+      Three consecutive runs produced byte-identical finding sets (809 rows), including one run
+      before and one after S5's CB-1 landed. 33 scenes in 6.8 s, GPU 0. [measured]
+    # ---------------------------------------------------------------------------
+    # The full per-scene violation table. Notation: <check><count><mark>, where
+    #   !  ERROR                       — a hard rule failed
+    #   ~  WARN, substantive           — a real measured finding, inferred datum or unadjudicated
+    #   .  WARN, nodata / BLOCKED      — the rule could not run (no declaration, or gated)
+    # A scene absent from a check emitted nothing for it. Regenerate with the reproduction
+    # command above; the text report carries every row's measured / expected / basis.
+    # ---------------------------------------------------------------------------
+    per_scene:
+      scene01:  [L11., L21., L31., L41~, L4b1!, L51., L76~, L810!, L91.]
+      scene02:  [L11., L21., L31., L41~, L4b1!, L51., L64!, L71., L810!, L91.]
+      scene03:  [L11., L21., L31., L41~, L4b6!, L51., L61~, L78~, L814!, L91.]
+      scene04:  [L11., L24~, L31., L41~, L4b4!, L51., L77~, L84!, L91.]
+      scene05:  [L11., L21., L31., L41~, L4b2!, L51., L64!, L71., L810!, L91.]
+      scene06:  [L11., L23~, L31., L41~, L4b2!, L51., L66!, L73~, L88!, L91., L101~]
+      scene07:  [L11., L21~, L31., L41~, L4b3!, L51., L71., L88!, L91., L101~]
+      scene08:  [L11., L21., L31., L41~, L4b2!, L51., L65!, L71., L811!, L91.]
+      scene09:  [L11., L22~, L31., L41~, L4b1!, L51., L74~, L89!, L91.]
+      scene10:  [L11., L21., L31., L41~, L4b9!, L51., L72~, L84!, L91.]
+      scene11:  [L11., L23~, L31., L41~, L4b3!, L51., L64!, L72~, L810!, L91., L101~]
+      scene12:  [L11., L21., L31., L41~, L4b1!, L51., L62!, L71., L88!, L91.]
+      scene13:  [L11., L21., L31., L41~, L4b3!, L51., L64~, L74~, L82!, L91.]
+      scene14:  [L11., L22~, L31., L41~, L51., L61., L71., L810!, L91.]
+      scene15:  [L85!]
+      scene16:  [L11., L21., L31., L41~, L51., L61., L71., L814!, L91.]
+      scene17:  [L11., L21., L31., L41~, L4b2!, L51., L74~, L811!, L91.]
+      scene18:  [L11., L21., L31., L41~, L4b1!, L51., L71., L811!, L91.]
+      scene19:  [L11., L21., L31., L41~, L51., L71., L815!]
+      scene20:  [L11., L21., L31., L41~, L51., L61., L71., L810!, L91.]
+      scene21:  [L51., L61., L71., L810!, L91.]
+      sceneC1:  [L51., L72~, L7s3!, L810!, L91.]
+      sceneC2:  [L11., L21., L31., L41~, L4b1!, L51., L72~, L7s4!, L91., L102~]
+      sceneC4:  [L41~, L51., L62~, L71., L7s2!, L810!, L91.]
+      sceneD1:  [L51., L61~, L79~, L818!, L91.]
+      sceneD2:  [L51., L736~, L7s2!, L88!]
+      sceneD3:  [L11., L21., L31., L41~, L4b3!, L51., L71., L812!, L91., L101~]
+      sceneD4:  [L51., L77~, L7s2!, L91.]
+      sceneN1:  [L11., L21., L31., L41~, L4b1!, L51., L61~, L79~, L7s4!, L810!, L91.]
+      sceneN2:  [L11., L21., L31., L41~, L51., L61~, L73~, L7s3!, L86!, L91.]
+      sceneN3:  [L11., L21., L31., L41~, L4b1!, L51., L62~, L74~, L7s3!, L810!, L91.]
+      sceneN4:  [L11., L21., L31., L41~, L51., L66~, L71., L87!, L91.]
+      sceneN5:  [L11., L21~, L31., L41~, L4b2!, L51., L61~, L71., L7s1!, L810!]
+
+    # Findings the scene WPs must adjudicate rather than reflexively fix, recorded here so they
+    # are not lost between windows.
+    open_questions:
+      - id: OQ-1
+        text: >
+          sceneD2's cement-sack stack carries a per-sack yaw draw
+          `brng.uniform(-4.0, 4.0)` (sceneD2:929) over 32 sacks, and the rebar bundle's
+          Batten / Strap prims inherit fixed off-axis bearings (+4 / -7 deg, sceneD2:881/902).
+          Neither appears in the §10.1 13-row abolish inventory, which lists only sceneD2:210
+          (ToolBox, -22 deg) for this scene. Same class as row 11 (sceneD1:855 crates).
+          Owner: S8. [measured]
+      - id: OQ-2
+        text: >
+          §10.2 lists 02 · 08 · 16 · 18 · 19 · 20 · N1 · N2 · N3 among the scenes with "no
+          `build_tree` call". They nonetheless instantiate trees through `build_planter`'s
+          internal call (corrected fact C-16, scene_common.py:2564) and those trees carry the
+          per-tree species draw: scene02 binds Elm_Sapling + Yellow_Pine, scene18 binds
+          White_Pine + Shumard_Oak x2. C-4 ("scene02 has no build_tree call") is true of DIRECT
+          call sites only. K4(b) must decide whether planter-borne trees are in the S-1 scope.
+          [measured]
+      - id: OQ-3
+        text: >
+          LINT-10 flags 6 `jitter=` kwargs that are NOT the three J-11 keep-at-zero builders
+          (scene06:276, scene07:173, scene11:250, sceneC2:166, sceneC2:264, sceneD3:198). Under
+          §1.2 X2 size/interval variation is KEPT and placement jitter is abolished, so each
+          needs a per-call verdict from its owning scene WP. Reported at warn, not banned.
 
 # ---------------------------------------------------------------------------
 # Angular / linear tolerances

@@ -632,8 +632,12 @@ def _snap_module(w, h, cx, cy, cell, origin_xy, lo, hi):
     **Two callers, and after GT-24 they no longer overlap.**
     `build_patch_field` (asphalt cut patch) is now carried only by profiles with no paver
     module at all - `street_asphalt` · `ramp_road` · `ramp_parking` · `roof_membrane` ·
-    `verge_rural` - plus `alley_concrete` (3.0 m bay, excluded by the rule above) and
-    `levee_paved` (0.200 interlocking, the one patch caller that still snaps).
+    `verge_rural` - plus `alley_concrete` (3.0 m bay, excluded by the rule above).
+    ~~and `levee_paved` (0.200 interlocking, the one patch caller that still snaps)~~
+    - **retired by GT-24's `levee_paved` extension** `[supervisor amendment 07-31 ·
+    ledger §11 SB-1]`: that row is deleted, so **no `build_patch_field` caller snaps to a
+    paving module any more** and this function's snap path is reached only by
+    `build_relaid_units`.
     `build_relaid_units` (re-laid unit group) is the **unit-paved** vocabulary and
     *requires* a snapping module, so it is the caller this function was really written for.
 
@@ -1970,8 +1974,17 @@ GROUND_PROFILES = {
         pave=dict(module=(0.200, 0.100), joint="interlock",
                   step_x=3.0, step_y=None),
         infra=dict(manhole=1, gully=2, gutter_L=1),
-        surface=(("patch", 4), ("crack", 5), ("stain", ("dirt", "water")),
-                 ("weed", 6)),
+        # [W3 GT-24 EXTENSION `[supervisor amendment 07-31 · ledger §11 SB-1]`]
+        #   **`("patch", 4)` deleted.** 인터로킹 200x100 is unit paving by this kit's own
+        #   dimension ledger (`GROUND_DIMENSIONS["unit_cell"]["levee_paved"]`, :319), so
+        #   GT-24's argument applies verbatim: a saw-cut, milled and re-laid rectangle is
+        #   an *asphalt* repair, and on interlocking block the real repair lifts and
+        #   relays whole units. Raised as `w3_mb_patch_v1.md` MB-F4 and left untouched
+        #   there because it sat outside the three authorised profiles.
+        #   Reach, measured before landing: `scene03` authors its own `surface` row
+        #   (8 patches, `scene03_riverbank.py:911`) and is **unreachable**; `scene17`
+        #   does not override and loses 4 `Patch_*` prims.
+        surface=(("crack", 5), ("stain", ("dirt", "water")), ("weed", 6)),
         extras=(("wear_lane", dict()),),
     ),
     # ── P14 ───────────────────────────────────────────────────────────────

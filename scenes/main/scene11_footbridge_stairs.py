@@ -208,10 +208,22 @@ PARAMS = dict(
               w=0.15, z=-0.142, t=0.02, seg=3.0, gap=5.0, y0=-58.0, y1=58.0),
     # --- sidewalk (interlocking pavers) + kerb ---
     #   [v6 ruling C-2] the old 34.5 m wide sidewalk read not as openness but as **waste ground**, and the
-    #   grass plate met the sky in a straight line. The sidewalk shrinks to 29.5 m (the minimum that holds
-    #   the stair foot 30.88 + the sign 31.6 + the bench 36) and outside it a planting strip + a street-tree
-    #   row + a distant tree band form the boundary.
-    walk=dict(y0=-60.0, y1=60.0, xw0=-40.0, xw1=-10.50, xe0=10.50, xe1=40.0,
+    #   grass plate met the sky in a straight line. The sidewalk shrank to 29.5 m (the minimum that held
+    #   the I-plan stair foot 30.88 + the sign 31.6 + the bench 36) and outside it a planting strip + a
+    #   street-tree row + a distant tree band formed the boundary.
+    #   [W3 **P11** · `w3_intake_v2_images.md` §7.2 *"S11 §10-1 sidewalk narrowing ADOPTED in principle —
+    #   execute per the report's filed coordinates"*] 29.5 m was never a footway; G11's is **4–6 m**.
+    #   The two numbers filed in `w3_s11_v1.md` §10-1 are used verbatim and nothing else in the
+    #   cross-section is re-opened: `xe1 40.0 → 22.0` and `xw0 −40.0 → −22.0`, i.e. **11.50 m** of
+    #   paving per side. The 29.5 m figure was v6 ruling C-2's, but its own justification died with the
+    #   I-plan: it was sized to hold a stair foot at x 30.88, and the H-plan put that foot at 16.90.
+    #   The planting strip, the street-tree row, the benches, the bus shelter and the stop pole all move
+    #   inboard with the edge (`verge` is derived from `xe1`/`xw0`, so it follows without being typed);
+    #   the distant tree band and the buildings do **not** move, so strip → band is grass, which is the
+    #   other half of what §10-1 filed (*"식재대와 수목 띠 사이는 지면(잔디)로 둔다"*).
+    #   **Residual, declared not hidden**: 11.50 m is still ~2× G11's footway. It is the filed number,
+    #   and this lane does not re-open a supervisor-adopted coordinate; the measured gap is in the report.
+    walk=dict(y0=-60.0, y1=60.0, xw0=-22.0, xw1=-10.50, xe0=10.50, xe1=22.0,
               z_top=-0.005, thick=0.50),
     # --- 보차도 경계석 (S06-B) : `infra_kit.build_curb_line`, NOT a 120 m box -----
     #   The audit's finding for 06/11 was never "add a curb" — the 150 mm exposure was
@@ -235,6 +247,13 @@ PARAMS = dict(
     curb=dict(z_road=-0.150, height=0.150, width=0.20, unit=1.0,
               y0=-60.0, y1=60.0, lod=(38.0, 84.0), far_unit=8.0),
     # --- planting strip (outer sidewalk boundary) : granite kerbstones + groundcover top ---
+    #   [W3 P11] the strip is **derived** from the footway edge (`xw0 − w` … `xw0`, `xe1` … `xe1 + w`),
+    #   so the narrowing translates it 18.00 m inboard — `x ±40.00…±42.40` → **`x ±22.00…±24.40`** —
+    #   without a coordinate being typed. Its outer kerb face is the one ≥ 0.30 m line in the
+    #   cross-section (`curb_top +0.14` → site grass `−0.16` = **0.300 m**, at the negative-obstacle
+    #   threshold, so a drop and not a step). That line is **translated, not created**; it is declared
+    #   in the ledger because it now stands 2.40 m outboard of the footway instead of 20.40 m.
+    #   Seen from the footway the strip is an **up-kerb (+0.145)**, so nothing a walker meets falls.
     verge=dict(w=2.40, curb_t=0.20, curb_top=0.14, soil_top=0.10,
                y0=-60.0, y1=60.0),
     # --- site ground (closes the horizon) : 1 cm below the road top face (−0.15) ---
@@ -311,28 +330,50 @@ PARAMS = dict(
         #   the real minimum = rear glass wall + **2 side walls** + bench + **route-map panel**.
         #   [W3 S11] pushed east from x 17.0 to 19.6: the east switchback tower now occupies
         #   x 13.20…16.90, and a shelter 100 mm off the mid-landing face reads as a collision.
-        shelter=dict(x0=19.6, x1=25.6, y0=-9.60, y1=-5.60, z_roof=2.55,
-                     post_r=0.08, bench_y=-8.6, side_t=0.05, side_h=2.20,
+        #   [W3 P11] `x 19.60…25.60` no longer fits an 11.50 m footway — 3.60 m of it would have
+        #   stood in the planting bed and on the lawn. Squeezing the box to fit between the tower face
+        #   (16.90) and the new edge (22.00) would have left a 3.80 m stub marooned 7.4 m from the
+        #   kerb, so the shelter keeps its **6.00 × 4.00 m box unchanged** and moves instead to where
+        #   a bus shelter belongs — **at the kerb, clear of the tower in y**: `x 11.40…17.40`
+        #   (0.90 m back from the kerb block's back face at 10.70) × `y −18.00…−14.00`
+        #   (3.96 m south of the east tower footprint, which ends at y −10.04).
+        #   `bench_y` follows the back wall (`y0 + 0.10 + 0.90`) so the seat keeps its 0.90 m clearance.
+        shelter=dict(x0=11.4, x1=17.4, y0=-18.00, y1=-14.00, z_roof=2.55,
+                     post_r=0.08, bench_y=-17.0, side_t=0.05, side_h=2.20,
                      side_inset=0.9, route_w=0.90, route_h=1.10),
-        bus_pole=(27.2, -7.60, 3.20),
+        #   [W3 P11] the stop pole cannot keep its old "1.6 m beyond the shelter's outer end" relation
+        #   (that lands at x 23.30, in the planting bed). A 정류장 표지 stands at the kerb anyway, so
+        #   it goes to `(11.80, −19.60)` — 1.30 m from the kerb block, 1.60 m upstream of the shelter.
+        bus_pole=(11.80, -19.60, 3.20),
         #   [W3 S11] lamps moved off the tower footprints (old x ±16.0 stood 1.0 m from the
         #   west leg and 0.9 m from the east one) to x ±19.0, y ±13.0.
         lamps=((19.0, -13.0), (19.0, 13.0), (-19.0, -13.0), (-19.0, 13.0)),
-        # street-tree row - [v6 ruling C-2] one row on the planting strip (x +-41.2), spacing 7.5 m +- jitter.
+        # street-tree row - [v6 ruling C-2] one row on the planting strip, spacing 7.5 m +- jitter.
+        #   [W3 P11] the strip centre moves 41.2 -> **23.2** (= xe1 22.0 + w/2), so the whole 16-tree
+        #   row translates 18.0 m inboard. Its y rhythm is untouched.
         #   it draws the sidewalk-grass boundary as a line. The stair corridor (y −2.4…2.4) is left empty.
         lamp=dict(pole_h=6.0, pole_r=0.10, arm_len=1.1, arm_r=0.055, head=0.32),
         #   [W3 S11] the four sidewalk trees at x ±14 / ±26, y ±20 are re-sited to x ±21 /
         #   ±30, y ±23. Under the H-plan `(−14.0, 20.0)` stood 2.9 m in front of the west
         #   stair foot, dead on the tower axis. G11 also shows the ground beside a footbridge
         #   foot **kept clear** — the street-tree row is the middle-distance element there.
-        trees=((41.2, -34.0), (41.2, -26.6), (41.2, -19.2), (41.2, -11.6),
-               (41.2, 11.8), (41.2, 19.4), (41.2, 26.8), (41.2, 34.2),
-               (-41.2, -34.2), (-41.2, -26.8), (-41.2, -19.4), (-41.2, -11.8),
-               (-41.2, 11.6), (-41.2, 19.2), (-41.2, 26.6), (-41.2, 34.0),
-               (21.0, -23.0), (21.0, 23.0), (30.0, -23.0), (30.0, 23.0),
-               (-21.0, -23.0), (-21.0, 23.0), (-30.0, -23.0), (-30.0, 23.0)),
+        #   [W3 P11] those 8 filler trees existed only to break up a 29.5 m expanse that no longer
+        #   exists. They are **not** scaled proportionally into the new footway: (21.0, 30.0) × 11.5/29.5
+        #   lands at x 14.6 / 18.1, and x 14.6 sits inside the west tower's x-band (−15.00…−13.20),
+        #   i.e. it would put a tree back on the tower axis 5.9 m in front of the west stair foot —
+        #   the exact defect the line above records removing. They become **one inner row of 4 per
+        #   side at x ±18.60** (outboard of the east tower's 16.90 face and of the west tower's
+        #   −15.00 face by 1.70 m / 3.60 m), keeping the street-tree y rhythm at ±23.0 / ±30.0.
+        trees=((23.2, -34.0), (23.2, -26.6), (23.2, -19.2), (23.2, -11.6),
+               (23.2, 11.8), (23.2, 19.4), (23.2, 26.8), (23.2, 34.2),
+               (-23.2, -34.2), (-23.2, -26.8), (-23.2, -19.4), (-23.2, -11.8),
+               (-23.2, 11.6), (-23.2, 19.2), (-23.2, 26.6), (-23.2, 34.0),
+               (18.6, -23.0), (18.6, 23.0), (18.6, -30.0), (18.6, 30.0),
+               (-18.6, -23.0), (-18.6, 23.0), (-18.6, -30.0), (-18.6, 30.0)),
         # [v5.1 §3] benches sit beside street-tree anchors (no even spacing · yaw jitter)
-        benches=((38.6, -19.2, 86.0), (-38.6, 19.2, -94.0)),
+        #   [W3 P11] the bench keeps its **1.40 m offset from the footway edge** (38.6 = 40.0 − 1.4
+        #   → 20.6 = 22.0 − 1.4) and therefore stays beside the street-tree anchor at y ∓19.2/19.4.
+        benches=((20.6, -19.2, 86.0), (-20.6, 19.2, -94.0)),
         bollards=((12.6, -5.6), (12.6, 5.6), (-12.6, -5.6), (-12.6, 5.6)),
         # [W3 S11 · G13] the storm-water trench grating G11 puts in the sidewalk beside the
         #   stair foot. It is a real drainage fixture with a 30 mm bar pitch — the pitch is
@@ -764,6 +805,77 @@ def _obstacle_boxes():
 
 
 # ===========================================================================
+# [C2-b] P11 footway census - the gate the narrowing needs
+# ===========================================================================
+def _zone_of(x, y):
+    """Which ground zone the plan point (x, y) lies in: road / walk / verge / ground.
+
+    The narrowing moves the walk edge 18.00 m inboard, so every ground-standing
+    element has to be re-checked against it. This is the single source both the
+    census and the eye check below use - nothing is asserted from a typed number."""
+    wk = PARAMS["walk"]
+    vg = PARAMS["verge"]
+    rd = PARAMS["road"]
+    if not (wk["y0"] <= y <= wk["y1"]):
+        return "ground"
+    if rd["x0"] <= x <= rd["x1"]:
+        return "road"
+    if (wk["xw0"] <= x <= wk["xw1"]) or (wk["xe0"] <= x <= wk["xe1"]):
+        return "walk"
+    if (wk["xw0"] - vg["w"] <= x <= wk["xw0"]) \
+            or (wk["xe1"] <= x <= wk["xe1"] + vg["w"]):
+        return "verge"
+    return "ground"
+
+
+def _footway_census():
+    """[W3 P11] Every ground-standing dressing element, against the narrowed footway.
+
+    Returns `(name, x, y, zone, allowed, ok)` rows. The street-tree row is the only
+    family allowed to stand on the planting strip; everything else must be on the
+    paving. Extended elements (shelter, gratings, benches, trees) are tested at
+    their AABB extremes as well as at their anchor, so a box that merely *starts*
+    on the footway does not pass."""
+    d = PARAMS["dress"]
+    vsoil_x = PARAMS["walk"]["xe1"] + 0.001
+    rows = []
+
+    def _add(name, x, y, hx=0.0, hy=0.0, allowed=("walk",)):
+        zs = {_zone_of(x, y)}
+        for sx in (-hx, hx):
+            for sy in (-hy, hy):
+                zs.add(_zone_of(x + sx, y + sy))
+        ok = zs.issubset(set(allowed))
+        rows.append((name, x, y, "+".join(sorted(zs)), "|".join(allowed), ok))
+
+    for i, (tx, ty) in enumerate(d["trees"]):
+        # the street-tree row is the family that stands on the strip; the inner row
+        # stands on the paving. Which one a tree is, is decided by the same test the
+        # builder uses for its base z (`|x| >= xe1`), never by index.
+        on_strip = abs(tx) >= vsoil_x
+        _add(f"Tree_{i}{' (strip)' if on_strip else ' (inner)'}", tx, ty,
+             1.1, 1.1, ("verge",) if on_strip else ("walk",))
+    for i, (bx, by, _yaw) in enumerate(d["benches"]):
+        _add(f"Bench_{i}", bx, by, 0.4, 1.0)
+    for i, (bx, by) in enumerate(d["bollards"]):
+        _add(f"Bollard_{i}", bx, by, 0.1, 0.1)
+    for i, (lx, ly) in enumerate(d["lamps"]):
+        _add(f"Lamp_{i}", lx, ly, 0.1, 0.1)
+    for i, (gx_, gy_, _yaw) in enumerate(d["gratings"]):
+        _add(f"Grating_{i}", gx_, gy_, float(d["grating_len"]) / 2.0, 0.15)
+    sh = d["shelter"]
+    _add("Shelter", (sh["x0"] + sh["x1"]) / 2.0, (sh["y0"] + sh["y1"]) / 2.0,
+         (sh["x1"] - sh["x0"]) / 2.0, (sh["y1"] - sh["y0"]) / 2.0)
+    _add("BusPole", d["bus_pole"][0], d["bus_pole"][1], 0.3, 0.3)
+    for i, (sx, sy, _yaw) in enumerate(PARAMS["sign"]["spots"]):
+        _add(f"Sign_{i}", sx, sy, 0.5, 0.5)
+    for i, px in enumerate(PARAMS["deck_posts"]["xs"]):
+        _add(f"DeckPost_{i}", px, PARAMS["deck_posts"]["y"],
+             PARAMS["deck_posts"]["r"], PARAMS["deck_posts"]["r"])
+    return rows
+
+
+# ===========================================================================
 # [C2] smoke - geometry self-check before boot (early exit)
 # ===========================================================================
 def _smoke_report():
@@ -917,6 +1029,54 @@ def _smoke_report():
     print(f"    시선 회랑(y −1.2…1.2, x {dk['x0']:.1f}…{gx:.1f} + 타워 발치) "
           f"드레싱 침입: {_corridor_hits()} 개 → "
           f"{'OK' if _corridor_hits() == 0 else 'FAIL'}")
+
+    # ── [W3 P11] 보도 폭 축소 (§10-1 · §7.2 채택) 게이트 ────────────────────
+    vg = PARAMS["verge"]
+    rdx = PARAMS["road"]["x1"]
+    w_e = wk["xe1"] - wk["xe0"]
+    w_w = wk["xw1"] - wk["xw0"]
+    tb_in = min(min(abs(a), abs(b)) for a, b, _h in PARAMS["treeband"]["rows"])
+    print("  [P11 보도 축소] §10-1 등재 좌표 · §7.2 채택")
+    print(f"    보도 폭 동 {w_e:.2f} m · 서 {w_w:.2f} m "
+          f"(구 29.50 m · G11 실측 4~6 m) → 좌우 대칭 "
+          f"{'OK' if abs(w_e - w_w) < 1e-9 else 'FAIL'} · "
+          f"G11 대비 잔여차 {w_e - 6.0:+.2f} m **미해소로 신고**")
+    print(f"    식재대 x {wk['xe1']:.2f}…{wk['xe1']+vg['w']:.2f} "
+          f"(구 40.00…42.40) · 보도측 단차 "
+          f"{vg['curb_top']-wk['z_top']:+.3f} m (올라섬) · 외측 연단 낙차 "
+          f"{vg['curb_top']-PARAMS['ground']['z_top']:.3f} m "
+          f"({'낙차' if vg['curb_top']-PARAMS['ground']['z_top'] >= 0.30 else '단차'}, "
+          f"임계 0.30) — **이설이지 신설이 아니다** (x ±42.40 → ±"
+          f"{wk['xe1']+vg['w']:.2f})")
+    print(f"    식재대 → 수목 띠 사이 잔디 {tb_in - (wk['xe1']+vg['w']):.2f} m "
+          f"(수목 띠 x ±{tb_in:.1f} 불변 · §10-1 '지면(잔디)로 둔다')")
+    cen = _footway_census()
+    bad = [r for r in cen if not r[5]]
+    print(f"  [P11 지면 요소 전수] {len(cen)}건 · 위반 {len(bad)}건 → "
+          f"{'OK' if not bad else 'FAIL'}")
+    for name, x, y, zone, allowed, ok in cen:
+        if not ok:
+            print(f"    [FAIL] {name:18s} ({x:+7.2f},{y:+7.2f}) zone={zone} "
+                  f"허용={allowed}")
+    n_strip = sum(1 for r in cen if r[0].endswith("(strip)"))
+    n_inner = sum(1 for r in cen if r[0].endswith("(inner)"))
+    print(f"    가로수 열 {n_strip}주(식재대) · 내측 열 {n_inner}주(보도) · "
+          f"차도(±{rdx:.2f}) 침범 0 "
+          f"{'OK' if not any('road' in r[3] for r in cen) else 'FAIL'}")
+    # ground-level eyes must stand on the footway - this is the check that caught
+    # `sidewalk_approach` at x 24.00, 2.00 m outside the narrowed edge.
+    gnd_eyes = [(n, v) for n, v in sorted(build_views().items())
+                if abs(v["eye"][2] - wk["z_top"]) < 2.0]
+    egood = 0
+    for n, v in gnd_eyes:
+        z = _zone_of(v["eye"][0], v["eye"][1])
+        ok = z == "walk"
+        egood += 1 if ok else 0
+        print(f"    지면 시점 {n:18s} eye ({v['eye'][0]:+.2f},"
+              f"{v['eye'][1]:+.2f},{v['eye'][2]:+.2f}) zone={z} "
+              f"{'OK' if ok else 'FAIL(보도 밖)'}")
+    print(f"    지면 시점 판정 {egood}/{len(gnd_eyes)} "
+          f"{'OK' if egood == len(gnd_eyes) else 'FAIL'}")
 
     # ── front profile (grid axis y=0, increasing x) - is the drop GT in frame ──
     print("  [정면 프로파일] 그리드 축 y=0.00 · x 15.0 → 20.0 (0.25 m 간격)")
@@ -1181,7 +1341,14 @@ def build_views():
                              tgt=[tx, ty, z_mid - 0.45])
     # sidewalk_approach: brief R6 "sidewalk approach" - along the east sidewalk toward the
     #   switchback tower's foot (now at x 15.10…16.90, y −1.20)
-    out["sidewalk_approach"] = dict(eye=[24.00, 3.20, 0.90],
+    #   [W3 P11] the old eye (24.00, 3.20, 0.90) is 2.00 m **outside** the narrowed footway — it
+    #   would stand in the planting bed, which is not a sidewalk approach. It slides **3.00 m
+    #   forward along its own ground bearing** (unit (−0.86543, −0.50104), i.e. the bearing, the
+    #   eye height and the target are all unchanged) to (21.40, 1.70, 0.90), 0.60 m inside the
+    #   edge. Eye-to-foot distance 8.78 → 5.78 m; that is the whole of the framing change and it
+    #   is measured against the baseline in the report. **This is a mise-en-scène cut, not one of
+    #   the 9 judge presets** — those come out of `sc.grid_views` above and are byte-identical.
+    out["sidewalk_approach"] = dict(eye=[21.40, 1.70, 0.90],
                                     tgt=[16.40, -1.20, 2.80])
     # overview: high-angle full view of the footbridge (6 lanes, deck and both towers at once)
     out["overview"] = dict(eye=[44.00, -34.00, 17.00], tgt=[0.00, 2.00, 3.60])
@@ -1979,7 +2146,9 @@ def main():
                     far[(k + r) % 3])
                 # the canopy radius is based on **the band width** (not on height) - so that even a large
                 #   height jitter cannot spread in x and encroach on the planting strip / street-tree row
-                #   (x +-41.2). Maximum x spread = x_jit 1.2 + rx 1.9 = 3.1 m.
+                #   ([W3 P11] now at x +-23.2, 21.3 m clear instead of 3.3 m). Maximum x spread =
+                #   x_jit 1.2 + rx 1.9 = 3.1 m; the band itself does not move (§10-1 leaves the
+                #   strip-to-band gap as grass).
                 rw = (xb_ - xa_) * 0.5
                 for j in range(nb):
                     hj = h * rnd.uniform(0.72, 1.16)

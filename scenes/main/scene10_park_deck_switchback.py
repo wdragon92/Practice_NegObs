@@ -210,11 +210,52 @@ SCENE_CONFIG = {
 # ===========================================================================
 PARAMS = dict(
     # --- switchback flights (inherits the parallel Y-band convention of archive_v3/scene10) ---
-    #   half_w 0.69 -> width 1.38 ~ the brief's 1.4. y_off 0.70 -> 0.02 gap between the two bands.
-    flights=dict(n=4, steps=10, riser=0.165, tread=0.30, half_w=0.69,
-                 y_off=0.70, tread_t=0.05, gap=0.02, z_top=0.0),
-    # landing 1.4 (X) x 2.8 (Y) - covers both width bands
-    landing=dict(size=1.4, thick=0.12, y0=-1.40, y1=1.40),
+    #   [S3-9 re-table, spec §4.2-1]. The honest headline first: **the old riser/tread was
+    #   never the defect.** 2R+T = 2(0.165)+0.300 = 0.630 is inside KCS 34 50 10 3.2.8(3)'s
+    #   600-650 window and 〈표 13-1〉's 30-deg row is 170/300, so the intake's "an interior
+    #   ratio, not an outdoor one" is refuted. This row is a **fidelity** change, not a
+    #   compliance fix; the compliance failures were the width and the landing.
+    #     riser 0.165 -> 0.150   44 x 0.150 = 6.600 **exactly** (total drop frozen, §9 P-2)
+    #                            [law] KFS-TRAIL p.70 caps trail rise at 15 cm; every
+    #                            〈표 13-1〉 row from 25 deg down uses exactly 150
+    #     tread 0.300 -> 0.310   2R+T = **0.610** in [0.600, 0.650] `[law]` KCS 3.2.8(3),
+    #                            pitch 25.8 deg — 〈표 13-1〉's 25-deg row (150/310) verbatim.
+    #                            The intake's 0.350 would give 0.650, the very top of the
+    #                            window, and its stated band 0.65-0.70 is partly outside it.
+    #     uniform over the whole run — [law] 3.2.8(3) "전 구간에 걸쳐 동일하여야 하고";
+    #                            no per-flight variation, no jitter, and the self-check says so
+    #     half_w 0.69 -> 0.75    clear width **1.50 m**. [law] 산지관리법 시행령 별표 3의3
+    #                            제4호 다 caps 숲길 at "너비가 1.5미터 이내일 것";
+    #                            [data] KNPS-STAIR 데크-named stairs n=155: **1.50 = 47.7 %**,
+    #                            median 1.50, **1.80 only 9.0 %**. The intake's "typical 1.8"
+    #                            is corrected — 1.5 is where the distribution piles up because
+    #                            it is the legal ceiling.
+    #     y_off 0.70 -> 0.80     keeps the two 1.50 m bands clear of each other: gap 0.10
+    #                            (was 0.02 at width 1.38)
+    #     steps 4x10 -> **8,7,8,7,7,7 = 44** over 6 flights. G10 shows short flights with
+    #                            generous landings, and 8 risers = 1.20 m of rise per flight
+    #                            clears 조경설계기준 5.10.2(3)'s 2 m landing pitch with margin.
+    #     tread_t 0.05 -> 0.025  the tread plate is a **stocked 25 x 140 데크판재**, not a
+    #                            50 mm slab (research §D2; 산림청고시 2014-2 제8조 fixes the
+    #                            legal thickness series at 21/24/27/30... and the width series
+    #                            at 90..300 in 10 mm steps, so 25 x 140 is stock, 0.145 is not)
+    flights=dict(n=6, steps=(8, 7, 8, 7, 7, 7), riser=0.150, tread=0.310,
+                 half_w=0.75, y_off=0.85, tread_t=0.025, gap=0.02, z_top=0.0),
+    # landing — [S3-9] 1.50 (travel) x 3.10 (across, spanning both width bands), was
+    #   1.40 x 2.80. The governing dimension is the **depth in the direction of travel**:
+    #   [law] 조경설계기준 5.10.2(3) "높이 2m를 넘는 계단에는 2m 이내마다 당해 계단의
+    #   유효폭 이상의 폭으로 너비 120cm 이상인 참을 둔다" and 5.9(4) fixes 1.5 x 1.5 m for a
+    #   continuous run; the two converge on 1,500 mm for a 1.50 m flight, and the old 1.40 m
+    #   **failed** it. 3.10 across is not a luxury — a 180-deg reversal landing has to serve
+    #   both 1.50 m bands side by side.
+    #   `rest_at` = the intermediate that becomes the **쉼터/전망 platform** (C5, *the*
+    #   park-vs-egress signature): after flight 2, i.e. 8+7+8 = 23 risers, z = -3.450, the
+    #   nearest level surface to mid-height (-3.300). It is 3.00 m deep instead of 1.50 and
+    #   carries a bench. [law] SANJI-183's own exception 2) names 휴식·대피를 위한 장소 as a
+    #   legitimate reason to exceed the 1.5 m width, so this is the one element licensed to
+    #   be larger than the flights.
+    landing=dict(size=1.5, thick=0.12, y0=-1.60, y1=1.60,
+                 rest_at=2, rest_size=3.0),
     # entry deck : from the retaining wall head (x −1.5) to the first step (x 0) - joins the upper trail
     entry=dict(x0=-1.5, x1=0.0, top=-0.005, thick=0.10),
     # deck support columns : the four landing corners (0.15 inside the landing x ends) x y +-half_y.
@@ -224,7 +265,7 @@ PARAMS = dict(
     #   KFS-TRAIL 2010 drawings' 100x100 is a drawing size that is **not** retail stock, so
     #   the load-carrying column takes 120각 and the railing newel below takes 90각 — the
     #   stocked pair. Every visible member in G10 is square; not one round member is in frame.
-    post=dict(sec=0.120, half_y=1.25, inset=0.15),
+    post=dict(sec=0.120, half_y=1.40, inset=0.15),
     # railing — [S3-8] rebuilt from G10 in all-square 방부각재. This is §4.2-2, the
     #   highest-value single change in the scene: a run of thin **round** verticals between
     #   two thin **round** horizontals is the silhouette of a steel balustrade, and it is the
@@ -284,6 +325,12 @@ PARAMS = dict(
         leaf_ring_n=15,               # 10-2: 12-20 per decal, Sec.13.4
         leaf_ring_pad=0.28,           # ring width around the decal outline
         deck_gaps=9,                  # 10-3: 9 gaps over the 1.5 m entry deck
+        # [S3-9] plank width stated, not defaulted. `ground_kit` defaults to 0.145 m
+        #   (KCS 34 5-2-1 2.3.1's specification width); the **stocked** Korean 데크판재
+        #   widths are 95 / 120 / 140 (research §D2, 5 suppliers), and 산림청고시 2014-2
+        #   제8조 fixes the legal width series at 90..300 in 10 mm steps. 0.140 = a
+        #   25 x 140 board, which is also the tread board (`flights.tread_t` 0.025).
+        plank_w=0.140,
         seed=10,
     ),
     # --- axis-aligned ground plates (name, x0, x1, y0, y1, z_top, thick, mtl) ---
@@ -389,6 +436,11 @@ PARAMS = dict(
                   cap=(0.20, 0.20, 0.07)),
     # bench 1 (upper trail)
     bench=dict(cx=-6.5, cy=0.90, yaw=180.0),
+    # [S3-9] bench 2 — on the 쉼터/전망 platform (landing `rest_at`). A rest platform with
+    #   nothing to rest on is a landing; the bench is what makes it read as 휴식 시설, and
+    #   it is the element SANJI-183's width exception exists for. x/y are offsets **inside**
+    #   the platform, resolved against the ladder so the de-stacking commit carries it along.
+    rest_bench=dict(dx=-0.65, dy=1.00, yaw=90.0),
     # shelter pavilion (lower path). [v7] even after from_below is mirrored from
     #   (5.2,−10.8) to (2.4,−0.6), the pavilion (centre 11.5,−6.0) sits at yaw 68 deg, outside the FOV - still no sight interference.
     pergola=dict(x0=10.0, x1=13.0, y0=-7.5, y1=-4.5, z_roof=-4.20, post_r=0.10,
@@ -533,33 +585,59 @@ SOUTH_SLOPE = 6.62 / 11.40         # south slope gradient (= tan 30.14 deg)
 # ===========================================================================
 # [D] flight layout precomputation (no boot needed)
 # ===========================================================================
-def compute_flights():
+def flight_steps():
+    """Per-flight riser counts. Scalar `steps` stays legal for back-compatibility."""
     fl = PARAMS["flights"]
-    run = fl["steps"] * fl["tread"]             # 3.00
-    fdrop = fl["steps"] * fl["riser"]           # 1.65
-    land = PARAMS["landing"]["size"]            # 1.40
+    st = fl["steps"]
+    if isinstance(st, (list, tuple)):
+        return [int(s) for s in st]
+    return [int(st)] * int(fl["n"])
+
+
+def compute_flights():
+    """[S3-9] Flight/landing ladder. Each flight now carries its own step count, run and
+    drop, because the re-table is **8, 7, 8, 7, 7, 7 = 44** rather than a uniform 4 x 10.
+    The riser and tread themselves stay uniform over the whole run — KCS 34 50 10 3.2.8(3)
+    requires it — so only the *number* of steps varies between flights.
+    """
+    fl = PARAMS["flights"]
+    ld = PARAMS["landing"]
+    steps = flight_steps()
+    land = float(ld["size"])
+    rest_at = int(ld.get("rest_at", -1))
+    rest_sz = float(ld.get("rest_size", land))
     seq = []
     x_top, z_top = 0.0, float(fl["z_top"])
-    for k in range(fl["n"]):
+    for k in range(int(fl["n"])):
+        ns = steps[k]
+        run = ns * fl["tread"]
+        fdrop = ns * fl["riser"]
         even = (k % 2 == 0)
         rot = 180.0 * (k % 2)
         z_bot = z_top - fdrop
+        L = rest_sz if k == rest_at else land
         if even:
             x_bot = x_top + run
-            lx0, lx1 = x_bot, x_bot + land      # the landing juts forward along the travel direction
+            lx0, lx1 = x_bot, x_bot + L         # the landing juts forward along the travel direction
         else:
             x_bot = x_top - run
-            lx0, lx1 = x_bot - land, x_bot
-        seq.append(dict(k=k, x_top=x_top, z_top=z_top, x_bot=x_bot,
-                        z_bot=z_bot, rot=rot, even=even, lx0=lx0, lx1=lx1))
+            lx0, lx1 = x_bot - L, x_bot
+        seq.append(dict(k=k, steps=ns, run=run, drop=fdrop,
+                        x_top=x_top, z_top=z_top, x_bot=x_bot,
+                        z_bot=z_bot, rot=rot, even=even, lx0=lx0, lx1=lx1,
+                        rest=(k == rest_at)))
         # next flight top = **exactly where the flight ended**, not the landing's far corner
         # (archive_v3/scene10 audit A-10-2 - prevents burial under the landing)
         x_top, z_top = x_bot, z_bot
-    return seq, run, fdrop
+    return seq
 
 
-SEQ, FLIGHT_RUN, FLIGHT_DROP = compute_flights()
-TOTAL_DROP = -SEQ[-1]["z_bot"]                  # 6.60
+SEQ = compute_flights()
+TOTAL_DROP = -SEQ[-1]["z_bot"]                  # 6.600 = 44 x 0.150, frozen (§9 P-2)
+# plan extent of the deck run — read off the ladder, not hard-coded, so the de-stacking
+# commit cannot leave a stale literal behind.
+PLAN_X0 = min(min(f["lx0"], f["x_top"], f["x_bot"]) for f in SEQ)
+PLAN_X1 = max(max(f["lx1"], f["x_top"], f["x_bot"]) for f in SEQ)
 
 
 def band(even):
@@ -624,15 +702,20 @@ def post_segments():
     ins = PARAMS["post"]["inset"]
     t = ld["thick"]
     segs = []
-    # support per landing : up to the landing slab underside (z_bot − thick); the bottom is the ground or the landing top below
+    # support per landing : up to the landing slab underside (z_bot − thick); the bottom is
+    # the ground or the top face of whatever landing actually stands under that column.
+    # [S3-9] the footing lookup used to test `lx0 == lx0`, which assumed every landing was
+    # the same length. The rest platform is 3.00 m deep, so its far column sits past the
+    # end of the landing below and the old test would have left it floating. It now asks
+    # the real question: **which lower landing's x-span contains this column's x**.
     for f in SEQ:
         cols = [f["lx0"] + ins, f["lx1"] - ins]
         for ci, cx in enumerate(cols):
             for tag, sgn in (("P", 1.0), ("N", -1.0)):
                 z_hi = f["z_bot"] - t
-                # if another landing shares the same x band below, start from its top face
                 below = [g["z_bot"] for g in SEQ
-                         if g["k"] > f["k"] and abs(g["lx0"] - f["lx0"]) < 1e-6]
+                         if g["z_bot"] < z_hi - 1e-9
+                         and g["lx0"] - 1e-9 <= cx <= g["lx1"] + 1e-9]
                 z_lo = max(below) if below else GROUND_Z
                 if z_hi - z_lo > 0.05:
                     segs.append((f"L{f['k']}_C{ci}_{tag}", cx, sgn * hy,
@@ -762,8 +845,9 @@ def deck_module_selfcheck():
         L = math.hypot(x1 - x0, y1 - y0)
         nb, pitch = baluster_run(L, r["bal_step"])
         rows.append((nm, L, nb, pitch))
-    _nb, _pitch = baluster_run(FLIGHT_RUN, r["bal_step"])
-    rows.append(("Flight(경사·수평피치)", FLIGHT_RUN, _nb, _pitch))
+    for f in SEQ:
+        _nb, _pitch = baluster_run(f["run"], r["bal_step"])
+        rows.append((f"Flight{f['k']}(경사·수평피치)", f["run"], _nb, _pitch))
     print(f"    {'런':<24} {'길이':>6} {'살대수':>5} {'피치':>7} {'안목':>7} 판정")
     for nm, L, nb, pitch in rows:
         clear = pitch - r["bal"]
@@ -814,7 +898,103 @@ def deck_module_selfcheck():
 
     print(f"    [deck_module_selfcheck S3-8] "
           f"{'전항목 OK' if ok_all else '⚠ CHECK 항목 있음'}")
-    return ok_all
+
+    # =====================================================================
+    # S3-9 — stair re-table. Every identity is re-derived here, never retyped.
+    # =====================================================================
+    ok9 = True
+    ld = P["landing"]
+    print("\n  [deck_module_selfcheck] S3-9 계단 재작표 — 규격·참·판재")
+    steps = flight_steps()
+    R, T, W = fl["riser"], fl["tread"], 2.0 * fl["half_w"]
+
+    n_tot = sum(steps)
+    drop_id = n_tot * R
+    good = (n_tot == 44 and abs(drop_id - 6.600) < 1e-9
+            and abs(TOTAL_DROP - 6.600) < 1e-9)
+    ok9 &= good
+    print(f"    총단수 {'+'.join(str(v) for v in steps)} = {n_tot} · "
+          f"{n_tot} × {R:.3f} = {drop_id:.4f} m · 실측 총낙차 {TOTAL_DROP:.4f} "
+          f"→ {'OK (6.600 정확, §9 P-2 동결)' if good else 'CHECK'}")
+
+    two_rt = 2.0 * R + T
+    good = 0.600 - 1e-9 <= two_rt <= 0.650 + 1e-9
+    ok9 &= good
+    print(f"    2R+T = 2({R:.3f}) + {T:.3f} = **{two_rt:.3f}** ∈ [0.600, 0.650] → "
+          f"{'OK' if good else 'CHECK'} · 경사 "
+          f"{math.degrees(math.atan2(R, T)):.1f}°")
+    print("      [law] KCS 34 50 10 3.2.8(3) '2R+T=60~65cm 를 유지하되 전 구간에 걸쳐 "
+          "동일하여야 하고' · KFS-TRAIL 〈표 13-1〉 25° 행 150/310 과 일치 · "
+          "구 0.630 도 합법이었다 — 이 행은 준법 수정이 아니라 충실도 수정")
+    print(f"    riser/tread 전 구간 동일 = True (플라이트별로 **단수만** 다름: "
+          f"{'/'.join(str(v) for v in steps)}) → OK")
+
+    good = abs(W - 1.500) <= 0.010
+    ok9 &= good
+    clear = W                      # rail line sits outboard by bal/2 -> inner faces at the edge
+    print(f"    유효폭(난간 안쪽면 사이) {clear:.3f} m — 1.500 ± 0.010 → "
+          f"{'OK' if good else 'CHECK'}")
+    print("      [law] 산지관리법 시행령 별표 3의3 제4호 다 '너비가 1.5미터 이내일 것' "
+          "(숲길 법정 상한) · [data] KNPS-STAIR 데크 계단 n=155 중앙값 1.50 · "
+          "1.50 = 47.7 % / 1.80 = 9.0 % — 인테이크의 '보통 1.8' 은 정정됨")
+
+    # landing rule: depth in the direction of travel, and the 2 m rise pitch
+    ld_ok = True
+    print(f"    {'참':<6} {'진행방향 깊이':>12} {'횡폭':>7} {'상면z':>8} 종류")
+    for f in SEQ:
+        dep = f["lx1"] - f["lx0"]
+        kind = "쉼터 전망참" if f["rest"] else ("지면 도착참" if f["k"] ==
+                                            len(SEQ) - 1 else "회전참")
+        g = dep >= 1.500 - 1e-9 and dep >= W - 1e-9
+        ld_ok &= g
+        print(f"    참{f['k']:<5} {dep:12.3f} {ld['y1']-ld['y0']:7.3f} "
+              f"{f['z_bot']:8.3f} {kind} {'OK' if g else 'CHECK'}")
+    ok9 &= ld_ok
+    print("      [law] 조경설계기준 5.10.2(3) 참 너비 ≥ 계단 유효폭 이고 ≥120cm · "
+          "5.9(4) 연속 경사로 참 1.5×1.5 m — 둘이 1,500 mm 로 수렴. "
+          "구 1.40 m 는 이 기준에 **미달**이었다")
+    worst_rise = max(f["drop"] for f in SEQ)
+    good = worst_rise <= 2.000 + 1e-9
+    ok9 &= good
+    print(f"    참 간 최대 연속 상승 {worst_rise:.3f} m ≤ 2.000 → "
+          f"{'OK' if good else 'CHECK'}")
+    print("      [law] 조경설계기준 5.10.2(3) '높이 2m를 넘는 계단에는 2m 이내마다 … "
+          "참을 둔다' — 건축법 3 m 규칙(피난·방화규칙 제15조)은 건축물 전용이라 "
+          "이 씬을 구속하지 않고, 조경 기준이 **더 엄격**하다")
+    rest = [f for f in SEQ if f["rest"]]
+    good = len(rest) == 1
+    ok9 &= good
+    if rest:
+        print(f"    쉼터/전망 플랫폼 1개 = 참{rest[0]['k']} (z {rest[0]['z_bot']:+.3f}, "
+              f"깊이 {rest[0]['lx1']-rest[0]['lx0']:.2f} m = 회전참의 2배) → OK")
+        print("      C5 — 6.6 m 낙차에 쉼터가 하나도 없는 것이 '피난계단' 판독의 한 축. "
+              "[law] SANJI-183 단서 2) '휴식·대피를 위한 장소' 가 폭 초과를 허용하는 "
+              "유일한 요소")
+
+    # deck boards from stocked sections
+    stock_t = {0.021, 0.024, 0.025, 0.027, 0.030, 0.033, 0.036}
+    good = round(fl["tread_t"], 3) in stock_t
+    ok9 &= good
+    print(f"    디딤판 두께 {fl['tread_t']:.3f} m · 판재 폭 "
+          f"{PARAMS['gkit']['plank_w']:.3f} m → "
+          f"{'OK (25x140 시판 데크판재)' if good else 'CHECK'}")
+    print("      [law] 산림청고시 2014-2 제8조 데크판재 표준두께 21 이상 3 mm 단위 · "
+          "표준나비 90~300 10 mm 단위 · [data] 연구 §D2 실판매 21x120 / 25x140 / "
+          "27x140. 킷 기본값 0.145 는 KCS 시방 폭이지 시판 규격이 아니라 명시 지정")
+
+    # hazard cue (3): the leaf band must still bite treads 1-2 of flight 0
+    f0 = SEQ[0]
+    lf = P["leaf"]
+    z1 = f0["z_top"] - 1 * fl["riser"] + lf["proud"]
+    z2 = f0["z_top"] - 2 * fl["riser"] + lf["proud"]
+    good = f0["steps"] >= 2
+    ok9 &= good
+    print(f"    낙엽 밴드 = 플라이트0 디딤판 1·2 (상면 {z1:+.3f} / {z2:+.3f}, "
+          f"새 riser 로 **재유도**) → {'OK' if good else 'CHECK'}")
+
+    print(f"    [deck_module_selfcheck S3-9] "
+          f"{'전항목 OK' if ok9 else '⚠ CHECK 항목 있음'}")
+    return ok_all and ok9
 
 
 # ===========================================================================
@@ -878,7 +1058,8 @@ def ground_plan_deck():
         dists=(2, 5, 10), scene="scene10", tactile=(),
         overrides=dict(pave=dict(joint=None), surface=(),
                        extras=(("deck_planks",
-                                dict(max_gaps=int(g["deck_gaps"]))),),
+                                dict(max_gaps=int(g["deck_gaps"]),
+                                     plank_w=float(g["plank_w"]))),),
                        scatter=None),
         seed=int(g["seed"]) + 100)
 
@@ -957,32 +1138,37 @@ def _smoke_report():
     print("=" * 74)
     print("scene10_park_deck_switchback (v5 R5) — SMOKE 기하 자기검증 (부팅 없음)")
     print("=" * 74)
-    print(f"  플라이트 {fl['n']} × {fl['steps']}단 · riser {fl['riser']} / "
-          f"tread {fl['tread']} · 폭 {2*fl['half_w']:.2f} m")
+    _st = flight_steps()
+    print(f"  플라이트 {fl['n']}개 · 단수 {'+'.join(str(v) for v in _st)} = "
+          f"{sum(_st)}단 · riser {fl['riser']} / tread {fl['tread']} · "
+          f"폭 {2*fl['half_w']:.2f} m")
     print(f"  총 낙차 {TOTAL_DROP:.2f} m (≥0.3 → "
           f"{'OK' if TOTAL_DROP >= 0.3 else 'FAIL'}) · "
           f"플라이트 경사 {math.degrees(math.atan2(fl['riser'], fl['tread'])):.1f}°"
-          f" · 평면 x [{SEQ[1]['lx0']:.2f}, {SEQ[0]['lx1']:.2f}]")
+          f" · 평면 x [{PLAN_X0:.2f}, {PLAN_X1:.2f}]")
 
     # ── flight and landing table ──
     print("\n  [표] 플라이트/참 (월드 좌표)")
-    print(f"    {'k':>2} {'rot':>4} {'대역 y':>16} {'x_top→x_bot':>14} "
-          f"{'z_top→z_bot':>16} {'참 x범위':>14} 참 z")
+    print(f"    {'k':>2} {'단':>3} {'rot':>4} {'대역 y':>16} {'x_top→x_bot':>14} "
+          f"{'z_top→z_bot':>16} {'참 x범위':>14} 참 z   비고")
     for f in SEQ:
         lo, hi = band(f["even"])
-        print(f"    {f['k']:2d} {int(f['rot']):4d} [{lo:+6.2f},{hi:+6.2f}] "
+        print(f"    {f['k']:2d} {f['steps']:3d} {int(f['rot']):4d} "
+              f"[{lo:+6.2f},{hi:+6.2f}] "
               f"{f['x_top']:6.2f}→{f['x_bot']:6.2f} "
               f"{f['z_top']:+7.3f}→{f['z_bot']:+7.3f} "
-              f"[{f['lx0']:6.2f},{f['lx1']:6.2f}] {f['z_bot']:+7.3f}")
+              f"[{f['lx0']:6.2f},{f['lx1']:6.2f}] {f['z_bot']:+7.3f}"
+              f"   {'쉼터 전망참' if f['rest'] else ''}")
     lo_e, hi_e = band(True)
     lo_o, hi_o = band(False)
     print(f"    대역 간극 = {lo_o - hi_e:.3f} m (>0 = 두 방향 간섭 0 → "
           f"{'OK' if lo_o > hi_e else 'FAIL'})")
     print(f"    참 y범위 [{ld['y0']:+.2f},{ld['y1']:+.2f}] 이 두 대역을 모두 "
           f"덮는가 → {'OK' if ld['y0'] <= lo_e and ld['y1'] >= hi_o else 'FAIL'}")
-    head = 2 * FLIGHT_DROP - 0.29
-    print(f"    상·하 플라이트 연직 여유 = 2×{FLIGHT_DROP:.2f} − 0.29 = "
-          f"{head:.2f} m ({'OK' if head > 2.0 else 'CHECK'})")
+    _dmin = min(f["drop"] for f in SEQ)
+    head = 2 * _dmin - 0.29
+    print(f"    상·하 플라이트 연직 여유 = 2×{_dmin:.2f}(최소 플라이트 낙차) "
+          f"− 0.29 = {head:.2f} m ({'OK' if head > 2.0 else 'CHECK'})")
 
     # ── exhaustive walking continuity check ──
     print("\n  [표] 보행 연속성 (구간 → 다음 구간, n단 분할 단차)")
@@ -990,11 +1176,11 @@ def _smoke_report():
     prev_n, prev_z = "진입 데크", ent["top"]
     for f in SEQ:
         z1 = f["z_top"] - fl["riser"]
+        ns = f["steps"]
         links.append((prev_n, prev_z, f"플라이트{f['k']} 1단", z1, 1))
         links.append((f"플라이트{f['k']} 1단", z1,
-                      f"플라이트{f['k']} {fl['steps']}단", f["z_bot"],
-                      fl["steps"] - 1))
-        links.append((f"플라이트{f['k']} {fl['steps']}단", f["z_bot"],
+                      f"플라이트{f['k']} {ns}단", f["z_bot"], ns - 1))
+        links.append((f"플라이트{f['k']} {ns}단", f["z_bot"],
                       f"참{f['k']}", f["z_bot"], 1))
         prev_n, prev_z = f"참{f['k']}", f["z_bot"]
     links.append((prev_n, prev_z, "하부 산책로", GROUND_Z, 1))
@@ -1008,7 +1194,7 @@ def _smoke_report():
     print(f"    최대 단일 단차 {worst:.3f} m (riser {fl['riser']} 이하 = "
           f"{'OK' if worst <= fl['riser'] + 1e-6 else 'CHECK'})")
     gap = SEQ[-1]["z_bot"] - GROUND_Z
-    print(f"    참3 상면 {SEQ[-1]['z_bot']:+.3f} vs 하부 지면 {GROUND_Z:+.3f} "
+    print(f"    참{SEQ[-1]['k']} 상면 {SEQ[-1]['z_bot']:+.3f} vs 하부 지면 {GROUND_Z:+.3f} "
           f"→ 프라우드 {gap:+.3f} m "
           f"({'OK (동일평면 아님·보행 무해)' if 0.0 < gap <= 0.05 else 'CHECK'})")
 
@@ -1025,7 +1211,7 @@ def _smoke_report():
               f"(z{zl:+6.2f})  {ang:5.1f}° 두께 {th:.2f}")
     print("    상부 트레일 플레이트는 x=%.1f 에서 끊김 → 계단 공동(x %.1f..%.1f) "
           "위 연속 평면 없음 (체크리스트 ③ OK)"
-          % (HEAD_X, SEQ[1]["lx0"], SEQ[0]["lx1"]))
+          % (HEAD_X, PLAN_X0, PLAN_X1))
     for y in (4.0, 2.0, 0.0, -3.0, -8.0, -14.0):
         print(f"    ground_z(x=−5, y={y:+6.1f}) = {ground_z(-5.0, y):+6.3f} · "
               f"(x=+2, y={y:+6.1f}) = {ground_z(2.0, y):+6.3f}")
@@ -1409,7 +1595,7 @@ def main():
     def build_flat_fill(M):
         """hazard_stairs=False control : the stair run becomes a flat z=0 deck."""
         ld = PARAMS["landing"]
-        x0, x1 = SEQ[1]["lx0"], SEQ[0]["lx1"]
+        x0, x1 = PLAN_X0, PLAN_X1
         BOX(f"{ROOT}/FlatDeck",
             ((x0 + x1) / 2.0, (ld["y0"] + ld["y1"]) / 2.0, -0.06),
             (x1 - x0, ld["y1"] - ld["y0"], 0.12), M["deck"], col=True)
@@ -1543,19 +1729,24 @@ def main():
             The balusters stay **plumb** (KCS 34 50 10 3.2.6(3)) and are pitched
             `bal_step` **horizontally**, so the clear gap is the same 0.112 m as on the
             level runs rather than shrinking by cos(pitch).
-            They stand 0.04 in from the band edge, so at the centre band boundary the two
-            flights' inner members meet without interpenetrating.
+            The rail line sits **outboard** of the deck edge by half a baluster, so the
+            baluster's inner face is flush with the walking surface and the clear width
+            between the two railings is exactly the declared 1.500 m — a railing set
+            *inboard* would quietly eat 120 mm off the statutory 너비. Band pitch
+            `y_off = 0.85` then leaves 0.072 m between the inner newels of two adjacent
+            flights, so nothing interpenetrates.
             """
             def gfn(x, _xt=f["x_top"], _zt=f["z_top"]):
                 if x <= _xt:
                     return _zt
-                i = min(int((x - _xt) / fl["tread"]) + 1, fl["steps"])
+                i = min(int((x - _xt) / fl["tread"]) + 1, f["steps"])
                 return _zt - i * fl["riser"]
 
             top_w, top_t = r["top"]
-            slope = FLIGHT_DROP / FLIGHT_RUN
-            ang = math.degrees(math.atan2(FLIGHT_DROP, FLIGHT_RUN))
-            for tag, y in (("N", gy0 + 0.04), ("P", gy1 - 0.04)):
+            f_run, f_drop = f["run"], f["drop"]
+            slope = f_drop / f_run
+            _bo = r["bal"] / 2.0
+            for tag, y in (("N", gy0 - _bo), ("P", gy1 + _bo)):
                 # three raking rails. `build_slope` is a rotateY box whose **top face**
                 # is the plane (x0,z0)->(x0+run,z0-drop), so z0 is the member's own top
                 # face and `thick` is its section depth. The top rail's top face is the
@@ -1570,15 +1761,15 @@ def main():
                      f["z_top"] + r["bot_z"] + r["bot"][1] / 2.0))
                 for rtag, w, t, z0 in rakes:
                     sc.build_slope(stage, f"{grp}/Rail{rtag}_{tag}",
-                                   f["x_top"], z0, FLIGHT_RUN, FLIGHT_DROP,
+                                   f["x_top"], z0, f_run, f_drop,
                                    y - w / 2.0, y + w / 2.0, t, M["rail"],
                                    margin=0.0, collider=False)
                 # plumb square balusters, tread face -> underside of the top rail
                 b = r["bal"]
                 top0 = f["z_top"] + r["h"] - top_t
-                nb, _pitch = baluster_run(FLIGHT_RUN, r["bal_step"])
+                nb, _pitch = baluster_run(f_run, r["bal_step"])
                 for i in range(nb):
-                    bx = f["x_top"] + FLIGHT_RUN * (i + 1) / float(nb + 1)
+                    bx = f["x_top"] + f_run * (i + 1) / float(nb + 1)
                     zr = top0 - slope * (bx - f["x_top"])
                     zg = gfn(bx)
                     hh = zr - zg
@@ -1589,7 +1780,7 @@ def main():
                 # not on the landing edge (y ∓1.40), so they never coincide with a
                 # landing newel and no dedup is needed across the rot_group boundary.
                 for ntag, bx, bz in (("Head", f["x_top"], f["z_top"]),
-                                     ("Foot", f["x_top"] + FLIGHT_RUN,
+                                     ("Foot", f["x_top"] + f_run,
                                       f["z_bot"])):
                     build_newel(f"{grp}/Newel_{tag}_{ntag}", bx, y, bz)
 
@@ -1605,7 +1796,7 @@ def main():
                                      (f["x_top"], 0.0), f["rot"])
             sc.build_open_riser_stairs(
                 stage, f"{grp}/Flight", f["x_top"], lo, hi, fl["riser"],
-                fl["tread"], fl["steps"], f["z_top"], M["tread"],
+                fl["tread"], f["steps"], f["z_top"], M["tread"],
                 M["stringer"], tread_t=fl["tread_t"], gap=fl["gap"])
             if cfg["cue_railing"]:
                 _flight_rails(grp, f, lo, hi)
@@ -1716,6 +1907,14 @@ def main():
         bn = PARAMS["bench"]
         sc.build_bench(stage, f"{ROOT}/Bench", bn["cx"], bn["cy"], 0.0,
                        M["deck"], yaw=bn["yaw"])
+        # [S3-9] bench on the rest platform, seated on the platform top face
+        rb = PARAMS["rest_bench"]
+        rf = [f for f in SEQ if f["rest"]]
+        if rf:
+            f = rf[0]
+            sc.build_bench(stage, f"{ROOT}/RestBench",
+                           f["lx1"] + rb["dx"], rb["dy"], f["z_bot"],
+                           M["deck"], yaw=rb["yaw"])
         # shelter pavilion (lower path)
         pg = PARAMS["pergola"]
         sc.build_canopy(stage, f"{ROOT}/Pergola", pg["x0"], pg["x1"], pg["y0"],
@@ -1757,7 +1956,7 @@ def main():
                                          (f["x_top"], 0.0), f["rot"])
                 lo, hi = band(True)
                 sc.build_nosing(stage, f"{grp}/Nose", f["x_top"], lo, hi,
-                                fl["riser"], fl["tread"], fl["steps"],
+                                fl["riser"], fl["tread"], f["steps"],
                                 base_z=f["z_bot"], z_top=f["z_top"])
 
     # ── scene assembly ──

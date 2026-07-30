@@ -1456,6 +1456,19 @@ def main():
         M["gk_gap"] = PBR(f"{ROOT}/Looks/GkGap",
                           diffuse_color=(0.026, 0.022, 0.018),
                           roughness_const=0.95, specular_level=0.0)
+        # [W3 L12] soiling on a plank deck is timber, darker — not gravel and not riprap.
+        #   See `build_ground_kit` for the measurement and the R3 rule these two answer.
+        #   `Looks/DeckStain*` carries "deck" -> the look layer classes both **wood**, as it
+        #   must: a soiling lobe that classes as stone gets the mineral detail grain.
+        M["deckdirt"] = PBR(
+            f"{ROOT}/Looks/DeckStainDirt", sc.tex_path("wood_dark", "diff"),
+            sc.tex_path("wood_dark", "nor"), sc.tex_path("wood_dark", "rough"),
+            sca["wood_dark"], tint=tuple(t * 0.62 for t in mp["deck_tint"]))
+        M["deckwet"] = PBR(
+            f"{ROOT}/Looks/DeckStainWet", sc.tex_path("wood_dark", "diff"),
+            sc.tex_path("wood_dark", "nor"), None, sca["wood_dark"],
+            tint=tuple(t * 0.52 for t in mp["deck_tint"]),
+            roughness_const=mp["wet_rough"])
         # [W3 L12 · GT-43] painted steel -> 착색방부목. The prim is renamed off `Looks/Rail`
         #   because that name is an exact hit in `scene_common.LOOK_ROLE` -> class **metal**,
         #   which would keep putting the brushed-metal detail grain on timber. `DeckGuardWood`
@@ -1608,8 +1621,25 @@ def main():
     def build_ground_kit(M):
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
-        M2.update(deck=M["gk_gap"], stain_dirt=M["gravel"],
-                  stain_water=M["wetrock"], silt=M["wetrock"])
+        # [W3 L12 · found on this lane's OWN first pilot render, and caused by it]
+        #   The three soiling roles on a **plank deck** were bound to rock maps:
+        #   `stain_dirt = M["gravel"]` and `stain_water = silt = M["wetrock"]` (the riprap
+        #   map at 0.65 scale). Against the old deck (albedo 0.081) they were dark-on-dark
+        #   and read as vague damp patches. GT-44 raised the deck to 0.229, and the same
+        #   decals became **loose gravel and wet cobbles lying on the planks** — a third of
+        #   the near band at `preset_h0.3_d5`. This is exactly the defect scene20 fixed at
+        #   `c30b65c` and scene01's pilot before it: ground_kit's own R3 rule is that the
+        #   decal ladder must be a **tone separator, never relief or another material**, and
+        #   a different material entirely is the strongest possible violation of it.
+        #   Rebound to the deck's OWN map at a fraction of the deck's own tone — soiling on
+        #   timber is timber, darker:
+        #     dirt  0.62 x deck  -> albedo 0.142   (L20's fraction, same rule)
+        #     water 0.52 x deck  -> albedo 0.119 + wet roughness (a wet plank is darker
+        #                           and shinier than a dirty one; `wet_rough` already exists)
+        #     silt  = the water tone (the shoreline film on the cantilever strip)
+        #   Material only: 0 prims, no GT quantity moves, `deck` (the plank-gap line) untouched.
+        M2.update(deck=M["gk_gap"], stain_dirt=M["deckdirt"],
+                  stain_water=M["deckwet"], silt=M["deckwet"])
         a = gk.apply_ground(kit, f"{ROOT}/GKit", ground_plan(), M2,
                             skin_exclude=sc.skin_exclude)
         b = gk.apply_ground(kit, f"{ROOT}/GKitPlanks", ground_plan_deck(), M2,

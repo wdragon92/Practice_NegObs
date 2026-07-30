@@ -1,0 +1,45 @@
+#usda 1.0
+(
+    """W3 K4(0) — season-off (flowerless) wrapper for Shrub/Rhododendron.usd.
+
+    WHY THIS FILE EXISTS.  `SEASONAL_SUBPRIMS` has stripped `/Root/Flowers` off every
+    Rhododendron since the realism-v1 layer landed, by calling `SetActive(False)` on
+    the referencing prim and then making that prim instanceable.  Measured with
+    usd-core 26.8: **USD discards opinions on descendants of an instance**, so the
+    shared prototype is composed from the reference alone and still carries
+    `Flowers` — every `place_shrubs` bed with the default `SHRUB_ORNAMENT` pool has
+    been rendering a full-bloom magenta scan (76.7 % magenta basecolor) in a library
+    that declares itself season-neutral.  Same defect class as the leaf-off trap the
+    red team caught on `build_tree(bare=)` (F1, `redteam_s0710_rebuild.md` §1.2);
+    this is its shrub half, and it is the one that was actually live.
+
+    Putting the `over` in a **wrapper layer** moves the opinion above the instance
+    boundary: the wrapper composes normally, the scene references the wrapper, and
+    every instance then shares one prototype that has no flowers.  Instancing is
+    kept, which this project treats as mandatory for vegetation.
+
+    Convention and licence follow `Gray_Birch_bare.usda` (scene04, commit 024a985):
+    the file lives **outside** the gitignored `assets/vegetation/` tree, contains no
+    asset content — one relative reference and one `over` — and is therefore
+    trackable while the geometry it points at stays untracked and procured by
+    `assets/download_vegetation.py`.
+
+    `metersPerUnit` MUST match the referenced asset (measured 0.01 on all 17
+    vegetation USDs).  Layer units are advisory in USD — a mismatch here would not
+    rescale anything, it would only lie to `add_vegetation`'s unit probe.
+    """
+    defaultPrim = "Root"
+    metersPerUnit = 0.01
+    upAxis = "Z"
+)
+
+def Xform "Root" (
+    prepend references = @../vegetation/Shrub/Rhododendron.usd@
+)
+{
+    over "Flowers" (
+        active = false
+    )
+    {
+    }
+}

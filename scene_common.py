@@ -2354,6 +2354,116 @@ BARE_SUBPRIMS = {
     "Trees/Lombardy_Poplar.usd": ("leaves",),
 }
 
+# --- Reference-wrapper layers — the ONLY route that survives instancing ------
+# [W3 K4(0) · red-team finding **F1** (`redteam_s0710_rebuild.md` §1.2)]
+#
+# **The bug this replaces.** Both leaf-off (`BARE_SUBPRIMS`) and the unconditional
+# season strip (`SEASONAL_SUBPRIMS`) used to be applied by calling `SetActive(False)`
+# on `{prim}/Asset/<name>` and then `SetInstanceable(True)` on `{prim}/Asset`.
+# Measured on usd-core 26.8 - **USD discards opinions on descendants of an instance,
+# regardless of authoring order**:
+#     plain reference, leaves deactivated     -> visible meshes ['trunk']            (works)
+#     deactivate FIRST, then SetInstanceable  -> visible meshes ['trunk', 'leaves']  (silently undone)
+#     SetInstanceable first, deactivate after -> hard error, "authoring to an instance proxy"
+# Ordering only converts the loud failure into a silent one. The old code comments
+# ("Leaf-off BEFORE instancing... order matters") were wrong **as semantics**, and the
+# `n_off` counters they printed counted *authored opinions*, never composed results.
+# Blast radius when it was found: scene10's 12 "leaf-off" trees rendered in full green
+# leaf, and - the live half nobody had noticed - **every `place_shrubs` bed on the
+# default `SHRUB_ORNAMENT` pool rendered a full-bloom magenta `Rhododendron`** in a
+# library whose own comment says the species is admissible "only on the premise that
+# the flower prims are disabled".
+#
+# **The route that works** (proven by scene04, commit `024a985`): compose the
+# deactivation **inside the prototype** by referencing a thin wrapper layer that
+# carries the `over ... (active = false)`. The wrapper composes normally - it is not
+# an instance - and the scene then instances the wrapper, so all instances share one
+# prototype that never had the sub-prim.
+#
+# The wrapper files live in `assets/veg_bare/` (deliberately **outside** the gitignored
+# `assets/vegetation/` tree: they hold one relative reference and one `over`, no asset
+# content, so they are trackable while the geometry stays untracked and procured).
+# `_veg_wrapper_write` authors a missing one on demand so a newly registered species
+# needs no manual file; the four in use are pre-authored and committed, so the author
+# path is a no-op on a clean checkout.
+VEG_BARE_DIR = os.path.join(ASSETS_DIR, "veg_bare")
+
+# Bare (leaf-off) `zmax` per species `[measured - usd-core 26.8, K4 micro `1346b70` §1.2]`.
+# `add_vegetation` scales by `target_h / native_h`, and `VEG_TREES` carries the **leafed**
+# zmax, so a wrapper row must hand its own native height or every bare tree lands 0.8-1.8 %
+# tall. (scene04's `TREES04` carries the same three numbers - they agree.)
+BARE_NATIVE = {
+    "Trees/Gray_Birch.usd":       3.2960,
+    "Trees/Elm_Sapling.usd":      3.0424,
+    "Trees/Lombardy_Poplar.usd": 13.4221,
+}
+
+# suffix per registry, so one species can carry both a bare and a season-off wrapper
+WRAP_SUFFIX = {"bare": "_bare", "season": "_noflower"}
+
+_WRAP_CACHE = {}
+
+
+def _veg_wrapper_write(path, usd_rel, names):
+    """Author one wrapper layer as text. Returns True on success.
+
+    Text, not `Usd.Stage.CreateNew`, on purpose: this module is imported by the
+    CPU-only invariance harness where `pxr` is a recording stub, and a wrapper must be
+    authorable there too. `metersPerUnit` is pinned to the asset convention (0.01,
+    measured on all 17 vegetation USDs) - layer units are advisory in USD, so a wrong
+    value would not rescale anything, it would only lie to `add_vegetation`'s probe.
+    """
+    over = "\n".join('    over "%s" (\n        active = false\n    )\n    {\n    }'
+                     % nm for nm in names)
+    body = ('#usda 1.0\n(\n    """Auto-authored by `scene_common.veg_wrapper_rel` '
+            '(W3 K4(0), red-team F1).\n\n'
+            '    Deactivates %s INSIDE the prototype, which is the only place the\n'
+            '    opinion survives `SetInstanceable(True)`. See `BARE_SUBPRIMS` in\n'
+            '    `scene_common.py` for the measurement that forced this route.\n'
+            '    """\n    defaultPrim = "Root"\n    metersPerUnit = 0.01\n'
+            '    upAxis = "Z"\n)\n\n'
+            'def Xform "Root" (\n    prepend references = @../vegetation/%s@\n)\n'
+            '{\n%s\n}\n'
+            % (" + ".join("/Root/%s" % n for n in names), usd_rel, over))
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w") as fh:
+            fh.write(body)
+        return True
+    except Exception as e:                     # read-only tree, sandbox, ...
+        print(f"[룩v1][경고] 래퍼 레이어 작성 실패 {path}: {e}")
+        return False
+
+
+def veg_wrapper_rel(usd_rel, names, kind="bare"):
+    """`add_vegetation`-ready rel path to the wrapper that strips `names`, or None.
+
+    usd_rel: source path relative to `VEG_DIR`, e.g. `Trees/Gray_Birch.usd`
+    names  : the sub-prims to deactivate (a `BARE_SUBPRIMS` / `SEASONAL_SUBPRIMS` value)
+    kind   : which suffix to use, so bare and season-off wrappers can coexist
+
+    Returns None when there is nothing to strip, when the source asset is absent, or
+    when the wrapper could not be authored - **every caller must fall back**, because
+    a missing wrapper must never cost a scene its vegetation.
+    """
+    if not names:
+        return None
+    key = (usd_rel, kind)
+    if key in _WRAP_CACHE:
+        return _WRAP_CACHE[key]
+    stem = os.path.splitext(os.path.basename(usd_rel))[0]
+    fname = stem + WRAP_SUFFIX.get(kind, "_bare") + ".usda"
+    path = os.path.join(VEG_BARE_DIR, fname)
+    rel = os.path.join("..", "veg_bare", fname)      # relative to VEG_DIR
+    ok = os.path.isfile(path)
+    if not ok:
+        if not os.path.isfile(os.path.join(VEG_DIR, usd_rel)):
+            _WRAP_CACHE[key] = None                  # nothing to wrap
+            return None
+        ok = _veg_wrapper_write(path, usd_rel, names)
+    _WRAP_CACHE[key] = rel if ok else None
+    return _WRAP_CACHE[key]
+
 VEG_ROCKS = [
     ("Rocks/rock_small_01.usda", 0.314, 0.128),
     ("Rocks/rock_small_08.usda", 0.196, 0.072),
@@ -2493,9 +2603,14 @@ def build_tree(stage, prefix, cx, cy, gz, wood_mtl, canopy_a_mtl, canopy_b_mtl,
     so 30 scenes switch over with no edits. Without the assets it falls back to the procedural
     blobs below (0 regression).
 
-    [W3 K4 micro] `bare=False` - **opt-in leaf-off tree**, default OFF. When True and the drawn
-    species is registered in `BARE_SUBPRIMS`, its `/Root/leaves` mesh is deactivated **before**
-    the prim is made instanceable, giving a real bare deciduous tree for a leaf-off scene.
+    [W3 K4 micro, **reworked in K4(0) after red-team F1**] `bare=False` - **opt-in leaf-off
+    tree**, default OFF. When True and the drawn species is registered in `BARE_SUBPRIMS`,
+    the reference target is swapped for that species' **wrapper layer** in
+    `assets/veg_bare/`, which carries the `/Root/leaves` deactivation *inside* the
+    prototype. The original route - deactivate the descendant, then instance - is
+    composition-inert (USD discards opinions on descendants of an instance) and rendered
+    trees in full leaf while reporting success; see the `BARE_SUBPRIMS` block for the
+    measurement. `BARE_NATIVE` supplies the bare `zmax` so the canopy-top cue is preserved.
     Two limits the caller must know:
       - It is a **silent no-op for an unregistered species**. `build_tree` draws from `VEG_TREES`
         by coordinate hash, and only `Elm_Sapling` of the three bare-capable assets is in that
@@ -2519,6 +2634,22 @@ def build_tree(stage, prefix, cx, cy, gz, wood_mtl, canopy_a_mtl, canopy_b_mtl,
         # The old uniform(1.45,1.85) was an unfounded magic number (red team finding - accepted).
         # -> A fixed ratio of 1.60 (total height to trunk height) with only +-8 % per-instance variation.
         target = float(trunk_h) * 1.60 * rnd.uniform(0.92, 1.08)
+        # [W3 K4(0) · F1 fix] Leaf-off is resolved **before** the reference is made, by
+        # swapping the reference target for a wrapper layer that carries the `over`
+        # inside the prototype. The old route (reference the source, `SetActive(False)`
+        # on the descendant, then instance) is composition-inert - see `BARE_SUBPRIMS`.
+        # The wrapper's own bare `zmax` replaces the leafed one so the canopy-top cue
+        # stays where the caller asked for it.
+        if bare:
+            _wrel = veg_wrapper_rel(rel, BARE_SUBPRIMS.get(rel), kind="bare")
+            if _wrel:
+                native = BARE_NATIVE.get(rel, native)
+                rel = _wrel
+                LOOK_STATS["bare_tree"] = LOOK_STATS.get("bare_tree", 0) + 1
+            else:
+                # Silent no-op for an unregistered species is the documented limit of
+                # `bare=` (see the docstring); count it so a caller can see the gap.
+                LOOK_STATS["bare_miss"] = LOOK_STATS.get("bare_miss", 0) + 1
         try:
             # **Attach to a child path.** Attaching to prefix itself would, as in `build_planter`,
             # apply the scale (about 0.0078) to sibling prims already created under the same prefix
@@ -2528,18 +2659,6 @@ def build_tree(stage, prefix, cx, cy, gz, wood_mtl, canopy_a_mtl, canopy_b_mtl,
                                 yaw_deg=rnd.uniform(0, 360),
                                 target_h=target, native_h=native)
             if vx is not None:
-                # [W3 K4 micro] Leaf-off BEFORE instancing. Order matters and is the same
-                # trap `place_shrubs` documents: once `SetInstanceable(True)` is applied the
-                # descendants live in a shared prototype and per-instance edits are silently
-                # ignored, so a deactivation written after it would look right in the source
-                # and do nothing on the stage. Default OFF -> this branch is dead in this
-                # commit, which is what the 33/33 prim-hash proof shows.
-                if bare:
-                    _off = _deactivate_seasonal(stage, f"{prefix}/Veg/Asset",
-                                                rel, table=BARE_SUBPRIMS)
-                    if _off:
-                        LOOK_STATS["bare_tree"] = \
-                            LOOK_STATS.get("bare_tree", 0) + 1
                 # The same asset is referenced many times, so instancing saves memory and time.
                 # (About 30 M extra triangles across the 33 scenes - red team estimate.)
                 # Instancing must be set on **the prim that holds the reference**. USD requires
@@ -2908,18 +3027,30 @@ def place_shrubs(stage, prefix, pts, target_h, pool=None, seed=1234,
         # height basis it is applied with the same factor to preserve the previous hedge density.
         s = (float(target_h) * (1.0 + overlap) / max(nat_h, 1e-6)
              * rnd.uniform(0.92, 1.08))
+        # [W3 K4(0) · F1 fix, shrub half] Resolve the season strip **before** referencing.
+        # This is the branch that was actually live: the default `SHRUB_ORNAMENT` pool
+        # carries `Rhododendron`, whose `/Root/Flowers` strip has been inert under
+        # instancing in every `build_planter` bed since realism-v1 - a 76.7 %-magenta
+        # full-bloom scan rendering in a library that declares itself season-neutral.
+        # Scale is deliberately still driven by the **flowered** `VEG_SHRUBS` row: those
+        # numbers are what every existing bed was authored against, and the strip is
+        # dressing, so the fix must not also move shrub heights.
+        rel_ref = veg_wrapper_rel(rel, SEASONAL_SUBPRIMS.get(rel),
+                                  kind="season") or rel
         try:
             # zmin is a native dimension and must be scaled by the same factor for the bottom to sit on the ground.
             # Forgetting this buries 41 cm of Rhododendron (zmin -0.416) underground.
-            xf = add_vegetation(stage, f"{prefix}/{tag}_{i}", rel,
+            xf = add_vegetation(stage, f"{prefix}/{tag}_{i}", rel_ref,
                                 (px, py, float(pz) + zmin * s),
                                 yaw_deg=rnd.uniform(0, 360),
                                 scale_mul=s)
             if xf is not None:
-                # Seasonal sub-prims off BEFORE instancing. Order matters:
-                # once SetInstanceable(True) is applied the descendants live in
-                # a shared prototype and per-instance edits are ignored.
-                _deactivate_seasonal(stage, f"{prefix}/{tag}_{i}/Asset", rel)
+                if rel_ref is rel:
+                    # No wrapper was available (species has no seasonal prims, or the
+                    # layer could not be authored). Keep the legacy stage-side strip as
+                    # the fallback: it is a genuine no-op under instancing, but it is
+                    # correct for any future NON-instanced consumer and costs nothing.
+                    _deactivate_seasonal(stage, f"{prefix}/{tag}_{i}/Asset", rel)
                 try:
                     stage.GetPrimAtPath(f"{prefix}/{tag}_{i}/Asset").SetInstanceable(True)
                 except Exception:

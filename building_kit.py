@@ -976,8 +976,9 @@ def backdrop_ph_h(p):
     **Why the clamp is opt-in and not the default.** Measured on this tree
     (`_b_backdrop` probe, isolated arm at `4bae470`, all 33 scenes): of the **33**
     backdrop blocks that are planned with a judged eye set, only scene01's **6** keep
-    their ridge under `z_ceil`. scene02 (10), scene08 (5) and scene16 (12) sit 8.9 to
-    38.7 m **above** it — deliberately, and scene16's own code says so in as many
+    their ridge under `z_ceil` (by 0.449–0.573 m). scene02 (10), scene08 (5) and
+    scene16 (12) sit **+10.645 to +38.706 m above** it — deliberately, and scene16's
+    own code says so in as many
     words: *"policy (2) is written for a building the camera faces, not for a wall it
     travels along"*, a downtown street wall that is supposed to close the horizon.
     Defaulting this clamp on would delete 27 of 33 blocks' skylines to satisfy a rule

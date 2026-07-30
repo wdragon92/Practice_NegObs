@@ -214,13 +214,43 @@ PARAMS = dict(
         #   ramp, N1/S1 are the flanking wings that keep the valley from reading as a
         #   tabletop. Every h is solved from that block's own ceiling minus its own
         #   `roof_allow`, and the printed "지붕선 위 하늘" column must read 5/5.
+        #  ★ Every block must also sit **inside the valley ground plane**. The first
+        #    solve put E1/E2/W1 at 56-76 m and N1/S1 partly past `Valley` (a 100 m box
+        #    centred at x=+6, i.e. x -44…+56 · y -50…+50), and the pilot render showed
+        #    exactly that: masses standing at the edge of the world with the plane's own
+        #    horizon seam running behind them. The sky arithmetic was right and the
+        #    containment was never checked — so `plaza_selfcheck` now gates BOTH, and the
+        #    blocks are re-solved inside the plane with >= 2 m of margin. W1 is **deleted**
+        #    rather than re-sited: the preset axis is +X (spec §D) and all four
+        #    mise-en-scene cuts look east, so a -X mass is behind every judged eye and was
+        #    paying 3 prims for nothing.
         blocks=(
-            ("E1",  56.0,  72.0, -22.0,  -3.0, 7.0),
-            ("E2",  60.0,  76.0,   2.0,  22.0, 7.6),
-            ("N1", -24.0,  26.0,  46.0,  58.0, 5.6),
-            ("W1", -74.0, -62.0, -20.0,  16.0, 6.4),
-            ("S1", -26.0,  22.0, -54.0, -44.0, 5.3),
+            ("E1",  44.0,  52.0, -26.0,  -4.0, 5.5),
+            ("E2",  46.0,  54.0,   3.0,  26.0, 5.7),
+            ("N1", -18.0,  30.0,  40.0,  48.0, 4.8),
+            ("S1", -20.0,  28.0, -48.0, -40.0, 4.8),
         )),
+
+    # === [W3 L20 · K4(b) · U-7 "open environment"] the mid-ground belt =================
+    #  Opening the horizon is only half the move. scene01's pilot found the other half the
+    #  hard way (its defect 4): with the near masses gone, the ground between the plaza and
+    #  the backdrop is *an empty green plane* — open, but not a place. G1 shows what fills
+    #  it: mature broadleaves between the plaza and the buildings, in autumn colour.
+    #  Two east rows on the valley grass plus one row on each flank, every tree the scene's
+    #  **route** species `elm` passed explicitly (`SCENE_SPECIES["Scene20"] = ("elm", None)`
+    #  — the belt slot is None and inventing a second stand here would contradict the frozen
+    #  table, which is the same call scene01 published for the same image).
+    #  Row separation **8.6 m** and pitch **8.0 m** (`sc.TREE_PITCH_M`): at 6.0 m separation
+    #  every tree's nearest neighbour is in the *other* row and `placement_lint` LINT-2
+    #  reads one zig-zag run instead of two rows (scene01's measurement, reused rather than
+    #  re-derived). Crown top lands at about -2.15 + 4.80 = **2.65 m**, under the h0.3
+    #  frame ceiling at every row distance, so the belt fills the mid-ground without
+    #  re-closing the sky the backdrop just opened.
+    belt=dict(z=-2.15, trunk_h=3.0, pitch=8.0,
+              rows=(("E1", 24.0, -16.0, 16.0, "y"),
+                    ("E2", 32.6, -16.0, 16.0, "y"),
+                    ("N1", 18.0, -18.0, 14.0, "x"),
+                    ("S1", -18.0, -18.0, 14.0, "x"))),
 
     # --- Context dressing (cue_scene_dressing): "civic / university-front urban plaza" ---
     #     The contrast between axis-aligned props (bands, buildings, planter rows) and the 30 deg diagonal edge is this scene's theme.
@@ -759,6 +789,25 @@ def main():
               f"{n_b - len(over)}/{n_b}" + (f" · 초과 {over}" if over else ""))
         return n_tot, over
 
+    def build_belt(M):
+        """[W3 L20 · K4(b)] the mid-ground elm belt on the valley grass."""
+        b = PARAMS["belt"]
+        mts = (M["wood"], M["canopy_a"], M["canopy_b"])
+        n = 0
+        for tag, fixed, a0, a1, axis in b["rows"]:
+            k = 0
+            v = a0
+            while v <= a1 + 1e-6:
+                cx, cy = (fixed, v) if axis == "y" else (v, fixed)
+                sc.build_tree(stage, f"{ROOT}/Belt_{tag}_{k}", cx, cy, b["z"],
+                              *mts, trunk_h=b["trunk_h"], species="elm")
+                n += 1
+                k += 1
+                v += b["pitch"]
+        print(f"[belt] 중경 수목 {n}주 · elm · 피치 {b['pitch']:.1f} m · "
+              f"열간 8.6 m · z {b['z']:.2f}")
+        return n
+
     def build_litter(M):
         """[W3 L20 · season] autumn leaf litter (G1).
 
@@ -806,6 +855,7 @@ def main():
 
     def build_dressing(M):
         _n_bd, _over = build_backdrop(M)
+        build_belt(M)
         # [v5.1 §2] One row of regulation bollards + dot tactile at the top of the mesa entry ramp
         bl = PARAMS["bollards"]
         for i, by in enumerate(bl["ys"]):
@@ -977,6 +1027,39 @@ def main():
         if backdrop_over:
             ok = False
             print(f"[selfcheck] ✘ 지붕선이 프레임 천장을 넘음: {backdrop_over}")
+
+        # ground-plane containment — the defect the first pilot render exposed --------
+        #   The sky arithmetic can be perfect while the mass stands off the edge of the
+        #   world. `Valley` is the only ground this scene has; every backdrop block and
+        #   every belt tree must be inside it, with margin, or the plane's own horizon
+        #   seam runs behind them. Nothing in the kit checks this — it is a scene-side
+        #   fact about a scene-side ground box, so it is gated here.
+        v = PARAMS["valley"]
+        H = v["size"] / 2.0
+        gx0, gx1, gy0, gy1 = 6.0 - H, 6.0 + H, -H, H
+        MRG = 2.0
+        off = []
+        for tag, x0, x1, y0, y1, _h in PARAMS["backdrop"]["blocks"]:
+            if (x0 < gx0 + MRG or x1 > gx1 - MRG
+                    or y0 < gy0 + MRG or y1 > gy1 - MRG):
+                off.append(tag)
+        b = PARAMS["belt"]
+        n_belt = 0
+        for tag, fixed, a0, a1, axis in b["rows"]:
+            t = a0
+            while t <= a1 + 1e-6:
+                cx, cy = (fixed, t) if axis == "y" else (t, fixed)
+                n_belt += 1
+                if not (gx0 + MRG <= cx <= gx1 - MRG
+                        and gy0 + MRG <= cy <= gy1 - MRG):
+                    off.append(f"Belt_{tag}@{cx:.1f},{cy:.1f}")
+                t += b["pitch"]
+        if off:
+            ok = False
+        print(f"[selfcheck] 지면 포함 — Valley x[{gx0:+.1f} {gx1:+.1f}] "
+              f"y[{gy0:+.1f} {gy1:+.1f}] · 배경 {len(PARAMS['backdrop']['blocks'])}동 "
+              f"+ 벨트 {n_belt}주 · 이탈 {len(off)}건"
+              + (f" {off}" if off else " · OK"))
         print(f"[selfcheck] scene20 {'통과' if ok else '실패'}")
         return ok
 

@@ -276,14 +276,29 @@ PARAMS = dict(
     #  the call site rather than inherited silently. Pitch is `sc.TREE_PITCH_M` (8.0 m,
     #  조례 6-8 m / 고시 4-8 m). `trunk_h` 3.0 -> target 3.0*1.60 = 4.80 m, over the
     #  S-4 street floor of 3.5 m; the plaza beds' 2.2 m trunk is gone with them.
-    lawn_trees=dict(y=(11.4, -11.4), x0=-13.0, n=4, trunk_h=3.0, trunk_r=0.085),
+    #  **Two rows per band, not one.** The first pilot put a single row at |y| = 11.4 and
+    #  the lawn behind it rendered as an empty green plane running to the backdrop — open,
+    #  but not a campus. G1's lawn is layered: bench line, then a near tree row, then a
+    #  deeper mass. The second row sits at |y| = 17.4 with a taller trunk (4.0 -> 6.40 m)
+    #  and is offset half a pitch in x, so the two rows never line up into a grid.
+    #  Same species in both rows — this is one route's planting seen in depth, not a
+    #  belt; Scene01's `SCENE_SPECIES` belt is `None` and stays `None`.
+    lawn_trees=(dict(y=(11.4, -11.4), x0=-13.0, n=4, trunk_h=3.0, trunk_r=0.085),
+                dict(y=(17.4, -17.4), x0=-9.0, n=4, trunk_h=4.0, trunk_r=0.110)),
 
     #  G1's fountain, in the north lawn where `beauty_overview` actually looks
     #  (bearing 45.9 deg from that eye against a +-30 deg half-field about 33.1 deg).
     #  A still basin: rim ring + water disc + centre plinth. No jets, no spray — moving
     #  water is outside this project's vocabulary and adds no negative-obstacle value.
-    fountain=dict(cx=7.0, cy=12.0, r_out=2.60, rim_w=0.35, rim_h=0.45,
-                  water_drop=0.12, plinth_r=0.55, plinth_h=0.30),
+    #  Form note, from the first pilot: the basin was authored as an outer cylinder with
+    #  an inner "well" cylinder, and **a solid outer cylinder has no inside** — the water
+    #  disc rendered buried inside it and the whole thing read as a concrete drum. It is
+    #  now built the way this scene already builds a planter: four granite walls + a cap
+    #  + an inner fill, with water as the fill. Square rather than round, which G1 is
+    #  not, and that divergence is stated rather than hidden.
+    fountain=dict(cx=7.0, cy=12.0, size=5.2, wall_t=0.30, wall_h=0.45,
+                  cap_over=0.05, cap_h=0.06, water_drop=0.14,
+                  plinth_r=0.45, plinth_h=0.34),
 
     #  Autumn litter (G1: leaves on the treads, swept into the step corners and along
     #  the kerb). `cover` is a target ground-cover FRACTION, not a count.
@@ -414,7 +429,10 @@ PARAMS = dict(
         #   desaturated and warmed, nothing like the mid-summer tint this scene carried
         #   (0.55, 0.68, 0.42). Green stays the largest channel - a straw-yellow lawn
         #   would be a different season, not this one.
-        grass_autumn_tint=(0.60, 0.63, 0.38),
+        grass_autumn_tint=(0.62, 0.60, 0.34),
+        # [W3 S01 · 01-A] stain tone: the plaza granite's own 0.72 tint, one step down.
+        #   Not `granite_dark` — see the `M2.update` note in `build_ground_kit`.
+        stain_tint=(0.62, 0.62, 0.61),
         # Still basin water: dark, smooth, dielectric. OmniGlass is forbidden project-wide.
         water_color=(0.045, 0.062, 0.070), water_rough=0.09,
         seat_wood=(0.055, 0.036, 0.022), seat_wood_rough=0.8,  # v4-D9 seat timber
@@ -895,6 +913,11 @@ def main():
         M["water"] = make_pbr("/World/Looks/Water",
                               diffuse_color=mp["water_color"],
                               roughness_const=mp["water_rough"], metallic=0.0)
+        # [W3 S01 · 01-A] stain tone — the plaza's own granite, darkened one step.
+        M["stain"] = make_pbr(
+            "/World/Looks/Stain", _tex_path("plaza_light", "diff"),
+            _tex_path("plaza_light", "nor"), _tex_path("plaza_light", "rough"),
+            sc["plaza_light"], tint=mp["stain_tint"])
         M["tactile"] = make_pbr(
             "/World/Looks/Tactile", _tex_path("tactile", "diff"),
             _tex_path("tactile", "nor"), None, sc["tactile"])
@@ -1156,9 +1179,13 @@ def main():
                           face_dir=(-1.0 if (y0 + y1) > 0 else 1.0),
                           base_z=bp["base_z"])
             p = bk.plan_building(bd, kind="backdrop", eyes=eyes)
+            # `parapet=` gets the **shell material**, not `M["parapet"]`. At 54-80 m a
+            # 0.72-grey capping band on a dark brick mass reads as a lit highlight
+            # along the roofline — the first pilot showed it as a white lid on the
+            # `h0.3_d5` background. A silhouette has no cap by definition.
             prims = bk.build_korean_building(
                 kit, stage, f"/World/Scene01/Backdrop_{tag}", bd,
-                bk.Mtls(M[bp["mat"]], parapet=M["parapet"]), plan=p)
+                bk.Mtls(M[bp["mat"]], parapet=M[bp["mat"]]), plan=p)
             n_tot += len(prims)
             sky = (p.z_ceil is None) or (hh + bp["base_z"] < p.z_ceil)
             if not sky:
@@ -1360,39 +1387,60 @@ def main():
         return res
 
     def build_lawn_trees(M):
-        """Monospecific `elm` row on each lawn band, pitch `sc.TREE_PITCH_M` (8.0 m)."""
-        lt = PARAMS["lawn_trees"]
+        """Monospecific `elm` planting on the lawn bands, pitch `sc.TREE_PITCH_M` (8.0 m).
+
+        Two rows per band at different distances and different heights, offset half a
+        pitch so they never resolve into a grid. Same species throughout: this is one
+        route's planting seen in depth, not a belt.
+        """
         pitch = float(getattr(sc, "TREE_PITCH_M", 8.0))
         zt = PARAMS["lawn"]["z_top"]
         n = 0
-        for j, y in enumerate(lt["y"]):
-            for i in range(int(lt["n"])):
-                x = lt["x0"] + pitch * i
-                build_tree(f"/World/Scene01/LawnTree_{j}{i}", x, y, zt,
-                           trunk_h=lt["trunk_h"], trunk_r=lt["trunk_r"],
-                           species="elm")
-                n += 1
-        print(f"[lawn] 교목 {n}주 · elm 단일종 · 피치 {pitch:.1f} m")
+        for r, lt in enumerate(PARAMS["lawn_trees"]):
+            for j, y in enumerate(lt["y"]):
+                for i in range(int(lt["n"])):
+                    x = lt["x0"] + pitch * i
+                    build_tree(f"/World/Scene01/LawnTree_{r}{j}{i}", x, y, zt,
+                               trunk_h=lt["trunk_h"], trunk_r=lt["trunk_r"],
+                               species="elm")
+                    n += 1
+        print(f"[lawn] 교목 {n}주 · elm 단일종 · 피치 {pitch:.1f} m · "
+              f"{len(PARAMS['lawn_trees'])}열")
 
     def build_fountain(M):
-        """G1's fountain basin — rim ring + still water + centre plinth."""
+        """G1's fountain — a still basin, built as a walled tank, not as nested discs.
+
+        The first pilot authored it as an outer cylinder + an inner cylinder + a water
+        disc, and the render showed why that cannot work: **a solid cylinder has no
+        inside**, so the water and the well both sat buried in the outer mass and the
+        element read as a plain concrete drum. Rebuilt on the form this scene already
+        owns (`build_planters`): four granite walls, a capping course, and a fill —
+        with water as the fill instead of turf.
+        """
         ft = PARAMS["fountain"]
         zt = PARAMS["lawn"]["z_top"]
         base = "/World/Scene01/Fountain"
-        ro, w, h = ft["r_out"], ft["rim_w"], ft["rim_h"]
-        # rim: an annulus approximated by an outer disc and an inner well, which is
-        # cheaper and reads identically at the ranges this element is ever seen from.
-        add_cylinder(f"{base}/Rim", (ft["cx"], ft["cy"], zt + h / 2.0 - 0.20),
-                     ro, h + 0.40, M["granite_dark"], collider=True)
-        add_cylinder(f"{base}/Well",
-                     (ft["cx"], ft["cy"], zt + h - ft["water_drop"] - 0.15),
-                     ro - w, 0.30, M["granite_dark"])
-        add_cylinder(f"{base}/Water",
-                     (ft["cx"], ft["cy"], zt + h - ft["water_drop"]),
-                     ro - w - 0.02, 0.02, M["water"])
-        add_cylinder(f"{base}/Plinth",
-                     (ft["cx"], ft["cy"], zt + h - ft["water_drop"]
-                      + ft["plinth_h"] / 2.0),
+        S, t, h = ft["size"], ft["wall_t"], ft["wall_h"]
+        over, cap_h = ft["cap_over"], ft["cap_h"]
+        half = S / 2.0
+        cx, cy = ft["cx"], ft["cy"]
+        top = zt + h
+        walls = [("S", cx, cy - half + t / 2.0, S, t),
+                 ("N", cx, cy + half - t / 2.0, S, t),
+                 ("W", cx - half + t / 2.0, cy, t, S - 2 * t),
+                 ("E", cx + half - t / 2.0, cy, t, S - 2 * t)]
+        for tag, wx, wy, sx, sy in walls:
+            add_box(f"{base}/Wall_{tag}", (wx, wy, zt + h / 2.0 - 0.20),
+                    (sx, sy, h + 0.40), M["granite_dark"], collider=True)
+            add_box(f"{base}/Cap_{tag}", (wx, wy, top + cap_h / 2.0),
+                    (sx + 2 * over if sx < sy else sx,
+                     sy + 2 * over if sy <= sx else sy, cap_h),
+                    M["granite_dark"])
+        # still water, inside the walls, `water_drop` below the coping
+        wz = top - ft["water_drop"]
+        add_box(f"{base}/Water", (cx, cy, wz - 0.05),
+                (S - 2 * t, S - 2 * t, 0.10), M["water"])
+        add_cylinder(f"{base}/Plinth", (cx, cy, wz + ft["plinth_h"] / 2.0),
                      ft["plinth_r"], ft["plinth_h"], M["granite_dark"])
 
     def build_litter(M):
@@ -1573,10 +1621,19 @@ def main():
             seed=1)
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
+        # [W3 S01 · 01-A] **stains stop being blobs.** They were bound to
+        #   `granite_dark`, i.e. the same near-black stone as the kerb, so a "stain"
+        #   rendered as a solid dark ellipse on white granite — the most visible ground
+        #   mark in the `beauty_overview` cut of the pilot, and exactly the class of
+        #   thing the user's ban is about even though it is not a rectangle. ground_kit's
+        #   own R3 rule says the decal ladder must stay **a tone separator, never
+        #   relief**; a material 3 stops darker than its host is not a tone separator.
+        #   `M["stain"]` is the plaza's own granite at 0.62 tone: the lobe still reads as
+        #   soiling at h0.3 and stops reading as paint at 20 m.
         M2.update(joint=M["granite_dark"], crack=M["granite_dark"],
                   patch=M["lower"], patch_cut=M["granite_dark"],
                   manhole=M["gk_iron"], gully=M["gk_iron"], weed=M["hedge"],
-                  stain_dirt=M["granite_dark"], stain_water=M["granite_dark"],
+                  stain_dirt=M["stain"], stain_water=M["stain"],
                   tactile=M["tactile"])
         res = gk.apply_ground(kit, "/World/Scene01/GKit", gp, M2,
                               skin_exclude=sc.skin_exclude,

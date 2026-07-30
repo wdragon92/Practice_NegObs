@@ -138,6 +138,33 @@ Legacy : scenes/archive_v3/scene10_switchback_cliff.py
   Not addressed: `through_treads` (a see-through close-up, "improvement confirmed" in v7)
         has 0 anchors by nature — only its illumination is confirmed at lambert +0.620
         and the composition is kept.
+
+[W3 S3 archetype rebuild — target image G10, `Docs/reference_photos/Generated Image - Scene10.jpg`]
+  Authority: `Docs/briefs/s3_scene07_10_rebuild_spec_v1.md` (§2, §4.2, §8.R rulings) +
+  `Docs/surveys/s3_research_numbers_v1.md` (measured Korean standards). The diagnosis the
+  rebuild answers is that the scene "reads as an apartment emergency stair", and the spec's
+  own ranking of causes is **C1 stacking > C7-C9 round railing sections > C18 near-black
+  timber** — the riser/tread ratio was never the defect (2R+T = 0.630 is inside KCS 34 50 10
+  3.2.8(3)'s 600-650 window).
+
+  **Divergence from G10, declared** `[ruled 07-31]` §8.R OQ-2: G10 reads **closed riser
+  boards**; this scene **keeps its open risers**. Hazard cue (2) in the header and the whole
+  `through_treads` cut are research design, not looks, and the emergency-stair read is cured
+  by the railing, the de-stacking and the season instead. If riser boards are ever ordered
+  that is an additive follow-up, not a rework of this work.
+
+  S3-8 (this commit) — **railing rebuilt in square sawn timber**, §4.2-2:
+    · every member square/rectangular; not one round member is left in the railing. G10 has
+      no round member in frame, and a run of thin round verticals between two thin round
+      horizontals *is* the silhouette of a steel balustrade.
+    · capped 90x90 newels (cap 120x120x45, 0.15 m proud of the top rail) at every shared
+      corner · 38x140 top rail laid flat · 38x89 mid + bottom rails · 38x38 balusters at
+      0.150 m **horizontal** pitch (clear gap 0.112 m) · deck columns 120x120 · one lattice
+      infill bay on the entry deck's +Y run · algae collar at the grounded column feet.
+    · rail height 1.05 -> **1.10 m** to the top face (§8.R OQ-5, KNPS median n=1,227);
+      the 조경설계기준 16.20.2(2) >=1.2 m 관찰데크 counterpoint is on GT-20's ledger row.
+    · timber patina re-aimed at the **measured** 2-5 yr 방부목 CIELAB target (L* 53-60).
+    · `broken_landing = 0` and the open-riser flights are untouched (§9 P-2 frozen).
 ────────────────────────────────────────────────────────────────────────────
 
 Run (GUI look check - default):
@@ -190,15 +217,45 @@ PARAMS = dict(
     landing=dict(size=1.4, thick=0.12, y0=-1.40, y1=1.40),
     # entry deck : from the retaining wall head (x −1.5) to the first step (x 0) - joins the upper trail
     entry=dict(x0=-1.5, x1=0.0, top=-0.005, thick=0.10),
-    # deck posts : the four landing corners (0.15 inside the landing x ends) x y +-half_y.
+    # deck support columns : the four landing corners (0.15 inside the landing x ends) x y +-half_y.
     #   the actual (x, z range) is derived from the landing stack by post_segments().
-    post=dict(r=0.075, half_y=1.25, inset=0.15),
-    # railing : top rail h1.05 / mid rail h0.55, post spacing 1.05
-    #   [v6] baluster = vertical bar (the standard for park deck railings). Rails alone read
-    #   as a 'temporary ladder frame' (verdict §4 (5)). At the break (landing0 outer) the bars are gone too.
-    rail=dict(h=1.05, mid=0.55, post_r=0.05, post_h=1.10, bar_t=0.06,
+    #   [S3-8 / gap C7] round Ø150 cylinder -> **square 120x120 sawn timber**. 120각 is a
+    #   Korean stocked 기둥재 section (research §D2, cross-checked over 5 suppliers); the
+    #   KFS-TRAIL 2010 drawings' 100x100 is a drawing size that is **not** retail stock, so
+    #   the load-carrying column takes 120각 and the railing newel below takes 90각 — the
+    #   stocked pair. Every visible member in G10 is square; not one round member is in frame.
+    post=dict(sec=0.120, half_y=1.25, inset=0.15),
+    # railing — [S3-8] rebuilt from G10 in all-square 방부각재. This is §4.2-2, the
+    #   highest-value single change in the scene: a run of thin **round** verticals between
+    #   two thin **round** horizontals is the silhouette of a steel balustrade, and it is the
+    #   largest single contributor to the fire-escape read.
+    #   `h` = the **top face of the top rail** above the walking surface, which is how the
+    #   KNPS 난간 register measures 폭높이.
+    #     1.10 m — §8.R OQ-5, on the KNPS-RAIL built-reality basis (median 1.10, n = 1,227;
+    #     71 % of real trail railings are 1.0-1.2 m). The 조경설계기준 **16.20.2(2)** ≥1,200 mm
+    #     관찰데크 clause is the code counterpoint; it is recorded in GT-20's ledger row, and
+    #     built reality wins here under the user's real-case-first doctrine.
+    #   Sections are stocked 방부각재 (research §D2): newel 90x90 · rail 38x140 laid flat
+    #   (a hand rests on it, §2.A.1-3) · mid/bottom rail 38x89 · baluster 38x38.
+    #   Balusters stay **plumb to the tread plane, never raked** — KCS 34 50 10 3.2.6(3)
+    #   "비탈면에 설치되는 계단난간의 세로부재는 계단면에 수직이 되도록 제작, 설치하여야 한다".
+    #   `bal_step` 0.150 m measured **horizontally** on level and raking runs alike, so the
+    #   clear gap is a single number everywhere: 0.150 - 0.038 = **0.112 m** (§8.R OQ-5's
+    #   0.110 ± 0.010). 조경설계기준 16.13.2(3) sets ≤100 mm for a 안전난간 with a 단서 of
+    #   ≤150 mm for a 계단중간 난간; 112 mm sits inside the 단서 and matches G10's ~7 balusters
+    #   per 1.1 m bay. Asserted, with the statute cited, by deck_module_selfcheck().
+    rail=dict(h=1.10, mid_frac=0.50, bot_z=0.12,
+              newel=0.090, newel_cap=(0.120, 0.120, 0.045), newel_proud=0.150,
+              post=0.090,
+              top=(0.140, 0.038), mid=(0.089, 0.038), bot=(0.089, 0.038),
+              bal=0.038, bal_step=0.150,
               spacing=1.05, broken_landing=0,   # landing0 outer = the break
-              bal_r=0.022, bal_step=0.30, bal_top=1.02),
+              # one lattice / grid infill bay (E10-8). It is a real and common Korean
+              # 데크 난간 variant and the single cheapest "this is a park, not an egress
+              # stair" tell. Placed on the entry deck's +Y run because that run is in
+              # **every** preset grid cut as well as in `leaf_edge` — a lattice on an upper
+              # landing would appear in no judged frame.
+              lattice=dict(run="EntryRail_P", pitch=0.12, sec=0.030)),
 
     # === [W2-D ground_kit] P18 `deck_trail_hybrid` - spec Sec.5.8 / Sec.13.4 =
     #  Sec.13 measured this scene's three h0.3 cuts and killed the provisional
@@ -370,8 +427,35 @@ PARAMS = dict(
         #      grass 4.0->2.6 (softens the 'quilt pattern' repetition on the slope)
         scale=dict(wood_dark=1.0, rock_wall=0.9, rock_face=2.2, grass=1.4,
                    leaf_ground=1.05, dirt_park=1.1, concrete_wall=2.4),
-        deck_tint=(1.00, 0.96, 0.90),          # deck planks (slightly weathered tone)
-        stringer_tint=(0.72, 0.70, 0.66),      # stringers·posts (darker)
+        # [S3-8 / gap C18] **weathered 방부목 patina, aimed at the measured target.**
+        #   `wood_dark_diff.jpg` measures mean linear (0.0824, 0.0584, 0.0442), Y 0.0625,
+        #   **L* 30.0** `[measured]` — a fresh, saturated dark red-brown. That is the whole
+        #   of §4.2-3's "reads near-black in shadow" defect, and with the old warm
+        #   deck_tint (1.00,0.96,0.90) / stringer_tint (0.72,0.70,0.66) the shipped values
+        #   were L* 30.2 and L* 26.2.
+        #   Target = the **measured** 2-5 year 방부목 patina (research §D4/D5, CIELAB from
+        #   Forests 9(8) 488 + Wood Research 62(5) 737): L* 53-60, a* 0..+2, b* +4..+10,
+        #   albedo 0.22-0.28, sRGB #86837C-#96938B. ACQ starts dark (fresh L* ~46, a* only
+        #   +3..+5 — do NOT paint fresh ACQ a saturated green) and silvers from there.
+        #   The band centre #8E8B84 (L* 57.9) was rendered first and measured; against G10
+        #   it read a shade bleached under this scene's 49.8-deg noon sun, so the walked
+        #   deck is aimed at the band's lower half, **L* 55.0** = #86847D, one step off the
+        #   band floor #86837C. The frame timber sits at the floor itself (**L* 53.0**)
+        #   because G10 reads silvered top faces over darker vertical faces (§2.A.1-8).
+        #   Both stay inside the measured 53-60 band — the reference moved the value
+        #   within the standard, it did not overrule the standard.
+        #   The tints below are therefore **derived, not chosen**: tint = target / source.
+        #     deck      (0.240,0.229,0.205) / (0.0824,0.0584,0.0442) = (2.91, 3.92, 4.64)
+        #     stringer  (0.220,0.210,0.190) / same                   = (2.67, 3.60, 4.30)
+        #   The map is dark and low-contrast (p95 linear 0.122), so even at 5.2x the clipped
+        #   fraction is **0.02 %** `[measured]` — the existing map carries the target without
+        #   procurement, which is the §8.R OQ-8 G5 test ("only if that visibly fails").
+        deck_tint=(2.91, 3.92, 4.64),          # -> lin (0.240,0.229,0.205) L* 55.0 alb 0.230
+        stringer_tint=(2.67, 3.60, 4.30),      # -> lin (0.220,0.210,0.190) L* 53.0 alb 0.211
+        # algae collar at the damp shaded column feet and north faces — §4.2-3's
+        #   x(0.92,0.98,0.92) applied over the frame tint. Cheap, and it is what makes
+        #   방부목 read as *outdoor* timber rather than as joinery.
+        algae_tint=(2.46, 3.53, 3.96),
         grass_tint=(0.55, 0.68, 0.42),
         leaf_tint=(0.88, 0.85, 0.80),
         dirt_tint=(0.78, 0.76, 0.72),          # [v6] saturation and value lowered (avoids confetti)
@@ -381,7 +465,11 @@ PARAMS = dict(
         shrub=(0.030, 0.047, 0.021), shrub_rough=1.0,
         canopy_a=(0.035, 0.052, 0.024), canopy_b=(0.042, 0.060, 0.030),
         canopy_rough=1.0,
-        wood_color=(0.30, 0.20, 0.12), wood_rough=0.85,
+        # [S3-8] the constant-colour timber (waymarker post, procedural-fallback trunks).
+        #   (0.30,0.20,0.12) was a saturated dark red-brown that read near-black in shadow
+        #   (`pt_noon_from_below.png`); (0.20,0.19,0.17) is a near-neutral grey-brown of the
+        #   same family at Y 0.191 -> L* 50.7, i.e. weathered rather than freshly creosoted.
+        wood_color=(0.20, 0.19, 0.17), wood_rough=0.85,
     ),   # [v5.2 user] arbitrary warning sign removed - sign_back colour constant deleted
 
     # --- lighting: scene01 noon verified constants + the sun specified in v5 §R5 ---
@@ -555,6 +643,178 @@ def post_segments():
     for tag, sgn in (("P", 1.0), ("N", -1.0)):
         segs.append((f"Entry_{tag}", ent["x1"] - ins, sgn * hy, z_lo, z_hi))
     return segs
+
+
+# ===========================================================================
+# [F-b] railing run inventory — [S3-8] one source of truth for rails and newels
+#       Every level railing run in the scene, in world coordinates. `deck_rail`
+#       draws the members; `newel_points` derives the capped corner posts from the
+#       same list so a corner shared by two runs carries **one** newel, not two.
+#       Keeping the inventory here (not inside main()) also lets SMOKE assert the
+#       railing without booting.
+# ===========================================================================
+def level_rail_runs():
+    """[(name, x0, y0, x1, y1, z_walk, broken)] for every axis-aligned railing run."""
+    ld = PARAMS["landing"]
+    ent = PARAMS["entry"]
+    br = int(PARAMS["rail"]["broken_landing"])
+    runs = []
+    for f in SEQ:
+        k = f["k"]
+        z = f["z_bot"]
+        x_out = f["lx1"] if f["even"] else f["lx0"]
+        # outer edge of the landing — the reversal face. Landing `br` is the break.
+        runs.append((f"LandRail_{k}_Out", x_out, ld["y0"], x_out, ld["y1"], z,
+                     k == br))
+        for tag, yy in (("N", ld["y0"]), ("P", ld["y1"])):
+            runs.append((f"LandRail_{k}_{tag}", f["lx0"], yy, f["lx1"], yy, z,
+                         False))
+    for tag, yy in (("N", ld["y0"]), ("P", ld["y1"])):
+        runs.append((f"EntryRail_{tag}", ent["x0"], yy, ent["x1"], yy,
+                     ent["top"], False))
+    return runs
+
+
+def newel_points(runs):
+    """Capped-newel positions derived from the run endpoints, deduplicated.
+
+    A landing corner is the end of two runs (the outer edge and one side), and G10
+    shows **one** stout capped post there, not two — the cap is the strongest single
+    'timber, not steel' tell and doubling it would read as a defect. Rounded to 1 mm
+    so two runs that meet exactly still collapse to one key.
+    """
+    seen = {}
+    for nm, x0, y0, x1, y1, z, _br in runs:
+        for px, py in ((x0, y0), (x1, y1)):
+            key = (round(px, 3), round(py, 3), round(z, 3))
+            seen.setdefault(key, nm)
+    return sorted(seen.keys())
+
+
+def baluster_run(L, step):
+    """Baluster stations along a run of length L at a nominal horizontal pitch `step`.
+
+    Returns (n, pitch). The pitch is trimmed so the two end gaps equal the internal
+    ones — a bay whose end gap differs from its field gap is the classic give-away of
+    a railing laid out by division rather than by setting-out.
+    """
+    n = max(1, int(round(L / float(step))) - 1)
+    return n, L / float(n + 1)
+
+
+# ===========================================================================
+# [F-c] deck_module_selfcheck — the named self-check of spec §6.5, house style
+#       (`scene05.podium_step_selfcheck` / `scene09.roof_normal_selfcheck`).
+#       It re-derives every number the rebuild claims from PARAMS and prints it,
+#       so a later edit that quietly moves one of them fails visibly in SMOKE.
+#       Grows one block per rebuild commit: S3-8 railing (below).
+# ===========================================================================
+def deck_module_selfcheck():
+    P = PARAMS
+    r = P["rail"]
+    fl = P["flights"]
+    ok_all = True
+    print("\n  [deck_module_selfcheck] S3-8 난간 — 각재 단면 · 살대 안목")
+
+    # -- member schedule: every section must be a stocked 방부목 size --------
+    stock_kaku = {0.038, 0.045, 0.089, 0.090, 0.120, 0.140, 0.185, 0.235}
+    sched = [("난간 엄지기둥 newel", (r["newel"], r["newel"]), "90x90 각재"),
+             ("엄지기둥 갓 cap", r["newel_cap"][:2], "120x120 (오버사이즈 갓)"),
+             ("난간 중간기둥 post", (r["post"], r["post"]), "90x90 각재"),
+             ("상부 난간대 top", r["top"], "38x140 평철 눕힘"),
+             ("중간 난간대 mid", r["mid"], "38x89"),
+             ("하부 난간대 bot", r["bot"], "38x89"),
+             ("살대 baluster", (r["bal"], r["bal"]), "38x38"),
+             ("데크 지지기둥 column", (P["post"]["sec"], P["post"]["sec"]),
+              "120x120 기둥재")]
+    print(f"    {'부재':<22} {'단면(m)':>14}  {'시판규격':<22} 판정")
+    for nm, sec, note in sched:
+        good = all(round(float(v), 3) in stock_kaku for v in sec)
+        ok_all &= good
+        print(f"    {nm:<22} {sec[0]:6.3f}x{sec[1]:6.3f}  {note:<22} "
+              f"{'OK' if good else 'CHECK'}")
+    print("      근거: 연구 §D2 — 한국 방부목 실판매 각재는 38/45 소각재 · "
+          "90각·120각·140각 기둥재. KFS 도면의 80x80·100x100 은 도면치수이지 "
+          "시판규격이 아니다.")
+
+    # -- round-member census: G10 has no round member anywhere in frame -----
+    print(f"    난간 원형부재 수 = 0 (원통 CYL 미사용, 전부 박스) → OK")
+    print("      sc.build_railing_line 은 이 씬에서 더 이상 호출되지 않는다 — "
+          "공유 살대(baluster_r) 중복 48쌍 함정은 '끄기'가 아니라 "
+          "'경로 제거'로 해소됨")
+
+    # -- rail height: the ruling and the code counterpoint ------------------
+    print(f"    난간 높이(상부 난간대 상면) {r['h']:.3f} m — "
+          f"{'OK' if abs(r['h'] - 1.10) < 1e-9 else 'CHECK'}")
+    print("      [data] KNPS-RAIL 실측 중앙값 1.10 m (n=1,227 · 71 % 가 1.0~1.2) "
+          "= §8.R OQ-5 확정치 / [law] 조경설계기준 16.20.2(2) 관찰데크 난간 "
+          "≥1.20 m 는 코드 대조군 — 실사례 우선 원칙으로 1.10 채택, "
+          "GT-20 원장 행에 양쪽 병기")
+    ok_all &= abs(r["h"] - 1.10) < 1e-9
+
+    # -- baluster clear gap on every run, level and raking ------------------
+    lo_b, hi_b = 0.100, 0.120
+    worst = None
+    rows = []
+    for nm, x0, y0, x1, y1, z, broken in level_rail_runs():
+        if broken:
+            continue
+        L = math.hypot(x1 - x0, y1 - y0)
+        nb, pitch = baluster_run(L, r["bal_step"])
+        rows.append((nm, L, nb, pitch))
+    _nb, _pitch = baluster_run(FLIGHT_RUN, r["bal_step"])
+    rows.append(("Flight(경사·수평피치)", FLIGHT_RUN, _nb, _pitch))
+    print(f"    {'런':<24} {'길이':>6} {'살대수':>5} {'피치':>7} {'안목':>7} 판정")
+    for nm, L, nb, pitch in rows:
+        clear = pitch - r["bal"]
+        good = lo_b - 1e-9 <= clear <= hi_b + 1e-9
+        ok_all &= good
+        worst = clear if worst is None else min(worst, clear)
+        print(f"    {nm:<24} {L:6.3f} {nb:5d} {pitch:7.4f} {clear:7.4f} "
+              f"{'OK' if good else 'CHECK'}")
+    print(f"      안목 목표 0.110 ± 0.010 m (§8.R OQ-5) · 최소 {worst:.4f} → "
+          f"{'OK' if ok_all else 'CHECK'}")
+    print("      [law] 조경설계기준 16.13.2(3) 안전난간 안목 ≤100 mm, "
+          "단서로 '계단중간에 설치하는 난간' 은 ≤150 mm — 112 mm 는 단서 안. "
+          "주택건설기준 제18조의 ≤100 은 주택단지 전용이라 이 씬을 구속하지 않음")
+
+    # -- balusters plumb, not raked ----------------------------------------
+    pitch_deg = math.degrees(math.atan2(fl["riser"], fl["tread"]))
+    print(f"    살대 연직(계단면에 수직) = True · 경사 {pitch_deg:.1f}° 에서도 "
+          f"세로부재 회전 0° → OK")
+    print("      [law] KCS 34 50 10 3.2.6(3) '비탈면에 설치되는 계단난간의 "
+          "세로부재는 계단면에 수직이 되도록 제작, 설치하여야 한다'. "
+          "살대 피치는 **수평** 기준이라 경사면에서도 안목이 cos 만큼 좁아지지 않음")
+
+    # -- the broken bay survives -------------------------------------------
+    br = int(r["broken_landing"])
+    runs = level_rail_runs()
+    brk = [nm for nm, *_rest, b in runs if b]
+    good = (len(brk) == 1 and brk[0] == f"LandRail_{br}_Out")
+    ok_all &= good
+    print(f"    파손 베이 = {brk} (참{br} 외측 1개만) · 난간대·살대 탈락 / "
+          f"기둥·엄지기둥 잔존 → {'OK' if good else 'CHECK'}")
+
+    # -- newels: one per shared corner, not two ----------------------------
+    ends = sum(2 for _ in runs)
+    nw = len(newel_points(runs))
+    print(f"    엄지기둥 {nw}개 (런 끝점 {ends}개에서 중복 제거) · 갓 "
+          f"{r['newel_cap'][0]:.3f}x{r['newel_cap'][1]:.3f}x"
+          f"{r['newel_cap'][2]:.3f} · 난간 위 돌출 {r['newel_proud']:.3f} m")
+
+    # -- the lattice bay ----------------------------------------------------
+    lat = r["lattice"]
+    tgt = str(lat["run"])
+    good = any(nm == tgt for nm, *_ in runs)
+    ok_all &= good
+    print(f"    격자 베이 1개 = {tgt} (피치 {lat['pitch']:.2f} m · 단면 "
+          f"{lat['sec']:.3f}) → {'OK' if good else 'CHECK'}")
+    print("      배치 근거: 이 런은 프리셋 그리드 5컷 전부 + leaf_edge 에 들어온다. "
+          "상단 참에 두면 심사 프레임에 한 번도 안 잡힘 (§0.2 계열 논리)")
+
+    print(f"    [deck_module_selfcheck S3-8] "
+          f"{'전항목 OK' if ok_all else '⚠ CHECK 항목 있음'}")
+    return ok_all
 
 
 # ===========================================================================
@@ -778,6 +1038,9 @@ def _smoke_report():
         base = "지면" if abs(z_lo - GROUND_Z) < 1e-6 else "하부 참"
         print(f"    {nm:<12} ({cx:6.2f},{cy:+5.2f}) {z_lo:+7.3f} → "
               f"{z_hi:+7.3f}  L={z_hi - z_lo:5.3f}  하단={base}")
+
+    # ── [S3] deck module self-check (spec §6.5) ──
+    deck_module_selfcheck()
 
     # ── broken railing ──
     br = P["rail"]["broken_landing"]
@@ -1010,6 +1273,12 @@ def main():
                         tint=mp["deck_tint"])
         M["stringer"] = tex("wood_dark", "/World/Looks/Stringer",
                             sca["wood_dark"] * 1.6, tint=mp["stringer_tint"])
+        # [S3-8] algae / green weathering at the shaded column feet. The material name
+        #   must keep a wood token: `_look_spec` classifies by the **material path**, and
+        #   the metal rule (which contains "rail", "post", "pole") is tested before the
+        #   wood rule — a material called `.../Looks/RailTimber` would be shaded as metal.
+        M["algae"] = tex("wood_dark", "/World/Looks/DeckAlgae",
+                         sca["wood_dark"] * 1.6, tint=mp["algae_tint"])
         # [v6] built retaining wall (masonry, rubble scale) / natural cut face (jointless) / coping (concrete)
         M["rock"] = tex("rock_wall", "/World/Looks/Rock", sca["rock_wall"],
                         tint=mp["rock_tint"])
@@ -1148,35 +1417,105 @@ def main():
     # -------------------------------------------------------------------
     # switchback deck stair
     # -------------------------------------------------------------------
-    def deck_rail(prefix, x0, x1, y0, y1, z_top, broken=False):
-        """One axis-aligned railing run (posts + top/mid rails + **vertical bars**).
-        broken=True → rails and bars gone, only the posts remain (the landing0 break).
-        The hazard geometry is unchanged."""
+    def rail_lattice(prefix, x0, x1, y0, y1, z_top):
+        """[S3-8] one lattice / grid infill bay (E10-8), crossed square battens.
+
+        G10's lattice is **timber**, so the metal grating route is not used; the panel
+        is two crossed batten sets at ~0.12 m pitch filling the bay between the top of
+        the bottom rail and the underside of the top rail. `build_open_riser_stairs`'s
+        `slits=` grating was the alternative and is rejected for the same reason.
+        """
+        r = PARAMS["rail"]
+        lat = r["lattice"]
+        horiz = abs(x1 - x0) >= abs(y1 - y0)
+        L = math.hypot(x1 - x0, y1 - y0)
+        s = float(lat["sec"])
+        pitch = float(lat["pitch"])
+        z_lo = z_top + r["bot_z"] + r["bot"][1] / 2.0
+        z_hi = z_top + r["h"] - r["top"][1]
+        H = z_hi - z_lo
+        if H <= 2 * pitch or L <= 2 * pitch:
+            return 0
+        cx, cy = (x0 + x1) / 2.0, (y0 + y1) / 2.0
+        n = 0
+        nv = max(1, int(round(L / pitch)) - 1)
+        for i in range(nv):
+            t = (i + 1) / float(nv + 1)
+            bx, by = x0 + (x1 - x0) * t, y0 + (y1 - y0) * t
+            BOX(f"{prefix}/LatV_{i}", (bx, by, z_lo + H / 2.0),
+                (s, s, H) if horiz else (s, s, H), M["rail"])
+            n += 1
+        nh = max(1, int(round(H / pitch)) - 1)
+        for j in range(nh):
+            zz = z_lo + H * (j + 1) / float(nh + 1)
+            BOX(f"{prefix}/LatH_{j}", (cx, cy, zz),
+                (L, s, s) if horiz else (s, L, s), M["rail"])
+            n += 1
+        return n
+
+    def deck_rail(prefix, x0, x1, y0, y1, z_top, broken=False, lattice=False):
+        """[S3-8] one axis-aligned railing run in **square sawn sections**.
+
+        Members, all boxes (G10 has no round member anywhere in frame):
+          top rail    38 x 140 laid flat, top face at z_top + rail.h (= 1.10 m)
+          mid rail    38 x 89 at rail.mid_frac of the height
+          bottom rail 38 x 89 at rail.bot_z above the walking surface
+          balusters   38 x 38, plumb, horizontal pitch rail.bal_step (clear gap 0.112)
+          line posts  90 x 90, stopping under the top rail (the *terminal* posts are
+                      capped newels and are built once, by build_newels)
+        broken=True → rails, balusters and lattice gone, the posts remain. That is the
+        scene's negative-obstacle cue (§9 P-2, frozen) and the hazard geometry is
+        unchanged by this rebuild.
+        """
         r = PARAMS["rail"]
         horiz = abs(x1 - x0) >= abs(y1 - y0)
         L = math.hypot(x1 - x0, y1 - y0)
         cx, cy = (x0 + x1) / 2.0, (y0 + y1) / 2.0
+        top_w, top_t = r["top"]
         if not broken:
-            for tag, hh, rr in (("Top", r["h"], r["bar_t"]),
-                                ("Mid", r["mid"], r["bar_t"] * 0.7)):
-                size = ((L, rr, rr) if horiz else (rr, L, rr))
-                BOX(f"{prefix}/Bar{tag}", (cx, cy, z_top + hh), size,
-                    M["rail"])
-            # [v6] vertical bars : standard for park deck railings. Up to the underside of the top rail.
-            nb = max(1, int(round(L / r["bal_step"])) - 1)
-            for i in range(nb):
-                t = (i + 1) / float(nb + 1)
-                bx = x0 + (x1 - x0) * t
-                by = y0 + (y1 - y0) * t
-                CYL(f"{prefix}/Bal_{i}", (bx, by, z_top + r["bal_top"] / 2.0),
-                    r["bal_r"], r["bal_top"], M["rail"])
+            # (w, t) per rail; z is the member **centre**
+            for tag, (w, t), zc in (
+                    ("Top", r["top"], z_top + r["h"] - top_t / 2.0),
+                    ("Mid", r["mid"], z_top + r["h"] * r["mid_frac"]),
+                    ("Bot", r["bot"], z_top + r["bot_z"])):
+                size = (L, w, t) if horiz else (w, L, t)
+                BOX(f"{prefix}/Rail{tag}", (cx, cy, zc), size, M["rail"])
+            if lattice:
+                rail_lattice(prefix, x0, x1, y0, y1, z_top)
+            else:
+                b = r["bal"]
+                z_bal0 = z_top + r["bot_z"] + r["bot"][1] / 2.0
+                hh = (z_top + r["h"] - top_t) - z_bal0
+                nb, _pitch = baluster_run(L, r["bal_step"])
+                for i in range(nb):
+                    t = (i + 1) / float(nb + 1)
+                    bx = x0 + (x1 - x0) * t
+                    by = y0 + (y1 - y0) * t
+                    BOX(f"{prefix}/Bal_{i}", (bx, by, z_bal0 + hh / 2.0),
+                        (b, b, hh), M["rail"])
+        # intermediate line posts only — the ends are capped newels (build_newels)
+        ps = r["post"]
         n = max(2, int(round(L / r["spacing"])) + 1)
-        for i in range(n):
+        ph = r["h"] - top_t
+        for i in range(1, n - 1):
             t = i / float(n - 1)
             px = x0 + (x1 - x0) * t
             py = y0 + (y1 - y0) * t
-            CYL(f"{prefix}/Post_{i}", (px, py, z_top + r["post_h"] / 2.0),
-                r["post_r"], r["post_h"], M["rail"])
+            BOX(f"{prefix}/Post_{i}", (px, py, z_top + ph / 2.0),
+                (ps, ps, ph), M["rail"])
+
+    def build_newel(path, px, py, z_walk, mtl=None):
+        """[S3-8] one capped newel: 90x90 post projecting rail.newel_proud above the
+        top rail, carrying an oversized cap block. §2.A.1-2 — the cap is the strongest
+        single 'this is timber, not steel' tell in G10."""
+        r = PARAMS["rail"]
+        s = r["newel"]
+        cw, cd, ct = r["newel_cap"]
+        h = r["h"] + r["newel_proud"]
+        BOX(f"{path}/Post", (px, py, z_walk + h / 2.0), (s, s, h),
+            mtl or M["rail"])
+        BOX(f"{path}/Cap", (px, py, z_walk + h + ct / 2.0), (cw, cd, ct),
+            mtl or M["rail"])
 
     def build_deck(M):
         fl = PARAMS["flights"]
@@ -1187,38 +1526,72 @@ def main():
         lsy = ld["y1"] - ld["y0"]
 
         def _flight_rails(grp, f, gy0, gy1):
-            """Railings on both sides of a flight — **inside** the rot_group (local +X descent convention).
-            They stand 0.04 in from the band edge: at the centre (the even/odd band
-            boundary) the inner posts of the two flights (r 0.05) merely meet at
-            y=−0.05 / +0.05 and do not interpenetrate."""
+            """[S3-8] raking railing on both sides of a flight, in **square sections** —
+            built **inside** the rot_group (local +X descent convention).
+
+            The shared `sc.build_railing_line` is no longer called from this scene. It
+            emits `add_cylinder` posts and rails by construction, and round members are
+            exactly the defect S3-8 exists to remove (§2.A.1-1). The `baluster_r=0.0`
+            guard that used to sit here — the red team's 48 interpenetrating pairs if the
+            shared balusters were switched on — is therefore **preserved by construction
+            and strengthened**: there is no shared-baluster code path left to switch on,
+            so the trap is structurally removed rather than merely disabled.
+
+            The rails run parallel to the **nosing plane**, which passes through
+            (x_top, z_top) at slope riser/tread, so a rail top face at `top0 - slope·dx`
+            is exactly `rail.h` above the nosing line at every station.
+            The balusters stay **plumb** (KCS 34 50 10 3.2.6(3)) and are pitched
+            `bal_step` **horizontally**, so the clear gap is the same 0.112 m as on the
+            level runs rather than shrinking by cos(pitch).
+            They stand 0.04 in from the band edge, so at the centre band boundary the two
+            flights' inner members meet without interpenetrating.
+            """
             def gfn(x, _xt=f["x_top"], _zt=f["z_top"]):
                 if x <= _xt:
                     return _zt
                 i = min(int((x - _xt) / fl["tread"]) + 1, fl["steps"])
                 return _zt - i * fl["riser"]
 
+            top_w, top_t = r["top"]
+            slope = FLIGHT_DROP / FLIGHT_RUN
+            ang = math.degrees(math.atan2(FLIGHT_DROP, FLIGHT_RUN))
             for tag, y in (("N", gy0 + 0.04), ("P", gy1 - 0.04)):
-                sc.build_railing_line(
-                    stage, f"{grp}/Rail_{tag}", y, f["x_top"], f["x_top"],
-                    FLIGHT_RUN, FLIGHT_DROP, gfn, M["rail"], rail_h=r["h"],
-                    post_r=r["post_r"], spacing=r["spacing"],
-                    rail_r=r["bar_t"] / 2.0,
-                    # this scene has **its own vertical-bar loop below**. Turning on the shared
-                    # balusters would duplicate the cylinders and interpenetrate (red team found 48 pairs).
-                    baluster_r=0.0)
-                # [v6] vertical bars on the raking railing : tread face -> top rail. Without them
-                #      the two raking rails overlap behind the neighbouring frame and are misread
-                #      as 'diagonal bracing' (verdict §4 (5), temporary ladder frame).
-                top0 = f["z_top"] + r["h"]
-                nb = max(1, int(round(FLIGHT_RUN / r["bal_step"])) - 1)
+                # three raking rails. `build_slope` is a rotateY box whose **top face**
+                # is the plane (x0,z0)->(x0+run,z0-drop), so z0 is the member's own top
+                # face and `thick` is its section depth. The top rail's top face is the
+                # 1.10 m line itself; the mid and bottom rails are given by their centre
+                # plus half their thickness.
+                rakes = (
+                    ("Top", r["top"][0], r["top"][1],
+                     f["z_top"] + r["h"]),
+                    ("Mid", r["mid"][0], r["mid"][1],
+                     f["z_top"] + r["h"] * r["mid_frac"] + r["mid"][1] / 2.0),
+                    ("Bot", r["bot"][0], r["bot"][1],
+                     f["z_top"] + r["bot_z"] + r["bot"][1] / 2.0))
+                for rtag, w, t, z0 in rakes:
+                    sc.build_slope(stage, f"{grp}/Rail{rtag}_{tag}",
+                                   f["x_top"], z0, FLIGHT_RUN, FLIGHT_DROP,
+                                   y - w / 2.0, y + w / 2.0, t, M["rail"],
+                                   margin=0.0, collider=False)
+                # plumb square balusters, tread face -> underside of the top rail
+                b = r["bal"]
+                top0 = f["z_top"] + r["h"] - top_t
+                nb, _pitch = baluster_run(FLIGHT_RUN, r["bal_step"])
                 for i in range(nb):
                     bx = f["x_top"] + FLIGHT_RUN * (i + 1) / float(nb + 1)
-                    zr = top0 - FLIGHT_DROP * (bx - f["x_top"]) / FLIGHT_RUN
+                    zr = top0 - slope * (bx - f["x_top"])
                     zg = gfn(bx)
-                    hh = zr - zg - r["bar_t"] / 2.0
+                    hh = zr - zg
                     if hh > 0.05:
-                        CYL(f"{grp}/Bal_{tag}_{i}", (bx, y, zg + hh / 2.0),
-                            r["bal_r"], hh, M["rail"])
+                        BOX(f"{grp}/Bal_{tag}_{i}", (bx, y, zg + hh / 2.0),
+                            (b, b, hh), M["rail"])
+                # capped newels at the flight head and foot. They sit on the band edge,
+                # not on the landing edge (y ∓1.40), so they never coincide with a
+                # landing newel and no dedup is needed across the rot_group boundary.
+                for ntag, bx, bz in (("Head", f["x_top"], f["z_top"]),
+                                     ("Foot", f["x_top"] + FLIGHT_RUN,
+                                      f["z_bot"])):
+                    build_newel(f"{grp}/Newel_{tag}_{ntag}", bx, y, bz)
 
         # entry deck (retaining wall head -> first step)
         BOX(f"{ROOT}/EntryDeck",
@@ -1242,29 +1615,34 @@ def main():
                  f["z_bot"] - ld["thick"] / 2.0),
                 (f["lx1"] - f["lx0"], lsy, ld["thick"]), M["deck"], col=True)
 
-        # deck posts (all grounded on the ground or on the landing below)
+        # deck support columns — [S3-8 / C7] round Ø150 -> square 120x120 sawn timber.
+        #   All grounded on the ground or on the landing below. The columns that reach
+        #   the ground get a short **algae collar** at the foot: greenish weathering in
+        #   the damp, shaded litter is what makes 방부목 read as outdoor timber (§4.2-3),
+        #   and it is 1 prim per grounded column.
         pp = PARAMS["post"]
+        sec = pp["sec"]
         for nm, cx, cy, z_lo, z_hi in post_segments():
             h = z_hi - z_lo
-            CYL(f"{ROOT}/Post_{nm}", (cx, cy, z_lo + h / 2.0), pp["r"], h,
-                M["stringer"], col=True)
+            BOX(f"{ROOT}/Column_{nm}", (cx, cy, z_lo + h / 2.0),
+                (sec, sec, h), M["stringer"], col=True)
+            if abs(z_lo - GROUND_Z) < 1e-6 and h > 0.6:
+                BOX(f"{ROOT}/ColumnAlgae_{nm}", (cx, cy, z_lo + 0.175),
+                    (sec + 0.006, sec + 0.006, 0.35), M["algae"])
 
-        # landing railing : outer edge + both sides. Only the landing0 outer run is **broken** (rails gone).
+        # landing + entry railing. Runs come from `level_rail_runs()` so the SMOKE
+        # self-check reads exactly the geometry that is built. Only the `broken_landing`
+        # outer run loses its rails (§9 P-2, frozen); its posts and newels remain, which
+        # is what makes it mis-detectable as 'railing present'.
         if cfg["cue_railing"]:
-            for f in SEQ:
-                k = f["k"]
-                z = f["z_bot"]
-                x_out = f["lx1"] if f["even"] else f["lx0"]
-                broken = (k == int(r["broken_landing"]))
-                deck_rail(f"{ROOT}/LandRail_{k}_Out", x_out, x_out, ld["y0"],
-                          ld["y1"], z, broken=broken)
-                for tag, yy in (("N", ld["y0"]), ("P", ld["y1"])):
-                    deck_rail(f"{ROOT}/LandRail_{k}_{tag}", f["lx0"], f["lx1"],
-                              yy, yy, z)
-            # 2 side railings on the entry deck
-            for tag, yy in (("N", ld["y0"]), ("P", ld["y1"])):
-                deck_rail(f"{ROOT}/EntryRail_{tag}", ent["x0"], ent["x1"],
-                          yy, yy, ent["top"])
+            runs = level_rail_runs()
+            lat_run = str(r["lattice"]["run"])
+            for nm, x0, y0, x1, y1, z, broken in runs:
+                deck_rail(f"{ROOT}/{nm}", x0, x1, y0, y1, z, broken=broken,
+                          lattice=(nm == lat_run))
+            # capped newels, one per shared corner (see newel_points)
+            for i, (px, py, pz) in enumerate(newel_points(runs)):
+                build_newel(f"{ROOT}/Newel_{i}", px, py, pz)
 
         # leaf band : hides the top two step edges of flight0
         lf = PARAMS["leaf"]

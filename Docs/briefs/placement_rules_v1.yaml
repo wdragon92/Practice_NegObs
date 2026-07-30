@@ -1,0 +1,484 @@
+# placement_rules_v1.yaml — the rule table `scripts/placement_lint.py` executes.
+#
+# Wave W3 · WP T1 · owner: T1 (this file and scripts/placement_lint.py are T1's ONLY writes).
+# Authority: Docs/briefs/w3_execution_spec_v1.md — §10.3 (PROP_EDGE), §10.4 (LINT-1..LINT-10),
+#            §1.2 (jitter), §1.3 (species), §1.8 (evidence-gap: prepare vs enforce), §12 (do-not-touch).
+#
+# Every number carries an evidence tag:
+#   [law]        statute / notice / enforcement-rule figure, cited in `basis`
+#   [derived]    computed from a [law] figure, derivation stated
+#   [measured]   measured in this repo, instrument named
+#   [ruled]      supervisor ruling relayed by the spec, section cited
+#   [convention] a linter implementation constant with no external authority; it decides
+#                classification or tolerance only, never a pass/fail threshold on a real dimension
+#
+# Editing contract: thresholds move only when the spec moves. If a rule's datum does not exist
+# yet, it stays under `gates:` with `mode: warn` and a `blocked_on:` — it is NOT deleted and it is
+# NOT quietly enforced (spec §1.8: "prepare" = check in warn mode, "enforce" = flip to hard).
+
+meta:
+  id: placement_rules_v1
+  wave: W3
+  spec: Docs/briefs/w3_execution_spec_v1.md
+  spec_rows: "§10.3 PE-1..PE-10 · §10.4 LINT-1..LINT-10"
+  linter: scripts/placement_lint.py
+  # The linter reads the stub harness through `scripts/geom_invariance_check.py` (import only —
+  # T1 never edits it, spec §4.1). This arm is the shipped configuration.
+  harness_arm:
+    NEGOBS_LOOK_MTL: "1"
+    NEGOBS_LOOK_GEO: "1"
+
+  # ---------------------------------------------------------------------------
+  # Baseline this table was calibrated against — spec §6.2 T1: "The linter must run on the
+  # UNTOUCHED tree first and publish its baseline violation list. A linter that only ever ran on
+  # fixed code proves nothing." Nothing was fixed to produce these numbers.
+  # Re-derive with:  python3 scripts/placement_lint.py --scenes all --max-rows 0
+  # ---------------------------------------------------------------------------
+  baseline:
+    date: 2026-07-30
+    head: 04cc85c
+    working_tree_delta: >
+      One concurrent in-flight change was present and is NOT T1's: S5's CB-1 in
+      scenes/main/scene09_ghat_riverfront.py. Proven not to move a finding — its only prim edit
+      is `LandPost_*` (scene09 land_posts moved to the terrace edge), which no prop class in
+      this table matches; the `sc.build_bench` line in that diff is unchanged context. [measured]
+    scenes: 33
+    veg_route: "asset — 26 of 33 scenes bind a tree USD, so species are read from the reference"
+    exit_code: 1
+    totals: {ERROR: 393, WARN: 385, BLOCKED: 29, INFO: 2}
+    errors_by_check:
+      LINT-8: 295          # patch / stain rotz, 31 scenes
+      LINT-4b: 49          # retired species, 20 scenes
+      LINT-6: 25           # bollard h 0.750 m, 6 scenes (02 · 05 · 06 · 08 · 11 · 12)
+      LINT-7-static: 24    # bc.jit_yaw / bc.jit_pos call sites, 9 batch1 scenes
+    corrected_facts_reproduced:
+      - "C-2 — 24 call sites and 25 `bc.`-prefixed text hits, and the per-scene split matches
+         the spec's own list exactly: N1:4 · N2:3 · N3:3 · N5:1 · C1:3 · C2:4 · C4:2 · D2:2 · D4:2"
+      - "C-9 — the measured bollard-carrier set is exactly the corrected 19 scenes; the
+         carrier_set_check raised nothing in either direction"
+      - "C-13 — scene03 carries 4 benches, not 3"
+    known_gaps: >
+      PLACEMENT is declared by 0 of 33 scenes, so LINT-1 / LINT-1b / LINT-3 (bearing half) /
+      LINT-5 / LINT-9 are structurally inert and report nodata. Those five become live only when
+      WINDOW 3's scene WPs add the declaration block.
+
+# ---------------------------------------------------------------------------
+# Angular / linear tolerances
+# ---------------------------------------------------------------------------
+tolerances:
+  bearing_deg: 0.5          # [law-derived] §10.4 LINT-3/LINT-7 state "± 0.5°" verbatim.
+  yaw_zero_deg: 0.5         # [convention] a |yaw| below this reads as authored-zero, not as jitter.
+  pitch_rel: 0.01           # [law-derived] §10.4 LINT-2 "constant within 1 %".
+  collinear_tol_m: 0.25     # [convention] classification only: max perpendicular residual for a run
+                            #   of props to be treated as ONE line when the scene declares no route.
+  min_run_n: 3              # [convention] classification only: a "row" needs >= 3 members.
+  bollard_min_run_n: 2      # [convention] PE-6's pitch is a consecutive-gap rule, so two bollards
+                            #   on one line already carry a testable pitch.
+  infer_max_mean_pitch_m: 12.0  # [convention] classification only: an inferred run whose mean
+                            #   spacing exceeds 1.5x the legal maximum (8 m) is not a candidate
+                            #   street row — it is park scatter, and reporting it is noise.
+  max_inferred_runs_per_scene: 4  # [convention] report the largest runs; the rest are summarised.
+  coord_round: 6            # [convention] the stub harness rounds to 6 dp (`_num`), so do we.
+
+# ---------------------------------------------------------------------------
+# LINT-1 .. LINT-10 — the rule table of spec §10.4
+#   severity: error | warn        (error -> exit 1)
+#   needs:    PLACEMENT keys the rule cannot run without
+#   infer:    what the linter may fall back to when `needs` is undeclared. Inferred findings are
+#             ALWAYS downgraded to warn and tagged `[inferred]` — an inferred datum may never
+#             fail a build.
+# ---------------------------------------------------------------------------
+checks:
+
+  LINT-1:
+    rule: "tree trunk centre >= 1.00 m lateral from kerb_lines"
+    value_m: 1.00
+    basis: "PE-1 · 산림청 고시 2-3(6)(가)1) [law]"
+    severity: error
+    needs: [kerb_lines]
+    infer: none                 # no safe surrogate for a kerb line; undeclared -> nodata row
+    applies_to: [tree]
+
+  LINT-1b:
+    rule: "tree trunk centre >= 2.00 m from the shoulder end where there is no sidewalk"
+    value_m: 2.00
+    basis: "PE-4 · 고시 2-3(6)(가)2) [law] — conditionally 1-2 m"
+    severity: error
+    needs: [shoulder_lines]
+    infer: none
+    applies_to: [tree]
+
+  LINT-2:
+    rule: "route pitch constant within 1 %, mean in [6.0, 8.0] m"
+    min_m: 6.0
+    max_m: 8.0
+    default_m: 7.0
+    basis: "PE-2 · 조례 제7조1가 6-8 m / 고시 4-8 m -> spec §10.3 default 7.0 [law]"
+    severity: error
+    needs: [routes]
+    infer: collinear_runs        # >= min_run_n trees on one line -> treat as a candidate route
+    applies_to: [tree]
+    note: >
+      Row 13 of the abolish inventory (§10.1) excludes scene13 — X4, §1.2: scene13's 8 trees are
+      apartment-court landscaping, not a street row. The linter therefore never HARD-fails an
+      inferred run; only a scene-declared `routes[*]` is a gate.
+
+  LINT-3:
+    rule: "route bearing = kerb bearing +- 0.5deg; per-tree placement yaw = 0"
+    basis: "PE-3 · 조례 제7조1나 · 고시 (나) [law]"
+    severity: error
+    needs: [routes, kerb_lines]  # bearing half only; the yaw half needs nothing
+    infer: none
+    applies_to: [tree]
+    exempt:
+      # §12-15 do-not-touch: build_tree's crown bearing U(0,360) is EXEMPT. It lands on the
+      # `<prefix>/Veg` prim itself (scene_common.py:2455 add_vegetation(..., yaw_deg=...)), so the
+      # linter reads the tree's PLACEMENT yaw from the ancestors ABOVE /Veg and ignores /Veg's own RZ.
+      - "own RZ of the /Veg prim (crown bearing) — spec §12-15 [ruled]"
+      - "trunk lean rotX/rotY (procedural fallback) — not a plan bearing"
+
+  LINT-4:
+    rule: "one species per routes[*] (S-1); one species per shrub bed / band (S-2)"
+    basis: "spec §1.3 / §10.2 [ruled 07-30]"
+    severity: error
+    needs: [routes]
+    infer: scene_census          # undeclared -> per-scene species census at warn
+    applies_to: [tree, shrub]
+
+  LINT-4b:
+    rule: "no retired species anywhere"
+    retired: [White_Pine, Yellow_Pine]
+    basis: >
+      spec §10.2 [ruled 07-30]: neither is in veg_manifest_w2.json's PASS list; White_Pine carries
+      an uncorrected zmin -0.351. Needs no declaration — the bound USD asset name is the evidence.
+    severity: error
+    needs: []
+    applies_to: [tree, shrub]
+
+  LINT-5:
+    rule: "free walking width >= 1.5 m after subtracting the 표2.2 occupancy"
+    floor_m: 1.5
+    target_m: 2.0
+    basis: >
+      PE-8 · 「도로의 구조·시설 기준에 관한 규칙」 제16조 [law]. Effective width >= 2.0 m national;
+      1.5 m is the constrained-condition floor only. Computable form (spec §10.3 [derived]):
+      setback_far_edge <= sidewalk_width - 1.5 and setback_near_edge >= 0.
+    severity: error
+    needs: [walk_edges]
+    infer: none
+    applies_to: [bench, lamp, bin, sign, bollard, tree, rack, shelter, planter]
+
+  LINT-6:
+    rule: "bollard h 0.8-1.0 m · dia 0.1-0.2 m · pitch 1.5 +- 0.1 m · axis on the 보도·차도 경계"
+    height_m: [0.8, 1.0]
+    diameter_m: [0.1, 0.2]
+    pitch_m: 1.5
+    pitch_tol_m: 0.1
+    basis: "PE-6 / PE-7 · 교통약자법 시행규칙 별표2 제7호 [law]"
+    severity: error
+    needs: []                    # h / dia / pitch need no declaration; only the yaw half needs kerb_lines
+    infer: collinear_runs
+    applies_to: [bollard]
+    carrier_set_check: true
+    note: >
+      A bollard is a solid of revolution — it has no readable yaw in the prim inventory, so the
+      "axis-locked / yaw = kerb bearing" half of PE-7 is only evaluable through the tactile pad's
+      front_dir or a declared anchor. Reported as nodata rather than silently passed.
+
+  LINT-7:
+    rule: "furniture yaw in {declared anchor bearings} +- 0.5deg"
+    basis: "J-3 / J-5 abolition · spec §1.2 / §10.1 [ruled 07-30]"
+    severity: error
+    needs: [anchors]
+    infer: axis_set              # undeclared -> the spec's own expected outcome, at warn
+    infer_bearings_deg: [0.0, 90.0, 180.0, 270.0]
+    infer_basis: >
+      spec §10.1: "For the current 33 scenes the resulting bearings are 0 / 90 / 180 / 270 plus
+      scene03's meander tangent". The meander tangent is a legitimate alignment and must be
+      preserved — scene03 findings are emitted with `meander_exempt_candidate: true` and must be
+      re-adjudicated against a declared anchor before anyone edits them.
+    applies_to: [bench, lamp, bin, sign, rack, shelter, cityblock, pavilion, toolbox, planter,
+                 sitestack]
+    meander_exempt_scenes: [scene03]
+
+  LINT-8:
+    rule: "no rotz != 0 on any `patch` or `stain` ground element"
+    basis: "J-1 / J-2 abolition · spec §10.1 rows 1-2 [ruled 07-30]"
+    severity: error
+    needs: []
+    applies_to: [patch, stain]
+    exempt:
+      # §10.1: "Directional yaw is not jitter and must not be swept up."
+      - "wear_lane (ground_kit.py:1102) · edge_litter (:1130) · edge_break (:1166)"
+      - "patch cut lines (:816/825/836) · gutters (:863/877) — yaw = atan2 from a centreline"
+      - "build_stain_field kinds `grime_band` and `tire` — already forced to yaw 0.0 by the
+         `line is not None` branch (ground_kit.py:1029); they are directional, not free blots"
+    exempt_stain_kinds: [grime_band, tire]
+
+  LINT-9:
+    rule: "bench / lamp / bin setback inside the measured band (M1-M6)"
+    basis: "spec §10.4 — the band comes from T2's archetype panels"
+    severity: warn               # HARD-CODED WARN — see gates.LINT-9 below
+    needs: [walk_edges]
+    applies_to: [bench, lamp, bin]
+
+  LINT-10:
+    rule: "no `jitter=` kwarg > 0 in scene code"
+    basis: "J-11 keep-at-zero params · spec §1.2 [ruled 07-30]"
+    severity: error
+    needs: []
+    # The three builders whose `jitter=0.0` default §1.2 J-11 names by file:line. A scene passing
+    # a non-zero value to one of these is the violation the rule exists for.
+    zero_locked_callees:
+      - name: build_joint_grid
+        where: "ground_kit.py:607"
+      - name: build_gutter_L
+        where: "infra_kit.py:403"
+      - name: gully_positions
+        where: "infra_kit.py:531"
+    # Any OTHER `jitter=` kwarg is reported at warn: §1.2 X2 keeps `jit_scale`-class (size /
+    # interval) variation and abolishes only placement jitter, so these need a per-call
+    # adjudication by the owning scene WP, not a blanket ban.
+    other_callee_severity: warn
+    # J-10: `jit_tint` is explicitly out of scope (§1.2). Never flag it.
+    ignore_kwargs: [tint_jitter, jit_tint]
+
+  # Static companion of LINT-7. §10.4 attributes J-3 (batch1_common jit_yaw/jit_pos) to LINT-7;
+  # the runtime half catches the resulting yaw, this half catches the call site so the abolition
+  # is greppable and permanent (spec §5.3: "T1 -> every scene commit").
+  LINT-7-static:
+    rule: "no bc.jit_yaw / bc.jit_pos call sites in scene code"
+    basis: "J-3 / J-4 · spec §1.2 · corrected count C-2 = 24 calls + 1 comment [ruled 07-30]"
+    severity: error
+    expected_call_sites: 24
+    expected_text_hits: 25
+    expected_comment_site: "sceneN1:154"
+    needs: []
+
+# ---------------------------------------------------------------------------
+# Evidence gates — spec §1.8. `mode: warn` means "prepared, not enforced".
+# Flipping a gate to `hard` is a spec change, not a linter change.
+# ---------------------------------------------------------------------------
+gates:
+  LINT-9:
+    mode: warn
+    blocked_on: "P-7 (§9 parked register) — T2 archetype panels; the M1-M6 measured setback band"
+    band: null                   # populate with {prop: [min_m, max_m]} when the panels land
+    enforce_flag: "--enforce-lint9"
+    note: >
+      §1.8 [ruled 07-30]: "the 6 prop-edge rows ... implementation may prepare, but the enforcement
+      gates HOLD until the evidence-closer agent lands its photo/PDF panels." The linter refuses to
+      enforce with `band: null` even when --enforce-lint9 is passed; it exits 2 (harness error)
+      rather than inventing a threshold.
+  LINT-1:
+    mode: hard
+    note: "PE-1 is [law], not evidence-gated. It is inert only because no scene declares kerb_lines yet."
+
+# ---------------------------------------------------------------------------
+# PLACEMENT declaration contract (spec §10.4)
+# ---------------------------------------------------------------------------
+placement:
+  # The block must be a module-level literal so it is greppable, diffable and readable without
+  # executing the scene. The linter reads it with ast.literal_eval-class evaluation (literals +
+  # dict()/list()/tuple() calls + unary minus). A PLACEMENT that needs the interpreter is reported
+  # as a harness finding, not silently skipped.
+  required_form: "module-level literal assignment"
+  keys:
+    walk_edges: "list of ((x0,y0),(x1,y1)) — walking-zone (보행안전공간) boundary polylines"
+    kerb_lines: "list of ((x0,y0),(x1,y1)) — 보도·차도 경계"
+    shoulder_lines: "list of ((x0,y0),(x1,y1)) — shoulder end, for PE-4 (no-sidewalk case)"
+    anchors: "{name: {face_bearing_deg: float, props: [prim-name regex, ...]}}"
+    routes: "{name: {pts: [(x,y), ...], species: <VEG_SPECIES key>, pitch_m: float}}"
+  missing_severity: warn         # raise to error with --require-placement once WINDOW 3 lands
+
+# ---------------------------------------------------------------------------
+# Prop classification — prim-path patterns.
+#   mode `suffix`  : full-path regex, matched against the prim path tail. Resolved FIRST.
+#   mode `segment` : name regex matched against path segments below the scene root; the
+#                    SHALLOWEST matching segment is the prop-instance root.
+# All patterns are classification only [convention]; none of them is a pass/fail threshold.
+# ---------------------------------------------------------------------------
+props:
+  order: [tree, shrub, patch, stain, bollard, bench, lamp, bin, sign, rack, shelter, planter,
+          cityblock, pavilion, toolbox, sitestack]
+
+  tree:
+    mode: suffix
+    pattern: '/Veg$'
+    require_child_ref: true      # <path>/Veg/Asset must carry a USD reference
+    species_from: '<self>/Asset'
+    note: >
+      Covers BOTH direct build_tree call sites AND build_planter's internal call
+      (scene_common.py:2564 — corrected fact C-16). Measured consequence: scenes the spec §10.2
+      lists as "no build_tree call" still instantiate planter-borne trees. [measured]
+
+  shrub:
+    mode: suffix
+    pattern: '/Shrub/Sh_\d+$'
+    require_child_ref: true
+    species_from: '<self>/Asset'
+
+  patch:
+    mode: suffix
+    pattern: '/Patch/Patch_\d+$'
+    note: "ground_kit.build_patch_field emits <path>/Patch_<i>; the cut-line children are Patch_<i>_Cut<k>."
+  stain:
+    mode: suffix
+    pattern: '/Stain_(?P<kind>tire|oil|water|efflorescence|gum|dirt|grime_band|drip)/(?P=kind)_\d+$'
+
+  bollard:
+    mode: segment
+    pattern: '^(Bollard|BollardLow)(_\w+)?$'
+    # The load-bearing cylinder inside the instance. build_bollard -> the instance prim itself;
+    # build_bollard_std -> /Post; batch1_common.build_bollard_v51 -> /Body.
+    post_suffixes: ['', '/Post', '/Body']
+    ignore_suffixes: ['/Band', '/Cap', '/Tactile', '/MtlBody', '/MtlBand', '/MtlTactile']
+    # Bollard-carrying scenes, corrected fact C-9 (scene18's bollards were removed in v5.1).
+    carrier_set: [scene02, scene03, scene05, scene06, scene08, scene11, scene12, scene13,
+                  scene14, scene16, scene20, scene21, sceneC4, sceneD1, sceneN1, sceneN2,
+                  sceneN3, sceneN4, sceneN5]
+
+  bench:
+    mode: segment
+    pattern: '^(Bench|BenchLow|BenchUp|LowBench|CourtBench|PlazaBench|ShelterBench|AmphiSeat)(_\w+)?$'
+  lamp:
+    mode: segment
+    pattern: '^(Lamp|ParkLamp|PlazaLamp|CorridorLamp|GarageLamp|WallLamp|Streetlight|Lantern|LightC|LightT)(_\w+)?$'
+  bin:
+    mode: segment
+    pattern: '^Bin(_\w+)?$'
+  sign:
+    mode: segment
+    pattern: '^(Sign|SignPost|SignInfo|EntrySign|DockSign|KmSign|BusSign|NamePlate|Placard|HangSign)(_\w+)?$'
+  rack:
+    mode: segment
+    pattern: '^(Rack|BikeRack)(_\w+)?$'
+  shelter:
+    mode: segment
+    pattern: '^(Shelter|Pergola|Colonnade)(_\w+)?$'
+  planter:
+    mode: segment
+    pattern: '^(Planter|PlanterLow|PlazaPlanter|CourtPlanter|RingPlanter|GapPlanter)(_\w+)?$'
+  cityblock:
+    mode: segment
+    pattern: '^City(_\w+)?$'
+  pavilion:
+    mode: segment
+    pattern: '^Pavilion(_\w+)?$'
+  toolbox:
+    mode: segment
+    pattern: '^(ToolBox|Mailbox|BusPole|TempPost)(_\w+)?$'
+  sitestack:
+    mode: segment
+    pattern: '^(Pallet|Carton|Bag|BagPallet|Container|Crate|Reel|Strap|Batten)(_\w+)?$'
+    # One physical stack is emitted as flat sibling prims (Pallet_N1_0_Bot / _S0 / _S1 / _S2 /
+    # _Top). Collapse them onto the stack tag so one authored yaw is one finding. [convention]
+    group_regex: '^(?P<key>(?:Pallet|Carton|Bag|BagPallet|Container|Crate|Reel|Strap|Batten)_[A-Za-z]+\d*)'
+    note: >
+      Yard dressing that carries §10.1's rows 11 and 12 — sceneD1:855 stacked-crate rotz
+      (yaw +- 9 deg) and the fixed off-axis site props sceneD1:153 (-14 deg) / sceneD2:210
+      (-22 deg). Without this class those two abolish-inventory rows are invisible to LINT-7.
+
+  # Sub-paths whose own rotation is exempt and must not be attributed to the enclosing prop.
+  exempt_suffixes:
+    - '/Veg$'                    # §12-15 crown bearing [ruled]
+    - '/Veg/.*'
+    - '/Shrub/.*'                # same generator, same exemption
+  # Prims that LOOK like a prop but are scene-local geometry, recorded so nothing is silently
+  # dropped. The linter lists near-misses under `unclassified` instead of guessing.
+  near_miss_report: true
+
+# ---------------------------------------------------------------------------
+# 「보도 설치 및 관리 지침」 표2.2 — obstacle occupied width, metres [law]
+# Used by LINT-5's derived form. Bands are given as [min, max]; the linter uses `max`
+# (the conservative end) and says so in the finding.
+# ---------------------------------------------------------------------------
+obstacle_widths_m:
+  lamp:      [0.8, 1.0]          # 가로등
+  signal:    [0.9, 1.2]          # 교통신호등 지주
+  sign:      [0.6, 1.8]          # 교통안전표지판
+  postbox:   [1.0, 1.1]          # 우체통
+  phonebox:  [1.2, 1.2]          # 공중전화박스
+  bin:       [0.9, 0.9]          # 휴지통
+  subwayvent: [0.8, 0.8]          # 지하철환기구
+  tree:      [0.9, 1.2]          # 가로수
+  tree_stake: [1.5, 1.5]          # 가로수보호지주
+  newsstand: [1.2, 2.0]          # 신문가판대
+  # Not in 표2.2 — taken from the prop's own measured footprint at run time:
+  bench:     null
+  bollard:   null
+  rack:      null
+
+# ---------------------------------------------------------------------------
+# §10.2 species table — the linter uses it to name what a scene SHOULD carry.
+# Advisory in v1: it is reported, never failed, because assignment is K4(b)'s work package.
+# ---------------------------------------------------------------------------
+species:
+  pass_list:
+    elm: Elm_Sapling
+    oak_pin: Shumard_Oak
+    ash: Fraxinus
+    birch: Gray_Birch
+    poplar: Lombardy_Poplar
+    juniper: Chinese_Juniper
+    fir: Douglas_Fir
+    oak_red: Scarlet_Oak
+    oak_black: Black_Oak
+    spruce: Colorado_Spruce
+  retired: [White_Pine, Yellow_Pine]
+  scene_route:                   # §10.2 route species; `belt` is the physically separate planting
+    scene01: {route: elm}
+    scene03: {route: poplar, belt: oak_black}
+    scene04: {route: oak_red, belt: oak_black}
+    scene05: {route: ash}
+    scene06: {route: oak_pin}
+    scene07: {route: juniper, belt: fir}
+    scene09: {route: birch, belt: oak_black}
+    scene10: {route: oak_red, belt: oak_black}
+    scene11: {route: ash}
+    scene12: {route: poplar}
+    scene13: {route: birch}
+    scene14: {route: ash}
+    scene17: {route: poplar, belt: oak_black}
+    sceneC2: {route: oak_red}
+    sceneD3: {route: oak_pin}
+    sceneN4: {route: elm}
+    sceneN5: {route: ash}
+  no_row: [scene02]              # C-4: scene02's species row is DELETED
+
+# ---------------------------------------------------------------------------
+# §12 do-not-touch — rows the linter must never generate a finding for.
+# ---------------------------------------------------------------------------
+do_not_touch:
+  - id: DNT-2
+    scope: scene17
+    rule: "stairs with no handrail — 한강 제방 practice; cue_railing=False stays"
+  - id: DNT-3
+    scope: scene18
+    rule: "scene18 has no bollards — no carriageway; excluded from the LINT-6 carrier set (C-9)"
+  - id: DNT-4
+    scope: all
+    rule: "equal streetlight spacing is correct — never flag a lamp row for being regular"
+  - id: DNT-6
+    scope: all
+    rule: "do not switch tactile ON; do not add tactile pads under bollards (P-10, P-12).
+           점자블록 is default-OFF by supervisor ruling (§10.3 점형블록 note) — LINT-6 must not
+           demand the 0.3 m dot strip of PE-6."
+  - id: DNT-15
+    scope: all
+    rule: "build_tree's yaw_deg U(0,360), its lean, and jit_tint are exempt from the abolition"
+  - id: DNT-16
+    scope: scene05
+    rule: "seat.arcs values are arc spans in degrees, not yaws (C-30) — never read as a bearing"
+  # Suppression entries: `path_prefix` + `suppress_checks` remove findings the spec has already
+  # adjudicated as correct. Suppression is never silent — the linter prints one INFO row per
+  # (check, scene, id) naming how many findings it withheld and why.
+  - id: DNT-C8
+    scope: scene20
+    path_prefix: "/World/Scene20/Diag"
+    suppress_checks: [LINT-7]
+    rule: >
+      Corrected fact C-8: "scene20 rot=dict(deg=30) is correct". `/Diag` is a
+      scene_common.build_rot_group at 30 deg (scene20:91, :455) — the scene's whole subject is a
+      diagonal plaza extension, so every prim inside the group inherits +30 deg by design. That
+      is scene geometry, not furniture jitter, and LINT-7 must not report it."

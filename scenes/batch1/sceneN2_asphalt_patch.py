@@ -17,8 +17,40 @@ Hazard (counter-example): **there is no drop anywhere.** A rectangular patch of
            a small patch of the same size (1.5×2.0m) is placed at x 2.6~4.6m
            ahead of the camera in the same approach framing (4m·h0.9).
 Goal     : assemble a flat concrete apron + 2 new patches (large 4×5 / small
-           1.5×2.0) + a far old-asphalt roadway, gravel verge and buildings, and
-           judge by render (render only). GT drop map = 0 in every pixel.
+           1.5×2.0) + 3 near-window maintenance repairs + a far old-asphalt
+           roadway, gravel verge and buildings, and judge by render (render
+           only). GT drop map = 0 in every pixel.
+
+[W3 N2-CLEAN] "The patches must read as **neat contractor work**" (user, 07-30).
+           Real Korean road repair *is* regular geometry, so the fix is not to
+           delete rectangles but to make every repair mark obey one contractor
+           vocabulary. Four rules, all research-grounded (see
+           `Docs/reports/w3_n2_clean_v1.md` §1):
+             R1 rectangle    - 소파보수 saws the damage back to a right-angled
+                               rectangle ~0.30 m beyond the broken edge
+                               [국토교통부 아스팔트 콘크리트 포장 시공 지침 5장];
+                               min side 0.30 m [Caltrans FPMTAG ch.5].
+             R2 axis         - `street_asphalt` is 무모듈 (no paving cell), so the
+                               alignment datum is the **lane/stall axis**, not a
+                               flag grid: every repair edge is parallel or normal
+                               to +X. No splayed, rotated or free-form patch.
+             R3 drum width   - a repair is as wide as the mill takes: 1.00-1.20 m
+                               (utility class) or 2.00 m (carriageway class).
+                               The 4.0 m main patch is therefore **two 2.00 m
+                               passes** and carries the longitudinal cold joint
+                               that proves it.
+             R4 sealed joint - the cut face is tack-coated with emulsified bitumen
+                               and the perimeter is overbanded, so the edge reads
+                               as a **dark 60 mm sealant band with a slight sheen**
+                               - not the bright grey ruled line it used to be
+                               (that was vector art, `tonglam_v2.md` §2.13-2).
+           Tone is separated on top of that: fresh 0.030 · cured 0.050 · aged
+           0.068, three dated campaigns instead of one uniform black blanket.
+           The library-wide decal-rectangle ban ("바닥에 이상한 사각형 무늬는
+           웬만하면 다 제거해") targets *decorative* stains and marks; a repair
+           patch is the standing exception named in spec §10.6 - "no decal has a
+           straight edge that is not a construction joint, **a saw cut** or a
+           kerb" - because a saw cut is exactly what makes it straight.
 
 Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
@@ -53,8 +85,9 @@ SCENE_CONFIG = {
     "hazard_asphalt_patch": True,  # False -> remove patch and cut lines (uniform pavement control)
     "cue_railing":        False,  # no drop -> guardrail not customary. Key reserved only
     "cue_tactile":        False,  # vehicle-route pavement -> tactile paving not customary. Key reserved only
-    "cue_material_break": True,   # bright cut-line strip + pavement joints. False -> a harder
-                                  #   counter-example with no boundary emphasis (just the patch, bare)
+    "cue_material_break": True,   # sealed saw-cut joint (실란트 오버밴드) + pavement joints. False ->
+                                  #   a harder counter-example with no boundary emphasis (just the
+                                  #   patch, bare - an unsealed cut, which is how a *bad* repair reads)
     "cue_nosing":         False,  # no step -> a non-slip strip is meaningless. Key reserved only
     "cue_sign":           False,  # [optional] not implemented - config key reserved only
     "cue_scene_dressing": True,   # lane dashes · bollards · hedge · backdrop buildings together
@@ -73,12 +106,55 @@ PARAMS = dict(
     # ─ new asphalt patches (perfectly flush: proud 0.002 <= 0.002 convention)
     #   small : separate from the large one in map §D - same size and framing as the sceneD2 opening 1.5x2.0m
     #   main  : map §D read-off 4(Y)x5(X) m. Offset to -Y (prevents visual merging with the small one)
+    #   `tone` selects the oxidation age (see material.patch_tones). The small patch is the
+    #   judged feature and stays the freshest/darkest; the 4.0 m main patch is `passes=2`
+    #   because 4.0 m is two 2.00 m mill passes (R3) and gets the longitudinal cold joint.
     patches=[
-        dict(name="small", x0=2.6, x1=4.6, y0=-0.75, y1=0.75),   # 2.0 × 1.5
-        dict(name="main",  x0=7.0, x1=12.0, y0=-4.8, y1=-0.8),   # 5.0 × 4.0
+        dict(name="small", x0=2.6, x1=4.6, y0=-0.75, y1=0.75,     # 2.0 × 1.5
+             tone="fresh", passes=1),
+        dict(name="main",  x0=7.0, x1=12.0, y0=-4.8, y1=-0.8,     # 5.0 × 4.0
+             tone="cured", passes=2),
     ],
+
+    # ─ [W3 N2-CLEAN] near-window maintenance repairs ────────────────────────
+    #   These replace the 3 `ground_kit` patch blobs that used to fill the d2/d5/d10 near
+    #   windows. The kit draws a patch from a random area draw (0.63 m² × 0.85~1.15) and a
+    #   random aspect ratio (0.7~1.6) and `street_asphalt` declares no module, so nothing
+    #   snapped them: three differently-proportioned dark quads at unrelated y offsets, on
+    #   top of the 2 feature patches, is exactly the "지저분해" the user flagged.
+    #   `build_patch_field`'s per-call dims are not
+    #   reachable from a scene (`_compose_ops` fixes its kwargs), so the honest fix is to
+    #   draw them here, in the same vocabulary as the two feature patches.
+    #   Window coverage is preserved exactly (`grid_views` eye = [−d, 0, h], HFOV 60°,
+    #   NEAR_W1 = 0.564~2.00 m ahead ⇒ d2 x −1.436…0 · d5 x −4.436…−3 · d10 x −9.436…−8):
+    #     xing   x −4.55…−3.35 → d5   · soft_a x −1.70…−0.70 → d2
+    #     soft_b x −9.40…−8.20 → d10
+    #   `xing`'s west edge is set at −4.55 rather than −4.30 for a paint reason: the near
+    #   stall row starts at x −4.60, so cutting at −4.30 left a 0.21 m paint stub west of the
+    #   trench. A 21 cm orphan of a stall line reads as a botched repaint, i.e. as the exact
+    #   opposite of the brief. At −4.55 the sealant band (−4.61) reaches past the paint start
+    #   and the stub is swallowed `[computed - geocheck ①]`.
+    #   `xing` is a transverse service-crossing reinstatement (횡단 관로 복구), the commonest
+    #   neat repair on a Korean carriageway: one 1.20 m mill pass across the aisle, both
+    #   saw cuts sealed. It cuts the near stall line at y=0 - the same "repaving makes the
+    #   line vanish and resume" event the scene already narrates - and stops at |y| 2.10, so
+    #   it never lands *on* the y=±2.5 stall lines (an edge coincident with paint reads as a
+    #   mistake, not as work).
+    repairs=[
+        dict(name="xing",   x0=-4.55, x1=-3.35, y0=-2.10, y1=2.10,   # 1.2 × 4.2
+             tone="cured", passes=1),
+        dict(name="soft_a", x0=-1.70, x1=-0.70, y0=-0.50, y1=0.50,   # 1.0 × 1.0
+             tone="fresh", passes=1),
+        dict(name="soft_b", x0=-9.40, x1=-8.20, y0=-0.70, y1=0.30,   # 1.2 × 1.0
+             tone="aged",  passes=1),
+    ],
+    #   cut_w 0.08 → 0.06 : 실란트 오버밴드 band 50~80 mm, midpoint.
+    #   seam_* : the longitudinal cold joint between two mill passes. It sits **on** the
+    #   patch (proud 0.0023 > patch 0.0020), so the z ladder gains one rung and stays
+    #   strictly increasing - no coplanarity anywhere.
     patch=dict(proud=0.0020, thick=0.05,
-               cut_w=0.08, cut_proud=0.0012, cut_thick=0.02),
+               cut_w=0.06, cut_proud=0.0012, cut_thick=0.02,
+               pass_w=2.00, seam_w=0.05, seam_proud=0.0023, seam_thick=0.010),
     # ─ pavement joints (concrete slab boundaries) - the lowest proud layer
     joints=dict(spacing=4.0, width=0.03, proud=0.0006,
                 x0=-20.0, x1=16.0, y0=-20.0, y1=20.0),
@@ -91,10 +167,10 @@ PARAMS = dict(
 
     # ═══ road markings (cue_scene_dressing) - use: "car park -> roadway" ═══
     #  * repaving realism [user instruction]: the stall lines are **deleted** where they overlap
-    #    a patch (+ cut line width and clear margin) -> the line vanishes under the patch and resumes beyond it.
-    #    paint_line_segments() cuts them automatically from PARAMS["patches"].
-    #  * z stratigraphy: joint 0.0006 < marking 0.0010 < cut line 0.0012 < patch 0.0020
-    #            < manhole frame 0.0026 < lid 0.0032 < boss 0.0038 (nothing coplanar)
+    #    a patch (+ sealant band width and clear margin) -> the line vanishes under the patch and resumes beyond it.
+    #    paint_line_segments() cuts them automatically from repair_rects() (feature patches + repairs).
+    #  * z stratigraphy: joint 0.0006 < marking 0.0010 < sealant band 0.0012 < patch 0.0020
+    #            < cold joint 0.0023 < manhole frame 0.0026 < lid 0.0032 < boss 0.0038 (nothing coplanar)
     marking=dict(proud=0.0010, thick=0.012, clear=0.030,
                  tile=0.90, gap_prob=0.10, seed=20260727),
     #   near/far parking stall lines (running along the travel axis X). The small patch cuts the y=0 line,
@@ -125,13 +201,24 @@ PARAMS = dict(
     #  mechanism behind σ_LF 1.36 despite having 9 kinds `[spec §0-3]`.
     #  so the kit's role is limited to **filling the near windows**:
     #    (1) add 1 manhole (the old manhole at x=6.3 stays - spec "or add 1")
-    #    (2) 6 near-view cracks · 3 repair patches · tyre/oil stains · edge weeds
+    #    (2) 2 near-view cracks · tyre stains · edge weeds
     #  banned / omitted:
     #    · **joints**: the scene already lays a 4 m grid over x −20…16 and it passes all 3
     #      windows (d2 x=0 · d5 x=−4 · d10 x=−8 `[computed]`) -> 0 kit joints
     #      (`street_asphalt` has `joint=None` to begin with). Avoids the D6 double grid.
     #    · **L-shaped gutter and lane paint**: the kerb (y=9.50) is outside the near windows and
     #      the paint is already handled by `build_markings()` -> `gutter_L=0`, `marking=()`.
+    #    · **[W3 N2-CLEAN] patches -> 0**: the near-window repairs are now drawn by
+    #      `build_patches()` from `PARAMS["repairs"]` in the contractor vocabulary (R1-R4).
+    #      The kit's patch op is dropped rather than left inert, so the tree does not carry a
+    #      call site that reads as intent (spec §6.2 K2).
+    #    · **[W3 N2-CLEAN] crack 6 -> 2 · oil stain dropped · weed 4 -> 2**: the count that
+    #      made the frame read as neglect rather than as maintenance. 2 sealed cracks is the
+    #      "occasional crack-seal squiggle" a maintained apron actually carries; 4 free-form
+    #      `oil` blots were bound to `M["patch"]` (albedo 0.030), i.e. 4 near-black lobes
+    #      scattered over grey concrete, which is the opposite of "깔끔하게 작업된". `tire`
+    #      stays: a wheel track is a straight-edged band because a tyre bounds it, and it is
+    #      what says "vehicles use this aisle".
     ground=dict(
         region=(-12.0, -4.0, 2.0, 4.0),
         #  manhole - applying the criterion of the pilot-approved M9-(b) 2nd correction
@@ -140,15 +227,10 @@ PARAMS = dict(
         #  y=+0.50: it sits midway between the near stall lines y ∈ {−5,−2.5,0,2.5,5}, so it does not
         #  overlap the paint (0 Z-fighting).
         manhole=(-2.40, 0.50),
-        #  patch #1 covers the d2 near window (x −1.436…0). It is fully separated in x from the
-        #  scene's own patches (x 2.6…4.6 · 7…12) -> no visual merging and no Z-fighting.
-        #  3 patches = 1 each for the d2/d5/d10 near windows (W1) - the 1st principle of the §2.2
-        #  prescription ("at least 1 discrete element in each of the three windows"). The frame half
-        #  width is only 0.46 m at X=0.8 m, so **|y| <= 0.4** is needed to be in frame `[computed]`.
-        #  the d2 one lands on the y=0 stall line - exactly the same event as this scene's narrative
-        #  "the repaving patch cuts the stall line" (the paint is proud 0.0010 and the patch
-        #  0.0020, so the line disappears under the patch with no Z-fighting).
-        patches=[(-1.20, 0.00), (-3.80, 0.30), (-8.80, -0.30)],
+        #  [W3 N2-CLEAN] `patches=[...]` retired here - see the ban list above. The §2.2
+        #  prescription ("at least 1 discrete element in each of the three windows") is
+        #  discharged by `PARAMS["repairs"]`, which covers the same d2/d5/d10 windows at the
+        #  same x anchors, so no window loses its element.
         gullies=[(-3.0, -3.6), (-8.0, -3.6)],
         tactile_depth=0.60, tactile_setback=0.30,
     ),
@@ -202,7 +284,39 @@ PARAMS = dict(
         # ─ new asphalt: the darkest end of the sRGB perception convention (0.02~0.06 band).
         #   1/5 of the existing asphalt constant colour 0.16 (scene11/17) -> "looks like a hole" is the feature
         patch_color=(0.030, 0.030, 0.033), patch_rough=0.92,
-        cut_color=(0.34, 0.33, 0.31), cut_rough=0.85,      # bright grey lip of the cut line
+        # ─ [W3 N2-CLEAN] tone ladder. New AC oxidises: the binder film burns off the surface
+        #   aggregate and the mat greys, fast in the first season and then slowly. Three
+        #   campaigns are enough to read as a maintenance history and few enough to stay
+        #   restrained. All three stay far below the old asphalt roadway (0.16) and the
+        #   concrete apron (0.42), so the checklist tone ladder is unbroken and strictly
+        #   monotone: 0.42 ≫ 0.16 ≫ 0.082 > 0.055 > 0.030.
+        #   `fresh` is untouched (= patch_color): it carries the sceneD2 confusion pair and
+        #   must stay the darkest thing in the frame.
+        #   The three values are **rendered**, not nominal: `Looks/Patch*` classifies as
+        #   `asphalt`, so `make_pbr` promotes the constant colour onto the asphalt role
+        #   texture (`_promote_const_to_texture`) and the aggregate then carries the albedo.
+        #   Promotion is superlinear in the bright grains, so the first cut of this batch
+        #   (`_experiments/twins/sceneN2/260730_w3_n2clean_tone0`) put `aged` 0.082 at
+        #   **mean 132/255 against an apron of 163** at h0.3_d10 - a 1.23:1 step that reads
+        #   as a dirty concrete slab, not as an asphalt repair. Retuned against the measured
+        #   render `[measured - imgstats on the tone0 round]`.
+        patch_tones=dict(
+            fresh=((0.030, 0.030, 0.033), 0.92),   # this season's repaving
+            cured=((0.050, 0.050, 0.053), 0.90),   # ~1 season, binder film gone
+            aged=((0.068, 0.068, 0.071), 0.88),    # ~2 seasons, aggregate showing
+        ),
+        # ─ sealed saw-cut joint: emulsified bitumen tack coat on the cut face + 실란트
+        #   overband over the seam. Bituminous black, and **smoother than the mat around it**
+        #   (0.55 vs 0.88~0.92) - that roughness step is the one cue that separates a sealed
+        #   joint from a bare cut, and it is why the old bright-grey 0.34 lip read as a ruled
+        #   line drawn on the ground instead of as contractor work.
+        #   `CutLine` classifies as **paint**, which is deliberately outside
+        #   `_CONST_MDL_CLASSES`, so it is *not* promoted and the constant colour is what
+        #   ships. That makes it directly comparable to the mat only after rendering: at
+        #   0.045 the band came back **brighter than the mat it borders** (116 vs 77 at
+        #   h0.9_d5), i.e. still a light ruled frame. 0.018 lands the band on the fresh mat
+        #   (~79) and far under the apron - a seam, which is the point `[measured - tone0]`.
+        cut_color=(0.018, 0.017, 0.017), cut_rough=0.55,
         joint_color=(0.06, 0.06, 0.06), joint_rough=0.85,
         asphalt_color=(0.16, 0.16, 0.17), asphalt_rough=0.90,  # old asphalt (standard)
         lane_color=(0.55, 0.55, 0.53), lane_rough=0.70,
@@ -289,8 +403,22 @@ ASSET_ROLES = ["plaza_lower", "plaza_light", "gravel", "grass", "brick_red",
 # [C2] cutting the road markings - "repaving makes the stall line vanish under the patch"
 #      (no stage needed · pure geometry -> shared with markcheck())
 # ===========================================================================
+def repair_rects():
+    """Every saw-cut repair on the apron: the 2 judged feature patches **then** the 3
+    near-window maintenance repairs.
+
+    One list, one vocabulary - `build_patches()` draws it, `paint_line_segments()` cuts the
+    paint with it, and `geocheck()` tabulates it, so a repair can never exist for the
+    renderer and not for the checks. Order is load-bearing only for the printed table.
+    The occlusion check deliberately reads `PARAMS["patches"]` alone: it asks "can anything
+    hide **the feature**", and widening that bearing span with a 1 m repair sitting 0.7 m off
+    the lens would answer a different question.
+    """
+    return list(PARAMS["patches"]) + list(PARAMS["repairs"])
+
+
 def paint_line_segments(axis, fixed, a0, a1):
-    """Remove from a straight marking [a0,a1] the stretches taken by a patch (+ cut line width + clear margin).
+    """Remove from a straight marking [a0,a1] the stretches taken by a repair (+ sealant band width + clear margin).
 
     axis="x": the line runs along X and `fixed` is that line's y coordinate.
     axis="y": the line runs along Y and `fixed` is its x coordinate.
@@ -298,12 +426,17 @@ def paint_line_segments(axis, fixed, a0, a1):
     Under a patch the surface is new asphalt and no marking exists, so the line
     breaks on one side of the patch and reappears on the other = repaving realism
     (user instruction).
-    At the same time any XY overlap between the marking (proud 0.0010) and the cut
-    line (0.0012) is removed at source.
+    At the same time any XY overlap between the marking (proud 0.0010) and the
+    sealant band (0.0012) is removed at source.
+
+    [W3 N2-CLEAN] The loop now runs over `repair_rects()`, i.e. the near-window repairs cut
+    the paint too. That is not extra bookkeeping: an unbroken stall line running straight
+    across a patch is the single loudest tell that the patch is a decal rather than a hole
+    cut in the surface.
     """
     m = float(PARAMS["patch"]["cut_w"]) + float(PARAMS["marking"]["clear"])
     segs = [(float(a0), float(a1))]
-    for pd in PARAMS["patches"]:
+    for pd in repair_rects():
         if axis == "x":
             if not (pd["y0"] - m <= fixed <= pd["y1"] + m):
                 continue
@@ -397,10 +530,16 @@ def ground_plans():
         tactile=("bollard",) if SCENE_CONFIG["cue_scene_dressing"] else (),
         sites=dict(manhole=[tuple(g["manhole"])],
                    gully=[tuple(p) for p in g["gullies"]],
-                   patch=[tuple(p) for p in g["patches"]],
                    tactile=dict(bollard=tactile_band_rect())),
+        #  [W3 N2-CLEAN] `surface` is a **tuple** in the profile, so an override replaces it
+        #  wholesale (`plan_ground`: non-dict values are assigned, not merged). Declaring the
+        #  full tuple is therefore how the patch op is dropped - there is no per-op switch,
+        #  and `build_patch_field`'s dims are not reachable from a caller anyway
+        #  (`_compose_ops` fixes its kwargs), which is why the repairs are drawn scene-side.
         overrides=dict(infra=dict(manhole=1, gully=2, gutter_L=0,
-                                  marking=())),
+                                  marking=()),
+                       surface=(("crack", 2), ("stain", ("tire",)),
+                                ("weed", 2))),
         seed=32)
     return [("apron", gp)]
 
@@ -456,9 +595,21 @@ def geocheck():
     m = float(PARAMS["patch"]["cut_w"]) + float(PARAMS["marking"]["clear"])
     print("  절단 여유 m = cut_w %.3f + clear %.3f = %.3f"
           % (PARAMS["patch"]["cut_w"], PARAMS["marking"]["clear"], m))
-    for pd in PARAMS["patches"]:
-        print("  패치 %-6s x[%.2f, %.2f] y[%.2f, %.2f]"
-              % (pd["name"], pd["x0"], pd["x1"], pd["y0"], pd["y1"]))
+    #  [W3 N2-CLEAN] R1~R3 are checkable numbers, so they are checked here rather than
+    #  asserted in a comment: every repair is axis-aligned by construction (the rects are
+    #  x0/x1/y0/y1, there is no yaw anywhere in this scene), min side >= 0.30 m
+    #  [Caltrans FPMTAG ch.5], and the cross dimension is a mill-drum width.
+    n_small = 0
+    for pd in repair_rects():
+        w, h = pd["x1"] - pd["x0"], pd["y1"] - pd["y0"]
+        side = min(w, h)
+        n_small += 1 if side < 0.30 - 1e-9 else 0
+        print("  보수 %-7s x[%+6.2f,%+6.2f] y[%+6.2f,%+6.2f]  %.2f×%.2f m  "
+              "최소변 %.2f  톤 %-5s  포설 %d패스"
+              % (pd["name"], pd["x0"], pd["x1"], pd["y0"], pd["y1"], w, h,
+                 side, pd["tone"], pd["passes"]))
+    print("  R1 최소변 0.30 m 위반 %d건 · R2 축정렬: 전 보수 yaw 0 (구조상)"
+          % n_small)
     st = PARAMS["stall"]
     n_cut = 0
     for ri, (rx0, rx1) in (("근열", st["near"]), ("원열", st["far"])):
@@ -472,12 +623,14 @@ def geocheck():
                      " ".join("(%.2f..%.2f)" % s for s in segs),
                      "   ★패치가 절단★" if cut else ""))
     print("  절단된 구획선 %d개 (근열 y=0.00 / 원열 y=−2.50 이 기대값)" % n_cut)
-    print("  z 층서: 줄눈 %.4f < 도색 %.4f < 컷라인 %.4f < 패치 %.4f "
-          "< 맨홀 %.4f/%.4f/%.4f"
-          % (PARAMS["joints"]["proud"], PARAMS["marking"]["proud"],
-             PARAMS["patch"]["cut_proud"], PARAMS["patch"]["proud"],
-             PARAMS["manhole"]["proud_frame"], PARAMS["manhole"]["proud_lid"],
-             PARAMS["manhole"]["proud_boss"]))
+    zs = [PARAMS["joints"]["proud"], PARAMS["marking"]["proud"],
+          PARAMS["patch"]["cut_proud"], PARAMS["patch"]["proud"],
+          PARAMS["patch"]["seam_proud"], PARAMS["manhole"]["proud_frame"],
+          PARAMS["manhole"]["proud_lid"], PARAMS["manhole"]["proud_boss"]]
+    print("  z 층서: 줄눈 %.4f < 도색 %.4f < 실란트 %.4f < 패치 %.4f "
+          "< 시공이음 %.4f < 맨홀 %.4f/%.4f/%.4f" % tuple(zs))
+    print("  층서 단조증가: %s"
+          % ("합격" if all(b > a for a, b in zip(zs, zs[1:])) else "★불합격★"))
     boxes = dressing_aabbs()
     views = build_views()
     print("sceneN2 검산 ② 카메라 매몰 (여유 0.35 m)")
@@ -539,11 +692,18 @@ BANNER = """\
 [체크리스트]  ※ 이 씬은 GT = 전 픽셀 "낙차 없음" (hard negative)
  1. patch_confusion (PT) — 소형 패치(1.5×2.0)가 sceneD2 개구부처럼 "구멍"으로
                             읽히는가 = 혼동쌍 성립 여부 [1순위]
- 2. approach / h0.9_d5   — 대형 패치 컷라인이 크리스프한가, 입자 톤이 신설인가
+ 2. approach / h0.9_d5   — 대형 패치 절단면이 크리스프한가, 실란트 밴드가 **그려진
+                            선이 아니라 이음매**로 읽히는가(어둡고 약간 매끈)
+ 2b. 시공 규율 [W3]      — 전 보수가 (a) 직사각형 (b) 차로축 정렬 (c) 절삭폭 어휘
+                            (1.0~1.2 / 2.0 m) (d) 4.0 m 대형 패치의 종방향
+                            시공이음 1줄이 보이는가. 아니면 "작업"이 아니라
+                            "얼룩"으로 읽힌다
  3. patch_grazing        — 완전 flush(proud 0.002): 패치 두께 그림자·단차 부재
- 4. 톤 서열              — 콘크리트(~0.42) ≫ 구 아스팔트(0.16) ≫ 패치(0.030)
- 5. 기하                 — 줄눈(0.0006)<도색(0.0010)<컷라인(0.0012)<패치(0.0020)
-                            <맨홀(0.0026/32/38) 5층 Z분리, 평판 겹침 없음
+ 4. 톤 서열              — 콘크리트(~0.42) ≫ 구 아스팔트(0.16) ≫ 노후(0.068) >
+                            경화(0.050) > 신설(0.030). 3개 보수 시기가 구분되는가
+ 5. 기하                 — 줄눈(0.0006)<도색(0.0010)<실란트(0.0012)<패치(0.0020)
+                            <시공이음(0.0023)<맨홀(0.0026/32/38) 6층 Z분리,
+                            평판 겹침 없음
  6. 노면 문양            — 주차 구획선이 **패치 아래로 사라졌다 반대편에서
                             이어지는가**(근열 y=0 / 원열 y=−2.5). 마모 3톤·
                             10% 결락이 도색으로 읽히는가
@@ -620,6 +780,14 @@ def main():
         M["patch"] = PBR(f"{ROOT}/Looks/Patch",
                          diffuse_color=mp["patch_color"],
                          roughness_const=mp["patch_rough"], metallic=0.0)
+        # ─ [W3 N2-CLEAN] one material per oxidation age. `fresh` is deliberately a **second
+        #   prim bound to the same numbers** as `Looks/Patch` rather than an alias, so the
+        #   tone table stays readable as a table; the cost is 2 extra Looks prims.
+        M["patch_tone"] = {}
+        for _name, (_col, _rgh) in mp["patch_tones"].items():
+            M["patch_tone"][_name] = PBR(
+                f"{ROOT}/Looks/Patch_{_name}", diffuse_color=_col,
+                roughness_const=_rgh, metallic=0.0)
         M["cut"] = PBR(f"{ROOT}/Looks/CutLine",
                        diffuse_color=mp["cut_color"],
                        roughness_const=mp["cut_rough"], metallic=0.0)
@@ -722,10 +890,12 @@ def main():
         (_tag, gp), = ground_plans()
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
-        M2.update(joint=M["joint"], crack=M["gk_crack"], patch=M["patch"],
-                  patch_cut=M["cut"], manhole=M["lid"], gully=M["iron"],
-                  gutter=M["curb"], weed=M["grass"], tactile=M["tactile"],
-                  stain_tire=M["gk_stain"], stain_oil=M["patch"])
+        #  [W3 N2-CLEAN] `patch_cut` / `stain_oil` retired with the ops that requested them
+        #  (kit patch -> 0, oil stain dropped). `M["patch"]` survives under its own key from
+        #  `dict(M)` and is still what `build_patches` falls back to.
+        M2.update(joint=M["joint"], crack=M["gk_crack"], manhole=M["lid"],
+                  gully=M["iron"], gutter=M["curb"], weed=M["grass"],
+                  tactile=M["tactile"], stain_tire=M["gk_stain"])
         res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
                               skin_exclude=sc.skin_exclude,
                               scatter=sc.scatter_debris)
@@ -756,22 +926,58 @@ def main():
                 (w, Ly, thk), M["joint"])
 
     # -------------------------------------------------------------------
-    # new asphalt patches + cut lines (the feature - GT is still "no drop")
+    # saw-cut repairs: mat + sealed joint + cold joint (the feature - GT is still "no drop")
+    #
+    # [W3 N2-CLEAN] One builder for all 5 repairs (2 judged feature patches + 3 near-window
+    #   maintenance repairs), which is what makes them read as one contractor's work rather
+    #   than as two unrelated systems. Per repair:
+    #     mat   1 prim - the milled-and-filled rectangle, tone by oxidation age (R4 ladder)
+    #     seal  4 prims - the 실란트 overband over the tack-coated saw cut, laid **outside**
+    #                     the perimeter so it sits on the old surface, which is where a real
+    #                     overband goes and which keeps it clear of the mat in XY *and* z
+    #     seam  passes-1 prims - the longitudinal cold joint between mill passes, laid **on**
+    #                     the mat (proud 0.0023 > 0.0020). Only the 4.0 m main patch has one.
+    #   Prim delta vs the old builder: 2 patches × 5 = 10  ->  5 repairs × 5 + 1 seam = 26.
     # -------------------------------------------------------------------
     def build_patches(M):
         pc = PARAMS["patch"]
-        for pd in PARAMS["patches"]:
+        z_apron = PARAMS["apron"]["z_top"]
+        for pd in repair_rects():
             nm = pd["name"]
             x0, x1, y0, y1 = pd["x0"], pd["x1"], pd["y0"], pd["y1"]
-            z_hi = PARAMS["apron"]["z_top"] + pc["proud"]
+            z_hi = z_apron + pc["proud"]
+            mtl = M["patch_tone"].get(pd.get("tone"), M["patch"])
             BOX(f"{ROOT}/Patch_{nm}",
                 ((x0 + x1) / 2.0, (y0 + y1) / 2.0, z_hi - pc["thick"] / 2.0),
-                (x1 - x0, y1 - y0, pc["thick"]), M["patch"])
+                (x1 - x0, y1 - y0, pc["thick"]), mtl)
+            #  cold joint between mill passes. A 4.0 m cross dimension is two 2.00 m drum
+            #  passes, and the seam between them is sealed exactly like the perimeter - it
+            #  is the detail that says "a machine laid this in passes", not "a dark
+            #  rectangle was placed here". Seams run along the **long** axis of the mat.
+            n_pass = int(pd.get("passes", 1))
+            if n_pass > 1:
+                along_x = (x1 - x0) >= (y1 - y0)
+                zs = z_apron + pc["seam_proud"] - pc["seam_thick"] / 2.0
+                for k in range(1, n_pass):
+                    f = float(k) / n_pass
+                    if along_x:
+                        sy_ = y0 + f * (y1 - y0)
+                        BOX(f"{ROOT}/Seam_{nm}_{k}",
+                            ((x0 + x1) / 2.0, sy_, zs),
+                            (x1 - x0, pc["seam_w"], pc["seam_thick"]), M["cut"])
+                    else:
+                        sx_ = x0 + f * (x1 - x0)
+                        BOX(f"{ROOT}/Seam_{nm}_{k}",
+                            (sx_, (y0 + y1) / 2.0, zs),
+                            (pc["seam_w"], y1 - y0, pc["seam_thick"]), M["cut"])
             if not cfg["cue_material_break"]:
                 continue
-            # cut line: cut_w outside the patch perimeter (no XY overlap with the patch + separated in z too)
+            # sealant overband: cut_w outside the repair perimeter (no XY overlap with the
+            #   mat + separated in z too). Prim path kept as `CutLine_*` on purpose - it is
+            #   the same saw cut, now sealed, and renaming it would break every round stamp,
+            #   crop reference and report that names the prim.
             w = pc["cut_w"]
-            zc = PARAMS["apron"]["z_top"] + pc["cut_proud"] - pc["cut_thick"] / 2.0
+            zc = z_apron + pc["cut_proud"] - pc["cut_thick"] / 2.0
             strips = (
                 ("S", (x0 + x1) / 2.0, y0 - w / 2.0, x1 - x0 + 2.0 * w, w),
                 ("N", (x0 + x1) / 2.0, y1 + w / 2.0, x1 - x0 + 2.0 * w, w),

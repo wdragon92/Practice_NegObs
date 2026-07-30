@@ -471,7 +471,19 @@ pre-existing), **LINT-9 1 BLOCKED** (P-7 parked), **LINT-1/2/3/4/5/7 + PLACEMENT
 
 ---
 
-## 10. GT ledger — what this workflow wrote
+## 10. Commits
+
+| commit | pathspec |
+|---|---|
+| **`6edce66`** | `scenes/main/scene02_underpass.py` · `Docs/reports/w3_cb7_v1.md` · `Docs/reports/regr_260731_w3_cb7{,_pre}.json` · `Docs/reports/_w3_cb7_crops/` — the **one** CB-7 commit that items (1)–(5) of the brief land in |
+| **`b7abe89`** | `Docs/audit_v4/gt_changes_w3.md` — the GT-1/2/3 landing records, split off because §4 records the commit hash and because that file is shared with the ledger owner (the `dc68e74` precedent does the same) |
+
+Neither commit touches `scenes/main/scene18*` or `assets/coastal` (`git diff --name-only
+dc68e74..HEAD` over those globs returns nothing), nor any kit, nor any other scene.
+
+---
+
+## 11. GT ledger — what this workflow wrote
 
 `Docs/audit_v4/gt_changes_w3.md` §3 status `OPEN → LANDED` on **GT-1, GT-2, GT-3 only**, and §4
 landing records filled with the commands actually run and their results. No other row, section or

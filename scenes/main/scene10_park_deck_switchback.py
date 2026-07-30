@@ -432,7 +432,11 @@ PARAMS = dict(
     #     edge; its south face at y −2.60 is the scarp down to the lower park and is the
     #     unguarded drop the scene's hazard cue (4) names, now **1.0 m outboard of the
     #     deck** instead of 4 m away past a wall.
-    corridor=dict(y0=-2.60, y1=8.00, thick=1.60),
+    #   `thick` must reach **below the lower park top (−6.62)** at the corridor's highest
+    #   station, or the hillside is hollow and the `from_below` cut looks straight through
+    #   it to the sky — measured on the 260731_w3_s10 pilot, a 4.8 m see-through band at
+    #   the head. Highest corridor top is −0.255, so 7.00 m of body clears it with margin.
+    corridor=dict(y0=-2.60, y1=8.00, thick=7.00),
 
     # --- [S3-11] season: **late autumn (만추), leaf-off**, pinned -------------------
     #   G10 reads leafless canopy + overwintered matted brown litter + a first flush of

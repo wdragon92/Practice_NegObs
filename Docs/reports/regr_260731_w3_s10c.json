@@ -1,0 +1,594 @@
+{
+  "pairs": [
+    {
+      "scene": "scene10",
+      "before": "look_check/scene10/260731_w3_s10",
+      "after": "look_check/scene10/260731_w3_s10c"
+    }
+  ],
+  "results": [
+    {
+      "scene": "scene10",
+      "view": "broken_rail",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "CAPTURE",
+          "msg": "manifest ok=false — 캡처 폴링 조기 종료(파일은 정상인 경우가 대부분)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 131.70091247558594,
+        "after_dark": 8.390046296296298,
+        "after_dark_near": 3.2691936728395063,
+        "after_clip": 0.0,
+        "after_white": 0.10250289351851852,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 131.43075561523438,
+        "before_dark": 8.574170524691358,
+        "before_dark_near": 3.3994020061728394,
+        "before_clip": 0.0,
+        "before_white": 0.09736689814814815,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.005135995370370364,
+        "diff_mean": 0.8389922380447388,
+        "diff_frac": 0.8680716306584362,
+        "d_mean": 0.2701568603515625,
+        "d_dark": -0.18412422839505993,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 1.6025222060757756
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "from_below",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "CAPTURE",
+          "msg": "manifest ok=false — 캡처 폴링 조기 종료(파일은 정상인 경우가 대부분)"
+        },
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 56 % (최대 편차 88/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 135.8621826171875,
+        "after_dark": 4.994984567901235,
+        "after_dark_near": 7.15844425154321,
+        "after_clip": 0.0,
+        "after_white": 0.955150462962963,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 117.21792602539062,
+        "before_dark": 7.3044463734567895,
+        "before_dark_near": 8.223861882716049,
+        "before_clip": 0.0,
+        "before_white": 0.3862847222222222,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.5688657407407408,
+        "diff_mean": 21.517200469970703,
+        "diff_frac": 32.70399305555556,
+        "d_mean": 18.644256591796875,
+        "d_dark": -2.3094618055555545,
+        "newdark": 0.0277295524691358,
+        "newdark_near": 0.017959770114942528,
+        "newdark_blob": 0.004822530864197531,
+        "blk_shift": 56.25,
+        "blk_max": 87.53846615836943
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "leaf_edge",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 136.04217529296875,
+        "after_dark": 1.8953510802469136,
+        "after_dark_near": 2.13843074845679,
+        "after_clip": 0.0,
+        "after_white": 0.4114583333333333,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 135.279541015625,
+        "before_dark": 1.9757908950617284,
+        "before_dark_near": 2.193045910493827,
+        "before_clip": 0.0,
+        "before_white": 0.39937789351851855,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.01208043981481477,
+        "diff_mean": 1.1249182224273682,
+        "diff_frac": 0.9527231224279835,
+        "d_mean": 0.76263427734375,
+        "d_dark": -0.08043981481481488,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.6944444444444444,
+        "blk_max": 16.066417249513762
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "preset_h0.3_d10",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 4 % (최대 편차 65/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 127.45703125,
+        "after_dark": 0.6869695216049383,
+        "after_dark_near": 0.03845968364197531,
+        "after_clip": 0.0,
+        "after_white": 0.21498842592592593,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 125.50283813476562,
+        "before_dark": 1.2174479166666667,
+        "before_dark_near": 0.040268132716049385,
+        "before_clip": 0.0,
+        "before_white": 0.21317997685185186,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.00180844907407407,
+        "diff_mean": 2.9575607776641846,
+        "diff_frac": 5.421585648148148,
+        "d_mean": 1.954193115234375,
+        "d_dark": -0.5304783950617284,
+        "newdark": 0.0012056327160493826,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 4.166666666666666,
+        "blk_max": 64.53960685502963,
+        "gz_ver": "v2.1",
+        "gz_spec": 2.799597550813641,
+        "gz_dE": 3.1979451376942967,
+        "gz_dN": 0.39834758688065586,
+        "gz_agree": 0.621875,
+        "gz_row": 137,
+        "gz_band": [
+          124.4,
+          177.4
+        ],
+        "gz_haz_row": 149.0,
+        "gz_d": 10.0,
+        "gz_band_mu": 107.31829319827261,
+        "gz_step_b": 14.78,
+        "gz_step_a": 16.09,
+        "gz_step_ratio": 1.089,
+        "gz_step_off": 12,
+        "gz_step_dom": 5.03
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "preset_h0.3_d2",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 145.79486083984375,
+        "after_dark": 0.5348668981481481,
+        "after_dark_near": 0.06257233796296297,
+        "after_clip": 0.0,
+        "after_white": 0.6856192129629629,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 145.1412353515625,
+        "before_dark": 0.6644965277777778,
+        "before_dark_near": 0.06281346450617284,
+        "before_clip": 0.0,
+        "before_white": 0.6638454861111112,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.02177372685185175,
+        "diff_mean": 0.9994208216667175,
+        "diff_frac": 1.6963895318930042,
+        "d_mean": 0.65362548828125,
+        "d_dark": -0.12962962962962965,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.6944444444444444,
+        "blk_max": 16.903683866216085,
+        "gz_ver": "v2.1",
+        "gz_spec": -0.8994526697429999,
+        "gz_dE": 1.6341241540069777,
+        "gz_dN": 2.5335768237499776,
+        "gz_agree": 0.6447916666666667,
+        "gz_row": 250,
+        "gz_band": [
+          169.6,
+          312.0
+        ],
+        "gz_haz_row": 248.7,
+        "gz_d": 2.0,
+        "gz_band_mu": 121.43240356445312,
+        "gz_step_b": 50.4,
+        "gz_step_a": 48.77,
+        "gz_step_ratio": 0.968,
+        "gz_step_off": 1,
+        "gz_step_dom": 29.84
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "preset_h0.3_d5",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 124.01531219482422,
+        "after_dark": 0.9350887345679012,
+        "after_dark_near": 0.7801649305555556,
+        "after_clip": 0.0,
+        "after_white": 0.19429976851851852,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 123.06938934326172,
+        "before_dark": 1.3668499228395061,
+        "before_dark_near": 0.7963204089506173,
+        "before_clip": 0.0,
+        "before_white": 0.1919849537037037,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.002314814814814825,
+        "diff_mean": 1.8905587196350098,
+        "diff_frac": 3.9239165380658436,
+        "d_mean": 0.9459228515625,
+        "d_dark": -0.4317611882716049,
+        "newdark": 0.0060281635802469135,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.6944444444444444,
+        "blk_max": 52.00187384524568,
+        "gz_ver": "v2.1",
+        "gz_spec": 0.21571851635308895,
+        "gz_dE": 0.43916215607278586,
+        "gz_dN": 0.2234436397196969,
+        "gz_agree": 0.5208333333333334,
+        "gz_row": 144,
+        "gz_band": [
+          130.6,
+          211.8
+        ],
+        "gz_haz_row": 174.3,
+        "gz_d": 5.0,
+        "gz_band_mu": 113.59415154637105,
+        "gz_step_b": 31.53,
+        "gz_step_a": 31.78,
+        "gz_step_ratio": 1.008,
+        "gz_step_off": 30,
+        "gz_step_dom": 72.37
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "preset_h0.9_d10",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 7 % (최대 편차 77/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 127.66634368896484,
+        "after_dark": 1.1102430555555556,
+        "after_dark_near": 0.42064525462962965,
+        "after_clip": 0.0,
+        "after_white": 0.15523726851851852,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 123.52721405029297,
+        "before_dark": 2.3874421296296298,
+        "before_dark_near": 0.8139226466049383,
+        "before_clip": 0.0,
+        "before_white": 0.15227141203703703,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0029658564814814825,
+        "diff_mean": 4.972748756408691,
+        "diff_frac": 7.757925025720165,
+        "d_mean": 4.139129638671875,
+        "d_dark": -1.2771990740740742,
+        "newdark": 0.009645061728395061,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.004822530864197531,
+        "blk_shift": 6.944444444444445,
+        "blk_max": 76.72963312537432
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "preset_h0.9_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "CAPTURE",
+          "msg": "manifest ok=false — 캡처 폴링 조기 종료(파일은 정상인 경우가 대부분)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 120.43012237548828,
+        "after_dark": 2.7823109567901234,
+        "after_dark_near": 3.3826437114197536,
+        "after_clip": 0.0,
+        "after_white": 0.20167824074074073,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 118.43809509277344,
+        "before_dark": 3.3266300154320985,
+        "before_dark_near": 3.8376494984567904,
+        "before_clip": 0.0,
+        "before_white": 0.19256365740740738,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.009114583333333343,
+        "diff_mean": 2.464702606201172,
+        "diff_frac": 3.5709394290123457,
+        "d_mean": 1.9920272827148438,
+        "d_dark": -0.544319058641975,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 4.166666666666666,
+        "blk_max": 30.98114063892217
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "preset_h0.9_d5",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "CAPTURE",
+          "msg": "manifest ok=false — 캡처 폴링 조기 종료(파일은 정상인 경우가 대부분)"
+        },
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 3 % (최대 편차 60/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 124.24224853515625,
+        "after_dark": 1.1551890432098766,
+        "after_dark_near": 0.7212094907407407,
+        "after_clip": 0.0,
+        "after_white": 0.1401909722222222,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 122.39091491699219,
+        "before_dark": 2.0514081790123457,
+        "before_dark_near": 0.7726900077160495,
+        "before_clip": 0.0,
+        "before_white": 0.1401909722222222,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0,
+        "diff_mean": 2.484828472137451,
+        "diff_frac": 3.84669174382716,
+        "d_mean": 1.8513336181640625,
+        "d_dark": -0.8962191358024691,
+        "newdark": 0.0036168981481481477,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 2.7777777777777777,
+        "blk_max": 60.4381568313792
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "preset_h1.8_d10",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 19 % (최대 편차 75/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 132.61370849609375,
+        "after_dark": 1.5687210648148149,
+        "after_dark_near": 0.8465952932098765,
+        "after_clip": 0.0,
+        "after_white": 0.11668113425925926,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 126.46453857421875,
+        "before_dark": 3.407889660493827,
+        "before_dark_near": 2.4590084876543212,
+        "before_clip": 0.0,
+        "before_white": 0.11436631944444445,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0023148148148148112,
+        "diff_mean": 6.956665992736816,
+        "diff_frac": 10.169222608024691,
+        "d_mean": 6.149169921875,
+        "d_dark": -1.8391685956790123,
+        "newdark": 0.012056327160493827,
+        "newdark_near": 0.008979885057471264,
+        "newdark_blob": 0.004822530864197531,
+        "blk_shift": 19.444444444444446,
+        "blk_max": 75.30918592316368
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "preset_h1.8_d2",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 11 % (최대 편차 76/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 123.72518920898438,
+        "after_dark": 3.1166570216049383,
+        "after_dark_near": 5.171561535493828,
+        "after_clip": 0.0,
+        "after_white": 0.05381944444444445,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 118.8778076171875,
+        "before_dark": 4.358796296296296,
+        "before_dark_near": 7.032696759259259,
+        "before_clip": 0.0,
+        "before_white": 0.03537326388888889,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.01844618055555556,
+        "diff_mean": 5.327213287353516,
+        "diff_frac": 7.345871913580247,
+        "d_mean": 4.847381591796875,
+        "d_dark": -1.2421392746913575,
+        "newdark": 0.0012056327160493826,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 11.11111111111111,
+        "blk_max": 75.63472148212199
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "preset_h1.8_d5",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 9 % (최대 편차 73/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 128.01785278320312,
+        "after_dark": 1.4181616512345678,
+        "after_dark_near": 1.3362027391975309,
+        "after_clip": 0.0,
+        "after_white": 0.13151041666666666,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 123.53655242919922,
+        "before_dark": 3.3540702160493825,
+        "before_dark_near": 2.548466435185185,
+        "before_clip": 0.0,
+        "before_white": 0.12594039351851852,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.00557002314814814,
+        "diff_mean": 5.319977760314941,
+        "diff_frac": 7.632426697530864,
+        "d_mean": 4.481300354003906,
+        "d_dark": -1.9359085648148147,
+        "newdark": 0.009645061728395061,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.004822530864197531,
+        "blk_shift": 9.027777777777777,
+        "blk_max": 72.94957315479935
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "reversal",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "CAPTURE",
+          "msg": "manifest ok=false — 캡처 폴링 조기 종료(파일은 정상인 경우가 대부분)"
+        },
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 5 % (최대 편차 79/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 142.40199279785156,
+        "after_dark": 6.140190972222222,
+        "after_dark_near": 4.447699652777778,
+        "after_clip": 0.0,
+        "after_white": 0.06372974537037038,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 139.65431213378906,
+        "before_dark": 6.398003472222221,
+        "before_dark_near": 4.931640625,
+        "before_clip": 0.0,
+        "before_white": 0.06199363425925926,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0017361111111111188,
+        "diff_mean": 3.3212850093841553,
+        "diff_frac": 4.330520190329218,
+        "d_mean": 2.7476806640625,
+        "d_dark": -0.2578124999999991,
+        "newdark": 0.0012056327160493826,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 4.861111111111112,
+        "blk_max": 78.57075754509955
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "through_treads",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "CAPTURE",
+          "msg": "manifest ok=false — 캡처 폴링 조기 종료(파일은 정상인 경우가 대부분)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 138.06109619140625,
+        "after_dark": 6.238811728395062,
+        "after_dark_near": 0.028332368827160496,
+        "after_clip": 0.0,
+        "after_white": 0.32978877314814814,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 136.775146484375,
+        "before_dark": 6.46995563271605,
+        "before_dark_near": 0.042799961419753084,
+        "before_clip": 0.0,
+        "before_white": 0.3253038194444444,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.00448495370370372,
+        "diff_mean": 1.285425066947937,
+        "diff_frac": 3.965438528806584,
+        "d_mean": 1.28594970703125,
+        "d_dark": -0.2311439043209882,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.6944444444444444,
+        "blk_max": 23.11523604530467
+      }
+    }
+  ]
+}

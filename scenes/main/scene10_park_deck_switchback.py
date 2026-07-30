@@ -181,6 +181,13 @@ Legacy : scenes/archive_v3/scene10_switchback_cliff.py
     belt), 13 shrub clumps become real autumn-legal USDs, grass and hedge tints derived
     to a straw target, 780 scattered litter instances around the 4 KEPT CB-2 lobes, rock
     outcrop at the uphill margin, 3 windowless silhouette masses beyond 80 m.
+  S10c — **the leaf-off arm of S3-11, delivered.** Red-team **F1** proved the mechanism
+    S3-11 used was composition-inert: a stage-side `SetActive(False)` on a descendant of
+    an instance is discarded by USD, so all twelve trees rendered in full green leaf
+    while the log printed `12/12`. `_bare_tree` now references the additive wrapper
+    layers `assets/veg_bare/*_bare.usda` via `sc.veg_wrapper_rel` (K4(0) `e4fc4cf`),
+    which composes the strip **inside** the prototype. Geometry, scale and placement are
+    unchanged by construction — the only delta is foliage leaving the frame.
 ────────────────────────────────────────────────────────────────────────────
 
 Run (GUI look check - default):
@@ -457,6 +464,14 @@ PARAMS = dict(
         # is left behind (§3.4; registered in `sc.BARE_SUBPRIMS` by the K4 micro-commit
         # 1346b70). `native_h` is the **trunk-only** zmax, not the full canopy bbox —
         # scaling a leafless tree by its leafed height would shrink it by 1-2 %.
+        # [S10c] The *mechanism* that consumes this table was wrong until K4(0) `e4fc4cf`:
+        # a stage-side `SetActive(False)` under an instance is discarded by USD, so round
+        # `260731_w3_s10` shipped twelve green trees while reporting 12/12 leaf-off
+        # (red-team **F1**). `_bare_tree` now references `assets/veg_bare/*_bare.usda`
+        # through `sc.veg_wrapper_rel`, which composes the strip inside the prototype.
+        # These three `native` values are the bare zmax and are **kept as authored** so
+        # the trunk scale is bit-identical across the fix; `deck_module_selfcheck` asserts
+        # them against `sc.BARE_NATIVE` (agreement ≤ 5 mm native = ≤ 0.1 % of height).
         bare=(("Trees/Gray_Birch.usd", 3.299),        # 자작나무 — park-typical
               ("Trees/Elm_Sapling.usd", 3.043),       # near field
               ("Trees/Lombardy_Poplar.usd", 13.422)),  # the tall verticals
@@ -1298,6 +1313,36 @@ def deck_module_selfcheck():
     print("      이 3종만이 잔가지 골격을 **trunk 프림**에 갖고 있어 /Root/leaves 를 "
           "끄면 진짜 나목이 남는다. 참나무류는 잎이 가지 인스턴서 안에 있어 끌 수 없고, "
           "그래서 §4.2-5 가 원경으로 재배치한다")
+
+    # [S10c · red-team F1] The registry membership above is necessary but **not**
+    # sufficient: the pre-fix scene held it and still rendered twelve green trees,
+    # because a stage-side `SetActive(False)` under an instance is discarded by USD.
+    # What has to be asserted is that the **reference target** is the wrapper layer.
+    wraps = [(rel, sc.veg_wrapper_rel(rel, sc.BARE_SUBPRIMS.get(rel), kind="bare"))
+             for rel, _n in se["bare"]]
+    wrap_ok = all(w for _r, w in wraps)
+    ok11 &= wrap_ok
+    print(f"    잎-off 경로 = 참조 래퍼 {sum(1 for _r, w in wraps if w)}/{len(wraps)}종 "
+          f"→ {'OK' if wrap_ok else 'CHECK'} : "
+          f"{', '.join((w or '미해결').split('/')[-1] for _r, w in wraps)}")
+    print("      래퍼는 인스턴스 경계 **위**에서 합성되므로 프로토타입 자체에 leaves 가 "
+          "없다. 무대에서 SetActive(False) 를 부르는 옛 경로는 USD 가 버린다 — "
+          "n_off 카운터는 작성된 의견을 셌지 합성 결과를 센 적이 없다(F1)")
+    nat_ok = True
+    for rel, nat in se["bare"]:
+        ref = sc.BARE_NATIVE.get(rel)
+        if ref is None:
+            nat_ok = False
+            continue
+        nat_ok &= abs(float(nat) - float(ref)) <= 0.005
+    ok11 &= nat_ok
+    print(f"    native_h ↔ sc.BARE_NATIVE 일치(≤5 mm) → "
+          f"{'OK' if nat_ok else 'CHECK'} : "
+          + " · ".join(f"{r.split('/')[-1].replace('.usd','')} {n:.4f}/"
+                       f"{sc.BARE_NATIVE.get(r, float('nan')):.4f}"
+                       for r, n in se["bare"]))
+    print("      씬 값을 유지하는 것이 의도다 — 척도 target/native 가 수정 전후 동일해야 "
+          "줄기가 움직이지 않고, 라운드가 선언할 델타가 '잎' 하나로 남는다")
     banned = {"Shrub/Forsythia.usd", "Shrub/Rhododendron.usd"}
     good = not (set(se["shrubs"]) & banned)
     ok11 &= good
@@ -2246,35 +2291,60 @@ def main():
     # dressing
     # -------------------------------------------------------------------
     def _bare_tree(path, rel, native, cx, cy, gz, target_h, yaw):
-        """[S3-11] One **leaf-off** tree, pinned to a species.
+        """[S3-11] One **leaf-off** tree, pinned to a species. -> (placed, bare).
 
         `sc.build_tree(bare=True)` alone is not enough and its own docstring says so: the
         species is drawn by coordinate hash from `VEG_TREES`, and only `Elm_Sapling` of
         the three bare-capable assets is in that pool, so `bare=True` yields a *mixed*
         frame. The planned `species=` kwarg is K4(b) and was never executed, so the scene
         takes the route the docstring names — it calls `add_vegetation` itself.
-        `/Root/leaves` is deactivated **before** `SetInstanceable(True)`: once a prim is
-        instanced its descendants live in a shared prototype and per-instance edits are
-        silently ignored (`scene_common.py:2467-2471`, the same class of silent-inertness
-        bug the repo already documented for the instancing flag).
+
+        [S10c · red-team **F1** (`redteam_s0710_rebuild.md` §1.2/§5.2), K4(0) `e4fc4cf`]
+        **The old route here was composition-inert and this scene was its victim.** It
+        referenced the *leafed* asset, called `_deactivate_seasonal` on `{path}/Asset/leaves`
+        and then made `{path}/Asset` instanceable. USD discards opinions on descendants of
+        an instance **regardless of authoring order**, so the stage accepted the
+        deactivation, the counter printed `12/12`, and all twelve trees rendered in full
+        green leaf (measured in pixels on round `260731_w3_s10`: `from_below` foreground
+        and `h1.8_d10` upper-left). The counter had been counting *authored opinions*,
+        never composed results.
+
+        The route that works — and the only one that survives instancing — is to reference
+        a **wrapper layer** that carries the `over ... (active = false)` above the instance
+        boundary, so the deactivation composes **inside** the prototype
+        (`assets/veg_bare/<species>_bare.usda`; scene04 precedent `024a985`, generalised
+        into `sc.veg_wrapper_rel` by K4(0)). Instancing is kept: all twelve trees still
+        share one prototype per species, and that prototype simply has no `leaves`.
+
+        `native` stays the **caller's** value, deliberately: `PARAMS['season']['bare']`
+        already carries the trunk-only zmax, so the scale factor `target_h / native` is
+        bit-identical to the pre-fix round and the trunks do not move. The only delta this
+        function now produces is the foliage leaving the frame, which is exactly what the
+        round it feeds is allowed to declare.
         """
-        xf = sc.add_vegetation(stage, path, rel, (cx, cy, gz),
+        wrel = sc.veg_wrapper_rel(rel, sc.BARE_SUBPRIMS.get(rel), kind="bare")
+        # A missing wrapper must never cost the scene its trees (`veg_wrapper_rel`'s own
+        # contract): fall back to the leafed asset, place it, and report bare=0 so the
+        # self-check and the print say so out loud instead of claiming a leaf-off frame.
+        xf = sc.add_vegetation(stage, path, wrel or rel, (cx, cy, gz),
                                yaw_deg=yaw, target_h=target_h, native_h=native)
         if xf is None:
-            return 0
-        off = sc._deactivate_seasonal(stage, f"{path}/Asset", rel,
-                                      table=sc.BARE_SUBPRIMS)
+            return (0, 0)
         try:
+            # Instancing is set on the prim that HOLDS the reference (`/Asset`), which is
+            # now the wrapper. The prototype is composed from the wrapper, leaves and all
+            # — that is, without them.
             stage.GetPrimAtPath(f"{path}/Asset").SetInstanceable(True)
         except Exception:
             pass
-        return 1 if off else 0
+        return (1, 1 if wrel else 0)
 
     def build_nature(M):
         tr = PARAMS["tree"]
         se = PARAMS["season"]
         bare_pool = se["bare"]
         n_bare = 0
+        n_veg = 0
         for n, (cx, cy, zone, th) in enumerate(PARAMS["trees"]):
             gz = _zone_z(cx, cy, zone)
             rel, native = bare_pool[n % len(bare_pool)]
@@ -2285,9 +2355,14 @@ def main():
             # directly under `Tree_n` would make these plantings invisible to LINT-1/2/3
             # and to the LINT-4b species gate — the numbers would improve by dropping out
             # of the check, which is the wrong kind of green.
-            n_bare += _bare_tree(f"{ROOT}/Tree_{n}/Veg", rel, native, cx, cy,
-                                 gz, target, (n * 47.0) % 360.0)
-            if n_bare == 0 and n == 0:
+            _placed, _bare = _bare_tree(f"{ROOT}/Tree_{n}/Veg", rel, native,
+                                        cx, cy, gz, target, (n * 47.0) % 360.0)
+            n_veg += _placed
+            n_bare += _bare
+            # [S10c] The fallback trigger is **the asset route being unavailable**, not
+            # leaf-off failing. Before the F1 fix the two were conflated, so a wrapper
+            # miss would have thrown away twelve real trunks for procedural blobs.
+            if n_veg == 0 and n == 0:
                 # asset route unavailable (LOOK_GEO off / assets absent) -> procedural
                 # fallback for the whole row, with the dormant blob tints.
                 for m, (bx, by, bzone, bth) in enumerate(PARAMS["trees"]):
@@ -2297,8 +2372,16 @@ def main():
                                   trunk_r=tr["trunk_r"], trunk_h=bth,
                                   stake_r=0.004, stake_h=0.02, stake_off=0.2)
                 break
+        # [S10c] The count is now a **composed** result: it counts trees whose reference
+        # target is the wrapper layer, i.e. trees whose prototype has no `leaves` prim.
+        # The pre-fix counter counted authored `SetActive(False)` calls, which USD threw
+        # away — 12/12 was printed while 12/12 rendered green (red-team F1).
         print(f"[S3-11] 낙엽수 잎-off {n_bare}/{len(PARAMS['trees'])}주 "
-              f"(Gray_Birch·Elm_Sapling·Lombardy_Poplar 로테이션)")
+              f"(Gray_Birch·Elm_Sapling·Lombardy_Poplar 로테이션 · "
+              f"assets/veg_bare/*_bare.usda 참조 래퍼 = 프로토타입 내부 합성)")
+        if n_veg and n_bare < n_veg:
+            print(f"[S3-11][경고] 래퍼 미해결 {n_veg - n_bare}주 — 잎이 남는다 "
+                  f"(assets/veg_bare/ 확인)")
 
         # autumn-legal shrubs replace the 13 green blob clumps (§4.2-5).
         se_pool = list(se["shrubs"])

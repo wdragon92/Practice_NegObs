@@ -1291,6 +1291,38 @@ repo is warm or dark brown, and G5 is the only element of scene10 where the inte
 warm map, §4.2-3) is visibly a workaround rather than a fix. **Neither blocks.** `[ruled 07-30]` §1.11
 precedent: *"record as an open procurement row, do not block."*
 
+## 8.R Supervisor rulings (07-31) — all eight OQs closed
+
+- **OQ-1 — RE-BIND TO SUMMER** (recommendation adopted). G7 is the user's fidelity order and it
+  is summer; the judged-surface move rides GT-17's declared full re-cache. `leaf_ground` stays on
+  the margin lobes only.
+- **OQ-2 — (a) OPEN RISERS KEPT.** The docstring hazard cue and the `through_treads` cut are
+  research design, not looks; the emergency-stair read is cured by S3-8/S3-10/S3-11. State the
+  divergence from G10 in the report AND the commit message. If the user later orders riser
+  boards, that is an additive follow-up, not a rework.
+- **OQ-3 — K4 MICRO-COMMIT AUTHORIZED, executed by this lane.** WINDOW 2 is *stopped* (not
+  closed); `scene_common` has no active owner. Conditions: additive + signature-preserving
+  (default-kwarg precedent = `build_tree`); the mechanism is **opt-in, default OFF**, so the
+  micro-commit itself must prove **33/33 prim-hash identity** (96968f3 method) — scene10 enables
+  it in its own file. `TEX["moss"]` registration rides the same micro-commit under the same
+  proof (the key has no existing consumer).
+- **OQ-4 — NOT BLOCKING.** G10 governs design; the n ≥ 8 photo panel stays owed to GATE-3 via
+  T2's scouted routes. GATE-3 itself is suspended under the per-scene-image doctrine (user,
+  07-31) until judging re-opens.
+- **OQ-5 — REVERSAL CONFIRMED**: rail 1.10 m, clear gap 0.110 m, on the KNPS built-reality
+  basis (n = 1,227). The earlier 1.20 m / ≤ 100 mm proposals are dead.
+- **OQ-6 — OPTION A.** The user's bar is fidelity to G10; the intake diagnosis is terrain-level;
+  budget is not a user constraint (standing "자원 적극 활용"). Risk contained by S3-10 being its
+  own commit with its own gate.
+- **OQ-7 — 28 COURSES CONFIRMED** (0.150 / 0.428). The parked 26-row is superseded; discrepancy
+  is on record here.
+- **OQ-8 — CONFIRMED as open procurement rows.** G1: procedural crest cluster now
+  (`gate_frame`-tier only). G5: one bounded CC0 weathered-plank attempt (ambientCG / Poly Haven);
+  otherwise ship the §4.2-3 cool-tint interim and leave the row open.
+- **SCOPE GUARD (user order 07-31): S3-1 (sceneC2 hygiene) is DEFERRED.** Only
+  `scene07`/`scene10` files plus the OQ-3 micro-commit may change in this lane. S3-2 stays
+  in-lane (it edits scene07's own file). No humans, no vehicles, anywhere.
+
 ---
 
 # 9. Evidence ledger

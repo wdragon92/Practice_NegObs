@@ -38,9 +38,14 @@ are the same archetype, so G2 is effectively this scene's own reference.
    (guidance blocks at a building entrance **and** warning blocks at a stair head).
    The band reuses scene01's registered generator and texture (`infra_kit.build_tactile_pair`
    dot type + the `tactile` role, `relief="normal"`; §12.5 ③ prim-cap route). See
-   `Docs/reports/w3_s16_v1.md` §2 for the GT-E1′ / GT-E2 / EXPECTED_FP arithmetic and for
-   the `TACTILE_SITES` / `EXPECTED_FP` rows this band **requires but does not write**
-   (ground_kit is not this workflow's file; adjudicator edits are parked per **D14**).
+   `Docs/reports/w3_s16_v1.md` §2 for the GT-E1′ / GT-E2 / EXPECTED_FP arithmetic.
+   **[W3 Lane-1 K1]** the band was built scene-side in `f831d61` only because `ground_kit.py`
+   belonged to another workflow that window. It is now a **registered ground_kit site**
+   (`TACTILE_SITES["scene16"]["stair_top"]`) emitted by `build_ground_kit` through the same
+   `_ik_tactile → infra_kit.build_tactile_pair` route scene01 uses, so B11's registry
+   describes what the kit actually emits and gates B6/B7/B9 see the band. Geometry is
+   unchanged by the move (prim-hash A/B); only the prim path moves,
+   `Tactile_StairHead` → `GKit/Tactile_stair_top`.
 
 2. **BS-4 street-wall backdrop.** The scene used to be a plaza with **grass on both sides
    of the walk**, which is the opposite of G2's dense downtown block. Both verges are now
@@ -72,7 +77,6 @@ import datetime
 
 import scene_common as sc
 import ground_kit as gk
-import infra_kit as ik        # [W3 S16] statutory tactile generator (scene01's route)
 import stair_kit as sk       # [realism v1] statutory handrail (§15(3)/(4))
 import facade_kit as fk      # [W3 S16 · BS-4] primitive injection for building_kit
 import building_kit as bk    # [W3 S16 · BS-4] street-wall backdrop (kind="backdrop")
@@ -167,9 +171,11 @@ PARAMS = dict(
     #   교통약자법 시행규칙 별표1 2호 차목 (점형 300 그리드 · 돌기 36개 · 높이 6±1 mm) +
     #   국도 실무요령 7.5 (점형 깊이 60 cm 표준 = 2줄) + 계단 첫 단 0.30 m 이격.
     #   The same three numbers ground_kit carries as `tactile_setback` 0.300 /
-    #   `tactile_band_depth` 0.600 / `tactile_dot_h` 0.006 — restated here because this
-    #   band is built scene-side (see the module docstring: ground_kit's TACTILE_SITES
-    #   registry is another workflow's file this wave).
+    #   `tactile_band_depth` 0.600 / `tactile_dot_h` 0.006. **[W3 Lane-1 K1]** the band is
+    #   now emitted by `build_ground_kit` from the registered `stair_top` site; these
+    #   values stay here because §7.4 makes the scene PARAMS the source of truth for
+    #   coordinates, and `build_ground_kit` asserts them against ground_kit's own
+    #   dimension table so the two can never drift apart silently.
     tactile=dict(ahead=0.3, depth=0.3, proud=0.004, land_depth=0.4,
                  head_setback=0.30, head_depth=0.60, head_dot_h=0.006),
     nosing=dict(color=(0.85, 0.72, 0.10), width=0.05, proud=0.001),
@@ -674,13 +680,36 @@ def main():
     def build_ground_kit(M):
         g = PARAMS["gkit"]
         p = PARAMS["pit"]
+        # --- [W3 Lane-1 K1] §7-4 statutory stair-head band, now a registered site ------
+        #   The band used to be built scene-side (`build_tactile_head`) because ground_kit
+        #   was another workflow's file when §7-4 landed. It is the same generator with the
+        #   same numbers — `_ik_tactile → infra_kit.build_tactile_pair`, dot type,
+        #   relief="normal", the `tactile` texture role — so the move is geometry-neutral;
+        #   what it buys is that gates B6 (GT-E1′), B7 (GT-E2) and B9 (albedo) finally see
+        #   the band, and B11's registry describes something the kit actually emits.
+        #   Bound to `hazard_stairs`, not to `cue_tactile`: the ruling exists to satisfy a
+        #   position check on the shipped build, and with the trench filled there is no
+        #   first riser to warn about, so the flat control arm inherits nothing.
+        st = PARAMS["stairs"]
+        tc = PARAMS["tactile"]
+        gd = gk.GROUND_DIMENSIONS
+        assert abs(tc["head_setback"] - gd["tactile_setback"][0]) < 1e-9 \
+            and abs(tc["head_depth"] - gd["tactile_band_depth"][0]) < 1e-9 \
+            and abs(tc["head_dot_h"] - gd["tactile_dot_h"][0]) < 1e-9 \
+            and abs(float(st["z_top"]) - float(PARAMS["walk"]["z_top"])) < 1e-9, \
+            "계단머리 점형: 씬 PARAMS 와 ground_kit 법정 치수가 어긋났다"
+        head_x1 = st["x0"] - tc["head_setback"]
+        head = (head_x1 - tc["head_depth"], st["y0"], head_x1, st["y1"])
+        tactile_sites = dict(entrance=tuple(g["tactile_entrance"]))
+        if cfg["hazard_stairs"]:
+            tactile_sites["stair_top"] = head
         gp = gk.plan_ground(
             "sidewalk_block", region=tuple(g["region"]),
             z=float(PARAMS["walk"]["z_top"]), gy=0.0, origin=(0.0, 0.0, 0.0),
             edges=[("stair_top", float(p["x0"]))],
             voids=((p["x0"], p["y0"], p["x1"], p["y1"]),),
             dists=(2, 5, 10), scene="scene16",
-            tactile=("entrance",),
+            tactile=tuple(tactile_sites),
             overrides=dict(
                 infra=dict(manhole=1, gully=2, gutter_L=0),
                 # "drip" added to the stain kinds = canopy eaves run-off.
@@ -694,7 +723,7 @@ def main():
             sites=dict(manhole=[tuple(v) for v in g["manholes"]],
                        gully=[tuple(v) for v in g["gullies"]],
                        patch=[tuple(v) for v in g["patches"]],
-                       tactile=dict(entrance=tuple(g["tactile_entrance"]))),
+                       tactile=tactile_sites),
             seed=16)
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
@@ -710,6 +739,17 @@ def main():
                               scatter=sc.scatter_debris)
         print(f"[ground_kit] scene16 P3 · 프림 {res['prims']} · "
               f"δmax {res['gt_delta_max']:.4f} · unit_cell {res['unit_cell']}")
+        if "stair_top" in tactile_sites:
+            need = gk.EDGE_K * gd["tactile_dot_h"][0]
+            print(f"[점자·계단머리] x {head[0]:+.2f}…{head[2]:+.2f} · 첫 단 "
+                  f"{tc['head_setback']:.2f} m 전 · 깊이 {tc['head_depth']:.2f} · 전폭 "
+                  f"{st['y1'] - st['y0']:.2f} · 돌기 h{gd['tactile_dot_h'][0] * 1000:.0f} mm "
+                  f"Ø35 · 알베도 상한 {gk.TACTILE_ALBEDO_CAP:.2f} · "
+                  f"등재 site TACTILE_SITES['scene16']['stair_top'] (B11)")
+            print(f"[점자·계단머리] GT-E1′ 이격 {tc['head_setback']:.3f} ≥ "
+                  f"{need:.3f} m (EDGE_K {gk.EDGE_K:.0f} × proud "
+                  f"{gd['tactile_dot_h'][0]:.3f}) — 충족. 먼 밴드(x −6.00…−5.40)는 "
+                  f"그대로 — cue+/label− 사분면 유지")
         return res
 
     def build_flat_fill(M):
@@ -847,7 +887,8 @@ def main():
             # [W3 S16 · §7-4] `Tactile_Top` **retired**. It sat at x −0.30…0.00, i.e. flush
             #   against the first riser with **zero setback and 0.30 m depth**, which is
             #   neither the statutory position (0.30 m clear) nor the statutory depth
-            #   (0.60 m = 2 rows). The §7-4 band supersedes it — see `build_tactile_head`.
+            #   (0.60 m = 2 rows). The §7-4 band supersedes it — see the `stair_top` site
+            #   in `build_ground_kit`.
             #   Keeping both would have laid 0.90 m of continuous yellow at the stair head
             #   in the cue-ON arm.
             sc.build_tactile(stage, f"{ROOT}/Tactile_Land",
@@ -904,46 +945,6 @@ def main():
 
             hrail(f"{ROOT}/PerimRail_S", -pr["y"], pr["x0"], pr["x1"])
             hrail(f"{ROOT}/PerimRail_N", pr["y"], pr["x0"], pr["x1"])
-
-    # -------------------------------------------------------------------
-    # [W3 S16 · §7-4 BOTH BANDS] statutory stair-head warning band
-    # -------------------------------------------------------------------
-    def build_tactile_head(M):
-        """The **second** band of the §7-4 ruling: a dot-type warning band 0.30 m in
-        front of the first riser, 0.60 m deep, full stair width.
-
-        Not bound to `cue_tactile`. The ruling exists to satisfy the user's position
-        check on the shipped build, and a band that is OFF by default satisfies no
-        position check. It **is** bound to `hazard_stairs`: with the trench filled there
-        is no first riser for a stair-head band to warn about, so the flat control arm
-        does not inherit a cue with nothing behind it.
-
-        Generator: `infra_kit.build_tactile_pair`, the same call scene01's registered
-        `stair_top` site makes, with the same `tactile` texture role. `relief="normal"`
-        (1 prim, dots carried by `tactile_yellow_nor`) rather than `relief="geom"`:
-        geom would emit 2 × 10 tiles × 36 = **720 nubs** for a 0.60 × 3.00 m band against
-        the §8.1 absolute cap of 200 — the sceneN5 precedent, decided the same way. The
-        nub the generator models is Ø35 mm (`min(tile)/6 × 0.35 × 2`), which is the
-        diameter the ruling names; the truncated-cone taper lives in the normal map.
-        """
-        st = PARAMS["stairs"]
-        tc = PARAMS["tactile"]
-        x_hi = st["x0"] - tc["head_setback"]
-        x_lo = x_hi - tc["head_depth"]
-        r = ik.build_tactile_pair(
-            gk.kit_from_scene_common(sc, stage), f"{ROOT}/Tactile_StairHead",
-            "dot", x_lo, st["y0"], x_hi, st["y1"], M["tactile"],
-            z=st["z_top"], relief="normal", walk_axis="x",
-            dot_h=tc["head_dot_h"])
-        need = gk.EDGE_K * r["nub_h"]
-        print(f"[점자·계단머리] x {x_lo:+.2f}…{x_hi:+.2f} · 첫 단 {tc['head_setback']:.2f} m "
-              f"전 · 깊이 {tc['head_depth']:.2f} · 전폭 {st['y1'] - st['y0']:.2f} · "
-              f"돌기 h{r['nub_h'] * 1000:.0f} mm Ø35 · 프림 {r['prim_count']} · "
-              f"알베도 상한 {gk.TACTILE_ALBEDO_CAP:.2f}")
-        print(f"[점자·계단머리] GT-E1′ 이격 {tc['head_setback']:.3f} ≥ "
-              f"{need:.3f} m (EDGE_K {gk.EDGE_K:.0f} × proud {r['nub_h']:.3f}) — 충족. "
-              f"먼 밴드(x −6.00…−5.40)는 그대로 — cue+/label− 사분면 유지")
-        return r
 
     # -------------------------------------------------------------------
     # [W3 S16 · BS-4] G2 street wall — both verges, kind="backdrop"
@@ -1085,7 +1086,9 @@ def main():
         build_east_exit(M, stair_mtl)
         build_canopy(M)
         build_cues(M, stair_mtl)
-        build_tactile_head(M)       # [W3 S16 · §7-4] statutory, not cue-bound
+        # [W3 Lane-1 K1] the §7-4 stair-head band is emitted by `build_ground_kit` from
+        #   the registered `stair_top` site — it is still gated on `hazard_stairs`, by the
+        #   `cfg["hazard_stairs"]` test that selects the site there.
         # [U-5] stated, not changed — the canopy already covers the whole descent.
         _cp, _st = PARAMS["canopy"], PARAMS["stairs"]
         _run = _st["tread"] * _st["nsteps"]

@@ -1942,9 +1942,21 @@ TACTILE_SITES = {
                                 "계단 첫 단", defect="색 바램·오염 −40 %")},
     "scene08": {"opening_ring": _T("dot", "개구 둘레 띠", 0.51, "개구 둘레",
                                    defect="부분 결손 2~3매")},
+    # [W3 Lane1 K1 · intake v2 §7-4 BOTH BANDS · GT-23] scene16 carries **two** bands.
+    #   `entrance` is the research band (no drop in front of it - the cue+/label- quadrant).
+    #   `stair_top` is the statutory warning band the §7-4 ruling added; it was built
+    #   scene-side in `f831d61` because this file was another workflow's that window, and
+    #   the same commit that registers it here moves the build into `build_ground_kit`
+    #   (B11: the registry may not describe something the kit does not emit).
+    #   GT-E1' clearance 0.300 >= EDGE_K 40 x proud 0.006 = 0.240 m, and the band takes the
+    #   scene's single full-width transverse slot in the GRAZE E band (B7 singular = 1) -
+    #   BOTH BANDS is legal precisely because the far band is never in the E band with it.
     "scene16": {"entrance": _T("dot", "건물 주출입구 전면 0.6×전폭", 0.54,
                                "주출입구", defect="점유·방해(자리만 비움)",
-                               note="★ 낙차와 무관 — cue+/label− 사분면")},
+                               note="★ 낙차와 무관 — cue+/label− 사분면"),
+                "stair_top": _T("dot", "계단 상단 0.30 m 전 0.6×전폭 3.00", 0.54,
+                                "계단 첫 단",
+                                note="먼 밴드와 한 씬에 공존 — E 대역에는 이 밴드만 든다")},
     "scene13": {"bollard": _T("dot", "볼라드 전면 0.3 m", 0.54, "볼라드 전면",
                               defect="부분 결손 2~3매"),
                 "stair_head": _T("dot", "보도 계단 상단", 0.54, "계단 첫 단",

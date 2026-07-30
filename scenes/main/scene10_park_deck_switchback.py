@@ -166,6 +166,21 @@ Legacy : scenes/archive_v3/scene10_switchback_cliff.py
       the 조경설계기준 16.20.2(2) >=1.2 m 관찰데크 counterpoint is on GT-20's ledger row.
     · timber patina re-aimed at the **measured** 2-5 yr 방부목 CIELAB target (L* 53-60).
     · `broken_landing = 0` and the open-riser flights are untouched (§9 P-2 frozen).
+
+  S3-9 — stair re-table, §4.2-1. 4x10 at 0.165/0.300/1.38 -> **6 flights, 8+7+8+7+7+7 = 44**
+    at 0.150/0.310 (2R+T 0.610, 25.8 deg), clear width **1.500**, 4 turn landings
+    1.50 x 3.20 + one 쉼터/전망 platform 3.00 deep at z −3.450 with a bench. Total drop
+    6.600 frozen. The old ratio was never the defect (0.630 is inside the KCS window);
+    the width and the landing were.
+  S3-10 — de-stacking, Option A. Flights tile the X axis and turn 90 deg on each landing;
+    plan overlap **0 m²**; the masonry shaft (BankCut + two-tier east wall + copings +
+    berm) is deleted and replaced by a real 25.8 % corridor slope with level benches
+    under the landings, air gap 0.020-0.600 m and the stair foot at 0.250 m (KFS 12-3 마
+    caps it at 300 mm). Plan x[−1.50, 24.14], y[−1.60, 3.10].
+  S3-11 — season, 만추 leaf-off. 24 trees pinned (12 bare deciduous + 12 evergreen far
+    belt), 13 shrub clumps become real autumn-legal USDs, grass and hedge tints derived
+    to a straw target, 780 scattered litter instances around the 4 KEPT CB-2 lobes, rock
+    outcrop at the uphill margin, 3 windowless silhouette masses beyond 80 m.
 ────────────────────────────────────────────────────────────────────────────
 
 Run (GUI look check - default):
@@ -190,6 +205,7 @@ import datetime
 
 import scene_common as sc
 import ground_kit as gk
+import urban_kit as uk
 
 
 # ===========================================================================
@@ -418,6 +434,69 @@ PARAMS = dict(
     #     deck** instead of 4 m away past a wall.
     corridor=dict(y0=-2.60, y1=8.00, thick=1.60),
 
+    # --- [S3-11] season: **late autumn (만추), leaf-off**, pinned -------------------
+    #   G10 reads leafless canopy + overwintered matted brown litter + a first flush of
+    #   small green leaves and green ground shoots. Those last two are **early-spring**
+    #   signals and are **excluded**: §12-7 bans seasonal/event-specific elements and the
+    #   only sanctioned exceptions are `04/07 browned leaves · C1 snow · C2 leaves`
+    #   (`ground_kit.py:46`). Late autumn is visually identical to G10 in every element
+    #   actually built here and it is already the sanctioned exception for this scene.
+    #   EXCLUDED by the pin: green leaf flush on any tree · green ground shoots · any
+    #   flowering shrub (`Forsythia` / `Rhododendron` stay out of the pools).
+    #   The census this fixes `[measured]`: 12 trail trees + 12 hill trees + 13 shrub
+    #   clumps = 37 green plants, plus 10 green hedge/crest bands, against 4 brown leaf
+    #   lobes. G10 has **zero** green vegetation objects and wall-to-wall litter.
+    season=dict(
+        # bare deciduous species, rotated. These are the **only three** tree USDs in the
+        # catalogue whose branch armature lives in the trunk prim rather than inside a
+        # leaf `PointInstancer`, so `/Root/leaves` can be deactivated and a real bare tree
+        # is left behind (§3.4; registered in `sc.BARE_SUBPRIMS` by the K4 micro-commit
+        # 1346b70). `native_h` is the **trunk-only** zmax, not the full canopy bbox —
+        # scaling a leafless tree by its leafed height would shrink it by 1-2 %.
+        bare=(("Trees/Gray_Birch.usd", 3.299),        # 자작나무 — park-typical
+              ("Trees/Elm_Sapling.usd", 3.043),       # near field
+              ("Trees/Lombardy_Poplar.usd", 13.422)),  # the tall verticals
+        # the oaks (`Shumard_Oak` / `Scarlet_Oak` / `Black_Oak`) **cannot** be stripped —
+        # their leaves ride inside the branch instancers — so §4.2-5 re-assigns them.
+        # The hill/ridge belt takes `Chinese_Juniper` instead: an evergreen keeps its
+        # needles in 만추, so a green mass at distance is not a season error, it is a
+        # conifer. It is also a `veg_manifest_w2` PASS species, which clears the nine
+        # LINT-4b errors the coordinate-hash draw was producing (White_Pine ×5 +
+        # Yellow_Pine ×4, both retired).
+        far=("Trees/Chinese_Juniper.usd", 2.5164),
+        # autumn-legal shrub pool. `Burning_Bush` is red 30.2 % — removed from the
+        # **global** pool for being autumn, therefore legal *here* by the same scope logic
+        # that admits the dry-leaf debris. `Juniper` is evergreen. `Forsythia` (blossom
+        # only, green 0.0 %) and `Rhododendron` (magenta 76.7 %) stay out.
+        shrubs=("Shrub/Burning_Bush.usd", "Shrub/Juniper.usd"),
+        shrub_h=1.35,
+        litter_cover=0.34,          # continuous, not lobed (C20)
+        litter_max=260,
+    ),
+    # [S3-11] rock outcrop at the uphill margin (E10-10) + foot boulders. `rock_moss_set_01`
+    #   is CC0 and its diffuse is **orange 82.2 %**, which makes it the better of the two
+    #   scans for late autumn (`_02`, yellow-green 92.9 %, is reserved for scene07).
+    #   `z_mode='base'` is mandatory — 52.4 % of its triangles sit below the origin — and
+    #   the sink stays at 0: `tonglam_v2` §1 row 10 already failed this scene once for
+    #   "boulder-scale D-5 rocks in **dark sink-rings**", and a boulder that sits in a hole
+    #   is the defect while a boulder that sits *on* the slope is the fix.
+    outcrop=[("rock_moss_set_01", 6.30, 4.15, 0.0, 22.0, 1.00),
+             ("rock_03_broken", 9.10, 3.30, 0.0, -35.0, 0.55),
+             ("rock_03_broken", 15.40, 2.60, 0.0, 110.0, 0.42),
+             ("rock_02", 5.10, 2.30, 0.0, 15.0, 1.00)],
+    # [S3-11] distant city glimpse (E10-13) — BS-4 **backdrop contract**: distant
+    #   silhouette only, **0 windows**, <=4 prims per mass, auto-demoted beyond
+    #   d_true > 80 m (`building_kit.should_backdrop` / `_b_backdrop`). The masses are
+    #   built scene-side as plain windowless boxes rather than by calling `building_kit`:
+    #   **no scene in the tree calls that kit today** (K3 owns it), and wiring a shared
+    #   kit from an S-lane would add a dependency this lane cannot verify. The product is
+    #   the same — "faint" is exactly what 0 windows and 3 prims mean.
+    #   (cx, cy, w, d, h) in the −X/−Y sector so they show through the trunks at G10's
+    #   u 0.00-0.10; the nearest is 88.6 m from the h0.3_d10 eye.
+    backdrop=[(-72.0, -62.0, 26.0, 14.0, 17.0),
+              (-92.0, -48.0, 34.0, 16.0, 23.0),
+              (-84.0, -34.0, 18.0, 12.0, 12.0)],
+
     # --- dressing ---
     # 10 trees (cx, cy, zone, trunk_h) - zone: north/south/lower/trail
     trees=[(-6.0, 5.5, "north", 3.6), (0.5, 8.0, "north", 4.0),
@@ -530,14 +609,30 @@ PARAMS = dict(
         #   x(0.92,0.98,0.92) applied over the frame tint. Cheap, and it is what makes
         #   방부목 read as *outdoor* timber rather than as joinery.
         algae_tint=(2.46, 3.53, 3.96),
-        grass_tint=(0.55, 0.68, 0.42),
+        # [S3-11] dormant straw/olive. The map is the only lever (no dormant-turf texture
+        #   exists), so the tint has to do all the work — and it is a **multiplier**, not a
+        #   colour. §4.2-5 proposes the literal triple (0.62, 0.60, 0.42) `[assumed]`;
+        #   applied to `grass_lawn_diff` (mean linear **0.0621 / 0.1115 / 0.0232**
+        #   `[measured]`) that lands at (0.0385, 0.0669, 0.0097), i.e. **R/G = 0.58 — still
+        #   green-dominant.** It darkens the lawn without making it dormant, which is the
+        #   cherry-blossom lesson in miniature: *judge by pixels, not by the value's name.*
+        #   Derived instead from a straw target: **#7F734E**, linear (0.211, 0.173, 0.077),
+        #   Y 0.174 → L* 48.8, R/G **1.22**, inside the project's ≤0.30 ground albedo clamp,
+        #   clipped fraction **0.02 %** `[measured]`.
+        grass_tint=(3.40, 1.55, 3.30),
         leaf_tint=(0.88, 0.85, 0.80),
         dirt_tint=(0.78, 0.76, 0.72),          # [v6] saturation and value lowered (avoids confetti)
         rock_tint=(0.82, 0.82, 0.80),          # [v6] rubble greyed (removes the European rampart tone)
         rockface_tint=(0.80, 0.80, 0.78),
         coping_tint=(0.78, 0.77, 0.74),
-        shrub=(0.030, 0.047, 0.021), shrub_rough=1.0,
-        canopy_a=(0.035, 0.052, 0.024), canopy_b=(0.042, 0.060, 0.030),
+        # same arithmetic for the hedge / crest bands, one step darker so the distant
+        #   masses stay behind the near ground: #6C6244, Y 0.128, R/G 1.21.
+        hedge_tint=(2.55, 1.16, 2.48),         # [S3-11] dormant hedge / crest band
+        backdrop_tint=(0.72, 0.73, 0.76),      # [S3-11] far-tier pale silhouette
+        # [S3-11] the blob-fallback tints go dormant too, so a run without the vegetation
+        #   assets does not silently ship a summer scene.
+        shrub=(0.052, 0.045, 0.026), shrub_rough=1.0,
+        canopy_a=(0.048, 0.043, 0.026), canopy_b=(0.055, 0.049, 0.030),
         canopy_rough=1.0,
         # [S3-8] the constant-colour timber (waymarker post, procedural-fallback trunks).
         #   (0.30,0.20,0.12) was a saturated dark red-brown that read near-black in shadow
@@ -1182,7 +1277,87 @@ def deck_module_selfcheck():
 
     print(f"    [deck_module_selfcheck S3-10] "
           f"{'전항목 OK' if ok10 else '⚠ CHECK 항목 있음'}")
-    return ok_all and ok9 and ok10
+
+    # =====================================================================
+    # S3-11 — season re-bind. The census is the assertion: G10 carries **zero** green
+    # vegetation objects, and the pre-rebuild scene carried 37 plants + 10 hedge bands.
+    # =====================================================================
+    ok11 = True
+    se = P["season"]
+    print("\n  [deck_module_selfcheck] S3-11 계절 재바인딩 — 만추 잎-off 고정")
+
+    bare_ok = all(rel in sc.BARE_SUBPRIMS for rel, _n in se["bare"])
+    ok11 &= bare_ok
+    print(f"    낙엽수 수종 {len(se['bare'])}종 전부 sc.BARE_SUBPRIMS 등록 → "
+          f"{'OK' if bare_ok else 'CHECK'} : "
+          f"{', '.join(r.split('/')[-1] for r, _ in se['bare'])}")
+    print("      이 3종만이 잔가지 골격을 **trunk 프림**에 갖고 있어 /Root/leaves 를 "
+          "끄면 진짜 나목이 남는다. 참나무류는 잎이 가지 인스턴서 안에 있어 끌 수 없고, "
+          "그래서 §4.2-5 가 원경으로 재배치한다")
+    banned = {"Shrub/Forsythia.usd", "Shrub/Rhododendron.usd"}
+    good = not (set(se["shrubs"]) & banned)
+    ok11 &= good
+    print(f"    관목 풀 {[x.split('/')[-1] for x in se['shrubs']]} · 개화종 "
+          f"{sorted(x.split('/')[-1] for x in banned)} 제외 → "
+          f"{'OK' if good else 'CHECK'}")
+    far_rel = se["far"][0]
+    good = far_rel not in ("Trees/White_Pine.usd", "Trees/Yellow_Pine.usd")
+    ok11 &= good
+    print(f"    원경 belt 수종 고정 {far_rel.split('/')[-1]} (상록 · PASS) → "
+          f"{'OK' if good else 'CHECK'} — 좌표해시 추첨이 뽑던 폐지 수종 "
+          f"White_Pine·Yellow_Pine 제거")
+
+    # the tint is a multiplier on a green map, so the census that matters is the
+    # **product**, not the triple. Mean linear of `grass_lawn_diff` is measured once and
+    # written here so the assertion is arithmetic, not opinion.
+    GRASS_LIN = (0.0621, 0.1115, 0.0232)
+    for nm, key in (("잔디", "grass_tint"), ("산울/능선", "hedge_tint")):
+        t = P["material"][key]
+        prod = tuple(a * b for a, b in zip(GRASS_LIN, t))
+        Y = 0.2126 * prod[0] + 0.7152 * prod[1] + 0.0722 * prod[2]
+        L = 116.0 * (Y ** (1.0 / 3.0)) - 16.0
+        rg = prod[0] / max(prod[1], 1e-9)
+        good = rg > 1.0 and Y <= 0.30
+        ok11 &= good
+        print(f"    {nm} 틴트 {t} × 맵 {GRASS_LIN} = "
+              f"({prod[0]:.4f},{prod[1]:.4f},{prod[2]:.4f}) · Y {Y:.4f} · L* {L:.1f} · "
+              f"R/G {rg:.2f} → {'OK (짚/올리브 · 지면 알베도 ≤0.30)' if good else 'CHECK'}")
+    print("      설계서 §4.2-5 의 리터럴 (0.62,0.60,0.42) 은 이 맵에 곱하면 R/G 0.58 로 "
+          "**여전히 녹색 우세** — 어둡게만 만들고 휴면시키지 못한다. 틴트는 색이 아니라 "
+          "곱셈자라는 것이 요지이고, 벚나무 판례('이름이 아니라 픽셀로 판단하라')의 축소판")
+
+    lobes = len(P["leaf_ground_patches"])
+    good = lobes == 4
+    ok11 &= good
+    print(f"    CB-2 카펫 마스크 로브 {lobes}개 존치 (H4: 로브는 움직여도 되지만 "
+          f"결코 직사각형으로 되돌아가지 않는다) → {'OK' if good else 'CHECK'} · "
+          f"연속성은 로브 추가가 아니라 주변 산포로")
+
+    eyes = [(-d, 0.0, h) for d in (2, 5, 10) for h in (0.3, 0.9, 1.8)]
+    dmin = min(math.dist((bx, by), (ex, ey))
+               for bx, by, _w, _dd, _h in P["backdrop"]
+               for ex, ey, _ez in eyes)
+    good = dmin > 80.0
+    ok11 &= good
+    print(f"    원경 실루엣 {len(P['backdrop'])}동 · 창 0개 · 심사 시점 최근접 "
+          f"d_true {dmin:.1f} m > 80 → {'OK' if good else 'CHECK'}")
+    print("      building_kit BS-4 계약(원경 실루엣 전용 · 창 없음 · 매스당 ≤4 프림 · "
+          "d_true>80 m 자동 강등)을 **산물로** 충족. 킷 호출을 하지 않은 이유는 "
+          "트리 안의 어떤 씬도 building_kit 을 호출하지 않고(K3 소유), S 레인에서 "
+          "공유 킷 의존을 새로 만들면 이 레인이 검증할 수 없는 결합이 생기기 때문")
+
+    sinks = [row[3] for row in P["outcrop"]]
+    good = all(abs(v) < 1e-9 for v in sinks)
+    ok11 &= good
+    print(f"    노두 {len(P['outcrop'])}개 · z_mode='base' · sink {set(sinks)} → "
+          f"{'OK (어두운 함몰 링 없음)' if good else 'CHECK'}")
+    print("      F2 규율 — tonglam_v2 §1 row 10 이 이 씬을 'D-5 바위가 어두운 함몰 "
+          "링에' 로 이미 한 번 떨어뜨렸다. 구멍에 앉은 바위가 결함이고 사면 **위에** "
+          "앉은 바위가 수정이다")
+
+    print(f"    [deck_module_selfcheck S3-11] "
+          f"{'전항목 OK' if ok11 else '⚠ CHECK 항목 있음'}")
+    return ok_all and ok9 and ok10 and ok11
 
 
 # ===========================================================================
@@ -1678,6 +1853,13 @@ def main():
         M["gk_gap"] = sc.make_pbr(stage, "/World/Looks/GkGap",
                                   diffuse_color=(0.028, 0.024, 0.020),
                                   roughness_const=0.95, specular_level=0.0)
+        # [S3-11] far-tier pale silhouette for the city glimpse. Constant colour on
+        #   purpose: the BS-4 contract is "distant-silhouette-only … no windows".
+        M["backdrop"] = sc.make_pbr(stage, "/World/Looks/FarSkyline",
+                                    diffuse_color=mp["backdrop_tint"],
+                                    roughness_const=0.90)
+        M["hedge"] = tex("grass", "/World/Looks/HedgeDormant", sca["grass"],
+                         tint=mp["hedge_tint"])
         M["wood"] = sc.make_pbr(stage, "/World/Looks/Wood",
                                 diffuse_color=mp["wood_color"],
                                 roughness_const=mp["wood_rough"])
@@ -2059,26 +2241,150 @@ def main():
     # -------------------------------------------------------------------
     # dressing
     # -------------------------------------------------------------------
+    def _bare_tree(path, rel, native, cx, cy, gz, target_h, yaw):
+        """[S3-11] One **leaf-off** tree, pinned to a species.
+
+        `sc.build_tree(bare=True)` alone is not enough and its own docstring says so: the
+        species is drawn by coordinate hash from `VEG_TREES`, and only `Elm_Sapling` of
+        the three bare-capable assets is in that pool, so `bare=True` yields a *mixed*
+        frame. The planned `species=` kwarg is K4(b) and was never executed, so the scene
+        takes the route the docstring names — it calls `add_vegetation` itself.
+        `/Root/leaves` is deactivated **before** `SetInstanceable(True)`: once a prim is
+        instanced its descendants live in a shared prototype and per-instance edits are
+        silently ignored (`scene_common.py:2467-2471`, the same class of silent-inertness
+        bug the repo already documented for the instancing flag).
+        """
+        xf = sc.add_vegetation(stage, path, rel, (cx, cy, gz),
+                               yaw_deg=yaw, target_h=target_h, native_h=native)
+        if xf is None:
+            return 0
+        off = sc._deactivate_seasonal(stage, f"{path}/Asset", rel,
+                                      table=sc.BARE_SUBPRIMS)
+        try:
+            stage.GetPrimAtPath(f"{path}/Asset").SetInstanceable(True)
+        except Exception:
+            pass
+        return 1 if off else 0
+
     def build_nature(M):
         tr = PARAMS["tree"]
+        se = PARAMS["season"]
+        bare_pool = se["bare"]
+        n_bare = 0
         for n, (cx, cy, zone, th) in enumerate(PARAMS["trees"]):
             gz = _zone_z(cx, cy, zone)
-            sc.build_tree(stage, f"{ROOT}/Tree_{n}", cx, cy, gz, M["wood"],
-                          M["canopy_a"], M["canopy_b"], trunk_r=tr["trunk_r"],
-                          trunk_h=th, stake_r=0.004, stake_h=0.02,
-                          stake_off=0.2)
-        # [v6] a blob grounded by its centre z on a 30 deg slope floats ry·tan30 (~0.35 m) downhill
-        #      -> ground it on the **lowest ground** in the blob footprint (structurally removes floating).
-        sh = PARAMS["shrub"]
-        emb = sh["embed"]
-        for n, (cx, cy, zone) in enumerate(PARAMS["shrubs"]):
-            for j, (dx, dy, rx, ry, rz) in enumerate(sh["blobs"]):
-                bx, by = cx + dx, cy + dy
-                gz = min(_zone_z(bx, by - ry, zone), _zone_z(bx, by, zone),
-                         _zone_z(bx, by + ry, zone))
-                sc.add_sphere(stage, f"{ROOT}/Shrub_{n}_{j}",
-                              (bx, by, gz + rz * (1.0 - emb)),
-                              (rx, ry, rz), M["shrub"])
+            rel, native = bare_pool[n % len(bare_pool)]
+            target = float(th) * 1.60
+            # the reference must land on `<prefix>/Veg/Asset`: that is `build_tree`'s
+            # convention **and** the hook `placement_lint`'s tree rule matches
+            # (`pattern: '/Veg$'`, `species_from: '<self>/Asset'`). Placing the asset
+            # directly under `Tree_n` would make these plantings invisible to LINT-1/2/3
+            # and to the LINT-4b species gate — the numbers would improve by dropping out
+            # of the check, which is the wrong kind of green.
+            n_bare += _bare_tree(f"{ROOT}/Tree_{n}/Veg", rel, native, cx, cy,
+                                 gz, target, (n * 47.0) % 360.0)
+            if n_bare == 0 and n == 0:
+                # asset route unavailable (LOOK_GEO off / assets absent) -> procedural
+                # fallback for the whole row, with the dormant blob tints.
+                for m, (bx, by, bzone, bth) in enumerate(PARAMS["trees"]):
+                    sc.build_tree(stage, f"{ROOT}/Tree_{m}", bx, by,
+                                  _zone_z(bx, by, bzone), M["wood"],
+                                  M["canopy_a"], M["canopy_b"],
+                                  trunk_r=tr["trunk_r"], trunk_h=bth,
+                                  stake_r=0.004, stake_h=0.02, stake_off=0.2)
+                break
+        print(f"[S3-11] 낙엽수 잎-off {n_bare}/{len(PARAMS['trees'])}주 "
+              f"(Gray_Birch·Elm_Sapling·Lombardy_Poplar 로테이션)")
+
+        # autumn-legal shrubs replace the 13 green blob clumps (§4.2-5).
+        se_pool = list(se["shrubs"])
+        pts = [(cx, cy, _zone_z(cx, cy, zone))
+               for cx, cy, zone in PARAMS["shrubs"]]
+        placed = sc.place_shrubs(stage, f"{ROOT}/Shrub", pts,
+                                 float(se["shrub_h"]), pool=se_pool,
+                                 seed=gk.det_seed("scene10.shrub", 0))
+        if not placed:
+            sh = PARAMS["shrub"]
+            emb = sh["embed"]
+            for n, (cx, cy, zone) in enumerate(PARAMS["shrubs"]):
+                for j, (dx, dy, rx, ry, rz) in enumerate(sh["blobs"]):
+                    bx, by = cx + dx, cy + dy
+                    gz = min(_zone_z(bx, by - ry, zone), _zone_z(bx, by, zone),
+                             _zone_z(bx, by + ry, zone))
+                    sc.add_sphere(stage, f"{ROOT}/Shrub_{n}_{j}",
+                                  (bx, by, gz + rz * (1.0 - emb)),
+                                  (rx, ry, rz), M["shrub"])
+        print(f"[S3-11] 가을 관목 {placed}/{len(pts)}군 "
+              f"(Burning_Bush 적 30.2 % · Juniper 상록 — 개화종 제외)")
+
+        # rock outcrop at the uphill margin + foot boulders (E10-10).
+        #   **Material override is mandatory here, not cosmetic.** The T2 rock scans bind
+        #   `assets/urban/nv_core/materials/SimPBR.mdl`, and that module fails to compile
+        #   in this runtime — `C120 could not find module '.::baking_annotations'` — so the
+        #   boulders render on the shader fallback (a flat saturated red mass, measured in
+        #   the `s311_season` probe). Binding the scene's own rock material on the Xform
+        #   **above** `/Asset` with `strongerThanDescendants` is the same device
+        #   `scatter_debris(mtl=…)` already uses to beat a prototype's mesh-level binding,
+        #   and it is the only one that survives `instanceable=True`.
+        n_out = 0
+        for i, (aid, ox, oy, _oz, oyaw, oscale) in enumerate(PARAMS["outcrop"]):
+            try:
+                xf = uk.add_urban_asset(stage, f"{ROOT}/Outcrop_{i}", aid,
+                                        pos_m=(ox, oy, ground_z(ox, oy)),
+                                        yaw_deg=oyaw, scale_mul=oscale,
+                                        z_mode="base", scene="10",
+                                        instanceable=False)
+                if xf is None:
+                    continue
+                # `instanceable=False` on purpose: an ancestor `strongerThanDescendants`
+                # bind does not reach inside a prototype (measured — the `s311b` probe
+                # still rendered the SimPBR fallback), so the override has to be written
+                # on the meshes themselves, which is exactly what `urban_kit`'s own
+                # `_bind_far_override` does. Four placements, so nothing is lost by not
+                # sharing a prototype.
+                try:
+                    from pxr import Usd, UsdShade
+                    ap = stage.GetPrimAtPath(f"{ROOT}/Outcrop_{i}/Asset")
+                    nb = 0
+                    for pr in Usd.PrimRange(ap):
+                        if pr.GetTypeName() == "Mesh":
+                            UsdShade.MaterialBindingAPI.Apply(pr).Bind(
+                                M["rockface"])
+                            nb += 1
+                    if nb == 0:
+                        print(f"[S3-11][경고] 노두 메시 0개 — 재질 미교체 {aid}")
+                except Exception as e:
+                    print(f"[S3-11][경고] 노두 재질 바인딩 실패 {aid}: {e}")
+                n_out += 1
+            except Exception as e:
+                print(f"[S3-11][경고] 노두 배치 실패 {aid}: {e}")
+        print(f"[S3-11] 암반 노두 {n_out}/{len(PARAMS['outcrop'])}개 "
+              f"(z_mode=base · sink 0 · SimPBR 폴백 대신 rockface 상위 바인딩)")
+
+        # continuous leaf litter over the corridor slope — C20. The 4 CB-2 carpet-mask
+        # lobes are **kept** as the dense cores (H4: a lobe may move, it may never become
+        # a rectangle again); the continuity comes from scatter around them, not from
+        # more lobes. `ground_fn` is mandatory here: without it every card would lie flat
+        # in mid-air over a 25.8 % slope.
+        se = PARAMS["season"]
+        cg = PARAMS["corridor"]
+        n_lit = 0
+        for i, (lx0, lx1, ly0, ly1) in enumerate((
+                (HEAD_X, PLAN_X1, cg["y0"], -1.70),
+                (HEAD_X, PLAN_X1, 1.70, 4.40),
+                (HEAD_X, PLAN_X1 * 0.5, -1.70, 1.70))):
+            n_lit += int(sc.scatter_debris(
+                stage, f"{ROOT}/Litter_{i}", lx0, ly0, lx1, ly1, 0.0,
+                cover=float(se["litter_cover"]),
+                seed=gk.det_seed("scene10.litter", i),
+                ground_fn=ground_z,
+                max_count=int(se["litter_max"])) or 0)
+        print(f"[S3-11] 연속 낙엽 산포 {n_lit}개 (CB-2 로브 4개는 조밀 코어로 존치)")
+
+        # distant city glimpse — BS-4 backdrop contract: 0 windows, silhouette only.
+        for i, (bx, by, bw, bd, bh) in enumerate(PARAMS["backdrop"]):
+            BOX(f"{ROOT}/Backdrop_{i}", (bx, by, bh / 2.0 + GROUND_Z),
+                (bw, bd, bh), M["backdrop"])
 
     def build_props(M):
         # timber waymarker (post + 2 direction blades + cap)
@@ -2117,18 +2423,43 @@ def main():
             base = ground_z((h["x0"] + h["x1"]) / 2.0,
                             (h["y0"] + h["y1"]) / 2.0)
             sc.build_hedge(stage, f"{ROOT}/FarHedge_{i}", h["x0"], h["y0"],
-                           h["x1"], h["y1"], h["h"], base_z=base)
+                           h["x1"], h["y1"], h["h"], mtl=M["hedge"],
+                           base_z=base)
         # [v6 C-4] forest band on the distant ridge crest - closed with a silhouette strip, not lollipops
         for i, h in enumerate(PARAMS["ridge_crest"]):
             sc.build_hedge(stage, f"{ROOT}/RidgeCrest_{i}", h["x0"], h["y0"],
-                           h["x1"], h["y1"], h["h"], base_z=h["base"])
-        # [v6 C-4] distant individuals get thicker trunks and more height to avoid 'thin stick + sphere'
+                           h["x1"], h["y1"], h["h"], mtl=M["hedge"],
+                           base_z=h["base"])
+        # [v6 C-4] distant individuals get thicker trunks and more height to avoid
+        #   'thin stick + sphere'. [S3-11] the species is now **pinned to
+        #   `Chinese_Juniper`** instead of drawn by coordinate hash: an evergreen keeps
+        #   its needles in 만추, so a green mass at distance is a conifer and not a season
+        #   error, and it is a `veg_manifest_w2` PASS row — which is what clears the nine
+        #   LINT-4b errors the hash draw produced (retired `White_Pine` ×5 + `Yellow_Pine`
+        #   ×4, the former carrying an uncorrected zmin −0.351).
+        rel, native = PARAMS["season"]["far"]
+        n_far = 0
         for i, t in enumerate(PARAMS["hill_trees"]):
             gz = _zone_z(t["cx"], t["cy"], t["zone"])
-            sc.build_tree(stage, f"{ROOT}/HillTree_{i}", t["cx"], t["cy"], gz,
-                          M["wood"], M["canopy_a"], M["canopy_b"],
-                          trunk_r=0.17, trunk_h=4.6 + 0.35 * (i % 4),
-                          stake_r=0.004, stake_h=0.02, stake_off=0.2)
+            th = 4.6 + 0.35 * (i % 4)
+            xf = sc.add_vegetation(stage, f"{ROOT}/HillTree_{i}/Veg", rel,
+                                   (t["cx"], t["cy"], gz),
+                                   yaw_deg=(i * 61.0) % 360.0,
+                                   target_h=th * 1.60, native_h=native)
+            if xf is None:
+                sc.build_tree(stage, f"{ROOT}/HillTree_{i}", t["cx"], t["cy"],
+                              gz, M["wood"], M["canopy_a"], M["canopy_b"],
+                              trunk_r=0.17, trunk_h=th,
+                              stake_r=0.004, stake_h=0.02, stake_off=0.2)
+            else:
+                try:
+                    stage.GetPrimAtPath(f"{ROOT}/HillTree_{i}/Veg/Asset") \
+                        .SetInstanceable(True)
+                except Exception:
+                    pass
+                n_far += 1
+        print(f"[S3-11] 원경 상록 {n_far}/{len(PARAMS['hill_trees'])}주 "
+              f"(Chinese_Juniper 고정 — White/Yellow_Pine 좌표해시 추첨 제거)")
 
     # [v5.2 user] arbitrary warning sign removed - build_sign() deleted.
 

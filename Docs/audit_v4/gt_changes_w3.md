@@ -197,6 +197,16 @@ its eyes open; a correction, if any, is the spec's to make.
   moves DEC-3's patch count** (`plaza_granite` `("patch", 2)` → `("patch", 1)`, −9 prims
   library-wide). If the supervisor intended scene01 only, this is the row to amend — the
   change is one tuple in `GROUND_PROFILES`.
+  **Supervisor ruling (07-31): profile-level reading CONFIRMED — W6 CLOSED.** The defect is
+  profile-level (a maintained plaza carries no weed tufts regardless of which scene renders it);
+  a scene01-only fork would leave the identical defect live in the 8 sibling scenes. RT's
+  shipped-side census is adopted as the figure of record: **81 instances / 12 scenes shipped**
+  (03 · C2 override `surface` to zero weeds, D3 to 8, scene18 re-adds 6 via its scene-side
+  override that the profile-row deletion cannot reach → net −48 over 8 scenes), all 81 are
+  `Grass_Short_C`, max shipped exposure **0.1174 m** (sceneN2) ≤ 0.12 — **class A holds
+  shipped-side**. Per W7/C-12 any row depending on the count must re-derive from scene
+  `PARAMS`. scene18's deliberate-looking weed override is NOT ruled here — its owning S-WP
+  reconciles it against the scene archetype in WINDOW 3.
 - **W7 · The weed census is a `SCENE_PLANS` figure, and C-12 applies to it.** The 85 / 13
   above is measured on the **fixture**. `scene03`'s shipped plan overrides `surface` to
   `(("patch", …), ("stain", …))` with no weed row at all, so the shipped tree carries fewer

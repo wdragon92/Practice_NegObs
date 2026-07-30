@@ -3827,8 +3827,15 @@ def _selfcheck():
     chk("surface 어휘 전부 SURFACE_KINDS 등재 (조용한 0개 낙하 차단)",
         all(w in SURFACE_KINDS for _k, w in _srows),
         f"{sorted({w for _k, w in _srows})} ⊆ {list(SURFACE_KINDS)}")
-    _gt24 = ("plaza_granite", "plaza_water", "sidewalk_block")
-    chk("GT-24 단위포장 3종 patch 행 0 (절삭 패치는 아스팔트 어휘)",
+    # [W3 K-micro · SB-F1] `levee_paved` added — the gate was one profile short of
+    # the rule it enforces. The 07-31 supervisor amendment extended GT-24 to the
+    # fourth unit-paved profile and deleted its `("patch", 4)` row (`:1972`), but the
+    # gate tuple still named three, so a regression that put the row back would have
+    # passed `python3 ground_kit.py` 60/60. SB recorded this deliberately rather than
+    # taking it, because that closure was authorised for one tuple and a gate tuple is
+    # a second one. This is that second tuple. No geometry, no prim delta.
+    _gt24 = ("plaza_granite", "plaza_water", "sidewalk_block", "levee_paved")
+    chk("GT-24 단위포장 4종 patch 행 0 (절삭 패치는 아스팔트 어휘)",
         not [k for k in _gt24 if ("patch" in {i[0] for i in
                                               GROUND_PROFILES[k]["surface"]})],
         " · ".join(f"{k}:{[i[0] for i in GROUND_PROFILES[k]['surface']]}"

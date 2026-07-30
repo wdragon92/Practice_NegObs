@@ -89,6 +89,27 @@ Run (GUI look check - default):
     not the culprit (flat shading and binding are fine), so switching to boxes would keep the same
     specular addition at the same material and orientation, and would only lose the corner lift.
 
+[W3 CB-1] w3_execution_spec_v1.md Sec.4.3 WP-S5 · Sec.5.2 CB-1. Two rows, one commit.
+  (A) **S09-A — three diagnostic side cuts** (Sec.10.5). The user could not judge this stair
+     because **not one of the five existing mise-en-scene cuts crosses the flight axis**:
+     ghat_walk / waterline / from_river / across_river all look along or head-on to ±X and
+     park_vista is framed on the pavilion, so 140-200 mm risers on a 10 m-wide flight
+     foreshorten into a flat masonry wall. Added to `build_views` **after** park_vista:
+     `stair_flank_raking` (primary, raking profile from over the water at +X/-Y) ·
+     `stair_flank_grazing` (down the flight from step 4 — the concealment case) ·
+     `landing_return` (cross-flight close-up on landing 1). Mise-en-scene registry only —
+     **no `sc.grid_views` call change and no preset touched**, so the 9 preset cuts stay
+     byte-identical and the judgement baseline is unaffected.
+  (B) **S09-C — stone posts off the stair face** (Sec.8 GT-10). The four `land_posts` stood
+     on the revetment at the two landing top faces (z -2.040 / -4.080), reading as posts
+     embedded partway up the stair face at different heights. They move to the terrace
+     promenade edge, all four at one height (x -0.80, z 0.0, four y stations). Props only —
+     hazard geometry (steps · landings · embankment · terrace) is untouched, and at
+     |y| ≥ 5.6 they sit outside the ±30 deg FOV of every grid preset [computed].
+  These two rows are coupled: `landing_return` runs at constant x = 4.34, which is exactly
+  the landing-1 x centre the old posts stood on, so the old post at (4.34, -5.6) would have
+  blocked the new cut outright.
+
 Auto capture : NEGOBS_CAPTURE=1 python scene09_ghat_riverfront.py
 Assembly smoke: NEGOBS_SMOKE=1 python scene09_ghat_riverfront.py
 Self-check   : NEGOBS_SELFCHECK=1 python scene09_ghat_riverfront.py  (no boot)
@@ -246,8 +267,35 @@ PARAMS = dict(
                   roof_rise=1.15, corner_lift=0.16,  # 4-sided slope + corner lift
                   finial_r=0.11, finial_h=0.42,
                   rail_h=0.44, rail_t=0.07, rail_post_r=0.035, rail_n=3),
-    # 4 landing marker stone posts — outside the stair width (y±5). Reads the ultra-wide scale and landing positions
-    land_posts=dict(r=0.24, h=2.1, ys=(-5.6, 5.6)),
+    # 4 stone posts. [W3 CB-1 · S09-C] **moved off the stair face onto the terrace.**
+    #   Defect (w3_intake_06_10 S09-C, visible in look_check/scene09/260730_w2d_fix/
+    #   pt_noon_across_river.png and pt_noon_from_river.png): the four posts stood at
+    #   the two landing x centres (4.34 / 9.28) on the embankment at y ±5.6, i.e. on
+    #   the **revetment face**, with their bases at the landing top faces z -2.040 and
+    #   z -4.080. They read as posts embedded partway up the stair face at three or
+    #   four different heights. A Korean 계선주 / quay post stands on the **quay top**,
+    #   at the level a boat is tied — never on a stair slope.
+    #   Fix, per w3_execution_spec_v1 Sec.8 GT-10 ("to the terrace edge or the lowest
+    #   landing"): **terrace edge**, all four at one height, z base 0.0.
+    #     · `x = -0.80` — the terrace's own declared promenade edge line: it is
+    #       `lawns[*].x1` (-0.8) verbatim. It is also the deepest setback available
+    #       here: with r 0.24 the footprint reaches x -1.04, clearing the pavilion
+    #       **eave tip x -1.15** (build_pavilion docstring) by 0.11 m [computed], and
+    #       standing 0.56 m back from the stair head lip at x = 0.
+    #     · `ys` — 4 stations on that one line, both taken from existing PARAMS, none
+    #       invented: ±5.6 is the row's own current y (0.6 m outside the flight edge
+    #       y ±5), ±12.0 is `lawns[*].y0 / y1`, the lawn bands' inner edge.
+    #       The `mooring` pile stations (±3.8 / ±13.5 / ±19.0) are deliberately NOT
+    #       reused: a pile sits at x -1.2, only 0.40 m away, and r 0.09 + r 0.24 = 0.33
+    #       would leave a 70 mm gap between two very differently sized posts.
+    #   Checks [computed]: |y| ≥ 5.6 at x -0.80 bears ≥ 31.3 deg from the furthest grid
+    #   preset eye (-10, 0) → **all four stay outside the ±30 deg preset FOV**, so they
+    #   cannot occlude the stair-head drop edge in any judged cut. Hazard geometry
+    #   (steps · landings · embankment · terrace) is untouched — these are props.
+    #   The ±12.0 pair straddles the lawn bands' river-side corner; `lawn_proud` is
+    #   0.03 m, so there is no step of consequence under the base.
+    land_posts=dict(r=0.24, h=2.1, x=-0.80, z=0.0,
+                    ys=(-12.0, -5.6, 5.6, 12.0)),
     # [v6 rework (3)] 2 lawn bands on the upper terrace — puts the evidence for "park" into the frame.
     #   Outside the stair width (y±5) · inside the terrace (x −30..0, y ±40). Top face proud by 0.03 (walk continuity).
     #   How it reads: left/right lawn faces in park_vista; in from_river/across_river
@@ -896,6 +944,73 @@ def build_views(run, z_bot, water_z, water_x0):
     #   [v8 Y1] the coordinates come from the single source PARAMS["views_park_vista"] (shared with the checker).
     _pv = PARAMS["views_park_vista"]
     views["park_vista"] = dict(eye=list(_pv["eye"]), tgt=list(_pv["tgt"]))
+
+    # === [W3 CB-1 · S09-A] three diagnostic side cuts =======================
+    #   w3_execution_spec_v1.md Sec.10.5 "S09-A three diagnostic cuts".
+    #   Why they exist: **not one of the five existing mise-en-scene cuts crosses the
+    #   flight axis** — ghat_walk / waterline / from_river / across_river all look
+    #   along or head-on to +-X, and park_vista is framed on the pavilion. At those
+    #   ranges the 140-200 mm risers on a 10 m-wide flight foreshorten into a flat
+    #   masonry wall (pt_noon_across_river.png reads as a plain revetment with faint
+    #   horizontal courses), which is the whole reason the stair cannot be judged.
+    #
+    #   These are **mise-en-scene registry entries only**. They are appended AFTER
+    #   park_vista, so the first 14 entries of `views` keep their identity and their
+    #   order: the 9 `sc.grid_views` presets stay byte-identical and the judgement
+    #   baseline is untouched. No preset height/distance/pitch is read or written here.
+    #
+    #   Lighting constraint (derived, not assumed): SUN_AZ_OFFSET = 0.0 with
+    #   hdri_sun_rotz_offset = 233.5; measured in pt_noon_across_river.png the mooring
+    #   /pile shadows fall toward +Y, so **the sun is on the -Y side**. A flank camera
+    #   must therefore sit at **+X and -Y** to keep both the risers and the flank
+    #   front-lit — which is what stair_flank_raking and landing_return do.
+    #
+    #   Geometry the bearings are derived from (recomputed from compute_steps(), all
+    #   [computed]): 36 risers, tread 0.34, landings at step 12 (x 3.74..4.94,
+    #   top z -2.040) and step 24 (x 8.68..9.88, top z -4.080); bottom step top
+    #   z -6.120 at x 13.96; water surface **z = -5.190** (= 6th-from-bottom step top
+    #   -5.240 + water_extra 0.05) starting at x = 11.92.
+    #   NOTE: w3_execution_spec_v1 Sec.10.5 and w3_intake_06_10 S09-B both quote the
+    #   waterline as "-5.240" — that is the *step top face*, not the water surface;
+    #   the surface this scene actually builds is **-5.190** (the water covers that
+    #   tread by 50 mm). Confirmed independently by WP-T3 on a real usd-core stage
+    #   (`Docs/reports/w3_geom_reverify_v1.md`, commit e0fdee4). It changes none of
+    #   the three cuts, which are literal coordinates — only the derived note below.
+
+    # (1) PRIMARY. Bearing 130.8 deg, pitch -5.5 deg, range 14.60 m [computed].
+    #   Eye is over the water (water starts at x 11.92) at z -2.20 = **2.99 m above
+    #   the surface (-5.190)** — a boat / mast height, not a drone shot.
+    #   Delivers the whole 36-riser stack in raking profile against the water, both
+    #   landings visible as breaks in the riser rhythm, and the waterline cutting the
+    #   flight. Front-lit: eye is at +X / -Y, the sun side.
+    views["stair_flank_raking"] = dict(eye=[15.00, -11.00, -2.20],
+                                       tgt=[5.50, 0.00, -3.60])
+    # (2) The concealment case, without touching a preset. Eye stands on **step 4**
+    #   (0-based index 3, x 1.02..1.36, top z -0.680) at z 0.55 = **1.23 m above that
+    #   tread** [computed], 0.4 m in from the north flight edge (y 4.60 vs y1 5.0),
+    #   looking straight down the flight (+X, target y identical so the axis is pure).
+    #   By construction the risers face **away** from the camera — this is the same
+    #   read the h0.3 grid presets test, and the question it answers is whether the
+    #   nosing line collapses into a single plane.
+    views["stair_flank_grazing"] = dict(eye=[1.20, 4.60, 0.55],
+                                        tgt=[11.00, 4.60, -4.60])
+    # (3) Cross-flight close-up on **landing 1** (x 3.74..4.94, top z -2.040).
+    #   Bearing 90 deg (+Y), pitch -14.7 deg, range 9.10 m [computed]. Shows the
+    #   1.20 m landing tread against the 0.34 m steps, the flank / cheek condition and
+    #   the terrace junction. Front-lit from the south (-Y).
+    #   Occlusion check against the embankment (PARAMS["embankment"], scene09:184-188):
+    #   the embankment is a **stepped extension on the same step table**, so at
+    #   x = 4.34 the surface at y = -8.20 is the same z = -2.040 as the landing, i.e.
+    #   there is no side *slope* to occlude. The ray from z +0.20 to z -2.10 passes
+    #   z = -0.636 at the y = -5.0 flight seam, **1.40 m clear** of that surface [computed].
+    #   The eye at z +0.20 is 2.24 m above it.
+    #   [W3 CB-1 · S09-C dependency] the ray is at constant x = 4.34, which is exactly
+    #   the landing-1 x centre the old `land_posts` stood on: the post at (4.34, -5.6)
+    #   used to span z -2.040..+0.060 directly on this sight line and would have
+    #   blocked the cut outright. S09-C moves those posts to the terrace, which is why
+    #   the two rows ship in the same commit.
+    views["landing_return"] = dict(eye=[4.34, -8.20, 0.20],
+                                   tgt=[4.34, 0.60, -2.10])
     return views
 
 
@@ -923,7 +1038,18 @@ BANNER = """\
                    원인은 법선이 아니라 `specular_level` 미지정이었다
 11. [v7] 석재 톤   — ghat_walk 포장이 순백(223)에서 회색 화강암(≈192)으로
                    내려오고, from_river 36단의 **단 분절**이 되살아났는가.
-                   물때(수위선)·이끼 밴드 대비는 그대로인가(대비비 보존)"""
+                   물때(수위선)·이끼 밴드 대비는 그대로인가(대비비 보존)
+12. [W3 S09-A] 진단 3컷 — 기존 5개 연출컷 중 **비행 축을 가로지르는 컷이 하나도 없었다**.
+    stair_flank_raking  — 36단 스택이 레이킹 프로파일로 서는가.
+                          중간 참 2개가 리듬의 끊김으로 보이고, 수면이 계단을 자르는가
+    stair_flank_grazing — 계단 4번째 단 위(트레드 +1.23 m)에서 내려다볼 때
+                          디딤코 선이 한 평면으로 뭉개지는가(은폐 케이스)
+    landing_return      — 1.20 m 참 트레드가 0.34 m 단들과 대비되어 읽히는가.
+                          측벽(cheek)·테라스 접합부가 보이는가
+    ※ 프리셋 13컷은 손대지 않았다 — 판정 베이스라인 불변
+13. [W3 S09-C] 석주 위치 — 계단면(리벳먼트) 중턱에 박혀 있던 석주 4본이
+                   테라스 산책로 가장자리(x −0.80, z 0.0)의 **한 높이**로 올라왔는가.
+                   계선주는 배를 매는 안벽 상단에 서지, 계단 경사면에 서지 않는다"""
 
 
 def main():
@@ -1410,15 +1536,16 @@ def main():
         build_lawns(M)                       # [v6 (3)] lawn bands + street trees
         build_deck(M)
         build_reeds(M)
-        # 4 landing marker stone posts — at the landing x centre, outside the stair width (y±5.6)
+        # 4 stone posts on the terrace promenade edge.
+        #   [W3 CB-1 · S09-C] was: two per landing at the landing x centre, standing on
+        #   the revetment at the landing top z. Now: one line at x = -0.80, z base 0.0,
+        #   four y stations — see the PARAMS["land_posts"] block for the derivation.
+        #   The prim names are kept as LandPost_* for continuity with the judgement files.
         lp = PARAMS["land_posts"]
-        for li, si in enumerate(PARAMS["stairs"]["landing_steps"]):
-            xa, xb, _ = steps[si]
-            for yi, yy in enumerate(lp["ys"]):
-                sc.add_cylinder(stage, f"{ROOT}/LandPost_{li}_{yi}",
-                                ((xa + xb) / 2.0, yy,
-                                 steps[si][2] + lp["h"] / 2.0),
-                                lp["r"], lp["h"], M["stone"], collider=True)
+        for pi, yy in enumerate(lp["ys"]):
+            sc.add_cylinder(stage, f"{ROOT}/LandPost_{pi}",
+                            (lp["x"], yy, lp["z"] + lp["h"] / 2.0),
+                            lp["r"], lp["h"], M["stone"], collider=True)
         # 4 benches — [§3] beside anchors (pavilion · lawn band edge · deck), yaw jitter +-3~8 deg
         for i, (bx, by, yaw) in enumerate(PARAMS["benches"]):
             sc.build_bench(stage, f"{ROOT}/Bench_{i}", bx, by, 0.0, M["post"],

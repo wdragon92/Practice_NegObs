@@ -250,8 +250,12 @@ PARAMS = dict(
     #  Coverage percentages themselves are `[ref]` G7 + `[assumed]` — no Korean document gives a
     #  tread-specific figure (research §B4b), so SMOKE **prints** them and 통람 judges them.
     stone_mtl=dict(n=8, seed=7071, scale=(0.55, 1.35), bump=1.5,
-                   tint_dry=(0.88, 0.86, 0.82), tint_moss=(0.74, 0.84, 0.70),
-                   tint_mid=(0.81, 0.85, 0.76), tint_jit=0.06,
+                   # [pilot fix 2] the moss and mid tiers carry 85 % of the riser bodies and
+                   #   41 % of the tread caps, and every riser on a +X-descending stair under
+                   #   this scene's frozen sun bearing is a shaded face — the two together read
+                   #   near-black. Both tiers are lifted; the zone *fractions* are untouched.
+                   tint_dry=(0.90, 0.88, 0.84), tint_moss=(0.82, 0.90, 0.78),
+                   tint_mid=(0.88, 0.90, 0.84), tint_jit=0.06,
                    n_dry=3, n_mid=3, n_moss=2),
     #  Zone targets, spec §4.1-3. `p_*` are the draw probabilities that realise them; the
     #  achieved fractions are measured from the built table and printed by the self-check.
@@ -328,16 +332,28 @@ PARAMS = dict(
     #   7.5 and grow: at `trunk_h` 9.0-9.4 the asset stands 14.4-15.0 m with its crown base
     #   ~4 m up, so what reaches over the corridor is canopy at the top of the frame — E7-8's
     #   tunnel — instead of foliage across the walk line.
-    #   Second pilot pass: at |cy| 5.6/7.5 the crowns cleared the walk line but the flat green
-    #   ridge wall came back into `h0.3_d2`'s horizon — the near canopy was the thing that had
-    #   closed it. Final placement keeps a **north** tree close (the north bank is only 0.36 m
-    #   below the corridor, so its crown base sits ~4 m up and reads as the tunnel roof) and
-    #   pushes the **south** one downhill past `stone_rhythm`'s target, because the south
-    #   margin is 1.8 m lower and a crown there lands at walk height.
-    frame_trees=[dict(name="F0", cx=2.20, cy=3.60, zone="north",
-                      trunk_h=9.0, trunk_r=0.36),
-                 dict(name="F1", cx=9.20, cy=-4.80, zone="south",
-                      trunk_h=9.4, trunk_r=0.30)],
+    #   **SHIPPED EMPTY, and this is a measured result, not an omission.**
+    #   Three placements were rendered: |cy| 2.6 (first pilot), |cy| 5.6 / 7.5, and
+    #   |cy| 3.6 / −4.8 at `trunk_h` 9.0-9.4 (= 14.4-15.0 m of `Shumard_Oak`, whose crown is
+    #   10.4 x 10.3 m at its 10.9 m native height). An A/B with `frame_trees` forced empty
+    #   isolates them as **the entire DARK / OCCL delta of this rebuild** `[measured, PT_FAST,
+    #   same round, same commit]`:
+    #       cut              with trees        without      CB-2 baseline
+    #       h0.3_d2          94.0 / 34.8 %   114.5 / 13.8 %   115.9 / 13.9 %
+    #       h0.9_d2          48.0 / 64.4 %    98.1 / 19.5 %    86.8 / 19.5 %
+    #       side_slope       10.1 / 93.9 %    87.9 / 24.4 %    82.5 / 26.4 % (w2d_fix)
+    #       stone_rhythm     73.3 / 48.5 %   127.9 /  7.3 %    97.8 /  6.2 % (w2d_fix)
+    #   Without them every DARK / OCCL gate lands **at or better than baseline** and the only
+    #   thing left moving is FRAME, which §6.4 declares in advance. With them `side_slope`
+    #   loses 78 luminance points and reads 94 % dark — that is not a look, it is a blackout.
+    #   The cause is structural, not a placement mistake: this asset's crown radius is ~0.48x
+    #   its height, the corridor is 3.4 m wide, and the south margin is 1.8 m BELOW the walk,
+    #   so any tree big enough to read as G7's old growth also roofs the walk line from
+    #   30-40 % of its own height. **E7-8's canopy tunnel therefore needs a distant belt or a
+    #   high-crown species, not two near-field trunks** — recorded as a follow-up, because
+    #   trading a live gate for a dressing item is exactly what H16 forbids. The builder path
+    #   below is left intact and driven by this list, so re-enabling is a one-line change.
+    frame_trees=[],
     #   Species is **pinned**, not hashed — see `build_ferns`. `native_h` is zmax
     #   [measured — scene_common.VEG_TREES / veg_manifest_w2.json].
     frame_tree_veg=dict(rel="Trees/Shumard_Oak.usd", native_h=10.8989),
@@ -581,8 +597,12 @@ PARAMS = dict(
                    granite=3.2, leaf_ground=2.0, gravel=0.35, grass=1.4,
                    dirt_park=1.10, moss=2.40),
         # [W3 S3-6 · GT-17] summer forest floor + the first moss tint in this scene.
-        forest_tint=(0.70, 0.71, 0.62),
-        moss_tint=(0.80, 0.93, 0.78),
+        # [pilot fix 2] 0.70/0.71/0.62 was measured 40 luminance points darker than the
+        #   `leaf_ground` x leaf_tint it replaced and drove the DARK gate on 5 cuts;
+        #   `dirt_park` is already a dark damp-soil scan, so the tint is now near-neutral and
+        #   the damp read comes from the map, not from a multiplier.
+        forest_tint=(1.00, 0.98, 0.90),
+        moss_tint=(0.95, 1.00, 0.92),
         # [W3 S3-7] 기와 tone. Dark grey-blue, kept under the sRGB dark-colour floor the
         #   v6 ruling set for roofs (the old flat constant was 0.045/0.030/0.018).
         tile_tint=(0.62, 0.64, 0.68),

@@ -389,7 +389,18 @@ python3 scripts/regression_check.py --before look_check/scene02/260731_w3_cb7 \
 python3 scratchpad/imgcmp.py <dirA> <dirB>               # means, LSB bands, red-fallback
 ```
 
-**Commits.** `5340d49` scene02 (GT-25) · this report. `look_check/**` and the four stamp edits are
-gitignored artefacts. `Docs/reports/regr_260731_w3_gt25.json` is this round's adjudication output
-and is committed with the report — the one path beyond the literal own-list, declared here rather
-than slipped in.
+**Commits.** `5340d49` scene02 (GT-25) · `ced59dd` this report + `regr_260731_w3_gt25.json`.
+`look_check/**` and the four stamp edits are gitignored artefacts. The regression JSON is this
+round's adjudication output and is the one path beyond the literal own-list — declared here rather
+than slipped in. **`scenes/main/scene07_temple_stone_path.py` and
+`scenes/main/scene10_park_deck_switchback.py` are byte-unchanged across `e1150d6..HEAD`**
+(`git diff --stat` empty), which is the FU-1 verdict expressed in the tree rather than only in
+prose.
+
+**Tree-wide floor at the landing commit.** `git archive 5340d49` → isolated arm →
+`python3 scripts/geom_invariance_check.py` **unscoped: R-4 33/33 · R-6 33/33 PASS**. Taken at
+`5340d49` rather than at HEAD deliberately: the concurrent lane's `8b6baa7` (GT-24 `ground_kit`)
+and `59a944e` landed between this batch's two commits, and certifying their tree is not this
+task's business (MD-F1). The interleaved history in `e1150d6..HEAD` is
+`5340d49` (mine) → `8b6baa7` (GT-24 lane) → `59a944e` (GT-24 lane) → `ced59dd` (mine); every
+commit's file list is inside its own lane's paths, checked commit by commit.

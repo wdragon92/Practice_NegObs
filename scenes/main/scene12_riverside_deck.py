@@ -104,6 +104,58 @@ step <= 0.17)
      (`sc.build_bench`), the straight cut of the bike path (§5), the near-black
      under-deck cavity in `bank_face` (an illumination item).
 
+[W3 L12 - target-image renovation] Lane 3 row 3.1 of `w3_intake_v2_images.md` §4.
+  **SEASON = SUMMER.** scene12 has no image of its own; under §7 ruling 8 an
+  imageless scene inherits its **nearest image's** season, and the intake names
+  **G3** (`Docs/reference_photos/Generated Image - Scene03.jpg`) primary and
+  **G9** (`...Scene09.jpg`) secondary. G3 is a Han River levee promenade in full
+  summer - saturated green shrub mass on the levee slope, full-leaf broadleaf on
+  the crest, deep blue sky with cirrus. **G9 is autumn and is read for the
+  deck-over-water FORM only, never for its season** - exactly the pairing
+  scene17 declares, and 12 and 17 share one world, so they must agree.
+  `season_audit()` runs the per-scene check §7-8 requires; there is no `bare=`
+  call site in this file and the audit gates on that.
+
+  **GT-43** (`Docs/audit_v4/gt_changes_w3.md` §3) - the river-side guard becomes
+  **착색방부목 round post-and-rail**, the product G3 actually shows at the water
+  edge, and its members move to the two round preservative-timber sections this
+  repo has verified (`s3_research_numbers_v1.md` §A5, KFS-TRAIL 그림 3-20 p.72,
+  grade A): **Ø120 posts · Ø80 rails**, replacing Ø64/Ø70/Ø40 steel-pipe
+  diameters. Three things are deliberately NOT done, each with its reason:
+    (a) **no balusters.** scene10's square sawn 방부목 railing
+        (`w3_s10_rebuild_v1.md` §2) is a park-deck 방부각재 product; G3's
+        river-edge product is a round-log post-and-rail with no infill at all.
+        More decisively: the h0.3 sight line running out **under the mid rail**
+        is this scene's negative-obstacle premise (see Hazard above), so
+        infilling the bay would silently move the research variable.
+    (b) **post pitch stays 1.5 m** against §A5's 1.2 m 통나무펜스 정간 - the
+        2.4 m destroyed span is two bays of the 1.5 m grid and the stubs at
+        -5.4/-4.2 sit on it, so re-pitching would move the hazard itself.
+    (c) **rail height stays 1.05 m.** It is below both 조경설계기준 16.13.2(2)
+        (산책로 1,100) and 16.20.2(2) (관찰데크 1,200); scene10 landed 1.10 on
+        the KNPS n=1,227 built-reality median. Left alone and recorded as
+        **L12-F1** - this scene's declared identity is a degraded guard, and
+        moving the rail height without a ruling moves a cue.
+  **GT-44** - the deck timber goes to the measured 2-5 year 방부목 patina band.
+  `M["deckwood"]` bound the `wood_dark` map **raw**: mean linear
+  (0.0824, 0.0584, 0.0442), L* 30.03, `albedo_selfcheck` 0.081 - a third of the
+  band floor, on a walked deck. Target L* 56.0 / a* +1.0 / b* +6.0, albedo
+  0.2391, which satisfies all four clauses of the band at once (see
+  `PARAMS["material"]["deck_tint"]` for the derivation and the clipping test).
+
+  **River width: measured, NOT re-widened.** The intake is explicit that "12 and
+  17 must not be re-widened independently of 03". `river_view_selfcheck()`
+  reports the water's share of every judged frame; the effective channel is
+  y 3.70..70.00 = **66.3 m**, already ~2x scene03's landed 33.8 m, so R03-1's
+  inheritance is satisfied by construction and the water plane is untouched.
+
+  **Species: no flip owed, measured not assumed.** `SCENE_SPECIES["Scene12"] =
+  ("poplar", None)`; all 5 route trees already resolve to `Lombardy_Poplar` by
+  prim-path token, so K4-F4's "a declared belt stays inert until the scene
+  passes species=/belt=" does not bite here - the **belt is None because the
+  scene has no across-water tree stand to put one on** (every tree is at
+  y -8.5..-13, the land side). Recorded so a later sweep does not "fix" it.
+
 Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
@@ -219,8 +271,18 @@ PARAMS = dict(
     far_bank=dict(x0=-40.0, x1=60.0, y0=70.0, y1=100.0, z_top=-1.50,
                   thick=2.2),
     # --- railing (river side y=1.15) : **no** kick plate - why the robot view stays open ---
-    rail=dict(y=1.15, post_r=0.032, post_h=1.05, spacing=1.5,
-              top_z=1.05, top_r=0.035, mid_z=0.55, mid_r=0.020,
+    # [W3 L12 · GT-43] sections move off steel-pipe diameters onto the two round
+    #   preservative-timber sizes this repo has verified (`s3_research_numbers_v1.md` §A5,
+    #   KFS-TRAIL 그림 3-20 p.72, source grade A): 방부원형목재 **Ø120** and **Ø80**.
+    #     post_r 0.032 -> 0.060 (Ø64 -> Ø120) · top_r 0.035 -> 0.040 (Ø70 -> Ø80)
+    #     mid_r  0.020 -> 0.040 (Ø40 -> Ø80)
+    #   Cost to the premise, re-derived not asserted: the open band between the deck top
+    #   face (z=0) and the **mid-rail underside** goes 0.530 -> 0.510 m (-20 mm, -3.8 %),
+    #   top-rail underside 1.015 -> 1.010. The h0.3 sight line survives; the cost is printed
+    #   by the smoke rather than left to a reader's arithmetic.
+    #   `spacing` and `post_h` are deliberately NOT touched - see the L12 docstring block (b)/(c).
+    rail=dict(y=1.15, post_r=0.060, post_h=1.05, spacing=1.5,
+              top_z=1.05, top_r=0.040, mid_z=0.55, mid_r=0.040,
               gap_x0=-6.0, gap_x1=-3.6,            # destroyed span 2.4 m
               stub_xs=(-5.4, -4.2), stub_h=0.10,   # sheared-off post stubs
               # [v6 C-6] warning tape = 0.02-thick square bar -> **thin ribbon + sag**.
@@ -312,10 +374,36 @@ PARAMS = dict(
         #     Han River turbid water is a pale grey-blue in reality, not pure blue-black.
         #   ** water z (−1.80) and extent unchanged = GT 1.80 m unchanged. Material only. **
         water_color=(0.062, 0.108, 0.112), water_rough=0.14,
-        # === [v7 ruling §8 (3)/(c)] the railing is a **glossy white pipe** (hospital / pool handrail).
-        #   A Han River deck railing is painted steel (dark grey). Albedo 0.80 -> 0.30,
-        #   metallic 0.9 → 0.25, rough 0.35 → 0.55.
-        rail_color=(0.30, 0.31, 0.33), rail_metallic=0.25, rail_rough=0.55,
+        # === [W3 L12 · GT-44] deck timber -> the measured 2-5 year 방부목 patina band ===
+        #   The `wood_dark` map was bound RAW here. Measured at full resolution this lane:
+        #     source mean linear (0.0824, 0.0584, 0.0442) · Y 0.0625 · L* 30.03
+        #   (an independent reproduction of `w3_s10_rebuild_v1.md` §2.2's figure).
+        #   Band [research §D4/D5, CIELAB from Forests 9(8) 488 and Wood Research 62(5) 737]:
+        #     L* 53-60 · a* 0..+2 · b* +4..+10 · albedo 0.22-0.28
+        #   The band's own clauses disagree at the floor - L* 53 <-> Y 0.2105 is BELOW the
+        #   albedo clause - so the effective intersection is **L* 54.1-59.9**. The target sits
+        #   in its lower half because this deck is open and unshaded under the 49.79 deg L0 sun.
+        #   Reference read [ref, this session]: G9's boardwalk in diffuse light measures
+        #     L* 58.05 · a* +1.41 · b* +2.34 - inside the band, but it is a RENDERED PIXEL under
+        #     sky illumination, i.e. an upper bound on albedo, not an albedo. Hence below it.
+        #   target L* 56.0 / a* +1.0 / b* +6.0 -> linear (0.2642, 0.2355, 0.2012), albedo 0.2391
+        #   tint = target / source; clipped texels at this gain = 0.0122 % -> the shipped map
+        #   carries the target, so no weathered-plank procurement is opened (S10 G5 stays unspent).
+        deck_tint=(3.207, 4.030, 4.553),
+        # === [W3 L12 · GT-43] guard timber = 착색방부목 (colour-stained), NOT weathered silver ===
+        #   G3's levee-edge guard and benches are a stained product, measured over 5 clean
+        #   patches this session at L* 32.7 (shadowed post) .. 51.6 (sunlit bench slat),
+        #   a* +0.5..+3.8, b* +6.8..+20.7 - plainly darker and warmer than the weathered band.
+        #   Research §D5 names 착색방부목 as a distinct product that starts brown rather than
+        #   following the ACQ green -> honey -> driftwood-grey path, so the deck and the guard
+        #   are genuinely two products, not one material at two ages.
+        #   Target L* 44.0 / a* +3.0 / b* +12.0 - inside the measured bracket, below the sunlit
+        #   reads (a lit face renders above its albedo), above the deep-shadow read.
+        #   -> linear (0.1766, 0.1320, 0.0894), albedo 0.1384. Clipping 0.0001 %.
+        #   Consequence, measured rather than hoped: deck/guard luminance contrast becomes
+        #   **1.73x**, where the outgoing painted steel against the corrected deck would have
+        #   been only 1.29x - the cue reads BETTER after the swap, not worse.
+        guard_tint=(2.144, 2.258, 2.022),
         wood_color=(0.30, 0.20, 0.12), wood_rough=0.85,
         bollard_color=(0.33, 0.33, 0.36), bollard_metallic=0.4,
         bollard_rough=0.5,
@@ -487,14 +575,17 @@ def _srgb(u):
 
 # (label, texture role|None, material key|None, large area, horizontal face)
 _ALBEDO_TABLE = [
-    ("데크 널(목)",     "wood_dark",      None,             True,  True),
+    # [W3 L12] the two timber rows now carry their derived tints. Before GT-44 the deck row
+    #   read `None` (the map bound raw) and printed 알베도 0.081 - the defect, in the scene's
+    #   own instrument. The guard row was `rail_color`, a painted-steel constant.
+    ("데크 널(목)",     "wood_dark",      "deck_tint",      True,  True),
+    ("가드 난간(목)",   "wood_dark",      "guard_tint",     False, False),
     ("호안 사석",       "rock_wall",      None,             True,  True),
     ("물때 사석",       "rock_wall",      "wet_tint",       True,  True),
     ("둔치 잔디",       "grass",          "grass_tint",     True,  True),
     ("자갈 산책로",     "gravel",         None,             True,  True),
     ("아파트 외벽",     "concrete_wall",  None,             True,  False),
     ("자전거도로 차선", None,             "paint_color",    False, True),
-    ("난간",            None,             "rail_color",     False, False),
     ("파라펫",          None,             "parapet_color",  True,  False),
     ("가로등 등기구",   None,             "lamp_color",     False, False),
     ("경고 테이프",     None,             "tape_color",     False, False),
@@ -546,6 +637,171 @@ def albedo_selfcheck(verbose=True):
         print(f"    ⇒ {'OK — 대면적 위반 0건' if ok else 'FAIL: ' + str(fails)}"
               f"{'  (WARN: ' + str(warns) + ')' if warns else ''}")
     return ok, rows
+
+
+# ===========================================================================
+# [B-3] [W3 L12] season audit + river-view measurement. Both are pure CPU, no
+#       Isaac boot, no GPU, no render - the scene03 `river_width_selfcheck`
+#       convention (`w3_s03_v1.md` §1.2) ported to this scene's geometry.
+# ===========================================================================
+def season_audit(verbose=True):
+    """[W3 L12] §7 ruling 8 requires **one seasonal audit per scene**, against the
+    season that scene's own target image pins. scene12 is imageless and inherits
+    **G3 = SUMMER**; G9 (autumn) is read for the deck-over-water form only.
+
+    Every row is a value read out of PARAMS, not an adjective. Returns (ok, rows).
+    """
+    mp = PARAMS["material"]
+
+    def _green_dom(t):
+        """A tint is a summer-foliage tint if green leads and it is not a dry khaki."""
+        return t[1] >= t[0] and t[1] > t[2]
+
+    rows = []
+    rows.append(("route trees x%d" % len(PARAMS["trees"]),
+                 'SCENE_SPECIES["Scene12"] route=poplar · bare= not passed (default False)',
+                 "full leaf", True))
+    rows.append(("belt trees x0",
+                 'SCENE_SPECIES["Scene12"] belt=None · no across-water stand exists '
+                 '(every tree y -8.5..-13, land side)',
+                 "n/a - nothing to flip", True))
+    for key in ("canopy_a", "canopy_b"):
+        t = mp[key]
+        rows.append((f"tree canopy {key}", f"{t}", "dark green", _green_dom(t)))
+    t = mp["grass_tint"]
+    rows.append(("floodplain turf grass_tint", f"{t}", "green-dominant", _green_dom(t)))
+    t = PARAMS["reed_tint"]
+    # 억새 read: green-dominant foliage with NO plume geometry built is a summer stand.
+    # A khaki plume band would be the autumn read; scene17 makes exactly this call and
+    # 12 shares its world, so the two must agree.
+    rows.append((f"silver grass x{sum(1 for _ in PARAMS['reeds'])} bands · "
+                 f"{len(list(reed_instances()))} stalks",
+                 f"reed_tint {t} · g/r {t[1]/t[0]:.2f} · g/b {t[1]/t[2]:.2f} · "
+                 f"no plume geometry built",
+                 "summer 억새 foliage", _green_dom(t)))
+    # Measured, not asserted. The token is assembled at runtime so that this counting
+    # line does not itself contain the literal it is looking for (it did, and the audit
+    # duly reported its own source as a leaf-off call site).
+    tok = "bare" + "=True"
+    nbare = 0
+    try:
+        with open(os.path.abspath(__file__), encoding="utf-8") as fh:
+            nbare = sum(1 for ln in fh if tok in ln and "tok =" not in ln)
+    except OSError:
+        nbare = -1
+    rows.append(("bare= / BARE_SUBPRIMS call sites", f"{nbare} in this file",
+                 "n/a by design - nothing here is leaf-off", nbare == 0))
+    rows.append(("Rhododendron (K4-F1 flower loss)",
+                 "not referenced in this scene",
+                 "n/a - library-wide, not a scene regression", True))
+    rows.append(("sun noon_sun_elev",
+                 f"{PARAMS['light']['noon_sun_elev']:.2f} deg = the library L0 datum "
+                 f"(29 of 33 scenes)",
+                 "INFO - no scene can pin summer through sun angle (S17-F3)", True))
+    ok = all(r[3] for r in rows)
+    if verbose:
+        print("  [W3 L12 계절 감사] G3 = 여름 (G9 는 형태만, 계절 아님)")
+        for name, val, read, good in rows:
+            print(f"    {'OK  ' if good else 'FAIL'} {name:34s} {val}")
+            print(f"         -> {read}")
+        print(f"    ⇒ 위반 {sum(1 for r in rows if not r[3])} 건")
+    return ok, rows
+
+
+def _cam_basis(eye, tgt):
+    """World -> normalised camera image coords. up=+Z, image u(right) · v(up).
+    Ported verbatim from `scene03_riverbank._cam_basis` so the two river scenes
+    are measured with one instrument. Returns project(P) -> (u, v, depth) in tan units."""
+    ex, ey, ez = eye
+    fx, fy, fz = tgt[0] - ex, tgt[1] - ey, tgt[2] - ez
+    fl = math.sqrt(fx * fx + fy * fy + fz * fz)
+    f = (fx / fl, fy / fl, fz / fl)
+    rx, ry = f[1], -f[0]
+    rl = math.hypot(rx, ry)
+    if rl < 1e-9:                       # sight line vertical - not used by this scene
+        return lambda p: None
+    r = (rx / rl, ry / rl, 0.0)
+    u_ = (r[1] * f[2] - r[2] * f[1], r[2] * f[0] - r[0] * f[2],
+          r[0] * f[1] - r[1] * f[0])
+
+    def project(p):
+        dx_, dy_, dz_ = p[0] - ex, p[1] - ey, p[2] - ez
+        d = dx_ * f[0] + dy_ * f[1] + dz_ * f[2]
+        if d <= 1e-6:
+            return None
+        return ((dx_ * r[0] + dy_ * r[1] + dz_ * r[2]) / d,
+                (dx_ * u_[0] + dy_ * u_[1] + dz_ * u_[2]) / d, d)
+    return project
+
+
+def river_view_selfcheck(verbose=True):
+    """[W3 L12] How much river is actually in frame - the quantity R03-1 needs.
+
+    The intake is explicit that **12 and 17 must not be re-widened independently
+    of 03** (`w3_intake_v2_images.md` §2 scene12 (c)), so this scene **measures**
+    its channel rather than moving it. The water plane is untouched by L12.
+
+    As `w3_s03_v1.md` §1.2 established, R03-1's literal wording - *"water subtends
+    >= 1/3 of the d5 frame width"* - is satisfied trivially by any horizontal band,
+    so it is not a discriminating test and is not reported as a pass. What is
+    reported is the same pair scene03 reports, computed the same way:
+
+      * `v_pct`    vertical subtense of the water band **in the frame's centre column**,
+                   as % of frame height. scene03 takes this on its sight axis because its
+                   river spans the same axis its cameras look down; here the river spans
+                   +Y while every preset looks down +X, so an "on-axis" column probe is
+                   degenerate (it lands at zero depth). The centre-column occupancy is the
+                   same quantity, read off the same sample, and is not axis-dependent.
+      * `area_pct` share of the frame the water polygon covers, by a 240 x 135 cell sample
+
+    Occlusion by near geometry is **not** modelled (the deck edge hides a great deal
+    of near water by design - that is this scene's whole hazard), so `area_pct` is an
+    upper bound and is used as a relative number, exactly as scene03 uses it.
+
+    Returns: (ok, diagnostic dict).
+    """
+    wt, fb = PARAMS["water"], PARAMS["far_bank"]
+    y_near, y_far = wt["y0"], fb["y0"]
+    zw, width = wt["z"], fb["y0"] - wt["y0"]
+    x0, x1 = wt["x0"], wt["x1"]
+    TU, TV = math.tan(math.radians(30.0)), math.tan(math.radians(18.0))
+
+    views = build_views()
+    diag = {}
+    for name in sorted(views):
+        eye, tgt = views[name]["eye"], views[name]["tgt"]
+        proj = _cam_basis(eye, tgt)
+        cells, centre_rows = set(), set()
+        NX, NY = 200, 140
+        for i in range(NX + 1):
+            xx = x0 + (x1 - x0) * i / NX
+            for j in range(NY + 1):
+                yy = y_near + (y_far - y_near) * j / NY
+                q = proj((xx, yy, zw))
+                if q is None or abs(q[0]) > TU or abs(q[1]) > TV:
+                    continue
+                cu = int((q[0] + TU) / (2 * TU) * 240)
+                cv = int((q[1] + TV) / (2 * TV) * 135)
+                cells.add((cu, cv))
+                if 114 <= cu <= 125:            # centre column, ~5 % of frame width
+                    centre_rows.add(cv)
+        diag[name] = dict(v_pct=round(100.0 * len(centre_rows) / 135.0, 2),
+                          area_pct=round(100.0 * len(cells) / (240.0 * 135.0), 2))
+
+    # scene03 landed 33.8 m (v7, `w3_s03_v1.md` §1.1). This scene must not be narrower
+    # than the river it shares a world with, and must not have been widened by this lane.
+    ok = width >= 33.8
+    if verbose:
+        print("  [W3 L12 강 뷰 검산] 기하만 · GPU 0 · 수면 평면 **무변경**")
+        print(f"    유효 수면 y {y_near:.2f}..{y_far:.2f} = {width:.1f} m "
+              f"(scene03 v7 착지값 33.8 m · v4 22.5 m) → "
+              f"{'OK (03 이상, 재확폭 불요)' if ok else 'FAIL'}")
+        for k in sorted(diag):
+            d = diag[k]
+            print(f"      {k:20s} 세로각 {d['v_pct']:6.2f} %  화면면적 {d['area_pct']:6.2f} %")
+        print("    주: R03-1 문구의 '프레임 폭 1/3'은 수면이 가로 밴드라 보이기만 하면 "
+              "항상 100 % — 실질 지표는 위 두 값 (w3_s03_v1.md §1.2).")
+    return ok, dict(width=width, views=diag)
 
 
 def _sun_dir():
@@ -870,6 +1126,35 @@ def _smoke_report():
     reed_selfcheck()
     albedo_selfcheck()
 
+    # ── [W3 L12 · GT-43 R-1] the guard re-section, printed rather than claimed ──
+    #   The ledger row asserts three things: the hazard/drop registry does not change,
+    #   14 collision boxes change radius, and the h0.3 sight line survives. All three
+    #   are re-derived here from PARAMS so a regression is visible without a render.
+    r = PARAMS["rail"]
+    posts = _rail_posts()
+    ncol = len(posts) + len(r["stub_xs"])
+    open_mid = r["mid_z"] - r["mid_r"]
+    open_top = r["top_z"] - r["top_r"]
+    print("  [W3 L12 · GT-43 R-1 가드 재단면 검산]")
+    print(f"    부재: 포스트 Ø{r['post_r']*2*1000:.0f} × {len(posts)} "
+          f"(구 Ø64) · 상부대 Ø{r['top_r']*2*1000:.0f} (구 Ø70) · "
+          f"중간대 Ø{r['mid_r']*2*1000:.0f} (구 Ø40)  "
+          f"[방부원형목재 Ø120/Ø80 · s3_research_numbers_v1.md §A5]")
+    print(f"    콜라이더(col=True) {ncol} 개 반경 0.032 → {r['post_r']:.3f} "
+          f"(포스트 {len(posts)} + 스텁 {len(r['stub_xs'])}) · 프림 수 불변")
+    print(f"    h0.3 시선 개구: 데크 상면 0.000 → 중간대 하단 {open_mid:.3f} m "
+          f"(구 0.530, Δ {(open_mid-0.530)*1000:+.0f} mm, "
+          f"{(open_mid/0.530-1.0)*100:+.1f} %) · 상부대 하단 {open_top:.3f} (구 1.015)")
+    print(f"    난간동자 0 개 (G3 = 통나무 가로대, 인필 없음) · 킥플레이트 없음 · "
+          f"훼손 스팬 {r['gap_x1']-r['gap_x0']:.1f} m 유지 → 위험 기하 불변")
+    print(f"    [L12-F1] 난간 높이 {r['post_h']:.2f} m — 조경설계기준 16.13.2(2) 1,100 / "
+          f"16.20.2(2) 1,200 미달 · scene10 은 실측 1.10 착지. "
+          f"본 씬은 '열화된 가드' 정체성이므로 무변경, 발견사항으로만 기록")
+
+    # ── [W3 L12] season pin + river-view measurement ──
+    season_audit()
+    river_view_selfcheck()
+
     # ── raking light ──
     sd = _sun_dir()
     print("  [태양] SUN_AZ_OFFSET="
@@ -1109,10 +1394,12 @@ def main():
     def setup_materials():
         sca = mp["scale"]
         M = {}
+        # [W3 L12 · GT-44] the map was bound raw (albedo 0.081). `deck_tint` is derived
+        #   as target/source against the measured 방부목 patina band - see PARAMS.
         M["deckwood"] = PBR(
             f"{ROOT}/Looks/DeckWood", sc.tex_path("wood_dark", "diff"),
             sc.tex_path("wood_dark", "nor"), sc.tex_path("wood_dark", "rough"),
-            sca["wood_dark"])
+            sca["wood_dark"], tint=mp["deck_tint"])
         M["rock"] = PBR(
             f"{ROOT}/Looks/Rock", sc.tex_path("rock_wall", "diff"),
             sc.tex_path("rock_wall", "nor"), sc.tex_path("rock_wall", "rough"),
@@ -1155,9 +1442,14 @@ def main():
         M["gk_gap"] = PBR(f"{ROOT}/Looks/GkGap",
                           diffuse_color=(0.026, 0.022, 0.018),
                           roughness_const=0.95, specular_level=0.0)
-        M["rail"] = PBR(f"{ROOT}/Looks/Rail", diffuse_color=mp["rail_color"],
-                        metallic=mp["rail_metallic"],
-                        roughness_const=mp["rail_rough"])
+        # [W3 L12 · GT-43] painted steel -> 착색방부목. The prim is renamed off `Looks/Rail`
+        #   because that name is an exact hit in `scene_common.LOOK_ROLE` -> class **metal**,
+        #   which would keep putting the brushed-metal detail grain on timber. `DeckGuardWood`
+        #   carries no metal keyword and hits the `wood` substring rule instead.
+        M["guard"] = PBR(
+            f"{ROOT}/Looks/DeckGuardWood", sc.tex_path("wood_dark", "diff"),
+            sc.tex_path("wood_dark", "nor"), sc.tex_path("wood_dark", "rough"),
+            sca["wood_dark"], tint=mp["guard_tint"])
         M["wood"] = PBR(f"{ROOT}/Looks/Wood", diffuse_color=mp["wood_color"],
                         roughness_const=mp["wood_rough"])
         M["bollard"] = PBR(f"{ROOT}/Looks/Bollard",
@@ -1389,7 +1681,7 @@ def main():
         r = PARAMS["rail"]
         for i, px in enumerate(_rail_posts()):
             CYL(f"{ROOT}/Rail/Post_{i}", (px, r["y"], r["post_h"] / 2.0),
-                r["post_r"], r["post_h"], M["rail"], col=True)
+                r["post_r"], r["post_h"], M["guard"], col=True)
         # top rail and mid rail : 2 segments minus the destroyed span (Z-axis cylinder laid along X)
         segs = [("W", d["x0"], r["gap_x0"]), ("E", r["gap_x1"], d["x1"])]
         for tag, x0, x1 in segs:
@@ -1398,12 +1690,12 @@ def main():
             for nm, zz, rr in (("Top", r["top_z"], r["top_r"]),
                                ("Mid", r["mid_z"], r["mid_r"])):
                 CYL(f"{ROOT}/Rail/{nm}_{tag}",
-                    ((x0 + x1) / 2.0, r["y"], zz), rr, x1 - x0, M["rail"],
+                    ((x0 + x1) / 2.0, r["y"], zz), rr, x1 - x0, M["guard"],
                     rotY=90.0)
         # sheared-off post stubs (damage trace - a cue for inferring the original fitting)
         for i, sx in enumerate(r["stub_xs"]):
             CYL(f"{ROOT}/Rail/Stub_{i}", (sx, r["y"], r["stub_h"] / 2.0),
-                r["post_r"], r["stub_h"], M["rail"], col=True)
+                r["post_r"], r["stub_h"], M["guard"], col=True)
         # a single warning tape (plainly sub-code - not a guard).
         #   [v6 C-6] a 0.02-thick solid square bar with an unsupported floating east end -> replaced by a
         #   **4 mm ribbon + parabolic sag + tied to the surviving posts at both ends**.

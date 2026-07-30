@@ -1568,24 +1568,48 @@ def main():
     #   real bar grid: `make_pbr` has no transparency input, so a perforated sheet
     #   cannot be a texture; the grid is the honest construction.
     # -------------------------------------------------------------------
-    def build_mesh_panel(M, prefix, p0, p1, z0, z1, pitch=0.22):
+    def build_mesh_panel(M, prefix, p0, p1, z_bot_fn, z_top, pitch=0.22):
+        """Trapezoidal expanded-metal infill: a horizontal top edge over a raked
+        bottom edge — the panel G11 shows at the head of its left tower, filling the
+        triangle between the stair's rake rail and the deck rail level.
+
+        `z_bot_fn(s)` gives the bottom edge at arc length `s` along p0→p1, so the
+        panel follows the flight instead of being a flat rectangle. Bars only: the
+        material layer has no transparency input, so a perforated sheet is not
+        buildable and a solid box would be a lie about what you can see through."""
         x0, y0 = float(p0[0]), float(p0[1])
         x1, y1 = float(p1[0]), float(p1[1])
         L = math.hypot(x1 - x0, y1 - y0)
         ux, uy = (x1 - x0) / L, (y1 - y0) / L
         along_x = abs(ux) > abs(uy)
         t = 0.014
+        made = 0
         nv = max(2, int(L / pitch))
         for i in range(nv):
             s = L * (i + 0.5) / nv
-            BOX(f"{prefix}/V_{i}", (x0 + ux*s, y0 + uy*s, (z0+z1)/2.0),
-                (t, t, z1 - z0), M["mesh"])
-        nh = max(2, int((z1 - z0) / pitch))
+            zb = float(z_bot_fn(s))
+            if z_top - zb < 0.05:
+                continue
+            BOX(f"{prefix}/V_{i}", (x0 + ux*s, y0 + uy*s, (zb + z_top)/2.0),
+                (t, t, z_top - zb), M["mesh"])
+            made += 1
+        # horizontals only across the stretch where the trapezoid is tall enough
+        z_lo = min(float(z_bot_fn(0.0)), float(z_bot_fn(L)))
+        nh = max(1, int((z_top - z_lo) / pitch))
         for j in range(nh):
-            zz = z0 + (z1 - z0) * (j + 0.5) / nh
-            BOX(f"{prefix}/H_{j}", ((x0+x1)/2.0, (y0+y1)/2.0, zz),
-                (L if along_x else t, t if along_x else L, t), M["mesh"])
-        return nv + nh
+            zz = z_lo + (z_top - z_lo) * (j + 0.5) / nh
+            # clip to the part of the run whose bottom edge is already below zz
+            ss = [L * (k + 0.5) / (nv * 2) for k in range(nv * 2)]
+            inside = [s for s in ss if z_bot_fn(s) <= zz]
+            if len(inside) < 2:
+                continue
+            sa, sb = min(inside), max(inside)
+            Ls = sb - sa
+            sc_ = (sa + sb) / 2.0
+            BOX(f"{prefix}/H_{j}", (x0 + ux*sc_, y0 + uy*sc_, zz),
+                (Ls if along_x else t, t if along_x else Ls, t), M["mesh"])
+            made += 1
+        return made
 
     # -------------------------------------------------------------------
     # One H-plan tower. Authored in the canonical local frame (descent → local +X,
@@ -1692,10 +1716,21 @@ def main():
             build_balustrade(M, f"{prefix}/HeadGuardBack",
                              (px + A_HEAD, py + BA0), (px + A_HEAD, py + BA1),
                              Z_TOP, height=ra["rail_h"])
-            # G11's expanded-metal sheet over the tower head, on the outer face.
+            # G11's expanded-metal sheet at the tower head, in the **stair plane**
+            #   (b = BA1, a 0…3.0), filling the trapezoid between flight A's rake rail
+            #   and a horizontal top 0.90 m above the deck rail.
+            #   It is deliberately NOT across the head landing's outer face: the pilot
+            #   round `260731_w3_s11` measured that placement filling the whole
+            #   h1.8_d2 / h0.9_d2 frame (mean 122.6 → 76.2, dark +34.3 pp) — the panel
+            #   became a fence photographed at 2 m, and G11 does not put it there.
+            mesh_run = 3.0
+            rake = st["riser"] / st["tread"]
+
+            def _mesh_bot(s, _z0=Z_TOP + ra["rail_h"], _r=rake):
+                return _z0 - _r * s
             build_mesh_panel(M, f"{prefix}/HeadMesh",
-                             (px + A_HEAD, py + BA1), (px + 0.0, py + BA1),
-                             Z_TOP + ra["rail_h"], Z_TOP + ra["rail_h"] + 0.90)
+                             (px + 0.0, py + BA1), (px + mesh_run, py + BA1),
+                             _mesh_bot, Z_TOP + ra["rail_h"] + 0.90)
             # mid-landing perimeter: every edge that carries the 2.755 m drop.
             edges = [("Side0", (A_A1, BA0), (A_M1, BA0)),
                      ("Side1", (A_A1, b_mid1), (A_M1, b_mid1)),

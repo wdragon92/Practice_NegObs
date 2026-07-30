@@ -36,7 +36,7 @@ Geometry correction (supervisor ruling applied):
 [v5.1 realism — meandering river rebuild]  User feedback: "the river bends unnaturally (a straight channel)".
 
   * Coordinate convention change: the PARAMS x values of river-parallel elements (levee crest·
-    gravel road·slope·beach·walkway·riprap·water·far bank) are now **not world X but the
+    crest walk·slope·beach·walkway·riprap·water·far bank) are now **not world X but the
     cross-section coordinate s** (the offset from the river centerline). World X = s + dx(y).
       dx(y) = A1·(cos(2πy/L1) − 1) + A3·(y/40)³      [river_dx]
       A1=6.0 · L1=110 · A3=−2.0
@@ -91,6 +91,38 @@ Geometry correction (supervisor ruling applied):
   (5) **03-B — bollards onto the line they defend** (G-3 / PE-7): cx −1.2 → −1.0 (the spur
       entry line), cy ±2.2 → **±1.2** (the spur edge). The third centre post the 03-B build
       spec asks for is **declined, with a measured reason** — see `PARAMS["bollards"]`.
+
+[v8 W3 · P03 lane]  Ledger rows **GT-46** (paving, FULL) · **GT-47** (its consequences).
+  Ruling: `w3_intake_v2_images.md` **§7.2 S03** — *"S03 crest promenade — PAVE, image doctrine
+  wins. G3's 점토블록 promenade supersedes the 07-29 'natural' ruling."* This closes the item
+  the S03 lane raised and refused to decide on its own (`w3_s03_v1.md` §7-9).
+
+  (6) **The crest walk is PAVED.** `levee_road` (3.0 m gravel, `/…/LeveeRoad`) →
+      `crest_walk` (**4.0 m 점토블록**, `/…/CrestWalk`) + `crest_band` (**0.4 m light-grey
+      block edge band = 2 courses of the 200 mm module**, `/…/CrestBand`), and the stair-head
+      apron takes the same paving. Hard walked surface **3.0 → 4.4 m**; 1.4 m × 95 m of mown
+      turf becomes walkable. The river-side paving edge stays at **x = −1.0**, so the 1.0 m
+      grass shoulder in front of the *unguarded* drop survives and **no new drop-parallel
+      line enters the near window**. `proud` stays **0.0015** — raising it to scene17's 0.006
+      would push the stair's first riser 0.1615 → 0.1660 m against 19 uniform 0.160 risers
+      (편의증진법 별표1 uniform 챌면), for zero visual return. **The drop edge at x = 0 does
+      not move: 3.2015 m, unchanged.**
+  (7) **The tone item `w3_s03_v1.md` §7-3 handed on is closed at its cause.** The near-white
+      near ground (h0.3_d2 `wht% 39.1 · mean 194 · σ_LF 0.94`) was never a missing-element
+      problem — it was the **gravel scan's highlight tail**: `gravel_diff` reads luminance
+      p99 **215.4** / >204 **3.56 %** where `paving_interlock_diff` reads **173.6** / **0.09 %**
+      at the same 0.28 mean albedo. Unit paving has no bright-stone tail, so the
+      region-restricted scatter that lane asked the kit for is no longer this scene's blocker.
+  (8) **The G3 river-edge timber post-and-rail fence stays DECLINED** (§7.2: *"the scene's
+      no-railing × water-anchor research identity outranks one image element"*). The
+      divergence is documented in `w3_p03_v1.md`, not silently absorbed. The 07-29 ruling's
+      **cycle-track** clause is also untouched — there is still no bike road and no centre
+      line on this crest; only its *natural surface* clause is superseded.
+  (9) **Consequences (GT-47)**: ground-plan region x0 −12.0 → −5.4 · `pave.module` declared
+      truthfully at (0.200, 0.100) while `joint` stays declined · edge break x −4.0 → −5.4 ·
+      the `cue_material_break=False` and `hazard_stairs=False` arms re-bound so the paving
+      cannot smuggle a material break into a control · `wear` re-bound off `dirt_park` ·
+      the pergola moved 0.8 m landward out of the new paving.
 ────────────────────────────────────────────────────────────────────────────
 """
 
@@ -115,7 +147,7 @@ SCENE_CONFIG = {
     "hazard_stairs":      True,    # False -> stairs+slope+beach become z=0 flat (only geometry toggle)
     "cue_railing":        False,   # **the identity of this type** - if True, one pipe rail on the stair right (y=+0.85) only
     "cue_tactile":        False,   # tactile paving is not the practice on levees - code path reserved only (unused here)
-    "cue_material_break": True,    # levee crest gravel vs stair concrete contrast. False->stairs are gravel too
+    "cue_material_break": True,    # [P03] crest 점토블록 vs stair concrete. False->stair takes the crest paving
     "cue_sign":           False,   # [optional] not implemented - config key reserved only
     "cue_scene_dressing": True,    # bollards·benches·shrubs·trees·dirt path, all together
     "cue_nosing":         False,   # [new] True -> non-slip nosing strip on every step
@@ -142,27 +174,76 @@ PARAMS = dict(
     meander=dict(A1=10.0, L1=110.0, A3=-3.4, y_ref=40.0,
                  seg_dy=5.0, y0=-47.5, y1=47.5, over=0.8, z_stagger=0.0015),
     # --- terrain ---
-    # levee crest: grass base + a gravel road band along Y (river-parallel) + stair spur
+    # levee crest: grass base + a 점토블록 promenade band along Y (river-parallel, with its
+    #   grey edge band) + the stair-head apron   [P03 · GT-46]
     # v4-A1/A2: levee crest y +-10 -> +-40 (matches the beach), x0 −20 -> −45.
     #   Previously no prim existed at x<−20 or |y|>10, so the main walk axis (levee path)
     #   was cut off into thin air, and a notch 3.2 deep lay open beside the slope (x 0..7, |y| 10..40).
     levee=dict(x0=-45.0, x1=0.0, y0=-40.0, y1=40.0, z_top=0.0, thick=0.5),
-    levee_road=dict(x0=-4.0, x1=-1.0, proud=0.0015, embed=0.05),  # gravel road (3m wide, full Y span)
-    levee_spur=dict(x0=-1.0, x1=0.0, y0=-1.2, y1=1.2),            # stair-head connecting spur (gravel)
+    # === [P03 · GT-46] the crest walk is PAVED in G3's 점토블록 ==================
+    # Ruling: `w3_intake_v2_images.md` §7.2 S03 — *"S03 crest promenade — PAVE, image
+    #   doctrine wins. G3's 점토블록 promenade supersedes the 07-29 'natural' ruling
+    #   (that ruling predates the target-image doctrine)."* The conflict was **raised**
+    #   by the S03 lane (`w3_s03_v1.md` §7-9, *"the single largest archetype divergence
+    #   from the target image"*) and deliberately left for a ruling; this is that ruling
+    #   executed.
+    # Pre-state (v7): `levee_road=dict(x0=-4.0, x1=-1.0, ...)` — a 3.0 m **gravel**
+    #   maintenance band. G3 shows no gravel anywhere on the crest: the walk is a
+    #   tan/beige interlocking clay-block promenade with a light-grey block edge band.
+    # Post-state: a 4.0 m 점토블록 field + a 0.4 m grey edge band = 4.4 m of hard walked
+    #   surface, replacing 3.0 m of gravel and taking 1.4 m from the mown verge.
+    #
+    # **Widths.** 4.0 m clear + 0.4 m band. A Hangang 둔치/제방 산책로 runs 4~6 m; 4.0 is
+    #   the low end of that band and is the widest this crest can carry while leaving the
+    #   **1.0 m grass shoulder** (x −1..0) between the paving and the *unguarded* 3.2 m
+    #   drop at x=0. The band is 0.400 m = **exactly 2 courses of the 200 mm module**.
+    # **The band sits on the LANDWARD margin, not the river margin where G3 puts it, and
+    #   that is a declared divergence with a research reason**: a light/dark line running
+    #   parallel to the drop edge, 1.0~1.4 m in front of it, would sit 0.6~1.0 m ahead of
+    #   the h0.3 d2 judged eye and act as a **drop cue this scene never declared**
+    #   (`cue_*` in SCENE_CONFIG is the scene's cue vector; adding one silently
+    #   contaminates the design). On the landward margin it is 4.0~4.4 m from the drop and
+    #   cues nothing. See `w3_p03_v1.md`.
+    # **`proud` stays 0.0015 — held, not overlooked, and the reason is the stair.**
+    #   `_stair_steps` starts the flight at `z_top = 0.000`, so the first riser measured
+    #   from the walked surface is `0.160 + proud`:
+    #       proud 0.0015 → first riser 0.1615 m  (+0.94 % on 19 uniform 0.160 risers)
+    #       proud 0.0060 → first riser 0.1660 m  (+3.75 %)   ← scene17's crown value
+    #   편의증진법 별표1 requires uniform 챌면, and 0.006 has no visual return here: the
+    #   landward paving edge is behind the d5 eye and 4.6 m ahead of the d10 eye, where a
+    #   4.5 mm step subtends ~0.02 px. So the drop edge at x=0 keeps **3.2015 m** exactly.
+    crest_walk=dict(x0=-5.0, x1=-1.0, proud=0.0015, embed=0.05),   # 점토블록 promenade (4.0 m)
+    crest_band=dict(x0=-5.4, x1=-5.0),                             # light-grey block edge band (2×200 mm)
+    levee_spur=dict(x0=-1.0, x1=0.0, y0=-1.2, y1=1.2),             # stair-head apron (same 점토블록)
 
-    # === [W2-D ground_kit] P13 levee_paved, natural-forced (spec §5.7) =====
-    # The supervisor ruling of 07-29 put scene03's cycle track on hold ("03 stays
-    # natural, the cycle track holds only for the scene17 levee"), so the whole paved half of
-    # profile P13 is inapplicable here. What is left is the levee crest as
-    # built: grass + a 3 m gravel road band + the stair-head spur.
-    #   -> `natural=True` is forced in `overrides`, which makes ground_kit
-    #      itself raise on any urban infra (manhole / gully / gutter / marking),
-    #      i.e. the §5.7 "zero urban infrastructure" rule is enforced by code, not by
-    #      discipline. Interlock joints are switched off as well: there is no
-    #      interlock paving on this crest, and the ledger's 200 mm unit cell
-    #      would draw a grid onto grass and gravel.
-    # z: elements sit on the **gravel band top** (levee_road proud, +1.5 mm).
-    #   Using the grass top (0.0) instead would bury every element on the road,
+    # === [W2-D ground_kit] P13 levee_paved (spec §5.7) ======================
+    # **[P03 · GT-47] The 07-29 hold is lifted on the SURFACE clause only.** That ruling
+    #   said *"03 stays natural, the cycle track holds only for the scene17 levee"*, i.e.
+    #   two things at once: (a) no paving and (b) no bike road. §7.2 supersedes (a);
+    #   **(b) is untouched** — there is still no cycle track, no lane marking and no
+    #   centre line on this crest, and D6's deleted centre line stays deleted.
+    #   -> `natural=True` is **kept** in `overrides`, and that is a deliberate choice, not
+    #      an oversight. The flag's only effect is to make ground_kit raise on urban infra
+    #      (manhole / gully / gutter / marking). G3 shows none of those on the promenade,
+    #      the "03 stays kerbless pending the S06-B photo check" deferral (intake §2
+    #      scene03 (e)) is still live, and K5/infra_kit is a Lane-1 dependency this lane
+    #      does not have. Flipping it to False would *permit* infrastructure the scene must
+    #      not have and would delete the code-enforced guard that keeps it out.
+    #   -> `pave.module` is now **(0.200, 0.100)** — truthful, because the crest IS laid in
+    #      blocks. It is a measured no-op in prims: the only readers of `pave["module"]`
+    #      are `build_patch_field` and `build_relaid_units`, and this scene builds neither.
+    #   -> **`pave.joint` stays None, declined with coordinates rather than by taste.**
+    #      `joint="interlock"` composes `build_joint_grid` from the profile's
+    #      `step_x = 3.0` as **x = const grooves spanning the whole y range**, i.e. lines
+    #      running **parallel to the drop edge at x = 0** — measured at x = −12.000 /
+    #      −9.000 / −6.000 / −3.000 on the old region and x = −3.000 on the paved band,
+    #      the last of which lands on the d10 GT-E2 E-band boundary [0.7d, 2.2d]. And the
+    #      archetype is wrong anyway: flexible block paving has **no 3 m 시공줄눈** — its
+    #      joints are the 3.5 mm sand joints between every unit (`joint_interlock_w`,
+    #      `ground_kit.py:250`), which the `paving_interlock` map delivers geometrically
+    #      free at `scale_m` 1.2 = the measured 200 mm block long side.
+    # z: elements sit on the **paving top** (crest_walk proud, +1.5 mm).
+    #   Using the grass top (0.0) instead would bury every element on the walk,
     #   which is exactly the burial class the pilots found (spec §1.1).
     # [v7 · 03-A + user ban "바닥에 이상한 사각형 무늬는 웬만하면 다 제거해"]
     #   **`patch` 8 -> 0, and the site list is deleted with it.** The old rationale ("trampled
@@ -184,13 +265,25 @@ PARAMS = dict(
     #   scene overrides `pave=dict(module=(None, None), ...)`, so its patches never snapped to
     #   the 인터로킹 200 cell in the first place. The 8 patches therefore leave by **this
     #   scene's own decision under the user ban**, and the inherited delta from GT-24 is **nil**.
+    #   **[P03] That deletion is NOT re-opened by the paving.** GT-24's vocabulary rule is
+    #   the reason: on unit paving a real repair is a *re-laid unit group*, never a saw-cut
+    #   rectangle — and a promenade in its first decade has no cause for one (the GT-40
+    #   scene08 precedent, where `relaid` was refused for exactly this reason).
+    # **[P03] region x0 −12.0 -> −5.4 = the paved band's outer edge.** Measured, on a CPU
+    #   A/B of `plan_ground` (prims 17 -> 17, elements 17 -> 17, so this buys nothing and
+    #   costs nothing in count): with the old 12 m region **4 of the 8 `stain` decals landed
+    #   at x <= −6.254**, i.e. on mown grass, floating 1.5 mm above turf; with the new
+    #   region every stain lands on paving, where a dirt/water stain has a surface to be on.
     # wear lane runs **along the river (+-Y)**, i.e. along the walking route on
     #   the crest, offset to x=-3.50 so it falls inside the d5 near window
     #   (x -4.44..-3.00). Length is capped at |y| <= 10 because the band is
-    #   straight while the road follows the meander. **[v7] Re-measured against A1=10.0:
-    #   |dx(10)| = 1.638 m** (was 0.95), so at |y|=10 the 3 m road spans x −5.638…−2.638
+    #   straight while the walk follows the meander. **[v7] Re-measured against A1=10.0:
+    #   |dx(10)| = 1.638 m** (was 0.95), so at |y|=10 the 4.0 m paving spans x −6.638…−2.638
     #   and the straight 0.90 m wear band (−3.95…−3.05) is still wholly inside it, with
-    #   0.412 m to spare at the inner edge. `wear_y` therefore stays at 10.
+    #   1.412 m to spare at the inner edge. `wear_y` therefore stays at 10.
+    #   **[P03] `wear_x` stays −3.50** rather than moving to the new centre (−3.00): the
+    #   desire line on a levee crest with an *unguarded* 3.2 m drop hugs the landward half,
+    #   and −3.50 keeps the lane inside the d5 near window it was placed for.
     # NO silt band. Spec §5.7 lists one, but the crest top (z=0) is 3.35 m
     #   above the water line (riprap bottom -3.35): silt deposition belongs to
     #   the beach at z=-3.2, which is outside every h0.3 near window.
@@ -198,8 +291,11 @@ PARAMS = dict(
     #   seam, so its half-length is bounded by |dx(y)| <= 0.10 m (the half width of the
     #   transition band). A1=6.0 gave |dx(3.0)| = 0.088 m; A1=10.0 gives 0.148 m — off the
     #   seam. Solving 10.0*(1 - cos(2*pi*y/110)) = 0.10 gives y = 2.477, so 2.4 is the
-    #   largest 0.1-rounded value that still holds: |dx(2.4)| = 0.094 m.
-    gkit=dict(x0=-12.0, half_y=3.0, wear_x=-3.50, wear_y=10.0,
+    #   largest 0.1-rounded value that still holds: |dx(2.4)| = 0.0946 m (re-measured [P03]).
+    #   **[P03] The seam the break sits on moves x −4.0 -> −5.4** (the paving/turf edge is
+    #   now the band's outer face); `break_y` is unchanged because the bound above depends
+    #   only on |dx(y)|, not on x.
+    gkit=dict(x0=-5.4, half_y=3.0, wear_x=-3.50, wear_y=10.0,
               break_y=2.4),
     slope=dict(x0=0.0, z0=0.0, run=7.0, drop=3.2, thick=0.4,   # 20-step match: run 7.0
                y0=-40.0, y1=40.0),
@@ -399,7 +495,14 @@ PARAMS = dict(
     marker=dict(post_r=0.04, post_h=1.2, plate=(0.06, 0.35, 0.25),
                 plate_z=1.02),
     # D7 pergola 1
-    pergola=dict(x0=-8.0, x1=-5.0, y0=3.0, y1=6.0, z_roof=2.4, post_r=0.09,
+    # **[P03] Moved 0.8 m landward.** Its river post line stood at x = −5.000, which the
+    #   paving now occupies (the grey edge band spans −5.400…−5.000), i.e. four posts
+    #   standing *in* the walking surface — the PROP-EDGE class G-3/PE-7 exists to stop.
+    #   x0/x1 −8.0/−5.0 -> −8.8/−5.8 keeps the 3.0 × 3.0 footprint and the y range, and
+    #   leaves the posts **0.400 m clear** of the paving. `benches[0]` (−6.500, 4.400) is
+    #   still inside the footprint (−8.8 <= −6.5 <= −5.8), checked, so its "inside the
+    #   pergola" rationale survives the move.
+    pergola=dict(x0=-8.8, x1=-5.8, y0=3.0, y1=6.0, z_roof=2.4, post_r=0.09,
                  roof_t=0.14, jyaw=-3.0),
     # D8 beach sports-field lines (beach identity)
     # (placed in the +Y far view so it misses the bridge y −22.5..−13.5 · benches y +-6)
@@ -417,7 +520,37 @@ PARAMS = dict(
     # --- materials: physical size for texture_scale [m/tile] + constants ---
     material=dict(
         scale=dict(gravel=0.6, grass=1.4, concrete_floor=0.8,   # grass 4.0: eases moss clumping
-                   dirt_park=1.0, rock_wall=1.5, wood_dark=1.0),
+                   dirt_park=1.0, rock_wall=1.5, wood_dark=1.0,
+                   # [P03] 1.2 is not a taste value: `scene_common.py:158-163` records that
+                   #   the PavingStones015 map carries 12 repeats per tile, so the long side
+                   #   of a block is 0.17 / 0.20 / 0.25 m at scale_m 1.0 / 1.2 / 1.5.
+                   #   **1.2 == the 인터로킹 200 x 100 standard**, i.e. the same module the
+                   #   kit ledger declares (`GROUND_DIMENSIONS["unit_cell"]["levee_paved"]`).
+                   paving_interlock=1.2),
+        # === [P03 · GT-46] 점토블록 promenade tones ==============================
+        # The `paving_interlock` scan is neutral grey concrete block (mean sRGB
+        # 141.0/141.2/140.2, linear albedo 0.2777). G3's promenade is a **warm tan clay
+        # paver**; its sunlit field measures sRGB 210/172/130 at full resolution
+        # `[ref, measured this session]`. `paving_tint` takes it there with **every channel
+        # <= 1.0**, so the tint can only attenuate the map and can never amplify its
+        # highlights — which matters, because the highlight tail is the whole tone defect
+        # this row is closing:
+        #     gravel_diff           lum p99 215.4 · >204 3.56 %  · albedo 0.2855
+        #     paving_interlock_diff lum p99 173.6 · >204 0.09 %  · albedo 0.2777
+        # Same mean albedo, **40x fewer near-white texels**. The near-white crest the
+        # S03 lane handed on (`w3_s03_v1.md` §7-3, h0.3_d2 `wht% 39.1 / mean 194`) was the
+        # gravel scan's bright stone tail, and unit paving simply does not have one.
+        #   paving_tint  (1.000, 0.717, 0.471) -> linear (0.2766, 0.1995, 0.1294)
+        #                = sRGB (145, 125, 101), luminance albedo **0.211**
+        #   band_tint    = scene17's own measured `paving_tint`, unchanged, so the two
+        #                  Hangang levee scenes share one grey-block value: albedo **0.231**,
+        #                  i.e. the band reads 10 % lighter and neutral against the tan
+        #                  field, which is what G3's "light-grey block edge band" is.
+        #   wear_tint    = paving_tint x 0.85 (`wear_albedo_gain`, ground_kit.py:282).
+        # All three are under `ALBEDO_CAP` 0.30 (ground_kit.py:128).
+        paving_tint=(1.00, 0.717, 0.471),
+        paving_band_tint=(0.84, 0.83, 0.81),
+        paving_wear_tint=(0.85, 0.609, 0.400),
         grass_tint=(0.55, 0.68, 0.42),        # eases tile repetition + green tint (kept)
         hedge_tint=(0.48, 0.60, 0.34),        # v4-B1 slope shrubs
         reed_tint=(0.78, 0.72, 0.40),         # v4-D5 reeds (dry silvergrass tone)
@@ -493,8 +626,12 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "scene03")
 
 # texture roles used by this scene (tactile unused)
+# [P03] `paving_interlock` joins the list — the crest walk is 점토블록 from GT-46 on.
+#   `gravel` STAYS: it is still the material of the `hazard_stairs=False` flat control's
+#   surroundings check and of the debris pool binding, and dropping a role from this list
+#   only turns a load failure from loud into silent.
 ASSET_ROLES = ["gravel", "grass", "concrete_floor", "dirt_park",
-               "rock_wall", "wood_dark", "hdri", "mdl"]
+               "rock_wall", "wood_dark", "paving_interlock", "hdri", "mdl"]
 
 
 # ===========================================================================
@@ -598,7 +735,7 @@ def build_views():
         return river_dx(y) + s
 
     # (1) river_along [mise-en-scene, non-judging] - a **walking sight line** (h1.65) on the
-    #    levee gravel road, looking upstream. It starts north of the bridge (y −22.5..−13.5) so nothing blocks the view.
+    #    levee crest promenade, looking upstream. It starts north of the bridge (y −22.5..−13.5) so nothing blocks the view.
     #    The eye is only 5 m above the water, so the on-screen meander bow is a small 0.4 %
     #    (check below) - not a judging cut but a realism cut of "walking the levee path".
     views["river_along"] = dict(eye=[W(-2.5, -10.0), -10.0, 1.65],
@@ -995,6 +1132,18 @@ def main():
 
         M = {}
         M["gravel"] = tex("gravel", "/World/Looks/Gravel", sca["gravel"])
+        # [P03 · GT-46] 점토블록 promenade + its light-grey edge band + the wear tone.
+        #   Three materials, one map. The prim names end in `Paving`, which is what the
+        #   realism look layer reads to class them as modular paving (`patch_mix` 0 —
+        #   the block pattern is protected instead of being broken up like natural ground).
+        M["paving"] = tex("paving_interlock", "/World/Looks/Paving",
+                          sca["paving_interlock"], tint=mp["paving_tint"])
+        M["paving_band"] = tex("paving_interlock", "/World/Looks/PavingBand",
+                               sca["paving_interlock"],
+                               tint=mp["paving_band_tint"])
+        M["paving_wear"] = tex("paving_interlock", "/World/Looks/PavingWear",
+                               sca["paving_interlock"],
+                               tint=mp["paving_wear_tint"])
         M["grass"] = tex("grass", "/World/Looks/Grass", sca["grass"],
                          tint=mp["grass_tint"])
         M["concrete"] = tex("concrete_floor", "/World/Looks/Concrete",
@@ -1172,10 +1321,13 @@ def main():
     # terrain·stair builders
     # -------------------------------------------------------------------
     def build_levee(M):
-        """Levee crest: grass base + a river-parallel gravel road band (3m wide) + the stair-head
-        connecting spur (gravel). The gravel band is 1.5mm proud of the top slab and 5cm embedded.
+        """Levee crest: grass base + a river-parallel **점토블록 promenade** (4.0 m) with a
+        light-grey block edge band (0.4 m) on its landward margin + the stair-head apron in
+        the same paving. The paving is 1.5 mm proud of the top slab and 5 cm embedded.
         [v5.1] Every band follows the meander polyline. The sub-band touching the shoulder (s=0)
-        is cut to 2.5 m to minimise the overlap lip against the slope; the land behind is 12 m wide."""
+        is cut to 2.5 m to minimise the overlap lip against the slope; the land behind is 12 m wide.
+        [P03 · GT-46] `LeveeRoad` (gravel) is renamed **`CrestWalk`** and `CrestBand` is new —
+        the prim paths change with the archetype so a later reader is not told "road"."""
         lv = PARAMS["levee"]
         top = lv["z_top"]
         # [W2-0 · P-A] Crest slabs are what ground_kit decorates. river_band
@@ -1183,27 +1335,42 @@ def main():
         # skin today, so this is a forward guard (prefix match covers the
         # per-segment rot groups).
         sc.skin_exclude(f"{ROOT}/LeveeBack", f"{ROOT}/Levee",
-                        f"{ROOT}/LeveeRoad", f"{ROOT}/LeveeSpur")
+                        f"{ROOT}/CrestWalk", f"{ROOT}/CrestBand",
+                        f"{ROOT}/LeveeSpur")
         river_band(f"{ROOT}/LeveeBack", lv["x0"], -8.0, top, lv["thick"],
                    M["grass"], max_w=12.0)
         # the shoulder side is 2.5 wide - overlap lip against the slope = (2.5+3.5)/2·(1/cos−cos)
         #   = 0.46 m @yaw 23 deg (y~+-35) · 0.09 m @yaw 10 deg (y~+-10) · 0 @corridor.
         river_band(f"{ROOT}/Levee", -8.0, lv["x1"], top, lv["thick"],
                    M["grass"], max_w=2.5, z_bias=-0.0005)
-        # gravel road band (river-parallel) - 1.5 mm proud of the top face · 5 cm embedded
-        lr = PARAMS["levee_road"]
-        z_top = top + lr["proud"]
-        river_band(f"{ROOT}/LeveeRoad", lr["x0"], lr["x1"], z_top,
-                   lr["proud"] + lr["embed"], M["gravel"], max_w=3.5)
-        # stair-head connecting spur (gravel, s -1..0, y -1.2..1.2)
+        # 점토블록 promenade (river-parallel) - 1.5 mm proud of the top face · 5 cm embedded.
+        #   max_w stays 3.5 (the crest hard band's existing convention), so a 4.0 m field
+        #   splits into 2 x 2.0 m sub-bands: two narrow interfaces instead of one wide one,
+        #   which is exactly the trade the river_band docstring prescribes at a material
+        #   border. 2 sub-bands x 19 segs = 38 prims (was 1 x 19 = 19 for the gravel road).
+        cw = PARAMS["crest_walk"]
+        cb = PARAMS["crest_band"]
+        z_top = top + cw["proud"]
+        thick = cw["proud"] + cw["embed"]
+        river_band(f"{ROOT}/CrestWalk", cw["x0"], cw["x1"], z_top,
+                   thick, M["paving"], max_w=3.5)
+        # light-grey block edge band on the LANDWARD margin (2 courses of the 200 mm module).
+        #   Same top plane as the field — a kerb here would be a 4th longitudinal line and
+        #   03 is one of the three kerbless-by-design scenes pending the S06-B photo check.
+        river_band(f"{ROOT}/CrestBand", cb["x0"], cb["x1"], z_top,
+                   thick, M["paving_band"], max_w=2.5)
+        # stair-head apron (same 점토블록, s -1..0, y -1.2..1.2)
         #   Near the corridor dx~0 · yaw~0, so it stays axis-aligned (hazard geometry match).
+        #   **Its top face does not move**: z_top is still `levee.z_top + 0.0015`, so the drop
+        #   at x=0 stays 3.2015 m and the stair's first riser stays 0.1615 m. Only the
+        #   material and the collider's bound material change.
         ls = PARAMS["levee_spur"]
-        z_bot = top - lr["embed"]
+        z_bot = top - cw["embed"]
         sc.add_box(stage, f"{ROOT}/LeveeSpur",
                    ((ls["x0"] + ls["x1"]) / 2.0, (ls["y0"] + ls["y1"]) / 2.0,
                     (z_top + z_bot) / 2.0),
                    (ls["x1"] - ls["x0"], ls["y1"] - ls["y0"], z_top - z_bot),
-                   M["gravel"], collider=True)
+                   M["paving"], collider=True)
 
     # -------------------------------------------------------------------
     # [W2-D] ground_kit — P13 levee_paved forced natural (spec §5.7 row 03).
@@ -1212,8 +1379,8 @@ def main():
     # -------------------------------------------------------------------
     def build_ground_kit(M):
         g = PARAMS["gkit"]
-        lv, lr = PARAMS["levee"], PARAMS["levee_road"]
-        z = lv["z_top"] + lr["proud"]
+        lv, cw = PARAMS["levee"], PARAMS["crest_walk"]
+        z = lv["z_top"] + cw["proud"]
         gp = gk.plan_ground(
             "levee_paved",
             region=(g["x0"], -g["half_y"], lv["x1"], g["half_y"]),
@@ -1222,9 +1389,17 @@ def main():
             dists=(2, 5, 10), scene="scene03",
             tactile=(),                 # §12.4 - p=0.24 park/beach, not installed
             overrides=dict(
-                natural=True,           # code-enforced: no urban infra here
+                # [P03] `natural` STAYS True — the surface is paved, the scene still
+                #   carries zero urban infrastructure (G3 shows none on the promenade,
+                #   and "03 stays kerbless pending the S06-B photo check" is still live).
+                #   The flag is the code-enforced guard for exactly that; flipping it
+                #   would *permit* what must stay out. See the `gkit` PARAMS comment.
+                natural=True,
                 infra=dict(manhole=0, gully=0, gutter_L=0, marking=()),
-                pave=dict(module=(None, None), joint=None,
+                # [P03] `module` is now declared truthfully (the crest IS blocks) and
+                #   `joint` is still None — declined with measured groove coordinates in
+                #   the `gkit` PARAMS comment, not by preference.
+                pave=dict(module=(0.200, 0.100), joint=None,
                           step_x=None, step_y=None),
                 # [v7 · 03-A + user ban] `("patch", 8)` removed; `sites` goes with it.
                 #   `stain` stays — DEC-1 lobes, no straight edge, which is what trampled
@@ -1256,6 +1431,18 @@ def main():
                 #   frame, so the statistics lose: the row is gone and the residual is
                 #   handed to the material lane (`w3_s03_v1.md` §7-3) instead of being
                 #   papered over. Re-open only if the kit gains a region-restricted scatter.
+                # **[P03 · GT-46] That residual is now closed at its cause, and the scatter
+                #   stays deleted — measured, not swapped.** §7-3's residual was never a
+                #   missing-element problem; it was the **gravel scan's highlight tail**
+                #   (`gravel_diff` lum p99 215.4 · >204 3.56 % against `paving_interlock`'s
+                #   173.6 · 0.09 %, at the same 0.28 mean albedo). Paving the crest removes
+                #   the near-white field itself, so the region-restricted scatter the S03
+                #   lane asked the kit lane for is **no longer needed by this scene** —
+                #   there is no gravel left in any h0.3 near window to restrict it to. The
+                #   ask stays open for the kit's other natural-profile clients; it is simply
+                #   not scene03's blocker any more. `("weed", 8)` is kept and is now
+                #   *better* placed than before: G3 shows weeds in the paving joints and
+                #   along both margins, which is exactly where the kit seeds them.
                 surface=(("stain", ("dirt", "water")), ("weed", 8)),
                 extras=(("wear_lane", dict(width=0.90)),)),
             extras_args=dict(wear_lane=dict(
@@ -1269,33 +1456,42 @@ def main():
         #   making the deletion reversible in one line. `weed` is the new key (the asset
         #   path is the kit's own `Shrub/Grass_Short_C.usd`; the material is only the
         #   procedural fallback), `debris` binds the scatter pool.
-        M2.update(patch=M["dirt"], patch_cut=M["dirt"], wear=M["dirt"],
+        # **[P03 · GT-47] `wear` is re-bound `dirt_park` -> the paving at x0.85.** The kit's
+        #   own ledger says a wear lane is the road surface times `wear_albedo_gain` 0.85
+        #   (`ground_kit.py:282`), i.e. **polished blocks**, not soil. `dirt_park` was right
+        #   while the crest was gravel; on 점토블록 it would draw a 0.9 m mud streak straight
+        #   down the middle of the promenade, inside the d5 near window.
+        #   `edge_break` stays on `dirt` deliberately — that element *is* the soil/paving
+        #   seam breaking up, so soil is its correct material.
+        M2.update(patch=M["dirt"], patch_cut=M["dirt"], wear=M["paving_wear"],
                   stain_dirt=M["dirt"], stain_water=M["concrete_dark"],
                   edge_break=M["dirt"], weed=M["hedge_v"][0],
                   debris=M["gravel"])
         res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
                               skin_exclude=sc.skin_exclude,
                               scatter=sc.scatter_debris)
-        # edge break (spec §5.7 "edge break") - the seam that crosses the h0.3
-        #   frames is the gravel road edge, and it runs **along Y**, which
-        #   `_compose_ops` cannot express (its `lines` are constant-y).
+        # edge break (spec §5.7 "edge break") - the hard/soft seam runs **along Y**,
+        #   which `_compose_ops` cannot express (its `lines` are constant-y).
         #   Direct call, same builder, same z. `break_y` keeps the straight
-        #   strip on the meandering seam: [v7, A1=10.0] |dx(2.4)| = 0.094 m < the
+        #   strip on the meandering seam: [v7, A1=10.0] |dx(2.4)| = 0.0946 m < the
         #   0.10 m half width of the transition band (at the old |y| <= 3.0 it
-        #   would now be 0.148 m — off the seam; see the `gkit` PARAMS comment).
-        #   Only the **landward** seam (x=-4.0) is broken. The river-side seam
-        #   at x=-1.0 is 1.0 m in front of the shoulder: drow = 5.65 rows @1080
-        #   at d10 against a 16-row floor, i.e. exactly the band GT-E2 keeps
-        #   clear, and for |y| <= 1.2 it is gravel-on-gravel (LeveeSpur) so
-        #   there is no material boundary to break there anyway.
+        #   would now be 0.1479 m — off the seam; see the `gkit` PARAMS comment).
+        #   **[P03] The landward seam moves x -4.0 -> -5.4**: the paving/turf boundary is
+        #   now the grey band's outer face, and that is the seam that needs breaking.
+        #   The river-side seam at x=-1.0 is unchanged and is still NOT broken: it is
+        #   1.0 m in front of the shoulder (drow = 5.65 rows @1080 at d10 against a
+        #   16-row floor, i.e. exactly the band GT-E2 keeps clear), and for |y| <= 1.2 it
+        #   is **paving-on-paving** (LeveeSpur takes the same 점토블록), so there is still
+        #   no material boundary to break there.
         by = g["break_y"]
         nb = 0
-        for tag, sx in (("W", lr["x0"]),):
+        for tag, sx in (("W", PARAMS["crest_band"]["x0"]),):
             nb += gk.build_edge_break(
                 kit, f"{ROOT}/GKit/EdgeBreak_{tag}",
                 ((sx, -by), (sx, by)), z, M["dirt"])["prim_count"]
-        print(f"[ground_kit] scene03 P13(natural) · prims {res['prims']} "
-              f"+ edge_break {nb} · delta_max {res['gt_delta_max']:.4f}")
+        print(f"[ground_kit] scene03 P13(paved crest · no urban infra) · "
+              f"prims {res['prims']} + edge_break {nb} · "
+              f"delta_max {res['gt_delta_max']:.4f}")
         return res
 
     def build_slopes(M):
@@ -1311,9 +1507,16 @@ def main():
                    y_gap=(-g, g), max_w=3.5)
 
     def build_stairs(M):
-        """Straight concrete stair, 20 steps. With cue_material_break OFF the stair is gravel too (same as the levee crest)."""
+        """Straight concrete stair, 20 steps. With cue_material_break OFF the stair takes the
+        **crest's own surface**, so the ablation arm really has no material break.
+
+        [P03 · GT-47] This is a live defect the paving exposed, not a cosmetic. The OFF branch
+        was bound to `M["gravel"]` *because the crest was gravel*; against a 점토블록 crest it
+        would have rendered **paving vs gravel — a material break in the arm whose entire
+        purpose is to have none**, silently converting the ablation control into a second
+        cue-on arm. The binding follows the crest, so it cannot drift again."""
         st = PARAMS["stairs"]
-        stair_mtl = M["concrete"] if cfg["cue_material_break"] else M["gravel"]
+        stair_mtl = M["concrete"] if cfg["cue_material_break"] else M["paving"]
         sc.build_straight_stairs(
             stage, f"{ROOT}/Stairs", st["x0"], st["y0"], st["y1"],
             st["riser"], st["tread"], st["nsteps"], st["base_z"],
@@ -1447,14 +1650,21 @@ def main():
 
     def build_flat_fill(M):
         """hazard_stairs=False control: stair·slope·beach unified to z=0 flat ground
-        (gravel flat from the levee crest to x18). Drop/hazard removed.
+        (flat ground from the levee crest to x18). Drop/hazard removed.
         Note: water·far bank remain as far-view elements — for a fully flat control,
-        combine with cue_scene_dressing=False (skip build_river too to remove the waterside)."""
+        combine with cue_scene_dressing=False (skip build_river too to remove the waterside).
+
+        [P03 · GT-47] The fill material follows the **stair-head apron**, not a literal.
+        The invariant this control has to hold is that **no line appears at x = 0 where the
+        drop used to be**: the apron (|y| <= 1.2, i.e. the whole hazard corridor y ±0.95 the
+        label is read from) meets the fill there. It was gravel-on-gravel; after GT-46 the
+        apron is 점토블록, so a `gravel` fill would have drawn a fresh material line straight
+        across the corridor in the twin that exists to have none."""
         lv = PARAMS["levee"]
         bc = PARAMS["beach"]
         # [v5.1] The control must be laid with the same meander bands or the levee-crest seam misses.
         river_band(f"{ROOT}/FlatFill", 0.0, bc["x1"], lv["z_top"],
-                   lv["thick"], M["gravel"], max_w=4.0)
+                   lv["thick"], M["paving"], max_w=4.0)
 
     # -------------------------------------------------------------------
     # prop builders (cue_scene_dressing)

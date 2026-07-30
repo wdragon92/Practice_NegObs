@@ -440,11 +440,20 @@ python3 scratchpad/imgcmp.py scratchpad/t4b_wrap scratchpad/t4b_swap  WRAP SWAP
 python3 scratchpad/t4b_crops.py            # the three sheets + per-region red + |grad|
 ```
 
-**Commits.** `urban_kit.py` + `assets/urban_wrap/*.usda` + this report +
-`Docs/reports/_w3_t4b_crops/*` — pathspec-only, in one commit. `Docs/audit_v4/gt_changes_w3.md`
-was **not** touched: this lane declares **no GT row** (no geometry, no walked surface, no
-hazard box, no drop edge — §5's byte-identical `geom_invariance` output is that claim's
-proof). `look_check/**` is untouched and no round was stamped.
+**Commits.** **`9903399`** — `urban_kit.py` + 7 × `assets/urban_wrap/*.usda` + this report +
+3 × `Docs/reports/_w3_t4b_crops/*.png`, pathspec-only, 11 files, one commit.
+`Docs/audit_v4/gt_changes_w3.md` was **not** touched: this lane declares **no GT row** (no
+geometry, no walked surface, no hazard box, no drop edge — §5's byte-identical
+`geom_invariance` output is that claim's proof). `look_check/**` is untouched and no round
+was stamped.
+
+**Interleaving, for the record.** The floor in §5 was taken at `f39abe0`; another lane
+landed **`6ae7766`** (`w3_sb_v1.md`, `look_check/README.md`, `w3_mb_patch_v1.md`,
+`_w3_sb_crops/`) between that measurement and this commit, so `9903399`'s parent is
+`6ae7766`, not `f39abe0`. Every path in `6ae7766` is inside that lane's own list and none of
+them is code, so the §5 numbers stand at the parent as taken. The wrappers were re-resolved
+after the commit and the working tree stayed clean — the stamp comparison in §1.4 does not
+rewrite a committed layer on the machine that wrote it.
 
 **`scenes/main/scene07_temple_stone_path.py` and
 `scenes/main/scene10_park_deck_switchback.py` are byte-unchanged across this batch**, which

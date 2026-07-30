@@ -28,7 +28,13 @@ implemented, and the one place the evidence for each of them is recorded.
 | 6 | Mirror `nv_content/` verbatim — 3 cross-folder sublayer aliases | `resolve_usd()` + `ALIAS_OF` |
 | 7 | Asset backdrops must still be dressed with `facade_kit` | not this file's job — K3 owns it |
 
-plus the ruled far-tier albedo override (§1.11) in `_bind_far_override()`.
+plus the ruled far-tier albedo override (§1.11) in `_bind_far_override()`, and — added by
+**W3 Lane-1 T4** — the **MDL package repair** in `ensure_mdl_package()` (section [1b]):
+the procured `nv_core/materials/` package is missing `baking_annotations.mdl`, so
+`SimPBR.mdl` does not compile and **every** urban asset renders flat red. It is repaired
+here rather than in the asset tree because `assets/urban/` is gitignored, and here rather
+than per scene because scene07 and scene10 each had to invent their own workaround before
+this existed (`w3_s07_rebuild_v1.md` §5.1 · `w3_s10_rebuild_v1.md` §5.2).
 
 ## Conventions
 
@@ -131,6 +137,189 @@ def ids(group=None, verdict=None):
             continue
         out.append(aid)
     return sorted(out)
+
+
+# ===========================================================================
+# [1b] MDL package repair — the `.::baking_annotations` defect
+#
+# ## The defect, measured
+#
+# Every `nv_content` asset binds a material whose `info:mdl:sourceAsset` is
+# `assets/urban/nv_core/materials/SimPBR.mdl`. That module opens with
+#
+#     import  .::SimPBR_Model::*;
+#     using   .::baking_annotations import *;
+#
+# and `baking_annotations.mdl` **is not in the procured tree**. The renderer therefore
+# reports, once per material `[measured — this session, t4 probe]`:
+#
+#     C120 could not find module '.::baking_annotations' in module path
+#     C121 imported module '::…::SimPBR_Model' contains errors
+#     Failed to create MDL shade node for prim '/__Prototype_1/Looks/…'
+#
+# and every urban asset falls back to the shader default — **flat saturated red**
+# (11.8 % of the frame at d2 in the probe). scene07 and scene10 both hit it and both
+# worked around it scene-side with `instanceable=False` + a per-mesh rebind.
+#
+# ## Why the fix has to materialise a file, and cannot be a search path
+#
+# `.::x` is a **relative** MDL module path: the MDL resolver looks for it only in the
+# package directory of the importing module. Re-running the probe with
+# `MDL_USER_PATH` **and** `MDL_SYSTEM_PATH` pointed at the Kit core `Base` directory
+# (which does contain `baking_annotations.mdl`) leaves all 8 `C120` errors in place
+# `[measured]`. A search path fixes absolute imports; it cannot fix this one.
+# The module has to exist **next to `SimPBR.mdl`**.
+#
+# ## Why it lives in the loader and not in the asset tree
+#
+# `assets/urban/` is gitignored (`.gitignore:52` — NVIDIA, redistribution forbidden), so a
+# file copied there by hand is not a repair anybody else receives: the next clone runs
+# `assets/download_urban.py` and gets the same broken package back. The durable repair is
+# therefore **here**, in the one module every consumer already goes through, and it heals
+# the tree from the local Kit installation (the same installation `OMNIPBR_PATH` already
+# depends on) instead of redistributing NVIDIA files through the repo.
+#
+# Root cause, for the record: `assets/download_urban.py`'s `CORE_MDL` list enumerates the
+# nine `SimPBR*.mdl` siblings by hand — its own comment says internal MDL `import`s are
+# invisible to `--resolve` — and misses `baking_annotations` (needed by SimPBR ·
+# SimPBR_Model · SimPBR_Buildings · SimPBR_RoadPaint) and `OmniUe4Function` / `OmniUe4Base`
+# (needed by SimPBR_Road). That file belongs to the procurement agent and is read-only for
+# W3 (spec §0), so the manifest row is **reported**, never patched — see
+# `Docs/reports/w3_k1t4_v1.md`.
+# ===========================================================================
+MDL_DIR = os.path.join(URBAN_DIR, "nv_core", "materials")
+
+# Where a missing sibling module is fetched from: the Kit core MDL tree of the *local*
+# runtime. `OMNIPBR_PATH` already pins that tree, so the root is derived from it rather
+# than hard-coded a second time. `NEGOBS_MDL_CORE` overrides it on a machine that keeps
+# Kit somewhere else.
+MDL_CORE_ROOT = os.environ.get(
+    "NEGOBS_MDL_CORE",
+    os.path.dirname(os.path.dirname(OMNIPBR_PATH)))     # .../omni/mdl/core
+
+_MDL_COMMENT = None
+_MDL_IMPORT = None
+_MDL_FOUND = {}
+_MDL_REPAIRED = None
+
+
+def _mdl_rel_imports(text):
+    """The relative sibling modules an MDL source imports: `.::Name` in either
+    `import .::Name::*;` or `using .::Name import *;` form.
+
+    Comments are stripped first — a copyright block that mentions an import must not
+    manufacture a dependency. `..::Name` (parent package) is reported separately because
+    this repair cannot satisfy it: it would have to invent a package layout.
+    """
+    import re
+    global _MDL_COMMENT, _MDL_IMPORT
+    if _MDL_COMMENT is None:
+        _MDL_COMMENT = re.compile(r"/\*.*?\*/|//[^\n]*", re.S)
+        _MDL_IMPORT = re.compile(
+            r"(?:^|\n)\s*(?:import|using)\s+(\.{1,2})::([A-Za-z_]\w*)")
+    src = _MDL_COMMENT.sub(" ", text)
+    here, parent = [], []
+    for dots, name in _MDL_IMPORT.findall(src):
+        (here if dots == "." else parent).append(name)
+    return sorted(set(here)), sorted(set(parent))
+
+
+def _find_core_mdl(name):
+    """Absolute path of `<name>.mdl` in the local Kit core MDL tree, or None.
+
+    The tree is small (~60 files over Base / Ue4 / Volume / …) and the walk is cached, so
+    a scene that places forty assets pays for it once.
+    """
+    if name in _MDL_FOUND:
+        return _MDL_FOUND[name]
+    hit = None
+    for root, _dirs, files in os.walk(MDL_CORE_ROOT):
+        if name + ".mdl" in files:
+            hit = os.path.join(root, name + ".mdl")
+            break
+    _MDL_FOUND[name] = hit
+    return hit
+
+
+def ensure_mdl_package(mdl_dir=None, verbose=False):
+    """Complete `assets/urban/nv_core/materials` so its MDL modules compile.
+
+    Idempotent, cached, and **never raises**: a urban asset with a broken material is a
+    look defect, but a loader that dies on a read-only asset tree is a dead scene. Returns
+    a report dict `{"added": [...], "missing": [...], "unsatisfiable": [...], "ok": bool}`.
+
+    Called automatically by `add_urban_asset` before the first reference is composed, so
+    no scene and no kit has to know this defect exists. Call it directly when a stage
+    references an urban asset without going through `add_urban_asset`.
+    """
+    global _MDL_REPAIRED
+    if _MDL_REPAIRED is not None and mdl_dir is None:
+        return _MDL_REPAIRED
+    d = mdl_dir or MDL_DIR
+    rep = dict(added=[], missing=[], unsatisfiable=[], ok=True, dir=d)
+    if not os.path.isdir(d):
+        rep["ok"] = False
+        rep["missing"].append(f"(materials dir absent: {d})")
+        if mdl_dir is None:
+            _MDL_REPAIRED = rep
+        return rep
+
+    # Breadth-first: a module copied in may itself import siblings (OmniUe4Function does).
+    seen = set()
+    queue = sorted(f for f in os.listdir(d) if f.endswith(".mdl"))
+    while queue:
+        fname = queue.pop(0)
+        if fname in seen:
+            continue
+        seen.add(fname)
+        try:
+            with open(os.path.join(d, fname), "r", encoding="utf-8",
+                      errors="replace") as fh:
+                here, parent = _mdl_rel_imports(fh.read())
+        except OSError as ex:
+            rep["ok"] = False
+            rep["unsatisfiable"].append(f"{fname}: unreadable ({ex})")
+            continue
+        for nm in parent:
+            rep["unsatisfiable"].append(f"{fname}: '..::{nm}' (parent package)")
+            rep["ok"] = False
+        for nm in here:
+            tgt = os.path.join(d, nm + ".mdl")
+            if os.path.isfile(tgt):
+                queue.append(nm + ".mdl")
+                continue
+            src = _find_core_mdl(nm)
+            if src is None:
+                rep["missing"].append(nm)
+                rep["ok"] = False
+                continue
+            try:
+                # Atomic: write beside the target and rename. Round runners drive 33
+                # scenes through one asset tree, and a half-written `.mdl` read by the
+                # next process would look exactly like the defect being repaired.
+                import shutil
+                tmp = tgt + f".tmp{os.getpid()}"
+                shutil.copyfile(src, tmp)
+                os.replace(tmp, tgt)
+            except OSError as ex:
+                rep["unsatisfiable"].append(f"{nm}: copy failed ({ex})")
+                rep["ok"] = False
+                continue
+            rep["added"].append(nm)
+            queue.append(nm + ".mdl")
+
+    if rep["added"] and verbose:
+        print(f"[urban_kit][mdl] {d} 보완 {len(rep['added'])}건: "
+              f"{', '.join(rep['added'])} ← {MDL_CORE_ROOT}")
+    if not rep["ok"]:
+        _warn_once("mdl:incomplete",
+                   f"[urban_kit][경고] MDL 패키지 미완성 — 미해결 {rep['missing']} "
+                   f"{rep['unsatisfiable']}. 도시 자산이 셰이더 폴백(단색 적색)으로 "
+                   f"렌더될 수 있다. Kit 코어 MDL 경로를 NEGOBS_MDL_CORE 로 지정하거나 "
+                   f"조달 담당에게 download_urban.CORE_MDL 보완을 요청하라.")
+    if mdl_dir is None:
+        _MDL_REPAIRED = rep
+    return rep
 
 
 # ===========================================================================
@@ -566,6 +755,10 @@ def add_urban_asset(stage, prim_path, asset_id, pos_m=(0.0, 0.0, 0.0), yaw_deg=0
     """
     from pxr import Usd, UsdGeom, Gf   # noqa: F401  (lazy — CPU-only import of this module)
 
+    # Complete the MDL package before the first reference composes (section [1b]).
+    # Cached after the first call, so this is one `os.listdir` for the whole run.
+    ensure_mdl_package()
+
     s = spec(asset_id)
 
     # --- scene scope (§3.3 cautions) ---------------------------------------
@@ -944,6 +1137,20 @@ def self_check(deep_z=True, verbose=True):
     os.environ.setdefault("PXR_USDC_EMIT_DEPRECATION_WARNINGS", "0")
 
     fails = []
+
+    # --- 0. the MDL package compiles at all (section [1b]) -------------------
+    #     Ahead of everything else: with `baking_annotations` missing, every row below
+    #     still loads, traverses and measures perfectly — and every one of them renders
+    #     flat red. A self-check that only counts triangles cannot see that, which is
+    #     exactly how the defect reached a judged frame in scene07's first pilot.
+    mdl = ensure_mdl_package(verbose=verbose)
+    if not mdl["ok"]:
+        fails.append(("mdl_package",
+                      f"unresolved {mdl['missing']} {mdl['unsatisfiable']}"))
+    if verbose:
+        print(f"[self-check] MDL package {'OK' if mdl['ok'] else 'INCOMPLETE'} — "
+              f"added {mdl['added'] or 'none (already complete)'}")
+
     rows = [a for a in ids() if a not in REFUSED_IDS]
     placeable = []
     for aid in rows:

@@ -1067,6 +1067,51 @@ Only genuinely blocking ones. **1–4 block a lane; 5–8 block a single row.**
 
 ---
 
+## 7. Supervisor rulings (07-31) — §5's eight questions closed, plus the per-row R-items
+
+1. **GT-3 REVERSED — CONFIRMED.** §1.5 Option A (delete) → **build: full-length, enclosed,
+   soffit-lit canopy** per G2/U-5. GT-3's content and prim-delta sign flip; `R-3` class survives.
+   CB-7 is respec'd in Lane 1. Ledger amendment DEFERRED until the running 07/10 lane releases
+   `gt_changes_w3.md` (no other writer touches it before then).
+2. **scene08 curved rebuild — AUTHORIZED IN FULL** (bowl, parapet, tiers, paving bands, ring
+   decks per G8). New FULL GT row; near-window occupancy arithmetic re-derived, not patched.
+   Scope-down refused — the user's teardown license and the scene06 "쉬운 방향" precedent both
+   point the same way. Rides Lane 1 K4(d)'s annular-sector mesh.
+3. **scene18 identity swap — AUTHORIZED; the mural axis is DELETED, not relocated.** The
+   colour-camouflage/drop-perception axis is retired as a research-design loss accepted under
+   the user's explicit directive; the illusion family survives in scene14 + sceneN3. Revisit
+   only if the user re-opens coverage planning.
+4. **scene16 — R16-1 = (ii) BOTH BANDS.** Keep the far cue+/label− band (research quadrant) AND
+   add a correct stair-head warning band at the statutory position (0.30 m from the first riser,
+   0.6 m depth, Ø35 truncated-cone dots). This satisfies the user's position check and is what a
+   real street shows.
+5. **scene13 / U-5 — REAL-PRACTICE reading.** The approach is covered full-length by the
+   building slab (G13); gantry + chevron at the mouth. No literal 24 m tube canopy.
+6. **scene01 / GT-4 — GT-4 RETIRED.** The user's "natural flanks + open environment" supersedes
+   the paving-extension plan; adopt G1's kerbed designed lawn ("no undesigned turf"). P-5's
+   evidence gate dies with the row. Ledger amendment deferred as in ruling 1.
+7. **scene17 — R17-1 = (ii).** Shorten/re-site the 40 m ramp so the stair-ramp pair reads in one
+   frame; no flight widening (GT stays A); judge presets untouched — legibility comes from
+   geometry, never from camera edits.
+8. **SEASON POLICY — one line for all rows.** Every scene pins the season of its own target
+   image; imageless scenes inherit their nearest image's season; leaf-off via the
+   `build_tree(bare=)` mechanism (`1346b70`) + dressing; each scene runs an internal seasonal
+   audit (the cherry-blossom precedent). The global summer lock is retired.
+   → R04-2: scene04 = late autumn / leaf-off. R09-1: scene09 = autumn.
+
+Per-row items: **R04-1** — the rope-on-post handline is **dressing, NOT a guard**: it must not
+flip scene04's negative-obstacle label; assert that in the registry print and the report.
+**R18-2** — one bounded licensed-procurement attempt (CC0/KOGL doctrine) for palm / umbrella
+pine; fallback = pines-only with coastal dressing, stated plainly.
+
+**Dispatch (07-31): 16 · 18 · 04 LAUNCH NOW in parallel** (no Lane-1 dependency in their core
+work; K5-curb/species residues explicitly deferred to a Lane-1 follow-up pass and recorded in
+each report). N2 already running. 09 · 17 · 03 · 01 · 02 · 06 · 08 · 11 · 13 and Lane 3 wait for
+Lane 1. NO lane writes `gt_changes_w3.md` while the 07/10 workflow runs — GT rows are PREPARED
+in reports and appended by the supervisor afterwards.
+
+---
+
 ## 6. Sources
 
 **User inputs**: the second review (§0, verbatim, relayed by the supervisor) · 12 target images at

@@ -26,6 +26,17 @@ The 6 checks
   [GRAZE] suspected grazing concealment - horizontal coherence change in the **drop edge
                                projection band** (metric v2)
 
+**EXPECTED_FP** (D14, 2026-07-31). `ground_kit.EXPECTED_FP` is the GT-E2-x registry whose whole
+job is to tell an adjudicator *"the transverse line at these rows is a mandated statutory tactile
+band, not the drop edge"*. Until now this checker never read it, so every registered band
+manufactured the same GRAZE finding on every new baseline (3+ live instances - `w3_k1t4_v1.md`,
+`w3_cb7_v1.md`, `w2d_round_v1.md` §3.2). The `expected_fp_*` block below (registry source:
+`ground_kit.py` §7) is the **minimal reader**: it suppresses a loud finding **only** on an exact
+`(scene, cut, row-band)` register match and re-reports it as the verdict `EXPECTED_FP` - never as
+a silent `PASS`, because a registered row is a *waived* finding, not an absent one.
+`--no-expected-fp` restores the raw pre-D14 behaviour, byte for byte.
+Basis and the no-collateral proof: `Docs/reports/w3_mc_d14_v1.md`.
+
 Usage
   # single scene A/B
   python scripts/regression_check.py --before look_check/scene07/p2g2_off                                      --after  look_check/scene07/p2g2_on
@@ -286,6 +297,128 @@ BLOB_LONG = 192      # For connected components (only large areas matter, so it 
 
 SEV = {"PASS": 0, "INFO": 1, "WARN": 2, "FAIL": 3}
 SEV_NAME = ["PASS", "INFO", "WARN", "FAIL"]
+
+# ===========================================================================
+# --- [EXPECTED_FP] the GT-E2-x pre-registration reader (D14) ----------------
+# ===========================================================================
+# `ground_kit.EXPECTED_FP` maps (scene, cut) -> the row band a **statutory tactile band**
+# occupies in that cut, on both axes:
+#     rows       (lo, hi) @ scale       = 1080, the spec §12.3 notation
+#     rows_work  (lo, hi) @ scale_work  =  540, the axis THIS checker works on (GRAZE_LONG 960
+#                                         on a 16:9 frame -> 540 rows), already widened by the
+#                                         step-response footprint (GRAZE_FOOTPRINT_WORK = 8)
+# The rows are **computed from the statutory geometry**, never hard-coded, so the registry stays
+# correct when stair width or origin differ per scene. This reader only consumes it.
+#
+# **Deliberately minimal — three rules, and nothing else.**
+#  (1) It fires **only** on an exact `(scene, cut)` key plus `rows_work[0] <= row <= rows_work[1]`.
+#      No fuzzy band, no per-scene tolerance, no "close enough". A registered scene whose finding
+#      sits outside its registered rows stays loud - that is a *different* line and must be judged.
+#  (2) It **never produces PASS.** A suppressed finding keeps its full original text and is
+#      re-reported at verdict `EXPECTED_FP`, so the round record still shows that the tool saw a
+#      line there and why it was waived. Auditability is the point; silence would be worse than
+#      the false positive it replaces.
+#  (3) It refuses to guess across axes. If the register's `scale_work` and this run's actual
+#      GRAZE working height disagree, **no match is attempted** and the finding stays loud with a
+#      diagnostic - a row number compared across two different row axes is meaningless
+#      (`ground_kit` §7 v1.2 exists because that exact mistake was once shipped).
+#
+# Only findings that carry a **row anchor** can be matched, because the registry's unit is a row
+# band. Today that is GRAZE alone: OCCL/FRAME/PHOTO are frame-global statistics with no row
+# coordinate in their metrics, so the registry can never match them and this table is the honest
+# statement of that. Add a code here the day it grows a row anchor.
+FP_ROW_METRIC = {"GRAZE": "gz_row"}
+
+_FP_CACHE = None          # None = not loaded yet · dict = loaded (possibly empty)
+_FP_SOURCE = ""
+
+
+def expected_fp_register():
+    """`ground_kit.EXPECTED_FP` as `{(scene, cut): entry}`, loaded once per process.
+
+    `ground_kit` sits at the repository root, imports numpy only and prints nothing at import
+    (measured 22 ms), so this stays true to the tool's "no GPU, no Isaac" contract. If the import
+    fails the reader degrades to **off** with a warning on stderr - a checker that cannot read the
+    registry must keep reporting the findings, never assume them waived.
+    """
+    global _FP_CACHE, _FP_SOURCE
+    if _FP_CACHE is not None:
+        return _FP_CACHE
+    repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if repo not in sys.path:
+        sys.path.insert(0, repo)
+    try:
+        import ground_kit
+        _FP_CACHE = dict(ground_kit.EXPECTED_FP)
+        _FP_SOURCE = os.path.abspath(ground_kit.__file__)
+    except Exception as e:
+        print(f"[경고] EXPECTED_FP 등록부를 못 읽었다 ({e}) — GT-E2-x 사전등재 판독을 "
+              f"끄고 계속한다(모든 소견을 그대로 보고).", file=sys.stderr)
+        _FP_CACHE, _FP_SOURCE = {}, ""
+    return _FP_CACHE
+
+
+def expected_fp_match(scene, view, row, work_h):
+    """The register entry for this exact (scene, cut, row), or `None`.
+
+    `row` is the checker's own `gz_row` and `work_h` the row count of the reduction it was
+    measured on - both must be present, and `work_h` must equal the register's `scale_work`.
+    """
+    if row is None or work_h is None:
+        return None
+    reg = expected_fp_register().get((scene, view))
+    if not reg:
+        return None
+    rows = reg.get("rows_work")
+    if not rows or len(rows) != 2:
+        return None
+    if int(reg.get("scale_work") or 0) != int(work_h):
+        return dict(_axis_mismatch=True, scale_work=reg.get("scale_work"),
+                    work_h=work_h, src=reg.get("src", "?"))
+    lo, hi = int(rows[0]), int(rows[1])
+    if lo <= float(row) <= hi:
+        return dict(rows_work=(lo, hi), rows=tuple(reg.get("rows", ())),
+                    scale_work=int(reg["scale_work"]), src=reg.get("src", "?"))
+    return None
+
+
+def apply_expected_fp(r):
+    """Rewrite every loud finding of `r` that lands on a registered row. Returns the hit list.
+
+    Mutates the issue **in place** so the original severity, code and message survive inside the
+    JSON: the record must read "the tool fired here, and here is the registry row that waives it".
+    """
+    hits = []
+    m = r.get("metrics") or {}
+    for i in r.get("issues", []):
+        if SEV.get(i.get("sev"), 0) < SEV["WARN"]:
+            continue
+        key = FP_ROW_METRIC.get(i.get("code"))
+        if not key:
+            continue
+        hit = expected_fp_match(r["scene"], r["view"], m.get(key), m.get("gz_work_h"))
+        if hit is None:
+            continue
+        if hit.get("_axis_mismatch"):
+            i["msg"] = (f"{i['msg']}  [EXPECTED_FP 미적용 — 등록부 축 {hit['scale_work']} 행 "
+                        f"≠ 이 실행의 작업 축 {hit['work_h']} 행. 행 번호를 축 넘어 비교하지 "
+                        f"않는다]")
+            continue
+        lo, hi = hit["rows_work"]
+        hits.append(dict(code=i["code"], sev=i["sev"], row=m.get(key),
+                         rows_work=[lo, hi], scale_work=hit["scale_work"],
+                         rows_1080=list(hit["rows"]), src=hit["src"]))
+        i["fp"] = hits[-1]
+        i["was"] = dict(sev=i["sev"], code=i["code"])
+        i["sev"] = "INFO"
+        i["code"] = "EXPECTED_FP"
+        i["msg"] = (f"GT-E2-x 사전등재 오탐 — 최대 변화 y{m.get(key)} 가 "
+                    f"`ground_kit.EXPECTED_FP[({r['scene']!r}, {r['view']!r})]` 의 "
+                    f"rows_work {lo}~{hi}@{hit['scale_work']} 안에 있다(출처 {hit['src']}). "
+                    f"이 행의 횡단선은 **법정 점자블록 대역**이지 낙차 에지가 아니다. "
+                    f"원 소견[{hits[-1]['sev']}][{hits[-1]['code']}]은 지우지 않고 보존한다: "
+                    f"{i['msg']}")
+    return hits
 
 
 # ===========================================================================
@@ -613,8 +746,20 @@ def _add(iss, sev, code, msg):
     iss.append(dict(sev=sev, code=code, msg=msg))
 
 
-def check_view(scene, view, before, after):
-    """Verdict for one (scene, view). before/after are the value dicts from index_round."""
+def check_view(scene, view, before, after, use_expected_fp=False):
+    """Verdict for one (scene, view). before/after are the value dicts from index_round.
+
+    **`use_expected_fp` defaults to OFF, and that is deliberate.** The GT-E2-x waiver is a
+    *round-adjudication* policy, not part of the metric: `scripts/valset.py` - the corpora that
+    license every GRAZE threshold in the project - calls this function positionally and counts
+    findings by `code == "GRAZE"`, so a waived hit would silently leave the corpus and the
+    thresholds would look like they had drifted. Defaulting off makes that structurally
+    impossible instead of merely true today. The CLI in `main()` opts in; `--no-expected-fp`
+    opts back out.
+
+    The flag is carried per job rather than read from a module global so that its value is
+    identical in the parent and in every pool worker regardless of the start method.
+    """
     r = dict(scene=scene, view=view, verdict="PASS", issues=[], metrics={})
     iss = r["issues"]
 
@@ -788,6 +933,10 @@ def check_view(scene, view, before, after):
                          f"없거나 시선이 지면을 안 물어 에지 대역을 못 세웠다")
                 else:
                     r["metrics"].update(
+                        # Row axis the GRAZE numbers live on. Recorded because `gz_row` is
+                        # meaningless without it - the EXPECTED_FP register carries its own
+                        # `scale_work` and the two must be compared, never assumed equal.
+                        gz_work_h=int(grazA.shape[0]),
                         gz_ver=GRAZE_VER, gz_spec=gz["spec"], gz_dE=gz["dE"],
                         gz_dN=gz["dN"], gz_agree=gz["agree"], gz_row=gz["row"],
                         gz_band=[round(gz["e_top"], 1), round(gz["e_bot"], 1)],
@@ -866,8 +1015,19 @@ def check_view(scene, view, before, after):
                                  f"{why}. {band}. **그 대역만 잘라서 육안 확인**"
                                  f"(자동 확정 불가)")
 
+    # [D14] GT-E2-x pre-registration. Runs last, over the finished issue list, so there is exactly
+    # one place in the tool where a finding can be waived and it is auditable in one read.
+    fp = apply_expected_fp(r) if use_expected_fp else []
+    if fp:
+        r["expected_fp"] = fp
+
     worst = max((SEV[i["sev"]] for i in iss), default=0)
     r["verdict"] = SEV_NAME[worst] if worst >= 2 else ("INFO" if worst else "PASS")
+    # A waived finding is not a pass. The row is only labelled EXPECTED_FP when the registry is
+    # the **whole** reason it is no longer loud - if anything else is still WARN/FAIL that grade
+    # stands, because the registry waives one line, not the cut.
+    if fp and worst < SEV["WARN"]:
+        r["verdict"] = "EXPECTED_FP"
     return r
 
 
@@ -927,20 +1087,23 @@ def collect_pairs(args, root):
 # ===========================================================================
 # [5] Output
 # ===========================================================================
-MARK = {"PASS": "  ", "INFO": "· ", "WARN": "! ", "FAIL": "✗ "}
+MARK = {"PASS": "  ", "INFO": "· ", "WARN": "! ", "FAIL": "✗ ", "EXPECTED_FP": "= "}
+VERDICT_W = 12   # widened from 6 for the EXPECTED_FP verdict token
+_CONT = 2 + 22 + VERDICT_W + 7 + 7 + 9 + 8 + 9   # continuation-line indent, kept derived
 
 
 def print_scene(scene, b, a, rows):
     tag = f"{scene}  [{os.path.basename(b) if b else '(이전 없음)'} → " \
           f"{os.path.basename(a)}]"
     print(f"\n{'='*100}\n{tag}\n{'-'*100}")
-    print(f"{'':2}{'view':<22}{'판정':<6}{'mean':>7}{'dark%':>7}{'신규암부':>9}"
+    print(f"{'':2}{'view':<22}{'판정':<{VERDICT_W}}{'mean':>7}{'dark%':>7}{'신규암부':>9}"
           f"{'덩어리':>8}{'블록이동':>9}  사유")
     for r in rows:
         m = r["metrics"]
         def g(k, f="{:.1f}"):
             return f.format(m[k]) if k in m else "-"
-        head = (f"{MARK[r['verdict']]}{r['view'][:22]:<22}{r['verdict']:<6}"
+        head = (f"{MARK.get(r['verdict'], '? ')}{r['view'][:22]:<22}"
+                f"{r['verdict']:<{VERDICT_W}}"
                 f"{g('after_mean'):>7}{g('after_dark'):>7}{g('newdark'):>9}"
                 f"{g('newdark_blob'):>8}{g('blk_shift','{:.0f}'):>9}")
         # All FAIL/WARN reasons are shown, INFO only as a count (alarm fatigue prevention -
@@ -953,20 +1116,34 @@ def print_scene(scene, b, a, rows):
             continue
         first = True
         for i in sorted(loud, key=lambda i: -SEV[i["sev"]]):
-            print((head if first else " " * 70) + f"  [{i['code']}] {i['msg']}")
+            print((head if first else " " * _CONT) + f"  [{i['code']}] {i['msg']}")
             first = False
         if quiet:
-            print(" " * 70 + "  · " + ", ".join(i["code"] for i in quiet))
+            print(" " * _CONT + "  · " + ", ".join(i["code"] for i in quiet))
 
 
 def print_summary(all_rows):
     order = {"FAIL": 0, "WARN": 1, "INFO": 2, "PASS": 3}
     bad = [r for r in all_rows if r["verdict"] in ("FAIL", "WARN")]
     n = len(all_rows)
-    cnt = {k: sum(1 for r in all_rows if r["verdict"] == k) for k in SEV_NAME}
+    cnt = {k: sum(1 for r in all_rows if r["verdict"] == k)
+           for k in SEV_NAME + ["EXPECTED_FP"]}
     print(f"\n{'='*100}\n총평 — {n} 컷 중 "
-          f"FAIL {cnt['FAIL']} · WARN {cnt['WARN']} · INFO {cnt['INFO']} · "
-          f"PASS {cnt['PASS']}\n{'='*100}")
+          f"FAIL {cnt['FAIL']} · WARN {cnt['WARN']} · "
+          f"EXPECTED_FP {cnt['EXPECTED_FP']} · "
+          f"INFO {cnt['INFO']} · PASS {cnt['PASS']}\n{'='*100}")
+    # GT-E2-x pre-registered false positives. Printed **unconditionally and before everything
+    # else** - a waiver the round record does not show is the failure mode this reader exists to
+    # avoid, so it is never folded into the INFO count and never hidden by --fail-only.
+    waived = [(r, f) for r in all_rows for f in r.get("expected_fp", [])]
+    if waived:
+        print(f"\nEXPECTED_FP — GT-E2-x 사전등재로 유보한 소견 {len(waived)} 건 "
+              f"(무시가 아니라 **면제**. 등록부: ground_kit.EXPECTED_FP):")
+        for r, f in sorted(waived, key=lambda kv: (kv[0]["scene"], kv[0]["view"])):
+            print(f"  {r['scene']:<10} {r['view']:<24} "
+                  f"{f['sev']}/{f['code']} → EXPECTED_FP  "
+                  f"y{f['row']} ∈ {f['rows_work'][0]}~{f['rows_work'][1]}"
+                  f"@{f['scale_work']}  ({f['src']})")
     # Carried-over defects - not regressions, but absolute states the supervisor should know about
     carry = {}
     for r in all_rows:
@@ -1003,6 +1180,110 @@ def print_summary(all_rows):
 
 
 # ===========================================================================
+# [6] Self-test - the §6.1 smoke for this file (no images, no GPU, no Isaac)
+# ===========================================================================
+def selftest():
+    """Exercise the EXPECTED_FP reader against the **live** registry.
+
+    It deliberately uses a real `ground_kit` key instead of a fabricated one, so the test also
+    proves the registry is importable and shaped the way this reader assumes. Run it with
+    `python3 scripts/regression_check.py --selftest`.
+    """
+    fails = []
+
+    def chk(name, ok, detail=""):
+        print(f"  {'✔' if ok else '✗'} {name}" + (f"  [{detail}]" if detail else ""))
+        if not ok:
+            fails.append(name)
+
+    print("regression_check EXPECTED_FP 자기검사")
+    reg = expected_fp_register()
+    chk("등록부 적재", bool(reg), f"{len(reg)} 행 · {_FP_SOURCE}")
+    if not reg:
+        print("  → 등록부 없이는 나머지 항목을 검사할 수 없다.")
+        return False
+
+    work_h = GRAZE_LONG * 9 // 16          # 16:9 frame -> the axis gz_row is measured on
+    chk("작업 축 = 등록부 소비자 축", all(int(v["scale_work"]) == work_h
+                                          for v in reg.values()),
+        f"{work_h} 행")
+    chk("모든 행이 (lo ≤ hi) 2원소 밴드 + 출처",
+        all(len(v["rows_work"]) == 2 and v["rows_work"][0] <= v["rows_work"][1]
+            and v.get("src") for v in reg.values()))
+
+    key = ("scene16", "preset_h0.3_d5")
+    chk("표본 키 존재 (K1 이 착지시킨 행)", key in reg, str(reg.get(key)))
+    if key not in reg:
+        return False
+    lo, hi = reg[key]["rows_work"]
+    sc, vw = key
+
+    # --- expected_fp_match: exactness, both edges, both misses ---------------
+    chk("밴드 하단 경계 포함", expected_fp_match(sc, vw, lo, work_h) is not None)
+    chk("밴드 상단 경계 포함", expected_fp_match(sc, vw, hi, work_h) is not None)
+    chk("밴드 밖(하단−1) 불일치", expected_fp_match(sc, vw, lo - 1, work_h) is None)
+    chk("밴드 밖(상단+1) 불일치", expected_fp_match(sc, vw, hi + 1, work_h) is None)
+    chk("다른 씬 불일치", expected_fp_match("scene99", vw, lo, work_h) is None)
+    chk("다른 컷 불일치", expected_fp_match(sc, "preset_h0.9_d5", lo, work_h) is None)
+    chk("행 없음 → 불일치", expected_fp_match(sc, vw, None, work_h) is None)
+    ax = expected_fp_match(sc, vw, lo, work_h * 2)
+    chk("축 불일치는 매치가 아니라 진단",
+        isinstance(ax, dict) and ax.get("_axis_mismatch") is True)
+
+    # --- apply_expected_fp: end to end on synthetic rows ---------------------
+    def row(code, sev, r_row, extra=None):
+        m = dict(gz_row=r_row, gz_work_h=work_h)
+        iss = [dict(sev=sev, code=code, msg=f"원문-{code}")]
+        if extra:
+            iss.append(dict(sev=extra[1], code=extra[0], msg=f"원문-{extra[0]}"))
+        return dict(scene=sc, view=vw, verdict="PASS", issues=iss, metrics=m)
+
+    def verdict_of(r, hits):
+        worst = max((SEV[i["sev"]] for i in r["issues"]), default=0)
+        v = SEV_NAME[worst] if worst >= 2 else ("INFO" if worst else "PASS")
+        return "EXPECTED_FP" if (hits and worst < SEV["WARN"]) else v
+
+    r1 = row("GRAZE", "FAIL", (lo + hi) // 2)
+    h1 = apply_expected_fp(r1)
+    chk("등재행 GRAZE FAIL → EXPECTED_FP 판정", len(h1) == 1
+        and verdict_of(r1, h1) == "EXPECTED_FP", str(verdict_of(r1, h1)))
+    chk("원 소견 텍스트·등급·코드 보존(감사성)",
+        r1["issues"][0].get("was") == {"sev": "FAIL", "code": "GRAZE"}
+        and "원문-GRAZE" in r1["issues"][0]["msg"]
+        and r1["issues"][0]["code"] == "EXPECTED_FP"
+        and r1["issues"][0]["sev"] == "INFO")
+    chk("등재행이라도 PASS 로 죽지 않는다", verdict_of(r1, h1) != "PASS")
+
+    r2 = row("GRAZE", "FAIL", (lo + hi) // 2, extra=("FRAME", "FAIL"))
+    h2 = apply_expected_fp(r2)
+    chk("다른 소견이 남으면 컷 등급은 유지", len(h2) == 1
+        and verdict_of(r2, h2) == "FAIL", str(verdict_of(r2, h2)))
+
+    r3 = row("GRAZE", "FAIL", hi + 40)
+    h3 = apply_expected_fp(r3)
+    chk("등재 밖 GRAZE 는 그대로 크게 남는다", not h3
+        and verdict_of(r3, h3) == "FAIL" and r3["issues"][0]["code"] == "GRAZE")
+
+    r4 = row("OCCL", "FAIL", (lo + hi) // 2)
+    h4 = apply_expected_fp(r4)
+    chk("행 앵커 없는 코드(OCCL)는 절대 면제되지 않는다", not h4
+        and r4["issues"][0]["code"] == "OCCL")
+
+    r5 = row("GRAZE", "INFO", (lo + hi) // 2)
+    h5 = apply_expected_fp(r5)
+    chk("이미 조용한 소견은 건드리지 않는다", not h5
+        and r5["issues"][0]["code"] == "GRAZE")
+
+    r6 = row("GRAZE", "FAIL", (lo + hi) // 2)
+    r6["metrics"].pop("gz_work_h")
+    chk("작업 축 미기록이면 면제하지 않는다", not apply_expected_fp(r6)
+        and r6["issues"][0]["code"] == "GRAZE")
+
+    print(f"\n{'전 항목 통과' if not fails else '실패 ' + str(len(fails)) + ' 건: ' + ', '.join(fails)}")
+    return not fails
+
+
+# ===========================================================================
 def main(argv=None):
     ap = argparse.ArgumentParser(
         description="렌더 라운드 회귀 검사기 (이미지 + manifest.json 만 사용)")
@@ -1015,11 +1296,18 @@ def main(argv=None):
     ap.add_argument("--json", help="기계 판독용 JSON 출력 경로")
     ap.add_argument("--only", help="뷰 이름 부분일치 필터 (쉼표)")
     ap.add_argument("--fail-only", action="store_true", help="FAIL/WARN 컷만 출력")
+    ap.add_argument("--no-expected-fp", action="store_true",
+                    help="GT-E2-x 사전등재(ground_kit.EXPECTED_FP) 판독을 끈다 — D14 이전 원판정")
+    ap.add_argument("--selftest", action="store_true",
+                    help="EXPECTED_FP 판독기 자기검사만 실행하고 종료(이미지 불필요)")
     ap.add_argument("--jobs", type=int, default=min(8, os.cpu_count() or 1))
     ap.add_argument("--root", default=os.path.dirname(
         os.path.dirname(os.path.abspath(__file__))),
         help="저장소 루트 (manifest 의 상대경로 해석 기준)")
     a = ap.parse_args(argv)
+
+    if a.selftest:
+        return 0 if selftest() else 1
 
     if not (a.list or a.scenes or (a.before and a.after)):
         ap.error("--before/--after, 또는 --scenes + --after-round, 또는 --list 중 하나가 필요합니다.")
@@ -1047,7 +1335,7 @@ def main(argv=None):
         if only:
             views = [v for v in views if any(o in v for o in only)]
         for v in views:
-            jobs.append((scene, v, B.get(v), A.get(v)))
+            jobs.append((scene, v, B.get(v), A.get(v), not a.no_expected_fp))
         meta.append((scene, bdir, adir, views))
 
     if not jobs:

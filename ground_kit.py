@@ -596,6 +596,51 @@ def _grid_ticks(a0, a1, step, o):
     return [o + i * step for i in range(i0, i1 + 1)]
 
 
+MODULE_SNAP_MAX_CELL = 1.00    # [m] above this a "unit_cell" is not a paver — see below
+
+
+def _snap_module(w, h, cx, cy, cell, origin_xy, lo, hi):
+    """**DEC-3 module snap.** Quantise a repair patch onto the paving module.
+
+    A real 절삭/덧씌우기 repair in flagstone paving lifts and relays **whole or half flags**
+    - the saw runs in the joint - so both the size and the position are multiples of half
+    the module. Returns `(w, h, cx, cy)` unchanged when the profile declares no module.
+
+    **Only paver-scale modules snap** (`cell <= MODULE_SNAP_MAX_CELL`). Three rows of the
+    `unit_cell` ledger are not paving modules at all and must not be used as one:
+    `alley_concrete` **3.0 m** is a 시공줄눈 contraction-joint bay, and `deck_timber` /
+    `deck_trail_hybrid` **0.145 m** is a plank width. Snapping a 0.65 m2 repair
+    `[statistic]` onto a 3 m bay would inflate it to 9 m2 and destroy the very statistic
+    DEC-3 is written to preserve. Of the five patch-carrying profiles that declare a cell,
+    four snap - `plaza_granite` 0.6 · `plaza_water` 0.6 · `sidewalk_block` 0.3 ·
+    `levee_paved` 0.2 - and `alley_concrete` is excluded by this rule.
+
+    `lo`/`hi` are the region bounds the snapped rectangle must stay inside; when the
+    module does not fit the region the un-snapped value is kept on that axis rather than a
+    rectangle that spills over an edge.
+    """
+    if not cell or float(cell) <= 0 or float(cell) > MODULE_SNAP_MAX_CELL:
+        return w, h, cx, cy
+    cell = float(cell)
+    q = cell / 2.0                              # whole **or half** flags
+    ox, oy = (origin_xy or (0.0, 0.0))
+    x0, y0 = lo
+    x1, y1 = hi
+    out = []
+    for (v, c, o, a0, a1) in ((w, cx, ox, x0, x1), (h, cy, oy, y0, y1)):
+        k = max(1, int(round(float(v) / q)))
+        vv = k * q
+        if vv > (a1 - a0):                      # module wider than the strip - leave it
+            out.append((float(v), float(c)))
+            continue
+        # The **low edge** lands on a module line: c - vv/2 = o + i*q.
+        i = round((float(c) - vv / 2.0 - o) / q)
+        cc = o + i * q + vv / 2.0
+        cc = min(max(cc, a0 + vv / 2.0), a1 - vv / 2.0)
+        out.append((vv, cc))
+    return out[0][0], out[1][0], out[0][1], out[1][1]
+
+
 # ===========================================================================
 # [4] The 15 new small builders - all **geometry**. Materials belong to T1 (spec §4.4).
 #
@@ -603,6 +648,205 @@ def _grid_ticks(a0, a1, step, o):
 #     is `dict(prim_count=int, elems=[Elem, ...])`. Passing `dry_kit()` as `kit` performs the
 #     same computation without touching USD - plan_ground relies on this property.
 # ===========================================================================
+def _blot_ring(path, seed, n, rough):
+    """DEC-1 radius ring: `r_i = 1 + U(-rough, +rough)`, smoothed **once** circularly.
+
+    The smoothing pass `r_i <- (r_{i-1} + 2 r_i + r_{i+1}) / 4` is what stops the lobe
+    from growing vertex spikes; without it a 16-gon at `rough=0.35` reads as a saw blade
+    rather than as a puddle. Deterministic from `(path, seed)` through the existing
+    `det_rng`, exactly like every other builder in this file.
+    """
+    n = max(5, int(n))
+    rng = det_rng("gkit.blot", _seed_key(path), seed)
+    r = [1.0 + (rng.random() * 2.0 - 1.0) * float(rough) for _ in range(n)]
+    sm = [(r[i - 1] + 2.0 * r[i] + r[(i + 1) % n]) / 4.0 for i in range(n)]
+    # Normalised so `max(r_i) == 1`: the lobe then **inscribes** the (rx, ry) box and its
+    # AABB is that box to within one vertex. Without this the bbox floats with the draw
+    # and every element's registered footprint would breathe by +-rough, which is the one
+    # thing `frame_budget` and the GT-E ladder must not have to guess about.
+    m = max(sm) or 1.0
+    return [v / m for v in sm]
+
+
+def build_blot(kit, path, cx, cy, rx, ry, mtl, *, n=16, rough=0.35, seed=0,
+               z, proud, z_fn=None):
+    """**DEC-1 — irregular flat lobe.** The primitive that replaces a decal rectangle.
+
+    A closed N-gon whose radii are `r_i = r * (1 + U(-rough, rough))`, once-smoothed so no
+    vertex spikes. **1 Mesh prim** - the same budget a `kit.B` decal plate costs, so no
+    profile prim_cap moves. The registered AABB is the polygon bbox, **exact**.
+
+    Deliberately **no alpha, no opacity, no texture** (spec §10.5 DEC-1): `add_vegetation`'s
+    own comment records that `enable_opacity` breaks the vegetation assets, and an
+    alpha-masked ground quad adds a sorting surface at grazing angles - which is exactly
+    the viewpoint this dataset lives at. The rejected alternative was a procedural mask
+    texture: it costs a generation step, a UV convention and an alpha path for a
+    silhouette an N-gon already gives.
+
+    **Single face, zero thickness.** Every other decal in this file is an 8 mm plate, and
+    that 8 mm rim all the way round the mask is half of what the eyes round read as
+    "a carpet laid on the ground" (`tonglam_v2.md` §2.13-2; scene07 already cut its leaf
+    band `proud` 0.012 -> 0.004 chasing the same artefact). A single upward face has no rim
+    at all, and at `proud` it cannot z-fight the slab underneath.
+
+    `z_fn(x, y) -> float` makes the lobe follow a sloped surface (scene07's 19 deg corridor,
+    scene10's trail). When given, `z` is ignored for the vertices and used only as the
+    element's registered base.
+    """
+    ring = _blot_ring(path, seed, n, rough)
+    nn = len(ring)
+    pr = float(proud)
+    pts = []
+    for i, ri in enumerate(ring):
+        a = 2.0 * math.pi * i / nn
+        pts.append((float(cx) + float(rx) * ri * math.cos(a),
+                    float(cy) + float(ry) * ri * math.sin(a)))
+    zs = [(float(z_fn(px, py)) if z_fn is not None else float(z)) + pr
+          for px, py in pts]
+    n0 = kit.mark()
+    _author_flat_mesh(kit, path, pts, zs, mtl)
+    ax0 = min(p[0] for p in pts); ax1 = max(p[0] for p in pts)
+    ay0 = min(p[1] for p in pts); ay1 = max(p[1] for p in pts)
+    az0 = min(zs); az1 = max(zs)
+    return dict(prim_count=kit.count_since(n0),
+                aabb=(ax0, ay0, az0, ax1, ay1, az1),
+                points=pts, zs=zs)
+
+
+def _author_flat_mesh(kit, path, pts, zs, mtl):
+    """Author the DEC-1 lobe as one `UsdGeom.Mesh` single-face polygon.
+
+    `pxr` is imported lazily and the whole body is skipped when the Kit carries no stage,
+    so `dry_kit()` still counts the prim - `plan_ground` and the CPU self-check depend on
+    that property (section [4] header). Material binding is done here rather than through
+    `kit.B` because the Kit's injected helpers only make boxes, cylinders, discs and
+    slopes; adding a polygon helper would mean editing `infra_kit`, which K1 does not own.
+    """
+    kit.prims.append(str(path))
+    stage = getattr(kit, "stage", None)
+    if stage is None:
+        return None
+    from pxr import UsdGeom, UsdShade, Gf
+    m = UsdGeom.Mesh.Define(stage, str(path))
+    m.CreatePointsAttr([Gf.Vec3f(float(x), float(y), float(zz))
+                        for (x, y), zz in zip(pts, zs)])
+    m.CreateFaceVertexCountsAttr([len(pts)])
+    m.CreateFaceVertexIndicesAttr(list(range(len(pts))))
+    m.CreateSubdivisionSchemeAttr("none")
+    m.CreateExtentAttr([
+        Gf.Vec3f(min(p[0] for p in pts), min(p[1] for p in pts), min(zs)),
+        Gf.Vec3f(max(p[0] for p in pts), max(p[1] for p in pts), max(zs))])
+    if mtl is not None:
+        UsdShade.MaterialBindingAPI.Apply(m.GetPrim()).Bind(mtl)
+    return m
+
+
+def build_carpet_mask(kit, path, cx, cy, rx, ry, mtl, *, z, proud,
+                      n=24, rough=0.18, seed=0, z_fn=None,
+                      feather=(0.30, 0.50), feather_density=26.0,
+                      feather_cap=60, feather_clip=None, drift=None):
+    """**DEC-2 — a leaf / gravel carpet edge that is not a rectangle.**
+
+    Two parts, per spec §10.5:
+      1. the **mask**: `build_blot` at low `rough` (0.15-0.20) and high `n` (24). A carpet
+         of fallen leaves has a soft, *convex* outline - it is not a puddle - so the ring
+         is much rounder than a stain's;
+      2. the **feather ring**: individual leaf cards laid in a band straddling the mask
+         boundary (inner `feather[0]` m, outer `feather[1]` m), density falling to zero
+         outward, from `assets/vegetation/Debris/{oakfall1,oakfall2,maplefall1,
+         fallcluster1,2}.usd`. This is returned as a `scatter_req` entry, i.e. it is
+         delegated to the injected `scatter_debris` callback exactly the way
+         `build_edge_break` already delegates - no new asset path in this module.
+
+    Returns the usual `dict(prim_count, elems, scatter_req)`.
+
+    **`drift` is PARKED and this builder refuses it.** Spec §10.5: the drift bias - the
+    mask centroid pulled toward the nearest vertical obstruction and elongated along it -
+    *"is the part that makes it read as real, and it is parked with P-4's evidence: build
+    DEC-1/DEC-3 first, they are already evidenced."* Accepting the kwarg silently would
+    let an implementer ship the unevidenced half, so it raises instead.
+    """
+    if drift is not None:
+        raise ValueError(
+            "ground_kit: DEC-2 drift bias 는 P-4 증거 게이트에 묶여 있다"
+            "(사양 §9 P-4 · §10.5). 마스크와 페더 링만 먼저 구현한다 — "
+            "drift= 를 넘기려면 증거 패널이 먼저 착지해야 한다.")
+    n0 = kit.mark()
+    blot = build_blot(kit, path, cx, cy, rx, ry, mtl,
+                      n=int(n), rough=float(rough), seed=seed,
+                      z=z, proud=proud, z_fn=z_fn)
+    ax0, ay0, az0, ax1, ay1, az1 = blot["aabb"]
+    elems = [_elem("carpet", path, blot["aabb"], proud=float(proud),
+                   mtl_key="carpet", decal=True, area=True, albedo=0.16)]
+    # The feather band is an **annulus**, so the request carries the mask bbox grown by the
+    # outer feather only - `region`, not a line + width. Growing by half a width (the
+    # `build_edge_break` convention, which is right for a *band along a line*) inflates the
+    # box by the mask's own diameter and throws leaf cards a metre and a half past the
+    # carpet, onto whatever plate happens to be there. `feather_clip` is the host plate:
+    # a card outside it would sit at the mask's z over different ground, i.e. float.
+    fi, fo = float(feather[0]), float(feather[1])
+    fx0, fy0, fx1, fy1 = ax0 - fo, ay0 - fo, ax1 + fo, ay1 + fo
+    if feather_clip is not None:
+        cx0, cy0, cx1, cy1 = _norm_region(feather_clip)
+        fx0, fy0 = max(fx0, cx0), max(fy0, cy0)
+        fx1, fy1 = min(fx1, cx1), min(fy1, cy1)
+    per = 2.0 * math.pi * math.sqrt(max(1e-6, (rx * rx + ry * ry) / 2.0))
+    cnt = min(int(feather_cap), int(round(per * float(feather_density))))
+    reqs = []
+    if cnt > 0 and fx1 > fx0 and fy1 > fy0:
+        # `edge_bias` = the band depth the callback keeps: it clears the interior so the
+        # cards land straddling the boundary, which is what "density falling to zero
+        # outward" means for a scatter that cannot evaluate the polygon itself.
+        reqs.append(dict(region=(fx0, fy0, fx1, fy1),
+                         count=cnt, edge_bias=fi + fo))
+    return dict(prim_count=kit.count_since(n0), elems=elems, scatter_req=reqs)
+
+
+# ---------------------------------------------------------------------------
+# G-6 · gravel deposition — **PREPARED, GATED** (`[ruled 07-30]` spec §1.8 · §9 P-4)
+#
+#   "Prepare" is defined by the ruling: *write the builder, the kwarg, the lint check,
+#   with the check in warn mode and the scene-side value unchanged.* So the cover
+#   function below exists, is unit-testable and is documented — and **no profile and no
+#   scene passes it**. It is released by WINDOW 5 / CB-11, when T2 lands the 5 plates
+#   showing armouring / rill / edge deposition on a 마사토 surface
+#   (산림청 「등산로 정비 매뉴얼」 · 「사방기술교본」 · 서울시 「등산로 정비 매뉴얼」).
+#
+#   Typology, from the evidence-closer's route (CB-11, **do not implement now**):
+#   rill / edge-accumulation / bead-sheet. The three terms below are the plumbing those
+#   three forms need; the *shapes* are not written until the plates exist.
+# ---------------------------------------------------------------------------
+G6_GATED = True                 # flip only with the T2 panels in hand (CB-11)
+G6_LAMBDA_EDGE = 0.25           # [m] edge-accumulation decay length   `[parked - P-4]`
+G6_SIGMA_TRACK = 0.35           # [m] wear-lane track sigma            `[parked - P-4]`
+
+
+def deposition_cover_fn(mask, centerline, *, mean_cover,
+                        lam_edge=G6_LAMBDA_EDGE, sig_track=G6_SIGMA_TRACK,
+                        low_points=()):
+    """G-6 density field for scattered gravel. **Gated — raises while `G6_GATED`.**
+
+    Returns `f(x, y) -> cover in [0, 1]`, normalised so the mean over `mask` equals the
+    profile's declared `cover`; the caller then binds size sorting to the same term
+    (bigger clasts where the cover is highest - that is what "armouring" means).
+
+      cover(x,y) = mean * norm * [ edge(x,y) + track(x,y) + low(x,y) ]
+        edge  = exp(-d_edge / lam_edge)          accumulation against the trail edge
+        track = exp(-d_track^2 / (2 sig_track^2))  the existing wear-lane centreline
+        low   = sum over `low_points` of the same Gaussian
+
+    The signature is fixed now so the scene-side call sites can be written and reviewed
+    against it; the body stays behind the gate because a deposition field guessed from
+    memory is precisely the "plausible, not measured" failure the W3 bar forbids.
+    """
+    if G6_GATED:
+        raise ValueError(
+            "ground_kit: G-6 자갈 퇴적(deposition_cover_fn) 은 증거 게이트에 "
+            "묶여 있다 — 사양 §1.8 / §9 P-4. T2 가 마사토 armouring·rill·edge "
+            "deposition 도판 5장을 착지시키기 전에는 호출 금지(CB-11에서 해제).")
+    raise NotImplementedError("G-6 body lands with CB-11.")   # pragma: no cover
+
+
 def build_joint_grid(kit, path, region, z, mtl, step_x=3.0, step_y=None,
                      width=None, recess=None, jitter=0.0, seed=0,
                      origin_xy=(0.0, 0.0), skip_x=(), skip_y=(),
@@ -686,7 +930,8 @@ def build_slab_joints(kit, path, region, z, mtl, step_x=None, step_y=None,
 
 def build_patch_field(kit, path, region, z, mtls, n=2, area_mean=None,
                       ar=(0.7, 1.6), cutline=False, seed=0, sites=None,
-                      cutline_n=1, yaw_max=14.0):
+                      cutline_n=1, yaw_deg=0.0, module=None,
+                      module_origin=(0.0, 0.0)):
     """**Repair patch + cut line.** Default 0.7x0.9 m (0.61-0.69 m2 per patch `[statistic]`).
 
     Area and position are geometry (here), colour difference is material (T1) - spec §4.4.
@@ -699,17 +944,26 @@ def build_patch_field(kit, path, region, z, mtls, n=2, area_mean=None,
 
     GT: +2 mm - not a drop.
 
-    [W2 fix batch F3] Two changes, both about the *boundary*:
-      `cutline` now defaults to **False**. The four 20 mm strokes it lays around the
-      patch perimeter are what the eyes round read as "a drawn dark outline frame"
-      on 10 / D3 / 03 (`tonglam_v2.md` §2.13-2) - real saw-cut lips are a tonal step in
-      the surface, not a ruled line, and at h0.3 the stroke reads as vector art. No
-      caller passed the flag, so this switches the whole library off at once; the
-      argument stays for a scene that wants it back.
-      `yaw_max` breaks the axis alignment. Every patch was emitted axis-aligned, so a
-      field of them reads as a set of rectangles laid on the ground rather than as
-      repairs cut into it. The AABB handed to `_elem` is the **exact** rotated one
-      (`_obb_aabb`), so region containment and the GT-E2 verdict see the true footprint.
+    [W2 fix batch F3] `cutline` defaults to **False**. The four 20 mm strokes it lays
+      around the patch perimeter are what the eyes round read as "a drawn dark outline
+      frame" on 10 / D3 / 03 (`tonglam_v2.md` §2.13-2) - real saw-cut lips are a tonal step
+      in the surface, not a ruled line, and at h0.3 the stroke reads as vector art. No
+      caller passed the flag, so this switches the whole library off at once; the argument
+      stays for a scene that wants it back.
+
+    [W3 J-1 + DEC-3 `[ruled 07-30]` spec §10.1 row 1 / §10.5]
+      **The rectangle stays** - real 절삭·덧씌우기 patches *are* saw-cut rectangles, so the
+      W2 `yaw_max=14.0` random splay was fixing the wrong thing: it made every repair look
+      like a dropped mat instead of like a cut. `yaw_max` is replaced by `yaw_deg`, which
+      the caller sets from the **profile's `unit_cell` axis** and which is `0.0` for every
+      profile currently in the ledger (all of them are grid-aligned, `GROUND_DIMENSIONS`
+      §unit_cell). The argument exists so a future rotated-module profile can declare its
+      axis instead of an implementer re-introducing a random draw.
+      `module` additionally snaps `w`/`h` to an integer number of flags and `cx`/`cy` so the
+      patch **edges land on joint lines** (`_snap_module`) - the saw runs in the joint.
+      Because the yaw is now a declared constant (0 in practice), the registered AABB is
+      the exact box AABB (`_box_aabb`) rather than an OBB envelope - this is spec **GT-8**,
+      and it is what moves `frame_budget` B1/B2/B5 and retires `regr_260730_w2d_fix.json`.
     """
     x0, y0, x1, y1 = _norm_region(region)
     area_mean = _dim("patch_area_mean") if area_mean is None else float(area_mean)
@@ -718,6 +972,7 @@ def build_patch_field(kit, path, region, z, mtls, n=2, area_mean=None,
     rng = det_rng("gkit.patch", _seed_key(path), seed)
     n0 = kit.mark()
     elems = []
+    yaw = float(yaw_deg)
     mtl = mtls.get("patch") if isinstance(mtls, dict) else mtls
     mtl_cut = (mtls.get("patch_cut", mtl) if isinstance(mtls, dict) else mtls)
     for i in range(int(n)):
@@ -730,11 +985,14 @@ def build_patch_field(kit, path, region, z, mtls, n=2, area_mean=None,
         else:
             cx = x0 + w / 2.0 + rng.random() * max(1e-6, (x1 - x0) - w)
             cy = y0 + h / 2.0 + rng.random() * max(1e-6, (y1 - y0) - h)
-        yaw = (rng.random() * 2.0 - 1.0) * float(yaw_max)
+        w, h, cx, cy = _snap_module(w, h, cx, cy, module, module_origin,
+                                    (x0, y0), (x1, y1))
         p = f"{path}/Patch_{i}"
         kit.B(p, (cx, cy, z + pr - 0.015), (w, h, 0.030), mtl, rotz=yaw)
         elems.append(_elem("patch", p,
-                           _obb_aabb(cx, cy, z + pr - 0.015, w, h, 0.030, yaw),
+                           (_box_aabb(cx, cy, z + pr - 0.015, w, h, 0.030)
+                            if abs(yaw) < 1e-9 else
+                            _obb_aabb(cx, cy, z + pr - 0.015, w, h, 0.030, yaw)),
                            proud=pr, mtl_key="patch", area=True, albedo=0.22))
         if cutline and i < int(cutline_n):
             for k, (dx, dy, sw, sh) in enumerate((
@@ -988,6 +1246,19 @@ def build_stain_field(kit, path, region, z, mtl, kind="dirt", n=6, seed=0,
     (the wall side waits for T1).
 
     Prims: 1 each.  GT: +1.6 to +2.3 mm - not a drop (R3 ladder rank 5 + kind).
+
+    [W3 J-2 + DEC-1 `[ruled 07-30]` spec §10.1 row 2 / §10.5]
+      The W2 fix put a `U(-22, +22)` yaw on the free-form kinds because they were emitting
+      as axis-aligned rectangles. A rotated rectangle is still a rectangle: spec §10.6's
+      all-scene checklist line is *"no decal has a straight edge that is not a construction
+      joint, a saw cut or a kerb"*, and a spilled-soil blot has none of those edges. So the
+      yaw is abolished (J-2) **and** the six free-form kinds - `dirt` `water` `oil` `gum`
+      `efflorescence` `drip` - are now built with **DEC-1 `build_blot`**: one Mesh, same
+      one-prim budget, exact polygon AABB (**GT-8**).
+      `grime_band` and `tire` stay rectangles at yaw 0 on purpose. Their straight edges are
+      real: a wall-to-floor junction band is bounded by the wall, and a wheel track is
+      bounded by the tyre. They were already forced to yaw 0 by the `line is not None`
+      branch, so nothing about them changes.
     """
     if kind not in _STAIN_KINDS:
         raise ValueError(f"ground_kit: stain kind 는 {_STAIN_KINDS} 중 하나.")
@@ -1019,17 +1290,20 @@ def build_stain_field(kit, path, region, z, mtl, kind="dirt", n=6, seed=0,
             cx = x0 + w / 2.0 + rng.random() * max(1e-6, (x1 - x0) - w)
             cy = y0 + h / 2.0 + rng.random() * max(1e-6, (y1 - y0) - h)
             line = None
-        # [W2 fix batch F3] Yaw jitter on the free-form stains only. `grime_band` and
-        #   `tire` are *directional* (a wall junction band, a wheel track) and must stay
-        #   axis-aligned; the soil / water / oil / gum blots have no axis, and emitting
-        #   them axis-aligned is half of the "photographic rectangles laid on the DG"
-        #   read at scene07 d5.
-        yaw = 0.0 if line is not None else (rng.random() * 2.0 - 1.0) * 22.0
         p = f"{path}/{kind}_{i}"
-        kit.B(p, (cx, cy, float(z) + pr - 0.004), (w, h, 0.008), mtl, rotz=yaw)
-        elems.append(_elem("stain", p,
-                           _obb_aabb(cx, cy, float(z) + pr - 0.004, w, h, 0.008,
-                                     yaw),
+        if line is None:
+            # DEC-1 lobe **inscribed in the rectangle it replaces** (`_blot_ring`
+            # normalises to max radius 1), so the registered footprint is the same box the
+            # rectangle occupied and the only AABB movement is GT-8's yaw removal.
+            blot = build_blot(kit, p, cx, cy, w / 2.0, h / 2.0, mtl,
+                              n=16, rough=0.35,
+                              seed=det_seed("gkit.stain.blot", kind, i, seed),
+                              z=float(z), proud=pr)
+            aabb = blot["aabb"]
+        else:
+            kit.B(p, (cx, cy, float(z) + pr - 0.004), (w, h, 0.008), mtl)
+            aabb = _box_aabb(cx, cy, float(z) + pr - 0.004, w, h, 0.008)
+        elems.append(_elem("stain", p, aabb,
                            proud=pr, mtl_key="stain_%s" % kind,
                            decal=True, line=line, albedo=albedo,
                            stain_kind=kind))
@@ -1041,6 +1315,14 @@ def build_footprints(kit, path, path_pts, z, mtl, n=10, seed=0, stride=0.62):
     objects - unrelated to the "no person/vehicle placement" convention `[spec §11]`.
 
     Prims: 1 each.  GT: +1.4 mm - not a drop (R3 ladder rank 4).
+
+    [W3 J-7 `[ruled 07-30]` spec §1.2] The **+-6 deg splay stays** - a real footfall is
+    splayed off the line of travel and this is the one jitter row the ruling explicitly
+    keeps. What is fixed is the **AABB**: the prim was authored at
+    `ang + U(-6, +6)` while `_elem` registered `_obb_aabb(..., ang)`, i.e. the registry and
+    the geometry disagreed by up to 6 deg on every print. `geom_invariance_check` cannot see
+    this because both of its arms produce the same wrong number (spec §1.2). The jittered
+    angle is now computed once and used for both.
     """
     pr = decal_proud("footprint")      # R3 - decal z ladder
     rng = det_rng("gkit.foot", _seed_key(path), seed)
@@ -1068,11 +1350,12 @@ def build_footprints(kit, path, path_pts, z, mtl, n=10, seed=0, stride=0.62):
         ox = px - math.sin(math.radians(ang)) * off
         oy = py + math.cos(math.radians(ang)) * off
         p = f"{path}/Foot_{i}"
+        splay = ang + (rng.random() - 0.5) * 12.0     # J-7: KEEP the +-6 deg
         kit.B(p, (ox, oy, float(z) + pr - 0.004), (0.27, 0.10, 0.008), mtl,
-              rotz=ang + (rng.random() - 0.5) * 12.0)
+              rotz=splay)
         elems.append(_elem("footprint", p,
                            _obb_aabb(ox, oy, float(z) + pr - 0.004,
-                                     0.27, 0.10, 0.008, ang),
+                                     0.27, 0.10, 0.008, splay),
                            proud=pr, mtl_key="stain_dirt", decal=True,
                            albedo=0.15))
     return dict(prim_count=kit.count_since(n0), elems=elems)
@@ -1453,8 +1736,15 @@ GROUND_PROFILES = {
                   step_x=_dim("step_contraction_plaza"),
                   step_y=_dim("step_expansion_plaza")),
         infra=dict(manhole=2, gully=2),
-        surface=(("patch", 2), ("crack", 4), ("stain", ("dirt", "water")),
-                 ("weed", 6)),
+        # [W3 DEC-3 / A1 `[ruled 07-30]` spec §10.5] Two prescribed counts move, both on
+        #   the same reading of the sample: **a maintained granite plaza**.
+        #     patch 2 -> 1  ("scene01's plaza patch count drops 2 -> 1", DEC-3)
+        #     weed  6 -> 0  ("scene01's `plaza_granite` weed count -> 0 — a maintained
+        #                     campus plaza has no weeds in the field", A1)
+        #   Both are profile-level and therefore library-wide: 01 · 05 · 14 · 18 · 20 · 21 ·
+        #   C1 · N1 · N3. That is the intended blast radius - the spec names the profile,
+        #   not the scene - and it is one of the reasons CB-2 re-baselines `regr_*`.
+        surface=(("patch", 1), ("crack", 4), ("stain", ("dirt", "water"))),
     ),
     # ── P2 ────────────────────────────────────────────────────────────────
     "plaza_water": _P(
@@ -1979,6 +2269,7 @@ def plan_ground(profile, region, *, z=0.0, z_fn=None, gy=0.0,
             e["meta"]["beyond"] = True         # On the ramp surface = d2 only (§5.0 C-2)
 
     _clamp_gt_e5(elems, view, ed)
+    _writeback_weed_heights(ops, elems)
 
     plan = dict(profile=profile, scene=scene, elements=elems,
                 materials_needed=mats, scatter_req=scat_reqs,
@@ -2044,6 +2335,47 @@ def _assert_unit_cell(profile, prof):
     if orig is None:
         raise ValueError(f"U3 위반: '{profile}' unit_cell_origin 이 없다 — "
                          "주기만 넘기면 계약 불이행(MDL 기본 원점은 UV 원점).")
+
+
+def _writeback_weed_heights(ops, elems):
+    """A1 / GT-9: hand the **GT-E5-clamped** heights back to the weed op.
+
+    `plan_ground` runs every builder twice - once on `dry_kit()` to harvest the elements,
+    then again in `apply_ground` to author USD. `_clamp_gt_e5` only touches the harvested
+    elements, so without this step the authored asset would be scaled from the *unclamped*
+    height and the plan and the stage would disagree exactly where the GT map is most
+    sensitive (an element near a drop edge). GT-9 states the requirement as
+    *"drive the asset scale from the GT-E5-clamped `proud`, not from native height"*; this
+    function is that sentence.
+
+    Elements the clamp marked `dropped` are handed back at height 0.0 rather than removed:
+    the op still emits one prim per index so the plan's prim count stays the number
+    `frame_budget` B10 was gated on, and a zero-height tuft is invisible.
+    """
+    by_op = {}
+    for e in elems:
+        if e["kind"] != "weed":
+            continue
+        by_op.setdefault(e["meta"].get("op"), []).append(e)
+    for op in ops:
+        rows = by_op.get(op["name"])
+        if not rows:
+            continue
+        rows.sort(key=lambda e: int(str(e["path"]).rsplit("_", 1)[-1]))
+        op["kw"]["heights"] = [0.0 if e["meta"].get("dropped")
+                               else float(e["proud"]) for e in rows]
+        # The footprint follows the scale, so a clamped clump is also **narrower**. Left
+        # uncorrected the registry would carry the unclamped 2.7x footprint against a
+        # smaller authored tuft - conservative, but a registry that disagrees with the
+        # stage is the J-7 defect in a different costume.
+        for e in rows:
+            if e["meta"].get("clamped_from") is None or not e["meta"].get("asset"):
+                continue
+            s = float(e["proud"]) / WEED_ASSET_ZMAX
+            ax0, ay0, az0, ax1, ay1, az1 = e["aabb"]
+            cx, cy = (ax0 + ax1) / 2.0, (ay0 + ay1) / 2.0
+            hx, hy = WEED_ASSET_XY[0] * s / 2.0, WEED_ASSET_XY[1] * s / 2.0
+            e["aabb"] = (cx - hx, cy - hy, az0, cx + hx, cy + hy, az1)
 
 
 def _clamp_gt_e5(elems, view, edges):
@@ -2676,12 +3008,22 @@ def _compose_ops(profile, prof, ctx, tactile_sites, sites, extras_args):
             #   and the builder hands the **string** `"patch"` straight to Bind
             #   - dry_kit does not Bind, so the CPU self-check cannot catch it
             #   `[measured - sceneN5 pilot round 1 crash]`.
+            # DEC-3: the yaw is the **profile's declared module axis**, never a draw.
+            #   Every row in the `unit_cell` ledger is grid-aligned, so this is 0.0 today;
+            #   `module`/`module_origin` then snap the rectangle onto whole flags.
+            #   The module comes from `pave["module"]` **after `overrides`**, not from the
+            #   `unit_cell` ledger: scene03 forces `module=(None, None)` because a 둔치
+            #   levee is not laid in blocks there, and reading the ledger instead would
+            #   snap its scene-authored `sites` onto a 200 mm grid the scene has disowned.
             ops.append(_op("patch", build_patch_field, "Patch",
                            args=((sx0, sy0, sx1, sy1), z),
                            kw=dict(mtls=dict(patch="patch",
                                              patch_cut="patch_cut"),
                                    n=item[1], seed=seed,
-                                   sites=sites.get("patch"))))
+                                   sites=sites.get("patch"),
+                                   yaw_deg=float(uc[3] if len(uc) > 3 else 0.0),
+                                   module=(pv.get("module") or (None,))[0],
+                                   module_origin=(ox, oy))))
         elif what == "crack":
             ops.append(_op("crack", build_crack_lines, "Crack",
                            args=((sx0, sy0, sx1, sy1), z, "@crack"),
@@ -2696,10 +3038,16 @@ def _compose_ops(profile, prof, ctx, tactile_sites, sites, extras_args):
                                        n=2 if kind == "grime_band" else 4,
                                        seed=seed)))
         elif what == "weed":
+            # A1 line-seeding contract: the clumps go **on the discontinuities this
+            #   profile is itself emitting** - the paving joints and the manhole / gully
+            #   frames - not on the region bounding box.
             ops.append(_op("weed", _build_weed_band, "Weed",
                            args=((sx0, sy0, sx1, sy1), z, "@weed"),
                            kw=dict(n=item[1], seed=seed,
-                                   h_max=ctx["caps"].get("weed_h"))))
+                                   h_max=ctx["caps"].get("weed_h"),
+                                   lines=_weed_seed_lines(
+                                       prof, (sx0, sy0, sx1, sy1),
+                                       (ox, oy), sites))))
 
     # ── extras ────────────────────────────────────────────────────────
     for name, kw0 in prof["extras"]:
@@ -2778,30 +3126,197 @@ def _compose_ops(profile, prof, ctx, tactile_sites, sites, extras_args):
     return ops
 
 
-def _build_weed_band(kit, path, region, z, mtl, n=6, seed=0, h_max=None):
+def _weed_sites(lines, region, n, rng):
+    """A1 line-seeding: pick `n` clump centres **on real discontinuities**.
+
+    `lines` is a list of polylines `[((x0,y0),(x1,y1)), ...]` in scene coordinates - joint
+    lines, the kerb polyline, manhole / gully frame perimeters. Weeds are sampled along
+    them, alternating a small +-lateral offset so a clump sits *in* the crack rather than
+    straddling it. Falls back to the region perimeter when no line is supplied, which is
+    the v1 behaviour and is correct for a strip-shaped region (a verge, a gutter run).
+    """
+    x0, y0, x1, y1 = region
+    segs = []
+    for ln in (lines or ()):
+        (ax, ay), (bx, by) = ln
+        L = math.hypot(float(bx) - float(ax), float(by) - float(ay))
+        if L > 1e-6:
+            segs.append((float(ax), float(ay), float(bx), float(by), L))
+    if not segs:
+        return [(x0 + 0.05 + rng.random() * max(1e-6, (x1 - x0) - 0.10),
+                 (y0 if i % 2 == 0 else y1) + (0.05 if i % 2 == 0 else -0.05))
+                for i in range(int(n))]
+    total = sum(s[4] for s in segs)
+    out = []
+    for i in range(int(n)):
+        # Stratified along the concatenated line length: a run of clumps must not pile up
+        # in one crack, and a purely uniform draw does exactly that at n <= 8.
+        s = total * ((i + rng.random()) / float(max(1, int(n))))
+        acc = 0.0
+        for ax, ay, bx, by, L in segs:
+            if acc + L >= s or (ax, ay, bx, by, L) is segs[-1]:
+                u = min(1.0, max(0.0, (s - acc) / max(L, 1e-9)))
+                px, py = ax + u * (bx - ax), ay + u * (by - ay)
+                nx, ny = -(by - ay) / L, (bx - ax) / L
+                off = 0.045 * (1.0 if i % 2 == 0 else -1.0)
+                out.append((min(max(px + nx * off, x0 + 0.03), x1 - 0.03),
+                            min(max(py + ny * off, y0 + 0.03), y1 - 0.03)))
+                break
+            acc += L
+    return out
+
+
+# -- A1 / GT-9: the weed asset --------------------------------------------
+#    `Shrub/Grass_Short_C.usd` — role `edge_weed`, verdict **PASS**, 1,598 tri
+#    `[measured - assets/veg_manifest_w2.json]`. size 0.2789 x 0.3044 x 0.125 m,
+#    zmin −0.0021, **zmax 0.1229** (= the exposure above grade, which is what
+#    `add_vegetation` scales by; the full 0.125 m includes the 2 mm root skirt).
+WEED_ASSET_REL = "Shrub/Grass_Short_C.usd"
+WEED_ASSET_ZMAX = 0.1229               # [measured - veg_manifest_w2.json]
+WEED_ASSET_XY = (0.2789, 0.3044)       # [measured - veg_manifest_w2.json]
+#    `realpath`, not `abspath`: `scenes/main/ground_kit.py` and `scenes/batch1/ground_kit.py`
+#    are **symlinks** to this file, so `abspath` would resolve the asset root to
+#    `scenes/main/assets/...` and make the weed depend on a second symlink existing. Same
+#    fallback `scene_common.py:825` already documents for its own asset root.
+VEG_ASSET_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                             "assets", "vegetation")
+
+
+def _weed_asset_path():
+    p = os.path.join(VEG_ASSET_DIR, WEED_ASSET_REL)
+    return p if os.path.isfile(p) else None
+
+
+def _add_weed_asset(kit, path, cx, cy, z, yaw_deg, scale):
+    """Reference the weed asset under `path`. Returns True when it was really authored.
+
+    Written here rather than called through `scene_common.add_vegetation` for the reason
+    the module header gives: `ground_kit` is imported **by** scenes, so importing
+    `scene_common` back would close a cycle (same rule `infra_kit` follows). The reference
+    goes on a **child** Xform because the asset root may already own an `xformOpOrder`;
+    `add_vegetation` learned that the hard way and the note is reproduced here so the two
+    implementations cannot drift apart silently.
+    """
+    asset = _weed_asset_path()
+    stage = getattr(kit, "stage", None)
+    kit.prims.append(str(path))
+    if stage is None or asset is None:
+        return False
+    from pxr import Usd, UsdGeom, Gf
+    unit = 0.01                                 # asset metersPerUnit (measured)
+    try:
+        src = Usd.Stage.Open(asset)
+        unit = (UsdGeom.GetStageMetersPerUnit(src)
+                / UsdGeom.GetStageMetersPerUnit(stage))
+    except Exception:
+        pass
+    xf = UsdGeom.Xform.Define(stage, str(path))
+    UsdGeom.Xform.Define(stage, str(path) + "/Asset") \
+        .GetPrim().GetReferences().AddReference(asset)
+    xf.AddTranslateOp().Set(Gf.Vec3d(float(cx), float(cy), float(z)))
+    xf.AddRotateZOp().Set(float(yaw_deg))
+    s = float(unit) * float(scale)
+    xf.AddScaleOp().Set(Gf.Vec3f(s, s, s))
+    try:
+        xf.GetPrim().SetInstanceable(True)      # 139 clumps -> one prototype
+    except Exception:
+        pass
+    return True
+
+
+def _weed_seed_lines(prof, region, origin_xy, sites):
+    """A1: the real discontinuities of *this* profile, as polylines.
+
+    Sources, in the order a real 잡초 colonises them: the paving joints the profile lays
+    (`build_joint_grid` / `build_slab_joints` ticks - the same `_grid_ticks` generator the
+    builder uses, so the two cannot drift), then the frame perimeter of every manhole and
+    gully the profile emits. A profile with neither (an asphalt carriageway, a poured
+    slab) returns `[]` and `_weed_sites` falls back to the region perimeter, which for
+    those profiles - all of them strip-shaped verges - is itself the real edge.
+    """
+    x0, y0, x1, y1 = region
+    ox, oy = origin_xy
+    pv = prof.get("pave") or {}
+    out = []
+    if pv.get("joint"):
+        for xx in _grid_ticks(x0, x1, pv.get("step_x"), ox):
+            out.append(((xx, y0), (xx, y1)))
+        for yy in _grid_ticks(y0, y1, pv.get("step_y"), oy):
+            out.append(((x0, yy), (x1, yy)))
+    inf = prof.get("infra") or {}
+    for key, half in (("manhole", 0.648 / 2.0), ("gully", 0.25)):
+        for i in range(int(inf.get(key, 0))):
+            st = (sites.get(key) or [])[i:i + 1]
+            if not st:
+                continue
+            cx, cy = float(st[0][0]), float(st[0][1])
+            if not (x0 <= cx <= x1 and y0 <= cy <= y1):
+                continue
+            out += [((cx - half, cy - half), (cx + half, cy - half)),
+                    ((cx + half, cy - half), (cx + half, cy + half)),
+                    ((cx + half, cy + half), (cx - half, cy + half)),
+                    ((cx - half, cy + half), (cx - half, cy - half))]
+    return out
+
+
+def _build_weed_band(kit, path, region, z, mtl, n=6, seed=0, h_max=None,
+                     lines=None, heights=None):
     """**Boundary weed band** - clump by clump in joint lines and gutter cover gaps.
 
     This is vegetation, not ground. **Subject to the GT-E5 ramp** (`exc="weed"`) - the
-    closer to the edge, the more `_clamp_gt_e5` cuts the height. Securing season-neutral
-    species is handed to team A (vegetation).
+    closer to the edge, the more `_clamp_gt_e5` cuts the height.
 
     Prims: 1 per clump.  GT: registered exception (h <= 0.12, ramp clamp).
+
+    [W3 A1 + GT-9 `[ruled 07-30]` spec §10.5 / gt_changes_w3 §3 GT-9]
+      **Two defects, one row.**
+      (1) *Placement.* The docstring above has always said "in joint lines and gutter cover
+          gaps" and the code has always ignored it: `cy` was pinned to the **region bounding
+          box**, which on a 16 m plaza is an invisible line through the middle of the field.
+          `lines=` now carries the real discontinuities and `_weed_sites` samples along
+          them. `_surface_ops` derives that list from the paving joints and the
+          manhole / gully frames the same profile is emitting.
+      (2) *The cube.* A 0.10 x 0.10 m box is not a weed. It becomes
+          `Shrub/Grass_Short_C.usd` (PASS, `role: edge_weed`, 1,598 tri).
+      **The clamp is load-bearing, not cosmetic.** The asset's native exposure is
+      **0.1229 m**, which is *above* GT-9's `h <= 0.12` class-A condition: placed at native
+      scale the weed leaves GT class A and GT-9 stops being a no-op. So the scale is driven
+      by the height, never the height by the asset - `scale = h / 0.1229`, and `h` is the
+      **GT-E5-clamped** `proud` that `plan_ground` writes back through `heights=` after
+      `_clamp_gt_e5` has run. At the h_max ceiling that is `0.12 / 0.1229 = 0.9764`.
+      The registered `_elem` aabb is recomputed from the **scaled** asset bbox
+      (0.10 -> 0.272 m at the ceiling), because `EDGE_STANDOFF` and the GT-E5 ramp both
+      read the footprint, and a 2.7x footprint that GT never sees is how a "class A" weed
+      quietly crosses an edge.
+      When the asset is missing from disk the builder falls back to the v1 cube at the same
+      height rather than dropping the row - `plan_ground` must stay runnable on a machine
+      that has not fetched `assets/vegetation/`.
     """
     x0, y0, x1, y1 = _norm_region(region)
     h_max = _dim("weed_h_max") if h_max is None else float(h_max)
     rng = det_rng("gkit.weed", _seed_key(path), seed)
     n0 = kit.mark()
     elems = []
+    have_asset = _weed_asset_path() is not None
+    sites = _weed_sites(lines, (x0, y0, x1, y1), int(n), rng)
     for i in range(int(n)):
-        cx = x0 + 0.05 + rng.random() * max(1e-6, (x1 - x0) - 0.10)
-        cy = (y0 if i % 2 == 0 else y1) + (0.05 if i % 2 == 0 else -0.05)
+        cx, cy = sites[i]
         hh = h_max * (0.5 + 0.5 * rng.random())
+        if heights is not None and i < len(heights):
+            hh = float(heights[i])              # GT-E5-clamped value, written back
+        yaw = 360.0 * rng.random()              # a tuft has no front (§12-15)
         p = f"{path}/Weed_{i}"
-        kit.B(p, (cx, cy, float(z) + hh / 2.0), (0.10, 0.10, hh), mtl)
+        if have_asset:
+            s = hh / WEED_ASSET_ZMAX
+            _add_weed_asset(kit, p, cx, cy, float(z), yaw, s)
+            fx, fy = WEED_ASSET_XY[0] * s, WEED_ASSET_XY[1] * s
+        else:
+            kit.B(p, (cx, cy, float(z) + hh / 2.0), (0.10, 0.10, hh), mtl)
+            fx = fy = 0.10
         elems.append(_elem("weed", p,
-                           _box_aabb(cx, cy, float(z) + hh / 2.0,
-                                     0.10, 0.10, hh),
-                           proud=hh, mtl_key="weed", exc="weed", albedo=0.15))
+                           _box_aabb(cx, cy, float(z) + hh / 2.0, fx, fy, hh),
+                           proud=hh, mtl_key="weed", exc="weed", albedo=0.15,
+                           asset=(WEED_ASSET_REL if have_asset else None)))
     return dict(prim_count=kit.count_since(n0), elems=elems)
 
 

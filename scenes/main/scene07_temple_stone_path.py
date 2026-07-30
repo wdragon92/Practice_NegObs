@@ -238,8 +238,13 @@ PARAMS = dict(
                  (9.10, 0.50, 1.25, 1.00), (10.90, -0.40, 1.15, 0.90)],
     # [W2 F3] proud 0.012 -> 0.004. A 12 mm rim all the way round each drift is
     #   the "edge shadow" that made the leaf drifts read as carpets laid on the DG.
-    leaf_band=dict(thick=0.05, proud=0.004, seed=7073, subs=3,
-                   sub_scale=(0.55, 0.92), sub_off=0.42, sub_rz=26.0),
+    # [W3 F3 / DEC-2] `thick` and the three `sub_*` rectangle-stacking knobs are retired:
+    #   the mask is a single zero-thickness N-gon, so there is no rim left to shade and no
+    #   stack of rectangles to hide behind. `subs` stays at 1 for the self-check line.
+    #   `feather` = the leaf-card band straddling the boundary (inner 0.30 / outer 0.50 m,
+    #   spec §10.5 DEC-2); `feather_cap` bounds the instance cost per mask.
+    leaf_band=dict(proud=0.004, seed=7073, subs=1,
+                   feather=(0.30, 0.50), feather_cap=22),
     # [v6] 3 leaf drifts on the yard (decomposed granite) - eases the 'large high-reflectance beige plane' (ruling (5)).
     #      A yard is flat by practice, so material variation, not curvature, breaks the monotony.
     #      All at y >= −1.55 (never past the south border −1.7 = zero floating).
@@ -541,28 +546,27 @@ KNOBS = knob_layout()
 
 
 def leaf_patches():
-    """[v6] Leaf band → slope-following patches. (name, x0, z0, run, drop, y0, y1, rz).
+    """Leaf carpets → **DEC-2 masks**. `(name, cx, cy, rx, ry)`, one entry per drift.
 
-    Implementation: subs slabs per patch are overlapped at different sizes·offsets to make the
-    border irregular (C-7). build_slope rotates about Y only, so rz(yaw) is unusable; instead
-    **width·centre jitter** breaks the rectangular border. The top face z sits exactly on the
-    corridor slope P(x)+proud.
+    [W3 F3 / DEC-2 `[ruled 07-30]` spec §10.5 · CB-2 pilot criterion §7.2]
+      The v6 construction laid `subs=3` overlapping **rectangles** per drift and relied on
+      the union of their borders to look irregular. It does not: at h0.3 the union of three
+      axis-aligned rectangles reads as three axis-aligned rectangles, which is the whole of
+      `tonglam_v2.md` §2.13-2's "photographic carpets laid on the DG" and is the named
+      pass condition for this pilot (*"07's leaf carpets ... stop being rectangles"*).
+      One `ground_kit.build_carpet_mask` lobe now replaces each 3-rectangle stack:
+      **18 prims -> 6**, no straight edge anywhere on the boundary, and the mask follows
+      the 19 deg corridor exactly because `build_blot` takes a per-vertex `z_fn`
+      (= `path_z`) instead of a slope-slab approximation.
+      `sub_scale` / `sub_off` / `sub_rz` are retired with the rectangles; `subs` stays in
+      PARAMS at 1 so the self-check line keeps reporting the same quantity.
     """
-    lb = PARAMS["leaf_band"]
-    rng = random.Random(int(lb["seed"]))
-    tan = STAIR_DROP / STAIR_RUN
     out = []
     for n, (cx, cy, sx, sy) in enumerate(PARAMS["leaf_drifts"]):
-        for j in range(int(lb["subs"])):
-            f = rng.uniform(*lb["sub_scale"]) if j else 1.0
-            ox = (rng.uniform(-1.0, 1.0) * lb["sub_off"] * sx) if j else 0.0
-            oy = (rng.uniform(-1.0, 1.0) * lb["sub_off"] * sy) if j else 0.0
-            w = sx * f
-            d = sy * f * rng.uniform(0.85, 1.15)
-            x0 = min(max(cx + ox - w / 2.0, 0.04), STAIR_RUN - 0.05 - w)
-            ycl = min(max(cy + oy, -1.66 + d / 2.0), 1.66 - d / 2.0)
-            out.append((f"{n}_{j}", x0, path_z(x0) + lb["proud"], w, w * tan,
-                        ycl - d / 2.0, ycl + d / 2.0))
+        rx, ry = sx / 2.0, sy / 2.0
+        cxc = min(max(float(cx), 0.04 + rx), STAIR_RUN - 0.05 - rx)
+        cyc = min(max(float(cy), -1.66 + ry), 1.66 - ry)
+        out.append((f"{n}", cxc, cyc, rx, ry))
     return out
 
 
@@ -761,19 +765,28 @@ def _smoke_report():
           f"{kemb:+.3f} m (<0 = 전량 매입 → "
           f"{'OK' if kemb < 0.0 else 'CHECK'})")
 
-    # ── [v6] leaf patches : checks slope alignment and containment in the corridor ──
+    # ── [W3 F3] leaf carpets : DEC-2 masks — slope alignment + corridor containment ──
+    #    The mask is a `build_blot` N-gon normalised to max radius 1, so the lobe
+    #    **inscribes** (cx±rx, cy±ry) and the containment test is exact on the bbox.
     lb = P["leaf_band"]
-    ferr = max(abs((z0) - (path_z(x0) + lb["proud"]))
-               for _n, x0, z0, _r, _d, _y0, _y1 in LEAF_PATCHES)
-    yout = max(max(abs(y0), abs(y1))
-               for _n, _x, _z, _r, _d, y0, y1 in LEAF_PATCHES)
-    xout = max(x0 + run for _n, x0, _z, run, _d, _y0, _y1 in LEAF_PATCHES)
-    print(f"\n  [v6 낙엽] 패치 {len(LEAF_PATCHES)}매(밴드 "
-          f"{len(P['leaf_drifts'])}×{lb['subs']}) · 사면 상면 정합 오차 "
+    ferr, dk = 0.0, gk.dry_kit()
+    for nm, cx, cy, rx, ry in LEAF_PATCHES:
+        b = gk.build_blot(dk, f"/dry/LeafMask_{nm}", cx, cy, rx, ry, None,
+                          n=24, rough=0.18, seed=int(lb["seed"]) + int(nm),
+                          z=0.0, proud=lb["proud"], z_fn=lambda x, y: path_z(x))
+        for (px, _py), pz in zip(b["points"], b["zs"]):
+            ferr = max(ferr, abs(pz - (path_z(px) + lb["proud"])))
+    yout = max(abs(cy) + ry for _n, _cx, cy, _rx, ry in LEAF_PATCHES)
+    xout = max(cx + rx for _n, cx, _cy, rx, _ry in LEAF_PATCHES)
+    xin = min(cx - rx for _n, cx, _cy, rx, _ry in LEAF_PATCHES)
+    print(f"\n  [W3 낙엽] 마스크 {len(LEAF_PATCHES)}매(드리프트 "
+          f"{len(P['leaf_drifts'])}×{lb['subs']}, 직사각 0매) · "
+          f"정점 z = path_z(x)+{lb['proud']:.3f} 사면 정합 오차 "
           f"{ferr:.4f} m ({'OK' if ferr < 1e-6 else 'FAIL'})")
     print(f"    최대 |y| {yout:.3f} (<1.70 = 남측 공동 위 부유 없음 → "
-          f"{'OK' if yout < 1.70 else 'FAIL'}) · 최대 x끝 {xout:.2f} "
-          f"(≤{STAIR_RUN:.2f} → {'OK' if xout <= STAIR_RUN + 1e-9 else 'CHECK'})")
+          f"{'OK' if yout < 1.70 else 'FAIL'}) · x 범위 {xin:.2f}..{xout:.2f} "
+          f"(≤{STAIR_RUN:.2f} → "
+          f"{'OK' if xout <= STAIR_RUN + 1e-9 and xin >= 0.0 else 'CHECK'})")
 
     # ── [v6] sun bearing -> per-face direct-light lambert check ──
     az = 33.5 + float(P["SUN_AZ_OFFSET"])
@@ -1125,27 +1138,69 @@ def main():
                              (k["dx"], k["dy"], k["thick"]),
                              pool[(k["i"] + 3) % len(pool)], collider=False,
                              rotz=k["rz"], rotx=k["rx"])
-        # leaf-litter band : partial occlusion of stone edges - **slope-following** (19 deg) overlapping patches (no scatter)
+        # [W3 F3 / DEC-2] leaf carpets - one irregular mask per drift, no rectangles.
+        #   The corridor masks take `z_fn=path_z`, so every vertex sits on the 19 deg
+        #   corridor plane and the "floating / buried end" the v6 slope slabs were built to
+        #   cure cannot come back. The yard masks are flat (the yard is flat by practice -
+        #   material variation, not curvature, breaks its monotony).
         lb = PARAMS["leaf_band"]
-        for nm, x0, z0, run, drop, y0, y1 in LEAF_PATCHES:
-            sc.build_slope(stage, f"{ROOT}/LeafDrift_{nm}", x0, z0, run, drop,
-                           y0, y1, lb["thick"], M["leaf"], margin=0.0,
-                           collider=False)
-        # yard leaf drifts : a flat surface, so overlapping rotated boxes (irregular borders)
         yl = PARAMS["yard_leaf"]
-        rng = random.Random(int(yl["seed"]))
+        kit = gk.kit_from_scene_common(sc, stage)
+        # Feather-ring clip boxes. A leaf card that lands off its host plate sits at the
+        #   mask's own z over different ground and floats: the corridor cards must stay
+        #   inside the PathCorridor slope (|y| <= 1.70, x 0..STAIR_RUN) and the yard cards
+        #   inside the Courtyard plate (x −24..0, y >= −1.70).
+        clip_cor = (0.0, -1.66, STAIR_RUN, 1.66)
+        clip_yard = (-23.9, -1.66, -0.10, 12.0)
+        masks = []
+        for nm, cx, cy, rx, ry in LEAF_PATCHES:
+            masks.append((f"LeafDrift_{nm}",
+                          gk.build_carpet_mask(
+                              kit, f"{ROOT}/LeafDrift_{nm}", cx, cy, rx, ry,
+                              M["leaf"], z=0.0, proud=lb["proud"],
+                              n=24, rough=0.18,
+                              seed=int(lb["seed"]) + int(nm),
+                              feather=lb["feather"],
+                              feather_cap=int(lb["feather_cap"]),
+                              feather_clip=clip_cor,
+                              z_fn=lambda x, y: path_z(x)),
+                          (lambda x, y: path_z(x)), 0.0))
         for n, (cx, cy, sx, sy) in enumerate(PARAMS["yard_drifts"]):
-            for j in range(int(yl["subs"])):
-                f = 1.0 if j == 0 else rng.uniform(*yl["scale"])
-                ox = 0.0 if j == 0 else rng.uniform(-1.0, 1.0) * yl["off"] * sx
-                oy = 0.0 if j == 0 else rng.uniform(-1.0, 1.0) * yl["off"] * sy
-                sc._oriented_box(
-                    stage, f"{ROOT}/YardLeaf_{n}_{j}",
-                    (cx + ox, cy + oy,
-                     lb["proud"] - lb["thick"] / 2.0 - j * 0.002),
-                    (sx * f, sy * f * rng.uniform(0.85, 1.15), lb["thick"]),
-                    M["leaf"], collider=False,
-                    rotz=rng.uniform(-yl["rz"], yl["rz"]))
+            masks.append((f"YardLeaf_{n}",
+                          gk.build_carpet_mask(
+                              kit, f"{ROOT}/YardLeaf_{n}", cx, cy,
+                              sx / 2.0, sy / 2.0, M["leaf"],
+                              z=0.0, proud=lb["proud"], n=24, rough=0.20,
+                              seed=int(yl["seed"]) + n,
+                              feather=lb["feather"],
+                              feather_cap=int(lb["feather_cap"]),
+                              feather_clip=clip_yard),
+                          (lambda x, y: 0.0), 0.0))
+        # DEC-2 feather ring: individual leaf cards straddling the mask boundary, density
+        #   falling to zero outward. Delegated to `scatter_debris` exactly the way
+        #   `ground_kit.apply_ground` consumes `build_edge_break`'s `scatter_req`, so the
+        #   asset pool stays in one place. `sct_debris_leaves_dry_*` / VEG_DEBRIS are
+        #   season-scoped to the leaf scenes (C2 · 07 · 10 · D3) - PROC §6.1 - and 07 is one.
+        #   **Every ring gets a two-argument `ground_fn`.** `scatter_debris` calls it as
+        #   `ground_fn(px, py)` and wraps the call in `except Exception: pass`
+        #   (`scene_common.py:2368-2381`), so handing it the scene's own one-argument
+        #   `path_z` does not raise - it silently falls back to the flat `z` argument and
+        #   lays every card at z = 0 over a corridor that descends 4.2 m. That is a real
+        #   defect this pilot caught in its first render: a band of leaves hanging in mid-air
+        #   across the frame. The lambda is the fix and the reason it must stay a lambda.
+        nfeather = 0
+        for nm, res, gfn, z0 in masks:
+            for i, req in enumerate(res["scatter_req"]):
+                rx0, ry0, rx1, ry1 = req["region"]
+                nfeather += int(sc.scatter_debris(
+                    stage, f"{ROOT}/{nm}_Feather_{i}",
+                    rx0, ry0, rx1, ry1, z0,
+                    cover=0.06, seed=gk.det_seed("s07.feather", nm, i),
+                    edge_bias=float(req["edge_bias"]),
+                    max_count=int(req["count"]), ground_fn=gfn,
+                    scale_jitter=(0.7, 1.15)) or 0)
+        print(f"[W3 F3] scene07 낙엽 마스크 {len(masks)}매(직사각 0) · "
+              f"페더 링 인스턴스 {nfeather}")
 
     # -------------------------------------------------------------------
     # gable roof : 2 build_slope slabs (each falling +-X from the ridge)

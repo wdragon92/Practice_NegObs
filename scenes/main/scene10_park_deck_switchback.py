@@ -280,8 +280,13 @@ PARAMS = dict(
     # [W2 F3] proud 0.012 -> 0.005 — the rim shadow that drew an outline round the
     #   trail leaf patches.
     leaf=dict(thick=0.02, proud=0.005, over=0.045),
-    # [v6 C-7] ground leaf patch : one square decal -> 3 overlaid with rotation / size jitter
-    leaf_patch=dict(seed=1007, subs=3, scale=(0.55, 0.90), off=0.42, rz=32.0),
+    # [W3 F3 / DEC-2] ground leaf patch: the 3-rectangle stack (`subs`/`scale`/`off`/`rz`)
+    #   is retired for one `build_carpet_mask` lobe per drift. `rough` 0.20 is DEC-2's
+    #   carpet band (0.15-0.20) - a leaf drift has a soft convex outline, not a puddle's.
+    #   `feather` is the leaf-card band straddling the boundary (inner 0.30 / outer 0.50 m).
+    #   The feather ring itself is scene-side (`gkit.leaf_ring_*`, row 10-2 below), so the
+    #   mask does not ask `build_carpet_mask` for a second one.
+    leaf_patch=dict(seed=1007, rough=0.20),
     leaf_ground_patches=[(-3.2, -0.9, 1.6, 1.1, "trail"),
                          (-5.6, 0.7, 1.4, 1.0, "trail"),
                          (1.4, -3.4, 2.2, 1.6, "lower"),
@@ -1107,22 +1112,23 @@ def main():
                             scatter=sc.scatter_debris)
         b = gk.apply_ground(kit, f"{ROOT}/GKitDeck", ground_plan_deck(), M2,
                             skin_exclude=sc.skin_exclude)
-        # 10-2 - break the straight outline the 3 stacked leaf decals still
-        #   leave behind (dE76 27.3, the strongest boundary Sec.13.3 found).
-        #   `scatter_debris(edge_bias=...)` skips 65 % of the interior, so the
-        #   debris lands on the outline instead of filling the rectangle.
+        # 10-2 · [W3 F3 / DEC-2 feather ring] - the boundary treatment for the leaf drifts,
+        #   now written against the **new masks**. The outline it used to chase (dE76 27.3,
+        #   the strongest boundary Sec.13.3 found) was a rectangle's; a lobe has no straight
+        #   edge, so the ring's job changes from "hide a ruled line" to "let the carpet
+        #   fade out", and it therefore runs on **all four** drifts, not only the two trail
+        #   ones. `scatter_debris(edge_bias=...)` skips the interior so the cards land in
+        #   the band straddling the mask boundary, which is DEC-2's feather ring exactly.
         g = PARAMS["gkit"]
-        tp = _plate("TrailPath")
         pad = float(g["leaf_ring_pad"])
         ring = 0
         for i, (cx, cy, sx, sy, zone) in enumerate(
                 PARAMS["leaf_ground_patches"]):
-            if zone != "trail":
-                continue
             ring += int(sc.scatter_debris(
                 stage, f"{ROOT}/GKit/LeafRing_{i}",
                 cx - sx / 2.0 - pad, cy - sy / 2.0 - pad,
-                cx + sx / 2.0 + pad, cy + sy / 2.0 + pad, float(tp[5]),
+                cx + sx / 2.0 + pad, cy + sy / 2.0 + pad,
+                _zone_z(cx, cy, zone),
                 cover=0.10, seed=gk.det_seed("scene10.leafring", i),
                 edge_bias=pad,
                 max_count=int(g["leaf_ring_n"])) or 0)
@@ -1273,22 +1279,22 @@ def main():
             BOX(f"{ROOT}/LeafTread_{i}", (cx, (blo + bhi) / 2.0,
                                           zt - lf["thick"] / 2.0),
                 (sx, bhi - blo, lf["thick"]), M["leaf"])
-        # 4 ground leaf drifts - [v6 C-7] square decal -> 3 rotated overlays break the boundary
+        # [W3 F3 / DEC-2] 4 ground leaf drifts - **one irregular mask each**.
+        #   v6 stacked 3 rotated rectangles per drift to break the boundary. Sec.13.3
+        #   measured the result: the leaf-decal outline is still the strongest boundary in
+        #   the scene at dE76 **27.3**, 1.8x the dirt<->grass seam (15.2). Three rotated
+        #   rectangles have twelve straight edges, not zero. A `build_carpet_mask` lobe has
+        #   none, and it costs 1 prim instead of 3 (12 -> 4 over the four drifts).
         lp = PARAMS["leaf_patch"]
-        rng = random.Random(int(lp["seed"]))
+        kit = gk.kit_from_scene_common(sc, stage)
         for n, (cx, cy, sx, sy, zone) in enumerate(
                 PARAMS["leaf_ground_patches"]):
-            zt = _zone_z(cx, cy, zone) + lf["proud"]
-            for j in range(int(lp["subs"])):
-                f = 1.0 if j == 0 else rng.uniform(*lp["scale"])
-                ox = 0.0 if j == 0 else rng.uniform(-1.0, 1.0) * lp["off"] * sx
-                oy = 0.0 if j == 0 else rng.uniform(-1.0, 1.0) * lp["off"] * sy
-                sc._oriented_box(
-                    stage, f"{ROOT}/LeafGround_{n}_{j}",
-                    (cx + ox, cy + oy, zt - lf["thick"] / 2.0 - j * 0.002),
-                    (sx * f, sy * f * rng.uniform(0.85, 1.15), lf["thick"]),
-                    M["leaf"], collider=False,
-                    rotz=rng.uniform(-lp["rz"], lp["rz"]))
+            zt = _zone_z(cx, cy, zone)
+            gk.build_carpet_mask(kit, f"{ROOT}/LeafGround_{n}",
+                                 cx, cy, sx / 2.0, sy / 2.0, M["leaf"],
+                                 z=zt, proud=lf["proud"],
+                                 n=24, rough=float(lp["rough"]),
+                                 seed=int(lp["seed"]) + n, feather_cap=0)
 
     # -------------------------------------------------------------------
     # dressing

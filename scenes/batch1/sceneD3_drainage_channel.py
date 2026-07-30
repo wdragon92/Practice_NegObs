@@ -192,7 +192,10 @@ PARAMS = dict(
                   len_lo=2.9, len_hi=3.1, over_lo=0.0, over_hi=0.05,
                   out_lo=0.32, out_hi=0.55, h_lo=0.05, h_hi=0.08),  # r2: almost no projection over the opening, a continuous low grass lip instead
     # --- fallen leaves on the channel bed (plate + scatter) ---
-    bed_leaf=dict(patches=6, seed=3002, y_half=0.22, thick=0.05,
+    # [W3 F3 / DEC-2] `thick` retired with the plates - the mask is a zero-thickness lobe
+    #   sitting `sink` above the bed slab, so there is no 50 mm end section to shade.
+    #   `rough` 0.20 = DEC-2's carpet band.
+    bed_leaf=dict(patches=6, seed=3002, y_half=0.22, rough=0.20,
                   sink=0.025, len_lo=0.9, len_hi=2.4, x0=1.0, x_span=34.0,
                   scatter=160, scale=(0.06, 0.045, 0.008),
                   jitter=(0.75, 1.30), lift=0.006),
@@ -863,14 +866,23 @@ def main():
         bl = PARAMS["bed_leaf"]
         rng = random.Random(int(bl["seed"]))
         z_top = -ch["depth"] + bl["sink"]      # 2.5 cm above the bed slab top face
+        # [W3 F3 / DEC-2] The 6 bed drifts were axis-aligned plates; at h0.3_d5 the channel
+        #   bed is seen almost end-on and their transverse edges drew six ruled lines across
+        #   it (`tonglam_v2.md` F3 lists "D3 d5" among the flagged edges). One
+        #   `build_carpet_mask` lobe each: same footprint, same 1 prim, no straight edge,
+        #   and no 50 mm rim to cast the outline shadow. Leaf litter caught in a concrete
+        #   측구 accumulates in lenses, which is what an elongated lobe is.
         step = bl["x_span"] / float(bl["patches"])
+        kit = gk.kit_from_scene_common(sc, stage)
         for i in range(int(bl["patches"])):
             xa = bl["x0"] + i * step + rng.uniform(0.0, step * 0.5)
             xb = xa + rng.uniform(bl["len_lo"], bl["len_hi"])
-            BOX(f"{ROOT}/BedLeaf_{i}",
-                ((xa + xb) / 2.0, rng.uniform(-0.05, 0.05),
-                 z_top - bl["thick"] / 2.0),
-                (xb - xa, 2.0 * bl["y_half"], bl["thick"]), M["leafbed"])
+            gk.build_carpet_mask(
+                kit, f"{ROOT}/BedLeaf_{i}",
+                (xa + xb) / 2.0, rng.uniform(-0.05, 0.05),
+                (xb - xa) / 2.0, bl["y_half"], M["leafbed"],
+                z=z_top, proud=0.0, n=24, rough=float(bl["rough"]),
+                seed=int(bl["seed"]) + i, feather_cap=0)
         UsdGeom.Xform.Define(stage, f"{ROOT}/BedLeaves")
         mats = [M[f"leaf_{i}"] for i in range(len(mp["leaf_tints"]))]
         sx, sy, sz = bl["scale"]

@@ -282,6 +282,12 @@ PARAMS = dict(
         leaf_tints=((0.20, 0.09, 0.03), (0.26, 0.13, 0.04),   # r1: desaturated
                     (0.16, 0.07, 0.025), (0.30, 0.19, 0.06)),
         leaf_rough=0.90,
+        # [W3 F3] leaf-bank **section** (vertical faces only). Darker and less saturated
+        #   than any scatter tint - the inside of a litter bank is shaded, damp and packed,
+        #   and it sits below the darkest scatter colour (0.16, 0.07, 0.025) on purpose so
+        #   the section reads as depth rather than as another leaf. Matt (0.94): a cut
+        #   section of packed litter has no specular lobe at all.
+        leaf_section_color=(0.085, 0.052, 0.028), leaf_section_rough=0.94,
         rail_color=(0.14, 0.14, 0.15), rail_metallic=0.8, rail_rough=0.45,
         wood_color=(0.30, 0.20, 0.12), wood_rough=0.85,
         # autumn canopy: keeps the sRGB dark band of the standard canopy (0.025,0.045,0.015)
@@ -490,6 +496,18 @@ def main():
                          tint=mp["grass_tint"])
         M["leafbed"] = tex("leaf_ground", f"{ROOT}/Looks/LeafBed",
                            sca["leaf_ground"], tint=mp["leaf_tex_tint"])
+        # [W3 F3 · DEC-2 §10.5 "sceneC2 additionally"] The **vertical-face binding bug**.
+        #   `leaf_ground` is a plan-view photograph of a leaf carpet. Bound to a box it also
+        #   lands on that box's vertical faces, where the same image reads as pressed-leaf
+        #   laminate - a sheet material, not a bank of litter. The largest instance is mound
+        #   A's upstream end face: 4.80 x 0.15 m, vertical, aimed straight at every preset
+        #   eye. A leaf bank cut through is not a photograph of leaves seen from above; it is
+        #   a dark, matt, compressed humus section with no legible leaf shapes at all, so the
+        #   section material is a **constant** - no plan-view texture on a vertical face.
+        M["leafsec"] = PBR(f"{ROOT}/Looks/LeafSection",
+                           diffuse_color=mp["leaf_section_color"],
+                           roughness_const=mp["leaf_section_rough"],
+                           metallic=0.0)
         for i, c in enumerate(mp["leaf_tints"]):
             M[f"leaf_{i}"] = PBR(f"{ROOT}/Looks/Leaf_{i}", diffuse_color=c,
                                  roughness_const=mp["leaf_rough"],
@@ -603,6 +621,54 @@ def main():
                 stage, f"{ROOT}/LeafDrift_{df['name']}",
                 (dg["cx"], sgn * dg["cy"], dg["center_z"]),
                 (dg["len_x"], dg["len_y"], dg["thick"]), M["leafbed"],
+                collider=False, rotx=-sgn * dg["rotx"])
+        build_leaf_sections(M)
+
+    def build_leaf_sections(M):
+        """[W3 F3] Re-skin the **exposed vertical faces** of the leaf layer.
+
+        The geometry of `LeafMound_A/B/C` and `LeafDrift_N/S` is **untouched** - it is what
+        buries steps 1~3 and it *is* this scene's negative-obstacle identity (the docstring
+        arithmetic at PARAMS['mound'] is load-bearing). What changes is only which material
+        the vertical faces carry: a thin section skin, 2 mm proud of each exposed face, on
+        the constant `leafsec` instead of the plan-view `leaf_ground` photograph.
+
+        Every mound gets its upstream end face and both flanks, and each side drift gets
+        its outboard flank. The two that matter most to the judged cuts are **mound B's
+        crest end at x = −0.25, z +0.05…+0.20** - the scene docstring calls that crest line
+        this scene's identity and it stands 1.75 m in front of the h0.3_d2 eye - and
+        **mound C's flanks at y = ±0.90**, which run the length of the buried risers inside
+        the corridor and are the "compressed-leaf laminate" the row names. Faces that turn
+        out to be buried (mound C's upstream end sits inside the stair solid) keep their
+        skin harmlessly: a 2 mm plate inside a solid renders nothing.
+
+        GT: none. Every plate stands on an existing vertical face above grade, adds no
+        walked surface, no drop edge and no collider.
+        """
+        t = 0.002                              # skin offset off the host face
+        for md in PARAMS["mound"]:
+            nm, yh, th = md["name"], md["y_half"], md["thick"]
+            # (1) upstream end section — vertical, `thick` tall, facing −X.
+            sc.add_box(stage, f"{ROOT}/LeafSec_{nm}_End",
+                       (md["x0"] - t, 0.0, md["z0"] - th / 2.0),
+                       (2.0 * t, 2.0 * yh, th), M["leafsec"], collider=False)
+            # (2) the two flanks — sloped exactly like the host plate, so the skin cannot
+            #     shear off it at the downstream end.
+            for tag, sgn in (("N", 1.0), ("S", -1.0)):
+                yy = sgn * (yh + t)
+                sc.build_slope(stage, f"{ROOT}/LeafSec_{nm}_{tag}",
+                               md["x0"], md["z0"], md["run"], md["drop"],
+                               yy - t, yy + t, th,
+                               M["leafsec"], margin=0.0, collider=False)
+        # (3) the side drifts' outboard flanks.
+        dg = PARAMS["drift_geo"]
+        for df in PARAMS["drift"]:
+            sgn = df["sgn"]
+            sc._oriented_box(
+                stage, f"{ROOT}/LeafSec_Drift_{df['name']}",
+                (dg["cx"], sgn * (dg["cy"] + dg["len_y"] / 2.0 + t),
+                 dg["center_z"]),
+                (dg["len_x"], 2.0 * t, dg["thick"]), M["leafsec"],
                 collider=False, rotx=-sgn * dg["rotx"])
 
     # -------------------------------------------------------------------

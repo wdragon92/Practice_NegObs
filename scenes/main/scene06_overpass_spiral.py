@@ -378,21 +378,30 @@ PARAMS = dict(
     #   trees, so no "lollipop parade" appears.
     #   height 4.4~4.8 (jitter +-1.2) - set to land **around eye level** from the deck
     #   viewpoint (z 5.3~6.8), covering the horizon but leaving the distant skyline.
-    treeband=dict(rows=((-33.0, -29.0, 4.8), (29.0, 33.0, 4.4)),
-                  x0=-74.0, x1=74.0, seg=7.0, jitter=1.2),
+    # [W3 S06 · G6 · BS-4] G6's backdrop is a **forested hill, a low-rise village and open
+    #   sky** — the intake's own words are *"G6 is open-sky — the far tier must not close the
+    #   horizon"*. The v6 build closed it completely: six blocks of 13.5…24 m at 78…94 m,
+    #   which the first pilot render showed as an unbroken brick wall filling the whole
+    #   background of `overview` and 60 % of `spiral_up` (the very complaint v7 §4(3) tried
+    #   to fix by re-aiming the camera, i.e. by treating a scene defect as a framing defect).
+    #   The fix is on the geometry side, where it belongs: the wooded band is raised and
+    #   pushed out to become the **hill**, and the blocks drop to **village** scale (2–3
+    #   storeys) and retreat behind it, so they read between the trees instead of over them.
+    treeband=dict(rows=((-40.0, -33.0, 9.6), (33.0, 40.0, 8.8)),
+                  x0=-86.0, x1=86.0, seg=7.0, jitter=2.4),
     buildings=dict(
-        E=dict(x0=78.0, x1=94.0, y0=-42.0, y1=42.0, h=24.0, floors=8,
-               axis="x", facade_x=78.0, face_dir=-1.0, base_z=-0.16),
-        W=dict(x0=-94.0, x1=-78.0, y0=-42.0, y1=42.0, h=21.0, floors=7,
-               axis="x", facade_x=-78.0, face_dir=1.0, base_z=-0.16),
-        N=dict(x0=-44.0, x1=8.0, y0=34.0, y1=48.0, h=18.0, floors=6,
-               axis="y", facade_y=34.0, face_dir=-1.0, base_z=-0.16),
-        N2=dict(x0=14.0, x1=52.0, y0=37.0, y1=49.0, h=13.5, floors=4,
-                axis="y", facade_y=37.0, face_dir=-1.0, base_z=-0.16),
-        S=dict(x0=-40.0, x1=6.0, y0=-50.0, y1=-36.0, h=20.0, floors=6,
-               axis="y", facade_y=-36.0, face_dir=1.0, base_z=-0.16),
-        S2=dict(x0=12.0, x1=54.0, y0=-46.0, y1=-34.0, h=14.5, floors=5,
-                axis="y", facade_y=-34.0, face_dir=1.0, base_z=-0.16),
+        E=dict(x0=104.0, x1=120.0, y0=-42.0, y1=42.0, h=9.0, floors=3,
+               axis="x", facade_x=104.0, face_dir=-1.0, base_z=-0.16),
+        W=dict(x0=-120.0, x1=-104.0, y0=-42.0, y1=42.0, h=7.5, floors=2,
+               axis="x", facade_x=-104.0, face_dir=1.0, base_z=-0.16),
+        N=dict(x0=-44.0, x1=8.0, y0=52.0, y1=66.0, h=8.0, floors=3,
+               axis="y", facade_y=52.0, face_dir=-1.0, base_z=-0.16),
+        N2=dict(x0=14.0, x1=52.0, y0=55.0, y1=67.0, h=6.5, floors=2,
+                axis="y", facade_y=55.0, face_dir=-1.0, base_z=-0.16),
+        S=dict(x0=-40.0, x1=6.0, y0=-68.0, y1=-54.0, h=8.5, floors=3,
+               axis="y", facade_y=-54.0, face_dir=1.0, base_z=-0.16),
+        S2=dict(x0=12.0, x1=54.0, y0=-64.0, y1=-52.0, h=6.0, floors=2,
+                axis="y", facade_y=-52.0, face_dir=1.0, base_z=-0.16),
     ),
     #   [v6 verdict (5)] window decals repeated on the same grid on every block, so the tiling showed ->
     #   window size and row spacing now differ per block to break the rhythm (key = buildings key).
@@ -1712,9 +1721,20 @@ def main():
             (pts_grass if k % 2 == 0 else pts_shrub).append(p)
         # [K4(b) S-2] one species per bed — `species=` names a SHRUB_SPECIES role and the
         #   draw happens ONCE per bed, so each bed is monospecific and deterministic.
+        # [W3 S06 · finding S06-F2] G6's bed is **miscanthus + flowering shrub**, and the
+        #   obvious role for the grasses is `riparian` -> `Shrub/Switchgrass.usd`. That file
+        #   EXISTS on disk but is **absent from `scene_common.VEG_SHRUBS`**, which is the
+        #   table `place_shrubs` filters every candidate through — so the role resolves to
+        #   an empty list and falls back **silently** to `SHRUB_ORNAMENT` (Rhododendron),
+        #   returning a healthy count for a bed that is not what was asked for. The first
+        #   render of this scene put two Rhododendron beds side by side and reported
+        #   "grasses 14". No sanctioned call can reach Switchgrass (a `pool=` argument is
+        #   filtered through the same table), and kits are frozen this window, so the
+        #   ornamental-grass read is **not achieved**; `border_narrow` is used instead so the
+        #   two beds are at least two deliberate species rather than one species twice.
         n_g = sc.place_shrubs(stage, f"{ROOT}/BedGrass", pts_grass,
                               bd["grass_h"], seed=6061, tag="Gr",
-                              species="riparian")
+                              species="border_narrow")
         n_s = sc.place_shrubs(stage, f"{ROOT}/BedShrub", pts_shrub,
                               bd["shrub_h"], seed=6062, tag="Sh",
                               species="ornament_bed")
@@ -1828,26 +1848,29 @@ def main():
                 ya = y0 + k*L + rb["post_t"]/2.0 + rb["joint"]
                 yb = y0 + (k+1)*L - rb["post_t"]/2.0 - rb["joint"]
                 yc, Ly = (ya + yb)/2.0, yb - ya
-                if k % 2 == 0:                           # sound panel bay
-                    BOX(f"{ROOT}/DeckPanel_{i}_{k}",
-                        (xe, yc, zt + dk["panel_h"]/2.0),
-                        (dk["parapet_t"], Ly, dk["panel_h"]), M["panel"])
-                    BOX(f"{ROOT}/DeckPanelCap_{i}_{k}",
-                        (xe, yc, zt + dk["panel_h"] + rb["cap_h"]/2.0),
-                        (dk["parapet_t"] + 2*rb["cap_over"], Ly, rb["cap_h"]),
-                        M["rail"])
-                else:                                    # open bay (see-through)
-                    BOX(f"{ROOT}/DeckKick_{i}_{k}",
-                        (xe, yc, zt + rb["kick_h"]/2.0),
-                        (dk["parapet_t"], Ly, rb["kick_h"]), M["panel"])
-                    nbal = int(rb["n_baluster"])
-                    bz0 = zt + rb["kick_h"]
-                    bz1 = zt + dk["parapet_h"] - 0.05
-                    for b in range(nbal):
-                        yb_ = ya + (b + 0.5) * Ly / float(nbal)
-                        CYL(f"{ROOT}/DeckBal_{i}_{k}_{b}",
-                            (xe, yb_, (bz0 + bz1)/2.0), rb["baluster_r"],
-                            bz1 - bz0, M["rail"])
+                # [W3 S06 · G6] **glass panels on the approach span.** G6 guards the deck
+                #   with laminated glass under a bronze tube rail; the v6 build alternated
+                #   opaque sound panels with open bar bays. Glass satisfies v6's own reason
+                #   for the open bays — *"both corridor walls pure black shadow faces"* —
+                #   strictly better than an open bay does, because it is see-through over
+                #   the FULL bay instead of between bars. So every bay is now glazed: shoe
+                #   kick band, a laminated panel with a real joint at each post, and the
+                #   bronze cap rail above. `build_glass_balustrade` is the right template
+                #   but is X-axis-only (`rotY=90` cap, same restriction as
+                #   `build_tube_railing`, finding S06-F1) and this run is Y-aligned, so its
+                #   three-part form — shoe / jointed panel / capping rail — is reproduced.
+                BOX(f"{ROOT}/DeckKick_{i}_{k}",
+                    (xe, yc, zt + rb["kick_h"]/2.0),
+                    (dk["parapet_t"], Ly, rb["kick_h"]), M["steel"])
+                BOX(f"{ROOT}/DeckGlass_{i}_{k}",
+                    (xe, yc, zt + rb["kick_h"]
+                     + (dk["panel_h"] - rb["kick_h"])/2.0),
+                    (0.019, Ly - 2*rb["joint"], dk["panel_h"] - rb["kick_h"]),
+                    M["glass"])
+                BOX(f"{ROOT}/DeckPanelCap_{i}_{k}",
+                    (xe, yc, zt + dk["panel_h"] + rb["cap_h"]/2.0),
+                    (dk["parapet_t"] + 2*rb["cap_over"], Ly, rb["cap_h"]),
+                    M["rail"])
             CYL(f"{ROOT}/DeckRail_{i}", (xe, (y0+y1)/2.0,
                                          zt + dk["parapet_h"]),
                 0.035, y1 - y0, M["rail"], rotX=90.0)

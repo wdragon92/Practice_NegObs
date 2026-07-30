@@ -116,10 +116,25 @@ coordinate (`scene05:116-119`, `scene08:166`) and to the scene15 M9-b pilot cons
 
 ### 1.5 scene02 `[ruled 07-30]`
 
-> Canopy **Option A** (none — era-consistent, and it differentiates scene02 from scene16's
-> Option-B form). **Statutory flood sill** (18 cm × 1–3 steps) — GT-affecting → `gt_changes` ledger
+> ~~Canopy **Option A** (none — era-consistent, and it differentiates scene02 from scene16's
+> Option-B form).~~ → **SUPERSEDED: Canopy Option B — BUILD a full-length, enclosed, soffit-lit
+> canopy** `[supervisor amendment 07-31 · micro-docs batch §14 MD-1]`. **Statutory flood sill**
+> (18 cm × 1–3 steps) — GT-affecting → `gt_changes` ledger
 > + re-cache at its render gate. **Curb shape fix.** **DELETE the stale landing docstring
 > proposal** (cancelled by the era-survey W4 re-ruling).
+
+> **Amendment MD-1 `[07-31]`.** The Option-A clause above is struck on the user's 2nd-review
+> ruling, relayed verbatim in `Docs/surveys/w3_intake_v2_images.md` §7-1: *"GT-3 REVERSED —
+> CONFIRMED. §1.5 Option A (delete) → **build: full-length, enclosed, soffit-lit canopy** per
+> G2/U-5. GT-3's content and prim-delta sign flip; `R-3` class survives. CB-7 is respec'd in
+> Lane 1."* Image **G2** selects **Option B** of 02-A. `gt_changes_w3.md` §3 GT-3 + §9-1 already
+> carry the flip and recorded the spec-side strike as **owed to the spec owner**; this is that
+> strike. **Only this one clause is superseded** — the sill, the curb reshape and the
+> landing-block deletion in the same ruling are untouched and all three are landed
+> (`6edce66`, GT-1/GT-2/GT-3 `LANDED`). What was built, measured, is in
+> `Docs/reports/w3_cb7_v1.md` §4: canopy **x −1.90 … 7.15** × y ±2.45, roof underside 2.70,
+> 5 column pairs, 8 valances, 10 soffit battens, **+45 prims on the canopy line** (scene02
+> 391 → 545 total).
 
 - The landing block at `scene02_underpass.py:29-33` / `:64-79` is marked *"DESIGN PROPOSAL AND IS
   NOT YET REFLECTED IN THE CODE"*. `era_consistency_survey_v1.md:881` already ruled
@@ -127,9 +142,13 @@ coordinate (`scene05:116-119`, `scene08:166`) and to the scene15 M9-b pilot cons
   geometry and are never retrofitted). RT-I §4-N4 is correct that neither A nor B cited it.
   → **Delete the block.** The pit end stays at `x1 = 7.0` (RT-I R9: A's "x ≈ 8.2" was the
   unimplemented proposal, not the as-built).
-- Deleting the canopy makes 02-B **mandatory**: with no roof, 「지하공공보도시설…규칙」 제8조⑤'s
+- ~~Deleting the canopy makes 02-B **mandatory**: with no roof, 「지하공공보도시설…규칙」 제8조⑤'s
   waterproofing duty falls entirely on the entrance sill, and 제8조⑦ (the roof clause) is the one
-  with a waiver.
+  with a waiver.~~ `[amended 07-31 · MD-1]` **The premise dies with Option A** — there is a roof
+  now. **The sill requirement survives on its own footing and is unchanged**: 제8조⑤ binds the
+  entrance whether or not 제8조⑦'s roof is present, and the sill is built and landed as **GT-1**
+  (`6edce66`, drop edge 3.380 m, 21 drop rows + 1 `up_step`). Only the *"with no roof"* rationale
+  is struck.
 - Sill build: raised apron `x −1.20 … 0.00`, `y ±2.10`, top **z = +0.18**, one 0.18 m riser across
   the full apron width at `x = −1.20`; descent then begins from +0.18 so the **total drop becomes
   3.38 m**. Accessibility companion: a 1:12 ramp on one side of the apron (recommended over
@@ -140,7 +159,9 @@ coordinate (`scene05:116-119`, `scene08:166`) and to the scene15 M9-b pilot cons
   road top −0.02) — the scene's own docstring at `:860-861` says so. Real curbs are flush to
   +20 mm relative to the footway with the step on the carriageway side only. Target: exposure above
   carriageway **150 mm**, curb top **flush … +20 mm** above the footway.
-- scene02 re-caches GT **once**, covering sill + curb + canopy deletion (§8).
+- scene02 re-caches GT **once**, covering sill + curb + ~~canopy deletion~~ **canopy rebuild**
+  `[amended 07-31 · MD-1]` (§8). The one-re-cache rule itself is unchanged and was honoured in
+  full at CB-7 (R-1 + R-2 `260731_cb7_recache` + R-3 `260731_w3_cb7`).
 
 ### 1.6 scene08 `[ruled 07-30]`
 
@@ -656,8 +677,8 @@ actually used**, it does not guess it.
 |---|---|---|---|---|---|
 | **GT-1** | Flood sill: raised apron top **+0.18**, one 0.18 m riser at `x = −1.20`, descent from +0.18 | 02 | Drop edge at `x = 0` carries **3.38 m** instead of 3.20 m; a **new 0.18 m up-step** appears at `x = −1.20` — **label it an up-step, not a drop** | **Full re-cache** | CB-7 |
 | **GT-2** | Curb reshape: top +0.10 above footway → flush … +0.02 | 02 | 100 mm vertical change on a walked surface; below the drop threshold but adjacent to the sill | **Rides GT-1's single re-cache** | CB-7 |
-| **GT-3** | Canopy deletion | 02 | No walked-surface z change; **OCCL baseline moves** (four posts and a 2.4 × 4.9 m slab leave every cut) | Re-stamp OCCL only | CB-7 |
-| **GT-4** | `upper_plaza` extended to the building faces (turf z = −0.63 → paving z = 0) + ground_kit region → (−16, −8, 0, 8) | 01 | **Height-field change** *and* every decal AABB moves (decorated area ×1.7). RT-I §4-N3's first missing flag | **Full re-cache + regr re-baseline.** `prim_cap=60` re-checked — expect to *reduce* per-element counts, not raise the cap. **HELD** by ruling 1.8 until T2 lands 5 plaza-to-plinth frames | CB-11 |
+| **GT-3** | ~~Canopy deletion~~ **Full-length enclosed soffit-lit canopy REBUILD** `[supervisor amendment 07-31 · §14 MD-1b]` | 02 | No walked-surface z change **(unchanged by the flip)**; **OCCL baseline moves** ~~(four posts and a 2.4 × 4.9 m slab leave every cut)~~ — **prims are ADDED, not removed; the sign of the prim delta flips** (canopy line **+45**, commit total 391 → 545) | Re-stamp OCCL only **(class survives the flip)** | CB-7 |
+| **GT-4** | ~~`upper_plaza` extended to the building faces (turf z = −0.63 → paving z = 0) + ground_kit region → (−16, −8, 0, 8)~~ **RETIRED — will never land** `[supervisor amendment 07-31 · §14 MD-2b]` | 01 | ~~**Height-field change** *and* every decal AABB moves (decorated area ×1.7). RT-I §4-N3's first missing flag~~ — **no z-profile effect remains; the row is dead** | ~~**Full re-cache + regr re-baseline.** `prim_cap=60` re-checked — expect to *reduce* per-element counts, not raise the cap. **HELD** by ruling 1.8 until T2 lands 5 plaza-to-plinth frames~~ — **the full re-cache retires with the row; the §1.8 hold is discharged, not satisfied; P-5 (§9) is dead** | ~~CB-11~~ **gate released** |
 | **GT-5** | scene13 `walk_north/south` `proud=0.007` → a real 150 mm curb step | 13 | Real geometry change on a walked surface. RT-I §4-N3's second missing flag | **Full re-cache** | CB-9 |
 | **GT-6** | S06-A: landing top 4.998 → 5.000, landing azimuth clipped at the deck edge, fascia stepped, railing `outer_r` 3.36 → 3.24, chord margin 1.03 → 1.000 | 06 (+ 05 · 19 · 13 share the builder) | **Designed to be GT-invariant** — r_in, r_out, azimuths and top-face z unchanged | **Prove invariance with a prim-hash / GT-delta diff** (the `96968f3` method). No re-cache if the diff is empty; a non-empty diff is a defect, not a new baseline. **Archive the judge baselines for 05 · 06 · 13 · 19 before touching `scene_common`** | CB-5 / CB-9 |
 | **GT-7** | scene08 tempbar deletion removes **2 `TempPost_*` collision boxes** | 08 | Hazard/collision box list changes | **Re-stamp the OCCL/GT baseline** | CB-8 |
@@ -680,7 +701,7 @@ Nothing below may be implemented as a finished value. Each row names its gate an
 | **P-2** | **scene10 archetype rebuild** — candidate D1 (2 flights × 14, riser 0.150 / tread 0.360 / width 1.80, one 1.8 × 3.0 m rest platform, galvanised frame + 방부목 tread, total drop **6.60 m unchanged**). **Explicitly keep**: plank gaps (`flights.gap = 0.02`), the stone pit / log fence, and **`rail.broken_landing = 0`** — the missing railing bay is this scene's negative-obstacle cue and must survive any rebuild | **User reference images** + the **KDS 34 00 00 단높이/단너비 verbatim text** (clause located, text never fetched) `[ruled 07-30]` | S3 |
 | **P-3** | **S08-B** — what replaces the barrier at the parapet gap. Options B-1 close the gap and move the cue to the stair head (recommended) · B-2 stainless 안전난간 1.1 m · B-3 a deliberately missing railing panel with post stubs (the `scene06 railing.broken=(180,270)` pattern) | **n ≥ 5 photos of finished Korean 선큰광장 pit edges** (청계광장 · 서울광장 · 광화문 · COEX/영동대로 · 시청역/을지로), from news or municipal press releases. Commons is thin; road-view banned | T2 → S6 |
 | **P-4** | **G-6 / 04-B gravel deposition** — mask to the trail polygon, `cover_fn` with edge (λ_e 0.25 m) + track (σ_t 0.35 m on the existing wear-lane centreline) + low-point terms, mean cover held at the profile's declared value, size sorting bound to the density term | **5 plates showing armouring / rill / edge deposition on a 마사토 surface** — 산림청 「등산로 정비 매뉴얼」 · 「사방기술교본」 · 서울시 「등산로 정비 매뉴얼」 `[ruled 07-30]` §1.8 | T2 → K1 · K4 · S5 |
-| **P-5** | **01-B paving to the building faces** (+ the same audit on 02 · 05, and 08 · 14 · 16 · 20 · 21) | **5 frames showing a paved plaza meeting a building plinth with no turf gap** — `Category:Hangang Park` (~60 files) + Commons university subcategories `[ruled 07-30]` §1.8 | T2 → S1 |
+| ~~**P-5**~~ **P-5 — DEAD** `[supervisor amendment 07-31 · §14 MD-2]` | ~~**01-B paving to the building faces** (+ the same audit on 02 · 05, and 08 · 14 · 16 · 20 · 21)~~ — **the parked item is superseded**: GT-4 is `RETIRED` (`gt_changes_w3.md` §3 GT-4 · §9-2), so there is no 01-B paving extension left to release | ~~**5 frames showing a paved plaza meeting a building plinth with no turf gap** — `Category:Hangang Park` (~60 files) + Commons university subcategories `[ruled 07-30]` §1.8~~ — **the evidence gate is DISCHARGED, not satisfied**: T2 owes S1 nothing on this row and no frame set need be harvested for it | ~~T2 → S1~~ **none** |
 | **P-6** | **04-A shrub massing** — 3 tuft rows → a continuous groundcover band; 2 shrub rows → 3–4 clumps of 3–7 of one species following the slope contour. Also the vehicle for scene13's apartment-court planting (X4) | **산림청 「가로수 조성관리 매뉴얼」 planting-pattern plates** `[ruled 07-30]` §1.8 | T2 → S5 |
 | **P-7** | **The 6 prop-edge rows M1–M6** — bench back-face offset and seat-axis convention · lamp pole-centre offset (interim 0.35–0.60 m, nominal 0.45, `[assumed]`) · bin offset and pairing · planter curb-vs-module registration · sign-post offset and panel clear height · whether benches sit between trees, on the tree line, or offset | **Pixel measurement on ≥ 5 frames each** from the named Commons populations, using the standard scale references (보도블록 300×300 / 200×100 · 점자블록 300×300 · 볼라드 Ø100–200 · 맨홀 Ø648). **LINT-9 stays WARN until then** `[ruled 07-30]` §1.8. Enforcing a guessed setback is worse than none | T2 → T1 |
 | **P-8** | **5 empty archetype panels** + 2 top-ups (§7.4) | T2's harvest. **Blocks GATE-3 for those scenes** `[ruled 07-30]` §1.8 | T2 |
@@ -1124,3 +1145,37 @@ python3 scripts/imgstats.py                    # ori_axis — advisory, never a 
 python3 scripts/make_review_gallery.py --round <round> --out look_check/_review_w3 \
         --status-json Docs/reports/regr_<round>.json
 ```
+
+---
+
+## 14. Supervisor amendment log
+
+**What this section is.** The spec is authority over `Docs/audit_v4/gt_changes_w3.md` (§0 of that
+file: *"This file never overrides it"*). When a user ruling reverses a spec clause, the ledger
+records the supersession and the **spec owner carries the strike** — the 07-31 ledger batch
+(`d71e1e3`) recorded two such strikes as owed (`w3_ledger_batch_v1.md` §6), and the Lane-1 exit
+red team re-verified both were still owed at `535926e` (`redteam_lane1.md` §9-1). This is where
+they land.
+
+**Method, GT-6 precedent.** *Annotate in place, never silently rewrite.* Every superseded clause
+keeps its text struck through beside the replacement and carries a `[supervisor amendment 07-31]`
+marker back to the item below. **Nothing in this file has been deleted.**
+
+| id | Clause struck | Where | Authority | Verified against |
+|---|---|---|---|---|
+| **MD-1** | §1.5 **Canopy Option A (none)** → Option B, build full-length enclosed soffit-lit canopy | §1.5 ruling quote + the *"Deleting the canopy makes 02-B mandatory"* bullet + the *"canopy deletion"* phrase in the one-re-cache bullet | `w3_intake_v2_images.md` §7-1 (user 2nd review, G2/U-5) | `gt_changes_w3.md` §3 GT-3 (`LANDED`) + §9-1; built figures from `w3_cb7_v1.md` §4 |
+| **MD-1b** | §8 GT-3 row — *"Canopy deletion"* and *"four posts and a 2.4 × 4.9 m slab leave every cut"* | §8 | same ruling | same; prim delta **+45 canopy line / 391 → 545 scene total** `[measured]` |
+| **MD-2** | §9 **P-5** — the whole parked row and its 5-frame evidence gate | §9 | `w3_intake_v2_images.md` §7-6 (GT-4 RETIRED; *"P-5's evidence gate dies with the row"*) | `gt_changes_w3.md` §3 GT-4 (`RETIRED`) + §9-2 |
+| **MD-2b** | §8 GT-4 row — the change, the z-effect, the full re-cache and the `HELD`/CB-11 gate | §8 | same ruling | same |
+
+**MD-1b / MD-2b are an extension of MD-1 / MD-2, stated rather than done silently.** The two
+items the ledger declared owed name §1.5 and §9 only. §8's GT-3 and GT-4 rows carry the *same*
+superseded content, and leaving them would make this document contradict itself on exactly the
+clauses it was told to strike — with the spec outranking the ledger, a reader following §8 would
+still delete the canopy that CB-7 has already built. Both edits are strikethrough, so the original
+text is intact and the extension is revertible in one edit if the supervisor did not want it.
+
+**What deliberately did NOT change.** §1.5's sill build, curb fix and landing-block deletion (all
+three landed at `6edce66`); the one-re-cache rule for scene02; GT-3's re-cache class (`R-3` only)
+and its CB-7 gate; every other §8 row; every other §9 parked row; §1.8's ruling text, which is the
+*source* of P-5's gate and stays as the record of why the hold existed.

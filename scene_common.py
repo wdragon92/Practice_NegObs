@@ -1649,8 +1649,82 @@ def build_straight_stairs(stage, prefix, x0, y0, y1, riser, tread, n, base_z,
     return prims
 
 
+# --- S06-A · the true annular-sector convention ----------------------------
+# [W3 K4(d) · T3 `w3_geom_reverify_v1.md` §3 NF-2 / §4]
+#
+# **What is wrong with the box convention.** `build_arc_steps` / `build_helix_steps`
+# approximate an annular sector with an axis-aligned Cube given the **outer** chord
+# width. Because a chord is the same length at every radius while the true sector
+# narrows towards the centre, the box overshoots the a0/a1 rays at the inner radius by
+#     overshoot = r_out * sin(dth/2) * margin - r_in * sin(dth/2)
+# and the ratio is `margin * r_out / r_in`, **independent of `seg`** - measured
+# **7.08125** on scene06's landing at seg in {24, 48, 96, 165, 330, 1000}. The absolute
+# figure T3 measured: **190.9 mm** of solid protruding perpendicular past the nominal
+# straight edge, in 24 teeth, on the y = -13.000 line where the landing meets step 0 and
+# the deck; and step 0's box corners span azimuth 172.94-198.60 deg against a nominal
+# 180.00-191.54 deg (**21.10 deg of inner overshoot** against the 0.11 deg outer
+# overshoot the scene06 comment records as harmless).
+#
+# **The §10.5 box fallback ("cap Dth so the r_in overwidth <= 1.05x") is unreachable at
+# any seg** - the ratio above does not contain Dth. T3's ruling is to author the mesh.
+#
+# **Why it is opt-in.** GT-6's acceptance test is a prim-hash / GT-delta diff that must
+# come back **empty except the enumerated +2 mm landing-top rows**, and those rows are a
+# *scene06* parameter change (`top_z` 4.998 -> 5.000), not a library change. Converting
+# Cube -> Mesh necessarily rewrites the inventory, so a default-ON conversion would make
+# GT-6's own proof impossible to run. The mechanism therefore lands here default OFF -
+# the K4M precedent - and scene06 / 05 / 19 turn it on inside their own pilots, where the
+# split proof is actually judged. `mesh=True` costs (arc_seg+1)*4 points per sector.
+def _annular_sector_mesh(stage, path, cx, cy, r_in, r_out, a0_deg, a1_deg,
+                         z_bot, z_top, mtl=None, collider=False, arc_seg=6):
+    """A closed annular-sector prism. Exact at the a0/a1 rays; arcs faceted by `arc_seg`.
+
+    Returns the Mesh. Point order per ring index i: [inner_bot, outer_bot, inner_top,
+    outer_top], so the four wall/face loops index arithmetically.
+    """
+    from pxr import Gf, UsdGeom, UsdPhysics, Vt
+    n = max(1, int(arc_seg))
+    a0, a1 = math.radians(a0_deg), math.radians(a1_deg)
+    pts = []
+    for i in range(n + 1):
+        a = a0 + (a1 - a0) * i / float(n)
+        ca, sa = math.cos(a), math.sin(a)
+        ix, iy = cx + r_in * ca, cy + r_in * sa
+        ox, oy = cx + r_out * ca, cy + r_out * sa
+        pts += [Gf.Vec3f(ix, iy, z_bot), Gf.Vec3f(ox, oy, z_bot),
+                Gf.Vec3f(ix, iy, z_top), Gf.Vec3f(ox, oy, z_top)]
+
+    def v(i, k):                                   # k: 0 ib, 1 ob, 2 it, 3 ot
+        return i * 4 + k
+    counts, idx = [], []
+
+    def quad(a, b, c, d):
+        counts.append(4)
+        idx.extend([a, b, c, d])
+    for i in range(n):
+        quad(v(i, 2), v(i, 3), v(i + 1, 3), v(i + 1, 2))     # top (+Z)
+        quad(v(i, 0), v(i + 1, 0), v(i + 1, 1), v(i, 1))     # bottom (-Z)
+        quad(v(i, 1), v(i + 1, 1), v(i + 1, 3), v(i, 3))     # outer wall
+        quad(v(i, 0), v(i, 2), v(i + 1, 2), v(i + 1, 0))     # inner wall
+    quad(v(0, 0), v(0, 1), v(0, 3), v(0, 2))                 # cap at a0
+    quad(v(n, 0), v(n, 2), v(n, 3), v(n, 1))                 # cap at a1
+    m = UsdGeom.Mesh.Define(stage, path)
+    m.CreatePointsAttr(Vt.Vec3fArray(pts))
+    m.CreateFaceVertexCountsAttr(Vt.IntArray(counts))
+    m.CreateFaceVertexIndicesAttr(Vt.IntArray(idx))
+    m.CreateSubdivisionSchemeAttr(UsdGeom.Tokens.none)
+    lo = Gf.Vec3f(min(p[0] for p in pts), min(p[1] for p in pts), float(z_bot))
+    hi = Gf.Vec3f(max(p[0] for p in pts), max(p[1] for p in pts), float(z_top))
+    m.CreateExtentAttr([lo, hi])
+    prim = m.GetPrim()
+    _bind_mtl(prim, mtl)
+    if collider:
+        UsdPhysics.CollisionAPI.Apply(prim)
+    return m
+
+
 def build_arc_steps(stage, prefix, cx, cy, r_in, r_out, a0_deg, a1_deg, seg,
-                    top_z, base_z, mtl, collider=True):
+                    top_z, base_z, mtl, collider=True, mesh=False, arc_seg=6):
     """Build one tier of an arc (a0..a1) as seg approximate trapezoidal boxes.
     Each segment = a Cube with rotZ (segment centre angle) + translate. Radial thickness = r_out-r_in,
     chord length = 2*r_mid*sin(dtheta/2)*1.02 (overlap margin preventing wedge gaps between segments).
@@ -1663,6 +1737,17 @@ def build_arc_steps(stage, prefix, cx, cy, r_in, r_out, a0_deg, a1_deg, seg,
     dth = math.radians((a1_deg - a0_deg) / float(seg))
     chord = 2.0 * r_out * math.sin(dth / 2.0) * 1.03   # Cover based on the outer radius (look r1: an r_mid basis leaves an outer wedge gap)
     prims = []
+    if mesh:
+        # [W3 K4(d)] True sectors: no chord margin, no inner overshoot, and the
+        # neighbouring sectors share their rays exactly, so the 1.03 cover the box
+        # convention needs against wedge gaps is not merely reduced - it is unnecessary.
+        for k in range(seg):
+            ak0 = a0_deg + (a1_deg - a0_deg) * k / float(seg)
+            ak1 = a0_deg + (a1_deg - a0_deg) * (k + 1) / float(seg)
+            prims.append(_annular_sector_mesh(
+                stage, f"{prefix}/Seg_{k}", cx, cy, r_in, r_out, ak0, ak1,
+                base_z, top_z, mtl, collider=collider, arc_seg=arc_seg))
+        return prims
     for k in range(seg):
         a_mid = math.radians(a0_deg) + (k + 0.5) * dth
         px = cx + r_mid * math.cos(a_mid)
@@ -1902,7 +1987,8 @@ def build_slope(stage, path, x0, z0, run, drop, y0, y1, thick, mtl,
 #      Mathematical definitions: Docs/stair_typology_survey_v2.md §3 / brief v3 §B
 # ===========================================================================
 def build_helix_steps(stage, prefix, cx, cy, r_in, r_out, a0_deg, step_deg, n,
-                      riser, z0, mtl, ccw=True, collider=True, base_drop=0.5):
+                      riser, z0, mtl, ccw=True, collider=True, base_drop=0.5,
+                      mesh=False, arc_seg=6):
     """Helical/spiral stone stairs (shared by T9 and winders). For step i (0-based):
       centre angle a_i = a0_deg + (i+0.5)*step_deg*dir  (dir=+1 ccw, -1 cw)
       annular sector box: radial width = r_out-r_in, chord length = 2*r_mid*sin(rad(step_deg)/2)*1.02
@@ -1923,6 +2009,15 @@ def build_helix_steps(stage, prefix, cx, cy, r_in, r_out, a0_deg, step_deg, n,
         py = cy + r_mid * math.sin(rad)
         top = z0 - (i + 1) * riser
         cz = top - base_drop / 2.0
+        if mesh:
+            # [W3 K4(d) · NF-2] Same convention as `build_arc_steps(mesh=True)`: the
+            # sector spans exactly one `step_deg` about its own centre azimuth, so the
+            # tread's plan edges land on the design rays instead of 190.9 mm past them.
+            prims.append(_annular_sector_mesh(
+                stage, f"{prefix}/Step_{i}", cx, cy, r_in, r_out,
+                a_deg - step_deg * 0.5, a_deg + step_deg * 0.5,
+                top - base_drop, top, mtl, collider=collider, arc_seg=arc_seg))
+            continue
         prims.append(_oriented_box(
             stage, f"{prefix}/Step_{i}", (px, py, cz),
             (radial, chord, base_drop), mtl, collider=collider, rotz=a_deg))
@@ -1930,7 +2025,7 @@ def build_helix_steps(stage, prefix, cx, cy, r_in, r_out, a0_deg, step_deg, n,
 
 
 def build_helix_ramp(stage, prefix, cx, cy, r_in, r_out, a0_deg, a1_deg, seg,
-                     z0, z1, thick, mtl, collider=True):
+                     z0, z1, thick, mtl, collider=True, top_face=False):
     """A smooth helical ramp (T10 car park ramp). The arc [a0,a1] is approximated by seg chord segments.
       Segment j (0-based): centre angle a_j = a0 + (j+0.5)*dth_deg
       Linear z interpolation: segment top centre z = z0 + (j+0.5)*dz_seg, dz_seg = (z1-z0)/seg
@@ -1966,6 +2061,41 @@ def build_helix_ramp(stage, prefix, cx, cy, r_in, r_out, a0_deg, a1_deg, seg,
         py = cy + r_mid * math.sin(rad)
         z_top = z0 + (j + 0.5) * dz_seg          # Centre height of the segment top surface
         cz = z_top - thick / 2.0
+        # [W3 K4(d) · NF-1 - T3 `w3_geom_reverify_v1.md` §3] **This builder displaces the
+        # top face it is asked to place.** `_oriented_box` composes translate -> rotZ ->
+        # rotX -> scale and the line above places the box **centre**, then tilts about
+        # that centre. For a slab of thickness t tilted by theta the top-face plane in the
+        # segment frame is z'(y') = y'*tan(theta) + (t/2)/cos(theta), so the surface is
+        #   shifted tangentially by (t/2)*sin(theta)  and  raised by (t/2)*(1/cos - 1).
+        # Measured on the shipped scene06 rings `[measured-usd]`:
+        #   SpiralFascia t 0.78, tilt -16.232 deg -> 109.0 mm shift, +16.34 mm lift
+        #   SpiralSoffit t 0.34, tilt -21.749 deg ->  63.0 mm shift, +13.03 mm lift
+        #   RailInnerTop t 0.064, tilt -33.513 deg -> 17.7 mm shift,  +6.38 mm lift
+        # The fascia ring is *lucky*, not correct: its 109.0 mm shift is 0.95 of one
+        # segment pitch (114.3 mm), so the top surface still just closes (span 114.95 vs
+        # pitch 114.31 mm) - any change to `thick`, `seg` or the slope opens real gaps,
+        # and NF-3's 388 mm leading-end notch is the same defect already visible.
+        # `top_face=True` places the top-face centre instead of the box centre. Default
+        # OFF because GT-6's split proof requires this commit's prim-hash diff to be
+        # empty; scene06 flips it inside its own pilot, where the 16 mm is judged.
+        #
+        # **Correction to T3's prescription, verified numerically.** §3 NF-1 says to
+        # "compensate `cz` by (t/2)(1/cos - 1) **and** the tangential origin by
+        # (t/2)*sin". Applying both **double-counts**: the tangential move slides the
+        # sloped plane, changing its height at the placement azimuth by -tan(th)*ds, so
+        # the pair over-corrects by (t/2)*sin*tan - measured **-23.7 mm** where the raw
+        # defect is **+12.0 mm** (t 0.78, tilt -14.05 deg). Solving both conditions at
+        # once - top face centred on its azimuth AND passing through `z_top` there -
+        #     z(u) = cz + (t/2)/cos + (u - s)tan ,  s = (t/2) sin ,  z(0) = z_top
+        #  => cz = z_top - (t/2)/cos + s*tan = z_top - (t/2)*cos
+        # so the z term is **+(t/2)(1 - cos)**, not -(t/2)(1/cos - 1). Verified on the
+        # fascia ring: lift +12.028 mm -> 0.000, tangential offset +94.68 mm -> 0.000.
+        if top_face and abs(tilt_deg) > 1e-9:
+            th = math.radians(tilt_deg)
+            cz += (thick / 2.0) * (1.0 - math.cos(th))
+            shift = (thick / 2.0) * math.sin(th)          # along the local tangent (+Y)
+            px -= shift * math.sin(rad)                   # local +Y = (-sin a, cos a)
+            py += shift * math.cos(rad)
         prims.append(_oriented_box(
             stage, f"{prefix}/Seg_{j}", (px, py, cz),
             (radial, seg_len, thick), mtl, collider=collider,

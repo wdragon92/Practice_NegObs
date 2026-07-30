@@ -1,0 +1,298 @@
+{
+ "note": "GT-6 row law \u2014 judge baselines archived BEFORE scene_common's arc/helix convention was touched (K4(d)). look_check/ is gitignored, so the archive itself lives on disk and THIS manifest is the tracked, verifiable record: any later claim that a re-render matches or moves the baseline can be checked against these md5s.",
+ "archived_at": "2026-07-30T18:15:17",
+ "git_head": "7e265924ec86094c7113e1c70dab74607669684b",
+ "source_round": "260730_w2d_fix",
+ "archive_dir_pattern": "look_check/<scene>/_gt6_judge_baseline",
+ "scenes": {
+  "scene05": {
+   "n_files": 15,
+   "files": {
+    "manifest.json": {
+     "md5": "faf3df5f8630040b902ede685178c350",
+     "bytes": 4662
+    },
+    "pt_noon_plaza_approach.png": {
+     "md5": "716a31c207499bf61f5ae19d4c29aea0",
+     "bytes": 3993258
+    },
+    "pt_noon_preset_h0.3_d10.png": {
+     "md5": "591de5d80d98a9fbf118a345fad53db4",
+     "bytes": 3992965
+    },
+    "pt_noon_preset_h0.3_d2.png": {
+     "md5": "034cb9de73998ab650d205401197eb33",
+     "bytes": 4562119
+    },
+    "pt_noon_preset_h0.3_d5.png": {
+     "md5": "eae19ab592edc126fd82b8b7f1c9e8a5",
+     "bytes": 4195661
+    },
+    "pt_noon_preset_h0.9_d10.png": {
+     "md5": "109ba1ce8fe1640c6285b08bd0e59c4b",
+     "bytes": 4165321
+    },
+    "pt_noon_preset_h0.9_d2.png": {
+     "md5": "e5be2d7fa6637f02ae329b4c3571023c",
+     "bytes": 4473586
+    },
+    "pt_noon_preset_h0.9_d5.png": {
+     "md5": "d0ae0cea54535f9075103cf40c698aae",
+     "bytes": 4296013
+    },
+    "pt_noon_preset_h1.8_d10.png": {
+     "md5": "cbdecb2bd62acb01f8b9e74af080c01b",
+     "bytes": 4090078
+    },
+    "pt_noon_preset_h1.8_d2.png": {
+     "md5": "cad93b1e2fb2eb7ac622593f49539376",
+     "bytes": 4496240
+    },
+    "pt_noon_preset_h1.8_d5.png": {
+     "md5": "e3299cb9337a9d82a94bbf47783a4ba2",
+     "bytes": 4282303
+    },
+    "pt_noon_rim_view.png": {
+     "md5": "62f303235e179fc67909de67018a7902",
+     "bytes": 4417452
+    },
+    "pt_noon_side_arc.png": {
+     "md5": "781b93f0b82407aef96a0ae9fb7614af",
+     "bytes": 4471684
+    },
+    "pt_noon_stage_lookup.png": {
+     "md5": "bfc244b3fe0d9bcfea8f13129b070ed6",
+     "bytes": 2977329
+    },
+    "round_stamp.json": {
+     "md5": "0a91a3a69ab29925a9e98594a2ca41c9",
+     "bytes": 520
+    }
+   }
+  },
+  "scene06": {
+   "n_files": 17,
+   "files": {
+    "manifest.json": {
+     "md5": "17341a679ecc0f194ff6c9d0afa63492",
+     "bytes": 5328
+    },
+    "pt_noon_broken_rail.png": {
+     "md5": "64c91e1de21fe3b72c2c2afd7a1f54cf",
+     "bytes": 4307309
+    },
+    "pt_noon_deck_entry.png": {
+     "md5": "f905df396ea6182a8b19f710779c15b2",
+     "bytes": 3864124
+    },
+    "pt_noon_ground_approach.png": {
+     "md5": "cd78c54c103f8026724af469f01aa0c8",
+     "bytes": 4650919
+    },
+    "pt_noon_ground_graze.png": {
+     "md5": "3a56863dbfc954a849366164ee8ecbb1",
+     "bytes": 4072393
+    },
+    "pt_noon_overview.png": {
+     "md5": "b779c222b1f32037d7181f2f98bea237",
+     "bytes": 4145883
+    },
+    "pt_noon_preset_h0.3_d10.png": {
+     "md5": "94a3907f76d29207930158099b861014",
+     "bytes": 4392407
+    },
+    "pt_noon_preset_h0.3_d2.png": {
+     "md5": "9cd3653d429741573108efa5fdc5a7ce",
+     "bytes": 5023696
+    },
+    "pt_noon_preset_h0.3_d5.png": {
+     "md5": "ec2713baf41ac2c1f69b31181edfc7cc",
+     "bytes": 4163184
+    },
+    "pt_noon_preset_h0.9_d10.png": {
+     "md5": "23ebbbf4179374dcf32c5b612746b426",
+     "bytes": 4302327
+    },
+    "pt_noon_preset_h0.9_d2.png": {
+     "md5": "af7d25232693e9708d875498cfa4f564",
+     "bytes": 4596589
+    },
+    "pt_noon_preset_h0.9_d5.png": {
+     "md5": "c0eb38612f4d1386184ff412243d930c",
+     "bytes": 4060820
+    },
+    "pt_noon_preset_h1.8_d10.png": {
+     "md5": "64624bc083c8dc2aece92d5b2ceb4f65",
+     "bytes": 4708449
+    },
+    "pt_noon_preset_h1.8_d2.png": {
+     "md5": "a1e02a839c9787e6991d5a677095480d",
+     "bytes": 4757574
+    },
+    "pt_noon_preset_h1.8_d5.png": {
+     "md5": "b715fda11d100c71f90aac3e0e09237c",
+     "bytes": 4522307
+    },
+    "pt_noon_spiral_up.png": {
+     "md5": "7b9d3adf54ec88db5e432a58e7616500",
+     "bytes": 2818913
+    },
+    "round_stamp.json": {
+     "md5": "6f7e0e3377b19ad917264c4fe1974cc1",
+     "bytes": 520
+    }
+   }
+  },
+  "scene13": {
+   "n_files": 17,
+   "files": {
+    "manifest.json": {
+     "md5": "abb47c29822b8aba6d265efab0ffcc03",
+     "bytes": 5352
+    },
+    "pt_noon_beauty_overview.png": {
+     "md5": "8985bffc5156b2e50de50ab70e8cafb8",
+     "bytes": 3108855
+    },
+    "pt_noon_bollard_walk.png": {
+     "md5": "549d9091acdd9e5b8fc853597a032a88",
+     "bytes": 2769851
+    },
+    "pt_noon_entry_approach.png": {
+     "md5": "3caaef915eb686c3e6b100ccc21fafda",
+     "bytes": 2848701
+    },
+    "pt_noon_portal_look.png": {
+     "md5": "3ad4709bafb82e1e6988afa2dd17c252",
+     "bytes": 3236130
+    },
+    "pt_noon_preset_h0.3_d10.png": {
+     "md5": "3fb73298c7b459b72ccb04804ff9a78f",
+     "bytes": 3348009
+    },
+    "pt_noon_preset_h0.3_d2.png": {
+     "md5": "5e916b4914df134d35d7e5fffe6192ca",
+     "bytes": 3731840
+    },
+    "pt_noon_preset_h0.3_d5.png": {
+     "md5": "50b30bec5311edd9838ea6b478763b6b",
+     "bytes": 3276298
+    },
+    "pt_noon_preset_h0.9_d10.png": {
+     "md5": "e66320ebb2a6e39f3c5999a7428af0e3",
+     "bytes": 2865254
+    },
+    "pt_noon_preset_h0.9_d2.png": {
+     "md5": "32e7020322bf7174be3802c85b0fcb52",
+     "bytes": 3170509
+    },
+    "pt_noon_preset_h0.9_d5.png": {
+     "md5": "39bf683374aaccc6fcca35c31dc89855",
+     "bytes": 2999591
+    },
+    "pt_noon_preset_h1.8_d10.png": {
+     "md5": "991fb9437bb80b0a500e17b670c4e487",
+     "bytes": 2743190
+    },
+    "pt_noon_preset_h1.8_d2.png": {
+     "md5": "d2388b48531f50ac97f92ba83cc4dc6e",
+     "bytes": 2907030
+    },
+    "pt_noon_preset_h1.8_d5.png": {
+     "md5": "39ce4af624734ed9238e849957dc1565",
+     "bytes": 3117757
+    },
+    "pt_noon_ramp_graze.png": {
+     "md5": "83e0dbad75fb00a362c54c034fd68fc9",
+     "bytes": 2857196
+    },
+    "pt_noon_stair_head.png": {
+     "md5": "e7562bd4c0192d644a7785980591a502",
+     "bytes": 3946010
+    },
+    "round_stamp.json": {
+     "md5": "1f67ed6aafc9e901ae4bf2e79fa5ec9d",
+     "bytes": 520
+    }
+   },
+   "t3_note": "T3 (w3_geom_reverify_v1.md \u00a77-5) REFUTED scene13's membership of GT-6: it has 0 arc/helix call sites, and its re-render obligation comes from GT-5 (the 150 mm curb), not from GT-6. Archived anyway because the lane brief names it and an archive costs nothing; the ledger row stays 05 \u00b7 06 \u00b7 19."
+  },
+  "scene19": {
+   "n_files": 18,
+   "files": {
+    "manifest.json": {
+     "md5": "9f5f08229d9358607a394a3a7cc8beba",
+     "bytes": 5670
+    },
+    "pt_noon_entry_gate.png": {
+     "md5": "6c1d85c3c9fd3265af6de738f9c88d52",
+     "bytes": 3950757
+    },
+    "pt_noon_lower_lookup.png": {
+     "md5": "93ee6435aca3f3ca0284345fca8f72d4",
+     "bytes": 3573947
+    },
+    "pt_noon_preset_h0.3_d2.png": {
+     "md5": "6f1464b4a420e1e6ef0d95408631f1e8",
+     "bytes": 4527265
+    },
+    "pt_noon_preset_h0.3_d3.5.png": {
+     "md5": "d1e801c2458bb06cd51493bb37d39218",
+     "bytes": 4603621
+    },
+    "pt_noon_preset_h0.3_d5.png": {
+     "md5": "220a408a0f0fa6d985335b3ddf38b9f5",
+     "bytes": 4536803
+    },
+    "pt_noon_preset_h0.9_d2.png": {
+     "md5": "426d1a23ebcc8f04cc1601a75f214638",
+     "bytes": 4050913
+    },
+    "pt_noon_preset_h0.9_d3.5.png": {
+     "md5": "a17cd84123fade40ce248ddca66872b2",
+     "bytes": 4042004
+    },
+    "pt_noon_preset_h0.9_d5.png": {
+     "md5": "dc4b9cbdfdec9b0507277f70b656740b",
+     "bytes": 4002106
+    },
+    "pt_noon_preset_h1.8_d2.png": {
+     "md5": "7997292e426452bf0f358b1203c581fd",
+     "bytes": 3411792
+    },
+    "pt_noon_preset_h1.8_d3.5.png": {
+     "md5": "20b15bc69733324a5029a17b699e2b75",
+     "bytes": 3386753
+    },
+    "pt_noon_preset_h1.8_d5.png": {
+     "md5": "98d037cc937c87db2b419c1a35722621",
+     "bytes": 3368601
+    },
+    "pt_noon_radial_nosing.png": {
+     "md5": "544155d43fe5be75db963a18bd1129f5",
+     "bytes": 3856204
+    },
+    "pt_noon_roof_context.png": {
+     "md5": "290409e5dc47557145ddb462e12a968e",
+     "bytes": 2364724
+    },
+    "pt_noon_roof_skyline.png": {
+     "md5": "313bf2e03f0d4239809f37a09645d38c",
+     "bytes": 2666297
+    },
+    "pt_noon_upper_approach.png": {
+     "md5": "5e35c688a7f6ec555fda50fb32eb07c1",
+     "bytes": 4118915
+    },
+    "pt_noon_winder_mid.png": {
+     "md5": "5bb723a601261b6ec999d482895eceef",
+     "bytes": 3392122
+    },
+    "round_stamp.json": {
+     "md5": "c4eddf35a9b19ce21d59dd377a6c748c",
+     "bytes": 520
+    }
+   }
+  }
+ }
+}

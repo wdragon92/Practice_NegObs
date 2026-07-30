@@ -237,8 +237,14 @@ PARAMS = dict(
     #  outer face (3.36) and outside the 6 m traffic envelope; the panel spans the mouth.
     #  `clear_h` is the **structural** clearance under the panel; the posted limit is the
     #  2.30 m bar hung from the same frame (Korean practice puts both at the mouth).
-    gantry=dict(x=0.40, y0=-3.55, y1=3.55, clear_h=4.00,
-                post_w=0.30, panel_h=0.90, panel_t=0.12),
+    #  `clear_h` 3.05 `[measured, pilot 260730_w3_s13]`: at 4.00 the panel sat **above**
+    #  `entry_approach`'s frame top (z 3.81 at the gantry plane for eye 1.55 → tgt −0.50,
+    #  vertical half-angle 18.0° at 16:9), i.e. the scene's identity element rendered
+    #  off-frame. 3.05 m clear over a ramp whose posted limit is 2.30 m is also the
+    #  ordinary Korean estate figure; G13's ≈4.5 m belongs to a shopping-mall portal.
+    #  Fixed by geometry, not by moving the camera (R17-1 doctrine).
+    gantry=dict(x=0.40, y0=-3.55, y1=3.55, clear_h=3.05,
+                post_w=0.30, panel_h=0.80, panel_t=0.12),
     height_bar=dict(x=0.40, z=2.30, r=0.09, y0=-3.2, y1=3.2, nseg=8,
                     hanger_t=0.05, hang_y=2.95),
     # --- [W3 S13 · G13] wall-face safety graphics on the trench cheeks ---
@@ -289,7 +295,11 @@ PARAMS = dict(
     #  scattered specimens. Species: see `TREE_SPECIES` below.
     tree_rows=[dict(y=9.55, x0=-12.0, n=6), dict(y=-9.75, x0=-12.0, n=6)],
     tree_pitch=8.0,
-    tree_trunk_h=4.70,                 # → target height 4.70 × 1.60 ≈ 7.5 m (street row)
+    #  `[measured, pilot 260730_w3_s13]` 4.70 (≈ 7.5 m) put a `Fraxinus` crown mass over
+    #  the whole beauty cut; a Korean estate 가로수 is 5–7 m and pruned narrow. 3.90 →
+    #  target 3.90 × 1.60 ≈ **6.24 m**. Both rows stay at |y| ≥ 9.55, i.e. beyond
+    #  CANOPY_TUNNEL_RECIPE's `d_min_broadleaf` 7.50 from the judged y = 0 axis (H16).
+    tree_trunk_h=3.90,                 # → target height 3.90 × 1.60 ≈ 6.2 m (street row)
     hedges=[(-22.0, 6.9, -14.6, 7.5), (14.2, -6.9, 21.3, -6.3),
             (2.4, 12.2, 9.6, 12.8)],
     # (bx, by, yaw, base_z) — bench 0 stands on walk_north, which is now at +0.150

@@ -1,0 +1,767 @@
+{
+  "pairs": [
+    {
+      "scene": "scene13",
+      "before": "scenes/main/look_check/scene13/260730_w2d_fix",
+      "after": "scenes/main/look_check/scene13/260730_w3_s13b"
+    }
+  ],
+  "results": [
+    {
+      "scene": "scene13",
+      "view": "beauty_overview",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "OCCL",
+          "msg": "신규 암부 2.8 % (근거리대 1.5 %) · 덩어리 0.8 %"
+        },
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 51 % (최대 편차 91/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 99.16024780273438,
+        "after_dark": 22.84640239197531,
+        "after_dark_near": 42.17797550154321,
+        "after_clip": 0.0,
+        "after_white": 1.8477285879629628,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 110.97775268554688,
+        "before_dark": 20.45095486111111,
+        "before_dark_near": 44.63457272376543,
+        "before_clip": 0.0,
+        "before_white": 1.8824508101851853,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.03472222222222254,
+        "diff_mean": 27.403339385986328,
+        "diff_frac": 47.19511959876543,
+        "d_mean": -11.8175048828125,
+        "d_dark": 2.3954475308641996,
+        "newdark": 2.7886284722222223,
+        "newdark_near": 1.5235871647509578,
+        "newdark_blob": 0.7619598765432098,
+        "blk_shift": 51.388888888888886,
+        "blk_max": 91.14996443000538
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "bollard_walk",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "OCCL",
+          "msg": "신규 암부 6.6 % (근거리대 0.0 %) · 덩어리 2.6 %"
+        },
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 46 % (최대 편차 180/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 78.5045394897461,
+        "after_dark": 24.179349922839506,
+        "after_dark_near": 20.188922646604937,
+        "after_clip": 0.0,
+        "after_white": 0.8204571759259258,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 83.7896957397461,
+        "before_dark": 23.45095486111111,
+        "before_dark_near": 25.398341049382715,
+        "before_clip": 0.0,
+        "before_white": 0.586009837962963,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.2344473379629628,
+        "diff_mean": 38.510047912597656,
+        "diff_frac": 61.28567065329218,
+        "d_mean": -5.28515625,
+        "d_dark": 0.7283950617283956,
+        "newdark": 6.610484182098765,
+        "newdark_near": 0.0,
+        "newdark_blob": 2.6331018518518516,
+        "blk_shift": 45.83333333333333,
+        "blk_max": 179.7877880831964
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "entry_approach",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "OCCL",
+          "msg": "신규 암부 3.0 % (근거리대 0.0 %) · 덩어리 0.5 %"
+        },
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 48 % (최대 편차 122/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 70.62057495117188,
+        "after_dark": 32.89414544753087,
+        "after_dark_near": 59.42322530864198,
+        "after_clip": 0.0,
+        "after_white": 1.0851417824074072,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 71.13727569580078,
+        "before_dark": 43.234423225308646,
+        "before_dark_near": 77.5148292824074,
+        "before_clip": 0.0,
+        "before_white": 1.283275462962963,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.1981336805555558,
+        "diff_mean": 32.80830001831055,
+        "diff_frac": 60.68378665123457,
+        "d_mean": -0.5167007446289062,
+        "d_dark": -10.340277777777779,
+        "newdark": 3.0249324845679015,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.544945987654321,
+        "blk_shift": 47.91666666666667,
+        "blk_max": 121.65551848626507
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "portal_look",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 82.60002136230469,
+        "after_dark": 26.95095486111111,
+        "after_dark_near": 15.0390625,
+        "after_clip": 0.0,
+        "after_white": 0.00390625,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 81.1823959350586,
+        "before_dark": 27.597029320987655,
+        "before_dark_near": 15.4956356095679,
+        "before_clip": 0.0,
+        "before_white": 0.0,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.00390625,
+        "diff_mean": 2.449521064758301,
+        "diff_frac": 4.187789351851852,
+        "d_mean": 1.4176254272460938,
+        "d_dark": -0.6460744598765444,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 5.555555555555555,
+        "blk_max": 53.703967734137336
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h0.3_d10",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "DARK",
+          "msg": "암흑 mean 52.7 · dark 49.2 %  [이월 — 변화 없음, 회귀 아님]"
+        },
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 33 % (최대 편차 101/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        },
+        {
+          "sev": "INFO",
+          "code": "EXPECTED_FP",
+          "msg": "GT-E2-x 사전등재 오탐 — 최대 변화 y151 가 `ground_kit.EXPECTED_FP[('scene13', 'preset_h0.3_d10')]` 의 rows_work 140~160@540 안에 있다(출처 tactile_stair_foot). 이 행의 횡단선은 **법정 점자블록 대역**이지 낙차 에지가 아니다. 원 소견[WARN][GRAZE]은 지우지 않고 보존한다: [v2.1][의심] 은닉 — 국소도 16.8 (에지 18.9 − 근경 2.2) · 열 일치율 0.86 · 단차 38.7→57.7(비 1.49) · 최대 변화 y151. 에지 대역에 화면을 가로지르는 선이 **생겼다/굵어졌다** → 숨어 있어야 할 낙차가 드러났을 가능성. 에지대역 y124~177/540 (낙차 10.0 m 지점 y149). **그 대역만 잘라서 육안 확인**(자동 확정 불가)",
+          "fp": {
+            "code": "GRAZE",
+            "sev": "WARN",
+            "row": 151,
+            "rows_work": [
+              140,
+              160
+            ],
+            "scale_work": 540,
+            "rows_1080": [
+              297,
+              304
+            ],
+            "src": "tactile_stair_foot"
+          },
+          "was": {
+            "sev": "WARN",
+            "code": "GRAZE"
+          }
+        }
+      ],
+      "metrics": {
+        "after_mean": 52.652896881103516,
+        "after_dark": 49.17930169753086,
+        "after_dark_near": 88.20939429012346,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 54.57597351074219,
+        "before_dark": 57.121817129629626,
+        "before_dark_near": 95.6493537808642,
+        "before_clip": 0.0,
+        "before_white": 0.0,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0,
+        "diff_mean": 16.867441177368164,
+        "diff_frac": 37.716515560699584,
+        "d_mean": -1.9230766296386719,
+        "d_dark": -7.942515432098766,
+        "newdark": 1.5685281635802468,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.08680555555555555,
+        "blk_shift": 32.63888888888889,
+        "blk_max": 100.9961223842881,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 16.779819311025676,
+        "gz_dE": 18.93109518949611,
+        "gz_dN": 2.1512758784704324,
+        "gz_agree": 0.8583333333333333,
+        "gz_row": 151,
+        "gz_band": [
+          124.4,
+          177.4
+        ],
+        "gz_haz_row": 149.0,
+        "gz_d": 10.0,
+        "gz_band_mu": 63.03785705566406,
+        "gz_step_b": 38.74,
+        "gz_step_a": 57.67,
+        "gz_step_ratio": 1.489,
+        "gz_step_off": 2,
+        "gz_step_dom": 3.05
+      },
+      "expected_fp": [
+        {
+          "code": "GRAZE",
+          "sev": "WARN",
+          "row": 151,
+          "rows_work": [
+            140,
+            160
+          ],
+          "scale_work": 540,
+          "rows_1080": [
+            297,
+            304
+          ],
+          "src": "tactile_stair_foot"
+        }
+      ]
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h0.3_d2",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 40 % (최대 편차 129/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        },
+        {
+          "sev": "INFO",
+          "code": "GRAZE",
+          "msg": "[v2.1] 판정 유보 — 프레임 측광이 흔들렸다(Δmean +7.9 · Δdark -29.5 pp). 조명 회귀를 먼저 처리하고 재실행할 것. 에지대역 y170~312/540 (낙차 2.0 m 지점 y249)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 77.86182403564453,
+        "after_dark": 9.86255787037037,
+        "after_dark_near": 6.618079668209877,
+        "after_clip": 0.0,
+        "after_white": 0.0033275462962962963,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 69.97815704345703,
+        "before_dark": 39.38343942901235,
+        "before_dark_near": 68.33031925154322,
+        "before_clip": 0.0,
+        "before_white": 0.0,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0033275462962962963,
+        "diff_mean": 23.733747482299805,
+        "diff_frac": 76.22595164609054,
+        "d_mean": 7.8836669921875,
+        "d_dark": -29.520881558641978,
+        "newdark": 1.3888888888888888,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.08680555555555555,
+        "blk_shift": 39.58333333333333,
+        "blk_max": 129.3090092028393,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 54.79735363047726,
+        "gz_dE": 55.21663098206475,
+        "gz_dN": 0.4192773515874869,
+        "gz_agree": 0.996875,
+        "gz_row": 216,
+        "gz_band": [
+          169.6,
+          312.0
+        ],
+        "gz_haz_row": 248.7,
+        "gz_d": 2.0,
+        "gz_band_mu": 59.4607048034668,
+        "gz_step_b": 15.76,
+        "gz_step_a": 22.83,
+        "gz_step_ratio": 1.448,
+        "gz_step_off": 33,
+        "gz_step_dom": 0.41
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h0.3_d5",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 21 % (최대 편차 103/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        },
+        {
+          "sev": "INFO",
+          "code": "GRAZE",
+          "msg": "[v2.1] 판정 유보 — 프레임 측광이 흔들렸다(Δmean +9.2 · Δdark -34.4 pp). 조명 회귀를 먼저 처리하고 재실행할 것. 에지대역 y131~212/540 (낙차 5.0 m 지점 y174)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 58.929054260253906,
+        "after_dark": 28.52637924382716,
+        "after_dark_near": 52.19328703703704,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 49.71250534057617,
+        "before_dark": 62.929349922839506,
+        "before_dark_near": 99.94912229938272,
+        "before_clip": 0.0,
+        "before_white": 0.0,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0,
+        "diff_mean": 24.041301727294922,
+        "diff_frac": 83.88676697530865,
+        "d_mean": 9.216548919677734,
+        "d_dark": -34.40297067901234,
+        "newdark": 1.4407310956790125,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.09162808641975309,
+        "blk_shift": 20.833333333333336,
+        "blk_max": 103.31714725309608,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 16.52699422133644,
+        "gz_dE": 20.120800828535767,
+        "gz_dN": 3.5938066071993258,
+        "gz_agree": 0.553125,
+        "gz_row": 167,
+        "gz_band": [
+          130.6,
+          211.8
+        ],
+        "gz_haz_row": 174.3,
+        "gz_d": 5.0,
+        "gz_band_mu": 54.53729248046875,
+        "gz_step_b": 64.46,
+        "gz_step_a": 24.94,
+        "gz_step_ratio": 0.387,
+        "gz_step_off": 7,
+        "gz_step_dom": 1.24
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h0.9_d10",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "OCCL",
+          "msg": "신규 암부 2.3 % (근거리대 0.0 %) · 덩어리 0.1 %"
+        },
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 38 % (최대 편차 110/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 61.709320068359375,
+        "after_dark": 33.35980902777778,
+        "after_dark_near": 59.24406828703703,
+        "after_clip": 0.0,
+        "after_white": 0.29781539351851855,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 63.129337310791016,
+        "before_dark": 48.65928819444444,
+        "before_dark_near": 80.49105420524691,
+        "before_clip": 0.0,
+        "before_white": 0.21433738425925924,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0834780092592593,
+        "diff_mean": 23.347227096557617,
+        "diff_frac": 56.07246656378601,
+        "d_mean": -1.4200172424316406,
+        "d_dark": -15.299479166666664,
+        "newdark": 2.272617669753086,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.1398533950617284,
+        "blk_shift": 38.19444444444444,
+        "blk_max": 110.42224460758786
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h0.9_d2",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "PHOTO",
+          "msg": "휘도 급상승 mean 78.3→104.6 (+26.3) — 밝아지는 방향(대개 개선). 의도 확인"
+        },
+        {
+          "sev": "WARN",
+          "code": "OCCL",
+          "msg": "신규 암부 2.2 % (근거리대 0.0 %) · 덩어리 0.1 %"
+        },
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 88 % (최대 편차 177/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 104.62509155273438,
+        "after_dark": 13.012972608024691,
+        "after_dark_near": 1.9486641589506173,
+        "after_clip": 0.0,
+        "after_white": 1.910662615740741,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 78.33035278320312,
+        "before_dark": 39.86289544753087,
+        "before_dark_near": 58.12608506944444,
+        "before_clip": 0.0,
+        "before_white": 0.8365162037037037,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 1.0741464120370372,
+        "diff_mean": 47.451148986816406,
+        "diff_frac": 64.44835069444444,
+        "d_mean": 26.29473876953125,
+        "d_dark": -26.849922839506178,
+        "newdark": 2.1870177469135803,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.08680555555555555,
+        "blk_shift": 87.5,
+        "blk_max": 176.888705652342
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h0.9_d5",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "OCCL",
+          "msg": "신규 암부 2.4 % (근거리대 0.2 %) · 덩어리 0.2 %"
+        },
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 40 % (최대 편차 139/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 75.39967346191406,
+        "after_dark": 13.512924382716049,
+        "after_dark_near": 12.296850887345679,
+        "after_clip": 0.0,
+        "after_white": 1.681640625,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 66.48799133300781,
+        "before_dark": 48.60585455246913,
+        "before_dark_near": 90.77920042438271,
+        "before_clip": 0.0,
+        "before_white": 0.9592737268518519,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.7223668981481481,
+        "diff_mean": 32.714561462402344,
+        "diff_frac": 77.8538933899177,
+        "d_mean": 8.91168212890625,
+        "d_dark": -35.09293016975308,
+        "newdark": 2.4281442901234565,
+        "newdark_near": 0.17959770114942528,
+        "newdark_blob": 0.23630401234567902,
+        "blk_shift": 39.58333333333333,
+        "blk_max": 139.21268552342138
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h1.8_d10",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "OCCL",
+          "msg": "신규 암부 2.1 % (근거리대 0.0 %) · 덩어리 0.1 %"
+        },
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 44 % (최대 편차 123/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 74.17521667480469,
+        "after_dark": 25.50974151234568,
+        "after_dark_near": 44.93007330246914,
+        "after_clip": 0.0,
+        "after_white": 1.5472366898148147,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 67.02471923828125,
+        "before_dark": 49.52681327160494,
+        "before_dark_near": 93.2104793595679,
+        "before_clip": 0.0,
+        "before_white": 1.1414207175925926,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.4058159722222221,
+        "diff_mean": 34.92449188232422,
+        "diff_frac": 70.5650880915638,
+        "d_mean": 7.1504974365234375,
+        "d_dark": -24.017071759259256,
+        "newdark": 2.1351755401234565,
+        "newdark_near": 0.008979885057471264,
+        "newdark_blob": 0.11574074074074074,
+        "blk_shift": 43.75,
+        "blk_max": 123.13415134334835
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h1.8_d2",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "OCCL",
+          "msg": "신규 암부 3.2 % (근거리대 1.9 %) · 덩어리 0.4 %"
+        },
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 86 % (최대 편차 175/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 108.64290618896484,
+        "after_dark": 16.332272376543212,
+        "after_dark_near": 19.737654320987655,
+        "after_clip": 0.0,
+        "after_white": 4.544632523148148,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 88.76870727539062,
+        "before_dark": 38.2857349537037,
+        "before_dark_near": 79.72752700617283,
+        "before_clip": 0.0,
+        "before_white": 2.420934606481482,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 2.123697916666666,
+        "diff_mean": 48.536170959472656,
+        "diff_frac": 61.497781635802475,
+        "d_mean": 19.87419891357422,
+        "d_dark": -21.95346257716049,
+        "newdark": 3.150318287037037,
+        "newdark_near": 1.8558429118773947,
+        "newdark_blob": 0.3761574074074074,
+        "blk_shift": 86.11111111111111,
+        "blk_max": 174.76088461753318
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h1.8_d5",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "OCCL",
+          "msg": "신규 암부 2.8 % (근거리대 0.3 %) · 덩어리 0.2 %"
+        },
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 76 % (최대 편차 141/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 100.8626480102539,
+        "after_dark": 11.10329861111111,
+        "after_dark_near": 5.338421103395062,
+        "after_clip": 0.0,
+        "after_white": 4.322482638888888,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 82.8411636352539,
+        "before_dark": 32.14520640432099,
+        "before_dark_near": 54.95225694444444,
+        "before_clip": 0.0,
+        "before_white": 2.7824074074074074,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 1.540075231481481,
+        "diff_mean": 46.43541717529297,
+        "diff_frac": 72.57486175411523,
+        "d_mean": 18.021484375,
+        "d_dark": -21.041907793209877,
+        "newdark": 2.799479166666667,
+        "newdark_near": 0.3172892720306513,
+        "newdark_blob": 0.22183641975308643,
+        "blk_shift": 76.38888888888889,
+        "blk_max": 140.70524511395362
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "ramp_graze",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "OCCL",
+          "msg": "신규 암부 2.5 % (근거리대 0.1 %) · 덩어리 0.2 %"
+        },
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 40 % (최대 편차 134/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        },
+        {
+          "sev": "INFO",
+          "code": "GRAZE",
+          "msg": "[v2.1] 판정 유보 — 프레임 측광이 흔들렸다(Δmean +8.1 · Δdark -25.5 pp). 조명 회귀를 먼저 처리하고 재실행할 것. 에지대역 y217~312/540 (낙차 14.0 m 지점 y270)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 85.9122314453125,
+        "after_dark": 15.981288580246913,
+        "after_dark_near": 19.417558834876544,
+        "after_clip": 0.0,
+        "after_white": 4.014033564814815,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 77.82527160644531,
+        "before_dark": 41.49980709876544,
+        "before_dark_near": 79.77635513117283,
+        "before_clip": 0.0,
+        "before_white": 3.6041666666666665,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.40986689814814836,
+        "diff_mean": 36.10554885864258,
+        "diff_frac": 75.25379372427984,
+        "d_mean": 8.086959838867188,
+        "d_dark": -25.518518518518526,
+        "newdark": 2.4799864969135803,
+        "newdark_near": 0.06585249042145594,
+        "newdark_blob": 0.20736882716049382,
+        "blk_shift": 40.27777777777778,
+        "blk_max": 134.0427067782965,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 15.587327097747764,
+        "gz_dE": 20.402199396502517,
+        "gz_dN": 4.814872298754753,
+        "gz_agree": 0.6552083333333333,
+        "gz_row": 290,
+        "gz_band": [
+          217.2,
+          312.4
+        ],
+        "gz_haz_row": 270.0,
+        "gz_d": 14.0,
+        "gz_band_mu": 71.43587493896484,
+        "gz_step_b": 1.91,
+        "gz_step_a": 3.67,
+        "gz_step_ratio": 1.922,
+        "gz_step_off": 20,
+        "gz_step_dom": 0.18
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "stair_head",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 45 % (최대 편차 128/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 134.00369262695312,
+        "after_dark": 16.089313271604937,
+        "after_dark_near": 2.0572916666666665,
+        "after_clip": 0.0,
+        "after_white": 25.32660590277778,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 124.71715545654297,
+        "before_dark": 22.934702932098766,
+        "before_dark_near": 1.8648726851851851,
+        "before_clip": 0.0,
+        "before_white": 25.060040509259256,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.2665653935185226,
+        "diff_mean": 20.252836227416992,
+        "diff_frac": 33.79692322530864,
+        "d_mean": 9.286537170410156,
+        "d_dark": -6.845389660493829,
+        "newdark": 0.0277295524691358,
+        "newdark_near": 0.008979885057471264,
+        "newdark_blob": 0.019290123456790122,
+        "blk_shift": 45.13888888888889,
+        "blk_max": 127.86386536875716
+      }
+    }
+  ]
+}

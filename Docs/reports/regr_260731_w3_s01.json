@@ -1,0 +1,431 @@
+{
+  "pairs": [
+    {
+      "scene": "scene01",
+      "before": "look_check/scene01/260731_w3_mb24",
+      "after": "look_check/scene01/260731_w3_s01"
+    }
+  ],
+  "results": [
+    {
+      "scene": "scene01",
+      "view": "amphi_view",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 131.12591552734375,
+        "after_dark": 7.421248070987654,
+        "after_dark_near": 3.4819878472222223,
+        "after_clip": 0.08217592592592593,
+        "after_white": 5.307436342592593,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene01",
+      "view": "beauty_overview",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 164.1772003173828,
+        "after_dark": 1.2338927469135803,
+        "after_dark_near": 0.008077739197530865,
+        "after_clip": 0.0,
+        "after_white": 50.53993055555556,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene01",
+      "view": "edge_closeup",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 194.68678283691406,
+        "after_dark": 0.11559606481481481,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 53.92650462962963,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene01",
+      "view": "lower_lookback",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 156.9459686279297,
+        "after_dark": 5.84375,
+        "after_dark_near": 1.4359085648148149,
+        "after_clip": 0.06505594135802469,
+        "after_white": 38.779152199074076,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene01",
+      "view": "preset_h0.3_d10",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 38 % (최대 편차 108/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        },
+        {
+          "sev": "WARN",
+          "code": "GRAZE",
+          "msg": "[v2.1][의심] 은닉 — 국소도 19.7 (에지 56.8 − 근경 37.1) · 열 일치율 0.88 · 단차 47.6→62.3(비 1.31) · 최대 변화 y132. 에지 대역에 화면을 가로지르는 선이 **생겼다/굵어졌다** → 숨어 있어야 할 낙차가 드러났을 가능성. 에지대역 y124~177/540 (낙차 10.0 m 지점 y149). **그 대역만 잘라서 육안 확인**(자동 확정 불가)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 177.04725646972656,
+        "after_dark": 0.8149594907407407,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 44.1244212962963,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 165.9635772705078,
+        "before_dark": 2.9683641975308643,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 36.78276909722222,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 7.341652199074076,
+        "diff_mean": 17.970808029174805,
+        "diff_frac": 26.889547968106996,
+        "d_mean": 11.08367919921875,
+        "d_dark": -2.1534047067901234,
+        "newdark": 0.0904224537037037,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.004822530864197531,
+        "blk_shift": 37.5,
+        "blk_max": 107.80218987800683,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 19.70204217339417,
+        "gz_dE": 56.8096057203671,
+        "gz_dN": 37.10756354697293,
+        "gz_agree": 0.8833333333333333,
+        "gz_row": 132,
+        "gz_band": [
+          124.4,
+          177.4
+        ],
+        "gz_haz_row": 149.0,
+        "gz_d": 10.0,
+        "gz_band_mu": 117.09310913085938,
+        "gz_step_b": 47.61,
+        "gz_step_a": 62.34,
+        "gz_step_ratio": 1.309,
+        "gz_step_off": 17,
+        "gz_step_dom": 1.1
+      }
+    },
+    {
+      "scene": "scene01",
+      "view": "preset_h0.3_d2",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 14 % (최대 편차 59/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 169.87078857421875,
+        "after_dark": 1.8093171296296295,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 37.843532986111114,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 164.96044921875,
+        "before_dark": 2.3806905864197527,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 32.52242476851852,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 5.321108217592595,
+        "diff_mean": 13.039445877075195,
+        "diff_frac": 27.54222929526749,
+        "d_mean": 4.91033935546875,
+        "d_dark": -0.5713734567901232,
+        "newdark": 0.1808449074074074,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.10127314814814815,
+        "blk_shift": 13.88888888888889,
+        "blk_max": 59.43052829732348,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 10.642511605661262,
+        "gz_dE": 10.766375194856,
+        "gz_dN": 0.12386358919473724,
+        "gz_agree": 0.6302083333333334,
+        "gz_row": 214,
+        "gz_band": [
+          169.6,
+          312.0
+        ],
+        "gz_haz_row": 248.7,
+        "gz_d": 2.0,
+        "gz_band_mu": 167.39447363654241,
+        "gz_step_b": 20.13,
+        "gz_step_a": 22.01,
+        "gz_step_ratio": 1.093,
+        "gz_step_off": 35,
+        "gz_step_dom": 2.04
+      }
+    },
+    {
+      "scene": "scene01",
+      "view": "preset_h0.3_d5",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 48 % (최대 편차 104/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 174.03260803222656,
+        "after_dark": 1.0564236111111112,
+        "after_dark_near": 0.0,
+        "after_clip": 4.822530864197531e-05,
+        "after_white": 36.25954861111111,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 161.81642150878906,
+        "before_dark": 1.1008391203703705,
+        "before_dark_near": 0.00024112654320987653,
+        "before_clip": 4.822530864197531e-05,
+        "before_white": 26.76265914351852,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 9.496889467592588,
+        "diff_mean": 19.20623779296875,
+        "diff_frac": 31.074861754115226,
+        "d_mean": 12.2161865234375,
+        "d_dark": -0.0444155092592593,
+        "newdark": 0.12176890432098765,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.009645061728395061,
+        "blk_shift": 47.91666666666667,
+        "blk_max": 104.26260121137457,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": -4.747103805616202,
+        "gz_dE": 23.37562336752059,
+        "gz_dN": 28.12272717313679,
+        "gz_agree": 0.7854166666666667,
+        "gz_row": 131,
+        "gz_band": [
+          130.6,
+          211.8
+        ],
+        "gz_haz_row": 174.3,
+        "gz_d": 5.0,
+        "gz_band_mu": 132.10701835642348,
+        "gz_step_b": 60.03,
+        "gz_step_a": 61.38,
+        "gz_step_ratio": 1.022,
+        "gz_step_off": 43,
+        "gz_step_dom": 2.63
+      }
+    },
+    {
+      "scene": "scene01",
+      "view": "preset_h0.9_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 162.57418823242188,
+        "after_dark": 1.2113233024691357,
+        "after_dark_near": 0.0009645061728395061,
+        "after_clip": 0.0,
+        "after_white": 30.038194444444443,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene01",
+      "view": "preset_h0.9_d2",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 20 % (최대 편차 63/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 153.80914306640625,
+        "after_dark": 2.667920524691358,
+        "after_dark_near": 0.05063657407407407,
+        "after_clip": 0.0,
+        "after_white": 14.174913194444445,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 149.61080932617188,
+        "before_dark": 3.6418788580246915,
+        "before_dark_near": 0.019169560185185185,
+        "before_clip": 0.0,
+        "before_white": 12.829210069444445,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 1.345703125,
+        "diff_mean": 15.704669952392578,
+        "diff_frac": 33.336773405349795,
+        "d_mean": 4.198333740234375,
+        "d_dark": -0.9739583333333335,
+        "newdark": 0.2230420524691358,
+        "newdark_near": 0.005986590038314176,
+        "newdark_blob": 0.09645061728395062,
+        "blk_shift": 20.13888888888889,
+        "blk_max": 62.80318155849116
+      }
+    },
+    {
+      "scene": "scene01",
+      "view": "preset_h0.9_d5",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 16 % (최대 편차 84/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 158.0754852294922,
+        "after_dark": 2.277440200617284,
+        "after_dark_near": 0.0015673225308641976,
+        "after_clip": 4.822530864197531e-05,
+        "after_white": 30.981336805555554,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 154.38145446777344,
+        "before_dark": 2.7696759259259256,
+        "before_dark_near": 0.008318865740740741,
+        "before_clip": 4.822530864197531e-05,
+        "before_white": 24.38013599537037,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 6.601200810185183,
+        "diff_mean": 14.419268608093262,
+        "diff_frac": 30.00019290123457,
+        "d_mean": 3.69403076171875,
+        "d_dark": -0.49223572530864157,
+        "newdark": 0.2941743827160494,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.024112654320987654,
+        "blk_shift": 15.972222222222221,
+        "blk_max": 84.12801059008572
+      }
+    },
+    {
+      "scene": "scene01",
+      "view": "preset_h1.8_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 159.74636840820312,
+        "after_dark": 1.5834780092592593,
+        "after_dark_near": 0.01253858024691358,
+        "after_clip": 0.0,
+        "after_white": 36.35901331018518,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene01",
+      "view": "preset_h1.8_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 140.2384033203125,
+        "after_dark": 3.8403260030864192,
+        "after_dark_near": 2.228250385802469,
+        "after_clip": 0.0,
+        "after_white": 0.01902488425925926,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene01",
+      "view": "preset_h1.8_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 149.17396545410156,
+        "after_dark": 3.142698688271605,
+        "after_dark_near": 0.45826099537037035,
+        "after_clip": 0.0,
+        "after_white": 23.79275173611111,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    }
+  ]
+}

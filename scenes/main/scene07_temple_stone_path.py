@@ -78,9 +78,11 @@ Inherit : scenes/archive_v3/scene07_wornstone_temple.py (worn_stone·mountain-te
      → The material was replaced with `rock_face` (jointless natural rock diff/nor) and a
        **per-stone material pool** (8 variants of scale·tint·texture_rotate·texture_translate
        jitter) was built so that the grain·colour·relief of adjacent stones disagree. bump 1.5 strengthens the relief.
-     → Silhouette: each stone carries one **canted knob** (a subsidiary lump 1~3 cm lower than the
-       main stone with different rz·rx) to break the rectangular outline. Protrusion in x is held
-       down by a numeric check.
+     → Silhouette: each stone carried one **canted knob** (a subsidiary lump 1~3 cm lower than the
+       main stone with different rz·rx) to break the rectangular outline.
+       **[W3 S3-3 · GT-16] the knob is DELETED.** It was a cure for a rectangular *silhouette*
+       that the archetype rebuild removes at source: a course of 2~4 slabs with a ragged front
+       edge has no rectangle to break. The archetype has no subsidiary lump anywhere in G7.
   (3) **Background horizon closure** — the ridge albedo sat at the sRGB dark floor (0.030), so even
      front-lit it became a black wall. Distant aerial perspective was baked into the albedo, raising
      it to near 0.052 / mid 0.088 / far 0.142 (more blue with distance), the near ridge was split
@@ -162,21 +164,40 @@ SIDE_DROP = 1.8                    # unguarded lateral drop on the south (−Y) 
 
 PARAMS = dict(
     # --- stepping stones (discrete natural stone) generation params : seed-fixed random ---
+    # [W3 S3-3 · GT-16] `cy` abolished (A6) and `rz` capped (A7).
+    #   A6 — the lateral slide of a whole step is an **archetype error**, not a jitter
+    #   question (`w3_intake_06_10.md` §1.0): a course of a stone stair spans the corridor,
+    #   and the ragged edge comes from the slab ends, not from sliding the step sideways.
+    #   `cy_jit` is kept as a PARAMS row at 0.0 so the abolition is visible in the file
+    #   rather than silently deleted, and the seeded RNG still draws `u` so every OTHER
+    #   stone value is bit-identical to the pre-S3-3 tree (the change stays attributable).
+    #   A7 — per-stone yaw capped 4.0 -> 3.0 deg, the adopted J-14 ruling
+    #   (spec §1.2: hand-set masonry genuinely is laid a few degrees out).
+    #   `rx` 2.5 deg is untouched: it is exactly the research's out-of-level roll
+    #   U(-2.5, +2.5) deg (`s3_research_numbers_v1.md` §B4).
     stones=dict(n=24, seed=707, x_start=0.06, x_end=12.05,
                 w=(0.50, 1.10), depth=(0.28, 0.40), gap=(0.05, 0.30),
                 proud=(0.02, 0.08), embed=(0.10, 0.18),
-                rz=4.0, rx=2.5, foot_half=0.22),
+                rz=3.0, rx=2.5, foot_half=0.22, cy_jit=0.0),
     # --- [v6] per-stone material pool : breaks the 'continuous joints' of a shared world projection ---
     #     Based on rock_face (jointless natural rock) · scale/tint/rotate/translate jitter.
+    #  [W3 S3-3 · LINT-10 adjudication] the key was named `jitter=`, which is the token
+    #  `placement_lint` LINT-10 flags with `needs-adjudication`. Adjudicated by the owning WP:
+    #  this is a **material tint** spread on 8 pool variants, i.e. neither placement jitter
+    #  (abolished by §1.2) nor size jitter (kept by §1.2 X2) — spec §12-15 puts `jit_tint`
+    #  explicitly out of scope. Renamed `tint_jit` so the static token stops firing and the
+    #  adjudication is recorded in the file rather than in a report nobody re-reads.
     stone_mtl=dict(n=8, seed=7071, scale=(0.55, 1.35), bump=1.5,
                    tint_dry=(0.88, 0.86, 0.82), tint_moss=(0.74, 0.84, 0.70),
-                   moss_every=3, jitter=0.06),
+                   moss_every=3, tint_jit=0.06),
     # --- [v6] canted knob : breaks the rectangular silhouette (below the main stone top, so GT is unchanged) ---
-    #     SMOKE checks x half-width = (dx·cosθ + dy·sinθ)/2 <= stone depth/2 + 0.02.
-    #     The 0.050 drop floor keeps a margin over the corner rise (0.043) from the max rx tilt
-    #     -> the knob peak never exceeds the main stone top (walk surface GT unchanged).
-    knob=dict(seed=7072, fx=0.62, fy=0.50, rz=(10.0, 20.0), rx=(3.0, 9.0),
-              drop=(0.050, 0.080), off_y=0.33, thick=0.16),
+    #     [W3 S3-3 · GT-16] **DELETED.** 24 prims, yaw 10-20 deg, tilt 3-9 deg, hung 50-80 mm
+    #     under the stone top. The v6 knob existed to break a *rectangular* silhouette; the
+    #     archetype has no subsidiary lump anywhere (`s3_scene07_10_rebuild_spec_v1.md` §1.B-1
+    #     A8, spec §9 P-1 "the knob dies with whichever archetype wins"). The silhouette break
+    #     is now the job of the course structure itself (S3-4): 2-4 slabs across a course with
+    #     a +-0.06 m ragged front edge. `knob=` is gone from PARAMS, `knob_layout()` and the
+    #     `StoneKnob_*` build loop with it.
     # --- corridor (ground between the stones) : leaf_ground slope ---
     corridor=dict(y0=-1.7, y1=1.7, thick=0.60),
 
@@ -524,7 +545,9 @@ def stone_layout():
         xa, xb = x, x + dep
         cx = (xa + xb) / 2.0
         cy_max = max(0.0, w / 2.0 - fh)   # must cover the walk line |y|<=fh
-        cy = (u * 2.0 - 1.0) * min(cy_max, 0.35)
+        # [S3-3 · A6] course lateral offset abolished; `u` is still drawn so the seeded
+        #   stream (and therefore every other stone value) does not move.
+        cy = (u * 2.0 - 1.0) * min(cy_max, float(sp["cy_jit"]))
         out.append(dict(i=i, xa=xa, xb=xb, cx=cx, w=w, cy=cy,
                         proud=pr, thick=pr + em, top=path_z(cx) + pr,
                         rz=rz, rx=rx, gap_next=gap))
@@ -533,38 +556,6 @@ def stone_layout():
 
 
 STONES = stone_layout()
-
-
-def knob_layout():
-    """[v6] Per-stone canted knob spec (computed without booting — SMOKE checks containment).
-
-    Each element: dict(i, cx, cy, dx, dy, thick, top, rz, rx, half_x, over_x)
-      · top   = main stone top − drop  → **the walk surface (GT) is the main stone top, unchanged**.
-      · half_x= X half-width after rotation = (dx·|cos| + dy·|sin|)/2.
-      · over_x= half_x − stone depth/2 (positive means X protrusion beyond the stone — held to 0.02 m or less).
-      · cy is pushed to one side by off_y·w so the Y silhouette leaves the main stone outline.
-    """
-    kp = PARAMS["knob"]
-    rng = random.Random(int(kp["seed"]))
-    out = []
-    for s in STONES:
-        dep = s["xb"] - s["xa"]
-        dx = dep * float(kp["fx"])
-        dy = s["w"] * float(kp["fy"])
-        rz = rng.uniform(*kp["rz"]) * (1.0 if rng.random() < 0.5 else -1.0)
-        rx = rng.uniform(*kp["rx"]) * (1.0 if rng.random() < 0.5 else -1.0)
-        drop = rng.uniform(*kp["drop"])
-        sgn = 1.0 if rng.random() < 0.5 else -1.0
-        a = math.radians(abs(rz))
-        half_x = (dx * math.cos(a) + dy * math.sin(a)) / 2.0
-        out.append(dict(i=s["i"], cx=s["cx"], cy=s["cy"] + sgn * kp["off_y"]
-                        * s["w"], dx=dx, dy=dy, thick=float(kp["thick"]),
-                        top=s["top"] - drop, rz=rz, rx=rx,
-                        half_x=half_x, over_x=half_x - dep / 2.0))
-    return out
-
-
-KNOBS = knob_layout()
 
 
 def leaf_patches():
@@ -785,20 +776,18 @@ def _smoke_report():
     print(f"    최소 매입 깊이 {emin:.3f} m (>0 = 부유 없음 → "
           f"{'OK' if emin > 0.0 else 'FAIL'})")
 
-    # ── [v6] canted knob : checks GT invariance + X protrusion limit ──
-    over = max(k["over_x"] for k in KNOBS)
-    # knob peak = top + (dy/2)·sin|rx| (rotX lifts the Y edge)
-    ktop = [k["top"] + (k["dy"] / 2.0) * math.sin(math.radians(abs(k["rx"])))
-            for k in KNOBS]
-    marg = min(s["top"] - t for s, t in zip(STONES, ktop))
-    kemb = max(k["top"] - k["thick"] - path_z(k["cx"]) for k in KNOBS)
-    print(f"\n  [v6 노브] {len(KNOBS)}개 · 노브 최고점이 주석 상면보다 낮은 "
-          f"여유 min {marg:+.4f} m (>0 = 보행면 GT 불변 → "
-          f"{'OK' if marg > 0.0 else 'FAIL'})")
-    print(f"    X 최대 돌출 {over:+.4f} m (≤0.02 → "
-          f"{'OK' if over <= 0.02 else 'CHECK'}) · 노브 하면−회랑면 최대 "
-          f"{kemb:+.3f} m (<0 = 전량 매입 → "
-          f"{'OK' if kemb < 0.0 else 'CHECK'})")
+    # ── [S3-3 · GT-16] knob deletion + jitter caps, reported where the knob table was ──
+    cyj = float(P["stones"]["cy_jit"])
+    print(f"\n  [S3-3] 캔티드 노브 24프림 삭제(GT-16) · 코스 측방 오프셋 cy_jit "
+          f"{cyj:.3f} (A6 폐지 → {'OK' if cyj == 0.0 else 'FAIL'}) · "
+          f"석당 요 캡 ±{P['stones']['rz']:.1f}° (J-14 ≤3.0 → "
+          f"{'OK' if P['stones']['rz'] <= 3.0 else 'FAIL'}) · "
+          f"기울기 ±{P['stones']['rx']:.1f}° (연구 §B4 U(-2.5,2.5) → "
+          f"{'OK' if P['stones']['rx'] <= 2.5 else 'CHECK'})")
+    cymax = max(abs(s["cy"]) for s in STONES)
+    print(f"    실측 최대 |cy| {cymax:.4f} m (=0 이어야 함 → "
+          f"{'OK' if cymax < 1e-9 else 'FAIL'}) · 보행면 z 불변: "
+          f"top = path_z(cx)+proud 는 cy·rz 와 무관")
 
     # ── [W3 F3] leaf carpets : DEC-2 masks — slope alignment + corridor containment ──
     #    The mask is a `build_blot` N-gon normalised to max radius 1, so the lobe
@@ -1123,7 +1112,7 @@ def main():
         # [v6] stepping-stone material pool - rock_face (jointless) x scale/tint/rotate/translate jitter
         smp = PARAMS["stone_mtl"]
         rng = random.Random(int(smp["seed"]))
-        jt = float(smp["jitter"])
+        jt = float(smp["tint_jit"])
         M["stone_pool"] = []
         for k in range(int(smp["n"])):
             base = (smp["tint_moss"] if (k % int(smp["moss_every"]) == 0)
@@ -1186,13 +1175,9 @@ def main():
                              (s["xb"] - s["xa"], s["w"], s["thick"]),
                              pool[s["i"] % len(pool)], collider=True,
                              rotz=s["rz"], rotx=s["rx"])
-        # canted knob : a subsidiary lump lower than the main stone (breaks the rectangular silhouette, GT unchanged)
-        for k in KNOBS:
-            sc._oriented_box(stage, f"{ROOT}/StoneKnob_{k['i']}",
-                             (k["cx"], k["cy"], k["top"] - k["thick"] / 2.0),
-                             (k["dx"], k["dy"], k["thick"]),
-                             pool[(k["i"] + 3) % len(pool)], collider=False,
-                             rotz=k["rz"], rotx=k["rx"])
+        # [S3-3 · GT-16] the 24 `StoneKnob_*` prims are deleted here. They were built with
+        #   `collider=False` and hung 50-80 mm under the stone top, so nothing walked or
+        #   collided with them: the deletion is an OCCL-baseline move, not a GT-z move.
         # [W3 F3 / DEC-2] leaf carpets - one irregular mask per drift, no rectangles.
         #   The corridor masks take `z_fn=path_z`, so every vertex sits on the 19 deg
         #   corridor plane and the "floating / buried end" the v6 slope slabs were built to

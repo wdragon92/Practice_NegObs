@@ -139,9 +139,12 @@ step <= 0.17)
   **GT-44** - the deck timber goes to the measured 2-5 year 방부목 patina band.
   `M["deckwood"]` bound the `wood_dark` map **raw**: mean linear
   (0.0824, 0.0584, 0.0442), L* 30.03, `albedo_selfcheck` 0.081 - a third of the
-  band floor, on a walked deck. Target L* 56.0 / a* +1.0 / b* +6.0, albedo
-  0.2391, which satisfies all four clauses of the band at once (see
-  `PARAMS["material"]["deck_tint"]` for the derivation and the clipping test).
+  band floor, on a walked deck. Target **L* 55.0 / a* +1.0 / b* +6.0**, albedo
+  0.2293, which satisfies all four clauses of the band at once and lands level
+  with scene10's deck (the same product, the same library, the same L0 sun).
+  L* 56.0 was rendered first and corrected once by the reference - see
+  `PARAMS["material"]["deck_tint"]` for the derivation, the correction and the
+  clipping test.
 
   **River width: measured, NOT re-widened.** The intake is explicit that "12 and
   17 must not be re-widened independently of 03". `river_view_selfcheck()`
@@ -386,10 +389,21 @@ PARAMS = dict(
         #   Reference read [ref, this session]: G9's boardwalk in diffuse light measures
         #     L* 58.05 · a* +1.41 · b* +2.34 - inside the band, but it is a RENDERED PIXEL under
         #     sky illumination, i.e. an upper bound on albedo, not an albedo. Hence below it.
-        #   target L* 56.0 / a* +1.0 / b* +6.0 -> linear (0.2642, 0.2355, 0.2012), albedo 0.2391
-        #   tint = target / source; clipped texels at this gain = 0.0122 % -> the shipped map
+        #   L* 56.0 was built and rendered FIRST (round `260731_w3_l12`, tint 3.207/4.030/4.553,
+        #   albedo 0.2391). Against the reference it read **a shade bleached** - closer to
+        #   driftwood grey than to a 2-5 year patina - and the near-ground band measured
+        #   mean 185 where scene10's landed deck, the same product in the same library under
+        #   the same L0 sun, measures **181**. Corrected ONCE by the reference, exactly as
+        #   `w3_s10_rebuild_v1.md` §2.2 records doing:
+        #   target L* 55.0 / a* +1.0 / b* +6.0 -> linear (0.2537, 0.2258, 0.1925), albedo 0.2293
+        #   - still inside all four clauses, still in the effective band's lower half, and now
+        #   numerically level with scene10. **The reference moved the value within the standard;
+        #   it did not overrule it.** This does NOT clear the near-ground mean>170 / wht%>=2
+        #   gates and is not claimed to: no in-band target can (even at the albedo floor 0.220
+        #   the band measures 177-178), which is L12-F3.
+        #   tint = target / source; clipped texels at this gain = 0.0070 % -> the shipped map
         #   carries the target, so no weathered-plank procurement is opened (S10 G5 stays unspent).
-        deck_tint=(3.207, 4.030, 4.553),
+        deck_tint=(3.080, 3.864, 4.355),
         # === [W3 L12 · GT-43] guard timber = 착색방부목 (colour-stained), NOT weathered silver ===
         #   G3's levee-edge guard and benches are a stained product, measured over 5 clean
         #   patches this session at L* 32.7 (shadowed post) .. 51.6 (sunlit bench slat),

@@ -14,8 +14,16 @@ Hazard  : a straight stair rotated 30 deg relative to the plaza walk axis (+X). 
 Goal    : assemble an upper plaza (plaza_light + bands, a scaled-down scene01 motif), a
           30 deg rot_group stair of 14 steps (width 5), the diagonal extension wedge
           (flush plaza-to-stair joint), a lower plaza (warm plaza_lower), grass fill (no
-          cavity), 3 axis-aligned buildings and axis-aligned props (bollard rows, planters,
-          benches, street lamps), and judge it from renders (render only).
+          cavity), an axis-aligned FAR backdrop silhouette and axis-aligned props (bollard
+          rows, planters, benches, street lamps), and judge it from renders (render only).
+
+Target image (W3, Lane 3 row 3.3): **G1** primary
+          (`Docs/reference_photos/Generated Image - Scene01.jpg`) + **G8** secondary.
+          G1 is the archetype of this scene - a granite plaza, a wide low-riser flight,
+          benches, planters, streetlights, and **open sky above the roofline**; only the
+          30 deg rotation differs. Season is pinned from G1 -> **autumn, in leaf**
+          (`w3_intake_v2_images.md` §7 ruling 8: an imageless scene inherits its nearest
+          image's season). G8 supplies the paving-band vocabulary.
 
 Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
@@ -37,6 +45,29 @@ import datetime
 
 import scene_common as sc
 import ground_kit as gk
+# [W3 L20] Lane-1 kits. All four are CPU-safe at import time (`pxr` is imported
+#   lazily inside every builder), so `NEGOBS_SMOKE` and the fake-USD harness see
+#   the same module graph the GPU run does.
+#     infra_kit    - K5 `derive_manholes` (G-4: manholes come from a declared
+#                    service line, never from the camera)
+#     building_kit - BS-4 `kind="backdrop"` (the "open it up" move G1 asks for)
+#     facade_kit   - the `Kit` primitive-injection shim building_kit builds through
+#     props_kit    - K4(c) C6 regulation bollard template
+import infra_kit as ik
+import facade_kit as fk
+import building_kit as bk
+import props_kit as pk
+
+
+# [W3 L20 · season] Pinned from the nearest target image G1 (§7 ruling 8).
+#   G1 is **autumn in leaf**: the frame-right maple carries a full orange crown,
+#   the mid-ground broadleaf row is turning and the conifer domes are dark green -
+#   there is no bare trunk anywhere in the frame. So `build_tree(bare=)` is
+#   deliberately NOT used here (the same audit result scene01 published for the
+#   same image); what autumn buys this scene is leaf litter and a warmed turf
+#   tone, both built below. Stated rather than skipped: "the leaf-off mechanism
+#   exists" is not a reason to fire it.
+SEASON = "autumn"
 
 
 # ===========================================================================
@@ -88,6 +119,12 @@ PARAMS = dict(
     stairs=dict(x0=0.0, riser=0.15, tread=0.34, nsteps=14,
                 y0=-2.5, y1=2.5, z_top=0.0, base_z=-2.6),
     # rot_group: pivot (0,0), 30 deg - rotates stair and lower plaza together (boundary stays aligned)
+    # ★ [W3 R20-1, restated in code] `deg=30.0` is a **scene-wide skew, not per-instance
+    #   jitter** (`w3_intake_06_10.md` §1.2 · intake v2 §2 scene20 (g)). It is the whole
+    #   identity of the T8 case - the drop boundary is deliberately off the walk axis - and
+    #   it is FROZEN. A later jitter-abolition linter pass must **not** zero it, and neither
+    #   must scene18's -2.57 deg, which is the same class of quantity. Anything that reads
+    #   this key as noise is reading the wrong table.
     rot=dict(pivot=(0.0, 0.0), deg=30.0),
     # Lower plaza (warm) - inside rot_group, continues from the stair foot (local x=4.76, z=-2.1)
     lower=dict(x0=4.76, x1=18.0, y0=-2.5, y1=2.5, z_top=-2.1, thick=0.15),
@@ -115,25 +152,75 @@ PARAMS = dict(
     #    Consequence: the d2 near window (x -1.44..0) cannot be filled by the
     #    kit at all in this scene. That is geometry, not an omission — the d2
     #    window lies beyond the diagonal for most of the frame width.
+    #  ★ [W3 L20 · F1 ghost patches — the spec names scene20] the `patch=` site list
+    #    is **deleted**, not re-sited. Two things were true at once and only one of them
+    #    was visible: (1) GT-24 already removed `("patch", 1)` from the `plaza_granite`
+    #    profile library-wide (a saw-cut milled rectangle is an *asphalt* repair; on 판석
+    #    600 unit paving the real repair lifts and relays whole flags), so this list has
+    #    emitted **0 prims** since that row landed — measured on the composed stage, GKit
+    #    carries crack/joint/gully/manhole/stain and no `Patch_*` at all; and (2) the
+    #    scene-side binding underneath it was `patch=M["upper"]`, i.e. the patch was bound
+    #    to the plaza's **own** material — the "lighter-than-base ghost patch" F1 names.
+    #    A dead call site that names a banned vocabulary reads as intent, so it goes
+    #    (the K2 doctrine: flip the default, then remove the now-inert call sites in the
+    #    same work package). G1 shows no repair mark of any kind on the granite field.
+    #  ★ [W3 L20 · G-4] manholes are no longer literal coordinates. `utility.line` declares
+    #    where the storm branch actually runs — along the north planting margin, on the
+    #    service side, into the north stair-head gully — and `infra_kit.derive_manholes`
+    #    returns the chambers the KDS 61 40 00 trigger table asks for. The two deleted
+    #    magic values `(-5.00, +1.40)` / `(-10.00, -1.40)` sat at |y| <= 1.4 with x < 0,
+    #    i.e. inside the d2/d5 near-window band the G-4 census indicts (19/26 sites).
     gkit=dict(
         region=(-13.0, -3.0, -2.0, 3.0),
-        manholes=[(-5.00, 1.40), (-10.00, -1.40)],
+        #    Ø450 storm branch under the north planting margin, running east to the
+        #    outfall; the north stair-head gully lateral joins it at x = -8.00. A 9.8 m
+        #    branch is two orders shorter than the Ø<=600 mm KDS straight-run interval
+        #    (75 m), so the run gets **no** intermediate chamber and the derivation
+        #    returns exactly the upstream head plus the gully junction = 2, which is also
+        #    the count `GROUND_PROFILES["plaza_granite"].infra` prescribes.
+        utility=dict(line=[(-12.60, 2.60), (-2.80, 2.60)],
+                     junctions=[(-8.00, 2.60)], d_mm=450.0),
         gullies=[(-3.00, -2.60), (-8.00, 2.60)],
-        patches=[(-3.70, -0.55), (-8.60, 0.30)],
     ),
 
-    # 3 axis-aligned horizon-closing buildings (not rotated - emphasises the alignment contrast)
-    #   base_z=-2.15 : top face of the valley grass. Left unset (0.0) the shell only reached down
-    #   to z=-1.0 and floated 1.15 m (audit v4 B3).
-    buildings=dict(
-        C=dict(x0=26.0, x1=32.0, y0=-14.0, y1=14.0, h=13.0, floors=4,
-               axis="x", facade_x=26.0, face_dir=-1.0, base_z=-2.15),
-        D=dict(x0=-6.0, x1=20.0, y0=16.0, y1=22.0, h=11.0, floors=4,
-               axis="y", facade_y=16.0, face_dir=-1.0, base_z=-2.15),
-        E=dict(x0=-40.0, x1=-32.0, y0=-16.0, y1=16.0, h=16.0, floors=5,
-               axis="x", facade_x=-32.0, face_dir=1.0, base_z=-2.15),
-    ),
-    window=dict(w=1.2, h=1.6, inset=0.15, col_step=2.6, margin=2.0),
+    # === [W3 L20 · BS-4] the axis-aligned masses stay, the closed horizon goes =========
+    #  What was here: three `sc.build_building` masses at **26 / 16 / 32 m** from the
+    #  plaza centre carrying h 13.0 / 11.0 / 16.0 and a full window grid. From the h0.3
+    #  judging eye at x=-2 the nearest of them (facade x=26, d 28.0 m) has a frame ceiling
+    #  of z = 0.3 + 0.1405*28.0 = **4.23 m** and a ridge at **13.75 m** — the mass runs off
+    #  the top edge of frame and there is no sky in the cut at all. G1's own reading is the
+    #  opposite: *"open sky above the roofline — no far skyline wall"*, and the intake row
+    #  names it as this scene's gap ("three axis-aligned buildings close the horizon — same
+    #  'open it up' move as 01 and 14").
+    #  What replaces it: the same **axis-aligned** identity — which is this scene's whole
+    #  theme, axis-aligned world against a 30 deg stair — rebuilt as a FAR silhouette
+    #  through `building_kit.plan_building(..., kind="backdrop")`, whose contract is
+    #  *distant silhouette only, no windows, 3-4 prims*. `bk.judged_eyes(0.0)` hands the
+    #  planner this scene's real preset eye set (gy = 0.0, spec §D fixes the axis), so
+    #  `d_true` / `in_frame` / `z_ceil` come from the judging geometry and not from
+    #  `|facade plane|` (B-F3). The acceptance condition is a number checked at assembly
+    #  time and printed per block: **ridge < z_ceil**, i.e. sky above every roofline,
+    #  where `ridge = base_z + h + bk.roof_allow(p)` — the parapet band and penthouse
+    #  `build_korean_building` emits **above** the shell-top invariant (S01-F1). It is
+    #  computed from the plan here rather than copied as a constant, because a copied 2.90
+    #  is exactly how scene01 shipped a wall off the top of frame twice.
+    #  base_z = -2.15 is the top face of the valley grass (audit v4 B3: left unset the
+    #  shells floated 1.15 m).
+    backdrop=dict(
+        base_z=-2.15,
+        mat="brick",
+        # (tag, x0, x1, y0, y1, h) - plan rectangles of the silhouette masses, all
+        #   axis-aligned. E1/E2 close the head of the diagonal, W1 backs the mesa entry
+        #   ramp, N1/S1 are the flanking wings that keep the valley from reading as a
+        #   tabletop. Every h is solved from that block's own ceiling minus its own
+        #   `roof_allow`, and the printed "지붕선 위 하늘" column must read 5/5.
+        blocks=(
+            ("E1",  56.0,  72.0, -22.0,  -3.0, 7.0),
+            ("E2",  60.0,  76.0,   2.0,  22.0, 7.6),
+            ("N1", -24.0,  26.0,  46.0,  58.0, 5.6),
+            ("W1", -74.0, -62.0, -20.0,  16.0, 6.4),
+            ("S1", -26.0,  22.0, -54.0, -44.0, 5.3),
+        )),
 
     # --- Context dressing (cue_scene_dressing): "civic / university-front urban plaza" ---
     #     The contrast between axis-aligned props (bands, buildings, planter rows) and the 30 deg diagonal edge is this scene's theme.
@@ -151,11 +238,38 @@ PARAMS = dict(
     #          i.e. background, with no interference with the judged region (diagonal drop boundary x -4.6..0).
     bollards=dict(x=-13.6, ys=(-2.25, -0.75, 0.75, 2.25),
                   block=dict(x0=-13.6, x1=-13.3, y0=-2.55, y1=2.55)),
-    planters=[(-10.0, 5.5), (-10.0, -5.5), (-6.5, 6.2)],
+    # === [W3 L20 · C5 / census / CB-5] the mesa furniture is re-sited, measured ========
+    #  Three defects, all found by arithmetic over the footprint rectangles before
+    #  anything was rendered (`scratchpad` layout probe, reproduced by `plaza_selfcheck`
+    #  below) — the pre-edit layout carried **four hard interpenetrations**:
+    #    Planter_2 x Bench_0        1.450 x 0.400 m  (a bench sitting inside a flower bed)
+    #    Planter_2 x Streetlight_0  0.140 x 0.140 m  (a 5.5 m pole rising out of the bed,
+    #                               0.78 m from the bed's own tree)
+    #    Planter_1 x Streetlight_1  0.140 x 0.140 m  (the same defect, south flank)
+    #    Bench_0   x Streetlight_0  0.140 x 0.070 m
+    #  and the census row `w3_md_reverts_v1.md` §5 — `oblique_overview` at **0.450 m**
+    #  from `Planter_1`'s bed AABB with a live `Elm_Sapling` in it, named there as *"the
+    #  closest geometric analogue"* to the C02-P1 defect that batch had just fixed.
+    #  The fix is a re-site, not a mitigation: the beds move onto the flank margins where
+    #  G1 puts every planted element (in G1 the plaza field above the steps is bare
+    #  paving), the bench row becomes ONE row parallel to the kerb line at y = +3.60 with
+    #  a constant bearing and irregular 3.25 / 4.25 m spacing (CB-5's pilot condition —
+    #  that is the difference between a row and a grid), and the poles move off the beds.
+    #  Post-edit: **0 overlaps**, every footprint corner on the mesa, worst judged-eye ->
+    #  bed distance **2.750 m** (`Planter_1` x `oblique_overview`) against the >= 2.50 m
+    #  gate `plaza_selfcheck` now asserts over all 13 cuts x all beds.
+    planters=[(-12.3, 5.6), (-12.3, -5.6), (-7.0, 5.6)],
     planter=dict(size=3.0),
-    benches=[(-7.5, 6.6, 180.0), (-7.5, -6.6, 0.0),
-             (-11.5, 3.0, 90.0), (-11.5, -3.0, -90.0)],
-    streetlights=[(-7.0, 6.8), (-9.0, -6.8), (-12.5, 4.0)],
+    #  [K4(b) S-2] one species per bed, declared, not drawn: `planter_accent` = Yew, the
+    #  formal-planter role of the species table. Before this the beds inherited
+    #  `SHRUB_ORNAMENT` through a per-bed `randrange`, and the composed stage measured
+    #  **4 Rhododendron + 2 Juniper across 3 beds** — two species in one civic planter run,
+    #  which is precisely what S-2 exists to stop. (Rhododendron's flower loss is a
+    #  library-wide `_deactivate_seasonal` treatment, K4-F1 — not a regression, and not the
+    #  reason for this change.)
+    planter_species="planter_accent",
+    benches=[(-12.9, 3.6, 0.0), (-9.65, 3.6, 0.0), (-5.4, 3.6, 0.0)],
+    streetlights=[(-12.6, 2.0), (-7.0, 3.0), (-9.5, -6.9)],
     streetlight=dict(pole_h=5.5, pole_r=0.07, arm_len=1.0, arm_r=0.04,
                      head=0.25),
     hedges=[(-14.0, 7.4, -9.0, 8.0), (-14.0, -8.0, -9.0, -7.4)],
@@ -169,11 +283,26 @@ PARAMS = dict(
                         block=dict(x0=16.7, x1=17.0, y0=-2.55, y1=2.55)),
     lower_benches=[(12.0, -1.85, 0.0), (12.0, 1.85, 0.0)],
 
+    # === [W3 L20 · season] autumn leaf litter (G1) ====================================
+    #  Three regions, each with its own `edge_bias` because the sweeping pattern differs.
+    #  The treads region lives **inside the 30 deg rot_group** and is authored in group
+    #  local coordinates, so the litter follows the diagonal exactly as the stair does —
+    #  scattering it in world space would lay a rectangular leaf field across a rotated
+    #  flight. `ground_fn` seats each instance on the tread it actually lands on; without
+    #  it a leaf on a 0.15 m riser floats.
+    litter=dict(treads=dict(cover=0.030, edge_bias=0.45, seed=10120),
+                foot=dict(cover=0.022, edge_bias=0.30, seed=20220),
+                plaza=dict(cover=0.012, edge_bias=1.20, seed=30320)),
+
     material=dict(
         scale=dict(plaza_light=1.80, band_dark=0.6, plaza_lower=0.7,
                    grass=1.4, brick_red=2.0, tactile=0.3),
         lower_warm_tint=(1.06, 1.0, 0.94),
-        grass_tint=(0.55, 0.68, 0.42),
+        # [W3 L20 · season] 0.55/0.68/0.42 -> 0.60/0.63/0.38: desaturated and warmed for
+        #   autumn, green still the largest channel. A straw-yellow lawn would be a
+        #   different season, not this one. (Same value scene01 measured against the same
+        #   image, so the two G1 scenes do not drift apart in tone.)
+        grass_tint=(0.60, 0.63, 0.38),
         glass_color=(0.06, 0.09, 0.12), glass_rough=0.08,
         rail_color=(0.80, 0.82, 0.85), rail_metallic=0.9, rail_rough=0.35,
         # [v5.1 §4] Parapet 0.90 -> 0.72 (no large pure-white areas)
@@ -410,19 +539,34 @@ def main():
     def build_ground_kit(M):
         g = PARAMS["gkit"]
         st = PARAMS["stairs"]
+        # [W3 L20 · G-4] the chambers are DERIVED from the declared branch, never from
+        #   the frame. `derive_manholes` knows nothing about cameras by construction;
+        #   the near-window check keeps a job, but only a **reject-only** one (G-4 build
+        #   spec 1: it may reject a position, never produce one), and it is run below in
+        #   `plaza_selfcheck` against this scene's own preset eyes.
+        u = g["utility"]
+        mh = ik.derive_manholes(u["line"], d_mm=u["d_mm"],
+                                junctions=[tuple(j) for j in u["junctions"]])
+        print("[gkit] 맨홀 유도 " + " · ".join(
+            f"{m['tag']}({m['x']:+.2f},{m['y']:+.2f}) {m['reason']}" for m in mh))
         gp = gk.plan_ground(
             "plaza_granite", region=tuple(g["region"]),
             z=float(PARAMS["upper"]["z_top"]), gy=0.0, origin=(0.0, 0.0, 0.0),
             edges=[("stair_top", float(st["x0"]))],
             dists=(2, 5, 10), scene="scene20", tactile=(),
-            sites=dict(manhole=[tuple(v) for v in g["manholes"]],
-                       gully=[tuple(v) for v in g["gullies"]],
-                       patch=[tuple(v) for v in g["patches"]]),
+            sites=dict(manhole=[(m["x"], m["y"]) for m in mh],
+                       gully=[tuple(v) for v in g["gullies"]]),
             seed=20)
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
-        M2.update(joint=M["band"], crack=M["band"], patch=M["upper"],
-                  patch_cut=M["band"], manhole=M["band"], gully=M["band"],
+        # [W3 L20 · F1] `patch=M["upper"]` / `patch_cut=M["band"]` are **deleted** with
+        #   the site list above. `M["upper"]` is the plaza's own material, so the binding
+        #   authored a repair patch in the same stone as the field it repairs — the
+        #   "lighter-than-base ghost rectangle" F1 indicts. The role emits nothing under
+        #   GT-24 either way; keeping a dead binding to a banned vocabulary is how the
+        #   next lane re-opts into it by accident.
+        M2.update(joint=M["band"], crack=M["band"],
+                  manhole=M["band"], gully=M["band"],
                   gutter=M["band"], gutter_cover=M["band"],
                   trench=M["band"], trench_frame=M["band"],
                   marking=M["band"], weed=M["grass"], wear=M["gk_stain"],
@@ -532,25 +676,136 @@ def main():
     #          street lamps, hedges) + mesa entry ramp
     # -------------------------------------------------------------------
     def build_bollard_std(M, prefix, cx, cy, bz, k=0):
-        """[v5.1 §2] One regulation bollard - height 0.90 m · diameter 0.15 m (r 0.075) +
-        white reflective band at the top (width 0.09). Basis: Enforcement Rule of the
-        Act on Promotion of Mobility Convenience for the Mobility Impaired, Table 2
-        (height 0.8-1.0 · diameter 0.1-0.2 · spacing around 1.5 m · bright reflective band).
-        The old sc.build_bollard defaults (r 0.06 · h 0.75) fall short of the regulatory
-        minimum, so the dimensions are stated explicitly here (scene_common untouched).
-        The body material uses per-instance tint jitter (bollard_0..2) to remove the
-        'identical clones' impression."""
-        h, r = 0.90, 0.075
-        sc.build_bollard(stage, f"{prefix}/Post", cx, cy, bz,
-                         mtl=M[f"bollard_{k % 3}"], radius=r, height=h)
-        sc.add_cylinder(stage, f"{prefix}/Band", (cx, cy, bz + h - 0.14),
-                        r * 1.05, 0.09, M["bollard_band"])
+        """[W3 L20 · K4(c) C6] one regulation bollard, now from the props_kit template.
+
+        What this replaced: a bare `sc.build_bollard` cylinder (r 0.075 · h 0.90) plus a
+        hand-authored band ring — two prims, a flat top and no base detail, i.e. a pipe
+        offcut standing on a slab. `props_kit.build_bollard_v2` is the C6 template the
+        intake row names, and it carries the four features that make the read
+        `[practice - §C6]`: **dome cap** (a flat-topped bollard is an offcut), **base
+        plate + anchor cover ring** (a bollard is bolted down, it does not grow out of
+        the paving), the **reflective band at knee height**, and a body that is not a
+        mirror. Statutory envelope is unchanged and still satisfied — 도로교통 약자
+        편의증진법 시행규칙 별표2: h 0.80-1.00 (template default **0.85**, the old value
+        was 0.90), Ø 0.10-0.20 (**0.11**, was 0.15), pitch ~1.5 m (this scene's rows are
+        at 1.5 m with a 1.5 m centre gap, unchanged).
+
+        **GT consequence, declared before it landed**: the body is a collider, so the
+        collision box moves — r 0.075 -> 0.055 and h 0.90 -> 0.85 on 8 instances (4 on the
+        mesa entry ramp, 4 in the lower-plaza corridor). No walked surface and no drop edge
+        is touched. That is GT class A and it is why this scene's row exists.
+
+        `compliant=True` on every instance: this is a civic plaza built to spec, not the
+        measured field population (the template's `compliant=False` arm reproduces the
+        three real failure modes and is deliberately not used here — a deterministic
+        choice about the site, stated rather than drawn).
+        """
+        pk.build_bollard_v2(stage, prefix, cx, cy, bz,
+                            M[f"bollard_{k % 3}"], band_mtl=M["bollard_band"],
+                            radius=0.055, height=0.85, band_z=0.62,
+                            band_h=0.06, compliant=True, seed=k)
+
+    def build_backdrop(M):
+        """[W3 L20 · BS-4] the axis-aligned horizon, opened.
+
+        Returns `(n_prims, over)` where `over` lists any block whose ridge breaks the
+        frame ceiling — empty is the acceptance condition, and `plaza_selfcheck` asserts
+        it rather than trusting this print.
+        """
+        bp = PARAMS["backdrop"]
+        eyes = bk.judged_eyes(0.0)          # spec §D: the preset axis is +X at gy = 0
+        kit = fk.Kit(sc.add_box, sc.add_cylinder,
+                     getattr(sc, "_oriented_box", None))
+        n_tot = 0
+        over = []
+        for tag, x0, x1, y0, y1, hh in bp["blocks"]:
+            # A silhouette is a plan rectangle seen edge-on; `axis`/`facade_*` only pick
+            # which face the planner measures from, and that face is the one turned
+            # toward the plaza centre.
+            if abs((x0 + x1) / 2.0) >= abs((y0 + y1) / 2.0):
+                bd = dict(x0=x0, x1=x1, y0=y0, y1=y1, h=hh, floors=3, axis="x",
+                          facade_x=(x0 if (x0 + x1) > 0 else x1),
+                          face_dir=(-1.0 if (x0 + x1) > 0 else 1.0),
+                          base_z=bp["base_z"])
+            else:
+                bd = dict(x0=x0, x1=x1, y0=y0, y1=y1, h=hh, floors=3, axis="y",
+                          facade_y=(y0 if (y0 + y1) > 0 else y1),
+                          face_dir=(-1.0 if (y0 + y1) > 0 else 1.0),
+                          base_z=bp["base_z"])
+            p = bk.plan_building(bd, kind="backdrop", eyes=eyes)
+            # `parapet=` gets the SHELL material, not `M["parapet"]` (0.72 grey). At
+            # 44-62 m a light capping band on a dark mass reads as a lit highlight along
+            # the roofline — a silhouette has no cap by definition (S01's pilot defect 3).
+            prims = bk.build_korean_building(
+                kit, stage, f"{ROOT}/Backdrop_{tag}", bd,
+                bk.Mtls(M[bp["mat"]], parapet=M[bp["mat"]]), plan=p)
+            n_tot += len(prims)
+            # `hh` is the SHELL top. `roof_allow` is the parapet band + penthouse that
+            # `build_korean_building` emits ABOVE the shell-top invariant, and backdrop
+            # policy (2) does not gate it (S01-F1). Compute it from the plan — never copy
+            # a constant — and compare the RIDGE.
+            allow = bk.roof_allow(p)
+            ridge = bp["base_z"] + hh + allow
+            sky = (p.z_ceil is None) or (ridge < p.z_ceil)
+            if not sky:
+                over.append((tag, round(ridge, 2), round(p.z_ceil, 2)))
+            print(f"[backdrop] {tag} W {p.W:5.1f} · shell h {hh:5.2f} · allow "
+                  f"{allow:4.2f} · ridge {ridge:5.2f} · {p.kind}/{p.tier} · d_true "
+                  f"{p.d_true:6.2f} m · in_frame {str(p.in_frame):5s} · z_ceil "
+                  f"{('%.2f' % p.z_ceil) if p.z_ceil is not None else '  n/a'} · "
+                  f"하늘 {str(sky):5s} · 프림 {len(prims)}")
+        n_b = len(bp["blocks"])
+        print(f"[backdrop] {n_b}동 {n_tot} 프림 · 창 0 · 지붕선 위 하늘 "
+              f"{n_b - len(over)}/{n_b}" + (f" · 초과 {over}" if over else ""))
+        return n_tot, over
+
+    def build_litter(M):
+        """[W3 L20 · season] autumn leaf litter (G1).
+
+        The tread scatter is authored **inside the 30 deg rot_group**, in group-local
+        coordinates, so it rotates with the flight; `stair_z` is the local ground
+        callback so each leaf sits on the tread it lands on instead of floating over a
+        0.15 m riser. The plaza scatter is world-space and is clipped to the
+        axis-aligned part of the mesa (x <= -4.5), because the wedge east of that line is
+        where the drop boundary runs and a leaf field there would sit over the cliff.
+        """
+        li = PARAMS["litter"]
+        st = PARAMS["stairs"]
+        lo = PARAMS["lower"]
+        # The rot_group Xform is authored by `build_diagonal`; re-calling
+        # `sc.build_rot_group` here would append a second set of xformOps to the same
+        # prim, so the path is referenced, not rebuilt. `build_litter` is therefore
+        # ordered strictly after `build_diagonal` in the assembly block below.
+        grp = f"{ROOT}/Diag"
+        tread, riser, ns = st["tread"], st["riser"], st["nsteps"]
+
+        def stair_z(x, y):
+            if x <= st["x0"]:
+                return 0.0
+            i = min(int((x - st["x0"]) / tread), ns - 1)
+            return -riser * (i + 1)
+
+        n = 0
+        n += sc.scatter_debris(
+            stage, f"{grp}/Litter_Tread",
+            st["x0"], st["y0"], st["x0"] + tread * ns, st["y1"], 0.0,
+            cover=li["treads"]["cover"], edge_bias=li["treads"]["edge_bias"],
+            seed=li["treads"]["seed"], ground_fn=stair_z, max_count=90)
+        n += sc.scatter_debris(
+            stage, f"{grp}/Litter_Foot",
+            lo["x0"], lo["y0"], lo["x0"] + 5.0, lo["y1"], lo["z_top"],
+            cover=li["foot"]["cover"], edge_bias=li["foot"]["edge_bias"],
+            seed=li["foot"]["seed"], max_count=70)
+        n += sc.scatter_debris(
+            stage, f"{ROOT}/Litter_Plaza",
+            PARAMS["upper"]["x0"] + 0.5, -7.6, PARAMS["upper"]["x1"], 7.6, 0.0,
+            cover=li["plaza"]["cover"], edge_bias=li["plaza"]["edge_bias"],
+            seed=li["plaza"]["seed"], max_count=60)
+        print(f"[litter] 낙엽 {n}개 (가을 · G1)")
+        return n
 
     def build_dressing(M):
-        for key, bd in PARAMS["buildings"].items():
-            sc.build_building(stage, f"{ROOT}/Building_{key}", bd,
-                              M["brick"], M["glass"], M["parapet"],
-                              window=PARAMS["window"])
+        _n_bd, _over = build_backdrop(M)
         # [v5.1 §2] One row of regulation bollards + dot tactile at the top of the mesa entry ramp
         bl = PARAMS["bollards"]
         for i, by in enumerate(bl["ys"]):
@@ -565,7 +820,8 @@ def main():
         for i, (px, py) in enumerate(PARAMS["planters"]):
             sc.build_planter(stage, f"{ROOT}/Planter_{i}", px, py, 0.0,
                              M["curb"], M["grass"], tree_mtls=tree_mtls,
-                             size=PARAMS["planter"]["size"])
+                             size=PARAMS["planter"]["size"],
+                             species=PARAMS["planter_species"])
         for i, (bx, by, yaw) in enumerate(PARAMS["benches"]):
             sc.build_bench(stage, f"{ROOT}/Bench_{i}", bx, by, 0.0,
                            M["wood"], yaw=yaw)
@@ -592,8 +848,137 @@ def main():
                        ar["x1"] - ar["x0"], vz - PARAMS["upper"]["z_top"],
                        ar["y0"], ar["y1"], ar["thick"], M["upper"],
                        margin=0.0, collider=True)
+        return _over
 
     # [v5.2 user] Arbitrary warning placards removed - build_signs() deleted.
+
+    # -------------------------------------------------------------------
+    # [W3 L20] plaza_selfcheck - the R-1 registry print + this lane's four gates
+    # -------------------------------------------------------------------
+    def plaza_selfcheck(backdrop_over):
+        """Boot-free, GPU-free assertions over the PARAMS this scene was built from.
+
+        The four things this lane changed are the four things it gates, because
+        "the geometry looks right in the file" is not evidence:
+          (1) **hazard / collision registry (R-1)** — the drop edge, the walked surfaces
+              and every collision box this scene declares, printed so a re-cache can be
+              read against it. The GT row for this lane is class **A**: the ONLY entries
+              that move are the 8 bollard bodies (C6 template) and the 3 planter kerb
+              runs (re-site); no walked surface and no drop edge is touched, and the
+              print is what proves it.
+          (2) **judged eye -> planter bed >= 2.50 m** over all 13 cuts x all beds
+              (`w3_md_reverts_v1.md` §5's census gate).
+          (3) **prop footprint overlaps = 0** over the mesa furniture.
+          (4) **G-4 reject-only occupancy** — every derived chamber is behind the eye or
+              outside the +-30 deg judged frame. This may only *reject*; it never
+              produces a position.
+        Plus the season audit and the backdrop sky result, both fail-loud.
+        """
+        import math as _m
+        ok = True
+        views = build_views()
+        eyes = [(k, float(v["eye"][0]), float(v["eye"][1]))
+                for k, v in views.items()]
+
+        # (1) hazard / collision registry ---------------------------------
+        st, up, lo = PARAMS["stairs"], PARAMS["upper"], PARAMS["lower"]
+        drop = st["riser"] * st["nsteps"]
+        print("[registry] 낙차 경계 = 30° 사선 x = -0.5774·y (rot local x=0) · "
+              f"낙차 {drop:.2f} m · 단 {st['nsteps']}개 "
+              f"(riser {st['riser']:.3f} · tread {st['tread']:.3f})")
+        print(f"[registry] 보행면: UpperPlaza z={up['z_top']:.2f} · UpperWedge "
+              f"z={up['z_top']:.2f} · Stairs z_top={st['z_top']:.2f} · LowerPlaza "
+              f"z={lo['z_top']:.2f} · Valley z={PARAMS['valley']['z_top']:.2f} "
+              "— 이번 레인에서 전부 불변")
+        n_boll = len(PARAMS["bollards"]["ys"]) + len(PARAMS["lower_bollards"]["ys"])
+        print(f"[registry] 충돌상자 변경: 볼라드 몸통 {n_boll}개 "
+              "(r 0.075→0.055 · h 0.90→0.85, C6) · 화단 연석 "
+              f"{len(PARAMS['planters']) * 4}개 (재배치) · 그 외 0")
+
+        # (2) + (3) footprint arithmetic ----------------------------------
+        def _rect(cx, cy, sx, sy, yaw=0.0):
+            if abs(abs(yaw) - 90.0) < 1e-6:
+                sx, sy = sy, sx
+            return (cx - sx / 2.0, cy - sy / 2.0, cx + sx / 2.0, cy + sy / 2.0)
+
+        S = PARAMS["planter"]["size"] + 2 * 0.05      # kerb + cap overhang
+        items = [(f"Planter_{i}", _rect(px, py, S, S))
+                 for i, (px, py) in enumerate(PARAMS["planters"])]
+        items += [(f"Bench_{i}", _rect(bx, by, 1.8, 0.4, yaw))
+                  for i, (bx, by, yaw) in enumerate(PARAMS["benches"])]
+        items += [(f"Streetlight_{i}",
+                   _rect(lx, ly, 2 * PARAMS["streetlight"]["pole_r"],
+                         2 * PARAMS["streetlight"]["pole_r"]))
+                  for i, (lx, ly) in enumerate(PARAMS["streetlights"])]
+        items += [(f"Hedge_{i}", (min(a, c), min(b, d), max(a, c), max(b, d)))
+                  for i, (a, b, c, d) in enumerate(PARAMS["hedges"])]
+        bl = PARAMS["bollards"]
+        items += [(f"Bollard_{i}", _rect(bl["x"], by, 0.16, 0.16))
+                  for i, by in enumerate(bl["ys"])]
+        ar = PARAMS["access_ramp"]
+        items.append(("AccessRamp", (ar["x0"], ar["y0"], ar["x1"], ar["y1"])))
+
+        coll = []
+        for i in range(len(items)):
+            for j in range(i + 1, len(items)):
+                a, b = items[i][1], items[j][1]
+                ox = min(a[2], b[2]) - max(a[0], b[0])
+                oy = min(a[3], b[3]) - max(a[1], b[1])
+                if ox > 0 and oy > 0:
+                    coll.append((items[i][0], items[j][0], ox, oy))
+        if coll:
+            ok = False
+            for n1, n2, ox, oy in coll:
+                print(f"[selfcheck] ✘ 간섭 {n1} x {n2} {ox:.3f} x {oy:.3f} m")
+        print(f"[selfcheck] 지물 간섭 {len(coll)}건 (기준 0)")
+
+        worst = None
+        for nm, r in items:
+            if not nm.startswith("Planter"):
+                continue
+            for k, ex, ey in eyes:
+                d = _m.hypot(max(r[0] - ex, 0.0, ex - r[2]),
+                             max(r[1] - ey, 0.0, ey - r[3]))
+                if worst is None or d < worst[0]:
+                    worst = (d, nm, k)
+        if worst[0] < 2.50:
+            ok = False
+        print(f"[selfcheck] 판정시점↔화단 최단 {worst[0]:.3f} m "
+              f"({worst[1]} x {worst[2]}) · 기준 ≥ 2.50 · "
+              f"{'OK' if worst[0] >= 2.50 else '위반'}")
+
+        # (4) G-4 reject-only occupancy -----------------------------------
+        u = PARAMS["gkit"]["utility"]
+        mh = ik.derive_manholes(u["line"], d_mm=u["d_mm"],
+                                junctions=[tuple(j) for j in u["junctions"]])
+        grid = [(k, ex, ey) for k, ex, ey in eyes if k.startswith("preset_")]
+        for m in mh:
+            worst_b = 0.0
+            behind = True
+            for k, ex, ey in grid:
+                dx = m["x"] - ex
+                if dx <= 0.0:
+                    continue                      # behind this eye (+X walk axis)
+                behind = False
+                worst_b = max(worst_b, abs(_m.degrees(_m.atan2(m["y"] - ey, dx))))
+            inside = (not behind) and worst_b <= 30.0
+            if inside:
+                ok = False
+            print(f"[selfcheck] 맨홀 {m['tag']}({m['x']:+.2f},{m['y']:+.2f}) "
+                  + ("모든 그리드 시점 후방" if behind
+                     else f"최대 방위 {worst_b:.1f}° (프레임 ±30°)")
+                  + f" · {'위반' if inside else 'OK'}")
+
+        # season audit + backdrop -----------------------------------------
+        row = sc.SCENE_SPECIES.get("Scene20", (None, None))
+        print(f"[season] {SEASON} · G1 in-leaf → bare=False · 수종 route "
+              f"{row[0]} · belt {row[1]} · 화단 {PARAMS['planter_species']} "
+              "· 봄개화 자산 0")
+        if backdrop_over:
+            ok = False
+            print(f"[selfcheck] ✘ 지붕선이 프레임 천장을 넘음: {backdrop_over}")
+        print(f"[selfcheck] scene20 {'통과' if ok else '실패'}")
+        return ok
 
     # -- Scene assembly --
     print("[씬] 재질·지오메트리 조립 중 ...")
@@ -605,9 +990,14 @@ def main():
         build_diagonal(M)
     else:
         build_flat_fill(M)
+    _bd_over = []
     if cfg["cue_scene_dressing"]:
-        build_dressing(M)
+        _bd_over = build_dressing(M)
     build_ground_kit(M)             # [W2-D] Ground elements - after dressing (scatter-order convention)
+    if cfg["hazard_stairs"] and cfg["cue_scene_dressing"]:
+        build_litter(M)             # season dressing - strictly after build_diagonal (rot_group)
+    if not plaza_selfcheck(_bd_over):
+        raise SystemExit("scene20 self-check 실패")
     # [v5.2 user] Arbitrary warning placards removed - cue_sign placement deleted.
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],

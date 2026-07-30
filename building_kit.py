@@ -697,6 +697,9 @@ class Plan:
         "d_true",      # B-F3: nearest judged eye -> facade rectangle [m]
         "z_ceil",      # B-F3: frame ceiling at d_true (backdrop policy (2))
         "in_frame",    # BS-4: any facade point inside +-30 deg of a judged eye
+        "roof_allow",  # S01-F1: roof furniture height above top_z [m]
+        "ridge",       # S01-F1: z of the highest prim the builders will emit
+        "roof_under_ceil",   # S01-F1: opt-in clamp of the roof furniture to z_ceil
     )
 
     def __init__(self):
@@ -936,7 +939,102 @@ def plan_building(bd, dist=None, kind=None, seed=None, eyes=None, **over):
     p.runs = _unit_runs(p.fac.u0, p.fac.u1, p.core_bays, CORE_W)
     p.n_bays = shopfront_bays(p.W, p.tier) if p.shopfront else 0   # B-F2
     p.mass = mass_faces(p)                                          # B-F1
+    if p.roof_under_ceil is None:
+        p.roof_under_ceil = False
+    p.roof_allow = roof_allow(p)                                    # S01-F1
+    p.ridge = p.top_z + p.roof_allow                                # S01-F1
     return p
+
+
+def backdrop_penthouse(p):
+    """The backdrop penthouse footprint `(pw, pdp)`, or `None`. 0 prims.
+
+    Second expression of `_b_backdrop`'s own three lines, and deterministic there
+    (unlike `build_rooftop`, which draws the footprint from an rng seeded on the
+    **prim prefix**). Having it as a function is what lets `plan_building` state an
+    **exact** ridge for `kind="backdrop"` instead of a bound.
+    """
+    side = math.sqrt(max(0.5, p.Lx * p.Ly * PH_AREA_FRAC)) * 0.85
+    pw = min(side, p.Lx * 0.5, 8.0)
+    pdp = min(side, p.Ly * 0.5, 8.0)
+    return (pw, pdp) if (pw > 1.2 and pdp > 1.2) else None
+
+
+# A penthouse shorter than this is not a penthouse — it is a plinth on a roof.
+# When the `roof_under_ceil` clamp cannot leave at least this much, the penthouse
+# is dropped instead of squashed.
+PH_MIN_H = 1.00
+
+
+def backdrop_ph_h(p):
+    """Penthouse height `_b_backdrop` will actually build [m]. 0 prims.
+
+    `PH_H` normally. With the **opt-in** `roof_under_ceil=True` it is clamped so the
+    penthouse top lands on `z_ceil`, which is the "clamp the roof elements" half of
+    S01-F1's remedy.
+
+    **Why the clamp is opt-in and not the default.** Measured on this tree
+    (`_b_backdrop` probe, isolated arm at `4bae470`, all 33 scenes): of the **33**
+    backdrop blocks that are planned with a judged eye set, only scene01's **6** keep
+    their ridge under `z_ceil`. scene02 (10), scene08 (5) and scene16 (12) sit 8.9 to
+    38.7 m **above** it — deliberately, and scene16's own code says so in as many
+    words: *"policy (2) is written for a building the camera faces, not for a wall it
+    travels along"*, a downtown street wall that is supposed to close the horizon.
+    Defaulting this clamp on would delete 27 of 33 blocks' skylines to satisfy a rule
+    those scenes have argued their way out of on the record. So the kit's default duty
+    is to **tell the truth** (`p.ridge`, which is what scene01 actually needed and had
+    to hand-derive as a scene-local constant), and the clamp is there for the caller
+    who wants policy (2) enforced rather than merely checked.
+    """
+    if p.roof_under_ceil and p.z_ceil is not None:
+        return max(0.0, min(PH_H, float(p.z_ceil) - p.top_z))
+    return PH_H
+
+
+def roof_allow(p):
+    """Height of the roof furniture **above `top_z`** [m]. 0 prims.
+
+    **This is finding S01-F1's fix.** `building_kit`'s total-height invariant is
+    *"the top of the shell stays at `base_z + h`"*, and backdrop policy (2) says
+    *"build nothing above `z_ceil`"* — but `build_rooftop` and `_b_backdrop` both
+    emit a parapet band and a penthouse **above** `top_z`, and policy (2) never
+    gated them. A caller that sized a backdrop from `h` — which is what the
+    invariant tells it to do — shipped a mass **+2.90 m** taller than the ceiling
+    it had just checked against. scene01 measured exactly that on all six of its
+    blocks, printed *"sky above roof 6/6"*, and rendered a brick wall running off
+    the top edge of `h0.3_d10`; it now carries a scene-local `ROOF_ALLOW` constant
+    to work around the kit. This function is that constant, computed rather than
+    copied, so the next caller does not have to rediscover it.
+
+    `kind="backdrop"` -> **exact**: `_b_backdrop` uses no rng for the penthouse.
+    Every other kind -> an **upper bound**, because `build_rooftop` jitters the
+    penthouse height +-8 % off `_rng(prefix, "roof", seed)` and the prim prefix does
+    not exist at plan time. A bound is the honest answer for "will this break
+    frame?", and `selfcheck [12]` asserts emitted <= bound for every kind x tier.
+    """
+    if p.kind == "backdrop":
+        if backdrop_penthouse(p) is None:
+            return RAIL_H
+        ph = backdrop_ph_h(p)
+        # The parapet is statutory 1.20 m and is **not** clamped: a shell whose own
+        # parapet already breaks the ceiling is too tall, and the fix for that is the
+        # caller's `h`, not a sub-statutory railing.
+        return max(RAIL_H, ph if ph >= PH_MIN_H else 0.0)
+    allow = RAIL_H                                   # parapet, always emitted
+    area_max = p.Lx * p.Ly * PH_AREA_FRAC
+    # `build_rooftop`'s footprint gate, evaluated at the rng's most generous draw
+    # (uniform 0.72..1.0 -> take 1.0; pdp grows as pw shrinks, so 1.0 bounds both).
+    side = math.sqrt(max(0.5, area_max))
+    pw = min(side, p.Lx * 0.5, 8.0)
+    pdp = min(max(0.5, area_max / max(0.5, pw)), p.Ly * 0.5, 8.0)
+    if pw > 1.4 and pdp > 1.4:
+        ph = PH_H * 1.08                             # `_jit`'s hard +-8 % ceiling
+        allow = max(allow, ph + (ANT_H if p.antenna else 0.0))
+        if p.tier in ("near", "mid"):
+            allow = max(allow, ph + 0.09 + 0.18 / 2.0)   # PenthouseCap top
+    if p.roof_sign:
+        allow = max(allow, RAIL_H + min(3.5, ROOFSIGN_H_MAX, p.h * 0.5))
+    return allow
 
 
 def mass_faces(p):
@@ -1635,15 +1733,21 @@ def _b_backdrop(K, stage, prefix, p, M):
                       (p.cx, p.cy, z_top + RAIL_H / 2.0),
                       (p.Lx + 0.20, p.Ly + 0.20, RAIL_H), M.parapet))
     rng = _rng(prefix, "bdrop", p.seed)
-    side = math.sqrt(max(0.5, p.Lx * p.Ly * PH_AREA_FRAC)) * 0.85
-    pw = min(side, p.Lx * 0.5, 8.0)
-    pdp = min(side, p.Ly * 0.5, 8.0)
-    if pw > 1.2 and pdp > 1.2:
-        prims.append(_box(
-            K, stage, f"{prefix}/Penthouse",
-            (p.cx + (p.Lx * 0.5 - pw * 0.5 - 0.4) * rng.uniform(-0.8, 0.8),
-             p.cy + (p.Ly * 0.5 - pdp * 0.5 - 0.4) * rng.uniform(-0.8, 0.8),
-             z_top + PH_H / 2.0), (pw, pdp, PH_H), M.shell))
+    # [W3 K-micro · S01-F1] The footprint moves to `backdrop_penthouse` so
+    # `plan_building` can state an **exact** `p.ridge` from the same three lines,
+    # and the height comes from `backdrop_ph_h` so the opt-in `roof_under_ceil`
+    # clamp has somewhere to act. With the default (`roof_under_ceil=False`) this
+    # is the pre-K-micro geometry expression for expression.
+    ph_xy = backdrop_penthouse(p)
+    if ph_xy is not None:
+        pw, pdp = ph_xy
+        ph_h = backdrop_ph_h(p)
+        if ph_h >= PH_MIN_H:
+            prims.append(_box(
+                K, stage, f"{prefix}/Penthouse",
+                (p.cx + (p.Lx * 0.5 - pw * 0.5 - 0.4) * rng.uniform(-0.8, 0.8),
+                 p.cy + (p.Ly * 0.5 - pdp * 0.5 - 0.4) * rng.uniform(-0.8, 0.8),
+                 z_top + ph_h / 2.0), (pw, pdp, ph_h), M.shell))
     return prims
 
 
@@ -2398,6 +2502,67 @@ def selfcheck(verbose=True):
                                   eyes=None)
             same = same and K1.calls == K2.calls
     chk("eyes=None → 좌표 완전 동일 (씬 미배선 보증)", same)
+
+    # --- 14. S01-F1 — the ridge the builders really emit --------------------
+    print("\n[14] S01-F1 지붕 부속 상한 — p.ridge vs 실제 최상단 프림")
+    over_b, exact_b, worst = [], [], 0.0
+    for kind in KINDS:
+        for d in (14.0, 30.0, 55.0, 95.0):
+            for W in (8.0, 24.0, 40.0):
+                for nf in (1, 4, 8, 15):
+                    for bz in (0.0, 3.4, -2.15):
+                        p, K, _pr = _run(kind, d, W=W, floors=nf, base_z=bz)
+                        top = max(c[2][2] + c[3][2] / 2.0 for c in K.calls)
+                        if top > p.ridge + 1e-9:
+                            over_b.append((p.kind, p.tier, W, nf, round(top, 3),
+                                           round(p.ridge, 3)))
+                        worst = max(worst, p.ridge - top)
+                        if p.kind == "backdrop" and abs(top - p.ridge) > 1e-9:
+                            exact_b.append((p.tier, W, nf, round(top, 3),
+                                            round(p.ridge, 3)))
+    chk("전 kind×tier×W×층×base_z 에서 실제 최상단 ≤ p.ridge", not over_b,
+        str(over_b[:4]) if over_b else f"여유 최대 {worst:.3f} m")
+    chk("kind=backdrop 은 p.ridge 가 **정확값** (실측 최상단과 일치)",
+        not exact_b, str(exact_b[:4]) if exact_b else "일치")
+    # The number scene01 had to derive by hand, now stated by the kit.
+    bdp = _demo_bd("backdrop", 55.0, W=18.0)
+    pb = plan_building(bdp, dist=55.0)
+    chk("backdrop 지붕 부속 = +2.90 m (S01 이 여섯 동에서 실측한 값)",
+        abs(pb.roof_allow - 2.90) < 1e-9
+        and abs(pb.ridge - (pb.top_z + 2.90)) < 1e-9,
+        f"roof_allow {pb.roof_allow:.2f} · ridge {pb.ridge:.2f}")
+    # The opt-in clamp, and the proof that it is genuinely opt-in.
+    eyes2 = judged_eyes(0.0)
+    # h chosen so the **shell** clears the ceiling and only the penthouse breaks it
+    # (d_true 32 -> z_ceil 4.80; shell top 2.80, so the head-room is 2.00 m: more
+    # than the 1.20 statutory parapet, less than the 2.90 penthouse).
+    tall = dict(x0=30.0, x1=48.0, y0=-9.0, y1=9.0, h=2.80, floors=1,
+                axis="x", facade_x=30.0, face_dir=-1.0)
+    pu = plan_building(tall, eyes=eyes2, kind="backdrop")
+    pc = plan_building(tall, eyes=eyes2, kind="backdrop", roof_under_ceil=True)
+    chk("기본값은 클램프 없음 (roof_under_ceil False · ridge = top+2.90)",
+        pu.roof_under_ceil is False
+        and abs(pu.ridge - (pu.top_z + PH_H)) < 1e-9, f"{pu.ridge:.2f}")
+    chk("roof_under_ceil=True 는 옥탑을 z_ceil 로 자른다",
+        pc.ridge <= pc.z_ceil + 1e-9 and pc.ridge < pu.ridge,
+        f"clamp {pc.ridge:.2f} ≤ z_ceil {pc.z_ceil:.2f} < 무클램프 {pu.ridge:.2f}")
+    Ku, Kc = _MockKit(oriented=True), _MockKit(oriented=True)
+    build_korean_building(Ku, None, "/W/B", tall, _ROLE_MTLS, eyes=eyes2,
+                          kind="backdrop")
+    build_korean_building(Kc, None, "/W/B", tall, _ROLE_MTLS, eyes=eyes2,
+                          kind="backdrop", roof_under_ceil=True)
+    tu = max(c[2][2] + c[3][2] / 2.0 for c in Ku.calls)
+    tc = max(c[2][2] + c[3][2] / 2.0 for c in Kc.calls)
+    chk("클램프 팔의 실제 최상단도 z_ceil 이하 (선언과 기하가 같다)",
+        abs(tu - pu.ridge) < 1e-9 and abs(tc - pc.ridge) < 1e-9
+        and tc <= pc.z_ceil + 1e-9, f"무클램프 {tu:.2f} · 클램프 {tc:.2f}")
+    # A shell that already breaks the ceiling cannot be rescued by the clamp: the
+    # 1.20 m parapet is statutory and stays. The clamp must **say so**, not fake it.
+    huge = dict(tall, h=9.0, floors=3)
+    ph_ = plan_building(huge, eyes=eyes2, kind="backdrop", roof_under_ceil=True)
+    chk("셸이 이미 천장을 넘으면 클램프는 법정 파라펫을 유지하고 ridge 로 사실을 말한다",
+        abs(ph_.roof_allow - RAIL_H) < 1e-9 and ph_.ridge > ph_.z_ceil,
+        f"ridge {ph_.ridge:.2f} > z_ceil {ph_.z_ceil:.2f} · allow {ph_.roof_allow:.2f}")
 
     print("\n" + "=" * 74)
     n_ok, n = sum(ok), len(ok)

@@ -19,10 +19,26 @@ Shared  : scene_common.py (build_slope/build_straight_stairs/build_rot_group/
       -> apartments and bridge on the far bank
   Down that bank go (a) **concrete stairs cutting straight through** (width 3, unrailed
   by custom) and (b) **a single diagonal ramp crossing the bank obliquely** (width 2.5,
-  grade 8%), taking the same 3.2 m drop at different grades — the contrast-pair intent
-  is unchanged, only the terrain was replaced with a real Han river section.
+  grade 12.5% [W3 S17]), taking the same 3.2 m drop at different grades — the contrast-pair
+  intent is unchanged, only the terrain was replaced with a real Han river section.
   Dropped: the zigzag 2 flights · paired lanes (lane A/B) · separate parapet ·
   the 3 retaining-wall opening segments.
+
+[W3 S17] Season, reference images, and the one authorised lever
+  * **Season = SUMMER**, pinned from **G3** (`Docs/reference_photos/Generated Image -
+    Scene03.jpg`), the nearest image to this scene under the 07-31 season ruling
+    (`w3_intake_v2_images.md` §7-8: an imageless scene inherits its nearest image's
+    season). G3 is the same Hangang levee section — crest path, planted slope, a **wide
+    unrailed flight cutting straight down the bank**, promenade, fence, benches, broad
+    water, bridge, far apartments — in **full leaf under a blue summer sky**. **G9**
+    (`…Scene09.jpg`, autumn) is secondary and is read **for the water-edge terrace form
+    only, never for its season.** Consequence: `build_tree(bare=)` stays **False**
+    everywhere in this file; there is no leaf-off element to wrap.
+  * **R17-1 = (ii)** (`w3_intake_v2_images.md` §7 ruling 7): the stair identity is
+    restored by **shortening the ramp**, NOT by widening the flight (the flight's
+    `y0/y1/riser/tread/nsteps/x0` are frozen) and NOT by re-aiming any camera
+    (`build_views` is byte-frozen — *"legibility comes from geometry, never from camera
+    edits"*).
 
 Hazard
   Looking +X from the levee path (z=0) at robot eye height h0.3, the sight line grazing
@@ -33,15 +49,42 @@ Hazard
   river-side edge of the diagonal ramp is only a kerb (h0.15) on a 1.5 m stone
   revetment — a below-code reality.
 
+Two declared below-code realities (stated, never smoothed)
+  1. The ramp's river-side edge is a 0.15 m kerb, not a guard (above).
+  2. **The ramp grade is 12.5% = 1/8** [W3 S17]. 편의증진법 접근로/경사로's ceiling is
+     **1/12**, and the 1/8 relaxation needs **all three** of 기존시설 · 높이 ≤1 m ·
+     상시보조서비스 (`Docs/surveys/cue_arrangement_survey.md:148` `[확인]`), none of which
+     holds here. So 1/8 is used as what it is: **the steepest gradient the Korean
+     accessibility code ever names** — a named number rather than an invented one — and
+     the deviation is declared, exactly as (1) is. What the 40 m ramp used to be was not
+     code-clean either: at 8.0% it was a **40 m continuous run with no rest landing**,
+     against 조경설계기준 LDS-2016 5.9 경사로 (4) — *1,500 × 1,500 landing every 30 m*
+     (`Docs/surveys/s3_research_numbers_v1.md` §217, grade **A**) — and landings are
+     **CANCELLED for 02 · 03 · 17** by `w3_execution_spec_v1.md` §6.1-1/2/5/8/9/10. At
+     25.6 m the run is under that 30 m threshold, so **no landing is owed**: the
+     shortening closes that defect instead of inheriting it.
+
+S06-B kerbless-by-design — VERIFIED, EV-C closed [W3 S17]
+  `w3_intake_06_10.md` §3 leaves 03/12/17 kerbless *"only if a photo check confirms it"*.
+  **G3 is that photo**: its levee crown paving meets the planted slope with a flush edge
+  and no raised 연석 anywhere along the promenade. The section here has no 차도 at all —
+  「도로의 구조·시설 기준」 제16조's 연석 separates a **carriageway** from a footway, and
+  what this crest carries is a 자전거도로 (asphalt, x −4…0) and a 보도 (interlock,
+  x −7.5…−4.5) **separated by a 0.5 m planting strip**, both at the same +0.006 top. A
+  보차도 경계석 would be a fabrication. `infra_kit.build_curb_line` is therefore **not**
+  called here; the only kerb-like prims are the crest cope (a 마루 끝 cope, `PARAMS["cope"]`)
+  and the ramp's river-side kerb, and neither is a 보차도 연석.
+
 Goal
-  (1) levee crest (sidewalk 3 + bike road 3) + crest kerb
+  (1) levee crest (sidewalk 3 + bike road 4 + 0.5 planting strip) + crest cope
   (2) grass bank as a 7-segment polyline (shoulder rounding 25.7% -> 60% at the
       bottom, 50% average = 1:2), built as 2 Y bands that leave only the stair width
       (y +-1.5) open — segments overlap by margin so no gap can open
   (3) 20 stair steps (riser 0.16 · tread 0.32 · width 3) cutting straight through
-  (4) diagonal ramp: a single build_slope inside rot_group (yaw 80.7931 deg) — length
-      40 m, grade 8%, width 2.5, uphill cut face (max 0.30 m) · river-side stone
-      revetment (max 1.53 m)
+      — **frozen by R17-1 (ii): no widening, no move, so GT keeps its drop edge at x=0**
+  (4) diagonal ramp: a single build_slope inside rot_group (yaw **75.5225 deg**) — length
+      **25.6 m**, grade **12.5%**, width 2.5, uphill cut face (max 0.30 m) · river-side
+      stone revetment (max 1.50 m)
   (5) terrace (promenade width 3 + grass + benches + silver grass) · riprap revetment ·
       broad water · 4 apartment blocks across · bridge (existing PARAMS reused)
 
@@ -54,14 +97,19 @@ Walking-continuity self-check table (both routes: levee path z=0 -> terrace z=�
   │ A4 terrace grass         ( 7.20,   0.00, −3.200)    flat (flush with stair foot)
   │ A5 promenade             (13.00,   0.00, −3.200)    flat
   ├ B0 levee crest           (−0.60,   4.10,  0.000)    flat
-  │ B1 ramp uphill start     ( 0.59,   3.90,  0.000)    0.152 threshold vs crest end
+  │ B1 ramp uphill start     ( 0.58,   3.85,  0.000)    0.149 threshold vs crest end
   │                                                     ([v7] old apron prim removed —
   │                                                      see PARAMS["ramp"]["apron"])
-  │ B2 ramp s=10             ( 3.43,  13.58, −0.800)    grade 8%
-  │ B3 ramp s=25             ( 5.83,  28.38, −2.000)    grade 8%
-  │ B4 ramp end s=40         ( 8.23,  43.19, −3.200)    grade 8% -> flush with terrace
-  └ B5 promenade merge       (13.00,  43.00, −3.200)    flat
-  * Both routes drop the same 3.20 — the basis of the contrast pair. Stairs 50% vs ramp 8%.
+  │ B2 ramp s=6.4            ( 3.39,   9.73, −0.800)    grade 12.5%
+  │ B3 ramp s=16             ( 5.79,  19.03, −2.000)    grade 12.5%
+  │ B4 ramp end s=25.6       ( 8.19,  28.32, −3.200)    grade 12.5% -> flush with terrace
+  └ B5 promenade merge       (13.00,  28.00, −3.200)    flat
+  * Both routes drop the same 3.20 — the basis of the contrast pair. Stairs 50% vs ramp
+    12.5% (was 8%): the contrast is 4.0x instead of 6.25x, and it now fits one frame.
+  * [W3 S17] Route B is a **walked surface**, so shortening it is a **GT FULL** change
+    (`w3_intake_v2_images.md` §2 GT key: FULL = walked surface moves -> R-1+R-2+R-3).
+    The intake's (f) guessed **A**; the measurement says FULL and the ledger row says
+    FULL. Route A (the flight) and the drop edge at x=0 are untouched.
 
 Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
@@ -85,6 +133,7 @@ import random as _random          # [v6] fixed-seed jitter for silver-grass clum
 
 import scene_common as sc
 import ground_kit as gk
+import infra_kit as ik          # [W3 S17 · F5] derive_manholes — G-4, KDS 61 40 00
 
 
 # ===========================================================================
@@ -148,14 +197,38 @@ PARAMS = dict(
     #    perturbation of the paving cell, which §4.4 assigns to T1 (MDL unit
     #    jitter). The kit's job is the ledger — unit_cell 0.200 / origin (0,0)
     #    is handed over by `plan_ground`.
+    #  ═══ [W3 S17 · F5] the manhole is DERIVED, not sited ═══════════════════
+    #  `tonglam_v2.md` FIX-5 calls the manhole *"the worst single prop"* in 17's d5 cut,
+    #  and G-4 diagnosed why: its coordinate (−2.00, 1.20) was solved from the camera,
+    #  not from a drainage network. `infra_kit.derive_manholes` now exists, so the
+    #  coordinate list is **deleted** and replaced by the service line it should always
+    #  have come from. `utility` below is that line; `build_ground_kit` runs the
+    #  derivation live and the smoke prints it, so the count is a **result**, not a claim.
+    #  Measured: Ø450 storm main under the trench drain at x = −4.15, the whole modelled
+    #  levee y −30…48 (78.0 m). KDS 61 40 00 max straight-run interval for Ø ≤ 600 is
+    #  **75 m**, so the run yields **2** chambers — `head` at (−4.15, −30.00) and one
+    #  `interval` at (−4.15, +9.00) — and **both are outside the ground plan region**
+    #  (x −7.5…0, y −6…6). Manholes inside the plan: **0**. That is the whole of FIX-5.
+    #  The gullies at (−4.15, ±5.50) are **not** declared as `junctions`: a 우수받이
+    #  reaches the main through a 연결관, and treating each as a chamber trigger would
+    #  put two manholes back into the near window by the back door.
+    #
+    #  `patches` is **deleted too**, and it is a measured null, not a hope: GT-24's
+    #  `levee_paved` extension (`f39abe0`) already removed the profile's `("patch", 4)`
+    #  row, so the site list has been inert since. CPU A/B of `plan_ground` with the list
+    #  present vs absent: `patch` **0 in both arms**, element count and prim count equal.
+    #  Kept as a comment rather than a live list because the user's ban on decorative
+    #  ground rectangles makes a dormant list of four rectangles read as intent.
+    #    was: patches=[(-1.15,-0.55), (-5.60,2.20), (-3.10,-3.40), (-6.40,-1.10)]
     gkit=dict(
         region=(-7.5, -6.0, 0.0, 6.0),        # crown hard surface only
-        manholes=[(-2.00, 1.20)],             # 1 unit, d5 near window
         gullies=[(-4.15, -5.50), (-4.15, 5.50)],
         trench=(-4.15, -4.80, 4.80),          # bike/green boundary drain
-        patches=[(-1.15, -0.55), (-5.60, 2.20), (-3.10, -3.40), (-6.40, -1.10)],
         wear_lane=((-6.00, -6.0), (-6.00, 6.0)),   # sidewalk wear axis (runs in Y)
     ),
+    #  The declared storm main (G-4's `PARAMS["utility"]` shape). Laid where a real one
+    #  runs: under the footway/bikeway boundary, parallel to the levee, toward the low end.
+    utility=dict(line=[(-4.15, -30.0), (-4.15, 48.0)], d_mm=450.0, kind="storm"),
     # Crest-end kerb — open at the stair gap (y +-1.5) and the ramp entry apron (y 2.6..4.4)
     cope=dict(x0=-0.20, x1=0.05, h=0.05,
               y_segs=((-30.0, -1.5), (1.5, 2.6), (4.4, 48.0))),
@@ -169,10 +242,14 @@ PARAMS = dict(
     stairs=dict(x0=0.0, riser=0.16, tread=0.32, nsteps=20,
                 y0=-1.5, y1=1.5, z_top=0.0, base_z=-4.6),
     # --- Single diagonal ramp : crosses the bank obliquely ---
-    #     length 40 m · grade 8% · width 2.5. Heading yaw = acos(6.4/40) = 80.7931 deg
-    #     (only 6.4 m of X progress over 40 m of run -> the 50% bank grade stretched to 8%)
+    #     length 25.6 m · grade 12.5% · width 2.5. Heading yaw = acos(6.4/25.6) = 75.5225 deg
+    #     (only 6.4 m of X progress over 25.6 m of run -> the 50% bank grade stretched to 12.5%)
     #     offset e : how far the deck's uphill edge is pushed riverward from the
     #     bank-chord tangent. e_up=0.6 gives an uphill cut face of 0.07~0.30 m (0 buried).
+    #     [W3 S17] Re-measured at length 25.6: cut 0.065~0.291 (positive everywhere, so the
+    #       deck is never buried) and the worst river-side face 1.530 -> **1.500 m**, still
+    #       far under the 2.35 m solid fill depth. The smoke prints both live — the v6
+    #       figures below (1.53 / 1.18) are the judgment's record, not current values.
     #     [v6 judgment (a)] Exposed fill face: the river-side cut (max 1.53 m) read as a
     #       "concrete block laid on the bank" (judge_v6_rt_mod6 §6 — worst forced element).
     #       Causes: (a) material break (rock_wall vs surrounding grass) + (b) flat top +
@@ -201,7 +278,30 @@ PARAMS = dict(
     #     [v7 judgment (11)-1 (a)] The batter read as "3 artificial steps" because a step
     #       height of 0.42 m is distinct at 17 m. **Keeping total width and drop (1.50 x 1.26)**,
     #       it splits into 9 steps at 0.14 m each (advised <=0.15) = a continuous slope.
-    ramp=dict(p0=(0.0, 4.0), length=40.0, width=2.5, e_up=0.60,
+    #     [W3 S17 · R17-1 (ii)] **length 40.0 -> 25.6, grade 8.0% -> 12.5%, yaw
+    #       80.7931 -> 75.5225 deg.** `p0`, `width`, `e_up`, the deck thickness, the kerb
+    #       and the batter are all **unchanged** — the single edited number is `length`,
+    #       and every other ramp quantity is derived from it by `ramp_geom()`.
+    #       *Why shorten and not re-site.* The ruling offers both. Measured in image space
+    #       (scratchpad `s17_frame_metric.py`, default Isaac camera hFOV 60 / vFOV 36 at
+    #       1920x1080, the frozen `build_views` eyes), against the ramp/stair projected-area
+    #       ratio in `pair_compare`:
+    #         · shorten, +Y sense (this)     40.0 -> 25.6 m : ratio 4.84 -> 3.59
+    #         · re-site to descend in −Y     40.0 m         : ratio 4.84 -> **7.53** (worse:
+    #           the ramp swings into the near field and takes 3.5 % of the frame)
+    #         · re-site head-far, foot beside the stair foot : ratio -> **5.04**, and the two
+    #           heads stop sharing the crest, which is the pair's premise (an agent standing
+    #           at the drop edge must see both ways down)
+    #       so **shorten** is the measured winner and the other two are recorded as tried.
+    #       Ramp plan-Y extent **39.88 -> 25.41 m (−36 %)**; the deck's far end comes from
+    #       65.5 m to 53.2 m off the `pair_compare` eye; the visible fraction of the deck in
+    #       `preset_h1.8_d10` goes 15.7 % -> 26.5 %.
+    #       *Why 25.6 and not 30.* 25.6 m is 3.2 / (1/8) — the run at the steepest gradient
+    #       Korean accessibility law names (see the docstring's below-code declaration 2).
+    #       30.0 m would be 10.67 % — a gradient no Korean standard names at all, i.e. an
+    #       invented number, which this repo does not ship (RF-5's "not an invented yellow").
+    #       Both are under the 30 m rest-landing threshold, so neither owes a landing.
+    ramp=dict(p0=(0.0, 4.0), length=25.6, width=2.5, e_up=0.60,
               deck_t=0.35, fill_t=2.0, fill_out=0.10,
               curb_w=0.15, curb_h=0.15,
               batter=dict(n=9, w=0.1667, dz=0.14, margin=0.30),
@@ -416,6 +516,19 @@ def ramp_geom():
                 e_dn=float(rp["e_up"]) + float(rp["width"]))
 
 
+def derived_manholes():
+    """[W3 S17 · F5] Chambers the declared storm main needs — `infra_kit.derive_manholes`.
+
+    G-4's rule, applied rather than quoted: a manhole exists where the **line** does
+    something (방향 / 경사 / 관경 변화 or 합류) and otherwise at the KDS 61 40 00
+    straight-run interval for its diameter. This function knows nothing about cameras,
+    which is the entire point of FIX-5 — the old coordinate (−2.00, 1.20) was solved
+    from the d5 near window."""
+    u = PARAMS["utility"]
+    return ik.derive_manholes([tuple(p) for p in u["line"]],
+                              d_mm=float(u["d_mm"]), kind=u["kind"])
+
+
 def ramp_point(s, e):
     """Ramp path parameters (s: distance travelled, e: riverward lateral offset) -> world (x, y, z)."""
     g = ramp_geom()
@@ -428,6 +541,158 @@ def ramp_point(s, e):
 # ===========================================================================
 # [C3] Smoke — pre-boot geometry self-check (early exit)
 # ===========================================================================
+def hazard_registry():
+    """**R-1 for GT-27** — re-derive the hazard / drop registry from `PARAMS`, boot-free.
+
+    `gt_changes_w3.md` §1 R-1: *"the scene's own self-check re-derives and prints the
+    hazard/drop registry from the changed geometry"*. Rows are derived, never typed:
+    every z comes out of `slope_z` / `ramp_geom` / the stair ladder.
+
+    Returns `[dict(tag, kind, x, y, z_top, fall, note), …]`; `kind` is `drop`
+    (a negative obstacle), `up_step` (never to be labelled a drop — GT-1's rule) or
+    `grade` (a walked surface that descends without an edge)."""
+    st = PARAMS["stairs"]
+    rp = PARAMS["ramp"]
+    sl = PARAMS["slope"]
+    cp = PARAMS["cope"]
+    g = ramp_geom()
+    rows = []
+    # (1) the scene's negative obstacle: the crest shoulder, everywhere the stair gap is not
+    rows.append(dict(tag="levee_crest", kind="drop", x=float(st["x0"]),
+                     y=(float(sl["y0"]), float(sl["y1"])),
+                     z_top=0.0, fall=float(_SLOPE_H),
+                     note="bank shoulder x=0 -> terrace; no guard (unrailed by custom)"))
+    # (2) the flight — 20 nosings, frozen by R17-1 (ii)
+    for k in range(int(st["nsteps"])):
+        rows.append(dict(tag=f"stair_nosing_{k + 1:02d}", kind="drop",
+                         x=float(st["x0"]) + st["tread"] * k,
+                         y=(float(st["y0"]), float(st["y1"])),
+                         z_top=-st["riser"] * k, fall=float(st["riser"]),
+                         note="frozen"))
+    # (3) route B — a graded walked surface, NOT a drop
+    rows.append(dict(tag="ramp_deck", kind="grade", x=float(rp["p0"][0]),
+                     y=float(rp["p0"][1]), z_top=0.0, fall=float(g["drop"]),
+                     note=f"length {g['length']:.2f} m, grade {g['grade'] * 100:.2f}%, "
+                          f"yaw {g['yaw']:.4f} deg — descends without an edge"))
+    # (4) the ramp's river-side edge: kerb only, over the fill face -> a real lateral fall
+    worst_face, worst_s = 0.0, 0.0
+    for i in range(0, 129):
+        s = g["length"] * i / 128.0
+        xd = g["d"][0] * s + g["n"][0] * g["e_dn"]
+        gz = slope_z(xd) if xd <= _SLOPE_RUN else _TERRACE_Z
+        face = (-g["grade"] * s) - gz
+        if face > worst_face:
+            worst_face, worst_s = face, s
+    px, py = rp["p0"]
+    rows.append(dict(tag="ramp_river_edge", kind="drop",
+                     x=px + g["d"][0] * worst_s + g["n"][0] * g["e_dn"],
+                     y=py + g["d"][1] * worst_s + g["n"][1] * g["e_dn"],
+                     z_top=-g["grade"] * worst_s, fall=worst_face,
+                     note=f"worst section at s={worst_s:.2f}; kerb h{rp['curb_h']:.2f} "
+                          f"only — declared below-code reality (1)"))
+    # (5) the crest cope — an UP-stand, never a drop (GT-1's labelling rule)
+    rows.append(dict(tag="crest_cope", kind="up_step", x=float(cp["x0"]),
+                     y=tuple(cp["y_segs"][0]), z_top=float(cp["h"]),
+                     fall=float(cp["h"]),
+                     note="cope proud of the crest; open at the stair gap and the ramp entry"))
+    return rows
+
+
+def _frame_metric():
+    """[W3 S17] The acceptance test for **R17-1 (ii)** — projected ramp/stair area.
+
+    The ruling asks that *"the stair-ramp pair reads in one frame"* with the judge
+    presets untouched, so the instrument has to be image space, not plan space. Default
+    Isaac viewport camera: focalLength 18.147 / horizontalAperture 20.955 -> **hFOV 60.0
+    deg**, 16:9 -> **vFOV 36.0 deg** at 1920x1080. Cameras come from `build_views()`,
+    which this work package does not edit."""
+    W, H = 1920.0, 1080.0
+    fx = (W / 2.0) / math.tan(math.radians(60.0) / 2.0)
+    fy = (H / 2.0) / math.tan(math.radians(36.0) / 2.0)
+    st = PARAMS["stairs"]
+    rp = PARAMS["ramp"]
+    g = ramp_geom()
+    px, py = rp["p0"]
+    stair = [(st["x0"], st["y0"], 0.0), (st["x0"], st["y1"], 0.0),
+             (st["x0"] + st["nsteps"] * st["tread"], st["y1"], -_SLOPE_H),
+             (st["x0"] + st["nsteps"] * st["tread"], st["y0"], -_SLOPE_H)]
+    ramp = [(px + g["d"][0] * s + g["n"][0] * e,
+             py + g["d"][1] * s + g["n"][1] * e, -g["grade"] * s)
+            for s, e in ((0.0, g["e_up"]), (0.0, g["e_dn"]),
+                         (g["length"], g["e_dn"]), (g["length"], g["e_up"]))]
+
+    def basis(eye, tgt):
+        f = [tgt[i] - eye[i] for i in range(3)]
+        n = math.sqrt(sum(c * c for c in f))
+        f = [c / n for c in f]
+        r = [f[1], -f[0], 0.0]
+        n = math.sqrt(r[0] * r[0] + r[1] * r[1]) or 1.0
+        r = [r[0] / n, r[1] / n, 0.0]
+        u = [r[1] * f[2] - r[2] * f[1], r[2] * f[0] - r[0] * f[2],
+             r[0] * f[1] - r[1] * f[0]]
+        return f, r, u
+
+    def proj(p, eye, bs):
+        f, r, u = bs
+        v = [p[i] - eye[i] for i in range(3)]
+        z = sum(v[i] * f[i] for i in range(3))
+        if z <= 1e-6:
+            return None
+        return (W / 2.0 + fx * sum(v[i] * r[i] for i in range(3)) / z,
+                H / 2.0 - fy * sum(v[i] * u[i] for i in range(3)) / z)
+
+    def clip(poly):
+        out = list(poly)
+        for e in range(4):
+            if not out:
+                return []
+            inp, out = out, []
+            for i in range(len(inp)):
+                a, b = inp[i - 1], inp[i]
+
+                def ins(p, e=e):
+                    return (p[0] >= 0.0, p[0] <= W, p[1] >= 0.0, p[1] <= H)[e]
+
+                def cut(a, b, e=e):
+                    if e < 2:
+                        xe = 0.0 if e == 0 else W
+                        t = (xe - a[0]) / (b[0] - a[0])
+                        return (xe, a[1] + t * (b[1] - a[1]))
+                    ye = 0.0 if e == 2 else H
+                    t = (ye - a[1]) / (b[1] - a[1])
+                    return (a[0] + t * (b[0] - a[0]), ye)
+
+                if ins(b):
+                    if not ins(a):
+                        out.append(cut(a, b))
+                    out.append(b)
+                elif ins(a):
+                    out.append(cut(a, b))
+        return out
+
+    def area(poly):
+        if len(poly) < 3:
+            return 0.0
+        return abs(sum(poly[i - 1][0] * poly[i][1] - poly[i][0] * poly[i - 1][1]
+                       for i in range(len(poly)))) / 2.0
+
+    out = []
+    views = build_views()
+    for vn in ("pair_compare", "across_river", "toe_lookup",
+               "preset_h0.9_d10", "preset_h1.8_d10"):
+        v = views[vn]
+        bs = basis(v["eye"], v["tgt"])
+        vals = {}
+        for nm, poly in (("stair", stair), ("ramp", ramp)):
+            pp = [proj(p, v["eye"], bs) for p in poly]
+            vals[nm] = (0.0, 0.0) if any(q is None for q in pp) else \
+                (area(clip(pp)), area(pp))
+        out.append((vn, vals["stair"][0] / (W * H), vals["ramp"][0] / (W * H),
+                    (vals["ramp"][0] / vals["stair"][0]) if vals["stair"][0] > 1e-6 else float("inf"),
+                    (vals["ramp"][0] / vals["ramp"][1] * 100.0) if vals["ramp"][1] > 1e-6 else 0.0))
+    return out
+
+
 def _smoke_report():
     st = PARAMS["stairs"]
     rp = PARAMS["ramp"]
@@ -480,12 +745,17 @@ def _smoke_report():
     # ── Ramp diagonal placement · cut/fill check ──
     p_end = ramp_point(g["length"], (g["e_up"] + g["e_dn"]) / 2.0)
     print("  [사선 램프 배치]")
-    print(f"    yaw {g['yaw']:.4f}° (cos = {_SLOPE_RUN}/{g['length']:.0f} = "
+    print(f"    yaw {g['yaw']:.4f}° (cos = {_SLOPE_RUN}/{g['length']:.1f} = "
           f"{g['d'][0]:.3f}) · 시점 {rp['p0']} · 종점 중심 "
           f"({p_end[0]:.2f}, {p_end[1]:.2f}, {p_end[2]:+.2f})")
     print(f"    상류 절토(+) / 매몰(−) · 강측 석축 높이:")
+    # [W3 S17] The station list is **derived from the live length**. It used to be the
+    #   literal `(0, 6, 12, 20, 28, 34, 40)`, which silently sampled 14.4 m of thin air
+    #   the moment `length` moved off 40 and reported a bogus FAIL for both this gate and
+    #   the batter gate below. Six equal stations + the end, whatever the length is.
+    _S = tuple(g["length"] * k / 6.0 for k in range(7))
     worst_cut, worst_face = 9.9, 0.0
-    for s in (0.0, 6.0, 12.0, 20.0, 28.0, 34.0, 40.0):
+    for s in _S:
         deck = -g["grade"] * s
         xu = g["d"][0] * s + g["n"][0] * g["e_up"]
         xd = g["d"][0] * s + g["n"][0] * g["e_dn"]
@@ -516,7 +786,7 @@ def _smoke_report():
           f"노면두께 {rp['deck_t']:.2f} = {worst_face - rp['deck_t']:.3f} m → "
           f"{'OK (배터 낙차가 더 큼)' if dz_bt * n_bt >= worst_face - rp['deck_t'] else 'FAIL'}")
     worst_res, x_toe_max, y_toe_min = 0.0, -99.0, 99.0
-    for s in (0.0, 6.0, 12.0, 20.0, 28.0, 34.0, 40.0):
+    for s in _S:                                   # [W3 S17] length-derived, see above
         deck = -g["grade"] * s
         z_toe = deck - rp["deck_t"] - dz_bt * n_bt
         x_toe = g["d"][0] * s + g["n"][0] * e_toe
@@ -538,8 +808,12 @@ def _smoke_report():
     # ── [v7 judgment (11)-1] entry apron footprint check (guards against the brown mass) ──
     #   The old apron sat inside rot_group(yaw), so local coordinates were mistaken for
     #   world and it reached world x +3.06 over the bank. The calculation is kept here.
-    cy_, sy_ = (math.cos(math.radians(g["yaw"])),
-                math.sin(math.radians(g["yaw"])))
+    # [W3 S17] Pinned to the **historical** yaw 80.7931 deg (length 40). This block is a
+    #   record of a past defect, so it must keep reporting the footprint the defective
+    #   prim actually had; recomputing it under the current yaw would rewrite history.
+    _YAW_HIST = 80.7931
+    cy_, sy_ = (math.cos(math.radians(_YAW_HIST)),
+                math.sin(math.radians(_YAW_HIST)))
     px0, py0 = rp["p0"]
 
     def _rot_world(lx, ly):
@@ -551,7 +825,7 @@ def _smoke_report():
     old_xmax = max(p[0] for p in old_pts)
     ap = rp["apron"]
     print("  [진입 apron 풋프린트 — v7 판정 ⑪-1 갈색 매스]")
-    print(f"    구(rot_group 내부, 두께 2.80): 월드 꼭짓점 "
+    print(f"    구(rot_group 내부, 두께 2.80 · 사적 yaw 80.7931): 월드 꼭짓점 "
           f"{[(round(a, 2), round(b, 2)) for a, b in old_pts]}")
     print(f"      → 월드 x 최대 {old_xmax:+.2f} (사면 상면 "
           f"{slope_z(old_xmax):+.2f}) = 사면 위 "
@@ -664,6 +938,56 @@ def _smoke_report():
                   f"{'사면·계단 전부 은닉 OK' if hid else '사면 일부 노출'}")
     print("    ⇒ 은닉 컷에서는 둔치 원측만 지평으로 남아 근측 잔디와 "
           "연속 평면으로 읽힌다(negative obstacle 성립).")
+
+    # ── [W3 S17] R-1 — hazard / drop registry, re-derived from PARAMS ──
+    reg = hazard_registry()
+    drops = [r for r in reg if r["kind"] == "drop"]
+    ups = [r for r in reg if r["kind"] == "up_step"]
+    grades = [r for r in reg if r["kind"] == "grade"]
+    print(f"  [R-1 위험/낙차 레지스트리] drop {len(drops)} · up_step {len(ups)} · "
+          f"grade {len(grades)}  (GT-27 full re-cache 의 R-1)")
+    for r in reg:
+        if r["tag"].startswith("stair_nosing_") and r["tag"] != "stair_nosing_01":
+            continue
+        y = r["y"]
+        ys = (f"[{y[0]:6.2f},{y[1]:6.2f}]" if isinstance(y, tuple)
+              else f"{y:13.2f}")
+        print(f"    {r['tag']:18s} {r['kind']:8s} x{r['x']:6.2f} y{ys} "
+              f"z_top{r['z_top']:+7.3f} 낙차 {r['fall']:5.3f}  {r['note']}")
+    print(f"    · stair_nosing_02..20 은 동일 규칙(riser {PARAMS['stairs']['riser']:.3f}) "
+          f"으로 생략 · 총 낙차 "
+          f"{PARAMS['stairs']['nsteps'] * PARAMS['stairs']['riser']:.2f}")
+    print(f"    · up_step 은 drop 이 아니다(GT-1 규칙): cope {ups[0]['fall']:.3f} m 는 "
+          f"마루 끝 돋움이지 낙차가 아니다 → "
+          f"{'OK' if all(u['kind'] == 'up_step' for u in ups) else 'FAIL'}")
+    print(f"    · 램프는 grade 행이다 — 가장자리 없이 내려간다 → "
+          f"{'OK' if grades and grades[0]['kind'] == 'grade' else 'FAIL'}")
+    print(f"    · 계단 낙차 시단 x {PARAMS['stairs']['x0']:.2f} · GT drop edge 불변 → "
+          f"{'OK' if abs(PARAMS['stairs']['x0']) < 1e-9 else 'FAIL'}")
+
+    # ── [W3 S17 · F5] manhole derivation (G-4 / KDS 61 40 00) ──
+    mh = derived_manholes()
+    gr = PARAMS["gkit"]["region"]
+    mh_in = [m for m in mh
+             if gr[0] <= m["x"] <= gr[2] and gr[1] <= m["y"] <= gr[3]]
+    u = PARAMS["utility"]
+    llen = sum(math.dist(u["line"][i], u["line"][i + 1])
+               for i in range(len(u["line"]) - 1))
+    print(f"  [F5 맨홀 유도] 관로 Ø{u['d_mm']:.0f} · {u['kind']} · 연장 {llen:.1f} m "
+          f"→ KDS 최대 간격 {ik.MANHOLE_INTERVAL_KDS[0][1]:.0f} m")
+    for m in mh:
+        print(f"    ({m['x']:6.2f}, {m['y']:6.2f}) s={m['s']:5.1f} {m['reason']}")
+    print(f"    지반 플랜 영역 {tuple(gr)} 내 맨홀 {len(mh_in)}개 → "
+          f"{'OK (tonglam FIX-5: 카메라 해 (−2.00,1.20) 폐기)' if not mh_in else '확인 요'}")
+
+    # ── [W3 S17] R17-1 (ii) acceptance — projected ramp/stair area ──
+    print("  [R17-1(ii) 수용 검사] 투영 면적비 (hFOV 60 · vFOV 36 · 1920×1080, "
+          "카메라 무편집)")
+    for vn, sfrac, rfrac, ratio, vis in _frame_metric():
+        print(f"    {vn:17s} 계단 {sfrac * 100:6.3f}% · 램프 {rfrac * 100:6.3f}% · "
+              f"램프/계단 {ratio:6.2f} · 램프 프레임내 {vis:5.1f}%")
+    print("    (기준선 L=40: pair_compare 계단 0.468% · 램프 2.265% · 비 4.84 · "
+          "램프 plan-Y 39.88 m)")
     print("=" * 74)
 
 
@@ -926,20 +1250,29 @@ def main():
         g = PARAMS["gkit"]
         lv = PARAMS["levee"]
         z_crown = float(lv["z_top"]) + float(PARAMS["crown_bike"]["proud"])
+        # [W3 S17 · F5] Derive, do not site. Returns the chambers the declared Ø450
+        #   storm main actually needs (KDS 61 40 00); keep only those inside the ground
+        #   plan region. The build count is whatever this returns — measured 0.
+        mh = derived_manholes()
+        gr = tuple(g["region"])
+        mh_in = [(m["x"], m["y"]) for m in mh
+                 if gr[0] <= m["x"] <= gr[2] and gr[1] <= m["y"] <= gr[3]]
+        print(f"[S17·F5] 관로 유도 맨홀 {len(mh)}개 "
+              f"{[(round(m['x'], 2), round(m['y'], 2), m['reason']) for m in mh]} "
+              f"→ 지반 플랜 영역 내 {len(mh_in)}개 (구: 카메라 해 (−2.00, 1.20) 1개)")
         gp = gk.plan_ground(
-            "levee_paved", region=tuple(g["region"]), z=z_crown, gy=0.0,
+            "levee_paved", region=gr, z=z_crown, gy=0.0,
             origin=(0.0, 0.0, 0.0),
             edges=[("levee_crest", float(PARAMS["stairs"]["x0"]))],
             dists=(2, 5, 10), scene="scene17", tactile=(),
             # §12.4 — 17 is OFF: p = 0.24 (park/riverside), below the 0.50 bar.
-            overrides=dict(infra=dict(manhole=1, gully=2, gutter_L=0,
+            overrides=dict(infra=dict(manhole=len(mh_in), gully=2, gutter_L=0,
                                       trench=1)),
             extras_args=dict(wear_lane=dict(centerline=tuple(g["wear_lane"]),
                                             width=0.90)),
-            sites=dict(manhole=[tuple(v) for v in g["manholes"]],
+            sites=dict(manhole=mh_in,
                        gully=[tuple(v) for v in g["gullies"]],
-                       trench=[tuple(g["trench"])],
-                       patch=[tuple(v) for v in g["patches"]]),
+                       trench=[tuple(g["trench"])]),
             seed=17)
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
@@ -1115,9 +1448,17 @@ def main():
                                   M["reed"])
                     yy += fh["spacing"] * rnd.uniform(0.55, 1.60)
                     k += 1
+        # [W3 S17 · K4(b)/K4-F4] **belt flip.** `SCENE_SPECIES["Scene17"] = ("poplar",
+        #   "oak_black")` — 양버들 on the walked levee, 굴참나무-class broadleaf on the far
+        #   bank. K4-F4 records that a declared belt is **inert until the scene passes
+        #   `species=`/`belt=`**, so until this line every tree in the scene, including
+        #   these three at x ~80 m across the water, was drawn as the route poplar. These
+        #   are the only three prims in the file that are physically a separate stand.
+        #   `bare=` stays default-OFF: G3 pins summer (see the header).
         for i, t in enumerate(PARAMS["far_trees"]):
             sc.build_tree(stage, f"{ROOT}/FarTree_{i}", t["cx"], t["cy"],
-                          fb["z_top"], M["wood"], M["canopy_a"], M["canopy_b"])
+                          fb["z_top"], M["wood"], M["canopy_a"], M["canopy_b"],
+                          belt=True)
 
     def build_flat_fill(M):
         """hazard_stairs=False control: crest to terrace unified as flat grass at z=0."""

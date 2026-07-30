@@ -312,6 +312,14 @@ its eyes open; a correction, if any, is the spec's to make.
   Owner **Lane-1 / `ground_kit`**; **the dry-run prim total changes when it lands and must be
   declared**, per §0-1. Until then the rule this watch item exists to enforce: *no row may take a
   scope figure from `SCENE_PLANS` without reading the scene file that carries the profile.*
+  **LANDED — `[K-micro 07-31 · §12-1]`.** All five fixtures synced; dry-run geometric prims
+  **1137 → 1109 (−28)**, scatter instances **670 → 670**, per-scene decomposition and the
+  `ast` proof that all five `surface=` literals now match their scene files are in **§12-1**.
+  **This bullet's own scene03 replacement text is superseded**: it prescribes
+  `surface=(("patch", 8), ("stain", …))` from `:900-916`, but FANOUT A's S03 rebuild deleted the patch
+  row, and the landed fixture mirrors the file at `4bae470` instead. The `region` / `edges` /
+  `origin` / sceneC2 `infra`+`pave` / scene09 `pave` residue is **not** closed and the rule in
+  the sentence above stays in force for it.
 - **W5 · GT-6 has two gates, one proof.** The builder change lands in CB-5 (`scene_common`, K4-d)
   and the scene cut lands in CB-9 (S4, blocked on T3). The invariance proof belongs to whichever
   lands first and must be **re-run** at the second — 05 · 19 · 13 share the builder and are not in

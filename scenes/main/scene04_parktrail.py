@@ -25,6 +25,33 @@ Hazard (T4): an **irregular-riser sleeper stair** descending a gently sloped par
   `NEGOBS_SELFCHECK=1 python scene04_parktrail.py` (stair intrusion · grounding · dirt-band
   coverage). Hazard geometry unchanged.
 
+[W3 S04-1 · verge renovation] Target image **G4**
+  (`Docs/reference_photos/Generated Image - Scene04.jpg`), law =
+  `Docs/surveys/w3_intake_v2_images.md` scene04 row §2 + §7 rulings 8 / R04-1 / R04-2.
+  The user's directive was *"침목길 수풀 좀 더 추가하면 나을지도?"*, and G4 redefines what
+  "수풀" means here: the flanks are **a deep continuous leaf-litter floor with bare trunks and
+  low tufts**, plus the **rope-on-timber-post handline** that is the actual Korean trail
+  signature. They are **not** shrub domes. What changed:
+   (1) The five constant-`cy` ellipsoid verge rows (121 `add_sphere` instances) and the six
+       3-blob shrub clusters (18 instances) are **deleted** - `tonglam_v2` scored the scene
+       FAIL on *"giant moss-green ellipsoid blobs"* and both families are that shape.
+   (2) A **ground layer** replaces them: leaf-litter base material on every off-path ground
+       plate, ~40 CB-2 (`ground_kit.build_blot`, DEC-1) drift lobes that follow the **walk
+       centreline** instead of a constant `cy`, several hundred real 3-D leaf cards
+       (`VEG_DEBRIS`), low turf tufts from the procured-unused `Grass_Short_A/B`, and
+       leaf-off trunks via the `build_tree(bare=)` mechanism landed at `1346b70`.
+   (3) A **rope-on-timber-post handline** along the walk (scene-local, lift-ready for
+       `props_kit`). Ruling **R04-1** is binding: it is **DRESSING, NOT A GUARD** and does not
+       flip this scene's negative-obstacle label. The mechanism that makes that true is not a
+       promise but construction: **it is built in both hazard arms** (like the ground_kit twin
+       parity), so its presence carries zero information about the label.
+   (4) Season pinned **late autumn / leaf-off** (§7 ruling 8 -> R04-2), with a per-element
+       seasonal audit printed by the self-check.
+   (5) `04-B`: the ground_kit gravel scatter is **masked off the lawn onto the trail polygon**.
+       The `G-6` deposition scatter stays **gated** and is not implemented here.
+  Self-check (no boot, no GPU):
+  `NEGOBS_SELFCHECK=1 python3 scene04_parktrail.py` (= `NEGOBS_SMOKE=1`).
+
 Consistency correction (against the director's brief §C):
   riser table sum = 1.45, tread table sum = 5.55.
   -> slope drop = 1.45 (not the brief text's 0.9/−1.5 approximation), lower flat z = −1.45 throughout.
@@ -140,8 +167,11 @@ PARAMS = dict(
     #   The end nodes are kept: the upper start sits inside the background fence opening (y −6.5..−2.5),
     #   the lower end inside its opening (y −1.5..3.5), and the stair junctions (0,0)/(5.55,0) are fixed.
     #   width_jit: per-segment width +-10 % (removes the artificial band of a constant compacted width).
+    # [W3 S04-1] tint 1.10/1.05/0.95 -> 1.00/0.96/0.88: against a lawn the trail had to be
+    #   lifted to read as compacted soil; against a litter floor the same lift made the 6 m
+    #   ConnectU landing the brightest object in the near frame (pilot round 1).
     path=dict(width=1.8, thick=0.06, proud=0.001, overlap=0.7, width_jit=0.10,
-              tint=(1.10, 1.05, 0.95),
+              tint=(0.94, 0.90, 0.82),
               upper=[(-33.0, -4.90), (-29.6, -5.51), (-26.7, -5.19),
                      (-23.8, -4.23), (-20.9, -2.39), (-18.0, -1.17),
                      (-15.1, -1.01), (-12.2, -1.49), (-9.3, -2.46),
@@ -193,76 +223,90 @@ PARAMS = dict(
                  dict(cx=18.0, cy=9.0, gz="lower", trunk_h=1.6),
                  dict(cx=22.0, cy=0.0, gz="lower", trunk_h=1.4)],
 
-    # 6 shrub (hedge) clusters: (cx, cy, gz notation).
-    # v4-B1: gz="slope" shrubs are axis-aligned boxes, so grade 0.261 x half-width 0.6 ->
-    #   0.157 buried upslope / 0.157 floating downslope (26 % of the 0.6 height) -> switched to build_slope.
-    # v4-B2: a single box with sharp corners read as a 'crate on the lawn' -> 3 overlapping slabs per cluster.
-    # [v5 verdict applied / re-fix] The v4-B1+B2 combination backfired. build_slope
-    #   makes a thin plate whose top face alone follows the grade, and 3 such plates at
-    #   different angles rendered as a 'heap of angular boards poking out of the lawn'
-    #   (step_detail right / canopy_anchor lower right / trail_approach both sides).
-    #   -> The shape is replaced by **3 overlapping flattened ellipsoids (add_sphere) = a canopy blob**.
-    #     · The slope correction is applied to the 'placement height' only, not to the shape (_resolve_gz).
-    #       Being an axis-aligned solid of revolution, no angular cut face appears from any angle.
-    #     · Grounding: the sphere centre sits at ground z + rz*(1−embed), burying the bottom by
-    #       rz*embed (=25 %) -> floating and hard-edged shadows disappear.
-    #     · blobs = (dx, dy, rx, ry, rz) [radius, m]. Max height ~ 1.75*rz.
-    hedges=[dict(cx=-10.0, cy=3.0, gz=0.0), dict(cx=-4.0, cy=5.5, gz=0.0),
-            dict(cx=1.5, cy=4.5, gz="slope"),
-            dict(cx=7.0, cy=-4.5, gz="lower"), dict(cx=13.0, cy=-2.0, gz="lower"),
-            dict(cx=16.0, cy=3.0, gz="lower")],
-    hedge=dict(embed=0.25,
-               blobs=((0.00, 0.00, 0.72, 0.60, 0.34),
-                      (0.52, 0.40, 0.50, 0.42, 0.25),
-                      (-0.44, -0.36, 0.55, 0.38, 0.29))),  # (dx,dy,rx,ry,rz)
-
-    # === [v5.1] Sleeper stair among grass - grass mound band + shrubs on both sides ===
-    # The old v4-D8 `slope_understory` (4 build_slope tilted plates) is the same family as the
-    #   'angular boards' shape the v5 verdict flagged on the shrubs, so it is dropped and
-    #   fully replaced by a **row of flattened ellipsoids** wrapping both sides of the stair.
-    #   · rowA (grass mound band) : covers the dirt shoulder (|y| 1.15~1.7) and the trim seam.
-    #   · rowB/rowC (shrubs)      : close the slope into scrub beyond it.
+    # === [W3 S04-1] verge = G4 ground layer ================================
+    # **Deleted here**: `hedges` / `hedge` (6 clusters x 3 flattened ellipsoids = 18 prims) and
+    #   `verge.rows` (5 constant-`cy` rows of `add_sphere`, 121 prims). Both are the shape
+    #   `tonglam_v2` failed the scene on - *"giant moss-green ellipsoid blobs"* - and G4 shows
+    #   **no shrub dome anywhere**: the flanks are a litter floor, bare trunks and low tufts.
+    #   The v6 rework (3 constant tuft colours, smaller, denser) treated the symptom
+    #   (the texture) and kept the disease (the ellipsoid row). The row itself is now gone.
     #
-    # [v6 verdict - re-fix] rowA rendered as a **"mossy boulder field / Japanese rock garden"**.
-    #   Cause = (a bulky 1.4x1.24x0.84 m smooth ellipsoid) x (grass texture uv 1.6 m/tile).
-    #   A 1.6 m period normal map laid over a 1.4 m lump gives **rock-mass relief**, not leaves,
-    #   and once it also exceeds knee height it reads as a boulder. As the verdict recommended:
-    #   **drop the texture (constant green) + shrink + increase the count + randomise placement**.
-    #     (a) Material : grass texture -> 3 constant tuft colours (bright green·dry green variants,
-    #                    2.2x brighter than shrub -> separates the 'grass' and 'shrub' layers).
-    #     (b) Size     : rx 0.70 -> 0.30/0.42/0.46, rz 0.42 -> 0.17/0.24/0.26
-    #                    (max height 0.74 -> 0.54 m = below the knee -> reads as grassland).
-    #                    Complies with the verdict's rx 0.35~0.45 (the front row is smaller still).
-    #     (c) Count    : 1 row (step 0.85, 9 per side) -> **3 rows** (step 0.26/0.40/0.50).
-    #                    Total 38 -> 121. Being smaller they are laid denser, so concealment improves.
-    #     (d) Irregular: to kill the evenly spaced bead-string look the row spacing itself is jittered +-35 %
-    #                    (jit_step) and 12 % are skipped, creating clumps and gaps.
-    #                    To stop the axis-aligned ellipsoids all lying the same way,
-    #                    half of them swap rx/ry.
-    #   · Corridor intrusion check - tuft rows use an rx/ry swap, so the y radius must be taken as
-    #     max(rx,ry) to stay on the safe side (worst case = maximum jitter combination):
-    #       rowA0 inner edge = 1.42 − 0.22·0.7 − 0.30·1.18 = 0.912 > half width 0.90 ✓
-    #       rowA1 inner edge = 1.92 − 0.154 − 0.42·1.18   = 1.270 ✓
-    #       rowA2 inner edge = 2.45 − 0.154 − 0.46·1.18   = 1.753 ✓
-    #     (the seed is deterministic, so the **measured minimum is 0.942** - verge_selfcheck (1))
-    #   · Concealment: coverage of the dirt-band outline (|y|=1.30) along x is **91.7 %** (the old rowA
-    #     was bulky enough to cover past the seam, but was itself a boulder field). The remaining 8 %
-    #     of gaps is intentional - a little soil showing between grass clumps is normal for grassland.
-    #   · Grounding condition rz·embed >= rx·grade (0.261) - invariant under scale jitter (both sides scale with s).
-    #     For tuft rows a swap shrinks the x radius, so un-swapped (original rx) is the worst case:
-    #       rowA0 0.17×0.5=0.085 ≥ 0.30×0.261=0.078 ✓
-    #       rowA1 0.24×0.5=0.120 ≥ 0.42×0.261=0.110 ✓
-    #       rowA2 0.26×0.5=0.130 ≥ 0.46×0.261=0.120 ✓
-    #       rowB  0.32×0.5=0.160 ≥ 0.60×0.261=0.157 ✓ (shrub - no swap)
-    #       rowC  0.30×0.5=0.150 ≥ 0.55×0.261=0.144 ✓
-    #   rows: (cy, rx, ry, rz, step, x0, x1, mtl)  — mtl "tuft"|"shrub"
-    verge=dict(embed=0.50, jit_pos=0.22, jit_scale=0.18, jit_step=0.35,
-               skip=0.12, swap=0.5,
-               rows=((1.42, 0.30, 0.30, 0.17, 0.26, -0.80, 6.40, "tuft"),
-                     (1.92, 0.42, 0.36, 0.24, 0.40, -0.75, 6.35, "tuft"),
-                     (2.45, 0.46, 0.40, 0.26, 0.50, -0.60, 6.25, "tuft"),
-                     (3.05, 0.60, 0.66, 0.32, 1.10, -0.50, 6.20, "shrub"),
-                     (3.85, 0.55, 0.62, 0.30, 1.75, -0.20, 6.00, "shrub"))),
+    # Everything below is laid **against the walk centreline**, not against a constant `cy` -
+    # that is what removes the "bead string beside a ruled band" read at source. `off` is the
+    # perpendicular offset from the walk (trail polyline -> stair spine -> trail polyline).
+    #
+    # (a) Drift lobes - CB-2 `ground_kit.build_blot` (DEC-1), one Mesh each, single face,
+    #     zero thickness, **never a rectangle**. Bands of lobes with jittered offset, radii and
+    #     along-line spacing. `proud` 0.006 m: above the 4 mm scene07 uses (04's lobes sit on
+    #     bare ground, not on stone) and far below the GT decal tolerance 0.020.
+    litter=dict(
+        proud=0.006, seed=40401, n=22, rough=0.20,
+        reach=(-8.5, 12.5),                 # along-walk x window for the whole ground layer
+        # bands: (offset, step, rx, ry, jit_off, jit_r)
+        #   The apron band (first row) hugs the walk: small `ry` is what lets it pass the
+        #   0.95 m corridor clearance at a 1.42 m offset, so litter reaches the stair
+        #   shoulder the way G4's does instead of stopping a metre short.
+        bands=((1.42, 1.05, 0.85, 0.34, 0.14, 0.18),
+               (2.05, 1.35, 1.35, 0.80, 0.30, 0.20),
+               (3.55, 1.85, 1.55, 0.95, 0.38, 0.20),
+               (5.45, 2.35, 1.80, 1.10, 0.45, 0.22)),
+        skip=0.10,
+        # (b) 3-D leaf cards - the relief that stops a litter floor reading as lino
+        #     (`scene_common.VEG_DEBRIS`, the S3 Debris leaf set). Season-legal here **because
+        #     04 is now pinned late autumn** (R04-2); C2/07/10/D3 were the earlier scope.
+        #   Scale band 0.55-0.95 (was 0.75-1.35): `fallcluster1` is natively 0.42 x 0.40 m
+        #   `[measured - usd-core bbox, this WP]`, so the old upper bound put 0.57 m leaf
+        #   clusters in the near frame - single leaves the size of a boot. More, smaller.
+        cards=dict(n=320, seed=40417, off=(1.12, 5.20), scale=(0.55, 0.95),
+                   rim=0.34),
+        # (c) low tufts - the procured-but-unused turf patches. `veg_manifest_w2.json` records
+        #     `Grass_Short_A` with role `verge_turf` and the note "잔디 패치(대) — scene04
+        #     버지 블롭 대체", i.e. it was bought for exactly this deletion and never wired.
+        #     Hue orange 0.177 / green 0.537 -> inside the turf gate, legal in the autumn cell.
+        #   n 30 -> 14 after pilot round 1: 30 turf patches read as a lawn breaking through
+        #   the litter, and G4 shows **two or three** green clumps in the whole frame.
+        tufts=dict(n=14, seed=40423, off=(1.30, 4.60), h=(0.12, 0.17),
+                   clump=(2, 3), clump_r=0.75),
+    ),
+    # (d) bare trunks - the G4 signature. Authored, not scattered: they frame the stair.
+    #     (x, perpendicular offset from the walk, target height [m], species slot)
+    #     Species slots: 0 = birch · 1 = elm · 2 = poplar (all leaf-off capable, see TREES04).
+    trunks=[(-7.6, -4.35, 8.6, 2), (-6.1, 3.05, 4.1, 0), (-4.2, -3.15, 3.4, 1),
+            (-2.4, 2.60, 9.4, 2), (-0.9, -2.45, 3.8, 0), (0.7, 2.20, 4.6, 0),
+            (1.9, -2.10, 3.3, 1), (3.3, 2.45, 10.2, 2), (4.6, -2.35, 4.4, 0),
+            (5.9, 2.75, 3.6, 1), (7.4, -2.80, 9.0, 2), (8.8, 3.10, 4.8, 0),
+            (10.6, -3.40, 3.9, 1), (12.1, 3.60, 8.2, 2),
+            # second rank - G4's flanks are a *stand*, not a row. These sit 6-11 m off the
+            # walk and close the frame behind the first rank.
+            (-8.8, 7.40, 11.5, 2), (-5.0, -6.90, 4.6, 0), (-1.6, -7.80, 10.8, 2),
+            (2.2, 6.60, 4.2, 1), (6.2, -6.40, 11.0, 2), (9.6, 7.10, 4.9, 0),
+            (13.4, -7.60, 10.4, 2), (15.8, 6.20, 4.3, 1)],
+
+    # === [W3 S04-1] rope-on-timber-post handline (K4(c) new prop template) ==
+    # **R04-1: DRESSING, NOT A GUARD.** Built in **both** hazard arms so its presence carries
+    #   zero information about the negative-obstacle label (the same twin-parity discipline
+    #   `build_ground_kit` already follows for GT-E4). Asserted in `verge_selfcheck`.
+    # Built form:
+    #   · post   Ø0.12 m round timber `[assumed]`, above the ≥0.07 m 끝마구리 floor that
+    #     「조경공사 표준시방서」(2003/2016) sets for a 통나무 post line `[law, adjacent form -
+    #     the clause governs a 철조망 post line, the nearest codified 통나무 post rule]`.
+    #   · pitch  ≤1.75 m, inside the same clause's ≤1.8 m post spacing. G4 reads ~2 m `[assumed]`.
+    #   · height 0.95 m exposed. KNPS-RAIL n=243 rows whose name contains 로프 give a median
+    #     **1.00 m** (`Docs/surveys/s3_research_numbers_v1.md` §A3, grade **B** - the column is
+    #     `폭높이` and may mix width entries) `[data]`. 0.95 is that median minus the grade-B
+    #     margin and matches G4's post-to-step proportion.
+    #   · rope   Ø0.018 m `[assumed]` (16-20 mm is the trail band), tied 0.10 m below the post
+    #     top, catenary sag 0.075 x span, drawn as 6 straight segments per span.
+    #   · offset 1.35 m from the walk centreline - outboard of the stair half width 0.90, of the
+    #     trim strip 1.15 and of the trail half width 0.99 (worst case with `width_jit`).
+    #   · reach  x -0.55 .. 6.60 along the walk. Two reasons, both stated: a 로프난간 is
+    #     installed at the steep/stepped reach, not along a flat park path; and extending it up
+    #     the meandering trail would stand posts 0.85-1.08 m in front of the d5/d10 preset eyes
+    #     (which run along y=0 while the trail wanders off it) - the "new geometry swallows a
+    #     preset camera" regression this project has already had four times.
+    rope=dict(x0=-0.55, x1=6.60, offset=1.35, pitch_max=1.75,
+              post_r=0.060, post_h=0.95, post_embed=0.10, post_jit=0.035,
+              rope_r=0.009, tie_drop=0.10, sag=0.075, seg=6, eye_keepout=1.20),
 
     # 5 benches (v4-D4: 1 -> 5). (cx, cy, gz, yaw)
     # [v5.1 global convention 3] No grid or aligned placement -> all moved beside an anchor (tree shade·shrub
@@ -296,9 +340,21 @@ PARAMS = dict(
     # v4-D11 4 leaf piles (season cue·ground variety)
     # [v5.1] Repositioned onto/beside the re-meandered trail (<=0.3 m from the centreline) - leaves
     #   must pile on a compacted surface to read as 'a path people walk'.
+    # [W3 S04-1] The four piles were **1.6 x 1.2 m axis-aligned boxes** - i.e. rectangles, the
+    #   one shape CB-2 exists to abolish. Same four sites, now DEC-1 lobes (`build_blot`) with
+    #   the drift material; `sy` becomes the lobe's y radius, `sx/2` its x radius.
+    #   [W3 S04-1] Extended from 4 to 10 sites. These are the **only** litter lobes allowed to
+    #   lie on a walked approach surface (the 3 x 6 m ConnectU landing and the trail band), and
+    #   they are authored rather than generated for exactly that reason. The class is
+    #   unchanged: at `proud` 0.006 m they are decals, an order below the 0.024 m GT-E1'
+    #   tolerance, and `ground_kit`'s own `edge_litter` / `wear_lane` decals already sit on
+    #   this same slab at +0.6-2 mm. **None of them touches a stair tread** - the nosing cut
+    #   line is this scene's hazard cue and it stays clean (see `verge_selfcheck` (2)).
     leaf_piles=[(-9.0, -2.50, 0.0), (-2.0, -0.75, 0.0), (8.0, -0.95, "lower"),
-                (15.0, 0.60, "lower")],
-    leaf=dict(sx=1.6, sy=1.2, h=0.05, proud=0.002),
+                (15.0, 0.60, "lower"),
+                (-2.55, 1.35, 0.0), (-1.30, -1.55, 0.0), (-0.75, 1.05, 0.0),
+                (-2.20, -2.25, 0.0), (6.80, 1.20, "lower"), (7.60, -1.85, "lower")],
+    leaf=dict(rx=1.05, ry=0.72, proud=0.006, n=20, rough=0.22, seed=40431),
 
     # Log handrail line (y=+1.0) when cue_railing is True.
     log_rail=dict(y=1.0, rail_r=0.05, post_r=0.05, rail_h=0.9, spacing=1.2),
@@ -306,29 +362,46 @@ PARAMS = dict(
     # --- Materials: physical size for texture_scale [m/tile] ---
     material=dict(
         # S4-4: dirt_park scale 2.0->3.0 (smaller leaf grain), desaturated tint.
-        scale=dict(dirt_park=3.0, gravel=0.5, grass=1.4, wood_dark=1.0),
+        # [W3 S04-1] `grass` is **retired from this scene** (see the seasonal audit): a lawn
+        #   texture measured 98.25 % green is a summer pixel set, and G4's off-path ground is
+        #   litter end to end. `leaf_ground` (TEX role, the C2 fallen-leaf ground) takes over.
+        # `leaf_ground` at 2.0 m/tile made 4-6 cm leaves subtend ~2 px at the h0.3 eye and
+        #   the floor read as *sand with confetti* in the first pilot cut. 1.20 m/tile puts
+        #   the leaf grain at G4's apparent size. `[measured - pilot round 1, this WP]`
+        scale=dict(dirt_park=3.0, gravel=0.5, leaf_ground=1.20, wood_dark=1.0),
         dirt_tint=(0.92, 0.88, 0.80),           # eases over-saturated leaves (base soil ground)
-        grass_tint=(0.55, 0.68, 0.42),          # eases tile repetition + green tint
-        hedge_tint=(0.46, 0.58, 0.32),          # v4-B2 hedge band (background·understory)
-        # [v5 verdict applied] Constant material for shrub blobs only. Meets verdict (c) "separate the
-        #   tint further from the grass" while keeping the existing canopy albedo convention (0.025~0.06 family ·
-        #   rough 1.0 · specular 0). One notch darker and less saturated than canopy_a/b so that
-        #   'tree canopy' and 'ground shrub' stay distinguishable.
-        shrub=(0.030, 0.047, 0.021), shrub_rough=1.0,
-        # [v6 verdict] 3 constant colours for the verge grass band only - removes the direct cause of the
-        #   grass texture (uv 1.6) turning into 'mossy rock' on an ellipsoid.
-        #   2.2x brighter than shrub(0.030,0.047,0.021) and less saturated, giving a **grass layer > shrub
-        #   layer** brightness order (it must stay darker than the grass texture's effective albedo ~ 0.11/0.14/0.08
-        #   to read as a clump). The 3 = deep green·light green·dry grass.
-        tuft=((0.070, 0.105, 0.042), (0.082, 0.112, 0.050),
-              (0.078, 0.096, 0.038)), tuft_rough=1.0,
+        # [W3 S04-1] two litter tones so the drift lobes read against the floor they lie on:
+        #   the floor is the flatter/greyer one, the drift a touch warmer and darker (a drift is
+        #   deeper, so it is less lit). Both are the same texture - only the tint differs, which
+        #   is the cheapest legal way to get tonal variation without a second 4K map.
+        # Pilot round 1 measured the floor far too bright against G4 (whose litter sits at
+        #   sRGB ~150/110/80). The map's own mean is 0.270/0.211/0.124, so the tint carries it
+        #   rather than fights it: the floor is left near-neutral-warm and the drift goes
+        #   deeper, because a drift is thicker litter in shade, not a different leaf.
+        litter_tint=(0.88, 0.82, 0.72),
+        #   Round-2 note: at 0.70/0.60/0.48 the drift lobes read as **dark islands with a hard
+        #   rim** on the paler floor at grazing angles - the "carpet laid on the ground"
+        #   artefact `tonglam_v2` §2.13-2 flagged on 07's leaf band. Two cures applied
+        #   together: the tint gap is halved, and a third of the leaf cards are seeded on the
+        #   lobe rims (the DEC-2 feather-ring idea, re-implemented with a walk mask).
+        drift_tint=(0.79, 0.71, 0.59),
+        # far-field understory mass (`bg_hedge` band). Same texture, darkest tint - at 34 m it
+        #   is a brown twig/litter mass, which is what a late-autumn hillside actually shows.
+        hedge_tint=(0.62, 0.56, 0.48),
         # [v5.1 global convention 4] Instance tint jitter +-5 % - to add as few new materials as possible
-        #   the base colour is left alone and only the variant count grows to 3 (shrub)·2 (canopy).
+        #   the base colour is left alone and only the variant count grows.
         tint_jitter=0.05,
         # S4-3: tree colours unified with the scene01 final values
         wood_color=(0.30, 0.20, 0.12), wood_rough=0.85,   # tree trunk·stakes
-        # v4-B (shared): canopy albedo raised (eases the problem of only a spherical blob silhouette showing)
-        canopy_a=(0.035, 0.052, 0.024), canopy_b=(0.042, 0.060, 0.030),
+        # [W3 S04-1] rope + post. The rope in G4 is a pale weathered twisted rope; timber posts
+        #   are grey-brown weathered 방부 log. Constant colours (a Ø18 mm rope and a Ø120 mm
+        #   post are below the resolution where a tiled map buys anything).
+        rope_color=(0.60, 0.56, 0.47), rope_rough=0.92,
+        post_color=(0.24, 0.19, 0.14), post_rough=0.88,
+        # v4-B (shared): canopy albedo. **Blob-fallback only** (assets absent / LOOK_GEO=0) -
+        #   with the assets present every tree is a real leaf-off USD. Pinned to a late-autumn
+        #   dry-twig brown so the fallback does not smuggle summer green into an autumn scene.
+        canopy_a=(0.052, 0.041, 0.026), canopy_b=(0.061, 0.047, 0.029),
         canopy_rough=1.0,
         tactile_color=(0.85, 0.72, 0.10),       # cue_tactile constant yellow
         sign_face=(0.55, 0.56, 0.58),           # v4-D2 board map face
@@ -372,13 +445,112 @@ if _sc_ov:
 
 
 # ===========================================================================
+# [C-2] PLACEMENT — the geometry-free declaration `scripts/placement_lint.py` reads
+#       (spec §10.4). Additive and static: it authors no prim and moves no coordinate, and it
+#       is parsed as a module-level literal, so every value here must stay a literal.
+#       Added by W3 S04-1 because the linter reported `PLACEMENT=NO` for this scene, i.e.
+#       every rule needing a datum was degrading to `nodata`.
+# ===========================================================================
+PLACEMENT = dict(
+    # **Empty on purpose, and that is a finding rather than an omission** - the same call
+    # scene07 made. LINT-5 reads `walk_edges` as a 보도 footway boundary and applies PE-8,
+    # 「도로의 구조·시설 기준에 관한 규칙」 제16조's 1.5 m effective-width floor, to anything
+    # standing near it. This is a park 산책로 with a sleeper stair, not a 도로 보도: 제16조
+    # does not govern it, and declaring the trail edge as a footway boundary would import a
+    # rule that would then "fail" the rope handline - a device that is standard practice on
+    # exactly this archetype. The datum is declared **absent**, not mis-declared.
+    walk_edges=[],
+    # There is no kerb line on a park trail. The dirt shoulder is a cut edge, not a 연석,
+    # so LINT-1's tree-to-kerb rule is vacuous here rather than unmeasured.
+    kerb_lines=[],
+    # **No anchor is declared, and the reason is measured, not stylistic.** Declaring one was
+    # tried in this WP: LINT-7 then becomes enforceable and turns 8 advisory `[inferred]` WARNs
+    # into **12 ERRORs** against props whose bearing is correct built form - a trail signpost
+    # carries two arms pointing *both ways along the path* (yaw 22° / 203°), so no single
+    # `face_bearing_deg` describes it, and the benches sit against tree shade and the trail
+    # edge with the v5.1 ±3-8° jitter, i.e. against natural anchors that have no build axis.
+    # Fitting a bearing datum to the geometry it is supposed to judge proves nothing, so the
+    # datum is left absent and LINT-7 stays advisory - which is what §10.4 says an inferred
+    # finding is for.
+    anchors={},
+    # 04's trees are a **hillside stand**, not a street route. Declaring a `route` would import
+    # a 6-8 m street-tree pitch rule that no forest has ever obeyed (X4's scene13 call).
+    routes={},
+)
+
+
+# ===========================================================================
 # [D] Paths
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "scene04")
 
 # Only the texture roles this scene uses are checked.
-ASSET_ROLES = ["dirt_park", "gravel", "grass", "wood_dark", "hdri", "mdl"]
+# [W3 S04-1] `grass` -> `leaf_ground`: the scene is pinned late autumn (R04-2) and no prim
+#   is bound to the lawn texture any more, so listing it would assert a dependency we do not have.
+ASSET_ROLES = ["dirt_park", "gravel", "leaf_ground", "wood_dark", "hdri", "mdl"]
+
+# [W3 S04-1] Scene-local tree species table - the season pin needs a species selector and
+#   `build_tree` has none (it draws from `scene_common.VEG_TREES` by coordinate hash; the
+#   planned K4(b) `species=` kwarg does not exist yet, and K4 is not this lane's file).
+#   `(usd rel, native zmax [m], weight, bare)` - `native` is the **measured `zmax`**, the
+#   quantity `add_vegetation` scales against `[measured - assets/veg_manifest_w2.json]`.
+#   Who is here and who is not, by the pixel rule, not by species name:
+#     · Gray_Birch / Elm_Sapling / Lombardy_Poplar - the **only three** assets in the whole
+#       library that split trunk and leaves into sibling meshes under `/Root`, so
+#       `BARE_SUBPRIMS` can strip `/Root/leaves` and leave a real bare tree
+#       (`scene_common.py` BARE_SUBPRIMS, landed `1346b70`). They carry the branch armature in
+#       the trunk mesh, so leaf-off costs 24-46 % of the triangles and keeps 98-99 % of height.
+#     · `Shumard_Oak` - **excluded**. Its leaves ride inside MASH `PointInstancer`s that also
+#       carry the branches, so it **cannot be stripped** (verified in the K4 micro-commit), and
+#       green oak foliage in a leaf-off frame is exactly the cherry-blossom mistake again.
+#       It is not "pushed to the backdrop" either: a green broadleaf at 34 m is still green.
+#     · one evergreen conifer, **far field only** - a conifer is legitimately green in late
+#       autumn and a Korean hillside in November is bare broadleaf with conifer mixed in.
+#       It is `Douglas_Fir` (zmax 6.0263, 24,336 tri, manifest verdict **PASS**), not a pine:
+#       `Yellow_Pine` and `White_Pine` are **retired species** under spec §10.2 and
+#       `placement_lint` LINT-4b errors on them by the bound asset name - measured on this
+#       very file, 3 ERROR, before the swap. Douglas fir is a `[substitute]` for the Korean
+#       conifer the same way `Shumard_Oak` substitutes for pin oak in `VEG_TREES`.
+#     · `Chinese_Juniper` - excluded: evergreen, so season-legal, but it is a landscaping
+#       shrub-tree, not a hillside forest species.
+#
+# **The bare rows reference a wrapper layer, not the source asset, and that is a defect
+#   report as much as a design choice.** `build_tree(bare=)`'s mechanism - deactivate
+#   `/Root/leaves` on the referencing prim, *then* `SetInstanceable(True)` - does not survive
+#   instancing: USD ignores prim opinions on **descendants of an instance**, so the shared
+#   prototype is composed from the reference alone and keeps its leaves. Measured twice this
+#   session: `usd-core 26.8` reports the prototype's children as `['Looks', 'trunk', 'leaves']`
+#   after a successful `SetActive(False)`, and pilot round 1 rendered **37/37 trees in full
+#   green leaf** while the scene log reported 37 deactivations and 0 failures. The K4 commit
+#   could not have seen this - its acceptance test was a 33/33 prim-hash identity with the
+#   feature **off**, and no scene had opted in. The fix belongs in `scene_common` (Lane K4's
+#   file, not this lane's); scene04 carries it as three additive wrapper layers under
+#   `assets/veg_bare/` (deliberately **outside** the gitignored `assets/vegetation/` tree - the
+#   wrapper holds no asset content, so it is trackable while the geometry stays procured), which put
+#   the `over` **above** the instance boundary and
+#   keep one shared prototype per species. Reported in `Docs/reports/w3_s04_v1.md` §7.
+#   `native` for a bare row is the **bare** zmax `[measured - usd-core, this session]`, so the
+#   0.8-1.8 % height shortfall the K4 note warns about does not apply here either.
+TREES04 = [
+    ("../veg_bare/Gray_Birch_bare.usda",       3.2960, 4, True),
+    ("../veg_bare/Elm_Sapling_bare.usda",      3.0424, 3, True),
+    ("../veg_bare/Lombardy_Poplar_bare.usda", 13.4221, 2, True),
+]
+TREES04_FAR = TREES04 + [("Trees/Douglas_Fir.usd", 6.0263, 2, False)]
+# Low turf patches. `(usd rel, native zmax [m], |zmin| [m], native half width [m], weight)`
+#   `[measured - assets/veg_manifest_w2.json]`. A/B carry `role: verge_turf` and the note
+#   *"잔디 패치(대) — scene04 버지 블롭 대체"*: they were procured for exactly this deletion
+#   and have never been wired. C is the repo's standing `edge_weed` asset (1,598 tri).
+#   Weights favour the **small** patches: at native scale A is 1.29 m across, and a 2 m turf
+#   mat is a lawn, not the handful of clumps G4 shows in the litter.
+# Placement tally — filled at build time, printed with the assembly line. A season pin that
+#   nobody counts is a claim; this makes "every near tree is leaf-off" a **number in the log**.
+VEG_TALLY = {}
+
+TUFTS04 = [("Shrub/Grass_Short_A.usd", 0.1390, 0.0228, 0.6446, 1),
+           ("Shrub/Grass_Short_B.usd", 0.1464, 0.0172, 0.3308, 2),
+           ("Shrub/Grass_Short_C.usd", 0.1229, 0.0021, 0.1395, 6)]
 
 
 def slope_z(x):
@@ -386,6 +558,27 @@ def slope_z(x):
     sl = PARAMS["slope"]
     t = max(0.0, min(x / sl["run"], 1.0))
     return sl["z0"] - sl["drop"] * t
+
+
+def ground_z(x):
+    """[W3 S04-1] Ground top z of **the arm actually being built**.
+
+    The hazard arm is the slope profile; the `hazard_stairs=False` control is one flat plane
+    at z=0 (`build_flat_fill`). Every element of the new ground layer - litter lobes, leaf
+    cards, tufts, trunks, rope posts - is seated with this, which is what lets the whole layer
+    (the handline above all) be built **identically in both arms**. That is not a convenience:
+    a dressing element that appears only in the hazard arm is a label leak, and R04-1 forbids
+    the handline from carrying label information.
+    """
+    return slope_z(x) if SCENE_CONFIG["hazard_stairs"] else 0.0
+
+
+def slope_grade(x):
+    """dz/dx of the ground at x (0 outside the slope run, 0 in the flat control)."""
+    sl = PARAMS["slope"]
+    if not SCENE_CONFIG["hazard_stairs"]:
+        return 0.0
+    return -(sl["drop"] / sl["run"]) if 0.0 <= x <= sl["run"] else 0.0
 
 
 def _resolve_gz(spec_gz, cx):
@@ -410,91 +603,470 @@ def tint_jitter(color, seed, amp=None):
 
 
 # ===========================================================================
-# [D2] [v6] verge instance generator - split out **so the assembler and the checker share coordinates**.
-#   (Structurally this was the loop inside build_verge. The seed is deterministic, so the measured
-#    minimum |y| / grounding clearance can be computed without Isaac -> verge_selfcheck)
-#   yield: (px, py, cz, ax, ay, az, kind, k, row)  - cz/a* are final world values
+# [D2] [W3 S04-1] Walk-relative ground-layer generators.
+#
+#   Every generator below is **deterministic and boot-free**, and the assembler and the
+#   checker consume the same one - the v6 lesson (`verge_instances`) that a checker with its
+#   own copy of the coordinates checks nothing. `verge_selfcheck` therefore measures the
+#   prims that are actually built.
+#
+#   The organising idea of the rebuild: the old verge was five rows at **constant `cy`**
+#   beside a meandering trail, which is why it read as a bead string beside a ruled band.
+#   Everything here is placed at a **perpendicular offset from the walk centreline**, so the
+#   litter, the tufts and the handline all bend with the path the way G4's do.
 # ===========================================================================
-def verge_instances():
-    vg = PARAMS["verge"]
-    emb, jp, js = vg["embed"], vg["jit_pos"], vg["jit_scale"]
-    jstep, skip, swap = vg["jit_step"], vg["skip"], vg["swap"]
-    for r, (cy0, rx, ry, rz, step, x0, x1, kind) in enumerate(vg["rows"]):
-        for sgn in (1.0, -1.0):
-            k, x = 0, x0
-            while x <= x1 + 1e-6:
-                rnd = random.Random(int((r * 97 + k * 7919
-                                         + (0 if sgn > 0 else 3571))))
-                x_next = x + step * (1.0 + rnd.uniform(-jstep, jstep))
+def _walk_polyline():
+    """Walk centreline: upper trail -> stair spine -> lower trail. x is monotone."""
+    pa = PARAMS["path"]
+    pts = list(pa["upper"])                       # ... -> (0.0, 0.0)
+    pts.append((STAIR_RUN, 0.0))                  # stair spine (corridor centre)
+    pts.extend(pa["lower"][1:])                   # lower starts at (STAIR_RUN, 0)
+    return pts
+
+
+WALK = _walk_polyline()
+# Worst-case trail half width: `path.width` x (1 + `width_jit`) / 2 = 1.8 x 1.1 / 2.
+TRAIL_HALF = PARAMS["path"]["width"] * (1.0 + PARAMS["path"]["width_jit"]) / 2.0
+STAIR_HALF = PARAMS["stairs"]["y1"]               # 0.90
+
+
+def _seg_dist(x, y, a, b):
+    """Distance from (x,y) to segment a-b, and the parameter t of the closest point."""
+    (xa, ya), (xb, yb) = a, b
+    dx, dy = xb - xa, yb - ya
+    L2 = dx * dx + dy * dy
+    t = 0.0 if L2 <= 1e-12 else max(0.0, min(1.0, ((x - xa) * dx
+                                                   + (y - ya) * dy) / L2))
+    return math.hypot(x - (xa + t * dx), y - (ya + t * dy)), t
+
+
+def trail_dist(x, y):
+    """Perpendicular distance to the nearest **trail** centreline segment (not the stair)."""
+    pa = PARAMS["path"]
+    best = 1e9
+    for pts in (pa["upper"], pa["lower"]):
+        for n in range(len(pts) - 1):
+            best = min(best, _seg_dist(x, y, pts[n], pts[n + 1])[0])
+    return best
+
+
+def walk_clear(x, y):
+    """Clearance [m] from (x,y) to the nearest **walked surface** edge.
+
+    Two walked surfaces exist: the trail band (half width `TRAIL_HALF`, worst case) and the
+    stair corridor (`|y| <= STAIR_HALF` over `x -0.10 .. STAIR_RUN + 0.10`, the connector
+    landings included). Negative means the point is *on* a walked surface. This is the single
+    predicate every new element is filtered by, so "nothing new stands where a person walks"
+    is true by construction and measurable without a render.
+    """
+    c = trail_dist(x, y) - TRAIL_HALF
+    if -0.10 <= x <= STAIR_RUN + 0.10:
+        c = min(c, abs(y) - STAIR_HALF)
+    return c
+
+
+def _ellipse_support(rx, ry, nx, ny):
+    """Support radius of an axis-aligned ellipse along the unit direction (nx, ny)."""
+    return math.hypot(rx * nx, ry * ny)
+
+
+def _walk_support_clear(x, y, rx, ry):
+    """`walk_clear` for an ellipse: clearance measured with the ellipse's own support radius
+    along each walked edge's normal, not with its bounding circle. A drift lobe is long
+    **along** the path and short across it, so a bounding-circle test would push the whole
+    litter band 0.5 m further out than the geometry needs."""
+    pa = PARAMS["path"]
+    best = 1e9
+    for pts in (pa["upper"], pa["lower"]):
+        for n in range(len(pts) - 1):
+            d, _t = _seg_dist(x, y, pts[n], pts[n + 1])
+            (xa, ya), (xb, yb) = pts[n], pts[n + 1]
+            L = math.hypot(xb - xa, yb - ya) or 1.0
+            nx, ny = -(yb - ya) / L, (xb - xa) / L
+            best = min(best, d - TRAIL_HALF - _ellipse_support(rx, ry, nx, ny))
+    if -0.10 <= x <= STAIR_RUN + 0.10:
+        best = min(best, abs(y) - STAIR_HALF - ry)
+    return best
+
+
+def _walk_at(s):
+    """Point and unit direction at arc length `s` along `WALK`."""
+    acc = 0.0
+    for n in range(len(WALK) - 1):
+        (xa, ya), (xb, yb) = WALK[n], WALK[n + 1]
+        L = math.hypot(xb - xa, yb - ya)
+        if acc + L >= s or n == len(WALK) - 2:
+            t = 0.0 if L <= 1e-9 else max(0.0, min(1.0, (s - acc) / L))
+            return ((xa + t * (xb - xa), ya + t * (yb - ya)),
+                    ((xb - xa) / (L or 1.0), (yb - ya) / (L or 1.0)))
+        acc += L
+    return WALK[-1], (1.0, 0.0)
+
+
+def _walk_s_of_x(x):
+    """Arc length of the first point on `WALK` at abscissa x (x is monotone along WALK)."""
+    acc = 0.0
+    for n in range(len(WALK) - 1):
+        (xa, ya), (xb, yb) = WALK[n], WALK[n + 1]
+        L = math.hypot(xb - xa, yb - ya)
+        if xa <= x <= xb and abs(xb - xa) > 1e-9:
+            return acc + L * (x - xa) / (xb - xa)
+        acc += L
+    return acc
+
+
+def _grade_tilt(x):
+    """(tiltX, tiltY) [deg] that lays a flat asset along the local grade.
+    Same convention as `scene_common.scatter_debris`: tilt = (atan(dz/dy), -atan(dz/dx))."""
+    return (0.0, -math.degrees(math.atan(slope_grade(x))))
+
+
+def litter_lobes():
+    """CB-2 drift lobes (DEC-1). yield: (i, cx, cy, rx, ry, seed)."""
+    lt = PARAMS["litter"]
+    s0, s1 = (_walk_s_of_x(lt["reach"][0]), _walk_s_of_x(lt["reach"][1]))
+    i = 0
+    for b, (off, step, rx0, ry0, joff, jr) in enumerate(lt["bands"]):
+        for side in (1.0, -1.0):
+            k, s = 0, s0
+            while s <= s1 + 1e-6:
+                rnd = random.Random(int(lt["seed"] + b * 977 + k * 7919
+                                        + (0 if side > 0 else 3571)))
+                s_next = s + step * (1.0 + rnd.uniform(-0.30, 0.30))
                 k += 1
-                # [v6] 12 % dropout - gives clumps and gaps instead of an evenly spaced bead string.
-                if rnd.random() < skip:
-                    x = x_next
+                if rnd.random() < lt["skip"]:
+                    s = s_next
                     continue
-                px = x + rnd.uniform(-jp, jp)
-                py = sgn * (cy0 + rnd.uniform(-jp, jp) * 0.7)
-                s = 1.0 + rnd.uniform(-js, js)
-                # [v6] So that the axis-aligned ellipsoids do not all lie the same way, half of them
-                #   swap rx/ry (add_sphere has no rotation argument). **tuft rows only** -
-                #   shrub rows have ry>rx, so a swap enlarges the x radius and breaks the grounding
-                #   inequality (rz·embed >= rx·grade) (rowB 0.160 < 0.172).
-                ax, ay = ((ry, rx) if (kind == "tuft" and rnd.random() < swap)
-                          else (rx, ry))
-                yield (px, py, slope_z(px) + rz * s * (1.0 - emb),
-                       ax * s, ay * s, rz * s, kind, k, r)
-                x = x_next
+                (cx, cy), (dx, dy) = _walk_at(s)
+                nx, ny = -dy, dx
+                d = off + rnd.uniform(-joff, joff)
+                px, py = cx + side * d * nx, cy + side * d * ny
+                rx = rx0 * (1.0 + rnd.uniform(-jr, jr))
+                ry = ry0 * (1.0 + rnd.uniform(-jr, jr))
+                # A lobe never laps a walked surface: GT stays class **A** by construction
+                # (the alternative - litter over the treads - is on-archetype for G4 but moves
+                #  the walked-surface reading, so it is a supervisor call, not this lane's).
+                if _walk_support_clear(px, py, rx, ry) >= 0.05:
+                    yield (i, px, py, rx, ry, int(lt["seed"] + 13 * i))
+                    i += 1
+                s = s_next
+
+
+def leaf_cards():
+    """3-D leaf cards over the flanks. yield: (i, px, py, rel, scale, yaw, tilt)."""
+    lt = PARAMS["litter"]["cards"]
+    reach = PARAMS["litter"]["reach"]
+    s0, s1 = _walk_s_of_x(reach[0]), _walk_s_of_x(reach[1])
+    pool = [p for p in sc.VEG_DEBRIS
+            if os.path.isfile(os.path.join(sc.VEG_DIR, p[0]))]
+    if not pool:
+        return
+    rnd = random.Random(int(lt["seed"]))
+    lobes = list(litter_lobes())
+    i, tries = 0, 0
+    while i < int(lt["n"]) and tries < int(lt["n"]) * 12:
+        tries += 1
+        if lobes and rnd.random() < float(lt.get("rim", 0.0)):
+            # **Rim card** - DEC-2's feather ring, re-implemented. `build_carpet_mask` would
+            # give it for free, but its ring is an unmasked AABB scatter and 04's walk runs
+            # *through* the litter band, so its cards would land on the stair and the trail.
+            # Here the ring is drawn on the lobe's own ellipse and then passed through the
+            # same walk mask as every other card.
+            _i, lx, ly, lrx, lry, _sd = lobes[rnd.randrange(len(lobes))]
+            a = rnd.uniform(0.0, 2 * math.pi)
+            r = rnd.uniform(0.88, 1.16)
+            px, py = lx + lrx * r * math.cos(a), ly + lry * r * math.sin(a)
+        else:
+            s = rnd.uniform(s0, s1)
+            (cx, cy), (dx, dy) = _walk_at(s)
+            nx, ny = -dy, dx
+            side = 1.0 if rnd.random() < 0.5 else -1.0
+            # sqrt-biased draw across the band: a real litter floor is deepest against the
+            # cut shoulder and thins outward, and a flat uniform draw reads as wallpaper.
+            u = rnd.random()
+            d = lt["off"][0] + (lt["off"][1] - lt["off"][0]) * (u ** 0.7)
+            px, py = cx + side * d * nx, cy + side * d * ny
+        if walk_clear(px, py) < 0.06:
+            continue
+        rel = pool[rnd.randrange(len(pool))][0]
+        yield (i, px, py, rel, rnd.uniform(*lt["scale"]),
+               rnd.uniform(0.0, 360.0), _grade_tilt(px))
+        i += 1
+
+
+def tuft_instances():
+    """Low turf patches in clumps. yield: (i, px, py, rel, native, zmin, target_h, yaw)."""
+    tf = PARAMS["litter"]["tufts"]
+    reach = PARAMS["litter"]["reach"]
+    s0, s1 = _walk_s_of_x(reach[0]), _walk_s_of_x(reach[1])
+    pool = [t for t in TUFTS04
+            if os.path.isfile(os.path.join(sc.VEG_DIR, t[0]))]
+    if not pool:
+        return
+    wpool = [t for t in pool for _ in range(t[4])]
+    rnd = random.Random(int(tf["seed"]))
+    i, tries = 0, 0
+    while i < int(tf["n"]) and tries < int(tf["n"]) * 12:
+        tries += 1
+        # G4's tufts are not a band - they are a handful of clumps in the litter, so the
+        # generator draws a clump anchor and then 2-4 members around it.
+        s = rnd.uniform(s0, s1)
+        (cx, cy), (dx, dy) = _walk_at(s)
+        nx, ny = -dy, dx
+        side = 1.0 if rnd.random() < 0.5 else -1.0
+        d = rnd.uniform(*tf["off"])
+        ax, ay = cx + side * d * nx, cy + side * d * ny
+        for _m in range(rnd.randint(*tf["clump"])):
+            if i >= int(tf["n"]):
+                break
+            r = tf["clump_r"] * math.sqrt(rnd.random())
+            a = rnd.uniform(0.0, 2 * math.pi)
+            px, py = ax + r * math.cos(a), ay + r * math.sin(a)
+            rel, native, zmin, hw, _w = wpool[rnd.randrange(len(wpool))]
+            h = rnd.uniform(*tf["h"])
+            # A turf patch is 0.28-1.29 m across, so it is filtered on its **own scaled
+            # footprint**, not on the point clearance the leaf cards use.
+            if walk_clear(px, py) < hw * (h / native) + 0.05:
+                continue
+            yield (i, px, py, rel, native, zmin, h, rnd.uniform(0.0, 360.0))
+            i += 1
+
+
+def trunk_instances():
+    """Authored bare trunks along the flanks. yield: (i, px, py, rel, native, h, bare)."""
+    rnd = random.Random(40441)
+    for i, (x, off, h, slot) in enumerate(PARAMS["trunks"]):
+        s = _walk_s_of_x(x)
+        (cx, cy), (dx, dy) = _walk_at(s)
+        nx, ny = -dy, dx
+        px, py = cx + off * nx, cy + off * ny
+        rel, native, _w, bare = TREES04[int(slot) % len(TREES04)]
+        yield (i, px, py, rel, native, h * rnd.uniform(0.94, 1.06), bare)
+
+
+# --- the rope-on-timber-post handline (R04-1: dressing, not a guard) --------
+def rope_posts():
+    """Post positions on both sides. yield: (side, k, px, py, gz).
+
+    Lift-ready: the only scene coupling is `WALK` / `ground_z`, both passed as values here,
+    so `props_kit` can take this verbatim as `build_rope_handline(line, ground_fn, spec)`.
+    """
+    rp = PARAMS["rope"]
+    s0, s1 = _walk_s_of_x(rp["x0"]), _walk_s_of_x(rp["x1"])
+    L = s1 - s0
+    n_span = max(1, int(math.ceil(L / rp["pitch_max"])))
+    for k in range(n_span + 1):
+        (cx, cy), (dx, dy) = _walk_at(s0 + L * k / n_span)
+        nx, ny = -dy, dx
+        for side in (1.0, -1.0):
+            px, py = cx + side * rp["offset"] * nx, cy + side * rp["offset"] * ny
+            yield (side, k, px, py, ground_z(px))
+
+
+def rope_pitch():
+    """Realised post pitch [m] (arc length / span count)."""
+    rp = PARAMS["rope"]
+    L = _walk_s_of_x(rp["x1"]) - _walk_s_of_x(rp["x0"])
+    return L / max(1, int(math.ceil(L / rp["pitch_max"])))
+
+
+def rope_span_points(p0, p1):
+    """Catenary-ish rope polyline between two tie points (parabolic sag, `seg` segments)."""
+    rp = PARAMS["rope"]
+    n = int(rp["seg"])
+    span = math.dist(p0, p1)
+    sag = rp["sag"] * span
+    out = []
+    for i in range(n + 1):
+        t = i / n
+        out.append((p0[0] + t * (p1[0] - p0[0]),
+                    p0[1] + t * (p1[1] - p0[1]),
+                    p0[2] + t * (p1[2] - p0[2]) - 4.0 * sag * t * (1.0 - t)))
+    return out
+
+
+def _eye_points():
+    """Every camera eye this scene ships (presets + mise-en-scene), for the keep-out test."""
+    return [tuple(v["eye"]) for v in build_views().values()]
+
+
+# --- 04-B : gravel masked off the lawn onto the trail polygon --------------
+def trail_tiles(x0, y0, x1, y1):
+    """Axis-aligned tiles **inscribed in the trail band** and clipped to the region.
+
+    `scatter_debris` scatters uniformly in an AABB and has no mask hook, so the ground_kit
+    field request (`region` x -12..-2.40, y -3..1, 38.4 m2) put ~150 gravel stones on the
+    **lawn** as well as on the trail - defect `04-B`. An AABB of half-side `a` fits inside a
+    strip of half width `h` at bearing `th` iff `a * (|sin th| + |cos th|) <= h`, so the tiles
+    below are inside the trail polygon **by construction** and the mask is provable on the
+    CPU (`verge_selfcheck` (5)) rather than judged by eye on a render.
+    """
+    pa = PARAMS["path"]
+    hw = pa["width"] * (1.0 - pa["width_jit"]) / 2.0     # conservative half width
+    out = []
+    for pts in (pa["upper"], pa["lower"]):
+        for n in range(len(pts) - 1):
+            (xa, ya), (xb, yb) = pts[n], pts[n + 1]
+            L = math.hypot(xb - xa, yb - ya)
+            if L <= 1e-6:
+                continue
+            ux, uy = (xb - xa) / L, (yb - ya) / L
+            a = hw / (abs(ux) + abs(uy))                 # inscribed half side
+            k, t = 0, a
+            while t <= L - a + 1e-6:
+                cx, cy = xa + t * ux, ya + t * uy
+                tx0, ty0, tx1, ty1 = cx - a, cy - a, cx + a, cy + a
+                cx0, cy0 = max(tx0, min(x0, x1)), max(ty0, min(y0, y1))
+                cx1, cy1 = min(tx1, max(x0, x1)), min(ty1, max(y0, y1))
+                if cx1 - cx0 > 0.12 and cy1 - cy0 > 0.12:
+                    out.append((cx0, cy0, cx1, cy1))
+                t += 2.0 * a
+                k += 1
+    return out
+
+
+# ===========================================================================
+# [D3] [W3 S04-1] verge_selfcheck - the R-1 registry print.
+#   Spec §6.2 names `verge_selfcheck` as 04's own gate, so the name survives the rebuild and
+#   the content is re-derived from the new geometry. Runs with no Isaac, no GPU.
+# ===========================================================================
+def _hazard_registry():
+    """Re-derive the hazard/drop registry from the geometry that is actually built."""
+    st = PARAMS["stairs"]
+    steps = sc._stair_steps(st["x0"], 0.0, 0.0, 0, st["z_top"], RISERS, TREADS)
+    return dict(kind="T4 irregular-riser sleeper stair",
+                n_risers=len(RISERS), run=STAIR_RUN, drop=STAIR_DROP,
+                top_edge_x=st["x0"], top_edge_z=st["z_top"],
+                corridor_half=st["y1"], steps=steps,
+                riser_min=min(RISERS), riser_max=max(RISERS),
+                lower_z=PARAMS["lower"]["z_top"])
 
 
 def verge_selfcheck(verbose=True):
-    """[v6] Coordinate check for the reworked verge - 0 stair intrusion · 0 floating · concealment continuity.
+    """[W3 S04-1] R-1 registry print + the new ground layer's own gates.
 
-    (1) Intrusion: is each instance's inner y edge |py| − ay greater than the stair half width 0.90 (measured minimum).
-    (2) Floating: does the ellipsoid bottom on the slope grade bite below the ground.
-        Highest point of the bottom (upslope tangent) z = cz − az, ground at that x = slope_z(px);
-        the grade correction lifts the upslope side by rx·|dz/dx|, so clearance = az·embed − ax·0.261.
-    (3) Concealment: over what % of x is the exposed dirt band (|y| 0.90~1.70) covered
-        (sweeping x −0.75..6.35 on a 0.1 m grid to see whether it falls inside some instance's XY ellipse).
+    (1) hazard/drop registry re-derived from RISERS/TREADS (unchanged by this WP - printed so
+        the claim is a measurement, not an assertion).
+    (2) walk intrusion: min clearance to a walked surface over **every** new prim family.
+    (3) rope handline: R04-1 evidence - offsets, pitch, twin-arm parity, camera keep-out.
+    (4) grounding: nothing floats on the 0.261 grade.
+    (5) 04-B gravel mask: every scatter tile inside the trail polygon.
+    (6) R04-2 seasonal audit, element by element.
     Returns: (ok, diag)
     """
-    sl = PARAMS["slope"]
-    grade = sl["drop"] / sl["run"]
-    inst = list(verge_instances())
-    half = PARAMS["stairs"]["y1"]                       # 0.90
-    min_gap = min(abs(p[1]) - p[4] for p in inst)
-    min_ground = min(p[5] * PARAMS["verge"]["embed"] - p[3] * grade
-                     for p in inst)
-    # (3) dirt-band coverage (one side, y=1.30 reference line)
-    xs = [(-0.75 + 0.1 * i) for i in range(72)]
-    cov = 0
-    for xq in xs:
-        hit = False
-        for px, py, _cz, ax, ay, _az, _k, _i, _r in inst:
-            if py <= 0.0:
-                continue
-            if ((xq - px) / ax) ** 2 + ((1.30 - py) / ay) ** 2 <= 1.0:
-                hit = True
-                break
-        cov += 1 if hit else 0
-    ok = (min_gap > half) and (min_ground >= 0.0) and (cov / len(xs) > 0.90)
+    reg = _hazard_registry()
+    lobes = list(litter_lobes())
+    cards = list(leaf_cards())
+    tufts = list(tuft_instances())
+    trunks = list(trunk_instances())
+    posts = list(rope_posts())
+    rp = PARAMS["rope"]
+    eyes = _eye_points()
+
+    # (2) walk intrusion
+    c_lobe = min([_walk_support_clear(px, py, rx, ry)
+                  for _i, px, py, rx, ry, _s in lobes] or [9.9])
+    c_card = min([walk_clear(px, py) for _i, px, py, *_r in cards] or [9.9])
+    _hw = {t[0]: t[3] for t in TUFTS04}
+    c_tuft = min([walk_clear(px, py) - _hw[rel] * (h / nat)
+                  for _i, px, py, rel, nat, _z, h, _y in tufts] or [9.9])
+    c_trunk = min([walk_clear(px, py) - 0.16
+                   for _i, px, py, _r, _n, _h, _b in trunks] or [9.9])
+    c_post = min([walk_clear(px, py) - rp["post_r"]
+                  for _s, _k, px, py, _g in posts] or [9.9])
+
+    # (3) rope
+    pitch = rope_pitch()
+    d_eye = min(math.hypot(px - e[0], py - e[1])
+                for _s, _k, px, py, _g in posts for e in eyes)
+    n_span = len(posts) // 2 - 1
+    # (5) gravel mask
+    g = PARAMS["gkit"]
+    tiles = trail_tiles(g["x0"], g["y0"], g["scatter_x1"], g["y1"])
+    pa = PARAMS["path"]
+    hw_out = pa["width"] * (1.0 + pa["width_jit"]) / 2.0
+    tile_off = 0.0
+    for (a0, b0, a1, b1) in tiles:
+        for cx, cy in ((a0, b0), (a1, b0), (a0, b1), (a1, b1)):
+            tile_off = max(tile_off, trail_dist(cx, cy) - hw_out)
+
+    ok = (c_lobe >= 0.0 and c_card >= 0.0 and c_tuft >= 0.0 and c_trunk >= 0.0
+          and c_post >= 0.0 and d_eye >= rp["eye_keepout"]
+          and pitch <= 1.80 and tile_off <= 0.0 and len(tiles) > 0)
+
     if verbose:
-        n_t = sum(1 for p in inst if p[6] == "tuft")
-        print("=" * 64)
-        print("scene04 [v6] verge(초지 밴드) 재작업 검산")
-        print("=" * 64)
-        print(f"  개체 수            {len(inst)} (tuft {n_t} / shrub "
-              f"{len(inst) - n_t})   구 38개")
-        print(f"  ① 계단 침범 여유   min(|y|−ry) = {min_gap:.3f} m "
-              f"> 반폭 {half:.2f} → {'OK' if min_gap > half else 'FAIL'}")
-        print(f"  ② 접지 여유        min(rz·emb − rx·구배) = {min_ground:+.4f} "
-              f"→ {'OK' if min_ground >= 0 else 'FAIL'}")
-        print(f"  ③ 흙띠(y=1.30) 피복 {100.0 * cov / len(xs):.1f} % "
-              f"→ {'OK' if cov / len(xs) > 0.90 else 'FAIL'}")
-        print(f"  최대 높이          "
-              f"{max(p[2] - slope_z(p[0]) + p[5] for p in inst):.2f} m "
-              f"(구 0.74 m)")
-        print("=" * 64)
-    return ok, dict(n=len(inst), min_gap=min_gap, min_ground=min_ground,
-                    cover=cov / len(xs))
+        print("=" * 72)
+        print("scene04 [W3 S04-1] R-1 레지스트리 + 지면층 자기검산 (부팅 0 · GPU 0)")
+        print("=" * 72)
+        print("[1] 위험/낙차 레지스트리 — 이번 WP 에서 이동 0 (재유도값)")
+        print(f"    유형          {reg['kind']}")
+        print(f"    단수/런/낙차  {reg['n_risers']}단 · run {reg['run']:.3f} · "
+              f"drop {reg['drop']:.3f} (라이저 {reg['riser_min']:.2f}~"
+              f"{reg['riser_max']:.2f})")
+        print(f"    낙차 시작선   x={reg['top_edge_x']:.3f} · z={reg['top_edge_z']:.3f}"
+              f" → 하부 z={reg['lower_z']:.3f}")
+        print(f"    보행 회랑     |y| ≤ {reg['corridor_half']:.2f} · "
+              f"답면 상단 z {', '.join(f'{s[2]:.3f}' for s in reg['steps'])}")
+        print("[2] 신설 프림의 보행면 침범 (음수면 FAIL)")
+        print(f"    낙엽 로브     {len(lobes):4d}매  min clear {c_lobe:+.3f} m")
+        print(f"    낙엽 카드     {len(cards):4d}개  min clear {c_card:+.3f} m")
+        print(f"    초지 포기     {len(tufts):4d}주  min clear {c_tuft:+.3f} m")
+        print(f"    나목 줄기     {len(trunks):4d}주  min clear {c_trunk:+.3f} m")
+        print(f"    로프 기둥     {len(posts):4d}본  min clear {c_post:+.3f} m")
+        print("[3] 로프 난간 — R04-1: 난간(가드) 아님 · 드레싱")
+        print(f"    측당 {len(posts) // 2}본 · 경간 {n_span}개 · 실현 피치 "
+              f"{pitch:.3f} m ≤ 1.80 [법·인접형식] · 지름 "
+              f"{2 * rp['post_r']:.3f} m ≥ 0.07 [법·인접형식]")
+        print(f"    노출고 {rp['post_h']:.2f} m (KNPS-RAIL 로프 n=243 중앙값 1.00 "
+              f"[데이터·등급B]) · 로프 Ø{2 * rp['rope_r']:.3f} [추정] · "
+              f"새그 {rp['sag']:.3f}×경간")
+        print(f"    보행 중심선 이격 {rp['offset']:.2f} m > 회랑 반폭 "
+              f"{STAIR_HALF:.2f} · 트림 1.15 · 답로 반폭 {TRAIL_HALF:.2f}")
+        print(f"    카메라 최근접 {d_eye:.3f} m ≥ 킵아웃 {rp['eye_keepout']:.2f} "
+              f"(프리셋+연출 {len(eyes)}대)")
+        print("    · 강성 레일 0 · 인필 0 · 발끝막이 0 — 단일 현수 로프뿐")
+        print(f"    · 낙차선(x {reg['top_edge_x']:.2f}~{reg['run']:.2f}, "
+              f"|y| ≤ {reg['corridor_half']:.2f})을 가로지르는 부재 0")
+        print("    · **양팔 동시 시공**: hazard_stairs=True/False 모두에 동일 건설 "
+              "→ 난간 유무가 라벨 정보를 0 비트 운반")
+        print("    ⇒ 네거티브 장애물 라벨 불변: T4 침목 계단 낙차 "
+              f"{reg['drop']:.2f} m")
+        print("[4] 접지 — 기둥 매입 "
+              f"{rp['post_embed']:.3f} m > 구배 {abs(slope_grade(1.0)):.3f}"
+              f"×지름 {2 * rp['post_r']:.3f} = "
+              f"{abs(slope_grade(1.0)) * 2 * rp['post_r']:.4f} m")
+        print(f"[5] 04-B 자갈 마스킹 — 타일 {len(tiles)}개 · 답로 밖 최대 "
+              f"{tile_off:+.3f} m (≤0 이면 잔디 유출 0)")
+        print("[6] R04-2 계절 감사 — 씬 고정 = 늦가을/낙엽")
+        for row in seasonal_audit():
+            print(f"    {row}")
+        print(f"판정: {'OK' if ok else 'FAIL'}")
+        print("=" * 72)
+    return ok, dict(lobes=len(lobes), cards=len(cards), tufts=len(tufts),
+                    trunks=len(trunks), posts=len(posts), pitch=pitch,
+                    d_eye=d_eye, tiles=len(tiles), tile_off=tile_off,
+                    clear=min(c_lobe, c_card, c_tuft, c_trunk, c_post))
+
+
+def seasonal_audit():
+    """[R04-2] Per-element seasonal verdict. Judged on **texture pixels**, never on a name -
+    the convention `Japanese_Cherry` was deleted under (`scene_common.VEG_TREES`)."""
+    return [
+        "지면 베이스   leaf_ground(낙엽 지면) — 구 grass(녹색 98.25 %) 결합 해제 ✓",
+        "낙엽 로브     leaf_ground + 웜 틴트 — 계절 일치 ✓",
+        "낙엽 카드     VEG_DEBRIS 5종(마른 낙엽) — 늦가을 고정으로 적법화 ✓",
+        "초지 포기     Grass_Short_A/B (green 0.537 · orange 0.177, 잔디 게이트) ✓",
+        "교목 근·중경  Gray_Birch·Elm_Sapling·Lombardy_Poplar **잎-off** "
+        "(래퍼 레이어 — 인스턴싱 프로토타입에서 leaves 제거 검증) ✓",
+        "교목 원경     Douglas_Fir(상록 침엽 — 11월 산지 혼효림, PASS종) ✓ / "
+        "Shumard_Oak 배제(MASH 인스턴서 → 잎 제거 불가) ✓",
+        "배경 헤지대   leaf_ground + 어두운 틴트(34 m 원경 갈색 임상) ✓",
+        "관목 블롭     삭제(18프림) — 상록 녹색 돔은 늦가을 오류 ✓",
+        "버지 타래     삭제(121프림) — 상동 ✓",
+        "침목·목재 프롭 계절 중립(목재) — 변경 없음 ✓",
+        "자갈 답면     계절 중립(마사토) — 변경 없음 ✓",
+        "HDRI·태양     qwantani_noon(무운 청천) — 계절 표지 없음, 미변경 (선언) △",
+    ]
 
 
 # ===========================================================================
@@ -530,9 +1102,13 @@ def main():
     capture_mode = os.environ.get("NEGOBS_CAPTURE", "0") == "1"
 
     # ── [v6] Run the coordinate check only, then exit (no Isaac boot needed) ──
-    if os.environ.get("NEGOBS_SELFCHECK", "0") == "1":
-        verge_selfcheck()
-        return
+    # [W3 S04-1] `NEGOBS_SMOKE` is accepted as an alias. The §6.1 floor runs
+    #   `NEGOBS_SMOKE=1 python <scene>` on every scene a WP touched; without this alias 04
+    #   would **boot Isaac and take the GPU** on what is meant to be a CPU gate.
+    if (os.environ.get("NEGOBS_SELFCHECK", "0") == "1"
+            or os.environ.get("NEGOBS_SMOKE", "0") == "1"):
+        ok, _diag = verge_selfcheck()
+        sys.exit(0 if ok else 1)
 
     sc.check_assets(ASSET_ROLES, hdri=PARAMS["light"]["hdri"])
 
@@ -574,15 +1150,31 @@ def main():
         M["gk_rock"] = sc.make_pbr(
             stage, "/World/Looks/GkRock", sc.tex_path("gravel", "diff"),
             sc.tex_path("gravel", "nor"), sc.tex_path("gravel", "rough"),
-            0.30, tint=(0.82, 0.81, 0.79))
+            # [W3 S04-1] 0.82 -> 0.62: against a lawn the scattered stones sat inside the
+            #   "grey debris 0.18-0.30" convention; against a litter floor they read as white
+            #   pebbles dropped on brown leaves (pilot round 1).
+            0.30, tint=(0.62, 0.60, 0.57))
         M["gravel"] = sc.make_pbr(
             stage, "/World/Looks/Gravel", sc.tex_path("gravel", "diff"),
             sc.tex_path("gravel", "nor"), sc.tex_path("gravel", "rough"),
             S["gravel"])
-        M["grass"] = sc.make_pbr(
-            stage, "/World/Looks/Grass", sc.tex_path("grass", "diff"),
-            sc.tex_path("grass", "nor"), sc.tex_path("grass", "rough"),
-            S["grass"], tint=mp["grass_tint"])
+        # [W3 S04-1 · R04-2] The off-path ground of a late-autumn Korean hillside is litter,
+        #   not lawn. `Litter` is the floor, `LeafDrift` the deeper drift lobes; both are
+        #   `leaf_ground` and differ only by tint. **Naming matters**: `_look_spec` classes a
+        #   material by the last path token, and "Leaf"/"Litter" land in the `veg` class -
+        #   which is *not* in `_SKIN_CLASSES`, so the ground slabs keep taking no displacement
+        #   skin (they took none before either, under `Grass`) and the 6 mm lobes cannot be
+        #   buried by one. That parity is deliberate, not luck.
+        M["litter"] = sc.make_pbr(
+            stage, "/World/Looks/LeafLitter", sc.tex_path("leaf_ground", "diff"),
+            sc.tex_path("leaf_ground", "nor"),
+            sc.tex_path("leaf_ground", "rough"),
+            S["leaf_ground"], tint=mp["litter_tint"])
+        M["drift"] = sc.make_pbr(
+            stage, "/World/Looks/LeafDrift", sc.tex_path("leaf_ground", "diff"),
+            sc.tex_path("leaf_ground", "nor"),
+            sc.tex_path("leaf_ground", "rough"),
+            S["leaf_ground"] * 0.80, tint=mp["drift_tint"])
         M["wood_dark"] = sc.make_pbr(
             stage, "/World/Looks/WoodDark", sc.tex_path("wood_dark", "diff"),
             sc.tex_path("wood_dark", "nor"), sc.tex_path("wood_dark", "rough"),
@@ -603,26 +1195,28 @@ def main():
         M["canopy_a"], M["canopy_b"] = M["canopy"][0], M["canopy"][2]
         # [W2 · ground_kit §12.5-3] texture-backed so the 36 dots shade.
         M["tactile"] = sc.tactile_pbr(stage, "/World/Looks/Tactile")
+        # [W3 S04-1] far-field understory band. Was the lawn texture with a green tint - a
+        #   34 m-distant green wall in a leaf-off frame. Same builder, litter texture, dark tint.
         M["hedge"] = sc.make_pbr(
-            stage, "/World/Looks/Hedge", sc.tex_path("grass", "diff"),
-            sc.tex_path("grass", "nor"), sc.tex_path("grass", "rough"),
+            stage, "/World/Looks/HedgeLeaf", sc.tex_path("leaf_ground", "diff"),
+            sc.tex_path("leaf_ground", "nor"),
+            sc.tex_path("leaf_ground", "rough"),
             1.2, tint=mp["hedge_tint"])
-        # [v5 verdict applied] shrub blobs only (canopy convention: rough 1.0 · specular 0)
-        # [v5.1] 3 variants at +-5 % jitter (per-individual variation inside a cluster)
-        M["shrub_v"] = [sc.make_pbr(stage, f"/World/Looks/Shrub{i}",
-                                    diffuse_color=tint_jitter(mp["shrub"],
-                                                              40 + i),
-                                    roughness_const=mp["shrub_rough"],
-                                    specular_level=0.0) for i in range(3)]
-        M["shrub"] = M["shrub_v"][0]
-        # [v6 verdict] verge grass band - the old "grass texture (uv 1.6) + hedge tint" rendered as
-        #   rock because of the magnified normal map -> replaced by **3 constant colours** (same as the
-        #   canopy convention: rough 1.0 · specular 0). The per-instance +-5 % tint jitter is kept.
-        M["verge"] = [sc.make_pbr(
-            stage, f"/World/Looks/Verge{i}",
-            diffuse_color=tint_jitter(c, 60 + i),
-            roughness_const=mp["tuft_rough"], specular_level=0.0)
-            for i, c in enumerate(mp["tuft"])]
+        # [W3 S04-1] `Shrub*` / `Verge*` constant-colour materials **deleted** with the 139
+        #   ellipsoids they were made for (121 verge + 18 shrub-cluster blobs). Deleting the
+        #   material as well as the geometry is the point: a constant-colour green left in the
+        #   Looks scope is exactly how a summer tint survives a season pin.
+        M["rope"] = sc.make_pbr(stage, "/World/Looks/Rope",
+                                diffuse_color=mp["rope_color"],
+                                roughness_const=mp["rope_rough"])
+        # **Name it `...Wood`, never `...Post`.** `_look_spec` classes a material by the
+        #   last path token and its keyword table puts "post" in the **metal** family
+        #   (alongside rail/pole/bollard). Pilot round 1 shipped `/World/Looks/PostTimber`
+        #   and rendered 12 pale plastic-looking pipes in place of weathered log posts.
+        #   "wood" is the token that lands in the wood family.
+        M["post"] = sc.make_pbr(stage, "/World/Looks/HandlineWood",
+                                diffuse_color=mp["post_color"],
+                                roughness_const=mp["post_rough"])
         M["sign_face"] = sc.make_pbr(stage, "/World/Looks/SignFace",
                                      diffuse_color=mp["sign_face"],
                                      roughness_const=0.6)
@@ -641,25 +1235,25 @@ def main():
                    mtl, collider=True)
 
     def build_ground(M):
-        """Upper flat (always). Base ground = grass (S4-1)."""
+        """Upper flat (always). Base ground = **leaf litter** (S4-1 + W3 S04-1)."""
         # [W2-0 · P-A] Slabs ground_kit decorates — keep the displacement skin
         # off them so the +0.6..2 mm decals are not buried (spec §1.2).
         sc.skin_exclude(f"{ROOT}/UpperFlat", f"{ROOT}/ConnectU")
-        _flat(f"{ROOT}/UpperFlat", PARAMS["upper"], M["grass"])
+        _flat(f"{ROOT}/UpperFlat", PARAMS["upper"], M["litter"])
 
     def build_slope_zone(M):
-        """Lower flat + slope (hazard on). Slope = grass base + corridor-side dirt band
+        """Lower flat + slope (hazard on). Slope = litter base + corridor-side dirt band
         + trim strip. The stair corridor itself (y +-corridor_y) is left empty (the stair fills it)."""
-        _flat(f"{ROOT}/LowerFlat", PARAMS["lower"], M["grass"])
+        _flat(f"{ROOT}/LowerFlat", PARAMS["lower"], M["litter"])
         sl = PARAMS["slope"]
         run, drop, thk = sl["run"], sl["drop"], sl["thick"]
         cy, to, dy, fy = (sl["corridor_y"], sl["trim_out"], sl["dirt_y"],
                           sl["flank_y"])
         tov = sl["trim_over"]
         for tag, sgn in (("P", 1.0), ("N", -1.0)):
-            gy0, gy1 = sorted((sgn * dy, sgn * fy))     # grass flank (outer)
-            sc.build_slope(stage, f"{ROOT}/SlopeGrass_{tag}", sl["x0"], sl["z0"],
-                           run, drop, gy0, gy1, thk, M["grass"], collider=False)
+            gy0, gy1 = sorted((sgn * dy, sgn * fy))     # litter flank (outer)
+            sc.build_slope(stage, f"{ROOT}/SlopeFlank_{tag}", sl["x0"], sl["z0"],
+                           run, drop, gy0, gy1, thk, M["litter"], collider=False)
             dy0, dy1 = sorted((sgn * to, sgn * dy))     # dirt band (corridor side)
             sc.build_slope(stage, f"{ROOT}/SlopeDirt_{tag}", sl["x0"], sl["z0"],
                            run, drop, dy0, dy1, thk, M["dirt"], collider=True)
@@ -669,7 +1263,7 @@ def main():
                            collider=False)
 
     def build_flat_fill(M):
-        """hazard_stairs=False control: slope·stair·lower unified into a z=0 flat (grass).
+        """hazard_stairs=False control: slope·stair·lower unified into a z=0 flat (litter).
         The upper flat (x <=0) is already laid by build_ground -> only x 0..lower.x1 is filled."""
         lo = PARAMS["lower"]
         x0, x1 = PARAMS["slope"]["x0"], lo["x1"]
@@ -677,14 +1271,76 @@ def main():
         th = PARAMS["upper"]["thick"]
         sc.add_box(stage, f"{ROOT}/FlatFill",
                    ((x0 + x1) / 2.0, (y0 + y1) / 2.0, 0.0 - th / 2.0),
-                   (x1 - x0, y1 - y0, th), M["grass"], collider=True)
+                   (x1 - x0, y1 - y0, th), M["litter"], collider=True)
 
-    def tree_no_stake(M, prefix, cx, cy, gz, trunk_h, slot=0):
-        """v4-B3: 3 nursery-planting stakes are the most incongruous element on a natural
-        trail -> neutralised by driving the stake dimensions close to 0. (Proposal: add a
-        stakes=False argument to scene_common.build_tree - see the fix log)
-        [v5.1] Each tree gets a different canopy material pair to break the colour repetition
-        (shape·size variation is already done by scene_common.build_tree v2 from the coordinate seed)."""
+    def _veg_bare(prefix, rel, native, cx, cy, gz, target_h, yaw, bare):
+        """Reference one vegetation USD, strip its leaves if the species allows, then instance.
+
+        **Order is the whole trick** and it is the trap `build_tree` and `place_shrubs` both
+        document: once `SetInstanceable(True)` is set the descendants live in a shared
+        prototype and a per-instance `SetActive(False)` is silently ignored - the source would
+        look right and the render would still be in leaf. Deactivate first, instance after.
+
+        The registry read is `scene_common.BARE_SUBPRIMS` (public), not the private
+        `_deactivate_seasonal`, so this function borrows the K4 micro-commit's **data** without
+        depending on another lane's private API.
+        Returns True when a real asset landed (False -> the caller falls back to blobs).
+        """
+        xf = sc.add_vegetation(stage, prefix, rel, (cx, cy, gz),
+                               yaw_deg=yaw, target_h=target_h, native_h=native)
+        if xf is None:
+            return False
+        VEG_TALLY[rel] = VEG_TALLY.get(rel, 0) + 1
+        if bare:
+            if rel not in sc.BARE_SUBPRIMS:
+                VEG_TALLY["bare_wrap"] = VEG_TALLY.get("bare_wrap", 0) + 1
+            # The wrapper layer has already removed the leaves above the instance boundary;
+            # this loop is a **no-op for the wrapper rows** (their `rel` is not a
+            # `BARE_SUBPRIMS` key) and stays only so that a future row pointing straight at a
+            # source asset still gets the K4 treatment - with its known instancing limit.
+            for nm in sc.BARE_SUBPRIMS.get(rel, ()):
+                try:
+                    p = stage.GetPrimAtPath(f"{prefix}/Asset/{nm}")
+                    if p and p.IsValid() and p.SetActive(False):
+                        VEG_TALLY["bare_off"] = VEG_TALLY.get("bare_off", 0) + 1
+                    else:
+                        VEG_TALLY["bare_miss"] = \
+                            VEG_TALLY.get("bare_miss", 0) + 1
+                except Exception as e:                  # never kill the scene over dressing
+                    print(f"[씬][경고] 잎-off 실패 {prefix}/{nm}: {e}")
+        try:
+            stage.GetPrimAtPath(f"{prefix}/Asset").SetInstanceable(True)
+        except Exception:
+            pass
+        return True
+
+    def tree_no_stake(M, prefix, cx, cy, gz, trunk_h, slot=0, far=False):
+        """[W3 S04-1] Season-pinned tree placement (R04-2 · §7 ruling 8).
+
+        `build_tree(bare=True)` alone is not enough and the K4 commit says so in its own
+        docstring: it draws the species from `VEG_TREES` by coordinate hash and only
+        `Elm_Sapling` of the three bare-capable assets is in that pool, so `bare=True` yields a
+        **mixed** frame - some trees leaf-off, the oaks still in full green leaf. A uniformly
+        leaf-off canopy needs a species selector, and the planned K4(b) `species=` kwarg does
+        not exist yet. So 04 draws from its own `TREES04` table and calls `add_vegetation`
+        itself, exactly as that docstring prescribes ("...or must call `add_vegetation` itself").
+
+        v4-B3 is preserved: no nursery stakes on a natural trail (the asset path has none, and
+        the blob fallback is called with the stake dimensions driven to ~0).
+        """
+        pool = TREES04_FAR if far else TREES04
+        rnd = random.Random((int(round(cx * 100)) * 73856093)
+                            ^ (int(round(cy * 100)) * 19349663))
+        wp = [t for t in pool for _ in range(t[2])
+              if os.path.isfile(os.path.join(sc.VEG_DIR, t[0]))]
+        if sc.LOOK_GEO and wp:
+            rel, native, _w, bare = wp[rnd.randrange(len(wp))]
+            # Same height convention as `build_tree`: total height = 1.60 x trunk_h with
+            # +-8 % per-instance variation, so the scene's canopy-top cue is untouched.
+            target = float(trunk_h) * 1.60 * rnd.uniform(0.92, 1.08)
+            if _veg_bare(f"{prefix}/Veg", rel, native, cx, cy, gz, target,
+                         rnd.uniform(0.0, 360.0), bare):
+                return
         ca, cb = ((0, 2), (1, 3), (2, 1), (3, 0))[int(slot) % 4]
         sc.build_tree(stage, prefix, cx, cy, gz, M["wood"], M["canopy"][ca],
                       M["canopy"][cb], trunk_r=PARAMS["tree"]["trunk_r"],
@@ -708,8 +1364,10 @@ def main():
         # No coordinates in prim names - a negative '-' is not a legal USD identifier (director hotfix)
         for bi, b in enumerate(PARAMS["bg_trees"]):
             gz = _resolve_gz(b["gz"], b["cx"])
+            # far=True lets an evergreen conifer into the backdrop mix - legitimately green in
+            # late autumn, and a Korean November hillside is bare broadleaf with pine in it.
             tree_no_stake(M, f"{ROOT}/BgTree_{bi}", b["cx"], b["cy"], gz,
-                          b["trunk_h"], slot=bi)
+                          b["trunk_h"], slot=bi, far=True)
 
     # -------------------------------------------------------------------
     # Sleeper stair (irregular steps) + sleeper risers + anchor stakes
@@ -792,24 +1450,125 @@ def main():
     # Nature (trees·shrubs·benches)
     # -------------------------------------------------------------------
     def build_verge(M):
-        """[v5.1] Sleeper stair among grass - grass mound band + 2 shrub rows on both sides.
+        """[W3 S04-1] The G4 ground layer, in place of the deleted ellipsoid rows.
 
-        Each instance is a flattened ellipsoid (add_sphere). The slope grade is reflected in
-        the **placement height** only (slope_z), not in the shape - so as not to repeat the
-        'tilted slab boards' the v5 verdict rejected. For grounding the centre sits at
-        gz + rz(1−embed), burying the bottom by rz·embed (see the anti-floating inequality in
-        the PARAMS.verge comment). Position·size jitter is deterministic from the coordinate
-        seed - identical on re-run.
-        [v6] Coordinate generation is split out into verge_instances() (guaranteeing the same
-        coordinates as the checker)."""
-        n = 0
-        for px, py, cz, ax, ay, az, kind, k, r in verge_instances():
-            mtl = (M["verge"][(k + r) % len(M["verge"])] if kind == "tuft"
-                   else M["shrub_v"][(k + r) % len(M["shrub_v"])])
-            sc.add_sphere(stage, f"{ROOT}/Verge_{n}", (px, py, cz),
-                          (ax, ay, az), mtl)
-            n += 1
-        return n
+        Four families, all laid against the **walk centreline** (see [D2]):
+          (a) drift lobes  - CB-2 DEC-1 `build_blot`, one Mesh each, never a rectangle,
+                             `z_fn` seats every vertex on the local grade so no lobe end
+                             floats or buries on the 14.6 deg slope;
+          (b) leaf cards   - real 3-D leaf assets, the relief that stops the floor reading
+                             as lino (the exact defect `VEG_DEBRIS`'s own comment records);
+          (c) turf tufts   - `Grass_Short_A/B`, procured for this deletion, never wired;
+          (d) bare trunks  - the G4 signature, leaf-off by species table.
+        Returns a count dict for the assembly print.
+        """
+        lt = PARAMS["litter"]
+        kit = gk.kit_from_scene_common(sc, stage)
+        gfn = (lambda x, y: ground_z(x))
+        n_lobe = 0
+        for i, cx, cy, rx, ry, seed in litter_lobes():
+            gk.build_blot(kit, f"{ROOT}/Drift_{i}", cx, cy, rx, ry, M["drift"],
+                          n=int(lt["n"]), rough=float(lt["rough"]), seed=seed,
+                          z=0.0, proud=float(lt["proud"]), z_fn=gfn)
+            n_lobe += 1
+        # v4-D11's four leaf piles: same sites, rectangles -> lobes.
+        lf = PARAMS["leaf"]
+        for i, (lx, ly, _gzs) in enumerate(PARAMS["leaf_piles"]):
+            gk.build_blot(kit, f"{ROOT}/LeafPile_{i}", lx, ly, lf["rx"],
+                          lf["ry"], M["drift"], n=int(lf["n"]),
+                          rough=float(lf["rough"]), seed=int(lf["seed"]) + i,
+                          z=0.0, proud=float(lf["proud"]), z_fn=gfn)
+        n_card = 0
+        for i, px, py, rel, s, yaw, tilt in leaf_cards():
+            if sc.add_vegetation(stage, f"{ROOT}/LeafCard_{i}", rel,
+                                 (px, py, ground_z(px)), yaw_deg=yaw,
+                                 tilt_deg=tilt, scale_mul=s) is not None:
+                try:
+                    stage.GetPrimAtPath(
+                        f"{ROOT}/LeafCard_{i}/Asset").SetInstanceable(True)
+                except Exception:
+                    pass
+                n_card += 1
+        n_tuft = 0
+        for i, px, py, rel, native, zmin, h, yaw in tuft_instances():
+            s = h / native
+            # `zmin` is the asset's depth below its own origin; lifting by it puts the patch
+            # bottom exactly on the ground (the defect `place_shrubs` documents at 41 cm on
+            # Rhododendron). The litter lobes' 6 mm then hide the seam.
+            if sc.add_vegetation(stage, f"{ROOT}/Tuft_{i}", rel,
+                                 (px, py, ground_z(px) + zmin * s),
+                                 yaw_deg=yaw, scale_mul=s) is not None:
+                try:
+                    stage.GetPrimAtPath(
+                        f"{ROOT}/Tuft_{i}/Asset").SetInstanceable(True)
+                except Exception:
+                    pass
+                n_tuft += 1
+        n_trunk = 0
+        for i, px, py, rel, native, h, bare in trunk_instances():
+            if _veg_bare(f"{ROOT}/Trunk_{i}", rel, native, px, py,
+                         ground_z(px), h, (i * 47.0) % 360.0, bare):
+                n_trunk += 1
+            else:                                   # blob fallback (assets absent)
+                tree_no_stake(M, f"{ROOT}/Trunk_{i}", px, py, ground_z(px),
+                              h / 1.6, slot=i)
+                n_trunk += 1
+        return dict(lobe=n_lobe, card=n_card, tuft=n_tuft, trunk=n_trunk)
+
+    def build_handline(M):
+        """[W3 S04-1 · K4(c) · R04-1] Rope-on-timber-post handline — **dressing, not a guard**.
+
+        Written **lift-ready** for `props_kit`: the only scene coupling is the centreline and
+        the ground function, both already values (`rope_posts` / `ground_z`), so lifting it is
+        a signature change (`line, ground_fn, spec`) and no logic change. Lane 1 may take it.
+
+        Why it is not a guard, in construction rather than in prose:
+          · no rigid rail, no infill, no toe board - one Ø18 mm catenary rope per span;
+          · it stands 1.35 m off the walk centreline, outboard of the corridor half width
+            0.90, of the trim strip 1.15 and of the trail half width 0.99, so it neither
+            narrows the walking band nor stands between the walker and the drop;
+          · nothing crosses the drop edge (x 0..5.55, |y| <= 0.90);
+          · **it is built in both hazard arms**, so its presence carries zero bits about the
+            negative-obstacle label. That is the property R04-1 actually needs; the rest is
+            description.
+        """
+        rp = PARAMS["rope"]
+        ties = {}
+        n_post = 0
+        for side, k, px, py, gz in rope_posts():
+            tag = "P" if side > 0 else "N"
+            rnd = random.Random(40451 + k * 31 + (0 if side > 0 else 7))
+            h = rp["post_h"] * (1.0 + rnd.uniform(-rp["post_jit"],
+                                                  rp["post_jit"]))
+            total = h + rp["post_embed"]
+            sc.add_cylinder(stage, f"{ROOT}/RopePost_{tag}_{k}",
+                            (px, py, gz + h - total / 2.0),
+                            rp["post_r"], total, M["post"], collider=True)
+            ties[(tag, k)] = (px, py, gz + h - rp["tie_drop"])
+            n_post += 1
+        n_seg = 0
+        n_k = max(k for _t, k in ties)
+        for tag in ("P", "N"):
+            for k in range(n_k):
+                pts = rope_span_points(ties[(tag, k)], ties[(tag, k + 1)])
+                for j in range(len(pts) - 1):
+                    a, b = pts[j], pts[j + 1]
+                    d = (b[0] - a[0], b[1] - a[1], b[2] - a[2])
+                    L = math.sqrt(sum(v * v for v in d)) or 1e-6
+                    ux, uy, uz = d[0] / L, d[1] / L, d[2] / L
+                    # `add_cylinder` authors [translate, rotateY, rotateX]; under the USD
+                    # row-vector convention points apply in reverse (rotX -> rotY -> translate),
+                    # so a local +Z axis maps to (cos a sin b, -sin a, cos a cos b). Inverting
+                    # that gives the two angles below - one prim per segment, no pivot group.
+                    ax = math.degrees(math.asin(max(-1.0, min(1.0, -uy))))
+                    by = math.degrees(math.atan2(ux, uz))
+                    sc.add_cylinder(
+                        stage, f"{ROOT}/RopeSpan_{tag}_{k}_{j}",
+                        ((a[0] + b[0]) / 2.0, (a[1] + b[1]) / 2.0,
+                         (a[2] + b[2]) / 2.0),
+                        rp["rope_r"], L, M["rope"], rotY=by, rotX=ax)
+                    n_seg += 1
+        return dict(post=n_post, span=n_seg)
 
     def build_nature(M):
         for ti, spec in enumerate(PARAMS["trees"]):
@@ -819,24 +1578,12 @@ def main():
         for n, spec in enumerate(PARAMS["trees_extra"]):        # v4-D9
             gz = _resolve_gz(spec["gz"], spec["cx"])
             tree_no_stake(M, f"{ROOT}/TreeX_{n}", spec["cx"], spec["cy"], gz,
-                          spec["trunk_h"], slot=n + 2)
-        # [v5 verdict applied / re-fix] Shrub cluster = 3 overlapping flattened ellipsoids (canopy blob).
-        #   v4's 'tilted slab + 3 stacked boxes' rendered as angular boards and was dropped.
-        #   An axis-aligned solid of revolution is used regardless of the slope, and the grade is
-        #   reflected only by sampling ground z at each blob's centre x (_resolve_gz).
-        #   -> The slope/flat branch itself disappears, so shear artefacts are eliminated at source.
-        hb = PARAMS["hedge"]
-        emb = hb["embed"]
-        for n, spec in enumerate(PARAMS["hedges"]):
-            for j, (dx, dy, rx, ry, rz) in enumerate(hb["blobs"]):
-                cx, cy = spec["cx"] + dx, spec["cy"] + dy
-                gz = _resolve_gz(spec["gz"], cx)       # grade applied to the placement height only
-                sc.add_sphere(stage, f"{ROOT}/Hedge_{n}_{j}",
-                              (cx, cy, gz + rz * (1.0 - emb)),
-                              (rx, ry, rz),
-                              M["shrub_v"][(n + j) % len(M["shrub_v"])])
-        # [v5.1] The v4-D8 slope understory band (4 build_slope tilted plates) is dropped ->
-        #   shrub rows 2·3 of build_verge replace the same area with ellipsoids.
+                          spec["trunk_h"], slot=n + 2, far=(abs(spec["cx"]) > 16.0))
+        # [W3 S04-1] The 6 shrub clusters (18 flattened ellipsoids) are **deleted**. They are
+        #   the same "moss-green blob" family as the verge rows `tonglam_v2` failed the scene
+        #   on, and G4 has no shrub dome anywhere - a late-autumn hillside understory is litter,
+        #   bare twigs and the occasional turf patch. The area they occupied is now covered by
+        #   the drift-lobe bands and tuft clumps of `build_verge`.
         # v4-D4: 5 benches
         for n, (bx, by, gz_spec, yaw) in enumerate(PARAMS["benches"]):
             gz = _resolve_gz(gz_spec, bx)
@@ -892,13 +1639,7 @@ def main():
                         pg["y0"], pg["y1"], pg["z_roof"], pg["post_r"],
                         M["wood_dark"], M["wood_dark"], roof_t=pg["roof_t"],
                         base_z=PARAMS["lower"]["z_top"])
-        # D11 4 leaf piles
-        lf = PARAMS["leaf"]
-        for n, (lx, ly, gz_spec) in enumerate(PARAMS["leaf_piles"]):
-            lz = _resolve_gz(gz_spec, lx) + lf["proud"]
-            sc.add_box(stage, f"{ROOT}/LeafPile_{n}",
-                       (lx, ly, lz - lf["h"] / 2.0),
-                       (lf["sx"], lf["sy"], lf["h"]), M["dirt"])
+        # D11 4 leaf piles — moved into `build_verge` as DEC-1 lobes (they were rectangles).
 
     # -------------------------------------------------------------------
     # cue - log handrail (railing) · tactile paving (tactile) · anti-slip (nosing)
@@ -929,9 +1670,43 @@ def main():
         M2 = dict(M)
         M2.update(wear=M["dirt"], litter=M["dirt_path"], edge_break=M["dirt"],
                   stain_dirt=M["dirt"], debris=M["gk_rock"])
+
+        def scatter_on_trail(st_, prefix, x0, y0, x1, y1, z_, cover=0.15,
+                             seed=0, max_count=0, edge_bias=0.0, pool=None,
+                             mtl=None, sink=0.0, scale_jitter=(0.75, 1.25),
+                             **kw):
+            """[04-B] The injected scatter callback, masked onto the trail polygon.
+
+            `plan_ground`'s field request is one AABB and `scatter_debris` has no mask hook,
+            so the P11 gravel field (region 38.4 m2) was landing ~150 stones on the **lawn**
+            as much as on the trail. This wrapper replaces that single call with one call per
+            tile of `trail_tiles`, i.e. per axis-aligned box **inscribed in the trail band**,
+            with `max_count` shared out by area. Per-area density is preserved and the lawn
+            gets nothing, provably (`verge_selfcheck` (5)) rather than by eye.
+
+            The signature is explicit rather than `**kw` on purpose: `ground_kit` decides
+            whether to pass `mtl` / `sink` / `scale_jitter` by **inspecting the callback's
+            parameters**, and a bare `**kw` would silently drop the `gk_rock` material
+            override and the F2 burial fraction.
+            """
+            tiles = trail_tiles(x0, y0, x1, y1)
+            if not tiles:
+                return 0
+            areas = [(a1 - a0) * (b1 - b0) for a0, b0, a1, b1 in tiles]
+            tot = sum(areas) or 1.0
+            n = 0
+            for i, ((a0, b0, a1, b1), ar) in enumerate(zip(tiles, areas)):
+                share = max(1, int(round(float(max_count) * ar / tot)))
+                n += int(sc.scatter_debris(
+                    st_, f"{prefix}_T{i}", a0, b0, a1, b1, z_, cover=cover,
+                    seed=int(seed) + 7919 * i, max_count=share,
+                    edge_bias=edge_bias, pool=pool, mtl=mtl, sink=sink,
+                    scale_jitter=scale_jitter, **kw) or 0)
+            return n
+
         res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
                               skin_exclude=sc.skin_exclude,
-                              scatter=sc.scatter_debris)
+                              scatter=scatter_on_trail)
         # ConnectU seam breaking — the dE76 18.9 boundary of the 3.0 x 6.0 m
         #   dirt landing against the grass slab (spec §5.7 / appendix A6).
         cn = PARAMS["connect"]
@@ -989,22 +1764,42 @@ def main():
     # ── Scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
     M = make_mtls()
-    build_ground(M)                 # upper flat (grass, always)
+    build_ground(M)                 # upper flat (litter floor, always)
     if cfg["hazard_stairs"]:
-        build_slope_zone(M)         # lower flat + slope (grass+dirt band+trim)
+        build_slope_zone(M)         # lower flat + slope (litter+dirt band+trim)
         build_sleeper_stairs(M)
     else:
-        build_flat_fill(M)          # control: unified z=0 flat (grass)
+        build_flat_fill(M)          # control: unified z=0 flat (litter)
     build_paths(M)                  # trail band + dirt connectors before/after the stair
     build_ground_kit(M)             # [W2-D] both arms — GT-E4 twin parity
     build_background(M)             # far-field closure (background fence·trees, always)
     if cfg["cue_scene_dressing"]:
         build_nature(M)
         build_park_props(M)         # v4-D: park context cues as a set
-        if cfg["hazard_stairs"]:
-            # [v5.1] Grass on both sides of the stair - only when the slope exists (meaningless in the flat control)
-            print(f"[씬] verge 초지·관목 {build_verge(M)}개")
+        # [W3 S04-1] **Both arms.** The old code built the verge only when the slope existed;
+        #   the ground layer is seated on `ground_z`, which resolves per arm, so the flat
+        #   control gets the same litter floor, tufts, trunks and handline. For the handline
+        #   that is not tidiness but ruling R04-1: dressing that appears only in the hazard
+        #   arm *is* a label cue, whatever the report says about it.
+        nv = build_verge(M)
+        nh = build_handline(M)
+        print(f"[씬] 지면층 — 낙엽 로브 {nv['lobe']}매 · 낙엽 카드 "
+              f"{nv['card']}개 · 초지 포기 {nv['tuft']}주 · 나목 "
+              f"{nv['trunk']}주")
+        _sp = ", ".join(f"{os.path.splitext(k.split('/')[-1])[0]} {v}"
+                        for k, v in sorted(VEG_TALLY.items())
+                        if k.endswith((".usd", ".usda")))
+        print(f"[씬] 수종(R04-2) — {_sp} · 잎-off(래퍼 레이어) "
+              f"{VEG_TALLY.get('bare_wrap', 0)} · 잎-off(런타임) "
+              f"{VEG_TALLY.get('bare_off', 0)} · 실패 "
+              f"{VEG_TALLY.get('bare_miss', 0)}")
+        print(f"[씬] 로프 난간(드레싱·R04-1) — 기둥 {nh['post']}본 · 로프 "
+              f"세그먼트 {nh['span']}개 · 피치 {rope_pitch():.2f} m · "
+              f"양팔 동시 시공")
     build_cues(M)
+    # R-1: the registry print rides every run, so the claim "the hazard geometry did not move"
+    #   is re-derived from the assembled scene rather than remembered from the report.
+    verge_selfcheck()
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])
 

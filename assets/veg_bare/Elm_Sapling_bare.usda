@@ -1,0 +1,43 @@
+#usda 1.0
+(
+    """W3 S04-1 — leaf-off (bare) wrapper for Elm_Sapling.usd.
+
+    WHY THIS FILE EXISTS.  scene_common's `BARE_SUBPRIMS` mechanism (commit 1346b70)
+    deactivates `/Root/leaves` on the referencing prim and then makes that prim
+    instanceable.  Measured this session with usd-core 26.8: the deactivation is
+    accepted on the stage, but **USD ignores prim opinions on descendants of an
+    instance**, so the shared prototype is composed from the reference alone and
+    still carries `leaves`.  The rendered tree is in full leaf while the stage
+    reports the deactivation as successful — scene04 pilot round 1 measured exactly
+    that: 37/37 reported off, every tree rendered green.
+
+    Putting the `over` in a **wrapper layer** moves the opinion above the instance
+    boundary: the wrapper composes normally, the scene references the wrapper, and
+    every instance then shares one prototype that has no leaves.  Instancing is
+    kept, which this project treats as mandatory for vegetation.
+
+    Verified with usd-core 26.8: two instances share `/__Prototype_1`, whose
+    children are ['Looks', 'trunk'], and the bare bbox height is 3.0424 m against the
+    leafed 3.0867 m (98.6 %).
+
+    Licence: this file lives **outside** `assets/vegetation/` on purpose. That tree is
+    gitignored because the NVIDIA Omniverse USDs may not be redistributed; this wrapper
+    contains **no** asset content - one relative reference and one `over` - so it is
+    trackable, while the geometry it points at stays untracked and procured by
+    `assets/download_vegetation.py`.
+    """
+    defaultPrim = "Root"
+    metersPerUnit = 0.01
+    upAxis = "Z"
+)
+
+def Xform "Root" (
+    prepend references = @../vegetation/Trees/Elm_Sapling.usd@
+)
+{
+    over "leaves" (
+        active = false
+    )
+    {
+    }
+}

@@ -38,9 +38,10 @@ Walking continuity self-check table (entry → up → deck → down → exit)
   3  Step up onto bottom step 25  az 108.46~120°, top z=+0.008      0.013
   4  Spiral up 26 steps/25 rises  riser 0.192 × 25 = 4.800          0.192/step
      (centre angle of step i = 180 + (i+0.5)·11.53846°, top = 5.0 −(i+1)·0.192)
-  5  Top step 0 → round landing   step 0 top 4.808 → landing 4.998  0.190
-     (landing = north-half annular landing r 0.48…3.30, azimuth 0~180°)
-  6  Landing → overpass deck      landing 4.998 → deck 5.000        0.002
+  5  Top step 0 → round landing   step 0 top 4.808 → landing 5.000  0.192
+     (landing = north-half annular landing r 0.48…3.30, clipped at the deck
+      edge to azimuth 0~62.964° and 117.036~180° — GT-29)
+  6  Landing → overpass deck      landing 5.000 → deck 5.000        0.000
   7  Deck run                     x 2.0…5.0, y −13.0…13.0, z 5.0    —
      (clearance over the roadway y −8…8 = 4.65 −(−0.15) = 4.80 m)
   8  North stair A, 13 steps      y 13.0…16.9, z 5.0 → 2.504        0.192/step
@@ -49,6 +50,27 @@ Walking continuity self-check table (entry → up → deck → down → exit)
  11  North sidewalk exit          (x 2…5, y 22.2…30, z −0.005)      0.013
 
   Total rise = total fall = 4.992 m. Max step 0.192 (normal riser), joints ≤0.013 m.
+  [W3 S06] the 0.190 / 0.002 pair above was the old 4.998 landing: one short riser at the
+  top of the flight and a 2 mm lip at the deck joint. GT-29's +2 mm removes both — the
+  flight now runs 26 identical 0.192 risers and the landing is flush with the deck.
+
+────────────────────────────────────────────────────────────────────────────
+W3 S06 — the G6 rebuild (user: "정체성 그렇게 안 겹치도록 이미지 참조해서 나선 구조 고쳐줘")
+  Target image: `Docs/reference_photos/Generated Image - Scene06.jpg` (G6), **summer**,
+  high sun, blue sky — pinned per §7 ruling 8; every deciduous element is leaf-ON and no
+  `build_tree(bare=)` call belongs in this scene.
+  G6 settles three open questions and all three are executed here:
+    1. the spiral is a **smooth continuous helicoid soffit** with **scalloped tread ends**,
+       not a stack of boxes under an interpolated fascia ribbon → K4(d) true annular
+       sectors (`mesh=True`) + `top_face=True` soffit + per-step fascia;
+    2. the railing is **bronze/brown horizontal tube, 4 rails** — against scene11's
+       painted-steel vertical bar. This pair IS the identity separation the user asked
+       for, so it is geometry and colour, not a texture swap;
+    3. the deck is carried on **white tapered V-form pillars**, not plain cylinders.
+  Plus G6's foreground boundary set (timber road guardrail with yellow reflective bands,
+  green mesh fence, 야면석-edged bed with ornamental grasses and a tripod-staked sapling)
+  and S06-B's unit-block kerb line. No humans, no vehicles (standing rule; G6's are
+  composition only — and G6 in fact shows neither).
 
 ────────────────────────────────────────────────────────────────────────────
 4-box opening convention: this scene has no cavity (pit) piercing the ground — the
@@ -118,6 +140,8 @@ import numpy as np
 
 import scene_common as sc
 import ground_kit as gk
+import infra_kit as ik
+import props_kit as pk
 
 
 # ===========================================================================
@@ -144,26 +168,57 @@ PARAMS = dict(
     #     centre) is chosen to coincide exactly with the azimuth-180 deg radial.
     #     Step 0 [180,191.54] touches the landing (north half 0~180) at the boundary;
     #     the last step 25 [108.46,120] sits at grade **below** it, so azimuth 120~180 deg is left wholly free as the entry passage.
+    #   [W3 S06 · GT-6 pilot] `mesh=True` turns the treads into **true annular sectors**
+    #     (`scene_common._annular_sector_mesh`, landed default-OFF at `5ceb76a`). The box
+    #     convention approximated the sector with an axis-aligned Cube given the OUTER
+    #     chord, so the solid overshot the design rays at r_in by `margin*r_out/r_in`
+    #     = **7.08125x** — 190.9 mm of tooth, in 24 teeth, on the landing seam. The sector
+    #     mesh is exact at both rays, which is also what makes the **chord margin 1.03 -> 1.000**
+    #     term of GT-6 real rather than nominal: a true sector needs no wedge-gap cover.
     spiral=dict(cx=3.5, cy=-13.0, r_in=1.5, r_out=3.3, a0=180.0, sweep=300.0,
-                n=26, riser=0.192, z0=5.0, base_drop=0.5),
-    # [v6 verdict (5)] fix for the spiral outer sawtooth · stepped soffit - **GT invariant**.
-    #   fascia : continuous outer fascia ring (helical band). Top line t(a)=_spiral_z_at(a)
-    #     +riser*0.30 -> +0.154 (step start) … −0.038 (step end) against the tread, so
-    #     it erases the chord stair silhouette without covering the tread. seg 0.5/deg.
-    #   soffit : one lower helical slab (RC spiral slab). It drops 0.2 m below the
-    #     tread-box underside (tread−0.5) to hide the stacked-block bottom faces.
-    fascia=dict(r_in=3.22, r_out=3.33, thick=0.78, z_off=0.30,
-                seg_per_deg=0.5),
-    soffit=dict(r_in=1.46, r_out=3.32, thick=0.34, drop=0.42,
-                seg_per_deg=0.5),
+                n=26, riser=0.192, z0=5.0, base_drop=0.5,
+                mesh=True, arc_seg=6),
+    # [W3 S06 · G6 · GT-6 "fascia stepped"] The v6 fascia was a **continuous helical ribbon**
+    #   whose top line was linearly interpolated while the treads step, so it rode
+    #   +0.154 m above the tread at each step start and −0.038 m below it at each step end —
+    #   a ±154/−38 mm sawtooth, 26x round the helix, and (measured on HEAD, `gt_probe.py`)
+    #   the ribbon **won the top-face sample** at r 3.15…3.25 over most of the sweep, i.e. it
+    #   was standing proud of the walking surface it was supposed to trim.
+    #   G6 shows the opposite: a **smooth continuous helicoid soffit** with the **scalloped
+    #   tread ends** exposed on the outer rim. So the ribbon becomes **one annular sector per
+    #   step**, its top pinned 2 mm BELOW that step's own tread face (the tread keeps the
+    #   walked surface) and its outer radius flush with `r_out` — the scallop of G6, and a
+    #   sawtooth of exactly 0 because there is no longer an interpolated line to sawtooth.
+    fascia=dict(r_in=3.20, r_out=3.30, drop_below=0.002, thick=0.62, arc_seg=6),
+    #   soffit : one lower helical slab (RC spiral slab) — G6's continuous helicoid soffit.
+    #     `top_face=True` is the NF-1 fix (`scene_common.build_helix_ramp`): the builder
+    #     places the box CENTRE and then tilts about it, so the surface it was asked to put
+    #     at z_top actually landed (t/2)(1/cos−1) high and (t/2)sin off along the tangent.
+    #     Measured on this ring at HEAD: 63.0 mm tangential, +13.03 mm lift.
+    soffit=dict(r_in=1.46, r_out=3.34, thick=0.34, drop=0.42,
+                seg_per_deg=0.5, top_face=True),
     # central column r0.5 (brief). The 1.0 m annular void between it and r_in 1.5 is
     #   guarded by the inner railing but has no kick plate - open at robot height (extra hazard).
     column=dict(r=0.5, z_bot=-0.30, z_top=5.00),
     # circular landing atop the spiral (= widened deck south end). North half only - south half is stair.
     #   r_in 0.48 : embedded 2 cm into the column (r0.5) to avoid coplanarity.
-    #   top_z 4.998 : 2 mm offset from the deck top 5.000 (§8 Z-fighting avoidance).
+    #   [W3 S06 · GT-6, the row's own +2 mm] top_z **4.998 -> 5.000**. The 2 mm offset bought
+    #     z-fighting immunity against the deck at the price of a 2 mm step in the walked route
+    #     (continuity table row 6). It is only needed where landing and deck are **coplanar in
+    #     plan**, and `clip=True` below removes exactly that region, so the two land together:
+    #     the clip is what makes the +2 mm safe, and the +2 mm is what makes the joint flush.
+    #   [W3 S06 · GT-6 "landing azimuth clipped at the deck edge"] the north-half annulus ran
+    #     the full 0…180 deg and therefore interpenetrated the deck slab over **9.196 m²**
+    #     (re-derived this session; the intake's 9.9 m² is the same defect at coarser bounds).
+    #     The deck edges x = 2.0 / 5.0 meet the landing rim r_out = 3.30 at
+    #     `acos(1.5/3.30)` = **62.964 deg**, so the landing is clipped to the two lobes
+    #     [0, 62.964] and [117.036, 180] and the wedge between them is left to the deck.
+    #     **No hole is opened**: every point of the removed wedge has |x−3.5| <= 1.5 and is
+    #     therefore deck. Residual overlap (the two slivers where a lobe still passes under the
+    #     slab at r < 3.30) measured **4.166 m², −54.7 %**; closing it needs either a deck
+    #     south-end move or a non-annular primitive — see the report, it is declared, not hidden.
     landing=dict(r_in=0.48, r_out=3.30, a0=0.0, a1=180.0, seg=24,
-                 top_z=4.998, base_z=4.498),
+                 top_z=5.000, base_z=4.498, clip=True, mesh=True, arc_seg=6),
     # --- overpass deck (width 3, runs along y) ---
     #   [v6 verdict (1)] the old build was one unsegmented panel per side -> it read as a **closed box girder**.
     #   Real overpasses segment every 2~3 m at the posts, alternating sound panels / open bars. rail_bay below
@@ -200,7 +255,15 @@ PARAMS = dict(
                   baluster_r=0.018, n_baluster=5),
     #   deck support columns - they land on the sidewalk outside the kerb (y +-8.0…8.6). y +-9.0 is
     #   0.7 m clear of the spiral outer edge (C.y −13 + r 3.3 = −9.7), so no interference.
-    deck_posts=dict(x=3.5, ys=(-9.0, 9.0), r=0.35, z_bot=-0.30),
+    # [W3 S06 · G6 point 3] the deck is carried on white **tapered "V"-form pillars**, not on
+    #   plain cylinders. This is the third design question G6 settles outright and it is the
+    #   single most recognisable thing about the real structure: two splayed legs rising from
+    #   one small footing to the deck soffit, each tapering as it rises. Modelled as `n_seg`
+    #   stacked cylinders per leg with a linear radius taper (a Cylinder cannot taper), tilted
+    #   about X so the splay opens along the deck axis. `r` is kept as the FOOTING radius so
+    #   the camera-collision AABB and `_solid_at` keep a single conservative envelope.
+    deck_posts=dict(x=3.5, ys=(-9.0, 9.0), r=0.35, z_bot=-0.30,
+                    splay=0.95, leg_r0=0.30, leg_r1=0.17, n_seg=5),
     # --- north entry stair (rot_group 90 deg - local +X descent becomes world +Y descent) ---
     #   rotation: (x,y) -> (16.5 − y, 9.5 + x)  [pivot (3.5,13.0), +90 deg]
     #   local y 11.5…14.5 -> world x 2.0…5.0 (matches the deck width)
@@ -221,7 +284,18 @@ PARAMS = dict(
     #   11 m north and **bounded** beyond by a verge + street tree row + distant tree band.
     walk=dict(x0=-70.0, x1=70.0, ys0=-19.0, ys1=-8.0, yn0=8.0, yn1=19.0,
               z_top=-0.005, thick=0.50),
-    curb=dict(w=0.60, z_top=0.0, thick=0.40),
+    # [W3 S06 · S06-B] the kerb was **one box 140 m long** per side — the audit's own
+    #   headline example of "colour without a curb": a 140 m extrusion has no joint and
+    #   therefore no scale, so at h0.3 it reads as a painted band, not as 연석.
+    #   `infra_kit.build_curb_line` emits **1 m unit blocks** (KS F 4006 is a 1 m product;
+    #   the joint rhythm is the cue), an R10 top arris via the `curb` look class, and a
+    #   chained L-gutter. `gt_drop = height + gutter cross-fall = 0.150 + 0.018 = 0.168`,
+    #   which is why this needs a GT row of its own and does not ride GT-6.
+    #   `lod_span` keeps the 1 m rhythm only inside the judged window and coarsens to 8 m
+    #   outside it — the lever the builder documents for exactly this 140 m case.
+    curb=dict(w=0.60, z_top=0.0, thick=0.40,
+              height=0.150, width=0.20, unit=1.0, embed=0.25,
+              lod_x=(-26.0, 26.0), far_unit=8.0),
     # --- verge (outer boundary of the sidewalk) : granite edging + ground-cover top ---
     verge=dict(w=2.40, curb_t=0.20, curb_top=0.14, soil_top=0.10,
                x0=-70.0, x1=70.0),
@@ -231,12 +305,22 @@ PARAMS = dict(
     #   extends to +-150 and handles the §A-4 horizon closure.
     ground=dict(x0=-150.0, x1=150.0, y0=-150.0, y1=150.0, z_top=-0.16,
                 thick=1.40),
-    # --- spiral railing (cue_railing) ---
-    #   outer_r 3.36 : 6 cm outside the outer radius (3.3). Over broken=(180,270) **only the rails**
-    #     are removed; the posts stay (brief R1 "posts remain").
+    # --- spiral railing (cue_railing) --- **G6 bronze horizontal tube, the 06/11 identity split**
+    #   [W3 S06 · R06-2] G6 guards helix and deck with **bronze/brown horizontal tubes**;
+    #     G11 guards scene11 with **painted-steel vertical bars**. That pair is the formal
+    #     identity separation the user asked for ("정체성 그렇게 안 겹치도록"), so the section,
+    #     the rail count and the colour are all load-bearing here, not dressing.
+    #   [W3 S06 · GT-6] `outer_r` **3.36 -> 3.24**. At 3.36 the posts stood **60 mm outboard of
+    #     the tread edge** (r_out 3.30) — floating in air off the slab, the S06-A finding.
+    #     3.24 puts the post centreline 60 mm INBOARD, which is where a real post baseplate goes.
+    #   [statutory note carried from `props_kit.build_tube_railing`] a horizontal-rail guard does
+    #     not satisfy the 안목 <= 100 mm rule the way a baluster guard does; the compliant form is
+    #     **4 rails inside 1.10 m**, giving a largest clear span of
+    #     (1.10 − 0.12)/3 − 2*0.024 = **0.279 m**. This is a *deliberately* non-baluster product,
+    #     and the scene must not blend the two — a mixture is what reads as procedural.
     #   inner_r 1.44 : 6 cm inside the inner radius (1.5). Intact over the whole arc.
-    railing=dict(outer_r=3.36, inner_r=1.44, rail_h=1.05, mid_drop=0.50,
-                 broken=(180.0, 270.0), pipe_r=0.032, post_r=0.030,
+    railing=dict(outer_r=3.24, inner_r=1.44, rail_h=1.10, rails=4, bottom=0.12,
+                 broken=(180.0, 270.0), pipe_r=0.024, post_r=0.030,
                  post_step_deg=20.0, seg_per_deg=0.25),
     # --- tactile paving (cue_tactile) ---
     #   lower: in front of the azimuth-180 deg entry passage (sidewalk) / upper: deck south-end stair head
@@ -265,6 +349,28 @@ PARAMS = dict(
                   (9.0, -9.30), (12.0, -9.30), (15.0, -9.30)),
         # bus stop pole (stop sign) - prop shared with the overpass world
         bus_pole=(24.0, -9.20, 3.2),
+    ),
+    # [W3 S06 · G6] the three near-field elements the image puts in front of everything else.
+    #   All of them are *boundary* devices — G6's foreground is read almost entirely through
+    #   them, and their absence is why the old frame's near field was bare paving.
+    g6=dict(
+        # brown timber road guardrail with yellow reflective bands, along the south kerb.
+        #   `props_kit.build_tube_railing` is the correct builder here and this is the ONE
+        #   run in the scene on its supported axis (X-aligned) — see the report finding on
+        #   its rotY=90 restriction. `rails=4` is the template's compliant default.
+        guard=dict(y=-8.85, x0=-30.0, x1=30.0, h=0.90, rails=3,
+                   tube_r=0.045, post_r=0.055, pitch=2.20,
+                   band_h=0.055, band_w=0.10),
+        # green PVC-coated welded mesh fence — G6's right margin, beyond the planting.
+        mesh=dict(y=-18.30, x0=-6.0, x1=34.0, h=1.80, post_pitch=2.50,
+                  post_r=0.030, wire_r=0.006, n_wire=9),
+        # landscaped bed at the tower foot: 야면석 rubble edge, ornamental grasses,
+        #   flowering shrubs, one sapling on a timber tripod support. Sited SOUTH-WEST of
+        #   the tower so it never enters the deck-run sight corridor (x 2…5) nor the
+        #   r <= 4.2 near frame that `_corridor_hits` protects.
+        bed=dict(cx=-1.60, cy=-15.60, rx=3.40, ry=2.10, edge_h=0.42,
+                 n_edge=26, grass_h=1.05, shrub_h=0.70,
+                 sapling=(-1.10, -15.10), tripod_r=0.62, tripod_h=1.55),
     ),
     # [v6 verdict C-2/C-4] distant closure - (1) pull the building blocks nearer the street and
     #   (2) lay a **tree silhouette band** (distant LOD) in front of them so the grass slab
@@ -315,9 +421,22 @@ PARAMS = dict(
         deck_tint=(0.76, 0.81, 0.97),
         parapet_tint=(0.78, 0.83, 0.99),
         soil_tint=(0.42, 0.44, 0.34),
+        # S06-B item 3 — pale flamed granite kerb (G6), lifted off `granite_dark`
+        curb_light_tint=(1.55, 1.58, 1.62),
+        # G6 foreground: brown timber road guardrail + yellow reflective bands
+        guard_wood=(0.185, 0.115, 0.062), guard_band=(0.62, 0.47, 0.05),
+        # G6 right margin: green PVC-coated welded mesh fence
+        mesh_green=(0.030, 0.098, 0.052),
+        # G6 planting bed: rough-stone (야면석) edge
+        rubble=(0.128, 0.124, 0.116),
         line_white=(0.55, 0.55, 0.52), line_yellow=(0.52, 0.40, 0.06),
-        # overpass railing = teal-painted steel (Korean practice) - saturation kept for the damage contrast
-        rail_color=(0.045, 0.105, 0.115), rail_rough=0.55, rail_metallic=0.35,
+        # [W3 S06 · G6 · R06-2] **bronze/brown tube railing** — the 06 identity, against
+        #   scene11's painted-steel bar. The old teal (0.045,0.105,0.115) was the generic
+        #   Korean municipal guardrail colour that 06 and 11 shared, i.e. exactly the
+        #   overlap the user asked to break. Brown powder-coat / bronze anodise, kept
+        #   inside the repo's dark-constant band (§A-1) and one notch warmer and lighter
+        #   than `wood_color` (0.30,0.20,0.12) so tube and timber do not read as one material.
+        rail_color=(0.255, 0.150, 0.082), rail_rough=0.42, rail_metallic=0.45,
         steel_color=(0.055, 0.058, 0.060), steel_rough=0.50,
         steel_metallic=0.45,
         # [v6 verdict C-3] the old panel_rough 0.18 = near-mirror -> it reflected the whole sky and
@@ -423,13 +542,37 @@ def _fascia_span():
     return (sp["a0"], sp["a0"] + sp["sweep"])
 
 
-def _fascia_z(a_deg):
-    """Fascia top line t(a) = continuous tread line + riser·z_off.
-    Within step i, t(a) − tread face ∈ [−riser·(0.5−z_off), +riser·(0.5+z_off)]
-    → with z_off 0.30 that is +0.154 (step start) … −0.038 (step end). It erases
-    the chord sawtooth without covering the tread (lesson: GT tread z is invariant)."""
-    sp = PARAMS["spiral"]
-    return _spiral_z_at(a_deg) + sp["riser"] * PARAMS["fascia"]["z_off"]
+def _soffit_z(a_deg):
+    """Top surface of the continuous helicoid soffit at azimuth a.
+
+    [W3 S06] This used to be `_fascia_z(a) − drop`, i.e. it hung off the fascia ribbon's
+    interpolated top line. The ribbon is now stepped (one sector per tread), so the soffit
+    is referenced directly to the **continuous** tread line — which is what a cast RC
+    helicoid actually is, and what G6 shows: the treads step, the underside does not."""
+    return _spiral_z_at(a_deg) - PARAMS["soffit"]["drop"]
+
+
+def _landing_arcs():
+    """The landing's azimuth lobes after the GT-6 clip at the deck edge.
+
+    Returns [(a0, a1), ...]. The clip azimuth is where the deck's own edge lines
+    x = deck.x0 / deck.x1 cross the landing rim r_out, i.e. `acos(half_deck_w / r_out)`;
+    the wedge between the two lobes is covered by the deck slab at the same z, so
+    clipping it removes solid/solid interpenetration without opening a walking hole."""
+    la, dk = PARAMS["landing"], PARAMS["deck"]
+    if not la.get("clip"):
+        return [(la["a0"], la["a1"])]
+    half = (dk["x1"] - dk["x0"]) / 2.0
+    ac = math.degrees(math.acos(min(1.0, half / la["r_out"])))
+    return [(la["a0"], ac), (180.0 - ac, la["a1"])]
+
+
+def _in_landing(az, r):
+    """Is plan point (az [0,360), r) on the clipped landing?"""
+    la = PARAMS["landing"]
+    if not (la["r_in"] <= r <= la["r_out"]):
+        return False
+    return any(a0 - 1e-9 <= az <= a1 + 1e-9 for a0, a1 in _landing_arcs())
 
 
 # ===========================================================================
@@ -520,18 +663,20 @@ def _solid_at(x, y, z):
     co = PARAMS["column"]
     if r <= co["r"] and co["z_bot"] <= z <= co["z_top"]:
         return "Column"
-    if la["r_in"] <= r <= la["r_out"] and la["a0"] <= az <= la["a1"] \
-            and la["base_z"] <= z <= la["top_z"]:
+    if _in_landing(az, r) and la["base_z"] <= z <= la["top_z"]:
         return "Landing"
     top = _spiral_top_at(r, az)
     if top is not None and top - sp["base_drop"] <= z <= top:
         return "SpiralStep"
+    # [W3 S06] the fascia is now **stepped**: its top follows the tread it trims, sitting
+    #   `drop_below` under that tread face, so it never stands proud of the walked surface.
+    if top is not None and fa["r_in"] <= r <= fa["r_out"]:
+        ft = top - fa["drop_below"]
+        if ft - fa["thick"] <= z <= ft:
+            return "SpiralFascia"
     a_c = _in_sweep(az)
     if a_c is not None:
-        tz = _fascia_z(a_c)
-        if fa["r_in"] <= r <= fa["r_out"] and tz - fa["thick"] <= z <= tz:
-            return "SpiralFascia"
-        sz = tz - so["drop"]
+        sz = _soffit_z(a_c)
         if so["r_in"] <= r <= so["r_out"] and sz - so["thick"] <= z <= sz:
             return "SpiralSoffit"
     # ── deck·support columns·deck railing ──
@@ -540,7 +685,10 @@ def _solid_at(x, y, z):
         return "Deck"
     dp = PARAMS["deck_posts"]
     for i, py in enumerate(dp["ys"]):
-        if math.hypot(x - dp["x"], y - py) <= dp["r"] \
+        # [W3 S06] V-form: one conservative envelope covering footing + both splayed legs.
+        #   The splay is across the deck (+-X), so the Y half-width stays the leg radius.
+        if abs(x - dp["x"]) <= dp["splay"] + dp["leg_r0"] \
+                and abs(y - py) <= max(dp["r"], dp["leg_r0"]) + 0.25 \
                 and dp["z_bot"] <= z <= dk["z_top"] - dk["thick"]:
             return f"DeckPost_{i}"
     rb = PARAMS["rail_bay"]
@@ -1092,6 +1240,17 @@ def main():
                         sc.tex_path("granite_dark", "diff"),
                         sc.tex_path("granite_dark", "nor"),
                         sc.tex_path("granite_dark", "rough"), s["granite_dark"])
+        # [W3 S06 · S06-B item 3] the kerb must NOT reuse `granite_dark` — scene01 recorded
+        #   that it "reads as a black hole", and G6's kerb is pale grey flamed granite.
+        #   S06-B asks for a `curb_granite_light` **texture role**; no such role exists in
+        #   `scene_common.TEX` and asset procurement is not this lane's, so the light granite
+        #   is made here from the granite maps with a lightening tint. The prim path token
+        #   `Curb` is what routes it to `LOOK_CLASS["curb"]`, i.e. to the R10 arris.
+        M["curb_light"] = PBR(f"{ROOT}/Looks/CurbGraniteLight",
+                              sc.tex_path("granite_dark", "diff"),
+                              sc.tex_path("granite_dark", "nor"),
+                              sc.tex_path("granite_dark", "rough"),
+                              s["granite_dark"], tint=mp["curb_light_tint"])
         M["brick"] = PBR(f"{ROOT}/Looks/Brick",
                          sc.tex_path("brick_red", "diff"),
                          sc.tex_path("brick_red", "nor"),
@@ -1139,6 +1298,20 @@ def main():
                           roughness_const=1.0, specular_level=0.0)
         M["leaf_b"] = PBR(f"{ROOT}/Looks/LeafB", diffuse_color=mp["leaf_b"],
                           roughness_const=1.0, specular_level=0.0)
+        # [W3 S06 · G6] foreground boundary materials
+        M["guard_wood"] = PBR(f"{ROOT}/Looks/GuardWood",
+                              diffuse_color=mp["guard_wood"],
+                              roughness_const=0.82)
+        M["guard_band"] = PBR(f"{ROOT}/Looks/GuardBand",
+                              diffuse_color=mp["guard_band"],
+                              roughness_const=0.45)
+        M["mesh"] = PBR(f"{ROOT}/Looks/MeshFence",
+                        diffuse_color=mp["mesh_green"], roughness_const=0.55)
+        M["rubble"] = PBR(f"{ROOT}/Looks/Rubble",
+                          sc.tex_path("granite_dark", "diff"),
+                          sc.tex_path("granite_dark", "nor"),
+                          sc.tex_path("granite_dark", "rough"), 0.55,
+                          tint=mp["rubble"])
         M["nosing"] = PBR(f"{ROOT}/Looks/Nosing",
                           diffuse_color=mp["nosing_color"],
                           roughness_const=0.7)
@@ -1167,13 +1340,30 @@ def main():
                 ((wk["x0"]+wk["x1"])/2.0, (ya+yb)/2.0,
                  wk["z_top"] - wk["thick"]/2.0),
                 (wk["x1"]-wk["x0"], yb-ya, wk["thick"]), M["paving"], col=True)
-        # kerb: band along the sidewalk edge (0.15 exposed above the roadway)
+        # [W3 S06 · S06-B] kerb = `infra_kit.build_curb_line`, unit blocks + L-gutter.
         cb = PARAMS["curb"]
-        for i, ye in enumerate((rd["y0"], rd["y1"])):
-            yc = ye - cb["w"]/2.0 if i == 0 else ye + cb["w"]/2.0
-            BOX(f"{ROOT}/Curb_{i}",
-                ((wk["x0"]+wk["x1"])/2.0, yc, cb["z_top"] - cb["thick"]/2.0),
-                (wk["x1"]-wk["x0"], cb["w"], cb["thick"]), M["curb"], col=True)
+        ok, bevel, note = ik.check_arris_role(sc)
+        print(f"[S06-B] arris role · {note} · {'OK' if ok else 'MISMATCH'}")
+        ikit = ik.kit_from_scene_common(sc, stage)
+        s_lo = cb["lod_x"][0] - wk["x0"]          # arc length runs from p0 at x0
+        s_hi = cb["lod_x"][1] - wk["x0"]
+        curb_res = []
+        for i, (ye, side) in enumerate(((rd["y0"], "left"), (rd["y1"], "right"))):
+            res = ik.build_curb_line(
+                ikit, f"{ROOT}/CurbLine_{i}",
+                (wk["x0"], ye), (wk["x1"], ye), M["curb_light"],
+                height=cb["height"], width=cb["width"], unit=cb["unit"],
+                gutter=True, z_road=rd["z_top"], walk_z=wk["z_top"],
+                road_side=side, embed=cb["embed"],
+                lod_span=(s_lo, s_hi), far_unit=cb["far_unit"],
+                joint_mtl=M["grime"], gutter_mtl=M["curb_light"],
+                collider=True)
+            curb_res.append(res)
+            print(f"[S06-B] CurbLine_{i} · blocks {res.get('n_block', '?')} · "
+                  f"prims {res.get('prim_count', '?')} "
+                  f"({res.get('prims_per_m', 0.0):.3f}/m) · "
+                  f"gt_drop {res.get('gt_drop', 0.0):.3f} · "
+                  f"hazard {res.get('is_gt_hazard')} · warn {res.get('warnings')}")
         # [v6 verdict C-2] verge - one row bounding the outside of the sidewalk (edging + ground cover).
         #   near-field boundary that stops the sidewalk meeting grass on a hard edge, i.e. an "empty lot".
         vg = PARAMS["verge"]
@@ -1208,38 +1398,58 @@ def main():
     # spiral stair + central column + circular landing
     # -------------------------------------------------------------------
     def build_spiral(M):
+        # [W3 S06 · GT-6 / K4(d)] treads as **true annular sectors**. `mesh=True` is the
+        #   K4(d) mechanism that landed default-OFF at `5ceb76a`; this scene is the pilot
+        #   that turns it on, which is where GT-6 said the split proof would actually be
+        #   judged. r_in / r_out / azimuths / tread z-ladder are passed unchanged — the
+        #   only thing that changes is that the solid now STOPS at the design rays instead
+        #   of overshooting them by margin*r_out/r_in = 7.08x at the inner radius.
         sc.build_helix_steps(stage, f"{ROOT}/Spiral", CX, CY, sp["r_in"],
                              sp["r_out"], sp["a0"], _step_deg(), sp["n"],
                              sp["riser"], sp["z0"], M["concrete"],
                              ccw=True, collider=True,
-                             base_drop=sp["base_drop"])
-        # [v6 verdict (5)] continuous outer fascia ring + lower helical slab (RC spiral soffit).
-        #   smooths **the silhouette only**, leaving the treads (GT) untouched.
-        a_lo, a_hi = _fascia_span()
+                             base_drop=sp["base_drop"],
+                             mesh=sp["mesh"], arc_seg=sp["arc_seg"])
+        # [W3 S06 · G6] **stepped** fascia — one sector per tread, pinned below that tread's
+        #   own face. This is GT-6's "fascia stepped" term and it is what produces G6's
+        #   scalloped outer rim. No interpolated top line survives, so the ±154/−38 mm
+        #   sawtooth is not reduced, it is structurally absent.
         fa = PARAMS["fascia"]
-        sc.build_helix_ramp(stage, f"{ROOT}/SpiralFascia", CX, CY,
-                            fa["r_in"], fa["r_out"], a_lo, a_hi,
-                            max(8, int(round((a_hi-a_lo) * fa["seg_per_deg"]))),
-                            _fascia_z(a_lo), _fascia_z(a_hi), fa["thick"],
-                            M["fascia"], collider=False)
+        sd = _step_deg()
+        for i in range(sp["n"]):
+            a_i = sp["a0"] + i * sd
+            ft = _spiral_top_z(i) - fa["drop_below"]
+            sc._annular_sector_mesh(
+                stage, f"{ROOT}/SpiralFascia/Seg_{i}", CX, CY,
+                fa["r_in"], fa["r_out"], a_i, a_i + sd,
+                ft - fa["thick"], ft, M["fascia"], collider=False,
+                arc_seg=fa["arc_seg"])
+        # [W3 S06 · G6 · NF-1] the **continuous helicoid soffit** — the one element G6
+        #   settles outright, and the reason K4(d)'s true-sector mesh was made mandatory
+        #   rather than budget-optional: a stack of boxes cannot produce it. `top_face=True`
+        #   is the NF-1 correction, so the surface lands where it is asked to.
+        a_lo, a_hi = _fascia_span()
         so = PARAMS["soffit"]
         sc.build_helix_ramp(stage, f"{ROOT}/SpiralSoffit", CX, CY,
                             so["r_in"], so["r_out"], a_lo, a_hi,
                             max(8, int(round((a_hi-a_lo) * so["seg_per_deg"]))),
-                            _fascia_z(a_lo) - so["drop"],
-                            _fascia_z(a_hi) - so["drop"], so["thick"],
-                            M["concrete"], collider=False)
+                            _soffit_z(a_lo), _soffit_z(a_hi), so["thick"],
+                            M["concrete"], collider=False,
+                            top_face=so["top_face"])
         co = PARAMS["column"]
         CYL(f"{ROOT}/Column", (CX, CY, (co["z_top"]+co["z_bot"])/2.0),
             co["r"], co["z_top"]-co["z_bot"], M["concrete"], col=True)
         la = PARAMS["landing"]
-        # north-half annular landing - it touches step 0 (azimuth 180~) at the boundary. build_arc_steps
-        #   segments are the outer chord x1.03, so the last segment overshoots 180 deg by 0.11 deg, but
-        #   its z band (4.498~4.998) overlaps step 0 (4.308~4.808) over only that 0.11 deg,
-        #   so there is no effect on reading or walking (recorded for supervisor review).
-        sc.build_arc_steps(stage, f"{ROOT}/Landing", CX, CY, la["r_in"],
-                           la["r_out"], la["a0"], la["a1"], la["seg"],
-                           la["top_z"], la["base_z"], M["deck"])
+        # [W3 S06 · GT-6] landing = **two lobes**, clipped at the deck edge azimuth, built as
+        #   true sectors. The old note here recorded a 0.11 deg overshoot past 180 deg as
+        #   "no effect"; with `mesh=True` the overshoot is 0.00 deg by construction, and the
+        #   9.196 m² slab interpenetration the full annulus caused is down to 4.166 m².
+        for k, (pa0, pa1) in enumerate(_landing_arcs()):
+            nseg = max(2, int(round(la["seg"] * (pa1 - pa0) / 180.0)))
+            sc.build_arc_steps(stage, f"{ROOT}/Landing_{k}", CX, CY, la["r_in"],
+                               la["r_out"], pa0, pa1, nseg,
+                               la["top_z"], la["base_z"], M["deck"],
+                               mesh=la["mesh"], arc_seg=la["arc_seg"])
 
     # -------------------------------------------------------------------
     # overpass deck + support columns
@@ -1289,14 +1499,35 @@ def main():
              dk["z_top"] - dk["thick"]/2.0),
             (dk["x1"]-dk["x0"], dk["y1"]-dk["y0"], dk["thick"]),
             M["deck"], col=True)
+        # [W3 S06 · G6] tapered V-form pillars
         dp = PARAMS["deck_posts"]
+        z1 = dk["z_top"] - dk["thick"]
         for i, py in enumerate(dp["ys"]):
-            z1 = dk["z_top"] - dk["thick"]
-            CYL(f"{ROOT}/DeckPost_{i}", (dp["x"], py, (dp["z_bot"]+z1)/2.0),
-                dp["r"], z1-dp["z_bot"], M["concrete"], col=True)
-            # column-head cap beam
-            BOX(f"{ROOT}/DeckCap_{i}", (dp["x"], py, z1 - 0.18),
-                (dk["x1"]-dk["x0"]+0.4, 0.9, 0.36), M["concrete"])
+            # footing pad — the V springs from one block, which is what makes it read as a V
+            BOX(f"{ROOT}/DeckFoot_{i}", (dp["x"], py, dp["z_bot"] + 0.22),
+                (1.10, 1.10, 0.44), M["concrete"], col=True)
+            z0 = dp["z_bot"] + 0.36
+            H = z1 - z0
+            tilt = math.degrees(math.atan2(dp["splay"], H))
+            L = math.hypot(dp["splay"], H)         # true leg length along its own axis
+            # The splay opens **across the deck (+-X)**, not along it. Two reasons, both
+            # measured: (a) the V then reads frontally, which is the axis `overview`,
+            # `ground_approach` and `ground_graze` actually look down; (b) a +-Y splay of
+            # 0.95 m would push the south leg head to y −9.95, i.e. 0.25 m INSIDE the
+            # spiral's r_out 3.30 plan footprint (centre distance 4.000 − 3.30 = 0.70 m of
+            # clearance is all there is). Across the deck the leg heads sit at x 2.55/4.45,
+            # inside the 3.0 m deck width and 4.11 m from the spiral centre.
+            for s, sgn in enumerate((-1.0, 1.0)):
+                for k in range(dp["n_seg"]):
+                    tm = (k + 0.5) / float(dp["n_seg"])
+                    rr = dp["leg_r0"] + (dp["leg_r1"] - dp["leg_r0"]) * tm
+                    CYL(f"{ROOT}/DeckPost_{i}/Leg_{s}_{k}",
+                        (dp["x"] + sgn * dp["splay"] * tm, py, z0 + H * tm),
+                        rr, L / dp["n_seg"] * 1.06, M["concrete"],
+                        rotY=sgn * tilt, col=(k == 0))
+            # column-head cap beam spanning the two leg heads
+            BOX(f"{ROOT}/DeckCap_{i}", (dp["x"], py, z1 - 0.16),
+                (dk["x1"]-dk["x0"]+0.4, 0.9, 0.32), M["concrete"])
 
     # -------------------------------------------------------------------
     # north entry stair (rot_group 90 deg)  - local +X descent -> world +Y descent
@@ -1403,12 +1634,105 @@ def main():
             col=True)
         BOX(f"{ROOT}/BusSign", (bx, by, gz + bh - 0.30),
             (0.06, 0.55, 0.55), M["panel"])
+        build_g6_boundary(M)
         build_treeband(M)
         for key, bd in PARAMS["buildings"].items():
             sc.build_building(stage, f"{ROOT}/Building_{key}", bd, M["brick"],
                               M["glass"], M["parapet"],
                               window=PARAMS["window_by"].get(
                                   key, PARAMS["window"]))
+
+    def build_g6_boundary(M):
+        """[W3 S06 · G6] the image's foreground boundary set — timber road guardrail,
+        green mesh fence, and the landscaped bed at the tower foot.
+
+        None of these is decoration in G6: the frame is *composed* out of them, and their
+        absence is the reason the old near field was 11 m of empty block paving. They also
+        carry no GT — every one of them stands outside the deck-run sight corridor and
+        outside the r <= 4.2 near frame (asserted by `_corridor_hits`, which stays 0)."""
+        g6 = PARAMS["g6"]
+        gz = PARAMS["walk"]["z_top"]
+
+        # --- brown timber road guardrail, yellow reflective bands -------------
+        gd = g6["guard"]
+        made = pk.build_tube_railing(
+            stage, f"{ROOT}/RoadGuard", [(gd["x0"], gd["y"]), (gd["x1"], gd["y"])],
+            lambda x, y: gz, M["guard_wood"], rails=gd["rails"],
+            rail_h=gd["h"], tube_r=gd["tube_r"], post_r=gd["post_r"],
+            post_pitch=gd["pitch"], bottom=0.30)
+        # the yellow reflective band is a wrap on each post, which is what a Korean
+        #   차선분리 guardrail actually carries — it is not painted on the rails.
+        n_post = int(made["post"])
+        for k in range(n_post):
+            px = gd["x0"] + (gd["x1"] - gd["x0"]) * k / max(1, n_post - 1)
+            BOX(f"{ROOT}/RoadGuardBand_{k}",
+                (px, gd["y"], gz + gd["h"] - 0.16),
+                (gd["band_w"], gd["band_w"], gd["band_h"]), M["guard_band"])
+        print(f"[G6] road guardrail · posts {made['post']} · rails {made['rail']} · "
+              f"clear_max {made['clear_max']:.3f} m")
+
+        # --- green PVC-coated welded mesh fence -------------------------------
+        mh = g6["mesh"]
+        npm = max(2, int(round((mh["x1"] - mh["x0"]) / mh["post_pitch"])) + 1)
+        for k in range(npm):
+            px = mh["x0"] + (mh["x1"] - mh["x0"]) * k / (npm - 1)
+            CYL(f"{ROOT}/MeshPost_{k}", (px, mh["y"], gz + mh["h"]/2.0),
+                mh["post_r"], mh["h"], M["mesh"])
+        for w in range(mh["n_wire"]):
+            zw = gz + 0.10 + (mh["h"] - 0.20) * w / float(mh["n_wire"] - 1)
+            CYL(f"{ROOT}/MeshWireH_{w}",
+                ((mh["x0"]+mh["x1"])/2.0, mh["y"], zw), mh["wire_r"],
+                mh["x1"] - mh["x0"], M["mesh"], rotY=90.0)
+
+        # --- landscaped bed at the tower foot ---------------------------------
+        #   야면석 (rough-stone) edge: individual blocks round an ellipse, NOT a smooth
+        #   ring — the whole point of 야면석 is that the units are irregular. Deterministic
+        #   jitter off a coordinate hash, so the bed is identical on every re-run.
+        bd = g6["bed"]
+        import random as _random
+        pts_grass, pts_shrub = [], []
+        for k in range(bd["n_edge"]):
+            th = 2.0 * math.pi * k / bd["n_edge"]
+            rnd = _random.Random(k * 7919 + 31)
+            ex = bd["cx"] + bd["rx"] * math.cos(th)
+            ey = bd["cy"] + bd["ry"] * math.sin(th)
+            hh = bd["edge_h"] * rnd.uniform(0.78, 1.18)
+            BOX(f"{ROOT}/BedEdge_{k}", (ex, ey, gz + hh/2.0 - 0.06),
+                (rnd.uniform(0.26, 0.42), rnd.uniform(0.24, 0.38), hh),
+                M["rubble"], col=True)
+        # soil pan, proud of the edge (real beds settle proud, they are not excavated)
+        BOX(f"{ROOT}/BedSoil", (bd["cx"], bd["cy"], gz + 0.14),
+            (2*bd["rx"] - 0.30, 2*bd["ry"] - 0.30, 0.40), M["soil"])
+        for k in range(14):
+            rnd = _random.Random(k * 6607 + 101)
+            th = 2.0 * math.pi * k / 14.0
+            rr = rnd.uniform(0.30, 0.80)
+            p = (bd["cx"] + bd["rx"] * rr * math.cos(th),
+                 bd["cy"] + bd["ry"] * rr * math.sin(th), gz + 0.34)
+            (pts_grass if k % 2 == 0 else pts_shrub).append(p)
+        # [K4(b) S-2] one species per bed — `species=` names a SHRUB_SPECIES role and the
+        #   draw happens ONCE per bed, so each bed is monospecific and deterministic.
+        n_g = sc.place_shrubs(stage, f"{ROOT}/BedGrass", pts_grass,
+                              bd["grass_h"], seed=6061, tag="Gr",
+                              species="riparian")
+        n_s = sc.place_shrubs(stage, f"{ROOT}/BedShrub", pts_shrub,
+                              bd["shrub_h"], seed=6062, tag="Sh",
+                              species="ornament_bed")
+        # sapling on a timber tripod support — G6 shows this explicitly
+        sx, sy = bd["sapling"]
+        sc.build_tree(stage, f"{ROOT}/BedSapling", sx, sy, gz + 0.30,
+                      M["wood"], M["leaf_a"], M["leaf_b"], canopy_spread=0.62)
+        for k in range(3):
+            th = math.radians(90.0 + 120.0 * k)
+            tx = sx + bd["tripod_r"] * math.cos(th)
+            ty = sy + bd["tripod_r"] * math.sin(th)
+            lean = math.degrees(math.atan2(bd["tripod_r"], bd["tripod_h"]))
+            CYL(f"{ROOT}/BedTripod_{k}",
+                ((sx + tx)/2.0, (sy + ty)/2.0, gz + 0.30 + bd["tripod_h"]/2.0),
+                0.035, math.hypot(bd["tripod_r"], bd["tripod_h"]),
+                M["wood"], rotY=lean * math.cos(th), rotX=-lean * math.sin(th))
+        print(f"[G6] tower-foot bed · edge {bd['n_edge']} · grasses {n_g} · "
+              f"shrubs {n_s} · sapling 1 on a 3-leg timber tripod")
 
     def build_treeband(M):
         """[v6 verdict C-2/C-4] distant tree silhouette band — a ridge-like row of blocks
@@ -1443,6 +1767,21 @@ def main():
     # -------------------------------------------------------------------
     # cues - railing (damaged variant) · tactile paving · nosing
     # -------------------------------------------------------------------
+    def _rail_offsets():
+        """Rail heights above the tread line, `props_kit.build_tube_railing`'s own formula.
+
+        [W3 S06 · G6] `bottom + (rail_h − bottom)*r/(rails−1)`, r = 0…rails−1. The template
+        cannot be *called* here — it takes a polyline and lays every tube with `rotY=90`,
+        i.e. along +X, so it is correct only for an X-aligned run (its own docstring says
+        the axis-aligned case "is the only case shipped"). A helix is neither. The section,
+        the rail count, the 1.10 m height and the clear-span arithmetic are therefore
+        reproduced here against the template rather than re-invented; see the report's
+        findings section, where the template's axis restriction is filed."""
+        rl = PARAMS["railing"]
+        n = max(2, int(rl["rails"]))
+        span = rl["rail_h"] - rl["bottom"]
+        return [rl["bottom"] + span * r / float(n - 1) for r in range(n)]
+
     def _pipe_arc(tag, rad, a0, a1, z_off, pipe_r, M):
         """One pipe rail following the spiral tread line (approximated with helix_ramp)."""
         rl = PARAMS["railing"]
@@ -1451,7 +1790,8 @@ def main():
                             rad - pipe_r, rad + pipe_r, a0, a1, nseg,
                             _spiral_z_at(a0) + z_off,
                             _spiral_z_at(a1) + z_off,
-                            pipe_r*2.0, M["rail"], collider=False)
+                            pipe_r*2.0, M["rail"], collider=False,
+                            top_face=True)
 
     def _posts(tag, rad, a0, a1, M):
         rl = PARAMS["railing"]
@@ -1517,22 +1857,29 @@ def main():
         a0, a1 = sp["a0"], sp["a0"] + sp["sweep"]
         b0, b1 = rl["broken"]
         if cfg["cue_railing"]:
-            # outer: posts remain over the whole arc, rails missing over the damaged arc (b0..b1)
+            # [W3 S06 · G6 · R06-2] **bronze horizontal tubes, 4 rails** on the helix.
+            #   The hazard is unchanged and stays exactly where the brief put it: over the
+            #   damaged arc (b0..b1 = 180…270 deg) **every rail is missing and the posts
+            #   remain**, so the guard still reads as present from a distance. Going from
+            #   2 rails to 4 makes the intact 210 deg *more* convincing, which sharpens the
+            #   misread rather than softening it — the cue is the ABSENCE, not the count.
+            offs = _rail_offsets()
             _posts("Outer", rl["outer_r"], a0, a1, M)
-            _pipe_arc("OuterTop", rl["outer_r"], b1, a1, rl["rail_h"],
-                      rl["pipe_r"], M)
-            _pipe_arc("OuterMid", rl["outer_r"], b1, a1,
-                      rl["rail_h"] - rl["mid_drop"], rl["pipe_r"]*0.7, M)
+            for r, zo in enumerate(offs):
+                _pipe_arc(f"OuterR{r}", rl["outer_r"], b1, a1, zo,
+                          rl["pipe_r"], M)
             # inner: intact over the whole arc (no kick plate - open at robot height)
             _posts("Inner", rl["inner_r"], a0, a1, M)
-            _pipe_arc("InnerTop", rl["inner_r"], a0, a1, rl["rail_h"],
-                      rl["pipe_r"], M)
-            _pipe_arc("InnerMid", rl["inner_r"], a0, a1,
-                      rl["rail_h"] - rl["mid_drop"], rl["pipe_r"]*0.7, M)
+            for r, zo in enumerate(offs):
+                _pipe_arc(f"InnerR{r}", rl["inner_r"], a0, a1, zo,
+                          rl["pipe_r"], M)
             # deck sound railing (both sides) - [v6 verdict (1)] post segmentation + alternating open bays
             build_deck_rail(M)
             la = PARAMS["landing"]
-            for i, (pa0, pa1) in enumerate(((0.0, 62.0), (118.0, 180.0))):
+            # [W3 S06] the parapet arcs are pinned to the **same clip azimuths as the landing
+            #   lobes** (they were hand-set to 62/118, a 1 deg guess at the same number), so
+            #   the guard now ends exactly where the slab it stands on ends.
+            for i, (pa0, pa1) in enumerate(_landing_arcs()):
                 sc.build_arc_steps(stage, f"{ROOT}/LandingParapet_{i}", CX, CY,
                                    la["r_out"] - 0.09, la["r_out"], pa0, pa1,
                                    max(4, int((pa1-pa0)/6.0)),

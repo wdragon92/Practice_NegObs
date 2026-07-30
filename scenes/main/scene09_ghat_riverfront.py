@@ -288,13 +288,26 @@ PARAMS = dict(
     #   carries; the far ridge is desaturated toward the sky (aerial perspective), which is
     #   why `hill_c` is both lighter and greyer than `hill_a`, not darker.
     #   (cx, cy, sx, sy, h, tone) — tone indexes (hill_a, hill_b, hill_c).
-    far_hills=[dict(cx=78.0, cy=-26.0, sx=16.0, sy=30.0, h=12.0, tone=0),
-               dict(cx=76.0, cy=2.0, sx=15.0, sy=34.0, h=13.5, tone=1),
-               dict(cx=79.0, cy=30.0, sx=16.0, sy=30.0, h=12.5, tone=0),
-               dict(cx=98.0, cy=-14.0, sx=20.0, sy=44.0, h=17.0, tone=2),
-               dict(cx=100.0, cy=26.0, sx=20.0, sy=40.0, h=16.0, tone=2),
-               dict(cx=126.0, cy=6.0, sx=26.0, sy=64.0, h=19.0, tone=2)],
-    hill=dict(blobs=9, blob_r=0.62, spread=0.78, seed=91),
+    #   [revised after the first pilot] the first belt was **9 ridges over y −40…+40 only**, which
+    #   from `g9_oblique` filled one corner and left the rest of the horizon open, and its ridge
+    #   **body box stood out as a hard slab** under the crowns (`body 0.55 h`). Two measured
+    #   corrections: the belt is widened to **y −108…+108** so it closes the horizon across the
+    #   whole water cut (the water plate itself is y ±40, and at 96–150 m a ±40 belt subtends only
+    #   ±22°), and the body drops to **0.30 h** with the crowns overlapping enough to hide it.
+    far_hills=[dict(cx=78.0, cy=-84.0, sx=16.0, sy=44.0, h=11.0, tone=1),
+               dict(cx=76.0, cy=-46.0, sx=15.0, sy=38.0, h=12.5, tone=0),
+               dict(cx=79.0, cy=-10.0, sx=16.0, sy=36.0, h=12.0, tone=1),
+               dict(cx=77.0, cy=24.0, sx=15.0, sy=36.0, h=13.0, tone=0),
+               dict(cx=80.0, cy=60.0, sx=16.0, sy=40.0, h=11.5, tone=1),
+               dict(cx=98.0, cy=-96.0, sx=20.0, sy=48.0, h=16.0, tone=2),
+               dict(cx=100.0, cy=-52.0, sx=20.0, sy=44.0, h=17.0, tone=2),
+               dict(cx=99.0, cy=-6.0, sx=20.0, sy=48.0, h=16.5, tone=2),
+               dict(cx=101.0, cy=40.0, sx=20.0, sy=44.0, h=17.5, tone=2),
+               dict(cx=98.0, cy=84.0, sx=20.0, sy=44.0, h=16.0, tone=2),
+               dict(cx=126.0, cy=-60.0, sx=26.0, sy=76.0, h=19.0, tone=2),
+               dict(cx=128.0, cy=20.0, sx=26.0, sy=80.0, h=19.5, tone=2),
+               dict(cx=125.0, cy=96.0, sx=26.0, sy=72.0, h=18.5, tone=2)],
+    hill=dict(blobs=11, blob_r=0.58, spread=0.92, body_frac=0.30, seed=91),
     # [v5 adopted] mooring bollard → **waterfront boundary pile**: religious and ferry-landing colour removed,
     #   scaled down to a stair-head boundary pile for a waterfront park. r 0.13→0.09, h 1.1→0.50.
     #   [v6] the |y| 8.5 pair is deleted — it falls under the new pavilion eaves (x −7.25..−1.15, y 5.35..11.45)
@@ -603,7 +616,13 @@ PARAMS = dict(
         #   `far_color` boxes got that backwards (a 0.13 near-black silhouette at 70 m).
         hill_a=(0.268, 0.196, 0.078),          # 단풍 maple orange-red
         hill_b=(0.288, 0.252, 0.086),          # 은행 ginkgo yellow
-        hill_c=(0.176, 0.176, 0.148),          # far ridge, desaturated toward the sky
+        # [revised after the first pilot] the first value (0.176, 0.176, 0.148) was **darker**
+        #   than the near ridges (0.268) — the exact opposite of what the comment above it claims,
+        #   and it rendered as a near-black rock wall standing over the autumn ridge instead of
+        #   receding behind it. Aerial perspective adds the sky's own light along the path, so a
+        #   distant ridge is **lighter and bluer** than a near one, never darker. Corrected to sit
+        #   above `hill_a`/`hill_b` in value with a blue bias, which is also what G9 shows.
+        hill_c=(0.230, 0.246, 0.288),          # far ridge, washed toward the sky
         hill_rough=1.0,
         # [v6 (1)] pavilion timber members — posts, tie beams, railing (reddish-brown pine) / raised floor (light floorboard)
         pav_wood_tint=(0.68, 0.44, 0.28), pav_floor_tint=(0.78, 0.60, 0.42),
@@ -1559,7 +1578,18 @@ def build_views(run, z_bot, water_z, water_x0):
     #   **Mise-en-scene registry only** — appended after the S09-A cuts, so the 9 `sc.grid_views`
     #   presets keep their identity and their order and the judgement baseline is untouched
     #   (the S09-A precedent, `w3_execution_spec_v1.md` Sec.10.5, applied again).
-    views["g9_oblique"] = dict(eye=[-20.0, 36.0, 13.0], tgt=[9.0, -1.0, 0.0])
+    #   **Handedness, corrected against the first render rather than against the arithmetic.**
+    #   The bearing table above was first written for an eye on the **+Y** side, on the reading
+    #   that a positive bearing offset puts an element on the right of frame (the `park_vista`
+    #   comment says so in as many words: *"duck boat +20.6 deg → right side"*). The first
+    #   `g9_oblique` render at eye (−20, **+36**, 13) came back **mirrored** — water filling the
+    #   LEFT, terrace on the right — so that reading is wrong for a camera looking south, and the
+    #   note it came from is only true for park_vista's own sense. Measured, not re-derived: the
+    #   eye moves to the **−Y** side and the target's y flips with it, which puts the −Y terraced
+    #   beds and the boardwalk in the left foreground and the water, far bank and autumn ridge on
+    #   the right — G9's layout. The magnitudes in the table above are unchanged (the geometry is
+    #   symmetric about y = 0 in everything this cut frames); only the sign of y is.
+    views["g9_oblique"] = dict(eye=[-20.0, -36.0, 13.0], tgt=[9.0, 1.0, 0.0])
     return views
 
 
@@ -2364,7 +2394,7 @@ def main():
         tone_mtl = (M["hill_a"], M["hill_b"], M["hill_c"])
         for i, h in enumerate(PARAMS["far_hills"]):
             mtl = tone_mtl[int(h["tone"]) % 3]
-            body_h = h["h"] * 0.55
+            body_h = h["h"] * hp["body_frac"]
             sc.add_box(stage, f"{ROOT}/Hill_{i}/Body",
                        (h["cx"], h["cy"], base + body_h / 2.0),
                        (h["sx"], h["sy"], body_h), mtl)
@@ -2378,9 +2408,12 @@ def main():
                 prof = 0.55 + 0.45 * math.sin(math.pi * t)
                 rz = h["h"] * hp["blob_r"] * prof * float(rs.uniform(0.86, 1.14))
                 rx = h["sx"] * hp["spread"] * 0.5 * float(rs.uniform(0.82, 1.18))
-                ry = h["sy"] / nb * 0.95 * float(rs.uniform(0.88, 1.22))
+                # crowns must **overlap**, or a ridge reads as a row of separate balls (the
+                #   first pilot's "caterpillar"). 1.55 x the station pitch is the smallest
+                #   multiplier at which neighbours merge at every drawn size.
+                ry = h["sy"] / nb * 1.55 * float(rs.uniform(0.88, 1.22))
                 sc.add_sphere(stage, f"{ROOT}/Hill_{i}/Crown_{k}",
-                              (bx, by, base + body_h * 0.82 + rz * 0.34),
+                              (bx, by, base + body_h * 0.60 + rz * 0.30),
                               (rx, ry, rz), mtl)
 
     def build_lilies(M):

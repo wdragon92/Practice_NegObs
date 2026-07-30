@@ -2425,10 +2425,25 @@ def main():
                     continue
                 # `instanceable=False` on purpose: an ancestor `strongerThanDescendants`
                 # bind does not reach inside a prototype (measured — the `s311b` probe
-                # still rendered the SimPBR fallback), so the override has to be written
+                # still rendered the fallback), so the override has to be written
                 # on the meshes themselves, which is exactly what `urban_kit`'s own
                 # `_bind_far_override` does. Four placements, so nothing is lost by not
                 # sharing a prototype.
+                # **[W3 K-micro · T4b-F2] The conclusion above is right; its cited cause
+                # was not, and the difference is a revert trap.** This comment used to
+                # name the **SimPBR/MDL** fallback. That one was fixed by T4's
+                # `ensure_mdl_package()` and is no longer what falls back here. Today the
+                # fallback on `Outcrop_0` is **MaterialX**: `rock_moss_set_01` is a Poly
+                # Haven CC0 row and every one of the 33 CC0 rows / 50 materials reaches an
+                # `ND_normalmap_float` node that is missing from this runtime's Sdr
+                # registry (`cannot find SdrNode`, ×4 in frame) `[measured — w3_t4b_v1.md
+                # §1.2, §3]`. So this bind is **not** dead weight left over from a fixed
+                # MDL bug: dropping it lands FU-1's measured **0.02 % → 4.50 %** red.
+                # `Outcrop_1..3` are NVIDIA assets with no MaterialX gap — for those three
+                # the workaround function really is gone and only the `rockface_tint` art
+                # decision remains. The clean migration is `urban_kit`'s `treatment=`
+                # wrapper (`w3_t4b_v1.md` §4.2), which is this scene owner's call, not the
+                # kit lane's; this edit corrects the record only.
                 try:
                     from pxr import Usd, UsdShade
                     ap = stage.GetPrimAtPath(f"{ROOT}/Outcrop_{i}/Asset")

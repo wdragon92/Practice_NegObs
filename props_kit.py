@@ -773,24 +773,73 @@ def build_gantry_sign(stage, prefix, x, y0, y1, gz, clear_h, post_mtl, panel_mtl
 
 def build_chevron_band(stage, prefix, x, y, z, mtl_y=None, mtl_k=None,
                        width=0.60, height=0.90, n=6, stripe_t=0.006,
-                       yaw=0.0, stage_mtl_prefix=None):
-    """G13: the **yellow/black diagonal chevron band** on a wall end.
+                       yaw=0.0, stage_mtl_prefix=None, slant_deg=0.0):
+    """G13: the **yellow/black hazard band** on a wall end.
 
     Colour is the statutory pair `[law - 산업안전보건법 별표8]`: 5Y 8.5/12 yellow with
-    black. Stripes run at 45 deg; `n` alternating bands across `width`. Modelled as thin
-    proud boxes rather than a texture so the band survives at grazing angles, which is
-    where a painted decal disappears.
+    black. `n` alternating bands across `width`, modelled as thin proud boxes rather
+    than a texture so the band survives at grazing angles, which is where a painted
+    decal disappears. The band lives in the local **YZ plane** (thin in X = the wall
+    normal); `_root` carries the wall's yaw.
+
+    **`slant_deg=` — the S13-F1 resolution, and why the default is 0.0.**
+    The docstring used to claim *"Stripes run at 45 deg"* while the code laid plain
+    **vertical** bars: there was no rotation anywhere in it, and `_root` takes yaw (Z)
+    only, so no caller could tilt them either. The claim was checked against the
+    governing photograph rather than argued: **G13's wall-end band is unambiguously a
+    45 deg hatch** (`w3_intake_v2_images.md` §2 G13 — *"yellow/black **diagonal**
+    chevron bands"* — and the reference half of `_w3_s13_crops/s13_ramp_marks.png`,
+    viewed for this decision). The vertical bars in the same photograph are the
+    **kerb blocks**, a different product. So the docstring was right and the
+    implementation was the defect; `slant_deg` is the missing capability.
+
+    The **default stays 0.0** because scene13 shipped the vertical form and kits are
+    frozen against wired geometry in this window: `slant_deg=0.0` reproduces the
+    landed band **exactly** (the general construction below degenerates to the
+    original three expressions at theta = 0 — verified as a 33/33 prim-hash identity,
+    not asserted). Flipping scene13 to `slant_deg=45.0` is the S13 owner's edit, with
+    its own declaration.
+
+    Construction for `slant_deg != 0`: stripes are spaced on the axis **perpendicular
+    to themselves** (pitch `width/n`, so the painted width is the same product as at
+    0 deg), and each one is cut to the **chord** of the band rectangle along its own
+    direction, so the hatch fills the rectangle instead of throwing long bars past its
+    corners. The stripe count therefore rises with the slant - the band is wider
+    measured across a diagonal - which is what a real hatch does.
     """
     pfx = stage_mtl_prefix or prefix
     my = mtl_y or _mtl(stage, pfx + "/ChevYellow", SAFETY_YELLOW, rough=0.55)
     mk = mtl_k or _mtl(stage, pfx + "/ChevBlack", SAFETY_BLACK, rough=0.55)
     _root(stage, prefix, x, y, z, yaw)
     made = dict(stripe=0)
-    for i in range(int(n)):
-        sy = -width / 2.0 + width * (i + 0.5) / n
-        sc.add_box(stage, f"{prefix}/Stripe_{i}", (0.0, sy, 0.0),
-                   (stripe_t, width / n, height * 1.35),
-                   my if i % 2 == 0 else mk)
+    th = math.radians(float(slant_deg))
+    ct, st_ = math.cos(th), math.sin(th)
+    H = height * 1.35                      # the painted height, as before
+    pitch = width / n
+    # extent of the rectangle measured across the stripe direction
+    span = width * abs(ct) + H * abs(st_)
+    n_eff = max(1, int(round(span / pitch)))
+    for i in range(int(n_eff)):
+        # c = offset along the perpendicular axis v = (cos, -sin) in (y, z)
+        c = -span / 2.0 + span * (i + 0.5) / n_eff
+        # chord of the rectangle along the stripe axis u = (sin, cos)
+        s_lo, s_hi = -1e9, 1e9
+        for coef, lim, off in ((st_, width / 2.0, c * ct),
+                               (ct, H / 2.0, -c * st_)):
+            if abs(coef) < 1e-12:
+                if abs(off) > lim:         # this stripe misses the band entirely
+                    s_lo, s_hi = 0.0, -1.0
+                continue
+            a, b = (-lim - off) / coef, (lim - off) / coef
+            s_lo, s_hi = max(s_lo, min(a, b)), min(s_hi, max(a, b))
+        if s_hi <= s_lo:
+            continue
+        sm, L = (s_lo + s_hi) / 2.0, s_hi - s_lo
+        sy = c * ct + sm * st_
+        sz = -c * st_ + sm * ct
+        sc.add_box(stage, f"{prefix}/Stripe_{i}", (0.0, sy, sz),
+                   (stripe_t, pitch, L),
+                   my if i % 2 == 0 else mk, rotX=float(slant_deg))
         made["stripe"] += 1
     return made
 
@@ -949,12 +998,18 @@ def _selfcheck():
         def __init__(self):
             self.prims = []
             self.xf = {}           # path -> rotZ [deg]  (S06-F1/S08-F1 evidence)
+            self.rx = {}           # path -> rotX [deg]  (S13-F1 evidence)
+            self.geo = {}          # path -> (center, size)
 
     rec = _P()
 
-    def _box(stage, path, center, size, mtl=None, collider=False, rotZ=0.0):
+    def _box(stage, path, center, size, mtl=None, collider=False, rotZ=0.0,
+             rotX=0.0):
         rec.prims.append(path)
         rec.xf[path] = float(rotZ)
+        rec.rx[path] = float(rotX)
+        rec.geo[path] = (tuple(float(v) for v in center),
+                         tuple(float(v) for v in size))
 
     def _cyl(stage, path, center, radius, height, mtl=None, rotY=0.0, rotX=0.0,
              collider=False, rotZ=0.0):
@@ -1096,6 +1151,32 @@ def _selfcheck():
         ck(build_gantry_sign(st, "/G13g", 0, -3, 3, 0, 2.2, "p", "n")["post"] == 2,
            "G13: gantry on two posts")
         ck(build_chevron_band(st, "/G13c", 0, 0, 1)["stripe"] == 6, "G13: chevron band")
+        # -- S13-F1: the docstring promised 45 deg and the code laid vertical bars.
+        #    (a) the default must still be the landed vertical band, expression for
+        #        expression, or scene13's four bands move; (b) 45 deg must actually
+        #        tilt, be cut to the band rectangle, and keep the painted stripe
+        #        width the statute pairs with.
+        _leg = [(f"/G13c/Stripe_{i}",
+                 (0.0, -0.60 / 2.0 + 0.60 * (i + 0.5) / 6, 0.0),
+                 (0.006, 0.60 / 6, 0.90 * 1.35)) for i in range(6)]
+        ck(all(rec.geo[p] == (c, s) for p, c, s in _leg)
+           and all(rec.rx[p] == 0.0 for p, _c, _s in _leg),
+           "G13: slant_deg=0.0 reproduces the landed vertical band exactly (S13-F1)")
+        r = build_chevron_band(st, "/G13x", 0, 0, 1, slant_deg=45.0)
+        _sx = [p for p in rec.prims if p.startswith("/G13x/Stripe_")]
+        ck(r["stripe"] == 13 and len(_sx) == 13,
+           f"G13: a 45 deg hatch needs 13 stripes over the diagonal span — got {r['stripe']}")
+        ck(all(abs(rec.rx[p] - 45.0) < 1e-9 for p in _sx),
+           "G13: every 45 deg stripe carries rotX 45 (the tilt the old code never had)")
+        ck(all(abs(rec.geo[p][1][1] - 0.60 / 6) < 1e-12 for p in _sx),
+           "G13: the painted stripe width is unchanged by the slant (perpendicular pitch)")
+        _ok_fit = all(
+            abs(rec.geo[p][0][1]) + rec.geo[p][1][2] / 2.0 * math.sin(math.radians(45.0))
+            <= 0.60 / 2.0 + 0.60 / 6 and
+            abs(rec.geo[p][0][2]) + rec.geo[p][1][2] / 2.0 * math.cos(math.radians(45.0))
+            <= 0.90 * 1.35 / 2.0 + 0.60 / 6 for p in _sx)
+        ck(_ok_fit,
+           "G13: each 45 deg stripe is cut to the band chord (no bars thrown past the corners)")
         r = build_trench_grating(st, "/G13t", 0, 0, 0, "f", "b")
         ck(r["bar"] == 200 and r["frame"] == 2, "G13: 30 mm bar pitch over 6 m")
         r = build_rope_handline(st, "/G4", [(0, 0), (6, 0)], lambda x: 0.0, "p", "r")

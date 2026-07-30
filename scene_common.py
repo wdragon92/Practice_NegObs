@@ -943,18 +943,22 @@ def _bind_mtl(prim, mtl):
         UsdShade.MaterialBindingAPI.Apply(prim).Bind(mtl)
 
 
-def add_box(stage, path, center, size, mtl=None, collider=False, rotZ=0.0):
-    """Axis-aligned box. `rotZ` (deg, +Z) spins it about its own centre.
+def add_box(stage, path, center, size, mtl=None, collider=False, rotZ=0.0,
+            rotX=0.0):
+    """Axis-aligned box. `rotZ` / `rotX` (deg) spin it about its own centre.
 
     [W3 K-micro · S06-F1 / S08-F1] `rotZ` exists so a template that lays a run
     along a **polyline** can honour that polyline's bearing without wrapping every
     element in a `build_rot_group` (an extra Xform prim per element, which moves
     prim budgets). The op is authored **only when it is non-zero**, and it is
     inserted between the translate and the scale so the applied order is
-    `scale -> rotZ -> translate` (USD applies xformOps in reverse list order -
-    the same convention `build_rot_group` documents). With `rotZ=0.0` the prim is
-    byte-identical to the pre-K-micro one, which is what makes this a
-    zero-geometry-change addition for all 33 wired scenes.
+    `scale -> rotX -> rotZ -> translate` (USD applies xformOps in reverse list
+    order - the same convention `build_rot_group` documents). With
+    `rotZ=rotX=0.0` the prim is byte-identical to the pre-K-micro one, which is
+    what makes this a zero-geometry-change addition for all 33 wired scenes.
+    `rotX` exists for **in-plane** rotation of an element that lives on a
+    vertical wall (thin in X): the 45 deg hazard hatch of `build_chevron_band`
+    is the first customer (S13-F1).
     """
     from pxr import UsdGeom, UsdPhysics, Gf
     cube = UsdGeom.Cube.Define(stage, path)
@@ -964,6 +968,8 @@ def add_box(stage, path, center, size, mtl=None, collider=False, rotZ=0.0):
     xf.AddTranslateOp().Set(Gf.Vec3d(*[float(c) for c in center]))
     if abs(float(rotZ)) > 1e-9:
         xf.AddRotateZOp().Set(float(rotZ))
+    if abs(float(rotX)) > 1e-9:
+        xf.AddRotateXOp().Set(float(rotX))
     xf.AddScaleOp().Set(Gf.Vec3f(float(size[0]) / 2.0,
                                  float(size[1]) / 2.0,
                                  float(size[2]) / 2.0))
@@ -978,7 +984,7 @@ def add_box(stage, path, center, size, mtl=None, collider=False, rotZ=0.0):
     # it has no rotation input, so a spun slab would get an unspun skin sticking out
     # past its corners. A rotated box is never a ground slab in this library (it is a
     # railing panel or a bearing-laid element), so the skin is simply declined.
-    if LOOK_GEO and abs(float(rotZ)) <= 1e-9 \
+    if LOOK_GEO and abs(float(rotZ)) <= 1e-9 and abs(float(rotX)) <= 1e-9 \
             and _skin_wanted(path, size, mtl):        # A new mesh = geometry
         try:
             # The seed **must be deterministic**. Python's builtin hash() is randomised per process by

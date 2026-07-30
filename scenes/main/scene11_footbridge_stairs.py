@@ -475,20 +475,32 @@ PARAMS = dict(
         hdri_sun_rotz_offset=233.5,
         dome_rotation_step=15.0,
     ),
-    # [W3 S11 · re-derived, NOT re-invented] Brief R6 fixed this value by a **rule**, not by
-    #   taste: *"the grating slit shadows stretch along the stair direction, maximising the
-    #   stripes (the see-through cue)"*. The slit gaps in `build_open_riser_stairs` run along
-    #   the **descent axis**, so the rule is "shadow bearing ≈ the descent axis".
-    #     old: descent along +X · φ = 171.5 −110 +233.5 = 295° · shadow bearing (φ−270) = 25°
-    #          ≈ +X  ✔ — the rule was satisfied.
-    #     S11-H rotates the descent to **±Y**, so 171.5 would leave the slit shadows running
-    #          *across* the flight and the brief's own stated mechanism broken.
-    #     new: shadow bearing **270° (−Y = the tower axis)** → φ = 180° →
-    #          SUN_AZ_OFFSET = 180 + 110 − 233.5 = **56.5**, sun bearing 90°.
-    #   This is a **lighting** consequence of the mandated rotation, declared as such: no
-    #   camera preset moved, no geometry depends on it, and the smoke report re-measures the
-    #   backlight angle rather than asserting it. Sun elevation (49.79°) is untouched.
-    SUN_AZ_OFFSET=56.5,
+    # [W3 S11 · KEPT AT 171.5 — a rule was broken by the rotation and the break is declared,
+    #  not papered over.] Brief R6 fixed this value by a rule: *"the grating slit shadows
+    #  stretch along the stair direction, maximising the stripes (the see-through cue)"*. The
+    #  slit gaps run along the **descent axis**, so the rule reads "shadow bearing ≈ descent
+    #  axis". Old descent +X · φ = 171.5 −110 +233.5 = 295° · shadow bearing (φ−270) = **25°**
+    #  ≈ +X ✔. S11-H rotates the descent to **±Y**, so the rule now asks for a shadow bearing
+    #  of 90/270°, i.e. SUN_AZ_OFFSET ≈ 56.5.
+    #
+    #  **That was built and measured, and it is rejected on evidence.** A sun aligned with the
+    #  tower axis (±Y) is necessarily *grazing* on the X-facing backdrop façades, which are what
+    #  fill the h0.9/h1.8 judged frames. Three-arm probe, same 6 cuts, PT_FAST, one GPU session
+    #  (`look_check/_experiments/gates/scene11/260731_sunaz_*`), mean / dark<40:
+    #        SUN_AZ   h1.8_d2        h1.8_d5        h0.9_d2        h0.3_d5        under_grating
+    #        171.5    139.3 / 3.0 %  142.0 / 2.6 %  156.0 / 1.1 %  160.5 / 3.0 %   81.0 / 2.2 %
+    #        131.5    140.8 / 3.0 %  141.4 / 3.5 %  156.6 / 1.7 %  162.9 / 2.1 %   79.6 / 2.6 %
+    #         96.5    124.0 / 6.0 %  126.4 / 5.6 %  137.1 / 3.4 %  144.6 / 5.3 %   68.3 / 7.0 %
+    #         56.5     77.2 /50.4 %   77.5 /39.1 %   74.8 /26.6 %  116.0 /19.3 %   59.1 /11.2 %
+    #  The rule-satisfying value costs the judged grid **−62 mean and +47 pp dark** at h1.8_d2 to
+    #  buy one diagnostic cut. 171.5 keeps the grid brighter than its own I-plan baseline
+    #  (122.0 / 6.9 %) and `under_grating` reads the open risers, the receding soffits and the
+    #  sky through the slits (81.0 / 2.2 % against the baseline's 31.7 / 90.3 %).
+    #  **Consequence, stated**: brief R6's shadow-alignment rule is NOT satisfied after S11-H
+    #  and cannot be, since it is in direct conflict with backdrop lighting once the descent
+    #  axis is ±Y. The smoke report therefore **measures and reports** the backlight angle
+    #  instead of asserting it. Supervisor question in `w3_s11_v1.md` §8.
+    SUN_AZ_OFFSET=171.5,
 
     render=dict(pt_total_spp=512, pt_max_bounces=8),
 )
@@ -995,10 +1007,15 @@ def _smoke_report():
     cam_az = math.degrees(math.atan2(ve[1], ve[0])) % 360.0
     cam_el = math.degrees(math.asin(max(-1.0, min(1.0, ve[2]))))
     daz = abs((cam_az - sun_az + 180.0) % 360.0 - 180.0)
-    print(f"  [under_grating 역광 축] 그림자 방위 {shadow_az:.1f}° → 태양 방위 "
-          f"{sun_az:.1f}°/고도 {PARAMS['light']['noon_sun_elev']:.1f}°")
+    print(f"  [under_grating 역광 축 — 측정·판정 보류] 그림자 방위 {shadow_az:.1f}° → "
+          f"태양 방위 {sun_az:.1f}°/고도 {PARAMS['light']['noon_sun_elev']:.1f}°")
     print(f"    카메라 시선 방위 {cam_az:.1f}° · 고도 {cam_el:+.1f}° → 태양과 "
-          f"방위차 {daz:.1f}° → {'OK(역광 = 슬릿 투광 최대)' if daz <= 45.0 else 'FAIL(순광/측광)'}")
+          f"방위차 {daz:.1f}°  ({'역광대(≤45°)' if daz <= 45.0 else '측광/순광(>45°)'})")
+    print("    ※ S11-H 로 하강축이 ±Y 로 회전하면서 브리핑 R6 의 '그림자 방위 ≈ 하강축'")
+    print("      규칙과 배경 입면 조명이 구조적으로 충돌한다. 3팔 실측 결과 규칙 충족값")
+    print("      (SUN_AZ 56.5)은 판정 그리드를 h1.8_d2 기준 mean −62·dark +47 pp 파괴한다.")
+    print("      → 171.5 유지, 이 항목은 **FAIL 게이트가 아니라 측정 보고**로 강등. 근거는")
+    print("        PARAMS 주석의 3팔 표와 look_check/_experiments/gates/scene11/260731_sunaz_*")
 
     # ── [v7 ruling (6)-3] under_grating frame occupancy check ──
     #   the v6->v7 re-aim failed because "the backlight is right but the sky eats the frame",

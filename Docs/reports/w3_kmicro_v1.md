@@ -2,7 +2,8 @@
 
 - **Lane**: K-micro (kit defects + tooling), sequential commits · **Branch**: `feat/realism-v1`
 - **Baseline of record for every number below**: HEAD **`4bae470`** (verified live at lane start,
-  not taken from the brief). Final HEAD **`6e19f79`**, 12 commits.
+  not taken from the brief). Final HEAD **`6dddfe0`**, **13 commits** (11 items + 2 ledger commits; item 9 is an
+  on-disk gitignored amendment with no commit — see §9).
 - **Dispatch**: FANOUT A's routed kit findings — S06-F1 · S08-F1 · S06-F2 · S09-F1 · S08-F2 ·
   S13-F1 · SB-F1 · S01-F1 · T4b-F2 · RT-A1 · RT-A2 · RT-A4 · ledger §7 **W9**.
 - **GT rows created: none.** Nothing this lane touches is a walked surface, a drop edge, a
@@ -30,7 +31,7 @@
 | 10 | `stamp_round.py` real fix (**RT-A1 · RT-A4**) | **FIXED** — `dirty_paths` · `env_source` · `baseline_of_record` · v0 readable | `20a986b` |
 | 11 | INDEX + README §4 owed rows (**RT-A2**) | **FIXED** — 8 rounds into the chain, `INDEX §3-W3` created | `6e19f79` |
 
-**Tree-wide floor at final HEAD `6e19f79`, isolated arm** `[re-run]`:
+**Tree-wide floor at final HEAD `6dddfe0`, isolated arm** `[re-run]`:
 
 ```
 geom_invariance_check   33/33 assembly · R-4 33/33 PASS · R-6 33/33 PASS
@@ -441,7 +442,7 @@ stamp.
 ```bash
 # isolated arms (10 lanes share the worktree — never measure tree-wide numbers in it)
 git archive 4bae470 | tar -x -C base/     # control
-git archive 6e19f79 | tar -x -C final/    # this lane
+git archive 6dddfe0 | tar -x -C final/    # this lane
 # wire the gitignored payloads into BOTH (RT-A7), else scene01/scene18 cannot assemble:
 #   assets/*.exr|jpg  assets/scene01/  assets/coastal/  vegetation/  urban/  urban_cc0/
 

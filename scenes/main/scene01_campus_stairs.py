@@ -254,7 +254,7 @@ PARAMS = dict(
     lawn=dict(
         z_top=-0.15, z_bot=-0.70,
         y_in=8.20, x_in_e=14.20,      # inner edges (outside the kerb / retaining band)
-        y_out=20.0, x_out=26.0,       # outer edges of the designed platform
+        y_out=24.0, x_out=28.0,       # outer edges — must clear the deep tree row (|y| 20)
         x_w=-20.0,                    # west end (past the west bank)
         ret_t=0.20,                   # retaining-band thickness at the lower-plaza frontage
         bank_step=0.8, bank_drops=(-0.31, -0.47),
@@ -279,12 +279,19 @@ PARAMS = dict(
     #  **Two rows per band, not one.** The first pilot put a single row at |y| = 11.4 and
     #  the lawn behind it rendered as an empty green plane running to the backdrop — open,
     #  but not a campus. G1's lawn is layered: bench line, then a near tree row, then a
-    #  deeper mass. The second row sits at |y| = 17.4 with a taller trunk (4.0 -> 6.40 m)
-    #  and is offset half a pitch in x, so the two rows never line up into a grid.
-    #  Same species in both rows — this is one route's planting seen in depth, not a
-    #  belt; Scene01's `SCENE_SPECIES` belt is `None` and stays `None`.
+    #  deeper stand. The second row is taller (trunk 4.0 -> 6.40 m) and offset half a
+    #  pitch in x, so the two never line up into a grid.
+    #  **Row separation is 8.6 m, and that number is not free.** At the first attempt the
+    #  rows sat 6.0 m apart against an 8.0 m pitch, which makes the nearest neighbour of
+    #  every tree a tree in the *other* row (7.2 m < 8.0 m): `placement_lint` LINT-2 then
+    #  inferred one zig-zag run of mean pitch 10.569 m with 128 % spread — i.e. the rows
+    #  did not read as rows, which is exactly what the eye sees too. At 8.6 m the
+    #  cross-row distance is 9.49 m, the in-row neighbour wins, and each row is a row.
+    #  Same species in both — one route's planting seen in depth. Scene01's
+    #  `SCENE_SPECIES` belt is `None` and stays `None`; a deeper stand of the *same*
+    #  species is not a belt.
     lawn_trees=(dict(y=(11.4, -11.4), x0=-13.0, n=4, trunk_h=3.0, trunk_r=0.085),
-                dict(y=(17.4, -17.4), x0=-9.0, n=4, trunk_h=4.0, trunk_r=0.110)),
+                dict(y=(20.0, -20.0), x0=-9.0, n=4, trunk_h=4.0, trunk_r=0.110)),
 
     #  G1's fountain, in the north lawn where `beauty_overview` actually looks
     #  (bearing 45.9 deg from that eye against a +-30 deg half-field about 33.1 deg).

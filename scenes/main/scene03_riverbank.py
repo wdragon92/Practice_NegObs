@@ -57,6 +57,41 @@ Geometry correction (supervisor ruling applied):
         (blocks a recurrence of audit v4's most frequent defect, 'water-ground junction floating')
       · Coplanar Z-fighting at equal z is avoided by a 1.5 mm stagger per seg·sub-band index.
 ────────────────────────────────────────────────────────────────────────────
+[v7 W3 · S03 lane]  Target image **G3** (`Docs/reference_photos/Generated Image - Scene03.jpg`),
+  season pinned **summer / full leaf** (§7-8 season policy: every scene pins its own image's
+  season). Governing law: `w3_intake_v2_images.md` §2 scene03 row + §7 **R03-1** + §3(ii)
+  rectangular-pattern sweep; carried items 03-A / 03-B / 03-C / 03-D.
+
+  (1) **R03-1 — the channel goes back WIDER THAN v4.** The v5.1 narrowing (22.5 → 15.8 m) is
+      **superseded**: effective water 15.8 → **33.8 m** (far_bank s 34 → 52, water s1 36 → 54),
+      i.e. +114 % over v5.1 and +50 % over the v4 width the ruling names as the floor. The
+      meander amplitude is raised with it (A1 6.0 → 10.0, A3 −2.0 → −3.4, amplitude
+      14.81 → **24.79 m**) so the bend is not flattened by the widening; |yaw|max
+      23.17° → **35.64°**, still well short of the 45° oxbow limit the v5.1 note draws.
+      amplitude/width lands at **0.73** (was 0.94) — the two constraints are in direct
+      arithmetic conflict and R03-1 rules which one gives. **No camera edit**: all 9 judge
+      presets and all 7 mise-en-scène cuts keep their coordinates to the digit.
+      Measured effect (`river_width_selfcheck`): water screen-area share of the frame
+      +36…+50 % on every cut that sees it.
+  (2) **03-C / K4-F4 — one silhouette class per bank.** The far-bank tree line now passes
+      `belt=True`, which activates `SCENE_SPECIES["Scene03"]`'s declared belt (`oak_black`,
+      Black_Oak) instead of planting the route species on both banks. Near bank (levee crest
+      + 둔치) stays `poplar` — `w3_intake_v2_images.md` §2 scene03 (e) rules the
+      `Lombardy_Poplar` levee assignment stands.
+  (3) **03-D — the never-replaced bushes.** The 6 × 3 = 18 flattened-ellipsoid blobs on the
+      slope become **real shrub USDs** through `sc.place_shrubs`, one bed = the whole slope
+      band (monospecific by construction, K4(b) S-2). The blob path is kept as the
+      assets-absent fallback (scene10 precedent), so LOOK_GEO=0 does not empty the slope.
+  (4) **03-A + user ban on 사각형 무늬** — every decorative ground rectangle leaves the scene:
+      the 8 `levee_paved` repair patches (→ 0), the D8 beach sports-field rectangle, and the
+      D6 levee-crest cycle-track centre line (a painted line on a *gravel* road, which also
+      contradicted the 07-29 "03 stays natural, the cycle track holds only for scene17"
+      ruling). The 둔치 cycle-track markings (D4) **stay** — functional road markings, not a
+      decorative pattern.
+  (5) **03-B — bollards onto the line they defend** (G-3 / PE-7): cx −1.2 → −1.0 (the spur
+      entry line), cy ±2.2 → **±1.2** (the spur edge). The third centre post the 03-B build
+      spec asks for is **declined, with a measured reason** — see `PARAMS["bollards"]`.
+────────────────────────────────────────────────────────────────────────────
 """
 
 import os
@@ -95,7 +130,16 @@ PARAMS = dict(
     # --- [v5.1] meander centerline (read by the module fns river_dx/river_yaw) ---
     #   y0/y1 are the band assembly range (7.5 beyond the terrain y +-40 - keeps the seg
     #   ends from curling inward as they rotate and tearing a sky hole in the far view).
-    meander=dict(A1=6.0, L1=110.0, A3=-2.0, y_ref=40.0,
+    # [v7 R03-1] A1 6.0 -> 10.0 · A3 -2.0 -> -3.4. The channel widening below would otherwise
+    #   flatten the bend (amplitude/width would fall to 0.44), so the amplitude is raised with
+    #   it: 14.81 -> 24.79 m. Everything the v5.1 note gates on is re-measured, not assumed:
+    #     |yaw|max        23.17 -> 35.64 deg   (the note's oxbow limit is 45 deg)
+    #     adj-seg d(yaw)   6.48 -> 10.82 deg
+    #     overlap lip @ |yaw|max, shoulder band w=3.0   0.25 -> 0.63 m  (far field, |y| ~ 40)
+    #   **dx(0)=0 and dx'(0)=0 hold for ANY A1/A3**, so the hazard corridor (y +-0.95) transform
+    #   is bit-identical to v6: stair · trim · spur · drop edge x=0 do not move. That invariance
+    #   is the reason this is not a walked-surface GT change.
+    meander=dict(A1=10.0, L1=110.0, A3=-3.4, y_ref=40.0,
                  seg_dy=5.0, y0=-47.5, y1=47.5, over=0.8, z_stagger=0.0015),
     # --- terrain ---
     # levee crest: grass base + a gravel road band along Y (river-parallel) + stair spur
@@ -120,22 +164,43 @@ PARAMS = dict(
     # z: elements sit on the **gravel band top** (levee_road proud, +1.5 mm).
     #   Using the grass top (0.0) instead would bury every element on the road,
     #   which is exactly the burial class the pilots found (spec §1.1).
-    # patches = trampled bare soil (spec §5.7 "8~12"), bound to the dirt material -
-    # trampled bare soil at the gravel/grass margins, not asphalt repairs.
+    # [v7 · 03-A + user ban "바닥에 이상한 사각형 무늬는 웬만하면 다 제거해"]
+    #   **`patch` 8 -> 0, and the site list is deleted with it.** The old rationale ("trampled
+    #   bare soil at the gravel/grass margins, not asphalt repairs") does not survive contact
+    #   with the shape: `build_patch_field` draws **axis-locked rectangles** (DEC-3), and
+    #   trampled soil has no straight edge. `w3_intake_v2_images.md` §3(ii) states the rule
+    #   the whole sweep runs on — a rectangle on the ground is legitimate only as a **saw-cut
+    #   asphalt repair on an asphalt road** — and this crest is grass + gravel, so the legitimate
+    #   count here is **0**, not the "1 or 0" the table allows the paved half of P13.
+    #   What carries the trampled-soil intent instead: the `stain` row, which has been
+    #   **irregular lobes** since DEC-1 (`ground_kit.py:671`, `:1250-1298`), plus the wear lane
+    #   and the edge break. Nothing is left un-modelled by the deletion.
+    #
+    #   **GT-24's `levee_paved` extension reaches this scene NOWHERE — measured, not assumed.**
+    #   The SB closure batch deleted `("patch", 4)` from the P13 profile row, and `ground_kit.py`
+    #   `:1984-1986` records the reach check itself: *"`scene03` authors its own `surface` row
+    #   (8 patches, `scene03_riverbank.py:911`) and is **unreachable**; `scene17` does not
+    #   override and loses 4 `Patch_*` prims."* The module-snap half is inert here too: this
+    #   scene overrides `pave=dict(module=(None, None), ...)`, so its patches never snapped to
+    #   the 인터로킹 200 cell in the first place. The 8 patches therefore leave by **this
+    #   scene's own decision under the user ban**, and the inherited delta from GT-24 is **nil**.
     # wear lane runs **along the river (+-Y)**, i.e. along the walking route on
     #   the crest, offset to x=-3.50 so it falls inside the d5 near window
     #   (x -4.44..-3.00). Length is capped at |y| <= 10 because the band is
-    #   straight while the road follows the meander: |dx(10)| = 0.95 m and the
-    #   road is 3 m wide, so the straight band is still inside the road at the
-    #   ends; at |y| = 20 it would not be (|dx| = 3.52).
+    #   straight while the road follows the meander. **[v7] Re-measured against A1=10.0:
+    #   |dx(10)| = 1.638 m** (was 0.95), so at |y|=10 the 3 m road spans x −5.638…−2.638
+    #   and the straight 0.90 m wear band (−3.95…−3.05) is still wholly inside it, with
+    #   0.412 m to spare at the inner edge. `wear_y` therefore stays at 10.
     # NO silt band. Spec §5.7 lists one, but the crest top (z=0) is 3.35 m
     #   above the water line (riprap bottom -3.35): silt deposition belongs to
     #   the beach at z=-3.2, which is outside every h0.3 near window.
+    # [v7] `break_y` 3.0 -> 2.4. The edge break is a STRAIGHT strip laid on a MEANDERING
+    #   seam, so its half-length is bounded by |dx(y)| <= 0.10 m (the half width of the
+    #   transition band). A1=6.0 gave |dx(3.0)| = 0.088 m; A1=10.0 gives 0.148 m — off the
+    #   seam. Solving 10.0*(1 - cos(2*pi*y/110)) = 0.10 gives y = 2.477, so 2.4 is the
+    #   largest 0.1-rounded value that still holds: |dx(2.4)| = 0.094 m.
     gkit=dict(x0=-12.0, half_y=3.0, wear_x=-3.50, wear_y=10.0,
-              break_y=3.0,
-              patch=[(-1.10, 0.15), (-3.35, 0.55), (-2.15, -1.35),
-                     (-5.10, 1.85), (-8.60, -0.80), (-9.35, 1.50),
-                     (-4.30, -2.15), (-11.00, 0.40)]),
+              break_y=2.4),
     slope=dict(x0=0.0, z0=0.0, run=7.0, drop=3.2, thick=0.4,   # 20-step match: run 7.0
                y0=-40.0, y1=40.0),
     # corridor bounding stairs + side trim (slope cut width). [v5.1] band_gap = the inner
@@ -168,15 +233,30 @@ PARAMS = dict(
     # [v5.1] channel narrowed (far_bank s0 40->34, water s1 40->36 - 34~36 is the
     #   overlap tucked under the far bank). Effective water s 18.2..34 = 15.8 m.
     #   meander amplitude 14.8 / channel width 15.8 = 0.94 -> meets the required "1~2x" floor.
-    water=dict(x0=16.5, y0=-40.0, x1=36.0, y1=40.0, z=-3.35,
-               bands=((16.5, 23.0, 0.06), (23.0, 29.0, 0.10),
-                      (29.0, 36.0, 0.15))),
-    far_bank=dict(x0=34.0, x1=70.0, y0=-40.0, y1=40.0, z_top=-3.2, thick=0.4),
+    # **[v7 R03-1 — this SUPERSEDES the v5.1 narrowing, per `w3_intake_v2_images.md` §7.**
+    #   User (2nd review): *"Scene3 도 참조, 강 뷰를 좀 더 넓히는걸 추천"*; the ruling asks for a
+    #   channel **wider than v4** to match G3, where the water holds the whole right third of
+    #   the frame and runs to the vanishing point.
+    #     far_bank s0  34 -> 52 · water s1  36 -> 54  (52..54 is the overlap tucked under the bank)
+    #     effective water s 18.2..52 = **33.8 m**  (v5.1 15.8 · v4 22.5)
+    #   The waterline itself (s 18.2, the riprap toe) does NOT move, so the riprap, the reed
+    #   band, the water gauge and the whole near bank are untouched — the widening is spent
+    #   entirely on the far side, which is where G3 puts it.
+    #   amplitude/width = 24.79 / 33.8 = **0.73** (was 0.94). The brief's "1~2x" and the user's
+    #   "widen it" cannot both be honoured — the amplitude is already at 35.6 deg of bank
+    #   tangent and 45 deg is oxbow — so the ruling decides, and the shortfall is declared
+    #   rather than engineered away.
+    water=dict(x0=16.5, y0=-40.0, x1=54.0, y1=40.0, z=-3.35,
+               bands=((16.5, 26.0, 0.06), (26.0, 38.0, 0.10),
+                      (38.0, 54.0, 0.15))),
+    far_bank=dict(x0=52.0, x1=88.0, y0=-40.0, y1=40.0, z_top=-3.2, thick=0.4),
     # v4-B3/D11: 3 far_hedge slabs (60 m grass-texture strips) drew regular hatching stripes
     #   on the horizon and read as a printed backdrop -> replaced by 7 tree lines.
     # [v5.1] The waterline moved in to s34, so the tree line moves to s38. An even 10 m
     #   spacing would break global convention 3 (no grids), so spacing·offset are irregular.
-    far_trees=[dict(cx=38.0 + dxo, cy=cy) for dxo, cy in
+    # [v7] Far bank at s52 -> the tree line rides it out to s56 (same +4 m stand-off). The
+    #   irregular per-tree dx offsets are carried over unchanged (convention 3).
+    far_trees=[dict(cx=56.0 + dxo, cy=cy) for dxo, cy in
                ((0.0, -31.0), (1.8, -22.5), (-1.2, -13.0), (2.4, -3.0),
                 (-0.6, 7.5), (1.5, 16.0), (-1.8, 27.5), (0.9, 35.0))],
 
@@ -189,7 +269,27 @@ PARAMS = dict(
     #   bring them nearer the camera (−6) and enlarge them, so instead **spread them
     #   off the sight axis (laterally) and retreat only to the road-spur line (s −1.0)**; 1.0 m outside the spur edge (y +-1.2).
     #   Azimuth from levee_walk |az| 14.8 deg -> 25.3 deg (frame edge).
-    bollards=[dict(cx=-1.2, cy=2.2), dict(cx=-1.2, cy=-2.2)],
+    # **[v7 · 03-B] The v6 lateral spread is REVERSED and the pair lands on the line it
+    #   defends.** `w3_intake_01_05.md` §03-B measured the defect: the posts sat at y = ±2.2
+    #   against a spur edge at y = ±1.2, i.e. **1.0 m outside**, standing on turf — *"they read
+    #   as free-standing monuments"*. G-3 / PE-7 is absolute: a bollard stands **on** the
+    #   보도·차도 경계 line it defends, offset 0.00 m, and the frame-occupancy problem the v6
+    #   ruling solved is to be solved by moving the camera or the spur, never the bollard.
+    #     cx −1.2 -> **−1.0** (the spur entry line, x=−1.0) · cy ±2.2 -> **±1.2** (the spur edge)
+    #   Dimensions were already lawful and are untouched (h 0.90 ∈ [0.8,1.0] · Ø0.15 ∈
+    #   [0.1,0.2] · reflective band z 0.74–0.84, 교통약자법 시행규칙 별표2 제7호).
+    # **The third, centre post of the 03-B build spec is DECLINED — with the measurement, not
+    #   by preference.** The spec asks for a row of 3 at a 1.2 m interval across the 2.4 m
+    #   spur (inside "1.5 m 안팎"). The centre post would stand at (−1.0, 0.0): the h0.3/h0.9
+    #   **d2 judged eye is at (−2.0, 0.0)**, so the post lands **1.00 m dead ahead on the
+    #   sight axis**, spanning z 0…0.90 — it fills the near window and destroys the very cut
+    #   the drop label is read from. The judge presets are frozen this window, so the spec's
+    #   own escape hatch ("move the camera or the spur") is not available, and H16 forbids
+    #   trading a live gate for a dressing refinement. Declared deviation: post interval
+    #   **2.4 m** against 별표2's "1.5 m 안팎". Re-open with the renumbering round, where the
+    #   preset axis can move. 점형블록 in front stays default-OFF (supervisor ruling,
+    #   `user_feedback_v5_1.md` §7) — restated here so it is not re-litigated.
+    bollards=[dict(cx=-1.0, cy=1.2), dict(cx=-1.0, cy=-1.2)],
     bollard=dict(h=0.90, r=0.075, band_z=0.74, band_h=0.10),
     # v4-D7: benches 1 -> 4 (2 levee crest + 2 beach). (cx, cy, base_z, yaw)
     # [v5.1 global convention 3] The old layout was 2 symmetric y=+-6 pairs (a grid) -> now
@@ -206,13 +306,35 @@ PARAMS = dict(
     #   **3 overlapping flattened ellipsoids** - axis-aligned solids of revolution have no
     #   cut face, and the gradient enters only via placement height (slope_z). Ground: rz·embed >= rx·grad(0.457):
     #     0.34x0.55=0.187 >= 0.40x0.457=0.183 ✓ (rx capped at 0.40)
+    # **[v7 · 03-D] These blobs are no longer what is built.** The carried item is *"shrub /
+    #   bush replacement"* — the slope clumps are the last never-replaced procedural
+    #   vegetation in this scene — and K4(b) landed the instrument: `sc.place_shrubs` stands
+    #   real shrub USDs and draws **one species per bed** (S-2). The 6 clump centres and the
+    #   3 per-clump offsets below are **kept as the placement grammar** (they are the authored
+    #   composition, and re-inventing coordinates would be a change nobody asked for): they
+    #   now generate 18 shrub *points*, and the ellipsoids survive only as the assets-absent
+    #   fallback (`build_dressing`, scene10 precedent). See `hedge["target_h"]` for the one
+    #   number that is genuinely new, and why it is not G3's number.
     hedges=[dict(cx=1.5, cy=-4.0), dict(cx=3.0, cy=6.0),
             dict(cx=2.2, cy=8.0), dict(cx=4.0, cy=-7.0),
             dict(cx=1.8, cy=-11.5), dict(cx=3.4, cy=13.0)],
     hedge=dict(embed=0.55,
                blobs=((0.00, 0.00, 0.40, 0.62, 0.34),
                       (0.30, 0.52, 0.30, 0.46, 0.25),
-                      (-0.26, -0.44, 0.33, 0.40, 0.29))),  # (dx,dy,rx,ry,rz)
+                      (-0.26, -0.44, 0.33, 0.40, 0.29)),  # (dx,dy,rx,ry,rz)
+               # [v7] `hedge_evergreen` = Holly (h 1.526) / Privet (h 1.114), one drawn for
+               #   the whole band. Both are evergreen broadleaf, so the summer pin of G3 is
+               #   satisfied without a seasonal strip, and neither carries a flower prim
+               #   (K4-F1's Rhododendron loss does not touch this scene).
+               species="hedge_evergreen",
+               # **target_h 0.85 is set by the scene's IDENTITY, not by G3.** G3's slope mass
+               #   is ~1.5 m. Here the highest bed sits at s=1.5, i.e. slope_z = −0.686, so a
+               #   1.5 m shrub tops out at **+0.814 m — 0.514 m ABOVE the h0.3 judged eye** and
+               #   would cut into the water band that is this scene type's ONLY drop evidence
+               #   ("no railing × water-surface anchor"). At 0.85 m the same crown tops at
+               #   **+0.164 m, 0.136 m BELOW** that eye. The instrument outranks the reference
+               #   photo on this one number (H16); the shortfall is declared, not hidden.
+               target_h=0.85),
     # 2 beach trees (crown top z~-0.15, below the levee-crest eye height 1.5 - series (3) anchor)
     trees=[dict(cx=10.0, cy=-4.0), dict(cx=16.0, cy=5.0)],
     # v4-D10: trees 2 -> 8 (3 more on the levee crest + 3 on the beach)
@@ -223,27 +345,51 @@ PARAMS = dict(
 
     # === v4-D context dressing (so it reads as a river levee) ===
     # D1 [top priority] distant bridge - fixes 'river' in one cut. The river axis is Y, so the bridge crosses along X.
-    bridge=dict(x0=12.0, x1=46.0, y0=-22.5, y1=-13.5, deck_top=-0.2,
+    # [v7] The deck must still land on BOTH banks after the widening: x1 46 -> 64 (the far
+    #   bank now starts at s52, so 12 m of deck sits over land on the far side, as before).
+    #   Piers go 5 -> 7 at the same 8.0 m bay (14·22·30·38·46·54·62) — a bridge is the one
+    #   place a constant pitch is correct, and G3 shows exactly that: a long low girder deck
+    #   on a regular pier line.
+    bridge=dict(x0=12.0, x1=64.0, y0=-22.5, y1=-13.5, deck_top=-0.2,
                 deck_thick=0.8, parapet_h=0.9, parapet_w=0.3,
-                pier_r=1.2, pier_x=(14.0, 22.0, 30.0, 38.0, 45.0),
+                pier_r=1.2,
+                pier_x=(14.0, 22.0, 30.0, 38.0, 46.0, 54.0, 62.0),
                 pier_z0=-3.7),
     # D2 far-side city silhouette (horizon closure + river-width scale anchor). base_z=far_bank top
     # [v5.1] Pulled in to s 55->48 with the narrower channel (far beach stays 14 m wide), and
     #   each block goes in its own rot_group for the meander tangent + placement jitter (yaw +-4 deg).
+    # [v7] The blocks ride the far bank out: facade s 48 -> 66 (unchanged 14 m of far 둔치
+    #   between the bank line and the first facade). Pushing them back 18 m without touching
+    #   the heights would shrink the skyline by a factor 54/72 = 0.75 from the levee_walk eye,
+    #   i.e. the widening would COST the horizon closure G3 relies on. Heights are therefore
+    #   re-derived, not left: h x 1.45~1.56 with the floor count kept at a Korean 2.90 m
+    #   storey (A 7 -> 11 floors, B 5 -> 8, C 8 -> 14). Net angular height vs v6: +9~17 %,
+    #   i.e. slightly MORE horizon closure than before, which is the direction G3 asks for
+    #   (its far bank is a continuous 한강변 apartment line). Honest limit: G3's towers read
+    #   as 20~25 storeys and these are 8~14 — a full backdrop rebuild is not in this lane.
     city=dict(
-        A=dict(x0=48.0, x1=55.0, y0=-30.0, y1=-14.0, h=22.0, floors=7,
-               axis="x", facade_x=48.0, face_dir=-1.0, base_z=-3.2, jyaw=3.5),
-        B=dict(x0=48.0, x1=57.0, y0=-6.0, y1=8.0, h=16.0, floors=5,
-               axis="x", facade_x=48.0, face_dir=-1.0, base_z=-3.2, jyaw=-4.0),
-        C=dict(x0=48.0, x1=53.0, y0=16.0, y1=30.0, h=26.0, floors=8,
-               axis="x", facade_x=48.0, face_dir=-1.0, base_z=-3.2, jyaw=2.5),
+        A=dict(x0=66.0, x1=73.0, y0=-30.0, y1=-14.0, h=31.9, floors=11,
+               axis="x", facade_x=66.0, face_dir=-1.0, base_z=-3.2, jyaw=3.5),
+        B=dict(x0=66.0, x1=75.0, y0=-6.0, y1=8.0, h=23.2, floors=8,
+               axis="x", facade_x=66.0, face_dir=-1.0, base_z=-3.2, jyaw=-4.0),
+        C=dict(x0=66.0, x1=71.0, y0=16.0, y1=30.0, h=40.6, floors=14,
+               axis="x", facade_x=66.0, face_dir=-1.0, base_z=-3.2, jyaw=2.5),
     ),
     # D5 reed band (waterline transition) - [v5.1] old 5-part axis-aligned boxes -> meander band
     #   (it must follow the waterline curvature to read as 'riverside reeds'). segs key dropped.
     reeds=dict(x0=16.0, x1=17.0, h=0.9, base_z=-3.2),
     # D6 levee-crest cycle track centre line + distance markers
-    levee_line=dict(x=-2.5, w=0.12, y0=-40.0, y1=40.0, z_top=0.002,
-                    thick=0.02),
+    # **[v7] The centre line is DELETED** — three independent reasons, any one sufficient:
+    #   (a) the user ban on ground patterns, read through §3(ii): a painted line is a road
+    #       marking and road markings are painted on **pavement**, never on a gravel
+    #       maintenance track — this one was a 0.12 x 80 m stripe lying on loose gravel;
+    #   (b) it is the last surviving fragment of the levee-crest **cycle track**, which the
+    #       07-29 supervisor ruling removed from this scene (*"03 stays natural, the cycle
+    #       track holds only for the scene17 levee"*) — the paving went, the line did not;
+    #   (c) G3 shows the crest promenade carrying **no longitudinal marking at all**.
+    #   The 둔치 markings (`path_lines`, D4) are a different object and STAY: a 자전거도로 on
+    #   the floodplain terrace really is line-marked, and G3's archetype depends on it.
+    #   The builder block goes with the parameter; nothing else reads `levee_line`.
     # [v5.1] 3 posts at an even 6 m had nothing to do with real river distance markers
     #   (hundreds of m apart); it was a decorative row -> cut to 2.
     # [v6 ruling (4) / v5.2 §6] The remaining 2 were judged "barber poles standing alone in
@@ -257,8 +403,13 @@ PARAMS = dict(
                  roof_t=0.14, jyaw=-3.0),
     # D8 beach sports-field lines (beach identity)
     # (placed in the +Y far view so it misses the bridge y −22.5..−13.5 · benches y +-6)
-    field=dict(x0=12.8, x1=15.8, y0=20.0, y1=32.0, w=0.10, z_top=-3.19,
-               thick=0.02),
+    # **[v7] DELETED.** This was four white lines forming a 3.0 x 12.0 m **rectangle painted
+    #   on the ground** — the most literal instance in this scene of what the user named
+    #   (*"바닥에 이상한 사각형 무늬는 웬만하면 다 제거해"*). It is also not a sports field: a
+    #   3 x 12 m outline is no court in any code, so the "beach identity" it was bought for
+    #   was never actually delivered, and G3 carries nothing like it. Deleted outright rather
+    #   than resized — a correctly sized court would be a new prop, which nobody asked for.
+    #   The builder block goes with the parameter; nothing else reads `field`.
     # D9 water-level gauge (fixes it as river infrastructure)
     gauge=dict(cx=17.4, cy=-3.0, r=0.09, z0=-3.35, z1=0.2,
                band_z=(-2.6, -1.6, -0.6), band_h=0.25),
@@ -456,9 +607,17 @@ def build_views():
     #    bridge crossing in one frame. Waterline screen bow 14.1 % (of frame half-width).
     views["meander_air"] = dict(eye=[W(10.2, -44.0), -44.0, 16.0],
                                 tgt=[W(20.0, 25.0), 25.0, -3.35])
-    # (3) bank_oblique [judging] - oblique upstream view from **above the far bank** (12.7 deg down).
-    #    Opposite side and a different angle from (2), cross-checking that the meander is no camera fluke.
-    #    Waterline bow 14.2 % · occlusion 21 % (all bridge deck, one continuous span).
+    # (3) bank_oblique [judging] - oblique upstream view from the **far side of the channel**
+    #    (12.7 deg down). Opposite side and a different angle from (2), cross-checking that
+    #    the meander is no camera fluke.
+    #    **[v7] The coordinates are DELIBERATELY NOT TOUCHED.** R03-1 is to be met by geometry,
+    #    never by a camera edit, and this is a judging cut — moving it would break its own
+    #    comparability with the baseline round. One consequence is recorded rather than
+    #    smoothed: the far bank moved from s34 to s52, so this eye (s40) that used to stand
+    #    **above the far bank** now stands **12 m out over the water** at the same height. The
+    #    cut still does its job (an aerial cross-check of the bend from the opposite side);
+    #    only the old "above the far bank" wording was wrong after the widening, and it is
+    #    corrected here rather than the camera being bent to fit it.
     views["bank_oblique"] = dict(eye=[W(40.0, -26.0), -26.0, 8.0],
                                  tgt=[W(20.0, 20.0), 20.0, -3.20])
     return views
@@ -509,6 +668,26 @@ def _seg_hits_box(eye, p, box):
     return True
 
 
+def _rot_xy(p, pivot, yaw_deg):
+    """Rotate a world point by `yaw_deg` about `pivot` in XY (z untouched)."""
+    c = math.cos(math.radians(yaw_deg))
+    s = math.sin(math.radians(yaw_deg))
+    dx_, dy_ = p[0] - pivot[0], p[1] - pivot[1]
+    return (pivot[0] + dx_ * c - dy_ * s, pivot[1] + dx_ * s + dy_ * c, p[2])
+
+
+def _seg_hits_rot_box(eye, p, box, pivot, yaw_deg):
+    """[v7] `_seg_hits_box` for a prim that lives inside a `build_rot_group`.
+
+    A rotation about +Z is rigid, so instead of inflating the box to an axis-aligned envelope
+    the segment is carried into the group's own frame (rotate both endpoints by −yaw about the
+    pivot) and tested against the box **as authored**. `t` is preserved by a rigid motion, so
+    the 0.995 end-point exclusion still means the same thing.
+    """
+    return _seg_hits_box(_rot_xy(eye, pivot, -yaw_deg),
+                         _rot_xy(p, pivot, -yaw_deg), box)
+
+
 def river_view_selfcheck(verbose=True):
     """[v6 ruling (1)] Coordinate check of **meander legibility + occlusion** for the new along-river cuts.
 
@@ -528,19 +707,49 @@ def river_view_selfcheck(verbose=True):
     TU, TV = math.tan(math.radians(30.0)), math.tan(math.radians(18.0))
 
     # --- near-view occluder AABBs (rot groups conservatively approximated by their bounding box) ---
+    # **[v7] The bridge occluder is rebuilt: ROTATED frame + deck/pier split.**
+    #   It used to be a single axis-aligned box spanning the pier feet (−3.70) to the parapet
+    #   top (+0.70), with the y range inflated by `byw` to swallow the rotated deck. Two errors
+    #   in one box, and both are the error this function already names and fixes for tree
+    #   crowns a few lines below — *"one solid box would falsely count the empty space under
+    #   the crown as occlusion"*:
+    #     · the **open space under the deck** (−3.70…−1.00, everything but 7 slender piers)
+    #       was solid;
+    #     · the **AABB inflation** counted the empty corners either side of the skewed deck.
+    #       At the v6 skew (14.75°, 34 m deck) that inflation was ±4.33 m; the R03-1 widening
+    #       takes the deck to 52 m and the local tangent to 23.65°, i.e. ±10.43 m, so the box
+    #       grows from 17.7 m to 29.9 m of y — **3.4× more phantom occluder than real deck
+    #       width (9.0 m)**, purely from a modelling shortcut.
+    #   With the old box the widening alone drives `meander_air` 31.8 % → 44.3 % occluded and
+    #   trips a 35 % gate on an occluder that does not physically exist. The fix is to test the
+    #   segment **inside the rot group's own frame** (`_seg_hits_rot_box`) against the deck as
+    #   authored, plus one box per pier. A/B on BOTH geometry arms is in `w3_s03_v1.md` §4:
+    #   the correction moves the v6 arm too, which is what makes it an instrument fix rather
+    #   than a gate tuned to a result.
     bg = PARAMS["bridge"]
-    bdx = river_dx((bg["y0"] + bg["y1"]) / 2.0)
-    byw = (bg["x1"] - bg["x0"]) / 2.0 * abs(math.sin(math.radians(
-        river_yaw((bg["y0"] + bg["y1"]) / 2.0))))
-    boxes = [(bdx + bg["x0"], bdx + bg["x1"], bg["y0"] - byw, bg["y1"] + byw,
-              bg["pier_z0"], bg["deck_top"] + bg["parapet_h"])]
+    b_cy = (bg["y0"] + bg["y1"]) / 2.0
+    b_xm = (bg["x0"] + bg["x1"]) / 2.0
+    bdx = river_dx(b_cy)
+    b_yawd = river_yaw(b_cy)
+    b_piv = (bdx + b_xm, b_cy)
+    rot_boxes = [
+        # deck + parapet, authored frame: soffit (deck_top − deck_thick) → parapet top
+        (bdx + bg["x0"], bdx + bg["x1"], bg["y0"], bg["y1"],
+         bg["deck_top"] - bg["deck_thick"], bg["deck_top"] + bg["parapet_h"]),
+    ]
+    for _px in bg["pier_x"]:                   # piers, authored frame, feet → soffit
+        rot_boxes.append((bdx + _px - bg["pier_r"], bdx + _px + bg["pier_r"],
+                          b_cy - bg["pier_r"], b_cy + bg["pier_r"],
+                          bg["pier_z0"], bg["deck_top"] - bg["deck_thick"]))
+    boxes = []
     # trees: crown (sphere blobs) and trunk kept separate - one solid box would falsely count
     #   the empty space under the crown as occlusion (build_tree: th = trunk_h·U(0.85,1.25)).
     trees = ([(t["cx"], t["cy"], PARAMS["beach"]["z_top"], 2.2)
               for t in PARAMS["trees"]]
              + [(t["cx"], t["cy"], t["gz"], 2.2)
                 for t in PARAMS["trees_extra"]]
-             + [(t["cx"], t["cy"], PARAMS["far_bank"]["z_top"], 3.0)
+             # [v7] far-bank stand trunk_h 3.0 -> 4.2, mirroring `build_river`
+             + [(t["cx"], t["cy"], PARAMS["far_bank"]["z_top"], 4.2)
                 for t in PARAMS["far_trees"]])
     for cx0, cy0, gz, th in trees:
         cx = river_dx(cy0) + cx0
@@ -595,7 +804,9 @@ def river_view_selfcheck(verbose=True):
             dev = max(dev, abs((u1 - u0) * (vv - v0) - (v1 - v0) * (u - u0))
                       / cl if cl > 1e-9 else 0.0)
         occ = sum(1 for _, _, _, p in pts
-                  if any(_seg_hits_box(eye, p, b) for b in boxes))
+                  if any(_seg_hits_box(eye, p, b) for b in boxes)
+                  or any(_seg_hits_rot_box(eye, p, b, b_piv, b_yawd)
+                         for b in rot_boxes))
         span = pts[-1][0] - pts[0][0]
         pit = math.degrees(math.atan2(tgt[2] - eye[2],
                                       math.hypot(tgt[0] - eye[0],
@@ -623,6 +834,100 @@ def river_view_selfcheck(verbose=True):
     return ok, diag
 
 
+def river_width_selfcheck(verbose=True):
+    """[v7 R03-1] Coordinate check of **how much river is actually in frame**.
+
+    R03-1's own wording — *"water subtends >= 1/3 of the d5 frame width"* — is satisfied
+    **trivially and was already satisfied before this edit**: the water is a horizontal band,
+    so wherever it appears at all it spans the full frame width. Stating that plainly instead
+    of quoting it as a pass is the point of this function. The quantity that actually moves
+    when the channel is widened, and the one this scene is judged on, is the **share of the
+    frame the water occupies** — reported here two ways:
+
+      * `v_pct`    vertical subtense of the water band on the sight axis, as % of frame height
+      * `area_pct` share of the frame the water polygon covers, by a 240 x 135 ray sample
+
+    Both are pure projective geometry over the same `_cam_basis` the v6 check uses — no Isaac
+    boot, no GPU, no render. Occlusion by near geometry is **not** modelled here (the v6 check
+    owns that), so `area_pct` is an upper bound; it is used as a **relative** before/after
+    number, which is what R03-1 asks for.
+
+    Also reported, because widening and bending trade against each other and the trade must be
+    visible: effective channel width, meander amplitude, their ratio, and |yaw|max.
+
+    Returns: (ok, diagnostic dict).
+    """
+    views = build_views()
+    wt, fb = PARAMS["water"], PARAMS["far_bank"]
+    s_near, s_far = 18.2, fb["x0"]            # riprap toe .. far bank line
+    zw = wt["z"]
+    TU, TV = math.tan(math.radians(30.0)), math.tan(math.radians(18.0))
+
+    ys = [-47.5 + 95.0 * k / 500.0 for k in range(501)]
+    xs = [river_dx(y) for y in ys]
+    amp = max(xs) - min(xs)
+    yaw_max = max(abs(river_yaw(y)) for y in ys)
+    width = s_far - s_near
+
+    diag = {}
+    for name in ("preset_h0.3_d2", "preset_h0.3_d5", "preset_h0.3_d10",
+                 "preset_h0.9_d2", "preset_h0.9_d5", "preset_h0.9_d10",
+                 "preset_h1.8_d2", "preset_h1.8_d5", "preset_h1.8_d10",
+                 "levee_walk", "stair_down", "beach_lookup", "across_river",
+                 "river_along", "meander_air", "bank_oblique"):
+        v = views.get(name)
+        if not v:
+            continue
+        eye, tgt = v["eye"], v["tgt"]
+        proj = _cam_basis(eye, tgt)
+        # (a) vertical subtense on the sight axis (y = 0 column of the water band)
+        col = []
+        for s in (s_near, s_far):
+            q = proj((river_dx(0.0) + s, 0.0, zw))
+            col.append(q[1] if q else None)
+        if None in col:
+            v_pct = 0.0
+        else:
+            lo, hi = sorted(col)
+            lo, hi = max(lo, -TV), min(hi, TV)
+            v_pct = 100.0 * max(0.0, hi - lo) / (2.0 * TV)
+        # (b) screen-area share: project a dense (s, y) lattice of the water polygon and
+        #     count the 240 x 135 frame cells it lands in. Cell counting, not point counting,
+        #     so the number does not depend on the lattice density once it saturates.
+        cells = set()
+        NS, NY = 90, 260
+        for i in range(NS + 1):
+            s = s_near + (s_far - s_near) * i / NS
+            for j in range(NY + 1):
+                y = -47.5 + 95.0 * j / NY
+                q = proj((river_dx(y) + s, y, zw))
+                if q is None or abs(q[0]) > TU or abs(q[1]) > TV:
+                    continue
+                cells.add((int((q[0] + TU) / (2 * TU) * 240),
+                           int((q[1] + TV) / (2 * TV) * 135)))
+        diag[name] = dict(v_pct=round(v_pct, 2),
+                          area_pct=round(100.0 * len(cells) / (240.0 * 135.0), 2))
+
+    ok = width > 22.5                          # R03-1: "wider than v4" (v4 = 22.5 m)
+    if verbose:
+        print("=" * 72)
+        print("scene03 [v7] R03-1 — 강 뷰 폭 검산 (기하만, GPU 0)")
+        print("=" * 72)
+        print(f"  유효 수면 폭 s {s_near:.1f}..{s_far:.1f} = {width:.1f} m "
+              f"(v5.1 15.8 · v4 22.5 · 기준: v4 초과)")
+        print(f"  사행 진폭 {amp:.2f} m · 진폭/폭 {amp / width:.2f} · "
+              f"|yaw|max {yaw_max:.2f}° (한계 45°)")
+        print("  프레임 내 수면 점유 —")
+        for k, d in diag.items():
+            print(f"    {k:20s} 세로각 {d['v_pct']:6.2f} %  화면면적 {d['area_pct']:6.2f} %")
+        print("  주: R03-1 문구의 '프레임 폭 1/3'은 수면이 가로 밴드라 "
+              "보이기만 하면 항상 100 % — 실질 지표는 위 두 값이다.")
+        print(f"  → {'OK' if ok else 'FAIL'}")
+        print("=" * 72)
+    return ok, dict(width=width, amp=amp, ratio=amp / width,
+                    yaw_max=yaw_max, views=diag)
+
+
 # ===========================================================================
 # [E] main - boot -> assemble -> light -> views -> capture/GUI
 # ===========================================================================
@@ -637,7 +942,10 @@ BANNER = """\
  6. cue_railing OFF/ON — 위험 기하(계단·사면) 트랜스폼 동일한가
  7. [v6] meander_air / bank_oblique — 사행이 프레임 안에서 휘어 보이는가
                      (검산: NEGOBS_SELFCHECK=1 python scene03_riverbank.py)
- 8. [v6] river_along — 둑길 보행 시점에서 하천 종방향 원근이 자연스러운가"""
+ 8. [v6] river_along — 둑길 보행 시점에서 하천 종방향 원근이 자연스러운가
+ 9. [v7] 강 뷰 — 수면이 v5.1 대비 확실히 넓어졌는가 (유효폭 15.8 → 33.8 m)
+10. [v7] 원경 — 건너편 수목선이 근경 양버들과 다른 실루엣(먹참나무)인가
+11. [v7] 바닥 — 사각형 무늬(보수패치·구장선·둑마루 중앙선)가 전부 사라졌는가"""
 
 
 def main():
@@ -645,7 +953,10 @@ def main():
 
     # ── [v6] run the coordinate check only, then exit (no Isaac boot needed) ──
     if os.environ.get("NEGOBS_SELFCHECK", "0") == "1":
-        river_view_selfcheck()
+        ok_v, _ = river_view_selfcheck()
+        ok_w, _ = river_width_selfcheck()      # [v7 R03-1]
+        print(f"[selfcheck] 사행 {'OK' if ok_v else 'FAIL'} · "
+              f"강폭 {'OK' if ok_w else 'FAIL'}")
         return
 
     # ── stage 0: asset existence check (before boot) ──
@@ -767,12 +1078,19 @@ def main():
     #   scene_common.build_tree always makes 3 stakes, so their dimensions are driven
     #   to near zero to neutralise them. (Proposal: add a stakes=False arg to build_tree - fix log)
     # -------------------------------------------------------------------
-    def tree_no_stake(M, prefix, cx, cy, gz, trunk_h=2.2, slot=0):
+    def tree_no_stake(M, prefix, cx, cy, gz, trunk_h=2.2, slot=0, belt=False):
         """[v5.1] Swap the crown material pair per tree (shape·size·tilt variation is
-        already done by scene_common.build_tree v2 from the coordinate seed)."""
+        already done by scene_common.build_tree v2 from the coordinate seed).
+
+        [v7 · 03-C / K4-F4] `belt=` is forwarded to `build_tree`. K4-F4 recorded that the
+        declared belts of 03·07·09·10·17 are **inert until the scene passes the flag** — this
+        scene passes it for the far-bank stand only, so `SCENE_SPECIES["Scene03"]` finally
+        resolves as authored: route `poplar` on the near bank, belt `oak_black` across the
+        water. Nothing is hard-coded here; the species table stays the single source of truth
+        (`species="oak_black"` would fork it)."""
         ca, cb = ((0, 2), (1, 3), (2, 1), (3, 0))[int(slot) % 4]
         sc.build_tree(stage, prefix, cx, cy, gz, M["wood"], M["canopy"][ca],
-                      M["canopy"][cb], trunk_h=trunk_h,
+                      M["canopy"][cb], trunk_h=trunk_h, belt=belt,
                       stake_r=0.004, stake_h=0.02, stake_off=0.2)
 
     # -------------------------------------------------------------------
@@ -908,28 +1226,56 @@ def main():
                 infra=dict(manhole=0, gully=0, gutter_L=0, marking=()),
                 pave=dict(module=(None, None), joint=None,
                           step_x=None, step_y=None),
-                surface=(("patch", len(g["patch"])),
-                         ("stain", ("dirt", "water"))),
+                # [v7 · 03-A + user ban] `("patch", 8)` removed; `sites` goes with it.
+                #   `stain` stays — DEC-1 lobes, no straight edge, which is what trampled
+                #   ground actually looks like. See the `gkit` PARAMS comment for the reach
+                #   check against GT-24 (nil: this scene overrides `surface` itself).
+                # **[v7, second pass — measured, not anticipated]** Deleting the patches
+                #   turned out to strip the near window of its entire tonal budget: the
+                #   site at (−1.10, 0.15) sat 0.90 m in front of the **h0.3 d2 judged eye**
+                #   and filled the lower frame, so with it gone `near_ground_stats` read
+                #   B30 `wht%` **6.8 → 39.3**, `σ_LF` **4.34 → 1.02**, mean **172 → 194** —
+                #   an unbroken bright gravel field where a mottled surface used to be.
+                #   That is a real blankness, not a metric artefact, and it is fixed with
+                #   **the vocabulary the ban explicitly keeps** (§3(ii): soiling, litter and
+                #   scatter are lobes and stay; only rectangles go):
+                #     · `("weed", 8)` — P13's own post-GT-24 row prescribes 6; a levee
+                #       crest margin is less maintained than a 둔치 promenade, and **G3
+                #       shows weeds in every joint of the revetment and along both
+                #       margins**, so 8 is the reference's direction, not an invention.
+                #     · `scatter` gravel — loose stone on a gravel maintenance track. The
+                #       numbers sit just under the two natural-profile precedents that
+                #       already ship it (`trail_soil` 0.10/150 · `courtyard_dg` 0.09/200),
+                #       because this track is maintained and those are not.
+                surface=(("stain", ("dirt", "water")), ("weed", 8)),
+                scatter=dict(kind="gravel", cover=0.08, count=130,
+                             scale_jitter=(0.38, 0.62), burial=0.38),
                 extras=(("wear_lane", dict(width=0.90)),)),
-            sites=dict(patch=[tuple(v) for v in g["patch"]]),
             extras_args=dict(wear_lane=dict(
                 centerline=((g["wear_x"], -g["wear_y"]),
                             (g["wear_x"], g["wear_y"])))),
             seed=3)
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
+        # [v7] `patch`/`patch_cut` keys stay bound even though the row is gone — the kit
+        #   only reads a key when the element exists, and leaving them costs nothing while
+        #   making the deletion reversible in one line. `weed` is the new key (the asset
+        #   path is the kit's own `Shrub/Grass_Short_C.usd`; the material is only the
+        #   procedural fallback), `debris` binds the scatter pool.
         M2.update(patch=M["dirt"], patch_cut=M["dirt"], wear=M["dirt"],
                   stain_dirt=M["dirt"], stain_water=M["concrete_dark"],
-                  edge_break=M["dirt"])
+                  edge_break=M["dirt"], weed=M["hedge_v"][0],
+                  debris=M["gravel"])
         res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
                               skin_exclude=sc.skin_exclude,
                               scatter=sc.scatter_debris)
         # edge break (spec §5.7 "edge break") - the seam that crosses the h0.3
         #   frames is the gravel road edge, and it runs **along Y**, which
         #   `_compose_ops` cannot express (its `lines` are constant-y).
-        #   Direct call, same builder, same z. |y| <= 3.0 keeps the straight
-        #   strip on the meandering seam: |dx(3.0)| = 0.088 m < the 0.10 m half
-        #   width of the transition band.
+        #   Direct call, same builder, same z. `break_y` keeps the straight
+        #   strip on the meandering seam: [v7, A1=10.0] |dx(2.4)| = 0.094 m < the
+        #   0.10 m half width of the transition band (at the old |y| <= 3.0 it
+        #   would now be 0.148 m — off the seam; see the `gkit` PARAMS comment).
         #   Only the **landward** seam (x=-4.0) is broken. The river-side seam
         #   at x=-1.0 is 1.0 m in front of the shoulder: drow = 5.65 rows @1080
         #   at d10 against a 16-row floor, i.e. exactly the band GT-E2 keeps
@@ -1037,10 +1383,16 @@ def main():
         river_band(f"{ROOT}/FarBank", fb["x0"], fb["x1"], fb["z_top"],
                    fb["thick"], M["grass"], max_w=12.0)
         # v4-B3/D11: distant hedge strips -> 8 tree lines (removes the tiled hatching stripes)
+        # [v7 · 03-C] `belt=True` -> Black_Oak (`SCENE_SPECIES` belt), a broad round crown
+        #   against the near bank's columnar Lombardy_Poplar: **one silhouette class per
+        #   bank**, which is the whole content of the carried "unnatural tree planting" item.
+        #   `trunk_h` 3.0 -> 4.2: the stand receded from s38 to s56, i.e. from ~44 m to ~62 m
+        #   from the levee_walk eye (factor 1.41), so the old height would have dropped the
+        #   far tree line below G3's continuous horizon band. 4.2 x 1.60 = 6.7 m crown top.
         for i, t in enumerate(PARAMS["far_trees"]):
             tree_no_stake(M, f"{ROOT}/FarTree_{i}",
                           river_dx(t["cy"]) + t["cx"], t["cy"],
-                          fb["z_top"], trunk_h=3.0, slot=i)
+                          fb["z_top"], trunk_h=4.2, slot=i, belt=True)
         # v4-D1 [top priority]: distant bridge - crosses the river axis (Y) along X. The deck x 12..46
         #   spans beach (−3.2)·water (−3.35)·far bank (−3.2), so 'river' is fixed in a single
         #   cut. The 5 piers run from their own ground up to the deck soffit (−1.0).
@@ -1123,17 +1475,39 @@ def main():
         # v4-B1 / [v5.1 re-fix]: slope shrubs = 3 overlapping flattened ellipsoids.
         #   The sloped slab (v4) was identified as an 'angular slab' in the v5 ruling, so it is dropped.
         #   The gradient enters only via placement height (slope_z) - an axis-aligned solid of revolution has no cut face.
+        # [v7 · 03-D] Real shrub USDs replace the ellipsoids. **One `place_shrubs` call for
+        #   the whole slope band = one bed**, which is deliberate under K4(b) S-2: the draw is
+        #   per bed, so six separate calls could stand Holly on three clumps and Privet on the
+        #   other three — two silhouettes on one continuous 25 m slope, exactly the mixed
+        #   border the rule exists to forbid. One call also keeps the per-point scale/yaw
+        #   sequence varied, where six same-seed calls would clone one clump six times
+        #   (global convention 3, no grids).
         hb = PARAMS["hedge"]
         emb = hb["embed"]
-        for i, h in enumerate(PARAMS["hedges"]):
-            for j, (dx, dy, rx, ry, rz) in enumerate(hb["blobs"]):
-                cx = h["cx"] + dx
-                cy = h["cy"] + dy
-                sc.add_sphere(stage, f"{ROOT}/Hedge_{i}_{j}",
-                              (river_dx(cy) + cx, cy,
-                               slope_z(cx) + rz * (1.0 - emb)),
-                              (rx, ry, rz),
-                              M["hedge_v"][(i + j) % len(M["hedge_v"])])
+        shrub_pts = [(river_dx(h["cy"] + dy) + h["cx"] + dx, h["cy"] + dy,
+                      slope_z(h["cx"] + dx))
+                     for h in PARAMS["hedges"]
+                     for (dx, dy, _rx, _ry, _rz) in hb["blobs"]]
+        placed_sh = sc.place_shrubs(stage, f"{ROOT}/Shrub", shrub_pts,
+                                    float(hb["target_h"]),
+                                    species=hb["species"],
+                                    seed=gk.det_seed("scene03.shrub", 0))
+        if not placed_sh:
+            # Assets absent or LOOK_GEO=0 -> the v5.1 ellipsoids, unchanged. A missing asset
+            # must degrade, not empty the slope (scene10 precedent, `:2394-2404`).
+            for i, h in enumerate(PARAMS["hedges"]):
+                for j, (dx, dy, rx, ry, rz) in enumerate(hb["blobs"]):
+                    cx = h["cx"] + dx
+                    cy = h["cy"] + dy
+                    sc.add_sphere(stage, f"{ROOT}/Hedge_{i}_{j}",
+                                  (river_dx(cy) + cx, cy,
+                                   slope_z(cx) + rz * (1.0 - emb)),
+                                  (rx, ry, rz),
+                                  M["hedge_v"][(i + j) % len(M["hedge_v"])])
+        print(f"[03-D] 사면 관목 {placed_sh}/{len(shrub_pts)}주 "
+              f"(place_shrubs · 1 bed · role {hb['species']} · h {hb['target_h']} m)"
+              if placed_sh else
+              f"[03-D] 관목 에셋 부재 -> 타원체 폴백 {len(shrub_pts)}개")
         # 2 beach trees (crown top below the levee-crest eye height - anchor) + 6 more from v4-D10
         bz = PARAMS["beach"]["z_top"]
         for i, t in enumerate(PARAMS["trees"]):
@@ -1147,10 +1521,10 @@ def main():
         river_band(f"{ROOT}/Reed", rd["x0"], rd["x1"], rd["base_z"] + rd["h"],
                    rd["h"], M["reed"], max_w=1.0, collider=False)
         # v4-D6: levee-crest cycle track centre line + 2 distance markers
-        ll = PARAMS["levee_line"]
-        river_band(f"{ROOT}/LeveeLine", ll["x"] - ll["w"] / 2.0,
-                   ll["x"] + ll["w"] / 2.0, ll["z_top"], ll["thick"],
-                   M["line"], max_w=ll["w"], collider=False)
+        # [v7] The centre-line band is deleted with its parameter (see PARAMS `levee_line`):
+        #   a painted marking on a gravel maintenance track, and the last fragment of a cycle
+        #   track the 07-29 ruling took off this scene. The marker builder below stays (the
+        #   list has been empty since v5.2 §6; refill it and the posts come back).
         mk = PARAMS["marker"]
         for i, (ms, my, jy) in enumerate(PARAMS["markers"]):
             mx = river_dx(my) + ms
@@ -1171,20 +1545,9 @@ def main():
                         M["wood_dark"], M["wood_dark"], roof_t=pg["roof_t"],
                         base_z=0.0)
         # v4-D8: beach sports-field lines (4 lines of a rectangle) - a rigid rectangle, so rotated as one
-        fd = PARAMS["field"]
-        fcy = (fd["y0"] + fd["y1"]) / 2.0
-        fdx = river_dx(fcy)
-        fgrp = river_prop(f"{ROOT}/Field", (fd["x0"] + fd["x1"]) / 2.0, fcy)
-        for tag, cx, cy, sx, sy in (
-                ("W", fd["x0"], fcy, fd["w"], fd["y1"] - fd["y0"]),
-                ("E", fd["x1"], fcy, fd["w"], fd["y1"] - fd["y0"]),
-                ("S", (fd["x0"] + fd["x1"]) / 2.0, fd["y0"],
-                 fd["x1"] - fd["x0"], fd["w"]),
-                ("N", (fd["x0"] + fd["x1"]) / 2.0, fd["y1"],
-                 fd["x1"] - fd["x0"], fd["w"])):
-            sc.add_box(stage, f"{fgrp}/Line_{tag}",
-                       (cx + fdx, cy, fd["z_top"] - fd["thick"] / 2.0),
-                       (sx, sy, fd["thick"]), M["line"])
+        # [v7] Deleted with its parameter — the one literal painted rectangle in this scene
+        #   (see PARAMS `field`). `M["line"]` is still used by `path_lines`, so the material
+        #   stays; only this block goes.
         # v4-D9: water-level gauge (white post + 3 red bands)
         gg = PARAMS["gauge"]
         gh = gg["z1"] - gg["z0"]

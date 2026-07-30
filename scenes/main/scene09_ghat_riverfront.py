@@ -110,6 +110,40 @@ Run (GUI look check - default):
   the landing-1 x centre the old posts stood on, so the old post at (4.34, -5.6) would have
   blocked the new cut outright.
 
+[W3 S09 · G9 renovation] `Docs/surveys/w3_intake_v2_images.md` §2 scene09 (b)/(c)/(e) + §7 ruling 8
+  (**R09-1: scene09 = autumn**) + §3(ii) (rectangular-ground sweep) + `w3_mb_patch_v1.md` MB-F1/MB-F2.
+  The target image is `Docs/reference_photos/Generated Image - Scene09.jpg` (**G9**) — an aerial
+  oblique of a Korean lake park: terraced planting beds retained by **dry-stone 자연석 walls**,
+  massed ground cover one species per bed, a **zigzag timber boardwalk** stepping to wide stone
+  step courses, reeds and lily pads at the water, and a **full autumn hillside** across the lake.
+  Seven rows land here; every one of them stays **outside the ±30° FOV of all nine grid presets**
+  (`fov_selfcheck()` asserts it from the coordinates, no render), so the judged near-ground cuts
+  and the drop-cue behaviour of the 36-step flight are untouched.
+    (1) **terraced beds + dry-stone retaining walls** — 5 beds (3 on −Y, 2 on +Y) at bed-top
+        z 0.50 / 1.00 / 1.50, each faced in coursed 자연석 blocks with a 1:6 batter. New collision
+        boxes beside the terrace (the **GT-15 precedent**), no walked-surface z change.
+    (2) **massed ground cover, one species per bed** — `sc.place_shrubs(pool=[<one asset>])`, so a
+        bed is monospecific **by construction** rather than by the per-bed draw. The species were
+        chosen from a **measured** seasonal audit (`season_audit()`), not from names.
+    (3) **zigzag timber boardwalk** — the straight 2.4 × 44 m slab is replaced by a 3-leg /
+        2-turn boardwalk in **stocked 방부목 sections** (scene10 precedent: 산림청고시 2014-2
+        thickness series 21/24/27/30 mm, width 90–300 mm in 10 mm steps → 25 × 140 데크판재;
+        120각 column, 90각 newel). Top face stays **0.06** — the walked surface does not move.
+    (4) **`plaza_water` patch row deleted scene-side** (MB-F1: the GT-24 profile deletion could not
+        reach this scene because the scene authors its own `surface` row). A waterfront terrace has
+        no repair cause — §3(ii)'s own ruling for this profile, applied where it can actually land.
+    (5) **`SCENE_PLANS["scene09"]` fixture synced** to the wired call (MB-F2 / ledger §7 **W9**).
+    (6) **far-bank building silhouettes deleted → autumn hillside belt.** G9 has no buildings: the
+        horizon is rolling wooded hills in ginkgo yellow / maple orange. The 2 dark boxes were the
+        v5 horizon-closure device; the hills close the horizon **and** carry the season.
+    (7) **belt species declared** — `build_tree(belt=True)` on the far-bank row, which activates
+        `SCENE_SPECIES["Scene09"][1] = "oak_black"` (K4-F4: a belt stays inert until a scene passes
+        it). Route trees keep the scene default `birch`.
+  Deliberately **not** done, with reasons, in `Docs/reports/w3_s09_v1.md` §3: timber steps laid on
+  the embankment stone (moves a walked surface for no research value) · G9's stepping-stone slabs
+  (the user's rectangular-ground ban is live and cannot be adjudicated here) · the light rig
+  (the dataset's controlled variable — season is carried by content, never by the sun).
+
 Auto capture : NEGOBS_CAPTURE=1 python scene09_ghat_riverfront.py
 Assembly smoke: NEGOBS_SMOKE=1 python scene09_ghat_riverfront.py
 Self-check   : NEGOBS_SELFCHECK=1 python scene09_ghat_riverfront.py  (no boot)
@@ -177,8 +211,24 @@ PARAMS = dict(
     #  Natural scene (`natural=True`): manhole / gully / gutter / marking all
     #  raise. The whole near-window prescription is joints + slab loss + film.
     #    09-1 slab joints made geometric, 5-9 mm wide, 1-2 mm recess-as-tone
-    #    09-2 slab loss ("flagstone loss") 4-6 per 100 m^2 -> patch field
+    #    09-2 slab loss ("flagstone loss") 4-6 per 100 m^2 -> patch field   **DELETED, W3 S09**
     #    09-3 water film / algae decals
+    #
+    #  [W3 S09 · row (4)] **The patch row is deleted.** `w3_intake_v2_images.md` §3(ii)'s
+    #  enumeration ruled `plaza_water` (**09**, the profile's only carrier) *"a waterfront
+    #  terrace with two repairs and no cause → 0"*. GT-24 executed that at the profile level
+    #  (`ground_kit.py:1755`, `8b6baa7`) and it **could not reach this scene**: scene09 authors
+    #  its own `surface` row here, so the profile deletion moved 0 prims and 0 pixels in 09 —
+    #  measured, and that null is the direct evidence for `w3_mb_patch_v1.md` **MB-F1**. The row
+    #  the sweep was aimed at is *this* tuple, and §3 GT-24's amended scope cell says in as many
+    #  words that 09 keeps its scene-side row and it is **the scene owner's to delete**. Done here.
+    #  The `sites patch=[...]` list goes with it rather than being left inert (the `scene05` /
+    #  `sceneN1` dead-list precedent, declared in GT-24's change cell as the implementing lane's
+    #  choice — this lane cleans).
+    #  What survives is correct and stays: `("crack", 4)` (irregular, DEC-1 class) and
+    #  `("stain", ("water",))` (a DEC-1 lobe). The **joint grid stays too** — §3(ii) item 4:
+    #  *"orthogonal, axis-aligned, correct and staying. A 600 mm granite module IS a grid of
+    #  rectangles"* — and G9 shows exactly that grey stone-block paving at bottom-left.
     #  step_x/step_y = 1.80 m override. The P2 table ships step_x = 19.80 m
     #  (`step_expansion_ghat`, the *expansion* joint period) and `_compose_ops`
     #  emits exactly one joint op, so over an 11.2 m approach corridor the
@@ -193,10 +243,6 @@ PARAMS = dict(
     gkit=dict(
         region=(-12.0, -5.0, -0.80, 5.0),
         joint_step=1.80,                       # 3 x granite cell 0.600 [computed]
-        #  One slab-loss patch per preset near-window; |y| small because the
-        #  frame half-width in W1 is 0.43 m (d2) / 0.81 m (d5, d10) [computed].
-        patches=((-1.30, 0.20), (-3.70, -0.30), (-8.70, 0.40)),
-        patch_n=5,                             # 4-6 per 100 m^2 x 112 m^2
         seed=9,
     ),
     # Upper terrace (flat sandstone, z=0). [A-09-2] x0 −12 → −30: fixes the d10 grid view (eye x=−10)
@@ -225,9 +271,30 @@ PARAMS = dict(
                dict(cx=55.5, cy=-11.0), dict(cx=57.0, cy=-3.0),
                dict(cx=55.5, cy=5.0), dict(cx=57.5, cy=13.0),
                dict(cx=56.0, cy=21.0), dict(cx=57.0, cy=29.0)],
-    # Far-side building silhouettes 2 (dark constant colour) — a distant layer 3 tiers deep
-    far_buildings=[dict(x0=66.0, x1=72.0, cy=14.0, sy=12.0, h=7.0),
-                   dict(x0=66.0, x1=72.0, cy=-14.0, sy=12.0, h=7.0)],
+    # [W3 S09 · row (6)] **The 2 far-side building silhouettes are DELETED.**
+    #   They were the v5/B-09-2 horizon-closure device ("the top half of the frame was uniform
+    #   teal, an infinity pool"). G9 answers the same question differently and the image is the
+    #   law here: there is **not one building** in the target — the far shore is a wooded
+    #   shoreline backed by **rolling autumn hills**, and that is what closes the horizon.
+    #   Deleting them is also the honest reading of the scene's own identity: a "lake park
+    #   waterfront" whose far bank carries two 7 m dark boxes is reading as a city river.
+    #   Replacement = `far_hills`, which closes the horizon **higher** (12–19 m vs 7 m) and
+    #   over a **wider** span, so B-09-2's failure mode cannot return; `horizon_selfcheck()`
+    #   asserts the elevation subtended at the two water cameras against the old boxes.
+    #
+    # Autumn hillside belt — 3 ridges at increasing distance, each a row of overlapping
+    #   ellipsoid masses on a low ridge body. Colours are the two autumn tones G9 shows
+    #   (ginkgo yellow, maple orange) plus the dark conifer that a Korean hillside always
+    #   carries; the far ridge is desaturated toward the sky (aerial perspective), which is
+    #   why `hill_c` is both lighter and greyer than `hill_a`, not darker.
+    #   (cx, cy, sx, sy, h, tone) — tone indexes (hill_a, hill_b, hill_c).
+    far_hills=[dict(cx=78.0, cy=-26.0, sx=16.0, sy=30.0, h=12.0, tone=0),
+               dict(cx=76.0, cy=2.0, sx=15.0, sy=34.0, h=13.5, tone=1),
+               dict(cx=79.0, cy=30.0, sx=16.0, sy=30.0, h=12.5, tone=0),
+               dict(cx=98.0, cy=-14.0, sx=20.0, sy=44.0, h=17.0, tone=2),
+               dict(cx=100.0, cy=26.0, sx=20.0, sy=40.0, h=16.0, tone=2),
+               dict(cx=126.0, cy=6.0, sx=26.0, sy=64.0, h=19.0, tone=2)],
+    hill=dict(blobs=9, blob_r=0.62, spread=0.78, seed=91),
     # [v5 adopted] mooring bollard → **waterfront boundary pile**: religious and ferry-landing colour removed,
     #   scaled down to a stair-head boundary pile for a waterfront park. r 0.13→0.09, h 1.1→0.50.
     #   [v6] the |y| 8.5 pair is deleted — it falls under the new pavilion eaves (x −7.25..−1.15, y 5.35..11.45)
@@ -311,11 +378,18 @@ PARAMS = dict(
                 (-22.6, 21.8), (-12.2, 27.4),
                 (-13.0, -17.8), (-19.2, -15.6), (-16.8, -25.0),
                 (-22.2, -22.4), (-12.6, -27.0)],
-    # 4 benches (river view) — [§3] beside anchors (pavilion · lawn band edge · deck) · yaw jitter
-    #   0/1 : 1.14 m from the pavilion plinth N/S faces (|y| 11.46), on the lawn band start line (|y| 12)
-    #   2/3 : 1.0 m from the deck's west side (x0 −10.0), on the lawn band
-    benches=[(-4.6, 12.6, 86.5), (-4.6, -12.6, 274.0),
-             (-11.0, 13.4, 93.5), (-11.0, -13.4, 265.5)],
+    # 4 benches (river view) — [§3] beside anchors (pavilion · bed wall · boardwalk) · yaw jitter
+    #   [W3 S09] re-sited off the two anchors that moved. 0 and 2 used to sit **inside** the new
+    #   +Y bed footprints (B4 y0 13.2 · B5 x −14.4..−8.0) and 1 sat 0.2 m off boardwalk leg L3;
+    #   each moves to 0.8–1.0 m clear of its new anchor, which is the same relationship the old
+    #   comment describes. Bench 3 (−11.0, −13.4) is **unmoved** — L3's south edge is y −12.4, so
+    #   it is already the declared 1.0 m clear [computed].
+    #   0 : 0.8 m south of bed B4's wall face (y 13.2), 1.74 m north of the pavilion plinth
+    #   1 : 1.0 m south of boardwalk leg L3 (y −12.4)
+    #   2 : 1.0 m south of bed B5's wall face (y 13.2)
+    #   3 : 1.0 m south of boardwalk leg L3 — unchanged
+    benches=[(-4.6, 12.4, 86.5), (-4.6, -13.4, 274.0),
+             (-11.0, 12.2, 93.5), (-11.0, -13.4, 265.5)],
     # [v6 rework (2)] 1 duck boat — box assembly → **ellipsoid (scaled sphere) assembly**.
     #   Judgment: "white untextured box + plank neck" → hull, breast, stern and wings go curved,
     #   and the canopy goes from a thick box (h 0.45) to a thin plate (0.05) + 4 posts.
@@ -345,8 +419,114 @@ PARAMS = dict(
     #   → the hazard geometry margin actually grows.
     #   [v6] plank seam spacing 2.0 → 0.62 m : a 2 m plank width read as 'wooden floor'.
     #   0.62 m is the width of a 3~4 board bundle = the minimum density at which the grain still stands at distance.
-    deck=dict(x0=-10.0, x1=-7.6, y0=-22.0, y1=22.0, top_z=0.06,
-              seam_step=0.62, seam_w=0.035, seam_drop=0.010),
+    # [W3 S09 · row (3)] **straight slab → zigzag boardwalk in stocked 방부목 sections.**
+    #   G9's boardwalk is the scene's leading line: it comes off the park, turns twice, and runs
+    #   out to the head of the stone step courses. The old element was a 2.4 × 44.0 m plank-seamed
+    #   plate at one x — a *floor*, not a route: it makes no turn, it goes nowhere, and at y ±22 it
+    #   is 22 m long in a frame that never sees its ends.
+    #   **3 legs, 2 right-angle turns, net progress toward the water** (legs overlap at the turns
+    #   by their own width, so the corners are solid and no seam opens):
+    #     L1  y −20.4…−18.0, x −16.0…−9.2   (east, off the park)
+    #     L2  x −11.6…−9.2,  y −20.4…−12.4  (north, along the shore)
+    #     L3  y −12.4…−10.0, x −11.6…−0.6   (east, out to the step courses)
+    #   Width **2.400 m** on every leg — unchanged from the old deck, and 조경설계기준 5.9(4)'s
+    #   1.5 m minimum with margin for a two-way lakeside promenade.
+    #   **The walked surface does not move**: `top_z` stays **0.060**, the value the old deck
+    #   shipped, so this is a planform change and a member change, not a z change [computed].
+    #   **Sections are stocked, per the scene10 precedent** (`scene10:262-265`, 산림청고시 2014-2
+    #   제8조 fixes the 데크판재 thickness series at 21/24/27/30 mm and the width series at
+    #   90–300 mm in 10 mm steps): plank **25 × 140** laid across the leg with a 6 mm gap ·
+    #   joist **38 × 140** at 0.45 m pitch · beam **90 × 90** · post **120 × 120** (scene10's
+    #   stocked 기둥재) · edge/rim board **25 × 140** on the free sides.
+    #   The old `seam_step 0.62` "3–4 board bundle" abstraction is retired: a 0.146 m plank pitch
+    #   is the real thing, and at 0.06 m above grade the members below are what read at a raking
+    #   angle, which is exactly what G9 shows.
+    #   **Termination.** L3 ends at x = **−0.60**, i.e. 0.60 m short of the stair head (x = 0), at
+    #   |y| 10.0…12.4 — **1.04 m outside the ±30° cone of the furthest grid preset eye** [computed,
+    #   `fov_selfcheck`]. The boardwalk therefore *delivers you onto the stone step courses* the way
+    #   G9 shows, without a single timber member landing on the embankment: a tread laid on the
+    #   stone would raise a walked surface by the 25 mm plank (above `GT_DELTA` 0.020) and buy the
+    #   research nothing. Declined on purpose — `Docs/reports/w3_s09_v1.md` §3.
+    boardwalk=dict(
+        top_z=0.06, width=2.40,
+        legs=[("L1", -16.0, -20.4, -9.2, -18.0, "x"),
+              ("L2", -11.6, -20.4, -9.2, -12.4, "y"),
+              ("L3", -11.6, -12.4, -0.6, -10.0, "x")],
+        plank=(0.140, 0.025), plank_gap=0.006,   # 25 x 140 데크판재
+        joist=(0.038, 0.140), joist_pitch=0.45,  # 38 x 140 장선
+        beam=0.090, post=0.120, post_pitch=2.70,  # 90각 멍에 · 120각 기둥
+        rim=(0.025, 0.140)),                     # 25 x 140 마구리/코너 보드
+    # [W3 S09 · rows (1)(2)] **terraced planting beds retained by dry-stone 자연석 walls.**
+    #   G9's whole left half. Each bed is a raised planting mass whose **water-facing (+X) face and
+    #   its exposed flank** are laid up in coursed 자연석 blocks; the beds step **up away from the
+    #   water** (0.50 → 1.00 → 1.50), which is what the image shows and what a real 계단식 화단 on a
+    #   flat lakeside terrace has to do.
+    #   **Placement law**: every bed corner nearest the travel axis is asserted outside the ±30°
+    #   FOV of all nine grid presets by `fov_selfcheck()` — the closest is B1's (−2.60, −5.80),
+    #   which bears **38.1°** from the furthest preset eye (−10, 0) [computed]. So the beds cannot
+    #   occlude the stair-head drop edge in any judged cut, and the flight (|y| ≤ 5) and terrace
+    #   top face are untouched. They read in `park_vista`, `from_river`, `across_river` and the new
+    #   `g9_oblique`.
+    #   `species` is the **single asset** the bed is massed with — monospecific *by construction*
+    #   (a one-member `pool=`), which is stronger than K4(b)'s per-bed draw and makes the record
+    #   exact. Every choice is justified by `season_audit()`'s measured hue fractions, not by name.
+    #   (tag, x0, y0, x1, y1, top_z, species asset, target_h, n, seed)
+    beds=[dict(tag="B1", x0=-8.0, y0=-9.4, x1=-2.6, y1=-5.8, top=0.50,
+               species="Shrub/Burning_Bush.usd", h=0.85, n=15, seed=911,
+               faces=("+x", "-y")),
+          dict(tag="B2", x0=-14.4, y0=-9.4, x1=-8.0, y1=-5.8, top=1.00,
+               species="Shrub/Juniper.usd", h=0.60, n=16, seed=912,
+               faces=("+x", "-y")),
+          dict(tag="B3", x0=-20.8, y0=-9.4, x1=-14.4, y1=-5.8, top=1.50,
+               species="Shrub/Holly.usd", h=1.05, n=14, seed=913,
+               faces=("+x", "-y")),
+          dict(tag="B4", x0=-8.0, y0=13.2, x1=-2.6, y1=18.4, top=0.50,
+               species="Shrub/Yew.usd", h=0.70, n=16, seed=914,
+               faces=("+x", "+y")),
+          dict(tag="B5", x0=-14.4, y0=13.2, x1=-8.0, y1=18.4, top=1.00,
+               species="Shrub/Boxwood.usd", h=0.65, n=17, seed=915,
+               faces=("+x", "+y"))],
+    #   Dry-stone (자연석 건식쌓기) facing. Course height 0.22 m and block length 0.36–0.62 m are
+    #   the ordinary Korean 자연석 쌓기 band; `batter` 1:6 is the dry-laid lean that keeps a
+    #   mortarless wall standing, and it is what makes the courses read as *stacked* rather than
+    #   as a printed texture. `jitter` moves each block's face in and out by up to ±18 mm so no two
+    #   courses line up — a dry-stone wall has **no continuous vertical joint**, which is the single
+    #   cue that separates it from a block wall.
+    #   **LINT-10 adjudication, made in the parameter name.** The linter asks the owning WP to
+    #   classify any `jitter=` kwarg: §1.2 X2 keeps **size / interval variation** and abolishes
+    #   **placement jitter**. This one is size variation and the code says so — each block's
+    #   *bedding face is pinned to the wall plane* and only its **depth** is drawn, so the front
+    #   face moves as a consequence of the block being a different stone, not because the stone
+    #   was nudged. Renamed `jitter` -> `depth_var` so the classification is visible at the call
+    #   site instead of living in a report.
+    drystone=dict(course_h=0.22, block_lo=0.36, block_hi=0.62, batter=1.0 / 6.0,
+                  depth=0.26, depth_var=0.018, gap=0.012, cap_h=0.10, seed=97),
+    # [W3 S09] G9's **root/stump feature on a moss bed** and the boulders sitting in the beds.
+    #   Both go through the **T4b wrapper** (`w3_t4b_v1.md` §1.1): `treatment="mtlxoff"` blocks the
+    #   MaterialX terminal whose `ND_normalmap_float` is missing from this runtime's Sdr registry
+    #   (**MD-F3**, the red error fallback) and falls back to the UsdPreviewSurface terminal the
+    #   same material already carries — so instancing and the asset's own normal survive together.
+    #   `rock_moss_set_01__mtlxoff.usda` / `tree_stump_01__mtlxoff.usda` are pre-authored and
+    #   committed; nothing here writes into `assets/urban_wrap/`.
+    #   (asset, bed tag, u, v, target_h, yaw) — u/v are fractions of the bed footprint.
+    bed_features=[("tree_stump_01", "B2", 0.42, 0.52, 1.25, 24.0),
+                  ("rock_moss_set_01", "B1", 0.68, 0.40, 0.62, 137.0),
+                  ("rock_moss_set_01", "B3", 0.30, 0.58, 0.78, 291.0),
+                  ("rock_moss_set_01", "B4", 0.55, 0.46, 0.55, 63.0)],
+    # [W3 S09] lily pads and floating leaf rafts — G9's right half. Thin discs on the water.
+    #   **Sited beside the reed beds at |y| ≥ 19.6, not out in the open water**, for two reasons
+    #   that agree: (a) `fov_selfcheck()` caught the first siting (|y| 9.8–15.5) **inside** the
+    #   ±30° cone of the `d10` presets — at 25–31 m the h0.3 sight line lands on the water at
+    #   x ≈ 21, which is exactly where those pads were, so they would have moved judged pixels;
+    #   (b) it is where lily pads actually grow. 수련 needs sheltered, shallow, still water —
+    #   the lee of a reed stand — not the middle of a 30 m open lake in front of a public
+    #   waterfront stair. The gate and the botany point the same way; the gate found it first.
+    #   Margins after the move (nearest corner, furthest preset eye (−10, 0)) [computed]:
+    #   +5.1° · +7.1° · +3.2° · +5.1°.
+    #   (cx, cy, n, r_lo, r_hi, seed)
+    lilies=[(16.0, -21.5, 14, 0.20, 0.42, 51), (20.0, -26.0, 12, 0.22, 0.46, 52),
+            (16.5, 20.5, 13, 0.20, 0.40, 53), (21.0, 25.0, 11, 0.24, 0.48, 54)],
+    lily=dict(t=0.012, spread=1.9),
     # [v5 adopted] reed stands — the embankment near the waterline (**outside** the stair width y±5) and the far bank.
     #   (cx, cy, n, seed). x 12.2~13.6 = just below the waterline (water_x0≈11.92) →
     #   reeds appear to rise out of the water. No interference with the hazard geometry (stairs y±5).
@@ -355,7 +535,10 @@ PARAMS = dict(
            (12.2, 8.5, 9, 21), (12.9, 13.0, 11, 22), (12.2, 18.0, 9, 23),
            (13.6, 24.0, 12, 24),
            (45.6, -14.0, 10, 41), (45.6, 14.0, 10, 42)],
-    reed=dict(r=0.022, h_lo=1.1, h_hi=1.9, spread=0.85, tilt=9.0),
+    reed=dict(r=0.022, h_lo=1.1, h_hi=1.9, spread=0.85, tilt=9.0,
+              # [W3 S09] plume = the buff seed head, 0.22 m of the culm top at 1.9x the radius.
+              #   Autumn 갈대 is read by its plume, not by its stem.
+              plume_h=0.22, plume_r_mul=1.9),
     # [v5 shared layer] Korean sign — (tag, TEX key, cx, cy, base_z, yaw, w, h)
     #   [v6] Info (−6.5, 5.5) → **(−7.0, −5.6)** : the +Y side is filled by the pavilion (plinth y 5.74~)
     #     and the deck (x −10.0..−7.6), leaving no room → moved to the symmetric position on the south side.
@@ -364,7 +547,19 @@ PARAMS = dict(
     #     −61.8 deg (out), ghat_walk(−4,0) −118.2 deg (out), waterline faces the +X water side → behind.
     #     from_river(23.92,0) +10.3 deg (31.4 m, distant) · park_vista −26.2 deg (27.8 m,
     #     bottom-left of frame) = the sign board enters the mise-en-scene cut with 0 sight-line occlusion.
-    signs=[("Info", "sign_info", -7.0, -5.6, 0.0, 180.0, 1.0, 0.75)],
+    #   [W3 S09] **The flat post-and-panel sign becomes a lectern (안내 거치대).** G9 carries
+    #     exactly one grey information lectern and it stands **beside the deck at the water end**,
+    #     not out on the lawn: a raked panel on a low plinth, chest height, read from above.
+    #     Re-sited (−7.0, −5.6) → **(−1.9, −9.4)**: 0.70 m east of bed B1's face (x −2.6) and
+    #     0.60 m north of boardwalk leg L3 (y −10.0), i.e. it is *at* the point the boardwalk
+    #     hands you to the stone step courses — the position that makes an information lectern
+    #     mean something. Its old site is now 0.20 m from bed B1's y1 face and could not be kept.
+    #     Camera re-check [computed, `fov_selfcheck`]: grid eyes (−2/−5/−10, 0) → −86.2 / −71.7 /
+    #     −49.3 deg, **all outside ±30 deg**; park_vista −18.9 deg at 31.4 m = bottom-left of frame.
+    #     `panel_tilt` 22 deg is the ordinary Korean 안내판 rake (readable standing at 1.5 m).
+    signs=[("Info", "sign_info", -1.9, -9.4, 0.0, 180.0, 0.92, 0.62)],
+    lectern=dict(plinth=(0.46, 0.30, 0.86), panel_tilt=22.0, panel_t=0.05,
+                 leg_r=0.045),
 
     material=dict(
         # [v6 rework (3)] stone role sandstone → **plaza_light** (light granite paving).
@@ -385,8 +580,31 @@ PARAMS = dict(
         #   old moss/stone = 0.30/0.90 = 0.333 → new 0.64×0.333 = 0.213.
         #   (dropping the absolute value alone would kill the waterline cue with it — this scene's only drop anchor)
         moss_tint=(0.213, 0.284, 0.185),       # was (0.30,0.40,0.26)
-        deck_tint=(0.95, 0.88, 0.78),          # timber boardwalk (grey weathered wood)
-        seam_color=(0.030, 0.026, 0.022),      # deck plank seams (dark-colour rule)
+        deck_tint=(0.95, 0.88, 0.78),          # timber boardwalk planks (grey weathered wood)
+        # [W3 S09 row (3)] the members under the plank deck are **not** the same tone as the
+        #   walking face: a deck plank silvers in the weather, a joist in permanent shade does
+        #   not. 0.72x the plank keeps the same hue and drops the value one step, which is what
+        #   separates the members at a raking angle. (scene10 ships the same relationship:
+        #   deck L* 55.0 / stringer L* 53.0.)
+        joist_tint=(0.68, 0.63, 0.56),
+        post_tint=(0.58, 0.53, 0.47),          # 120각 기둥 — one step darker again
+        seam_color=(0.030, 0.026, 0.022),      # (kept: dark-colour rule, used by the rim shadow)
+        # [W3 S09 row (1)] dry-stone 자연석. A dry-laid Korean retaining wall is a **warmer and
+        #   darker** stone than the machined granite paving beside it — it is a field stone, not a
+        #   sawn slab, and it carries lichen. 0.86x the paving tint with a warm bias keeps it
+        #   inside the same albedo family (so `albedo_selfcheck` still governs it) while reading
+        #   as a different material at 20 m.
+        drystone_tint=(0.55, 0.52, 0.46),
+        drystone_cap_tint=(0.60, 0.57, 0.50),  # the coping course, weathered a shade lighter
+        # [W3 S09 row (6)] autumn hillside. The three tones are the two that dominate G9
+        #   (ginkgo yellow, maple orange) plus the dark conifer band a Korean hillside always
+        #   carries; `hill_c` is the far ridge and is deliberately **lighter and greyer**, not
+        #   darker — aerial perspective washes a distant ridge toward the sky, and the old
+        #   `far_color` boxes got that backwards (a 0.13 near-black silhouette at 70 m).
+        hill_a=(0.268, 0.196, 0.078),          # 단풍 maple orange-red
+        hill_b=(0.288, 0.252, 0.086),          # 은행 ginkgo yellow
+        hill_c=(0.176, 0.176, 0.148),          # far ridge, desaturated toward the sky
+        hill_rough=1.0,
         # [v6 (1)] pavilion timber members — posts, tie beams, railing (reddish-brown pine) / raised floor (light floorboard)
         pav_wood_tint=(0.68, 0.44, 0.28), pav_floor_tint=(0.78, 0.60, 0.42),
         # [v8 judgment §4 (1)] the near-white roof was really a **specular additive term** (module
@@ -401,7 +619,16 @@ PARAMS = dict(
         duck_top_color=(0.52, 0.19, 0.17), duck_top_rough=0.55,  # canopy (red)
         beak_color=(0.74, 0.42, 0.07), beak_rough=0.5,
         # [v6 side fix] 0.055/0.065/0.030 → raised. The reeds fused into black needles.
-        reed_color=(0.110, 0.125, 0.060), reed_rough=1.0,
+        # [W3 S09 · R09-1] **autumn.** A 갈대 stand in a Korean October is straw, not olive:
+        #   the culm has gone over and the plume is buff. The measured reference is the library's
+        #   own `lawngrass_a_basecolor.png` — orange 55.5 % / yellow 23.2 %, mean RGB
+        #   (0.628, 0.595, 0.420) `[measured, season_audit]` — scaled into this scene's albedo
+        #   band. Green 0.0 % is the point: the old (0.110, 0.125, 0.060) is a **summer** olive
+        #   and it was the loudest wrong-season pixel block in the frame after the far bank.
+        reed_color=(0.232, 0.196, 0.118), reed_rough=1.0,
+        # plumes — the buff seed head that makes a reed bed read as a reed bed at 20 m
+        reed_plume_color=(0.352, 0.318, 0.238), reed_plume_rough=1.0,
+        lily_color=(0.086, 0.132, 0.062), lily_rough=0.62,
         # [B-09-4] 0.55 → 0.42: the water-mark band was weaker than the sandstone texture variation,
         #   so the waterline was not identifiable. (The contrast amount is kept identical after the stone swap.)
         # [v7] contrast ratio preserved for the same reason: old 0.42/0.90 = 0.467 → 0.64×0.467 = 0.299
@@ -413,9 +640,17 @@ PARAMS = dict(
         post_color=(0.10, 0.085, 0.07), post_rough=0.8,
         # [v6 side fix] judgment: "the whole far bank is an untextured black silhouette (p5 5.2/8.8)".
         #   Raise the distant silhouette and canopy albedo into the measured vegetation reflectance band (6~12 %).
-        far_color=(0.130, 0.125, 0.118),       # distant building silhouette
+        # [W3 S09 row (6)] `far_color` (the distant **building** silhouette) is **deleted with its
+        #   two boxes**; the horizon is closed by `hill_a/b/c` instead. Nothing else read it.
         wood_color=(0.30, 0.20, 0.12), wood_rough=0.85,
-        canopy_a=(0.055, 0.085, 0.035), canopy_b=(0.075, 0.115, 0.045),
+        # [W3 S09 · R09-1] the **procedural blob canopy** (the fallback path of `sc.build_tree`,
+        #   and the only tree colour this scene can actually set — see `season_audit()` item 3:
+        #   the library has **zero** autumn foliage assets, all 10 measured tree/shrub rows read
+        #   green 74–100 % with orange 0.000 and red 0.000). Pinned to the autumn pair G9 shows so
+        #   the fallback cannot smuggle summer green into an autumn scene. Same reflectance band
+        #   (6–12 %) the v6 side fix established, re-hued rather than re-levelled.
+        canopy_a=(0.118, 0.086, 0.032),        # 단풍 orange-red
+        canopy_b=(0.132, 0.116, 0.040),        # 은행 yellow
         canopy_rough=1.0,
     ),
 
@@ -818,7 +1053,18 @@ _ALBEDO_TABLE = [
     ("정자 기와지붕",         None,          "roof_tile_color", True,  True),
     ("정자 누마루(목)",       "wood_dark",   "pav_floor_tint",  False, True),
     ("오리배 선체",           None,          "duck_color",      False, False),
-    ("원경 건물 실루엣",      None,          "far_color",       True,  False),
+    # [W3 S09] the rows the renovation adds. The dry-stone wall is a **large vertical** face
+    #   (5 walls, up to 6.4 m x 1.5 m) so criterion (A) governs it and (B) does not apply;
+    #   the autumn hills are large but vertical-ish masses at 70-130 m, same treatment.
+    #   `far_color` leaves the table with its two boxes (row (6)).
+    ("자연석 옹벽",           "plaza_light", "drystone_tint",   True,  False),
+    ("자연석 옹벽 갓돌",      "plaza_light", "drystone_cap_tint", False, True),
+    ("데크 장선",             "wood_dark",   "joist_tint",      False, False),
+    ("데크 기둥",             "wood_dark",   "post_tint",       False, False),
+    ("가을 산능선 a(단풍)",   None,          "hill_a",          True,  False),
+    ("가을 산능선 b(은행)",   None,          "hill_b",          True,  False),
+    ("가을 산능선 c(원경)",   None,          "hill_c",          True,  False),
+    ("갈대 이삭",             None,          "reed_plume_color", False, False),
 ]
 
 
@@ -872,6 +1118,282 @@ def albedo_selfcheck(verbose=True):
 
 
 # ===========================================================================
+# [C4] [W3 S09 · R09-1] **the scene's own seasonal audit** — §7 ruling 8 requires one per scene
+#   ("each scene runs an internal seasonal audit (the cherry-blossom precedent)"), and the
+#   instrument is the project's own: **pixels, never names** (`w3_execution_spec_v1.md` C-21,
+#   *"Name heuristics are dead — the pixel rule is the only instrument"*).
+#
+# What it measures: for every shrub basecolor atlas in the library, the hue histogram of the
+#   opaque, saturated texels. What it decides: which assets this scene may mass a bed with, now
+#   that its season is pinned **autumn**. Measured this session (256 px thumbnails, alpha > 0.5,
+#   value > 0.06, saturation > 0.15; hue bands in degrees):
+#
+#     atlas                        red   orange  yellow   yg    green   magenta  mean RGB
+#     burningbush_leaf            0.399   0.005   0.002  0.262  0.000    0.000   (.654 .462 .430)
+#     forsythiaflower             0.000   0.064   0.936  0.000  0.000    0.000   (.795 .706 .213)
+#     green1 (Boxwood/Yew/Cedar)  0.000   0.000   0.000  1.000  0.000    0.000   (.410 .483 .229)
+#     hollyprivet                 0.000   0.000   0.000  0.310  0.690    0.000   (.222 .344 .100)
+#     lawngrass_a                 0.000   0.555   0.232  0.177  0.019    0.000   (.628 .595 .420)
+#     rhododendron                0.046   0.003   0.222  0.000  0.000    0.729   (.657 .423 .623)
+#     switchgrass                 0.000   0.000   0.000  0.000  1.000    0.000   (.321 .547 .267)
+#
+# Three findings this scene acts on:
+#   1. **`Burning_Bush` is re-admitted, and it is the only warm mass in the library.** Its ban
+#      (`scene_common.py` `SHRUB_ORNAMENT` block) reads *"red 30.2 % (autumn colour). Fine for C2,
+#      but banned in summer and all-season scenes, so it is dropped from the global pool"* — the
+#      ban's stated premise is the **global summer lock**, and §7 ruling 8 retired that lock. On a
+#      scene pinned autumn the asset is not merely admissible, it is the correct one. It is taken
+#      through `pool=`, not by re-adding it to `SHRUB_ORNAMENT` (that is K4's file and it is frozen).
+#   2. **`Forsythia` stays banned even in autumn.** Yellow 93.6 % on a *blossom-only* atlas is
+#      March–April, not October — an autumn pin does not license a spring flower. Named here so the
+#      next reader does not "fix" the omission.
+#   3. **The library has no flowering ground cover at all, and no autumn tree.** `Rhododendron`'s
+#      magenta 72.9 % is the `/Root/Flowers` strip, which K4(0)'s season wrapper removes library-wide
+#      (**K4-F1** — this is not a regression, it is the fix), and every tree row measures green
+#      74–100 % / orange 0.000 / red 0.000. So G9's massed pink/white cosmos **cannot be built from
+#      stock**: this scene delivers massed *autumn foliage* colour instead, and the flowering
+#      ground-cover procurement is a routed follow-up (`w3_s09_v1.md` §7).
+# ===========================================================================
+# `scenes/main/` -> repo root -> assets/. Taken from `_HERE` rather than from `sc.VEG_DIR` so the
+# audit still runs when the vegetation tree is unprocured (it then reports SKIP, never a pass).
+_SHRUB_TEX_DIR = os.path.abspath(os.path.join(
+    _HERE, "..", "..", "assets", "vegetation", "Shrub", "materials", "textures"))
+
+# (atlas, verdict for an AUTUMN scene, why) — the verdicts are the decision, the numbers above
+# are the evidence, and `season_audit()` re-measures the numbers rather than trusting this table.
+_SEASON_RULE = [
+    ("burningbush_leaf_basecolor.png", "USE",  "red 0.399 — 단풍 mass, autumn-correct"),
+    ("hollyprivet_basecolor.png",      "USE",  "상록 — season-neutral"),
+    ("green1_basecolor.png",           "USE",  "상록 — season-neutral"),
+    ("switchgrass_basecolor.png",      "N/A",  "green 1.000, and unreachable: no VEG_SHRUBS row"),
+    ("lawngrass_a_basecolor.png",      "N/A",  "straw, but unreachable: no VEG_SHRUBS row"),
+    ("rhododendron_basecolor.png",     "USE",  "magenta 0.729 is the Flowers strip — K4(0) wrapper removes it"),
+    ("forsythiaflower_basecolor.png",  "BAN",  "yellow 0.936 blossom-only = 3~4월, not autumn"),
+]
+# The assets this scene actually masses its beds with. Every one must be a `VEG_SHRUBS` row
+# **and** carry a `USE` verdict above; `season_audit()` FAILs if either is untrue.
+_BED_ASSET_ATLAS = {
+    "Shrub/Burning_Bush.usd": "burningbush_leaf_basecolor.png",
+    "Shrub/Juniper.usd":      "green1_basecolor.png",
+    "Shrub/Holly.usd":        "hollyprivet_basecolor.png",
+    "Shrub/Yew.usd":          "green1_basecolor.png",
+    "Shrub/Boxwood.usd":      "green1_basecolor.png",
+}
+
+
+def _hue_fracs(path):
+    """Hue-band fractions of the opaque, saturated texels of a basecolor atlas.
+    Returns None when PIL or the file is missing (the audit then reports SKIP, never a pass)."""
+    try:
+        from PIL import Image
+        im = Image.open(path).convert("RGBA")
+        im.thumbnail((256, 256))
+        a = np.asarray(im, dtype=np.float64) / 255.0
+    except Exception:
+        return None
+    rgb, al = a[..., :3], a[..., 3]
+    m = (al > 0.5) & (rgb.max(axis=-1) > 0.06)
+    if not m.any():
+        return None
+    px = rgb[m]
+    mx, mn = px.max(axis=-1), px.min(axis=-1)
+    dl = mx - mn
+    r, g, b = px[:, 0], px[:, 1], px[:, 2]
+    hh = np.zeros(len(px))
+    nz = dl > 1e-6
+    i = (mx == r) & nz
+    hh[i] = ((g[i] - b[i]) / dl[i]) % 6
+    i = (mx == g) & nz
+    hh[i] = ((b[i] - r[i]) / dl[i]) + 2
+    i = (mx == b) & nz
+    hh[i] = ((r[i] - g[i]) / dl[i]) + 4
+    hue = hh * 60.0
+    strong = np.where(mx > 0, dl / np.maximum(mx, 1e-9), 0.0) > 0.15
+    n = float(len(px))
+
+    def f(lo, hi):
+        return float(((hue >= lo) & (hue < hi) & strong).sum()) / n
+    return dict(red=float((((hue < 20) | (hue >= 330)) & strong).sum()) / n,
+                orange=f(20, 45), yellow=f(45, 70), yg=f(70, 90),
+                green=f(90, 160), magenta=f(280, 330),
+                mean=tuple(float(v) for v in px.mean(axis=0)))
+
+
+def season_audit(verbose=True):
+    """[W3 S09 · §7 ruling 8] Per-scene seasonal audit. Returns (ok, rows).
+
+    FAILs if (a) a bed is massed with an asset carrying a `BAN` verdict, (b) a bed asset is not a
+    `VEG_SHRUBS` row (it would silently fall back to the default pool — see S09-F1), or (c) a
+    `BAN` atlas measures as season-neutral after all (i.e. the ban is stale and should be revisited).
+    """
+    rows, fails = [], []
+    veg_rows = {s[0] for s in getattr(sc, "VEG_SHRUBS", ())}
+    for atlas, verdict, why in _SEASON_RULE:
+        fr = _hue_fracs(os.path.join(_SHRUB_TEX_DIR, atlas))
+        if fr is None:
+            rows.append((atlas, verdict, None, "SKIP(텍스처/PIL 없음)", why))
+            continue
+        warm = fr["red"] + fr["orange"]
+        tag = "OK"
+        if verdict == "BAN" and fr["yellow"] < 0.10 and warm < 0.10:
+            tag = "REVISIT(금지 근거 약함)"
+        rows.append((atlas, verdict, fr, tag, why))
+    used = []
+    for b in PARAMS["beds"]:
+        a = b["species"]
+        atlas = _BED_ASSET_ATLAS.get(a)
+        ver = dict((x[0], x[1]) for x in _SEASON_RULE).get(atlas)
+        prob = []
+        if a not in veg_rows:
+            prob.append("VEG_SHRUBS 행 없음(S09-F1)")
+        if ver == "BAN":
+            prob.append("금지 종")
+        if ver is None:
+            prob.append("계절 판정 미등록")
+        if prob:
+            fails.append(f"{b['tag']}:{a}({'/'.join(prob)})")
+        used.append((b["tag"], a, atlas or "-", ver or "-", "OK" if not prob
+                     else "FAIL " + "/".join(prob)))
+    ok = not fails
+    if verbose:
+        print("=" * 68)
+        print("scene09 [W3 S09 · R09-1] 계절 감사 — 씬 고정 = **가을**  (픽셀 계측, 이름 금지)")
+        print("=" * 68)
+        for atlas, verdict, fr, tag, why in rows:
+            if fr is None:
+                print(f"  {atlas:32s} {verdict:5s} {tag}")
+                continue
+            print(f"  {atlas:32s} {verdict:5s} red {fr['red']:.3f} "
+                  f"or {fr['orange']:.3f} yel {fr['yellow']:.3f} "
+                  f"yg {fr['yg']:.3f} grn {fr['green']:.3f} "
+                  f"mag {fr['magenta']:.3f}  {tag}")
+            print(f"     └ {why}")
+        print("  ── 화단별 단일 종 (pool=1개 = 구조적 단일종) ──")
+        for tag, a, atlas, ver, st in used:
+            print(f"  {tag}  {a:26s} {atlas:32s} {ver:5s} {st}")
+        print(f"  ⇒ {'OK — 계절 위반 0건' if ok else 'FAIL: ' + str(fails)}")
+        print("  ※ 한계(정직하게): 이 라이브러리에는 **개화 지피 자산이 0종**이고 "
+              "**단풍 수목 자산도 0종**이다.")
+        print("     G9 의 분홍/흰 코스모스 군식은 재고로 만들 수 없다 — 이 씬은 "
+              "가을 **단풍 잎색** 군식으로 대체하고,")
+        print("     개화 지피 조달은 후속 행으로 넘긴다 (w3_s09_v1.md §7).")
+        print("=" * 68)
+    return ok, rows
+
+
+# ===========================================================================
+# [C5] [W3 S09] **FOV self-check** — the placement law of this renovation, asserted from the
+#   coordinates with no render. Every element the G9 rows add must lie outside the +-30 deg
+#   horizontal FOV of **all nine** `sc.grid_views` presets, so it cannot occlude the stair-head
+#   drop edge in any judged cut. This is the S09-C / land_posts argument (`:291`) generalised
+#   into a gate: that row proved its four posts one at a time in a comment, and a comment does
+#   not fail a build.
+#   An element is OUT when, for every preset eye, either it is behind the eye (dx <= 0) or its
+#   nearest corner bears more than `FOV_HALF` from the +X axis. The **nearest corner** is the
+#   one that minimises |bearing| over the footprint, computed exactly (not sampled): x is taken
+#   at its maximum and |y| at its minimum, which is the extremum of atan(|y|/dx) on a box.
+# ===========================================================================
+_FOV_HALF = 30.0
+_PRESET_EYES = tuple((-d, 0.0) for d in (2, 5, 10))
+
+
+def _box_min_bearing(x0, y0, x1, y1, eye):
+    """Smallest |bearing| (deg) any point of the axis-aligned box subtends at `eye`, looking +X.
+    Returns None when the whole box is behind the eye."""
+    ex, ey = eye
+    dx = max(x0, x1) - ex
+    if dx <= 0.0:
+        return None
+    lo, hi = min(y0, y1) - ey, max(y0, y1) - ey
+    dy = 0.0 if lo <= 0.0 <= hi else (lo if lo > 0.0 else hi)
+    return abs(math.degrees(math.atan2(dy, dx)))
+
+
+def fov_selfcheck(verbose=True):
+    """[W3 S09] Returns (ok, rows). ok = every added element is outside every preset FOV."""
+    items = []
+    for b in PARAMS["beds"]:
+        items.append((f"화단 {b['tag']}", b["x0"], b["y0"], b["x1"], b["y1"]))
+    bw = PARAMS["boardwalk"]
+    for tag, x0, y0, x1, y1, _ax in bw["legs"]:
+        items.append((f"보드워크 {tag}", x0, y0, x1, y1))
+    lx, ly = PARAMS["signs"][0][2], PARAMS["signs"][0][3]
+    items.append(("안내 거치대", lx - 0.35, ly - 0.35, lx + 0.35, ly + 0.35))
+    for cx, cy, _n, _rl, _rh, _s in PARAMS["lilies"]:
+        sp = PARAMS["lily"]["spread"]
+        items.append((f"수련 ({cx:.1f},{cy:.1f})", cx - sp, cy - sp, cx + sp,
+                      cy + sp))
+    rows, bad = [], []
+    for name, x0, y0, x1, y1 in items:
+        worst, worst_eye = 1e9, None
+        for eye in _PRESET_EYES:
+            b = _box_min_bearing(x0, y0, x1, y1, eye)
+            if b is not None and b < worst:
+                worst, worst_eye = b, eye
+        if worst_eye is None:
+            rows.append((name, None, None, "OUT(전 프리셋 후방)"))
+            continue
+        ok_i = worst > _FOV_HALF
+        if not ok_i:
+            bad.append(name)
+        rows.append((name, worst, worst_eye,
+                     f"OUT (여유 {worst - _FOV_HALF:+.1f}°)" if ok_i
+                     else "**IN — 판정컷 침범**"))
+    ok = not bad
+    if verbose:
+        print("=" * 68)
+        print(f"scene09 [W3 S09] 신설 요소 프리셋 FOV 배제 검산 "
+              f"(±{_FOV_HALF:.0f}° · 눈 x=-2/-5/-10, y=0 · 렌더 없음)")
+        print("=" * 68)
+        for name, b, eye, tag in rows:
+            if b is None:
+                print(f"  {name:22s} {tag}")
+            else:
+                print(f"  {name:22s} 최소 방위 {b:6.1f}° @eye{eye}  {tag}")
+        print(f"  ⇒ {'OK — 판정 프리셋 침범 0건' if ok else 'FAIL: ' + str(bad)}")
+        print("=" * 68)
+    return ok, rows
+
+
+def horizon_selfcheck(verbose=True):
+    """[W3 S09 row (6)] The deleted far-side building boxes closed the horizon; the autumn hills
+    must close it **at least as high** from the two water cameras, or B-09-2's 'infinity pool'
+    failure comes back. Compares the elevation each mass subtends at `from_river` / `across_river`
+    against the retired boxes (x0 66, h 7.0 on a far bank whose top face is `water_z + 1.6`).
+    No render — pure trigonometry on the shipped coordinates."""
+    _steps, _bz, _zb, water_z, _bh = compute_steps()
+    fb = PARAMS["far_bank"]
+    fb_z = water_z + fb["above_water"]
+    water_x0 = _steps[PARAMS["stairs"]["nsteps"]
+                      - PARAMS["stairs"]["submerge_from_bottom"]][0]
+    cams = (("from_river", water_x0 + 12.0, water_z + 1.6),
+            ("across_river", (water_x0 + PARAMS["water"]["x_far"]) / 2.0,
+             water_z + 1.5))
+    old = 7.0                      # retired far_buildings h, at x0 66.0
+    rows, bad = [], []
+    for tag, ex, ez in cams:
+        e_old = math.degrees(math.atan2(fb_z + old - ez, 66.0 - ex))
+        e_new = max(math.degrees(math.atan2(
+            fb_z + h["h"] - ez, (h["cx"] - h["sx"] / 2.0) - ex))
+            for h in PARAMS["far_hills"])
+        okr = e_new >= e_old
+        if not okr:
+            bad.append(tag)
+        rows.append((tag, e_old, e_new, okr))
+    ok = not bad
+    if verbose:
+        print("=" * 68)
+        print("scene09 [W3 S09] 지평 폐합 검산 — 폐기된 건물 실루엣 vs 가을 산능선")
+        print("=" * 68)
+        for tag, a, b, okr in rows:
+            print(f"  {tag:14s} 구 건물 {a:+.2f}° → 신 능선 {b:+.2f}°  "
+                  f"{'OK' if okr else 'FAIL(지평이 낮아졌다)'}")
+        print(f"  ⇒ {'OK — 지평 폐합 유지 또는 개선' if ok else 'FAIL: ' + str(bad)}")
+        print("=" * 68)
+    return ok, rows
+
+
+# ===========================================================================
 # [C-2] ground_kit plan - pure CPU, no USD. Coordinates from PARAMS (Sec.7.4).
 # ===========================================================================
 def ground_plan():
@@ -888,12 +1410,12 @@ def ground_plan():
         edges=[("stair_head", float(st["x0"]))],
         dists=(2, 5, 10), scene="scene09",
         tactile=(),                # Sec.12.4 OFF - p = 0.24 and natural scene
-        sites=dict(patch=[tuple(v) for v in g["patches"]]),
+        sites={},                  # [W3 S09 row (4)] the `patch` site list went with the row
         overrides=dict(
             pave=dict(step_x=float(g["joint_step"]),
                       step_y=float(g["joint_step"])),
-            surface=(("patch", int(g["patch_n"])), ("crack", 4),
-                     ("stain", ("water",))),
+            # [W3 S09 row (4)] `("patch", 5)` DELETED — see the PARAMS["gkit"] block.
+            surface=(("crack", 4), ("stain", ("water",))),
             extras=()),
         seed=int(g["seed"]))
 
@@ -1011,6 +1533,33 @@ def build_views(run, z_bot, water_z, water_x0):
     #   the two rows ship in the same commit.
     views["landing_return"] = dict(eye=[4.34, -8.20, 0.20],
                                    tgt=[4.34, 0.60, -2.10])
+
+    # === [W3 S09] `g9_oblique` — the cut the target image is judged against ==
+    #   G9 is an **aerial oblique**: terraced beds and the boardwalk on the left, the stone step
+    #   courses and the pavilion through the centre, water and the autumn far shore filling the
+    #   right. `park_vista` already looks down that axis (its own note has the boardwalk at −25°
+    #   left, the stair head at −2° centre, the waterline at +12° right) but it stands at z 3.8
+    #   and frames the pavilion, so the beds and the boardwalk's turns fall outside it.
+    #   This cut keeps the axis (bearing **−51.9°**, against park_vista's −57.2°) and lifts the
+    #   eye to 13.0 m — the height at which G9 was drawn — so the renovation can be compared with
+    #   the image element for element instead of by assertion.
+    #   Back-computation, FOV ±30° horizontal / ±18° vertical, sight-line pitch −15.5°
+    #   → frame bearing offsets [−30, +30], frame elevation [−33.5°, +2.5°] (all [computed]):
+    #     bed B5 (−11.2, 15.8)   −14.6°  22.0 m   elev −28.6°   → left foreground, terraced
+    #     bed B4 (−5.3, 15.8)     −2.1°  25.0 m                 → left of centre
+    #     bed B1 (−5.3, −7.6)    −19.5°  46.0 m                 → left, the +X wall face
+    #     bed B2 (−11.2, −7.6)   −26.7°                          → left edge
+    #     boardwalk L3 axis      −21.6°  49.2 m                 → the leading line, with its turn
+    #     pavilion (−4.2, 8.8)    −8.0°  31.5 m                 → centre-left
+    #     stair head (0, 0)       −9.0°  41.2 m   elev −17.5°   → centre, the 36 courses in plan
+    #     waterline (11.92, 0)    +3.5°  48.1 m   elev −20.8°   → centre-right
+    #     duck boat (15.4, 3.0)   +8.9°                          → right
+    #     far bank near edge      +22.5° 73.4 m                 → right
+    #     autumn ridge 0          +19.6° 115.9 m  elev −2.3°    → top right, closing the horizon
+    #   **Mise-en-scene registry only** — appended after the S09-A cuts, so the 9 `sc.grid_views`
+    #   presets keep their identity and their order and the judgement baseline is untouched
+    #   (the S09-A precedent, `w3_execution_spec_v1.md` Sec.10.5, applied again).
+    views["g9_oblique"] = dict(eye=[-20.0, 36.0, 13.0], tgt=[9.0, -1.0, 0.0])
     return views
 
 
@@ -1049,7 +1598,16 @@ BANNER = """\
     ※ 프리셋 13컷은 손대지 않았다 — 판정 베이스라인 불변
 13. [W3 S09-C] 석주 위치 — 계단면(리벳먼트) 중턱에 박혀 있던 석주 4본이
                    테라스 산책로 가장자리(x −0.80, z 0.0)의 **한 높이**로 올라왔는가.
-                   계선주는 배를 매는 안벽 상단에 서지, 계단 경사면에 서지 않는다"""
+                   계선주는 배를 매는 안벽 상단에 서지, 계단 경사면에 서지 않는다
+14. [W3 S09 · G9] 목표 이미지 대조 — `g9_oblique` 한 컷에서 아래가 동시에 읽히나
+    (1) 자연석 계단식 화단 5단 — 켜(course)가 층지고 **세로 줄눈이 이어지지 않는가**
+    (2) 화단마다 **한 종**의 지피가 덩어리로 차 있는가 (혼식 0)
+    (3) 지그재그 데크 — 두 번 꺾이고, 널이 **진행 방향과 직교**하며,
+        장선·멍에·기둥이 레이킹 각에서 분리되어 보이는가
+    (4) 가을 — 갈대가 짚빛 + 이삭, 원경 능선이 단풍/은행 색으로 지평을 닫는가
+        (건물 실루엣 2동은 삭제됐다 — G9 에 건물은 한 채도 없다)
+    (5) 판정 프리셋 13컷의 근경은 **아무것도 바뀌지 않았는가**
+        (신설 요소 전부 ±30° 밖 — `fov_selfcheck`)"""
 
 
 def main():
@@ -1061,7 +1619,12 @@ def main():
     if os.environ.get("NEGOBS_SELFCHECK", "0") == "1":
         ok1, _ = roof_normal_selfcheck()
         ok2, _ = albedo_selfcheck()
-        sys.exit(0 if (ok1 and ok2) else 1)
+        # [W3 S09] the three gates this renovation adds — season (R09-1), preset-FOV exclusion
+        #   (the placement law of every added element) and horizon closure (row (6)'s premise).
+        ok3, _ = season_audit()
+        ok4, _ = fov_selfcheck()
+        ok5, _ = horizon_selfcheck()
+        sys.exit(0 if (ok1 and ok2 and ok3 and ok4 and ok5) else 1)
 
     sc.check_assets(ASSET_ROLES, hdri=PARAMS["light"]["hdri"])
     simulation_app = sc.boot(capture_mode or smoke)
@@ -1110,6 +1673,19 @@ def main():
                         sca["stone"], tint=mp["moss_tint"])
         M["deck"] = tex("wood_dark", "/World/Looks/Deck", sca["wood_dark"],
                         tint=mp["deck_tint"])
+        # [W3 S09 row (3)] the members under the walking face are a shade darker — see the
+        #   `joist_tint` / `post_tint` comments. Same texture, so this is a tone step, not a
+        #   second material family.
+        M["joist"] = tex("wood_dark", "/World/Looks/Joist", sca["wood_dark"],
+                         tint=mp["joist_tint"])
+        M["deck_post"] = tex("wood_dark", "/World/Looks/DeckPost",
+                             sca["wood_dark"], tint=mp["post_tint"])
+        # [W3 S09 row (1)] dry-stone 자연석 — the granite texture at a warmer, darker tint.
+        M["drystone"] = tex("plaza_light", "/World/Looks/DryStone",
+                            sca["stone"] * 0.55, tint=mp["drystone_tint"])
+        M["drystone_cap"] = tex("plaza_light", "/World/Looks/DryStoneCap",
+                                sca["stone"] * 0.55,
+                                tint=mp["drystone_cap_tint"])
         # [W2 fix batch F1] Ground-class decal materials for the kit — see the
         #   `scripts/const_color_audit.py` rule: a *ground* prim may not carry a
         #   texture-less constant. paint / metal / water / misc are excluded from
@@ -1157,9 +1733,21 @@ def main():
         M["post"] = sc.make_pbr(stage, "/World/Looks/Post",
                                 diffuse_color=mp["post_color"],
                                 roughness_const=mp["post_rough"])
-        M["far"] = sc.make_pbr(stage, "/World/Looks/Far",
-                               diffuse_color=mp["far_color"],
-                               roughness_const=0.95, specular_level=0.0)
+        # [W3 S09] reed plume (buff seed head) + lily pad + the three autumn ridge tones.
+        #   `far` (the retired building silhouette material) is deleted with row (6).
+        M["reed_plume"] = sc.make_pbr(stage, "/World/Looks/ReedPlume",
+                                      diffuse_color=mp["reed_plume_color"],
+                                      roughness_const=mp["reed_plume_rough"],
+                                      specular_level=0.0)
+        M["lily"] = sc.make_pbr(stage, "/World/Looks/Lily",
+                                diffuse_color=mp["lily_color"],
+                                roughness_const=mp["lily_rough"],
+                                specular_level=0.0)
+        for _k in ("hill_a", "hill_b", "hill_c"):
+            M[_k] = sc.make_pbr(stage, f"/World/Looks/Hill{_k[-1].upper()}",
+                                diffuse_color=mp[_k],
+                                roughness_const=mp["hill_rough"],
+                                specular_level=0.0)
         M["wood"] = sc.make_pbr(stage, "/World/Looks/Wood",
                                 diffuse_color=mp["wood_color"],
                                 roughness_const=mp["wood_rough"])
@@ -1274,16 +1862,21 @@ def main():
                            h["cy"] - fh["length"] / 2.0,
                            fh["cx"] + fh["sx"] / 2.0,
                            h["cy"] + fh["length"] / 2.0, fh["h"], base_z=fb_z)
+        # [W3 S09 · row (7)] **belt species declared.** `SCENE_SPECIES["Scene09"]` is
+        #   `("birch", "oak_black")` and the belt half has been inert since K4(b) landed —
+        #   `resolve_species` only reaches it when a call passes `belt=True`, and no scene09
+        #   call did (**K4-F4**: the belts registered for 03 / 09 / 17 "stay inert until you
+        #   pass species="). The far-bank stand is exactly what a belt is for: a *different*
+        #   species at a distance where its crown cannot roof the walked corridor
+        #   (`sc.TREE_BANDS["belt"]`, d_min 7.50 — this row is 44 m away across water).
+        #   The route trees on the terrace keep the scene default (`birch`), so the two bands
+        #   are now genuinely two species instead of one repeated.
         for i, t in enumerate(PARAMS["far_trees"]):
             sc.build_tree(stage, f"{ROOT}/FarTree_{i}", t["cx"], t["cy"], fb_z,
-                          M["wood"], M["canopy_a"], M["canopy_b"])
-        # Far-side building silhouettes 2 (distant layer) — completes the 3-tier depth of the horizon
-        for i, b in enumerate(PARAMS["far_buildings"]):
-            sc.add_box(stage, f"{ROOT}/FarBldg_{i}",
-                       ((b["x0"] + b["x1"]) / 2.0, b["cy"],
-                        fb_z + b["h"] / 2.0),
-                       (b["x1"] - b["x0"], b["sy"], b["h"]), M["far"],
-                       collider=True)
+                          M["wood"], M["canopy_a"], M["canopy_b"], belt=True)
+        # [W3 S09 · row (6)] the 2 building silhouettes are gone; the autumn ridges close the
+        #   horizon in their place. `horizon_selfcheck()` proves the closure did not get lower.
+        build_far_hills(M)
 
     def _step_top_at(x):
         """Stair (= embankment) top-face z at x. For grounding the reeds. Outside the range, the end value."""
@@ -1459,27 +2052,353 @@ def main():
                        (lw["x1"] - lw["x0"], lw["y1"] - lw["y0"], pr),
                        M["grass"], collider=True)
         for i, (tx, ty) in enumerate(PARAMS["park_trees"]):
-            sc.build_tree(stage, f"{ROOT}/ParkTree_{i}", tx, ty, pr,
+            # [W3 S09] a route tree standing **inside** a terraced bed is planted in that bed,
+            #   not floating over it: its ground z is the bed's soil surface. Without this the
+            #   tree at (−13.4, 17.2) — inside B5 — would be buried to 0.88 m of its trunk.
+            #   Species stays the scene default (`birch`); only the far-bank belt is declared.
+            sc.build_tree(stage, f"{ROOT}/ParkTree_{i}", tx, ty,
+                          _bed_top_at(tx, ty, pr),
                           M["wood"], M["canopy_a"], M["canopy_b"])
 
     def build_deck(M):
-        """[v5 adopted] Timber boardwalk connection — the lake park waterfront promenade.
-        [v6] x −9.2..−6.8 (6.8 m clear of the stair-head edge x=0 → no interference with the
-        hazard geometry), top face 0.06 (6 cm above the terrace 0.0 — walk continuity). The plank seam
-        spacing is tightened 2.0 → 0.62 m so it still reads as 'a deck with plank grain' at a distance."""
-        d = PARAMS["deck"]
-        cx = (d["x0"] + d["x1"]) / 2.0
-        sc.add_box(stage, f"{ROOT}/Deck",
-                   (cx, (d["y0"] + d["y1"]) / 2.0, d["top_z"] / 2.0),
-                   (d["x1"] - d["x0"], d["y1"] - d["y0"], d["top_z"]),
-                   M["deck"], collider=True)
-        n = int(round((d["y1"] - d["y0"]) / d["seam_step"]))
-        for k in range(1, n):
-            y = d["y0"] + k * d["seam_step"]
-            sc.add_box(stage, f"{ROOT}/DeckSeam_{k}",
-                       (cx, y, d["top_z"] - d["seam_drop"] / 2.0),
-                       (d["x1"] - d["x0"], d["seam_w"], d["seam_drop"]),
-                       M["seam"])
+        """[W3 S09 · row (3)] **Zigzag timber boardwalk** — replaces the v5/v6 straight slab.
+
+        Three legs, two right-angle turns, net progress toward the water (see the
+        `PARAMS["boardwalk"]` block for the coordinates and the reason each one is where it is).
+        The walked surface is **unchanged**: `top_z` is still 0.060.
+
+        Members, all **stocked 방부목 sections** on the scene10 precedent (산림청고시 2014-2 제8조
+        fixes the 데크판재 thickness series 21/24/27/30 mm and the width series 90–300 mm in 10 mm
+        steps; a 0.145 m plank is a KCS specification width, not a retail size):
+          plank  25 x 140 laid **across** the leg, 6 mm gap  — the walking face
+          joist  38 x 140 on edge at 0.45 m pitch            — under the planks, spanning the width
+          beam   90 x 90 continuous under the joists          — the 멍에
+          post   120 x 120 at 2.70 m                          — the 기둥, down to grade
+          rim    25 x 140 on the two free edges               — the 마구리 board
+        A plank runs across the leg because that is how a boardwalk is built (planks span joists,
+        joists span beams); the old element ran its seams **along** its own long axis, which is
+        the one direction a plank never runs.
+        Turn corners are solid: consecutive legs overlap by a full leg width, so the plank runs
+        simply butt into each other and no seam opens at a corner.
+        """
+        bw = PARAMS["boardwalk"]
+        tz = float(bw["top_z"])
+        pw, pt = bw["plank"]
+        pg = float(bw["plank_gap"])
+        jw, jd = bw["joist"]
+        bm, po = float(bw["beam"]), float(bw["post"])
+        rw, rd = bw["rim"]
+        z_plank = tz - pt / 2.0                       # plank body
+        z_joist = tz - pt - jd / 2.0                  # joists hang under the planks
+        z_beam = tz - pt - jd - bm / 2.0
+        pitch = pw + pg                               # 0.146 m plank period
+        n_plank = n_joist = n_post = 0
+        for tag, x0, y0, x1, y1, axis in bw["legs"]:
+            P = f"{ROOT}/Boardwalk/{tag}"
+            lo, hi = (x0, x1) if axis == "x" else (y0, y1)
+            run = hi - lo
+            # --- planks, across the leg -------------------------------------
+            n = max(1, int(math.floor(run / pitch)))
+            off = (run - (n * pitch - pg)) / 2.0      # centre the run in the leg
+            for k in range(n):
+                c = lo + off + pw / 2.0 + k * pitch
+                if axis == "x":
+                    ctr, size = (c, (y0 + y1) / 2.0, z_plank), (pw, y1 - y0, pt)
+                else:
+                    ctr, size = ((x0 + x1) / 2.0, c, z_plank), (x1 - x0, pw, pt)
+                sc.add_box(stage, f"{P}/Plank_{k}", ctr, size, M["deck"],
+                           collider=(k % 6 == 0))
+                n_plank += 1
+            # --- joists, along the leg ---------------------------------------
+            cross_lo, cross_hi = (y0, y1) if axis == "x" else (x0, x1)
+            nj = max(2, int(round((cross_hi - cross_lo) / bw["joist_pitch"])))
+            for k in range(nj + 1):
+                c = cross_lo + (cross_hi - cross_lo) * k / float(nj)
+                if axis == "x":
+                    ctr, size = ((x0 + x1) / 2.0, c, z_joist), (run, jw, jd)
+                else:
+                    ctr, size = (c, (y0 + y1) / 2.0, z_joist), (jw, run, jd)
+                sc.add_box(stage, f"{P}/Joist_{k}", ctr, size, M["joist"])
+                n_joist += 1
+            # --- beams + posts ------------------------------------------------
+            npst = max(2, int(round(run / bw["post_pitch"])))
+            for s, cc in ((0, cross_lo + bm), (1, cross_hi - bm)):
+                if axis == "x":
+                    sc.add_box(stage, f"{P}/Beam_{s}",
+                               ((x0 + x1) / 2.0, cc, z_beam), (run, bm, bm),
+                               M["deck_post"])
+                else:
+                    sc.add_box(stage, f"{P}/Beam_{s}",
+                               (cc, (y0 + y1) / 2.0, z_beam), (bm, run, bm),
+                               M["deck_post"])
+                for k in range(npst + 1):
+                    c = lo + run * k / float(npst)
+                    px, py = (c, cc) if axis == "x" else (cc, c)
+                    hpost = z_beam - bm / 2.0 + 0.30      # 0.30 m into grade
+                    sc.add_box(stage, f"{P}/Post_{s}_{k}",
+                               (px, py, (z_beam - bm / 2.0) - hpost / 2.0),
+                               (po, po, hpost), M["deck_post"], collider=True)
+                    n_post += 1
+            # --- rim board on the two free edges -------------------------------
+            for s, cc in ((0, cross_lo + rw / 2.0), (1, cross_hi - rw / 2.0)):
+                if axis == "x":
+                    ctr, size = ((x0 + x1) / 2.0, cc, tz - rd / 2.0), (run, rw, rd)
+                else:
+                    ctr, size = (cc, (y0 + y1) / 2.0, tz - rd / 2.0), (rw, run, rd)
+                sc.add_box(stage, f"{P}/Rim_{s}", ctr, size, M["joist"])
+        print(f"[보드워크] 지그재그 3구간 2회 꺾임 · 널 {n_plank} · 장선 {n_joist} "
+              f"· 기둥 {n_post} · 상면 z {tz:.3f}(불변)")
+
+    # -------------------------------------------------------------------
+    # [W3 S09 · rows (1)(2)] terraced beds + dry-stone 자연석 retaining walls
+    # -------------------------------------------------------------------
+    def _drystone_face(M, path, ax, const, lo, hi, z0, z1, seed):
+        """One coursed dry-stone face. `ax` is the face normal ('+x','-x','+y','-y'); the face
+        plane sits at `const` and the wall runs from `lo` to `hi` along the other horizontal axis.
+
+        Courses are laid bottom-up. Within a course the block lengths are drawn from
+        [block_lo, block_hi] so **no vertical joint continues** into the course above — that
+        discontinuity is the single cue that separates 자연석 건식쌓기 from a block wall. Each
+        block's **depth** is drawn from `depth +- depth_var` with its bedding face pinned to the
+        wall plane (size variation, not placement jitter — see the LINT-10 adjudication in
+        `PARAMS["drystone"]`), and the whole face leans back with the dry-laid `batter` (1:6), so
+        the courses catch light one at a time instead of reading as one flat plane.
+        Blocks are dressing (`collider=False`) — the bed core behind them carries the collision.
+        """
+        ds = PARAMS["drystone"]
+        rs = np.random.RandomState(int(seed) & 0x7FFFFFFF)
+        sgn = 1.0 if ax in ("+x", "+y") else -1.0
+        along_x = ax in ("+y", "-y")
+        ch = ds["course_h"]
+        nc = max(1, int(round((z1 - z0) / ch)))
+        ch = (z1 - z0) / nc
+        n = 0
+        for c in range(nc):
+            zc = z0 + (c + 0.5) * ch
+            # batter: each course above the base steps back from the face plane
+            back = ds["batter"] * (zc - z0)
+            u = lo
+            k = 0
+            while u < hi - 0.05:
+                L = float(rs.uniform(ds["block_lo"], ds["block_hi"]))
+                L = min(L, hi - u)
+                d = ds["depth"] + float(rs.uniform(-ds["depth_var"],
+                                                    ds["depth_var"]))
+                cu = u + L / 2.0
+                cf = const - sgn * (back + d / 2.0)
+                if along_x:
+                    ctr = (cu, cf, zc)
+                    size = (max(L - ds["gap"], 0.08), d, ch - ds["gap"])
+                else:
+                    ctr = (cf, cu, zc)
+                    size = (d, max(L - ds["gap"], 0.08), ch - ds["gap"])
+                sc.add_box(stage, f"{path}/C{c}_{k}", ctr, size, M["drystone"])
+                u += L
+                k += 1
+                n += 1
+        # coping course (갓돌) — one continuous flatter band that reads as the wall head
+        back = ds["batter"] * (z1 - z0)
+        d = 0.30
+        cf = const - sgn * (back + d / 2.0)
+        if along_x:
+            ctr = ((lo + hi) / 2.0, cf, z1 + ds["cap_h"] / 2.0)
+            size = (hi - lo, d, ds["cap_h"])
+        else:
+            ctr = (cf, (lo + hi) / 2.0, z1 + ds["cap_h"] / 2.0)
+            size = (d, hi - lo, ds["cap_h"])
+        sc.add_box(stage, f"{path}/Cap", ctr, size, M["drystone_cap"])
+        return n + 1
+
+    def _tag_seed(tag):
+        """Stable per-bed seed offset. **Not `hash()`** — CPython randomises `hash(str)` per
+        process (PEP 456 / `PYTHONHASHSEED`), so seeding a wall off it would make the scene
+        emit a different stone layout on every run and break the prim-hash reproducibility
+        `geom_invariance_check` and every regression baseline depend on. Caught here before it
+        shipped; the sum of code points is deterministic for all time."""
+        return sum(ord(c) for c in str(tag)) % 89
+
+    def _bed_at(tag):
+        for b in PARAMS["beds"]:
+            if b["tag"] == tag:
+                return b
+        return None
+
+    def _bed_top_at(x, y, default=0.0):
+        """Soil-surface z at (x, y) if it falls inside a terraced bed, else `default`.
+        The beds do not overlap, so the first hit is the answer."""
+        for b in PARAMS["beds"]:
+            if b["x0"] <= x <= b["x1"] and b["y0"] <= y <= b["y1"]:
+                return float(b["top"]) - 0.12          # soil_drop
+        return float(default)
+
+    def build_beds(M):
+        """[W3 S09 · rows (1)(2)] The terraced planting beds — G9's left half.
+
+        Each bed is one solid core (the planting mass, collider — this is what a body collides
+        with) plus a coursed dry-stone facing on its **exposed** faces only. Which faces are
+        exposed is declared per bed rather than derived, because the derivation would be wrong:
+        B2 stands behind B1, so B2's +X face is exposed **only above B1's top** — the facing is
+        cut to that band and no block is built where nothing can see it.
+        The soil surface sits `soil_drop` below the wall head so the bed reads as a container
+        holding a mass, not as a slab with plants glued on top.
+        """
+        ds = PARAMS["drystone"]
+        soil_drop = 0.12
+        tops = {b["tag"]: b["top"] for b in PARAMS["beds"]}
+        n_block = 0
+        for b in PARAMS["beds"]:
+            B = f"{ROOT}/Bed_{b['tag']}"
+            top = float(b["top"])
+            # core: the retained planting mass. Top face `soil_drop` below the wall head.
+            sc.add_box(stage, f"{B}/Core",
+                       ((b["x0"] + b["x1"]) / 2.0, (b["y0"] + b["y1"]) / 2.0,
+                        (top - soil_drop) / 2.0),
+                       (b["x1"] - b["x0"], b["y1"] - b["y0"], top - soil_drop),
+                       M["grass"], collider=True)
+            for fi, face in enumerate(b["faces"]):
+                # the exposed band: from the top of whatever stands in front, to this wall head
+                z0 = 0.0
+                if face == "+x":
+                    front = [t for tg, t in tops.items()
+                             if tg != b["tag"] and t < top]
+                    # a bed directly in front (larger x0, same y band) hides the lower part
+                    for ob in PARAMS["beds"]:
+                        if (ob["tag"] != b["tag"] and ob["x0"] >= b["x1"] - 1e-6
+                                and not (ob["y1"] <= b["y0"] or ob["y0"] >= b["y1"])):
+                            z0 = max(z0, ob["top"])
+                    _ = front
+                    n_block += _drystone_face(
+                        M, f"{B}/Wall{fi}", "+x", b["x1"], b["y0"], b["y1"],
+                        z0, top, ds["seed"] + 7 * fi + _tag_seed(b["tag"]))
+                else:
+                    const = b["y0"] if face == "-y" else b["y1"]
+                    n_block += _drystone_face(
+                        M, f"{B}/Wall{fi}", face, const, b["x0"], b["x1"],
+                        0.0, top, ds["seed"] + 11 * fi + _tag_seed(b["tag"]))
+        print(f"[화단] 계단식 {len(PARAMS['beds'])}단 · 자연석 블록 {n_block}")
+        return n_block
+
+    def build_bed_planting():
+        """[W3 S09 · row (2)] Massed ground cover, **one species per bed**.
+
+        `pool=[<one asset>]` makes the bed monospecific *by construction*: `place_shrubs` filters
+        `VEG_SHRUBS` by the pool and then draws one row for the whole bed (K4(b) · S-2), so a
+        one-member pool removes the draw entirely and the record is exact. The species come from
+        `season_audit()`'s measured verdicts.
+        Points are an irregular lattice — a jittered grid at ~0.9 m, then culled to `n` — because
+        a planting bed is planted on a spacing, not scattered, but never on a visible grid.
+        """
+        placed = 0
+        soil_drop = 0.12
+        for b in PARAMS["beds"]:
+            rs = np.random.RandomState(int(b["seed"]))
+            x0, y0 = b["x0"] + 0.55, b["y0"] + 0.55
+            x1, y1 = b["x1"] - 0.55, b["y1"] - 0.55
+            nx = max(1, int(round((x1 - x0) / 0.95)) + 1)
+            ny = max(1, int(round((y1 - y0) / 0.95)) + 1)
+            pts = []
+            for i in range(nx):
+                for j in range(ny):
+                    px = x0 + (x1 - x0) * i / max(nx - 1, 1)
+                    py = y0 + (y1 - y0) * j / max(ny - 1, 1)
+                    pts.append((px + float(rs.uniform(-0.26, 0.26)),
+                                py + float(rs.uniform(-0.26, 0.26)),
+                                float(b["top"]) - soil_drop))
+            rs.shuffle(pts)
+            pts = pts[:int(b["n"])]
+            placed += sc.place_shrubs(
+                stage, f"{ROOT}/Bed_{b['tag']}/Mass", pts, float(b["h"]),
+                pool=[b["species"]], seed=int(b["seed"]), tag="Sh")
+        print(f"[화단 군식] 관목 {placed}본 · 화단당 1종(pool 1개 = 구조적 단일종)")
+        return placed
+
+    def build_bed_features():
+        """[W3 S09] G9's root/stump feature and the boulders in the beds, through the **T4b
+        wrapper** — `treatment="mtlxoff"` + `instanceable=True`. This is the only route that
+        combines instancing with a working material on `rock_moss_set_01`: the asset binds a
+        MaterialX material whose `ND_normalmap_float` is missing from this runtime's Sdr registry
+        (**MD-F3**), and a scene-side bind cannot reach inside a prototype (`w3_t4b_v1.md` §1.2).
+        Failure is non-fatal: an unprocured urban tree must not cost the scene its beds."""
+        try:
+            import urban_kit as uk
+        except Exception as e:
+            print(f"[urban][경고] urban_kit 로드 실패 — 화단 특징물 생략: {e}")
+            return 0
+        soil_drop = 0.12
+        n = 0
+        for i, (aid, tag, u, v, th, yaw) in enumerate(PARAMS["bed_features"]):
+            b = _bed_at(tag)
+            if b is None:
+                continue
+            px = b["x0"] + (b["x1"] - b["x0"]) * float(u)
+            py = b["y0"] + (b["y1"] - b["y0"]) * float(v)
+            pz = float(b["top"]) - soil_drop
+            try:
+                # `z_mode="base"` + a 0.10 m bed. Measured live on this run, the default
+                #   `grade` mode buries these rows: `tree_stump_01` carries **38.9 %** of its
+                #   triangles below its own origin (zmin −0.193 m) and `rock_moss_set_01`
+                #   **52.4 %** (zmin −0.661 m) — urban_kit prints both warnings and tells the
+                #   caller exactly this. A boulder set in a planting bed is bedded a hand's
+                #   depth, not sunk to its waist, and G9's root feature sits **on** its moss bed.
+                uk.add_urban_asset(stage, f"{ROOT}/Bed_{tag}/Feat_{i}", aid,
+                                   pos_m=(px, py, pz - 0.10), yaw_deg=float(yaw),
+                                   target_h=float(th), scene="09", z_mode="base",
+                                   instanceable=True, treatment="mtlxoff")
+                n += 1
+            except Exception as e:
+                print(f"[urban][경고] {aid} 배치 실패({tag}): {e}")
+        print(f"[화단 특징물] 그루터기/이끼바위 {n}점 (T4b mtlxoff 래퍼 · instanceable)")
+        return n
+
+    def build_far_hills(M):
+        """[W3 S09 · row (6)] The autumn hillside belt that replaces the 2 building silhouettes.
+
+        Each ridge is a low body box plus a row of overlapping flattened ellipsoids — the same
+        device `sc.build_hedge`'s crown uses, at landscape scale. Deterministic per ridge.
+        `horizon_selfcheck()` asserts these close the horizon at least as high as the boxes did.
+        """
+        hp = PARAMS["hill"]
+        _steps, _bz, _zb, water_z, _bh = compute_steps()
+        fb = PARAMS["far_bank"]
+        base = water_z + fb["above_water"]
+        tone_mtl = (M["hill_a"], M["hill_b"], M["hill_c"])
+        for i, h in enumerate(PARAMS["far_hills"]):
+            mtl = tone_mtl[int(h["tone"]) % 3]
+            body_h = h["h"] * 0.55
+            sc.add_box(stage, f"{ROOT}/Hill_{i}/Body",
+                       (h["cx"], h["cy"], base + body_h / 2.0),
+                       (h["sx"], h["sy"], body_h), mtl)
+            rs = np.random.RandomState(int(hp["seed"]) + 13 * i)
+            nb = int(hp["blobs"])
+            for k in range(nb):
+                t = (k + 0.5) / nb
+                by = h["cy"] - h["sy"] / 2.0 + h["sy"] * t
+                bx = h["cx"] + float(rs.uniform(-1.0, 1.0)) * h["sx"] * 0.18
+                # ridge profile: full height at the centre, tapering to the ends
+                prof = 0.55 + 0.45 * math.sin(math.pi * t)
+                rz = h["h"] * hp["blob_r"] * prof * float(rs.uniform(0.86, 1.14))
+                rx = h["sx"] * hp["spread"] * 0.5 * float(rs.uniform(0.82, 1.18))
+                ry = h["sy"] / nb * 0.95 * float(rs.uniform(0.88, 1.22))
+                sc.add_sphere(stage, f"{ROOT}/Hill_{i}/Crown_{k}",
+                              (bx, by, base + body_h * 0.82 + rz * 0.34),
+                              (rx, ry, rz), mtl)
+
+    def build_lilies(M):
+        """[W3 S09] Lily pads / floating leaf rafts on the still water — G9's right half.
+        Thin n-gon discs at the water surface, |y| >= 7.4 so they are nowhere near the flight."""
+        lp = PARAMS["lily"]
+        n = 0
+        for ci, (cx, cy, cnt, rlo, rhi, seed) in enumerate(PARAMS["lilies"]):
+            rs = np.random.RandomState(int(seed))
+            for k in range(int(cnt)):
+                dx = float(rs.uniform(-lp["spread"], lp["spread"]))
+                dy = float(rs.uniform(-lp["spread"], lp["spread"]))
+                r = float(rs.uniform(rlo, rhi))
+                sc.add_disc(stage, f"{ROOT}/Lily_{ci}_{k}",
+                            (cx + dx, cy + dy, water_z + lp["t"] / 2.0), r,
+                            lp["t"], M["lily"], seg=9)
+                n += 1
+        print(f"[수생] 수련 잎 {n}장 (수면 z {water_z:.3f})")
 
     def build_reeds(M):
         """[v5 adopted] Reed stands — near the waterline (embankment, outside the stair width y±5) and on the far bank.
@@ -1496,30 +2415,75 @@ def main():
                 hh = float(rs.uniform(rd["h_lo"], rd["h_hi"]))
                 a = float(rs.uniform(0.0, 360.0))
                 t = rd["tilt"]
+                ry = t * math.cos(math.radians(a))
+                rx = t * math.sin(math.radians(a))
                 sc.add_cylinder(
                     stage, f"{ROOT}/Reed_{ci}_{k}",
                     (cx + dx, cy + dy, gz + hh / 2.0), rd["r"], hh, M["reed"],
-                    rotY=t * math.cos(math.radians(a)),
-                    rotX=t * math.sin(math.radians(a)))
+                    rotY=ry, rotX=rx)
+                # [W3 S09 · R09-1] the buff seed head. An autumn 갈대 bed is read by its
+                #   plumes, not by its culms; without them a straw-tinted stem row just
+                #   looks like dead grass. Seated at the culm top and following its tilt —
+                #   `add_cylinder` rotates about the prim centre, so the top of a stem tilted
+                #   by (rx, ry) has moved, and the plume centre is placed on that same axis.
+                ph = rd["plume_h"]
+                d_up = hh / 2.0 + ph / 2.0
+                sr, sy_ = math.radians(ry), math.radians(rx)
+                sc.add_cylinder(
+                    stage, f"{ROOT}/ReedPlume_{ci}_{k}",
+                    (cx + dx + d_up * math.sin(sr),
+                     cy + dy - d_up * math.sin(sy_),
+                     gz + hh / 2.0 + d_up * math.cos(sr) * math.cos(sy_)),
+                    rd["r"] * rd["plume_r_mul"], ph, M["reed_plume"],
+                    rotY=ry, rotX=rx)
 
     def build_signs():
-        """[v5 shared layer] Korean sign (sc.build_sign). The coordinate checks are in the PARAMS comments."""
-        back = sc.make_pbr(stage, "/World/Looks/SignBack",
+        """[v5 shared layer / W3 S09] Korean information **lectern** (안내 거치대).
+
+        G9 carries exactly one, and it is a lectern, not a post-and-panel sign: a raked panel on
+        a low plinth, read from above by someone standing at it. `sc.build_sign` builds the
+        post-and-panel form, so the lectern is assembled here from the same panel material —
+        plinth (a stone body on two legs) + a `rotX`-raked panel at `panel_tilt` — and the panel
+        texture role is unchanged, so nothing downstream of `sign_info` moves.
+        """
+        lc = PARAMS["lectern"]
+        body = sc.make_pbr(stage, "/World/Looks/LecternBody",
                            diffuse_color=(0.16, 0.17, 0.18),
                            metallic=0.6, roughness_const=0.5)
         for tag, key, cx, cy, bz, yaw, w, h in PARAMS["signs"]:
             panel = sc.make_pbr(stage, f"/World/Looks/Sign{tag}",
                                 diff=sc.tex_path(key, "diff"), uv_mode=True,
                                 roughness_const=0.6)
-            sc.build_sign(stage, f"{ROOT}/Sign_{tag}", cx, cy, bz, yaw, panel,
-                          w=w, h=h, back_mtl=back)
+            P = f"{ROOT}/Sign_{tag}"
+            px, py, pz = lc["plinth"]
+            grp = sc.build_rot_group(stage, P, (cx, cy), yaw)
+            # two legs + the plinth head
+            for s, dy in (("L", -py * 0.62), ("R", py * 0.62)):
+                sc.add_cylinder(stage, f"{grp}/Leg_{s}",
+                                (cx, cy + dy, bz + (pz - 0.10) / 2.0),
+                                lc["leg_r"], pz - 0.10, body, collider=True)
+            sc.add_box(stage, f"{grp}/Head",
+                       (cx, cy, bz + pz - 0.05), (px, w + 0.10, 0.10), body)
+            # The raked panel. `_oriented_box` applies scale -> rotX -> rotZ -> translate, so the
+            #   box is authored **standing** (X = width, Y = thickness, Z = height) and rotX
+            #   `panel_tilt` leans its top back by that angle from vertical. Its centre is lifted
+            #   by half the *projected* height so the panel foot sits on the plinth head.
+            tilt = float(lc["panel_tilt"])
+            hh = float(h)
+            sc._oriented_box(
+                stage, f"{grp}/Panel",
+                (cx, cy, bz + pz + hh * math.cos(math.radians(tilt)) / 2.0),
+                (float(w), lc["panel_t"], hh), panel, rotx=tilt)
 
     def build_dressing(M):
-        """[v5 adopted / v6 rework] Lake park dressing — 8 waterfront boundary piles +
-        **1 timber samojeong** + 4 landing stone posts + 4 benches + **1 duck boat (curved)** +
-        boardwalk + **2 lawn bands + 10 street trees** + 10 reed stands.
+        """[v5 adopted / v6 rework / W3 S09] Lake park dressing — 6 waterfront boundary piles +
+        **1 timber samojeong** + 4 terrace stone posts + 4 benches + **1 duck boat (curved)** +
+        **5 terraced beds in dry-stone 자연석** + **a zigzag timber boardwalk** + 2 lawn bands +
+        10 street trees + 10 reed stands with plumes + 4 lily rafts.
         [v6 §6 emptying] the 2 planters are deleted — the street trees on the lawn bands take over that role.
-        All outside the stair width (y±5) or on the terrace → hazard geometry unchanged."""
+        All outside the stair width (y±5) or on the terrace → hazard geometry unchanged, and
+        every element **W3 S09** adds is additionally asserted outside the ±30° FOV of all nine
+        grid presets by `fov_selfcheck()`."""
         r = PARAMS["mooring_r"]
         h = PARAMS["mooring_h"]
         # [v5] mooring bollard → boundary pile (scaled down): marks the stair-head waterfront boundary
@@ -1533,9 +2497,13 @@ def main():
                             (m["cx"], m["cy"], h + 0.04 / 2.0), r * 1.2, 0.04,
                             M["post"])
         build_pavilion(M)
+        build_beds(M)                        # [W3 S09 (1)] 자연석 계단식 화단 — G9's left half
         build_lawns(M)                       # [v6 (3)] lawn bands + street trees
-        build_deck(M)
+        build_deck(M)                        # [W3 S09 (3)] zigzag boardwalk
+        build_bed_planting()                 # [W3 S09 (2)] one species per bed
+        build_bed_features()                 # [W3 S09] stump / moss boulders via T4b wrapper
         build_reeds(M)
+        build_lilies(M)                      # [W3 S09] lily pads on the still water
         # 4 stone posts on the terrace promenade edge.
         #   [W3 CB-1 · S09-C] was: two per landing at the landing x centre, standing on
         #   the revetment at the landing top z. Now: one line at x = -0.80, z base 0.0,
@@ -1636,6 +2604,14 @@ def main():
         # [v7] roof mesh normals + §4 albedo cap self-check (no render)
         roof_normal_selfcheck()
         albedo_selfcheck()
+        # [W3 S09] season / FOV / horizon gates, in the smoke run too — the S1–S8 obligation
+        #   (spec §6.2) is that the scene's own self-check passes **after** the edit.
+        _s_ok, _ = season_audit()
+        _f_ok, _ = fov_selfcheck()
+        _h_ok, _ = horizon_selfcheck()
+        print(f"[W3 S09] 계절 {'OK' if _s_ok else 'FAIL'} · "
+              f"FOV 배제 {'OK' if _f_ok else 'FAIL'} · "
+              f"지평 폐합 {'OK' if _h_ok else 'FAIL'}")
         # binding check right after assembly — follow-up to judgment §6 (2) ("if it is still bright, check the binding")
         rp = stage.GetPrimAtPath(f"{ROOT}/Pavilion/Roof")
         fp = stage.GetPrimAtPath(f"{ROOT}/Pavilion/Finial")
@@ -1661,14 +2637,34 @@ def main():
             shp = stage.GetPrimAtPath("/World/Looks/PavRoof/Shader")
             sh = UsdShade.Shader(shp)
             got = {}
-            for nm in ("diffuse_color_constant", "reflection_roughness_constant",
-                       "specular_level", "metallic_constant"):
-                i = sh.GetInput(nm)
-                got[nm] = i.Get() if i else "(미지정=MDL 기본값)"
-            print("  PavRoof MDL 입력 실측:")
+            # [W3 S09 · S09-F2] **the v8 probe was reading the wrong input names.** With
+            #   `NEGOBS_LOOK_V1=1` (i.e. `LOOK_MTL` on — the channel every judged round uses),
+            #   `sc.make_pbr` routes a constant-colour material in a `_CONST_MDL_CLASSES` role
+            #   through `_make_ground_pbr` (`scene_common.py:1295-1319`), and that factory names
+            #   its inputs **`..._a`** (`:1551` `specular_level_a`, `:1520` `base_color_a`). The
+            #   v8 probe asked for `specular_level` / `diffuse_color_constant` only, so under the
+            #   judged channel it reported **all four inputs "(미지정)" and printed a false FAIL**
+            #   on a material that is correctly set — including `diffuse_color_constant`, which is
+            #   demonstrably authored. Measured this session, not inferred. The probe now asks for
+            #   both spellings and reports which factory actually built the material.
+            _PAIRS = (("diffuse_color_constant", "base_color_a"),
+                      ("reflection_roughness_constant", "roughness_a"),
+                      ("specular_level", "specular_level_a"),
+                      ("metallic_constant", "metallic_a"))
+            route = "make_pbr(OmniPBR 직결)"
+            for a, b in _PAIRS:
+                ia, ib = sh.GetInput(a), sh.GetInput(b)
+                if ia is not None and ia.Get() is not None:
+                    got[a] = ia.Get()
+                elif ib is not None and ib.Get() is not None:
+                    got[b] = ib.Get()
+                    route = "_make_ground_pbr(const-MDL 경유)"
+                else:
+                    got[a] = "(미지정=MDL 기본값)"
+            print(f"  PavRoof MDL 입력 실측  ·  경로 {route}:")
             for nm, val in got.items():
                 print(f"    {nm:32s} {val}")
-            sl = got["specular_level"]
+            sl = got.get("specular_level", got.get("specular_level_a"))
             print(f"  ⇒ specular_level {'OK(0.0 명시)' if sl == 0.0 else 'FAIL'}"
                   f" — 미지정이면 OmniPBR 기본 0.5(F0 0.04)가 살아 "
                   f"roughness {mp['roof_tile_rough']} 광로브로 천공/태양을 가산한다")

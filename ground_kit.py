@@ -3581,7 +3581,23 @@ SCENE_PLANS = {
                   sites=dict(manhole=[(-2.40, 1.60)],
                              gully=[(-1.75, -3.40), (-1.75, 3.40)],
                              patch=[(-1.25, 0.20), (-3.60, -0.30), (-8.60, 0.40)])),
-    "scene09": _S("plaza_water", (-12.0, -6.0, -0.5, 6.0), edges=_E0),
+    # 09 - (v1.5, fixture drift) `gt_changes_w3.md` §7 **W9** / `w3_mb_patch_v1.md` **MB-F2**.
+    #   The fixture carried no `overrides` at all while `scene09_ghat_riverfront.py:ground_plan()`
+    #   passes `surface=(("patch", 5), ("crack", 4), ("stain", ("water",)))` and `extras=()`, so a
+    #   census taken from this file alone could not see the override - which is exactly how GT-24
+    #   came to declare `plaza_water` reachable when it was not (**MB-F1**). Now mirrors the wired
+    #   call's `surface` / `extras`, in its **post-W3-S09 form**: the scene deleted its own
+    #   `("patch", 5)` row in the same commit (a waterfront terrace has no repair cause -
+    #   `w3_intake_v2_images.md` §3(ii)'s ruling for this profile, landed where it could reach).
+    #   **Deliberately NOT synced here, stated rather than left to be discovered**: the fixture's
+    #   `region` / `edges` still differ from the wired call ((-12,-6,-0.5,6) + `_E0` vs
+    #   (-12,-5,-0.80,5) + `("stair_head", 0.0)`), and the wired `pave` step override (1.80 m) is
+    #   not mirrored. Both move the dry-run joint count, which is a different declaration with its
+    #   own prim number; W9 routes the five-fixture repair to Lane-1 / `ground_kit`, and this lane
+    #   syncs **only its own scene's `surface` / `extras`**, which is what its dispatch authorises.
+    "scene09": _S("plaza_water", (-12.0, -6.0, -0.5, 6.0), edges=_E0,
+                  overrides=dict(surface=(("crack", 4), ("stain", ("water",))),
+                                 extras=())),
     "scene10": _S("deck_trail_hybrid", (-12.0, -0.85, -1.5, 0.85), edges=_E0,
                   extras_args=dict(deck_planks=dict(region=(-1.5, -1.4, 0.0, 1.4)),
                                    edge_break=dict(lines=[-0.85, 0.85]))),

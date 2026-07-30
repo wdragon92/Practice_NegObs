@@ -943,13 +943,27 @@ def _bind_mtl(prim, mtl):
         UsdShade.MaterialBindingAPI.Apply(prim).Bind(mtl)
 
 
-def add_box(stage, path, center, size, mtl=None, collider=False):
+def add_box(stage, path, center, size, mtl=None, collider=False, rotZ=0.0):
+    """Axis-aligned box. `rotZ` (deg, +Z) spins it about its own centre.
+
+    [W3 K-micro · S06-F1 / S08-F1] `rotZ` exists so a template that lays a run
+    along a **polyline** can honour that polyline's bearing without wrapping every
+    element in a `build_rot_group` (an extra Xform prim per element, which moves
+    prim budgets). The op is authored **only when it is non-zero**, and it is
+    inserted between the translate and the scale so the applied order is
+    `scale -> rotZ -> translate` (USD applies xformOps in reverse list order -
+    the same convention `build_rot_group` documents). With `rotZ=0.0` the prim is
+    byte-identical to the pre-K-micro one, which is what makes this a
+    zero-geometry-change addition for all 33 wired scenes.
+    """
     from pxr import UsdGeom, UsdPhysics, Gf
     cube = UsdGeom.Cube.Define(stage, path)
     cube.CreateSizeAttr(2.0)
     cube.CreateExtentAttr([Gf.Vec3f(-1, -1, -1), Gf.Vec3f(1, 1, 1)])
     xf = UsdGeom.Xformable(cube)
     xf.AddTranslateOp().Set(Gf.Vec3d(*[float(c) for c in center]))
+    if abs(float(rotZ)) > 1e-9:
+        xf.AddRotateZOp().Set(float(rotZ))
     xf.AddScaleOp().Set(Gf.Vec3f(float(size[0]) / 2.0,
                                  float(size[1]) / 2.0,
                                  float(size[2]) / 2.0))
@@ -960,7 +974,12 @@ def add_box(stage, path, center, size, mtl=None, collider=False):
     # [realism v1] Cover large horizontal ground slabs with a micro-relief skin.
     # In Phase1 E9 **vertex displacement was the largest visual contributor** (bigger than the MDL swap).
     # The slab itself is untouched, so the drop edge silhouette is unchanged (approval condition (2)).
-    if LOOK_GEO and _skin_wanted(path, size, mtl):    # A new mesh = geometry
+    # `_ground_skin` authors an **axis-aligned** relief patch from (center, size);
+    # it has no rotation input, so a spun slab would get an unspun skin sticking out
+    # past its corners. A rotated box is never a ground slab in this library (it is a
+    # railing panel or a bearing-laid element), so the skin is simply declined.
+    if LOOK_GEO and abs(float(rotZ)) <= 1e-9 \
+            and _skin_wanted(path, size, mtl):        # A new mesh = geometry
         try:
             # The seed **must be deterministic**. Python's builtin hash() is randomised per process by
             # PYTHONHASHSEED, which would change the terrain relief on every render (this project's rule is
@@ -1140,7 +1159,17 @@ _SKIN_DENY = ("stair", "step", "tread", "riser", "nosing", "curb", "ramp",
 
 
 def add_cylinder(stage, path, center, radius, height, mtl=None,
-                 rotY=0.0, rotX=0.0, collider=False):
+                 rotY=0.0, rotX=0.0, collider=False, rotZ=0.0):
+    """Z-axis cylinder. `rotZ` (deg, +Z) is applied **after** `rotY`/`rotX`.
+
+    [W3 K-micro · S06-F1 / S08-F1] The op order in the list is
+    `[translate, rotZ, rotY, rotX]`, and USD applies xformOps in **reverse** list
+    order, so the actual sequence is `rotX -> rotY -> rotZ -> translate`. That is
+    the order a bearing-laid tube needs: `rotY=90` lays the cylinder's local Z
+    along world +X, and `rotZ` then swings that lying tube onto the polyline's
+    bearing. Authored only when non-zero, so every existing call site is
+    byte-identical.
+    """
     from pxr import UsdGeom, UsdPhysics, Gf
     cyl = UsdGeom.Cylinder.Define(stage, path)
     cyl.CreateRadiusAttr(float(radius))
@@ -1149,6 +1178,8 @@ def add_cylinder(stage, path, center, radius, height, mtl=None,
     xf = UsdGeom.Xformable(cyl)
     # Order: translate -> rotate (rotate about the prim origin, then move)
     xf.AddTranslateOp().Set(Gf.Vec3d(*[float(c) for c in center]))
+    if abs(float(rotZ)) > 1e-9:
+        xf.AddRotateZOp().Set(float(rotZ))
     if abs(rotY) > 1e-9:
         xf.AddRotateYOp().Set(float(rotY))
     if abs(rotX) > 1e-9:

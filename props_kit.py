@@ -614,9 +614,24 @@ def build_nosing_tier(stage, prefix, steps, y0, y1, tier="retrofit_strip",
 # 11. G6 · bronze horizontal-tube railing
 # ===========================================================================
 
+def _seg_bearing(a, b, bearing):
+    """Bearing [deg, +Z] to lay a run along segment `a`->`b`.
+
+    [W3 K-micro · S06-F1 / S08-F1] `bearing="auto"` (the default) takes the
+    segment's own bearing, which is what makes a polyline template honour a
+    polyline. A **number** forces that constant bearing on every segment —
+    `bearing=0.0` reproduces the pre-K-micro X-only output exactly, which is the
+    escape hatch for a caller that already spins the whole run in a
+    `build_rot_group` (scene08's chord pattern) and must not have it spun twice.
+    """
+    if bearing != "auto":
+        return float(bearing)
+    return math.degrees(math.atan2(b[1] - a[1], b[0] - a[0]))
+
+
 def build_tube_railing(stage, prefix, pts, gz_fn, mtl, rails=4, rail_h=1.10,
                        tube_r=0.024, post_r=0.030, post_pitch=1.80,
-                       bottom=0.12):
+                       bottom=0.12, bearing="auto"):
     """G6: **bronze horizontal tube railing**, 3-4 rails, on a polyline.
 
     The image the wave is matching (G6, scene06) shows the helix and the deck both guarded
@@ -631,6 +646,14 @@ def build_tube_railing(stage, prefix, pts, gz_fn, mtl, rails=4, rail_h=1.10,
     the reference value; with 4 rails over 1.10 m the largest clear span is
     (1.10 - 0.12) / 3 - 2 * 0.024 = **0.279 m**, i.e. a *deliberately* non-baluster form.
     Do not blend the two: the mixture is what makes a railing read as procedural.
+
+    **`bearing=` [W3 K-micro, fixes S06-F1 / S08-F1].** Every rail used to be laid
+    with `rotY=90.0` alone, i.e. along **+X**, regardless of the polyline: `ang` was
+    computed and then thrown away (`del ang`). A Y-aligned run therefore built rails
+    **crossing** the run instead of following it, silently, and the docstring
+    conceded the axis-aligned case "is the only case shipped". The bearing is now
+    honoured per segment (`bearing="auto"`); pass a number to force a constant
+    bearing, and `bearing=0.0` to reproduce the old X-only output byte for byte.
     """
     made = dict(post=0, rail=0, clear_max=0.0)
     if len(pts) < 2:
@@ -662,13 +685,12 @@ def build_tube_railing(stage, prefix, pts, gz_fn, mtl, rails=4, rail_h=1.10,
         for j, (a, b, L) in enumerate(segs):
             mx, my = (a[0] + b[0]) / 2.0, (a[1] + b[1]) / 2.0
             g = float(gz_fn(mx, my))
-            ang = math.degrees(math.atan2(b[1] - a[1], b[0] - a[0]))
+            ang = _seg_bearing(a, b, bearing)
+            # rotY=90 lays the local Z along +X, rotZ then swings that lying tube
+            # onto the segment's bearing (applied after rotY - see `sc.add_cylinder`).
             sc.add_cylinder(stage, f"{prefix}/Rail_{r}_{j}", (mx, my, g + z_off),
-                            tube_r, L, mtl, rotY=90.0)
-            # rotY=90 lays the Z axis along +X; the bearing is applied by the caller's
-            # frame when the polyline is axis-aligned, which is the only case shipped.
+                            tube_r, L, mtl, rotY=90.0, rotZ=ang)
             made["rail"] += 1
-            del ang
     made["clear_max"] = (rail_h - bottom) / max(1, rails - 1) - 2 * tube_r
     return made
 
@@ -680,7 +702,7 @@ def build_tube_railing(stage, prefix, pts, gz_fn, mtl, rails=4, rail_h=1.10,
 def build_glass_balustrade(stage, prefix, pts, gz_fn, glass_mtl, cap_mtl,
                            shoe_mtl=None, panel_h=1.10, panel_t=0.019,
                            panel_len=1.50, joint=0.012, cap_r=0.025,
-                           shoe_h=0.10):
+                           shoe_h=0.10, bearing="auto"):
     """G8: **structural-glass balustrade** - shoe channel, glass panels, capping rail.
 
     The sunken-plaza image guards its curved stair and its pit edge with glass, which is
@@ -691,11 +713,19 @@ def build_glass_balustrade(stage, prefix, pts, gz_fn, glass_mtl, cap_mtl,
     The panel joints are the whole read - a single continuous glass sheet is the give-away
     of a procedural balustrade. Glass gets `opacity`/roughness from the caller's material;
     this builder only decides the form.
+
+    **`bearing=` [W3 K-micro, fixes S08-F1 / S06-F1].** Panels and shoe were world-axis
+    `add_box` calls and the cap rail a `rotY=90` cylinder, so the whole template was
+    **X-axis-only**: any polyline at a bearing != 0 built panels across the run. The
+    bearing is now honoured per segment (`bearing="auto"`). `bearing=0.0` restores the
+    old X-only output exactly - which is what a caller that already spins the run in a
+    `build_rot_group` (scene08's chords) must pass so the run is not spun twice.
     """
     made = dict(panel=0, shoe=0, cap=0)
     for j, (a, b) in enumerate(zip(pts, pts[1:])):
         L = math.hypot(b[0] - a[0], b[1] - a[1])
         n = max(1, int(round(L / panel_len)))
+        ang = _seg_bearing(a, b, bearing)
         for k in range(n):
             t0, t1 = k / n, (k + 1) / n
             x0, y0 = a[0] + (b[0] - a[0]) * t0, a[1] + (b[1] - a[1]) * t0
@@ -705,17 +735,17 @@ def build_glass_balustrade(stage, prefix, pts, gz_fn, glass_mtl, cap_mtl,
             seg_len = math.hypot(x1 - x0, y1 - y0) - joint
             sc.add_box(stage, f"{prefix}/Panel_{j}_{k}",
                        (mx, my, g + shoe_h + panel_h / 2.0),
-                       (seg_len, panel_t, panel_h), glass_mtl)
+                       (seg_len, panel_t, panel_h), glass_mtl, rotZ=ang)
             made["panel"] += 1
         mx, my = (a[0] + b[0]) / 2.0, (a[1] + b[1]) / 2.0
         g = float(gz_fn(mx, my))
         if shoe_mtl is not None:
             sc.add_box(stage, f"{prefix}/Shoe_{j}", (mx, my, g + shoe_h / 2.0),
-                       (L, panel_t + 0.030, shoe_h), shoe_mtl)
+                       (L, panel_t + 0.030, shoe_h), shoe_mtl, rotZ=ang)
             made["shoe"] += 1
         sc.add_cylinder(stage, f"{prefix}/Cap_{j}",
                         (mx, my, g + shoe_h + panel_h + cap_r * 0.6),
-                        cap_r, L, cap_mtl, rotY=90.0)
+                        cap_r, L, cap_mtl, rotY=90.0, rotZ=ang)
         made["cap"] += 1
     return made
 
@@ -918,15 +948,18 @@ def _selfcheck():
     class _P:                      # minimal recording stub, same shape as the R-4 harness
         def __init__(self):
             self.prims = []
+            self.xf = {}           # path -> rotZ [deg]  (S06-F1/S08-F1 evidence)
 
     rec = _P()
 
-    def _box(stage, path, center, size, mtl=None, collider=False):
+    def _box(stage, path, center, size, mtl=None, collider=False, rotZ=0.0):
         rec.prims.append(path)
+        rec.xf[path] = float(rotZ)
 
     def _cyl(stage, path, center, radius, height, mtl=None, rotY=0.0, rotX=0.0,
-             collider=False):
+             collider=False, rotZ=0.0):
         rec.prims.append(path)
+        rec.xf[path] = float(rotZ)
 
     def _sph(stage, path, center, scale3, mtl=None):
         rec.prims.append(path)
@@ -1035,6 +1068,31 @@ def _selfcheck():
                                    "g", "c", "s")
         ck(r["panel"] == 4 and r["cap"] == 1 and r["shoe"] == 1,
            "G8: 1.5 m panel bays with cap and shoe")
+        # -- S06-F1 / S08-F1: a **Y-aligned** run must follow the polyline ------
+        #    This is the case the two templates used to build wrong in silence:
+        #    every element came out along +X, i.e. crossing the run. The stub
+        #    records `rotZ`, so the bearing is asserted, not described.
+        ck(all(abs(rec.xf[p]) < 1e-9 for p in rec.prims
+               if p.startswith("/G6/Rail_") or p.startswith("/G8/")),
+           "G6/G8: an X-aligned run is still laid at rotZ 0 (no regression)")
+        build_tube_railing(st, "/G6y", [(0, 0), (0, 6)], lambda x, y: 0.0, "m")
+        _ry = [rec.xf[p] for p in rec.prims if p.startswith("/G6y/Rail_")]
+        ck(len(_ry) == 4 and all(abs(v - 90.0) < 1e-9 for v in _ry),
+           f"G6: Y-aligned run lays 4 rails at rotZ 90 (S06-F1) — got {_ry}")
+        build_glass_balustrade(st, "/G8y", [(0, 0), (0, 6)], lambda x, y: 0.0,
+                               "g", "c", "s")
+        _gy = [rec.xf[p] for p in rec.prims if p.startswith("/G8y/")]
+        ck(len(_gy) == 6 and all(abs(v - 90.0) < 1e-9 for v in _gy),
+           f"G8: Y-aligned run lays 4 panels + shoe + cap at rotZ 90 (S08-F1) — got {_gy}")
+        build_tube_railing(st, "/G6x", [(0, 0), (0, 6)], lambda x, y: 0.0, "m",
+                           bearing=0.0)
+        ck(all(abs(rec.xf[p]) < 1e-9 for p in rec.prims
+               if p.startswith("/G6x/")),
+           "G6: `bearing=0.0` reproduces the pre-K-micro X-only output exactly")
+        _diag = build_tube_railing(st, "/G6d", [(0, 0), (3, 3)],
+                                   lambda x, y: 0.0, "m")
+        ck(abs(rec.xf["/G6d/Rail_0_0"] - 45.0) < 1e-9 and _diag["rail"] == 4,
+           "G6: a 45 deg polyline is laid at rotZ 45 (not snapped to an axis)")
         ck(build_gantry_sign(st, "/G13g", 0, -3, 3, 0, 2.2, "p", "n")["post"] == 2,
            "G13: gantry on two posts")
         ck(build_chevron_band(st, "/G13c", 0, 0, 1)["stripe"] == 6, "G13: chevron band")

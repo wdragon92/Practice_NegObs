@@ -50,11 +50,11 @@ low_shop 1, backdrop 10).
 
 | kind        | near (<20 m) | mid (20~40) | far (40~80) | silhouette (>80) |
 |-------------|--------------|-------------|-------------|------------------|
-| `shop_house`| **59** (56)  | **30** (27) | **9** (6)   | 4 (3)            |
+| `shop_house`| **65** (62)  | **38** (35) | **9** (6)   | 4 (3)            |
 | `apt`       | **57** (54)  | **23** (20) | **15** (12) | 4 (4)            |
 | `office`    | **31** (28)  | **15** (12) | **11** (8)  | 4 (3)            |
 | `villa`     | **57** (54)  | **28** (25) | **10** (7)  | 4 (3)            |
-| `low_shop`  | **36** (33)  | **17** (14) | **7** (4)   | 4 (3)            |
+| `low_shop`  | **44** (41)  | **27** (24) | **7** (4)   | 4 (3)            |
 | `backdrop`  | 4 (3)        | 4 (3)       | 4 (3)       | 4 (3)            |
 
 Budget = **measured + 3** (the worst case where the water tank, antenna and
@@ -62,10 +62,53 @@ roof sign all switch on at once, 1 prim each `[measured]`). Only the `backdrop`
 row and the `silhouette` column are exempt and use the **builder's structural
 maximum of 4** (shell 1~2 + parapet 1 + penthouse 1). The table's evidence
 grade is `[estimated]` and its role is not a design target but a **regression
-freeze line** — see the `BUDGET` comment for the full story.
+freeze line** — see the `BUDGET` comment for the full story. The width-dependent
+part of the cap is **not** in the table; it lives in `prim_budget(kind, tier, W)`.
 
 `backdrop` is **distant-silhouette-only** regardless of distance. No windows,
 3~4 prims.
+
+W3 CB-4 (2026-07-31) — B-F1 · B-F2 · B-F3 · BS-4
+------------------------------------------------
+Survey R3 (`Docs/surveys/w3r_building_ab_v1.md`) rendered this module against
+`scene_common.build_building` and against an asset backdrop, and found the mass,
+plinth, attachment and rooftop layers correct but three defects that blocked
+adoption. All four rows are `[ruled 07-30]` W3 spec §4.2 K3.
+
+* **B-F1 — 62 of 62 glazing prims were buried inside the solid shell.** Every
+  window, shopfront and entrance asked `Facade.world` for a *negative* `out`,
+  i.e. it was pushed **into** the mass. `Facade.world`'s own docstring says `out`
+  is "the distance **outward** from the wall face (always positive)".
+  → `Plan.out_at(u0,u1,z0,z1)` now reports the outward face of whatever volume
+  actually covers a facade window, and every `glass`/`sign`/`decal` element sits
+  `fk.WALL_PROUD` = 5 mm proud of it. Three distinct burial mechanisms were
+  present and all three are covered: the plain shell, the **office podium** in
+  front of a set-back tower, and the **protruding apartment core** (a positive
+  `out` of 0.55 was still 30 mm inside the 0.60 core, and the fire-access decal
+  sat **588 mm** inside it).
+* **The new self-check `[11]`** is the reason this row exists at all: the suite
+  was 135/135 green while nothing was visible, because `[5]` counted prims,
+  `[7]` checked `z ≥ base_z − 0.05` and `[8]` checked path uniqueness — **none
+  of them asked whether a facade prim is on the outside of the wall.** `[11]`
+  asserts `out_max > 0` per **material role** against every overlapping mass box,
+  and `[11a]` cross-validates the mass model against the emitted prims so the
+  check cannot be satisfied by a stale model. On the pre-CB-4 tree `[11]` reports
+  **73** burial pairs on the standard grid and **712** over the W × base_z sweep
+  `[measured]`.
+* **B-F2 — the shopfront bay count was a per-tier constant, so `W` was absent
+  from the parameterisation.** A 28 m facade got three butted 8.93 m glazing
+  panels against a real Korean bay of 3.0–4.5 m. → `shopfront_bays(W, tier)`,
+  and `prim_budget` grew a `W` term because a bay costs 2 prims.
+* **B-F3 — `lod_dist` defaulted to `|facade plane|`**, i.e. it assumed the camera
+  sits at the origin. → `judged_eyes()` / `eye_distance()` derive the distance
+  from the real `grid_views` eye set. Opt-in via `eyes=`.
+* **BS-4 — `kind="backdrop"` for out-of-frame buildings.** `facade_in_frame()`
+  applies the spec's ±30° rule to the whole facade segment; a facade no judged
+  eye can see is demoted to the 3-prim silhouette builder.
+
+**Nothing here is wired to a scene.** With `eyes=None` the plan is byte-identical
+to the pre-CB-4 one apart from the glazing offsets, and no scene file imports
+this module yet (integration is BS-2, 24 call sites, a later batch).
 
 Design conventions (same as facade_kit — each has caused a real incident)
 ------------------------------------------------------------------------
@@ -129,6 +172,8 @@ __all__ = [
     "Mtls", "Plan", "KINDS",
     "build_korean_building", "infer_kind", "plan_building", "plan_levels",
     "prim_budget", "BUDGET", "selfcheck",
+    "mass_faces", "shopfront_bays",
+    "judged_eyes", "eye_distance", "facade_in_frame", "should_backdrop",
 ]
 
 KINDS = ("shop_house", "apt", "office", "villa", "low_shop", "backdrop")
@@ -171,6 +216,21 @@ CORE_WIN_W = 0.90      # [estimated] width of the tall narrow stairwell window
 BAY_APT = 9.00         # [knowledge] facade width of one apartment unit, 8~12
 BAY_VILLA = 4.50       # [knowledge] multi-family unit width
 BAY_SHOP = 5.00        # [knowledge] shop frontage 4~6
+
+# --- Shopfront bay derivation (B-F2, survey R3 §5.2) ---------------------
+# The bay count used to be the **constant** 4/3/1 per LOD tier with
+# `bay_w = max(3.0, W/nb)`, i.e. `W` was absent from the parameterisation. On
+# scene20's building C (W = 28 m, mid) that produced three butted glazing panels
+# of **8.93 m** each with no pier `[measured — survey R3 §5.2]`. Real Korean
+# neighbourhood shopfront bays are **3.0–4.5 m**, so the count is now derived
+# from W.
+SHOP_BAY_MIN, SHOP_BAY_MAX = 3.00, 4.50   # [knowledge] Korean shopfront bay band
+SHOP_BAY_TARGET = 3.60                    # survey R3 §5.2's prescribed divisor
+# Prim guard, **not** a design target: the shopfront costs 2 prims per bay, so an
+# unbounded count would walk straight through the budget table. When the cap binds
+# the resulting bay exceeds SHOP_BAY_MAX and `shopfront_bays` says so via
+# `bay_width()`. far / silhouette build no shopfront at all (survey §6 LOD table).
+SHOP_BAY_CAP = {"near": 10, "mid": 8, "far": 0, "silhouette": 0}
 
 # --- Rooftop penthouse (Building Act Enforcement Decree §119 (1)5, 9 — statutory) ---
 PH_AREA_FRAC = 0.125   # statutory: horizontal projection <= 1/8 of building area is
@@ -224,6 +284,22 @@ RESI_FH_MAX = 3.05     # [estimated] upper bound of the residential floor-height
 
 # --- LOD floor-count caps (survey §6 LOD table) --------------------------
 ROW_CAP = {"near": 8, "mid": 5, "far": 2, "silhouette": 0}
+
+# --- Judged-eye set (B-F3 / BS-4, survey R3 §2 · §5.3) -------------------
+# `scene_common.grid_views(gy, heights=(0.3,0.9,1.8), dists=(2,5,10), pitch=-10)`
+# puts the eye at `(-d, gy, h)` looking along **+X**. 21 of the 33 scenes call it
+# as `sc.grid_views(0.0)`; the exceptions pass their own gy `[measured — grep]`,
+# which is why `judged_eyes` takes gy rather than hard-coding 0.
+EYE_HEIGHTS = (0.3, 0.9, 1.8)
+EYE_DISTS = (2.0, 5.0, 10.0)
+EYE_YAW_HALF = 30.0    # deg. **Measured, not a convention**: the capture is
+                       #   1920x1080 (`scene_common.py:852`) and vFOV is 36
+                       #   (`fk.CAM_VFOV`), so the horizontal half-angle is
+                       #   atan(tan(18 deg) * 16/9) = **30.006 deg**. The scenes'
+                       #   own camera checks already write it as +-30
+                       #   (e.g. `scene21:181`). It is the frame **width** test and
+                       #   is deliberately independent of `fk.frame_ceiling`, which
+                       #   is the height test.
 
 
 # ===========================================================================
@@ -309,6 +385,123 @@ def _jit(rng, v, frac=0.08):
 
 def _clamp(v, lo, hi):
     return lo if v < lo else (hi if v > hi else v)
+
+
+# ===========================================================================
+# [1b] B-F2 — shopfront bay count derived from the facade width
+# ===========================================================================
+def shopfront_bays(W, tier):
+    """Number of ground-floor shopfront bays for a facade of width `W`. 0 prims.
+
+    `n = clamp(round(W / SHOP_BAY_TARGET), 1, SHOP_BAY_CAP[tier])` — survey R3
+    §5.2's prescription verbatim. Returns 0 where no shopfront is built.
+
+    The band cannot always be met with an integer split: below W ≈ 7.2 m there is
+    no n with `W/n` inside 3.0–4.5 (W = 5.0 gives 5.00 at n=1 or 2.50 at n=2), and
+    above `cap · SHOP_BAY_MAX` the prim guard binds. Both cases pick the count
+    nearest the band and are reported by `bay_width()` rather than hidden.
+    """
+    cap = int(SHOP_BAY_CAP.get(str(tier), 0))
+    if cap <= 0:
+        return 0
+    w = float(W)
+    if w < 1.5:                                  # `fk.build_shopfront`'s own floor
+        return 0
+    return int(_clamp(round(w / SHOP_BAY_TARGET), 1, cap))
+
+
+def bay_width(W, tier):
+    """Resulting bay width [m], or 0.0 when no shopfront is built. 0 prims."""
+    n = shopfront_bays(W, tier)
+    return (float(W) / n) if n else 0.0
+
+
+# ===========================================================================
+# [1c] B-F3 / BS-4 — the judged eye set, true distance, and the frame test
+# ===========================================================================
+def judged_eyes(gy=0.0, heights=EYE_HEIGHTS, dists=EYE_DISTS):
+    """The judged camera positions as `[(x, y, z), ...]`. 0 prims.
+
+    Mirrors `scene_common.grid_views(gy, heights, dists, pitch=-10)`: eye at
+    `(-d, gy, h)`, view direction **+X**. The pitch is irrelevant here — the
+    horizontal test uses the +X bearing and the vertical test is
+    `fk.frame_ceiling`, which already contains the pitch.
+    """
+    return [(-float(d), float(gy), float(h))
+            for h in heights for d in dists]
+
+
+def _facade_rect(p):
+    """The facade rectangle as `(plane, u0, u1, z0, z1, axis_y)` — the surface a
+    judged eye can actually see. 0 prims."""
+    return (p.plane, p.fac.u0, p.fac.u1, p.base_z, p.top_z, p.axis_y)
+
+
+def eye_distance(p, eyes):
+    """**B-F3.** Shortest distance from any judged eye to the nearest point of the
+    facade rectangle [m]. 0 prims.
+
+    The default `dist` is `abs(facade plane coordinate)`, which assumes the camera
+    sits at the origin and ignores both the eye's standoff and the building's
+    lateral offset. Over the 89 `bd` dicts in the 33 scenes that assigns the
+    **wrong LOD tier to 16 (18.0 %)**, `d_default − d_true` mean −4.4 m, range
+    −49.0 … +10.0 `[measured — survey R3 §2]`. Under-estimating the distance is
+    the expensive direction: it promotes a tier and spends prims off-frame.
+    """
+    plane, u0, u1, z0, z1, axis_y = _facade_rect(p)
+    best = float("inf")
+    for (ex, ey, ez) in eyes:
+        # nearest point of the axis-aligned rectangle to the eye
+        eu, en = (ex, ey) if axis_y else (ey, ex)
+        du = max(u0 - eu, 0.0, eu - u1)
+        dz = max(z0 - ez, 0.0, ez - z1)
+        dn = en - plane
+        d = math.sqrt(du * du + dz * dz + dn * dn)
+        if d < best:
+            best = d
+    return best
+
+
+def facade_in_frame(p, eyes, half_deg=EYE_YAW_HALF):
+    """**BS-4 policy (1).** True when **any** point of the facade falls inside
+    `±half_deg` of **any** judged eye's +X view axis. 0 prims.
+
+    The facade is a segment in plan, so the whole segment is tested, not its
+    centre: a long wall can be out of frame at both ends and still cross the axis.
+    Points behind the eye (x ≤ eye x) never count.
+    """
+    plane, u0, u1, z0, z1, axis_y = _facade_rect(p)
+    lim = math.tan(math.radians(float(half_deg)))
+    # segment endpoints in world (x, y)
+    ends = [(u0, plane), (u1, plane)] if axis_y else [(plane, u0), (plane, u1)]
+    for (ex, ey, _ez) in eyes:
+        fs = []
+        for (px, py) in ends:
+            dx = px - ex
+            if dx <= 1e-9:                       # at or behind the eye plane
+                fs.append(None)
+                continue
+            fs.append((py - ey) / dx)            # tan(bearing)
+        a, b = fs
+        if a is not None and abs(a) <= lim:
+            return True
+        if b is not None and abs(b) <= lim:
+            return True
+        if a is not None and b is not None and (a > lim) != (b > lim) \
+                and (a < -lim) != (b < -lim):
+            return True                          # the segment straddles the axis
+    return False
+
+
+def should_backdrop(p, eyes, half_deg=EYE_YAW_HALF):
+    """**BS-4.** `True` when the building earns no facade geometry at all.
+    0 prims.
+
+    Survey R3 §7.2 measured **4 of 12** buildings in the five repeated-brick
+    scenes to be outside ±30° of every judged eye in every judged cut. A backdrop
+    is 3–4 prims against 6–56, so this row has a **negative** prim cost.
+    """
+    return not facade_in_frame(p, eyes, half_deg)
 
 
 # ===========================================================================
@@ -498,6 +691,12 @@ class Plan:
         "setback", "step_top", "rooftop", "tank", "antenna", "roof_sign",
         "shopfront", "awning", "signs", "balcony", "gas", "downpipe",
         "fire", "ac_mode", "ac_units", "opts",
+        # --- computed, never bd switches -----------------------------------
+        "mass",        # B-F1: solid volumes as (u0, u1, z0, z1, out_face)
+        "n_bays",      # B-F2: shopfront bay count derived from W
+        "d_true",      # B-F3: nearest judged eye -> facade rectangle [m]
+        "z_ceil",      # B-F3: frame ceiling at d_true (backdrop policy (2))
+        "in_frame",    # BS-4: any facade point inside +-30 deg of a judged eye
     )
 
     def __init__(self):
@@ -507,6 +706,29 @@ class Plan:
     def __repr__(self):
         return (f"<Plan {self.kind}/{self.tier} d={self.dist:.0f} "
                 f"W={self.W:.1f} floors={self.floors} rows={self.rows}>")
+
+    # -- B-F1: which surface is actually there at (u, z) --------------------
+    def out_at(self, u0, u1, z0, z1):
+        """Outward face of the **outermost solid volume** covering the facade
+        window `[u0,u1] x [z0,z1]`, in `Facade` `out` units. 0 prims.
+
+        Returns `0.0` (the facade plane) when nothing covers the window, and
+        never less than 0.0: the reference surface for a facade attachment is at
+        worst the plane the `bd` box declares. That floor is what keeps a
+        set-back tower (`out = -1.20`) or a roof penthouse (`out ≈ -4`) from
+        dragging an attachment *backwards* into the building.
+
+        This is the single mechanism behind B-F1. Every `glass` / `sign` /
+        `decal` placement asks it where the wall is instead of assuming the
+        facade plane, which is why `selfcheck [11]` is green **by construction**
+        rather than by per-site tuning.
+        """
+        o = 0.0
+        for (a0, a1, b0, b1, face) in (self.mass or ()):
+            if min(u1, a1) - max(u0, a0) > 1e-9 \
+                    and min(z1, b1) - max(z0, b0) > 1e-9 and face > o:
+                o = face
+        return o
 
 
 # **Plan switches** that may be read straight out of the `bd` dictionary. Only
@@ -535,17 +757,30 @@ def _bd_plane(bd, axis_y):
     return float(bd["x1"] if fd > 0 else bd["x0"])
 
 
-def plan_building(bd, dist=None, kind=None, seed=None, **over):
+def plan_building(bd, dist=None, kind=None, seed=None, eyes=None, **over):
     """`bd` -> `Plan`. **0 prims.** Every decision is made here.
 
-    When `dist` is unspecified, the priority is `bd["lod_dist"]` then
-    `|facade plane coordinate|` (the same approximation the current
-    `build_building` used — it assumes the camera is roughly at the origin).
+    Distance priority: explicit `dist` -> `bd["lod_dist"]` -> **the judged eye
+    set** (`eyes`, B-F3) -> `|facade plane coordinate|`. The last is the historical
+    default and is wrong by construction — it assumes the camera sits at the
+    origin. Pass `eyes=judged_eyes(gy)` (or set `bd["lod_dist"]`) and the tier is
+    derived from the real geometry instead.
+
+    `eyes` also drives **BS-4**: when no point of the facade falls inside ±30° of
+    any judged eye, the building is demoted to `kind="backdrop"` (3–4 prims). An
+    explicit `kind=`/`bd["kind"]` does **not** veto this — the whole point of the
+    row is that a building nobody can see earns no facade — but passing
+    `backdrop_demote=False` in `over` does, for the A/B control arm.
+
+    With `eyes=None` (the default) nothing above applies and the plan is byte-for
+    byte what it was before, which is what keeps this an unwired, zero-regression
+    change.
 
     `over` can force any plan field (`piloti=False`, `rows=3`, ...). If `bd`
     carries an optional key of the same name, that is read too (so scenes can
     tune it).
     """
+    backdrop_demote = bool(over.pop("backdrop_demote", True))
     p = Plan()
     p.x0 = float(min(bd["x0"], bd["x1"]))
     p.x1 = float(max(bd["x0"], bd["x1"]))
@@ -565,8 +800,22 @@ def plan_building(bd, dist=None, kind=None, seed=None, **over):
     p.W = p.Lx if p.axis_y else p.Ly          # facade width
     p.depth = p.Ly if p.axis_y else p.Lx      # depth perpendicular to the facade
 
+    # --- B-F3 / BS-4: the judged eye set ---------------------------------
+    # `p.fac` is not built yet, so the two helpers are fed the facade rectangle
+    # through the same Plan fields they read (`plane`, `axis_y`, `base_z`,
+    # `top_z`) plus a provisional `fac`; see `_facade_rect`.
+    p.fac = fk.Facade(p.plane, p.fdir, *((p.x0, p.x1) if p.axis_y
+                                         else (p.y0, p.y1)),
+                      base_z=p.base_z, axis_y=p.axis_y, depth_ref=p.depth)
+    if eyes:
+        p.d_true = eye_distance(p, eyes)
+        p.in_frame = facade_in_frame(p, eyes)
+        p.z_ceil = fk.frame_ceiling(p.d_true)
+
     if dist is None:
         dist = bd.get("lod_dist")
+    if dist is None:
+        dist = p.d_true                          # B-F3
     if dist is None:
         dist = abs(p.plane)
     p.dist = float(dist)
@@ -575,8 +824,12 @@ def plan_building(bd, dist=None, kind=None, seed=None, **over):
     p.kind_raw = str(kind or bd.get("kind") or infer_kind(bd, p.dist))
     if p.kind_raw not in KINDS:
         p.kind_raw = infer_kind(bd, p.dist)
-    # **Distance-driven type demotion** — requirement 1.
+    # **Distance-driven type demotion** — requirement 1 — and **BS-4**: a facade
+    # that never enters a judged frame earns the silhouette builder regardless of
+    # how close it is.
     p.kind = "backdrop" if p.tier == "silhouette" else p.kind_raw
+    if backdrop_demote and p.in_frame is False:
+        p.kind = "backdrop"
 
     p.seed = int(seed) if seed is not None else _seed_of(
         p.kind, round(p.x0, 2), round(p.y0, 2), p.floors, round(p.h, 2))
@@ -584,9 +837,6 @@ def plan_building(bd, dist=None, kind=None, seed=None, **over):
 
     p.levels, p.ground_h, p.floor_h = plan_levels(
         p.kind, p.h, p.floors, p.base_z)
-    p.fac = fk.Facade(p.plane, p.fdir, *((p.x0, p.x1) if p.axis_y
-                                         else (p.y0, p.y1)),
-                      base_z=p.base_z, axis_y=p.axis_y, depth_ref=p.depth)
 
     # --- Repeat count for windows/balconies (survey §6 LOD table + §4 prim
     #     reallocation rule) ------------------------------------------------
@@ -678,7 +928,70 @@ def plan_building(bd, dist=None, kind=None, seed=None, **over):
         if key in p.__slots__:
             setattr(p, key, val)
     p.opts = dict(over)
+
+    # --- Derived from the *final* switch values ---------------------------
+    # `runs` is a function of `core_bays`, which is a bd switch, so it has to be
+    # recomputed here or a scene that passes `core_bays` gets a stale run list
+    # (and, since B-F1, a `mass` list that disagrees with the built cores).
+    p.runs = _unit_runs(p.fac.u0, p.fac.u1, p.core_bays, CORE_W)
+    p.n_bays = shopfront_bays(p.W, p.tier) if p.shopfront else 0   # B-F2
+    p.mass = mass_faces(p)                                          # B-F1
     return p
+
+
+def mass_faces(p):
+    """**Pure** description of every solid volume of building `p`, as
+    `[(u0, u1, z0, z1, out_face), ...]` in facade coordinates. 0 prims.
+
+    `out_face` is the outward distance of the volume's outermost face from
+    `p.plane` — 0.0 for a volume flush with the facade plane, negative for a
+    set-back one, `CORE_PROUD` for a protruding core.
+
+    This mirrors the conditionals of `build_mass`, `build_core` and
+    `_b_backdrop`. It is a **second expression of the same geometry**, so
+    `selfcheck [11a]` cross-validates it prim-for-prim against the boxes those
+    builders actually emit, for every kind x tier. A silent divergence here would
+    make the visibility check lie, which is the one failure mode that matters.
+
+    Excluded on purpose: `PilotiCol` (a 0.45 m column, not a wall — role `stone`,
+    and no glazing is built in the piloti band) and `Parapet` (above `top_z`).
+    """
+    out = []
+    if p.kind == "backdrop":
+        # `_b_backdrop` does not call `build_mass`; it splits at 0.72*h instead.
+        if p.floors >= 12:
+            z_mid = p.base_z + p.h * 0.72
+            out.append((p.fac.u0, p.fac.u1, p.base_z, z_mid, 0.0))
+            out.append((p.fac.u0, p.fac.u1, z_mid, p.top_z,
+                        -min(2.0, p.depth * 0.2)))
+        else:
+            out.append((p.fac.u0, p.fac.u1, p.base_z, p.top_z, 0.0))
+        return out
+    z_bot = p.base_z
+    if p.piloti:
+        z_bot = p.base_z + min(p.ground_h, PILOTI_H + 0.4)
+        if (p.depth - p.porch) > 0.4:
+            # `_inner_range(p, porch)` insets the facade-normal axis only.
+            out.append((p.fac.u0, p.fac.u1, p.base_z, z_bot, -float(p.porch)))
+    if p.step_top:
+        z_step = p.base_z + DAYLIGHT_STEP_Z
+        out.append((p.fac.u0, p.fac.u1, z_bot, z_step, 0.0))
+        out.append((p.fac.u0, p.fac.u1, z_step, p.top_z, -DAYLIGHT_STEP_IN))
+    elif p.setback > 0.0:
+        z_pod = min(p.levels[min(2, p.floors)], p.top_z - 0.5)
+        out.append((p.fac.u0, p.fac.u1, z_bot, z_pod, 0.0))
+        out.append((p.fac.u0, p.fac.u1, z_bot, p.top_z, -float(p.setback)))
+    else:
+        out.append((p.fac.u0, p.fac.u1, z_bot, p.top_z, 0.0))
+    # Protruding stair/lift cores. `build_core` is called from `_b_apt` only, so
+    # the kind is tested here too — otherwise a scene that forces `core_bays` on a
+    # non-apt bd would make `out_at` promise a core that never gets built.
+    if p.kind == "apt":
+        _, core_us = p.runs if isinstance(p.runs, tuple) else (None, [])
+        for u in core_us:
+            out.append((u - CORE_W / 2.0, u + CORE_W / 2.0,
+                        p.base_z, p.top_z, CORE_PROUD))
+    return out
 
 
 def _unit_runs(u0, u1, n_core, core_w):
@@ -817,16 +1130,25 @@ def build_core(K, stage, prefix, p, M):
         zw0 = p.levels[min(1, p.floors)] + 0.4
         zw1 = p.top_z - 0.5
         if zw1 - zw0 > 1.0:
+            # **B-F1**: `CORE_PROUD − 0.05` put the 0.04-thick strip's outer face
+            # 30 mm *inside* the core it belongs to — buried, and missed by the
+            # 135/135 suite because its `out` was positive. It now sits 5 mm proud
+            # of whatever surface `out_at` reports at this window.
+            t = 0.04
+            wo = p.out_at(u - CORE_WIN_W / 2.0, u + CORE_WIN_W / 2.0, zw0, zw1)
             prims.append(_box(
                 K, stage, f"{prefix}/CoreStrip_{i}",
-                p.fac.world(u, CORE_PROUD - 0.05, (zw0 + zw1) / 2.0),
-                p.fac.size(CORE_WIN_W, 0.04, zw1 - zw0), M.glass))
+                p.fac.world(u, wo + fk.WALL_PROUD + t / 2.0, (zw0 + zw1) / 2.0),
+                p.fac.size(CORE_WIN_W, t, zw1 - zw0), M.glass))
         if p.tier == "near":
             # Communal entrance — the 2.10 height is a **scale anchor**. Never randomize.
+            t = 0.06
+            wo = p.out_at(u - 0.80, u + 0.80, p.base_z, p.base_z + DOOR_H)
             prims.append(_box(
                 K, stage, f"{prefix}/CoreDoor_{i}",
-                p.fac.world(u, CORE_PROUD + 0.02, p.base_z + DOOR_H / 2.0),
-                p.fac.size(1.60, 0.06, DOOR_H), M.glass))
+                p.fac.world(u, wo + fk.WALL_PROUD + t / 2.0,
+                            p.base_z + DOOR_H / 2.0),
+                p.fac.size(1.60, t, DOOR_H), M.glass))
     return prims
 
 
@@ -935,31 +1257,46 @@ def build_window_bands(K, stage, prefix, p, M, mode="bay"):
     if not idx:
         return prims
 
+    # **B-F1** — every glazing prim below asked `Facade.world` for a *negative*
+    # `out`, i.e. it was pushed **into** a solid mass box. Survey R3 §5.1 measured
+    # 62 of 62 GLASS prims invisible across 5 types x 4 tiers. `out_at` reports the
+    # outward face of whatever volume actually covers the window (the shell, an
+    # office podium in front of a set-back tower, a protruding core), and the
+    # glazing sits `fk.WALL_PROUD` = 5 mm outside it.
+    u0, u1 = p.fac.u0, p.fac.u1
+
     if mode == "curtain":
         z0 = lv[idx[0]] + 0.6
         z1 = min(lv[idx[-1]] + p.floor_h - 0.3, p.top_z - 0.3)
+        wo = p.out_at(u0, u1, z0, z1)
         if z1 - z0 > 1.0:
+            t = 0.05
             prims.append(_box(
                 K, stage, f"{prefix}/CurtainGlass",
-                p.fac.world(p.fac.mid, -0.10, (z0 + z1) / 2.0),
-                p.fac.size(p.W - 0.8, 0.05, z1 - z0), M.glass))
+                p.fac.world(p.fac.mid, wo + fk.WALL_PROUD + t / 2.0,
+                            (z0 + z1) / 2.0),
+                p.fac.size(p.W - 0.8, t, z1 - z0), M.glass))
         for j, f in enumerate(idx):
             zb = lv[f] - 0.10
             if zb <= p.base_z + 0.2:
                 continue
+            # The mullion band rides the same reference so it stays proud of the
+            # glass it is supposed to shade (0.10 out vs the glass's 0.055).
             prims.append(_box(
                 K, stage, f"{prefix}/Mullion_{f}",
-                p.fac.world(p.fac.mid, 0.04, zb),
+                p.fac.world(p.fac.mid, wo + 0.04, zb),
                 p.fac.size(p.W - 0.6, 0.12, 0.30), M.parapet))
         return prims
 
     if mode == "band":
+        t, bh = 0.04, 1.40
         for f in idx:
             zc = lv[f] + min(1.6, p.floor_h * 0.55)
+            wo = p.out_at(u0, u1, zc - bh / 2.0, zc + bh / 2.0)
             prims.append(_box(
                 K, stage, f"{prefix}/WinBand_{f}",
-                p.fac.world(p.fac.mid, -0.12, zc),
-                p.fac.size(p.W - 2.0, 0.04, 1.40), M.glass))
+                p.fac.world(p.fac.mid, wo + fk.WALL_PROUD + t / 2.0, zc),
+                p.fac.size(p.W - 2.0, t, bh), M.glass))
         return prims
 
     # --- bay mode --------------------------------------------------------
@@ -969,14 +1306,17 @@ def build_window_bands(K, stage, prefix, p, M, mode="bay"):
     bw = (p.W - 1.6) / nb
     ww = min(1.70, bw * 0.55)
     wh = 1.45
+    t = 0.04
     for f in idx:
         zc = lv[f] + 0.90 + wh / 2.0          # sill 0.90 [estimated]
         for b in range(nb):
             u = p.fac.u0 + 0.8 + (b + 0.5) * bw
+            wo = p.out_at(u - ww / 2.0, u + ww / 2.0,
+                          zc - wh / 2.0, zc + wh / 2.0)
             prims.append(_box(
                 K, stage, f"{prefix}/Win_{f}_{b}",
-                p.fac.world(u, -0.10, zc),
-                p.fac.size(ww, 0.04, wh), M.glass))
+                p.fac.world(u, wo + fk.WALL_PROUD + t / 2.0, zc),
+                p.fac.size(ww, t, wh), M.glass))
     return prims
 
 
@@ -1110,9 +1450,15 @@ def build_entrance(K, stage, prefix, p, M, canopy=True):
     prims = []
     u = p.fac.mid
     dh = 2.40                                   # [estimated] automatic-door clear height
+    t = 0.06
+    # **B-F1** — was `out = −0.10`, which buried the entrance inside the office
+    # podium (the podium keeps the full footprint while the tower is set back
+    # `SETBACK_OFFICE`, so the podium face is the surface that counts here).
+    wo = p.out_at(u - 1.80, u + 1.80, p.base_z, p.base_z + dh)
     prims.append(_box(K, stage, f"{prefix}/EntryGlass",
-                      p.fac.world(u, -0.10, p.base_z + dh / 2.0),
-                      p.fac.size(3.60, 0.06, dh), M.glass))
+                      p.fac.world(u, wo + fk.WALL_PROUD + t / 2.0,
+                                  p.base_z + dh / 2.0),
+                      p.fac.size(3.60, t, dh), M.glass))
     if canopy:
         out = 2.00
         prims.append(_box(K, stage, f"{prefix}/EntryCanopy",
@@ -1131,10 +1477,23 @@ def build_unit_number(K, stage, prefix, p, M):
     Survey §5: a mandatory element for the background apartments in scenes 12,
     13 and 17. Size is `[knowledge]` (in the 1.5~2.5 m class).
     """
+    w, t = 1.80, 0.05
     z = min(p.top_z - 1.2, p.levels[min(p.floors, 2)] + 1.2)
+    u = p.fac.u0 + 1.8
+    # **B-F1**: on a narrow slab (W ≈ 8 m) the plate's default u half-overlaps the
+    # protruding core and 0.515 m of it ends up **inside** the core `[measured]`.
+    # Snap it onto the core rather than leaving it straddling — mounting the 동
+    # 번호 above the communal entrance is the canonical Korean position anyway,
+    # and it is where the survey §5 photos put it.
+    _, core_us = p.runs if isinstance(p.runs, tuple) else (None, [])
+    for cu in core_us:
+        if abs(cu - u) < (CORE_W + w) / 2.0:
+            u = cu
+            break
+    wo = p.out_at(u - w / 2.0, u + w / 2.0, z - w / 2.0, z + w / 2.0)
     return [_box(K, stage, f"{prefix}/UnitNo",
-                 p.fac.world(p.fac.u0 + 1.8, 0.06, z),
-                 p.fac.size(1.80, 0.05, 1.80), M.sign)]
+                 p.fac.world(u, wo + fk.WALL_PROUD + t / 2.0, z),
+                 p.fac.size(w, t, w), M.sign)]
 
 
 # ===========================================================================
@@ -1146,24 +1505,62 @@ def _fire(K, stage, prefix, p, M):
     identical**, so budget verification still holds."""
     if not p.fire:
         return []
+    r = fk.FIRE_TRI_D / 2.0
+
+    def _out(u, zc):
+        """**B-F1** — the triangle sits on whatever wall is at (u, z), not on the
+        nominal facade plane. An apartment core protrudes `CORE_PROUD` = 0.60 m
+        and the single 40 m station lands dead centre on it, which buried the
+        decal **588 mm** deep `[measured]`."""
+        return p.out_at(u - r, u + r, zc - r, zc + r) + fk.WALL_PROUD
+
     try:
         return fk.build_fire_access_marks(
             stage, prefix, p.fac, p.levels, M.decal,
-            max_floors=max(1, int(p.rows or 1)))
+            max_floors=max(1, int(p.rows or 1)), out_fn=_out)
     except ImportError:
         prims = []
         n_st = max(1, int(math.ceil(p.W / fk.FIRE_SPACING)))
         lv = p.levels[:-1][:max(1, int(p.rows or 1))]
+        t = 0.004
         for s in range(n_st):
             u = p.fac.u0 + (s + 0.5) * (p.W / n_st)
             for f, zf in enumerate(lv):
                 if not (2 <= f + 1 <= 11):
                     continue
+                zc = zf + 0.80 + 0.60
                 prims.append(_box(
                     K, stage, f"{prefix}/FireMark_{s}_{f + 1}",
-                    p.fac.world(u, 0.010, zf + 0.80 + 0.60),
-                    p.fac.size(fk.FIRE_TRI_D, 0.004, fk.FIRE_TRI_D), M.decal))
+                    p.fac.world(u, _out(u, zc) + t / 2.0, zc),
+                    p.fac.size(fk.FIRE_TRI_D, t, fk.FIRE_TRI_D), M.decal))
         return prims
+
+
+def _shopfront(K, stage, prefix, p, M):
+    """Ground-floor shopfront for the two retail types. **2·bays + 3~5 prims.**
+
+    **B-F2**: the bay count is `p.n_bays`, derived from the facade width by
+    `shopfront_bays`. It used to be the tier constant 4/3/1 with a
+    `bay_w = max(3.0, W/nb)` floor that could only ever make bays *wider*, so a
+    28 m facade got three butted 8.93 m panels `[measured — survey R3 §5.2]`
+    against a real Korean bay of 3.0–4.5 m.
+
+    **B-F1**: `wall_out` hands `fk.build_shopfront` the outward face of the volume
+    that actually covers the ground-floor band, so the glazing lands 5 mm proud of
+    it instead of 100 mm inside it.
+    """
+    if not p.shopfront:
+        return []
+    nb = int(p.n_bays or 0)
+    if nb <= 0:
+        return []
+    wo = p.out_at(p.fac.u0, p.fac.u1, p.base_z, p.base_z + p.ground_h)
+    return fk.build_shopfront(
+        K, stage, prefix, p.fac, M.glass, M.parapet, M.stone,
+        ground_h=p.ground_h, bay_w=p.W / nb,
+        steps=(1 if p.tier == "near" else 0),
+        shutter_box=(p.tier == "near"), max_bays=nb, seed=p.seed,
+        wall_out=wo)
 
 
 def _attachments(K, stage, prefix, p, M):
@@ -1256,13 +1653,7 @@ def _b_low_shop(K, stage, prefix, p, M):
     prims = build_mass(K, stage, prefix, p, M)
     prims += fk.build_plinth(K, stage, prefix, p.x0, p.x1, p.y0, p.y1,
                              p.base_z, M.stone, height=1.10)
-    if p.shopfront:
-        nb = 3 if p.tier == "near" else 2
-        prims += fk.build_shopfront(
-            K, stage, prefix, p.fac, M.glass, M.parapet, M.stone,
-            ground_h=p.ground_h, bay_w=max(3.0, p.W / nb),
-            steps=(1 if p.tier == "near" else 0),
-            shutter_box=(p.tier == "near"), max_bays=nb, seed=p.seed)
+    prims += _shopfront(K, stage, prefix, p, M)
     if p.signs:
         # The signage band covers most of the facade — band_h uses the
         # statutory cap of 0.80 verbatim.
@@ -1284,13 +1675,7 @@ def _b_shop_house(K, stage, prefix, p, M):
     prims = build_mass(K, stage, prefix, p, M)
     prims += fk.build_plinth(K, stage, prefix, p.x0, p.x1, p.y0, p.y1,
                              p.base_z, M.stone, height=1.10)
-    if p.shopfront:
-        nb = 4 if p.tier == "near" else (3 if p.tier == "mid" else 1)
-        prims += fk.build_shopfront(
-            K, stage, prefix, p.fac, M.glass, M.parapet, M.stone,
-            ground_h=p.ground_h, bay_w=max(3.0, p.W / nb),
-            steps=(1 if p.tier == "near" else 0),
-            shutter_box=(p.tier == "near"), max_bays=nb, seed=p.seed)
+    prims += _shopfront(K, stage, prefix, p, M)
     if p.signs:
         prims += fk.build_signage(
             K, stage, prefix, p.fac, M.sign, M.sign,
@@ -1396,12 +1781,21 @@ _BUILDERS = {
 # (the module docstring's parenthesised "representative measured values" had
 # gone stale alongside it). The re-baseline moved **more cells down than up** —
 # apt/mid 34->23, office/mid 22->15 — so the table did not get looser.
+#
+# **v2 re-baseline 2026-07-31 (W3 CB-4 / B-F2).** Four cells move, all of them
+# the retail types, all of them for one reason: the shopfront bay count is now
+# derived from the facade width instead of a per-tier constant, and a bay costs
+# 2 prims. At the reference `BUDGET_REF_W = 24 m` the count goes 4->7 (near) and
+# 3->7 (mid) for `shop_house`, 3->7 and 2->7 for `low_shop`. Same rule as v1
+# (cap = measured + 3 at W=24); the width-dependent part lives in
+# `prim_budget(kind, tier, W)`, not in the table. Every other cell is byte-equal
+# to v1 — B-F1 moves glazing, it does not create any.
 BUDGET = {
-    "shop_house": {"near": 59, "mid": 30, "far": 9, "silhouette": 4},
+    "shop_house": {"near": 65, "mid": 38, "far": 9, "silhouette": 4},
     "apt":        {"near": 57, "mid": 23, "far": 15, "silhouette": 4},
     "office":     {"near": 31, "mid": 15, "far": 11, "silhouette": 4},
     "villa":      {"near": 57, "mid": 28, "far": 10, "silhouette": 4},
-    "low_shop":   {"near": 36, "mid": 17, "far": 7, "silhouette": 4},
+    "low_shop":   {"near": 44, "mid": 27, "far": 7, "silhouette": 4},
     "backdrop":   {"near": 4, "mid": 4, "far": 4, "silhouette": 4},
 }
 
@@ -1409,25 +1803,49 @@ BUDGET = {
 # recomputing under the same rule). selfcheck [5] re-measures these every run
 # and compares against the table, so update this whenever the code changes.
 BUDGET_MEASURED = {
-    "shop_house": {"near": 56, "mid": 27, "far": 6, "silhouette": 3},
+    "shop_house": {"near": 62, "mid": 35, "far": 6, "silhouette": 3},
     "apt":        {"near": 54, "mid": 20, "far": 12, "silhouette": 4},
     "office":     {"near": 28, "mid": 12, "far": 8, "silhouette": 3},
     "villa":      {"near": 54, "mid": 25, "far": 7, "silhouette": 3},
-    "low_shop":   {"near": 33, "mid": 14, "far": 4, "silhouette": 3},
+    "low_shop":   {"near": 41, "mid": 24, "far": 4, "silhouette": 3},
     "backdrop":   {"near": 3, "mid": 3, "far": 3, "silhouette": 3},
 }
 
 
-def prim_budget(kind, tier):
-    """**Per-building prim cap** for a type and LOD tier. 0 prims."""
-    return BUDGET.get(kind, BUDGET["backdrop"]).get(tier, 4)
+BUDGET_REF_W = 24.0    # the representative facade width every cell was measured at
+
+
+def prim_budget(kind, tier, W=None):
+    """**Per-building prim cap** for a type, LOD tier and facade width. 0 prims.
+
+    **B-F2 added the `W` term.** Before it, the table had no width term at all
+    (`fix_building_kit_v1.md` §7-1 already listed that as a known limitation),
+    which was tolerable only because the bay count was a constant. Now the
+    shopfront costs `2` prims per bay and the bay count follows `W`, so the cap
+    has to follow it too or a wide facade fails a budget it never had a chance of
+    meeting.
+
+    The term is deliberately narrow — `2 × (bays(W) − bays(24 m))`, i.e. exactly
+    the shopfront's own per-bay cost against the width every cell was measured at.
+    Nothing else in the builder grows monotonically with `W`: `build_window_bands`
+    bay mode is capped at 4 columns and is already at that cap at 24 m, and the
+    balcony run count is bounded by `_unit_runs`.
+
+    `W=None` reproduces the old two-argument behaviour exactly, so existing
+    callers are unaffected.
+    """
+    base = BUDGET.get(kind, BUDGET["backdrop"]).get(tier, 4)
+    if W is None or kind not in ("shop_house", "low_shop"):
+        return base
+    return base + 2 * max(0, shopfront_bays(W, tier)
+                          - shopfront_bays(BUDGET_REF_W, tier))
 
 
 # ===========================================================================
 # [6] Top-level API
 # ===========================================================================
 def build_korean_building(kit, stage, prefix, bd, mtls, dist=None, kind=None,
-                          seed=None, plan=None, **over):
+                          seed=None, plan=None, eyes=None, **over):
     """One Korean building. **The replacement for the current
     `build_building`.**
 
@@ -1448,6 +1866,11 @@ def build_korean_building(kit, stage, prefix, bd, mtls, dist=None, kind=None,
       kind   force the type. If None, `bd["kind"]` then `infer_kind()`.
       plan   reuse a pre-built `Plan` (for verification and layout
              optimization).
+      eyes   the judged camera positions, e.g. `judged_eyes(gy)`. Supplying them
+             switches on **B-F3** (`dist` from the real eye-to-facade geometry
+             instead of `|facade plane|`) and **BS-4** (a facade outside ±30° of
+             every judged eye is demoted to `kind="backdrop"`). Ignored when
+             `plan` is given — build the Plan with `eyes` instead.
 
     Returns: the list of prims created.
 
@@ -1462,7 +1885,7 @@ def build_korean_building(kit, stage, prefix, bd, mtls, dist=None, kind=None,
     K = kit
     M = Mtls.coerce(mtls)
     p = plan if plan is not None else plan_building(
-        bd, dist=dist, kind=kind, seed=seed, **over)
+        bd, dist=dist, kind=kind, seed=seed, eyes=eyes, **over)
     return _BUILDERS[p.kind](K, stage, prefix, p, M)
 
 
@@ -1471,7 +1894,14 @@ def build_korean_building(kit, stage, prefix, bd, mtls, dist=None, kind=None,
 # ===========================================================================
 class _MockKit(fk.Kit):
     """A Kit that creates no prims and only **counts** them. For budget and
-    coordinate verification only."""
+    coordinate verification only.
+
+    Record layout: `(shape, path, center, size, collider, mtl)`. `mtl` was added
+    for check **[11]**, which has to know a prim's **material role** — it is a
+    role check, not a path-name heuristic, so it cannot be fooled by a rename and
+    it automatically covers roles that arrive later. Indices 0–4 are unchanged, so
+    every older check still reads `c[2]` / `c[3]` as before.
+    """
 
     def __init__(self, oriented=False):
         self.calls = []
@@ -1481,20 +1911,20 @@ class _MockKit(fk.Kit):
 
     def _box(self, stage, path, center, size, mtl=None, collider=False):
         rec = ("box", path, tuple(float(v) for v in center),
-               tuple(float(v) for v in size), collider)
+               tuple(float(v) for v in size), collider, mtl)
         self.calls.append(rec)
         return rec
 
     def _cyl(self, stage, path, center, radius, height, mtl=None, **kw):
         rec = ("cyl", path, tuple(float(v) for v in center),
-               (2 * float(radius), 2 * float(radius), float(height)), False)
+               (2 * float(radius), 2 * float(radius), float(height)), False, mtl)
         self.calls.append(rec)
         return rec
 
     def _obox(self, stage, path, center, size, mtl=None, collider=False,
               rotz=0.0, rotx=0.0):
         rec = ("obox", path, tuple(float(v) for v in center),
-               tuple(float(v) for v in size), collider)
+               tuple(float(v) for v in size), collider, mtl)
         self.calls.append(rec)
         return rec
 
@@ -1525,6 +1955,85 @@ def _run(kind, dist, **kw):
     prims = build_korean_building(K, None, "/W/B", bd, Mtls("sh", "gl", "pa"),
                                   dist=dist, plan=p)
     return p, K, prims
+
+
+# ---------------------------------------------------------------------------
+# [7a] B-F1 — the outward-visibility instrument
+# ---------------------------------------------------------------------------
+# Every role gets its **own** sentinel so check [11] reads the real material
+# role. `Mtls("sh","gl","pa")` (what `_run` uses, mirroring the legacy 3-argument
+# call) collapses stone/metal/sign/decal onto `parapet` through the fallback
+# chain, which would make a role check meaningless.
+_ROLE_NAMES = ("shell", "glass", "parapet", "stone", "metal", "sign",
+               "decal", "dark")
+_ROLE_MTLS = Mtls(*_ROLE_NAMES)
+# Roles that must be **visible from outside**: glazing, signage panels and
+# decals only exist to be seen. `parapet`/`stone`/`metal` are legitimately
+# allowed to be flush or recessed (a kick plate, a plinth, a bracket).
+VISIBLE_ROLES = ("glass", "sign", "decal")
+# Roles that form a **solid volume** a facade attachment can be buried in.
+# `dark` is the piloti rear wall; `stone` is not here because `PilotiCol` is a
+# 0.45 m column and the plinth is a 25 mm band, neither of which is a mass.
+MASS_ROLES = ("shell", "dark")
+
+
+def _out_face(p, rec):
+    """Outward distance of a recorded prim's outermost face from `p.plane`, in
+    `Facade` `out` units. 0 prims."""
+    n = 1 if p.axis_y else 0
+    return p.fdir * (rec[2][n] - p.plane) + rec[3][n] / 2.0
+
+
+def _span(rec, ax):
+    return (rec[2][ax] - rec[3][ax] / 2.0, rec[2][ax] + rec[3][ax] / 2.0)
+
+
+def _overlaps(a, b):
+    return min(a[1], b[1]) - max(a[0], b[0]) > 1e-9
+
+
+def visibility_violations(p, calls):
+    """**The B-F1 gate.** Every `glass`/`sign`/`decal` prim must have
+    `out_max > 0` against **every mass box that overlaps it**. 0 prims.
+
+    Returns `[(prim_path, mass_path, margin_m), ...]`; empty means green.
+
+    Why this check and not the ones that already existed: `[5]` counts prims
+    against a budget, `[7]` checks `z >= base_z - 0.05`, `[8]` checks path
+    uniqueness. **None of them asks whether a facade prim is on the outside of
+    the wall**, so `building_kit` shipped 135/135 green while burying 62 of 62
+    glazing prims `[measured — survey R3 §5.1]`. That is the defect that stopped
+    adoption, so it gets its own instrument.
+
+    `out_max` is measured **against the mass box's own outer face**, not against
+    the nominal facade plane: a positive `out` is not enough when the volume in
+    front of you is a protruding core (`CORE_PROUD` 0.60) — the pre-fix
+    `CoreStrip` sat at `out = +0.55` and was still 30 mm inside its own core.
+    Overlap is tested on **both** the tangent and the z axis, because a prim that
+    clears the mass horizontally is not buried by it.
+    """
+    tan_ax = 0 if p.axis_y else 1
+    mass = [c for c in calls if c[5] in MASS_ROLES]
+    bad = []
+    for c in calls:
+        if c[5] not in VISIBLE_ROLES:
+            continue
+        for m in mass:
+            if _overlaps(_span(c, tan_ax), _span(m, tan_ax)) \
+                    and _overlaps(_span(c, 2), _span(m, 2)):
+                margin = _out_face(p, c) - _out_face(p, m)
+                if margin <= 0.0:
+                    bad.append((c[1], m[1], margin))
+    return bad
+
+
+def _run_roles(kind, dist, **kw):
+    """`_run` with one sentinel material per role, for checks [11] and [11a]."""
+    K = _MockKit(oriented=True)
+    bd = _demo_bd(kind, dist, **kw)
+    p = plan_building(bd, dist=dist)
+    build_korean_building(K, None, "/W/B", bd, _ROLE_MTLS, dist=dist, plan=p)
+    return p, K
 
 
 def selfcheck(verbose=True):
@@ -1730,6 +2239,166 @@ def selfcheck(verbose=True):
         same = same and (K1.calls == K2.calls)
     chk("동일 입력 → 동일 프림·좌표", same)
 
+    # --- 11a. mass_faces == what build_mass/build_core actually emit ---------
+    # `out_at` is only as good as `mass_faces`, and `mass_faces` is a *second*
+    # expression of `build_mass`'s conditionals. A silent divergence would make
+    # check [11] green while the geometry stayed buried, so it is cross-validated
+    # prim-for-prim before [11] is allowed to mean anything.
+    print("\n[11a] mass_faces ↔ 실제 매스 프림 교차검증")
+    MASS_PATHS = ("/Shell", "/ShellStep", "/ShellTop", "/Podium",
+                  "/PilotiRear")
+    for kind in KINDS:
+        for d in (14.0, 30.0, 55.0, 95.0):
+            p, K = _run_roles(kind, d)
+            built = [c for c in K.calls
+                     if c[1].endswith(MASS_PATHS) or "/Core_" in c[1]]
+            tan_ax = 0 if p.axis_y else 1
+            got = sorted((round(_span(c, tan_ax)[0], 6),
+                          round(_span(c, tan_ax)[1], 6),
+                          round(_span(c, 2)[0], 6), round(_span(c, 2)[1], 6),
+                          round(_out_face(p, c), 6)) for c in built)
+            want = sorted((round(a, 6), round(b, 6), round(z0, 6),
+                           round(z1, 6), round(f, 6))
+                          for (a, b, z0, z1, f) in mass_faces(p))
+            if not chk(f"{kind} d={d:.0f} 매스 {len(want)}개 일치",
+                       got == want,
+                       f"모델 {want}\n            실측 {got}" if got != want
+                       else f"{len(got)}개"):
+                break
+    # Every mass prim must carry a mass role, or [11] would silently skip it.
+    role_ok = True
+    for kind in KINDS:
+        _, K = _run_roles(kind, 14.0)
+        for c in K.calls:
+            if (c[1].endswith(MASS_PATHS) or "/Core_" in c[1]) \
+                    and c[5] not in MASS_ROLES:
+                role_ok = False
+    chk("매스 프림은 모두 shell/dark 역할", role_ok)
+
+    # --- 11. B-F1 outward visibility (out_max > 0) --------------------------
+    print("\n[11] B-F1 외부 가시성 — glass/sign/decal 의 out_max > 0")
+    tot_bad, tot_vis = 0, 0
+    for kind in KINDS:
+        for tier, d in (("near", 14.0), ("mid", 30.0), ("far", 55.0),
+                        ("sil", 95.0)):
+            p, K = _run_roles(kind, d)
+            vis = [c for c in K.calls if c[5] in VISIBLE_ROLES]
+            bad = visibility_violations(p, K.calls)
+            tot_vis += len(vis)
+            tot_bad += len(bad)
+            if bad:
+                chk(f"{kind}/{tier} 매몰 0", False,
+                    f"{len(bad)}건 {[(a.split('/')[-1], b.split('/')[-1], round(m, 3)) for a, b, m in bad[:3]]}")
+    chk(f"전 유형·전 티어 glass/sign/decal {tot_vis}개 전부 외부 노출",
+        tot_bad == 0, f"매몰 {tot_bad}건")
+    # Widths and base offsets the demo bd does not reach — the office podium,
+    # the villa daylight step and the apt core are the three burial mechanisms.
+    edge = 0
+    for kind in KINDS:
+        for d in (14.0, 30.0, 55.0):
+            for W in (8.0, 12.0, 28.0, 40.0):
+                for bz in (0.0, 3.4, -2.15):
+                    p, K = _run_roles(kind, d, W=W, base_z=bz)
+                    edge += len(visibility_violations(p, K.calls))
+    chk("폭 8~40 m × base_z −2.15/0/3.4 전수에서도 매몰 0", edge == 0,
+        f"매몰 {edge}건")
+
+    # --- 12. B-F2 shopfront bay band ---------------------------------------
+    print("\n[12] B-F2 상가 베이 폭 (한국 3.0~4.5 m)")
+    off = []
+    for W in (8.0, 12.0, 18.0, 24.0, 28.0, 34.0):
+        for tier in ("near", "mid"):
+            bw = bay_width(W, tier)
+            if not (SHOP_BAY_MIN - 1e-9 <= bw <= SHOP_BAY_MAX + 1e-9):
+                off.append((W, tier, round(bw, 2)))
+    chk("W 8~34 m · near/mid 전부 3.0~4.5 m 대역", not off, str(off))
+    chk("W=28 (scene20 C) 베이 = 3.50 m — 종전 8.93 m",
+        abs(bay_width(28.0, "mid") - 3.50) < 1e-9,
+        f"{bay_width(28.0, 'mid'):.2f} m")
+    chk("far/silhouette 은 상가 미시공(베이 0)",
+        shopfront_bays(24.0, "far") == 0
+        and shopfront_bays(24.0, "silhouette") == 0)
+    # The budget must follow W, or the row breaks its own gate.
+    wb = []
+    for kind in ("shop_house", "low_shop"):
+        for tier, d in (("near", 14.0), ("mid", 30.0)):
+            for W in (8.0, 12.0, 18.0, 24.0, 28.0, 34.0):
+                p, K = _run_roles(kind, d, W=W)
+                cap = prim_budget(p.kind, p.tier, p.W)
+                if len(K.calls) > cap:
+                    wb.append((kind, tier, W, len(K.calls), cap))
+    chk("폭 가변 상가가 prim_budget(kind, tier, W) 이내", not wb, str(wb))
+    chk("prim_budget 2인자 호출은 종전과 동일",
+        prim_budget("shop_house", "near") == BUDGET["shop_house"]["near"]
+        and prim_budget("shop_house", "near", BUDGET_REF_W)
+        == BUDGET["shop_house"]["near"])
+
+    # --- 13. B-F3 / BS-4 judged-eye geometry -------------------------------
+    print("\n[13] B-F3 판정 시선 거리 · BS-4 프레임 판정")
+    eyes = judged_eyes(0.0)
+    chk("judged_eyes = grid_views 격자 9안 (−d, gy, h)",
+        len(eyes) == 9 and (-10.0, 0.0, 0.3) in eyes
+        and (-2.0, 0.0, 1.8) in eyes, str(eyes[:2]))
+    # Head-on facade at x = 30 (the scene20-C form). The default `|plane|` = 30
+    # ignores the nearest eye's own standoff (x = −2), so d_true must be 32.
+    ahead = dict(x0=30.0, x1=36.0, y0=-6.0, y1=6.0, h=12.0, floors=4,
+                 axis="x", facade_x=30.0, face_dir=-1.0)
+    p0 = plan_building(ahead)
+    pe = plan_building(ahead, eyes=eyes)
+    chk("기본 dist = |파사드 평면| (종전 동작 보존)",
+        abs(p0.dist - 30.0) < 1e-9 and p0.d_true is None, f"{p0.dist:.2f}")
+    chk("d_true = 최근접 판정 시선 → 파사드 최근접점 (30 → 32)",
+        abs(pe.d_true - 32.0) < 1e-9, f"{pe.d_true:.3f} m")
+    # Laterally offset facade: the default ignores the offset entirely.
+    side = dict(ahead, y0=20.0, y1=32.0)
+    ps = plan_building(side, eyes=eyes)
+    chk("횡방향 이격 파사드도 반영 (기본 30 → 실제 √(32²+20²))",
+        abs(ps.d_true - math.hypot(32.0, 20.0)) < 1e-9
+        and abs(plan_building(side).dist - 30.0) < 1e-9,
+        f"{ps.d_true:.2f} m")
+    chk("z_ceil = fk.frame_ceiling(d_true)",
+        abs(pe.z_ceil - fk.frame_ceiling(pe.d_true)) < 1e-12,
+        f"{pe.z_ceil:.2f} m")
+    chk("lod_dist 가 있으면 그것이 우선 (씬 오버라이드)",
+        abs(plan_building(dict(ahead, lod_dist=55.0),
+                          eyes=eyes).dist - 55.0) < 1e-9)
+    # BS-4: the same building swung sideways past +-30 deg from every eye.
+    aside = dict(ahead, y0=60.0, y1=72.0)
+    pout = plan_building(aside, eyes=eyes)
+    chk("정면 파사드는 프레임 안", pe.in_frame is True)
+    chk("±30° 밖 파사드는 프레임 밖 → kind=backdrop",
+        pout.in_frame is False and pout.kind == "backdrop",
+        f"in_frame={pout.in_frame} kind={pout.kind} d_true={pout.d_true:.1f}")
+    K = _MockKit(oriented=True)
+    build_korean_building(K, None, "/W/B", aside, _ROLE_MTLS, eyes=eyes)
+    chk("BS-4 강등 = 3~4 프림 (음의 프림 비용)", 3 <= len(K.calls) <= 4,
+        f"{len(K.calls)}프림")
+    chk("backdrop_demote=False 는 A/B 대조군을 남긴다",
+        plan_building(aside, eyes=eyes,
+                      backdrop_demote=False).kind != "backdrop",
+        plan_building(aside, eyes=eyes, backdrop_demote=False).kind)
+    # A wall behind the eye is never in frame, however wide.
+    behind = dict(x0=-60.0, x1=-40.0, y0=-6.0, y1=6.0, h=12.0, floors=4,
+                  axis="x", facade_x=-40.0, face_dir=1.0)
+    chk("카메라 뒤쪽 파사드는 프레임 밖",
+        plan_building(behind, eyes=eyes).in_frame is False)
+    # Straddling the axis counts even when both ends are outside +-30 deg.
+    wide = dict(ahead, y0=-80.0, y1=80.0)
+    chk("시선축을 가로지르는 긴 벽은 프레임 안 (양 끝은 밖)",
+        plan_building(wide, eyes=eyes).in_frame is True)
+    # eyes=None must change nothing at all — this is what makes CB-4 unwired.
+    same = True
+    for kind in KINDS:
+        for d in (14.0, 30.0, 55.0, 95.0):
+            b = _demo_bd(kind, d)
+            K1 = _MockKit(oriented=True)
+            K2 = _MockKit(oriented=True)
+            build_korean_building(K1, None, "/W/B", b, _ROLE_MTLS, dist=d)
+            build_korean_building(K2, None, "/W/B", b, _ROLE_MTLS, dist=d,
+                                  eyes=None)
+            same = same and K1.calls == K2.calls
+    chk("eyes=None → 좌표 완전 동일 (씬 미배선 보증)", same)
+
     print("\n" + "=" * 74)
     n_ok, n = sum(ok), len(ok)
     print(f"검사 {n_ok}/{n} 통과")
@@ -1782,7 +2451,17 @@ def _scan_scenes(verbose=True):
             tree = ast.parse(open(f, encoding="utf-8").read())
             win = None
             bds = []
+            gy = None
             for node in ast.walk(tree):
+                # The scene's own judged-eye centre line, for B-F3. 21 of 33
+                # scenes call `sc.grid_views(0.0)`; a few pass their own literal
+                # (0.4 / -2.75 / -3.6) and a few pass a name we cannot resolve
+                # statically — those fall back to 0.0 and are counted as such.
+                if isinstance(node, ast.Call) and getattr(
+                        node.func, "attr", None) == "grid_views" and node.args:
+                    v = _lit(node.args[0])
+                    if isinstance(v, (int, float)) and gy is None:
+                        gy = float(v)
                 dd = _as_dict(node)
                 if not dd:
                     continue
@@ -1796,6 +2475,7 @@ def _scan_scenes(verbose=True):
             for b in bds:
                 b["_scene"] = os.path.basename(f)
                 b["_win"] = win or DEF_WIN
+                b["_gy"] = 0.0 if gy is None else gy
             rows += bds
     if not rows:
         return None
@@ -1825,6 +2505,11 @@ def _scan_scenes(verbose=True):
     tot_cur = tot_new = win_cur = 0
     kinds = {}
     tiers = {}
+    over = []
+    bays_out = 0
+    d_shift = {"promote": 0, "demote": 0, "same": 0}
+    d_delta = []
+    bs4 = 0
     for b in rows:
         c, w = cur_prims(b, b["_win"])
         tot_cur += c
@@ -1835,9 +2520,27 @@ def _scan_scenes(verbose=True):
         tot_new += len(K.calls)
         kinds[p.kind] = kinds.get(p.kind, 0) + 1
         tiers[p.tier] = tiers.get(p.tier, 0) + 1
-        if len(K.calls) > prim_budget(p.kind, p.tier):
+        cap = prim_budget(p.kind, p.tier, p.W)          # B-F2: cap follows W
+        if len(K.calls) > cap:
+            over.append((b["_scene"], p.kind, p.tier, len(K.calls), cap))
             print(f"    [예산초과] {b['_scene']} {p.kind}/{p.tier} "
-                  f"{len(K.calls)} > {prim_budget(p.kind, p.tier)}")
+                  f"{len(K.calls)} > {cap}")
+        if p.n_bays:                                    # B-F2 band audit
+            bw = p.W / p.n_bays
+            if not (SHOP_BAY_MIN - 1e-9 <= bw <= SHOP_BAY_MAX + 1e-9):
+                bays_out += 1
+        # --- B-F3 / BS-4, measured but **not applied** (scenes are unwired) ---
+        pe = plan_building(b, eyes=judged_eyes(b.get("_gy", 0.0)),
+                           backdrop_demote=False)
+        d_delta.append(p.dist - pe.d_true)
+        if pe.tier == p.tier:
+            d_shift["same"] += 1
+        elif pe.d_true < p.dist:
+            d_shift["promote"] += 1
+        else:
+            d_shift["demote"] += 1
+        if pe.in_frame is False:
+            bs4 += 1
     if verbose:
         print("\n" + "=" * 74)
         print(f"33씬 실측 ({len(rows)}동, scene18 town 13동은 튜플 생성이라 제외)")
@@ -1848,6 +2551,17 @@ def _scan_scenes(verbose=True):
               f"({100.0 * (tot_new - tot_cur) / max(1, tot_cur):+.1f} %)")
         print(f"  추론 유형 분포 : {kinds}")
         print(f"  LOD 티어 분포  : {tiers}")
+        print(f"  [B-F2] 베이 폭 3.0~4.5 m 밖 : {bays_out}동 "
+              f"(상한이 물린 초광폭 파사드)")
+        print(f"  [예산] 초과 : {len(over)}동")
+        dd = sorted(d_delta)
+        print(f"  [B-F3] 씬별 판정 시선 기준 티어 변동 : "
+              f"승급 {d_shift['promote']} · 강등 {d_shift['demote']} · "
+              f"동일 {d_shift['same']} / {len(rows)}동 "
+              f"({100.0 * (len(rows) - d_shift['same']) / max(1, len(rows)):.1f} % 오티어)")
+        print(f"  [B-F3] d_default − d_true : 평균 {sum(dd) / max(1, len(dd)):+.1f} · "
+              f"중앙 {dd[len(dd) // 2]:+.1f} · 범위 {dd[0]:+.1f} … {dd[-1]:+.1f} m")
+        print(f"  [BS-4] ±30° 프레임 밖 (backdrop 대상) : {bs4}동 / {len(rows)}동")
     return tot_cur, tot_new
 
 

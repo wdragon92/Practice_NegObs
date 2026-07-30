@@ -64,7 +64,7 @@ import random
 import zlib
 
 __all__ = [
-    "Kit", "Facade", "facade_from_bd",
+    "Kit", "Facade", "facade_from_bd", "WALL_PROUD",
     "frame_ceiling", "lod_tier", "floor_levels", "window_rows_visible",
     "build_plinth", "build_shopfront", "build_aircon_units", "build_signage",
     "build_balcony_stack", "build_downpipe_run", "build_fire_access_marks",
@@ -93,6 +93,13 @@ SIGN_PROJ_T = 0.30       # statutory: projecting sign thickness <=0.30 (Seoul)
 SIGN_PROJ_BOTTOM = 3.00  # statutory: ground to underside >=3.0 (4.0 where there is no sidewalk)
 STAIR_RISER = 0.16       # statutory range: rules §15 riser 0.15-0.18 (<=0.15 exempts the mid rail)
 STAIR_TREAD = 0.32       # statutory: rules §15 tread >=0.30
+WALL_PROUD = 0.005       # convention: **inner** face of a facade-plane attachment sits
+                         # 5 mm outside the wall it is mounted on. Identical to
+                         # `scene_common.build_building`'s `WIN_EPS` (scene_common.py:2644),
+                         # which settled on the same figure for the same reason: the shell
+                         # is a **solid** box, so any recess buries the glass. Without
+                         # reveal geometry the deepest expressible recess is zero, and a
+                         # coplanar face z-fights. See `build_shopfront(wall_out=...)`.
 GAS_BAND_W = 0.030       # statutory: KGS FU551 2.5.7.2 - yellow band width 30 mm
 GAS_BAND_Z = 1.00        # statutory: +1 m above each floor level
 GAS_VALVE_Z = (1.60, 2.00)   # confirmed: LH city gas specification - riser main valve at floor +1.6-2.0
@@ -400,7 +407,7 @@ def build_shopfront(K, stage, prefix, fac, mtl_glass, mtl_frame,
                     mtl_stone=None, ground_h=4.00, bay_w=5.00,
                     opening_h=2.60, kick_h=0.25, inset=0.12,
                     shutter_box=True, steps=1, door_bay=None,
-                    max_bays=6, seed=0):
+                    max_bays=6, seed=0, wall_out=0.0):
     """Ground-floor shopfront: opening + kick plate + shutter box + entrance steps.
     **Prims per building = 2*bays + 3-5** (bays=4 -> 11-13; bays capped by `max_bays`).
 
@@ -422,15 +429,33 @@ def build_shopfront(K, stage, prefix, fac, mtl_glass, mtl_frame,
         default 0.32. Guide rails would be 2 per bay and double the prim count, so
         they are **not implemented** (60 mm vanishes at evaluation distance).
 
-    The opening is recessed `inset` **into** the wall (same sign convention as the
-    current window inset). Kick plate and shutter box protrude slightly beyond the
-    wall face to cast a shadow line.
+    `wall_out` [B-F1] is the outward offset of the **wall surface this shopfront is
+    mounted on**, measured from `fac.plane` in `Facade` `out` units. 0.0 means the
+    facade plane itself. Callers that build a set-back mass (an office podium, a
+    daylight step, a protruding core) pass the outward face of whichever volume
+    actually covers this band, so the glazing lands on the surface that is really
+    there. See `building_kit.Plan.out_at`.
+
+    `inset` **[retained for API compatibility, currently a no-op]**. It used to push
+    the glazing `inset` metres *into* the wall, but the shell is a **solid** box:
+    survey R3 §5.1 measured that this buried **62 of 62** glazing prims across five
+    types and four LOD tiers, so no window in the library was ever visible. Without
+    reveal geometry (4 extra prims per bay, which the prim budget forbids) the
+    deepest expressible recess is **zero**, and a coplanar face z-fights — the exact
+    conclusion `scene_common.build_building` reached at its `WIN_EPS` block
+    (`scene_common.py:2637-2645`). Glazing therefore sits `WALL_PROUD` (5 mm) proud
+    of `wall_out`. The parameter is kept so the reveal decomposition can restore it
+    without a signature change (a signature change is a 24-call-site edit).
+
+    Kick plate and shutter box protrude further than the glazing so they still cast
+    their shadow line onto it.
     """
     rng = _rng(prefix, "shopfront", seed)
     prims = []
     W = fac.width
     if W < 1.5:
         return prims
+    wo = float(wall_out)                        # [B-F1] wall surface this sits on
     nb = max(1, min(int(max_bays), int(round(W / max(2.0, float(bay_w))))))
     bw = W / nb
     z0 = fac.base_z
@@ -449,7 +474,7 @@ def build_shopfront(K, stage, prefix, fac, mtl_glass, mtl_frame,
         tread = STAIR_TREAD * (ns - s)          # Lower steps are deeper (nosing overlap)
         prims.append(K.box(
             stage, f"{prefix}/ShopStep_{s}",
-            fac.world(du, tread / 2.0, (step_top + zt) / 2.0),
+            fac.world(du, wo + tread / 2.0, (step_top + zt) / 2.0),
             fac.size(dw + 0.80, tread, r + 0.02),
             mtl_stone if mtl_stone is not None else mtl_frame))
         step_top = zt
@@ -460,33 +485,36 @@ def build_shopfront(K, stage, prefix, fac, mtl_glass, mtl_frame,
     op_z1 = min(op_z0 + op_h, z0 + gh - 0.45)   # Reserve room for the slab and sign band
     op_h = max(1.2, op_z1 - op_z0)
 
+    g_t, d_t = 0.04, 0.06                       # glazing / door slab thickness
     for b in range(nb):
         u = fac.u0 + (b + 0.5) * bw
         gw = max(0.6, bw - 0.40)                # Bay minus 0.40 (columns and frames)
-        # Kick plate - stone/metal band
+        # Kick plate - stone/metal band. Sits further out than the glazing so its
+        # shadow line still falls on the glass.
         prims.append(K.box(
             stage, f"{prefix}/ShopKick_{b}",
-            fac.world(u, 0.03, z0 + kb / 2.0),
+            fac.world(u, wo + 0.03, z0 + kb / 2.0),
             fac.size(bw, 0.06, kb),
             mtl_stone if mtl_stone is not None else mtl_frame))
-        # Glazed opening - inset into the wall
+        # Glazed opening - **5 mm proud of the wall surface** [B-F1]. See the
+        # `inset` note in the docstring for why it is not recessed.
         prims.append(K.box(
             stage, f"{prefix}/ShopGlass_{b}",
-            fac.world(u, -float(inset), (op_z0 + op_z1) / 2.0),
-            fac.size(gw, 0.04, op_h), mtl_glass))
+            fac.world(u, wo + WALL_PROUD + g_t / 2.0, (op_z0 + op_z1) / 2.0),
+            fac.size(gw, g_t, op_h), mtl_glass))
 
     # Entrance door - **height 2.10 is a scale anchor**. Not randomised.
     prims.append(K.box(
         stage, f"{prefix}/ShopDoor",
-        fac.world(du, -float(inset) + 0.02, step_top + DOOR_H / 2.0),
-        fac.size(dw, 0.06, DOOR_H), mtl_frame))
+        fac.world(du, wo + WALL_PROUD + d_t / 2.0, step_top + DOOR_H / 2.0),
+        fac.size(dw, d_t, DOOR_H), mtl_frame))
 
     # Shutter box - lintel above the opening
     if shutter_box:
         sb_h = 0.32                             # [estimate] 0.25-0.40
         prims.append(K.box(
             stage, f"{prefix}/ShutterBox",
-            fac.world(fac.mid, 0.09, op_z1 + sb_h / 2.0),
+            fac.world(fac.mid, wo + 0.09, op_z1 + sb_h / 2.0),
             fac.size(W - 0.20, 0.18, sb_h), mtl_frame))
     return prims
 
@@ -559,7 +587,20 @@ def build_aircon_units(K, stage, prefix, fac, mtl_body, mtl_bracket=None,
                     break
                 u = fac.u0 + u_margin + (k + 0.5) * \
                     (W - 2 * u_margin) / max(1, int(per_level))
-                # Deterministic micro offset for the left/right placement per floor (avoids a ruler-straight look)
+                # ---- KEEP `[ruled 07-30]` W3 spec §1.2 -----------------------
+                # This `U(-0.35, +0.35)` u-offset survives the W3 jitter abolition
+                # **on purpose**, and is listed as a KEEP so nobody "fixes" it.
+                # Reason it is not decorative wobble: an outdoor unit is mounted
+                # wherever the dwelling's own indoor unit and refrigerant run put
+                # it, which follows the **room layout behind the wall**, not the
+                # facade grid. Neighbouring flats in the same block have different
+                # room layouts, so the real column of units is genuinely irregular
+                # - lining them up on a ruler is what would be the fabrication.
+                # This closes RT-R §4-N1 (the row C's "complete inventory" missed)
+                # and it is the reason the W3 spec's abolish list is 13 rows, not
+                # 14. `facade_kit.py` gas-valve z `U(*GAS_VALVE_Z)` is KEEP for the
+                # same class of reason (it carries a stated real basis).
+                # Determinism is unaffected: `rng` is crc32-seeded, never `hash()`.
                 u += rng.uniform(-0.35, 0.35)
                 slots.append((u, zf + 0.35))    # [estimate] floor level +0.2-0.6
 
@@ -870,7 +911,7 @@ def build_fire_access_marks(stage, prefix, fac, levels, mtl_decal,
                             tri_d=FIRE_TRI_D, spacing_m=FIRE_SPACING,
                             floor_min=2, floor_max=11, sill_up=FIRE_SILL_MAX,
                             win_h=1.20, out=0.010, max_floors=None,
-                            hit_mark=False):
+                            hit_mark=False, out_fn=None):
     """**Fire entry window red inverted triangle decal.**
     **Prims per building = (stations) x (marked floors)** - one thin triangular quad
     per location.
@@ -897,6 +938,13 @@ def build_fire_access_marks(stage, prefix, fac, levels, mtl_decal,
     Geometry: an equilateral triangle inscribed in a circle of diameter `tri_d`, with
     the **vertex pointing down**. A 3-point Mesh offset `out` (default 0.010) from the
     wall face - the minimum that avoids z-fighting.
+
+    `out_fn(u, z) -> out` **[B-F1]** overrides the flat `out` per station. The facade
+    plane is not always the outermost surface at a given (u, z): an apartment's
+    stair/lift core protrudes `building_kit.CORE_PROUD` = 0.60 m, so a mark placed at
+    a flat 0.010 lands **588 mm inside the core** and is invisible. Pass a resolver
+    (`building_kit.Plan.out_at`) and each station sits on whatever wall is really
+    there. With `out_fn=None` the behaviour is exactly the flat `out` as before.
     `subdivisionScheme="none"` is **authored explicitly** (the USD default catmullClark
     rounds the triangle and destroys the shape - same reason as build_sign).
     doubleSided=True removes any winding-direction bug at the root (same prim count).
@@ -927,13 +975,14 @@ def build_fire_access_marks(stage, prefix, fac, levels, mtl_decal,
                 continue
             # Window centre z = floor level + sill height (statutory max 0.8) + window height/2
             zc = zf + float(sill_up) + float(win_h) / 2.0
+            o = float(out) if out_fn is None else float(out_fn(u, zc))
             # Equilateral triangle (vertex down): angles -90, 30, 150 deg
             pts = []
             for ang in (-90.0, 30.0, 150.0):
                 a = math.radians(ang)
                 du, dz = R * math.cos(a), R * math.sin(a)
                 pts.append(Gf.Vec3f(*[float(v) for v in
-                                      fac.world(u + du, out, zc + dz)]))
+                                      fac.world(u + du, o, zc + dz)]))
             path = f"{prefix}/FireMark_{s}_{fl}"
             mesh = UsdGeom.Mesh.Define(stage, path)
             mesh.CreatePointsAttr(pts)
@@ -956,7 +1005,7 @@ def build_fire_access_marks(stage, prefix, fac, levels, mtl_decal,
                     a = math.radians(ang)
                     du, dz = 0.015 * math.cos(a), 0.015 * math.sin(a)
                     hp.append(Gf.Vec3f(*[float(v) for v in fac.world(
-                        u + 0.35 + du, out, zc + R + 0.10 + dz)]))
+                        u + 0.35 + du, o, zc + R + 0.10 + dz)]))
                 hm = UsdGeom.Mesh.Define(stage, f"{prefix}/FireHit_{s}_{fl}")
                 hm.CreatePointsAttr(hp)
                 hm.CreateFaceVertexCountsAttr([3])

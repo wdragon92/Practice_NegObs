@@ -1,0 +1,71 @@
+#usda 1.0
+(
+    """Auto-authored by `urban_kit.asset_wrapper` (W3 T4b, MD-F2 / MD-F3).
+
+    Reference wrapper for `rock_moss_set_01` under treatment `stone_moss`.
+    scene07 §4.1-3 moss tier (`scene07:257 tint_moss`).
+
+    The opinion below composes INSIDE the prototype, which is the only place
+    it survives `SetInstanceable(True)` — a scene-side binding stops at the
+    instance boundary. See section [8b] of `urban_kit.py`.
+    Do not hand-edit: `asset_wrapper()` rewrites this file when the stamp
+    below no longer matches the registry.
+    """
+    defaultPrim = "Root"
+    metersPerUnit = 1.0
+    upAxis = "Z"
+    customLayerData = {
+        string negobs_wrap_stamp = "a53d311b931c414d"
+        string negobs_wrap_asset = "rock_moss_set_01"
+        string negobs_wrap_treatment = "stone_moss"
+    }
+)
+
+def Xform "Root"
+{
+    def Scope "WrapLooks"
+    {
+        def Material "Mtl"
+        {
+            token outputs:mdl:displacement.connect = </Root/WrapLooks/Mtl/Shader.outputs:out>
+            token outputs:mdl:surface.connect = </Root/WrapLooks/Mtl/Shader.outputs:out>
+            token outputs:mdl:volume.connect = </Root/WrapLooks/Mtl/Shader.outputs:out>
+
+            def Shader "Shader"
+            {
+                uniform token info:implementationSource = "sourceAsset"
+                uniform asset info:mdl:sourceAsset = @/home/vislab/miniconda3/envs/env_isaaclab/lib/python3.10/site-packages/omni/mdl/core/Base/OmniPBR.mdl@
+                uniform token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+                asset inputs:diffuse_texture = @../urban_cc0/rock_moss_set_01/textures/rock_moss_set_01_diff_1k.jpg@ (
+                    colorSpace = "auto"
+                )
+                asset inputs:reflectionroughness_texture = @../urban_cc0/rock_moss_set_01/textures/rock_moss_set_01_rough_1k.jpg@ (
+                    colorSpace = "raw"
+                )
+                float inputs:reflection_roughness_texture_influence = 1
+                bool inputs:project_uvw = 0
+                color3f inputs:diffuse_tint = (0.8200, 0.9000, 0.7800)
+                float inputs:metallic_constant = 0.000
+                token outputs:out
+            }
+        }
+    }
+
+    def Xform "Geom" (
+        prepend references = @../urban_cc0/rock_moss_set_01/rock_moss_set_01_1k.usdc@
+        prepend apiSchemas = ["MaterialBindingAPI"]
+    )
+    {
+        rel material:binding = </Root/WrapLooks/Mtl> (
+            bindMaterialAs = "strongerThanDescendants"
+        )
+
+        over "_materials"
+        {
+            over "rock_moss_set_01"
+            {
+                token outputs:mtlx:surface.connect = None
+            }
+        }
+    }
+}

@@ -36,6 +36,14 @@ here rather than in the asset tree because `assets/urban/` is gitignored, and he
 than per scene because scene07 and scene10 each had to invent their own workaround before
 this existed (`w3_s07_rebuild_v1.md` §5.1 · `w3_s10_rebuild_v1.md` §5.2).
 
+and — added by **W3 T4b** — the **reference wrappers** in section [8b]
+(`asset_wrapper()` + `add_urban_asset(..., treatment=)`): the urban twin of K4(0)'s
+`scene_common.veg_wrapper_rel`. They are the only route that gives a scene *both*
+instancing and a chosen material (MD-F2), and they are also where the **MaterialX gap**
+is closed (MD-F3): all 33 Poly Haven CC0 rows bind an `ND_normalmap_float` node that is
+absent from this runtime's Sdr registry, which is a different subsystem from [1b]'s
+`.mdl` package and is not repaired by it.
+
 ## Conventions
 
 - **Z-up, metres.** Scene stages are `metersPerUnit = 1.0` (`scene_common.py:900-903`).
@@ -686,7 +694,8 @@ def available(asset_id):
 # [7] Load statistics — the same posture as `scene_common.LOOK_STATS`
 # ===========================================================================
 LOAD_STATS = dict(placed=0, by_group={}, far_override_mats=0, far_override_scaled=0,
-                  instanced=0, z_review_hits=[], warn_rows=[], scope_unchecked=[])
+                  instanced=0, z_review_hits=[], warn_rows=[], scope_unchecked=[],
+                  wrapped=0, by_treatment={})
 _WARNED = set()
 
 
@@ -707,6 +716,9 @@ def load_report():
                      f"(cap {FAR_ALBEDO_CAP})")
     if LOAD_STATS["instanced"]:
         lines.append(f"[urban_kit] instanceable: {LOAD_STATS['instanced']}")
+    if LOAD_STATS["wrapped"]:
+        t = " · ".join(f"{k} {v}" for k, v in sorted(LOAD_STATS["by_treatment"].items()))
+        lines.append(f"[urban_kit] wrapper refs: {LOAD_STATS['wrapped']} — {t}")
     if LOAD_STATS["z_review_hits"]:
         lines.append(f"[urban_kit] z-review rows placed at grade: "
                      f"{sorted(set(LOAD_STATS['z_review_hits']))}")
@@ -722,7 +734,7 @@ def load_report():
 def add_urban_asset(stage, prim_path, asset_id, pos_m=(0.0, 0.0, 0.0), yaw_deg=0.0,
                     target_h=None, scale_mul=1.0, tilt_deg=(0.0, 0.0),
                     z_mode=None, z_lift_m=None, scene=None, instanceable=False,
-                    far_override="auto"):
+                    far_override="auto", treatment=None):
     """Reference an urban asset under an Xform this function owns. Returns the parent `Xform`.
 
     Args:
@@ -741,6 +753,12 @@ def add_urban_asset(stage, prim_path, asset_id, pos_m=(0.0, 0.0, 0.0), yaw_deg=0
       scene        scene tag ('01', 'C2', 'D2' ...) — enforces the §3.3 season/era scopes.
       instanceable set `/Asset` instanceable so repeated placements share one prototype.
       far_override 'auto' (default) or 'off' — the §1.11 A/B arms for the 8 far-tier buildings.
+      treatment    a `TREATMENTS` key (section [8b]). The reference target becomes the
+                   per-(asset, treatment) **wrapper layer**, so the material opinion is
+                   already inside the prototype and `instanceable=True` keeps it. This is
+                   the only supported way to combine instancing with a chosen material —
+                   a scene-side bind cannot reach into a prototype. Falls back to the raw
+                   asset (with a warning) when the pair has no wrapper.
 
     Quirk 4 — **parent-Xform placement.** The referenced roots already own
     `[xformOp:translate, rotateXYZ, scale]` on 78 of the 243 measurable rows (every `_inst.usd`
@@ -811,10 +829,25 @@ def add_urban_asset(stage, prim_path, asset_id, pos_m=(0.0, 0.0, 0.0), yaw_deg=0
     if z_lift_m:
         lift += float(z_lift_m)
 
+    # --- reference target: the asset, or its (asset, treatment) wrapper [8b] --
+    ref_path = s.usd_path
+    if treatment:
+        w = asset_wrapper(asset_id, treatment)
+        if w:
+            ref_path = w
+            LOAD_STATS["wrapped"] += 1
+            LOAD_STATS["by_treatment"][treatment] = \
+                LOAD_STATS["by_treatment"].get(treatment, 0) + 1
+        else:
+            _warn_once(f"wrapmiss:{asset_id}:{treatment}",
+                       f"[urban_kit][경고] {asset_id}: 트리트먼트 '{treatment}' 래퍼를 "
+                       f"만들 수 없어 원본 자산으로 폴백한다 — 재질 선택은 적용되지 "
+                       f"않으며, CC0 자산이라면 MaterialX 결함(MD-F3)이 그대로 남는다")
+
     # --- prims (quirk 4) ----------------------------------------------------
     xf = UsdGeom.Xform.Define(stage, prim_path)
     asset_prim = UsdGeom.Xform.Define(stage, prim_path + "/Asset").GetPrim()
-    asset_prim.GetReferences().AddReference(s.usd_path)
+    asset_prim.GetReferences().AddReference(ref_path)
 
     x, y, z = (float(v) for v in pos_m)
     xf.AddTranslateOp().Set(Gf.Vec3d(x, y, z + lift * geom_scale))
@@ -829,7 +862,15 @@ def add_urban_asset(stage, prim_path, asset_id, pos_m=(0.0, 0.0, 0.0), yaw_deg=0
     # --- far-tier material override (`[ruled 07-30]` §1.11) -----------------
     did_override = False
     if s.group == "buildings_far" and far_override == "auto":
-        did_override = _bind_far_override(stage, asset_prim, s)
+        if ref_path != s.usd_path:
+            # A treatment IS a material decision, and the §1.11 override is another
+            # one. Running both would bind per mesh over the wrapper's material and
+            # take the instancing back — the whole point of the wrapper.
+            _warn_once("farovr:" + asset_id,
+                       f"[urban_kit][경고] {asset_id}: treatment='{treatment}' 이 "
+                       f"§1.11 원거리 오버라이드를 대체한다 (둘 다 재질 결정이다)")
+        else:
+            did_override = _bind_far_override(stage, asset_prim, s)
 
     if instanceable:
         if did_override:
@@ -994,6 +1035,475 @@ def _make_far_override_mtl(stage, s, src_mat):
     LOAD_STATS["far_override_mats"] += 1
     _FAR_MTL_CACHE[key] = mtl
     return mtl
+
+
+# ===========================================================================
+# [8b] Reference wrappers — instancing **and** a scene-chosen material
+#
+# ## The two defects this closes
+#
+# **MD-F2 — "instanced" and "scene-chosen material" were mutually exclusive.**
+# A scene that wants its own material on an urban asset had to bind it from the
+# scene, and a binding authored in the scene cannot reach inside a prototype:
+# an ancestor `strongerThanDescendants` opinion stops at the instance boundary
+# and a per-mesh `Bind()` cannot be authored on an instance proxy at all. So
+# scene07 (30 kerb boulders) and scene10 (4 outcrops) both had to pass
+# `instanceable=False` — the material won and the prototype sharing was lost.
+# `w3_md_reverts_v1.md` §1.5 measured that this is **not** revertible (the FU-1
+# arm did revert it and lost the look), and named the fix: the urban twin of
+# K4(0)'s `sc.veg_wrapper_rel`.
+#
+# **MD-F3 — the MaterialX gap.** `rock_moss_set_01` binds a MaterialX material
+# whose `ND_normalmap_float` node is **not in this runtime's Sdr registry**, so
+# the moment it is instanced the shader network fails to build and the asset
+# renders the red error fallback (`w3_md_reverts_v1.md` §1.4: 0.02 % → 4.50 %
+# of the frame). `ensure_mdl_package()` (section [1b]) repairs `.mdl` modules and
+# cannot touch a MaterialX node definition — different subsystem, different gap.
+#
+# **The gap is library-wide, not one asset** `[measured — this session, usd-core
+# 26.8]`. Every one of the **33 Poly Haven CC0 rows** carries it: 50 materials,
+# each with an `outputs:mtlx:surface` terminal whose network reaches an
+# `ND_normalmap_float` node. MD-F3 named one asset because one asset is all that
+# is wired today; any new CC0 call site renders red. That is the finding this
+# section is sized for.
+#
+# ## The route — the same one K4(0) proved for vegetation
+#
+# A wrapper layer references the asset and carries the opinion. The wrapper is a
+# normal (non-instanced) composition, so the opinion composes; the scene then
+# references **the wrapper** and instances that, so the opinion is already inside
+# the prototype. Wrapper files live in `assets/urban_wrap/`, deliberately outside
+# the gitignored `assets/urban/` (NVIDIA) and `assets/urban_cc0/` (size) trees:
+# they hold one relative reference, a few `over`s and at most one material, so
+# they are trackable while the geometry stays untracked and procured.
+#
+# ## Two treatment kinds
+#
+# `mtlx_off` — block the material's `outputs:mtlx:surface` connection. USD's
+#   connection-blocking (`.connect = None`) removes the MaterialX terminal, and
+#   the renderer falls back to the **`outputs:surface` UsdPreviewSurface** terminal
+#   the same material already carries. Verified `[measured]` that **all 50 CC0
+#   materials carry both terminals**, so nothing is left unshaded — the fallback
+#   keeps the asset's own diffuse, roughness *and* normal map. No material is
+#   authored, no absolute path is written, the wrapper is byte-portable.
+#
+# `omnipbr` — author one OmniPBR material inside the wrapper from the asset's own
+#   texture set (`ASSET_TEXTURES`) plus the treatment's look parameters, and bind
+#   it on the wrapper root with `strongerThanDescendants`. This is the route for a
+#   scene that wants a *chosen* look (scene07's moss tiers, scene10's `rockface`),
+#   not merely a working one. It is the MDL arm: the material is OmniPBR, exactly
+#   what `make_pbr` and `_make_far_override_mtl` author.
+#
+#   **Normal-free, on purpose** `[measured]`: the CC0 sets ship `*_nor_gl_*` —
+#   OpenGL green convention — while this project's OmniPBR pipeline is fed
+#   `*_nor_dx_*` throughout (`scene_common.make_pbr` call sites). Binding a GL map
+#   into a DX slot inverts the green channel and lights every crevice from the
+#   wrong side, which is a worse defect than no normal at all. `use_normal=True`
+#   exists in the registry for a set that ships DX, and is off on every shipped row.
+#
+# ## What a scene gets
+#
+#     add_urban_asset(stage, path, "rock_moss_set_01", ..., treatment="mtlxoff",
+#                     instanceable=True)
+#
+# One prototype per (asset, treatment), the look the scene asked for, and **no
+# scene-side binding at all**. The wrapper is authored on demand if absent, and a
+# failure to author is never fatal — the caller silently falls back to the raw
+# asset, because a missing wrapper must never cost a scene its geometry.
+# ===========================================================================
+# `NEGOBS_URBAN_WRAP` redirects the authored layers elsewhere. `self_check()` uses it to
+# exercise all 45 (asset, treatment) pairs in a temp dir instead of writing 45 files into
+# a tracked tree: only the pairs a scene actually references belong in the repo, and a
+# gate that dirties the working tree it is gating is not a gate.
+URBAN_WRAP_DIR = os.environ.get("NEGOBS_URBAN_WRAP",
+                                os.path.join(ASSETS_DIR, "urban_wrap"))
+
+# Bumped when the authored text changes shape, so wrappers written by an older
+# revision are rewritten instead of being trusted.
+WRAP_FORMAT = 1
+
+# Materials that carry a MaterialX terminal, per asset, as prim paths **relative to
+# the asset's `defaultPrim`** `[measured — this session, usd-core 26.8; regenerated
+# and re-verified by `self_check()` step 7, so drift in a re-procured tree is a FAIL,
+# not a surprise]`. All 33 Poly Haven CC0 rows are here; every listed material also
+# carries an `outputs:surface` UsdPreviewSurface terminal, which is what makes
+# `mtlx_off` safe. The NVIDIA `nv_content` tree has **0** rows — its materials are
+# MDL and are section [1b]'s business.
+MTLX_MATERIALS = {
+    "Barrel_01": ("_materials/Barrel_01",),
+    "WetFloorSign_01": ("_materials/WetFloorSign_01",),
+    "barrel_03": ("_materials/barrel_03",),
+    "cardboard_box_01": ("_materials/cardboard_box_01",),
+    "concrete_road_barrier_02": ("_materials/concrete_road_barrier_02",),
+    "exterior_aircon_unit": ("_materials/exterior_aircon_unit_rusted_01",
+                             "_materials/exterior_aircon_unit_rusted_02",
+                             "_materials/exterior_aircon_unit_01",
+                             "_materials/exterior_aircon_unit_02"),
+    "hand_truck": ("_materials/hand_truck",),
+    "korean_fire_extinguisher_01": ("_materials/korean_fire_extinguisher_01_body",
+                                    "_materials/korean_fire_extinguisher_01_glass",
+                                    "_materials/korean_fire_extinguisher_01_paper"),
+    "lateral_sea_marker": ("_materials/lateral_sea_marker",),
+    "metal_trash_can": ("_materials/metal_trash_can",
+                        "_materials/metal_trash_can_rust"),
+    "modular_chainlink_fence": ("_materials/modular_chainlink_fence_posts",
+                                "_materials/modular_chainlink_fence_wire"),
+    "modular_fire_escape": ("_materials/modular_fire_escape_02",
+                            "_materials/modular_fire_escape_01"),
+    "modular_metal_gutter": ("_materials/modular_metal_gutter",),
+    "modular_urban_apartments_facade": (
+        "_materials/modular_urban_apartments_facade_trim_01",
+        "_materials/modular_urban_apartments_facade_trim_02",
+        "_materials/modular_urban_apartments_facade_plaster",
+        "_materials/modular_urban_apartments_facade_objects",
+        "_materials/modular_urban_apartments_facade_glass"),
+    "modular_wooden_pier": ("_materials/modular_wooden_pier_planks",
+                            "_materials/modular_wooden_pier_poles"),
+    "ocean_buoy": ("_materials/buoy",),
+    "old_tyre": ("_materials/tire_r13_01",),
+    "painted_wooden_bench": ("_materials/painted_wooden_bench",),
+    "planter_pot_clay": ("_materials/planter_pot_clay",),
+    "plastic_crate_03": ("_materials/plastic_crate_03",),
+    "power_box_01": ("_materials/power_box_01",),
+    "rock_moss_set_01": ("_materials/rock_moss_set_01",),
+    "rock_moss_set_02": ("_materials/rock_moss_set_02",),
+    "rollershutter_door": ("_materials/rollershutter_door",
+                           "_materials/rollershutter_door_graffiti"),
+    "rollershutter_window_01": ("_materials/rollershutter_window_01_graffiti",
+                                "_materials/rollershutter_window_01"),
+    "rollershutter_window_02": ("_materials/rollershutter_window_02",
+                                "_materials/rollershutter_window_02_graffiti"),
+    "security_light": ("_materials/security_light",
+                       "_materials/security_light_bulb"),
+    "stone_01": ("_materials/stone_01",),
+    "trashbag": ("_materials/trashbag",),
+    "tree_stump_01": ("_materials/tree_stump_01",),
+    "tree_stump_02": ("_materials/tree_stump_02",),
+    "utility_box_01": ("_materials/utility_box_01",),
+    "utility_box_02": ("_materials/utility_box_02",),
+}
+
+# The asset's own texture set, for the `omnipbr` treatments. Paths are relative to
+# `ASSETS_DIR` so the wrapper can reference them **relatively** and stay portable.
+# Only single-material assets are listed: one wrapper material bound
+# `strongerThanDescendants` over a 5-material facade would flatten five looks into
+# one, which is a look regression, not a fix — `_wrap_body` refuses the multi-material
+# rows outright rather than letting a caller discover that in a frame.
+ASSET_TEXTURES = {
+    "rock_moss_set_01": dict(
+        diffuse="urban_cc0/rock_moss_set_01/textures/rock_moss_set_01_diff_1k.jpg",
+        roughness="urban_cc0/rock_moss_set_01/textures/rock_moss_set_01_rough_1k.jpg",
+        normal="urban_cc0/rock_moss_set_01/textures/rock_moss_set_01_nor_gl_1k.exr"),
+    "rock_moss_set_02": dict(
+        diffuse="urban_cc0/rock_moss_set_02/textures/rock_moss_set_02_diff_1k.jpg",
+        roughness="urban_cc0/rock_moss_set_02/textures/rock_moss_set_02_rough_1k.jpg",
+        normal="urban_cc0/rock_moss_set_02/textures/rock_moss_set_02_nor_gl_1k.exr"),
+    "stone_01": dict(
+        diffuse="urban_cc0/stone_01/textures/stone_01_diff_1k.jpg",
+        roughness="urban_cc0/stone_01/textures/stone_01_rough_1k.exr",
+        normal="urban_cc0/stone_01/textures/stone_01_nor_gl_1k.exr"),
+    "tree_stump_01": dict(
+        diffuse="urban_cc0/tree_stump_01/textures/tree_stump_01_diff_1k.jpg",
+        roughness="urban_cc0/tree_stump_01/textures/tree_stump_01_rough_1k.exr",
+        normal="urban_cc0/tree_stump_01/textures/tree_stump_01_nor_gl_1k.exr"),
+    "tree_stump_02": dict(
+        diffuse="urban_cc0/tree_stump_02/textures/tree_stump_02_diff_1k.jpg",
+        roughness="urban_cc0/tree_stump_02/textures/tree_stump_02_rough_1k.exr",
+        normal="urban_cc0/tree_stump_02/textures/tree_stump_02_nor_gl_1k.exr"),
+    "old_tyre": dict(
+        diffuse="urban_cc0/old_tyre/textures/old_tyre_diff_1k.jpg",
+        roughness="urban_cc0/old_tyre/textures/old_tyre_rough_1k.exr",
+        normal="urban_cc0/old_tyre/textures/old_tyre_nor_gl_1k.exr"),
+}
+
+# The treatment registry. **A treatment is a look decision, not an asset fact** — the
+# same treatment applies to any asset that has what it needs, and the wrapper file is
+# named `<asset>__<treatment>.usda`, one prototype per pair.
+#
+# The three stone tiers carry `scene07:252-258`'s own measured tints
+# (`PARAMS["stone_mtl"]`), and `rockface` carries `scene10:645`'s `rockface_tint`, so
+# a scene migrating off its per-mesh bind (§ the revert recipe in
+# `Docs/reports/w3_t4b_v1.md`) keeps the numbers it already shipped instead of
+# inventing new ones here.
+TREATMENTS = {
+    # --- kind `mtlx_off`: no material, just the MaterialX terminal block --------
+    "mtlxoff": dict(
+        kind="mtlx_off",
+        doc="MD-F3 repair only — block the MaterialX terminal so the asset's own "
+            "UsdPreviewSurface (diffuse + roughness + normal) shades it."),
+    # --- kind `omnipbr`: the asset's textures under a chosen tint ---------------
+    "scan": dict(kind="omnipbr", tint=(1.0, 1.0, 1.0),
+                 doc="the scan's own albedo, rebound onto OmniPBR — the MDL arm of "
+                     "the MD-F3 repair, no tint applied."),
+    "stone_moss": dict(kind="omnipbr", tint=(0.82, 0.90, 0.78),
+                       doc="scene07 §4.1-3 moss tier (`scene07:257 tint_moss`)."),
+    "stone_mid": dict(kind="omnipbr", tint=(0.88, 0.90, 0.84),
+                      doc="scene07 §4.1-3 mid tier (`scene07:258 tint_mid`)."),
+    "stone_dry": dict(kind="omnipbr", tint=(0.90, 0.88, 0.84),
+                      doc="scene07 §4.1-3 dry tier (`scene07:257 tint_dry`)."),
+    "rockface": dict(kind="omnipbr", tint=(0.80, 0.80, 0.78),
+                     doc="scene10 v6 jointless natural rock (`scene10:645 "
+                         "rockface_tint`)."),
+}
+
+_WRAP_CACHE = {}
+
+
+def _wrap_tree(rel_paths):
+    """Nest `('a/b', 'a/c')` into `{'a': {'b': {}, 'c': {}}}`.
+
+    Two `over "_materials"` blocks in one layer is a duplicate prim spec and will not
+    parse, and every CC0 row keeps its materials under a single `_materials` scope, so
+    the blocks have to be merged rather than emitted one per material.
+    """
+    tree = {}
+    for rp in rel_paths:
+        node = tree
+        for part in rp.strip("/").split("/"):
+            node = node.setdefault(part, {})
+    return tree
+
+
+def _wrap_overs(tree, leaf_body, indent=1):
+    """Emit the nested `over` blocks for `_wrap_tree`'s output."""
+    pad = "    " * indent
+    out = []
+    for name, kids in sorted(tree.items()):
+        body = (_wrap_overs(kids, leaf_body, indent + 1) if kids
+                else "".join(f"{pad}    {ln}\n" for ln in leaf_body))
+        out.append(f'{pad}over "{name}"\n{pad}{{\n{body}{pad}}}\n')
+    return "".join(out)
+
+
+def _wrap_stamp(s, treatment, tr):
+    """The identity of a wrapper's *content*, machine-independent.
+
+    Deliberately excludes `OMNIPBR_PATH`: it is absolute and per-installation, so
+    including it would make every checkout rewrite (and dirty) every `omnipbr`
+    wrapper. Staleness against the local MDL install is checked separately, by
+    testing whether the path the file actually names still exists.
+    """
+    import hashlib
+    key = json.dumps([WRAP_FORMAT, s.id, treatment,
+                      os.path.basename(s.usd_path),
+                      MTLX_MATERIALS.get(s.id, ()),
+                      ASSET_TEXTURES.get(s.id, {}),
+                      {k: v for k, v in sorted(tr.items()) if k != "doc"}],
+                     sort_keys=True, default=str)
+    return hashlib.sha1(key.encode("utf-8")).hexdigest()[:16]
+
+
+def _wrap_body(s, treatment, tr, stamp):
+    """The wrapper layer text, or None when this (asset, treatment) is not buildable.
+
+    Text, not `Usd.Stage.CreateNew`, for `sc._veg_wrapper_write`'s reason: this module
+    is imported by the CPU-only invariance harness where `pxr` is a recording stub, and
+    a wrapper must be authorable there too. It is also the reviewable form — a wrapper
+    is 20 lines of composition, and it should read like it.
+    """
+    src = os.path.relpath(s.usd_path, URBAN_WRAP_DIR)
+    head = (
+        '#usda 1.0\n(\n'
+        '    """Auto-authored by `urban_kit.asset_wrapper` (W3 T4b, MD-F2 / MD-F3).\n\n'
+        '    Reference wrapper for `%s` under treatment `%s`.\n'
+        '    %s\n\n'
+        '    The opinion below composes INSIDE the prototype, which is the only place\n'
+        '    it survives `SetInstanceable(True)` — a scene-side binding stops at the\n'
+        '    instance boundary. See section [8b] of `urban_kit.py`.\n'
+        '    Do not hand-edit: `asset_wrapper()` rewrites this file when the stamp\n'
+        '    below no longer matches the registry.\n'
+        '    """\n'
+        '    defaultPrim = "Root"\n'
+        '    metersPerUnit = %s\n'
+        '    upAxis = "Z"\n'
+        '    customLayerData = {\n'
+        '        string negobs_wrap_stamp = "%s"\n'
+        '        string negobs_wrap_asset = "%s"\n'
+        '        string negobs_wrap_treatment = "%s"\n'
+        '    }\n'
+        ')\n\n' % (s.id, treatment, tr.get("doc", ""), repr(float(s.mpu)),
+                   stamp, s.id, treatment))
+
+    # **Why the asset hangs under `Root/Geom` and not under `Root` itself.**
+    # `[measured — usd-core 26.8, this session]` A property authored on the wrapper's
+    # `Root` composes onto the **instance prim** (`<prim>/Asset`), not into the
+    # prototype: USD shares the instance root's *children*, and the instance root's own
+    # properties stay on the instance. The first cut of this section bound
+    # `material:binding` on `Root` and measured the result inside the prototype —
+    # `/__Prototype_1` carried **no** `material:binding` at all and all six meshes still
+    # resolved to the asset's own material. Ancestor binding resolution does not walk out
+    # of a prototype into the instance that references it, so the bind was inert exactly
+    # the way the scene-side bind it replaces is inert. One extra Xform level puts the
+    # binding on a prim that **is** inside the prototype, and both treatments use the same
+    # shape so a scene can switch treatment without the composed paths moving.
+    geom_open = ('    def Xform "Geom" (\n'
+                 '        prepend references = @%s@\n' % src)
+
+    if tr["kind"] == "mtlx_off":
+        mats = MTLX_MATERIALS.get(s.id)
+        if not mats:
+            return None                      # nothing to block — no wrapper needed
+        overs = _wrap_overs(_wrap_tree(mats),
+                            ["token outputs:mtlx:surface.connect = None"], indent=2)
+        return (head +
+                'def Xform "Root"\n{\n' + geom_open + '    )\n    {\n' + overs +
+                '    }\n}\n')
+
+    if tr["kind"] == "omnipbr":
+        tex = ASSET_TEXTURES.get(s.id)
+        if not tex:
+            return None
+        if len(MTLX_MATERIALS.get(s.id, ("",))) > 1:
+            return None                      # multi-material row — see ASSET_TEXTURES
+        mdl = OMNIPBR_PATH
+        if not os.path.isfile(mdl):
+            return None                      # no local OmniPBR — mtlx_off is the route
+        tint = tuple(float(v) for v in tr.get("tint", (1.0, 1.0, 1.0)))
+        PAD = " " * 16                                   # inside `def Shader`
+
+        def _tex_line(name, rel, cs):
+            return ('asset inputs:%s = @%s@ (\n%s    colorSpace = "%s"\n%s)'
+                    % (name, rel, PAD, cs, PAD))
+
+        def _arel(key):
+            return os.path.relpath(os.path.join(ASSETS_DIR, tex[key]), URBAN_WRAP_DIR)
+
+        lines = [
+            'uniform token info:implementationSource = "sourceAsset"',
+            'uniform asset info:mdl:sourceAsset = @%s@' % mdl,
+            'uniform token info:mdl:sourceAsset:subIdentifier = "OmniPBR"',
+            _tex_line("diffuse_texture", _arel("diffuse"), "auto"),
+        ]
+        if tex.get("roughness"):
+            lines.append(_tex_line("reflectionroughness_texture",
+                                   _arel("roughness"), "raw"))
+            lines.append('float inputs:reflection_roughness_texture_influence = 1')
+        if tr.get("use_normal") and tex.get("normal"):
+            lines.append(_tex_line("normalmap_texture", _arel("normal"), "raw"))
+        lines.append('bool inputs:project_uvw = 0')      # the asset's own UVs
+        lines.append('color3f inputs:diffuse_tint = (%.4f, %.4f, %.4f)' % tint)
+        lines.append('float inputs:metallic_constant = %.3f'
+                     % float(tr.get("metallic", 0.0)))
+        if tr.get("roughness_const") is not None:
+            lines.append('float inputs:reflection_roughness_constant = %.3f'
+                         % float(tr["roughness_const"]))
+        if tr.get("specular_level") is not None:
+            lines.append('float inputs:specular_level = %.3f'
+                         % float(tr["specular_level"]))
+        lines.append('token outputs:out')
+        shader = "".join("%s%s\n" % (PAD, ln) for ln in lines)
+        mtl = (
+            '    def Scope "WrapLooks"\n    {\n'
+            '        def Material "Mtl"\n        {\n'
+            '            token outputs:mdl:displacement.connect = '
+            '</Root/WrapLooks/Mtl/Shader.outputs:out>\n'
+            '            token outputs:mdl:surface.connect = '
+            '</Root/WrapLooks/Mtl/Shader.outputs:out>\n'
+            '            token outputs:mdl:volume.connect = '
+            '</Root/WrapLooks/Mtl/Shader.outputs:out>\n\n'
+            '            def Shader "Shader"\n            {\n'
+            + shader
+            + '            }\n        }\n    }\n')
+        # The MaterialX terminal is blocked here **as well**. The bind above already
+        # takes every mesh off the asset's own material, but the broken network would
+        # still be sitting in the prototype, and "an unbound material is never built"
+        # is an assumption about the render delegate, not a fact this module measured.
+        # Blocking costs one line and removes the assumption.
+        blk = _wrap_overs(_wrap_tree(MTLX_MATERIALS.get(s.id, ())),
+                          ["token outputs:mtlx:surface.connect = None"], indent=2)
+        return (head +
+                'def Xform "Root"\n{\n' + mtl + '\n' + geom_open +
+                '        prepend apiSchemas = ["MaterialBindingAPI"]\n'
+                '    )\n    {\n'
+                '        rel material:binding = </Root/WrapLooks/Mtl> (\n'
+                '            bindMaterialAs = "strongerThanDescendants"\n'
+                '        )\n\n' + blk + '    }\n}\n')
+
+    return None
+
+
+def _wrap_is_current(path, stamp):
+    """True when the on-disk wrapper is this registry's, and usable on this machine.
+
+    Two questions, deliberately separate:
+      - **identity** — does the file carry `stamp`? A registry edit or a `WRAP_FORMAT`
+        bump invalidates it.
+      - **locality** — every `@...@` asset path it names must resolve. The one that can
+        fail on a fresh checkout is the absolute `OmniPBR.mdl`, which is per-installation
+        (`OMNIPBR_PATH` is hard-coded the same way in `scene_common.py`). Rewriting on
+        that condition alone is what lets the file be committed at all: a checkout on a
+        machine with Kit somewhere else self-heals, and a checkout on the same machine
+        leaves the tree clean.
+    """
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
+            txt = fh.read()
+    except OSError:
+        return False
+    if ('string negobs_wrap_stamp = "%s"' % stamp) not in txt:
+        return False
+    for tok in txt.split("@")[1::2]:
+        if tok.startswith("/"):
+            if not os.path.exists(tok):
+                return False
+        elif not os.path.exists(os.path.normpath(os.path.join(URBAN_WRAP_DIR, tok))):
+            return False
+    return True
+
+
+def asset_wrapper(asset_id, treatment):
+    """Absolute path of the `(asset_id, treatment)` wrapper layer, or **None**.
+
+    None means *"there is no wrapper for this pair"* and is not an error: every caller
+    falls back to the raw asset, because a missing wrapper must never cost a scene its
+    geometry (`sc.veg_wrapper_rel`'s posture, and for the same reason).
+
+    Named `asset_wrapper`, not MD-F2's proposed `asset_wrapper_rel`: the vegetation twin
+    returns a **relative** path because `add_vegetation` joins it onto `VEG_DIR`, while
+    `add_urban_asset` composes the absolute path `resolve_usd()` hands it. Returning a
+    "rel" here would be a false parallel to a caller that has no base to join it to.
+    """
+    key = (asset_id, treatment)
+    if key in _WRAP_CACHE:
+        return _WRAP_CACHE[key]
+    tr = TREATMENTS.get(treatment)
+    if tr is None:
+        raise UrbanAssetError(
+            f"unknown treatment {treatment!r} — registered: {sorted(TREATMENTS)}")
+    s = spec(asset_id)                                  # raises on an unusable row
+    stamp = _wrap_stamp(s, treatment, tr)
+    path = os.path.join(URBAN_WRAP_DIR, f"{asset_id}__{treatment}.usda")
+    if not _wrap_is_current(path, stamp):
+        body = _wrap_body(s, treatment, tr, stamp)
+        if body is None:
+            _WRAP_CACHE[key] = None
+            return None
+        try:
+            os.makedirs(URBAN_WRAP_DIR, exist_ok=True)
+            tmp = path + f".tmp{os.getpid()}"           # atomic, as [1b] is: round
+            with open(tmp, "w", encoding="utf-8") as fh:   # runners drive 33 scenes
+                fh.write(body)                             # through one asset tree
+            os.replace(tmp, path)
+        except OSError as ex:                           # read-only tree, sandbox, ...
+            _warn_once("wrap:" + str(key),
+                       f"[urban_kit][경고] 래퍼 레이어 작성 실패 {path}: {ex} — "
+                       f"{asset_id} 는 원본 자산으로 폴백한다")
+            _WRAP_CACHE[key] = None
+            return None
+    _check_banned(path)
+    _WRAP_CACHE[key] = path
+    return path
+
+
+def wrap_ids(treatment="mtlxoff"):
+    """Asset ids for which `treatment` can produce a wrapper. `mtlxoff` → the 33 CC0 rows."""
+    tr = TREATMENTS.get(treatment)
+    if tr is None:
+        return []
+    if tr["kind"] == "mtlx_off":
+        return sorted(MTLX_MATERIALS)
+    return sorted(a for a in ASSET_TEXTURES
+                  if len(MTLX_MATERIALS.get(a, ("",))) <= 1)
 
 
 # ===========================================================================
@@ -1301,6 +1811,123 @@ def self_check(deep_z=True, verbose=True):
                 drift += 1
         if verbose:
             print(f"[self-check] Z_REVIEW {len(Z_REVIEW)} rows re-measured, drift {drift}")
+
+    # --- 7. section [8b] — the wrapper route ---------------------------------
+    #     Three questions, in the order in which a wrong answer costs the most:
+    #       (a) is `MTLX_MATERIALS` still true of the assets on disk? A re-procured
+    #           tree could rename a material and the table would silently stop
+    #           blocking anything — the wrapper would compose and the frame would
+    #           still be red. Re-measured, never re-read.
+    #       (b) does the wrapper actually compose, and is the opinion in effect?
+    #       (c) does it still compose when the reference is instanced — which is the
+    #           only property the whole section exists for.
+    n_tab = n_wrap = 0
+    for aid in sorted(MTLX_MATERIALS):
+        try:
+            src = Usd.Stage.Open(resolve_usd(aid))
+        except Exception as ex:
+            fails.append((aid, f"mtlx table: stage open: {ex}"))
+            continue
+        dflt = src.GetDefaultPrim()
+        if not dflt:
+            fails.append((aid, "mtlx table: no defaultPrim"))
+            continue
+        want = set(MTLX_MATERIALS[aid])
+        got = set()
+        for pr in src.Traverse():
+            if pr.GetTypeName() != "Material":
+                continue
+            a_mtlx = pr.GetAttribute("outputs:mtlx:surface")
+            if not (a_mtlx and a_mtlx.GetConnections()):
+                continue
+            rel = pr.GetPath().pathString[len(dflt.GetPath().pathString) + 1:]
+            got.add(rel)
+            a_surf = pr.GetAttribute("outputs:surface")
+            if not (a_surf and a_surf.GetConnections()):
+                # `mtlx_off` would leave this material with no terminal at all.
+                fails.append((aid, f"{rel}: MaterialX terminal but no "
+                                   f"outputs:surface fallback — mtlx_off unsafe"))
+        if got != want:
+            fails.append((aid, f"MTLX_MATERIALS drift: table {sorted(want)} vs "
+                               f"measured {sorted(got)}"))
+        else:
+            n_tab += 1
+    if verbose:
+        print(f"[self-check] MTLX_MATERIALS {n_tab}/{len(MTLX_MATERIALS)} rows "
+              f"re-measured ({sum(len(v) for v in MTLX_MATERIALS.values())} materials)")
+
+    global URBAN_WRAP_DIR
+    _wrap_home, _tmp_home = URBAN_WRAP_DIR, None
+    if os.environ.get("NEGOBS_URBAN_WRAP") is None:
+        import tempfile
+        _tmp_home = tempfile.mkdtemp(prefix="negobs_wrapchk_")
+        URBAN_WRAP_DIR = _tmp_home
+        _WRAP_CACHE.clear()
+
+    wstage = Usd.Stage.CreateInMemory()
+    UsdGeom.SetStageMetersPerUnit(wstage, 1.0)
+    UsdGeom.SetStageUpAxis(wstage, UsdGeom.Tokens.z)
+    probes = [(a, "mtlxoff") for a in sorted(MTLX_MATERIALS)]
+    probes += [(a, t) for a in sorted(ASSET_TEXTURES)
+               for t in ("scan", "stone_moss")
+               if len(MTLX_MATERIALS.get(a, ("",))) <= 1]
+    for i, (aid, tname) in enumerate(probes):
+        w = asset_wrapper(aid, tname)
+        if w is None:
+            fails.append((aid, f"treatment {tname}: no wrapper authored"))
+            continue
+        # two placements of the same pair must share ONE prototype
+        for k in (0, 1):
+            add_urban_asset(wstage, f"/World/Wrap/W{i:03d}_{k}", aid,
+                            pos_m=(i * 12.0, k * 12.0, 0.0), z_mode="base",
+                            instanceable=True, treatment=tname,
+                            scene=(SCENE_SCOPE[aid][0] if aid in SCENE_SCOPE else None))
+        ap = wstage.GetPrimAtPath(f"/World/Wrap/W{i:03d}_0/Asset")
+        if not ap.IsInstance():
+            fails.append((aid, f"treatment {tname}: /Asset is not an instance"))
+            continue
+        proto = ap.GetPrototype()
+        tr = TREATMENTS[tname]
+        if tr["kind"] == "mtlx_off":
+            for rel in MTLX_MATERIALS[aid]:
+                mp = proto.GetStage().GetPrimAtPath(
+                    proto.GetPath().pathString + "/Geom/" + rel)
+                if not mp or not mp.IsValid():
+                    fails.append((aid, f"{rel}: absent inside the prototype"))
+                    continue
+                a_mtlx = mp.GetAttribute("outputs:mtlx:surface")
+                if a_mtlx and a_mtlx.GetConnections():
+                    fails.append((aid, f"{rel}: MaterialX terminal SURVIVED "
+                                       f"instancing — the wrapper did nothing"))
+                a_surf = mp.GetAttribute("outputs:surface")
+                if not (a_surf and a_surf.GetConnections()):
+                    fails.append((aid, f"{rel}: lost its UsdPreviewSurface terminal"))
+        else:
+            n_bound = 0
+            for pr in Usd.PrimRange(proto):
+                if pr.GetTypeName() != "Mesh":
+                    continue
+                b = UsdShade.MaterialBindingAPI(pr).ComputeBoundMaterial()[0]
+                if b and b.GetPath().name == "Mtl":
+                    n_bound += 1
+            if n_bound == 0:
+                fails.append((aid, f"treatment {tname}: no mesh in the prototype "
+                                   f"is bound to the wrapper material"))
+        n_wrap += 1
+    n_proto = len(wstage.GetPrototypes())
+    if n_proto != len(probes):
+        fails.append(("wrapper_prototypes",
+                      f"{n_proto} prototypes for {len(probes)} (asset, treatment) "
+                      f"pairs at 2 placements each — sharing is broken"))
+    if verbose:
+        print(f"[self-check] wrappers {n_wrap}/{len(probes)} composed inside the "
+              f"prototype · prototypes {n_proto} for {2 * len(probes)} placements"
+              + (f" (authored in {_tmp_home})" if _tmp_home else ""))
+    if _tmp_home:
+        import shutil
+        shutil.rmtree(_tmp_home, ignore_errors=True)
+        URBAN_WRAP_DIR = _wrap_home
+        _WRAP_CACHE.clear()
 
     if verbose:
         print(f"[self-check] {'PASS' if not fails else 'FAIL'} — "

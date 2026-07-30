@@ -46,15 +46,16 @@ Legacy : scenes/archive_v3/scene10_switchback_cliff.py
   · vertical clearance between flights = 2×1.65 − 0.29 (stringer+tread) = 3.01 m.
   · even band y[−1.39,−0.01] / odd band y[+0.01,+1.39] — overlap 0 (gap 0.02).
 
-[Geometry core]
+[Geometry core]  — **superseded by the W3 S3 rebuild below; kept as the v5 record**
   · 4 flights × 10 steps, riser 0.165 / tread 0.30 / width 1.38, total drop 6.60.
   · A pure switchback makes no horizontal progress (plan x −1.4..4.4). The ground along
     the stair must therefore be effectively vertical, and that is realised as a **park
-    cut stone retaining wall** (head wall at x=−1.5 + side wall at y=1.45). The brief's
-    "30° slope" is met by the **surrounding slopes** (the north +Y 30° grass slope /
-    the south −Y 30° grass slope).
+    cut stone retaining wall** (head wall at x=−1.5 + side wall at y=1.45).
+    ** This sentence is the diagnosis, not the design.** S3-10 removes the wall by
+    removing its cause: a traversing deck makes horizontal progress, so the ground can
+    be a real slope. See [W3 S3] below.
   · No ground plane covers the cavity (the stair passage) — the upper trail plate stops
-    at x=−1.5, and in front of it (x −1.5..4.4) only the lower path (z −6.62) exists.
+    at x=−1.5, and in front of it only the corridor slope exists.
 
 [v6 verdict revision — judge_v6_rt_new7.md §4 + supervisor decision, 3 items]
   (1) **sun reselected** (supervisor approved — front lit on the open side). The old
@@ -254,8 +255,16 @@ PARAMS = dict(
     #   carries a bench. [law] SANJI-183's own exception 2) names 휴식·대피를 위한 장소 as a
     #   legitimate reason to exceed the 1.5 m width, so this is the one element licensed to
     #   be larger than the flights.
+    #   [S3-10] `rest_extra` projects the rest platform past the +Y band as a 전망 balcony,
+    #   and `clear` is the designed air gap between the deck underside and natural grade.
+    #   0.25 m under the flights and turn landings is not a styling choice: [law] KFS-TRAIL
+    #   특별시방서 12-3 마 (p.165) "데크계단의 설치시 … 계단하단부와 지반과의 높이차가
+    #   30cm 이상으로 올라가지 않도록 시공하고" — the stair foot must stay within 300 mm of
+    #   natural grade. The rest platform is not a stair foot, so it is allowed to stand
+    #   0.60 m proud and read as a projecting 전망대.
     landing=dict(size=1.5, thick=0.12, y0=-1.60, y1=1.60,
-                 rest_at=2, rest_size=3.0),
+                 rest_at=2, rest_size=3.0, rest_extra=1.5,
+                 clear=0.25, rest_clear=0.60),
     # entry deck : from the retaining wall head (x −1.5) to the first step (x 0) - joins the upper trail
     entry=dict(x0=-1.5, x1=0.0, top=-0.005, thick=0.10),
     # deck support columns : the four landing corners (0.15 inside the landing x ends) x y +-half_y.
@@ -342,14 +351,23 @@ PARAMS = dict(
     #   [v6 (2)(c)] BankCut (north retaining wall) stays a single 6.62 m wall only over the deck
     #   run x −40..5.2; east of it (x 5.2..44) it splits into **lower wall + berm (1.0 m) + upper wall**.
     #   berm top z −3.30; the upper wall steps back to y 2.45..2.60, which creates a shadow line.
+    #   [S3-10 / Option A, §8.R OQ-6] **the masonry shaft is gone.** `BankCut` (a 7.40 m
+    #   single wall over the whole deck run), `EastTierLow`, `EastTierUp`, all three
+    #   `copings` and the berm planting band are **deleted**: they existed only because a
+    #   pure switchback makes no horizontal progress, so the ground beside it had to be
+    #   effectively vertical (the v5 docstring says so in as many words). A traversing deck
+    #   descends with the hill, so the hill is modelled instead of walled — §2.B-2 C15/C16.
+    #   What survives of the masonry is the **short head wall** at x = −1.5: `UpperBody`'s
+    #   exposed face, now only `landing.clear` (0.255 m) tall because the corridor ground
+    #   starts just below the entry deck instead of 6.62 m below it.
+    #   `UpperTrail`/`UpperBody` widen to y 8.00 so the upper terrace meets the north bank,
+    #   which retreats from y 2.60 to y 8.00 — the deck corridor needs the room the wall
+    #   used to occupy.
     plates=[
-        ("UpperTrail",   -40.0,  -1.5,  -1.60,  1.45,  0.00, 0.45, "grass"),
-        ("UpperBody",    -40.0,  -1.5,  -1.60,  1.45, -0.45, 6.95, "rock"),
+        ("UpperTrail",   -40.0,  -1.5,  -1.60,  8.00,  0.00, 0.45, "grass"),
+        ("UpperBody",    -40.0,  -1.5,  -1.60,  8.00, -0.45, 6.95, "rock"),
         ("TrailPath",    -40.0,  -1.6,  -0.85,  0.85,  0.002, 0.06, "dirt"),
-        ("BankCut",      -40.0,   5.20,  1.45,  2.60,  0.00, 7.40, "rock"),
-        ("EastTierLow",    5.20, 44.0,   1.45,  2.45, -3.30, 4.30, "rock"),
-        ("EastTierUp",     5.20, 44.0,   2.45,  2.60,  0.00, 3.50, "rock"),
-        ("LowerParkMain", -1.5,  44.0, -13.00,  1.45, -6.62, 1.50, "grass"),
+        ("LowerParkMain", -1.5,  44.0, -13.00,  8.00, -6.62, 1.50, "grass"),
         ("LowerParkFar", -40.0,  44.0, -60.00, -13.00, -6.62, 1.50, "grass"),
         ("LowerPath",     -1.5,  44.0,  -4.40, -2.60, -6.618, 0.06, "dirt"),
         ("FarHill",      -40.0,  44.0,  15.00, 40.00,  7.16, 9.00, "grass"),
@@ -359,8 +377,10 @@ PARAMS = dict(
     # --- Y-direction slopes (_ybank, rotX slab) : (name, x0,x1, y_hi,z_hi, y_lo,z_lo,
     #     thick, mtl). +Y is high and it falls toward −Y.
     ybanks=[
-        # north park slope (30.0 deg) - retaining wall top (y2.60,z0) -> ridge (y15,z7.16)
-        ("NorthBank", -40.0, 44.0, 15.00, 7.16, 2.60, 0.00, 9.00, "grass"),
+        # north park slope (30.0 deg) — [S3-10] its foot moves y 2.60 -> **8.00**: the
+        #   retaining wall it used to stand on is gone and the deck corridor occupies the
+        #   ground out to y 8.0, so the hillside starts beyond the corridor margin.
+        ("NorthBank", -40.0, 44.0, 15.00, 7.16, 8.00, 0.00, 9.00, "grass"),
         # south unguarded slope (30.1 deg) - trail shoulder (y−1.6,z0) -> lower ground (y−13)
         ("SouthBankCap", -40.0, -1.5, -1.60, 0.00, -13.00, -6.62, 0.50,
          "grass"),
@@ -370,16 +390,11 @@ PARAMS = dict(
         ("SouthBankBody", -40.0, -1.5, -1.60, -0.50, -13.00, -7.12, 7.50,
          "rockface"),
     ],
-    # --- [v6] retaining wall coping band : (name, x0, x1, y0, y1, z_top, thick) ---
-    #     projects 0.08 m past the wall face to cast a shadow line at the top (reads as civil works).
-    #   (the head wall top is covered by the entry deck, so no coping - avoids interpenetration)
-    copings=[("BankW", -40.0, 5.20, 1.41, 2.60, 0.02, 0.18),
-             ("BankE", 5.20, 44.0, 2.37, 2.60, 0.02, 0.18),
-             ("Tier", 5.20, 44.0, 1.37, 2.45, -3.28, 0.16)],
-    # --- [v6] berm planting band : (x0, x1) - shrub strip on the berm top (z −3.30) ---
-    berm_hedges=[(5.6, 15.5), (19.0, 29.0), (33.0, 43.4)],
-    berm=dict(y0=1.62, y1=2.34, h=0.85, base_z=-3.30),
-
+    # --- [S3-10] coping band and berm planting **deleted with the wall they belonged to**.
+    #     `copings` (BankW / BankE / Tier) and `berm_hedges` / `berm` were the two-tier
+    #     east wall's dressing; with the wall gone they have nothing to sit on. The v6
+    #     fix they implemented ("dispel the fortress-wall impression") is superseded by
+    #     removing the fortress, which is the stronger form of the same fix.
     # --- leaf bands : hiding the top two step edges (flight0 treads 1·2) + ground litter ---
     # [W2 F3] proud 0.012 -> 0.005 — the rim shadow that drew an outline round the
     #   trail leaf patches.
@@ -395,6 +410,13 @@ PARAMS = dict(
                          (-5.6, 0.7, 1.4, 1.0, "trail"),
                          (1.4, -3.4, 2.2, 1.6, "lower"),
                          (5.0, -1.9, 2.0, 1.5, "lower")],
+
+    # --- [S3-10] deck corridor ground band (Option A). The slab is 10.6 m wide so the
+    #     judged grid cuts (half-FOV ~30 deg, so |y| < 5.8 at 10 m) never see its north
+    #     edge; its south face at y −2.60 is the scarp down to the lower park and is the
+    #     unguarded drop the scene's hazard cue (4) names, now **1.0 m outboard of the
+    #     deck** instead of 4 m away past a wall.
+    corridor=dict(y0=-2.60, y1=8.00, thick=1.60),
 
     # --- dressing ---
     # 10 trees (cx, cy, zone, trunk_h) - zone: north/south/lower/trail
@@ -595,10 +617,22 @@ def flight_steps():
 
 
 def compute_flights():
-    """[S3-9] Flight/landing ladder. Each flight now carries its own step count, run and
-    drop, because the re-table is **8, 7, 8, 7, 7, 7 = 44** rather than a uniform 4 x 10.
-    The riser and tread themselves stay uniform over the whole run — KCS 34 50 10 3.2.8(3)
-    requires it — so only the *number* of steps varies between flights.
+    """[S3-10, Option A] Flight/landing ladder for a **traversing** deck.
+
+    S3-9 kept the inherited 180-deg reversal in two parallel Y bands. §8.R OQ-6 rules
+    Option A, and Option A is only reachable by giving that up, because a pure reversal in
+    two bands **cannot** de-stack: flight k+2 always lands back on flight k's footprint.
+    The scene's own v5 docstring says as much — *"A pure switchback makes no horizontal
+    progress"* — which is why the ground under it had to be a masonry shaft.
+
+    What is built instead is G10's actual form (§2.A.1-6/7): **every flight descends +X,
+    each landing turns the run 90 deg and hands it to the other Y band, and the whole
+    assembly traverses the slope.** Nothing sits above anything, daylight and litter show
+    between and under the flights, and the ground can be a real slope instead of a wall.
+
+    Landings jut forward along the travel direction and the next flight starts at the
+    landing's **far** edge (the A-10-2 rule: never start a flight under the slab above it),
+    so the ladder tiles the X axis and the plan is Sigma(run) + Sigma(landing).
     """
     fl = PARAMS["flights"]
     ld = PARAMS["landing"]
@@ -606,55 +640,114 @@ def compute_flights():
     land = float(ld["size"])
     rest_at = int(ld.get("rest_at", -1))
     rest_sz = float(ld.get("rest_size", land))
+    rest_ext = float(ld.get("rest_extra", 0.0))
     seq = []
     x_top, z_top = 0.0, float(fl["z_top"])
     for k in range(int(fl["n"])):
         ns = steps[k]
         run = ns * fl["tread"]
         fdrop = ns * fl["riser"]
-        even = (k % 2 == 0)
-        rot = 180.0 * (k % 2)
+        rest = (k == rest_at)
         z_bot = z_top - fdrop
-        L = rest_sz if k == rest_at else land
-        if even:
-            x_bot = x_top + run
-            lx0, lx1 = x_bot, x_bot + L         # the landing juts forward along the travel direction
-        else:
-            x_bot = x_top - run
-            lx0, lx1 = x_bot - L, x_bot
+        L = rest_sz if rest else land
+        x_bot = x_top + run
+        lx0, lx1 = x_bot, x_bot + L
+        # the landing spans **both** width bands so the walker can cross from the band the
+        # flight ran in to the band the next flight runs in; the rest platform also
+        # projects past the +Y band as a 전망 balcony.
+        ly0, ly1 = float(ld["y0"]), float(ld["y1"]) + (rest_ext if rest else 0.0)
         seq.append(dict(k=k, steps=ns, run=run, drop=fdrop,
                         x_top=x_top, z_top=z_top, x_bot=x_bot,
-                        z_bot=z_bot, rot=rot, even=even, lx0=lx0, lx1=lx1,
-                        rest=(k == rest_at)))
-        # next flight top = **exactly where the flight ended**, not the landing's far corner
-        # (archive_v3/scene10 audit A-10-2 - prevents burial under the landing)
-        x_top, z_top = x_bot, z_bot
+                        z_bot=z_bot, rot=0.0, even=(k % 2 == 0),
+                        lx0=lx0, lx1=lx1, ly0=ly0, ly1=ly1, rest=rest))
+        x_top, z_top = lx1, z_bot
     return seq
 
 
 SEQ = compute_flights()
 TOTAL_DROP = -SEQ[-1]["z_bot"]                  # 6.600 = 44 x 0.150, frozen (§9 P-2)
-# plan extent of the deck run — read off the ladder, not hard-coded, so the de-stacking
-# commit cannot leave a stale literal behind.
-PLAN_X0 = min(min(f["lx0"], f["x_top"], f["x_bot"]) for f in SEQ)
-PLAN_X1 = max(max(f["lx1"], f["x_top"], f["x_bot"]) for f in SEQ)
-
-
-def band(even):
-    """Width band of a flight (world y). Even = −Y band, odd = +Y band."""
+def band(k):
+    """[S3-10] World Y band of flight `k`. Even = −Y band, odd = +Y band. Flights are now
+    built directly in world coordinates — every flight descends +X, so the 180-deg
+    `build_rot_group` that used to mirror the odd flights is gone."""
     fl = PARAMS["flights"]
     lo, hi = -fl["y_off"] - fl["half_w"], -fl["y_off"] + fl["half_w"]
-    return (lo, hi) if even else (-hi, -lo)
+    return (lo, hi) if (int(k) % 2 == 0) else (-hi, -lo)
+
+
+PLAN_X0 = min(min(f["lx0"], f["x_top"], f["x_bot"]) for f in SEQ)
+PLAN_X1 = max(max(f["lx1"], f["x_top"], f["x_bot"]) for f in SEQ)
+PLAN_Y0 = min(min(f["ly0"], band(f["k"])[0]) for f in SEQ)
+PLAN_Y1 = max(max(f["ly1"], band(f["k"])[1]) for f in SEQ)
+
+
+def ground_line():
+    """[S3-10] The corridor's longitudinal ground profile, as (x, z) control points.
+
+    The rule is one line long: **the ground shadows the deck at a fixed air gap** —
+    it ramps at the flight's own grade under a flight and benches level under a landing.
+    That is a cut-and-fill trail bench, and it is the only profile that keeps the gap
+    uniform; a straight ramp cannot, because the deck falls at 48 % on a flight and 0 %
+    on a landing while a straight ground falls at the 25.8 % mean, so the deck would dive
+    below grade at every flight foot (checked: −0.085 m at the first one).
+
+    Gap: `landing.clear` 0.25 m under flights and turn landings — [law] KFS-TRAIL
+    특별시방서 12-3 마 keeps 계단하단부 within 300 mm of natural grade — `rest_clear`
+    0.60 m under the 쉼터 platform, which is not a stair foot, and finally 0.020 m at the
+    ground-arrival landing, which **is** the walking step onto the lower path.
+    """
+    ld = PARAMS["landing"]
+    clr = float(ld["clear"])
+    rclr = float(ld.get("rest_clear", clr))
+    ent = PARAMS["entry"]
+    pts = [(float(ent["x0"]), float(ent["top"]) - clr),
+           (float(ent["x1"]), float(ent["top"]) - clr)]
+    last = SEQ[-1]["k"]
+    for f in SEQ:
+        if f["k"] == last:
+            # the ground-arrival landing: the gap **is** the 20 mm walking step onto the
+            # lower path, so the bench meets the lower park exactly.
+            pts.append((f["x_bot"], GROUND_Z))
+            pts.append((f["lx1"], GROUND_Z))
+        else:
+            # the stair foot always lands at `clear`; only the rest platform's bench then
+            # keeps falling under it, so the extra air is picked up **under the platform**
+            # and never as a steepening under the flight above it (which would put the
+            # ground at 62 % where the flight itself is 48 %).
+            pts.append((f["x_bot"], f["z_bot"] - clr))
+            pts.append((f["lx1"], f["z_bot"] - (rclr if f["rest"] else clr)))
+    return pts
+
+
+GROUND_LINE = ground_line()
+
+
+def corridor_z(x):
+    """Ground z inside the deck corridor, piecewise-linear on GROUND_LINE."""
+    if x <= GROUND_LINE[0][0]:
+        return GROUND_LINE[0][1]
+    for i in range(len(GROUND_LINE) - 1):
+        xa, za = GROUND_LINE[i]
+        xb, zb = GROUND_LINE[i + 1]
+        if xa - 1e-9 <= x <= xb + 1e-9:
+            if xb - xa < 1e-12:
+                return zb
+            return za + (zb - za) * (x - xa) / (xb - xa)
+    return GROUND_LINE[-1][1]
 
 
 # ===========================================================================
 # [E] terrain maths
 # ===========================================================================
+NORTH_PIVOT = 8.00                 # [S3-10] bank foot, was 2.60 (the old wall top)
+
+
 def north_z(y):
-    """Top z of the north (+Y) 30° grass slope (retaining wall top y2.60 = 0)."""
-    if y <= 2.60:
+    """Top z of the north (+Y) 30° grass slope. Its foot moved out to y 8.00 when the
+    retaining wall it used to stand on was deleted (Option A)."""
+    if y <= NORTH_PIVOT:
         return 0.0
-    return min(7.16, (y - 2.60) * NORTH_TAN)
+    return min(7.16, (y - NORTH_PIVOT) * NORTH_TAN)
 
 
 def south_z(y):
@@ -665,21 +758,23 @@ def south_z(y):
 
 
 def ground_z(x, y):
-    """Ground z used to seat dressing."""
-    if y >= 2.60:
+    """Ground z used to seat dressing. [S3-10] inside the corridor band it is the real
+    descending slope, not the old shaft floor at −6.62."""
+    cg = PARAMS["corridor"]
+    if y >= NORTH_PIVOT:
         return north_z(y)
-    if y >= 1.45:
-        return 0.0                     # side retaining wall top
-    if y >= -1.60:
-        return TRAIL_Z if x <= HEAD_X else GROUND_Z
     if x <= HEAD_X:
+        if y >= -1.60:
+            return TRAIL_Z             # upper terrace / trail
         return south_z(y)
-    return GROUND_Z
+    if cg["y0"] <= y <= cg["y1"]:
+        return corridor_z(x)
+    return GROUND_Z                    # lower park, beyond the corridor scarp
 
 
 def _zone_z(x, y, zone):
     if zone == "north":
-        return north_z(y)
+        return max(north_z(y), ground_z(x, y))
     if zone == "south":
         return south_z(y)
     if zone in ("lower", "low"):
@@ -716,15 +811,18 @@ def post_segments():
                 below = [g["z_bot"] for g in SEQ
                          if g["z_bot"] < z_hi - 1e-9
                          and g["lx0"] - 1e-9 <= cx <= g["lx1"] + 1e-9]
-                z_lo = max(below) if below else GROUND_Z
+                # [S3-10] no landing stacks over another any more, so every column now
+                # founds on the **sloped corridor ground**, not on the old shaft floor.
+                z_lo = max(below) if below else corridor_z(cx)
                 if z_hi - z_lo > 0.05:
                     segs.append((f"L{f['k']}_C{ci}_{tag}", cx, sgn * hy,
                                  z_lo, z_hi))
-    # post at the +X end of the entry deck (rises from landing1 top −3.30 below)
+    # post at the +X end of the entry deck. [S3-10] nothing sits under it any more —
+    # the deck no longer doubles back — so it founds on the corridor ground.
     z_hi = ent["top"] - ent["thick"]
-    z_lo = SEQ[1]["z_bot"]
     for tag, sgn in (("P", 1.0), ("N", -1.0)):
-        segs.append((f"Entry_{tag}", ent["x1"] - ins, sgn * hy, z_lo, z_hi))
+        cx = ent["x1"] - ins
+        segs.append((f"Entry_{tag}", cx, sgn * hy, corridor_z(cx), z_hi))
     return segs
 
 
@@ -737,19 +835,23 @@ def post_segments():
 #       railing without booting.
 # ===========================================================================
 def level_rail_runs():
-    """[(name, x0, y0, x1, y1, z_walk, broken)] for every axis-aligned railing run."""
+    """[(name, x0, y0, x1, y1, z_walk, broken)] for every axis-aligned railing run.
+
+    [S3-10] each landing carries its own y extent (the rest platform is deeper in +Y),
+    and the **outer edge** is the +X face — the walker's forward edge, which is the one
+    with the drop beyond it now that every flight descends +X.
+    """
     ld = PARAMS["landing"]
     ent = PARAMS["entry"]
     br = int(PARAMS["rail"]["broken_landing"])
     runs = []
     for f in SEQ:
-        k = f["k"]
-        z = f["z_bot"]
-        x_out = f["lx1"] if f["even"] else f["lx0"]
-        # outer edge of the landing — the reversal face. Landing `br` is the break.
-        runs.append((f"LandRail_{k}_Out", x_out, ld["y0"], x_out, ld["y1"], z,
+        k, z = f["k"], f["z_bot"]
+        y0, y1 = f["ly0"], f["ly1"]
+        # forward (+X) edge of the landing. Landing `br` is the break (§9 P-2 frozen).
+        runs.append((f"LandRail_{k}_Out", f["lx1"], y0, f["lx1"], y1, z,
                      k == br))
-        for tag, yy in (("N", ld["y0"]), ("P", ld["y1"])):
+        for tag, yy in (("N", y0), ("P", y1)):
             runs.append((f"LandRail_{k}_{tag}", f["lx0"], yy, f["lx1"], yy, z,
                          False))
     for tag, yy in (("N", ld["y0"]), ("P", ld["y1"])):
@@ -994,7 +1096,93 @@ def deck_module_selfcheck():
 
     print(f"    [deck_module_selfcheck S3-9] "
           f"{'전항목 OK' if ok9 else '⚠ CHECK 항목 있음'}")
-    return ok_all and ok9
+
+    # =====================================================================
+    # S3-10 — de-stacking (Option A). C1 is the scene's headline defect, so the
+    # zero-overlap property is **asserted**, not budgeted: without an assertion the
+    # next coordinate edit puts a flight back over another and nothing notices.
+    # =====================================================================
+    ok10 = True
+    print("\n  [deck_module_selfcheck] S3-10 탈적층(옵션 A) — 평면 중첩·이격·회랑")
+
+    def _rect_ov(a, b):
+        return (max(0.0, min(a[1], b[1]) - max(a[0], b[0]))
+                * max(0.0, min(a[3], b[3]) - max(a[2], b[2])))
+
+    flr = [(f"플라이트{f['k']}", (f["x_top"], f["x_bot"]) + band(f["k"]))
+           for f in SEQ]
+    ldr = [(f"참{f['k']}", (f["lx0"], f["lx1"], f["ly0"], f["ly1"]))
+           for f in SEQ]
+    worst_ov, worst_pair = 0.0, "-"
+    for i in range(len(flr)):
+        for j in range(i + 1, len(flr)):
+            o = _rect_ov(flr[i][1], flr[j][1])
+            if o > worst_ov:
+                worst_ov, worst_pair = o, f"{flr[i][0]}×{flr[j][0]}"
+    good = worst_ov < 1e-9
+    ok10 &= good
+    print(f"    플라이트 상호 평면 중첩 최대 {worst_ov:.6f} m² ({worst_pair}) → "
+          f"{'OK (0 — 어떤 플라이트도 다른 플라이트 위에 있지 않다)' if good else 'CHECK'}")
+    worst_fl, worst_flp = 0.0, "-"
+    for nf, rf in flr:
+        for nl, rl in ldr:
+            o = _rect_ov(rf, rl)
+            if o > worst_fl:
+                worst_fl, worst_flp = o, f"{nf}×{nl}"
+    good = worst_fl < 1e-9
+    ok10 &= good
+    print(f"    플라이트/참 평면 중첩 최대 {worst_fl:.6f} m² ({worst_flp}) → "
+          f"{'OK (참이 디딤판을 덮지 않는다 — A-10-2)' if good else 'CHECK'}")
+    print("      C1 — 구 배치는 4개 플라이트가 3.0×2.8 m 평면 안에서 2단으로 겹쳐 "
+          "연직 여유 3.01 m 의 '수직 갱도' 였고, 그것이 아파트 피난계단 판독의 최대 축.")
+
+    # air gap under the deck
+    gaps = []
+    for f in SEQ:
+        for xx, zz in ((f["x_top"], f["z_top"]), (f["x_bot"], f["z_bot"]),
+                       (f["lx1"], f["z_bot"])):
+            gaps.append(zz - corridor_z(xx))
+    gmin, gmax = min(gaps), max(gaps)
+    good = gmin > 0.0
+    ok10 &= good
+    foot_gaps = [f["z_bot"] - corridor_z(f["x_bot"]) for f in SEQ
+                 if f["k"] != SEQ[-1]["k"]]
+    good2 = max(foot_gaps) <= 0.300 + 1e-9
+    ok10 &= good2
+    print(f"    데크 하부 공기층 {gmin:.3f} ~ {gmax:.3f} m (모두 >0 → "
+          f"{'OK' if good else 'CHECK'}) · 계단하단부 최대 "
+          f"{max(foot_gaps):.3f} m ≤ 0.300 → {'OK' if good2 else 'CHECK'}")
+    print("      [law] KFS-TRAIL 특별시방서 12-3 마 (p.165) '데크계단의 설치시 … "
+          "계단하단부와 지반과의 높이차가 30cm 이상으로 올라가지 않도록 시공' — "
+          "이 조항이 옥외 참 규칙의 실체이고, 동시에 데크가 지면을 따라가야 하는 이유")
+
+    # masonry census
+    walls = [nm for nm, x0, x1, y0, y1, zt, th, mk in P["plates"]
+             if mk in ("rock", "rockface") and x1 > HEAD_X + 1e-9]
+    good = not walls
+    ok10 &= good
+    print(f"    데크 구간(x>{HEAD_X:.1f}) 석축 플레이트 {len(walls)}개 {walls} → "
+          f"{'OK (갱도 소거)' if good else 'CHECK'}")
+    print(f"    머리 옹벽 노출고 {abs(corridor_z(HEAD_X)):.3f} m "
+          f"(구 BankCut 7.40 m 단일벽 → §4.2-4A 의 'short head wall')")
+
+    seg = [(GROUND_LINE[i], GROUND_LINE[i + 1])
+           for i in range(len(GROUND_LINE) - 1)]
+    steep = max((abs(b[1] - a[1]) / (b[0] - a[0]))
+                for a, b in seg if b[0] - a[0] > 1e-6)
+    print(f"    회랑 종단: 평균 {100.0*(TRAIL_Z-GROUND_Z)/(PLAN_X1-HEAD_X):.1f} % · "
+          f"최급 {100.0*steep:.1f} %(= 플라이트 자체 경사) · 참 아래는 수평 벤치")
+    print(f"    평면 x [{HEAD_X:.2f}, {PLAN_X1:.2f}] · y [{PLAN_Y0:.2f}, "
+          f"{PLAN_Y1:.2f}]  (설계서 §4.2-4A 추정 x[−1.5,12]·y[−2.6,1.6])")
+    print("      추정치와의 차이는 산술: Σ런 13.64 + 회전참 4×1.50 + 쉼터 3.00 + "
+          "도착참 1.50 = 24.14. 설계서 추정 12 는 **참이 X 를 먹는다는 점을 빼고** "
+          "Σ런만 센 값이다. 참이 X 를 먹지 않게 하려면 참을 옆 대역에 붙여야 하는데, "
+          "그러면 순 X 진행이 런−1.50 = 0.67 m/1.05 m 낙차 = 157 % 가 되어 지반이 "
+          "다시 수직이 된다 — 즉 갱도로 되돌아간다. 평면을 늘리는 쪽이 옵션 A 다")
+
+    print(f"    [deck_module_selfcheck S3-10] "
+          f"{'전항목 OK' if ok10 else '⚠ CHECK 항목 있음'}")
+    return ok_all and ok9 and ok10
 
 
 # ===========================================================================
@@ -1070,40 +1258,42 @@ def ground_plan_deck():
 def build_views():
     views = sc.grid_views(0.0)          # h{0.3,0.9,1.8} × d{2,5,10}, +X
 
-    l0 = SEQ[0]                          # landing0 (z −1.65, x 3.0..4.4)
-    lc = ((l0["lx0"] + l0["lx1"]) / 2.0, 0.0, l0["z_bot"])
-    # reversal : landing0 from the south (open side) - the flight above (+X down) and below (−X reversed) at once.
-    #   [v7 verdict §7 (1)·(a)] the old shot (eye 3.70,−3.20,−0.30 / pitch −24 deg) filled the
-    #   frame with masonry wall + brown timber only, so "neighbourhood park" did not read.
-    #   -> **pull back 3.6 m, rise 1.5 m and lift the pitch to −16 deg**: the frame top
-    #   (+2.0 deg elevation) catches the **north 30 deg grass slope and shrub clumps** past the coping,
-    #   while the bottom (−34 deg) keeps landing0 and flights 0/1 (SMOKE [v7 mise-en-scene] check).
-    views["reversal"] = dict(eye=[6.60, -6.60, 1.20],
-                             tgt=[2.90, -0.35, -0.88])
-    # through_treads : open-riser see-through - the flight below and the ground between the treads
-    views["through_treads"] = dict(eye=[1.5, -2.8, -1.10],
-                                   tgt=[1.7, 0.30, -4.20])
-    # broken_rail : close-up of the missing-rail run at the landing0 outer edge (x 4.4) + the 4.95 m drop
-    #   [v7 verdict §7 (2)] the old sight line 135 deg gave lit-face normal 315 deg -> lambert +0.273,
-    #   putting the broken and the intact railing in the same dark band. Rotating 0.7 m toward
-    #   the south (open side) gives sight 111.9 deg (normal 291.9 deg) -> **+0.480**. The frame
-    #   bottom (−38.5 deg) passes through the vertical space under landing0 and lands on the wall
-    #   face at z −4.46 -> **the depth of the 4.95 m drop itself stays in frame** (SMOKE bottom-ray landing).
-    views["broken_rail"] = dict(eye=[5.60, -3.40, -0.30],
-                                tgt=[4.35, -0.30, -1.55])
-    # leaf_edge : leaves hiding the top two steps - close to the approaching robot's viewpoint
-    views["leaf_edge"] = dict(eye=[-1.05, -1.55, 0.55],
-                              tgt=[0.80, -0.70, -0.38])
-    # from_below : the whole switchback from the lower park (landings·posts·drop anchors)
-    #   [v7 verdict §7 (2)·(b)] the old shot (eye 8.0,−7.5 -> tgt 1.8,0) had sight azimuth 129.6 deg,
-    #   so **half the subject was the +X-facing cut face and head wall** (lambert −0.342 = shaded side)
-    #   -> mean 36.4 · dark 66.3 %. At sun az 250 the front-lit faces are the −Y ones (0.607),
-    #   so the shot is **mirrored to the open side (−Y)** and looks up at the deck from due south.
-    #   sight 105.4 deg · lit-face normal 285.4 deg -> lambert +0.526.
-    #   pitch +6.6 deg is the value that puts "the lower park grass, dirt trail and shrubs in the
-    #   bottom half, the deck stack in the top half" (the former at 7.5~10.6 m, the latter at +18.7 deg elevation).
-    views["from_below"] = dict(eye=[5.20, -10.80, GROUND_Z + 1.55],
-                               tgt=[2.40, -0.60, -3.85])
+    # [S3-10] every mise-en-scene cut is now **derived from the ladder**, not typed as a
+    #   literal, because the de-stacking moves landing0 from x[3.0,4.4] z −1.65 to
+    #   x[2.48,3.98] z −1.20 and the run now reaches x 24.1. A literal eye/tgt would have
+    #   silently drifted off its subject — the exact failure mode §6.4 warns about.
+    l0 = SEQ[0]
+    lcx = (l0["lx0"] + l0["lx1"]) / 2.0
+    lcz = l0["z_bot"]
+    # reversal : the turn at landing0 read from the open south side — the flight arriving
+    #   (+X, band A) and the flight leaving (+X, band B) in one frame. The 180-deg reversal
+    #   it was named for is gone with the de-stacking; the **turn** it photographs is not.
+    views["reversal"] = dict(eye=[lcx + 3.40, -6.60, lcz + 2.40],
+                             tgt=[lcx - 0.30, -0.35, lcz + 0.32])
+    # through_treads : open-riser see-through on flight 0 (band A). [S3-10] the deck now
+    #   stands 0.25 m off natural grade instead of over a 6.6 m shaft, so what shows
+    #   between the treads is the litter slope rather than a void — which is what G10
+    #   shows too. The cue is unchanged: with no riser board the nosing light-dark pair
+    #   never forms.
+    f0 = SEQ[0]
+    fmx = (f0["x_top"] + f0["x_bot"]) / 2.0
+    fmy = sum(band(0)) / 2.0
+    views["through_treads"] = dict(
+        eye=[fmx, fmy - 2.10, (f0["z_top"] + f0["z_bot"]) / 2.0 - 0.28],
+        tgt=[fmx + 0.20, fmy + 1.00, corridor_z(fmx + 0.20) - 0.55])
+    # broken_rail : close-up of the missing-rail run on landing0's forward (+X) edge and
+    #   the open drop past it. Kept front-lit (sight ~112 deg) exactly as v7 tuned it.
+    xo = l0["lx1"]
+    views["broken_rail"] = dict(eye=[xo + 1.60, -3.40, lcz + 0.90],
+                                tgt=[xo + 0.35, -0.30, lcz - 0.35])
+    # leaf_edge : the leaf band biting the top two treads, from the approaching robot's eye
+    views["leaf_edge"] = dict(eye=[-1.05, fmy - 1.00, 0.55],
+                              tgt=[0.80, fmy, f0["z_top"] - 2.5 * PARAMS["flights"]["riser"]])
+    # from_below : the whole traverse from the lower park. [S3-10] the run reaches x 24.1,
+    #   so the eye pulls back along the slope to keep the zigzag in one frame.
+    mid = SEQ[len(SEQ) // 2]
+    views["from_below"] = dict(eye=[mid["x_top"] + 2.00, -12.60, GROUND_Z + 1.55],
+                               tgt=[mid["x_top"] - 1.60, -0.60, mid["z_top"] - 0.40])
     return views
 
 
@@ -1152,23 +1342,22 @@ def _smoke_report():
     print(f"    {'k':>2} {'단':>3} {'rot':>4} {'대역 y':>16} {'x_top→x_bot':>14} "
           f"{'z_top→z_bot':>16} {'참 x범위':>14} 참 z   비고")
     for f in SEQ:
-        lo, hi = band(f["even"])
+        lo, hi = band(f["k"])
         print(f"    {f['k']:2d} {f['steps']:3d} {int(f['rot']):4d} "
               f"[{lo:+6.2f},{hi:+6.2f}] "
               f"{f['x_top']:6.2f}→{f['x_bot']:6.2f} "
               f"{f['z_top']:+7.3f}→{f['z_bot']:+7.3f} "
               f"[{f['lx0']:6.2f},{f['lx1']:6.2f}] {f['z_bot']:+7.3f}"
               f"   {'쉼터 전망참' if f['rest'] else ''}")
-    lo_e, hi_e = band(True)
-    lo_o, hi_o = band(False)
+    lo_e, hi_e = band(0)
+    lo_o, hi_o = band(1)
     print(f"    대역 간극 = {lo_o - hi_e:.3f} m (>0 = 두 방향 간섭 0 → "
           f"{'OK' if lo_o > hi_e else 'FAIL'})")
     print(f"    참 y범위 [{ld['y0']:+.2f},{ld['y1']:+.2f}] 이 두 대역을 모두 "
           f"덮는가 → {'OK' if ld['y0'] <= lo_e and ld['y1'] >= hi_o else 'FAIL'}")
-    _dmin = min(f["drop"] for f in SEQ)
-    head = 2 * _dmin - 0.29
-    print(f"    상·하 플라이트 연직 여유 = 2×{_dmin:.2f}(최소 플라이트 낙차) "
-          f"− 0.29 = {head:.2f} m ({'OK' if head > 2.0 else 'CHECK'})")
+    print("    상·하 플라이트 연직 여유 = **해당 없음** — S3-10 탈적층 이후 어떤 "
+          "플라이트도 다른 플라이트 위에 있지 않다(중첩 0 m², deck_module_selfcheck "
+          "S3-10). 구 배치의 3.01 m 는 갱도의 증상이지 미덕이 아니었다.")
 
     # ── exhaustive walking continuity check ──
     print("\n  [표] 보행 연속성 (구간 → 다음 구간, n단 분할 단차)")
@@ -1265,25 +1454,19 @@ def _smoke_report():
               f"({ex:+.2f},{ey:+.2f}, 0.00)  "
               f"{'직사광 도달' if ok else '옹벽 그늘(설계상 허용)'}")
 
-    # ── [v6] two-tier retaining wall consistency check ──
-    tiers = {nm: (x0, x1, y0, y1, zt, th)
-             for nm, x0, x1, y0, y1, zt, th, _m in P["plates"]
-             if nm in ("BankCut", "EastTierLow", "EastTierUp")}
-    bc, tl, tu = tiers["BankCut"], tiers["EastTierLow"], tiers["EastTierUp"]
-    print(f"\n  [v6 옹벽] 단일벽 x ≤ {bc[1]:.2f}(데크 구간 — 위험 기하 불변) / "
-          f"동측 2단 x ≥ {tl[0]:.2f}")
-    print(f"    하단벽 상면(소단) z {tl[4]:+.2f} · 노출고 "
-          f"{tl[4] - GROUND_Z:.2f} m · 상단벽 노출고 {0.0 - tl[4]:.2f} m "
-          f"(구 단일 {0.0 - GROUND_Z:.2f} m → "
-          f"{'OK' if max(tl[4] - GROUND_Z, -tl[4]) < 4.0 else 'CHECK'})")
-    print(f"    소단 폭 {tu[2] - tl[2]:.2f} m · 접합 연속(하단벽 상면 y "
-          f"{tl[2]:.2f}~{tl[3]:.2f}, 상단벽 저면 z {tu[4] - tu[5]:+.2f} ≤ "
-          f"{tl[4]:+.2f} → "
-          f"{'OK' if tu[4] - tu[5] <= tl[4] + 1e-9 else 'FAIL'})")
-    bm = P["berm"]
-    print(f"    소단 식재 {len(P['berm_hedges'])}띠 y[{bm['y0']:.2f},"
-          f"{bm['y1']:.2f}] ⊂ 소단 y[{tl[2]:.2f},{tl[3]:.2f}] → "
-          f"{'OK' if bm['y0'] >= tl[2] and bm['y1'] <= tl[3] else 'FAIL'}")
+    # ── [S3-10] corridor ground profile — the shaft's replacement ──
+    print("\n  [S3-10 지형] 데크 회랑 종단 (석축 갱도 → 실사면)")
+    print(f"    {'x':>8} {'지반z':>8} {'데크z':>8} {'여유':>7}")
+    for f in SEQ:
+        for nm, xx, zz in (("플라이트머리", f["x_top"], f["z_top"]),
+                           ("플라이트발", f["x_bot"], f["z_bot"]),
+                           ("참 끝", f["lx1"], f["z_bot"])):
+            g = corridor_z(xx)
+            print(f"    {xx:8.2f} {g:8.3f} {zz:8.3f} {zz - g:7.3f}  {nm}")
+    grade = 100.0 * (TRAIL_Z - GROUND_Z) / (PLAN_X1 + 1.5 - HEAD_X + 1.5)
+    print(f"    회랑 평균 종단경사 {100.0*6.62/(PLAN_X1 - HEAD_X):.1f} % · "
+          f"머리 옹벽 노출고 {abs(corridor_z(HEAD_X)):.3f} m "
+          f"(구 6.62 m 단일벽 → 짧은 머리벽)")
 
     # ── grid camera collision check ──
     print("\n  [검산] 그리드 카메라(−d, 0, h) vs 기하 AABB")
@@ -1327,11 +1510,12 @@ def _smoke_report():
                     (pg["y0"] + pg["y1"]) / 2.0, pg["z_roof"]))
     for yy in (4.0, 7.0, 11.0):
         anchors.append((f"북측 잔디사면 y{yy:.0f}", 3.0, yy, north_z(yy)))
-    bm = P["berm"]
-    for x0b, x1b in P["berm_hedges"][:1]:
-        anchors.append(("소단 식재띠", (x0b + x1b) / 2.0,
-                        (bm["y0"] + bm["y1"]) / 2.0,
-                        bm["base_z"] + bm["h"] / 2.0))
+    _rf = [f for f in SEQ if f["rest"]]
+    if _rf:
+        _r = _rf[0]
+        anchors.append(("쉼터 전망참", (_r["lx0"] + _r["lx1"]) / 2.0,
+                        (_r["ly1"] + PARAMS["landing"]["y1"]) / 2.0,
+                        _r["z_bot"] + 0.6))
     sp, bn = P["signpost"], P["bench"]
     anchors.append(("이정표", sp["cx"], sp["cy"], sp["post_h"] / 2.0))
     anchors.append(("벤치", bn["cx"], bn["cy"], 0.25))
@@ -1542,16 +1726,22 @@ def main():
                 (x1 - x0, y1 - y0, th), M[mk], col=True)
         for nm, x0, x1, yh, zh, yl, zl, th, mk in PARAMS["ybanks"]:
             ybank(f"{ROOT}/Bank_{nm}", x0, x1, yh, zh, yl, zl, th, M[mk])
-        # [v6] retaining wall coping - projects past the wall face to make a shadow line at the top
-        for nm, x0, x1, y0, y1, zt, th in PARAMS["copings"]:
-            BOX(f"{ROOT}/Coping_{nm}",
-                ((x0 + x1) / 2.0, (y0 + y1) / 2.0, zt - th / 2.0),
-                (x1 - x0, y1 - y0, th), M["coping"], col=True)
-        # [v6] planting band on the east two-tier wall berm (z −3.30) - dispels the 'fortress' impression
-        bm = PARAMS["berm"]
-        for i, (x0, x1) in enumerate(PARAMS["berm_hedges"]):
-            sc.build_hedge(stage, f"{ROOT}/BermHedge_{i}", x0, bm["y0"],
-                           x1, bm["y1"], bm["h"], base_z=bm["base_z"])
+        # [S3-10] the deck corridor's real descending slope, one sloped slab per segment
+        #   of `GROUND_LINE`. This is the shaft's replacement: instead of a 7.40 m masonry
+        #   wall holding a vertical ground, the hill falls **with** the deck at a mean
+        #   25.8 % and is benched level under each landing, which is how a cut-and-fill
+        #   trail bench is actually built. The slab side faces at y = CORRIDOR_Y0 / Y1 are
+        #   the natural scarps down to the lower park and up to the north bank — no
+        #   masonry, no coping, no fortress.
+        cg = PARAMS["corridor"]
+        for i in range(len(GROUND_LINE) - 1):
+            (xa, za), (xb, zb) = GROUND_LINE[i], GROUND_LINE[i + 1]
+            if xb - xa < 1e-6:
+                continue
+            sc.build_slope(stage, f"{ROOT}/CorridorSlope_{i}", xa, za,
+                           xb - xa, za - zb, cg["y0"], cg["y1"],
+                           float(cg["thick"]), M["grass"], margin=0.0,
+                           collider=True)
 
     # -------------------------------------------------------------------
     # [W2-D] ground_kit - P18 deck_trail_hybrid (two plans, two z levels).
@@ -1791,20 +1981,21 @@ def main():
 
         for f in SEQ:
             k = f["k"]
-            lo, hi = band(True)              # local band (even convention) - rot180 mirrors it
-            grp = sc.build_rot_group(stage, f"{ROOT}/FlightGrp_{k}",
-                                     (f["x_top"], 0.0), f["rot"])
+            lo, hi = band(k)                 # [S3-10] world band; no rot group
+            grp = f"{ROOT}/FlightGrp_{k}"
             sc.build_open_riser_stairs(
                 stage, f"{grp}/Flight", f["x_top"], lo, hi, fl["riser"],
                 fl["tread"], f["steps"], f["z_top"], M["tread"],
                 M["stringer"], tread_t=fl["tread_t"], gap=fl["gap"])
             if cfg["cue_railing"]:
                 _flight_rails(grp, f, lo, hi)
-            # landing (world coordinates) - slab covering both bands
+            # landing — spans both width bands so the walker crosses from this flight's
+            # band into the next one's; the rest platform also projects past +Y.
             BOX(f"{ROOT}/Landing_{k}",
-                ((f["lx0"] + f["lx1"]) / 2.0, lcy,
+                ((f["lx0"] + f["lx1"]) / 2.0, (f["ly0"] + f["ly1"]) / 2.0,
                  f["z_bot"] - ld["thick"] / 2.0),
-                (f["lx1"] - f["lx0"], lsy, ld["thick"]), M["deck"], col=True)
+                (f["lx1"] - f["lx0"], f["ly1"] - f["ly0"], ld["thick"]),
+                M["deck"], col=True)
 
         # deck support columns — [S3-8 / C7] round Ø150 -> square 120x120 sawn timber.
         #   All grounded on the ground or on the landing below. The columns that reach
@@ -1817,7 +2008,7 @@ def main():
             h = z_hi - z_lo
             BOX(f"{ROOT}/Column_{nm}", (cx, cy, z_lo + h / 2.0),
                 (sec, sec, h), M["stringer"], col=True)
-            if abs(z_lo - GROUND_Z) < 1e-6 and h > 0.6:
+            if abs(z_lo - corridor_z(cx)) < 1e-6 and h > 0.6:
                 BOX(f"{ROOT}/ColumnAlgae_{nm}", (cx, cy, z_lo + 0.175),
                     (sec + 0.006, sec + 0.006, 0.35), M["algae"])
 
@@ -1838,7 +2029,7 @@ def main():
         # leaf band : hides the top two step edges of flight0
         lf = PARAMS["leaf"]
         f0 = SEQ[0]
-        blo, bhi = band(True)
+        blo, bhi = band(0)
         for i in (1, 2):
             xa = f0["x_top"] + (i - 1) * fl["tread"]
             xb = f0["x_top"] + i * fl["tread"]
@@ -1952,9 +2143,8 @@ def main():
         if cfg["cue_nosing"]:
             fl = PARAMS["flights"]
             for f in SEQ:
-                grp = sc.build_rot_group(stage, f"{ROOT}/NoseGrp_{f['k']}",
-                                         (f["x_top"], 0.0), f["rot"])
-                lo, hi = band(True)
+                grp = f"{ROOT}/NoseGrp_{f['k']}"
+                lo, hi = band(f["k"])
                 sc.build_nosing(stage, f"{grp}/Nose", f["x_top"], lo, hi,
                                 fl["riser"], fl["tread"], f["steps"],
                                 base_z=f["z_bot"], z_top=f["z_top"])

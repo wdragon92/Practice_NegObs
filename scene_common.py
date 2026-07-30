@@ -2710,6 +2710,40 @@ VEG_SHRUBS = [
     ("Shrub/Holly.usd",         2.378, 0.084, 361070, 1.526),
     ("Shrub/Yew.usd",           1.235, 0.013, 144320, 0.727),
     ("Shrub/Cedar_Shrub.usd",   0.288, 0.000, 186446, 0.876),
+    # [W3 K-micro · S06-F2 / S09-F1 / S03 §9-7] **The four grass rows the three
+    # dead `SHRUB_SPECIES` roles have always named.** `riparian` (Switchgrass),
+    # `verge_turf` (Grass_Short_A/B) and `edge_weed` (Grass_Short_C) pointed at
+    # assets that are on disk but had **no `VEG_SHRUBS` row**, and `place_shrubs`
+    # filters `species=` *and* `pool=` through this table — so all three roles
+    # resolved empty and fell back to `SHRUB_ORNAMENT` **silently**. scene06's
+    # first render put two Rhododendron beds side by side while the scene printed
+    # "grasses 14"; Switchgrass was unreachable from any sanctioned call.
+    #   Five fields `[measured — assets/veg_manifest_w2.json, byte-matched to the
+    #   files on disk this session: 2457126 / 845898 / 124868 / 1208701 B]`.
+    #   width = the larger XY extent · zmin = |origin-to-bottom| · height = the z
+    #   extent (zmax + |zmin|), the same convention the Holly/Yew/Cedar rows use.
+    #     Grass_Short_A  1.2893x1.2939x0.1618  zmin -0.0228  tri  32,504
+    #     Grass_Short_B  0.6615x0.6752x0.1636  zmin -0.0172  tri  11,137
+    #     Grass_Short_C  0.2789x0.3044x0.1250  zmin -0.0021  tri   1,598
+    #     Switchgrass    2.0090x2.0268x1.3717  zmin -0.0005  tri   8,934
+    # **Season pixel-check, the K4-F1 test applied to each** `[measured this
+    #   session, PIL over the basecolor PNGs, and cross-read against the
+    #   manifest's UV-weighted `foliage_uv_hue`]`: `switchgrass_basecolor.png`
+    #   green **1.0000**, red 0.0000, magenta 0.0000; `lawngrass_a_basecolor.png`
+    #   (shared by A/B/C) red **0.0003**, magenta **0.0000** — whole-texture
+    #   green+yellow-green 0.438 with the balance in dry straw (the manifest's
+    #   UV-weighted figures are green 0.535-0.542 + yellow-green 0.281-0.287
+    #   = **0.821-0.823 >= the 0.75 turf gate**, which is why these passed
+    #   procurement and `Grass_Trimmed_A~C` at 0.72 did not). Neither texture
+    #   carries autumn red or bloom magenta, so unlike `Forsythia` /
+    #   `Burning_Bush` / `Rhododendron` these four need **no** seasonal strip and
+    #   have no `SEASONAL_SUBPRIMS` row.
+    # Triangles are cheap here (1.6k-32.5k against 55k-404k for the woody rows),
+    # so a turf band is affordable in the near field where a shrub blob is not.
+    ("Shrub/Grass_Short_A.usd", 1.294, 0.023,  32504, 0.162),
+    ("Shrub/Grass_Short_B.usd", 0.675, 0.017,  11137, 0.164),
+    ("Shrub/Grass_Short_C.usd", 0.304, 0.002,   1598, 0.125),
+    ("Shrub/Switchgrass.usd",   2.027, 0.001,   8934, 1.372),
 ]
 # A clipped hedge really is box-shaped (it is trimmed). What the blob gets wrong is the
 # **untrimmed shrubs of a flower bed** - those are what get replaced with real assets.
@@ -3453,6 +3487,14 @@ def place_shrubs(stage, prefix, pts, target_h, pool=None, seed=1234,
     avail = [s for s in VEG_SHRUBS
              if s[0] in names and os.path.isfile(os.path.join(VEG_DIR, s[0]))]
     if not avail:
+        # [W3 K-micro · S06-F2] Loud, not silent. A `pool=` that resolves to
+        # nothing used to return 0 without a word, so a bed simply did not exist
+        # and the scene's own census printed the number it asked for.
+        if pool:
+            print(f"[관목][경고] pool 이 VEG_SHRUBS 에서 0종으로 해석됐다 — "
+                  f"{prefix} 는 비어 있다 · 요청 {list(names)}")
+            LOOK_STATS["shrub_pool_miss"] = \
+                LOOK_STATS.get("shrub_pool_miss", 0) + 1
         return 0
     import random as _random
     rnd = _random.Random(int(seed) & 0x7FFFFFFF)
@@ -3467,6 +3509,23 @@ def place_shrubs(stage, prefix, pts, target_h, pool=None, seed=1234,
                 and os.path.isfile(os.path.join(VEG_DIR, s[0]))]
         if role:
             avail = role
+        else:
+            # [W3 K-micro · S06-F2 / S09-F1] **The fallback is now loud.** This is
+            # the branch that made three roles inert for a whole wave: the bed came
+            # back with a healthy count of the *wrong* species and nothing said so.
+            # The fallback itself is kept (an empty bed is worse than a substituted
+            # one mid-render), but it now names the role, the reason and the pool
+            # it actually drew from, and it is counted so a round can be audited
+            # from the log alone.
+            why = ("역할 미등록" if species not in SHRUB_SPECIES
+                   else ("VEG_SHRUBS 행 없음/디스크 부재: "
+                         + ", ".join(w for w in want
+                                     if not any(s[0] == w for s in VEG_SHRUBS))
+                         or "디스크 부재"))
+            print(f"[관목][경고] species='{species}' 해석 실패({why}) — "
+                  f"{prefix} 는 대신 {[s[0] for s in avail]} 로 채워진다")
+            LOOK_STATS["shrub_species_miss"] = \
+                LOOK_STATS.get("shrub_species_miss", 0) + 1
     bed = avail[rnd.randrange(len(avail))]
     placed = 0
     for i, (px, py, pz) in enumerate(pts):
@@ -4236,6 +4295,30 @@ def _variation_selfcheck():
             L0["lookfix"] is True and L0["sun_angle_deg"] == 0.53)
         chk("_SUN_CAP_DEG_DEFAULT still 0.6 (W2 value)",
             _SUN_CAP_DEG_DEFAULT == 0.6)
+
+        # (4) [W3 K-micro · S06-F2 / S09-F1] every SHRUB_SPECIES role must
+        #     resolve to at least one VEG_SHRUBS row. This is the gate that
+        #     would have caught three dead roles at landing time instead of
+        #     three scene lanes finding them one at a time in a render.
+        print("\n[4] SHRUB_SPECIES 역할 → VEG_SHRUBS 해석 (S06-F2 게이트)")
+        _reg = {s[0] for s in VEG_SHRUBS}
+        _dead = {r: [w for w in ws if w not in _reg]
+                 for r, ws in SHRUB_SPECIES.items()}
+        _dead = {r: m for r, m in _dead.items() if len(m) == len(SHRUB_SPECIES[r])}
+        chk(f"{len(SHRUB_SPECIES)} roles all resolve to >=1 VEG_SHRUBS row",
+            not _dead, str(_dead) if _dead else
+            " · ".join(f"{r}:{len([w for w in ws if w in _reg])}"
+                       for r, ws in sorted(SHRUB_SPECIES.items())))
+        _orph = sorted({w for ws in SHRUB_SPECIES.values() for w in ws} - _reg)
+        chk("no role names an asset with no registry row",
+            not _orph, str(_orph) if _orph else "0")
+        _pools = sorted(set(SHRUB_HEDGE) | set(SHRUB_ORNAMENT))
+        chk("SHRUB_HEDGE / SHRUB_ORNAMENT are registered too",
+            all(p in _reg for p in _pools), str(_pools))
+        _disk = [s[0] for s in VEG_SHRUBS
+                 if os.path.isfile(os.path.join(VEG_DIR, s[0]))]
+        print(f"         · VEG_SHRUBS {len(VEG_SHRUBS)}행 · 디스크 존재 "
+              f"{len(_disk)}종 (부재는 조달 상태이지 결함이 아니다)")
     finally:
         for k, v in keep.items():
             os.environ.pop(k, None)

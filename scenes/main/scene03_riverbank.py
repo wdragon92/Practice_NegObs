@@ -1243,13 +1243,20 @@ def main():
                 #       crest margin is less maintained than a 둔치 promenade, and **G3
                 #       shows weeds in every joint of the revetment and along both
                 #       margins**, so 8 is the reference's direction, not an invention.
-                #     · `scatter` gravel — loose stone on a gravel maintenance track. The
-                #       numbers sit just under the two natural-profile precedents that
-                #       already ship it (`trail_soil` 0.10/150 · `courtyard_dg` 0.09/200),
-                #       because this track is maintained and those are not.
+                #   **A `scatter` gravel field was tried here and REVERTED on the render.**
+                #   It is left written down because the reasoning was sound and the result
+                #   was not: `scatter=dict(kind="gravel", cover=0.08, count=130,
+                #   scale_jitter=(0.38, 0.62), burial=0.38)` recovered the statistics well
+                #   (`σ_LF` 1.02 → 3.35 at d2, and d5 4.14 → 5.66 = the only clean h0.3 cut
+                #   in either arm) and looked **wrong**: `apply_ground` scatters over the
+                #   whole plan region (−12…0, ±3), which on this crest is **mostly mown
+                #   grass**, so the d5/d10 frames filled with pale 0.1–0.2 m stones strewn
+                #   across a lawn. A levee crest has stone on its gravel track and none on
+                #   its verge. Trading a blank floor for boulders on a lawn is a worse
+                #   frame, so the statistics lose: the row is gone and the residual is
+                #   handed to the material lane (`w3_s03_v1.md` §7-3) instead of being
+                #   papered over. Re-open only if the kit gains a region-restricted scatter.
                 surface=(("stain", ("dirt", "water")), ("weed", 8)),
-                scatter=dict(kind="gravel", cover=0.08, count=130,
-                             scale_jitter=(0.38, 0.62), burial=0.38),
                 extras=(("wear_lane", dict(width=0.90)),)),
             extras_args=dict(wear_lane=dict(
                 centerline=((g["wear_x"], -g["wear_y"]),

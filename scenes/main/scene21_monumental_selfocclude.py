@@ -329,15 +329,17 @@ PARAMS = dict(
     signs=[("Info", "sign_info", -3.2, -5.4, 0.0, 180.0, 1.0, 0.75)],
 
     material=dict(
-        # [W3 L21 · BS-1] `brick_red` **2.0 → 1.00**. The rendered course at scale_m 2.0
-        #   is 154 mm against the Korean 67 mm of KS L 4201 (190 × 90 × 57 + 10 mm bed) —
-        #   **2.30 ×** — and spec §10.7 BS-1 names scene21 in its 17-scene list with the
-        #   band 0.90–1.10 (**do not ship 0.87**, C-19). The role is also **re-pointed**:
-        #   it used to clad the three deleted horizon masses, and now carries G1's
-        #   *"salmon/rose brick-red block band"* on the plaza, which is the only place
-        #   the image actually puts this material. See `build_plazas`.
+        # [W3 L21 · BS-1 discharged by deletion] `brick_red` is **gone from this scene**.
+        #   It clad the three deleted horizon masses (§ backdrop) and was then re-pointed
+        #   to the plaza apron band, where the pilot render refuted it (see `build_plazas`
+        #   and **L21-F4**). With no consumer left, the role is dropped rather than left
+        #   at a corrected `scale_m` nobody reads: spec §10.7 **BS-1** names scene21 in
+        #   its 17-scene list (rendered course **154 mm vs the Korean 67 mm of
+        #   KS L 4201**, 2.30 ×), and a deleted binding satisfies it more completely than
+        #   a re-scaled one. The backdrop silhouettes take `marble_light`, which is what
+        #   G1 shows: stone institutional blocks, not brick.
         scale=dict(marble_light=1.2, plaza_light=1.80, granite_dark=1.0,
-                   band_dark=0.5, brick_red=1.00, tactile=0.3, grass=1.4),
+                   band_dark=0.5, tactile=0.3, grass=1.4),
         # [W3 L21 · season] G1 is **autumn**: the turf is desaturated and warmed, with
         #   green still the largest channel. A straw-yellow lawn would be a different
         #   season, not this one. (Same measured value the S01 lane pinned from G1.)
@@ -397,8 +399,10 @@ if _sc_ov:
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "scene21")
+# [W3 L21] `brick_red` removed — the three brick horizon masses are gone (BS-4) and the
+#   plaza band reverted to `band_dark` after the pilot (L21-F4). No consumer, no role.
 ASSET_ROLES = ["marble_light", "plaza_light", "granite_dark", "band_dark",
-               "brick_red", "tactile", "grass",
+               "tactile", "grass",
                "sign_info", "hdri", "mdl"]              # [v5] sign_info
 
 
@@ -668,10 +672,6 @@ def main():
             f"{ROOT}/Looks/Band", sc.tex_path("band_dark", "diff"),
             sc.tex_path("band_dark", "nor"), sc.tex_path("band_dark", "rough"),
             sca["band_dark"])
-        M["brick"] = PBR(
-            f"{ROOT}/Looks/Brick", sc.tex_path("brick_red", "diff"),
-            sc.tex_path("brick_red", "nor"), sc.tex_path("brick_red", "rough"),
-            sca["brick_red"])
         M["grass"] = PBR(
             f"{ROOT}/Looks/Grass", sc.tex_path("grass", "diff"),
             sc.tex_path("grass", "nor"), sc.tex_path("grass", "rough"),
@@ -740,16 +740,27 @@ def main():
              lo["z_top"] - lo["thick"] / 2.0),
             (lo["x1"] - x0, lo["y1"] - lo["y0"], lo["thick"]),
             M["plaza"] if cfg["cue_material_break"] else M["marble"], col=True)
-        # [W3 L21 · G1] The two apron bands become the image's **salmon/rose brick-red
-        #   block band**, not a charcoal run. G1 puts exactly one coloured block band in
-        #   an otherwise light-grey granite plaza, and the project's own cross-cutting
-        #   read 1 lists *"a paving band"* among the legitimate functional ground marks —
-        #   this is that vocabulary, not a decorative rectangle. `band_dark` keeps its
-        #   real job (the ground_kit joint/crack/manhole decal ladder, `build_ground_kit`).
+        # [W3 L21 · G1 · pilot-measured REVERSAL] The two apron bands stay `band_dark`.
+        #   The first pilot bound them to `brick_red`, on the reading that G1 shows a
+        #   *"salmon/rose brick-red block band"* in an otherwise light-grey granite plaza
+        #   and that cross-cutting read 1 lists *"a paving band"* among the legitimate
+        #   functional ground marks. **The render refuted the asset, not the intent.**
+        #   `brick_red` is a **wall** brick scan (KS L 4201 190 × 90 × 57 stretcher bond)
+        #   with a large per-brick albedo spread; laid at the BS-1 scale of 1.00 m on a
+        #   0.40 m wide × 32 m long strip it resolves into individual bricks, half of
+        #   them near the marble tone and half dark red, so the run reads as a **broken
+        #   chain of red rectangles** across the plaza — measured in
+        #   `_w3_l21_crops/l21_band_brick_refuted.png`. That is the "이상한 사각형 무늬"
+        #   the rectangles ban exists to kill, arrived at from the opposite direction.
+        #   The right asset is a **점토블록 paving** texture, which the library does not
+        #   have; that is a procurement row (**L21-F4**), not a scene edit. `brick_red`
+        #   is therefore dropped from this scene entirely — with the band reverted it has
+        #   no consumer left — and spec §10.7 **BS-1**'s scene21 entry is discharged by
+        #   deletion of the binding rather than by a scale value.
         for k, xb in enumerate((x0 + 1.0, x0 + 2.0)):
             BOX(f"{ROOT}/LowerBand_{k}",
                 (xb, (lo["y0"] + lo["y1"]) / 2.0, lo["z_top"] - 0.02),
-                (0.4, lo["y1"] - lo["y0"], 0.06), M["brick"])
+                (0.4, lo["y1"] - lo["y0"], 0.06), M["band"])
 
     # -------------------------------------------------------------------
     # [W2-D] ground_kit - P1 plaza_granite (spec §5.1 row scene21)

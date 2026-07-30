@@ -1710,6 +1710,20 @@ def build_nosing(stage, prefix, x0, y0, y1, riser, tread, n, base_z=0.0,
     return prims
 
 
+# --- C0-7 · the baluster 안목 gate -------------------------------------------
+# [법령] 도로안전시설 설치·관리 지침 (난간) — the **clear opening (안목)** between adjacent
+# vertical members is 100 mm or less. The quantity is a *clear* span, surface to surface, not
+# a centre pitch: with cylindrical balusters of radius r at pitch p the clear opening is
+# `p - 2r`, which is exactly `baluster_gap` in this builder's parameterisation.
+#
+# Why this is a gate and not a default. `props_audit_w1/C1_scene_props_01-05.md` **C0-7**
+# graded the railing family 치명: the statutory members existed but sat behind a flag, and the
+# pit railing measured a 450 mm opening — "geometry justified by a statutory requirement was
+# violating that requirement". A default can be overridden silently by any of the 16 call
+# sites; a gate cannot. A caller asking for more than the statute gets clamped **and told**.
+BALUSTER_CLEAR_MAX = 0.100
+
+
 def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
                        mtl, rail_h=None, post_r=0.02, spacing=None, rail_r=0.03,
                        rail_mid_r=0.018, rail_mid_drop=0.45,
@@ -1758,25 +1772,53 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
     # guardrails are dense without exception. On a slope the balusters stay **vertical** (only the
     # rail tilts), which makes the silhouette markedly different. Inside the LOOK_GEO gate - A/B control preserved.
     if LOOK_GEO and baluster_r > 0:
+        # [W3 K4(a) · C0-7 gate] Enforce the 안목 here rather than trusting 16 call sites.
+        # Census at the time of writing (AST, `scenes/*/*.py` + every kit): **16 sites, none
+        # of which passes `baluster_gap`** - all 16 inherit 0.098 m, and scene18 alone opts
+        # out with `baluster_r=0.0`. So the clamp below is inert today, by measurement, and
+        # the gate exists for the call site that has not been written yet.
+        if baluster_gap > BALUSTER_CLEAR_MAX + 1e-9:
+            print(f"[룩v1][경고] 간살 안목 {baluster_gap * 1000:.0f} mm "
+                  f"> 법정 {BALUSTER_CLEAR_MAX * 1000:.0f} mm — {prefix} 클램프")
+            baluster_gap = BALUSTER_CLEAR_MAX
         pitch = 2.0 * baluster_r + baluster_gap
-        xb = x_start + pitch * 0.5
-        b = 0
-        while xb <= x_end - pitch * 0.25:
-            t = max(0.0, min((xb - x_top) / run, 1.0)) if run > 1e-9 else 0.0
+
+        def _bal(idx, bx):
+            """One vertical baluster at bx. Returns True when it was tall enough to build."""
+            t = max(0.0, min((bx - x_top) / run, 1.0)) if run > 1e-9 else 0.0
             ztop = top0 - drop * t - rail_r          # Underside of the top rail
-            gz = float(ground_fn(xb))
+            gz = float(ground_fn(bx))
             # The balusters must come down **close to the ground**. Previously they stopped at the mid
             # rail and filled only 43 % of the guardrail height, and the actual opening in the lower
             # 0.45-0.60 m violated the cited statutory 100 mm by 11 to 28 times.
             # (Geometry justified by a statutory requirement was violating that requirement.)
             zbot = max(gz + 0.04, top0 - drop * t - rail_h + 0.04)
             h = ztop - zbot
-            if h > 0.05:
-                prims.append(add_cylinder(
-                    stage, f"{prefix}/Bal_{b}", (xb, y, zbot + h / 2.0),
-                    baluster_r, h, mtl))
+            if h <= 0.05:
+                return False
+            prims.append(add_cylinder(
+                stage, f"{prefix}/Bal_{idx}", (bx, y, zbot + h / 2.0),
+                baluster_r, h, mtl))
+            return True
+
+        xb = x_start + pitch * 0.5
+        b = 0
+        x_last = None
+        while xb <= x_end - pitch * 0.25:
+            if _bal(b, xb):
+                x_last = xb
             xb += pitch
             b += 1
+        # [W3 K4(a) · C0-7 gate, run end] The loop terminates at `x_end - 0.25*pitch`, so the
+        # clear opening left between the last baluster and the rail terminus is
+        # `x_end - x_last - r`, which reaches **1.25*pitch - r = 136 mm at the default pitch**
+        # `[computed]` - the very 안목 the gate enforces everywhere else, violated at the one
+        # place a pedestrian meets the rail end. One terminal baluster, flush with x_end,
+        # closes it. It is placed only when the span actually exceeds the statute, so a run
+        # whose length happens to divide evenly gains nothing.
+        if x_last is not None and (x_end - x_last) - baluster_r > BALUSTER_CLEAR_MAX + 1e-9:
+            if _bal(b, x_end - baluster_r):
+                b += 1
         LOOK_STATS["baluster"] = LOOK_STATS.get("baluster", 0) + b
 
     # Posts: landing on the real ground (ground_fn), top = the rail line.

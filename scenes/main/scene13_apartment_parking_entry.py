@@ -33,11 +33,23 @@ Hazard
   removed on the south side over x 10.5~13.5 (3 m), and the adjoining stair shaft
   (depth 3.96) is left with bare coping and no railing.
 
+[W3 S13 · G13] What the target image changed (ruling `w3_intake_v2_images.md` §7-5)
+  U-5 ("지하 진입로는 캐노피를 진입로 끝까지") is read **real-practice**, not literally:
+  G13 shows **no canopy over the ramp at all**. The approach is covered for its whole
+  length by the **building slab over the portal** (already built: `garage.ceil_z = -1.2`
+  from `portal.x = 24.0` eastward, with estate ground above it), and what spans the mouth
+  is a **stainless gantry sign**. So the 5.8 m free-standing porch (a canopy over 24 % of
+  the approach, which appears in **no** reference image) is **deleted** and replaced by
+  `props_kit.build_gantry_sign` + the height-limit bar re-hung from it.
+  Also from G13: yellow/black bands and a reflective guidance strip on the trench wall
+  faces, yellow/black kerb blocks on the ramp cheeks, a yellow ramp centre line, a ginkgo
+  street row at 8.0 m pitch, and the 보차도 kerb the footways never had (GT-5).
+
 Goal
   (1) ground split into 6 boxes that **do not cover** the ramp trench opening
       (x 0..24, y +-3.3) or the stair shaft opening (x 5..11.2, y 3.3..6.9)
   (2) straight ramp in 3 segments (transition-main-transition) + side walls and coping +
-      canopy above + barrier gate + height-limit bar + fee board
+      gantry sign over the mouth + barrier gate + height-limit bar + fee board
   (3) adjoining pedestrian stair, 24 steps (riser 0.165, width 1.4, 2 switchback flights
       + mid landing) -> basement corridor -> basement 1 car park (dim lighting — PT assumed)
   (4) statutory bollards (h0.9 · r0.08 · spacing 1.5 · reflective top band) + 0.3 m dot
@@ -76,8 +88,9 @@ Smoke (no boot):          NEGOBS_SMOKE=1  python scene13_apartment_parking_entry
 
 Coordinates: Z-up, m, travel axis +X (estate sidewalk -> ramp descent). **Drop start edge x=0.**
   surface z=0, basement 1 floor z=-3.96, upper slab underside z=-1.2.
-  Sun: SUN_AZ_OFFSET=171.5 (default for every scene — the canopy shadow catches the top
-  of the opening).
+  **Footway top z=+0.150** (GT-5) — the four `walk_*` plates and the two crossing
+  turn-down ramps; carriageway datum stays z=0.
+  Sun: SUN_AZ_OFFSET=171.5 (default for every scene).
 """
 
 import os
@@ -88,6 +101,8 @@ import datetime
 
 import scene_common as sc
 import ground_kit as gk
+import infra_kit as ik
+import props_kit as pk
 
 
 # ===========================================================================
@@ -171,17 +186,44 @@ PARAMS = dict(
         #  x=−3.90 dodges both the DriveLine dashes (i=3 −6.05…−4.55 / i=4 −3.45…−1.95)
         #  and the tyre polish bands (|y| 0.575…1.125) -> zero Z-fighting.
         manhole_d5=(-3.90, 0.00),
-        #  13-5 ramp lane boundary solid line — start 0.6 -> **0.80**. It must begin behind
-        #  the relocated entry trench's far frame edge (0.71) so the paint does not ride
-        #  onto the steel frame (practice also breaks it at the trench). Length stays 6.0.
-        lane_lines=[(0.80, -2.40), (0.80, 2.40)],
+        #  13-5 **[W3 S13 · G13] the two white ramp edge lines are DELETED.** G13's ramp
+        #  carries one **yellow centre line** and nothing else; the two white boundary
+        #  lines at y=+-2.40 are not in the image and not in Korean ramp practice (the
+        #  2-lane ramp is divided, not edge-marked). The centre line is scene-owned
+        #  (`ramp_line`) because a `gkit` marking is a flat plate at plan z and cannot
+        #  ride the 8.5 %/17 % deck.
+        lane_lines=[],
+        #  [W3 S13] GD patch 2 -> 1 (intake §2 scene13 (e)). The remaining patch is a
+        #  contractor **saw-cut asphalt patch on the asphalt approach**, which the user's
+        #  rectangle ban explicitly exempts; a second one reads as the "지저분한" N2 case.
+        patch_n=1,
         groove=(3.6, -3.0, 20.4, 3.0),        # 13-2 grooving — delegated to T1 stripes
         tactile_bollard=(-2.90, 4.35, -1.40, 4.65),   # §12.4 sidewalk part only
     ),
-    walk_cross=dict(x0=-3.2, x1=-1.2, y_far=16.0, proud=0.007),   # sidewalk crossing the ramp
-    walk_north=dict(y0=7.2, y1=9.2, x0=-14.0, x1=30.0, proud=0.007),
-    walk_spur=dict(x0=11.4, x1=13.4, y0=3.3, y1=7.2, proud=0.007),
-    walk_south=dict(y0=-9.4, y1=-7.4, x0=-14.0, x1=30.0, proud=0.007),
+    # ═══ [W3 GT-5] footway 150 mm — proud 0.007 (a 3 mm step) → a real kerb step ═══
+    #  All four walk plates rise together. GT-5 names walk_north/walk_south only; raising
+    #  those two alone would leave a **143 mm step** where walk_cross and walk_spur join
+    #  them (ledger §7 watch item W2), which is a new unlabelled drop on a walked route.
+    #  The two crossing arms that meet the carriageway (CrossN1 / CrossS1) become
+    #  **turn-down ramps** (4.9 % / 4.6 %) instead of plates, so the 146 mm step at the
+    #  driveway edge does not exist either. See `hazard_registry()`.
+    walk_cross=dict(x0=-3.2, x1=-1.2, y_far=16.0, proud=0.150),   # sidewalk crossing the ramp
+    walk_north=dict(y0=7.2, y1=9.2, x0=-14.0, x1=30.0, proud=0.150),
+    walk_spur=dict(x0=11.4, x1=14.4, y0=3.3, y1=7.2, proud=0.150),
+    walk_south=dict(y0=-9.4, y1=-7.4, x0=-14.0, x1=30.0, proud=0.150),
+    walk_plate_t=0.12,                 # buried depth below the plate top (top = z + proud)
+    #  The spur is widened 2.0 → 3.0 m in x so its turn-down can be 2.0 m long: at the
+    #  old 1.0 m the ramp toward the stair head would have been **15 %**, which is not a
+    #  pedestrian approach. 0.150 / 2.0 = 7.5 % ≤ 1/12.
+    spur_ramp=dict(x0=11.4, run=2.0),  # spur turn-down toward the stair head (−X)
+    # ═══ [W3 GT-5 · K5] 보차도 경계석 — infra_kit.build_curb_line ═══
+    #  1 m precast units · R10 top arris via the `curb` look class (0 prims) · no L-gutter
+    #  (the kerb faces a planted verge, not a carriageway pan — `build_gutter_L` would
+    #  invent a road gutter where there is no road), so **gt_drop = height = 0.150**.
+    curb=dict(height=0.150, width=0.20, unit=1.0, embed=0.20, joint_w=0.006,
+              arris="look", arris_r=0.010, far_unit=8.0,
+              lod_span=(8.0, 28.0),    # arc length from x=-14 → the judged window x −6…14
+              drop_h=0.020, drop_taper=1.0),
     # --- Statutory bollards (per Enforcement Rule of the Act on Promotion of Mobility Convenience for the Mobility Impaired, Table 2) ---
     #     h0.9 · r0.08 · spacing 1.5 · reflective top band · 0.3 m dot tactile in front.
     #     Placed **only where vehicles might intrude** = the 2 sidewalk/road crossings.
@@ -189,17 +231,26 @@ PARAMS = dict(
                  band_r=0.086),
     bollard_rows=[dict(y=4.35, xs=(-2.9, -1.4), tac_y0=4.35, tac_y1=4.65),
                   dict(y=-4.35, xs=(-2.9, -1.4), tac_y0=-4.65, tac_y1=-4.35)],
-    # --- Canopy (entry shelter) + height-limit bar + barrier gate ---
-    canopy=dict(x0=-1.6, x1=4.2, y0=-3.75, y1=3.75, z_roof=2.85,
-                roof_t=0.35, post_r=0.16, base_z=0.0,
-                # [v6 C-3] fascia band : wraps the slab perimeter and drops below the soffit
-                #   by drop, so it reads as a shelter with thickness rather than a flat board.
-                fas_ov=0.09, fas_in=0.02, fas_drop=0.07, fas_top_in=0.02,
-                # 3 soffit lights (customary at basement entries — dim, assuming PT 8 bounces)
-                soffit_xs=(0.0, 1.4, 2.8), soffit=(0.90, 0.22, 0.06),
-                soffit_drop=0.01),
-    height_bar=dict(x=-1.5, z=2.30, r=0.09, y0=-3.2, y1=3.2, nseg=8,
-                    hanger_t=0.05),
+    # --- [W3 S13 · G13] Gantry sign over the mouth + height-limit bar + barrier gate ---
+    #  The porch canopy (x −1.6…4.2, 5.8 m of a 24 m approach) is DELETED — ruling §7-5.
+    #  Posts stand on solid ground at |y| = 3.55, i.e. 40 mm clear of the trench coping
+    #  outer face (3.36) and outside the 6 m traffic envelope; the panel spans the mouth.
+    #  `clear_h` is the **structural** clearance under the panel; the posted limit is the
+    #  2.30 m bar hung from the same frame (Korean practice puts both at the mouth).
+    gantry=dict(x=0.40, y0=-3.55, y1=3.55, clear_h=4.00,
+                post_w=0.30, panel_h=0.90, panel_t=0.12),
+    height_bar=dict(x=0.40, z=2.30, r=0.09, y0=-3.2, y1=3.2, nseg=8,
+                    hanger_t=0.05, hang_y=2.95),
+    # --- [W3 S13 · G13] wall-face safety graphics on the trench cheeks ---
+    #  Bands sit on the **inner** wall faces (y = ±3.0) where the deck has dropped far
+    #  enough to expose them; scene13's cheeks are flush-coped by design (the below-code
+    #  reality this scene exists to carry), so there is no above-ground parapet to paint.
+    chevron=dict(xs=(8.0, 12.0), width=1.20, height=0.55, n=6, stripe_t=0.006,
+                 dz=(0.45, 0.58)),      # band centre above the deck, per xs entry
+    wall_strip=dict(x0=7.0, x1=23.294, dz=0.60, h=0.08, t=0.014),
+    # --- [W3 S13 · G13] ramp deck markings (scene-owned: they must ride the slope) ---
+    ramp_line=dict(x_start=0.85, half_w=0.075, proud=0.004, thick=0.02),
+    kerb_stripe=dict(x0=0.90, x1=3.60, unit=0.45, thick=0.03, proud=0.006),
     gate=dict(x=2.2, y=3.15, box=(0.34, 0.30, 1.00), base_z=0.12,
               arm_r=0.05, arm_z=0.97, arm_y0=-2.6, arm_y1=3.0, nseg=7),
     # --- Signs (cue_sign) ---
@@ -221,18 +272,35 @@ PARAMS = dict(
                  head_x0=11.5, head_x1=11.8,        # warning band at the stair head
                  foot_x0=11.25, foot_x1=11.55),     # warning band at the basement landing
     # --- Dressing (irregular placement: no even spacing or grids, yaw jitter) ---
+    #  [W3 S13 · GT-5] `(4.3, −8.9)` sat **inside** walk_south (y −9.4…−7.4); at proud
+    #  0.007 that was invisible, at 0.150 the bed would be sunk 150 mm. Moved clear.
+    #  Planter trees are placed by the scene (not by `build_planter`) so they can carry
+    #  `species=` — `build_planter` has no species argument and would fall back to the
+    #  `SCENE_SPECIES` row, making the scene two-species (K4(b) S-1 forbids that).
     planters=[dict(cx=-8.6, cy=6.4, size=3.4, tree=True),
               dict(cx=-12.9, cy=-5.2, size=2.8, tree=True),
               dict(cx=16.8, cy=10.9, size=3.8, tree=True),
-              dict(cx=4.3, cy=-8.9, size=3.0, tree=True),
+              dict(cx=4.3, cy=-11.4, size=3.0, tree=True),
               dict(cx=27.4, cy=-6.1, size=3.2, tree=False)],
     planter=dict(curb_h=0.42, curb_t=0.22, cap_over=0.05, cap_h=0.05,
                  grass_h=0.38),
-    trees=[(-19.4, 8.9), (-16.1, -9.7), (9.2, 12.4), (21.7, 6.8),
-           (-5.8, -12.3), (30.6, 12.1), (18.4, -11.6), (-24.7, 3.4)],
-    hedges=[(-22.0, 6.9, -14.6, 7.5), (14.2, -7.6, 21.3, -7.0),
+    # [W3 S13 · K4(b)] **G13's ginkgo street row.** Two monospecific rows at the library
+    #  pitch `TREE_PITCH_M = 8.0`, one each side of the estate footway, replacing eight
+    #  scattered specimens. Species: see `TREE_SPECIES` below.
+    tree_rows=[dict(y=9.55, x0=-12.0, n=6), dict(y=-9.75, x0=-12.0, n=6)],
+    tree_pitch=8.0,
+    tree_trunk_h=4.70,                 # → target height 4.70 × 1.60 ≈ 7.5 m (street row)
+    hedges=[(-22.0, 6.9, -14.6, 7.5), (14.2, -6.9, 21.3, -6.3),
             (2.4, 12.2, 9.6, 12.8)],
-    benches=[(-9.4, 8.3, 174.0), (17.3, 12.6, -6.0), (-13.6, -7.1, 3.0)],
+    # (bx, by, yaw, base_z) — bench 0 stands on walk_north, which is now at +0.150
+    benches=[(-9.4, 8.3, 174.0, 0.150), (17.3, 12.6, -6.0, 0.0),
+             (-13.6, -7.1, 3.0, 0.0)],
+    # [W3 S13 · G13] mid-rise-street backdrop signature: utility pole + transformer +
+    #  overhead spans. Backdrop only — outside every judged near-ground cone.
+    poles=[(-6.0, 11.6, True), (18.0, 11.6, False)],
+    pole=dict(h=9.0, r=0.11, arm_len=1.8, arm_t=0.09, arm_zs=(8.10, 7.50),
+              tr_r=0.28, tr_h=0.90, tr_z=6.60, wire_r=0.018, sag=0.35, seg=3,
+              wire_ys=(-0.75, 0.0, 0.75)),
     streetlights=[(-7.2, 6.95), (12.6, 7.05), (26.9, -7.2)],
     streetlight=dict(pole_h=5.2, pole_r=0.075, arm_len=1.0, arm_r=0.045,
                      head=0.26),
@@ -258,7 +326,18 @@ PARAMS = dict(
 
     material=dict(
         scale=dict(paving_interlock=1.2, concrete_floor=1.0,
-                   concrete_wall=1.4, grass=1.4, tactile=0.3, plaster=2.4),
+                   concrete_wall=1.4, grass=1.4, tactile=0.3, plaster=2.4,
+                   marble_light=1.1),
+        # [W3 GT-5 · K5 3.] the kerb binds a **curb-class** material (path token `Curb`
+        #   → LOOK_CLASS["curb"], bevel 10 mm = the R10 arris `arris="look"` relies on).
+        #   S06-B item 3's `curb_granite_light` role is not authored (procurement HOLD),
+        #   so `marble_light` is the stand-in — the same one scene02/CB-7 bound — and
+        #   `granite_dark` stays forbidden on a kerb.
+        curb_tint=(0.80, 0.79, 0.76),
+        # stainless gantry (STS304 hairline) — brighter and flatter than the tube railing
+        gantry_color=(0.72, 0.735, 0.75), gantry_metallic=0.85, gantry_rough=0.30,
+        # ramp centre line — Korean ramp practice is a YELLOW divider, not white edge lines
+        line_y_color=(0.72, 0.60, 0.10), line_y_rough=0.58,
         grass_tint=(0.52, 0.63, 0.40),
         grass_tint_b=(0.47, 0.60, 0.37),        # planter grass (+-5% tint jitter)
         paving_tint=(0.86, 0.85, 0.83),
@@ -343,7 +422,21 @@ LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "scene13")
 ASSET_ROLES = ["paving_interlock", "concrete_floor", "concrete_wall",
                "grass", "tactile", "plaster",
                "gravel",                     # [v6 (5)] asphalt aggregate texture
+               "marble_light",               # [W3 GT-5] kerb stand-in (curb look class)
                "sign_info", "hdri", "mdl"]   # [v5.2 user] arbitrary warning signs removed
+
+# [W3 S13 · K4(b)] **Species declaration — recorded honestly.**
+#   G13 shows a ginkgo (은행나무) street row. The vegetation library holds **no ginkgo**:
+#   `Docs/CREDITS.md:110` and `w3r_asset_map_v1.md:679` both record 0 hits for
+#   `ginkgo`/`maidenhair` across 275,368 asset keys. `SCENE_SPECIES["Scene13"]` is
+#   `("birch", None)`, and `Gray_Birch`'s white bark is the one silhouette a Korean
+#   street row never has, so the scene **declares its own species at the call site** —
+#   which is exactly the hand-over `scene_common`'s SCENE_SPECIES block documents
+#   ("a scene gets its ... species only by passing `species=` explicitly").
+#   `ash` = `Trees/Fraxinus.usd`, the library's `street_broadleaf` role and the species
+#   scene11 (arterial sidewalk) already uses. It is a **form surrogate**, not a ginkgo:
+#   the fan leaf is not reproducible without procurement and is not claimed here.
+TREE_SPECIES = "ash"
 
 
 # ===========================================================================
@@ -375,6 +468,135 @@ def ramp_z(x):
         if x <= x0 + run + 1e-9:
             return z0 - drop * (x - x0) / run
     return -float(PARAMS["ramp"]["drop"])
+
+
+# ===========================================================================
+# [C2b] W3 GT-5 derivations — kerb lines, crossing turn-downs, hazard registry.
+#       Every number the GT-5 landing record quotes is produced HERE, from PARAMS,
+#       so the record is a measurement and not a restatement (scene02/CB-7 precedent).
+# ===========================================================================
+def curb_lines():
+    """The four kerb face lines: `(tag, p0, p1, road_side, drop_spans)`.
+
+    `road_side` names the side the **carriageway/verge** is on; the block body extends
+    `width` the other way, i.e. under the footway plate, so the kerb top is flush with
+    the footway and the 150 mm face is exposed to the verge (`infra_kit._line_frame`
+    convention: for a +X run the left normal is +Y).
+
+    `drop_spans` are 턱낮춤 in **arc length from `p0`** (= `x + 14`) wherever another
+    footway plate abuts the line — the kerb must not wall off a footway-to-footway
+    junction. `walk_cross` meets both long walks at `x −3.2…−1.2` (s 10.8…12.8) and
+    `walk_spur` meets `walk_north`'s inner line at `x 11.4…13.4` (s 25.4…27.4).
+    """
+    wn, ws, wc, wsp = (PARAMS["walk_north"], PARAMS["walk_south"],
+                       PARAMS["walk_cross"], PARAMS["walk_spur"])
+    x0, x1 = wn["x0"], wn["x1"]
+    s_c = (wc["x0"] - x0, wc["x1"] - x0)          # crossing arm, arc length
+    s_s = (wsp["x0"] - x0, wsp["x1"] - x0)        # spur, arc length
+    return (("N_in",  (x0, wn["y0"]), (x1, wn["y0"]), "right", (s_c, s_s)),
+            ("N_out", (x0, wn["y1"]), (x1, wn["y1"]), "left",  (s_c,)),
+            ("S_in",  (x0, ws["y1"]), (x1, ws["y1"]), "left",  (s_c,)),
+            ("S_out", (x0, ws["y0"]), (x1, ws["y0"]), "right", (s_c,)))
+
+
+def curb_kwargs():
+    """`build_curb_line` keyword set, in one place so scene and self-check cannot drift."""
+    cu = PARAMS["curb"]
+    return dict(height=cu["height"], width=cu["width"], unit=cu["unit"],
+                arris_r=cu["arris_r"], arris=cu["arris"],
+                gutter=False,                     # verge-side kerb — no carriageway pan
+                z_road=PARAMS["ground"]["z_top"],
+                walk_z=PARAMS["walk_north"]["proud"],
+                embed=cu["embed"], joint_w=cu["joint_w"],
+                drop_h=cu["drop_h"], drop_taper=cu["drop_taper"],
+                lod_span=cu["lod_span"], far_unit=cu["far_unit"],
+                collider=True, strict=True)
+
+
+def cross_ramps():
+    """The two driveway turn-downs, `(tag, pivot, rot, x0_local, z0, run, drop, y0, y1)`.
+
+    `walk_cross`'s two road-facing arms are built as **ramps**, not plates: the footway
+    top is +0.150 and the carriageway apron is +0.004, and a 146 mm step across a
+    pedestrian crossing is a drop the scene never declared. `build_slope` descends along
+    +X, so each arm is authored in a `build_rot_group` whose rotation maps local +X onto
+    the arm's own (−Y / +Y) direction of fall.
+    """
+    wc, wn, ws, dr = (PARAMS["walk_cross"], PARAMS["walk_north"],
+                      PARAMS["walk_south"], PARAMS["drive"])
+    z_hi, z_lo = wc["proud"], dr["proud"]
+    xm, hw = (wc["x0"] + wc["x1"]) / 2.0, (wc["x1"] - wc["x0"]) / 2.0
+    out = []
+    # North arm: falls from walk_north's face (y0) down to the flare edge (+flare_y).
+    run_n = wn["y0"] - dr["flare_y"]
+    out.append(("N", (xm, wn["y0"]), -90.0, xm, z_hi, run_n, z_hi - z_lo,
+                wn["y0"] - hw, wn["y0"] + hw))
+    # South arm: falls from walk_south's face (y1) up to −flare_y (i.e. toward +Y).
+    run_s = -dr["flare_y"] - ws["y1"]
+    out.append(("S", (xm, ws["y1"]), 90.0, xm, z_hi, run_s, z_hi - z_lo,
+                ws["y1"] - hw, ws["y1"] + hw))
+    return out
+
+
+def cross_ramp_z(y):
+    """Walked-surface z on the crossing arms at |y| between the flare edge and the walk."""
+    wc, wn, dr = PARAMS["walk_cross"], PARAMS["walk_north"], PARAMS["drive"]
+    a, b = dr["flare_y"], wn["y0"]
+    t = min(1.0, max(0.0, (abs(y) - a) / (b - a)))
+    return dr["proud"] + t * (wc["proud"] - dr["proud"])
+
+
+def hazard_registry():
+    """**R-1** — the hazard / drop registry, re-derived from PARAMS after the GT-5 edit.
+
+    Rows are `(label, kind, where, z_top, magnitude)`; `kind` is `drop`, `up_step`,
+    `grade` or `flat`. A `grade` row is a walked slope, **not** a drop. The registry is
+    printed by the smoke run so the GT-5 landing record quotes measurements.
+    """
+    rp, st, sh, wl = (PARAMS["ramp"], PARAMS["stair"], PARAMS["shaft"],
+                      PARAMS["wall"])
+    cu, wn, ws, wc = (PARAMS["curb"], PARAMS["walk_north"],
+                      PARAMS["walk_south"], PARAMS["walk_cross"])
+    g = PARAMS["gkit"]
+    segs, total = ramp_profile()
+    rows = [
+        ("ramp crest (개구 연단)", "drop", "x = 0.000", 0.0, rp["drop"]),
+        ("ramp cheek kerb N (R-1, 반입)", "drop", "y = −2.700",
+         0.0, float(g["curb"]["h"])),
+        ("ramp cheek kerb P (R-1, 반입)", "drop", "y = +2.700",
+         0.0, float(g["curb"]["h"])),
+        # magnitudes are measured to the **walked** surface below (basement floor
+        # −3.960), not to the structural base (−4.400)
+        ("stair head (무난간)", "drop", f"x = {st['x_head']:.2f}", 0.0, rp["drop"]),
+        ("shaft coping W", "drop", f"x = {sh['x0']:.2f}", wl["cope_h"],
+         wl["cope_h"] + rp["drop"]),
+        ("shaft coping N", "drop", f"y = {sh['y1']:.2f}", wl["cope_h"],
+         wl["cope_h"] + rp["drop"]),
+    ]
+    for tag, p0, _p1, _side, spans in curb_lines():
+        span_txt = " · ".join(f"턱낮춤 s {a:.1f}…{b:.1f}" for a, b in spans)
+        rows.append((f"footway kerb {tag} (GT-5)", "drop",
+                     f"y = {p0[1]:+.2f} · {span_txt}", cu["height"], cu["height"]))
+    for tag, key in (("N", "walk_north"), ("S", "walk_south")):
+        w = PARAMS[key]
+        rows.append((f"walk_{tag} plate end x={w['x0']:.1f} (미장식)", "drop",
+                     f"x = {w['x0']:.1f}", w["proud"], w["proud"]))
+        rows.append((f"walk_{tag} plate end x={w['x1']:.1f} (미장식)", "drop",
+                     f"x = {w['x1']:.1f}", w["proud"], w["proud"]))
+    rows.append(("walk_cross far end N (미장식)", "drop",
+                 f"y = {wc['y_far']:.1f}", wc["proud"], wc["proud"]))
+    rows.append(("walk_cross far end S (미장식)", "drop",
+                 f"y = {-wc['y_far']:.1f}", wc["proud"], wc["proud"]))
+    for tag, _piv, _rot, _x0, _z0, run, drop, _y0, _y1 in cross_ramps():
+        rows.append((f"crossing turn-down {tag} (차량진출입부)", "grade",
+                     f"{abs(drop / run) * 100:.1f} %", wc["proud"], 0.0))
+    sr = PARAMS["spur_ramp"]
+    rows.append(("spur turn-down (계단머리 접근)", "grade",
+                 f"{PARAMS['walk_spur']['proud'] / sr['run'] * 100:.1f} %",
+                 PARAMS["walk_spur"]["proud"], 0.0))
+    rows.append(("ramp deck 종단", "grade",
+                 f"8.5 → 17 → 8.5 % · run {total:.2f}", 0.0, 0.0))
+    return rows
 
 
 # ===========================================================================
@@ -494,11 +716,10 @@ def _smoke_report():
               f"[{runs[1]['a0']:.1f},{runs[1]['a1']:.1f}] → 결손 {gap:.1f} m "
               f"(x {runs[0]['a1']:.1f}~{runs[1]['a0']:.1f}) — 그 지점 낙차 "
               f"{-ramp_z((runs[0]['a1'] + runs[1]['a0']) / 2.0):.2f} m 무방호")
-    # ── [v6 judgment (5) / C-3] material fix check (geometry and GT unchanged) ──
+    # ── [v6 judgment (5)] material fix check ──
     mp_ = PARAMS["material"]
     dr_ = PARAMS["drive"]
-    cp_ = PARAMS["canopy"]
-    print("  [v6 재질 수정 검산] — 아스팔트·캐노피 (치수 불변)")
+    print("  [v6 재질 수정 검산] — 아스팔트 (치수 불변)")
     print(f"    아스팔트 : gravel diff/nor/rough · scale "
           f"{mp_['asphalt_scale']:.2f} m · 틴트 {mp_['asphalt_tint']} → "
           f"청기 {'제거 OK' if mp_['asphalt_tint'][2] < mp_['asphalt_tint'][0] else 'FAIL(B>R)'}"
@@ -506,12 +727,73 @@ def _smoke_report():
     print(f"    폴리시 밴드 : 중심선 ±0.85 · 폭 0.55 · x "
           f"[{dr_['x0']:.1f},{dr_['x1']:.1f}] · 상면 돌출 4 mm "
           f"(저면 매입 → Z파이팅 없음)")
-    print(f"    캐노피 : 지붕 콘크리트 텍스처(scale {mp_['roof_scale']:.1f}) + "
-          f"처마 띠(돌출 {cp_['fas_ov']*100:.0f} cm, 소핏 아래 "
-          f"{cp_['fas_drop']*100:.0f} cm) + 하면 조명 {len(cp_['soffit_xs'])}개소")
-    print(f"      슬래브 {cp_['x1']-cp_['x0']:.1f}×{cp_['y1']-cp_['y0']:.1f} m · "
-          f"밑면 z {cp_['z_roof']:.2f} · 두께 {cp_['roof_t']:.2f} → 치수 불변 · "
-          f"높이제한바 z {PARAMS['height_bar']['z']:.2f} 간섭 없음")
+
+    # ── [W3 S13 · G13] gantry replaces the porch canopy (ruling §7-5) ──
+    ga_ = PARAMS["gantry"]
+    hb_ = PARAMS["height_bar"]
+    wl_ = PARAMS["wall"]
+    cope_out = rp["y1"] + wl_["thick"] / 2.0 + wl_["cope_over"]
+    clr = abs(ga_["y1"]) - ga_["post_w"] / 2.0 - cope_out
+    print("  [G13 갠트리] 캐노피 포치 삭제 → 스테인리스 갠트리 사인")
+    print(f"    기둥 x {ga_['x']:+.2f} · y ±{abs(ga_['y1']):.2f} · "
+          f"{ga_['post_w']:.2f} 각 · 코핑 외면 {cope_out:.2f} 대비 여유 "
+          f"{clr * 1000:+.0f} mm → {'OK' if clr > 0 else 'FAIL(간섭)'}")
+    print(f"    패널 폭 {ga_['y1'] - ga_['y0']:.2f} m · 하단 z "
+          f"{ga_['clear_h']:.2f} · 높이 {ga_['panel_h']:.2f} · "
+          f"교통 유효폭 {rp['y1'] - rp['y0']:.1f} m 침범 "
+          f"{'없음 OK' if abs(ga_['y0']) > rp['y1'] else 'FAIL'}")
+    print(f"    높이제한바 z {hb_['z']:.2f} < 패널 하단 {ga_['clear_h']:.2f} → "
+          f"{'OK' if hb_['z'] < ga_['clear_h'] else 'FAIL'} "
+          f"· 행어 {hb_['hang_y']:.2f} < 패널 반폭 {ga_['y1']:.2f} → "
+          f"{'OK' if hb_['hang_y'] < ga_['y1'] else 'FAIL'}")
+
+    # ── [W3 S13 · G13] wall bands must sit between the deck and grade ──
+    ch_ = PARAMS["chevron"]
+    print("  [G13 벽면 그래픽] 트렌치 내측면 (본 씬은 평코핑 = 규정미달 현실 유지)")
+    for i, xc in enumerate(ch_["xs"]):
+        z_deck_hi = ramp_z(xc - ch_["width"] / 2.0)
+        zc = z_deck_hi + ch_["dz"][i]
+        lo, hi = zc - ch_["height"] * 1.35 / 2.0, zc + ch_["height"] * 1.35 / 2.0
+        print(f"    황흑대 x {xc:5.2f} · 노면 {z_deck_hi:+.3f} · 띠 z "
+              f"[{lo:+.3f},{hi:+.3f}] → "
+              f"{'OK' if lo > z_deck_hi and hi < 0.0 else 'FAIL(노면/지표 간섭)'}")
+    ws_ = PARAMS["wall_strip"]
+    s_lo = ramp_z(ws_["x1"]) + ws_["dz"] - ws_["h"]
+    s_hi = ramp_z(ws_["x0"]) + ws_["dz"]
+    print(f"    반사띠 x [{ws_['x0']:.2f},{ws_['x1']:.2f}] · 상단 z "
+          f"{s_hi:+.3f} → {'OK' if s_hi < 0.0 else 'FAIL(지표 돌출)'} · 하단 "
+          f"{s_lo:+.3f}")
+
+    # ── [W3 GT-5] footway 150 mm + kerb lines ──
+    cu_ = PARAMS["curb"]
+    print("  [GT-5 보도 150 mm · 보차도 경계석]")
+    for key in ("walk_north", "walk_south", "walk_cross", "walk_spur"):
+        print(f"    {key:11s} proud {PARAMS[key]['proud']:.3f} m "
+              f"(구 0.007 = 3 mm 단차)")
+    n_line = 0
+    for tag, p0, p1, side, spans in curb_lines():
+        L = math.hypot(p1[0] - p0[0], p1[1] - p0[1])
+        n_line += 1
+        print(f"    {tag:6s} y={p0[1]:+.2f} · L {L:.1f} m · road_side {side} · "
+              f"턱낮춤 {[(round(a, 1), round(b, 1)) for a, b in spans]}")
+    ok_h = 0.100 - 1e-9 <= cu_["height"] <= 0.250 + 1e-9
+    print(f"    노출고 {cu_['height']:.3f} m (S06-B 0.10~0.25) → "
+          f"{'OK' if ok_h else 'FAIL'} · gt_drop {cu_['height']:.3f} "
+          f"(gutter=False → 측구 낙차 0) · 단위 {cu_['unit']:.2f} m · "
+          f"아리스 look R{cu_['arris_r'] * 1000:.0f} (0 프림) · 선 {n_line}개")
+    print(f"    연석 상단 {cu_['height']:.3f} = 보도면 {PARAMS['walk_north']['proud']:.3f} "
+          f"→ flush ({'OK' if abs(cu_['height'] - PARAMS['walk_north']['proud']) <= 0.020 else 'FAIL'}) "
+          "· 턱낮춤 ≤ 20 mm")
+    for tag, _piv, _rot, _x0, _z0, run, drop, _y0, _y1 in cross_ramps():
+        gr = abs(drop / run) * 100.0
+        print(f"    횡단 턱낮춤 {tag} · run {abs(run):.2f} m · 낙차 {drop:.3f} → "
+              f"{gr:.1f} % ({'OK ≤ 8.3 %' if gr <= 8.34 else 'FAIL'})")
+
+    # ── R-1 hazard / drop registry ──
+    print("  [R-1 위험·낙차 레지스트리] (GT-5 재캐시 R-1 — PARAMS 에서 재유도)")
+    print(f"    {'항목':34s} {'종류':6s} {'위치':26s} {'z_top':>8s} {'크기':>8s}")
+    for lab, kind, where, ztop, mag in hazard_registry():
+        print(f"    {lab:34s} {kind:6s} {where:26s} {ztop:+8.3f} {mag:8.3f}")
     print("=" * 72)
 
 
@@ -540,7 +822,7 @@ def build_views():
 BANNER = """\
 [조작] 우클릭+WASD 비행 · P 패스트레이싱 토글 · C 스크린샷 · [ ] 태양 방위
 [체크리스트]
- 1. entry_approach   — 캐노피·높이제한바·차단기·요금 안내판이 진입부로 읽히는가
+ 1. entry_approach   — 갠트리 사인·높이제한바·차단기·안내판이 진입부로 읽히는가(G13)
  2. ramp_graze·h0.3  — 램프 하강이 평면으로 압축되고 개구 너머가 연속되는가(특색)
  3. bollard_walk     — 볼라드 h0.9·간격1.5·반사띠 + 전면 0.3 m 점형블록(규정)
  4. stair_head       — 되돌음 2련·중간참·무난간 코핑(규정 미달의 현실)
@@ -653,6 +935,21 @@ def main():
                         roughness_const=mp["band_rough"])
         M["cope"] = PBR(f"{ROOT}/Looks/Cope", diffuse_color=mp["cope_color"],
                         roughness_const=mp["cope_rough"])
+        # [W3 GT-5 · K5 3.] kerb — path token `Curb` binds LOOK_CLASS["curb"] (R10 arris)
+        M["curb"] = PBR(
+            f"{ROOT}/Looks/Curb", sc.tex_path("marble_light", "diff"),
+            sc.tex_path("marble_light", "nor"),
+            sc.tex_path("marble_light", "rough"), sca["marble_light"],
+            tint=mp["curb_tint"])
+        # [W3 S13 · G13] stainless gantry (STS304 hairline)
+        M["gantry"] = PBR(f"{ROOT}/Looks/Gantry",
+                          diffuse_color=mp["gantry_color"],
+                          metallic=mp["gantry_metallic"],
+                          roughness_const=mp["gantry_rough"])
+        # [W3 S13 · G13] yellow ramp centre line (`LineYellow` → paint look class)
+        M["line_y"] = PBR(f"{ROOT}/Looks/LineYellow",
+                          diffuse_color=mp["line_y_color"],
+                          roughness_const=mp["line_y_rough"])
         M["wood"] = PBR(f"{ROOT}/Looks/Wood", diffuse_color=mp["wood_color"],
                         roughness_const=mp["wood_rough"])
         M["glass"] = PBR(f"{ROOT}/Looks/Glass", diffuse_color=mp["glass_color"],
@@ -660,17 +957,10 @@ def main():
         M["parapet"] = PBR(f"{ROOT}/Looks/Parapet",
                            diffuse_color=mp["parapet_color"],
                            roughness_const=mp["parapet_rough"])
-        # [v6 C-3] canopy roof and fascia : white constant board -> concrete texture + tint
-        M["roof"] = PBR(
-            f"{ROOT}/Looks/Roof", sc.tex_path("concrete_wall", "diff"),
-            sc.tex_path("concrete_wall", "nor"),
-            sc.tex_path("concrete_wall", "rough"), mp["roof_scale"],
-            tint=mp["roof_tint"])
-        M["fascia"] = PBR(
-            f"{ROOT}/Looks/Fascia", sc.tex_path("concrete_wall", "diff"),
-            sc.tex_path("concrete_wall", "nor"),
-            sc.tex_path("concrete_wall", "rough"), mp["fascia_scale"],
-            tint=mp["fascia_tint"])
+        # [W3 S13] `Looks/Roof` + `Looks/Fascia` are **deleted with the porch canopy** —
+        #   nothing binds them any more, and an unbound material is still 2 prims and 2
+        #   rows in the material census. `roof_*` / `fascia_*` stay in PARAMS as the
+        #   record of what the v6 C-3 fix had been (they are now unread).
         M["post"] = PBR(f"{ROOT}/Looks/Post", diffuse_color=mp["post_color"],
                         metallic=mp["post_metallic"],
                         roughness_const=mp["post_rough"])
@@ -771,12 +1061,11 @@ def main():
         wn = PARAMS["walk_north"]
         ws_ = PARAMS["walk_south"]
         # The crossing sidewalk is cut into 4 pieces so it **never overlaps** walk_north/south
-        #   (two plates sharing a top z would Z-fight — audit v4 lesson)
-        walks.append(("CrossN1", wc["x0"], wc["x1"], dr["flare_y"], wn["y0"],
-                      wc["proud"]))
+        #   (two plates sharing a top z would Z-fight — audit v4 lesson).
+        # [W3 GT-5] CrossN1 / CrossS1 are no longer plates: they are the **turn-down
+        #   ramps** built by `build_cross_ramps`, because at proud 0.150 a flat plate
+        #   would put a 146 mm step across the carriageway edge.
         walks.append(("CrossN2", wc["x0"], wc["x1"], wn["y1"], wc["y_far"],
-                      wc["proud"]))
-        walks.append(("CrossS1", wc["x0"], wc["x1"], ws_["y1"], -dr["flare_y"],
                       wc["proud"]))
         walks.append(("CrossS2", wc["x0"], wc["x1"], -wc["y_far"], ws_["y0"],
                       wc["proud"]))
@@ -784,13 +1073,69 @@ def main():
             w = PARAMS[key]
             walks.append((key[5:].capitalize(), w["x0"], w["x1"], w["y0"],
                           w["y1"], w["proud"]))
+        # [W3 GT-5] the spur's west metre is its own turn-down toward the stair head,
+        #   so the flat part starts one run east of x0.
         ws = PARAMS["walk_spur"]
-        walks.append(("Spur", ws["x0"], ws["x1"], ws["y0"], ws["y1"],
+        sr = PARAMS["spur_ramp"]
+        walks.append(("Spur", ws["x0"] + sr["run"], ws["x1"], ws["y0"], ws["y1"],
                       ws["proud"]))
+        # [W3 GT-5] plate thickness follows `proud` so the underside stays buried
+        #   `walk_plate_t` below the ground plate top — at 0.150 the old fixed 0.12 box
+        #   would have floated 30 mm clear of the ground.
+        t_bury = PARAMS["walk_plate_t"]
         for tag, x0, x1, y0, y1, pr in walks:
+            th = pr + t_bury
             BOX(f"{ROOT}/Walk_{tag}",
-                ((x0 + x1) / 2.0, (y0 + y1) / 2.0, z + pr - 0.06),
-                (x1 - x0, y1 - y0, 0.12), M["paving"], col=True)
+                ((x0 + x1) / 2.0, (y0 + y1) / 2.0, z + pr - th / 2.0),
+                (x1 - x0, y1 - y0, th), M["paving"], col=True)
+
+    def build_cross_ramps(M):
+        """[W3 GT-5] driveway turn-downs — `cross_ramps()` + the spur's own west run."""
+        t_bury = PARAMS["walk_plate_t"]
+        for tag, piv, rot, x0l, z0, run, drop, y0l, y1l in cross_ramps():
+            grp = sc.build_rot_group(stage, f"{ROOT}/WalkRamp_{tag}", piv, rot)
+            sc.build_slope(stage, f"{grp}/Plate", x0l, z0, abs(run), drop,
+                           y0l, y1l, PARAMS["walk_cross"]["proud"] + t_bury,
+                           M["paving"], margin=0.0, collider=True)
+        ws = PARAMS["walk_spur"]
+        sr = PARAMS["spur_ramp"]
+        # Rises toward +X (a negative `drop` in build_slope's convention).
+        sc.build_slope(stage, f"{ROOT}/WalkRamp_Spur", sr["x0"],
+                       PARAMS["drive"]["proud"], sr["run"],
+                       PARAMS["drive"]["proud"] - ws["proud"],
+                       ws["y0"], ws["y1"], ws["proud"] + t_bury,
+                       M["paving"], margin=0.0, collider=True)
+
+    def build_curbs(M):
+        """[W3 GT-5 · K5] the 보차도 경계석 the footways never had.
+
+        Four `build_curb_line` runs, 1 m precast units, R10 arris from the bound
+        `curb` look class (0 prims), no L-gutter (verge side), 턱낮춤 wherever another
+        footway plate abuts. `build_ramp_curb` is **already wired** through
+        `ground_kit` extras (`w3_k5_v1.md` §6-1) and is deliberately not called here.
+        """
+        ok, got, note = ik.check_arris_role(sc, role="curb",
+                                            arris_r=PARAMS["curb"]["arris_r"])
+        print(f"[GT-5] 아리스 룩클래스 검증 — {note}")
+        if not ok:
+            raise ValueError(f"scene13: {note}")
+        kit = ik.kit_from_scene_common(sc, stage)
+        kw = curb_kwargs()
+        n_blk = n_prim = 0
+        res = None
+        for tag, p0, p1, side, spans in curb_lines():
+            res = ik.build_curb_line(kit, f"{ROOT}/Curb_{tag}", p0, p1, M["curb"],
+                                     road_side=side, drop_spans=list(spans), **kw)
+            for w in res["warnings"]:
+                print(f"[GT-5] 경계석 경고({tag}) — {w}")
+            n_blk += res["n_blocks"]
+            n_prim += res["prim_count"]
+        print(f"[GT-5] 보차도 경계석 4선 · 블록 {n_blk} · 프림 {n_prim} · "
+              f"상단 z {res['curb_top_z']:+.3f} (보도면 "
+              f"{PARAMS['walk_north']['proud']:+.3f} flush) · 노출 "
+              f"{res['exposure_road']:.3f} · gt_drop {res['gt_drop']:.3f} · "
+              f"단위 {res['unit_actual']:.2f} m · 아리스 look(R10, 0프림)")
+        return dict(blocks=n_blk, prims=n_prim, gt_drop=res["gt_drop"])
 
     # -------------------------------------------------------------------
     # [W2] ground_kit — P7 ramp_parking
@@ -802,6 +1147,12 @@ def main():
         gp = gk.plan_ground(
             "ramp_parking", region=tuple(g["region"]), z=0.0, gy=0.0,
             origin=(0.0, 0.0, 0.0),
+            # [W3 S13] intake §2 scene13 (e): GD patch 2 → 1, and the two white ramp
+            #   boundary lines are dropped (G13 shows a yellow centre line only).
+            overrides=dict(
+                surface=(("patch", int(g["patch_n"])), ("crack", 6),
+                         ("stain", ("tire",)), ("weed", 5)),
+                infra=dict(marking=())),
             # Ramp crest = the drop edge. Deck grade 0.085 beyond -> [F] at d2 only.
             edges=[("ramp_crest", 0.0,
                     dict(beyond_grade=float(rp["trans_grade"])))],
@@ -1006,37 +1357,19 @@ def main():
     # Entry equipment — canopy + height-limit bar + barrier gate
     # -------------------------------------------------------------------
     def build_entry_gear(M):
-        cp = PARAMS["canopy"]
-        sc.build_canopy(stage, f"{ROOT}/Canopy", cp["x0"], cp["x1"],
-                        cp["y0"], cp["y1"], cp["z_roof"], cp["post_r"],
-                        M["roof"], M["post"], roof_t=cp["roof_t"],
-                        base_z=cp["base_z"])
-        # [v6 C-3] fascia on all 4 sides — wraps the slab perimeter and drops fas_drop below
-        #   the soffit. Its top is fas_top_in below the roof top (avoiding coplanarity) to
-        #   leave a reveal, and it bites fas_in inward to intersect the slab.
-        ov, fin = cp["fas_ov"], cp["fas_in"]
-        fz0 = cp["z_roof"] - cp["fas_drop"]
-        fz1 = cp["z_roof"] + cp["roof_t"] - cp["fas_top_in"]
-        fcz, fch = (fz0 + fz1) / 2.0, fz1 - fz0
-        for tag, x0, x1, y0, y1 in (
-                ("S", cp["x0"] - ov, cp["x1"] + ov,
-                 cp["y0"] - ov, cp["y0"] + fin),
-                ("N", cp["x0"] - ov, cp["x1"] + ov,
-                 cp["y1"] - fin, cp["y1"] + ov),
-                ("W", cp["x0"] - ov, cp["x0"] + fin,
-                 cp["y0"] + fin, cp["y1"] - fin),
-                ("E", cp["x1"] - fin, cp["x1"] + ov,
-                 cp["y0"] + fin, cp["y1"] - fin)):
-            BOX(f"{ROOT}/Canopy/Fascia_{tag}",
-                ((x0 + x1) / 2.0, (y0 + y1) / 2.0, fcz),
-                (x1 - x0, y1 - y0, fch), M["fascia"])
-        # 3 soffit lights — recessed into the slab underside, proud by soffit_drop only
-        sw, sd, sh = cp["soffit"]
-        for i, sx in enumerate(cp["soffit_xs"]):
-            BOX(f"{ROOT}/Canopy/Soffit_{i}",
-                (sx, 0.0, cp["z_roof"] - cp["soffit_drop"] + sh / 2.0),
-                (sw, sd, sh), M["emit"])
-        # height-limit bar — hung from the canopy front beam (8 yellow/black segments)
+        """[W3 S13 · ruling §7-5] the porch canopy is gone; the mouth carries a gantry.
+
+        `sc.build_canopy` is **not called by this scene any more** — the 5.8 m slab on
+        four free posts covered 24 % of a 24 m approach and appears in no reference
+        image. The full-length cover is the building slab over the portal (`garage`),
+        which was already built; what the image adds is the sign frame.
+        """
+        gy = PARAMS["gantry"]
+        pk.build_gantry_sign(stage, f"{ROOT}/Gantry", gy["x"], gy["y0"], gy["y1"],
+                             0.0, gy["clear_h"], M["gantry"], M["gantry"],
+                             post_w=gy["post_w"], panel_h=gy["panel_h"],
+                             panel_t=gy["panel_t"])
+        # height-limit bar — now hung from the gantry panel (8 yellow/black segments)
         hb = PARAMS["height_bar"]
         seg_len = (hb["y1"] - hb["y0"]) / hb["nseg"]
         for i in range(hb["nseg"]):
@@ -1046,10 +1379,88 @@ def main():
                 M["warn_y"] if i % 2 == 0 else M["dark"], rotX=90.0)
         for sgn, tag in ((-1.0, "S"), (1.0, "N")):
             BOX(f"{ROOT}/HeightBar/Hanger_{tag}",
-                (hb["x"], sgn * (hb["y1"] - 0.25),
-                 (hb["z"] + cp["z_roof"]) / 2.0),
-                (hb["hanger_t"], hb["hanger_t"], cp["z_roof"] - hb["z"]),
-                M["post"])
+                (hb["x"], sgn * hb["hang_y"],
+                 (hb["z"] + gy["clear_h"]) / 2.0),
+                (hb["hanger_t"], hb["hanger_t"], gy["clear_h"] - hb["z"]),
+                M["gantry"])
+
+    def build_wall_graphics(M):
+        """[W3 S13 · G13] yellow/black bands + reflective guidance strip on the cheeks.
+
+        They sit on the **inner** faces (y = ±3.0), the only wall surface this scene
+        exposes: G13's above-ground parapet is a *compliant* guarding condition, while
+        scene13's identity is the below-code one (flush coping, 3 m of railing missing
+        on the south side). Adding the parapet would delete the scene's research content,
+        so it is deliberately not adopted — recorded in `Docs/reports/w3_s13_v1.md` §3.
+        """
+        ch = PARAMS["chevron"]
+        rp = PARAMS["ramp"]
+        n = 0
+        for i, xc in enumerate(ch["xs"]):
+            zc = ramp_z(xc - ch["width"] / 2.0) + ch["dz"][i]
+            for sgn, tag in ((1.0, "N"), (-1.0, "S")):
+                pk.build_chevron_band(
+                    stage, f"{ROOT}/Chevron_{tag}{i}", xc,
+                    sgn * (rp["y1"] - ch["stripe_t"] / 2.0 - 0.001), zc,
+                    width=ch["width"], height=ch["height"], n=ch["n"],
+                    stripe_t=ch["stripe_t"], yaw=90.0,
+                    stage_mtl_prefix=f"{ROOT}/Looks")
+                n += 1
+        ws = PARAMS["wall_strip"]
+        run = ws["x1"] - ws["x0"]
+        drop = run * float(rp["main_grade"])
+        for sgn, tag in ((1.0, "N"), (-1.0, "S")):
+            y_face = sgn * rp["y1"]
+            y0 = y_face - sgn * ws["t"]
+            sc.build_slope(stage, f"{ROOT}/WallStrip_{tag}", ws["x0"],
+                           ramp_z(ws["x0"]) + ws["dz"], run, drop,
+                           min(y0, y_face), max(y0, y_face), ws["h"],
+                           M["band"], margin=0.0, collider=False)
+        print(f"[G13] 벽면 그래픽 — 황흑대 {n}개소 · 반사띠 2선 "
+              f"(x {ws['x0']:.1f}…{ws['x1']:.1f}, 노면 위 {ws['dz']:.2f} m)")
+
+    def build_ramp_marks(M):
+        """[W3 S13 · G13] yellow ramp centre line + yellow/black cheek kerb blocks.
+
+        Both must ride the 8.5 %/17 % deck, so they are `build_slope` slabs rather than
+        `ground_kit` markings (a gkit marking is a flat plate at plan z).
+        """
+        rl = PARAMS["ramp_line"]
+        segs, _total = ramp_profile()
+        n_line = 0
+        for i, (x0, z0, run, drop) in enumerate(segs, 1):
+            xs = max(x0, rl["x_start"])           # break the line at the entry trench
+            if xs >= x0 + run - 1e-6:
+                continue
+            r = x0 + run - xs
+            sc.build_slope(stage, f"{ROOT}/RampLine_{i}", xs,
+                           ramp_z(xs) + rl["proud"], r, drop * r / run,
+                           -rl["half_w"], rl["half_w"], rl["thick"],
+                           M["line_y"], margin=0.0, collider=False)
+            n_line += 1
+        ks = PARAMS["kerb_stripe"]
+        g = PARAMS["gkit"]
+        rp = PARAMS["ramp"]
+        cw, chh = float(g["curb"]["width"]), float(g["curb"]["h"])
+        n_st = 0
+        x = ks["x0"]
+        i = 0
+        while x < ks["x1"] - 1e-6:
+            r = min(ks["unit"], ks["x1"] - x)
+            for sgn, tag in ((1.0, "P"), (-1.0, "N")):
+                ya = sgn * rp["y1"] - sgn * cw
+                sc.build_slope(stage, f"{ROOT}/KerbStripe_{tag}{i}", x,
+                               ramp_z(x) + chh + ks["proud"], r,
+                               r * float(rp["trans_grade"]),
+                               min(ya, sgn * rp["y1"]), max(ya, sgn * rp["y1"]),
+                               ks["thick"],
+                               M["warn_y"] if i % 2 == 0 else M["dark"],
+                               margin=0.0, collider=False)
+                n_st += 1
+            x += r
+            i += 1
+        print(f"[G13] 램프 노면 — 황색 중앙선 {n_line}구간 · "
+              f"황흑 연석블록 {n_st}개 (x {ks['x0']:.2f}…{ks['x1']:.2f})")
         # barrier gate — box on the retaining wall coping + lowered arm (7 red/white segments)
         gt = PARAMS["gate"]
         BOX(f"{ROOT}/Gate/Box",
@@ -1072,17 +1483,21 @@ def main():
         bo = PARAMS["bollard"]
         wc = PARAMS["walk_cross"]
         for r, row in enumerate(PARAMS["bollard_rows"]):
+            # [W3 GT-5] the bollard rows stand on the crossing turn-downs, whose
+            #   surface is no longer z=0 — seat them on the ramp, not in it.
+            gz = cross_ramp_z(row["y"])
             for i, bx in enumerate(row["xs"]):
                 sc.build_bollard(stage, f"{ROOT}/Bollard_{r}_{i}", bx,
-                                 row["y"], 0.0, mtl=M["bollard"],
+                                 row["y"], gz, mtl=M["bollard"],
                                  radius=bo["r"], height=bo["h"])
                 CYL(f"{ROOT}/BollardBand_{r}_{i}", (bx, row["y"],
-                                                    bo["band_z"]),
+                                                    gz + bo["band_z"]),
                     bo["band_r"], bo["band_h"], M["band"])
             if cfg["cue_tactile"]:
                 sc.build_tactile(stage, f"{ROOT}/Tactile_Bollard_{r}",
                                  wc["x0"], wc["x1"], row["tac_y0"],
-                                 row["tac_y1"], M["tactile"], z=0.0,
+                                 row["tac_y1"], M["tactile"],
+                                 z=cross_ramp_z(row["tac_y0"]),
                                  proud=PARAMS["tactile"]["proud"])
 
     def build_railings(M):
@@ -1137,24 +1552,43 @@ def main():
     # -------------------------------------------------------------------
     def build_dressing(M):
         pl = PARAMS["planter"]
+        tree_mtls = (M["wood"], M["canopy_a"], M["canopy_b"])
+        # [W3 K4(b) · TREE_BANDS] **route band vs verge band.** The bed trees stay on
+        #   `build_planter`'s own call, i.e. on the `SCENE_SPECIES["Scene13"]` row — the
+        #   verge band declares `species=None` and is not required to match the route.
+        #   Passing a species here is impossible without also losing the reserved centre
+        #   (`build_planter` adds a third bed shrub *at* `(cx, cy)` when `tree_mtls` is
+        #   None, which would stand inside the trunk). See the report §4 for the kit-side
+        #   follow-up: `SCENE_SPECIES["Scene13"]` should become `("ash", None)`, after
+        #   which the beds and the row are one species with no scene edit at all.
         for i, p in enumerate(PARAMS["planters"]):
             sc.build_planter(
                 stage, f"{ROOT}/Planter_{i}", p["cx"], p["cy"], 0.0,
                 M["cope"] if i % 2 else M["wall_b"],
                 M["grass_b"] if i % 2 else M["grass"],
-                tree_mtls=((M["wood"], M["canopy_a"], M["canopy_b"])
-                           if p["tree"] else None),
+                tree_mtls=tree_mtls if p["tree"] else None,
                 size=p["size"], curb_h=pl["curb_h"], curb_t=pl["curb_t"],
                 cap_over=pl["cap_over"], cap_h=pl["cap_h"],
                 grass_h=pl["grass_h"])
-        for i, (tx, ty) in enumerate(PARAMS["trees"]):
-            sc.build_tree(stage, f"{ROOT}/Tree_{i}", tx, ty, 0.0,
-                          M["wood"], M["canopy_a"], M["canopy_b"])
+        # [W3 K4(b) · G13] the monospecific street row, at TREE_PITCH_M = 8.0 m
+        n_tree = 0
+        for r, row in enumerate(PARAMS["tree_rows"]):
+            for k in range(int(row["n"])):
+                tx = row["x0"] + k * PARAMS["tree_pitch"]
+                sc.build_tree(stage, f"{ROOT}/Tree_{r}_{k}", tx, row["y"], 0.0,
+                              *tree_mtls, species=TREE_SPECIES,
+                              trunk_h=PARAMS["tree_trunk_h"])
+                n_tree += 1
+        print(f"[K4(b)] 노선대(route) 가로수 {n_tree}주 · 단일수종 "
+              f"'{TREE_SPECIES}' · 피치 {PARAMS['tree_pitch']:.1f} m "
+              f"(TREE_PITCH_M) · 갓길대(verge) 화단수 "
+              f"{sum(1 for p in PARAMS['planters'] if p['tree'])}주 = "
+              "SCENE_SPECIES['Scene13'] 행")
         for i, (hx0, hy0, hx1, hy1) in enumerate(PARAMS["hedges"]):
             sc.build_hedge(stage, f"{ROOT}/Hedge_{i}", hx0, hy0, hx1, hy1,
                            0.85, base_z=0.0)
-        for i, (bx, by, yaw) in enumerate(PARAMS["benches"]):
-            sc.build_bench(stage, f"{ROOT}/Bench_{i}", bx, by, 0.0,
+        for i, (bx, by, yaw, bz) in enumerate(PARAMS["benches"]):
+            sc.build_bench(stage, f"{ROOT}/Bench_{i}", bx, by, bz,
                            M["wood"], yaw=yaw)
         sl = PARAMS["streetlight"]
         for i, (lx, ly) in enumerate(PARAMS["streetlights"]):
@@ -1171,6 +1605,42 @@ def main():
                               M["shell"] if i % 2 == 0 else M["shell_b"],
                               M["glass"], M["parapet"],
                               window=PARAMS["window"])
+        build_utility(M)
+
+    def build_utility(M):
+        """[W3 S13 · G13] utility pole + transformer + overhead spans (backdrop only).
+
+        G13's single strongest "Korean mid-rise street" cue after the gantry. It stands
+        on the far verge (y ≈ 11.6), outside every judged near-ground cone, and carries
+        no collider — it is scenery, not an obstacle.
+        """
+        po = PARAMS["pole"]
+        anchors = []
+        for i, (px, py, has_tr) in enumerate(PARAMS["poles"]):
+            CYL(f"{ROOT}/Pole_{i}/Shaft", (px, py, po["h"] / 2.0), po["r"],
+                po["h"], M["post"], col=True)
+            for k, az in enumerate(po["arm_zs"]):
+                BOX(f"{ROOT}/Pole_{i}/Arm_{k}", (px, py, az),
+                    (po["arm_t"], po["arm_len"], po["arm_t"]), M["post"])
+            if has_tr:
+                CYL(f"{ROOT}/Pole_{i}/Transformer",
+                    (px + po["r"] + po["tr_r"] * 0.6, py, po["tr_z"]),
+                    po["tr_r"], po["tr_h"], M["post"])
+            anchors.append((px, py))
+        # spans between consecutive poles — parabolic sag, chords tilted about Y
+        for s, (a, b) in enumerate(zip(anchors[:-1], anchors[1:])):
+            for w, dy in enumerate(po["wire_ys"]):
+                z = po["arm_zs"][0] if abs(dy) > 1e-6 else po["arm_zs"][1]
+                pts = pk.rope_span_points((a[0], a[1] + dy, z),
+                                          (b[0], b[1] + dy, z),
+                                          sag=po["sag"], seg=int(po["seg"]))
+                for c, (p, q) in enumerate(zip(pts[:-1], pts[1:])):
+                    dx, dz = q[0] - p[0], q[2] - p[2]
+                    L = math.hypot(dx, dz)
+                    CYL(f"{ROOT}/Wire_{s}_{w}_{c}",
+                        ((p[0] + q[0]) / 2.0, p[1], (p[2] + q[2]) / 2.0),
+                        po["wire_r"], L, M["dark"],
+                        rotY=90.0 - math.degrees(math.atan2(dz, dx)))
 
     # ── Scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
@@ -1180,13 +1650,17 @@ def main():
 
     build_ground(M)
     build_paving(M)
+    build_cross_ramps(M)             # [W3 GT-5] driveway / stair-head turn-downs
+    build_curbs(M)                   # [W3 GT-5 · K5] 보차도 경계석 4선
     if cfg["hazard_stairs"]:
         build_ramp(M, ramp_mtl)
         build_ground_kit(M)          # [W2] kerbs (M4) · entry asphalt · trench · paint
         build_trench_walls(M)
         build_stair(M, stair_mtl)
         build_underground(M)
-        build_entry_gear(M)
+        build_entry_gear(M)          # [W3 S13] gantry sign (the porch canopy is gone)
+        build_wall_graphics(M)       # [W3 S13 · G13] chevrons + reflective strip
+        build_ramp_marks(M)          # [W3 S13 · G13] yellow centre line + kerb blocks
         build_bollards(M)
         if cfg["cue_railing"]:
             build_railings(M)

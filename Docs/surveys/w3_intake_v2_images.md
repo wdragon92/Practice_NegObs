@@ -1120,6 +1120,31 @@ band added, far band as-is) until the renumbering round. The crosswalk anchor ab
 agreed direction WHEN that round opens — do not execute before it. The patch-vocabulary
 sweep is unaffected and stays queued.
 
+**§7.2 Supervisor rulings, batch 2 (post-FANOUT-A, 07-31)** — sources: the eight w3_sNN_v1.md
+reports + redteam_fanout_a.md.
+- **S03 crest promenade — PAVE, image doctrine wins.** G3's 점토블록 promenade supersedes the
+  07-29 "natural" ruling (that ruling predates the target-image doctrine). Executed as a
+  follow-up lane with its own FULL GT row. The river-edge post-and-rail fence stays
+  **DECLINED** (OQ-2 class: the scene's no-railing × water-anchor research identity outranks
+  one image element; divergence documented).
+- **S09 — stepping stones ALLOWED** as physical 판석 slabs with 3D relief (the user's ban
+  targets decorative rectangle DECALS, not real objects; prefer irregular outlines). Boardwalk
+  0.60 m termination **ACCEPTED** (GT-economy). stone_tint 0.64→0.524 measured correction
+  authorized (material micro).
+- **S13 parapet refusal ACCEPTED** — the designed below-code hazard (3 m missing railing)
+  outranks G13's parapet; divergence documented.
+- **S11 §10-1 sidewalk narrowing ADOPTED in principle** — execute per the report's filed
+  coordinates with an honestly-declared GT class. Shadow/R6: the lane's measured SUN choice
+  stands (rule unsatisfiable post-H; record, don't chase).
+- **S06 — shipped horizon ACCEPTED**; the G6 forested hill joins the scene07 canopy-tunnel
+  item as one "high-crown belt" practice row (polish round). S06-F3 (judge-grid origin
+  coupled to deck y0) → X-track decouple queue; the deck y0 move waits for it.
+- **S01-F7** (E2 cross-line slot vs future tactile arm) noted for the ablation-arm design
+  round. **S08/S13 GRAZE 유보** re-evaluates automatically at the first same-arm successor
+  round (GATE-2/final). **S09 autumn/flowering procurement gap** → open row; an
+  autumn-leaf-tint TREATMENT wrapper (T4b pattern applied to leaf materials) is the candidate
+  mechanism — polish round, measured.
+
 **Dispatch (07-31): 16 · 18 · 04 LAUNCH NOW in parallel** (no Lane-1 dependency in their core
 work; K5-curb/species residues explicitly deferred to a Lane-1 follow-up pass and recorded in
 each report). N2 already running. 09 · 17 · 03 · 01 · 02 · 06 · 08 · 11 · 13 and Lane 3 wait for

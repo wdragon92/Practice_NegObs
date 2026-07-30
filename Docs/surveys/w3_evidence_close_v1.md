@@ -174,7 +174,7 @@ Legend — **CLOSED**: statute text in hand, or a photo set at the stated n.
 | **R7** bollards on the 경계 line | law + v5.1 | **PHOTO-CONFIRMED** | Hongdae frame: a regular bollard row exactly on the carriageway/walk boundary, nothing in the walking band |
 | **01-B** paving to the building face | ⚠ `[assumed]` from standards | **CLOSED (photo)** | n = 4 frames where a Korean sidewalk/plaza meets a building plinth **with no turf gap**: Daejeon 문정로, Jongno ×2 (KOGL-1), Cheonan 연암율금로. See §4.3 |
 | **S10-A** 목재 데크 계단 vocabulary | needed n≥8, `Category:Boardwalks in South Korea` = 3 files | **PARTIALLY CLOSED, n = 3** | 행당역 대현산공원 ×3 (CC BY 4.0) are **deck stairs, not benches** — they were mis-shelved in the in-repo set. Vocabulary recorded in §4.4. Still short of n≥8. |
-| **S06-B** kerbless-by-design (03/12/17) | photo check never run | **PARTIALLY CLOSED, n = 4** | `river_levee` panel: Hangang park hard-landscape (w3008, w3009, w3010) shows paving meeting gravel/planting **near-flush, with no 15–25 cm road kerb**; the riverside walk/cycle path (w3006) is edged by a **metal railing**, not a kerb. So "kerbless" is right for the *park/path* surfaces. The **levee crown road** itself is not clearly framed in any panel photo — that sub-claim stays open. |
+| **S06-B** kerbless-by-design (03/12/17) | photo check never run | **PARTIALLY CLOSED, n = 4** | `river_levee` panel: Hangang park hard-landscape (`river_levee/w3008`, `/w3009`, `/w3010`) shows paving meeting gravel/planting **near-flush, with no 15–25 cm road kerb**; the riverside walk/cycle path (`river_levee/w3006`) is edged by a **metal railing**, not a kerb. So "kerbless" is right for the *park/path* surfaces. The **levee crown road** itself is not clearly framed in any panel photo — that sub-claim stays open. |
 
 ### 3.2 Rows still open
 
@@ -302,9 +302,18 @@ honestly. **Rows at n ≥ 5 become hard gates; rows below n = 5 stay `warn`**, a
 | **M1** | 벤치 | seat axis **parallel to the edge it stands against**; back face **against** that edge | axis **±2°**; back-face gap **0 – 0.3 m** | **2** | 0 | **warn** (n < 5) |
 | **M6** | 벤치 ↔ 가로수 | benches sit **between** trees, on the tree line, not offset into the walk | on the tree line, mid-gap | **2** | 0 | **warn** (n < 5) — v5.1's "anchor" idea is *consistent* with the frames but is **not** demonstrated |
 
-**M-row frames** (all in-repo `expanded/` or the new `w3/` panels): M1 wc140, w3012 · M2 wc065,
-wc110, wc140, wc144, w3009, w3010 · M3 wc047, wc081, wc140 · M4 wc041, wc047, wc048, wc065, wc110,
-wc144 · M5 wc010, wc140, w3006, w3008, w3016 · M6 wc047, wc140.
+**M-row frames.** `wcNNN` = `Docs/reference_photos/expanded/`; `panel/w3NNN` = the new panels.
+(The `w3NNN` index restarts per panel, so it is only unique when qualified by the panel name.)
+
+| row | frames |
+|---|---|
+| M1 | wc140 · `street_arterial/w3012` |
+| M2 | wc065 · wc110 · wc140 · wc144 · `street_arterial/w3009` · `street_arterial/w3010` |
+| M3 | wc047 · wc081 · wc140 |
+| M4a | wc041 · wc047 · wc048 · wc065 · wc110 · wc144 |
+| M4b | `plaza_civic/w3006` · `plaza_civic/w3024` |
+| M5 | wc010 · wc140 · `sidewalk_local/w3006` · `sidewalk_local/w3008` · `street_arterial/w3016` |
+| M6 | wc047 · wc140 |
 
 **Rows M1, M3, M6 are STILL-OPEN** at n = 2/3/2. The honest reading is that the *class* rules
 ("never in the walking band", "against an edge") held in every frame examined with **zero

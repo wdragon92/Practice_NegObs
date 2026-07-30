@@ -4,6 +4,10 @@
 > git author date reads 2026-07-30) · **Branch** `feat/realism-v1`
 > **HEAD at work** `e1150d6` (verified live; the brief's `a7842bc` is five docs commits back —
 > `d4469c1 · 35b8e39 · 6f5b24c · 4d88923 · e1150d6`, all Markdown, no code)
+> **Landed at** `8b6baa7`, whose parent is `5340d49` — a **concurrent lane's** GT-25 scene02
+> commit that appeared mid-task (MB-F3). Every A/B arm in this report is cut from `e1150d6`, so
+> the isolation is of `ground_kit.py` alone and is unaffected by that commit; `5340d49` touches
+> `scenes/main/scene02_underpass.py` only.
 > **Owned files, and only these**: `ground_kit.py` · this report · the pilot rounds under
 > `look_check/scene{01,16,09,02}/260731_w3_mb24{,_pre}/` (gitignored by policy).
 > **Authority**: `gt_changes_w3.md` §3/§4 **GT-24** `OPEN`, declared 07-31 by the micro-docs batch
@@ -317,7 +321,7 @@ gets pixel evidence at all. Declared as an addition to the declared gate, not a 
 
 **§4 GT-24 — landing record (prepared):**
 
-> **Owner** MB (micro batch) · **CB id** — (no CB gate; micro pilots) · **Commit** `<sha>`
+> **Owner** MB (micro batch) · **CB id** — (no CB gate; micro pilots) · **Commit** `8b6baa7`
 > (`ground_kit.py` + `Docs/reports/w3_mb_patch_v1.md`, pathspec).
 > **The three `GROUND_PROFILES` tuple edits**: `plaza_granite` ~~`("patch", 1)`~~ → row deleted ·
 > `plaza_water` ~~`("patch", 2)`~~ → row deleted · `sidewalk_block` ~~`("patch", 2)`~~ → row

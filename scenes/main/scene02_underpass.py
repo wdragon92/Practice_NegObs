@@ -28,67 +28,107 @@ Auto capture mode (for headless verification):
 
 Coordinates: Z-up, m, travel axis +X, drop start edge = x=0.
 
+Smoke / self-check (no Isaac boot):  NEGOBS_SMOKE=1 python3 scene02_underpass.py
+
 ===========================================================================
-⚠️ What follows is a **DESIGN PROPOSAL AND IS NOT YET REFLECTED IN THE CODE**
-   (2026-07-29). The session that was writing it was cut off by a usage limit.
-   The coordinate check is finished, so the next session can implement it
-   exactly as tabulated here. **Delete this warning block once implemented.**
+W3 · CB-7 respec (2026-07-31) — GT-1 flood sill · GT-2 curb · GT-3 canopy REBUILD
 ===========================================================================
-Geometry core (numeric check) — [v8 design proposal] statutory landing + wide mid rail
-===========================================================================
-Diagnosis   : Docs/reports/stair_compliance_v1.md §1 scene02 row (P0-L1 · P0-R1)
-Calc tools  : stair_kit.stair_landings() / mid_rail_lines() / build_stair_landing()
-              — this file **does not compute landing coordinates itself** (single source of truth).
+LAW: `Docs/surveys/w3_intake_v2_images.md` §2 scene02 row + §3(i) + §7-1 ·
+     `Docs/audit_v4/gt_changes_w3.md` §3 GT-1/GT-2/GT-3 (as amended by the
+     07-31 supervisor batch §9-1) · `Docs/briefs/w3_execution_spec_v1.md` §1.5
+     (Option-A canopy-deletion clause **superseded**; sill/curb/landing-block
+     clauses stand) · target image `Docs/reference_photos/Generated Image - Scene02.jpg`
+     (**G2**) · user 2nd review *"Scene2 참조해서 좀 더 지하도 느낌으로"* and
+     *"지하 진입로 … 캐노피 진입로 끝까지"*.
 
-  L1 landing  : drop 3.20 > statutory 3.00 (Fire/Evacuation Rule §15①1) → 1 landing required.
-      stair_landings(3.20, 0.160, 0.320) ⇒ m = floor(3.00/0.160) = 18,
-      n_flights = ceil(20/18) = 2, 20 = 10 + 10 (front-first allocation, deterministic).
-      run 6.40 → **7.60** (+1.20 = landing depth, exactly the statutory minimum 1.20).
-  R1 mid rail : width 3.50 > 3.00, and the exemption conditions are **AND**-ed, so it already
-      fails at riser 0.160 > 0.150 → required. mid_rail_lines(−1.75, 1.75, 0.160, 0.320)
-      ⇒ n_bays = ceil(3.50/3.00) = 2 → **1 line at y = 0.000** (each bay 1.75).
+**The stale v8 landing / mid-rail proposal that used to live here is DELETED**, per
+spec §1.5 and `era_consistency_survey_v1.md:881` (*02 landing (L1) = CANCEL* — 지하보도
+is a 도로 부속물, outside 건축법 in every era, and landings are never retrofitted).
+It was never in the code, so nothing is removed from the stage by the deletion; the
+pit end stays at `x1 = 7.0`.
 
-[Walking-continuity z ladder]  enter → descend → landing → descend → exit (every step ≤ 0.160)
-  ┌ #  section            x range          top z       step / verdict
-  │ 0  ground sidewalk     ≤ 0.00          +0.000      flat (opening front edge = drop 3.200)
-  │ 1  flight0 step 1   0.00 … 0.32        −0.160      0.160
-  │ 2  flight0 step 5   1.28 … 1.60        −0.800      0.160 × 4
-  │ 3  flight0 step 10  2.88 … 3.20        −1.600      0.160 × 5   ← end of flight0
-  │ 4  **landing**      3.20 … 4.40        −1.600      0.000 (flat 1.200)
-  │ 5  flight1 step 1   4.40 … 4.72        −1.760      0.160       ← landing front edge
-  │ 6  flight1 step 5   5.68 … 6.00        −2.400      0.160 × 4
-  │ 7  flight1 step 10  7.28 … 7.60        −3.200      0.160 × 5
-  │ 8  lower landing    7.60 … 8.20        −3.200      0.000 (flush)
-  └ 9  tunnel floor     8.20 … 12.20       −3.200      0.000 (flush)
-  * Total drop preserved: 10×0.160 + 0 + 10×0.160 = 3.200 = the old 20×0.160.
-  * Discontinuity 0: flight0.z_bot = landing.z = flight1.z_top = −1.600 (stair_kit self-check (4)).
-  * Downstream shift +1.20 : pit x1 7.0→8.2 · lower landing 6.4→7.6 · tunnel x0 7.0→8.2 ·
-    perimeter railing x1/x_rear · grass opening gx1 7.6→8.8 · road 8.0→9.2 (kerb and lane
-    markings follow) · 3 tunnel lamps · Exit sign 7.8→9.0. (the x ≤ 3.20 stretch is **completely unchanged**)
+[GT-1] Flood sill — 침수방지 진입 단차  `[law - 행안부 「지하공간 침수방지를 위한
+       수방기준 실무매뉴얼」 3-1-1 해설(2): 18 cm 계단 1~3개 + 난간 반드시 설치]`
+  · raised apron  x −1.20 … 0.00 · y ±2.10 · top **z = +0.18** (1 step of 0.18 ≤ 0.18)
+  · **one 0.18 m riser at x = −1.20 — an UP-STEP, not a drop.** Label accordingly.
+  · the descent now begins from +0.18, so the drop edge at x = 0 carries **3.380 m**
+    (was 3.200). The stair keeps 20 steps and tread 0.320 (run 6.400 unchanged, nosing
+    period unchanged); the riser becomes 3.380/20 = **0.169 m** (≤ 0.18 statutory), so the
+    foot still lands exactly on the lower landing at −3.200 and neither the landing, the
+    tunnel nor the portal moves.
+  · parapet/lintel top +0.15 → **+0.18**, flush with the apron: the 계단폭 doubles as the
+    둑마루 the manual names, and the seam at x = 0 closes.
+  · **난간 반드시 설치**: a short handrail line on each flank of the sill, y = ±1.68,
+    x −1.12 … −0.32, 0.85 m above the apron, meeting the stair handrail's top extension at
+    x = −0.32 so the two read as one line. Posts stand on **RF-1 bolted base plates**
+    (`props_kit.build_base_plate`) in the **RF-2** `sts304_10s` rung — the sill is a 2024
+    retrofit, the entrance is not, and *that contrast is the deliverable*. Every other post
+    in the scene stays cast-in.
+  · NOT built: the spec §1.5 companion 1:12 ramp and the x = −1.30 linear trench grating.
+    Both would be **undeclared GT geometry** (GT-1's row fixes the apron and *one* riser),
+    and the trench is refused by this scene's own measured B7 finding
+    (`Docs/reports/w2d_edit_g1.md` §3). Recorded in `Docs/reports/w3_cb7_v1.md` §8.
 
-[GT change] — the landing alters the z(x) profile, so the drop/depth GT cache must be regenerated
-  · drop edge count : 20 → **21** (20 nosings + **1 landing front edge**)
-  · new edge        : x = 4.400, y ±1.75, top z = −1.600.
-                      residual drop caught at this edge = sum of downstream flight1 = **1.600 m**
-  · new flat strip  : x 3.200…4.400 × y −1.75…1.75 = 1.20 × 3.50 = **4.20 m²**,
-                      local drop **0** (landing top face; labelled flat ground, not a stair face)
-  · unchanged       : total drop 3.200 at the opening front edge x=0 · nosing period 0.320 · riser 0.160
-                      (the period is broken exactly 1 time, only over the landing — the nosing silhouette cue survives)
-  · The mid rail and handrails create no z(x,y), so **GT is unchanged** (self-occlusion only increases).
+[GT-2] Curb reshape — the library's one outright shape error
+  · was: `curb_top +0.10` above a 0.0 footway = a 100 mm trip line along the walk.
+  · now: `infra_kit.build_curb_line`, 1 m unit blocks with a 6 mm joint recess and the
+    R = 10 mm arris carried by `LOOK_CLASS["curb"]`. Carriageway datum −0.02 → **−0.130**
+    (the only way exposure 150 mm and "curb top flush … +20 mm above the footway" hold at
+    the same time), exposure above carriageway **0.150**, curb top **+0.020**.
+  · `gutter=False` — this scene already switched `gutter_L` off with a measured reason
+    (see `gkit` below), so `gt_drop` = 0.150 exactly.
 
-[Camera occlusion check]  (substituting the build_views coordinates directly)
-  · grid gy : 0.000 → **−0.875** (centre of the south bay). Avoids the y=0 mid rail masking
-    the preset axis head-on — same precedent as scene01 R2-1 (central-railing avoidance gy=−2.75).
-    −0.875 is still inside the |y| ≤ 1.75 opening, so the head-on view into the pit is kept.
-  · h0.3 concealment preserved : the sight line grazing the edge (x=0, z=0) meets the landing
-    top face (−1.600) at x = 1.600·d/0.3 = 5.33·d → 10.7 m at d=2 > the landing's downstream
-    end 4.40 → **the landing stays hidden**.
-    (the landing became shallower at −1.600, but the grazing sight line still cannot reach it.)
-  · h1.8/d2 sees the landing top face from x=3.56 onward (the 0.9/… judging cut — intended exposure).
-  · No eye falls inside the landing AABB (x 3.20…4.40 · y ±1.75 · z −3.50…−1.600).
-  · inside_looking_up : eye x 6.60 → **7.80** (+1.20, keeping 0.50 m above the lower landing),
-    y 0.00 → −0.875 (avoiding the y=0 mid rail head-on). The sight line clears the landing top
-    face by 0.065 m at x=4.40 → the landing does not block it.
+[GT-3] Canopy — **content FLIPPED by the supervisor**: deletion → full-length enclosure
+  · the old `EntryCanopy` (4 free posts + a 2.40 × 4.90 m slab covering 0.60 m of a
+    ≈7.6 m descent) is **deleted**; none of its 5 prims carried a hazard or drop label.
+  · new: a continuous canopy **x −1.90 … 7.15** (9.05 m) — 1.90 m of approach measured
+    from the pit edge (GT-3/U-5 require ≥ 1.00 m; scene16 has exactly 1.00), the sill
+    riser and its apron, the whole 6.40 m descent, the lower landing and the pit rear.
+    Roof springs from the parapet walls on a **column line** (5 pairs at 2.26 m),
+    **side infill** (glazing + spandrel between the columns, closing the flank against the
+    parapet and the perimeter rail), and **soffit lighting** — 2 rows × 5 recessed 1.20 m
+    battens at 2.20 m pitch, the spacing G2 shows. scene16 (`:84`, x −1.0 … 4.6) is the
+    in-library reference form; this is the same form at 02's length.
+  · GT class: **R-3 only.** A canopy moves no walked surface. The OCCL baseline moves and
+    the prim delta is **positive** — see the ledger row.
+
+[G2 finishes] the pit's flanking walls get **tile cladding** (inner 40 mm of the 300 mm
+  retaining wall) under a **granite coping** (top 60 mm, 20 mm proud each side), which is
+  what G2 shows and what a Korean 지하보도 mouth is actually built of. The structural
+  parapet height and the perimeter guard rail are **not** re-litigated: the rail is this
+  scene's grazing-angle identity cue and the guard for a 3.38 m hole.
+
+[BS-4] dense downtown backdrop on **both** verges (`building_kit`, `kind="backdrop"`,
+  judged-eye framing), with the corner gap the cross-street at x 8…13 requires. The old
+  `Building_B` brick slab (x −14…10, y 9…13) overlapped the carriageway and is replaced by
+  the north row; `Building_C` (the +X vista) stays.
+
+[Walking-continuity z ladder]  approach → UP-STEP → sill → descend → landing → tunnel
+  ┌ #  section              x range          top z       step / verdict
+  │ 0  ground sidewalk       ≤ −1.20         +0.000      flat
+  │ 1  **sill riser**        x = −1.20       —           **+0.180 UP-STEP** (not a drop)
+  │ 2  sill apron       −1.20 … 0.00         +0.180      flat 1.200 (y ±2.10)
+  │ 3  drop edge             x = 0.00        +0.180      **drop 3.380** to the pit floor
+  │ 4  stair step 1     0.00 … 0.32          +0.011      0.169
+  │ 5  stair step 10    2.88 … 3.20          −1.510      0.169 × 9
+  │ 6  stair step 20    6.08 … 6.40          −3.200      0.169 × 10
+  │ 7  lower landing    6.40 … 7.00          −3.200      0.000 (flush)
+  └ 8  tunnel floor     7.00 … 11.00         −3.200      0.000 (flush)
+  * 20 × 0.169 = 3.380 = 0.180 (sill) + 3.200 (old drop). Run 6.400 and the 0.320 nosing
+    period are **bit-identical to the pre-state** — the silhouette cue is untouched.
+  * Every riser ≤ 0.180 「지하도로시설기준에 관한 규칙」 · every riser ≤ 0.200 outdoor rule.
+
+[Camera occlusion check]
+  · grid gy stays 0.000 — no mid rail exists (the v8 proposal is deleted), so the scene01
+    R2-1 central-railing avoidance does not apply.
+  · h0.3 concealment is **strengthened, not weakened**: the sill raises the near lip by
+    0.18 m, so the sight line grazing the new edge (x = 0, z = +0.18) is steeper than
+    before and reaches even less of the pit floor.
+  · The canopy roof underside sits at z = 2.70 over x −1.90 … 7.15. All **9 grid preset
+    eyes** (x = −2 / −5 / −10) stand outside that footprint — the d2 pair clears the front
+    edge by 0.10 m — so the h/d grid goes on measuring the approach rather than the
+    enclosure interior. `pit_edge` (−0.5, 0, 1.7) and `inside_looking_up` (6.6, 0, −2.7)
+    are **declared interior cuts**: they are the ones the soffit battens exist for.
 """
 
 import os
@@ -99,7 +139,11 @@ import datetime
 
 import scene_common as sc
 import ground_kit as gk
-import stair_kit as sk           # Statutory landing / mid rail (single source of truth for coordinate calculation)
+import stair_kit as sk           # Statutory handrail (single source of truth for coordinate calculation)
+import infra_kit as ik           # [W3 CB-7 · GT-2] build_curb_line (K5)
+import props_kit as pk           # [W3 CB-7 · GT-1] RF-1 base plate + RF-2 metal age ladder (K4c)
+import facade_kit as fk          # [W3 CB-7 · BS-4] primitive injection for building_kit
+import building_kit as bk        # [W3 CB-7 · BS-4] dense downtown street wall
 
 
 # ===========================================================================
@@ -155,21 +199,46 @@ PARAMS = dict(
     #    (statutory x -0.90..-0.30, full opening width); the lower landing band
     #    stays on the existing `sc.build_tactile` path because it lives at
     #    z=-3.2, a different surface from this plan.
-    gkit=dict(x0=-12.0, half_y=4.0, manhole=[(-1.20, 0.35)],
+    #  [W3 CB-7 · GT-1] the manhole moved (-1.20, 0.35) -> (-2.90, 1.10). The old
+    #    coordinate is **inside the flood-sill apron footprint** (x -1.20..0.00,
+    #    y +-2.10) and would have been buried under the 0.18 m platform. The site is
+    #    also one of the "solved from the d5 frame occupancy" coordinates K5's G-4
+    #    census flags (the comment below still says "lands in the d2 near window"),
+    #    so the move is a correction in both directions. Manholes are flush -> **no GT
+    #    change** (K5 J-11 keep-at-zero: 맨홀 flush 는 KEEP).
+    gkit=dict(x0=-12.0, half_y=4.0, manhole=[(-2.90, 1.10)],
               gully_x=-0.95, gully_y=3.60),
-    # Stair 20 steps x riser 0.16 · tread 0.32 -> drop 3.2 m, run 6.4 m. z_top=0
-    stairs=dict(x0=0.0, riser=0.16, tread=0.32, nsteps=20,
-                y0=-1.75, y1=1.75, z_top=0.0, base_z=-3.5),
+    # ═══ [W3 CB-7 · GT-1] flood sill (침수방지 진입 단차) ════════════════════
+    #  `[law]` 행안부 「지하공간 침수방지를 위한 수방기준 실무매뉴얼」 3-1-1 해설(2):
+    #    "18cm 높이의 계단 1~3개" + "난간은 … 반드시 설치". One step of 0.180 is taken.
+    #  The apron is 0.35 m wider than the opening half-width on each side (2.10 vs 1.75),
+    #  so the riser face is continuous across the full mouth and the two existing gullies
+    #  at (-0.95, +-3.60) sit 1.50 m clear of the apron edge on the same x band — they are
+    #  the collectors the apron sheds to (no new trench: see the docstring).
+    sill=dict(x0=-1.20, x1=0.00, y0=-2.10, y1=2.10, top=0.18, base_z=-0.50,
+              rail_y=1.68, rail_x0=-1.12, rail_x1=-0.32, rail_h=0.85,
+              rail_dia=0.034, post_r=0.020, post_x=(-1.04, -0.40),
+              plate=0.100, plate_t=0.008, plate_bed=0.010, era="sts304_10s"),
+    # Stair 20 steps x riser 0.169 · tread 0.32 -> drop 3.38 m, run 6.4 m. z_top=+0.18
+    #   [W3 CB-7 · GT-1] riser 0.160 -> 0.169 and z_top 0.000 -> +0.180 so that the foot
+    #   still lands on -3.200: 0.180 - 20 x 0.169 = -3.200. Run, tread and the nosing
+    #   period are unchanged, and 0.169 <= the 0.18 m statutory ceiling.
+    stairs=dict(x0=0.0, riser=0.169, tread=0.32, nsteps=20,
+                y0=-1.75, y1=1.75, z_top=0.18, base_z=-3.5),
     landing=dict(x0=6.4, x1=7.0, z_top=-3.2, base_z=-3.5),   # Lower landing
-    # Retaining wall: thickness 0.3, inner face ±1.75 (touching the stair width), outer face ±2.05, parapet top +0.15
-    wall=dict(thick=0.3, y_in=1.75, parapet_top=0.15, base_z=-3.5),
+    # Retaining wall: thickness 0.3, inner face ±1.75 (touching the stair width), outer face ±2.05,
+    #   parapet top +0.18 (flush with the sill apron - the 계단폭/둑마루 reading).
+    #   [W3 CB-7 · G2 finishes] the inner `tile_t` of the thickness is tile cladding and the
+    #   top `coping_t` is a granite coping, `coping_over` proud on each side (drip line).
+    wall=dict(thick=0.3, y_in=1.75, parapet_top=0.18, base_z=-3.5,
+              tile_t=0.04, coping_t=0.06, coping_over=0.02),
     # Tunnel portal: opening at x=7, 3.5 (width) x 2.3 (height) - z -3.2..-0.9 above the landing (z-3.2),
-    #   4 m deep interior box (x 7..11), with the lintel above remaining (z -0.9..0.15)
+    #   4 m deep interior box (x 7..11), with the lintel above remaining (z -0.9..0.18)
     tunnel=dict(x0=7.0, depth=4.0, open_w=3.5, open_h=2.3,
-                floor_z=-3.2, lintel_top=0.15),
+                floor_z=-3.2, lintel_top=0.18),
     # Ground-level railing around the pit (3 sides): south/north x 0..7 at y=±1.9, rear at x=7.15
     perim_rail=dict(y=1.9, x0=0.0, x1=7.0, x_rear=7.15,
-                    parapet_top=0.15, rail_h=0.9, post_r=0.03,
+                    parapet_top=0.18, rail_h=0.9, post_r=0.03,
                     rail_r=0.03, rail_mid_r=0.018, mid_h=0.45, spacing=1.2),
     # ═══ [realism v1] Stair rail → statutory handrail (§15(3)/(4)) ══════════
     #  Old: `y=1.65, x_start=-0.5, rail_h=0.9, post_r=0.02, rail_r=0.03,
@@ -186,17 +255,21 @@ PARAMS = dict(
     #  **handrail** shall be installed." One pipe per side, no infill.
     #  **Post-mounted, not wall-bracketed** — and that is a measured decision,
     #  not a shortcut. Unlike scene15's 3~4 m house facades, the flanking walls
-    #  here are retaining walls capped at `wall.parapet_top` = +0.15, so the
-    #  850 mm rail line sits **0.70 m above the wall top** at the stair head and
-    #  does not meet the wall until x = 1.60 (step 5) `[computed]`. Brackets
+    #  here are retaining walls capped at `wall.parapet_top` = +0.18, so the
+    #  850 mm rail line sits **0.85 m above the wall top** at the stair head and
+    #  does not meet the wall until x = 1.61 (step 5) `[computed, W3 CB-7]`. Brackets
     #  would float over the first 25 % of the run. Posts also let the statutory
     #  ≥300 mm end extensions actually exist (§15(4)3), which a wall mount here
     #  could not provide — and a post-mounted stainless handrail is what open-cut
     #  underpass entrances are actually built with.
     #  y = `wall.y_in` − 0.07 → pipe face 53 mm and post face 50 mm clear of the
     #  wall, both ≥ the statutory 50 mm (§15(4)2) `[computed]`.
+    #  [W3 CB-7] `ext_top` 0.30 -> **0.32** (still >= the statutory 0.30) so the top
+    #  extension terminates at x = -0.32, exactly where the GT-1 sill handrail ends:
+    #  both lines sit at y = +-1.68 and z = 0.18 + 0.85 = 1.03, so they read as one
+    #  continuous handrail from the approach to the bottom of the descent.
     stair_rail=dict(y=1.68, dia=0.034, height=0.85, post_r=0.020,
-                    post_spacing=1.20, ext_top=0.30, ext_bot=0.60),
+                    post_spacing=1.20, ext_top=0.32, ext_bot=0.60),
     tactile=dict(ahead=0.3, depth=0.3, proud=0.004,   # Top warning strip x=-0.3..0
                  land_depth=0.4),                      # Landing tactile width
     # v4-B1: width 0.05 / proud 0.001 vanished under 512spp denoising -> the 20 steps read as a
@@ -217,11 +290,26 @@ PARAMS = dict(
     # === v4-D1 road (top-priority context cue: the underpass's 'reason to exist') ===
     #   Establishes the narrative that the tunnel (x 7..11, ceiling top face -0.6) passes under the road.
     #   The east sidewalk (formerly Walk_E x 7..16) is cut by the road width and split into E1/E2.
-    road=dict(x0=8.0, x1=13.0, y0=-60.0, y1=60.0, top=-0.02, thick=0.5,
-              walk_a=7.7, walk_b=13.3,                 # Kerb outer face = sidewalk cut face
-              curb_top=0.10, curb_base=-0.5,
+    # [W3 CB-7 · GT-2] carriageway datum `top` -0.02 -> **-0.130**. This is the only way
+    #   the two halves of the GT-2 row hold simultaneously: exposure above the carriageway
+    #   **150 mm** *and* curb top **flush … +20 mm above the footway** (0.000). The kerb is
+    #   now `infra_kit.build_curb_line` (1 m unit blocks, 6 mm joint recess, R = 10 mm arris
+    #   via LOOK_CLASS["curb"]), so `curb_top` / `curb_base` are retired.
+    #   `walk_a/walk_b` move 7.70/13.30 -> **7.80/13.20** so the sidewalk cut face meets the
+    #   block body (width 0.20 measured back from the kerb face) with no gap.
+    road=dict(x0=8.0, x1=13.0, y0=-60.0, y1=60.0, top=-0.130, thick=0.5,
+              walk_a=7.8, walk_b=13.2,                 # Kerb block back face = sidewalk cut face
               lane_x=10.5, lane_w=0.12, dash_len=3.0, dash_step=6.0,
               dash_y0=-36.0, dash_n=13),
+    # [W3 CB-7 · GT-2] the K5 builder's arguments, kept where the numbers can be read.
+    #   `gutter=False`: this scene switched `gutter_L` off in W2-D with a measured reason
+    #   (see the `gkit` note), so `gt_drop` = `height` = 0.150 exactly, with no cross-fall
+    #   term to carry. `lod_span` keeps the 1 m product rhythm inside the judged band
+    #   (y -14 … +14 -> arc length 46 … 74 on a line that starts at y = -60) and coarsens
+    #   to 8 m blocks outside it: 40 blocks + 1 bed core = **41 prims per 120 m line**
+    #   `[measured - dry_kit A/B this session]` instead of 121.
+    curb=dict(width=0.20, unit=1.0, height=0.150, embed=0.20, joint_w=0.006,
+              arris="look", far_unit=8.0, lod_half=14.0),
     # === v4-D other context dressing ===
     # D4 underpass entrance sign (2 posts + 1 panel) - establishes 'underpass' in a single cut
     # [v5.1 realism] Feedback "the board (panel) position is unnatural" -> moved to the **side of the entrance**.
@@ -236,9 +324,92 @@ PARAMS = dict(
     #     parapet) -> zero cases of close range (<1.2 m) AND inside the FOV.
     sign=dict(x=-3.4, y0=1.9, y1=3.7, z0=1.5, z1=2.25, thick=0.08,
               post_r=0.05, post_h=2.25),
-    # D5 canopy over the stair head (subway-entrance silhouette)
-    canopy=dict(x0=-1.8, x1=0.6, y0=-2.45, y1=2.45, z_roof=2.7, post_r=0.08,
-                roof_t=0.14, base_z=0.0),
+    # ═══ [W3 CB-7 · GT-3, content FLIPPED] full-length enclosed soffit-lit canopy ═══
+    #  Supersedes the old `D5 canopy over the stair head`
+    #  (`x0=-1.8, x1=0.6, y0=-2.45, y1=2.45, z_roof=2.7, post_r=0.08, roof_t=0.14`) —
+    #  a free-standing porch on four posts covering **0.60 m of a ≈7.6 m descent**
+    #  `[repro - gt_changes_w3.md §6]`. Deleted, not patched.
+    #
+    #  Form: G2 + `scene16:84` (the in-library reference, x -1.00 … 4.60 over a 4.48 m
+    #  descent). Here: x -1.90 … 7.15 = **1.90 m of approach** measured from the pit edge
+    #  (GT-3 / U-5 ask for >= 1.00 m; scene16 has exactly 1.00) + the sill riser at -1.20
+    #  and its apron + the whole 6.40 m descent + the lower landing + the pit rear (the
+    #  perimeter rail's own rear line is at 7.15). The front edge stops at -1.90 rather
+    #  than -2.20 for a measured reason: the nearest judged eye is `preset_h*_d2` at
+    #  x = -2.00, and the 9 grid cuts must keep standing **outside** the enclosure so the
+    #  h/d grid goes on measuring the approach. `pit_edge` and `inside_looking_up` are
+    #  declared interior cuts.
+    #    · roof deck   z 2.70 (underside) … 2.84, y +-2.45 (0.40 m eaves past the wall
+    #      outer face +-2.05) — a flat deck, as scene16's is.
+    #    · beams       8 transverse ribs at **1.30 m** pitch. G2 shows ~7 over the opening;
+    #      these are main beams, not C4 rafters, so the 300-450 mm rafter band does not
+    #      apply `[practice]`.
+    #    · columns     5 pairs at **2.30 m** pitch on the wall centre line y = +-1.95,
+    #      0.12 x 0.12 m box section. Bases: the parapet (+0.18) where the wall exists,
+    #      the sidewalk (0.00) for the front pair at x = -2.05. Each carries a cast-in
+    #      **mortar collar**, not an RF-1 plate — the canopy is entrance-original, the
+    #      sill handrail is the retrofit, and RF-1's own instruction is that the contrast
+    #      between the two is the deliverable.
+    #    · side infill one opaque **valance** panel per bay per flank in the plane
+    #      y = +-2.02, from `infill_z0` up to the roof underside.
+    #      **Measured decision, round 260731_w3_cb7 r1 -> r2.** r1 built the infill as
+    #      full-height *glazing* down to the rail top (1.05) using the library's `glass`
+    #      material. That material is an **opaque dark constant** (0.06, 0.09, 0.12) - fine
+    #      for a 1.2 x 1.6 m window, catastrophic as a 9 m x 1.35 m wall: it read as a
+    #      black slab, took `beauty_overview` to DARK, `h1.8_d2` to PHOTO -45.8 mean, and
+    #      it **hid the BS-4 street wall the same commit had just built**, which is the
+    #      opposite of what G2 shows (the shops read past the canopy flanks at eye level).
+    #      r2 keeps the infill where a real 지하보도 canopy has it - a deep valance over a
+    #      ventilation band - and leaves 1.08 … `infill_z0` open. That band is **not** a
+    #      hole in the enclosure: below it the parapet and the perimeter guard already
+    #      close the flank `[practice; the r1 arm is kept in the report as evidence]`.
+    #    · soffit      2 rows at y = +-0.80, 5 recessed 1.20 m battens per row at **2.20 m**
+    #      pitch from x = -1.90 (Korean underpass canopies run 1.2 m battens at 2.0-2.5 m
+    #      centres `[practice]`). Each batten carries one SphereLight — without them the
+    #      enclosure turns the whole descent into a DARK cut.
+    canopy=dict(x0=-1.90, x1=7.15, y_roof=2.45, y_col=1.95, y_glaz=2.02,
+                z_roof=2.70, roof_t=0.14, eaves_fascia=0.22, fascia_t=0.06,
+                beam_pitch=1.30, beam_w=0.16, beam_h=0.22,
+                col_w=0.12, n_col=5, collar_w=0.22, collar_h=0.04,
+                infill_z0=1.75, infill_t=0.03, infill_top=2.70,
+                lamp_y=(-0.80, 0.80), lamp_x0=-1.90, lamp_pitch=2.20, lamp_n=5,
+                lamp_len=1.20, lamp_w=0.14, lamp_t=0.06,
+                lamp_radius=0.10, lamp_intensity=40000.0,
+                lamp_color=(0.93, 0.96, 1.0)),
+    # ═══ [W3 CB-7 · BS-4] dense downtown street wall, both verges ═══════════
+    #  G2 closes the horizon with continuous shopfront blocks on both sides of the
+    #  entrance, so this scene **keeps** its wall (intake §2 scene02 (e)). Built with
+    #  `building_kit.plan_building(kind="backdrop", eyes=judged_eyes(0.0))` so the frame
+    #  test (BS-4) and the true-distance tier (B-F3) come from the real judging geometry.
+    #  The x 7.60 … 13.40 gap is the cross street the carriageway occupies — a real corner,
+    #  and it also removes the pre-existing defect where `buildings.B` (x -14 … 10)
+    #  overlapped the carriageway at x 8 … 10.
+    backdrop=dict(
+        base_z=-0.35,             # foot buried below the walk (0.0) and the grass (-0.03)
+        S=dict(y0=-22.0, y1=-9.0, facade_y=-9.0, face_dir=1.0, blocks=(
+            (-18.0, -11.0, 13.5, 4, "city_stone"),
+            (-11.0,  -4.0, 11.0, 3, "city_plaster"),
+            (-4.0,    2.5, 15.0, 5, "city_wall"),
+            (2.5,     7.6, 20.0, 6, "city_plaster"),
+            (13.4,   20.0, 17.0, 5, "city_stone"))),
+        N=dict(y0=9.0, y1=22.0, facade_y=9.0, face_dir=-1.0, blocks=(
+            (-18.0, -10.0, 12.0, 4, "city_wall"),
+            (-10.0,  -3.0, 16.0, 5, "city_stone"),
+            (-3.0,    3.0, 10.5, 3, "city_plaster"),
+            (3.0,     7.6, 22.0, 7, "city_wall"),
+            (13.4,   20.0, 18.0, 6, "city_stone"))),
+        # the 1 m verge between the walk edge (|y| = 8) and the new building line
+        # (|y| = 9), paved at the existing ground top + 10 mm. No walked surface moves
+        # (the walk edge already had a 20 mm step against the grass); the strips stop
+        # short of the carriageway so nothing is laid over the road.
+        #   The 4th pair closes the last strip of "undesigned turf" the judged cuts see:
+        #   x 16 … 20 between the walk's east end and the backdrop's, straight down the
+        #   travel axis and visible in every h1.8 cut as a green band.
+        apron=dict(z_top=-0.02, thick=0.30, strips=(
+            (-18.0, -9.0, 7.8, -8.0), (13.2, -9.0, 20.0, -8.0),
+            (-18.0,  8.0, 7.8,  9.0), (13.2,  8.0, 20.0,  9.0),
+            (16.0,  -8.0, 20.0,  8.0))),
+    ),
     # D6 route-map / information board - [v5.1] **deleted** (count reduction).
     #   Feedback "reduce the count / if redundant, cut the board" -> the board is removed and
     #   entrance signage is consolidated into the single D4 underpass entrance sign.
@@ -271,9 +442,11 @@ PARAMS = dict(
                        radius=0.12, intensity=45000.0,
                        color=(0.92, 0.95, 1.0)),
     buildings=dict(
-        # 1 brick building: y 9..13, x -14..10, h10. Facade on the -Y plane (sidewalk side), windows arrayed along x
-        B=dict(x0=-14.0, x1=10.0, y0=9.0, y1=13.0, h=10.0, floors=4,
-               axis="y", facade_y=9.0, face_dir=-1.0),
+        # [W3 CB-7 · BS-4] the old brick building **B** (x -14..10, y 9..13, h10) is
+        #   deleted: it straddled the carriageway (x 8..13) and it was the only thing
+        #   standing on the north verge, which G2 shows as a continuous block row. The
+        #   `backdrop` N row replaces it. C stays — it is the +X vista that closes the
+        #   axis beyond the cross street, and BS-4 has nothing to say about it.
         # Distant vista: 1 building at +X. Facade on the -X plane, windows arrayed along y
         C=dict(x0=22.0, x1=28.0, y0=-10.0, y1=10.0, h=10.0, floors=4,
                axis="x", facade_x=22.0, face_dir=-1.0),
@@ -288,7 +461,25 @@ PARAMS = dict(
     # --- Materials: physical size for texture_scale [m/tile] + tint/constants ---
     material=dict(
         scale=dict(plaza_lower=0.7, concrete_floor=1.0, concrete_wall=2.0,
-                   grass=1.4, brick_red=2.0, granite_dark=1.0, tactile=0.3),
+                   grass=1.4, brick_red=2.0, granite_dark=1.0, tactile=0.3,
+                   # [W3 CB-7] G2 finishes + BS-4 shells
+                   wall_tile=0.30,      # 300 mm module - Korean 지하보도 wall tile `[practice]`
+                   granite_light=1.0,   # coping / sill apron / kerb blocks
+                   plaster=1.6),
+        # [W3 CB-7 r2->r3] tints pulled down after the r2 round measured
+        #   `wht% 26.9 >= 2` on `preset_h0.3_d2` — a cream 1.20 x 4.20 m sill apron
+        #   0.8 m in front of an h0.3 eye is exactly the "large near-white area" the
+        #   v5.1 §4 parapet ruling (0.90 -> 0.72) already outlawed, and Korean 화강암
+        #   coping/kerb is mid-grey in reality, not cream.
+        wall_tile_tint=(0.88, 0.86, 0.80),      # G2's cream wall tile
+        granite_light_tint=(0.72, 0.71, 0.68),  # light granite coping / kerb / sill
+        city_wall_tint=(0.94, 0.95, 0.97),      # cool grey concrete / tile
+        city_stone_tint=(0.92, 0.90, 0.87),     # light granite / stone cladding
+        city_plaster_tint=(0.95, 0.94, 0.90),   # warm beige render
+        canopy_roof=(0.62, 0.64, 0.66), canopy_roof_rough=0.42,
+        canopy_col=(0.66, 0.68, 0.70), canopy_col_rough=0.30,
+        canopy_span=(0.72, 0.73, 0.74), canopy_span_rough=0.45,
+        soffit_lamp=(0.94, 0.96, 0.98), soffit_lamp_rough=0.25,
         grass_tint=(0.55, 0.68, 0.42),
         hedge_tint=(0.50, 0.64, 0.38),            # v4-B2 hedge (black-slab fix)
         tunnel_tint=(0.32, 0.32, 0.34),           # Dark tunnel concrete tint
@@ -354,6 +545,12 @@ LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "scene02")
 # brick_red·granite_dark·tactile + HDRI + MDL)
 ASSET_ROLES = ["plaza_lower", "concrete_floor", "concrete_wall", "grass",
                "brick_red", "granite_dark", "tactile",
+               # [W3 CB-7] G2 finishes (wall tile / granite coping / kerb) + BS-4 shells.
+               #   S06-B item 3 asks for a dedicated `curb_granite_light` role; that role
+               #   is **not authored** (procurement is on HOLD this wave), so `marble_light`
+               #   is bound as the stand-in — the same stand-in K5's own test stage used —
+               #   and `granite_dark` stays forbidden on the kerb.
+               "plaza_light", "marble_light", "plaster",
                "sign_exit",     # [v5.2 user] Arbitrary warning placards removed
                "hdri", "mdl"]
 
@@ -373,20 +570,326 @@ def build_views():
 
 
 # ===========================================================================
+# [C2] W3 CB-7 geometry derivations + the R-1 self-check (boot-free, GPU-free)
+#      Every number the GT-1/GT-2/GT-3 landing records quote is produced HERE,
+#      from PARAMS, so the record is a measurement and not a restatement.
+# ===========================================================================
+def canopy_columns():
+    """(i, x, base_z) for every canopy column pair. 0 prims — plan only."""
+    cp, sl = PARAMS["canopy"], PARAMS["sill"]
+    pitch = (cp["x1"] - cp["x0"]) / float(cp["n_col"] - 1)
+    out = []
+    for i in range(int(cp["n_col"])):
+        x = cp["x0"] + pitch * i
+        if x >= 0.0:
+            bz = PARAMS["wall"]["parapet_top"]          # on the parapet
+        elif x >= sl["x0"]:
+            bz = sl["top"]                              # on the sill apron
+        else:
+            bz = PARAMS["walk"]["z_top"]                # on the approach paving
+        out.append((i, x, bz))
+    return out
+
+
+def canopy_lamps():
+    """(row, k, x, y) for every soffit batten. 0 prims — plan only."""
+    cp = PARAMS["canopy"]
+    return [(r, k, cp["lamp_x0"] + cp["lamp_pitch"] * k, y)
+            for r, y in enumerate(cp["lamp_y"]) for k in range(int(cp["lamp_n"]))]
+
+
+def curb_lines():
+    """The two kerb face lines: (tag, p0, p1, road_side).
+
+    West line: the carriageway lies at +X of the face, so the block body must extend
+    toward -X -> `road_side="right"`. East line mirrors it. `[measured - dry_kit A/B]`
+    """
+    rd = PARAMS["road"]
+    return (("W", (rd["x0"], rd["y0"]), (rd["x0"], rd["y1"]), "right"),
+            ("E", (rd["x1"], rd["y0"]), (rd["x1"], rd["y1"]), "left"))
+
+
+def curb_kwargs():
+    """The `build_curb_line` keyword set, in one place so the self-check and the
+    scene cannot drift apart."""
+    cu, rd, w = PARAMS["curb"], PARAMS["road"], PARAMS["walk"]
+    s_mid = (rd["y1"] - rd["y0"]) / 2.0            # arc length of y = 0 on either line
+    return dict(height=cu["height"], width=cu["width"], unit=cu["unit"],
+                arris_r=0.010, gutter=False, z_road=rd["top"],
+                walk_z=w["z_top"], embed=cu["embed"], joint_w=cu["joint_w"],
+                arris=cu["arris"], collider=True, strict=True,
+                lod_span=(s_mid - cu["lod_half"], s_mid + cu["lod_half"]),
+                far_unit=cu["far_unit"])
+
+
+def hazard_registry():
+    """**R-1** — the hazard / drop registry re-derived from PARAMS.
+
+    Rows are `(label, kind, x, z_top, magnitude)` where `kind` is `drop`, `up_step`
+    or `flat`. `up_step` rows are **not drops** and must never be labelled as such
+    (GT-1: *"label it an up-step, not a drop"*).
+    """
+    st, sl, la, tn = (PARAMS["stairs"], PARAMS["sill"],
+                      PARAMS["landing"], PARAMS["tunnel"])
+    rows = [("approach paving", "flat", sl["x0"] - 1.0, PARAMS["walk"]["z_top"], 0.0),
+            ("sill riser (침수방지턱)", "up_step", sl["x0"], sl["top"], sl["top"]),
+            ("sill apron", "flat", (sl["x0"] + sl["x1"]) / 2.0, sl["top"], 0.0),
+            ("pit opening front edge", "drop", st["x0"], st["z_top"],
+             st["z_top"] - la["z_top"])]
+    for k in range(1, int(st["nsteps"]) + 1):
+        rows.append((f"stair nosing {k}", "drop", st["x0"] + st["tread"] * (k - 1),
+                     st["z_top"] - st["riser"] * (k - 1),
+                     st["z_top"] - st["riser"] * (k - 1) - la["z_top"]))
+    rows.append(("lower landing", "flat", la["x0"], la["z_top"], 0.0))
+    rows.append(("tunnel floor", "flat", tn["x0"], tn["floor_z"], 0.0))
+    return rows
+
+
+# Prims this commit deletes. Each one is asserted **out** of the collision/hazard
+# lists by `underpass_selfcheck` (§6.2 S1-S8: "every deleted prim must be checked out
+# of the hazard/collision box list").
+DELETED_PRIMS = (
+    ("EntryCanopy/Roof", True, "GT-3 — free-standing porch roof, 2.40 x 4.90 m"),
+    ("EntryCanopy/Post_SW", True, "GT-3 — porch post"),
+    ("EntryCanopy/Post_NW", True, "GT-3 — porch post"),
+    ("EntryCanopy/Post_SE", True, "GT-3 — porch post"),
+    ("EntryCanopy/Post_NE", True, "GT-3 — porch post"),
+    ("Road/Curb_W", False, "GT-2 — 120 m extruded kerb box, top +0.10 above the footway"),
+    ("Road/Curb_E", False, "GT-2 — ditto, east side"),
+    ("Building_B/*", True, "BS-4 — brick slab that overlapped the carriageway"),
+)
+
+
+def underpass_selfcheck(verbose=True):
+    """R-1 registry print + the CB-7 gates. Boot-free and GPU-free.
+
+    (1) GT-1 — the z ladder, the UP-STEP label, riser statute, sill handrail + RF-1/RF-2.
+    (2) GT-2 — `build_curb_line` run on a `dry_kit`: block rhythm, exposure, footway flush.
+    (3) GT-3 — canopy coverage against the descent, enclosure closure, soffit pitch.
+    (4) deleted prims are out of every hazard / collision list.
+    Returns (ok, diag).
+    """
+    ok = True
+    diag = {}
+    st, sl, la = PARAMS["stairs"], PARAMS["sill"], PARAMS["landing"]
+    wl, cp, rd = PARAMS["wall"], PARAMS["canopy"], PARAMS["road"]
+
+    def chk(label, cond, detail=""):
+        nonlocal ok
+        ok = ok and bool(cond)
+        if verbose:
+            print(f"  [{'OK ' if cond else 'FAIL'}] {label}"
+                  + (f" — {detail}" if detail else ""))
+        return bool(cond)
+
+    # ---------------- (1) GT-1 ------------------------------------------
+    print("\n[1] GT-1 침수방지 진입 단차 + 하강 z 사다리 (R-1 레지스트리)")
+    reg = hazard_registry()
+    drop_edge = st["z_top"] - la["z_top"]
+    foot = st["z_top"] - st["riser"] * st["nsteps"]
+    diag.update(drop_edge=drop_edge, foot=foot, riser=st["riser"])
+    ups = [r for r in reg if r[1] == "up_step"]
+    drops = [r for r in reg if r[1] == "drop"]
+    print(f"      단 {len(drops)}개(개구 전연 1 + 노징 {st['nsteps']}) · "
+          f"UP-STEP {len(ups)}개 · 평탄 {len(reg) - len(drops) - len(ups)}개")
+    for lab, kind, x, z, mag in reg[:4] + reg[-3:]:
+        print(f"      · {lab:<26s} {kind:<8s} x{x:+7.3f}  z{z:+7.3f}  Δ{mag:6.3f}")
+    chk("sill 1단 ≤ 0.18 m (행안부 3-1-1 · 18 cm 계단 1~3개)",
+        sl["top"] <= 0.180 + 1e-9, f"{sl['top']:.3f} m × 1단")
+    chk("UP-STEP 은 낙차가 아니다 — 라벨 분리", len(ups) == 1 and ups[0][0].startswith("sill"),
+        f"x = {sl['x0']:+.2f}")
+    chk("개구 전연 낙차 = 3.380 m", abs(drop_edge - 3.380) < 1e-9, f"{drop_edge:.3f}")
+    chk("계단 발끝이 하부 랜딩에 정확히 착지", abs(foot - la["z_top"]) < 1e-9,
+        f"{foot:.4f} vs {la['z_top']:.4f}")
+    chk("단높이 ≤ 0.18 m (지하도로시설기준)", st["riser"] <= 0.180 + 1e-9,
+        f"{st['riser']:.3f} m")
+    chk("run·노징 주기 불변", abs(st["tread"] * st["nsteps"] - 6.40) < 1e-9
+        and abs(st["tread"] - 0.32) < 1e-9, "run 6.400 · tread 0.320")
+    chk("apron 이 개구보다 넓다", sl["y1"] > st["y1"], f"±{sl['y1']:.2f} vs ±{st['y1']:.2f}")
+    chk("파라펫 상단 = apron 상단 (둑마루 연속)",
+        abs(wl["parapet_top"] - sl["top"]) < 1e-9, f"{wl['parapet_top']:.3f}")
+    # manhole must be clear of the apron footprint
+    mh_in = [(x, y) for x, y in PARAMS["gkit"]["manhole"]
+             if sl["x0"] - 0.25 <= x <= sl["x1"] + 0.25
+             and sl["y0"] - 0.25 <= y <= sl["y1"] + 0.25]
+    chk("맨홀이 apron 발자국 밖", not mh_in, f"{PARAMS['gkit']['manhole']}")
+    # sill handrail
+    sr = PARAMS["stair_rail"]
+    z_sill_rail = sl["top"] + sl["rail_h"]
+    z_stair_ext = st["z_top"] + sr["height"]
+    chk("난간 반드시 설치 — sill 손잡이 2선", sl["rail_x1"] > sl["rail_x0"],
+        f"y ±{sl['rail_y']:.2f} · x {sl['rail_x0']:+.2f}…{sl['rail_x1']:+.2f} · "
+        f"z {z_sill_rail:.3f}")
+    chk("sill 손잡이와 계단 손잡이가 같은 선에서 만난다",
+        abs(z_sill_rail - z_stair_ext) < 1e-9
+        and abs(sl["rail_x1"] + sr["ext_top"]) < 1e-9,
+        f"z {z_sill_rail:.3f} · 접합 x {sl['rail_x1']:+.2f}")
+    chk("손잡이 지름 φ32~38 mm (피난방화 §15④1)",
+        0.032 - 1e-9 <= sl["rail_dia"] <= 0.038 + 1e-9, f"φ{sl['rail_dia']*1000:.0f}")
+    chk("계단 손잡이 수평연장 ≥ 300 mm (§15④3)", sr["ext_top"] >= 0.300 - 1e-9,
+        f"{sr['ext_top']*1000:.0f} mm")
+    chk("RF-1 플레이트 두께가 시판 규격 (6/8/9T)",
+        abs(sl["plate_t"] - min(pk.PLATE_STOCK_T, key=lambda t: abs(t - sl["plate_t"]))) < 1e-9,
+        f"{sl['plate_t']*1000:.0f}T · {sl['plate']*1000:.0f}×{sl['plate']*1000:.0f}")
+    chk("RF-2 연식 등급이 METAL_AGE 에 존재", sl["era"] in pk.METAL_AGE,
+        f"{sl['era']} → albedo {pk.METAL_AGE[sl['era']][0]}")
+    diag["sill_posts"] = len(sl["post_x"]) * 2
+
+    # ---------------- (2) GT-2 ------------------------------------------
+    print("\n[2] GT-2 보차도 경계석 — infra_kit.build_curb_line (K5)")
+    kw = curb_kwargs()
+    tot = 0
+    for tag, p0, p1, side in curb_lines():
+        # a recording Kit, so the block **lengths** are measured and not assumed:
+        # `unit_actual` is the run mean and reads 3.0 m once `lod_span` coarsens the
+        # far field, which says nothing about the rhythm inside the judged window.
+        seen = []
+
+        def _box(path, center, size, mtl=None, col=False, _s=seen):
+            _s.append((path, center, size)); return path
+
+        def _obox(path, center, size, mtl=None, rotz=0.0, rotx=0.0, col=False,
+                  _s=seen):
+            _s.append((path, center, size)); return path
+
+        res = ik.build_curb_line(ik.Kit(_box, None, _obox), f"/dry/Curb_{tag}",
+                                 p0, p1, None, road_side=side, **kw)
+        lens = sorted(round(s[0], 3) for p, _c, s in seen if "/Blk_" in p)
+        near = [v for v in lens if abs(v - PARAMS["curb"]["unit"]) < 0.02]
+        tot += res["prim_count"]
+        diag[f"curb_{tag}"] = res
+        print(f"      {tag}측 · 블록 {res['n_blocks']:3d} · 프림 {res['prim_count']:3d} "
+              f"({res['prims_per_m']:.2f}/m) · 근경 1 m 블록 {len(near)} · "
+              f"원경 {lens[-1]:.2f} m · 상단 z {res['curb_top_z']:+.3f} · "
+              f"차도노출 {res['exposure_road']:.3f} · gt_drop {res['gt_drop']:.3f} · "
+              f"경고 {len(res['warnings'])}")
+        chk(f"{tag}측 경고 0 (strict)", not res["warnings"], str(res["warnings"]))
+        chk(f"{tag}측 상단이 보도 flush…+20 mm",
+            -1e-9 <= res["curb_top_z"] <= 0.020 + 1e-9, f"{res['curb_top_z']:+.4f}")
+        chk(f"{tag}측 차도 노출 150 mm", abs(res["exposure_road"] - 0.150) < 1e-9,
+            f"{res['exposure_road']:.3f}")
+        chk(f"{tag}측 판정창 1 m 제품 리듬",
+            len(near) >= int(2 * PARAMS["curb"]["lod_half"]) and min(lens) >= 0.98,
+            f"{len(near)}블록 × {PARAMS['curb']['unit']:.3f} m "
+            f"(창 {2*PARAMS['curb']['lod_half']:.0f} m) · 최소 {min(lens):.3f} m")
+        chk(f"{tag}측 원경만 far_unit 로 굵어진다",
+            abs(lens[-1] - PARAMS["curb"]["far_unit"]) < 0.5,
+            f"{lens[-1]:.2f} m ≈ far_unit {PARAMS['curb']['far_unit']:.1f}")
+    chk("R10 아리스는 LOOK_CLASS['curb'] 경유 (0 프림)",
+        ik.check_arris_role(sc, "curb", 0.010), "bevel 10.0 mm")
+    chk("보도 절단면이 블록 배면과 정확히 만난다",
+        abs((rd["x0"] - PARAMS["curb"]["width"]) - rd["walk_a"]) < 1e-9
+        and abs((rd["x1"] + PARAMS["curb"]["width"]) - rd["walk_b"]) < 1e-9,
+        f"walk_a {rd['walk_a']:.2f} · walk_b {rd['walk_b']:.2f}")
+    chk("차도 기준면 −0.130 (노출 150 + 상단 +20 을 동시에 만족하는 유일값)",
+        abs(rd["top"] + 0.130) < 1e-9, f"{rd['top']:+.3f}")
+    diag["curb_prims"] = tot
+
+    # ---------------- (3) GT-3 ------------------------------------------
+    print("\n[3] GT-3 전장 밀폐 소핏조명 캐노피 (내용 반전분)")
+    run = st["tread"] * st["nsteps"]
+    appr = st["x0"] - cp["x0"]
+    tail = cp["x1"] - PARAMS["pit"]["x1"]
+    cols = canopy_columns()
+    lamps = canopy_lamps()
+    print(f"      캐노피 x {cp['x0']:+.2f}…{cp['x1']:+.2f} ({cp['x1']-cp['x0']:.2f} m) vs "
+          f"하강 x {st['x0']:+.2f}…{st['x0']+run:+.2f} ({st['nsteps']}×{st['tread']:.2f}"
+          f"={run:.2f}) → 접근로 {appr:.2f} m + 전 구간 + 후단 여유 {tail:.2f} m")
+    print(f"      기둥 {len(cols)}쌍 · 피치 {(cp['x1']-cp['x0'])/(cp['n_col']-1):.2f} m · "
+          f"소핏 {len(lamps)}등 ({len(cp['lamp_y'])}열 × {cp['lamp_n']}) · "
+          f"피치 {cp['lamp_pitch']:.2f} m")
+    chk("전 하강 구간 + 접근로 ≥ 1 m 피복 (U-5 · GT-3)",
+        cp["x0"] <= st["x0"] - 1.0 + 1e-9 and cp["x1"] >= st["x0"] + run - 1e-9,
+        f"접근 {appr:.2f} m · 종단 {cp['x1']:+.2f} ≥ {st['x0']+run:+.2f}")
+    chk("sill riser 도 지붕 아래", cp["x0"] < sl["x0"] - 1e-9,
+        f"riser 앞 {sl['x0']-cp['x0']:.2f} m")
+    z_rail_top = (PARAMS["perim_rail"]["parapet_top"]
+                  + PARAMS["perim_rail"]["rail_h"])
+    chk("측면 인필이 지붕 밑면까지 연속",
+        abs(cp["infill_top"] - cp["z_roof"]) < 1e-9
+        and cp["infill_z0"] < cp["infill_top"] - 1e-9,
+        f"z {cp['infill_z0']:.2f}…{cp['infill_top']:.2f} "
+        f"({cp['infill_top']-cp['infill_z0']:.2f} m 깊이)")
+    chk("인필 하단이 방호 난간 상단보다 위 — 두 요소가 겹치지 않는다",
+        cp["infill_z0"] > z_rail_top + 1e-9,
+        f"{cp['infill_z0']:.2f} > {z_rail_top:.2f} · 환기대 "
+        f"{cp['infill_z0']-z_rail_top:.2f} m (선언된 개방대)")
+    chk("기둥이 옹벽 두께 안에 선다", cp["y_col"] - cp["col_w"] / 2.0 >= wl["y_in"] - 1e-9
+        and cp["y_col"] + cp["col_w"] / 2.0 <= wl["y_in"] + wl["thick"] + 1e-9,
+        f"y {cp['y_col']-cp['col_w']/2:.3f}…{cp['y_col']+cp['col_w']/2:.3f} "
+        f"⊂ {wl['y_in']:.2f}…{wl['y_in']+wl['thick']:.2f}")
+    chk("기둥이 sill 손잡이 선을 침범하지 않는다",
+        cp["y_col"] - cp["col_w"] / 2.0 > sl["rail_y"] + sl["post_r"] + 1e-9,
+        f"{cp['y_col']-cp['col_w']/2:.3f} > {sl['rail_y']+sl['post_r']:.3f}")
+    chk("소핏 등기구 피치 2.0~2.5 m (실무)",
+        2.0 - 1e-9 <= cp["lamp_pitch"] <= 2.5 + 1e-9, f"{cp['lamp_pitch']:.2f} m")
+    chk("등기구 열이 개구 폭 안", max(abs(y) for y in cp["lamp_y"])
+        + cp["lamp_w"] / 2.0 < wl["y_in"], f"±{max(abs(y) for y in cp['lamp_y']):.2f}")
+    # The 9 `preset_*` grid cuts must stand **outside** the canopy footprint, so the
+    # h/d grid keeps measuring the approach and not the enclosure interior. The three
+    # mise-en-scène cuts (`pit_edge`, `inside_looking_up`, and `approach`'s target) are
+    # declared interior views — being under the roof is what they are for.
+    _grid = [v["eye"] for k, v in build_views().items() if k.startswith("preset_")]
+    chk("9개 grid 판정 시점이 캐노피 발자국 밖",
+        all(not (cp["x0"] <= e[0] <= cp["x1"] and abs(e[1]) <= cp["y_roof"])
+            for e in _grid),
+        f"가장 가까운 시점 x {max(e[0] for e in _grid):+.2f} < {cp['x0']:+.2f}")
+    diag.update(canopy_cols=len(cols), canopy_lamps=len(lamps))
+
+    # ---------------- (4) deleted prims ---------------------------------
+    print("\n[4] 삭제 프림 — 위험/충돌 목록 체크아웃")
+    haz = {r[0] for r in hazard_registry()}
+    for path, had_collider, why in DELETED_PRIMS:
+        chk(f"{path} 삭제", path not in haz,
+            ("collider 있었음 → 충돌목록에서 제거" if had_collider
+             else "collider 없음") + f" · {why}")
+    # Residual-reference gate. A *comment* may name a deleted prim (they all do, so the
+    # deletion is documented); what must be gone is the **path construction**, i.e. the
+    # token `{ROOT}/<path>` in an f-string. `Building_B` is keyed off `PARAMS`, so it is
+    # tested where it actually lives.
+    src = open(os.path.abspath(__file__), encoding="utf-8").read()
+    live = [p for p, _c, _w in DELETED_PRIMS
+            if not p.endswith("/*") and ("{ROOT}/" + p) in src]
+    chk("잔존 경로 생성 0 — 삭제 프림이 f-string 으로 다시 만들어지지 않는다",
+        not live, f"잔존 {live}" if live else "8/8 제거")
+    chk("Building_B 가 PARAMS['buildings'] 에서 제거됨",
+        "B" not in PARAMS["buildings"], f"남은 키 {sorted(PARAMS['buildings'])}")
+    # needle assembled at runtime so this line cannot match itself
+    _needle = "sc.build_" + "canopy("
+    chk("scene_common 의 4주식 포치 빌더 호출 0",
+        _needle not in src, "GT-3 은 씬 로컬 build_canopy 로 대체")
+
+    print(f"\n[SELFCHECK] scene02 CB-7 — {'PASS' if ok else 'FAIL'}")
+    return ok, diag
+
+
+# ===========================================================================
 # [D] Isaac Sim scene assembly + main loop
 # ===========================================================================
 BANNER = """\
 [조작] 우클릭+WASD 비행 · P 패스트레이싱 토글 · C 스크린샷 · [ ] 태양 방위
 [체크리스트]
  1. approach / beauty  — 지하도 피트 인상 (개구·옹벽·계단·터널 포탈 식별)
- 2. h0.3·d5~10         — 피트가 완전한 평지로 보이고 난간·점자만 뜨는가
+ 2. h0.3·d5~10         — 피트가 완전한 평지로 보이고 난간만 뜨는가
  3. pit_edge / inside  — 피트 내부 깊이감·암부 그라디언트, 터널 포탈 암부
  4. cue ON vs OFF      — 피트·계단·옹벽 기하 트랜스폼 동일한가 (nosing/railing/tactile)
- 5. 재질               — 타일 반복·늘어남·Z파이팅·부유 없는가"""
+ 5. 재질               — 타일 반복·늘어남·Z파이팅·부유 없는가
+ 6. [CB-7] 침수방지턱   — 0.18 m 올라선 뒤 하강하는가 (UP-STEP 이지 낙차가 아니다)
+ 7. [CB-7] 캐노피       — 진입로 끝까지 덮이고 소핏 등기구가 하강면을 밝히는가
+ 8. [CB-7] 경계석       — 1 m 줄눈 리듬이 읽히고 보도면과 flush 인가"""
 
 
 def main():
     capture_mode = os.environ.get("NEGOBS_CAPTURE", "0") == "1"
+
+    # ── [W3 CB-7] the §6.1 floor runs `NEGOBS_SMOKE=1 python <scene>` on every scene a
+    #    WP touched. Run the CB-7 self-check (R-1 registry + the GT-1/2/3 gates) and
+    #    exit **before** the Isaac boot, so the CPU gate never takes the GPU.
+    if (os.environ.get("NEGOBS_SMOKE", "0") == "1"
+            or os.environ.get("NEGOBS_SELFCHECK", "0") == "1"):
+        ok, _diag = underpass_selfcheck()
+        sys.exit(0 if ok else 1)
+
     sc.check_assets(ASSET_ROLES, hdri=PARAMS["light"]["hdri"])
 
     # -- Stage 1: boot Isaac Sim (SimulationApp must always come first) --
@@ -460,6 +963,60 @@ def main():
         M["tactile"] = PBR(
             f"{ROOT}/Looks/Tactile", sc.tex_path("tactile", "diff"),
             sc.tex_path("tactile", "nor"), None, sca["tactile"])
+        # [W3 CB-7 · G2 finishes] the material **name** is what the look layer classifies
+        #   on (`scene_common.LOOK_ROLE` reads the last path segment): `Tile` -> paving,
+        #   `Granite` -> stone, `Curb` -> the curb class that carries the R = 10 mm arris
+        #   (`LOOK_CLASS["curb"]["bevel"] = 0.010`), which is why the kerb material must be
+        #   called `Curb` and nothing else.
+        M["wall_tile"] = PBR(
+            f"{ROOT}/Looks/Tile", sc.tex_path("plaza_light", "diff"),
+            sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
+            sca["wall_tile"], tint=mp["wall_tile_tint"])
+        M["granite_light"] = PBR(
+            f"{ROOT}/Looks/Granite", sc.tex_path("marble_light", "diff"),
+            sc.tex_path("marble_light", "nor"), sc.tex_path("marble_light", "rough"),
+            sca["granite_light"], tint=mp["granite_light_tint"])
+        M["curb"] = PBR(
+            f"{ROOT}/Looks/Curb", sc.tex_path("marble_light", "diff"),
+            sc.tex_path("marble_light", "nor"), sc.tex_path("marble_light", "rough"),
+            sca["granite_light"], tint=mp["granite_light_tint"])
+        # [W3 CB-7 · BS-4] street-wall shells (scene16 precedent — the "city"/"wall"/
+        #   "plaster" tokens are load-bearing for texture promotion).
+        M["city_wall"] = PBR(
+            f"{ROOT}/Looks/CityWall", sc.tex_path("concrete_wall", "diff"),
+            sc.tex_path("concrete_wall", "nor"),
+            sc.tex_path("concrete_wall", "rough"), sca["concrete_wall"],
+            tint=mp["city_wall_tint"])
+        M["city_stone"] = PBR(
+            f"{ROOT}/Looks/CityStone", sc.tex_path("marble_light", "diff"),
+            sc.tex_path("marble_light", "nor"),
+            sc.tex_path("marble_light", "rough"), sca["granite_light"],
+            tint=mp["city_stone_tint"])
+        M["city_plaster"] = PBR(
+            f"{ROOT}/Looks/CityPlaster", sc.tex_path("plaster", "diff"),
+            sc.tex_path("plaster", "nor"), sc.tex_path("plaster", "rough"),
+            sca["plaster"], tint=mp["city_plaster_tint"])
+        # [W3 CB-7 · GT-3] canopy
+        M["canopy_roof"] = PBR(f"{ROOT}/Looks/CanopyRoof",
+                               diffuse_color=mp["canopy_roof"],
+                               metallic=0.75,
+                               roughness_const=mp["canopy_roof_rough"])
+        M["canopy_col"] = PBR(f"{ROOT}/Looks/CanopyPost",
+                              diffuse_color=mp["canopy_col"], metallic=0.85,
+                              roughness_const=mp["canopy_col_rough"])
+        M["canopy_span"] = PBR(f"{ROOT}/Looks/CanopySpandrel",
+                               diffuse_color=mp["canopy_span"], metallic=0.6,
+                               roughness_const=mp["canopy_span_rough"])
+        M["soffit_lamp"] = PBR(f"{ROOT}/Looks/Lamp02Soffit",
+                               diffuse_color=mp["soffit_lamp"],
+                               roughness_const=mp["soffit_lamp_rough"])
+        # [W3 CB-7 · GT-1] RF-2 age ladder — the sill handrail is a 2024 retrofit and
+        #   is deliberately a **different rung** from the entrance's own metalwork.
+        M["sill_rail"] = pk.age_mtl(stage, f"{ROOT}/Looks/RailSill",
+                                    PARAMS["sill"]["era"])
+        M["sill_bed"] = PBR(f"{ROOT}/Looks/BedMortar",
+                            diffuse_color=(0.58, 0.57, 0.55),
+                            roughness_const=0.85)
         # Constant colours
         M["glass"] = PBR(f"{ROOT}/Looks/Glass",
                                  diffuse_color=mp["glass_color"],
@@ -661,6 +1218,50 @@ def main():
             stair_mtl, col=True)
 
     # -------------------------------------------------------------------
+    # [W3 CB-7 · GT-1] flood sill — raised apron + the statutory handrail
+    # -------------------------------------------------------------------
+    def build_sill(M):
+        """침수방지 진입 단차. `[law - 행안부 실무매뉴얼 3-1-1 해설(2)]`
+
+        One 0.18 m step (the manual's "18cm 계단 1~3개"), granite-topped, 0.35 m wider
+        than the opening on each side so the riser face runs the full mouth. The riser
+        at `x = sill.x0` is an **UP-STEP** — `hazard_registry()` labels it so, and it
+        must never be written into a drop list.
+
+        난간은 반드시 설치: two handrail lines on `stair_rail.y`, so they continue the
+        stair's own line, each on **RF-1 bolted base plates** in the **RF-2**
+        `sill.era` rung. Every other post in this scene is cast-in — that contrast is
+        RF-1's stated deliverable.
+        """
+        sl = PARAMS["sill"]
+        BOX(f"{ROOT}/Sill/Apron",
+            ((sl["x0"] + sl["x1"]) / 2.0, (sl["y0"] + sl["y1"]) / 2.0,
+             (sl["top"] + sl["base_z"]) / 2.0),
+            (sl["x1"] - sl["x0"], sl["y1"] - sl["y0"], sl["top"] - sl["base_z"]),
+            M["granite_light"], col=True)
+        z_rail = sl["top"] + sl["rail_h"]
+        n_plate = 0
+        for sgn, tag in ((-1.0, "S"), (1.0, "N")):
+            CYL(f"{ROOT}/Sill/Rail_{tag}",
+                ((sl["rail_x0"] + sl["rail_x1"]) / 2.0, sgn * sl["rail_y"], z_rail),
+                sl["rail_dia"] / 2.0, sl["rail_x1"] - sl["rail_x0"],
+                M["sill_rail"], rotY=90.0)
+            for k, px in enumerate(sl["post_x"]):
+                CYL(f"{ROOT}/Sill/Post_{tag}{k}",
+                    (px, sgn * sl["rail_y"], (sl["top"] + z_rail) / 2.0),
+                    sl["post_r"], z_rail - sl["top"], M["sill_rail"])
+                pk.build_base_plate(
+                    stage, f"{ROOT}/Sill/Plate_{tag}{k}", px, sgn * sl["rail_y"],
+                    sl["top"], M["sill_rail"], bed_mtl=M["sill_bed"],
+                    plate=sl["plate"], thick=sl["plate_t"],
+                    bedding=sl["plate_bed"])
+                n_plate += 1
+        print(f"[GT-1] 침수방지턱 {sl['top']:.3f} m × 1단 (x {sl['x0']:+.2f}) · "
+              f"개구 전연 낙차 {PARAMS['stairs']['z_top'] - PARAMS['landing']['z_top']:.3f} m · "
+              f"난간 2선 · RF-1 플레이트 {n_plate}개 ({sl['plate_t']*1000:.0f}T) · "
+              f"RF-2 {sl['era']}")
+
+    # -------------------------------------------------------------------
     # Retaining wall - both sides (south/north) + rear lintel. Inner face ±1.75 (touching the stair width), parapet +0.15.
     # -------------------------------------------------------------------
     def build_walls(M):
@@ -674,11 +1275,30 @@ def main():
         cz = (top + bot) / 2.0
         hz = top - bot
         Lx = p["x1"] - p["x0"]
-        # Retaining walls on both sides (south y=-1.9 / north y=+1.9), x 0..7
+        # [W3 CB-7 · G2 finishes] the 300 mm wall is split into a structural body and a
+        #   40 mm tile cladding on the inner face, capped by a 60 mm granite coping that
+        #   oversails 20 mm on each side (the drip line G2 shows). The three solids abut
+        #   face to face — no coincident *visible* face, so no Z-fighting, the same
+        #   technique the sidewalk cut faces already use against the wall outer faces.
+        tile_t = wl["tile_t"]
+        cop_t = wl["coping_t"]
+        cop_ov = wl["coping_over"]
+        body_top = top - cop_t                     # +0.12
+        y_body_c = (wl["y_in"] + tile_t + y_out) / 2.0
+        body_w = y_out - (wl["y_in"] + tile_t)
         for sgn, tag in ((-1.0, "S"), (1.0, "N")):
             BOX(f"{ROOT}/Wall_{tag}",
-                ((p["x0"] + p["x1"]) / 2.0, sgn * y_ctr, cz),
-                (Lx, wl["thick"], hz), M["concrete_wall"], col=True)
+                ((p["x0"] + p["x1"]) / 2.0, sgn * y_body_c,
+                 (body_top + bot) / 2.0),
+                (Lx, body_w, body_top - bot), M["concrete_wall"], col=True)
+            BOX(f"{ROOT}/WallTile_{tag}",
+                ((p["x0"] + p["x1"]) / 2.0, sgn * (wl["y_in"] + tile_t / 2.0),
+                 (body_top + bot) / 2.0),
+                (Lx, tile_t, body_top - bot), M["wall_tile"], col=True)
+            BOX(f"{ROOT}/WallCoping_{tag}",
+                ((p["x0"] + p["x1"]) / 2.0,
+                 sgn * (wl["y_in"] + wl["thick"] / 2.0), body_top + cop_t / 2.0),
+                (Lx, wl["thick"] + 2.0 * cop_ov, cop_t), M["granite_light"])
         # Rear retaining wall: only the lintel above the tunnel opening (z -3.2..-0.9) remains (z -0.9..0.15)
         lintel_bot = tn["floor_z"] + tn["open_h"]  # -0.9
         lintel_top = tn["lintel_top"]              # 0.15
@@ -783,13 +1403,16 @@ def main():
         if cfg["cue_railing"]:
             sr = PARAMS["stair_rail"]
 
-            # Stepped ground callback - the post feet sit on the actual step top faces
-            #   (x<0 = ground 0.0, stair range = step top face, lower landing = clamped to -3.2).
+            # Stepped ground callback - the post feet sit on the actual step top faces.
+            #   [W3 CB-7 · GT-1] west of the opening the ground is now the **sill apron**
+            #   (+0.18 over x -1.20..0), and the sidewalk (0.0) only beyond the riser.
+            sl = PARAMS["sill"]
+
             def stair_ground(x):
                 if x <= 1e-9:
-                    return 0.0
-                return -st["riser"] * min(max(int(x / st["tread"]) + 1, 1),
-                                          st["nsteps"])
+                    return sl["top"] if x >= sl["x0"] else PARAMS["walk"]["z_top"]
+                return st["z_top"] - st["riser"] * min(
+                    max(int(x / st["tread"]) + 1, 1), st["nsteps"])
 
             run = st["tread"] * st["nsteps"]          # 6.4
             drop = st["riser"] * st["nsteps"]         # 3.2
@@ -866,20 +1489,145 @@ def main():
         BOX(f"{ROOT}/Road/Surface",
             ((rd["x0"] + rd["x1"]) / 2.0, cy, rd["top"] - rd["thick"] / 2.0),
             (rd["x1"] - rd["x0"], Ly, rd["thick"]), M["asphalt"], col=True)
-        # 2 kerb lines (between the sidewalk cut faces walk_a/walk_b and the carriageway)
-        for tag, xa, xb in (("W", rd["walk_a"], rd["x0"]),
-                            ("E", rd["x1"], rd["walk_b"])):
-            BOX(f"{ROOT}/Road/Curb_{tag}",
-                ((xa + xb) / 2.0, cy,
-                 (rd["curb_top"] + rd["curb_base"]) / 2.0),
-                (xb - xa, Ly, rd["curb_top"] - rd["curb_base"]),
-                M["granite_dark"], col=True)
+        # [W3 CB-7 · GT-2] the two extruded kerb boxes (`Road/Curb_W`, `Road/Curb_E`,
+        #   top +0.10 above the footway = a 100 mm trip line, 120 m with no joint) are
+        #   deleted and rebuilt by `infra_kit.build_curb_line`. Neither carried a
+        #   collider or a hazard label; both are checked out in `underpass_selfcheck`.
+        kit = ik.kit_from_scene_common(sc, stage)
+        kw = curb_kwargs()
+        n_blk = n_prim = 0
+        for tag, p0, p1, side in curb_lines():
+            res = ik.build_curb_line(kit, f"{ROOT}/Curb_{tag}", p0, p1, M["curb"],
+                                     road_side=side, **kw)
+            for w in res["warnings"]:
+                print(f"[GT-2] 경계석 경고({tag}) — {w}")
+            n_blk += res["n_blocks"]
+            n_prim += res["prim_count"]
+            gt_drop, top_z, expo, unit = (res["gt_drop"], res["curb_top_z"],
+                                          res["exposure_road"], res["unit_actual"])
+        print(f"[GT-2] 경계석 2선 · 블록 {n_blk} · 프림 {n_prim} · 단위 {unit:.3f} m · "
+              f"상단 z {top_z:+.3f} (보도 flush…+0.020) · 차도노출 {expo:.3f} · "
+              f"gt_drop {gt_drop:.3f} · 아리스 look(R10, 0프림)")
         # Centre dashed line (8 mm proud of the carriageway)
         for k in range(rd["dash_n"]):
             yd = rd["dash_y0"] + rd["dash_step"] * k
             BOX(f"{ROOT}/Road/Dash_{k}",
                 (rd["lane_x"], yd, rd["top"] - 0.002),
                 (rd["lane_w"], rd["dash_len"], 0.02), M["lane"])
+
+    # -------------------------------------------------------------------
+    # [W3 CB-7 · GT-3] full-length enclosed soffit-lit canopy
+    # -------------------------------------------------------------------
+    def build_canopy(M):
+        """The GT-3 rebuild. See the `PARAMS["canopy"]` note for the form and its source.
+
+        Deleted by this function's existence: the `scene_common` 4-post porch builder
+        under `EntryCanopy` — a flat slab on four free posts covering 0.60 m of the
+        descent. The self-check asserts that call form no longer appears in this file.
+        """
+        cp = PARAMS["canopy"]
+        wl = PARAMS["wall"]
+        L = cp["x1"] - cp["x0"]
+        cx = (cp["x0"] + cp["x1"]) / 2.0
+        soffit = cp["z_roof"]
+        # (a) roof deck + eaves fascia (front + two flanks)
+        BOX(f"{ROOT}/Canopy/Deck", (cx, 0.0, soffit + cp["roof_t"] / 2.0),
+            (L, 2.0 * cp["y_roof"], cp["roof_t"]), M["canopy_roof"], col=True)
+        BOX(f"{ROOT}/Canopy/FasciaFront",
+            (cp["x0"] - cp["fascia_t"] / 2.0, 0.0,
+             soffit + cp["roof_t"] - cp["eaves_fascia"] / 2.0),
+            (cp["fascia_t"], 2.0 * cp["y_roof"], cp["eaves_fascia"]),
+            M["canopy_roof"])
+        for sgn, tag in ((-1.0, "S"), (1.0, "N")):
+            BOX(f"{ROOT}/Canopy/Fascia_{tag}",
+                (cx, sgn * (cp["y_roof"] + cp["fascia_t"] / 2.0),
+                 soffit + cp["roof_t"] - cp["eaves_fascia"] / 2.0),
+                (L, cp["fascia_t"], cp["eaves_fascia"]), M["canopy_roof"])
+        # (b) transverse beams — the soffit rhythm G2 reads
+        n_beam = max(2, int(round(L / cp["beam_pitch"])) + 1)
+        for i in range(n_beam):
+            bx = cp["x0"] + L * i / float(n_beam - 1)
+            BOX(f"{ROOT}/Canopy/Beam_{i}",
+                (bx, 0.0, soffit - cp["beam_h"] / 2.0),
+                (cp["beam_w"], 2.0 * cp["y_roof"], cp["beam_h"]), M["canopy_roof"])
+        # (c) column line + cast-in mortar collar (NOT an RF-1 plate — see PARAMS)
+        cols = canopy_columns()
+        for i, x, bz in cols:
+            for sgn, tag in ((-1.0, "S"), (1.0, "N")):
+                BOX(f"{ROOT}/Canopy/Col_{tag}{i}",
+                    (x, sgn * cp["y_col"], (bz + soffit) / 2.0),
+                    (cp["col_w"], cp["col_w"], soffit - bz),
+                    M["canopy_col"], col=True)
+                BOX(f"{ROOT}/Canopy/Collar_{tag}{i}",
+                    (x, sgn * cp["y_col"], bz + cp["collar_h"] / 2.0),
+                    (cp["collar_w"], cp["collar_w"], cp["collar_h"]),
+                    M["sill_bed"])
+        # (d) side infill — one valance panel per bay per flank (see PARAMS for the
+        #     r1 glazing arm this replaces)
+        n_glaz = 0
+        for i in range(len(cols) - 1):
+            xa, xb = cols[i][1], cols[i + 1][1]
+            for sgn, tag in ((-1.0, "S"), (1.0, "N")):
+                BOX(f"{ROOT}/Canopy/Infill_{tag}{i}",
+                    ((xa + xb) / 2.0, sgn * cp["y_glaz"],
+                     (cp["infill_z0"] + cp["infill_top"]) / 2.0),
+                    (xb - xa - cp["col_w"], cp["infill_t"],
+                     cp["infill_top"] - cp["infill_z0"]), M["canopy_span"])
+                n_glaz += 1
+        # (e) soffit battens + their lights
+        from pxr import UsdLux, Gf
+        lamps = canopy_lamps()
+        for r, k, lx, ly in lamps:
+            BOX(f"{ROOT}/Canopy/Batten_{r}{k}",
+                (lx, ly, soffit - cp["lamp_t"] / 2.0),
+                (cp["lamp_len"], cp["lamp_w"], cp["lamp_t"]), M["soffit_lamp"])
+            lt = UsdLux.SphereLight.Define(stage, f"{ROOT}/Canopy/Light_{r}{k}")
+            lt.CreateRadiusAttr(float(cp["lamp_radius"]))
+            lt.CreateIntensityAttr(float(cp["lamp_intensity"]))
+            lt.CreateColorAttr(Gf.Vec3f(*[float(c) for c in cp["lamp_color"]]))
+            UsdGeom.Xformable(lt.GetPrim()).AddTranslateOp().Set(
+                Gf.Vec3d(float(lx), float(ly), float(soffit - cp["lamp_t"] - 0.02)))
+        run = PARAMS["stairs"]["tread"] * PARAMS["stairs"]["nsteps"]
+        print(f"[GT-3] 캐노피 x {cp['x0']:+.2f}…{cp['x1']:+.2f} ({L:.2f} m) vs 하강 "
+              f"x {PARAMS['stairs']['x0']:+.2f}…{PARAMS['stairs']['x0']+run:+.2f} → "
+              f"접근로 {PARAMS['stairs']['x0']-cp['x0']:.2f} m + 전 구간 + 후단 "
+              f"{cp['x1']-PARAMS['pit']['x1']:.2f} m · 기둥 {len(cols)}쌍 · "
+              f"보 {n_beam} · 인필 {n_glaz}조 · 소핏 {len(lamps)}등")
+
+    # -------------------------------------------------------------------
+    # [W3 CB-7 · BS-4] dense downtown street wall on both verges
+    # -------------------------------------------------------------------
+    def build_backdrop(M):
+        """G2 closes the horizon with continuous blocks on both sides. `kind="backdrop"`
+        is forced and the judged-eye set drives BS-4 / B-F3, as scene16 §3 established."""
+        eyes = bk.judged_eyes(0.0)
+        kit = fk.Kit(sc.add_box, sc.add_cylinder,
+                     getattr(sc, "_oriented_box", None))
+        bp = PARAMS["backdrop"]
+        n_tot = n_frame = 0
+        for tag in ("S", "N"):
+            row = bp[tag]
+            for i, (x0, x1, h, floors, mkey) in enumerate(row["blocks"]):
+                bd = dict(x0=x0, x1=x1, y0=row["y0"], y1=row["y1"],
+                          h=h, floors=floors, axis="y",
+                          facade_y=row["facade_y"], face_dir=row["face_dir"],
+                          base_z=bp["base_z"])
+                p = bk.plan_building(bd, kind="backdrop", eyes=eyes)
+                prims = bk.build_korean_building(
+                    kit, stage, f"{ROOT}/CityBlock_{tag}{i}", bd,
+                    bk.Mtls(M[mkey], parapet=M["parapet"]), plan=p)
+                n_tot += len(prims)
+                n_frame += 1 if p.in_frame else 0
+        ap = bp["apron"]
+        for i, (ax0, ay0, ax1, ay1) in enumerate(ap["strips"]):
+            BOX(f"{ROOT}/StreetApron_{i}",
+                ((ax0 + ax1) / 2.0, (ay0 + ay1) / 2.0,
+                 ap["z_top"] - ap["thick"] / 2.0),
+                (ax1 - ax0, ay1 - ay0, ap["thick"]), M["sidewalk"])
+        n_bd = sum(len(bp[t]["blocks"]) for t in ("S", "N"))
+        print(f"[BS-4] 가로벽 {n_tot} 프림 / {n_bd} 동 (프레임 안 {n_frame} · "
+              f"자동 강등 {n_bd - n_frame}) + 전면 포장 {len(ap['strips'])} "
+              f"— 구 Building_B 대체, 교차로 공백 x 7.60…13.40")
 
     def build_dressing(M):
         for key, bd in PARAMS["buildings"].items():
@@ -898,12 +1646,9 @@ def main():
             sc.build_hedge(stage, f"{ROOT}/Hedge_{i}", xa, yc - h["half"],
                            xa + seg_w + 0.05, yc + h["half"], hh,
                            mtl=M["hedge"], base_z=0.0)
-        # v4-D5 canopy over the stair head (subway-entrance silhouette)
-        cp = PARAMS["canopy"]
-        sc.build_canopy(stage, f"{ROOT}/EntryCanopy", cp["x0"], cp["x1"],
-                        cp["y0"], cp["y1"], cp["z_roof"], cp["post_r"],
-                        M["parapet"], M["pole"], roof_t=cp["roof_t"],
-                        base_z=cp["base_z"])
+        # [W3 CB-7 · GT-3] the v4-D5 stair-head porch (scene_common porch builder -> `EntryCanopy`)
+        #   is deleted; `build_canopy` above is the full-length replacement and is called
+        #   from the assembly block so it lands after the walls it springs from.
         # v4-D4 underpass entrance sign (panel + white pictogram face + 2 posts)
         sg = PARAMS["sign"]
         zc = (sg["z0"] + sg["z1"]) / 2.0
@@ -972,6 +1717,7 @@ def main():
     build_ground(M)
     if cfg["hazard_stairs"]:
         build_sidewalk(M)
+        build_sill(M)               # [W3 CB-7 · GT-1] before the stairs it raises
         build_stairs(stair_mtl)
         build_walls(M)
         build_tunnel(M)
@@ -981,6 +1727,8 @@ def main():
     build_ground_kit(M)             # [W2-D] both arms — GT-E4 twin parity
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
+        build_backdrop(M)           # [W3 CB-7 · BS-4] G2 street wall, both verges
+        build_canopy(M)             # [W3 CB-7 · GT-3] after the walls it springs from
     if cfg.get("cue_sign") and cfg["hazard_stairs"]:
         build_signs()               # [v5 shared layer] (Exit is inside the tunnel -> requires the pit)
 

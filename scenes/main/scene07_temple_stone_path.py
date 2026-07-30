@@ -463,6 +463,34 @@ PARAMS = dict(
               post_r=0.20, post_h=2.4, n_posts=5,
               roof_half_run=5.6, roof_drop=1.6, roof_t=0.30, roof_y=4.2,
               ridge_z=5.20),
+    # =======================================================================
+    # [W3 S3-7] Crest roof cluster — PROCEDURAL, `gate_frame`-tier only
+    # =======================================================================
+    #  Gap **G1** `[ruled 07-31]` §8.R OQ-8: the catalogue has **zero** Korean tile-roofed
+    #  geometry. A keyword sweep returns 172 hits but 162 are `signs_kr` rows matching "korea"
+    #  in `root_key`; the only tile-roofed asset in 291 + 33 rows is `typical_building_18`, a
+    #  generic Western low-rise with no 처마 curve, no 팔작 hip-gable and no rafter row. So the
+    #  cluster stays procedural and the row stays open in the procurement queue.
+    #  **H16 governs the budget**: `gate_frame` is 1 of 14 cuts and is NOT one of the 5 preset
+    #  cuts the baseline round judges, so this is the lowest-value item in the whole rebuild.
+    #  It gets two clone masses, an upturned eave, one dentil row and one red wall fragment —
+    #  and not one minute more. `hall` itself does not move: it is a caster in the v7 shadow
+    #  table and H12 forbids disturbing a working v6/v7 fix for a backdrop.
+    #  `z0` is a **stepped terrace**, not decoration: from `gate_frame`'s eye at
+    #  (7.00, −0.91) the crest sightline over the yard shoulder (x 0, z 0) rises 0.13 m per
+    #  metre going −X, so it stands at z 3.31 at cx −25.5 and z 4.42 at cx −34. A flat-ground
+    #  0.85x / 0.70x clone (ridge 4.42 / 3.64) would be **behind the crest and invisible**.
+    #  A Korean 산사 does exactly this — the upper courts step up the hillside on 축대 — so
+    #  each clone gets a terrace and the clearance is asserted in SMOKE, not assumed.
+    roof_cluster=[dict(name="Mid", cx=-25.5, cy=11.5, s=0.85, z0=1.20),
+                  dict(name="Far", cx=-34.0, cy=-2.5, s=0.70, z0=2.70)],
+    #  처마 곡선 is a curve; a two-segment approximation is the cheapest read that is not a
+    #  flat plane. `[assumed]` — spec §4.1-4.
+    eave=dict(run=0.80, lift=0.35, dentil_n=22, dentil=(0.10, 0.16, 0.22),
+              red=(0.55, 0.14, 0.11)),
+    #  E7-10: one slender dark timber pole, ~0.15 m diameter, left of the stair, no crossarm.
+    #  One prim; no asset can beat that on cost (spec §3.2). CC0 pier-pole maps.
+    pole=dict(cx=-2.0, cy=2.60, r=0.055, h=4.5),
     # --- pines (build_tree) : slope·yard·terrace (name, cx, cy, zone, trunk_h) ---
     pines=[("N0", 2.5, 4.6, "north", 3.0), ("N1", 7.4, 6.2, "north", 3.4),
            ("N2", 11.6, 4.2, "north", 2.8), ("N3", -6.0, 6.5, "flat", 3.2),
@@ -535,6 +563,9 @@ PARAMS = dict(
         # [W3 S3-6 · GT-17] summer forest floor + the first moss tint in this scene.
         forest_tint=(0.70, 0.71, 0.62),
         moss_tint=(0.86, 1.00, 0.84),
+        # [W3 S3-7] 기와 tone. Dark grey-blue, kept under the sRGB dark-colour floor the
+        #   v6 ruling set for roofs (the old flat constant was 0.045/0.030/0.018).
+        tile_tint=(0.62, 0.64, 0.68),
         stone_moss_tint=(0.86, 0.95, 0.82),   # (old stepping-stone moss tone - unused in v6)
         leaf_tint=(0.95, 0.90, 0.82),
         gravel_tint=(0.84, 0.81, 0.76),       # [v6] eases the yard's high-reflectance beige
@@ -1470,6 +1501,41 @@ def _smoke_report():
         print(f"      {nm:<14} cx {cx:+7.2f} r {r:4.2f} n {mask_n(cx):3d} "
               f"{'근경' if mask_n(cx) == lb['n_near'] else '원경'}")
 
+    # ── [S3-7] crest roof cluster — sightline, computed, not eyeballed ──
+    #    §4.1-4: "the roofs must be visible over the crest from `gate_frame`'s eye … compute
+    #    it in SMOKE, do not eyeball it". G7's own perspective (roof top surfaces seen from a
+    #    camera below the crest) is not self-consistent; what IS buildable is a numeric
+    #    clearance above the crest sightline, so that is what is asserted.
+    hl = P["hall"]
+    ep = P["eave"]
+    v_gf = build_views()["gate_frame"]
+    ex, _ey, ez = (float(v) for v in v_gf["eye"])
+    crest_x, crest_z = 0.0, 0.0            # the yard shoulder is the crest for this cut
+    print("\n  [S3-7 지붕군] gate_frame 시선 위 여유 (눈 "
+          f"({ex:.2f}, {ez:.2f}) → 마루 x{crest_x:.1f} z{crest_z:.2f})")
+    ok_sl = True
+    for nm, cx, s, z0 in ([("Hall", hl["cx"], 1.0, 0.0)]
+                          + [(r["name"], r["cx"], float(r["s"]),
+                              float(r["z0"])) for r in P["roof_cluster"]]):
+        ridge = z0 + hl["ridge_z"] * s
+        # the crest sightline extended to this roof's x
+        t = (cx - ex) / (crest_x - ex) if abs(crest_x - ex) > 1e-9 else 1.0
+        z_line = ez + (crest_z - ez) * t
+        clr = ridge - z_line
+        ok_sl = ok_sl and clr > 0.0
+        print(f"    {nm:<5} cx {cx:+7.2f} 용마루 z {ridge:5.2f} vs 시선 z "
+              f"{z_line:5.2f} → 여유 {clr:+.2f} m "
+              f"{'OK' if clr > 0.0 else 'FAIL(마루에 가림)'}")
+    eave_z = hl["ridge_z"] - hl["roof_drop"] + float(ep["lift"])
+    print(f"    처마: 직선 평면 대비 끝단 +{ep['lift']:.2f} m / 마지막 "
+          f"{ep['run']:.2f} m (x 연장 없음 = 새 그림자 없음) · 끝단 z "
+          f"{eave_z:.2f} · 서까래 {ep['dentil_n']}개(근경 지붕 +X 처마 한정) · "
+          f"단청 벽편 1 · 목주 Ø{P['pole']['r']*2*1000:.0f} mm × "
+          f"{P['pole']['h']:.1f} m @ ({P['pole']['cx']:+.1f}, "
+          f"{P['pole']['cy']:+.1f}) → {'OK' if ok_sl else 'CHECK'}")
+    print("    ※ H16: gate_frame 은 판정 프레임이 아니다(프리셋 5컷에 없음). "
+          "이 절은 기록용이며 계단 충실도와 교환하지 않는다.")
+
     # ── [v6] sun bearing -> per-face direct-light lambert check ──
     az = 33.5 + float(P["SUN_AZ_OFFSET"])
     el = math.radians(float(P["light"]["noon_sun_elev"]))
@@ -1758,6 +1824,31 @@ def main():
         #   i.e. OpenGL green, while every other map in this registry is DX. The K4 note gives
         #   the consumer two choices — flip green or drop `nor` — and dropping it is the one
         #   that cannot silently invert the lighting on a judged surface.
+        # [W3 S3-7] Crest-cluster tile roof. The **geometry** stays procedural (gap G1) — this
+        #   only replaces the flat `roof_color` constant with the real 기와 map from the
+        #   shared texture pool. T2, local use only, never redistributed.
+        _shared = os.path.join(sc.ASSETS_DIR, "urban", "nv_content",
+                               "common_assets", "shared_textures")
+        _tile_a = os.path.join(_shared, "tile_roof_01_a.png")
+        _tile_n = os.path.join(_shared, "tile_roof_01_n.png")
+        if os.path.isfile(_tile_a):
+            M["tile"] = sc.make_pbr(stage, "/World/Looks/TileRoof", _tile_a,
+                                    _tile_n if os.path.isfile(_tile_n) else None,
+                                    None, 1.6, tint=mp["tile_tint"],
+                                    roughness_const=0.86, specular_level=0.0)
+        else:
+            M["tile"] = M["roof"]
+        # 단청 red wall fragment + the E7-10 timber pole (CC0 pier-pole maps).
+        M["red"] = sc.make_pbr(stage, "/World/Looks/DancheongRed",
+                               diffuse_color=PARAMS["eave"]["red"],
+                               roughness_const=0.82, specular_level=0.0)
+        _pier = os.path.join(sc.ASSETS_DIR, "urban_cc0", "modular_wooden_pier",
+                             "textures")
+        _pd = os.path.join(_pier, "modular_wooden_pier_poles_diff_1k.png")
+        _pr = os.path.join(_pier, "modular_wooden_pier_poles_rough_1k.png")
+        M["pole"] = (sc.make_pbr(stage, "/World/Looks/Pole", _pd, None, _pr,
+                                 1.1, tint=(0.72, 0.68, 0.62))
+                     if os.path.isfile(_pd) else M["wood"])
         M["moss"] = sc.make_pbr(stage, "/World/Looks/Moss",
                                 sc.tex_path("moss", "diff"), None,
                                 sc.tex_path("moss", "rough"),
@@ -2161,14 +2252,39 @@ def main():
     # gable roof : 2 build_slope slabs (each falling +-X from the ridge)
     # -------------------------------------------------------------------
     def gable_roof(prefix, x_ridge, z_ridge, half_run, drop, y0, y1, thick,
-                   mtl):
+                   mtl, upturn=False):
         """From the ridge (x_ridge, z_ridge), **fall** by drop on each side along ±X.
         build_slope only descends toward +X, so the −X half is given a start point at the eave
-        (x_ridge−half_run, z_ridge−drop) with drop=−drop (a rise)."""
-        sc.build_slope(stage, f"{prefix}/RoofP", x_ridge, z_ridge, half_run,
-                       drop, y0, y1, thick, mtl, margin=0.10, collider=False)
-        sc.build_slope(stage, f"{prefix}/RoofN", x_ridge - half_run,
-                       z_ridge - drop, half_run, -drop, y0, y1, thick, mtl,
+        (x_ridge−half_run, z_ridge−drop) with drop=−drop (a rise).
+
+        [W3 S3-7] `upturn=True` splits each half into a main plane plus a shallower **처마**
+        segment over the last `eave.run` metres, so the eave tip finishes `eave.lift` higher
+        than a straight plane would put it. The x extent of the roof is unchanged — the lift
+        comes out of the drop, not out of an added overhang, so nothing new casts a shadow.
+        """
+        ep = PARAMS["eave"]
+        run2 = float(ep["run"]) if upturn else 0.0
+        if not upturn or half_run <= run2 * 1.5:
+            sc.build_slope(stage, f"{prefix}/RoofP", x_ridge, z_ridge,
+                           half_run, drop, y0, y1, thick, mtl, margin=0.10,
+                           collider=False)
+            sc.build_slope(stage, f"{prefix}/RoofN", x_ridge - half_run,
+                           z_ridge - drop, half_run, -drop, y0, y1, thick,
+                           mtl, margin=0.10, collider=False)
+            return
+        run1 = half_run - run2
+        d1 = drop * run1 / half_run
+        d2 = drop * run2 / half_run - float(ep["lift"])
+        sc.build_slope(stage, f"{prefix}/RoofP", x_ridge, z_ridge, run1, d1,
+                       y0, y1, thick, mtl, margin=0.10, collider=False)
+        sc.build_slope(stage, f"{prefix}/RoofPE", x_ridge + run1, z_ridge - d1,
+                       run2, d2, y0, y1, thick, mtl, margin=0.10,
+                       collider=False)
+        sc.build_slope(stage, f"{prefix}/RoofN", x_ridge - run1,
+                       z_ridge - d1, run1, -d1, y0, y1, thick, mtl,
+                       margin=0.10, collider=False)
+        sc.build_slope(stage, f"{prefix}/RoofNE", x_ridge - half_run,
+                       z_ridge - d1 - d2, run2, -d2, y0, y1, thick, mtl,
                        margin=0.10, collider=False)
 
     # -------------------------------------------------------------------
@@ -2269,7 +2385,62 @@ def main():
         gable_roof(f"{ROOT}/Hall", hl["cx"], hl["ridge_z"],
                    hl["roof_half_run"], hl["roof_drop"],
                    hl["cy"] - hl["roof_y"], hl["cy"] + hl["roof_y"],
-                   hl["roof_t"], M["roof"])
+                   hl["roof_t"], M["tile"], upturn=True)
+        # [S3-7] rafter-end dentil row under the **+X** eave only — that is the face
+        #   `gate_frame` looks at (eye x 7.0 -> target x −5.6), and G7 shows the dentils on
+        #   the nearest roof only. 22 boxes, one row, no second tier.
+        ep = PARAMS["eave"]
+        dw, dd, dh = (float(v) for v in ep["dentil"])
+        ex = hl["cx"] + hl["roof_half_run"]
+        ez = hl["ridge_z"] - hl["roof_drop"] + float(ep["lift"])
+        n_d = int(ep["dentil_n"])
+        for j in range(n_d):
+            dy = hl["cy"] - hl["roof_y"] * 0.92 \
+                + 2.0 * hl["roof_y"] * 0.92 * (j + 0.5) / n_d
+            BOX(f"{ROOT}/Hall/Dentil_{j}", (ex - dd / 2.0, dy, ez - dh * 0.75),
+                (dd, dw, dh), M["wood"])
+
+    def build_roof_cluster(M):
+        """[S3-7] Two further roof masses at staggered depth (§4.1-4), plus the 단청-red wall
+        fragment under the mid roof's eave. `gate_frame`-tier only — see the PARAMS note."""
+        hl = PARAMS["hall"]
+        ep = PARAMS["eave"]
+        for r in PARAMS["roof_cluster"]:
+            s = float(r["s"])
+            z0 = float(r["z0"])
+            pre = f"{ROOT}/Roof{r['name']}"
+            BOX(f"{pre}/Terrace", (r["cx"], r["cy"], (z0 - 0.4) / 2.0),
+                ((hl["sx"] + 3.4) * s, (hl["sy"] + 3.4) * s, z0 + 0.4),
+                M["rock"])
+            BOX(f"{pre}/Base",
+                (r["cx"], r["cy"], z0 + hl["base_h"] * s / 2.0),
+                ((hl["sx"] + 1.2) * s, (hl["sy"] + 1.2) * s,
+                 hl["base_h"] * s), M["rock"])
+            BOX(f"{pre}/Body",
+                (r["cx"], r["cy"],
+                 z0 + hl["base_h"] * s + hl["post_h"] * s / 2.0),
+                ((hl["sx"] - 1.0) * s, (hl["sy"] - 1.2) * s,
+                 hl["post_h"] * s), M["wood"])
+            gable_roof(pre, r["cx"], z0 + hl["ridge_z"] * s,
+                       hl["roof_half_run"] * s, hl["roof_drop"] * s,
+                       r["cy"] - hl["roof_y"] * s, r["cy"] + hl["roof_y"] * s,
+                       hl["roof_t"] * s, M["tile"], upturn=True)
+        rm = PARAMS["roof_cluster"][0]
+        s0 = float(rm["s"])
+        BOX(f"{ROOT}/RoofMid/RedWall",
+            (rm["cx"] + hl["roof_half_run"] * s0 * 0.55, rm["cy"],
+             float(rm["z0"]) + hl["base_h"] * s0 + hl["post_h"] * s0 * 0.45),
+            (0.30, hl["sy"] * s0 * 0.80, hl["post_h"] * s0 * 0.72),
+            M["red"])
+        # E7-10 wooden pole — one cylinder, CC0 pier-pole maps, no crossarm.
+        pp = PARAMS["pole"]
+        CYL(f"{ROOT}/Pole", (pp["cx"], pp["cy"],
+                             _zone_z(pp["cx"], pp["cy"], "flat")
+                             + pp["h"] / 2.0),
+            pp["r"], pp["h"], M["pole"], col=True)
+        print(f"[S3-7] 지붕군 {1 + len(PARAMS['roof_cluster'])}동(처마 들림 "
+              f"{ep['lift']:.2f} m / {ep['run']:.2f} m) · 서까래 "
+              f"{ep['dentil_n']} · 단청 벽편 1 · 목주 1 — gate_frame 전용")
 
     def build_nature(M):
         tr = PARAMS["tree"]
@@ -2404,6 +2575,7 @@ def main():
         build_gate(M)
         build_lanterns(M)
         build_hall(M)
+        build_roof_cluster(M)
         build_nature(M)
     if cfg["cue_sign"] and cfg["hazard_stairs"]:
         build_sign(M)

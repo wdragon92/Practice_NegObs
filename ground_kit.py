@@ -96,6 +96,7 @@ __all__ = [
     # Layer 1
     "GROUND_DIMENSIONS", "GROUND_PROFILES", "TACTILE_SITES", "EXPECTED_FP",
     "GROUND_INVARIANTS", "SCENE_PLANS", "SCATTER_POOLS", "DECAL_Z_ORDER",
+    "SURFACE_KINDS",
     "GROUND_PROUD_MIN", "GROUND_PROUD_FLOOR", "GT_DELTA", "EDGE_STANDOFF",
     "EDGE_K", "GRAZE_ROW_SEP", "GRAZE_ROW_SEP_WORK", "GRAZE_ROW_SEP_1080",
     "GRAZE_FOOTPRINT_WORK", "GRAZE_FOOTPRINT_1080", "GRAZE_WORK_H",
@@ -111,6 +112,7 @@ __all__ = [
     "build_groove_band", "build_membrane", "build_stain_field",
     "build_footprints", "build_wear_lane", "build_edge_litter",
     "build_edge_break", "build_deck_planks", "build_silt_band",
+    "build_relaid_units",
 ]
 
 
@@ -155,6 +157,14 @@ DECAL_Z_ORDER = {
     "wear_lane":   3,          # trodden band along the walking line
     "footprint":   4,          # trace pressed into the trodden band
     "stain":       5,          # discrete soiling decals, + DECAL_Z_SUB per kind
+    # [W3 GT-24] `relaid` - a group of **re-laid paving units** (the unit-paved repair
+    #   vocabulary that replaces the asphalt cut patch). It lands on top of the ladder for
+    #   two reasons that agree: physically it is the newest intervention on the surface
+    #   (the units are lifted and re-bedded *after* the soiling and wear were there, and
+    #   re-bedded units sit fractionally proud of the settled field around them), and the
+    #   ladder is **append-only** - every existing family's z is baked into 33 committed
+    #   scene hashes, so inserting a rank would move every decal in the library.
+    "relaid":      6,
 }
 
 
@@ -250,6 +260,12 @@ GROUND_DIMENSIONS = {
     "patch_area_mean":      (0.63, "통계", "건당 0.61~0.69 ㎡ 표본 중앙"),
     "patch_proud":          (0.002, "실측", "sceneN2 PARAMS 계승"),
     "patch_cutline_proud":  (0.0012, "실측", "동"),
+    # -- Re-laid paving units (GT-24 unit-paved repair vocabulary) --------
+    #    Sized in **units, not in m²**: a re-laid group is "n×m flags", so the nominal
+    #    area is only the seed the module snap quantises. 4 units is the sample habit
+    #    (판석 600 → 2×2 = 1.44 ㎡, 보도블록 300 → 4×4 of the 300 grid at the same seed).
+    "relaid_area_mean":     (1.44, "추정", "판석 600 2×2 = 1.44 ㎡ — 모듈 스냅 시드 [추정]"),
+    "relaid_albedo":        (0.24, "추정", "재부설 유닛 색조차 — 포장면과 패치 0.22 사이 [추정]"),
     "crack_w":              (0.012, "통계", "사진표본 3~15 mm 중앙"),
     "crack_recess":         (-0.006, "통계", "동 음각 3~10 mm 중앙"),
     "crack_seg":            (0.60, "추정", "폴리라인 세그 길이 [추정]"),
@@ -600,7 +616,7 @@ MODULE_SNAP_MAX_CELL = 1.00    # [m] above this a "unit_cell" is not a paver —
 
 
 def _snap_module(w, h, cx, cy, cell, origin_xy, lo, hi):
-    """**DEC-3 module snap.** Quantise a repair patch onto the paving module.
+    """**DEC-3 module snap.** Quantise a repair rectangle onto the paving module.
 
     A real 절삭/덧씌우기 repair in flagstone paving lifts and relays **whole or half flags**
     - the saw runs in the joint - so both the size and the position are multiples of half
@@ -611,9 +627,15 @@ def _snap_module(w, h, cx, cy, cell, origin_xy, lo, hi):
     `alley_concrete` **3.0 m** is a 시공줄눈 contraction-joint bay, and `deck_timber` /
     `deck_trail_hybrid` **0.145 m** is a plank width. Snapping a 0.65 m2 repair
     `[statistic]` onto a 3 m bay would inflate it to 9 m2 and destroy the very statistic
-    DEC-3 is written to preserve. Of the five patch-carrying profiles that declare a cell,
-    four snap - `plaza_granite` 0.6 · `plaza_water` 0.6 · `sidewalk_block` 0.3 ·
-    `levee_paved` 0.2 - and `alley_concrete` is excluded by this rule.
+    DEC-3 is written to preserve.
+
+    **Two callers, and after GT-24 they no longer overlap.**
+    `build_patch_field` (asphalt cut patch) is now carried only by profiles with no paver
+    module at all - `street_asphalt` · `ramp_road` · `ramp_parking` · `roof_membrane` ·
+    `verge_rural` - plus `alley_concrete` (3.0 m bay, excluded by the rule above) and
+    `levee_paved` (0.200 interlocking, the one patch caller that still snaps).
+    `build_relaid_units` (re-laid unit group) is the **unit-paved** vocabulary and
+    *requires* a snapping module, so it is the caller this function was really written for.
 
     `lo`/`hi` are the region bounds the snapped rectangle must stay inside; when the
     module does not fit the region the un-snapped value is kept on that axis rather than a
@@ -1006,6 +1028,78 @@ def build_patch_field(kit, path, region, z, mtls, n=2, area_mean=None,
                                              sw, sh, 0.020),
                                    proud=cpr, mtl_key="patch_cut",
                                    albedo=0.14))
+    return dict(prim_count=kit.count_since(n0), elems=elems)
+
+
+def build_relaid_units(kit, path, region, z, mtls, n=0, area_mean=None,
+                       ar=(0.8, 1.5), seed=0, sites=None, yaw_deg=0.0,
+                       module=None, module_origin=(0.0, 0.0)):
+    """**Re-laid paving units** - the unit-paved repair vocabulary `[W3 GT-24, prepared]`.
+
+    A rectangle of paving whose units were **lifted and re-bedded**: same module, same
+    joint pattern, a slightly different tone (new or re-sorted units, fresh bedding sand,
+    no weathering yet). It is the object a 판석 광장 or a 보도블록 보도 actually shows
+    after a repair - the thing GT-24 removed the asphalt cut patch in favour of.
+
+    **What makes it not a patch**, in code and not only in prose:
+      * `module` is **required**. Without a paver module a "re-laid unit" is meaningless,
+        so this builder raises instead of silently degrading into a floating lozenge -
+        that is the guard that stops the vocabulary drifting back into asphalt.
+      * The rectangle is snapped to whole/half flags by `_snap_module` (**DEC-3**) - the
+        boundary of the group *is* a joint line, which is why it reads as replaced units
+        rather than as a saw cut.
+      * **No cut line.** The four 20 mm perimeter strokes of `build_patch_field` are a saw
+        lip; there is no saw here. The read is carried by material tone (T1), not by a
+        drawn outline - the exact defect `tonglam_v2.md` §2.13-2 caught on 10 / D3 / 03.
+      * Relief is one rung of the R3 decal ladder (`decal_proud("relaid")` = **1.8 mm**),
+        not the patch's 2.0 mm 절삭 lip - a re-bedded flag stands marginally proud of the
+        settled field, it is not an overlay.
+
+    Prims: **1 per group**. GT: +1.8 mm - not a drop (an order under `GT_DELTA`).
+
+    **Prepared only.** `n` defaults to **0** and no profile and no scene declares a
+    `("relaid", n)` row at this commit, so the library builds zero of these. The
+    vocabulary is registered - `SURFACE_KINDS`, `DECAL_Z_ORDER`, `GROUND_DIMENSIONS`,
+    the `plan_ground` dispatch and this builder - so a later scene opts in with a profile
+    row and a `relaid` material key, and nothing else.
+    """
+    x0, y0, x1, y1 = _norm_region(region)
+    n = int(n)
+    if n <= 0:
+        return dict(prim_count=0, elems=[])
+    cell = None if module is None else float(module)
+    if not cell or cell <= 0 or cell > MODULE_SNAP_MAX_CELL:
+        raise ValueError(
+            f"ground_kit: build_relaid_units 는 포장 모듈이 필요하다 "
+            f"(module={module!r}). 재부설 '유닛'은 단위포장에서만 성립한다 — "
+            f"무모듈 프로파일의 보수는 `build_patch_field`(절삭 패치)다.")
+    area_mean = _dim("relaid_area_mean") if area_mean is None else float(area_mean)
+    pr = decal_proud("relaid")          # R3 - decal z ladder
+    alb = _dim("relaid_albedo")
+    rng = det_rng("gkit.relaid", _seed_key(path), seed)
+    n0 = kit.mark()
+    elems = []
+    yaw = float(yaw_deg)
+    mtl = mtls.get("relaid") if isinstance(mtls, dict) else mtls
+    for i in range(n):
+        a = area_mean * (0.85 + 0.30 * rng.random())
+        r = ar[0] + (ar[1] - ar[0]) * rng.random()
+        w = math.sqrt(a * r)
+        h = a / w
+        if sites and i < len(sites):
+            cx, cy = float(sites[i][0]), float(sites[i][1])
+        else:
+            cx = x0 + w / 2.0 + rng.random() * max(1e-6, (x1 - x0) - w)
+            cy = y0 + h / 2.0 + rng.random() * max(1e-6, (y1 - y0) - h)
+        w, h, cx, cy = _snap_module(w, h, cx, cy, cell, module_origin,
+                                    (x0, y0), (x1, y1))
+        p = f"{path}/Relaid_{i}"
+        kit.B(p, (cx, cy, z + pr - 0.015), (w, h, 0.030), mtl, rotz=yaw)
+        elems.append(_elem("relaid", p,
+                           (_box_aabb(cx, cy, z + pr - 0.015, w, h, 0.030)
+                            if abs(yaw) < 1e-9 else
+                            _obb_aabb(cx, cy, z + pr - 0.015, w, h, 0.030, yaw)),
+                           proud=pr, mtl_key="relaid", area=True, albedo=alb))
     return dict(prim_count=kit.count_since(n0), elems=elems)
 
 
@@ -1713,6 +1807,15 @@ def _ik_ramp_curb(kit, path, profile, y_neg, y_pos, mtl, height=0.12,
 _URBAN_INFRA_KEYS = ("manhole", "gully", "gutter_L", "gutter_U", "marking",
                      "trench")
 
+# The closed vocabulary of `profile["surface"]` rows `[W3 GT-24]`.
+#   Before this registry existed an unknown row name fell through the `plan_ground`
+#   dispatch chain **silently** - a typo, or a scene opting into a vocabulary the kit does
+#   not have yet, produced zero elements and zero complaint. `plan_ground` now raises.
+#   `relaid` is registered here and built by `build_relaid_units`, but **no profile and no
+#   scene declares it at this commit** (count 0 everywhere - GT-24 prepares the vocabulary,
+#   it does not opt anything in).
+SURFACE_KINDS = ("patch", "relaid", "crack", "stain", "weed")
+
 # What `overrides[key] = None` clears a profile key **to** (§F2 explicit-clear semantic).
 # Keys absent from the table clear to `None`.
 _OVERRIDE_EMPTY = {"pave": dict, "infra": dict, "surface": tuple,
@@ -1744,7 +1847,13 @@ GROUND_PROFILES = {
         #   Both are profile-level and therefore library-wide: 01 · 05 · 14 · 18 · 20 · 21 ·
         #   C1 · N1 · N3. That is the intended blast radius - the spec names the profile,
         #   not the scene - and it is one of the reasons CB-2 re-baselines `regr_*`.
-        surface=(("patch", 1), ("crack", 4), ("stain", ("dirt", "water"))),
+        # [W3 GT-24 `[declared 07-31]`] **`("patch", 1)` deleted.** DEC-3's 2 -> 1 above is
+        #   superseded on the vocabulary, not on the count: a saw-cut, milled and re-laid
+        #   rectangle is an *asphalt* repair. On 판석 600 unit paving the real repair lifts
+        #   and relays **whole flags**, so the cut patch reads as the "이상한 사각형 무늬"
+        #   the user named. The re-laid-unit vocabulary that replaces it is `"relaid"`
+        #   (registered below, count 0 everywhere - nothing opts in yet).
+        surface=(("crack", 4), ("stain", ("dirt", "water"))),
     ),
     # ── P2 ────────────────────────────────────────────────────────────────
     "plaza_water": _P(
@@ -1752,7 +1861,8 @@ GROUND_PROFILES = {
         natural=True,
         pave=dict(module=(0.600, 0.600), joint="slab",
                   step_x=_dim("step_expansion_ghat"), step_y=None),
-        surface=(("patch", 2), ("crack", 4), ("stain", ("water",))),
+        # [W3 GT-24] `("patch", 2)` deleted - same argument as P1 (판석 600 가트 계단광장).
+        surface=(("crack", 4), ("stain", ("water",))),
         extras=(("silt_band", dict(n=2)), ("edge_break", dict(density=10.0)),),
     ),
     # ── P3 ────────────────────────────────────────────────────────────────
@@ -1761,8 +1871,11 @@ GROUND_PROFILES = {
         pave=dict(module=(0.300, 0.300), joint="interlock",
                   step_x=3.0, step_y=None),
         infra=dict(manhole=1, gully=2, gutter_L=1),
-        surface=(("patch", 2), ("crack", 4), ("stain", ("dirt", "gum")),
-                 ("weed", 8)),
+        # [W3 GT-24] `("patch", 2)` deleted - 보도블록 300 그리드 위의 절삭 패치는
+        #   아스팔트 어휘다. Note the profile-row deletion does **not** reach the two
+        #   scenes that author their own `surface` row (08 `("patch", 3)`,
+        #   16 `("patch", 1)`) - those are scene-side and out of GT-24's scope.
+        surface=(("crack", 4), ("stain", ("dirt", "gum")), ("weed", 8)),
     ),
     # ── P4 ────────────────────────────────────────────────────────────────
     "street_asphalt": _P(
@@ -1998,7 +2111,15 @@ TACTILE_OFF_REASON = {
     "scene20": "정체성 충돌 — 은닉 착시", "scene21": "정체성 충돌 — 은닉 착시",
     "sceneN3": "정체성 충돌 — 은닉 착시",
     "scene15": "p≈0.05 — 노후 골목 표본 0/12",
-    "scene18": "파형 비정형 — 300 그리드 부설 미관행",
+    # [W3 GT-24 / S18 blocker 3] The old reason read "파형 비정형 — 300 그리드 부설
+    #   미관행". **That reason died with the wave**: `a443d5a` replaced the mural wave
+    #   stair with a 해운대형 백사장 진입 계단 on a flat granite promenade (GT-26), so
+    #   "irregular wave-form" describes nothing in the scene. The site stays unregistered
+    #   for a different and still-true reason, stated here instead
+    #   (`w3_s18_v1.md` §9 · `scene18_wavy_artstair.py:1319`).
+    "scene18": "육지측 유도 띠는 선형(유도)인데 라이브러리 촉감 텍스처가 점형뿐 — "
+               "킷 등재 시 120 m 법정 경고면이 되므로 씬측 시공(폭 0.300, 낙차연 "
+               "12.20 m 이격). 계단머리 점형은 은닉축 토글 cue_tactile 소관",
     "scene19": "민간 옥상 — 편의증진법 대상시설 아님",
     "sceneD1": "비대상(산업 야드). 미설치 사유를 코드에 명시한 모범 사례",
     "sceneD2": "비대상(공사장)", "sceneD3": "비대상(농촌 도로변)",
@@ -3014,6 +3135,12 @@ def _compose_ops(profile, prof, ctx, tactile_sites, sites, extras_args):
     # -- Surface prescriptions -------------------------------------------
     for item in prof["surface"]:
         what = item[0]
+        if what not in SURFACE_KINDS:
+            raise ValueError(
+                f"ground_kit: surface 어휘 '{what}' 미등재 "
+                f"({profile}/{ctx.get('scene')}). 등재된 어휘: {SURFACE_KINDS}. "
+                "새 어휘는 SURFACE_KINDS·빌더·(데칼이면) DECAL_Z_ORDER 를 "
+                "먼저 등재하라 — 조용히 0개로 떨어지던 경로는 막혔다.")
         if what == "patch":
             # * The material dict **must** be passed as the kw `mtls=`. Passed positionally it
             #   does not match the `apply_ground` substitution rules (@string / kw mtl* / kw mtls)
@@ -3033,6 +3160,21 @@ def _compose_ops(profile, prof, ctx, tactile_sites, sites, extras_args):
                                              patch_cut="patch_cut"),
                                    n=item[1], seed=seed,
                                    sites=sites.get("patch"),
+                                   yaw_deg=float(uc[3] if len(uc) > 3 else 0.0),
+                                   module=(pv.get("module") or (None,))[0],
+                                   module_origin=(ox, oy))))
+        elif what == "relaid":
+            # [W3 GT-24] The unit-paved counterpart of `patch`. Same substitution
+            #   contract (`mtls=` as a kw - see the note above), same DEC-3 module
+            #   source (`pave["module"]` **after** overrides). Unlike `patch` it has no
+            #   cut-line material: a re-laid group has no saw lip.
+            #   **Unreachable at this commit** - no profile carries a `("relaid", n)`
+            #   row, so this branch is prepared vocabulary, not live geometry.
+            ops.append(_op("relaid", build_relaid_units, "Relaid",
+                           args=((sx0, sy0, sx1, sy1), z),
+                           kw=dict(mtls=dict(relaid="relaid"),
+                                   n=item[1], seed=seed,
+                                   sites=sites.get("relaid"),
                                    yaw_deg=float(uc[3] if len(uc) > 3 else 0.0),
                                    module=(pv.get("module") or (None,))[0],
                                    module_origin=(ox, oy))))
@@ -3650,6 +3792,26 @@ def _selfcheck():
         (max(_lad) - min(_lad)) <= 0.0020 + 1e-12
         and max(_lad) <= GT_DELTA / 8.0,
         f"폭 {(max(_lad) - min(_lad)) * 1000:.1f} mm · 최대 {max(_lad) * 1000:.1f} mm")
+    # -- (W3 GT-24) surface vocabulary registry ---------------------------
+    _srows = {(k, it[0]) for k, p in GROUND_PROFILES.items()
+              for it in p["surface"]}
+    chk("surface 어휘 전부 SURFACE_KINDS 등재 (조용한 0개 낙하 차단)",
+        all(w in SURFACE_KINDS for _k, w in _srows),
+        f"{sorted({w for _k, w in _srows})} ⊆ {list(SURFACE_KINDS)}")
+    _gt24 = ("plaza_granite", "plaza_water", "sidewalk_block")
+    chk("GT-24 단위포장 3종 patch 행 0 (절삭 패치는 아스팔트 어휘)",
+        not [k for k in _gt24 if ("patch" in {i[0] for i in
+                                              GROUND_PROFILES[k]["surface"]})],
+        " · ".join(f"{k}:{[i[0] for i in GROUND_PROFILES[k]['surface']]}"
+                   for k in _gt24))
+    # `relaid` is **prepared**, not opted in. If a profile ever declares it this check
+    # fails on purpose - the report sentence "count 0 everywhere" would have gone stale
+    # and the opting-in lane must re-state it (append-before-land, in code).
+    chk("relaid 준비 어휘 — 프로파일 선언 0건 (씬 옵트인 없음)",
+        "relaid" in SURFACE_KINDS and "relaid" in DECAL_Z_ORDER
+        and not [k for _k, w in _srows if w == "relaid" for k in (_k,)],
+        f"선언 {[k for k, w in _srows if w == 'relaid']} · "
+        f"양각 {decal_proud('relaid') * 1000:.1f} mm")
     # (v1.3, D-5) Every scatter kind a profile prescribes must have a pool, or the
     # prescription silently renders as the callback default (= fallen leaves).
     _kinds = {p["scatter"]["kind"] for p in GROUND_PROFILES.values()
@@ -3740,6 +3902,50 @@ def _selfcheck():
         and not ({e["kind"] for e in _p_clear["elements"]}
                  & {"manhole", "gully", "gutter_l"}),
         f"소거 {_p_clear['prims']} 프림 = 명시0 {_p_zero['prims']} 프림")
+    # -- (W3 GT-24) the prepared `relaid` vocabulary, exercised on dry_kit -----
+    _rl = build_relaid_units(dry_kit(), "/T/GKit/Relaid", (-6.0, -3.0, 0.0, 3.0),
+                             0.0, dict(relaid="relaid"), n=3, module=0.600,
+                             module_origin=(0.0, 0.0), seed=24)
+    _q = 0.600 / 2.0
+    _snapped = all(
+        abs(round((e["aabb"][3] - e["aabb"][0]) / _q)
+            - (e["aabb"][3] - e["aabb"][0]) / _q) < 1e-6
+        and abs(round((e["aabb"][4] - e["aabb"][1]) / _q)
+                - (e["aabb"][4] - e["aabb"][1]) / _q) < 1e-6
+        and abs(round((e["aabb"][0] - 0.0) / _q)
+                - (e["aabb"][0] - 0.0) / _q) < 1e-6
+        for e in _rl["elems"])
+    chk("relaid 3개 = 3 프림 · 컷라인 0 (톱자국 없음)",
+        _rl["prim_count"] == 3 and len(_rl["elems"]) == 3
+        and all(e["kind"] == "relaid" for e in _rl["elems"]),
+        f"{_rl['prim_count']} 프림 / {len(_rl['elems'])} 요소")
+    chk("relaid 모듈 스냅 — 크기·저변이 반쪽 플래그(0.300) 배수 (DEC-3)",
+        _snapped,
+        " · ".join(f"{e['aabb'][3] - e['aabb'][0]:.3f}×"
+                   f"{e['aabb'][4] - e['aabb'][1]:.3f}" for e in _rl["elems"]))
+    chk("relaid 양각 = 데칼 사다리 6번 = 1.8 mm < 패치 2.0 mm < GT_DELTA",
+        abs(_rl["elems"][0]["proud"] - decal_proud("relaid")) < 1e-12
+        and decal_proud("relaid") < _dim("patch_proud") < GT_DELTA,
+        f"{_rl['elems'][0]['proud'] * 1000:.1f} mm")
+    chk("relaid n=0 기본값 → 프림 0 (준비 어휘, 라이브러리 산출 0)",
+        build_relaid_units(dry_kit(), "/T/GKit/Relaid", (-6, -3, 0, 3), 0.0,
+                           dict(relaid="relaid"), module=0.600)["prim_count"] == 0)
+    chk("무모듈 프로파일에서 relaid → ValueError (아스팔트 회귀 차단)",
+        raises(lambda: build_relaid_units(dry_kit(), "/T/GKit/Relaid",
+                                          (-6, -3, 0, 3), 0.0,
+                                          dict(relaid="relaid"), n=2,
+                                          module=None), "relaid-module"))
+    chk("3.0 m 시공줄눈 대역은 모듈 아님 → relaid ValueError (MODULE_SNAP_MAX_CELL)",
+        raises(lambda: build_relaid_units(dry_kit(), "/T/GKit/Relaid",
+                                          (-6, -3, 0, 3), 0.0,
+                                          dict(relaid="relaid"), n=2,
+                                          module=3.000), "relaid-cell"))
+    chk("미등재 surface 어휘 → ValueError (GT-24 어휘 등록부)",
+        raises(lambda: plan_ground("sidewalk_block", (-10, -2, 0, 2),
+                                   scene="scene16", edges=_E0,
+                                   overrides=dict(
+                                       surface=(("resurface", 2),))),
+               "surface-kind"))
     # (v1.3, D-5) An unregistered scatter kind must not fall back to the leaf pool.
     chk("미등재 산포 kind → ValueError (D-5)",
         raises(lambda: apply_ground(

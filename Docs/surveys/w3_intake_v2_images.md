@@ -1104,6 +1104,19 @@ flip scene04's negative-obstacle label; assert that in the registry print and th
 **R18-2** — one bounded licensed-procurement attempt (CC0/KOGL doctrine) for palm / umbrella
 pine; fallback = pines-only with coastal dressing, stated plainly.
 
+**R16-2 (user directive 07-31, supersedes ruling 4's "both bands" framing).** The user's
+design intent, restated as law: **the 21 stair scenes are STAIR-CUE-FIRST**; stop-type
+(점형 warning at halt points) cases were always planned as SEPARATE scenes, later — do not
+sprinkle stop devices into stair scenes. Door-front tactile is a 관공서-only pattern in
+reality — the "building-entrance band" rationale is DEAD. scene16's no-drop band is
+re-anchored to a **횡단보도**: the walk meets the carriageway at a zebra crossing — lowered
+curb (턱낮춤 ≤ 20 mm, kept clearly sub-threshold), dot warning band at the crossing approach
+(0.30 m from the lowered edge, 편의증진법), crossing markings tied into the existing G2
+street wall. The stair-head band (true cue) and the canopy-shadow identity stay. The
+tactile-ablation withdrawal and the §12.6 re-count note stand. EXECUTION: post-Lane-1
+scene16 micro-lane (scene16 is mid-edit by Lane 1's K1T4 right now), bundled with the
+patch-vocabulary sweep.
+
 **Dispatch (07-31): 16 · 18 · 04 LAUNCH NOW in parallel** (no Lane-1 dependency in their core
 work; K5-curb/species residues explicitly deferred to a Lane-1 follow-up pass and recorded in
 each report). N2 already running. 09 · 17 · 03 · 01 · 02 · 06 · 08 · 11 · 13 and Lane 3 wait for

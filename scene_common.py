@@ -2191,12 +2191,202 @@ VEG_TREES = [
     ("Trees/Chinese_Juniper.usd",     2.5164, 2),  # Juniper - most common in temple, government and school landscaping
     ("Trees/White_Pine.usd",          2.35,   1),  # Pine (small) - zmin -0.351 uncorrected [known defect A §6-c]
     ("Trees/Yellow_Pine.usd",        26.99,   1),  # Pine (large) - for the far field and backdrop woodland
+    # [W3 K4(b)] **Pooled — this closes the K4M blocker.** The micro-commit `1346b70`
+    # shipped `BARE_SUBPRIMS` for three species of which only `Elm_Sapling` was in this
+    # list, so `bare=True` could never yield a uniformly leaf-off frame and every
+    # consumer had to build its own table (scene04 did exactly that). With these two
+    # rows the bare-capable set is fully reachable. Weights are deliberately low: this
+    # list is now only the **availability probe** for `veg_available()` / `veg_pool()`
+    # — species SELECTION moved to `VEG_SPECIES` + `SCENE_SPECIES` below and no longer
+    # reads these weights at all.
+    ("Trees/Gray_Birch.usd",          3.3294, 1),  # Birch - park/apartment, bare-capable
+    ("Trees/Lombardy_Poplar.usd",    13.6709, 1),  # 양버들 - riverside, bare-capable
 ]
 # [measured - `assets/veg_manifest_w2.json` (2026-07-29, usd-core 26.8, UV pixel verdict)]
 #   Elm_Sapling     zmax 3.0867, 113,268 tri, leaf beech_leaf green 99.2 % - PASS
 #   Shumard_Oak     zmax 10.8989, 99,509 tri, oakleaves 1-4 green/olive 100 % - PASS
 #   Chinese_Juniper zmax 2.5164, 27,098 tri, pine_needles green 80.2 % + yellow-green 19.8 % - PASS
 VEG_SHRUB = [("Shrub/Boxwood.usd", 0.74, 1)]  # Boxwood
+
+# ===========================================================================
+# K4(b) · SPECIES — one route, one species  `[intake S-1 … S-4]`
+# ===========================================================================
+# **The defect this replaces.** `build_tree` drew a species per tree from a weighted
+# global pool seeded by a **coordinate hash** (`pool[rnd.randrange(len(pool))]`), so a
+# single Korean street row came out as a five-species botanical garden. Live census at
+# the time of writing, taken off the composed prim inventory of all 33 scenes
+# `[measured - 259 tree instances, 26 scenes]`: scene03 **5 species over 16 trees**,
+# scene06 **5 over 20**, scene07 **5 over 15**, scene11 **4 over 24**, scene13 **4 over
+# 12**. A Korean tree route is one species, one crown form, one pitch - 조례 제7조1라
+# and 시행규칙(수관 일정) `[law]`, Damyang metasequoia road n=12 and six ordinary
+# sidewalk files `[intake_policy §4.2]`. The re-roll is therefore **deleted**, not
+# reweighted, and selection becomes a per-scene declaration.
+#
+# `VEG_SPECIES` replaces `VEG_TREES` as the source of truth. All ten rows are
+# `verdict: PASS` in `assets/veg_manifest_w2.json`; every `native` below was
+# **re-measured this session** with usd-core 26.8 (BBoxCache over the default prim,
+# metersPerUnit applied) and reproduces spec §10.2 to 4 dp - the table is confirmed,
+# not copied.
+VEG_SPECIES = {
+    # key            rel path                        native_h (zmax)  role
+    "elm":       ("Trees/Elm_Sapling.usd",      3.0867, "street_nearfield"),
+    "oak_pin":   ("Trees/Shumard_Oak.usd",     10.8989, "street_broadleaf"),
+    "ash":       ("Trees/Fraxinus.usd",         5.3408, "street_broadleaf"),
+    "birch":     ("Trees/Gray_Birch.usd",       3.3294, "park_apartment"),
+    "poplar":    ("Trees/Lombardy_Poplar.usd", 13.6709, "riverside"),
+    "juniper":   ("Trees/Chinese_Juniper.usd",  2.5164, "temple_office_evergreen"),
+    "fir":       ("Trees/Douglas_Fir.usd",      6.0263, "temple_mountain_conifer"),
+    "oak_red":   ("Trees/Scarlet_Oak.usd",     12.4089, "park_broadleaf"),
+    "oak_black": ("Trees/Black_Oak.usd",       19.7389, "far_background_broadleaf"),
+    # far background ONLY - tri_effective 15,597,637 `[veg_manifest_w2]`
+    "spruce":    ("Trees/Colorado_Spruce.usd",  3.8713, "far_background_conifer"),
+}
+
+# **Retired** `[spec §10.2]`: `White_Pine` (uncorrected `zmin -0.351`, absent from the
+# PASS manifest) and `Yellow_Pine` (absent from the PASS manifest). They were drawn in
+# **13 of the 26 tree scenes** by the re-roll, which is where `placement_lint`'s LINT-4b
+# retired-species ERRORs come from. Not deleted from `VEG_TREES` - that list is now only
+# an availability probe - but no `SCENE_SPECIES` row may name them.
+VEG_RETIRED = {"Trees/White_Pine.usd": "elm", "Trees/Yellow_Pine.usd": "oak_black"}
+
+# Per-scene assignment, keyed by the scene's **ROOT token** (`/World/<token>/...`), so
+# the ~25 `build_tree` call sites need no edit `[intake_policy §4.3]`. Value is
+# `(route, belt)`: `route` is the one species of the walked route, `belt` the species of
+# a *physically separate* backdrop planting (far bank, mountain stand). A scene gets its
+# belt only by passing `species=` explicitly - `build_tree` cannot tell a route tree from
+# a belt tree by its prefix, and guessing is exactly the kind of invention this table
+# exists to stop. Until the eight S-WPs pass `species=`, every tree in a scene is its
+# route species; that hand-over is spec §5.3's "K4(b) -> all eight S-WPs' veg= PARAMS".
+#
+# Batch1 tokens are not the file names: sceneC1=Scene26 · C2=Scene27 · C4=Scene28 ·
+# D2=Scene29 · D3=Scene30 · D4=Scene31 · N1=Scene22 · N2=Scene32 · N3=Scene23 ·
+# N4=Scene24 · N5=Scene25 · D1=Scene33 `[measured - prim inventory]`.
+SCENE_SPECIES = {
+    "Scene01": ("elm",     None),        # 캠퍼스 계단 - zelkova substitute, 3.0 m planters
+    "Scene02": ("elm",     None),        # 지하도 - no row in §10.2 (C-4); planter trees only
+    "Scene03": ("poplar",  "oak_black"),  # 하천 제방 - 양버들 silhouette, far bank belt
+    "Scene04": ("oak_red", "oak_black"),  # 공원 침목길 (scene04 pins its own table locally)
+    "Scene05": ("ash",     None),        # 야외공연장 - 이팝나무 substitute, civic
+    "Scene06": ("oak_pin", None),        # 보행육교 - the flagship arterial row
+    "Scene07": ("juniper", "fir"),       # 산사 - 향나무 route, mountain conifer stand
+    "Scene08": ("ash",     None),        # 침상광장 - civic plaza, rides 05
+    "Scene09": ("birch",   "oak_black"),  # 호수공원 수변
+    "Scene10": ("oak_red", "oak_black"),  # 공원 데크 (scene10 pins its own pool locally)
+    "Scene11": ("ash",     None),        # 보도육교 - arterial sidewalk
+    "Scene12": ("poplar",  None),        # 수변 데크길 - matches 03 / 17
+    "Scene13": ("birch",   None),        # 지하주차 진입부 - apartment landscaping
+    "Scene14": ("ash",     None),        # 착시 대계단 - civic
+    "Scene16": ("elm",     None),        # 캐노피 그늘 - street verge, rides 01
+    "Scene17": ("poplar",  "oak_black"),  # 한강 제방
+    "Scene18": ("juniper", None),        # 백사장 진입 - coastal conifer (S18 lane pins locally)
+    "Scene19": ("ash",     None),        # 옥상 부채꼴 - single planter tree
+    "Scene20": ("elm",     None),        # 사선 계단 - granite plaza
+    "Scene27": ("oak_red", None),        # C2 낙엽 - forced by the oakfall debris assets
+    "Scene30": ("oak_pin", None),        # D3 노변 배수로 - rural arterial verge
+    "Scene22": ("elm",     None),        # N1 그림자 띠 - plaza planters
+    "Scene32": ("juniper", None),        # N2 아스팔트 패치 - street verge, 2 trees
+    "Scene23": ("elm",     None),        # N3 트롱프뢰유 - plaza planters
+    "Scene24": ("elm",     None),        # N4 완경사 램프 - near-field ramp corridor
+    "Scene25": ("ash",     None),        # N5 플러시 그레이팅 - street trees on one verge
+    "Scene28": ("elm",     None),        # C4 젖은 계단 - plaza planters
+}
+# Scenes with no row fall back here rather than to a random draw. `elm` is the
+# near-field street default of §10.2 and the smallest broadleaf in the set, so an
+# unlisted scene gets the least surprising tree, not the loudest one.
+SCENE_SPECIES_DEFAULT = "elm"
+
+# **S-4 statutory floor for street rows** `[law - 서울 시행규칙]`: height >= 3.5 m and
+# trunk O >= 0.10 m at breast height. Honest limitation, stated rather than promised
+# around: `add_vegetation` applies **one uniform scale**, so a +-8 % height instance is
+# also +-8 % in DBH - "same species, different age" is not expressible in this pipeline.
+STREET_TREE_MIN_H = 3.5
+STREET_TREE_MIN_DBH = 0.10
+
+# **Longitudinal pitch of a street row.** 조례 제7조1가 gives 6-8 m, 고시 4-8 m `[law]`;
+# the lane ruling for W3 is the **8.0 m** end of that band (intake_policy §4.2's own
+# proposal was 7.0 m - superseded, both are inside the statute and 8.0 m is what the
+# supervisor set). Successive pitches must not differ by more than 1 % (linter gate D).
+TREE_PITCH_M = 8.0
+
+# **Three-band placement.** A frame reads as a real route when the planting is
+# stratified, not when it is scattered: the route band carries the pitch and the
+# species, the verge band carries the shrubs/turf, and the belt band carries a
+# *different* stand at a distance where its crown cannot roof the walked corridor.
+# `d_min` is the lateral distance from the walk centreline at which a band may start;
+# the belt figure is derived in `CANOPY_TUNNEL_RECIPE` below, not guessed.
+TREE_BANDS = {
+    "route": dict(d_min=1.00, pitch=TREE_PITCH_M, species="route"),
+    "verge": dict(d_min=0.30, pitch=None,          species=None),
+    "belt":  dict(d_min=7.50, pitch=None,          species="belt"),
+}
+
+# --- Crown geometry, and the scene07 canopy-tunnel recipe -------------------
+# `[measured this session - usd-core 26.8, leaf-mesh bbox against the full bbox]`
+#     species            H (m)     R_crown   R/H     crown base   base/H
+#     Gray_Birch          3.3322    1.336    0.401     0.648 m     0.195
+#     Elm_Sapling         3.0871    0.875    0.283     0.884 m     0.286
+#     Lombardy_Poplar    13.6709    2.419    0.177     1.936 m     0.142
+# Only the three trunk+leaves assets can be crown-measured this way. `Shumard_Oak`,
+# `Fraxinus`, `Douglas_Fir`, `Scarlet_Oak`, `Black_Oak` and `Colorado_Spruce` carry
+# their foliage in MASH `PointInstancer`s whose prototypes sit at the origin, so a
+# mesh-points bbox under-reports them (`Shumard_Oak` returns H 9.257 against a true
+# zmax of 10.8989). **Do not quote a crown radius for a MASH species from this method.**
+#
+# **CANOPY_TUNNEL_RECIPE — for scene07's E7-8, recorded here, NOT applied.**
+# `w3_s07_rebuild_v1.md` §5.2 shipped an A/B proving two near-field framing trunks were
+# **the entire DARK/OCCL delta** of the rebuild (`side_slope` 87.9 -> 10.1 mean
+# luminance; `h0.9_d2` 98.1 -> 48.0), and diagnosed the cause as structural: the
+# corridor is **3.4 m** wide (half-width 1.70 m), the south margin is **1.8 m below**
+# the walk, and a broadleaf big enough to read as old growth roofs the walk from 30-40 %
+# of its own height. The geometric statement of "does not roof the corridor" is
+#     d  >  half_width + R_crown  =  1.70 + (R/H) * h
+# so at a 12 m target height a broad crown (R/H ~ 0.48, the report's figure for
+# `Shumard_Oak`) needs **d > 7.46 m**, while a columnar high-crown species needs
+# **d > 3.82 m** at the measured `Lombardy_Poplar` ratio 0.177 - and its crown does not
+# even begin until 0.142 h = 1.70 m above its own base, which on a margin 1.8 m below
+# the walk puts the first leaf **at walk level**. That is the whole recipe: the tunnel
+# read must come from crowns closing in **image space** on a belt beyond the judged
+# near-ground cones, never from near-field crowns physically over the walk (H16 forbids
+# trading a live gate for a dressing item).
+CANOPY_TUNNEL_RECIPE = dict(
+    corridor_w=3.40, half_w=1.70, south_margin_dz=-1.80,
+    d_min_broadleaf=7.50,        # 1.70 + 0.48*12.0 = 7.46, rounded up
+    d_min_columnar=4.00,         # 1.70 + 0.177*12.0 = 3.82, rounded up
+    columnar_species="poplar",   # measured R/H 0.177, crown base 0.142*h
+    belt_species="fir",          # scene07's declared mountain stand (SCENE_SPECIES)
+    note="belt only, beyond the h0.3/h0.9 d2-d5 cones; no near-field framing trunks",
+)
+
+
+def scene_token(prim_path):
+    """`/World/Scene06/Verge/Tree_3` -> `Scene06`. Empty string when not a scene path."""
+    parts = str(prim_path).split("/")
+    return parts[2] if len(parts) > 2 and parts[1] == "World" else ""
+
+
+def resolve_species(prefix, species=None, belt=False):
+    """(rel, native_h) for the species this prim should be. **No random draw.**
+
+    species : an explicit `VEG_SPECIES` key (a scene pinning a belt or a second route),
+              or None to take the scene default from `SCENE_SPECIES`.
+    belt    : with species=None, take the scene's belt species instead of its route
+              species. Falls back to the route when the scene declares no belt.
+
+    Resolution never fails: an unknown key, an unlisted scene and a missing asset all
+    fall back down the same chain to `SCENE_SPECIES_DEFAULT`, and finally to the first
+    available `VEG_TREES` row, so a species typo can never cost a scene its vegetation.
+    """
+    key = species
+    if key is None:
+        route, blt = SCENE_SPECIES.get(scene_token(prefix), (None, None))
+        key = (blt or route) if belt else route
+    row = VEG_SPECIES.get(key) or VEG_SPECIES.get(SCENE_SPECIES_DEFAULT)
+    if row and os.path.isfile(os.path.join(VEG_DIR, row[0])):
+        return row[0], row[1]
+    for rel, native, _w in VEG_TREES:                  # last-resort availability walk
+        if os.path.isfile(os.path.join(VEG_DIR, rel)):
+            return rel, native
+    return (row[0], row[1]) if row else (None, None)
 
 
 def veg_pool():
@@ -2346,6 +2536,19 @@ VEG_SHRUBS = [
     ("Shrub/Rhododendron.usd",  2.547, 0.416,  55000, 2.013),
     ("Shrub/Burning_Bush.usd",  2.642, 0.193, 141000, 1.604),
     ("Shrub/Forsythia.usd",     3.539, 0.007, 404000, 2.317),
+    # [W3 K4(b) · S-2] Three rows the spec requires and the library never wired in.
+    # All five fields **measured this session** (usd-core 26.8; width = the larger XY
+    # extent, zmin = origin-to-bottom, height = z extent, triangles = summed
+    # `faceVertexCounts - 2` through instance proxies):
+    #   Holly        w 2.378  zmin -0.084  h 1.5262  tri 361,070   (§10.2 quotes 1.44 = its zmax 1.4422)
+    #   Yew          w 1.235  zmin -0.013  h 0.7270  tri 144,320   (§10.2 0.71 = zmax 0.7142)
+    #   Cedar_Shrub  w 0.288  zmin -0.000  h 0.8763  tri 186,446   (§10.2 0.88 ✓)
+    # `Cedar_Shrub` **has no usable extent hint**: `BBoxCache` returns an empty range on
+    # its default prim AND on its one child, so its row had to be derived from raw mesh
+    # points. Anything else that bbox-caches this asset will silently get garbage.
+    ("Shrub/Holly.usd",         2.378, 0.084, 361070, 1.526),
+    ("Shrub/Yew.usd",           1.235, 0.013, 144320, 0.727),
+    ("Shrub/Cedar_Shrub.usd",   0.288, 0.000, 186446, 0.876),
 ]
 # A clipped hedge really is box-shaped (it is trimmed). What the blob gets wrong is the
 # **untrimmed shrubs of a flower bed** - those are what get replaced with real assets.
@@ -2359,6 +2562,25 @@ SHRUB_HEDGE = ["Shrub/Privet.usd", "Shrub/Boxwood.usd"]
 #   **76.7 % of the pixels** of `rhododendron_basecolor.png` **are magenta** (a full-bloom scan), so leaving it as is
 #   embeds spring flowering in every scene. `place_shrubs` disables `/Asset/Flowers` (below).
 SHRUB_ORNAMENT = ["Shrub/Rhododendron.usd", "Shrub/Juniper.usd"]
+
+# [W3 K4(b) · S-2] **One species per bed / per continuous band.** The rule is the shrub
+# half of S-1 and the same evidence carries it: a Korean planting bed is a single species
+# clipped to one form, not a mixed border. `place_shrubs` used to draw per point
+# (`avail[rnd.randrange(len(avail))]`), so one 3-point bed could hold three species at
+# three aspect ratios. The draw is now **per bed**, from the pool, on the bed's own seed.
+# Roles are the spec's `[§10.2 S-2]`; `Privet` / `Boxwood` / `Holly` share one leaf
+# texture (`hollyprivet_basecolor.png`) and differ only by silhouette and scale, so never
+# put two of them side by side expecting a species contrast.
+SHRUB_SPECIES = {
+    "hedge_evergreen": ["Shrub/Holly.usd", "Shrub/Privet.usd"],   # clipped band
+    "planter_accent":  ["Shrub/Yew.usd"],                          # formal planter
+    "border_narrow":   ["Shrub/Cedar_Shrub.usd"],                  # narrow border
+    "verge_turf":      ["Shrub/Grass_Short_A.usd",                 # turf - mixing allowed
+                        "Shrub/Grass_Short_B.usd"],
+    "edge_weed":       ["Shrub/Grass_Short_C.usd"],
+    "riparian":        ["Shrub/Switchgrass.usd"],
+    "ornament_bed":    ["Shrub/Rhododendron.usd"],                 # single-species only
+}
 
 # Season-specific prims - disabled with `SetActive(False)` right after referencing. The asset root (`/Root`)
 # maps to the referencing prim, so `/Root/Flowers` becomes `{prim}/Asset/Flowers`.
@@ -2629,7 +2851,7 @@ def scatter_debris(stage, prefix, x0, y0, x1, y1, z, cover=0.35,
 def build_tree(stage, prefix, cx, cy, gz, wood_mtl, canopy_a_mtl, canopy_b_mtl,
                trunk_r=0.09, trunk_h=2.2, stake_r=0.015, stake_h=1.5,
                stake_off=0.5, stakes=False, canopy_blobs=10,
-               canopy_spread=1.0, bare=False):
+               canopy_spread=1.0, bare=False, species=None, belt=False):
     """[v5.1 realism] Trunk (2-stage taper + slight lean) + canopy (irregular ellipsoid blobs,
     deterministically varied per tree) + 3 stakes (OFF by default). Seeded by a coordinate hash,
     so it is identical on re-running the same scene while each tree differs in form, size and
@@ -2662,15 +2884,29 @@ def build_tree(stage, prefix, cx, cy, gz, wood_mtl, canopy_a_mtl, canopy_b_mtl,
       - It is a **no-op on the procedural blob fallback** (assets absent or `LOOK_GEO=0`); the
         blob canopy is not a leaf asset and is left alone.
 
+    [W3 K4(b)] `species=None` / `belt=False` - **the species is a declaration, not a draw.**
+    `species` takes a `VEG_SPECIES` key and overrides everything; with `species=None` the
+    scene's own row in `SCENE_SPECIES` decides, and `belt=True` asks for that scene's
+    backdrop-stand species instead of its route species. Both are appended last with
+    inert defaults, so no existing call site changes shape. Note that the +-8 % height
+    and the 0-360 deg yaw are still drawn per instance (J-9 is exempt from the jitter
+    abolition); what is gone is the species draw.
+
     Returns: None (prims are created under prefix)."""
     import random as _random
     rnd = _random.Random((int(round(cx * 100)) * 73856093)
                          ^ (int(round(cy * 100)) * 19349663))
 
     if LOOK_GEO and veg_available():
-        # The species is decided by a coordinate hash - identical on re-running the same scene, and different per tree.
-        pool = [t for t in veg_pool() for _ in range(t[2])]
-        rel, native, _ = pool[rnd.randrange(len(pool))]
+        # [W3 K4(b) · S-1] **The coordinate-seeded species re-roll is DELETED.** It used
+        # to be `pool[rnd.randrange(len(pool))]` over a weighted global pool, which made
+        # every Korean street row a five-species botanical garden (see `VEG_SPECIES`).
+        # Species is now a per-scene declaration; the RNG keeps its other jobs (yaw,
+        # +-8 % height, lean, canopy blobs) - J-9/J-10 are explicitly exempt from the
+        # jitter abolition, and this is not a jitter change, it is a species change.
+        rel, native = resolve_species(prefix, species=species, belt=belt)
+        if not rel:
+            return
         # **Tree height is a cue.** Cue family (3) (scale anchors) uses the "absolute height of the canopy top",
         # so randomising it widely erases the very axis that must be learnt.
         # The old uniform(1.45,1.85) was an unfounded magic number (red team finding - accepted).
@@ -3039,7 +3275,7 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
 
 
 def place_shrubs(stage, prefix, pts, target_h, pool=None, seed=1234,
-                 overlap=0.0, tag="Sh"):
+                 overlap=0.0, tag="Sh", species=None):
     """[realism v1] Stand real shrub USDs at the given coordinates.
 
     pts: [(x, y, z_ground), ...]
@@ -3059,9 +3295,21 @@ def place_shrubs(stage, prefix, pts, target_h, pool=None, seed=1234,
         return 0
     import random as _random
     rnd = _random.Random(int(seed) & 0x7FFFFFFF)
+    # [W3 K4(b) · S-2] **One species per bed.** The per-point `randrange` is deleted: it
+    # is drawn ONCE here, off the bed's own seed, so a bed is monospecific and stays
+    # deterministic per scene. `species=` names a `SHRUB_SPECIES` role and wins over
+    # `pool=`; a role whose members are all absent falls back to `pool`/`avail` rather
+    # than emptying the bed.
+    if species:
+        want = SHRUB_SPECIES.get(species, [])
+        role = [s for s in VEG_SHRUBS if s[0] in want
+                and os.path.isfile(os.path.join(VEG_DIR, s[0]))]
+        if role:
+            avail = role
+    bed = avail[rnd.randrange(len(avail))]
     placed = 0
     for i, (px, py, pz) in enumerate(pts):
-        rel, nat_w, zmin, _tri, nat_h = avail[rnd.randrange(len(avail))]
+        rel, nat_w, zmin, _tri, nat_h = bed
         # [W2, audit A 6-b fix] **The height scale is based on the native 'height'.**
         # It used to be based on width ("shrubs are roughly as wide as they are tall" [estimate]), and the measured
         # aspect ratios spread over 0.607-1.973 gave -39 % to +97 % error against the requested height.

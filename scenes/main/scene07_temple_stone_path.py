@@ -236,9 +236,25 @@ PARAMS = dict(
     #  (abolished by §1.2) nor size jitter (kept by §1.2 X2) — spec §12-15 puts `jit_tint`
     #  explicitly out of scope. Renamed `tint_jit` so the static token stops firing and the
     #  adjudication is recorded in the file rather than in a report nobody re-reads.
+    #  [W3 S3-6 · GT-17] `moss_every = 3` — a blind "every third stone is mossy" — is replaced
+    #  by the **zone-driven** rule of spec §4.1-3. The pool splits into three tiers and the
+    #  selection reads the slab's zone, not its index. `[law]` 조경설계기준 2.6.2(1) makes moss
+    #  a *specifiable, preservable* design attribute on 산석 ("이끼 등 착생식물의 보존이 필요한
+    #  산석은 설계서에 이를 명시한다"), so this is a specified quantity, not weathering flavour.
+    #  Coverage percentages themselves are `[ref]` G7 + `[assumed]` — no Korean document gives a
+    #  tread-specific figure (research §B4b), so SMOKE **prints** them and 통람 judges them.
     stone_mtl=dict(n=8, seed=7071, scale=(0.55, 1.35), bump=1.5,
                    tint_dry=(0.88, 0.86, 0.82), tint_moss=(0.74, 0.84, 0.70),
-                   moss_every=3, tint_jit=0.06),
+                   tint_mid=(0.81, 0.85, 0.76), tint_jit=0.06,
+                   n_dry=3, n_mid=3, n_moss=2),
+    #  Zone targets, spec §4.1-3. `p_*` are the draw probabilities that realise them; the
+    #  achieved fractions are measured from the built table and printed by the self-check.
+    moss_zone=dict(seed=7080, cap_t=0.060,
+                   walk=(0.00, 0.10), p_walk=0.05,
+                   tread_outer=(0.35, 0.55), p_outer=0.66,
+                   riser=(0.60, 0.85), p_riser=0.76,
+                   joint=1.00, boulder_top=(0.70, 0.90), p_boulder=0.80,
+                   margin=0.20),
     # --- [v6] canted knob : breaks the rectangular silhouette (below the main stone top, so GT is unchanged) ---
     #     [W3 S3-3 · GT-16] **DELETED.** 24 prims, yaw 10-20 deg, tilt 3-9 deg, hung 50-80 mm
     #     under the stone top. The v6 knob existed to break a *rectangular* silhouette; the
@@ -336,13 +352,21 @@ PARAMS = dict(
     # --- axis-aligned ground plate table (name, x0, x1, y0, y1, z_top, thick, mtl) ---
     #     v5 regression checklist (3) : no plane covers a cavity - at the south drop y=−1.7
     #     the plates are **split** at that border (no continuous slab bridges it).
+    #  [W3 S3-6 · GT-17] **Season re-bind, summer pin** `[ruled 07-31]` §8.R OQ-1.
+    #    `leaf` = `TEX["leaf_ground"]`, whose own role comment is "Fallen-leaf ground (C2)" —
+    #    an **autumn** texture. It was bound to the corridor, all three south terraces and the
+    #    approach, i.e. scene07 was a summer canopy over an autumn floor. The cherry-blossom
+    #    precedent applies in reverse (`scene_common.py:2098-2101` deleted `Japanese_Cherry`
+    #    for being 0.0 % green): **judge by pixels, not by the role's name**. These five
+    #    surfaces move to `forest` = `dirt_park` darkened and damped; `leaf_ground` survives
+    #    on the margin lobes only, which is where G7 actually shows brown litter.
     plates=[
         ("Courtyard",     -24.0,   0.0,  -1.7,  44.0,   0.0, 0.50, "gravel"),
         ("CourtyardBody", -24.0,   0.0,  -1.7,  44.0,  -0.5, 2.20, "rock"),
         ("BackField",     -46.0, -24.0,  -1.7,  44.0,   0.0, 2.40, "grass"),
-        ("SouthTerraceA", -46.0,   0.0, -34.0,  -1.7,  -1.8, 1.20, "leaf"),
-        ("SouthTerraceC",  12.2,  90.0, -34.0,  -1.7,  -6.0, 1.20, "leaf"),
-        ("Approach",       12.2,  90.0,  -1.7,   2.15, -4.2, 1.00, "leaf"),
+        ("SouthTerraceA", -46.0,   0.0, -34.0,  -1.7,  -1.8, 1.20, "forest"),
+        ("SouthTerraceC",  12.2,  90.0, -34.0,  -1.7,  -6.0, 1.20, "forest"),
+        ("Approach",       12.2,  90.0,  -1.7,   2.15, -4.2, 1.00, "forest"),
         ("NorthWallFlat",  12.2,  90.0,   2.15,  2.6,  -1.25, 3.20, "rock"),
         ("NorthBankFlat",  12.2,  90.0,   2.6,  44.0,  -2.0, 1.20, "grass"),
         ("ScarpFlatBot",   12.2,  90.0,  -1.80, -1.66, -4.2, 2.00, "rock"),
@@ -350,8 +374,8 @@ PARAMS = dict(
     # --- slope plates (build_slope) : (name, z0, drop, y0, y1, thick, mtl) ---
     #     All x0=0, run=STAIR_RUN. margin=0.0 (plate borders match exactly).
     slopes=[
-        ("PathCorridor",  0.00, STAIR_DROP, -1.70,  1.70, 0.60, "leaf"),
-        ("SouthTerraceB", -1.80, STAIR_DROP, -34.0, -1.70, 1.20, "leaf"),
+        ("PathCorridor",  0.00, STAIR_DROP, -1.70,  1.70, 0.60, "forest"),
+        ("SouthTerraceB", -1.80, STAIR_DROP, -34.0, -1.70, 1.20, "forest"),
         ("SouthScarp",    0.00, STAIR_DROP, -1.80, -1.66, 2.00, "rock"),
         ("NorthWall",     0.75, 2.00,        1.70,  2.15, 3.20, "rock"),
         ("NorthBank",     0.00, 2.00,        2.15, 44.00, 1.20, "grass"),
@@ -359,9 +383,17 @@ PARAMS = dict(
     # --- leaf-litter band (partial occlusion of stone edges) : thin slabs over the corridor (cx, cy, sx, sy) ---
     #     [v6] axis-aligned horizontal slabs -> **slope-following slabs** (19 deg) + 3 rotated overlaps per patch.
     #     The old way buried the upper end and floated the lower one by 0.17 m (= gate_frame's black square holes).
-    leaf_drifts=[(1.30, 0.55, 1.30, 0.95), (3.05, -0.60, 1.10, 1.00),
-                 (5.40, 0.35, 1.40, 1.10), (7.20, -0.75, 1.00, 0.85),
-                 (9.10, 0.50, 1.25, 1.00), (10.90, -0.40, 1.15, 0.90)],
+    #  [W3 S3-6 · GT-17] **Re-sited to the margins.** These six were carpets laid ACROSS the
+    #    walked surface at |cy| 0.35-0.75; G7 puts brown litter only at the flight margins and
+    #    in the joints, never on the walk. Each is now a small lobe on the shoulder at
+    #    |cy| >= 1.15 (§4.1-5's floor is 1.0), sized `sx` 0.38 so it lands **inside one tread**
+    #    — with `z_fn = course_top` a wider lobe would drape over a riser and read as a torn
+    #    sheet. The mechanism (`build_carpet_mask` + feather ring) is unchanged: H4 forbids
+    #    turning a CB-2 lobe back into a rectangle, and none of these does.
+    #    `cx` values are **tread centres** `0.43571 * (k + 0.5)` for k = 3, 7, 12, 16, 21, 25.
+    leaf_drifts=[(1.525, 1.28, 0.38, 0.80), (3.267, -1.34, 0.38, 0.92),
+                 (5.446, 1.42, 0.38, 0.74), (7.188, -1.22, 0.38, 0.86),
+                 (9.366, 1.20, 0.38, 0.78), (11.107, -1.40, 0.38, 0.70)],
     # [W2 F3] proud 0.012 -> 0.004. A 12 mm rim all the way round each drift is
     #   the "edge shadow" that made the leaf drifts read as carpets laid on the DG.
     # [W3 F3 / DEC-2] `thick` and the three `sub_*` rectangle-stacking knobs are retired:
@@ -392,6 +424,7 @@ PARAMS = dict(
     #   cx 3.05 down are far-field and stay at 24.
     leaf_band=dict(proud=0.004, seed=7073, subs=1,
                    feather=(0.30, 0.50), feather_cap=22,
+                   cover_corridor=0.035, cover_yard=0.06,
                    n_far=24, n_near=48, chord_near_x=(-8.6, 2.2)),
     # [v6] 3 leaf drifts on the yard (decomposed granite) - eases the 'large high-reflectance beige plane' (ruling (5)).
     #      A yard is flat by practice, so material variation, not curvature, breaks the monotony.
@@ -497,7 +530,11 @@ PARAMS = dict(
     material=dict(
         # [v6] rock_face = jointless natural rock for the stones / granite = lanterns·plinths
         scale=dict(rock_wall=3.5, rock_face=0.95,
-                   granite=3.2, leaf_ground=2.0, gravel=0.35, grass=1.4),
+                   granite=3.2, leaf_ground=2.0, gravel=0.35, grass=1.4,
+                   dirt_park=1.10, moss=0.55),
+        # [W3 S3-6 · GT-17] summer forest floor + the first moss tint in this scene.
+        forest_tint=(0.70, 0.71, 0.62),
+        moss_tint=(0.86, 1.00, 0.84),
         stone_moss_tint=(0.86, 0.95, 0.82),   # (old stepping-stone moss tone - unused in v6)
         leaf_tint=(0.95, 0.90, 0.82),
         gravel_tint=(0.84, 0.81, 0.76),       # [v6] eases the yard's high-reflectance beige
@@ -794,11 +831,15 @@ def course_layout():
 COURSES = course_layout()
 
 
-def course_top(x):
-    """Walked-surface z at station `x` on the flight (the course whose tread covers x).
+def course_top(x, y=0.0):
+    """Walked-surface z at station `(x, y)` on the flight.
 
-    Outside the flight it degrades to the yard (x < 0) or the approach road (x > run), so
-    it is safe to hand to a scatter / mask `ground_fn`.
+    With the default `y = 0` this is the course's own level tread z, i.e. the walk-line GT.
+    With a real `y` it returns **that slab's** top, which differs from the course value by the
+    non-walk slabs' bedding jitter (`jz`) — a mask or a scatter laid on the shoulder has to
+    sit on the slab that is actually there, not on the course's nominal plane.
+    Outside the flight it degrades to the yard (`x < 0`) or the approach road (`x > run`), so
+    it is safe to hand to any `ground_fn` / `z_fn` callback.
     """
     cp = PARAMS["courses"]
     if x < float(cp["x0"]):
@@ -807,7 +848,11 @@ def course_top(x):
         return -STAIR_DROP
     tread = (float(cp["x1"]) - float(cp["x0"])) / int(cp["n"])
     i = min(int(cp["n"]) - 1, int((x - float(cp["x0"])) / tread))
-    return COURSES[i]["top"]
+    c = COURSES[i]
+    for s in c["slabs"]:
+        if s["y0"] - 1e-9 <= y <= s["y1"] + 1e-9:
+            return s["top"]
+    return c["top"]
 
 
 def kerb_layout():
@@ -865,6 +910,71 @@ def kerb_layout():
 
 
 KERB = kerb_layout()
+
+
+def assign_moss():
+    """[W3 S3-6 · GT-17] Zone-driven moss plan (spec §4.1-3), computed once, CPU-only.
+
+    Writes `cap_moss` / `body_moss` onto every slab and `moss` onto every kerb boulder, so
+    the SMOKE table and the builder read **one** plan and can never disagree. The slab is
+    split into a **cap** (the walked top, `cap_t` thick) and a **body** (the rest, whose front
+    face IS the riser), which is the only way to give a tread and its own riser different moss
+    without authoring a proud strip along the nosing — and a proud strip along the nosing is
+    exactly what H2 / RF-5 forbid on this scene.
+    """
+    mz = PARAMS["moss_zone"]
+    rng = random.Random(int(mz["seed"]))
+    walk = []
+    for c in COURSES:
+        for s in c["slabs"]:
+            s["cap_moss"] = (False if s["walk"]
+                             else rng.random() < float(mz["p_outer"]))
+            s["body_moss"] = rng.random() < float(mz["p_riser"])
+            if s["walk"]:
+                walk.append(s)
+    # The walked centre band's target is 0.00-0.10, i.e. one or two courses out of 28. At
+    # that rate a Bernoulli draw's own variance is the whole budget (2 hits already overshoots
+    # by area weighting), so this zone is filled by **quota**, not by probability: exactly
+    # `round(p_walk_area * n)` courses are picked. Every other zone is wide enough that a
+    # draw lands inside its band, and is left as a draw so the pattern stays irregular.
+    k = int(round(float(mz["p_walk"]) * len(walk)))
+    for s in rng.sample(walk, min(k, len(walk))):
+        s["cap_moss"] = True
+    for b in KERB:
+        b["moss"] = rng.random() < float(mz["p_boulder"])
+
+
+assign_moss()
+
+
+def moss_fractions():
+    """Achieved moss coverage by §4.1-3 zone, as area fractions. `[measured]` per build."""
+    mz = PARAMS["moss_zone"]
+    cp = PARAMS["courses"]
+    wc = float(cp["walk_clear"])
+    a_walk = m_walk = a_out = m_out = a_ris = m_ris = 0.0
+    for c in COURSES:
+        for s in c["slabs"]:
+            dx = s["xb_f"] - s["xback"]
+            dy = s["y1"] - s["y0"]
+            if s["walk"]:
+                aw = dx * (2.0 * wc)          # the walked centre band on this cap
+                a_walk += aw
+                m_walk += aw if s["cap_moss"] else 0.0
+                ao = dx * max(0.0, dy - 2.0 * wc)
+            else:
+                ao = dx * dy
+            a_out += ao
+            m_out += ao if s["cap_moss"] else 0.0
+            ar = dy * (float(cp["thick"]) - float(mz["cap_t"]))
+            a_ris += ar
+            m_ris += ar if s["body_moss"] else 0.0
+    nb = len(KERB) or 1
+    return dict(walk=m_walk / (a_walk or 1.0),
+                tread_outer=m_out / (a_out or 1.0),
+                riser=m_ris / (a_ris or 1.0),
+                joint=1.0,
+                boulder_top=sum(1 for b in KERB if b["moss"]) / nb)
 
 def leaf_patches():
     """Leaf carpets → **DEC-2 masks**. `(name, cx, cy, rx, ry)`, one entry per drift.
@@ -1249,6 +1359,44 @@ def stone_course_selfcheck():
 
     # ── [S3-5] fern margins + framing trunks ──
     fp = P["ferns"]
+    # ── [S3-6 · GT-17] season re-bind + moss zones ──
+    leaf_surf = [nm for nm, *_r, mk in P["plates"] if mk == "leaf"] \
+        + [nm for nm, _z0, _d, _y0, _y1, _t, mk in P["slopes"] if mk == "leaf"]
+    mz = P["moss_zone"]
+    mf = moss_fractions()
+    print(f"\n  [S3-6 · GT-17] 여름 고정 — leaf_ground 결합 지면 플레이트/사면 "
+          f"{len(leaf_surf)}면 (재바인딩 전 5면: PathCorridor·SouthTerraceA/B/C·"
+          f"Approach → forest) → "
+          f"{'OK' if not leaf_surf else 'FAIL ' + str(leaf_surf)}")
+    print(f"    낙엽 로브: 회랑 {len(P['leaf_drifts'])}매 |cy| min "
+          f"{min(abs(c[1]) for c in P['leaf_drifts']):.2f} "
+          f"(§4.1-5 ≥1.0 = 여백 이동 → "
+          f"{'OK' if min(abs(c[1]) for c in P['leaf_drifts']) >= 1.0 else 'FAIL'}) · "
+          f"워크라인 |y|≤{cp['foot_half']} 침범 없음 → "
+          f"{'OK' if min(abs(c[1]) - c[3] / 2.0 for c in P['leaf_drifts']) > cp['foot_half'] else 'FAIL'}"
+          f" · 마당 로브 {len(P['yard_drifts'])}매 유지 · 페더 cover 회랑 "
+          f"{P['leaf_band']['cover_corridor']:.3f} / 마당 "
+          f"{P['leaf_band']['cover_yard']:.3f}")
+    print(f"    sct_debris_leaves_dry_* 배치 0건 (SCENE_SCOPE 은 '07' 을 허용하지만 "
+          f"07 은 여름 — 허용은 권고가 아니다, H10)")
+    print(f"    [§4.1-3 이끼 구역] 실측 커버리지 (목표는 [ref]+[assumed], "
+          f"게이트 아님 — 통람이 판정)")
+    for zk, lab in (("walk", "보행 중앙대 |y|≤0.35"),
+                    ("tread_outer", "답면 외측"),
+                    ("riser", "챌면(판 몸통)"),
+                    ("joint", "줄눈·속채움"),
+                    ("boulder_top", "야면석 상면")):
+        tgt = mz[zk]
+        band = f"{tgt[0]:.2f}~{tgt[1]:.2f}" if isinstance(tgt, tuple) \
+            else f"{float(tgt):.2f}"
+        ok = (tgt[0] - 1e-9 <= mf[zk] <= tgt[1] + 1e-9) \
+            if isinstance(tgt, tuple) else abs(mf[zk] - float(tgt)) < 1e-9
+        print(f"      {lab:<20} 실측 {mf[zk]:.3f}  목표 {band}  "
+              f"{'IN' if ok else 'OUT'}")
+    print(f"      여백 |y|>1.70          목표 {mz['margin']:.2f} — 고사리대 "
+          f"{P['ferns']['north']['n'] + P['ferns']['south']['n']}주 + gk 이끼 "
+          f"stain 으로 구성, 재질 분할 아님(측정 안 함)")
+
     print(f"  [S3-5] 고사리대 스탠드인 {fp['north']['n'] + fp['south']['n']}주 "
           f"(북 {fp['north']['n']} y{fp['north']['y']} / 남 "
           f"{fp['south']['n']} y{fp['south']['y']}) — G2 공백, "
@@ -1288,9 +1436,9 @@ def _smoke_report():
                           n=mask_n(cx), rough=0.18,
                           seed=int(lb["seed"]) + int(nm),
                           z=0.0, proud=lb["proud"],
-                          z_fn=lambda x, y: course_top(x))
-        for (px, _py), pz in zip(b["points"], b["zs"]):
-            ferr = max(ferr, abs(pz - (course_top(px) + lb["proud"])))
+                          z_fn=course_top)
+        for (px, py), pz in zip(b["points"], b["zs"]):
+            ferr = max(ferr, abs(pz - (course_top(px, py) + lb["proud"])))
     yout = max(abs(cy) + ry for _n, _cx, cy, _rx, ry in LEAF_PATCHES)
     xout = max(cx + rx for _n, cx, _cy, rx, _ry in LEAF_PATCHES)
     xin = min(cx - rx for _n, cx, _cy, rx, _ry in LEAF_PATCHES)
@@ -1599,23 +1747,52 @@ def main():
                 stage, f"/World/Looks/Crest_{tone}",
                 diffuse_color=mp[f"crest_{tone}"], roughness_const=1.0,
                 specular_level=0.0)
-        # [v6] stepping-stone material pool - rock_face (jointless) x scale/tint/rotate/translate jitter
+        # [W3 S3-6 · GT-17] Summer forest floor. `dirt_park` is already in the tree and already
+        #   tuned for this scene family; darkened and cooled it reads as damp mountain soil
+        #   under a closed canopy, which is what G7's between-stone ground is.
+        M["forest"] = tex("dirt_park", "/World/Looks/Forest",
+                          sca["dirt_park"], tint=mp["forest_tint"])
+        # [W3 S3-6] The first real moss material in this scene. Source: `sc.TEX["moss"]`
+        #   (Poly Haven `rock_moss_set_02`, **CC0**, registered by the K4 micro-commit).
+        #   **`nor` is dropped on purpose**: that role ships a Poly Haven `_nor_gl` **EXR**,
+        #   i.e. OpenGL green, while every other map in this registry is DX. The K4 note gives
+        #   the consumer two choices — flip green or drop `nor` — and dropping it is the one
+        #   that cannot silently invert the lighting on a judged surface.
+        M["moss"] = sc.make_pbr(stage, "/World/Looks/Moss",
+                                sc.tex_path("moss", "diff"), None,
+                                sc.tex_path("moss", "rough"),
+                                sca["moss"], tint=mp["moss_tint"],
+                                bump=1.2)
+        # [v6 -> W3 S3-6] stepping-stone material pool. Was 8 variants with a blind
+        #   `moss_every = 3`; now **three tiers** so the selection can read the zone
+        #   (§4.1-3): dry = the walked centre band, mid = the tread outer band, moss = the
+        #   riser bodies, the joints and the boulder tops. The `rock_face` jointless base,
+        #   the per-variant world-UV offset and the bump are unchanged — that machinery is
+        #   what cured the v6 "brick-jointed slabs" defect and is not in scope here.
         smp = PARAMS["stone_mtl"]
         rng = random.Random(int(smp["seed"]))
         jt = float(smp["tint_jit"])
         M["stone_pool"] = []
-        for k in range(int(smp["n"])):
-            base = (smp["tint_moss"] if (k % int(smp["moss_every"]) == 0)
-                    else smp["tint_dry"])
-            tint = tuple(max(0.0, c * (1.0 + rng.uniform(-jt, jt)))
-                         for c in base)
-            m = tex("rock_face", f"/World/Looks/StoneNat_{k}",
-                    rng.uniform(*smp["scale"]), tint=tint,
-                    bump=float(smp["bump"]))
-            tex_xform(m, translate=(rng.uniform(-4.0, 4.0),
-                                    rng.uniform(-4.0, 4.0)),
-                      rotate=rng.uniform(0.0, 360.0))
-            M["stone_pool"].append(m)
+        for tier, base in (("dry", smp["tint_dry"]),
+                           ("mid", smp["tint_mid"]),
+                           ("moss", smp["tint_moss"])):
+            lst = []
+            for k in range(int(smp[f"n_{tier}"])):
+                tint = tuple(max(0.0, c * (1.0 + rng.uniform(-jt, jt)))
+                             for c in base)
+                m = tex("rock_face", f"/World/Looks/StoneNat_{tier}{k}",
+                        rng.uniform(*smp["scale"]), tint=tint,
+                        bump=float(smp["bump"]))
+                tex_xform(m, translate=(rng.uniform(-4.0, 4.0),
+                                        rng.uniform(-4.0, 4.0)),
+                          rotate=rng.uniform(0.0, 360.0))
+                lst.append(m)
+                M["stone_pool"].append(m)
+            M[f"stone_{tier}"] = lst
+        # the moss tier gets the real mossy-rock scan as its last variant: it tiles with rock
+        #   structure, so it is right as a riser / joint / boulder patch and wrong as a carpet
+        #   (K4 caution 1) — which is exactly where it is used.
+        M["stone_moss"].append(M["moss"])
         # [v5 shared layer] Korean sign panel - uv_mode=True (mesh st matched 1:1)
         M["sign_info"] = sc.make_pbr(
             stage, "/World/Looks/SignInfo",
@@ -1675,33 +1852,66 @@ def main():
         rewrite it as courses — is the recommended one and is what this is.
         """
         cp = PARAMS["courses"]
-        pool = M["stone_pool"]
+        mz = PARAMS["moss_zone"]
         thick = float(cp["thick"])
+        cap_t = float(mz["cap_t"])
+        body_t = thick - cap_t
+
+        def pick(tier, key):
+            lst = M[f"stone_{tier}"]
+            return lst[key % len(lst)]
+
         for c in COURSES:
             i = c["i"]
             b = c["bed"]
             # 속채움 core: one slab per course, 60 mm under the tread, so a lateral joint
             #   bottoms out on stone. 표준시방서 0400-3.2 ㄹ "내부는 속채움한다".
+            #   Zone "joint" = moss 1.00 (§4.1-3): it is only ever seen through the joints.
             BOX(f"{ROOT}/CourseBed_{i}",
                 ((b["x0"] + b["x1"]) / 2.0, (b["y0"] + b["y1"]) / 2.0,
                  b["top"] - b["thick"] / 2.0),
                 (b["x1"] - b["x0"], b["y1"] - b["y0"], b["thick"]),
-                pool[(i * 3 + 1) % len(pool)], col=True)
+                pick("moss", i), col=True)
             for s in c["slabs"]:
                 dx = s["xb_f"] - s["xback"]
                 dy = s["y1"] - s["y0"]
+                cx0 = (s["xback"] + s["xb_f"]) / 2.0
+                cy0 = (s["y0"] + s["y1"]) / 2.0
+                th = math.radians(s["yaw"])
+                ra = math.radians(s["roll"])
+                # cap = the walked top face; body = the rest, and the body's front face IS the
+                #   riser. Splitting the slab is the only way to give a tread and its own riser
+                #   different moss without authoring a proud strip along the nosing — and a
+                #   proud strip along the nosing is exactly what H2 / RF-5 forbid here.
+                #   The body centre is the cap centre displaced by (0, 0, -h) **in the slab's
+                #   own frame**, so the offset is rotated by the same rotX then rotZ that
+                #   `_oriented_box` applies (op order translate -> rotZ -> rotX -> scale).
+                #   Displacing it in world z instead would slide the body sideways by
+                #   h*sin(roll) — up to 5.5 mm — and open a ledge under the cap.
+                h = (cap_t + body_t) / 2.0
+                ox = -h * math.sin(ra) * math.sin(th)
+                oy = h * math.sin(ra) * math.cos(th)
+                oz = -h * math.cos(ra)
+                cap_tier = ("moss" if s["cap_moss"]
+                            else ("dry" if s["walk"] else "mid"))
                 sc._oriented_box(
                     stage, f"{ROOT}/Course_{i}_{s['k']}",
-                    ((s["xback"] + s["xb_f"]) / 2.0,
-                     (s["y0"] + s["y1"]) / 2.0, s["top"] - thick / 2.0),
-                    (dx, dy, thick),
-                    # per-slab material from the 8-variant pool: adjacent slabs must not
-                    #   share a world-projected grain or the course reads as one casting
-                    pool[(i * 5 + s["k"] * 3) % len(pool)], collider=True,
+                    (cx0, cy0, s["top"] - cap_t / 2.0), (dx, dy, cap_t),
+                    pick(cap_tier, i * 5 + s["k"] * 3), collider=True,
                     rotz=s["yaw"], rotx=s["roll"])
+                sc._oriented_box(
+                    stage, f"{ROOT}/CourseBody_{i}_{s['k']}",
+                    (cx0 + ox, cy0 + oy, s["top"] - cap_t / 2.0 + oz),
+                    (dx, dy, body_t),
+                    pick("moss" if s["body_moss"] else "mid",
+                         i * 7 + s["k"] * 2), collider=False,
+                    rotz=s["yaw"], rotx=s["roll"])
+        mf = moss_fractions()
         print(f"[S3-4] scene07 자연석 계단 {len(COURSES)}코스 · 판 "
               f"{sum(len(c['slabs']) for c in COURSES)} · 속채움 "
-              f"{len(COURSES)} · 개방사면 0 %")
+              f"{len(COURSES)} · 개방사면 0 % · 이끼 보행대 "
+              f"{mf['walk']*100:.0f}% / 답면외측 {mf['tread_outer']*100:.0f}% / "
+              f"챌면 {mf['riser']*100:.0f}% / 줄눈 100%")
 
     def build_stone_dressing(M):
         """고임돌/틈메우기돌 shims at every riser foot + the 돌깔기 aprons (KFS-TRAIL p.72)."""
@@ -1779,6 +1989,18 @@ def main():
                         tilt_deg=b["tilt"], z_mode="base", scene="07",
                         instanceable=True)
                     n_asset += 1
+                    # [S3-6 · GT-17] boulder-top moss zone 0.70-0.90 (§4.1-3). `rock_01/02/
+                    #   03_broken` are plain rock scans, so the moss is bound over the whole
+                    #   instance with `strongerThanDescendants` — the pattern `scatter_debris`
+                    #   already uses to beat an instanceable `/Asset`'s own binding.
+                    if b["moss"]:
+                        try:
+                            from pxr import UsdShade
+                            UsdShade.MaterialBindingAPI.Apply(
+                                stage.GetPrimAtPath(path)).Bind(
+                                M["moss"], UsdShade.Tokens.strongerThanDescendants)
+                        except Exception:
+                            pass
                     continue
                 except Exception as e:
                     print(f"[S3-5][경고] {b['name']} {b['asset']}: {e} — 폴백")
@@ -1888,8 +2110,8 @@ def main():
                               #   inside the courses over most of the flight and would poke
                               #   through at the nosings. S3-6 then re-sites these lobes to
                               #   the margins, where G7 actually puts the litter.
-                              z_fn=lambda x, y: course_top(x)),
-                          (lambda x, y: course_top(x)), 0.0))
+                              z_fn=course_top),
+                          course_top, 0.0))
         for n, (cx, cy, sx, sy) in enumerate(PARAMS["yard_drifts"]):
             masks.append((f"YardLeaf_{n}",
                           gk.build_carpet_mask(
@@ -1914,14 +2136,21 @@ def main():
         #   lays every card at z = 0 over a corridor that descends 4.2 m. That is a real
         #   defect this pilot caught in its first render: a band of leaves hanging in mid-air
         #   across the frame. The lambda is the fix and the reason it must stay a lambda.
+        # [W3 S3-6 · GT-17] `cover` is now **per host**: the corridor ring drops 0.06 -> 0.035
+        #   because 07 is summer and a summer margin carries an accumulation, not a carpet
+        #   (§4.1-5, "reduce `cover` to the margin density"). The pool stays `sc.VEG_DEBRIS`;
+        #   the urban `sct_debris_leaves_dry_*` rows are **never placed in 07** even though
+        #   `SCENE_SCOPE` permits '07' — a scope permission is not a recommendation (H10).
         nfeather = 0
         for nm, res, gfn, z0 in masks:
+            cov = (lb["cover_corridor"] if nm.startswith("LeafDrift")
+                   else lb["cover_yard"])
             for i, req in enumerate(res["scatter_req"]):
                 rx0, ry0, rx1, ry1 = req["region"]
                 nfeather += int(sc.scatter_debris(
                     stage, f"{ROOT}/{nm}_Feather_{i}",
                     rx0, ry0, rx1, ry1, z0,
-                    cover=0.06, seed=gk.det_seed("s07.feather", nm, i),
+                    cover=float(cov), seed=gk.det_seed("s07.feather", nm, i),
                     edge_bias=float(req["edge_bias"]),
                     max_count=int(req["count"]), ground_fn=gfn,
                     scale_jitter=(0.7, 1.15)) or 0)

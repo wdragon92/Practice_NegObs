@@ -429,7 +429,28 @@ PARAMS = dict(
     bins=[(-2.0, -4.0), (-2.0, 4.0)],
     bin_spec=dict(r=0.28, h=0.9),
     # D11 2 planters (replacing the hedge on its own)
-    planters=[(-8.0, -5.0), (-13.0, 5.5)],
+    # [W3 GT-25 · C02-P1] `planters[0]` **(-8.0, -5.0) -> (-11.0, -5.0)**.
+    #   Why: the `beauty_overview` eye is (-7.0, -5.0, 3.0) (`build_views` below), so the old
+    #   coordinate stood a 3.0 x 3.0 m bed **1.00 m** from a judged eye in plan. K4(b) then
+    #   turned its crown into a real 1.06-scaled `Elm_Sapling` USD and `place_shrubs` added two
+    #   rhododendrons, so the lower half of that frame filled with foliage — measured on the
+    #   HEAD arm at **PHOTO -57.5 mean · OCCL 32.8 % new-dark · blob 19.7 % · FRAME 81 %**
+    #   (`w3_cb7_v1.md` §8.1). The bed moves 3.0 m west along the same footway; nothing else
+    #   in the scene moves and the second planter (-13.0, 5.5) is untouched.
+    #   **The y stays -5.0, and the declared row's -6.2 is NOT taken — measured reason.**
+    #   The hedge band (`hedge` above) runs x -16.0 … 6.8 at y = -7.0 +- 0.30 with per-segment
+    #   `y_var`, and its own comment records that it was moved "y -6 -> -7 (avoiding the
+    #   planter)". At (-11.0, **-6.2**) the bed's AABB is y -7.75 … -4.65 and drives straight
+    #   through it: measured interpenetration **Hedge_0 2.350 x 0.683 x 1.060 m** and
+    #   **Hedge_1 0.885 x 0.660 x 0.898 m** (isolated fake-USD arm, `w3_md_reverts_v1.md` §3).
+    #   At y = -5.0 the overlap set is **identical to HEAD's** (the ground plates the bed
+    #   stands on, nothing else) and the hedge clearance the scene engineered is preserved.
+    #   Cost of the deviation: plan distance eye->bed centre **4.000 m** instead of the row's
+    #   re-derived **4.176 m** — a 0.176 m shortfall on a figure the ledger row itself says is
+    #   not its target ("the target of this row is the coordinate"). Declared, not silent:
+    #   the landing-record text asks the supervisor to amend the row's coordinate to
+    #   (-11.0, -5.0) or to rule that the hedge may move instead.
+    planters=[(-11.0, -5.0), (-13.0, 5.5)],
     # D10 3 fluorescent lamps inside the tunnel (gives the dark zone information - secures data value)
     # [v5 verdict applied] At the exposure set by the noon sun (2450) + dome (1000), intensity 1500
     #   contributed effectively nothing to the image, so the tunnel opening was 'pure black' in every RT cut.

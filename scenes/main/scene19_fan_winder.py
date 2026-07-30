@@ -53,6 +53,23 @@ Type identity: the nosings are radial — no straight-line vanishing point.
     adjustment is out of scope for this instruction — read the PT judgment on the premise that
     "the corridor cuts receive sky light only".
 
+[W3 L19] (2026-07-31, lane L19 — `Docs/reports/w3_l19_v1.md`; ledger **GT-50 · GT-51**)
+  scene19 is **imageless** and rides **G8** (`w3_intake_v2_images.md` §4 Lane-3 row 3.7 —
+  the only target image with curved steps, curved parapets and a modern Korean urban
+  roofscape), with **G13** secondary for rooftop/utility hardware. Season is therefore
+  pinned **summer** from G8 (§7 ruling 8) and `_season_audit()` asserts it.
+  (1) **GT-50 — K4(d) `mesh=True`** on all four arc families. The box convention's
+    1.03 chord margin let each tread overshoot its own design ray by 3.045° at r_in;
+    where two treads overlapped the higher one won the top face, so the walked surface
+    sat **one riser (183.333 mm) too high** in 9 wedge slivers. `_arc_split_proof()`
+    measures it: 205,257 samples, 17,019 differ, **all in one stratum**, new-void 0.
+  (2) **GT-51** — era rider §6.2-B (stair guard 1.00 → **1.10 m**) · **N-A3** rooftop
+    plant as measured CC0 scans through `urban_kit(treatment="mtlxoff")` · the 옥상
+    planter rebuilt to 조경기준 제12조 토심 0.75 m with `juniper` / `Yew` pinned ·
+    19-4 membrane patches 4 → 2 re-materialled to read as **우레탄 덧방**, not asphalt.
+  ※ Carried, not fixed: the winder corridor's photometry (finding **L19-F1**) — see the
+    report. The v4 note below already recorded the cause; L19 measures it.
+
 Run / capture / smoke : the same env convention as scene05 and scene06.
     NEGOBS_CAPTURE=1 / NEGOBS_SMOKE=1 / NEGOBS_PARAMS_OVERRIDE / NEGOBS_SCENE_CONFIG
 
@@ -96,8 +113,17 @@ PARAMS = dict(
     #   top_z=−0.15*(i+1), base −2.3) → 90 deg of total turn, drop 1.8
     # [rooftop v3] kite_n: entry sectors 0..kite_n-1 are merged into a single kite landing (top −riser).
     #   The remaining (n−kite_n) steps divide the (n·riser − riser) drop evenly → total drop stays 1.8.
+    # [W3 L19 · GT-41] `mesh=True` — the K4(d) true annular sector. The builder landed
+    #   default-OFF at `5ceb76a` (ledger GT-6 `RELEASED`) and 05 · 06 · 19 flip it inside
+    #   their own pilots; scene06's is GT-29, this is scene19's. The box convention lays a
+    #   Cube of chord `2·r_out·sin(Δθ/2)·1.03` per sub-segment, so at Δθ = 2.5° the half
+    #   chord is **89.877 mm** and the angular overshoot past the design ray is
+    #   `asin(89.877/r) − 1.25°` = **3.0453° at r 1.2 → 0.0375° at r 4.0** (arc 63.78 →
+    #   2.62 mm). Where two treads overlap the higher one wins the top face, so the tread
+    #   hand-over sat that far past its own design ray. See §[C] `_arc_split_proof`.
     winder=dict(r_in=1.2, r_out=4.0, n=12, sector_deg=7.5, a0=0.0,
-                riser=0.15, base_z=-2.3, seg=3, kite_n=3),
+                riser=0.15, base_z=-2.3, seg=3, kite_n=3, mesh=True,
+                arc_seg=6),
     # inner corner newel: Cylinder r1.1 (z −2.3..0.5)
     newel=dict(r=1.1, z_bot=-2.3, z_top=0.5),
     # building corner L wall: flush with the winder radial edges (y=0 / x=0) — seals the side drop pockets
@@ -105,8 +131,16 @@ PARAMS = dict(
     walls=dict(z_bot=-6.0, z_top=3.5,   # [rooftop v3] extended down to ground −6.0 (rooftop core body)
                south=dict(x0=-8.0, x1=4.0, y0=-1.0, y1=0.0),
                west=dict(x0=-1.0, x1=0.0, y0=-8.0, y1=4.0)),
-    # outer low parapet: per-step arc ring (r 3.82..4.05), +1.0 above each step top (arc ring)
-    parapet=dict(r_in=3.82, r_out=4.05, h=1.0),
+    # outer low parapet: per-step arc ring (r 3.82..4.05), +h above each step top (arc ring)
+    # [W3 L19 · era rider §6.2-B] **h 1.00 → 1.10.** "Rail height 0.90 m outdoors is the
+    #   wrong default. Outdoor = 1.10 m … **scene19 → 1.1 m**"
+    #   (`w3_execution_spec_v1.md` §10.7). This is the **stair** guard on the winder's
+    #   outer arc — a 1.8 m fall to the corner slab — and 1.00 m was below the outdoor
+    #   line. The **rooftop perimeter** parapet (`roof.pp_h` 1.20) is a different fixture
+    #   under a different clause (건축법 시행령 제40조 옥상광장 난간 1.2 m) and is NOT
+    #   moved here; `roof.pp_h_inner` is already 1.10 and the `roof_skyline` sight-line
+    #   budget is computed against it, so touching it would move a judged cut.
+    parapet=dict(r_in=3.82, r_out=4.05, h=1.1),
     # [accessibility v2] entry and exit opened (per the look_refs study): parapet on sectors 2..9 only.
     #   corner   = corner slab (the wedge floor between the outer arc and the straight sidewalk edge, lower plaza extension −1.95)
     #   threshold= upper threshold sliver (gap between sidewalk x=4 and the entry sector outer arc, max 0.14, z0)
@@ -118,8 +152,13 @@ PARAMS = dict(
     access=dict(parapet_first=3, parapet_last=9,
                 corner=dict(x0=-1.0, y0=-1.0, x1=4.0, y1=4.0),
                 threshold=dict(x0=3.70, y0=0.0, y1=1.53),
-                guard=dict(x0=3.7, x1=4.0, y0=1.53, y1=4.0, h_top=1.0),
-                post_r=0.05, post_h=1.15),
+    #   [W3 L19 · era rider §6.2-B] guard `h_top` 1.00 → 1.10 (same outdoor line as the
+    #   winder parapet). `post_h` 1.15 → 1.25 is **not** a second era move: the post foot
+    #   is buried 0.05 below its step top, so 1.15 put the cap at `top + 1.10`, exactly
+    #   flush with the old 1.00 parapet + 0.10. Against a 1.10 parapet the same 0.10 m
+    #   proud gate-post reading needs 1.25. The 0.10 m tell is the point of the post.
+                guard=dict(x0=3.7, x1=4.0, y0=1.53, y1=4.0, h_top=1.1),
+                post_r=0.05, post_h=1.25),
     # upper/lower sidewalks (material boundary cue) — solid slabs (down to ground −2.31)
     upper=dict(x0=4.0, x1=17.0, y0=-9.0, y1=4.0, top_z=0.0),
     lower=dict(x0=-9.0, x1=4.0, y0=4.0, y1=17.0, top_z=-1.95),
@@ -132,7 +171,30 @@ PARAMS = dict(
     #        have an empty intersection, so the spec ruled for the mid band of an aged coat) — kit ledger default 0.19.
     #  19-2 parapet turn-up + coping  -> build_rooftop (`roof.turnup_h/coping_w` above)
     #  19-3 roof drains at 2 places (10.5, -0.6) [in every F cut] · (6.0, -7.5)
-    #  19-4 4 membrane repair overcoat patches · radial water marks around the drains · runoff below the parapet
+    #  19-4 membrane repair overcoat patches · radial water marks around the drains · runoff below the parapet
+    #    ★ [W3 L19] **4 → 2, and they are re-materialled so they READ as 우레탄 덧방.**
+    #      Two separate defects, both measured at HEAD:
+    #      (a) COUNT. The intake row (`w3_intake_v2_images.md` §2 scene19 (c)) calls the
+    #          patch prescription "the second-highest count in the set, on a **roof
+    #          membrane** … three of them on one small roof is not [real]" — and the file
+    #          shipped **four**, on a 12.5 x 12.5 m deck. A urethane deck fails where water
+    #          stands, which is the drain sump and the parapet turn-up, not four scattered
+    #          spots. The two surviving 덧방 are re-sited **onto the two drains** (0.9 m
+    #          off-centre, the ponding ring), which is where a real 보수 goes.
+    #      (b) MATERIAL. Both patch roles were bound to `M["coating"]` — **the identical
+    #          material as the deck**. A 2 mm proud plate in the same green at the same
+    #          roughness is not a repair, it is nothing; the only way it could ever read
+    #          was as a silhouette rectangle, which is the vocabulary U-6 bans. A real
+    #          우레탄 덧방 is *the same product applied again*: same hue, **fresher value
+    #          and markedly more sheen** because it has not chalked yet. So the patch takes
+    #          its own material `patch_coat` (same green hue, +18 % value, roughness
+    #          0.72 → 0.46) and the lap edge takes `patch_lap` (a slightly darker feathered
+    #          band of the same coat) — NOT `gk_stain`, which is the dark asphalt saw-cut
+    #          line and is exactly the "reads as asphalt" failure this row exists to fix.
+    #          `build_patch_field(cutline=False)` is the kit default and `apply_ground`
+    #          never overrides it, so no cut line is built at all — the saw-cut vocabulary
+    #          is absent by construction and `patch_cut` is bound only so a future
+    #          `cutline=True` cannot silently fall back to the dark stain.
     #  --   **no joint grid** — P6 has `joint=None`, so the kit cannot emit one.
     #  ★ Tactile **OFF** (§12.4): private rooftop, not a facility covered by the
     #    accessibility act. The scene keeps a `cue_tactile` path for ablation
@@ -147,7 +209,19 @@ PARAMS = dict(
         grid_origin_x=11.6,                    # = 2 * xref(5.8), build_views
         region_inset=0.25,                     # = roof.pp_t (inside parapets)
         drains=[(10.50, -0.60), (6.00, -7.50)],
-        patches=[(12.30, -0.60), (14.30, -0.25), (9.20, -3.40), (6.80, 1.90)],
+        # [W3 L19] 4 → 2, and the two survivors carry **two different causes**, which is
+        #   what makes them read as maintenance rather than as decoration:
+        #     (11.60, −0.60) — the ponding ring of drain 1 (10.50, −0.60), the classic
+        #        우레탄 방수 failure. 1.10 m off the gully centre, so it laps the sump
+        #        surround without covering it.
+        #     ( 8.00,  2.60) — the maintenance walking line out of the rooftop core door
+        #        (x 4.04, y −0.50) toward the north parapet, where a coat wears through
+        #        under dragged plant. Clear of the planter (x 4.5…7.5 · y −8.3…−5.3),
+        #        the pipe run (y −8.55) and the U_N inner face (y 3.75) by ≥ 0.73 m.
+        #   Drain 2 (6.00, −7.50) gets **no** patch: it is under the rooftop planter box,
+        #   which is a pre-existing siting conflict this lane records rather than hides
+        #   (finding L19-F2) — a 덧방 that nobody could reach is not evidence of repair.
+        patches=[(11.60, -0.60), (8.00, 2.60)],
         seam_pitch=1.00,
         wear_n=5,
     ),
@@ -172,8 +246,50 @@ PARAMS = dict(
     roof=dict(pp_t=0.25, pp_h=1.2, pp_h_inner=1.1,
               # [W2-D §5.6 19-2] turn-up 0.30 m · coping 0.50, the middle of 0.45~0.55
               turnup_h=0.30, coping_w=0.50,
-              hvac=[dict(cx=13.0, cy=-7.0), dict(cx=14.4, cy=-7.0)],
-              hvac_size=(0.9, 0.35, 0.8),
+              # [W3 L19 · N-A3, `w3_execution_spec_v1.md` §3.3 — **P0 for scene19**]
+              #   "scene19 rooftop equipment: `ac_unit_04/05/06` re-tasked as rooftop
+              #   plant + PH `utility_box_01/02`, `power_box_01`". The two procedural
+              #   0.9 x 0.35 x 0.8 boxes were a **wall-hung 가정용 실외기 silhouette put
+              #   on a roof deck**: nothing on a real Korean office rooftop looks like
+              #   that. Asset-first (§1.1) replaces them with measured scans:
+              #     `exterior_aircon_unit` 1.800 x 0.374 x **0.928** m (zmin −0.320) — the
+              #        Korean 실외기 bank, x2 on the existing concrete plinths. **This is a
+              #        declared divergence from N-A3's literal `ac_unit_04`, and the reason
+              #        is measured, not aesthetic**: `ac_unit_04` is 3.604 x 4.203 x 1.985 m,
+              #        and on this 12.5 x 12.5 m deck every siting that clears the pipe run
+              #        (y −8.61), the planter box (x 4.5…7.5) and the U_S parapet puts a
+              #        **2.1 m** mass — 0.2 m ABOVE the `roof_context` eye at z 1.9 — inside
+              #        that cut's sight line to the planter canopy, with a clearance of
+              #        0.15 m on the ray to the crown top. Losing a judged cut to fit a named
+              #        asset is the wrong trade (§7 ruling 7's posture). `exterior_aircon_unit`
+              #        carries **4 MTLX materials** (`…_01`, `…_02`, `…_rusted_01`,
+              #        `…_rusted_02`), i.e. the RF-2 age ladder inside one scan.
+              #        `ac_unit_04` stays owed for a scene with deck to spare.
+              #     `power_box_01` 0.512 x 0.362 x 0.506 m — the 배전함 on the deck beside
+              #        the core door. There is **no wall to hang it on**: the L wall's only
+              #        surface facing the upper deck is its 1.0 m end face at x = 4, and the
+              #        0.9 m door takes all of it — so it stands free on a plinth, which is
+              #        what a real 옥상 배전함 does.
+              #     `utility_box_01` 0.520 x 0.432 x **1.120** m — the 옥외 배전반 on the
+              #        east run. Together these two are G13's transformer/box hardware
+              #        vocabulary brought onto the roof, which is the secondary-image job.
+              #   All three are CC0 MaterialX rows, so **every one goes through the T4b
+              #   wrapper** (`treatment="mtlxoff"`, `w3_t4b_v1.md` **T4b-F1**: a raw CC0 call
+              #   site renders **red**; this is library-wide, not a per-asset quirk).
+              #   `power_box_01` measures `zmin −0.252` (49.8 % of its height below its own
+              #   origin) and `exterior_aircon_unit` `zmin −0.320` (34.5 %), so both are
+              #   placed `z_mode="base"` — the scene09 `build_bed_features` precedent.
+              plant=dict(
+                  ac=[dict(aid="exterior_aircon_unit", cx=12.20, cy=-7.00,
+                           yaw=0.0, size=(1.800, 0.374, 0.928)),
+                      dict(aid="exterior_aircon_unit", cx=14.20, cy=-7.00,
+                           yaw=0.0, size=(1.800, 0.374, 0.928))],
+                  plinth_h=0.10, plinth_over=0.10,
+                  boxes=[dict(aid="power_box_01", cx=4.90, cy=-1.90, yaw=0.0,
+                              size=(0.512, 0.362, 0.506), plinth=0.08),
+                         dict(aid="utility_box_01", cx=15.90, cy=2.60,
+                              yaw=-90.0, size=(0.432, 0.520, 1.120),
+                              plinth=0.08)]),
               vent=dict(cx=8.0, cy=-5.5, r=0.15, h=0.8),
               pipe=dict(x0=5.0, x1=16.0, y=-8.55, r=0.06),
               door=dict(w=0.9, h=2.1),   # position = centre of the L wall south end face (x=4)
@@ -184,8 +300,52 @@ PARAMS = dict(
               #   0.19 m clear of the pipe run (y −8.61..−8.49) and 0.25 m clear of the U_W parapet (x4.25).
               #   canopy_*: the measured upper bound of the tree form that scene_common.build_tree
               #   builds from a coordinate-hash RNG (trunk 2.42 + canopy) — for the occlusion AABB and frame checks.
+              #   [W3 L19] Two corrections, both sourced, neither cosmetic.
+              #   ① **토심.** `build_planter`'s defaults gave `curb_h 0.45 / grass_h 0.40`,
+              #      i.e. **0.40 m of soil** — and the bed carried a 3.24–3.80 m 교목.
+              #      조경기준(국토교통부 고시) 제12조 인공지반 조경의 최소 토심: 초화류·
+              #      지피식물 0.15 · 소관목 0.30 · 대관목 0.45 · **교목 0.70 m**. A tree on
+              #      0.40 m of substrate on a roof deck is not merely unrealistic, it is
+              #      below the standard the drawing would have been approved against.
+              #      → `curb_h 0.90 / soil_h 0.75`, a raised 옥상 플랜터 box, which is also
+              #      what the real thing looks like (a box you can sit on, not a kerb).
+              #   ② **수종.** `SCENE_SPECIES["Scene19"]` resolves to `ash` (`Fraxinus.usd`,
+              #      native 5.341 m) — the civic street-plaza species, inherited because
+              #      `build_planter` does **not** forward `species=` to `build_tree`
+              #      (K4(c) signature-preserving; the kit is frozen this window). A 5 m
+              #      이팝나무 substitute on an exposed roof is the wrong plant: 옥상조경
+              #      uses wind- and shallow-soil-tolerant evergreens. Pinned to
+              #      **`juniper`** (`Chinese_Juniper.usd`, native 2.516 m, §10.2 role
+              #      "temple / office **evergreen**") by calling `build_tree` directly at
+              #      the scene, which is the only scene-side route to `species=`.
+              #      An evergreen also makes the bed **season-neutral**, which is the
+              #      honest answer for a scene whose season is pinned from an image
+              #      (§7 ruling 8) and which must carry neither bloom nor leaf-off.
+              #   ③ **관목** pinned to `planter_accent` (`Yew.usd`, 주목) — S-2's "formal
+              #      planter accent" row, one species per bed. This removes the last
+              #      `Rhododendron` from scene19, so **K4-F1's library-wide magenta loss
+              #      cannot show up here at all**; the delta is declared, not discovered.
+              #   The tree is seated off-centre at (cx − 0.62, cy + 0.62) because
+              #   `build_planter(tree_mtls=None)` puts its third shrub at the bed centre;
+              #   교목 offset + 관목 massed is the normal planting layout anyway.
               planter=dict(cx=6.0, cy=-6.8, size=3.0,
-                           canopy_top=3.90, canopy_r=1.35)),
+                           curb_h=0.90, soil_h=0.75,
+                           tree_dx=-0.62, tree_dy=0.62,
+                           tree_species="juniper", shrub_species="planter_accent",
+                   #   `trunk_h 1.55` makes `build_tree`'s target `1.55 x 1.60 x U(0.92,
+                   #   1.08)`; at the pinned coordinate (5.38, −6.18) the deterministic
+                   #   draw is **2.5065 m** — i.e. the Juniper is placed at essentially
+                   #   its own native 2.516 m (scale 0.9961) instead of being stretched
+                   #   1.4x, which is the whole point of matching `trunk_h` to the species.
+                   #   Crown top = soil 0.750 + 2.5065 = **3.2565 m**; measured crown
+                   #   radius 0.537 m (asset bbox 107.74 x 106.02 x 254.42 asset-units).
+                   #   `canopy_top` / `canopy_r` below are the **conservative upper
+                   #   bounds** used by the occlusion AABB and the frame checks, per the
+                   #   convention the v4 note set (it declared 3.90 against a measured
+                   #   3.81). K4-F7 applies: a MASH-instanced species cannot be crown-
+                   #   measured from mesh points, so the margin is not decoration.
+                           trunk_h=1.55,
+                           canopy_top=3.30, canopy_r=0.75)),
 
     material=dict(
         scale=dict(plaza_light=1.80, plaza_lower=0.8, granite_dark=1.0,
@@ -212,6 +372,20 @@ PARAMS = dict(
         #   (`entry_gate` mean -47, `upper_approach` -57). Rescaled to luminance 0.19,
         #   the declared mid, keeping the green hue exactly.
         coating_color=(0.155, 0.203, 0.162), coating_rough=0.72,
+        # [W3 L19 · 19-4] **우레탄 덧방 (repair overcoat)** — its own material, because
+        #   binding the patch to `coating` (what HEAD did) makes it invisible: same hue,
+        #   same value, same roughness, 2 mm proud. The real tell of a 덧방 on a weathered
+        #   deck is that it is *the same product applied again*: identical hue, a fresher
+        #   value, and much more sheen because it has not chalked. Value +18 % on the
+        #   declared M2 mid (luminance 0.19 → 0.224, still inside the director-approved
+        #   0.16~0.22 band's neighbourhood and far from the 0.10~0.16 special-effects
+        #   band), hue held exactly (G/R and G/B ratios preserved to 3 decimals);
+        #   roughness 0.72 → 0.46, the single strongest cue and the only one that
+        #   survives a shadowed frame. `patch_lap` is the feathered coat edge — the same
+        #   overcoat brushed thin, one step DOWN in value, never the dark `gk_stain`
+        #   saw-cut line (that is the asphalt vocabulary this row exists to remove).
+        patch_coat_color=(0.183, 0.240, 0.191), patch_coat_rough=0.46,
+        patch_lap_color=(0.132, 0.173, 0.138), patch_lap_rough=0.60,
         nosing_color=(0.85, 0.72, 0.10), nosing_rough=0.7,
         hvac_color=(0.60, 0.61, 0.62), hvac_rough=0.5,      # [rooftop v3] HVAC unit
         # r5 judgment: a dark door was buried in the dark granite wall → painted steel plate in blue-grey for contrast
@@ -278,6 +452,165 @@ def _step_top(i):
     return -w["riser"] - rem * (i - kn + 1)
 
 
+# ---------------------------------------------------------------------------
+# [W3 L19 · GT-41] The K4(d) split proof, run in the scene's own smoke check.
+#   GT-6's acceptance test is "a prim-hash / GT-delta diff … proven, not asserted".
+#   For scene19 the two conventions differ **only** in which azimuth a tread owns, so
+#   the honest instrument is a walked-top-face sampler over the annulus that evaluates
+#   both conventions from the same PARAMS and classifies every differing sample.
+#   GPU 0, no boot, ~0.6 s.
+# ---------------------------------------------------------------------------
+def _arc_top_box(x, y):
+    """Top face of the winder step **boxes** (the pre-K4(d) convention) at (x, y)."""
+    w = PARAMS["winder"]
+    cx, cy = PARAMS["center"]["cx"], PARAMS["center"]["cy"]
+    dth = math.radians(w["sector_deg"] / float(w["seg"]))
+    half = w["r_out"] * math.sin(dth / 2.0) * 1.03      # = chord/2
+    radial, r_mid = w["r_out"] - w["r_in"], (w["r_in"] + w["r_out"]) / 2.0
+    dx, dy, best = x - cx, y - cy, None
+    for i in range(w["n"]):
+        for k in range(w["seg"]):
+            a_mid = math.radians(w["a0"] + i * w["sector_deg"]) + (k + 0.5) * dth
+            ca, sa = math.cos(a_mid), math.sin(a_mid)
+            lx, ly = dx * ca + dy * sa - r_mid, -dx * sa + dy * ca
+            if abs(lx) <= radial / 2.0 and abs(ly) <= half:
+                t = _step_top(i)
+                best = t if best is None or t > best else best
+    return best
+
+
+def _arc_top_mesh(x, y):
+    """Top face of the winder step **true annular sectors** (K4(d)) at (x, y)."""
+    w = PARAMS["winder"]
+    cx, cy = PARAMS["center"]["cx"], PARAMS["center"]["cy"]
+    dx, dy = x - cx, y - cy
+    r = math.hypot(dx, dy)
+    if not (w["r_in"] <= r <= w["r_out"]):
+        return None
+    a = math.degrees(math.atan2(dy, dx)) % 360.0
+    if not (w["a0"] <= a <= w["a0"] + w["n"] * w["sector_deg"]):
+        return None
+    return _step_top(min(int((a - w["a0"]) / w["sector_deg"]), w["n"] - 1))
+
+
+def _arc_split_proof(nr=57, na=3601):
+    """GT-41's split proof. Returns (samples, strata, new_void, new_solid, per_boundary).
+
+    The winder steps are *not* the only solid over the annulus — the L walls, the newel,
+    the corner slab and the threshold all bid for the same (x, y). The walked surface is
+    the max of the two, which is why the a0/a1 ends come out clean: the box overshoot
+    past 0° and 90° falls **inside** `Wall_south` / `Wall_west` (`z_top` 3.5), so it can
+    never win a top face. GT-29 had to declare that term for scene06 because scene06's
+    landing ray overshot into open air; here it is proved absent rather than assumed.
+    """
+    w = PARAMS["winder"]
+    nw, up, lo = PARAMS["newel"], PARAMS["upper"], PARAMS["lower"]
+    wl, ac = PARAMS["walls"], PARAMS["access"]
+    co, th, gd = ac["corner"], ac["threshold"], ac["guard"]
+
+    def other(x, y):
+        c = []
+        if math.hypot(x - PARAMS["center"]["cx"],
+                      y - PARAMS["center"]["cy"]) <= nw["r"]:
+            c.append(nw["z_top"])
+        for tag in ("south", "west"):
+            b = wl[tag]
+            if b["x0"] <= x <= b["x1"] and b["y0"] <= y <= b["y1"]:
+                c.append(wl["z_top"])
+        if co["x0"] <= x <= co["x1"] and co["y0"] <= y <= co["y1"]:
+            c.append(lo["top_z"])
+        if th["x0"] <= x <= up["x0"] and th["y0"] <= y <= th["y1"]:
+            c.append(up["top_z"])
+        if gd["x0"] <= x <= gd["x1"] and gd["y0"] <= y <= gd["y1"]:
+            c.append(gd["h_top"])
+        if x >= up["x0"]:
+            c.append(up["top_z"])
+        if y >= lo["y1"] - 13.0 and x <= lo["x1"]:
+            c.append(lo["top_z"])
+        return max(c) if c else None
+
+    def walked(x, y, fn):
+        s, o = fn(x, y), other(x, y)
+        if s is None:
+            return o
+        return s if o is None else max(s, o)
+
+    span = w["n"] * w["sector_deg"]
+    r0, r1 = w["r_in"] - 0.10, w["r_out"] + 0.10
+    a0, a1 = w["a0"] - 4.0, w["a0"] + span + 4.0
+    strata, per = {}, {}
+    n_tot = nv = ns = 0
+    for ir in range(nr):
+        r = r0 + (r1 - r0) * ir / (nr - 1)
+        for ia in range(na):
+            a = a0 + (a1 - a0) * ia / (na - 1)
+            x, y = r * math.cos(math.radians(a)), r * math.sin(math.radians(a))
+            zb = walked(x, y, _arc_top_box)
+            zm = walked(x, y, _arc_top_mesh)
+            n_tot += 1
+            if zb is None and zm is None:
+                continue
+            if zb is None:
+                ns += 1
+                continue
+            if zm is None:
+                nv += 1
+                continue
+            if abs(zm - zb) < 1e-9:
+                continue
+            strata[round((zm - zb) * 1000.0, 3)] = \
+                strata.get(round((zm - zb) * 1000.0, 3), 0) + 1
+            b = min(range(w["n"] + 1),
+                    key=lambda i: abs(a - (w["a0"] + i * w["sector_deg"])))
+            per[b] = per.get(b, 0) + 1
+    return n_tot, strata, nv, ns, per
+
+
+# ---------------------------------------------------------------------------
+# [W3 L19 · §7 ruling 8] Seasonal audit — every scene pins the season of its
+#   governing image and audits its own dressing against it. scene19 is imageless and
+#   rides **G8** (`w3_intake_v2_images.md` §4 Lane 3 row 3.7), whose read is
+#   **summer, high sun, clear sky**. The audit asserts, rather than states, that
+#   nothing in the scene carries a competing seasonal cue.
+# ---------------------------------------------------------------------------
+SCENE_SEASON = "summer"          # inherited from G8 (nearest image, Lane-3 3.7)
+
+
+def _season_audit():
+    """Print the seasonal ledger and return the list of violations."""
+    import scene_common as _sc
+    rf = PARAMS["roof"]
+    pl = rf["planter"]
+    bad = []
+    rows = []
+    # 1. the only vegetation in the scene
+    tree = _sc.resolve_species("/World/Scene19/Planter_A",
+                               species=pl["tree_species"])[0]
+    rows.append(("교목", tree, "상록 (계절 중립)"
+                 if "Juniper" in tree or "Fir" in tree or "Spruce" in tree
+                 else "낙엽 — 계절 표기 필요"))
+    if not ("Juniper" in tree or "Fir" in tree or "Spruce" in tree):
+        bad.append(f"tree {tree} is deciduous under a summer pin")
+    shr = _sc.SHRUB_SPECIES.get(pl["shrub_species"], [])
+    rows.append(("관목", ", ".join(shr) or "(none)",
+                 f"1종/화단 = {len(shr)}"))
+    if len(shr) != 1:
+        bad.append(f"shrub role {pl['shrub_species']} is not single-species")
+    for s in shr:
+        if s in _sc.SEASONAL_SUBPRIMS:
+            bad.append(f"{s} carries a seasonal sub-prim ({_sc.SEASONAL_SUBPRIMS[s]})")
+    # 2. leaf-off must not be reachable
+    rows.append(("bare=", "호출 없음", "낙엽기 표현 0"))
+    # 3. no seasonal scatter: the roof profile's debris pool
+    rows.append(("낙엽 스캐터", "roof_membrane 프로파일", "지붕 도막 — 낙엽 처방 없음"))
+    print("  [계절 감사] 기준 이미지 G8 = 여름·고각 태양·맑음 → "
+          f"SCENE_SEASON={SCENE_SEASON}")
+    for a, b, c in rows:
+        print(f"    {a:12s} {b:44s} {c}")
+    print(f"    → {'OK' if not bad else 'FAIL ' + str(bad)}")
+    return bad
+
+
 _BOXES_CACHE = [None]
 
 
@@ -323,12 +656,21 @@ def _solid_boxes():
              lo["top_z"], h)):
         B.append((f"RoofPP_{tag}", x0, x1, y0, y1, bz - 0.05, bz + hh))
     # plant, rooftop door, planter (approximated including the canopy)
-    hs = rf["hvac_size"]
-    for i, u in enumerate(rf["hvac"]):
-        B.append((f"Hvac_{i}", u["cx"] - hs[0] / 2 - 0.05,
-                  u["cx"] + hs[0] / 2 + 0.05, u["cy"] - hs[1] / 2 - 0.05,
-                  u["cy"] + hs[1] / 2 + 0.05, up["top_z"],
-                  up["top_z"] + 0.1 + hs[2]))
+    # [W3 L19 · N-A3] The two procedural boxes became two `exterior_aircon_unit` scans on
+    #   the same plinths; the AABB is the asset's measured footprint + the plinth overhang,
+    #   so the occlusion test still reads the same coordinates the assembly uses.
+    pl_h, pl_o = rf["plant"]["plinth_h"], rf["plant"]["plinth_over"]
+    for i, u in enumerate(rf["plant"]["ac"]):
+        sx, sy, sz = u["size"]
+        B.append((f"Hvac_{i}", u["cx"] - sx / 2 - pl_o, u["cx"] + sx / 2 + pl_o,
+                  u["cy"] - sy / 2 - pl_o, u["cy"] + sy / 2 + pl_o,
+                  up["top_z"], up["top_z"] + pl_h + sz))
+    for u in rf["plant"]["boxes"]:
+        sx, sy, sz = u["size"]
+        B.append((f"Plant_{u['aid']}", u["cx"] - sx / 2 - 0.06,
+                  u["cx"] + sx / 2 + 0.06, u["cy"] - sy / 2 - 0.06,
+                  u["cy"] + sy / 2 + 0.06, up["top_z"],
+                  up["top_z"] + u["plinth"] + sz))
     v = rf["vent"]
     B.append(("Vent", v["cx"] - v["r"], v["cx"] + v["r"] * 2.2,
               v["cy"] - v["r"], v["cy"] + v["r"], up["top_z"],
@@ -342,9 +684,13 @@ def _solid_boxes():
               (ws["y0"] + ws["y1"]) / 2 + d["w"] / 2, up["top_z"],
               up["top_z"] + d["h"]))
     pl = rf["planter"]
-    ph = max(pl["size"] / 2.0, pl["canopy_r"])                  # canopy included
-    B.append(("Planter_A", pl["cx"] - ph, pl["cx"] + ph, pl["cy"] - ph,
-              pl["cy"] + ph, 0.0, pl["canopy_top"]))
+    # [W3 L19] the crown is now off-centre, so the AABB is the union of the box and the
+    #   crown disc rather than one square about the bed centre.
+    tx, ty = pl["cx"] + pl["tree_dx"], pl["cy"] + pl["tree_dy"]
+    hb, cr = pl["size"] / 2.0, pl["canopy_r"]
+    B.append(("Planter_A", min(pl["cx"] - hb, tx - cr), max(pl["cx"] + hb, tx + cr),
+              min(pl["cy"] - hb, ty - cr), max(pl["cy"] + hb, ty + cr),
+              0.0, pl["canopy_top"]))
     for k, bd in PARAMS["buildings"].items():
         bz = float(bd.get("base_z", 0.0))
         B.append((f"Bldg{k}", bd["x0"], bd["x1"], bd["y0"], bd["y1"],
@@ -463,6 +809,28 @@ def _geom_report():
           f"{up['top_z'] + 2.0:+.2f} → "
           f"{'OK (눈높이 이하)' if e_roof + 0.5 < up['top_z'] + 2.0 else 'FAIL'}")
 
+    # ---- [W3 L19 · GT-41] K4(d) split proof -------------------------------
+    w = PARAMS["winder"]
+    n_tot, strata, nv, ns, per = _arc_split_proof()
+    riser_mm = round((_step_top(w["kite_n"] - 1)
+                      - _step_top(w["kite_n"])) * 1000.0, 3)
+    n_diff = sum(strata.values())
+    print(f"  [GT-41 분할증명] mesh={w['mesh']} · 표본 {n_tot} · 상이 {n_diff} "
+          f"({100.0 * n_diff / n_tot:.2f} %) · new-void {nv} · new-solid {ns}")
+    for d, c in sorted(strata.items(), key=lambda kv: -kv[1]):
+        print(f"    {d:+10.3f} mm  n={c}")
+    lone = (len(strata) == 1 and abs(list(strata)[0] + riser_mm) < 1e-3
+            and nv == 0 and ns == 0)
+    print(f"    단 하나의 계층 = 정확히 −1 라이저({riser_mm:.3f} mm) · "
+          f"디딤면 z 이동 0 → {'OK' if lone else 'FAIL'}")
+    ends = [b for b in per if b in (0, w["n"])]
+    kite = [b for b in per if 1 <= b <= w["kite_n"] - 1]
+    print(f"    인계 경계 {sorted(b for b in per)} · a0/a1 끝단 {ends} "
+          f"(L 벽에 매몰) · 카이트 경계 {kite} (라이저 0) → "
+          f"{'OK' if not ends and not kite else 'FAIL'}")
+
+    _season_audit()
+
     hits = [(n, _solid_at(*v["eye"])) for n, v in sorted(views.items())]
     hits = [(n, s) for n, s in hits if s is not None]
     for n, s in hits:
@@ -504,10 +872,14 @@ def _geom_report():
 
     v = views["roof_context"]
     rf = PARAMS["roof"]
-    pl, hv = rf["planter"], rf["hvac"]
-    probes = [("수관 정상", (pl["cx"], pl["cy"], pl["canopy_top"]))]
+    pl, hv = rf["planter"], rf["plant"]["ac"]
+    probes = [("수관 정상", (pl["cx"] + pl["tree_dx"], pl["cy"] + pl["tree_dy"],
+                             pl["canopy_top"])),
+              ("화단 연석 상단", (pl["cx"], pl["cy"] + pl["size"] / 2.0,
+                                  pl["curb_h"]))]
     for i, u in enumerate(hv):
-        probes.append((f"실외기{i}", (u["cx"], u["cy"], 0.5 + 0.4 * i)))
+        probes.append((f"실외기{i}", (u["cx"], u["cy"],
+                                      rf["plant"]["plinth_h"] + u["size"][2])))
     probes += [("환기구", (rf["vent"]["cx"], rf["vent"]["cy"], 0.8)),
                ("배관", (10.0, rf["pipe"]["y"], 0.14)),
                ("남 파라펫 상단", (10.0, PARAMS["upper"]["y0"] + 0.12,
@@ -572,6 +944,11 @@ def build_views():
     #   [_frame_scan check] steps 88.8 % (**riser 41.8 / tread 47.0** — an ascending sight line, so the
     #   riser faces are exposed in alternation) · 8 steps sighted (sector 2~9) · white mass 0.0 % ·
     #   newel 11.2 % (the radial convergence datum) · dark L wall 0.1 %.
+    #   [W3 L19 · doc drift corrected] the "8 steps (sector 2~9)" line above is **stale** and was
+    #   already stale at HEAD: re-run on the untouched tree the check reports **7/12, sectors
+    #   3~9**. The gate is `>= 6`, so it passed either way and nobody re-read it. Annotated in
+    #   place rather than rewritten (GT-6's precedent); the live number is what `_geom_report`
+    #   prints, not what this comment claims.
     out["lower_lookup"]   = dict(eye=[0.59, 3.35, -0.02], tgt=[1.55, 1.55, -0.9])
     # [rooftop v4 / v6 judgment (2)] the old eye(5.2,0.7,1.5) sat inside the L wall and edge guard, so no
     #   tgt could avoid the white mass (0 fan steps visible). Following the judgment's recommendation it
@@ -728,6 +1105,13 @@ def main():
         M["coating"] = sc.make_pbr(stage, "/World/Looks/Coating",
                                    diffuse_color=mp["coating_color"],
                                    roughness_const=mp["coating_rough"])
+        # [W3 L19 · 19-4] 우레탄 덧방 (repair overcoat) + its feathered lap edge.
+        M["patch_coat"] = sc.make_pbr(stage, "/World/Looks/PatchCoat",
+                                      diffuse_color=mp["patch_coat_color"],
+                                      roughness_const=mp["patch_coat_rough"])
+        M["patch_lap"] = sc.make_pbr(stage, "/World/Looks/PatchLap",
+                                     diffuse_color=mp["patch_lap_color"],
+                                     roughness_const=mp["patch_lap_rough"])
         M["gk_iron"] = sc.make_pbr(stage, "/World/Looks/GKitIron",
                                    diffuse_color=(0.09, 0.09, 0.095),
                                    metallic=0.55, roughness_const=0.55)
@@ -796,8 +1180,11 @@ def main():
             z=float(up["top_z"]), gy=0.0, origin=(ox, 0.0, 0.0), axis="-x",
             edges=[("roof_edge", s_edge)], dists=(2, 3.5, 5),
             scene="scene19", tactile=(),
+            # [W3 L19 · 19-4] `("patch", 4)` → `("patch", 2)`. Both survivors carry a
+            #   cause (see PARAMS["gkit"]["patches"]); `patch_proud` is 0.002 m, two
+            #   orders below `GT_DELTA` 0.020, so this is dressing, not a GT row.
             overrides=dict(infra=dict(gully=2),
-                           surface=(("patch", 4),
+                           surface=(("patch", 2),
                                     ("stain", ("water", "drip", "dirt")))),
             extras_args=dict(membrane=dict(seam_pitch=float(g["seam_pitch"]),
                                            wear_n=int(g["wear_n"]))),
@@ -807,8 +1194,10 @@ def main():
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
         M2.update(membrane=M["coating"], membrane_seam=M["gk_stain"],
-                  membrane_wear=M["coating"], patch=M["coating"],
-                  patch_cut=M["gk_stain"], gully=M["gk_iron"],
+                  # [W3 L19 · 19-4] the 덧방 gets its own coat, and the lap edge is a
+                  #   feathered coat rather than the dark asphalt saw-cut stain.
+                  membrane_wear=M["coating"], patch=M["patch_coat"],
+                  patch_cut=M["patch_lap"], gully=M["gk_iron"],
                   manhole=M["gk_iron"], trench=M["gk_iron"],
                   trench_frame=M["gk_iron"], joint=M["gk_stain"],
                   crack=M["gk_stain"], weed=M["grass"], wear=M["gk_stain"],
@@ -831,9 +1220,11 @@ def main():
         w = PARAMS["winder"]
         for i in range(w["n"]):
             a0 = w["a0"] + i * w["sector_deg"]
+            # [W3 L19 · GT-41] `mesh=` — true annular sectors. See PARAMS["winder"].
             sc.build_arc_steps(stage, f"/World/Scene19/Step_{i}", cx, cy,
                                w["r_in"], w["r_out"], a0, a0 + w["sector_deg"],
-                               w["seg"], _step_top(i), w["base_z"], M["step"])
+                               w["seg"], _step_top(i), w["base_z"], M["step"],
+                               mesh=w["mesh"], arc_seg=w["arc_seg"])
         # inner corner newel
         nw = PARAMS["newel"]
         sc.add_cylinder(stage, "/World/Scene19/Newel",
@@ -857,10 +1248,16 @@ def main():
         for i in range(ac["parapet_first"], ac["parapet_last"] + 1):
             a0 = w["a0"] + i * w["sector_deg"]
             top = _step_top(i)
+            # [W3 L19 · GT-41] The parapet ring is a **guard**, not a walked surface, so
+            #   its `mesh=` flip is R-3 and not GT — but it is the ring the eye actually
+            #   reads as "curved" (G8's concentric vocabulary), and the box convention
+            #   left each 7.5° arc 0.34° proud of its neighbour at r_in, i.e. a stepped
+            #   ledge every 7.5° along a nominally smooth curve.
             sc.build_arc_steps(stage, f"/World/Scene19/Parapet_{i}", cx, cy,
                                pp["r_in"], pp["r_out"], a0, a0 + w["sector_deg"],
                                1, top + pp["h"], top - 0.1, M["parapet"],
-                               collider=True)
+                               collider=True, mesh=w["mesh"],
+                               arc_seg=w["arc_seg"])
         # gate posts at both ends of the parapet (marking where the opening starts, look_refs study) — metal.
         #   The post foot is buried −0.05 below the top face of the open-side (lower) step → prevents floating
         r_mid = (pp["r_in"] + pp["r_out"]) / 2.0
@@ -904,6 +1301,65 @@ def main():
     # [rooftop v3] rooftop parapet (perimeter guard) + plant props + rooftop door
     #   — scene context cues (plant back-inference · scale anchor). Hazard geometry (winder) unchanged.
     # -------------------------------------------------------------------
+    def build_plant(M):
+        """[W3 L19 · N-A3] rooftop plant + PH boxes as measured CC0 scans.
+
+        Every asset here is a MaterialX row, so **every call passes `treatment="mtlxoff"`**
+        — `w3_t4b_v1.md` **T4b-F1**: all 33 CC0 rows bind `ND_normalmap_float`, which is
+        missing from this runtime's Sdr registry, and a raw call site renders **red**.
+        The wrapper puts the material opinion inside the prototype, which is the only
+        route that survives `instanceable=True` (a scene-side bind cannot reach into a
+        prototype — measured twice, `w3_t4b_v1.md` §1.2 and GT-21's rock fix).
+        `z_mode="base"` because these scans carry geometry below their own origin
+        (`exterior_aircon_unit` zmin −0.320 = 34.5 %, `power_box_01` −0.252 = 49.8 %);
+        the default `grade` mode would sink them to the waist (scene09 precedent).
+        Failure is **non-fatal**: an unloadable urban row must not cost the roof its
+        plinths, so the plinths are built first and unconditionally.
+        """
+        rf, up = PARAMS["roof"], PARAMS["upper"]
+        pl = rf["plant"]
+        z0 = up["top_z"]
+        for i, u in enumerate(pl["ac"]):          # concrete 기초, always built
+            sx, sy, _ = u["size"]
+            sc.add_box(stage, f"/World/Scene19/HvacBase_{i}",
+                       (u["cx"], u["cy"], z0 + pl["plinth_h"] / 2.0),
+                       (sx + 2 * pl["plinth_over"], sy + 2 * pl["plinth_over"],
+                        pl["plinth_h"]), M["granite"])
+        for u in pl["boxes"]:
+            sx, sy, _ = u["size"]
+            sc.add_box(stage, f"/World/Scene19/PlantBase_{u['aid']}",
+                       (u["cx"], u["cy"], z0 + u["plinth"] / 2.0),
+                       (sx + 0.12, sy + 0.12, u["plinth"]), M["granite"])
+        try:
+            import urban_kit as uk
+        except Exception as e:
+            print(f"[urban][경고] urban_kit 로드 실패 — 옥상 설비 생략: {e}")
+            return 0
+        n = 0
+        for i, u in enumerate(pl["ac"]):
+            try:
+                if uk.add_urban_asset(
+                        stage, f"/World/Scene19/Hvac_{i}", u["aid"],
+                        pos_m=(u["cx"], u["cy"], z0 + pl["plinth_h"]),
+                        yaw_deg=u["yaw"], z_mode="base", scene="19",
+                        instanceable=True, treatment="mtlxoff") is not None:
+                    n += 1
+            except Exception as e:
+                print(f"[urban][경고] {u['aid']} 배치 실패: {e}")
+        for u in pl["boxes"]:
+            try:
+                if uk.add_urban_asset(
+                        stage, f"/World/Scene19/Plant_{u['aid']}", u["aid"],
+                        pos_m=(u["cx"], u["cy"], z0 + u["plinth"]),
+                        yaw_deg=u["yaw"], z_mode="base", scene="19",
+                        instanceable=True, treatment="mtlxoff") is not None:
+                    n += 1
+            except Exception as e:
+                print(f"[urban][경고] {u['aid']} 배치 실패: {e}")
+        print(f"[옥상 설비] N-A3 실측 스캔 {n}/{len(pl['ac']) + len(pl['boxes'])}점 "
+              f"· treatment=mtlxoff · z_mode=base · instanceable")
+        return n
+
     def build_rooftop(M):
         rf = PARAMS["roof"]
         up, lo = PARAMS["upper"], PARAMS["lower"]
@@ -964,15 +1420,10 @@ def main():
         pp("L_N", lo["x0"] + t, lo["x1"], lo["y1"] - t, lo["y1"], lo["top_z"], h, lo)
         pp("L_E", lo["x1"] - t, lo["x1"], lo["y0"], lo["y1"] - t, lo["top_z"], h, lo)
 
-        # HVAC units (0.1 plinth + body) + gooseneck vent + pipe run — upper rooftop
-        hs = rf["hvac_size"]
-        for i, u in enumerate(rf["hvac"]):
-            sc.add_box(stage, f"/World/Scene19/HvacBase_{i}",
-                       (u["cx"], u["cy"], up["top_z"] + 0.05),
-                       (hs[0] + 0.1, hs[1] + 0.1, 0.1), M["granite"])
-            sc.add_box(stage, f"/World/Scene19/Hvac_{i}",
-                       (u["cx"], u["cy"], up["top_z"] + 0.1 + hs[2] / 2.0),
-                       hs, M["hvac"])
+        # [W3 L19 · N-A3] rooftop plant — the two procedural boxes and the two PH boxes
+        #   are real scans through `urban_kit`, on the concrete plinths that were already
+        #   there (a 실외기 sits on 기초 + 방진패드, not on the membrane).
+        build_plant(M)
         v = rf["vent"]
         sc.add_cylinder(stage, "/World/Scene19/Vent",
                         (v["cx"], v["cy"], up["top_z"] + v["h"] / 2.0),
@@ -1001,10 +1452,21 @@ def main():
     def build_dressing(M):
         tree_mtls = (M["wood"], M["canopy_a"], M["canopy_b"])
         pl = PARAMS["roof"]["planter"]     # [rooftop v4] position comes from the single source PARAMS
+        # [W3 L19] 옥상 플랜터: 토심 0.75 m (조경기준 제12조 교목 0.70 이상) ·
+        #   관목 1종 pinned (`planter_accent` = 주목) · 교목은 `species=` 를 넘기기 위해
+        #   **직접** `build_tree` 로 심는다 — `build_planter` 는 `species=` 를
+        #   `place_shrubs` 로만 넘기고 `build_tree` 로는 넘기지 않는다(K4(c) 시그니처 보존,
+        #   킷은 이번 창에서 동결). `tree_mtls=None` 이면 세 번째 관목이 화단 중앙에
+        #   앉으므로 교목은 (−0.62, +0.62) 오프셋에 심는다.
         sc.build_planter(stage, "/World/Scene19/Planter_A",
                          pl["cx"], pl["cy"], 0.0,
-                         M["granite"], M["grass"], tree_mtls=tree_mtls,
-                         size=pl["size"])
+                         M["granite"], M["grass"], tree_mtls=None,
+                         size=pl["size"], curb_h=pl["curb_h"],
+                         grass_h=pl["soil_h"], species=pl["shrub_species"])
+        sc.build_tree(stage, "/World/Scene19/Planter_A",
+                      pl["cx"] + pl["tree_dx"], pl["cy"] + pl["tree_dy"],
+                      pl["soil_h"], *tree_mtls,
+                      trunk_h=pl["trunk_h"], species=pl["tree_species"])
         for key, bd in PARAMS["buildings"].items():
             sc.build_building(stage, f"/World/Scene19/Building_{key}", bd,
                               M["brick"], M["glass"], M["parapet"])
@@ -1025,7 +1487,8 @@ def main():
                 sc.build_arc_steps(stage, f"/World/Scene19/Rail_{i}", cx, cy,
                                    pp["r_out"] - 0.06, pp["r_out"], a0,
                                    a0 + w["sector_deg"], 1, top + 0.06,
-                                   top - 0.06, M["rail"], collider=False)
+                                   top - 0.06, M["rail"], collider=False,
+                                   mesh=w["mesh"], arc_seg=w["arc_seg"])
         # cue_tactile: warning tactile strip on the upper approach (in front of the first step)
         if cfg.get("cue_tactile"):
             # [W2 · ground_kit §12.5-3] texture-backed so the 36 dots shade.
@@ -1040,10 +1503,13 @@ def main():
             for i in range(w["n"]):
                 a0 = w["a0"] + i * w["sector_deg"]
                 top = _step_top(i)
+                # default-OFF ablation arm — flipped with the rest so the arm is not
+                #   left on the retired convention (GT-40's tactile-arc precedent).
                 sc.build_arc_steps(stage, f"/World/Scene19/Nosing_{i}", cx, cy,
                                    w["r_out"] - 0.06, w["r_out"], a0,
                                    a0 + w["sector_deg"], 1, top + 0.004,
-                                   top - 0.02, nos, collider=False)
+                                   top - 0.02, nos, collider=False,
+                                   mesh=w["mesh"], arc_seg=w["arc_seg"])
 
     # ── scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")

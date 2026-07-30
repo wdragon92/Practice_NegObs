@@ -144,6 +144,29 @@ Run (GUI look check - default):
   (the user's rectangular-ground ban is live and cannot be adjudicated here) · the light rig
   (the dataset's controlled variable — season is carried by content, never by the sun).
 
+[W3 P09 · GT-41] The two items the S09 lane **filed and did not take**, taken here after
+  `w3_intake_v2_images.md` §7.2 ruled on both. Nothing else in the scene moves.
+    (1) **판석 디딤돌 — the stepping stones, un-declined.** §7.2: *"S09 — stepping stones ALLOWED
+        as physical 판석 slabs with 3D relief (the user's ban targets decorative rectangle DECALS,
+        not real objects; prefer irregular outlines)."* Ten slabs, **irregular 6/7-gon prisms**
+        authored as `UsdGeom.Mesh` in-scene, 0.120 m thick, in the −Y lawn band on a 0.57 m stride
+        from the lawn edge to the **landward end of boardwalk leg L1** — which until now began in
+        the middle of a lawn with no approach at all. Top face **12 mm** above the mown turf,
+        **below `ground_kit.GT_DELTA` (0.020)**, `collider=False`: element AABBs add (GT-8 class),
+        the hazard/collision box list does not. `stepstone_selfcheck()` asserts all five conditions
+        — sub-threshold · irregular · inside the lawn · clear of the deck · clear of the trees —
+        from the shipped coordinates, and fails the build otherwise.
+    (2) **the stone tone correction.** `w3_s09_v1.md` §7 **P1** measured it and declined to take
+        it after its own pilot; §7.2 authorised it — `stone_tint` **0.64 → 0.524** (linear factor
+        **0.818**). `stain` · `moss` · `drystone` · `drystone_cap` take the **same** factor, so
+        every ratio the file authors survives and the **waterline contrast — this scene's only
+        drop anchor — is preserved by construction**, exactly as v7 preserved it at 0.90 → 0.64.
+        Material only: **0 prims, 0 geometry**, GT-17's *"render-gate item, not a GT item"* class.
+  Still **not** done, and still for the reasons `w3_s09_v1.md` §7 gives: the last two metres of
+  boardwalk onto the embankment stone (**P7** — §7.2 *"boardwalk 0.60 m termination ACCEPTED"*) ·
+  flowering ground cover (**P2**, no stock asset) · reflective water (**P4**) · a real `PLACEMENT`
+  block (**P5**) · the ridge-crown device (**P3**).
+
 Auto capture : NEGOBS_CAPTURE=1 python scene09_ghat_riverfront.py
 Assembly smoke: NEGOBS_SMOKE=1 python scene09_ghat_riverfront.py
 Self-check   : NEGOBS_SELFCHECK=1 python scene09_ghat_riverfront.py  (no boot)
@@ -383,6 +406,45 @@ PARAMS = dict(
     lawns=[dict(x0=-24.0, x1=-0.8, y0=12.0, y1=30.0),
            dict(x0=-24.0, x1=-0.8, y0=-30.0, y1=-12.0)],
     lawn_proud=0.03,
+    # [W3 P09 · GT-41 (1)] **판석 디딤돌 — G9's stepping stones, as physical slabs.**
+    #   `w3_s09_v1.md` §2 row 15 declined them (**P6**) because the user's 바닥 사각형 무늬 ban
+    #   was live and a scene lane cannot adjudicate a ban. `w3_intake_v2_images.md` §7.2 did
+    #   adjudicate it: *"S09 — stepping stones ALLOWED as physical 판석 slabs with 3D relief
+    #   (the user's ban targets decorative rectangle DECALS, not real objects; prefer irregular
+    #   outlines)"*. So the three conditions of the permission are built in, and each one is a
+    #   machine check in `stepstone_selfcheck()` rather than a sentence here:
+    #     · **physical, with relief** — a 0.120 m thick slab (the 화강석 판석 100~150 mm band),
+    #       bedded into the turf, authored as a **UsdGeom.Mesh prism** (the `build_hip_roof`
+    #       precedent) and not as a ground decal;
+    #     · **irregular outline** — 6 or 7 vertices, per-vertex radius drawn from
+    #       [`r_lo`, `r_hi`] and per-vertex angle jittered by up to `ang_var`, so no slab is a
+    #       rectangle and no two slabs are alike. The gate asserts `nv >= 5` and a minimum
+    #       radius spread on every slab;
+    #     · **sub-threshold** — top face `lawn_proud + proud` = 0.030 + 0.012 = **0.042**, i.e.
+    #       12 mm above the mown turf, **below `ground_kit.GT_DELTA` (0.020)**. The gate asserts
+    #       it against the imported constant, so a later edit cannot drift it silently.
+    #   **12 mm is also the correct Korean detail here, not just the convenient one.** A 디딤돌
+    #   in a **planting bed** stands 30~60 mm proud (it must shed water and out-top the ground
+    #   cover); a 디딤돌 in a **mown lawn** is set flush-to-slightly-proud, because anything
+    #   taller is a mower strike. G9's slabs sit in mown turf with the grass growing to their
+    #   edges — flush-set, and that is what is built.
+    #   **Where, and why there.** One route, in the −Y lawn band, from the lawn's inner edge to
+    #   the **landward end of boardwalk leg L1** (`y −18.0`, `x −16.0…−9.2`). Before this the
+    #   boardwalk began in the middle of a lawn with **no land approach at all** — a 디딤돌 line
+    #   exists exactly where a desire line crosses turf between two hard surfaces, and this is
+    #   that line. `x = −14.6` is chosen, not centred: the park tree at (−13.0, −17.8) stands on
+    #   the obvious `x = −13` line, and 1.60 m of clearance from its trunk is worth more than a
+    #   round number. Stagger ±0.10 m alternating — a stepping-stone line follows a **stride**,
+    #   and a stride alternates feet.
+    #   **No +Y mirror**, deliberately: the +Y lawn has no boardwalk and therefore no
+    #   destination, and a decorative copy of a functional route is the thing the ban is about.
+    #   **Placement law** [computed]: the footprint is `x −15.015…−14.185`, `y −17.865…−12.105`,
+    #   i.e. entirely **behind** all three h0.3 preset eyes (`x = −2/−5/−10`, looking +X), so
+    #   `fov_selfcheck` returns `OUT(전 프리셋 후방)` and the judged near window cannot see it.
+    #   It reads in `g9_oblique`, the cut the target image is judged against.
+    stepstones=dict(x=-14.6, y0=-12.42, pitch=0.57, n=10, stagger=0.10,
+                    r_lo=0.235, r_hi=0.315, nv=(6, 7), ang_var=12.0,
+                    thick=0.120, proud=0.012, seed=709),
     # 10 street trees — on the lawn bands, irregular layout (§3 bans grids and even spacing).
     #   From park_vista (eye −9.6, 22) the nearest is 6.1 m away and all sit outside the +-30 deg FOV →
     #   zero foreground intrusion. From from_river(23.92,0)/across_river(27.96,0) they
@@ -587,12 +649,31 @@ PARAMS = dict(
         #   plaza_light diff linear mean 0.469 × 0.64 = **albedo 0.300**
         #   (real grey granite sits in the 0.2~0.35 band) → expected render sRGB 0.75 ~ 191.
         #   ** geometry and concealment behaviour unchanged ** — every step, terrace and embankment still share one material.
-        stone_tint=(0.64, 0.63, 0.60),         # was (0.90,0.89,0.86)
+        # [W3 P09 · GT-41 (2)] **0.64 → 0.524.** The v7 step above fixed the *sandstone swap*'s
+        #   near-white; it did not fix the paving, and the W3 S09 round measured exactly how much
+        #   was left: `near_ground_stats` on the three judged h0.3 cuts read **wht% 64.6 / 66.0 /
+        #   65.2** against the v5.1 §1 convention of < 2, mean **203 / 206 / 204** against ≤ 170,
+        #   and `regression_check` raised a **WHITE FAIL** on `h0.3_d10` (2.1 → 45.4 %,
+        #   `look_check/scene09/260731_w3_s09/regr_vs_260731_w3_cb1.json`). `w3_s09_v1.md` §7 **P1**
+        #   filed the correction and declined to take it at the end of a long lane, *"after the
+        #   pilot"*; `w3_intake_v2_images.md` §7.2 then authorised it — *"stone_tint 0.64→0.524
+        #   measured correction authorized (material micro)"*.
+        #   Linear factor **0.818** (0.64 × 0.818 = 0.5235). albedo 0.469 × 0.524 = **0.2458**,
+        #   which is the middle of the real grey-granite 0.20~0.35 band and no longer its top;
+        #   expected render sRGB `_srgb(0.2458 × 1.77)` = **0.691 ≈ 176** (was 0.756 ≈ 193).
+        #   **The same 0.818 is applied to every tint that was authored as a ratio of this one**
+        #   (`stain` · `moss` · `drystone` · `drystone_cap`), so the ratios below survive to four
+        #   decimal places and the **waterline contrast — this scene's only drop anchor — is
+        #   preserved by construction**, exactly as v7 preserved it through 0.90 → 0.64.
+        #   Not scaled, deliberately: `gk_crack` (a flat 0.055 near-black) — darkening the paving
+        #   only *widens* the crack contrast, and a crack is not a ratio of the stone it is in.
+        stone_tint=(0.524, 0.515, 0.491),      # was (0.64,0.63,0.60) ← (0.90,0.89,0.86)
         # [v5 adopted] moss tint — the 2 steps just below the water (the 'wet band' of the water-level history).
         # [v7] **contrast ratio preserved** to match the stone_tint reduction (0.90→0.64).
         #   old moss/stone = 0.30/0.90 = 0.333 → new 0.64×0.333 = 0.213.
         #   (dropping the absolute value alone would kill the waterline cue with it — this scene's only drop anchor)
-        moss_tint=(0.213, 0.284, 0.185),       # was (0.30,0.40,0.26)
+        # [W3 P09] × 0.818 again. moss/stone 0.3328 → **0.3321** [computed].
+        moss_tint=(0.174, 0.232, 0.151),       # was (0.213,0.284,0.185)
         deck_tint=(0.95, 0.88, 0.78),          # timber boardwalk planks (grey weathered wood)
         # [W3 S09 row (3)] the members under the plank deck are **not** the same tone as the
         #   walking face: a deck plank silvers in the weather, a joist in permanent shade does
@@ -607,8 +688,16 @@ PARAMS = dict(
         #   sawn slab, and it carries lichen. 0.86x the paving tint with a warm bias keeps it
         #   inside the same albedo family (so `albedo_selfcheck` still governs it) while reading
         #   as a different material at 20 m.
-        drystone_tint=(0.55, 0.52, 0.46),
-        drystone_cap_tint=(0.60, 0.57, 0.50),  # the coping course, weathered a shade lighter
+        # [W3 P09 · GT-41 (2)] × 0.818 with the paving, and **this is the reason it had to move**:
+        #   the comment above authors this tint as *0.86× the paving*. Left at 0.55 while the
+        #   paving dropped to 0.524 the wall would have come out **lighter than the machined slab
+        #   beside it** (ratio 1.050) — the exact inverse of the physical claim it is built on.
+        #   drystone/stone 0.8594 → **0.8588**, cap/stone 0.9375 → **0.9370** [computed].
+        #   These two faces are outside the ±30° cone of all three h0.3 presets (`fov_selfcheck`),
+        #   so they cannot enter the wht% verification in either direction — the two halves of
+        #   this tone row are cleanly separable, and they are separated in the report.
+        drystone_tint=(0.450, 0.425, 0.376),   # was (0.55,0.52,0.46)
+        drystone_cap_tint=(0.491, 0.466, 0.409),  # was (0.60,0.57,0.50) — coping, a shade lighter
         # [W3 S09 row (6)] autumn hillside. The three tones are the two that dominate G9
         #   (ginkgo yellow, maple orange) plus the dark conifer band a Korean hillside always
         #   carries; `hill_c` is the far ridge and is deliberately **lighter and greyer**, not
@@ -651,7 +740,16 @@ PARAMS = dict(
         # [B-09-4] 0.55 → 0.42: the water-mark band was weaker than the sandstone texture variation,
         #   so the waterline was not identifiable. (The contrast amount is kept identical after the stone swap.)
         # [v7] contrast ratio preserved for the same reason: old 0.42/0.90 = 0.467 → 0.64×0.467 = 0.299
-        stain_tint=(0.299, 0.299, 0.263),      # was (0.42,0.42,0.37)
+        # [W3 P09 · GT-41 (2)] × 0.818 again. stain/stone 0.4672 → **0.4676** [computed].
+        #   This is the tint the **waterline band** and the kit's **joint** lines both bind to
+        #   (`build_ground_kit` M2: `joint=M["stain"]`), so holding the ratio holds the joint
+        #   grid's legibility at the same time as the drop anchor's.
+        stain_tint=(0.245, 0.245, 0.215),      # was (0.299,0.299,0.263)
+        # [W3 P09 · GT-41 (1)] 판석 디딤돌. A lawn-set stepping stone is a **different stone lot**
+        #   from the sawn promenade slab beside it — soil splash and mower wear take it a shade
+        #   down and a shade greyer. 0.92× the paving tint keeps it in the same albedo family
+        #   (so `albedo_selfcheck` governs it) while separating it from the paving at 20 m.
+        stepstone_tint=(0.482, 0.474, 0.452),
         grass_tint=(0.55, 0.68, 0.42),
         # [B-09-3] rough 0.10 → 0.15 (eases the uniform bright teal clipping)
         water_color=(0.06, 0.11, 0.12), water_rough=0.15,
@@ -1078,6 +1176,10 @@ _ALBEDO_TABLE = [
     #   `far_color` leaves the table with its two boxes (row (6)).
     ("자연석 옹벽",           "plaza_light", "drystone_tint",   True,  False),
     ("자연석 옹벽 갓돌",      "plaza_light", "drystone_cap_tint", False, True),
+    # [W3 P09] the 판석 디딤돌 — 10 slabs of ~0.24 m² each ≈ 2.4 m², a **small horizontal**
+    #   area, so criterion (B) applies and a violation would be a WARN, not a FAIL. Listed so
+    #   the new tint is governed by the same cap as everything else rather than escaping it.
+    ("판석 디딤돌",           "plaza_light", "stepstone_tint",  False, True),
     ("데크 장선",             "wood_dark",   "joist_tint",      False, False),
     ("데크 기둥",             "wood_dark",   "post_tint",       False, False),
     ("가을 산능선 a(단풍)",   None,          "hill_a",          True,  False),
@@ -1316,6 +1418,124 @@ _FOV_HALF = 30.0
 _PRESET_EYES = tuple((-d, 0.0) for d in (2, 5, 10))
 
 
+# ===========================================================================
+# [C5] [W3 P09 · GT-41 (1)] 판석 디딤돌 — **one source** for the assembler and both gates.
+#   `build_stepstones` extrudes this, `fov_selfcheck` excludes it from the judged cones and
+#   `stepstone_selfcheck` asserts the §7.2 permission's conditions on it. A gate that
+#   re-derives geometry from a *copy* of the coordinates proves nothing — the
+#   `hip_roof_topology` / `views_park_vista` single-source convention, applied again.
+# ===========================================================================
+def stepstone_outlines():
+    """Returns `[(tag, cx, cy, poly, z_top, z_bot)]`, `poly` = CCW [(x, y), ...] in world plan.
+
+    Determinism: `np.random.RandomState(seed)`, **never `hash()`** — CPython randomises
+    `hash(str)` per process, which is the S09-F3 defect that would have made the prim hash
+    differ run to run. Per-vertex angle jitter is capped at `ang_var` = 12°, i.e. well under
+    half the 51.4°/60° vertex spacing, so the vertex order stays monotonic and the polygon
+    cannot self-intersect.
+    """
+    ss = PARAMS["stepstones"]
+    rs = np.random.RandomState(int(ss["seed"]) & 0x7FFFFFFF)
+    z_top = float(PARAMS["lawn_proud"]) + float(ss["proud"])
+    z_bot = z_top - float(ss["thick"])
+    out = []
+    for k in range(int(ss["n"])):
+        cx = float(ss["x"]) + (ss["stagger"] if k % 2 == 0 else -ss["stagger"])
+        cy = float(ss["y0"]) - k * float(ss["pitch"])
+        nv = int(ss["nv"][k % len(ss["nv"])])
+        a0 = float(rs.uniform(0.0, 360.0))
+        poly = []
+        for j in range(nv):
+            a = (a0 + 360.0 * j / nv
+                 + float(rs.uniform(-ss["ang_var"], ss["ang_var"])))
+            r = float(rs.uniform(ss["r_lo"], ss["r_hi"]))
+            poly.append((cx + r * math.cos(math.radians(a)),
+                         cy + r * math.sin(math.radians(a))))
+        out.append((f"S{k}", cx, cy, poly, z_top, z_bot))
+    return out
+
+
+def _poly_aabb(poly):
+    xs = [p[0] for p in poly]
+    ys = [p[1] for p in poly]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+def stepstone_selfcheck(verbose=True):
+    """[W3 P09 · GT-41 (1)] The stepping-stone permission, asserted from the shipped
+    coordinates instead of from a paragraph. No render, no boot. Five conditions:
+
+      (a) **sub-threshold** — proud above the mown lawn < `ground_kit.GT_DELTA` (0.020).
+          Read from the imported constant, so a later `GT_DELTA` edit re-decides this
+          scene automatically instead of leaving a stale number in a comment.
+      (b) **irregular outline** — `nv >= 5` (a rectangle is impossible) **and** a radius
+          spread >= 0.04 m about the slab centre (a *regular* n-gon is impossible too:
+          `sc.add_disc` would have produced one, and a machined disc is not a 판석).
+      (c) **in the lawn** — every slab's plan AABB lies wholly inside one lawn band, so no
+          slab overhangs onto the granite promenade where it would be a trip lip on a
+          walked surface instead of a stone in turf.
+      (d) **clear of the boardwalk** — >= 0.10 m in plan from every leg footprint. The
+          route's whole purpose is to arrive at leg L1; arriving *inside* it would be an
+          interpenetration, not an arrival.
+      (e) **clear of the park trees** — >= 1.00 m from every trunk station. This is the
+          gate that keeps `x = -14.6` honest: the obvious `x = -13` line runs straight
+          through the tree at (-13.0, -17.8).
+    """
+    ss = PARAMS["stepstones"]
+    stones = stepstone_outlines()
+    proud = float(ss["proud"])
+    rows, bad = [], []
+    gt_delta = float(gk.GT_DELTA)
+    ok_a = proud < gt_delta
+    if not ok_a:
+        bad.append("(a) 문턱")
+    lawns = [(lw["x0"], lw["y0"], lw["x1"], lw["y1"]) for lw in PARAMS["lawns"]]
+    legs = [(x0, y0, x1, y1)
+            for _t, x0, y0, x1, y1, _ax in PARAMS["boardwalk"]["legs"]]
+    trees = list(PARAMS["park_trees"])
+    for tag, cx, cy, poly, z_top, _z_bot in stones:
+        x0, y0, x1, y1 = _poly_aabb(poly)
+        radii = [math.hypot(px - cx, py - cy) for px, py in poly]
+        spread = max(radii) - min(radii)
+        ok_b = len(poly) >= 5 and spread >= 0.04
+        ok_c = any(lx0 <= x0 and x1 <= lx1 and ly0 <= y0 and y1 <= ly1
+                   for lx0, ly0, lx1, ly1 in lawns)
+        d_leg = min(_rect_gap(x0, y0, x1, y1, *lg) for lg in legs)
+        ok_d = d_leg >= 0.10
+        d_tree = min(_rect_gap(x0, y0, x1, y1, tx, ty, tx, ty)
+                     for tx, ty in trees)
+        ok_e = d_tree >= 1.00
+        if not (ok_b and ok_c and ok_d and ok_e):
+            bad.append(tag)
+        rows.append((tag, len(poly), spread, ok_b, ok_c, d_leg, ok_d,
+                     d_tree, ok_e))
+    ok = ok_a and not bad
+    if verbose:
+        print("=" * 68)
+        print("scene09 [W3 P09] 판석 디딤돌 허가 조건 검산 (렌더 없음)")
+        print("=" * 68)
+        print(f"  (a) 문턱 이하   잔디면 위 노출 {proud * 1000:.0f} mm "
+              f"< GT_DELTA {gt_delta * 1000:.0f} mm  "
+              f"{'OK' if ok_a else 'FAIL'}   "
+              f"[상면 z {stones[0][4]:.3f} · 두께 {ss['thick'] * 1000:.0f} mm]")
+        for tag, nv, sp, ok_b, ok_c, dl, ok_d, dt, ok_e in rows:
+            print(f"  {tag:4s} 꼭짓점 {nv} · 반지름 편차 {sp * 1000:5.1f} mm "
+                  f"{'OK' if ok_b else 'FAIL'} · 잔디밭 내부 "
+                  f"{'OK' if ok_c else 'FAIL'} · 데크 이격 {dl:5.3f} m "
+                  f"{'OK' if ok_d else 'FAIL'} · 수목 이격 {dt:5.2f} m "
+                  f"{'OK' if ok_e else 'FAIL'}")
+        print(f"  ⇒ {'OK — 허가 조건 위반 0건' if ok else 'FAIL: ' + str(bad)}")
+        print("=" * 68)
+    return ok, rows
+
+
+def _rect_gap(ax0, ay0, ax1, ay1, bx0, by0, bx1, by1):
+    """Plan gap between two axis-aligned rects (0.0 if they overlap or touch)."""
+    dx = max(bx0 - ax1, ax0 - bx1, 0.0)
+    dy = max(by0 - ay1, ay0 - by1, 0.0)
+    return math.hypot(dx, dy)
+
+
 def _box_min_bearing(x0, y0, x1, y1, eye):
     """Smallest |bearing| (deg) any point of the axis-aligned box subtends at `eye`, looking +X.
     Returns None when the whole box is behind the eye."""
@@ -1338,6 +1558,15 @@ def fov_selfcheck(verbose=True):
         items.append((f"보드워크 {tag}", x0, y0, x1, y1))
     lx, ly = PARAMS["signs"][0][2], PARAMS["signs"][0][3]
     items.append(("안내 거치대", lx - 0.35, ly - 0.35, lx + 0.35, ly + 0.35))
+    # [W3 P09] the 판석 디딤돌 route, as **one** footprint: the slabs are a single element
+    #   for this test (they are collinear on 0.57 m centres, so the union's nearest corner
+    #   is the binding one and per-slab rows would be ten copies of the same answer).
+    _sx0, _sy0, _sx1, _sy1 = 1e9, 1e9, -1e9, -1e9
+    for _t, _cx, _cy, _poly, _zt, _zb in stepstone_outlines():
+        _a0, _b0, _a1, _b1 = _poly_aabb(_poly)
+        _sx0, _sy0 = min(_sx0, _a0), min(_sy0, _b0)
+        _sx1, _sy1 = max(_sx1, _a1), max(_sy1, _b1)
+    items.append(("판석 디딤돌 10", _sx0, _sy0, _sx1, _sy1))
     for cx, cy, _n, _rl, _rh, _s in PARAMS["lilies"]:
         sp = PARAMS["lily"]["spread"]
         items.append((f"수련 ({cx:.1f},{cy:.1f})", cx - sp, cy - sp, cx + sp,
@@ -1637,7 +1866,14 @@ BANNER = """\
     (4) 가을 — 갈대가 짚빛 + 이삭, 원경 능선이 단풍/은행 색으로 지평을 닫는가
         (건물 실루엣 2동은 삭제됐다 — G9 에 건물은 한 채도 없다)
     (5) 판정 프리셋 13컷의 근경은 **아무것도 바뀌지 않았는가**
-        (신설 요소 전부 ±30° 밖 — `fov_selfcheck`)"""
+        (신설 요소 전부 ±30° 밖 — `fov_selfcheck`)
+15. [W3 P09 · GT-41] 톤 + 디딤돌
+    (1) 석재 톤 — h0.3 세 컷의 포장이 순백(wht% 65 · mean 205)에서 내려왔는가.
+        물때(수위선) 밴드와 줄눈 대비는 **비가 보존됐으므로** 그대로여야 한다.
+        자연석 옹벽이 포장보다 **어둡게** 남아 있는가 (0.86배 관계 유지)
+    (2) 판석 디딤돌 — `g9_oblique` 좌하단 잔디밭에서, **모서리가 직각이 아닌**
+        부정형 판석 10장이 잔디에 박혀 보드워크 L1 끝단으로 이어지는가.
+        데칼이 아니라 **두께 120 mm 의 돌**로 보이는가 (측면 그림자)"""
 
 
 def main():
@@ -1654,7 +1890,9 @@ def main():
         ok3, _ = season_audit()
         ok4, _ = fov_selfcheck()
         ok5, _ = horizon_selfcheck()
-        sys.exit(0 if (ok1 and ok2 and ok3 and ok4 and ok5) else 1)
+        # [W3 P09] the 판석 디딤돌 permission gate (GT-41 (1)).
+        ok6, _ = stepstone_selfcheck()
+        sys.exit(0 if (ok1 and ok2 and ok3 and ok4 and ok5 and ok6) else 1)
 
     sc.check_assets(ASSET_ROLES, hdri=PARAMS["light"]["hdri"])
     simulation_app = sc.boot(capture_mode or smoke)
@@ -1716,6 +1954,12 @@ def main():
         M["drystone_cap"] = tex("plaza_light", "/World/Looks/DryStoneCap",
                                 sca["stone"] * 0.55,
                                 tint=mp["drystone_cap_tint"])
+        # [W3 P09 · GT-41 (1)] 판석 디딤돌 — the same granite texture at its own tone
+        #   (`stepstone_tint`). Texture scale 0.75× the promenade's: a slab is ~0.55 m across
+        #   and the promenade's 1.1 m granite cell would put **less than half a cell** on a
+        #   whole stone, i.e. no visible stone character at all.
+        M["stepstone"] = tex("plaza_light", "/World/Looks/StepStone",
+                             sca["stone"] * 0.75, tint=mp["stepstone_tint"])
         # [W2 fix batch F1] Ground-class decal materials for the kit — see the
         #   `scripts/const_color_audit.py` rule: a *ground* prim may not carry a
         #   texture-less constant. paint / metal / water / misc are excluded from
@@ -2089,6 +2333,54 @@ def main():
             sc.build_tree(stage, f"{ROOT}/ParkTree_{i}", tx, ty,
                           _bed_top_at(tx, ty, pr),
                           M["wood"], M["canopy_a"], M["canopy_b"])
+
+    def build_stepstones(M):
+        """[W3 P09 · GT-41 (1)] 판석 디딤돌 — one irregular prism mesh per slab.
+
+        **Why it is not `sc.add_box`**: a box is a rectangle, and §7.2's permission is
+        explicitly conditional on *"irregular outlines preferred"*. **Why it is not
+        `sc.add_disc`**: that is a *regular* n-gon — a machined disc, which is what a
+        원형 디딤돌 is and not what a 판석 is. So the slab is authored here from
+        `stepstone_outlines()`, exactly the way `build_hip_roof` authors the pavilion roof:
+        side quads + two n-gon caps, `subdivisionScheme="none"` so the faceted outline
+        survives (catmullClark would round every slab into a pebble), winding taken from
+        the CCW plan ring so the side normals point outward — the `sc.add_disc` topology,
+        with the ring made irregular.
+
+        `collider=False`, and the reason is GT-41's z-profile cell: the lawn box underneath
+        is already `collider=True` with its top face 12 mm lower, so the walkable surface
+        exists and does not move by more than `GT_DELTA`. Adding 10 collision boxes to buy
+        12 mm of relief would change the hazard/collision box list, which is a different
+        declaration from the element-AABB one this row makes.
+        """
+        from pxr import UsdGeom, Gf
+        P = f"{ROOT}/StepStones"
+        n = 0
+        for tag, _cx, _cy, poly, z_top, z_bot in stepstone_outlines():
+            nv = len(poly)
+            pts = ([Gf.Vec3f(float(x), float(y), float(z_bot))
+                    for x, y in poly]
+                   + [Gf.Vec3f(float(x), float(y), float(z_top))
+                      for x, y in poly])
+            counts, idx = [], []
+            for k in range(nv):                       # side quads, outward
+                counts.append(4)
+                idx += [k, (k + 1) % nv, (k + 1) % nv + nv, k + nv]
+            counts.append(nv)                         # top cap (+Z)
+            idx += list(range(nv, 2 * nv))
+            counts.append(nv)                         # bottom cap (−Z)
+            idx += list(range(nv - 1, -1, -1))
+            x0, y0, x1, y1 = _poly_aabb(poly)
+            m = UsdGeom.Mesh.Define(stage, f"{P}/Slab_{tag}")
+            m.CreatePointsAttr(pts)
+            m.CreateFaceVertexCountsAttr(counts)
+            m.CreateFaceVertexIndicesAttr(idx)
+            m.CreateSubdivisionSchemeAttr("none")
+            m.CreateExtentAttr([Gf.Vec3f(float(x0), float(y0), float(z_bot)),
+                                Gf.Vec3f(float(x1), float(y1), float(z_top))])
+            sc._bind_mtl(m.GetPrim(), M["stepstone"])
+            n += 1
+        return n
 
     def build_deck(M):
         """[W3 S09 · row (3)] **Zigzag timber boardwalk** — replaces the v5/v6 straight slab.
@@ -2532,6 +2824,12 @@ def main():
         build_pavilion(M)
         build_beds(M)                        # [W3 S09 (1)] 자연석 계단식 화단 — G9's left half
         build_lawns(M)                       # [v6 (3)] lawn bands + street trees
+        n_ss = build_stepstones(M)           # [W3 P09 (1)] 판석 디딤돌 — G9's stepping stones
+        _sst = PARAMS["stepstones"]
+        print(f"[디딤돌] 판석 {n_ss}장 · 부정형 {_sst['nv'][0]}~{_sst['nv'][-1]}각 "
+              f"· 두께 {_sst['thick'] * 1000:.0f} mm · 잔디면 위 노출 "
+              f"{_sst['proud'] * 1000:.0f} mm (< GT_DELTA {gk.GT_DELTA * 1000:.0f} mm) "
+              f"· 콜라이더 없음")
         build_deck(M)                        # [W3 S09 (3)] zigzag boardwalk
         build_bed_planting()                 # [W3 S09 (2)] one species per bed
         build_bed_features()                 # [W3 S09] stump / moss boulders via T4b wrapper
@@ -2642,9 +2940,11 @@ def main():
         _s_ok, _ = season_audit()
         _f_ok, _ = fov_selfcheck()
         _h_ok, _ = horizon_selfcheck()
+        _d_ok, _ = stepstone_selfcheck()     # [W3 P09] GT-41 (1)
         print(f"[W3 S09] 계절 {'OK' if _s_ok else 'FAIL'} · "
               f"FOV 배제 {'OK' if _f_ok else 'FAIL'} · "
-              f"지평 폐합 {'OK' if _h_ok else 'FAIL'}")
+              f"지평 폐합 {'OK' if _h_ok else 'FAIL'} · "
+              f"[W3 P09] 디딤돌 {'OK' if _d_ok else 'FAIL'}")
         # binding check right after assembly — follow-up to judgment §6 (2) ("if it is still bright, check the binding")
         rp = stage.GetPrimAtPath(f"{ROOT}/Pavilion/Roof")
         fp = stage.GetPrimAtPath(f"{ROOT}/Pavilion/Finial")

@@ -221,22 +221,33 @@ PARAMS = dict(
     #  roofline is always inside the frame with sky above it, never cutting the top edge.
     #  `plan_building` re-derives `z_ceil` per block from the real eye set and the build
     #  loop prints it, so the claim is checked at assembly time, not asserted here.
+    #  **`h` is the SHELL top, not the ridge — measured, after the check lied once.**
+    #  `building_kit`'s total-height invariant is *"the top of the shell must stay at
+    #  base_z + h"*, and `build_korean_building` then puts a parapet band and a penthouse
+    #  **above** it. Measured off the emitted prims, identically on all six blocks:
+    #  **+2.90 m** from shell top to the highest prim (parapet 1.2, penthouse to 2.9).
+    #  The first pilot compared `h + base_z` against `z_ceil`, printed "sky above roof
+    #  6/6", and rendered a brick wall running off the top edge of `h0.3_d10`. The check
+    #  now uses `base_z + h + ROOF_ALLOW` and every height below is solved from it.
+    #  This is also a finding for the kit owner: backdrop policy (2) says *build nothing
+    #  above `z_ceil`*, and the roof furniture is not subject to it (§8 S01-F1).
     backdrop=dict(
         base_z=-0.63,          # sits on GroundGrass, not on the plaza
+        roof_allow=2.90,       # [measured] shell top -> highest emitted prim
         mat="brick_R",
         # (tag, x0, x1, y0, y1, h) — plan rectangles of the silhouette masses.
         #   E1..E3  the +X campus block G1 puts across the head of the plaza
         #   W1      the -X mass that closes `lower_lookback`
         #   N1 / S1 the flanking wings, far enough that the lawn reads as open ground
-        #  Every ridge below is set from that ceiling, measured per block at assembly
-        #  time; the printed `sky above roof` column must read True six times.
+        #  Every shell height below is solved from that ceiling minus `roof_allow`, per
+        #  block, and the printed `sky above roof` column must read True six times.
         blocks=(
-            ("E1",  56.0,  72.0, -16.0,  -1.0,  8.2),
-            ("E2",  60.0,  74.0,   2.0,  18.0,  9.0),
-            ("E3",  78.0,  92.0, -10.0,   8.0, 10.5),
-            ("W1", -90.0, -74.0,  -8.0,  10.0,  9.0),
-            ("N1", -26.0, -10.0,  60.0,  72.0,  9.0),
-            ("S1",   4.0,  22.0, -68.0, -56.0,  7.8),
+            ("E1",  56.0,  72.0, -16.0,  -1.0,  5.7),
+            ("E2",  60.0,  74.0,   2.0,  18.0,  6.3),
+            ("E3",  78.0,  92.0, -10.0,   8.0,  8.7),
+            ("W1", -90.0, -74.0,  -8.0,  10.0,  6.5),
+            ("N1", -26.0, -10.0,  60.0,  72.0,  6.4),
+            ("S1",   4.0,  22.0, -68.0, -56.0,  5.1),
         ),
     ),
     window=dict(w=1.2, h=1.6, inset=0.15, col_step=2.5, margin=2.0),
@@ -1194,12 +1205,16 @@ def main():
                 kit, stage, f"/World/Scene01/Backdrop_{tag}", bd,
                 bk.Mtls(M[bp["mat"]], parapet=M[bp["mat"]]), plan=p)
             n_tot += len(prims)
-            sky = (p.z_ceil is None) or (hh + bp["base_z"] < p.z_ceil)
+            # `hh` is the SHELL top. The ridge is `roof_allow` higher — parapet band +
+            # penthouse, which `build_korean_building` emits above the invariant and
+            # which backdrop policy (2) does not gate. Compare the RIDGE.
+            ridge = bp["base_z"] + hh + bp["roof_allow"]
+            sky = (p.z_ceil is None) or (ridge < p.z_ceil)
             if not sky:
-                over.append((tag, hh, p.z_ceil))
-            print(f"[backdrop] {tag} W {p.W:5.1f} h {hh:5.1f} · kind {p.kind} / "
-                  f"tier {p.tier} · d_true {p.d_true:6.2f} m · "
-                  f"in_frame {str(p.in_frame):5s} · z_ceil "
+                over.append((tag, round(ridge, 2), round(p.z_ceil, 2)))
+            print(f"[backdrop] {tag} W {p.W:5.1f} shell h {hh:5.2f} · ridge "
+                  f"{ridge:5.2f} · kind {p.kind} / tier {p.tier} · d_true "
+                  f"{p.d_true:6.2f} m · in_frame {str(p.in_frame):5s} · z_ceil "
                   f"{('%.2f' % p.z_ceil) if p.z_ceil is not None else '  n/a'} · "
                   f"sky above roof {str(sky):5s} · prims {len(prims)}")
         print(f"[backdrop] {len(bp['blocks'])}동 {n_tot} 프림 · 창 0 · "

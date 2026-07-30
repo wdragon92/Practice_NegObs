@@ -210,9 +210,17 @@ PARAMS = dict(
     #     construction: a rectangle with a circular hole cannot be tiled by boxes and annular
     #     sectors without either a coplanar overlap (z-fighting) or an uncovered corner, and the
     #     v6 rectangle is precisely the shape the user asked to be taken out of this scene.
+    #     Band materials are chosen on **measured albedo**, not on name. `plaza_light` is
+    #     mean 0.710 `[measured — diff texture, 512 px]` and under a noon sun it renders past
+    #     the v5.1 §4 pure-white line: the first pilot put **77.4 % of `h0.3_d2` above 0.8**
+    #     with it on the near band. The near band is therefore `paving_interlock` (0.554) —
+    #     literally v6's own plaza material, whose measured WHITE share was 0.3 % — and the
+    #     rhythm is carried by `plaza_lower` (0.494), a 1.12:1 tone step, which is the kind of
+    #     band G8 actually shows. A bullseye is as much a decorative ground pattern as a
+    #     rectangle is.
     plaza=dict(r_out=26.0, thick=0.80, sectors=16, arc_seg=6,
-               bands=((14.0, 17.2, "plaza_a"), (17.2, 20.4, "plaza_b"),
-                      (20.4, 23.6, "plaza_a"), (23.6, 26.0, "plaza_b"))),
+               bands=((14.0, 17.2, "paving"), (17.2, 20.4, "plaza_b"),
+                      (20.4, 23.6, "paving"), (23.6, 26.0, "plaza_b"))),
     # --- ground beyond the plaza + the carriageway --------------------------
     #     [S06-B] v6 painted two 90 m lane lines on bare ground with no road slab and no kerb.
     #     v7 builds the road: an 80 deg carriageway arc at street level (−0.150) with a real
@@ -315,7 +323,10 @@ PARAMS = dict(
         (-2.0, 14.0,  34.0,  46.0, 26.0,  8, "y",  34.0, -1.0, "city_stone"),
         (18.0, 32.0, -46.0, -34.0, 42.0, 13, "y", -34.0,  1.0, "city_wall"),
         (-2.0, 14.0, -46.0, -34.0, 30.0, 10, "y", -34.0,  1.0, "city_plaster"),
-        (-32.0, -18.0, -14.0,  2.0, 32.0, 10, "x", -18.0, 1.0, "city_stone"),
+        #  the −X block sits back at 30 m: at a −18 m facade `building_kit` measures
+        #  `d_true` 8.0 m from the h*_d10 eye, i.e. a 32 m tower standing 8 m behind the
+        #  judged camera. Measured, then moved.
+        (-46.0, -30.0, -14.0,  2.0, 32.0, 10, "x", -30.0, 1.0, "city_stone"),
     )),
     window=dict(w=1.3, h=1.7, inset=0.15, col_step=2.8, margin=2.2),
 
@@ -335,12 +346,25 @@ PARAMS = dict(
         rail_color=(0.80, 0.82, 0.85), rail_metallic=0.9, rail_rough=0.35,
         # [K5 S06-B 3.] a curb-class role, NOT granite_dark (scene01: "reads as a black hole")
         curb_tint=(0.86, 0.85, 0.82),
+        #  **Plaza albedo is measured, not styled.** The stock diffuse maps sit high —
+        #  `paving_interlock` 0.554, `plaza_lower` 0.494, `stone_flag` 0.476 `[measured,
+        #  512 px, Rec.709 luma]` — and pilot 2 rendered the sunlit near band at
+        #  `near_ground_stats` **L_mu 0.728 · wht 29.6 %**, i.e. a plaza that is brighter than
+        #  any 화강석 판석 or 보도블록 in the field (real 0.35–0.45). These tints pull all three
+        #  onto ~0.40, which is both the realistic band and what clears the v5.1 §4 WHITE flag.
+        pave_tint=(0.72, 0.72, 0.71),      # 0.554 -> 0.399
+        plazab_tint=(0.80, 0.80, 0.79),    # 0.494 -> 0.395
+        flag_tint=(0.85, 0.85, 0.84),      # 0.476 -> 0.405
+        cwall_tint=(0.85, 0.85, 0.84),     # 0.523 -> 0.445
         wood_tint=(0.72, 0.62, 0.50),
         bollard_color=(0.33, 0.33, 0.36), bollard_metallic=0.4,
         bollard_rough=0.5,
         glass_color=(0.055, 0.075, 0.090), glass_rough=0.10,
         # [G8] the balustrade is low-iron laminated glass seen against sky, not shopfront glass
-        gb_color=(0.115, 0.140, 0.150), gb_rough=0.06,
+        #  No transmission is available in this material stack, so a laminated balustrade
+        #  seen against sky must be authored as what it *reads* as: a pale, slightly rough
+        #  panel. At 0.115 it rendered as a black ribbon around the rim (pilot 1).
+        gb_color=(0.30, 0.34, 0.36), gb_rough=0.12,
         mull_color=(0.055, 0.055, 0.060), mull_rough=0.45, mull_metallic=0.6,
         lamp_color=(0.88, 0.88, 0.84), lamp_rough=0.4,
         sign_back_color=(0.055, 0.060, 0.070), sign_back_rough=0.5,
@@ -657,17 +681,9 @@ def _obstacle_boxes():
     b = PARAMS["bowl"]
     pr = PARAMS["parapet"]
     boxes = list(planter_boxes())
-    for name, r0, r1, a0, a1, kh in bed_arcs():
-        xs, ys = [], []
-        for i in range(17):
-            aa = a0 + (a1 - a0) * i / 16.0
-            for rr in (r0, r1):
-                px, py = _pol(rr, aa)
-                xs.append(px)
-                ys.append(py)
-        z0 = _surface_z(*_pol((r0 + r1) / 2.0, (a0 + a1) / 2.0))
-        boxes.append((f"Bed_{name}", min(xs), max(xs), min(ys), max(ys),
-                      z0, z0 + kh + 1.20))
+    # **Annular beds are deliberately NOT in this list.** The AABB of a 36-52 deg arc at
+    # r ~ 15 is a ~20 x 12 m box that reports a false collision for any eye standing inside
+    # the bowl; they are tested in polar by `bed_contains` in the collision loop instead.
     # the guarded rim arc, as 12 chord AABBs (one AABB would swallow the whole plaza)
     for i in range(12):
         aa = pr["a0"] + (pr["a1"] - pr["a0"]) * i / 12.0
@@ -932,6 +948,13 @@ def _smoke_report():
         s = _solid_at(ex, ey, ez)
         if s is not None:
             hits.append((name, f"{s}(지형 매몰)"))
+        for bn in PARAMS["beds"]:
+            bd = PARAMS["beds"][bn]
+            gz = _surface_z(*_pol((bd["r0"] + bd["r1"]) / 2.0,
+                                  (bd["a0"] + bd["a1"]) / 2.0))
+            if bed_contains(bn, ex, ey) <= 0.0 \
+                    and gz <= ez <= gz + bd["kerb_h"] + 1.20:
+                hits.append((name, f"Bed_{bn}(극좌표)"))
     for name, bn in hits:
         print(f"    [FAIL] {name} eye 가 {bn} 내부")
     gate("카메라 충돌 0", not hits)
@@ -1069,9 +1092,18 @@ def build_views():
     views = sc.grid_views(0.0)
     # pit_edge: pedestrian standing at the cascade head (h1.55) - the bowl interior is exposed
     views["pit_edge"] = dict(eye=[-1.60, -0.60, 1.55], tgt=[7.00, 1.20, -2.60])
-    # open_gap: oblique on the opening in the guard - where the balustrade stops and the
-    #   cascade head begins (the B-1 replacement for v6's demolished run)
-    views["open_gap"] = dict(eye=[-3.20, -6.40, 1.60], tgt=[3.20, -1.00, -0.40])
+    # open_gap: oblique ALONG the guard to the point where it stops and the cascade head
+    #   begins (the B-1 replacement for v6's demolished run). Pilot 2's framing
+    #   (eye (−3.20, −6.40, 1.60)) put the tier bank across the middle and the guard end out
+    #   of frame — it answered no question, so it was re-sited rather than kept for pairing.
+    #   The eye must stand INSIDE the cascade sector (a < 210 deg): at a = 218 it is behind
+    #   the guard it is meant to look along, and the smoke run's ray march says so (first
+    #   block 0.27 on `Parapet`).
+    _ox, _oy = _pol(18.5, 196.0)
+    _px, _py = _pol(7.0, 205.0)
+    #   tgt z is set 0.30 m ABOVE the cascade top face at that radius (−3.00): aiming at
+    #   −3.20 puts the sight line inside the flight and the ray march says so (0.82).
+    views["open_gap"] = dict(eye=[_ox, _oy, 2.00], tgt=[_px, _py, -2.70])
     # underground_look: from the arena floor looking back up the cascade at the rim
     views["underground_look"] = dict(eye=[15.20, 1.60, -3.10],
                                      tgt=[3.00, -0.80, 0.60])
@@ -1081,10 +1113,13 @@ def build_views():
     _sx, _sy = _pol(16.5, 205.0)
     _tx, _ty = _pol(8.0, 190.0)
     views["stair_south"] = dict(eye=[_sx, _sy, 2.20], tgt=[_tx, _ty, -2.60])
-    # facade_court: head-on to the arcade shopfronts (weakly emissive) from the forecourt
-    ax, ay = _pol(11.4, 250.0)
-    tx, ty = _pol(17.0, 250.0)
-    views["facade_court"] = dict(eye=[ax, ay, -3.20], tgt=[tx, ty, -2.60])
+    # facade_court: oblique ALONG the arcade from the forecourt — columns receding, wood
+    #   soffit overhead, shopfronts (weakly emissive) on the right. Pilot 2 aimed this cut
+    #   radially at r 11.4 -> 17.0 and got two columns filling the frame with a flat grey
+    #   sheet between them; the arcade is a *linear* space and has to be read along.
+    ax, ay = _pol(12.0, 232.0)
+    tx, ty = _pol(16.2, 262.0)
+    views["facade_court"] = dict(eye=[ax, ay, -3.00], tgt=[tx, ty, -3.00])
     # beauty_overview: the G8 composition - high oblique from the near south-west, so the
     #   cascade runs away from the eye, the timber tiers fill the far left and the arcade the
     #   near right. [MD-F7] the eye now stands well clear of every bed footprint in plan.
@@ -1163,15 +1198,19 @@ def main():
                        sc.tex_path(role, "nor"), sc.tex_path(role, "rough"),
                        scale, **kw)
 
-        M["paving"] = tex("paving_interlock", "Paving", sca["paving_interlock"])
+        M["paving"] = tex("paving_interlock", "Paving", sca["paving_interlock"],
+                          tint=mp["pave_tint"])
         M["plaza_a"] = tex("plaza_light", "PlazaA", sca["plaza_light"])
-        M["plaza_b"] = tex("plaza_lower", "PlazaB", sca["plaza_lower"])
+        M["plaza_b"] = tex("plaza_lower", "PlazaB", sca["plaza_lower"],
+                           tint=mp["plazab_tint"])
         M["band"] = tex("band_dark", "Band", sca["band_dark"])
-        M["cwall"] = tex("concrete_wall", "ConcreteWall", sca["concrete_wall"])
+        M["cwall"] = tex("concrete_wall", "ConcreteWall", sca["concrete_wall"],
+                         tint=mp["cwall_tint"])
         M["cfloor"] = tex("concrete_floor", "ConcreteFloor",
                           sca["concrete_floor"])
         M["granite"] = tex("granite_dark", "Granite", sca["granite_dark"])
-        M["flag"] = tex("stone_flag", "StoneFlag", sca["stone_flag"])
+        M["flag"] = tex("stone_flag", "StoneFlag", sca["stone_flag"],
+                        tint=mp["flag_tint"])
         M["asphalt_t"] = tex("asphalt", "AsphaltTex", sca["asphalt"])
         M["wood"] = tex("wood_dark", "Wood", sca["wood_dark"],
                         tint=mp["wood_tint"])
@@ -1372,8 +1411,10 @@ def main():
              arc_seg=48)
         rr, j = b["r_arena"], 0
         while rr < ar["r_shop"] - 0.6:
-            r1 = min(rr + 1.30, ar["r_shop"])
-            mkey = "plaza_a" if j % 2 == 0 else "band"
+            r1 = min(rr + 2.20, ar["r_shop"])
+            # 0.494 vs 0.306 `[measured]` — a 1.6:1 step, the grey/화강석 pair G8 shows.
+            # The first pilot alternated 0.710 against 0.318 at 1.30 m and read as a bullseye.
+            mkey = "plaza_b" if j % 2 == 0 else "granite"
             for tag, (a0, a1), lim in (("Ctrl", sec["ctrl"], b["r_rim"]),
                                        ("Arc", sec["arcade"], ar["r_shop"])):
                 if rr >= lim:
@@ -1470,6 +1511,11 @@ def main():
              M["cwall"], arc_seg=24)
         SECT(f"{ROOT}/Shop/Lintel", ar["r_shop"] - 0.16, ar["r_shop"] + 0.02,
              a0, a1, ar["glass_z1"], ar["glass_z1"] + 0.34, M["cwall"],
+             arc_seg=24)
+        # one continuous transom — without it the shopfront renders as a single flat sheet
+        # of grey, which is the "facade billboard" defect in miniature
+        SECT(f"{ROOT}/Shop/Transom", ar["r_shop"] - 0.11, ar["r_shop"] - 0.01,
+             a0, a1, ar["glass_z0"] + 2.10, ar["glass_z0"] + 2.19, M["mullion"],
              arc_seg=24)
         for i in range(int(ar["n_col"])):
             aa = a0 + (a1 - a0) * (i + 0.5) / ar["n_col"]
@@ -1705,11 +1751,16 @@ def main():
             done = False
             if kit is not None:
                 try:
-                    p = bk.plan_building(bd, kind="backdrop", eyes=eyes)
+                    # BS-4 forces `kind="backdrop"` only for blocks the judged eyes cannot
+                    # frame; these stand 30-46 m from the beauty eye and DO frame, so the
+                    # tier is left to `plan_building`/`should_backdrop` rather than pinned.
+                    p = bk.plan_building(bd, eyes=eyes)
                     prims = bk.build_korean_building(
                         kit, stage, f"{ROOT}/CityBlock_{i}", bd,
                         bk.Mtls(M[mkey], parapet=M["parapet"]), plan=p)
                     n_tot += len(prims)
+                    print(f"[backdrop] {i} kind {p.kind} / tier {p.tier} · d_true "
+                          f"{p.d_true:5.1f} m · in_frame {p.in_frame} · 프림 {len(prims)}")
                     done = True
                 except Exception as e:
                     print(f"[backdrop][경고] {i} → build_building 폴백: {e}")

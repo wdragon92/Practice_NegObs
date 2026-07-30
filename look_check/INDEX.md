@@ -60,7 +60,7 @@ Status legend — **baseline-of-record**: what the next regression run compares 
 
 | scene | round | date | MB | cuts | era / phase | kind | status | judged / used by | location |
 |---|---|---|---:|---:|---|---|---|---|---|
-| `scene01` | `260730_w2d_fix` | 2026-07-30 | 55 | 13 | W2 fix batch (07-30) | judge | **baseline-of-record** · active | `w2_fixbatch_v1.md` | `<scene>/` |
+| `scene01` | `260730_w2d_fix` | 2026-07-30 | 55 | 13 | W2 fix batch (07-30) | judge | superseded 2026-07-31 by `260731_w3_s01` (§3-W3) · before-arm | `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene01` | `260730_w2d_judge` | 2026-07-30 | 52 | 13 | W2-D judge (07-30) | judge | before-arm of the fix gate · active | `w2d_round_v1.md` · `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene01` | `p2c_a` | 2026-07-28 | 12 | 3 | P2 gate (07-28) | twin A/B (look toggle) | corpus | `realism_phase2.md` | `<scene>/` |
 | `scene01` | `p2c_b` | 2026-07-28 | 12 | 3 | P2 gate (07-28) | twin A/B (look toggle) | corpus | `realism_phase2.md` | `<scene>/` |
@@ -81,7 +81,7 @@ Status legend — **baseline-of-record**: what the next regression run compares 
 | `scene01` | `v6_rt` | 2026-07-27 | 53 | 13 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v7_rt_A.md` | `<scene>/` |
 | `scene01` | `v7_pt` | 2026-07-27 | 51 | 13 | v5-v8 judge (07-27) | judge | **baseline-of-record** · anchor | `audit_v4/judge_v7_rt_B.md` | `<scene>/` |
 | `scene01` | `v7_rt` | 2026-07-27 | 53 | 13 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v7_rt_B.md` | `<scene>/` |
-| `scene02` | `260730_w2d_fix` | 2026-07-30 | 49 | 13 | W2 fix batch (07-30) | judge | **baseline-of-record** · active | `w2_fixbatch_v1.md` | `<scene>/` |
+| `scene02` | `260730_w2d_fix` | 2026-07-30 | 49 | 13 | W2 fix batch (07-30) | judge | superseded 2026-07-31 by `260731_w3_gt25` (§3-W3) · before-arm | `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene02` | `260730_w2d_judge` | 2026-07-30 | 47 | 13 | W2-D judge (07-30) | judge | before-arm of the fix gate · active | `w2d_round_v1.md` · `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene02` | `p2dark_fast256` | 2026-07-28 | 13 | 3 | P2 gate (07-28) | twin A/B (render mode) | corpus | `deadpixel_diag_d3.md` | `<scene>/` |
 | `scene02` | `p2dark_fast64` | 2026-07-28 | 12 | 3 | P2 gate (07-28) | twin A/B (render mode) | corpus | `deadpixel_diag_d3.md` | `<scene>/` |
@@ -91,14 +91,14 @@ Status legend — **baseline-of-record**: what the next regression run compares 
 | `scene02` | `v6_rt` | 2026-07-27 | 54 | 13 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v7_rt_A.md` | `<scene>/` |
 | `scene02` | `v7_pt` | 2026-07-27 | 51 | 13 | v5-v8 judge (07-27) | judge | **baseline-of-record** · anchor | `audit_v4/judge_v7_rt_B.md` | `<scene>/` |
 | `scene02` | `v7_rt` | 2026-07-27 | 54 | 13 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v7_rt_B.md` | `<scene>/` |
-| `scene03` | `260730_w2d_fix` | 2026-07-30 | 64 | 16 | W2 fix batch (07-30) | judge | **baseline-of-record** · active | `w2_fixbatch_v1.md` | `<scene>/` |
+| `scene03` | `260730_w2d_fix` | 2026-07-30 | 64 | 16 | W2 fix batch (07-30) | judge | superseded 2026-07-31 by `260731_w3_s03` (§3-W3) · before-arm | `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene03` | `260730_w2d_judge` | 2026-07-30 | 61 | 16 | W2-D judge (07-30) | judge | before-arm of the fix gate · active | `w2d_round_v1.md` · `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene03` | `r1_on` | 2026-07-28 | 55 | 16 | P4 realism (07-28) | judge | corpus | `realism_phase2.md` | `<scene>/` |
 | `scene03` | `r2_on` | 2026-07-28 | 62 | 16 | P4 realism (07-28) | judge | corpus | `realism_v1_final.md` | `<scene>/` |
 | `scene03` | `v6_rt` | 2026-07-27 | 51 | 13 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v7_rt_A.md` | `<scene>/` |
 | `scene03` | `v7_pt` | 2026-07-27 | 54 | 16 | v5-v8 judge (07-27) | judge | **baseline-of-record** · anchor | `audit_v4/judge_v7_rt_B.md` | `<scene>/` |
 | `scene03` | `v7_rt` | 2026-07-27 | 60 | 16 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v7_rt_B.md` | `<scene>/` |
-| `scene04` | `260730_w2d_fix` | 2026-07-30 | 62 | 13 | W2 fix batch (07-30) | judge | **baseline-of-record** · active | `w2_fixbatch_v1.md` | `<scene>/` |
+| `scene04` | `260730_w2d_fix` | 2026-07-30 | 62 | 13 | W2 fix batch (07-30) | judge | superseded 2026-07-31 by `260731_w3_s04` (§3-W3) · before-arm | `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene04` | `260730_w2d_judge` | 2026-07-30 | 59 | 13 | W2-D judge (07-30) | judge | before-arm of the fix gate · active | `w2d_round_v1.md` · `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene04` | `r1_on` | 2026-07-28 | 50 | 13 | P4 realism (07-28) | judge | corpus | `realism_phase2.md` | `<scene>/` |
 | `scene04` | `r2_on` | 2026-07-28 | 60 | 13 | P4 realism (07-28) | judge | corpus | `realism_v1_final.md` | `<scene>/` |
@@ -115,7 +115,7 @@ Status legend — **baseline-of-record**: what the next regression run compares 
 | `scene05` | `v7_rt` | 2026-07-27 | 52 | 13 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v7_rt_B.md` | `<scene>/` |
 | `scene05` | `v8_pt` | 2026-07-27 | 51 | 13 | v5-v8 judge (07-27) | judge | **baseline-of-record** · corpus · anchor | `audit_v4/judge_v8_rt.md` | `<scene>/` |
 | `scene05` | `v8_rt` | 2026-07-27 | 52 | 13 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v8_rt.md` | `<scene>/` |
-| `scene06` | `260730_w2d_fix` | 2026-07-30 | 64 | 15 | W2 fix batch (07-30) | judge | **baseline-of-record** · active | `w2_fixbatch_v1.md` | `<scene>/` |
+| `scene06` | `260730_w2d_fix` | 2026-07-30 | 64 | 15 | W2 fix batch (07-30) | judge | superseded 2026-07-31 by `260731_w3_s06` (§3-W3) · before-arm | `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene06` | `260730_w2d_judge` | 2026-07-30 | 61 | 15 | W2-D judge (07-30) | judge | before-arm of the fix gate · active | `w2d_round_v1.md` · `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene06` | `r1_on` | 2026-07-28 | 48 | 15 | P4 realism (07-28) | judge | corpus | `realism_phase2.md` | `<scene>/` |
 | `scene06` | `r2_on` | 2026-07-28 | 61 | 15 | P4 realism (07-28) | judge | corpus · anchor | `realism_v1_final.md` | `<scene>/` |
@@ -123,7 +123,7 @@ Status legend — **baseline-of-record**: what the next regression run compares 
 | `scene06` | `v7_rt` | 2026-07-27 | 48 | 15 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v7_rt_B.md` | `<scene>/` |
 | `scene06` | `v8_pt` | 2026-07-27 | 50 | 15 | v5-v8 judge (07-27) | judge | **baseline-of-record** · corpus · anchor | `audit_v4/judge_v8_rt.md` | `<scene>/` |
 | `scene06` | `v8_rt` | 2026-07-27 | 55 | 15 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v8_rt.md` | `<scene>/` |
-| `scene07` | `260730_w2d_fix` | 2026-07-30 | 72 | 14 | W2 fix batch (07-30) | judge | **baseline-of-record** · active | `w2_fixbatch_v1.md` | `<scene>/` |
+| `scene07` | `260730_w2d_fix` | 2026-07-30 | 72 | 14 | W2 fix batch (07-30) | judge | superseded 2026-07-31 by `260731_w3_s07` (§3-W3) · before-arm | `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene07` | `260730_w2d_judge` | 2026-07-30 | 68 | 14 | W2-D judge (07-30) | judge | before-arm of the fix gate · active | `w2d_round_v1.md` · `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene07` | `p2g1_off` | 2026-07-28 | 57 | 14 | P2 gate (07-28) | twin A/B (look toggle) | corpus | `realism_phase2.md` | `<scene>/` |
 | `scene07` | `p2g1_on` | 2026-07-28 | 55 | 14 | P2 gate (07-28) | twin A/B (look toggle) | corpus | `realism_phase2.md` | `<scene>/` |
@@ -140,14 +140,14 @@ Status legend — **baseline-of-record**: what the next regression run compares 
 | `scene07` | `v7_rt` | 2026-07-27 | 59 | 14 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v7_rt_B.md` | `<scene>/` |
 | `scene07` | `v8_pt` | 2026-07-27 | 57 | 14 | v5-v8 judge (07-27) | judge | **baseline-of-record** · corpus | `audit_v4/judge_v8_rt.md` | `<scene>/` |
 | `scene07` | `v8_rt` | 2026-07-27 | 60 | 14 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v8_rt.md` | `<scene>/` |
-| `scene08` | `260730_w2d_fix` | 2026-07-30 | 55 | 15 | W2 fix batch (07-30) | judge | **baseline-of-record** · active | `w2_fixbatch_v1.md` | `<scene>/` |
+| `scene08` | `260730_w2d_fix` | 2026-07-30 | 55 | 15 | W2 fix batch (07-30) | judge | superseded 2026-07-31 by `260731_w3_s08d` (§3-W3) · before-arm | `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene08` | `260730_w2d_judge` | 2026-07-30 | 52 | 15 | W2-D judge (07-30) | judge | before-arm of the fix gate · active | `w2d_round_v1.md` · `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene08` | `r1_on` | 2026-07-28 | 47 | 15 | P4 realism (07-28) | judge | corpus | `realism_phase2.md` | `<scene>/` |
 | `scene08` | `r2_on` | 2026-07-28 | 51 | 15 | P4 realism (07-28) | judge | corpus | `realism_v1_final.md` | `<scene>/` |
 | `scene08` | `v6_rt` | 2026-07-27 | 53 | 15 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v7_rt_A.md` | `<scene>/` |
 | `scene08` | `v7_pt` | 2026-07-27 | 50 | 15 | v5-v8 judge (07-27) | judge | **baseline-of-record** | `audit_v4/judge_v7_rt_B.md` | `<scene>/` |
 | `scene08` | `v7_rt` | 2026-07-27 | 51 | 15 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v7_rt_B.md` | `<scene>/` |
-| `scene09` | `260730_w2d_fix` | 2026-07-30 | 35 | 14 | W2 fix batch (07-30) | judge | **baseline-of-record** · active | `w2_fixbatch_v1.md` | `<scene>/` |
+| `scene09` | `260730_w2d_fix` | 2026-07-30 | 35 | 14 | W2 fix batch (07-30) | judge | superseded 2026-07-31 by `260731_w3_s09` (§3-W3) · before-arm | `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene09` | `260730_w2d_judge` | 2026-07-30 | 34 | 14 | W2-D judge (07-30) | judge | before-arm of the fix gate · active | `w2d_round_v1.md` · `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene09` | `r1_on` | 2026-07-28 | 33 | 14 | P4 realism (07-28) | judge | corpus | `realism_phase2.md` | `<scene>/` |
 | `scene09` | `r2_on` | 2026-07-28 | 35 | 14 | P4 realism (07-28) | judge | corpus | `realism_v1_final.md` | `<scene>/` |
@@ -156,7 +156,7 @@ Status legend — **baseline-of-record**: what the next regression run compares 
 | `scene09` | `v8_pt` | 2026-07-28 | 34 | 14 | v5-v8 judge (07-27) | judge | **baseline-of-record** · corpus · anchor | `audit_v4/judge_v8_rt.md` | `<scene>/` |
 | `scene09` | `v8_rt` | 2026-07-27 | 37 | 14 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v8_rt.md` | `<scene>/` |
 | `scene09` | `v8_rt2` | 2026-07-27 | 37 | 14 | v5-v8 judge (07-27) | judge | evidence | `audit_v4/judge_v8_rt.md` | `<scene>/` |
-| `scene10` | `260730_w2d_fix` | 2026-07-30 | 66 | 14 | W2 fix batch (07-30) | judge | **baseline-of-record** · active | `w2_fixbatch_v1.md` | `<scene>/` |
+| `scene10` | `260730_w2d_fix` | 2026-07-30 | 66 | 14 | W2 fix batch (07-30) | judge | superseded 2026-07-31 by `260731_w3_s10c` (§3-W3) · before-arm | `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene10` | `260730_w2d_judge` | 2026-07-30 | 63 | 14 | W2-D judge (07-30) | judge | before-arm of the fix gate · active | `w2d_round_v1.md` · `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene10` | `r1_on` | 2026-07-28 | 64 | 14 | P4 realism (07-28) | judge | corpus | `realism_phase2.md` | `<scene>/` |
 | `scene10` | `r2_on` | 2026-07-28 | 66 | 14 | P4 realism (07-28) | judge | corpus | `realism_v1_final.md` | `<scene>/` |
@@ -164,7 +164,7 @@ Status legend — **baseline-of-record**: what the next regression run compares 
 | `scene10` | `v7_rt` | 2026-07-27 | 66 | 14 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v7_rt_B.md` | `<scene>/` |
 | `scene10` | `v8_pt` | 2026-07-27 | 69 | 14 | v5-v8 judge (07-27) | judge | **baseline-of-record** · corpus · anchor | `audit_v4/judge_v8_rt.md` | `<scene>/` |
 | `scene10` | `v8_rt` | 2026-07-27 | 67 | 14 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v8_rt.md` | `<scene>/` |
-| `scene11` | `260730_w2d_fix` | 2026-07-30 | 57 | 14 | W2 fix batch (07-30) | judge | **baseline-of-record** · active | `w2_fixbatch_v1.md` | `<scene>/` |
+| `scene11` | `260730_w2d_fix` | 2026-07-30 | 57 | 14 | W2 fix batch (07-30) | judge | superseded 2026-07-31 by `260731_w3_s11` (§3-W3) · before-arm | `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene11` | `260730_w2d_judge` | 2026-07-30 | 49 | 14 | W2-D judge (07-30) | judge | before-arm of the fix gate · active | `w2d_round_v1.md` · `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene11` | `r1_on` | 2026-07-28 | 49 | 14 | P4 realism (07-28) | judge | corpus | `realism_phase2.md` | `<scene>/` |
 | `scene11` | `r2_on` | 2026-07-28 | 56 | 14 | P4 realism (07-28) | judge | corpus · anchor | `realism_v1_final.md` | `<scene>/` |
@@ -180,7 +180,7 @@ Status legend — **baseline-of-record**: what the next regression run compares 
 | `scene12` | `v7_rt` | 2026-07-27 | 52 | 16 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v7_rt_B.md` | `<scene>/` |
 | `scene12` | `v8_pt` | 2026-07-27 | 49 | 16 | v5-v8 judge (07-27) | judge | **baseline-of-record** · corpus · anchor | `audit_v4/judge_v8_rt.md` | `<scene>/` |
 | `scene12` | `v8_rt` | 2026-07-27 | 53 | 16 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v8_rt.md` | `<scene>/` |
-| `scene13` | `260730_w2d_fix` | 2026-07-30 | 47 | 15 | W2 fix batch (07-30) | judge | **baseline-of-record** · active | `w2_fixbatch_v1.md` | `<scene>/` |
+| `scene13` | `260730_w2d_fix` | 2026-07-30 | 47 | 15 | W2 fix batch (07-30) | judge | superseded 2026-07-31 by `260730_w3_s13b` (§3-W3) · before-arm | `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene13` | `260730_w2d_judge` | 2026-07-30 | 45 | 15 | W2-D judge (07-30) | judge | before-arm of the fix gate · active | `w2d_round_v1.md` · `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene13` | `p2dark_fast256` | 2026-07-28 | 9 | 3 | P2 gate (07-28) | twin A/B (render mode) | corpus | `deadpixel_diag_d3.md` | `<scene>/` |
 | `scene13` | `p2dark_fast64` | 2026-07-28 | 9 | 3 | P2 gate (07-28) | twin A/B (render mode) | corpus | `deadpixel_diag_d3.md` | `<scene>/` |
@@ -204,20 +204,20 @@ Status legend — **baseline-of-record**: what the next regression run compares 
 | `scene15` | `v7_pt` | 2026-07-27 | 48 | 13 | v5-v8 judge (07-27) | judge | **baseline-of-record** | `audit_v4/judge_v7_rt_B.md` | `<scene>/` |
 | `scene15` | `v7_rt` | 2026-07-27 | 50 | 13 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v7_rt_B.md` | `<scene>/` |
 | `scene15` | `w2_pilot` | 2026-07-29 | 52 | 13 | W2 (07-29) | gate (ground pilot) | active | `w2_pilot_ground_v1.md` | `<scene>/` |
-| `scene16` | `260730_w2d_fix` | 2026-07-30 | 52 | 13 | W2 fix batch (07-30) | judge | **baseline-of-record** · active | `w2_fixbatch_v1.md` | `<scene>/` |
+| `scene16` | `260730_w2d_fix` | 2026-07-30 | 52 | 13 | W2 fix batch (07-30) | judge | superseded 2026-07-31 by `260731_w3_s16` (§3-W3) · before-arm | `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene16` | `260730_w2d_judge` | 2026-07-30 | 50 | 13 | W2-D judge (07-30) | judge | before-arm of the fix gate · active | `w2d_round_v1.md` · `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene16` | `r2_on` | 2026-07-28 | 50 | 13 | P4 realism (07-28) | judge | corpus | `realism_v1_final.md` | `<scene>/` |
 | `scene16` | `v6_rt` | 2026-07-27 | 53 | 13 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v7_rt_A.md` | `<scene>/` |
 | `scene16` | `v7_pt` | 2026-07-27 | 51 | 13 | v5-v8 judge (07-27) | judge | **baseline-of-record** · anchor | `audit_v4/judge_v7_rt_B.md` | `<scene>/` |
 | `scene16` | `v7_rt` | 2026-07-27 | 53 | 13 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v7_rt_B.md` | `<scene>/` |
-| `scene17` | `260730_w2d_fix` | 2026-07-30 | 54 | 14 | W2 fix batch (07-30) | judge | **baseline-of-record** · active | `w2_fixbatch_v1.md` | `<scene>/` |
+| `scene17` | `260730_w2d_fix` | 2026-07-30 | 54 | 14 | W2 fix batch (07-30) | judge | superseded 2026-07-31 by `260731_w3_s17` (§3-W3) · before-arm | `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene17` | `260730_w2d_judge` | 2026-07-30 | 51 | 14 | W2-D judge (07-30) | judge | before-arm of the fix gate · active | `w2d_round_v1.md` · `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene17` | `r2_on` | 2026-07-28 | 55 | 14 | P4 realism (07-28) | judge | corpus | `realism_v1_final.md` | `<scene>/` |
 | `scene17` | `v6_rt` | 2026-07-27 | 52 | 14 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v7_rt_A.md` | `<scene>/` |
 | `scene17` | `v7_rt` | 2026-07-27 | 51 | 14 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v7_rt_B.md` | `<scene>/` |
 | `scene17` | `v8_pt` | 2026-07-27 | 43 | 14 | v5-v8 judge (07-27) | judge | **baseline-of-record** · corpus · anchor | `audit_v4/judge_v8_rt.md` | `<scene>/` |
 | `scene17` | `v8_rt` | 2026-07-27 | 51 | 14 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v8_rt.md` | `<scene>/` |
-| `scene18` | `260730_w2d_fix` | 2026-07-30 | 47 | 14 | W2 fix batch (07-30) | judge | **baseline-of-record** · active | `w2_fixbatch_v1.md` | `<scene>/` |
+| `scene18` | `260730_w2d_fix` | 2026-07-30 | 47 | 14 | W2 fix batch (07-30) | judge | superseded 2026-07-31 by `260731_w3_s18` (§3-W3) · before-arm | `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene18` | `260730_w2d_judge` | 2026-07-30 | 43 | 14 | W2-D judge (07-30) | judge | before-arm of the fix gate · active | `w2d_round_v1.md` · `w2_fixbatch_v1.md` | `<scene>/` |
 | `scene18` | `r2_on` | 2026-07-28 | 41 | 14 | P4 realism (07-28) | judge | corpus | `realism_v1_final.md` | `<scene>/` |
 | `scene18` | `v6_rt` | 2026-07-27 | 39 | 13 | v5-v8 judge (07-27) | judge | corpus | `audit_v4/judge_v7_rt_A.md` | `<scene>/` |
@@ -255,7 +255,7 @@ Status legend — **baseline-of-record**: what the next regression run compares 
 | `sceneC1` | `r3_pt` | 2026-07-27 | 7 | 4 | P2/P3 early (07-24/25) | fix-check | evidence | `audit_v4/audit_scene*.md` | `<scene>/` |
 | `sceneC1` | `r4` | 2026-07-27 | 28 | 13 | P2/P3 early (07-24/25) | fix-check | evidence | `audit_v4/audit_scene*.md` | `<scene>/` |
 | `sceneC1` | `r4_pt` | 2026-07-27 | 7 | 4 | P2/P3 early (07-24/25) | fix-check | evidence | `audit_v4/audit_scene*.md` | `<scene>/` |
-| `sceneC2` | `260730_w2d_fix` | 2026-07-30 | 68 | 13 | W2 fix batch (07-30) | judge | **baseline-of-record** · active | `w2_fixbatch_v1.md` | `<scene>/` |
+| `sceneC2` | `260730_w2d_fix` | 2026-07-30 | 68 | 13 | W2 fix batch (07-30) | judge | superseded 2026-07-31 by `260731_w3_cb2` (§3-W3) · before-arm | `w2_fixbatch_v1.md` | `<scene>/` |
 | `sceneC2` | `260730_w2d_judge` | 2026-07-30 | 64 | 13 | W2-D judge (07-30) | judge | before-arm of the fix gate · active | `w2d_round_v1.md` · `w2_fixbatch_v1.md` | `<scene>/` |
 | `sceneC2` | `balust` | 2026-07-28 | 70 | 13 | P4 near-field (07-28) | fix-check | corpus | `graze_recalibration_v1.md` | `<scene>/` |
 | `sceneC2` | `ctx1` | 2026-07-27 | 62 | 13 | batch1 ctx (07-27/28) | judge | corpus | `multi_scene_completion_report.md` | `<scene>/` |
@@ -327,7 +327,7 @@ Status legend — **baseline-of-record**: what the next regression run compares 
 | `sceneN1` | `ctx1` | 2026-07-27 | 53 | 13 | batch1 ctx (07-27/28) | judge | corpus | `multi_scene_completion_report.md` | `<scene>/` |
 | `sceneN1` | `ctx2` | 2026-07-28 | 53 | 13 | batch1 ctx (07-27/28) | judge | corpus | `multi_scene_completion_report.md` | `<scene>/` |
 | `sceneN1` | `r2_on` | 2026-07-28 | 49 | 13 | P4 realism (07-28) | judge | corpus | `realism_v1_final.md` | `<scene>/` |
-| `sceneN2` | `260730_w2d_fix` | 2026-07-30 | 60 | 13 | W2 fix batch (07-30) | judge | **baseline-of-record** · active | `w2_fixbatch_v1.md` | `<scene>/` |
+| `sceneN2` | `260730_w2d_fix` | 2026-07-30 | 60 | 13 | W2 fix batch (07-30) | judge | superseded 2026-07-31 by `260730_w3_n2clean` (§3-W3) · before-arm | `w2_fixbatch_v1.md` | `<scene>/` |
 | `sceneN2` | `260730_w2d_judge` | 2026-07-30 | 57 | 13 | W2-D judge (07-30) | judge | before-arm of the fix gate · active | `w2d_round_v1.md` · `w2_fixbatch_v1.md` | `<scene>/` |
 | `sceneN2` | `ctx1` | 2026-07-27 | 60 | 13 | batch1 ctx (07-27/28) | judge | corpus | `multi_scene_completion_report.md` | `<scene>/` |
 | `sceneN2` | `ctx2` | 2026-07-28 | 60 | 13 | batch1 ctx (07-27/28) | judge | corpus | `multi_scene_completion_report.md` | `<scene>/` |
@@ -349,6 +349,112 @@ Status legend — **baseline-of-record**: what the next regression run compares 
 | `sceneN5` | `ctx2` | 2026-07-28 | 52 | 13 | batch1 ctx (07-27/28) | judge | corpus | `multi_scene_completion_report.md` | `<scene>/` |
 | `sceneN5` | `r2_on` | 2026-07-28 | 50 | 13 | P4 realism (07-28) | judge | corpus · anchor | `realism_v1_final.md` | `<scene>/` |
 | `sceneN5` | `w2_pilot` | 2026-07-29 | 53 | 13 | W2 (07-29) | gate (ground pilot) | active | `w2_pilot_ground_v1.md` | `<scene>/` |
+
+## 3-W3. W3 scene rounds (2026-07-30/31) — **added 2026-07-31 by the K-micro lane**
+
+`[redteam_fanout_a.md **RT-A2** — "the README §4 chain and `look_check/INDEX.md` are stale for
+**all eight** rebuilt scenes"]`. §3 above is a 07-30 snapshot and carries **no W3 round at all**,
+so the only committed record of the W3 grids was the README chain, which was itself stale. This
+section is enumerated **from the round stamps and the PNGs on disk**, not from the lane reports —
+every `git_head` below was read out of that round's own `round_stamp.json`.
+
+**Status is derived, not asserted**: a round is marked baseline-of-record here **iff**
+`regression_check.resolve_round` actually returns it for that scene under the README §4 chain as
+committed. Simulated over all 33 scene directories: **33/33 resolve, 0 unresolved**, and the eight
+FANOUT A scenes are the only ones whose resolution moved.
+
+| scene | round | cuts | MB | git_head | status |
+|---|---|---:|---:|---|---|
+| `scene01` | `260731_w3_cb2` | 5 | 21 | `10b3946` | evidence |
+| `scene01` | `260731_w3_mb24` | 5 | 21 | `e1150d6` | superseded by `260731_w3_s01` |
+| `scene01` | `260731_w3_mb24_pre` | 5 | 20 | `e1150d6` | evidence |
+| `scene01` | `260731_w3_s01` | 13 | 49 | `f6bb772` | **baseline-of-record** |
+| `scene01` | `260731_w3_s01_pre` | 13 | 53 | `1234a51` | evidence |
+| `scene02` | `260731_w3_cb7` | 13 | 45 | `dc68e74` | superseded by `260731_w3_gt25` |
+| `scene02` | `260731_w3_cb7_pre` | 13 | 47 | `dc68e74` | evidence |
+| `scene02` | `260731_w3_gt25` | 13 | 46 | `5340d49` | **baseline-of-record** |
+| `scene02` | `260731_w3_gt25_pre` | 13 | 45 | `5340d49` | evidence |
+| `scene02` | `260731_w3_mb24` | 5 | 20 | `e1150d6` | evidence |
+| `scene02` | `260731_w3_mb24_pre` | 5 | 19 | `e1150d6` | evidence |
+| `scene03` | `260731_w3_cb2` | 5 | 23 | `d7494f4` | evidence |
+| `scene03` | `260731_w3_s03` | 16 | 64 | `5fa563a` | **baseline-of-record** · carries `compared_against` (RT-A4) |
+| `scene04` | `260731_w3_s04` | 13 | 73 | `0711973` | **baseline-of-record** |
+| `scene04` | `260731_w3_s04b` | 13 | 70 | `0711973` | evidence |
+| `scene06` | `260731_w3_s06` | 15 | 55 | `69c6f9f` | **baseline-of-record** |
+| `scene07` | `260731_w3_cb2` | 5 | 26 | `c2676d6` | evidence |
+| `scene07` | `260731_w3_s07` | 14 | 72 | `c3cebc3` | **baseline-of-record** |
+| `scene08` | `260731_w3_s08` | 15 | 50 | `—` | **no `round_stamp.json`** — X1 violation |
+| `scene08` | `260731_w3_s08b` | 15 | 54 | `—` | **no `round_stamp.json`** — X1 violation |
+| `scene08` | `260731_w3_s08c` | 15 | 54 | `—` | **no `round_stamp.json`** — X1 violation |
+| `scene08` | `260731_w3_s08d` | 15 | 55 | `f8206de` | **baseline-of-record** |
+| `scene09` | `260731_w3_cb1` | 17 | 42 | `2333699` | evidence |
+| `scene09` | `260731_w3_mb24` | 5 | 13 | `e1150d6` | evidence |
+| `scene09` | `260731_w3_mb24_pre` | 5 | 13 | `e1150d6` | evidence |
+| `scene09` | `260731_w3_s09` | 18 | 48 | `02fdfa9` | **baseline-of-record** |
+| `scene10` | `260731_w3_pre10` | 5 | 24 | `1346b70` | evidence |
+| `scene10` | `260731_w3_pre10c` | 14 | 75 | `e8e2895` | evidence |
+| `scene10` | `260731_w3_s10` | 14 | 75 | `e3619df` | superseded by `260731_w3_s10c` |
+| `scene10` | `260731_w3_s10c` | 14 | 75 | `e8e2895` | **baseline-of-record** |
+| `scene11` | `260731_w3_s11` | 15 | 59 | `afc28f2` | **baseline-of-record** |
+| `scene13` | `260730_w3_s13b` | 15 | 53 | `013fe8a` | **baseline-of-record** |
+| `scene16` | `260731_w3_mb24` | 5 | 21 | `e1150d6` | evidence |
+| `scene16` | `260731_w3_mb24_pre` | 5 | 21 | `e1150d6` | evidence |
+| `scene16` | `260731_w3_s16` | 13 | 51 | `f831d61` | **baseline-of-record** |
+| `scene17` | `260731_w3_s17` | 14 | 52 | `25f366c` | **baseline-of-record** |
+| `scene17` | `260731_w3_s17_pre` | 14 | 51 | `884d24c` | evidence |
+| `scene17` | `260731_w3_sb17` | 5 | 21 | `f39abe0` | evidence |
+| `scene17` | `260731_w3_sb17_pre` | 5 | 21 | `8bf7882` | evidence |
+| `scene18` | `260731_w3_s18` | 14 | 44 | `0711973` | **baseline-of-record** |
+| `scene18` | `260731_w3_s18b` | 14 | 41 | `0711973` | evidence |
+| `scene18` | `260731_w3_s18c` | 14 | 41 | `0711973` | evidence |
+| `scene18` | `260731_w3_s18d` | 14 | 42 | `0711973` | evidence |
+| `scene18` | `260731_w3_s18e` | 14 | 42 | `0711973` | evidence |
+| `sceneC2` | `260731_w3_cb2` | 5 | 26 | `10b3946` | **baseline-of-record** |
+| `sceneN2` | `260730_w3_n2clean` | 13 | 58 | `c3cebc3` | **baseline-of-record** |
+
+Total **46 rounds · 1991 MB** at scene roots. The `260730_w2d_fix` rows of the 16 scenes that now
+have a W3 baseline are marked *superseded* in §3 above, in the same edit.
+
+**Three things this table does not hide.**
+1. `scene08`'s `260731_w3_s08` / `_s08b` / `_s08c` carry **no `round_stamp.json`** — spec §6.2 **X1**
+   says *"`stamp_round.py` on **every** capture directory; an unstamped round is unreadable in six
+   weeks"*. They are pilot iterations superseded by `_s08d`, which is stamped; recorded so the gap is
+   visible rather than inferred from an absence.
+2. `scene03`'s `260731_w3_s03` is its baseline-of-record **by its report** (`w3_s03_v1.md` §, 16
+   cuts) while its stamp spends the `baseline_of_record` key on RT-A4's *other* meaning (the round
+   it compared against). `scripts/stamp_round.py --read` now normalises that to `compared_against`
+   so no marker-reader is fooled, but the **stamp itself is owed a keys-only amendment** by the S03
+   owner, on the cb7/SB-3 precedent.
+3. `scene18`'s `260731_w3_s18` still carries no marker either (the same F5 class); ledger §4
+   **GT-26** remains its authority.
+
+### 3-W3-1. W3 `_experiments/` entries (gates · twins)
+
+| topic | scene | entry | cuts | MB |
+|---|---|---|---:|---:|
+| `gates` | `scene13` | `260730_w3_s13_pre` | 15 | 54 |
+| `gates` | `scene09` | `260731_w3_cb1_ctl` | 14 | 34 |
+| `gates` | `scene09` | `260731_w3_cb1_crops` | 6 | 9 |
+| `gates` | `scene20` | `260731_w3_cb4` | 5 | 21 |
+| `gates` | `scene20` | `260731_w3_cb4ctl` | 5 | 21 |
+| `gates` | `scene21` | `260731_w3_cb4` | 5 | 20 |
+| `gates` | `scene21` | `260731_w3_cb4ctl` | 5 | 20 |
+| `gates` | `sceneC1` | `260731_w3_cb3` | 13 | 54 |
+| `gates` | `sceneC1` | `260731_w3_cb3_base` | 13 | 54 |
+| `gates` | `sceneN3` | `260731_w3_cb3` | 13 | 56 |
+| `gates` | `sceneN3` | `260731_w3_cb3_base` | 13 | 58 |
+| `gates` | `sceneN2` | `260730_w3_n2clean_crop` | 5 | 14 |
+| `gates` | `scene11` | `260731_sunaz_96p5` | 6 | 23 |
+| `gates` | `scene11` | `260731_sunaz_131p5` | 6 | 23 |
+| `gates` | `scene11` | `260731_sunaz_171p5` | 6 | 23 |
+| `twins` | `scene03` | `260731_w3_s03_pre` | 16 | 61 |
+| `twins` | `scene17` | `260731_w3_s17_noise` | 14 | 51 |
+| `twins` | `scene17` | `260731_w3_sb17_noise` | 5 | 21 |
+| `twins` | `sceneN2` | `260730_w3_n2clean_tone0` | 13 | 58 |
+
+`gates/scene13/260730_w3_s13_pre` is the row S13 flagged as owed (`w3_s13_v1.md` §10-3): it is the
+**pre** arm of scene13's rebuild, and without it the `260730_w3_s13b` baseline has no before-arm on
+record.
 
 ## 4. `_experiments/` — full table
 

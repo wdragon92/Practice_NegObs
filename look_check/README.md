@@ -154,7 +154,7 @@ cd /home/vislab/Desktop/work_sy/Practice_NegObs
 
 # regression of a new round against each scene's own baseline-of-record
 python3 scripts/regression_check.py --scenes 'look_check/scene*' \
-  --before-round 260731_w3_gt25,260731_w3_s10c,260731_w3_s07,260731_w3_s04,260731_w3_s16,260731_w3_s18,260730_w3_n2clean,260731_w3_cb1,260731_w3_mb24,260731_w3_cb2,260730_w2d_fix,260730_w2d_judge,w2c_g2,w2_pilot,r2b_on,wall,facade,r2_on \
+  --before-round 260731_w3_s01,260731_w3_s03,260731_w3_s06,260731_w3_s08d,260731_w3_s09,260731_w3_s11,260730_w3_s13b,260731_w3_s17,260731_w3_gt25,260731_w3_s10c,260731_w3_s07,260731_w3_s04,260731_w3_s16,260731_w3_s18,260730_w3_n2clean,260731_w3_cb1,260731_w3_mb24,260731_w3_cb2,260730_w2d_fix,260730_w2d_judge,w2c_g2,w2_pilot,r2b_on,wall,facade,r2_on \
   --after-round <new round> \
   --fail-only --json Docs/reports/regr_<new round>.json
 
@@ -191,19 +191,41 @@ python3 scripts/regression_check.py \
 | `scene16` | `260731_w3_s16` | 13 cuts, `baseline_of_record: true` (GT-23) — **ahead of `mb24` on purpose**: `mb24` is a 5-cut micro round and pixel-null on this scene, so putting it first would drop 8 cuts and gain nothing |
 | `scene18` | `260731_w3_s18` | 14 cuts, named by ledger §4 **GT-26**; its stamp carries no marker (the F5 class), so the ledger row is the authority |
 | `sceneN2` | `260730_w3_n2clean` | 13 cuts, named by ledger §7 **W8** |
-| `scene09` | `260731_w3_cb1` | 17 cuts — **ahead of `mb24` for the same reason as scene16**; `mb24` is pixel-null against it by construction (`w3_mb_patch_v1.md` §8) |
-| `scene01` | `260731_w3_mb24` | 5 cuts, but it is scene01's **newest** round and post-dates GT-24's landing; `260731_w3_cb2` is the same 5 cuts and older |
-| `scene03` · `sceneC2` | `260731_w3_cb2` | 5 cuts, their newest W3 round |
-| the other 22 | `260730_w2d_fix` | the 33-scene W2-D fix batch, present for **all 33** |
+| `scene01` | `260731_w3_s01` | 13 cuts, stamp `baseline_of_record: true` — **replaces `260731_w3_mb24` (5 cuts)**; the S01 rebuild's own judged grid |
+| `scene03` | `260731_w3_s03` | 16 cuts — **replaces `260731_w3_cb2` (5 cuts)**. Named baseline-of-record by `w3_s03_v1.md`; its stamp spends the key on RT-A4's other meaning, so the **report** is the authority here, as for scene18 |
+| `scene06` | `260731_w3_s06` | 15 cuts — **replaces `260730_w2d_fix`**. Stamp amended 07-31 (K-micro item 9, RT-A1: it was the one FANOUT A baseline with no marker) |
+| `scene08` | `260731_w3_s08d` | 15 cuts, `baseline_of_record: true` — **replaces `260730_w2d_fix`**; supersedes the unstamped `_s08`/`_s08b`/`_s08c` pilots |
+| `scene09` | `260731_w3_s09` | 18 cuts, `baseline_of_record: true` — **replaces `260731_w3_cb1` (17 cuts)**, the G9 refit round |
+| `scene11` | `260731_w3_s11` | 15 cuts, `baseline_of_record: true` — **replaces `260730_w2d_fix` (14 cuts)**; the row S11 flagged as owed |
+| `scene13` | `260730_w3_s13b` | 15 cuts, `baseline_of_record: true` — **replaces `260730_w2d_fix`**; its pre-arm is `_experiments/gates/scene13/260730_w3_s13_pre` (INDEX §3-W3-1) |
+| `scene17` | `260731_w3_s17` | 14 cuts, `baseline_of_record: true` — **replaces `260730_w2d_fix`** (same 14 cuts). Note (2) below is amended by this row |
+| `sceneC2` | `260731_w3_cb2` | 5 cuts, its newest W3 round (unchanged) |
+| the other 17 | `260730_w2d_fix` | the 33-scene W2-D fix batch, present for **all 33** |
 
-> **Two things this chain does not hide.** (1) Everything after `260730_w2d_fix` —
+> **Refreshed again 2026-07-31 (K-micro lane — `redteam_fanout_a.md` **RT-A2**).** SB's refresh
+> landed before FANOUT A's eight scene rebuilds were judged, so the chain still resolved
+> `01→mb24` (5 cuts) · `03→cb2` (5 cuts) · `09→cb1` (17 cuts) · `06·08·11·13·17→260730_w2d_fix`.
+> Five of those eight lanes did **not** flag their own row as owed. The eight rounds above were
+> added at the head in one edit. **Verified by simulating `resolve_round` over all 33 scene
+> directories with the chain exactly as committed here**: 33/33 resolve · 0 unresolved · **exactly
+> the eight FANOUT A scenes move** · **no scene loses a cut** (01 5→13 · 03 5→16 · 06 15→15 ·
+> 08 15→15 · 09 17→18 · 11 14→15 · 13 15→15 · 17 14→14). The eight round names are each unique to
+> one scene directory on disk, so head position cannot shadow another scene. The full W3 round
+> inventory this was enumerated from is now `INDEX.md` **§3-W3** — §3 there was a 07-30 snapshot
+> carrying no W3 round at all, which is why the README chain had become the only committed record.
+
+> **Two things this chain does not hide.** (1) `260731_w3_cb1` and `260731_w3_mb24` are
+> **now unreachable too** — scene09 and scene01 resolve above them since the 07-31 K-micro
+> refresh — and so is everything after `260730_w2d_fix` —
 > `260730_w2d_judge`, `w2c_g2`, `w2_pilot`, `r2b_on`, `wall`, `facade`, `r2_on` — is
 > **unreachable** while that round survives on all 33 scenes. It is kept as a safety net for
 > the day one of those directories is pruned, not because any scene resolves to it today;
 > verified by resolution over `look_check/scene*` (33/33 resolve, 0 unresolved).
 > (2) `scene17`'s 5-cut micro-pilot rounds `260731_w3_sb17{,_pre}` are **deliberately absent**
-> from the chain: scene17's baseline-of-record stays `260730_w2d_fix` (14 cuts), because
-> promoting a 5-cut round would drop 9 cuts from every later comparison. Both stamps say so.
+> from the chain, because promoting a 5-cut round would drop 9 cuts from every later comparison.
+> Both stamps say so. ~~scene17's baseline-of-record stays `260730_w2d_fix` (14 cuts)~~
+> **[amended 07-31, K-micro]** — it is now `260731_w3_s17`, the S17 rebuild's own **14-cut** grid,
+> so no cut is lost and the 5-cut exclusion argument is untouched.
 > The same reasoning is why `260731_w3_mb24` sits below the full grids rather than at the head.
 
 > **Edge integrity is never read from GRAZE alone** (`ground_kit_spec_v1.md` §7.5 A3).

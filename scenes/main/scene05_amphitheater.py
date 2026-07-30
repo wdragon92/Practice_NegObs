@@ -46,6 +46,48 @@ Run (GUI look check - default):
      plaza paving is a shared item across all scenes, so it is explicitly
      recorded as WAIVED (awaiting a global decision by the director).
 
+[W3 L05 · G8 ride] `w3_intake_v2_images.md` §4 Lane 3 row **3.6** routes scene05 onto
+  image **G8** (primary) + **G1** (secondary): *"curved stepped seating bank in a modern
+  Korean plaza"*. Five things came off the image and one was refused, all measured.
+  ① **K4(d) true annular sectors** (`build_arc_steps(mesh=True)`) on **all 12 arc sites**.
+     The box convention approximates a sector with an axis-aligned Cube sized on the
+     **outer** chord, so at r_in the end segments overshoot the a0/a1 rays and the inner
+     boundary is a chord, not an arc — the two causes ② below spent seg 3→12 and a pair of
+     cheek walls patching around. The mesh is exact at the rays and arcs are faceted by
+     `arc_seg`, so **GT-11's wedge gap and arc-end sliver are 0 by construction**, not by
+     tolerance. GT-6 law: the judged baselines for 05·06·19 were archived **before**
+     `scene_common` was cut (`5ceb76a`, manifest `Docs/reports/gt6_judge_baseline_manifest.json`),
+     and this scene flips the lever **inside its own pilot**, which is where the split proof
+     is judged (`w3_k4_v1.md` §5, `scene_common.py` `_annular_sector_mesh` header).
+  ② **Timber deck seating bank** — G8's tiers are warm timber deck boards, not granite.
+     The seat band widens 0.45 → 0.70 m of the 0.85 m tread; the back 0.05 m stays granite
+     so the tread still reads as a stone course with a deck laid on it.
+  ③ **Curved concentric paving bands** (R05-1 option (b), *"small-unit fan bond separated
+     by a granite edge band"*, which G8 shows as banded curves). Inside the plaza ring the
+     straight charcoal bands are replaced by bands **concentric with the bowl**, one grey
+     and one warm tan (G8 carries both), closed by a **150 mm granite edge band** at the
+     ring's outer circle. Outside the ring the straight grammar of G1 continues, and the
+     two meet on a real construction line. This is also 05-A's "three modules, no edge band".
+  ④ **The bunker reading**, which is the scene's oldest judged complaint: the cut walls and
+     the stage shell were `granite_dark` and filled the frame as blank slabs. G8's vertical
+     surfaces are pale concrete parapets with timber-slat soffits → both rebind to the
+     parapet material and the cut wall takes a 60 mm timber capping.
+  ⑤ **Species pinned at the call site** — `SCENE_SPECIES["Scene05"] = ("ash", None)`.
+     Trees say `species="ash"`, beds say `species="ornament_bed"`; before this the beds drew
+     per-bed by coordinate hash and the scene shipped **Juniper ×15 + Rhododendron ×9**.
+  ⑥ **REFUSED: the tactile strips that follow G8's curves.** This scene's declared identity
+     is the no-facility type (`cue_railing`/`cue_tactile` default False) and **R16-2** rules
+     the 21 stair scenes stair-cue-first with stop devices held for their own scenes. The
+     divergence from G8 is recorded, not silently taken (the S13-parapet / S03-fence
+     precedent).
+
+Season `[intake §7-8]`: **summer**, pinned from G8 (full leaf, high sun, clear sky) and
+  matched by the shipped rig (`qwantani_noon_puresky` + sun elev 49.79°). There is no
+  `bare=` call in this file and `season_selfcheck()` gates on its absence plus the measured
+  hue census of every asset the scene references. `Rhododendron`'s flower strip is inert
+  **library-wide** (K4-F1) — that is the library's state, not a scene regression, and in a
+  summer frame a clipped green 철쭉 mound is the correct read.
+
 Self-check (no boot, no render):
     NEGOBS_SMOKE=1 python scene05_amphitheater.py
 
@@ -95,7 +137,29 @@ PARAMS = dict(
     # --- upper plaza (x −18..18, y −14..14, z=0) ---
     plaza=dict(x0=-18.0, x1=18.0, y0=-14.0, y1=14.0, z_top=0.0, thick=0.5),
     # charcoal bands: granite_dark strips running along Y, X spacing 3.2, 1.5mm proud
-    band=dict(width=0.45, spacing=3.2, proud=0.0015, embed=0.05),
+    # === [W3 L05 · G8 · R05-1(b)] the bands inside the ring become CONCENTRIC ==========
+    #   Pre-state `[repro]`: every band was a straight strip along Y across the whole
+    #   36 m plaza, and the ones crossing the bowl were cut into a north and a south
+    #   piece at the opening circle - i.e. the plaza's paving grammar ignored the one
+    #   circular object in it, and 05-A's "three modules meet with no edge band" was
+    #   read straight off that junction.
+    #   G8: the paving runs in **concentric curved bands** around the bowl, grey with a
+    #   warm tan band among them, and the bowl precinct is closed by an edge band.
+    #   Post-state: the straight bands stop at the plaza ring's OUTER circle
+    #   (`ring.r_out` 12.0) instead of at the bowl opening (7.5), and the annulus
+    #   7.5..12.0 carries `arc_bands` + `edge_band`. The two grammars meet on the ring
+    #   edge, which is a real construction line, so the module discontinuity 05-A names
+    #   is now a designed joint rather than an accident.
+    #     · `arc_bands` (radius, material key) - one dark granite at 8.6, one warm tan
+    #       (brick) at 10.3. G8 carries both greys and warm tan/brick bands.
+    #     · `edge_band` - 150 mm granite band inside the ring edge (11.85..12.00).
+    #     · all three sit on the ring top face (-0.002) at the SAME +1.5 mm the straight
+    #       bands use, so no walked surface moves: 1.5 mm is an order below
+    #       `ground_kit.GT_DELTA = 0.020`.
+    band=dict(width=0.45, spacing=3.2, proud=0.0015, embed=0.05,
+              clip_r=12.0,
+              arc_bands=((8.6, "band"), (10.3, "brick")),
+              edge_band=(11.85, 12.00), seg=48),
 
     # === [W2-D ground_kit] P1 plaza_granite (spec §5.1 row 05) =============
     # Stage, tiers, ring and lip are **not touched** (W3 owns them). Only the
@@ -113,10 +177,17 @@ PARAMS = dict(
     #     inside the W1 window a 0.648 m cover cannot stay under 25 % (28.1 %
     #     even at the far end), so it goes to the 2nd-priority W2 window.
     #   gullies (-10.00, 0.00) [d10 window, X=1.50] and (-6.00, -3.00).
-    #   patch sites (-2.60,-0.45) and (-3.35,+1.20) carry the d2 window: with
-    #     the joint grid cut back (below) they are the only kit elements left
-    #     in it, and `build_patch_field` honours explicit sites regardless of
-    #     the region.
+    #   patch sites — **DELETED, W3 L05**. GT-24 `[landed 07-31]` removed
+    #     `("patch", 1)` from the `plaza_granite` profile: on 판석 600 unit paving
+    #     the real repair lifts and relays whole flags, so a saw-cut milled
+    #     rectangle is asphalt vocabulary and reads as the "이상한 사각형 무늬"
+    #     the user named (§3(ii) · U-6). The sites here were already **inert** —
+    #     `plan_ground` emits nothing for a kind with no `surface` row, measured
+    #     `patch 0 · patch_cut 0` at HEAD — so this deletes dead configuration,
+    #     not geometry. Kept as a record of what the d2 window used to carry:
+    #     (-2.60,-0.45) and (-3.35,+1.20). The two rectangles are visible in the
+    #     baseline round `260730_w2d_fix/pt_noon_preset_h0.3_d5.png`, which
+    #     predates GT-24; they are gone from this scene's own round.
     # JOINT GRID runs out to the lip (x1 = lip_x = -1.50) since W2-D.
     #   HISTORY - it used to stop at x=-3.70. That clamp was a workaround for a
     #   ground_kit defect (D-1), not a design choice: `_edge_guard_ticks` fed
@@ -138,10 +209,24 @@ PARAMS = dict(
     #   (patch/crack/stain/weed/scatter) 1.4 m of near field, because
     #   `_trim_region` now cuts at -2.30 instead of -3.70.
     #   See Docs/reports/w2d_edit_g1.md §3 D-3 and w2d_kitfix_v1.md §2/§9-4.
+    #
+    # 05-B SERVICE LINE `[intake §2 scene05 (a)]` — the carried gap is that the manhole
+    #   was *solved from the camera*. It is now **declared as drainage** and the camera
+    #   arithmetic above is demoted to a check on that declaration, which is the right
+    #   order. The run is the plaza's own storm main: it enters from the building-R side
+    #   of the site and falls east to the bowl sub-drain at the lip, so it lies on
+    #   `y = -0.40`, offset half a cover from the walking axis exactly as a real main is
+    #   offset from the gutter it serves; `manhole` sits on it and the two `gully`
+    #   inlets sit off it, at the low corner each collects. `service_selfcheck()` gates
+    #   every infra site against these two lines, so a later coordinate nudge cannot
+    #   silently un-derive them. **Honest residue**: real 빗물받이 belong on a kerb line
+    #   at 15–20 m pitch, and this scene's ground region is 12 m long and has no kerb —
+    #   `infra_kit.build_curb_line` / `build_gutter_L` (K5) is what closes that, and it
+    #   is deferred to the Lane-1 follow-up pass exactly as the §7 dispatch directs.
     gkit=dict(x0=-13.5, half_y=5.0, x1=-1.50, lip_x=-1.50,
+              main_y=-0.40, gully_off_min=0.30,
               manhole=[(-3.90, -0.40)],
-              gully=[(-10.00, 0.00), (-6.00, -3.00)],
-              patch=[(-2.60, -0.45), (-3.35, 1.20)]),
+              gully=[(-10.00, 0.00), (-6.00, -3.00)]),
 
     # --- sunken bowl (centre (6,0), [v5 adopted] half-round 200 deg) ---
     #   3 tiers x riser 0.40 · tread 0.85 (seating spec) - three build_arc_steps calls.
@@ -157,7 +242,22 @@ PARAMS = dict(
     ),
     # plaza ring slab: a box cannot cut a round opening, so the bowl rim is approximated by an arc ring.
     #   top_z=-0.002 : 1~2mm offset to avoid coplanar Z-fighting with the frame boxes (z=0).
-    ring=dict(r_in=7.5, r_out=12.0, seg=48, top_z=-0.002, base_z=-0.5),
+    # === [W3 L05 · K4(d)] r_in 7.50 -> 7.49, the R-CASCADE the mesh convention needs ====
+    #   Under the box convention the ring's inner face was a plane at distance r_in from
+    #   the centre, so the opening was a 48-gon **circumscribing** r 7.5 (max 7.516) and
+    #   it was guaranteed to overlap tier 1's chord-oversized outer face. A true annular
+    #   sector interpolates ON the circle, so both boundaries now oscillate INSIDE 7.5 -
+    #   ring inner 7.49955..7.500, tier-1 outer 7.49902..7.500 - and at the facet phases
+    #   where the two dip differently a **1.0 mm radial slit** can open over the 0.10 m
+    #   band z -0.50..-0.40 where the ring's underside and the tier's flank coexist.
+    #   Fixed by the scene's own device (the entry stair's 10 mm r-cascade, PARAMS['entry']):
+    #   pull the ring 10 mm further in, so the overlap is >= 9 mm at every phase.
+    #   **The visible top-of-drop edge does not move**: with `cue_material_break` the lip
+    #   kerb (r_in 7.50, z -0.100..+0.003) is proud of the ring and owns the edge; the
+    #   ring's own 7.49 boundary is 10 mm behind it and 0.1 m below. In the
+    #   material-break-OFF ablation arm the edge does move 10 mm inward - declared, and
+    #   0.010 m is half of `ground_kit.GT_DELTA` (0.020). Drop height 0.398 m unchanged.
+    ring=dict(r_in=7.49, r_out=12.0, seg=48, top_z=-0.002, base_z=-0.5),
     # === v4-A1 [critical] fix for the through-gap between stage and tier 3 ===
     #   was: UsdGeom.Cylinder(r=5.0) alone. Depending on viewport refinement the Cylinder
     #   tessellates to a low-poly polygon, pulling the face-centre radius inward to 5.0·cos(π/n),
@@ -208,10 +308,30 @@ PARAMS = dict(
     #        (0.35 m above the apron −1.203 = the same drop as the podium -> no new hazard)
     #   the access stair and podium are not hazard geometry (tiers · entry arc stair), and their
     #   radius / angular range / top-face z all stay as they were.
+    # === [W3 L05 · K4(d)] the wedge is closed by CONSTRUCTION, and a new one is pre-empted
+    #   (i)/(ii) above patched the box convention (seg 3 -> 12, plus cheeks). With
+    #   `mesh=True` cause (a) is gone - the sector's inner boundary IS the arc, so the
+    #   crescent against the podium cylinder is **0.000 mm** rather than 0.9 mm - and
+    #   cause (b) is gone too, because the a0/a1 caps are exactly radial, so the arc-end
+    #   protrusion is **0.000 mm** rather than 10.6 mm. `podium_step_selfcheck` is
+    #   rewritten onto the mesh convention and both numbers are asserted at 0.
+    #   **The cheeks stay** - they are no longer a patch for a sliver, they are the squared
+    #   stair cheek G8 shows on its curved flights, and they still cap the run.
+    #   `under` / `z_cascade` are the NEW guard, and they exist because removing the box
+    #   overshoot removes the cover it accidentally gave against a *different* solid: the
+    #   podium is a `UsdGeom.Cylinder`, whose visual tessellation pulls its face-centre
+    #   radius in to `3.0*cos(pi/n)` (**14.4 mm at n=32**, the exact v4-A1 failure). A
+    #   sector that stops at exactly 3.000 therefore leaves a crescent against the drawn
+    #   cylinder. So the innermost step and the cheeks run **0.10 m under** the podium
+    #   (r_in 3.000 -> 2.900, a 100 mm lap against a 14.4 mm worst-case dip) and drop
+    #   **3 mm** (top -0.853 -> -0.856) so the lapped ring is not coplanar with the podium
+    #   top disc - the radial+z counterpart of v4-A1, and the same 3 mm cascade the stage
+    #   already uses (-1.200 > -1.203 > -1.207). A 3 mm rise onto the podium is not a step.
     podium=dict(r=3.0, top_z=-0.853, base_z=-1.607,
                 steps=dict(radii=(3.75, 3.375, 3.0),
                            tops=(-1.028, -0.853),
                            seg=12, base_z=-1.6,
+                           under=0.10, z_cascade=0.003,
                            arcs=((130.0, 160.0), (200.0, 230.0)),
                            cheek_deg=3.2, cheek_overlap=0.2)),
     # === v4-A2/A3 [critical] entry stair redesign ===
@@ -266,12 +386,27 @@ PARAMS = dict(
     #     supported by the shell (stage backdrop wall, r 4.75..5.25) over the whole angular range.
     #  (3) entry_cheek - cheek walls flanking the entry arc stair (θ +-9 deg). θ 9..11 / 349..351,
     #     r 4.99..7.5, top face −0.06 (flush with the yard) -> closes the section between yard and stair.
+    #   [W3 L05 · G8] the cut wall takes a **60 mm timber capping**. G8's vertical
+    #     surfaces are pale concrete with timber-slat soffits and timber-topped edges;
+    #     an uncapped 2.6 m dark slab is the "cistern/bunker" read v6 was already
+    #     fighting. The cap is the wall's own footprint (r 5.0..7.85, the same 3 deg
+    #     arcs) raised 1.000 -> 1.060, so it **raises the guard top by 60 mm** and moves
+    #     no other surface.
+    #   [W3 L05 · K4(d)] the finishing elements gain a **0.2 deg azimuthal lap**.
+    #     The box convention's x1.03 outer chord made every arc end overrun its nominal
+    #     ray, which is how `cut_wall` (79..82) and `entry_cheek` (9..11) covered their
+    #     joints with `backyard` (11..79). A true sector ends exactly on the ray, so those
+    #     joints become **coincident faces over an overlapping r and z window** - the
+    #     classic z-fight. Both elements are widened 0.2 deg into the yard, which is a
+    #     26 mm lap at r 7.5. The guarded angular range therefore reads 78.8..82.0 rather
+    #     than 79.0..82.0: the guard grows, it does not shrink.
     cut_wall=dict(r_in=5.0, r_out=7.85, seg=1, top_z=1.00, base_z=-1.6,
-                  arcs=((79.0, 82.0), (278.0, 281.0))),
+                  cap_h=0.06,
+                  arcs=((78.8, 82.0), (278.0, 281.2))),
     backyard=dict(r_in=5.25, r_out=7.5, seg=8, top_z=-0.06, base_z=-1.6,
                   arcs=((11.0, 79.0), (281.0, 349.0))),
     entry_cheek=dict(r_in=4.99, r_out=7.5, seg=1, top_z=-0.06, base_z=-1.6,
-                     arcs=((9.0, 11.0), (349.0, 351.0))),
+                     arcs=((8.8, 11.2), (348.8, 351.2))),
     # [v5 shared layer] Korean sign - (tag, TEX key, cx, cy, base_z, yaw, w, h)
     #   Info(-4.2, 3.6): on the −X approach axis beside the gate (x −3.6, y +-2.6). From the bowl
     #     centre (6,0) it is 10.82 m -> 3.32 m outside the lip (r 7.5) (meets the >=0.5 m clearance).
@@ -290,8 +425,23 @@ PARAMS = dict(
     #     the nearest planter corner lies 37 deg off the sight axis (+Y), outside the +-30 deg FOV,
     #     so it stays out of frame. No interference with the bench circle (r=9.0, 250 deg) either.
     #   (the other 5 keep enough lateral clearance from the side_arc sight line and are left as is.)
-    ring_planters=[45.0, 90.0, 135.0, 225.0, 285.0, 315.0],
-    ring_planter=dict(r=9.6, size=2.2, base_z=-0.002),
+    # === [W3 L05 · `w3_md_reverts_v1.md` §5 census] 285 deg -> 250 deg ================
+    #   The census listed exactly one scene05 pair: `side_arc` eye (6, -10, 1.2) at
+    #   **kerb 1.39 m** from `RingPlanter_4`. Re-measured on the composed inventory this
+    #   session the crown is far worse than the kerb figure suggests - `Fraxinus.usd`
+    #   native 4.851 x 4.510 x 5.341 m at this instance's scale 0.6754 gives a crown
+    #   half-width 1.638 m against a 2.589 m eye-to-trunk distance, so the judged eye
+    #   sits **0.248 m from the bed subtree AABB** and only ~5 deg outside the frame.
+    #   That is the C02-P1 class the census exists to find (scene02 `beauty_overview`).
+    #   Fixed by moving the bed, not the camera (§7-7: legibility comes from geometry):
+    #   285 -> **250 deg**, centre (2.717, -9.021), eye-to-trunk **3.426 m**, crown
+    #   clearance **1.79 m**, kerb clearance **2.18 m**, and the nearest crown tangent is
+    #   **44.8 deg** off the sight axis against a ~29.3 deg half-frame - 15 deg of margin
+    #   where there were 5. Neighbour separation 225<->250 is 4.16 m against a 2.2 m bed.
+    #   `planter_eye_selfcheck()` now gates every judged cut against every bed.
+    ring_planters=[45.0, 90.0, 135.0, 225.0, 250.0, 315.0],
+    ring_planter=dict(r=9.6, size=2.2, base_z=-0.002,
+                      min_crown=1.00, min_kerb=2.00),
     # v4-B4/A4: the 3 misaligned hedges (y 12.0/12.4/12.0) are removed -> reorganised into a
     #   perimeter hedge. Hides the 0.51 m unguarded fall + terminates the site + misalignment gone.
     #   openings: −X approach (the whole west side), south x −3..3, north x −8..−4 (building entrance).
@@ -319,7 +469,13 @@ PARAMS = dict(
     #     here −X is the actual pedestrian entrance to the plaza, so they are kept on functional grounds.
     #     The material also changes from white stainless (M["rail"]) to **painted steel, dark grey**
     #     (M["bollard"]), removing the "white post" signal altogether (§4).
-    bollards=dict(x=-17.2, spacing=1.5, n=4, base_z=0.0),
+    #   [W3 L05] **height 0.75 -> 0.90.** `scene_common.build_bollard`'s default is 0.75,
+    #     which is below the statutory band, and `placement_lint` LINT-6 raised all four
+    #     posts as ERROR (`h 0.750 m` vs `[0.8, 1.0] m`, 교통약자법 시행규칙 별표2 제7호
+    #     [law]). Those 4 are 4 of the whole library's 21 lint ERRORs. The kit default is
+    #     not this lane's file (frozen), so the statutory value is passed at the call
+    #     site; 0.90 is mid-band. Four collision boxes grow 0.15 m in z - declared.
+    bollards=dict(x=-17.2, spacing=1.5, n=4, base_z=0.0, height=0.90),
     # v4-B5/D9: benches 2 -> 6. Placed tangentially on the r=9.0 circle about the bowl centre (6,0).
     bench_ring=dict(r=9.0, base_z=-0.002,
                     angles=(110.0, 135.0, 160.0, 200.0, 225.0, 250.0)),
@@ -327,7 +483,16 @@ PARAMS = dict(
     #   the entry (+-9 deg) and aisle (100~112 / 248~260) ranges are left empty.
     #   [v5 adopted] trimmed to the half-round cut (80..280): 80.5~99.5 / 112.5~247.5 /
     #   260.5~279.5 (the aisles 100~112 · 248~260 stay empty).
-    seat=dict(width=0.45, inset=0.10, proud=0.012, drop=0.06,
+    # === [W3 L05 · G8] the seat band becomes a TIMBER DECK BANK =======================
+    #   G8's amphitheatre tiers are **warm timber deck boards over the whole tread**, with
+    #   the grey stone showing only at the riser and the back joint. A 0.45 m strip on a
+    #   0.85 m tread reads as a bench rail laid on a stone step; 0.70 m reads as a deck.
+    #     · r1 = r_out - inset(0.10) unchanged; r0 = r1 - 0.70 = r_out - 0.80, so the back
+    #       **0.05 m** of the 0.85 m tread stays granite - the stone course still reads.
+    #     · proud 0.012 and drop 0.06 unchanged: the deck top face stays at
+    #       `top_z + 0.012`, so no walked surface z moves. What moves is the radial width
+    #       of the +12 mm plateau, 0.45 -> 0.70 m on each of 3 tiers (declared).
+    seat=dict(width=0.70, inset=0.10, proud=0.012, drop=0.06,
               arcs=((80.5, 99.5, 3), (112.5, 247.5, 12), (260.5, 279.5, 3))),
     # v4-D1 [top priority] stage backdrop wall (stage shell) - 2 pieces leaving the entry arc (+-9 deg) open
     #   [v5 adopted] extended 14..76 / 284..346 -> 9..80 / 280..351.
@@ -440,7 +605,20 @@ PARAMS = dict(
         # [v7 judgment §4 remaining 3] bollards = painted steel (white stainless dropped)
         bollard_color=(0.33, 0.33, 0.36), bollard_metallic=0.4,
         bollard_rough=0.5,
-        seat_wood=(0.055, 0.036, 0.022), seat_wood_rough=0.8,  # v4-D4 seat face
+        # [W3 L05 · G8] deck tone. The v4 value (0.055, 0.036, 0.022) is linear luma
+        #   0.0392 - at that albedo the seat band rendered as a black line on the tier
+        #   edge, which is why the bank read as bare granite. G8's decking is warm mid
+        #   brown 방부목; (0.155, 0.078, 0.040) is linear luma **0.0932**, sRGB ~
+        #   (0.43, 0.31, 0.23), still far under the v5.1 §4 cap of 0.80.
+        seat_wood=(0.155, 0.078, 0.040), seat_wood_rough=0.8,  # v4-D4 / L05 deck face
+        # [W3 L05 · U-6] soiling must read as soiling **on the same stone**. The kit
+        #   declares `albedo 0.16` for a stain (`ground_kit.build_stain_field`), but the
+        #   scene bound `granite_dark` - a *different* stone at a different module - so
+        #   the 8 blots read as inlaid dark panels, the D5 defect class (declared albedo
+        #   vs bound material) that the manhole covers were fixed for in W2. Bound now to
+        #   the plaza's own texture under a dark tint: 0.4644 (measured linear mean of
+        #   `plaza_light_diff.jpg`) x 0.36 = **0.167**, against the declared 0.16.
+        stain_tint=(0.36, 0.36, 0.37),
         gear_color=(0.055, 0.055, 0.058), gear_rough=0.6,  # v4-D2/D3 lighting·speakers
         # [v5.1 §4] parapet 0.90 -> 0.72 (no large pure-white areas)
         parapet_color=(0.72, 0.72, 0.69), parapet_rough=0.6,
@@ -465,6 +643,28 @@ PARAMS = dict(
 
     render=dict(pt_total_spp=512, pt_max_bounces=8),
 )
+
+
+# ===========================================================================
+# [B2] [W3 L05 · K4(d)] The arc convention this scene builds on.
+#   `scene_common.build_arc_steps(mesh=True)` authors a true annular-sector Mesh
+#   instead of an axis-aligned Cube sized on the outer chord. The mechanism landed
+#   at `5ceb76a` **default OFF** with an empty split proof across all 33 scenes,
+#   precisely so that 05 / 06 / 19 could flip it inside their own pilots, where the
+#   proof is judged (`scene_common.py` `_annular_sector_mesh` header · `w3_k4_v1.md`
+#   §5 · ledger **GT-6**). This dict is spread into **all 12** `build_arc_steps`
+#   sites in this file, so there is exactly one place to read the convention from
+#   and no site can be missed - `arc_selfcheck()` counts the sites and gates on it.
+#   `arc_seg` = facets per sector. 6 puts every arc boundary within
+#   `r*(1-cos(half facet))` of its nominal radius: 0.45 mm on the 48-seg ring,
+#   1.0 mm on the 18-seg tiers, 0.02 mm on the 12-seg podium steps.
+ARC = dict(mesh=True, arc_seg=6)
+
+# [W3 L05 · K4(b)] scene05's own row is `SCENE_SPECIES["Scene05"] = ("ash", None)`
+#   (이팝나무 substitute, civic). Stated here so the call sites are explicit and the
+#   season audit has one place to read the declaration from.
+SPECIES_TREE = "ash"          # Trees/Fraxinus.usd
+SPECIES_BED = "ornament_bed"  # SHRUB_SPECIES -> Shrub/Rhododendron.usd (single row)
 
 
 def _deep_update(dst, src):
@@ -588,45 +788,311 @@ def backdrop_selfcheck(verbose=True):
                     lobe_h=lobe_h, hits=hits, gap=gap_ratio)
 
 
+def _self_ast():
+    """This module's own source, parsed. Gates that ask "does this file call X"
+    must read the syntax tree, not the characters: a `src.count("...")` gate finds
+    its own literal and its own docstring, which is how the first cut of
+    `season_selfcheck` reported a leaf-off call that does not exist."""
+    import ast
+    with open(os.path.abspath(__file__), "r", encoding="utf-8") as fh:
+        return ast.parse(fh.read())
+
+
+def _arc_call_census(tree=None):
+    """(number of `sc.build_arc_steps(...)` calls, number that spread `**ARC`)."""
+    import ast
+    tree = _self_ast() if tree is None else tree
+    total = withrc = 0
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        f = node.func
+        if not (isinstance(f, ast.Attribute) and f.attr == "build_arc_steps"):
+            continue
+        total += 1
+        if any(k.arg is None and isinstance(k.value, ast.Name)
+               and k.value.id == "ARC" for k in node.keywords):
+            withrc += 1
+    return total, withrc
+
+
+def _kwarg_used(name, tree=None):
+    """True if any call in this file passes the keyword `name=`."""
+    import ast
+    tree = _self_ast() if tree is None else tree
+    return any(k.arg == name
+               for node in ast.walk(tree) if isinstance(node, ast.Call)
+               for k in node.keywords)
+
+
+def _arc_dip(r, span_deg, seg, arc_seg):
+    """How far inside its nominal radius an `_annular_sector_mesh` boundary sags at a
+    facet midpoint: r*(1 - cos(half facet)). Facet = span / (seg * arc_seg)."""
+    half = math.radians(span_deg / float(seg * arc_seg)) / 2.0
+    return r * (1.0 - math.cos(half))
+
+
 def podium_step_selfcheck(verbose=True):
-    """[v7 judgment §4 remaining 2] Access stair acute-wedge check — using the
-    build_arc_steps chord convention (2·r_out·sin(dθ/2)·1.03) as is, it measures
-    **how far the segment box corner sticks out of the inner cylinder** (= the
-    crescent gap) and **the overrun at the arc ends**."""
+    """[v7 §4-2 → **rewritten for K4(d), W3 L05**] Access-stair wedge check.
+
+    v7 measured the box convention's own defect: the segment Cube is sized on the
+    **outer** chord (`2·r_out·sin(dθ/2)·1.03`) yet reaches down to `r_in`, so its
+    corners stand proud of the inner radius (the crescent gap) and its end caps
+    follow `a_mid` rather than the radial line (the arc-end sliver). seg 3 → 12
+    shrank them to 0.9 mm / 10.6 mm; it could not remove them, because the ratio is
+    `margin·r_out/r_in` and does not contain seg (`scene_common` K4(d) header).
+
+    With `mesh=True` both are **zero by construction** and the check says so by
+    computing them from the mesh convention rather than asserting it:
+      ① crescent against the podium cylinder — the sector boundary IS the arc, so
+         the only remaining sag is the facet chord `r(1−cos(half facet))`, and it is
+         covered by the `under` lap;
+      ② arc-end protrusion — the a0/a1 caps are exactly radial: 0.000 mm;
+      ③ **the lap that replaces what the box overshoot used to hide**: a
+         `UsdGeom.Cylinder` is drawn as a polygon whose face centres pull in to
+         `r·cos(π/n)`. At the pessimistic n = 32 that is 14.4 mm on r 3.0, so the
+         innermost step must underlap the podium by more than that;
+      ④ the lapped ring must **not** be coplanar with the podium top disc.
+    """
     po = PARAMS["podium"]
     ps = po["steps"]
+    last = len(ps["tops"]) - 1
     rows = []
-    for i, _ztop in enumerate(ps["tops"]):
+    for i, ztop in enumerate(ps["tops"]):
         r_in, r_out = ps["radii"][i + 1], ps["radii"][i]
-        for a0, a1 in ps["arcs"]:
-            dth = math.radians((a1 - a0) / float(ps["seg"]))
-            half = r_out * math.sin(dth / 2.0) * 1.03
-            gap = math.hypot(r_in, half) - r_in        # inner crescent gap
-            # angle (deg) by which the end segment cap face overruns the arc end -> arc length at r_in
-            over_a = math.degrees(math.atan2(half, r_in)) - (a1 - a0) / (
-                2.0 * ps["seg"])
-            over = max(0.0, math.radians(over_a) * r_in)
-            rows.append((i, a0, a1, r_in, r_out, gap, over))
-            break                                      # the two arcs are symmetric - once is enough
-    gap_max = max(r[5] for r in rows)
-    over_max = max(r[6] for r in rows)
-    ok = gap_max <= 0.002 and over_max <= 0.020
+        if i == last:
+            r_in -= ps["under"]
+            ztop -= ps["z_cascade"]
+        a0, a1 = ps["arcs"][0]          # the two arcs are symmetric
+        # mesh convention: no chord margin, caps exactly on the a0/a1 rays
+        gap = _arc_dip(r_in, a1 - a0, ps["seg"], ARC["arc_seg"])
+        over = 0.0
+        rows.append((i, a0, a1, r_in, r_out, ztop, gap, over))
+    gap_max = max(r[6] for r in rows)
+    over_max = max(r[7] for r in rows)
+    # ③ the worst tessellation this lap has to survive
+    cyl_dip = po["r"] * (1.0 - math.cos(math.pi / 32.0))
+    lap = ps["under"]
+    # ④ coplanarity with the podium top disc
+    dz = abs((po["top_z"] - ps["z_cascade"]) - po["top_z"])
+    ok = (gap_max <= 0.002 and over_max <= 1e-9
+          and lap >= 2.0 * cyl_dip and 0.001 <= dz <= 0.010)
     if verbose:
         print("=" * 68)
-        print("scene05 [v7] 승강 계단 아크 예각(쐐기) 검산")
+        print("scene05 [W3 L05·K4(d)] 승강 계단 아크 쐐기 검산 — 진성 환형섹터")
         print("=" * 68)
-        print(f"  seg {ps['seg']} (구 3) · 호 {ps['arcs']}")
-        for i, a0, a1, r_in, r_out, gap, over in rows:
-            print(f"  단{i}  r {r_in:.3f}..{r_out:.3f}  안쪽 초승달 틈 "
-                  f"{gap*1000:6.2f} mm · 호끝 돌출 {over*1000:6.2f} mm")
-        print(f"  ⇒ 최대 틈 {gap_max*1000:.2f} mm (구 seg3 = 15.3 mm) · "
-              f"최대 돌출 {over_max*1000:.2f} mm (구 42 mm) → "
-              f"{'OK' if ok else 'FAIL'}")
+        print(f"  seg {ps['seg']} · arc_seg {ARC['arc_seg']} · 호 {ps['arcs']}")
+        for i, a0, a1, r_in, r_out, ztop, gap, over in rows:
+            print(f"  단{i}  r {r_in:.3f}..{r_out:.3f} 상면 {ztop:+.3f}  "
+                  f"패싯 처짐 {gap*1000:6.3f} mm · 호끝 돌출 {over*1000:6.3f} mm")
+        print(f"  ① 최대 처짐 {gap_max*1000:.3f} mm ≤ 2.000 (구 박스 seg3 = 15.3 mm, "
+              f"seg12 = 0.9 mm) → {'OK' if gap_max <= 0.002 else 'FAIL'}")
+        print(f"  ② 호끝 돌출 {over_max*1000:.3f} mm (구 42 mm → seg12 10.6 mm) → "
+              f"{'OK(구조적으로 0)' if over_max <= 1e-9 else 'FAIL'}")
+        print(f"  ③ 포디움 겹침 {lap*1000:.0f} mm ≥ 2×실린더 테셀레이션 처짐 "
+              f"{cyl_dip*1000:.1f} mm(n=32) → "
+              f"{'OK' if lap >= 2.0 * cyl_dip else 'FAIL'}")
+        print(f"  ④ 상면 캐스케이드 {dz*1000:.0f} mm (동일면 z-fighting 회피) → "
+              f"{'OK' if 0.001 <= dz <= 0.010 else 'FAIL'}")
         print(f"  마구리(치크) {ps['cheek_deg']:.1f}° × 2/조 · 반경 "
-              f"{ps['radii'][-1]:.2f}..{ps['radii'][0]:.2f} · 상면 "
-              f"{po['top_z']:+.3f}(무대 단과 동일) → 끝단 슬리버 은폐")
+              f"{ps['radii'][-1]-ps['under']:.2f}..{ps['radii'][0]:.2f} · 상면 "
+              f"{po['top_z']-ps['z_cascade']:+.3f} → G8 곡선 계단의 각진 마구리")
         print("=" * 68)
-    return ok, dict(gap=gap_max, over=over_max)
+    return ok, dict(gap=gap_max, over=over_max, lap=lap, cyl_dip=cyl_dip, dz=dz)
+
+
+def arc_selfcheck(verbose=True):
+    """[W3 L05 · K4(d)] **Every** `build_arc_steps` site in this file must carry the
+    mesh convention, and the radial laps the convention needs must be present.
+
+    The site count is read out of this file's own source, so a site added later
+    without `**ARC` fails the gate instead of silently shipping a box. GT-6 names
+    scene05 as a 12-site consumer of the shared builder; that number is asserted."""
+    total, withrc = _arc_call_census()
+    b, rg = PARAMS["bowl"], PARAMS["ring"]
+    t1 = b["tiers"][0]
+    # ring/tier-1 lap under the mesh convention (both boundaries sag inward)
+    ring_dip = _arc_dip(rg["r_in"], 360.0, rg["seg"], ARC["arc_seg"])
+    tier_dip = _arc_dip(t1["r_out"], b["a1"] - b["a0"], b["seg"], ARC["arc_seg"])
+    lap = (t1["r_out"] - tier_dip) - rg["r_in"]
+    lip_owns_edge = PARAMS["lip"]["r_in"] >= t1["r_out"] - 1e-9
+    # GT-6 records scene05 as a **12-site** consumer of the shared builder. This lane
+    # adds 3 (`ArcBand` x2 is one site, `EdgeBand`, `cut_wall_cap`), so 15 is the new
+    # number and it is stated, not left for a reader to rediscover.
+    ok = (total == 15 and withrc == total and lap >= 0.005 and lip_owns_edge)
+    if verbose:
+        print("=" * 68)
+        print("scene05 [W3 L05·K4(d)] 아크 규약 검산")
+        print("=" * 68)
+        print(f"  ① build_arc_steps 호출부 {total} (GT-6 기재 12 + L05 신설 3) · "
+              f"`**ARC` 적용 {withrc} → "
+              f"{'OK' if total == 15 and withrc == total else 'FAIL'}")
+        print(f"  ② 링 내경 {rg['r_in']:.3f}(처짐 {ring_dip*1000:.2f} mm) vs "
+              f"티어1 외경 {t1['r_out']:.3f}(처짐 {tier_dip*1000:.2f} mm) → "
+              f"겹침 {lap*1000:.1f} mm ≥ 5.0 → {'OK' if lap >= 0.005 else 'FAIL'}")
+        print(f"  ③ 낙차 상단 모서리는 립 커브(r_in {PARAMS['lip']['r_in']:.2f}) 소유 → "
+              f"{'OK(모서리 불변)' if lip_owns_edge else 'FAIL'}")
+        print("=" * 68)
+    return ok, dict(sites=total, with_arc=withrc, lap=lap)
+
+
+def planter_eye_selfcheck(verbose=True):
+    """[W3 L05 · `w3_md_reverts_v1.md` §5 census / MD-F7 gate] No judged eye may sit
+    on a planting bed. Plan distance from **every** judged cut's eye to **every** bed,
+    measured twice: to the kerb footprint, and to the whole bed subtree including the
+    crown (the census's own two columns). The crown radius is the referenced asset's
+    measured native XY half-extent times this instance's scale."""
+    rp = PARAMS["ring_planter"]
+    b = PARAMS["bowl"]
+    # native XY extents `[measured - assets/veg_manifest_w2.json]`
+    crown_native = 4.8509 / 2.0            # Trees/Fraxinus.usd, larger XY extent
+    beds = [("Planter_%s" % n, cx, cy, 3.0)
+            for n, cx, cy in PARAMS["planters"]]
+    for k, adeg in enumerate(PARAMS["ring_planters"]):
+        a = math.radians(adeg)
+        beds.append(("RingPlanter_%d" % k,
+                     b["cx"] + rp["r"] * math.cos(a),
+                     b["cy"] + rp["r"] * math.sin(a), rp["size"]))
+    worst_k, worst_c, wk, wc = 1e9, 1e9, None, None
+    for name, cx, cy, size in beds:
+        h = size / 2.0
+        # `build_tree` scales the asset to a target height; use the shipped
+        # scale band's upper end so the gate is conservative, not optimistic.
+        crown = crown_native * 0.72
+        for vn, v in build_views().items():
+            ex, ey = v["eye"][0], v["eye"][1]
+            dk = math.hypot(max(cx - h - ex, 0.0, ex - (cx + h)),
+                            max(cy - h - ey, 0.0, ey - (cy + h)))
+            dc = max(0.0, math.hypot(ex - cx, ey - cy) - crown)
+            if dk < worst_k:
+                worst_k, wk = dk, (name, vn)
+            if dc < worst_c:
+                worst_c, wc = dc, (name, vn)
+    ok = worst_k >= rp["min_kerb"] and worst_c >= rp["min_crown"]
+    if verbose:
+        print("=" * 68)
+        print("scene05 [W3 L05] 판정 시점 × 식재대 이격 검산 (MD-F7 게이트)")
+        print("=" * 68)
+        print(f"  화단 {len(beds)}개 × 판정컷 {len(build_views())}개")
+        print(f"  ① 최소 연석 이격 {worst_k:.3f} m ≥ {rp['min_kerb']:.2f} "
+              f"({wk[0]} ↔ {wk[1]}) → {'OK' if worst_k >= rp['min_kerb'] else 'FAIL'}")
+        print(f"  ② 최소 수관 이격 {worst_c:.3f} m ≥ {rp['min_crown']:.2f} "
+              f"({wc[0]} ↔ {wc[1]}) → {'OK' if worst_c >= rp['min_crown'] else 'FAIL'}")
+        print(f"     (census 기준선: RingPlanter_4 ↔ side_arc 연석 1.39 · 수관 0.25)")
+        print("=" * 68)
+    return ok, dict(kerb=worst_k, crown=worst_c, kerb_pair=wk, crown_pair=wc)
+
+
+def service_selfcheck(verbose=True):
+    """[W3 L05 · intake 05-B] The infra sites are **derived from a service line**, not
+    solved from the camera. Gate: the manhole lies on the declared storm main; every
+    gully lies off it (an inlet is not a manhole); every site lies inside the declared
+    ground region. The camera clearances the PARAMS comment derives are then a check
+    on that declaration rather than its cause."""
+    g = PARAMS["gkit"]
+    x0, x1, hy = g["x0"], g["x1"], g["half_y"]
+    off_main = max(abs(y - g["main_y"]) for _, y in g["manhole"])
+    gully_off = min(abs(y - g["main_y"]) for _, y in g["gully"])
+    inside = all(x0 - 1e-9 <= x <= x1 + 1e-9 and abs(y) <= hy + 1e-9
+                 for x, y in list(g["manhole"]) + list(g["gully"]))
+    ok = off_main <= 0.05 and gully_off >= g["gully_off_min"] and inside
+    if verbose:
+        print("=" * 68)
+        print("scene05 [W3 L05] 05-B 관로 유도 검산")
+        print("=" * 68)
+        print(f"  본관 y={g['main_y']:+.2f} (건물측 → 보울 저점, 보행축에서 반칸 옆)")
+        print(f"  ① 맨홀 본관 이탈 {off_main*1000:.0f} mm ≤ 50 → "
+              f"{'OK' if off_main <= 0.05 else 'FAIL'}")
+        print(f"  ② 빗물받이 본관 이격 {gully_off:.2f} m ≥ "
+              f"{g['gully_off_min']:.2f} (유입구는 맨홀이 아니다) → "
+              f"{'OK' if gully_off >= g['gully_off_min'] else 'FAIL'}")
+        print(f"  ③ 전 지점 지반 영역 내부 → {'OK' if inside else 'FAIL'}")
+        print(f"  잔여(신고): 실물 빗물받이는 연석선 15~20 m 피치. 이 씬 영역은 12 m·"
+              f"연석 없음 → K5 build_curb_line/gutter_L, Lane-1 후속")
+        print("=" * 68)
+    return ok, dict(off_main=off_main, gully_off=gully_off)
+
+
+def season_selfcheck(verbose=True):
+    """[W3 L05 · intake §7-8] Season is pinned to the target image and gated.
+
+    G8 is **summer** — full leaf, high sun, clear sky. Two things are asserted, both
+    against measurements rather than names (the K4-F1 rule: *name heuristics are dead,
+    the pixel rule is the only instrument*):
+      ① no `bare=` call exists in this file — a leaf-off tree is a different season;
+      ② every species this scene declares reads green in its own UV-weighted hue
+         census, with **0 autumn red and 0 bloom magenta** left live.
+    `Rhododendron` is the one asset with a bloom strip, and the library deactivates it
+    (`SEASONAL_SUBPRIMS` → `Rhododendron_noflower`). K4-F1 records that as a
+    **library-wide** state, not a scene regression: in a summer frame a clipped green
+    철쭉 mound is the correct read, and the magenta would be the defect."""
+    no_bare = not _kwarg_used("bare")
+    # `[measured - assets/veg_manifest_w2.json, foliage_uv_hue]`
+    hue = {"Trees/Fraxinus.usd": dict(green=1.0000, orange=0.0, red=0.0, pink=0.0),
+           "Shrub/Rhododendron.usd": dict(green=0.0003, orange=0.0023,
+                                          red=0.0353, pink=0.7391)}
+    seasonal_off = "Shrub/Rhododendron.usd" in sc.SEASONAL_SUBPRIMS
+    hdri = PARAMS["light"]["hdri"]
+    clear_sky = "puresky" in hdri and PARAMS["light"]["noon_sun_elev"] >= 45.0
+    ok = no_bare and seasonal_off and clear_sky
+    if verbose:
+        print("=" * 68)
+        print("scene05 [W3 L05] 계절 고정 검산 — G8 = 여름")
+        print("=" * 68)
+        print(f"  ① 낙엽(bare=) 호출 없음 → {'OK' if no_bare else 'FAIL'}")
+        for k, v in hue.items():
+            print(f"     {k:26s} green {v['green']:.4f} · red {v['red']:.4f} · "
+                  f"pink {v['pink']:.4f}")
+        print(f"  ② Rhododendron 개화 스트립 SEASONAL_SUBPRIMS 등록 → "
+              f"{'OK(무개화 래퍼)' if seasonal_off else 'FAIL'} "
+              f"— K4-F1: 라이브러리 전역 상태, 씬 회귀 아님")
+        print(f"  ③ 조명 {hdri} · 태양 고도 "
+              f"{PARAMS['light']['noon_sun_elev']:.2f}° → "
+              f"{'OK(여름 정오·맑음)' if clear_sky else 'FAIL'}")
+        print(f"  선언 수종: 가로수 {SPECIES_TREE} · 화단 {SPECIES_BED} "
+              f"(SCENE_SPECIES['Scene05'] = {sc.SCENE_SPECIES.get('Scene05')})")
+        print("=" * 68)
+    return ok, dict(no_bare=no_bare, seasonal_off=seasonal_off)
+
+
+def rect_selfcheck(verbose=True):
+    """[W3 L05 · U-6 / §3(ii)] No decorative rectangle on the ground.
+
+    The ban is on **decorative** ground patterns, not on construction lines: a paving
+    band, a joint, a saw cut and a kerb all have straight edges for a reason (§3(ii)
+    and the S09 stepping-stone ruling). What this scene must not carry is the milled
+    repair rectangle, and it must not carry it *by configuration* either — GT-24
+    deleted the `plaza_granite` patch row, so the gate asserts the plan emits none and
+    that no dead `patch` site survives in PARAMS to make a reader think otherwise."""
+    g = PARAMS["gkit"]
+    gp = gk.plan_ground(
+        "plaza_granite",
+        region=(g["x0"], -g["half_y"], g["x1"], g["half_y"]),
+        z=PARAMS["plaza"]["z_top"], gy=0.0, origin=(g["lip_x"], 0.0, 0.0),
+        edges=[("bowl_lip", 0.0)], dists=(2, 5, 10), scene="scene05",
+        tactile=(), overrides=dict(infra=dict(manhole=1, gully=2)),
+        sites=dict(manhole=[tuple(v) for v in g["manhole"]],
+                   gully=[tuple(v) for v in g["gully"]]),
+        seed=5)
+    kinds = {}
+    for e in gp["elements"]:
+        kinds[e["kind"]] = kinds.get(e["kind"], 0) + 1
+    n_patch = kinds.get("patch", 0) + kinds.get("patch_cut", 0)
+    n_relaid = kinds.get("relaid", 0)
+    no_site = "patch" not in g
+    ok = n_patch == 0 and n_relaid == 0 and no_site
+    if verbose:
+        print("=" * 68)
+        print("scene05 [W3 L05] 지면 사각형 검산 (U-6 · §3(ii))")
+        print("=" * 68)
+        print(f"  지반 원소 {sorted(kinds.items())}")
+        print(f"  ① patch/patch_cut {n_patch} · relaid {n_relaid} → "
+              f"{'OK' if n_patch == 0 and n_relaid == 0 else 'FAIL'}")
+        print(f"  ② PARAMS['gkit'] 에 죽은 patch 사이트 없음 → "
+              f"{'OK' if no_site else 'FAIL'}")
+        print(f"  존치(합법 직선): 포장 띠 · 신축줄눈 · 연석 — §3(ii) 는 장식 무늬만 금지")
+        print("=" * 68)
+    return ok, dict(patch=n_patch, kinds=kinds)
 
 
 # ===========================================================================
@@ -832,9 +1298,18 @@ def main():
     #   §4 albedo cap.  NEGOBS_SMOKE=1 (or NEGOBS_SELFCHECK=1) python scene05_...
     if (os.environ.get("NEGOBS_SMOKE", "0") == "1"
             or os.environ.get("NEGOBS_SELFCHECK", "0") == "1"):
-        ok = all([backdrop_selfcheck()[0], podium_step_selfcheck()[0],
-                  albedo_selfcheck()[0]])
-        print(f"[SMOKE] scene05 자가검사 {'전항 OK' if ok else 'FAIL 있음'} "
+        checks = [("backdrop", backdrop_selfcheck()[0]),
+                  ("podium_step", podium_step_selfcheck()[0]),
+                  ("albedo", albedo_selfcheck()[0]),
+                  ("arc(K4d)", arc_selfcheck()[0]),
+                  ("planter_eye", planter_eye_selfcheck()[0]),
+                  ("service(05-B)", service_selfcheck()[0]),
+                  ("season", season_selfcheck()[0]),
+                  ("rect(U-6)", rect_selfcheck()[0])]
+        ok = all(v for _, v in checks)
+        bad = [k for k, v in checks if not v]
+        print(f"[SMOKE] scene05 자가검사 {len(checks)}항 "
+              f"{'전항 OK' if ok else 'FAIL ' + ','.join(bad)} "
               f"— 부팅 없이 조기 종료")
         sys.exit(0 if ok else 1)
 
@@ -880,6 +1355,11 @@ def main():
             stage, "/World/Looks/GraniteDark", sc.tex_path("granite_dark", "diff"),
             sc.tex_path("granite_dark", "nor"), sc.tex_path("granite_dark", "rough"),
             scl["granite_dark"])
+        # [W3 L05] soiling = the plaza's own stone under a dark tint, not another stone.
+        M["stain"] = sc.make_pbr(
+            stage, "/World/Looks/Stain", sc.tex_path("plaza_light", "diff"),
+            sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
+            scl["plaza_light"], tint=mp["stain_tint"])
         # stage: blue-grey flagstone (warm) vs light granite depending on cue_material_break (geometry unchanged)
         if cfg["cue_material_break"]:
             M["stage"] = sc.make_pbr(
@@ -996,7 +1476,8 @@ def main():
         # ring slab (arc): provides the smooth circular edge of the bowl opening (r=7.5)
         sc.build_arc_steps(stage, "/World/Scene05/PlazaRing", b["cx"], b["cy"],
                            rg["r_in"], rg["r_out"], 0.0, 360.0, rg["seg"],
-                           rg["top_z"], rg["base_z"], M["plaza_light"])
+                           rg["top_z"], rg["base_z"], M["plaza_light"],
+                           **ARC)
         # 4 boxes fill outside the ring square. Leaving the square **inscribed** in the ring's outer
         # circle (half side = r_out/√2) empty keeps the square at r<=r_out -> the ring covers the corners, gap 0.
         # (a "circumscribed square" would leave outside-circle gaps at the 4 corners, opening the joint.)
@@ -1015,7 +1496,10 @@ def main():
         slab("S", sx0 - ov, sx1 + ov, p["y0"], sy0)
 
     # -------------------------------------------------------------------
-    # charcoal bands - along Y, spacing 3.2. Bands crossing the bowl opening are split into two in y.
+    # paving bands. [W3 L05 · G8 · R05-1(b)] Straight along Y **outside** the plaza
+    #   ring (the G1 grammar), **concentric with the bowl** inside it (the G8 grammar),
+    #   and the two meet on the ring's outer circle, closed by a 150 mm granite edge
+    #   band. Every band is the same +1.5 mm embedded strip as before.
     # -------------------------------------------------------------------
     def build_bands(M, hazard):
         p = PARAMS["plaza"]
@@ -1026,26 +1510,46 @@ def main():
         z_top = top + bd["proud"]
         cz = (z_top + z_bot) / 2.0
         hz = z_top - z_bot
-        r = b["open_r"]
+        # clip radius: the ring's outer circle when the bowl exists, the bowl
+        # opening otherwise (the flat control arm has no ring to run bands on).
+        r = bd["clip_r"] if hazard else b["open_r"]
         n = 0
         x = p["x0"] + bd["spacing"]
         while x < p["x1"] - 1e-6:
             dx = x - b["cx"]
-            if hazard and abs(dx) < r:
-                # bowl opening x range -> clipped into north/south pieces (+0.2 margin outside the opening)
+            if abs(dx) < r:
+                # inside the bowl precinct -> clipped into north/south pieces
+                # (+0.2 margin outside the circle, as before)
                 halfc = math.sqrt(r * r - dx * dx) + 0.2
-                sc.add_box(stage, f"/World/Scene05/Band_{n}_N",
-                           (x, (halfc + p["y1"]) / 2.0, cz),
-                           (bd["width"], p["y1"] - halfc, hz), M["band"])
-                sc.add_box(stage, f"/World/Scene05/Band_{n}_S",
-                           (x, (p["y0"] - halfc) / 2.0, cz),
-                           (bd["width"], (-halfc) - p["y0"], hz), M["band"])
+                if p["y1"] - halfc > 0.05:
+                    sc.add_box(stage, f"/World/Scene05/Band_{n}_N",
+                               (x, (halfc + p["y1"]) / 2.0, cz),
+                               (bd["width"], p["y1"] - halfc, hz), M["band"])
+                if (-halfc) - p["y0"] > 0.05:
+                    sc.add_box(stage, f"/World/Scene05/Band_{n}_S",
+                               (x, (p["y0"] - halfc) / 2.0, cz),
+                               (bd["width"], (-halfc) - p["y0"], hz), M["band"])
             else:
                 cy = (p["y0"] + p["y1"]) / 2.0
                 sc.add_box(stage, f"/World/Scene05/Band_{n}", (x, cy, cz),
                            (bd["width"], p["y1"] - p["y0"], hz), M["band"])
             x += bd["spacing"]
             n += 1
+        if not hazard:
+            return
+        # --- G8: concentric bands on the ring, + the 150 mm granite edge band ---
+        rg = PARAMS["ring"]
+        z_hi = rg["top_z"] + bd["proud"]
+        z_lo = rg["top_z"] - bd["embed"]
+        for k, (rr, key) in enumerate(bd["arc_bands"]):
+            sc.build_arc_steps(stage, f"/World/Scene05/ArcBand_{k}",
+                               b["cx"], b["cy"], rr - bd["width"] / 2.0,
+                               rr + bd["width"] / 2.0, 0.0, 360.0, bd["seg"],
+                               z_hi, z_lo, M[key], collider=False, **ARC)
+        e0, e1 = bd["edge_band"]
+        sc.build_arc_steps(stage, "/World/Scene05/EdgeBand", b["cx"], b["cy"],
+                           e0, e1, 0.0, 360.0, bd["seg"], z_hi, z_lo,
+                           M["granite_dark"], collider=False, **ARC)
 
     # -------------------------------------------------------------------
     # [W2-D] ground_kit — P1 plaza_granite, upper plaza west of the bowl lip.
@@ -1064,15 +1568,18 @@ def main():
             tactile=(),                 # §12.4 - p=0.24 park, not installed
             overrides=dict(infra=dict(manhole=1, gully=2)),
             sites=dict(manhole=[tuple(v) for v in g["manhole"]],
-                       gully=[tuple(v) for v in g["gully"]],
-                       patch=[tuple(v) for v in g["patch"]]),
+                       gully=[tuple(v) for v in g["gully"]]),
             seed=5)
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
+        # [W3 L05] `patch` / `patch_cut` / `weed` bindings deleted with the rows that
+        #   used to draw them (GT-24 patch, A1 weed): measured at HEAD the plan emits
+        #   `patch 0 · patch_cut 0 · weed 0`, so these three keys were dead bindings
+        #   that made a reader believe the scene still drew saw-cut rectangles.
+        #   `stain_*` moves off `granite_dark` - see PARAMS['material']['stain_tint'].
         M2.update(joint=M["granite_dark"], crack=M["granite_dark"],
-                  patch=M["stage"], patch_cut=M["granite_dark"],
-                  manhole=M["gk_iron"], gully=M["gk_iron"], weed=M["hedge"],
-                  stain_dirt=M["granite_dark"], stain_water=M["granite_dark"])
+                  manhole=M["gk_iron"], gully=M["gk_iron"],
+                  stain_dirt=M["stain"], stain_water=M["stain"])
         res = gk.apply_ground(kit, "/World/Scene05/GKit", gp, M2,
                               skin_exclude=sc.skin_exclude,
                               scatter=sc.scatter_debris)
@@ -1092,7 +1599,7 @@ def main():
             sc.build_arc_steps(stage, f"/World/Scene05/Tier_{i}", b["cx"], b["cy"],
                                t["r_in"], t["r_out"], b["a0"], b["a1"],
                                b["seg"], t["top_z"], b["base_z"],
-                               M["plaza_light"])
+                               M["plaza_light"], **ARC)
         # v4-A1: stage = inner disc (r 4.9) + 32-seg arc rim (4.2..5.22).
         #   rim outer min radius 5.22 > tier-3 inner max 5.0242 -> through-gap 0.
         rim = stg["rim"]
@@ -1101,7 +1608,7 @@ def main():
                         stg["radius"], stg["height"], M["stage"], collider=True)
         sc.build_arc_steps(stage, "/World/Scene05/Stage/Rim", b["cx"], b["cy"],
                            rim["r_in"], rim["r_out"], 0.0, 360.0, rim["seg"],
-                           rim["top_z"], rim["base_z"], M["stage"])
+                           rim["top_z"], rim["base_z"], M["stage"], **ARC)
         # [v5.1] circular podium + 2 access stairs - coordinate rationale in the PARAMS["podium"] comment
         po = PARAMS["podium"]
         sc.add_cylinder(stage, "/World/Scene05/Stage/Podium",
@@ -1110,12 +1617,19 @@ def main():
                         po["r"], po["top_z"] - po["base_z"], M["stage"],
                         collider=True)
         ps = po["steps"]
+        last = len(ps["tops"]) - 1
         for j, (a0, a1) in enumerate(ps["arcs"]):
             for i, ztop in enumerate(ps["tops"]):
+                # [W3 L05] the innermost step laps 0.10 m under the podium cylinder
+                # and drops 3 mm, so it is not coplanar with the podium top disc.
+                r_in = ps["radii"][i + 1]
+                if i == last:
+                    r_in -= ps["under"]
+                    ztop -= ps["z_cascade"]
                 sc.build_arc_steps(
                     stage, f"/World/Scene05/Stage/PodiumStep_{j}_{i}",
-                    b["cx"], b["cy"], ps["radii"][i + 1], ps["radii"][i],
-                    a0, a1, ps["seg"], ztop, ps["base_z"], M["stage"])
+                    b["cx"], b["cy"], r_in, ps["radii"][i],
+                    a0, a1, ps["seg"], ztop, ps["base_z"], M["stage"], **ARC)
             # [v7 judgment §4 remaining 2] end caps (cheeks) - hide the knife edges at both arc ends.
             #   one short arc of thickness cheek_deg each, covering the full radial width (3.0..3.75).
             #   top face = the podium top face (−0.853) -> 0.35 m above the apron (the same
@@ -1125,8 +1639,10 @@ def main():
                                   ("B", a1 - ov, a1 + cd - ov)):
                 sc.build_arc_steps(
                     stage, f"/World/Scene05/Stage/PodiumCheek_{j}{tag}",
-                    b["cx"], b["cy"], ps["radii"][-1], ps["radii"][0],
-                    ca0, ca1, 1, po["top_z"], ps["base_z"], M["stage"])
+                    b["cx"], b["cy"], ps["radii"][-1] - ps["under"],
+                    ps["radii"][0], ca0, ca1, 1,
+                    po["top_z"] - ps["z_cascade"], ps["base_z"], M["stage"],
+                    **ARC)
 
     def build_flight(M, prefix, a0, a1, seg):
         """v4-A2/A3: one arc stair concentric with the tiers. Because the radius ladder
@@ -1137,7 +1653,7 @@ def main():
         for i, ztop in enumerate(e["tops"]):
             sc.build_arc_steps(stage, f"{prefix}/Step_{i}", b["cx"], b["cy"],
                                e["radii"][i + 1], e["radii"][i], a0, a1, seg,
-                               ztop, e["base_z"], M["plaza_lower"])
+                               ztop, e["base_z"], M["plaza_lower"], **ARC)
 
     def build_entry(M):
         """Entry stair (+X radial, a −9..+9°) + the 2 v4-D5 seating aisle stairs."""
@@ -1162,7 +1678,7 @@ def main():
                 sc.build_arc_steps(stage, f"/World/Scene05/Seat_{i}_{j}",
                                    b["cx"], b["cy"], r0, r1, a0, a1, seg,
                                    z_hi, z_hi - se["drop"], M["seat_wood"],
-                                   collider=False)
+                                   collider=False, **ARC)
 
     def build_lip(M):
         """Lip kerb ring (cue_material_break): a dark granite material-break cue outside the opening."""
@@ -1170,7 +1686,7 @@ def main():
         b = PARAMS["bowl"]
         sc.build_arc_steps(stage, "/World/Scene05/LipCurb", b["cx"], b["cy"],
                            l["r_in"], l["r_out"], l["a0"], l["a1"], l["seg"],
-                           l["top_z"], l["base_z"], M["granite_dark"])
+                           l["top_z"], l["base_z"], M["granite_dark"], **ARC)
 
     def build_halfbowl_finish(M):
         """[v5 adopted] Half-round finish — cut side wall + grass backyard + entry cheek walls.
@@ -1189,15 +1705,28 @@ def main():
           · entry stair flanks (θ ±9) → entry_cheek (θ 9..11 / 349..351) top face −0.06
         """
         b = PARAMS["bowl"]
+        # [W3 L05 · G8] `cut_wall` leaves `granite_dark` for the parapet material.
+        #   A 2.6 m dark slab across the frame is the "cistern/bunker" reading v6 was
+        #   already fighting when it dropped the shell 1.40 -> 0.70; G8's vertical
+        #   surfaces are pale concrete. Material only - no dimension moves.
         for key, mtl in (("backyard", M["grass"]),
                          ("entry_cheek", M["plaza_light"]),
-                         ("cut_wall", M["granite_dark"])):
+                         ("cut_wall", M["parapet"])):
             p = PARAMS[key]
             for j, (a0, a1) in enumerate(p["arcs"]):
                 sc.build_arc_steps(stage, f"/World/Scene05/{key}_{j}",
                                    b["cx"], b["cy"], p["r_in"], p["r_out"],
                                    a0, a1, p["seg"], p["top_z"], p["base_z"],
-                                   mtl)
+                                   mtl, **ARC)
+        # [W3 L05 · G8] 60 mm timber capping on the cut wall (G8's timber-topped
+        #   parapets / slat soffits). Raises the guard top 1.000 -> 1.060.
+        cw = PARAMS["cut_wall"]
+        for j, (a0, a1) in enumerate(cw["arcs"]):
+            sc.build_arc_steps(stage, f"/World/Scene05/cut_wall_cap_{j}",
+                               b["cx"], b["cy"], cw["r_in"], cw["r_out"],
+                               a0, a1, cw["seg"],
+                               cw["top_z"] + cw["cap_h"], cw["top_z"],
+                               M["seat_wood"], **ARC)
 
     # -------------------------------------------------------------------
     # grass ground outside the site - split into 4 boxes leaving the bowl opening empty (r1 fixed).
@@ -1282,12 +1811,24 @@ def main():
         (Proposal: add a stakes=False argument to scene_common.build_tree/build_planter.)
         """
         kw = {} if size is None else dict(size=size)
+        # [W3 L05 · K4(b)] **the species is stated at the call site.** `build_planter`
+        #   used to pass `pool=` only, so each bed drew its shrub by coordinate hash and
+        #   the composed scene shipped **Juniper x15 + Rhododendron x9** across 8 beds -
+        #   monospecific per bed, but two species on one plaza ring, which is exactly the
+        #   defect S-1/S-2 exist against and the opposite of G8's one-clipped-shrub-per-
+        #   planter reading. `species=` landed on `build_planter` in K-micro item 3
+        #   (S08-F2), so the role is pinned here: `ornament_bed` -> Rhododendron, a single
+        #   `SHRUB_SPECIES` row, hence one species over all 8 beds. The tree likewise says
+        #   `species="ash"` rather than leaving it to `SCENE_SPECIES` resolution - the same
+        #   value, stated instead of inferred (the scene08 precedent).
         sc.build_planter(stage, prefix, cx, cy, base_z,
-                         M["granite_dark"], M["grass"], tree_mtls=None, **kw)
+                         M["granite_dark"], M["grass"], tree_mtls=None,
+                         species=SPECIES_BED, **kw)
         # planted on the build_planter default grass_h=0.40 top face (same height as the internal call)
         sc.build_tree(stage, prefix, cx, cy, base_z + 0.40,
                       M["wood"], M["canopy_a"], M["canopy_b"],
-                      stake_r=0.004, stake_h=0.02, stake_off=0.2)
+                      stake_r=0.004, stake_h=0.02, stake_off=0.2,
+                      species=SPECIES_TREE)
 
     def build_backdrop_shrubs(M):
         """[v6 judgment (i)] Backdrop shrub buffer — a shrub band planted in the yard
@@ -1347,7 +1888,7 @@ def main():
         for k in range(bl["n"]):
             sc.build_bollard(stage, f"/World/Scene05/Bollard_{k}", bl["x"],
                              y0 + bl["spacing"] * k, bl["base_z"],
-                             mtl=M["bollard"])
+                             mtl=M["bollard"], height=bl["height"])
         # [v5.2 user] bench ring removed - "hurts openness, remove it cleanly"
         #   (the bench_ring PARAMS stay for the record; the build is skipped)
         # v4-D1 [top priority] stage backdrop wall (stage shell), 2 pieces - only when the bowl exists
@@ -1355,10 +1896,11 @@ def main():
         sh = PARAMS["shell"]
         if cfg["hazard_stairs"]:
             for j, (a0, a1) in enumerate(sh["arcs"]):
+                # [W3 L05 · G8] parapet material, same reason as `cut_wall`.
                 sc.build_arc_steps(stage, f"/World/Scene05/StageShell_{j}",
                                    b["cx"], b["cy"], sh["r_in"], sh["r_out"],
                                    a0, a1, sh["seg"], sh["top_z"],
-                                   sh["base_z"], M["granite_dark"])
+                                   sh["base_z"], M["parapet"], **ARC)
             build_backdrop_shrubs(M)
         # v4-D2 2 lighting towers (mast + 3 heads)
         tw = PARAMS["tower"]
@@ -1422,7 +1964,8 @@ def main():
             # top rail: a thin arc box ring (stands in for a segmented cylinder chain - avoids exposing rotZ)
             sc.build_arc_steps(stage, "/World/Scene05/Rail/Top", b["cx"], b["cy"],
                                r_post - 0.03, r_post + 0.03, a0, a1, 12,
-                               rail_h, rail_h - 0.04, M["rail"], collider=False)
+                               rail_h, rail_h - 0.04, M["rail"], collider=False,
+                               **ARC)
         # cue_tactile: −X approach warning tactile strip (outside the lip)
         if cfg.get("cue_tactile"):
             sc.build_tactile(stage, "/World/Scene05/Tactile",
@@ -1437,7 +1980,8 @@ def main():
                                    b["cx"], b["cy"], t["r_out"] - 0.06, t["r_out"],
                                    b["a0"], b["a1"], b["seg"],  # [v5] follows the half-round
                                    t["top_z"] + 0.003,
-                                   t["top_z"] - 0.02, nos, collider=False)
+                                   t["top_z"] - 0.02, nos, collider=False,
+                                   **ARC)
 
     # -------------------------------------------------------------------
     # [v5 shared layer] Korean sign (cue_sign)

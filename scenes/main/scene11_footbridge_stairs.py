@@ -1342,13 +1342,20 @@ def build_views():
     # sidewalk_approach: brief R6 "sidewalk approach" - along the east sidewalk toward the
     #   switchback tower's foot (now at x 15.10…16.90, y −1.20)
     #   [W3 P11] the old eye (24.00, 3.20, 0.90) is 2.00 m **outside** the narrowed footway — it
-    #   would stand in the planting bed, which is not a sidewalk approach. It slides **3.00 m
-    #   forward along its own ground bearing** (unit (−0.86543, −0.50104), i.e. the bearing, the
-    #   eye height and the target are all unchanged) to (21.40, 1.70, 0.90), 0.60 m inside the
-    #   edge. Eye-to-foot distance 8.78 → 5.78 m; that is the whole of the framing change and it
-    #   is measured against the baseline in the report. **This is a mise-en-scène cut, not one of
-    #   the 9 judge presets** — those come out of `sc.grid_views` above and are byte-identical.
-    out["sidewalk_approach"] = dict(eye=[21.40, 1.70, 0.90],
+    #   would stand in the planting bed, which is not a sidewalk approach.
+    #   The first fix slid it 3.00 m forward along its own ground bearing to (21.40, 1.70, 0.90).
+    #   **The pilot refuted that** and the numbers are kept rather than hidden: on the same 48×27
+    #   `_solid_at` raycast the cut's own subject disappeared — footway occupancy **10.9 % → 0.0 %**,
+    #   tower 12.7 → 21.6 %, eye-to-foot 8.78 → 5.78 m — i.e. a 5.8 m portrait of a stringer, which
+    #   cannot answer this cut's checklist question (sign facing the approacher · trench grating ·
+    #   walk + kerb read as 육교 at a glance), and it is what the OCCL flag on the first pilot was
+    #   measuring. A sidewalk approach is walked **along the sidewalk**, so the eye is re-sited to
+    #   (19.60, 8.60, 0.90) — on the footway, 2.40 m inside its outer edge, approaching the foot
+    #   from +Y with **the target, the eye height and the frame composition unchanged**:
+    #   sky 37.3 → 37.3 % · tower 12.7 → 12.5 % · footway 10.9 → **17.2 %** · d 8.78 → 10.31 m.
+    #   **This is a mise-en-scène cut, not one of the 9 judge presets** — those come out of
+    #   `sc.grid_views` above and are byte-identical across both rounds.
+    out["sidewalk_approach"] = dict(eye=[19.60, 8.60, 0.90],
                                     tgt=[16.40, -1.20, 2.80])
     # overview: high-angle full view of the footbridge (6 lanes, deck and both towers at once)
     out["overview"] = dict(eye=[44.00, -34.00, 17.00], tgt=[0.00, 2.00, 3.60])

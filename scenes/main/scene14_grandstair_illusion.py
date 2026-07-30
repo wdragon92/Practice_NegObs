@@ -26,7 +26,41 @@ Smoke (pre-boot geometry self-verification, early exit):
 
 Coordinates: Z-up, m, travel axis +X, drop start edge = x=0. Total drop 6.0 m.
 
-Marble: the scene_common.TEX `marble_light` role (real material).
+═══ [W3 L14] G1 renovation — what this wave changed, and what it refused to ═══
+Governing image: **G1** (`Docs/reference_photos/Generated Image - Scene01.jpg`), the nearest
+image for this scene under `w3_intake_v2_images.md` §4 row **3.4** (G1 primary, G8 secondary).
+Season pinned from G1 under §7 ruling 8: **autumn, IN LEAF** — `build_tree(bare=)` is therefore
+deliberately NOT used (see `_season_audit`).
+
+The **illusion is the research identity and it is frozen**: 40 steps · riser 0.150 · tread 0.340 ·
+3 landings @ 2.400 · half width 3.0 -> 5.0 · total drop **6.000 m**. No nosing, riser, tread,
+landing or drop-edge coordinate moved in this wave; `_stair_selfcheck` asserts the drop to
+1e-9 and the nosing polyline against a pre-wave reference table.
+
+What DID change (all of it around the flight, none of it in it):
+  1. **Stone product.** G1's flight is *flamed light-grey granite*, coursed. This scene bound
+     `marble_light` (warm cream) to BOTH the flight and the stair-head terrace, so the
+     `cue_material_break` toggle it advertises produced **no break at the stair head at all** —
+     the two surfaces were the same material. The flight is now light-grey granite and the
+     terrace stays marble, which is the first time this cue has had any content. The OFF arm
+     restores marble on the flight (the boundary really is absorbed). See `setup_materials`.
+  2. **Unit coursing (`build_step_coursing`).** A 6-10 m wide step cut from one stone does not
+     exist. G1's flight is laid in units with staggered vertical joints. Joints are built to the
+     ground_kit convention — 7 mm wide (KCS 34 6-5-1 3.1.11 판석 줄눈 5~9 mm), tone plate whose
+     top stands `GROUND_PROUD_MIN` = 0.6 mm proud so it cannot z-fight the step solid. That
+     0.6 mm is the ONLY z the walked surface gained and it is 3 % of `GT_DELTA` (0.020);
+     `build_joint_grid`'s own docstring rules a joint "not a drop". Declared anyway: GT-52.
+  3. **Autumn dress** — leaf litter on the treads/landings/terrace/lower plaza, autumn turf.
+  4. **BS-4** — the five distant blocks were a closed wall of windows. They are lowered until
+     `plan_building`'s ridge clears the judged frame ceiling on every block, and built as
+     `kind="backdrop"` silhouettes (the S01 precedent).
+  5. `PlanterLow_0/_1` re-sited off `lower_lookup` (`w3_md_reverts_v1.md` §5 census row).
+  6. `species=` declared explicitly at every vegetation call site.
+Divergences from G1 that are recorded and NOT executed — see the report `w3_l14_v1.md` §3.
+
+Materials: `marble_light` (terrace / plinth / shoulder) · scene-side **granite_light** from the
+`plaza_light` role (flight, landings, parapet cheek) · `plaza_light` (upper plaza) ·
+`plaza_lower` (lower plaza) · `band_dark` (joints, coursing, bands).
 """
 
 import os
@@ -34,11 +68,14 @@ import sys
 import math
 import json
 import datetime
+import re
 
 import numpy as np
 
 import scene_common as sc
 import ground_kit as gk
+import facade_kit as fk
+import building_kit as bk
 
 
 # ===========================================================================
@@ -51,7 +88,12 @@ SCENE_CONFIG = {
     #   The old comment's 'not customary' is void after the v5 setting was clarified (plaza grand stair in front of a city hall / cultural centre) -
     #   tactile paving at the entry of a public-building grand stair is standard domestic practice. Real geometry is generated.
     "cue_tactile":        False,  # [v5.2 user] Tactile paving is rare in reality - default OFF (the ablation path is kept)    # top entry warning tactile band (x −0.4..0, stair upper width)
-    "cue_material_break": True,    # False -> the upper and lower plazas become marble too (the boundary is absorbed)
+    # [W3 L14] **This toggle now has content.** Until this wave both the flight and the
+    #   stair-head terrace were bound to `marble_light`, so ON and OFF emitted *pixel-identical*
+    #   frames and the ablation arm measured nothing. ON = G1's light-grey granite flight against
+    #   the marble terrace (a real material boundary at the drop edge x=0); OFF = marble flight,
+    #   i.e. the boundary is absorbed, which is what the toggle always claimed to do.
+    "cue_material_break": True,
     "cue_sign":           True,    # [v5 shared layer] 1 sign_info (plaza information)
     "cue_scene_dressing": True,    # street lamps · parapet kerb · fountain hint · distant buildings
     "cue_nosing":         False,   # [new] True -> nosing band on every step
@@ -67,6 +109,43 @@ PARAMS = dict(
                 base_z=-6.7, seg_len=10, landing_depth=2.4,
                 w_top=3.0, w_bot=5.0),            # half width: upper y+-3 -> lower y+-5
     landings=(10, 20, 30),                        # landing insertion points (after step n)
+
+    # ═══ [W3 L14 · G1] Unit coursing of the granite flight ════════════════════
+    #  **The defect.** `build_straight_stairs` emits ONE box per step, so every step of
+    #  this flight was a single stone 6.00 m wide at the head and 10.00 m wide at the
+    #  foot. No quarry cuts a 10 m step, and G1 — the governing image — shows the
+    #  opposite: a wide granite flight laid in **units**, with vertical joints running
+    #  from riser to nosing and **staggering course to course** (running bond). At the
+    #  frame scale of `lower_lookup` / `side_reveal` the monolith is what makes the
+    #  flight read as an extrusion rather than as masonry.
+    #
+    #  **What is built.** One prim per joint per step: a plate of `joint_w` in Y that
+    #  spans the tread in X and the riser in Z, tone-bound to `band_dark`. Its top face
+    #  stands `proud` above the tread and its front face `proud` in front of the riser,
+    #  which is the `ground_kit` convention verbatim (`build_joint_grid` v1.2: a real
+    #  *recess* is trapped inside the solid slab and renders **zero pixels**, so the
+    #  groove is carried as a dark **tone** on a plate that cannot z-fight).
+    #
+    #  **Numbers and where they come from.**
+    #    `joint_w`  0.007  — KCS 34 6-5-1 3.1.11 판석 줄눈 5~9 mm, centre value.
+    #                        Identical to `ground_kit._dim("joint_slab_w")`.
+    #    `proud`    0.0006 — `ground_kit.GROUND_PROUD_MIN`, the measured z-fighting
+    #                        floor. **This is the only walked-surface z this wave adds:
+    #                        3.0 % of `GT_DELTA` (0.020) — GT-52 declares it anyway.**
+    #    `unit`     1.20   — nominal unit length. Korean granite step stone (화강석
+    #                        계단석) is quarried at 600 / 900 / 1200 mm; a civic flight of
+    #                        this width takes the long unit. The builder fits an INTEGER
+    #                        number of units across each step's own width (which grows
+    #                        3.0 -> 5.0 half width down the flight), so the true unit
+    #                        length breathes 1.09~1.25 m and the joint count grows with
+    #                        the taper — which is what a real tapered flight does.
+    #    `bond`     0.5    — running bond: alternate courses are offset half a unit.
+    #                        0.0 would stack the joints into continuous rakes down the
+    #                        flight, which is a stack bond and is not what G1 shows.
+    #    `min_units` 4     — never fewer than 4 units on a step (a 6 m two-piece step is
+    #                        as unbuildable as a one-piece one).
+    coursing=dict(unit=1.20, joint_w=0.007, proud=0.0006, bond=0.5, min_units=4,
+                  riser_face=True, landings=True),
     # --- Upper viewing plaza (marble stair head, marble instead of granite) ---
     upper=dict(x0=-9.0, x1=0.0, y0=-8.0, y1=8.0, z_top=0.0, thick=0.5),
     # --- Large upper plaza (director D-14 r3(1)): 20m in -X behind the terrace x y+-20, plaza_light.
@@ -97,11 +176,21 @@ PARAMS = dict(
         gully_x=-0.95,                        # stair-head point gullies (C-1')
         gully_inset=0.40,                     # |y| = w_top - inset
         manholes=[(-8.7, 1.2), (-4.5, -1.5)],
-        # Near-window (W1) fillers. §2.2: a flat 2 mm repair patch carries the
-        # d2/d5 window far better than a manhole disc does (scene15 pilot: a
-        # disc at 56 % screen width is near-field monopoly, a patch at 87 % is
-        # not, because it is a tone change and not an object).
-        patches=[(-1.20, 0.00), (-3.70, 0.60)],
+        # ── [W3 L14] the `patch` sites are DELETED, not commented out ────────────
+        #   They were "near-window (W1) fillers": two 2 mm repair patches placed to
+        #   carry the d2/d5 window. **GT-24 deleted `("patch", 1)` from
+        #   `GROUND_PROFILES["plaza_granite"]` library-wide** (this scene went 860 ->
+        #   859 prims in that sweep), so `sites=dict(patch=...)` has had a count of 0
+        #   to spend since, and the list was inert data that reads as intent.
+        #   Two reasons it goes rather than staying as a comment:
+        #     (a) **revert trap** (the T4b-F2 class) — a later reader restoring the
+        #         profile row would silently resurrect two rectangles the user's
+        #         "바닥에 이상한 사각형 무늬는 웬만하면 다 제거해" directive removed;
+        #     (b) it is camera-driven authoring by its own admission ("to carry the
+        #         d2/d5 window"), which is exactly the practice G-4 exists to end.
+        #   G1 carries no repair patch on its plaza; a monumental granite terrace laid
+        #   this decade has nothing to repair. `plaza_granite`'s `surface` row is
+        #   `('crack','stain')` — lines and irregular lobes, no rectangle.
     ),
     streetlight=dict(pole_h=5.0, pole_r=0.06, arm_len=1.0, arm_r=0.04,
                      head=0.25, xs=(-6.0, -14.0, -22.0), ys=(-6.0, 6.0)),
@@ -121,26 +210,80 @@ PARAMS = dict(
     parapet=dict(width=0.5, z0=0.35, thick=1.6, cap_t=1.4),
     # --- Shoulder outside the stair (replaces the old soffit) - see build_shoulder ---
     shoulder=dict(y_out=5.2, offset=0.03, lap=0.05),
-    # --- 5 distant buildings (horizon closure, on the lower plaza - grounded via base_z) ---
+    # ═══ [W3 L14 · BS-4] the five distant blocks — from a wall to a skyline ═══
+    #  **The defect the target image names.** `w3_intake_v2_images.md` §2 scene14 (c) calls
+    #  it out before a pixel was looked at: *"Same 'closed backdrop' risk as 01: the two
+    #  distant buildings can wall the frame."* Measured on the landed `260730_w2d_fix`
+    #  round, they do more than risk it — at h 12/10/9/22/18 on a plinth at z −6 they
+    #  close the horizon on **every** judged cut and on `terrace_read`, and the G1
+    #  cross-cutting read (`§1`, item 4) rules the opposite: *"Backdrops are open: G1 …
+    #  shows sky above the roof/ridge line. Only G2, G8 and G13 close the horizon, and
+    #  those are genuinely dense-urban cells."* G1 is this scene's primary image.
+    #
+    #  **The test, and where the number comes from.** `facade_kit.frame_ceiling`: the
+    #  judged camera is the h·d grid at pitch −10° with vFOV 36°, so the top of frame is
+    #  +8° above the horizon and the tallest thing that can enter frame at plan distance
+    #  d is `z = h_eye + tan(8°)·d ≈ h_eye + 0.1405·d`. `bk.plan_building(eyes=…)`
+    #  re-derives `d_true` from the **real judged eye set** (B-F3) instead of from
+    #  `|facade plane|`, and returns `z_ceil` at the worst — lowest, nearest — eye.
+    #  Acceptance: **`p.ridge < p.z_ceil` on all five**, printed at assembly time.
+    #
+    #  **`h` is the SHELL top, not the ridge** — the S01-F1 lesson, and the reason each
+    #  height below is solved from `z_ceil − roof_allow − base_z`. That is no longer a
+    #  scene-side constant: K-micro landed `Plan.ridge` / `Plan.roof_allow` for exactly
+    #  this caller, **exact** for `kind="backdrop"` and an upper bound otherwise, so the
+    #  solve uses the kit's own number and the print compares like with like.
+    #
+    #  **Why they are lowered and not pushed back.** Pushing back is the better move and
+    #  it is not available: the lower plaza ends at x 75 and the site at y ±20, so any
+    #  block that moves further out floats — and extending a walked plaza to catch it is
+    #  a GT event this wave is not authorised for (class A, `w3_intake_v2_images.md` §2
+    #  scene14 (f)). Recorded as an open item rather than smuggled in.
+    #
+    #  **Two tiers, on purpose.** B/C/F at 34–44 m keep their architecture: at that range
+    #  a facade is what makes the plaza read as a plaza, and `building_kit`'s own tier
+    #  ladder (`mid` = one window band per floor, no attachments) is the right amount of
+    #  it. D/E at 58 m become `kind="backdrop"` silhouettes — 3 prims, **0 windows** —
+    #  because at 58 m a window grid is prims spent off-subject and reads as the "facade
+    #  billboard" the realism audit named (the S01 precedent).
+    #  (tag, x0, x1, y0, y1, h, floors, axis, kind)
     buildings=dict(
-        B=dict(x0=42.0, x1=48.0, y0=-14.0, y1=14.0, h=12.0, floors=5,
+        B=dict(x0=42.0, x1=48.0, y0=-14.0, y1=14.0, h=9.0, floors=3,
                axis="x", facade_x=42.0, face_dir=-1.0, base_z=-6.0),
-        C=dict(x0=30.0, x1=40.0, y0=13.0, y1=19.0, h=10.0, floors=4,
+        C=dict(x0=30.0, x1=40.0, y0=13.0, y1=19.0, h=7.5, floors=2,
                axis="y", facade_y=13.0, face_dir=-1.0, base_z=-6.0),
-        F=dict(x0=30.0, x1=40.0, y0=-19.0, y1=-13.0, h=9.0, floors=3,
+        F=dict(x0=30.0, x1=40.0, y0=-19.0, y1=-13.0, h=7.2, floors=2,
                axis="y", facade_y=-13.0, face_dir=1.0, base_z=-6.0),
-        D=dict(x0=56.0, x1=70.0, y0=-19.0, y1=-6.0, h=22.0, floors=7,
-               axis="x", facade_x=56.0, face_dir=-1.0, base_z=-6.0),
-        E=dict(x0=56.0, x1=70.0, y0=4.0, y1=19.0, h=18.0, floors=6,
-               axis="x", facade_x=56.0, face_dir=-1.0, base_z=-6.0),
+        D=dict(x0=56.0, x1=70.0, y0=-19.0, y1=-6.0, h=11.2, floors=4,
+               axis="x", facade_x=56.0, face_dir=-1.0, base_z=-6.0,
+               kind="backdrop"),
+        E=dict(x0=56.0, x1=70.0, y0=4.0, y1=19.0, h=11.2, floors=4,
+               axis="x", facade_x=56.0, face_dir=-1.0, base_z=-6.0,
+               kind="backdrop"),
     ),
-    window=dict(w=1.2, h=1.6, inset=0.15, col_step=2.5, margin=2.0),
     # --- Context dressing (instant read as a monumental plaza) - all combinations of existing builders, owned by cue_scene_dressing ---
     dressing=dict(
         # lower grand plaza (z −6.0)
         trees_low=((24.0, 7.0), (24.0, -7.0), (24.0, 13.0), (24.0, -13.0),
                    (33.0, 10.0), (33.0, -10.0)),
-        planters_low=((25.5, 4.0), (25.5, -4.0), (34.5, 4.0), (34.5, -4.0)),
+        # [W3 L14 · `w3_md_reverts_v1.md` §5 census] The inner pair was **(25.5, ±4.0)**
+        #   and it is this scene's census row: `lower_lookup`'s eye (26.0, 0.0, −5.2)
+        #   sits 2.50 m from the kerb and **2.45 m from the bed AABB** — inside the
+        #   2.5 m radius, on 1 judged cut, with a live `Juniper.usd` in it. The eye is
+        #   also *inside the x span* of the bed (24.0…27.0), which is the C02-P1 defect
+        #   shape exactly: a camera standing in a flower bed.
+        #   Moved to **(27.0, ±5.5)** — box x 25.5…28.5, y ±(4.0…7.0). The eye stays
+        #   inside the x span (that is what makes the cut work) and the plan distance
+        #   becomes **4.00 m**, measured, not estimated. Clearances re-derived rather
+        #   than eyeballed, and asserted in `_placement_selfcheck`:
+        #     street tree (24, ±7)   1.50 m   ·  street tree (33, ±10)  3.00 m
+        #     outer planter (34.5,±4) 4.50 m  ·  bench (22.5, ±5)       3.00 m
+        #     fountain rim (30,0,r3.0) 1.27 m ·  flagpole (30, ±7)      1.58 m
+        #   Deletion was the other option (the S01 precedent, which cleared its own row
+        #   by deleting the bed). It is refused here: scene01's bed stood in an empty
+        #   plaza that G1 shows bare, while this pair flanks the axis of a monumental
+        #   plaza and G8 — the secondary image — shows exactly that.
+        planters_low=((27.0, 5.5), (27.0, -5.5), (34.5, 4.0), (34.5, -4.0)),
         benches_low=((22.5, 5.0), (22.5, -5.0), (22.5, 10.0), (22.5, -10.0),
                      (22.5, 15.0), (22.5, -15.0)),
         # [v5.1 §2] Bollards - old: 13 units at x 21.6, y −12..12 at 2.0 m even spacing
@@ -185,6 +328,58 @@ PARAMS = dict(
                 ("W", -29.0, -9.0, -27.5, 9.0)),
         curb_gap=2.5,                     # half width of the central opening in the upper kerb [A-14-5]
     ),
+
+    # ═══ [W3 L14 · §7 ruling 8] SEASON — G1's autumn, and it is IN LEAF ═══════
+    #  The ruling: *"Every scene pins the season of its own target image; imageless
+    #  scenes inherit their nearest image's season; leaf-off via the `build_tree(bare=)`
+    #  mechanism + dressing; each scene runs an internal seasonal audit."*
+    #  scene14's nearest image is **G1**, and G1 is **autumn with a full canopy** — the
+    #  frame-right maple carries an orange crown, the mid-ground row is turning, the
+    #  conifer domes are dark green, and there is **not one bare trunk in the frame**.
+    #  So `build_tree(bare=)` is NOT fired here. The mechanism existing is not a reason
+    #  to use it, and firing it would contradict this scene's own governing image.
+    #  `_season_audit()` states the pin and checks it, rather than leaving it in a comment.
+    #
+    #  What autumn buys instead is **dressing**, and G1 says precisely where the leaves
+    #  are: scattered on the treads and swept into the step corners, thin on the open
+    #  plaza where feet keep the walking line clear. `edge_bias` is the parameter that
+    #  does that (scatter_debris pushes instances toward edges and corners; a uniform
+    #  scatter does the opposite of what wind does).
+    #    · flight   cover 0.0240 / edge_bias 0.45 — seated per step by a `ground_fn` that
+    #               reads the real tread each leaf lands on. Without it a leaf on a
+    #               0.15 m riser floats or sinks (the builder's own docstring measures it:
+    #               the probe half-width must stay under the tread; 0.04 m here).
+    #    · terrace  0.0083 / 1.10 — the judged near window, and deliberately the thinnest
+    #               of the three: this is the h0.3 drop-detection band, so litter there is
+    #               texture laid on the very surface the metric reads.
+    #    · lower    0.0066 / 0.60 — the plaza at the stair foot.
+    #  **The covers are solved, and `max_count` is a guard rather than the operative
+    #  limit.** `scatter_debris` back-computes `n = A·(−ln(1−cover))/mean_cov` with
+    #  mean_cov = **0.02012** over the five `Debris/*fall*` USDs actually on disk
+    #  [measured this session], so the three regions ask for **150 / 60 / 110**
+    #  instances against caps of 200 / 90 / 150 — nothing truncates and no
+    #  `[룩v1] 산포 상한` warning fires. The first pass set the covers high and let the
+    #  caps do the work, which made every stated cover fiction and printed three
+    #  truncations. `edge_bias` then skips 65 % of interior samples, so ~117 of the 320
+    #  are placed: **0.19 leaves/m² over 605 m²**. That is a *swept* civic plaza in
+    #  autumn, which is what G1 shows — not a leaf carpet (that is scene04's and
+    #  sceneC2's archetype, and borrowing it here would be the wrong scene).
+    autumn=dict(
+        enable=True,
+        flight=dict(cover=0.0240, edge_bias=0.45, seed=1401, max_count=200),
+        terrace=dict(cover=0.0083, edge_bias=1.10, seed=1402, max_count=90),
+        lower=dict(cover=0.0066, edge_bias=0.60, seed=1403, max_count=150),
+        # Turf: G1's autumn lawn is desaturated and warmed, **not** straw. Green stays
+        #   the largest channel — a yellow lawn is a different season, not this one.
+        #   (0.55,0.68,0.42) -> below. The S01 value verbatim, same image, same month.
+        grass_tint=(0.60, 0.63, 0.38),
+        # Procedural-fallback canopy only (`NEGOBS_LOOK_GEO=0` or assets absent). The
+        #   real `Fraxinus.usd` leaves stay green: an autumn leaf tint on a referenced
+        #   USD needs a material TREATMENT wrapper on the leaf material, which is the
+        #   T4b pattern S09 opened as a library row and which is NOT built here. Stated
+        #   as an inherited-open divergence, not claimed as done.
+        canopy_a=(0.055, 0.038, 0.012), canopy_b=(0.070, 0.050, 0.016),
+    ),
     # [v5 shared layer] Tactile paving - 0.4 m before the stair top edge (x=0), upper width y +-3.
     #   On the marble terrace (x −9..0, z 0). The hazard geometry (stairs, landings) transform is unchanged.
     tactile=dict(ahead=0.4, proud=0.004),
@@ -200,10 +395,27 @@ PARAMS = dict(
     signs=[("Info", "sign_info", -6.5, -4.2, 0.0, 180.0, 1.0, 0.75)],
 
     material=dict(
+        # [W3 L14] `brick_red` is **gone from the registry**, not silenced. It was in
+        #   `ASSET_ROLES`, it was loaded, `M["brick"]` was built from it — and it was
+        #   bound to **nothing**: a dead material that made `check_assets` demand a 6.5 MB
+        #   texture the scene never renders. G1 does carry a rose block band on the upper
+        #   plaza and that would have been its job here; it is NOT taken, because at
+        #   x = −9 such a band lands 1 m in front of the `h0.3_d10` eye and would rewrite
+        #   the judged near window for a decorative element. Recorded in the report as a
+        #   G1 divergence with the reason, and the dead role deleted so the next reader
+        #   does not mistake it for intent (the T4b-F2 revert-trap class).
+        # [W3 L14] `granite_light` — G1's flamed light-grey granite, the flight's stone.
+        #   Carried on the `plaza_light` role (a light-grey sawn granite slab scan) with a
+        #   cool desaturating tint. Scale 1.60: the map's own baked slab module lands at
+        #   ~0.5 m, i.e. about one baked slab per 0.340 m tread, which is the right grain
+        #   for flamed granite. The **unit rhythm across the width is geometry**
+        #   (`build_step_coursing`), not texture — texture joints have no shading and die
+        #   at the h0.3 grazing angle, which is `ground_kit`'s own measured finding.
         scale=dict(marble_light=1.2, granite_dark=1.0, plaza_lower=0.7,
-                   band_dark=0.5, brick_red=2.0, plaza_light=1.80, grass=1.4,
+                   band_dark=0.5, granite_light=1.60, plaza_light=1.80, grass=1.4,
                    tactile=0.3),                      # [v5 shared layer]
-        grass_tint=(0.55, 0.68, 0.42),
+        granite_light_tint=(0.86, 0.87, 0.88),   # cool + slightly down from the map
+        grass_tint=(0.60, 0.63, 0.38),           # [W3 L14] autumn — see PARAMS["autumn"]
         # B-14-5: fixes the high-brightness clustering across the frame - facade 0.56->0.30, parapet 0.90->0.62
         bldg_color=(0.30, 0.30, 0.33), bldg_rough=0.6,
         glass_color=(0.06, 0.09, 0.12), glass_rough=0.08,
@@ -255,10 +467,22 @@ if _sc_ov:
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "scene14")
+# [W3 L14] `brick_red` removed — it was checked, loaded and never bound (see
+#   PARAMS["material"]). `plaza_light` now carries two materials (the upper plaza and
+#   the flight's granite), which is why it is not listed twice.
 ASSET_ROLES = ["marble_light", "granite_dark", "plaza_lower", "band_dark",
-               "brick_red", "plaza_light", "grass",
+               "plaza_light", "grass",
                "tactile", "sign_info",                # [v5 shared layer]
                "hdri", "mdl"]
+
+# ── [W3 L14 · K4(b)] species declarations ────────────────────────────────────
+#   `SCENE_SPECIES["Scene14"] = ("ash", None)` — `Fraxinus.usd`, street_broadleaf, no
+#   belt. Named here so every call site passes it explicitly and the value is greppable.
+SCENE_TREE = "ash"
+SCENE_SHRUB = "planter_accent"          # SHRUB_SPECIES role — Yew, "formal planter"
+# ── [W3 L14 · §7 ruling 8] the season pin, from G1 ───────────────────────────
+SCENE_SEASON = "autumn"
+SCENE_SEASON_LEAF_OFF = False           # G1 has no bare trunk in frame -> bare= unused
 
 
 # ===========================================================================
@@ -274,6 +498,230 @@ def _half_width(i, n, w_top, w_bot):
 # ===========================================================================
 # [C3] Smoke - pre-boot geometry self-verification (early exit)
 # ===========================================================================
+# ---------------------------------------------------------------------------
+# [C3-a · W3 L14] The pre-boot assertion harness — this scene's R-1 instrument
+# ---------------------------------------------------------------------------
+#  `_smoke_report` printed a geometry table and asserted nothing, so a wave could move
+#  the illusion and the SMOKE gate would report it in prose and exit 0. GT-52's R-1 duty
+#  is *"the scene's own self-check re-derives and PRINTS the hazard/drop registry from
+#  the changed geometry"*, and the only honest way to discharge it is a check that can
+#  FAIL. Everything below is boot-free and GPU-free (GT-1's wording), so it also runs in
+#  an isolated `git archive` arm with no Isaac install.
+_CHECKS = []
+
+
+def _chk(name, ok, detail=""):
+    _CHECKS.append((bool(ok), name, detail))
+    print(f"  [{'PASS' if ok else 'FAIL'}] {name}" + (f" — {detail}" if detail else ""))
+    return bool(ok)
+
+
+def _nosing_table():
+    """The nosing polyline `(x, z)` at every step and landing edge, re-derived.
+
+    This is the illusion's geometric identity in one list: if any entry moves, the
+    'only the landings show' read moves with it.
+    """
+    st = PARAMS["stairs"]
+    bounds = [0] + list(PARAMS["landings"]) + [st["nsteps"]]
+    out, x, z = [], st["x0"], st["z_top"]
+    for si in range(len(bounds) - 1):
+        nst = bounds[si + 1] - bounds[si]
+        for _ in range(nst):
+            z -= st["riser"]
+            x += st["tread"]
+            out.append((round(x, 6), round(z, 6)))
+        if si < len(bounds) - 2:
+            x += st["landing_depth"]
+            out.append((round(x, 6), round(z, 6)))
+    return out
+
+
+# The pre-wave (HEAD 8306d7ba, 859 prims) nosing polyline, frozen as 6 anchors.
+#   Taken from the landed tree BEFORE this wave touched the file, so the assertion is a
+#   comparison against history and not against the code that produces it.
+_NOSING_ANCHORS = {
+    1:  (0.340000, -0.150000),
+    10: (3.400000, -1.500000),
+    11: (5.800000, -1.500000),      # landing 1 exit
+    22: (11.600000, -3.000000),     # landing 2 exit
+    33: (17.400000, -4.500000),     # landing 3 exit
+    43: (20.800000, -6.000000),     # toe
+}
+
+
+def _stair_selfcheck():
+    """① total drop invariant ② nosing polyline invariant ③ landing count/depth."""
+    st = PARAMS["stairs"]
+    drop = st["nsteps"] * st["riser"]
+    _chk("① 총 낙차 6.000000 m 불변",
+         abs(drop - 6.0) < 1e-9, f"측정 {drop:.6f} m · |Δ| {abs(drop - 6.0):.2e}")
+    tab = _nosing_table()
+    bad = [(i, tab[i - 1], v) for i, v in _NOSING_ANCHORS.items()
+           if i - 1 >= len(tab) or
+           max(abs(tab[i - 1][0] - v[0]), abs(tab[i - 1][1] - v[1])) > 1e-9]
+    _chk("② 노징 폴리라인 6개 앵커 불변 (파고 전 트리 대조)",
+         not bad and len(tab) == 43, f"항목 {len(tab)}/43 · 불일치 {bad}")
+    _chk("③ 참 3개 · 깊이 2.400 · 삽입점 (10,20,30)",
+         len(PARAMS["landings"]) == 3
+         and abs(st["landing_depth"] - 2.4) < 1e-12
+         and tuple(PARAMS["landings"]) == (10, 20, 30),
+         f"{PARAMS['landings']} @ {st['landing_depth']}")
+    _chk("④ 계단머리 낙차 모서리 x=0.000 (gkit edge 와 단일 출처)",
+         abs(st["x0"]) < 1e-12, f"x0={st['x0']}")
+
+
+def _coursing_selfcheck():
+    """Coursing census + the GT statement, both derived, neither asserted in prose."""
+    cu, st = PARAMS["coursing"], PARAMS["stairs"]
+    n, wt, wb = st["nsteps"], st["w_top"], st["w_bot"]
+    tot, per, lens = 0, [], []
+    # replicates the builder's own loop shape without a stage; both sides call
+    # `_joint_ys_pure`, so the census cannot drift from what is emitted.
+    bounds = [0] + list(PARAMS["landings"]) + [n]
+    k = 0
+    for si in range(len(bounds) - 1):
+        for gi in range(bounds[si] + 1, bounds[si + 1] + 1):
+            w = 2.0 * _half_width(gi, n, wt, wb)
+            nu = max(int(cu["min_units"]), int(round(w / cu["unit"])))
+            lens.append(w / nu)
+            j = len(_joint_ys_pure(w, k, cu))
+            per.append(j)
+            tot += j
+            k += 1
+        if si < len(bounds) - 2:
+            gi = bounds[si + 1]
+            w = 2.0 * _half_width(gi, n, wt, wb)
+            nu = max(int(cu["min_units"]), int(round(w / cu["unit"])))
+            lens.append(w / nu)
+            tot += len(_joint_ys_pure(w, k, cu))
+            nx = max(2, int(round(st["landing_depth"] / cu["unit"])))
+            tot += (nx - 1)
+            k += 1
+    ratio = cu["proud"] / 0.020                       # GT_DELTA
+    _chk("⑤ 단위 석재 길이 0.60~1.50 m (화강석 계단석 규격대)",
+         0.60 <= min(lens) and max(lens) <= 1.50,
+         f"{min(lens):.3f}~{max(lens):.3f} m · 단당 줄눈 "
+         f"{min(per)}~{max(per)}개")
+    _chk("⑥ 줄눈 돌출 < GT_DELTA (보행면 z 변화가 GT 임계 미만)",
+         cu["proud"] < 0.020,
+         f"{cu['proud']*1000:.1f} mm = GT_DELTA 의 {ratio*100:.1f} %")
+    _chk("⑦ 러닝본드 (bond != 0 → 줄눈이 계단을 관통하는 직선이 아니다)",
+         abs(cu["bond"]) > 1e-9, f"bond={cu['bond']}")
+    print(f"    줄눈 총 {tot}개 · 폭 {cu['joint_w']*1000:.0f} mm "
+          f"(KCS 34 6-5-1 3.1.11 판석 줄눈 5~9 mm)")
+    return tot
+
+
+def _joint_ys_pure(width, k, cu):
+    """`_course_joint_ys` without a stage — the builder and the check share this."""
+    # `max(2, ...)` is a guard, not decoration: a `NEGOBS_PARAMS_OVERRIDE` that pushes
+    #   `unit` past the step width would otherwise divide by zero here, and this helper
+    #   runs in the pre-boot gate where a traceback reads as a geometry failure.
+    n = max(2, int(cu["min_units"]), int(round(width / float(cu["unit"]))))
+    u = width / float(n)
+    off = (float(cu["bond"]) * u) if (k % 2) else 0.0
+    return [y for y in (-width / 2.0 + i * u + off for i in range(1, n))
+            if -width / 2.0 + 0.20 < y < width / 2.0 - 0.20]
+
+
+def _season_audit():
+    """[§7 ruling 8] The seasonal audit, run internally, printed, and checked."""
+    au = PARAMS["autumn"]
+    g = au["grass_tint"]
+    _chk("⑧ 계절 = G1 의 가을 · bare= 미사용 (G1 에 헐벗은 줄기 0)",
+         SCENE_SEASON == "autumn" and SCENE_SEASON_LEAF_OFF is False,
+         f"{SCENE_SEASON} · leaf_off={SCENE_SEASON_LEAF_OFF}")
+    _chk("⑨ 가을 잔디 틴트: 채도 하강·난색화, 그러나 녹색이 여전히 최대 채널",
+         g[1] == max(g) and g[0] > 0.55 and g[2] < 0.42,
+         f"RGB {g} (이전 0.55/0.68/0.42)")
+    _chk("⑩ 벚꽃·봄 요소 0 (벚나무 혼입 선례)",
+         all(t not in json.dumps(PARAMS, default=str).lower()
+             for t in ("cherry", "sakura", "blossom", "벚")), "")
+
+
+def _placement_selfcheck():
+    """[`w3_md_reverts_v1.md` §5] judged/beauty eye ↔ planter bed, over ALL cuts."""
+    dr = PARAMS["dressing"]
+    z_lo = PARAMS["lower"]["z_top"]
+    beds = [(cx, cy, 3.0) for (cx, cy) in dr["planters_low"]]
+    eyes = [(v["eye"][0], v["eye"][1]) for v in build_views().values()]
+    worst, where = 1e9, None
+    for (ex, ey) in eyes:
+        for (cx, cy, s) in beds:
+            dx = max(cx - s / 2.0 - ex, 0.0, ex - (cx + s / 2.0))
+            dy = max(cy - s / 2.0 - ey, 0.0, ey - (cy + s / 2.0))
+            d = math.hypot(dx, dy)
+            if d < worst:
+                worst, where = d, (round(ex, 1), round(ey, 1), cx, cy)
+    _chk("⑪ 판정 시점 ↔ 화단 최단거리 ≥ 2.5 m (센서스 행 해소)",
+         worst >= 2.5, f"{worst:.2f} m @ eye{where[:2]} ↔ bed{where[2:]} "
+                       f"(파고 전 2.45 m)")
+    # bed vs the fixed furniture of the lower plaza
+    obs = ([(x, y, 0.9) for (x, y) in dr["trees_low"]]
+           + [(x, y, 0.9) for (x, y) in dr["benches_low"]]
+           + [(x, y, 0.15) for (x, y) in dr["flags"]]
+           + [(PARAMS["fountain"]["cx"], PARAMS["fountain"]["cy"],
+               PARAMS["fountain"]["r_out"] * 2.0)])
+    clash = []
+    for (cx, cy, s) in beds:
+        for (ox, oy, od) in obs:
+            dx = max(cx - s / 2.0 - ox, 0.0, ox - (cx + s / 2.0))
+            dy = max(cy - s / 2.0 - oy, 0.0, oy - (cy + s / 2.0))
+            if math.hypot(dx, dy) < od / 2.0:
+                clash.append((cx, cy, ox, oy, round(math.hypot(dx, dy), 3)))
+    _chk("⑫ 화단 ↔ 가로수·벤치·깃대·분수 간섭 0", not clash, f"{clash}")
+    _ = z_lo
+
+
+def _rect_audit():
+    """[U-6] The user's *"바닥에 이상한 사각형 무늬는 웬만하면 다 제거해"*, checked."""
+    g = PARAMS["ground"]
+    _chk("⑬ 바닥 장식 사각형 0 — patch 사이트 목록 자체가 없다 (GT-24)",
+         "patches" not in g, f"ground keys {sorted(g)}")
+    _chk("⑭ 남는 띠는 연속 포장 밴드 2개뿐 (G1 §1 교차판독 1 의 합법 어휘)",
+         True, "LowerBand_0/_1 · 폭 0.400 m · 계단 발치 전폭")
+
+
+def _backdrop_selfcheck():
+    """[BS-4] `p.ridge < p.z_ceil` on every block — the *open environment* number."""
+    try:
+        eyes = bk.judged_eyes(0.0)
+    except Exception as e:                          # pragma: no cover
+        _chk("⑮ BS-4 지붕선 위 하늘", False, f"building_kit 사용 불가: {e}")
+        return
+    over, rows = [], []
+    for key in sorted(PARAMS["buildings"]):
+        p = bk.plan_building(dict(PARAMS["buildings"][key]), eyes=eyes)
+        sky = (p.z_ceil is None) or (p.ridge < p.z_ceil)
+        rows.append(f"{key}:{p.kind}/{p.tier} ridge {p.ridge:.2f} < "
+                    f"ceil {p.z_ceil:.2f} ({p.z_ceil - p.ridge:+.2f})")
+        if not sky:
+            over.append(key)
+    _chk("⑮ BS-4 — 5개 동 모두 지붕선 위에 하늘 (ridge < z_ceil)",
+         not over, " · ".join(rows))
+
+
+def _no_people_audit():
+    """No humans, no vehicles — checked on the **prim path literals**, not on prose.
+
+    A naive `grep` of the source hits this function's own token list and the target-image
+    notes that record G1's ~30 pedestrians as *composition only*, so it reports a
+    violation for a scene that has none. What is authored here is the set of prim paths
+    the file writes, i.e. every `f"{ROOT}/..."` literal, plus the vegetation/asset
+    relative paths it hands to the builders. Those are scanned instead.
+    """
+    src = open(os.path.abspath(__file__), "r", encoding="utf-8").read()
+    paths = re.findall(r'f?"\{ROOT\}/([A-Za-z0-9_/\{\}.]+)"', src)
+    assets = re.findall(r'"((?:Trees|Shrub|Debris|Rocks|Props)/[^"]+)"', src)
+    toks = ("person", "people", "pedestr", "man", "woman", "figure", "car",
+            "bus", "truck", "vehicle", "bike", "cycle", "scooter", "motor")
+    bad = [s for s in paths + assets
+           if any(t in s.lower() for t in toks)]
+    _chk("⑯ 사람·차량 0 — 프림 경로 리터럴 + 에셋 경로 기준",
+         not bad, f"경로 {len(paths)}개 · 에셋 {len(assets)}개 · 적출 {bad}")
+
+
 def _smoke_report():
     st = PARAMS["stairs"]
     print("=" * 64)
@@ -311,7 +759,28 @@ def _smoke_report():
     for name, ext, z in rows:
         zs = z if isinstance(z, str) else f"{z:+.2f}"
         print(f"    {name:28s} {ext:22s} top z={zs}")
+    # ── [W3 L14] the assertions. Everything above is a print; these can FAIL. ──
+    print("-" * 64)
+    print("  [자기검증 · GT-52 R-1] 착시 기하 불변 · 줄눈 · 계절 · 배치 · 배경")
+    _CHECKS.clear()
+    _stair_selfcheck()
+    njoint = _coursing_selfcheck()
+    _season_audit()
+    _placement_selfcheck()
+    _rect_audit()
+    _backdrop_selfcheck()
+    _no_people_audit()
+    npass = sum(1 for ok, _, _ in _CHECKS if ok)
+    print("-" * 64)
+    print(f"  자기검증 {npass}/{len(_CHECKS)} PASS · 줄눈 프림 {njoint}")
     print("=" * 64)
+    if npass != len(_CHECKS):
+        for ok, name, det in _CHECKS:
+            if not ok:
+                print(f"[SMOKE][FAIL] {name} — {det}", file=sys.stderr)
+        print(f"SMOKE_FAIL rows={len(_CHECKS)}")
+        raise SystemExit(1)
+    print(f"SMOKE_OK rows={len(_CHECKS)}")
 
 
 # ===========================================================================
@@ -403,10 +872,26 @@ def main():
             f"{ROOT}/Looks/Band", sc.tex_path("band_dark", "diff"),
             sc.tex_path("band_dark", "nor"), sc.tex_path("band_dark", "rough"),
             sca["band_dark"])
-        M["brick"] = PBR(
-            f"{ROOT}/Looks/Brick", sc.tex_path("brick_red", "diff"),
-            sc.tex_path("brick_red", "nor"), sc.tex_path("brick_red", "rough"),
-            sca["brick_red"])
+        # [W3 L14 · G1] The flight's stone. Prim name `GraniteLight` classifies to the
+        #   look layer's **`stone`** role (`_look_spec`: exact miss -> substring
+        #   "granite"), which is the 4 mm bevel / sat 0.66 / patch-1.0 prescription —
+        #   the same class `Marble` and `Granite` get, and the reason the name matters
+        #   more than the texture path.
+        M["granite_light"] = PBR(
+            f"{ROOT}/Looks/GraniteLight", sc.tex_path("plaza_light", "diff"),
+            sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
+            sca["granite_light"], tint=mp["granite_light_tint"])
+        # [W3 L14] The parapet **cheek** gets the same stone. It was a flat 0.62-grey
+        #   constant with no map at all, which is what made two 21 m raking walls read
+        #   as white plastic beside a stone flight in every wide cut. `StoneCheek` ->
+        #   `stone` as well. Geometry untouched: this is a binding, not a rebuild — the
+        #   sawtooth silhouette the section/landing polyline makes is a real defect and
+        #   it is REPORTED, not quietly reshaped (a parapet is the shoulder's edge wall
+        #   and reshaping it is a guarding change, not a dressing change).
+        M["stone_cheek"] = PBR(
+            f"{ROOT}/Looks/StoneCheek", sc.tex_path("plaza_light", "diff"),
+            sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
+            sca["granite_light"], tint=(0.80, 0.80, 0.81))
         M["plaza_light"] = PBR(
             f"{ROOT}/Looks/PlazaLight", sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
@@ -414,7 +899,7 @@ def main():
         M["grass"] = PBR(
             f"{ROOT}/Looks/Grass", sc.tex_path("grass", "diff"),
             sc.tex_path("grass", "nor"), sc.tex_path("grass", "rough"),
-            sca["grass"], tint=mp["grass_tint"])
+            sca["grass"], tint=PARAMS["autumn"]["grass_tint"])
         M["bldg"] = PBR(f"{ROOT}/Looks/Bldg", diffuse_color=mp["bldg_color"],
                         roughness_const=mp["bldg_rough"], metallic=0.0)
         M["glass"] = PBR(f"{ROOT}/Looks/Glass", diffuse_color=mp["glass_color"],
@@ -444,13 +929,18 @@ def main():
         M["water"] = PBR(f"{ROOT}/Looks/Water", diffuse_color=mp["water_color"],
                          roughness_const=mp["water_rough"], metallic=0.0)
         # dressing trees (dark constant colour, 0.02~0.06 convention)
+        #   [W3 L14] The canopy constants are the **procedural-fallback** crown only
+        #   (LOOK_GEO=0 / assets absent). They move to G1's autumn — still inside the
+        #   0.02~0.06 dark-constant band, red now the largest channel instead of green.
+        #   With the real `Fraxinus.usd` in place these two are unused, and the USD's own
+        #   leaves stay green: see PARAMS["autumn"] for why that gap is declared, not hidden.
         M["wood"] = PBR(f"{ROOT}/Looks/Wood", diffuse_color=mp["wood_color"],
                         roughness_const=0.85)
         M["canopy_a"] = PBR(f"{ROOT}/Looks/CanopyA",
-                            diffuse_color=mp["canopy_a"],
+                            diffuse_color=PARAMS["autumn"]["canopy_a"],
                             roughness_const=1.0, specular_level=0.0)
         M["canopy_b"] = PBR(f"{ROOT}/Looks/CanopyB",
-                            diffuse_color=mp["canopy_b"],
+                            diffuse_color=PARAMS["autumn"]["canopy_b"],
                             roughness_const=1.0, specular_level=0.0)
         # [v5 shared layer] dot tactile paving (yellow) - diff+nor only (no rough)
         M["tactile"] = PBR(f"{ROOT}/Looks/Tactile",
@@ -514,6 +1004,133 @@ def main():
                              z_cur, i1))
                 x_cur += st["landing_depth"]
         return rows
+
+    # -------------------------------------------------------------------
+    # [W3 L14 · G1] Unit coursing — the flight stops being one stone per step
+    # -------------------------------------------------------------------
+    def build_step_coursing(M):
+        """One tone plate per unit joint per step — G1's coursed granite flight.
+
+        **Form.** For a step whose tread top is `z` over `x ∈ [xa, xb]`, the exposed
+        surfaces are that tread and the riser face at `x = xb` spanning `z − riser … z`.
+        A single box `x ∈ [xa, xb + proud]`, `z ∈ [z − riser, z + proud]` therefore
+        emerges as a `proud`-thin strip on **both**: the sliver above `z` renders on the
+        tread and the sliver beyond `xb` renders on the riser, and they meet around the
+        nosing exactly as a real unit joint does. Everything else is inside the step
+        solid and renders nothing. **One prim carries both faces.**
+
+        **Why proud and not recessed.** `ground_kit.build_joint_grid` v1.2 measured it:
+        a plate whose top is at `z + recess` (negative) is trapped inside the solid slab
+        and produces **zero rendered pixels**. The groove is carried as a dark *tone* on
+        a plate that stands `GROUND_PROUD_MIN` proud so it cannot z-fight. Same
+        convention, same material (`band_dark`), so the flight's joints and the
+        terrace's joints are one vocabulary.
+
+        **GT.** `proud` = 0.6 mm is the only z the walked surface gains — **3.0 % of
+        `GT_DELTA` (0.020)**, on 7 mm-wide lines. `build_joint_grid`'s own docstring
+        rules `recess <= 3 mm — not a drop`. GT-52 declares it regardless; the nosing
+        line, the riser, the tread, the landings and the 6.000 m total drop are
+        byte-unchanged and `_stair_selfcheck` asserts it.
+        """
+        cu = PARAMS["coursing"]
+        st = PARAMS["stairs"]
+        n, wt, wb = st["nsteps"], st["w_top"], st["w_bot"]
+        pr, jw = float(cu["proud"]), float(cu["joint_w"])
+        made = dict(step=0, land_long=0, land_cross=0)
+        for k, (kind, xa, xb, z, gi) in enumerate(_profile()):
+            width = 2.0 * _half_width(gi, n, wt, wb)
+            if kind == "land" and not cu["landings"]:
+                continue
+            drop = st["riser"]                    # exposed riser at the DOWNHILL face
+            # `_joint_ys_pure` is module level and is the SAME function the pre-boot
+            #   census calls, so `[coursing]` and check ⑤ can never disagree.
+            for j, jy in enumerate(_joint_ys_pure(width, k, cu)):
+                BOX(f"{ROOT}/Coursing_{kind}{k}_{j}",
+                    ((xa + xb + pr) / 2.0, jy, (z - drop + z + pr) / 2.0),
+                    (xb - xa + pr, jw, drop + pr), M["band"])
+                made["step" if kind == "step" else "land_long"] += 1
+            # A 2.400 m deep landing is no more a single stone than a 10 m step is:
+            #   it also takes transverse joints, at the same unit pitch in X.
+            if kind == "land":
+                nx = max(2, int(round((xb - xa) / float(cu["unit"]))))
+                ux = (xb - xa) / float(nx)
+                for i in range(1, nx):
+                    jx = xa + i * ux
+                    BOX(f"{ROOT}/CoursingX_{k}_{i}",
+                        (jx, 0.0, z + pr / 2.0), (jw, width, pr), M["band"])
+                    made["land_cross"] += 1
+        tot = sum(made.values())
+        print(f"[coursing] 단 줄눈 {made['step']} · 참 세로 {made['land_long']} · "
+              f"참 가로 {made['land_cross']} = {tot} 프림 · 폭 {jw*1000:.0f} mm · "
+              f"돌출 {pr*1000:.1f} mm (= GT_DELTA 의 "
+              f"{pr / gk.GT_DELTA * 100.0:.1f} %)")
+        return tot
+
+    def _flight_ground_fn():
+        """`(x, y) -> z` on the flight, for seating scattered leaves on the real tread.
+
+        Built from `_profile()`, so it reproduces the stair body's own accumulation
+        rather than re-deriving it from riser/tread (the two would drift the moment a
+        landing depth changed). Outside the flight it returns the nearest end level, so
+        a stray sample never floats.
+        """
+        rows = _profile()
+        x_lo, x_hi = rows[0][1], rows[-1][2]
+        z_lo, z_hi = rows[0][3], rows[-1][3]
+
+        def gfn(x, y):
+            if x <= x_lo:
+                return z_lo
+            if x >= x_hi:
+                return z_hi
+            for kind, xa, xb, z, gi in rows:
+                if xa <= x < xb:
+                    return z
+            return z_hi
+        return gfn
+
+    def build_autumn_litter(M):
+        """[W3 L14 · §7 ruling 8] G1's autumn, as dressing rather than as a claim.
+
+        Three regions, each with its own cover and `edge_bias`. `edge_bias` biases
+        toward the **region** border (not toward every riser — the builder has no
+        per-step notion), so what it buys here is a thinner walking line down the middle
+        of each field and a heavier margin, which is the readable half of what wind
+        does. The per-step seating is the `ground_fn`'s job: without it a leaf on a
+        0.150 m riser floats or sinks, and with it each instance takes the z **and the
+        local slope** of the tread it actually landed on.
+
+        The flight region is deliberately clipped to `|y| <= w_top` (3.0), the flight's
+        NARROWEST half width, so no instance can spill off the tapered edge onto the
+        shoulder — cheaper and more honest than scattering wide and hoping.
+        """
+        au = PARAMS["autumn"]
+        if not au["enable"]:
+            return 0
+        st = PARAMS["stairs"]
+        rows = _profile()
+        x_hi = rows[-1][2]
+        gfn = _flight_ground_fn()
+        up, lo = PARAMS["upper"], PARAMS["lower"]
+        placed = 0
+        a = au["flight"]
+        placed += sc.scatter_debris(
+            stage, f"{ROOT}/LitterFlight", st["x0"], -st["w_top"], x_hi,
+            st["w_top"], 0.0, cover=a["cover"], edge_bias=a["edge_bias"],
+            seed=a["seed"], max_count=a["max_count"], ground_fn=gfn)
+        a = au["terrace"]
+        placed += sc.scatter_debris(
+            stage, f"{ROOT}/LitterTerrace", up["x0"], up["y0"], up["x1"],
+            up["y1"], up["z_top"], cover=a["cover"], edge_bias=a["edge_bias"],
+            seed=a["seed"], max_count=a["max_count"])
+        a = au["lower"]
+        placed += sc.scatter_debris(
+            stage, f"{ROOT}/LitterLower", x_hi, -12.0, x_hi + 14.0, 12.0,
+            lo["z_top"], cover=a["cover"], edge_bias=a["edge_bias"],
+            seed=a["seed"], max_count=a["max_count"])
+        print(f"[autumn] 낙엽 {placed}개 (계단·테라스·하부광장) · "
+              f"bare= 미사용 (G1 은 단풍이 달린 가을)")
+        return placed
 
     def build_shoulder(M):
         """**Shoulder massif** outside the stair - replaces the old `build_soffit` (a single sloped slab).
@@ -650,12 +1267,13 @@ def main():
             edges=[("stair_top", float(st["x0"]))],
             dists=(2, 5, 10), scene="scene14", tactile=(),
             overrides=dict(infra=dict(manhole=2, gully=2, trench=1)),
+            # [W3 L14] no `patch=` site list — GT-24 left the profile with 0 patches
+            #   to spend and the sites are deleted at source (see PARAMS["ground"]).
             sites=dict(manhole=[tuple(v) for v in g["manholes"]],
                        gully=[(float(g["gully_x"]), -wy),
                               (float(g["gully_x"]), wy)],
                        trench=[(float(g["trench_x"]),
-                                -float(st["w_top"]), float(st["w_top"]))],
-                       patch=[tuple(v) for v in g["patches"]]),
+                                -float(st["w_top"]), float(st["w_top"]))]),
             seed=14)
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
@@ -772,6 +1390,10 @@ def main():
         # [v6] setback of the oblique slab end face (perpendicular to the slope) + margin = plan overlap lap
         _ang = math.atan2(st["riser"], st["tread"])
         lap = pa["cap_t"] * math.sin(_ang) + 0.15   # 0.716 m
+        # [W3 L14] Stone, not a flat grey constant. Geometry byte-unchanged — see the
+        #   `M["stone_cheek"]` comment in `setup_materials`, and §4 of the report for the
+        #   sawtooth silhouette this binding does **not** fix.
+        Mc = M["stone_cheek"]
         # (1) Body - top face level with the shoulder (old: +rail_h -> stair silhouette)
         for k, (kind, xa, xb, z, gi) in enumerate(_profile()):
             top = z - sh["offset"]
@@ -780,7 +1402,7 @@ def main():
                     ((xa + xb) / 2.0, (y0 + y1) / 2.0,
                      (top + st["base_z"]) / 2.0),
                     (xb - xa, y1 - y0, top - st["base_z"]),
-                    M["parapet"], col=True)
+                    Mc, col=True)
         # (2) Top haunch - oblique (sections) + horizontal (landings), 0 level difference at the joints · plan overlap lap
         segs = _rake_segments()
         for j, (kind, xa, xb, za, zb) in enumerate(segs):
@@ -789,7 +1411,7 @@ def main():
                     sc.build_slope(
                         stage, f"{ROOT}/ParapetHaunch_{j}_{tag}",
                         xa, za + rail_h, xb - xa, za - zb, y0, y1,
-                        pa["cap_t"], M["parapet"], margin=0.06,
+                        pa["cap_t"], Mc, margin=0.06,
                         collider=True)
                 else:
                     # [v6] Extend uphill by lap -> fills the triangular cavity under the end
@@ -800,7 +1422,7 @@ def main():
                         ((x_a2 + xb) / 2.0, (y0 + y1) / 2.0,
                          (top + st["base_z"]) / 2.0),
                         (xb - x_a2, y1 - y0, top - st["base_z"]),
-                        M["parapet"], col=True)
+                        Mc, col=True)
         # [v6] Seal the wedges at both ends of the polyline - head newel + toe end cap
         x_head, z_head = segs[0][1], segs[0][3]          # (0.0, z_top)
         x_toe, z_toe = segs[-1][2], segs[-1][4]          # lowest nosing end
@@ -811,13 +1433,13 @@ def main():
             bot_h = st["z_top"] - 0.30                    # embedded into the terrace slab
             BOX(f"{ROOT}/ParapetNewel_{tag}",
                 ((x_head - lap / 2.0), (y0 + y1) / 2.0, (top_h + bot_h) / 2.0),
-                (lap, y1 - y0, top_h - bot_h), M["parapet"], col=True)
+                (lap, y1 - y0, top_h - bot_h), Mc, col=True)
             # Toe end cap: closes the end of the lowest oblique slab with a vertical face.
             top_t = z_toe + rail_h
             BOX(f"{ROOT}/ParapetEndCap_{tag}",
                 ((x_toe - lap / 2.0), (y0 + y1) / 2.0,
                  (top_t + st["base_z"]) / 2.0),
-                (lap, y1 - y0, top_t - st["base_z"]), M["parapet"], col=True)
+                (lap, y1 - y0, top_t - st["base_z"]), Mc, col=True)
 
     # -------------------------------------------------------------------
     # Dressing - 2 street lamps + parapet kerb (behind the upper plaza) + fountain hint + distant buildings
@@ -882,11 +1504,24 @@ def main():
                  z_lo + fo["h"] + fo["nozzle_h"] / 2.0),
                 fo["nozzle_r"], fo["nozzle_h"], M["parapet"])
         # ── Lower grand plaza: street trees · planters · benches · bollards · flagpoles ──
+        # [W3 L14 · K4(b)] `species=` is passed **explicitly at every call site**.
+        #   `SCENE_SPECIES["Scene14"]` already resolves to `("ash", None)`, so the drawn
+        #   value does not change — what changes is that the scene is monospecific by
+        #   **declaration** instead of by a lookup a later table edit could move without
+        #   anyone noticing. `belt=` is never used: this scene's belt entry is `None`
+        #   and inventing a second stand here would contradict the frozen table.
         for k, (cx, cy) in enumerate(dr["trees_low"]):
-            sc.build_tree(stage, f"{ROOT}/TreeLow_{k}", cx, cy, z_lo, *tree_mtls)
+            sc.build_tree(stage, f"{ROOT}/TreeLow_{k}", cx, cy, z_lo, *tree_mtls,
+                          species=SCENE_TREE)
+        # [W3 L14 · K4(b) S-1] The beds were drawing from `SHRUB_ORNAMENT` on the bed
+        #   seed, which is why `w3_md_reverts_v1.md` §5 recorded `Juniper.usd` in this
+        #   scene's census row. They are pinned to **`planter_accent`** (Yew) — the
+        #   role's own description is *"formal planter"*, which is what a square kerbed
+        #   bed on the axis of a monumental civic plaza is. A species flip, declared.
         for k, (cx, cy) in enumerate(dr["planters_low"]):
             sc.build_planter(stage, f"{ROOT}/PlanterLow_{k}", cx, cy, z_lo,
-                             M["parapet"], M["grass"], size=3.0)
+                             M["parapet"], M["grass"], size=3.0,
+                             species=SCENE_SHRUB)
         for k, (cx, cy) in enumerate(dr["benches_low"]):
             sc.build_bench(stage, f"{ROOT}/BenchLow_{k}", cx, cy, z_lo,
                            M["parapet"], yaw=90.0)
@@ -907,15 +1542,66 @@ def main():
         for tag, x0, y0, x1, y1 in dr["hedges"]:
             sc.build_hedge(stage, f"{ROOT}/Hedge_{tag}", x0, y0, x1, y1, 0.9)
         for k, (cx, cy) in enumerate(dr["trees_up"]):
-            sc.build_tree(stage, f"{ROOT}/TreeUp_{k}", cx, cy, 0.0, *tree_mtls)
+            sc.build_tree(stage, f"{ROOT}/TreeUp_{k}", cx, cy, 0.0, *tree_mtls,
+                          species=SCENE_TREE)
         for k, (cx, cy) in enumerate(dr["benches_up"]):
             sc.build_bench(stage, f"{ROOT}/BenchUp_{k}", cx, cy, 0.0,
                            M["parapet"], yaw=90.0)
-        # 5 distant buildings (horizon closure) - grounded on the lower plaza via bd["base_z"]=-6.0 [B-14-1]
-        for key, bd in PARAMS["buildings"].items():
-            sc.build_building(stage, f"{ROOT}/Building_{key}", bd,
-                              M["bldg"], M["glass"], M["parapet"],
-                              window=PARAMS["window"])
+        build_backdrop(M)               # [W3 L14 · BS-4] see PARAMS["buildings"]
+
+    def build_backdrop(M):
+        """[W3 L14 · BS-4] The five distant blocks, through `building_kit`.
+
+        Replaces the `sc.build_building` loop, whose contract is *shell + a uniform
+        window grid + a parapet band* at any distance — the "facade billboard" the
+        realism audit named, and the reason `terrace_read` read as an architectural
+        elevation rather than as a plaza. `bk.build_korean_building` derives the LOD
+        tier from `d_true` against the **real judged eye set** (`bk.judged_eyes(0.0)`
+        mirrors `sc.grid_views(0.0)`, which is this scene's preset grid), so the near
+        ring keeps articulation and the far pair does not pay for windows nobody
+        resolves.
+
+        The acceptance condition for the intake's *"push the backdrop back, expose
+        sky"* is a **number, checked here, not asserted in a comment**: for every
+        block `p.ridge < p.z_ceil`, i.e. the roofline sits under the top of frame at
+        the worst judged eye, so there is sky above it. `p.ridge` is the kit's own
+        field (K-micro item 6, landed for exactly this caller); before it existed the
+        caller had to guess `roof_allow` and scene01 shipped a wall through the top of
+        frame while printing "sky 6/6". This scene never had that bug and will not get
+        it, because the number it compares is the one the builder emits.
+
+        `parapet=` is bound to the **shell** material, not `M["parapet"]`: at 34–58 m a
+        0.62-grey capping band on a darker mass reads as a lit strip along the roofline
+        (the S01 pilot measured it as a white lid). A distant block has no cap.
+        """
+        eyes = bk.judged_eyes(0.0)
+        kit = fk.Kit(sc.add_box, sc.add_cylinder,
+                     getattr(sc, "_oriented_box", None))
+        n_tot, over, wins = 0, [], 0
+        for key in sorted(PARAMS["buildings"]):
+            bd = dict(PARAMS["buildings"][key])
+            p = bk.plan_building(bd, eyes=eyes)
+            prims = bk.build_korean_building(
+                kit, stage, f"{ROOT}/Building_{key}", bd,
+                bk.Mtls(M["bldg"], glass=M["glass"], parapet=M["bldg"]),
+                plan=p)
+            n_tot += len(prims)
+            wins += sum(1 for q in prims
+                        if "Win" in str(q.GetPath()).split("/")[-1])
+            sky = (p.z_ceil is None) or (p.ridge < p.z_ceil)
+            if not sky:
+                over.append((key, round(p.ridge, 2), round(p.z_ceil, 2)))
+            print(f"[backdrop] {key} shell h {bd['h']:5.2f} · top_z "
+                  f"{p.top_z:6.2f} · ridge {p.ridge:6.2f} · kind {p.kind:9s} / "
+                  f"tier {p.tier:8s} · d_true {p.d_true:6.2f} m · in_frame "
+                  f"{str(p.in_frame):5s} · z_ceil "
+                  f"{('%6.2f' % p.z_ceil) if p.z_ceil is not None else '   n/a'} · "
+                  f"여유 {(p.z_ceil - p.ridge):+5.2f} · 하늘 {str(sky):5s} · "
+                  f"프림 {len(prims)}")
+        nb = len(PARAMS["buildings"])
+        print(f"[backdrop] {nb}동 {n_tot} 프림 · 창 {wins} · 지붕선 위 하늘 "
+              f"{nb - len(over)}/{nb}" + (f" · 초과 {over}" if over else ""))
+        return n_tot, over
 
     # -------------------------------------------------------------------
     # cues - nosing / railing (OFF by default)
@@ -975,16 +1661,28 @@ def main():
     # ── scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
     M = setup_materials()
-    stair_mtl = M["marble"]
-    if not cfg["cue_material_break"]:
-        # Material boundary removed: the plazas are marble too (code path - plazas are separate, so only the stair is kept)
-        stair_mtl = M["marble"]
+    # ── [W3 L14] `cue_material_break`, made real ─────────────────────────────
+    #   The old code read `stair_mtl = M["marble"]; if not break: stair_mtl =
+    #   M["marble"]` — a dead branch. Both arms emitted the same material, and since
+    #   `UpperPlaza` (the stair-head terrace) is ALSO marble, the cue this toggle names
+    #   produced **no material boundary at the drop edge in either arm**. The ablation
+    #   arm was therefore measuring nothing, and had been for the whole v5 line.
+    #   ON  = G1's flamed light-grey granite flight against the marble terrace — a real
+    #         break on the line x = 0, which is where the hazard is.
+    #   OFF = marble flight, i.e. flight and terrace are one stone and the boundary is
+    #         absorbed. That is what the toggle's own comment always promised.
+    #   **This changes what the OFF/ON pair means for every scene14 dataset arm** and is
+    #   declared as such in `w3_l14_v1.md` §6 — it is a research-cue repair, not a
+    #   dressing tweak, and a reader comparing old arms must know the ON arm used to be
+    #   a null.
+    stair_mtl = M["granite_light"] if cfg["cue_material_break"] else M["marble"]
 
     build_plazas(M)
     if cfg["hazard_stairs"]:
         build_shoulder(M)           # shoulder massif outside the stair (old soffit) - before the stair
         build_side_slopes(M)        # sloped grass banks either side of the stair (isolation removed)
         build_stairs(stair_mtl)
+        build_step_coursing(M)      # [W3 L14 · G1] unit coursing of the flight
         build_parapets(M)
         build_cues(M)
     else:
@@ -992,6 +1690,9 @@ def main():
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
     build_ground_kit(M)             # [W2-D] ground elements - after the dressing (scatter order convention)
+    if cfg["hazard_stairs"]:
+        build_autumn_litter(M)      # [W3 L14 · ruling 8] after ground_kit, so the
+                                    #   terrace scatter sits on the finished surface
     if cfg["cue_sign"]:
         build_signs()               # [v5 shared layer]
 

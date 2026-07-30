@@ -222,7 +222,13 @@ PARAMS = dict(
                  # foot of every riser. `sc.VEG_ROCKS` is 0.128-0.314 m wide, i.e. 조약돌
                  # (100-200 mm) to 호박돌 (200-400 mm), which is exactly the two products the
                  # clause names. Without them the joints read open even though they are closed.
-                 shim_n=4, shim_band=(0.02, 0.11), shim_cover=0.16,
+                 # `cover` is a target ground-cover FRACTION, not a count, and `scatter_debris`
+                 # back-computes n = A*(-ln(1-cover)) / effective-area-per-instance. The joint
+                 # band is 0.09 x 3.30 m = 0.30 m2 and `VEG_ROCKS` effective areas run
+                 # 0.031-0.128 m2, so the first pilot's 0.16 rounded to **0 instances**. 0.80 is
+                 # both the value that yields 4-5 shims and the physically right one: a
+                 # 틈메우기돌 band IS ~80 % filled with stone.
+                 shim_n=5, shim_band=(0.02, 0.11), shim_cover=0.80,
                  # 돌깔기 aprons, KFS-TRAIL p.72: 하단부 1,000 / 상단부 >=500 mm, 자연석 판석
                  # T100. Laid 6 mm proud (below the 20 mm GT_DELTA) so they are a material
                  # change, not a step: the exit step is measured to the road plate, not to these.
@@ -314,10 +320,24 @@ PARAMS = dict(
     #   not the 0.22 m courtyard pines 4-6 m off axis. Two are added at the corridor margins.
     #   On the asset path `build_tree` scales the tree by `trunk_h * 1.60`, so `trunk_h` is
     #   what makes a big trunk; `trunk_r` is carried for the procedural fallback arm.
-    frame_trees=[dict(name="F0", cx=2.30, cy=2.62, zone="north",
-                      trunk_h=6.4, trunk_r=0.36),
-                 dict(name="F1", cx=5.10, cy=-2.55, zone="south",
-                      trunk_h=6.8, trunk_r=0.30)],
+    #   [pilot fix] The first pilot put these at |cy| 2.55-2.62 with `trunk_h` 6.4/6.8.
+    #   `Shumard_Oak` is 10.4 x 10.3 m **wide** at its 10.9 m native height, so at that
+    #   offset the south tree's crown swallowed the corridor and `stone_rhythm` came back as
+    #   a wall of leaves with no stair in it at all. The south margin is also 1.8 m BELOW the
+    #   corridor, which puts that crown at exactly walk height. They move out to |cy| 5.6 /
+    #   7.5 and grow: at `trunk_h` 9.0-9.4 the asset stands 14.4-15.0 m with its crown base
+    #   ~4 m up, so what reaches over the corridor is canopy at the top of the frame — E7-8's
+    #   tunnel — instead of foliage across the walk line.
+    #   Second pilot pass: at |cy| 5.6/7.5 the crowns cleared the walk line but the flat green
+    #   ridge wall came back into `h0.3_d2`'s horizon — the near canopy was the thing that had
+    #   closed it. Final placement keeps a **north** tree close (the north bank is only 0.36 m
+    #   below the corridor, so its crown base sits ~4 m up and reads as the tunnel roof) and
+    #   pushes the **south** one downhill past `stone_rhythm`'s target, because the south
+    #   margin is 1.8 m lower and a crown there lands at walk height.
+    frame_trees=[dict(name="F0", cx=2.20, cy=3.60, zone="north",
+                      trunk_h=9.0, trunk_r=0.36),
+                 dict(name="F1", cx=9.20, cy=-4.80, zone="south",
+                      trunk_h=9.4, trunk_r=0.30)],
     #   Species is **pinned**, not hashed — see `build_ferns`. `native_h` is zmax
     #   [measured — scene_common.VEG_TREES / veg_manifest_w2.json].
     frame_tree_veg=dict(rel="Trees/Shumard_Oak.usd", native_h=10.8989),
@@ -559,10 +579,10 @@ PARAMS = dict(
         # [v6] rock_face = jointless natural rock for the stones / granite = lanterns·plinths
         scale=dict(rock_wall=3.5, rock_face=0.95,
                    granite=3.2, leaf_ground=2.0, gravel=0.35, grass=1.4,
-                   dirt_park=1.10, moss=0.55),
+                   dirt_park=1.10, moss=2.40),
         # [W3 S3-6 · GT-17] summer forest floor + the first moss tint in this scene.
         forest_tint=(0.70, 0.71, 0.62),
-        moss_tint=(0.86, 1.00, 0.84),
+        moss_tint=(0.80, 0.93, 0.78),
         # [W3 S3-7] 기와 tone. Dark grey-blue, kept under the sRGB dark-colour floor the
         #   v6 ruling set for roofs (the old flat constant was 0.045/0.030/0.018).
         tile_tint=(0.62, 0.64, 0.68),
@@ -1880,10 +1900,13 @@ def main():
                 lst.append(m)
                 M["stone_pool"].append(m)
             M[f"stone_{tier}"] = lst
-        # the moss tier gets the real mossy-rock scan as its last variant: it tiles with rock
-        #   structure, so it is right as a riser / joint / boulder patch and wrong as a carpet
-        #   (K4 caution 1) — which is exactly where it is used.
-        M["stone_moss"].append(M["moss"])
+        # [pilot fix] `M["moss"]` is deliberately **NOT** appended to the slab tier. K4's
+        #   caution 1 is exact: `rock_moss_set_02` is a 1k scan of an 8 m rock group, so at a
+        #   slab-sized world projection it repeats into a hard-edged green camouflage
+        #   patchwork — which is what the first pilot's `stone_rhythm` showed. The scan stays
+        #   on the **boulders** (large, singular, its native subject) at a 2.40 m projection;
+        #   the slab moss tier is the tinted `rock_face` variants, i.e. the repo's existing
+        #   green-tint-on-stone convention (spec §3.0 C-A2).
         # [v5 shared layer] Korean sign panel - uv_mode=True (mesh st matched 1:1)
         M["sign_info"] = sc.make_pbr(
             stage, "/World/Looks/SignInfo",
@@ -1962,7 +1985,10 @@ def main():
                 ((b["x0"] + b["x1"]) / 2.0, (b["y0"] + b["y1"]) / 2.0,
                  b["top"] - b["thick"] / 2.0),
                 (b["x1"] - b["x0"], b["y1"] - b["y0"], b["thick"]),
-                pick("moss", i), col=True)
+                # zone "joint" = moss 1.00, and this is `TEX["moss"]`'s one correct home:
+                #   a flat horizontal face seen through a 0-60 mm joint, where a
+                #   world-projected rock-with-moss scan reads as damp mottled fill.
+                M["moss"] if (i % 2 == 0) else pick("moss", i), col=True)
             for s in c["slabs"]:
                 dx = s["xb_f"] - s["xback"]
                 dy = s["y1"] - s["y0"]
@@ -2026,23 +2052,37 @@ def main():
         hy = float(cp["apron_half_y"])
         pr = float(cp["apron_proud"])
         at = float(cp["apron_t"])
+        # [pilot fix] The first pilot laid these as a 3-cell grid of 0.60 x 0.93 m boxes and
+        #   they read as **cast concrete paving** across the near field of `h0.3_d2` — the one
+        #   thing a temple approach must not have. 자연석 판석 is riven, irregular and laid to
+        #   an irregular joint (§4.1-1b), so the field is now 4 x 4 with per-flag size jitter,
+        #   +-6 deg yaw and a drawn joint, and it draws from the mid/moss stone tiers rather
+        #   than from a pale variant.
         for tag, x0, x1, ztop in (
                 ("Lo", float(cp["x1"]), float(cp["x1"]) + float(cp["apron_lo"]),
                  -STAIR_DROP + pr),
                 ("Up", -float(cp["apron_up"]), float(cp["x0"]) - 0.02, pr)):
-            nx = max(1, int(round((x1 - x0) / 0.50)))
+            nx = max(2, int(round((x1 - x0) / 0.34)))
+            ny = 4
             for a in range(nx):
-                for c2 in range(3):
+                for c2 in range(ny):
                     fx0 = x0 + (x1 - x0) * a / nx
                     fx1 = x0 + (x1 - x0) * (a + 1) / nx
-                    fy0 = -hy + 2.0 * hy * c2 / 3.0
-                    fy1 = -hy + 2.0 * hy * (c2 + 1) / 3.0
+                    fy0 = -hy + 2.0 * hy * c2 / ny
+                    fy1 = -hy + 2.0 * hy * (c2 + 1) / ny
+                    jx = rng.uniform(0.04, 0.11)
+                    jy = rng.uniform(0.04, 0.13)
+                    tier = "moss" if rng.random() < 0.35 else "mid"
                     sc._oriented_box(
                         stage, f"{ROOT}/Apron{tag}_{a}_{c2}",
-                        ((fx0 + fx1) / 2.0, (fy0 + fy1) / 2.0, ztop - at / 2.0),
-                        (fx1 - fx0 - 0.02, fy1 - fy0 - 0.02, at),
-                        M["stone_pool"][(a * 3 + c2) % len(M["stone_pool"])],
-                        collider=True, rotz=rng.uniform(-2.5, 2.5))
+                        ((fx0 + fx1) / 2.0 + rng.uniform(-0.02, 0.02),
+                         (fy0 + fy1) / 2.0 + rng.uniform(-0.03, 0.03),
+                         ztop - at / 2.0),
+                        (max(0.16, fx1 - fx0 - jx),
+                         max(0.20, fy1 - fy0 - jy), at),
+                        M[f"stone_{tier}"][(a * 3 + c2)
+                                           % len(M[f"stone_{tier}"])],
+                        collider=True, rotz=rng.uniform(-6.0, 6.0))
         print(f"[S3-4] 고임돌·틈메우기돌 {n_shim} 인스턴스 · 돌깔기 에이프런 "
               f"하단 {cp['apron_lo']:.2f} m / 상단 {cp['apron_up']:.2f} m")
 
@@ -2078,20 +2118,46 @@ def main():
                         pos_m=(b["cx"], b["cy"], b["seat_z"]),
                         yaw_deg=b["yaw"], scale_mul=b["scale"],
                         tilt_deg=b["tilt"], z_mode="base", scene="07",
-                        instanceable=True)
+                        instanceable=False)
                     n_asset += 1
-                    # [S3-6 · GT-17] boulder-top moss zone 0.70-0.90 (§4.1-3). `rock_01/02/
-                    #   03_broken` are plain rock scans, so the moss is bound over the whole
-                    #   instance with `strongerThanDescendants` — the pattern `scatter_debris`
-                    #   already uses to beat an instanceable `/Asset`'s own binding.
-                    if b["moss"]:
-                        try:
-                            from pxr import UsdShade
-                            UsdShade.MaterialBindingAPI.Apply(
-                                stage.GetPrimAtPath(path)).Bind(
-                                M["moss"], UsdShade.Tokens.strongerThanDescendants)
-                        except Exception:
-                            pass
+                    # [S3-5 pilot fix] **Two things are happening here and both are load-bearing.**
+                    #   (a) The moss zone: boulder tops carry 0.70-0.90 moss (§4.1-3), so a
+                    #       drawn subset takes `M["moss"]` and the rest a `rock_face` stone
+                    #       tier. Every boulder is bound — see (b).
+                    #   (b) **scene07 is the first scene in the tree that actually loads an
+                    #       urban asset** (spec §3.0: "the only call site in the tree is
+                    #       `batch1_common.py:185`", and it is unreached). The first pilot
+                    #       round found out what that costs: `assets/urban/nv_core/materials/
+                    #       SimPBR.mdl` fails to compile — "could not find module
+                    #       `.::baking_annotations`" — so every rock arrived with an invalid
+                    #       material and rendered as **flat bright red** in `h0.3_d2`,
+                    #       `temple_walk` and `side_slope`. `instanceable=True` made it
+                    #       unfixable from the scene: the broken binding lives inside
+                    #       `/__Prototype_N/...`, and an ancestor `strongerThanDescendants`
+                    #       binding does not reach into an instance prototype. With
+                    #       `instanceable=False` the referenced prims are real descendants and
+                    #       the ancestor binding wins. Cost is ~30 x 3-10 k unique triangles,
+                    #       which §12-14 explicitly does not budget on. The MDL search-path
+                    #       defect itself belongs to whoever owns `assets/urban` — it is
+                    #       recorded in the report, not worked around anywhere else.
+                    try:
+                        from pxr import UsdShade
+                        UsdShade.MaterialBindingAPI.Apply(
+                            stage.GetPrimAtPath(path)).Bind(
+                            # [pilot fix 2] the boulders take the **tinted-stone** moss
+                            #   convention, not the raw scan: `make_pbr` projects in world
+                            #   space, so on a rounded 0.4-0.9 m boulder `rock_moss_set_02`
+                            #   smears into a wet-plastic sheet at any projection scale that
+                            #   was tried. The raw scan keeps exactly the one job K4's note
+                            #   says it is right for — the flat 속채움 bed seen through the
+                            #   joints, below.
+                            M["stone_moss"][b["name"].__hash__()
+                                            % len(M["stone_moss"])] if b["moss"]
+                            else M["stone_mid"][b["cx"].__hash__()
+                                                % len(M["stone_mid"])],
+                            UsdShade.Tokens.strongerThanDescendants)
+                    except Exception as e:
+                        print(f"[S3-5][경고] {b['name']} 재질 바인딩 실패: {e}")
                     continue
                 except Exception as e:
                     print(f"[S3-5][경고] {b['name']} {b['asset']}: {e} — 폴백")

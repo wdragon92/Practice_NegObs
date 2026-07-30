@@ -1,0 +1,9 @@
+# Heavy CC0 texture binaries (~13 MB) — reproduced by the sibling script, like
+# `assets/*.jpg` and `assets/scene01/*` are at the repo root .gitignore.
+# The repo-wide .gitignore is owned by another lane, so the rule lives here
+# instead: a directory-local .gitignore is additive and touches nobody else.
+#   reproduce: python3 assets/coastal/download_coastal_assets.py
+*.jpg
+*.png
+*.zip
+!download_coastal_assets.py

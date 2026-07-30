@@ -1113,9 +1113,12 @@ re-anchored to a **횡단보도**: the walk meets the carriageway at a zebra cro
 curb (턱낮춤 ≤ 20 mm, kept clearly sub-threshold), dot warning band at the crossing approach
 (0.30 m from the lowered edge, 편의증진법), crossing markings tied into the existing G2
 street wall. The stair-head band (true cue) and the canopy-shadow identity stay. The
-tactile-ablation withdrawal and the §12.6 re-count note stand. EXECUTION: post-Lane-1
-scene16 micro-lane (scene16 is mid-edit by Lane 1's K1T4 right now), bundled with the
-patch-vocabulary sweep.
+tactile-ablation withdrawal and the §12.6 re-count note stand.
+**EXECUTION HELD (user 07-31: "일단 나중에 씬 번호 다시 메겨야 할 거니까, 일단 냅둬").**
+Scene numbering/case taxonomy will be reshuffled later; scene16 stays as landed (stair-head
+band added, far band as-is) until the renumbering round. The crosswalk anchor above is the
+agreed direction WHEN that round opens — do not execute before it. The patch-vocabulary
+sweep is unaffected and stays queued.
 
 **Dispatch (07-31): 16 · 18 · 04 LAUNCH NOW in parallel** (no Lane-1 dependency in their core
 work; K5-curb/species residues explicitly deferred to a Lane-1 follow-up pass and recorded in

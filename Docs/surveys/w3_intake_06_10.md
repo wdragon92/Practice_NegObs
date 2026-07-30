@@ -731,3 +731,18 @@ to reproduce exactly, but they are not yet `[measured on stage]`.
 6. **P-1** — must land together with `tonglam_v2` **F3** for scenes 03 · 07 · 10 · D3 · C2, or the decal
    rectangles regress.
 7. **S07-A / S10-A** — after the user's refs arrive; each bundled with its scene's F2/F3 fixes.
+
+---
+
+## §S — Supervisor addendum (2026-07-31, user feedback round 2)
+
+**S11-H (user, verbatim intent): Korean footbridges are H-plan.** "육교가 너무 양쪽으로
+뻗어있어. 한국 육교는 H형이야" — stair towers run PARALLEL to the carriageway on each
+sidewalk (often switchback flights hugging the road edge), the deck crosses between them:
+an H in plan. Our scene11 (and the scene06 approach layout) extends stairs INLINE with the
+deck axis (I-plan), sprawling along the bridge direction — wrong archetype.
+→ S4 rows: **S11-H rebuild** (stair towers rotated 90°, parallel-to-road switchback,
+footprint per real H-form photos n≥6 — harvest via scripts/harvest_refs.py conventions);
+**S06 approach check** against the same principle (spiral tower placement relative to road).
+Differentiation stands (user: "양쪽으로 다르게 읽힐 수 있잖아"): 06 = spiral identity,
+11 = H-form + grating see-through identity.

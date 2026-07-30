@@ -181,6 +181,27 @@ Measured on the shipped rings:
 | `RailOuterTop` (pipe) | 0.064 | −15.844° | 8.7 mm | +1.26 mm | — |
 | `RailInnerTop` (pipe) | 0.064 | **−33.513°** | 17.7 mm | +6.38 mm | — |
 
+> **AMENDMENT `[supervisor 07-31 · micro-docs batch · source `w3_k4_v1.md` §5.3 / finding K4-F3]`.**
+> ~~compensate `cz` by `(t/2)(1/cos θ − 1)` **and** the tangential origin by `(t/2)·sin θ`~~ —
+> **the two terms above are correct as a *diagnosis* and wrong as a *prescription*: applied
+> together they double-count.** The tangential move slides the sloped plane, which changes its
+> height at the placement azimuth by `−tan θ · ds`, so the compensation over-shoots. Measured on
+> the fascia ring (`t` 0.78, tilt −14.05°) by K4(d): raw defect **+12.03 mm**, and this report's
+> pair over-corrects it to **−23.7 mm** — a bigger error than the one being fixed, and of the
+> opposite sign. Solving both conditions simultaneously,
+>
+> ```
+> z(u) = cz + (t/2)/cosθ + (u − s)·tanθ ,   s = (t/2)·sinθ ,   z(0) = z_top
+>   =>  cz = z_top − (t/2)/cosθ + s·tanθ = z_top − (t/2)·cosθ
+> ```
+>
+> so the z term is **`+(t/2)(1 − cos θ)`**, *not* `−(t/2)(1/cos θ − 1)`. Verified by K4(d): lift
+> **+12.028 mm → 0.000** and tangential offset **+94.68 mm → 0.000**. The tangential term
+> `(t/2)·sin θ` is unchanged; only the z term is re-derived. **Everything else in NF-1 stands** —
+> the defect is real, the measured column below reproduces, and the fix still belongs to K4(d),
+> where it landed at `5ceb76a` (default OFF, GT-6 split proof empty: 31,017 rows, 0 differ).
+> Cross-noted in `Docs/audit_v4/gt_changes_w3.md` §3 GT-6 (`§10 MD-5`).
+
 The fascia's 109 mm tangential shift is **0.95 of one segment pitch** (114.3 mm), so the ring's top
 surface is still continuous — the top face of segment *j* covers the azimuth of segment *j+1*, and
 the span (114.95 mm) just exceeds the pitch (114.31 mm) by 0.64 mm. The ring is therefore *lucky*,
@@ -333,6 +354,13 @@ C0-7 defect is entirely about **reach**, and its inventory has drifted since W1 
    item 3's 20–30 mm nib is authored 16 mm high, the soffit ring stays 13 mm off its own line, and
    the inner rail pipe stays 6.4 mm off the tread line. It is a shared-module defect, so S4 cannot
    fix it from `scene06`.
+   **AMENDMENT `[supervisor 07-31 · micro-docs batch · `w3_k4_v1.md` §5.3 / K4-F3]`** — the
+   instruction stands, **the formula in §3 does not**: ~~compensate `cz` by `(t/2)(1/cos θ − 1)`
+   and the tangential origin by `(t/2)·sin θ`~~ over-corrects a **+12.03 mm** defect to
+   **−23.7 mm** when both terms are applied. The correct z term is **`+(t/2)(1 − cos θ)`** (the
+   tangential term is unchanged); verified lift +12.028 mm → 0.000, tangential +94.68 mm → 0.000.
+   **Landed at `5ceb76a`, default OFF**, with GT-6's split proof empty (31,017 rows / 0 differ).
+   Full derivation at §3 NF-1 above; cross-noted in `gt_changes_w3.md` §3 GT-6 (`§10 MD-5`).
 4. **`spiral_selfcheck` should gain two assertions** beyond the four in §10.5 item 6: (a) no segment
    footprint extends past the ring's a0/a1 rays by more than 5 mm at **any** radius (kills NF-2);
    (b) the fascia top surface is continuous — no azimuth in `[a0, a1]` where the top face of the

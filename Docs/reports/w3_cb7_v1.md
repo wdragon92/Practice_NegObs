@@ -489,3 +489,78 @@ dc68e74..HEAD` over those globs returns nothing), nor any kit, nor any other sce
 landing records filled with the commands actually run and their results. No other row, section or
 figure in that file was touched, and no text was deleted — the file's own §0-3 rule
 (*"record the command, do not guess it"*) and the GT-6 annotate-in-place precedent both apply.
+
+---
+
+## Appendix A · Supervisor rulings on this report's open questions `[07-31, post-Lane-1]`
+
+Appended by the supervisor micro-docs batch (`Docs/audit_v4/gt_changes_w3.md` §10 ·
+`Docs/reports/w3_micro_docs_v1.md`). **Appendix only — no figure, verdict or crop above this line
+was edited.** Both questions were raised by this report itself (§4.2 and §8.2) and both were still
+open at the Lane-1 exit gate (`redteam_lane1.md` §9-5).
+
+### A-1 · S02-Q1 — valance-over-open-vent-band as "side infill" → **ACCEPTED**
+
+**The question** (§4.2): GT-3's word is *"side infill"*; this commit read it as **parapet + guard +
+valance**, closed above eye height and open at hand height (the band 1.08 → 1.75 left deliberately
+open), and offered `canopy.infill_z0` 1.75 → 1.08 plus a non-`glass` panel material as the
+one-parameter alternative if a literally sealed flank was intended.
+
+**Ruling: ACCEPTED as built. The vent-band form is the real Korean underpass canopy form**, and
+that is the doctrine this wave is judged on (*"실제 표본 확인해서 똑같게"*). A 지하보도 entrance
+canopy is a roof on columns with a valance and an open ventilation band at hand height — a sealed
+flank is a different object (a glazed 승강장 enclosure), and building it here would be plausible
+rather than sampled. **The measured glazing rejection stands** and is the second, independent
+reason: §4.2's r1 arm was built, rendered and measured, and the library's `glass` material is an
+**opaque dark constant** `(0.06, 0.09, 0.12)` — correct for a 1.2 × 1.6 m window, catastrophic as a
+9 m × 1.35 m wall. It took `beauty_overview` to **DARK**, `preset_h1.8_d2` to PHOTO **−45.8** mean,
+and — the decisive row — **hid the BS-4 street wall the same commit had just built**, which is the
+opposite of what G2 shows (in G2 the shops read *past* the canopy flanks at eye level). Rejecting an
+arm on measured pixels, keeping the crop
+(`_w3_cb7_crops/cb7_r1_glazing_rejected_beauty.png`) and asking the question instead of quietly
+choosing is the behaviour this ruling is endorsing, not merely permitting.
+
+**Consequences.** `canopy.infill_z0` stays at **1.75**; no panel material is procured; GT-3 needs
+no amendment — its §3 row and §4 landing record already describe the built form, and its class
+(`R-3` only) is unaffected. **S02-Q1 is CLOSED.**
+
+### A-2 · R02-2 — G2's centre-bay escalator → three stair bays → **DECLINED**
+
+**The question** (§8.2): the intake's scene02 item (g) *recommends* declining G2's centre-bay
+escalator and building three stair bays instead. §7's eight rulings never adjudicated it and CB-7's
+brief did not carry it.
+
+**Ruling: DECLINED — do not build three bays.** Two reasons, both of which would have to be
+overturned by the user, not by a lane:
+
+1. **It is not user-ordered.** Ruling 1 of intake §7 reversed GT-3 and named exactly what to build
+   (*"full-length, enclosed, soffit-lit canopy per G2/U-5"*). It did not order a bay re-count, and
+   §7's eight rulings are the closed set. Re-planning the stair from an intake *recommendation*
+   would be a lane inventing scope — the same failure the `RETIRED` vocabulary exists to prevent.
+2. **It re-opens a question that was closed with evidence.** Three bays need bay separators, which
+   is the **mid-rail** question the v8 landing/mid-rail docstring proposal closed by deletion (§6,
+   and spec §1.5's *"DELETE the stale landing docstring proposal"*, itself carrying
+   `era_consistency_survey_v1.md:881`'s **02 landing (L1) = CANCEL**). Reopening a closed,
+   evidence-backed deletion to satisfy an unruled recommendation is the wrong trade.
+
+**Consequences.** scene02 keeps its single stair bay. §8.4's honest list of *what G2 has and 02
+does not* stays exactly as written — the escalator remains on it, now as a **declined** item rather
+than an undecided one. No GT row is created or amended: a bay re-count would have moved walked
+surfaces and drop edges and would have needed a **new FULL** row under §0-1; declining it means
+none is owed. **R02-2 is CLOSED as DECLINED.**
+
+### A-3 · What this appendix did NOT rule
+
+* **S02-Q2** (§5 — whether *"the parapet gets tile cladding + granite coping"* can mean raising the
+  parapet to G2's chest height, which would delete the perimeter guard on a 3.38 m drop) — **still
+  open**, still with the supervisor.
+* **R02-3** (tactile at the stair head, §8.2) — remains blocked by §12 do-not-touch **6** and by
+  **R16-2's EXECUTION HELD** until the scene-renumbering round.
+* **C02-P1** (§8.1, the planter 1.0 m from `beauty_overview`'s eye) — no longer merely *reported*:
+  it is now declared as ledger row **GT-25** (`OPEN`, `planters[0]` → ≈ `(−11.0, −6.2)`, element
+  AABB move, no walked-z, R-3 only, gate = the `beauty_overview` re-render). The fix itself is
+  phase-Code work, not this report's.
+* **GT-1 ramp**, **PLACEMENT**, **LINT-6/LINT-9** (§8.2) — unchanged, still with their named owners.
+* **RT-4** (`redteam_lane1.md` §8): `_w3_cb7_crops/G2_matched_crop.png` is the real-world reference
+  photograph and contains pedestrians. Recorded, not ruled here — if the no-humans rule is meant to
+  bind `Docs/reports/` exhibits, the exhibit is replaced by a pointer into the intake file.

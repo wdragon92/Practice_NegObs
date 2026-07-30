@@ -805,15 +805,14 @@ def main():
         for i, bd in enumerate(PARAMS["benches"]):
             bz = base_of(bd["base"])
             pfx = f"{ROOT}/Bench_{i}"
-            # [v5.1 §3] Fixes the axis-aligned/exact-position look. Bench 0 is by the snow pile and the stair
-            #   shoulder, bench 1 sits next to the snow pile 0 anchor, so the jitter is limited to 0.18
-            #   and does not eat into the existing clearance (0.22 m).
-            _dx, _dy = bc.jit_pos(bd["cx"], bd["cy"], "benchC1", amp=0.18)
-            _yaw = bc.jit_yaw(bd["cx"], bd["cy"], "benchC1", lo=3.0, hi=8.0,
-                              base=bd["yaw"])
-            sc.build_bench(stage, pfx, bd["cx"] + _dx, bd["cy"] + _dy, bz,
+            # [W3 CB-3 · J-3/J-4 abolished, spec §1.2 / §10.1] Was +-0.18 m / +-3~8 deg
+            #   coordinate-hash jitter. Bench 0 stands by the snow pile and the stair shoulder,
+            #   bench 1 next to snow pile 0; each now sits at its nominal centre on its anchor's
+            #   bearing, which RESTORES the 0.22 m clearance the jitter was trimmed to fit inside.
+            #   This is a CB-3 GATE-1 pilot scene.
+            sc.build_bench(stage, pfx, bd["cx"], bd["cy"], bz,
                            M["wood"], length=bs["length"], width=bs["width"],
-                           height=bs["height"], yaw=_yaw)
+                           height=bs["height"], yaw=bd["yaw"])
             # The child prims below are in the build_bench root Xform local frame (rotation inherited)
             back_y = -(bs["width"] / 2.0 - 0.04)
             BOX(f"{pfx}/Back", (0.0, back_y, bs["height"] + bs["back_h"] / 2.0),
@@ -831,11 +830,11 @@ def main():
         for i, ld in enumerate(PARAMS["lamps"]):
             bz = base_of(ld["base"])
             pfx = f"{ROOT}/Lamp_{i}"
-            # [v5.1 §3] Position jitter +-0.15 m. The shadow still falls only on the x<0 terrace
-            #   (shadow direction (−0.879,+0.477), length 8.5 m), so the concealment condition on the
-            #   stair treads is unchanged.
-            _dx, _dy = bc.jit_pos(ld["cx"], ld["cy"], "lampC1", amp=0.15)
-            cx, cy, arm = ld["cx"] + _dx, ld["cy"] + _dy, ld["arm"]
+            # [W3 CB-3 · J-4 abolished] Was +-0.15 m position jitter. The lamp returns to its
+            #   nominal centre; the shadow still falls only on the x<0 terrace (shadow direction
+            #   (−0.879,+0.477), length 8.5 m), so the concealment condition on the stair treads
+            #   is unchanged — the jitter only ever moved it inside that envelope.
+            cx, cy, arm = ld["cx"], ld["cy"], ld["arm"]
             CYL(f"{pfx}/Pole", (cx, cy, bz + lm["pole_h"] / 2.0),
                 lm["pole_r"], lm["pole_h"], M["pole"], col=True)
             # The arm is a horizontal cylinder running +Y/−Y -> rotX 90 deg (axis Z->Y)

@@ -284,16 +284,18 @@ PARAMS = dict(
 
 
 def fence_placements():
-    """[v5.1 §3] 3 movable safety fences - breaks up the even 2.1 m spacing and axis-parallel look.
-    Position +-0.18 m · yaw +-3~8 deg (deterministic from a coordinate hash). Temporary fences on a real
-    site are not lined up exactly. * The 3.9 m clearance from the opening (which stays unguarded) is
-    overwhelmingly larger than the jitter width (0.18), so the 'unguarded opening' feature is unchanged."""
-    out = []
-    for i, fd in enumerate(PARAMS["site"]["fences"]):
-        dx, dy = bc.jit_pos(fd["cx"], fd["cy"], "fenceD2", amp=0.18)
-        yaw = bc.jit_yaw(fd["cx"], fd["cy"], "fenceD2", lo=3.0, hi=8.0)
-        out.append((i, fd["cx"] + dx, fd["cy"] + dy, yaw))
-    return out
+    """3 movable safety fences on the slab-edge bearing.
+
+    [W3 CB-3 · J-3/J-4 abolished, spec §1.2 / §10.1] Was +-0.18 m position and
+    +-3~8 deg yaw jitter, argued from "temporary fences on a real site are not
+    lined up exactly". The ruling's replacement is structural: a fence run
+    takes the bearing of the edge it guards (here the slab edge, bearing 0) and
+    varies by interval against a real cause, never by angle. The 3.9 m
+    clearance to the still-unguarded opening is untouched — the deleted jitter
+    was an order of magnitude smaller than it.
+    """
+    return [(i, fd["cx"], fd["cy"], 0.0)
+            for i, fd in enumerate(PARAMS["site"]["fences"])]
 
 
 def formpanel_xs():

@@ -18,13 +18,18 @@ Contents:
         using it).
   [2] bollard_v51_aabbs — AABB list for verifying the above bollard
       (shadow / burial checks).
-  [3] det_rng / jit_yaw / jit_pos / jit_tint — deterministic jitter seeded by
-      a coordinate hash (v5.1 §3 layout irregularity, §4 material tint
-      jitter). Same coordinate -> always the same value, so the scene does not
-      shift between reruns and re-renders.
+  [3] det_rng / jit_scalar / jit_tint — deterministic variation seeded by a
+      coordinate hash (v5.1 §3, §4 material tint jitter). Same coordinate ->
+      always the same value, so the scene does not shift between reruns and
+      re-renders.
+      **jit_yaw and jit_pos are RETIRED** in W3 CB-3 (J-3 / J-4 abolished,
+      `[ruled 07-30]`, spec §1.2 / §10.1). They still exist, and are inert, so
+      that the last call sites outside this work package keep importing; see
+      `JIT_LEGACY_CALLS` for when they can be deleted outright.
 
 Basis: Docs/surveys/batch1_geophysics_realism_survey.md §4, §6
        Docs/audit_v4/user_feedback_v5_1.md global conventions §2, §3, §4
+       Docs/briefs/w3_execution_spec_v1.md §1.2 · §3.1 C6 · §10.1 (W3)
 
 Coordinates: Z-up, metres. No function needs Isaac (pure computation) — except
 build_* which needs pxr.
@@ -52,6 +57,71 @@ BOLLARD_V51 = dict(
     tactile_width=0.40,   # pad width (lateral)
     spacing=1.5,          # spacing around 1.5 m (upheld by the caller's layout)
 )
+
+# ---------------------------------------------------------------------------
+# [0b] C6 asset flip — **PREPARED, NOT ADOPTED** (spec §1.8 "prepare" posture)
+#
+# Spec §3.1 row C6 flips the bollard to an asset, and §4.2 puts the K2 half of
+# that flip here. Four independent gates say it may not be *switched on* in
+# this window, so what lands is the route and its measurements, with the
+# scene-side value unchanged:
+#
+#   (1) spec §5.3 hard dependency edge — "K4(c) prop templates -> C6 asset swap
+#       in K2". K4(c) is WINDOW 2; K2 is WINDOW 1.
+#   (2) spec §3.1 C6 gate — "an A/B h0.3 crop (asset vs current) before
+#       adoption". No such crop exists; CB-3's own pilots are N3 and C1.
+#   (3) `Docs/audit_v4/gt_changes_w3.md` §0-1 — a change to a hazard/collision
+#       box may not land before its ledger row exists. Swapping the body
+#       changes `build_bollard_v51`'s collider and `bollard_v51_aabbs`, and
+#       there is no GT row for it (the ledger is T5's file, not K2's).
+#   (4) spec §3.1 C6 residual work — "base plate + anchor cover + impact-
+#       absorbing band material" is prop-template work, i.e. K4(c) again. The
+#       raw asset also has **no reflective band**, which 별표2 제7호 requires,
+#       so adopting it today would be a net compliance loss for batch1.
+#
+# Measured through `urban_kit` (usd-core, instance proxies expanded) against
+# 교통약자법 시행규칙 별표2 제7호 (h 0.80–1.00 m, dia 0.10–0.20 m) `[law]`:
+#
+#   bollard_01            dia 139.3 mm · bbox h 1002.8 · zmin −182.6 ·
+#                         **exposed 820.2 mm at grade** · 2,564 tri · PASS
+#   strt_fxd_bollard_05   dia 133.0 mm · bbox h  844.9 · zmin  −53.9 ·
+#                         **exposed 791.0 mm at grade** · 2,628 tri · PASS
+#   strt_fxd_bollard_03   207.1 x 297.4 x 721.3 mm — non-circular and below the
+#                         height floor; the deliberate non-compliance variant
+#
+# **Correction to carry forward.** The procurement note reads both adopted rows
+# as "both in spec". That is true of the bbox and false of the *installed*
+# object: `urban_kit` places these at `z_mode="grade"` (local z = 0 is street
+# grade), so the exposed height is `zmax`, not the bbox height — and
+# `strt_fxd_bollard_05` then stands **791.0 mm, 9.0 mm below the 800 mm
+# statutory floor**. It needs `z_lift_m >= 0.009`, which is what
+# `bollard_asset_lift()` returns. `bollard_01` clears the floor unaided.
+#
+# For reference, the batch1 procedural bollard is dia 120 mm x h 900 mm —
+# already inside the statutory band, unlike `scene_common.build_bollard`
+# (dia 120 x h 750, 6.3 % below the floor, spec §3.1 C6). So this flip buys
+# fidelity, not compliance, and nothing breaks by waiting for its gates.
+# ---------------------------------------------------------------------------
+BOLLARD_STATUTE = dict(h_min=0.80, h_max=1.00, dia_min=0.10, dia_max=0.20)
+
+BOLLARD_ASSET = dict(
+    primary="bollard_01",              # dia 139.3 · exposed 820.2 mm
+    variant="strt_fxd_bollard_05",     # dia 133.0 · exposed 791.0 mm (needs the lift)
+    noncompliant="strt_fxd_bollard_03",  # the measured 부적정 variant, spec §3.1 C6
+)
+
+
+def bollard_asset_lift(asset_id):
+    """Extra z lift, in metres, that brings an asset bollard's **exposed**
+    height up to the 800 mm statutory floor. 0.0 when it already clears.
+
+    Raises `urban_kit.UrbanAssetError` if the id is unusable, so a caller that
+    wires an asset can never end up silently building nothing.
+    """
+    import urban_kit as uk
+    s = uk.spec(asset_id)
+    return max(0.0, float(BOLLARD_STATUTE["h_min"]) - float(s.exposed_h))
+
 
 # Default material colours (used only when the scene passes no mtl)
 _BODY_RGB = (0.78, 0.80, 0.83)      # brushed stainless
@@ -101,10 +171,54 @@ def _norm_front(front_dir):
     return 0.0, (1.0 if fy >= 0.0 else -1.0)
 
 
+def _build_bollard_asset(stage, prefix, cx, cy, base_z, asset_id,
+                         front_dir, tactile, mtl_tactile, spec_over):
+    """[C6, PREPARED — see the §0b block] Asset body + our own tactile pad.
+
+    Kept out of `build_bollard_v51`'s body so the procedural path stays exactly
+    the code it was before CB-3. No call site reaches this yet.
+    """
+    import urban_kit as uk
+    from pxr import UsdGeom
+
+    UsdGeom.Xform.Define(stage, prefix)
+    uk.add_urban_asset(stage, prefix + "/Body", asset_id,
+                       pos_m=(float(cx), float(cy), float(base_z)),
+                       yaw_deg=0.0, z_mode="grade",
+                       z_lift_m=bollard_asset_lift(asset_id),
+                       instanceable=True)
+    out = dict(body=stage.GetPrimAtPath(prefix + "/Body"), band=None, tactile=None)
+    # The reflective band and the base plate / anchor cover are residual
+    # procedural work owned by K4(c) (spec §3.1 C6). They are deliberately NOT
+    # faked here: a band drawn at the procedural radius would not sit on this
+    # body, and shipping the asset without one is a 별표2 제7호 miss that the
+    # adoption gate has to see.
+    if tactile:
+        S = dict(BOLLARD_V51)
+        if spec_over:
+            S.update(spec_over)
+        s = uk.spec(asset_id)
+        r = 0.5 * max(float(s.size_m[0]), float(s.size_m[1]))
+        fx, fy = _norm_front(front_dir)
+        d, w = float(S["tactile_depth"]), float(S["tactile_width"])
+        if fx != 0.0:
+            xs = sorted((cx + fx * r, cx + fx * (r + d)))
+            ys = (cy - w / 2.0, cy + w / 2.0)
+        else:
+            xs = (cx - w / 2.0, cx + w / 2.0)
+            ys = sorted((cy + fy * r, cy + fy * (r + d)))
+        if mtl_tactile is None:
+            mtl_tactile = tactile_mtl(stage, prefix + "/MtlTactile")
+        out["tactile"] = sc.build_tactile(stage, prefix + "/Tactile",
+                                          xs[0], xs[1], ys[0], ys[1],
+                                          mtl_tactile, z=float(base_z))
+    return out
+
+
 def build_bollard_v51(stage, prefix, cx, cy, base_z, yaw_todo_none=None,
                       mtl_body=None, mtl_band=None, mtl_tactile=None,
                       front_dir=(1.0, 0.0), radius=None, height=None,
-                      tactile=True, band=True, spec=None):
+                      tactile=True, band=True, spec=None, asset=None):
     """[v5.1 spec] One functional-furniture bollard.
 
       prefix       : prim group path (/Body, /Band, /Tactile created under it)
@@ -120,10 +234,19 @@ def build_bollard_v51(stage, prefix, cx, cy, base_z, yaw_todo_none=None,
       tactile/band : individual toggles (scenes turn them off when a grazing
                      view risks occlusion)
       spec         : optional dict overriding BOLLARD_V51
+      asset        : **PREPARED, default off.** A `urban_kit` id
+                     (`BOLLARD_ASSET["primary"]` / `["variant"]`) routes the
+                     body to the procured asset instead of the cylinder. Do
+                     not switch it on: the four gates in the §0b block, above,
+                     all have to clear first — chiefly K4(c) and a GT row.
 
     Returns: dict(body=..., band=..., tactile=...) of prims (None if absent).
     """
     from pxr import UsdGeom
+
+    if asset:
+        return _build_bollard_asset(stage, prefix, cx, cy, base_z, asset,
+                                    front_dir, tactile, mtl_tactile, spec)
 
     S = dict(BOLLARD_V51)
     if spec:
@@ -181,17 +304,29 @@ def build_bollard_v51(stage, prefix, cx, cy, base_z, yaw_todo_none=None,
 
 
 def bollard_v51_aabbs(name, cx, cy, base_z=0.0, front_dir=(1.0, 0.0),
-                      radius=None, height=None, tactile=True, spec=None):
+                      radius=None, height=None, tactile=True, spec=None,
+                      asset=None):
     """AABB list for verification -> [(name, xa, xb, ya, yb, z_top), ...].
     Follows the 5-tuple convention that a scene's dressing_aabbs()/dresscheck()
     can consume as-is. The tactile pad uses z_top = base_z + 0.004
-    (effectively flush)."""
+    (effectively flush).
+
+    `asset` mirrors `build_bollard_v51`'s prepared C6 route and must be passed
+    wherever that one is, or the check would measure a body the scene no longer
+    builds — the exact class of registry/geometry divergence spec §1.2 J-7 is
+    about. Default off; see the §0b block."""
     S = dict(BOLLARD_V51)
     if spec:
         S.update(spec)
     r = float(S["radius"] if radius is None else radius)
     h = float(S["height"] if height is None else height)
     rb = r + float(S["band_proud"])
+    if asset:
+        import urban_kit as uk
+        s = uk.spec(asset)
+        r = 0.5 * max(float(s.size_m[0]), float(s.size_m[1]))
+        rb = r
+        h = float(s.exposed_h) + bollard_asset_lift(asset)
     cx, cy, base_z = float(cx), float(cy), float(base_z)
     out = [(name, cx - rb, cx + rb, cy - rb, cy + rb, base_z + h)]
     if tactile:
@@ -229,7 +364,47 @@ def bollard_line(x0, y0, x1, y1, spacing=None, include_end=True):
 #     Seeded by a hash of the coordinates (+ tag) -> rerunning the same scene
 #     any number of times yields identical results. Uses the same hash
 #     constants as build_tree(v2) to keep the style consistent.
+#
+# [W3 · CB-3] **J-3 / J-4 are abolished** (`[ruled 07-30]`, spec §1.2, §10.1
+#   rows 3 and 4). `jit_yaw` and `jit_pos` are now inert: they return the
+#   anchor bearing and (0, 0). `jit_scalar` and `jit_tint` are NOT in the
+#   abolition inventory and are untouched (§10.1 lists only :248 and :256;
+#   `jit_tint` is exempt by spec §12-15).
+#
+#   Why the abolition had to be a **behaviour** flip and not a signature
+#   default flip: every one of C-2's 24 call sites passes its amplitude
+#   explicitly (`amp=0.12 .. 0.22`, `lo=3.0, hi=5.0 / 8.0`) `[measured]`, so
+#   changing `lo`/`hi`/`amp` defaults alone would have changed **nothing** at
+#   any call site. The defaults are flipped to zero as well, so that the
+#   declared default and the actual behaviour agree.
+#
+#   The replacement is structural, not "delete and hope" (spec §10.1): an
+#   object takes the bearing of the thing it belongs to (kerb line, planter
+#   cap face, platform edge) and varies by size, model and interval — never by
+#   angle. For batch1 those bearings are the axis set {0, 90, 180, 270}, which
+#   is what the surviving `base=` argument already carried.
 # ===========================================================================
+JITTER_ABOLISHED = True          # J-3 / J-4, spec §1.2 [ruled 07-30]
+
+# Residual `bc.jit_yaw` / `bc.jit_pos` call sites, counted per process. CB-3
+# removed the 19 sites in the files it owns; the last 5 belong to other work
+# packages (sceneC2 x4 -> S3/CB-2, sceneN5 x1 -> S4). This counter is what
+# tells those owners the shim is still load-bearing — when a full 33-scene
+# assembly reports zero, the two functions can be deleted outright.
+JIT_LEGACY_CALLS = dict(jit_yaw=0, jit_pos=0)
+_JIT_WARNED = set()
+
+
+def _jit_retired(fn, replacement):
+    """Count an inert legacy call and say so once per process."""
+    JIT_LEGACY_CALLS[fn] = JIT_LEGACY_CALLS.get(fn, 0) + 1
+    if fn in _JIT_WARNED:
+        return
+    _JIT_WARNED.add(fn)
+    print("[batch1_common] `%s` is abolished (J-3/J-4, spec §1.2 [ruled 07-30]) "
+          "and now returns %s. Remove the call site." % (fn, replacement))
+
+
 def det_rng(*keys):
     """Build a deterministic random.Random from a list of coordinate/string keys."""
     seed = 0x9E3779B9
@@ -245,21 +420,41 @@ def det_rng(*keys):
     return _random.Random(seed)
 
 
-def jit_yaw(cx, cy, tag="", lo=3.0, hi=8.0, base=0.0):
-    """Yaw jitter (degrees) to break up axis-parallel placement.
-    |delta| in [lo, hi], random sign."""
-    r = det_rng(cx, cy, tag, "yaw")
-    d = r.uniform(lo, hi) * (1.0 if r.random() < 0.5 else -1.0)
-    return float(base) + d
+def jit_yaw(cx, cy, tag="", lo=0.0, hi=0.0, base=0.0):
+    """**RETIRED (J-3, spec §1.2 / §10.1 row 3) — returns `base` unchanged.**
+
+    Was: yaw jitter of |delta| in [lo, hi] degrees with a random sign, to break
+    up axis-parallel placement. The supervisor abolished it on 2026-07-30:
+    decorative angular wobble is not what makes a real Korean streetscape look
+    irregular, and it defeats the alignment the placement linter checks
+    (LINT-7). `lo`, `hi` and `cx`/`cy`/`tag` are accepted and ignored so the
+    last few call sites outside this work package keep importing cleanly.
+
+    `base` is the bearing of the anchor the object belongs to, which is the
+    replacement rule — so returning it is the correct behaviour, not a stub.
+    """
+    _jit_retired("jit_yaw", "the anchor bearing `base`")
+    return float(base)
 
 
-def jit_pos(cx, cy, tag="", amp=0.20):
-    """Positional jitter to break up even spacing.
-    Returns (dx, dy) with |d| <= amp (isotropic)."""
-    r = det_rng(cx, cy, tag, "pos")
-    a = r.uniform(0.0, 2.0 * math.pi)
-    m = amp * math.sqrt(r.uniform(0.15, 1.0))
-    return m * math.cos(a), m * math.sin(a)
+def jit_pos(cx, cy, tag="", amp=0.0):
+    """**RETIRED (J-4, spec §1.2 / §10.1 row 4) — returns (0.0, 0.0).**
+
+    Was: isotropic positional jitter of |d| <= `amp` metres to break up even
+    spacing. Abolished with J-3: spacing irregularity in a real frame comes
+    from a cause (a tree pit, a manhole, a doorway), so it belongs in the
+    scene's own interval table, not in a coordinate hash. `amp` is accepted
+    and ignored.
+
+    Returning zero restores each prop to its nominal PARAMS coordinate. Every
+    batch1 call site sized its amplitude to stay *inside* an existing
+    clearance (sceneC1:809 "does not eat into the existing clearance (0.22 m)",
+    sceneD4:646 "|y| = 7.40 +- 0.12 -> clearance kept", sceneD2:289 "3.9 m
+    clearance ... overwhelmingly larger than the jitter width"), so collapsing
+    the offset to zero can only widen a clearance, never narrow one.
+    """
+    _jit_retired("jit_pos", "(0.0, 0.0)")
+    return 0.0, 0.0
 
 
 def jit_scalar(cx, cy, tag="", lo=-1.0, hi=1.0):

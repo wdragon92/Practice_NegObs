@@ -345,22 +345,23 @@ def build_views():
 #   Excluded (functional repeating rows, so alignment is realistic): stall lines · lane dashes · joints · stop line.
 # ===========================================================================
 def streetlight_placements():
-    """[(name, x, y, yaw), ...] - streetlight position ±0.2 m · arm bearing ±3~8° jitter."""
-    out = []
-    for s in PARAMS["streetlights"]:
-        dx, dy = bc.jit_pos(s["cx"], s["cy"], "slN2", amp=0.20)
-        yaw = bc.jit_yaw(s["cx"], s["cy"], "slN2", lo=3.0, hi=8.0)
-        out.append((s["name"], s["cx"] + dx, s["cy"] + dy, yaw))
-    return out
+    """[(name, x, y, yaw), ...] - streetlights on the kerb bearing.
+
+    [W3 CB-3 · J-3/J-4 abolished, spec §1.2 / §10.1] The +-0.2 m position and
+    +-3~8 deg arm-bearing jitter is deleted: a lamp column stands on the kerb
+    line and its arm reaches over the carriageway it lights.
+    """
+    return [(s["name"], s["cx"], s["cy"], 0.0) for s in PARAMS["streetlights"]]
 
 
 def planter_placements():
-    """[(name, x, y), ...] - street-tree planter position ±0.15 m jitter (kept axis-aligned: the kerb)."""
-    out = []
-    for p in PARAMS["planters"]:
-        dx, dy = bc.jit_pos(p["cx"], p["cy"], "plN2", amp=0.15)
-        out.append((p["name"], p["cx"] + dx, p["cy"] + dy))
-    return out
+    """[(name, x, y), ...] - street-tree planters at their nominal centres.
+
+    [W3 CB-3 · J-4 abolished] The +-0.15 m jitter is deleted; the docstring
+    already conceded the planters are kerb-aligned, so the offset was pure
+    decoration.
+    """
+    return [(p["name"], p["cx"], p["cy"]) for p in PARAMS["planters"]]
 
 
 def bollard_points():

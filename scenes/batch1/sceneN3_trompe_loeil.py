@@ -576,18 +576,16 @@ def build_views():
 #   (2) painting occlusion : do the new solids intrude into the camera-to-painting corridor?
 # ===========================================================================
 def placements():
-    """[v5.1 §3] Deterministic jittered placement. Shared by the builder and the check.
+    """Anchor-bearing placement. Shared by the builder and the check.
+
+    [W3 CB-3 · J-3/J-4 abolished, spec §1.2 / §10.1] Was v5.1 §3 deterministic
+    jitter (+-0.18 m / +-3~8 deg on benches, +-0.15 m on planters). Each bench
+    now takes the bearing of the planter face it belongs to (`b["yaw"]`) and
+    both stand at their nominal PARAMS centres. This is the CB-3 pilot scene:
+    the furniture must read as one line parallel to its anchor.
     Returns (benches[(name,x,y,yaw)], planters[(name,x,y)], bollards[(name,x,y)])."""
-    bl = []
-    for b in PARAMS["benches"]:
-        dx, dy = bc.jit_pos(b["cx"], b["cy"], "benchN3", amp=0.18)
-        yaw = bc.jit_yaw(b["cx"], b["cy"], "benchN3", lo=3.0, hi=8.0,
-                         base=b["yaw"])
-        bl.append((b["name"], b["cx"] + dx, b["cy"] + dy, yaw))
-    pl = []
-    for p in PARAMS["planters"]:
-        dx, dy = bc.jit_pos(p["cx"], p["cy"], "plN3", amp=0.15)
-        pl.append((p["name"], p["cx"] + dx, p["cy"] + dy))
+    bl = [(b["name"], b["cx"], b["cy"], b["yaw"]) for b in PARAMS["benches"]]
+    pl = [(p["name"], p["cx"], p["cy"]) for p in PARAMS["planters"]]
     bo = []
     sp = PARAMS["bollard"]["spacing"]
     for row in PARAMS["bollard_rows"]:

@@ -371,15 +371,15 @@ def bollard_points():
 
 
 def civic_placements():
-    """[v5.1 §3] Position jitter for planters and plaza lamps (breaks exact L/R symmetry)."""
-    pls = []
-    for i, pd in enumerate(PARAMS["planters"]):
-        dx, dy = bc.jit_pos(pd["cx"], pd["cy"], "plC4", amp=0.15)
-        pls.append((i, pd["cx"] + dx, pd["cy"] + dy, pd))
-    lms = []
-    for i, ld in enumerate(PARAMS["plazalamps"]):
-        dx, dy = bc.jit_pos(ld["cx"], ld["cy"], "lmC4", amp=0.18)
-        lms.append((i, ld["cx"] + dx, ld["cy"] + dy, ld))
+    """Planters and plaza lamps at their nominal centres.
+
+    [W3 CB-3 · J-4 abolished, spec §1.2 / §10.1] Was +-0.15 m / +-0.18 m
+    position jitter, justified as "breaks exact L/R symmetry". A symmetric
+    civic plaza IS symmetric; the cure for a cloned row is a real cause for the
+    interval (a tree pit, a manhole, a doorway), not a coordinate hash.
+    """
+    pls = [(i, pd["cx"], pd["cy"], pd) for i, pd in enumerate(PARAMS["planters"])]
+    lms = [(i, ld["cx"], ld["cy"], ld) for i, ld in enumerate(PARAMS["plazalamps"])]
     return pls, lms
 
 

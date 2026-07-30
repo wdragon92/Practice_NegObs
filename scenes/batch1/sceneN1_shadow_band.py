@@ -150,14 +150,14 @@ PARAMS = dict(
               dict(name="D", cx=9.0, cy=15.0, base_z=0.0, tree=True)],
     planter=dict(size=3.0, curb_h=0.45, curb_t=0.25, cap_over=0.05,
                  cap_h=0.05, grass_h=0.40),
-    # benches - all next to an anchor (planter or hedge). yaw and position use the v5.1 §3 deterministic jitter
-    #   (bc.jit_yaw/jit_pos, coordinate hash seed) to remove the axis-parallel, evenly-spaced impression.
+    # benches - all next to an anchor (planter or hedge), and each carries that anchor's bearing.
+    #   [W3 CB-3] the v5.1 §3 `bc.jit_yaw/jit_pos` coordinate-hash jitter is ABOLISHED (spec §1.2).
     benches=[dict(name="A", cx=-6.0, cy=-6.6, yaw=0.0),     # 0.9 m in front of planter A
              dict(name="B", cx=12.0, cy=7.6, yaw=0.0),      # 0.9 m in front of planter B
              dict(name="C", cx=8.0, cy=-7.4, yaw=0.0),      # 0.6 m beside streetlight B
              dict(name="D", cx=17.0, cy=-10.6, yaw=0.0),    # 0.9 m in front of planter C
              dict(name="E", cx=-9.0, cy=10.3, yaw=0.0)],    # 1.2 m in front of hedge A
-    bench_jitter=dict(yaw_lo=3.0, yaw_hi=8.0, pos_amp=0.22),
+    # (`bench_jitter` deleted with the J-3/J-4 abolition — it fed nothing else.)
     # ── bollards [v5.1 §2 · ctx2 relocation] ──────────────────────────────
     #   old: 12 decorative bollards in 2 rows at the plaza edge y=+-9 (spacing 4 m · h0.75 · no reflective
     #   band or dot tactile paving) -> **removed entirely**. Decorative bollard rows are banned (v5.1 §2).
@@ -330,25 +330,24 @@ def build_views():
 #       The builder and the numeric check call the **same function**, so the AABBs always match reality.
 # ===========================================================================
 def bench_placements():
-    """[(name, x, y, yaw), ...] - final placement of the 5 benches after jitter."""
-    j = PARAMS["bench_jitter"]
-    out = []
-    for b in PARAMS["benches"]:
-        dx, dy = bc.jit_pos(b["cx"], b["cy"], "benchN1", amp=j["pos_amp"])
-        yaw = bc.jit_yaw(b["cx"], b["cy"], "benchN1",
-                         lo=j["yaw_lo"], hi=j["yaw_hi"], base=b["yaw"])
-        out.append((b["name"], b["cx"] + dx, b["cy"] + dy, yaw))
-    return out
+    """[(name, x, y, yaw), ...] - the 5 benches on their anchors' bearings.
+
+    [W3 CB-3 · J-3/J-4 abolished, spec §1.2 / §10.1] Each bench sits at its
+    nominal PARAMS coordinate and takes the bearing of the planter or hedge it
+    stands in front of (`b["yaw"]`), which for this plaza is the axis set.
+    Deleting the +-0.22 m / +-3~8 deg coordinate-hash jitter can only widen the
+    clearances the dressing check measures, never narrow them.
+    """
+    return [(b["name"], b["cx"], b["cy"], b["yaw"]) for b in PARAMS["benches"]]
 
 
 def streetlight_placements():
-    """[(name, x, y, yaw), ...] - placement of the 4 streetlights after jitter (arm bearings unaligned)."""
-    out = []
-    for s in PARAMS["streetlights"]:
-        dx, dy = bc.jit_pos(s["cx"], s["cy"], "slN1", amp=0.20)
-        yaw = bc.jit_yaw(s["cx"], s["cy"], "slN1", lo=3.0, hi=8.0)
-        out.append((s["name"], s["cx"] + dx, s["cy"] + dy, yaw))
-    return out
+    """[(name, x, y, yaw), ...] - the 4 streetlights, arms on the plaza axis.
+
+    [W3 CB-3 · J-3/J-4 abolished] A lamp arm points where the carriageway or
+    the walkway it lights runs; it is not a decorative angle. Bearing 0.0.
+    """
+    return [(s["name"], s["cx"], s["cy"], 0.0) for s in PARAMS["streetlights"]]
 
 
 def bollard_entry_points():

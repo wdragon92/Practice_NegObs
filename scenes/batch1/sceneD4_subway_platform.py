@@ -640,17 +640,17 @@ def main():
     def build_dressing(M):
         bn = PARAMS["bench"]
         k = 0
-        # [v5.1 §3] breaks the 12 m even spacing and the perfect axis alignment. These are fixed
-        #   platform seats, so the jitter is **small**: angle within the installation tolerance (3~5 deg), position +-0.12 m
-        #   (the ceiling panels, sleepers and tactile paving are exempt as industrially aligned, so unchanged).
-        #   |y| = 7.40 +- 0.12 -> clearance kept from the edge (|y| 2.0) and the side wall (7.958).
+        # [W3 CB-3 · J-3/J-4 abolished, spec §1.2 / §10.1] Was +-0.12 m position and
+        #   +-3~5 deg yaw jitter "within the installation tolerance". A platform gang seat is
+        #   bolted to a set-out line off the platform edge, so its bearing IS the edge bearing
+        #   (0 deg) and its offset is the set-out dimension: |y| = 7.40 exactly, restoring the
+        #   full clearance to the edge (|y| 2.0) and the side wall (7.958). The ceiling panels,
+        #   sleepers and tactile paving were already exempt as industrially aligned.
         for ys, xs in ((bn["ys"][0], bn["xs_near"]), (bn["ys"][1], bn["xs_far"])):
             for x in xs:
-                dx, dy = bc.jit_pos(x, ys, "benchD4", amp=0.12)
-                yaw = bc.jit_yaw(x, ys, "benchD4", lo=3.0, hi=5.0)
-                sc.build_bench(stage, f"{ROOT}/Bench_{k}", x + dx, ys + dy,
+                sc.build_bench(stage, f"{ROOT}/Bench_{k}", x, ys,
                                HA["z_walk"], M["bench"], length=bn["length"],
-                               width=bn["width"], height=bn["height"], yaw=yaw)
+                               width=bn["width"], height=bn["height"], yaw=0.0)
                 k += 1
         tm = PARAMS["trim"]
         dr = PARAMS["door"]

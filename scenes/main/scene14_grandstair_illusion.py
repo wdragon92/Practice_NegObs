@@ -240,27 +240,44 @@ PARAMS = dict(
     #  a GT event this wave is not authorised for (class A, `w3_intake_v2_images.md` §2
     #  scene14 (f)). Recorded as an open item rather than smuggled in.
     #
-    #  **Two tiers, on purpose.** B/C/F at 34–44 m keep their architecture: at that range
-    #  a facade is what makes the plaza read as a plaza, and `building_kit`'s own tier
-    #  ladder (`mid` = one window band per floor, no attachments) is the right amount of
-    #  it. D/E at 58 m become `kind="backdrop"` silhouettes — 3 prims, **0 windows** —
-    #  because at 58 m a window grid is prims spent off-subject and reads as the "facade
-    #  billboard" the realism audit named (the S01 precedent).
-    #  (tag, x0, x1, y0, y1, h, floors, axis, kind)
+    #  **The builder stays `sc.build_building`, and that is a decision taken on pixels,
+    #  not a decision skipped.** The `building_kit` route was written, rendered and
+    #  rejected: `bk.build_korean_building(eyes=bk.judged_eyes(0.0))` puts B at
+    #  `d_true` 44 m, which is the kit's **`far`** tier, and `far` is defined as *"windows
+    #  become one horizontal band per floor, no attachments"*. In `terrace_read` — the
+    #  illusion cut, where the backdrop owns the upper half of the frame — that turned a
+    #  five-storey block with a window rhythm into a **blank slab with two ribbon
+    #  bands**, i.e. a *worse* frame than the closed one the directive is trying to
+    #  open. Both rounds exist (`260731_w3_l14_bk` and this one) and the crop is in the
+    #  report. The tier ladder is right for a scene whose backdrop is 60–120 m away
+    #  (scene01's is); it is wrong for a ring at 34–58 m, and arguing the kit out of it
+    #  belongs in a lane that can iterate the tier — recorded as an open item, with the
+    #  measurement, instead of shipped because it was the fashionable route.
+    #  **What BS-4 actually asked for is delivered: sky above every roofline.** The kit
+    #  is kept as the *measuring instrument* — `bk.plan_building(eyes=…)` supplies
+    #  `d_true` and `z_ceil` — and the ridge is `sc.build_building`'s own, which is
+    #  `base_z + h + 3.28` **derived from the builder, not guessed**: `Penthouse` sits at
+    #  `base + h + 0.5 + 2.6/2` (height 2.6), `PenthouseCap` centres at
+    #  `base + h + 0.5 + 2.6 + 0.09` with half-thickness 0.09, so the highest emitted
+    #  prim is `base + h + 3.28`; the statutory 1.20 m rooftop parapet (건축법 시행령
+    #  제40조) is lower and never wins. Guessing this number is the S01-F1 defect, which
+    #  shipped a wall through the top of frame while printing "sky 6/6".
+    #  Heights are solved from `h < z_ceil − base_z − 3.28`, per block, at its own d_true.
     buildings=dict(
-        B=dict(x0=42.0, x1=48.0, y0=-14.0, y1=14.0, h=9.0, floors=3,
+        B=dict(x0=42.0, x1=48.0, y0=-14.0, y1=14.0, h=8.9, floors=3,
                axis="x", facade_x=42.0, face_dir=-1.0, base_z=-6.0),
         C=dict(x0=30.0, x1=40.0, y0=13.0, y1=19.0, h=7.5, floors=2,
                axis="y", facade_y=13.0, face_dir=-1.0, base_z=-6.0),
         F=dict(x0=30.0, x1=40.0, y0=-19.0, y1=-13.0, h=7.2, floors=2,
                axis="y", facade_y=-13.0, face_dir=1.0, base_z=-6.0),
-        D=dict(x0=56.0, x1=70.0, y0=-19.0, y1=-6.0, h=11.2, floors=4,
-               axis="x", facade_x=56.0, face_dir=-1.0, base_z=-6.0,
-               kind="backdrop"),
-        E=dict(x0=56.0, x1=70.0, y0=4.0, y1=19.0, h=11.2, floors=4,
-               axis="x", facade_x=56.0, face_dir=-1.0, base_z=-6.0,
-               kind="backdrop"),
+        D=dict(x0=56.0, x1=70.0, y0=-19.0, y1=-6.0, h=10.9, floors=4,
+               axis="x", facade_x=56.0, face_dir=-1.0, base_z=-6.0),
+        E=dict(x0=56.0, x1=70.0, y0=4.0, y1=19.0, h=10.9, floors=4,
+               axis="x", facade_x=56.0, face_dir=-1.0, base_z=-6.0),
     ),
+    window=dict(w=1.2, h=1.6, inset=0.15, col_step=2.5, margin=2.0),
+    # [W3 L14] highest prim of `sc.build_building` above `base_z + h` — see above.
+    sc_roof_extra=3.28,
     # --- Context dressing (instant read as a monumental plaza) - all combinations of existing builders, owned by cue_scene_dressing ---
     dressing=dict(
         # lower grand plaza (z −6.0)
@@ -691,11 +708,14 @@ def _backdrop_selfcheck():
         _chk("⑮ BS-4 지붕선 위 하늘", False, f"building_kit 사용 불가: {e}")
         return
     over, rows = [], []
+    extra = float(PARAMS["sc_roof_extra"])
     for key in sorted(PARAMS["buildings"]):
-        p = bk.plan_building(dict(PARAMS["buildings"][key]), eyes=eyes)
-        sky = (p.z_ceil is None) or (p.ridge < p.z_ceil)
-        rows.append(f"{key}:{p.kind}/{p.tier} ridge {p.ridge:.2f} < "
-                    f"ceil {p.z_ceil:.2f} ({p.z_ceil - p.ridge:+.2f})")
+        bd = PARAMS["buildings"][key]
+        p = bk.plan_building(dict(bd), eyes=eyes)
+        ridge = float(bd["base_z"]) + float(bd["h"]) + extra
+        sky = (p.z_ceil is None) or (ridge < p.z_ceil)
+        rows.append(f"{key}:d{p.d_true:.1f} ridge {ridge:.2f} < "
+                    f"ceil {p.z_ceil:.2f} ({p.z_ceil - ridge:+.2f})")
         if not sky:
             over.append(key)
     _chk("⑮ BS-4 — 5개 동 모두 지붕선 위에 하늘 (ridge < z_ceil)",
@@ -1159,11 +1179,19 @@ def main():
             y_in = max(hw - lap, 0.0)              # bite lap under the stair
             top = z - off
             for tag, y0, y1 in (("N", y_in, yb), ("S", -yb, -y_in)):
+                # [W3 L14] The shoulder is the flight's own stone, not the terrace's.
+                #   It was `marble`, which matched when the flight was marble too. Once
+                #   the flight went to G1's grey granite the shoulder became a warm
+                #   cream stripe running the whole 20.8 m down both flanks of a grey
+                #   flight — visible in the first pilot's `beauty_overview` crop, and
+                #   not a thing any stair is built from: the apron beside a granite
+                #   flight is the same product laid flat. Binding only; the shoulder's
+                #   geometry (tread − 0.030, per step) is byte-unchanged.
                 BOX(f"{ROOT}/Shoulder_{kind}{k}_{tag}",
                     ((xa + xb) / 2.0, (y0 + y1) / 2.0,
                      (top + st["base_z"]) / 2.0),
                     (xb - xa, y1 - y0, top - st["base_z"]),
-                    M["marble"], col=True)
+                    M["granite_light"], col=True)
 
     def build_side_slopes(M):
         """Sloped grass banks either side of the stair (director D-14 r3(2)): from outside the shoulder
@@ -1550,56 +1578,43 @@ def main():
         build_backdrop(M)               # [W3 L14 · BS-4] see PARAMS["buildings"]
 
     def build_backdrop(M):
-        """[W3 L14 · BS-4] The five distant blocks, through `building_kit`.
+        """[W3 L14 · BS-4] The five distant blocks — lowered until sky shows over each.
 
-        Replaces the `sc.build_building` loop, whose contract is *shell + a uniform
-        window grid + a parapet band* at any distance — the "facade billboard" the
-        realism audit named, and the reason `terrace_read` read as an architectural
-        elevation rather than as a plaza. `bk.build_korean_building` derives the LOD
-        tier from `d_true` against the **real judged eye set** (`bk.judged_eyes(0.0)`
-        mirrors `sc.grid_views(0.0)`, which is this scene's preset grid), so the near
-        ring keeps articulation and the far pair does not pay for windows nobody
-        resolves.
+        The builder is unchanged (`sc.build_building`); what changed is that the heights
+        are no longer free. `bk.plan_building(eyes=bk.judged_eyes(0.0))` supplies
+        `d_true` — the shortest distance from the **real judged eye set** to the facade
+        rectangle (B-F3), instead of `|facade plane|`, which assumes the camera sits at
+        the origin — and `z_ceil = frame_ceiling(d_true)`, the world z the top edge of a
+        judged frame reaches at that distance. The ridge is this builder's own
+        `base_z + h + 3.28` (derived in `PARAMS["buildings"]`, not guessed). The
+        acceptance condition for *"환경을 트인 느낌으로"* is therefore a number, printed
+        per block and asserted pre-boot in check ⑮: **ridge < z_ceil on 5/5**.
 
-        The acceptance condition for the intake's *"push the backdrop back, expose
-        sky"* is a **number, checked here, not asserted in a comment**: for every
-        block `p.ridge < p.z_ceil`, i.e. the roofline sits under the top of frame at
-        the worst judged eye, so there is sky above it. `p.ridge` is the kit's own
-        field (K-micro item 6, landed for exactly this caller); before it existed the
-        caller had to guess `roof_allow` and scene01 shipped a wall through the top of
-        frame while printing "sky 6/6". This scene never had that bug and will not get
-        it, because the number it compares is the one the builder emits.
-
-        `parapet=` is bound to the **shell** material, not `M["parapet"]`: at 34–58 m a
-        0.62-grey capping band on a darker mass reads as a lit strip along the roofline
-        (the S01 pilot measured it as a white lid). A distant block has no cap.
+        See `PARAMS["buildings"]` for why the `building_kit` `kind=`/tier route was
+        rendered and then rejected rather than shipped.
         """
         eyes = bk.judged_eyes(0.0)
-        kit = fk.Kit(sc.add_box, sc.add_cylinder,
-                     getattr(sc, "_oriented_box", None))
-        n_tot, over, wins = 0, [], 0
+        extra = float(PARAMS["sc_roof_extra"])
+        n_tot, over = 0, []
         for key in sorted(PARAMS["buildings"]):
-            bd = dict(PARAMS["buildings"][key])
-            p = bk.plan_building(bd, eyes=eyes)
-            prims = bk.build_korean_building(
-                kit, stage, f"{ROOT}/Building_{key}", bd,
-                bk.Mtls(M["bldg"], glass=M["glass"], parapet=M["bldg"]),
-                plan=p)
+            bd = PARAMS["buildings"][key]
+            p = bk.plan_building(dict(bd), eyes=eyes)
+            prims = sc.build_building(stage, f"{ROOT}/Building_{key}", bd,
+                                      M["bldg"], M["glass"], M["parapet"],
+                                      window=PARAMS["window"])
             n_tot += len(prims)
-            wins += sum(1 for q in prims
-                        if "Win" in str(q.GetPath()).split("/")[-1])
-            sky = (p.z_ceil is None) or (p.ridge < p.z_ceil)
+            ridge = float(bd["base_z"]) + float(bd["h"]) + extra
+            sky = (p.z_ceil is None) or (ridge < p.z_ceil)
             if not sky:
-                over.append((key, round(p.ridge, 2), round(p.z_ceil, 2)))
+                over.append((key, round(ridge, 2), round(p.z_ceil, 2)))
             print(f"[backdrop] {key} shell h {bd['h']:5.2f} · top_z "
-                  f"{p.top_z:6.2f} · ridge {p.ridge:6.2f} · kind {p.kind:9s} / "
-                  f"tier {p.tier:8s} · d_true {p.d_true:6.2f} m · in_frame "
-                  f"{str(p.in_frame):5s} · z_ceil "
+                  f"{bd['base_z'] + bd['h']:6.2f} · ridge {ridge:6.2f} · d_true "
+                  f"{p.d_true:6.2f} m · in_frame {str(p.in_frame):5s} · z_ceil "
                   f"{('%6.2f' % p.z_ceil) if p.z_ceil is not None else '   n/a'} · "
-                  f"여유 {(p.z_ceil - p.ridge):+5.2f} · 하늘 {str(sky):5s} · "
+                  f"여유 {(p.z_ceil - ridge):+5.2f} · 하늘 {str(sky):5s} · "
                   f"프림 {len(prims)}")
         nb = len(PARAMS["buildings"])
-        print(f"[backdrop] {nb}동 {n_tot} 프림 · 창 {wins} · 지붕선 위 하늘 "
+        print(f"[backdrop] {nb}동 {n_tot} 프림 · 지붕선 위 하늘 "
               f"{nb - len(over)}/{nb}" + (f" · 초과 {over}" if over else ""))
         return n_tot, over
 

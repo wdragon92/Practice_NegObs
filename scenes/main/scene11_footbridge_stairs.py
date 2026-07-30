@@ -3,54 +3,85 @@
 scene11_footbridge_stairs.py - NegObs synthetic scene 11: steel stairs of a
 pedestrian overpass (Isaac Sim 4.5) · new in v5 (old scene11_grating_fireescape → scenes/archive_v3/)
 
-Type    : R6 steel footbridge stairs over 6 lanes (inherits the open-riser ·
-          grating see-through axis)
+Type    : R6 steel footbridge, **H-plan** (S11-H) over 6 lanes (inherits the
+          open-riser · grating see-through axis)
 Spec    : Docs/briefs/multi_scene_brief_v5.md §R6 + the shared-layer section
+Law     : Docs/surveys/w3_intake_06_10.md **§S · S11-H** ("한국 육교는 H형이야")
+          + Docs/surveys/w3_intake_v2_images.md §2 scene11 **R11-1 / R11-2**
+          + §3 S06-B (curb legibility) · §7 R16-2 (stair-cue-first)
+Image   : Docs/reference_photos/"Generated Image - Scene11.jpg" (**G11**) — season
+          **summer** (full leaf, cumulus sky), beige-tan painted steel throughout.
 Shared  : scene_common.py (build_open_riser_stairs / build_rot_group /
-          build_railing_line / build_canopy / build_sign / build_tactile)
+          build_railing_line / build_canopy / build_sign / build_tactile) ·
+          infra_kit.build_curb_line (S06-B) · props_kit RF-1 / RF-5 / G13
 World   : shares the footbridge convention with scene06_overpass_spiral.py
           (roadway asphalt 0.045 · kerb 0.15 · sidewalk paving_interlock · streetlights)
+          — **but not its stair identity**: 06 = spiral tower, 11 = H-form +
+          grating see-through (§S differentiation, user: "양쪽으로 다르게 읽힐 수 있잖아").
+
+────────────────────────────────────────────────────────────────────────────
+S11-H — why the plan was rebuilt (the I-plan is gone)
+  The old build ran both stair sets **inline with the deck axis** (x 15…30.88 and
+  its mirror), so the structure sprawled 62 m along the bridge direction. The user
+  rejected exactly that: *"육교가 너무 양쪽으로 뻗어있어. 한국 육교는 H형이야"*.
+  A Korean 육교 is an **H in plan**: the stair towers run **parallel to the
+  carriageway** on each sidewalk, and the deck crosses between them.
+  **R11-1** refines it from G11: the H is **asymmetric** — one straight leg and one
+  switchback leg — which is what the photograph shows, not a symmetric double
+  switchback.
+    · **west tower = STRAIGHT leg** (flight A → mid landing → flight B, all +Y),
+      hugging the west sidewalk at x −15.00…−13.20, y −1.20…17.08.
+    · **east tower = SWITCHBACK leg** (flight A −Y → mid landing → flight B back
+      +Y on the neighbouring lane), hugging the east sidewalk at
+      x 13.20…16.90, y −10.04…1.20.
+  Both towers are authored in a canonical local frame (descent toward local +X) and
+  placed by `build_rot_group`, exactly the device the old west mirror already used.
 
 ────────────────────────────────────────────────────────────────────────────
 Hazard (= the reality of falling short of the code)
-  A footbridge crossing 6 lanes. From the deck (z=+5.5) two east steel flights
-  (22 steps × 2, with a mid landing) descend to the sidewalk. The treads are
-  grating (3 slits) - with no riser **you see straight through to below**, and in
-  noon light the slit shadows lay stripes on the road that erase the nosing edge.
-  Main defect - **the outer railing on the east mid landing (z=2.75) has no
-  kickplate below it.** At robot eye height (h0.3) the railing bars pass above the
-  field of view and the whole 0~0.35 m band below is open, so the 2.755 m drop
-  past the landing reads as "the floor continues".
-  The west mid landing has the same geometry but **does** have a kickplate, making
-  it the code-compliant control (same geometry × fitting present/absent = a
-  contrast pair for cue learning).
-  Third - the sides of the deck and the upper stair drop 5.65 m to the road
-  surface (−0.15), and the noise panels block the view, erasing the depth cue of
-  the drop (the floor texture).
+  ① **Deck-end / tower-head drop.** A robot crossing the deck (+X) meets the east
+  head landing's outer edge at x = 15.00: beyond it is a **5.505 m** fall to the
+  sidewalk (−0.005). At h0.3 the balustrade's lower band is open, so the far
+  sidewalk and roadway show through and the floor reads as continuous. This is the
+  drop the h0.3 preset grid frames head-on (grid origin unchanged at 15.00/0/5.50).
+  ② **The east mid landing (z = 2.75) has no kickplate.** At h0.3 the railing bars
+  pass above the field of view and the 0~0.35 m band below is open, so the 2.755 m
+  drop past the landing reads as "the floor continues". The **west** mid landing
+  carries the kickplate on the matched edge class — the code-compliant control.
+  **Honest limitation of R11-1**: the asymmetric H means the two mid landings are
+  no longer *identical* boxes (east 1.80 × 3.70, west 1.80 × 1.80). The control
+  pair is therefore held on the **matched edge class** — each landing's 1.80 m
+  transverse side edge, same 2.755 m drop, same 1.10 m railing — and not on the
+  whole landing. Stated rather than implied; see Docs/reports/w3_s11_v1.md §3.
+  ③ **Grating see-through.** Treads are grating (3 slits) — with no riser you see
+  straight through to below, and in noon light the slit shadows stripe the sidewalk
+  and erase the nosing edge.
 
-GT drop invariance: the cue_* toggles only switch railing · panel · kickplate ·
-  tactile · sign prims on and off. The transforms of the deck · landings · stairs
-  (riser 0.125 / tread 0.32 / 22 steps × 2) never change.
+GT drop invariance: the cue_* toggles only switch railing · kickplate · tactile ·
+  sign prims on and off. The transforms of the deck · landings · stairs
+  (riser 0.125 / tread 0.32 / 22 steps × 2 per tower) never change with a cue flag.
 
 ────────────────────────────────────────────────────────────────────────────
-Walking-continuity self-check table (west sidewalk → up → deck → down → east sidewalk)
+Walking-continuity self-check table (west foot → up → deck → down → east foot)
 
-  #  section                  coordinates (world, m)                 step
-  ─  ───────────────────────  ─────────────────────────────────────  ──────
-  1  W sidewalk approach      (x −45…−30.88, y ±0.9, z −0.005)       —
-  2  W flight B 22 steps up   x −30.88…−23.84, z 0.000 → 2.750       0.125/step
-  3  W mid landing            x −23.84…−22.04, z 2.750 (kickplate Y) 0.000
-  4  W flight A 22 steps up   x −22.04…−15.00, z 2.750 → 5.500       0.125/step
-  5  W top landing            x −15.00…−13.20, z 5.500               0.000
-  6  deck run                 x −13.20…13.20, y −1.2…1.2, z 5.500    —
+  #  section                        coordinates (world, m)                step
+  ─  ─────────────────────────────  ────────────────────────────────────  ──────
+  1  W sidewalk approach            (x −15.0…−13.2, y ≥ 17.08, z −0.005)  —
+  2  W flight B 22 steps up  (−Y)   y 17.08…10.04, z 0.000 → 2.750        0.125/step
+  3  W mid landing (kickplate Y)    y 10.04…8.24,  z 2.750                0.000
+  4  W flight A 22 steps up  (−Y)   y 8.24…1.20,   z 2.750 → 5.500        0.125/step
+  5  W head landing → deck          x −15.00…−13.20, y ±1.20, z 5.500     0.000
+  6  deck run (+X)                  x −13.20…13.20, y ±1.20, z 5.500      —
      (clearance over the roadway x −10.5…10.5 = 5.10 −(−0.15) = 5.25 m)
-  7  E top landing            x 13.20…15.00, z 5.500                 0.000
-  8  E flight A 22 steps down x 15.00…22.04, z 5.500 → 2.750         0.125/step
-  9  E mid landing            x 22.04…23.84, z 2.750 (kickplate N)   0.000
- 10  E flight B 22 steps down x 23.84…30.88, z 2.750 → 0.000         0.125/step
- 11  E sidewalk exit          (x 30.88…45, y ±0.9, z −0.005)         0.005
+  7  E head landing                 x 13.20…15.00, y ±1.20, z 5.500       0.000
+  8  E flight A 22 steps down (−Y)  y −1.20…−8.24, z 5.500 → 2.750        0.125/step
+  9  E mid landing (kickplate N)    y −8.24…−10.04, z 2.750               0.000
+ 10  E flight B 22 steps down (+Y)  y −10.04…−1.20 (lane x 15.10…16.90),
+                                    z 2.750 → 0.000                       0.125/step
+ 11  E sidewalk exit                (x 15.10…16.90, y ≥ −1.20, z −0.005)  0.005
 
-  total rise = total fall = 5.500 m (= 44 × 0.125). Step at the joints ≤ 0.005 m.
+  total rise = total fall = 5.500 m (= 44 × 0.125) — **invariant, unchanged by the
+  H rebuild** (the crossing height z 5.50 did not move). Joint step ≤ 0.005 m.
   slope = atan(0.125/0.32) = 21.34° - a gentle footbridge stair (2R+T = 0.570).
 
 ────────────────────────────────────────────────────────────────────────────
@@ -58,13 +89,14 @@ Walking-continuity self-check table (west sidewalk → up → deck → down → 
   above-ground structures). Sidewalk/roadway slabs may be laid as continuous boxes
   without breaching §A-3.
 
-Camera axis note: brief R6 called for a "sidewalk approach grid", but grid_views
-  follows the convention of **putting the drop boundary head-on in frame**
-  (eye_x = origin −d), so taken as a ground-level approach the robot would face
-  the ascending stair and the drop GT would leave the frame.
-  → the grid is therefore taken on the **deck run axis (+X, origin = the east
-  stair drop start x=15.0, z 5.5)**, and the sidewalk approach the brief asked for
-  is provided as the mise-en-scene cut `sidewalk_approach`.
+Camera axis note: the grid keeps the **deck run axis (+X)** and the origin
+  **(15.00, 0, 5.50)** it already had — under the H-plan that point is the east
+  head landing's outer edge, i.e. the drop a deck-travelling robot meets head-on.
+  The approach corridor (d = 2/5/10 m behind it) is the deck itself, so no preset
+  eye floats off the structure and **no judge preset had to be edited** to make the
+  H-plan legible (the scene17 R17-1 principle: legibility comes from geometry).
+  The stair head, which under the H-plan lies 1.20 m off that axis, is carried by
+  the dedicated `stair_head` mise-en-scene cut.
   (Judging priority 1 = does hazard concealment hold at the robot's h0.3 - brief
   v5 shared layer 4)
 
@@ -90,6 +122,8 @@ import numpy as np
 
 import scene_common as sc
 import ground_kit as gk
+import infra_kit as ik
+import props_kit as pk
 
 
 # ===========================================================================
@@ -116,17 +150,30 @@ PARAMS = dict(
     #   slits 3 : the tread is cut into 4 pieces with three 0.02 m gaps - see-through below, grid shadows.
     stair=dict(riser=0.125, tread=0.32, n=22, y0=-0.90, y1=0.90,
                tread_t=0.045, gap=0.025, slits=3),
-    # --- east (main hazard side) stair layout ---
-    #   top landing -> flight A -> mid landing -> flight B -> sidewalk
-    #   the landings (top and mid) are steel-deck boxes as thick as the bridge deck (deck.thick 0.40).
-    #   kickplate=False is this scene's main defect (brief R6).
-    east=dict(pad_x0=13.20, pad_x1=15.00, a_x0=15.00,
-              mid_len=1.80, z_top=5.50, pad_y0=-1.20, pad_y1=1.20,
-              kick_h=0.14, kickplate=False),
-    # --- west (code-compliant control) - mirrored with rot_group 180 deg ---
-    #   pivot (−7.5, 0) · 180 deg : local (x,y) -> world (−15 − x, −y).
-    #   local x 0 -> world −15.00 (top landing west end), local x 15.88 -> world −30.88 (foot).
-    west=dict(pivot=(-7.5, 0.0), rot=180.0, kickplate=True),
+    # --- H-plan tower geometry (S11-H · R11-1) ------------------------------
+    #   Both towers are authored in a **canonical local frame** whose +X is the
+    #   direction of descent and whose local Y is the flight width, then placed by
+    #   `build_rot_group` so that +X lands on the carriageway axis (±Y in world).
+    #   `head` = depth of the head landing along the travel axis (= deck width, so
+    #   the 90° turn off the deck has a full flight-width square to turn in);
+    #   `mid` = depth of the mid landing; `lane_gap` = the gap between the two
+    #   parallel lanes of the switchback leg.
+    tower=dict(width=1.80, head=2.40, mid=1.80, lane_gap=0.10,
+               z_top=5.50, pad_t=0.40, kick_h=0.14,
+               col_r=0.13, col_inset=0.34, col_z_bot=-0.30),
+    # --- east tower = SWITCHBACK leg, the hazard side (kickplate ABSENT) -----
+    #   pivot = the mid-point of the stair-head line, rot −90° :
+    #     local (px+a, py+b) -> world (px + b, py − a)
+    #   so local +X (descent) maps to world −Y and the leg runs parallel to the
+    #   carriageway on the east sidewalk. Footprint x 13.20…16.90, y −10.04…1.20.
+    east=dict(pivot=(14.10, -1.20), rot=-90.0, kind="switchback",
+              kickplate=False),
+    # --- west tower = STRAIGHT leg, the code-compliant control (kickplate ON) -
+    #   rot +90° : local (px+a, py+b) -> world (px − b, py + a).
+    #   Footprint x −15.00…−13.20, y −1.20…17.08 — one narrow straight leg hugging
+    #   the road edge, which is what G11's left tower is.
+    west=dict(pivot=(-14.10, 1.20), rot=90.0, kind="straight",
+              kickplate=True),
     # --- footbridge deck (width 2.4, runs along x) ---
     deck=dict(x0=-13.20, x1=13.20, y0=-1.20, y1=1.20, z_top=5.50, thick=0.40,
               panel_h=1.80, panel_t=0.07, rail_z=1.95, rail_r=0.035),
@@ -139,9 +186,18 @@ PARAMS = dict(
     #   and sight purpose is identical, and it matches real Korean footbridge practice (partial noise panels).
     #   post_h 1.98 = top rail centre rail_z 1.95 + pipe radius 0.035 -> the post
     #   **carries** the rail (so the rail does not float as in the old build).
+    #   [W3 S11 · G11] The noise panels are **deleted**. G11 shows a Korean arterial
+    #   footbridge whose deck balustrade is a **uniform vertical-baluster guard** for its
+    #   whole length — no acoustic infill anywhere on the span — and the v6 "bunker
+    #   corridor / pure-black shadow side" finding was a symptom of the panels, not of the
+    #   bay rhythm. Every bay is now an open baluster bay, and the baluster pitch is put on
+    #   the statutory 안목: `baluster_gap` 0.100 m clear (도로안전시설 지침, the same value
+    #   `scene_common.BALUSTER_CLEAR_MAX` gates on `build_railing_line`). The old local loop
+    #   ran 6 balusters per 2.05 m bay = **0.32 m clear**, i.e. 3.2× the statute, and it was
+    #   invisible to the K4(a) gate because it is scene-local geometry, not a kit call.
     rail_bay=dict(post_t=0.10, post_h=1.98, n_bay=12, joint=0.05,
                   kick_h=0.16, cap_h=0.07, cap_over=0.03,
-                  baluster_r=0.018, n_baluster=6),
+                  baluster_r=0.009, baluster_gap=0.100),
     #   support piers - they land on the sidewalk outside the kerb (x +-10.5…11.1). Up to the deck soffit.
     deck_posts=dict(xs=(-11.80, 11.80), y=0.0, r=0.40, z_bot=-0.30,
                     cap_sx=1.0, cap_sy=2.8, cap_h=0.36),
@@ -157,7 +213,27 @@ PARAMS = dict(
     #   row + a distant tree band form the boundary.
     walk=dict(y0=-60.0, y1=60.0, xw0=-40.0, xw1=-10.50, xe0=10.50, xe1=40.0,
               z_top=-0.005, thick=0.50),
-    curb=dict(w=0.60, z_top=0.0, thick=0.40),
+    # --- 보차도 경계석 (S06-B) : `infra_kit.build_curb_line`, NOT a 120 m box -----
+    #   The audit's finding for 06/11 was never "add a curb" — the 150 mm exposure was
+    #   already right. It was three legibility defects, and all three are closed here:
+    #     B-1 material : `granite_dark` ("reads as a black hole", scene01:235) → a light
+    #                    granite role (`plaza_light`), per S06-B 3.'s `curb_granite_light`.
+    #     B-2 monolith : one 120 m box → **1 m unit blocks** with a 6 mm joint gap and the
+    #                    R = 10 mm top arris (`arris="look"`, MOLIT directive 321 fig 2.17,
+    #                    carried by `LOOK_CLASS["curb"].bevel`; the material prim is named
+    #                    `.../Looks/Curb` so `_look_spec` classes it correctly).
+    #     B-3 no gutter: `build_gutter_L` is chained by `gutter=True`, so the section is
+    #                    asphalt → L-gutter → curb → sidewalk block, as infra_kit:409 says
+    #                    the real Korean section is.
+    #   `lod_span` keeps the 1 m rhythm only inside the judged window (world y −22…+24,
+    #   which covers both stair feet and every mise-en-scene cut) and coarsens to 8 m
+    #   blocks outside it — 1.08 prims/m is unaffordable over 120 m and buys nothing at
+    #   40 m distance.
+    #   **GT**: `gt_drop = height + gutter drop_at_curb = 0.150 + 0.018 = 0.168 m`, a
+    #   continuous linear step along both carriageway edges. Sub-threshold (< 0.30 m), so
+    #   it is a step, **not** a negative-obstacle drop — declared as such in the ledger row.
+    curb=dict(z_road=-0.150, height=0.150, width=0.20, unit=1.0,
+              y0=-60.0, y1=60.0, lod=(38.0, 84.0), far_unit=8.0),
     # --- planting strip (outer sidewalk boundary) : granite kerbstones + groundcover top ---
     verge=dict(w=2.40, curb_t=0.20, curb_top=0.14, soil_top=0.10,
                y0=-60.0, y1=60.0),
@@ -175,7 +251,15 @@ PARAMS = dict(
     #  it on **this** scene path, so no `gk` tactile op is emitted. The
     #  non-conforming variant assigned to scene11 is "bearing off by 15 deg"
     #  (mis-installation, 325 of 2,847 complaints) - `skew_deg`.
-    tactile=dict(pad_len=0.40, low_len=0.40, proud=0.004, skew_deg=15.0),
+    #  [W3 S11 · **R11-2**] G11 shows the band **across the walk at the stair foot**, and
+    #  that is confirmed here as the standard placement for a footbridge foot (06 and 11
+    #  both): a 0.60 m-deep warning band spanning the full flight width, set back
+    #  `setback` = 0.30 m from the last riser (편의증진법). The head band keeps the same
+    #  0.30 m setback before the first riser. This is a **stair cue**, which R16-2 keeps —
+    #  it is not a stop-type device at a halt point, and none is added.
+    #  `cue_tactile` stays **OFF by default** (the standing v5.2 user directive); this row
+    #  fixes where the band goes when the ablation arm turns it on. See report §4.
+    tactile=dict(band_d=0.60, setback=0.30, proud=0.004, skew_deg=15.0),
 
     # === [W2-D ground_kit] P9 `bridge_deck` - spec Sec.5.3 rows 11 ==========
     #  Grid origin is NOT the world origin: `_grid_shift()` puts it at the east
@@ -190,12 +274,18 @@ PARAMS = dict(
     #  and the deck slab is 0.400 m thick, so it would pierce the soffit -
     #  which is the exact surface the `under_grating` preset looks at. A deck
     #  scupper has no builder in the kit; carried as a rider, not faked.
+    #  [W3 S11 · user rectangle ban] the two `patch` sites are **deleted**. The user's
+    #  standing ban on decorative rectangular ground patterns admits exactly one legitimate
+    #  rectangle — a contractor saw-cut asphalt repair on an **asphalt road**. This deck is
+    #  a concrete slab bound to `M["concrete"]`, so a saw-cut rectangle on it is the banned
+    #  vocabulary, not the licensed one. `crack` / `stain` / `wear_lane` / `edge_break` are
+    #  unaffected: none of them is a rectangle. (This is the same reasoning GT-24 applied to
+    #  the unit-paved profiles; `bridge_deck` was simply not in that row's scope.)
     gkit=dict(
-        deck_pad_x1=15.00,             # include the steel top landing for the
+        deck_pad_x1=15.00,             # include the steel head landing for the
                                        # longitudinal bands (d2 W1 sits on it)
         wear_w=0.75,
         drip_y=(-1.00, 1.00),          # rail-foot rundown, Sec.5.3
-        patches=((11.20, 0.30), (6.30, -0.35)),   # d5 / d10 near windows
         seed=11,
     ),
     # --- Korean sign (cue_sign) : sign_info (footbridge guidance) 768x512 -> w:h = 3:2 ---
@@ -208,32 +298,48 @@ PARAMS = dict(
     #   -> (1) east sign yaw 0 (= facing +X, toward the approaching viewer) / west flipped to yaw 180
     #      (2) backing swapped for aluminium grey (M["signback"], 0.44)
     #      (3) keep the 2.6 m clearance from the sight axis (y=0) (corridor-clearing convention).
+    #   [W3 S11] the H rebuild moved both stair feet, so the two signs follow them: the east
+    #   foot is now at (x 15.10…16.90, y −1.20) and the west foot at (x −15.00…−13.20,
+    #   y 17.08). Each sign stands beside its foot, faces the pedestrian walking toward it
+    #   along the sidewalk, and keeps clear of the deck sight corridor (|y| ≤ 1.2, x ≤ 15.0).
     sign=dict(w=0.90, h=0.60, pole_h=2.40,
-              spots=((31.60, -2.60, 0.0), (-31.60, 2.60, 180.0))),
+              spots=((18.60, -2.80, 180.0), (-18.60, 15.40, 0.0))),
     # --- dressing ---
     dress=dict(
         # one bus shelter (east sidewalk) - off the grid sight axis (y −9.6…−5.6)
         #   [v6 ruling (5)] the old build was just a roof slab + 4 posts, so it read as a "carport".
         #   the real minimum = rear glass wall + **2 side walls** + bench + **route-map panel**.
-        shelter=dict(x0=17.0, x1=23.0, y0=-9.60, y1=-5.60, z_roof=2.55,
+        #   [W3 S11] pushed east from x 17.0 to 19.6: the east switchback tower now occupies
+        #   x 13.20…16.90, and a shelter 100 mm off the mid-landing face reads as a collision.
+        shelter=dict(x0=19.6, x1=25.6, y0=-9.60, y1=-5.60, z_roof=2.55,
                      post_r=0.08, bench_y=-8.6, side_t=0.05, side_h=2.20,
                      side_inset=0.9, route_w=0.90, route_h=1.10),
-        bus_pole=(24.6, -7.60, 3.20),
-        lamps=((16.0, -12.0), (16.0, 12.0), (-16.0, -12.0), (-16.0, 12.0)),
+        bus_pole=(27.2, -7.60, 3.20),
+        #   [W3 S11] lamps moved off the tower footprints (old x ±16.0 stood 1.0 m from the
+        #   west leg and 0.9 m from the east one) to x ±19.0, y ±13.0.
+        lamps=((19.0, -13.0), (19.0, 13.0), (-19.0, -13.0), (-19.0, 13.0)),
         # street-tree row - [v6 ruling C-2] one row on the planting strip (x +-41.2), spacing 7.5 m +- jitter.
         #   it draws the sidewalk-grass boundary as a line. The stair corridor (y −2.4…2.4) is left empty.
         lamp=dict(pole_h=6.0, pole_r=0.10, arm_len=1.1, arm_r=0.055, head=0.32),
+        #   [W3 S11] the four sidewalk trees at x ±14 / ±26, y ±20 are re-sited to x ±21 /
+        #   ±30, y ±23. Under the H-plan `(−14.0, 20.0)` stood 2.9 m in front of the west
+        #   stair foot, dead on the tower axis. G11 also shows the ground beside a footbridge
+        #   foot **kept clear** — the street-tree row is the middle-distance element there.
         trees=((41.2, -34.0), (41.2, -26.6), (41.2, -19.2), (41.2, -11.6),
                (41.2, 11.8), (41.2, 19.4), (41.2, 26.8), (41.2, 34.2),
                (-41.2, -34.2), (-41.2, -26.8), (-41.2, -19.4), (-41.2, -11.8),
                (-41.2, 11.6), (-41.2, 19.2), (-41.2, 26.6), (-41.2, 34.0),
-               (14.0, -20.0), (14.0, 20.0), (26.0, -20.0), (26.0, 20.0),
-               (-14.0, -20.0), (-14.0, 20.0), (-26.0, -20.0), (-26.0, 20.0)),
+               (21.0, -23.0), (21.0, 23.0), (30.0, -23.0), (30.0, 23.0),
+               (-21.0, -23.0), (-21.0, 23.0), (-30.0, -23.0), (-30.0, 23.0)),
         # [v5.1 §3] benches sit beside street-tree anchors (no even spacing · yaw jitter)
         benches=((38.6, -19.2, 86.0), (-38.6, 19.2, -94.0)),
-        bollards=((12.6, -4.0), (12.6, 4.0), (-12.6, -4.0), (-12.6, 4.0)),
-        # road band under the stair (cue_material_break) - contrast surface for the grating shadows
-        band=dict(x0=15.0, x1=31.5, y0=-1.40, y1=1.40, z=0.004, t=0.03),
+        bollards=((12.6, -5.6), (12.6, 5.6), (-12.6, -5.6), (-12.6, 5.6)),
+        # [W3 S11 · G13] the storm-water trench grating G11 puts in the sidewalk beside the
+        #   stair foot. It is a real drainage fixture with a 30 mm bar pitch — the pitch is
+        #   what makes it a grating and not a painted rectangle — so it is outside the
+        #   decorative-rectangle ban, not an exception to it.
+        gratings=((16.00, 1.60, 0.0), (-14.10, 18.60, 0.0)),
+        grating_len=2.60,
     ),
     # [v6 ruling C-2/C-4] distant closure - a tree silhouette band (distant LOD, a ridge-like row of blocks)
     #   is laid outside the sidewalk so the grass plate never meets the sky directly. It is not a file of
@@ -246,6 +352,13 @@ PARAMS = dict(
     #         0.72~1.16x -> a saw-toothed skyline) (3) segments are cut down to 5.0 m and x jitter +-1.7
     #         gives fore/aft depth (4) the tint is not near-field foliage (deep green) but **three
     #         low-saturation grey-greens reflecting aerial perspective** (leaf_far_*), cycled to kill the flat-slab look.
+    #   [J-11 adjudication — this scene WP, as `placement_lint` asks] `jitter` / `x_jit`
+    #   here are **size and height variation of a distant LOD silhouette**, which spec
+    #   §1.2 X2 explicitly KEEPS; they are not placement jitter of a placed object, which
+    #   X2 abolishes. The band is one continuous 100 m-long backdrop element whose only
+    #   job is to stop the grass plate meeting the sky in a straight line — remove the
+    #   variation and the v7 "painted green slab" finding returns verbatim. Classified,
+    #   not silenced: the WARN stays visible in the linter and is answered here.
     treeband=dict(rows=((44.5, 48.5, 4.8), (-48.5, -44.5, 4.4)),
                   y0=-58.0, y1=58.0, seg=5.0, jitter=1.2,
                   base_frac=0.36, blobs=3, x_jit=1.2),
@@ -298,22 +411,42 @@ PARAMS = dict(
         #   "rusted steel" (under_grating) -> swapped for concrete_wall (joints and tie holes) plus
         #   an equalising tint (0.72,0.77,0.92) = mean 102 ~ albedo 0.40, a neutral concrete.
         scale=dict(paving_interlock=1.0, metal_rust=0.55, concrete_wall=2.0,
-                   granite_dark=1.0, brick_red=2.0, grass=1.4, tactile=0.3),
+                   granite_dark=1.0, plaza_light=0.55, brick_red=2.0,
+                   grass=1.4, tactile=0.3),
         asphalt_color=(0.045, 0.045, 0.050), asphalt_rough=0.92,
-        metal_tint=(0.90, 0.94, 1.00),          # painted-steel tone (neutral cool grey)
+        # [W3 S11 · G11 measured] The footbridge in the target photograph is painted the
+        #   standard Korean arterial-overpass **beige-tan**, not grey. Sampled off
+        #   `Generated Image - Scene11.jpg`: the sunlit girder face is sRGB (152,144,136)
+        #   = linear (0.321, 0.285, 0.249), the shaded lower band sRGB (95,86,72). The v7
+        #   ruling's target ("linear median 0.051 ≈ painted-steel dark grey") is therefore
+        #   **6× too dark for this scene's own reference**, and its neutral-cool-grey tint is
+        #   the wrong hue. The v7 *mechanism* is kept in full — it is the only thing that can
+        #   narrow a texture's tonal range, and the white/brown rust blotching it killed must
+        #   stay killed — and only its target band is re-aimed:
+        #     metal_rust linear p5 0.0116 / p95 0.216  →  0.220 … 0.340
+        #     brightness = (0.340−0.220)/(0.216−0.0116) = 0.587
+        #     add       = 0.220 − 0.0116·0.587        = 0.213
+        #   desaturation is raised 0.55 → 0.78 (the split is wider at the higher level) and
+        #   the tint carries the measured beige ratio R:G:B = 1.00 : 0.90 : 0.79.
+        metal_tint=(1.00, 0.90, 0.79),          # painted-steel beige-tan (G11 measured)
         # [v7 ruling (6)-1] OmniPBR albedo correction - the texture lookup gets
         #   diffuse = tex*brightness + add to compress the contrast (linear
         #   p5 0.0116/p95 0.216 -> 0.045/0.090), and desaturation erases the colour split.
         #   expected result: linear median 0.051 ~ sRGB 63 = painted-steel dark grey.
-        metal_albedo=dict(brightness=0.220, add=0.0425, desaturation=0.55),
+        metal_albedo=dict(brightness=0.587, add=0.213, desaturation=0.78),
         concrete_tint=(0.72, 0.77, 0.92),
         parapet_tint=(0.78, 0.83, 0.99),
         soil_tint=(0.42, 0.44, 0.34),
+        curb_tint=(0.86, 0.83, 0.78),           # light granite 연석 (S06-B B-1)
         line_white=(0.55, 0.55, 0.52), line_yellow=(0.52, 0.40, 0.06),
-        band_color=(0.070, 0.070, 0.075), band_rough=0.88,
-        rail_color=(0.050, 0.098, 0.108), rail_rough=0.55, rail_metallic=0.35,
-        steel_color=(0.055, 0.058, 0.060), steel_rough=0.50,
-        steel_metallic=0.45,
+        # [W3 S11 · G11] railings, balusters, mesh panels and stringers are the **same
+        #   beige-tan paint job** as the girder in the photograph — one paint spec for the
+        #   whole structure, which is how a real 육교 is coated. The old dark teal
+        #   (0.050, 0.098, 0.108) and near-black steel (0.055) are gone.
+        rail_color=(0.300, 0.270, 0.235), rail_rough=0.55, rail_metallic=0.12,
+        steel_color=(0.262, 0.236, 0.205), steel_rough=0.55,
+        steel_metallic=0.12,
+        mesh_color=(0.238, 0.214, 0.186), mesh_rough=0.62,
         # [v6 ruling C-3 family] panel_rough 0.18 = near-specular -> sky reflection makes it look
         #   like a large white board. Lowered to the real gloss of painted steel sheet (0.48).
         panel_color=(0.075, 0.095, 0.105), panel_rough=0.48,
@@ -342,10 +475,20 @@ PARAMS = dict(
         hdri_sun_rotz_offset=233.5,
         dome_rotation_step=15.0,
     ),
-    # value specified by brief R6. Shadow azimuth φ = 171.5 −110 +233.5 = 295 deg ->
-    #   horizontal shadow bearing ~25 deg (almost +X = the deck's long axis). The grating slit shadows
-    #   stretch along the stair direction, maximising the road stripes (the see-through cue).
-    SUN_AZ_OFFSET=171.5,
+    # [W3 S11 · re-derived, NOT re-invented] Brief R6 fixed this value by a **rule**, not by
+    #   taste: *"the grating slit shadows stretch along the stair direction, maximising the
+    #   stripes (the see-through cue)"*. The slit gaps in `build_open_riser_stairs` run along
+    #   the **descent axis**, so the rule is "shadow bearing ≈ the descent axis".
+    #     old: descent along +X · φ = 171.5 −110 +233.5 = 295° · shadow bearing (φ−270) = 25°
+    #          ≈ +X  ✔ — the rule was satisfied.
+    #     S11-H rotates the descent to **±Y**, so 171.5 would leave the slit shadows running
+    #          *across* the flight and the brief's own stated mechanism broken.
+    #     new: shadow bearing **270° (−Y = the tower axis)** → φ = 180° →
+    #          SUN_AZ_OFFSET = 180 + 110 − 233.5 = **56.5**, sun bearing 90°.
+    #   This is a **lighting** consequence of the mandated rotation, declared as such: no
+    #   camera preset moved, no geometry depends on it, and the smoke report re-measures the
+    #   backlight angle rather than asserting it. Sun elevation (49.79°) is untouched.
+    SUN_AZ_OFFSET=56.5,
 
     render=dict(pt_total_spp=512, pt_max_bounces=8),
 )
@@ -376,8 +519,8 @@ if _sc_ov:
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "scene11")
 ASSET_ROLES = ["paving_interlock", "metal_rust", "concrete_wall",
-               "granite_dark", "brick_red", "grass", "tactile", "sign_info",
-               "hdri", "mdl"]
+               "granite_dark", "plaza_light", "brick_red", "grass", "tactile",
+               "sign_info", "hdri", "mdl"]
 
 
 def _flight_run():
@@ -390,14 +533,50 @@ def _flight_drop():
     return st["n"] * st["riser"]
 
 
-def _east_x():
-    """East x nodes: (top landing start, A head, A foot = mid landing start, mid landing end, B foot)."""
-    e = PARAMS["east"]
+# ===========================================================================
+# [C1a] H-plan tower frames — the single source for geometry AND for the
+#       numeric self-checks. Everything below is expressed in a tower's
+#       **canonical local frame**:
+#         a = travel / descent coordinate (a = 0 at the stair head; +a descends)
+#         b = transverse coordinate (b = 0 is the centre of the first flight)
+#       A tower is placed by `build_rot_group(pivot, rot)`; the world map is
+#         east (rot −90°): world = (px + b, py − a)   →  a = −(y−py), b = x−px
+#         west (rot +90°): world = (px − b, py + a)   →  a =  (y−py), b = px−x
+# ===========================================================================
+def _tower_nodes():
+    """(a-coordinates of the leg nodes) — head back, head/stair head, A foot,
+    mid landing far edge, and the straight leg's B foot."""
+    tw = PARAMS["tower"]
     run = _flight_run()
-    a1 = e["a_x0"] + run                       # 22.04
-    m1 = a1 + e["mid_len"]                     # 23.84
-    b1 = m1 + run                              # 30.88
-    return (e["pad_x0"], e["a_x0"], a1, m1, b1)
+    a_head = -float(tw["head"])          # −2.40 : back edge of the head landing
+    a_A1 = run                           #   7.04 : foot of flight A
+    a_M1 = a_A1 + float(tw["mid"])       #   8.84 : far edge of the mid landing
+    a_B1 = a_M1 + run                    #  15.88 : straight-leg foot
+    return a_head, a_A1, a_M1, a_B1
+
+
+def _lane_b():
+    """Transverse extents (b0, b1) of lane A and of the switchback's lane B."""
+    tw = PARAMS["tower"]
+    h = float(tw["width"]) / 2.0
+    g = float(tw["lane_gap"])
+    return (-h, h), (h + g, h + g + float(tw["width"]))
+
+
+def _world_to_local(tag, x, y):
+    """World (x, y) → that tower's canonical (a, b)."""
+    px, py = PARAMS[tag]["pivot"]
+    if tag == "east":
+        return -(y - py), x - px
+    return (y - py), px - x
+
+
+def _local_to_world(tag, a, b):
+    """That tower's canonical (a, b) → world (x, y)."""
+    px, py = PARAMS[tag]["pivot"]
+    if tag == "east":
+        return px + b, py - a
+    return px - b, py + a
 
 
 # ===========================================================================
@@ -406,27 +585,56 @@ def _east_x():
 #   are checked in coordinates. Follows the scene08 `_obstacle_boxes` / `_solid_at` convention.
 #   east and west stairs are **symmetric about x=0** through rot_group 180 deg, so ax=|x| serves both.
 # ===========================================================================
-def _stair_top(ax):
-    """Top-face z of the stair or landing at |x| (None outside the stair band). The width test is the caller's."""
-    e = PARAMS["east"]
+def _tower_top(tag, a, b):
+    """(kind, top-face z) of the tower at canonical (a, b); None outside the tower.
+
+    `kind` is "pad" for a landing (a 0.40 m steel-deck box, like the bridge deck) and
+    "tread" for a grating step (a `tread_t` slab — the slits are ignored so that the
+    occlusion test stays conservative)."""
     st = PARAMS["stair"]
-    run = _flight_run()
-    a0 = e["a_x0"]
-    a1 = a0 + run
-    m1 = a1 + e["mid_len"]
-    b1 = m1 + run
-    z_mid = e["z_top"] - _flight_drop()
-    if e["pad_x0"] <= ax <= a0:
-        return e["z_top"]
-    if a0 < ax <= a1:
-        i = min(st["n"], int((ax - a0) / st["tread"]) + 1)
-        return e["z_top"] - i * st["riser"]
-    if a1 < ax <= m1:
-        return z_mid
-    if m1 < ax <= b1:
-        i = min(st["n"], int((ax - m1) / st["tread"]) + 1)
-        return z_mid - i * st["riser"]
+    tw = PARAMS["tower"]
+    a_head, a_A1, a_M1, a_B1 = _tower_nodes()
+    (bA0, bA1), (bB0, bB1) = _lane_b()
+    z_top = float(tw["z_top"])
+    z_mid = z_top - _flight_drop()
+    switch = PARAMS[tag]["kind"] == "switchback"
+    # head landing
+    if a_head <= a <= 0.0 and bA0 <= b <= bA1:
+        return "pad", z_top
+    # flight A
+    if 0.0 < a <= a_A1 and bA0 <= b <= bA1:
+        i = min(st["n"], int(a / st["tread"]) + 1)
+        return "tread", z_top - i * st["riser"]
+    # mid landing (the switchback leg's landing spans both lanes)
+    b_mid1 = bB1 if switch else bA1
+    if a_A1 < a <= a_M1 and bA0 <= b <= b_mid1:
+        return "pad", z_mid
+    # flight B
+    if switch:
+        if 0.0 <= a <= a_A1 and bB0 <= b <= bB1:
+            i = min(st["n"], int((a_A1 - a) / st["tread"]) + 1)
+            return "tread", z_mid - i * st["riser"]
+    else:
+        if a_M1 < a <= a_B1 and bA0 <= b <= bA1:
+            i = min(st["n"], int((a - a_M1) / st["tread"]) + 1)
+            return "tread", z_mid - i * st["riser"]
     return None
+
+
+def _tower_footprint(tag):
+    """World AABB (x0, x1, y0, y1) of a tower's plan footprint."""
+    a_head, a_A1, a_M1, a_B1 = _tower_nodes()
+    (bA0, bA1), (bB0, bB1) = _lane_b()
+    switch = PARAMS[tag]["kind"] == "switchback"
+    a_lo, a_hi = a_head, (a_M1 if switch else a_B1)
+    b_lo, b_hi = bA0, (bB1 if switch else bA1)
+    xs, ys = [], []
+    for a in (a_lo, a_hi):
+        for b in (b_lo, b_hi):
+            wx, wy = _local_to_world(tag, a, b)
+            xs.append(wx)
+            ys.append(wy)
+    return min(xs), max(xs), min(ys), max(ys)
 
 
 def _solid_at(x, y, z):
@@ -472,21 +680,19 @@ def _solid_at(x, y, z):
                 and dk["x0"] <= x <= dk["x1"] \
                 and dk["z_top"] <= z <= dk["z_top"] + rb["post_h"]:
             return f"DeckRail_{i}"
-    # ── the two stair sets (east/west symmetric) ──
-    ax = abs(x)
-    top = _stair_top(ax)
-    if top is not None:
-        run = _flight_run()
-        a0, a1 = e["a_x0"], e["a_x0"] + run
-        m1 = a1 + e["mid_len"]
-        on_pad = (e["pad_x0"] <= ax <= a0) or (a1 < ax <= m1)
-        half = (e["pad_y1"] if on_pad else st["y1"])
-        if abs(y) <= half:
-            if on_pad:
-                if top - PARAMS["deck"]["thick"] <= z <= top:
-                    return "StairPad"
-            elif top - st["tread_t"] <= z <= top:
-                return "StairTread"
+    # ── the two H-plan towers (no longer symmetric — R11-1) ──
+    tw = PARAMS["tower"]
+    for tag in ("east", "west"):
+        a, b = _world_to_local(tag, x, y)
+        hit = _tower_top(tag, a, b)
+        if hit is None:
+            continue
+        kind, top = hit
+        if kind == "pad":
+            if top - float(tw["pad_t"]) <= z <= top:
+                return "StairPad"
+        elif top - st["tread_t"] <= z <= top:
+            return "StairTread"
     # ── bus shelter (roof slab) ──
     sh = PARAMS["dress"]["shelter"]
     if sh["x0"] <= x <= sh["x1"] and sh["y0"] <= y <= sh["y1"] \
@@ -529,6 +735,10 @@ def _obstacle_boxes():
     for i, (bx, by) in enumerate(d["bollards"]):
         boxes.append((f"Bollard_{i}", bx - 0.1, bx + 0.1, by - 0.1, by + 0.1,
                       gz, gz + 0.75))
+    for i, (gx_, gy_, _yaw) in enumerate(d["gratings"]):
+        L = float(d["grating_len"]) / 2.0
+        boxes.append((f"Grating_{i}", gx_ - L, gx_ + L, gy_ - 0.25, gy_ + 0.25,
+                      gz - 0.10, gz + 0.01))
     bx, by, bh = d["bus_pole"]
     boxes.append(("BusPole", bx - 0.3, bx + 0.3, by - 0.3, by + 0.3, gz,
                   gz + bh))
@@ -547,35 +757,59 @@ def _obstacle_boxes():
 def _smoke_report():
     st = PARAMS["stair"]
     e = PARAMS["east"]
+    tw = PARAMS["tower"]
     dk = PARAMS["deck"]
     wk = PARAMS["walk"]
     run, drop = _flight_run(), _flight_drop()
-    pad0, a0, a1, m1, b1 = _east_x()
+    a_head, a_A1, a_M1, a_B1 = _tower_nodes()
+    (bA0, bA1), (bB0, bB1) = _lane_b()
+    z_top = float(tw["z_top"])
     gz = wk["z_top"]
     print("=" * 68)
-    print("scene11_footbridge_stairs — SMOKE 기하 자기검증 (부팅 없음)")
+    print("scene11_footbridge_stairs — SMOKE 기하 자기검증 (부팅 없음) · H형(S11-H)")
     print("=" * 68)
-    print(f"  계단: 폭 {st['y1']-st['y0']:.2f} · {st['n']}단 × 2련 · "
+    print(f"  계단: 폭 {tw['width']:.2f} · {st['n']}단 × 2련/타워 · "
           f"riser {st['riser']} · tread {st['tread']} · 그레이팅 슬릿 {st['slits']}")
     print(f"    련당 run {run:.2f} / drop {drop:.3f} · 경사 "
           f"{math.degrees(math.atan2(st['riser'], st['tread'])):.2f}° · "
           f"2R+T = {2*st['riser']+st['tread']:.3f}")
     tot = 2 * drop
-    print(f"    총 낙차 {tot:.3f} = 상판고 {e['z_top']:.2f} → "
-          f"{'OK' if abs(tot-e['z_top']) < 1e-9 else 'FAIL'} (접속 단차 0)")
+    print(f"    총 낙차 {tot:.3f} = 상판고 {z_top:.2f} → "
+          f"{'OK' if abs(tot-z_top) < 1e-9 else 'FAIL'} (접속 단차 0) "
+          f"— **I→H 재구축 불변량**")
     print(f"    낙차 ≥ 0.3 m → {'OK' if tot >= 0.3 else 'FAIL'}")
-    print(f"  [동측 x 마디] 상부참 {pad0:.2f}…{a0:.2f} · A {a0:.2f}…{a1:.2f} "
-          f"· 중간참 {a1:.2f}…{m1:.2f} · B {m1:.2f}…{b1:.2f}")
+    # ── H-plan: tower footprints, parallel-to-carriageway check ──
+    print("  [H형 타워 배치] 차도축 = ±Y · 상판축 = +X")
+    for tag, nm in (("east", "동측(스위치백)"), ("west", "서측(직선)")):
+        fx0, fx1, fy0, fy1 = _tower_footprint(tag)
+        span_x, span_y = fx1 - fx0, fy1 - fy0
+        par = span_y > span_x            # long axis along the carriageway?
+        on_walk = ((wk["xe0"] <= fx0 and fx1 <= wk["xe1"]) or
+                   (wk["xw0"] <= fx0 and fx1 <= wk["xw1"]))
+        print(f"    {nm:14s} x {fx0:+7.2f}…{fx1:+7.2f} ({span_x:5.2f} m) · "
+              f"y {fy0:+7.2f}…{fy1:+7.2f} ({span_y:5.2f} m)")
+        print(f"      차도 평행(장축=Y) {'OK' if par else 'FAIL'} · "
+              f"보도 위 {'OK' if on_walk else 'FAIL'} · "
+              f"차도(±{PARAMS['road']['x1']:.2f}) 침범 "
+              f"{'OK(없음)' if fx0 > PARAMS['road']['x1'] or fx1 < PARAMS['road']['x0'] else 'FAIL'}")
+    fe = _tower_footprint("east")
+    fw = _tower_footprint("west")
+    asym = abs((fe[1]-fe[0]) - (fw[1]-fw[0])) > 0.5
+    print(f"    R11-1 비대칭 H (한 다리 직선 + 한 다리 스위치백) "
+          f"{'OK' if asym else 'FAIL'}")
+    print(f"  [타워 로컬 마디 a] 상부참 {a_head:.2f}…0.00 · A 0.00…{a_A1:.2f} "
+          f"· 중간참 {a_A1:.2f}…{a_M1:.2f} · B(직선) {a_M1:.2f}…{a_B1:.2f} "
+          f"/ B(스위치백) {a_A1:.2f}→0.00 @ b {bB0:.2f}…{bB1:.2f}")
     # ── walking continuity table ──
-    z_mid = e["z_top"] - drop
+    z_mid = z_top - drop
     rows = [
         ("서측 보도 → 계단 B", gz, 0.0, "join"),
         ("서측 계단 B(22단)", 0.0, z_mid, "flight"),
         ("서측 중간참", z_mid, z_mid, "flat"),
-        ("서측 계단 A(22단)", z_mid, e["z_top"], "flight"),
-        ("서측 상부 참 → 상판", e["z_top"], dk["z_top"], "flat"),
-        ("상판 → 동측 상부 참", dk["z_top"], e["z_top"], "flat"),
-        ("동측 계단 A(22단)", e["z_top"], z_mid, "flight"),
+        ("서측 계단 A(22단)", z_mid, z_top, "flight"),
+        ("서측 상부 참 → 상판", z_top, dk["z_top"], "flat"),
+        ("상판 → 동측 상부 참", dk["z_top"], z_top, "flat"),
+        ("동측 계단 A(22단)", z_top, z_mid, "flight"),
         ("동측 중간참", z_mid, z_mid, "flat"),
         ("동측 계단 B(22단)", z_mid, 0.0, "flight"),
         ("동측 계단 → 보도", 0.0, gz, "join"),
@@ -594,17 +828,31 @@ def _smoke_report():
         print(f"    {nm:22s} z {z0:+.3f} → {z1:+.3f}  Δ{d:+.3f}  "
               f"{'OK' if ok else 'FAIL'}")
     print(f"    연속성 판정: {'OK' if bad == 0 else f'FAIL({bad})'}")
-    # ── hazard: missing kickplate on the mid landing ──
-    print(f"  [위험①] 동측 중간참 킥플레이트 {'有' if e['kickplate'] else '無'} "
-          f"— 참 상면 {z_mid:.3f} → 보도 {gz:+.3f} 낙차 {z_mid-gz:.3f} m")
-    print(f"    로봇 h0.3 시야 하단이 난간 하부 개방대(0…"
-          f"{PARAMS['rail']['rail_h']-PARAMS['rail']['rail_mid_drop']:.2f} m)를 "
-          f"통과 → 낙차 은닉 성립 {'OK' if not e['kickplate'] else 'FAIL(대조군)'}")
+    # ── hazard ① : the deck-end / tower-head drop the h0.3 grid frames ──
+    gx0, gy0, gz0 = _grid_shift()
+    print(f"  [위험①] 상판 진행 끝 = 동측 상부참 외측 연단 x {gx0:.2f} · "
+          f"상면 {gz0:.3f} → 보도 {gz:+.3f} 낙차 {gz0-gz:.3f} m "
+          f"{'OK' if gz0-gz >= 0.3 else 'FAIL'}")
+    print(f"    난간 하부 개방대(0…"
+          f"{PARAMS['rail']['rail_h']-PARAMS['rail']['rail_mid_drop']:.2f} m)가 "
+          f"h0.3 시야를 통과 → 원거리 보도·차도면이 비쳐 '바닥 연속' 오독")
+    # ── hazard ② : missing kickplate on the east mid landing ──
+    print(f"  [위험②] 동측 중간참 킥플레이트 {'有' if e['kickplate'] else '無'} "
+          f"— 참 상면 {z_mid:.3f} → 보도 {gz:+.3f} 낙차 {z_mid-gz:.3f} m "
+          f"{'OK' if not e['kickplate'] else 'FAIL(대조군)'}")
     print(f"    서측 중간참 킥플레이트 "
-          f"{'有' if PARAMS['west']['kickplate'] else '無'} (동일 기하 대조군)")
-    print(f"  [위험②] 상판·계단 상부 측면 → 차도면 "
-          f"{PARAMS['road']['z_top']:+.2f} 낙차 "
-          f"{dk['z_top']-PARAMS['road']['z_top']:.3f} m (방음 패널이 바닥 단서 차단)")
+          f"{'有' if PARAMS['west']['kickplate'] else '無'} (대조군)")
+    # matched edge class — R11-1 costs the identical-box control, so the pair is
+    # held on the 1.80 m transverse side edge that BOTH landings have.
+    e_edge = _local_to_world("east", (a_A1 + a_M1) / 2.0, bB1)
+    w_edge = _local_to_world("west", (a_A1 + a_M1) / 2.0, bA1)
+    print(f"    [대조 쌍 = 정합 연단 등급] 동측 측면 연단 "
+          f"({e_edge[0]:+.2f}, {e_edge[1]:+.2f}) vs 서측 ({w_edge[0]:+.2f}, "
+          f"{w_edge[1]:+.2f}) — 길이 {tw['mid']:.2f} m · 낙차 {z_mid-gz:.3f} m · "
+          f"난간고 {PARAMS['rail']['rail_h']:.2f} m 동일, 킥플레이트만 상이 "
+          f"{'OK' if e['kickplate'] != PARAMS['west']['kickplate'] else 'FAIL'}")
+    print(f"    ※ R11-1 비대칭 H 의 대가: 두 중간참 자체는 더 이상 합동이 아니다 "
+          f"(동 {tw['mid']:.2f}×{bB1-bA0:.2f} · 서 {tw['mid']:.2f}×{bA1-bA0:.2f}).")
     print(f"  [위험③] 그레이팅 투과: 디딤판 {st['slits']}슬릿 × 0.02 m + 전후 "
           f"gap {st['gap']} → 라이저 부재로 하부 직시")
     # ── deck clearance · piers ──
@@ -619,36 +867,44 @@ def _smoke_report():
         print(f"    지지 기둥 x={px:+.2f} · 보도 위 {'OK' if on_walk else 'FAIL'} "
               f"· 연석(±{PARAMS['road']['x1']:.2f}) 바깥 "
               f"{'OK' if abs(px) > PARAMS['road']['x1'] else 'FAIL'}")
-    # ── rot_group 180 deg coordinate check (west) ──
-    w = PARAMS["west"]
-    px, py = w["pivot"]
-
-    def _rot180(x, y):
-        return (2*px - x, 2*py - y)
-    locs = [("상부참 서단", 0.0, 0.0), ("A 하단", run, 0.0),
-            ("중간참 끝", run + e["mid_len"], 0.0),
-            ("B 하단", 2*run + e["mid_len"], 0.0)]
-    print("  [서측 rot_group 180° 검산]  (x,y) → (−15 − x, −y)")
-    for nm, lx, ly in locs:
-        wx, wy = _rot180(lx, ly)
-        print(f"    {nm:10s} 로컬 x {lx:6.2f} → 월드 x {wx:7.2f}")
-    wxb, _ = _rot180(2*run + e["mid_len"], 0.0)
-    print(f"    서측 하단 x {wxb:.2f} ⊂ 서측 보도 [{wk['xw0']:.1f}, "
-          f"{wk['xw1']:.1f}] → {'OK' if wk['xw0'] <= wxb <= wk['xw1'] else 'FAIL'}")
+    # ── rot_group placement check: local (a, b) node → world, both towers ──
+    print("  [rot_group 검산] 로컬 (a,b) → 월드 (x,y) · 동 −90° / 서 +90°")
+    nodes = (("상부참 후단", a_head, 0.0), ("계단머리", 0.0, 0.0),
+             ("A 하단", a_A1, 0.0), ("중간참 외단", a_M1, 0.0))
+    for tag, nm in (("east", "동"), ("west", "서")):
+        px, py = PARAMS[tag]["pivot"]
+        outs = []
+        for lbl, aa, bb in nodes:
+            wx, wy = _local_to_world(tag, aa, bb)
+            outs.append(f"{lbl} ({wx:+.2f},{wy:+.2f})")
+        print(f"    {nm} pivot ({px:+.2f},{py:+.2f}) : " + " · ".join(outs))
+        # foot of the descending leg
+        if PARAMS[tag]["kind"] == "switchback":
+            fx, fy = _local_to_world(tag, 0.0, (bB0 + bB1) / 2.0)
+        else:
+            fx, fy = _local_to_world(tag, a_B1, 0.0)
+        on_walk = ((wk["xe0"] <= fx <= wk["xe1"]) or
+                   (wk["xw0"] <= fx <= wk["xw1"])) and wk["y0"] <= fy <= wk["y1"]
+        print(f"      계단 하단 ({fx:+.2f}, {fy:+.2f}) ⊂ 보도 "
+              f"{'OK' if on_walk else 'FAIL'}")
     # ── grid camera vs new geometry coordinate check ──
     gx, gy, gzc = _grid_shift()
-    print(f"  [그리드] 원점 = 동측 낙차 시작 (x {gx:.2f}, y {gy:.2f}, z {gzc:.2f})")
+    print(f"  [그리드] 원점 = 상판 진행 끝(동측 상부참 외측 연단) "
+          f"(x {gx:.2f}, y {gy:.2f}, z {gzc:.2f}) — I형 시절과 **동일 좌표**")
     for d in (2, 5, 10):
         ex = gx - d
-        on_deck = dk["x0"] <= ex <= e["pad_x1"]
+        a_e, b_e = _world_to_local("east", ex, gy)
+        on_deck = (dk["x0"] <= ex <= dk["x1"]) or \
+            (_tower_top("east", a_e, b_e) is not None)
         in_w = dk["y0"] < gy < dk["y1"]
         print(f"    d={d:2d}  eye ({ex:+.2f}, {gy:+.2f}, {gzc+0.3:.2f}~"
               f"{gzc+1.8:.2f}) · 상판/참 위 {'OK' if on_deck else 'FAIL'} "
               f"· 폭 안 {'OK' if in_w else 'FAIL'}")
     print(f"    지지 기둥(x ±11.80, z ≤ {deck_bot:.2f})은 상판 **아래** — "
           f"eye z ≥ {gzc+0.3:.2f} 시선 폐색 없음 OK")
-    print(f"    시선 회랑(y −1.2…1.2, x {dk['x0']:.1f}…{b1:.1f}) 드레싱 침입: "
-          f"{_corridor_hits()} 개 → {'OK' if _corridor_hits() == 0 else 'FAIL'}")
+    print(f"    시선 회랑(y −1.2…1.2, x {dk['x0']:.1f}…{gx:.1f} + 타워 발치) "
+          f"드레싱 침입: {_corridor_hits()} 개 → "
+          f"{'OK' if _corridor_hits() == 0 else 'FAIL'}")
 
     # ── front profile (grid axis y=0, increasing x) - is the drop GT in frame ──
     print("  [정면 프로파일] 그리드 축 y=0.00 · x 15.0 → 20.0 (0.25 m 간격)")
@@ -673,13 +929,14 @@ def _smoke_report():
     print(f"    프로파일 최대 낙차 {dmax:.3f} m ≥ 0.3 → "
           f"{'OK(낙차 GT 프레임 내)' if dmax >= 0.3 else 'FAIL'}")
 
-    # ── h0.3 concealment check (sight line grazing the deck edge) ──
-    print("  [h0.3 은닉 검산] 상판 연단(x=15.0, z 5.500) 스치는 시선")
+    # ── h0.3 concealment check (sight line grazing the head-landing edge) ──
+    ftx1 = _tower_footprint("east")[1]
+    print(f"  [h0.3 은닉 검산] 상부참 연단(x={gx:.1f}, z {gzc:.3f}) 스치는 시선")
     for dd in (2.0, 5.0, 10.0):
         x_hit = gx + (gzc - gz) * dd / 0.3
-        print(f"    d={dd:4.1f} m → 보도 재출현 x {x_hit:7.1f} vs 계단 하단 "
-              f"{b1:.2f} → 계단 전 구간 은닉 "
-              f"{'OK' if x_hit > b1 else 'FAIL'}")
+        print(f"    d={dd:4.1f} m → 보도 재출현 x {x_hit:7.1f} vs 동측 타워 "
+              f"외곽 {ftx1:.2f} → 타워 전 구간 은닉 "
+              f"{'OK' if x_hit > ftx1 else 'FAIL'}")
 
     # ── camera collision and sight-line occlusion check (scene08 convention) ──
     boxes = _obstacle_boxes()
@@ -699,9 +956,14 @@ def _smoke_report():
     print(f"    충돌: {len(hits)}건 → {'OK' if not hits else 'FAIL'}")
     print("    [시선 차단] 미장센 컷 ray march 0.1 m (첫 차단 비율 ≥ 0.90 = OK)")
     print("      ※ preset_* 그리드는 pitch −10° 로 바닥을 겨냥하는 규약 — 제외")
+    print("      ※ stair_head 도 동일 등급(로봇 h0.3 이 자기가 선 참 상면을 겨냥)이라 제외")
+    # The test asks "did dressing get in the way?". A cut that deliberately aims at the
+    # walked surface it stands on cannot pass it — that is why `preset_*` is excluded, and
+    # `stair_head` is the same class of cut (h0.3 on the head landing, pitch −10°).
+    floor_aimed = ("stair_head",)
     blocked = []
     for name, v in sorted(views.items()):
-        if name.startswith("preset_"):
+        if name.startswith("preset_") or name in floor_aimed:
             continue
         eA = np.array(v["eye"], dtype=float)
         tg = np.array(v["tgt"], dtype=float)
@@ -780,24 +1042,41 @@ def _smoke_report():
 
 
 def _grid_shift():
-    """Grid origin = the drop-start edge of the east stair (east end of the top landing, deck level)."""
-    e = PARAMS["east"]
-    return (e["a_x0"], 0.0, e["z_top"])
+    """Grid origin = **the drop edge a deck-travelling robot meets head-on**.
+
+    Under the H-plan that is the outer (+X) edge of the east head landing, which the
+    tower geometry places at exactly the coordinate the I-plan grid already used
+    (x 15.00, y 0, z 5.50) — so the judge presets did not move. Beyond it is a
+    5.505 m fall to the east sidewalk."""
+    tw = PARAMS["tower"]
+    (_, bA1), _ = _lane_b()
+    px, _py = PARAMS["east"]["pivot"]
+    return (px + bA1, 0.0, float(tw["z_top"]))
 
 
 def _corridor_hits():
-    """Number of dressing prims inside the grid sight corridor (y −1.2…1.2, x −13.2…30.88)."""
+    """Dressing prims standing inside a sight corridor that could hide a drop.
+
+    Two corridors, not one: (1) the deck + head-landing run the h0.3 grid travels
+    (|y| ≤ 1.2, x −13.2…15.0) and (2) each tower's plan footprint, because a lamp or
+    a tree inside a tower would occlude the very flights the mise-en-scene cuts judge.
+    **Flush ground fixtures are excluded by construction** — the trench gratings sit
+    at or below the walk surface and cannot occlude anything."""
     d = PARAMS["dress"]
-    _, _, _, _, b1 = _east_x()
     pts = list(d["trees"]) + list(d["lamps"]) + list(d["bollards"]) \
         + [(b[0], b[1]) for b in d["benches"]] + [d["bus_pole"][:2]]
     sh = d["shelter"]
     pts += [((sh["x0"]+sh["x1"])/2.0, (sh["y0"]+sh["y1"])/2.0)]
     pts += [(s[0], s[1]) for s in PARAMS["sign"]["spots"]]
+    gx, _, _ = _grid_shift()
+    boxes = [(PARAMS["deck"]["x0"], gx, -1.2, 1.2)]
+    boxes += [_tower_footprint(t) for t in ("east", "west")]
     n = 0
     for x, y in pts:
-        if PARAMS["deck"]["x0"] <= x <= b1 and -1.2 <= y <= 1.2:
-            n += 1
+        for x0, x1, y0, y1 in boxes:
+            if x0 <= x <= x1 and y0 <= y <= y1:
+                n += 1
+                break
     return n
 
 
@@ -814,13 +1093,13 @@ def ground_plan():
         region=(float(dk["x0"]), float(dk["y0"]),
                 float(g["deck_pad_x1"]), float(dk["y1"])),
         z=float(dk["z_top"]), gy=float(gy), origin=(gx, gy, gz), axis="+x",
-        edges=[("stair_head", 0.0)],
+        edges=[("deck_end", 0.0)],
         dists=(2, 5, 10), scene="scene11",
         tactile=(),                 # Sec.12.4 - kept on the scene's own path
-        sites=dict(patch=[tuple(v) for v in g["patches"]]),
+        sites=dict(),
         overrides=dict(
             infra=dict(gully=0),    # see the PARAMS note: soffit pierce
-            surface=(("patch", 2), ("crack", 4),
+            surface=(("patch", 0), ("crack", 4),
                      ("stain", ("water", "drip"))),
             extras=(("wear_lane", dict(width=float(g["wear_w"]))),
                     ("edge_break", dict(density=0.0,
@@ -846,8 +1125,9 @@ def build_views():
         t[0] += gx
         t[2] += gz
         out[k] = dict(eye=e, tgt=t)
-    _, _, a1, m1, b1 = _east_x()
-    z_mid = PARAMS["east"]["z_top"] - _flight_drop()
+    a_head, a_A1, a_M1, a_B1 = _tower_nodes()
+    (bA0, bA1), (bB0, bB1) = _lane_b()
+    z_mid = float(PARAMS["tower"]["z_top"]) - _flight_drop()
     # under_grating: [v7 ruling (6)-3 re-aim - cause of the repeat failure]
     #   v6->v7 got the axis right (dead centre of the y=0 slit · ascending −X · backlit) but
     #   **eye z 0.60 · elevation +31 deg** was the problem. With a low eye and a shallow aim
@@ -862,39 +1142,65 @@ def build_views():
     #      sight-line occlusion test (first block >=0.90) still passes unchanged.
     #   measured (same ray cast): sky 18.5 % · frame subject 100 % StairTread ·
     #      the sun is **occluded** by the tread (no direct disc = only slit light remains).
-    out["under_grating"] = dict(eye=[21.70, 0.00, 2.00],
-                                tgt=[20.79, 0.00, 3.08])
-    # deck_walk: pedestrian view along the deck (h1.6) - the corridor between the noise panels
+    #   [W3 S11] re-derived for the H-plan. The east flight A now descends along −Y at
+    #   x 13.20…15.00, so the backlit under-soffit station moves under **that** flight.
+    #   The backlight condition (sun bearing 205°, so the camera bearing must be within
+    #   45° of it) is re-checked numerically by the smoke report, not assumed.
+    #   Station: on the sidewalk under east flight A near its low end, aimed **up the
+    #   slope** (+Y, bearing 90°) so the soffit fills the frame and the sun (bearing 90°
+    #   after the SUN_AZ_OFFSET re-derivation) sits straight ahead = maximum slit light.
+    #   Numbers, not taste: eye z 2.00 keeps the v7 headroom convention exactly
+    #   (0.83 m under the flight-A soffit at that station) and pitch +48° measures
+    #   **sky 14.2 % · StairTread 78.1 %** on the same 32×18 `_solid_at` raycast the
+    #   v7 ruling used — the v7 cut measured 18.5 % sky, the v6 one 64.7 %.
+    out["under_grating"] = dict(eye=[14.10, -7.90, 2.00],
+                                tgt=[14.10, -5.76, 4.38])
+    # deck_walk: pedestrian view along the deck (h1.6) — now an all-open baluster corridor
     out["deck_walk"] = dict(eye=[-9.00, 0.00, 7.10], tgt=[8.00, 0.00, 6.30])
     # midlanding: robot view on the east mid landing (h0.3) - head-on at the open band left by the missing kickplate
-    out["midlanding"] = dict(eye=[a1 + 0.30, 0.00, z_mid + 0.30],
-                             tgt=[m1 + 1.60, -1.90, z_mid - 0.35])
-    # sidewalk_approach: brief R6 "sidewalk approach" - from the east sidewalk toward the stair foot
-    out["sidewalk_approach"] = dict(eye=[38.00, -5.00, 0.90],
-                                    tgt=[26.00, -0.40, 3.20])
-    # overview: high-angle full view of the footbridge (6 lanes, deck and both stairs at once)
-    out["overview"] = dict(eye=[44.00, -34.00, 17.00], tgt=[2.00, 0.00, 4.00])
+    mx, my = _local_to_world("east", (a_A1 + a_M1) / 2.0 - 0.55, (bA1 + bB0) / 2.0)
+    tx, ty = _local_to_world("east", a_M1 + 3.20, (bA1 + bB0) / 2.0)
+    out["midlanding"] = dict(eye=[mx, my, z_mid + 0.30],
+                             tgt=[tx, ty, z_mid - 0.45])
+    # sidewalk_approach: brief R6 "sidewalk approach" - along the east sidewalk toward the
+    #   switchback tower's foot (now at x 15.10…16.90, y −1.20)
+    out["sidewalk_approach"] = dict(eye=[24.00, 3.20, 0.90],
+                                    tgt=[16.40, -1.20, 2.80])
+    # overview: high-angle full view of the footbridge (6 lanes, deck and both towers at once)
+    out["overview"] = dict(eye=[44.00, -34.00, 17.00], tgt=[0.00, 2.00, 3.60])
+    # stair_head: [W3 S11 · new] the H-plan puts the stair head 1.20 m off the deck axis,
+    #   so the stair-cue judgement gets its own robot-height cut: h0.3 on the east head
+    #   landing, head-on at the first riser line and the flight falling away along −Y.
+    hx, hy = _local_to_world("east", -1.70, 0.0)
+    sx, sy = _local_to_world("east", 3.60, 0.0)
+    out["stair_head"] = dict(eye=[hx, hy, float(PARAMS["tower"]["z_top"]) + 0.30],
+                             tgt=[sx, sy, float(PARAMS["tower"]["z_top"]) - 1.05])
     return out
 
 
 BANNER = """\
 [조작] 우클릭+WASD 비행 · P 패스트레이싱 토글 · C 스크린샷 · [ ] 태양 방위
-[체크리스트]
- 1. h0.3 그리드      — 그레이팅 투과·단코 소실로 하강 시작(x=15.0)이 은닉되나
-                       (방음판 그림자면 순흑 대역이 개방 베이로 걷혔는지 함께)
- 2. midlanding       — 동측 중간참 난간 하부 개방대(킥플레이트 無) 2.755 m 낙차
- 3. under_grating    — 역광 재조준: 라이저 부재 하부 투시 + 슬릿 투광 스트라이프
- 4. deck_walk        — 지주 분절 + 개방 베이 교대 회랑 · 상판 유효고 5.25 m
- 5. sidewalk_approach— 안내 사인이 **접근자를 마주보는지**(구 흑색 배면 패널
-                       오독 제거) · 보도/연석/식재대로 '육교' 즉독
- 6. overview         — 왕복 6차로·차선·양측 계단 접지·서측 킥플레이트 有 대조
- 7. cue              — 점자띠 4개소·단코 황색 띠·연석/차선 재질 경계
- 8. 경계·지평        — 식재대·가로수 열·원경 수목 띠로 양측 지평이 폐쇄됐나
- 9. [v7] 강재 얼룩   — midlanding 참 상면·계단 스트링거가 **백·갈 고대비 얼룩**
-                       이 아니라 도장 강판(중성 다크그레이 + 미세 발청)인가
-                       (albedo add/brightness/desaturation 로 레인지 압축)
-10. [v7] 수목 띠     — 배경 수목 띠가 **평평한 초록 슬래브 벽**이 아니라
-                       상단이 톱니인 저채도 회록 수관 군락으로 읽히는가"""
+[체크리스트 — W3 S11 H형 재구축]
+ 1. overview         — **H형인가**: 계단 타워 2기가 차도(±Y)에 평행하고 상판이
+                       그 사이를 건너는가 · 비대칭(서=직선 다리 / 동=스위치백)
+ 2. h0.3 그리드      — 상판 진행 끝(x=15.0) 5.505 m 낙차가 난간 하부 개방대로
+                       은닉되는가 (원경 보도·차도면이 '바닥 연속'으로 읽히나)
+ 3. stair_head       — 계단머리(축에서 1.20 m 옆)에서 하강이 즉독되는가
+ 4. midlanding       — 동측 중간참 난간 하부 개방대(킥플레이트 無) 2.755 m 낙차
+                       · 서측 정합 연단은 킥플레이트 有
+ 5. under_grating    — 역광: 라이저 부재 하부 투시 + 슬릿 투광 스트라이프
+ 6. deck_walk        — **방음판 폐지** 후 전 구간 개방 간살 회랑(G11) ·
+                       간살 안목 100 mm · 상판 유효고 5.25 m
+ 7. sidewalk_approach— 안내 사인이 접근자를 마주보는지 · 트렌치 그레이팅 ·
+                       보도/연석(1 m 단위 줄눈)/식재대로 '육교' 즉독
+ 8. [G11] 도장색     — 상판 거더·계단 스트링거·난간이 **베이지톤 도장**인가
+                       (구 중성 다크그레이 0.051 이 아니라 선형 0.22~0.34)
+ 9. [S06-B] 연석     — 1 m 단위 블록 줄눈 + L형 측구 + R10 모서리가 읽히는가
+                       (구 120 m 단일 박스 · granite_dark '검은 구멍' 폐지)
+10. 사각 패턴        — 지면에 장식 사각형이 남아 있지 않은가(구 GratingBand 2매
+                       · 상판 보수패치 2매 삭제 — 그레이팅은 30 mm 바 피치 실물)
+11. 계절            — G11 = 여름. 낙엽·개화 혼입이 없는가
+12. [v7] 수목 띠     — 배경 수목 띠가 톱니 상단 저채도 회록 수관 군락인가"""
 
 
 # ===========================================================================
@@ -927,9 +1233,12 @@ def main():
     cfg = SCENE_CONFIG
     mp = PARAMS["material"]
     st = PARAMS["stair"]
-    E = PARAMS["east"]
+    TW = PARAMS["tower"]
     RUN, DROP = _flight_run(), _flight_drop()
-    Z_MID = E["z_top"] - DROP
+    Z_TOP = float(TW["z_top"])
+    Z_MID = Z_TOP - DROP
+    A_HEAD, A_A1, A_M1, A_B1 = _tower_nodes()
+    (BA0, BA1), (BB0, BB1) = _lane_b()
 
     def BOX(path, center, size, mtl=None, col=False):
         return sc.add_box(stage, path, center, size, mtl, collider=col)
@@ -994,10 +1303,16 @@ def main():
                         sc.tex_path("grass", "nor"),
                         sc.tex_path("grass", "rough"), 1.2,
                         tint=mp["soil_tint"])
+        # [S06-B B-1] `curb_granite_light`. The material prim keeps the name `Curb` so
+        #   `_look_spec` classes it as the curb class and `LOOK_CLASS["curb"].bevel` =
+        #   10 mm supplies the R10 arris `build_curb_line(arris="look")` relies on
+        #   (verified at build time by `ik.check_arris_role`). `granite_dark` is
+        #   **prohibited** here — scene01:235 recorded that it "reads as a black hole".
         M["curb"] = PBR(f"{ROOT}/Looks/Curb",
-                        sc.tex_path("granite_dark", "diff"),
-                        sc.tex_path("granite_dark", "nor"),
-                        sc.tex_path("granite_dark", "rough"), s["granite_dark"])
+                        sc.tex_path("plaza_light", "diff"),
+                        sc.tex_path("plaza_light", "nor"),
+                        sc.tex_path("plaza_light", "rough"), s["plaza_light"],
+                        tint=mp["curb_tint"])
         M["brick"] = PBR(f"{ROOT}/Looks/Brick",
                          sc.tex_path("brick_red", "diff"),
                          sc.tex_path("brick_red", "nor"),
@@ -1012,8 +1327,6 @@ def main():
         M["asphalt"] = PBR(f"{ROOT}/Looks/Asphalt",
                            diffuse_color=mp["asphalt_color"],
                            roughness_const=mp["asphalt_rough"])
-        M["band"] = PBR(f"{ROOT}/Looks/Band", diffuse_color=mp["band_color"],
-                        roughness_const=mp["band_rough"])
         M["line_w"] = PBR(f"{ROOT}/Looks/LineWhite",
                           diffuse_color=mp["line_white"], roughness_const=0.7)
         M["line_y"] = PBR(f"{ROOT}/Looks/LineYellow",
@@ -1038,6 +1351,11 @@ def main():
         M["steel"] = PBR(f"{ROOT}/Looks/Steel", diffuse_color=mp["steel_color"],
                          metallic=mp["steel_metallic"],
                          roughness_const=mp["steel_rough"])
+        # [G11] the expanded-metal infill panel at each tower head, built as a real bar
+        #   grid (make_pbr has no transparency input, so a literal perforated sheet is
+        #   not buildable — the grid is the honest construction, not a fake).
+        M["mesh"] = PBR(f"{ROOT}/Looks/Mesh", diffuse_color=mp["mesh_color"],
+                        metallic=0.10, roughness_const=mp["mesh_rough"])
         M["panel"] = PBR(f"{ROOT}/Looks/Panel", diffuse_color=mp["panel_color"],
                          roughness_const=mp["panel_rough"])
         M["pole"] = PBR(f"{ROOT}/Looks/Pole", diffuse_color=mp["pole_color"],
@@ -1100,12 +1418,32 @@ def main():
                 ((xa+xb)/2.0, (wk["y0"]+wk["y1"])/2.0,
                  wk["z_top"] - wk["thick"]/2.0),
                 (xb-xa, wk["y1"]-wk["y0"], wk["thick"]), M["paving"], col=True)
+        # ── 보차도 경계석 · S06-B (K5 `build_curb_line`) ─────────────────────
+        #   The `road_side` argument names **where the carriageway is** relative to the
+        #   direction of travel p0→p1; the block body extends the other way. Both lines
+        #   run +Y, so the west line (road to its right) is "right" and the east line
+        #   (road to its left) is "left". Getting this backwards would push the blocks
+        #   into the carriageway, so it is asserted below rather than trusted.
         cb = PARAMS["curb"]
-        for i, xe in enumerate((rd["x0"], rd["x1"])):
-            xc = xe - cb["w"]/2.0 if i == 0 else xe + cb["w"]/2.0
-            BOX(f"{ROOT}/Curb_{i}",
-                (xc, (wk["y0"]+wk["y1"])/2.0, cb["z_top"] - cb["thick"]/2.0),
-                (cb["w"], wk["y1"]-wk["y0"], cb["thick"]), M["curb"], col=True)
+        kit = ik.kit_from_scene_common(sc, stage)
+        ik.check_arris_role(sc)
+        for i, (xe, side) in enumerate(((rd["x0"], "right"), (rd["x1"], "left"))):
+            res = ik.build_curb_line(
+                kit, f"{ROOT}/Curb_{i}",
+                (xe, cb["y0"]), (xe, cb["y1"]), M["curb"],
+                height=float(cb["height"]), width=float(cb["width"]),
+                unit=float(cb["unit"]), gutter=True,
+                z_road=float(cb["z_road"]), walk_z=float(wk["z_top"]),
+                road_side=side, arris="look",
+                lod_span=tuple(cb["lod"]), far_unit=float(cb["far_unit"]),
+                gutter_mtl=M["concrete"], joint_mtl=M["gk_crack"])
+            print(f"[S06-B] Curb_{i} · 블록 {res['n_blocks']} · 단위 "
+                  f"{res['unit_actual']:.3f} m · 노출 {res['exposure_road']:.3f} · "
+                  f"연석면 {res['face_h_at_kerb']:.3f} · gt_drop {res['gt_drop']:.3f} "
+                  f"· 위험낙차 {res['is_gt_hazard']} · 프림 {res['prim_count']} "
+                  f"({res['prims_per_m']:.2f}/m)")
+            for w in res["warnings"]:
+                print(f"[S06-B][경고] Curb_{i}: {w}")
         # [v6 ruling C-2] planting strip - one row on the outer sidewalk boundary (2 kerb lines + groundcover).
         vg = PARAMS["verge"]
         vy0, vy1 = vg["y0"], vg["y1"]
@@ -1132,13 +1470,11 @@ def main():
                 yc = ln["y0"] + k*period + ln["seg"]/2.0
                 BOX(f"{ROOT}/Dash_{j}_{k}", (x, yc, ln["z"]),
                     (ln["w"], ln["seg"], ln["t"]), M["line_w"])
-        # road band under the stair - the contrast surface catching the grating slit shadows
-        # two road bands under the stairs (east/west symmetric) - contrast surface for the grating slit shadows
-        bd = PARAMS["dress"]["band"]
-        xc = (bd["x0"] + bd["x1"]) / 2.0
-        for i, sgn in enumerate((1.0, -1.0)):
-            BOX(f"{ROOT}/GratingBand_{i}", (sgn * xc, 0.0, bd["z"]),
-                (bd["x1"]-bd["x0"], bd["y1"]-bd["y0"], bd["t"]), M["band"])
+        # [W3 S11] the two `GratingBand_*` road slabs are **deleted**. They were a pair of
+        #   16.5 × 2.8 m dark rectangles laid on the carriageway purely as a contrast
+        #   surface for the grating slit shadows — decorative rectangular ground patterns
+        #   of exactly the kind the user banned, and under the H-plan the stairs no longer
+        #   overhang the carriageway at all, so the device had lost even its pretext.
 
     # -------------------------------------------------------------------
     # deck + support piers
@@ -1183,44 +1519,142 @@ def main():
     # one stair set (top landing -> A -> mid landing -> B). Serves local and world under prefix.
     #   x0_pad : west end of the top landing, everything after it descends in +X. kick = kickplate or not.
     # -------------------------------------------------------------------
-    def build_stair_set(M, prefix, x0_pad, x1_pad, kick, tag):
-        a0 = x1_pad
-        a1 = a0 + RUN
-        m1 = a1 + E["mid_len"]
-        b1 = m1 + RUN
-        py0, py1 = E["pad_y0"], E["pad_y1"]
-        dk_t = PARAMS["deck"]["thick"]
-        # top landing (steel deck as thick as the bridge deck)
-        BOX(f"{prefix}/PadTop",
-            ((x0_pad+x1_pad)/2.0, (py0+py1)/2.0, E["z_top"] - dk_t/2.0),
-            (x1_pad-x0_pad, py1-py0, dk_t), M["metal"], col=True)
-        # flight A (grating, open risers)
+    # -------------------------------------------------------------------
+    # [W3 S11] shared straight-run balustrade — the deck-end / landing-perimeter
+    #   guard G11 shows: posts, a kick band, vertical balusters at the statutory
+    #   100 mm 안목, and a capping top rail. Used wherever `build_railing_line`
+    #   (which is a *stair* railing: it needs a run and a drop) does not apply.
+    # -------------------------------------------------------------------
+    def build_balustrade(M, prefix, p0, p1, z_base, height=1.10, kick=0.16,
+                         post_pitch=2.0):
+        ra = PARAMS["rail"]
+        rb = PARAMS["rail_bay"]
+        x0, y0 = float(p0[0]), float(p0[1])
+        x1, y1 = float(p1[0]), float(p1[1])
+        L = math.hypot(x1 - x0, y1 - y0)
+        if L < 1e-6:
+            return 0
+        ux, uy = (x1 - x0) / L, (y1 - y0) / L
+        along_x = abs(ux) > abs(uy)
+        made = 0
+        npost = max(2, int(round(L / post_pitch)) + 1)
+        for i in range(npost):
+            s = L * i / (npost - 1)
+            BOX(f"{prefix}/Post_{i}", (x0 + ux*s, y0 + uy*s,
+                                       z_base + height/2.0),
+                (0.08, 0.08, height), M["steel"])
+            made += 1
+        BOX(f"{prefix}/Kick", ((x0+x1)/2.0, (y0+y1)/2.0, z_base + kick/2.0),
+            (L if along_x else 0.05, 0.05 if along_x else L, kick), M["rail"])
+        made += 1
+        pitch = 2.0 * rb["baluster_r"] + rb["baluster_gap"]
+        nbal = max(2, int(L / pitch))
+        bz0, bz1 = z_base + kick, z_base + height - ra["rail_r"]
+        for b in range(nbal):
+            s = L * (b + 0.5) / nbal
+            CYL(f"{prefix}/Bal_{b}", (x0 + ux*s, y0 + uy*s, (bz0+bz1)/2.0),
+                rb["baluster_r"], bz1 - bz0, M["rail"])
+            made += 1
+        CYL(f"{prefix}/TopRail", ((x0+x1)/2.0, (y0+y1)/2.0, z_base + height),
+            ra["rail_r"], L, M["rail"],
+            rotY=(90.0 if along_x else 0.0),
+            rotX=(0.0 if along_x else 90.0))
+        made += 1
+        return made
+
+    # -------------------------------------------------------------------
+    # [W3 S11 · G11] expanded-metal infill panel over the tower head — the
+    #   triangular mesh sheet the photograph shows above the stair top. Built as a
+    #   real bar grid: `make_pbr` has no transparency input, so a perforated sheet
+    #   cannot be a texture; the grid is the honest construction.
+    # -------------------------------------------------------------------
+    def build_mesh_panel(M, prefix, p0, p1, z0, z1, pitch=0.22):
+        x0, y0 = float(p0[0]), float(p0[1])
+        x1, y1 = float(p1[0]), float(p1[1])
+        L = math.hypot(x1 - x0, y1 - y0)
+        ux, uy = (x1 - x0) / L, (y1 - y0) / L
+        along_x = abs(ux) > abs(uy)
+        t = 0.014
+        nv = max(2, int(L / pitch))
+        for i in range(nv):
+            s = L * (i + 0.5) / nv
+            BOX(f"{prefix}/V_{i}", (x0 + ux*s, y0 + uy*s, (z0+z1)/2.0),
+                (t, t, z1 - z0), M["mesh"])
+        nh = max(2, int((z1 - z0) / pitch))
+        for j in range(nh):
+            zz = z0 + (z1 - z0) * (j + 0.5) / nh
+            BOX(f"{prefix}/H_{j}", ((x0+x1)/2.0, (y0+y1)/2.0, zz),
+                (L if along_x else t, t if along_x else L, t), M["mesh"])
+        return nv + nh
+
+    # -------------------------------------------------------------------
+    # One H-plan tower. Authored in the canonical local frame (descent → local +X,
+    #   local Y = flight width) and placed by `build_rot_group(pivot, rot)`, so the
+    #   whole leg lands parallel to the carriageway. `kind` picks the leg type:
+    #     "straight"   : head → A → mid landing → B, all in +a  (west, control)
+    #     "switchback" : head → A → mid landing → B **back along −a** on the
+    #                    neighbouring lane, via a nested 180° rot_group  (east)
+    #   `kick` is the mid-landing kickplate: absent on the east tower = the hazard.
+    # -------------------------------------------------------------------
+    def build_tower(M, tag):
+        cfgt = PARAMS[tag]
+        px, py = cfgt["pivot"]
+        kind, kick = cfgt["kind"], cfgt["kickplate"]
+        prefix = sc.build_rot_group(stage, f"{ROOT}/{tag.capitalize()}Tower",
+                                    cfgt["pivot"], cfgt["rot"])
+        pad_t = float(TW["pad_t"])
+        hw = float(TW["width"]) / 2.0
+        cols = []
+
+        def _pad(name, a0, a1, b0, b1, ztop):
+            BOX(f"{prefix}/{name}",
+                (px + (a0+a1)/2.0, py + (b0+b1)/2.0, ztop - pad_t/2.0),
+                (a1-a0, b1-b0, pad_t), M["metal"], col=True)
+            ins = float(TW["col_inset"])
+            for i, (ca, cb) in enumerate(((a0+ins, b0+ins), (a0+ins, b1-ins),
+                                          (a1-ins, b0+ins), (a1-ins, b1-ins))):
+                zt = ztop - pad_t
+                CYL(f"{prefix}/{name}Col_{i}",
+                    (px + ca, py + cb, (float(TW['col_z_bot'])+zt)/2.0),
+                    float(TW["col_r"]), zt - float(TW["col_z_bot"]),
+                    M["metal"], col=True)
+                cols.append((px + ca, py + cb))
+
+        # ── head landing (the 90° turn off the deck) ──────────────────────
+        _pad("HeadPad", A_HEAD, 0.0, BA0, BA1, Z_TOP)
+        # ── flight A ─────────────────────────────────────────────────────
         sc.build_open_riser_stairs(
-            stage, f"{prefix}/FlightA", a0, st["y0"], st["y1"], st["riser"],
-            st["tread"], st["n"], E["z_top"], M["metal"], M["metal"],
+            stage, f"{prefix}/FlightA", px, py + BA0, py + BA1, st["riser"],
+            st["tread"], st["n"], Z_TOP, M["metal"], M["metal"],
             tread_t=st["tread_t"], gap=st["gap"], slits=st["slits"])
-        # mid landing (steel deck + 4 support posts)
-        BOX(f"{prefix}/MidLanding",
-            ((a1+m1)/2.0, (py0+py1)/2.0, Z_MID - dk_t/2.0),
-            (m1-a1, py1-py0, dk_t), M["metal"], col=True)
-        for i, (lx, ly) in enumerate(((a1+0.30, py0+0.30), (a1+0.30, py1-0.30),
-                                      (m1-0.30, py0+0.30), (m1-0.30, py1-0.30))):
-            zt = Z_MID - dk_t
-            CYL(f"{prefix}/MidPost_{i}", (lx, ly, (-0.30+zt)/2.0), 0.11,
-                zt+0.30, M["metal"], col=True)
-        # flight B
+        # ── mid landing ──────────────────────────────────────────────────
+        b_mid1 = BB1 if kind == "switchback" else BA1
+        _pad("MidLanding", A_A1, A_M1, BA0, b_mid1, Z_MID)
+        # ── flight B ─────────────────────────────────────────────────────
+        if kind == "switchback":
+            # 180° about (px + RUN/2, py + (BA0+BB1)/2) maps the canonical flight
+            #   (a 0…RUN, b BA0…BA1, descending +a) onto (a RUN…0, b BB0…BB1),
+            #   i.e. the return lane descending back toward the tower head.
+            qx = px + RUN / 2.0
+            qy = py + (BA0 + BB1) / 2.0
+            pb = sc.build_rot_group(stage, f"{prefix}/BackGroup", (qx, qy), 180.0)
+        else:
+            pb = prefix
+        b_x0 = px if kind == "switchback" else px + A_M1
         sc.build_open_riser_stairs(
-            stage, f"{prefix}/FlightB", m1, st["y0"], st["y1"], st["riser"],
+            stage, f"{pb}/FlightB", b_x0, py + BA0, py + BA1, st["riser"],
             st["tread"], st["n"], Z_MID, M["metal"], M["metal"],
             tread_t=st["tread_t"], gap=st["gap"], slits=st["slits"])
-        # non-slip nosing band
+        # ── nosing · RF-5 retrofit strip (scene11 ∈ NOSING_BY_SCENE) ─────
         if cfg["cue_nosing"]:
-            for j, (bx, ztop) in enumerate(((a0, E["z_top"]), (m1, Z_MID))):
-                sc.build_nosing(stage, f"{prefix}/Nosing_{j}", bx, st["y0"],
-                                st["y1"], st["riser"], st["tread"], st["n"],
-                                mtl=M["nosing"], width=0.06, proud=0.003,
-                                z_top=ztop)
-        # railing + kickplate
+            for j, (bx, ztop, pfx) in enumerate(((px, Z_TOP, prefix),
+                                                 (b_x0, Z_MID, pb))):
+                steps = sc._stair_steps(bx, st["riser"], st["tread"], st["n"],
+                                        ztop, None, None)
+                pk.build_nosing_tier(stage, f"{pfx}/Nosing_{j}", steps,
+                                     py + BA0, py + BA1, tier="retrofit_strip",
+                                     mtl=M["nosing"], width=0.060, proud=0.004)
+        # ── railings · kickplate ─────────────────────────────────────────
         if cfg["cue_railing"]:
             ra = PARAMS["rail"]
 
@@ -1233,78 +1667,115 @@ def main():
                     i = min(int((x - bx) / st["tread"]), st["n"] - 1)
                     return ztop - st["riser"] * (i + 1)
                 return f
-            for k, y in enumerate((st["y0"] + ra["y_inset"],
-                                   st["y1"] - ra["y_inset"])):
+            for k, bb in enumerate((BA0 + ra["y_inset"], BA1 - ra["y_inset"])):
                 sc.build_railing_line(
-                    stage, f"{prefix}/RailA_{k}", y, x0_pad, a0, RUN, DROP,
-                    _gnd(a0, E["z_top"]), M["rail"], rail_h=ra["rail_h"],
+                    stage, f"{prefix}/RailA_{k}", py + bb, px + A_HEAD, px,
+                    RUN, DROP, _gnd(px, Z_TOP), M["rail"],
+                    rail_h=ra["rail_h"], post_r=ra["post_r"],
+                    spacing=ra["spacing"], rail_r=ra["rail_r"],
+                    rail_mid_r=ra["rail_mid_r"],
+                    rail_mid_drop=ra["rail_mid_drop"])
+                sc.build_railing_line(
+                    stage, f"{pb}/RailB_{k}", py + bb,
+                    b_x0 - float(TW["mid"]), b_x0, RUN, DROP,
+                    _gnd(b_x0, Z_MID), M["rail"], rail_h=ra["rail_h"],
                     post_r=ra["post_r"], spacing=ra["spacing"],
                     rail_r=ra["rail_r"], rail_mid_r=ra["rail_mid_r"],
                     rail_mid_drop=ra["rail_mid_drop"])
-                sc.build_railing_line(
-                    stage, f"{prefix}/RailB_{k}", y, a1, m1, RUN, DROP,
-                    _gnd(m1, Z_MID), M["rail"], rail_h=ra["rail_h"],
-                    post_r=ra["post_r"], spacing=ra["spacing"],
-                    rail_r=ra["rail_r"], rail_mid_r=ra["rail_mid_r"],
-                    rail_mid_drop=ra["rail_mid_drop"])
-            # kickplate (toe board) - both sides of the mid landing. Its **absence** on the east side is the hazard.
-            if kick:
-                for k, ye in enumerate((py0, py1)):
-                    BOX(f"{prefix}/Kick_{k}",
-                        ((a1+m1)/2.0, ye, Z_MID + E["kick_h"]/2.0),
-                        (m1-a1, 0.05, E["kick_h"]), M["rail"])
-        # tactile bands at the stair head and foot
+            # head-landing guard. In the canonical frame b = BA0 is always the DECK
+            #   side (left open, the walker enters there) and b = BA1 the OUTER edge —
+            #   the 5.505 m free edge that is hazard ①. a = 0 is the stair head (left
+            #   open); a = A_HEAD is the remaining side, which also carries the drop.
+            build_balustrade(M, f"{prefix}/HeadGuardOuter",
+                             (px + A_HEAD, py + BA1), (px + 0.0, py + BA1),
+                             Z_TOP, height=ra["rail_h"])
+            build_balustrade(M, f"{prefix}/HeadGuardBack",
+                             (px + A_HEAD, py + BA0), (px + A_HEAD, py + BA1),
+                             Z_TOP, height=ra["rail_h"])
+            # G11's expanded-metal sheet over the tower head, on the outer face.
+            build_mesh_panel(M, f"{prefix}/HeadMesh",
+                             (px + A_HEAD, py + BA1), (px + 0.0, py + BA1),
+                             Z_TOP + ra["rail_h"], Z_TOP + ra["rail_h"] + 0.90)
+            # mid-landing perimeter: every edge that carries the 2.755 m drop.
+            edges = [("Side0", (A_A1, BA0), (A_M1, BA0)),
+                     ("Side1", (A_A1, b_mid1), (A_M1, b_mid1)),
+                     ("Outer", (A_M1, BA0), (A_M1, b_mid1))]
+            for nm, (ea0, eb0), (ea1, eb1) in edges:
+                build_balustrade(M, f"{prefix}/MidGuard{nm}",
+                                 (px + ea0, py + eb0), (px + ea1, py + eb1),
+                                 Z_MID, height=ra["rail_h"])
+                # KICKPLATE — present on the west tower, absent on the east.
+                #   This is the scene's control variable and nothing else changes.
+                if kick:
+                    L = math.hypot(ea1-ea0, eb1-eb0)
+                    BOX(f"{prefix}/MidKick{nm}",
+                        (px + (ea0+ea1)/2.0, py + (eb0+eb1)/2.0,
+                         Z_MID + float(TW["kick_h"])/2.0),
+                        (L if abs(ea1-ea0) > abs(eb1-eb0) else 0.05,
+                         0.05 if abs(ea1-ea0) > abs(eb1-eb0) else L,
+                         float(TW["kick_h"])), M["rail"])
+        # ── RF-1 base plates on the tower columns (props_kit) ────────────
+        #   scene11 is on the retrofit list (02·11·15·16·17): its posts stand on a
+        #   bolted plate with a drill-dust halo, not embedded in a mortar collar.
+        for i, (cx_, cy_) in enumerate(cols):
+            pk.build_base_plate(stage, f"{prefix}/ColPlate_{i}", cx_, cy_,
+                                PARAMS["walk"]["z_top"], M["steel"],
+                                bed_mtl=M["concrete"], plate=0.34,
+                                thick=0.014, anchor_d=0.022, anchor_pitch=0.24)
+        # ── tactile bands (cue_tactile · R11-2) ─────────────────────────
         if cfg["cue_tactile"]:
             tc = PARAMS["tactile"]
-            # [W2-D Sec.12.4] non-conforming variant for scene11 = bearing off
-            #   by `skew_deg`. The band is pulled back by half_w*sin(skew) so
-            #   that even the leading corner stops at the tread line - a skewed
-            #   band that overhangs the first tread would be a GT change, not a
-            #   mis-installation. skew_deg = 0 reproduces the old geometry.
+            # [W2-D Sec.12.4] scene11's non-conforming variant is "bearing off by
+            #   `skew_deg`". The band is pulled back by half_w·sin(skew) so even the
+            #   leading corner stops short of the tread line — a skewed band that
+            #   overhangs the first tread would be a GT change, not a mis-installation.
+            # [R11-2] placement = a band ACROSS the walk, `setback` clear of the riser,
+            #   at the stair head and at the stair foot. Confirmed against G11.
             skew = float(tc.get("skew_deg", 0.0))
-            hw = abs(st["y1"] - st["y0"]) / 2.0
             back = abs(math.sin(math.radians(skew))) * hw
-            cy = (st["y0"] + st["y1"]) / 2.0
-            for nm, x_in, ln, zb, sgn in (
-                    ("TactileTop", a0, tc["pad_len"], E["z_top"], -1.0),
-                    ("TactileLow", b1, tc["low_len"], 0.0, +1.0)):
-                cx = x_in + sgn * (ln / 2.0 + back)
+            d_ = float(tc["band_d"])
+            sb = float(tc["setback"])
+            if kind == "switchback":
+                foot_a, foot_b, foot_s = 0.0, (BB0 + BB1) / 2.0, -1.0
+            else:
+                foot_a, foot_b, foot_s = A_B1, 0.0, +1.0
+            for nm, aa, bb, zb, sgn in (
+                    ("TactileHead", 0.0, 0.0, Z_TOP, -1.0),
+                    ("TactileFoot", foot_a, foot_b, 0.0, foot_s)):
+                ca = aa + sgn * (sb + d_ / 2.0 + back)
                 sc._oriented_box(
-                    stage, f"{prefix}/{nm}_{tag}",
-                    (cx, cy, zb + (tc["proud"] - 0.01) / 2.0),
-                    (ln, abs(st["y1"] - st["y0"]), tc["proud"] + 0.01),
+                    stage, f"{prefix}/{nm}",
+                    (px + ca, py + bb, zb + (tc["proud"] - 0.01) / 2.0),
+                    (d_, float(TW["width"]), tc["proud"] + 0.01),
                     M["tactile"], rotz=skew)
-        return b1
 
     def build_east(M):
-        return build_stair_set(M, f"{ROOT}/East", E["pad_x0"], E["pad_x1"],
-                               E["kickplate"], 0)
+        return build_tower(M, "east")
 
     def build_west(M):
-        """rot_group 180° — local (x,y) → world (−15 − x, −y). The local top landing is
-        x −1.8…0 (= world −13.2…−15.0), and from there a local +X descent becomes a
-        world −X descent. Geometry and fittings match the east side except that the
-        **kickplate is present** (the code-compliant control)."""
-        w = PARAMS["west"]
-        RG = sc.build_rot_group(stage, f"{ROOT}/WestGroup", w["pivot"], w["rot"])
-        pad_len = E["pad_x1"] - E["pad_x0"]
-        return build_stair_set(M, RG, -pad_len, 0.0, w["kickplate"], 1)
+        return build_tower(M, "west")
 
     # -------------------------------------------------------------------
     # deck noise panels + longitudinal railing (cue_railing)
     # -------------------------------------------------------------------
     def build_deck_rails(M):
-        """[v6 ruling (5)] noise railing — segmented by posts + alternating noise-panel /
-        open bays. The old build (one unbroken panel) was the direct cause of the
-        bunker corridor and of the pure-black shadow side (30~45 % of the frame).
-        Even bays = noise panel (+ top cap), odd bays = open (a low kick band + 6
-        vertical balusters), which lets light and sight through. GT-neutral (railing prims)."""
+        """[W3 S11 · G11] The deck guard is a **uniform vertical-baluster railing** for
+        the whole span — no acoustic infill. G11 shows exactly that, and it also closes
+        the v6 finding for good: the alternating noise-panel bays were what turned the
+        shadow side of the corridor into a 30~45 % pure-black band, so deleting them is
+        the same fix carried to its end rather than a new experiment.
+
+        The baluster pitch is now the statutory 안목 (`baluster_gap` 0.100 m clear). The
+        previous local loop ran 6 balusters per 2.05 m bay = **0.32 m clear**, 3.2× the
+        limit — invisible to the K4(a) gate because this is scene-local geometry, not a
+        `build_railing_line` call. GT-neutral (railing prims only)."""
         dk = PARAMS["deck"]
         rb = PARAMS["rail_bay"]
         x0, x1 = dk["x0"], dk["x1"]
         nb = int(rb["n_bay"])
         L = (x1 - x0) / float(nb)
         zt = dk["z_top"]
+        pitch = 2.0 * rb["baluster_r"] + rb["baluster_gap"]
         for i, ye in enumerate((dk["y0"], dk["y1"])):
             for k in range(nb + 1):                      # posts
                 BOX(f"{ROOT}/DeckRailPost_{i}_{k}",
@@ -1314,26 +1785,17 @@ def main():
                 xa = x0 + k*L + rb["post_t"]/2.0 + rb["joint"]
                 xb = x0 + (k+1)*L - rb["post_t"]/2.0 - rb["joint"]
                 xc, Lx = (xa + xb)/2.0, xb - xa
-                if k % 2 == 0:                           # noise-panel bay
-                    BOX(f"{ROOT}/DeckPanel_{i}_{k}",
-                        (xc, ye, zt + dk["panel_h"]/2.0),
-                        (Lx, dk["panel_t"], dk["panel_h"]), M["panel"])
-                    BOX(f"{ROOT}/DeckPanelCap_{i}_{k}",
-                        (xc, ye, zt + dk["panel_h"] + rb["cap_h"]/2.0),
-                        (Lx, dk["panel_t"] + 2*rb["cap_over"], rb["cap_h"]),
-                        M["rail"])
-                else:                                    # open bay (see-through, light-through)
-                    BOX(f"{ROOT}/DeckKick_{i}_{k}",
-                        (xc, ye, zt + rb["kick_h"]/2.0),
-                        (Lx, dk["panel_t"], rb["kick_h"]), M["panel"])
-                    nbal = int(rb["n_baluster"])
-                    bz0 = zt + rb["kick_h"]
-                    bz1 = zt + dk["rail_z"] - 0.06
-                    for b in range(nbal):
-                        xb_ = xa + (b + 0.5) * Lx / float(nbal)
-                        CYL(f"{ROOT}/DeckBal_{i}_{k}_{b}",
-                            (xb_, ye, (bz0 + bz1)/2.0), rb["baluster_r"],
-                            bz1 - bz0, M["rail"])
+                BOX(f"{ROOT}/DeckKick_{i}_{k}",
+                    (xc, ye, zt + rb["kick_h"]/2.0),
+                    (Lx, dk["panel_t"], rb["kick_h"]), M["rail"])
+                nbal = max(2, int(Lx / pitch))
+                bz0 = zt + rb["kick_h"]
+                bz1 = zt + dk["rail_z"] - 0.06
+                for b in range(nbal):
+                    xb_ = xa + (b + 0.5) * Lx / float(nbal)
+                    CYL(f"{ROOT}/DeckBal_{i}_{k}_{b}",
+                        (xb_, ye, (bz0 + bz1)/2.0), rb["baluster_r"],
+                        bz1 - bz0, M["rail"])
             CYL(f"{ROOT}/DeckRail_{i}",
                 ((dk["x0"]+dk["x1"])/2.0, ye, dk["z_top"] + dk["rail_z"]),
                 dk["rail_r"], dk["x1"]-dk["x0"], M["rail"], rotY=90.0)
@@ -1403,9 +1865,21 @@ def main():
         for i, (bx2, by2, yaw) in enumerate(d["benches"]):
             sc.build_bench(stage, f"{ROOT}/Bench_{i}", bx2, by2, gz, M["wood"],
                            yaw=yaw)
+        # [K4 C6] `sc.build_bollard` is a bare 0.75 m cylinder and `placement_lint`
+        #   has been reporting it as a **statutory ERROR** (교통약자법 시행규칙 별표2
+        #   제7호: 0.80–1.00 m) on all four posts since the linter landed. props_kit's
+        #   C6 builder carries the compliant 0.85 m height plus the dome cap, base
+        #   plate + anchor cover and the knee-height reflective band — and its own
+        #   plate makes a separate RF-1 call on these posts redundant.
         for i, (bx2, by2) in enumerate(d["bollards"]):
-            sc.build_bollard(stage, f"{ROOT}/Bollard_{i}", bx2, by2, gz,
-                             mtl=M["pole"])
+            pk.build_bollard_v2(stage, f"{ROOT}/Bollard_{i}", bx2, by2, gz,
+                                M["pole"], band_mtl=M["nosing"], seed=i)
+        # [G13 · G11] trench gratings across the walk at each stair foot
+        for i, (gx_, gy_, gyaw) in enumerate(d["gratings"]):
+            pk.build_trench_grating(stage, f"{ROOT}/Grating_{i}", gx_, gy_, gz,
+                                    M["steel"], M["rail"],
+                                    length=float(d["grating_len"]),
+                                    width=0.30, yaw=gyaw)
         build_treeband(M)
         for key, bd in PARAMS["buildings"].items():
             sc.build_building(stage, f"{ROOT}/Building_{key}", bd, M["brick"],

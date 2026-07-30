@@ -24,6 +24,44 @@ Auto capture (headless):  NEGOBS_CAPTURE=1 python scene16_canopy_shadow.py
 Smoke early exit:         NEGOBS_SMOKE=1  python scene16_canopy_shadow.py
 
 Coordinates: Z-up, m, travel axis +X, drop start edge = x=0.
+
+═══ W3 renovation (intake v2 §2 scene16 row · §7 rulings 4 & 8) ═════════════
+Target image: `Docs/reference_photos/Generated Image - Scene02.jpg` (**G2**) — 16 and 02
+are the same archetype, so G2 is effectively this scene's own reference.
+
+1. **§7-4 BOTH BANDS.** The far `tactile_entrance` band (`gkit`, x −6.00…−5.40) is the
+   scene's **cue+/label− quadrant filler** (§12.6): a statutory band in front of a
+   *building entrance*, i.e. deliberately at a spot with **no drop**. It is left exactly
+   where it was. A **second, correct stair-head warning band** is added at the statutory
+   position — 0.30 m in front of the first riser, 0.60 m deep, full stair width — so the
+   scene carries a true cue *and* a false one, which is what a real Korean street shows
+   (guidance blocks at a building entrance **and** warning blocks at a stair head).
+   The band reuses scene01's registered generator and texture (`infra_kit.build_tactile_pair`
+   dot type + the `tactile` role, `relief="normal"`; §12.5 ③ prim-cap route). See
+   `Docs/reports/w3_s16_v1.md` §2 for the GT-E1′ / GT-E2 / EXPECTED_FP arithmetic and for
+   the `TACTILE_SITES` / `EXPECTED_FP` rows this band **requires but does not write**
+   (ground_kit is not this workflow's file; adjudicator edits are parked per **D14**).
+
+2. **BS-4 street-wall backdrop.** The scene used to be a plaza with **grass on both sides
+   of the walk**, which is the opposite of G2's dense downtown block. Both verges are now
+   a continuous **street wall** built by `building_kit` with an explicit
+   `kind="backdrop"` and the real judged eye set (`bk.judged_eyes(0.0)`), i.e. 3–4 prims
+   per block and **no windows at backdrop tier**. Buildings C/D (the +X / −X horizon
+   closers) are untouched — this row is about the two verges.
+
+3. **U-6 sweep.** `gkit` repair patches 2 → **1**, and the survivor is re-sited against a
+   real cause (the manhole reinstatement cut) instead of floating on open pavement.
+   §3(ii) N2 reconciliation: a repair patch **stays rectangular** — what is swept is the
+   count and the causeless placement, not the shape.
+
+4. **U-5 is already satisfied** and is only *stated* here, not changed: canopy
+   x −1.00…+4.60 against a descent of x 0.00…4.48 (14 × 0.32) — the roof covers the whole
+   flight plus 1.00 m of approach. 16 is the in-library model for the continuous-canopy
+   form (02-A), not a defect.
+
+DEFERRED to a Lane-1 follow-up (recorded, not attempted here): **K5** curb geometry for the
+colour-only `M["curb"]`, **K4(b)** street-row species, and the `PLACEMENT` block that would
+promote the eight `placement_lint` `nodata` WARNs into real gates.
 """
 
 import os
@@ -34,7 +72,10 @@ import datetime
 
 import scene_common as sc
 import ground_kit as gk
+import infra_kit as ik        # [W3 S16] statutory tactile generator (scene01's route)
 import stair_kit as sk       # [realism v1] statutory handrail (§15(3)/(4))
+import facade_kit as fk      # [W3 S16 · BS-4] primitive injection for building_kit
+import building_kit as bk    # [W3 S16 · BS-4] street-wall backdrop (kind="backdrop")
 
 
 # ===========================================================================
@@ -47,7 +88,15 @@ SCENE_CONFIG = {
     #   Both stairs are wall to wall, so §15(1)2 is met by the "wall". The pit
     #   perimeter guard is unchanged. Docs/reports/scene15_railing_fix_v1.md §8.
     "cue_railing":        True,   # one handrail per stair side + guardrail around the pit at ground level
-    "cue_tactile":        False,  # [v5.2 user] tactile paving is rare in reality - OFF by default (path kept for ablation)   # dot tactile paving: top warning strip + lower passage
+    # [v5.2 user] tactile paving is rare in reality - OFF by default (path kept for ablation).
+    # [W3 S16 · §7-4] What this toggle still owns: the **lower landing** band and the
+    #   bollard-frontage band. It no longer owns the **stair head** — the §7-4 ruling puts a
+    #   statutory warning band there unconditionally so that the user's position check is
+    #   satisfied in the *shipped* build, exactly as the entrance band already is. The
+    #   ablation consequence (scene16's cue-OFF arm now retains one drop-correlated band)
+    #   is written up in `Docs/reports/w3_s16_v1.md` §2.4 for the supervisor — it is a
+    #   dataset-semantics decision, not a scene decision.
+    "cue_tactile":        False,  # dot tactile paving: lower passage landing + bollard frontage
     "cue_material_break": True,   # False -> stairs·passage also take the sidewalk material (plaza_lower)
     "cue_nosing":         True,   # yellow non-slip strip on every step (low contrast inside the shadow - the signature)
     "cue_sign":           True,   # [v5 shared layer] one sign_exit (underpass exit)
@@ -113,7 +162,16 @@ PARAMS = dict(
     #  wall, both ≥ statutory 50 mm (§15(4)2) `[computed]`.
     stair_rail=dict(y=1.43, dia=0.034, height=0.85, post_r=0.020,
                     post_spacing=1.20, ext_top=0.30, ext_bot=0.30),
-    tactile=dict(ahead=0.3, depth=0.3, proud=0.004, land_depth=0.4),
+    # `ahead`/`depth`/`proud` drive the toggle-bound bands (lower landing, bollard front).
+    # `head_*` is the **statutory stair-head warning band** added by §7-4 (BOTH BANDS):
+    #   교통약자법 시행규칙 별표1 2호 차목 (점형 300 그리드 · 돌기 36개 · 높이 6±1 mm) +
+    #   국도 실무요령 7.5 (점형 깊이 60 cm 표준 = 2줄) + 계단 첫 단 0.30 m 이격.
+    #   The same three numbers ground_kit carries as `tactile_setback` 0.300 /
+    #   `tactile_band_depth` 0.600 / `tactile_dot_h` 0.006 — restated here because this
+    #   band is built scene-side (see the module docstring: ground_kit's TACTILE_SITES
+    #   registry is another workflow's file this wave).
+    tactile=dict(ahead=0.3, depth=0.3, proud=0.004, land_depth=0.4,
+                 head_setback=0.30, head_depth=0.60, head_dot_h=0.006),
     nosing=dict(color=(0.85, 0.72, 0.10), width=0.05, proud=0.001),
 
     # ═══ [W2-D ground_kit] P3 sidewalk_block - spec §5.2 scene16 row ══════════
@@ -136,11 +194,24 @@ PARAMS = dict(
     #    16-row floor, so a continuous transverse drip band there is a GT-E2
     #    violation [computed]. The drip is therefore carried as **decals**
     #    (`stain` kind "drip") inside the trimmed region instead of a line.
+    #  ★ [W3 S16 · U-6] **patch 2 → 1.** Intake v2 §3(ii) rules `sidewalk_block`
+    #    (02·08·16) down to one patch per main scene, and the N2 reconciliation is
+    #    explicit that a repair patch **keeps its rectangle** (saw-cut 커터 geometry,
+    #    DEC-3 module snap + axis lock) — what the sweep removes is the **count** and
+    #    the **causeless placement**. Deleted: (−1.20, +0.35), a 0.9 × 0.6 m rectangle
+    #    floating 1.2 m in front of the stair head with nothing to explain it, and the
+    #    single most conspicuous decorative rectangle in the near field of the d2 cut.
+    #    Deleted: (−8.60, −0.30), same objection at range. Survivor (−4.85, −0.80) is
+    #    butted to the manhole at (−3.90, −0.80) with a 0.10 m gap — a utility-cut
+    #    reinstatement, which is the one repair on a Korean footway that always has a
+    #    visible cause. Gate effect `[measured, gk.plan_ground dry run]`: B1 1 (≥1) ·
+    #    B2 51.0 % (≥20) · B6/B7/B9/B10/B11 unchanged PASS; B4/B5 were already WARN
+    #    before this edit and are untouched by it.
     gkit=dict(
         region=(-12.0, -2.5, 0.0, 2.5),
         manholes=[(-3.9, -0.8)],
         gullies=[(-6.0, -2.2), (-1.5, 2.2)],
-        patches=[(-1.20, 0.35), (-8.60, -0.30)],
+        patches=[(-4.85, -0.80)],
         # entrance tactile band: 0.60 m deep, walk-corridor width
         tactile_entrance=(-6.00, -2.5, -5.40, 2.5),
         wear_lane=((-12.0, 0.0), (-0.85, 0.0)),   # desire line to the stairs
@@ -164,6 +235,89 @@ PARAMS = dict(
                axis="x", facade_x=-24.0, face_dir=1.0),
     ),
     window=dict(w=1.2, h=1.6, inset=0.15, col_step=2.5, margin=2.0),
+
+    # ═══ [W3 S16 · BS-4] G2 street wall — the backdrop rebuild ═══════════════
+    #  What it replaces: `ground` grass, visible on **both verges** beyond the walk
+    #  (|y| > 8) in every judged cut. G2 closes both sides of the entrance with a
+    #  continuous downtown block, and the intake row names that as the main work.
+    #
+    #  Why `kind="backdrop"` and not a tiered type `[measured — bk.plan_building]`:
+    #    * `bk.eye_distance` measures to the **nearest point of the facade rectangle**.
+    #      For a wall that runs *past* the camera that nearest point is the lateral
+    #      standoff (8.00 m), not the nearest point that is ever **in** frame. The blocks
+    #      therefore compute `tier="near"` and `z_ceil` 1.42–3.59 m, and the §10.8
+    #      backdrop-policy (2) cap ("build nothing above z_ceil") would cut a 4-storey
+    #      street wall off at first-floor sill height. Policy (2) is written for a
+    #      building the camera faces, not for a wall it travels along.
+    #    * The frame test agrees with the eye: the ±30° cone only reaches |y| = 8 at
+    #      X ≥ 13.9 m, so the wall enters frame from world x ≈ +4.7 (d10) / +12.7 (d2) —
+    #      i.e. **only the far run is ever seen, and only in silhouette**.
+    #    * 4 of the 12 blocks (S0·S1·N0·N1) are behind every judged eye and BS-4 demotes
+    #      them on its own (`in_frame=False`); forcing the kind makes the whole row one
+    #      decision instead of eight.
+    #  Prims 38 for 12 blocks (`prim_budget("backdrop", …) = 4` each) and **0 windows**.
+    #
+    #  Heights: the four blocks flanking the stair head (x −9…+5.5) are held to
+    #  9.8–14.0 m on purpose. The walk is a 16 m canyon floor; at h = 14 the sky-view
+    #  factor on the centreline is cos(atan(14/8)) ≈ 0.50, and the judged subject is a
+    #  stair already sitting in canopy shadow (`under_canopy` runs mean 52.7 / dark 40.7 %
+    #  in the 260730_w2d_fix baseline `[measured]`). The two taller blocks (24.0 / 26.0 m)
+    #  sit **east of the flight**, where the sky they take is behind the descent.
+    #  Sun check: `SUN_AZ_OFFSET` puts the shadow azimuth at 0°, i.e. **along +X**, so a
+    #  wall running along X casts its shadow onto its own footprint and never across the
+    #  walk — the canopy stays the only thing shadowing the stair.
+    #  Blocks: (x0, x1, h, floors, shell material key).
+    #  ── r2, after the first pilot `[measured — 260731_w3_s16 r1 vs 260730_w2d_fix]` ──
+    #  r1 put the facades on the walk edge (|y| = 8.0) with a brick shell in the mix and
+    #  paid for it on two instruments at once:
+    #    * **OCCL** newdark 4.7 % / blob 1.9 % (h1.8_d2), 3.1 % (h0.9_d2), 2.3 %
+    #      (shadow_band) — and the mask was **entirely in the top third at the left and
+    #      right edges** (row bands 0–3, col bands 0–1 and 6–7), i.e. sky→wall, not
+    #      "camera swallowed". The pixels crossed the <25 line because the facades face
+    #      ±y while the sun sits on the **−X axis**: a street running along X gets *zero*
+    #      direct sun on its street wall, so the shells live on skylight alone, and
+    #      `brick_red` is a **0.087 linear-albedo** map `[measured]` — with r1's 0.78
+    #      tint the worst blocks were an effective **0.050**.
+    #    * **under_canopy** dark 40.7 → 57.1 % — the sky-view factor on a 16 m canyon
+    #      floor at h ≈ 14 is cos(atan(14/8)) ≈ 0.50, and the judged subject already
+    #      lives on indirect light.
+    #  r2 fixes both causes rather than shrinking the deliverable: the canyon opens from
+    #  16 to 20 m (facade |y| 8.0 → **10.0**, SVF 0.50 → 0.58), the two tall blocks come
+    #  down 26/24 → 22/21 m, and `brick_red` leaves the street-wall palette for
+    #  `marble_light` (0.325) — Korean 근생 street walls are tile / 석재 / 미장 far more
+    #  often than face brick anyway, and G2's own two flanks are grey tile and metal.
+    #  Effective shell albedo now 0.20–0.33 against r1's 0.05–0.25, all inside §1.11's
+    #  ≤0.55 band. `brick_red` is untouched elsewhere (building C keeps it).
+    backdrop=dict(
+        base_z=-0.35,             # foot buried below the walk (0.0) and the grass (−0.03)
+        S=dict(y0=-24.0, y1=-10.0, facade_y=-10.0, face_dir=1.0, blocks=(
+            (-16.0,  -8.0, 12.0, 4, "city_stone"),
+            (-8.0,   -2.0, 10.4, 3, "city_plaster"),
+            (-2.0,    5.5, 13.2, 4, "city_wall"),
+            (5.5,    12.0, 22.0, 7, "city_plaster"),
+            (12.0,   20.0, 15.2, 5, "city_stone"),
+            (20.0,   26.0, 18.0, 6, "city_wall"))),
+        N=dict(y0=10.0, y1=24.0, facade_y=10.0, face_dir=-1.0, blocks=(
+            (-16.0,  -9.0, 11.2, 3, "city_wall"),
+            (-9.0,   -2.5, 13.6, 4, "city_stone"),
+            (-2.5,    4.0,  9.8, 3, "city_plaster"),
+            (4.0,    11.5, 16.0, 5, "city_wall"),
+            (11.5,   19.0, 21.0, 7, "city_stone"),
+            (19.0,   26.0, 19.0, 6, "city_plaster"))),
+        # The verge the street wall cannot cover: the 2 m strips between the walk edge
+        # (|y| = 8) and the new building line (|y| = 10), plus the 4 m band between the
+        # walk's east end (x 22) and building C's facade (x 26) — a lawn closing a
+        # downtown street at 32–36 m. All three are paved at the **existing ground top**
+        # (`ground.z_top` −0.03) + 10 mm to defeat z-fighting, i.e. a material change of
+        # a surface that is already there: no walked surface moves (GT class A) and the
+        # only step introduced is the 20 mm the walk already has against the verge.
+        # Kept as three strips, not one slab, so that nothing is laid over the trench
+        # void (GT-V) — the east strip starts 3.52 m past the trench end at x 18.48.
+        apron=dict(z_top=-0.02, thick=0.30, strips=(
+            (-16.0, -10.0, 26.0, -8.0),
+            (-16.0,   8.0, 26.0, 10.0),
+            (22.0,   -8.0, 26.0,  8.0))),
+    ),
 
     # --- context dressing (cue_scene_dressing) : "a downtown plaza with an underpass entrance" ---
     # entrance sign gate (portal-type sign) - spans the top of the opening
@@ -209,8 +363,23 @@ PARAMS = dict(
     signs=[("Exit", "sign_exit", -1.6, 2.6, 0.0, 180.0, 0.9, 0.45)],
 
     material=dict(
+        # `brick_red` 2.0 is the library-wide value BS-1 will re-derive (0.90–1.10) across
+        # 17 scenes in K3 — deliberately **not** touched here, and the new street-wall
+        # brick shell reads the same key so that sweep still lands in one place.
         scale=dict(plaza_lower=0.7, plaza_light=1.80, grass=1.4,
-                   brick_red=2.0, tactile=0.3),
+                   brick_red=2.0, tactile=0.3,
+                   concrete_wall=2.0, plaster=2.2, marble_light=1.6),
+        # [W3 S16 · BS-4] Street-wall shells. Three tones, mixed along both rows, because
+        #   a Korean downtown block is never one material: 회색 콘크리트·타일 / 석재 /
+        #   미장. Tints are **near-unity on purpose** — see the r2 note in
+        #   `PARAMS["backdrop"]`: these facades never see direct sun (the sun is on the
+        #   −X axis and the wall runs along X), so anything that scales the map down
+        #   drives the shaded facade under the OCCL <25 line. Linear albedo after tint
+        #   0.198 / 0.257 / 0.328 `[measured on the maps]`, all inside §1.11's ≤0.55 band
+        #   and all still textures, never constants.
+        city_wall_tint=(0.94, 0.95, 0.97),      # cool grey concrete / tile
+        city_stone_tint=(0.92, 0.90, 0.87),     # light granite / stone cladding
+        city_plaster_tint=(0.95, 0.94, 0.90),   # warm beige render
         grass_tint=(0.55, 0.68, 0.42),
         roof_color=(0.72, 0.72, 0.74), roof_rough=0.55,     # light grey roof
         post_color=(0.55, 0.55, 0.58), post_metallic=0.5, post_rough=0.5,
@@ -275,8 +444,10 @@ if _sc_ov:
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "scene16")
 
+# [W3 S16 · BS-4] `concrete_wall` / `plaster` join for the street-wall shells.
 ASSET_ROLES = ["plaza_lower", "plaza_light", "grass", "tactile",
-               "brick_red", "sign_exit", "hdri", "mdl"]   # [v5] sign_exit
+               "brick_red", "concrete_wall", "plaster", "marble_light",
+               "sign_exit", "hdri", "mdl"]   # [v5] sign_exit
 
 
 def build_views():
@@ -302,7 +473,11 @@ BANNER = """\
  4. cue ON vs OFF      — nosing/railing/tactile 토글 시 기하 트랜스폼 불변
  5. 재질·태양방위      — [ ]키로 그림자가 계단을 덮는 방위 확인·Z파이팅 없는가
  6. [v4] 동측 출구 계단(x14→18.48 상승)·둘레난간 파라펫 접지·사인 게이트
- 7. [v5] 공통 레이어 — 점자띠(상단·하부) + sign_exit(진입부 y +2.6) 판독"""
+ 7. [v5] 공통 레이어 — 점자띠(하부 랜딩·볼라드) + sign_exit(진입부 y +2.6) 판독
+ 8. [W3] 점자 2본 — 계단머리 경고(x −0.90…−0.30, 낙차 있음) + 주출입구(x −6.00…−5.40,
+        낙차 없음)가 한 프레임에 같이 읽히는가(§7-4 BOTH BANDS)
+ 9. [W3] 양측 가로벽 — 잔디 소실·창 0·프레임 좌우가 도심 블록으로 닫히는가(BS-4)
+10. [W3] 보수 패치 1매가 맨홀 옆에 붙어 '원인 있는 절삭 보수'로 읽히는가(U-6)"""
 
 
 def main():
@@ -365,6 +540,25 @@ def main():
             f"{ROOT}/Looks/Brick", sc.tex_path("brick_red", "diff"),
             sc.tex_path("brick_red", "nor"), sc.tex_path("brick_red", "rough"),
             sca["brick_red"])
+        # [W3 S16 · BS-4] street-wall shells. The material **name** is what the look layer
+        #   classifies on (`scene_common._look_spec` reads the last path segment), so the
+        #   "city"/"wall"/"plaster"/"brick" tokens are load-bearing: CityWall/CityParapet
+        #   land in the concrete family and CityBrick/CityPlaster in the brick family,
+        #   which is what earns them texture promotion and the detail normal.
+        M["city_wall"] = PBR(
+            f"{ROOT}/Looks/CityWall", sc.tex_path("concrete_wall", "diff"),
+            sc.tex_path("concrete_wall", "nor"),
+            sc.tex_path("concrete_wall", "rough"), sca["concrete_wall"],
+            tint=mp["city_wall_tint"])
+        M["city_stone"] = PBR(
+            f"{ROOT}/Looks/CityStone", sc.tex_path("marble_light", "diff"),
+            sc.tex_path("marble_light", "nor"),
+            sc.tex_path("marble_light", "rough"), sca["marble_light"],
+            tint=mp["city_stone_tint"])
+        M["city_plaster"] = PBR(
+            f"{ROOT}/Looks/CityPlaster", sc.tex_path("plaster", "diff"),
+            sc.tex_path("plaster", "nor"), sc.tex_path("plaster", "rough"),
+            sca["plaster"], tint=mp["city_plaster_tint"])
         M["tactile"] = PBR(
             f"{ROOT}/Looks/Tactile", sc.tex_path("tactile", "diff"),
             sc.tex_path("tactile", "nor"), None, sca["tactile"])
@@ -490,7 +684,10 @@ def main():
             overrides=dict(
                 infra=dict(manhole=1, gully=2, gutter_L=0),
                 # "drip" added to the stain kinds = canopy eaves run-off.
-                surface=(("patch", 2), ("crack", 4),
+                # [W3 S16 · U-6] patch 2 → 1. The count lives here; `gkit["patches"]`
+                #   only supplies the site, so leaving it at 2 would have auto-placed
+                #   the second one back.
+                surface=(("patch", 1), ("crack", 4),
                          ("stain", ("dirt", "gum", "drip")), ("weed", 8)),
                 extras=(("wear_lane", dict(width=0.90)),)),
             extras_args=dict(wear_lane=dict(centerline=tuple(g["wear_lane"]))),
@@ -647,10 +844,12 @@ def main():
         if cfg["cue_tactile"]:
             tc = PARAMS["tactile"]
             pa = PARAMS["passage"]
-            sc.build_tactile(stage, f"{ROOT}/Tactile_Top",
-                             st["x0"] - tc["ahead"], st["x0"],
-                             st["y0"], st["y1"], M["tactile"], z=0.0,
-                             proud=tc["proud"])
+            # [W3 S16 · §7-4] `Tactile_Top` **retired**. It sat at x −0.30…0.00, i.e. flush
+            #   against the first riser with **zero setback and 0.30 m depth**, which is
+            #   neither the statutory position (0.30 m clear) nor the statutory depth
+            #   (0.60 m = 2 rows). The §7-4 band supersedes it — see `build_tactile_head`.
+            #   Keeping both would have laid 0.90 m of continuous yellow at the stair head
+            #   in the cue-ON arm.
             sc.build_tactile(stage, f"{ROOT}/Tactile_Land",
                              pa["x0"], pa["x0"] + tc["land_depth"],
                              st["y0"], st["y1"], M["tactile"],
@@ -705,6 +904,92 @@ def main():
 
             hrail(f"{ROOT}/PerimRail_S", -pr["y"], pr["x0"], pr["x1"])
             hrail(f"{ROOT}/PerimRail_N", pr["y"], pr["x0"], pr["x1"])
+
+    # -------------------------------------------------------------------
+    # [W3 S16 · §7-4 BOTH BANDS] statutory stair-head warning band
+    # -------------------------------------------------------------------
+    def build_tactile_head(M):
+        """The **second** band of the §7-4 ruling: a dot-type warning band 0.30 m in
+        front of the first riser, 0.60 m deep, full stair width.
+
+        Not bound to `cue_tactile`. The ruling exists to satisfy the user's position
+        check on the shipped build, and a band that is OFF by default satisfies no
+        position check. It **is** bound to `hazard_stairs`: with the trench filled there
+        is no first riser for a stair-head band to warn about, so the flat control arm
+        does not inherit a cue with nothing behind it.
+
+        Generator: `infra_kit.build_tactile_pair`, the same call scene01's registered
+        `stair_top` site makes, with the same `tactile` texture role. `relief="normal"`
+        (1 prim, dots carried by `tactile_yellow_nor`) rather than `relief="geom"`:
+        geom would emit 2 × 10 tiles × 36 = **720 nubs** for a 0.60 × 3.00 m band against
+        the §8.1 absolute cap of 200 — the sceneN5 precedent, decided the same way. The
+        nub the generator models is Ø35 mm (`min(tile)/6 × 0.35 × 2`), which is the
+        diameter the ruling names; the truncated-cone taper lives in the normal map.
+        """
+        st = PARAMS["stairs"]
+        tc = PARAMS["tactile"]
+        x_hi = st["x0"] - tc["head_setback"]
+        x_lo = x_hi - tc["head_depth"]
+        r = ik.build_tactile_pair(
+            gk.kit_from_scene_common(sc, stage), f"{ROOT}/Tactile_StairHead",
+            "dot", x_lo, st["y0"], x_hi, st["y1"], M["tactile"],
+            z=st["z_top"], relief="normal", walk_axis="x",
+            dot_h=tc["head_dot_h"])
+        need = gk.EDGE_K * r["nub_h"]
+        print(f"[점자·계단머리] x {x_lo:+.2f}…{x_hi:+.2f} · 첫 단 {tc['head_setback']:.2f} m "
+              f"전 · 깊이 {tc['head_depth']:.2f} · 전폭 {st['y1'] - st['y0']:.2f} · "
+              f"돌기 h{r['nub_h'] * 1000:.0f} mm Ø35 · 프림 {r['prim_count']} · "
+              f"알베도 상한 {gk.TACTILE_ALBEDO_CAP:.2f}")
+        print(f"[점자·계단머리] GT-E1′ 이격 {tc['head_setback']:.3f} ≥ "
+              f"{need:.3f} m (EDGE_K {gk.EDGE_K:.0f} × proud {r['nub_h']:.3f}) — 충족. "
+              f"먼 밴드(x −6.00…−5.40)는 그대로 — cue+/label− 사분면 유지")
+        return r
+
+    # -------------------------------------------------------------------
+    # [W3 S16 · BS-4] G2 street wall — both verges, kind="backdrop"
+    # -------------------------------------------------------------------
+    def build_backdrop(M):
+        """The dense downtown block G2 shows on both sides of the entrance.
+
+        `bk.judged_eyes(0.0)` is the scene's own preset eye set (`sc.grid_views(0.0)` —
+        `build_views` uses gy = 0.0), so `d_true` / `in_frame` / `z_ceil` are computed
+        from the real judging geometry (B-F3) instead of `|facade plane|`.
+        `kind="backdrop"` is forced — see the `PARAMS["backdrop"]` note for why the
+        tier that `eye_distance` returns is the wrong instrument for a wall the camera
+        travels **along** rather than faces.
+        """
+        eyes = bk.judged_eyes(0.0)
+        kit = fk.Kit(sc.add_box, sc.add_cylinder,
+                     getattr(sc, "_oriented_box", None))
+        bp = PARAMS["backdrop"]
+        n_tot = n_frame = 0
+        for tag in ("S", "N"):
+            row = bp[tag]
+            for i, (x0, x1, h, floors, mkey) in enumerate(row["blocks"]):
+                bd = dict(x0=x0, x1=x1, y0=row["y0"], y1=row["y1"],
+                          h=h, floors=floors, axis="y",
+                          facade_y=row["facade_y"], face_dir=row["face_dir"],
+                          base_z=bp["base_z"])
+                p = bk.plan_building(bd, kind="backdrop", eyes=eyes)
+                prims = bk.build_korean_building(
+                    kit, stage, f"{ROOT}/CityBlock_{tag}{i}", bd,
+                    bk.Mtls(M[mkey], parapet=M["parapet"]), plan=p)
+                n_tot += len(prims)
+                n_frame += 1 if p.in_frame else 0
+                print(f"[backdrop] {tag}{i} W {p.W:4.1f} h {h:5.1f} m · "
+                      f"kind {p.kind} / tier {p.tier} · d_true {p.d_true:5.2f} m · "
+                      f"in_frame {str(p.in_frame):5s} · z_ceil {p.z_ceil:4.2f} · "
+                      f"프림 {len(prims)}/{bk.prim_budget('backdrop', p.tier, p.W)} "
+                      f"· 창 0")
+        ap = bp["apron"]
+        for i, (ax0, ay0, ax1, ay1) in enumerate(ap["strips"]):
+            BOX(f"{ROOT}/StreetApron_{i}",
+                ((ax0 + ax1) / 2.0, (ay0 + ay1) / 2.0,
+                 ap["z_top"] - ap["thick"] / 2.0),
+                (ax1 - ax0, ay1 - ay0, ap["thick"]), M["walk"])
+        print(f"[backdrop] 가로벽 {n_tot} 프림 / 12 동 (프레임 안 {n_frame} · "
+              f"BS-4 자동 강등 {12 - n_frame}) + 전면 포장 {len(ap['strips'])} "
+              f"— 양측 잔디 대체")
 
     # -------------------------------------------------------------------
     # dressing - 2 planters + distant buildings
@@ -800,10 +1085,20 @@ def main():
         build_east_exit(M, stair_mtl)
         build_canopy(M)
         build_cues(M, stair_mtl)
+        build_tactile_head(M)       # [W3 S16 · §7-4] statutory, not cue-bound
+        # [U-5] stated, not changed — the canopy already covers the whole descent.
+        _cp, _st = PARAMS["canopy"], PARAMS["stairs"]
+        _run = _st["tread"] * _st["nsteps"]
+        print(f"[U-5] 캐노피 x {_cp['x0']:+.2f}…{_cp['x1']:+.2f} vs 하강 x "
+              f"{_st['x0']:+.2f}…{_st['x0'] + _run:+.2f} "
+              f"({_st['nsteps']}×{_st['tread']:.2f}={_run:.2f}) → 접근로 "
+              f"{_st['x0'] - _cp['x0']:.2f} m + 전 구간 + 하단 여유 "
+              f"{_cp['x1'] - (_st['x0'] + _run):.2f} m — 이미 충족(16 이 표준형)")
     else:
         build_flat_fill(M)
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
+        build_backdrop(M)           # [W3 S16 · BS-4] G2 street wall, both verges
     build_ground_kit(M)             # [W2-D] ground elements - after the dressing (scatter order convention)
     if cfg.get("cue_sign"):
         build_signs()               # [v5 shared layer]

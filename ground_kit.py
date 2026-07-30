@@ -3544,8 +3544,20 @@ SCENE_PLANS = {
     #   flag and the fixture never set it. The real scene forces `natural=True` and zeroes
     #   the infra; the fixture now mirrors that (via the F2 explicit clear), so a
     #   regression that puts urban infra back on 03 fails `python3 ground_kit.py`.
+    #   (W3 K-micro, ledger §7 **W9**) `surface` / `extras` synced to the wired call
+    #   (`scene03_riverbank.py:1259-1264`). **W9's own replacement text for scene03 is
+    #   stale and is deliberately not followed**: it prescribes
+    #   `surface=(("patch", 8), ("stain", …))` from `:900-916`, but the S03 rebuild that
+    #   landed in FANOUT A **deleted the patch row** (§3(ii) rectangle ban - the census
+    #   at HEAD shows `patch` gone) and raised the weed row to 8. The fixture mirrors
+    #   the file as it now is, which is the doctrine W9 exists to enforce.
     "scene03": _S("levee_paved", (-12.0, -3.0, 6.0, 3.0), edges=_E0,
-                  overrides=dict(natural=True, infra=None)),
+                  overrides=dict(natural=True, infra=None,
+                                 surface=(("stain", ("dirt", "water")),
+                                          ("weed", 8)),
+                                 extras=(("wear_lane", dict(width=0.90)),)),
+                  extras_args=dict(wear_lane=dict(
+                      centerline=((-3.50, -10.0), (-3.50, 10.0))))),
     "scene04": _S("trail_soil", (-12.0, -1.6, 2.0, 1.6), edges=_E0),
     # 05 - (v1.4, fixture drift) The fixture used origin (0,0,0) while the scene runs the
     #   grid at the bowl lip (-1.5, 0, 0), because `build_views()` subtracts 1.5 from every
@@ -3637,15 +3649,33 @@ SCENE_PLANS = {
                              # rot_group local x=9.3, z=-4.25. The fixture uses nominal coordinates.
                              trench=[(9.3, -0.9, 0.9)],
                              patch=[(-4.2, 0.10), (-7.6, -0.30)])),
+    #   (W3 K-micro, ledger §7 **W9** / MB-F2) synced to `scene16_canopy_shadow.py:713-722`.
     "scene16": _S("sidewalk_block", (-12.0, -2.5, 2.0, 2.5), edges=_E0,
                   tactile=("entrance",),
+                  overrides=dict(
+                      infra=dict(manhole=1, gully=2, gutter_L=0),
+                      surface=(("patch", 1), ("crack", 4),
+                               ("stain", ("dirt", "gum", "drip")),
+                               ("weed", 8)),
+                      extras=(("wear_lane", dict(width=0.90)),)),
+                  extras_args=dict(wear_lane=dict(
+                      centerline=((-12.0, 0.0), (-0.85, 0.0)))),
                   sites=dict(manhole=[(-3.9, -0.8)],
                              gully=[(-6.0, -2.2), (-1.5, 2.2)],
                              tactile=dict(entrance=(-6.0, -2.5, -5.4, 2.5)))),
     "scene17": _S("levee_paved", (-12.0, -4.0, 4.0, 4.0), edges=_E0,
                   sites=dict(manhole=[(-2.0, 1.2)],
                              gully=[(-3.0, -3.6), (-9.0, -3.6)])),
+    #   (W3 K-micro, ledger §7 **W9** / MB-F2) synced to `scene18_wavy_artstair.py:1548-1561`.
     "scene18": _S("plaza_granite", (-12.0, -5.0, -0.5, 5.0), edges=_E0,
+                  overrides=dict(
+                      infra=dict(manhole=2, gully=2),
+                      surface=(("patch", 3), ("crack", 4),
+                               ("stain", ("dirt", "efflorescence")),
+                               ("weed", 6)),
+                      extras=(("silt_band", dict(n=2)),)),
+                  extras_args=dict(silt_band=dict(waterline=6.0, width=0.50,
+                                                  n=2)),
                   sites=dict(manhole=[(-4.0, 1.0), (-9.0, -1.0)],
                              gully=[(-2.5, -4.6), (-8.0, 4.6)])),
     # 19 - mirrored (x' = 2*5.8 - x), travel -X, dists (2, 3.5, 5).
@@ -3676,7 +3706,12 @@ SCENE_PLANS = {
                   caps=dict(weed_h=0.045), tactile=("stair_top",),
                   sites=dict(manhole=[(-3.0, 1.0)],
                              gully=[(-5.0, -2.6), (-9.0, 2.6)])),
+    #   (W3 K-micro, ledger §7 **W9** / MB-F2) synced to `sceneC2_leaf_stairs.py:398`.
+    #   The wired call also zeroes `infra` and forces its own `pave` module; those are
+    #   **not** mirrored here, exactly as the S09 sync did — they move the dry-run joint
+    #   and infra counts, which is a second declaration. Named, not hidden.
     "sceneC2": _S("sidewalk_block", (-10.6, -3.6, -0.3, 3.6), edges=_E0,
+                  overrides=dict(surface=(), extras=(), scatter=None),
                   sites=dict(manhole=[(-4.0, 1.2)],
                              gully=[(-2.0, -3.2), (-8.0, 3.2)])),
     "sceneC4": _S("sidewalk_block", (-10.0, -3.0, -0.5, 3.0), edges=_E0,

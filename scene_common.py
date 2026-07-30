@@ -121,6 +121,33 @@ TEX = dict(
     leaf_ground=dict(dir=S1_DIR, diff="leaf_ground_diff.jpg",
                      nor="leaf_ground_nor_dx.jpg",
                      rough="leaf_ground_rough.jpg"),        # Fallen-leaf ground (C2)
+    # [W3 K4 micro] Moss - the first moss role in the library.
+    #   Until now the repo had **no moss texture, no moss material and no moss role**
+    #   (`s3_scene07_10_rebuild_spec_v1.md` §3.0 C-A2); the convention was a green tint on an
+    #   existing stone map plus a `moss`/`GkMoss` token in the prim path so the look layer
+    #   classes it as vegetation (`:520`, `:567`). That convention is unchanged - this role is
+    #   an *addition* for the cases where a real mossy-rock scan beats a tint.
+    #   Source: Poly Haven `rock_moss_set_02`, **CC0 1.0** (redistributable, tier T1), already on
+    #   disk under `assets/urban_cc0/` - **zero procurement**.
+    #   [measured - assets/urban_manifest_w3.json /polyhaven[23].pixels[0]]
+    #     1024x1024 · chroma 757,261 px (72.2 %) · yellow-green **0.9286** of chroma · orange 0.0652
+    #     · albedo_lin **0.0812** · near-white 0.0 %  (independent recompute this session:
+    #     mean linear albedo 0.0750 over all pixels - same order, different gate)
+    #   **Three cautions for whoever binds it first** (it has no consumer as of this commit):
+    #     1. It is a rock-*with*-moss scan, not a moss carpet. Structure tiles as rock, so it reads
+    #        correctly as a joint / riser-base / boulder-top patch and badly as a large-area ground.
+    #        Large-area moss stays on the tint convention (§3.2, fit grade **B**).
+    #     2. The normal map is Poly Haven **`_nor_gl`, i.e. OpenGL convention, and EXR**. Every other
+    #        role in this registry is a **DX** map (`_nor_dx`) or an ambientCG `_nor`, and every other
+    #        map here is JPG/PNG. A consumer that wants the repo's normal convention must either flip
+    #        green or drop `nor` from its `make_pbr` call - do not assume parity with the rows above.
+    #     3. The asset USD binds a `rock_moss_set_02_rough_1k.**exr**` that was never downloaded; the
+    #        roughness map that exists on disk is the **JPG** named here.
+    moss=dict(dir=os.path.join(ASSETS_DIR, "urban_cc0", "rock_moss_set_02",
+                               "textures"),
+              diff="rock_moss_set_02_diff_1k.jpg",
+              nor="rock_moss_set_02_nor_gl_1k.exr",
+              rough="rock_moss_set_02_rough_1k.jpg"),
 )
 
 # Batch-1 overcast HDRI (shared by C1 snow and C4 wet stone) - selected via light_params["hdri"],
@@ -2146,7 +2173,7 @@ def veg_available():
     return bool(veg_pool())
 
 
-def _deactivate_seasonal(stage, asset_path, usd_rel):
+def _deactivate_seasonal(stage, asset_path, usd_rel, table=None):
     """Turn off season-specific sub-prims of a referenced vegetation asset.
 
     The season convention is judged on leaf/flower TEXTURE PIXELS, not on the
@@ -2155,8 +2182,12 @@ def _deactivate_seasonal(stage, asset_path, usd_rel):
     is deactivated. Deactivation removes the prim from composition, so the
     flower geometry is never drawn and costs nothing.
     Silent no-op when the asset has no registered seasonal prims.
+
+    table: which registry to read. Default `None` -> `SEASONAL_SUBPRIMS`, the
+      library-wide unconditional one, so the existing call site is unchanged.
+      `BARE_SUBPRIMS` is passed by the **opt-in** leaf-off path of `build_tree`.
     """
-    names = SEASONAL_SUBPRIMS.get(usd_rel)
+    names = (SEASONAL_SUBPRIMS if table is None else table).get(usd_rel)
     if not names:
         return 0
     off = 0
@@ -2294,6 +2325,35 @@ SEASONAL_SUBPRIMS = {
     "Shrub/Rhododendron.usd": ("Flowers",),
 }
 
+# [W3 K4 micro · spec `s3_scene07_10_rebuild_spec_v1.md` §3.4, ruling §8.R OQ-3]
+# **Leaf-off (bare) trees at zero procurement cost.**
+#   Every tree in the catalogue is a green-foliage scan - all 10 measured `veg_manifest_w2`
+#   tree/shrub rows read green 74-100 %, orange 0.000, red 0.000. There is no leafless, no
+#   bare-branch and no winter tree asset anywhere. But three tree USDs split trunk and leaves
+#   into **separate sibling meshes under `/Root`, with the whole branch armature living in the
+#   trunk mesh**, so deactivating `/Root/leaves` leaves a real bare tree, not a bare pole.
+#   [measured this session - usd-core 26.8, `Usd.Stage.Open` + BBoxCache + faceVertexCounts]
+#     asset               /Root children        trunk tri   leaves tri   full zmax   trunk zmax
+#     Gray_Birch.usd      Looks, trunk, leaves    118,417      138,208     3.3294 m    3.2960 m
+#     Elm_Sapling.usd     Looks, trunk, leaves     47,334       65,934     3.0867 m    3.0424 m
+#     Lombardy_Poplar.usd Looks, trunk, leaves    101,130      316,776    13.6709 m   13.4221 m
+#   The bare form keeps **98.2-99.2 % of the canopy-top height** and costs **24-46 %** of the
+#   triangles. `Fraxinus` / `Shumard_Oak` / `Scarlet_Oak` / `Black_Oak` are **deliberately absent**:
+#   their leaves ride inside MASH `PointInstancer`s that also carry the branches, so killing an
+#   instancer removes the branch with it (verified on `Shumard_Oak` and `Fraxinus` this session).
+# **Why this is a separate table and not more rows in `SEASONAL_SUBPRIMS`**: that table is
+#   unconditional - it strips its prims in all 33 scenes. Leaf-off is a *scene identity*, not a
+#   library-wide season, so it is **opt-in** via `build_tree(..., bare=True)` and is applied
+#   nowhere in this commit (33/33 prim-hash identity is the acceptance test of the ruling).
+# Scale note for the first consumer: `add_vegetation` scales by `target_h / native_h` and
+#   `VEG_TREES` carries the **full** (leafed) zmax, so a bare tree lands 0.8-1.8 % short of the
+#   requested height - inside the +-8 % per-instance jitter `build_tree` already applies.
+BARE_SUBPRIMS = {
+    "Trees/Gray_Birch.usd":      ("leaves",),
+    "Trees/Elm_Sapling.usd":     ("leaves",),
+    "Trees/Lombardy_Poplar.usd": ("leaves",),
+}
+
 VEG_ROCKS = [
     ("Rocks/rock_small_01.usda", 0.314, 0.128),
     ("Rocks/rock_small_08.usda", 0.196, 0.072),
@@ -2417,7 +2477,7 @@ def scatter_debris(stage, prefix, x0, y0, x1, y1, z, cover=0.35,
 def build_tree(stage, prefix, cx, cy, gz, wood_mtl, canopy_a_mtl, canopy_b_mtl,
                trunk_r=0.09, trunk_h=2.2, stake_r=0.015, stake_h=1.5,
                stake_off=0.5, stakes=False, canopy_blobs=10,
-               canopy_spread=1.0):
+               canopy_spread=1.0, bare=False):
     """[v5.1 realism] Trunk (2-stage taper + slight lean) + canopy (irregular ellipsoid blobs,
     deterministically varied per tree) + 3 stakes (OFF by default). Seeded by a coordinate hash,
     so it is identical on re-running the same scene while each tree differs in form, size and
@@ -2432,6 +2492,18 @@ def build_tree(stage, prefix, cx, cy, gz, wood_mtl, canopy_a_mtl, canopy_b_mtl,
     **real tree USD** (the prim set changes, so it belongs to geometry). The signature is unchanged,
     so 30 scenes switch over with no edits. Without the assets it falls back to the procedural
     blobs below (0 regression).
+
+    [W3 K4 micro] `bare=False` - **opt-in leaf-off tree**, default OFF. When True and the drawn
+    species is registered in `BARE_SUBPRIMS`, its `/Root/leaves` mesh is deactivated **before**
+    the prim is made instanceable, giving a real bare deciduous tree for a leaf-off scene.
+    Two limits the caller must know:
+      - It is a **silent no-op for an unregistered species**. `build_tree` draws from `VEG_TREES`
+        by coordinate hash, and only `Elm_Sapling` of the three bare-capable assets is in that
+        pool, so `bare=True` alone yields a *mixed* frame. A scene that needs a uniformly leaf-off
+        canopy needs a species selector as well (the planned K4(b) `species=` kwarg), or must
+        call `add_vegetation` itself.
+      - It is a **no-op on the procedural blob fallback** (assets absent or `LOOK_GEO=0`); the
+        blob canopy is not a leaf asset and is left alone.
 
     Returns: None (prims are created under prefix)."""
     import random as _random
@@ -2456,6 +2528,18 @@ def build_tree(stage, prefix, cx, cy, gz, wood_mtl, canopy_a_mtl, canopy_b_mtl,
                                 yaw_deg=rnd.uniform(0, 360),
                                 target_h=target, native_h=native)
             if vx is not None:
+                # [W3 K4 micro] Leaf-off BEFORE instancing. Order matters and is the same
+                # trap `place_shrubs` documents: once `SetInstanceable(True)` is applied the
+                # descendants live in a shared prototype and per-instance edits are silently
+                # ignored, so a deactivation written after it would look right in the source
+                # and do nothing on the stage. Default OFF -> this branch is dead in this
+                # commit, which is what the 33/33 prim-hash proof shows.
+                if bare:
+                    _off = _deactivate_seasonal(stage, f"{prefix}/Veg/Asset",
+                                                rel, table=BARE_SUBPRIMS)
+                    if _off:
+                        LOOK_STATS["bare_tree"] = \
+                            LOOK_STATS.get("bare_tree", 0) + 1
                 # The same asset is referenced many times, so instancing saves memory and time.
                 # (About 30 M extra triangles across the 33 scenes - red team estimate.)
                 # Instancing must be set on **the prim that holds the reference**. USD requires

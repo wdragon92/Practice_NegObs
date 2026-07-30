@@ -510,9 +510,21 @@ def main():
         #   for paint and metal), so a *ground* prim bound to one gets no texture at
         #   all. `GKitCrack` / `GKitStain` classify as concrete, so they are promoted
         #   to a real ground texture with the intended albedo preserved.
-        M["gk_stain"] = PBR(f"{ROOT}/Looks/GKitStain",
-                            diffuse_color=(0.20, 0.20, 0.195),
-                            roughness_const=0.86)
+        # [W3 L20 · 01-A, on the first pilot render] the stain lobes stopped being plates.
+        #   `GKitStain` was a **constant near-black** (0.20, 0.20, 0.195) laid on white
+        #   granite. `Stain_water/water_2` measures 0.613 x 0.496 m and its near edge sits
+        #   0.05 m in front of the `preset_h0.3_d5` eye `[measured — composed inventory]`,
+        #   so at h0.3 it fills a third of the near band and reads as a **painted plate**,
+        #   not as soiling. ground_kit's own R3 rule is that the decal ladder must be *a
+        #   tone separator, never relief*, and a material three stops darker than its host
+        #   is not a tone separator — the same defect scene01's pilot found and fixed on
+        #   the same profile. `M["stain"]` is now the plaza's own granite at **0.62 of the
+        #   scene's own T-1 tone** (0.72 x 0.62 = 0.4464): still clearly soiling at h0.3,
+        #   no longer paint at 20 m. Material only — 0 prims, no GT quantity moves.
+        M["stain"] = PBR(
+            f"{ROOT}/Looks/GKitStain", sc.tex_path("plaza_light", "diff"),
+            sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
+            sca["plaza_light"], tint=(0.4464, 0.4464, 0.4464))
         M["wood"] = PBR(f"{ROOT}/Looks/Wood", diffuse_color=mp["wood_color"],
                         roughness_const=mp["wood_rough"])
         M["canopy_a"] = PBR(f"{ROOT}/Looks/CanopyA",
@@ -599,8 +611,8 @@ def main():
                   manhole=M["band"], gully=M["band"],
                   gutter=M["band"], gutter_cover=M["band"],
                   trench=M["band"], trench_frame=M["band"],
-                  marking=M["band"], weed=M["grass"], wear=M["gk_stain"],
-                  stain_dirt=M["gk_stain"], stain_water=M["gk_stain"])
+                  marking=M["band"], weed=M["grass"], wear=M["stain"],
+                  stain_dirt=M["stain"], stain_water=M["stain"])
         res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
                               skin_exclude=sc.skin_exclude,
                               scatter=sc.scatter_debris)

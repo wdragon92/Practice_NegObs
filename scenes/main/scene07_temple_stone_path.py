@@ -163,22 +163,71 @@ STAIR_DROP = 4.2                   # total drop over the stepping-stone run (slo
 SIDE_DROP = 1.8                    # unguarded lateral drop on the south (−Y) side
 
 PARAMS = dict(
-    # --- stepping stones (discrete natural stone) generation params : seed-fixed random ---
-    # [W3 S3-3 · GT-16] `cy` abolished (A6) and `rz` capped (A7).
-    #   A6 — the lateral slide of a whole step is an **archetype error**, not a jitter
-    #   question (`w3_intake_06_10.md` §1.0): a course of a stone stair spans the corridor,
-    #   and the ragged edge comes from the slab ends, not from sliding the step sideways.
-    #   `cy_jit` is kept as a PARAMS row at 0.0 so the abolition is visible in the file
-    #   rather than silently deleted, and the seeded RNG still draws `u` so every OTHER
-    #   stone value is bit-identical to the pre-S3-3 tree (the change stays attributable).
-    #   A7 — per-stone yaw capped 4.0 -> 3.0 deg, the adopted J-14 ruling
-    #   (spec §1.2: hand-set masonry genuinely is laid a few degrees out).
-    #   `rx` 2.5 deg is untouched: it is exactly the research's out-of-level roll
-    #   U(-2.5, +2.5) deg (`s3_research_numbers_v1.md` §B4).
-    stones=dict(n=24, seed=707, x_start=0.06, x_end=12.05,
-                w=(0.50, 1.10), depth=(0.28, 0.40), gap=(0.05, 0.30),
-                proud=(0.02, 0.08), embed=(0.10, 0.18),
-                rz=3.0, rx=2.5, foot_half=0.22, cy_jit=0.0),
+    # =======================================================================
+    # [W3 S3-4 · GT-14] 자연석 계단 — the course table
+    # =======================================================================
+    #  What died here: 24 discrete `디딤돌` pavers with U(0.05, 0.30) gaps between them,
+    #  i.e. **34.0 % of the run was bare slope**. 조경설계기준 21.5(6)(7) puts a 디딤돌 on
+    #  *level* ground, 30 mm proud, long axis across travel — it is the wrong product for a
+    #  19.0 deg approach. What replaces it is 자연석 계단석 laid in courses
+    #  (조경설계기준 21.8 계단돌 쌓기 · KFS-TRAIL 특별시방서 13-2).
+    #
+    #  Every row is cited in `Docs/briefs/s3_scene07_10_rebuild_spec_v1.md` §4.1-1 and
+    #  `Docs/surveys/s3_research_numbers_v1.md` §B0/§B3/§B4:
+    #    n = 28                supervisor ruling §8.R OQ-7 (0.150 / 0.428 confirmed)
+    #    flight x 0.00..12.20  the **whole** frozen run. The old flight stopped at 12.05 and
+    #                          that 0.15 m shortfall, plus `proud`, IS the +0.201 m orphan
+    #                          exit lip: path_z(11.85) + 0.08 = -3.999 against a road at -4.200.
+    #    thick 0.250           KFS-TRAIL 13-2 가 자연석 계단석 300x300x250 mm [law]
+    #    ov 0.12               back-overlap. The back edge is **not** jittered, so the realised
+    #                          interlock is 0.12 + U(-jt/2, +jt/2) = 0.06..0.18 m, i.e. always
+    #                          above 표준시방서 0400-3.2 ㄷ's "아랫돌의 뒤뿌리는 윗돌에 50mm
+    #                          이상 물리도록" [law], and the open-slope fraction is **0 by
+    #                          construction**, not by budget.
+    #    jt 0.12               FRONT edge only: U(-0.06, +0.06), so neighbouring slabs in one
+    #                          course differ by up to 0.12 m. This is G7's ragged nosing
+    #                          (50-120 mm read) and the real negative-obstacle cue.
+    #    riser_sigma 0.010     dressed 마름돌 sigma, research §B4, truncated +-2.5 sigma
+    #    settle_amp/period     **correlated** long-wave settlement, +-20 mm over 8-12 courses.
+    #                          Research §B4: hand-laid stone on an earth core settles in
+    #                          patches — "white noise reads as fake". This is the row that
+    #                          makes the rise table look built rather than sampled.
+    #    rise_band             the declared band the self-check asserts. Realised rises are
+    #                          clamped into it and then renormalised so the total is exact.
+    #    exit_up 0.030         the last course stands 30 mm above the approach road =
+    #                          조경설계기준 21.5(6)'s 디딤돌 proud, and it is an **UP-STEP**
+    #                          (GT-14, GT-1 rule (b)) — never a drop.
+    #    blocks 2..4 (mode 3)  G7: "each step is a course of 2-4 large irregular slabs".
+    #    walk_clear 0.35       no lateral seam inside the walked centre band, so the walk line
+    #                          |y| <= foot_half never straddles a joint and the GT top face of
+    #                          a course is one slab. Also §4.1-3's zone-0 boundary.
+    #    bed_drop / bed_thick  속채움: one core slab per course, top 60 mm under the tread, so
+    #                          a lateral joint bottoms out on stone instead of on air
+    #                          (표준시방서 0400-3.2 ㄹ "내부는 속채움한다") [law].
+    #    corridor_bed 0.33     the `PathCorridor` / `SouthScarp` slope plates drop by this much.
+    #                          A course tread is **level** (조경설계기준 21.8(1) "지면과 수평이
+    #                          되게"), so its back edge sits up to one rise below the 19.0 deg
+    #                          plane; without the drop the frozen plane would pierce every
+    #                          tread. `path_z()` itself is untouched — this moves the *plate*,
+    #                          not the datum. Declared in GT-14.
+    courses=dict(n=28, seed=7075, x0=0.0, x1=STAIR_RUN, y0=-1.70, y1=1.70,
+                 exit_up=0.030, rise_band=(0.120, 0.180), riser_sigma=0.010,
+                 settle_amp=0.020, settle_period=(8.0, 12.0),
+                 ov=0.12, jt=0.12, blocks=(2, 3, 4), blocks_w=(0.18, 0.64, 0.18),
+                 seam_jit=0.15, seam_gap=(0.0, 0.030), min_slab_w=0.45,
+                 walk_clear=0.35, thick=0.250, jyaw=3.0, jroll=2.5, jz=0.020,
+                 bed_drop=0.060, bed_thick=0.40, foot_half=0.22,
+                 corridor_bed=0.33,
+                 # 고임돌 + 틈메우기돌 (KFS-TRAIL 13-2 나) — shim / gap-filling stones at the
+                 # foot of every riser. `sc.VEG_ROCKS` is 0.128-0.314 m wide, i.e. 조약돌
+                 # (100-200 mm) to 호박돌 (200-400 mm), which is exactly the two products the
+                 # clause names. Without them the joints read open even though they are closed.
+                 shim_n=4, shim_band=(0.02, 0.11), shim_cover=0.16,
+                 # 돌깔기 aprons, KFS-TRAIL p.72: 하단부 1,000 / 상단부 >=500 mm, 자연석 판석
+                 # T100. Laid 6 mm proud (below the 20 mm GT_DELTA) so they are a material
+                 # change, not a step: the exit step is measured to the road plate, not to these.
+                 apron_lo=1.00, apron_up=0.60, apron_half_y=1.40,
+                 apron_t=0.10, apron_proud=0.006, apron_seed=7076),
     # --- [v6] per-stone material pool : breaks the 'continuous joints' of a shared world projection ---
     #     Based on rock_face (jointless natural rock) · scale/tint/rotate/translate jitter.
     #  [W3 S3-3 · LINT-10 adjudication] the key was named `jitter=`, which is the token
@@ -511,51 +560,157 @@ def _zone_z(x, y, zone):
 
 
 # ===========================================================================
-# [E] discrete natural stepping-stone layout - seed-fixed random (reproducible)
+# [E] 자연석 계단 course layout - seed-fixed random (reproducible, no boot needed)
 # ===========================================================================
-def stone_layout():
-    """Return the list of per-stone box specs (computable without booting).
+def _rise_table(rng, cp):
+    """The 28 riser heights, in order, summing **exactly** to `STAIR_DROP − exit_up`.
 
-    Each element: dict(i, xa, xb, cx, w, cy, thick, proud, top, rz, rx, gap_next)
-      xa/xb = the stone's −X/+X ends, cx = centre, w = Y width, cy = Y centre offset,
-      top   = top face z (= path_z(cx) + proud), thick = thickness (embedment included).
-    Gaps and depths are geometrically scaled so the raw samples fit x_end−x_start exactly
-    (the total run is fixed so the junction coordinates of the lower approach road do not drift).
+    Construction (research §B4, both halves of it):
+      1. `w_i ~ N(0, riser_sigma)` truncated at +-2.5 sigma — the *dressed* stone spread.
+      2. `s_i = A·sin(2*pi*i/T + phi)`, `A = settle_amp`, `T ∈ settle_period` — the
+         **correlated** settlement of the earth core. It is a displacement of the course
+         *top*, so it enters the rise table as a first difference `s_i − s_{i−1}`, and
+         `s_-1` is evaluated at the notional course before the first one (the yard shoulder).
+         This is the whole point: an i.i.d. rise error reads as noise, a long-wave one reads
+         as a stair that has been walked on for three hundred years.
+      3. Clamp into `rise_band`, then push the residual back onto the courses in proportion
+         to their remaining headroom until the sum is exact. The total drop is frozen, so
+         the table has to absorb its own noise rather than let the junction drift.
+
+    Returns the rise list `R` where `R[0]` is the **entry** step (yard z 0 -> course 0 top)
+    and `R[i]` is the step from course i−1 onto course i.
     """
-    sp = PARAMS["stones"]
-    rng = random.Random(int(sp["seed"]))
-    n = int(sp["n"])
-    raw = []
-    for _ in range(n):
-        raw.append((rng.uniform(*sp["depth"]), rng.uniform(*sp["gap"]),
-                    rng.uniform(*sp["w"]), rng.uniform(*sp["proud"]),
-                    rng.uniform(*sp["embed"]),
-                    rng.uniform(-sp["rz"], sp["rz"]),
-                    rng.uniform(-sp["rx"], sp["rx"]),
-                    rng.random()))
-    span = float(sp["x_end"]) - float(sp["x_start"])
-    total = sum(d + g for d, g, *_ in raw)
-    k = span / total                    # geometric scaling (gaps and depths together)
+    n = int(cp["n"])
+    sig = float(cp["riser_sigma"])
+    amp = float(cp["settle_amp"])
+    per = rng.uniform(*cp["settle_period"])
+    pha = rng.uniform(0.0, 2.0 * math.pi)
+
+    def settle(i):
+        return amp * math.sin(2.0 * math.pi * i / per + pha)
+
+    lo, hi = (float(v) for v in cp["rise_band"])
+    mu = (STAIR_DROP - float(cp["exit_up"])) / n
+    R = []
+    for i in range(n):
+        w = rng.gauss(0.0, sig)
+        w = max(-2.5 * sig, min(2.5 * sig, w))          # truncated, research §B4
+        R.append(mu + w + (settle(i) - settle(i - 1)))
+    target = STAIR_DROP - float(cp["exit_up"])
+    for _ in range(64):
+        R = [min(hi, max(lo, r)) for r in R]
+        err = target - sum(R)
+        if abs(err) < 1e-12:
+            break
+        head = [(hi - r) if err > 0 else (r - lo) for r in R]
+        tot = sum(head)
+        if tot <= 1e-12:
+            break
+        R = [r + err * h / tot for r, h in zip(R, head)]
+    return [min(hi, max(lo, r)) for r in R]
+
+
+def _course_seams(rng, cp, blocks):
+    """Lateral seam positions inside one course, y0..y1, `blocks−1` of them.
+
+    Nominal even split, jittered by `seam_jit` so course seams do not line up down the
+    flight, then two guards: no seam inside the walked centre band `|y| <= walk_clear`
+    (so the walk-line GT face of a course is always ONE slab), and no slab narrower
+    than `min_slab_w`.
+    """
+    y0, y1 = float(cp["y0"]), float(cp["y1"])
+    span = y1 - y0
+    mw = float(cp["min_slab_w"])
+    wc = float(cp["walk_clear"])
+    sj = float(cp["seam_jit"])
+    seams = []
+    for b in range(1, int(blocks)):
+        s = y0 + span * b / float(blocks) + rng.uniform(-sj, sj)
+        if abs(s) <= wc:                                 # off the walked centre band
+            s = wc + 0.10 if (s >= 0.0) else -(wc + 0.10)
+        seams.append(s)
+    seams.sort()
+    lim = y0
+    for k in range(len(seams)):                          # forward min-width pass
+        seams[k] = max(seams[k], lim + mw)
+        lim = seams[k]
+    lim = y1
+    for k in range(len(seams) - 1, -1, -1):              # backward pass
+        seams[k] = min(seams[k], lim - mw)
+        lim = seams[k]
+    return [s for s in seams if y0 + mw - 1e-9 <= s <= y1 - mw + 1e-9]
+
+
+def course_layout():
+    """Return the 28-course 자연석 계단 table (computable without booting).
+
+    Each course: dict(i, xa, xb, top, rise, blocks=[slab, ...], bed=dict(...))
+      · `xa`/`xb`  nominal tread back / front (`xb` = the nosing line)
+      · `top`      the course's **level** tread z = the walk-line GT face
+      · slab       dict(k, y0, y1, xb_f, xback, top, yaw, roll, walk)
+                   `xback = xa − ov` is NOT jittered, which is what guarantees both the
+                   0 % open-slope fraction and the >=50 mm interlock; `xb_f` is.
+    """
+    cp = PARAMS["courses"]
+    rng = random.Random(int(cp["seed"]))
+    n = int(cp["n"])
+    x0, x1 = float(cp["x0"]), float(cp["x1"])
+    tread = (x1 - x0) / n
+    ov, jt = float(cp["ov"]), float(cp["jt"])
+    fh = float(cp["foot_half"])
+    R = _rise_table(rng, cp)
+    tops, z = [], 0.0
+    for r in R:
+        z -= r
+        tops.append(z)
     out = []
-    x = float(sp["x_start"])
-    fh = float(sp["foot_half"])
-    for i, (d, g, w, pr, em, rz, rx, u) in enumerate(raw):
-        dep = d * k
-        gap = g * k
-        xa, xb = x, x + dep
-        cx = (xa + xb) / 2.0
-        cy_max = max(0.0, w / 2.0 - fh)   # must cover the walk line |y|<=fh
-        # [S3-3 · A6] course lateral offset abolished; `u` is still drawn so the seeded
-        #   stream (and therefore every other stone value) does not move.
-        cy = (u * 2.0 - 1.0) * min(cy_max, float(sp["cy_jit"]))
-        out.append(dict(i=i, xa=xa, xb=xb, cx=cx, w=w, cy=cy,
-                        proud=pr, thick=pr + em, top=path_z(cx) + pr,
-                        rz=rz, rx=rx, gap_next=gap))
-        x = xb + gap
+    for i in range(n):
+        xa, xb = x0 + i * tread, x0 + (i + 1) * tread
+        nb = rng.choices(list(cp["blocks"]), weights=list(cp["blocks_w"]))[0]
+        seams = _course_seams(rng, cp, nb)
+        edges = [float(cp["y0"])] + seams + [float(cp["y1"])]
+        slabs = []
+        for k in range(len(edges) - 1):
+            g = rng.uniform(*cp["seam_gap"]) / 2.0
+            sy0 = edges[k] + (g if k > 0 else 0.0)
+            sy1 = edges[k + 1] - (g if k + 1 < len(edges) - 1 else 0.0)
+            walk = (sy0 <= -fh + 1e-9) and (sy1 >= fh - 1e-9)
+            # the last course's nosing lands **on** the frozen junction: no front jitter,
+            # so x = 12.2 / z = -4.2 cannot drift out from under the approach road.
+            xf = xb if i == n - 1 else xb + rng.uniform(-jt / 2.0, jt / 2.0)
+            slabs.append(dict(
+                k=k, y0=sy0, y1=sy1, xback=xa - ov, xb_f=xf,
+                # only a NON-walk slab carries bedding z jitter: the walked face of a
+                # course is the rise table's own value, so the GT stays the declared table
+                top=tops[i] + (0.0 if walk
+                               else rng.uniform(-cp["jz"], cp["jz"])),
+                yaw=rng.uniform(-cp["jyaw"], cp["jyaw"]),
+                roll=rng.uniform(-cp["jroll"], cp["jroll"]), walk=walk))
+        out.append(dict(i=i, xa=xa, xb=xb, top=tops[i], rise=R[i], slabs=slabs,
+                        bed=dict(x0=xa - ov, x1=xb, y0=float(cp["y0"]),
+                                 y1=float(cp["y1"]),
+                                 top=tops[i] - float(cp["bed_drop"]),
+                                 thick=float(cp["bed_thick"]))))
     return out
 
 
-STONES = stone_layout()
+COURSES = course_layout()
+
+
+def course_top(x):
+    """Walked-surface z at station `x` on the flight (the course whose tread covers x).
+
+    Outside the flight it degrades to the yard (x < 0) or the approach road (x > run), so
+    it is safe to hand to a scatter / mask `ground_fn`.
+    """
+    cp = PARAMS["courses"]
+    if x < float(cp["x0"]):
+        return 0.0
+    if x >= float(cp["x1"]):
+        return -STAIR_DROP
+    tread = (float(cp["x1"]) - float(cp["x0"])) / int(cp["n"])
+    i = min(int(cp["n"]) - 1, int((x - float(cp["x0"])) / tread))
+    return COURSES[i]["top"]
 
 
 def leaf_patches():
@@ -600,13 +755,41 @@ def mask_n(cx):
 
 
 def stone_metrics():
-    """Stepping-stone verification metrics — (rise list, gap list, entry/exit steps)."""
-    tops = [s["top"] for s in STONES]
-    rises = [tops[i] - tops[i + 1] for i in range(len(tops) - 1)]
-    gaps = [s["gap_next"] for s in STONES[:-1]]
-    enter = 0.0 - tops[0]                        # yard (z=0) -> top of stone 1
-    exit_ = tops[-1] - (-STAIR_DROP)             # last stone -> approach road (−4.2)
+    """Course-table verification metrics — (rise list, open-gap list, entry/exit steps).
+
+    `gaps` is the **course-to-course open-slope gap** measured per lateral band:
+    `slab_back(i) − slab_front(i−1)`. A positive value is bare corridor showing between two
+    courses, which is exactly the 34.0 % defect A2; the back-overlap construction makes every
+    entry negative, and the self-check asserts `max(gaps) < 0`.
+    `enter` = yard z 0 -> course 0 top. `exit_` = course 27 top -> approach road −4.2,
+    **positive = the stone stands above the road = an UP-STEP** (GT-14 / GT-1 rule (b)).
+    """
+    rises = [c["rise"] for c in COURSES]
+    gaps = []
+    for i in range(1, len(COURSES)):
+        prev_front = max(s["xb_f"] for s in COURSES[i - 1]["slabs"])
+        back = COURSES[i]["slabs"][0]["xback"]
+        gaps.append(back - prev_front)
+    enter = 0.0 - COURSES[0]["top"]
+    exit_ = COURSES[-1]["top"] - (-STAIR_DROP)
     return rises, gaps, enter, exit_
+
+
+def course_interlock():
+    """Per-course-pair interlock (m): how far course i's back tail runs under course i−1.
+
+    표준시방서 0400-3.2 ㄷ [law]: "아랫돌의 뒤뿌리는 윗돌에 50mm 이상 물리도록 한다".
+    Measured per lateral band against the *nearest* slab of the course above, because the
+    two courses may be split into a different number of slabs.
+    """
+    out = []
+    for i in range(1, len(COURSES)):
+        for s in COURSES[i]["slabs"]:
+            ymid = (s["y0"] + s["y1"]) / 2.0
+            above = min(COURSES[i - 1]["slabs"],
+                        key=lambda t: abs((t["y0"] + t["y1"]) / 2.0 - ymid))
+            out.append(above["xb_f"] - s["xback"])
+    return out
 
 
 # ===========================================================================
@@ -725,69 +908,169 @@ def _grid_obstacles():
     return obs
 
 
+def stone_course_selfcheck():
+    """[W3 S3-4 · spec §6.5] The 자연석 계단 course table, asserted line by line.
+
+    House style is `scene05.podium_step_selfcheck` / `scene09.roof_normal_selfcheck`:
+    print the measured quantity next to the threshold and the authority, and say OK/FAIL
+    rather than leaving the reader to compare two numbers in their head.
+    """
+    P = PARAMS
+    cp = P["courses"]
+    n = int(cp["n"])
+    tread = (float(cp["x1"]) - float(cp["x0"])) / n
+    rises, gaps, enter, exit_ = stone_metrics()
+    lo, hi = (float(v) for v in cp["rise_band"])
+    bed = float(cp["corridor_bed"])
+    thick = float(cp["thick"])
+
+    print("\n  [표] 자연석 계단 코스표 (i, xa..xb, 판수, 상면 z, 답차, "
+          "코스간 개방, 물림)")
+    print(f"    {'i':>2} {'xa':>6} {'xb':>6} {'판':>3} {'top z':>8} "
+          f"{'답차':>6} {'개방':>7} {'물림':>6} {'선단요철':>8} 워크라인")
+    ok_walk, ok_seam = True, True
+    ilk = course_interlock()
+    for c in COURSES:
+        i = c["i"]
+        # a course covers the walk line iff SOME slab spans |y| <= foot_half
+        covers = any(s["walk"] for s in c["slabs"])
+        ok_walk = ok_walk and covers
+        # exactly one slab may own the walk band (no joint on the walk line)
+        ok_seam = ok_seam and (sum(1 for s in c["slabs"] if s["walk"]) == 1)
+        gp = gaps[i - 1] if i > 0 else float("nan")
+        fronts = [s["xb_f"] for s in c["slabs"]]
+        ragged = max(fronts) - min(fronts)
+        il = float("nan")
+        if i > 0:
+            per = []
+            for s in c["slabs"]:
+                ym = (s["y0"] + s["y1"]) / 2.0
+                above = min(COURSES[i - 1]["slabs"],
+                            key=lambda t: abs((t["y0"] + t["y1"]) / 2.0 - ym))
+                per.append(above["xb_f"] - s["xback"])
+            il = min(per)
+        print(f"    {i:2d} {c['xa']:6.2f} {c['xb']:6.2f} "
+              f"{len(c['slabs']):3d} {c['top']:8.3f} {c['rise']:6.3f} "
+              f"{gp:+7.3f} {il:6.3f} {ragged:8.3f} "
+              f"{'OK' if covers else 'MISS'}")
+
+    # A2 — the headline defect. open-slope fraction = sum(positive course gaps) / run
+    openslope = sum(max(0.0, g) for g in gaps)
+    frac = openslope / (float(cp["x1"]) - float(cp["x0"]))
+    print(f"\n    [A2] 개방 사면 비율 = Σ(코스간 양의 간격)/run = "
+          f"{openslope:.4f}/{float(cp['x1']) - float(cp['x0']):.2f} = "
+          f"{frac*100:.3f} %  (목표 0.000 %, 재건 전 34.0 % → "
+          f"{'OK' if frac < 1e-9 else 'FAIL'})")
+    print(f"         최대 코스간 간격 {max(gaps):+.4f} m (<0 = 항상 겹침 → "
+          f"{'OK' if max(gaps) < 0.0 else 'FAIL'}) · 뒤물림 min "
+          f"{min(ilk):.4f} / max {max(ilk):.4f} m "
+          f"(표준시방서 0400-3.2 ㄷ ≥0.050 → "
+          f"{'OK' if min(ilk) >= 0.050 - 1e-9 else 'FAIL'})")
+
+    # within-course joints: seam gap + the two neighbours' yaw at the far end
+    jmax = 0.0
+    for c in COURSES:
+        for k in range(len(c["slabs"]) - 1):
+            a, b = c["slabs"][k], c["slabs"][k + 1]
+            la = (a["xb_f"] - a["xback"]) / 2.0
+            lb = (b["xb_f"] - b["xback"]) / 2.0
+            jmax = max(jmax, (b["y0"] - a["y1"])
+                       + la * abs(math.sin(math.radians(a["yaw"])))
+                       + lb * abs(math.sin(math.radians(b["yaw"]))))
+    print(f"    [줄눈] 코스 내 최대 가시 줄눈 {jmax:.4f} m "
+          f"(G7 0.00~0.06 → {'OK' if jmax <= 0.060 + 1e-9 else 'FAIL'}) · "
+          f"건식(모르타르 0) — 표준시방서 0400-1.3 ㄹ 건식쌓기")
+    print(f"    [워크라인] 전 코스가 |y| ≤ {cp['foot_half']} 를 덮는가 → "
+          f"{'OK' if ok_walk else 'FAIL'} · 워크밴드에 줄눈 없음(1판 전담) → "
+          f"{'OK' if ok_seam else 'FAIL'}")
+
+    # A3 — rise table against the declared band
+    mu = sum(rises) / len(rises)
+    print(f"    [A3 답차] min {min(rises):.4f} / max {max(rises):.4f} / "
+          f"평균 {mu:.4f} / 편차폭 {max(rises)-min(rises):.4f} m "
+          f"(선언대 {lo:.3f}~{hi:.3f} → "
+          f"{'OK' if min(rises) >= lo - 1e-9 and max(rises) <= hi + 1e-9 else 'FAIL'})"
+          f" · 합 {sum(rises):.6f} = 낙차−탈출 "
+          f"{STAIR_DROP - float(cp['exit_up']):.6f} → "
+          f"{'OK' if abs(sum(rises) - (STAIR_DROP - float(cp['exit_up']))) < 1e-9 else 'FAIL'}")
+    print(f"         구성: 마름돌 σ{cp['riser_sigma']*1000:.0f} mm 백색잡음 + "
+          f"상관 침하 ±{cp['settle_amp']*1000:.0f} mm / "
+          f"{cp['settle_period'][0]:.0f}~{cp['settle_period'][1]:.0f}단 "
+          f"(연구 §B4 — 백색잡음만으로는 가짜로 읽힌다)")
+    print(f"    [2H+B] 2×{mu:.4f} + {tread:.4f} = {2*mu + tread:.4f} m · "
+          f"KFS 표 13-1 20° 행 0.710 대비 {(2*mu + tread - 0.710)*1000:+.0f} mm · "
+          f"KCS 34 50 10 3.2.8(3) 0.600~0.650 밖 — 28코스는 §8.R OQ-7 결재값이고 "
+          f"run·drop 이 동결이라 n 이 2H+B 를 유일하게 결정한다(20.39/n). 게이트 아님, 기록값")
+
+    # A11 — entry / exit
+    print(f"    [A11 진입] 마당 z0 → 코스0 상면 = {enter:+.4f} m "
+          f"(≈1답차 {mu:.3f} → {'OK' if 0.10 <= enter <= 0.20 else 'CHECK'}, "
+          f"재건 전 +0.002)")
+    print(f"    [A11 탈출] 코스{n-1} 상면 {COURSES[-1]['top']:.3f} vs 진입로 "
+          f"{-STAIR_DROP:.3f} = {exit_:+.4f} m → **UP-STEP** "
+          f"(돌이 노면보다 높다 = 진입로에서 오르는 단, 낙차 아님; GT-14·GT-1 규칙(b)) · "
+          f"≤0.05 → {'OK' if 0.0 < exit_ <= 0.050 else 'FAIL'} · "
+          f"조경설계기준 21.5(6) 디딤돌 돌출 30 mm · 재건 전 +0.201")
+
+    # A9 — bedding: nothing floats, nothing pokes through
+    mint, maxb = 1e9, -1e9
+    for c in COURSES:
+        pt_back = path_z(c["xa"] - float(cp["ov"])) - bed
+        pt_front = path_z(c["xb"]) - bed
+        for s in c["slabs"]:
+            roll = (s["y1"] - s["y0"]) / 2.0 * math.sin(
+                math.radians(abs(s["roll"])))
+            mint = min(mint, s["top"] - roll - pt_back)      # >0 = no poke-through
+        maxb = max(maxb, (c["bed"]["top"] - c["bed"]["thick"]) - pt_front)
+    print(f"    [A9 정착] 회랑 베드 z0 −{bed:.2f} m (path_z 자체는 불변) · "
+          f"트레드 최저 모서리 − 베드 상면 min {mint:+.4f} m "
+          f"(>0 = 19° 평면이 수평 트레드를 뚫지 않음 → "
+          f"{'OK' if mint > 0.0 else 'FAIL'})")
+    print(f"         속채움 하면 − 베드 상면 max {maxb:+.4f} m "
+          f"(<0 = 공중 부양 없음 → {'OK' if maxb < 0.0 else 'FAIL'}) · "
+          f"판 두께 {thick:.3f} m (KFS 13-2 가 자연석 계단석 300×300×250)")
+
+    # walk-line flatness under the out-of-level roll
+    dev = float(cp["foot_half"]) * math.sin(math.radians(float(cp["jroll"])))
+    print(f"    [수평] 판 out-of-level ±{cp['jroll']:.1f}° (연구 §B4 "
+          f"U(−2.5,+2.5)) → 워크밴드 |y|≤{cp['foot_half']} 안 z 편차 "
+          f"≤{dev*1000:.1f} mm · 코스 상면은 수평 (조경설계기준 21.8(1) "
+          f"'지면과 수평이 되게')")
+
+    # the frozen junction must not drift
+    reach = max(s["xb_f"] + (s["y1"] - s["y0"]) / 2.0
+                * abs(math.sin(math.radians(s["yaw"])))
+                for c in COURSES for s in c["slabs"])
+    print(f"    [동결] run {STAIR_RUN:.2f} · drop {STAIR_DROP:.2f} · "
+          f"SIDE_DROP {SIDE_DROP:.2f} 불변 · 최말단 코스 선단 = "
+          f"{COURSES[-1]['xb']:.3f} (지터 0, 접합부 x=12.2 고정) · "
+          f"요 포함 최대 x 도달 {reach:.3f} m")
+
+    # [S3-3 · GT-16] the knob / jitter-cap row keeps reporting after the rebuild
+    print(f"    [S3-3] 노브 0프림(GT-16 삭제 유지) · 코스 측방 오프셋 0 (A6) · "
+          f"판당 요 캡 ±{cp['jyaw']:.1f}° (J-14 ≤3.0 → "
+          f"{'OK' if cp['jyaw'] <= 3.0 else 'FAIL'})")
+
+
 def _smoke_report():
     P = PARAMS
     print("=" * 72)
     print("scene07_temple_stone_path (v5 R2) — SMOKE 기하 자기검증 (부팅 없음)")
     print("=" * 72)
     slope_deg = math.degrees(math.atan2(STAIR_DROP, STAIR_RUN))
+    cp = P["courses"]
+    tread = (float(cp["x1"]) - float(cp["x0"])) / int(cp["n"])
+    nslab = sum(len(c["slabs"]) for c in COURSES)
     print(f"  사면: run {STAIR_RUN:.2f} m / drop {STAIR_DROP:.2f} m "
-          f"= {slope_deg:.1f}°  · 배석 {len(STONES)}석 (seed "
-          f"{P['stones']['seed']})")
+          f"= {slope_deg:.1f}°  · 자연석 계단 {len(COURSES)}코스 / "
+          f"{nslab}판 (seed {cp['seed']})")
     print(f"  낙차 검증: 주낙차 {STAIR_DROP:.2f} ≥ 0.3 → "
           f"{'OK' if STAIR_DROP >= 0.3 else 'FAIL'} · "
           f"측방 {SIDE_DROP:.2f} ≥ 0.3 → "
           f"{'OK' if SIDE_DROP >= 0.3 else 'FAIL'}")
 
-    # ── tables [1][2][3] stepping stones ──
-    rises, gaps, enter, exit_ = stone_metrics()
-    print("\n  [표] 자연석 이산 배석 (i, xa..xb, 폭 w, cy, 두께, 상면 z, "
-          "답차→다음, 간격)")
-    print(f"    {'i':>2} {'xa':>6} {'xb':>6} {'w':>5} {'cy':>6} {'thk':>5} "
-          f"{'top z':>7} {'답차':>6} {'간격':>6} {'매입':>5} 워크라인")
-    ok_walk = True
-    for s in STONES:
-        i = s["i"]
-        rise = rises[i] if i < len(rises) else float("nan")
-        y0, y1 = s["cy"] - s["w"] / 2.0, s["cy"] + s["w"] / 2.0
-        fh = P["stones"]["foot_half"]
-        covers = (y0 <= -fh + 1e-9) and (y1 >= fh - 1e-9)
-        ok_walk = ok_walk and covers
-        print(f"    {i:2d} {s['xa']:6.2f} {s['xb']:6.2f} {s['w']:5.2f} "
-              f"{s['cy']:+6.2f} {s['thick']:5.2f} {s['top']:7.3f} "
-              f"{rise:6.3f} {s['gap_next']:6.3f} "
-              f"{s['thick'] - s['proud']:5.2f} {'OK' if covers else 'MISS'}")
-    print(f"    [1] 진입 단차(마당 z0 → 1석 상면) = {enter:+.3f} m")
-    print(f"    [2] 답차 min {min(rises):.3f} / max {max(rises):.3f} / "
-          f"평균 {sum(rises)/len(rises):.3f} m  "
-          f"(리듬 파괴 폭 {max(rises)-min(rises):.3f})")
-    print(f"        간격 min {min(gaps):.3f} / max {max(gaps):.3f} m "
-          f"(목표대 0.05~0.35 → "
-          f"{'OK' if min(gaps) >= 0.045 and max(gaps) <= 0.355 else 'CHECK'})")
-    print(f"    [3] 탈출 단차(마지막 석 → 진입로 z{-STAIR_DROP:.1f}) "
-          f"= {exit_:+.3f} m")
-    print(f"    보행 연속성: 전 배석이 워크라인 |y| ≤ "
-          f"{P['stones']['foot_half']} 를 덮는가 → "
-          f"{'OK' if ok_walk else 'FAIL'}")
-    max_step = max(abs(enter), abs(exit_), max(abs(r) for r in rises))
-    print(f"    최대 단일 답차 {max_step:.3f} m "
-          f"({'보행 가능(<0.35)' if max_step < 0.35 else '과대 — 재조정 필요'})")
-    emin = min(s["thick"] - s["proud"] for s in STONES)
-    print(f"    최소 매입 깊이 {emin:.3f} m (>0 = 부유 없음 → "
-          f"{'OK' if emin > 0.0 else 'FAIL'})")
-
-    # ── [S3-3 · GT-16] knob deletion + jitter caps, reported where the knob table was ──
-    cyj = float(P["stones"]["cy_jit"])
-    print(f"\n  [S3-3] 캔티드 노브 24프림 삭제(GT-16) · 코스 측방 오프셋 cy_jit "
-          f"{cyj:.3f} (A6 폐지 → {'OK' if cyj == 0.0 else 'FAIL'}) · "
-          f"석당 요 캡 ±{P['stones']['rz']:.1f}° (J-14 ≤3.0 → "
-          f"{'OK' if P['stones']['rz'] <= 3.0 else 'FAIL'}) · "
-          f"기울기 ±{P['stones']['rx']:.1f}° (연구 §B4 U(-2.5,2.5) → "
-          f"{'OK' if P['stones']['rx'] <= 2.5 else 'CHECK'})")
-    cymax = max(abs(s["cy"]) for s in STONES)
-    print(f"    실측 최대 |cy| {cymax:.4f} m (=0 이어야 함 → "
-          f"{'OK' if cymax < 1e-9 else 'FAIL'}) · 보행면 z 불변: "
-          f"top = path_z(cx)+proud 는 cy·rz 와 무관")
+    # ── stone_course_selfcheck (spec §6.5) ──
+    stone_course_selfcheck()
 
     # ── [W3 F3] leaf carpets : DEC-2 masks — slope alignment + corridor containment ──
     #    The mask is a `build_blot` N-gon normalised to max radius 1, so the lobe
@@ -798,15 +1081,16 @@ def _smoke_report():
         b = gk.build_blot(dk, f"/dry/LeafMask_{nm}", cx, cy, rx, ry, None,
                           n=mask_n(cx), rough=0.18,
                           seed=int(lb["seed"]) + int(nm),
-                          z=0.0, proud=lb["proud"], z_fn=lambda x, y: path_z(x))
+                          z=0.0, proud=lb["proud"],
+                          z_fn=lambda x, y: course_top(x))
         for (px, _py), pz in zip(b["points"], b["zs"]):
-            ferr = max(ferr, abs(pz - (path_z(px) + lb["proud"])))
+            ferr = max(ferr, abs(pz - (course_top(px) + lb["proud"])))
     yout = max(abs(cy) + ry for _n, _cx, cy, _rx, ry in LEAF_PATCHES)
     xout = max(cx + rx for _n, cx, _cy, rx, _ry in LEAF_PATCHES)
     xin = min(cx - rx for _n, cx, _cy, rx, _ry in LEAF_PATCHES)
     print(f"\n  [W3 낙엽] 마스크 {len(LEAF_PATCHES)}매(드리프트 "
           f"{len(P['leaf_drifts'])}×{lb['subs']}, 직사각 0매) · "
-          f"정점 z = path_z(x)+{lb['proud']:.3f} 사면 정합 오차 "
+          f"정점 z = course_top(x)+{lb['proud']:.3f} 정합 오차 "
           f"{ferr:.4f} m ({'OK' if ferr < 1e-6 else 'FAIL'})")
     print(f"    최대 |y| {yout:.3f} (<1.70 = 남측 공동 위 부유 없음 → "
           f"{'OK' if yout < 1.70 else 'FAIL'}) · x 범위 {xin:.2f}..{xout:.2f} "
@@ -1153,9 +1437,17 @@ def main():
             BOX(f"{ROOT}/Plate_{nm}",
                 ((x0 + x1) / 2.0, (y0 + y1) / 2.0, zt - th / 2.0),
                 (x1 - x0, y1 - y0, th), M[mk], col=True)
+        # [S3-4 · GT-14] `PathCorridor` and `SouthScarp` are the two slope plates the stair
+        #   beds into, and they drop by `corridor_bed`. A course tread is LEVEL, so its back
+        #   edge sits up to one rise below the 19.0 deg plane; leaving the plate on the plane
+        #   would push it up through the back of every tread. `path_z()` — the datum every
+        #   other plate, the dressing and `ground_z()` read — is untouched.
+        bed = float(PARAMS["courses"]["corridor_bed"])
         for nm, z0, drop, y0, y1, th, mk in PARAMS["slopes"]:
-            sc.build_slope(stage, f"{ROOT}/Slope_{nm}", 0.0, z0, STAIR_RUN,
-                           drop, y0, y1, th, M[mk], margin=0.0, collider=True)
+            dz = bed if nm in ("PathCorridor", "SouthScarp") else 0.0
+            sc.build_slope(stage, f"{ROOT}/Slope_{nm}", 0.0, z0 - dz,
+                           STAIR_RUN, drop, y0, y1, th + dz, M[mk],
+                           margin=0.0, collider=True)
 
     def build_flat_fill(M):
         """hazard_stairs=False control : stones·slope·south drop flattened to z=0."""
@@ -1163,21 +1455,91 @@ def main():
             M["gravel"], col=True)
 
     # -------------------------------------------------------------------
-    # discrete natural stepping stones (scene-local - build_worn_stone_stairs unused)
+    # 자연석 계단 : 28 courses of 2-4 bedded slabs (scene-local generator, §4.1-1 route (ii))
     # -------------------------------------------------------------------
     def build_stones(M):
+        """[S3-4 · GT-14] Courses, 속채움 bed, 고임돌/틈메우기돌 shims, 돌깔기 aprons.
+
+        `sc.build_worn_stone_stairs` is the shared archetype builder and it was weighed:
+        it gives lateral blocks, `jyaw`, `jz` and a solid base for one call, but it has
+        **no back-overlap term** — each block spans `xa + U(-jt/2, jt/2) .. xb + U(...)`,
+        so a course's back edge can stand up to `jt` behind the course above and A2 comes
+        back in miniature. Adding an `ov=` kwarg is a `scene_common` edit, i.e. K4's, not
+        S3's (spec §H15). Spec §4.1-1 route **(ii)** — keep the scene-local generator and
+        rewrite it as courses — is the recommended one and is what this is.
+        """
+        cp = PARAMS["courses"]
         pool = M["stone_pool"]
-        for s in STONES:
-            cz = s["top"] - s["thick"] / 2.0
-            # per-stone material (a pool whose world-projected UVs are offset) - breaks joint continuity between neighbours
-            sc._oriented_box(stage, f"{ROOT}/Stone_{s['i']}",
-                             (s["cx"], s["cy"], cz),
-                             (s["xb"] - s["xa"], s["w"], s["thick"]),
-                             pool[s["i"] % len(pool)], collider=True,
-                             rotz=s["rz"], rotx=s["rx"])
-        # [S3-3 · GT-16] the 24 `StoneKnob_*` prims are deleted here. They were built with
-        #   `collider=False` and hung 50-80 mm under the stone top, so nothing walked or
-        #   collided with them: the deletion is an OCCL-baseline move, not a GT-z move.
+        thick = float(cp["thick"])
+        for c in COURSES:
+            i = c["i"]
+            b = c["bed"]
+            # 속채움 core: one slab per course, 60 mm under the tread, so a lateral joint
+            #   bottoms out on stone. 표준시방서 0400-3.2 ㄹ "내부는 속채움한다".
+            BOX(f"{ROOT}/CourseBed_{i}",
+                ((b["x0"] + b["x1"]) / 2.0, (b["y0"] + b["y1"]) / 2.0,
+                 b["top"] - b["thick"] / 2.0),
+                (b["x1"] - b["x0"], b["y1"] - b["y0"], b["thick"]),
+                pool[(i * 3 + 1) % len(pool)], col=True)
+            for s in c["slabs"]:
+                dx = s["xb_f"] - s["xback"]
+                dy = s["y1"] - s["y0"]
+                sc._oriented_box(
+                    stage, f"{ROOT}/Course_{i}_{s['k']}",
+                    ((s["xback"] + s["xb_f"]) / 2.0,
+                     (s["y0"] + s["y1"]) / 2.0, s["top"] - thick / 2.0),
+                    (dx, dy, thick),
+                    # per-slab material from the 8-variant pool: adjacent slabs must not
+                    #   share a world-projected grain or the course reads as one casting
+                    pool[(i * 5 + s["k"] * 3) % len(pool)], collider=True,
+                    rotz=s["yaw"], rotx=s["roll"])
+        print(f"[S3-4] scene07 자연석 계단 {len(COURSES)}코스 · 판 "
+              f"{sum(len(c['slabs']) for c in COURSES)} · 속채움 "
+              f"{len(COURSES)} · 개방사면 0 %")
+
+    def build_stone_dressing(M):
+        """고임돌/틈메우기돌 shims at every riser foot + the 돌깔기 aprons (KFS-TRAIL p.72)."""
+        cp = PARAMS["courses"]
+        b0, b1 = (float(v) for v in cp["shim_band"])
+        n_shim = 0
+        for c in COURSES[:-1]:
+            xf = min(s["xb_f"] for s in c["slabs"])
+            below = COURSES[c["i"] + 1]["top"]
+            n_shim += int(sc.scatter_debris(
+                stage, f"{ROOT}/JointShim_{c['i']}",
+                xf + b0, float(cp["y0"]) + 0.05, xf + b1,
+                float(cp["y1"]) - 0.05, below,
+                cover=float(cp["shim_cover"]), pool=sc.VEG_ROCKS,
+                seed=gk.det_seed("s07.shim", str(c["i"]), 0),
+                max_count=int(cp["shim_n"]), scale_jitter=(0.6, 1.1),
+                sink=0.03, mtl=M["gk_rock"]) or 0)
+        # 돌깔기 aprons — 자연석 판석 T100, 6 mm proud so they are a material change and
+        #   not a step (the exit step is measured to the road plate, GT-14).
+        rng = random.Random(int(cp["apron_seed"]))
+        hy = float(cp["apron_half_y"])
+        pr = float(cp["apron_proud"])
+        at = float(cp["apron_t"])
+        for tag, x0, x1, ztop in (
+                ("Lo", float(cp["x1"]), float(cp["x1"]) + float(cp["apron_lo"]),
+                 -STAIR_DROP + pr),
+                ("Up", -float(cp["apron_up"]), float(cp["x0"]) - 0.02, pr)):
+            nx = max(1, int(round((x1 - x0) / 0.50)))
+            for a in range(nx):
+                for c2 in range(3):
+                    fx0 = x0 + (x1 - x0) * a / nx
+                    fx1 = x0 + (x1 - x0) * (a + 1) / nx
+                    fy0 = -hy + 2.0 * hy * c2 / 3.0
+                    fy1 = -hy + 2.0 * hy * (c2 + 1) / 3.0
+                    sc._oriented_box(
+                        stage, f"{ROOT}/Apron{tag}_{a}_{c2}",
+                        ((fx0 + fx1) / 2.0, (fy0 + fy1) / 2.0, ztop - at / 2.0),
+                        (fx1 - fx0 - 0.02, fy1 - fy0 - 0.02, at),
+                        M["stone_pool"][(a * 3 + c2) % len(M["stone_pool"])],
+                        collider=True, rotz=rng.uniform(-2.5, 2.5))
+        print(f"[S3-4] 고임돌·틈메우기돌 {n_shim} 인스턴스 · 돌깔기 에이프런 "
+              f"하단 {cp['apron_lo']:.2f} m / 상단 {cp['apron_up']:.2f} m")
+
+    def build_leaf_masks(M):
         # [W3 F3 / DEC-2] leaf carpets - one irregular mask per drift, no rectangles.
         #   The corridor masks take `z_fn=path_z`, so every vertex sits on the 19 deg
         #   corridor plane and the "floating / buried end" the v6 slope slabs were built to
@@ -1203,8 +1565,13 @@ def main():
                               feather=lb["feather"],
                               feather_cap=int(lb["feather_cap"]),
                               feather_clip=clip_cor,
-                              z_fn=lambda x, y: path_z(x)),
-                          (lambda x, y: path_z(x)), 0.0))
+                              # [S3-4] the walked surface is the stone tops now, not the
+                              #   19 deg plane. Bound to `path_z` the mask would be buried
+                              #   inside the courses over most of the flight and would poke
+                              #   through at the nosings. S3-6 then re-sites these lobes to
+                              #   the margins, where G7 actually puts the litter.
+                              z_fn=lambda x, y: course_top(x)),
+                          (lambda x, y: course_top(x)), 0.0))
         for n, (cx, cy, sx, sy) in enumerate(PARAMS["yard_drifts"]):
             masks.append((f"YardLeaf_{n}",
                           gk.build_carpet_mask(
@@ -1461,10 +1828,16 @@ def main():
             sc.build_tactile(stage, f"{ROOT}/Tactile", -0.62, -0.02,
                              -1.6, 1.6, tac, z=0.0)
         if cfg["cue_nosing"]:
-            for s in STONES:
-                BOX(f"{ROOT}/Nose_{s['i']}",
-                    (s["xb"] - 0.03, s["cy"], s["top"] + 0.002),
-                    (0.06, s["w"] * 0.9, 0.012), M["stone_cap"])
+            # H2 / RF-5 / KFS-TRAIL 13-2 나: a natural-stone stair's anti-slip measure IS
+            #   the rough face. This path stays dead (`cue_nosing = False`) and exists only
+            #   so the toggle can be exercised; it is never called from a shipped 07.
+            for c in COURSES:
+                for s in c["slabs"]:
+                    BOX(f"{ROOT}/Nose_{c['i']}_{s['k']}",
+                        (s["xb_f"] - 0.03, (s["y0"] + s["y1"]) / 2.0,
+                         s["top"] + 0.002),
+                        (0.06, (s["y1"] - s["y0"]) * 0.9, 0.012),
+                        M["stone_cap"])
 
     # ── scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
@@ -1472,6 +1845,8 @@ def main():
     if cfg["hazard_stairs"]:
         build_terrain(M)
         build_stones(M)
+        build_stone_dressing(M)
+        build_leaf_masks(M)
         build_cues(M)
     else:
         build_flat_fill(M)
@@ -1487,9 +1862,10 @@ def main():
         build_ground_kit(M)          # [W2-D] ground elements, dressing last
 
     rises, gaps, enter, exit_ = stone_metrics()
-    print(f"[기하] 배석 {len(STONES)}석 run={STAIR_RUN:.2f} drop="
+    print(f"[기하] 자연석 계단 {len(COURSES)}코스 run={STAIR_RUN:.2f} drop="
           f"{STAIR_DROP:.2f} · 답차 {min(rises):.3f}~{max(rises):.3f} · "
-          f"간격 {min(gaps):.3f}~{max(gaps):.3f} · 측방 낙차 {SIDE_DROP:.2f}")
+          f"코스간 최대 개방 {max(gaps):+.3f}(<0) · 진입 {enter:+.3f} · "
+          f"탈출 {exit_:+.3f} UP-STEP · 측방 낙차 {SIDE_DROP:.2f}")
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])

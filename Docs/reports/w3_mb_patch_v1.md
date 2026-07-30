@@ -402,5 +402,3 @@ Regression JSONs are written **into the round directories** (a stated path, giti
 * Live tree, this session: `ground_kit.py` · `scene_common.py:578` (`LOOK_RULES`) ·
   `scene09:884-901` · `scene16:706-727` · `scene18:1549-1566` · `scene19:795-816` ·
   `sceneC2:380-399` · `sceneD3:373-400,1033-1050` · `grid_views:3900`
-</content>
-</invoke>

@@ -152,9 +152,9 @@ name onto its era, kind and role, which is what the old names fail to say by the
 ```bash
 cd /home/vislab/Desktop/work_sy/Practice_NegObs
 
-# regression of a new round against each scene's own latest judged round
+# regression of a new round against each scene's own baseline-of-record
 python3 scripts/regression_check.py --scenes 'look_check/scene*' \
-  --before-round 260730_w2d_judge,w2c_g2,w2_pilot,r2b_on,wall,facade,r2_on \
+  --before-round 260731_w3_gt25,260731_w3_s10c,260731_w3_s07,260731_w3_s04,260731_w3_s16,260731_w3_s18,260730_w3_n2clean,260731_w3_cb1,260731_w3_mb24,260731_w3_cb2,260730_w2d_fix,260730_w2d_judge,w2c_g2,w2_pilot,r2b_on,wall,facade,r2_on \
   --after-round <new round> \
   --fail-only --json Docs/reports/regr_<new round>.json
 
@@ -171,8 +171,40 @@ python3 scripts/regression_check.py \
 > `Docs/reports/regression_tool_v1.md` §6/§7. The tail of the chain is `r2_on`
 > (`graze_recalibration_v1.md` §9); everything before it is a scene that has since been
 > re-judged, **newest first**, so each scene resolves to its own latest judged round.
-> **Add a newly judged round to the head, never the tail** — `260730_w2d_judge` (33/33)
-> is now the head and is the standing baseline-of-record.
+> **Add a newly judged round to the head, never the tail.**
+>
+> **Refreshed 2026-07-31 (SB closure batch — `gt_changes_w3.md` §11 SB-4, closing
+> `w3_mc_d14_v1.md` §10 D14-B3).** The chain still had `260730_w2d_judge` at its head while
+> eight W3 rounds had become baselines-of-record, so every scene that had been re-judged in
+> W3 was silently compared against a pre-W3 grid — D14-B3's finding, and the reason every
+> re-manufactured GRAZE in that report traced to a stale resolution. **How the order is
+> chosen, because `resolve_round` returns the FIRST name in the list that exists as a
+> directory containing `*.png` — list order is priority, not date** (`regression_check.py`
+> `resolve_round`). Every entry below was verified on disk before it was written here:
+
+| resolves | round | why it sits where it does |
+|---|---|---|
+| `scene02` | `260731_w3_gt25` | 13 cuts, stamp `baseline_of_record: true`; supersedes `260731_w3_cb7`, whose stamp now says so |
+| `scene10` | `260731_w3_s10c` | 14 cuts, `baseline_of_record: true`; supersedes `260731_w3_s10` |
+| `scene07` | `260731_w3_s07` | 14 cuts, `baseline_of_record: true` |
+| `scene04` | `260731_w3_s04` | 13 cuts, `baseline_of_record: true` (GT-22) |
+| `scene16` | `260731_w3_s16` | 13 cuts, `baseline_of_record: true` (GT-23) — **ahead of `mb24` on purpose**: `mb24` is a 5-cut micro round and pixel-null on this scene, so putting it first would drop 8 cuts and gain nothing |
+| `scene18` | `260731_w3_s18` | 14 cuts, named by ledger §4 **GT-26**; its stamp carries no marker (the F5 class), so the ledger row is the authority |
+| `sceneN2` | `260730_w3_n2clean` | 13 cuts, named by ledger §7 **W8** |
+| `scene09` | `260731_w3_cb1` | 17 cuts — **ahead of `mb24` for the same reason as scene16**; `mb24` is pixel-null against it by construction (`w3_mb_patch_v1.md` §8) |
+| `scene01` | `260731_w3_mb24` | 5 cuts, but it is scene01's **newest** round and post-dates GT-24's landing; `260731_w3_cb2` is the same 5 cuts and older |
+| `scene03` · `sceneC2` | `260731_w3_cb2` | 5 cuts, their newest W3 round |
+| the other 22 | `260730_w2d_fix` | the 33-scene W2-D fix batch, present for **all 33** |
+
+> **Two things this chain does not hide.** (1) Everything after `260730_w2d_fix` —
+> `260730_w2d_judge`, `w2c_g2`, `w2_pilot`, `r2b_on`, `wall`, `facade`, `r2_on` — is
+> **unreachable** while that round survives on all 33 scenes. It is kept as a safety net for
+> the day one of those directories is pruned, not because any scene resolves to it today;
+> verified by resolution over `look_check/scene*` (33/33 resolve, 0 unresolved).
+> (2) `scene17`'s 5-cut micro-pilot rounds `260731_w3_sb17{,_pre}` are **deliberately absent**
+> from the chain: scene17's baseline-of-record stays `260730_w2d_fix` (14 cuts), because
+> promoting a 5-cut round would drop 9 cuts from every later comparison. Both stamps say so.
+> The same reasoning is why `260731_w3_mb24` sits below the full grids rather than at the head.
 
 > **Edge integrity is never read from GRAZE alone** (`ground_kit_spec_v1.md` §7.5 A3).
 > A GRAZE firing against a baseline several waves old is unattributable; the instrument

@@ -44,6 +44,18 @@ assets/scene01/*
 # 재현: python assets/download_vegetation.py
 assets/vegetation/
 
+# NVIDIA Omniverse 도시 USD (dsready/simready, ~600MB) — 위와 **동일 판정**:
+# 렌더·데이터셋 공개 ✅ / USD 재배포 ❌ (ZZ §9.2 · §10.6, license_audit_v1.md).
+# 이 줄은 assets/download_urban.py 와 **같은 커밋에 들어가야 한다** — 첫 조달이
+# 중간에 끊기면 추적되지 않은 NVIDIA USD 가 트리에 남는다(redteam_w3r §1.5-1).
+# 재현: python assets/download_urban.py   (원장: assets/urban_manifest_w3.json)
+assets/urban/
+
+# Poly Haven 모델 (CC0 1.0). 라이선스상 재배포 가능하나 1k 번들만도 ~340MB 라
+# 용량 사유로 제외한다 — assets/*.exr / *.jpg 와 같은 이유, 같은 처분.
+# 재현: python assets/download_urban.py --only polyhaven_cc0
+assets/urban_cc0/
+
 # --- 실사 레퍼런스 라이선스 격리 (license_audit_v1.md) -------------------
 # 라이선스 근거가 없는 제3자 사진. 취득 경로 확인 전까지 배포하지 않는다.
 # (이미 과거 커밋에 포함돼 있으므로 히스토리 정리 여부는 별도 결정 사항.)

@@ -50,6 +50,8 @@ Written 2026-07-29, target: the 33 NegObs scenes (21 main + 12 batch 1)
 | function | creates GT drop | note |
 |---|---|---|
 | `build_gutter_L`        | **no** | but curb exposure grows by `width*cross_slope` (about 18-30 mm) -> recompute the curb GT |
+| `build_curb_line`       | **yes** | curb top -> carriageway = `height` (default 0.150), + the gutter cross-fall when `gutter=True`. Depressed (턱낮춤) spans drop to <= 20 mm and are **not** a drop |
+| `derive_manholes`       | no | pure geometry helper - returns coordinates, builds nothing |
 | `build_gully`           | `lid=True` no / **`lid=False` yes** | uncovered, drop = `body_h` (0.64 m) |
 | `build_manhole`         | `lid=True` no / **`lid=False` yes** | flush +-10 mm is below a minor step |
 | `build_ramp_curb`       | **yes** | curb top -> carriageway = `height` (0.10-0.15 m). **New drop line** |
@@ -62,10 +64,19 @@ Written 2026-07-29, target: the 33 NegObs scenes (21 main + 12 batch 1)
 ```python
 import infra_kit as ik
 kit = ik.kit_from_scene_common(sc, stage)          # sc = already-imported scene_common
-ik.build_gutter_L(kit, f"{ROOT}/Gutter", 0.0, -4.0, 60.0, -4.0,
-                  top_z=0.0, mtl=M["concrete"])
+
+# the 보차도 section in one call: gutter + unit-length curb + 턱낮춤 at the crossing
+ik.build_curb_line(kit, f"{ROOT}/Curb", (0.0, -4.0), (60.0, -4.0),
+                   M["curb_granite_light"], z_road=-0.150, walk_z=-0.005,
+                   drop_spans=[(24.0, 27.0)])      # crossing at s = 24…27 m
+
 for x in ik.gully_positions(0.0, 60.0, sag_points=(23.5,)):
     ik.build_gully(kit, f"{ROOT}/Gully_{x:.0f}", x, -3.75, 0.0, M["steel"])
+
+# manholes are **derived from a declared service line**, never authored (G-4)
+for mh in ik.derive_manholes([(-13.5, -3.0), (-2.0, -3.0)], d_mm=450):
+    ik.build_manhole(kit, f"{ROOT}/MH_{mh['tag']}", mh["x"], mh["y"], 0.0,
+                     M["iron"])
 ```
 
 Check prim counts and geometry without Isaac: `python3 infra_kit.py`
@@ -80,8 +91,10 @@ import zlib
 __all__ = [
     "Kit", "kit_from_scene_common", "dry_kit",
     "det_seed", "det_rng",
-    "INFRA_DIMENSIONS", "TACTILE_YELLOW",
-    "build_gutter_L", "gully_positions", "build_gully", "build_manhole",
+    "INFRA_DIMENSIONS", "TACTILE_YELLOW", "MANHOLE_INTERVAL_KDS",
+    "TACTILE_WORN_STATE", "RF4_ADHERED_PAD",
+    "build_gutter_L", "build_curb_line", "curb_s_at", "check_arris_role",
+    "gully_positions", "build_gully", "derive_manholes", "build_manhole",
     "build_ramp_curb", "build_road_marking", "wall_joint_positions",
     "build_retaining_wall_details", "build_tactile_pair",
 ]
@@ -111,6 +124,24 @@ INFRA_DIMENSIONS = {
     "gully_body_h":         (0.640, "추정", "동 [추정]"),
     "gully_spacing":        (22.0, "확인", "동 3.배수공 파: 직선부 20~25 m. 22 는 그 중앙"),
     "gully_spacing_max":    (25.0, "확인", "동 (상한)"),
+    # -- Curb line (보차도 경계석) ---------------------------------------
+    # [W3 K5 · S06-B] The 150/250/100 exposure band and the "flush … +20 mm to the footway"
+    # rule are **project rulings**, not statute text: they are stated in
+    # `Docs/surveys/w3_intake_06_10.md` §3 S06-B item 2 and repeated in
+    # `Docs/briefs/w3_execution_spec_v1.md` §9. No 조문 was quoted verbatim for them in either
+    # document, so they are tagged `사양` (spec ruling) rather than `확인` (statute verified).
+    "curb_exposure_def":    (0.150, "사양", "S06-B 2. — 차도 대비 노출고 기본값 150 mm (w3_intake_06_10 §3)"),
+    "curb_exposure_max":    (0.250, "사양", "동 — 상한 250 mm"),
+    "curb_exposure_min":    (0.100, "사양", "동 — 하한 100 mm"),
+    "curb_over_walk_max":   (0.020, "사양", "동 — 연석 top 은 보도면 대비 flush ~ +20 mm. scene02 의 +100 mm 가 유일한 형상 오류"),
+    "curb_unit":            (1.00, "사양", "S06-B 1. — 연석은 1 m 단위 기성 제품. 줄눈 리듬이 '페인트가 아니라 연석'이라는 최강 단서"),
+    "curb_arris_r":         (0.010, "확인", "국토부 훈령 321호 보도 설치지침 그림 2.17 — 수직 연석 R=10 "
+                                           "(scene_common.py LOOK_CLASS['curb'] bevel 과 동일 출처)"),
+    "curb_width":           (0.20, "추정", "연석 폭. S06-B 기본값 0.20 을 그대로 승계 [추정 — 제품 규격 원문 미확인]"),
+    "curb_joint_w":         (0.006, "추정", "연석 줄눈 폭. 원문 없음. 옹벽 수축이음 6~8 mm 준용 [추정] (측구 줄눈과 동일 유추)"),
+    "curb_drop_h":          (0.020, "사양", "S06-B 4. 턱낮춤 — 횡단·볼라드열·광장 진입부에서 ≤ 20 mm. "
+                                           "본문은 '실무 관행'으로만 서술하고 법조문을 인용하지 않았다 [법조문 미확인]"),
+    "curb_drop_taper":      (1.00, "추정", "턱낮춤 전이 구간 = 경사형 경계석 1 단위 [추정 — 원문 없음]"),
     # -- Manhole --------------------------------------------------------
     "manhole_d_648":        (0.648, "확인", "KS D 4040 인증제품 / 국도 실무요령 3.17 (차도 회주철·보도 칼라 공통)"),
     "manhole_d_766":        (0.766, "확인", "동 (옵션)"),
@@ -118,6 +149,11 @@ INFRA_DIMENSIONS = {
     "manhole_thick":        (0.110, "확인", "동 110t"),
     "manhole_flush_tol":    (0.010, "확인", "노면과 동일면 ±10 mm (임무 지시 / 실무 ±10~20 mm)"),
     "manhole_frame_w":      (0.045, "추정", "틀 링 폭. 원문 없음 [추정]"),
+    # [W3 K5 · G-4] KDS 61 40 00 직선부 최대 간격 — `MANHOLE_INTERVAL_KDS` 의 원천값.
+    "manhole_int_d600":     (75.0, "확인", "하수도설계기준 KDS 61 40 00 — Ø ≤ 600 mm 직선부 최대 75 m"),
+    "manhole_int_d1000":    (100.0, "확인", "동 — 600 < Ø ≤ 1,000 mm 최대 100 m"),
+    "manhole_int_d1500":    (150.0, "확인", "동 — 1,000 < Ø ≤ 1,500 mm 최대 150 m"),
+    "manhole_int_d1650":    (200.0, "확인", "동 — Ø ≥ 1,650 mm 최대 200 m"),
     # -- Parking ramp curb ----------------------------------------------
     "ramp_curb_h_min":      (0.10, "확인", "주차장법 시행규칙 §6①5다 — 높이 10~15 cm"),
     "ramp_curb_h_max":      (0.15, "확인", "동"),
@@ -151,6 +187,67 @@ INFRA_DIMENSIONS = {
 # The statute specifies only "yellow" for tactile paving and gives no colour coordinates `[no source]`.
 # The RGB below approximates the yellow used in practice `[estimate]`. Unrelated to v5.1 §4 (no pure white).
 TACTILE_YELLOW = (0.86, 0.66, 0.10)
+
+# [W3 K5 · G-4] **KDS 61 40 00 straight-run maximum manhole interval**, by pipe diameter.
+#   `((d_m_upper_inclusive, max_interval_m), ...)`, ascending. `derive_manholes` is the only
+#   consumer. The four values are ledgered above as `manhole_int_*`.
+MANHOLE_INTERVAL_KDS = (
+    (0.600, 75.0),
+    (1.000, 100.0),
+    (1.500, 150.0),
+    (float("inf"), 200.0),
+)
+
+# ---------------------------------------------------------------------------
+# [W3 K5] **PREPARED — HOLD. Nothing in this file reads the two dicts below.**
+#
+# They exist so that the two tactile rows the W3 execution spec assigns to K5 are *recorded
+# with their numbers* instead of being re-derived (and re-invented) by whoever unblocks them.
+# `_selfcheck` asserts that no `build_*` function references either name — "record the spec,
+# build nothing" is a **testable** claim here, not a promise.
+#
+# Why they are held, both reasons load-bearing (`w3_execution_spec_v1.md` §10.2 P-10):
+#   1. Tactile paving is **OFF by default by user decision** (§12 do-not-touch 6) and an
+#      implementer must not flip it. `build_tactile_pair` carries the same warning.
+#   2. At the RF-4 pad's 6-12 mm proud, GT-E1' (`|x_e| >= EDGE_K * z_e`, `ground_kit.EDGE_K = 40`)
+#      demands **0.24-0.48 m** of edge clearance against the statutory 0.30 m tactile position.
+#      The 12 mm end of the range therefore **fails** at 0.30 m and needs the same
+#      `GT-E2-x` / `EXPECTED_FP` registration in `ground_kit` that the flush case already has.
+#      That registration is `ground_kit`'s file (K1), not this one - which is precisely why K5
+#      may not build it.
+# ---------------------------------------------------------------------------
+TACTILE_WORN_STATE = dict(
+    status="HOLD",
+    row="w3_execution_spec_v1.md §6.2-D (K5 + S8)",
+    # The >= 8 mm colour layer abrades along the walked line. Statutory replacement threshold
+    # for the dot height is the worn-state *target*, not a defect.
+    dot_h_new=0.006,                  # 확인 - 교통약자법 시행규칙 별표1, h 6+-1 mm (= INFRA_DIMENSIONS['tactile_dot_h'])
+    dot_h_worn_max=0.0035,            # 확인 - §6.2-D, 교체 기준 "돌기 높이 3.5 mm 이하"
+    # **No worn RGB is given on purpose.** The worn read is "grey concrete with yellow surviving
+    # only at the edges and as ring outlines round the dots" - that is a *mask*, not a colour, and
+    # a single invented RGB would be a fabricated number. The correct source when this unblocks:
+    # measure it off sceneD4's shipped strip, which §12 do-not-touch 13 names as the library's
+    # only correct worn tactile and forbids cleaning up.
+    centre="bare host paving albedo - do NOT invent a colour [no source]",
+    edge_survives=TACTILE_YELLOW,
+    reference_scene="sceneD4_subway_platform (tactile proud 0.004, `tactile` texture role)",
+    build_here=False,
+)
+
+RF4_ADHERED_PAD = dict(
+    status="HOLD",
+    row="w3_execution_spec_v1.md §10.2 P-10 (RF-4 retrofit tactile as an adhered pad)",
+    proud_min=0.006,                  # 사양 - P-10 "proud +6…+12 mm"
+    proud_max=0.012,                  # 사양 - 동
+    adhesive_perimeter=(0.001, 0.002),  # 사양 - "1-2 mm dark adhesive perimeter"
+    grid_aligned=False,               # 사양 - the outline is **not** aligned to the paver grid
+    corner_loss_tiles=(1, 2),         # 사양 - 1-2 tiles with corner loss
+    # Blockers, both of which must clear before a single prim is emitted:
+    block_1="tactile is default-OFF by user decision (§12 do-not-touch 6)",
+    block_2="GT-E1' needs EDGE_K(40) * proud = 0.24…0.48 m clearance vs the statutory 0.30 m "
+            "position -> GT-E2-x / EXPECTED_FP registration in ground_kit (K1), not here",
+    build_here=False,
+)
 
 
 # ===========================================================================
@@ -409,6 +506,15 @@ def build_gutter_L(kit, prefix, x0, y0, x1, y1, top_z, mtl,
     `asphalt -> L-type gutter -> curb (trapezoidal) -> sidewalk block` (same survey
     §3.6), while our scenes go "asphalt -> curb box -> sidewalk" with no gutter.
 
+    ### Wiring `[W3 K5]`
+    **Do not call this directly to build a 보차도 section.** `build_curb_line(..., gutter=True)`
+    (the default) chains it on the carriageway side of the *same* line and folds
+    `drop_at_curb` into the returned `gt_drop`, which is the recomputation the GT note below
+    demands. Calling both by hand is how the two get out of step.
+    Standalone use stays correct for a gutter with **no** kerb - a levee crown road, a service
+    yard edge. The measured state at W3 open: `gutter_L=0` in scenes 02 · 03 · 08 · 16 · 17,
+    and 06 · 11 never request it, so every section that should have one has none.
+
     ### Dimension basis
     - width **300 / 500**, thickness **200** - National Highway Construction Design
       Practice Guide, 3. Drainage 2), read off the type-1 section drawing `[verified]`
@@ -431,10 +537,21 @@ def build_gutter_L(kit, prefix, x0, y0, x1, y1, top_z, mtl,
     - **`Kit(obox=...)` is required** because the cross slope always tilts the pan.
       With `cross_slope=0.0` and an axis-parallel segment it works without obox (a flat
       gutter).
-    - `jitter`: joint position jitter [m]. Default 0 (real joints are exactly evenly
-      spaced - the jitter recommendation in §3.4 concerns **placed objects** such as
-      bollards and trees, not construction joints). Use 0.02-0.05 only when poor
-      workmanship must be reproduced.
+    - `jitter`: joint position jitter [m]. **KEEP AT ZERO. This is a J-11 zero-locked
+      parameter and a non-zero value is a LINT-10 hard error.**
+      `Docs/briefs/placement_rules_v1.yaml` names this exact callee (`build_gutter_L`,
+      `infra_kit.py:403` at the time of writing) in `LINT-10.zero_locked_callees`, so
+      `placement_lint.py` fails any scene that passes a non-zero value. Two reasons:
+      (1) a construction joint is **set out**, not scattered - real bays are exactly evenly
+      spaced, which is the whole point of the `_bay_joints` convention above; (2) the §3.4
+      jitter recommendation this parameter was originally written for concerns **placed
+      objects** (bollards, trees, benches), and W3's §1.2 X2 ruling keeps only
+      `jit_scale`-class size/interval variation while abolishing placement jitter.
+      **[W3 K5 correction]** The previous text here read *"use 0.02-0.05 only when poor
+      workmanship must be reproduced"*. That invitation is **withdrawn** - it contradicts
+      the ban that landed with J-11, and poor workmanship in a gutter is a *material and
+      level* defect (spalled arris, ponding, a mis-set panel), not a randomised joint
+      pitch. The parameter itself stays so the deterministic path keeps its test coverage.
 
     ### Prim count
     **1** base slab + `ceil(L/6) + (L/20)` panels.
@@ -525,6 +642,361 @@ def build_gutter_L(kit, prefix, x0, y0, x1, y1, top_z, mtl,
 
 
 # ===========================================================================
+# [4b] Curb line (보차도 경계석)  * W3 K5 / S06-B - the new shared builder
+# ===========================================================================
+def _as_points(p0, p1):
+    """`(p0, p1)` or `(polyline, None)` -> a list of `(x, y)` of length >= 2."""
+    if p1 is None:
+        pts = [(float(p[0]), float(p[1])) for p in p0]
+        if len(pts) < 2:
+            raise ValueError("infra_kit: 연석 폴리라인은 점 2개 이상이어야 한다.")
+        return pts
+    return [(float(p0[0]), float(p0[1])), (float(p1[0]), float(p1[1]))]
+
+
+def curb_s_at(p0, p1, x, y):
+    """World point -> **arc length `s`** along the same line `build_curb_line` uses.
+
+    `drop_spans` is expressed in arc length because that is the only parameterisation
+    that survives a polyline. Scene owners think in world coordinates, so this converts:
+
+        s = ik.curb_s_at(P0, P1, x_crossing_lo, y_kerb)
+
+    Returns the arc length of the **perpendicular projection** of `(x, y)` onto the line,
+    clamped to `[0, L]`. On a polyline the nearest segment wins.
+    """
+    pts = _as_points(p0, p1)
+    best, s_acc = None, 0.0
+    for a, b in zip(pts[:-1], pts[1:]):
+        L, _, (ux, uy), _ = _line_frame(a[0], a[1], b[0], b[1])
+        t = ((float(x) - a[0]) * ux + (float(y) - a[1]) * uy)
+        tc = min(max(t, 0.0), L)
+        px, py = a[0] + ux * tc, a[1] + uy * tc
+        d2 = (px - float(x)) ** 2 + (py - float(y)) ** 2
+        if best is None or d2 < best[0]:
+            best = (d2, s_acc + tc)
+        s_acc += L
+    return best[1]
+
+
+def check_arris_role(sc, role="curb", arris_r=0.010):
+    """Assert that the **look class the caller must bind** really carries the R = 10 mm arris.
+
+    `arris="look"` (the default) builds **no arris geometry**: the 10 mm top arris comes from
+    `scene_common.LOOK_CLASS[role]["bevel"]` -> `round_edges_radius` on the material, which is
+    the repo's established mechanism for it (`scene_common.py` LOOK_CLASS comment: *"vertical
+    curb **R=10** - MOLIT directive no. 321, sidewalk installation guideline, figure 2.17"*).
+    That makes the arris a property of the **material the scene binds**, not of this file - so
+    a scene that binds a `concrete` (20 mm) or `stone` (4 mm) material silently gets the wrong
+    arris and nothing complains.
+
+    This closes that hole without importing `scene_common`: pass the **already-imported module
+    object**, exactly as `kit_from_scene_common(sc, stage)` does.
+
+        ok, measured, note = ik.check_arris_role(sc)
+        assert ok, note
+
+    Returns `(ok, measured_bevel_or_None, note)`.
+    """
+    lc = getattr(sc, "LOOK_CLASS", None)
+    if not isinstance(lc, dict):
+        return (False, None, "scene_common.LOOK_CLASS 를 찾을 수 없다")
+    spec = lc.get(role)
+    if not isinstance(spec, dict):
+        return (False, None, f"LOOK_CLASS['{role}'] 없음 — 연석은 curb 룩클래스에 물려야 한다")
+    got = float(spec.get("bevel", 0.0))
+    ok = abs(got - float(arris_r)) < 1e-9
+    return (ok, got,
+            f"LOOK_CLASS['{role}'].bevel = {got * 1000:.1f} mm "
+            f"(요구 {float(arris_r) * 1000:.1f} mm)"
+            + ("" if ok else " — 불일치. arris='step' 을 쓰거나 룩클래스를 맞출 것"))
+
+
+def build_curb_line(kit, path, p0, p1, mtl, height=0.150, width=0.20,
+                    unit=1.0, arris_r=0.010, gutter=True, drop_spans=(),
+                    z_road=0.0, walk_z=None, road_side="left",
+                    embed=0.20, joint_w=0.006, joint_mtl=None,
+                    drop_h=0.020, drop_taper=1.0, arris="look",
+                    bed=True, bed_frac=(0.55, 0.95), lod_span=None,
+                    far_unit=8.0, gutter_mtl=None, gutter_kwargs=None,
+                    collider=True, strict=True):
+    """**보차도 경계석 (curb line)** - unit-length blocks, 10 mm top arris, optional L-gutter.
+
+    The single builder S06-B asks for, so that the 보차도 section is identical in every scene.
+
+    ### Why unit-length blocks are the whole point `[ruling - execution spec §6.2-K5]`
+    > *"`build_curb_line` must emit **unit-length** blocks (real 연석 is a 1 m unit product -
+    > the joint rhythm is the single strongest cue that it is a curb and not paint) with the
+    > R = 10 mm top arris the repo's own `scene_common.py:304` note calls for."*
+
+    The audit found the opposite everywhere: scene06's curb is **one box 140 m long**
+    (`w3_intake_06_10.md` §3 finding 2), and scene16 binds `M["curb"]` with **no prim at all**
+    ("colour without geometry"). A 140 m extrusion with no joint has no scale: at h0.3 it reads
+    as a painted band. The 1 m rhythm is what makes it read as a kerb.
+
+    ### The joint is a **gap**, not a prim
+    Same device as `build_gutter_L`: blocks are separated by a `joint_w` gap, and a continuous
+    **bedding core** (`bed=True`) sits *inside* the block footprint with its top `arris_r` below
+    the block tops, so the gap is a real 6 mm x ~140 mm dark recess rather than a see-through
+    slot. The core is fully interior (`bed_frac` of the width, bottom raised 5 mm) - no coplanar
+    face with the blocks, so no z-fighting. Pass `joint_mtl` for a mortar tone.
+
+    ### Height rule `[spec - S06-B 2., not statute; see INFRA_DIMENSIONS notes]`
+    - `height` = exposure **above the carriageway datum `z_road`**: default **0.150**,
+      max 0.250, min 0.100. Out of band raises unless `strict=False`.
+    - `walk_z` (footway top): the curb top must be **flush … +20 mm** above it. scene02's
+      `curb_top +0.10` above a 0.0 footway is the library's only outright shape error and is
+      exactly what this check catches - as built it is a 100 mm trip line along the walk.
+    - With `gutter=True` the pan's curb edge sits `drop_at_curb` (about 18 mm at width 0.30)
+      **below** `z_road`, so the **visible face at the kerb** is `height + drop_at_curb`. That
+      is `build_gutter_L`'s own GT note, honoured here: `gt_drop` returns the summed value.
+
+    ### 턱낮춤 (`drop_spans`) `[spec - S06-B 4.; 법조문 미인용]`
+    `[(s0, s1), ...]` or `[(s0, s1, h), ...]` in **arc length** (use `curb_s_at` to convert from
+    world coordinates). Over the span the exposure drops to `drop_h` (<= 20 mm), and one
+    `drop_taper`-long **transition block** on each side takes the mid-value, which is how a
+    graded 경사형 경계석 unit actually works. Block boundaries are forced onto every span and
+    taper edge, so **no block ever straddles a transition**. scene06 has a bollard row at
+    `y = -9.30` with no corresponding drop - that is the row this parameter exists for.
+
+    ### Arris
+    - `arris="look"` (**default, 0 prims**): the R = 10 mm comes from the bound material's
+      `round_edges_radius`, via `LOOK_CLASS["curb"]["bevel"] = 0.010`. **Bind a curb-class
+      material** - S06-B 3. asks for a new `curb_granite_light` role and forbids reusing
+      `granite_dark` (scene01 recorded that it "reads as a black hole"). Verify the binding
+      with `check_arris_role(sc)`; this function cannot see inside `mtl`.
+    - `arris="step"`: a 2-prim-per-block **stepped approximation** - the top `arris_r` course is
+      inset `arris_r` on the road side. It is a square step, not a fillet `[approximation]`;
+      at 10 mm the difference is sub-pixel beyond ~1 m. Use it only for a hero close-up, or
+      where the scene cannot bind a curb-class material.
+    - `arris="none"`: hard edge. Control arm only.
+
+    ### Prim count
+    `1 bed group` + `n blocks` (x2 with `arris="step"`) + the gutter's own `1 + joints`.
+    At `unit=1.0` that is **1.01-1.08 prims/m** measured (12 m -> 13 prims, 140 m -> 141) -
+    five times the gutter, which is unavoidable: the joint rhythm *is* the deliverable. Two
+    levers when a long run cannot pay for it: `lod_span=(s_lo, s_hi)` segments at `unit` only
+    inside the judged window and at `far_unit` (default 8 m) outside it, and `unit` itself.
+    Measured: a 140 m run with a 30 m window costs **45** prims instead of **141**.
+
+    ### Args
+    - `p0`, `p1`: the **kerb face line** - the face that meets the carriageway. Pass a point
+      list as `p0` with `p1=None` for a polyline. This is the *same* line `build_gutter_L`
+      takes as its curb-side edge, which is why `gutter=True` can just chain it.
+    - `road_side`: `"left"` (+normal) / `"right"` (-normal), the `build_gutter_L` convention.
+      The block body extends `width` **away** from the road.
+    - `embed`: depth buried below `z_road` (bedding clearance / z-fighting guard).
+    - `strict=False`: downgrade the statutory-band and footway-flush checks to returned
+      warnings. Intended for a deliberately non-compliant scene, which must then say so in
+      its own docstring.
+
+    GT: **creates a drop line.** `gt_drop = height + gutter drop_at_curb` (0.150 -> about
+        0.168 with the default gutter), a **continuous linear drop** along the whole run.
+        Depressed spans are `drop_h` (<= 20 mm) and are **not** a drop - a scene that wires
+        this needs a GT re-cache and a ledger row. **No scene is wired by K5**; scene owners
+        (02 · 06 · 08 · 11 · 13 · 16) do that in their own commits.
+
+    Returns: dict(blocks[], beds[], joints[s], n_blocks, unit_actual, heights[],
+               curb_top_z, exposure_road, face_h_at_kerb, gt_drop, is_gt_hazard,
+               gutter, gutter_drop, arris, drop_spans, warnings[], length,
+               prim_count, prims_per_m)
+    """
+    if road_side not in ("left", "right"):
+        raise ValueError("road_side 는 'left' 또는 'right'.")
+    if arris not in ("look", "step", "none"):
+        raise ValueError("arris 는 'look' | 'step' | 'none'.")
+    if width <= 0.0 or unit <= 0.0:
+        raise ValueError("width>0, unit>0 이어야 한다.")
+    if joint_w >= unit:
+        raise ValueError("joint_w 는 unit 보다 작아야 한다.")
+
+    warnings = []
+
+    def _fail(msg):
+        if strict:
+            raise ValueError(msg)
+        warnings.append(msg)
+
+    exp_min, exp_max = 0.100, 0.250
+    if not (exp_min - 1e-9 <= height <= exp_max + 1e-9):
+        _fail(f"curb height={height:.3f} 는 S06-B 노출고 대역 "
+              f"{exp_min:.2f}~{exp_max:.2f} m 밖이다.")
+    if drop_h > 0.020 + 1e-9:
+        _fail(f"drop_h={drop_h:.3f} — 턱낮춤은 ≤ 20 mm (S06-B 4.).")
+
+    m0 = kit.mark()
+    pts = _as_points(p0, p1)
+    side = 1.0 if road_side == "left" else -1.0
+
+    # -- Gutter first: its cross fall sets the surface at the kerb foot ---
+    gut, gutter_drop = None, 0.0
+    if gutter:
+        gkw = dict(gutter_kwargs or {})
+        gkw.setdefault("road_side", road_side)
+        gut = build_gutter_L(kit, f"{path}/Gutter",
+                             pts[0][0], pts[0][1], pts[-1][0], pts[-1][1],
+                             float(z_road),
+                             mtl if gutter_mtl is None else gutter_mtl, **gkw)
+        gutter_drop = float(gut["drop_at_curb"])
+
+    curb_top = float(z_road) + float(height)
+    if walk_z is not None:
+        over = curb_top - float(walk_z)
+        if not (-1e-9 <= over <= 0.020 + 1e-9):
+            _fail(f"연석 top 이 보도면 대비 {over * 1000:+.0f} mm — S06-B 2. 는 "
+                  f"flush ~ +20 mm 를 요구한다 (scene02 의 +100 mm 가 그 오류).")
+
+    # -- Normalised depressed spans --------------------------------------
+    spans = []
+    for sp in (drop_spans or ()):
+        a, b = float(sp[0]), float(sp[1])
+        hd = float(sp[2]) if len(sp) > 2 else float(drop_h)
+        if b < a:
+            a, b = b, a
+        spans.append((a, b, hd))
+    spans.sort()
+
+    tap = max(0.0, float(drop_taper))
+
+    def _h_at(s):
+        """Exposure at arc length `s`: full height, taper mid-value, or the depressed value."""
+        h = float(height)
+        for a, b, hd in spans:
+            if a - 1e-9 <= s <= b + 1e-9:
+                h = min(h, hd)
+            elif tap > 0.0 and (a - tap) <= s < a:
+                h = min(h, hd + (float(height) - hd) * (a - s) / tap)
+            elif tap > 0.0 and b < s <= (b + tap):
+                h = min(h, hd + (float(height) - hd) * (s - b) / tap)
+        return h
+
+    # -- Cut boundaries: segment ends, span edges, taper edges, LOD edges -
+    seg_L, seg_s0 = [], []
+    s_acc = 0.0
+    for a, b in zip(pts[:-1], pts[1:]):
+        L_i, _, _, _ = _line_frame(a[0], a[1], b[0], b[1])
+        seg_s0.append(s_acc)
+        seg_L.append(L_i)
+        s_acc += L_i
+    L_tot = s_acc
+
+    forced = set()
+    for a, b, _ in spans:
+        for v in (a - tap, a, b, b + tap):
+            if 1e-6 < v < L_tot - 1e-6:
+                forced.add(round(v, 6))
+    if lod_span is not None:
+        for v in (float(lod_span[0]), float(lod_span[1])):
+            if 1e-6 < v < L_tot - 1e-6:
+                forced.add(round(v, 6))
+
+    def _unit_at(s):
+        if lod_span is None:
+            return float(unit)
+        return (float(unit) if float(lod_span[0]) - 1e-9 <= s <= float(lod_span[1]) + 1e-9
+                else float(far_unit or unit))
+
+    blocks, beds, joints, heights = [], [], [], []
+    caps = []
+    thick_base = float(embed)
+
+    for si, (A, B) in enumerate(zip(pts[:-1], pts[1:])):
+        L_i, yaw, (ux, uy), (nx, ny) = _line_frame(A[0], A[1], B[0], B[1])
+        off = -side * float(width) / 2.0            # kerb face line -> body centre line
+
+        def _c(s_local, n_off):
+            return (A[0] + ux * s_local + nx * n_off,
+                    A[1] + uy * s_local + ny * n_off)
+
+        s0_seg = seg_s0[si]
+        cuts = sorted({0.0, L_i} | {round(v - s0_seg, 6) for v in forced
+                                    if 1e-6 < (v - s0_seg) < L_i - 1e-6})
+
+        # ---- cells: uniform split of each interval, no offcut fragment ---
+        cells = []                                   # (a_local, b_local)
+        for a_i, b_i in zip(cuts[:-1], cuts[1:]):
+            span_len = b_i - a_i
+            u_here = _unit_at(s0_seg + (a_i + b_i) / 2.0)
+            n = max(1, int(round(span_len / u_here)))
+            for j in range(n):
+                cells.append((a_i + span_len * j / n, a_i + span_len * (j + 1) / n))
+
+        # ---- blocks -------------------------------------------------------
+        group = []                                   # (a, b, h) runs of equal height
+        for ci, (ca, cb) in enumerate(cells):
+            mid = (ca + cb) / 2.0
+            h_b = _h_at(s0_seg + mid)
+            ja = 0.0 if ci == 0 else float(joint_w) / 2.0
+            jb = 0.0 if ci == len(cells) - 1 else float(joint_w) / 2.0
+            ba, bb = ca + ja, cb - jb
+            blen = bb - ba
+            if blen <= 0.02:
+                continue
+            heights.append(h_b)                  # index-aligned with `blocks`
+            if ci > 0:
+                joints.append(s0_seg + ca)
+            top_b = float(z_road) + h_b
+            thick = h_b + thick_base
+            body_t = thick - (float(arris_r) if arris == "step" else 0.0)
+            cx, cy = _c((ba + bb) / 2.0, off)
+            bp = f"{path}/Blk_{si}_{ci:03d}"
+            kit.B(bp, (cx, cy, top_b - (float(arris_r) if arris == "step" else 0.0)
+                       - body_t / 2.0),
+                  (blen, float(width), body_t), mtl, rotz=yaw, col=collider)
+            blocks.append(bp)
+            if arris == "step":
+                # Top course inset `arris_r` on the road side -> a square 10 mm arris.
+                w_cap = float(width) - float(arris_r)
+                off_cap = off - side * float(arris_r) / 2.0
+                px, py = _c((ba + bb) / 2.0, off_cap)
+                cp = f"{path}/Arris_{si}_{ci:03d}"
+                kit.B(cp, (px, py, top_b - float(arris_r) / 2.0),
+                      (blen, w_cap, float(arris_r)), mtl, rotz=yaw, col=False)
+                caps.append(cp)
+            if group and abs(group[-1][2] - h_b) < 1e-9:
+                group[-1] = (group[-1][0], cb, h_b)
+            else:
+                group.append((ca, cb, h_b))
+
+        # ---- bedding core: one prim per constant-height run ---------------
+        if bed:
+            f_lo, f_hi = float(bed_frac[0]), float(bed_frac[1])
+            w_bed = float(width) * (f_hi - f_lo)
+            off_bed = -side * float(width) * (f_lo + f_hi) / 2.0
+            for gi, (ga, gb, gh) in enumerate(group):
+                glen = gb - ga
+                if glen <= 0.02 or w_bed <= 0.0:
+                    continue
+                top_bed = float(z_road) + gh - float(arris_r)
+                t_bed = (gh + thick_base) - float(arris_r) - 0.005
+                if t_bed <= 0.0:
+                    continue
+                px, py = _c((ga + gb) / 2.0, off_bed)
+                bpth = f"{path}/Bed_{si}_{gi:02d}"
+                kit.B(bpth, (px, py, top_bed - t_bed / 2.0),
+                      (glen, w_bed, t_bed),
+                      mtl if joint_mtl is None else joint_mtl,
+                      rotz=yaw, col=False)
+                beds.append(bpth)
+
+    n_blk = len(blocks)
+    unit_actual = (L_tot / n_blk) if n_blk else 0.0
+    prim_count = kit.count_since(m0)
+    return dict(
+        blocks=blocks, beds=beds, caps=caps, joints=joints,
+        n_blocks=n_blk, unit_actual=unit_actual, heights=heights,
+        curb_top_z=curb_top, exposure_road=float(height),
+        face_h_at_kerb=float(height) + gutter_drop,
+        gt_drop=float(height) + gutter_drop, is_gt_hazard=True,
+        gutter=gut, gutter_drop=gutter_drop,
+        arris=dict(mode=arris, r=float(arris_r),
+                   role="curb" if arris == "look" else None),
+        drop_spans=spans, warnings=warnings, length=L_tot,
+        prim_count=prim_count,
+        prims_per_m=(prim_count / L_tot if L_tot > 0 else 0.0))
+
+
+# ===========================================================================
 # [5] Gully - placement rule + body
 # ===========================================================================
 def gully_positions(x0, x1, spacing=22.0, sag_points=(), curve_points=(),
@@ -554,8 +1026,16 @@ def gully_positions(x0, x1, spacing=22.0, sag_points=(), curve_points=(),
     - `spacing`: target spacing (default 22 = the midpoint of 20-25)
     - `max_spacing`: **absolute limit** (default 25). If interpolation exceeds it, the
       count is increased.
-    - `jitter`: deterministic jitter [m] applied only to interpolated straight-section
-      points. Mandatory points are not moved (they are functional). Default 0.
+    - `jitter`: **KEEP AT ZERO. J-11 zero-locked parameter; a non-zero value is a LINT-10
+      hard error.** `Docs/briefs/placement_rules_v1.yaml` names this exact callee
+      (`gully_positions`, `infra_kit.py:531` at the time of writing) in
+      `LINT-10.zero_locked_callees`. A gully is a **hydraulic** object: its position is
+      solved from the sag, the curve end and the 20-25 m capacity interval quoted above,
+      so displacing it by a random half-metre does not add realism, it breaks the one
+      thing the placement rule encodes. **[W3 K5 correction]** the earlier wording read as
+      a neutral option ("applied only to interpolated straight-section points"); it is
+      not an option, it is off. The code path stays only so `_selfcheck` can keep proving
+      determinism (`ps2 == ps3`), which is what caught the `hash()` bug.
     - `with_kind=True`: returns `[(x, "sag"|"curve"|"straight"), ...]`.
 
     0 prims (coordinates only). GT: not applicable.
@@ -741,8 +1221,130 @@ def build_gully(kit, prefix, cx, cy, top_z, grate_mtl, pit_mtl=None,
 
 
 # ===========================================================================
-# [6] Manhole
+# [6] Manhole - G-4 derivation rule, then the body
 # ===========================================================================
+def derive_manholes(line, d_mm=450.0, kind="storm", junctions=(),
+                    grade_changes=(), size_changes=(), head=True,
+                    merge_tol=1.0, interval=None):
+    """**Derive manhole positions from a declared service line** (G-4). Builds nothing.
+
+    ### The defect this replaces `[measured - w3_intake_01_05.md §1 G-4]`
+    Manhole coordinates in this library were **solved from the camera, not from a drainage
+    network**. The code says so itself - `scene05_amphitheater.py:111-114`:
+
+    > *"manhole (-3.90, -0.40) -> X = 2.60 m at d5, screen width 414 px = 21.6 % of frame.
+    >  Same construction as the scene15 pilot fix (M9-b)…"*
+
+    The census: **26 manhole sites across 19 scenes**; **19/26 (73 %)** at
+    `x in [-4.5, -1.0]` (the d2/d5 near-window band); **11/26** at exactly `x = -2.40` or
+    `x in [-4.00, -3.80]`, with six scenes converging on `x = -2.40` alone; **|y| <= 2.4** and
+    **x < 0** in 26/26. A network under a 16 x 16 m plaza does not put every access chamber
+    inside one 3.5 m band on one axis.
+
+    ### The rule `[law - 하수도설계기준 KDS 61 00 00 / KDS 61 40 00 관로시설·맨홀]`
+    A manhole is required **where the line does something** - a change of 방향 / 경사 / 관경, or
+    a 합류 - and otherwise at a maximum straight-run interval by diameter:
+
+    | Ø | max interval |
+    |---|---|
+    | <= 600 mm | **75 m** |
+    | 600 < Ø <= 1,000 | **100 m** |
+    | 1,000 < Ø <= 1,500 | **150 m** |
+    | >= 1,650 mm | **200 m** |
+
+    (`MANHOLE_INTERVAL_KDS`, ledgered as `manhole_int_*`.)
+
+    ### The consequence, which is the point
+    A plaza is one to two orders shorter than 75 m, so **a small plaza correctly yields 1 or 0
+    manholes**. Several scenes should lose one - `tonglam_v2.md` FIX-5 calls the manhole *"the
+    worst single prop"* in scene17's d5 cut and a minor defect in 01 · 02 · 05 · 15 · N5 · N1 ·
+    13. Scenes 03 · 04 · 07 must stay at **zero**.
+
+    ### The near-window check keeps a job, but a different one `[G-4 build spec 1.]`
+    > *"The near-window occupancy check stays as a **render-composition assertion** … but it may
+    > only *reject* a position, never *produce* one."*
+
+    So this function deliberately knows nothing about cameras. If a derived position lands in W1
+    over the 25 % occupancy limit, the remedy is to adjust the preset or accept the occupancy and
+    **record which was chosen** - not to slide the manhole back onto the camera axis.
+
+    ### Args
+    - `line`: `[(x0,y0), (x1,y1), …]` - the service line the scene **declares**, laid where a
+      real one runs: along the long axis toward the low point, on the building's service side,
+      or under the footway parallel to the kerb. **Never diagonally across an open plaza.**
+      The PARAMS shape G-4 specifies is
+      `PARAMS["utility"] = dict(line=[…], d_mm=450, kind="storm")`.
+    - `junctions`: `[(x,y), …]` where a branch (a gully lateral, a side line) meets the run.
+    - `grade_changes`, `size_changes`: `[(x,y), …]` for 경사 / 관경 change points.
+    - `head=True`: a chamber at the **upstream head** of the run. `[practice]` - G-4's scene05
+      worked example places the single derived manhole *"at the run's upstream head or at the
+      junction with the gully branch"*. Set `False` for a run that starts at an existing chamber.
+    - `merge_tol`: two triggers closer than this collapse to one chamber (a vertex that is also
+      a junction is **one** manhole, not two).
+    - `interval`: override the KDS table (e.g. a 10-30 m 하수도 시설기준 class spacing).
+
+    Returns `[dict(x, y, s, reason, tag), …]` ordered by `s`. `reason` is one of
+    `head` / `vertex` / `junction` / `grade` / `size` / `interval`.
+    """
+    pts = [(float(p[0]), float(p[1])) for p in line]
+    if len(pts) < 2:
+        raise ValueError("infra_kit: 서비스 라인은 점 2개 이상이어야 한다 "
+                         "(맨홀 좌표를 직접 쓰지 말고 관로를 선언하라 — G-4).")
+    d_m = float(d_mm) / 1000.0
+    if interval is None:
+        interval = next(v for cap, v in MANHOLE_INTERVAL_KDS if d_m <= cap)
+    interval = float(interval)
+
+    seg = []
+    s_acc = 0.0
+    for a, b in zip(pts[:-1], pts[1:]):
+        L_i, _, (ux, uy), _ = _line_frame(a[0], a[1], b[0], b[1])
+        seg.append((s_acc, L_i, a, (ux, uy)))
+        s_acc += L_i
+    L_tot = s_acc
+
+    def _at(s):
+        s = min(max(float(s), 0.0), L_tot)
+        for s0, L_i, a, (ux, uy) in seg:
+            if s <= s0 + L_i + 1e-9:
+                t = s - s0
+                return (a[0] + ux * t, a[1] + uy * t)
+        a = pts[-1]
+        return (a[0], a[1])
+
+    cand = []
+    if head:
+        cand.append((0.0, "head"))
+    for s0, L_i, _, _ in seg[1:]:                    # polyline vertices = 방향 변화
+        cand.append((s0, "vertex"))
+    for tag, pset in (("junction", junctions), ("grade", grade_changes),
+                      ("size", size_changes)):
+        for q in (pset or ()):
+            cand.append((curb_s_at(pts, None, q[0], q[1]), tag))
+
+    # -- Straight-run interval fill between consecutive mandatory points --
+    fixed = sorted(set([0.0, L_tot] + [s for s, _ in cand]))
+    for a, b in zip(fixed[:-1], fixed[1:]):
+        gap = b - a
+        if gap <= interval + 1e-9:
+            continue
+        n = int(math.ceil(gap / interval - 1e-9))    # even split, no offcut (the _bay_joints rule)
+        for j in range(1, n):
+            cand.append((a + gap * j / n, "interval"))
+
+    order = {"junction": 0, "vertex": 1, "grade": 2, "size": 3, "head": 4,
+             "interval": 5}
+    cand.sort(key=lambda t: (t[0], order.get(t[1], 9)))
+    out = []
+    for s, reason in cand:
+        if out and abs(s - out[-1]["s"]) <= float(merge_tol):
+            continue                                  # a vertex that is also a junction = 1 chamber
+        x, y = _at(s)
+        out.append(dict(x=x, y=y, s=s, reason=reason,
+                        tag=f"{len(out):02d}{reason[0].upper()}"))
+    return out
+
+
 def build_manhole(kit, prefix, cx, cy, top_z, lid_mtl, frame_mtl=None,
                   d_frame=0.648, d_lid=None, frame_w=0.045, thick=0.110,
                   lid_t=0.055, flush_tol=0.010, proud=None, seat=0.002,
@@ -772,6 +1374,13 @@ def build_manhole(kit, prefix, cx, cy, top_z, lid_mtl, frame_mtl=None,
     deterministic draw of `U(-flush_tol, +flush_tol)` is used - if many covers sit at
     exactly the same height, the result reads as CG (survey §3.1, construction
     tolerance).
+
+    **[W3 K5] This draw is an adjudicated KEEP, not an oversight.** The W3 execution spec
+    §1.2 lists `infra_kit:802` (this line) beside `ground_kit:1289` as a *justified keep*
+    under the J-11 jitter abolition: it is not placement jitter but the **KS D 4040
+    setting tolerance**, i.e. a real manufacturing/construction band, and it is bounded by
+    `flush_tol` rather than free. Do not "fix" it to a constant, and do not confuse it with
+    the two zero-locked `jitter=` parameters (`build_gutter_L`, `gully_positions`).
 
     `seat=0.002`: the frame top sits 2 mm below the cover. At the same z the two discs
     produce **coplanar z-fighting** (and real covers rest on the frame ledge, so it is
@@ -847,8 +1456,35 @@ def build_ramp_curb(kit, prefix, profile, y_neg, y_pos, mtl,
                     height=0.12, width=0.30, sides="both", embed=0.10,
                     margin=0.0, collider=True, seg_len=None,
                     z_fn=None):
-    """**Curbs on both sides of a parking entry ramp.** The part missing from scene13, and
-    a general-purpose function.
+    """**Curbs on both sides of a parking entry ramp.** 주차램프 측면 연석 - **not** a 보차도 kerb.
+
+    ### Which builder do I want? `[W3 K5]`
+    - **This one** for a **parking ramp cheek curb**: 주차장법 시행규칙 §6①5다, cast in place,
+      continuous, follows a `ramp_profile()` slope, 10-15 cm, >= 30 cm off each wall face.
+      **No unit joints** - it is cast, not a precast unit product.
+    - **`build_curb_line`** for the **보차도 경계석** between a carriageway and a footway:
+      1 m precast units, 10 mm arris, L-gutter, 턱낮춤 spans, 150 mm exposure band.
+      S06-B item 5 gives scene13 **both** rows - this function for the ramp cheeks *and*
+      `build_curb_line` to replace `walk_north` / `walk_south`'s `proud=0.007` (a 3 mm step
+      between an apartment driveway and its footway) with a real 150 mm kerb.
+
+    ### Wiring status `[measured 2026-07-30 - correction of a stale claim]`
+    `w3_intake_06_10.md` §3 records this function as *"ships `build_ramp_curb` … that **no
+    scene calls**"*. That is **no longer true** and an implementer must not "fix" it twice:
+    it is wired through `ground_kit._ik_ramp_curb` (`ground_kit.py:1676`), declared in the
+    profile's `extras` tuple (`ground_kit.py:1801`, `("ramp_curb", dict(height=0.12))`) and
+    fed by scene13's `extras_args=dict(ramp_curb=dict(profile=segs, …))`
+    (`scene13_apartment_parking_entry.py:817`). `_ik_ramp_curb` also registers the two
+    `ramp_curb` elements and emits the `gt_changes` handover row, so **the GT bookkeeping is
+    already in place** - what scene13 still owes is the footway kerb, not this one.
+    The `offset` argument of the v1 notation does not exist; reduce `width` and set
+    `y_neg` / `y_pos` directly (the note `_ik_ramp_curb` already carries).
+
+    ### Arris
+    Cast-in-place concrete, so the arris is the **concrete** look class (20 mm, KCS 21 50 05),
+    not the 10 mm precast curb value. Do not bind a `curb`-class material here just because the
+    prim is called a curb - `check_arris_role(sc, role="concrete", arris_r=0.020)` is the
+    matching assertion.
 
     ### Statutory basis `[verified]`
     **Parking Lot Act Enforcement Rules Article 6(1)5(c)** - a ramp must have
@@ -1422,6 +2058,176 @@ def _selfcheck():
         f"{g['drop_at_curb'] * 1000:.1f} mm")
     chk("연석측 모서리가 차도측보다 낮다", g["z_curb_edge"] < g["z_road_edge"])
 
+    # -- Curb line (W3 K5 · S06-B) ---------------------------------------
+    print("\n[1b] build_curb_line — 12 m 직선 (기본값)")
+    k = dry_kit()
+    c = build_curb_line(k, "/W/Curb", (0.0, -4.0), (12.0, -4.0), None,
+                        z_road=-0.150, walk_z=-0.005)
+    print(f"      프림 {c['prim_count']} / {c['length']:.1f} m "
+          f"= {c['prims_per_m']:.2f} 프림/m · 블록 {c['n_blocks']} 개 "
+          f"× {c['unit_actual']:.3f} m")
+    chk("블록 12개 = 1 m 단위 제품", c["n_blocks"] == 12, str(c["n_blocks"]))
+    chk("단위 길이 1.000 m", abs(c["unit_actual"] - 1.0) < 1e-9,
+        f"{c['unit_actual']:.4f} m")
+    chk("줄눈 11개 (블록 사이마다)", len(c["joints"]) == 11, str(len(c["joints"])))
+    chk("연석 top = 보도면 +5 mm (flush~+20 규정 내)",
+        abs(c["curb_top_z"] - 0.0) < 1e-9, f"{c['curb_top_z']:+.4f} m")
+    chk("노출고 150 mm", abs(c["exposure_road"] - 0.150) < 1e-9)
+    chk("측구 자동 연결 + 연석면 = 150 + 18 mm",
+        c["gutter"] is not None and abs(c["face_h_at_kerb"] - 0.168) < 0.002,
+        f"{c['face_h_at_kerb'] * 1000:.1f} mm")
+    chk("GT 낙차선 신설 표기", c["is_gt_hazard"] and c["gt_drop"] > 0.10)
+    chk("기본 arris = look (프림 0) + curb 룩클래스 요구",
+        c["arris"]["mode"] == "look" and c["arris"]["role"] == "curb"
+        and not c["caps"])
+    chk("arris_r = 10 mm (LOOK_CLASS['curb'].bevel 과 동일 출처)",
+        abs(c["arris"]["r"] - 0.010) < 1e-9)
+    chk("경고 없음(적법 구성)", not c["warnings"], str(c["warnings"]))
+
+    print("\n[1c] build_curb_line — 턱낮춤 · scene02 형상오류 · LOD")
+    k = dry_kit()
+    c2 = build_curb_line(k, "/W/Curb2", (0.0, 0.0), (12.0, 0.0), None,
+                         z_road=-0.150, drop_spans=[(5.0, 8.0)], gutter=False)
+    hs = c2["heights"]
+    print("      단높이: " + " ".join(f"{h * 1000:.0f}" for h in hs))
+    chk("횡단 구간 3 블록이 20 mm 로 낮아짐",
+        sum(1 for h in hs if abs(h - 0.020) < 1e-9) == 3,
+        f"{sum(1 for h in hs if abs(h - 0.020) < 1e-9)} 개")
+    chk("전이 블록 2개 = 중간 높이 85 mm",
+        sum(1 for h in hs if abs(h - 0.085) < 1e-6) == 2)
+    chk("나머지는 150 mm 유지",
+        sum(1 for h in hs if abs(h - 0.150) < 1e-9) == len(hs) - 5)
+    chk("전이 경계에 블록이 걸치지 않음(높이 3종뿐)",
+        len({round(h, 6) for h in hs}) == 3,
+        str(sorted({round(h * 1000) for h in hs})))
+    chk("베드 = 등높이 런마다 1개 = 5개", len(c2["beds"]) == 5,
+        str(len(c2["beds"])))
+    bad = False
+    try:                                        # scene02: 연석 top 이 보도면 +100 mm
+        build_curb_line(dry_kit(), "/W/X", (0.0, 0.0), (5.0, 0.0), None,
+                        z_road=-0.020, walk_z=0.0, height=0.120, gutter=False)
+    except ValueError:
+        bad = True
+    chk("scene02 형상오류(+100 mm)를 거부", bad)
+    w = build_curb_line(dry_kit(), "/W/X2", (0.0, 0.0), (5.0, 0.0), None,
+                        z_road=-0.020, walk_z=0.0, height=0.120, gutter=False,
+                        strict=False)
+    chk("strict=False 는 경고로 강등", len(w["warnings"]) == 1,
+        str(w["warnings"]))
+    bad2 = False
+    try:                                        # 노출고 대역 밖
+        build_curb_line(dry_kit(), "/W/X3", (0.0, 0.0), (5.0, 0.0), None,
+                        height=0.300, gutter=False)
+    except ValueError:
+        bad2 = True
+    chk("노출고 대역(100~250 mm) 밖 거부", bad2)
+    k = dry_kit()
+    c3 = build_curb_line(k, "/W/Curb3", (0.0, 0.0), (140.0, 0.0), None,
+                         gutter=False, lod_span=(55.0, 85.0))
+    k = dry_kit()
+    c4 = build_curb_line(k, "/W/Curb4", (0.0, 0.0), (140.0, 0.0), None,
+                         gutter=False)
+    print(f"      140 m: 전구간 {c4['prim_count']} 프림 → LOD 30 m 창 "
+          f"{c3['prim_count']} 프림")
+    chk("LOD 로 140 m 가 1/3 이하", c3["prim_count"] * 3 <= c4["prim_count"],
+        f"{c3['prim_count']} vs {c4['prim_count']}")
+    chk("근경 창은 1 m 단위 유지",
+        sum(1 for i in range(len(c3["joints"]) - 1)
+            if abs(c3["joints"][i + 1] - c3["joints"][i] - 1.0) < 1e-6) >= 29)
+    k = dry_kit()
+    c5 = build_curb_line(k, "/W/Curb5", (0.0, 0.0), (6.0, 0.0), None,
+                         gutter=False, arris="step")
+    chk("arris='step' = 블록당 +1 프림", len(c5["caps"]) == c5["n_blocks"])
+    k = dry_kit()
+    c6 = build_curb_line(k, "/W/Curb6", [(0.0, 0.0), (10.0, 0.0), (10.0, 6.0)],
+                         None, None, gutter=False)
+    chk("폴리라인 지원 (16 m = 16 블록)", c6["n_blocks"] == 16,
+        str(c6["n_blocks"]))
+    chk("월드좌표 → 호장 변환", abs(curb_s_at([(0.0, 0.0), (10.0, 0.0),
+                                              (10.0, 6.0)], None, 10.0, 3.0)
+                                    - 13.0) < 1e-9)
+
+    # -- Manhole derivation (W3 K5 · G-4) --------------------------------
+    print("\n[1d] derive_manholes — G-4 관로 유도")
+    mh05 = derive_manholes([(-13.5, -3.0), (-2.0, -3.0)], d_mm=450)
+    print("      scene05 관로 11.5 m: "
+          + ", ".join(f"({m['x']:.1f},{m['y']:.1f}){m['reason']}" for m in mh05))
+    chk("11.5 m 직선 → 맨홀 1개 (KDS 75 m 훨씬 미만)", len(mh05) == 1,
+        str(len(mh05)))
+    chk("상류단 배치 — 카메라축 (−3.90,−0.40) 아님",
+        abs(mh05[0]["x"] + 13.5) < 1e-9 and mh05[0]["reason"] == "head")
+    mh_v = derive_manholes([(0.0, 0.0), (30.0, 0.0), (30.0, 20.0)], d_mm=450)
+    chk("방향 변화 정점에 1개", any(m["reason"] == "vertex" for m in mh_v))
+    chk("정점 좌표 정확", any(abs(m["x"] - 30.0) < 1e-6 and abs(m["y"]) < 1e-6
+                              for m in mh_v))
+    mh_i = derive_manholes([(0.0, 0.0), (400.0, 0.0)], d_mm=450, head=False)
+    gapsi = [mh_i[i + 1]["s"] - mh_i[i]["s"] for i in range(len(mh_i) - 1)]
+    chk("400 m Ø450 → 간격 전부 ≤ 75 m", max(gapsi) <= 75.0 + 1e-6,
+        f"max {max(gapsi):.1f} m")
+    chk("자투리 없는 균등 분할", max(gapsi) - min(gapsi) < 1e-9,
+        f"{gapsi[0]:.2f} m")
+    mh_b = derive_manholes([(0.0, 0.0), (400.0, 0.0)], d_mm=1200, head=False)
+    chk("Ø1200 은 150 m 간격 → 더 적다", len(mh_b) < len(mh_i),
+        f"{len(mh_b)} vs {len(mh_i)}")
+    mh_j = derive_manholes([(0.0, 0.0), (40.0, 0.0)], d_mm=450,
+                           junctions=[(0.4, 0.0)])
+    chk("합류점이 상류단과 1 m 내 → 1개로 병합", len(mh_j) == 1,
+        str(len(mh_j)))
+    chk("16 m 광장 관로 → 0~1개",
+        len(derive_manholes([(-8.0, 0.0), (8.0, 0.0)], head=False)) == 0)
+
+    # -- Prepared-HOLD constants (RF-4 / §6.2-D) -------------------------
+    print("\n[1e] 준비만 · HOLD (P-10 이중차단)")
+    # "record the spec, build nothing" is asserted, not promised: walk the AST and prove that
+    # no function body anywhere in this file (self-check excepted) reads either name.
+    import ast as _ast
+    _tree = _ast.parse(open(__file__, encoding="utf-8").read())
+    _held = {"TACTILE_WORN_STATE": [], "RF4_ADHERED_PAD": []}
+    for _fn in _ast.walk(_tree):
+        if not isinstance(_fn, (_ast.FunctionDef, _ast.AsyncFunctionDef)):
+            continue
+        if _fn.name == "_selfcheck":
+            continue
+        for _nd in _ast.walk(_fn):
+            if isinstance(_nd, _ast.Name) and _nd.id in _held:
+                _held[_nd.id].append(f"{_fn.name}:{_nd.lineno}")
+    for _n, _hits in _held.items():
+        chk(f"{_n} 는 선언만 — 어떤 함수도 참조하지 않는다",
+            not _hits, ", ".join(_hits) if _hits else "참조 0곳")
+    chk("HOLD 표기 + build_here=False",
+        TACTILE_WORN_STATE["status"] == "HOLD"
+        and RF4_ADHERED_PAD["status"] == "HOLD"
+        and not TACTILE_WORN_STATE["build_here"]
+        and not RF4_ADHERED_PAD["build_here"])
+    chk("마모 돌기 목표 3.5 mm ≤ 신품 6 mm",
+        TACTILE_WORN_STATE["dot_h_worn_max"] < TACTILE_WORN_STATE["dot_h_new"])
+    chk("마모 중앙부 색은 '만들지 않는다' 로 기록(수치 날조 금지)",
+        isinstance(TACTILE_WORN_STATE["centre"], str)
+        and "no source" in TACTILE_WORN_STATE["centre"])
+    chk("RF-4 12 mm proud 는 0.30 m 위치에서 GT-E1′ 위반 → 등록 필요",
+        RF4_ADHERED_PAD["proud_max"] * 40.0 > 0.30,
+        f"{RF4_ADHERED_PAD['proud_max'] * 40.0:.2f} m > 0.30 m")
+
+    # -- Dimension ledger <-> signature defaults -------------------------
+    print("\n[1f] 치수대장 ↔ 함수 기본값 일치")
+    import inspect
+    _d = inspect.signature(build_curb_line).parameters
+    for key, pname in (("curb_exposure_def", "height"),
+                       ("curb_width", "width"),
+                       ("curb_unit", "unit"),
+                       ("curb_arris_r", "arris_r"),
+                       ("curb_joint_w", "joint_w"),
+                       ("curb_drop_h", "drop_h"),
+                       ("curb_drop_taper", "drop_taper")):
+        chk(f"{pname} = INFRA_DIMENSIONS['{key}']",
+            abs(float(_d[pname].default) - INFRA_DIMENSIONS[key][0]) < 1e-12,
+            f"{_d[pname].default}")
+    chk("KDS 간격표가 대장과 일치",
+        [v for _, v in MANHOLE_INTERVAL_KDS]
+        == [INFRA_DIMENSIONS[k2][0] for k2 in
+            ("manhole_int_d600", "manhole_int_d1000",
+             "manhole_int_d1500", "manhole_int_d1650")])
+
     # -- Gully placement -------------------------------------------------
     print("\n[2] gully_positions — 0~100 m, 오목부 37 m, 커브 12·64 m")
     ps = gully_positions(0.0, 100.0, sag_points=(37.0,),
@@ -1564,6 +2370,9 @@ def _selfcheck():
     print("\n[9] GT 낙차 영향 요약")
     for label, val in (
             ("build_gutter_L        ", "낙차 아님 (단 연석 노출고 +18~30 mm)"),
+            ("build_curb_line       ", "★ GT = height + 측구 횡단낙차 (기본 0.168 m) — "
+                                       "턱낮춤 구간은 ≤ 20 mm 로 낙차 아님"),
+            ("derive_manholes       ", "좌표만 반환 — 프림 없음"),
             ("build_gully(lid=True) ", "낙차 아님"),
             ("build_gully(lid=False)", "★ GT 0.64 m"),
             ("build_manhole(lid=T)  ", "낙차 아님 (flush ±10 mm)"),

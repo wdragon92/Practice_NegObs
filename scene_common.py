@@ -3201,9 +3201,19 @@ def build_tree(stage, prefix, cx, cy, gz, wood_mtl, canopy_a_mtl, canopy_b_mtl,
 
 def build_planter(stage, prefix, cx, cy, base_z, curb_mtl, grass_mtl,
                   tree_mtls=None, size=3.0, curb_h=0.45, curb_t=0.25,
-                  cap_over=0.05, cap_h=0.05, grass_h=0.40):
+                  cap_over=0.05, cap_h=0.05, grass_h=0.40, species=None):
     """Flower bed: 4 kerb walls + cap (overhang) + grass top surface (+ an optional tree).
-    With tree_mtls=(wood, canopy_a, canopy_b) a tree is placed in the centre. Transplanted from scene01."""
+    With tree_mtls=(wood, canopy_a, canopy_b) a tree is placed in the centre. Transplanted from scene01.
+
+    [W3 K-micro · S08-F2] `species=` names a `SHRUB_SPECIES` role and is handed
+    straight to `place_shrubs`. Before this the internal call passed `pool=`
+    only, so a scene **could not pin the species of its own square beds**:
+    scene08's census read 3 species scene-wide although every bed it built was
+    monospecific, and K4(b) S-1's one-species-per-bed rule was unreachable
+    through this builder. Signature-preserving (K4(c)): a keyword with a default
+    of `None`, which is exactly the old behaviour — `place_shrubs` only lets
+    `species` win over `pool` when it is truthy.
+    """
     S, h, t = size, curb_h, curb_t
     over, gh = cap_over, grass_h
     half = S / 2.0
@@ -3234,7 +3244,7 @@ def build_planter(stage, prefix, cx, cy, base_z, curb_mtl, grass_mtl,
                 pts.append((cx, cy, base_z + gh))
             place_shrubs(stage, f"{prefix}/Shrub", pts,
                          target_h=min(0.85, max(0.45, inner * 0.9)),
-                         pool=SHRUB_ORNAMENT,
+                         pool=SHRUB_ORNAMENT, species=species,
                          seed=zlib.crc32(f"{cx:.2f}_{cy:.2f}".encode()))
     if tree_mtls is not None:
         build_tree(stage, prefix, cx, cy, base_z + gh, *tree_mtls)

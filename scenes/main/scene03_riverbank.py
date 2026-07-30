@@ -551,6 +551,21 @@ PARAMS = dict(
         paving_tint=(1.00, 0.717, 0.471),
         paving_band_tint=(0.84, 0.83, 0.81),
         paving_wear_tint=(0.85, 0.609, 0.400),
+        # **[P03-F2 — found on the pilot's first pass, fixed before the round was kept.]**
+        #   The two `stain` kinds were bound to `dirt_park` and `concrete_dark`, which were
+        #   right against *gravel* and are wrong against 점토블록: measured on
+        #   `pt_noon_levee_walk.png`, the `concrete_dark` water lobes rendered sRGB
+        #   (202,185,160) against paving at (199,181,156) — **lighter than the surface they
+        #   soil, flat, and untextured**, i.e. they read as spilled cement, not water; and
+        #   the `dirt_park` lobe read as a heap of loose gravel lying on the blocks.
+        #   A stain is the *same surface seen through a film*, so both are re-derived from
+        #   `paving_tint` and keep the block pattern showing through — which is also what
+        #   stops them reading as decals at all:
+        #     wet   = paving x 0.70                  -> albedo 0.148  (a damp block is
+        #             0.5~0.7 x its dry reflectance)
+        #     soil  = paving x (0.78, 0.70, 0.56)    -> albedo 0.161, browner and duller
+        paving_wet_tint=(0.700, 0.502, 0.330),
+        paving_soil_tint=(0.780, 0.502, 0.264),
         grass_tint=(0.55, 0.68, 0.42),        # eases tile repetition + green tint (kept)
         hedge_tint=(0.48, 0.60, 0.34),        # v4-B1 slope shrubs
         reed_tint=(0.78, 0.72, 0.40),         # v4-D5 reeds (dry silvergrass tone)
@@ -1144,6 +1159,11 @@ def main():
         M["paving_wear"] = tex("paving_interlock", "/World/Looks/PavingWear",
                                sca["paving_interlock"],
                                tint=mp["paving_wear_tint"])
+        # [P03-F2] the two stain kinds, re-derived from the paving (see `material` PARAMS)
+        M["paving_wet"] = tex("paving_interlock", "/World/Looks/PavingWet",
+                              sca["paving_interlock"], tint=mp["paving_wet_tint"])
+        M["paving_soil"] = tex("paving_interlock", "/World/Looks/PavingSoil",
+                               sca["paving_interlock"], tint=mp["paving_soil_tint"])
         M["grass"] = tex("grass", "/World/Looks/Grass", sca["grass"],
                          tint=mp["grass_tint"])
         M["concrete"] = tex("concrete_floor", "/World/Looks/Concrete",
@@ -1464,7 +1484,7 @@ def main():
         #   `edge_break` stays on `dirt` deliberately — that element *is* the soil/paving
         #   seam breaking up, so soil is its correct material.
         M2.update(patch=M["dirt"], patch_cut=M["dirt"], wear=M["paving_wear"],
-                  stain_dirt=M["dirt"], stain_water=M["concrete_dark"],
+                  stain_dirt=M["paving_soil"], stain_water=M["paving_wet"],
                   edge_break=M["dirt"], weed=M["hedge_v"][0],
                   debris=M["gravel"])
         res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,

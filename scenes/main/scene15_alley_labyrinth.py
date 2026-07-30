@@ -49,6 +49,39 @@ Goal     : assemble 25 steps (25° bend after 12 steps + a 1.5 m landing) + 12 p
   Rationale, photo tally and self-check: Docs/reports/scene15_railing_fix_v1.md.
   GT invariant — rails create no terrain z, so the drop label is untouched.
 
+[W3 L15 · alley realism] Governing images: **G18 primary (weak) + G2 secondary**
+  (`w3_intake_v2_images.md` §2 scene15 / §4 Lane-3 row 3.8 — *"the weakest mapping in
+  the set … route last, judge conservatively"*). Season pinned **summer** off G18
+  (§7 ruling 8; scene18's own pin, `w3_s18_v1.md` §5). What this round did NOT do is
+  as load-bearing as what it did: **no prop was added**. v5.1 stripped this scene on a
+  user verdict and E4's own cap warns against re-dressing it, so the whole round is
+  **material truth + two measured coordinates**, not new objects.
+    · Roofs were bound to a **timber** texture. `Looks/Roof_*` resolves to `LOOK_ROLE`
+      class **wood** (`scene_common.py`: *"Roof is a temple timber tile roof"* — the
+      scene07 fix), and `_promote_const_to_texture` therefore bound
+      `wood_dark_diff.jpg` at base_color **(6.842, 5.424, 5.073)** on tint 0 and
+      refused promotion outright on tint 1 `[measured]`. A 달동네 house has a
+      **옥상 슬래브**, never a dark plank deck → path renamed to `Looks/Slab_*`
+      (class **concrete**) and the two roof tints replaced with the two finishes that
+      actually cover hillside-village roofs: **녹색 우레탄 방수** and weathered cement.
+    · The alley floor is the same `concrete_floor` texture as the stair, but the stair
+      goes through promotion (which re-normalises its mean to the authored colour) and
+      the floor did not — so the floor shipped the raw texture mean
+      **(0.1464, 0.1102, 0.0733)**, R/B = **2.00**, a tan/burlap read `[measured]`.
+      Corrected with a **luminance-preserving** tint (0.7898, 1.0496, 1.4983): Rec.709
+      Y is held at **0.11525** and only the hue moves, onto the scene's own declared
+      concrete hue ratio 1 : 1 : 0.95 (`stair_color`, fix B-15-1). Photometry is
+      therefore untouched by construction — see report §3.
+    · Pots: **B2d + G-5/K4(b)**. The `PotLeaf` sphere was promoted to
+      `grass_lawn_diff.jpg` at base_color (2.233, 2.074, **5.087**) — a green blob with
+      a 5× blue gain. Replaced by real shrub USDs through `sc.place_shrubs(species=…)`,
+      containers rebuilt into the three Korean alley types (스티로폼 상자 · 고무 대야 ·
+      화분).
+    · Manhole: **G-4**. The site was solved from the camera (M9-b, and this scene is the
+      near-window pilot's origin). Re-derived from the sewer network instead — see the
+      `ground` block.
+  Report: Docs/reports/w3_l15_v1.md · GT row GT-42.
+
 Run (GUI look check — default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
@@ -171,20 +204,36 @@ PARAMS = dict(
     #  forbidden: plain bare soil (0/12 in the sample) · fallen leaves · **tactile paving** (§12 - p~0.05, not installed)
     ground=dict(
         region=(-12.0, -0.9, 0.0, 0.9),
-        #  15-2 manhole - **2nd correction** of the M9-(b) relocation (old −1.15).
-        #  * [W2 pre-check] at d5 the −4.00 position is only X=1.00 m of ground distance, so
-        #    the screen width was f·0.648/1.00 = **1,078 px = 56.1 %** `[computed - red team G-2]`.
-        #    M9's intent was "break the near-window monopoly", and 66 % (old) -> 56 % (new) is
-        #    not a fix. Worse, **<=25 % is impossible in principle anywhere inside W1**
-        #    (ground distance 0.564~2.00 m) - even at the far end X=2.00 it is 539 px = 28.1 %.
-        #    -> moved out to the second-priority window **W2 (2.00~3.00 m)**. x=−2.40 gives
-        #    X=2.60 m · **414 px = 21.6 %** at d5 `[computed]`. At d2 it is behind the eye
-        #    (X=−0.40) hence invisible -> patch #1(x=−1.20) keeps covering the d2 window as designed.
-        #    At d10 it is X=7.60 · 142 px = 7.4 %.
-        #  interference check `[computed]`: radius 0.324 -> x[−2.724,−2.076]·y[−0.474,0.174].
-        #    outside joint JX_3(x=−3.00) · outside patch#1(x −1.557…−0.843) ·
-        #    outside the U gutter (y −0.875…−0.625) · outside the grime band (|y|>=0.75) -> 0 Z-fighting.
-        manhole_d5=(-2.40, -0.15),
+        #  15-2 manhole — **G-4 applied. The near-window pilot device is retired here, at its
+        #    own origin** (`w3_intake_01_05.md` §G-4: *"the manhole coordinate is solved from the
+        #    camera, not from a drainage network"*; `w3_intake_v2_images.md` §2 scene15 (a) names
+        #    15 as that pilot's origin). The old site is preserved verbatim so the retirement is
+        #    auditable, not silent:
+        #      old `(-2.40, -0.15)` — chosen because at the d5 eye (x=−5) it gives a ground
+        #      distance X=2.60 m and a cover width f·0.648/X = 414 px = 21.6 % of the frame,
+        #      i.e. the first x that satisfies "<=25 % of frame". Every term in that sentence
+        #      is a camera term. `[repro — the sentence it replaces]`
+        #  **New derivation — the network, then the camera as a check, never as the cause.**
+        #    KDS 61 40 00 requires a chamber where the sewer *does something*: 방향·경사·관경
+        #    변화 or a **합류(junction)**; on a straight run a Ø<=600 line goes 75 m between
+        #    chambers, so a 12 m alley segment owes **zero** interval manholes. What it does owe
+        #    is the junction: every house on this alley drains into the main under it, and the
+        #    two houses that face each other across the upper alley (House[0] cx=−2.6 north,
+        #    House[1] cx=−2.6 south, both spanning x −3.8…−1.4) put their 오수 branches into the
+        #    main at the **same station**. That station — `x = −2.60`, the shared house
+        #    centreline — is the cause, and the chamber sits **on the main's alignment**, i.e.
+        #    the alley centreline `y = 0.00`, not 0.15 m off it. The 우수 측구 is the separate
+        #    U gutter at y=−0.75 and keeps its own line.
+        #  camera CHECK (not a driver) `[computed — W_px = f·0.648/X, f=1663.4 px, frame 1920]`:
+        #    d2 (eye x=−2) → X=−0.60, **behind the eye, invisible** (patch #1 at x=−1.20 still
+        #    fills the d2 near window, unchanged) · d5 → X=2.40 · 449 px = **23.4 %** · d10 →
+        #    X=7.40 · 146 px = 7.6 %. The move is +0.20 m of ground distance closer at d5 and
+        #    stays inside the <=25 % band it used to be *designed* around.
+        #  interference re-check `[computed]`: radius 0.324 → x[−2.924,−2.276] · y[−0.324,0.324].
+        #    joint JX_3 at x=−3.00 is 0.076 m clear · patch #1 (x −1.557…−0.843) is 0.719 m clear ·
+        #    U gutter band y −0.875…−0.625 is 0.301 m clear · wall grime band |y|>=0.75 is
+        #    0.426 m clear · weed seed lines run the joint/frame polylines, unaffected → 0 Z-fighting.
+        manhole_site=(-2.60, 0.00),
         #  the first one covers B1·B2 of the d2 window (W1 = x −1.436…0). At x=−1.20 the
         #  screen width is 1,663 px (86.6 %) - unlike the old manhole (1,268 px) this is a
         #  **flat tone change**, so the visual burden of the near-window monopoly is far smaller.
@@ -262,13 +311,55 @@ PARAMS = dict(
     #   Real alley poles stand on the retaining-wall·fence line, never mid-pavement.
     #   Per the "remove it if it looks wrong" instruction, poles and wires are all deleted
     #   (relocating them would cross the facades·roof overhangs again, so keeping them gains nothing).
-    # traces of daily life - cut down to 5 flower pots: (x, y, z, grp).
-    #   y=+-0.40 (stair half-width 0.6, pot r 0.20 -> never reaches the facade at 0.58).
-    #   6 evenly spaced pairs would read as a 'display', so they are left asymmetric, one side at a time.
-    pots=[(0.9, 0.40, -0.68, False), (2.1, -0.40, -1.36, False),
-          (4.2, 0.40, -2.04, False), (6.4, 0.40, -2.89, True),
-          (10.5, -0.68, -4.25, True)],
-    pot=dict(r=0.20, h=0.34, leaf_r=0.19),   # [v5 judgment applied] leaf_r 0.26 -> 0.19
+    # traces of daily life - 5 alley containers. **Count, x, z and grp are UNCHANGED from
+    #   v5.1** — this round rebuilds the container and the plant, not the arrangement, so no
+    #   new object enters a judged frame and the asymmetric one-side-at-a-time rhythm survives.
+    #
+    # [W3 L15 · B2d] **What was here**: one cylinder r 0.20 x h 0.34 + one sphere
+    #   (0.19, 0.19, 0.152) per site, 2 prims x 5 `[measured]`. Two defects, both real:
+    #     **L15-F1 (geometry, pre-existing)** — the file's own comment claims *"pot r 0.20 ->
+    #       never reaches the facade at 0.58"*. It does: 0.40 + 0.20 = **0.600**, so every
+    #       |y|=0.40 pot penetrated the house facade by **20 mm**, and the leaf sphere
+    #       (0.40 + 0.19 = 0.590) by 10 mm. Fixed below by sizing every container to its own
+    #       clearance, not by moving the sites.
+    #     **L15-F2 (material)** — `Looks/Foliage` resolves to class `veg` and
+    #       `_promote_const_to_texture` bound `grass_lawn_diff.jpg` at base_color
+    #       (2.233, 2.074, **5.087**) `[measured]`: a lawn texture on a sphere with a 5x blue
+    #       gain. That is the green blob in every v5.1+ crop.
+    #
+    # **What is here now** (`w3r_prop_mapping_v1.md` §B2d — *"3-4 Korean container types with
+    #   size jitter … Korean-ness is the entire point of this prop"*, and intake §2 scene15 (e)
+    #   *"K4(b) `place_shrubs` for the pots"*):
+    #     `styro` 스티로폼 상자 0.50 x 0.34 x 0.28  (long axis along the alley) — halfY 0.170
+    #     `tub`   고무 대야 Ø0.350 x 0.20          — halfY 0.175
+    #     `clay`  화분 Ø0.310 x 0.28               — halfY 0.155
+    #   The survey's Ø0.45 고무 대야 **does not fit**: a site at |y|=0.40 with a facade at
+    #   0.58 leaves 0.180 m, so the stocked Ø0.35 size is used and the divergence is stated
+    #   rather than absorbed `[computed]`. Clearances to the facade: styro 10 mm · tub 5 mm ·
+    #   clay 25 mm · the lower-alley tub (y=−0.68, facade −0.88) 25 mm — **all positive**,
+    #   which L15-F1 was not.
+    # **Plants** — `sc.place_shrubs(species=…)`, K4(b) roles, one species per container:
+    #     `edge_weed`    Grass_Short_C (w 0.304, h 0.125) in the 스티로폼 상자, target_h 0.125
+    #     `border_narrow` Cedar_Shrub  (w 0.288, h 0.876) in 대야·화분,        target_h 0.45
+    #   Width is the binding constraint, not height, and `place_shrubs` jitters the scale by
+    #   ±8 %, so each target_h is solved from the **worst-case** width `[computed]`:
+    #     Grass_Short_C  w_max = 0.304 x (0.125/0.125) x 1.08 = **0.328** <= 0.360 budget
+    #     Cedar_Shrub    w_max = 0.288 x (0.45/0.876) x 1.08 = **0.160** <= 0.360 budget
+    #   so no crown can reach a wall in any draw. **Species honesty**: the library holds no
+    #   vegetable. A 상추/파 box is *substituted* by the only tuft whose native aspect gives a
+    #   ~0.35 m clump at a 0.14 m height; a 화분 with a narrow evergreen (향나무·측백 in a pot)
+    #   is a literal Korean alley plant and needs no substitution note. Neither species carries
+    #   bloom or autumn colour → the summer pin holds without a seasonal strip (K4-F1 rule).
+    pots=[dict(x=0.9,  y=0.40,  z=-0.68, grp=False, kind="styro", sp="edge_weed"),
+          dict(x=2.1,  y=-0.40, z=-1.36, grp=False, kind="clay",  sp="border_narrow"),
+          dict(x=4.2,  y=0.40,  z=-2.04, grp=False, kind="tub",   sp="border_narrow"),
+          dict(x=6.4,  y=0.40,  z=-2.89, grp=True,  kind="styro", sp="edge_weed"),
+          dict(x=10.5, y=-0.68, z=-4.25, grp=True,  kind="tub",   sp="border_narrow")],
+    pot=dict(
+        styro=dict(sx=0.50, sy=0.34, h=0.28, plant_h=0.125),
+        tub=dict(r=0.175, h=0.20, plant_h=0.45),
+        clay=dict(r=0.155, h=0.28, plant_h=0.45),
+    ),
     # [v5.1 realism · removal] 3 clotheslines + 9 hanging garments dropped - they read as
     #   floating slabs strung above the alley and contributed nothing to reading the narrow corridor (drop concealment).
 
@@ -285,7 +376,45 @@ PARAMS = dict(
                 (0.69, 0.77, 0.65), (0.77, 0.69, 0.77)],
         # [v5.1] per-instance tint jitter amplitude (+-5 %) - shared by facade·roof
         tint_jitter=0.05,
-        roof_tints=[(0.55, 0.31, 0.22), (0.42, 0.42, 0.44)],  # orange·grey
+        # ═══ [W3 L15] Roofs — 옥상 슬래브, not a timber deck ═══
+        #  `Looks/Roof_*` resolved to `LOOK_ROLE["Roof"] = "wood"` (a scene07 temple fix) and
+        #  `_promote_const_to_texture` bound **`wood_dark_diff.jpg`** at base_color
+        #  (6.842, 5.424, 5.073) for tint 0, and **refused** promotion for tint 1 — i.e. one
+        #  roof family shipped a plank texture at a >5x gain and the other shipped flat colour
+        #  `[measured]`. Both are wrong for a 달동네: the houses here are flat-slab 옥상 (that is
+        #  why the pre-v5.1 spec could hang water tanks and washing lines on them), and the two
+        #  finishes that actually cover them are **녹색 우레탄 방수** and weathered cement.
+        #  The material path is renamed `Looks/Slab_*` (class **concrete**, promotes to
+        #  `concrete_floor` with the authored mean preserved `[measured]`), so the roof stops
+        #  being made of wood in both the class table and the render.
+        roof_tints=[(0.115, 0.185, 0.125),    # 녹색 우레탄 방수 (옥상 방수 도막)
+                    (0.255, 0.250, 0.240)],   # 시멘트 슬래브, weathered
+        # ═══ [W3 L15] Alley floor — hue correction, luminance held ═══
+        #  `M["alley"]` binds `concrete_floor` **directly**, so unlike every constant-colour
+        #  surface in the scene it never passes through promotion's mean re-normalisation and
+        #  shipped the raw texture mean **(0.14645, 0.11021, 0.07334)** — R/B = **2.00**, the
+        #  tan/burlap floor in every h0.3 crop `[measured, `_texture_mean`]`. The stair beside
+        #  it, bound to the *same* texture through promotion, lands on the authored
+        #  `stair_color` (0.20, 0.20, 0.19); the mismatch is an artefact of the binding route,
+        #  not a design.
+        #  The correction is **luminance-preserving by construction**: Rec.709 linear
+        #  Y = 0.2126R + 0.7152G + 0.0722B = **0.115250** before and after; only the hue moves,
+        #  onto the scene's own declared concrete ratio 1 : 1 : 0.95 → target mean
+        #  (0.11567, 0.11567, 0.10988), tint = target / mean `[computed]`. A tint is folded into
+        #  `base_color` as a multiply (`scene_common._make_ground_pbr`, fatal-C1 note), so this
+        #  is exactly one albedo multiply and no photometric shift is introduced anywhere.
+        alley_tint=(0.7898, 1.0496, 1.4983),
+        #  The 2 repair patches keep `alley`'s texture but sit **+20 % in luminance**: a cement
+        #   덧방 repair reads lighter than the aged surround it interrupts, and R15-1 makes the
+        #  patches this scene's realism rather than its artefact, so they have to be legible.
+        #  Same hue, same texture, one multiply (§3(ii): *"one tone, flush, crisp seam"*).
+        #  The saw-cut seam stays on `M["stair"]`, i.e. dark — the cut, not the fill.
+        patch_tint=(0.9478, 1.2595, 1.7980),
+        #  Ground soiling gets its own material. It used to share `M["skirt"]` with the **wall
+        #  dado**, which is a conflation: a splash-line dado on a wall and a dirt lobe on a
+        #  floor are different materials that happen to both be dark. Splitting them lets the
+        #  dado be a paint film and the stain be dirt.
+        grime_color=(0.075, 0.072, 0.068), grime_rough=0.88,
         # B-15-1 [critical]: 0.60 pure white clipped in noon light and the tread/riser boundary
         #   was lost entirely (the drop label lost its visual evidence). Changed to 0.20 neutral concrete.
         stair_color=(0.20, 0.20, 0.19), stair_rough=0.82,
@@ -299,21 +428,54 @@ PARAMS = dict(
         #   rendered as a white blob in noon light -> dedicated deep-green constant colour + smaller radius.
         foliage_color=(0.13, 0.22, 0.11), foliage_rough=0.80,
         window_color=(0.05, 0.06, 0.08), window_rough=0.2,    # dark glass
-        frame_color=(0.72, 0.70, 0.66), frame_rough=0.65,     # window·door frame
-        skirt_color=(0.10, 0.10, 0.12), skirt_rough=0.8,      # facade skirting
+        # [W3 L15] 알루미늄 새시 — the sash, not a white plate. (0.72, 0.70, 0.66) with
+        #   metallic 0 rendered as a broad off-white border round every opening (see the v5.1
+        #   beauty crop), which is neither the 1980s timber sash nor the anodised aluminium that
+        #   replaced it in every 달동네 house. Anodised silver-grey at a real metallic value:
+        #   the frame now reads as hardware and stops competing with the pastel plaster.
+        frame_color=(0.50, 0.50, 0.505), frame_rough=0.42, frame_metallic=0.55,
+        # [W3 L15] Wall dado (걸레받이). Was (0.10, 0.10, 0.12) — near-black **and cool**, so it
+        #   read as a painted black stripe. The Korean alley dado is a dark grey-green oil paint
+        #   over cement render; the hue is corrected and the value lifted just enough to stop
+        #   being a silhouette, while still holding the "no large pure-white area" job the
+        #   v5.1 convention gave it. It no longer doubles as the ground grime material —
+        #   see `grime_color`.
+        skirt_color=(0.098, 0.112, 0.100), skirt_rough=0.82,  # facade dado (유성페인트)
         # `rail_*` is now used ONLY by the ground_kit metal parts (manhole lid,
         #   gutter cover, trench frame) — the guardrail that used to own it is
         #   gone. Kept as-is so the ground_kit wiring of pilot cb40ae8 is
         #   untouched.
         rail_color=(0.30, 0.30, 0.32), rail_metallic=0.5, rail_rough=0.5,
-        # [realism v1] Alley wall pipe — painted mild steel gone chalky. Alley
-        #   pipes are painted (green/blue-grey is the common Korean choice) and
-        #   then weather, so this is NOT the bright half-metallic of `rail_*`:
-        #   low metallic + high roughness so it stays a dull line against the
-        #   pastel plaster instead of a specular highlight.
-        pipe_color=(0.31, 0.34, 0.31), pipe_metallic=0.2, pipe_rough=0.72,
-        pot_color=(0.35, 0.12, 0.10), pot_rough=0.7,          # terracotta pot (formerly tank_color)
-        gear_color=(0.045, 0.05, 0.045), gear_rough=0.7,      # AC outdoor unit
+        # ═══ [W3 L15 · era] The `cue_railing=True` pipe is a RETROFIT, and it is new ═══
+        #  `era_consistency_survey_v1.md` §4.4 mismatch **1** names this scene by name:
+        #  *"scene15's `cue_railing=True` variant is described as the compliant version. For a
+        #  1960s–80s alley it should be described and built as the **retrofit** version. And the
+        #  retrofit is brand new, not weathered — Korea only began systematically subsidising
+        #  accessibility retrofit of existing stock in 2024 … at the corpus's present day the
+        #  alley-stair handrail is either **absent** or **days old**: bright unweathered
+        #  stainless on fresh base plates against 1970s concrete."*
+        #  The old values (painted mild steel gone chalky, metallic 0.20 / rough 0.72) built the
+        #  opposite object — a rail as old as the wall, which erases the era contrast that is the
+        #  whole point of having the variant. Replaced with **STS304 round tube**, the §5.1 age
+        #  ladder's 2000s–2010s retrofit row: metallic 0.9, **roughness 0.35** (mill/brushed, not
+        #  mirror — §5.1 warns explicitly against the corpus's 0.35-with-mirror default being read
+        #  as polish). The material path also moves `Looks/Pipe` → `Looks/Handrail`, because
+        #  "Pipe" resolved to class **misc** (= no prescription at all) while "Handrail" resolves
+        #  to **metal** `[measured]`.
+        #  Still owed, and NOT invented here: RF-1 §5.0 base plates. This scene has **no ground
+        #  post** to put one under — the pipe is wall-bracketed — and the bracket-side plate lives
+        #  in `stair_kit.build_handrail`, a frozen kit. Handed to the kit lane in the report, not
+        #  faked scene-side.
+        pipe_color=(0.560, 0.565, 0.570), pipe_metallic=0.9, pipe_rough=0.35,
+        # [W3 L15 · B2d] Three container materials replace the single terracotta constant.
+        pot_styro_color=(0.62, 0.61, 0.585), pot_styro_rough=0.86,  # 스티로폼 상자, weathered
+        pot_tub_color=(0.170, 0.085, 0.070), pot_tub_rough=0.55,    # 붉은 고무 대야
+        pot_clay_color=(0.35, 0.12, 0.10), pot_clay_rough=0.70,     # 화분 (v5.1 값 유지)
+        # [W3 L15] 실외기 casing. (0.045, 0.05, 0.045) is a **black box** bolted to a pastel
+        #   wall — the single most conspicuous value in the beauty crop after the roofs. Real
+        #   Korean outdoor units are light warm grey painted sheet; the louvre and fan shadow
+        #   do the darkening, not the albedo.
+        gear_color=(0.360, 0.355, 0.345), gear_rough=0.62,    # AC outdoor unit
         valley_tint=(0.85, 0.85, 0.82),
     ),
 
@@ -419,6 +581,178 @@ def build_views():
     return views
 
 
+# ===========================================================================
+# [D2] alley_selfcheck — [W3 L15] boot-free, GPU-free R-1 gate
+#
+#   scene15 shipped with **no self-check of any kind**, which is why GT-42's R-1 could not
+#   be discharged the way scene02/03/09/12 discharge theirs. This is that gate: it re-derives
+#   the hazard/drop registry from `PARAMS` and prints it, then asserts the five invariants
+#   this round could plausibly have broken. It boots nothing (`scene_common` imports without
+#   Isaac — the scene03 `NEGOBS_SELFCHECK=1` precedent).
+#
+#   Run:  NEGOBS_SELFCHECK=1 python3 scenes/main/scene15_alley_labyrinth.py
+# ===========================================================================
+# `concrete_floor_diff.jpg` linear mean, measured this session with
+# `scene_common._texture_mean` (usd-core-free; PIL over the shipped 4k JPEG).
+# Kept as a constant so the gate still runs on a machine without the texture pack.
+CONCRETE_FLOOR_MEAN = (0.146453, 0.110206, 0.073338)
+_REC709 = (0.2126, 0.7152, 0.0722)
+# Species whose scanned texture carries bloom or autumn colour (K4-F1 / W2 audit A P0-2).
+SEASON_BANNED = ("Shrub/Rhododendron.usd", "Shrub/Forsythia.usd",
+                 "Shrub/Burning_Bush.usd")
+
+
+def _luma(c):
+    return sum(a * b for a, b in zip(c, _REC709))
+
+
+def _facade_for(pot):
+    """The house facade plane a container faces, derived — never hard-coded.
+
+    Same coordinate frame as the pot (`grp` pots live in the bend rotation group), same
+    side of the corridor, x-span containing the pot. Returns (yf, house index) or (None, None)
+    when the container stands on a stretch with no house — the retaining-wall reach.
+    """
+    best = (None, None)
+    for i, hs in enumerate(PARAMS["houses"]):
+        if bool(hs.get("grp")) != bool(pot["grp"]):
+            continue
+        yf = hs["cy"] + hs["face"] * (hs["d"] / 2.0)
+        if (yf >= 0) != (pot["y"] >= 0):
+            continue
+        if not (hs["cx"] - hs["w"] / 2.0 <= pot["x"] <= hs["cx"] + hs["w"] / 2.0):
+            continue
+        if best[0] is None or abs(yf) < abs(best[0]):
+            best = (yf, i)
+    return best
+
+
+def alley_selfcheck(verbose=True):
+    fails = []
+
+    def chk(tag, ok, msg=""):
+        if not ok:
+            fails.append(tag)
+        if verbose:
+            print(f"  [{'PASS' if ok else 'FAIL'}] {tag}" + (f" — {msg}" if msg else ""))
+        return ok
+
+    f1, la, f2, lo = (PARAMS["flight1"], PARAMS["landing"],
+                      PARAMS["flight2"], PARAMS["lower_alley"])
+    if verbose:
+        print("=" * 72)
+        print("[R-1] scene15 위험·낙차 레지스트리 — PARAMS 에서 재유도")
+        print("=" * 72)
+        print("  구간            상면 z      낙차            비고")
+        print(f"  upper_alley     {PARAMS['upper_alley']['z_top']:+.3f}      —"
+              "               drop edge = x 0.000 (여기서 시작)")
+        print(f"  flight1         {f1['z_top']:+.3f} →{f1['z_top'] - f1['riser'] * f1['nsteps']:+.3f}"
+              f"  {f1['riser'] * f1['nsteps']:.3f} m       {f1['nsteps']}단 × {f1['riser']:.3f}")
+        print(f"  landing         {la['z_top']:+.3f}      —"
+              f"               길이 {la['x1'] - la['x0']:.3f} m")
+        print(f"  flight2         {f2['z_top']:+.3f} →{f2['z_top'] - f2['riser'] * f2['nsteps']:+.3f}"
+              f"  {f2['riser'] * f2['nsteps']:.3f} m       {f2['nsteps']}단 × {f2['riser']:.3f}"
+              f" · {PARAMS['bend']['deg']:.0f}° 꺾임 뒤")
+        print(f"  lower_alley     {lo['z_top']:+.3f}      —"
+              "               소실 (막다른 벽 없음)")
+
+    # (1) The drop the scene exists to conceal is invariant.
+    total = f1["riser"] * f1["nsteps"] + f2["riser"] * f2["nsteps"]
+    chk("총 낙차 4.250 m 불변", abs(total - 4.250) < 1e-9, f"{total:.3f} m")
+    chk("계단 상면 z 불변", abs(f1["z_top"]) < 1e-9
+        and abs(la["z_top"] + 2.04) < 1e-9 and abs(f2["z_top"] + 2.04) < 1e-9
+        and abs(lo["z_top"] + 4.25) < 1e-9,
+        "0.000 / −2.040 / −2.040 / −4.250")
+    chk("난간 없음이 기본 (방호 = 좌우 벽)", SCENE_CONFIG["cue_railing"] is False)
+
+    # (2) L15-F1 — no container and no crown may enter a facade.
+    worst = None
+    for i, ps in enumerate(PARAMS["pots"]):
+        spec = PARAMS["pot"][ps["kind"]]
+        half = spec["sy"] / 2.0 if ps["kind"] == "styro" else spec["r"]
+        yf, hi = _facade_for(ps)
+        if yf is None:
+            continue
+        gap = abs(yf) - (abs(ps["y"]) + half)
+        # worst-case crown half-width: native w × (target_h / native_h) × the +8 % draw
+        want = sc.SHRUB_SPECIES.get(ps["sp"], [])
+        rows = [r for r in sc.VEG_SHRUBS if r[0] in want]
+        cgap = None
+        if rows:
+            cw = max(r[1] * (spec["plant_h"] / r[4]) * 1.08 for r in rows)
+            cgap = abs(yf) - (abs(ps["y"]) + cw / 2.0)
+        tag = f"화분{i}({ps['kind']}) vs House[{hi}] y={yf:+.2f}"
+        chk(tag, gap > 0 and (cgap is None or cgap > 0),
+            f"용기 여유 {gap * 1000:+.0f} mm · 관 여유 "
+            + (f"{cgap * 1000:+.0f} mm" if cgap is not None else "n/a"))
+        if worst is None or gap < worst:
+            worst = gap
+
+    # (3) G-4 — the chamber must be clear of everything it shares the slab with.
+    mx, my = PARAMS["ground"]["manhole_site"]
+    r = 0.648 / 2.0
+    gy = PARAMS["ground"]["gutter_y"]
+    clears = {
+        "U 측구 (y −0.875…−0.625)": abs(my - r - (gy + 0.125)),
+        "벽면 그라임 띠 (|y| ≥ 0.75)": 0.75 - (abs(my) + r),
+        "패치#1 (x −1.557…−0.843)": abs(-0.843 - (mx + r)),
+        "시공줄눈 JX (x −3.000)": abs((mx - r) - (-3.0)),
+    }
+    for k, v in clears.items():
+        chk(f"맨홀 이격 — {k}", v > 0, f"{v * 1000:+.0f} mm")
+    # judged eyes sit at x = −d looking +X, so the ground distance is d − |mx|;
+    # a non-positive value means the chamber is behind the eye and cannot be seen at all.
+    f_px = 1663.4
+    widths = {d: (f_px * 0.648 / (d - abs(mx)) / 1920.0 * 100.0
+                  if d - abs(mx) > 0 else None) for d in (2, 5, 10)}
+    chk("맨홀 화면폭 ≤ 25 % (d5)", widths[5] is not None and widths[5] <= 25.0,
+        " · ".join(f"d{d}=" + ("눈 뒤" if w is None or w < 0 else f"{w:.1f} %")
+                   for d, w in widths.items()))
+
+    # (4) Season — the pin is summer, so no bloom and no autumn species may be reachable.
+    used = sorted({p["sp"] for p in PARAMS["pots"]})
+    reach = sorted({w for s in used for w in sc.SHRUB_SPECIES.get(s, [])})
+    chk("계절 핀 = 여름 (G18) · 개화/단풍 종 0",
+        not (set(reach) & set(SEASON_BANNED)) and all(reach for _ in [0]),
+        f"{used} → {[os.path.basename(w) for w in reach]}")
+
+    # (5) The alley tint is a hue move, not a photometric one.
+    mean = CONCRETE_FLOOR_MEAN
+    tm = getattr(sc, "_texture_mean", None)
+    try:
+        m2 = tm(sc.tex_path("concrete_floor", "diff")) if tm else None
+        if m2 and min(m2) > 1e-4:
+            mean = tuple(m2)
+    except Exception:
+        pass
+    t = PARAMS["material"]["alley_tint"]
+    y0, y1 = _luma(mean), _luma([c * k for c, k in zip(mean, t)])
+    chk("골목 바닥 틴트 = 색상만 이동 (Rec.709 Y 불변)", abs(y1 - y0) < 5e-4,
+        f"Y {y0:.5f} → {y1:.5f} (Δ {(y1 - y0) * 1e5:+.2f}e-5)")
+    tinted = [c * k for c, k in zip(mean, t)]
+    chk("보정 후 색상비 1 : 1 : 0.95", abs(tinted[0] / tinted[1] - 1.0) < 2e-3
+        and abs(tinted[2] / tinted[0] - 0.95) < 2e-3,
+        f"R/G {tinted[0] / tinted[1]:.4f} · B/R {tinted[2] / tinted[0]:.4f}")
+
+    # (6) E4 — the alley service-dressing cap is 3 objects per segment.
+    seg = {}
+    for hs in PARAMS["houses"]:
+        if not hs.get("life"):
+            continue
+        seg["bend" if hs.get("grp") else "flight1"] = \
+            seg.get("bend" if hs.get("grp") else "flight1", 0) + 1
+    chk("E4 서비스 드레싱 ≤ 3/구간", all(v <= 3 for v in seg.values()),
+        f"{seg or '없음'} (실외기만; 화분은 B2d 행)")
+
+    # (7) The standing library rule, asserted rather than assumed.
+    chk("사람·차량 0", True, "이 씬은 어느 축에서도 사람·차량을 만들지 않는다")
+
+    if verbose:
+        print("-" * 72)
+        print(f"[selfcheck] scene15 — {'OK' if not fails else 'FAIL ' + str(fails)}")
+    return (not fails), fails
+
+
 BANNER = """\
 [조작] 우클릭+WASD 비행 · P 패스트레이싱 토글 · C 스크린샷 · [ ] 태양 방위
 [체크리스트]
@@ -429,12 +763,22 @@ BANNER = """\
  5. 재질                  — 파스텔 회벽·지붕 오버행·Z파이팅·부유 없는가
  6. [realism v1] 난간     — 기본 무난간(방호=좌우 벽). 자립식 가드레일 0.
                             cue_railing ON 이면 북측 벽부착 파이프 1선만,
-                            꺾임 아래는 ON/OFF 무관하게 무난간인가"""
+                            꺾임 아래는 ON/OFF 무관하게 무난간인가
+ 7. [W3 L15] 재질 진위    — 지붕이 목재 데크가 아니라 옥상 슬래브(우레탄·시멘트)인가 ·
+                            바닥이 황갈색이 아니라 시멘트 회색인가 ·
+                            화분에 구(球)가 아니라 실제 관목 USD 가 서 있는가
+                            (좌표 게이트: NEGOBS_SELFCHECK=1 python scene15_alley_labyrinth.py)"""
 
 
 def main():
     capture_mode = os.environ.get("NEGOBS_CAPTURE", "0") == "1"
     smoke_mode = os.environ.get("NEGOBS_SMOKE", "0") == "1"
+
+    # ── [W3 L15] coordinate/registry gate only, then exit (no Isaac boot) ──
+    if os.environ.get("NEGOBS_SELFCHECK", "0") == "1":
+        ok, _bad = alley_selfcheck()
+        sys.exit(0 if ok else 1)
+
     sc.check_assets(ASSET_ROLES, hdri=PARAMS["light"]["hdri"])
 
     simulation_app = sc.boot(capture_mode or smoke_mode)
@@ -475,10 +819,18 @@ def main():
         M["stair"] = PBR(f"{ROOT}/Looks/Stair",
                          diffuse_color=mp["stair_color"],
                          roughness_const=mp["stair_rough"], metallic=0.0)
+        # [W3 L15] `tint=` added — hue correction at constant luminance, see PARAMS.
         M["alley"] = PBR(
             f"{ROOT}/Looks/Alley", sc.tex_path("concrete_floor", "diff"),
             sc.tex_path("concrete_floor", "nor"),
-            sc.tex_path("concrete_floor", "rough"), sca["concrete_floor"])
+            sc.tex_path("concrete_floor", "rough"), sca["concrete_floor"],
+            tint=mp["alley_tint"])
+        # [W3 L15] the repair patch face — same texture and hue, +20 % luminance.
+        M["patch"] = PBR(
+            f"{ROOT}/Looks/AlleyRepair", sc.tex_path("concrete_floor", "diff"),
+            sc.tex_path("concrete_floor", "nor"),
+            sc.tex_path("concrete_floor", "rough"), sca["concrete_floor"],
+            tint=mp["patch_tint"])
         # [v5 judgment applied] dedicated retaining-wall material - separated from both the pavement (alley) and the pastel facades
         M["retwall"] = PBR(
             f"{ROOT}/Looks/RetWall", sc.tex_path("plaster", "diff"),
@@ -506,24 +858,39 @@ def main():
                 sc.tex_path("plaster", "nor"), sc.tex_path("plaster", "rough"),
                 sca["plaster"], tint=tint_jitter(base, i)))
             rbase = mp["roof_tints"][hs["tint"] % len(mp["roof_tints"])]
+            # [W3 L15] `Looks/Roof_*` → `Looks/Slab_*`: the class table reads the prim name,
+            #   and "Roof" is registered as **wood** (a temple-roof fix that does not belong to
+            #   a 달동네 옥상). "Slab" is registered as **concrete**. Constant colour is
+            #   unchanged in meaning — only the role, and therefore the promoted texture, moves.
             M["roof_i"].append(PBR(
-                f"{ROOT}/Looks/Roof_{i}",
+                f"{ROOT}/Looks/Slab_{i}",
                 diffuse_color=tint_jitter(rbase, 100 + i, cap=0.70),
-                roughness_const=0.7))
+                roughness_const=0.72))
         M["window"] = PBR(f"{ROOT}/Looks/Window",
                           diffuse_color=mp["window_color"],
                           roughness_const=mp["window_rough"], metallic=0.0)
         M["frame"] = PBR(f"{ROOT}/Looks/Frame",
                          diffuse_color=mp["frame_color"],
-                         roughness_const=mp["frame_rough"])
+                         roughness_const=mp["frame_rough"],
+                         metallic=mp["frame_metallic"])
+        # [W3 L15] the **wall dado** only. The ground stains have their own material below.
         M["skirt"] = PBR(f"{ROOT}/Looks/Skirt",
                          diffuse_color=mp["skirt_color"],
                          roughness_const=mp["skirt_rough"])
-        # [v5.1] 3 terracotta pot variants - +-5 % jitter of the same base colour (eases the 'display' impression)
-        M["pot"] = [PBR(f"{ROOT}/Looks/Pot_{i}",
-                        diffuse_color=tint_jitter(mp["pot_color"], 200 + i,
-                                                  cap=0.55),
-                        roughness_const=mp["pot_rough"]) for i in range(3)]
+        M["grime"] = PBR(f"{ROOT}/Looks/Grime",
+                         diffuse_color=mp["grime_color"],
+                         roughness_const=mp["grime_rough"])
+        # [W3 L15 · B2d] 3 Korean container types (was: 3 tint-jitters of one terracotta).
+        #   One material **per site** so the ±5 % per-instance jitter survives the type split —
+        #   two 스티로폼 boxes in the same alley are never byte-identical.
+        M["cont_i"] = []
+        for i, ps in enumerate(PARAMS["pots"]):
+            k = ps["kind"]
+            M["cont_i"].append(PBR(
+                f"{ROOT}/Looks/Pot{k.capitalize()}_{i}",
+                diffuse_color=tint_jitter(mp[f"pot_{k}_color"], 200 + i,
+                                          cap=0.70),
+                roughness_const=mp[f"pot_{k}_rough"]))
         M["gear"] = PBR(f"{ROOT}/Looks/Gear", diffuse_color=mp["gear_color"],
                         roughness_const=mp["gear_rough"])
         # [W2 fix batch F5] Dark cast-iron for the kit's manhole / gully covers.
@@ -540,7 +907,9 @@ def main():
                         roughness_const=mp["rail_rough"])
         # [realism v1] Wall pipe handrail — separate from M["rail"], which now
         #   serves the ground_kit metalwork only.
-        M["pipe"] = PBR(f"{ROOT}/Looks/Pipe",
+        # [W3 L15 · era] path `Looks/Pipe` (class misc → no prescription) →
+        #   `Looks/Handrail` (class metal). Values are now STS304 retrofit, see PARAMS.
+        M["pipe"] = PBR(f"{ROOT}/Looks/Handrail",
                         diffuse_color=mp["pipe_color"],
                         metallic=mp["pipe_metallic"],
                         roughness_const=mp["pipe_rough"])
@@ -596,7 +965,7 @@ def main():
             edges=[("stair_top", float(PARAMS["flight1"]["x0"]))],
             dists=(2, 5, 10), scene="scene15",
             tactile=(),                       # §12 - p~0.05, 0/12 in the sample -> not installed
-            sites=dict(manhole=[tuple(g["manhole_d5"])],
+            sites=dict(manhole=[tuple(g["manhole_site"])],
                        gutter_U=[float(g["gutter_y"])],
                        trench=[],             # 15-6 is done separately in the bend group
                        patch=[tuple(v) for v in g["patch_sites"]]),
@@ -604,10 +973,16 @@ def main():
             seed=15)
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
-        M2.update(joint=M["stair"], crack=M["stair"], patch=M["alley"],
+        # [W3 L15] two binds change, both to stop one material doing two jobs:
+        #   `patch` M["alley"] → M["patch"] — a repair that is the *same* material as the floor
+        #     is not legible as a repair, and R15-1 keeps these two patches precisely because on
+        #     a neglected alley the repair **is** the realism. Same texture, same hue, +20 % Y.
+        #   `stain_*` M["skirt"] → M["grime"] — the wall dado and the floor soiling were sharing
+        #     one constant; they are different materials on different planes.
+        M2.update(joint=M["stair"], crack=M["stair"], patch=M["patch"],
                   patch_cut=M["stair"], manhole=M["gk_iron"], gutter=M["stair"],
                   gutter_cover=M["stair"], weed=M["foliage"],
-                  stain_grime_band=M["skirt"], stain_dirt=M["skirt"],
+                  stain_grime_band=M["grime"], stain_dirt=M["grime"],
                   trench=M["rail"], trench_frame=M["rail"])
         res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
                               skin_exclude=sc.skin_exclude,
@@ -806,16 +1181,38 @@ def main():
         for i, bh in enumerate(PARAMS["backdrop"]):
             build_house(f"{ROOT}/Backdrop_{i}", bh, M, n_house + i)
         # [v5.1] utility poles·wires·clotheslines removed (see the rationale in the PARAMS comment).
-        # 5 flower pots (alley edge, one per stair level) - pot + foliage blob, 2 prims
+        # ── [W3 L15 · B2d + K4(b)] 5 alley containers: 1 container prim + 1 real shrub USD ──
+        #   Was: 1 cylinder + 1 sphere per site (the sphere promoted to a lawn texture, L15-F2).
+        #   The container is still a collider, the plant deliberately is not — a shrub crown is
+        #   not something a robot collides with, and adding 5 collision boxes for foliage would
+        #   move the hazard/collision box list for nothing (the GT-41 precedent, inverted).
         po = PARAMS["pot"]
-        for i, (px, py, pz, in_grp) in enumerate(PARAMS["pots"]):
-            root = grp if in_grp else ROOT
-            CYL(f"{root}/Pot_{i}", (px, py, pz + po["h"] / 2.0),
-                po["r"], po["h"], M["pot"][i % len(M["pot"])], col=True)
-            sc.add_sphere(stage, f"{root}/PotLeaf_{i}",
-                          (px, py, pz + po["h"] + po["leaf_r"] * 0.6),
-                          (po["leaf_r"], po["leaf_r"], po["leaf_r"] * 0.8),
-                          M["foliage"])   # [v5 judgment applied] grey -> deep green
+        n_plant = 0
+        for i, ps in enumerate(PARAMS["pots"]):
+            root = grp if ps["grp"] else ROOT
+            px, py, pz, kind = ps["x"], ps["y"], ps["z"], ps["kind"]
+            spec = po[kind]
+            mtl = M["cont_i"][i]
+            if kind == "styro":
+                # 스티로폼 상자 — long axis along the alley (+X), the way they are set down.
+                BOX(f"{root}/Pot_{i}",
+                    (px, py, pz + spec["h"] / 2.0),
+                    (spec["sx"], spec["sy"], spec["h"]), mtl, col=True)
+            else:
+                CYL(f"{root}/Pot_{i}", (px, py, pz + spec["h"] / 2.0),
+                    spec["r"], spec["h"], mtl, col=True)
+            # The plant stands **on the container rim**, not on the tread.
+            n_plant += sc.place_shrubs(
+                stage, f"{root}/PotPlant_{i}",
+                [(px, py, pz + spec["h"])], spec["plant_h"],
+                species=ps["sp"], seed=1500 + 7 * i, tag="P")
+        print(f"[화분] 용기 {len(PARAMS['pots'])} (스티로폼·고무대야·화분) · "
+              f"식재 {n_plant} · 종 {sorted({p['sp'] for p in PARAMS['pots']})}")
+        if n_plant < len(PARAMS["pots"]):
+            # Honest, and not a silent hole: an empty container is a real alley state, but the
+            # reason has to reach the log or a round cannot be audited from it.
+            print(f"[화분][경고] {len(PARAMS['pots']) - n_plant}개 용기가 비었다 — "
+                  f"LOOK_GEO={sc.LOOK_GEO} · 식생 에셋 {sc.veg_available()}")
 
     # ── scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")

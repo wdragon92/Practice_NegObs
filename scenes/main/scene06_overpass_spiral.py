@@ -387,21 +387,35 @@ PARAMS = dict(
     #   The fix is on the geometry side, where it belongs: the wooded band is raised and
     #   pushed out to become the **hill**, and the blocks drop to **village** scale (2–3
     #   storeys) and retreat behind it, so they read between the trees instead of over them.
-    treeband=dict(rows=((-40.0, -33.0, 9.6), (33.0, 40.0, 8.8)),
-                  x0=-86.0, x1=86.0, seg=7.0, jitter=2.4),
+    #   **Two pilot renders were spent finding out that the band is the wrong instrument for
+    #   the hill, and the band is therefore left exactly as v6 built it.** Attempt 1 raised
+    #   it in place (h 8.8-9.6 at y ∓33…40): at 20 m the 7 m segments stopped reading as a
+    #   ridge and became a row of green monoliths with dome caps — a wall of vegetation
+    #   replacing a wall of brick, which is not an improvement. Attempt 2 pushed it to
+    #   y ∓46…54 and widened the segment to 14 m: still a wall, because a 10-11 m band at
+    #   33-41 m subtends ~17 deg and the h1.8/d10 eye sits 5 m up on the deck looking
+    #   straight into it. The band only works at the height v6 chose, where it sits BELOW
+    #   the deck eye and merely stops the grass slab meeting the sky.
+    #   So the horizon is opened the other way, and only the other way: **the village
+    #   blocks drop from 13.5-24 m to 6.0-9.0 m (2-3 storeys) and retreat** — see
+    #   `buildings` below. What is genuinely NOT delivered is G6's *forested hill*, which
+    #   needs a real landform (a displaced ground mesh or a billboard ridge), not this
+    #   block-row LOD. Recorded as owed in the report rather than faked with a taller band.
+    treeband=dict(rows=((-33.0, -29.0, 4.8), (29.0, 33.0, 4.4)),
+                  x0=-74.0, x1=74.0, seg=7.0, jitter=1.2),
     buildings=dict(
         E=dict(x0=104.0, x1=120.0, y0=-42.0, y1=42.0, h=9.0, floors=3,
                axis="x", facade_x=104.0, face_dir=-1.0, base_z=-0.16),
         W=dict(x0=-120.0, x1=-104.0, y0=-42.0, y1=42.0, h=7.5, floors=2,
                axis="x", facade_x=-104.0, face_dir=1.0, base_z=-0.16),
-        N=dict(x0=-44.0, x1=8.0, y0=52.0, y1=66.0, h=8.0, floors=3,
-               axis="y", facade_y=52.0, face_dir=-1.0, base_z=-0.16),
-        N2=dict(x0=14.0, x1=52.0, y0=55.0, y1=67.0, h=6.5, floors=2,
-                axis="y", facade_y=55.0, face_dir=-1.0, base_z=-0.16),
-        S=dict(x0=-40.0, x1=6.0, y0=-68.0, y1=-54.0, h=8.5, floors=3,
-               axis="y", facade_y=-54.0, face_dir=1.0, base_z=-0.16),
-        S2=dict(x0=12.0, x1=54.0, y0=-64.0, y1=-52.0, h=6.0, floors=2,
-                axis="y", facade_y=-52.0, face_dir=1.0, base_z=-0.16),
+        N=dict(x0=-44.0, x1=8.0, y0=66.0, y1=80.0, h=8.0, floors=3,
+               axis="y", facade_y=66.0, face_dir=-1.0, base_z=-0.16),
+        N2=dict(x0=14.0, x1=52.0, y0=69.0, y1=81.0, h=6.5, floors=2,
+                axis="y", facade_y=69.0, face_dir=-1.0, base_z=-0.16),
+        S=dict(x0=-40.0, x1=6.0, y0=-82.0, y1=-68.0, h=8.5, floors=3,
+               axis="y", facade_y=-68.0, face_dir=1.0, base_z=-0.16),
+        S2=dict(x0=12.0, x1=54.0, y0=-78.0, y1=-66.0, h=6.0, floors=2,
+                axis="y", facade_y=-66.0, face_dir=1.0, base_z=-0.16),
     ),
     #   [v6 verdict (5)] window decals repeated on the same grid on every block, so the tiling showed ->
     #   window size and row spacing now differ per block to break the rhythm (key = buildings key).

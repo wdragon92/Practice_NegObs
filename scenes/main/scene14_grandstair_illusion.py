@@ -431,7 +431,19 @@ PARAMS = dict(
         scale=dict(marble_light=1.2, granite_dark=1.0, plaza_lower=0.7,
                    band_dark=0.5, granite_light=1.60, plaza_light=1.80, grass=1.4,
                    tactile=0.3),                      # [v5 shared layer]
-        granite_light_tint=(0.86, 0.87, 0.88),   # cool + slightly down from the map
+        # [W3 L14, corrected on the first pilot's own pixels] The first value was
+        #   (0.86, 0.87, 0.88) — blue highest, i.e. a **cool** tint. `plaza_light`'s map
+        #   is already all but neutral (mean RGB 182.0/180.9/177.8, **saturation
+        #   2.33 %** [measured this session]), so a cool tint cancelled the last of its
+        #   warmth and the flight rendered at a mean **saturation of 0.10 %** — a dead
+        #   grey card. Korean flamed 화강석 (포천석·마천석) is a *warm* light grey with
+        #   dark and pink speckle, and G1's flight reads that way. The ratio below is
+        #   1.000 : 0.981 : 0.955, which lands the rendered mean near 6~7 % saturation
+        #   at an unchanged value. **It also lowers the min channel, which is what the
+        #   regression tool's `white = min(R,G,B) > 0.8` counts — that is a side effect
+        #   and not the motive**, and §6 reports the WHITE finding on the pre-correction
+        #   numbers so the metric is not quietly tuned away.
+        granite_light_tint=(0.885, 0.868, 0.845),
         grass_tint=(0.60, 0.63, 0.38),           # [W3 L14] autumn — see PARAMS["autumn"]
         # B-14-5: fixes the high-brightness clustering across the frame - facade 0.56->0.30, parapet 0.90->0.62
         bldg_color=(0.30, 0.30, 0.33), bldg_rough=0.6,
@@ -911,7 +923,7 @@ def main():
         M["stone_cheek"] = PBR(
             f"{ROOT}/Looks/StoneCheek", sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
-            sca["granite_light"], tint=(0.80, 0.80, 0.81))
+            sca["granite_light"], tint=(0.815, 0.800, 0.780))
         M["plaza_light"] = PBR(
             f"{ROOT}/Looks/PlazaLight", sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),

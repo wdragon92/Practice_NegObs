@@ -243,8 +243,30 @@ PARAMS = dict(
     #   stack of rectangles to hide behind. `subs` stays at 1 for the self-check line.
     #   `feather` = the leaf-card band straddling the boundary (inner 0.30 / outer 0.50 m,
     #   spec §10.5 DEC-2); `feather_cap` bounds the instance cost per mask.
+    # [W3 S3-2] Near-field chord polish (redteam_w3_window1.md §3.1). On scene07's
+    #   `h0.3_d2` the 24-gon chord facets of the nearest masks are faintly readable at
+    #   ~1 m. The sanctioned cure is "raise `n` ... for near-field masks (cosmetic knob)".
+    #   Only the masks that stand inside `chord_near_x` are raised, so the fix stays a
+    #   near-field fix and the far masks keep their measured 24-gon budget.
+    #   [measured] polygonisation sagitta = r*(1-cos(pi/n)) at the largest near mask
+    #   (YardLeaf_0, rx 1.20): n 24 -> 10.3 mm, n 48 -> 2.6 mm. Capture is 1920x1080 at a
+    #   36 deg vertical FOV = 0.582 mrad/px, so at the 1 m standoff that is 17.7 px -> 4.4 px.
+    #   Cost on the mask itself is zero prims: a `build_blot` N-gon is ONE Mesh whatever `n`
+    #   is (spec §10.5 DEC-1), so this adds points, not prims (3 masks x 24 extra vertices
+    #   = +72 points). [measured] the scene total moves 1088 -> 1090 all the same, because
+    #   `build_carpet_mask` derives the feather-ring *region* from the mask AABB and a
+    #   48-gon inscribes the (rx, ry) box more tightly than a 24-gon: the ring region moves
+    #   by a few mm and `scatter_debris` lands 2 more leaf cards. Second-order, declared.
+    #   Side effect, declared: the radius ring is drawn per vertex, so a 48-gon edge carries
+    #   finer boundary detail than a 24-gon one. `_blot_ring`'s smoothing pass has a zero at
+    #   Nyquist ((1+cos w)/2), so no vertex spikes appear - the edge gets crinklier, not spiky,
+    #   which is what a real leaf-carpet boundary does at that scale.
+    #   Near-field set = the 3 masks the redteam names: yard drifts at cx -2.6 / -7.6 and
+    #   corridor drift 0 at cx ~ 1.30. The yard drift at -13.2 and corridor drifts from
+    #   cx 3.05 down are far-field and stay at 24.
     leaf_band=dict(proud=0.004, seed=7073, subs=1,
-                   feather=(0.30, 0.50), feather_cap=22),
+                   feather=(0.30, 0.50), feather_cap=22,
+                   n_far=24, n_near=48, chord_near_x=(-8.6, 2.2)),
     # [v6] 3 leaf drifts on the yard (decomposed granite) - eases the 'large high-reflectance beige plane' (ruling (5)).
     #      A yard is flat by practice, so material variation, not curvature, breaks the monotony.
     #      All at y >= −1.55 (never past the south border −1.7 = zero floating).
@@ -573,6 +595,19 @@ def leaf_patches():
 LEAF_PATCHES = leaf_patches()
 
 
+def mask_n(cx):
+    """[W3 S3-2] N-gon order for a carpet mask centred at `cx` (see PARAMS['leaf_band']).
+
+    Near-field masks get the raised order; everything else keeps the 24-gon budget.
+    One function, used by both the SMOKE table and the builder, so the two can never
+    disagree about which mask was polished.
+    """
+    lb = PARAMS["leaf_band"]
+    x0, x1 = lb["chord_near_x"]
+    near = float(x0) <= float(cx) <= float(x1)
+    return int(lb["n_near"] if near else lb["n_far"])
+
+
 def stone_metrics():
     """Stepping-stone verification metrics — (rise list, gap list, entry/exit steps)."""
     tops = [s["top"] for s in STONES]
@@ -772,7 +807,8 @@ def _smoke_report():
     ferr, dk = 0.0, gk.dry_kit()
     for nm, cx, cy, rx, ry in LEAF_PATCHES:
         b = gk.build_blot(dk, f"/dry/LeafMask_{nm}", cx, cy, rx, ry, None,
-                          n=24, rough=0.18, seed=int(lb["seed"]) + int(nm),
+                          n=mask_n(cx), rough=0.18,
+                          seed=int(lb["seed"]) + int(nm),
                           z=0.0, proud=lb["proud"], z_fn=lambda x, y: path_z(x))
         for (px, _py), pz in zip(b["points"], b["zs"]):
             ferr = max(ferr, abs(pz - (path_z(px) + lb["proud"])))
@@ -787,6 +823,25 @@ def _smoke_report():
           f"{'OK' if yout < 1.70 else 'FAIL'}) · x 범위 {xin:.2f}..{xout:.2f} "
           f"(≤{STAIR_RUN:.2f} → "
           f"{'OK' if xout <= STAIR_RUN + 1e-9 and xin >= 0.0 else 'CHECK'})")
+    # [S3-2] chord polish table - which masks were raised and what it bought (sagitta)
+    allm = ([(f"LeafDrift_{nm}", cx, rx) for nm, cx, _cy, rx, _ry in LEAF_PATCHES]
+            + [(f"YardLeaf_{i}", cx, sx / 2.0)
+               for i, (cx, _cy, sx, _sy) in enumerate(P["yard_drifts"])])
+    nn_near = sum(1 for _nm, cx, _r in allm if mask_n(cx) == lb["n_near"])
+    sag24 = max(r * (1.0 - math.cos(math.pi / lb["n_far"]))
+                for _nm, cx, r in allm if mask_n(cx) == lb["n_near"]) \
+        if nn_near else 0.0
+    sagn = max(r * (1.0 - math.cos(math.pi / mask_n(cx)))
+               for _nm, cx, r in allm if mask_n(cx) == lb["n_near"]) \
+        if nn_near else 0.0
+    print(f"    [S3-2 현폭] 근경 마스크 {nn_near}매 n {lb['n_far']}→"
+          f"{lb['n_near']} (근경대 x{lb['chord_near_x']}) · 최대 현-호 새지타 "
+          f"{sag24*1000:.1f}→{sagn*1000:.1f} mm "
+          f"(1 m 시거·0.582 mrad/px → {sag24/0.000582:.1f}→{sagn/0.000582:.1f} px) · "
+          f"프림 증가 0 (N-gon 1 Mesh)")
+    for nm, cx, r in allm:
+        print(f"      {nm:<14} cx {cx:+7.2f} r {r:4.2f} n {mask_n(cx):3d} "
+              f"{'근경' if mask_n(cx) == lb['n_near'] else '원경'}")
 
     # ── [v6] sun bearing -> per-face direct-light lambert check ──
     az = 33.5 + float(P["SUN_AZ_OFFSET"])
@@ -1158,7 +1213,7 @@ def main():
                           gk.build_carpet_mask(
                               kit, f"{ROOT}/LeafDrift_{nm}", cx, cy, rx, ry,
                               M["leaf"], z=0.0, proud=lb["proud"],
-                              n=24, rough=0.18,
+                              n=mask_n(cx), rough=0.18,
                               seed=int(lb["seed"]) + int(nm),
                               feather=lb["feather"],
                               feather_cap=int(lb["feather_cap"]),
@@ -1170,7 +1225,8 @@ def main():
                           gk.build_carpet_mask(
                               kit, f"{ROOT}/YardLeaf_{n}", cx, cy,
                               sx / 2.0, sy / 2.0, M["leaf"],
-                              z=0.0, proud=lb["proud"], n=24, rough=0.20,
+                              z=0.0, proud=lb["proud"], n=mask_n(cx),
+                              rough=0.20,
                               seed=int(yl["seed"]) + n,
                               feather=lb["feather"],
                               feather_cap=int(lb["feather_cap"]),

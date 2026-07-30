@@ -411,3 +411,17 @@ The following are handed over rather than actioned:
   edge and stop. Verified as the physically correct read — a crack runs up to the saw cut and is
   milled out beyond it — and identical in kind to the baseline, where kit `Patch_1`
   (x −4.217…−3.383) overlapped the same two polylines.
+
+---
+
+## §7 Supervisor adjudication (07-31)
+
+- **PHOTO h0.3_d5 d_mean −25.6 — ACCEPTED as intended.** The near field is filled by the
+  transverse reinstatement (fresh dark asphalt at 100 % screen width): on-thesis material
+  change, `newdark 0.00`, dark% unchanged, DARK/BLOWN/OCCL 13/13 clean. The §6.2 lever stays
+  unused.
+- **Baseline-of-record**: `260730_w3_n2clean` is sceneN2's latest judgement round in the scene
+  root, which per `look_check/README.md` §2 IS the baseline-of-record convention; the stamp
+  `regr_260730_w3_n2clean.json` is committed alongside this note. No README chain edit needed.
+- **GT ledger**: the 8th z-rung (`seam_proud = 0.0023`, inside `GT_DELTA 0.020`) is queued for
+  the supervisor's deferred ledger batch (ledger is locked by the running 07/10 lane).

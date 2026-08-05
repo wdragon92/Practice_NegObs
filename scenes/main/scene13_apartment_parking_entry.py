@@ -269,7 +269,9 @@ PARAMS = dict(
     #  Fixed by geometry, not by moving the camera (R17-1 doctrine).
     gantry=dict(x=0.40, y0=-3.55, y1=3.55, clear_h=3.05,
                 post_w=0.30, panel_h=0.80, panel_t=0.12),
-    height_bar=dict(x=0.40, z=2.30, r=0.09, y0=-3.2, y1=3.2, nseg=8,
+    # [08-05 user, 4th answer] bar tips 3.2 -> 3.05: the glass walls now run to
+    #   x=0, and the old tips crossed the glass planes at y ±3.15.
+    height_bar=dict(x=0.40, z=2.30, r=0.09, y0=-3.05, y1=3.05, nseg=8,
                     hanger_t=0.05, hang_y=2.95),
     # --- [08-05 user · U-5 literal] full-length ramp canopy — R13-1 superseded ---
     #  Form = the library's flat-deck canopy idiom (scene02 GT-3 / scene16): RC deck +
@@ -315,7 +317,11 @@ PARAMS = dict(
                 fascia_top=3.00, fascia_proud=0.02,
                 col_w=0.14, col_x0=3.15, col_pitch=2.90,
                 n_col=8, beam_w=0.12, beam_h=0.20, embed=0.02,
-                glass=dict(t=0.019, joint=0.012, kick_h=0.12, kick_t=0.05),
+                #  [4th answer] glass_x0 0.0: the mouth rail stubs are removed
+                #  and the curtain walls run to the trench edge. The unroofed
+                #  run (x < deck x0) gets a steel top channel tying the panes.
+                glass=dict(t=0.019, joint=0.012, kick_h=0.12, kick_t=0.05,
+                           x0=0.0, cap_t=0.06, cap_h=0.06),
                 end_wall=dict(x0=23.90, t_in=0.012),
                 #  `[measured]` r1: scene02's 40000 -> portal_look 22.4/87.4 %
                 #  (unjudgeable) -> 160000 -> 42.6/29.7 %. [3rd answer] the glass
@@ -344,10 +350,12 @@ PARAMS = dict(
     #    +-1.6 m in y at the east end (light roof, 3 transverse beams added).
     #    Soffit lamps 2x3 added — an unlit sealed shaft repeats the r1 DARK
     #    failure (stair_head measured 109.9 -> 57.1 without them).
+    #  [4th answer] side_mode: "rail" (current) = open canopy with the shaft
+    #    rail runs (PARAMS stair_rail_runs); "glass" = the round-3 glazed box.
     stair_canopy=dict(x0=4.60, x1=11.90, y0=3.50, y1=7.30, z_roof=2.45,
                       roof_t=0.10, fascia_h=0.28, fascia_t=0.05,
                       fascia_top=2.67, fascia_proud=0.02, post_w=0.10,
-                      embed=0.02,
+                      embed=0.02, side_mode="rail",
                       posts=((4.85, 3.72), (4.85, 7.08), (11.30, 5.10)),
                       beam_xs=(4.85, 8.10, 11.30), beam_w=0.08, beam_h=0.14,
                       glass_w=dict(c=5.125, a0=3.50, a1=6.90),
@@ -378,12 +386,15 @@ PARAMS = dict(
     #     c = coping centreline = wall centreline (trench +-3.15 / shaft N 6.775 · W 5.125)
     rail=dict(h=0.95, post_r=0.03, rail_r=0.028, mid_r=0.018, mid_h=0.46,
               spacing=1.45, base_z=0.12),
-    # [08-05 user, 3rd answer] railings inside the curtain-wall span are
-    #   **replaced by the glass walls** — only the entry-mouth stubs (x 0..2.75,
-    #   both flanks) remain. Guard continuity = stub + glass wall + end wall,
-    #   unbroken end to end (smoke [가드 연속성] check).
-    rail_runs=[dict(axis="x", c=-3.15, a0=0.0, a1=2.75),
-               dict(axis="x", c=3.15,  a0=0.0, a1=2.75)],
+    # [08-05 user, 4th answer] the mouth rail stubs are gone too — the glass
+    #   curtain walls now run x 0..24 on both flanks, so the trench carries NO
+    #   railing at all. Guard continuity = glass wall + end wall (smoke check).
+    #   The stair box side guard is mode-switchable (stair_canopy.side_mode):
+    #   "rail" (current) builds the two shaft rail runs below; "glass" builds
+    #   the round-3 glass walls instead.
+    rail_runs=[],
+    stair_rail_runs=[dict(axis="x", c=6.775, a0=5.0, a1=11.2),
+                     dict(axis="y", c=5.125, a0=3.3, a1=6.9)],
     # --- Tactile paving (cue_tactile) ---
     tactile=dict(depth=0.30, proud=0.004,
                  head_x0=11.5, head_x1=11.8,        # warning band at the stair head
@@ -426,16 +437,24 @@ PARAMS = dict(
     streetlight=dict(pole_h=5.2, pole_r=0.075, arm_len=1.0, arm_r=0.045,
                      head=0.26),
     # 3 apartment blocks — facade inset windows (build_building). base_z=0 (surface plinth)
-    # [08-05 user, 2nd answer] A101 moved south (y -15..7.4 -> **-24..-4**):
-    #   its x=34 facade stood dead ahead of the road axis y=0 — the §0-2 rule
-    #   ("no building blocks a road front"). The axis now exits to open sky
-    #   between A101 (south) and A102 (north).
+    # [08-05 user, 4th answer] A101 becomes an E-W slab block (판상형) whose
+    #   LONG side runs parallel to the entry driveway/ramp — "the parking
+    #   entrance usually has its driveway running parallel to the long section
+    #   of the apartment building". x 0..36 x y -22..-13, north facade facing
+    #   the drive corridor; clear of walk_south (-9.4..-7.4), the y=-9.75 tree
+    #   row, and the underground garage (y >= -9.3). Its ENE noon shadow falls
+    #   east of the approach road (x >= 19). §0-2 kept: road axis y=0 open.
+    #   (2nd-answer state was x 34..46 N-S at the east — superseded.)
     buildings=dict(
-        A101=dict(x0=34.0, x1=46.0, y0=-24.0, y1=-4.0, h=45.0, floors=15,
-                  axis="x", facade_x=34.0, face_dir=-1.0, base_z=0.0),
+        A101=dict(x0=0.0, x1=36.0, y0=-22.0, y1=-13.0, h=45.0, floors=15,
+                  axis="y", facade_y=-13.0, face_dir=1.0, base_z=0.0),
         A102=dict(x0=30.5, x1=42.0, y0=13.6, y1=25.0, h=39.0, floors=13,
                   axis="x", facade_x=30.5, face_dir=-1.0, base_z=0.0),
-        A103=dict(x0=-46.0, x1=-34.0, y0=-20.0, y1=11.5, h=42.0, floors=14,
+        # [08-05 user, 4th answer] A103 shifted north (y -20..11.5 -> -5..26):
+        #   under the WSW noon sun its south wing shadowed the whole approach
+        #   road (caster band for the road is y -20..-5.3 [computed]) — "move
+        #   the building in the back a little to the side".
+        A103=dict(x0=-46.0, x1=-34.0, y0=-5.0, y1=26.0, h=42.0, floors=14,
                   axis="x", facade_x=-34.0, face_dir=1.0, base_z=0.0),
     ),
     window=dict(w=1.3, h=1.5, inset=0.15, col_step=2.7, margin=2.2),
@@ -835,16 +854,17 @@ def _smoke_report():
     # -- [08-05 doctrine + 3rd answer] guard continuity: mouth rail stubs +
     #    glass curtain walls + end wall must cover both flanks end to end --
     cp0 = PARAMS["canopy"]
-    runs = sorted([r for r in PARAMS["rail_runs"] if r["axis"] == "x"],
-                  key=lambda r: (r["c"], r["a0"]))
-    stubs_ok = (len(runs) == 2 and
-                all(abs(r["a0"]) < 1e-6 and abs(r["a1"] - cp0["x0"]) < 1e-6
-                    for r in runs))
-    print("  [가드 연속성] (08-05 독트린 — 스텁 + 유리 월 + 엔드월)")
-    print(f"    마우스 스텁 2런 x [0,{cp0['x0']:.2f}] 양측 → "
-          f"{'OK' if stubs_ok else 'FAIL'} · 유리 월 x "
-          f"[{cp0['x0']:.2f},{cp0['x1']:.2f}] 양측 · 엔드월 x "
-          f"{cp0['end_wall']['x0']:.2f} → 전 구간 무단절")
+    gx0_ = cp0["glass"]["x0"]
+    hb0 = PARAMS["height_bar"]
+    glass_full = abs(gx0_) < 1e-6 and len(PARAMS["rail_runs"]) == 0
+    print("  [가드 연속성] (08-05 4차 — 트렌치 난간 0, 유리 월 전장 + 엔드월)")
+    print(f"    유리 월 x [{gx0_:.2f},{cp0['x1']:.2f}] 양측 (개구 무롭 구간 "
+          f"x<{cp0['x0']:.2f} 는 상부 채널 캡) · 엔드월 x "
+          f"{cp0['end_wall']['x0']:.2f} → {'전 구간 무단절 OK' if glass_full else 'FAIL'}")
+    print(f"    높이제한바 끝 y ±{abs(hb0['y0']):.2f} < 유리면 ±{cp0['y_col']:.2f} → "
+          f"{'OK' if abs(hb0['y0']) < cp0['y_col'] else 'FAIL(유리 관통)'} · "
+          f"계단 박스 측면 = {PARAMS['stair_canopy']['side_mode']} 모드 "
+          f"(rail ↔ glass 전환 가능)")
     # ── [v6 judgment (5)] material fix check ──
     mp_ = PARAMS["material"]
     dr_ = PARAMS["drive"]
@@ -1661,13 +1681,21 @@ def main():
         #   sections, faces 3.125/3.175 inside 3.08..3.22 → no coplanar) +
         #   jointed glass per column bay, top embedded 20 mm into the deck.
         gl = cp["glass"]
+        gx0 = gl["x0"]                # [4th answer] glass runs to the trench edge
         n_glass = 0
         for sgn, tag in ((1.0, "N"), (-1.0, "S")):
             BOX(f"{ROOT}/Canopy/Kick_{tag}",
-                ((cp["x0"] + cp["x1"]) / 2.0, sgn * cp["y_col"],
+                ((gx0 + cp["x1"]) / 2.0, sgn * cp["y_col"],
                  (base - 0.02 + base + gl["kick_h"]) / 2.0),
-                (L, gl["kick_t"], gl["kick_h"] + 0.02), M["post"])
-        stations = ([cp["x0"]]
+                (cp["x1"] - gx0, gl["kick_t"], gl["kick_h"] + 0.02), M["post"])
+            # steel top channel over the unroofed mouth run (x < deck x0) —
+            #   ties the free pane tops; ends tuck into the deck body, bottom
+            #   offset 5 mm below the deck underside so no face is coplanar
+            BOX(f"{ROOT}/Canopy/GlassCap_{tag}",
+                ((gx0 + cp["x0"] + 0.01) / 2.0, sgn * cp["y_col"],
+                 (2.695 + 2.755) / 2.0),
+                (cp["x0"] + 0.01 - gx0, gl["cap_t"], gl["cap_h"]), M["post"])
+        stations = ([gx0]
                     + [cp["col_x0"] + k * cp["col_pitch"]
                        for k in range(int(cp["n_col"]))] + [cp["x1"]])
         gz0 = base + gl["kick_h"]
@@ -1767,11 +1795,13 @@ def main():
         for i, (px, py) in enumerate(cp["posts"]):
             BOX(f"{ROOT}/StairCanopy/Post_{i}", (px, py, h / 2.0),
                 (cp["post_w"], cp["post_w"], h), M["post"], col=True)
-        # glass walls on the shaft W/N rims — DeckGlass 3-part idiom: kick band
-        #   (top of coping, embedded 20 mm), jointed panels, steel mullions.
+        # side guard, mode-switchable [4th answer]: "rail" -> the shaft rail
+        #   runs are built by build_railings (PARAMS stair_rail_runs); "glass"
+        #   -> DeckGlass 3-part idiom walls (round-3 form) built here.
         n_gp = 0
-        for spec, axis, tag in ((cp["glass_w"], "y", "W"),
-                                (cp["glass_n"], "x", "N")):
+        specs = (((cp["glass_w"], "y", "W"), (cp["glass_n"], "x", "N"))
+                 if cp["side_mode"] == "glass" else ())
+        for spec, axis, tag in specs:
             run = spec["a1"] - spec["a0"]
             n_bay = max(1, int(round(run / cp["mullion"]["spacing"])))
             mw = cp["mullion"]["w"]
@@ -1824,7 +1854,8 @@ def main():
                 n_sl += 1
         print(f"[U-5 계단 캐노피] x {cp['x0']:.2f}…{cp['x1']:.2f} · "
               f"y {cp['y0']:.2f}…{cp['y1']:.2f} · 밑면 z {cp['z_roof']:.2f} · "
-              f"포스트 {len(cp['posts'])}본(동측 뉴얼 1) · 유리 {n_gp}판 · "
+              f"포스트 {len(cp['posts'])}본(동측 뉴얼 1) · 측면 "
+              f"{'유리 ' + str(n_gp) + '판' if cp['side_mode'] == 'glass' else '난간(rail 모드)'} · "
               f"소핏 {n_sl}등")
 
     def build_wall_graphics(M):
@@ -1960,7 +1991,10 @@ def main():
                 a += ra["spacing"]
                 n += 1
 
-        for i, rr in enumerate(PARAMS["rail_runs"]):
+        runs = list(PARAMS["rail_runs"])
+        if PARAMS["stair_canopy"]["side_mode"] == "rail":
+            runs += list(PARAMS["stair_rail_runs"])
+        for i, rr in enumerate(runs):
             line(f"{ROOT}/Rail_{i}", rr["axis"], rr["c"], rr["a0"], rr["a1"])
 
     def build_tactiles(M):

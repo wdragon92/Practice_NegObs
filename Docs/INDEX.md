@@ -31,13 +31,12 @@
 - **`gt_changes_w3.md`** — **GT ledger (append-only · 선신고).** 상태 어휘·re-cache 규칙은 §0~§2 원본
 - `user_feedback_v5_1.md` — **현실성 규약**: 전역 §1~5(나무 v2·볼라드 규정·배치 비정형·틴트 지터·지형 곡률)
   + v5.2 원칙 §6~9(조경 개방감·점자블록 기본 OFF·임의 팻말 금지). 씬별 조치 표 포함
-- `audit_scene01-05.md` … `audit_scene16-21.md` — 4팀 전수 감사
-- `consolidated_fix_plan.md` — 통합 수정 계획
-- `judge_v5_*.md` · `judge_v6_rt_*.md` · `judge_v7_rt_*.md` · `judge_v8_rt.md` — 라운드별 판정문
-  (각 파일 말미에 **감독 결정** 부록)
-- `fixlog_*.md` — 구현 픽스로그 (I1~I5, FA/FB, N1~N4, VA~VD, W0~W7, X1~X3, Y1)
+- `judge_v6_rt_*.md` · `judge_v7_rt_*.md` · `judge_v8_rt.md` — 현역 판정문 (v6_new7 = scene10/12
+  지배 판정, v7A·v7B·v8 = GRAZE 임계값 근거 사슬; 각 파일 말미에 **감독 결정** 부록)
+- `fixlog_*.md` — 구현 픽스로그 (I1~I5, FA/FB, N1~N4, VA~VD, W0~W7, X1~X3, Y1 —
+  대기열 씬의 supersede note 추기 대상이라 현역 잔류)
 - `library21_final_hq.png` — 본편 21씬 컨택트 시트 (생성기 `scripts/make_hq_sheet.py`)
-- `scene_overview_v4.png` · `keep15_v5pt_hq.png` — 이전 세대 시트
+- ※ v4 전수 감사 4건·통합 수정 계획·judge v5 6건·이전 세대 시트 PNG → `../archive/audit_v4/`
 
 ## surveys/ (조사)
 - **`cue_arrangement_survey.md`** — **맥락 단서 배치 조사.** 낙차 유형×동반 요소 매트릭스(§1) ·
@@ -45,8 +44,8 @@
 - **`cue_expansion_survey_v1.md`** — 토글 단서 확장 조사+계획 (**계획 전용 — 사용자 결재 대기**)
 - `korean_pedestrian_geometry.md` · `korean_urban_backdrop.md` — 국내 보행 기하·도시 배경 조사
 - `era_consistency_survey_v1.md` — 연대 정합 조사 (개보수 어휘 12칸)
-- `stair_typology_survey.md` (T1~T8) · `stair_typology_survey_v2.md` (T9~T21) — 계단 유형 조사
-  (v2의 "명소" 노선은 v5에서 일상 공간 노선으로 폐기)
+- `stair_typology_survey_v2.md` (T9~T21) — 계단 유형 조사 (§3 수학 정의 = scene_common 출처;
+  "명소" 노선은 v5에서 폐기. v1(T1~T8)은 `../archive/surveys/`)
 - `batch1_geophysics_realism_survey.md` — 배치1 물리 근거(태양고도·알베도·젖음/눈 광학·표준 치수)
 - `scene_composition_audit.md` · `_dimension_index.md` · `s3_research_numbers_v1.md`
   — 구성 감사 · 치수 색인 · S3 조사 수치
@@ -74,17 +73,24 @@
 - **`realism_v1_final.md`** — **총괄·인수인계 1순위.** 결과 수치 · 구현 · 정정 · 버그 · 결정 대기
 - `realism_baseline.md` · `realism_phase1.md` · `realism_phase2.md` — 사실화 v1 라운드 (07-28)
 - `realism_rubric_v1.md` — 판정관용 실사성 루브릭 (전 씬 공용)
-- 진단: `deadpixel_diag_d3.md` · `deadpixel_diag_0701.md`
-- 조달·매핑: `const_color_texture_map.md` · `sky_procurement_v1.md` · `real_reference_expansion.md`
-- 감사: `code_audit_realism_v1.md`(치명 4·중대 10) · `license_audit_v1.md` ·
-  `doc_consistency_audit_v1.md` · `regression_tool_v1.md` · `stair_compliance_v1.md`
-- 완료 보고: `scene01_completion_report.md` · `multi_scene_completion_report.md`
+- 조달·매핑: `sky_procurement_v1.md` · `real_reference_expansion.md` (실사 n=54 — imgstats 게이트 근거)
+- 감사·기준: `regression_tool_v1.md` · `stair_compliance_v1.md` · `graze_recalibration_v1.md`
+- 완료 보고: `scene01_completion_report.md` (scene01 대기열 이력 근거)
 - **파일명 규칙 계열** (개별 색인 생략):
-  - `w2*_v1.md` — W2 기반 공사 보고 (ground kit·재질·도구·수술·판정)
+  - `w2*.md` — W2 기반 공사 보고 중 현역 근거 8건(merge_t1 §7·§9 / round §3.2 / gate_preflight §3.4 /
+    fixbatch(GT-58 인용) / veg_procurement / tools / edit_g1 / kitfix — 종결 10건은 archive)
   - `w3_*_v1.md` + `_w3_*_crops/` — W3 씬별 개보수 보고·판정 크롭
-  - `redteam_*.md` — red-team 검증 보고
+  - `redteam_s0710_rebuild.md` — red-team 중 유일 잔류(scene10 F1 — 나머지 14건은 archive)
   - `regr_*.json` — 라운드별 회귀 스냅샷 (`regression_check.py --json` 출력)
+- ※ 진단(deadpixel 2)·일회성 감사(code_audit·license·doc_consistency·scene_wholeness)·
+  const_color_texture_map·완료보고(multi_scene)·leaf_globalization·lighting_round_impl·
+  t0_spike·fix_small_w1 → `../archive/reports/`
 - ※ 룩체크 v1(자연 도랑) 보고서·지시서는 `../../Practice_TerrainGen/Docs/` 로 분리(07-27)
+
+## archive/ (종결 기록 보관 — 08-05 1차 56건)
+- 규칙: 원경로 `Docs/<하위>/<파일>` → `archive/<하위>/<파일>` (파일명 불변).
+  목록·이동 근거·2차 후보는 **`archive/README.md`**
+- 2차 이동(fixlog·judge v6~v8·tonglam_v2·realism_gap/ 등)은 갤러리 개보수 웨이브 종료 후 검토
 
 ## legacy/ (이력 보존 — 현행 아님)
 - `scene_redesign_v5_proposal.md` · `nanobanana_batch1_geometry_map.md` ·

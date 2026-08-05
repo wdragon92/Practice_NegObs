@@ -54,9 +54,10 @@ Hazard
   달려있다 — 덮여 있어야 한다"). R13-1's real-practice reading is superseded **for the
   canopy clause only**; everything else in §7-5 (gantry sign, height bar, wall graphics,
   markings) stands. The cover is the library's flat-deck canopy idiom (scene02 GT-3 /
-  scene16, no new geometry idiom): RC deck x 2.75…24.0 on coping-mounted steel columns.
-  The mouth x 0…2.75 stays open — the gantry/height-bar cluster keeps its own
-  daylight (08-05 2차: barrier gate deleted by user instruction). The soffit carries 14
+  scene16, no new geometry idiom): RC deck x 0…24.0 on coping-mounted steel columns.
+  [08-05 user, 5th answer] the deck connects to the mouth (x0 2.75 → 0.0): the
+  free-standing gantry frame is deleted — the height bar hangs from the mouth
+  beam and the sign panel mounts on the west parapet band. The soffit carries 16
   recessed lamp battens (scene02 GT-3 precedent; 실무 관행) — without them the
   covered trench falls to DARK (baseline wall-shadow band measures mean 11).
   `portal_look` and `ramp_graze` are **declared under-canopy cuts** (photometric
@@ -70,8 +71,8 @@ Goal
   (1) ground split into 6 boxes that **do not cover** the ramp trench opening
       (x 0..24, y +-3.3) or the stair shaft opening (x 5..11.2, y 3.3..6.9)
   (2) straight ramp in 3 segments (transition-main-transition) + side walls and coping +
-      gantry sign over the mouth + height-limit bar + fee board +
-      full-length flat-deck canopy x 2.75…24.0 (08-05 · U-5 literal) +
+      parapet-mounted entry sign + canopy-hung height-limit bar + fee board +
+      full-length flat-deck canopy x 0…24.0 (08-05 · U-5 literal, 5th: to the mouth) +
       pedestrian stair-entry canopy (08-05 2차 — U-5 는 보행 진입구에도 적용)
   (3) adjoining pedestrian stair, 24 steps (riser 0.165, width 1.4, 2 switchback flights
       + mid landing) -> basement corridor -> basement 1 car park (dim lighting — PT assumed)
@@ -253,35 +254,38 @@ PARAMS = dict(
                  band_r=0.086),
     bollard_rows=[dict(y=4.35, xs=(-2.9, -1.4), tac_y0=4.35, tac_y1=4.65),
                   dict(y=-4.35, xs=(-2.9, -1.4), tac_y0=-4.65, tac_y1=-4.35)],
-    # --- [W3 S13 · G13] Gantry sign over the mouth + height-limit bar ---
-    #  The porch canopy (x −1.6…4.2, 5.8 m of a 24 m approach) is DELETED — ruling §7-5.
-    #  [08-05 user] a **full-length** canopy returns (see `canopy` below) — the gantry
-    #  cluster itself is unchanged and stays outside the deck (x < 2.75).
-    #  Posts stand on solid ground at |y| = 3.55, i.e. 40 mm clear of the trench coping
-    #  outer face (3.36) and outside the 6 m traffic envelope; the panel spans the mouth.
-    #  `clear_h` is the **structural** clearance under the panel; the posted limit is the
-    #  2.30 m bar hung from the same frame (Korean practice puts both at the mouth).
-    #  `clear_h` 3.05 `[measured, pilot 260730_w3_s13]`: at 4.00 the panel sat **above**
-    #  `entry_approach`'s frame top (z 3.81 at the gantry plane for eye 1.55 → tgt −0.50,
-    #  vertical half-angle 18.0° at 16:9), i.e. the scene's identity element rendered
-    #  off-frame. 3.05 m clear over a ramp whose posted limit is 2.30 m is also the
-    #  ordinary Korean estate figure; G13's ≈4.5 m belongs to a shopping-mall portal.
-    #  Fixed by geometry, not by moving the camera (R17-1 doctrine).
-    gantry=dict(x=0.40, y0=-3.55, y1=3.55, clear_h=3.05,
-                post_w=0.30, panel_h=0.80, panel_t=0.12),
-    # [08-05 user, 4th answer] bar tips 3.2 -> 3.05: the glass walls now run to
-    #   x=0, and the old tips crossed the glass planes at y ±3.15.
+    # --- [W3 S13 · G13 → 08-05 5th answer] entry sign + height-limit bar,
+    #     both CANOPY-MOUNTED — the free-standing gantry frame is DELETED. ---
+    #  With the deck connected to the mouth (canopy x0 = 0) a separate portal
+    #  frame doubles the structure; the user's 5th answer mounts the height-bar
+    #  hardware directly on the canopy. G13's identity pair (sign + bar) stays:
+    #  · sign panel on the WEST parapet band: z 2.80..3.60 — laps the parapet
+    #    top 3.00 by 0.20 (mounted band, not floating); y ±3.40 inside the band
+    #    run (±3.468); back face x −0.01 embedded 10 mm into the fascia solid
+    #    (x −0.02..0.04) — welded mount, no coplanar faces. Top 3.60 stays
+    #    under `entry_approach`'s frame top at this plane (≈3.72, slope of the
+    #    3.81 `[measured, pilot 260730_w3_s13]` figure at x 0.40).
+    #  · height bar (posted 2.30) hung from the MOUTH BEAM (station x 0.40):
+    #    hangers z 2.35..2.54 — 40 mm into the bar top, 20 mm into the beam
+    #    soffit (2.52). Tips y ±3.05 keep clear of the glass planes ±3.15
+    #    (4th answer).
+    entry_sign=dict(x_back=-0.01, panel_t=0.12, y_half=3.40, z0=2.80, z1=3.60),
     height_bar=dict(x=0.40, z=2.30, r=0.09, y0=-3.05, y1=3.05, nseg=8,
-                    hanger_t=0.05, hang_y=2.95),
+                    hanger_t=0.05, hang_y=2.95, hang_z0=2.35, hang_z1=2.54),
     # --- [08-05 user · U-5 literal] full-length ramp canopy — R13-1 superseded ---
     #  Form = the library's flat-deck canopy idiom (scene02 GT-3 / scene16): RC deck +
     #  fascia band + transverse beams + steel columns. No new geometry idiom.
-    #  · x0 2.75: keeps the gantry + height-bar cluster in its own daylight mouth
-    #    (08-05 2차: the barrier gate is deleted, so the old arm-swing rationale is
-    #    retired — geometry kept stable); the judged h/d preset eyes (all x ≤ 0)
-    #    stay **outside** the deck, same discipline as scene02.
-    #  · z_roof 2.70 (underside): > height-bar 2.30; deck top 2.84 < gantry panel
-    #    bottom 3.05, so the sign reads above the canopy in `entry_approach`.
+    #  · x0 0.0 [08-05 user, 5th answer]: the deck connects to the mouth — the
+    #    old x0 2.75 "gantry daylight" rationale is retired with the gantry
+    #    frame itself. The glass walls end under the deck the whole run (the
+    #    4th-answer free-pane top channel is deleted). The judged h/d preset
+    #    eyes (all x ≤ −2) stay **outside** the deck, same discipline as scene02.
+    #  · col_mouth_x 0.40: one extra column pair + beam at the height-bar
+    #    station — the bar hangs from this beam (entry_sign note above); the
+    #    beam stays clear of the W parapet band (beam x 0.34..0.46 vs band
+    #    x −0.02..0.04).
+    #  · z_roof 2.70 (underside): > height-bar 2.30; sign band top 3.60 above
+    #    deck top 2.84, so the sign reads over the roofline in `entry_approach`.
     #  · columns y=±3.15 stand ON the trench coping (base_z = rail base 0.12), pitch
     #    2.90 = 2 × rail spacing 1.45 with col_x0 on a post station — the south run's
     #    posts at those stations sit fully inside the column section (welded base in
@@ -312,16 +316,16 @@ PARAMS = dict(
     #    (3) the east end x 23.90..24.0 closes with a solid end wall (portal
     #    head — also masks Ground_E's exposed west face). The only opening is
     #    the west entry mouth -> "completely wrapped".
-    canopy=dict(x0=2.75, x1=24.0, y_deck=3.45, y_col=3.15,
+    canopy=dict(x0=0.0, x1=24.0, y_deck=3.45, y_col=3.15,
                 z_roof=2.70, roof_t=0.14, fascia_h=0.45, fascia_t=0.06,
                 fascia_top=3.00, fascia_proud=0.02,
                 col_w=0.14, col_x0=3.15, col_pitch=2.90,
-                n_col=8, beam_w=0.12, beam_h=0.20, embed=0.02,
-                #  [4th answer] glass_x0 0.0: the mouth rail stubs are removed
-                #  and the curtain walls run to the trench edge. The unroofed
-                #  run (x < deck x0) gets a steel top channel tying the panes.
+                n_col=8, col_mouth_x=0.40, beam_w=0.12, beam_h=0.20, embed=0.02,
+                #  [4th answer] glass_x0 0.0: curtain walls run to the trench
+                #  edge. [5th answer] the deck now covers that whole run, so
+                #  every pane top embeds into the deck — no free-pane channel.
                 glass=dict(t=0.019, joint=0.012, kick_h=0.12, kick_t=0.05,
-                           x0=0.0, cap_t=0.06, cap_h=0.06),
+                           x0=0.0),
                 end_wall=dict(x0=23.90, t_in=0.012),
                 #  `[measured]` r1: scene02's 40000 -> portal_look 22.4/87.4 %
                 #  (unjudgeable) -> 160000 -> 42.6/29.7 %. [3rd answer] the glass
@@ -350,12 +354,16 @@ PARAMS = dict(
     #    +-1.6 m in y at the east end (light roof, 3 transverse beams added).
     #    Soffit lamps 2x3 added — an unlit sealed shaft repeats the r1 DARK
     #    failure (stair_head measured 109.9 -> 57.1 without them).
-    #  [4th answer] side_mode: "rail" (current) = open canopy with the shaft
-    #    rail runs (PARAMS stair_rail_runs); "glass" = the round-3 glazed box.
+    #  [4th answer] side_mode toggle: "rail" = open canopy with the shaft rail
+    #    runs (PARAMS stair_rail_runs); "glass" = the round-3 glazed box.
+    #  [08-05 user, 5th answer] mode set to "glass" — the 4th-answer "rail
+    #    (current)" reading was a MISREAD of the instruction: the user asked
+    #    for the glass wrap plus ONE descending handrail inside (see
+    #    `stair_handrail`), not for the glass to be replaced by rails.
     stair_canopy=dict(x0=4.60, x1=11.90, y0=3.50, y1=7.30, z_roof=2.45,
                       roof_t=0.10, fascia_h=0.28, fascia_t=0.05,
                       fascia_top=2.67, fascia_proud=0.02, post_w=0.10,
-                      embed=0.02, side_mode="rail",
+                      embed=0.02, side_mode="glass",
                       posts=((4.85, 3.72), (4.85, 7.08), (11.30, 5.10)),
                       beam_xs=(4.85, 8.10, 11.30), beam_w=0.08, beam_h=0.14,
                       glass_w=dict(c=5.125, a0=3.50, a1=6.90),
@@ -390,11 +398,21 @@ PARAMS = dict(
     #   curtain walls now run x 0..24 on both flanks, so the trench carries NO
     #   railing at all. Guard continuity = glass wall + end wall (smoke check).
     #   The stair box side guard is mode-switchable (stair_canopy.side_mode):
-    #   "rail" (current) builds the two shaft rail runs below; "glass" builds
-    #   the round-3 glass walls instead.
+    #   "rail" builds the two shaft rail runs below; "glass" (current — 5th
+    #   answer) builds the round-3 glass walls instead.
     rail_runs=[],
     stair_rail_runs=[dict(axis="x", c=6.775, a0=5.0, a1=11.2),
                      dict(axis="y", c=5.125, a0=3.3, a1=6.9)],
+    # [08-05 user, 5th answer] descending handrail INSIDE the glazed box — a
+    #   wall-mounted STS tube on the centre wall (ShaftWall_Mid, both faces),
+    #   following each flight at 0.85 above the nosing line (BF-code wall rail
+    #   0.80~0.90), with a U-return round the wall's west nose at the mid
+    #   landing (x 7.52 — 80 mm clear of the nose face 7.60). The rail line at
+    #   the open stair head = the 08-05 doctrine's drop cue. Brackets embed
+    #   20 mm into the wall faces; the tube stays inside the flight bands
+    #   (y 4.87 / 5.33 vs bands ..4.95 / 5.25..), an 80 mm clear-width cost.
+    stair_handrail=dict(r=0.02, h=0.85, standoff=0.08,
+                        bracket_r=0.013, bracket_xs=(8.3, 9.4, 10.5)),
     # --- Tactile paving (cue_tactile) ---
     tactile=dict(depth=0.30, proud=0.004,
                  head_x0=11.5, head_x1=11.8,        # warning band at the stair head
@@ -424,6 +442,25 @@ PARAMS = dict(
     tree_trunk_h=3.90,                 # → target height 3.90 × 1.60 ≈ 6.2 m (street row)
     hedges=[(-22.0, 6.9, -14.6, 7.5), (14.2, -6.9, 21.3, -6.3),
             (2.4, 12.2, 9.6, 12.8)],
+    # [08-05 user, 5th answer · GT-62] "is that really the best Bush can do? It's
+    #  too shiny to be called a bush" — the box+crown-blob hedge (grass-projected
+    #  spheres) reads as glossy topiary balls. Each band becomes a row of real
+    #  clipped-shrub USDs (place_shrubs); the three rects above and the ~0.85 m
+    #  silhouette are unchanged, roots {ROOT}/Hedge_{i} kept for A/B.
+    #  · Species pinned to ONE for the whole estate (S-1/S-2 spirit — a Korean
+    #    estate clips a single hedge species): `Privet` (쥐똥나무), the classic
+    #    Korean hedge and the lightest of the Privet/Boxwood/Holly trio (147 k
+    #    tri). Per-band seeds keep jitter sequences distinct (no cloned rhythm).
+    #  · target_h 0.78 × (1+overlap 0.10) ≈ 0.86 exposed ≈ the old 0.85 box.
+    #    Scaled width ≈ 1.704 × 0.78×1.10/1.114 ≈ 1.31 m (min 1.21 at −8 %
+    #    jitter); pitch ≤ 0.70 → neighbours always fuse ≥ 0.5 m into one
+    #    continuous clipped band, not discrete balls (§4-1 trimmed-band intent).
+    #  · Cross-band envelope ±0.66 m off the centreline: Hedge_1 (cy −6.6)
+    #    reaches y −7.31 vs walk_south edge −7.4 (clear 0.09), Hedge_0 foliage
+    #    x ≤ −14.44 vs walk_north west end −14.0 (clear 0.44) — no walk overlap.
+    hedge=dict(target_h=0.78, overlap=0.10, pitch=0.70, end_margin=0.50,
+               jit_along=0.06, jit_across=0.04,
+               pool=["Shrub/Privet.usd"]),
     # (bx, by, yaw, base_z) — bench 0 stands on walk_north, which is now at +0.150
     benches=[(-9.4, 8.3, 174.0, 0.150), (17.3, 12.6, -6.0, 0.0),
              (-13.6, -7.1, 3.0, 0.0)],
@@ -856,15 +893,16 @@ def _smoke_report():
     cp0 = PARAMS["canopy"]
     gx0_ = cp0["glass"]["x0"]
     hb0 = PARAMS["height_bar"]
-    glass_full = abs(gx0_) < 1e-6 and len(PARAMS["rail_runs"]) == 0
-    print("  [가드 연속성] (08-05 4차 — 트렌치 난간 0, 유리 월 전장 + 엔드월)")
-    print(f"    유리 월 x [{gx0_:.2f},{cp0['x1']:.2f}] 양측 (개구 무롭 구간 "
-          f"x<{cp0['x0']:.2f} 는 상부 채널 캡) · 엔드월 x "
+    glass_full = (abs(gx0_) < 1e-6 and abs(cp0["x0"]) < 1e-6
+                  and len(PARAMS["rail_runs"]) == 0)
+    print("  [가드 연속성] (08-05 5차 — 트렌치 난간 0, 데크·유리 월 모두 전장)")
+    print(f"    유리 월 x [{gx0_:.2f},{cp0['x1']:.2f}] 양측 · 데크 x0 "
+          f"{cp0['x0']:.2f} (마우스까지 — 판 상단 전 구간 데크 매입) · 엔드월 x "
           f"{cp0['end_wall']['x0']:.2f} → {'전 구간 무단절 OK' if glass_full else 'FAIL'}")
     print(f"    높이제한바 끝 y ±{abs(hb0['y0']):.2f} < 유리면 ±{cp0['y_col']:.2f} → "
           f"{'OK' if abs(hb0['y0']) < cp0['y_col'] else 'FAIL(유리 관통)'} · "
           f"계단 박스 측면 = {PARAMS['stair_canopy']['side_mode']} 모드 "
-          f"(rail ↔ glass 전환 가능)")
+          f"(rail ↔ glass 전환 가능, 5차: glass + 하행 핸드레일)")
     # ── [v6 judgment (5)] material fix check ──
     mp_ = PARAMS["material"]
     dr_ = PARAMS["drive"]
@@ -877,54 +915,59 @@ def _smoke_report():
           f"[{dr_['x0']:.1f},{dr_['x1']:.1f}] · 상면 돌출 4 mm "
           f"(저면 매입 → Z파이팅 없음)")
 
-    # ── [W3 S13 · G13] gantry replaces the porch canopy (ruling §7-5) ──
-    ga_ = PARAMS["gantry"]
+    # ── [08-05 5차] entry sign(파라펫 부착) + height bar(캐노피 보 직결) ──
+    es_ = PARAMS["entry_sign"]
     hb_ = PARAMS["height_bar"]
-    wl_ = PARAMS["wall"]
-    # [08-05 verify r1] the coping outer face is wall centreline (3.15) + thick/2 +
-    #   cope_over = y1 + thick + cope_over = 3.36, NOT y1 + thick/2 + cope_over —
-    #   the old expression over-reported the gantry margin 4.75x (+190 vs +40 mm).
-    cope_out = rp["y1"] + wl_["thick"] + wl_["cope_over"]
-    clr = abs(ga_["y1"]) - ga_["post_w"] / 2.0 - cope_out
-    print("  [G13 갠트리] 스테인리스 갠트리 사인 (전장 캐노피 서측 개구에 공존 — 08-05)")
-    print(f"    기둥 x {ga_['x']:+.2f} · y ±{abs(ga_['y1']):.2f} · "
-          f"{ga_['post_w']:.2f} 각 · 코핑 외면 {cope_out:.2f} 대비 여유 "
-          f"{clr * 1000:+.0f} mm → {'OK' if clr > 0 else 'FAIL(간섭)'}")
-    print(f"    패널 폭 {ga_['y1'] - ga_['y0']:.2f} m · 하단 z "
-          f"{ga_['clear_h']:.2f} · 높이 {ga_['panel_h']:.2f} · "
-          f"교통 유효폭 {rp['y1'] - rp['y0']:.1f} m 침범 "
-          f"{'없음 OK' if abs(ga_['y0']) > rp['y1'] else 'FAIL'}")
-    print(f"    높이제한바 z {hb_['z']:.2f} < 패널 하단 {ga_['clear_h']:.2f} → "
-          f"{'OK' if hb_['z'] < ga_['clear_h'] else 'FAIL'} "
-          f"· 행어 {hb_['hang_y']:.2f} < 패널 반폭 {ga_['y1']:.2f} → "
-          f"{'OK' if hb_['hang_y'] < ga_['y1'] else 'FAIL'}")
+    cpk = PARAMS["canopy"]
+    fw_x0 = cpk["x0"] - cpk["fascia_proud"]            # W 밴드 외면 −0.02
+    fw_x1 = fw_x0 + cpk["fascia_t"]                    # W 밴드 내면 +0.04
+    beam_lo = cpk["z_roof"] - cpk["beam_h"] + cpk["embed"]   # 보 밑면 2.52
+    print("  [5차 진입 장비] 자립 갠트리 프레임 삭제 — 사인·높이제한바 캐노피 부착")
+    print(f"    사인 패널 z [{es_['z0']:.2f},{es_['z1']:.2f}] · 파라펫 상단 "
+          f"{cpk['fascia_top']:.2f} 랩 {cpk['fascia_top'] - es_['z0']:.2f} m → "
+          f"{'OK' if es_['z0'] < cpk['fascia_top'] < es_['z1'] else 'FAIL(부유)'} "
+          f"· 배면 x {es_['x_back']:+.2f} ∈ 파시아 ({fw_x0:+.2f},{fw_x1:+.2f}) → "
+          f"{'매입 OK' if fw_x0 < es_['x_back'] < fw_x1 else 'FAIL'}")
+    print(f"    패널 반폭 ±{es_['y_half']:.2f} < 밴드 런 ±{cpk['y_deck'] + cpk['fascia_proud'] - 0.002:.3f} → "
+          f"{'OK' if es_['y_half'] < cpk['y_deck'] + cpk['fascia_proud'] - 0.002 else 'FAIL'} "
+          f"· 상단 {es_['z1']:.2f} < entry_approach 프레임 상단 ≈3.72 → "
+          f"{'OK' if es_['z1'] < 3.72 else 'FAIL(프레임 밖)'}")
+    print(f"    높이제한바 z {hb_['z']:.2f} · 행어 z [{hb_['hang_z0']:.2f},"
+          f"{hb_['hang_z1']:.2f}] — 바 상단 {hb_['z'] + hb_['r']:.2f} 관입 · 마우스 보 "
+          f"밑면 {beam_lo:.2f} 관입 → "
+          f"{'OK' if hb_['hang_z0'] < hb_['z'] + hb_['r'] and hb_['hang_z1'] > beam_lo else 'FAIL(이격)'} "
+          f"· 행어 y ±{hb_['hang_y']:.2f} < 보 반폭 ±{cpk['y_col']:.2f} → "
+          f"{'OK' if hb_['hang_y'] < cpk['y_col'] else 'FAIL'}")
 
     # ── [08-05 user · U-5 literal] full-length canopy ──
     cp_ = PARAMS["canopy"]
     cov = (cp_["x1"] - cp_["x0"]) / po["x"] * 100.0
-    cols = [cp_["col_x0"] + k * cp_["col_pitch"] for k in range(int(cp_["n_col"]))]
-    print("  [U-5 캐노피] 트렌치 전장 플랫데크 (08-05 사용자 확정 — R13-1 캐노피항 대체)")
+    cols = ([cp_["col_mouth_x"]]
+            + [cp_["col_x0"] + k * cp_["col_pitch"]
+               for k in range(int(cp_["n_col"]))])
+    print("  [U-5 캐노피] 트렌치 전장 플랫데크 (08-05 5차 — 데크 마우스까지 연결)")
     print(f"    범위 x [{cp_['x0']:.2f},{cp_['x1']:.2f}] · 개구 {po['x']:.0f} m 대비 "
-          f"피복 {cov:.0f}% (잔여 x<{cp_['x0']:.2f} = 갠트리·높이제한바 채광 개구)")
+          f"피복 {cov:.0f}% → {'OK' if cov >= 100.0 - 1e-6 else 'FAIL(무롭 잔여)'}")
     soffit = min(cp_["z_roof"] - cp_["beam_h"] + cp_["embed"],
                  cp_["fascia_top"] - cp_["fascia_h"])
     print(f"    최저 부재 밑면(보/파라펫 밴드) z {soffit:.2f} > 높이제한바 {hb_['z']:.2f} → "
-          f"{'OK' if soffit > hb_['z'] else 'FAIL'} · 파라펫 상단 "
-          f"{cp_['fascia_top']:.2f} < 갠트리 패널 하단 {ga_['clear_h']:.2f} → "
-          f"{'OK' if cp_['fascia_top'] < ga_['clear_h'] else 'FAIL'}")
+          f"{'OK' if soffit > hb_['z'] else 'FAIL'} · 마우스 보 x {cp_['col_mouth_x']:.2f} "
+          f"vs W 밴드 내면 {fw_x1:+.2f} 이격 "
+          f"{cp_['col_mouth_x'] - cp_['beam_w'] / 2.0 - fw_x1:.2f} m → "
+          f"{'OK' if cp_['col_mouth_x'] - cp_['beam_w'] / 2.0 > fw_x1 else 'FAIL(간섭)'}")
     gl_ = cp_["glass"]
     print(f"    [3차 건물형] 유리 커튼월 양 플랭크 (킥 {gl_['kick_h']:.2f} + 패널 "
-          f"t{gl_['t']:.3f}, 베이 {int(cp_['n_col']) + 1}/측) · 엔드월 x "
+          f"t{gl_['t']:.3f}, 베이 {len(cols) + 1}/측) · 엔드월 x "
           f"[{cp_['end_wall']['x0']:.2f},{po['x'] - 0.01:.2f}] (지면 x=24 와 "
           f"10 mm 이격 — 공면 회피) · 포털 유효고 {abs(-1.25 - (-3.714)):.2f} m "
           f"> 표기 {po['head_clear']:.1f} → OK")
-    print(f"    기둥 {int(cp_['n_col'])}쌍 · x {cols[0]:.2f}…{cols[-1]:.2f} @ "
-          f"{cp_['col_pitch']:.2f} (= 살대 1.45 × 2, 포스트 정위치) · y ±{cp_['y_col']:.2f} "
+    print(f"    기둥 {len(cols)}쌍 · x {cols[0]:.2f}…{cols[-1]:.2f} (마우스 "
+          f"{cp_['col_mouth_x']:.2f} + 정규 @{cp_['col_pitch']:.2f}) · y ±{cp_['y_col']:.2f} "
           f"코핑 위 · 내면 {cp_['y_col'] - cp_['col_w'] / 2.0:.2f} > 유효폭 ±{rp['y1']:.1f} → "
           f"{'OK' if cp_['y_col'] - cp_['col_w'] / 2.0 > rp['y1'] else 'FAIL(침범)'}")
-    n_lamp_ = 2 * (int(cp_["n_col"]) - 1)
+    n_lamp_ = 2 * (len(cols) - 1)
     print(f"    소핏 조명 {n_lamp_}등 (2열 y ±{abs(cp_['lamp_y'][0]):.2f} × 미드베이 "
-          f"{int(cp_['n_col']) - 1}) · SphereLight r {cp_['lamp_radius']:.2f} · "
+          f"{len(cols) - 1}) · SphereLight r {cp_['lamp_radius']:.2f} · "
           f"{cp_['lamp_intensity']:.0f} — scene02 GT-3 관행 "
           f"(무조명 시 캐노피 하부 DARK — portal_look·ramp_graze 는 선언된 하부 컷)")
 
@@ -957,6 +1000,17 @@ def _smoke_report():
           f"캐노피 외면 {cp_['y_deck'] + cp_['fascia_proud']:.2f} → 이격 "
           f"{(sp_['y0'] - sp_['fascia_proud']) - (cp_['y_deck'] + cp_['fascia_proud']):.3f} m · "
           f"유리 월 W/N + 소핏 {2 * len(sp_['lamp_xs'])}등 → 밀폐 계단실 조명 확보")
+    hr_ = PARAMS["stair_handrail"]
+    y_ra_ = st_["y_a1"] - hr_["standoff"]
+    y_rb_ = st_["y_b0"] + hr_["standoff"]
+    in_a = st_["y_a0"] < y_ra_ < st_["y_a1"]
+    in_b = st_["y_b0"] < y_rb_ < st_["y_b1"]
+    print(f"    [5차 하행 핸드레일] 답면 위 {hr_['h']:.2f} (벽부 0.80~0.90) → "
+          f"{'OK' if 0.80 <= hr_['h'] <= 0.90 else 'FAIL'} · 레일선 A y {y_ra_:.2f} "
+          f"∈ 플라이트 A / B y {y_rb_:.2f} ∈ 플라이트 B → "
+          f"{'OK' if in_a and in_b else 'FAIL(벽 관통)'} · U리턴 x "
+          f"{st_['x_turn'] - hr_['standoff']:.2f} ≥ 참 서단 {st_['land_x0']:.2f} → "
+          f"{'OK' if st_['x_turn'] - hr_['standoff'] >= st_['land_x0'] else 'FAIL'}")
     bd_ = PARAMS["buildings"]
     blockers = [k for k, b in bd_.items()
                 if b["y0"] < 0.0 < b["y1"] and b["x0"] > po["x"]]
@@ -1039,10 +1093,10 @@ def build_views():
 BANNER = """\
 [조작] 우클릭+WASD 비행 · P 패스트레이싱 토글 · C 스크린샷 · [ ] 태양 방위
 [체크리스트]
- 1. entry_approach   — 갠트리·높이제한바 + 전장 캐노피가 진입부로 읽히는가(G13+U-5, 08-05 2차: 차단기·전주 없음)
+ 1. entry_approach   — 파라펫 사인·캐노피 직결 높이제한바 + 전장 데크가 진입부로 읽히는가(G13+U-5, 08-05 5차)
  2. ramp_graze·h0.3  — 램프 하강이 평면으로 압축되고 개구 너머가 연속되는가(특색)
  3. bollard_walk     — 볼라드 h0.9·간격1.5·반사띠 + 전면 0.3 m 점형블록(규정)
- 4. stair_head       — 되돌음 2련·중간참·연속 난간(08-05 독트린)·개방 계단머리
+ 4. stair_head       — 되돌음 2련·중간참·유리 랩 + 하행 핸드레일(08-05 5차)·개방 계단머리
  5. portal_look      — 포털 유효고·소핏 조명 하 램프 판독(PT 필수 — 캐노피 하부 선언 컷)
  6. beauty_overview  — 아파트 3동·조경 화단·수목 v2 배치가 비정형인가"""
 
@@ -1517,6 +1571,57 @@ def main():
              wl["cope_h"] / 2.0),
             (sh["x1"] - sh["x0"], t + 2 * wl["cope_over"], wl["cope_h"]),
             M["cope"])
+        # [08-05 user, 5th answer] descending handrail on the centre wall —
+        #   one STS tube per flight at hr["h"] above the nosing line, joined by
+        #   a U-return round the wall's west nose at the mid landing. Geometry
+        #   constraints in the PARAMS["stair_handrail"] note.
+        hr = PARAMS["stair_handrail"]
+        run_f = st["n_flight"] * st["tread"]                  # 3.60
+        drop_f = st["n_flight"] * st["riser"]                 # 1.98
+        ang = math.degrees(math.atan2(drop_f, run_f))
+        slope_L = math.hypot(run_f, drop_f)
+        xc_mid = (st["x_head"] + st["x_turn"]) / 2.0
+        y_ra = st["y_a1"] - hr["standoff"]                    # flight A side
+        y_rb = st["y_b0"] + hr["standoff"]                    # flight B side
+        z_top_a = hr["h"]                                     # head, ground z=0
+        z_low = st["mid_z"] + hr["h"]                         # landing level
+        z_low_b = 2.0 * st["mid_z"] + hr["h"]                 # basement level
+        # flight A rises toward +X (head east) / flight B descends toward +X
+        CYL(f"{ROOT}/StairHandrail/SlopeA",
+            (xc_mid, y_ra, (z_top_a + z_low) / 2.0), hr["r"], slope_L,
+            M["rail"], rotY=90.0 - ang)
+        CYL(f"{ROOT}/StairHandrail/SlopeB",
+            (xc_mid, y_rb, (z_low + z_low_b) / 2.0), hr["r"], slope_L,
+            M["rail"], rotY=90.0 + ang)
+        # U-return round the wall nose (x_turn): cross run + 2 corner stubs
+        x_u = st["x_turn"] - hr["standoff"]
+        CYL(f"{ROOT}/StairHandrail/UTurn",
+            (x_u, (y_ra + y_rb) / 2.0, z_low), hr["r"], y_rb - y_ra,
+            M["rail"], rotX=90.0)
+        for yc, tag in ((y_ra, "A"), (y_rb, "B")):
+            CYL(f"{ROOT}/StairHandrail/UStub_{tag}",
+                ((x_u + st["x_turn"] + 0.04) / 2.0, yc, z_low), hr["r"],
+                st["x_turn"] + 0.04 - x_u, M["rail"], rotY=90.0)
+        # wall brackets — embed 20 mm into the wall faces (y 4.95 / 5.25) and
+        #   the nose face (x 7.60); short tubes at the rail height
+        def _hz(x, top_z, sgn):
+            return top_z + sgn * (x - st["x_head"]) / run_f * drop_f
+        for bx in hr["bracket_xs"]:
+            CYL(f"{ROOT}/StairHandrail/BrkA_{int(bx * 10)}",
+                (bx, (y_ra + st["y_a1"] + 0.02) / 2.0, _hz(bx, z_top_a, 1.0)),
+                hr["bracket_r"], st["y_a1"] + 0.02 - y_ra, M["rail"],
+                rotX=90.0)
+            zb = z_low - (bx - st["x_turn"]) / run_f * drop_f
+            CYL(f"{ROOT}/StairHandrail/BrkB_{int(bx * 10)}",
+                (bx, (y_rb + st["y_b0"] - 0.02) / 2.0, zb),
+                hr["bracket_r"], y_rb - (st["y_b0"] - 0.02), M["rail"],
+                rotX=90.0)
+        CYL(f"{ROOT}/StairHandrail/BrkU",
+            ((x_u + st["x_turn"] + 0.02) / 2.0, (y_ra + y_rb) / 2.0, z_low),
+            hr["bracket_r"], st["x_turn"] + 0.02 - x_u, M["rail"], rotY=90.0)
+        print(f"[5차 하행 핸드레일] 중앙벽 벽부 STS r{hr['r']:.3f} · 답면 위 "
+              f"{hr['h']:.2f} · A(y {y_ra:.2f}) 하행 + U리턴(x {x_u:.2f}) + "
+              f"B(y {y_rb:.2f}) 하행 · 브래킷 {2 * len(hr['bracket_xs']) + 1}개")
 
     # -------------------------------------------------------------------
     # Basement — corridor + garage (floor · walls · columns · bay lines · dim lights)
@@ -1592,20 +1697,22 @@ def main():
     # Entry equipment — gantry sign + height-limit bar (08-05 2nd answer: gate deleted)
     # -------------------------------------------------------------------
     def build_entry_gear(M):
-        """[W3 S13 · ruling §7-5] the mouth carries a gantry sign + height bar.
+        """[W3 S13 · ruling §7-5 → 08-05 5th answer] entry sign + height bar,
+        both canopy-mounted.
 
-        `sc.build_canopy` is **not called by this scene any more** — the 5.8 m porch
-        (a slab on four free posts covering 24 % of a 24 m approach) stays deleted.
-        [08-05] the full-length cover is now `build_canopy_full` (user override of
-        §7-5's canopy clause, U-5 read literally); the gantry cluster is unchanged
-        and keeps the open x < 2.75 equipment mouth.
+        The free-standing gantry frame is DELETED: with the deck connected to
+        the mouth (canopy x0 = 0) a separate portal frame doubles the
+        structure. The sign panel mounts on the west parapet band; the height
+        bar hangs from the mouth beam (geometry constraints in the
+        PARAMS["entry_sign"] note).
         """
-        gy = PARAMS["gantry"]
-        pk.build_gantry_sign(stage, f"{ROOT}/Gantry", gy["x"], gy["y0"], gy["y1"],
-                             0.0, gy["clear_h"], M["gantry"], M["gantry"],
-                             post_w=gy["post_w"], panel_h=gy["panel_h"],
-                             panel_t=gy["panel_t"])
-        # height-limit bar — now hung from the gantry panel (8 yellow/black segments)
+        es = PARAMS["entry_sign"]
+        BOX(f"{ROOT}/EntrySign/Panel",
+            (es["x_back"] - es["panel_t"] / 2.0, 0.0,
+             (es["z0"] + es["z1"]) / 2.0),
+            (es["panel_t"], 2.0 * es["y_half"], es["z1"] - es["z0"]),
+            M["gantry"])
+        # height-limit bar — hung from the mouth beam (8 yellow/black segments)
         hb = PARAMS["height_bar"]
         seg_len = (hb["y1"] - hb["y0"]) / hb["nseg"]
         for i in range(hb["nseg"]):
@@ -1616,8 +1723,8 @@ def main():
         for sgn, tag in ((-1.0, "S"), (1.0, "N")):
             BOX(f"{ROOT}/HeightBar/Hanger_{tag}",
                 (hb["x"], sgn * hb["hang_y"],
-                 (hb["z"] + gy["clear_h"]) / 2.0),
-                (hb["hanger_t"], hb["hanger_t"], gy["clear_h"] - hb["z"]),
+                 (hb["hang_z0"] + hb["hang_z1"]) / 2.0),
+                (hb["hanger_t"], hb["hanger_t"], hb["hang_z1"] - hb["hang_z0"]),
                 M["gantry"])
 
     def build_canopy_full(M):
@@ -1659,19 +1766,19 @@ def main():
                 ((x_in0 + x_in1) / 2.0,
                  sgn * (y_full - cp["fascia_t"] / 2.0), fz - 0.001),
                 (x_in1 - x_in0, cp["fascia_t"], cp["fascia_h"]), M["fascia"])
-        # transverse beams — one per column station (bearing on the column pair;
-        #   beam_w < col_w so no flank face is coplanar), top embedded 20 mm.
-        n_beam = int(cp["n_col"])
-        for k in range(n_beam):
-            xb = cp["col_x0"] + k * cp["col_pitch"]
+        # column stations: mouth pair (height-bar beam, 5th answer) + regular
+        #   pitch run — beams bear on every station (beam_w < col_w so no
+        #   flank face is coplanar), tops embedded 20 mm.
+        stations_col = ([cp["col_mouth_x"]]
+                        + [cp["col_x0"] + k * cp["col_pitch"]
+                           for k in range(int(cp["n_col"]))])
+        for k, xb in enumerate(stations_col):
             BOX(f"{ROOT}/Canopy/Beam_{k}",
                 (xb, 0.0, cp["z_roof"] - cp["beam_h"] / 2.0 + em),
                 (cp["beam_w"], 2.0 * cp["y_col"], cp["beam_h"]), M["roof"])
-        # columns on the coping, both flanks — the south run's rail posts at the
-        #   same stations sit fully inside the column section (welded base).
+        # columns on the coping, both flanks
         h_col = cp["z_roof"] - base + em
-        for k in range(int(cp["n_col"])):
-            xc = cp["col_x0"] + k * cp["col_pitch"]
+        for k, xc in enumerate(stations_col):
             for sgn, tag in ((1.0, "N"), (-1.0, "S")):
                 BOX(f"{ROOT}/Canopy/Col_{tag}{k}",
                     (xc, sgn * cp["y_col"], base + h_col / 2.0),
@@ -1688,16 +1795,9 @@ def main():
                 ((gx0 + cp["x1"]) / 2.0, sgn * cp["y_col"],
                  (base - 0.02 + base + gl["kick_h"]) / 2.0),
                 (cp["x1"] - gx0, gl["kick_t"], gl["kick_h"] + 0.02), M["post"])
-            # steel top channel over the unroofed mouth run (x < deck x0) —
-            #   ties the free pane tops; ends tuck into the deck body, bottom
-            #   offset 5 mm below the deck underside so no face is coplanar
-            BOX(f"{ROOT}/Canopy/GlassCap_{tag}",
-                ((gx0 + cp["x0"] + 0.01) / 2.0, sgn * cp["y_col"],
-                 (2.695 + 2.755) / 2.0),
-                (cp["x0"] + 0.01 - gx0, gl["cap_t"], gl["cap_h"]), M["post"])
-        stations = ([gx0]
-                    + [cp["col_x0"] + k * cp["col_pitch"]
-                       for k in range(int(cp["n_col"]))] + [cp["x1"]])
+        # [5th answer] the free-pane top channel (GlassCap) is deleted — the
+        #   deck now covers the whole run and every pane top embeds into it.
+        stations = [gx0] + stations_col + [cp["x1"]]
         gz0 = base + gl["kick_h"]
         gz1 = cp["z_roof"] + em
         for b in range(len(stations) - 1):
@@ -1731,8 +1831,8 @@ def main():
         #   beams (mid-bay) and above the beam soffit line.
         n_lamp = 0
         bz = cp["z_roof"] - cp["lamp_t"] / 2.0 + em
-        for k in range(int(cp["n_col"]) - 1):
-            lx = cp["col_x0"] + (k + 0.5) * cp["col_pitch"]
+        for k in range(len(stations_col) - 1):
+            lx = (stations_col[k] + stations_col[k + 1]) / 2.0
             for r, ly in enumerate(cp["lamp_y"]):
                 BOX(f"{ROOT}/Canopy/LampBatten_{r}{k}", (lx, ly, bz),
                     (cp["lamp_len"], cp["lamp_w"], cp["lamp_t"]), M["lamp"])
@@ -1747,9 +1847,11 @@ def main():
                              float(cp["z_roof"] - cp["lamp_t"] - 0.02)))
                 n_lamp += 1
         print(f"[U-5 캐노피] 전장 플랫데크 x {cp['x0']:.2f}…{cp['x1']:.2f} "
-              f"({L:.2f} m) · 데크 밑면 z {cp['z_roof']:.2f} · 보 {n_beam}본 · "
-              f"기둥 {int(cp['n_col'])}쌍 (코핑 위 y ±{cp['y_col']:.2f}) · "
-              f"소핏 {n_lamp}등 (2열 × {int(cp['n_col']) - 1})")
+              f"({L:.2f} m — 5차: 마우스까지 연결) · 데크 밑면 z {cp['z_roof']:.2f} · "
+              f"보 {len(stations_col)}본 · 기둥 {len(stations_col)}쌍 "
+              f"(코핑 위 y ±{cp['y_col']:.2f}, 마우스 스테이션 x "
+              f"{cp['col_mouth_x']:.2f}) · 유리 {n_glass}판 · "
+              f"소핏 {n_lamp}등 (2열 × {len(stations_col) - 1})")
 
     def build_stair_canopy(M):
         """[08-05 user, 2nd/3rd answers] pedestrian stair-entry structure —
@@ -2054,9 +2156,36 @@ def main():
               f"(TREE_PITCH_M) · 갓길대(verge) 화단수 "
               f"{sum(1 for p in PARAMS['planters'] if p['tree'])}주 = "
               "SCENE_SPECIES['Scene13'] 행")
+        # [08-05 user, 5th answer · GT-62] hedge bands: box+crown blobs → rows of
+        # real clipped shrub USDs (rationale and clearances: PARAMS["hedge"]
+        # note). Asset-first, no material authoring — the Privet asset carries
+        # its own season-neutral leaf MDL, so the material-work freeze holds.
+        # A run without the assets (or LOOK_GEO=0) degrades to the legacy
+        # build_hedge instead of emptying the verge (scene03 03-D precedent).
+        hg = PARAMS["hedge"]
+        n_hedge = 0
         for i, (hx0, hy0, hx1, hy1) in enumerate(PARAMS["hedges"]):
-            sc.build_hedge(stage, f"{ROOT}/Hedge_{i}", hx0, hy0, hx1, hy1,
-                           0.85, base_z=0.0)
+            seed = gk.det_seed("scene13.hedge", i)
+            jr = gk.det_rng("scene13.hedge.jit", i)
+            cx0, cx1 = hx0 + hg["end_margin"], hx1 - hg["end_margin"]
+            cy = (hy0 + hy1) / 2.0
+            span = max(cx1 - cx0, 1e-6)
+            n = max(2, int(math.ceil(span / hg["pitch"])) + 1)
+            step = span / (n - 1)
+            pts = [(cx0 + k * step
+                    + jr.uniform(-hg["jit_along"], hg["jit_along"]),
+                    cy + jr.uniform(-hg["jit_across"], hg["jit_across"]),
+                    0.0) for k in range(n)]
+            placed = sc.place_shrubs(stage, f"{ROOT}/Hedge_{i}", pts,
+                                     hg["target_h"], pool=hg["pool"],
+                                     seed=seed, overlap=hg["overlap"])
+            if not placed:
+                sc.build_hedge(stage, f"{ROOT}/Hedge_{i}", hx0, hy0, hx1,
+                               hy1, 0.85, base_z=0.0)
+            n_hedge += placed
+        print(f"[GT-62] 생울타리 {len(PARAMS['hedges'])}밴드 · 실관목 {n_hedge}주 "
+              f"(place_shrubs pool=Privet · h {hg['target_h']:.2f}"
+              f"×{1 + hg['overlap']:.2f} · 폴백 {'무' if n_hedge else 'build_hedge'})")
         for i, (bx, by, yaw, bz) in enumerate(PARAMS["benches"]):
             sc.build_bench(stage, f"{ROOT}/Bench_{i}", bx, by, bz,
                            M["wood"], yaw=yaw)
@@ -2095,7 +2224,7 @@ def main():
         build_trench_walls(M)
         build_stair(M, stair_mtl)
         build_underground(M)
-        build_entry_gear(M)          # [W3 S13] gantry sign + height bar
+        build_entry_gear(M)          # [W3 S13 · 5차] parapet sign + canopy-hung bar
         build_canopy_full(M)         # [08-05 user · U-5 literal] full-length canopy
         build_stair_canopy(M)        # [08-05, 2nd/3rd answers] stair-entry glazed box
         build_wall_graphics(M)       # [W3 S13 · G13] chevrons + reflective strip

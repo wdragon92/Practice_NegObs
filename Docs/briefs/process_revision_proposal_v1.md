@@ -85,7 +85,7 @@ GPU `flock /tmp/negobs_gpu.lock`.
 | Q2 | scene06 나선 가드 rail 2본 — 시각적으로 허전하면 3~4본? | gallery 검수에서 판단 |
 | Q3 | scene12 edge_void cut — 근접 post가 화면 지배, 재조준? | 검수에서 판단 |
 | Q4 | 잔여 "규정미달/열화" 정체성 전 씬 sweep 1회 (grep + 육안) 실행? | 실행 (30분급) |
-| Q5 | 씬 번호 재부여 round 시점 (16 횡단보도 HELD 포함) | W4 직전 |
+| Q5 | 씬 번호 재부여 round 시점 (16 횡단보도 HELD 포함) | ~~W4 직전~~ **답변됨(08-05): DEFERRED — 재부여 안 함.** 이후 wave에서도 씬 추가 가능성이 높아 지금 재부여하면 곧 무효화됨. 현행 번호 유지. scene16 재정박 HELD는 별도 판단 대기 |
 
 ## 6. Gallery 검수 표준 체크리스트
 

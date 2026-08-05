@@ -1060,9 +1060,16 @@ def main():
                 BOX(f"{base}/Head_{tag}",
                     (lx + sgn * sl["arm_len"], ly, sl["pole_h"] - 0.15),
                     (sl["head"], sl["head"], 0.12), M["lamp"])
+        # [GT-63] clipped hedge bands: box+crown blobs -> fused rows of real
+        #   shrub USDs (place_hedge_row; rects/heights/prim roots unchanged;
+        #   legacy build_hedge fallback inside).
+        n_hedge = 0
         for i, (hx0, hy0, hx1, hy1) in enumerate(PARAMS["hedges"]):
-            sc.build_hedge(stage, f"{ROOT}/Hedge_{i}", hx0, hy0, hx1, hy1,
-                           0.8, base_z=0.0)
+            n_hedge += sc.place_hedge_row(
+                stage, f"{ROOT}/Hedge_{i}", hx0, hy0, hx1, hy1,
+                0.8, gk.det_seed("scene16.hedge", i), base_z=0.0)
+        print(f"[GT-63] 생울타리 실관목 {n_hedge}주 "
+              f"(place_hedge_row · 폴백 {'무' if n_hedge else 'build_hedge'})")
         # 2 sidewalk paving bands (indicate the plaza scale) - outside the trench at y=+-6
         w = PARAMS["walk"]
         wb = PARAMS["walk_bands"]

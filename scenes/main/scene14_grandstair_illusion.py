@@ -1584,8 +1584,16 @@ def main():
             M["marble"], col=True)
         BOX(f"{ROOT}/MonumentShaft", (mx, my, 3.8), (1.6, 1.6, 6.0),
             M["marble"], col=True)
+        # [GT-63] clipped hedge bands: box+crown blobs -> fused rows of real
+        #   shrub USDs (place_hedge_row; rects/heights/prim roots unchanged;
+        #   legacy build_hedge fallback inside).
+        n_hedge = 0
         for tag, x0, y0, x1, y1 in dr["hedges"]:
-            sc.build_hedge(stage, f"{ROOT}/Hedge_{tag}", x0, y0, x1, y1, 0.9)
+            n_hedge += sc.place_hedge_row(
+                stage, f"{ROOT}/Hedge_{tag}", x0, y0, x1, y1, 0.9,
+                gk.det_seed("scene14.hedge", tag))
+        print(f"[GT-63] 생울타리 실관목 {n_hedge}주 "
+              f"(place_hedge_row · 폴백 {'무' if n_hedge else 'build_hedge'})")
         for k, (cx, cy) in enumerate(dr["trees_up"]):
             sc.build_tree(stage, f"{ROOT}/TreeUp_{k}", cx, cy, 0.0, *tree_mtls,
                           species=SCENE_TREE)

@@ -1658,15 +1658,23 @@ def main():
         # v4-D1: road (the underpass's reason to exist)
         build_road(M)
         # Hedge - v4-B2: 4 segments with varied height and y to break up the 'black cuboid' look
+        # [GT-63] clipped hedge bands: box+crown blobs -> fused rows of real
+        #   shrub USDs (place_hedge_row; rects/heights/prim roots unchanged;
+        #   legacy build_hedge fallback inside).
         h = PARAMS["hedge"]
         seg_w = (h["x1"] - h["x0"]) / float(h["nseg"])
+        n_hedge = 0
         for i in range(h["nseg"]):
             xa = h["x0"] + seg_w * i
             yc = h["y"] + h["y_var"][i % len(h["y_var"])]
             hh = h["h"] + h["h_var"][i % len(h["h_var"])]
-            sc.build_hedge(stage, f"{ROOT}/Hedge_{i}", xa, yc - h["half"],
-                           xa + seg_w + 0.05, yc + h["half"], hh,
-                           mtl=M["hedge"], base_z=0.0)
+            n_hedge += sc.place_hedge_row(
+                stage, f"{ROOT}/Hedge_{i}", xa, yc - h["half"],
+                xa + seg_w + 0.05, yc + h["half"], hh,
+                gk.det_seed("scene02.hedge", i),
+                base_z=0.0, fallback_mtl=M["hedge"])
+        print(f"[GT-63] 생울타리 실관목 {n_hedge}주 "
+              f"(place_hedge_row · 폴백 {'무' if n_hedge else 'build_hedge'})")
         # [W3 CB-7 · GT-3] the v4-D5 stair-head porch (scene_common porch builder -> `EntryCanopy`)
         #   is deleted; `build_canopy` above is the full-length replacement and is called
         #   from the assembly block so it lands after the walls it springs from.

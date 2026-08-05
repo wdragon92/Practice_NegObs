@@ -938,7 +938,11 @@ def main():
             M["alley"], col=True)
         # upper alley retaining wall, 2 rows (A-15-3 critical): a 1.8 m wide ridge -> both flanks closed.
         #   Top z=1.2, solid down to the valley (−4.35) -> the 4.35 m cliff is gone.
+        # [GT-63] clipped hedge bands: box+crown blobs -> fused rows of real
+        #   shrub USDs (place_hedge_row; rects/heights/prim roots unchanged;
+        #   legacy build_hedge fallback inside).
         rw = PARAMS["retwall"]
+        n_hedge = 0
         for tag, y0, y1 in (("N", rw["y_in"], rw["y_out"]),
                             ("S", -rw["y_out"], -rw["y_in"])):
             BOX(f"{ROOT}/RetWall_{tag}",
@@ -947,9 +951,12 @@ def main():
                 (rw["x1"] - rw["x0"], y1 - y0, rw["z_top"] - v["z_top"]),
                 M["retwall"], col=True)   # [v5 judgment applied] M["alley"] -> dedicated retaining wall
             # hedge on top of the retaining wall (helps read the alley)
-            sc.build_hedge(stage, f"{ROOT}/RetHedge_{tag}",
-                           rw["x0"], y0 + 0.05, rw["x0"] + 8.0, y1 - 0.05,
-                           0.5, base_z=rw["z_top"])
+            n_hedge += sc.place_hedge_row(
+                stage, f"{ROOT}/RetHedge_{tag}",
+                rw["x0"], y0 + 0.05, rw["x0"] + 8.0, y1 - 0.05,
+                0.5, gk.det_seed("scene15.hedge", tag), base_z=rw["z_top"])
+        print(f"[GT-63] 생울타리 실관목 {n_hedge}주 "
+              f"(place_hedge_row · 폴백 {'무' if n_hedge else 'build_hedge'})")
 
     # -------------------------------------------------------------------
     # [W2] ground_kit - P5 alley_concrete. Full fill of the upper alley (x −12…0).

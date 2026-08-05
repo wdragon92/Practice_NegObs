@@ -1139,10 +1139,16 @@ def main():
                                  M["tactile"], front_dir=bo["front"],
                                  radius=bo["r"], height=bo["h"],
                                  tactile=False)
+        # [GT-63] clipped hedge bands: box+crown blobs -> fused rows of real
+        #   shrub USDs (place_hedge_row; rects/heights/prim roots unchanged;
+        #   legacy build_hedge fallback inside).
         hg = PARAMS["hedge"]
-        sc.build_hedge(stage, f"{ROOT}/Hedge", hg["x0"], hg["y0"], hg["x1"],
-                       hg["y1"], hg["h"], base_z=PARAMS["verge"]["z_top"],
-                       tint=mp["hedge_tint"])
+        n_hedge = sc.place_hedge_row(
+            stage, f"{ROOT}/Hedge", hg["x0"], hg["y0"], hg["x1"],
+            hg["y1"], hg["h"], gk.det_seed("sceneN2.hedge", 0),
+            base_z=PARAMS["verge"]["z_top"], fallback_tint=mp["hedge_tint"])
+        print(f"[GT-63] 생울타리 실관목 {n_hedge}주 "
+              f"(place_hedge_row · 폴백 {'무' if n_hedge else 'build_hedge'})")
         for key, bd in PARAMS["buildings"].items():
             sc.build_building(stage, f"{ROOT}/Building_{key}", bd,
                               M["brick"], M["glass"], M["parapet"],

@@ -3657,6 +3657,62 @@ def build_hedge(stage, prefix, x0, y0, x1, y1, h, mtl=None, base_z=0.0,
     return box
 
 
+def place_hedge_row(stage, prefix, x0, y0, x1, y1, h, seed,
+                    pool=None, base_z=0.0, pitch_frac=0.53, overlap=0.10,
+                    end_margin=0.50, jit_along=0.06, jit_across=0.04,
+                    fallback_mtl=None, fallback_tint=(0.35, 0.45, 0.28)):
+    """[GT-63] A clipped hedge band as a fused row of real shrub USDs.
+
+    Drop-in successor to `build_hedge` for FOREGROUND clipped bands only — the
+    box+crown-blob idiom stays for distant masses (FarHedge / RidgeCrest /
+    BackHedge / BgHedge / Overhang / TreeLine families), where it is the
+    intended cheap silhouette (v6 C-5). Pattern established by GT-62 on
+    scene13: the user's verdict was that the blob surface, not the trimmed
+    band form, is what fails to read as a bush (§4-1 keeps the form).
+
+    The band rect and the legacy band height `h` keep their old meaning:
+    place_shrubs scales by (1+overlap), so target_h = h/(1+overlap) lands the
+    exposed height back on ~h. Pitch = scaled shrub width × pitch_frac
+    (default 0.53) so neighbours always fuse into one continuous clipped band,
+    never discrete balls. Long axis is auto-detected; `seed` should come from
+    the scene's det_seed(...) so beds stay deterministic per band.
+
+    Falls back to the legacy `build_hedge` under the same prim root when the
+    assets are absent or LOOK_GEO=0 — a missing asset degrades, it never
+    empties the verge (scene03 03-D). Returns shrubs placed (0 = fallback).
+    """
+    import random as _random
+    names = list(pool or SHRUB_HEDGE[:1])   # default single species: Privet
+    row = next((s for s in VEG_SHRUBS if s[0] in names), None)
+    placed = 0
+    if row is not None:
+        _rel, nat_w, _zmin, _tri, nat_h = row
+        target_h = float(h) / (1.0 + overlap)
+        pitch = max(0.30, (nat_w / max(nat_h, 1e-6)) * float(h) * pitch_frac)
+        sx, sy = abs(x1 - x0), abs(y1 - y0)
+        along_x = sx >= sy
+        L = max(sx, sy)
+        m = min(float(end_margin), L / 4.0)
+        span = max(L - 2.0 * m, 1e-6)
+        n = max(2, int(math.ceil(span / pitch)) + 1)
+        step = span / (n - 1)
+        jr = _random.Random((int(seed) & 0x7FFFFFFF) ^ 0x1E0B63)
+        t0 = (min(x0, x1) if along_x else min(y0, y1)) + m
+        u_c = ((y0 + y1) / 2.0) if along_x else ((x0 + x1) / 2.0)
+        pts = []
+        for k in range(n):
+            t = t0 + k * step + jr.uniform(-jit_along, jit_along)
+            u = u_c + jr.uniform(-jit_across, jit_across)
+            pts.append((t, u, float(base_z)) if along_x
+                       else (u, t, float(base_z)))
+        placed = place_shrubs(stage, prefix, pts, target_h, pool=names,
+                              seed=seed, overlap=overlap)
+    if not placed:
+        build_hedge(stage, prefix, x0, y0, x1, y1, h, mtl=fallback_mtl,
+                    base_z=base_z, tint=fallback_tint)
+    return placed
+
+
 def build_bench(stage, prefix, cx, cy, base_z, mtl, length=1.8, width=0.4,
                 height=0.45, yaw=0.0):
     """A backless bench (seat + 4 legs). Default 1.8 x 0.4 x h0.45, weathered_planks.

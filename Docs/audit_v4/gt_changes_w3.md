@@ -1097,3 +1097,54 @@ SMOKE 는 스테이지 빌드 전 단락되므로 dressing 신설 코드는 렌�
 - gallery: `look_check/_review/260805_w3_s13fix5/` (사용자 검수 대기).
 
 **Status: OPEN** (사용자 검수 통과 시 CLOSED — GT-58~61 과 같은 사이클).
+
+## 19. GT-63 — 08-05 헤지 실자산 전환 확산: 전경 전정 밴드 8씬 (선신고)
+
+**Authority**: 08-05 사용자 — GT-62 헤지 방식 승인("Good") + "please tidy up the bushes in the
+other scene in that style too". scene13 에서 확립한 표현(전정 밴드 형태 유지 + `place_shrubs`
+실관목 융합 열)을 라이브러리의 나머지 전경 전정 헤지에 확산한다.
+
+**Scope**:
+- **공용 헬퍼 신설** `scene_common.place_hedge_row` — GT-62 알고리즘의 일반화(레거시 밴드고
+  h 의미 유지: target_h = h/(1+overlap 0.10) → 노출고 ≈ h · pitch = 스케일 폭×0.53 융합 ·
+  단일종 Privet 기본 · 씬 det_seed · 에셋 부재/LOOK_GEO=0 시 legacy `build_hedge` 폴백,
+  같은 prim 루트). §2.3 준수: scene16 1씬 선행 렌더 확인 후 확산.
+- **전환 8씬** (밴드 rect·h·prim 루트 전부 불변, 표현만 교체): scene02 Hedge_0..3(도로변
+  4분절 h 1.0+var·M["hedge"] 폴백) · scene05 Hedge_0..4(광장 외곽 5편·개구 3, h 0.6 —
+  v6(i) 무대 가드 완충 기능은 실관목 질량으로 승계) · scene14 Hedge_{tag}(상부 광장 경계
+  h 0.9) · scene15 RetHedge_N/S(옹벽 상부 base_z 1.2·h 0.5 — 엽면 벽면 오버행은 실관행,
+  육안 확인 대상) · scene16 Hedge_0/1(h 0.8) · scene20 Hedge_0/1(h 0.9) · sceneN1
+  Hedge_A/B(h 0.85 — 그림자 밴드 원천은 고가 슬래브라 무관 확인) · sceneN2 Hedge(연석대
+  52 m·h 0.9, base_z=verge z_top).
+- **제외(관용구 상이 — 존치)**: FarHedge/RidgeCrest/BackHedge/BgHedge/Overhang/TreeLine
+  계열(scene04·07·09·10·12·C2·N4·D3) = 원경 숲/실루엣 매스, v6 C-5 blob 이 의도된 저비용
+  관용구. scene13 은 GT-62 라운드 검수 대기 중이므로 본 행에서 불변(검수 후 헬퍼 통합).
+- 재질 작업 0(에셋 MDL) · §4-1 전정 밴드 형태 유지 · §4-14(예산=instance 공유) 근거.
+
+**GT 판정**: 전 씬 dressing 전용 — 보행면·낙차 에지·hazard/GT 불변 → **R-3 전용**
+(대상 컷 FRAME/PHOTO/OCCL 변화는 본 행 귀속). scene05 무대 완충·scene15 옹벽 상부는
+가드/단서 기능 승계를 육안으로 확인한다.
+
+**§4 착지기록** (2026-08-05): floor — py_compile 8/8 · SMOKE 8/8(Opus 에이전트 변환·검증,
+§2.6 R5; AST 인자 결합 검사 병행) · geom_invariance 33/33 R-4/R-6 PASS · placement_lint
+ERROR 0(WARN = PLACEMENT 데이텀 부재 nodata 기존 소견군 + LINT-9 gated).
+- render: `flock -o /tmp/negobs_gpu.lock bash scripts/rounds/run_260805_w3_hedgeswap.sh` —
+  scene16 파일럿 선행 확인(§2.3) 후 7씬 확산. 8씬 13컷씩 104컷, census 계 **444주**
+  (s16 11·s02 30·s05 180·s14 81·s15 38·s20 14·N1 30·N2 71) · 폴백 0 · scene02 spp 256.
+- regression (`Docs/reports/regr_260805_w3_hedgeswap.json`, 씬별 직전 라운드 대비 —
+  05·14 는 `260805_w3_doctrine`, 나머지 `260731_w3_full`): **FAIL 1 · WARN 18 · INFO 14 ·
+  PASS 71**. 귀속: ① N2 `preset_h0.3_d10` GRAZE FAIL = 구판 돔 열의 "녹색 벽" 수평 에지가
+  개방형 실관목 열로 약화된 것(단차비 0.89) — N2 는 함정 씬(낙차 無)으로 "낙차 은닉" 성립
+  불가, 검출기 오탐·선언 귀속(y180~420 대역 A/B 크롭 육안). ② UNCHANGED WARN 14 = 헤지
+  비노출 컷의 동일 렌더(변경분이 프레임 밖 — 본 라운드는 헤지 단독 변경이므로 정상).
+  ③ scene15 WARN 3(FRAME/OCCL/DARK/PHOTO) = 옹벽 상부 엽면 볼륨 + 골목 낙영(육안: 판독선
+  유지·부유 없음). 이월 DARK 3(s15×2·s16×1)·WHITE 8(N1×8) = 전 라운드 절대 상태.
+- 육안: s16 파일럿(밴드 융합·트렌치 너머 판독) · s15 옹벽 상부 · N2 연석대 A/B · s14 상부
+  광장 경계 · s05 외곽 5편(개구 3 유지) — 전부 실관목 판독, 당구공/각재 읽힘 소거.
+- **검토-제외**: scene05 `backdrop_shrub`(무대 가드 완충)는 v7 §4-1 판정으로 이미
+  무텍스처·플랫(rough 1.0·spec 0) 처리 — "광택 블롭" 실패군 아님. `backdrop_instances()`
+  단일원천이 자체 검산(lobe 중첩 check 7)과 결합·가드 기능 겸직 → 본 행 범위 외.
+  실자산 전환을 원하면 별도 행(아크 배치 place_shrubs) 후보.
+- gallery: `look_check/_review/260805_w3_hedgeswap/` (사용자 검수 대기).
+
+**Status: OPEN** (사용자 검수 통과 시 CLOSED — GT-62 와 같은 사이클)

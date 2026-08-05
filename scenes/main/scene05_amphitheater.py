@@ -1917,9 +1917,17 @@ def main():
                              b["cy"] + rp["r"] * math.sin(a), rp["base_z"],
                              size=rp["size"])
         # v4-B4/A4 hedge around the plaza (3 misaligned pieces -> 5 perimeter pieces, 3 openings)
+        # [GT-63] clipped hedge bands: box+crown blobs -> fused rows of real
+        #   shrub USDs (place_hedge_row; rects/heights/prim roots unchanged;
+        #   legacy build_hedge fallback inside).
+        n_hedge = 0
         for j, (x0, y0, x1, y1) in enumerate(PARAMS["hedges"]):
-            sc.build_hedge(stage, f"/World/Scene05/Hedge_{j}", x0, y0, x1, y1,
-                           PARAMS["hedge_h"], mtl=M["hedge"])
+            n_hedge += sc.place_hedge_row(
+                stage, f"/World/Scene05/Hedge_{j}", x0, y0, x1, y1,
+                PARAMS["hedge_h"], gk.det_seed("scene05.hedge", j),
+                fallback_mtl=M["hedge"])
+        print(f"[GT-63] 생울타리 실관목 {n_hedge}주 "
+              f"(place_hedge_row · 폴백 {'무' if n_hedge else 'build_hedge'})")
         # [v7 judgment §4 remaining 3] west bollards - a decorative row of 10 (spacing 2.67 m, width 24 m)
         #   -> **4 gate posts on the entry axis** (regulation spacing 1.5 m, width 4.5 m) · painted steel.
         #   v5.1 §2 "only where vehicle intrusion is a concern · spacing around 1.5 m · remove decorative rows".

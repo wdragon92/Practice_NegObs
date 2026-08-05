@@ -20,6 +20,9 @@ GT-57 OPEN → 당면 작업은 `briefs/gallery_fix_plan_v1.md`.
   계단부 rail/glass 모드·A103 그림자 이동·A101 평행 판상형) →
   `_s13fix5`(GT-62: 캐노피 전장 연결·높이바 직결·계단부 유리 랩+하행 핸드레일·
   **헤지 실관목 전환**(Privet 31주 — "too shiny to be called a bush" 답변)) — **사용자 검수 대기**
+- 헤지 실자산 확산 `260805_w3_hedgeswap`(GT-63: `place_hedge_row` 공용 헬퍼 + 전경 전정
+  밴드 8씬 scene02·05·14·15·16·20·N1·N2, 계 444주 — 원경 매스(FarHedge 계열)·scene05
+  backdrop_shrub 는 검토-제외, 원장 참조) — **사용자 검수 대기**
 - 검수 총평(08-05, 이후 모든 작업의 표준법): ① **배치 품질 우선 — 재질 작업 동결**
   ② 통행 연속성(길은 씬 끝까지, 길 정면 건물 금지) ③ scene04 = 맥락 배치 모범
 - `process_spec_v1.md` 결재 완료(R1~R7, R3·R4 조건부) — `w3_execution_spec_v1.md` RETIRED

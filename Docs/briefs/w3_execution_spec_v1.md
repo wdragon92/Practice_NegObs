@@ -1,5 +1,8 @@
 # W3 Execution Spec v1 — the single implementation source
 
+> **RETIRED (2026-08-05)** — 상설 규칙은 `Docs/briefs/process_spec_v1.md` §2~§5로 전문 이관 완료
+> (이관 검증: 같은 문서 §8). 본 문서는 W3 이력 참조용으로만 보존하며 필독 문서가 아니다.
+
 > **Wave**: W3 · **Kind**: execution spec (this is what the W3 fleet builds from) · **Date**: 2026-07-30
 > **Branch**: `feat/realism-v1` · **Repo state**: HEAD `8451eb5` (procurement) on top of `effe59e` (intake)
 > **Authority**: this document **supersedes** the intake/survey documents wherever they disagree.

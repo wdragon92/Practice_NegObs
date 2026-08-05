@@ -974,6 +974,11 @@ scene_common 문제로 보이니 검토·수정" — **차도류 프로파일 �
 사양·무구배 데크)은 그대로 승계.
 
 **§4 착지기록** (2026-08-05): 검증 floor 4종 OK (스모크에 [계단 캐노피]·[§0-2 정면축] 블록 신설).
-render/regression/gallery: 라운드 `260805_w3_s13fix2` — 착지 후 본 절에 추기.
+- render: `bash scripts/rounds/run_260805_w3_s13fix.sh` (ROUND=260805_w3_s13fix2) — 15/15컷 59.2 s.
+- regression vs `260805_w3_s13fix` (`Docs/reports/regr_260805_w3_s13fix2.json`): FAIL 1 · WARN 4 ·
+  PASS 10 — stair_head FRAME/OCCL/PHOTO = 계단 캐노피 신설(선언 변화), WARN FRAME 4컷 =
+  차단기·전주 소거 + A101 이동. 육안: 두 캐노피가 L자 지붕으로 읽히고, 정면축 개방(동측
+  하늘) · 도로 클린(맨홀·잡초 0) 확인.
+- gallery: `look_check/_review/260805_w3_s13fix2/` (사용자 검수 대기).
 
 **Status: OPEN** (사용자 검수 통과 시 CLOSED).

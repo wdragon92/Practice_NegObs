@@ -11,7 +11,7 @@ source ~/miniconda3/etc/profile.d/conda.sh
 conda activate env_isaaclab
 export PYTHONNOUSERSITE=1 PYTHONUNBUFFERED=1
 
-ROUND=260805_w3_s13fix
+ROUND=260805_w3_s13fix2
 LOG=look_check/logs/${ROUND}.log
 mkdir -p look_check/logs
 : > $LOG

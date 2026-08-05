@@ -532,6 +532,8 @@ with the carried-in ramp-curb record.
 approach is covered for its whole length, by whatever real Korean practice uses"* (G13's answer: building
 slab + gantry)? Recommend the latter and record it, because the literal reading builds a 24 m canopy that
 appears in **none** of the reference images.
+*(08-05: the canopy clause of this ruling is REVERSED by the user's gallery answer — see §7 개정 5.
+and ledger GT-58.)*
 
 ---
 
@@ -866,7 +868,7 @@ exactly **Option B**.
 |---|---|---|---|
 | **02** underpass | 지하보도 stair, pit runs `x 0 → ~8.2` | `x −1.8 … 0.6` (`:240`) — **0.6 m of a ~7.6 m descent**, 4 free posts | **FAILS.** Rebuild as G2: continuous, springing from the parapet walls, soffit-lit, full descent + ≥1 m of approach. **This is the GT-3 reversal.** |
 | **16** canopy shadow | 지하보도 stair, `x 0 → 4.48` | `x −1.0 … 4.6` (`:84`) — **whole descent + 1.0 m approach** | **PASSES.** 16 is the in-library reference form. Do not disturb the roof; 16's work is the tactile (R16-1) and the backdrop. |
-| **13** parking entry | 지하주차장 ramp, `x −14 → portal x 24` | `x −1.6 … 4.2` (`:193`) — **5.8 m of a 24 m ramp** | **FAILS as built**, but G13 shows the real answer is **building slab + gantry sign**, not a 24 m canopy. See **R13-1**. |
+| **13** parking entry | 지하주차장 ramp, `x −14 → portal x 24` | `x −1.6 … 4.2` (`:193`) — **5.8 m of a 24 m ramp** | **FAILS as built**, but G13 shows the real answer is **building slab + gantry sign**, not a 24 m canopy. See **R13-1** *(08-05 REVERSED — §7 개정 5., GT-58)*. |
 | **08** sunken plaza | pit stair to an underground mall | none | **Excluded** — G8 shows an open sunken bowl with no entrance canopy. A sunken plaza is not a 지하 진입로. |
 | **D4** subway platform | underground, no modelled surface approach | n/a | **Excluded** (and batch1 is frozen under U-1). |
 
@@ -995,7 +997,7 @@ Ordered by *(evidence strength × user emphasis) ÷ dependency depth*.
 | **2.5** | **01** | G1 | M | BS-4 · K4(b/c) · GD | Pilot **01**. GT **A** if GT-4 is retired (R01-1); FULL if it is not. |
 | **2.6** | **06** | G6 | L | **K4(d)** — hard block · T3's numbers | Pilot **06** + **GT-6 split prim-hash proof** (landing rows only; any other non-empty row is a defect). Archive 05 · 06 · 19 judge baselines **before** `scene_common` is cut. |
 | **2.7** | **11** | G11 | L | K5 · K4(c) | Pilot **11**. **FULL** re-cache, **new ledger row required** (H-plan moves every tread). Land after 06 so the shared overpass world is settled once. |
-| **2.8** | **13** | G13 | M | **K5** (`build_ramp_curb`) | Pilot **13**. **FULL** — GT-5 already declares the 150 mm curb. **Blocked on R13-1** (canopy reading). |
+| **2.8** | **13** | G13 | M | **K5** (`build_ramp_curb`) | Pilot **13**. **FULL** — GT-5 already declares the 150 mm curb. **Blocked on R13-1** (canopy reading) *(08-05 해소 — §7 개정 5., GT-58)*. |
 | **2.9** | **09** | G9 | M | K4(b) | Pilot **09**. GT **A**; GT-10 already declares the mooring move. |
 | **2.10** | **08** | G8 | **L** | **K4(d)** · BS-4 · K5 | Pilot **08**. **FULL + new ledger row.** The largest row in the wave; invalidates the scene's near-window arithmetic. **Blocked on R08-1.** |
 | **2.11** | **18** | G18 | **L** | K4(b) (+ possible procurement) · BS-4 · K5 | Pilot **18**. **FULL**, with **total drop 2.56 m held invariant** to bound the re-cache (the 07/10 precedent). **Blocked on R18-1.** |
@@ -1087,6 +1089,10 @@ Only genuinely blocking ones. **1–4 block a lane; 5–8 block a single row.**
    real street shows.
 5. **scene13 / U-5 — REAL-PRACTICE reading.** The approach is covered full-length by the
    building slab (G13); gantry + chevron at the mouth. No literal 24 m tube canopy.
+   **→ REVERSED 08-05 (user gallery answer, GT-3 형식 개정)**: the canopy clause flips to the
+   **literal** reading — full-length flat-deck canopy x 2.75…24.0 (library idiom, scene02
+   GT-3 / scene16), the x<2.75 mouth stays open for the gantry/barrier cluster. Every other
+   §7-5 clause (gantry, height bar, wall graphics, markings) stands. Ledger row **GT-58**.
 6. **scene01 / GT-4 — GT-4 RETIRED.** The user's "natural flanks + open environment" supersedes
    the paving-extension plan; adopt G1's kerbed designed lawn ("no undesigned turf"). P-5's
    evidence gate dies with the row. Ledger amendment deferred as in ruling 1.

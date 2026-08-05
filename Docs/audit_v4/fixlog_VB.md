@@ -1,5 +1,8 @@
 # fixlog V-B — scene13 교체(R8) / scene17 재구성 (v5.1 현실성 갈아엎기)
 
+> **[08-05 supersede — GT-58]** scene13 의 "남측 3 m 결손"·구 포치 캐노피 서술은 대체됨
+> (결손 수리 + 전장 플랫데크 캐노피). 정본 `gt_changes_w3.md` GT-58. 본문은 당시 기록 보존.
+
 작성 2026-07-27 · 팀 V-B(Opus 5) · 단독 소유 파일 2종
 근거: `Docs/audit_v4/user_feedback_v5_1.md` §전역 현실성 규약 + 씬별 지시 13·17행,
 `Docs/briefs/multi_scene_brief_v5.md`(파일 구조·공통 레이어), 참고 구현 scene16.

@@ -305,8 +305,12 @@ PARAMS = dict(
                 z_roof=2.70, roof_t=0.14, fascia_h=0.22, fascia_t=0.06,
                 fascia_proud=0.02, col_w=0.14, col_x0=3.15, col_pitch=2.90,
                 n_col=8, beam_w=0.12, beam_h=0.20, embed=0.02,
+                #  `[measured, round 260805_w3_s13fix r1]` scene02's 40000 left
+                #  portal_look at mean 22.4 / dark 87.4 % (판정 불능 대역 — this
+                #  deck is 6.9 m wide over albedo ~0.1 asphalt vs scene02's 4.9 m
+                #  over granite). 160000 (4x) targets the ~55 mean judged band.
                 lamp_y=(-1.85, 1.85), lamp_len=1.20, lamp_w=0.14, lamp_t=0.06,
-                lamp_radius=0.10, lamp_intensity=40000.0,
+                lamp_radius=0.10, lamp_intensity=160000.0,
                 lamp_color=(0.93, 0.96, 1.0)),
     # --- [W3 S13 · G13] wall-face safety graphics on the trench cheeks ---
     #  Bands sit on the **inner** wall faces (y = ±3.0) where the deck has dropped far

@@ -921,6 +921,21 @@ spec §6-④ 에 따라 h0.3 프리셋 컷 육안 확인 필수.
 - 검증 floor 4종: `py_compile` OK · `NEGOBS_SMOKE` 전 항목 OK([난간 연속성]·[U-5 캐노피] 신설,
   코핑 외면 검산 3.21→3.36 정정 포함) · `geom_invariance_check` 704 프림 해시 3자 일치 PASS ·
   `placement_lint` ERROR 0 (PLACEMENT=NO 는 기존 P-7 게이트 항목, 프로파일 불변).
-- render/regression/gallery: 라운드 `260805_w3_s13fix` — 착지 후 본 절에 추기.
+- 검증 워크플로(3렌즈, 08-05) 반영: 파시아 림 공면 → 드립엣지 20 mm 돌출 재설계 · 보 자유피치
+  → 기둥 스테이션 정착 · **소핏 조명 14등 신설**(2열×7 미드베이, scene02 GT-3 관행).
+- 조명 스윕 `[measured]`: scene02 값 40000 → `portal_look` mean 22.4 / dark 87.4 %(판정 불능)
+  → **160000** → mean **42.6** / dark **29.7 %**(판정 가능 대역).
+- render: `bash scripts/rounds/run_260805_w3_s13fix.sh` — 15/15컷, 50.8 s. **flock 우회 기록**:
+  `/tmp/negobs_gpu.lock` fd 가 Omniverse Hub 데몬에 상속·누수되어 flock 영구 대기 → GPU 유휴
+  확인 후 직접 실행. 다음 라운드 전 데몬 재기동(또는 잠금 경로 교체) 필요.
+- regression vs `260731_w3_full` (`Docs/reports/regr_260805_w3_s13fix.json`): 15컷 FAIL 10 ·
+  WARN 1 · PASS 4 — 전부 본 행 선언 변화 귀속: FRAME = 신규 캐노피 기하(기둥 열·데크) ·
+  `portal_look` DARK/PHOTO/OCCL = 선언된 캐노피 하부 컷 · `stair_head` PHOTO = 데크 지면 그림자
+  (flight1 음영대). GRAZE `preset_h0.3_d5` 는 촉지 등록부 EXPECTED_FP 자동 해소.
+- spec §6-④ h0.3 육안 확인: 기하 은닉 유지 — d5/d10 에서 램프 노면 평면 압축 재확인. 소핏
+  점등이 개구 상부에 보여 "덮인 진입로" 맥락단서가 성립(연구 취지 부합).
+- gallery: `look_check/_review/260805_w3_s13fix/` (씬 1 · 4컷). **사고 기록**: `make_review_gallery`
+  를 `--out` 없이 1회 실행 → `_review_w2` meta·scene13 썸네일 클로버(spec §의 기지 footgun) →
+  `w2_fixbatch_v1.md:367` 의 원 명령으로 **전체 재생성 복구 완료**(33씬·132썸네일 검증).
 
 **Status: OPEN** (사용자 검수 통과 시 CLOSED).

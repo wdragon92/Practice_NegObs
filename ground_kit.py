@@ -1882,11 +1882,15 @@ GROUND_PROFILES = {
         surface=(("crack", 4), ("stain", ("dirt", "gum")), ("weed", 8)),
     ),
     # ── P4 ────────────────────────────────────────────────────────────────
-    # [08-05 user `[ruled]` · GT-59] **차도류 3프로파일(P4·P7·P8)에서 weed·manhole
-    #   전면 소거** — "왜 도로에 잔디와 맨홀을 계속 넣나. scene_common 문제로 보이니
-    #   검토·수정하라." 프로파일 차원 소거이므로 라이브러리 전역이 의도된 사거리다:
-    #   본선 scene13 · batch1 sceneN2(맨홀 사이트 보유)·N4 — batch1 은 U-1 동결이라
-    #   해동 시 승계된다(원장 GT-59 기록). gully·gutter(배수)는 기능 인프라로 존치.
+    # [08-05 user `[ruled]` — GT-59] **weed + manhole removed from all three
+    #   road-class profiles (P4/P7/P8)** — user: "why do grass and manholes keep
+    #   appearing on roads? looks like a scene_common problem — review and fix."
+    #   Effective reach `[verified r2]`: **scene13 only** — batch1 sceneN2/N4
+    #   author their own `surface` tuple (assigned wholesale) and N2 re-adds
+    #   `manhole=1` via its `infra` override (merged over the profile), so the
+    #   profile edit CANNOT reach them; their call-site cleanup is an explicit
+    #   unfreeze TODO recorded in GT-59/60 (batch1 is U-1 frozen). gully/gutter
+    #   (drainage) stay — functional infra, not complained about.
     "street_asphalt": _P(
         "차도 접점 아스팔트 [법령 별표6]",
         pave=dict(module=(None, None), joint=None, step_x=None, step_y=None),
@@ -1916,7 +1920,7 @@ GROUND_PROFILES = {
         "지하주차 진입 램프 [법령 주차장법 §6①5다·마]",
         pave=dict(module=(None, None), joint="contraction",
                   step_x=3.0, step_y=None),
-        # [08-05 user · GT-59] manhole 1 → 0 · weed 5 → 0 (P4 주석의 차도류 소거)
+        # [08-05 user — GT-59] manhole 1 -> 0, weed 5 -> 0 (see the P4 note)
         infra=dict(trench=2, marking=("line", "line")),
         surface=(("patch", 2), ("crack", 6), ("stain", ("tire",))),
         extras=(("groove_band", dict()), ("ramp_curb", dict(height=0.12)),),
@@ -1925,7 +1929,7 @@ GROUND_PROFILES = {
     "ramp_road": _P(
         "옹벽 회랑 하향 램프 [시방 오목부 빗물받이 필수]",
         pave=dict(module=(None, None), joint=None, step_x=None, step_y=None),
-        # [08-05 user · GT-59] weed 4 → 0 (P4 주석의 차도류 소거; manhole 은 원래 0)
+        # [08-05 user — GT-59] weed 4 -> 0 (see the P4 note; manhole was already 0)
         infra=dict(gully=6, gutter_L=2, marking=("line", "line")),
         surface=(("patch", 2), ("crack", 6), ("stain", ("tire", "dirt"))),
     ),
@@ -3631,7 +3635,10 @@ SCENE_PLANS = {
                       ramp_curb=dict(profile=_RAMP13_PROFILE, y_neg=-3.0,
                                      y_pos=3.0, height=0.12, width=0.30),
                       groove_band=dict(region=(3.6, -3.0, 20.4, 3.0))),
-                  sites=dict(manhole=[(-3.90, 0.00)],
+                  # [08-05 GT-59] manhole site removed with the wired call (no
+                  #   grass/manholes on roads); the sited patch mirrors the
+                  #   scene's B1/B2 near-window filler.
+                  sites=dict(patch=[(-3.90, 0.00)],
                              # 13-3 entry trench (d2 only) + 13-4 ramp foot
                              # Collection trench (mise en scene - beyond the crest, so outside h0.3)
                              #  * (v1.2) 0.35 -> 0.52. With a frame half-width of 0.19 the

@@ -1,9 +1,10 @@
 #!/bin/bash
 # =============================================================================
-# S13 캐노피·난간 보수 라운드 — scene13 단독 PT (round = 260805_w3_s13fix)
-#   근거: gallery_fix_plan_v1.md §3 사용자 답변 (08-05) — 난간 수리 + U-5 캐노피
-#   재질 팔: 260805_w3_doctrine 과 동일 (LOOK_V1=1 · DETAIL_SCALE=2 · ROUGH_GAIN=0)
-#   baseline (회귀): 260731_w3_full (fix plan §2)
+# S13 gallery answer round 3 — scene13 solo PT (round = 260805_w3_s13fix3)
+#   Authority: user 3rd answer 08-05 (building-form structure, glass curtain
+#   walls replacing railings, GT-60) on top of GT-58/GT-59.
+#   Material arms: same as 260805_w3_doctrine (LOOK_V1=1, DETAIL_SCALE=2, RG=0)
+#   Regression baseline: 260805_w3_s13fix2 (round-over-round)
 # =============================================================================
 cd /home/vislab/Desktop/work_sy/Practice_NegObs || exit 9
 unset PYTHONPATH VIRTUAL_ENV
@@ -11,7 +12,7 @@ source ~/miniconda3/etc/profile.d/conda.sh
 conda activate env_isaaclab
 export PYTHONNOUSERSITE=1 PYTHONUNBUFFERED=1
 
-ROUND=260805_w3_s13fix
+ROUND=260805_w3_s13fix3
 LOG=look_check/logs/${ROUND}.log
 mkdir -p look_check/logs
 : > $LOG

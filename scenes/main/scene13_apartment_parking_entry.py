@@ -204,9 +204,10 @@ PARAMS = dict(
         #    `[computed]`. Beyond the crest nothing changes, so C-2 (ramp deck d2 only) holds.
         trench_entry=0.52,
         trench_sump=23.4,                     # 13-4 sump at the ramp foot (mise-en-scene)
-        #  [08-05 user · 2차] 13-8 맨홀(d5 윈도 필러, 구 (-3.90, 0.00)) 삭제 —
-        #  "도로에 잔디·맨홀 금지". 필러 역할은 은퇴, 프로파일 차원 정리는
-        #  ground_kit P4/P7/P8 참조 (GT-59).
+        #  [08-05 user, 2nd answer] the 13-8 manhole (d5-window filler, was
+        #  (-3.90, 0.00)) is DELETED — "no grass/manholes on roads". The filler
+        #  role passes to a sited patch (see the gkit call); profile-level
+        #  cleanup lives in ground_kit P4/P7/P8 (GT-59).
         #  13-5 **[W3 S13 · G13] the two white ramp edge lines are DELETED.** G13's ramp
         #  carries one **yellow centre line** and nothing else; the two white boundary
         #  lines at y=+-2.40 are not in the image and not in Korean ramp practice (the
@@ -301,29 +302,60 @@ PARAMS = dict(
     #    Verify r1 measured the baseline's wall-shadow band at mean 11 (DARK < 25)
     #    with the trench OPEN — the deck removes direct sun from all but ~0.4 m of
     #    the 6 m width, so unlit soffit ⇒ portal_look/ramp_graze unjudgeable.
+    #  [08-05 user, 3rd answer] **Redefined as a building-form structure**:
+    #    (1) fascia -> parapet band (fascia_top 3.00 — 0.16 above the deck top
+    #    2.84, 45 mm under the gantry panel bottom 3.05), (2) both flanks take
+    #    **glass curtain walls** instead of railings (scene06 DeckGlass 3-part
+    #    idiom: kick band + glass t0.019 + joints, columns act as mullions),
+    #    (3) the east end x 23.90..24.0 closes with a solid end wall (portal
+    #    head — also masks Ground_E's exposed west face). The only opening is
+    #    the west entry mouth -> "completely wrapped".
     canopy=dict(x0=2.75, x1=24.0, y_deck=3.45, y_col=3.15,
-                z_roof=2.70, roof_t=0.14, fascia_h=0.22, fascia_t=0.06,
-                fascia_proud=0.02, col_w=0.14, col_x0=3.15, col_pitch=2.90,
+                z_roof=2.70, roof_t=0.14, fascia_h=0.45, fascia_t=0.06,
+                fascia_top=3.00, fascia_proud=0.02,
+                col_w=0.14, col_x0=3.15, col_pitch=2.90,
                 n_col=8, beam_w=0.12, beam_h=0.20, embed=0.02,
-                #  `[measured, round 260805_w3_s13fix r1]` scene02's 40000 left
-                #  portal_look at mean 22.4 / dark 87.4 % (판정 불능 대역 — this
-                #  deck is 6.9 m wide over albedo ~0.1 asphalt vs scene02's 4.9 m
-                #  over granite). 160000 (4x) targets the ~55 mean judged band.
+                glass=dict(t=0.019, joint=0.012, kick_h=0.12, kick_t=0.05),
+                end_wall=dict(x0=23.90, t_in=0.012),
+                #  `[measured]` r1: scene02's 40000 -> portal_look 22.4/87.4 %
+                #  (unjudgeable) -> 160000 -> 42.6/29.7 %. [3rd answer] the glass
+                #  curtain walls + end wall now block the flank daylight ->
+                #  raised again to 280000 (re-measure and adjust if needed).
                 lamp_y=(-1.85, 1.85), lamp_len=1.20, lamp_w=0.14, lamp_t=0.06,
-                lamp_radius=0.10, lamp_intensity=160000.0,
+                lamp_radius=0.10, lamp_intensity=280000.0,
                 lamp_color=(0.93, 0.96, 1.0)),
-    # --- [08-05 user · 2차] pedestrian stair-entry canopy — U-5 는 보행 진입구에도
-    #   적용 ("보행 지하주차 입구에도 캐노피"). 같은 플랫데크 관용구의 보행 스케일.
-    #   · 남측 파시아 외면 y 3.48 vs 램프 캐노피 파시아 외면 3.47 — 10 mm 이격,
-    #     인접 지붕 2개로 읽히고 공면 없음.
-    #   · 포스트 4본은 개구(샤프트·트렌치)를 피해 **지반 위에만** 착지; 동측 쌍은
-    #     walk_spur 플레이트 서면(x=11.4)에서 50 mm 이격.
-    #   · 샤프트 y 3.3~3.5 남측 20 cm 는 비피복(트렌치 캐노피와의 이격 코스트).
+    # --- [08-05 user, 2nd answer] pedestrian stair-entry canopy — U-5 applies
+    #   to the pedestrian entrance too. Same flat-deck idiom, pedestrian scale.
+    #   - south fascia outer face y 3.48 vs ramp-canopy fascia outer 3.47 —
+    #     10 mm apart: reads as two adjoining roofs, no coplanar faces.
+    #   - posts land on SOLID GROUND only, dodging both openings.
+    #   - the shaft's south 20 cm strip (y 3.3~3.5) stays uncovered — the cost
+    #     of keeping clear of the ramp canopy.
+    #  [08-05 user, 3rd answer] The stair box takes the same building form:
+    #    parapet band (top 2.67) + the shaft W (x=5.125) / N (y=6.775) railings
+    #    replaced by glass walls (mullions @1.55, kick band). East side (stair
+    #    head) is the entry opening. W glass starts at y 3.5 — the 3.3~3.5 slot
+    #    between the two structures is unreachable.
+    #  [verify r2] the old east post pair (11.30, y 3.72/7.08) stood inside the
+    #    0.2 m stair-mouth strip, 50 mm off the registered 3.96 m drop edge and
+    #    inside flight A's clear width -> replaced by ONE newel at (11.30, 5.10):
+    #    between the flight bands (A ..4.95 / B 5.25..), on solid ground east of
+    #    the head (x >= 11.2), 100 mm clear of both flights. Deck cantilevers
+    #    +-1.6 m in y at the east end (light roof, 3 transverse beams added).
+    #    Soffit lamps 2x3 added — an unlit sealed shaft repeats the r1 DARK
+    #    failure (stair_head measured 109.9 -> 57.1 without them).
     stair_canopy=dict(x0=4.60, x1=11.90, y0=3.50, y1=7.30, z_roof=2.45,
-                      roof_t=0.10, fascia_h=0.16, fascia_t=0.05,
-                      fascia_proud=0.02, post_w=0.10, embed=0.02,
-                      posts=((4.85, 3.72), (4.85, 7.08),
-                             (11.30, 3.72), (11.30, 7.08))),
+                      roof_t=0.10, fascia_h=0.28, fascia_t=0.05,
+                      fascia_top=2.67, fascia_proud=0.02, post_w=0.10,
+                      embed=0.02,
+                      posts=((4.85, 3.72), (4.85, 7.08), (11.30, 5.10)),
+                      beam_xs=(4.85, 8.10, 11.30), beam_w=0.08, beam_h=0.14,
+                      glass_w=dict(c=5.125, a0=3.50, a1=6.90),
+                      glass_n=dict(c=6.775, a0=5.00, a1=11.20),
+                      mullion=dict(w=0.05, spacing=1.55),
+                      lamp_rows=(4.40, 6.00), lamp_xs=(6.00, 8.10, 10.20),
+                      lamp_len=0.90, lamp_w=0.12, lamp_t=0.05,
+                      lamp_radius=0.08, lamp_intensity=160000.0),
     # --- [W3 S13 · G13] wall-face safety graphics on the trench cheeks ---
     #  Bands sit on the **inner** wall faces (y = ±3.0) where the deck has dropped far
     #  enough to expose them; scene13's cheeks are flush-coped by design (the below-code
@@ -334,9 +366,9 @@ PARAMS = dict(
     # --- [W3 S13 · G13] ramp deck markings (scene-owned: they must ride the slope) ---
     ramp_line=dict(x_start=0.85, half_w=0.075, proud=0.004, thick=0.02),
     kerb_stripe=dict(x0=0.90, x1=3.60, unit=0.45, thick=0.03, proud=0.006),
-    # [08-05 user · 2차] 차단기(gate) 삭제 — 사용자 지시. 북측 난간 런이 x 0 까지
-    #   연장되고, 캐노피 서단 x0 의 근거는 갠트리 클러스터 채광 + 판정 시점 이격으로
-    #   대체된다 (GT-59).
+    # [08-05 user, 2nd answer] barrier gate DELETED on user instruction. The
+    #   north rail run extends to x 0, and the canopy x0 rationale becomes the
+    #   gantry-cluster daylight + judged-eye standoff (GT-59).
     # --- Signs (cue_sign) ---
     sign_info=dict(cx=-1.1, cy=4.75, yaw=170.0, w=0.9, h=0.7, pole_h=2.2),
     # [v5.2 user] arbitrary warning signs removed — stair-caution sign (sign_step) deleted.
@@ -346,11 +378,12 @@ PARAMS = dict(
     #     c = coping centreline = wall centreline (trench +-3.15 / shaft N 6.775 · W 5.125)
     rail=dict(h=0.95, post_r=0.03, rail_r=0.028, mid_r=0.018, mid_h=0.46,
               spacing=1.45, base_z=0.12),
-    rail_runs=[dict(axis="x", c=-3.15, a0=0.0,  a1=24.0),   # 08-05: gap repaired
-               dict(axis="x", c=3.15,  a0=0.0,  a1=5.0),    # 08-05 2차: gate 삭제 → x 0 부터
-               dict(axis="x", c=3.15,  a0=11.2, a1=24.0),
-               dict(axis="x", c=6.775, a0=5.0,  a1=11.2),
-               dict(axis="y", c=5.125, a0=3.3,  a1=6.9)],
+    # [08-05 user, 3rd answer] railings inside the curtain-wall span are
+    #   **replaced by the glass walls** — only the entry-mouth stubs (x 0..2.75,
+    #   both flanks) remain. Guard continuity = stub + glass wall + end wall,
+    #   unbroken end to end (smoke [가드 연속성] check).
+    rail_runs=[dict(axis="x", c=-3.15, a0=0.0, a1=2.75),
+               dict(axis="x", c=3.15,  a0=0.0, a1=2.75)],
     # --- Tactile paving (cue_tactile) ---
     tactile=dict(depth=0.30, proud=0.004,
                  head_x0=11.5, head_x1=11.8,        # warning band at the stair head
@@ -383,16 +416,20 @@ PARAMS = dict(
     # (bx, by, yaw, base_z) — bench 0 stands on walk_north, which is now at +0.150
     benches=[(-9.4, 8.3, 174.0, 0.150), (17.3, 12.6, -6.0, 0.0),
              (-13.6, -7.1, 3.0, 0.0)],
-    # [08-05 user · 2차] G13 의 전주·트랜스포머·가공선 시그니처는 **삭제** — "지시하지
-    #  않은 자산을 임의로 넣지 말 것" (미지시 자산 금지 원칙, GT-59). G13 레퍼런스와의
-    #  의도적 이탈로 원장에 기록.
-    streetlights=[(-7.2, 6.95), (12.6, 7.05), (26.9, -7.2)],
+    # [08-05 user, 2nd answer] G13's utility pole / transformer / overhead-wire
+    #  signature is DELETED — "don't add assets that weren't instructed". A
+    #  deliberate departure from the G13 reference, recorded in ledger GT-59.
+    # [verify r2] middle light 12.6 -> 13.4: its 1.0 m arm head (x 11.6) hung
+    #   fully over the new stair-canopy roof (deck x1 11.9) and lit the roof,
+    #   not the spur walkway.
+    streetlights=[(-7.2, 6.95), (13.4, 7.05), (26.9, -7.2)],
     streetlight=dict(pole_h=5.2, pole_r=0.075, arm_len=1.0, arm_r=0.045,
                      head=0.26),
     # 3 apartment blocks — facade inset windows (build_building). base_z=0 (surface plinth)
-    # [08-05 user · 2차] A101 을 남측으로 이동 (y −15…7.4 → **−24…−4**): 진입로 축
-    #   y=0 정면(x=34 파사드)을 막고 있었다 — §0-2 "길 정면을 건물로 막지 않는다".
-    #   축선은 이제 A101(남)·A102(북) 사이 개방 하늘로 빠진다.
+    # [08-05 user, 2nd answer] A101 moved south (y -15..7.4 -> **-24..-4**):
+    #   its x=34 facade stood dead ahead of the road axis y=0 — the §0-2 rule
+    #   ("no building blocks a road front"). The axis now exits to open sky
+    #   between A101 (south) and A102 (north).
     buildings=dict(
         A101=dict(x0=34.0, x1=46.0, y0=-24.0, y1=-4.0, h=45.0, floors=15,
                   axis="x", facade_x=34.0, face_dir=-1.0, base_z=0.0),
@@ -795,14 +832,19 @@ def _smoke_report():
           f"간격 {bo['gap']:.1f} 내외 · 상단 반사띠 z {bo['band_z']:.2f} → "
           f"{'OK' if 0.8 <= bo['h'] <= 1.0 and 0.1 <= 2 * bo['r'] <= 0.2 else 'FAIL'}")
 
-    # ── [08-05 doctrine] railing continuity — the 3 m south gap is repaired ──
-    runs = sorted([r for r in PARAMS["rail_runs"] if r["axis"] == "x"
-                   and abs(r["c"] + 3.15) < 1e-6], key=lambda r: r["a0"])
-    cont = (len(runs) == 1 and abs(runs[0]["a0"]) < 1e-6
-            and abs(runs[0]["a1"] - po["x"]) < 1e-6)
-    print("  [난간 연속성] (08-05 독트린 — 가드 자체가 낙차 단서)")
-    print(f"    남측 개구 난간: x [{runs[0]['a0']:.1f},{runs[0]['a1']:.1f}] · "
-          f"{len(runs)}런 → {'연속 OK' if cont else 'FAIL(결손 잔존)'}")
+    # -- [08-05 doctrine + 3rd answer] guard continuity: mouth rail stubs +
+    #    glass curtain walls + end wall must cover both flanks end to end --
+    cp0 = PARAMS["canopy"]
+    runs = sorted([r for r in PARAMS["rail_runs"] if r["axis"] == "x"],
+                  key=lambda r: (r["c"], r["a0"]))
+    stubs_ok = (len(runs) == 2 and
+                all(abs(r["a0"]) < 1e-6 and abs(r["a1"] - cp0["x0"]) < 1e-6
+                    for r in runs))
+    print("  [가드 연속성] (08-05 독트린 — 스텁 + 유리 월 + 엔드월)")
+    print(f"    마우스 스텁 2런 x [0,{cp0['x0']:.2f}] 양측 → "
+          f"{'OK' if stubs_ok else 'FAIL'} · 유리 월 x "
+          f"[{cp0['x0']:.2f},{cp0['x1']:.2f}] 양측 · 엔드월 x "
+          f"{cp0['end_wall']['x0']:.2f} → 전 구간 무단절")
     # ── [v6 judgment (5)] material fix check ──
     mp_ = PARAMS["material"]
     dr_ = PARAMS["drive"]
@@ -845,11 +887,17 @@ def _smoke_report():
     print(f"    범위 x [{cp_['x0']:.2f},{cp_['x1']:.2f}] · 개구 {po['x']:.0f} m 대비 "
           f"피복 {cov:.0f}% (잔여 x<{cp_['x0']:.2f} = 갠트리·높이제한바 채광 개구)")
     soffit = min(cp_["z_roof"] - cp_["beam_h"] + cp_["embed"],
-                 cp_["z_roof"] - cp_["fascia_h"] + cp_["embed"])
-    print(f"    최저 부재 밑면(보/파시아) z {soffit:.2f} > 높이제한바 {hb_['z']:.2f} → "
-          f"{'OK' if soffit > hb_['z'] else 'FAIL'} · 데크 상면 "
-          f"{cp_['z_roof'] + cp_['roof_t']:.2f} < 갠트리 패널 하단 {ga_['clear_h']:.2f} → "
-          f"{'OK' if cp_['z_roof'] + cp_['roof_t'] < ga_['clear_h'] else 'FAIL'}")
+                 cp_["fascia_top"] - cp_["fascia_h"])
+    print(f"    최저 부재 밑면(보/파라펫 밴드) z {soffit:.2f} > 높이제한바 {hb_['z']:.2f} → "
+          f"{'OK' if soffit > hb_['z'] else 'FAIL'} · 파라펫 상단 "
+          f"{cp_['fascia_top']:.2f} < 갠트리 패널 하단 {ga_['clear_h']:.2f} → "
+          f"{'OK' if cp_['fascia_top'] < ga_['clear_h'] else 'FAIL'}")
+    gl_ = cp_["glass"]
+    print(f"    [3차 건물형] 유리 커튼월 양 플랭크 (킥 {gl_['kick_h']:.2f} + 패널 "
+          f"t{gl_['t']:.3f}, 베이 {int(cp_['n_col']) + 1}/측) · 엔드월 x "
+          f"[{cp_['end_wall']['x0']:.2f},{po['x'] - 0.01:.2f}] (지면 x=24 와 "
+          f"10 mm 이격 — 공면 회피) · 포털 유효고 {abs(-1.25 - (-3.714)):.2f} m "
+          f"> 표기 {po['head_clear']:.1f} → OK")
     print(f"    기둥 {int(cp_['n_col'])}쌍 · x {cols[0]:.2f}…{cols[-1]:.2f} @ "
           f"{cp_['col_pitch']:.2f} (= 살대 1.45 × 2, 포스트 정위치) · y ±{cp_['y_col']:.2f} "
           f"코핑 위 · 내면 {cp_['y_col'] - cp_['col_w'] / 2.0:.2f} > 유효폭 ±{rp['y1']:.1f} → "
@@ -860,7 +908,7 @@ def _smoke_report():
           f"{cp_['lamp_intensity']:.0f} — scene02 GT-3 관행 "
           f"(무조명 시 캐노피 하부 DARK — portal_look·ramp_graze 는 선언된 하부 컷)")
 
-    # ── [08-05 2차] 보행 계단 캐노피 + 미지시 자산 소거 + 정면축 개방 ──
+    # -- [08-05 2nd answer] stair canopy + uninstructed-asset removals + road-axis check --
     sp_ = PARAMS["stair_canopy"]
     print("  [계단 캐노피] 보행 진입구 (U-5 확장 — 08-05 2차)")
     cover_ok = (sp_["x0"] <= sh["x0"] and sp_["x1"] >= sh["x1"]
@@ -869,17 +917,26 @@ def _smoke_report():
           f"{sp_['y1']:.2f}] ⊇ 샤프트 [{sh['x0']:.1f},{sh['x1']:.1f}]×"
           f"[{sp_['y0']:.2f}↑,{sh['y1']:.1f}] → {'OK' if cover_ok else 'FAIL'} "
           f"(남측 y {sh['y0']:.1f}~{sp_['y0']:.2f} 는 트렌치 캐노피 이격 코스트)")
+    #  [verify r2] posts must dodge the openings AND the walking surfaces:
+    #  the flight bands (A y 3.55..4.95 / B y 5.25..6.65) at the mouth strip
+    #  (x 11.2..11.5), where the old SE post stood 50 mm off the drop edge.
+    st_ = PARAMS["stair"]
     bad_post = []
+    hw = sp_["post_w"] / 2.0
     for px, py in sp_["posts"]:
         in_shaft = sh["x0"] < px < sh["x1"] and sh["y0"] < py < sh["y1"]
         in_trench = 0.0 < px < po["x"] and -3.3 < py < 3.3
-        if in_shaft or in_trench:
+        in_mouth = (sh["x1"] - hw < px < sh["x1"] + 0.3 + hw and
+                    (st_["y_a0"] - hw < py < st_["y_a1"] + hw or
+                     st_["y_b0"] - hw < py < st_["y_b1"] + hw))
+        if in_shaft or in_trench or in_mouth:
             bad_post.append((px, py))
-    print(f"    포스트 {len(sp_['posts'])}본 개구 침범: "
-          f"{bad_post if bad_post else '없음 → OK'} · 남측 파시아 외면 "
-          f"{sp_['y0'] - sp_['fascia_proud']:.2f} vs 램프 캐노피 외면 "
-          f"{cp_['y_deck'] + cp_['fascia_proud']:.2f} → 이격 "
-          f"{(sp_['y0'] - sp_['fascia_proud']) - (cp_['y_deck'] + cp_['fascia_proud']):.3f} m")
+    print(f"    포스트 {len(sp_['posts'])}본(동측 뉴얼 y 5.10 — 플라이트 대역 사이) "
+          f"개구·계단머리 침범: {bad_post if bad_post else '없음 → OK'}")
+    print(f"    남측 파시아 외면 {sp_['y0'] - sp_['fascia_proud']:.2f} vs 램프 "
+          f"캐노피 외면 {cp_['y_deck'] + cp_['fascia_proud']:.2f} → 이격 "
+          f"{(sp_['y0'] - sp_['fascia_proud']) - (cp_['y_deck'] + cp_['fascia_proud']):.3f} m · "
+          f"유리 월 W/N + 소핏 {2 * len(sp_['lamp_xs'])}등 → 밀폐 계단실 조명 확보")
     bd_ = PARAMS["buildings"]
     blockers = [k for k, b in bd_.items()
                 if b["y0"] < 0.0 < b["y1"] and b["x0"] > po["x"]]
@@ -1119,6 +1176,8 @@ def main():
                         roughness_const=mp["dark_rough"])
         M["warn_y"] = PBR(f"{ROOT}/Looks/WarnY", diffuse_color=mp["warn_y"],
                           roughness_const=0.6)
+        # warn_r kept as a palette slot — its only consumer (the barrier arm's
+        # red segments) was deleted 08-05 (GT-59)
         M["warn_r"] = PBR(f"{ROOT}/Looks/WarnR", diffuse_color=mp["warn_r"],
                           roughness_const=0.6)
         M["canopy_a"] = PBR(f"{ROOT}/Looks/CanopyA",
@@ -1298,9 +1357,9 @@ def main():
             origin=(0.0, 0.0, 0.0),
             # [W3 S13] intake §2 scene13 (e): GD patch 2 → 1, and the two white ramp
             #   boundary lines are dropped (G13 shows a yellow centre line only).
-            # [08-05 user · 2차] weed 5 → 삭제 · manhole 사이트 삭제 — "도로에
-            #   잔디·맨홀 금지" (GT-59). 프로파일 기본값 유입 방지를 위해 surface
-            #   행은 명시 유지.
+            # [08-05 user, 2nd answer] weed 5 -> removed, manhole site removed
+            #   — "no grass/manholes on roads" (GT-59). The surface row stays
+            #   explicit so profile defaults can never leak back in.
             overrides=dict(
                 surface=(("patch", int(g["patch_n"])), ("crack", 6),
                          ("stain", ("tire",))),
@@ -1311,6 +1370,11 @@ def main():
             dists=(2, 5, 10), scene="scene13",
             tactile=("bollard",) if cfg["cue_tactile"] else (),
             sites=dict(
+                # [verify r2] the manhole deletion emptied the judged W1/d5
+                #   near window (ground_kit B1/B2 soft gates went FAIL) — the
+                #   scene's one saw-cut patch is sited there instead: a road-
+                #   legal area element the user's rectangle ban exempts.
+                patch=[(-3.90, 0.00)],
                 trench=[(float(g["trench_entry"]), rp["y0"], rp["y1"]),
                         (float(g["trench_sump"]), rp["y0"], rp["y1"])],
                 marking=[(x, y, 0.0, 6.0) for x, y in g["lane_lines"]],
@@ -1505,7 +1569,7 @@ def main():
                 M["emit"])
 
     # -------------------------------------------------------------------
-    # Entry equipment — gantry sign + height-limit bar (08-05 2차: gate 삭제)
+    # Entry equipment — gantry sign + height-limit bar (08-05 2nd answer: gate deleted)
     # -------------------------------------------------------------------
     def build_entry_gear(M):
         """[W3 S13 · ruling §7-5] the mouth carries a gantry sign + height bar.
@@ -1554,24 +1618,26 @@ def main():
         BOX(f"{ROOT}/Canopy/Deck",
             (cx, 0.0, cp["z_roof"] + cp["roof_t"] / 2.0),
             (L, 2.0 * cp["y_deck"], cp["roof_t"]), M["roof"], col=True)
-        # fascia ring, 20 mm proud of the deck rim on all 4 sides (drip edge) —
-        #   tops embedded 20 mm into the deck underside. W/E bands run the full
-        #   width; N/S bands tuck 2 mm INTO the W/E solids (solid corners, no
-        #   coplanar fascia/deck faces anywhere — see the PARAMS note).
+        # [08-05 3차] parapet band ring, 20 mm proud of the deck rim — wraps the
+        #   deck edge and rises 0.16 above the deck top (building massing). W/E
+        #   bands run the full width; N/S bands tuck 2 mm INTO the W/E solids
+        #   (solid corners, no coplanar fascia/deck faces — see the PARAMS note).
         p = cp["fascia_proud"]
-        fz = cp["z_roof"] - cp["fascia_h"] / 2.0 + em
+        fz = cp["fascia_top"] - cp["fascia_h"] / 2.0
         y_full = cp["y_deck"] + p
         for xe, tag in ((cp["x0"] - p + cp["fascia_t"] / 2.0, "W"),
                         (cp["x1"] + p - cp["fascia_t"] / 2.0, "E")):
             BOX(f"{ROOT}/Canopy/Fascia_{tag}", (xe, 0.0, fz),
                 (cp["fascia_t"], 2.0 * (y_full - 0.002), cp["fascia_h"]),
                 M["fascia"])
+        # N/S bands sit 1 mm lower than W/E (verify r2: identical fz left the
+        #   2 mm corner tuck strips with bit-exact coplanar soffit faces)
         x_in0 = cp["x0"] - p + cp["fascia_t"] - 0.002
         x_in1 = cp["x1"] + p - cp["fascia_t"] + 0.002
         for sgn, tag in ((1.0, "N"), (-1.0, "S")):
             BOX(f"{ROOT}/Canopy/Fascia_{tag}",
                 ((x_in0 + x_in1) / 2.0,
-                 sgn * (y_full - cp["fascia_t"] / 2.0), fz),
+                 sgn * (y_full - cp["fascia_t"] / 2.0), fz - 0.001),
                 (x_in1 - x_in0, cp["fascia_t"], cp["fascia_h"]), M["fascia"])
         # transverse beams — one per column station (bearing on the column pair;
         #   beam_w < col_w so no flank face is coplanar), top embedded 20 mm.
@@ -1590,6 +1656,47 @@ def main():
                 BOX(f"{ROOT}/Canopy/Col_{tag}{k}",
                     (xc, sgn * cp["y_col"], base + h_col / 2.0),
                     (cp["col_w"], cp["col_w"], h_col), M["post"], col=True)
+        # [08-05 3차] glass curtain walls on both flanks — scene06 DeckGlass
+        #   3-part idiom: continuous steel kick band (swallowed by the column
+        #   sections, faces 3.125/3.175 inside 3.08..3.22 → no coplanar) +
+        #   jointed glass per column bay, top embedded 20 mm into the deck.
+        gl = cp["glass"]
+        n_glass = 0
+        for sgn, tag in ((1.0, "N"), (-1.0, "S")):
+            BOX(f"{ROOT}/Canopy/Kick_{tag}",
+                ((cp["x0"] + cp["x1"]) / 2.0, sgn * cp["y_col"],
+                 (base - 0.02 + base + gl["kick_h"]) / 2.0),
+                (L, gl["kick_t"], gl["kick_h"] + 0.02), M["post"])
+        stations = ([cp["x0"]]
+                    + [cp["col_x0"] + k * cp["col_pitch"]
+                       for k in range(int(cp["n_col"]))] + [cp["x1"]])
+        gz0 = base + gl["kick_h"]
+        gz1 = cp["z_roof"] + em
+        for b in range(len(stations) - 1):
+            a, bxt = stations[b], stations[b + 1]
+            ga_ = (a + gl["joint"] if b == 0
+                   else a + cp["col_w"] / 2.0 + gl["joint"])
+            gb_ = (bxt - gl["joint"] if b == len(stations) - 2
+                   else bxt - cp["col_w"] / 2.0 - gl["joint"])
+            if gb_ - ga_ < 0.05:
+                continue
+            for sgn, tag in ((1.0, "N"), (-1.0, "S")):
+                BOX(f"{ROOT}/Canopy/Glass_{tag}{b}",
+                    ((ga_ + gb_) / 2.0, sgn * cp["y_col"],
+                     (gz0 + gz1) / 2.0),
+                    (gb_ - ga_, gl["t"], gz1 - gz0), M["glass"])
+                n_glass += 1
+        # [08-05 3차] solid end wall over the portal head — closes the box and
+        #   masks Ground_E's west face (the green band portal_look showed).
+        #   East face at 23.99 keeps 10 mm clear of the ground plane x=24 (no
+        #   coplanar); bottom −1.25 laps the slab underside (−1.2), leaving
+        #   2.46 m portal clear > posted 2.3.
+        ew = cp["end_wall"]
+        ew_x1 = cp["x1"] - 0.01
+        BOX(f"{ROOT}/Canopy/EndWall",
+            ((ew["x0"] + ew_x1) / 2.0, 0.0, (-1.25 + gz1) / 2.0),
+            (ew_x1 - ew["x0"], 2.0 * (cp["y_deck"] - cp["fascia_t"] - 0.002),
+             gz1 + 1.25), M["fascia"], col=True)
         # soffit lamps — recessed battens at the 7 mid-bay stations x 2 rows,
         #   each carrying one SphereLight (scene02 GT-3 recipe; ramp luminaires
         #   are Korean practice, not a render hack). Battens sit clear of the
@@ -1617,9 +1724,10 @@ def main():
               f"소핏 {n_lamp}등 (2열 × {int(cp['n_col']) - 1})")
 
     def build_stair_canopy(M):
-        """[08-05 user · 2차] pedestrian stair-entry canopy — U-5 applies to the
-        보행 진입구 too. Same flat-deck idiom at pedestrian scale; geometry
-        constraints live in the `PARAMS["stair_canopy"]` note (GT-59)."""
+        """[08-05 user, 2nd/3rd answers] pedestrian stair-entry structure —
+        U-5 applies to the pedestrian entrance too. Building form (GT-59/60):
+        flat deck + parapet band + glass walls on the shaft W/N rims + soffit
+        lamps. Geometry constraints live in the PARAMS["stair_canopy"] note."""
         cp = PARAMS["stair_canopy"]
         em = cp["embed"]
         p = cp["fascia_proud"]
@@ -1628,13 +1736,15 @@ def main():
         W = cp["y1"] - cp["y0"]
         cx = (cp["x0"] + cp["x1"]) / 2.0
         cy = (cp["y0"] + cp["y1"]) / 2.0
+        base = PARAMS["rail"]["base_z"]           # shaft coping top
         BOX(f"{ROOT}/StairCanopy/Deck",
             (cx, cy, cp["z_roof"] + cp["roof_t"] / 2.0),
             (L, W, cp["roof_t"]), M["roof"], col=True)
-        # fascia ring — same anti-coplanar scheme as the ramp canopy: W/E bands
-        #   run the full width (end caps 2 mm inside the N/S solids), N/S bands
-        #   tuck 2 mm into the W/E solids, ring 20 mm proud of the deck rim.
-        fz = cp["z_roof"] - cp["fascia_h"] / 2.0 + em
+        # parapet band ring — W/E bands full width (end caps 2 mm inside the
+        #   N/S solids); N/S bands tuck 2 mm into the W/E solids AND sit 1 mm
+        #   lower (verify r2: identical fz left 2 mm corner strips with
+        #   bit-exact coplanar soffit faces).
+        fz = cp["fascia_top"] - cp["fascia_h"] / 2.0
         x_out0, x_out1 = cp["x0"] - p, cp["x1"] + p
         for xe, tag in ((x_out0 + ft / 2.0, "W"), (x_out1 - ft / 2.0, "E")):
             BOX(f"{ROOT}/StairCanopy/Fascia_{tag}", (xe, cy, fz),
@@ -1643,15 +1753,79 @@ def main():
         for ye, tag in ((cp["y1"] + p - ft / 2.0, "N"),
                         (cp["y0"] - p + ft / 2.0, "S")):
             BOX(f"{ROOT}/StairCanopy/Fascia_{tag}",
-                ((x_in0 + x_in1) / 2.0, ye, fz),
+                ((x_in0 + x_in1) / 2.0, ye, fz - 0.001),
                 (x_in1 - x_in0, ft, cp["fascia_h"]), M["fascia"])
+        # transverse beams on the support lines (flat-deck idiom kept honest —
+        #   verify r2 flagged a 6.45 m unsupported 0.10 m slab)
+        for i, xb in enumerate(cp["beam_xs"]):
+            BOX(f"{ROOT}/StairCanopy/Beam_{i}",
+                (xb, cy, cp["z_roof"] - cp["beam_h"] / 2.0 + em),
+                (cp["beam_w"], W - 0.10, cp["beam_h"]), M["roof"])
+        # posts: W pair on solid ground + ONE east newel between the flight
+        #   bands (verify r2 — the old SE post blocked the stair mouth)
         h = cp["z_roof"] + em
         for i, (px, py) in enumerate(cp["posts"]):
             BOX(f"{ROOT}/StairCanopy/Post_{i}", (px, py, h / 2.0),
                 (cp["post_w"], cp["post_w"], h), M["post"], col=True)
+        # glass walls on the shaft W/N rims — DeckGlass 3-part idiom: kick band
+        #   (top of coping, embedded 20 mm), jointed panels, steel mullions.
+        n_gp = 0
+        for spec, axis, tag in ((cp["glass_w"], "y", "W"),
+                                (cp["glass_n"], "x", "N")):
+            run = spec["a1"] - spec["a0"]
+            n_bay = max(1, int(round(run / cp["mullion"]["spacing"])))
+            mw = cp["mullion"]["w"]
+            kz = (base - 0.02 + base + 0.12) / 2.0
+            gz0, gz1 = base + 0.12, cp["z_roof"] + em
+            if axis == "y":
+                BOX(f"{ROOT}/StairCanopy/Kick_{tag}",
+                    (spec["c"], (spec["a0"] + spec["a1"]) / 2.0, kz),
+                    (0.05, run, 0.14 + 0.02), M["post"])
+            else:
+                BOX(f"{ROOT}/StairCanopy/Kick_{tag}",
+                    ((spec["a0"] + spec["a1"]) / 2.0, spec["c"], kz),
+                    (run, 0.05, 0.14 + 0.02), M["post"])
+            for b in range(n_bay):
+                a = spec["a0"] + b * run / n_bay
+                bnd = spec["a0"] + (b + 1) * run / n_bay
+                ga_, gb_ = a + 0.012, bnd - 0.012
+                ctr = (ga_ + gb_) / 2.0
+                if axis == "y":
+                    BOX(f"{ROOT}/StairCanopy/Glass_{tag}{b}",
+                        (spec["c"], ctr, (gz0 + gz1) / 2.0),
+                        (0.019, gb_ - ga_, gz1 - gz0), M["glass"])
+                else:
+                    BOX(f"{ROOT}/StairCanopy/Glass_{tag}{b}",
+                        (ctr, spec["c"], (gz0 + gz1) / 2.0),
+                        (gb_ - ga_, 0.019, gz1 - gz0), M["glass"])
+                n_gp += 1
+                if b < n_bay - 1:
+                    ms = spec["a0"] + (b + 1) * run / n_bay
+                    mc = ((spec["c"], ms) if axis == "y" else (ms, spec["c"]))
+                    BOX(f"{ROOT}/StairCanopy/Mullion_{tag}{b}",
+                        (mc[0], mc[1], (gz0 + gz1) / 2.0),
+                        (mw, mw, gz1 - gz0), M["post"])
+        # soffit lamps — the sealed shaft repeats the r1 DARK failure without
+        #   them (stair_head 109.9 -> 57.1 measured); same recipe, small scale
+        n_sl = 0
+        bz = cp["z_roof"] - cp["lamp_t"] / 2.0 + em
+        for ly in cp["lamp_rows"]:
+            for lx in cp["lamp_xs"]:
+                BOX(f"{ROOT}/StairCanopy/LampBatten_{n_sl}", (lx, ly, bz),
+                    (cp["lamp_len"], cp["lamp_w"], cp["lamp_t"]), M["lamp"])
+                lt = UsdLux.SphereLight.Define(
+                    stage, f"{ROOT}/StairCanopy/Light_{n_sl}")
+                lt.CreateRadiusAttr(float(cp["lamp_radius"]))
+                lt.CreateIntensityAttr(float(cp["lamp_intensity"]))
+                lt.CreateColorAttr(Gf.Vec3f(0.93, 0.96, 1.0))
+                UsdGeom.Xformable(lt.GetPrim()).AddTranslateOp().Set(
+                    Gf.Vec3d(float(lx), float(ly),
+                             float(cp["z_roof"] - cp["lamp_t"] - 0.02)))
+                n_sl += 1
         print(f"[U-5 계단 캐노피] x {cp['x0']:.2f}…{cp['x1']:.2f} · "
               f"y {cp['y0']:.2f}…{cp['y1']:.2f} · 밑면 z {cp['z_roof']:.2f} · "
-              f"포스트 {len(cp['posts'])}본 (개구 회피, 지반 착지)")
+              f"포스트 {len(cp['posts'])}본(동측 뉴얼 1) · 유리 {n_gp}판 · "
+              f"소핏 {n_sl}등")
 
     def build_wall_graphics(M):
         """[W3 S13 · G13] yellow/black bands + reflective guidance strip on the cheeks.
@@ -1733,7 +1907,7 @@ def main():
             i += 1
         print(f"[G13] 램프 노면 — 황색 중앙선 {n_line}구간 · "
               f"황흑 연석블록 {n_st}개 (x {ks['x0']:.2f}…{ks['x1']:.2f})")
-        # [08-05 user · 2차] 차단기(Gate/Box + Arm 7세그) 삭제 — 사용자 지시 (GT-59).
+        # [08-05 user, 2nd answer] barrier gate (Gate/Box + 7-seg arm) deleted (GT-59).
 
     # -------------------------------------------------------------------
     # Cue — bollards and dot tactile / railing / signs
@@ -1867,8 +2041,9 @@ def main():
                               M["shell"] if i % 2 == 0 else M["shell_b"],
                               M["glass"], M["parapet"],
                               window=PARAMS["window"])
-        # [08-05 user · 2차] build_utility (전주·트랜스포머·가공선) 삭제 — 미지시
-        #   자산 금지. G13 시그니처였으나 사용자 지시가 레퍼런스에 우선한다 (GT-59).
+        # [08-05 user, 2nd answer] build_utility (poles/transformer/wires) deleted
+        #   — uninstructed assets. It was a G13 signature, but the user's
+        #   instruction outranks the reference (GT-59).
 
     # ── Scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
@@ -1888,7 +2063,7 @@ def main():
         build_underground(M)
         build_entry_gear(M)          # [W3 S13] gantry sign + height bar
         build_canopy_full(M)         # [08-05 user · U-5 literal] full-length canopy
-        build_stair_canopy(M)        # [08-05 user · 2차] 보행 계단 입구 캐노피
+        build_stair_canopy(M)        # [08-05, 2nd/3rd answers] stair-entry glazed box
         build_wall_graphics(M)       # [W3 S13 · G13] chevrons + reflective strip
         build_ramp_marks(M)          # [W3 S13 · G13] yellow centre line + kerb blocks
         build_bollards(M)

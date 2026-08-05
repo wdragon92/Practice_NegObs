@@ -855,3 +855,28 @@ with `ground_kit`'s owner. **W9's rule stands unchanged until they land.**
 `scene10`. Every one of them published `geom_invariance_check` **132/132 cells identical**
 (33 scenes × 3 arms + prim counts) against the isolated arm at `4bae470`. Detail and evidence:
 `Docs/reports/w3_kmicro_v1.md`.
+
+---
+
+## 13. GT-57 — 08-05 독트린: 파손·결손 난간 소거, 전 씬 연속 가드화 (사후 신고)
+
+**Authority**: 08-05 사용자 룰링 — *위험 단서는 난간 자체(낭떠러지 표지)이지 난간의 훼손이 아니다.
+파손 난간 계열은 기존 해석의 착오.* 서류 간소화 룰링 동일 세션 — 본 행은 씬별 보고서를 대체한다.
+
+**Scope** (커밋 `206f89d`, 재질분 `f4d4b04`는 GT 무관):
+- `scene_common.build_railing_line` — LOOK_GEO A/B 게이트 철거: 1.10 m 상단·살대 인필·양단 포스트가
+  전 렌더 모드 공통 기하가 됨. `LOOK_GEO=0` 팔의 컨트롤 기하가 바뀌는 **의도된** 변화.
+- scene06 외측 가드 결손 아크(180–270°) 소거 · scene10 `broken_landing` 퇴역(참0 외측 4.97 m 개방부 가드)
+  · scene12 훼손 스팬 2.4 m/스텁/테이프 소거(GT-43 목재 단면 유지, 살대 콜라이더 +129)
+  · scene01 로컬 3런 → 공용 빌더 (rail_h 0.9→1.10).
+
+**규율 기록 (§0-1 위반 사후 신고)**: 외부 도구(naldori 오귀속) 수습 국면에서 선신고 없이 착지됨.
+본 행은 사후 기재이며 위반 사실을 그대로 남긴다.
+
+**Re-cache**: R-1 = scene06/10/12 스모크 베어 실행 OK (206f89d 커밋 메시지에 기록).
+R-2 는 W5 생산 전 일괄 유예. R-3 = 라운드 `260805_w3_doctrine`(6씬: 01·05·06·10·12·14)을
+`260731_w3_full`(구명 `260731_w3_final`, 08-05 개칭 — "final" 주장 철회) 대비 판정 후 새 기준선으로 스탬프.
+01/06/10/12 의 FRAME FAIL 은 본 행이 선언한 의도 변화다 — EXPECTED_FP 등록부는 촉지 밴드 전용이므로
+쓰지 않고, 판정 해석은 이 행과 회귀 JSON 으로 갈음한다.
+
+**§4 착지기록**: <라운드 실행 후 기재>

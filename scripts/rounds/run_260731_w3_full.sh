@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# W3 최종 리뷰 라운드 — 갤러리 v2 원본 — 33씬 전 컷 PT (round = 260731_w3_final)
+# W3 최종 리뷰 라운드 — 갤러리 v2 원본 — 33씬 전 컷 PT (round = 260731_w3_full)
 #   look_check/README.md §2 명명규약: <yymmdd>_<wave>_<purpose>
 #   재질 팔: LOOK_V1=1 (=MTL 1 · GEO 1) · DETAIL_SCALE=2.0 · DETAIL_ROUGH_GAIN=0
 #            (w2c_merge_t1_v1.md §7 GO 항목 1 — 스윕 최적값, rough_gain 은 노이즈)
@@ -12,7 +12,7 @@ source ~/miniconda3/etc/profile.d/conda.sh
 conda activate env_isaaclab
 export PYTHONNOUSERSITE=1 PYTHONUNBUFFERED=1
 
-ROUND=260731_w3_final
+ROUND=260731_w3_full
 LOG=look_check/logs/${ROUND}.log
 TIMES=look_check/logs/${ROUND}_times.tsv
 mkdir -p look_check/logs

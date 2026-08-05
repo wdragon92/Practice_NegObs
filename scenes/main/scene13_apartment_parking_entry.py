@@ -56,7 +56,12 @@ Hazard
   markings) stands. The cover is the library's flat-deck canopy idiom (scene02 GT-3 /
   scene16, no new geometry idiom): RC deck x 2.75…24.0 on coping-mounted steel columns.
   The mouth x 0…2.75 stays open — the barrier arm (gate x=2.2) must swing to vertical,
-  and the gantry/height-bar cluster keeps its own daylight. Ledger row **GT-58**
+  and the gantry/height-bar cluster keeps its own daylight. The soffit carries 14
+  recessed lamp battens (scene02 GT-3 precedent; 실무 관행) — without them the
+  covered trench falls to DARK (baseline wall-shadow band measures mean 11).
+  `portal_look` and `ramp_graze` are **declared under-canopy cuts** (photometric
+  change intended; judged under soffit light, scene02 `pit_edge` 방식).
+  Ledger row **GT-58**
   (`Docs/audit_v4/gt_changes_w3.md` §14): R-3 re-stamp — no walked surface moves,
   the OCCL baseline over the trench changes; R-1 is inert here (registry is
   drop/grade-only, all new colliders are above-ground positive obstacles).
@@ -290,10 +295,19 @@ PARAMS = dict(
     #  · beams ride the 8 column stations (beam_w 0.12 < col_w 0.14 → bearing
     #    reads welded, no coplanar flank) — verify r1 had free-pitch beams
     #    interpenetrating the k=1 columns by 27.5 mm mid-air.
+    #  · soffit lamps (scene02 GT-3 precedent — "without them the enclosure turns
+    #    the whole descent into a DARK cut", and 램프 조명은 실제 관행): 2 rows of
+    #    recessed battens at mid-bay stations (7 × 2 = 14), each with a SphereLight.
+    #    Verify r1 measured the baseline's wall-shadow band at mean 11 (DARK < 25)
+    #    with the trench OPEN — the deck removes direct sun from all but ~0.4 m of
+    #    the 6 m width, so unlit soffit ⇒ portal_look/ramp_graze unjudgeable.
     canopy=dict(x0=2.75, x1=24.0, y_deck=3.45, y_col=3.15,
                 z_roof=2.70, roof_t=0.14, fascia_h=0.22, fascia_t=0.06,
                 fascia_proud=0.02, col_w=0.14, col_x0=3.15, col_pitch=2.90,
-                n_col=8, beam_w=0.12, beam_h=0.20, embed=0.02),
+                n_col=8, beam_w=0.12, beam_h=0.20, embed=0.02,
+                lamp_y=(-1.85, 1.85), lamp_len=1.20, lamp_w=0.14, lamp_t=0.06,
+                lamp_radius=0.10, lamp_intensity=40000.0,
+                lamp_color=(0.93, 0.96, 1.0)),
     # --- [W3 S13 · G13] wall-face safety graphics on the trench cheeks ---
     #  Bands sit on the **inner** wall faces (y = ±3.0) where the deck has dropped far
     #  enough to expose them; scene13's cheeks are flush-coped by design (the below-code
@@ -827,6 +841,11 @@ def _smoke_report():
           f"{cp_['col_pitch']:.2f} (= 살대 1.45 × 2, 포스트 정위치) · y ±{cp_['y_col']:.2f} "
           f"코핑 위 · 내면 {cp_['y_col'] - cp_['col_w'] / 2.0:.2f} > 유효폭 ±{rp['y1']:.1f} → "
           f"{'OK' if cp_['y_col'] - cp_['col_w'] / 2.0 > rp['y1'] else 'FAIL(침범)'}")
+    n_lamp_ = 2 * (int(cp_["n_col"]) - 1)
+    print(f"    소핏 조명 {n_lamp_}등 (2열 y ±{abs(cp_['lamp_y'][0]):.2f} × 미드베이 "
+          f"{int(cp_['n_col']) - 1}) · SphereLight r {cp_['lamp_radius']:.2f} · "
+          f"{cp_['lamp_intensity']:.0f} — scene02 GT-3 관행 "
+          f"(무조명 시 캐노피 하부 DARK — portal_look·ramp_graze 는 선언된 하부 컷)")
 
     # ── [W3 S13 · G13] wall bands must sit between the deck and grade ──
     ch_ = PARAMS["chevron"]
@@ -907,7 +926,7 @@ BANNER = """\
  2. ramp_graze·h0.3  — 램프 하강이 평면으로 압축되고 개구 너머가 연속되는가(특색)
  3. bollard_walk     — 볼라드 h0.9·간격1.5·반사띠 + 전면 0.3 m 점형블록(규정)
  4. stair_head       — 되돌음 2련·중간참·연속 난간(08-05 독트린)·개방 계단머리
- 5. portal_look      — 포털 유효고·지하 약발광(PT 필수, RT 는 새까맣게 나옴)
+ 5. portal_look      — 포털 유효고·소핏 조명 하 램프 판독(PT 필수 — 캐노피 하부 선언 컷)
  6. beauty_overview  — 아파트 3동·조경 화단·수목 v2 배치가 비정형인가"""
 
 
@@ -925,7 +944,7 @@ def main():
     import carb.input
     import omni.usd
     import omni.appwindow
-    from pxr import UsdGeom
+    from pxr import Gf, UsdGeom, UsdLux
     from omni.kit.viewport.utility import (get_active_viewport,
                                            capture_viewport_to_file)
     from isaacsim.core.utils.viewports import set_camera_view
@@ -1529,9 +1548,31 @@ def main():
                 BOX(f"{ROOT}/Canopy/Col_{tag}{k}",
                     (xc, sgn * cp["y_col"], base + h_col / 2.0),
                     (cp["col_w"], cp["col_w"], h_col), M["post"], col=True)
+        # soffit lamps — recessed battens at the 7 mid-bay stations x 2 rows,
+        #   each carrying one SphereLight (scene02 GT-3 recipe; ramp luminaires
+        #   are Korean practice, not a render hack). Battens sit clear of the
+        #   beams (mid-bay) and above the beam soffit line.
+        n_lamp = 0
+        bz = cp["z_roof"] - cp["lamp_t"] / 2.0 + em
+        for k in range(int(cp["n_col"]) - 1):
+            lx = cp["col_x0"] + (k + 0.5) * cp["col_pitch"]
+            for r, ly in enumerate(cp["lamp_y"]):
+                BOX(f"{ROOT}/Canopy/LampBatten_{r}{k}", (lx, ly, bz),
+                    (cp["lamp_len"], cp["lamp_w"], cp["lamp_t"]), M["lamp"])
+                lt = UsdLux.SphereLight.Define(
+                    stage, f"{ROOT}/Canopy/Light_{r}{k}")
+                lt.CreateRadiusAttr(float(cp["lamp_radius"]))
+                lt.CreateIntensityAttr(float(cp["lamp_intensity"]))
+                lt.CreateColorAttr(
+                    Gf.Vec3f(*[float(c) for c in cp["lamp_color"]]))
+                UsdGeom.Xformable(lt.GetPrim()).AddTranslateOp().Set(
+                    Gf.Vec3d(float(lx), float(ly),
+                             float(cp["z_roof"] - cp["lamp_t"] - 0.02)))
+                n_lamp += 1
         print(f"[U-5 캐노피] 전장 플랫데크 x {cp['x0']:.2f}…{cp['x1']:.2f} "
               f"({L:.2f} m) · 데크 밑면 z {cp['z_roof']:.2f} · 보 {n_beam}본 · "
-              f"기둥 {int(cp['n_col'])}쌍 (코핑 위 y ±{cp['y_col']:.2f})")
+              f"기둥 {int(cp['n_col'])}쌍 (코핑 위 y ±{cp['y_col']:.2f}) · "
+              f"소핏 {n_lamp}등 (2열 × {int(cp['n_col']) - 1})")
 
     def build_wall_graphics(M):
         """[W3 S13 · G13] yellow/black bands + reflective guidance strip on the cheeks.

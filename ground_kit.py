@@ -1882,12 +1882,16 @@ GROUND_PROFILES = {
         surface=(("crack", 4), ("stain", ("dirt", "gum")), ("weed", 8)),
     ),
     # ── P4 ────────────────────────────────────────────────────────────────
+    # [08-05 user `[ruled]` · GT-59] **차도류 3프로파일(P4·P7·P8)에서 weed·manhole
+    #   전면 소거** — "왜 도로에 잔디와 맨홀을 계속 넣나. scene_common 문제로 보이니
+    #   검토·수정하라." 프로파일 차원 소거이므로 라이브러리 전역이 의도된 사거리다:
+    #   본선 scene13 · batch1 sceneN2(맨홀 사이트 보유)·N4 — batch1 은 U-1 동결이라
+    #   해동 시 승계된다(원장 GT-59 기록). gully·gutter(배수)는 기능 인프라로 존치.
     "street_asphalt": _P(
         "차도 접점 아스팔트 [법령 별표6]",
         pave=dict(module=(None, None), joint=None, step_x=None, step_y=None),
-        infra=dict(manhole=1, gully=3, gutter_L=1, marking=("line",)),
-        surface=(("patch", 3), ("crack", 6), ("stain", ("tire", "oil")),
-                 ("weed", 4)),
+        infra=dict(gully=3, gutter_L=1, marking=("line",)),
+        surface=(("patch", 3), ("crack", 6), ("stain", ("tire", "oil"))),
     ),
     # ── P5 ────────────────────────────────────────────────────────────────
     "alley_concrete": _P(
@@ -1912,18 +1916,18 @@ GROUND_PROFILES = {
         "지하주차 진입 램프 [법령 주차장법 §6①5다·마]",
         pave=dict(module=(None, None), joint="contraction",
                   step_x=3.0, step_y=None),
-        infra=dict(manhole=1, trench=2, marking=("line", "line")),
-        surface=(("patch", 2), ("crack", 6), ("stain", ("tire",)),
-                 ("weed", 5)),
+        # [08-05 user · GT-59] manhole 1 → 0 · weed 5 → 0 (P4 주석의 차도류 소거)
+        infra=dict(trench=2, marking=("line", "line")),
+        surface=(("patch", 2), ("crack", 6), ("stain", ("tire",))),
         extras=(("groove_band", dict()), ("ramp_curb", dict(height=0.12)),),
     ),
     # ── P8 ────────────────────────────────────────────────────────────────
     "ramp_road": _P(
         "옹벽 회랑 하향 램프 [시방 오목부 빗물받이 필수]",
         pave=dict(module=(None, None), joint=None, step_x=None, step_y=None),
+        # [08-05 user · GT-59] weed 4 → 0 (P4 주석의 차도류 소거; manhole 은 원래 0)
         infra=dict(gully=6, gutter_L=2, marking=("line", "line")),
-        surface=(("patch", 2), ("crack", 6), ("stain", ("tire", "dirt")),
-                 ("weed", 4)),
+        surface=(("patch", 2), ("crack", 6), ("stain", ("tire", "dirt"))),
     ),
     # ── P9 ────────────────────────────────────────────────────────────────
     "bridge_deck": _P(

@@ -1,0 +1,581 @@
+{
+  "pairs": [
+    {
+      "scene": "scene14",
+      "before": "look_check/scene14/260730_w2d_fix",
+      "after": "look_check/scene14/260731_w3_l14"
+    }
+  ],
+  "results": [
+    {
+      "scene": "scene14",
+      "view": "beauty_overview",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "WHITE",
+          "msg": "순백 면적 증가 8.1→18.2 % (+10.1 pp)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 148.6949920654297,
+        "after_dark": 0.6235050154320988,
+        "after_dark_near": 0.04099151234567901,
+        "after_clip": 0.0,
+        "after_white": 18.19307002314815,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 150.78326416015625,
+        "before_dark": 0.5146604938271605,
+        "before_dark_near": 0.0015673225308641976,
+        "before_clip": 0.0,
+        "before_white": 8.099754050925926,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 10.093315972222223,
+        "diff_mean": 6.193129062652588,
+        "diff_frac": 30.530317644032923,
+        "d_mean": -2.0882720947265625,
+        "d_dark": 0.1088445216049383,
+        "newdark": 0.03375771604938271,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.014467592592592593,
+        "blk_shift": 8.333333333333332,
+        "blk_max": 20.675566133952174
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "lower_lookup",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 133.9051513671875,
+        "after_dark": 0.020543981481481483,
+        "after_dark_near": 0.050395447530864196,
+        "after_clip": 0.0,
+        "after_white": 3.229021990740741,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 134.39646911621094,
+        "before_dark": 9.645061728395063e-05,
+        "before_dark_near": 0.00024112654320987653,
+        "before_clip": 0.0,
+        "before_white": 6.045283564814815,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -2.816261574074074,
+        "diff_mean": 8.0402250289917,
+        "diff_frac": 42.67184284979424,
+        "d_mean": -0.4913177490234375,
+        "d_dark": 0.02044753086419753,
+        "newdark": 0.0036168981481481477,
+        "newdark_near": 0.008979885057471264,
+        "newdark_blob": 0.0,
+        "blk_shift": 6.25,
+        "blk_max": 25.317282072263794
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "preset_h0.3_d10",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 28 % (최대 편차 88/255)"
+        },
+        {
+          "sev": "WARN",
+          "code": "GRAZE",
+          "msg": "[v2.1][의심] 은닉 — 국소도 9.5 (에지 34.3 − 근경 24.8) · 열 일치율 0.71 · 단차 43.0→26.3(비 0.61) · 최대 변화 y124. 낙차행의 선이 **무너졌다** → 낙차가 과도하게 은폐·매몰됐을 가능성. 에지대역 y124~177/540 (낙차 10.0 m 지점 y149). **그 대역만 잘라서 육안 확인**(자동 확정 불가)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 191.94187927246094,
+        "after_dark": 0.3195408950617284,
+        "after_dark_near": 0.17566068672839505,
+        "after_clip": 0.0,
+        "after_white": 27.700303819444443,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 191.78237915039062,
+        "before_dark": 0.0036651234567901233,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 28.095847800925927,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.3955439814814845,
+        "diff_mean": 15.075218200683594,
+        "diff_frac": 25.04497813786008,
+        "d_mean": 0.1595001220703125,
+        "d_dark": 0.3158757716049383,
+        "newdark": 0.15673225308641975,
+        "newdark_near": 0.18259099616858238,
+        "newdark_blob": 0.019290123456790122,
+        "blk_shift": 28.47222222222222,
+        "blk_max": 87.65340765425222,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 9.485946878491713,
+        "gz_dE": 34.32177225733191,
+        "gz_dN": 24.835825378840195,
+        "gz_agree": 0.709375,
+        "gz_row": 124,
+        "gz_band": [
+          124.4,
+          177.4
+        ],
+        "gz_haz_row": 149.0,
+        "gz_d": 10.0,
+        "gz_band_mu": 179.3457794189453,
+        "gz_step_b": 43.0,
+        "gz_step_a": 26.27,
+        "gz_step_ratio": 0.611,
+        "gz_step_off": 25,
+        "gz_step_dom": 0.77
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "preset_h0.3_d2",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 22 % (최대 편차 91/255)"
+        },
+        {
+          "sev": "FAIL",
+          "code": "GRAZE",
+          "msg": "[v2.1][의심] 은닉 — 국소도 33.0 (에지 38.6 − 근경 5.6) · 열 일치율 0.76 · 단차 59.6→61.0(비 1.02) · 최대 변화 y176. 에지 대역에 화면을 가로지르는 선이 **생겼다/굵어졌다** → 숨어 있어야 할 낙차가 드러났을 가능성. 에지대역 y170~312/540 (낙차 2.0 m 지점 y249). **그 대역만 잘라서 육안 확인**(자동 확정 불가)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 191.9212188720703,
+        "after_dark": 0.439380787037037,
+        "after_dark_near": 0.5242091049382716,
+        "after_clip": 0.0,
+        "after_white": 19.78414351851852,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 192.9866943359375,
+        "before_dark": 0.26765046296296297,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 20.254050925925927,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.46990740740740833,
+        "diff_mean": 16.793384552001953,
+        "diff_frac": 32.169929912551446,
+        "d_mean": -1.0654754638671875,
+        "d_dark": 0.17173032407407401,
+        "newdark": 0.1458815586419753,
+        "newdark_near": 0.32926245210727967,
+        "newdark_blob": 0.028935185185185185,
+        "blk_shift": 21.52777777777778,
+        "blk_max": 90.59914810294325,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 33.026833826359045,
+        "gz_dE": 38.621762317985215,
+        "gz_dN": 5.594928491626172,
+        "gz_agree": 0.759375,
+        "gz_row": 176,
+        "gz_band": [
+          169.6,
+          312.0
+        ],
+        "gz_haz_row": 248.7,
+        "gz_d": 2.0,
+        "gz_band_mu": 184.02345275878906,
+        "gz_step_b": 59.61,
+        "gz_step_a": 61.04,
+        "gz_step_ratio": 1.024,
+        "gz_step_off": 73,
+        "gz_step_dom": 1.58
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "preset_h0.3_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "CAPTURE",
+          "msg": "manifest ok=false — 캡처 폴링 조기 종료(파일은 정상인 경우가 대부분)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 194.0167694091797,
+        "after_dark": 0.017602237654320986,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.5829716435185185,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 194.59202575683594,
+        "before_dark": 0.03501157407407408,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 0.7188223379629629,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.13585069444444442,
+        "diff_mean": 12.110554695129395,
+        "diff_frac": 22.078076774691358,
+        "d_mean": -0.57525634765625,
+        "d_dark": -0.01740933641975309,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 17.36111111111111,
+        "blk_max": 38.52763420684536,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 8.801987119628286,
+        "gz_dE": 12.760541461581322,
+        "gz_dN": 3.958554341953037,
+        "gz_agree": 0.54375,
+        "gz_row": 142,
+        "gz_band": [
+          130.6,
+          211.8
+        ],
+        "gz_haz_row": 174.3,
+        "gz_d": 5.0,
+        "gz_band_mu": 180.9709930419922,
+        "gz_step_b": 31.87,
+        "gz_step_a": 19.96,
+        "gz_step_ratio": 0.626,
+        "gz_step_off": 32,
+        "gz_step_dom": 1.56
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "preset_h0.9_d10",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 25 % (최대 편차 57/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 192.20907592773438,
+        "after_dark": 0.02160493827160494,
+        "after_dark_near": 0.010127314814814815,
+        "after_clip": 0.0,
+        "after_white": 4.067418981481481,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 194.44207763671875,
+        "before_dark": 0.056616512345679014,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 4.516637731481481,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.44921875,
+        "diff_mean": 12.428979873657227,
+        "diff_frac": 23.262056327160494,
+        "d_mean": -2.233001708984375,
+        "d_dark": -0.03501157407407407,
+        "newdark": 0.0012056327160493826,
+        "newdark_near": 0.002993295019157088,
+        "newdark_blob": 0.0,
+        "blk_shift": 25.0,
+        "blk_max": 57.30153036384243
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "preset_h0.9_d2",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "FAIL",
+          "code": "WHITE",
+          "msg": "순백(>0.8) 대면적 증가 21.7→47.3 % (+25.6 pp) — v5.1 §4 금지 규약"
+        },
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 36 % (최대 편차 47/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 183.51446533203125,
+        "after_dark": 0.7155671296296297,
+        "after_dark_near": 0.0349633487654321,
+        "after_clip": 0.0,
+        "after_white": 47.287398726851855,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 184.8348846435547,
+        "before_dark": 0.5248842592592592,
+        "before_dark_near": 0.0037374614197530865,
+        "before_clip": 0.0,
+        "before_white": 21.69820601851852,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 25.589192708333336,
+        "diff_mean": 23.56951904296875,
+        "diff_frac": 54.373730066872426,
+        "d_mean": -1.3204193115234375,
+        "d_dark": 0.19068287037037046,
+        "newdark": 0.20254629629629628,
+        "newdark_near": 0.005986590038314176,
+        "newdark_blob": 0.028935185185185185,
+        "blk_shift": 36.11111111111111,
+        "blk_max": 47.26081857843644
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "preset_h0.9_d5",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 28 % (최대 편차 46/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 187.84388732910156,
+        "after_dark": 0.28173225308641975,
+        "after_dark_near": 0.005545910493827161,
+        "after_clip": 0.0,
+        "after_white": 8.90675636574074,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 188.75039672851562,
+        "before_dark": 0.26220100308641975,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 9.90480324074074,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.998046875,
+        "diff_mean": 16.42901039123535,
+        "diff_frac": 29.880674511316872,
+        "d_mean": -0.9065093994140625,
+        "d_dark": 0.01953125,
+        "newdark": 0.04581404320987654,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.019290123456790122,
+        "blk_shift": 28.47222222222222,
+        "blk_max": 46.40147715187453
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "preset_h1.8_d10",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 26 % (최대 편차 65/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 186.25674438476562,
+        "after_dark": 0.18586033950617284,
+        "after_dark_near": 0.001326195987654321,
+        "after_clip": 0.0,
+        "after_white": 10.403356481481481,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 189.291748046875,
+        "before_dark": 0.171875,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 12.129050925925926,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -1.7256944444444446,
+        "diff_mean": 15.009998321533203,
+        "diff_frac": 28.992975180041153,
+        "d_mean": -3.035003662109375,
+        "d_dark": 0.01398533950617284,
+        "newdark": 0.02290702160493827,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.009645061728395061,
+        "blk_shift": 25.694444444444443,
+        "blk_max": 65.14610268562583
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "preset_h1.8_d2",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "CAPTURE",
+          "msg": "manifest ok=false — 캡처 폴링 조기 종료(파일은 정상인 경우가 대부분)"
+        },
+        {
+          "sev": "FAIL",
+          "code": "WHITE",
+          "msg": "순백(>0.8) 대면적 증가 20.6→45.8 % (+25.2 pp) — v5.1 §4 금지 규약"
+        },
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 40 % (최대 편차 59/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 177.98085021972656,
+        "after_dark": 0.7038966049382717,
+        "after_dark_near": 0.46718267746913583,
+        "after_clip": 0.0,
+        "after_white": 45.78667534722222,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 180.24119567871094,
+        "before_dark": 0.5348668981481481,
+        "before_dark_near": 0.31828703703703703,
+        "before_clip": 0.0,
+        "before_white": 20.634693287037038,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 25.151982060185183,
+        "diff_mean": 26.1816463470459,
+        "diff_frac": 59.854520318930035,
+        "d_mean": -2.260345458984375,
+        "d_dark": 0.16902970679012352,
+        "newdark": 0.18687307098765432,
+        "newdark_near": 0.26640325670498083,
+        "newdark_blob": 0.038580246913580245,
+        "blk_shift": 39.58333333333333,
+        "blk_max": 59.461137666571176
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "preset_h1.8_d5",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 41 % (최대 편차 65/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 180.9912872314453,
+        "after_dark": 0.5112847222222222,
+        "after_dark_near": 0.024715470679012346,
+        "after_clip": 0.0,
+        "after_white": 26.482204861111114,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 184.5705108642578,
+        "before_dark": 0.35951967592592593,
+        "before_dark_near": 0.003978587962962963,
+        "before_clip": 0.0,
+        "before_white": 20.04325810185185,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 6.438946759259263,
+        "diff_mean": 21.452285766601562,
+        "diff_frac": 45.272006815843625,
+        "d_mean": -3.5792236328125,
+        "d_dark": 0.15176504629629628,
+        "newdark": 0.14226466049382716,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.019290123456790122,
+        "blk_shift": 40.97222222222222,
+        "blk_max": 64.6855561587663
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "side_reveal",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 22 % (최대 편차 31/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 161.1320343017578,
+        "after_dark": 0.07764274691358025,
+        "after_dark_near": 0.013020833333333334,
+        "after_clip": 0.0,
+        "after_white": 21.79181134259259,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 166.7602996826172,
+        "before_dark": 0.04272762345679012,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 13.059244791666666,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 8.732566550925926,
+        "diff_mean": 12.601048469543457,
+        "diff_frac": 44.98276748971193,
+        "d_mean": -5.628265380859375,
+        "d_dark": 0.03491512345679013,
+        "newdark": 0.014467592592592591,
+        "newdark_near": 0.005986590038314176,
+        "newdark_blob": 0.0,
+        "blk_shift": 21.52777777777778,
+        "blk_max": 31.063836140756194
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "terrace_read",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 43 % (최대 편차 82/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 173.86648559570312,
+        "after_dark": 0.5185185185185185,
+        "after_dark_near": 0.9777681327160493,
+        "after_clip": 0.0,
+        "after_white": 18.18525752314815,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 179.8887481689453,
+        "before_dark": 0.3319347993827161,
+        "before_dark_near": 0.43233989197530864,
+        "before_clip": 0.0,
+        "before_white": 18.911024305555554,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.7257667824074048,
+        "diff_mean": 23.86090087890625,
+        "diff_frac": 40.94552147633745,
+        "d_mean": -6.0222625732421875,
+        "d_dark": 0.1865837191358024,
+        "newdark": 0.16276041666666669,
+        "newdark_near": 0.38912835249042144,
+        "newdark_blob": 0.03375771604938271,
+        "blk_shift": 43.05555555555556,
+        "blk_max": 82.06176036530297
+      }
+    }
+  ]
+}

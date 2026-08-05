@@ -923,7 +923,12 @@ def main():
         M["stone_cheek"] = PBR(
             f"{ROOT}/Looks/StoneCheek", sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
-            sca["granite_light"], tint=(0.815, 0.800, 0.780))
+            # [regr 260731_w3_l14] the sunlit cheek drove WHITE 8.1 -> 18.2 % at
+            #   0.815; darken to ~0.40 as exposure compensation (the L05-F2
+            #   precedent) but keep GT-52's warm ratio 1.000:0.981:0.955 — a flat
+            #   (0.40, 0.40, 0.42) cool tint is the exact grey-card failure GT-52
+            #   corrected.
+            sca["granite_light"], tint=(0.400, 0.392, 0.382))
         M["plaza_light"] = PBR(
             f"{ROOT}/Looks/PlazaLight", sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),

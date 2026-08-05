@@ -150,15 +150,23 @@ PARAMS = dict(
     #   7.5..12.0 carries `arc_bands` + `edge_band`. The two grammars meet on the ring
     #   edge, which is a real construction line, so the module discontinuity 05-A names
     #   is now a designed joint rather than an accident.
-    #     · `arc_bands` (radius, material key) - one dark granite at 8.6, one warm tan
-    #       (brick) at 10.3. G8 carries both greys and warm tan/brick bands.
+    #     · `arc_bands` (radius, material key) - dark granite at 8.0 and 11.0 with a
+    #       warm tan (brick) band between them at 9.5. G8 carries both greys and warm
+    #       tan/brick bands. **Three, not two** `[pilot 2 -> pilot 3]`: with two the
+    #       annulus lost the straight bands without replacing their rhythm, and the
+    #       near field measured **47.1 % over the white line against the pre-state's
+    #       29.9 %** on the same 520x220 px box - the bands were carrying tonal relief
+    #       the paving cannot carry alone. At 8.0/9.5/11.0 the judged approach axis
+    #       (looking +X from x -6) crosses a band at x -5.0, -3.5 and -2.0, i.e. the
+    #       near field is banded again, in the curved grammar instead of the straight
+    #       one.
     #     · `edge_band` - 150 mm granite band inside the ring edge (11.85..12.00).
     #     · all three sit on the ring top face (-0.002) at the SAME +1.5 mm the straight
     #       bands use, so no walked surface moves: 1.5 mm is an order below
     #       `ground_kit.GT_DELTA = 0.020`.
     band=dict(width=0.45, spacing=3.2, proud=0.0015, embed=0.05,
               clip_r=12.0,
-              arc_bands=((8.6, "band"), (10.3, "brick")),
+              arc_bands=((8.0, "band"), (9.5, "brick"), (11.0, "band")),
               edge_band=(11.85, 12.00), seg=48),
 
     # === [W2-D ground_kit] P1 plaza_granite (spec §5.1 row 05) =============
@@ -622,6 +630,32 @@ PARAMS = dict(
         gear_color=(0.055, 0.055, 0.058), gear_rough=0.6,  # v4-D2/D3 lighting·speakers
         # [v5.1 §4] parapet 0.90 -> 0.72 (no large pure-white areas)
         parapet_color=(0.72, 0.72, 0.69), parapet_rough=0.6,
+        # [W3 L05 · pilot 1 -> pilot 2] **the one real defect this lane created.**
+        #   Pilot `260731_w3_l05` bound the cut wall and the stage shell to
+        #   `parapet` (0.720) to kill the "dark slab" read, and the round came back
+        #   with **WHITE on 7 of 13 cuts** — `side_arc` 2.2 -> 29.6 %,
+        #   `preset_h1.8_d2` 1.1 -> 27.7 %, `plaza_approach` 14.2 -> 41.8 % — the
+        #   v5.1 §4 large-pure-white prohibition, and the same defect S08's pilot 1
+        #   created at 77.4 %. `albedo_selfcheck` did **not** catch it because its
+        #   render forecast is applied to horizontal surfaces only, and these are
+        #   2.6 m walls that happen to fill the frame (recorded as L05-F1).
+        #   0.720 is white-paint bright. Korean 노출콘크리트 sits at a diffuse
+        #   reflectance of **0.30-0.40**, so the walls get their own constant at
+        #   **0.34** (sRGB ~ 0.62): still 4.4x the `granite_dark` 0.078 the bunker
+        #   read came from, and inside the band a real wall occupies.
+        #   **pilot 2 -> pilot 3**, and the reason is exposure, not material.
+        #   At 0.340 the sunlit wall face still measured **luma 0.75 · 50 % over
+        #   the 0.8 line** `[measured, 200x230 px on plaza_approach]`, against the
+        #   pre-state's 0.444. The library's render runs hot: the plaza paving is
+        #   bound at a **realistic** 0.334 linear albedo (0.4644 texture x 0.72
+        #   tint, inside the 0.35-0.45 band real 화강석 판석 occupies) and still
+        #   renders **luma 0.655 with 29.9 % of its area over 0.8 in the BASELINE
+        #   ITSELF**. So a wall at a physically correct 0.30-0.40 cannot satisfy
+        #   v5.1 §4 in this rig. 0.200 is the value that lands the wall face on
+        #   **luma ~0.60**, between the pre-state's 0.444 and the white line, and
+        #   it is recorded as an exposure compensation rather than dressed up as a
+        #   material fact (finding **L05-F2**).
+        wall_conc=(0.200, 0.197, 0.191), wall_conc_rough=0.75,
         # [v7 §4] 0.88 -> 0.78: the luminaire face exceeded the albedo cap (0.80) (it was a small-area
         #   WARN, but nothing the self-check flags is left standing).
         lamp_color=(0.78, 0.78, 0.75), lamp_rough=0.4,
@@ -1417,6 +1451,10 @@ def main():
         M["parapet"] = sc.make_pbr(stage, "/World/Looks/Parapet",
                                    diffuse_color=mp["parapet_color"],
                                    roughness_const=mp["parapet_rough"])
+        # [W3 L05] the bowl's own walls — exposed concrete, not painted parapet.
+        M["wall_conc"] = sc.make_pbr(stage, "/World/Looks/WallConc",
+                                     diffuse_color=mp["wall_conc"],
+                                     roughness_const=mp["wall_conc_rough"])
         M["lamp"] = sc.make_pbr(stage, "/World/Looks/Lamp",
                                 diffuse_color=mp["lamp_color"],
                                 roughness_const=mp["lamp_rough"])
@@ -1709,9 +1747,11 @@ def main():
         #   A 2.6 m dark slab across the frame is the "cistern/bunker" reading v6 was
         #   already fighting when it dropped the shell 1.40 -> 0.70; G8's vertical
         #   surfaces are pale concrete. Material only - no dimension moves.
+        #   [pilot 2] `wall_conc` (0.34), not `parapet` (0.72) - see the material
+        #   comment: pilot 1 put WHITE on 7 of 13 cuts with the brighter constant.
         for key, mtl in (("backyard", M["grass"]),
                          ("entry_cheek", M["plaza_light"]),
-                         ("cut_wall", M["parapet"])):
+                         ("cut_wall", M["wall_conc"])):
             p = PARAMS[key]
             for j, (a0, a1) in enumerate(p["arcs"]):
                 sc.build_arc_steps(stage, f"/World/Scene05/{key}_{j}",
@@ -1896,11 +1936,12 @@ def main():
         sh = PARAMS["shell"]
         if cfg["hazard_stairs"]:
             for j, (a0, a1) in enumerate(sh["arcs"]):
-                # [W3 L05 · G8] parapet material, same reason as `cut_wall`.
+                # [W3 L05 · G8] exposed-concrete material, same reason and same
+                #   pilot-2 correction as `cut_wall`.
                 sc.build_arc_steps(stage, f"/World/Scene05/StageShell_{j}",
                                    b["cx"], b["cy"], sh["r_in"], sh["r_out"],
                                    a0, a1, sh["seg"], sh["top_z"],
-                                   sh["base_z"], M["parapet"], **ARC)
+                                   sh["base_z"], M["wall_conc"], **ARC)
             build_backdrop_shrubs(M)
         # v4-D2 2 lighting towers (mast + 3 heads)
         tw = PARAMS["tower"]

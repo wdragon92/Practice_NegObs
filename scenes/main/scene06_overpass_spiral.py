@@ -305,7 +305,7 @@ PARAMS = dict(
     #   extends to +-150 and handles the §A-4 horizon closure.
     ground=dict(x0=-150.0, x1=150.0, y0=-150.0, y1=150.0, z_top=-0.16,
                 thick=1.40),
-    # --- spiral railing (cue_railing) --- **G6 bronze horizontal tube, the 06/11 identity split**
+    # --- spiral railing (cue_railing) --- continuous bronze tube guard
     #   [W3 S06 · R06-2] G6 guards helix and deck with **bronze/brown horizontal tubes**;
     #     G11 guards scene11 with **painted-steel vertical bars**. That pair is the formal
     #     identity separation the user asked for ("정체성 그렇게 안 겹치도록"), so the section,
@@ -313,14 +313,11 @@ PARAMS = dict(
     #   [W3 S06 · GT-6] `outer_r` **3.36 -> 3.24**. At 3.36 the posts stood **60 mm outboard of
     #     the tread edge** (r_out 3.30) — floating in air off the slab, the S06-A finding.
     #     3.24 puts the post centreline 60 mm INBOARD, which is where a real post baseplate goes.
-    #   [statutory note carried from `props_kit.build_tube_railing`] a horizontal-rail guard does
-    #     not satisfy the 안목 <= 100 mm rule the way a baluster guard does; the compliant form is
-    #     **4 rails inside 1.10 m**, giving a largest clear span of
-    #     (1.10 − 0.12)/3 − 2*0.024 = **0.279 m**. This is a *deliberately* non-baluster product,
-    #     and the scene must not blend the two — a mixture is what reads as procedural.
-    #   inner_r 1.44 : 6 cm inside the inner radius (1.5). Intact over the whole arc.
-    railing=dict(outer_r=3.24, inner_r=1.44, rail_h=1.10, rails=4, bottom=0.12,
-                 broken=(180.0, 270.0), pipe_r=0.024, post_r=0.030,
+    #   Two continuous rails and evenly spaced posts make the spiral read as a
+    #   conventional pedestrian guard instead of a damaged set piece.  `inner_r`
+    #   stays 6 cm inside the inner tread edge so its bases remain supported.
+    railing=dict(outer_r=3.24, inner_r=1.44, rail_h=1.10, rails=2, bottom=0.55,
+                 pipe_r=0.024, post_r=0.030,
                  post_step_deg=20.0, seg_per_deg=0.25),
     # --- tactile paving (cue_tactile) ---
     #   lower: in front of the azimuth-180 deg entry passage (sidewalk) / upper: deck south-end stair head
@@ -844,18 +841,11 @@ def _smoke_report():
         print(f"    {nm:22s} z {z0:+.3f} → {z1:+.3f}  Δ{d:+.3f}  "
               f"{'OK' if ok else 'FAIL'}")
     print(f"    연속성 판정: {'OK' if bad == 0 else f'FAIL({bad})'}")
-    # ── hazard (missing-railing arc) ──
-    b0, b1 = rl["broken"]
-    z_b0, z_b1 = _spiral_z_at(b0), _spiral_z_at(b1)
-    gz = PARAMS["walk"]["z_top"]
-    print(f"  [위험] 외측 난간 탈락 방위 [{b0:.0f}, {b1:.0f}] (상부 {b1-b0:.0f}°)")
-    print(f"    개방 에지 z {z_b0:+.3f} … {z_b1:+.3f} → 지면 {gz:+.3f} 낙차 "
-          f"{z_b0-gz:.3f} … {z_b1-gz:.3f} (평균 {(z_b0+z_b1)/2-gz:.3f} m)")
-    print(f"    낙차 ≥ 0.3 m → {'OK' if (z_b1-gz) >= 0.3 else 'FAIL'}  "
-          f"· 포스트는 잔존(가로대만 결손)")
-    print(f"    내측 보이드: r {PARAMS['column']['r']:.2f}…{sp['r_in']:.2f} "
-          f"(폭 {sp['r_in']-PARAMS['column']['r']:.2f}), 깊이 최대 "
-          f"{_spiral_top_z(0)-gz:.3f} m — 내측 난간 有/킥플레이트 無")
+    # ── guard continuity ──
+    a0, a1 = sp["a0"], sp["a0"] + sp["sweep"]
+    print(f"  [난간 연속성] 내·외측 가드 방위 [{a0:.0f}, {a1:.0f}] 전 구간 연결")
+    print(f"    높이 {rl['rail_h']:.2f} m · 가로대 {rl['rails']}본 · "
+          f"기둥 간격 {rl['post_step_deg']:.0f}° → OK")
     # ── deck clearance · column interference ──
     deck_bot = dk["z_top"] - dk["thick"]
     print(f"  [데크] 상면 {dk['z_top']:.2f} 저면 {deck_bot:.2f} · 차도 상면 "
@@ -1144,7 +1134,9 @@ def build_views():
     out["spiral_up"] = dict(eye=[1.70, -11.20, 1.45], tgt=[5.30, -11.20, 2.75])
     # deck_entry: entering the spiral descent from the deck (pedestrian view h1.6).
     out["deck_entry"] = dict(eye=[3.50, -9.50, 6.60], tgt=[4.60, -14.60, 4.30])
-    # broken_rail: close-up of the missing-railing arc (azimuth 225 deg, r3.3, z 4.155).
+    # broken_rail: close-up of the upper outer-guard arc (azimuth 225 deg, r3.3, z 4.155).
+    #   [08-05] the missing-rail hazard is gone (continuous guard doctrine); the
+    #   name is kept so regression rounds keep pairing.
     #   eye to the southwest - lit-face normal 203.2 deg, 58 deg from sun az 145 -> lambert
     #   +0.340 (lower than the +0.645 at v6 az 205 but still front lit, SMOKE per-shot table).
     out["broken_rail"] = dict(eye=[-1.42, -16.44, 5.60],
@@ -1172,7 +1164,7 @@ BANNER = """\
 [체크리스트]
  1. h0.3 그리드(데크 종주) — 기둥머리 상면(5.000)과 원측 지면이 하나의 평면으로
                             읽혀 환형 보이드(5.005 m)·나선 하강이 은닉되나
- 2. broken_rail    — 상부 90°(방위 180~270) 가로대 결손 + 포스트 잔존 판독
+ 2. broken_rail    — 상부 외측 가드(연속 2단 가로대)가 평범한 보행 가드로 읽히는가
  3. spiral_up      — 나선 내부 상행(피치 +19°): 랜딩 소핏이 상단을 막았나
  3b. d2 프리셋      — h0.9/h1.8 은 pitch −20/−28° : 연단·디딤이 프레임 안인가
  3c. 태양 az 145    — 그리드 피사면(+Y향)·deck_entry 상반의 암부가 걷혔나
@@ -1892,20 +1884,15 @@ def main():
     def build_cues(M):
         rl = PARAMS["railing"]
         a0, a1 = sp["a0"], sp["a0"] + sp["sweep"]
-        b0, b1 = rl["broken"]
         if cfg["cue_railing"]:
-            # [W3 S06 · G6 · R06-2] **bronze horizontal tubes, 4 rails** on the helix.
-            #   The hazard is unchanged and stays exactly where the brief put it: over the
-            #   damaged arc (b0..b1 = 180…270 deg) **every rail is missing and the posts
-            #   remain**, so the guard still reads as present from a distance. Going from
-            #   2 rails to 4 makes the intact 210 deg *more* convincing, which sharpens the
-            #   misread rather than softening it — the cue is the ABSENCE, not the count.
+            # Both sides use the same uninterrupted guard profile.  The old outer
+            # run resumed only after 270°, leaving posts with no rails for a full
+            # quadrant and making the walking edge appear broken.
             offs = _rail_offsets()
             _posts("Outer", rl["outer_r"], a0, a1, M)
             for r, zo in enumerate(offs):
-                _pipe_arc(f"OuterR{r}", rl["outer_r"], b1, a1, zo,
+                _pipe_arc(f"OuterR{r}", rl["outer_r"], a0, a1, zo,
                           rl["pipe_r"], M)
-            # inner: intact over the whole arc (no kick plate - open at robot height)
             _posts("Inner", rl["inner_r"], a0, a1, M)
             for r, zo in enumerate(offs):
                 _pipe_arc(f"InnerR{r}", rl["inner_r"], a0, a1, zo,

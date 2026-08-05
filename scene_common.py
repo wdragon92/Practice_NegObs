@@ -1857,15 +1857,13 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
       run,drop : horizontal length and drop of the sloped section
       ground_fn: x -> ground z callback (landing height of the post foot). Stepped on stairs.
     Returns: list of created prims."""
-    # The defaults change to the statutory values **only under LOOK_GEO** (post count = geometry).
-    # Previously the defaults themselves were changed to 1.1/2.0, and callers that do not state
-    # these two values (scene03/14/17/21) **saw the post count change even with the look layer off**.
-    # The post loop is outside the gate, so the control geometry gets contaminated -
-    # the same type of recurrence as the one named "fatal C3" and fixed in bc87292.
+    # A shared guardrail is a finished built element, not a cue that changes its
+    # section according to a look-development flag. Keep the familiar 1.10 m
+    # rail line and a modest 1.5 m post rhythm in every render mode.
     if rail_h is None:
-        rail_h = 1.1 if LOOK_GEO else 0.9      # Road safety facility guideline 2.5
+        rail_h = 1.1
     if spacing is None:
-        spacing = 2.0 if LOOK_GEO else 1.2
+        spacing = 1.5
     ground_ref = float(ground_fn(x_top))       # Ground at the top of the slope
     top0 = ground_ref + rail_h                 # Rail top z at x_top
     L = math.hypot(run, drop)
@@ -1892,8 +1890,10 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
     # Vertical balusters - the guardrail standard of the road safety facility guideline. A clear
     # opening of 100 mm or less between balusters is a statutory requirement, so real Korean
     # guardrails are dense without exception. On a slope the balusters stay **vertical** (only the
-    # rail tilts), which makes the silhouette markedly different. Inside the LOOK_GEO gate - A/B control preserved.
-    if LOOK_GEO and baluster_r > 0:
+    # rail tilts), which makes the silhouette markedly different. They are part
+    # of the normal railing construction, so do not hide them behind a render
+    # look toggle.
+    if baluster_r > 0:
         # [W3 K4(a) · C0-7 gate] Enforce the 안목 here rather than trusting 16 call sites.
         # Census at the time of writing (AST, `scenes/*/*.py` + every kit): **16 sites, none
         # of which passes `baluster_gap`** - all 16 inherit 0.098 m, and scene18 alone opts
@@ -1944,9 +1944,17 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
         LOOK_STATS["baluster"] = LOOK_STATS.get("baluster", 0) + b
 
     # Posts: landing on the real ground (ground_fn), top = the rail line.
-    xp = x_start
-    p = 0
-    while xp <= x_end + 1e-6:
+    # Include both termini. The old incremental loop could leave the final
+    # support up to one full bay short of the rail end, making a continuous run
+    # read as if it had been cut off in mid-air.
+    post_xs = [x_start]
+    xp = x_start + spacing
+    while xp < x_end - 1e-6:
+        post_xs.append(xp)
+        xp += spacing
+    if x_end - post_xs[-1] > 1e-6:
+        post_xs.append(x_end)
+    for p, xp in enumerate(post_xs):
         gz = float(ground_fn(xp))
         t = max(0.0, min((xp - x_top) / run, 1.0)) if run > 1e-9 else 0.0
         railz = top0 - drop * t
@@ -1955,8 +1963,6 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
             prims.append(add_cylinder(
                 stage, f"{prefix}/Post_{p}", (xp, y, gz + ph / 2.0),
                 post_r, ph, mtl))
-        xp += spacing
-        p += 1
 
     # -- Handrail -------------------------------------------------------
     # Evac/fire structure rules §15(4). **Unimplemented in all 33 scenes.**

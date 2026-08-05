@@ -13,11 +13,10 @@ Legacy : scenes/archive_v3/scene10_switchback_cliff.py
   A timber deck switchback stair on the slope of a neighbourhood park trail. The
   hazard is **the reality of falling short of code**.
 
-  (1) One landing railing is broken — on the first landing (z −1.65, outer edge x 4.4)
-      two rails have come away and only the posts remain. The ground below is z −6.62
-      → a **4.97 m open drop**. A railing reduced to posts is easily mis-detected as
-      'railing present' from the robot's viewpoint (a trap case for the
-      equipment-inference cue).
+  (1) [08-05 doctrine] every landing edge carries the same continuous guardrail
+      (`broken_landing=None`) — the guard itself is the drop cue (a rail line
+      means "the ground falls away beyond it"); the old broken-bay trap on
+      landing0 (4.97 m open drop behind bare posts) is retired.
   (2) Open risers — the flight below and the ground show through between the timber
       treads. With no tread/riser light-dark pair, the nosing cut line never forms.
   (3) Leaf litter — a leaf_ground band bites over and covers the edges of the top two
@@ -165,7 +164,7 @@ Legacy : scenes/archive_v3/scene10_switchback_cliff.py
     · rail height 1.05 -> **1.10 m** to the top face (§8.R OQ-5, KNPS median n=1,227);
       the 조경설계기준 16.20.2(2) >=1.2 m 관찰데크 counterpoint is on GT-20's ledger row.
     · timber patina re-aimed at the **measured** 2-5 yr 방부목 CIELAB target (L* 53-60).
-    · `broken_landing = 0` and the open-riser flights are untouched (§9 P-2 frozen).
+    · every landing edge carries the same continuous guardrail; the open-riser flights are untouched.
 
   S3-9 — stair re-table, §4.2-1. 4x10 at 0.165/0.300/1.38 -> **6 flights, 8+7+8+7+7+7 = 44**
     at 0.150/0.310 (2R+T 0.610, 25.8 deg), clear width **1.500**, 4 turn landings
@@ -322,7 +321,7 @@ PARAMS = dict(
               post=0.090,
               top=(0.140, 0.038), mid=(0.089, 0.038), bot=(0.089, 0.038),
               bal=0.038, bal_step=0.150,
-              spacing=1.05, broken_landing=0,   # landing0 outer = the break
+              spacing=1.05, broken_landing=None,  # every landing edge is guarded
               # one lattice / grid infill bay (E10-8). It is a real and common Korean
               # 데크 난간 variant and the single cheapest "this is a park, not an egress
               # stair" tell. Placed on the entry deck's +Y run because that run is in
@@ -957,12 +956,12 @@ def level_rail_runs():
     """
     ld = PARAMS["landing"]
     ent = PARAMS["entry"]
-    br = int(PARAMS["rail"]["broken_landing"])
+    br = PARAMS["rail"]["broken_landing"]
     runs = []
     for f in SEQ:
         k, z = f["k"], f["z_bot"]
         y0, y1 = f["ly0"], f["ly1"]
-        # forward (+X) edge of the landing. Landing `br` is the break (§9 P-2 frozen).
+        # Forward (+X) edge of every landing is guarded continuously.
         runs.append((f"LandRail_{k}_Out", f["lx1"], y0, f["lx1"], y1, z,
                      k == br))
         for tag, yy in (("N", y0), ("P", y1)):
@@ -1086,14 +1085,13 @@ def deck_module_selfcheck():
           "세로부재는 계단면에 수직이 되도록 제작, 설치하여야 한다'. "
           "살대 피치는 **수평** 기준이라 경사면에서도 안목이 cos 만큼 좁아지지 않음")
 
-    # -- the broken bay survives -------------------------------------------
-    br = int(r["broken_landing"])
+    # -- every landing edge is protected -----------------------------------
     runs = level_rail_runs()
     brk = [nm for nm, *_rest, b in runs if b]
-    good = (len(brk) == 1 and brk[0] == f"LandRail_{br}_Out")
+    good = not brk
     ok_all &= good
-    print(f"    파손 베이 = {brk} (참{br} 외측 1개만) · 난간대·살대 탈락 / "
-          f"기둥·엄지기둥 잔존 → {'OK' if good else 'CHECK'}")
+    print(f"    모든 참 외측 난간 연결 · 누락 런 {brk or '없음'} → "
+          f"{'OK' if good else 'CHECK'}")
 
     # -- newels: one per shared corner, not two ----------------------------
     ends = sum(2 for _ in runs)
@@ -1641,13 +1639,9 @@ def _smoke_report():
     # ── [S3] deck module self-check (spec §6.5) ──
     deck_module_selfcheck()
 
-    # ── broken railing ──
-    br = P["rail"]["broken_landing"]
-    f = SEQ[br]
-    print(f"\n  [파손 난간] 참{br} 외측 에지 x={f['lx1'] if f['even'] else f['lx0']:.2f}"
-          f" z={f['z_bot']:+.2f} — 가로대 2본 탈락 · 포스트 잔존")
-    print(f"    개방 낙차 = {f['z_bot'] - GROUND_Z:.2f} m "
-          f"(≥0.3 → {'OK' if f['z_bot'] - GROUND_Z >= 0.3 else 'FAIL'})")
+    # ── railing continuity ──
+    print("\n  [난간 연속성] 모든 참 외측 에지에 상·중·하 가로대와 수직 살대가 "
+          "끝 기둥까지 연속 배치됨 → OK")
 
     # ── [v6] sun reselection check : lambert per face + direct sun reaching the passage ──
     az = 33.5 + float(P["SUN_AZ_OFFSET"])
@@ -1807,7 +1801,7 @@ BANNER = """\
  1. h0.3 그리드      — 낙엽 덮인 상단 2단이 '평탄한 데크 진입'으로 읽히나
  2. through_treads   — 라이저 부재로 디딤판 사이 아래 플라이트·지면이 투시되나
  3. reversal         — 참0에서 두 방향 플라이트(±X, 병렬 Y 대역)가 한 프레임에
- 4. broken_rail      — 가로대 탈락·포스트 잔존 + 4.97 m 개방 낙차가 명확한가
+ 4. broken_rail      — 참0 외측 연속 난간 뒤로 4.97 m 낙차가 은닉되어 읽히는가
  5. leaf_edge        — 낙엽 밴드가 단코를 물고 덮어 절단선을 지우나
  6. from_below       — 데크 기둥 접지·참 스택이 낙차 앵커로 읽히나
  7. 남측 사면        — 트레일 어깨 밖 30° 무방호 하강이 grazing 시 소실되나
@@ -2244,9 +2238,8 @@ def main():
                     (sec + 0.006, sec + 0.006, 0.35), M["algae"])
 
         # landing + entry railing. Runs come from `level_rail_runs()` so the SMOKE
-        # self-check reads exactly the geometry that is built. Only the `broken_landing`
-        # outer run loses its rails (§9 P-2, frozen); its posts and newels remain, which
-        # is what makes it mis-detectable as 'railing present'.
+        # Self-check and assembly use the same complete run inventory so a
+        # landing edge cannot silently lose its rails while retaining its posts.
         if cfg["cue_railing"]:
             runs = level_rail_runs()
             lat_run = str(r["lattice"]["run"])

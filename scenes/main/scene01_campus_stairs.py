@@ -1673,49 +1673,31 @@ def main():
         #   `build_ground_kit` now emits the compliant band at x -0.90..-0.30,
         #   still gated by cfg["cue_tactile"] so the ablation toggle is intact.
 
-        # handrails: centre y=0 + both sides y=+-5.45. Top rail tilted along the stair slope +
-        # a 1 m horizontal extension at the top + posts (dia 4 cm, spacing ~1.2 m, height 0.9 m).
+        # Ordinary guardrails: centre y=0 + both sides y=+-5.45.  Use the
+        # shared builder so all three runs have the same top/mid rail, vertical
+        # infill and end posts instead of three locally diverging pipe layouts.
         if cfg["cue_railing"]:
             rl = PARAMS["railing"]
             st = PARAMS["stairs"]
             tread, riser, nsteps = st["tread"], st["riser"], st["nsteps"]
             run_x1 = tread * nsteps                   # 1.52
             drop = riser * nsteps                     # 0.6
-            rail_h = rl["post_h"]                     # 0.9
             ext = rl["ext"]
-            ang = math.degrees(math.atan2(drop, run_x1))   # slope angle (vs horizontal)
-            L = math.hypot(run_x1, drop)
+
+            def rail_ground(x):
+                if x <= 0.0:
+                    return 0.0
+                step_idx = min(int(x / tread), nsteps - 1)
+                return -riser * (step_idx + 1)
+
             for j, y in enumerate(rl["y_lines"]):
                 base = f"/World/Scene01/Rail_{j}"
-                # top horizontal extension rail (x -ext->0, z=rail_h) - Cylinder Z axis turned to X
-                add_cylinder(f"{base}/RailExt", (-ext / 2.0, y, rail_h),
-                             rl["rail_r"], ext, M["rail"], rotY=90.0)
-                # sloped rail: (0, rail_h) -> (run_x1, rail_h-drop). Tilted with rotateY.
-                add_cylinder(f"{base}/RailSlope",
-                             (run_x1 / 2.0, y, rail_h - drop / 2.0),
-                             rl["rail_r"], L, M["rail"], rotY=90.0 + ang)
-                # R2-5: mid rail - same geometry as the top rail, copied with z lowered by mid_drop.
-                mid_z = rail_h - rl["rail_mid_drop"]
-                add_cylinder(f"{base}/RailExtMid", (-ext / 2.0, y, mid_z),
-                             rl["rail_mid_r"], ext, M["rail"], rotY=90.0)
-                add_cylinder(f"{base}/RailSlopeMid",
-                             (run_x1 / 2.0, y, mid_z - drop / 2.0),
-                             rl["rail_mid_r"], L, M["rail"], rotY=90.0 + ang)
-                # posts: F6 - they land on the actual step top face. Bottom = tread, top = sloped rail.
-                xp = -ext
-                p = 0
-                while xp <= run_x1 + 1e-6:
-                    if xp <= 0:
-                        gz = 0.0                       # upper plaza / extension section
-                    else:
-                        step_idx = min(int(xp / tread), nsteps - 1)
-                        gz = -riser * (step_idx + 1)   # height of that tread
-                    railz = rail_h - drop * max(0.0, min(xp / run_x1, 1.0))
-                    ph = railz - gz                    # variable height (between rail and tread)
-                    add_cylinder(f"{base}/Post_{p}", (xp, y, gz + ph / 2.0),
-                                 rl["post_r"], ph, M["rail"])
-                    xp += rl["spacing"]
-                    p += 1
+                sc.build_railing_line(
+                    stage, base, y, -ext, 0.0, run_x1, drop, rail_ground,
+                    M["rail"], rail_h=1.10, post_r=rl["post_r"],
+                    spacing=rl["spacing"], rail_r=rl["rail_r"],
+                    rail_mid_r=rl["rail_mid_r"],
+                    rail_mid_drop=0.52)
 
     # -------------------------------------------------------------------
     # setup_lighting (§5: DomeLight + noon HDRI lookfix + auxiliary sun)

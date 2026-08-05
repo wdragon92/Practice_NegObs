@@ -13,28 +13,27 @@ Shared  : scene_common.py · **world shared with scene17_ramp_pair_hangang.py**
 
 Hazard
   A 2.5 m wide timber deck cantilevers 1.25 m out over the revetment riprap and
-  passes above the water (−1.8). On the river side **one 2.4 m span of railing
-  is destroyed** (only post stubs remain, plus a single warning tape), so that
-  stretch is entirely unguarded, and even the surviving railing **has no kick
-  plate (bottom closure panel)**, so at robot eye height h0.3 the sight line
-  runs straight out under the mid rail (z 0.55). Yet **the near water is not
-  visible** - the sight line grazing the deck outer edge (y 1.25, z 0) reaches
-  the water only at y = 8.75 m, so the 7.50 m stretch of riprap and water over
-  y 1.25..8.75 disappears from frame (missing ground band). The 8-step descent
-  at the deck end (x=0) is hidden the same way in grazing.
+  passes above the water (−1.8). [08-05 doctrine] the railing itself is the drop
+  cue — a continuous guard line means "water beyond the rail" — so the river-side
+  run is an ordinary full-height guard (1.10 m, picket infill, **no kick plate**).
+  The negative obstacle is the concealed drop, not a damaged guard: **the near
+  water is not visible** - the sight line grazing the deck outer edge (y 1.25,
+  z 0) reaches the water only at y = 8.75 m, so the 7.50 m stretch of riprap and
+  water over y 1.25..8.75 disappears from frame (missing ground band). The
+  8-step descent at the deck end (x=0) is hidden the same way in grazing.
 
 Goal
   (1) deck (x −18..0, width 2.5, z=0) + timber beams and piles + cantilever 1.25 m
-  (2) river-side railing (posts + top rail + mid rail, no kick plate) + destroyed
-      span 2.4 m
+  (2) river-side railing (posts + top rail + mid rail + pickets, no kick plate),
+      continuous over the full deck run
   (3) 8-riser connecting stair at the deck end (0.17 × 8 = 1.36) → lower
       floodplain (−1.36)
   (4) revetment riprap tiers (−0.55/−1.45/−1.75/−1.78/−1.95/−2.40) + water −1.8
       + reeds and silver grass
   (5) bike-path band · bench · streetlight · backdrop bridge/apartments
       (scene17 convention)
-  (6) [v5.2 user] arbitrary warning signboards removed - only damage traces
-      (post stubs, tape) remain
+  (6) [v5.2 user] arbitrary warning signboards removed; [08-05 doctrine] damage
+      traces (destroyed span, post stubs, tape) removed as well
 
 v6 ruling (judge_v6_rt_new7 §6) applied - **GT drop 1.80 unchanged** (director
 decision 4)
@@ -66,8 +65,8 @@ step <= 0.17)
   │ 0 upper grass       (−26.0, −3.0, 0.00)        flat (grass / decomposed granite path)
   │ 1 deck entry        (−18.0,  0.0, 0.00)        flat (flush with the floodplain)
   │ 2 deck walk         (−12.0,  0.0, 0.00)        flat (width 2.5, river-side railing)
-  │ 3 destroyed span    ( −4.8,  0.0, 0.00)        ← **river side 2.4 m unguarded**
-  │                                                    (drop 1.80 beyond the edge)
+  │ 3 mid-deck          ( −4.8,  0.0, 0.00)        flat (guarded; drop 1.80
+  │                                                    beyond the rail line)
   │ 4 stair head        (  0.0,  0.0, 0.00)        flat
   │ 5 step 1 tread      (  0.16, 0.0, −0.17)       0.17
   │ 6 step 7 tread      (  2.08, 0.0, −1.19)       0.17 × 6
@@ -136,6 +135,10 @@ step <= 0.17)
         the KNPS n=1,227 built-reality median. Left alone and recorded as
         **L12-F1** - this scene's declared identity is a degraded guard, and
         moving the rail height without a ruling moves a cue.
+    [08-05 doctrine override] (a)-(c) are superseded by the user ruling that the
+        guard itself is the drop cue (rail line = "water beyond"), not guard
+        degradation: the run is now continuous at 1.10 m with Ø40 picket infill
+        (see PARAMS["rail"]). The paragraphs above are kept as history.
   **GT-44** - the deck timber goes to the measured 2-5 year 방부목 patina band.
   `M["deckwood"]` bound the `wood_dark` map **raw**: mean linear
   (0.0824, 0.0584, 0.0442), L* 30.03, `albedo_selfcheck` 0.081 - a third of the
@@ -195,7 +198,7 @@ import ground_kit as gk
 # ===========================================================================
 SCENE_CONFIG = {
     "hazard_stairs":      True,    # False -> deck/stair/floodplain steps flattened to z=0 (only geometry toggle)
-    "cue_railing":        True,    # river-side railing (no kick plate). The 2.4 m destroyed span is always missing
+    "cue_railing":        True,    # continuous river-side pedestrian railing
     "cue_tactile":        False,   # tactile paving not customary on a waterfront timber deck - code path reserved only
     "cue_material_break": True,    # deck timber vs floodplain grass/gravel contrast. False -> stair in grass-tone timber too
     "cue_sign":           False,   # [v5.2 user] arbitrary warning signboards removed - none placed (key reserved only)
@@ -273,7 +276,7 @@ PARAMS = dict(
     water=dict(x0=-40.0, x1=60.0, y0=3.70, y1=70.0, z=-1.80),
     far_bank=dict(x0=-40.0, x1=60.0, y0=70.0, y1=100.0, z_top=-1.50,
                   thick=2.2),
-    # --- railing (river side y=1.15) : **no** kick plate - why the robot view stays open ---
+    # --- railing (river side y=1.15): continuous, ordinary post-and-picket guard ---
     # [W3 L12 · GT-43] sections move off steel-pipe diameters onto the two round
     #   preservative-timber sizes this repo has verified (`s3_research_numbers_v1.md` §A5,
     #   KFS-TRAIL 그림 3-20 p.72, source grade A): 방부원형목재 **Ø120** and **Ø80**.
@@ -283,18 +286,14 @@ PARAMS = dict(
     #   face (z=0) and the **mid-rail underside** goes 0.530 -> 0.510 m (-20 mm, -3.8 %),
     #   top-rail underside 1.015 -> 1.010. The h0.3 sight line survives; the cost is printed
     #   by the smoke rather than left to a reader's arithmetic.
-    #   `spacing` and `post_h` are deliberately NOT touched - see the L12 docstring block (b)/(c).
-    rail=dict(y=1.15, post_r=0.060, post_h=1.05, spacing=1.5,
-              top_z=1.05, top_r=0.040, mid_z=0.55, mid_r=0.040,
-              gap_x0=-6.0, gap_x1=-3.6,            # destroyed span 2.4 m
-              stub_xs=(-5.4, -4.2), stub_h=0.10,   # sheared-off post stubs
-              # [v6 C-6] warning tape = 0.02-thick square bar -> **thin ribbon + sag**.
-              #   the old spec was a solid rod spanning x −6.0..−3.6 outright, so (a) its thickness
-              #   was steel-beam grade and (b) the east end −3.6 had no support, so it floated in mid-air.
-              #   new spec: tie both ends to the **surviving posts x −6.0 / −3.0** and
-              #   let the centre droop by sag - a parabolic ribbon (4 mm thick).
-              tape=dict(anchor_xs=(-6.0, -3.0), z_end=0.90, sag=0.17,
-                        nseg=10, w=0.075, t=0.004, tie_h=0.05)),
+    #   [doctrine 08-05] The guard itself is the drop cue (a rail line means "water
+    #   beyond"), so the damaged 2.4 m bay, post stubs and warning tape are replaced
+    #   by a continuous full-height run: 1.10 m to the top face (scene10-parallel)
+    #   with a 100 mm maximum clear picket opening. Sections stay on the GT-43
+    #   timber sizes (post Ø120 · rails Ø80); pickets are Ø40 timber dowels.
+    rail=dict(y=1.15, post_r=0.060, post_h=1.10, spacing=1.5,
+              top_z=1.10, top_r=0.040, mid_z=0.55, mid_r=0.040,
+              baluster_r=0.020, baluster_gap=0.098),
     # [v5.2 user] arbitrary warning signboards removed - fall-hazard / stair-hazard sign parameters deleted.
     # --- upper floodplain dressing ---
     path=dict(x0=-40.0, x1=0.0, y0=-4.6, y1=-2.6, proud=0.002),   # decomposed-granite promenade
@@ -427,7 +426,6 @@ PARAMS = dict(
         parapet_color=(0.70, 0.70, 0.68), parapet_rough=0.6,
         bridge_color=(0.05, 0.05, 0.055), bridge_rough=0.7,
         lamp_color=(0.78, 0.78, 0.75), lamp_rough=0.4,
-        tape_color=(0.75, 0.62, 0.10), tape_rough=0.7,
         canopy_a=(0.025, 0.045, 0.015), canopy_b=(0.035, 0.060, 0.020),
         canopy_rough=1.0,
     ),
@@ -480,17 +478,16 @@ ASSET_ROLES = ["wood_dark", "rock_wall", "grass", "gravel", "concrete_wall",
 # [C2] geometry helpers (shared by smoke and assembly)
 # ===========================================================================
 def _rail_posts():
-    """Railing post x list - **inside** the destroyed span (gap_x0..gap_x1) is left empty.
-    The posts at both ends of the span survive (so the damage boundary reads)."""
+    """Railing post x list, including supports at both connected endpoints."""
     d = PARAMS["deck"]
     r = PARAMS["rail"]
-    xs = []
-    n = int(round((d["x1"] - d["x0"]) / r["spacing"]))
-    for k in range(n + 1):
-        x = d["x0"] + k * r["spacing"]
-        if r["gap_x0"] < x < r["gap_x1"]:
-            continue
+    xs = [d["x0"]]
+    x = d["x0"] + r["spacing"]
+    while x < d["x1"] - 1e-6:
         xs.append(round(x, 4))
+        x += r["spacing"]
+    if d["x1"] - xs[-1] > 1e-6:
+        xs.append(d["x1"])
     return xs
 
 
@@ -602,7 +599,6 @@ _ALBEDO_TABLE = [
     ("자전거도로 차선", None,             "paint_color",    False, True),
     ("파라펫",          None,             "parapet_color",  True,  False),
     ("가로등 등기구",   None,             "lamp_color",     False, False),
-    ("경고 테이프",     None,             "tape_color",     False, False),
     ("억새 대",         "grass",          "reed_tint",      False, False),
 ]
 
@@ -838,11 +834,9 @@ def _obstacle_boxes():
     d = PARAMS["deck"]
     r = PARAMS["rail"]
     boxes = []
-    # 2 railing segments (AABB including posts and rails)
-    for tag, x0, x1 in (("Rail_W", d["x0"], r["gap_x0"]),
-                        ("Rail_E", r["gap_x1"], d["x1"])):
-        boxes.append((tag, x0, x1, r["y"] - 0.06, r["y"] + 0.06,
-                      0.0, r["top_z"]))
+    # One continuous railing run (AABB including posts and rails).
+    boxes.append(("Rail", d["x0"], d["x1"], r["y"] - 0.06,
+                  r["y"] + 0.06, 0.0, r["top_z"]))
     # bench · streetlight · tree · reed · sign · bollard
     for i, (bx, by, _yaw) in enumerate(PARAMS["benches"]):
         boxes.append((f"Bench_{i}", bx - 0.95, bx + 0.95, by - 0.25, by + 0.25,
@@ -1112,58 +1106,47 @@ def _smoke_report():
         print(f"    {nm:16s} 기울기 {m:+.3f}/m → 최초 접촉 y {y_hit:5.2f} "
               f"(z {z_hit:+.2f}, {kind}) · 에지 뒤 은닉 밴드 {band:.2f} m → {flag}")
 
-    # ── railing destroyed span ──
+    # ── railing continuity (08-05 doctrine: the guard itself is the drop cue) ──
     xs = _rail_posts()
-    gapw = r["gap_x1"] - r["gap_x0"]
+    end_ok = (abs(xs[0] - d["x0"]) < 1e-6 and abs(xs[-1] - d["x1"]) < 1e-6)
     print("  [난간]")
     print(f"    포스트 {len(xs)}본 (간격 {r['spacing']} m) · 상단대 z "
           f"{r['top_z']:.2f} · 중간대 z {r['mid_z']:.2f} · **킥플레이트 없음**")
-    print(f"    훼손 스팬 x [{r['gap_x0']:.1f},{r['gap_x1']:.1f}] = {gapw:.1f} m"
-          f" → {'OK' if abs(gapw-2.4) < 1e-6 else 'FAIL'} "
-          f"(잔존 밑동 {len(r['stub_xs'])}본)")
-    print(f"    난간 상단 {r['top_z']:.2f} m — 현행 규정 1.1 미달 = "
-          f"'규정 미달의 현실'")
-    # [v6 C-6] warning tape = ribbon tied to the surviving posts at both ends (no floating)
-    tp = r["tape"]
-    anch_ok = all(any(abs(ax - px) < 1e-6 for px in xs)
-                  for ax in tp["anchor_xs"])
-    print(f"    경고 테이프: 두께 {tp['t']*1000:.0f} mm 리본 × {tp['nseg']}세그 "
-          f"(구 {20:.0f} mm 각재) · 폭 {tp['w']*100:.1f} cm · "
-          f"처짐 {tp['sag']*100:.0f} cm")
-    print(f"      결속 x {tp['anchor_xs']} vs 잔존 포스트 → "
-          f"{'OK(양단 지지 — 부유 해소)' if anch_ok else 'FAIL(무지지 단부)'}"
-          f"  · 스팬 {tp['anchor_xs'][1]-tp['anchor_xs'][0]:.1f} m, "
-          f"양단 z {tp['z_end']:.2f} → 중앙 z "
-          f"{tp['z_end']-tp['sag']:.2f}")
+    print(f"    연속 런 x [{d['x0']:.1f},{d['x1']:.1f}] · 양단 포스트 지지 → "
+          f"{'OK' if end_ok else 'FAIL(단부 무지지)'}")
+    print(f"    난간 상단 {r['top_z']:.2f} m — 조경설계기준 16.13.2(2) 1,100 충족 · "
+          f"살대 안목 {r['baluster_gap']*1000:.0f} mm ≤ 100")
 
     # ── [v7] silver grass stalk conversion + §4 albedo cap self-check ──
     reed_selfcheck()
     albedo_selfcheck()
 
-    # ── [W3 L12 · GT-43 R-1] the guard re-section, printed rather than claimed ──
-    #   The ledger row asserts three things: the hazard/drop registry does not change,
-    #   14 collision boxes change radius, and the h0.3 sight line survives. All three
-    #   are re-derived here from PARAMS so a regression is visible without a render.
+    # ── [W3 L12 · GT-43 → 08-05 연속화] the guard section, printed rather than claimed ──
+    #   Sections stay on the GT-43 timber sizes (post Ø120 · rails Ø80); what changed
+    #   is continuity: the damaged bay / stubs / tape are gone and a picket infill
+    #   (Ø40, clear 98 mm) runs the whole deck. Re-derived from PARAMS so a
+    #   regression is visible without a render.
     r = PARAMS["rail"]
     posts = _rail_posts()
-    ncol = len(posts) + len(r["stub_xs"])
+    pitch = 2.0 * r["baluster_r"] + r["baluster_gap"]
+    nbal = 0
+    _x = d["x0"] + pitch
+    while _x < d["x1"] - pitch * 0.5:
+        nbal += 1
+        _x += pitch
     open_mid = r["mid_z"] - r["mid_r"]
     open_top = r["top_z"] - r["top_r"]
-    print("  [W3 L12 · GT-43 R-1 가드 재단면 검산]")
-    print(f"    부재: 포스트 Ø{r['post_r']*2*1000:.0f} × {len(posts)} "
-          f"(구 Ø64) · 상부대 Ø{r['top_r']*2*1000:.0f} (구 Ø70) · "
-          f"중간대 Ø{r['mid_r']*2*1000:.0f} (구 Ø40)  "
+    print("  [W3 L12 가드 검산 — 연속 방부목 난간]")
+    print(f"    부재: 포스트 Ø{r['post_r']*2*1000:.0f} × {len(posts)} · "
+          f"상부대 Ø{r['top_r']*2*1000:.0f} · 중간대 Ø{r['mid_r']*2*1000:.0f} · "
+          f"살대 Ø{r['baluster_r']*2*1000:.0f} × {nbal}  "
           f"[방부원형목재 Ø120/Ø80 · s3_research_numbers_v1.md §A5]")
-    print(f"    콜라이더(col=True) {ncol} 개 반경 0.032 → {r['post_r']:.3f} "
-          f"(포스트 {len(posts)} + 스텁 {len(r['stub_xs'])}) · 프림 수 불변")
-    print(f"    h0.3 시선 개구: 데크 상면 0.000 → 중간대 하단 {open_mid:.3f} m "
-          f"(구 0.530, Δ {(open_mid-0.530)*1000:+.0f} mm, "
-          f"{(open_mid/0.530-1.0)*100:+.1f} %) · 상부대 하단 {open_top:.3f} (구 1.015)")
-    print(f"    난간동자 0 개 (G3 = 통나무 가로대, 인필 없음) · 킥플레이트 없음 · "
-          f"훼손 스팬 {r['gap_x1']-r['gap_x0']:.1f} m 유지 → 위험 기하 불변")
-    print(f"    [L12-F1] 난간 높이 {r['post_h']:.2f} m — 조경설계기준 16.13.2(2) 1,100 / "
-          f"16.20.2(2) 1,200 미달 · scene10 은 실측 1.10 착지. "
-          f"본 씬은 '열화된 가드' 정체성이므로 무변경, 발견사항으로만 기록")
+    print(f"    살대 피치 {pitch*1000:.0f} mm (안목 {r['baluster_gap']*1000:.0f} mm ≤ 100) · "
+          f"콜라이더 = 포스트 {len(posts)} + 살대 {nbal}")
+    print(f"    h0.3 시선 개구: 데크 상면 0.000 → 중간대 하단 {open_mid:.3f} m · "
+          f"상부대 하단 {open_top:.3f} — 살대 사이로 수면 프레임 부분 잔존")
+    print(f"    난간 높이 {r['top_z']:.2f} m — 조경설계기준 16.13.2(2) 1,100 충족 "
+          f"(구 1.05 '열화된 가드' 정체성은 08-05 독트린으로 폐기)")
 
     # ── [W3 L12] season pin + river-view measurement ──
     season_audit()
@@ -1289,7 +1272,9 @@ def build_views():
     (y=0) - the h0.3 cut is itself the 'no kick plate + hidden near water'
     ruling cut."""
     views = sc.grid_views(0.0)
-    # edge_void: from robot eye height (0.35), standing inside the destroyed span **right at the edge** (y 0.90),
+    # edge_void: from robot eye height (0.35), standing at the rail line **right at the edge** (y 0.90),
+    #   [08-05] the destroyed span this cut was named for is gone; the name is kept so
+    #   regression rounds keep pairing. The cut now reads "drop concealed behind a guarded edge".
     #   looking out past the edge - the key cut. [coordinate check] the sight line clears the deck outer
     #   edge (y 1.25) at z=+0.16 (the old eye y 0.20 punched through the slab). From this viewpoint
     #   the water is visible only from y >= 3.05, and 1.90..3.05 stays hidden.
@@ -1301,7 +1286,8 @@ def build_views():
     #   destroyed span, robot eye height 0.35 = the reason this cut exists). The through-edge slope
     #   −1.000/m is unchanged too, so the 1.78 m hidden band backing the ruling holds (smoke [drop visibility]).
     views["edge_void"] = dict(eye=[-4.80, 0.90, 0.35], tgt=[-3.05, 3.45, -1.62])
-    # broken_span: the destroyed span seen obliquely from land (the promenade) - post stubs and warning tape
+    # broken_span: the same bay seen obliquely from land (the promenade). [08-05] now a
+    #   continuous guarded run; name kept for regression pairing.
     views["broken_span"] = dict(eye=[-9.50, -3.20, 1.70], tgt=[-4.60, 0.70, 0.10])
     # stair_join: the 8-step descent joint at the deck end.
     #   [v6 ruling (4) re-aim] the old cut (eye −4.20,−3.40,2.80 / tgt 1.80,−0.30,−1.00) had
@@ -1350,8 +1336,8 @@ BANNER = """\
 [조작] 우클릭+WASD 비행 · P 패스트레이싱 토글 · C 스크린샷 · [ ] 태양 방위
 [체크리스트]
  1. h0.3 그리드     — 킥플레이트 없는 난간 아래로 근접 수면이 은닉되는가
- 2. edge_void       — 훼손 스팬에서 수면 직행 개방이 읽히는가 (핵심 컷)
- 3. broken_span     — 잔존 포스트 밑동·경고 테이프(리본 처짐·양단 결속)
+ 2. edge_void       — 난간 너머 낙차가 은닉된 채 '물가 데크'로 읽히는가 (핵심 컷)
+ 3. broken_span     — 연속 난간 런(살대 인필)이 평범한 물가 가드로 읽히는가
  4. stair_join      — 데크 끝 8단 하강이 프레임에 들어왔는가(재조준 컷)
  5. under_deck      — 캔틸레버 하부 말뚝·보·사석 공간이 보이는가(저시점)
  6. bank_face       — 데크면→에지→하부공간→사석→수제선이 수직으로 쌓이는가
@@ -1493,8 +1479,6 @@ def main():
                           roughness_const=mp["bridge_rough"])
         M["lamp"] = PBR(f"{ROOT}/Looks/Lamp", diffuse_color=mp["lamp_color"],
                         roughness_const=mp["lamp_rough"])
-        M["tape"] = PBR(f"{ROOT}/Looks/Tape", diffuse_color=mp["tape_color"],
-                        roughness_const=mp["tape_rough"])
         M["canopy_a"] = PBR(f"{ROOT}/Looks/CanopyA",
                             diffuse_color=mp["canopy_a"],
                             roughness_const=mp["canopy_rough"],
@@ -1718,75 +1702,34 @@ def main():
             M["grass"], col=True)
 
     # -------------------------------------------------------------------
-    # railing - a single river-side run. 2.4 m destroyed span missing + no kick plate.
+    # Railing - one continuous river-side run with ordinary vertical pickets.
     # -------------------------------------------------------------------
     def build_railing(M):
         d = PARAMS["deck"]
         r = PARAMS["rail"]
-        for i, px in enumerate(_rail_posts()):
+        post_xs = _rail_posts()
+        for i, px in enumerate(post_xs):
             CYL(f"{ROOT}/Rail/Post_{i}", (px, r["y"], r["post_h"] / 2.0),
                 r["post_r"], r["post_h"], M["guard"], col=True)
-        # top rail and mid rail : 2 segments minus the destroyed span (Z-axis cylinder laid along X)
-        segs = [("W", d["x0"], r["gap_x0"]), ("E", r["gap_x1"], d["x1"])]
-        for tag, x0, x1 in segs:
-            if x1 - x0 <= 1e-6:
-                continue
-            for nm, zz, rr in (("Top", r["top_z"], r["top_r"]),
-                               ("Mid", r["mid_z"], r["mid_r"])):
-                CYL(f"{ROOT}/Rail/{nm}_{tag}",
-                    ((x0 + x1) / 2.0, r["y"], zz), rr, x1 - x0, M["guard"],
-                    rotY=90.0)
-        # sheared-off post stubs (damage trace - a cue for inferring the original fitting)
-        for i, sx in enumerate(r["stub_xs"]):
-            CYL(f"{ROOT}/Rail/Stub_{i}", (sx, r["y"], r["stub_h"] / 2.0),
-                r["post_r"], r["stub_h"], M["guard"], col=True)
-        # a single warning tape (plainly sub-code - not a guard).
-        #   [v6 C-6] a 0.02-thick solid square bar with an unsupported floating east end -> replaced by a
-        #   **4 mm ribbon + parabolic sag + tied to the surviving posts at both ends**.
-        _build_tape_ribbon(M)
-
-    def _build_tape_ribbon(M):
-        """Warning tape across the destroyed span = a sagging ribbon tied to the 2 surviving posts.
-
-        Geometry : x ∈ [xa, xb] (surviving post x), z(x) = z_end − sag·(1 − u²),
-                   u = 2(x − xm)/L  → z_end at both ends, z_end − sag at the centre.
-        Build    : sc._oriented_box(rotz=90, rotx=a).
-                   op order is scale → rotX → rotZ, so local Y (the length axis)
-                   is (0, cos a, sin a) after rotX(a) and (−cos a, 0, sin a)
-                   after rotZ(90).
-                   That is, the segment axis (cos a, 0, −sin a) ∝ (dx, 0, dz)
-                   → a = atan2(−dz, dx). Given size=(t, seg_len, w),
-                   local X = thickness (world Y) and local Z = width (vertical).
-        """
-        r = PARAMS["rail"]
-        tp = r["tape"]
-        xa, xb = tp["anchor_xs"]
-        L = xb - xa
-        xm = (xa + xb) / 2.0
-
-        def z_of(x):
-            u = 2.0 * (x - xm) / L
-            return tp["z_end"] - tp["sag"] * (1.0 - u * u)
-
-        n = int(tp["nseg"])
-        for i in range(n):
-            x0 = xa + L * i / n
-            x1 = xa + L * (i + 1) / n
-            z0, z1 = z_of(x0), z_of(x1)
-            dx, dz = x1 - x0, z1 - z0
-            seg_len = math.hypot(dx, dz)
-            ang = math.degrees(math.atan2(-dz, dx))
-            sc._oriented_box(
-                stage, f"{ROOT}/Rail/Tape_{i}",
-                ((x0 + x1) / 2.0, r["y"], (z0 + z1) / 2.0),
-                (tp["t"], seg_len * 1.02, tp["w"]), M["tape"],
-                rotz=90.0, rotx=ang)
-        # tie point - the tape end wrapped round the post (lets the eye confirm it is not floating)
-        for i, ax in enumerate((xa, xb)):
-            CYL(f"{ROOT}/Rail/TapeTie_{i}", (ax, r["y"], z_of(ax)),
-                r["post_r"] + 0.006, tp["tie_h"], M["tape"])
+        for nm, zz, rr in (("Top", r["top_z"], r["top_r"]),
+                           ("Mid", r["mid_z"], r["mid_r"])):
+            CYL(f"{ROOT}/Rail/{nm}",
+                ((d["x0"] + d["x1"]) / 2.0, r["y"], zz), rr,
+                d["x1"] - d["x0"], M["guard"], rotY=90.0)
+        pitch = 2.0 * r["baluster_r"] + r["baluster_gap"]
+        x = d["x0"] + pitch
+        n = 0
+        while x < d["x1"] - pitch * 0.5:
+            CYL(f"{ROOT}/Rail/Baluster_{n}",
+                (x, r["y"], (r["top_z"] - r["top_r"] + 0.04) / 2.0),
+                r["baluster_r"], r["top_z"] - r["top_r"] - 0.04,
+                M["guard"], col=True)
+            x += pitch
+            n += 1
 
     # [v5.2 user] arbitrary warning signboards removed - build_signs() deleted.
+    # [08-05 doctrine] destroyed-span warning tape removed with the damaged bay -
+    #   _build_tape_ribbon() deleted (history: v6 C-6, git 42d0308 and earlier).
 
     # -------------------------------------------------------------------
     # dressing - reeds · bench · streetlight · tree · bike path · bollard

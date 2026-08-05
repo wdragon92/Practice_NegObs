@@ -879,4 +879,10 @@ R-2 는 W5 생산 전 일괄 유예. R-3 = 라운드 `260805_w3_doctrine`(6씬: 
 01/06/10/12 의 FRAME FAIL 은 본 행이 선언한 의도 변화다 — EXPECTED_FP 등록부는 촉지 밴드 전용이므로
 쓰지 않고, 판정 해석은 이 행과 회귀 JSON 으로 갈음한다.
 
-**§4 착지기록**: <라운드 실행 후 기재>
+**§4 착지기록** (2026-08-05):
+- render: `flock /tmp/negobs_gpu.lock bash scripts/rounds/run_260805_w3_doctrine.sh scene01 scene05 scene06 scene10 scene12 scene14` — 6/6 exit 0, 35~65 s/scene.
+- regression: `scripts/regression_check.py --list <6씬 pairs> --json Docs/reports/regr_260805_w3_doctrine.json` vs `260731_w3_full` — 84컷 FAIL 2 · WARN 12 · PASS 63.
+  FRAME 계열(06/10/12 broken_rail·edge_void 등)은 본 행이 선언한 의도 변화 — 육안 확인: 06 연속 bronze 2단, 10 참0 연속 guard, 12 연속 picket run 착지. scene12 edge_void OCCL 4.9 %는 신규 picket 근접 음영.
+  scene05 UNCHANGED 4컷 = `260731_w3_full` render 당시 scene05가 dirty(wall_conc 기반영) — baseline에 이미 포함, WHITE 41.8→17.3 % 유지 확인. scene14 side_reveal FRAME 38 % = 온색 다크닝 적용 확인(beauty WHITE 18.2→17.2 %).
+- 새 baseline = `260805_w3_doctrine` (01·05·06·10·12·14) · 나머지 27씬 baseline은 `260731_w3_full` 유지.
+- gallery: `look_check/_review/260805_w3_doctrine/` (사용자 검수 대기 — 검수 통과 시 본 행 CLOSED).

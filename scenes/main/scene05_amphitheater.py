@@ -102,6 +102,28 @@ Run (GUI look check - default):
   C02-P1). The drop edge, the lip kerb, the tiers and the stage are untouched: every new
   object stands on the plaza or the ring, ≥ 0.24 m radially outside the lip (r_out 7.80).
 
+[GT-75 · edges] 08-06 검수 named two ends that were left unfinished. Both are
+  junction work — no radius, arc, material, walking surface, drop edge or camera moves,
+  and the P-16 stage redesign stays out of scope.
+  ① **A tuft lobe planted inside the south `cut_wall`**, popping out of the slab's outer
+     face as a lone green boulder on a blank concrete wall (`pt_noon_side_arc.png`,
+     confirmed again in `pt_noon_plaza_approach.png`). `backdrop_instances()` kept only the
+     clump **centre** inside 12..78 / 282..348 and laid the first clump of every run exactly
+     on the `a0` ray, so a clump whose azimuthal half-envelope is 5.46°/5.60° reached
+     277.29° — inside `cut_wall` (278.0..281.2, r 5.0..7.85, z −1.6..+1.06), which fully
+     contains the r 5.78..6.31 / z +0.04..+0.88 band those lobes sit in. **17 lobes** were
+     buried in the slab. Now the clump run is inset by that same envelope
+     (`_lobe_arc_pad`), so the declared arc IS the envelope: overrun **0.000°**, nearest
+     lobe **1.687° (184 mm)** clear of the wall. Silhouette above the arc wall is kept
+     (+1.281 > +0.70). `backdrop_selfcheck` ⑧.
+  ② **The stage-access stair ended in a blade, not in steps** ("계단이 너무 튄다"). Both
+     cheeks were built at the podium top (−0.856), a 0.19 m thick slab standing 0.347 m
+     proud of the apron with one blank face — and exactly coplanar with the top course
+     over their 0.2° overlap. `cheek_level=0` rakes them onto the bottom course (−1.031):
+     the end elevation now walks **−0.853 → −0.856 → −1.031 → −1.203**, the same
+     0.003/0.175/0.172 ladder as the radial one, proud height **0.347 → 0.172 m**, and the
+     coplanar pair becomes the scene's own 3 mm cascade. `podium_step_selfcheck` ⑤⑥.
+
 Season `[intake §7-8]`: **summer**, pinned from G8 (full leaf, high sun, clear sky) and
   matched by the shipped rig (`qwantani_noon_puresky` + sun elev 49.79°). There is no
   `bare=` call in this file and `season_selfcheck()` gates on its absence plus the measured
@@ -361,13 +383,40 @@ PARAMS = dict(
     #   **3 mm** (top -0.853 -> -0.856) so the lapped ring is not coplanar with the podium
     #   top disc - the radial+z counterpart of v4-A1, and the same 3 mm cascade the stage
     #   already uses (-1.200 > -1.203 > -1.207). A 3 mm rise onto the podium is not a step.
+    # === [GT-75] the cheek is RAKED to the bottom course — `cheek_level` ================
+    #   Verdict this round: "계단이 너무 튄다 / 좀 더 깔끔하게 붙여라". Traced in
+    #   `260806_w3_fixqueue/pt_noon_side_arc.png`: the run itself is fine, the **run end**
+    #   is not. `cheek_level` did not exist, so both cheeks were built at the podium top
+    #   (`po.top_z − z_cascade` = −0.856) across the full radial width 2.90..3.75 — a
+    #   0.19 m thick blade standing **0.347 m** proud of the apron (−1.203) with one blank
+    #   vertical face and no relation to the treads it flanks. That is the "proud slab"
+    #   read; the flight ends in a wall instead of ending in steps. It also put the cheek
+    #   top and the top course top on the **same plane −0.856 over the 0.2° overlap band
+    #   r 2.90..3.375** — an exactly coplanar pair, the z-fight the rest of this scene
+    #   spends r- and z-cascades avoiding.
+    #   Fix (junction/finish only — no radius, no arc, no material, P-16 untouched):
+    #   `cheek_level=0` puts the cheek on the **bottom course** (`tops[0] − z_cascade` =
+    #   −1.031), so the end elevation walks the same ladder as the flight:
+    #     podium −0.853 → top course −0.856 (3 mm) → cheek −1.031 (0.175) → apron −1.203
+    #     (0.172)  `[computed]` — identical risers to the radial ladder −1.203 → −1.028
+    #     (0.175) → −0.856 (0.172) → −0.853 (3 mm). Riser rhythm continuous, max 0.175 m.
+    #   · proud height of the end block above the apron **0.347 → 0.172 m** (halved), and
+    #     what stands there is now one course of the stair, not a blade.
+    #   · the coplanar pair is gone: cheek −1.031 vs bottom course −1.028 is the scene's
+    #     own 3 mm cascade, vs the top course −0.856 it is a full 0.175 m riser.
+    #   · nothing is left raw: the top course's arc-end face (0.175 m) lands on the cheek,
+    #     the bottom course's on a 3 mm reveal over it, and the cheek's own end face
+    #     (0.172 m) lands on the apron. `cheek_overlap` 0.2° still buries the junction.
+    #   · the cheek keeps the `under` 0.10 m lap, and at −1.031 that lap sits **inside**
+    #     the podium cylinder (−1.607..−0.853), so the lap can never be exposed.
+    #   Gated by `podium_step_selfcheck` ⑤⑥ (end ladder · no coplanar top pair).
     podium=dict(r=3.0, top_z=-0.853, base_z=-1.607,
                 steps=dict(radii=(3.75, 3.375, 3.0),
                            tops=(-1.028, -0.853),
                            seg=12, base_z=-1.6,
                            under=0.10, z_cascade=0.003,
                            arcs=((130.0, 160.0), (200.0, 230.0)),
-                           cheek_deg=3.2, cheek_overlap=0.2)),
+                           cheek_deg=3.2, cheek_overlap=0.2, cheek_level=0)),
     # === v4-A2/A3 [critical] entry stair redesign ===
     #   was: an orthogonal flight (x_top 13.5, tread 0.35). The step boundaries in x and the tier
     #   boundaries x(=6+r) were not aligned at all, so the tread widths of the real walking profile
@@ -663,6 +712,26 @@ PARAMS = dict(
     #     · lobe overlap: adjacent lobe z gap kept <= 1.35·min(rz) -> **no detached floaters**
     #       (check (7) reports the measured worst-case ratio over the jitter combinations).
     #     · taper: higher lobes get radius x(1−0.14t) -> crown taper (avoids a cylinder look).
+    # === [GT-75] the arcs below are the LOBE ENVELOPE, not the clump-centre run ==========
+    #   Defect found in `260806_w3_fixqueue/pt_noon_side_arc.png` (and again in
+    #   `pt_noon_plaza_approach.png`): a tuft lobe stands **inside the south `cut_wall`
+    #   slab and pops out of its outer face** as a lone green boulder floating on a blank
+    #   concrete wall, ~0.9 m above the wall's base, with a second lobe just breaking the
+    #   surface below it.
+    #   Cause `[measured]`: `backdrop_instances()` laid the FIRST clump of a row exactly on
+    #   the `a0` ray (s = 0 -> a = a0) and then only the clump CENTRE was kept inside
+    #   12..78 / 282..348. A clump is not a point: with `jit_pos` 0.075 m and a largest
+    #   lobe `rx0·(1+jit_scale)·1.15`, its azimuthal half-envelope is **5.46° (row 0) /
+    #   5.60° (row 1)** at those radii, so the k=1 clumps reached down to **277.29°** —
+    #   straight through `cut_wall` (278.0..281.2, r 5.0..7.85, z −1.6..+1.06), which fully
+    #   contains the r 5.78..6.31 / z +0.04..+0.88 band those lobes occupy. **17 lobes**
+    #   were inside the slab; the north wall (78.8..82.0) escaped only because the dropout
+    #   RNG happened to end that run early — i.e. by luck, not by construction.
+    #   Fix: `backdrop_instances()` now generates clump centres over the arc **inset by
+    #   that same half-envelope**, so the arcs read as the envelope they were always
+    #   documented to be. Measured after the inset: 0.000° overrun beyond 12..78 /
+    #   282..348, and the nearest lobe stands **0.80° (0.087 m)** clear of `cut_wall`.
+    #   No radius, z or material moves; `backdrop_selfcheck` ⑧ gates both numbers.
     backdrop_shrub=dict(base_z=-0.06, embed=0.5, taper=0.14,
                         jit_step=0.35, skip=0.12, jit_pos=0.075,
                         jit_scale=0.15, jit_h=0.12,
@@ -838,14 +907,45 @@ def _deep_update(dst, src):
 #   intrusion, floating and silhouette height can be measured without Isaac.
 #   yield: (px, py, pz, ax, ay, az, row, k, lobe)
 # ===========================================================================
+# [GT-75] tangential half-width factor of a lobe. `ay = ax · U(2−A, A)`, so the
+#   worst tangential half-extent of a lobe is `ax · A`. Declared once because the
+#   azimuthal end-inset below is derived from it; A = 1.15 reproduces the literal
+#   `uniform(0.85, 1.15)` it replaces, so the RNG stream is unchanged [computed].
+_LOBE_ASPECT = 1.15
+
+
+def _lobe_arc_pad(rr0, rx0, jit_pos, jit_scale):
+    """[GT-75] Worst-case azimuthal half-envelope of one clump on row `rr0` [rad].
+
+    A clump centre is jittered by `jit_pos` in both r and (r·)azimuth, and its
+    largest lobe carries `ax = rx0·(1+jit_scale)`, `ay` up to `_LOBE_ASPECT·ax`, at
+    a radius as small as `rr0 − jit_pos`. The clump therefore sweeps
+
+        pad = jit_pos/rr0 + rx0·(1+jit_scale)·_LOBE_ASPECT / (rr0 − jit_pos)
+
+    radians either side of its nominal ray. Generating clump centres over
+    `[a0+pad, a1−pad]` puts the whole lobe envelope inside the declared arc **by
+    construction** — the arc's clearance from `cut_wall` is then a real clearance
+    rather than a clearance of the centres only.
+    """
+    return (jit_pos / rr0
+            + rx0 * (1.0 + jit_scale) * _LOBE_ASPECT / (rr0 - jit_pos))
+
+
 def backdrop_instances():
     sh = PARAMS["backdrop_shrub"]
     b = PARAMS["bowl"]
     emb = sh["embed"]
     for r_i, (rr0, step, rx0, rz0, h_top, nlobe) in enumerate(sh["rows"]):
+        # [GT-75] clump centres run over the arc INSET by the lobe envelope
+        pad = _lobe_arc_pad(rr0, rx0, sh["jit_pos"], sh["jit_scale"])
         for a_i, (a0, a1) in enumerate(sh["arcs"]):
+            a_lo = math.radians(a0) + pad
+            a_hi = math.radians(a1) - pad
+            if a_hi <= a_lo:                  # arc narrower than one clump -> empty
+                continue
             k, s = 0, 0.0
-            span = math.radians(a1 - a0) * rr0            # arc length [m]
+            span = (a_hi - a_lo) * rr0                    # arc length [m]
             while s <= span + 1e-6:
                 rnd = random.Random(int(r_i * 9176 + a_i * 3571 + k * 7919))
                 s_next = s + step * (1.0 + rnd.uniform(-sh["jit_step"],
@@ -854,7 +954,7 @@ def backdrop_instances():
                 if rnd.random() < sh["skip"]:             # dropout -> clumps/gaps
                     s = s_next
                     continue
-                a = math.radians(a0) + s / rr0
+                a = a_lo + s / rr0
                 sc_ = 1.0 + rnd.uniform(-sh["jit_scale"], sh["jit_scale"])
                 hh = h_top * (1.0 + rnd.uniform(-sh["jit_h"], sh["jit_h"]))
                 rx, rz = rx0 * sc_, rz0 * sc_
@@ -869,7 +969,9 @@ def backdrop_instances():
                     yield (b["cx"] + rr * math.cos(a + da),
                            b["cy"] + rr * math.sin(a + da),
                            z_lo + (z_hi - z_lo) * t,
-                           rx * f, rx * f * rnd.uniform(0.85, 1.15), rz * f,
+                           rx * f,
+                           rx * f * rnd.uniform(2.0 - _LOBE_ASPECT, _LOBE_ASPECT),
+                           rz * f,
                            r_i, k, j)
                 s = s_next
 
@@ -886,6 +988,12 @@ def backdrop_selfcheck(verbose=True):
     ⑥ Camera           : does every preset eye stay outside the lobe ellipsoids?
     ⑦ Lobe continuity  : is the z gap between adjacent lobes of one clump ≤ 1.35·min(az)?
                          (beyond that the stack breaks and turns into "beads floating in mid-air".)
+    ⑧ Azimuth envelope : [GT-75] does the whole lobe (centre ± its tangential half-extent),
+                         not just its centre, stay inside the declared arc — and how far
+                         does the nearest lobe stand from the `cut_wall` slabs it used to
+                         be planted inside? ① and ② measured radius only, so a lobe could
+                         sit dead centre of the band and still be swallowed by the wall
+                         at the arc end.
     """
     b = PARAMS["bowl"]
     sh = PARAMS["backdrop_shrub"]
@@ -917,9 +1025,29 @@ def backdrop_selfcheck(verbose=True):
                     + ((ez - pz) / az) ** 2) <= 1.0:
                 hits.append(name)
                 break
+    # ⑧ [GT-75] azimuthal envelope of each lobe vs (a) its declared arc, (b) cut_wall.
+    #   The lobes are axis-aligned ellipsoids, so the tangential half-extent is bounded
+    #   by max(ax, ay); at radius rr that is `degrees(max(ax,ay)/rr)` of azimuth.
+    az_over, wall_gap = 0.0, 1e9
+    for px, py, pz, ax, ay, azz, *_ in inst:
+        rr = math.hypot(px - b["cx"], py - b["cy"])
+        aa = math.degrees(math.atan2(py - b["cy"], px - b["cx"])) % 360.0
+        half = math.degrees(max(ax, ay) / rr)
+        lo, hi = aa - half, aa + half
+        for s0, s1 in sh["arcs"]:                 # the arc this clump belongs to
+            if s0 <= aa <= s1:
+                az_over = max(az_over, s0 - lo, hi - s1)
+                break
+        for w0, w1 in PARAMS["cut_wall"]["arcs"]:
+            if hi <= w0 or lo >= w1:              # disjoint -> a real clearance
+                wall_gap = min(wall_gap, w0 - hi if hi <= w0 else lo - w1)
+            else:                                 # overlapping -> planted in the slab
+                wall_gap = min(wall_gap, -(min(hi, w1) - max(lo, w0)))
+    az_over = max(az_over, 0.0)
     ok = (r_min >= wall_out - 1e-6 and r_max <= yard_out
           and z_bot <= sh["base_z"] and z_top > wall_top
-          and lobe_h <= 0.50 and not hits and gap_ratio <= 1.35)
+          and lobe_h <= 0.50 and not hits and gap_ratio <= 1.35
+          and az_over <= 1e-9 and wall_gap > 0.0)
     if verbose:
         n_pos = len(stacks)
         print("=" * 68)
@@ -940,9 +1068,14 @@ def backdrop_selfcheck(verbose=True):
         print(f"  ⑥ 카메라 매몰      {hits if hits else '없음 → OK'}")
         print(f"  ⑦ 로브 연속        최대 간격/rz = {gap_ratio:.3f} ≤ 1.35 → "
               f"{'OK(스택 끊김 0)' if gap_ratio <= 1.35 else 'FAIL'}")
+        print(f"  ⑧ 방위 봉투        선언 호 이탈 {az_over:.3f}° = 0 · 측벽(cut_wall) "
+              f"이격 {wall_gap:+.3f}° ({math.radians(abs(wall_gap))*sh['rows'][1][0]*1000:.0f} mm "
+              f"@r {sh['rows'][1][0]:.2f}) → "
+              f"{'OK(벽 관입 0)' if az_over <= 1e-9 and wall_gap > 0.0 else 'FAIL'}")
         print("=" * 68)
     return ok, dict(n=len(inst), r_min=r_min, r_max=r_max, z_top=z_top,
-                    lobe_h=lobe_h, hits=hits, gap=gap_ratio)
+                    lobe_h=lobe_h, hits=hits, gap=gap_ratio,
+                    az_over=az_over, wall_gap=wall_gap)
 
 
 def _self_ast():
@@ -1010,6 +1143,17 @@ def podium_step_selfcheck(verbose=True):
          `r·cos(π/n)`. At the pessimistic n = 32 that is 14.4 mm on r 3.0, so the
          innermost step must underlap the podium by more than that;
       ④ the lapped ring must **not** be coplanar with the podium top disc.
+
+    [GT-75] two end-finish gates, because ①~④ measure the RUN and the round's verdict
+    was about the run END:
+      ⑤ **end ladder** — walking off the run sideways (podium → top course → cheek →
+         apron) must be the same riser rhythm as walking up it (apron → bottom course →
+         top course → podium): every riser ≤ 0.20 m and the two ladders' worst risers
+         within 5 mm of each other. A cheek at the podium top made the last of those
+         risers 0.347 m, i.e. a blank blade twice the height of the steps it flanked;
+      ⑥ **no coplanar top pair** — the cheek shares an r window and a 0.2° azimuth
+         window with both courses, so its top face must sit a real distance from theirs
+         (either the 3 mm cascade or a full riser), never on the same plane.
     """
     po = PARAMS["podium"]
     ps = po["steps"]
@@ -1032,8 +1176,24 @@ def podium_step_selfcheck(verbose=True):
     lap = ps["under"]
     # ④ coplanarity with the podium top disc
     dz = abs((po["top_z"] - ps["z_cascade"]) - po["top_z"])
+    # ⑤/⑥ [GT-75] the run END. `z_apron` is the stage rim top face the flight stands on.
+    z_apron = PARAMS["stage"]["rim"]["top_z"]
+    cheek_z = ps["tops"][ps["cheek_level"]] - ps["z_cascade"]
+    tops_eff = [t - (ps["z_cascade"] if i == last else 0.0)
+                for i, t in enumerate(ps["tops"])]
+    radial = [z_apron] + tops_eff + [po["top_z"]]          # apron -> ... -> podium
+    end = [po["top_z"], tops_eff[-1], cheek_z, z_apron]     # podium -> ... -> apron
+    r_rise = [abs(b - a) for a, b in zip(radial, radial[1:])]
+    e_rise = [abs(b - a) for a, b in zip(end, end[1:])]
+    proud = cheek_z - z_apron                              # end block above the apron
+    ladder_ok = (max(e_rise) <= 0.20
+                 and abs(max(e_rise) - max(r_rise)) <= 0.005)
+    # ⑥ the cheek top vs every course top (they share r and a 0.2° azimuth window)
+    dz_cheek = min(abs(cheek_z - t) for t in tops_eff)
+    cheek_ok = dz_cheek >= 0.001
     ok = (gap_max <= 0.002 and over_max <= 1e-9
-          and lap >= 2.0 * cyl_dip and 0.001 <= dz <= 0.010)
+          and lap >= 2.0 * cyl_dip and 0.001 <= dz <= 0.010
+          and ladder_ok and cheek_ok)
     if verbose:
         print("=" * 68)
         print("scene05 [W3 L05·K4(d)] 승강 계단 아크 쐐기 검산 — 진성 환형섹터")
@@ -1053,9 +1213,20 @@ def podium_step_selfcheck(verbose=True):
               f"{'OK' if 0.001 <= dz <= 0.010 else 'FAIL'}")
         print(f"  마구리(치크) {ps['cheek_deg']:.1f}° × 2/조 · 반경 "
               f"{ps['radii'][-1]-ps['under']:.2f}..{ps['radii'][0]:.2f} · 상면 "
-              f"{po['top_z']-ps['z_cascade']:+.3f} → G8 곡선 계단의 각진 마구리")
+              f"{cheek_z:+.3f} (단 {ps['cheek_level']} 레벨) → 계단 리듬을 잇는 각진 마구리")
+        print(f"  ⑤ 단높이 리듬     반경방향 {'/'.join(f'{v:.3f}' for v in r_rise)} · "
+              f"마구리방향 {'/'.join(f'{v:.3f}' for v in e_rise)} m — 최대 "
+              f"{max(e_rise):.3f} ≤ 0.200 · 양방향 차 "
+              f"{abs(max(e_rise)-max(r_rise))*1000:.0f} mm ≤ 5 → "
+              f"{'OK(연속)' if ladder_ok else 'FAIL'}")
+        print(f"  ⑥ 마구리 돌출     에이프런 {z_apron:+.3f} 위 {proud:.3f} m "
+              f"(구 포디움 레벨 0.347 m) · 단 상면과의 최소 이격 "
+              f"{dz_cheek*1000:.0f} mm ≥ 1 → "
+              f"{'OK(동일면 0)' if cheek_ok else 'FAIL'}")
         print("=" * 68)
-    return ok, dict(gap=gap_max, over=over_max, lap=lap, cyl_dip=cyl_dip, dz=dz)
+    return ok, dict(gap=gap_max, over=over_max, lap=lap, cyl_dip=cyl_dip, dz=dz,
+                    proud=proud, dz_cheek=dz_cheek,
+                    r_rise=r_rise, e_rise=e_rise)
 
 
 def arc_selfcheck(verbose=True):
@@ -1630,6 +1801,10 @@ BANNER = """\
                        등간격 도열이 사라지고 빈틈/군락이 생겼는가
  9. [v7] 승강 계단   — rim_view·side_arc 400 % 에서 호 끝의 나이프 에지가
                        **각진 마구리**로 바뀌었는가, 무대 단과의 초승달 틈 0
+ 9-1.[GT-75] 계단 마구리 — side_arc 에서 계단 끝이 **에이프런 위 0.172 m 한 단**으로
+                       내려앉아 계단 리듬을 잇는가(구 0.347 m 민무늬 판벽)
+ 9-2.[GT-75] 측벽 관입 — side_arc·plaza_approach 의 남측 cut_wall 외면에서
+                       **튀어나온 초록 바위(관목 로브)가 사라졌는가**
 10. [v7] 서측 볼라드 — stage_lookup 지평선의 백색 포스트 열이 사라지고
                        진입축 4본(도장 강재)만 남았는가
 11. [GT-69] 관계 배치 — stage_lookup 에서 진입로(가로등 2·가로수 2·벤치 2·
@@ -1985,16 +2160,21 @@ def main():
                     a0, a1, ps["seg"], ztop, ps["base_z"], M["stage"], **ARC)
             # [v7 judgment §4 remaining 2] end caps (cheeks) - hide the knife edges at both arc ends.
             #   one short arc of thickness cheek_deg each, covering the full radial width (3.0..3.75).
-            #   top face = the podium top face (−0.853) -> 0.35 m above the apron (the same
-            #   drop as the podium, no new hazard). Pushed toward the stair by overlap to close the gap.
+            #   Pushed toward the stair by overlap to close the gap.
+            # [GT-75] the cheek sits on course `cheek_level` (the bottom course), not on
+            #   the podium top: the run end steps down in the flight's own rhythm instead
+            #   of terminating in a 0.347 m blank blade. Rationale + measured ladder in the
+            #   PARAMS["podium"] comment; material is unchanged (`M["stage"]`, the same
+            #   Look prim the podium and the apron bind).
             cd, ov = ps["cheek_deg"], ps["cheek_overlap"]
+            cheek_z = ps["tops"][ps["cheek_level"]] - ps["z_cascade"]
             for tag, ca0, ca1 in (("A", a0 - cd + ov, a0 + ov),
                                   ("B", a1 - ov, a1 + cd - ov)):
                 sc.build_arc_steps(
                     stage, f"/World/Scene05/Stage/PodiumCheek_{j}{tag}",
                     b["cx"], b["cy"], ps["radii"][-1] - ps["under"],
                     ps["radii"][0], ca0, ca1, 1,
-                    po["top_z"] - ps["z_cascade"], ps["base_z"], M["stage"],
+                    cheek_z, ps["base_z"], M["stage"],
                     **ARC)
 
     def build_flight(M, prefix, a0, a1, seg):

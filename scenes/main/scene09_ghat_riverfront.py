@@ -277,7 +277,15 @@ PARAMS = dict(
     #   It uses the same (xa, xb, tz, base_z), so the seam error = 0.
     embankment=dict(y_edge=40.0),
     # Water : from the stair submergence line to the far side (river width ~30m)
-    water=dict(x_far=44.0, y0=-40.0, y1=40.0),
+    #   [GT-86] y0/y1 -+40 -> -+150. **The channel width (x 11.92..44) and water_z are
+    #   untouched** — the drop anchor is the waterline on the stairs and it does not move.
+    #   What moves is the lake's *lateral* extent, and it has to: the backdrop masses ran to
+    #   y -+108 over a water plate that stopped at -+40, so from `park_vista` and `g9_oblique`
+    #   every mass beyond |y| 40 hung over **nothing** and the sky showed under it (the
+    #   260731 verdict, "a cloud across the lake"). Grounding the belt means the ground and
+    #   the water under it have to reach as far as the belt does. -+150 = the far-shore
+    #   plate's `lake_y`, so water and shore share one edge with no gap [computed].
+    water=dict(x_far=44.0, y0=-150.0, y1=150.0),
     # Far-side bank (sandstone) + tree line
     #   [B-09-2] above_water 0.3 → 1.6 / hedge 2.0 → 3.6 / trees 3 → 8 + 2 buildings:
     #   fixes the horizon-closure failure where the top half of the frame was uniform teal (an 'infinity pool').
@@ -288,12 +296,89 @@ PARAMS = dict(
     #   horizon-closure effect and the hedge/tree/building base_z all stay as they were.
     far_bank=dict(x0=44.0, x1=74.0, y0=-40.0, y1=40.0, above_water=1.6,
                   thick=2.4),
-    far_hedge=dict(cx=52.0, sx=1.4, length=24.0, h=3.6),
-    far_hedges=[dict(cy=-24.0), dict(cy=0.0), dict(cy=24.0)],
-    far_trees=[dict(cx=56.0, cy=-28.0), dict(cx=57.5, cy=-20.0),
-               dict(cx=55.5, cy=-11.0), dict(cx=57.0, cy=-3.0),
-               dict(cx=55.5, cy=5.0), dict(cx=57.5, cy=13.0),
-               dict(cx=56.0, cy=21.0), dict(cx=57.0, cy=29.0)],
+    # === [GT-86] far-shore TERRAIN — the ground every backdrop mass now stands on =========
+    #   The 260731 verdict on this scene: *"What is that cloud-like thing across the lake?"*
+    #   Measured cause, from `look_check/scene09/260731_w3_full/pt_noon_g9_oblique.png` and
+    #   `pt_noon_park_vista.png`: `far_hills` ran x 68..141 and y -120..+132 while the only
+    #   terrain out there — `far_bank` — is x 44..74, y -+40. **Every ridge outside that
+    #   30 x 80 m rectangle had no ground under it at all**, so each ridge body box showed its
+    #   flat bottom face and its raw end walls against the sky, and the belt terminated in
+    #   mid-air over the water. That is the "flat-bottomed slab" and it is a grounding
+    #   failure, not a tone failure.
+    #
+    #   Fix = five terrain plates that tile the whole backdrop footprint with **no plan
+    #   overlap** (so no two coplanar top faces can z-fight) and **no free edge inside any
+    #   camera frame** (`backdrop_selfcheck` proves the second claim):
+    #     SideS/SideN  x_west..x1  |y| 150..182  — the lake's own S/N shore
+    #     BankS/BankN  44..rear_x0 |y| 40..150   — the far bank continued past its y edges
+    #     Rear         rear_x0..x1 |y| <= 150    — the wooded terrace behind the shore
+    #   **`rear_x0` = `far_bank["x1"]` and `rise` = 0.0 — a butt joint, deliberately.** The
+    #   first cut of this row raised the Rear plate 0.35 m so that it would *bury* the far
+    #   bank's +X cliff face; that works, but it substitutes a dead-straight 0.35 m lip
+    #   running 300 m along x = 72 (0.29 deg, ~9 px at 70 m [computed]) for the cliff, and a
+    #   300 m machined line in a natural shoreline is the same class of defect this round
+    #   exists to remove. Butting the plates at x = 74 instead leaves the two solids sharing
+    #   one plane: the bank's +X face and Rear's -X face are coincident and face **opposite
+    #   ways**, so neither is ever the front-most surface, and above z -5.99 there is nothing
+    #   to see there at all. Every plate therefore ships at one elevation, `fb_z`, and the
+    #   far shore has no seam, no lip and no tone break anywhere in it.
+    #   Plate bottoms: side/bank thick 2.4 -> z -5.99 (below water -5.19, exactly the
+    #   `far_bank` convention), rear thick 4.6 -> z -8.19. `collider=False` on all five:
+    #   nothing walks 100 m across open water, and the hazard/collision box list must not
+    #   change for a backdrop row.
+    far_shore=dict(x_west=-40.0, x1=158.0, rear_x0=74.0, lake_y=150.0,
+                   edge_y=184.0, rise=0.0, thick_side=2.4, thick_rear=4.6),
+    # === [GT-86] shoreline scrub — was a 3-run clipped hedge (`build_hedge`, 3.6 m) ========
+    #   In both review cuts that row read as **a line of identical dark-green balls** with a
+    #   machined scallop on top, 45 m out on a wild lake shore. GT-63 keeps the box+crown
+    #   idiom for distant masses, and this row is inside the exception the user opened on
+    #   this scene: at 45 m a 2.4-3.2 m shrub subtends 3.0-4.1 deg (~100-130 px at
+    #   1920 px / 60 deg), well inside the range where real foliage geometry pays for itself.
+    #   -> `sc.place_hedge_row` per segment (real shrub USD, instanced, **legacy build_hedge
+    #   fallback when the assets are absent** — the degradation contract is unchanged), with
+    #   the runs BROKEN and the heights uneven so the fringe has a profile instead of a scallop.
+    #   9 shoreline segments over y -86..+94 (the shoreline is now continuous to |y| 150) plus
+    #   4 thicket clumps at x 65..69 that carry the eye from the open shore into the woods
+    #   (all four end at x <= 68.8, clear of the Rear plate's x 74 joint).
+    #   `sp` indexes `far_hedge["pools"]`; one species per continuous run (K4(b) S-2).
+    far_hedge=dict(w=2.4, seed=9021, overlap=0.10, end_margin=0.40,
+                   pools=(("Shrub/Holly.usd",), ("Shrub/Privet.usd",),
+                          ("Shrub/Burning_Bush.usd",))),
+    far_hedges=[dict(cx=51.0, cy=-86.0, L=18.0, h=2.4, sp=0),
+                dict(cx=52.4, cy=-64.0, L=14.0, h=3.0, sp=1),
+                dict(cx=50.6, cy=-44.0, L=20.0, h=2.6, sp=2),
+                dict(cx=52.0, cy=-20.0, L=16.0, h=3.2, sp=0),
+                dict(cx=50.8, cy=2.0, L=22.0, h=2.4, sp=1),
+                dict(cx=52.6, cy=26.0, L=14.0, h=3.0, sp=2),
+                dict(cx=51.2, cy=48.0, L=18.0, h=2.8, sp=0),
+                dict(cx=52.2, cy=72.0, L=16.0, h=2.4, sp=1),
+                dict(cx=50.6, cy=94.0, L=20.0, h=3.0, sp=2),
+                dict(cx=66.2, cy=-52.0, L=15.0, h=3.6, sp=2),
+                dict(cx=67.6, cy=-14.0, L=13.0, h=3.2, sp=0),
+                dict(cx=66.0, cy=22.0, L=15.0, h=3.8, sp=1),
+                dict(cx=67.4, cy=60.0, L=13.0, h=3.4, sp=2)],
+    # === [GT-86] far-shore tree stand ====================================================
+    #   Was 8 trees on `sc.build_tree`'s **default trunk_h 2.2**, i.e. a target height of
+    #   2.2 x 1.60 = 3.52 m [computed]. At 45 m a 3.5 m tree is 4.5 deg tall and stands
+    #   *behind a 3.6 m hedge*: in both review cuts the stand is invisible and the shore
+    #   reads as bare ground with a ball hedge on it. `th` is now declared per tree and the
+    #   stand is a real 8.6-11.5 m shoreline wood (belt species `oak_black`, native 19.74 m,
+    #   scaled ~0.5x, instanced by `build_tree`). It also gives the backdrop its middle
+    #   depth layer: real foliage at 45-60 m in front of the procedural ridges at 85-200 m,
+    #   which is the sane LOD ladder — no 15.6 M-triangle asset is spent at 140 m.
+    #   Spacing 6-11 m, irregular, 3 loose ranks; band d_min 7.50 m is satisfied 6x over.
+    far_trees=[dict(cx=56.4, cy=-84.0, th=5.6), dict(cx=61.8, cy=-76.0, th=6.4),
+               dict(cx=55.0, cy=-68.0, th=6.0), dict(cx=64.5, cy=-60.0, th=5.8),
+               dict(cx=57.8, cy=-54.0, th=6.8), dict(cx=54.2, cy=-45.0, th=6.2),
+               dict(cx=62.6, cy=-38.0, th=7.0), dict(cx=56.0, cy=-30.0, th=5.8),
+               dict(cx=66.0, cy=-24.0, th=6.6), dict(cx=58.6, cy=-17.0, th=6.0),
+               dict(cx=54.6, cy=-8.0, th=6.4), dict(cx=63.4, cy=-2.0, th=7.2),
+               dict(cx=57.2, cy=6.0, th=5.4), dict(cx=60.8, cy=14.0, th=6.6),
+               dict(cx=54.8, cy=21.0, th=6.0), dict(cx=65.2, cy=28.0, th=6.8),
+               dict(cx=58.0, cy=35.0, th=5.8), dict(cx=62.0, cy=44.0, th=6.4),
+               dict(cx=55.4, cy=52.0, th=6.2), dict(cx=66.4, cy=62.0, th=7.0),
+               dict(cx=59.2, cy=70.0, th=5.6), dict(cx=63.8, cy=80.0, th=6.6),
+               dict(cx=56.8, cy=90.0, th=6.0)],
     # [W3 S09 · row (6)] **The 2 far-side building silhouettes are DELETED.**
     #   They were the v5/B-09-2 horizon-closure device ("the top half of the frame was uniform
     #   teal, an infinity pool"). G9 answers the same question differently and the image is the
@@ -305,32 +390,101 @@ PARAMS = dict(
     #   over a **wider** span, so B-09-2's failure mode cannot return; `horizon_selfcheck()`
     #   asserts the elevation subtended at the two water cameras against the old boxes.
     #
-    # Autumn hillside belt — 3 ridges at increasing distance, each a row of overlapping
-    #   ellipsoid masses on a low ridge body. Colours are the two autumn tones G9 shows
-    #   (ginkgo yellow, maple orange) plus the dark conifer that a Korean hillside always
-    #   carries; the far ridge is desaturated toward the sky (aerial perspective), which is
-    #   why `hill_c` is both lighter and greyer than `hill_a`, not darker.
-    #   (cx, cy, sx, sy, h, tone) — tone indexes (hill_a, hill_b, hill_c).
-    #   [revised after the first pilot] the first belt was **9 ridges over y −40…+40 only**, which
-    #   from `g9_oblique` filled one corner and left the rest of the horizon open, and its ridge
-    #   **body box stood out as a hard slab** under the crowns (`body 0.55 h`). Two measured
-    #   corrections: the belt is widened to **y −108…+108** so it closes the horizon across the
-    #   whole water cut (the water plate itself is y ±40, and at 96–150 m a ±40 belt subtends only
-    #   ±22°), and the body drops to **0.30 h** with the crowns overlapping enough to hide it.
-    far_hills=[dict(cx=78.0, cy=-84.0, sx=16.0, sy=44.0, h=11.0, tone=1),
-               dict(cx=76.0, cy=-46.0, sx=15.0, sy=38.0, h=12.5, tone=0),
-               dict(cx=79.0, cy=-10.0, sx=16.0, sy=36.0, h=12.0, tone=1),
-               dict(cx=77.0, cy=24.0, sx=15.0, sy=36.0, h=13.0, tone=0),
-               dict(cx=80.0, cy=60.0, sx=16.0, sy=40.0, h=11.5, tone=1),
-               dict(cx=98.0, cy=-96.0, sx=20.0, sy=48.0, h=16.0, tone=2),
-               dict(cx=100.0, cy=-52.0, sx=20.0, sy=44.0, h=17.0, tone=2),
-               dict(cx=99.0, cy=-6.0, sx=20.0, sy=48.0, h=16.5, tone=2),
-               dict(cx=101.0, cy=40.0, sx=20.0, sy=44.0, h=17.5, tone=2),
-               dict(cx=98.0, cy=84.0, sx=20.0, sy=44.0, h=16.0, tone=2),
-               dict(cx=126.0, cy=-60.0, sx=26.0, sy=76.0, h=19.0, tone=2),
-               dict(cx=128.0, cy=20.0, sx=26.0, sy=80.0, h=19.5, tone=2),
-               dict(cx=125.0, cy=96.0, sx=26.0, sy=72.0, h=18.5, tone=2)],
-    hill=dict(blobs=11, blob_r=0.58, spread=0.92, body_frac=0.30, seed=91),
+    # Autumn hillside belt.
+    #   [GT-86 — the user overrides the GT-63 "cheap distant mass is intended" ruling for
+    #    THIS scene, recorded in the ledger row.] Two measured defects were rebuilt out:
+    #
+    #   (a) **balloons.** The old crown was `blob_r 0.58 x h` in z on a plan radius of
+    #       `sx x 0.92 / 2` — 12.4-23.9 m across. From the h1.8 grid eye that subtends
+    #       **8.0-10.0 deg**, ~290 px at 1920 px / 60 deg [computed]. A real broadleaf crown
+    #       is 4-8 m across. The belt was drawing objects 2.5x too big to be trees, which is
+    #       why it read as cumulus. The crown radius is now declared per ridge (`cr`) and set
+    #       so that **every belt subtends the same 3.2-3.6 deg** whatever its distance — a
+    #       real distance LOD, not a constant: cr 2.8 @ 88 m, 3.6 @ 113 m, 4.6 @ 134 m,
+    #       5.6 @ 180 m (the flanking ridges).
+    #   (b) **the body box.** `body_frac 0.30 x h` was an axis-aligned cuboid under the
+    #       crowns; at 11-19 m tall it was never covered and it is the flat-topped slab and
+    #       the raw end walls visible in `pt_noon_g9_oblique.png`. It is **deleted**. The
+    #       landform is now `lobes` flattened ellipsoids whose centres sit BELOW the terrain
+    #       top (`sink` 0.55 of their own z radius), so only a cap emerges — a buried cap has
+    #       no bottom face and no end wall by construction, at any camera angle.
+    #
+    #   Silhouette: crowns are scattered on a jittered grid over the ridge footprint, each
+    #   drawn at 0.72-1.30 x cr with an independent z radius, and `spire_p` of them are
+    #   redrawn as narrow conifer spires (0.46 x radius, 2.30 x height) that break the crest
+    #   line — the sawtooth-with-spikes profile of a Korean wooded ridge. Every crown is sunk
+    #   `bury` of its z radius into the surface it stands on, so no crown floats and none
+    #   shows a cut edge.
+    #   Tone: `hill_mix[tone]` are per-crown weights over (hill_a, hill_b, hill_c, hill_d),
+    #   so a ridge is a mixed stand, not one flat colour.
+    #
+    #   **`h` is the ridge's CREST height above its terrain plate, and it is honest.** The
+    #   first cut of this row kept the old meaning ("landform = h x land_frac, crowns on
+    #   top"), which made the realized crest of a 20.5 m ridge come out at **9.9 m** —
+    #   `horizon_selfcheck` and `backdrop_selfcheck` would both have been asserting against
+    #   a height the scene does not build. The assembler now solves the landform from the
+    #   crest instead: `land_h = h - (1 - bury) * cr * crown_ref`, so the mean crest crown
+    #   tops out at `base + h` and the two gates measure the mass that is actually there.
+    #   Heights are set from the two things that bind them [computed]:
+    #     - `horizon_selfcheck`: the nearest ridge face (x 74.2, 50.3 m from `from_river`)
+    #       must subtend >= 9.44 deg -> crest >= 8.36 m. Belt A ships 11.0-12.5 m.
+    #     - belt separation at the LOW eyes (the grid presets at z 0.3-1.8, where a farther
+    #       ridge is only visible if it is taller): z_B > 1.8 + 1.235 (z_A - 1.8) and
+    #       z_C > 1.8 + 1.231 (z_B - 1.8). Against the DERATED crest (0.85 h, the ratio the
+    #       gates use) that needs h_B > 12.1 and h_C > 13.4; the shipped 11.0 / 13.5 / 16.0
+    #       clears both.
+    #   `sx` widened with it (18-30 -> 26-34) so the landform slope stays in the 40-45 deg
+    #   band a Korean wooded ridge actually stands at, instead of becoming a thumb.
+    #
+    #   Layout (cx, cy, sx, sy, h, tone, cr) — 3 belts + 2 flanking shore ridges:
+    #     belt A  cx 90-92   h 11.0-12.5  the wooded slope right behind the shore; its toe is
+    #             at x 74.2, i.e. hard against the Rear plate's front edge [computed]
+    #     belt B  cx 112-114 h 13.5-14.5
+    #     belt C  cx 133-135 h 16.0-17.0  stands on the Rear plate's back edge, so the plate's
+    #             own far edge (x 158) is always behind a crest and never meets the sky
+    #     flank   cy -+167   h 13.5       on the SideS/SideN plates: these close the lake's own
+    #             S/N horizon, which is where `park_vista` and `g9_oblique` looked straight
+    #             past the old belt into empty dome.
+    #   Every footprint is inside a single terrain plate and every crown centre is clamped to
+    #   that plate inset by its own radius — `backdrop_selfcheck()` asserts both.
+    far_hills=[dict(cx=90.0, cy=-124.0, sx=26.0, sy=46.0, h=11.5, tone=0, cr=2.8),
+               dict(cx=91.0, cy=-86.0, sx=26.0, sy=42.0, h=12.5, tone=1, cr=2.8),
+               dict(cx=90.0, cy=-50.0, sx=26.0, sy=40.0, h=11.0, tone=0, cr=2.8),
+               dict(cx=92.0, cy=-14.0, sx=26.0, sy=40.0, h=12.5, tone=1, cr=2.8),
+               dict(cx=90.0, cy=22.0, sx=26.0, sy=40.0, h=11.5, tone=0, cr=2.8),
+               dict(cx=91.5, cy=58.0, sx=26.0, sy=40.0, h=12.0, tone=1, cr=2.8),
+               dict(cx=90.0, cy=96.0, sx=26.0, sy=46.0, h=11.0, tone=0, cr=2.8),
+               dict(cx=113.0, cy=-118.0, sx=30.0, sy=52.0, h=13.5, tone=1, cr=3.6),
+               dict(cx=112.0, cy=-70.0, sx=30.0, sy=52.0, h=14.5, tone=2, cr=3.6),
+               dict(cx=114.0, cy=-20.0, sx=30.0, sy=52.0, h=13.5, tone=1, cr=3.6),
+               dict(cx=112.0, cy=30.0, sx=30.0, sy=52.0, h=14.5, tone=2, cr=3.6),
+               dict(cx=114.0, cy=78.0, sx=30.0, sy=52.0, h=14.0, tone=1, cr=3.6),
+               dict(cx=113.0, cy=120.0, sx=30.0, sy=48.0, h=13.5, tone=2, cr=3.6),
+               dict(cx=135.0, cy=-112.0, sx=34.0, sy=60.0, h=16.0, tone=2, cr=4.6),
+               dict(cx=133.0, cy=-56.0, sx=34.0, sy=62.0, h=17.0, tone=2, cr=4.6),
+               dict(cx=135.0, cy=0.0, sx=34.0, sy=62.0, h=16.5, tone=2, cr=4.6),
+               dict(cx=133.0, cy=56.0, sx=34.0, sy=62.0, h=17.0, tone=2, cr=4.6),
+               dict(cx=135.0, cy=112.0, sx=34.0, sy=60.0, h=16.0, tone=2, cr=4.6),
+               dict(cx=60.0, cy=-167.0, sx=180.0, sy=20.0, h=13.5, tone=2, cr=5.6),
+               dict(cx=60.0, cy=167.0, sx=180.0, sy=20.0, h=13.5, tone=2, cr=5.6)],
+    #   `lobe_span` / `lobe_r` / `lobe_w` are the landform's fit to its own footprint, and
+    #   they are solved, not tuned: an ellipsoid sunk by `sink` of its z radius emerges with
+    #   `sqrt(1 - sink^2)` = 0.835 of its plan radius, so the outermost cap reaches
+    #   `lobe_span/2 + lobe_r` = 0.28 + 0.22 = **0.50** of the ridge length — exactly the
+    #   declared footprint, never past it — while adjacent caps still overlap
+    #   (centre pitch 0.28 L against radii 0.22 L each) so the ridge has no notch between
+    #   lobes. Across the ridge, `lobe_w + lobe_jit` = 0.43 + 0.07 = **0.50** likewise
+    #   [computed]. That is what lets `backdrop_selfcheck` test the footprint and be testing
+    #   the geometry.
+    hill=dict(lobes=3, sink=0.55, bury=0.45, pitch=1.55, crown_ref=1.20,
+              jit=0.30, spire_p=0.18, spire_r=0.46, spire_h=2.30, seed=91,
+              lobe_span=0.56, lobe_r=0.22, lobe_w=0.43, lobe_jit=0.07,
+              # per-crown tone weights over (hill_a maple, hill_b ginkgo,
+              #   hill_c haze, hill_d evergreen). Warm near, hazy far — the aerial
+              #   perspective is now carried by the MIX, not by one flat colour.
+              mix=((0.42, 0.26, 0.04, 0.28),
+                   (0.24, 0.44, 0.06, 0.26),
+                   (0.12, 0.16, 0.54, 0.18))),
     # [v5 adopted] mooring bollard → **waterfront boundary pile**: religious and ferry-landing colour removed,
     #   scaled down to a stair-head boundary pile for a waterfront park. r 0.13→0.09, h 1.1→0.50.
     #   [v6] the |y| 8.5 pair is deleted — it falls under the new pavilion eaves (x −7.25..−1.15, y 5.35..11.45)
@@ -703,16 +857,39 @@ PARAMS = dict(
         #   carries; `hill_c` is the far ridge and is deliberately **lighter and greyer**, not
         #   darker — aerial perspective washes a distant ridge toward the sky, and the old
         #   `far_color` boxes got that backwards (a 0.13 near-black silhouette at 70 m).
-        hill_a=(0.268, 0.196, 0.078),          # 단풍 maple orange-red
-        hill_b=(0.288, 0.252, 0.086),          # 은행 ginkgo yellow
+        # [GT-86] **levelled down x0.73.** The measured failure of the 260731 cut is that
+        #   the belt read as *cloud*, and the tone was half the cause: at 0.288 albedo the
+        #   render prediction is sRGB 0.74 (189/255) — brighter than the granite promenade
+        #   in the same frame, on a mass 90-140 m away. Measured autumn hillside reflectance
+        #   at that range sits in the 0.14-0.22 band, so the pair is re-levelled and the
+        #   hue ratio (1 : 0.731 : 0.291 / 1 : 0.875 : 0.299) is preserved exactly.
+        hill_a=(0.196, 0.143, 0.057),          # 단풍 maple orange-red
+        hill_b=(0.210, 0.184, 0.063),          # 은행 ginkgo yellow
+        # [GT-86] the dark evergreen a Korean hillside always carries, added as a **fourth**
+        #   tone. The three-tone belt gave every ridge one flat colour, which is the other
+        #   half of the cloud read; `hill_mix` now draws per crown from four tones, and this
+        #   is the one that supplies the tonal breaks between the warm masses.
+        hill_d=(0.058, 0.078, 0.048),          # 상록침엽 dark evergreen
         # [revised after the first pilot] the first value (0.176, 0.176, 0.148) was **darker**
         #   than the near ridges (0.268) — the exact opposite of what the comment above it claims,
         #   and it rendered as a near-black rock wall standing over the autumn ridge instead of
         #   receding behind it. Aerial perspective adds the sky's own light along the path, so a
         #   distant ridge is **lighter and bluer** than a near one, never darker. Corrected to sit
         #   above `hill_a`/`hill_b` in value with a blue bias, which is also what G9 shows.
-        hill_c=(0.230, 0.246, 0.288),          # far ridge, washed toward the sky
+        # [GT-86] levelled with the pair above (x0.85 here, not x0.73: the haze tone must stay
+        #   **above** hill_a/hill_b in value or aerial perspective inverts again).
+        hill_c=(0.196, 0.209, 0.245),          # far ridge, washed toward the sky
         hill_rough=1.0,
+        # [GT-86] the bare hillside under the canopy (the emerged landform caps). Deliberately
+        #   duller and greyer than `grass_tint` (x0.72 / x0.66 / x0.79): it is only ever seen
+        #   in the slivers between crowns at 85-200 m, where a promenade-bright green would
+        #   read as a painted flat. The far-shore ground plates themselves keep `grass_tint`,
+        #   identical to `FarBank`, so the shoreline carries **no tone seam** at all.
+        shore_tint=(0.396, 0.449, 0.332),
+        # [GT-86] procedural fallback tone for the shoreline scrub (`place_hedge_row` ->
+        #   `build_hedge` when the shrub assets are absent). Darker than the shore it stands
+        #   on, or the fringe disappears into the ground in the degraded arm.
+        scrub_tint=(0.232, 0.298, 0.196),
         # [v6 (1)] pavilion timber members — posts, tie beams, railing (reddish-brown pine) / raised floor (light floorboard)
         pav_wood_tint=(0.68, 0.44, 0.28), pav_floor_tint=(0.78, 0.60, 0.42),
         # [v8 judgment §4 (1)] the near-white roof was really a **specular additive term** (module
@@ -1185,6 +1362,13 @@ _ALBEDO_TABLE = [
     ("가을 산능선 a(단풍)",   None,          "hill_a",          True,  False),
     ("가을 산능선 b(은행)",   None,          "hill_b",          True,  False),
     ("가을 산능선 c(원경)",   None,          "hill_c",          True,  False),
+    # [GT-86] the fourth ridge tone and the bare-hillside tone. Both are large but
+    #   vertical-ish masses at 85-200 m, so criterion (A) governs them and (B) does not —
+    #   the same treatment the three ridge tones above already carry. The far-shore ground
+    #   plates are NOT a new row: they bind `grass_tint`, which is already in this table.
+    ("가을 산능선 d(상록)",   None,          "hill_d",          True,  False),
+    ("원경 산체(지형 캡)",    "grass",       "shore_tint",      True,  False),
+    ("물가 관목 폴백",        "grass",       "scrub_tint",      False, False),
     ("갈대 이삭",             None,          "reed_plume_color", False, False),
 ]
 
@@ -1297,6 +1481,10 @@ _BED_ASSET_ATLAS = {
     "Shrub/Burning_Bush.usd": "burningbush_leaf_basecolor.png",
     "Shrub/Juniper.usd":      "green1_basecolor.png",
     "Shrub/Holly.usd":        "hollyprivet_basecolor.png",
+    # [GT-86] Privet registered — the shoreline scrub draws it, and `Holly`/`Privet` share
+    #   one leaf atlas (`hollyprivet_basecolor.png`), so the verdict is literally the same
+    #   measurement. Without the row the audit would have reported "계절 판정 미등록".
+    "Shrub/Privet.usd":       "hollyprivet_basecolor.png",
     "Shrub/Yew.usd":          "green1_basecolor.png",
     "Shrub/Boxwood.usd":      "green1_basecolor.png",
 }
@@ -1360,8 +1548,14 @@ def season_audit(verbose=True):
             tag = "REVISIT(금지 근거 약함)"
         rows.append((atlas, verdict, fr, tag, why))
     used = []
-    for b in PARAMS["beds"]:
-        a = b["species"]
+    # [GT-86] the shoreline scrub joins the audit. It is massed planting on the same rule as
+    #   a bed (one species per continuous run), and leaving it out would let a new row put a
+    #   spring blossom on an autumn shore without the gate saying a word. One entry per
+    #   distinct pool, not per segment — 13 segments draw from 3 pools.
+    _plant = [(b["tag"], b["species"]) for b in PARAMS["beds"]]
+    for _p in dict.fromkeys(PARAMS["far_hedge"]["pools"]):
+        _plant.append(("물가관목", _p[0]))
+    for b_tag, a in _plant:
         atlas = _BED_ASSET_ATLAS.get(a)
         ver = dict((x[0], x[1]) for x in _SEASON_RULE).get(atlas)
         prob = []
@@ -1372,8 +1566,8 @@ def season_audit(verbose=True):
         if ver is None:
             prob.append("계절 판정 미등록")
         if prob:
-            fails.append(f"{b['tag']}:{a}({'/'.join(prob)})")
-        used.append((b["tag"], a, atlas or "-", ver or "-", "OK" if not prob
+            fails.append(f"{b_tag}:{a}({'/'.join(prob)})")
+        used.append((b_tag, a, atlas or "-", ver or "-", "OK" if not prob
                      else "FAIL " + "/".join(prob)))
     ok = not fails
     if verbose:
@@ -1603,6 +1797,14 @@ def fov_selfcheck(verbose=True):
     return ok, rows
 
 
+# [GT-86] Both horizon gates derate the declared crest to **0.85 h** before measuring.
+#   `h` is the crest a ridge's TALLEST crowns reach; the continuous skyline a viewer sees is
+#   the p90 of the crown draw, measured at 0.85 h over the 977 crowns this table ships
+#   [measured, replaying the assembler's own RandomState]. Asserting against the maximum
+#   would be asserting against a silhouette made of a handful of spires.
+_CREST_KEEP = 0.85
+
+
 def horizon_selfcheck(verbose=True):
     """[W3 S09 row (6)] The deleted far-side building boxes closed the horizon; the autumn hills
     must close it **at least as high** from the two water cameras, or B-09-2's 'infinity pool'
@@ -1621,9 +1823,14 @@ def horizon_selfcheck(verbose=True):
     rows, bad = [], []
     for tag, ex, ez in cams:
         e_old = math.degrees(math.atan2(fb_z + old - ez, 66.0 - ex))
-        e_new = max(math.degrees(math.atan2(
-            fb_z + h["h"] - ez, (h["cx"] - h["sx"] / 2.0) - ex))
-            for h in PARAMS["far_hills"])
+        # [GT-86] `dx > 0` guard. GT-86 adds two flanking shore ridges whose near face is at
+        #   x = -35, i.e. **behind** both water eyes; `atan2(+dz, -dx)` returns ~+166 deg for
+        #   them and the max would have been a meaningless number that always passes. Only
+        #   masses in front of the eye can close the horizon in front of the eye.
+        e_new = max((math.degrees(math.atan2(
+            fb_z + h["h"] * _CREST_KEEP - ez, (h["cx"] - h["sx"] / 2.0) - ex))
+            for h in PARAMS["far_hills"]
+            if (h["cx"] - h["sx"] / 2.0) - ex > 0.0), default=-90.0)
         okr = e_new >= e_old
         if not okr:
             bad.append(tag)
@@ -1639,6 +1846,195 @@ def horizon_selfcheck(verbose=True):
         print(f"  ⇒ {'OK — 지평 폐합 유지 또는 개선' if ok else 'FAIL: ' + str(bad)}")
         print("=" * 68)
     return ok, rows
+
+
+# ===========================================================================
+# [C6] [GT-86] far-shore terrain — **one source** for the assembler and the gate.
+#   `build_far_shore` extrudes this table, `build_far_hills` seats every ridge and clamps
+#   every crown against it, and `backdrop_selfcheck` proves the two claims the user's
+#   verdict turns on. A gate that re-derives the ground from a copy proves nothing — the
+#   `hip_roof_topology` / `stepstone_outlines` single-source convention, applied again.
+# ===========================================================================
+def shore_plates():
+    """`[(tag, x0, y0, x1, y1, top_z, thick)]` — the far-shore terrain, tiled with **no plan
+    overlap**. Two plates that overlap in plan at the same top z would z-fight along the
+    shared face; two plates that merely touch cannot. Ordered near-to-far for readability;
+    `shore_top_at` returns the first hit, and the tiling makes 'first' unambiguous."""
+    _s, _b, _z, water_z, _h = compute_steps()
+    fb, fs = PARAMS["far_bank"], PARAMS["far_shore"]
+    fz = water_z + fb["above_water"]           # far-bank top face  [computed -3.590]
+    rz = fz + fs["rise"]                       # rear plate top; rise 0.0 -> the same -3.590
+    ts, tr = fs["thick_side"], fs["thick_rear"]
+    return [("BankS", fb["x0"], -fs["lake_y"], fs["rear_x0"], fb["y0"], fz, ts),
+            ("BankN", fb["x0"], fb["y1"], fs["rear_x0"], fs["lake_y"], fz, ts),
+            ("Rear", fs["rear_x0"], -fs["lake_y"], fs["x1"], fs["lake_y"], rz, tr),
+            ("SideS", fs["x_west"], -fs["edge_y"], fs["x1"], -fs["lake_y"], fz, ts),
+            ("SideN", fs["x_west"], fs["lake_y"], fs["x1"], fs["edge_y"], fz, ts)]
+
+
+def shore_plate_at(x, y):
+    """The plate a point stands on, or None. Boundaries are inclusive on both plates; a
+    ridge is only ever declared inside one of them (asserted by `backdrop_selfcheck`)."""
+    for row in shore_plates():
+        if row[1] <= x <= row[3] and row[2] <= y <= row[4]:
+            return row
+    return None
+
+
+def shore_top_at(x, y, default=None):
+    """Terrain top z at (x, y) on the far shore. `default` covers the far bank itself, whose
+    plate is `far_bank` and whose top face is the datum every other plate is measured from.
+    Callers pass `fb_z` — a planting station inside the bank rectangle then keeps the
+    bank's own top face and nothing moves."""
+    row = shore_plate_at(x, y)
+    return float(row[5]) if row is not None else default
+
+
+def _ray_box_near(ex, ey, ux, uy, x0, x1, y0, y1):
+    """Nearest positive distance at which the ray is inside the plan box (slab test).
+    None when it never enters."""
+    tmin, tmax = 0.0, 1e18
+    for a, u, lo, hi in ((ex, ux, x0, x1), (ey, uy, y0, y1)):
+        if abs(u) < 1e-12:
+            if a < lo or a > hi:
+                return None
+        else:
+            t1, t2 = (lo - a) / u, (hi - a) / u
+            if t1 > t2:
+                t1, t2 = t2, t1
+            tmin, tmax = max(tmin, t1), min(tmax, t2)
+    return tmin if tmax >= tmin else None
+
+
+def _ground_exit(ex, ey, ux, uy, step=1.0, far=440.0):
+    """Distance at which the ray last stands over covered ground (shore plate, far bank or
+    water plate). Marched rather than solved: the covered region is a union of five plates
+    plus the bank and the lake, and a march is the honest way to say 'the last one'."""
+    fb, wt = PARAMS["far_bank"], PARAMS["water"]
+    _s, _b, _z, water_z, _h = compute_steps()
+    wx0 = _s[PARAMS["stairs"]["nsteps"]
+             - PARAMS["stairs"]["submerge_from_bottom"]][0]
+    fz = water_z + fb["above_water"]
+    last, t = None, step
+    while t < far:
+        x, y = ex + ux * t, ey + uy * t
+        p = shore_plate_at(x, y)
+        if p is not None:
+            last = (t, p[5])
+        elif fb["x0"] <= x <= fb["x1"] and fb["y0"] <= y <= fb["y1"]:
+            last = (t, fz)
+        elif wx0 <= x <= wt["x_far"] and wt["y0"] <= y <= wt["y1"]:
+            last = (t, water_z)
+        t += step
+    return last
+
+
+# The cuts that look INTO the backdrop. `across_river` / `from_river` / `stair_flank_*` are
+#   excluded because they face the ghat (-X): the backdrop is behind them, and closing it
+#   there is `horizon_selfcheck`'s job, not this gate's.
+_BACKDROP_CAM_NAMES = ("g9_oblique", "park_vista", "preset_h1.8_d10",
+                       "preset_h0.3_d2", "waterline")
+_BACKDROP_HALF_FOV = 30.0
+
+
+def _backdrop_cams():
+    """`[(name, eye, tgt)]` read out of **`build_views()` itself**, not re-typed here. A gate
+    that keeps its own copy of the eye coordinates silently stops tracking the camera the
+    day someone re-aims it; this one cannot."""
+    steps, _bz, z_bot, water_z, _bh = compute_steps()
+    wx0 = steps[PARAMS["stairs"]["nsteps"]
+                - PARAMS["stairs"]["submerge_from_bottom"]][0]
+    v = build_views(steps[-1][1], z_bot, water_z, wx0)
+    return [(n, tuple(v[n]["eye"]), tuple(v[n]["tgt"]))
+            for n in _BACKDROP_CAM_NAMES if n in v]
+# The outer 8 % of frame width on each side is not sampled. At those bearings every cut in
+#   this scene already looks past the lake into the dome (the void ring x < 11.92 / |y| > 40
+#   beside the ghat is pre-existing and is not this row's to close), so asserting there
+#   would be asserting against the baseline rather than against this change. [measured]
+_BACKDROP_EDGE_SKIP = 0.08
+
+
+def backdrop_selfcheck(verbose=True):
+    """[GT-86] The two claims the user's verdict turns on, asserted from the shipped
+    coordinates with no render. Returns (ok, rows).
+
+      (A) **GROUNDED** — every ridge footprint, grown by its own crown radius, lies wholly
+          inside ONE terrain plate, and its base sits on that plate's top face. This is the
+          direct statement of "no mass hangs over water or sky": a mass that cannot leave
+          its plate cannot have a bottom face against the sky. (The assembler additionally
+          clamps each crown centre to the same rect inset by its own radius, so the
+          guarantee holds per crown, not just per footprint.)
+      (B) **CLOSED** — for every backdrop camera and every sampled bearing across its frame,
+          some ridge in front subtends a HIGHER elevation than the terrain's own far edge
+          along that bearing. That is exactly "the sky meets a treeline, never a bare ground
+          edge", and it is what `far_hills` exists for. Reported as a margin in degrees; the
+          worst margin is the number to watch between rounds.
+    """
+    plates = shore_plates()
+    rows_a, bad = [], []
+    for i, h in enumerate(PARAMS["far_hills"]):
+        r = float(h["cr"])
+        x0, x1 = h["cx"] - h["sx"] / 2.0 - r, h["cx"] + h["sx"] / 2.0 + r
+        y0, y1 = h["cy"] - h["sy"] / 2.0 - r, h["cy"] + h["sy"] / 2.0 + r
+        hit = next((p for p in plates
+                    if p[1] <= x0 and x1 <= p[3] and p[2] <= y0 and y1 <= p[4]),
+                   None)
+        m = 0.0 if hit is None else min(x0 - hit[1], hit[3] - x1,
+                                        y0 - hit[2], hit[4] - y1)
+        if hit is None:
+            bad.append(f"Hill_{i}(지면 밖)")
+        rows_a.append((i, hit[0] if hit else "-", m, hit is not None))
+    rows_b = []
+    for name, eye, tgt in _backdrop_cams():
+        ex, ey, ez = eye
+        az0 = math.degrees(math.atan2(tgt[1] - ey, tgt[0] - ex))
+        worst, worst_az, n = 1e9, None, 41
+        for k in range(n):
+            f = k / (n - 1.0)
+            if f < _BACKDROP_EDGE_SKIP or f > 1.0 - _BACKDROP_EDGE_SKIP:
+                continue
+            az = az0 - _BACKDROP_HALF_FOV + 2.0 * _BACKDROP_HALF_FOV * f
+            ux = math.cos(math.radians(az))
+            uy = math.sin(math.radians(az))
+            ge = _ground_exit(ex, ey, ux, uy)
+            if ge is None:
+                continue
+            te, zg = ge
+            e_edge = math.degrees(math.atan2(zg - ez, te))
+            e_mass = -90.0
+            for h in PARAMS["far_hills"]:
+                tn = _ray_box_near(ex, ey, ux, uy,
+                                   h["cx"] - h["sx"] / 2.0, h["cx"] + h["sx"] / 2.0,
+                                   h["cy"] - h["sy"] / 2.0, h["cy"] + h["sy"] / 2.0)
+                if tn is None or tn <= 0.5 or tn >= te:
+                    continue
+                p = shore_plate_at(h["cx"], h["cy"])
+                top = (p[5] if p else 0.0) + h["h"] * _CREST_KEEP
+                e_mass = max(e_mass,
+                             math.degrees(math.atan2(top - ez, tn)))
+            if e_mass - e_edge < worst:
+                worst, worst_az = e_mass - e_edge, az
+        okc = worst > 0.0
+        if not okc:
+            bad.append(f"{name}(지평 열림)")
+        rows_b.append((name, worst, worst_az, okc))
+    ok = not bad
+    if verbose:
+        print("=" * 68)
+        print("scene09 [GT-86] 원경 배경 접지·지평 검산 (렌더 없음)")
+        print("=" * 68)
+        print("  (A) 접지 — 능선 발자국+수관반경이 지형판 안에 있는가")
+        for i, tag, m, okr in rows_a:
+            print(f"    Hill_{i:<2d} 지형판 {tag:6s} 가장자리 여유 {m:6.2f} m  "
+                  f"{'OK' if okr else 'FAIL(허공)'}")
+        print("  (B) 폐합 — 프레임 방위별 [능선 고도 − 지형 끝단 고도]")
+        for name, w, az, okr in rows_b:
+            print(f"    {name:16s} 최악 여유 {w:+6.2f}° @방위 "
+                  f"{(f'{az:+7.2f}' if az is not None else '   n/a')}  "
+                  f"{'OK' if okr else 'FAIL(하늘이 맨땅 끝단과 만난다)'}")
+        print(f"  ⇒ {'OK — 허공 부양 0건 · 지평 열림 0건' if ok else 'FAIL: ' + str(bad)}")
+        print("=" * 68)
+    return ok, rows_a + rows_b
 
 
 # ===========================================================================
@@ -1892,7 +2288,10 @@ def main():
         ok5, _ = horizon_selfcheck()
         # [W3 P09] the 판석 디딤돌 permission gate (GT-41 (1)).
         ok6, _ = stepstone_selfcheck()
-        sys.exit(0 if (ok1 and ok2 and ok3 and ok4 and ok5 and ok6) else 1)
+        # [GT-86] the backdrop grounding + skyline-closure gate.
+        ok7, _ = backdrop_selfcheck()
+        sys.exit(0 if (ok1 and ok2 and ok3 and ok4 and ok5 and ok6 and ok7)
+                 else 1)
 
     sc.check_assets(ASSET_ROLES, hdri=PARAMS["light"]["hdri"])
     simulation_app = sc.boot(capture_mode or smoke)
@@ -2000,6 +2399,14 @@ def main():
                                 specular_level=0.0)
         M["grass"] = tex("grass", "/World/Looks/Grass", sca["grass"],
                          tint=mp["grass_tint"])
+        # [GT-86] the emerged landform caps (bare hillside under the canopy) and the
+        #   procedural fallback tone for the shoreline scrub. Both ride the grass texture at
+        #   a 2.4x coarser world scale: at 80-150 m the promenade-scale tiling turns into
+        #   uniform noise, and the coarser cell keeps a legible grain instead [computed].
+        M["shore"] = tex("grass", "/World/Looks/Shore", sca["grass"] * 2.4,
+                         tint=mp["shore_tint"])
+        M["scrub"] = tex("grass", "/World/Looks/Scrub", sca["grass"],
+                         tint=mp["scrub_tint"])
         M["water"] = sc.make_pbr(stage, "/World/Looks/Water",
                                  diffuse_color=mp["water_color"],
                                  roughness_const=mp["water_rough"],
@@ -2017,7 +2424,7 @@ def main():
                                 diffuse_color=mp["lily_color"],
                                 roughness_const=mp["lily_rough"],
                                 specular_level=0.0)
-        for _k in ("hill_a", "hill_b", "hill_c"):
+        for _k in ("hill_a", "hill_b", "hill_c", "hill_d"):   # [GT-86] +hill_d
             M[_k] = sc.make_pbr(stage, f"/World/Looks/Hill{_k[-1].upper()}",
                                 diffuse_color=mp[_k],
                                 roughness_const=mp["hill_rough"],
@@ -2129,13 +2536,26 @@ def main():
                     fb_z - fb["thick"] / 2.0),
                    (fb["x1"] - fb["x0"], fb["y1"] - fb["y0"], fb["thick"]),
                    M["grass"], collider=True)
+        build_far_shore(M)
+        # [GT-86] shoreline scrub — one `place_hedge_row` per segment (real shrub USD,
+        #   instanced; legacy `build_hedge` under the same prim root when the assets are
+        #   absent, so the degradation contract is unchanged). The runs are broken and the
+        #   heights uneven: the old 3-run clipped band read as a line of identical balls.
         fh = PARAMS["far_hedge"]
+        pools = fh["pools"]
+        n_sh = 0
         for i, h in enumerate(PARAMS["far_hedges"]):
-            sc.build_hedge(stage, f"{ROOT}/FarHedge_{i}",
-                           fh["cx"] - fh["sx"] / 2.0,
-                           h["cy"] - fh["length"] / 2.0,
-                           fh["cx"] + fh["sx"] / 2.0,
-                           h["cy"] + fh["length"] / 2.0, fh["h"], base_z=fb_z)
+            base = shore_top_at(h["cx"], h["cy"], fb_z)
+            n_sh += sc.place_hedge_row(
+                stage, f"{ROOT}/FarHedge_{i}",
+                h["cx"] - fh["w"] / 2.0, h["cy"] - h["L"] / 2.0,
+                h["cx"] + fh["w"] / 2.0, h["cy"] + h["L"] / 2.0,
+                float(h["h"]), int(fh["seed"]) + 17 * i,
+                pool=list(pools[int(h["sp"]) % len(pools)]), base_z=base,
+                overlap=float(fh["overlap"]), end_margin=float(fh["end_margin"]),
+                fallback_mtl=M["scrub"])
+        print(f"[원경] 물가 관목 {len(PARAMS['far_hedges'])}구간 · 실관목 {n_sh}주 "
+              f"(0 = 절차적 폴백)")
         # [W3 S09 · row (7)] **belt species declared.** `SCENE_SPECIES["Scene09"]` is
         #   `("birch", "oak_black")` and the belt half has been inert since K4(b) landed —
         #   `resolve_species` only reaches it when a call passes `belt=True`, and no scene09
@@ -2145,9 +2565,18 @@ def main():
         #   (`sc.TREE_BANDS["belt"]`, d_min 7.50 — this row is 44 m away across water).
         #   The route trees on the terrace keep the scene default (`birch`), so the two bands
         #   are now genuinely two species instead of one repeated.
+        #   [GT-86] `trunk_h=t["th"]` — the call used to take the 2.2 m DEFAULT, so the whole
+        #   stand was 3.52 m tall behind a 3.6 m hedge and never appeared in a cut. Ground
+        #   z is read from the terrain table, not assumed to be `fb_z`, because the stand now
+        #   runs out to |y| 90 where the shoreline is a `BankS/BankN` plate.
         for i, t in enumerate(PARAMS["far_trees"]):
-            sc.build_tree(stage, f"{ROOT}/FarTree_{i}", t["cx"], t["cy"], fb_z,
-                          M["wood"], M["canopy_a"], M["canopy_b"], belt=True)
+            sc.build_tree(stage, f"{ROOT}/FarTree_{i}", t["cx"], t["cy"],
+                          shore_top_at(t["cx"], t["cy"], fb_z),
+                          M["wood"], M["canopy_a"], M["canopy_b"],
+                          trunk_h=float(t["th"]), belt=True)
+        print(f"[원경] 물가 수림 {len(PARAMS['far_trees'])}주 "
+              f"(수고 {min(t['th'] for t in PARAMS['far_trees']) * 1.60:.1f}~"
+              f"{max(t['th'] for t in PARAMS['far_trees']) * 1.60:.1f} m · belt 종)")
         # [W3 S09 · row (6)] the 2 building silhouettes are gone; the autumn ridges close the
         #   horizon in their place. `horizon_selfcheck()` proves the closure did not get lower.
         build_far_hills(M)
@@ -2672,41 +3101,144 @@ def main():
         print(f"[화단 특징물] 그루터기/이끼바위 {n}점 (T4b mtlxoff 래퍼 · instanceable)")
         return n
 
-    def build_far_hills(M):
-        """[W3 S09 · row (6)] The autumn hillside belt that replaces the 2 building silhouettes.
+    def build_far_shore(M):
+        """[GT-86] The far-shore terrain — five plates from `shore_plates()`.
 
-        Each ridge is a low body box plus a row of overlapping flattened ellipsoids — the same
-        device `sc.build_hedge`'s crown uses, at landscape scale. Deterministic per ridge.
-        `horizon_selfcheck()` asserts these close the horizon at least as high as the boxes did.
+        Why it exists: `far_hills` ran to x 141 / y -120..+132 while the only ground out
+        there was `far_bank` (x 44..74, y +-40), so every ridge outside that rectangle stood
+        on nothing and showed its cut bottom against the sky. This is that ground.
+        `collider=False` throughout — no body reaches 100 m of open water, and a backdrop row
+        may not change the hazard/collision box list."""
+        n = 0
+        for tag, x0, y0, x1, y1, tz, th in shore_plates():
+            # All five carry `grass`, the same material as `FarBank`: the plates butt at one
+            #   elevation, so a second tone here would put a straight seam across an
+            #   otherwise continuous shoreline. Aerial perspective is carried by the ridge
+            #   tone mix instead, where it belongs.
+            sc.add_box(stage, f"{ROOT}/FarShore_{tag}",
+                       ((x0 + x1) / 2.0, (y0 + y1) / 2.0, tz - th / 2.0),
+                       (x1 - x0, y1 - y0, th), M["grass"], collider=False)
+            n += 1
+        print(f"[원경] 원안 지형판 {n}장 (x {PARAMS['far_shore']['x_west']:.0f}~"
+              f"{PARAMS['far_shore']['x1']:.0f} · |y| ≤ "
+              f"{PARAMS['far_shore']['edge_y']:.0f} · 맞댐이음 단차 "
+              f"{PARAMS['far_shore']['rise'] * 1000:.0f} mm · 비충돌)")
+
+    def _lobe_surface(lobes, x, y, base):
+        """Landform surface z at (x, y): the highest emerged ellipsoid cap, or the terrain
+        top where no cap reaches. Analytic, so a crown can be seated on the slope it stands
+        on instead of on a nominal ridge height."""
+        z = base
+        for lx, ly, lz, rx, ry, rz in lobes:
+            u = ((x - lx) / rx) ** 2 + ((y - ly) / ry) ** 2
+            if u < 1.0:
+                z = max(z, lz + rz * math.sqrt(1.0 - u))
+        return z
+
+    def build_far_hills(M):
+        """[GT-86] The autumn hillside backdrop, rebuilt **grounded and de-ballooned**.
+
+        Two structural changes against the row it replaces (W3 S09 row (6)):
+
+        (1) **No body box.** The old ridge was `add_box(h*0.30)` under a row of blobs, and at
+            11-19 m tall the box was never covered: its flat bottom face and its raw end
+            walls are the "slab floating over the waterline" in `pt_noon_g9_oblique.png`.
+            The landform is now `lobes` flattened ellipsoids whose centre sits `sink` of
+            their own z radius BELOW the terrain top, so only a cap emerges. A buried cap
+            has no bottom face and no end wall — the defect is removed by construction, not
+            by hiding it.
+              cap height = rz * (1 - sink)             -> rz = land_h / (1 - sink)
+              cap radius = r * sqrt(1 - sink^2)        -> r  = wanted / sqrt(1 - sink^2)
+            Both identities are applied below rather than tuned by eye, and `lobe_span` /
+            `lobe_r` / `lobe_w` are sized off them so the emerged landform reaches its own
+            footprint edge and stops there [computed].
+
+        (2) **Crowns at tree scale.** The old crown was 12.4-23.9 m across, which subtends
+            8.0-10.0 deg from the h1.8 grid eye — cumulus, not a canopy.
+            `cr` is declared per ridge so every belt subtends 3.2-3.6 deg regardless of
+            range, and each crown is drawn at 0.72-1.30 x cr with an independent z radius.
+            `spire_p` of them are redrawn as narrow conifer spires that break the crest.
+            Each crown is sunk `bury` of its z radius into the surface returned by
+            `_lobe_surface`, so nothing floats and nothing shows a cut, and each centre is
+            clamped to its own terrain plate inset by its own radius, so nothing can
+            overhang the terrain either. `backdrop_selfcheck()` asserts both.
+
+        Tone is drawn per crown from `hill["mix"][tone]` over the four hill tones, so a
+        ridge is a mixed stand instead of one flat colour (the other half of the cloud read).
+        Deterministic: one `RandomState` per ridge off `hill["seed"]`, never `hash()`.
         """
         hp = PARAMS["hill"]
-        _steps, _bz, _zb, water_z, _bh = compute_steps()
-        fb = PARAMS["far_bank"]
-        base = water_z + fb["above_water"]
-        tone_mtl = (M["hill_a"], M["hill_b"], M["hill_c"])
+        tone_mtl = (M["hill_a"], M["hill_b"], M["hill_c"], M["hill_d"])
+        mix = hp["mix"]
+        k_em = math.sqrt(max(1e-6, 1.0 - float(hp["sink"]) ** 2))
+        n_lobe = n_crown = 0
         for i, h in enumerate(PARAMS["far_hills"]):
-            mtl = tone_mtl[int(h["tone"]) % 3]
-            body_h = h["h"] * hp["body_frac"]
-            sc.add_box(stage, f"{ROOT}/Hill_{i}/Body",
-                       (h["cx"], h["cy"], base + body_h / 2.0),
-                       (h["sx"], h["sy"], body_h), mtl)
+            plate = shore_plate_at(h["cx"], h["cy"])
+            if plate is None:                       # gated by backdrop_selfcheck
+                print(f"[원경][경고] Hill_{i} 이 지형판 밖이다 — 건너뛴다")
+                continue
+            _t, px0, py0, px1, py1, base, _th = plate
             rs = np.random.RandomState(int(hp["seed"]) + 13 * i)
-            nb = int(hp["blobs"])
-            for k in range(nb):
-                t = (k + 0.5) / nb
-                by = h["cy"] - h["sy"] / 2.0 + h["sy"] * t
-                bx = h["cx"] + float(rs.uniform(-1.0, 1.0)) * h["sx"] * 0.18
-                # ridge profile: full height at the centre, tapering to the ends
-                prof = 0.55 + 0.45 * math.sin(math.pi * t)
-                rz = h["h"] * hp["blob_r"] * prof * float(rs.uniform(0.86, 1.14))
-                rx = h["sx"] * hp["spread"] * 0.5 * float(rs.uniform(0.82, 1.18))
-                # crowns must **overlap**, or a ridge reads as a row of separate balls (the
-                #   first pilot's "caterpillar"). 1.55 x the station pitch is the smallest
-                #   multiplier at which neighbours merge at every drawn size.
-                ry = h["sy"] / nb * 1.55 * float(rs.uniform(0.88, 1.22))
-                sc.add_sphere(stage, f"{ROOT}/Hill_{i}/Crown_{k}",
-                              (bx, by, base + body_h * 0.60 + rz * 0.30),
-                              (rx, ry, rz), mtl)
+            along_y = h["sy"] >= h["sx"]
+            L, W = max(h["sx"], h["sy"]), min(h["sx"], h["sy"])
+            # --- landform: overlapping buried caps along the ridge axis -----------
+            # `h` is the CREST height, so the landform is what is left of it once the crown
+            #   that stands on the crest is subtracted — see the PARAMS note.
+            crest = max(0.5, h["h"] - (1.0 - float(hp["bury"]))
+                        * float(h["cr"]) * float(hp["crown_ref"]))
+            lobes = []
+            nl = max(1, int(hp["lobes"]))
+            for k in range(nl):
+                t = 0.5 if nl == 1 else k / (nl - 1.0)
+                prof = 0.62 + 0.38 * math.sin(math.pi * t)   # tapers to both ends
+                land_h = crest * prof * float(rs.uniform(0.88, 1.12))
+                rz = land_h / (1.0 - float(hp["sink"]))
+                lz = base - float(hp["sink"]) * rz
+                rl = L * float(hp["lobe_r"]) / k_em
+                rw = W * float(hp["lobe_w"]) / k_em
+                u = (t - 0.5) * L * float(hp["lobe_span"])
+                v = float(rs.uniform(-1.0, 1.0)) * hp["lobe_jit"] * W
+                lx, ly = ((h["cx"] + v, h["cy"] + u) if along_y
+                          else (h["cx"] + u, h["cy"] + v))
+                rx, ry = ((rw, rl) if along_y else (rl, rw))
+                lobes.append((lx, ly, lz, rx, ry, rz))
+                sc.add_sphere(stage, f"{ROOT}/Hill_{i}/Land_{k}",
+                              (lx, ly, lz), (rx, ry, rz), M["shore"])
+                n_lobe += 1
+            # --- canopy: jittered grid of crowns over the ridge footprint ---------
+            cr = float(h["cr"])
+            pitch = cr * float(hp["pitch"])
+            nu = max(1, int(round(L / pitch)))
+            nv = max(1, int(round(W / pitch)))
+            w = mix[int(h["tone"]) % len(mix)]
+            cw = [sum(w[:j + 1]) for j in range(len(w))]
+            for a in range(nu):
+                for b in range(nv):
+                    du = -L / 2.0 + (a + 0.5) * (L / nu) + float(
+                        rs.uniform(-1.0, 1.0)) * hp["jit"] * pitch
+                    dv = -W / 2.0 + (b + 0.5) * (W / nv) + float(
+                        rs.uniform(-1.0, 1.0)) * hp["jit"] * pitch
+                    cx, cy = ((h["cx"] + dv, h["cy"] + du) if along_y
+                              else (h["cx"] + du, h["cy"] + dv))
+                    s = float(rs.uniform(0.72, 1.30))
+                    spire = float(rs.uniform(0.0, 1.0)) < float(hp["spire_p"])
+                    rx = cr * s * (float(hp["spire_r"]) if spire else 1.0)
+                    ry = rx * float(rs.uniform(0.86, 1.16))
+                    rz = cr * s * (float(hp["spire_h"]) if spire
+                                   else float(rs.uniform(0.95, 1.45)))
+                    # never overhang the plate this ridge stands on
+                    cx = min(max(cx, px0 + rx), px1 - rx)
+                    cy = min(max(cy, py0 + ry), py1 - ry)
+                    surf = _lobe_surface(lobes, cx, cy, base)
+                    pk = float(rs.uniform(0.0, 1.0))
+                    ti = next((j for j, c in enumerate(cw) if pk <= c),
+                              len(cw) - 1)
+                    sc.add_sphere(stage, f"{ROOT}/Hill_{i}/Crown_{a}_{b}",
+                                  (cx, cy, surf - float(hp["bury"]) * rz),
+                                  (rx, ry, rz), tone_mtl[ti % len(tone_mtl)])
+                    n_crown += 1
+        print(f"[원경] 가을 능선 {len(PARAMS['far_hills'])}열 · 지형 캡 {n_lobe}개 "
+              f"· 수관 {n_crown}개 (수관 반경 2.8~5.6 m = 어느 열에서나 3.2~3.6°)")
 
     def build_lilies(M):
         """[W3 S09] Lily pads / floating leaf rafts on the still water — G9's right half.
@@ -2941,10 +3473,12 @@ def main():
         _f_ok, _ = fov_selfcheck()
         _h_ok, _ = horizon_selfcheck()
         _d_ok, _ = stepstone_selfcheck()     # [W3 P09] GT-41 (1)
+        _b_ok, _ = backdrop_selfcheck()      # [GT-86] 접지 · 지평 폐합
         print(f"[W3 S09] 계절 {'OK' if _s_ok else 'FAIL'} · "
               f"FOV 배제 {'OK' if _f_ok else 'FAIL'} · "
               f"지평 폐합 {'OK' if _h_ok else 'FAIL'} · "
-              f"[W3 P09] 디딤돌 {'OK' if _d_ok else 'FAIL'}")
+              f"[W3 P09] 디딤돌 {'OK' if _d_ok else 'FAIL'} · "
+              f"[GT-86] 원경 접지 {'OK' if _b_ok else 'FAIL'}")
         # binding check right after assembly — follow-up to judgment §6 (2) ("if it is still bright, check the binding")
         rp = stage.GetPrimAtPath(f"{ROOT}/Pavilion/Roof")
         fp = stage.GetPrimAtPath(f"{ROOT}/Pavilion/Finial")

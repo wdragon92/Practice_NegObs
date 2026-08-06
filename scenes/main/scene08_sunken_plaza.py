@@ -12,7 +12,8 @@ Type    : circular sunken plaza (bowl) cut into a city-block plaza. **v7 is a fu
 Shared  : scene_common.py (K4(d) annular-sector mesh via build_arc_steps(mesh=True) ·
           build_rot_group · build_planter · build_tree/place_shrubs species · build_sign ·
           build_building) · props_kit.py (K4(c) build_glass_balustrade G8 template ·
-          build_tube_railing · build_bench_slat · build_bollard_v2) · infra_kit.py (K5
+          build_bench_slat · build_bollard_v2; `build_tube_railing` is NOT called — see
+          the R2 note below, GT-85) · infra_kit.py (K5
           build_curb_line — the real 보차도 경계석 the painted lane lines never had) ·
           building_kit.py (BS-4 kind="backdrop" CBD wall) · ground_kit.py (P3 sidewalk_block).
 
@@ -69,7 +70,17 @@ offender, 2 P0 findings)
     **EXEMPT at any width**, which is what lets it be a 14.6 m-wide civic cascade without a
     handrail row standing on the camera axis. The riser value is therefore a *judgment*
     requirement, not a style choice. **CLEARED.**
-  - **R2 편측 난간**: both flanks of the cascade carry a `props_kit.build_tube_railing` run.
+  - **R2 편측 난간**: both flanks of the cascade carry a raked 4-rail tube guard. **[GT-85]** It
+    is built in-scene, not by `props_kit.build_tube_railing`: that kit samples the ground once
+    per polyline segment and lays every rail with `rotY=90`, so on a 4.400 m descent it built
+    4 LEVEL tubes at the mid-flight height while its posts followed the true stair — rails with
+    no post under them at the top, posts finishing 2 m below their rails at the foot, and the
+    south run driving through the timber tier bank. The kit's section is kept verbatim (4 rails
+    in 1.100 m, 0.120 m bottom offset, clear span 0.279 m); the run is re-laid on the **nosing
+    pitch line** (`flank_datum`), carried by posts snapped to tread centres, and terminated at
+    both ends by a 0.300 m level handrail extension dying into an end newel that stands wholly
+    on flat ground. Same client move as scene06's spiral guard, for the same kit limitation
+    (finding S08-F1 / S06-F1).
   - The **timber tiers are seating, not circulation** (riser 0.375) — the scene05 ※ precedent.
     They are reached from the arena floor and from the cascade, and the self-check records them
     as seating so a later compliance sweep does not read them as an illegal stair.
@@ -242,8 +253,31 @@ PARAMS = dict(
                  panel_h=1.10, panel_t=0.019, panel_len=1.35, joint=0.012,
                  cap_r=0.025, shoe_h=0.10),
     # --- cascade flank railings (R2) ---------------------------------------
+    #  [GT-85] v7 called `props_kit.build_tube_railing` on a radial line that descends 4.400 m.
+    #  That kit samples the ground ONCE per polyline segment (its midpoint) and lays every rail
+    #  with `rotY=90`, i.e. **horizontal**. On a one-segment run the result was 4 level tubes
+    #  frozen at the mid-flight height while the posts followed the true stair, so the run read
+    #  as floating rails over orphan posts `[measured — rails z −2.130…−1.150 vs post tops
+    #  −3.250…−0.100; 3 of 6 posts finished entirely below the lowest rail]`, and on the south
+    #  flank the same level tubes drove straight through the timber tier bank. A raked stair
+    #  guard is not expressible in that kit, so the run is built in-scene against the kit's own
+    #  SECTION numbers — the scene06 precedent for a run the X-only template cannot state.
+    #
+    #  The guard is now dimensioned off the **nosing pitch line** (`flank_datum`), which is the
+    #  line a stair guard is measured from: rail_h is the height over every nosing, so the guard
+    #  stands 1.100 m over each nosing and 1.250 m over each tread back edge, and the lowest
+    #  rail keeps a uniform 0.120 m toe gap `[computed]`. Section kept verbatim from the kit:
+    #  4 rails inside 1.100 m with a 0.120 m bottom offset -> largest clear span
+    #  (1.100 − 0.120)/3 − 2×0.024 = **0.279 m**, the deliberate non-baluster form.
+    #    edge_off  the end newels stand this far clear of the rim / arena edge so the WHOLE post
+    #              footprint bears on flat ground (post_r 0.030 << 0.100): no post straddles a
+    #              riser, which is what left v7's posts hanging over a 0.150 m step
+    #    ext       level handrail extension past each end of the flight, dying into an end newel
+    #              (편의증진법 별표1 손잡이 수평연장 0.30 m) — no rail end is free anywhere
+    #    azim_in   plan inset of the run from the cascade sector edge, in degrees (was hardcoded)
     flank_rail=dict(rails=4, rail_h=1.10, tube_r=0.024, post_r=0.030,
-                    post_pitch=1.80, inset=0.25),
+                    post_pitch=1.80, bottom=0.12, edge_off=0.10, ext=0.30,
+                    azim_in=0.80),
     # --- tactile warning arc (cue_tactile; R16-2 stair-cue-first) ----------
     #     head band 0.30 m clear of the first riser, 0.60 m deep, on the cascade arc only.
     #     No stop-type device anywhere in this scene (R16-2), and no rectangle.
@@ -549,6 +583,100 @@ def _surface_z(x, y):
     return b["floor_z"]                 # arcade + ctrl forecourt
 
 
+# --- [GT-85] cascade flank guard: the run is designed here, built in [F] -----
+def flank_azimuths():
+    """[(tag, a_deg)] the two flank rays, inset `azim_in` from the cascade sector edges.
+
+    The rays are UNCHANGED from v7 (a0 + 0.80 / a1 − 0.80); only what is built on them moved.
+    The binding clearance is at the foot, where the sector edge is the tier bank's radial face:
+    at r = 4.100 the 0.80 deg inset is 0.057 m in plan, so the post face stands 0.027 m and the
+    tube face 0.033 m clear of it `[measured]` — tight, but the run does not touch the bank.
+    The v7 defect was the opposite failure: level tubes at one frozen z drove straight THROUGH
+    the tier bank between r 11 and 12 on the south flank."""
+    a0, a1 = PARAMS["sector"]["cascade"]
+    ai = PARAMS["flank_rail"]["azim_in"]
+    return [("S", a0 + ai), ("N", a1 - ai)]
+
+
+def flank_nodes():
+    """(r_head, r_a_foot, r_land_foot, r_foot) — the guard's kink radii, outermost first.
+
+    Both outer nodes sit `edge_off` CLEAR of the edge they guard (rim / arena rather than on it)
+    so every newel's footprint bears wholly on one flat surface; `post_r` 0.030 << `edge_off`
+    0.100 `[computed]`. A post placed exactly on the rim or the arena edge is half over a
+    0.150 m riser, which is the class of defect this rebuild exists to remove."""
+    b, cs, fr = PARAMS["bowl"], PARAMS["cascade"], PARAMS["flank_rail"]
+    r_a = b["r_rim"] - cs["n_flight_a"] * cs["tread"]        # 9.50 flight A foot
+    return (b["r_rim"] + fr["edge_off"], r_a, r_a - cs["land"],
+            b["r_arena"] - fr["edge_off"])
+
+
+def flank_datum(r):
+    """z of the guard datum on the cascade ray at radius r — the **nosing pitch line**.
+
+    Straight over each flight at dz/dr = riser/tread = 0.500, level over the 1.20 m mid landing,
+    level over both handrail extensions. Every rail is a fixed offset from this line, so the
+    guard height is constant relative to the stair instead of constant in world z (the GT-85
+    defect). At r = r_rim the line is exactly z = 0, i.e. it meets the plaza at the rim."""
+    b, cs = PARAMS["bowl"], PARAMS["cascade"]
+    r_head, r_a, r_l, r_foot = flank_nodes()
+    s = cs["riser"] / cs["tread"]
+    z_a = -cs["n_flight_a"] * cs["riser"]                    # −2.250 at the flight A foot
+    if r >= r_head:
+        return s * (r_head - b["r_rim"])
+    if r >= r_a:
+        return s * (r - b["r_rim"])
+    if r >= r_l:
+        return z_a
+    if r >= r_foot:
+        return z_a + s * (r - r_l)
+    return z_a + s * (r_foot - r_l)
+
+
+def _tread_centres(r_hi, r_lo, tread):
+    """[r] centre radius of every whole tread in (r_lo, r_hi], outermost first."""
+    out, r = [], r_hi
+    while r - tread > r_lo - 1e-9:
+        out.append(round(r - tread / 2.0, 6))
+        r -= tread
+    return out
+
+
+def flank_posts():
+    """[r] post radii on one flank, outermost first.
+
+    Every rail kink carries a post except the landing foot, where a post would bridge the
+    landing nosing and the course below it; that one kink is closed by an elbow instead.
+    Interior posts SNAP to tread centres, which is what makes the run read as one guard: a post
+    landing at a tread centre is always the same length `[computed 1.199 m]`, so the whole run
+    finishes within 1.124…1.224 m. Bay count is ceil(L / post_pitch), so no bay exceeds the
+    1.80 m spec pitch `[computed max 1.65 m]`."""
+    b, cs, fr = PARAMS["bowl"], PARAMS["cascade"], PARAMS["flank_rail"]
+    r_head, r_a, r_l, r_foot = flank_nodes()
+
+    def interior(r_hi, r_lo, cen):
+        n = max(1, int(math.ceil((r_hi - r_lo) / fr["post_pitch"] - 1e-9)))
+        out = []
+        for i in range(1, n):
+            want = r_hi - (r_hi - r_lo) * i / n
+            out.append(min(cen, key=lambda c: (abs(c - want), -c)))
+        return out
+
+    return ([round(r_head + fr["ext"], 6), round(r_head, 6)]
+            + interior(r_head, r_a, _tread_centres(b["r_rim"], r_a, cs["tread"]))
+            + [round(r_a, 6), round(r_l + fr["edge_off"], 6)]
+            + interior(r_l, r_foot, _tread_centres(r_l, b["r_arena"], cs["tread"]))
+            + [round(r_foot, 6), round(r_foot - fr["ext"], 6)])
+
+
+def flank_rail_offsets():
+    """[dz] rail-axis offsets above the datum line, lowest first — the kit's own ladder."""
+    fr = PARAMS["flank_rail"]
+    n = int(fr["rails"])
+    return [fr["bottom"] + (fr["rail_h"] - fr["bottom"]) * k / max(1, n - 1)
+            for k in range(n)]
+
+
 def _sun_dir():
     """DistantLight travel direction d (world). Inverts setup_lighting's op order exactly."""
     lp = PARAMS["light"]
@@ -617,14 +745,18 @@ def h03_probes():
     b = PARAMS["bowl"]
     fr = PARAMS["flank_rail"]
     out = []
-    # cascade flank railings
-    a0c, a1c = PARAMS["sector"]["cascade"]
-    for tag, a in (("FlankS", a0c + 0.8), ("FlankN", a1c - 0.8)):
-        r = b["r_arena"] + fr["inset"]
-        while r <= b["r_rim"] - fr["inset"] + 1e-6:
+    # cascade flank guard — [GT-85] probe the CROWN of the top rail (datum + rail_h + tube_r),
+    #   which is the run's highest point, over the whole run INCLUDING both handrail extensions.
+    #   The v7 probe used `_surface_z + rail_h`, which was neither where the rail was built nor
+    #   the top of it, and it stopped 0.25 m short of each end.
+    r_head, _r_a, _r_l, r_foot = flank_nodes()
+    r0, r1 = r_foot - fr["ext"], r_head + fr["ext"]
+    for tag, a in flank_azimuths():
+        r = r0
+        while r <= r1 + 1e-6:
             px, py = _pol(r, a)
-            out.append((f"{tag}_{r:.1f}", px, py,
-                        _surface_z(px, py) + fr["rail_h"]))
+            out.append((f"Flank{tag}_{r:.1f}", px, py,
+                        flank_datum(r) + fr["rail_h"] + fr["tube_r"]))
             r += 0.25
     # in-bowl bed: kerb + shrub crown
     bd = PARAMS["beds"]["arena_south"]
@@ -815,6 +947,42 @@ def _smoke_report():
     gate("D1 단높이 ≤ 0.20", cs["riser"] <= 0.20)
     print(f"    [좌석 티어] riser {tp['riser']:.3f} · tread {tp['tread']:.3f} — "
           f"관람석(순환동선 아님). scene05 ※ 선례로 계단 규정 대상 제외를 명시 기록")
+
+    # [GT-85] R2 flank guard — the run must be CARRIED, not floating. Four properties, each of
+    #   which the v7 kit call violated: bay ≤ spec pitch, one post length (so one rail height),
+    #   the lowest rail clear of the walked surface, and no post foot straddling a riser.
+    fr = PARAMS["flank_rail"]
+    fp = flank_posts()
+    a_f = flank_azimuths()[0][1]
+    f_bay = max(fp[i] - fp[i + 1] for i in range(len(fp) - 1))
+    f_len = [flank_datum(r) + fr["rail_h"] + fr["tube_r"]
+             - _surface_z(*_pol(r, a_f)) for r in fp]
+    f_toe, rr = 9e9, fp[-1]
+    while rr <= fp[0] + 1e-9:
+        f_toe = min(f_toe, flank_datum(rr) + fr["bottom"]
+                    - _surface_z(*_pol(rr, a_f)))
+        rr += 0.01
+    print(f"    [법규 R2 편측난간] 플랭크당 지주 {len(fp)} · 간격 "
+          f"{min(fp[i]-fp[i+1] for i in range(len(fp)-1)):.2f}~{f_bay:.2f} m · "
+          f"지주 길이 {min(f_len):.3f}~{max(f_len):.3f} m · 최하단 레일 발끝 여유 "
+          f"{f_toe:.3f} m · 수평연장 {fr['ext']:.2f} m × 2")
+    gate("R2 지주 간격 ≤ post_pitch", f_bay <= fr["post_pitch"] + 1e-9,
+         f"{f_bay:.2f} ≤ {fr['post_pitch']:.2f}")
+    gate("R2 지주 길이 편차 ≤ 0.15 m (난간고 일정)",
+         max(f_len) - min(f_len) <= 0.15 + 1e-9,
+         f"Δ{max(f_len)-min(f_len):.3f} m")
+    gate("R2 최하단 레일이 보행면 위 (파고듦 0)", f_toe >= 0.05,
+         f"{f_toe:.3f} m")
+    gate("R2 지주 발이 전부 평탄면 (라이저 걸침 0)",
+         all(abs(_surface_z(*_pol(r - fr["post_r"], a_f))
+                 - _surface_z(*_pol(r + fr["post_r"], a_f))) < 1e-6
+             for r in fp))
+    gate("R2 레일 마디 끝이 전부 지주/엘보에 물림",
+         all(any(abs(r - p) < 1e-6 for p in fp)
+             or abs(r - flank_nodes()[2]) < 1e-6
+             for r in (flank_nodes()[0] + fr["ext"], flank_nodes()[0],
+                       flank_nodes()[1], flank_nodes()[2],
+                       flank_nodes()[3], flank_nodes()[3] - fr["ext"])))
 
     # ── 2. nothing covers the cavity ──────────────────────────────────────
     print("  [공동 은폐 검산] 개구 위를 덮는 z≥0 판이 있는가")
@@ -1171,9 +1339,12 @@ def main():
     def BOX(path, center, size, mtl=None, col=False):
         return sc.add_box(stage, path, center, size, mtl, collider=col)
 
-    def CYL(path, center, r, h, mtl=None, rotY=0.0, rotX=0.0, col=False):
+    def CYL(path, center, r, h, mtl=None, rotY=0.0, rotX=0.0, col=False,
+            rotZ=0.0):
+        # rotZ defaults to 0.0, so every pre-GT-85 call site is byte-identical; the flank guard
+        # needs it to swing a raked tube (rotY) onto its plan bearing.
         return sc.add_cylinder(stage, path, center, r, h, mtl,
-                               rotY=rotY, rotX=rotX, collider=col)
+                               rotY=rotY, rotX=rotX, collider=col, rotZ=rotZ)
 
     def PBR(path, *args, **kwargs):
         return sc.make_pbr(stage, path, *args, **kwargs)
@@ -1582,31 +1753,84 @@ def main():
               f"캡 {made['cap']} · 슈 {made['shoe']}")
 
     def build_flank_rails(M):
-        """R2 — one `props_kit.build_tube_railing` run on each cascade flank (radial lines)."""
-        fr = PARAMS["flank_rail"]
-        a0, a1 = PARAMS["sector"]["cascade"]
-        r_hi = b["r_rim"] - fr["inset"]
-        r_lo = b["r_arena"] + fr["inset"]
-        for tag, a in (("S", a0 + 0.8), ("N", a1 - 0.8)):
-            p0, p1 = _pol(r_hi, a), _pol(r_lo, a)
-            mxx, myy = (p0[0] + p1[0]) / 2.0, (p0[1] + p1[1]) / 2.0
-            L = math.hypot(p1[0] - p0[0], p1[1] - p0[1])
-            bear = math.degrees(math.atan2(p1[1] - p0[1], p1[0] - p0[0]))
-            grp = sc.build_rot_group(stage, f"{ROOT}/FlankGrp_{tag}",
-                                     (mxx, myy), bear)
+        """R2 — a **raked** tube guard on each cascade flank, built in-scene [GT-85].
 
-            def gz(lx, _ly, _a=a, _m=(mxx, myy), _L=L):
-                # the kit works in the group's LOCAL frame; map local x back to a radius on
-                # this flank's ray and sample the true descent there.
-                t = (lx - (_m[0] - _L / 2.0)) / max(_L, 1e-6)
-                rr = r_hi + (r_lo - r_hi) * min(max(t, 0.0), 1.0)
-                return _surface_z(*_pol(rr, _a))
-            pk.build_tube_railing(
-                stage, f"{grp}/Rail",
-                [(mxx - L / 2.0, myy), (mxx + L / 2.0, myy)], gz, M["rail"],
-                rails=int(fr["rails"]), rail_h=fr["rail_h"],
-                tube_r=fr["tube_r"], post_r=fr["post_r"],
-                post_pitch=fr["post_pitch"])
+        `props_kit.build_tube_railing` samples the ground once per polyline segment and lays
+        every rail with `rotY=90`, so on this 4.400 m descent it produced level tubes hanging
+        over posts that tracked the stair. The kit's SECTION is kept verbatim (4 rails, 0.120 m
+        bottom offset, tube 0.024 / post 0.030 -> clear span 0.279 m); only the geometry is
+        rebuilt, the same client move scene06 makes for its spiral guard.
+
+        Closure rules, and every one of them is asserted in the smoke run:
+          - rails are offsets from `flank_datum`, so the guard is one height over the stair;
+          - each post runs from the surface under it up to the top rail's CROWN, so the tube is
+            fully engaged in the post (post_r 0.030 > tube_r 0.024) and no post finishes short;
+          - every rail run ends on a post axis, so no cut face is exposed and every mitre is
+            hidden inside a newel — except the landing foot, which takes an elbow because a post
+            there would straddle a riser;
+          - both ends are level handrail extensions dying into an end newel on flat ground.
+        """
+        fr = PARAMS["flank_rail"]
+        r_head, r_a, r_l, r_foot = flank_nodes()
+        nodes = [r_head + fr["ext"], r_head, r_a, r_l, r_foot,
+                 r_foot - fr["ext"]]
+        posts = flank_posts()
+        offs = flank_rail_offsets()
+        # rake angle of each rail run, one per node interval. Constant over a flank, so it is
+        # derived once rather than per rail.
+        elevs = [math.degrees(math.atan2(flank_datum(nodes[j + 1])
+                                         - flank_datum(nodes[j]),
+                                         nodes[j] - nodes[j + 1]))
+                 for j in range(len(nodes) - 1)]
+        # Landing-foot elbow radius. Two tubes deflected by `dfl` leave a V whose outermost
+        # point sits tube_r / cos(dfl/2) from the node, so a tube_r sphere would leave the
+        # outside of the bend open by 0.7 mm; this closes it exactly
+        # `[computed 0.02466 m at dfl 26.565 deg]` and bulges 2.7 % of a tube radius, which is
+        # what a welded elbow does anyway.
+        elb_r = fr["tube_r"] / math.cos(math.radians(
+            abs(elevs[3] - elevs[2]) / 2.0))
+        n_p = n_r = n_e = 0
+        for tag, a in flank_azimuths():
+            grp = f"{ROOT}/FlankGrp_{tag}"
+            UsdGeom.Xform.Define(stage, grp)
+            bear = a + 180.0            # the run descends INWARD along the flank ray
+            for i, rr in enumerate(posts):
+                px, py = _pol(rr, a)
+                z0 = _surface_z(px, py)
+                z1 = flank_datum(rr) + fr["rail_h"] + fr["tube_r"]
+                CYL(f"{grp}/Post_{i}", (px, py, (z0 + z1) / 2.0),
+                    fr["post_r"], z1 - z0, M["rail"], col=True)
+                n_p += 1
+            for j in range(len(nodes) - 1):
+                ra, rb = nodes[j], nodes[j + 1]
+                pa, pb = _pol(ra, a), _pol(rb, a)
+                run = ra - rb                       # plan length, outward -> inward
+                rise = flank_datum(rb) - flank_datum(ra)
+                # rotY lays the cylinder's local Z along +X and tilts it to the rake; rotZ then
+                # swings that raked tube onto the ray bearing (sc.add_cylinder op order).
+                elev = elevs[j]
+                for k, off in enumerate(offs):
+                    za = flank_datum(ra) + off
+                    zb = flank_datum(rb) + off
+                    CYL(f"{grp}/Rail_{k}_{j}",
+                        ((pa[0] + pb[0]) / 2.0, (pa[1] + pb[1]) / 2.0,
+                         (za + zb) / 2.0),
+                        fr["tube_r"], math.hypot(run, rise), M["rail"],
+                        rotY=90.0 - elev, rotZ=bear)
+                    n_r += 1
+            ex, ey = _pol(r_l, a)
+            for k, off in enumerate(offs):
+                sc.add_sphere(stage, f"{grp}/Elbow_{k}",
+                              (ex, ey, flank_datum(r_l) + off),
+                              (elb_r,) * 3, M["rail"])
+                n_e += 1
+        bay = max(posts[i] - posts[i + 1] for i in range(len(posts) - 1))
+        clear = ((fr["rail_h"] - fr["bottom"]) / max(1, int(fr["rails"]) - 1)
+                 - 2.0 * fr["tube_r"])
+        print(f"[측면 난간 R2] 양 플랭크 · 지주 {n_p} · 레일 {n_r} · 엘보 {n_e} · "
+              f"최대 지주 간격 {bay:.2f} m (≤ {fr['post_pitch']:.2f}) · 레일 안목 "
+              f"{clear:.3f} m · 디딤코선 기준 난간고 {fr['rail_h']:.2f} m · "
+              f"양단 수평연장 {fr['ext']:.2f} m")
 
     def build_tactile_arc(M):
         """cue_tactile — a curved warning band at the cascade head only.

@@ -70,6 +70,56 @@ Type identity: the nosings are radial — no straight-line vanishing point.
   ※ Carried, not fixed: the winder corridor's photometry (finding **L19-F1**) — see the
     report. The v4 note below already recorded the cause; L19 measures it.
 
+[GT-82] (2026-08-06, user verdict "this scene only needs the stairs going down from the
+  rooftop — why another building · it is too dark near the stairs · entrance and exit still
+  read narrow"). Four changes, all sourced from the 260731_w3_full cuts.
+  (1) **Backdrop buildings C · D · E deleted.** They were the "another building" and they were
+    also the floating-plate defect: `build_building` runs `facade_kit.build_aircon_units(
+    mode="eaves", eaves_z=2.30)` and `Facade.world()` takes that z as a **world absolute**,
+    so D's 4 units sat at z 2.30 while D's roof deck is at z −2.50 and its parapet crown at
+    −1.30 — **3.60 m of open air under a 0.06 m bracket** [measured]. In `pt_noon_roof_context`
+    they project to sx +0.122 / +0.271 / +0.432 (the 4th at +0.609 is behind the juniper),
+    sy +0.340 — which is the row of 3 dark plates the audit flagged. Deleting the buildings
+    deletes the plates by construction; the scene is now the host L-core and nothing else.
+    Consequence: `roof_skyline` keeps its eye/tgt but its gate is re-based from "building E
+    occupancy" to "the 6 m drop to the alley + the north parapet crown", which is what a
+    rooftop north view actually has to read once the backdrop is gone.
+  (2) **The black flanking masses take real concrete.** `granite_dark` measures linear
+    luminance **0.0767** [measured, assets/scene01/granite_dark_diff.jpg] and it was bound to
+    the two L-core walls and the newel — the whole surround of the descent. In shadow that is
+    indistinguishable from black, which is what `upper_approach` and `entry_gate` show. The
+    walls move to `concrete_wall` (texture mean 0.2372) tinted to **0.290** = **3.78x**;
+    the newel to the same texture tinted to **0.159** = 2.08x, still 0.48x of the tread value
+    (`plaza_light` 0.4627 x 0.72 = 0.333) so it keeps its job as the dark radial datum.
+    The rooftop planter box leaves `granite` for the same reason (it is the near-black box in
+    `roof_context`).
+  (3) **The core is lowered 3.50 -> 2.55 m and capped.** Sun bearing is az **245.0 deg**,
+    elev **49.79 deg** [computed from `light.noon_dome_rot` −110 + `SUN_AZ_OFFSET` 171.5 +
+    `hdri_sun_rotz_offset` 233.5 and `noon_sun_elev`], so shadow offset per metre of height is
+    (**+0.766 x, +0.357 y**) — `_sun_dir` / `_shadow_reach` derive both from the same PARAMS
+    the stage lighting reads, so the number cannot drift from the render. At 3.50 the west
+    wall's crown threw its shadow to **x 4.06** on the lowest tread, i.e. past `r_out` 4.00 —
+    **the whole fan was in shade at the bottom, 0.00 m of it lit** — and the south wall's to
+    y 1.30 across a 1.53 m landing, leaving **0.23 m** lit. With the crown at 2.55 (+0.12
+    coping) those become **x 3.42** (0.58 m of the fan lit) and **y 1.01** on a 2.00 m landing
+    (**0.99 m lit, 15 % -> 50 %**). 2.55 is the floor a rooftop stair core can take
+    (2.10 door + 0.05 frame head + 0.40 lintel). The wall top was a raw box face, so an L of
+    three non-overlapping coping boxes (`CoreCap_S/W_S/W_N`, 0.12 thick, 0.08 proud) caps it —
+    split at y −1.08 / +0.08 so no two caps are ever coplanar.
+  (4) **Entry and exit widened, and both parapet run ends get a pier.** `parapet_first`
+    3 -> 4 and `parapet_last` 9 -> 8: the retained ring is sectors 4..8, so the entry opens
+    over 0..29.5 deg and the exit over 68.0..90 deg. Measured by `_clear_widths`: the entry
+    throat at the first nosing line goes **1.530 -> 1.958 m** and the exit's open-arc chord
+    **1.044 -> 1.526 m** — the old exit was **below** the 1.20 m stair clear-width floor this
+    project works to, which is the "exit looks narrow" reading. The threshold and the edge guard follow the
+    new 30 deg arc (`x0` 3.70 -> **3.46** = 4·cos30, which is what stops a sliver drop opening
+    between the arc and the threshold; `y` 1.53 -> **2.00** = 4·sin30) and they now share one
+    west face plane instead of jogging 0.24 m. The run ends were a sawn radial face with a
+    0.05 m cylinder standing beside it; they are now `ParapetEnd_entry/exit` — annular piers
+    r 3.78..4.09 (0.04 proud of the ring on both radii, so the cut face is inside the pier),
+    3.0 deg wide, 0.14 m proud of the guard crown — with the gate post kept as a **finial on
+    the pier** so the prim path and the "post is the tell" reading both survive.
+
 Run / capture / smoke : the same env convention as scene05 and scene06.
     NEGOBS_CAPTURE=1 / NEGOBS_SMOKE=1 / NEGOBS_PARAMS_OVERRIDE / NEGOBS_SCENE_CONFIG
 
@@ -100,7 +150,8 @@ SCENE_CONFIG = {
     "cue_material_break": True,    # upper sidewalk (plaza_light) vs lower sidewalk (plaza_lower)
     "cue_nosing":         False,   # True → radial nosing anti-slip arc bands
     "cue_sign":           False,   # [reserved]
-    "cue_scene_dressing": True,    # planter, buildings, grass
+    "cue_scene_dressing": True,    # [GT-82] rooftop planter · parapets · plant · grass
+                                   #   (the 3 backdrop buildings are gone — see PARAMS)
 }
 
 
@@ -128,7 +179,13 @@ PARAMS = dict(
     newel=dict(r=1.1, z_bot=-2.3, z_top=0.5),
     # building corner L wall: flush with the winder radial edges (y=0 / x=0) — seals the side drop pockets
     #   [accessibility v2] south x1 1→4·y1 −0.2→0, west x1 −0.2→0·y1 1→4
-    walls=dict(z_bot=-6.0, z_top=3.5,   # [rooftop v3] extended down to ground −6.0 (rooftop core body)
+    # [GT-82(3)] `z_top` 3.5 -> **2.55**, plus a coping cap. 2.55 = door 2.10 + frame head
+    #   0.05 + lintel 0.40, i.e. the lowest a stair core that carries a 2.1 m door can be.
+    #   The 0.95 m removed is worth (0.95 x 0.766) = **0.73 m** of shadow pulled back off the
+    #   winder in x and (0.95 x 0.357) = 0.34 m in y at every level [computed, sun az 245.0 /
+    #   elev 49.79]. `cap_t/cap_over` build the L coping that terminates the wall top.
+    walls=dict(z_bot=-6.0, z_top=2.55,  # [rooftop v3] extended down to ground −6.0 (rooftop core body)
+               cap_t=0.12, cap_over=0.08,
                south=dict(x0=-8.0, x1=4.0, y0=-1.0, y1=0.0),
                west=dict(x0=-1.0, x1=0.0, y0=-8.0, y1=4.0)),
     # outer low parapet: per-step arc ring (r 3.82..4.05), +h above each step top (arc ring)
@@ -149,16 +206,40 @@ PARAMS = dict(
     #   threshold x0 3.86→3.70 (at 22.5 deg the outer arc retreats to x=3.70 — prevents a sliver gap;
     #   the inner band bites in as a z0 plate above the kite top face −0.15 = effective tread boundary x<=3.70),
     #   y1 1.05→1.53 (=4·sin22.5 deg). guard follows at x0 3.7·y0 1.53 (seals the junction slot).
-    access=dict(parapet_first=3, parapet_last=9,
+    # [GT-82(4)] entry and exit widened again — `parapet_first` 3→**4**, `parapet_last` 9→**8**,
+    #   i.e. the retained ring is sectors 4..8 and the openings become 0..30 deg / 67.5..90 deg.
+    #   Measured (`_clear_widths`): entry throat at the first nosing line **1.530 → 1.958**,
+    #   exit open-arc chord **1.044 → 1.526**. The old exit sat below the 1.20 m stair
+    #   clear-width floor. The fan itself does not move: `winder` (n 12 · kite_n 3 · riser
+    #   0.15 · drop 1.8) is untouched — only which sectors carry the outer guard.
+    #   threshold `x0` 3.70→**3.46** is forced, not cosmetic: at 30 deg the outer arc retreats
+    #   to x = 4·cos30 = 3.4641, so a threshold that stopped at 3.70 would leave a
+    #   0.236 m open drop between the arc edge and the sliver. `y1` 1.53→**2.00** = 4·sin30.
+    #   The guard takes the same `x0` so the entry throat's west face is one plane instead of
+    #   a 0.24 m jog.
+    access=dict(parapet_first=4, parapet_last=8,
                 corner=dict(x0=-1.0, y0=-1.0, x1=4.0, y1=4.0),
-                threshold=dict(x0=3.70, y0=0.0, y1=1.53),
+                threshold=dict(x0=3.46, y0=0.0, y1=2.00),
     #   [W3 L19 · era rider §6.2-B] guard `h_top` 1.00 → 1.10 (same outdoor line as the
     #   winder parapet). `post_h` 1.15 → 1.25 is **not** a second era move: the post foot
     #   is buried 0.05 below its step top, so 1.15 put the cap at `top + 1.10`, exactly
     #   flush with the old 1.00 parapet + 0.10. Against a 1.10 parapet the same 0.10 m
     #   proud gate-post reading needs 1.25. The 0.10 m tell is the point of the post.
-                guard=dict(x0=3.7, x1=4.0, y0=1.53, y1=4.0, h_top=1.1),
-                post_r=0.05, post_h=1.25),
+                guard=dict(x0=3.46, x1=4.0, y0=2.00, y1=4.0, h_top=1.1),
+    #   [GT-82(4)] The gate post is no longer ground-founded: it stands on the end pier, so
+    #   `post_h` 1.25 → **0.34** and its foot is buried 0.04 into the pier crown, which puts
+    #   the cap at `pier_top + 0.30`. The 0.10 m proud tell that 1.25 was carrying is now
+    #   carried by the pier's own `rise` (0.14 above the guard crown) plus the post above it —
+    #   the run reads as pier + finial instead of a sawn face with a stick beside it.
+                post_r=0.05, post_h=0.34,
+    #   [GT-82(4)] `end_pier` — the terminal pilaster of the outer guard run. r 3.78..4.09 is
+    #   0.04 proud of the ring (3.82..4.05) on **both** radii, so the ring's radial cut face
+    #   sits inside the pier volume; `lead` 0.5 deg is how far it reaches past the run end and
+    #   `span` 3.0 deg its total width, so it eats 0.5 deg of the opening and 2.5 deg of the
+    #   retained ring. `drop` buries the foot 0.30 below the lower of the two straddled step
+    #   tops — no floating end at either terminal.
+                end_pier=dict(r_in=3.78, r_out=4.09, lead=0.5, span=3.0,
+                              rise=0.14, drop=0.30)),
     # upper/lower sidewalks (material boundary cue) — solid slabs (down to ground −2.31)
     upper=dict(x0=4.0, x1=17.0, y0=-9.0, y1=4.0, top_z=0.0),
     lower=dict(x0=-9.0, x1=4.0, y0=4.0, y1=17.0, top_z=-1.95),
@@ -225,23 +306,22 @@ PARAMS = dict(
         seam_pitch=1.00,
         wear_n=5,
     ),
-    # horizon-closing buildings (base_z = ground) — C high-rise + [rooftop v3] D/E low-rise (roofs at or below
-    #   eye height, −2.5/−1.5 = rooftop scale anchors)
-    # [rooftop v4] E relocated: from the old x−28..−14·y8..22 (north-west) the sight line grazed the **lower
-    #   terrace parapets L_W/L_N (top −0.75)** and the roof (cap top −1.0) sank below that
-    #   silhouette (2 rounds running with no sighting). Moving it to a due-north site (x6..20·y16..42) opens
-    #   a sight line that crosses neither the upper rooftop (x4..17·y−9..4) nor the lower terrace (x−9..4·y4..17)
-    #   parapets. Height 4.5 (roof −1.5) unchanged → against the 2.0 eye height it sits
-    #   3.0 m below = the scale anchor holds. The facade is turned to the south face (our side).
-    #   *hazard geometry (winder, parapet) unchanged; only the distant building moves.*
-    buildings=dict(
-        C=dict(x0=44.0, x1=54.0, y0=-16.0, y1=16.0, h=15.0, floors=5,
-               axis="x", facade_x=44.0, face_dir=-1.0, base_z=-6.0),
-        D=dict(x0=-30.0, x1=-16.0, y0=-20.0, y1=-6.0, h=3.5, floors=1,
-               axis="x", facade_x=-16.0, face_dir=1.0, base_z=-6.0),
-        E=dict(x0=6.0, x1=20.0, y0=16.0, y1=42.0, h=4.5, floors=1,
-               axis="y", facade_y=16.0, face_dir=-1.0, base_z=-6.0),
-    ),
+    # [GT-82(1)] **The three backdrop buildings are deleted, not disabled.**
+    #   They were `C` (x44..54, h15), `D` (x−30..−16, h3.5) and `E` (x6..20·y16..42, h4.5),
+    #   added in rooftop v3/v4 as horizon closure and as a below-eye-height scale anchor.
+    #   Two reasons they go:
+    #     (a) the scene is a rooftop-down fan stair and nothing else — a second building mass
+    #         is the thing the reviewer could not account for;
+    #     (b) every one of them shipped a **floating fixture**. `build_building` calls
+    #         `facade_kit.build_aircon_units(mode="eaves", eaves_z=2.30)` and `Facade.world()`
+    #         reads that z as a world absolute rather than relative to `base_z`, so on D
+    #         (roof −2.50, parapet crown −1.30) the 4 units hang at z 2.30..2.855 —
+    #         **3.60 m above the crown on a 0.06 m bracket** [measured]. That is the row of
+    #         dark plates in `pt_noon_roof_context`; their projected sx +0.122/+0.271/+0.432
+    #         and sy +0.340 match the audit frame to within 16 px [computed].
+    #   The kit-side z bug is **not** fixed here — it is `facade_kit`, which this lane does not
+    #   own. Nothing in scene19 references `PARAMS["buildings"]` any more, so the key is gone
+    #   rather than left empty: an empty dict would read as "temporarily off".
     # [rooftop v3] rooftop parapet (perimeter guard) · plant props · rooftop door — build_rooftop
     roof=dict(pp_t=0.25, pp_h=1.2, pp_h_inner=1.1,
               # [W2-D §5.6 19-2] turn-up 0.30 m · coping 0.50, the middle of 0.45~0.55
@@ -292,7 +372,14 @@ PARAMS = dict(
                               plinth=0.08)]),
               vent=dict(cx=8.0, cy=-5.5, r=0.15, h=0.8),
               pipe=dict(x0=5.0, x1=16.0, y=-8.55, r=0.06),
-              door=dict(w=0.9, h=2.1),   # position = centre of the L wall south end face (x=4)
+              # position = centre of the L wall south end face (x=4)
+              # [GT-82(2)] The leaf was a bare 0.04 m plate on a 1.0 m wide wall end — in
+              #   `upper_approach` it is the flat pale slab that fills a third of the frame
+              #   with no frame, no reveal and no head. `frame_w/frame_t` add a steel jamb-and-
+              #   head set: outer width `w + 2·frame_w` = **1.00** = exactly the wall end face,
+              #   so the frame terminates on the wall arris instead of overhanging it, and the
+              #   leaf sits 0.02 m back inside the frame face.
+              door=dict(w=0.9, h=2.1, frame_w=0.05, frame_t=0.06),
               # [rooftop v4] the rooftop planter position is promoted into PARAMS (single source for
               #   assembly and occlusion checks). The old (11,−6) was 5.9 m in front of the roof_context eye, so the
               #   canopy top was cropped at sy=1.95, outside the top of frame (v6 judgment extra observation (1)).
@@ -349,7 +436,19 @@ PARAMS = dict(
 
     material=dict(
         scale=dict(plaza_light=1.80, plaza_lower=0.8, granite_dark=1.0,
-                   concrete_wall=2.0, brick_red=2.0, grass=1.4),
+                   concrete_wall=2.0, core_newel=1.2, grass=1.4),
+        # [GT-82(2)] The L-core walls and the newel leave `granite_dark`.
+        #   [measured] linear texture means — granite_dark 0.0761/0.0768/0.0775 (lum
+        #   **0.0767**), concrete_wall 0.2653/0.2366/0.1602 (lum 0.2372, and warm: B/R 0.60).
+        #   `core_tint` lands the wall at (0.300, 0.291, 0.260), lum **0.290** — inside the
+        #   0.20~0.35 weathered exposed-concrete band, neutral, and one step below the
+        #   `parapet_color` 0.40 coping so the hierarchy coping > wall still reads.
+        #   `newel_tint` lands the newel at (0.165, 0.160, 0.150), lum **0.159** = 2.08x
+        #   granite_dark but still **0.48x** the tread value (plaza_light 0.4627 x 0.72
+        #   = 0.333), so the radial convergence datum keeps its contrast without being a
+        #   black hole in the middle of the fan.
+        core_tint=(1.131, 1.230, 1.623),
+        newel_tint=(0.622, 0.676, 0.936),
         lower_warm_tint=(1.06, 1.0, 0.94),
         grass_tint=(0.55, 0.68, 0.42),
         glass_color=(0.06, 0.09, 0.12), glass_rough=0.08,
@@ -637,10 +736,14 @@ def _solid_boxes():
         ("EdgeGuard", gd["x0"], gd["x1"], gd["y0"], gd["y1"], lo["top_z"],
          gd["h_top"]),
     ]
+    # [GT-82(3)] The AABB top is the **coping** top, not the wall top. The 0.08 m coping
+    #   overhang is deliberately NOT added to x/y: the wall footprint is flush with the
+    #   winder's a0/a1 radial edges, so widening it here would swallow an 0.08 m sliver of
+    #   Step_0 in every scan. Erring toward under-occlusion is this section's stated rule.
     for tag in ("south", "west"):
         b = wl[tag]
         B.append((f"Wall_{tag}", b["x0"], b["x1"], b["y0"], b["y1"],
-                  wl["z_bot"], wl["z_top"]))
+                  wl["z_bot"], wl["z_top"] + wl["cap_t"]))
     # 7 rooftop parapet runs (same z as pp() in build_rooftop: base−0.05 .. base+hh)
     for tag, x0, x1, y0, y1, bz, hh in (
             ("U_E", up["x1"] - t, up["x1"], up["y0"], up["y1"], up["top_z"], h),
@@ -678,11 +781,14 @@ def _solid_boxes():
     p = rf["pipe"]
     B.append(("PipeRun", p["x0"], p["x1"], p["y"] - p["r"], p["y"] + p["r"],
               up["top_z"] + 0.02, up["top_z"] + 0.02 + 2 * p["r"]))
+    # [GT-82(2)] the AABB is the **frame** outer face (x1 + frame_t) and the frame outer
+    #   width (w + 2·frame_w), which is what a sight line now meets.
     d, ws = rf["door"], wl["south"]
-    B.append(("CoreDoor", ws["x1"], ws["x1"] + 0.04,
-              (ws["y0"] + ws["y1"]) / 2 - d["w"] / 2,
-              (ws["y0"] + ws["y1"]) / 2 + d["w"] / 2, up["top_z"],
-              up["top_z"] + d["h"]))
+    d_half = d["w"] / 2 + d["frame_w"]
+    B.append(("CoreDoor", ws["x1"], ws["x1"] + d["frame_t"],
+              (ws["y0"] + ws["y1"]) / 2 - d_half,
+              (ws["y0"] + ws["y1"]) / 2 + d_half, up["top_z"],
+              up["top_z"] + d["h"] + d["frame_w"]))
     pl = rf["planter"]
     # [W3 L19] the crown is now off-centre, so the AABB is the union of the box and the
     #   crown disc rather than one square about the bed centre.
@@ -691,13 +797,7 @@ def _solid_boxes():
     B.append(("Planter_A", min(pl["cx"] - hb, tx - cr), max(pl["cx"] + hb, tx + cr),
               min(pl["cy"] - hb, ty - cr), max(pl["cy"] + hb, ty + cr),
               0.0, pl["canopy_top"]))
-    for k, bd in PARAMS["buildings"].items():
-        bz = float(bd.get("base_z", 0.0))
-        B.append((f"Bldg{k}", bd["x0"], bd["x1"], bd["y0"], bd["y1"],
-                  bz - 1.0, bz + bd["h"]))
-        B.append((f"Bldg{k}_roof", bd["x0"] - 0.1, bd["x1"] + 0.1,
-                  bd["y0"] - 0.1, bd["y1"] + 0.1, bz + bd["h"],
-                  bz + bd["h"] + 0.5))
+    # [GT-82(1)] the `Bldg*` / `Bldg*_roof` rows are gone with the buildings themselves.
     _BOXES_CACHE[0] = B
     return B
 
@@ -727,6 +827,21 @@ def _solid_at(x, y, z):
                 and pp["r_in"] <= r <= pp["r_out"] \
                 and top - 0.1 <= z <= top + pp["h"] + 0.06:
             return f"Parapet_{i}"
+    # [GT-82(4)] the two end piers reach `lead` deg **past** the retained span, so they fall
+    #   outside the loop above and would otherwise be invisible to the white-mass gate —
+    #   which is the one number the entry/exit widening is judged on. They are tested here
+    #   against their own radii and their own crown (`pp.h + rise`).
+    ep = ac["end_pier"]
+    for a_end, lo_d, hi_d, i_ref in (
+            (w["a0"] + ac["parapet_first"] * w["sector_deg"],
+             -ep["lead"], ep["span"] - ep["lead"], ac["parapet_first"]),
+            (w["a0"] + (ac["parapet_last"] + 1) * w["sector_deg"],
+             ep["lead"] - ep["span"], ep["lead"], ac["parapet_last"])):
+        top = _step_top(i_ref)
+        if a_end + lo_d <= a <= a_end + hi_d \
+                and ep["r_in"] <= r <= ep["r_out"] \
+                and top - ep["drop"] <= z <= top + pp["h"] + ep["rise"]:
+            return f"Parapet_end{i_ref}"
     return None
 
 
@@ -793,21 +908,101 @@ def _pct(scan, *prefixes):
     return sum(v for k, v in scan.items() if k.startswith(prefixes))
 
 
+# ---------------------------------------------------------------------------
+# [GT-82(4)] Entry / exit clear width, measured at the outer arc rather than asserted.
+#   The opening is bounded by the end pier's leading edge on one side and by the L wall face
+#   (a0 = the y=0 face, a1 = the x=0 face) on the other, so the honest quantity is the chord
+#   between those two points at r_out. 1.20 m is the stair clear-width floor this project
+#   works to; the entry also has to stay wide enough that the kite landing is not a slot.
+# ---------------------------------------------------------------------------
+_CLEAR_MIN = 1.20
+
+
+def _clear_widths():
+    """(entry, exit) clear width [m], printed with the 1.20 m gate.
+
+    entry = the throat at the first nosing line `threshold.x0`. South bound is the a0 wall
+      face (y = 0); north bound is whichever comes first of the edge guard's south face
+      (`threshold.y1`) and the entry pier's leading ray — the pier is at r 3.78..4.09 and
+      that ray crosses x0 inside that band, so it is a real obstruction, not a notional one.
+    exit  = the chord of the **open** outer arc, from the exit pier's leading ray to the a1
+      wall face, at r_out — this is the gap a descender steps out through onto the wedge.
+    """
+    w, ac = PARAMS["winder"], PARAMS["access"]
+    ro, ep = w["r_out"], ac["end_pier"]
+    th, gd = ac["threshold"], ac["guard"]
+    a_in = w["a0"] + ac["parapet_first"] * w["sector_deg"] - ep["lead"]
+    a_out = w["a0"] + (ac["parapet_last"] + 1) * w["sector_deg"] + ep["lead"]
+    a_end = w["a0"] + w["n"] * w["sector_deg"]
+    y_pier = th["x0"] * math.tan(math.radians(a_in))
+    r_pier = th["x0"] / math.cos(math.radians(a_in))
+    if not (ep["r_in"] <= r_pier <= ep["r_out"]):
+        y_pier = float("inf")                  # the pier ray misses the nosing line
+    entry = min(gd["y0"] - th["y0"], y_pier)
+    p0 = (ro * math.cos(math.radians(a_out)), ro * math.sin(math.radians(a_out)))
+    p1 = (ro * math.cos(math.radians(a_end)), ro * math.sin(math.radians(a_end)))
+    exit_ = math.hypot(p1[0] - p0[0], p1[1] - p0[1])
+    ok = min(entry, exit_) >= _CLEAR_MIN
+    print(f"  진입/탈출 유효폭 입구 {entry:.3f} m "
+          f"(x {th['x0']:.2f} 코선 · 벽면 y0 ~ 가드/피어 {min(gd['y0'], y_pier):.3f}) · "
+          f"출구 {exit_:.3f} m ({a_out:.1f}~{a_end:.1f}° 개방호 현) → "
+          f"{'OK' if ok else 'FAIL'} (기준 ≥{_CLEAR_MIN:.2f} m)")
+    return entry, exit_
+
+
+def _sun_dir():
+    """Unit vector toward the sun, from the same PARAMS the stage lighting reads.
+
+    `setup_lighting` authors the DistantLight as `[rotateZ, rotateX]`; USD applies the list in
+    reverse, so rotX(90 − elev) tilts the emit direction off −Z first and rotZ swings it. The
+    dome/sun azimuth is `noon_dome_rot + SUN_AZ_OFFSET + hdri_sun_rotz_offset`.
+    """
+    lp = PARAMS["light"]
+    rz = math.radians(lp["noon_dome_rot"] + PARAMS["SUN_AZ_OFFSET"]
+                      + lp["hdri_sun_rotz_offset"])
+    rx = math.radians(90.0 - lp["noon_sun_elev"])
+    ey, ez = math.sin(rx), -math.cos(rx)          # emit dir after rotX, from (0,0,−1)
+    ex2 = -ey * math.sin(rz)
+    ey2 = ey * math.cos(rz)
+    return -ex2, -ey2, -ez                        # toward the sun
+
+
+def _shadow_reach():
+    """[GT-82(3)] How far the L-core crown throws its shadow onto the winder.
+
+    The winder is the only thing under it, so this is the number the "too dark near the
+    stairs" verdict is about. Offset per metre of height = (−Sx/Sz, −Sy/Sz).
+    """
+    sx, sy, sz = _sun_dir()
+    kx, ky = -sx / sz, -sy / sz
+    az = math.degrees(math.atan2(sx, sy)) % 360.0
+    wl, w = PARAMS["walls"], PARAMS["winder"]
+    z_low = _step_top(w["n"] - 1)                 # lowest tread
+    crown = wl["z_top"] + wl["cap_t"]
+    reach_x = (crown - z_low) * kx                # west wall (x=0 face) → +x
+    reach_y = (crown - (-w["riser"])) * ky        # south wall (y=0) → kite landing
+    print(f"  태양 az {az:.1f}° · elev {PARAMS['light']['noon_sun_elev']:.2f}° → "
+          f"그림자 {kx:+.3f}x/{ky:+.3f}y per m")
+    print(f"    서측 코어 마루 {crown:+.2f} → 최하단 디딤({z_low:+.2f})에서 x {reach_x:.2f} "
+          f"(r_out {w['r_out']:.2f} 중 {max(0.0, w['r_out'] - reach_x):.2f} m 채광) · "
+          f"남측 코어 → 카이트 랜딩에서 y {reach_y:.2f} "
+          f"(랜딩 폭 {PARAMS['access']['threshold']['y1']:.2f} 중 "
+          f"{max(0.0, PARAMS['access']['threshold']['y1'] - reach_y):.2f} m 채광)")
+    return reach_x, reach_y
+
+
 def _geom_report():
     """Pre-boot geometry and camera self-verification (NEGOBS_SMOKE=1)."""
     views = build_views()
     up = PARAMS["upper"]
-    bE = PARAMS["buildings"]["E"]
-    e_roof = bE["base_z"] + bE["h"]
     print("=" * 70)
     print("scene19_fan_winder — SMOKE 기하 자기검증 (부팅 전)")
     print("=" * 70)
     print(f"  총낙차 {abs(_step_top(PARAMS['winder']['n'] - 1)):.2f} m "
           f"(카이트 {PARAMS['winder']['kite_n']}섹터 + 잔여 "
           f"{PARAMS['winder']['n'] - PARAMS['winder']['kite_n']}단) — 불변 검사")
-    print(f"  E동 지붕 z {e_roof:+.2f} (캡 {e_roof + 0.5:+.2f}) vs 옥상 눈높이 "
-          f"{up['top_z'] + 2.0:+.2f} → "
-          f"{'OK (눈높이 이하)' if e_roof + 0.5 < up['top_z'] + 2.0 else 'FAIL'}")
+    _clear_widths()
+    _shadow_reach()
 
     # ---- [W3 L19 · GT-41] K4(d) split proof -------------------------------
     w = PARAMS["winder"]
@@ -838,14 +1033,22 @@ def _geom_report():
     print(f"  [eye 매몰] {len(hits)}건 → {'OK' if not hits else 'FAIL'}")
 
     print("  [프레임 레이마칭] 21×12 광선 · 60° 수평화각")
+    # [GT-82(1)] roof_skyline keeps its eye/tgt — only the **gate** is re-based. With
+    #   building E deleted the cut can no longer carry a below-eye-height scale anchor, and
+    #   pretending otherwise would be the same "checked by eye" failure the v4 note records.
+    #   What the cut still has to prove is the thing that makes it a *rooftop*: the north
+    #   parapet crown in the near field and, past it, the ground **6 m below** (upper deck 0.0
+    #   vs `ground.top_z` −6.0). Both must be present; the drop is the depth cue.
     v = views["roof_skyline"]
     sc_sky = _frame_scan(v["eye"], v["tgt"])
-    pe = _pct(sc_sky, "BldgE")
+    p_gnd = _pct(sc_sky, "Ground")
+    p_pp = _pct(sc_sky, "RoofPP")
     print(f"    roof_skyline  eye{tuple(v['eye'])} → tgt{tuple(v['tgt'])}")
     for k in sorted(sc_sky, key=lambda k: -sc_sky[k])[:6]:
         print(f"      {k:16s} {sc_sky[k]:5.1f}%")
-    print(f"      E동 점유 {pe:.1f}% (≥8 = 스케일 앵커 성립) → "
-          f"{'OK' if pe >= 8.0 else 'FAIL'}")
+    ok_sky = p_gnd >= 4.0 and p_pp >= 3.0
+    print(f"      6 m 아래 지반 {p_gnd:.1f}% (≥4) · 옥상 파라펫 {p_pp:.1f}% (≥3) → "
+          f"{'OK' if ok_sky else 'FAIL'} (배경 건물 없음 = GT-82(1))")
 
     def _stair_cut(name, min_step, min_tier, max_white):
         v = views[name]
@@ -1000,14 +1203,14 @@ BANNER = """\
  4b. lower_lookup  — [옥상 v4] 마지막 단에서 팬을 거슬러 올려다본 **라이저 면**
                      (4번과 짝: 부감=디딤 84 % / 앙각=라이저 47 %)
  5. cue            — 상/하부 보도 재질경계 / 외측 파라펫·핸드레일
- 6. entry_gate     — [접근성 v2] 문턱→카이트 랜딩 연속(입구 폭 1.53)·게이트
-                     기둥·에지 가드, 하부는 출구 sector→코너 슬래브→하부 보도 연속
+ 6. entry_gate     — [GT-82] 문턱→카이트 랜딩 연속(**입구 유효폭 1.96**, 이전
+                     1.53)·단부 피어+게이트 기둥·에지 가드, 하부는 출구
+                     (**1.53**, 이전 1.04) sector→코너 슬래브→하부 보도 연속
  7. roof_context   — [옥상 v3] 실외기·환기구·배관·옥상 파라펫 + 옥상 화단·수목
                      [옥상 v4] 수관 정상이 프레임 안에 온전히 들어오는가
-                     (스케일 앵커 역할은 8번 roof_skyline 이 전담 — 이 컷의
-                      시선은 U_W 파라펫(상단 1.2)에 막혀 원경 D동이 안 보인다)
- 8. roof_skyline   — [옥상 v4] 북측 파라펫 너머 E동 지붕이 **눈높이 아래**로
-                     열리는가(스케일 앵커) + 6 m 아래 지반이 함께 읽히는가"""
+                     [GT-82] 화단 박스·코어 벽이 검은 덩어리로 죽지 않는가
+ 8. roof_skyline   — [GT-82] 배경 건물 3동 삭제. 북측 파라펫 마루와 그 너머
+                     **6 m 아래 지반**만으로 옥상 높이가 읽히는가"""
 
 
 def main():
@@ -1018,9 +1221,11 @@ def main():
         # [rooftop v4] coordinate check before booting — the convention that stops occlusion failures recurring (v6 judgment §lessons).
         _geom_report()
 
+    # [GT-82] `brick_red` out (the three backdrop buildings were its only consumer),
+    #   `concrete_wall` in (the L core and the newel).
     sc.check_assets(
         ["plaza_light", "plaza_lower", "granite_dark",
-         "brick_red", "grass", "hdri", "mdl"],
+         "concrete_wall", "grass", "hdri", "mdl"],
         hdri=PARAMS["light"]["hdri"])
 
     simulation_app = sc.boot(capture_mode or smoke_mode)
@@ -1060,15 +1265,30 @@ def main():
             stage, "/World/Looks/Step", sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
             scl["plaza_light"], tint=(0.72, 0.72, 0.72))   # [T1 T-1] x0.72
-        # building corner L wall and newel = dark granite (granite_dark) — contrasts with the steps
+        # dark granite — kept only for the small deck-level bases (HVAC / PH plinths),
+        #   which sit in full sun and read as 기초 stone. [GT-82(2)] it is NO LONGER the
+        #   surround of the descent.
         M["granite"] = sc.make_pbr(
             stage, "/World/Looks/Granite", sc.tex_path("granite_dark", "diff"),
             sc.tex_path("granite_dark", "nor"), sc.tex_path("granite_dark", "rough"),
             scl["granite_dark"])
-        M["brick"] = sc.make_pbr(
-            stage, "/World/Looks/Brick", sc.tex_path("brick_red", "diff"),
-            sc.tex_path("brick_red", "nor"), sc.tex_path("brick_red", "rough"),
-            scl["brick_red"])
+        # [GT-82(2)] the rooftop core (L wall + coping) — exposed concrete, lum 0.290.
+        #   `/World/Looks/CoreWall` resolves to the look layer's **concrete** class (the
+        #   `"wall"` token), so it takes the concrete bevel 0.020, the structure weather
+        #   profile and bump 1.6 — the same prescription the parapets already get.
+        M["core"] = sc.make_pbr(
+            stage, "/World/Looks/CoreWall", sc.tex_path("concrete_wall", "diff"),
+            sc.tex_path("concrete_wall", "nor"),
+            sc.tex_path("concrete_wall", "rough"),
+            scl["concrete_wall"], tint=mp["core_tint"])
+        # [GT-82(2)] the newel = the core's rounded corner, same concrete one value down.
+        #   `/World/Looks/NewelConcrete` carries the `"concrete"` token for the same reason.
+        M["newel"] = sc.make_pbr(
+            stage, "/World/Looks/NewelConcrete",
+            sc.tex_path("concrete_wall", "diff"),
+            sc.tex_path("concrete_wall", "nor"),
+            sc.tex_path("concrete_wall", "rough"),
+            scl["core_newel"], tint=mp["newel_tint"])
         M["grass"] = sc.make_pbr(
             stage, "/World/Looks/Grass", sc.tex_path("grass", "diff"),
             sc.tex_path("grass", "nor"), sc.tex_path("grass", "rough"),
@@ -1225,11 +1445,11 @@ def main():
                                w["r_in"], w["r_out"], a0, a0 + w["sector_deg"],
                                w["seg"], _step_top(i), w["base_z"], M["step"],
                                mesh=w["mesh"], arc_seg=w["arc_seg"])
-        # inner corner newel
+        # inner corner newel — [GT-82(2)] core concrete, not granite_dark
         nw = PARAMS["newel"]
         sc.add_cylinder(stage, "/World/Scene19/Newel",
                         (cx, cy, (nw["z_top"] + nw["z_bot"]) / 2.0),
-                        nw["r"], nw["z_top"] - nw["z_bot"], M["granite"],
+                        nw["r"], nw["z_top"] - nw["z_bot"], M["newel"],
                         collider=True)
         # 2 faces of the building corner L wall
         wl = PARAMS["walls"]
@@ -1239,8 +1459,25 @@ def main():
             b = wl[tag]
             sc.add_box(stage, f"/World/Scene19/Wall_{tag}",
                        ((b["x0"] + b["x1"]) / 2.0, (b["y0"] + b["y1"]) / 2.0, zc),
-                       (b["x1"] - b["x0"], b["y1"] - b["y0"], hz), M["granite"],
+                       (b["x1"] - b["x0"], b["y1"] - b["y0"], hz), M["core"],
                        collider=True)
+        # [GT-82(3)] L coping over the core. The two wall boxes overlap in
+        #   x −1..0 · y −1..0, so a cap per wall would put two coplanar plates on the same
+        #   z = z_top+cap_t and z-fight there. The cap is therefore cut as **three
+        #   non-overlapping runs**: the south run carries the corner, and the west run is
+        #   split either side of it at y = south.y0 − over / south.y1 + over.
+        ov, ct = wl["cap_over"], wl["cap_t"]
+        bs, bw = wl["south"], wl["west"]
+        cap_z = wl["z_top"] + ct / 2.0
+        for tag, x0, x1, y0, y1 in (
+                ("S", bs["x0"] - ov, bs["x1"] + ov, bs["y0"] - ov, bs["y1"] + ov),
+                ("W_S", bw["x0"] - ov, bw["x1"] + ov, bw["y0"] - ov,
+                 bs["y0"] - ov),
+                ("W_N", bw["x0"] - ov, bw["x1"] + ov, bs["y1"] + ov,
+                 bw["y1"] + ov)):
+            sc.add_box(stage, f"/World/Scene19/CoreCap_{tag}",
+                       ((x0 + x1) / 2.0, (y0 + y1) / 2.0, cap_z),
+                       (x1 - x0, y1 - y0, ct), M["parapet"])
         # outer low parapet: the entry (sector 0..1) and exit (10..11) are open [accessibility v2],
         #   arc rings on the middle sectors only (each step top +h)
         pp = PARAMS["parapet"]
@@ -1258,18 +1495,39 @@ def main():
                                1, top + pp["h"], top - 0.1, M["parapet"],
                                collider=True, mesh=w["mesh"],
                                arc_seg=w["arc_seg"])
-        # gate posts at both ends of the parapet (marking where the opening starts, look_refs study) — metal.
-        #   The post foot is buried −0.05 below the top face of the open-side (lower) step → prevents floating
+        # [GT-82(4)] Run ends. Each terminal is now **pier + finial**, replacing "a sawn
+        #   radial face with a 0.05 m stick standing next to it":
+        #     ParapetEnd_* — an annular pier 0.04 proud of the ring on both radii and
+        #       `lead` deg past the run end, so the ring's cut face (and the handrail's cut
+        #       end, which shares the same radial plane) is enclosed, not exposed. Its foot
+        #       is `drop` below the LOWER of the two step tops it straddles, so neither
+        #       terminal can float over the step below it.
+        #     GatePost_*  — the same metal post, kept at the same prim path, now standing on
+        #       the pier crown (foot buried 0.04) rather than rising from the step.
         r_mid = (pp["r_in"] + pp["r_out"]) / 2.0
-        for tag, top, ang in (
-                ("entry", _step_top(ac["parapet_first"]),
-                 w["a0"] + ac["parapet_first"] * w["sector_deg"]),
-                ("exit", _step_top(ac["parapet_last"] + 1),
-                 w["a0"] + (ac["parapet_last"] + 1) * w["sector_deg"])):
-            a = math.radians(ang)
+        ep = ac["end_pier"]
+        for tag, i_ref, ang, sgn in (
+                ("entry", ac["parapet_first"],
+                 w["a0"] + ac["parapet_first"] * w["sector_deg"], +1.0),
+                ("exit", ac["parapet_last"],
+                 w["a0"] + (ac["parapet_last"] + 1) * w["sector_deg"], -1.0)):
+            top = _step_top(i_ref)
+            a_lo = min(ang - sgn * ep["lead"],
+                       ang + sgn * (ep["span"] - ep["lead"]))
+            a_hi = a_lo + ep["span"]
+            # the foot must clear the lower of the two straddled step tops
+            i_out = i_ref - 1 if sgn > 0 else i_ref + 1
+            base = min(top, _step_top(max(0, min(w["n"] - 1, i_out)))) \
+                - ep["drop"]
+            pier_top = top + pp["h"] + ep["rise"]
+            sc.build_arc_steps(stage, f"/World/Scene19/ParapetEnd_{tag}", cx, cy,
+                               ep["r_in"], ep["r_out"], a_lo, a_hi, 1,
+                               pier_top, base, M["parapet"], collider=True,
+                               mesh=w["mesh"], arc_seg=w["arc_seg"])
+            a = math.radians((a_lo + a_hi) / 2.0)
             sc.add_cylinder(stage, f"/World/Scene19/GatePost_{tag}",
                             (cx + r_mid * math.cos(a), cy + r_mid * math.sin(a),
-                             top - 0.05 + ac["post_h"] / 2.0),
+                             pier_top - 0.04 + ac["post_h"] / 2.0),
                             ac["post_r"], ac["post_h"], M["rail"])
 
     # -------------------------------------------------------------------
@@ -1282,6 +1540,10 @@ def main():
         # threshold sliver: fills the gap between the sidewalk (z0) and the entry sector outer arc with sidewalk paving.
         #   The band biting inward (r<4) is buried outside the entry steps (step0/1) → the effective tread
         #   boundary stays consistently at x=3.86
+        # [GT-82(4)] with the opening at 30 deg the arc retreats to x = 4·cos30 = **3.4641**,
+        #   so `x0` is 3.46 and the effective boundary is a single straight 2.00 m nosing at
+        #   x = 3.46 instead of the old 1.53 m one at 3.70. The guard shares that x0, so the
+        #   throat's west face is one plane from y 0 to y 4 — no 0.24 m jog to catch the eye.
         th = ac["threshold"]
         sc.add_box(stage, "/World/Scene19/Threshold",
                    ((th["x0"] + up["x0"]) / 2.0, (th["y0"] + th["y1"]) / 2.0,
@@ -1296,6 +1558,20 @@ def main():
                     (low_z + gd["h_top"]) / 2.0),
                    (gd["x1"] - gd["x0"], gd["y1"] - gd["y0"],
                     gd["h_top"] - low_z), M["parapet"], collider=True)
+        # [GT-82(4)] The guard is the westward continuation of the north rooftop parapet —
+        #   both crowns are 1.10 — but `RoofPP_U_N` carries a coping and the guard did not,
+        #   so the run changed section mid-crown. Same 0.012 m plate as `RoofCope_*`, proud
+        #   0.06 on the two free faces (west over the wedge, south over the throat) and
+        #   **flush at x = up.x0** so it butts the U_N coping instead of overlapping it —
+        #   a coplanar overlap at the same z is exactly the z-fight this round is fixing.
+        #   Its north edge takes U_N's own coping overhang so the two read as one line.
+        cw, t = PARAMS["roof"]["coping_w"], PARAMS["roof"]["pp_t"]
+        cap_n = up["y1"] + (cw - t) / 2.0
+        sc.add_box(stage, "/World/Scene19/EdgeGuardCap",
+                   ((gd["x0"] - 0.06 + gd["x1"]) / 2.0,
+                    (gd["y0"] - 0.06 + cap_n) / 2.0, gd["h_top"] + 0.006),
+                   (gd["x1"] - gd["x0"] + 0.06, cap_n - gd["y0"] + 0.06, 0.012),
+                   M["parapet"])
 
     # -------------------------------------------------------------------
     # [rooftop v3] rooftop parapet (perimeter guard) + plant props + rooftop door
@@ -1439,15 +1715,31 @@ def main():
                         p["r"], p["x1"] - p["x0"], M["hvac"], rotY=90.0)
         # rooftop steel door — at upper terrace level on the L wall south end face (x=4, width 1m).
         #   Right beside the entry threshold, so the route "out of the rooftop core and onto the corner stairs" reads.
+        # [GT-82(2)] the leaf now sits inside a steel frame instead of being a bare plate on
+        #   a blank wall end. Frame outer face x = x1 + frame_t (4.06), leaf outer face
+        #   x1 + 0.04 → the leaf is **0.02 m recessed**, which is the reveal that makes it
+        #   read as a door at all. Frame outer width w + 2·frame_w = 1.00 = the wall end
+        #   face exactly, so the jambs die on the wall arris with nothing overhanging.
         d = rf["door"]
         ws = PARAMS["walls"]["south"]
+        dcy = (ws["y0"] + ws["y1"]) / 2.0
+        fw, ft = d["frame_w"], d["frame_t"]
         sc.add_box(stage, "/World/Scene19/CoreDoor",
-                   (ws["x1"] + 0.02, (ws["y0"] + ws["y1"]) / 2.0,
-                    up["top_z"] + d["h"] / 2.0),
+                   (ws["x1"] + 0.02, dcy, up["top_z"] + d["h"] / 2.0),
                    (0.04, d["w"], d["h"]), M["door"])
+        for tag, dy in (("L", -(d["w"] + fw) / 2.0), ("R", (d["w"] + fw) / 2.0)):
+            sc.add_box(stage, f"/World/Scene19/CoreDoorJamb_{tag}",
+                       (ws["x1"] + ft / 2.0, dcy + dy,
+                        up["top_z"] + (d["h"] + fw) / 2.0),
+                       (ft, fw, d["h"] + fw), M["rail"])
+        sc.add_box(stage, "/World/Scene19/CoreDoorHead",
+                   (ws["x1"] + ft / 2.0, dcy,
+                    up["top_z"] + d["h"] + fw / 2.0),
+                   (ft, d["w"] + 2 * fw, fw), M["rail"])
 
     # -------------------------------------------------------------------
-    # dressing — planter + distant buildings + [rooftop v3] rooftop context elements
+    # dressing — rooftop planter + [rooftop v3] rooftop context elements
+    #   ([GT-82] the distant-building tier is deleted)
     # -------------------------------------------------------------------
     def build_dressing(M):
         tree_mtls = (M["wood"], M["canopy_a"], M["canopy_b"])
@@ -1458,18 +1750,21 @@ def main():
         #   `place_shrubs` 로만 넘기고 `build_tree` 로는 넘기지 않는다(K4(c) 시그니처 보존,
         #   킷은 이번 창에서 동결). `tree_mtls=None` 이면 세 번째 관목이 화단 중앙에
         #   앉으므로 교목은 (−0.62, +0.62) 오프셋에 심는다.
+        # [GT-82(2)] the bed leaves `granite` for the core concrete: a 3.0 x 3.0 x 0.90 box in
+        #   a 0.0767-luminance stone is the second near-black mass in `roof_context`, and a
+        #   raised 옥상 플랜터 is a cast box, not a granite monolith. Geometry unchanged, so
+        #   the `Planter_A` occlusion AABB and the `roof_context` frame probes do not move.
         sc.build_planter(stage, "/World/Scene19/Planter_A",
                          pl["cx"], pl["cy"], 0.0,
-                         M["granite"], M["grass"], tree_mtls=None,
+                         M["core"], M["grass"], tree_mtls=None,
                          size=pl["size"], curb_h=pl["curb_h"],
                          grass_h=pl["soil_h"], species=pl["shrub_species"])
         sc.build_tree(stage, "/World/Scene19/Planter_A",
                       pl["cx"] + pl["tree_dx"], pl["cy"] + pl["tree_dy"],
                       pl["soil_h"], *tree_mtls,
                       trunk_h=pl["trunk_h"], species=pl["tree_species"])
-        for key, bd in PARAMS["buildings"].items():
-            sc.build_building(stage, f"/World/Scene19/Building_{key}", bd,
-                              M["brick"], M["glass"], M["parapet"])
+        # [GT-82(1)] the `Building_C/D/E` loop is deleted — see PARAMS. The scene's only
+        #   built mass is the host L core the fan winds around.
         build_rooftop(M)
 
     # -------------------------------------------------------------------

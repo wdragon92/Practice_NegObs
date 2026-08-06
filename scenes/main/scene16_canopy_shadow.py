@@ -64,9 +64,53 @@ are the same archetype, so G2 is effectively this scene's own reference.
    flight plus 1.00 m of approach. 16 is the in-library model for the continuous-canopy
    form (02-A), not a defect.
 
-DEFERRED to a Lane-1 follow-up (recorded, not attempted here): **K5** curb geometry for the
-colour-only `M["curb"]`, **K4(b)** street-row species, and the `PLACEMENT` block that would
-promote the eight `placement_lint` `nodata` WARNs into real gates.
+DEFERRED to a Lane-1 follow-up (recorded, not attempted here): **K4(b)** street-row species,
+and the `PLACEMENT` block that would promote the eight `placement_lint` `nodata` WARNs into
+real gates. (**K5** curb geometry is no longer deferred — see GT-79 below.)
+
+═══ GT-79 — the crossed road (scene identity) ═══════════════════════════════
+User verdict: *"I do not know Scene16 identity. If it is an underground passage,
+should it not be installed so that it feels like it crosses the road?"* — the descending
+stair and the lower passage were built, but **nothing in the scene said what the passage
+crosses under**, so the trench read as a decorative sunken slot in a plaza.
+
+Added: a two-lane carriageway running **along Y, perpendicular to the passage axis**, over
+the lower passage — kerb lines (`infra_kit.build_curb_line`, the scene02 GT-2 section),
+a yellow centre line and two white edge lines, street footways, and a **covered box
+section** where the trench passes under the carriageway. The east exit stair (x 14.00…18.48)
+now stands on the **far footway**, so the read is descend / pass under the road / come up
+on the other side. `PARAMS["xroad"]` carries every coordinate.
+
+Three measured facts this row must state, because each one is a compromise forced by
+geometry the brief freezes:
+
+1. **Clear headroom under the box = 1.75 m** `[computed]`. The passage invert (−2.100)
+   and the plaza datum (0.000) are both fixed by the T20 stair (14 × 0.150), and the
+   carriageway datum is fixed at −0.130 by the GT-2 kerb section (150 mm exposure with
+   the kerb top at +0.020 over a 0.000 footway). That leaves 1.970 m for structure +
+   headroom over a 3.00 m clear span; the box roof is built at the minimum credible
+   depth (0.170 m RC slab + 0.050 m wearing course = 0.220) → soffit −0.350, clear
+   1.750 m. A statutory 지하보도 wants 2.30–2.50 m; reaching it would require moving the
+   passage invert, which this round may not touch. Recorded, not hidden.
+2. **The 150 mm trench parapet may not stand inside a carriageway.** `Wall_S`/`Wall_N`
+   therefore run at `parapet_top` (+0.150) outside the crossing and are **capped at the
+   box soffit** (−0.350) inside it, in one extra segment per side; the roof slab bears on
+   that segment. Prim roots `Wall_S`/`Wall_N` are kept (they become the west run).
+   The two parapet terminations get **end piers** and the pit guardrail is split into two
+   runs with **end posts** on those piers — the craftsmanship rule for this round.
+   The guardrail's x = 0.00 end is left exactly as it was: it sits inside the frozen
+   judged band (T20 stair head) and is recorded for a later round.
+3. **Sun geometry** `[computed]`. `SUN_AZ_OFFSET` 146.5 puts the shadow azimuth at 0°,
+   i.e. **along +X**, at 49.79° elevation (shadow length = 0.845 × height). Every member
+   added by GT-79 stands at x ≥ 5.60, so none of them can throw a shadow west of its own
+   footprint: the judged stair band (x 0.00…4.48) keeps the canopy as its only shadow
+   source, unchanged. The canopy, the stair, the nosing, the stair-head tactile band and
+   the GT-71 hedge bands are untouched.
+
+GT note: the two kerb lines are a **new 150 mm linear drop** at x 7.80 / 13.80 (the
+`build_curb_line` `gt_drop`), 7.80 m east of the judged stair head. The scene's registered
+hazard inputs — `edges=[("stair_top", 0.00)]`, `voids=((0.00, −1.50, 4.48, 1.50),)` and
+`TACTILE_SITES["scene16"]` — are unchanged, but the GT cache needs a re-run.
 """
 
 import os
@@ -78,6 +122,7 @@ import datetime
 import scene_common as sc
 import ground_kit as gk
 import stair_kit as sk       # [realism v1] statutory handrail (§15(3)/(4))
+import infra_kit as ik       # [GT-79] kerb line + road markings (K5 route)
 import facade_kit as fk      # [W3 S16 · BS-4] primitive injection for building_kit
 import building_kit as bk    # [W3 S16 · BS-4] street-wall backdrop (kind="backdrop")
 
@@ -180,6 +225,50 @@ PARAMS = dict(
                  head_setback=0.30, head_depth=0.60, head_dot_h=0.006),
     nosing=dict(color=(0.85, 0.72, 0.10), width=0.05, proud=0.001),
 
+    # ═══ [GT-79] the crossed road — what the passage runs under ══════════════
+    #  Section, west → east (all values metres, plaza datum z = 0.000):
+    #    fw0  5.60 ─ street footway ─ kb0 7.60 │ kerb 0.20 │ car0 7.80
+    #      … 6.00 m two-lane carriageway (centre 10.80) …
+    #    car1 13.80 │ kerb 0.20 │ kb1 14.00 ─ street footway ─ fw1 16.00
+    #  * `car0/car1` are the **kerb face** lines (`build_curb_line` p0/p1); the block
+    #    body runs 0.20 m away from the road, so `kb0/kb1` are the block back faces and
+    #    therefore the line the plaza walk is cut on — the kerb seals the walk's cut
+    #    face exactly (scene02 `walk_a/walk_b` idiom).
+    #  * `pv0/pv1` (0.05 m outside `kb0/kb1`) are the pavement and box-slab extents. The
+    #    0.05 m offset exists so **no face of the carriageway slab is coplanar with a
+    #    face of a kerb block or of the cut walk** — the only way to keep a buried kerb
+    #    bed z-fight-free `[computed]`.
+    #  * `fw0/fw1` are the street corridor edges and are the **same numbers as the gap in
+    #    the BS-4 street wall** below, so the road runs between the blocks to the scene
+    #    rim (§0-2) instead of dying into a facade.
+    #  * `y0/y1` = ±`ground.size`/2: the carriageway ends **on the ground plate rim**, so
+    #    it has no raw end face anywhere inside the world.
+    #  * `kb1` 14.00 is exactly the east exit stair head, so the box mouth opens straight
+    #    into the stair well and the far footway is the one the stair climbs to. There is
+    #    **no crossing marked on this road** — that absence is the reason the underpass
+    #    exists, and it is deliberate, not an omission.
+    #  * `box_soffit` / `box_wear`: see docstring GT-79 note 1 for the 1.75 m headroom
+    #    arithmetic. The roof bears on the capped wall segment (`Wall_*_Box`).
+    #  * `pier`: the parapet end pier at each box mouth — 0.36 m along X, 0.02 m proud of
+    #    the 0.30 m wall on both faces (so no coplanar face with the wall), capped at
+    #    +0.280, i.e. 0.130 above the parapet. It is what the split guardrail's end post
+    #    stands on.
+    xroad=dict(car0=7.80, car1=13.80, kb0=7.60, kb1=14.00,
+               pv0=7.55, pv1=14.05, fw0=5.60, fw1=16.00,
+               y0=-70.0, y1=70.0, z_road=-0.130, thick=0.50,
+               box_soffit=-0.350, box_wear=-0.180,
+               pier=dict(length=0.36, out=0.02, top=0.280),
+               lane=dict(centre_x=10.80, w_centre=0.15, w_edge=0.15,
+                         edge_in=0.25, proud=0.003)),
+    # [GT-79 · K5] `build_curb_line` arguments. Identical section to scene02 GT-2:
+    #   exposure 0.150 above the carriageway datum −0.130 → kerb top +0.020, i.e.
+    #   flush…+20 mm above the 0.000 footway, which is the builder's strict band.
+    #   `gutter=False` (this street has no L-gutter pan) → gt_drop = height = 0.150.
+    #   `lod_half` 12.0 keeps the 1 m unit rhythm inside |y| ≤ 12 (the judged window on a
+    #   140 m line) and coarsens to 12 m blocks outside it `[measured — dry run]`.
+    curb=dict(height=0.150, width=0.20, unit=1.0, embed=0.20, joint_w=0.006,
+              arris="look", far_unit=12.0, lod_half=12.0),
+
     # ═══ [W2-D ground_kit] P3 sidewalk_block - spec §5.2 scene16 row ══════════
     #  Row prescription: "edge weeds on both walk verges · 1 manhole · canopy
     #  drip staining band (eaves projection)"; manhole (-3.9, -0.8).
@@ -226,9 +315,15 @@ PARAMS = dict(
     # surrounding ground / dressing
     #   gx1 14.5 -> 19.0 : also clears the east exit stair footprint (x 14..18.48) from the grass.
     ground=dict(size=140.0, z_top=-0.03, gx0=-0.5, gx1=19.0, gy0=-1.85, gy1=1.85),
+    # [GT-79] B (8.00, −4.50) and C (12.00, 5.00) stood **inside** the new carriageway
+    #   (x 7.80…13.80): a 3.00 m planter box centred at x 8.00 spans 6.50…9.50, C spans
+    #   10.50…13.50 `[computed]`. Both move to the far footway (x 15.70…18.70), east of
+    #   the kerb back 14.00 and west of the bollard block 20.20, where they read as the
+    #   planting of the street the passage comes up onto. A and D are unchanged — they
+    #   are the two that share the judged frame with the stair.
     planters=[dict(name="A", cx=-4.0, cy=4.0, base_z=0.0),
-              dict(name="B", cx=8.0, cy=-4.5, base_z=0.0),
-              dict(name="C", cx=12.0, cy=5.0, base_z=0.0),
+              dict(name="B", cx=17.2, cy=-4.6, base_z=0.0),
+              dict(name="C", cx=17.2, cy=4.6, base_z=0.0),
               dict(name="D", cx=2.0, cy=6.5, base_z=0.0)],
     planter=dict(size=3.0, curb_h=0.45, curb_t=0.25, cap_over=0.05,
                  cap_h=0.05, grass_h=0.40),
@@ -294,22 +389,33 @@ PARAMS = dict(
     #  often than face brick anyway, and G2's own two flanks are grey tile and metal.
     #  Effective shell albedo now 0.20–0.33 against r1's 0.05–0.25, all inside §1.11's
     #  ≤0.55 band. `brick_red` is untouched elsewhere (building C keeps it).
+    #  ── [GT-79] the street corridor is cut through both rows ──────────────────
+    #  A road that dies into a facade is not a road (§0-2, and the scene13 GT-64 note
+    #  "the carriageway no longer dies in the lawn"). Both rows now leave a **gap at
+    #  x 5.60…16.00** — exactly `xroad.fw0…fw1`, the street footway edges — so the
+    #  carriageway and its two footways run between the blocks and on to the scene rim.
+    #  Blocks per row 6 → 5: S3 (5.5…12.0, h 22.0) and S4 (12.0…20.0, h 15.2) are
+    #  replaced by (16.0…21.0, h 22.0) and (21.0…26.0, h 15.2); N3 (4.0…11.5, h 16.0)
+    #  and N4 (11.5…19.0, h 21.0) by (16.0…21.5, h 21.0) and (21.5…26.0, h 19.0), and the
+    #  block that flanks the stair grows to the corridor edge (S2 5.5 → 5.6, N2 4.0 →
+    #  5.6). The **tall pair stays east of the flight**, which is the r2 rule the row was
+    #  built on. Sky opened by the gap is all at x ≥ 5.60, i.e. behind the judged stair
+    #  band, and the shadow azimuth is 0° (+X), so nothing about the stair's lighting
+    #  moves `[computed]`.
     backdrop=dict(
         base_z=-0.35,             # foot buried below the walk (0.0) and the grass (−0.03)
         S=dict(y0=-24.0, y1=-10.0, facade_y=-10.0, face_dir=1.0, blocks=(
             (-16.0,  -8.0, 12.0, 4, "city_stone"),
             (-8.0,   -2.0, 10.4, 3, "city_plaster"),
-            (-2.0,    5.5, 13.2, 4, "city_wall"),
-            (5.5,    12.0, 22.0, 7, "city_plaster"),
-            (12.0,   20.0, 15.2, 5, "city_stone"),
-            (20.0,   26.0, 18.0, 6, "city_wall"))),
+            (-2.0,    5.6, 13.2, 4, "city_wall"),
+            (16.0,   21.0, 22.0, 7, "city_plaster"),
+            (21.0,   26.0, 15.2, 5, "city_stone"))),
         N=dict(y0=10.0, y1=24.0, facade_y=10.0, face_dir=-1.0, blocks=(
             (-16.0,  -9.0, 11.2, 3, "city_wall"),
             (-9.0,   -2.5, 13.6, 4, "city_stone"),
-            (-2.5,    4.0,  9.8, 3, "city_plaster"),
-            (4.0,    11.5, 16.0, 5, "city_wall"),
-            (11.5,   19.0, 21.0, 7, "city_stone"),
-            (19.0,   26.0, 19.0, 6, "city_plaster"))),
+            (-2.5,    5.6,  9.8, 3, "city_plaster"),
+            (16.0,   21.5, 21.0, 7, "city_stone"),
+            (21.5,   26.0, 19.0, 6, "city_plaster"))),
         # The verge the street wall cannot cover: the 2 m strips between the walk edge
         # (|y| = 8) and the new building line (|y| = 10), plus the 4 m band between the
         # walk's east end (x 22) and building C's facade (x 26) — a lawn closing a
@@ -319,10 +425,18 @@ PARAMS = dict(
         # only step introduced is the 20 mm the walk already has against the verge.
         # Kept as three strips, not one slab, so that nothing is laid over the trench
         # void (GT-V) — the east strip starts 3.52 m past the trench end at x 18.48.
+        # [GT-79] the two long strips are cut on `xroad.pv0/pv1` (7.55 / 14.05), not on
+        #   the kerb backs: cutting them on the kerb backs would have left the apron's
+        #   cut face coplanar with the street footway plate's face over the same 0.30 m
+        #   of z `[computed]` — a z-fight. At pv0/pv1 the apron's cut face meets the
+        #   carriageway slab's face back to back instead, and the 0.05 m it gives up is
+        #   covered by the street footway plate above it (top 0.000 vs apron −0.020).
         apron=dict(z_top=-0.02, thick=0.30, strips=(
-            (-16.0, -10.0, 26.0, -8.0),
-            (-16.0,   8.0, 26.0, 10.0),
-            (22.0,   -8.0, 26.0,  8.0))),
+            (-16.0, -10.0,  7.55, -8.0),
+            (14.05, -10.0, 26.0,  -8.0),
+            (-16.0,   8.0,  7.55, 10.0),
+            (14.05,   8.0, 26.0,  10.0),
+            (22.0,   -8.0, 26.0,   8.0))),
     ),
 
     # --- context dressing (cue_scene_dressing) : "a downtown plaza with an underpass entrance" ---
@@ -349,8 +463,14 @@ PARAMS = dict(
     #   zero near occlusion, unrelated to the judging subject (stairs·canopy shadow, x 0..4.6).
     bollards=dict(x=20.5, ys=(-3.75, -2.25, -0.75, 0.75, 2.25, 3.75),
                   block=dict(x0=20.2, x1=20.5, y0=-4.05, y1=4.05)),
-    benches=[(-5.0, 5.5, 180.0), (-5.0, -5.5, 0.0), (9.0, 5.0, 180.0)],
-    streetlights=[(-3.0, 6.5), (9.0, -6.5)],
+    # [GT-79] bench 2 (9.00, 5.00) sat in the carriageway → moved to the far footway at
+    #   (17.00, 6.90), 0.80 m clear of planter C (y 3.10…6.10) `[computed]`.
+    benches=[(-5.0, 5.5, 180.0), (-5.0, -5.5, 0.0), (17.0, 6.9, 180.0)],
+    # [GT-79] streetlight 2 (9.00, −6.50) sat in the carriageway. It becomes the **road's
+    #   own** light on the east street footway (x 14.00…16.00): pole at x 15.00, arms
+    #   ±0.90 → 14.10…15.90, inside the footway. Shadow runs +X (0.845 × 5.00 = 4.23 m,
+    #   to x 19.23), i.e. away from the judged stair band `[computed]`.
+    streetlights=[(-3.0, 6.5), (15.0, -6.5)],
     streetlight=dict(pole_h=5.0, pole_r=0.07, arm_len=0.9, arm_r=0.04,
                      head=0.24),
     hedges=[(-12.0, 6.5, -9.0, 7.3), (14.0, -7.3, 18.0, -6.5)],
@@ -374,7 +494,24 @@ PARAMS = dict(
         # brick shell reads the same key so that sweep still lands in one place.
         scale=dict(plaza_lower=0.7, plaza_light=1.80, grass=1.4,
                    brick_red=2.0, tactile=0.3,
-                   concrete_wall=2.0, plaster=2.2, marble_light=1.6),
+                   concrete_wall=2.0, plaster=2.2, marble_light=1.6,
+                   asphalt=3.0),          # [GT-79] PolyHaven asphalt_02, measured 3.0 m tile
+        # [GT-79] Carriageway. Textured, never a constant: a carriageway is a **ground**
+        #   prim and `scripts/const_color_audit.py` forbids a texture-less constant there
+        #   (scene02's `asphalt_color` predates that rule). Tint is deliberately light for
+        #   a Korean urban street — aged 아스콘 is mid-grey, not black — and R ≥ B so the
+        #   scene13 blue-cast check ("청기 제거") passes.
+        asphalt_tint=(0.58, 0.57, 0.55),
+        # [GT-79 · K5] the kerb is a real product now, so it takes a stone map (the
+        #   `marble_light` role already loaded for the street wall) rather than the
+        #   colour-only `curb_color` the planters keep. Path token `Curb` →
+        #   LOOK_CLASS["curb"], which is what `arris="look"` needs for its R10 arris.
+        road_curb_tint=(0.80, 0.79, 0.76),
+        # Road markings stay **constant colours**: `_LOOK_RULES` puts the paint family
+        #   ahead of asphalt on purpose, because a marking that takes an aggregate
+        #   texture stops working as a cue. White is held at 0.80 (v5.1 §4, no pure white).
+        lane_white=(0.80, 0.80, 0.78), lane_yellow=(0.78, 0.62, 0.10),
+        lane_rough=0.55,
         # [W3 S16 · BS-4] Street-wall shells. Three tones, mixed along both rows, because
         #   a Korean downtown block is never one material: 회색 콘크리트·타일 / 석재 /
         #   미장. Tints are **near-unity on purpose** — see the r2 note in
@@ -451,9 +588,36 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "scene16")
 
 # [W3 S16 · BS-4] `concrete_wall` / `plaster` join for the street-wall shells.
+# [GT-79] `asphalt` joins for the crossed carriageway.
 ASSET_ROLES = ["plaza_lower", "plaza_light", "grass", "tactile",
                "brick_red", "concrete_wall", "plaster", "marble_light",
-               "sign_exit", "hdri", "mdl"]   # [v5] sign_exit
+               "asphalt", "sign_exit", "hdri", "mdl"]   # [v5] sign_exit
+
+
+def curb_lines():
+    """[GT-79 · K5] the two kerb **face** lines: `(tag, p0, p1, road_side)`.
+
+    `road_side` names the side the carriageway is on, so the block body extends the other
+    way and its back face lands on `kb0`/`kb1` — the same line the plaza walk is cut on.
+    West line: the carriageway lies at +X of the face with the line running −Y → +Y, so
+    the body must go toward −X → `road_side="right"` (the scene02 convention).
+    """
+    r = PARAMS["xroad"]
+    return (("W", (r["car0"], r["y0"]), (r["car0"], r["y1"]), "right"),
+            ("E", (r["car1"], r["y0"]), (r["car1"], r["y1"]), "left"))
+
+
+def curb_kwargs():
+    """[GT-79 · K5] `build_curb_line` keyword set, in one place so the scene and the
+    printed self-check cannot drift apart."""
+    cu, r, w = PARAMS["curb"], PARAMS["xroad"], PARAMS["walk"]
+    s_mid = (r["y1"] - r["y0"]) / 2.0          # arc length of y = 0 on either line
+    return dict(height=cu["height"], width=cu["width"], unit=cu["unit"],
+                arris_r=0.010, gutter=False, z_road=r["z_road"],
+                walk_z=w["z_top"], embed=cu["embed"], joint_w=cu["joint_w"],
+                arris=cu["arris"], collider=True, strict=True,
+                lod_span=(s_mid - cu["lod_half"], s_mid + cu["lod_half"]),
+                far_unit=cu["far_unit"])
 
 
 def build_views():
@@ -483,7 +647,9 @@ BANNER = """\
  8. [W3] 점자 2본 — 계단머리 경고(x −0.90…−0.30, 낙차 있음) + 주출입구(x −6.00…−5.40,
         낙차 없음)가 한 프레임에 같이 읽히는가(§7-4 BOTH BANDS)
  9. [W3] 양측 가로벽 — 잔디 소실·창 0·프레임 좌우가 도심 블록으로 닫히는가(BS-4)
-10. [W3] 보수 패치 1매가 맨홀 옆에 붙어 '원인 있는 절삭 보수'로 읽히는가(U-6)"""
+10. [W3] 보수 패치 1매가 맨홀 옆에 붙어 '원인 있는 절삭 보수'로 읽히는가(U-6)
+11. [GT-79] 교차 도로 — 통로가 '도로 밑을 지나간다'로 읽히는가(차도·연석·중앙선·
+        복개 박스 입구, 동측 계단이 도로 건너편에서 올라오는가) · 계단 그림자 밴드 불변"""
 
 
 def main():
@@ -594,6 +760,22 @@ def main():
                            roughness_const=mp["parapet_rough"])
         M["curb"] = PBR(f"{ROOT}/Looks/Curb", diffuse_color=mp["curb_color"],
                         roughness_const=mp["curb_rough"])
+        # [GT-79] carriageway + kerb product + the two paint tones.
+        M["asphalt"] = PBR(
+            f"{ROOT}/Looks/RoadAsphalt", sc.tex_path("asphalt", "diff"),
+            sc.tex_path("asphalt", "nor"), sc.tex_path("asphalt", "rough"),
+            sca["asphalt"], tint=mp["asphalt_tint"])
+        M["road_curb"] = PBR(
+            f"{ROOT}/Looks/RoadCurb", sc.tex_path("marble_light", "diff"),
+            sc.tex_path("marble_light", "nor"),
+            sc.tex_path("marble_light", "rough"), sca["marble_light"],
+            tint=mp["road_curb_tint"])
+        M["lane_w"] = PBR(f"{ROOT}/Looks/LaneWhite",
+                          diffuse_color=mp["lane_white"],
+                          roughness_const=mp["lane_rough"])
+        M["lane_y"] = PBR(f"{ROOT}/Looks/LaneYellow",
+                          diffuse_color=mp["lane_yellow"],
+                          roughness_const=mp["lane_rough"])
         M["wood"] = PBR(f"{ROOT}/Looks/Wood", diffuse_color=mp["wood_color"],
                         roughness_const=mp["wood_rough"])
         M["canopy_a"] = PBR(f"{ROOT}/Looks/CanopyA",
@@ -631,14 +813,22 @@ def main():
         H = g["size"] / 2.0
         gx0, gx1 = g["gx0"], g["gx1"]
         gy0, gy1 = g["gy0"], g["gy1"]
+        r = PARAMS["xroad"]
         BOX(f"{ROOT}/Grass_W", ((-H + gx0) / 2.0, 0.0, cz),
             (gx0 + H, g["size"], th), M["grass"])
         BOX(f"{ROOT}/Grass_E", ((gx1 + H) / 2.0, 0.0, cz),
             (H - gx1, g["size"], th), M["grass"])
-        BOX(f"{ROOT}/Grass_S", ((gx0 + gx1) / 2.0, (-H + gy0) / 2.0, cz),
-            (gx1 - gx0, gy0 + H, th), M["grass"])
-        BOX(f"{ROOT}/Grass_N", ((gx0 + gx1) / 2.0, (gy1 + H) / 2.0, cz),
-            (gx1 - gx0, H - gy1, th), M["grass"])
+        # [GT-79] the S/N verge grass is cut on the carriageway slab (x pv0…pv1). The
+        #   grass top is −0.030 and the carriageway datum −0.130, so grass left under
+        #   the road would stand 100 mm proud of it `[computed]`. Cutting on pv0/pv1
+        #   (not on the kerb backs) puts the grass end face **back to back** with the
+        #   slab face instead of co-facing it, and the 0.05 m strip it gives up is
+        #   covered by the walk (|y| ≤ 8) or by the street footway plate (|y| ≥ 8).
+        for tag, ya, yb in (("S", -H, gy0), ("N", gy1, H)):
+            for sfx, xa, xb in (("", gx0, r["pv0"]), ("_E", r["pv1"], gx1)):
+                BOX(f"{ROOT}/Grass_{tag}{sfx}",
+                    ((xa + xb) / 2.0, (ya + yb) / 2.0, cz),
+                    (xb - xa, yb - ya, th), M["grass"])
 
     # -------------------------------------------------------------------
     # ground-level sidewalk - around the trench (x 0..14, outer wall faces +-1.8): west + south·north flanks
@@ -658,14 +848,18 @@ def main():
         BOX(f"{ROOT}/Walk_W",
             ((w["x_w"] + p["x0"]) / 2.0, (w["y_s"] + w["y_n"]) / 2.0, cz),
             (p["x0"] - w["x_w"], w["y_n"] - w["y_s"], th), M["walk"], col=True)
-        # south: trench x span, y_s..-y_out
-        BOX(f"{ROOT}/Walk_S",
-            ((p["x0"] + x_tr1) / 2.0, (w["y_s"] - y_out) / 2.0, cz),
-            (x_tr1 - p["x0"], (-y_out) - w["y_s"], th), M["walk"], col=True)
-        # north: trench x span, +y_out..y_n
-        BOX(f"{ROOT}/Walk_N",
-            ((p["x0"] + x_tr1) / 2.0, (y_out + w["y_n"]) / 2.0, cz),
-            (x_tr1 - p["x0"], w["y_n"] - y_out, th), M["walk"], col=True)
+        # south / north flanks of the trench.
+        # [GT-79] each flank is cut on the kerb **back** faces (kb0 / kb1) so the kerb
+        #   block, whose body runs 0.20 m back from the face, seals the walk's cut face
+        #   over its whole exposed height (z −0.330…+0.020) with no gap `[computed]` —
+        #   the scene02 `walk_a/walk_b` rule. Below −0.330 the cut face is inside the
+        #   carriageway slab. Prim roots `Walk_S`/`Walk_N` stay on the west run.
+        r = PARAMS["xroad"]
+        for tag, ya, yb in (("S", w["y_s"], -y_out), ("N", y_out, w["y_n"])):
+            for sfx, xa, xb in (("", p["x0"], r["kb0"]), ("_E", r["kb1"], x_tr1)):
+                BOX(f"{ROOT}/Walk_{tag}{sfx}",
+                    ((xa + xb) / 2.0, (ya + yb) / 2.0, cz),
+                    (xb - xa, yb - ya, th), M["walk"], col=True)
         # east: trench end (x18.48 = east stair head)..x_e, full width
         BOX(f"{ROOT}/Walk_E",
             ((x_tr1 + w["x_e"]) / 2.0, (w["y_s"] + w["y_n"]) / 2.0, cz),
@@ -753,32 +947,63 @@ def main():
         return res
 
     def build_flat_fill(M):
-        """hazard_stairs=False control: the trench is filled, everything flat at z=0."""
-        sc.skin_exclude(f"{ROOT}/FlatWalk")      # [W2-0 · P-A] the twin gets the same conditions
+        """hazard_stairs=False control: the trench is filled, everything flat at z=0.
+
+        [GT-79] the road is site context, not a cue, so it is built in **both** arms; the
+        flat twin therefore takes the same carriageway cut (kb0 / kb1) as `build_walk`,
+        which is what keeps the two arms differing by the trench alone.
+        """
         w = PARAMS["walk"]
-        BOX(f"{ROOT}/FlatWalk",
-            ((w["x_w"] + w["x_e"]) / 2.0, (w["y_s"] + w["y_n"]) / 2.0,
-             w["z_top"] - w["thick"] / 2.0),
-            (w["x_e"] - w["x_w"], w["y_n"] - w["y_s"], w["thick"]),
-            M["walk"], col=True)
+        r = PARAMS["xroad"]
+        for sfx, xa, xb in (("", w["x_w"], r["kb0"]), ("_E", r["kb1"], w["x_e"])):
+            # [W2-0 · P-A] the twin gets the same conditions — register before BOX.
+            sc.skin_exclude(f"{ROOT}/FlatWalk{sfx}")
+            BOX(f"{ROOT}/FlatWalk{sfx}",
+                ((xa + xb) / 2.0, (w["y_s"] + w["y_n"]) / 2.0,
+                 w["z_top"] - w["thick"] / 2.0),
+                (xb - xa, w["y_n"] - w["y_s"], w["thick"]),
+                M["walk"], col=True)
 
     # -------------------------------------------------------------------
     # walls + stairs + lower passage
     # -------------------------------------------------------------------
     def build_walls(M):
+        """Trench retaining walls.
+
+        [GT-79] The wall used to be one box per side, x 0.00…18.48, topped at
+        `parapet_top` +0.150. Under the new carriageway that 150 mm upstand would stand
+        **inside the road**, 0.280 m above the carriageway datum −0.130 `[computed]`, so
+        the run is cut into three: parapet outside the crossing, and a segment capped at
+        the box soffit (−0.350) under it, which is also what the roof slab bears on. The
+        prim roots `Wall_S` / `Wall_N` stay on the west run.
+        Each of the two parapet terminations gets an **end pier**: 0.36 m along X, 0.02 m
+        proud of the 0.30 m wall on both faces (so it shares no face plane with the wall
+        and cannot z-fight), capped at +0.280. It finishes the parapet's cut end and
+        carries the split guardrail's end post.
+        """
         p = PARAMS["pit"]
         wl = PARAMS["wall"]
+        r = PARAMS["xroad"]
+        pi = r["pier"]
         y_out = wl["y_in"] + wl["thick"]          # 1.8
         y_ctr = (wl["y_in"] + y_out) / 2.0
         top = wl["parapet_top"]
         bot = wl["base_z"]
-        cz = (top + bot) / 2.0
-        hz = top - bot
-        Lx = wl["x1"] - p["x0"]
+        sof = r["box_soffit"]
+        runs = (("", p["x0"], r["pv0"], top),          # approach trench, parapet on
+                ("_Box", r["pv0"], r["pv1"], sof),     # under the carriageway, capped
+                ("_E", r["pv1"], wl["x1"], top))       # far trench, parapet on
         for sgn, tag in ((-1.0, "S"), (1.0, "N")):
-            BOX(f"{ROOT}/Wall_{tag}",
-                ((p["x0"] + wl["x1"]) / 2.0, sgn * y_ctr, cz),
-                (Lx, wl["thick"], hz), M["wall"], col=True)
+            for sfx, xa, xb, zt in runs:
+                BOX(f"{ROOT}/Wall_{tag}{sfx}",
+                    ((xa + xb) / 2.0, sgn * y_ctr, (zt + bot) / 2.0),
+                    (xb - xa, wl["thick"], zt - bot), M["wall"], col=True)
+            for k, xc in enumerate((r["pv0"] - pi["length"] / 2.0,
+                                    r["pv1"] + pi["length"] / 2.0)):
+                BOX(f"{ROOT}/WallPier_{tag}{k}",
+                    (xc, sgn * y_ctr, (sof + pi["top"]) / 2.0),
+                    (pi["length"], wl["thick"] + 2.0 * pi["out"],
+                     pi["top"] - sof), M["parapet"], col=True)
         # (audit v4 A1) east blocking wall Wall_E removed - the east exit stair stands there instead.
 
     def build_stairs(stair_mtl, passage_mtl):
@@ -927,7 +1152,10 @@ def main():
             top_z = base_z + pr["rail_h"]
             mid_z = base_z + pr["mid_h"]
 
-            def hrail(prefix, const_c, a0, a1):
+            def hrail(prefix, const_c, a0, a1, ends=(False, False)):
+                """One guardrail run. `ends` asks for a **terminating post** at a0 / a1;
+                the top and mid rails end on that post's axis, so the run has no rail
+                stub hanging in air."""
                 mid_c = (a0 + a1) / 2.0
                 length = a1 - a0
                 CYL(f"{prefix}/Top", (mid_c, const_c, top_z),
@@ -942,9 +1170,142 @@ def main():
                         pr["post_r"], ph, M["rail"])
                     a += pr["spacing"]
                     n += 1
+                for tag_e, a_e, want in (("EndA", a0, ends[0]),
+                                         ("EndB", a1, ends[1])):
+                    if want:
+                        CYL(f"{prefix}/{tag_e}",
+                            (a_e, const_c, base_z + ph / 2.0),
+                            pr["post_r"], ph, M["rail"])
+                return n + sum(1 for e in ends if e)
 
-            hrail(f"{ROOT}/PerimRail_S", -pr["y"], pr["x0"], pr["x1"])
-            hrail(f"{ROOT}/PerimRail_N", pr["y"], pr["x0"], pr["x1"])
+            # [GT-79] the pit guardrail used to be one 18.48 m run per side. Under the
+            #   carriageway (x pv0…pv1) the trench is covered, so a guardrail there would
+            #   stand in the road: the run is split at the two parapet **end piers**
+            #   (their centres, so the rails die on the end post that stands on the pier)
+            #   and each new termination gets that post. The east run's far end (18.48)
+            #   gets one too — it was a bare rail stub. The west run's x = 0.00 end is
+            #   **left exactly as it was**: it lies inside the frozen judged band at the
+            #   T20 stair head, so its termination is deferred, not fixed here.
+            pi = PARAMS["xroad"]["pier"]
+            c_w = PARAMS["xroad"]["pv0"] - pi["length"] / 2.0
+            c_e = PARAMS["xroad"]["pv1"] + pi["length"] / 2.0
+            n_pr = 0
+            for sgn, tag in ((-1.0, "S"), (1.0, "N")):
+                n_pr += hrail(f"{ROOT}/PerimRail_{tag}", sgn * pr["y"],
+                              pr["x0"], c_w, ends=(False, True))
+                n_pr += hrail(f"{ROOT}/PerimRail_{tag}_E", sgn * pr["y"],
+                              c_e, pr["x1"], ends=(True, True))
+            print(f"[GT-79] 피트 둘레난간 2런×2측 · 지주 {n_pr} "
+                  f"(끝기둥 6 — 서측 x {c_w:.2f} · 동측 x {c_e:.2f}/"
+                  f"{pr['x1']:.2f}) · x 0.00 단부는 판정대역 동결로 미변경")
+
+    # -------------------------------------------------------------------
+    # [GT-79] the crossed road — carriageway · kerbs · markings · covered box
+    # -------------------------------------------------------------------
+    def build_road(M):
+        """The road the passage runs under.
+
+        Build order, west → east and bottom → top:
+          `Road/Pave_S|_N`   asphalt carriageway body, y rim → −1.80 and +1.80 → rim
+          `Road/BoxSlab`     RC box roof over the trench (y ±1.80), soffit −0.350
+          `Road/BoxWear`     its 50 mm wearing course, top flush with the carriageway
+          `Road/Footway_*`   the street's own footways where the plaza stops (|y| ≥ 8)
+          `Curb_W|_E`        `infra_kit.build_curb_line` — the K5 kerb product
+          `Road/Lane*`       yellow centre line + two white edge lines
+
+        The trench band is the only part that is decked. West of the box the trench
+        stays open for 3.07 m between the stair foot (4.48) and the mouth (7.55), and
+        east of it the box mouth opens straight onto the east exit stair head (14.00),
+        which is the open-cut / box / open-cut section a real 지하보도 has.
+        """
+        r = PARAMS["xroad"]
+        w = PARAMS["walk"]
+        ln = r["lane"]
+        wl = PARAMS["wall"]
+        y_out = wl["y_in"] + wl["thick"]                 # 1.80 — outer wall faces
+        pv0, pv1 = r["pv0"], r["pv1"]
+        pxc, pxl = (pv0 + pv1) / 2.0, pv1 - pv0
+        zr, th = r["z_road"], r["thick"]
+        cz = zr - th / 2.0
+        if cfg["hazard_stairs"]:
+            spans = (("S", r["y0"], -y_out), ("N", y_out, r["y1"]))
+        else:
+            spans = (("S", r["y0"], r["y1"]),)           # flat control: no trench to deck
+        for tag, ya, yb in spans:
+            BOX(f"{ROOT}/Road/Pave_{tag}", (pxc, (ya + yb) / 2.0, cz),
+                (pxl, yb - ya, th), M["asphalt"], col=True)
+        if cfg["hazard_stairs"]:
+            sof, wear = r["box_soffit"], r["box_wear"]
+            BOX(f"{ROOT}/Road/BoxSlab", (pxc, 0.0, (sof + wear) / 2.0),
+                (pxl, 2.0 * y_out, wear - sof), M["wall"], col=True)
+            BOX(f"{ROOT}/Road/BoxWear", (pxc, 0.0, (wear + zr) / 2.0),
+                (pxl, 2.0 * y_out, zr - wear), M["asphalt"])
+        # Street footways: the plaza is the footway inside |y| ≤ 8, so these only run
+        #   from the plaza edge out to the rim. Top 0.000 — 20 mm above the BS-4 apron
+        #   and 30 mm above the grass, so both are covered with no coplanar face.
+        for xt, xa, xb in (("W", r["fw0"], r["kb0"]), ("E", r["kb1"], r["fw1"])):
+            for tag, ya, yb in (("S", r["y0"], w["y_s"]), ("N", w["y_n"], r["y1"])):
+                BOX(f"{ROOT}/Road/Footway_{xt}{tag}",
+                    ((xa + xb) / 2.0, (ya + yb) / 2.0,
+                     w["z_top"] - w["thick"] / 2.0),
+                    (xb - xa, yb - ya, w["thick"]), M["walk"], col=True)
+        # [K5] kerb lines — the colour-only `M["curb"]` finally has geometry.
+        kit = ik.kit_from_scene_common(sc, stage)
+        ok_arris, got, msg = ik.check_arris_role(sc)
+        if not ok_arris:
+            print(f"[GT-79] 연석 아리스 경고 — {msg}")
+        kw = curb_kwargs()
+        n_blk = n_prim = 0
+        top_z = expo = gt_drop = unit = 0.0
+        for tag, p0, p1, side in curb_lines():
+            res = ik.build_curb_line(kit, f"{ROOT}/Curb_{tag}", p0, p1,
+                                     M["road_curb"], road_side=side, **kw)
+            for wmsg in res["warnings"]:
+                print(f"[GT-79] 경계석 경고({tag}) — {wmsg}")
+            n_blk += res["n_blocks"]
+            n_prim += res["prim_count"]
+            top_z, expo = res["curb_top_z"], res["exposure_road"]
+            gt_drop, unit = res["gt_drop"], res["unit_actual"]
+        # Markings. No crosswalk: the underpass **is** the crossing here.
+        for tag, mx, mtl, wdt in (("Centre", ln["centre_x"], M["lane_y"],
+                                   ln["w_centre"]),
+                                  ("EdgeW", r["car0"] + ln["edge_in"],
+                                   M["lane_w"], ln["w_edge"]),
+                                  ("EdgeE", r["car1"] - ln["edge_in"],
+                                   M["lane_w"], ln["w_edge"])):
+            ik.build_road_marking(kit, f"{ROOT}/Road/Lane{tag}", "line", mtl,
+                                  mx, r["y0"], z=zr, yaw_deg=90.0,
+                                  proud=ln["proud"], line_w=wdt,
+                                  length=r["y1"] - r["y0"])
+        head = (r["box_soffit"] - PARAMS["passage"]["z_top"]) if cfg["hazard_stairs"] else 0.0
+        print(f"[GT-79] 교차 도로 · 차도 x {r['car0']:.2f}…{r['car1']:.2f} "
+              f"({r['car1'] - r['car0']:.2f} m 2차로, 중앙선 x {ln['centre_x']:.2f}) · "
+              f"y {r['y0']:.0f}…{r['y1']:.0f} (지반 림 — 절단면 없음) · "
+              f"가로 회랑 x {r['fw0']:.2f}…{r['fw1']:.2f} = 가로벽 개구부")
+        cu = PARAMS["curb"]
+        print(f"[GT-79] 연석 2선 · 블록 {n_blk} · 프림 {n_prim} · 평균 블록 "
+              f"{unit:.2f} m (판정창 |y|≤{cu['lod_half']:.0f} 은 단위 "
+              f"{cu['unit']:.2f} · 바깥 {cu['far_unit']:.2f} LOD) · "
+              f"상단 z {top_z:+.3f} (보도 flush…+0.020) · 차도노출 {expo:.3f} · "
+              f"gt_drop {gt_drop:.3f} (신규 선형 낙차 — GT 재캐시 필요)")
+        # Sun check, restated where the road is built: shadow azimuth 0° (+X) at 49.79°
+        #   elevation → shadow length 0.845 × height, always toward +X. The westernmost
+        #   member GT-79 adds is the west end pier at x = pv0 − pier/2 − pier/2.
+        _sun_tan = math.tan(math.radians(PARAMS["light"]["noon_sun_elev"]))
+        _west = min(r["fw0"], r["pv0"] - r["pier"]["length"])
+        print(f"[GT-79] 태양 검증 · 그림자 방위 0°(+X) · 고도 "
+              f"{PARAMS['light']['noon_sun_elev']:.2f}° (그림자 길이 "
+              f"{1.0 / _sun_tan:.3f}×높이) · 신규 부재 최서단 x {_west:+.2f} → "
+              f"판정 계단대역 x 0.00…"
+              f"{PARAMS['stairs']['tread'] * PARAMS['stairs']['nsteps']:.2f} 에 "
+              f"신규 그림자 0 — 캐노피가 계속 그림자 소유")
+        if cfg["hazard_stairs"]:
+            print(f"[GT-79] 복개 박스 x {pv0:.2f}…{pv1:.2f} · 슬래브 "
+                  f"{r['z_road'] - r['box_soffit']:.3f} m · 소핏 "
+                  f"{r['box_soffit']:+.3f} · 유효고 {head:.3f} m "
+                  f"(지하보도 기준 2.30 미달 — 통로 바닥 −2.100 동결에 따른 결과, 문서화) · "
+                  f"서측 개착 {pv0 - PARAMS['passage']['x0']:.2f} m · "
+                  f"동측 입구 = 동측 계단머리 {PARAMS['east_stairs']['x0']:.2f}")
 
     # -------------------------------------------------------------------
     # [W3 S16 · BS-4] G2 street wall — both verges, kind="backdrop"
@@ -963,6 +1324,7 @@ def main():
         kit = fk.Kit(sc.add_box, sc.add_cylinder,
                      getattr(sc, "_oriented_box", None))
         bp = PARAMS["backdrop"]
+        n_blk = sum(len(bp[t]["blocks"]) for t in ("S", "N"))
         n_tot = n_frame = 0
         for tag in ("S", "N"):
             row = bp[tag]
@@ -988,9 +1350,10 @@ def main():
                 ((ax0 + ax1) / 2.0, (ay0 + ay1) / 2.0,
                  ap["z_top"] - ap["thick"] / 2.0),
                 (ax1 - ax0, ay1 - ay0, ap["thick"]), M["walk"])
-        print(f"[backdrop] 가로벽 {n_tot} 프림 / 12 동 (프레임 안 {n_frame} · "
-              f"BS-4 자동 강등 {12 - n_frame}) + 전면 포장 {len(ap['strips'])} "
-              f"— 양측 잔디 대체")
+        print(f"[backdrop] 가로벽 {n_tot} 프림 / {n_blk} 동 (프레임 안 {n_frame} · "
+              f"BS-4 자동 강등 {n_blk - n_frame}) + 전면 포장 {len(ap['strips'])} "
+              f"— 양측 잔디 대체 · [GT-79] x "
+              f"{PARAMS['xroad']['fw0']:.2f}…{PARAMS['xroad']['fw1']:.2f} 가로 회랑 개방")
 
     # -------------------------------------------------------------------
     # dressing - 2 planters + distant buildings
@@ -1095,12 +1458,18 @@ def main():
               f"설계 주수 11→9(실배치 {n_hedge} · 0 = build_hedge 폴백) · "
               f"공칭 중첩 46 %/39 %(최악 +0.13 m) — 융합 유지")
         # 2 sidewalk paving bands (indicate the plaza scale) - outside the trench at y=+-6
+        # [GT-79] each band is cut on the kerb backs (kb0 / kb1): it sits 13 mm below the
+        #   walk top, so across the carriageway (datum −0.130) it would have hung 117 mm
+        #   in the air `[computed]`. The kerb block covers both cut ends.
         w = PARAMS["walk"]
         wb = PARAMS["walk_bands"]
+        r = PARAMS["xroad"]
         for i, by in enumerate(wb["ys"]):
-            BOX(f"{ROOT}/WalkBand_{i}",
-                ((w["x_w"] + w["x_e"]) / 2.0, by, wb["z"] - 0.01),
-                (w["x_e"] - w["x_w"], wb["width"], 0.02), M["band"])
+            for sfx, xa, xb in (("", w["x_w"], r["kb0"]),
+                                ("_E", r["kb1"], w["x_e"])):
+                BOX(f"{ROOT}/WalkBand_{i}{sfx}",
+                    ((xa + xb) / 2.0, by, wb["z"] - 0.01),
+                    (xb - xa, wb["width"], 0.02), M["band"])
 
     # ── scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
@@ -1130,6 +1499,11 @@ def main():
               f"{_cp['x1'] - (_st['x0'] + _run):.2f} m — 이미 충족(16 이 표준형)")
     else:
         build_flat_fill(M)
+    # [GT-79] site context, not a cue: the crossed road is built in **both** hazard arms
+    #   and in the dressing-OFF arm, exactly like the walk and the walls. It is what
+    #   makes the scene an underpass rather than a slot in a plaza, and it carries no
+    #   drop-correlated signal, so toggle integrity is untouched.
+    build_road(M)
     if cfg["cue_scene_dressing"]:
         build_dressing(M)
         build_backdrop(M)           # [W3 S16 · BS-4] G2 street wall, both verges

@@ -215,6 +215,48 @@ Legacy : scenes/archive_v3/scene10_switchback_cliff.py
       base 3.10 / 6.76) — the distant TreeLine idiom `place_hedge_row` itself excludes
       and GT-63 keeps. **No foreground clipped band or shrub bed exists near the path**,
       and none was invented.
+
+[GT-77 — 08-06 gallery review: "데크가 연결되는 길도 자연스럽게"]
+  GT-65 made the **deck** continuous; the 08-06 audit says the **ground it lands on**
+  is not — 무맥락 평탄 황토 매트. Read off the round's own cuts:
+  `pt_noon_preset_h1.8_d10.png` shows a 1.70 m dirt ribbon with two dead-straight
+  parallel edges butting into a 3.20 m deck head, so 0.75 m of bare turf flanks the
+  threshold on each side and the last metre of the walk crosses grass; the ribbon has
+  no shoulder, no edging and no planting anywhere along it, and the same butt joint is
+  repeated at the arrival end where a 3.20 m landing hands off to a 1.80 m `DeckExit`
+  strip. `pt_noon_reversal.png` shows the ground beyond the deck terminating in raw
+  vertical cut faces. This block finishes both ends and nothing else: the registered
+  6.600 m drop, the flight/landing table, every collider and every P-2 preserved item
+  (널 틈 · 돌구덩이 · 통나무 펜스 family) are untouched.
+  (1) **Approach paths, both ends, from one table** (`PARAMS['approach']`). Four member
+      families per end — `apron` (dirt wings carrying the path out to the full deck
+      width at the threshold), `header` (a 90 mm 방부목 마구리재 bedded across the deck
+      end), `edge` (90x90 경계목: straight run + 90-deg return + flank, every run end
+      dying into another member or into a capped end post) and `verge` (a 0.60 m rough
+      dormant-grass shoulder outside the edging). Every member is dressing over ground
+      that already carries its collider — `col=False` throughout — so no walking
+      surface, no drop edge and no GT-read AABB moves; the row stays R-3.
+  (2) **No coplanar pair and no coincident visible face, by construction.** Each member
+      is offset onto its own step of the existing decal ladder and *bedded into* the
+      member it meets, so the surface it replaces passes **inside** a solid instead of
+      lying on it: header top = path top + 0.010 (path top and deck top both buried),
+      edging tucked 0.010 into the path, apron outer edge tucked 0.040 under the flank,
+      flank end tucked 0.030 into the header, return ends tucked into run and flank.
+      Asserted member by member by the `[GT-77 접근로]` SMOKE table.
+  (3) **Nothing crosses the south shoulder.** At the entry the deck head stands on the
+      break line of the 30 % unguarded south slope (hazard cue (4)), so every entry
+      member stops at y −1.600 exactly: a board projecting past the break would be the
+      floating end this round exists to remove, and moving path material past it would
+      move a drop edge. SMOKE asserts max |y| over the entry members.
+  (4) **Head-wall fill batter.** North of the deck the terrace (z 0.000) met the corridor
+      bench (−0.255) as a raw 0.255 m vertical cut, 6.4 m long. A 0.90 m grass batter
+      (15.8 deg) returns it to grade, held 0.030 m clear of the deck fascia so no face is
+      coincident with it. `collider=False` — the corridor bench underneath already
+      carries the collision surface, so the physics world is bit-identical.
+  (5) **Verge planting, 4 clumps** (13 -> 17), all through the existing `sc.place_shrubs`
+      autumn-legal route. Each is held outside the +X grid sight corridor (the ray from
+      the d10 eye to the deck head corner), so no judged grid cut loses the stair head —
+      checked by coordinates, not by eye.
 ────────────────────────────────────────────────────────────────────────────
 
 Run (GUI look check - default):
@@ -462,8 +504,17 @@ PARAMS = dict(
     #   The feather ring itself is scene-side (`gkit.leaf_ring_*`, row 10-2 below), so the
     #   mask does not ask `build_carpet_mask` for a second one.
     leaf_patch=dict(seed=1007, rough=0.20),
-    leaf_ground_patches=[(-3.2, -0.9, 1.6, 1.1, "trail"),
-                         (-5.6, 0.7, 1.4, 1.0, "trail"),
+    # [GT-77] the two **trail** lobes move inboard — cy −0.9 -> −0.30 and +0.7 -> +0.25.
+    #   They used to straddle the trail edge (spans y −1.45..−0.35 / +0.20..+1.20), which
+    #   after this round would put roughly half of each drift under the 0.60 m verge band
+    #   and clip it on an invisible line. Moved, each drift lies **inside the 1.70 m dirt
+    #   band** (−0.85..+0.25 / −0.25..+0.75) where litter on a walked path belongs, and
+    #   the verge overlaps only the outer 0.13-0.23 m of the feather ring, which
+    #   `approach_dressing_z` seats rather than buries. Shape, size, seed and the
+    #   `build_carpet_mask` idiom are untouched — H4 allows a lobe to move, never to
+    #   become a rectangle again. The two `lower` lobes are not affected and do not move.
+    leaf_ground_patches=[(-3.2, -0.30, 1.6, 1.1, "trail"),
+                         (-5.6, 0.25, 1.4, 1.0, "trail"),
                          (1.4, -3.4, 2.2, 1.6, "lower"),
                          (5.0, -1.9, 2.0, 1.5, "lower")],
 
@@ -493,6 +544,75 @@ PARAMS = dict(
     #   (name, x0, x1, y0, y1, z_top, thick)
     exit_paths=[("DeckExit",     24.10, 44.00, -0.90, 0.90, -6.618, 0.06),
                 ("DeckExitLink", 26.00, 27.80, -2.60, -0.90, -6.618, 0.06)],
+
+    # --- [GT-77 · §0-2] approach-path finishing at the two deck ends --------------
+    #   GT-65 carried the walking **line** to the scene edge; it did not finish the
+    #   ground under it. Both ends handed a 3.20 m deck to a narrower dirt ribbon that
+    #   simply butted into it (entry 1.70 m `TrailPath`, exit 1.80 m `DeckExit`), so the
+    #   threshold was flanked by 0.70-0.75 m of bare turf on each side, and the ribbon
+    #   itself was a texture rectangle with two ruled parallel edges and no shoulder.
+    #   Four member families finish each end, and both ends are built from this one
+    #   table so the entry and the exit cannot drift apart:
+    #     apron  — dirt wings that carry the path out to the deck's own 3.20 m at the
+    #              threshold. The path plate keeps its width; the wings add only the
+    #              flanks, so the plate's top face is never doubled — **no coplanar
+    #              pair exists in the apron at all**.
+    #     header — 90 mm 방부목 마구리재 laid across the deck end, bedded `bite` into the
+    #              deck and `over` into the path. Its top face is `proud` (0.010 m) over
+    #              the path veneer, so the path top face and the deck top face both pass
+    #              **inside** the board: the dirt/board/plank seam is closed with no
+    #              coplanar pair and no coincident visible face `[computed]`.
+    #     edge   — 90x90 방부각재 경계목, the stocked section the railing newel already
+    #              uses (§4.2-2 / research §D2). Bedded 0.043 m, standing 0.047 m proud,
+    #              and tucked `tuck` into the path so its inner face never coincides with
+    #              the path's side face. A run never stops in mid-air: the straight run
+    #              dies into a 90-deg return, the return into the flank, the flank into
+    #              the header, and the far end of the straight run into a **capped end
+    #              post**.
+    #     verge  — 0.60 m rough dormant-grass shoulder outside the edging (`hedge` tint,
+    #              not `leaf`: a brown ribbon beside a brown path would read as a second
+    #              path). Top 0.010 m over grade = 5 mm clear of the leaf-drift decal
+    #              step (`leaf.proud` 0.005), so a drift is buried where the two meet
+    #              instead of fighting it `[computed]`.
+    #   Colliders: **none**. Every member is a veneer over a plate that already carries
+    #   the collider (`TrailPath`/`UpperTrail` at the entry, `Landing_5`/`LowerParkMain`
+    #   at the exit), exactly the `exit_paths` doctrine — so no walking surface, no drop
+    #   edge and no GT-read AABB moves.
+    approach=dict(
+        edge=0.090,          # 90x90 경계목 section
+        edge_proud=0.047,    # exposed height above grade (bedded 0.043 of the 0.090)
+        edge_tuck=0.010,     # how far the edging bites into the path veneer
+        header=0.090,        # 마구리재 section (width along the path = 0.090)
+        header_bite=0.040,   # header sunk into the deck footprint
+        header_over=0.050,   # header lapped onto the path side
+        header_proud=0.010,  # header top over the path veneer top
+        # **The outer faces are a staircase, not a common plane.** The deck fascia is at
+        #   y ±1.600; a member whose own outer face also landed on 1.600 would put two
+        #   exposed coplanar vertical faces in the same place at the deck corner — the
+        #   vertical twin of the coplanar defect, and it does not show up in a top-face
+        #   census. So the header steps 0.010 in from the fascia and the flank steps
+        #   0.005 in from the header: three planes, 5 mm apart, none shared `[computed]`.
+        header_inset=0.010,  # header end face inboard of the deck fascia
+        flank_inset=0.015,   # flank outer face inboard of the deck fascia
+        apron_run=1.100,     # deck face -> return board centreline
+        apron_bite=0.030,    # apron end slid 0.010 inside the header's deck-side face
+        apron_tuck=0.040,    # apron outer edge tucked under the flank board
+        apron_t=0.060,       # same 60 mm veneer thickness the dirt plates use
+        verge_w=0.600, verge_off=0.015, verge_proud=0.010, verge_t=0.050,
+        post=0.120, post_proud=0.260, post_cap=(0.160, 0.160, 0.040),
+        # `sgn` = the direction the path leaves the deck. `run_end` is where the edging
+        #   terminates in its post: at the entry it is set **behind** the d10 grid eye
+        #   (x −10.0) so every judged grid cut sees a continuous edge line rather than a
+        #   terminus, with 0.74 m of clearance from the eye `[computed]`.
+        ends=(dict(tag="Entry", sgn=-1.0, x_deck=-1.50, path_z=0.002,
+                   grade=0.000, path_half_y=0.85, run_end=-10.80),
+              dict(tag="Exit", sgn=1.0, x_deck=24.14, path_z=-6.618,
+                   grade=-6.620, path_half_y=0.90, run_end=31.00)),
+        # [GT-77 (4)] head-wall fill batter: (x0, z0, run, drop, y0, y1, thick).
+        #   y0 1.630 = 0.030 m clear of the entry deck's +Y fascia (y 1.600), the
+        #   minimum that guarantees no face is coincident with it `[computed]`.
+        head_fillet=(-1.50, 0.000, 0.90, 0.255, 1.630, 8.00, 0.60),
+    ),
 
     # --- [S3-11] season: **late autumn (만추), leaf-off**, pinned -------------------
     #   G10 reads leafless canopy + overwintered matted brown litter + a first flush of
@@ -586,7 +706,19 @@ PARAMS = dict(
             # [v7 verdict §7 (a)] one more park shrub is set at the left of the from_below frame
             #   (yaw −26 deg) so the deck is wrapped in planting. The sight corridor (camera->deck)
             #   runs in the x 3.5 band, so there is no intrusion - checked by SMOKE [v7 mise-en-scene].
-            (0.5, -5.5, "lower")],
+            (0.5, -5.5, "lower"),
+            # [GT-77 (5)] verge planting at the two approaches, 4 clumps. GT-65 found no
+            #   foreground shrub bed and refused to invent one; this round's brief asks
+            #   for "modest verge/planting per the park idiom", so the four are placed —
+            #   and placed **outside the +X grid sight corridor**, which is the constraint
+            #   that decides their y. The corridor is the ray from the d10 eye (−10,0) to
+            #   the deck head corner (−1.5, ±1.60); at x −6.6 it is at |y| 0.64 and at
+            #   x −6.2 at |y| 0.72, against a clump half-width of 1.30 in `_grid_obstacles`
+            #   `[computed]` — so |y| >= 2.70 keeps every judged grid cut's view of the
+            #   stair head intact. The two lower-park clumps also become `from_below`
+            #   anchors (they are `lower`, so the v7 anchor census picks them up).
+            (-6.6, 3.1, "north"), (-6.2, -2.7, "south"),
+            (26.2, 2.3, "lower"), (29.2, -5.9, "lower")],
     shrub=dict(embed=0.25,
                blobs=((0.00, 0.00, 0.75, 0.60, 0.35),
                       (0.54, 0.41, 0.51, 0.43, 0.26),
@@ -599,12 +731,26 @@ PARAMS = dict(
     #   wide top" -> blades shrunk further to **0.58x0.09** and lifted to 2.06/1.80, so the
     #   **exposed post grows to 1.80 m (79 % of the total height)**. The post thickens
     #   0.065 -> 0.080 so the 'post-type' silhouette reads first at a distance.
-    signpost=dict(cx=-3.6, cy=1.00, post_r=0.080, post_h=2.26,
+    #   [GT-77] cy 1.00 -> **1.06**. The 0.080 m post spanned y 0.92..1.08 and the new
+    #   경계목 occupies y 0.840..0.930, so the old value put the post 0.010 m **inside**
+    #   the board — a 10 mm interpenetration, which is the one defect this round is not
+    #   allowed to author. 1.06 stands the waymarker in the verge with 0.050 m clear of
+    #   the board `[computed]`; nothing else about it moves.
+    signpost=dict(cx=-3.6, cy=1.06, post_r=0.080, post_h=2.26,
                   arm=(0.58, 0.05, 0.09), arm_off=0.34,
                   arms=((2.06, 15.0), (1.80, 195.0)),
                   cap=(0.20, 0.20, 0.07)),
     # bench 1 (upper trail)
-    bench=dict(cx=-6.5, cy=0.90, yaw=180.0),
+    #   [GT-77] cy 0.90 -> **1.75**. `build_bench` is 1.80 x 0.40, so at 0.90 the seat
+    #   spanned y 0.70..1.10 and **two of its four legs stood inside the 1.70 m walking
+    #   lane** (y 0.73..0.79), with the bench overhanging the trail — visible in the
+    #   round's own `pt_noon_preset_h1.8_d10.png`. With the 경계목 in place the board
+    #   would run between its legs, which is the picture of furniture dropped on a path
+    #   rather than set beside one. 1.75 puts the near leg at y 1.61, i.e. 0.11 m clear
+    #   **behind** the verge (outer edge 1.500) `[computed]`, off the walking line and
+    #   in the planted shoulder, which is where a park bench actually stands. Nothing
+    #   about the bench itself changes and it stays a `_grid_obstacles` / v7 anchor row.
+    bench=dict(cx=-6.5, cy=1.75, yaw=180.0),
     # [S3-9] bench 2 — on the 쉼터/전망 platform (landing `rest_at`). A rest platform with
     #   nothing to rest on is a landing; the bench is what makes it read as 휴식 시설, and
     #   it is the element SANJI-183's width exception exists for. x/y are offsets **inside**
@@ -1762,6 +1908,173 @@ def ground_plan_deck():
 
 
 # ===========================================================================
+# [F-3] [GT-77 · §0-2] approach-path finishing — one table, both deck ends
+# ===========================================================================
+def approach_members():
+    """Every approach member at the two deck ends, in world coordinates.
+
+    Returns `[(name, kind, (cx, cy, cz), (sx, sy, sz)), ...]`. `kind` selects the
+    material in the builder and is what the SMOKE table groups by. SMOKE and the
+    builder read this **one** function, so a number cannot be right in the report and
+    wrong on the stage — the failure mode GT-65's hand-written rail list produced.
+
+    Every offset here exists to keep two surfaces out of the same plane. The rule is
+    always the same: the member that arrives is bedded **into** the member it meets, so
+    the surface it replaces passes inside a solid and is simply not rendered. Stated
+    once, per junction `[computed]`:
+      · header top  = path top + `header_proud` -> the path veneer's top face and the
+        deck's top face both lie inside the board (0.010 / 0.017 m under it)
+      · edging inner face is `edge_tuck` inside the path veneer -> never coincident
+        with the path's own side face
+      · apron outer edge is `apron_tuck` under the flank board -> the apron's outer
+        side face lies inside the flank, not on its face
+      · flank end is 0.010 m inside the header's deck-side face; the run's far end is
+        inside the post
+      · verge top = grade + `verge_proud` = 5 mm over the leaf-drift decal step, and its
+        inner 0.030 m is under the run board
+
+    The three edging members meet at **butt** joints, not laps: the return board owns
+    the corner and the run and the flank stop on its two faces. Lapping them would put
+    two 0.090 m boards at the same top z sharing a 0.045 x 0.070 m patch of plan — a
+    coplanar pair at every one of the 12 corners, which is the exact defect this round
+    is called for. Butted, the shared planes are back-to-back interior faces of one
+    solid union and the top faces meet along a line of zero area — the same adjacency
+    the ground plates have always used. `coplanar_census()` proves it arithmetically.
+    """
+    ap = PARAMS["approach"]
+    sec, ep, tuck = (float(ap["edge"]), float(ap["edge_proud"]),
+                     float(ap["edge_tuck"]))
+    hbite, hover, hpr = (float(ap["header_bite"]), float(ap["header_over"]),
+                         float(ap["header_proud"]))
+    arun, abite = float(ap["apron_run"]), float(ap["apron_bite"])
+    atuck, at = float(ap["apron_tuck"]), float(ap["apron_t"])
+    vw, voff = float(ap["verge_w"]), float(ap["verge_off"])
+    vp, vt = float(ap["verge_proud"]), float(ap["verge_t"])
+    ps, pp = float(ap["post"]), float(ap["post_proud"])
+    cap = tuple(float(c) for c in ap["post_cap"])
+    # the deck half-width is **derived**, never typed: every outer face is set from the
+    # deck edge, and that edge is the landing table's own y1.
+    dhy = float(PARAMS["landing"]["y1"])
+    hhy = dhy - float(ap["header_inset"])            # header end face
+    fc = dhy - float(ap["flank_inset"]) - sec / 2.0  # flank centreline
+    out = []
+    for e in ap["ends"]:
+        tag, u = str(e["tag"]), float(e["sgn"])
+        xd, pz, gz = float(e["x_deck"]), float(e["path_z"]), float(e["grade"])
+        phy, xe = float(e["path_half_y"]), float(e["run_end"])
+        x_ret = xd + u * arun                    # return-board centreline
+        x_run = x_ret + u * sec / 2.0            # butt face: run / verge start here
+        x_fla = x_ret - u * sec / 2.0            # butt face: flank starts here
+        x_ap0 = xd - u * abite                   # apron end, inside the header
+        x_fl = xd - u * (hbite - 0.010)          # flank end, inside the header
+        run_c = phy + sec / 2.0 - tuck           # straight-run centreline
+        ap_out = fc + sec / 2.0 - atuck          # apron outer edge, under the flank
+        z_edge = gz + ep - sec / 2.0
+        pre = f"Approach_{tag}"
+        out.append((f"{pre}/Header", "header",
+                    (xd + u * (hover - hbite) / 2.0, 0.0, pz + hpr - sec / 2.0),
+                    (hbite + hover, 2.0 * hhy, sec)))
+        for s, sfx in ((1.0, "P"), (-1.0, "N")):
+            out.append((f"{pre}/Apron_{sfx}", "apron",
+                        ((x_ap0 + x_run) / 2.0, s * (phy + ap_out) / 2.0,
+                         pz - at / 2.0),
+                        (abs(x_run - x_ap0), ap_out - phy, at)))
+            out.append((f"{pre}/EdgeRun_{sfx}", "edge",
+                        ((x_run + xe) / 2.0, s * run_c, z_edge),
+                        (abs(xe - x_run), sec, sec)))
+            # the corner board owns the corner: its y runs centre-to-centre plus half a
+            # section at each end, so its inner and outer faces land flush on the run's
+            # and the flank's, and its plan never overlaps either of them.
+            out.append((f"{pre}/EdgeReturn_{sfx}", "edge",
+                        (x_ret, s * (run_c + fc) / 2.0, z_edge),
+                        (sec, fc - run_c + sec, sec)))
+            out.append((f"{pre}/EdgeFlank_{sfx}", "edge",
+                        ((x_fl + x_fla) / 2.0, s * fc, z_edge),
+                        (abs(x_fla - x_fl), sec, sec)))
+            out.append((f"{pre}/EdgePost_{sfx}", "edge",
+                        (xe, s * run_c, gz + (pp - 0.10) / 2.0),
+                        (ps, ps, pp + 0.10)))
+            out.append((f"{pre}/EdgeCap_{sfx}", "edge",
+                        (xe, s * run_c, gz + pp + cap[2] / 2.0), cap))
+            out.append((f"{pre}/Verge_{sfx}", "verge",
+                        ((x_run + xe) / 2.0, s * (run_c + voff + vw / 2.0),
+                         gz + vp - vt / 2.0),
+                        (abs(xe - x_run), vw, vt)))
+    return out
+
+
+def coplanar_census():
+    """Every axis-aligned top face in the scene, tested pairwise for a coplanar overlap.
+
+    `[(name_a, name_b, area)]` for every pair that shares a top z (1 um) **and** overlaps
+    in plan with non-zero area — i.e. every pair that would z-fight. The census covers the
+    ground plates, the exit-path veneers, the entry deck, the six landings and the whole
+    GT-77 approach table, which is every axis-aligned horizontal surface the scene
+    authors. Sloped members (`ybanks`, `CorridorSlope_*`, `HeadFillet`) are excluded by
+    construction — their tops are not horizontal, so they cannot be coplanar with these.
+
+    An empty list is the round's "no coplanar z-fighting" claim, arithmetically.
+    """
+    ld, ent = PARAMS["landing"], PARAMS["entry"]
+    faces = [(nm, x0, x1, y0, y1, zt)
+             for nm, x0, x1, y0, y1, zt, _t, _m in PARAMS["plates"]]
+    faces += [(nm, x0, x1, y0, y1, zt)
+              for nm, x0, x1, y0, y1, zt, _t in PARAMS["exit_paths"]]
+    faces.append(("EntryDeck", float(ent["x0"]), float(ent["x1"]),
+                  float(ld["y0"]), float(ld["y1"]), float(ent["top"])))
+    for f in SEQ:
+        faces.append((f"Landing_{f['k']}", f["lx0"], f["lx1"], f["ly0"],
+                      f["ly1"], f["z_bot"]))
+    for name, _kind, c, s in approach_members():
+        faces.append((name, c[0] - s[0] / 2.0, c[0] + s[0] / 2.0,
+                      c[1] - s[1] / 2.0, c[1] + s[1] / 2.0, c[2] + s[2] / 2.0))
+    bad = []
+    for i in range(len(faces)):
+        na, ax0, ax1, ay0, ay1, az = faces[i]
+        for j in range(i + 1, len(faces)):
+            nb, bx0, bx1, by0, by1, bz = faces[j]
+            if abs(az - bz) > 1e-6:
+                continue
+            ov = (max(0.0, min(ax1, bx1) - max(ax0, bx0))
+                  * max(0.0, min(ay1, by1) - max(ay0, by0)))
+            if ov > 1e-9:
+                bad.append((na, nb, ov))
+    return bad
+
+
+# [GT-77] top-face rectangles of the approach members a scattered dressing card can land
+#   on. Precomputed once so `approach_dressing_z` stays a lookup inside a scatter loop
+#   (`scatter_debris` samples its `ground_fn` five times per instance).
+_APPROACH_TOPS = [(c[0] - s[0] / 2.0, c[0] + s[0] / 2.0,
+                   c[1] - s[1] / 2.0, c[1] + s[1] / 2.0, c[2] + s[2] / 2.0)
+                  for _n, _k, c, s in approach_members()
+                  if _k in ("verge", "edge", "apron")]
+
+
+def approach_dressing_z(x, y, base):
+    """Surface a scattered leaf card should sit on at (x, y), given the plan's flat `base`.
+
+    The verge, the edging and the apron stand 0.002-0.047 m over grade, so a card
+    scattered at `base` inside one of them would be authored **inside a solid** and
+    render as nothing — the silent-burial mode this library has already paid for once
+    (`ground_kit` R1: flush elements buried under the relief skin, manhole dark pixels
+    5.88 % -> 0.02 % `[measured]`). Returning the member's own top face puts the card on
+    the shoulder instead of in it.
+
+    Outside every member the return is `base` unchanged, so the scatter is bit-identical
+    there, and `scatter_debris` draws the same number of RNG values with or without a
+    `ground_fn` — `det_seed` determinism is untouched. Its local-slope probe clamps to
+    +-15 deg, so the step at a member's edge tilts a card at most that far, which is what
+    a leaf lying against a board does anyway.
+    """
+    z = float(base)
+    for x0, x1, y0, y1, zt in _APPROACH_TOPS:
+        if x0 <= x <= x1 and y0 <= y <= y1 and zt > z:
+            z = zt
+    return z
+
+
+# ===========================================================================
 # [G] camera presets: grid_views (gy=0.0) + 5 mise-en-scene shots
 # ===========================================================================
 def build_views():
@@ -1826,6 +2139,17 @@ def _grid_obstacles():
         gz = _zone_z(cx, cy, zone)
         obs.append((f"Shrub_{len(obs)}", cx - 1.3, cx + 1.3, cy - 1.1,
                     cy + 1.1, gz, gz + 0.65))
+    # [GT-77] the capped end posts of the approach edging are the only new members
+    #   that stand tall enough to reach a grid eye (top = grade + 0.260 + cap, against
+    #   eye heights 0.30/0.90/1.80), so they enter the collision census rather than
+    #   being asserted safe in prose.
+    for name, kind, ctr, size in approach_members():
+        if not name.endswith("/EdgePost_P") and not name.endswith("/EdgePost_N"):
+            continue
+        obs.append((name.split("/")[-1] + f"_{len(obs)}",
+                    ctr[0] - size[0] / 2.0, ctr[0] + size[0] / 2.0,
+                    ctr[1] - size[1] / 2.0, ctr[1] + size[1] / 2.0,
+                    ctr[2] - size[2] / 2.0, ctr[2] + size[2] / 2.0))
     return obs
 
 
@@ -1913,6 +2237,104 @@ def _smoke_report():
           f"DeckExitLink y {_lk[4]:.2f}→{_lk[3]:.2f} 가 LowerPath 북단 "
           f"y {_lp[4]:.2f} 에 접함 → "
           f"{'OK (풀밭 막다른 길 해소)' if abs(_lk[3] - _lp[4]) < 1e-9 else 'CHECK'}")
+    # ── [GT-77 · §0-2] approach finishing at the two deck ends ──
+    apx = P["approach"]
+    _mem = approach_members()
+    _dhy = float(ld["y1"])
+    print("\n  [GT-77 접근로] 데크 양 끝단 마감 — 전 부재 col=False "
+          "(기존 콜라이더 위 데코 · 보행면·낙차 모서리·GT AABB 불변)")
+    print(f"    {'부재':28s} {'종류':7s} {'x범위':>17s} {'y범위':>17s} {'상면z':>8s}")
+    for nm, kind, c, s in _mem:
+        print(f"    {nm:28s} {kind:7s} "
+              f"[{c[0]-s[0]/2.0:7.3f},{c[0]+s[0]/2.0:7.3f}] "
+              f"[{c[1]-s[1]/2.0:7.3f},{c[1]+s[1]/2.0:7.3f}] "
+              f"{c[2]+s[2]/2.0:8.3f}")
+    ok77 = True
+    for e in apx["ends"]:
+        tag = str(e["tag"])
+        pz, phy = float(e["path_z"]), float(e["path_half_y"])
+        gz_e, xe = float(e["grade"]), float(e["run_end"])
+        deck_z = float(ent["top"]) if tag == "Entry" else SEQ[-1]["z_bot"]
+        h_top = pz + float(apx["header_proud"])
+        c_path, c_deck = h_top - pz, h_top - deck_z
+        # the board must not share a plane with either surface it closes (that is the
+        # z-fighting test) and must stay a trim, never a step: the largest face it
+        # presents is asserted against the flight riser.
+        good = (min(abs(c_path), abs(c_deck)) >= 0.005
+                and max(abs(c_path), abs(c_deck)) <= float(fl["riser"]))
+        ok77 &= good
+        print(f"    [{tag}] 마구리재 상면 {h_top:+.3f} : 포장 상면 "
+              f"{pz:+.3f}({c_path:+.3f}) · 데크 상면 {deck_z:+.3f}({c_deck:+.3f}) "
+              f"→ 두 면과 모두 비동일평면(최소 이격 "
+              f"{min(abs(c_path), abs(c_deck)):.3f} ≥ 0.005) · 최대 노출 "
+              f"{max(abs(c_path), abs(c_deck)):.3f} ≤ riser {fl['riser']:.3f} "
+              f"{'OK' if good else 'CHECK'}")
+        _role = ("진입단: 포장이 데크보다 높으므로 마구리재는 두 면 위에 서는 "
+                 "10 mm 노출 경계재" if c_deck > 0 else
+                 "도착단: 마구리재가 참과 포장 사이에 앉아 등록 단차 0.020 을 "
+                 "0.008 + 0.010 으로 나눈다")
+        print(f"      {_role} — 콜라이더 없음이므로 보행 연속성 표의 "
+              f"등록 단차는 불변")
+        ymax = max(abs(c[1]) + s[1] / 2.0 for nm, _k, c, s in _mem
+                   if nm.startswith(f"Approach_{tag}/"))
+        good = ymax <= _dhy + 1e-9
+        ok77 &= good
+        print(f"    [{tag}] 문턱 유효폭 {2.0*phy:.2f} m(포장) → {2.0*_dhy:.2f} m"
+              f"(데크와 동일) · 부재 최대 |y| {ymax:.3f} ≤ 데크 가장자리 "
+              f"{_dhy:.3f} → {'OK' if good else 'CHECK'}"
+              + ("  (남측 30 % 무방호 어깨선을 넘는 부재 0개)"
+                 if tag == "Entry" else ""))
+        print(f"    [{tag}] 버지 상면 {gz_e + float(apx['verge_proud']):+.3f} = "
+              f"지면 +{float(apx['verge_proud']):.3f} → 낙엽 드리프트 단"
+              f"(leaf.proud {P['leaf']['proud']:.3f}) 대비 여유 "
+              f"{float(apx['verge_proud']) - float(P['leaf']['proud']):+.3f} m · "
+              f"경계목 종단 말뚝 x {xe:+.2f}")
+    # vertical-face clearances. A top-face census cannot see these: two exposed
+    #   **side** faces landing on the same y-plane at the deck corner would z-fight just
+    #   as badly, so every outer face is stepped and the steps are asserted here.
+    _sec = float(apx["edge"])
+    _fc = _dhy - float(apx["flank_inset"]) - _sec / 2.0
+    _gaps = (("데크 측면 ↔ 마구리재 끝면", float(apx["header_inset"])),
+             ("마구리재 끝면 ↔ 플랭크 외면",
+              float(apx["flank_inset"]) - float(apx["header_inset"])),
+             ("플랭크 외면 ↔ 에이프런 외변", float(apx["apron_tuck"])),
+             ("마구리재 데크측 면 ↔ 에이프런 끝면",
+              float(apx["header_bite"]) - float(apx["apron_bite"])),
+             ("마구리재 데크측 면 ↔ 플랭크 끝", 0.010),
+             ("포장 측면 ↔ 경계목 내면", float(apx["edge_tuck"])))
+    _gmin = min(g for _n, g in _gaps)
+    ok77 &= _gmin >= 0.005 - 1e-9
+    print("    면 겹침 방지 이격 (노출 수직면이 같은 평면에 앉지 않도록 계단식 후퇴)")
+    for _n, _g in _gaps:
+        print(f"      {_n:32s} {_g:+.3f} m")
+    print(f"      최소 이격 {_gmin:.3f} ≥ 0.005 → "
+          f"{'OK' if _gmin >= 0.005 - 1e-9 else 'CHECK'} · 플랭크 중심선 "
+          f"y ±{_fc:.3f} (외면 ±{_fc + _sec / 2.0:.3f})")
+    _cop = coplanar_census()
+    ok77 &= not _cop
+    print(f"    동일평면 겹침 감사(축정렬 상면 {len(_mem) + len(P['plates']) + len(P['exit_paths']) + 1 + len(SEQ)}면 "
+          f"전수 쌍검사) → {len(_cop)}쌍 "
+          f"{'OK (z-fighting 면 0)' if not _cop else 'CHECK ' + str(_cop[:3])}")
+    # dressing that lands on the new members must sit **on** them, not inside them
+    _bur = [(nm, cy) for nm, cy, _sx, sy, zn in P["leaf_ground_patches"]
+            if zn == "trail" and abs(cy) + sy / 2.0 > 0.85 + 1e-9]
+    ok77 &= not _bur
+    print(f"    낙엽 드리프트(trail) 흙길 대역 |y| ≤ 0.85 이탈 {len(_bur)}개 → "
+          f"{'OK (버지가 로브를 잘라내지 않는다)' if not _bur else 'CHECK ' + str(_bur)}")
+    _probe = [("버지 안", -6.0, 1.20), ("에이프런 안", -2.0, 1.20),
+              ("경계목 위", -6.0, 0.885), ("포장 위", -6.0, 0.00)]
+    print("    산포 착지면 probe (approach_dressing_z, base = 0.000)")
+    for _n, _px, _py in _probe:
+        print(f"      {_n:10s} ({_px:+5.1f},{_py:+5.2f}) → z "
+              f"{approach_dressing_z(_px, _py, 0.0):+.3f}")
+    _hf = apx["head_fillet"]
+    print(f"    머리 성토 배수면: x {_hf[0]:+.2f}→{_hf[0]+_hf[2]:+.2f} · "
+          f"z {_hf[1]:+.3f}→{_hf[1]-_hf[3]:+.3f} "
+          f"({math.degrees(math.atan2(_hf[3], _hf[2])):.1f}°) · y {_hf[4]:+.2f}.."
+          f"{_hf[5]:+.2f} — 데크 측면(y {_dhy:+.2f})에서 "
+          f"{_hf[4]-_dhy:.3f} m 이격 · collider=False")
+    print(f"    [GT-77 접근로] {'전항목 OK' if ok77 else '⚠ CHECK 항목 있음'}")
+
     print("  [표] Y 방향 사면(_ybank, rotX)")
     for nm, x0, x1, yh, zh, yl, zl, th, _m in P["ybanks"]:
         ang = math.degrees(math.atan2(zh - zl, yh - yl))
@@ -2130,7 +2552,10 @@ BANNER = """\
  9. cue 토글         — railing/tactile/nosing ON/OFF 시 위험 기하 불변인가
 10. [v6] 태양        — from_below·through_treads 에 직사광이 들어왔나(암부 사망 해소)
 11. [v6] 옹벽        — 사석 스케일 + 동측 2단(소단 식재)로 '공원 절토면'이 되나
-12. [v6] 난간        — 세로살이 들어가 '가설 사다리틀'이 아니라 데크 난간인가"""
+12. [v6] 난간        — 세로살이 들어가 '가설 사다리틀'이 아니라 데크 난간인가
+13. [GT-77] 접근로   — 데크 양 끝단에서 포장이 데크 폭까지 나가 마구리재에 물려 붙는가
+                       (경계목·버지·식재가 길을 '무맥락 매트'에서 떼어내는가 ·
+                        런 끝마다 리턴/말뚝 · 머리 절토면 raw cut 소거)"""
 
 
 def main():
@@ -2299,6 +2724,34 @@ def main():
                            collider=True)
 
     # -------------------------------------------------------------------
+    # [GT-77 · §0-2] approach-path finishing at the two deck ends
+    # -------------------------------------------------------------------
+    def build_approach(M):
+        """Lay the `approach_members()` table, plus the head-wall fill batter.
+
+        `col=False` on every member without exception. Each one is a veneer or a trim
+        over a plate that already carries the collider (`TrailPath`/`UpperTrail` at the
+        entry, `Landing_5`/`LowerParkMain` at the exit), which is the same contract
+        `exit_paths` is built under: the walking surface, the drop edges, the hazard
+        registry and the GT-read AABBs are all exactly where they were.
+        """
+        mk = dict(apron="dirt", header="stringer", edge="stringer", verge="hedge")
+        for name, kind, ctr, size in approach_members():
+            BOX(f"{ROOT}/{name}", ctr, size, M[mk[kind]], col=False)
+        # [GT-77 (4)] head-wall fill batter. North of the deck the terrace top (0.000)
+        #   met the corridor bench (−0.255) as a raw vertical cut face 6.37 m long —
+        #   `UpperTrail`'s +X face, standing in `reversal`. A 0.90 m batter returns it
+        #   to grade at 15.8 deg. `margin` is left at the builder's default so the
+        #   uphill end laps **back over** the terrace instead of leaving the vertical
+        #   face showing through a wedge under the batter's own crest `[computed]`.
+        #   `collider=False`: the corridor bench under it already carries the collision
+        #   surface, so the physics world is bit-identical to the previous round.
+        hf = PARAMS["approach"]["head_fillet"]
+        sc.build_slope(stage, f"{ROOT}/HeadFillet", float(hf[0]), float(hf[1]),
+                       float(hf[2]), float(hf[3]), float(hf[4]), float(hf[5]),
+                       float(hf[6]), M["grass"], collider=False)
+
+    # -------------------------------------------------------------------
     # [W2-D] ground_kit - P18 deck_trail_hybrid (two plans, two z levels).
     # -------------------------------------------------------------------
     def build_ground_kit(M):
@@ -2324,13 +2777,20 @@ def main():
         ring = 0
         for i, (cx, cy, sx, sy, zone) in enumerate(
                 PARAMS["leaf_ground_patches"]):
+            # [GT-77] the ring boxes reach into the verge and over the apron, both of
+            #   which stand proud of the plan's flat z — so the ring is seated on a
+            #   surface function instead of a scalar. `approach_dressing_z` is the
+            #   identity outside the approach members, so the other two rings are
+            #   unchanged.
+            _zt = _zone_z(cx, cy, zone)
             ring += int(sc.scatter_debris(
                 stage, f"{ROOT}/GKit/LeafRing_{i}",
                 cx - sx / 2.0 - pad, cy - sy / 2.0 - pad,
                 cx + sx / 2.0 + pad, cy + sy / 2.0 + pad,
-                _zone_z(cx, cy, zone),
+                _zt,
                 cover=0.10, seed=gk.det_seed("scene10.leafring", i),
                 edge_bias=pad,
+                ground_fn=lambda px, py, _b=_zt: approach_dressing_z(px, py, _b),
                 max_count=int(g["leaf_ring_n"])) or 0)
         print(f"[ground_kit] scene10 P18 · 프림 {a['prims']}+{b['prims']} · "
               f"산포 {a['instances']}+{ring} · δmax {a['gt_delta_max']:.4f} · "
@@ -2972,6 +3432,10 @@ def main():
     if cfg["hazard_stairs"]:
         build_deck(M)
         build_cues(M)
+        # [GT-77] the approach members are dimensioned off the deck ends (entry head
+        #   x −1.50, arrival landing face x 24.14), so they only exist when the deck
+        #   does — the `hazard_stairs=False` control arm keeps its bare flat plate.
+        build_approach(M)
         build_ground_kit(M)          # [W2-D] trail + entry-deck ground elements
     else:
         build_flat_fill(M)

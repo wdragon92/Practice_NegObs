@@ -149,7 +149,13 @@ SCENE_CONFIG = {
     "cue_railing":        False,   # railings are not the practice on temple stone paths (unguarded) - code path only
     "cue_tactile":        False,   # not the practice (v5 brief §shared) - code path only
     "cue_material_break": True,    # yard decomposed granite vs worn stone contrast
-    "cue_sign":           True,    # [v5 shared layer] sign_info (temple notice) at the entrance
+    "cue_sign":           False,   # [GT-84 user: remove the guide sign] the entrance notice board
+                                   #   is OUT of the default build. v5.2 precedent: the code path
+                                   #   is NOT deleted - PARAMS["sign"], build_sign, the sign_info
+                                   #   material/asset role and the `notice_face` PLACEMENT anchor
+                                   #   all stay, so the ablation arm still builds with True and
+                                   #   only the default flips. The board carried no cue and no
+                                   #   hazard-registry entry, so no walked surface or drop moves
     "cue_scene_dressing": True,    # Iljumun gate·stone lanterns·stone wall·pines·Dharma hall silhouette
     "cue_nosing":         False,   # non-slip strips are not the practice on natural-stone nosings - code path only
 }
@@ -545,6 +551,8 @@ PARAMS = dict(
                       (-0.46, -0.38, 0.58, 0.40, 0.30))),
     # --- temple notice board (sign_info) : at the entrance (before the gate), facing the approach (yaw 180) ---
     #   [v7] Moved −2.6 m with the gate (keeps its 0.65 m relative position behind it).
+    #   [GT-84] `cue_sign` defaults to False, so this block builds only on the ablation arm.
+    #   Kept verbatim — the geometry is still the one the arm must reproduce.
     sign=dict(cx=-4.95, cy=-1.15, yaw=180.0, w=0.78, h=0.62, pole_h=1.95),
 
     # --- distant ridgelines (horizon closure, straight ahead on the main camera axis +X) ---
@@ -1228,9 +1236,12 @@ def _grid_obstacles():
     obs.append(("Hall", hl["cx"] - hl["sx"] / 2.0, hl["cx"] + hl["sx"] / 2.0,
                 hl["cy"] - hl["roof_y"], hl["cy"] + hl["roof_y"],
                 0.0, hl["ridge_z"]))
-    obs.append(("SignPost", sg["cx"] - 0.06, sg["cx"] + 0.06,
-                sg["cy"] - sg["w"] / 2.0, sg["cy"] + sg["w"] / 2.0,
-                0.0, sg["pole_h"]))
+    # [GT-84] gated with the build: an obstacle that is not built is not an obstacle. The AABB
+    #   stays here for the `cue_sign=True` ablation arm.
+    if SCENE_CONFIG["cue_sign"]:
+        obs.append(("SignPost", sg["cx"] - 0.06, sg["cx"] + 0.06,
+                    sg["cy"] - sg["w"] / 2.0, sg["cy"] + sg["w"] / 2.0,
+                    0.0, sg["pole_h"]))
     for i, p in enumerate(PARAMS["lanterns"]):
         r = ln["cap_w"] / 2.0
         obs.append((f"Lantern_{i}", p["cx"] - r, p["cx"] + r,
@@ -1629,14 +1640,19 @@ def _smoke_report():
         ("석등(남)", P["lanterns"][1]["cx"] - 0.47,
          P["lanterns"][1]["cx"] + 0.47, P["lanterns"][1]["cy"] - 0.47,
          P["lanterns"][1]["cy"] + 0.47, 0.0, ln_h),
-        ("안내판", P["sign"]["cx"] - 0.06, P["sign"]["cx"] + 0.06,
-         P["sign"]["cy"] - P["sign"]["w"] / 2.0,
-         P["sign"]["cy"] + P["sign"]["w"] / 2.0, 0.0, P["sign"]["pole_h"]),
         ("법당", P["hall"]["cx"] - P["hall"]["sx"] / 2.0,
          P["hall"]["cx"] + P["hall"]["sx"] / 2.0,
          P["hall"]["cy"] - P["hall"]["roof_y"],
          P["hall"]["cy"] + P["hall"]["roof_y"], 0.0, P["hall"]["ridge_z"]),
     ]
+    # [GT-84] The notice board is a caster only on the `cue_sign=True` ablation arm. The table
+    #   reports what is actually built, so the row is gated rather than deleted.
+    if SCENE_CONFIG["cue_sign"]:
+        casters.insert(4, ("안내판", P["sign"]["cx"] - 0.06,
+                           P["sign"]["cx"] + 0.06,
+                           P["sign"]["cy"] - P["sign"]["w"] / 2.0,
+                           P["sign"]["cy"] + P["sign"]["w"] / 2.0,
+                           0.0, P["sign"]["pole_h"]))
     print("\n  [v7 그림자] 캐스터 → 마당(z=0) 투영 발자국 · 워크라인 |y|≤0.22")
     shade = []                       # (name, x0, x1, y_south) - shadow on the yard
     for nm, x0, x1, y0, y1, zlo, zhi in casters:

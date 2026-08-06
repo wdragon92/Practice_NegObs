@@ -71,18 +71,27 @@ User ruling: *"화강석 재질 집착 중단 — '그냥 큰 계단'으로 읽�
      `ConcreteFloor` / `ConcreteWall`, which is load-bearing: `_look_spec` classifies by
      prim name, so the old `GraniteLight` / `StoneCheek` names would keep the **stone**
      prescription (sat 0.66 · patch 1.0 · `_W_STONE`) on a concrete texture.
-  2. **The side wall gains a handrail** (`build_wall_handrail`). The wall itself is
-     unchanged — its top face stays on the nosing line + 0.950, the top of the 08-05
-     doctrine band (wall-rail 0.85~0.95) — and a Ø38 mm rail on Ø30 stanchions now rides
-     0.100 above it, so the guard line reads at 1.069 m. The rail is the drop cue; the
-     wall alone was reading as a raking slab.
+  2. The side wall gained a handrail — **withdrawn at GT-78, see the block below.**
 **No parapet, tread, riser, landing, nosing or drop-edge coordinate moves, and no collider
-is added or removed** — the rail family is dressing (`col=False`), the wall under it already
-collides. P-15 (the parapet base defect) stays deferred and is NOT touched here.
+is added or removed.** P-15 (the parapet base defect) stays deferred and is NOT touched here.
+
+═══ [GT-78] 08-06 gallery answer — the wall-top handrail is withdrawn ═══════════
+User ruling: *"왜 벽에 핸드레일을 달았지? 빼."* Everything GT-70 mounted on the wall top is
+deleted — the `build_wall_handrail` builder (8 bars + 13 stanchions per side = **42 prims**,
+prim roots `WallRail_N` / `WallRail_S`), its `parapet.rail` parameter block and its call site,
+all three in the same edit. That is this file's own K2 doctrine, already applied to the `patch`
+sites: a live parameter block for a withdrawn element is how the next reader reinstates it by
+restoring one line.
+What GT-70 keeps, it keeps: the concrete re-materialisation (item 1 above) is untouched, and
+**the wall itself does not move** — top face on the nosing line + 0.950 m, width 0.5, the same
+raking parapet the flight has carried since v5.1. The rail family was dressing (`col=False`)
+riding above the wall, so this removal changes **0 colliders, 0 walked-surface z and 0 drop-edge
+coordinates**; nothing but the 42 rail prims leaves the stage.
 
 Materials: `marble_light` (terrace / plinth / monument) · `concrete_floor` (flight, landings,
 shoulder) · `concrete_wall` (side walls) · `plaza_light` (upper plaza) · `plaza_lower`
-(lower plaza) · `band_dark` (joints, coursing, bands) · `Looks/Rail` (wall handrail).
+(lower plaza) · `band_dark` (joints, coursing, bands) · `Looks/Rail` (kept for the
+`cue_railing` ablation arm only — nothing rides on the wall top).
 """
 
 import os
@@ -234,44 +243,21 @@ PARAMS = dict(
     side_slope=dict(y_out=20.0, thick=3.0, run_ext=3.2),
     fountain=dict(cx=30.0, cy=0.0, r_out=3.0, r_in=2.4, h=0.4,
                   nozzles=5, nozzle_r=0.06, nozzle_h=0.5),
-    # --- Side parapets (width 0.5) ---
-    #     thick 0.4->1.6 : embedded into the stepped shoulder (build_shoulder) over the whole run to remove the float
-    #     [v5.1] cap_t : slab thickness of the sloped top haunch (oblique solid) - see the bite check in the
-    #       build_parapets docstring (vertical equivalent 1.530 > required 0.43+0.03).
-    #
-    # ═══ [GT-70] `rail` — the handrail that makes the side wall read as a wall ═══
-    #  The wall geometry is NOT in this row. Its top face stays at nosing + `z0 + 0.6` =
-    #  **0.950 m**, which is the top of the 08-05 wall-rail band (0.85~0.95); what the wall
-    #  lacked was any element that says *rail*, so from every wide cut it read as a raking
-    #  slab rather than as a guarded edge. The rail below rides on top of it.
-    #    `r`      0.019 — Ø38 mm, the upper bound of the graspable 3.2~3.8 cm handrail
-    #                     diameter (장애인·노인·임산부 등의 편의증진 보장에 관한 법률
-    #                     시행규칙 별표1). Same family as scene13's wall handrail (r 0.020).
-    #    `lift`   0.100 — rail axis above the wall top. Clear gap under the tube =
-    #                     lift − r = **0.081 m**, so the rail casts a real shadow line
-    #                     instead of reading as a bead moulded into the coping.
-    #                     Guard line (rail crown) = 0.950 + 0.100 + 0.019 = **1.069 m**
-    #                     over the nosing, inside the 1.1 m 계단 난간 practice.
-    #    `post_r` 0.015 — Ø30 stanchion.
-    #    `pitch`  1.80  — nominal plan pitch. The builder divides the run between the two
-    #                     inset end posts (21.485 m) into a whole number of equal bays, so
-    #                     the true pitch is **12 bays × 1.790 m** [computed] and the end
-    #                     posts land on the newel end and on the toe.
-    #    `y_in`   0.15  — rail axis inboard offset from the wall's inner face (|y| 5.05),
-    #                     i.e. |y| = 5.200. Tube extent |y| 5.181…5.219 sits **entirely on
-    #                     the wall** (5.05…5.55) and **outside `w_bot` = 5.000**, so nothing
-    #                     overhangs the walked surface. Asserted pre-boot (check ⑳).
-    #    `margin` 0.03  — bar overlap at the rake/landing kinks (23.83°); the joint z is
-    #                     continuous by `_rake_segments` construction, this only closes the
-    #                     cylinder end faces.
-    #    `embed`  0.02  — how far a stanchion runs **below** the wall top. A vertical
-    #                     cylinder has a flat bottom disc, and on the 23.83° rake the wall
-    #                     top moves 0.030 · tan 23.83° = **0.0133 m** across a Ø30 post, so
-    #                     without the embed half of every post on a rake would float by up
-    #                     to 6.6 mm. 0.020 > 0.0133 clears it with margin [computed].
-    parapet=dict(width=0.5, z0=0.35, thick=1.6, cap_t=1.4,
-                 rail=dict(r=0.019, lift=0.100, post_r=0.015, pitch=1.80,
-                           y_in=0.15, margin=0.03, embed=0.02)),
+    # --- Side parapets (the raking side walls of the flight) ---
+    # ═══ [GT-78] the `rail` sub-block is deleted — nothing rides on the wall top ═══
+    #  GT-70 carried a Ø38 mm bar on Ø30 stanchions 0.100 m above the wall top (guard line
+    #  1.069 m); the 08-06 gallery answer rejects it. The seven parameters go out with the
+    #  geometry so the family cannot be reinstated by restoring one line — the same removal
+    #  discipline the `patch` sites got.
+    #  **The wall keeps every number it had**, and they are the numbers the checks read:
+    #    `width` 0.5  — plan width of the parapet; the wall spans |y| 5.05…5.55.
+    #    `z0`    0.35 — wall top over the nosing line is `z0 + 0.6` = **0.950 m**, the top
+    #                   of the 08-05 wall band (0.85~0.95). Asserted pre-boot (check ⑱).
+    #    `thick` 1.6  — body depth embedded into the stepped shoulder over the whole run
+    #                   (v5.1: this is what removed the floating-plate read).
+    #    `cap_t` 1.4  — thickness of the oblique top haunch; the bite check in the
+    #                   `build_parapets` docstring (vertical equivalent 1.530 > 0.43+0.03).
+    parapet=dict(width=0.5, z0=0.35, thick=1.6, cap_t=1.4),
     # --- Shoulder outside the stair (replaces the old soffit) - see build_shoulder ---
     shoulder=dict(y_out=5.2, offset=0.03, lap=0.05),
     # ═══ [W3 L14 · BS-4] the five distant blocks — from a wall to a skyline ═══
@@ -814,27 +800,36 @@ def _material_selfcheck():
          f"scale {sorted(sca)} · 잔존 사석 키 {dead}")
 
 
-def _wallrail_selfcheck():
-    """[GT-70] The wall-cum-handrail: height band, guard line, and no walk-line overhang."""
+def _sidewall_selfcheck():
+    """[GT-78] The side wall stays exactly where it was; nothing rides on top of it.
+
+    Two things have to be true after a removal, and only one of them is about the thing
+    removed. (⑱) The wall is a *survivor* of this row, so its own numbers are asserted
+    rather than assumed — a removal that silently drags the parapet with it would pass an
+    "is the rail gone" test. (⑲) The rail is gone from the **three places** that can
+    resurrect it: the parameter block, the prim-path literals and the call graph. The path
+    scan reuses `_no_people_audit`'s idiom — it reads the `f"{ROOT}/…"` literals this file
+    writes, not its prose, so the GT-78 block above may name `WallRail` freely.
+    """
     st, pa = PARAMS["stairs"], PARAMS["parapet"]
-    ra = pa["rail"]
     wall_h = pa["z0"] + 0.6                     # wall top over the nosing line
-    crown = wall_h + float(ra["lift"]) + float(ra["r"])
-    gap = float(ra["lift"]) - float(ra["r"])
-    y_ax = st["w_bot"] + 0.05 + float(ra["y_in"])
-    y_in_edge = y_ax - max(float(ra["r"]), float(ra["post_r"]))
-    y_out_edge = y_ax + max(float(ra["r"]), float(ra["post_r"]))
-    _chk("⑱ 벽 겸 손잡이 높이 0.85~0.95 m (08-05 독트린 대역) — 벽 기하 불변",
-         0.85 - 1e-9 <= wall_h <= 0.95 + 1e-9,
-         f"노징선 위 {wall_h:.3f} m (z0 {pa['z0']} + 0.600)")
-    _chk("⑲ 손잡이 마루 ≤ 1.10 m (계단 난간 관행) · 관 아래 순간격 ≥ 0.05 m",
-         crown <= 1.10 + 1e-9 and gap >= 0.05,
-         f"마루 {crown:.3f} m · 순간격 {gap*1000:.0f} mm · 관 Ø{ra['r']*2000:.0f} mm")
-    _chk("⑳ 손잡이가 보행면 위로 내밀지 않는다 (안쪽 끝 ≥ w_bot, 벽폭 안)",
-         y_in_edge >= st["w_bot"] - 1e-9
-         and y_out_edge <= st["w_bot"] + 0.05 + pa["width"] + 1e-9,
-         f"|y| {y_in_edge:.3f}~{y_out_edge:.3f} · w_bot {st['w_bot']:.3f} · "
-         f"벽 {st['w_bot'] + 0.05:.3f}~{st['w_bot'] + 0.05 + pa['width']:.3f}")
+    y_in, y_out = st["w_bot"] + 0.05, st["w_bot"] + 0.05 + pa["width"]
+    src = open(os.path.abspath(__file__), "r", encoding="utf-8").read()
+    paths = re.findall(r'f?"\{ROOT\}/([A-Za-z0-9_/\{\}.]+)"', src)
+    live = sorted({p.split("/")[0] for p in paths
+                   if "WallRail" in p or "Handrail" in p})
+    # A *statement* that defines or calls the builder — anchored at the start of a line so
+    #   that the prose above, this scan itself and the GT-78 tombstone comment do not
+    #   count as survivors.
+    calls = re.findall(r'^\s*(?:def\s+)?build_wall_handrail\s*\(', src, re.M)
+    _chk("⑱ 측벽 상단 = 노징선 위 0.85~0.95 m (08-05 벽 대역) — 벽 기하 불변",
+         0.85 - 1e-9 <= wall_h <= 0.95 + 1e-9
+         and abs(y_out - y_in - pa["width"]) < 1e-9,
+         f"노징선 위 {wall_h:.3f} m (z0 {pa['z0']} + 0.600) · 벽 |y| "
+         f"{y_in:.3f}~{y_out:.3f} (폭 {pa['width']:.3f}) · 해치 {pa['cap_t']:.3f}")
+    _chk("⑲ 벽 위 손잡이 0 — 파라미터·프림경로·호출부 동시 삭제 (되돌림 함정 차단)",
+         "rail" not in pa and not live and not calls,
+         f"parapet 키 {sorted(pa)} · 잔존 프림 루트 {live} · 잔존 호출 {len(calls)}개")
 
 
 def _backdrop_selfcheck():
@@ -918,8 +913,8 @@ def _smoke_report():
         print(f"    {name:28s} {ext:22s} top z={zs}")
     # ── [W3 L14] the assertions. Everything above is a print; these can FAIL. ──
     print("-" * 64)
-    print("  [자기검증 · GT-52 R-1 / GT-70] 착시 기하 불변 · 줄눈 · 계절 · 배치 · "
-          "배경 · 재질 · 측벽 손잡이")
+    print("  [자기검증 · GT-52 R-1 / GT-70 / GT-78] 착시 기하 불변 · 줄눈 · 계절 · "
+          "배치 · 배경 · 재질 · 측벽(손잡이 없음)")
     _CHECKS.clear()
     _stair_selfcheck()
     njoint = _coursing_selfcheck()
@@ -929,7 +924,7 @@ def _smoke_report():
     _backdrop_selfcheck()
     _no_people_audit()
     _material_selfcheck()
-    _wallrail_selfcheck()
+    _sidewall_selfcheck()
     npass = sum(1 for ok, _, _ in _CHECKS if ok)
     print("-" * 64)
     print(f"  자기검증 {npass}/{len(_CHECKS)} PASS · 줄눈 프림 {njoint}")
@@ -1615,85 +1610,12 @@ def main():
                  (top_t + st["base_z"]) / 2.0),
                 (lap, y1 - y0, top_t - st["base_z"]), Mc, col=True)
 
-    def build_wall_handrail(M):
-        """[GT-70] The rail that makes the side wall read as a wall-cum-handrail.
-
-        **Why.** The 08-05 doctrine is that the guard itself is the drop cue. This scene
-        had the guard — a 0.950 m wall over the nosing line, the top of the 0.85~0.95
-        wall-rail band — but nothing on it that reads as a *rail*, so at
-        `beauty_overview` / `side_reveal` scale the two flanks were raking slabs and the
-        6.0 m drop between them had no line drawn along it.
-
-        **What is built, and what is not.** One continuous bar per side over the whole
-        polyline, on stanchions. The wall under it is **not touched**: no parapet body,
-        haunch, newel or end-cap coordinate moves, and the bar family carries **no
-        collider** — the wall it stands on already collides, and this row is R-3. The
-        P-15 parapet-base defect stays deferred.
-
-        **Geometry.** The bar rides the wall-top polyline (`_rake_segments` + the newel
-        run at the head) offset up by `lift`, so its z is continuous at every rake/landing
-        kink by the same construction that makes the wall top continuous — nothing here
-        re-derives the polyline from riser/tread. Verified: the 7 bar-to-bar joints close
-        at |Δz| = 0 [computed]. Stanchions divide the 21.485 m between the two inset end
-        posts into 12 equal bays of **1.790 m** [computed], which puts the end posts on
-        the newel end and on the toe rather than at an arbitrary offset.
-        Census: **8 bars + 13 posts per side = 42 prims** [computed].
-
-        **Heights** (over the nosing line, which is at most one riser above the tread the
-        walker stands on): wall top 0.950 · rail axis 1.050 · rail crown 1.069 · clear gap
-        under the tube 0.081. Asserted pre-boot in checks ⑱⑲⑳.
-        """
-        st = PARAMS["stairs"]
-        pa = PARAMS["parapet"]
-        ra = pa["rail"]
-        yb = st["w_bot"] + 0.05                      # 5.05 - wall inner face
-        rail_h = pa["z0"] + 0.6                      # 0.95 - wall top over the nosing
-        _ang = math.atan2(st["riser"], st["tread"])
-        lap = pa["cap_t"] * math.sin(_ang) + 0.15    # 0.716 - newel plan length
-        rr, pr = float(ra["r"]), float(ra["post_r"])
-        lift, mg = float(ra["lift"]), float(ra["margin"])
-        segs = _rake_segments()
-        # The head newel is a level run of `lap` in front of the first rake; without it
-        #   the bar would start at x=0 and leave the newel bare, which is where
-        #   `terrace_read` looks first.
-        runs = [("land", segs[0][1] - lap, segs[0][1], segs[0][3], segs[0][3])] + segs
-
-        def _wall_top(x):
-            """Wall top face z at plan x (the rail's support line)."""
-            for kind, xa, xb, za, zb in runs:
-                if x <= xb + 1e-9:
-                    t = 0.0 if (xb - xa) < 1e-9 else (max(x, xa) - xa) / (xb - xa)
-                    return za + (zb - za) * t + rail_h
-            return runs[-1][4] + rail_h
-
-        x_a, x_b = runs[0][1], runs[-1][2]              # -0.715 … 20.800
-        # End posts are inset by their own radius so the tube's outer face lands flush
-        #   with the newel end face / the toe, instead of half-overhanging into air.
-        x_p0, x_p1 = x_a + pr, x_b - pr
-        nbay = max(1, int(round((x_p1 - x_p0) / float(ra["pitch"]))))
-        step = (x_p1 - x_p0) / nbay
-        n_bar = n_post = 0
-        for sgn, tag in ((1.0, "N"), (-1.0, "S")):
-            y = sgn * (yb + float(ra["y_in"]))        # +-5.200, on the wall, outside w_bot
-            for j, (kind, xa, xb, za, zb) in enumerate(runs):
-                run, drop = xb - xa, za - zb
-                CYL(f"{ROOT}/WallRail_{tag}/Bar_{j}",
-                    ((xa + xb) / 2.0, y, (za + zb) / 2.0 + rail_h + lift),
-                    rr, math.hypot(run, drop) + mg, M["rail"],
-                    rotY=90.0 + math.degrees(math.atan2(drop, run)))
-                n_bar += 1
-            emb = float(ra["embed"])
-            for i in range(nbay + 1):
-                px = x_p0 + i * step
-                CYL(f"{ROOT}/WallRail_{tag}/Post_{i}",
-                    (px, y, _wall_top(px) + (lift - emb) / 2.0),
-                    pr, lift + emb, M["rail"])
-                n_post += 1
-        print(f"[GT-70] 측벽 손잡이 바 {n_bar} · 지주 {n_post} (bay {step:.3f} m) · "
-              f"벽 상단 {rail_h:.3f} + 들림 {lift:.3f} → 마루 "
-              f"{rail_h + lift + rr:.3f} m · |y| {yb + float(ra['y_in']):.3f} "
-              f"(w_bot {st['w_bot']:.3f} 밖) · 콜라이더 0")
-        return n_bar + n_post
+    # [GT-78] `build_wall_handrail` (GT-70) is deleted here, not disabled behind a flag.
+    #   The 42-prim bar/stanchion family that rode 0.100 m above the wall top is gone with
+    #   its `parapet.rail` parameters and its call site in the assembly block below; check
+    #   ⑲ asserts all three are absent. `build_parapets` above is untouched, so the raking
+    #   wall — and every walked surface, nosing and drop-edge coordinate — is byte-identical
+    #   to the round the user judged.
 
     # -------------------------------------------------------------------
     # Dressing - 2 street lamps + parapet kerb (behind the upper plaza) + fountain hint + distant buildings
@@ -1935,8 +1857,7 @@ def main():
         build_side_slopes(M)        # sloped grass banks either side of the stair (isolation removed)
         build_stairs(stair_mtl)
         build_step_coursing(M)      # [W3 L14 · G1] unit coursing of the flight
-        build_parapets(M)
-        build_wall_handrail(M)      # [GT-70] wall-cum-handrail — dressing on the wall top
+        build_parapets(M)           # [GT-78] the raking side wall — and nothing on top of it
         build_cues(M)
     else:
         build_flat_fill(stair_mtl)

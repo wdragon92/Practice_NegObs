@@ -69,14 +69,37 @@ S06-B kerbless-by-design — VERIFIED, EV-C closed [W3 S17]
   **G3 is that photo**: its levee crown paving meets the planted slope with a flush edge
   and no raised 연석 anywhere along the promenade. The section here has no 차도 at all —
   「도로의 구조·시설 기준」 제16조's 연석 separates a **carriageway** from a footway, and
-  what this crest carries is a 자전거도로 (asphalt, x −4…0) and a 보도 (interlock,
-  x −7.5…−4.5) **separated by a 0.5 m planting strip**, both at the same +0.006 top. A
+  what this crest carries is a 자전거도로 (asphalt, x −7…−3 [GT-81]) and a 보도
+  (interlock, x −10.5…−7.5) **separated by a 0.5 m planting strip**, both at the same
+  +0.006 top, with a 3.0 m turf verge between the bike road and the crest. A
   보차도 경계석 would be a fabrication. `infra_kit.build_curb_line` is therefore **not**
   called here; the only kerb-like prims are the crest cope (a 마루 끝 cope, `PARAMS["cope"]`)
   and the ramp's river-side kerb, and neither is a 보차도 연석.
 
+[GT-81] The crown moved back and both routes were joined up (08-06 user verdict)
+  * *"The main road is right next to the slope — widen the distance and trim it
+    neatly."* It was literally true: the bike road's riverward edge and the 3.2 m
+    drop edge were the same line, x=0. The whole crown (walk · planting strip ·
+    bike road) is translated **−3.0 m** as a rigid body — widths, `proud`, `embed`
+    and the z ladder untouched — and `x −3.0 … 0.0` becomes a **turf verge** that
+    ends on the crest cope. The drop edge stays at x=0, so no GT row moves.
+  * The 08-06 audit added: *"ramp slab isolated in grass, not connected to top
+    levee road or bottom riverside road."* Four `spurs` close the four turf gaps
+    (5.10 m at the stair foot, 2.10 m at the ramp foot, 3.00 m at the stair head
+    once the road moved, 0.58 m at the ramp head), each ending edge-to-edge on a
+    built face, never in turf.
+  * The ramp embankment was truncated flat at s=0 — up to 1.37 m of vertical face
+    plus nine batter-strip ends. `ramp["head"]` gives every band a return nose at
+    the batter's own grade; all ten bands dive under the bank inside their own run
+    and clear the flight by 0.39 m [computed, smoke gate].
+  * The river-side kerb now ends with a 0.50 m dropped-kerb piece instead of a
+    0.146 m stub, the trench drain butts a catch basin at each end instead of
+    stopping 0.70 m short, and the footway wear lane runs the walk's full length
+    in the walk's own material instead of being a 12 m concrete island.
+
 Goal
-  (1) levee crest (sidewalk 3 + bike road 4 + 0.5 planting strip) + crest cope
+  (1) levee crest (sidewalk 3 + bike road 4 + 0.5 planting strip + 3.0 verge)
+      + crest cope
   (2) grass bank as a 7-segment polyline (shoulder rounding 25.7% -> 60% at the
       bottom, 50% average = 1:2), built as 2 Y bands that leave only the stair width
       (y +-1.5) open — segments overlap by margin so no gap can open
@@ -90,20 +113,30 @@ Goal
 
 Walking-continuity self-check table (both routes: levee path z=0 -> terrace z=−3.2)
   ┌ #  section               coord (x, y, z)            step / verdict
-  │ A0 levee bike road       (−1.50,  −6.00,  0.000)    flat
-  │ A1 crest shoulder (edge) ( 0.00,   0.00,  0.000)    ← **drop 3.20, no railing**
-  │ A2 stair step 1          ( 0.32,   0.00, −0.160)    0.160
-  │ A3 stair step 20         ( 6.40,   0.00, −3.200)    0.160 x 19
-  │ A4 terrace grass         ( 7.20,   0.00, −3.200)    flat (flush with stair foot)
-  │ A5 promenade             (13.00,   0.00, −3.200)    flat
-  ├ B0 levee crest           (−0.60,   4.10,  0.000)    flat
-  │ B1 ramp uphill start     ( 0.58,   3.85,  0.000)    0.149 threshold vs crest end
+  │ A0 bike road centre      (−5.00,  −6.00, +0.006)    flat  [GT-81 −2.00 -> −5.00]
+  │ A1 stair entry link      (−1.50,   0.00, +0.006)    flat  (LinkStairCrest 3.0 x 3.0,
+  │                                                      butts the road at x −3.0)
+  │ A2 crest shoulder (edge) ( 0.00,   0.00, +0.006)    ← **drop 3.20, no railing**
+  │ A3 stair step 1          ( 0.32,   0.00, −0.160)    0.166 (unchanged: the link
+  │                                                      restores the crown's +0.006 top)
+  │ A4 stair step 20         ( 6.40,   0.00, −3.200)    0.160 x 19
+  │ A5 stair foot link       ( 9.00,   0.00, −3.196)    0.004 up, flat  [GT-81 NEW —
+  │                                                      was 5.10 m of turf]
+  │ A6 promenade             (11.50,   0.00, −3.196)    flat, edge to edge with A5
+  ├ B0 bike road centre      (−5.00,   3.85, +0.006)    flat
+  │ B1 ramp entry link       (−1.00,   3.85, +0.006)    flat  (LinkRampCrest, butts the
+  │                                                      road at x −3.0)  [GT-81 NEW]
+  │ B2 ramp uphill start     ( 0.58,   3.85,  0.000)    0.006 threshold vs the link
   │                                                     ([v7] old apron prim removed —
-  │                                                      see PARAMS["ramp"]["apron"])
-  │ B2 ramp s=6.4            ( 3.39,   9.73, −0.800)    grade 12.5%
-  │ B3 ramp s=16             ( 5.79,  19.03, −2.000)    grade 12.5%
-  │ B4 ramp end s=25.6       ( 8.19,  28.32, −3.200)    grade 12.5% -> flush with terrace
-  └ B5 promenade merge       (13.00,  28.00, −3.200)    flat
+  │                                                      see PARAMS["ramp"]["apron"];
+  │                                                      the 0.149 turf notch it left is
+  │                                                      what B1 now paves)
+  │ B3 ramp s=6.4            ( 3.39,   9.73, −0.800)    grade 12.5%
+  │ B4 ramp s=16             ( 5.79,  19.03, −2.000)    grade 12.5%
+  │ B5 ramp end s=25.6       ( 8.19,  28.32, −3.200)    grade 12.5% -> flush with terrace
+  │ B6 ramp foot link        (10.00,  29.00, −3.196)    flat  [GT-81 NEW — was 2.10 m
+  │                                                      of turf]
+  └ B7 promenade             (11.50,  29.00, −3.196)    flat, edge to edge with B6
   * Both routes drop the same 3.20 — the basis of the contrast pair. Stairs 50% vs ramp
     12.5% (was 8%): the contrast is 4.0x instead of 6.25x, and it now fits one frame.
   * [W3 S17] Route B is a **walked surface**, so shortening it is a **GT FULL** change
@@ -173,11 +206,36 @@ PARAMS = dict(
     #    (`plan_ground(z=...)`); with two different tops half of them would be
     #    2 mm below the surface they belong to and read as buried.
     #  ★ `crown_line.x` -1.5 -> **-2.0** = centre of the widened bike road.
+    #
+    #  ═══ [GT-81] the whole crown moves 3.0 m LANDWARD — a real verge ═════════
+    #  User verdict 08-06: *"the main road is right next to the slope — widen the
+    #  distance and trim it neatly."* Measured, the complaint is exact: the bike
+    #  road's riverward edge was `x = 0.000`, i.e. **the carriageway edge and the
+    #  3.2 m drop edge were the same line** — zero verge, and the only thing
+    #  between asphalt and a 1:2 bank was the 0.25 m cope [measured].
+    #  Every crown band therefore translates by **dx = -3.0** and the freed strip
+    #  `x -3.0 .. 0.0` becomes `verge` — levee crest turf, no new prim (a band
+    #  prim at z=0 would be coplanar with `Levee`'s top and z-fight).
+    #    bike  x -7.0 .. -3.0  (4.0, asphalt)   <- 3.0 m back from the crest
+    #    green x -7.5 .. -7.0  (0.5, grass)
+    #    walk  x -10.5 .. -7.5 (3.0, interlock)
+    #    verge x -3.0 ..  0.0  (3.0, turf)      <- NEW, ends on the cope line
+    #  Widths, `proud`, `embed` and the z ladder are untouched: this is a rigid
+    #  translation, so the crown's own construction is unchanged and only its
+    #  offset from the hazard moves. The drop edge stays `x = 0` (GT frozen); what
+    #  changes is that the surface AT the edge is now turf, not asphalt, except at
+    #  the two entry spurs (see `spurs`) that carry the road to the stair and ramp
+    #  heads. Crest-edge z was already the cope's +0.050 wherever the cope runs,
+    #  so `hazard_registry` is unaffected [computed].
     levee=dict(x0=-24.0, x1=0.0, y0=-30.0, y1=48.0, z_top=0.0, thick=3.6),
-    crown_walk=dict(x0=-7.5, x1=-4.5, proud=0.006, embed=0.06),   # sidewalk (interlocking)
-    crown_green=dict(x0=-4.5, x1=-4.0, top=0.000, embed=0.10),    # 0.5 planting separation strip
-    crown_bike=dict(x0=-4.0, x1=0.0, proud=0.006, embed=0.06),    # bike road (asphalt)
-    crown_line=dict(x=-2.0, w=0.10, seg=2.4, gap=2.0, z=0.008),   # bike road centre dashed line
+    crown_walk=dict(x0=-10.5, x1=-7.5, proud=0.006, embed=0.06),  # sidewalk (interlocking)
+    crown_green=dict(x0=-7.5, x1=-7.0, top=0.000, embed=0.10),    # 0.5 planting separation strip
+    crown_bike=dict(x0=-7.0, x1=-3.0, proud=0.006, embed=0.06),   # bike road (asphalt)
+    crown_line=dict(x=-5.0, w=0.10, seg=2.4, gap=2.0, z=0.008),   # bike road centre dashed line
+    # [GT-81] The verge is a datum, not a prim — the `Levee` crest turf already
+    #   occupies x -24..0 at z=0. Recorded here so the spur builders and the smoke
+    #   gate read one number instead of re-deriving `crown_bike["x1"]`.
+    verge=dict(x0=-3.0, x1=0.0),
 
     # ═══ [W2-D ground_kit] P13 levee_paved — spec §5.9 scene17 row ═══════════
     #  (3) construction joints 3 m + patches · (4) interlock joints incised 2 mm (profile default) ·
@@ -187,12 +245,22 @@ PARAMS = dict(
     #    i.e. **across** the crown. Here the road runs along **Y** (the levee),
     #    so a y=const gutter would be perpendicular to the road it drains.
     #    The same drainage function is carried by a **linear trench drain at
-    #    x = -4.15** (the bike road's landward edge, against the planting
+    #    x = -7.15** (the bike road's landward edge, against the planting
     #    strip) which the kit can orient correctly. `gutter_L` is set to 0.
-    #    GT-E2 check: the trench sits 4.15 m in front of the crest, so at d5 it
-    #    is at X=0.85 and at d10 at X=5.85 — both **outside** the E band
-    #    [0.7d, 2.2d], i.e. it is never judged as a near-edge transverse line
-    #    [computed].
+    #    GT-E2 check, re-run after the [GT-81] crown translation: the trench sits
+    #    7.15 m in front of the crest, so at d2 it is at X=-5.15 and at d5 at
+    #    X=-2.15 (both **behind** the eye) and at d10 at X=2.85 against the E band
+    #    [7.0, 22.0] — **outside at every station**, i.e. it is never judged as a
+    #    near-edge transverse line. The translation moves it further from the edge
+    #    than the -4.15 it was cleared at, so the margin only grows [computed].
+    #  ═══ [GT-81] the linear run now **terminates into a chamber at each end** ══
+    #    The trench used to run y -4.80..+4.80 with the two gullies parked at
+    #    y = ±5.50, i.e. a 9.6 m grating that **stopped in mid-pavement 0.70 m
+    #    short of the thing it drains into** — the review cut's "fragment". The
+    #    gully AABBs are y ∓5.70..∓5.30 [measured, `plan_ground` dry run], so the
+    #    run is extended to y -5.30..+5.30 and now **butts the catch basin at both
+    #    ends**: gully - trench - gully reads as one drainage set instead of three
+    #    unrelated slabs. Length 9.60 -> 10.60 m; prim count unchanged (2).
     #  * (5) "block settlement +-3 mm (2x2 units)" is **not** placed here: it is a per-unit
     #    perturbation of the paving cell, which §4.4 assigns to T1 (MDL unit
     #    jitter). The kit's job is the ledger — unit_cell 0.200 / origin (0,0)
@@ -204,12 +272,14 @@ PARAMS = dict(
     #  coordinate list is **deleted** and replaced by the service line it should always
     #  have come from. `utility` below is that line; `build_ground_kit` runs the
     #  derivation live and the smoke prints it, so the count is a **result**, not a claim.
-    #  Measured: Ø450 storm main under the trench drain at x = −4.15, the whole modelled
-    #  levee y −30…48 (78.0 m). KDS 61 40 00 max straight-run interval for Ø ≤ 600 is
-    #  **75 m**, so the run yields **2** chambers — `head` at (−4.15, −30.00) and one
-    #  `interval` at (−4.15, +9.00) — and **both are outside the ground plan region**
-    #  (x −7.5…0, y −6…6). Manholes inside the plan: **0**. That is the whole of FIX-5.
-    #  The gullies at (−4.15, ±5.50) are **not** declared as `junctions`: a 우수받이
+    #  Measured: Ø450 storm main under the trench drain at x = −7.15 ([GT-81]: it follows
+    #  the trench, which followed the crown), the whole modelled levee y −30…48 (78.0 m).
+    #  KDS 61 40 00 max straight-run interval for Ø ≤ 600 is **75 m**, so the run yields
+    #  **2** chambers — `head` at (−7.15, −30.00) and one `interval` at (−7.15, +9.00) —
+    #  and **both are outside the ground plan region** (x −10.5…−3.0, y −6…6). Manholes
+    #  inside the plan: **0**, unchanged by the translation (the derivation never saw a
+    #  camera and does not see the crown offset either). That is the whole of FIX-5.
+    #  The gullies at (−7.15, ±5.50) are **not** declared as `junctions`: a 우수받이
     #  reaches the main through a 연결관, and treating each as a chamber trigger would
     #  put two manholes back into the near window by the back door.
     #
@@ -220,18 +290,30 @@ PARAMS = dict(
     #  Kept as a comment rather than a live list because the user's ban on decorative
     #  ground rectangles makes a dormant list of four rectangles read as intent.
     #    was: patches=[(-1.15,-0.55), (-5.60,2.20), (-3.10,-3.40), (-6.40,-1.10)]
+    #  ═══ [GT-81] the wear lane runs the WHOLE walk, not a 12 m island ════════
+    #    `build_wear_lane` is a decal strip along a centreline and it is **not**
+    #    clipped to `region` (checked: `plan_ground` accepts the full-length
+    #    centreline and still passes B6-B12 [measured, dry run]). It used to be
+    #    given y -6..+6, so a 0.90 x 12.0 m band began and ended in the middle of
+    #    a 78 m footway — which is what reads as a slab dropped on the paving.
+    #    It now spans the walk's own extent (levee y -30..48), so it terminates
+    #    where the walk terminates and nowhere else. 1 prim either way.
     gkit=dict(
-        region=(-7.5, -6.0, 0.0, 6.0),        # crown hard surface only
-        gullies=[(-4.15, -5.50), (-4.15, 5.50)],
-        trench=(-4.15, -4.80, 4.80),          # bike/green boundary drain
-        wear_lane=((-6.00, -6.0), (-6.00, 6.0)),   # sidewalk wear axis (runs in Y)
+        region=(-10.5, -6.0, -3.0, 6.0),      # crown hard surface only (translated -3.0)
+        gullies=[(-7.15, -5.50), (-7.15, 5.50)],
+        trench=(-7.15, -5.30, 5.30),          # bike/green boundary drain, gully to gully
+        wear_lane=((-9.00, -30.0), (-9.00, 48.0)),   # sidewalk wear axis (runs in Y, full walk)
     ),
     #  The declared storm main (G-4's `PARAMS["utility"]` shape). Laid where a real one
     #  runs: under the footway/bikeway boundary, parallel to the levee, toward the low end.
-    utility=dict(line=[(-4.15, -30.0), (-4.15, 48.0)], d_mm=450.0, kind="storm"),
-    # Crest-end kerb — open at the stair gap (y +-1.5) and the ramp entry apron (y 2.6..4.4)
+    utility=dict(line=[(-7.15, -30.0), (-7.15, 48.0)], d_mm=450.0, kind="storm"),
+    # Crest-end cope — open exactly where an entry spur crosses it, nowhere else.
+    #   [GT-81] the ramp gap moves 2.60..4.40 -> **3.15..4.55** so it is the ramp
+    #   spur's own y-extent: the cope now ends flush against the spur edge on both
+    #   sides instead of leaving a 0.55 m stub of turf between kerb and paving.
+    #   The stair gap (±1.5) already equalled the stair width and is unchanged.
     cope=dict(x0=-0.20, x1=0.05, h=0.05,
-              y_segs=((-30.0, -1.5), (1.5, 2.6), (4.4, 48.0))),
+              y_segs=((-30.0, -1.5), (1.5, 3.15), (4.55, 48.0))),
     # --- Grass bank: 7-segment polyline (rounded shoulder -> straight below, 50% average) ---
     #     Check rule: each segment end must sit **above** the stair chord (z = −0.5x)
     #     or the stairs get buried in the bank (auto-checked in the smoke run).
@@ -301,16 +383,84 @@ PARAMS = dict(
     #       30.0 m would be 10.67 % — a gradient no Korean standard names at all, i.e. an
     #       invented number, which this repo does not ship (RF-5's "not an invented yellow").
     #       Both are under the 30 m rest-landing threshold, so neither owes a landing.
+    #     ═══ [GT-81] the head was a RAW CUT — `head` closes it ═══════════════
+    #       Reading `pt_noon_levee_walk` and `pt_noon_ramp_run` (260731_w3_full):
+    #       the embankment is truncated flat at s=0, so the whole transverse
+    #       profile — deck 0.35, `Fill` down to −2.35, and the nine `Batter`
+    #       steps — presents a vertical face standing over the bank. Measured at
+    #       s=0 with `slope_z`: 0.15 m of exposure at the uphill corner (e 0.6)
+    #       rising to **1.369 m** at the deck's river corner (e 3.1), and each
+    #       batter step showing 0.66…1.07 m of its own end. That is the grey slab
+    #       with a vertical left face, and the nine strips beside it that read as
+    #       a picket comb.
+    #       A fill embankment is never cut off; it **returns into the slope**. So
+    #       every longitudinal band gets a mirror-image nose that starts at that
+    #       band's own top and falls upstream at the batter's own grade
+    #       (dz/w = 0.140/0.1667 = 1:1.19), until it dives under the bank surface.
+    #       `run0` is the fill band's nose length and each batter band k gets
+    #       `run0 - run_step*(k+1)` — the outer bands sit lower and need less, so
+    #       the nose fans in plan instead of ending on one straight line.
+    #       Closure, worst point of each band [computed, `slope_z` vs nose top]:
+    #         fill (e 3.20) buried at t 1.15 < run 1.35 · batter k0 (e 3.37) at
+    #         t 1.10 < 1.29 · k4 (e 4.03) at t 1.00 < 1.05 · k8 (e 4.70) at
+    #         t 0.75 < 0.81 — every band closes inside its own run.
+    #       Stair clearance is the binding constraint, not the closure: the nose
+    #       runs upstream, i.e. toward the flight. Its most −Y corner is
+    #       y = 1.89 (fill band) against the stair's y1 = 1.50, a **0.39 m**
+    #       clear gap [computed]; that is why the runs are sized down to the
+    #       minimum that still buries, and why they are not simply set equal.
+    #     [GT-81] `curb_end` — the river-side kerb used to stop dead 0.146 m proud
+    #       of the terrace at s=L. The last 0.50 m is now a dropped-kerb ramp to
+    #       the foot apron's top, so the run ends at zero height like a real kerb
+    #       does. The hazardous stretch (worst face 1.500 at s≈8…13.6) is nowhere
+    #       near it, so the below-code declaration (1) is untouched [computed].
     ramp=dict(p0=(0.0, 4.0), length=25.6, width=2.5, e_up=0.60,
               deck_t=0.35, fill_t=2.0, fill_out=0.10,
-              curb_w=0.15, curb_h=0.15,
+              curb_w=0.15, curb_h=0.15, curb_end=0.50,
               batter=dict(n=9, w=0.1667, dz=0.14, margin=0.30),
+              head=dict(run0=1.35, run_step=0.06, margin=0.10),
               apron=dict(build=False, x0=-1.60, x1=0.05, y0=0.60, y1=5.40,
                          t=0.35, drop=0.015)),
     # --- Terrace (riverside flat) : grass + promenade (width 3, parallel to the river) ---
     terrace=dict(x0=6.4, x1=27.5, y0=-30.0, y1=48.0, z_top=_TERRACE_Z,
                  thick=1.0),
     promenade=dict(x0=11.5, x1=14.5, proud=0.004, line_w=0.10, line_in=0.18),
+    # ═══ [GT-81] `spurs` — the four links that stop both routes ending in turf ══
+    #   The 08-06 audit: *"ramp slab isolated in grass, not connected to top levee
+    #   road or bottom riverside road."* Measured before the fix, both routes were
+    #   islands at **both** ends:
+    #     · stair head  — the bike road reached x=0, so the head was fed only
+    #       because the carriageway itself ran to the drop edge. Moving the crown
+    #       3.0 m back (see `crown_*`) would have left a 3.0 m turf gap, so the
+    #       spur is not decoration, it is what makes the widened verge legal.
+    #     · ramp head   — the deck's uphill corner is (0.581, 3.850) and the crest
+    #       ends at x=0: a 0.58 m turf notch, 0.152 m deep [computed].
+    #     · stair foot  — flight ends x=6.40 z=−3.200; promenade starts x=11.50.
+    #       **5.10 m of turf** between the last tread and the riverside path.
+    #     · ramp foot   — deck foot edge (6.981, 28.636)…(9.402, 28.011) z=−3.200;
+    #       same promenade edge. **2.10 m** of turf at the near corner.
+    #   Each link is one slab, `proud` above the plate it lies on so nothing is
+    #   coplanar (crest links +0.006 = the crown's own top plane; terrace links
+    #   +0.004 = the promenade's), and each **ends on a built edge**, never in
+    #   turf: crest links butt the bike road at x=-3.0, terrace links butt the
+    #   promenade at x=11.5 exactly (edge to edge, no overlap, no z-fight).
+    #   The ramp links are deliberately allowed to run a few cm past the deck's
+    #   diagonal edge — the deck's plan boundary is at 75.52°, a box cannot follow
+    #   it, and the residual is a 6 mm lip at worst (crest, where the deck top is
+    #   z=0) or a clean intersection line (foot, where the 12.5 % deck simply
+    #   emerges through the level apron). Both beat leaving a wedge of turf.
+    #   None of these is a hazard surface: every one is flat, at the level of the
+    #   plate it joins, and outside the GT drop registry [computed].
+    spurs=dict(
+        stair_crest=dict(x0=-3.00, x1=0.00, y0=-1.50, y1=1.50,
+                         proud=0.006, embed=0.30),
+        ramp_crest=dict(x0=-3.00, x1=0.70, y0=3.15, y1=4.55,
+                        proud=0.006, embed=0.55),
+        stair_foot=dict(x0=6.35, x1=11.50, y0=-1.50, y1=1.50,
+                        proud=0.004, embed=0.26),
+        ramp_foot=dict(x0=6.90, x1=11.50, y0=27.90, y1=30.40,
+                       proud=0.004, embed=0.26),
+    ),
     # --- Riprap revetment + water + far bank ---
     bank=dict(x0=27.5, run=2.0, drop=0.45, thick=1.2, margin=0.2),
     water=dict(x0=28.6, x1=72.0, y0=-42.0, y1=60.0, z=-3.42),
@@ -373,10 +523,17 @@ PARAMS = dict(
     # [W2-D §5.9 ②] x -6.4 -> -7.9. The re-cut crown moved the walk to
     #   x -7.5..-4.5, so -6.4 would put a lighting pole in the middle of
     #   the footway. -7.9 is 0.4 m landward of the walk edge.
-    crown_lights=[(-7.9, -12.0), (-7.9, 9.5), (-7.9, 31.0)],
+    # [GT-81] -7.9 -> -10.9: the crown translated -3.0, so the same
+    #   "0.4 m landward of the walk edge (now -10.5)" rule gives -10.9.
+    #   The arm still reaches +1.0 m riverward, i.e. to x -9.9, inside the
+    #   walk's landward half — lighting geometry unchanged.
+    crown_lights=[(-10.9, -12.0), (-10.9, 9.5), (-10.9, 31.0)],
     streetlight=dict(pole_h=4.6, pole_r=0.075, arm_len=1.0, arm_r=0.045,
                      head=0.25),
-    crown_trees=[(-11.2, -8.4), (-14.6, 12.7), (-9.8, 33.2), (-17.1, -19.6)],
+    # [GT-81] all four translated -3.0 with the crown. Without it the -9.8 tree
+    #   would stand in the middle of the relocated footway (x -10.5..-7.5).
+    #   Landward-most is now -20.1, still 3.9 m inside the levee body (x0 -24.0).
+    crown_trees=[(-14.2, -8.4), (-17.6, 12.7), (-12.8, 33.2), (-20.1, -19.6)],
     km_sign=dict(x=14.9, y=-4.6, pole_r=0.05, pole_h=2.2,
                  panel=(0.06, 0.7, 0.42), panel_z=1.95),
 
@@ -405,6 +562,14 @@ PARAMS = dict(
         #   pulled down to the lowest channel (B), giving sRGB (80,79,78) ~ neutral grey concrete.
         conc_tint=(0.53, 0.66, 1.00),
         paving_tint=(0.84, 0.83, 0.81),
+        # [GT-81] Trodden interlock. `ground_kit.build_wear_lane` declares
+        #   albedo 0.22 and the scene bound it to `conc`, so a 0.90 m band of a
+        #   **different material** was laid on the footway — the "slab" of the
+        #   review cut. A wear lane is the same paving, walked dull: same
+        #   texture, same scale, tint pulled to 0.74x of `paving_tint`, which is
+        #   the ratio between the kit's declared 0.22 and the interlock's
+        #   nominal 0.30 [derived].
+        paving_worn_tint=(0.62, 0.61, 0.60),
         rock_tint=(0.72, 0.71, 0.68),
         asphalt_color=(0.145, 0.145, 0.155), asphalt_rough=0.86,
         # [W2-D §5.9 ①] tint for the textured asphalt — keeps the old
@@ -805,6 +970,104 @@ def _smoke_report():
           f"y ≥ {y_toe_min:.2f} > 계단 y1 {st['y1']:.1f} → "
           f"{'OK (계단 무간섭)' if y_toe_min > st['y1'] else 'FAIL'}")
 
+    # ── [GT-81] head return (nose) closure + stair clearance ──
+    hd = rp["head"]
+    bt2 = rp["batter"]
+    k_ret = float(bt2["dz"]) / float(bt2["w"])
+    e_fill_hi = g["e_dn"] + rp["fill_out"]
+    noses = [("fill  ", float(hd["run0"]), -rp["deck_t"], e_fill_hi)]
+    for k in range(int(bt2["n"])):
+        noses.append((f"batt{k}", float(hd["run0"]) - float(hd["run_step"]) * (k + 1),
+                      -rp["deck_t"] - bt2["dz"] * (k + 1),
+                      e_fill_hi + bt2["w"] * (k + 1)))
+    print(f"  [GT-81 램프 두부 리턴] {len(noses)}밴드 × 구배 1:{1.0 / k_ret:.2f} "
+          f"(배터와 동일) · 기준 런 {hd['run0']:.2f} − {hd['run_step']:.2f}/밴드")
+    ok_nose, y_min_nose = True, 99.0
+    for tag, run_j, z0_j, e_hi in noses:
+        t_close = None
+        for i in range(1, 201):
+            t = run_j * i / 200.0
+            xw = g["n"][0] * e_hi - g["d"][0] * t
+            gz = slope_z(xw) if xw <= tot_run else te["z_top"]
+            if z0_j - k_ret * t <= gz + 1e-9:
+                t_close = t
+                break
+        y_corner = rp["p0"][1] + g["n"][1] * e_hi - g["d"][1] * run_j
+        y_min_nose = min(y_min_nose, y_corner)
+        ok = t_close is not None
+        ok_nose &= ok
+        face0 = z0_j - (slope_z(g["n"][0] * e_hi) if g["n"][0] * e_hi <= tot_run
+                        else te["z_top"])
+        print(f"    {tag} e{e_hi:5.2f} 절단면 {max(0.0, face0):5.3f} m → 런 "
+              f"{run_j:.2f} · 매몰 t "
+              f"{('%.2f' % t_close) if ok else ' 미매몰'} · 끝단 y {y_corner:6.2f}")
+    print(f"    전 밴드 자기 런 안에서 지반에 매몰 → "
+          f"{'OK (수직 절단면 소멸)' if ok_nose else 'FAIL'}")
+    print(f"    두부 최소 y {y_min_nose:.2f} > 계단 y1 {st['y1']:.2f} → "
+          f"{'OK (계단 무간섭, 여유 %.2f m)' % (y_min_nose - st['y1']) if y_min_nose > st['y1'] else 'FAIL'}")
+
+    # ── [GT-81] crown offset — the road is no longer on the drop edge ──
+    vg = PARAMS["verge"]
+    cb, cw, cg = PARAMS["crown_bike"], PARAMS["crown_walk"], PARAMS["crown_green"]
+    print("  [GT-81 마루 단면 후퇴] 도로↔사면 이격")
+    print(f"    보도 [{cw['x0']:6.2f},{cw['x1']:6.2f}] · 식수대 "
+          f"[{cg['x0']:6.2f},{cg['x1']:6.2f}] · 자전거도로 "
+          f"[{cb['x0']:6.2f},{cb['x1']:6.2f}] · 녹지 verge "
+          f"[{vg['x0']:6.2f},{vg['x1']:6.2f}]")
+    print(f"    자전거도로 강측 끝 {cb['x1']:+.2f} → 낙차 시단 {st['x0']:+.2f} "
+          f"이격 {st['x0'] - cb['x1']:.2f} m (구 0.00) → "
+          f"{'OK' if st['x0'] - cb['x1'] >= 2.5 else 'FAIL'}")
+    print(f"    폭 보존: 자전거 {cb['x1'] - cb['x0']:.2f} · 보도 "
+          f"{cw['x1'] - cw['x0']:.2f} · 분리대 {cg['x1'] - cg['x0']:.2f} → "
+          f"{'OK (강체 평행이동)' if abs((cb['x1'] - cb['x0']) - 4.0) < 1e-9 and abs((cw['x1'] - cw['x0']) - 3.0) < 1e-9 else 'FAIL'}")
+    print(f"    낙차 시단 불변 x {st['x0']:.2f} · 사면 시단 불변 → "
+          f"{'OK' if abs(st['x0']) < 1e-9 else 'FAIL'}")
+
+    # ── [GT-81] links — no run may end in turf, no slab may float ──
+    sp = PARAMS["spurs"]
+    pm = PARAMS["promenade"]
+    print("  [GT-81 접속 슬래브] 양 끝이 축조면에 닿는가 · 부유 없는가")
+    _lk = (("stair_crest", 0.0, cb["x1"], st["x0"], "자전거도로", "계단 시단"),
+           ("ramp_crest", 0.0, cb["x1"], None, "자전거도로", "램프 상류변"),
+           ("stair_foot", te["z_top"], None, pm["x0"], "계단 하단", "산책로"),
+           ("ramp_foot", te["z_top"], None, pm["x0"], "램프 노면", "산책로"))
+    ok_link = True
+    for key, base, x_in, x_out, nm_in, nm_out in _lk:
+        b = sp[key]
+        z_hi, z_lo = base + b["proud"], base - b["embed"]
+        d_in = None if x_in is None else b["x0"] - x_in
+        d_out = None if x_out is None else b["x1"] - x_out
+        # underside vs ground at the riverward end (crest links overhang the shoulder)
+        gz_end = (slope_z(b["x1"]) if base == 0.0 and b["x1"] > 0.0
+                  else (te["z_top"] if base != 0.0 else 0.0))
+        floats = z_lo > gz_end + 1e-9
+        ok_link &= (d_in is None or abs(d_in) < 1e-9) and \
+                   (d_out is None or abs(d_out) < 1e-9) and not floats
+        print(f"    {key:12s} x [{b['x0']:6.2f},{b['x1']:6.2f}] y "
+              f"[{b['y0']:6.2f},{b['y1']:6.2f}] 상면 {z_hi:+.3f} 하면 {z_lo:+.3f}")
+        print(f"      {nm_in} 접합 "
+              f"{'—' if d_in is None else '%+.3f m' % d_in} · {nm_out} 접합 "
+              f"{'—' if d_out is None else '%+.3f m' % d_out} · 강측 끝 지반 "
+              f"{gz_end:+.3f} → {'부유 FAIL' if floats else '착지 OK'}")
+    # the two turf gaps the links close, restated as the numbers they were
+    print(f"    구 잔디 공백: 계단 하단 {pm['x0'] - (st['x0'] + srun):.2f} m · "
+          f"램프 하단 {pm['x0'] - (g['d'][0] * g['length'] + g['n'][0] * g['e_dn']):.2f} m · "
+          f"램프 상단 {g['n'][0] * g['e_up']:.2f} m → 전부 0")
+    print(f"    램프 상류변 x (y {sp['ramp_crest']['y0']:.2f}→"
+          f"{sp['ramp_crest']['y1']:.2f}) = "
+          f"{g['n'][0] * g['e_up']:.3f}→"
+          f"{g['n'][0] * g['e_up'] + g['d'][0] * (sp['ramp_crest']['y1'] - (rp['p0'][1] + g['n'][1] * g['e_up'])) / g['d'][1]:.3f}"
+          f" vs 슬래브 끝 {sp['ramp_crest']['x1']:.2f} → 사선 잔차 ≤ 0.07 m")
+    print(f"    접속 슬래브 종합 → {'OK' if ok_link else 'FAIL'}")
+
+    # ── [GT-81] river-side kerb end ──
+    _ce = float(rp["curb_end"])
+    _z_ce = rp["curb_h"] - g["grade"] * (g["length"] - _ce)
+    _z_ap = te["z_top"] + sp["ramp_foot"]["proud"]
+    print(f"  [GT-81 연석 종단] 본체 {g['length'] - _ce:.2f} m + 낮춤 {_ce:.2f} m "
+          f"({_z_ce:+.3f} → {_z_ap:+.3f}, 낙차 {_z_ce - _z_ap:.3f}) → "
+          f"{'OK (0 높이로 종단)' if abs((_z_ce - _z_ap) - (g['grade'] * _ce + rp['curb_h'] - sp['ramp_foot']['proud'])) < 1e-6 else 'FAIL'}")
+
     # ── [v7 judgment (11)-1] entry apron footprint check (guards against the brown mass) ──
     #   The old apron sat inside rot_group(yaw), so local coordinates were mistaken for
     #   world and it reached world x +3.06 over the bank. The calculation is kept here.
@@ -1034,7 +1297,16 @@ BANNER = """\
                     콘크리트**인가(conc_tint 채널 등화).
  9. [v7] 배터·억새 — 강측 배터가 '계단 3단'이 아니라 연속 사면으로 읽히는가
                     (9단 × 0.14 m), 건너편 억새가 등간격 구슬열이 아니라
-                    3열 엇갈림 군락으로 읽히는가"""
+                    3열 엇갈림 군락으로 읽히는가
+10. [GT-81] 이격 — levee_walk 에서 **도로 / 3.0 m 잔디 verge / 마루 코프 / 사면**
+                    이 네 켜로 읽히는가(도로가 낙차선에 붙어 있지 않은가)
+11. [GT-81] 접속 — pair_compare·ramp_run 에서 램프·계단이 **잔디에서 끝나지 않는가**:
+                    상단은 자전거도로까지, 하단은 산책로 x11.5 까지 포장이 이어지는가
+12. [GT-81] 두부 — levee_walk 우측 램프 시단의 **평평한 상면 + 수직 절단면 + 빗살
+                    무늬 배터 끝**이 사라지고 잔디 코가 사면으로 잠기는가
+13. [GT-81] 마감 — 강측 연석이 산책로 앞에서 0 높이로 낮아지는가, 트렌치가 양 끝
+                    우수받이에 물리는가(흰 금속 띠가 아니라 어두운 주철인가),
+                    보도 마모대가 보도 재질로 전 구간 연속인가"""
 
 
 def main():
@@ -1090,6 +1362,13 @@ def main():
             sc.tex_path("paving_interlock", "nor"),
             sc.tex_path("paving_interlock", "rough"),
             sca["paving_interlock"], tint=mp["paving_tint"])
+        # [GT-81] same texture and tile size as `paving`, tint only — so the wear
+        #   lane reads as trodden footway, not as a slab of another material.
+        M["paving_worn"] = PBR(
+            f"{ROOT}/Looks/PavingWorn", sc.tex_path("paving_interlock", "diff"),
+            sc.tex_path("paving_interlock", "nor"),
+            sc.tex_path("paving_interlock", "rough"),
+            sca["paving_interlock"], tint=mp["paving_worn_tint"])
         # [W2 fix batch F4, iteration 1] The turf materials are renamed into the
         #   **soil** look class. `LOOK_CLASS["veg"]` is `mdl="omni"`, so every grass
         #   plane took the plain OmniPBR branch and none of the MDL de-tiling ran:
@@ -1279,8 +1558,14 @@ def main():
         M2.update(joint=M["conc"], crack=M["conc"], patch=M["asphalt"],
                   patch_cut=M["conc"], manhole=M["gk_iron"], gully=M["gk_iron"],
                   gutter=M["conc"], gutter_cover=M["conc"],
-                  trench=M["rail"], trench_frame=M["rail"],
-                  marking=M["paint"], weed=M["grass_b"], wear=M["conc"],
+                  # [GT-81] the trench was the brightest prim on the crown. Its
+                  #   elements declare albedo 0.10 (frame) / 0.09 (cover), but the
+                  #   scene bound them to `rail` — a 0.66 stainless constant — so a
+                  #   grating that should read as dark cast iron rendered as a white
+                  #   strip lying on the asphalt. Same defect and same fix as the
+                  #   W2-F5 manhole/gully covers, which already use `gk_iron` (0.10).
+                  trench=M["gk_iron"], trench_frame=M["gk_iron"],
+                  marking=M["paint"], weed=M["grass_b"], wear=M["paving_worn"],
                   stain_dirt=M["conc"], stain_water=M["conc"])
         res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,
                               skin_exclude=sc.skin_exclude,
@@ -1352,13 +1637,46 @@ def main():
                            y_hi - bt["w"], y_hi, rp["fill_t"],
                            M["grass_b"],
                            margin=bt["margin"], collider=True)
+        # (1)-c [GT-81] head return — the mirror of the batter, run upstream.
+        #   Local +X of `grp_h` is −d (upstream) and local +Y is +n (riverward),
+        #   so one `build_slope` per longitudinal band gives that band a nose that
+        #   starts at its own top and falls at the batter's grade until the bank
+        #   surface swallows it. Without this the embankment is truncated flat at
+        #   s=0 and shows 0.15…1.37 m of vertical face plus nine strip ends.
+        hd = rp["head"]
+        k_ret = float(bt["dz"]) / float(bt["w"])       # 1:1.19, the batter's own grade
+        grp_h = sc.build_rot_group(stage, f"{ROOT}/RampHead", (px, py),
+                                   g["yaw"] + 180.0)
+        e_fill_hi = g["e_dn"] + rp["fill_out"]
+        _noses = [(float(hd["run0"]), -rp["deck_t"],
+                   py + g["e_up"], py + e_fill_hi)]
+        for k in range(int(bt["n"])):
+            _noses.append((float(hd["run0"]) - float(hd["run_step"]) * (k + 1),
+                           -rp["deck_t"] - bt["dz"] * (k + 1),
+                           py + e_fill_hi + bt["w"] * k,
+                           py + e_fill_hi + bt["w"] * (k + 1)))
+        for j, (run_j, z0_j, ya, yb) in enumerate(_noses):
+            sc.build_slope(stage, f"{grp_h}/Nose_{j}", px, z0_j, run_j,
+                           k_ret * run_j, ya, yb, rp["fill_t"], M["grass_b"],
+                           margin=float(hd["margin"]), collider=True)
         # (2) deck (concrete paving)
         sc.build_slope(stage, f"{grp}/Deck", px, 0.0, L, drop, y_dn, y_up,
                        rp["deck_t"], ramp_mtl, margin=0.0, collider=True)
         # (3) river-side kerb (h0.15) — no railing (a below-code reality)
-        sc.build_slope(stage, f"{grp}/Curb", px, rp["curb_h"], L, drop,
+        #   [GT-81] the run stops `curb_end` short and a dropped-kerb piece takes
+        #   the last stretch down to the foot apron's top, so the kerb ends at
+        #   zero height on paving instead of as a 0.146 m stub.
+        _ce = float(rp["curb_end"])
+        _z_ce = rp["curb_h"] - g["grade"] * (L - _ce)          # kerb top where the drop starts
+        _z_apron = _TERRACE_Z + PARAMS["spurs"]["ramp_foot"]["proud"]
+        sc.build_slope(stage, f"{grp}/Curb", px, rp["curb_h"], L - _ce,
+                       drop * (L - _ce) / L,
                        y_dn, y_dn + rp["curb_w"], rp["curb_h"] + 0.35,
                        M["conc"], margin=0.0, collider=True)
+        sc.build_slope(stage, f"{grp}/CurbEnd", px + (L - _ce), _z_ce, _ce,
+                       _z_ce - _z_apron, y_dn, y_dn + rp["curb_w"],
+                       rp["curb_h"] + 0.35, M["conc"], margin=0.05,
+                       collider=True)
         # (4) entry apron — [v7 judgment (11)-1] **build skipped** (reason in the note below).
         if PARAMS["ramp"]["apron"]["build"]:
             ap = PARAMS["ramp"]["apron"]
@@ -1407,6 +1725,31 @@ def main():
         sc.build_slope(stage, f"{ROOT}/Bank", bk["x0"], te["z_top"], bk["run"],
                        bk["drop"], te["y0"], te["y1"], bk["thick"], M["rock"],
                        margin=bk["margin"], collider=True)
+
+    # -------------------------------------------------------------------
+    # [GT-81] Links — crest road -> both heads, both feet -> riverside promenade
+    #   Four slabs, no cleverness: each is a box whose top sits on the z ladder of
+    #   the plate it joins (crest +0.006 = the crown plane, terrace +0.004 = the
+    #   promenade plane) so nothing is coplanar with the turf underneath it, and
+    #   each terminates on a built edge — x=-3.0 is the bike road's riverward
+    #   face, x=11.5 is the promenade's landward face, both met edge to edge.
+    #   `embed` is sized so the underside stays below the falling ground at the
+    #   riverward end (crest links overhang the bank shoulder by up to 0.70 m,
+    #   where the bank has already dropped 0.18 m), i.e. no slab floats.
+    # -------------------------------------------------------------------
+    def build_links(M, hard_mtl):
+        sp = PARAMS["spurs"]
+        for key, base in (("stair_crest", 0.0), ("ramp_crest", 0.0),
+                          ("stair_foot", _TERRACE_Z), ("ramp_foot", _TERRACE_Z)):
+            b = sp[key]
+            z_hi = base + b["proud"]
+            z_lo = base - b["embed"]
+            name = "".join(p.capitalize() for p in key.split("_"))
+            BOX(f"{ROOT}/Link{name}",
+                ((b["x0"] + b["x1"]) / 2.0, (b["y0"] + b["y1"]) / 2.0,
+                 (z_hi + z_lo) / 2.0),
+                (b["x1"] - b["x0"], b["y1"] - b["y0"], z_hi - z_lo),
+                hard_mtl, col=True)
 
     # -------------------------------------------------------------------
     # River + far bank (broad water kept — no meander)
@@ -1579,6 +1922,7 @@ def main():
         build_stairs(M, hard_mtl)
         build_ramp(M, hard_mtl)
         build_terrace(M)
+        build_links(M, hard_mtl)    # [GT-81] after the terrace: the foot links lie on it
         build_cues(M)
     else:
         build_flat_fill(M)

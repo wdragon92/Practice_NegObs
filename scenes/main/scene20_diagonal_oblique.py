@@ -25,6 +25,21 @@ Target image (W3, Lane 3 row 3.3): **G1** primary
           (`w3_intake_v2_images.md` §7 ruling 8: an imageless scene inherits its nearest
           image's season). G8 supplies the paving-band vocabulary.
 
+═══ [GT-87] 08-06 gallery answer — the flight gets a side wall ══════════════════
+User ruling: *"계단 양옆에 난간이나 뭔가 있어야 하지 않나..? 벽이라도.. 너무 위험해 보여"*.
+The tube guard this scene shipped (`stair_rail`, `StairRail_N/_S`) is replaced by a **masonry
+cheek wall on each side of the flight** (`build_stair_walls`, prim roots `StairWall_N/_S`,
+still gated by `cue_railing`). Two defects go with it, both visible in
+`look_check/scene20/260805_w3_hedgeswap`: a Ø60 tube 0.10 m inboard of the flight edge is the
+whole guard against a 2.10 m drop and reads as a floating fragment over the mesa lip; and the
+flight's own **side faces were raw** — 14 stepped end faces of `build_straight_stairs` meeting
+the valley grass with nothing capping them. The wall is built the way `scene14.build_parapets`
+builds one (body box + oblique top haunch + head newel + toe end cap), and — GT-78 having
+just removed the handrail from scene14's wall top — **nothing rides on this wall either**.
+**Stair geometry, drop, walked-surface z, the 30° drop-edge line and the GT registries are
+unchanged**; the wall is new solid beside the flight. OCCL: it is a new opaque occluder along
+the flight's two flanks (declared and measured in `plaza_selfcheck` gate (5)).
+
 Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
@@ -75,7 +90,7 @@ SEASON = "autumn"
 # ===========================================================================
 SCENE_CONFIG = {
     "hazard_stairs":      True,   # False -> remove stairs/lower plaza, whole scene flat at z=0
-    "cue_railing":        True,   # Sloped rails on both sides of the stair (inside rot_group - follows the diagonal)
+    "cue_railing":        True,   # [GT-87] Cheek WALLS on both sides of the stair (inside rot_group - follows the diagonal). False -> bare flight, the ablation arm is unchanged in kind
     "cue_tactile":        False,  # [v5.2 user] Tactile paving is rare in reality - OFF by default (ablation path kept)   # Top warning strip (inside rot_group - follows the diagonal)
     "cue_material_break": True,   # False -> unify stair/lower with the upper material (plaza_light)
     "cue_nosing":         False,  # (key reserved)
@@ -131,9 +146,50 @@ PARAMS = dict(
     # Lower grass base - fills the valley (no cavity). Fully solid under the rotated stair/plaza.
     valley=dict(size=100.0, z_top=-2.15, thick=1.0),
 
-    stair_rail=dict(y=2.4, x_start=-0.4, rail_h=0.9, post_r=0.02,
-                    rail_r=0.03, rail_mid_r=0.018, rail_mid_drop=0.45,
-                    spacing=1.3),
+    # === [GT-87] 난간벽 — the side guard the 08-06 gallery answer asks for ==============
+    #  What was here: `stair_rail` — a tube guard (rail Ø60 · mid Ø36 · posts Ø40) standing
+    #  at local |y| 2.40, i.e. 0.10 m INBOARD of the flight's own side face. Retired with its
+    #  call site, for the two reasons the round's cuts show:
+    #    (1) it was the only thing between the walker and a 2.10 m drop, and against light
+    #        granite a white tube line reads as a fragment floating over the mesa lip;
+    #    (2) it left the flight's **side faces raw** — `build_straight_stairs` emits boxes
+    #        y −2.5…2.5 down to base −2.6, so 14 stepped end faces met the valley grass.
+    #  A cheek wall answers both, and it is the construction the library already carries for
+    #  a civic flight (`scene14.build_parapets`): body + oblique haunch + newel + end cap.
+    #    `wall_h`   0.95 — wall top over the nosing line. The 08-05 wall band is 0.85~0.95 and
+    #                      scene14's parapet sits at the same 0.950, so the two grand-stair
+    #                      scenes guard at one height. With the coping the guard line is
+    #                      0.95 + 0.06 = **1.010 m** [computed]; the fall here is 2.10 m, i.e.
+    #                      past the 1.20 m at which 건축법 시행령 §40 makes a guard mandatory.
+    #    `lap`      0.06 — how far the wall's inner face laps ONTO the flight: |y| 2.44 against
+    #                      the flight's 2.50. A flush 2.50 face would be coplanar with the
+    #                      stair's own side face in a **different material** — the z-fighting
+    #                      this round's verdict names. With the lap the stepped side faces end
+    #                      up inside the wall solid. Clear walking width 5.00 → **4.88 m**
+    #                      [computed]; no stair prim moves and no drop edge moves.
+    #    `width`    0.36 — wall thickness, |y| 2.44…2.80. 350 mm masonry class.
+    #    `haunch_t` 2.10 — PERPENDICULAR thickness of the oblique top slab (`sc.build_slope`
+    #                      measures it that way). Vertical equivalent 2.10/cos 23.815° =
+    #                      **2.295 m**, which must exceed the flight's 2.10 m drop or the body
+    #                      box shows through the wall face — scene14's "bite" condition,
+    #                      re-derived here rather than copied. Bite at the head **0.095 m**
+    #                      [computed]. The slab's deepest vertex lands at z **−3.071**, inside
+    #                      the valley slab (bottom −3.150), so no solid pokes out of the
+    #                      ground plane at the toe.
+    #    `body_drop` 0.10 — body top = wall top at the toe (−1.150) − 0.10 = **−1.250**, so the
+    #                      body is buried under the haunch over the whole run.
+    #    `base_z`  −2.30 — foot of every wall solid, 0.15 m under the valley top (−2.15).
+    #                      Nothing terminates in air.
+    #    `cap_t`    0.06 · `cap_proud` 0.03 · `cap_bite` 0.04 — the coping: a band oversailing
+    #                      the wall 30 mm on each face and sunk 40 mm into it, so it reads as a
+    #                      capping with its own shadow line and is not a coplanar skin. Bound
+    #                      to `band_dark`, the plaza's own dark granite, which is what makes
+    #                      the guard a LINE at 20 m — the property the tube did not have.
+    #    `nose`     0.02 — coping projection past the newel end and the toe end face. A coping
+    #                      stopping flush with the end face reads as a saw cut.
+    stair_wall=dict(width=0.36, lap=0.06, wall_h=0.95, haunch_t=2.10,
+                    body_drop=0.10, base_z=-2.30,
+                    cap_t=0.06, cap_proud=0.03, cap_bite=0.04, nose=0.02),
     tactile=dict(ahead=0.3, depth=0.3, proud=0.004),
 
     # === [W2-D ground_kit] P1 plaza_granite - spec §5.1 scene20 row ========================
@@ -412,7 +468,7 @@ BANNER = """\
  1. oblique_overview / walk_axis_front — 30° 사교 계단·사선 낙차 경계 식별
  2. h0.3·d5~10                         — 사선 경계 위로 낙차 2.1m가 은닉되는가
  3. 정렬 대비                          — 건물은 축정렬, 계단만 30° 틀어진 대비
- 4. cue ON vs OFF                      — railing/tactile(사선 따라) 토글 시 기하 불변
+ 4. cue ON vs OFF                      — 측벽/tactile(사선 따라) 토글 시 계단 기하 불변
  5. 재질/공동                          — 하부 잔디 채움·경계 정합·Z파이팅 없는가
  6. [v4] 사선 쐐기 접합(첫 단차 전 폭 0.15)·축정렬 볼라드 열·건물 접지
  7. [v5] 공통 레이어 — 사선 점자띠 판독"""
@@ -483,9 +539,10 @@ def main():
             sc.tex_path("tactile", "nor"), None, sca["tactile"])
         M["glass"] = PBR(f"{ROOT}/Looks/Glass", diffuse_color=mp["glass_color"],
                          roughness_const=mp["glass_rough"], metallic=0.0)
-        M["rail"] = PBR(f"{ROOT}/Looks/Rail", diffuse_color=mp["rail_color"],
-                        metallic=mp["rail_metallic"],
-                        roughness_const=mp["rail_rough"])
+        # [GT-87] `Looks/Rail` is gone with the tube guard it was the only binding for.
+        #   `rail_color` / `rail_metallic` / `rail_rough` stay in PARAMS because the three
+        #   bollard bodies below are derived from them — the wall takes `Looks/Parapet`
+        #   (concrete) and `Looks/Band` (dark granite coping), both already in this scene.
         # [v5.1 §2/§4] Materials for the regulation bollards - 3 body variants (tint jitter +-5%) + reflective band.
         #   The band is small in area, so high luminance is allowed (unrelated to the no-large-pure-white-area rule).
         for _i, _f in enumerate((0.95, 1.0, 1.05)):
@@ -634,6 +691,97 @@ def main():
     # -------------------------------------------------------------------
     # Stair + lower plaza (rot_group 30 deg - boundary stays aligned) + diagonal cue
     # -------------------------------------------------------------------
+    def build_stair_walls(M, grp):
+        """[GT-87] The masonry cheek wall on each side of the 30° flight.
+
+        Authored in **rot_group local coordinates**, so the two walls follow the diagonal
+        exactly as the flight does — a world-space wall beside a rotated flight is the
+        defect this scene exists to avoid.
+
+        Four solids per side, which is `scene14.build_parapets`' construction and its
+        reasons, re-derived for this flight's numbers:
+          `Body`   an axis-aligned box over the whole run, top **−1.250** (the wall top at
+                   the toe, less 0.10). Its top face never shows: the haunch underside is
+                   at −1.345 at the head and sinks from there, so the box is bitten into
+                   the slab by ≥ **0.095 m** everywhere [computed].
+          `Haunch` ONE oblique slab (`sc.build_slope`, `margin=0`) whose TOP face is the
+                   nosing line + 0.950 from the drop edge to the last nosing. This is the
+                   line the eye reads, and it is straight — a per-step wall would be the
+                   stepped parapet the 08-05 answer already rejected in scene14.
+          `Newel`  a level head block on the mesa, plan length `lap` = haunch_t·sin(ang) +
+                   0.15 = **0.998 m**. `lap` is not a taste number: the perpendicular end
+                   face of an oblique slab retreats uphill by haunch_t·sin(ang) = 0.848 m,
+                   and without a block that long the wall would open a triangular cavity
+                   under its own head — scene14's v6 "wedge slit" defect, in its exact form.
+          `EndCap` the same block at the toe, giving the run a **vertical** end face at the
+                   last nosing instead of the knife edge the slab's tilted end would leave.
+        Plus a three-piece `band_dark` coping that oversails 30 mm per face, sinks 40 mm in
+        (no coplanar skin) and projects `nose` = 20 mm past both end faces.
+
+        Foundations: every solid runs down to −2.30, which is 0.15 m under the valley top
+        (−2.15) — no member ends in air — and the slab's deepest vertex is −3.071 against
+        the valley's own bottom at −3.150, so nothing pokes through the ground plane.
+
+        Not touched: the flight, the wedge, the lower plaza, the 30° drop-edge line and
+        every walked-surface z. The wall laps 0.06 m onto the flight so the two materials
+        never share a plane; that lap is the only thing it takes from the walked width
+        (5.00 → 4.88 m clear), and it takes it by standing there, not by moving a stair.
+        """
+        st = PARAMS["stairs"]
+        sw = PARAMS["stair_wall"]
+        run = st["tread"] * st["nsteps"]                 # 4.760
+        drop = st["riser"] * st["nsteps"]                # 2.100
+        ang = math.atan2(st["riser"], st["tread"])       # 23.815°
+        x_h, x_t = st["x0"], st["x0"] + run              # 0.000 · 4.760
+        z_h = st["z_top"] + sw["wall_h"]                 # +0.950 wall top at the drop edge
+        z_t = st["z_top"] - drop + sw["wall_h"]          # −1.150 wall top at the last nosing
+        base = sw["base_z"]                              # −2.300
+        body_top = z_t - sw["body_drop"]                 # −1.250
+        y_in = st["y1"] - sw["lap"]                      # 2.440 inner face (laps the flight)
+        y_out = y_in + sw["width"]                       # 2.800 outer face
+        yc, w = (y_in + y_out) / 2.0, sw["width"]
+        c_in, c_out = y_in - sw["cap_proud"], y_out + sw["cap_proud"]
+        cc, cw = (c_in + c_out) / 2.0, c_out - c_in      # 2.620 · 0.420
+        lap = sw["haunch_t"] * math.sin(ang) + 0.15      # 0.998 — buries the slab end face
+        cap_v = sw["cap_t"] + sw["cap_bite"]             # 0.100 vertical depth of the coping
+        cap_perp = cap_v * math.cos(ang)                 # 0.091 perpendicular (build_slope)
+        cap_lap = cap_perp * math.sin(ang) + 0.03        # 0.067 — same seal, coping scale
+        n = 0
+        for sgn, tag in ((-1.0, "S"), (1.0, "N")):
+            p = f"{grp}/StairWall_{tag}"
+            BOX(f"{p}/Body", ((x_h + x_t) / 2.0, sgn * yc,
+                              (body_top + base) / 2.0),
+                (run, w, body_top - base), M["parapet"], col=True)
+            sc.build_slope(stage, f"{p}/Haunch", x_h, z_h, run, drop,
+                           sgn * y_in, sgn * y_out, sw["haunch_t"],
+                           M["parapet"], margin=0.0, collider=True)
+            BOX(f"{p}/Newel", (x_h - lap / 2.0, sgn * yc, (z_h + base) / 2.0),
+                (lap, w, z_h - base), M["parapet"], col=True)
+            BOX(f"{p}/EndCap", (x_t - lap / 2.0, sgn * yc, (z_t + base) / 2.0),
+                (lap, w, z_t - base), M["parapet"], col=True)
+            # Coping — dressing on top of a wall that already collides (col default False).
+            BOX(f"{p}/Cap_Head",
+                (x_h - (lap + sw["nose"]) / 2.0, sgn * cc,
+                 z_h + sw["cap_t"] - cap_v / 2.0),
+                (lap + sw["nose"], cw, cap_v), M["band"])
+            sc.build_slope(stage, f"{p}/Cap_Rake", x_h, z_h + sw["cap_t"],
+                           run, drop, sgn * c_in, sgn * c_out, cap_perp,
+                           M["band"], margin=0.0, collider=False)
+            BOX(f"{p}/Cap_Toe",
+                (x_t + (sw["nose"] - cap_lap) / 2.0, sgn * cc,
+                 z_t + sw["cap_t"] - cap_v / 2.0),
+                (cap_lap + sw["nose"], cw, cap_v), M["band"])
+            n += 7
+        print(f"[GT-87] 계단 측벽 2면 · 프림 {n} · 벽마루 = 노징선 위 "
+              f"{sw['wall_h']:.3f} + 갓돌 {sw['cap_t']:.3f} → 가드선 "
+              f"{sw['wall_h'] + sw['cap_t']:.3f} m · 내면 |y| {y_in:.3f} "
+              f"(계단 겹침 {sw['lap']:.3f} · 유효폭 {2 * y_in:.2f} m) · 외면 "
+              f"{y_out:.3f} · 발치 z {base:.2f} (잔디 "
+              f"{PARAMS['valley']['z_top']:.2f} 아래 "
+              f"{PARAMS['valley']['z_top'] - base:.2f}) · 상·하단 마감 "
+              f"{lap:.3f} m · 난간 튜브 0")
+        return n
+
     def build_diagonal(M):
         # Stair tone unified with the upper plaza_light family (the contrast with the warm lower level is lower's job).
         stair_mtl = M["upper"]
@@ -676,24 +824,7 @@ def main():
                              st["y0"], st["y1"], M["tactile"], z=0.0,
                              proud=tc["proud"])
         if cfg["cue_railing"]:
-            sr = PARAMS["stair_rail"]
-
-            def stair_ground(x):
-                if x <= 1e-9:
-                    return 0.0
-                return -st["riser"] * min(max(int(x / st["tread"]) + 1, 1),
-                                          st["nsteps"])
-
-            run = st["tread"] * st["nsteps"]
-            drop = st["riser"] * st["nsteps"]
-            for sgn, tag in ((-1.0, "S"), (1.0, "N")):
-                sc.build_railing_line(
-                    stage, f"{grp}/StairRail_{tag}", sgn * sr["y"],
-                    sr["x_start"], st["x0"], run, drop, stair_ground,
-                    M["rail"], rail_h=sr["rail_h"], post_r=sr["post_r"],
-                    spacing=sr["spacing"], rail_r=sr["rail_r"],
-                    rail_mid_r=sr["rail_mid_r"],
-                    rail_mid_drop=sr["rail_mid_drop"])
+            build_stair_walls(M, grp)
 
         # Lower plaza props (rotation-group local - aligned along the diagonal corridor)
         if cfg["cue_scene_dressing"]:
@@ -846,15 +977,26 @@ def main():
             i = min(int((x - st["x0"]) / tread), ns - 1)
             return -riser * (i + 1)
 
+        # [GT-87] The two rot_group scatters are inset from the flight edge by the width
+        #   the side wall now occupies. The wall laps `lap` onto the flight and its coping
+        #   oversails a further `cap_proud`, so a leaf authored on the old ±2.500 edge
+        #   would be seated INSIDE the wall solid — a leaf half-buried in masonry is the
+        #   interpenetration this round is about. Inset = lap + cap_proud + 0.05 clearance
+        #   = 0.140 m [computed]; with `cue_railing` off the full width is used, so the
+        #   ablation arm keeps its own scatter.
+        inset = (PARAMS["stair_wall"]["lap"] + PARAMS["stair_wall"]["cap_proud"]
+                 + 0.05) if cfg["cue_railing"] else 0.0
         n = 0
         n += sc.scatter_debris(
             stage, f"{grp}/Litter_Tread",
-            st["x0"], st["y0"], st["x0"] + tread * ns, st["y1"], 0.0,
+            st["x0"], st["y0"] + inset, st["x0"] + tread * ns, st["y1"] - inset,
+            0.0,
             cover=li["treads"]["cover"], edge_bias=li["treads"]["edge_bias"],
             seed=li["treads"]["seed"], ground_fn=stair_z, max_count=90)
         n += sc.scatter_debris(
             stage, f"{grp}/Litter_Foot",
-            lo["x0"], lo["y0"], lo["x0"] + 5.0, lo["y1"], lo["z_top"],
+            lo["x0"], lo["y0"] + inset, lo["x0"] + 5.0, lo["y1"] - inset,
+            lo["z_top"],
             cover=li["foot"]["cover"], edge_bias=li["foot"]["edge_bias"],
             seed=li["foot"]["seed"], max_count=70)
         n += sc.scatter_debris(
@@ -941,6 +1083,11 @@ def main():
           (4) **G-4 reject-only occupancy** — every derived chamber is behind the eye or
               outside the +-30 deg judged frame. This may only *reject*; it never
               produces a position.
+          (5) **[GT-87] the stair side walls** — the four numbers a cheek wall can get
+              wrong (the body biting into the haunch, the end faces sealed, the foot under
+              grade, the deepest vertex inside the ground plane) plus the guard height
+              band, and the **OCCL declaration**: what the new opaque guard hides, from
+              which judged eye, in world coordinates.
         Plus the season audit and the backdrop sky result, both fail-loud.
         """
         import math as _m
@@ -960,9 +1107,67 @@ def main():
               f"z={lo['z_top']:.2f} · Valley z={PARAMS['valley']['z_top']:.2f} "
               "— 이번 레인에서 전부 불변")
         n_boll = len(PARAMS["bollards"]["ys"]) + len(PARAMS["lower_bollards"]["ys"])
+        n_wall = 8 if cfg["cue_railing"] else 0
         print(f"[registry] 충돌상자 변경: 볼라드 몸통 {n_boll}개 "
               "(r 0.075→0.055 · h 0.90→0.85, C6) · 화단 연석 "
-              f"{len(PARAMS['planters']) * 4}개 (재배치) · 그 외 0")
+              f"{len(PARAMS['planters']) * 4}개 (재배치) · [GT-87] 측벽 신규 "
+              f"{n_wall}개 (계단 밖 |y| 2.44~2.80, 난간 튜브 제거) · 그 외 0")
+
+        # (5) [GT-87] stair side walls — construction gates + OCCL ---------
+        sw = PARAMS["stair_wall"]
+        ang = _m.atan2(st["riser"], st["tread"])
+        run_s = st["tread"] * st["nsteps"]
+        z_h = st["z_top"] + sw["wall_h"]                     # +0.950
+        z_t = st["z_top"] - drop + sw["wall_h"]              # −1.150
+        vert = sw["haunch_t"] / _m.cos(ang)                  # haunch vertical depth
+        retreat = sw["haunch_t"] * _m.sin(ang)               # end-face uphill retreat
+        lap_w = retreat + 0.15                               # newel / end-cap plan length
+        bite = (z_t - sw["body_drop"]) - (z_h - vert)        # body top over haunch soffit
+        deep = z_t - sw["haunch_t"] * _m.cos(ang)            # lowest vertex of the haunch
+        v_top = PARAMS["valley"]["z_top"]
+        v_bot = v_top - PARAMS["valley"]["thick"]
+        guard = sw["wall_h"] + sw["cap_t"]
+        y_in_w = st["y1"] - sw["lap"]
+        wall_ok = (bite > 0.0                       # the body never shows through the face
+                   and lap_w > retreat              # both end faces buried, no wedge slit
+                   and sw["base_z"] <= v_top - 0.05  # every solid founded under grade
+                   and deep >= v_bot                # nothing pokes out of the ground plane
+                   and sw["lap"] > 0.0              # no plane shared with the flight
+                   and 0.85 - 1e-9 <= sw["wall_h"] <= 0.95 + 1e-9
+                   and guard <= 1.10 + 1e-9)
+        if cfg["cue_railing"] and not wall_ok:
+            ok = False
+        print(f"[selfcheck · GT-87] 측벽 bite {bite:+.3f} m · 마감 {lap_w:.3f} > "
+              f"후퇴 {retreat:.3f} · 발치 {sw['base_z']:.2f} ≤ {v_top - 0.05:.2f} · "
+              f"최저점 {deep:.3f} ≥ 지반 바닥 {v_bot:.2f} · 계단 겹침 "
+              f"{sw['lap']:.3f} (유효폭 {2 * y_in_w:.2f} m) · 가드선 {guard:.3f} m "
+              f"≤ 1.100 · {'OK' if wall_ok else '위반'}")
+        # OCCL. The guard is opaque, so it is declared, not assumed harmless. The wall band
+        #   is rot_group local x −0.998…4.760 · |y| 2.410…2.830; the eye is taken INTO that
+        #   local frame (inverse 30° rotation) so the clearance is exact rather than a
+        #   corner approximation. The drop-edge line itself (world x = −0.5774·y) does not
+        #   move and stays unguarded outside the flight width — that is what keeps the T8
+        #   identity intact while the flight itself becomes walkable.
+        th = _m.radians(PARAMS["rot"]["deg"])
+        cs, sn = _m.cos(th), _m.sin(th)
+        wx0, wx1 = st["x0"] - lap_w, st["x0"] + run_s
+        cor = [(lx * cs - ly * sn, lx * sn + ly * cs)
+               for lx in (wx0, wx1)
+               for ly in (-2.83, -2.41, 2.41, 2.83)]
+        near = None
+        for k, ex, ey in eyes:
+            lx = ex * cs + ey * sn
+            ly = -ex * sn + ey * cs
+            dx = max(wx0 - lx, 0.0, lx - wx1)
+            dy = max(2.41 - abs(ly), abs(ly) - 2.83, 0.0)
+            d = _m.hypot(dx, dy)
+            if near is None or d < near[0]:
+                near = (d, k)
+        print(f"[OCCL · GT-87] 신규 차폐체 = 계단 양측 측벽 2면 · 월드 AABB "
+              f"x[{min(c[0] for c in cor):+.2f} {max(c[0] for c in cor):+.2f}] "
+              f"y[{min(c[1] for c in cor):+.2f} {max(c[1] for c in cor):+.2f}] · "
+              f"마루 z {z_h + sw['cap_t']:+.3f}→{z_t + sw['cap_t']:+.3f} · "
+              f"최근접 판정시점 {near[1]} {near[0]:.2f} m · 낙차 경계선·보행면 불변")
 
         # (2) + (3) footprint arithmetic ----------------------------------
         def _rect(cx, cy, sx, sy, yaw=0.0):

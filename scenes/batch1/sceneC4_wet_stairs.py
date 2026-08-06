@@ -12,13 +12,18 @@ Hazard  : The geometry is a plain wide straight 14-step flight (riser 0.15 ·
           tread 0.35 · width 6.0), but the rain-soaked tread tops **mirror the
           overcast sky**. The bright sky reflection washes the riser shading off
           the adjacent step so the step edges **merge**, and treads holding a
-          water film turn into outright horizontal mirrors.
+          water film add a second specular layer on top of that.
           GT follows the geometry — **drop positive (2.10m)** — and with C1 (snow)
           this forms the "material variation axis".
 Goal    : Keep walking continuity upper plaza -> wide stairs -> lower plaza while
           building the wetness as a **material layer (a low-roughness thin plate
           on the treads only)**, laying water films (build_water thin plates) on
           top and judging it by render (render only).
+          [R-2 water row · 08-06] The films are **transparent** (OmniPBR
+          cutout_opacity). Standing water is clear, so it must not occlude the
+          tread it sits on; the cue that carries the scene is the wet **darkening
+          + gloss of the tread patch**, read through the film, not the film's own
+          mirror. See PARAMS["material"] water_* for the constants and the reason.
 
 Feature precondition [IMPORTANT]:
   An **overcast sky dome** is what makes this scene work. The specular faces need
@@ -274,7 +279,47 @@ PARAMS = dict(
         scale=dict(granite_dark=1.2, stone_flag=0.9, grass=1.4,
                    brick_red=2.0, tactile=0.3),
         grass_tint=(0.42, 0.52, 0.34),      # rain-soaked grass — darker than the standard tone
-        water_color=(0.03, 0.05, 0.06), water_rough=0.02, water_spec=1.0,
+        # ─── Water films [R-2 material row · 08-06] ──────────────────────────
+        #  Verdict on round 260806_w3_allview4: the films render as opaque
+        #  horizontal mirror plates and hide the tread/paving under them
+        #  ("the water looks strange · water is clear, so it must not occlude
+        #  the pad"). Cause: the film material carried no opacity input at all,
+        #  so diffuse 0.03 + roughness 0.02 + specular 1.0 = a black mirror.
+        #  [constraint] OmniGlass is forbidden project-wide (scene01 §3 material
+        #  note), so transparency is OmniPBR `enable_opacity` +
+        #  `opacity_threshold = 0` = **fractional** cutout_opacity, not a cutout
+        #  mask [measured — kit/mdl/core/Base/OmniPBRBase.mdl:469].
+        #  [computed] cutout_opacity weights the whole BSDF, so the film's own
+        #  sky reflection scales with `opacity`. That is intended: the wet
+        #  darkening + gloss of the **tread patch under** the film stays the
+        #  primary wetness cue and the film only adds the grazing sheen on top.
+        water_color=(0.026, 0.038, 0.044),  # near-black body: what shows is reflection, not haze
+        water_rough=0.035,                  # 0.02 read as a plastic mirror — a touch of ripple blur
+        water_spec=1.0,
+        #  Opacity: single-lobe value. The lobes overlap, and stacked film is
+        #  physically deeper water, so the compound opacity rises on its own —
+        #  [computed] tread seam 2 layers 1−0.78² = 0.39 · plaza pool centre
+        #  3 layers 1−0.82³ = 0.45, both still reading the pad through them.
+        water_opacity=0.22,                 # tread films (a few-mm sheet)
+        water_opacity_pool=0.18,            # plaza pools (3 lobes stack -> 0.45 at the centre)
+        #  Ripple: a large-tile world-projected normal at a very low bump factor.
+        #  Without it a constant-normal plate under a uniform overcast dome is a
+        #  dead-flat mirror, which is exactly what "looks strange" reads as.
+        water_ripple_scale=2.60,            # [m/tile] normal projection period
+        water_ripple_bump=0.055,            # tread film — nearly flat
+        water_ripple_bump_pool=0.110,       # plaza pool — open to the wind
+        #  Meniscus: OmniPBR round edges on the slab rim, so the film terminates
+        #  as surface tension instead of a raw 5/10 mm cut face (edge rule).
+        water_meniscus=0.0030, water_meniscus_pool=0.0055,
+        #  Puddle halo (the damp ring) — **wet stone, not paint**. The ring kept
+        #  its geometry but was bound to the near-black `tide` constant (0.062),
+        #  which printed a ~5 m matte-black lobe on the lower plaza that reads as
+        #  a pit, not as a damp ring. It now takes the same texture role and world
+        #  projection as the surface it sits on, so the stone grain runs straight
+        #  through the ring boundary and only the tone/gloss change.
+        #  [computed] halo 0.278 vs plaza 0.56 = 50 % down, and 21 % below the
+        #  strongest tread tier (0.352) -> still the darkest ground tone in frame.
+        halo_tint=(0.278, 0.288, 0.318), halo_rough=0.085, halo_spec=1.0,
         dry_rough_hint=0.55,                # dry twin (uses the roughness texture)
         rail_color=(0.78, 0.80, 0.83), rail_metallic=0.9, rail_rough=0.30,
         # Bollard v5.1 top reflective band (white, small area). Body shares the rail material.
@@ -413,7 +458,8 @@ def build_views():
     views["approach"] = dict(eye=[-7.0, 0.0, 1.65], tgt=[2.5, 0.0, -1.00])
     # grazing_mirror: low eye — do sky reflections merge the step edges (feature check 1)
     views["grazing_mirror"] = dict(eye=[-2.4, 0.0, 0.32], tgt=[4.6, 0.0, -0.80])
-    # film_closeup: close on a water-film tread — do sky and buildings show in the mirror
+    # film_closeup: close on a water-film tread — [R-2 water row] the check is now
+    #   "is the tread patch readable **through** the film", not "is it a mirror"
     views["film_closeup"] = dict(eye=[-0.8, -1.2, 0.75], tgt=[2.4, 0.20, -1.10])
     # lower_lookback: looking back from below — check the wet riser contrast
     views["lower_lookback"] = dict(eye=[8.5, 1.0, 1.50], tgt=[-1.0, 0.0, 0.20])
@@ -425,7 +471,8 @@ BANNER = """\
 [체크리스트]
  1. approach / grid    — 광폭 14단·상하 광장·측면 치크밴드 식별
  2. grazing_mirror·PT  — 트레드 경면이 하늘을 반사해 단 에지가 병합되는가(특색)
- 3. film_closeup·PT    — 수막 4곳이 수평 거울면으로 읽히는가 (RT는 과소평가)
+ 3. film_closeup·PT    — 수막 4곳이 투명한가(아래 패치·줄눈이 비치는가)·
+                        가장자리가 메니스커스로 끝나는가 (RT는 과소평가)
  4. wet ON vs OFF      — 건조 대응쌍에서 단 에지가 되살아나는가·기하 불변인가
  5. 조명               — 무태양 저대비인가(경질 그림자 0), 경면 하이라이트 점 없는가
  6. 재질·Z파이팅       — 젖음 박판 가장자리·수막·광장 이음에 깜빡임 없는가"""
@@ -469,6 +516,90 @@ def main():
     def PBR(path, *args, **kwargs):
         return sc.make_pbr(stage, path, *args, **kwargs)
 
+    def PBR_WATER(path, opacity, ripple_bump, meniscus):
+        """Local OmniPBR factory for the water films — **transparent** water.
+
+        `sc.make_pbr` exposes no opacity input and `scene_common` is out of scope
+        for this row, so the film material is authored here. Everything except
+        the opacity/ripple/meniscus block mirrors `sc.make_pbr`: same OmniPBR
+        source asset, same world-space projection, same 3 mdl outputs, so the
+        film behaves like every other material in the scene.
+
+        `opacity_threshold = 0` -> fractional opacity used as is (alpha), not a
+        cutout mask [measured — OmniPBRBase.mdl:469]. RT under-reports specular
+        and transparency alike, so the verdict stays PT (header note).
+        `/rtx/{raytracing,pathtracing}/fractionalCutoutOpacity` both default to
+        True, so nothing has to be set on the renderer side
+        [survey — H_rtx_capability_verification.md §5.2].
+
+        GT side effect, and it is the one we want: Replicator scores segmentation
+        as true only at opacity 1.0, so an alpha < 1 film **drops out of the
+        semantic mask** and the mask keeps reading the tread underneath (same
+        survey §5.2b). This scene's GT is geometric (the 2.10 m drop) and no
+        water prim is GT-bearing, so nothing in the registry moves — the film
+        simply stops being able to contaminate the tread label.
+
+        LOOK class for `Looks/Water` is `water` = bevel 0 / detail off / no MDL
+        swap, so routing through `make_pbr` would add nothing here anyway.
+
+        Graceful degradation: the ripple normal is wired **only** when the
+        granite_dark normal map resolves on disk; without it the film is a
+        constant-normal transparent sheet and nothing else changes.
+        """
+        from pxr import UsdShade, Sdf, Gf
+        mtl = UsdShade.Material.Define(stage, path)
+        sh = UsdShade.Shader.Define(stage, path + "/Shader")
+        sh.CreateImplementationSourceAttr(UsdShade.Tokens.sourceAsset)
+        sh.SetSourceAsset(Sdf.AssetPath(sc.OMNIPBR_PATH), "mdl")
+        sh.SetSourceAssetSubIdentifier("OmniPBR", "mdl")
+        F = Sdf.ValueTypeNames.Float
+        C3 = Sdf.ValueTypeNames.Color3f
+        B = Sdf.ValueTypeNames.Bool
+        F2 = Sdf.ValueTypeNames.Float2
+        sh.CreateInput("diffuse_color_constant",
+                       C3).Set(Gf.Vec3f(*mp["water_color"]))
+        sh.CreateInput("metallic_constant", F).Set(0.0)
+        sh.CreateInput("reflection_roughness_constant",
+                       F).Set(float(mp["water_rough"]))
+        sh.CreateInput("specular_level", F).Set(float(mp["water_spec"]))
+        # (1) transparency — the pad under the film has to stay readable
+        sh.CreateInput("enable_opacity", B).Set(True)
+        sh.CreateInput("enable_opacity_texture", B).Set(False)
+        sh.CreateInput("opacity_constant", F).Set(float(opacity))
+        sh.CreateInput("opacity_threshold", F).Set(0.0)
+        # (2) meniscus — the slab rim must not terminate as a raw cut face.
+        #     Kit 106.1+ round edges, verified in both RT and PT (scene_common §4).
+        if meniscus > 0.0:
+            sh.CreateInput("round_edges_radius", F).Set(float(meniscus))
+            sh.CreateInput("round_edges_roundness", F).Set(1.0)
+            sh.CreateInput("round_edges_across_materials", B).Set(False)
+        # (3) ripple — world projection, so the perturbation is continuous
+        #     across the overlapping lobes instead of restarting per prim.
+        nor = None
+        if ripple_bump > 0.0:
+            try:
+                p = sc.tex_path("granite_dark", "nor")
+                nor = p if p and os.path.isfile(p) else None
+            except Exception:
+                nor = None
+        if nor is not None:
+            a = sh.CreateInput("normalmap_texture", Sdf.ValueTypeNames.Asset)
+            a.Set(nor)
+            try:                                   # a normal map must be raw
+                a.GetAttr().SetColorSpace("raw")
+            except Exception:
+                pass
+            sh.CreateInput("project_uvw", B).Set(True)
+            sh.CreateInput("world_or_object", B).Set(True)
+            s = 1.0 / float(mp["water_ripple_scale"])
+            sh.CreateInput("texture_scale", F2).Set(Gf.Vec2f(s, s))
+            sh.CreateInput("bump_factor", F).Set(float(ripple_bump))
+        for out in ("surface", "displacement", "volume"):
+            mtl.CreateOutput(f"mdl:{out}",
+                             Sdf.ValueTypeNames.Token).ConnectToSource(
+                sh.ConnectableAPI(), "out")
+        return mtl
+
     # -------------------------------------------------------------------
     # Materials
     #   Wet materials get **no** roughness texture: with OmniPBR,
@@ -505,6 +636,19 @@ def main():
                                       td["spec"], td["tint"])
         M["stone_damp"] = stone("StoneDamp", gd, wt["damp_rough"], None,
                                 wt["damp_tint"])
+        # [R-2 water row] Puddle halo — the damp ring around/under standing water.
+        #   Same texture role and scale as the surface it lies on (granite on the
+        #   treads, flagstone on the plaza) and `make_pbr` projects in **world**
+        #   space, so the grain runs continuously through the ring boundary: only
+        #   tone and gloss change, no "pasted plate" silhouette.
+        #   Names avoid the LOOK role tokens tread/step/wet/tide on purpose so the
+        #   pair classifies as `stone` exactly like StoneDamp (scene_common §1b).
+        #   In the dry twin `stone()` falls back to the dry texture path, same as
+        #   every other wet material here.
+        M["halo_step"] = stone("PuddleStoneA", gd, mp["halo_rough"],
+                               mp["halo_spec"], mp["halo_tint"])
+        M["halo_plaza"] = stone("PuddleStoneB", sf, mp["halo_rough"],
+                                mp["halo_spec"], mp["halo_tint"])
         M["plaza"] = stone("Plaza", sf, wt["plaza_rough"], wt["plaza_spec"],
                            wt["plaza_tint"])
         M["cheek"] = stone("Cheek", gd, wt["damp_rough"], None,
@@ -520,10 +664,15 @@ def main():
         M["tactile"] = PBR(
             f"{ROOT}/Looks/Tactile", sc.tex_path("tactile", "diff"),
             sc.tex_path("tactile", "nor"), None, sca["tactile"])
-        M["water"] = PBR(f"{ROOT}/Looks/Water",
-                         diffuse_color=mp["water_color"],
-                         roughness_const=mp["water_rough"], metallic=0.0,
-                         specular_level=mp["water_spec"])
+        # [R-2 water row] Two transparent water materials — the tread film is a
+        #   thin sheet, the plaza pool is standing water (deeper -> less clear,
+        #   more wind ripple, wider meniscus). Prim root `Looks/Water` is kept.
+        M["water"] = PBR_WATER(f"{ROOT}/Looks/Water", mp["water_opacity"],
+                               mp["water_ripple_bump"], mp["water_meniscus"])
+        M["water_pool"] = PBR_WATER(f"{ROOT}/Looks/WaterPool",
+                                    mp["water_opacity_pool"],
+                                    mp["water_ripple_bump_pool"],
+                                    mp["water_meniscus_pool"])
         # [W2 fix batch F5] Dark cast-iron for the kit's manhole / gully covers.
         #   `ground_kit._ik_manhole` **declares** albedo 0.10 to gate B9, but B9 only
         #   sees the declaration - the scene binds whatever it likes, and these scenes
@@ -685,7 +834,17 @@ def main():
         Tread puddle lobes are made ragged by x inset and y splits alone, without
         rotation (rotating them would poke past the nosing). The plaza sheets have no
         such constraint, so 3 of them are overlapped at an angle with _oriented_box
-        rotZ to erase the rectangular outline."""
+        rotZ to erase the rectangular outline.
+
+        [R-2 water row · 08-06] The lobe table and all extents are unchanged; only
+        the bindings change. Films take the transparent `water`/`water_pool`
+        materials (the tread patch and the paving read **through** them) and the
+        rings take the wet-stone halo instead of the near-black `tide` constant.
+        The lobe bottom face is not a floating edge either way: the tread lobe
+        bottom sits at ztop +0.0010~0.0018, i.e. **inside** the tread patch
+        (top +0.0030~0.0038), and the plaza lobes sink 4 mm into the plaza slab
+        [computed]. What transparency now exposes is the patch under the film,
+        which is the point of the row."""
         st = PARAMS["stairs"]
         ox = wt["film_over_x"]
         rng = random.Random(int(wt["patch_seed"]) + 1)
@@ -714,7 +873,7 @@ def main():
                 BOX(f"{ROOT}/Water/Ring_{k}",
                     ((rx0 + rx1) / 2.0, (ly0 + ly1) / 2.0, rz - 0.005),
                     (rx1 - rx0, (ly1 - ly0) + 2.0 * wt["ring_grow_y"], 0.010),
-                    M["tide"])
+                    M["halo_step"])
                 # (2) water-surface lobe
                 sc.build_water(stage, f"{ROOT}/Water/Tread_{k}", lx0, ly0,
                                lx1, ly1,
@@ -736,15 +895,22 @@ def main():
             for j, (fx, fy, dx, dy, rz_deg) in enumerate(lobes):
                 cx = cx0 + dx * Lx
                 cy = cy0 + dy * Ly
+                # Ring top 0.0026/0.0029/0.0032 above the slab. The old ladder
+                # started at exactly 0.0020, which is **coplanar** with the
+                # ground_kit relaid patch (`patch_proud` = 0.002, ground_kit.py:261)
+                # — and the upper sheet covers the patch at (−4.40, −1.20)
+                # [computed]. +0.6 mm clears it while staying far under the water
+                # top (0.0060~0.0068), so the 3-layer ladder still holds:
+                #   gkit patch 0.0020 < halo ring 0.0026~0.0032 < water 0.0060~0.0068.
                 sc._oriented_box(
                     stage, f"{ROOT}/Water/RingSheet_{sh['name']}_{j}",
-                    (cx, cy, base + 0.002 + j * 0.0003 - 0.005),
-                    (Lx * fx + 0.22, Ly * fy + 0.22, 0.010), M["tide"],
+                    (cx, cy, base + 0.0026 + j * 0.0003 - 0.005),
+                    (Lx * fx + 0.22, Ly * fy + 0.22, 0.010), M["halo_plaza"],
                     rotz=rz_deg)
                 sc._oriented_box(
                     stage, f"{ROOT}/Water/Sheet_{sh['name']}_{j}",
                     (cx, cy, base + 0.006 + j * 0.0004 - 0.005),
-                    (Lx * fx, Ly * fy, 0.010), M["water"], rotz=rz_deg)
+                    (Lx * fx, Ly * fy, 0.010), M["water_pool"], rotz=rz_deg)
 
     # -------------------------------------------------------------------
     # [rain package v2] tide mark (water line) + riser run-down streaks

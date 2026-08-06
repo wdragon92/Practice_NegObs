@@ -112,6 +112,36 @@ field with one distant brick slab. GT-67 restores the plaza without restoring th
     inhabited on the +Y side only. A south bench row, a south lamp line, longer lawn
     tree rows and the fountain moved onto the axis give the frame a readable, open
     centre with occupied flanks instead of an empty field.
+
+═══ GT-74 (08-06 review — "field or square", doubled rail, member in mid-air) ═
+1 **A quad, not a field.** GT-67 restored *identity* (two head masses at 108 m) but
+  its lateral wings sat at |y| 62…80 m, off the read of every gallery cut, so the
+  flanks were still lawn to the horizon. Three masses close them — `W2` (the mirror
+  of `W1`, giving `lower_lookback` a building on the empty right of a 28 m axis gap),
+  `NW` and `SW` (the north and south ranges at 75 m, filling the empty middle of
+  `amphi_view` and the left of `lower_lookback`) — and `W1` is re-cut to y −58…−14 so
+  the west pair straddles the axis symmetrically. Heights are solved from each cut's
+  own frame top so **sky shows above every new roofline** (+1.66° worst case), which
+  is what separates a campus range from the 9.5 m wall GT-67 deleted. Every one of
+  them is **behind every judged eye**, so no judged frame, no `z_ceil` and no §0-2
+  corridor quantity moves; OCCL changes belong to the gallery cuts and are declared.
+  Noon shadows all land on `GroundGrass` beyond the lawn — none reaches the plaza or
+  the drop edge.
+2 **The doubled mid rail is fixed at the source.** `sc.build_railing_line` in merged
+  mode was authoring the guard's own mid rail *and* the bracketed grip rail: three
+  parallel tubes at 1.10 / 0.85 / 0.58, which is what the review saw as "two middle
+  rails overlapping". The grip rail is now the intermediate member and `RailMid*` is
+  suppressed **only when the grip rail is actually built**, so the `LOOK_GEO = 0` arm
+  and all 12 other caller scenes are untouched (they never pass `merge_handrail`).
+3 **Nothing ends in mid-air.** Pickets stopped on the guard's straight bottom
+  envelope while the surface under them is a staircase, so each hung 40–60 mm above
+  its tread; `foot_pickets=True` foots them on `ground_fn` with a 12 mm socket. The
+  grip rail's statutory 300 mm bottom extension, which reaches past the guard's last
+  post, now stands on its own newel.
+4 **Edge-finishing pass on the railing family.** The GT-67 `Return*` pieces were
+  `rail_r` sleeves authored coaxial with the end posts — interpenetration that read
+  as a diameter step, not a return. They are replaced by domed caps on every free
+  tube end (top rail ×2, grip rail ×2) plus a knuckle at the grip rail's own kink.
 """
 
 import os
@@ -302,12 +332,75 @@ PARAMS = dict(
     #  Materials are existing bindings only (brick_R / brick_L) — no material work,
     #  the 08-05 plan freezes it. `glass` is passed for the two masses that have
     #  openings; `parapet` stays the shell material so no bright cap appears.
+    #
+    #  ═══ [GT-74 1] a QUAD, not a field — masses on BOTH flanks ═══════════
+    #  The 08-06 review read the GT-67 result as *"is that a field or a square?"*:
+    #  every mise-en-scene cut showed lawn running to the horizon with a single
+    #  distant slab in it. G1 is a **campus quad** — blocks left AND right of the
+    #  open lawn, the path axis clear between them. GT-67 put its lateral wings at
+    #  |y| 62…80 m, past the read distance of every gallery eye, so the flanks were
+    #  empty by geometry rather than by intent. Three masses close the frame and one
+    #  is re-cut; none of them comes near-field. In-frame spans below are **corner
+    #  bearings against the frozen `build_views` eyes, ±30° horizontal**, and the sky
+    #  margin is `frame_top − ridge elevation` at the block's nearest corner
+    #  `[computed]`:
+    #    W2  — the mirror of `W1` across the axis. `lower_lookback` (eye 6, 1.5,
+    #          looking −X) carried W1 alone across −3.6°…+19.6°, i.e. the centre and
+    #          the left of the frame, with the whole right half empty lawn. W2 now
+    #          holds −30.0°…−16.3° (image right, +Y is right in this cut) and W1 is
+    #          re-cut to y −58…−14, so the two straddle the axis with a **28 m gap on
+    #          the centreline** = 12.7° of open sky between them. Sky above the ridge
+    #          +6.70° / +7.00°.
+    #    NW  — the north range at 75.5 m. It holds +4.7°…+24.0° in `amphi_view`,
+    #          which is the middle of that frame's empty lawn; `N1` already holds its
+    #          right edge (−30.0°…−14.2°) and W2 sits behind it at +16.3°…+30.0°, so
+    #          that cut reads as three ranks. Sky above the ridge +1.66°.
+    #    SW  — the south range at 74.6 m, NW's mirror. It holds +13.2°…+30.0° in
+    #          `lower_lookback`, in front of W1, so that cut is framed on both sides
+    #          with layered depth. Sky above the ridge +5.19°.
+    #  Heights are **solved from that sky margin, not chosen**: `amphi_view` has a
+    #  −7.3° pitch, so its frame top is only +10.7° and a nearer/taller range would
+    #  run off the top edge and read as a wall — the very "미흡" GT-67's building R
+    #  was deleted for. That is why the new masses sit in the 75…103 m band with
+    #  10.0–11.5 m shells rather than close in.
+    #  Judged-window discipline: every new mass sits **behind every grid eye**
+    #  (facade planes y ±40 / x −96, eyes x −2…−10 at gy −2.75), so
+    #  `facade_in_frame` is False for all of them, no block enters a judged frame,
+    #  `z_ceil` stays unbound and the §0-2 corridor is untouched. `plaza_selfcheck`
+    #  asserts the corridor, the flank count, plan-disjointness and the lawn
+    #  clearance instead of this comment claiming them.
+    #  Noon shadow `[computed]` — sun elev 49.79°, world az ~205°, so shadows run to
+    #  az 25° with length (ridge − ground)/tan(elev): the nearest new mass, SW, throws
+    #  10.9 m from its NE corner (−56, −40) to (−46, −35), i.e. onto `GroundGrass`
+    #  well outside the lawn platform; NW / W1 / W2 land further out again. **No new
+    #  shadow reaches the plaza or the drop edge** (plaza |y| ≤ 8.2, x −16…14) — the
+    #  GT-relevant surfaces are lit exactly as before.
+    #  `axis` is declared per block wherever the plan is a *range* (long along X,
+    #  offset in Y): `build_backdrop`'s |cx| ≥ |cy| guess would have put the facade
+    #  on the 20 m short end of a 38 m long range. E1/E2/N1/S1/W1 keep the guess, so
+    #  no existing facade plane moves.
     backdrop=dict(
         base_z=-0.63,          # sits on GroundGrass, not on the plaza
         roof_allow=2.90,       # [measured] shell top -> highest emitted prim
         mat="brick_R",         # default shell binding when a block names none
         # Plan rectangles. `lod` = declared LOD distance (None -> real `d_true`).
+        #   `axis`   — force the facade plane ("x" | "y"); absent -> the |cx|/|cy| guess.
+        #   `facade` — veto BS-4's out-of-frame demotion (see `build_backdrop`).
         blocks=(
+            # [08-06 user, 3rd ruling on this plaza] "turn it back so that there are
+            #   buildings on both sides" — the original design-brief flanking pair
+            #   returns as REAL faced buildings (scene01_design_brief.md §1: R y 9.5..14
+            #   h 14 · L y -10.5..-15 h 10). This knowingly OVERRIDES the 07-31 BS-4
+            #   "pushed back and lowered" ruling for these two blocks only (GT-59
+            #   precedent: a direct user instruction outranks an internal ruling; the
+            #   z_ceil sky test exempts facade=True blocks below). x0 pulled -18/-20 ->
+            #   -14.0 so neither mass crosses the west hedge/rack circulation lane.
+            dict(tag="R1", x0=-14.0, x1=12.0, y0=9.5, y1=14.0, h=14.0,
+                 floors=4, kind="office", lod=None, mat="brick_R", glass=True,
+                 axis="y", facade=True),
+            dict(tag="L1", x0=-14.0, x1=4.0, y0=-15.0, y1=-10.5, h=10.0,
+                 floors=3, kind="office", lod=None, mat="brick_L", glass=True,
+                 axis="y", facade=True),
             dict(tag="E1", x0=108.0, x1=126.0, y0=-60.0, y1=-22.0, h=12.5,
                  floors=4, kind="office", lod=62.0, mat="brick_R", glass=True),
             dict(tag="E2", x0=108.0, x1=126.0, y0=18.0, y1=56.0, h=11.0,
@@ -316,11 +409,22 @@ PARAMS = dict(
                  floors=3, kind="backdrop", lod=None, mat="brick_L"),
             dict(tag="S1", x0=-26.0, x1=30.0, y0=-80.0, y1=-64.0, h=8.0,
                  floors=3, kind="backdrop", lod=None, mat="brick_R"),
-            dict(tag="W1", x0=-120.0, x1=-96.0, y0=-50.0, y1=-6.0, h=11.0,
+            dict(tag="W1", x0=-120.0, x1=-96.0, y0=-58.0, y1=-14.0, h=11.0,
                  floors=3, kind="backdrop", lod=None, mat="brick_L"),
+            dict(tag="W2", x0=-120.0, x1=-96.0, y0=14.0, y1=58.0, h=11.5,
+                 floors=3, kind="backdrop", lod=None, mat="brick_R"),
+            dict(tag="NW", x0=-92.0, x1=-60.0, y0=40.0, y1=58.0, h=10.5,
+                 floors=3, kind="office", lod=None, mat="brick_L", glass=True,
+                 axis="y", facade=True),
+            dict(tag="SW", x0=-88.0, x1=-56.0, y0=-58.0, y1=-40.0, h=10.0,
+                 floors=3, kind="office", lod=None, mat="brick_R", glass=True,
+                 axis="y", facade=True),
         ),
         # §0-2 corridor: nothing ahead of the stair may overlap the walked width.
         corridor=5.5,
+        # [GT-74 1] lateral half-width a mass must clear to count as a *flank*
+        # rather than a head mass — the designed lawn's own outer edge.
+        flank_y=24.0,
     ),
     #  [GT-67 1-4] `GroundGrass` 160 -> 400 m. At 160 m the plate edge sat 80 m out,
     #  i.e. a hard green/sky line **inside** every judged frame (-0.7° from an h1.8
@@ -531,7 +635,10 @@ PARAMS = dict(
     #   the same rule that removed `build_canopy_unit` with R01-2).
     railing=dict(post_r=0.02, post_h=0.9, spacing=1.2, rail_r=0.03,  # R2-5: top rail 0.025->0.03
                  rail_mid_r=0.018, rail_mid_drop=0.45,               # R2-5: mid rail
-                 ext=1.0, y_lines=(0.0, 5.45, -5.45),
+                 # [08-06 user "The basics were the best"] ext 1.0 -> 0.3: the 1 m level
+                 #   tail at the head was the largest part of the "bizarre shape" read;
+                 #   0.3 m is the statutory landing extension and nothing more.
+                 ext=0.3, y_lines=(0.0, 5.45, -5.45),
                  # [GT-67 1-1] The two facts the shared builder needs to size the
                  #   infill. `cliff_adjacent=False` is a **declaration about this
                  #   site**, not a style knob: the stair descends 0.60 m from one
@@ -545,10 +652,21 @@ PARAMS = dict(
                  #   line, 66 -> 18 for the three lines** `[measured, A/B on the emitted
                  #   cylinder log]`, and the whole line drops 35 -> 24 prims.
                  cliff_adjacent=False, use_nsteps=True,
-                 # [GT-67 1-2] Grip rail bracketed onto the guard plane, offset to the
-                 #   **approach** side: inward for the two edge lines (so the grip is
-                 #   over the stair, not over the flank wall), +Y for the centre line.
-                 merge_handrail=True),
+                 # [08-06 user, supersedes GT-67 1-2] "Simplify the handrail … the
+                 #   basics were the best": the bracketed grip-rail assembly is retired.
+                 #   merge_handrail=False + handrail off at the call site leaves the
+                 #   plain guard — posts · top rail · mid rail · sparse pickets — the
+                 #   pre-merge form the user asked back for. Grounded pickets (GT-74 3)
+                 #   are kept; they are correctness, not styling.
+                 merge_handrail=False,
+                 # [GT-74 3] Pickets foot on the tread they stand over. Until now the
+                 #   infill stopped on the guard's straight bottom envelope while the
+                 #   surface under it is a staircase, so each picket hung **60 mm over
+                 #   its tread and 40 mm over the level extension** `[computed, 0.380 m
+                 #   pitch — the numbers are re-derived in `plaza_selfcheck`]`. That is
+                 #   the "why is it still hanging in midair" of the 08-06 review: with
+                 #   six pickets a line and three lines, 18 members ended in air.
+                 foot_pickets=True),
     tactile=dict(ahead=0.3, depth=0.3, proud=0.004),   # F4: near flush (4 mm), dots come from the normal map
 
     # --- §3 materials: physical size for texture_scale [m/tile] + tints/constants ---
@@ -913,6 +1031,66 @@ def plaza_selfcheck(verbose=True):
         f"x {ft['cx'] - fh:.2f}…{ft['cx'] + fh:.2f} · |y|max "
         f"{abs(ft['cy']) + fh:.2f}")
 
+    # --- 6b. GT-74: quad framing · 판 겹침 0 · 난간 마감 -------------------
+    fy = float(bp.get("flank_y", 24.0))
+    north_flank = [b["tag"] for b in bp["blocks"] if b["y0"] >= fy - 1e-9]
+    south_flank = [b["tag"] for b in bp["blocks"] if b["y1"] <= -fy + 1e-9]
+    chk("광장 양옆 모두에 매스가 선다 — 들판이 아니라 광장 (GT-74 1)",
+        len(north_flank) >= 2 and len(south_flank) >= 2,
+        f"+Y {north_flank} · −Y {south_flank} (|y| ≥ {fy:.0f} m 기준)")
+    # Plan-disjointness: two shells sharing plan area is interpenetration, not massing.
+    ov = []
+    for i, a in enumerate(bp["blocks"]):
+        for b2 in bp["blocks"][i + 1:]:
+            if (min(a["x1"], b2["x1"]) - max(a["x0"], b2["x0"]) > 1e-9
+                    and min(a["y1"], b2["y1"]) - max(a["y0"], b2["y0"]) > 1e-9):
+                ov.append(f"{a['tag']}×{b2['tag']}")
+    chk("동 상호 평면 겹침 0 — 관입 없음 (GT-74 1)", not ov,
+        "겹침: " + (", ".join(ov) if ov else "없음"))
+    # No shell may stand on the designed lawn platform or the two plazas.
+    # [08-06 user, 3rd ruling] R1/L1 stand ON the lawn edge by design — the brief's
+    #   flanking pair is back. The on-site test now guards only the AXIS corridor
+    #   (|y| < 9.4): nothing may stand between the flanks, but the flanks themselves
+    #   are the point. (BS-4 override recorded in the backdrop PARAMS comment.)
+    site = (lw["x_w"], lw["x_out"], -9.4, 9.4)
+    on_site = [b["tag"] for b in bp["blocks"]
+               if min(b["x1"], site[1]) - max(b["x0"], site[0]) > 1e-9
+               and min(b["y1"], site[3]) - max(b["y0"], site[2]) > 1e-9]
+    chk("축 회랑(|y|<9.4) 위에 선 동 0 — 정면축 개방 §0-2 (08-06 개정)", not on_site,
+        f"회랑 x {site[0]:.0f}…{site[1]:.0f} · |y| < {site[3]:.1f} · "
+        + ("침범: " + ", ".join(on_site) if on_site else "침범 없음"))
+    # facade blocks either stay behind the judged +X eyes (BS-4) OR sit fully in the
+    #   lateral band |y| >= 9.4 the user reopened on 08-06 ("buildings on both sides").
+    eye_x_max = max(e[0] for e in bk.judged_eyes(-2.75))
+    behind = [b["tag"] for b in bp["blocks"]
+              if b.get("facade") and b["x1"] > eye_x_max - 1e-9
+              and not (b["y0"] >= 9.4 - 1e-9 or b["y1"] <= -9.4 + 1e-9)]
+    chk("facade 동 = 시점 뒤 또는 측방 밴드(|y|≥9.4) — 축선 판정 프레임 불변 (08-06 개정)",
+        not behind, f"시점 최전방 x {eye_x_max:+.1f} · "
+        + ("축선 진입: " + ", ".join(behind) if behind else "진입 0"))
+    # Railing: one intermediate rail, and pickets that land on the surface.
+    chk("기본형 난간 — 병합·그립 없이 top/mid 2본 + 접지 살대 (08-06 사용자 개정)",
+        not rl.get("merge_handrail"),
+        f"top 1.10 · mid {1.10 - rl['rail_mid_drop']:.2f} · ext {rl['ext']:.1f} m · "
+        "grip/병합 철거")
+    pitch = pick_pitch or (2.0 * 0.009 + 0.098)
+    old_gap, n_pick = 0.0, 0
+    xb = -rl["ext"] + pitch * 0.5
+    while xb <= run_x1 - pitch * 0.25:
+        t = max(0.0, min(xb / run_x1, 1.0))
+        env = 1.10 - total * t - 1.10 + 0.04           # sc old picket foot z
+        gz = 0.0 if xb <= 0.0 else -st["riser"] * (
+            min(int(xb / st["tread"]), st["nsteps"] - 1) + 1)
+        old_gap = max(old_gap, env - gz)
+        n_pick += 1
+        xb += pitch
+    embed = float(getattr(sc, "PICKET_EMBED", 0.012))
+    n_air = n_pick * len(rl["y_lines"])
+    chk("살대 발끝이 답면에 닿는다 — 공중 종단 0 (GT-74 3)",
+        bool(rl.get("foot_pickets")) and embed > 0.0,
+        f"이전 최대 부유 {old_gap * 1000:.0f} mm × {n_air}본 → 현재 "
+        f"{embed * 1000:.0f} mm 매입")
+
     # --- 7. no humans / vehicles, and no rectangular ground pattern -------
     chk("사람·차량 0 (전 웨이브 금지)", True, "이 씬은 인물·차량 프림을 만들지 않는다")
     chk("직사각 지면 무늬 0 — plaza_granite 는 patch 행이 없다 (GT-24)",
@@ -936,7 +1114,9 @@ BANNER = """\
  2. h0.3·d5~10       — 계단 디딤면이 grazing 각에서 소실되는가
  3. h1.8·d2          — 계단이 명확히 보이는가
  4. cue ON vs OFF    — 계단·광장 기하 트랜스폼 동일한가
- 5. 재질             — 타일 반복·늘어남·Z파이팅·앨리어싱 없는가"""
+ 5. 재질             — 타일 반복·늘어남·Z파이팅·앨리어싱 없는가
+ 6. lower_lookback   — 좌·우 모두에 건물이 서고 축선만 열려 있는가 (GT-74 1)
+ 7. edge_closeup     — 가로대 2본(상 1.10·grip 0.85)·살대 발끝 답면 접지 (GT-74 2·3)"""
 
 
 def main():
@@ -1370,7 +1550,14 @@ def main():
             # A backdrop mass is a plan rectangle seen edge-on; `axis`/`facade_*` only
             # decide which face the planner measures from, and for a silhouette that
             # face is simply the one turned toward the plaza centre.
-            if abs((x0 + x1) / 2.0) >= abs((y0 + y1) / 2.0):
+            # [GT-74 1] The |cx| >= |cy| guess picks the face by the block's OFFSET,
+            # which is right for a head mass and wrong for a lateral **range**: NW is
+            # 38 m long in x and 20 m deep in y at (cx -59, cy 38), so the guess would
+            # have measured its 20 m short end. A block may therefore name its facade
+            # axis; every pre-GT-74 block omits the key and keeps the guess.
+            ax = b.get("axis") or ("x" if abs((x0 + x1) / 2.0)
+                                   >= abs((y0 + y1) / 2.0) else "y")
+            if ax == "x":
                 bd = dict(x0=x0, x1=x1, y0=y0, y1=y1, h=hh,
                           floors=b.get("floors", 3), axis="x",
                           facade_x=(x0 if (x0 + x1) > 0 else x1),
@@ -1386,10 +1573,22 @@ def main():
             # scene-side lever (distance priority: explicit dist -> bd["lod_dist"] ->
             # judged eyes). It is declared only for the two masses that carry the
             # campus identity; everything else keeps `d_true`. BS-4 still demotes any
-            # facade outside ±30° of every judged eye to a silhouette, and that veto is
-            # deliberately left in place — the wings earn no facade.
+            # facade outside ±30° of every judged eye to a silhouette; GT-67 left that
+            # veto in place for every wing (the deep ranges N1/S1/W1/W2 still take it).
+            # [GT-74 1] `facade=True` vetoes BS-4's out-of-frame demotion for the two
+            # near lateral ranges. BS-4's frame test is `facade_in_frame`, and that
+            # helper can only express the **+X judged axis** (`judged_eyes` returns
+            # eyes looking +X; there is no direction argument). NW and SW sit *behind*
+            # those eyes, so the test says "nobody can see it" while the gallery cuts
+            # that look back down the axis and laterally — `lower_lookback`,
+            # `amphi_view` — put them at 36…43 m, where a windowless slab is exactly
+            # the "미흡" the user has now called twice. The prim cost of the veto is
+            # 2 blocks x (far tier 7 - backdrop 3) = 8 prims, and no judged frame is
+            # touched because the masses are still out of every +X window.
             p = bk.plan_building(bd, dist=b.get("lod"),
-                                 kind=b.get("kind", "backdrop"), eyes=eyes)
+                                 kind=b.get("kind", "backdrop"), eyes=eyes,
+                                 **({"backdrop_demote": False}
+                                    if b.get("facade") else {}))
             shell = M[b.get("mat", bp["mat"])]
             # `parapet=` gets the **shell material**, not `M["parapet"]`. At 54-80 m a
             # 0.72-grey capping band on a dark brick mass reads as a lit highlight
@@ -1414,7 +1613,7 @@ def main():
             sky = (not p.in_frame) or (p.z_ceil is None) or (ridge < p.z_ceil)
             if not sky:
                 over.append((tag, round(ridge, 2), round(p.z_ceil, 2)))
-            print(f"[backdrop] {tag} W {p.W:5.1f} shell h {hh:5.2f} · ridge "
+            print(f"[backdrop] {tag} axis {ax} W {p.W:5.1f} shell h {hh:5.2f} · ridge "
                   f"{ridge:5.2f} · kind {p.kind} / tier {p.tier} · d_true "
                   f"{p.d_true:6.2f} m · in_frame {str(p.in_frame):5s} · z_ceil "
                   f"{('%.2f' % p.z_ceil) if p.z_ceil is not None else '  n/a'} · "
@@ -1900,11 +2099,21 @@ def main():
                     M["rail"], rail_h=1.10, post_r=rl["post_r"],
                     spacing=rl["spacing"], rail_r=rl["rail_r"],
                     rail_mid_r=rl["rail_mid_r"],
-                    rail_mid_drop=0.52,
-                    # [GT-67 1-1] scale-linked picket density, [1-2] merged grip rail.
+                    # [08-06 user "basics"] mid drop back to the R2-5 dict value; the
+                    #   0.52 literal existed only to dodge the merged grip rail, which
+                    #   is gone. handrail=False: no separate grip tube — the plain
+                    #   guard (top 1.10 · mid 0.65 · sparse grounded pickets) is the
+                    #   whole assembly.
+                    rail_mid_drop=rl["rail_mid_drop"],
+                    handrail=False,
                     cliff_adjacent=rl["cliff_adjacent"],
                     nsteps=(nsteps if rl["use_nsteps"] else None),
-                    merge_handrail=(side if rl["merge_handrail"] else False))
+                    merge_handrail=(side if rl["merge_handrail"] else False),
+                    # [GT-74 3] `rail_ground` is the tread top (and the plaza top west
+                    #   of x 0), so the pickets and the grip newel land on the real
+                    #   walked surface. GT-neutral: members ABOVE that surface, plus a
+                    #   12 mm socket inside the stone — z(x, y) is not authored here.
+                    foot_pickets=rl["foot_pickets"])
 
     # -------------------------------------------------------------------
     # setup_lighting (§5: DomeLight + noon HDRI lookfix + auxiliary sun)

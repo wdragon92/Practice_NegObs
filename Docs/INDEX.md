@@ -41,7 +41,8 @@
 ## surveys/ (조사)
 - **`cue_arrangement_survey.md`** — **맥락 단서 배치 조사.** 낙차 유형×동반 요소 매트릭스(§1) ·
   단서-낙차 조건부 확률과 설계 목표(§2, §2.5) · 우리 33씬 대조(§4)
-- **`cue_expansion_survey_v1.md`** — 토글 단서 확장 조사+계획 (**계획 전용 — 사용자 결재 대기**)
+- **`cue_expansion_survey_v1.md`** — **낙차 간접 단서 지도(§1, 5갈래 — 기존 6키+신규 통합)** +
+  탈상관 재고(§2) · 배선 감사(§6) · 확장 계획(§7) (**계획 전용 — 사용자 결재 대기**)
 - `korean_pedestrian_geometry.md` · `korean_urban_backdrop.md` — 국내 보행 기하·도시 배경 조사
 - `era_consistency_survey_v1.md` — 연대 정합 조사 (개보수 어휘 12칸)
 - `stair_typology_survey_v2.md` (T9~T21) — 계단 유형 조사 (§3 수학 정의 = scene_common 출처;

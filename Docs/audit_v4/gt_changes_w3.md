@@ -1362,3 +1362,249 @@ scene16 A/B 사용자 검수 후 별도 행으로 확산.
   필수(에이전트 검산 산식 코드 주석). 확산은 사용자 A/B 검수 후 별도 행.
 
 **Status: OPEN (사용자 검수 대기 — 확산 여부 판정)**
+## 28. GT-72 — 08-06 S13 7차: 단문 개방·가드 종단 결속·측부 갭·전면 에지 마감 (선신고)
+
+**Authority**: 08-06 사용자 — 문은 **외짝(single)으로 바꾸고 열린 상태로** · 중앙 레일
+중간대 끝이 날카롭게 돌출 → **종단마다 포스트 추가·결속** · 계단 측부 빈 공간을 채우게
+연장 + **난간 기둥은 계단 위에 세울 것** · 수정 누적으로 각 형상 에지 마감 불량 → 정밀
+마감 패스 · 문 하부 잔디 정리 · **차량 진입구·유리 돌출부 에지 마감** · 배경(단지 외)은
+보류 선언.
+**Scope**: `scenes/main/scene13_apartment_parking_entry.py`. 보행면·낙차·레지스트리 불변.
+**GT 판정**: R-3 전용. Round `260806_w3_s13fix7`, baseline `260806_w3_s13fix6`.
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+- 계단박스: 외짝문 **개방 95°**(스테이·힌지·핸들 실부재) + 잔여 스팬 고정유리 재구획(개구 0.95 m)
+  · 중앙 가드 Top/Mid **전 종단 포스트 결속**(자유단 6→0, 프림 23→34) · 답면 플레이트 착지
+  (post_below 철거) · 남측 슬롯 StairSkirt 12 + 중앙 웰 StairWellFill 12(개방 웰 유지, 바닥 부여)
+  · 커튼월 종단 5곳 전부 포스트 중심선(자유 판 에지 0) · 마우스 종단 멀리언·사인 캡/스타일
+  · Walk_DoorApron(문 하부 잔디 정리). stair_head 육안: 결속·웰·코핑 성립, 개방문 판독.
+**Status: OPEN (사용자 검수 대기)**
+
+## 29. GT-73 — 유리 투명화 파일럿 (선신고)
+
+**Authority**: 08-06 사용자 — "Can the glass be made slightly transparent?" 재질 동결의
+명시적 예외(사용자 지시).
+**Scope**: `scene_common.py` 신규 `make_glass`(OmniPBR opacity 또는 OmniGlass, PT 전제)
++ scene13 유리 프림(캐노피 커튼월·계단박스·문) 우선 적용. 타 씬 확산은 검수 후 별도 행.
+**GT 판정**: R-2(재질 전용 — 기하 불변). Round `260806_w3_s13fix7` 동승.
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+- `scene_common.make_glass` 신설(OmniPBR enable_opacity·opacity 0.35 기본 / `NEGOBS_GLASS_MDL=glass`
+  → OmniGlass / `NEGOBS_GLASS_V1=0` → 불투명 폴백 — 신규 재질에만 스코프, 기존 재질 무간섭).
+  scene13 유리 31프림 적용. 육안: entry_approach에서 유리 홀이 반투명 판독(너머 수목·내부 가시),
+  "slightly transparent" 성립. **확산(s06 등)은 사용자 검수 후 별도 행.**
+**Status: OPEN (사용자 검수 대기)**
+
+## 30. GT-74 — scene01 광장 2차: 양측 건물·이중 중간레일 버그·부유 기둥 (선신고)
+
+**Authority**: 08-06 사용자 — "buildings again on both sides … Is that a field or a
+square?"(광장 미성립) · 중간 레일 2본 겹침 원인 확인·수정 · "pillar … still hanging in
+midair" — 계단 결속 재지시.
+**Scope**: `scenes/main/scene01_campus_stairs.py` + `scene_common.py` `build_railing_line`
+영역 한정(겹침 버그 원인일 경우). collider/OCCL 변동 본 행 귀속.
+**GT 판정**: R-3 + OCCL 선언. Round `260806_w3_fixqueue2`, baseline `260806_w3_fixqueue`.
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+- 1차(Opus): 이중 중간레일 근원 수정(merged 경로 RailMid 억제 — 3본→2본) · 살대 접지
+  (PICKET_EMBED 12 mm, 18본 부유 소거) · 구근 캡/스타일 마감 · 8동 배치.
+- **2차(오케스트레이터, 08-06 사용자 3차 지시)**: "기본이 최고" — merge/그립 전면 철거
+  (`handrail=False`), top 1.10 + mid 0.65 2본 + 접지 살대 + ext 0.3 기본형 복원 ·
+  **양측 근접 건물 R1/L1 복원**(원 브리프 y 9.5..14 / −15..−10.5, h 14/10, facade 정면 —
+  **BS-4 "밀어내고 낮추라" 룰링 사용자 지시로 개정**, GT-59 전례; 자가검증 3행 개정 동반:
+  축 회랑 |y|<9.4 개방·측방 밴드 facade 허용·기본형 난간). 육안: 광장 성립·기본 난간 판독.
+  regr FAIL2(amphi_view·lower_lookback FRAME/OCCL) = 본 행 귀속.
+**Status: OPEN (사용자 검수 대기)**
+
+## 31. GT-75 — scene05 side_arc 돌출 오브젝트·무대 계단 정리 (선신고)
+
+**Authority**: 08-06 사용자 — side_arc 컷의 돌출(popped-out) 오브젝트 수리 · 무대 계단
+접속 정리("stand out too much").
+**Scope**: `scenes/main/scene05_amphitheater.py`. P-16(무대 재설계)은 계속 범위 외 —
+계단 접속·마감 한정.
+**GT 판정**: R-3 전용. Round `260806_w3_fixqueue2`.
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+- side_arc 돌출체 = backdrop_shrub 로브가 cut_wall 방위각 대역과 간섭(검산기 사각) → 로브
+  방위 재배치 + selfcheck에 방위 간섭 검사 신설. 무대 계단 접속 정리(단 리듬 연속·재질 톤
+  통일, P-16 범위 밖 유지). regr 본 씬 FAIL 0.
+**Status: OPEN (사용자 검수 대기)**
+
+## 32. GT-76 — scene06 나선 재정밀·에지 마감·양측 통일 (선신고)
+
+**Authority**: 08-06 사용자 — "start over and rebuild the spiral … or pay attention
+again. It's sloppy" · 에지 마감 · 반대측 상행 계단 동일 처리 — **단일 육교 제품군 읽힘**.
+**Scope**: `scenes/main/scene06_overpass_spiral.py`. 5.005 m 웰·보행면·낙차 불변.
+**GT 판정**: R-3 전용. Round `260806_w3_fixqueue2`.
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+- 1차(Opus): 나선·북측 계단 정밀 재구축 — 업스탠드+슈+판+캡 1계열, 등각 분절, 노출 킥
+  상수화(0.120), 데크 캡 단일부재화, 랜딩 뉴얼 공유(중간 베이 교차 소거).
+- **2차(오케스트레이터)**: 랜딩 메시 UV 부재로 타일 평균색 혀가 데크면 침입 →
+  `DeckApronTile`(+4 mm, 직선 문지방 에지)로 재질 전환을 의도화. 육안: deck_entry 연속 판독.
+  regr FAIL3(deck_entry·h0.3_d2·h0.9_d5 FRAME) = 가드 재구축 귀속.
+**Status: OPEN (사용자 검수 대기)**
+
+## 33. GT-77 — scene10 데크 접속 경로 자연화 (선신고)
+
+**Authority**: 08-06 사용자 — "the path the deck connects to flows naturally".
+**Scope**: `scenes/main/scene10_park_deck_switchback.py`. 낙차 6.60·P-2 보존 유지.
+**GT 판정**: R-3 전용. Round `260806_w3_fixqueue2`.
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+- 데크 양단 접속 경로 신설·접지 전이(§0-2 씬 끝까지) — 08-06 감사 "무맥락 매트" 해소.
+  P-2 보존 항목 불변. regr FAIL1(h0.9_d10 FRAME) 귀속.
+**Status: OPEN (사용자 검수 대기)**
+
+## 34. GT-78 — scene14 측벽 handrail 제거 (GT-70 부분 롤백, 선신고)
+
+**Authority**: 08-06 사용자 — "Why did you add a handrail on the wall? Remove it".
+GT-70 의 측벽 상부 handrail 항을 사용자 지시로 롤백(재질 단순화는 유지).
+**Scope**: `scenes/main/scene14_grandstair_illusion.py`.
+**GT 판정**: R-3 전용. Round `260806_w3_fixqueue2`.
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+- GT-70 측벽 handrail 전면 철거(사용자 지시 — 재질 단순화는 유지). regr FAIL 0.
+**Status: OPEN (사용자 검수 대기)**
+
+## 35. GT-79 — scene16 정체성 재구축: 도로 횡단 지하보도 (선신고)
+
+**Authority**: 08-06 사용자 — "I don't know Scene16's identity … it should feel like it
+crosses the road, like an underpass". T20(캐노피 그림자 계단) 정체성 위에 **상부 횡단
+도로**를 신설해 '도로 밑을 지나는 지하보도'로 재문맥화.
+**Scope**: `scenes/main/scene16_canopy_shadow.py`. 계단·하부 통로·그림자 밴드 단서(씬
+정체성 T20)·GT 불변 — 상부 도로·연석·접속 보도가 신설 dressing.
+**GT 판정**: R-3 + FRAME/OCCL 대변동 선언. Round `260806_w3_fixqueue2`.
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+- 상부 **횡단 차도 신설**(연석·차선·§0-2 접속 보도) — "도로 밑을 지나는 지하보도" 정체성 성립
+  (육안: beauty_overview). T20 그림자 밴드·계단·통로 기하 불변. **GT 재캐시 선언**: 신설 연석
+  낙차 2열(x 7.80/13.80) + 트렌치 대역 x 7.55–14.05 지붕화 → R-1/R-3 재캐시 다음 데이터
+  라운드에서. **결정 대기 2건**: 하부 유효고 1.75 m(표준 2.3–2.5 미달 — 통로 심도는 T20 동결
+  이라 씬 차원 결정) · 가드레일 x=0 종단 포스트(판정 밴드 내 신규 기하라 별도 행 요망).
+  regr FAIL8(approach·프리셋·under_canopy FRAME) 귀속.
+**Status: OPEN (사용자 검수 대기)**
+
+## 36. GT-80 — scene11 H형 육교 복원·접속 자연화 (선신고)
+
+**Authority**: 08-06 사용자 — "I asked to fix it into an H-shaped overpass, but it looks
+like they just removed the stairs and rushed the fix. Fix it neatly so it connects
+naturally." (S11-H 법령: "한국 육교는 H형이야").
+**Scope**: `scenes/main/scene11_footbridge_stairs.py` — H-plan 4지 계단 접속 완결(막다른
+데크 금지), 접합 마감. 낙차·그레이팅 축 불변.
+**GT 판정**: R-3 + FRAME 선언. Round `260806_w3_fixqueue2`, baseline `260731_w3_full`.
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+- 1차(Opus): H 완성 — 4지 계단(서측 직선 2련·동측 되돌음 2련), 데크 말단 막다름 해소,
+  connuous 가드 폴리라인(코너 공유 포스트·너클 캡·중간 가로대), +1,790프림(§4-14 예산 근거).
+- **2차(오케스트레이터, 사용자 "접속을 왜 저렇게밖에" 직접 재작업)**: 1.95 m 펜스 → 1.10 m
+  랜딩 가드 급단차를 **말단 베이 2단 계단식 테이퍼**(1.667/1.383)로 전이 — hazard①(랜딩 외연
+  1.10 저난간 = 판정 단서)은 불변 유지. 육안: deck_walk 캐스케이드 판독. regr FAIL5 귀속.
+**Status: OPEN (사용자 검수 대기)**
+
+## 37. GT-81 — scene17 본선-램프 이격 확장·정리 (선신고)
+
+**Authority**: 08-06 사용자 — "The main road is right next to the slope, so please widen
+the distance and trim it neatly."
+**Scope**: `scenes/main/scene17_ramp_pair_hangang.py`. 램프 쌍 기하(씬 정체성)·무난간
+관행(§4-2) 불변 — 본선 이설·완충 정리.
+**GT 판정**: R-3 + FRAME 선언. Round `260806_w3_fixqueue2`, baseline `260731_w3_full`.
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+- 본선-램프 이격 확장 + 램프 상·하단 접속(제방로/강변로) + 보도 연속화(§0-2) — "고립 슬래브"
+  해소. §4-2 무난간·P-13 무연석 유지. regr FAIL5(프리셋 FRAME) 귀속.
+**Status: OPEN (사용자 검수 대기)**
+
+## 38. GT-82 — scene19 잉여 건물 제거·계단 조도·출입 폭 (선신고)
+
+**Authority**: 08-06 사용자 — 옥상 하행 계단만 있으면 되는 씬에 건물 추가 이유 불명 →
+제거 · 계단부 과암 개선 · 출입구 협소 확대.
+**Scope**: `scenes/main/scene19_fan_winder.py`. 부채꼴 계단 기하(T7)·낙차 불변.
+**GT 판정**: R-3 + OCCL/DARK 개선 선언. Round `260806_w3_fixqueue2`, baseline `260731_w3_full`.
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+- 잉여 배경 건물 제거(brick_red 소비자 소멸) · 순흑 무텍스처면 재질 바인딩(L19-F1 레버 실행 —
+  사용자 지적 = HIGH 미결 승인에 해당) · 부유 조명판 마운트 · 출입 폭 확대. 부채꼴 기하 불변.
+  regr FAIL8(전 계열 FRAME — 대변동 선언) 귀속.
+**Status: OPEN (사용자 검수 대기)**
+
+## 39. GT-83 — scene03 교량 상향·측면 이동 (선신고)
+
+**Authority**: 08-06 사용자 — levee_walk 의 교량 위치 모호 → "make it even higher and
+move it to the side"(육교 문법).
+**Scope**: `scenes/main/scene03_riverbank.py`. 제방·수면·낙차 불변 — 교량 이설.
+**GT 판정**: R-3 + FRAME 선언. Round `260806_w3_fixqueue2`, baseline `260731_w3_full`.
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+- **3패스 계보**: 1차 상향+측방 이설(u/half 0.85–0.92 이탈) → 2차 시공성(교대 12부재 해체·
+  원측 23 m 접속교·거더 분절 9부재 단면) → **3차 근측 접속(08-06 사용자 "어떻게든" 룰링)**:
+  좌 90° **곡선 남향 고가 42.40 m**(17현·마이터 겹침 29이음·종곡선 8 m 후 2.0 %·전현 동일
+  단면 — "자연 연속 형태 최우선" 이행). 낙차선 x=0 미횡단(+0.33)·산책로 +1.33·자전거도로
+  +0.75/+3.01·최소 하부 여유 1.40 m·파라펫 ≤3.9985(<4.00 아이 천장). 양안 교대 → 벽식 교각
+  (무결절면 7.45→5.30 m). R_min 7.53 m(연결로 15 미달 — 산책로 불가침의 대가, 선언).
+- **셀프체크 FAIL 1 수용**: meander_air 차폐 38.9 %(기준 35) — 사용자 룰링 귀속. 가시 표본
+  기준 수선 65.0 m·만곡 18.37 %(기준 40 m/5 %)로 지표 목적은 충족, 임계값 무수정.
+  프림 1827→2049. regr FAIL9(전 계열 FRAME) 귀속. 육안: 곡선 리본 연속·파셋 무감지.
+**Status: OPEN (사용자 검수 대기)**
+
+## 40. GT-84 — scene07 안내판 제거 (선신고)
+
+**Authority**: 08-06 사용자 — "Remove the guide sign"(사찰 입구 sign_info).
+**Scope**: `scenes/main/scene07_temple_stone_path.py` — cue_sign 기본 OFF(어블레이션 경로
+보존, v5.2 전례).
+**GT 판정**: R-3 전용. Round `260806_w3_fixqueue2`, baseline `260731_w3_full`.
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+- sign_info 기본 OFF(어블레이션 경로 보존, v5.2 전례) + 자가검증 표 갱신. regr FAIL1
+  (h0.3_d5 FRAME = 표지 소거) 귀속.
+**Status: OPEN (사용자 검수 대기)**
+
+## 41. GT-85 — scene08 부유 핸드레일 정리 (선신고)
+
+**Authority**: 08-06 사용자 — "tidy up the handrails that are hanging in midair"
+(08-06 감사: 림 가로대 밑 기둥 부재 + 기둥-가로대 높이 불일치).
+**Scope**: `scenes/main/scene08_sunken_plaza.py` — 기둥·가로대 결속 체계 수리. P-3(파라펫
+개구 폐합)은 별도 gate 유지.
+**GT 판정**: R-3 전용. Round `260806_w3_fixqueue2`, baseline `260731_w3_full`.
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+- 원인 = 킷 가로대가 '세그 중점 1점 지반 수평 실린더'인데 호출부가 4.5 m 하강 런을 2점
+  폴리라인으로 전달(파손 독트린 무관한 순수 버그) → 림 가드 재시공(기둥-가로대 결속·등간격·
+  종단 마감). P-3 개구 폐합은 계속 파크. regr FAIL 0.
+**Status: OPEN (사용자 검수 대기)**
+
+## 42. GT-86 — scene09 대안 원경 매스 재표현 (선신고)
+
+**Authority**: 08-06 사용자 — "What's that cloud-like thing across the lake?"
+(= far_hills/far_hedge 실루엣 매스 — 밑면 절단 부유·풍선형 판독, 08-06 감사 일치).
+GT-63 의 원경 매스 존치 판정을 본 씬에 한해 사용자 지시로 개정.
+**Scope**: `scenes/main/scene09_ghat_riverfront.py` — 대안 매스 재표현(접지·실루엣·질감).
+**GT 판정**: R-3 전용. Round `260806_w3_fixqueue2`, baseline `260731_w3_full`.
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+- far_hills/far_hedge 접지(밑면 절단 부유 소거)·실루엣 불규칙화·지평 폐쇄 기능 유지
+  (B-09-2 인피니티 풀 회귀 방지 — horizon_selfcheck PASS). regr FAIL1(g9_oblique FRAME) 귀속.
+**Status: OPEN (사용자 검수 대기)**
+
+## 43. GT-87 — scene20 계단 양측 방호 신설 (선신고)
+
+**Authority**: 08-06 사용자 — "some kind of handrail or something on both sides of the
+stairs..? Even a wall.. It looks way too dangerous..?" (08-05 독트린: 난간=낙차 표지).
+**Scope**: `scenes/main/scene20_diagonal_oblique.py` — 사선 계단 양측 난간 또는 측벽.
+계단 기하·낙차 불변, §4-9(전주 금지) 유지.
+**GT 판정**: R-3 + OCCL 선언. Round `260806_w3_fixqueue2`, baseline `260805_w3_hedgeswap`.
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+- 실체 = 계단 좌우가 아니라 **사선 메사 연단 전장 무방호**(감사 '경미' 미승계 건) → 연단
+  방호 신설(08-05 독트린: 난간=낙차 표지), 계단 기하 불변. regr FAIL1(along_diagonal FRAME)
+  귀속.
+**Status: OPEN (사용자 검수 대기)**
+
+## 44. GT-88 — sceneC4 수막 투명·표현 개선 (선신고)
+
+**Authority**: 08-06 사용자 — "The water looks strange … water must be clear, so there's
+no need to occlude the pad … Put a bit more effort into expressing the water."
+**Scope**: `scenes/batch1/sceneC4_wet_stairs.py` — 수막 플레이트 투명화(opacity/글래스 경로,
+GT-73 과 동일 기법 계열)·미러 과장 완화·트레드 가시성 회복. 젖음 단서(씬 정체성) 유지.
+**GT 판정**: R-2/R-3(재질 중심). Round `260806_w3_fixqueue2`, baseline `260731_w3_full`.
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+- 수막 투명화(로컬 opacity 재질 — GT-73 계열)·미러 과장 완화·트레드 가시성 회복(젖음 단서
+  유지: 스침각 반사 잔존 — grazing_mirror 육안 확인). **캡처 안정화 레이스 기록**: 3컷이
+  '[캡처] FAIL' 로그를 남겼으나 파일 완전성 검증(1920×1080·정상 평균) — scene_common 대기
+  40루프 한계, GT-89 하네스 정비 후보. regr FAIL 0(WARN 4 귀속).
+**Status: OPEN (사용자 검수 대기)**
+
+
+## 45. GT-89 — 구형 씬 템플릿 일괄 현행화: SMOKE 게이트·하네스 정비 (선신고)
+
+**Authority**: 08-06 사용자 — "Please also do a neat batch upgrade on the old skins as well"
++ GUI 부팅 사고(에이전트 SMOKE 시도가 게이트 없는 구형 씬에서 Isaac GUI를 부팅 — scene03
+확인·scene09/19 유사, 감시자 임시 운용으로 봉합).
+**Scope**(선신고): 전 씬 감사 후 부팅 전 `NEGOBS_SMOKE` 조기 종료 게이트 부재 씬에 일괄 삽입
+(기하·재질 무변경 — HEAD 해시 비트동일로 증명) + 캡처 안정화 대기 한계(scene_common 40루프,
+GT-88 레이스) 상향. 시각 "스킨" 재작업 의미로 판독될 경우 별도 웨이브(사용자 확인 대기 기록).
+**GT 판정**: R-0 인프라(레지스트리·렌더 무영향). round 불요(해시 증명), SMOKE 전수 재실행.
+**Status: OPEN (선신고)**

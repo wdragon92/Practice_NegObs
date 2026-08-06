@@ -1096,7 +1096,9 @@ SMOKE 는 스테이지 빌드 전 단락되므로 dressing 신설 코드는 렌�
   랩 + 하행 레일(중간참 U-리턴 포함) 확인.
 - gallery: `look_check/_review/260805_w3_s13fix5/` (사용자 검수 대기).
 
-**Status: OPEN** (사용자 검수 통과 시 CLOSED — GT-58~61 과 같은 사이클).
+**08-06 검수(사용자, Isaac Sim 대화형 검수)**: 수정 요청 — 계단박스 개폐(중앙 벽 철거·출입문·측면 낙차 폐합)·아파트 정남향 그리드·교차로·수목/보도 정렬 → **GT-64 사이클로 이관**.
+
+**Status: OPEN** (GT-64 라운드 검수와 함께 재판정).
 
 ## 19. GT-63 — 08-05 헤지 실자산 전환 확산: 전경 전정 밴드 8씬 (선신고)
 
@@ -1147,4 +1149,216 @@ ERROR 0(WARN = PLACEMENT 데이텀 부재 nodata 기존 소견군 + LINT-9 gated
   실자산 전환을 원하면 별도 행(아크 배치 place_shrubs) 후보.
 - gallery: `look_check/_review/260805_w3_hedgeswap/` (사용자 검수 대기).
 
-**Status: OPEN** (사용자 검수 통과 시 CLOSED — GT-62 와 같은 사이클)
+**08-06 검수(사용자)**: 방향 승인("a bit more natural") · **밀도 과밀 지적**("still pretty dense") → GT-71 파일럿(scene16 A/B) 선신고. 확산 여부는 파일럿 검수 후.
+
+**Status: OPEN** (밀도 파일럿 판정과 함께 재판정)
+## 20. GT-64 — 08-06 S13 6차 답변: 정남향 판상 그리드 · 남북 교차로 · 계단박스 개폐 (선신고)
+
+**Authority**: 08-06 사용자 — ① "Make sure all the apartments face south and line them up …
+move the current A103 … a bit further south and align it, then add the A104 building and
+arrange it in a grid-like pattern"(한국 아파트 정남향 관행) ② "make the end of the road
+continue further north and south as an intersection" ③ 전 턴 사용자 제안 승인분: 중앙 벽
+(ShaftWall_Mid) 철거 · 하행 계단 입구 문 · 문 옆 낙차 폐합 ④ 수목 배치·보도 정렬 수리,
+계단 핸드레일 "loose" 지적.
+
+**Scope**(선신고): `scenes/main/scene13_apartment_parking_entry.py` 단독.
+- 아파트 마스터플랜: A101 남향 반전(파사드 y0면·face_dir −1) · A102/A103 E-W 판상 전환
+  (A103 남측 이동·정렬) · **A104 신설** — 전동 정남향 그리드. 정오 그림자 검산 [computed]
+  재기재(판정 아이라인 x ≤ −2 · 접근로 비음영 유지). 카메라 아이가 신설 매스에 삼켜지는
+  컷은 최소 이동 + meta.json 정직 기재(X2) — 컷 이름·수 15 불변.
+- 도로망: 진입로 종단 남북 교차로(연석·횡단·보도 연속 §0-2) · 보도/횡단 정렬 수리 ·
+  가로수열 도로망 추종(피치 8.0 §4-4) + 구조물 이격. §4-9(13 전주 금지)·차량/사람 금지 유지.
+- 계단박스: ShaftWall_Mid 철거(**collider 제거 본 행 귀속**) → 플라이트 사이 자립 양면
+  핸드레일(U-리턴·h 0.85) · 동측 입구 프레임+강화유리문 + 잔여 스팬 고정 유리 폐합 ·
+  샤프트 개구 잔디 립 → 콘크리트 코핑 · 뉴얼(11.30, 5.10) 문틀 통합/이설.
+- 파크 P-6(scene13 식재)은 사용자 직접 지시 우선(GT-59 전례) — 본 행이 개정 기록.
+
+**GT 판정**: 보행면·낙차 에지·GT drop 불변(트렌치·계단 기하 불변) → **R-3 전용**.
+마스터플랜발 FRAME/OCCL/PHOTO 대변동 + ShaftWall_Mid collider 제거는 본 행 귀속.
+Round `260806_w3_s13fix6`(15컷, baseline `260805_w3_s13fix5`).
+
+**§4 착지기록** (2026-08-06): 구현 = Opus 5 에이전트 8기(§2.6 R5, 파일 소유권 분리) · 통합 floor — py_compile 9파일 OK · SMOKE 8/8 OK · geom_invariance R-4/R-6 33/33 PASS · placement_lint 신규 ERROR 0(전역 17 = HEAD 상태와 동일한 기존 소견 — stash A/B 확인) · building_kit OK. 추가 검증: HEAD 대조 기하 해시 — **미변경 25씬 비트동일**(공용 킷 `build_railing_line` 신규 kwarg 기본값 불활성 입증, §2.3).
+- render: `flock -o /tmp/negobs_gpu.lock bash scripts/rounds/run_260806_w3_s13fix6.sh` —
+  15/15컷 56.9 s. 재렌더 1회: beauty_overview 아이 (−17,−15,12)→(−31,−8,14) — 중심선 이격
+  1.11 m 논거가 반프러스텀에는 불충분(A104 서측 박공이 프레임 우반 점유) → 개방 회랑 축으로
+  이동, 코드 주석·X2 기재. stair_head 아이도 에이전트가 2.50 m 내부 진입(닫힌 유리문이 구
+  아이를 가림 — 주석 기재). 컷 이름·수 15 불변.
+- census: 수목 28역 중 21식재·7드롭(간섭별 실측 이격 로그 출력 — 유리홀 2·화단 1·가로등 1·
+  차도/횡단 3) · hazard_registry 20→30행(신설 남북 도로망 연석/턴다운/림 — 트렌치·샤프트·
+  계단·기존 E-W 행 전부 byte-identical, "stair head 무난간" 행 포함) · ShaftWall_Mid collider
+  제거 1(본 행 선언) · 그림자 검산 `sun_shadow()` 파생(접근로·판정 아이 6국 전부 비음영).
+- regression vs `_s13fix5` (`Docs/reports/regr_260806_w3_s13fix6.json`): FAIL 3 · WARN 1 ·
+  INFO 4 · PASS 7 — 전부 본 행 귀속. beauty_overview FRAME/OCCL = 마스터플랜+아이 이동 ·
+  bollard_walk FRAME/OCCL = 교차로·보도 정렬·수목 재배치 · stair_head FRAME/OCCL+**DARK
+  신규(mean 42.8·dark 16.9 %)** = 중앙벽 철거+동측 유리 폐합 — 판독 가능 수준이나
+  `stair_canopy.lamp_intensity` watch item(주석 기재), 검수에서 어둡다고 판정되면 상향 행.
+  portal_look UNCHANGED = 변경분 프레임 밖(정상). 이월 BLOWN 3·DARK 1 = 전 라운드 절대 상태.
+- 육안: stair_head(중앙벽 철거 후 양 플라이트 관통 시야·자립 양면 가드·U-리턴·머리 뉴얼
+  결속·코핑의 잔디 립 소거) · beauty_overview(회랑 구도 — 북열 남향 창면·남열 무창 북면·
+  교차로 전경) · bollard_walk(보도→횡단→보도 정렬·정면축 개방 §0-2). 유리문은 무투과
+  재질 스택이라 렌더에서 불투명 판으로 읽힘(라이브러리 전역 제약 — scene08 §전례) — "유리
+  너머 낙차 가시" 취지는 렌더상 성립하지 않음을 기록.
+- gallery: `look_check/_review/260806_w3_s13fix6/` (사용자 검수 대기).
+
+**Status: OPEN (사용자 검수 대기 — GT-62 와 같은 사이클)**
+
+## 21. GT-65 — scene10 난간 접합·데크 연속성 (선신고, gallery_fix_plan §1)
+
+**Authority**: 08-05 갤러리 검수("이 씬 먼저") — 난간 모서리·newel 연결부 정리 ·
+데크 느낌 끝까지 연속 · 전경 관목 재검토(원경 TreeLine 계열은 GT-63 제외 유지).
+**Scope**: `scenes/main/scene10_park_deck_switchback.py`. 낙차 6.60 유지 · P-2 파크 존중
+(archetype 재건 아님, 접합부·연속성 정리만).
+**GT 판정**: R-3 전용. Round `260806_w3_fixqueue`, baseline 씬별 직전 라운드.
+**§4 착지기록** (2026-08-06): 구현 = Opus 5 에이전트 8기(§2.6 R5, 파일 소유권 분리) · 통합 floor — py_compile 9파일 OK · SMOKE 8/8 OK · geom_invariance R-4/R-6 33/33 PASS · placement_lint 신규 ERROR 0(전역 17 = HEAD 상태와 동일한 기존 소견 — stash A/B 확인) · building_kit OK. 추가 검증: HEAD 대조 기하 해시 — **미변경 25씬 비트동일**(공용 킷 `build_railing_line` 신규 kwarg 기본값 불활성 입증, §2.3).
+- render: `flock -o /tmp/negobs_gpu.lock bash scripts/rounds/run_260806_w3_fixqueue.sh` —
+  7씬 순차(scene01 선행 = §2.3 공용 킷 1씬 선검증), 계 97컷.
+- regression (`Docs/reports/regr_260806_w3_fixqueue.json`, baseline 01/06/10/12 =
+  `260805_w3_doctrine` · 05/14/16 = `260805_w3_hedgeswap`): 계 FAIL 10 · WARN 30 ·
+  INFO 7 · PASS 50 — 씬별 귀속은 각 행 참조.
+- gallery: `look_check/_review/260806_w3_fixqueue/` (사용자 검수 대기).
+- 본 씬 귀속: FAIL 1 = leaf_edge FRAME 42 %(모서리·뉴얼 접합 재작업 + 진입 데크 전연
+  EntryRail_Out 신설 — 9 그리드 아이 낙엽 단서 가림 0 검산) · WARN 4(FRAME) 동일 귀속.
+  육안: 접합부 단일 제품군 읽힘·부유 단부 0. 낙차 6.60·P-2 보존 항목(널 틈·돌구덩이·
+  통나무 펜스) 불변.
+
+**Status: OPEN (사용자 검수 대기)**
+
+## 22. GT-66 — scene12 픽켓 롤백: GT-43 원 단면 복원 (선신고)
+
+**Authority**: 08-05 검수 — "원래 가드 느낌(기둥 Ø120 + 상·중 통나무 2단, 인필 없음)".
+연속 런은 유지(08-05 독트린 — 훼손 스팬 부활 금지).
+**Scope**: `scenes/main/scene12_riverside_deck.py` — 살대(픽켓) 제거·GT-43 단면 복원,
+**픽켓 collider 129본 제거(본 행 귀속)**. Q3(edge_void 재조준)은 본 롤백으로 대체.
+**GT 판정**: R-3 + collider 제거 선언. Round `260806_w3_fixqueue`.
+**§4 착지기록** (2026-08-06): 구현 = Opus 5 에이전트 8기(§2.6 R5, 파일 소유권 분리) · 통합 floor — py_compile 9파일 OK · SMOKE 8/8 OK · geom_invariance R-4/R-6 33/33 PASS · placement_lint 신규 ERROR 0(전역 17 = HEAD 상태와 동일한 기존 소견 — stash A/B 확인) · building_kit OK. 추가 검증: HEAD 대조 기하 해시 — **미변경 25씬 비트동일**(공용 킷 `build_railing_line` 신규 kwarg 기본값 불활성 입증, §2.3).
+- render: `flock -o /tmp/negobs_gpu.lock bash scripts/rounds/run_260806_w3_fixqueue.sh` —
+  7씬 순차(scene01 선행 = §2.3 공용 킷 1씬 선검증), 계 97컷.
+- regression (`Docs/reports/regr_260806_w3_fixqueue.json`, baseline 01/06/10/12 =
+  `260805_w3_doctrine` · 05/14/16 = `260805_w3_hedgeswap`): 계 FAIL 10 · WARN 30 ·
+  INFO 7 · PASS 50 — 씬별 귀속은 각 행 참조.
+- gallery: `look_check/_review/260806_w3_fixqueue/` (사용자 검수 대기).
+- 본 씬 귀속: FAIL 2 = edge_void 54 %·under_deck 22 % FRAME(픽켓 소거 — 근접 컷에서
+  세로 살대 소실) · WARN 2 동일. 육안: GT-43 단면(Ø120 기둥 + 상·중 통나무 2단) 복원,
+  연속 런·에지 부식 밴드 유지. **레일 높이 1.10 유지 판단 기록**: GT-43 사료값은 1.05였으나
+  1.05의 유일 논거였던 '열화 가드(L12-F1)' 정체성이 08-05 독트린으로 은퇴 → 인필 롤백만
+  수행(높이 재론은 검수 시 사용자 판단). 픽켓 collider 실측 129본 제거(선언 일치).
+
+**Status: OPEN (사용자 검수 대기)**
+
+## 23. GT-67 — scene01 amphi 삭제 · railing 규모 연동 · 광장 복원 (선신고)
+
+**Authority**: 08-05 검수 5건(1-1~1-5).
+**Scope**: `scenes/main/scene01_campus_stairs.py` + `scene_common.py build_railing_line`
+(단수/낙차 기반 살대 spacing 파라미터 — **기본값 시 기존 13개 호출 씬과 비트동일 필수**,
+사용은 scene01만; §2.3 1씬 선검증은 fixqueue 렌더 순서 scene01 선행으로 이행).
+- amphi(3단 미니 야외극장) 삭제(**collision box 제거 본 행 귀속**).
+- handrail 한 덩어리 정리(패널 따로 노는 문짝 인상 해소).
+- 광장 정체성 복원: 건물 재도입(**OCCL 변동 본 행 귀속**), 기준
+  `Docs/reference_photos/Generated Image - Scene01.jpg`, §0-2(길 정면 건물 금지)·scene04 참조.
+**GT 판정**: R-3 + collider/OCCL 선언. Round `260806_w3_fixqueue`.
+**§4 착지기록** (2026-08-06): 구현 = Opus 5 에이전트 8기(§2.6 R5, 파일 소유권 분리) · 통합 floor — py_compile 9파일 OK · SMOKE 8/8 OK · geom_invariance R-4/R-6 33/33 PASS · placement_lint 신규 ERROR 0(전역 17 = HEAD 상태와 동일한 기존 소견 — stash A/B 확인) · building_kit OK. 추가 검증: HEAD 대조 기하 해시 — **미변경 25씬 비트동일**(공용 킷 `build_railing_line` 신규 kwarg 기본값 불활성 입증, §2.3).
+- render: `flock -o /tmp/negobs_gpu.lock bash scripts/rounds/run_260806_w3_fixqueue.sh` —
+  7씬 순차(scene01 선행 = §2.3 공용 킷 1씬 선검증), 계 97컷.
+- regression (`Docs/reports/regr_260806_w3_fixqueue.json`, baseline 01/06/10/12 =
+  `260805_w3_doctrine` · 05/14/16 = `260805_w3_hedgeswap`): 계 FAIL 10 · WARN 30 ·
+  INFO 7 · PASS 50 — 씬별 귀속은 각 행 참조.
+- gallery: `look_check/_review/260806_w3_fixqueue/` (사용자 검수 대기).
+- 본 씬 귀속: FAIL 2 = amphi_view FRAME 17 %(amphi 삭제 — collider 제거 선언 일치) ·
+  lower_lookback FRAME 35 %/OCCL 5.0 %(광장 복원 — 건물·게시판·거치대·벤치 재도입, OCCL
+  선언 귀속). WARN 9(주로 preset FRAME) = railing 살대 성김 + 광장 요소.
+  +Y 계단머리 낙차 형상 변화 기록: amphi 3단(0.30×2)이 단일 0.600 m 에지(x 1.52)로 —
+  남측 apron 과 동형(그쪽은 v4-A1 이래 미등재), 레지스트리 행 이동 0, self-check 에 N/S
+  동형 검증 추가. `build_railing_line` 신규 밀도 kwarg 는 기본값 비트동일(위 floor 입증),
+  사용은 scene01 단독(낙차 0.6 m·절벽 무 → 성김). 육안: 광장 정체성 성립·핸드레일 일체화.
+
+**Status: OPEN (사용자 검수 대기)**
+
+## 24. GT-68 — scene06 나선 guard 유리 통일 (선신고)
+
+**Authority**: 08-05 검수 — 본교량 deck(DeckGlass 유리판+bronze cap, G6)과 나선 tube 2단
+불일치 → 나선 guard를 main 계열로 통일, 곡면 분할은 deck 패널 분할 규칙. Q2(가로대 본수)
+본 행으로 대체.
+**Scope**: `scenes/main/scene06_overpass_spiral.py`.
+**GT 판정**: R-3 전용(가드 재표현 — 보행면·낙차 불변). Round `260806_w3_fixqueue`.
+**§4 착지기록** (2026-08-06): 구현 = Opus 5 에이전트 8기(§2.6 R5, 파일 소유권 분리) · 통합 floor — py_compile 9파일 OK · SMOKE 8/8 OK · geom_invariance R-4/R-6 33/33 PASS · placement_lint 신규 ERROR 0(전역 17 = HEAD 상태와 동일한 기존 소견 — stash A/B 확인) · building_kit OK. 추가 검증: HEAD 대조 기하 해시 — **미변경 25씬 비트동일**(공용 킷 `build_railing_line` 신규 kwarg 기본값 불활성 입증, §2.3).
+- render: `flock -o /tmp/negobs_gpu.lock bash scripts/rounds/run_260806_w3_fixqueue.sh` —
+  7씬 순차(scene01 선행 = §2.3 공용 킷 1씬 선검증), 계 97컷.
+- regression (`Docs/reports/regr_260806_w3_fixqueue.json`, baseline 01/06/10/12 =
+  `260805_w3_doctrine` · 05/14/16 = `260805_w3_hedgeswap`): 계 FAIL 10 · WARN 30 ·
+  INFO 7 · PASS 50 — 씬별 귀속은 각 행 참조.
+- gallery: `look_check/_review/260806_w3_fixqueue/` (사용자 검수 대기).
+- 본 씬 귀속: FAIL 3 = spiral_up FRAME 90 %/OCCL(근거리대 41 %)·broken_rail 83 %·
+  preset_h1.8_d2 80 % + PHOTO 휘도 하락 — 전부 나선 가드의 tube 2단 → 유리+bronze cap
+  (DeckGlass 계열) 통일 귀속. 육안 확정: overview 에서 본교량-나선이 단일 제품군, 곡면은
+  데크 패널 규칙대로 분할; spiral_up 의 암색 패널은 역광의 무투과 유리(카메라 매몰 아님 —
+  구도 정합). **판정축 협소화 기록**: 문서화된 제3 위험축(내측 난간 로봇높이 개구)이 유리
+  슈+판으로 폐합됨 — 5.005 m 웰 낙차·레지스트리 불변, W4 GT 재판정 후보로 이월.
+
+**Status: OPEN (사용자 검수 대기)**
+
+## 25. GT-69 — scene05 배치·활용도 개선 (선신고)
+
+**Authority**: 08-05 검수 — 유형 식별 합격, asset 배치·활용(벤치·수목·소품 관계 배치)
+집중, scene04 모범. 관목 종 재검토는 GT-63(실관목 전환)으로 상당 부분 소화 — 잔여는 배치.
+**Scope**: `scenes/main/scene05_amphitheater.py`. backdrop_shrub(v7 가드 겸직)·무대
+재설계(P-16)는 범위 외. seat.arcs = 호 스팬(§4-16) 주의.
+**GT 판정**: R-3 전용. Round `260806_w3_fixqueue`.
+**§4 착지기록** (2026-08-06): 구현 = Opus 5 에이전트 8기(§2.6 R5, 파일 소유권 분리) · 통합 floor — py_compile 9파일 OK · SMOKE 8/8 OK · geom_invariance R-4/R-6 33/33 PASS · placement_lint 신규 ERROR 0(전역 17 = HEAD 상태와 동일한 기존 소견 — stash A/B 확인) · building_kit OK. 추가 검증: HEAD 대조 기하 해시 — **미변경 25씬 비트동일**(공용 킷 `build_railing_line` 신규 kwarg 기본값 불활성 입증, §2.3).
+- render: `flock -o /tmp/negobs_gpu.lock bash scripts/rounds/run_260806_w3_fixqueue.sh` —
+  7씬 순차(scene01 선행 = §2.3 공용 킷 1씬 선검증), 계 97컷.
+- regression (`Docs/reports/regr_260806_w3_fixqueue.json`, baseline 01/06/10/12 =
+  `260805_w3_doctrine` · 05/14/16 = `260805_w3_hedgeswap`): 계 FAIL 10 · WARN 30 ·
+  INFO 7 · PASS 50 — 씬별 귀속은 각 행 참조.
+- gallery: `look_check/_review/260806_w3_fixqueue/` (사용자 검수 대기).
+- 본 씬 귀속: FAIL 2 = stage_lookup FRAME 67 %(벤치·수목·소품 관계 재배치 — scene04 문법) ·
+  preset_h0.3_d10 GRAZE[의심 드러남] — y124~177 대역 육안: 신설 플랜터 연석/좌석 라인이
+  에지 검출기에 걸린 것, 낙차 노출·은닉 전제 훼손 무 → 선언 귀속. WARN 3 동일.
+  신규 가구 collider 9(벤치 6·휴지통 3) — 전부 립 연석 밖 ≥0.817 m·보행면/낙차 무접촉.
+  불변 확인: backdrop_shrub·무대(P-16)·seat.arcs(§4-16)·GT-63 헤지 밴드.
+
+**Status: OPEN (사용자 검수 대기)**
+
+## 26. GT-70 — scene14 재질 단순화 · 측벽 handrail (선신고)
+
+**Authority**: 08-05 검수 — 화강석 재질 집착 중단("그냥 큰 계단"으로 충분) · 측벽은
+적당한 벽 겸 handrail 읽힘(재질 단순화 + 측벽 상부 handrail 검토).
+**Scope**: `scenes/main/scene14_grandstair_illusion.py`. P-15(파라펫 하단 결손 구조 수리)
+계속 유예.
+**GT 판정**: R-3 전용. Round `260806_w3_fixqueue`.
+**§4 착지기록** (2026-08-06): 구현 = Opus 5 에이전트 8기(§2.6 R5, 파일 소유권 분리) · 통합 floor — py_compile 9파일 OK · SMOKE 8/8 OK · geom_invariance R-4/R-6 33/33 PASS · placement_lint 신규 ERROR 0(전역 17 = HEAD 상태와 동일한 기존 소견 — stash A/B 확인) · building_kit OK. 추가 검증: HEAD 대조 기하 해시 — **미변경 25씬 비트동일**(공용 킷 `build_railing_line` 신규 kwarg 기본값 불활성 입증, §2.3).
+- render: `flock -o /tmp/negobs_gpu.lock bash scripts/rounds/run_260806_w3_fixqueue.sh` —
+  7씬 순차(scene01 선행 = §2.3 공용 킷 1씬 선검증), 계 97컷.
+- regression (`Docs/reports/regr_260806_w3_fixqueue.json`, baseline 01/06/10/12 =
+  `260805_w3_doctrine` · 05/14/16 = `260805_w3_hedgeswap`): 계 FAIL 10 · WARN 30 ·
+  INFO 7 · PASS 50 — 씬별 귀속은 각 행 참조.
+- gallery: `look_check/_review/260806_w3_fixqueue/` (사용자 검수 대기).
+- 본 씬 귀속: WARN 3(FAIL 0) — beauty_overview·preset FRAME = 화강석→단순 콘크리트 팔레트
+  (플라이트 선형 휘도 0.4128→0.2487, −40 % **선언 의도**) + 측벽 상부 handrail 신설(벽 겸
+  handrail 읽힘, h 0.85~0.95 독트린). preset_h0.3_d5 UNCHANGED = 변경분 프레임 밖.
+  P-15(파라펫 하단 결손) 유예 유지·착시 기하 불변(자가검증 통과).
+
+**Status: OPEN (사용자 검수 대기)**
+
+## 27. GT-71 — scene16 헤지 밀도 완화 파일럿 A/B (선신고)
+
+**Authority**: 08-06 사용자 — hedgeswap 검수 "it does feel a bit more natural, but it's
+still pretty dense" → 밀도 완화 파일럿. §4-1(전정 밴드 형태) 유지 — 융합 밴드는 유지하되
+과밀만 완화.
+**Scope**: `scenes/main/scene16_canopy_shadow.py` 호출부만 — `place_hedge_row`
+`pitch_frac 0.53→0.62` + jitter 소폭 확대(공용 헬퍼 무수정, kwarg 전달). **확산 금지** —
+scene16 A/B 사용자 검수 후 별도 행으로 확산.
+**GT 판정**: R-3 전용. Round `260806_w3_fixqueue`(scene16 컷 = A/B의 B판).
+**§4 착지기록** (2026-08-06): 구현 = Opus 5 에이전트 8기(§2.6 R5, 파일 소유권 분리) · 통합 floor — py_compile 9파일 OK · SMOKE 8/8 OK · geom_invariance R-4/R-6 33/33 PASS · placement_lint 신규 ERROR 0(전역 17 = HEAD 상태와 동일한 기존 소견 — stash A/B 확인) · building_kit OK. 추가 검증: HEAD 대조 기하 해시 — **미변경 25씬 비트동일**(공용 킷 `build_railing_line` 신규 kwarg 기본값 불활성 입증, §2.3).
+- render: `flock -o /tmp/negobs_gpu.lock bash scripts/rounds/run_260806_w3_fixqueue.sh` —
+  7씬 순차(scene01 선행 = §2.3 공용 킷 1씬 선검증), 계 97컷.
+- regression (`Docs/reports/regr_260806_w3_fixqueue.json`, baseline 01/06/10/12 =
+  `260805_w3_doctrine` · 05/14/16 = `260805_w3_hedgeswap`): 계 FAIL 10 · WARN 30 ·
+  INFO 7 · PASS 50 — 씬별 귀속은 각 행 참조.
+- gallery: `look_check/_review/260806_w3_fixqueue/` (사용자 검수 대기).
+- 본 씬 귀속: WARN 3 = 전부 UNCHANGED(헤지 비노출 컷 — 본 파일럿은 헤지 단독 변경이므로
+  정상). census `[GT-71]` 로그: 설계 11→9주(실배치 9·폴백 0) · pitch_frac 0.53→0.62 ·
+  지터 0.06/0.04→0.10/0.06 · 공칭 중첩 46 %/39 %(최악 +0.13 m) — **융합 유지**(§4-1).
+  양자화 주의 기록: 0.62 는 밴드1의 6주 임계 0.6129 대비 +1.1 % — 확산 시 씬별 span 재계산
+  필수(에이전트 검산 산식 코드 주석). 확산은 사용자 A/B 검수 후 별도 행.
+
+**Status: OPEN (사용자 검수 대기 — 확산 여부 판정)**

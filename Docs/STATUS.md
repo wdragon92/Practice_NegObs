@@ -1,43 +1,39 @@
-# STATUS — W3 마감 · 08-05 독트린 반영 · 갤러리 재작업 대기 (2026-08-05)
+# STATUS — 08-06 GT-64~71 착지 · 갤러리 재검수 대기 (2026-08-06)
 
-직전 판(W2 마감 스냅샷, 07-30)은 git 이력 참조. 이 판 = W3 마감 + 독트린 + 검수 결과.
+직전 판(W3 마감 + 08-05 독트린)은 git 이력 참조. 이 판 = fix-plan §2 큐 실행 + S13 6차.
 
 ## 한 줄
-**W3(이미지 기반 사실화 개보수) 33/33 완료.** 08-05 독트린(난간 자체가 낙차 단서 —
-파손·열화 가드 개념 은퇴) 반영. 갤러리 검수 결과 **수정 요청** → R7 gate 미통과,
-GT-57 OPEN → 당면 작업은 `briefs/gallery_fix_plan_v1.md`.
+**gallery_fix_plan §2 큐 전부 실행 완료.** S13 6차(GT-64: 정남향 판상 4동 그리드·남북
+교차로·계단박스 개폐) + 백로그 6씬(GT-65~70) + 헤지 밀도 파일럿(GT-71) 착지 —
+**갤러리 2건 사용자 검수 대기**. 구현은 Opus 5 에이전트 위임(08-06 사용자 지시, §2.6).
 
 ## 읽는 순서 (신규 합류)
-1. 이 파일 → 2. `briefs/process_spec_v1.md`(상설 운영 규칙 — 08-05 결재)
-→ 3. `briefs/gallery_fix_plan_v1.md`(당면 실행 계획) → 4. `audit_v4/gt_changes_w3.md`(GT ledger)
+1. 이 파일 → 2. `briefs/process_spec_v1.md`(상설 운영 규칙) → 3. `audit_v4/gt_changes_w3.md`
+행 20~27(GT-64~71 착지기록) → 4. `briefs/gallery_fix_plan_v1.md`(§2 큐 — 본 라운드로 소화)
 
 ## 현재 상태
-- 라운드: 독트린 6씬 `260805_w3_doctrine` · 나머지 27씬 `260731_w3_full`(구 `_final`에서 개칭 —
-  상태 주장 단어 금지) · scene13 선행 수리 3라운드 `260805_w3_s13fix`(GT-58: 연속 가드 + 전장
-  캐노피) → `_s13fix2`(GT-59: 계단 캐노피·전주/차단기/도로 맨홀 소거·**공용 킷 P4/P7/P8
-  weed·manhole 소거** — 차도 보유 씬의 다음 라운드 FRAME 회귀는 GT-59 귀속) →
-  `_s13fix3`(GT-60: 건물형 유리 구조물) → `_s13fix4`(GT-61: 트렌치 난간 0·유리 전장·
-  계단부 rail/glass 모드·A103 그림자 이동·A101 평행 판상형) →
-  `_s13fix5`(GT-62: 캐노피 전장 연결·높이바 직결·계단부 유리 랩+하행 핸드레일·
-  **헤지 실관목 전환**(Privet 31주 — "too shiny to be called a bush" 답변)) — **사용자 검수 대기**
-- 헤지 실자산 확산 `260805_w3_hedgeswap`(GT-63: `place_hedge_row` 공용 헬퍼 + 전경 전정
-  밴드 8씬 scene02·05·14·15·16·20·N1·N2, 계 444주 — 원경 매스(FarHedge 계열)·scene05
-  backdrop_shrub 는 검토-제외, 원장 참조) — **사용자 검수 대기**
-- 검수 총평(08-05, 이후 모든 작업의 표준법): ① **배치 품질 우선 — 재질 작업 동결**
-  ② 통행 연속성(길은 씬 끝까지, 길 정면 건물 금지) ③ scene04 = 맥락 배치 모범
-- `process_spec_v1.md` 결재 완료(R1~R7, R3·R4 조건부) — `w3_execution_spec_v1.md` RETIRED
-- Q4 sweep 완료: scene13 남측 결손·scene15 sub-code 정체성 등은 갤러리 재검수 후 제안
-- 단서 토글 확장 조사: `surveys/cue_expansion_survey_v1.md` — **계획 전용, 사용자 결재 대기**
-  (코드 무수정; 착수는 갤러리 개보수 완료 후)
+- **검수 대기 2건**: `look_check/_review/260806_w3_s13fix6/`(scene13 15컷 — GT-64) ·
+  `look_check/_review/260806_w3_fixqueue/`(scene01·05·06·10·12·14·16 97컷 — GT-65~71)
+- GT-62(s13fix5)는 08-06 검수(수정 요청)로 **GT-64 사이클에 이관** · GT-63(hedgeswap)은
+  방향 승인 + 밀도 지적 → **GT-71 파일럿**(scene16 11→9주, pitch 0.62) — 확산은 검수 후
+- scene13 6차 요지: A101 남향 반전 · A102/A103 E-W 판상 전환 · **A104 신설**(2×2 그리드,
+  전동 정남향) · 진입로 서단 T자 남북 교차로 + 보도/횡단 정렬 · 수목 21주 도로망 추종
+  (간섭 7역 드롭) · 계단박스 = 중앙벽 철거→자립 양면 가드 + 동측 강화유리문 + 고정유리
+  폐합 + 코핑. watch: stair_head DARK(42.8) — 검수에서 어두우면 lamp 상향 행
+- **신규 문서 2건**: `surveys/building_asset_survey_v1.md`(건물 사실성 — 08-06 "건물이
+  가장 부자연스럽다" 대응, **계획 전용·결재 대기**) · `reports/continuity_audit_v1.md`
+  (33씬 통행 연속성 감사 — 소견 33건, 차기 웨이브 후보)
+- 검증: floor 4종 + building_kit green · HEAD 대조 기하 해시 미변경 25씬 비트동일 ·
+  회귀 s13fix6 FAIL3/WARN1(전부 귀속) · fixqueue FAIL10/WARN30(전부 귀속, 원장 행별 기재)
 
 ## 다음
-1. `gallery_fix_plan_v1.md` §2 순서: scene10 → 12 롤백 → 01(삭제→railing→광장) → 06 통일
-   → 05·14 → 전 씬 continuity pass → ledger 선신고 → 렌더/회귀/갤러리 → **재검수 요청**
-2. 재검수 통과 시: GT-57 CLOSED · R4 큐 폐기 확정 · Q4 후보 제안
-3. W4 GT 재판정 → W5 hazard-off 팔 + 20k 생산 렌더(~15 h) → 학습 인계
-   (씬 번호 재부여 DEFERRED — spec §1)
+1. **사용자 검수**: 위 갤러리 2건 (spec §6 체크리스트) → 통과 시 GT-62~71 CLOSED,
+   GT-57(갤러리 재작업) CLOSED + R4 큐 폐기 확정
+2. GT-71 A/B 판정 → 헤지 밀도 확산 여부(씬별 span 재계산 필수 — 원장 행 27 주의)
+3. `building_asset_survey_v1.md` 결재 → 건물 사실성 파일럿(1씬)
+4. `continuity_audit_v1.md` 소견 33건 → 차기 정비 웨이브 범위 결정
+5. W4 GT 재판정(scene06 로봇높이 개구 폐합 이월분 포함) → W5 hazard-off + 20k 생산 렌더
 
 ## 규율
-`process_spec_v1.md` §2가 정본. 요지: 커밋 전 검증 floor 4종 green / 씬1렌더→회귀→육안→커밋 /
-검증 없는 확산 금지 / 같은 prim A/B / GT 선신고(ledger) / GPU·ledger flock 배타 /
-round 명명에 상태 주장 단어 금지 / gallery `--out` 필수.
+`process_spec_v1.md` §2가 정본. 요지: 커밋 전 floor 4종 green / 같은 prim A/B / GT 선신고 /
+GPU·ledger flock(-o) 배타 / round 명명 상태 주장 금지 / gallery `--out` 필수.

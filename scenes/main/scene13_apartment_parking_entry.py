@@ -37,11 +37,15 @@ Hazard
   coping (no G13 parapet) remains the scene's below-code identity.
   [08-06 · GT-64] The stair head keeps its registered 3.96 m drop edge at x = 11.20
   (unmoved), but it is no longer an *open* mouth: the east face of the stair box is
-  now a Korean basement-stair entrance — a steel frame with a closed tempered-glass
-  double leaf over the descending flight, fixed glass over the rest — so the only
-  passage is the door and nobody can step past its edge into the shaft. The drop
-  cue survives as the visible descent through the leaf, the centre guard line and
-  the newly coped east rim.
+  a Korean basement-stair entrance — a steel frame over the descending flight, fixed
+  glass over the rest — so the only passage is the door and nobody can step past its
+  edge into the shaft.
+  [08-06 · GT-72] The double leaf becomes a **single leaf modelled OPEN** (95 deg
+  hold-open on the south jamb) with a fixed sidelight filling the rest of the clear
+  opening. With the leaf swung clear, the descent is directly visible through the
+  doorway — that is now the primary drop cue, backed by the centre guard line and
+  the coped east rim. GT-73 makes the glazing translucent, so the descent also
+  reads *through* the fixed panes.
 
 [W3 S13 · G13] What the target image changed (ruling `w3_intake_v2_images.md` §7-5)
   U-5 ("지하 진입로는 캐노피를 진입로 끝까지") is read **real-practice**, not literally:
@@ -98,7 +102,8 @@ Walking-continuity self-check table (surface -> stair -> basement -> ramp -> sur
   │ 0  estate north sidewalk   (13.0,  8.20,  0.000)      flat (interlocking)
   │ 1  stair spur sidewalk     (12.4,  5.50,  0.000)      flat
   │ 2  tactile warning band    (11.65, 4.25,  0.004)      0.004 (cue_tactile)
-  │ 2b entrance door threshold (11.30, 4.28,  0.000)      flat (clear opening 1.35 m)
+  │ 2b entrance door threshold (11.30, 4.08,  0.000)      flat (single leaf, held
+  │                                                       open 95 deg — clear 0.95 m)
   │ 3  stair head (coped rim)  (11.20, 4.25,  0.000)      ← **drop 3.96, door-guarded**
   │ 4  tread 1                 (11.05, 4.25, -0.165)      0.165
   │ 5  tread 12                ( 7.75, 4.25, -1.980)      0.165 x 11
@@ -361,7 +366,12 @@ PARAMS = dict(
     #    hangers z 2.35..2.54 — 40 mm into the bar top, 20 mm into the beam
     #    soffit (2.52). Tips y ±3.05 keep clear of the glass planes ±3.15
     #    (4th answer).
-    entry_sign=dict(x_back=-0.01, panel_t=0.12, y_half=3.40, z0=2.80, z1=3.60),
+    #  [08-06 user · GT-72] the panel was a bare 6.80 × 0.80 m slab whose top and
+    #  two ends were raw cut faces 0.60 m clear of the parapet band. It gets the
+    #  band's own idiom: a cap coping 20 mm proud on 3 sides + two end stiles, so
+    #  every edge of the sign is a member and not a cut.
+    entry_sign=dict(x_back=-0.01, panel_t=0.12, y_half=3.40, z0=2.80, z1=3.60,
+                    cap_t=0.06, cap_over=0.02, stile_t=0.06),
     height_bar=dict(x=0.40, z=2.30, r=0.09, y0=-3.05, y1=3.05, nseg=8,
                     hanger_t=0.05, hang_y=2.95, hang_z0=2.35, hang_z1=2.54),
     # --- [08-05 user · U-5 literal] full-length ramp canopy — R13-1 superseded ---
@@ -416,8 +426,22 @@ PARAMS = dict(
                 #  [4th answer] glass_x0 0.0: curtain walls run to the trench
                 #  edge. [5th answer] the deck now covers that whole run, so
                 #  every pane top embeds into the deck — no free-pane channel.
+                #  [08-06 user · GT-72] "protruding glass edges … everything
+                #  capped or set back". Bay 0 used to start at x 0.012 and the
+                #  kick band at x 0.000, so 2.3 m of RAW PANE EDGE and a raw
+                #  band end faced the approach at the mouth (the parapet band
+                #  only covers z 2.55…3.00). A curtain wall ends in a mullion:
+                #  `mouth_mull` is a 0.14 section at x 0.00…0.14 on the coping,
+                #  and bay 0 then measures −0.012 wide and is dropped by the
+                #  existing 0.05 m minimum-bay guard — the run starts at the
+                #  mullion with the pane joint INSIDE the section. `glass.x0`
+                #  stays 0.0, so the smoke's guard-continuity gate is untouched.
                 glass=dict(t=0.019, joint=0.012, kick_h=0.12, kick_t=0.05,
                            x0=0.0),
+                #  x 0.06 (not 0.07): the section then runs x −0.01…0.13, i.e.
+                #  10 mm PAST the kick band's west end face at x 0.00, so that
+                #  face is buried instead of coplanar with the mullion's own.
+                mouth_mull=dict(x=0.06, w=0.14),
                 end_wall=dict(x0=23.90, t_in=0.012),
                 #  `[measured]` r1: scene02's 40000 -> portal_look 22.4/87.4 %
                 #  (unjudgeable) -> 160000 -> 42.6/29.7 %. [3rd answer] the glass
@@ -466,41 +490,72 @@ PARAMS = dict(
     #      Its beam-support duty passes to the two jamb posts (11.30, 3.55)
     #      and (11.30, 5.00) plus a north post (11.30, 6.90): 3 bearings on
     #      the x=11.30 line instead of 1, all clear of the mouth opening.
-    #    · Clear door opening y 3.60…4.95 = **1.35 m** — the full 1.40 m
-    #      flight width less the two 0.10 m jambs, above the 0.90 m code
-    #      minimum. Closure runs y 3.50…6.90, i.e. the whole east rim of the
-    #      shaft: jamb 3.50…3.60 · door 3.60…4.95 · jamb 4.95…5.05 · fixed
-    #      glass 5.05…6.90. North of 6.90 and east of 11.20 is solid ground,
-    #      so there is no reachable gap left at the NE corner.
-    #    · `[risk, declared]` this library has **no transmissive material**
-    #      (scene08 §"No transmission is available in this material stack"),
-    #      so the leaf reads as a dark reflective pane rather than clear
-    #      glass, and it now stands between the old `stair_head` eye and the
-    #      flights — see `build_views()` for the one forced eye move, and the
-    #      soffit-lamp note below for the DARK watch item.
+    #  [08-06 user · GT-72] the east face is rebuilt around a **SINGLE leaf,
+    #    modelled OPEN**, and the whole enclosure is re-cornered.
+    #    · Clear structural opening y 3.60…4.85 = 1.25 m, split into a 0.95 m
+    #      swing leaf (3.60…4.55) + a 0.06 m glazing mullion (4.55…4.61) + a
+    #      0.24 m fixed sidelight (4.61…4.85, lapping the north jamb). The
+    #      walked clear width is the leaf's 0.95 m ≥ 0.90 m code minimum;
+    #      1.25 m in one leaf would not be a door anybody builds.
+    #    · The north jamb centre moves 5.00 → **4.90 = the centre-guard rail
+    #      line** (see `stair_handrail.inset`), so the guard's head return
+    #      dies dead-centre in the jamb post instead of grazing its corner.
+    #      Closure now reads jamb 3.50…3.60 · leaf/sidelight 3.60…4.85 ·
+    #      jamb 4.85…4.95 · fixed glass 4.90…6.775 (to the NE corner post).
+    #    · Hold-open geometry `[computed]`: hinge (11.38, 3.60) — 30 mm east
+    #      of the frame's east face 11.35 so the swinging stile clears the
+    #      jamb; at 95 deg the leaf tip lands at x 12.326, where the spur
+    #      turn-down (7.3 %, top 0.004 at x 11.40) has risen to 0.072. The
+    #      leaf is therefore hung at `leaf_z0` 0.080 → **8 mm clearance, zero
+    #      interpenetration**, and the undercut is the price of a door that
+    #      opens over a turn-down whose start (x 11.40) may not move. A
+    #      jamb-mounted stay arm holds it there.
+    #    · NE corner: the north glass used to stop at x 11.20 while the east
+    #      glass ran on to y 6.90 — two planes crossing with 0.10/0.125 m of
+    #      free pane past the corner. Both runs now die in ONE corner post at
+    #      (11.30, 6.775), which also takes over the beam bearing the old
+    #      (11.30, 6.90) post carried (0.475 m of light-deck cantilever north
+    #      of it). NW corner + the W run's south end get the same treatment
+    #      (`glass_posts`), so no curtain-wall run ends in a free pane edge.
     stair_canopy=dict(x0=4.60, x1=11.90, y0=3.50, y1=7.30, z_roof=2.45,
                       roof_t=0.10, fascia_h=0.28, fascia_t=0.05,
                       fascia_top=2.67, fascia_proud=0.02, post_w=0.10,
                       embed=0.02, side_mode="glass",
                       posts=((4.85, 3.72), (4.85, 7.08), (11.30, 3.55),
-                             (11.30, 5.00), (11.30, 6.90)),
+                             (11.30, 4.90), (11.30, 6.775)),
                       beam_xs=(4.85, 8.10, 11.30), beam_w=0.08, beam_h=0.14,
-                      glass_w=dict(c=5.125, a0=3.50, a1=6.90),
-                      glass_n=dict(c=6.775, a0=5.00, a1=11.20),
+                      glass_w=dict(c=5.125, a0=3.56, a1=6.775),
+                      glass_n=dict(c=6.775, a0=5.125, a1=11.30),
+                      #  (x, y, section) — curtain-wall terminal posts. They stand
+                      #  on the shaft coping (top 0.12), not over the opening.
+                      glass_posts=((5.125, 3.56, 0.12), (5.125, 6.775, 0.12)),
+                      #  `kick_z0` −0.02 (was `base` − 0.02 = 0.10): the N run now
+                      #  reaches x 11.30, i.e. 0.10 m past ShaftCope_N's east end
+                      #  (11.20) onto Ground_N2, where a coping-based band would
+                      #  float 0.10 m above grade. Taking the band to below grade
+                      #  lands it on whatever is actually there — buried inside the
+                      #  coping where the coping exists, standing on the ground
+                      #  where it does not — with no plinth invented on the apron.
+                      kick_z0=-0.02,
                       mullion=dict(w=0.05, spacing=1.55),
                       #  east entrance wall — see the note above
+                      #  `y1` 6.90 = the shaft rim; the glazing itself now dies at
+                      #  the NE corner post `glass_n.c` 6.775, north of which is
+                      #  outside the enclosure (roof overhang), not a gap.
                       east=dict(x=11.30, y0=3.50, y1=6.90,
-                                jamb_y=(3.55, 5.00), jamb_w=0.10,
-                                door_y0=3.60, door_y1=4.95, door_z1=2.10,
-                                #  `meet_w` is the CLOSED-door meeting gap between
-                                #  the two leaves (6 mm), not a stile width — with
-                                #  0 the two leaf frames would share a bit-exact
-                                #  plane at y 4.275 and z-fight.
+                                jamb_y=(3.55, 4.90), jamb_w=0.10,
+                                door_y0=3.60, door_y1=4.85, door_z1=2.10,
                                 #  `lap` 0.010: every infill pane laps 10 mm into
                                 #  its frame member instead of sitting flush, the
                                 #  same no-coplanar rule the canopy fascia uses.
-                                leaf_t=0.05, glass_t=0.019, stile=0.06,
-                                meet_w=0.006, lap=0.010,
+                                leaf_w=0.95, leaf_t=0.05, glass_t=0.019,
+                                stile=0.06, lap=0.010,
+                                mull_y=4.58, mull_w=0.06,
+                                hinge_x=11.38, hinge_y=3.60, open_deg=95.0,
+                                leaf_z0=0.080, bot_rail=0.10,
+                                stay_r=0.012, stay_z=1.05, stay_u=0.30,
+                                hinge_r=0.022, hinge_h=0.12,
+                                sill_t=0.012, sill_over=0.05,
                                 handle_r=0.016, head_h=0.06,
                                 kick_h=0.14, kick_t=0.05,
                                 mullion_w=0.05, mullion_span=1.55),
@@ -550,26 +605,70 @@ PARAMS = dict(
     #   landing's west nose (x 7.52). The rail line at the stair head is the
     #   08-05 doctrine's drop cue.
     # [08-06 user · GT-64] `ShaftWall_Mid` is DELETED, so the rail can no longer be
-    #   wall-mounted. It becomes a **free-standing double-sided guard**: one STS
-    #   tube per flight, side-fixed to that flight's own inner slab edge, both post
-    #   lines inside the 0.30 m flight-divider strip.
-    #   · `off` 0.05 → rail lines y 5.00 (flight A, edge 4.95) and y 5.20 (flight B,
-    #     edge 5.25). Both are OUTSIDE the flight bands, so the 1.40 m clear width
-    #     of each flight is restored in full — the wall rail cost 80 mm per flight.
-    #   · `mid_h` 0.45: the well between the flights is only 0.30 m wide, so a bare
-    #     top tube would leave a 0.85 m gap. Two-tube section, the same one the
-    #     trench guard uses (`rail.mid_h` 0.46).
-    #   · TERMINATIONS — the 08-06 review called the railing "loose", and it was:
-    #     `SlopeA` ended at (11.20, ·, 0.85) in mid air. Now flight A runs on past
-    #     the rim as a level return into the door's north jamb post at x 11.30
-    #     (`jamb_x`), carried at the rim by a newel on the new east coping
-    #     (`newel_x` 11.16, base = coping top 0.12); flight B's lower end is buried
-    #     60 mm into the corridor's south wall face at x 11.20. No free tube end.
-    stair_handrail=dict(r=0.02, h=0.85, mid_h=0.45, off=0.05,
-                        post_r=0.022, post_below=0.30, post_xs=(8.3, 9.4, 10.5),
-                        bracket_r=0.013, bracket_len=0.14,
-                        u_off=0.08, newel_x=11.16, jamb_x=11.30,
-                        wall_embed=0.06),
+    #   wall-mounted. It is a **free-standing double-sided guard**: one two-tube STS
+    #   run per flight, `mid_h` 0.45 because a bare top tube over a 0.30 m well would
+    #   leave a 0.85 m gap (same section as the trench guard, `rail.mid_h` 0.46).
+    # [08-06 user · GT-72] two defects the review named are fixed here.
+    #   (a) "the rail pillars are not standing on the stairs": the posts ran from
+    #       `nose(x) − 0.30` on rail lines y 5.00 / 5.20, i.e. inside the 0.30 m
+    #       divider **well**, so all six hung in mid air over a bottomless slot.
+    #       `inset` 0.05 moves both rail lines ONTO their own flight — y 4.90
+    #       (flight A, edge 4.95) and y 5.30 (flight B, edge 5.25) — and every post
+    #       now foots on the tread below it (`tread_embed` 20 mm) on a base plate.
+    #       `post_xs` are tread MID-points (11.05 − 0.30·k, common to both flights),
+    #       not the old 8.3/9.4/10.5 of which 9.4 sat exactly on a nosing.
+    #       Cost: the walked width between the shaft wall and the post line is
+    #       1.40 − 0.05 − 0.022 = 1.328 m ≥ 1.2 m code `[computed]`.
+    #   (b) "the end of the middle rail protrudes sharply": only the TOP tube was
+    #       terminated. Every run end now lands in a post or in masonry —
+    #       head: `newel_x` 11.16 newel footed on tread 1 + Top/Mid returns into the
+    #       door's north jamb (`jamb_x` 11.30, `jamb_embed`);
+    #       landing: two U newels at `u_off` on the landing carrying Top **and** Mid
+    #       cross tubes and stubs (the old U tied the top tube only);
+    #       foot: `foot_newel_x` 11.32 on the corridor floor with Top/Mid returns —
+    #       the old foot stub aimed at Corridor_Wall_S (y ≤ 5.25), which the new
+    #       rail line y 5.30 no longer meets. Free tube ends: 6 → 0.
+    #   `plate_r` 0.045 (not 0.05): at 0.05 the head newel's plate would overhang
+    #   the registered drop edge x 11.20 by 5 mm. `newel_x` 11.14 for the same
+    #   reason — plate x 11.095…11.185, 15 mm inside the rim, and the level
+    #   returns start AT the newel so the raking tube meets it, not past it.
+    stair_handrail=dict(r=0.02, h=0.85, mid_h=0.45, inset=0.05,
+                        post_r=0.022, post_xs=(8.35, 9.25, 10.15),
+                        plate_r=0.045, plate_t=0.012, tread_embed=0.02,
+                        u_off=0.08, newel_x=11.14, jamb_x=11.30,
+                        jamb_embed=0.04, foot_newel_x=11.32),
+    # [08-06 user · GT-72] "there is a space at the side of the stairs — extend it
+    #   further to fill the gap". Two open slots, both infilled here. NEITHER the
+    #   riser count, the tread x-bands, the flight z's nor the registered 3.96 m
+    #   drop edge at x 11.20 move — these are lapped fills against existing solids.
+    #   · SOUTH slot y 3.30…3.55 (0.25 m): between the flight/landing south face and
+    #     TrenchWall_N's north face 3.30, open to the shaft base for the whole
+    #     6.20 m run. Filled per step; at the rim it laps the existing
+    #     `shaft_east` band (y 3.28…3.53), so the drop edge silhouette is unchanged.
+    #   · WELL slot y 4.95…5.25 (0.30 m) between the two flights: **bottomless** —
+    #     nothing exists below −4.40 — which is the black slot in the review cut.
+    #     Filled up to flight B's stepped top, so the well keeps the open-well form
+    #     GT-64's user approved (no central wall is restored) but now has a floor.
+    #   Both fills stop `reveal` 1 mm under the neighbouring tread and lap 10 mm
+    #   into the flight side face: the `shaft_east.cope_drop` no-coplanar device.
+    #   `reveal` also pulls both fills 1 mm back from the rim plane x 11.20 and
+    #   1 mm below the structural base −4.40: the top step of each flight and the
+    #   `shaft_east` bands already put a +X-facing face on x 11.20 and a −Z-facing
+    #   face on −4.40, and a fill face coincident with those would z-fight over
+    #   the lap band. The 1 mm is invisible and the lap is what closes the slot.
+    stair_infill=dict(skirt_y0=3.30, skirt_y1=3.56,
+                      well_y0=4.95, well_y1=5.26,
+                      land_x0=5.24, reveal=0.001),
+    # [08-06 user · GT-72] "tidy the turf strip below the door" — the 0.20 m grass
+    #   band between the shaft rim (11.20) and the spur turn-down's west end (11.40)
+    #   ran straight into the door frame. It becomes an interlocking apron on the
+    #   walk-plate idiom: top 0.003 (1 mm under the turn-down's own 0.004 west end,
+    #   so no coplanar seam), south edge butted to TrenchCope_N's north face 3.36.
+    #   `x0` 11.21, NOT the rim 11.20: Ground_N2's west face sits on that plane
+    #   and faces the same way, so a flush apron would z-fight along the
+    #   registered drop edge. 10 mm of turf stays in the rim shadow — the same
+    #   10 mm no-coplanar offset the footway plates take at the scene rim.
+    door_apron=dict(x0=11.21, x1=11.42, y0=3.36, y1=7.30, proud=0.003),
     # --- Tactile paving (cue_tactile) ---
     tactile=dict(depth=0.30, proud=0.004,
                  head_x0=11.5, head_x1=11.8,        # warning band at the stair head
@@ -801,6 +900,13 @@ PARAMS = dict(
         cope_color=(0.62, 0.62, 0.60), cope_rough=0.65,
         wood_color=(0.28, 0.19, 0.12), wood_rough=0.85,
         glass_color=(0.055, 0.075, 0.10), glass_rough=0.08,
+        # [08-06 user · GT-73] vision glass — the canopy curtain walls, the stair
+        #   box and the door. `glass_*` above stays the OPAQUE spandrel/window
+        #   look and still binds the 4 apartment blocks (a translucent window on a
+        #   solid shell would show the shell, not a room). The tint is the pane's
+        #   own colour, so at opacity 0.35 the descent behind it stays legible.
+        glass_v_color=(0.55, 0.66, 0.68), glass_v_opacity=0.35,
+        glass_v_rough=0.05, glass_v_ior=1.49,
         parapet_color=(0.60, 0.60, 0.58), parapet_rough=0.62,
         shell_tint=(0.86, 0.84, 0.80), shell_tint_b=(0.80, 0.79, 0.78),
         # [v6 C-3] canopy slab = a 6x5 m untextured white board (styrofoam carport) ->
@@ -1675,37 +1781,77 @@ def _smoke_report():
             bad_post.append((px, py))
     off_ground = [(px, py) for px, py in sp_["posts"]
                   if sh["x0"] < px < sh["x1"] and sh["y0"] < py < sh["y1"]]
-    print(f"    포스트 {len(sp_['posts'])}본(문틀 잼 2 + 북측 1 + 서측 2 — 중앙 "
-          f"뉴얼 (11.30,5.10) 철거) 개구·계단머리 침범: "
+    print(f"    포스트 {len(sp_['posts'])}본(문틀 잼 2 + NE 코너 1 + 서측 2 — "
+          f"GT-72: 북측 (11.30,6.90) → 코너 (11.30,6.775)) 개구·계단머리 침범: "
           f"{bad_post if bad_post else '없음 → OK'} · 개구 위 착지: "
           f"{off_ground if off_ground else '없음 → OK'}")
     print(f"    남측 파시아 외면 {sp_['y0'] - sp_['fascia_proud']:.2f} vs 램프 "
           f"캐노피 외면 {cp_['y_deck'] + cp_['fascia_proud']:.2f} → 이격 "
           f"{(sp_['y0'] - sp_['fascia_proud']) - (cp_['y_deck'] + cp_['fascia_proud']):.3f} m · "
           f"유리 월 W/N + 소핏 {2 * len(sp_['lamp_xs'])}등 → 밀폐 계단실 조명 확보")
+    #  [GT-72] curtain-wall corners: every run end must be a post centreline.
+    gw_, gn_ = sp_["glass_w"], sp_["glass_n"]
+    post_c = ([(px, py) for px, py, _w in sp_["glass_posts"]]
+              + list(sp_["posts"]))
 
-    # ── [08-06 · GT-64] stair-box opening/closing: door · east glass · coping ──
-    print("  [GT-64 계단박스] 중앙벽 철거 · 출입문 · 동측면 폐합 · 동측 코핑")
-    clear_w = ea_["door_y1"] - ea_["door_y0"]
+    def _has_post(x, y):
+        return any(abs(px - x) < 1e-6 and abs(py - y) < 1e-6
+                   for px, py in post_c)
+    ends = [("W 남단", gw_["c"], gw_["a0"]), ("W 북단(NW)", gw_["c"], gw_["a1"]),
+            ("N 서단(NW)", gn_["a0"], gn_["c"]),
+            ("N 동단(NE)", gn_["a1"], gn_["c"]),
+            ("동측 고정유리 북단(NE)", ea_["x"], gn_["c"])]
+    free_end = [t for t, xx, yy in ends if not _has_post(xx, yy)]
+    print(f"    [GT-72 코너] 커튼월 종단 {len(ends)}곳 → 자유 판 에지 "
+          f"{free_end if free_end else '없음 → OK (전량 포스트 중심선 종단)'} · "
+          f"NW 코너 포스트 ({gw_['c']:.3f},{gn_['c']:.3f}) · NE 코너 포스트 "
+          f"({ea_['x']:.2f},{gn_['c']:.3f}) = 보 지점 겸용")
+
+    # ── [08-06 · GT-64/GT-72] stair-box door · east glass · coping ──
+    print("  [GT-72 계단박스] 외짝문 개방 · 동측면 폐합 · 동측 코핑")
+    clear_w = ea_["leaf_w"]
     jw = ea_["jamb_w"] / 2.0
     seg = [("잼S", ea_["y0"], ea_["jamb_y"][0] + jw),
-           ("문", ea_["jamb_y"][0] + jw, ea_["jamb_y"][1] - jw),
+           ("문짝(개방)", ea_["jamb_y"][0] + jw, ea_["mull_y"] - ea_["mull_w"] / 2.0),
+           ("멀리언", ea_["mull_y"] - ea_["mull_w"] / 2.0,
+            ea_["mull_y"] + ea_["mull_w"] / 2.0),
+           ("측창(고정)", ea_["mull_y"] + ea_["mull_w"] / 2.0,
+            ea_["jamb_y"][1] - jw),
            ("잼N", ea_["jamb_y"][1] - jw, ea_["jamb_y"][1] + jw),
-           ("고정유리(잼 랩)", ea_["jamb_y"][1], ea_["y1"])]
+           ("고정유리(잼 랩)", ea_["jamb_y"][1], sp_["glass_n"]["c"])]
     #  a gap only counts when the next member STARTS after the previous one ends;
     #  a negative delta is a deliberate lap (glass into post), not a hole.
     holes = [f"{a[0]}|{b[0]}" for a, b in zip(seg[:-1], seg[1:])
              if b[1] - a[2] > 1e-9]
-    print(f"    동측면 y [{ea_['y0']:.2f},{ea_['y1']:.2f}] = "
+    print(f"    동측면 y [{ea_['y0']:.2f},{sp_['glass_n']['c']:.3f}] = "
           + " + ".join(f"{t} {a:.2f}…{b:.2f}" for t, a, b in seg)
           + f" → 틈 {holes if holes else '없음 → OK (문이 유일 통로)'}")
-    print(f"    유효 개구폭 {clear_w:.2f} m (플라이트 폭 {st_['width']:.2f} − 잼 "
-          f"2×{ea_['jamb_w']:.2f}) ≥ 0.90 → "
+    _th = math.radians(ea_["open_deg"])
+    _tip = ea_["hinge_x"] + ea_["leaf_w"] * math.sin(_th)
+    _sr, _ws = PARAMS["spur_ramp"], PARAMS["walk_spur"]
+    _rz = (PARAMS["drive"]["proud"]
+           + max(0.0, min(_sr["run"], _tip - _sr["x0"])) / _sr["run"]
+           * (_ws["proud"] - PARAMS["drive"]["proud"]))
+    print(f"    유효 통과폭 {clear_w:.2f} m (외짝 문짝) ≥ 0.90 → "
           f"{'OK' if clear_w >= 0.90 else 'FAIL'} · 문틀 x {ea_['x']:.2f} > 샤프트 "
           f"연단 {sh['x1']:.2f} (지반 위 이격 {ea_['x'] - ea_['jamb_w'] / 2.0 - sh['x1']:.2f} m) · "
           f"문 상단 {ea_['door_z1']:.2f} < 보 밑면 "
           f"{sp_['z_roof'] - sp_['beam_h'] + sp_['embed']:.2f} → "
           f"{'OK' if ea_['door_z1'] < sp_['z_roof'] - sp_['beam_h'] + sp_['embed'] else 'FAIL'}")
+    print(f"    [GT-72 개방] {ea_['open_deg']:.0f}° 홀드오픈 · 선단 x {_tip:.3f} · "
+          f"스퍼 턱낮춤 상면 {_rz:+.3f} vs 문짝 하단 {ea_['leaf_z0']:+.3f} → "
+          f"{'OK 관통 0 (이격 %+.3f)' % (ea_['leaf_z0'] - _rz) if ea_['leaf_z0'] > _rz else 'FAIL(포장 관통)'}"
+          f" · 힌지 x {ea_['hinge_x']:.2f} > 프레임 동면 "
+          f"{ea_['x'] + ea_['jamb_w'] / 2.0:.2f} → "
+          f"{'OK' if ea_['hinge_x'] > ea_['x'] + ea_['jamb_w'] / 2.0 else 'FAIL(잼 간섭)'}")
+    da_ = PARAMS["door_apron"]
+    print(f"    [GT-72 문 하부 포장] 에이프런 x [{da_['x0']:.2f},{da_['x1']:.2f}] · "
+          f"y [{da_['y0']:.2f},{da_['y1']:.2f}] · 상면 {da_['proud']:+.3f} "
+          f"(스퍼 서단 {PARAMS['drive']['proud']:+.3f} 대비 −1 mm, 공면 회피) · "
+          f"남단 = TrenchCope_N 북면 {PARAMS['ramp']['y1'] + PARAMS['wall']['thick'] + PARAMS['wall']['cope_over']:.2f} → "
+          f"{'OK' if da_['y0'] >= PARAMS['ramp']['y1'] + PARAMS['wall']['thick'] + PARAMS['wall']['cope_over'] - 1e-9 else 'FAIL(코핑 간섭)'}"
+          f" · 서단 {da_['x0']:.3f} vs 샤프트 연단 {sh['x1']:.2f} → 연단 돌출 "
+          f"{'0 (동측 %+.0f mm 오프셋 — 공면 회피)' % ((da_['x0'] - sh['x1']) * 1000) if da_['x0'] > sh['x1'] else 'FAIL(연단 침범)'}")
     se_ = PARAMS["shaft_east"]
     wl_ = PARAMS["wall"]
     covered = sorted([(a, b) for a, b, _z in se_["bands"]]
@@ -1722,23 +1868,70 @@ def _smoke_report():
           f"{se_['bands'][2][2]:+.2f} = 슬래브 밑면 → 유효고 "
           f"{se_['bands'][2][2] - PARAMS['corridor']['floor_z']:.2f} m ≥ 2.1 → "
           f"{'OK' if se_['bands'][2][2] - PARAMS['corridor']['floor_z'] >= 2.1 else 'FAIL'}")
+    #  ── [08-06 · GT-72] side-gap infills ──
+    si_ = PARAMS["stair_infill"]
+    print(f"    [GT-72 측부 갭] 남측 슬롯 {si_['skirt_y0']:.2f}…{st_['y_a0']:.2f} "
+          f"({st_['y_a0'] - si_['skirt_y0']:.2f} m, x {si_['land_x0']:.2f}…"
+          f"{st_['x_head']:.2f}) + 중앙 웰 {si_['well_y0']:.2f}…{st_['y_b0']:.2f} "
+          f"({st_['y_b0'] - si_['well_y0']:.2f} m, 종전 무저) → 계단형 충전 "
+          f"{2 * st_['n_flight'] + 1}개 · 상단 = 인접 답면 −"
+          f"{si_['reveal'] * 1000:.0f} mm · 측면 랩 "
+          f"{(si_['skirt_y1'] - st_['y_a0']) * 1000:.0f} mm → "
+          f"{'OK (공면·부유 0)' if si_['skirt_y1'] > st_['y_a0'] and si_['well_y1'] > st_['y_b0'] else 'FAIL(랩 없음)'}")
+    print(f"    불변 확인: 단수 {st_['n_flight']}×2 · 챌판 {st_['riser']:.3f} · "
+          f"디딤 {st_['tread']:.2f} · 낙차 연단 x {st_['x_head']:.2f} · "
+          f"레지스트리 행 무변동 (충전은 기존 솔리드에 랩되는 인필)")
     hr_ = PARAMS["stair_handrail"]
-    y_ra_ = st_["y_a1"] + hr_["off"]
-    y_rb_ = st_["y_b0"] - hr_["off"]
-    strip_ok = (st_["y_a1"] < y_ra_ < y_rb_ < st_["y_b0"] + 1e-9 or
-                st_["y_a1"] < y_ra_ and y_rb_ < st_["y_b0"])
-    print(f"    [자립 중앙 가드] 답면 위 {hr_['h']:.2f} + 중간대 {hr_['mid_h']:.2f} "
-          f"(0.80~0.90 대역) → {'OK' if 0.80 <= hr_['h'] <= 0.90 else 'FAIL'} · "
-          f"레일선 A y {y_ra_:.2f} / B y {y_rb_:.2f} ∈ 분리대 "
-          f"[{st_['y_a1']:.2f},{st_['y_b0']:.2f}] → "
-          f"{'OK (양 플라이트 유효폭 1.40 전량 회복)' if strip_ok else 'FAIL'}")
-    print(f"    종단부: A 수평리턴 → 문틀 잼 x {hr_['jamb_x']:.2f} 매입 · 머리 뉴얼 "
-          f"x {hr_['newel_x']:.2f}(동측 코핑 상단 "
-          f"{wl_['cope_h'] - se_['cope_drop']:.3f} 에 10 mm 매입) · "
-          f"B 하단 복도 남벽 x {sh['x1']:.2f} 매입 {hr_['wall_embed'] * 1000:.0f} mm "
-          f"→ 공중 종단 0 · U리턴 x {st_['x_turn'] - hr_['u_off']:.2f} ≥ 참 서단 "
-          f"{st_['land_x0']:.2f} → "
-          f"{'OK' if st_['x_turn'] - hr_['u_off'] >= st_['land_x0'] else 'FAIL'}")
+    y_ra_ = st_["y_a1"] - hr_["inset"]
+    y_rb_ = st_["y_b0"] + hr_["inset"]
+    on_tread = (st_["y_a0"] + hr_["post_r"] < y_ra_ < st_["y_a1"] - hr_["post_r"]
+                and st_["y_b0"] + hr_["post_r"] < y_rb_
+                < st_["y_b1"] - hr_["post_r"])
+    #  post stations must be tread MID-points, else a post lands on a nosing
+    mids = [round(st_["x_head"] - (k + 0.5) * st_["tread"], 4)
+            for k in range(st_["n_flight"])]
+    off_mid = [bx for bx in hr_["post_xs"] if round(bx, 4) not in mids]
+    print(f"    [GT-72 자립 중앙 가드] 답면 위 {hr_['h']:.2f} + 중간대 "
+          f"{hr_['mid_h']:.2f} (0.80~0.90 대역) → "
+          f"{'OK' if 0.80 <= hr_['h'] <= 0.90 else 'FAIL'} · 레일선 A y "
+          f"{y_ra_:.2f} ∈ 플라이트A [{st_['y_a0']:.2f},{st_['y_a1']:.2f}] / "
+          f"B y {y_rb_:.2f} ∈ 플라이트B [{st_['y_b0']:.2f},{st_['y_b1']:.2f}] → "
+          f"{'OK (기둥 전량 답면 착지)' if on_tread else 'FAIL(웰 위 부유)'} · "
+          f"벽~기둥 유효폭 {st_['width'] - hr_['inset'] - hr_['post_r']:.3f} ≥ 1.20 → "
+          f"{'OK' if st_['width'] - hr_['inset'] - hr_['post_r'] >= 1.20 else 'FAIL'}")
+    print(f"    기둥 스테이션 {hr_['post_xs']} = 디딤 중앙 → "
+          f"{'OK' if not off_mid else 'FAIL(코 위 착지 %s)' % off_mid} · "
+          f"답면 매입 {hr_['tread_embed'] * 1000:.0f} mm + 베이스 플레이트 r"
+          f"{hr_['plate_r']:.2f}")
+    print(f"    종단부(Top·Mid 동시): A 수평리턴 → 문틀 잼 x {hr_['jamb_x']:.2f} "
+          f"매입 {hr_['jamb_embed'] * 1000:.0f} mm (잼 중심 y "
+          f"{ea_['jamb_y'][1]:.2f} = 레일선 → "
+          f"{'OK' if abs(ea_['jamb_y'][1] - y_ra_) < 1e-9 else 'FAIL(축 불일치)'}) · "
+          f"머리 뉴얼 x {hr_['newel_x']:.2f} (답면 1 착지 · 베이스 플레이트 동단 "
+          f"{hr_['newel_x'] + hr_['plate_r']:.3f} < 연단 {st_['x_head']:.2f} → "
+          f"{'OK 돌출 0' if hr_['newel_x'] + hr_['plate_r'] < st_['x_head'] else 'FAIL(연단 돌출)'}"
+          f") · U 뉴얼 2본 x "
+          f"{st_['x_turn'] - hr_['u_off']:.2f} ≥ 참 서단 {st_['land_x0']:.2f} → "
+          f"{'OK' if st_['x_turn'] - hr_['u_off'] >= st_['land_x0'] else 'FAIL'} · "
+          f"B 하단 복도 뉴얼 x {hr_['foot_newel_x']:.2f} (복도 y "
+          f"[{PARAMS['corridor']['y0']:.2f},{PARAMS['corridor']['y1']:.2f}] 내 "
+          f"{'OK' if PARAMS['corridor']['y0'] < y_rb_ < PARAMS['corridor']['y1'] else 'FAIL'}) "
+          f"→ 공중 종단 0")
+
+    # ── [08-06 · GT-73] glass transparency pilot (material-only, R-2) ──
+    mp_ = PARAMS["material"]
+    print("  [GT-73 유리 투명화] 사용자 지시에 의한 재질 동결 예외 (기하 불변)")
+    print(f"    백엔드 = {sc.glass_backend()} · 불투명도 "
+          f"{mp_['glass_v_opacity']:.2f} (0.30~0.45 대역) → "
+          f"{'OK' if 0.30 <= mp_['glass_v_opacity'] <= 0.45 else 'FAIL'} · "
+          f"거칠기 {mp_['glass_v_rough']:.2f} · IOR {mp_['glass_v_ior']:.2f} · "
+          f"틴트 {tuple(round(c, 2) for c in mp_['glass_v_color'])}")
+    print(f"    적용 = Canopy/Glass_* · StairCanopy/Glass_* · EastGlass_* · "
+          f"DoorTransom · DoorSidelight · Leaf_Glass  |  불투명 유지 = "
+          f"Looks/Glass (건물 4동 창호 — 솔리드 셸 뒤에 방이 없다)")
+    print("    A/B: NEGOBS_GLASS_V1=0 → 구 Looks/Glass 상수로 make_pbr 폴백 · "
+          "NEGOBS_GLASS_MDL=glass → OmniGlass.mdl (PT 에서 OmniPBR opacity 가 "
+          "불투명하게 나오면 이 스위치 하나로 전환)")
 
     # ── [08-06 · GT-64] road network · master plan · shadows · street rows ──
     _smoke_gt64(sh, po)
@@ -1809,16 +2002,22 @@ def build_views():
     # [08-06 · GT-64 — the round's ONE eye move, declared for meta honesty (X2)]
     #   eye x 13.6 → 11.10; y/z and the target are untouched, the cut name and the
     #   15-cut set are untouched. Forced, not stylistic: GT-64 closes the east face
-    #   with a CLOSED glass door at x 11.25…11.35, and this library has **no
+    #   with a CLOSED glass door at x 11.25…11.35, and this library had **no
     #   transmissive material** (scene08: "No transmission is available in this
     #   material stack"), so a leaf that is meant to keep the descent visible in
     #   fact renders as an opaque dark pane. The old eye's centre ray met it at
     #   (11.30, 4.50, 0.35) `[computed]` — the cut would have judged a door, not the
     #   flights it exists to judge. The eye therefore steps 2.50 m through the
     #   opening to just inside the box: still outside every solid (above tread 1,
-    #   2.85 m under the deck soffit 2.45, 0.70 m south of the new centre guard at
-    #   y 5.00), same bearing, same subject. The door is now behind the camera and
-    #   is judged instead in `beauty_overview` / `bollard_walk`.
+    #   2.85 m under the deck soffit 2.45, same bearing, same subject).
+    # [08-06 · GT-72/73] BOTH premises of that move are now void — the leaf is a
+    #   single leaf swung 95 deg clear of the opening (GT-72) and the fixed panes
+    #   are translucent (GT-73). The eye is nevertheless **left where it is**: this
+    #   round's brief holds the preset eyes, and moving it back would confound the
+    #   craftsmanship read with a viewpoint change. Restoring x 13.6 is a separate
+    #   decision for the round that judges these two rows.
+    #   The eye is 0.70 m south of the centre guard, whose rail line moved 5.00 →
+    #   4.90 (GT-72) — i.e. 0.60 m clear, still outside every solid.
     views["stair_head"] = dict(eye=[11.10, 4.30, 1.60], tgt=[6.6, 4.90, -2.20])
     # portal_look: from mid-ramp toward the basement portal (dimly lit garage)
     views["portal_look"] = dict(eye=[13.0, 0.0, -0.95], tgt=[27.0, 0.5, -3.20])
@@ -1837,12 +2036,12 @@ def build_views():
 BANNER = """\
 [조작] 우클릭+WASD 비행 · P 패스트레이싱 토글 · C 스크린샷 · [ ] 태양 방위
 [체크리스트]
- 1. entry_approach   — 파라펫 사인·캐노피 직결 높이제한바 + 전장 데크가 진입부로 읽히는가(G13+U-5, 08-05 5차)
+ 1. entry_approach   — 마우스 종단 멀리언·유리 서단 에지 마감·사인 프레임(GT-72) + 투명 커튼월(GT-73)
  2. ramp_graze·h0.3  — 램프 하강이 평면으로 압축되고 개구 너머가 연속되는가(특색)
- 3. bollard_walk     — 볼라드 h0.9·간격1.5·반사띠 + 전면 0.3 m 점형블록(규정)
- 4. stair_head       — 되돌음 2련·중간참·중앙벽 철거 후 자립 양면 가드(GT-64)·종단부 결속
+ 3. bollard_walk     — 계단박스 외짝문 개방·NW/NE 코너 포스트·문 하부 포장(GT-72)
+ 4. stair_head       — 측부 갭 폐합(남측 슬롯·중앙 웰)·기둥 답면 착지·Top/Mid 종단 결속(GT-72)
  5. portal_look      — 포털 유효고·소핏 조명 하 램프 판독(PT 필수 — 캐노피 하부 선언 컷)
- 6. beauty_overview  — 정남향 판상 4동 2×2 그리드·남북 교차로·도로망 추종 가로수(GT-64)"""
+ 6. beauty_overview  — 정남향 판상 4동 2×2 그리드·남북 교차로 + 개방 문짝 읽힘(GT-72)"""
 
 
 def main():
@@ -1872,12 +2071,20 @@ def main():
     mp = PARAMS["material"]
     ROOT = "/World/Scene13"
 
-    def BOX(path, center, size, mtl=None, col=False):
-        return sc.add_box(stage, path, center, size, mtl, collider=col)
+    def BOX(path, center, size, mtl=None, col=False, rotZ=0.0):
+        # `rotZ` [GT-72]: the open door leaf's members are the scene's only
+        # spun boxes. It is authored only when non-zero (scene_common K-micro),
+        # so every existing call site is byte-identical.
+        return sc.add_box(stage, path, center, size, mtl, collider=col,
+                          rotZ=rotZ)
 
-    def CYL(path, center, r, h, mtl=None, rotY=0.0, rotX=0.0, col=False):
+    def CYL(path, center, r, h, mtl=None, rotY=0.0, rotX=0.0, col=False,
+            rotZ=0.0):
+        # `rotZ` [GT-72]: the door's hold-open stay is a bearing-laid tube whose
+        # plan bearing is not axis-aligned (rotY 90 lays it along +X, rotZ swings
+        # it). Authored only when non-zero — see scene_common.add_cylinder.
         return sc.add_cylinder(stage, path, center, r, h, mtl,
-                               rotY=rotY, rotX=rotX, collider=col)
+                               rotY=rotY, rotX=rotX, collider=col, rotZ=rotZ)
 
     def PBR(path, *args, **kwargs):
         return sc.make_pbr(stage, path, *args, **kwargs)
@@ -1969,6 +2176,18 @@ def main():
                         roughness_const=mp["wood_rough"])
         M["glass"] = PBR(f"{ROOT}/Looks/Glass", diffuse_color=mp["glass_color"],
                          roughness_const=mp["glass_rough"])
+        # [08-06 user · GT-73] translucent vision glass (scene_common.make_glass).
+        #   `opaque_*` feeds the NEGOBS_GLASS_V1=0 arm, which hands exactly the old
+        #   `Looks/Glass` constants to make_pbr — the fallback is the previous look.
+        M["glass_v"] = sc.make_glass(
+            stage, f"{ROOT}/Looks/GlassV", color=mp["glass_v_color"],
+            opacity=mp["glass_v_opacity"], roughness=mp["glass_v_rough"],
+            ior=mp["glass_v_ior"], opaque_color=mp["glass_color"],
+            opaque_roughness=mp["glass_rough"])
+        print(f"[GT-73 유리 투명화] 백엔드 = {sc.glass_backend()} · 불투명도 "
+              f"{mp['glass_v_opacity']:.2f} · 적용 = 램프 커튼월 · 계단박스 "
+              f"W/N · 동측 고정유리 · 문짝/트랜섬/측창 (건물 창호는 기존 불투명 "
+              f"Looks/Glass 유지)")
         M["parapet"] = PBR(f"{ROOT}/Looks/Parapet",
                            diffuse_color=mp["parapet_color"],
                            roughness_const=mp["parapet_rough"])
@@ -2147,6 +2366,12 @@ def main():
         sr = PARAMS["spur_ramp"]
         walks.append(("Spur", ws["x0"] + sr["run"], ws["x1"], ws["y0"], ws["y1"],
                       ws["proud"]))
+        # [08-06 user · GT-72] entrance apron — the grass band that ran into the
+        #   door frame. Same plate idiom, `proud` 0.003 so its top is 1 mm under
+        #   the turn-down's west end (0.004): a joint line, not a coplanar seam.
+        da = PARAMS["door_apron"]
+        walks.append(("DoorApron", da["x0"], da["x1"], da["y0"], da["y1"],
+                      da["proud"]))
         # [W3 GT-5] plate thickness follows `proud` so the underside stays buried
         #   `walk_plate_t` below the ground plate top — at 0.150 the old fixed 0.12 box
         #   would have floated 30 mm clear of the ground.
@@ -2413,19 +2638,65 @@ def main():
              -(fa["drop"] + fa["gap"]) / 2.0),
             (fa["t"] + 0.04, fa["y1"] - fa["y0"], fa["drop"] - fa["gap"]),
             M["cope"])
-        # [08-05 5th answer → 08-06 · GT-64] the descending handrail, rebuilt as a
-        #   FREE-STANDING double-sided guard now that ShaftWall_Mid is gone.
-        #   One tube per flight (top + mid), side-fixed to that flight's own inner
-        #   slab edge by short bracket stubs, posts standing in the divider strip.
-        #   Every end is tied into something solid — see the terminations block.
+        # ── [08-06 user · GT-72] the two side slots, infilled ────────────────
+        #   Step bands are re-derived from PARAMS (they are NOT read back from the
+        #   built prims), so the fills cannot drift from the flights:
+        #     flight A step k : x [x_head−(k+1)·tread, x_head−k·tread], top −(k+1)·riser
+        #     flight B step k : x [x_turn+k·tread,  x_turn+(k+1)·tread],
+        #                       top mid_z−(k+1)·riser
+        #   Rationale + the invariance argument live in the PARAMS["stair_infill"] note.
+        si = PARAMS["stair_infill"]
+        rev = si["reveal"]
+        z_bot_f = st["base_z"] - rev
+        x_rim = st["x_head"] - rev              # never coincident with the rim
+        steps_a = [(st["x_head"] - (k + 1) * st["tread"],
+                    min(st["x_head"] - k * st["tread"], x_rim),
+                    -(k + 1) * st["riser"]) for k in range(st["n_flight"])]
+        steps_b = [(st["x_turn"] + k * st["tread"],
+                    min(st["x_turn"] + (k + 1) * st["tread"], x_rim),
+                    st["mid_z"] - (k + 1) * st["riser"])
+                   for k in range(st["n_flight"])]
+        n_fill = 0
+        for k, (xa, xb, zt) in enumerate(steps_a):
+            BOX(f"{ROOT}/StairSkirt_A{k}",
+                ((xa + xb) / 2.0, (si["skirt_y0"] + si["skirt_y1"]) / 2.0,
+                 (z_bot_f + zt - rev) / 2.0),
+                (xb - xa, si["skirt_y1"] - si["skirt_y0"],
+                 zt - rev - z_bot_f), stair_mtl, col=True)
+            n_fill += 1
+        BOX(f"{ROOT}/StairSkirt_Land",
+            ((si["land_x0"] + st["x_turn"]) / 2.0,
+             (si["skirt_y0"] + si["skirt_y1"]) / 2.0,
+             (z_bot_f + st["mid_z"] - rev) / 2.0),
+            (st["x_turn"] - si["land_x0"], si["skirt_y1"] - si["skirt_y0"],
+             st["mid_z"] - rev - z_bot_f), stair_mtl, col=True)
+        n_fill += 1
+        for k, (xa, xb, zt) in enumerate(steps_b):
+            BOX(f"{ROOT}/StairWellFill_{k}",
+                ((xa + xb) / 2.0, (si["well_y0"] + si["well_y1"]) / 2.0,
+                 (z_bot_f + zt - rev) / 2.0),
+                (xb - xa, si["well_y1"] - si["well_y0"],
+                 zt - rev - z_bot_f), stair_mtl, col=True)
+            n_fill += 1
+        print(f"[GT-72 측부 갭 폐합] 남측 슬롯 y {si['skirt_y0']:.2f}…"
+              f"{st['y_a0']:.2f} ({st['y_a0'] - si['skirt_y0']:.2f} m) + 중앙 웰 "
+              f"y {si['well_y0']:.2f}…{st['y_b0']:.2f} "
+              f"({st['y_b0'] - si['well_y0']:.2f} m, 무저 → 하행 플라이트 바닥) · "
+              f"충전 {n_fill}개 · 상단 리빌 {rev * 1000:.0f} mm (공면 회피) · "
+              f"단높이/디딤 x대/연단 x {st['x_head']:.2f} 불변")
+
+        # [08-05 5th answer → 08-06 · GT-64/GT-72] the descending handrail: a
+        #   free-standing double-sided guard, one two-tube run per flight, with
+        #   every post FOOTED ON A TREAD and every run end tied into a post or
+        #   masonry (GT-72 (2)/(3)). Constraints in PARAMS["stair_handrail"].
         hr = PARAMS["stair_handrail"]
         run_f = st["n_flight"] * st["tread"]                  # 3.60
         drop_f = st["n_flight"] * st["riser"]                 # 1.98
         ang = math.degrees(math.atan2(drop_f, run_f))
         slope_L = math.hypot(run_f, drop_f)
         xc_mid = (st["x_head"] + st["x_turn"]) / 2.0
-        y_ra = st["y_a1"] + hr["off"]                         # flight A rail line
-        y_rb = st["y_b0"] - hr["off"]                         # flight B rail line
+        y_ra = st["y_a1"] - hr["inset"]                       # 4.90 — on flight A
+        y_rb = st["y_b0"] + hr["inset"]                       # 5.30 — on flight B
 
         def _nose_a(x):
             """Flight A nosing line: z 0 at the head x_head, −1.98 at the landing."""
@@ -2435,9 +2706,29 @@ def main():
             """Flight B nosing line: −1.98 at the landing, −3.96 at the corridor."""
             return st["mid_z"] - (x - st["x_turn"]) * drop_f / run_f
 
+        def _tread_a(x):
+            """Top of the flight-A tread that carries x (a post foots on THIS, not
+            on the nosing line — the line runs up to one riser above the tread)."""
+            k = min(st["n_flight"] - 1,
+                    max(0, int(math.floor((st["x_head"] - x) / st["tread"]))))
+            return -(k + 1) * st["riser"]
+
+        def _tread_b(x):
+            k = min(st["n_flight"] - 1,
+                    max(0, int(math.floor((x - st["x_turn"]) / st["tread"]))))
+            return st["mid_z"] - (k + 1) * st["riser"]
+
+        def _foot_post(path, x, y, z_tread, z_top):
+            """Post + base plate, seated `tread_embed` into the tread it stands on."""
+            zb = z_tread - hr["tread_embed"]
+            CYL(path, (x, y, (zb + z_top) / 2.0), hr["post_r"], z_top - zb,
+                M["rail"], col=True)
+            CYL(f"{path}_Plate", (x, y, z_tread + hr["plate_t"] / 2.0 - 0.003),
+                hr["plate_r"], hr["plate_t"], M["rail"])
+
         n_tube = n_post = 0
-        for tag, yc, nose, sgn in (("A", y_ra, _nose_a, -1.0),
-                                   ("B", y_rb, _nose_b, 1.0)):
+        for tag, yc, nose, tread, sgn in (("A", y_ra, _nose_a, _tread_a, -1.0),
+                                          ("B", y_rb, _nose_b, _tread_b, 1.0)):
             for lab, dz, rr in (("Top", hr["h"], hr["r"]),
                                 ("Mid", hr["mid_h"], hr["r"] * 0.75)):
                 z_w = nose(st["x_turn"]) + dz
@@ -2446,58 +2737,69 @@ def main():
                     (xc_mid, yc, (z_w + z_e) / 2.0), rr, slope_L,
                     M["rail"], rotY=90.0 + sgn * ang)
                 n_tube += 1
-            # posts on the divider strip + a bracket stub into the slab edge
             for bx in hr["post_xs"]:
-                zt = nose(bx) + hr["h"]
-                zb = nose(bx) - hr["post_below"]
-                CYL(f"{ROOT}/StairHandrail/Post{tag}_{int(bx * 10)}",
-                    (bx, yc, (zt + zb) / 2.0), hr["post_r"], zt - zb,
-                    M["rail"], col=True)
+                _foot_post(f"{ROOT}/StairHandrail/Post{tag}_{int(bx * 100)}",
+                           bx, yc, tread(bx), nose(bx) + hr["h"])
                 n_post += 1
-                y_in = (st["y_a1"] if tag == "A" else st["y_b0"])
-                CYL(f"{ROOT}/StairHandrail/Brk{tag}_{int(bx * 10)}",
-                    (bx, (yc + y_in) / 2.0, nose(bx) - hr["post_below"] * 0.6),
-                    hr["bracket_r"], hr["bracket_len"], M["rail"], rotX=90.0)
-        # U-return round the landing's west nose: cross run + 2 corner stubs
+        # U-return round the landing's west nose. GT-72: the U now carries the MID
+        #   tube as well (both flights' mid tubes used to die free at x_turn) and
+        #   stands on two newels footed on the landing — it used to float.
         x_u = st["x_turn"] - hr["u_off"]
-        z_low = st["mid_z"] + hr["h"]
-        CYL(f"{ROOT}/StairHandrail/UTurn",
-            (x_u, (y_ra + y_rb) / 2.0, z_low), hr["r"], y_rb - y_ra,
-            M["rail"], rotX=90.0)
+        z_top_u = st["mid_z"] + hr["h"]
+        z_mid_u = st["mid_z"] + hr["mid_h"]
         for yc, tag in ((y_ra, "A"), (y_rb, "B")):
-            CYL(f"{ROOT}/StairHandrail/UStub_{tag}",
-                ((x_u + st["x_turn"] + 0.04) / 2.0, yc, z_low), hr["r"],
-                st["x_turn"] + 0.04 - x_u, M["rail"], rotY=90.0)
-        # -- terminations (the 08-06 "loose railing" fix) --------------------
-        #  A: level return from the rim (x_head, 0.85) east INTO the door's north
-        #     jamb post, carried at the rim by a newel standing on the new east
-        #     coping. Nothing ends in mid air.
-        ret_L = hr["jamb_x"] - st["x_head"] + hr["wall_embed"]
-        CYL(f"{ROOT}/StairHandrail/HeadReturn",
-            ((st["x_head"] + hr["jamb_x"] + hr["wall_embed"]) / 2.0, y_ra,
-             hr["h"]), hr["r"], ret_L, M["rail"], rotY=90.0)
-        #  the newel foots 10 mm INTO the east coping (whose top is `cope_drop`
-        #  under the W/N coping) — a base plate, not a tube standing on a plane
-        z_cope = PARAMS["rail"]["base_z"] - 0.01
-        CYL(f"{ROOT}/StairHandrail/HeadNewel",
-            (hr["newel_x"], y_ra, (z_cope + hr["h"] + hr["r"]) / 2.0),
-            hr["post_r"], hr["h"] + hr["r"] - z_cope, M["rail"], col=True)
-        #  B: the lower end runs straight into solid work — the `shaft_east` band M
-        #     pier (y 4.95…5.25, x 10.95…11.20) and then, through `wall_embed`,
-        #     the corridor's south wall face (Corridor_Wall_S spans y 5.00…5.25, so
-        #     the rail line y 5.20 is inside it). The tube dies in masonry, not air.
+            _foot_post(f"{ROOT}/StairHandrail/UNewel_{tag}", x_u, yc,
+                       st["mid_z"], z_top_u + hr["r"])
+            n_post += 1
+            for lab, zl, rr in (("Top", z_top_u, hr["r"]),
+                                ("Mid", z_mid_u, hr["r"] * 0.75)):
+                CYL(f"{ROOT}/StairHandrail/UStub{lab}_{tag}",
+                    ((x_u + st["x_turn"] + 0.04) / 2.0, yc, zl), rr,
+                    st["x_turn"] + 0.04 - x_u, M["rail"], rotY=90.0)
+                n_tube += 1
+        for lab, zl, rr in (("Top", z_top_u, hr["r"]),
+                            ("Mid", z_mid_u, hr["r"] * 0.75)):
+            CYL(f"{ROOT}/StairHandrail/UTurn{lab}",
+                (x_u, (y_ra + y_rb) / 2.0, zl), rr, y_rb - y_ra,
+                M["rail"], rotX=90.0)
+            n_tube += 1
+        # -- terminations: 0 free tube ends (GT-72 (2)) -----------------------
+        #  HEAD (flight A, east): Top AND Mid return level into the door's north
+        #    jamb post at x 11.30 — the jamb centre IS the rail line y 4.90 — and
+        #    are carried at the rim by a newel footed on tread 1.
+        ret_x1 = hr["jamb_x"] + hr["jamb_embed"]
+        ret_x0 = min(hr["newel_x"], st["x_head"])
         for lab, dz, rr in (("Top", hr["h"], hr["r"]),
                             ("Mid", hr["mid_h"], hr["r"] * 0.75)):
-            CYL(f"{ROOT}/StairHandrail/FootStub_{lab}",
-                (st["x_head"] + hr["wall_embed"] / 2.0, y_rb,
-                 _nose_b(st["x_head"]) + dz), rr, hr["wall_embed"],
+            CYL(f"{ROOT}/StairHandrail/HeadReturn{lab}",
+                ((ret_x0 + ret_x1) / 2.0, y_ra, dz), rr, ret_x1 - ret_x0,
                 M["rail"], rotY=90.0)
-        n_tube += 6                       # U-turn 1 + U-stubs 2 + head return 1 + foot 2
-        print(f"[GT-64 자립 중앙 가드] 중앙벽 철거 → 양면 STS r{hr['r']:.3f} · "
-              f"답면 위 {hr['h']:.2f}+{hr['mid_h']:.2f} · 레일선 A y {y_ra:.2f} / "
-              f"B y {y_rb:.2f} (분리대 {st['y_a1']:.2f}~{st['y_b0']:.2f} 내) · "
-              f"튜브 {n_tube}본 · 포스트 {n_post + 1}본 · 종단 = 문틀 잼 "
-              f"+ 머리 뉴얼 + 복도 남벽 매입 (공중 종단 0)")
+            n_tube += 1
+        _foot_post(f"{ROOT}/StairHandrail/HeadNewel", hr["newel_x"], y_ra,
+                   _tread_a(st["x_head"] - st["tread"] / 2.0),
+                   hr["h"] + hr["r"])
+        n_post += 1
+        #  FOOT (flight B, east): the rail line moved off Corridor_Wall_S
+        #    (y ≤ 5.25), so the old wall-embedded stub would have ended in air.
+        #    Top and Mid now return level to a newel footed on the corridor floor.
+        z_f = _nose_b(st["x_head"])                    # −3.960 = corridor floor
+        foot_x = hr["foot_newel_x"]
+        for lab, dz, rr in (("Top", hr["h"], hr["r"]),
+                            ("Mid", hr["mid_h"], hr["r"] * 0.75)):
+            CYL(f"{ROOT}/StairHandrail/FootReturn{lab}",
+                ((st["x_head"] + foot_x) / 2.0, y_rb, z_f + dz), rr,
+                foot_x - st["x_head"], M["rail"], rotY=90.0)
+            n_tube += 1
+        _foot_post(f"{ROOT}/StairHandrail/FootNewel", foot_x, y_rb, z_f,
+                   z_f + hr["h"] + hr["r"])
+        n_post += 1
+        print(f"[GT-72 자립 중앙 가드] 양면 STS r{hr['r']:.3f} · 답면 위 "
+              f"{hr['h']:.2f}+{hr['mid_h']:.2f} · 레일선 A y {y_ra:.2f} "
+              f"(플라이트 3.55~4.95 내) / B y {y_rb:.2f} (5.25~6.65 내) → 포스트 "
+              f"{n_post}본 전량 답면 착지 (매입 {hr['tread_embed'] * 1000:.0f} mm "
+              f"+ 베이스 플레이트) · 튜브 {n_tube}본 · 종단 = 머리 뉴얼+잼 매입 "
+              f"{hr['jamb_embed'] * 1000:.0f} mm · U 뉴얼 2 (Top+Mid) · 복도 "
+              f"뉴얼 x {foot_x:.2f} → 공중 종단 0")
 
     # -------------------------------------------------------------------
     # Basement — corridor + garage (floor · walls · columns · bay lines · dim lights)
@@ -2583,11 +2885,31 @@ def main():
         PARAMS["entry_sign"] note).
         """
         es = PARAMS["entry_sign"]
+        xc_p = es["x_back"] - es["panel_t"] / 2.0
         BOX(f"{ROOT}/EntrySign/Panel",
-            (es["x_back"] - es["panel_t"] / 2.0, 0.0,
-             (es["z0"] + es["z1"]) / 2.0),
+            (xc_p, 0.0, (es["z0"] + es["z1"]) / 2.0),
             (es["panel_t"], 2.0 * es["y_half"], es["z1"] - es["z0"]),
             M["gantry"])
+        # [08-06 user · GT-72] frame the panel: a cap coping over the top edge and
+        #   two end stiles, each `cap_over` proud of the panel face on 3 sides, so
+        #   the sign's top and ends are members instead of raw cut faces. The cap
+        #   bottom laps 10 mm into the panel (no coplanar contact).
+        #   `2 * cap_over` on the x size (not one-sided): a one-sided frame would
+        #   leave the cap/stile FRONT faces bit-exact coplanar with the panel's
+        #   own front face at x −0.01. The frame now stands 20 mm proud on both
+        #   faces, which is what a capping section does anyway.
+        co_, ct_ = es["cap_over"], es["cap_t"]
+        BOX(f"{ROOT}/EntrySign/Cap",
+            (xc_p, 0.0, es["z1"] - 0.010 + ct_ / 2.0),
+            (es["panel_t"] + 2 * co_, 2.0 * (es["y_half"] + co_), ct_),
+            M["gantry"])
+        for sgn, tag in ((1.0, "N"), (-1.0, "S")):
+            BOX(f"{ROOT}/EntrySign/Stile_{tag}",
+                (xc_p, sgn * (es["y_half"] + co_ - es["stile_t"] / 2.0),
+                 (es["z0"] + es["z1"] - 0.010) / 2.0),
+                (es["panel_t"] + 2 * co_, es["stile_t"],
+                 es["z1"] - es["z0"] - 0.010),
+                M["gantry"])
         # height-limit bar — hung from the mouth beam (8 yellow/black segments)
         hb = PARAMS["height_bar"]
         seg_len = (hb["y1"] - hb["y0"]) / hb["nseg"]
@@ -2673,22 +2995,33 @@ def main():
                 (cp["x1"] - gx0, gl["kick_t"], gl["kick_h"] + 0.02), M["post"])
         # [5th answer] the free-pane top channel (GlassCap) is deleted — the
         #   deck now covers the whole run and every pane top embeds into it.
-        stations = [gx0] + stations_col + [cp["x1"]]
+        # [08-06 user · GT-72] MOUTH MULLION — the curtain wall's west terminal.
+        #   Stations are now (x, half-section) pairs so the mullion, the columns
+        #   and the two run ends are handled by one rule: a pane runs from
+        #   `station + half + joint` to `next − half − joint`, i.e. every joint
+        #   lands inside a section. Bay 0 comes out negative and is dropped by the
+        #   0.05 m minimum-bay guard, so the run starts AT the mullion.
         gz0 = base + gl["kick_h"]
         gz1 = cp["z_roof"] + em
-        for b in range(len(stations) - 1):
-            a, bxt = stations[b], stations[b + 1]
-            ga_ = (a + gl["joint"] if b == 0
-                   else a + cp["col_w"] / 2.0 + gl["joint"])
-            gb_ = (bxt - gl["joint"] if b == len(stations) - 2
-                   else bxt - cp["col_w"] / 2.0 - gl["joint"])
+        mm = cp["mouth_mull"]
+        for sgn, tag in ((1.0, "N"), (-1.0, "S")):
+            BOX(f"{ROOT}/Canopy/MouthMullion_{tag}",
+                (mm["x"], sgn * cp["y_col"], (base - 0.02 + gz1) / 2.0),
+                (mm["w"], mm["w"], gz1 - base + 0.02), M["post"], col=True)
+        gstations = ([(gx0, 0.0), (mm["x"], mm["w"] / 2.0)]
+                     + [(xc, cp["col_w"] / 2.0) for xc in stations_col]
+                     + [(cp["x1"], 0.0)])
+        for b in range(len(gstations) - 1):
+            (a, ha), (bxt, hb) = gstations[b], gstations[b + 1]
+            ga_ = a + ha + gl["joint"]
+            gb_ = bxt - hb - gl["joint"]
             if gb_ - ga_ < 0.05:
                 continue
             for sgn, tag in ((1.0, "N"), (-1.0, "S")):
                 BOX(f"{ROOT}/Canopy/Glass_{tag}{b}",
                     ((ga_ + gb_) / 2.0, sgn * cp["y_col"],
                      (gz0 + gz1) / 2.0),
-                    (gb_ - ga_, gl["t"], gz1 - gz0), M["glass"])
+                    (gb_ - ga_, gl["t"], gz1 - gz0), M["glass_v"])
                 n_glass += 1
         # [08-05 3차] solid end wall over the portal head — closes the box and
         #   masks Ground_E's west face (the green band portal_look showed).
@@ -2728,6 +3061,12 @@ def main():
               f"(코핑 위 y ±{cp['y_col']:.2f}, 마우스 스테이션 x "
               f"{cp['col_mouth_x']:.2f}) · 유리 {n_glass}판 · "
               f"소핏 {n_lamp}등 (2열 × {len(stations_col) - 1})")
+        print(f"[GT-72 마우스 에지] 커튼월 종단 멀리언 2본 x "
+              f"{mm['x'] - mm['w'] / 2.0:.2f}…{mm['x'] + mm['w'] / 2.0:.2f} "
+              f"(코핑 위 y ±{cp['y_col']:.2f}) → 유리 서단 노출 에지 2.31 m "
+              f"→ 0 · 킥밴드 서단면 피복 · 내면 "
+              f"{cp['y_col'] - mm['w'] / 2.0:.2f} > 유효폭 3.00 → "
+              f"{'OK' if cp['y_col'] - mm['w'] / 2.0 > 3.0 else 'FAIL'}")
 
     def build_stair_canopy(M):
         """[08-05 user, 2nd/3rd answers] pedestrian stair-entry structure —
@@ -2778,22 +3117,34 @@ def main():
         #   runs are built by build_railings (PARAMS stair_rail_runs); "glass"
         #   -> DeckGlass 3-part idiom walls (round-3 form) built here.
         n_gp = 0
+        # [08-06 user · GT-72] curtain-wall TERMINAL POSTS. Without them the W run
+        #   ended in a free pane edge at y 3.50 and the two runs crossed at the NW
+        #   corner with 0.10~0.125 m of pane past each other. The NE corner is the
+        #   frame post (11.30, 6.775) in `posts`. Each run's a0/a1 is now a post
+        #   centreline, so the 12 mm pane joint lands inside the post section.
+        gz1_p = cp["z_roof"] + em
+        for i, (px, py, pw) in enumerate(cp["glass_posts"]):
+            BOX(f"{ROOT}/StairCanopy/GlassPost_{i}",
+                (px, py, (base - 0.02 + gz1_p) / 2.0),
+                (pw, pw, gz1_p - base + 0.02), M["post"], col=True)
         specs = (((cp["glass_w"], "y", "W"), (cp["glass_n"], "x", "N"))
                  if cp["side_mode"] == "glass" else ())
         for spec, axis, tag in specs:
             run = spec["a1"] - spec["a0"]
             n_bay = max(1, int(round(run / cp["mullion"]["spacing"])))
             mw = cp["mullion"]["w"]
-            kz = (base - 0.02 + base + 0.12) / 2.0
             gz0, gz1 = base + 0.12, cp["z_roof"] + em
+            #  [GT-72] band foot at `kick_z0`, not at the coping top — PARAMS note
+            kz = (cp["kick_z0"] + gz0) / 2.0
+            kh = gz0 - cp["kick_z0"]
             if axis == "y":
                 BOX(f"{ROOT}/StairCanopy/Kick_{tag}",
                     (spec["c"], (spec["a0"] + spec["a1"]) / 2.0, kz),
-                    (0.05, run, 0.14 + 0.02), M["post"])
+                    (0.05, run, kh), M["post"])
             else:
                 BOX(f"{ROOT}/StairCanopy/Kick_{tag}",
                     ((spec["a0"] + spec["a1"]) / 2.0, spec["c"], kz),
-                    (run, 0.05, 0.14 + 0.02), M["post"])
+                    (run, 0.05, kh), M["post"])
             for b in range(n_bay):
                 a = spec["a0"] + b * run / n_bay
                 bnd = spec["a0"] + (b + 1) * run / n_bay
@@ -2802,11 +3153,11 @@ def main():
                 if axis == "y":
                     BOX(f"{ROOT}/StairCanopy/Glass_{tag}{b}",
                         (spec["c"], ctr, (gz0 + gz1) / 2.0),
-                        (0.019, gb_ - ga_, gz1 - gz0), M["glass"])
+                        (0.019, gb_ - ga_, gz1 - gz0), M["glass_v"])
                 else:
                     BOX(f"{ROOT}/StairCanopy/Glass_{tag}{b}",
                         (ctr, spec["c"], (gz0 + gz1) / 2.0),
-                        (gb_ - ga_, 0.019, gz1 - gz0), M["glass"])
+                        (gb_ - ga_, 0.019, gz1 - gz0), M["glass_v"])
                 n_gp += 1
                 if b < n_bay - 1:
                     ms = spec["a0"] + (b + 1) * run / n_bay
@@ -2814,64 +3165,117 @@ def main():
                     BOX(f"{ROOT}/StairCanopy/Mullion_{tag}{b}",
                         (mc[0], mc[1], (gz0 + gz1) / 2.0),
                         (mw, mw, gz1 - gz0), M["post"])
-        # [08-06 user · GT-64] EAST ENTRANCE FACE — steel frame + closed tempered
-        #   glass double leaf over the descending flight, fixed glass over the rest.
-        #   Layout and clearances are proved in the PARAMS["stair_canopy"]["east"]
-        #   note and re-checked by the smoke run; nothing here moves the shaft rect,
-        #   the stair, or the registered 3.96 m drop edge at x 11.20.
+        # [08-06 user · GT-64 → GT-72] EAST ENTRANCE FACE — steel frame, a SINGLE
+        #   leaf modelled OPEN (95 deg hold-open) + a fixed sidelight over the rest
+        #   of the clear opening, fixed glass over the remainder of the rim.
+        #   Layout, hold-open clearance and the corner rule are proved in the
+        #   PARAMS["stair_canopy"]["east"] note and re-checked by the smoke run;
+        #   nothing here moves the shaft rect, the stair, or the registered 3.96 m
+        #   drop edge at x 11.20.
         ea = cp["east"]
         ex = ea["x"]
         beam_soffit = cp["z_roof"] - cp["beam_h"] + em          # 2.31
-        jw = ea["jamb_w"] / 2.0
-        n_leaf = 0
-        #  head member over the door opening (the beam takes the load above it)
-        BOX(f"{ROOT}/StairCanopy/DoorHead",
-            (ex, (ea["door_y0"] + ea["door_y1"]) / 2.0,
-             ea["door_z1"] + ea["head_h"] / 2.0),
-            (ea["leaf_t"] + 0.02, ea["door_y1"] - ea["door_y0"], ea["head_h"]),
-            M["post"])
-        #  transom: fixed glass from the door head up into the beam soffit. Both
-        #  ends lap `lap` into the jamb posts and the bottom laps into the head, so
-        #  the band leaves no slot and no coincident face.
         lp = ea["lap"]
+        jy0, jy1 = ea["jamb_y"]                                 # jamb centrelines
+        n_leaf = 0
+        #  threshold sill plate — the frame foot lands on a member, not on turf.
+        #  Top 8 mm proud of the apron: a sill, not a step (continuity row 2b).
+        BOX(f"{ROOT}/StairCanopy/DoorSill",
+            (ex, (jy0 + jy1) / 2.0, ea["sill_t"] / 2.0 - 0.004),
+            (ea["leaf_t"] + 2 * ea["sill_over"], jy1 - jy0, ea["sill_t"]),
+            M["rail"])
+        #  head member over the whole clear opening, jamb centre to jamb centre
+        BOX(f"{ROOT}/StairCanopy/DoorHead",
+            (ex, (jy0 + jy1) / 2.0, ea["door_z1"] + ea["head_h"] / 2.0),
+            (ea["leaf_t"] + 0.02, jy1 - jy0, ea["head_h"]), M["post"])
+        #  transom: fixed glass from the door head up into the beam soffit. Both
+        #  ends land on the jamb centrelines and the bottom laps into the head, so
+        #  the band leaves no slot and no coincident face.
         BOX(f"{ROOT}/StairCanopy/DoorTransom",
-            (ex, (ea["door_y0"] + ea["door_y1"]) / 2.0,
+            (ex, (jy0 + jy1) / 2.0,
              (ea["door_z1"] + ea["head_h"] - lp + beam_soffit + em) / 2.0),
-            (ea["glass_t"], ea["door_y1"] - ea["door_y0"] + 2 * lp,
-             beam_soffit + em - ea["door_z1"] - ea["head_h"] + lp), M["glass"])
-        #  two leaves, modelled CLOSED: stiles + rails in steel, glass infill
-        ymid = (ea["door_y0"] + ea["door_y1"]) / 2.0
-        mg = ea["meet_w"] / 2.0
+            (ea["glass_t"], jy1 - jy0,
+             beam_soffit + em - ea["door_z1"] - ea["head_h"] + lp),
+            M["glass_v"])
         st_w = ea["stile"]
-        z_bot = 0.005                          # threshold gap, not a step
-        for li, (ly0, ly1) in enumerate(((ea["door_y0"], ymid - mg),
-                                         (ymid + mg, ea["door_y1"]))):
-            for lab, yc_ in (("SL", ly0 + st_w / 2.0), ("SR", ly1 - st_w / 2.0)):
-                BOX(f"{ROOT}/StairCanopy/Leaf{li}_{lab}",
-                    (ex, yc_, (z_bot + ea["door_z1"]) / 2.0),
-                    (ea["leaf_t"], st_w, ea["door_z1"] - z_bot), M["post"])
-            for lab, zc_, hz_ in (("RB", z_bot + 0.08 / 2.0, 0.08),
-                                  ("RT", ea["door_z1"] - st_w / 2.0, st_w)):
-                BOX(f"{ROOT}/StairCanopy/Leaf{li}_{lab}",
-                    (ex, (ly0 + ly1) / 2.0, zc_),
-                    (ea["leaf_t"], ly1 - ly0 - 2 * st_w, hz_), M["post"])
-            gz_lo, gz_hi = z_bot + 0.08 - lp, ea["door_z1"] - st_w + lp
-            BOX(f"{ROOT}/StairCanopy/Leaf{li}_Glass",
-                (ex, (ly0 + ly1) / 2.0, (gz_lo + gz_hi) / 2.0),
-                (ea["glass_t"], ly1 - ly0 - 2 * st_w + 2 * lp, gz_hi - gz_lo),
-                M["glass"])
-            #  pull handle on the OUTSIDE face, beside the meeting stile —
-            #  seated 0.6 r into the leaf so it is fixed, not floating
-            sc.add_cylinder(
-                stage, f"{ROOT}/StairCanopy/Leaf{li}_Handle",
-                (ex + ea["leaf_t"] / 2.0 + ea["handle_r"] * 0.6,
-                 ymid + (0.12 if li else -0.12), 1.05),
-                ea["handle_r"], 0.30, M["rail"])
-            n_leaf += 1
-        #  fixed glass closing the rest of the east face. The run starts at the
-        #  north jamb's CENTRELINE so the first pane's 12 mm joint still lands
-        #  inside the post section — no slot beside the door.
-        fy0, fy1 = ea["jamb_y"][1], ea["y1"]
+        #  glazing mullion + fixed sidelight between the leaf and the north jamb.
+        #  Both lap `lap` UP into the head member instead of stopping flush on its
+        #  soffit, so no member top is coplanar with the head's underside.
+        BOX(f"{ROOT}/StairCanopy/DoorMullion",
+            (ex, ea["mull_y"], (ea["door_z1"] + lp) / 2.0),
+            (ea["leaf_t"], ea["mull_w"], ea["door_z1"] + lp), M["post"])
+        sy0 = ea["mull_y"] + ea["mull_w"] / 2.0 - lp
+        sy1 = ea["jamb_y"][1]
+        BOX(f"{ROOT}/StairCanopy/DoorSideKick",
+            (ex, (sy0 + sy1) / 2.0, (ea["kick_h"] - 0.02) / 2.0),
+            (ea["kick_t"], sy1 - sy0, ea["kick_h"] + 0.02), M["post"])
+        BOX(f"{ROOT}/StairCanopy/DoorSidelight",
+            (ex, (sy0 + sy1) / 2.0,
+             (ea["kick_h"] - lp + ea["door_z1"] + lp) / 2.0),
+            (ea["glass_t"], sy1 - sy0, ea["door_z1"] - ea["kick_h"] + 2 * lp),
+            M["glass_v"])
+        n_gp += 1
+        #  ── the single leaf, modelled OPEN ────────────────────────────────
+        #  Leaf-local (u along the leaf from the hinge, v across its thickness).
+        #  `add_box(rotZ=-open_deg)` maps local +y → (sin, cos) and local +x →
+        #  (cos, −sin), which is exactly the map below, so member centres and the
+        #  prim rotation stay consistent (no member is placed by eye).
+        th = math.radians(ea["open_deg"])
+        sn, ct = math.sin(th), math.cos(th)
+        hx, hy = ea["hinge_x"], ea["hinge_y"]
+        rz = -ea["open_deg"]
+        lw, lt = ea["leaf_w"], ea["leaf_t"]
+        z0l, z1l = ea["leaf_z0"], ea["door_z1"]
+        br = ea["bot_rail"]
+
+        def _leafxy(u, v=0.0):
+            return (hx + u * sn + v * ct, hy + u * ct - v * sn)
+
+        for lab, uc, uw in (("SH", st_w / 2.0, st_w),          # hinge stile
+                            ("SL", lw - st_w / 2.0, st_w)):    # lock stile
+            lx, ly = _leafxy(uc)
+            BOX(f"{ROOT}/StairCanopy/Leaf_{lab}", (lx, ly, (z0l + z1l) / 2.0),
+                (lt, uw, z1l - z0l), M["post"], rotZ=rz)
+        for lab, zc_, hz_ in (("RB", z0l + br / 2.0, br),
+                              ("RT", z1l - st_w / 2.0, st_w)):
+            lx, ly = _leafxy(lw / 2.0)
+            BOX(f"{ROOT}/StairCanopy/Leaf_{lab}", (lx, ly, zc_),
+                (lt, lw - 2 * st_w, hz_), M["post"], rotZ=rz)
+        gz_lo, gz_hi = z0l + br - lp, z1l - st_w + lp
+        lx, ly = _leafxy(lw / 2.0)
+        BOX(f"{ROOT}/StairCanopy/Leaf_Glass", (lx, ly, (gz_lo + gz_hi) / 2.0),
+            (ea["glass_t"], lw - 2 * st_w + 2 * lp, gz_hi - gz_lo),
+            M["glass_v"], rotZ=rz)
+        #  pull handle on the leaf's outer face, seated 0.6 r into the stile
+        hxp, hyp = _leafxy(lw - 0.12, lt / 2.0 + ea["handle_r"] * 0.6)
+        CYL(f"{ROOT}/StairCanopy/Leaf_Handle", (hxp, hyp, 1.05),
+            ea["handle_r"], 0.30, M["rail"])
+        #  two butt hinges: a knuckle on the axis + a strap that reaches 80 mm
+        #  INTO the jamb post, so the leaf hangs on hardware and the 30 mm hinge
+        #  offset is not an air gap.
+        for i, hz in enumerate((0.35, 1.85)):
+            CYL(f"{ROOT}/StairCanopy/Leaf_Hinge{i}", (hx, hy, hz),
+                ea["hinge_r"], ea["hinge_h"], M["rail"])
+            BOX(f"{ROOT}/StairCanopy/Leaf_HingeStrap{i}",
+                ((ex + hx) / 2.0, hy, hz),
+                (hx - ex + 0.06, 0.045, 0.09), M["rail"])
+        #  hold-open stay: jamb anchor → leaf, both ends at `stay_z`, so one
+        #  bearing-laid tube (rotY 90 then rotZ = its own plan bearing) does it.
+        #  It attaches to the leaf face that TURNS TOWARD the south jamb as the
+        #  door swings (leaf-local v = +t/2); anchoring on −t/2 would run the arm
+        #  straight through the leaf `[computed: both ends must share the sign]`.
+        ax, ay = ex + ea["leaf_t"] / 2.0, jy0
+        bx_, by_ = _leafxy(ea["stay_u"], lt / 2.0)
+        sdx, sdy = bx_ - ax, by_ - ay
+        CYL(f"{ROOT}/StairCanopy/Leaf_Stay",
+            ((ax + bx_) / 2.0, (ay + by_) / 2.0, ea["stay_z"]),
+            ea["stay_r"], math.hypot(sdx, sdy), M["rail"], rotY=90.0,
+            rotZ=math.degrees(math.atan2(sdy, sdx)))
+        n_leaf += 1
+        #  fixed glass closing the rest of the east face, from the north jamb's
+        #  CENTRELINE to the NE corner post's centreline — both 12 mm joints land
+        #  inside a post section, so neither end is a free pane edge.
+        fy0, fy1 = ea["jamb_y"][1], cp["glass_n"]["c"]
         run_e = fy1 - fy0
         n_bay_e = max(1, int(math.ceil(run_e / ea["mullion_span"])))
         BOX(f"{ROOT}/StairCanopy/EastKick",
@@ -2884,7 +3288,7 @@ def main():
                 (ex, (a + bnd) / 2.0 + 0.0,
                  (ea["kick_h"] + beam_soffit + em) / 2.0),
                 (ea["glass_t"], bnd - a - 0.024,
-                 beam_soffit + em - ea["kick_h"]), M["glass"])
+                 beam_soffit + em - ea["kick_h"]), M["glass_v"])
             n_gp += 1
             if b < n_bay_e - 1:
                 BOX(f"{ROOT}/StairCanopy/EastMullion_{b}",
@@ -2913,11 +3317,24 @@ def main():
               f"포스트 {len(cp['posts'])}본(문틀 잼 2 + 북측 1 + 서측 2) · 측면 "
               f"{'유리 ' + str(n_gp) + '판' if cp['side_mode'] == 'glass' else '난간(rail 모드)'} · "
               f"소핏 {n_sl}등")
-        print(f"[GT-64 계단 출입문] 강재 프레임 + 강화유리 양여닫이 {n_leaf}짝 "
-              f"(폐쇄 모델) · 유효 개구 {ea['door_y1'] - ea['door_y0']:.2f} m · "
-              f"문 상단 {ea['door_z1']:.2f} + 트랜섬 → 보 밑면 {beam_soffit:.2f} · "
-              f"잔여 동측면 고정유리 {n_bay_e}판 (y {fy0:.2f}…{fy1:.2f}) → "
-              f"문이 유일 통로 · 문 옆 낙차 접근 폐합")
+        tip_x = hx + lw * sn
+        ws_, sr_ = PARAMS["walk_spur"], PARAMS["spur_ramp"]
+        ramp_top = (PARAMS["drive"]["proud"]
+                    + max(0.0, min(sr_["run"], tip_x - sr_["x0"]))
+                    / sr_["run"] * (ws_["proud"] - PARAMS["drive"]["proud"]))
+        print(f"[GT-72 계단 출입문] 강재 프레임 + 외짝 {n_leaf}짝 **개방 모델** "
+              f"({ea['open_deg']:.0f}° 홀드오픈, 힌지 x {hx:.2f}/y {hy:.2f}) · "
+              f"유효 통과폭 {lw:.2f} m ≥ 0.90 → "
+              f"{'OK' if lw >= 0.90 else 'FAIL'} · 구조 개구 "
+              f"{ea['door_y1'] - ea['door_y0']:.2f} m = 문짝 {lw:.2f} + 멀리언 "
+              f"{ea['mull_w']:.2f} + 측창 {ea['door_y1'] - ea['mull_y'] - ea['mull_w'] / 2.0:.2f}")
+        print(f"    문짝 선단 x {tip_x:.3f} · 그 지점 스퍼 턱낮춤 상면 "
+              f"{ramp_top:+.3f} vs 문짝 하단 {ea['leaf_z0']:+.3f} → 이격 "
+              f"{ea['leaf_z0'] - ramp_top:+.3f} m "
+              f"{'OK (관통 0)' if ea['leaf_z0'] > ramp_top else 'FAIL(포장 관통)'}"
+              f" · 문 상단 {ea['door_z1']:.2f} + 트랜섬 → 보 밑면 "
+              f"{beam_soffit:.2f} · 잔여 동측면 고정유리 {n_bay_e}판 "
+              f"(y {fy0:.2f}…{fy1:.2f} — NE 코너 포스트까지)")
 
     def build_wall_graphics(M):
         """[W3 S13 · G13] yellow/black bands + reflective guidance strip on the cheeks.

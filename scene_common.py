@@ -1446,6 +1446,106 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
     return mtl
 
 
+# ===========================================================================
+# [4b] make_glass - translucent glazing, PT-oriented (GT-73)
+# ===========================================================================
+# Every glass prim in the 33 scenes binds a constant-colour OmniPBR, which is
+# **opaque** - scene08 recorded it as "no transmission is available in this
+# material stack" and scene13's `build_views` had to move an eye because of it.
+# The 08-06 user instruction ("Can the glass be made slightly transparent?") is
+# an explicit exception to the material freeze, and it is only meaningful under
+# PT (the verdict renderer, 8 bounces).
+#
+# Two backends, selected by `NEGOBS_GLASS_MDL`:
+#   "pbr" (default) - OmniPBR with `enable_opacity` + `opacity_constant`. The
+#     path tracer resolves fractional cutout opacity stochastically, so the pane
+#     reads as a tinted sheet and, having no refraction, cannot distort the
+#     descent behind it - which is the cue this library's glass has to preserve.
+#   "glass" - `OmniGlass.mdl` (`mtl/OmniGlass`), `thin_walled=True` so a 19 mm
+#     pane is one interface instead of a 19 mm solid slab of glass (a slab
+#     refracts and displaces the treads seen through it).
+# `enable_opacity` is authored **only on the material this function creates**.
+# The §5b vegetation note is the reason it is never turned on globally: those
+# leaves are modelled geometry with no alpha channel, so a global switch breaks
+# them (ZZ §10.2). Nothing here touches `make_pbr`'s code path.
+#
+# `NEGOBS_GLASS_V1=0` returns the caller's OPAQUE `make_pbr` material instead,
+# so the arm is A/B-able without editing any scene file.
+GLASS_V1 = os.environ.get("NEGOBS_GLASS_V1", "1") == "1"
+GLASS_MDL = os.environ.get("NEGOBS_GLASS_MDL", "pbr").strip().lower()
+OMNIGLASS_PATH = os.path.join(os.path.dirname(OMNIPBR_PATH), "OmniGlass.mdl")
+GLASS_STATS = dict(omnipbr=0, omniglass=0, fallback=0)
+
+
+def glass_backend():
+    """One-line description of the arm `make_glass` will take - for census prints."""
+    if not GLASS_V1:
+        return "OFF (NEGOBS_GLASS_V1=0 - opaque make_pbr fallback)"
+    if GLASS_MDL in ("glass", "omniglass") and os.path.isfile(OMNIGLASS_PATH):
+        return "OmniGlass.mdl (thin_walled)"
+    return "OmniPBR enable_opacity"
+
+
+def make_glass(stage, path, color=(0.55, 0.66, 0.68), opacity=0.35,
+               roughness=0.05, ior=1.49, specular_level=0.6,
+               opaque_color=None, opaque_roughness=None):
+    """Slightly transparent glazing. Returns a `UsdShade.Material`, like `make_pbr`.
+
+    `opacity` is the OmniPBR `opacity_constant` (0 = clear, 1 = opaque); it is
+    clamped to 0.05..1.0 so a caller can never author an invisible pane.
+    `opaque_color` / `opaque_roughness` are what the `NEGOBS_GLASS_V1=0` arm
+    hands to `make_pbr`, i.e. the pane's pre-GT-73 look - pass the scene's old
+    glass constants there and the fallback is byte-identical to the old build.
+    `opacity_threshold` is written as 0.0 explicitly: with a threshold > 0 the
+    MDL binarises the value and the pane goes fully opaque again.
+    """
+    from pxr import UsdShade, Sdf, Gf
+
+    if not GLASS_V1:
+        GLASS_STATS["fallback"] += 1
+        return make_pbr(
+            stage, path,
+            diffuse_color=(opaque_color if opaque_color is not None else color),
+            roughness_const=(opaque_roughness if opaque_roughness is not None
+                             else roughness))
+
+    op = min(1.0, max(0.05, float(opacity)))
+    mtl = UsdShade.Material.Define(stage, path)
+    sh = UsdShade.Shader.Define(stage, path + "/Shader")
+    sh.CreateImplementationSourceAttr(UsdShade.Tokens.sourceAsset)
+    F = Sdf.ValueTypeNames.Float
+    C3 = Sdf.ValueTypeNames.Color3f
+    B = Sdf.ValueTypeNames.Bool
+
+    if GLASS_MDL in ("glass", "omniglass") and os.path.isfile(OMNIGLASS_PATH):
+        sh.SetSourceAsset(Sdf.AssetPath(OMNIGLASS_PATH), "mdl")
+        sh.SetSourceAssetSubIdentifier("OmniGlass", "mdl")
+        sh.CreateInput("glass_color", C3).Set(Gf.Vec3f(*color))
+        sh.CreateInput("glass_ior", F).Set(float(ior))
+        sh.CreateInput("frosting_roughness", F).Set(float(roughness))
+        sh.CreateInput("thin_walled", B).Set(True)
+        GLASS_STATS["omniglass"] += 1
+    else:
+        sh.SetSourceAsset(Sdf.AssetPath(OMNIPBR_PATH), "mdl")
+        sh.SetSourceAssetSubIdentifier("OmniPBR", "mdl")
+        sh.CreateInput("diffuse_color_constant", C3).Set(Gf.Vec3f(*color))
+        sh.CreateInput("metallic_constant", F).Set(0.0)
+        sh.CreateInput("reflection_roughness_constant", F).Set(float(roughness))
+        if specular_level is not None:
+            sh.CreateInput("specular_level", F).Set(float(specular_level))
+        sh.CreateInput("enable_opacity", B).Set(True)
+        sh.CreateInput("enable_opacity_texture", B).Set(False)
+        sh.CreateInput("opacity_constant", F).Set(op)
+        sh.CreateInput("opacity_threshold", F).Set(0.0)
+        GLASS_STATS["omnipbr"] += 1
+
+    for out in ("surface", "displacement", "volume"):
+        mtl.CreateOutput(f"mdl:{out}",
+                         Sdf.ValueTypeNames.Token).ConnectToSource(
+            sh.ConnectableAPI(), "out")
+    return mtl
+
+
 # Unit-cell jitter defaults (T1 §1.8-3). sigma 0.10 / accent 7 % are the spec
 # values; they only take effect once ground_kit supplies a cell period.
 UNIT_CELL_DEFAULTS = dict(sigma=0.10, accent=0.07)
@@ -1845,13 +1945,31 @@ def build_nosing(stage, prefix, x0, y0, y1, riser, tread, n, base_z=0.0,
 # sites; a gate cannot. A caller asking for more than the statute gets clamped **and told**.
 BALUSTER_CLEAR_MAX = 0.100
 
+# --- GT-74 · the picket foot ------------------------------------------------
+# `foot_pickets=True` lets an infill picket end **on the surface it stands over**
+# instead of on the guard's own bottom envelope (`rail line - rail_h`). On stepped
+# ground the two are not the same line: the rail is a straight ramp, the treads are
+# a staircase, so the envelope floats above the tread by up to one riser.
+# `PICKET_EMBED` is how far the picket is socketed into that surface (a contact, not
+# a coplanar touch, so nothing z-fights); `PICKET_REACH_MAX` bounds how far below the
+# envelope a picket may chase a ground_fn, so a parapet whose `ground_fn` reports the
+# road far below still gets a picket and not a 3 m spear.
+PICKET_EMBED = 0.012
+PICKET_REACH_MAX = 0.30
+# Clear gap between the guard plane and the bracketed grip rail axis, used both to
+# place `sk.build_handrail` and to re-derive its radius from the returned rail y.
+GRIP_WALL_GAP = 0.060
+# Grip-rail end standard: the slim newel that carries the statutory bottom
+# extension where the guard's own post line has already ended.
+GRIP_NEWEL_R = 0.015
+
 
 def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
                        mtl, rail_h=None, post_r=0.02, spacing=None, rail_r=0.03,
                        rail_mid_r=0.018, rail_mid_drop=0.45,
                        baluster_r=0.009, baluster_gap=0.098, handrail=True,
                        cliff_adjacent=True, nsteps=None, picket_pitch=None,
-                       merge_handrail=False):
+                       merge_handrail=False, foot_pickets=False):
     """One guardrail line (a generalisation of scene01 build_cues). Top rail + mid rail + posts.
       y        : rail Y position
       x_start  : x where the horizontal extension starts (x_start..x_top is horizontal)
@@ -1879,8 +1997,28 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
     the guard plane (offset to the given side) with its top extension running back to
     `x_start`, so the two horizontal extension pieces read as one member.
 
+    [GT-74 2] **The merged line carries ONE intermediate rail, not two.** GT-67 kept the
+    guard's own mid rail (`rail_mid_drop` below the top rail) *and* hung the grip rail
+    at 850 mm, so a merged line ran three parallel tubes — top 1.10, grip 0.85, mid 0.58
+    `[measured on scene01]` — and the two lower ones read in every cut as a doubled,
+    overlapping mid rail. When the grip rail is actually built (`merge_handrail` **and**
+    `LOOK_GEO` **and** `handrail` **and** `run > 0.3`) the grip rail **is** the
+    intermediate member and `RailMid*` is not authored. If `sk.build_handrail` raises,
+    the guard falls back to its own mid rail — a guard never ends up with a single rail.
+
+    [GT-74 4] **Terminations.** In merged-with-grip mode the two `Return*` sleeves are
+    dropped: they were `rail_r` cylinders authored **coaxial with the end posts**
+    (r 0.030 over r 0.020), i.e. an interpenetrating sleeve that read as a diameter step,
+    not as a return. What replaces them terminates each run for real — a domed cap on
+    every free rail end, a knuckle at the grip rail's own kink, and a slim newel under
+    the grip rail's statutory bottom extension so the last 300 mm is carried instead of
+    cantilevered over the landing.
+
+    [GT-74 3] `foot_pickets` (see `PICKET_EMBED` above) foots the infill on the real
+    stepped surface. Off by default.
+
     Defaults reproduce the previous geometry exactly — no existing call site passes any
-    of the four kwargs.
+    of the five kwargs.
     Returns: list of created prims."""
     # A shared guardrail is a finished built element, not a cue that changes its
     # section according to a look-development flag. Keep the familiar 1.10 m
@@ -1908,8 +2046,15 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
             (x_top + run / 2.0, y, top0 - z_off - drop / 2.0),
             r, L, mtl, rotY=90.0 + ang))
 
+    # [GT-74 2] Will a bracketed grip rail actually be authored below? Only then is
+    # the guard's own mid rail a duplicate. The four conditions are exactly the ones
+    # the handrail block is gated on, so the `LOOK_GEO = 0` arm keeps `RailMid*` and
+    # is byte-identical to GT-67.
+    grip_wanted = bool(merge_handrail) and bool(LOOK_GEO) and bool(handrail) \
+        and float(run) > 0.3
     _seg("RailTop", rail_r, 0.0)
-    _seg("RailMid", rail_mid_r, rail_mid_drop)
+    if not grip_wanted:
+        _seg("RailMid", rail_mid_r, rail_mid_drop)
     x_end = x_top + run
 
     # Vertical balusters - the guardrail standard of the road safety facility guideline. A clear
@@ -1960,7 +2105,19 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
             # rail and filled only 43 % of the guardrail height, and the actual opening in the lower
             # 0.45-0.60 m violated the cited statutory 100 mm by 11 to 28 times.
             # (Geometry justified by a statutory requirement was violating that requirement.)
-            zbot = max(gz + 0.04, top0 - drop * t - rail_h + 0.04)
+            #
+            # [GT-74 3] "close to the ground" was still measured against the **rail's own
+            # bottom envelope**, which on a flight is a straight ramp while the surface is a
+            # staircase. The envelope therefore sits above the tread everywhere except at the
+            # tread's downstream edge, and the picket ends in mid-air: 60 mm over each tread
+            # and 40 mm over the level extension `[measured on scene01, 0.38 m pitch]`. With
+            # `foot_pickets` the picket lands on `ground_fn` and is socketed `PICKET_EMBED`
+            # into it, with `PICKET_REACH_MAX` bounding the chase (see the constant).
+            if foot_pickets:
+                zbot = max(gz - PICKET_EMBED,
+                           top0 - drop * t - rail_h - PICKET_REACH_MAX)
+            else:
+                zbot = max(gz + 0.04, top0 - drop * t - rail_h + 0.04)
             h = ztop - zbot
             if h <= 0.05:
                 return False
@@ -2021,19 +2178,35 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
     # knuckle closes the kink; an end return ties top rail -> mid rail -> end post into
     # one closed frame, which is how a real end standard terminates. No GT effect —
     # members above the walked surface, no z(x, y) changes.
+    def _rail_z_at(xe):
+        t = max(0.0, min((xe - x_top) / run, 1.0)) if run > 1e-9 else 0.0
+        return top0 - drop * t
+
     if merge_handrail:
-        for tag, r_j, z_off in (("RailTop", rail_r, 0.0),
-                                ("RailMid", rail_mid_r, rail_mid_drop)):
+        knuckles = [("RailTop", rail_r, 0.0)]
+        if not grip_wanted:
+            knuckles.append(("RailMid", rail_mid_r, rail_mid_drop))
+        for tag, r_j, z_off in knuckles:
             prims.append(add_cylinder(
                 stage, f"{prefix}/{tag}Knuckle", (x_top, y, top0 - z_off),
                 r_j, 2.0 * r_j, mtl))
-        for tag, xe in (("Start", x_start), ("End", x_end)):
-            t = max(0.0, min((xe - x_top) / run, 1.0)) if run > 1e-9 else 0.0
-            z_hi = top0 - drop * t
-            prims.append(add_cylinder(
-                stage, f"{prefix}/Return{tag}",
-                (xe, y, z_hi - rail_mid_drop / 2.0), rail_r, rail_mid_drop,
-                mtl))
+        if grip_wanted:
+            # [GT-74 4] Domed end caps instead of the coaxial `Return*` sleeves. The
+            # top rail is `rail_r` 0.030 and the end post `post_r` 0.020, so the rail's
+            # flat end face stood 10 mm proud of the post as an exposed cut ring at both
+            # termini `[computed]`. A hemisphere of the rail's own radius, centred on the
+            # rail axis at the terminus, closes that face; the post passes through it, so
+            # the pair reads as one ball-ended standard.
+            for tag, xe in (("Start", x_start), ("End", x_end)):
+                prims.append(add_sphere(
+                    stage, f"{prefix}/RailTopCap{tag}", (xe, y, _rail_z_at(xe)),
+                    (rail_r, rail_r, rail_r), mtl))
+        else:
+            for tag, xe in (("Start", x_start), ("End", x_end)):
+                prims.append(add_cylinder(
+                    stage, f"{prefix}/Return{tag}",
+                    (xe, y, _rail_z_at(xe) - rail_mid_drop / 2.0), rail_r,
+                    rail_mid_drop, mtl))
 
     # -- Handrail -------------------------------------------------------
     # Evac/fire structure rules §15(4). **Unimplemented in all 33 scenes.**
@@ -2052,7 +2225,7 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
                 hr_kw = dict(wall_y=y,
                              wall_side=(1.0 if float(merge_handrail) >= 0
                                         else -1.0),
-                             wall_gap=0.060,
+                             wall_gap=GRIP_WALL_GAP,
                              ext_top=max(sk.K.HANDRAIL_EXT_MIN,
                                          x_top - x_start),
                              ext_bot=sk.K.HANDRAIL_EXT_MIN)
@@ -2066,8 +2239,47 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
             # No call site consumes the return value (18 sites, all bare statements).
             prims += hr["prims"]
             LOOK_STATS["handrail"] = LOOK_STATS.get("handrail", 0) + 1
+            if grip_wanted:
+                # -- [GT-74 4] grip-rail end standards -----------------------
+                # `build_handrail` lays three tubes and hangs brackets on the guard
+                # plane at `HANDRAIL_POST_SPACING`; the run's two ends are open cut
+                # faces, and the statutory 300 mm bottom extension reaches **past**
+                # the guard's own end post, so it hung unsupported over the landing.
+                # Radius is re-derived from the returned rail y (arm = wall gap + r),
+                # never restated, so it cannot drift from the tube actually built.
+                hy = float(hr["y"])
+                hx0, hx1 = float(hr["x_start"]), float(hr["x_end"])
+                hz0, hz1 = float(hr["z_top_rail"]), float(hr["z_bot_rail"])
+                hr_r = max(1e-4, abs(hy - y) - GRIP_WALL_GAP)
+                # knuckle at the grip rail's own kink (the guard already has one)
+                prims.append(add_cylinder(
+                    stage, f"{prefix}/GripKnuckle", (x_top, hy, hz0),
+                    hr_r, 2.0 * hr_r, mtl))
+                # domed caps on both free tube ends
+                for tag, hx, hz in (("Top", hx0, hz0), ("End", hx1, hz1)):
+                    prims.append(add_sphere(
+                        stage, f"{prefix}/GripCap{tag}", (hx, hy, hz),
+                        (hr_r, hr_r, hr_r), mtl))
+                # newel under the outer end of the bottom extension. It foots on
+                # `ground_fn` like every guard post, so the assembly has no member
+                # that stops in mid-air.
+                gz_n = float(ground_fn(hx1))
+                h_n = hz1 - gz_n
+                if h_n > 1e-3:
+                    prims.append(add_cylinder(
+                        stage, f"{prefix}/GripNewel", (hx1, hy, gz_n + h_n / 2.0),
+                        GRIP_NEWEL_R, h_n, mtl))
         except Exception as e:
             print(f"[룩v1][경고] 손잡이 실패 {prefix}: {e}")
+            if grip_wanted:
+                # [GT-74 2] Degradation: the grip rail is what replaced the guard's
+                # mid rail. Without it the guard would be a single top rail, so the
+                # mid rail (and its knuckle) come back rather than leaving a gap.
+                _seg("RailMid", rail_mid_r, rail_mid_drop)
+                prims.append(add_cylinder(
+                    stage, f"{prefix}/RailMidKnuckle",
+                    (x_top, y, top0 - rail_mid_drop), rail_mid_r,
+                    2.0 * rail_mid_r, mtl))
     return prims
 
 

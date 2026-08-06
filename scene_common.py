@@ -1849,13 +1849,38 @@ BALUSTER_CLEAR_MAX = 0.100
 def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
                        mtl, rail_h=None, post_r=0.02, spacing=None, rail_r=0.03,
                        rail_mid_r=0.018, rail_mid_drop=0.45,
-                       baluster_r=0.009, baluster_gap=0.098, handrail=True):
+                       baluster_r=0.009, baluster_gap=0.098, handrail=True,
+                       cliff_adjacent=True, nsteps=None, picket_pitch=None,
+                       merge_handrail=False):
     """One guardrail line (a generalisation of scene01 build_cues). Top rail + mid rail + posts.
       y        : rail Y position
       x_start  : x where the horizontal extension starts (x_start..x_top is horizontal)
       x_top    : x where the slope starts (descending by drop towards +X from here)
       run,drop : horizontal length and drop of the sloped section
       ground_fn: x -> ground z callback (landing height of the post foot). Stepped on stairs.
+
+    [GT-67 1-1] Picket density is tied to the flight's own scale, opt-in:
+      cliff_adjacent : True (default) = this line is a **fall-protection guard**, so the
+                       statutory 안목 below binds and the pitch is 2r + baluster_gap.
+                       False = the caller declares no cliff / road / water alongside;
+                       combined with a sub-1.20 m `drop` (건축법 시행령 §40, the fall from
+                       which a guard becomes mandatory) the line is a hand guide and its
+                       infill is a rhythm, not a screen.
+      nsteps         : step count of the flight. With `cliff_adjacent=False` the derived
+                       pitch is `run / nsteps` — one picket per riser, which is the
+                       rhythm the flight itself already has.
+      picket_pitch   : explicit centre pitch [m]; overrides the derivation.
+    The derivation can only make a line **sparser** than the statutory pitch, never
+    denser (`max` below), and is refused for drops at or above the 1.20 m threshold.
+
+    [GT-67 1-2] `merge_handrail` (False / +1 / -1) folds the grip rail into the guard
+    instead of standing it beside it: rail knuckles at the slope transition, end returns
+    tying top rail -> mid rail -> end post, and the handrail carried on **brackets** off
+    the guard plane (offset to the given side) with its top extension running back to
+    `x_start`, so the two horizontal extension pieces read as one member.
+
+    Defaults reproduce the previous geometry exactly — no existing call site passes any
+    of the four kwargs.
     Returns: list of created prims."""
     # A shared guardrail is a finished built element, not a cue that changes its
     # section according to a look-development flag. Keep the familiar 1.10 m
@@ -1904,6 +1929,27 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
                   f"> 법정 {BALUSTER_CLEAR_MAX * 1000:.0f} mm — {prefix} 클램프")
             baluster_gap = BALUSTER_CLEAR_MAX
         pitch = 2.0 * baluster_r + baluster_gap
+        picket_relaxed = False
+        # [GT-67 1-1] Scale-linked density. The gate above is the **fall-protection**
+        # rule (도로안전시설 지침 · 피난방화규칙 §15④); 건축법 시행령 §40 makes a guard
+        # mandatory from a 1.20 m fall. Below that, with nothing to fall into alongside,
+        # the line is a hand guide and a 116 mm screen over a 0.60 m plaza flight is a
+        # section borrowed from a bridge parapet. Entered only when the caller says so.
+        if picket_pitch is not None or not cliff_adjacent:
+            nonstat_drop_max = 1.20              # 건축법 시행령 §40 난간 의무 낙차
+            if picket_pitch is not None:
+                want = float(picket_pitch)
+            elif float(drop) >= nonstat_drop_max - 1e-9:
+                want = pitch                     # statutory case — relaxation refused
+                print(f"[룩v1][경고] 낙차 {float(drop):.2f} m ≥ "
+                      f"{nonstat_drop_max:.2f} m — 살대 완화 거부, 법정 피치 유지 "
+                      f"{prefix}")
+            elif nsteps:
+                want = float(run) / float(nsteps)        # one picket per riser
+            else:
+                want = pitch * (nonstat_drop_max / max(float(drop), 0.15))
+            picket_relaxed = want > pitch + 1e-9
+            pitch = max(pitch, want)             # never denser than the statute
 
         def _bal(idx, bx):
             """One vertical baluster at bx. Returns True when it was tall enough to build."""
@@ -1938,7 +1984,12 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
         # place a pedestrian meets the rail end. One terminal baluster, flush with x_end,
         # closes it. It is placed only when the span actually exceeds the statute, so a run
         # whose length happens to divide evenly gains nothing.
-        if x_last is not None and (x_end - x_last) - baluster_r > BALUSTER_CLEAR_MAX + 1e-9:
+        # [GT-67 1-1] Skipped when the pitch was relaxed: the trigger is the 100 mm 안목,
+        # which by definition does not bind that line, and the extra picket would land
+        # inside the end post anyway (r 0.009 at `x_end - r` vs a post of r 0.020 at
+        # `x_end`) — an invisible duplicate. The end post closes the run there.
+        if (not picket_relaxed) and x_last is not None \
+                and (x_end - x_last) - baluster_r > BALUSTER_CLEAR_MAX + 1e-9:
             if _bal(b, x_end - baluster_r):
                 b += 1
         LOOK_STATS["baluster"] = LOOK_STATS.get("baluster", 0) + b
@@ -1964,6 +2015,26 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
                 stage, f"{prefix}/Post_{p}", (xp, y, gz + ph / 2.0),
                 post_r, ph, mtl))
 
+    # -- Terminations (GT-67 1-2) ---------------------------------------
+    # The two rail runs meet at `x_top` with open cylinder ends and stop dead at both
+    # termini, so the infill panel reads as a loose leaf hung beside the flight. A
+    # knuckle closes the kink; an end return ties top rail -> mid rail -> end post into
+    # one closed frame, which is how a real end standard terminates. No GT effect —
+    # members above the walked surface, no z(x, y) changes.
+    if merge_handrail:
+        for tag, r_j, z_off in (("RailTop", rail_r, 0.0),
+                                ("RailMid", rail_mid_r, rail_mid_drop)):
+            prims.append(add_cylinder(
+                stage, f"{prefix}/{tag}Knuckle", (x_top, y, top0 - z_off),
+                r_j, 2.0 * r_j, mtl))
+        for tag, xe in (("Start", x_start), ("End", x_end)):
+            t = max(0.0, min((xe - x_top) / run, 1.0)) if run > 1e-9 else 0.0
+            z_hi = top0 - drop * t
+            prims.append(add_cylinder(
+                stage, f"{prefix}/Return{tag}",
+                (xe, y, z_hi - rail_mid_drop / 2.0), rail_r, rail_mid_drop,
+                mtl))
+
     # -- Handrail -------------------------------------------------------
     # Evac/fire structure rules §15(4). **Unimplemented in all 33 scenes.**
     # dia 32-38, height 850, **horizontal end extension >=300** - that end hook is
@@ -1971,10 +2042,29 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
     # No GT effect: a vertical/horizontal member above the stair surface, it does not change z(x,y).
     if LOOK_GEO and handrail and run > 0.3:
         try:
-            prims += sk.build_handrail(
+            hr_kw = {}
+            if merge_handrail:
+                # [GT-67 1-2] Carried ON the guard, not beside it: brackets off the
+                # guard plane instead of a second post line, and the top extension
+                # runs back to `x_start` so the guard's horizontal piece and the grip's
+                # horizontal piece are one member. `ext_bot` keeps the statutory
+                # 300 mm hook — that bend is the Korean silhouette, not clutter.
+                hr_kw = dict(wall_y=y,
+                             wall_side=(1.0 if float(merge_handrail) >= 0
+                                        else -1.0),
+                             wall_gap=0.060,
+                             ext_top=max(sk.K.HANDRAIL_EXT_MIN,
+                                         x_top - x_start),
+                             ext_bot=sk.K.HANDRAIL_EXT_MIN)
+            hr = sk.build_handrail(
                 stage, f"{prefix}/Handrail", y, x_top, run, drop, mtl,
                 add_cylinder, z_top=ground_ref, ground_fn=ground_fn,
-                strict=False)
+                strict=False, **hr_kw)
+            # `build_handrail` returns a **dict**; `prims += dict` extended the list
+            # with the dict's KEYS (7 strings per line). Geometry was never affected —
+            # the prims are authored on the stage — but the returned list was wrong.
+            # No call site consumes the return value (18 sites, all bare statements).
+            prims += hr["prims"]
             LOOK_STATS["handrail"] = LOOK_STATS.get("handrail", 0) + 1
         except Exception as e:
             print(f"[룩v1][경고] 손잡이 실패 {prefix}: {e}")

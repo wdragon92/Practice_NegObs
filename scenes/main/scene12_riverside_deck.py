@@ -15,7 +15,9 @@ Hazard
   A 2.5 m wide timber deck cantilevers 1.25 m out over the revetment riprap and
   passes above the water (−1.8). [08-05 doctrine] the railing itself is the drop
   cue — a continuous guard line means "water beyond the rail" — so the river-side
-  run is an ordinary full-height guard (1.10 m, picket infill, **no kick plate**).
+  run is an ordinary full-height guard (1.10 m). [GT-66] its section is G3's
+  river-edge product: Ø120 round posts carrying **two** Ø80 log rails, with
+  **no vertical picket infill and no kick plate**, so the bay stays open.
   The negative obstacle is the concealed drop, not a damaged guard: **the near
   water is not visible** - the sight line grazing the deck outer edge (y 1.25,
   z 0) reaches the water only at y = 8.75 m, so the 7.50 m stretch of riprap and
@@ -24,8 +26,8 @@ Hazard
 
 Goal
   (1) deck (x −18..0, width 2.5, z=0) + timber beams and piles + cantilever 1.25 m
-  (2) river-side railing (posts + top rail + mid rail + pickets, no kick plate),
-      continuous over the full deck run
+  (2) river-side railing (posts + top rail + one mid rail; no picket infill, no
+      kick plate), continuous over the full deck run
   (3) 8-riser connecting stair at the deck end (0.17 × 8 = 1.36) → lower
       floodplain (−1.36)
   (4) revetment riprap tiers (−0.55/−1.45/−1.75/−1.78/−1.95/−2.40) + water −1.8
@@ -135,10 +137,21 @@ step <= 0.17)
         the KNPS n=1,227 built-reality median. Left alone and recorded as
         **L12-F1** - this scene's declared identity is a degraded guard, and
         moving the rail height without a ruling moves a cue.
-    [08-05 doctrine override] (a)-(c) are superseded by the user ruling that the
-        guard itself is the drop cue (rail line = "water beyond"), not guard
-        degradation: the run is now continuous at 1.10 m with Ø40 picket infill
-        (see PARAMS["rail"]). The paragraphs above are kept as history.
+    [08-05 doctrine] (b)-(c) are superseded by the user ruling that the guard
+        itself is the drop cue (rail line = "water beyond"), not guard
+        degradation: the damaged bay, the stubs and the tape are gone and the run
+        is continuous. (b) survives intact - the 1.5 m pitch never moved. (c) is
+        spent: with the "degraded guard" identity retired the sub-code 1.05 had
+        no remaining reason, so the run stands at 1.10 m (조경설계기준
+        16.13.2(2) 1,100 · scene10 parity) and stays there.
+    [GT-66 · 08-05 gallery review] (a) is **reinstated**. The 08-05 continuity
+        pass had also added a Ø40 picket infill (clear 98 mm); reviewed, the user
+        asked for the original guard back, so the infill is deleted and the
+        section is the GT-43 one again - Ø120 posts, two Ø80 log rails, nothing
+        between them. Continuity is **not** rolled back with it: no damaged span,
+        stub or tape returns. (a)'s second reason is the load-bearing one - the
+        h0.3 sight line running out under the mid rail is this scene's
+        negative-obstacle premise, and the pickets were narrowing it.
   **GT-44** - the deck timber goes to the measured 2-5 year 방부목 patina band.
   `M["deckwood"]` bound the `wood_dark` map **raw**: mean linear
   (0.0824, 0.0584, 0.0442), L* 30.03, `albedo_selfcheck` 0.081 - a third of the
@@ -276,7 +289,7 @@ PARAMS = dict(
     water=dict(x0=-40.0, x1=60.0, y0=3.70, y1=70.0, z=-1.80),
     far_bank=dict(x0=-40.0, x1=60.0, y0=70.0, y1=100.0, z_top=-1.50,
                   thick=2.2),
-    # --- railing (river side y=1.15): continuous, ordinary post-and-picket guard ---
+    # --- railing (river side y=1.15): continuous 2-rail log guard, no infill ---
     # [W3 L12 · GT-43] sections move off steel-pipe diameters onto the two round
     #   preservative-timber sizes this repo has verified (`s3_research_numbers_v1.md` §A5,
     #   KFS-TRAIL 그림 3-20 p.72, source grade A): 방부원형목재 **Ø120** and **Ø80**.
@@ -288,12 +301,18 @@ PARAMS = dict(
     #   by the smoke rather than left to a reader's arithmetic.
     #   [doctrine 08-05] The guard itself is the drop cue (a rail line means "water
     #   beyond"), so the damaged 2.4 m bay, post stubs and warning tape are replaced
-    #   by a continuous full-height run: 1.10 m to the top face (scene10-parallel)
-    #   with a 100 mm maximum clear picket opening. Sections stay on the GT-43
-    #   timber sizes (post Ø120 · rails Ø80); pickets are Ø40 timber dowels.
+    #   by a continuous full-height run: 1.10 m to the top face (scene10-parallel).
+    #   [GT-66] The picket infill that same pass added (baluster_r 0.020 ·
+    #   baluster_gap 0.098 · 129 Ø40 dowels, all colliders) is **deleted** - the keys
+    #   are gone, not zeroed, so nothing can silently re-plant them. What is left is
+    #   the GT-43 section verbatim: **Ø120 post · Ø80 top rail · one Ø80 mid rail**,
+    #   two rails and open bays, which is what G3's river-edge product carries.
+    #   Continuity is untouched (08-05 doctrine): the run is still x −18..0 with
+    #   posts on both connected ends. Clearances this leaves, all [computed] and
+    #   printed by the smoke: deck top face → mid-rail underside 0.510 m ·
+    #   mid-rail top → top-rail underside 0.470 m · clear bay between posts 1.380 m.
     rail=dict(y=1.15, post_r=0.060, post_h=1.10, spacing=1.5,
-              top_z=1.10, top_r=0.040, mid_z=0.55, mid_r=0.040,
-              baluster_r=0.020, baluster_gap=0.098),
+              top_z=1.10, top_r=0.040, mid_z=0.55, mid_r=0.040),
     # [v5.2 user] arbitrary warning signboards removed - fall-hazard / stair-hazard sign parameters deleted.
     # --- upper floodplain dressing ---
     path=dict(x0=-40.0, x1=0.0, y0=-4.6, y1=-2.6, proud=0.002),   # decomposed-granite promenade
@@ -1115,38 +1134,33 @@ def _smoke_report():
     print(f"    연속 런 x [{d['x0']:.1f},{d['x1']:.1f}] · 양단 포스트 지지 → "
           f"{'OK' if end_ok else 'FAIL(단부 무지지)'}")
     print(f"    난간 상단 {r['top_z']:.2f} m — 조경설계기준 16.13.2(2) 1,100 충족 · "
-          f"살대 안목 {r['baluster_gap']*1000:.0f} mm ≤ 100")
+          f"살대 인필 없음 (GT-66 롤백 — 상·중 통나무 2단)")
 
     # ── [v7] silver grass stalk conversion + §4 albedo cap self-check ──
     reed_selfcheck()
     albedo_selfcheck()
 
-    # ── [W3 L12 · GT-43 → 08-05 연속화] the guard section, printed rather than claimed ──
-    #   Sections stay on the GT-43 timber sizes (post Ø120 · rails Ø80); what changed
-    #   is continuity: the damaged bay / stubs / tape are gone and a picket infill
-    #   (Ø40, clear 98 mm) runs the whole deck. Re-derived from PARAMS so a
-    #   regression is visible without a render.
+    # ── [GT-66 픽켓 롤백] the guard section, printed rather than claimed ──
+    #   Members are the GT-43 sections (post Ø120 · rails Ø80) and nothing else:
+    #   the 08-05 picket infill is deleted, so this is a 2-rail log guard with open
+    #   bays. Continuity (08-05) is unchanged and is asserted above. Every number
+    #   re-derived from PARAMS so a regression is visible without a render.
     r = PARAMS["rail"]
     posts = _rail_posts()
-    pitch = 2.0 * r["baluster_r"] + r["baluster_gap"]
-    nbal = 0
-    _x = d["x0"] + pitch
-    while _x < d["x1"] - pitch * 0.5:
-        nbal += 1
-        _x += pitch
-    open_mid = r["mid_z"] - r["mid_r"]
-    open_top = r["top_z"] - r["top_r"]
-    print("  [W3 L12 가드 검산 — 연속 방부목 난간]")
+    open_mid = r["mid_z"] - r["mid_r"]                  # deck top face -> mid-rail underside
+    open_bay = (r["top_z"] - r["top_r"]) - (r["mid_z"] + r["mid_r"])
+    clear_x = r["spacing"] - 2.0 * r["post_r"]          # clear span between posts
+    print("  [GT-66 가드 검산 — 연속 방부목 2단 난간 (인필 없음)]")
     print(f"    부재: 포스트 Ø{r['post_r']*2*1000:.0f} × {len(posts)} · "
-          f"상부대 Ø{r['top_r']*2*1000:.0f} · 중간대 Ø{r['mid_r']*2*1000:.0f} · "
-          f"살대 Ø{r['baluster_r']*2*1000:.0f} × {nbal}  "
-          f"[방부원형목재 Ø120/Ø80 · s3_research_numbers_v1.md §A5]")
-    print(f"    살대 피치 {pitch*1000:.0f} mm (안목 {r['baluster_gap']*1000:.0f} mm ≤ 100) · "
-          f"콜라이더 = 포스트 {len(posts)} + 살대 {nbal}")
-    print(f"    h0.3 시선 개구: 데크 상면 0.000 → 중간대 하단 {open_mid:.3f} m · "
-          f"상부대 하단 {open_top:.3f} — 살대 사이로 수면 프레임 부분 잔존")
+          f"상부대 Ø{r['top_r']*2*1000:.0f} × 1 · 중간대 Ø{r['mid_r']*2*1000:.0f} × 1 · "
+          f"살대 0  [방부원형목재 Ø120/Ø80 · s3_research_numbers_v1.md §A5]")
+    print(f"    콜라이더 = 포스트 {len(posts)} 개 (구 포스트 13 + 살대 129 = 142 "
+          f"→ 살대 129 제거, GT-66 귀속) · 가로대는 비충돌 유지")
+    print(f"    개구: 데크 상면 0.000 → 중간대 하단 {open_mid:.3f} m · "
+          f"중간대 상단 → 상부대 하단 {open_bay:.3f} m · 포스트 간 순간격 "
+          f"{clear_x:.3f} m → h0.3 시선 전 구간 관통 (연구 전제 복원)")
     print(f"    난간 높이 {r['top_z']:.2f} m — 조경설계기준 16.13.2(2) 1,100 충족 "
-          f"(구 1.05 '열화된 가드' 정체성은 08-05 독트린으로 폐기)")
+          f"(GT-43 기록 1.05 '열화된 가드' 정체성은 08-05 독트린으로 폐기 — 미복원)")
 
     # ── [W3 L12] season pin + river-view measurement ──
     season_audit()
@@ -1337,7 +1351,8 @@ BANNER = """\
 [체크리스트]
  1. h0.3 그리드     — 킥플레이트 없는 난간 아래로 근접 수면이 은닉되는가
  2. edge_void       — 난간 너머 낙차가 은닉된 채 '물가 데크'로 읽히는가 (핵심 컷)
- 3. broken_span     — 연속 난간 런(살대 인필)이 평범한 물가 가드로 읽히는가
+ 3. broken_span     — 연속 난간 런(기둥+상·중 통나무 2단, 인필 없음)이 평범한
+                      물가 가드로 읽히는가
  4. stair_join      — 데크 끝 8단 하강이 프레임에 들어왔는가(재조준 컷)
  5. under_deck      — 캔틸레버 하부 말뚝·보·사석 공간이 보이는가(저시점)
  6. bank_face       — 데크면→에지→하부공간→사석→수제선이 수직으로 쌓이는가
@@ -1347,7 +1362,8 @@ BANNER = """\
                       대역이 생겨 '인피니티 풀'이 아니라 강으로 읽히는가
  9. [v7] 억새       — bank_face 중앙·beauty_overview 우측이 갈색 육면체가
                       아니라 **줄기 사이로 배경이 비치는 대(stalk) 군락**인가
-10. [v7] 난간       — 광택 백색 파이프가 도장 강재(다크그레이)로 바뀌었는가
+10. [GT-43/66] 난간 — 착색방부목 Ø120 기둥 + Ø80 통나무 2단으로 읽히는가
+                      (도장 강재 파이프·살대 인필 모두 아님)
 11. [v7] 지평       — +X(우측) 배후가 시가지 실루엣으로 닫혔는가"""
 
 
@@ -1702,7 +1718,11 @@ def main():
             M["grass"], col=True)
 
     # -------------------------------------------------------------------
-    # Railing - one continuous river-side run with ordinary vertical pickets.
+    # Railing - one continuous river-side run: Ø120 posts + 2 Ø80 log rails.
+    #   [GT-66] The `Rail/Baluster_*` loop (129 Ø40 dowels, col=True) is deleted;
+    #   the bays are open, as GT-43 specified before the 08-05 continuity pass
+    #   added an infill. Prim roots `Rail/Post_*` · `Rail/Top` · `Rail/Mid` and
+    #   the continuous run x −18..0 are unchanged.
     # -------------------------------------------------------------------
     def build_railing(M):
         d = PARAMS["deck"]
@@ -1716,16 +1736,6 @@ def main():
             CYL(f"{ROOT}/Rail/{nm}",
                 ((d["x0"] + d["x1"]) / 2.0, r["y"], zz), rr,
                 d["x1"] - d["x0"], M["guard"], rotY=90.0)
-        pitch = 2.0 * r["baluster_r"] + r["baluster_gap"]
-        x = d["x0"] + pitch
-        n = 0
-        while x < d["x1"] - pitch * 0.5:
-            CYL(f"{ROOT}/Rail/Baluster_{n}",
-                (x, r["y"], (r["top_z"] - r["top_r"] + 0.04) / 2.0),
-                r["baluster_r"], r["top_z"] - r["top_r"] - 0.04,
-                M["guard"], col=True)
-            x += pitch
-            n += 1
 
     # [v5.2 user] arbitrary warning signboards removed - build_signs() deleted.
     # [08-05 doctrine] destroyed-span warning tape removed with the damaged bay -

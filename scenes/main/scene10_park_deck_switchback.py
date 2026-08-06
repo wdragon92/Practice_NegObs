@@ -187,6 +187,34 @@ Legacy : scenes/archive_v3/scene10_switchback_cliff.py
     layers `assets/veg_bare/*_bare.usda` via `sc.veg_wrapper_rel` (K4(0) `e4fc4cf`),
     which composes the strip **inside** the prototype. Geometry, scale and placement are
     unchanged by construction — the only delta is foliage leaving the frame.
+
+[GT-65 — 08-05 gallery review: "연결부가 아직 지저분" + "데크 느낌이 끝까지"]
+  P-2 keeps the archetype parked, so this is junction and continuity work only — the
+  널 틈, the 돌구덩이 (rock outcrop) and the 통나무 펜스 family are untouched and the
+  registered 6.600 m drop, the flight/landing table and every collider are frozen.
+  (1) **Railing junctions, rebuilt from one model.** The deck is y-monotone, so its
+      guarded boundary is exactly two polylines; `deck_slabs()` -> `rail_runs()` now
+      derives every rail, every corner and every newel from that boundary instead of a
+      hand-written list. Fixed by construction: the forward run no longer stands across
+      the head of the next flight (it did at 5 turns and at the exit), a flight rail and
+      the landing rail it continues into are collinear so a junction carries **one**
+      capped newel instead of two 19 mm apart (12 such pairs), the landing back edges
+      are closed so no run starts in mid-air, and a baluster can no longer sit inside a
+      line post. Newels 52 -> **41**, runs 32 -> **39**.
+  (2) **Deck continuity to the scene end.** The upper dirt trail met the deck 0.10 m
+      short (grass seam); the deck planking existed only on the 1.5 m entry deck, so the
+      remaining 22.6 m of landings read as smooth slabs; and the arrival landing railed
+      off its own exit onto grass 1.0 m north of a `LowerPath` it never touched. The
+      trail now meets the deck at x −1.50, all six landings carry the same 25x140 board
+      division, the arrival guard is gone (20 mm to grade — a guard there is a false
+      drop cue) and `DeckExit`/`DeckExitLink` hand the walk to `LowerPath` and on to the
+      scene edge, with the east forest band pulled back to leave the gate.
+  (3) **Foreground shrub review: nothing to convert.** All 13 shrub clumps already run
+      through `sc.place_shrubs` (autumn-legal pool, `det_seed`). The only `build_hedge`
+      users are `FarHedge_*` (y −40..−37, x 40..43) and `RidgeCrest_*` (crest bands at
+      base 3.10 / 6.76) — the distant TreeLine idiom `place_hedge_row` itself excludes
+      and GT-63 keeps. **No foreground clipped band or shrub bed exists near the path**,
+      and none was invented.
 ────────────────────────────────────────────────────────────────────────────
 
 Run (GUI look check - default):
@@ -388,7 +416,13 @@ PARAMS = dict(
     plates=[
         ("UpperTrail",   -40.0,  -1.5,  -1.60,  8.00,  0.00, 0.45, "grass"),
         ("UpperBody",    -40.0,  -1.5,  -1.60,  8.00, -0.45, 6.95, "rock"),
-        ("TrailPath",    -40.0,  -1.6,  -0.85,  0.85,  0.002, 0.06, "dirt"),
+        # [GT-65] x1 −1.60 -> **−1.50**: the dirt trail stopped 0.10 m short of the
+        #   entry deck (x0 −1.50) and the walk crossed a 0.10 m strip of bare grass
+        #   before it reached the timber. −1.50 is also the value `ground_kit`'s own
+        #   `SCENE_PLANS` fixture has always carried for this plan, and the §7.3
+        #   invariant `_inv_10_trail_cut` is "xb <= −1.5", so the trail meets the deck
+        #   exactly at the cut and never covers the stair corridor.
+        ("TrailPath",    -40.0,  -1.5,  -0.85,  0.85,  0.002, 0.06, "dirt"),
         ("LowerParkMain", -1.5,  44.0, -13.00,  8.00, -6.62, 1.50, "grass"),
         ("LowerParkFar", -40.0,  44.0, -60.00, -13.00, -6.62, 1.50, "grass"),
         ("LowerPath",     -1.5,  44.0,  -4.40, -2.60, -6.618, 0.06, "dirt"),
@@ -443,6 +477,22 @@ PARAMS = dict(
     #   it to the sky — measured on the 260731_w3_s10 pilot, a 4.8 m see-through band at
     #   the head. Highest corridor top is −0.255, so 7.00 m of body clears it with margin.
     corridor=dict(y0=-2.60, y1=8.00, thick=7.00),
+
+    # --- [GT-65 · §0-2] deck -> lower park hand-off -------------------------------
+    #   The stair arrived at x 24.14 and stopped **on grass**: `LowerPath` (the lower
+    #   park trail, y −4.40..−2.60) runs parallel 1.0 m south of the arrival landing
+    #   and never meets it, and the arrival landing's forward edge was railed on top
+    #   of that, so the descent dead-ended into its own guard. Two dirt strips carry
+    #   the walking line on: `DeckExit` continues the deck axis east to the scene edge
+    #   (x 44 = `LowerParkMain` x1), `DeckExitLink` is the T onto `LowerPath`.
+    #   Both are **2 mm veneers over ground that already exists** (`LowerParkMain` top
+    #   −6.620, corridor ground −6.620 past its last station) and are built **without
+    #   colliders**: they add a trail reading, not a walking surface, so no collider,
+    #   no drop edge and no GT-read AABB moves — the row stays R-3.
+    #   z −6.618 is the same decal ladder step `LowerPath` uses.
+    #   (name, x0, x1, y0, y1, z_top, thick)
+    exit_paths=[("DeckExit",     24.10, 44.00, -0.90, 0.90, -6.618, 0.06),
+                ("DeckExitLink", 26.00, 27.80, -2.60, -0.90, -6.618, 0.06)],
 
     # --- [S3-11] season: **late autumn (만추), leaf-off**, pinned -------------------
     #   G10 reads leafless canopy + overwintered matted brown litter + a first flush of
@@ -566,9 +616,16 @@ PARAMS = dict(
                  roof_t=0.16),
     # [v5.2 user] arbitrary warning sign removed - the stair-caution sign (PARAMS['sign']) is deleted.
     # distant closure : forest band beyond the lower park + trees on the upper ridge
+    #   [GT-65] the east band stopped at y +1.40, i.e. it stood across **both** lower
+    #   trails (`LowerPath` y −4.40..−2.60 and the new `DeckExit` y −0.90..+0.90): a
+    #   4 m forest wall at x 40 is where the walk ended. y1 −5.20 opens the gate the
+    #   trails pass through with 0.8 m of margin. Horizon closure is unaffected —
+    #   `FarRidge` (top z 3.50, x 44..78) and the two `ridge_crest` bands stand behind
+    #   the gap. The band idiom itself is untouched (GT-63 keeps build_hedge for the
+    #   distant TreeLine family).
     far_hedges=[dict(x0=-40.0, x1=6.0, y0=-40.0, y1=-37.0, h=4.0),
                 dict(x0=6.0, x1=44.0, y0=-40.0, y1=-37.0, h=4.0),
-                dict(x0=40.0, x1=43.0, y0=-33.0, y1=1.40, h=4.0)],
+                dict(x0=40.0, x1=43.0, y0=-33.0, y1=-5.20, h=4.0)],
     # [v6 C-4] forest silhouette band on the distant ridge crest (FarRidge top z 3.50) -
     #   the horizon is closed with a round-crown strip instead of individual lollipops.
     #   + the **straight horizon** of the north hill (FarHill top 7.16), verdict (1)'s 'stage
@@ -940,53 +997,160 @@ def post_segments():
 
 
 # ===========================================================================
-# [F-b] railing run inventory — [S3-8] one source of truth for rails and newels
-#       Every level railing run in the scene, in world coordinates. `deck_rail`
-#       draws the members; `newel_points` derives the capped corner posts from the
-#       same list so a corner shared by two runs carries **one** newel, not two.
-#       Keeping the inventory here (not inside main()) also lets SMOKE assert the
-#       railing without booting.
+# [F-b] railing inventory — [S3-8 · GT-65] one source of truth for every rail
+#       member, newel and junction in the scene.
+#
+#       [GT-65] The deck is **y-monotone**: at every x exactly one y-interval is
+#       walkable (entry deck -> flight band -> landing -> flight band -> ...), so its
+#       guarded boundary is exactly two polylines, ylo(x) and yhi(x). Every run is one
+#       segment of one of them and `deck_slabs()` is the only place a coordinate is
+#       written. Listing the runs by hand is what produced the four junction defects
+#       the 08-05 gallery review flagged as "연결부가 아직 지저분":
+#         (a) `LandRail_k_Out` was drawn across the **whole** landing width, i.e. it
+#             ran straight through the head of the next flight — 5 flights, plus the
+#             arrival landing where it railed off the exit itself (§0-2 dead end);
+#         (b) the level runs sat on the slab edge (y ±1.60) while the flight runs sat
+#             `bal/2` outboard (y ∓1.619), so every flight head and foot carried
+#             **two** 90x90 capped newels 19 mm apart — 12 interpenetrating pairs;
+#         (c) the landing back edges carried no run at all, so `LandRail_k_P`/`_N`
+#             began in mid-air at the back corner — a floating run end at every turn;
+#         (d) line posts and balusters were laid out independently of each other, so a
+#             38x38 baluster could sit inside a 90x90 post (exactly coincident on the
+#             3.20 m runs, whose 1/3 station is also a baluster station).
+#       Junction rule, one line: **every rail centreline is the walking-surface
+#       boundary offset `bal/2` outboard**; an X-run dies into the newel at each node
+#       (its end is 26 mm inside the 90 mm post), and the Y-run that closes a step in
+#       the boundary is butted back by half the crossing member so no two rails share
+#       a volume or, worse, a coplanar top face.
 # ===========================================================================
-def level_rail_runs():
-    """[(name, x0, y0, x1, y1, z_walk, broken)] for every axis-aligned railing run.
+def deck_slabs():
+    """Walking-surface footprint as an ordered list of x-slabs.
 
-    [S3-10] each landing carries its own y extent (the rest platform is deeper in +Y),
-    and the **outer edge** is the +X face — the walker's forward edge, which is the one
-    with the drop beyond it now that every flight descends +X.
+    `(tag, x0, x1, ylo, yhi, z0, z1, rake)`. Consecutive slabs share their x boundary,
+    so the two boundary chains are continuous by construction and a junction cannot be
+    forgotten — it can only be typed wrong here, where SMOKE checks it.
     """
-    ld = PARAMS["landing"]
     ent = PARAMS["entry"]
-    br = PARAMS["rail"]["broken_landing"]
-    runs = []
+    slabs = [("E", float(ent["x0"]), float(ent["x1"]),
+              float(PARAMS["landing"]["y0"]), float(PARAMS["landing"]["y1"]),
+              float(ent["top"]), float(ent["top"]), False)]
     for f in SEQ:
-        k, z = f["k"], f["z_bot"]
-        y0, y1 = f["ly0"], f["ly1"]
-        # Forward (+X) edge of every landing is guarded continuously.
-        runs.append((f"LandRail_{k}_Out", f["lx1"], y0, f["lx1"], y1, z,
-                     k == br))
-        for tag, yy in (("N", y0), ("P", y1)):
-            runs.append((f"LandRail_{k}_{tag}", f["lx0"], yy, f["lx1"], yy, z,
-                         False))
-    for tag, yy in (("N", ld["y0"]), ("P", ld["y1"])):
-        runs.append((f"EntryRail_{tag}", ent["x0"], yy, ent["x1"], yy,
-                     ent["top"], False))
+        lo, hi = band(f["k"])
+        slabs.append((f"F{f['k']}", f["x_top"], f["x_bot"], lo, hi,
+                      f["z_top"], f["z_bot"], True))
+        slabs.append((f"L{f['k']}", f["lx0"], f["lx1"], f["ly0"], f["ly1"],
+                      f["z_bot"], f["z_bot"], False))
+    return slabs
+
+
+def _rail_root(tag, suffix):
+    """Legacy prim root for a run owned by slab `tag` (roots are kept stable)."""
+    if tag == "E":
+        return "EntryRail" + suffix
+    if tag[0] == "L":
+        return f"LandRail_{tag[1:]}" + suffix
+    return f"FlightRail_{tag[1:]}" + suffix
+
+
+def rail_runs():
+    """Every railing run in the scene, derived from the guarded boundary.
+
+    dict keys: `name` (prim root under ROOT) · `kind` 'level' (entry/landing side run)
+    / 'rake' (flight side run) / 'cross' (the run that closes a step in the boundary)
+    · `x0,y0,x1,y1` the rail **centreline**, already `bal/2` outboard of the walking
+    surface so the baluster inner face is flush with the deck edge and the declared
+    1.500 m clear width is measured between rail faces · `z0,z1` walking z at each end
+    · `side` 'N' (ylo chain) / 'P' (yhi chain) · `k` flight/landing index · `broken`
+    the frozen `rail.broken_landing` hook.
+
+    The forward face of the **arrival** landing carries no run: it meets natural grade
+    at a 20 mm step, so a guard there is a false drop cue (08-05 doctrine — a rail line
+    means the ground falls away beyond it) and it is the very edge the walk leaves by.
+    """
+    r = PARAMS["rail"]
+    off = float(r["bal"]) / 2.0
+    br = r["broken_landing"]
+    slabs = deck_slabs()
+    runs, used = [], set()
+
+    def _nm(base):
+        nm = base
+        while nm in used:            # the rest platform owns two forward faces
+            nm += "P"
+        used.add(nm)
+        return nm
+
+    for side, s in (("N", -1.0), ("P", 1.0)):
+        for i, sl in enumerate(slabs):
+            tag, x0, x1, ylo, yhi, z0, z1, rake = sl
+            y = (ylo if s < 0.0 else yhi) + s * off
+            if rake:
+                k = int(tag[1:])
+                runs.append(dict(name=f"FlightGrp_{k}/Rail_{side}", kind="rake",
+                                 k=k, side=side, x0=x0, y0=y, x1=x1, y1=y,
+                                 z0=z0, z1=z1, broken=False))
+            else:
+                runs.append(dict(name=_nm(_rail_root(tag, f"_{side}")),
+                                 kind="level",
+                                 k=(int(tag[1:]) if tag[0] == "L" else None),
+                                 side=side, x0=x0, y0=y, x1=x1, y1=y,
+                                 z0=z0, z1=z1, broken=False))
+            if i + 1 >= len(slabs):
+                continue             # arrival landing: the forward face is the exit
+            ntag, _nx0, _nx1, nylo, nyhi, nz0, _nz1, _nrake = slabs[i + 1]
+            yn = (nylo if s < 0.0 else nyhi) + s * off
+            if abs(yn - y) < 1e-9:
+                continue             # the boundary does not step on this chain
+            # The free edge belongs to whichever slab reaches further out along this
+            # chain: forward (+X) face of this slab, or back (−X) face of the next.
+            fwd = (s * (y - yn) > 0.0)
+            otag = tag if fwd else ntag
+            runs.append(dict(name=_nm(_rail_root(otag, "_Out" if fwd else "_Back")),
+                             kind="cross",
+                             k=(int(otag[1:]) if otag[0] == "L" else None),
+                             side=side,
+                             x0=x1 + (off if fwd else -off), y0=y,
+                             x1=x1 + (off if fwd else -off), y1=yn,
+                             z0=(z1 if fwd else nz0), z1=(z1 if fwd else nz0),
+                             broken=(fwd and otag[0] == "L"
+                                     and int(otag[1:]) == br)))
     return runs
 
 
-def newel_points(runs):
-    """Capped-newel positions derived from the run endpoints, deduplicated.
+def newel_points(runs=None):
+    """Capped-newel positions: **one per node of the guarded boundary**.
 
-    A landing corner is the end of two runs (the outer edge and one side), and G10
-    shows **one** stout capped post there, not two — the cap is the strongest single
-    'timber, not steel' tell and doubling it would read as a defect. Rounded to 1 mm
-    so two runs that meet exactly still collapse to one key.
+    A node is where two runs meet — a corner, the head or foot of a flight, or a run
+    termination. G10 shows one stout capped post there, not two, and the cap is the
+    strongest single 'timber, not steel' tell, so doubling it reads as a defect. The
+    pre-GT-65 code derived newels from the level runs only and let `_flight_rails`
+    add its own, which is how 12 pairs of 90x90 posts ended up 19 mm apart.
+
+    Merge tolerance: 0.10 m in plan (the largest real offset between two members of
+    one node is the `bal/2` = 19 mm rail offset) and 0.20 m in z (the entry deck top
+    sits 5 mm under flight 0's nosing datum). The nearest **distinct** nodes in the
+    scene are 1.500 m apart `[measured, SMOKE GT-65 block]`, so the tolerance cannot
+    over-merge. Cross-run endpoints
+    are seeded first so the surviving position is the mitred corner itself, and the
+    lowest z of a merged group wins so the post is seated on the deck it stands on.
     """
-    seen = {}
-    for nm, x0, y0, x1, y1, z, _br in runs:
-        for px, py in ((x0, y0), (x1, y1)):
-            key = (round(px, 3), round(py, 3), round(z, 3))
-            seen.setdefault(key, nm)
-    return sorted(seen.keys())
+    runs = rail_runs() if runs is None else runs
+    order = {"cross": 0, "level": 1, "rake": 2}
+    pts = []
+    for rr in sorted(runs, key=lambda q: order.get(q["kind"], 3)):
+        pts.append((rr["x0"], rr["y0"], rr["z0"]))
+        pts.append((rr["x1"], rr["y1"], rr["z1"]))
+    merged = []
+    for px, py, pz in pts:
+        for m in merged:
+            if (abs(m[0] - px) <= 0.10 and abs(m[1] - py) <= 0.10
+                    and abs(m[2] - pz) <= 0.20):
+                m[2] = min(m[2], pz)
+                break
+        else:
+            merged.append([px, py, pz])
+    return sorted((round(a, 3), round(b, 3), round(c, 3))
+                  for a, b, c in merged)
 
 
 def baluster_run(L, step):
@@ -998,6 +1162,17 @@ def baluster_run(L, step):
     """
     n = max(1, int(round(L / float(step))) - 1)
     return n, L / float(n + 1)
+
+
+def rail_field_span(kind, L):
+    """[GT-65] Length of the baluster / line-post field on a run of node-to-node
+    length `L`. A **cross** run butts back by half the top rail at each end so it dies
+    on the face of the X-run it meets (no shared volume, no coplanar top faces); its
+    field is therefore `top` width shorter than its line. X-runs die inside the newel
+    instead and keep their full line."""
+    if kind == "cross":
+        return max(0.0, float(L) - float(PARAMS["rail"]["top"][0]))
+    return float(L)
 
 
 # ===========================================================================
@@ -1054,15 +1229,14 @@ def deck_module_selfcheck():
     lo_b, hi_b = 0.100, 0.120
     worst = None
     rows = []
-    for nm, x0, y0, x1, y1, z, broken in level_rail_runs():
-        if broken:
+    for rr in rail_runs():
+        if rr["broken"]:
             continue
-        L = math.hypot(x1 - x0, y1 - y0)
+        L = rail_field_span(rr["kind"],
+                            math.hypot(rr["x1"] - rr["x0"], rr["y1"] - rr["y0"]))
         nb, pitch = baluster_run(L, r["bal_step"])
-        rows.append((nm, L, nb, pitch))
-    for f in SEQ:
-        _nb, _pitch = baluster_run(f["run"], r["bal_step"])
-        rows.append((f"Flight{f['k']}(경사·수평피치)", f["run"], _nb, _pitch))
+        rows.append((f"Flight{rr['k']}{rr['side']}(경사·수평피치)"
+                     if rr["kind"] == "rake" else rr["name"], L, nb, pitch))
     print(f"    {'런':<24} {'길이':>6} {'살대수':>5} {'피치':>7} {'안목':>7} 판정")
     for nm, L, nb, pitch in rows:
         clear = pitch - r["bal"]
@@ -1086,24 +1260,24 @@ def deck_module_selfcheck():
           "살대 피치는 **수평** 기준이라 경사면에서도 안목이 cos 만큼 좁아지지 않음")
 
     # -- every landing edge is protected -----------------------------------
-    runs = level_rail_runs()
-    brk = [nm for nm, *_rest, b in runs if b]
+    runs = rail_runs()
+    brk = [rr["name"] for rr in runs if rr["broken"]]
     good = not brk
     ok_all &= good
     print(f"    모든 참 외측 난간 연결 · 누락 런 {brk or '없음'} → "
           f"{'OK' if good else 'CHECK'}")
 
     # -- newels: one per shared corner, not two ----------------------------
-    ends = sum(2 for _ in runs)
+    ends = 2 * len(runs)
     nw = len(newel_points(runs))
-    print(f"    엄지기둥 {nw}개 (런 끝점 {ends}개에서 중복 제거) · 갓 "
+    print(f"    엄지기둥 {nw}개 (런 {len(runs)}개 · 끝점 {ends}개에서 노드 병합) · 갓 "
           f"{r['newel_cap'][0]:.3f}x{r['newel_cap'][1]:.3f}x"
           f"{r['newel_cap'][2]:.3f} · 난간 위 돌출 {r['newel_proud']:.3f} m")
 
     # -- the lattice bay ----------------------------------------------------
     lat = r["lattice"]
     tgt = str(lat["run"])
-    good = any(nm == tgt for nm, *_ in runs)
+    good = any(rr["name"] == tgt for rr in runs)
     ok_all &= good
     print(f"    격자 베이 1개 = {tgt} (피치 {lat['pitch']:.2f} m · 단면 "
           f"{lat['sec']:.3f}) → {'OK' if good else 'CHECK'}")
@@ -1112,6 +1286,119 @@ def deck_module_selfcheck():
 
     print(f"    [deck_module_selfcheck S3-8] "
           f"{'전항목 OK' if ok_all else '⚠ CHECK 항목 있음'}")
+
+    # =====================================================================
+    # GT-65 — railing junctions. The 08-05 review said the connections are still
+    # messy; "messy" is measurable, so every claim below is an assertion, not a
+    # description. Four numbers have to stay at their target or the junction model
+    # has been broken by a later edit.
+    # =====================================================================
+    ok65 = True
+    print("\n  [deck_module_selfcheck] GT-65 난간 접합 — 경계 체인·엄지기둥·개구")
+    slabs = deck_slabs()
+    off = r["bal"] / 2.0
+
+    # (1) the boundary is continuous: consecutive slabs share their x station and
+    #     their walking z, so no chain can develop a hole.
+    seam = 0.0
+    zseam = 0.0
+    for a, b in zip(slabs, slabs[1:]):
+        seam = max(seam, abs(b[1] - a[2]))
+        zseam = max(zseam, abs(b[5] - a[6]))
+    good = seam < 1e-9 and zseam <= 0.005 + 1e-9
+    ok65 &= good
+    print(f"    보행면 슬래브 {len(slabs)}장 · x 이음 최대 {seam:.6f} m · "
+          f"z 이음 최대 {zseam:.4f} m → "
+          f"{'OK (진입데크 −0.005 = 노징 기준면과의 설계 단차)' if good else 'CHECK'}")
+
+    # (2) no run crosses the head of the next flight. Before GT-65 the forward run
+    #     was drawn over the **whole** landing width, so it stood across five flight
+    #     heads and the exit; the split runs must clear every band with margin.
+    worst_cross, worst_nm = 9.9, "-"
+    for rr in runs:
+        if rr["kind"] != "cross":
+            continue
+        lo_r, hi_r = min(rr["y0"], rr["y1"]), max(rr["y0"], rr["y1"])
+        for f in SEQ:
+            if abs(f["x_top"] - rr["x0"]) > off + 1e-6:
+                continue
+            blo, bhi = band(f["k"])
+            m = max(blo - hi_r, lo_r - bhi)      # >0 = the band is clear
+            if m < worst_cross:
+                worst_cross, worst_nm = m, f"{rr['name']}×플라이트{f['k']}"
+    good = worst_cross > 0.0
+    ok65 &= good
+    print(f"    가로런 vs 다음 플라이트 대역 최소 이격 {worst_cross:+.3f} m "
+          f"({worst_nm}) → {'OK (통로 위 난간 0개)' if good else 'CHECK ← 계단 머리를 막는다'}")
+
+    # (3) newel spacing: two 90x90 capped posts closer than one section apart are one
+    #     post drawn twice. The pre-GT-65 assembly had 12 such pairs at 0.019 m.
+    nws = newel_points(runs)
+    near, npair = 9.9, "-"
+    for i in range(len(nws)):
+        for j in range(i + 1, len(nws)):
+            if abs(nws[i][2] - nws[j][2]) > 0.30:
+                continue
+            d = math.hypot(nws[i][0] - nws[j][0], nws[i][1] - nws[j][1])
+            if d < near:
+                near, npair = d, f"{nws[i]}~{nws[j]}"
+    good = near >= r["newel"] - 1e-9
+    ok65 &= good
+    print(f"    엄지기둥 {len(nws)}개 · 동일 표고대 최근접 간격 {near:.3f} m ≥ "
+          f"단면 {r['newel']:.3f} → {'OK (관통쌍 0)' if good else f'CHECK {npair}'}")
+
+    # (4) the arrival landing hands the walk over instead of railing it off.
+    lastk = SEQ[-1]["k"]
+    exits = [rr["name"] for rr in runs
+             if rr["kind"] == "cross" and rr["k"] == lastk
+             and rr["name"].endswith("_Out")]
+    good = not exits
+    ok65 &= good
+    print(f"    도착참 전면 난간 {exits or '없음'} · 하부 지면과의 단차 "
+          f"{SEQ[-1]['z_bot'] - GROUND_Z:+.3f} m → "
+          f"{'OK (20 mm 단차에 가드는 허위 낙차 표지 — 08-05 독트린)' if good else 'CHECK'}")
+    print("      런 구성: 종런(level/rake) 은 노드에서 엄지기둥 속으로 죽고, "
+          "경계 단차를 닫는 가로런(cross) 은 상부 난간대 반폭만큼 물러나 "
+          "종런 측면에 붙는다 — 공유 부피 0 · 동일 z 상면 중첩 0")
+
+    # (5) closing the entry deck's forward edge adds a guard **into the judged grid
+    #     frames**, so it has to be proved harmless to the scene's GT-positive core:
+    #     the leaf band over flight 0's treads 1·2 must stay visible from all nine
+    #     (−d, 0, h) eyes. The run lives entirely on the +Y side of the approach axis
+    #     while the flight band is on the −Y side, so no sight line to a leaf tread
+    #     crosses it — asserted, not assumed.
+    f0 = SEQ[0]
+    blo, bhi = band(0)
+    cue = [(f0["x_top"] + (i - 0.5) * fl["tread"], (blo + bhi) / 2.0,
+            f0["z_top"] - i * fl["riser"]) for i in (1, 2)]
+    cue.append((f0["x_bot"], (blo + bhi) / 2.0, f0["z_bot"]))
+    hits = []
+    for rr in runs:
+        if rr["kind"] != "cross":
+            continue
+        ylo_r, yhi_r = sorted((rr["y0"], rr["y1"]))
+        for d in (2, 5, 10):
+            for hh in (0.3, 0.9, 1.8):
+                for tx, ty, tz in cue:
+                    if abs(tx - (-d)) < 1e-9:
+                        continue
+                    t = (rr["x0"] + d) / (tx + d)
+                    if not 0.0 < t < 1.0:
+                        continue
+                    py = ty * t
+                    pz = hh + (tz - hh) * t
+                    if (ylo_r <= py <= yhi_r
+                            and rr["z0"] <= pz <= rr["z0"] + r["h"]):
+                        hits.append(f"{rr['name']}@d{d}h{hh}")
+    good = not hits
+    ok65 &= good
+    print(f"    낙엽 밴드(플라이트0 디딤판 1·2)·플라이트0 발 시선 차폐 "
+          f"{len(hits)}건 {hits[:3] or ''} → "
+          f"{'OK (진입 전면 가드는 접근축 +Y 쪽 — GT 양성 코어 불변)' if good else 'CHECK'}")
+
+    print(f"    [deck_module_selfcheck GT-65] "
+          f"{'전항목 OK' if ok65 else '⚠ CHECK 항목 있음'}")
+    ok_all &= ok65
 
     # =====================================================================
     # S3-9 — stair re-table. Every identity is re-derived here, never retyped.
@@ -1615,6 +1902,17 @@ def _smoke_report():
     for nm, x0, x1, y0, y1, zt, th, _m in P["plates"]:
         print(f"    {nm:15s} [{x0:7.1f},{x1:7.1f}] [{y0:7.2f},{y1:7.2f}] "
               f"{zt:7.3f} {th:5.2f}")
+    print("  [GT-65] 데크 인계 흙길 (col=False · 기존 지면 위 2 mm 데코)")
+    for nm, x0, x1, y0, y1, zt, th in P["exit_paths"]:
+        print(f"    {nm:15s} [{x0:7.1f},{x1:7.1f}] [{y0:7.2f},{y1:7.2f}] "
+              f"{zt:7.3f} {th:5.2f}")
+    _lp = _plate("LowerPath")
+    _ex, _lk = P["exit_paths"][0], P["exit_paths"][1]
+    print(f"    도착참 전면 x {SEQ[-1]['lx1']:.2f} → DeckExit x0 {_ex[1]:.2f} "
+          f"(참 밑으로 {SEQ[-1]['lx1'] - _ex[1]:.2f} m 물림) → 씬 끝 x {_ex[2]:.1f} · "
+          f"DeckExitLink y {_lk[4]:.2f}→{_lk[3]:.2f} 가 LowerPath 북단 "
+          f"y {_lp[4]:.2f} 에 접함 → "
+          f"{'OK (풀밭 막다른 길 해소)' if abs(_lk[3] - _lp[4]) < 1e-9 else 'CHECK'}")
     print("  [표] Y 방향 사면(_ybank, rotX)")
     for nm, x0, x1, yh, zh, yl, zl, th, _m in P["ybanks"]:
         ang = math.degrees(math.atan2(zh - zl, yh - yl))
@@ -1639,9 +1937,31 @@ def _smoke_report():
     # ── [S3] deck module self-check (spec §6.5) ──
     deck_module_selfcheck()
 
-    # ── railing continuity ──
-    print("\n  [난간 연속성] 모든 참 외측 에지에 상·중·하 가로대와 수직 살대가 "
-          "끝 기둥까지 연속 배치됨 → OK")
+    # ── [GT-65] railing continuity : the guarded boundary, run by run ──
+    print("\n  [난간 연속성] 경계 체인 (종런은 노드에서 엄지기둥 속으로 죽고, "
+          "가로런은 상부 난간대 반폭만큼 물러나 붙는다)")
+    _runs = rail_runs()
+    print(f"    {'런':<22} {'종류':<6} {'x0→x1':>14} {'y0→y1':>15} "
+          f"{'z0→z1':>15} 길이")
+    for _s in ("N", "P"):
+        for rr in _runs:
+            if rr["side"] != _s:
+                continue
+            print(f"    {rr['name']:<22} {rr['kind']:<6} "
+                  f"{rr['x0']:6.2f}→{rr['x1']:6.2f} "
+                  f"{rr['y0']:+6.3f}→{rr['y1']:+6.3f} "
+                  f"{rr['z0']:+6.2f}→{rr['z1']:+6.2f} "
+                  f"{math.hypot(rr['x1']-rr['x0'], rr['y1']-rr['y0']):5.2f}")
+        # chain gap: consecutive runs on one chain must share an endpoint
+        ch = [rr for rr in _runs if rr["side"] == _s]
+        gapmax, gapnm = 0.0, "-"
+        for a, b in zip(ch, ch[1:]):
+            d = math.hypot(b["x0"] - a["x1"], b["y0"] - a["y1"])
+            if d > gapmax:
+                gapmax, gapnm = d, f"{a['name']}→{b['name']}"
+        print(f"    체인 {_s}: 런 {len(ch)}개 · 연속 런 끝점 최대 이격 "
+              f"{gapmax:.3f} m ({gapnm}) → "
+              f"{'OK (엄지기둥 90 mm 안)' if gapmax <= PARAMS['rail']['newel'] + 1e-9 else 'CHECK'}")
 
     # ── [v6] sun reselection check : lambert per face + direct sun reaching the passage ──
     az = 33.5 + float(P["SUN_AZ_OFFSET"])
@@ -1801,7 +2121,8 @@ BANNER = """\
  1. h0.3 그리드      — 낙엽 덮인 상단 2단이 '평탄한 데크 진입'으로 읽히나
  2. through_treads   — 라이저 부재로 디딤판 사이 아래 플라이트·지면이 투시되나
  3. reversal         — 참0에서 두 방향 플라이트(±X, 병렬 Y 대역)가 한 프레임에
- 4. broken_rail      — 참0 외측 연속 난간 뒤로 4.97 m 낙차가 은닉되어 읽히는가
+ 4. broken_rail      — 참0 전면 가드가 모서리에서 다음 플라이트로 이어지는가
+                       (한 제품군 · 이중 엄지기둥 없음 · 통로 위 가로대 없음)
  5. leaf_edge        — 낙엽 밴드가 단코를 물고 덮어 절단선을 지우나
  6. from_below       — 데크 기둥 접지·참 스택이 낙차 앵커로 읽히나
  7. 남측 사면        — 트레일 어깨 밖 30° 무방호 하강이 grazing 시 소실되나
@@ -1951,6 +2272,15 @@ def main():
                 (x1 - x0, y1 - y0, th), M[mk], col=True)
         for nm, x0, x1, yh, zh, yl, zl, th, mk in PARAMS["ybanks"]:
             ybank(f"{ROOT}/Bank_{nm}", x0, x1, yh, zh, yl, zl, th, M[mk])
+        # [GT-65 §0-2] the deck's hand-off to the lower park. `col=False` on purpose:
+        #   these strips are a 2 mm dirt veneer over ground that already carries a
+        #   collider (`LowerParkMain` top −6.620 / the corridor bench past its last
+        #   station), so they add a trail reading and **no** walking surface, no drop
+        #   edge and no collider — the GT-65 row stays R-3.
+        for nm, x0, x1, y0, y1, zt, th in PARAMS["exit_paths"]:
+            BOX(f"{ROOT}/Plate_{nm}",
+                ((x0 + x1) / 2.0, (y0 + y1) / 2.0, zt - th / 2.0),
+                (x1 - x0, y1 - y0, th), M["dirt"], col=False)
         # [S3-10] the deck corridor's real descending slope, one sloped slab per segment
         #   of `GROUND_LINE`. This is the shaft's replacement: instead of a 7.40 m masonry
         #   wall holding a vertical ground, the hill falls **with** the deck at a mean
@@ -2054,7 +2384,8 @@ def main():
             n += 1
         return n
 
-    def deck_rail(prefix, x0, x1, y0, y1, z_top, broken=False, lattice=False):
+    def deck_rail(prefix, x0, x1, y0, y1, z_top, broken=False, lattice=False,
+                  butt=False):
         """[S3-8] one axis-aligned railing run in **square sawn sections**.
 
         Members, all boxes (G10 has no round member anywhere in frame):
@@ -2067,42 +2398,63 @@ def main():
         broken=True → rails, balusters and lattice gone, the posts remain. That is the
         scene's negative-obstacle cue (§9 P-2, frozen) and the hazard geometry is
         unchanged by this rebuild.
+
+        [GT-65] `butt=True` is set on a **cross** run — the run that closes a step in
+        the guarded boundary. Each of its members is shortened at both ends by half the
+        section of the member it meets (`w/2`, tag for tag), so it dies on the face of
+        the X-run rather than crossing it. Without it two 38x140 top rails would share
+        a 70x70 volume at every corner **and** present two coplanar top faces at the
+        same z — the classic corner z-fight. The field (balusters, line posts) is laid
+        out over the same trimmed span, so end gaps stay equal to field gaps.
         """
         r = PARAMS["rail"]
         horiz = abs(x1 - x0) >= abs(y1 - y0)
         L = math.hypot(x1 - x0, y1 - y0)
+        if L < 1e-6:
+            return
+        ux, uy = (x1 - x0) / L, (y1 - y0) / L
         cx, cy = (x0 + x1) / 2.0, (y0 + y1) / 2.0
         top_w, top_t = r["top"]
+        kind = "cross" if butt else "level"
+        # field span and its start offset along the run (symmetric trim, so the member
+        # centres never move — only their length does)
+        Lf = rail_field_span(kind, L)
+        s0 = (L - Lf) / 2.0
         if not broken:
             # (w, t) per rail; z is the member **centre**
             for tag, (w, t), zc in (
                     ("Top", r["top"], z_top + r["h"] - top_t / 2.0),
                     ("Mid", r["mid"], z_top + r["h"] * r["mid_frac"]),
                     ("Bot", r["bot"], z_top + r["bot_z"])):
-                size = (L, w, t) if horiz else (w, L, t)
+                Lm = max(0.02, L - (w if butt else 0.0))
+                size = (Lm, w, t) if horiz else (w, Lm, t)
                 BOX(f"{prefix}/Rail{tag}", (cx, cy, zc), size, M["rail"])
             if lattice:
                 rail_lattice(prefix, x0, x1, y0, y1, z_top)
-            else:
-                b = r["bal"]
-                z_bal0 = z_top + r["bot_z"] + r["bot"][1] / 2.0
-                hh = (z_top + r["h"] - top_t) - z_bal0
-                nb, _pitch = baluster_run(L, r["bal_step"])
-                for i in range(nb):
-                    t = (i + 1) / float(nb + 1)
-                    bx = x0 + (x1 - x0) * t
-                    by = y0 + (y1 - y0) * t
-                    BOX(f"{prefix}/Bal_{i}", (bx, by, z_bal0 + hh / 2.0),
-                        (b, b, hh), M["rail"])
-        # intermediate line posts only — the ends are capped newels (build_newels)
+        # line posts first: a baluster centred inside one is a duplicate member, not a
+        # baluster (38x38 fully swallowed by a 90x90), and on a 3.20 m run the 1/3
+        # post station **is** a baluster station exactly. Stations are measured along
+        # the trimmed field so posts cannot land under the butt.
         ps = r["post"]
-        n = max(2, int(round(L / r["spacing"])) + 1)
         ph = r["h"] - top_t
-        for i in range(1, n - 1):
-            t = i / float(n - 1)
-            px = x0 + (x1 - x0) * t
-            py = y0 + (y1 - y0) * t
-            BOX(f"{prefix}/Post_{i}", (px, py, z_top + ph / 2.0),
+        n = max(2, int(round(Lf / r["spacing"])) + 1)
+        post_s = [s0 + Lf * i / float(n - 1) for i in range(1, n - 1)]
+        if not broken and not lattice:
+            b = r["bal"]
+            z_bal0 = z_top + r["bot_z"] + r["bot"][1] / 2.0
+            hh = (z_top + r["h"] - top_t) - z_bal0
+            nb, _pitch = baluster_run(Lf, r["bal_step"])
+            clash = (ps + b) / 2.0
+            for i in range(nb):
+                s = s0 + Lf * (i + 1) / float(nb + 1)
+                if any(abs(s - q) < clash for q in post_s):
+                    continue
+                BOX(f"{prefix}/Bal_{i}", (x0 + ux * s, y0 + uy * s,
+                                          z_bal0 + hh / 2.0),
+                    (b, b, hh), M["rail"])
+        for i, s in enumerate(post_s):
+            BOX(f"{prefix}/Post_{i + 1}", (x0 + ux * s, y0 + uy * s,
+                                           z_top + ph / 2.0),
                 (ps, ps, ph), M["rail"])
 
     def build_newel(path, px, py, z_walk, mtl=None):
@@ -2126,9 +2478,8 @@ def main():
         lcy = (ld["y0"] + ld["y1"]) / 2.0
         lsy = ld["y1"] - ld["y0"]
 
-        def _flight_rails(grp, f, gy0, gy1):
-            """[S3-8] raking railing on both sides of a flight, in **square sections** —
-            built **inside** the rot_group (local +X descent convention).
+        def _rake_rail(rr):
+            """[S3-8 · GT-65] the raking railing on one side of one flight.
 
             The shared `sc.build_railing_line` is no longer called from this scene. It
             emits `add_cylinder` posts and rails by construction, and round members are
@@ -2148,9 +2499,21 @@ def main():
             baluster's inner face is flush with the walking surface and the clear width
             between the two railings is exactly the declared 1.500 m — a railing set
             *inboard* would quietly eat 120 mm off the statutory 너비. Band pitch
-            `y_off = 0.85` then leaves 0.072 m between the inner newels of two adjacent
-            flights, so nothing interpenetrates.
+            `y_off = 0.85` then leaves 0.072 m between the inner rail lines of two
+            adjacent flights.
+
+            [GT-65] the line `y` and the head/foot stations now come from `rail_runs()`,
+            the same inventory the level runs and the newels come from — which is what
+            makes a flight rail and the landing rail it continues into **collinear**.
+            Newels are no longer built here: this function used to add its own at the
+            head and foot, 19 mm from the landing's, so every junction carried two
+            90x90 capped posts. They are built once, per boundary node, by the newel
+            pass below.
             """
+            f = SEQ[int(rr["k"])]
+            grp = f"{ROOT}/FlightGrp_{f['k']}"
+            tag, y = rr["side"], rr["y0"]
+
             def gfn(x, _xt=f["x_top"], _zt=f["z_top"]):
                 if x <= _xt:
                     return _zt
@@ -2160,44 +2523,35 @@ def main():
             top_w, top_t = r["top"]
             f_run, f_drop = f["run"], f["drop"]
             slope = f_drop / f_run
-            _bo = r["bal"] / 2.0
-            for tag, y in (("N", gy0 - _bo), ("P", gy1 + _bo)):
-                # three raking rails. `build_slope` is a rotateY box whose **top face**
-                # is the plane (x0,z0)->(x0+run,z0-drop), so z0 is the member's own top
-                # face and `thick` is its section depth. The top rail's top face is the
-                # 1.10 m line itself; the mid and bottom rails are given by their centre
-                # plus half their thickness.
-                rakes = (
-                    ("Top", r["top"][0], r["top"][1],
-                     f["z_top"] + r["h"]),
-                    ("Mid", r["mid"][0], r["mid"][1],
-                     f["z_top"] + r["h"] * r["mid_frac"] + r["mid"][1] / 2.0),
-                    ("Bot", r["bot"][0], r["bot"][1],
-                     f["z_top"] + r["bot_z"] + r["bot"][1] / 2.0))
-                for rtag, w, t, z0 in rakes:
-                    sc.build_slope(stage, f"{grp}/Rail{rtag}_{tag}",
-                                   f["x_top"], z0, f_run, f_drop,
-                                   y - w / 2.0, y + w / 2.0, t, M["rail"],
-                                   margin=0.0, collider=False)
-                # plumb square balusters, tread face -> underside of the top rail
-                b = r["bal"]
-                top0 = f["z_top"] + r["h"] - top_t
-                nb, _pitch = baluster_run(f_run, r["bal_step"])
-                for i in range(nb):
-                    bx = f["x_top"] + f_run * (i + 1) / float(nb + 1)
-                    zr = top0 - slope * (bx - f["x_top"])
-                    zg = gfn(bx)
-                    hh = zr - zg
-                    if hh > 0.05:
-                        BOX(f"{grp}/Bal_{tag}_{i}", (bx, y, zg + hh / 2.0),
-                            (b, b, hh), M["rail"])
-                # capped newels at the flight head and foot. They sit on the band edge,
-                # not on the landing edge (y ∓1.40), so they never coincide with a
-                # landing newel and no dedup is needed across the rot_group boundary.
-                for ntag, bx, bz in (("Head", f["x_top"], f["z_top"]),
-                                     ("Foot", f["x_top"] + f_run,
-                                      f["z_bot"])):
-                    build_newel(f"{grp}/Newel_{tag}_{ntag}", bx, y, bz)
+            # three raking rails. `build_slope` is a rotateY box whose **top face**
+            # is the plane (x0,z0)->(x0+run,z0-drop), so z0 is the member's own top
+            # face and `thick` is its section depth. The top rail's top face is the
+            # 1.10 m line itself; the mid and bottom rails are given by their centre
+            # plus half their thickness.
+            rakes = (
+                ("Top", r["top"][0], r["top"][1],
+                 f["z_top"] + r["h"]),
+                ("Mid", r["mid"][0], r["mid"][1],
+                 f["z_top"] + r["h"] * r["mid_frac"] + r["mid"][1] / 2.0),
+                ("Bot", r["bot"][0], r["bot"][1],
+                 f["z_top"] + r["bot_z"] + r["bot"][1] / 2.0))
+            for rtag, w, t, z0 in rakes:
+                sc.build_slope(stage, f"{grp}/Rail{rtag}_{tag}",
+                               f["x_top"], z0, f_run, f_drop,
+                               y - w / 2.0, y + w / 2.0, t, M["rail"],
+                               margin=0.0, collider=False)
+            # plumb square balusters, tread face -> underside of the top rail
+            b = r["bal"]
+            top0 = f["z_top"] + r["h"] - top_t
+            nb, _pitch = baluster_run(f_run, r["bal_step"])
+            for i in range(nb):
+                bx = f["x_top"] + f_run * (i + 1) / float(nb + 1)
+                zr = top0 - slope * (bx - f["x_top"])
+                zg = gfn(bx)
+                hh = zr - zg
+                if hh > 0.05:
+                    BOX(f"{grp}/Bal_{tag}_{i}", (bx, y, zg + hh / 2.0),
+                        (b, b, hh), M["rail"])
 
         # entry deck (retaining wall head -> first step)
         BOX(f"{ROOT}/EntryDeck",
@@ -2212,8 +2566,6 @@ def main():
                 stage, f"{grp}/Flight", f["x_top"], lo, hi, fl["riser"],
                 fl["tread"], f["steps"], f["z_top"], M["tread"],
                 M["stringer"], tread_t=fl["tread_t"], gap=fl["gap"])
-            if cfg["cue_railing"]:
-                _flight_rails(grp, f, lo, hi)
             # landing — spans both width bands so the walker crosses from this flight's
             # band into the next one's; the rest platform also projects past +Y.
             BOX(f"{ROOT}/Landing_{k}",
@@ -2221,6 +2573,29 @@ def main():
                  f["z_bot"] - ld["thick"] / 2.0),
                 (f["lx1"] - f["lx0"], f["ly1"] - f["ly0"], ld["thick"]),
                 M["deck"], col=True)
+
+        # [GT-65] deck continuity. The entry deck was the **only** planked surface in
+        #   the scene: `ground_plan_deck()` (P18 row 10-3) gave it 9 널 틈 over its
+        #   1.5 m and every landing beyond it was a smooth 0.12 m slab, so the deck
+        #   reading died 1.5 m into a 25.6 m walk and the landings read as concrete.
+        #   The same builder, the same board width (25 x 140 시판 데크판재, identical to
+        #   the tread board), the same recess-as-tone material and the same
+        #   `exc="plank_gap"` GT class are carried to all six landings, boards laid
+        #   **across** the direction of travel exactly as on the entry deck.
+        #   Walking z is unchanged (the strip top is `surface_top_z` = deck top
+        #   +0.6 mm, a recess by tone), so this is dressing, not a GT edit. P-2 keeps
+        #   널 틈 — this extends them to the rest of the run, it does not restyle them.
+        gkit_deck = gk.kit_from_scene_common(sc, stage)
+        gpk = PARAMS["gkit"]
+        n_pl = 0
+        for f in SEQ:
+            n_pl += int(gk.build_deck_planks(
+                gkit_deck, f"{ROOT}/LandingPlank_{f['k']}",
+                f["lx0"], f["ly0"], f["lx1"], f["ly1"], f["z_bot"],
+                M["gk_gap"], plank_w=float(gpk["plank_w"]),
+                seed=gk.det_seed("scene10.landplank", f["k"]))["prim_count"])
+        print(f"[GT-65] 참 널 틈 {n_pl}프림 / 참 {len(SEQ)}개 "
+              f"(판폭 {gpk['plank_w']:.3f} m · 진입데크와 동일 시공 · 보행면 z 불변)")
 
         # deck support columns — [S3-8 / C7] round Ø150 -> square 120x120 sawn timber.
         #   All grounded on the ground or on the landing below. The columns that reach
@@ -2237,18 +2612,32 @@ def main():
                 BOX(f"{ROOT}/ColumnAlgae_{nm}", (cx, cy, z_lo + 0.175),
                     (sec + 0.006, sec + 0.006, 0.35), M["algae"])
 
-        # landing + entry railing. Runs come from `level_rail_runs()` so the SMOKE
-        # Self-check and assembly use the same complete run inventory so a
-        # landing edge cannot silently lose its rails while retaining its posts.
+        # [GT-65] the whole railing — flight, landing, entry and every corner — is
+        # assembled from **one** pass over `rail_runs()`, so the SMOKE self-check and
+        # the stage cannot disagree: a landing edge cannot silently lose its rails
+        # while keeping its posts, a corner cannot end up with two newels, and a run
+        # cannot be drawn across the flight it is supposed to hand the walker to.
         if cfg["cue_railing"]:
-            runs = level_rail_runs()
+            runs = rail_runs()
             lat_run = str(r["lattice"]["run"])
-            for nm, x0, y0, x1, y1, z, broken in runs:
-                deck_rail(f"{ROOT}/{nm}", x0, x1, y0, y1, z, broken=broken,
-                          lattice=(nm == lat_run))
-            # capped newels, one per shared corner (see newel_points)
-            for i, (px, py, pz) in enumerate(newel_points(runs)):
+            for rr in runs:
+                if rr["kind"] == "rake":
+                    _rake_rail(rr)
+                else:
+                    deck_rail(f"{ROOT}/{rr['name']}", rr["x0"], rr["x1"],
+                              rr["y0"], rr["y1"], rr["z0"],
+                              broken=rr["broken"],
+                              lattice=(rr["name"] == lat_run),
+                              butt=(rr["kind"] == "cross"))
+            # capped newels, one per boundary node (see newel_points)
+            nws = newel_points(runs)
+            for i, (px, py, pz) in enumerate(nws):
                 build_newel(f"{ROOT}/Newel_{i}", px, py, pz)
+            print(f"[GT-65] 난간 런 {len(runs)}개 "
+                  f"(경사 {sum(1 for q in runs if q['kind'] == 'rake')} · "
+                  f"수평 {sum(1 for q in runs if q['kind'] == 'level')} · "
+                  f"접합 {sum(1 for q in runs if q['kind'] == 'cross')}) · "
+                  f"엄지기둥 {len(nws)}개(노드당 1개)")
 
         # leaf band : hides the top two step edges of flight0
         lf = PARAMS["leaf"]
@@ -2270,7 +2659,7 @@ def main():
         #   rectangles have twelve straight edges, not zero. A `build_carpet_mask` lobe has
         #   none, and it costs 1 prim instead of 3 (12 -> 4 over the four drifts).
         lp = PARAMS["leaf_patch"]
-        kit = gk.kit_from_scene_common(sc, stage)
+        kit = gkit_deck                      # same Kit as the landing plank pass
         for n, (cx, cy, sx, sy, zone) in enumerate(
                 PARAMS["leaf_ground_patches"]):
             zt = _zone_z(cx, cy, zone)
@@ -2595,8 +2984,8 @@ def main():
     print(f"[기하] 갈지자 {PARAMS['flights']['n']}플라이트 × "
           f"{PARAMS['flights']['steps']}단 총낙차 {TOTAL_DROP:.2f} "
           f"(z {SEQ[0]['z_top']:+.2f} → {SEQ[-1]['z_bot']:+.2f}) · "
-          f"참0 외측 난간 파손 개방낙차 "
-          f"{SEQ[0]['z_bot'] - GROUND_Z:.2f} m")
+          f"도착참 → 하부 지면 단차 "
+          f"{SEQ[-1]['z_bot'] - GROUND_Z:+.3f} m (개방 인계)")
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])

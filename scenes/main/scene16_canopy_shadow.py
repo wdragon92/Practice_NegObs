@@ -1063,13 +1063,37 @@ def main():
         # [GT-63] clipped hedge bands: box+crown blobs -> fused rows of real
         #   shrub USDs (place_hedge_row; rects/heights/prim roots unchanged;
         #   legacy build_hedge fallback inside).
+        # [GT-71 pilot] Density loosening, **call site only** — the shared helper,
+        #   the band rects, h 0.8, base_z, the prim roots and the det_seed are all
+        #   untouched; only three kwargs move. User verdict on the GT-63 hedgeswap
+        #   was "a bit more natural, but still pretty dense", so pitch_frac
+        #   0.53 -> 0.62 and the jitter 0.06/0.04 -> 0.10/0.06. §4-1 still governs:
+        #   the band must read as ONE fused clipped mass, just less packed.
+        #   Fusion holds by the helper's own width math `[measured — Privet
+        #   1.7039 x 1.6378 x 1.1135 m off the asset; VEG_SHRUBS carries w 1.704 /
+        #   h 1.114]` + `[computed]`: place_shrubs scales by h/nat_h, so a shrub's
+        #   plan footprint is 1.704 x (0.8/1.114) x U(0.92,1.08) = 1.126…1.322 m,
+        #   against pitch = (1.704/1.114) x 0.8 x 0.62 = 0.759 m. n = ceil(span/
+        #   pitch)+1 then snaps the row to step 0.667 m (band 0, span 2.00) and
+        #   0.750 m (band 1, span 3.00) = 46 % / 39 % overlap at nominal size, and
+        #   still +0.13 m of overlap in the compound worst case (both neighbours
+        #   at U 0.92, jitter pulling them 0.20 m apart, and the 1.638 m minor plan
+        #   axis — not the 1.704 m major — facing the row under the random yaw).
+        #   Counts 5+6 = 11 -> 4+5 = 9 shrubs. 0.62 sits just above the 0.613
+        #   threshold at which band 1 sheds its 6th shrub and the plateau runs to
+        #   0.817, i.e. it is the smallest step that actually thins **both** bands.
         n_hedge = 0
         for i, (hx0, hy0, hx1, hy1) in enumerate(PARAMS["hedges"]):
             n_hedge += sc.place_hedge_row(
                 stage, f"{ROOT}/Hedge_{i}", hx0, hy0, hx1, hy1,
-                0.8, gk.det_seed("scene16.hedge", i), base_z=0.0)
+                0.8, gk.det_seed("scene16.hedge", i), base_z=0.0,
+                pitch_frac=0.62, jit_along=0.10, jit_across=0.06)
         print(f"[GT-63] 생울타리 실관목 {n_hedge}주 "
               f"(place_hedge_row · 폴백 {'무' if n_hedge else 'build_hedge'})")
+        print(f"[GT-71] 밀도 완화 파일럿(호출부 한정) · pitch_frac 0.53→0.62 · "
+              f"지터 0.06/0.04→0.10/0.06 · 밴드 rect·h 0.8·seed·prim root 불변 · "
+              f"설계 주수 11→9(실배치 {n_hedge} · 0 = build_hedge 폴백) · "
+              f"공칭 중첩 46 %/39 %(최악 +0.13 m) — 융합 유지")
         # 2 sidewalk paving bands (indicate the plaza scale) - outside the trench at y=+-6
         w = PARAMS["walk"]
         wb = PARAMS["walk_bands"]

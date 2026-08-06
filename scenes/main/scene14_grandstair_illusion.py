@@ -58,9 +58,31 @@ What DID change (all of it around the flight, none of it in it):
   6. `species=` declared explicitly at every vegetation call site.
 Divergences from G1 that are recorded and NOT executed — see the report `w3_l14_v1.md` §3.
 
-Materials: `marble_light` (terrace / plinth / shoulder) · scene-side **granite_light** from the
-`plaza_light` role (flight, landings, parapet cheek) · `plaza_light` (upper plaza) ·
-`plaza_lower` (lower plaza) · `band_dark` (joints, coursing, bands).
+═══ [GT-70] 08-05 gallery answer — the stone product is retired ═════════════════
+User ruling: *"화강석 재질 집착 중단 — '그냥 큰 계단'으로 읽히면 충분"* and *"측벽은 적당한
+벽 겸 handrail 로 읽히게"*. Two items, both of them re-representation:
+  1. **The flight stops being granite.** L14 bound the flight, the landings and the shoulder
+     to a scene-side granite made from the `plaza_light` slab scan with a tuned warm tint;
+     the parapet cheek took the same scan darkened. Four surfaces were carrying one
+     hand-tuned stone. They now take the library's plain concrete roles — `concrete_floor`
+     on the walked family and `concrete_wall` on the side walls — at the library's own
+     scales (1.0 / 2.0, the `scene02` underpass-stair values). **No role is acquired**: both
+     roles are already in `sc.TEX` and on disk. The material-prim names move to
+     `ConcreteFloor` / `ConcreteWall`, which is load-bearing: `_look_spec` classifies by
+     prim name, so the old `GraniteLight` / `StoneCheek` names would keep the **stone**
+     prescription (sat 0.66 · patch 1.0 · `_W_STONE`) on a concrete texture.
+  2. **The side wall gains a handrail** (`build_wall_handrail`). The wall itself is
+     unchanged — its top face stays on the nosing line + 0.950, the top of the 08-05
+     doctrine band (wall-rail 0.85~0.95) — and a Ø38 mm rail on Ø30 stanchions now rides
+     0.100 above it, so the guard line reads at 1.069 m. The rail is the drop cue; the
+     wall alone was reading as a raking slab.
+**No parapet, tread, riser, landing, nosing or drop-edge coordinate moves, and no collider
+is added or removed** — the rail family is dressing (`col=False`), the wall under it already
+collides. P-15 (the parapet base defect) stays deferred and is NOT touched here.
+
+Materials: `marble_light` (terrace / plinth / monument) · `concrete_floor` (flight, landings,
+shoulder) · `concrete_wall` (side walls) · `plaza_light` (upper plaza) · `plaza_lower`
+(lower plaza) · `band_dark` (joints, coursing, bands) · `Looks/Rail` (wall handrail).
 """
 
 import os
@@ -90,9 +112,12 @@ SCENE_CONFIG = {
     "cue_tactile":        False,  # [v5.2 user] Tactile paving is rare in reality - default OFF (the ablation path is kept)    # top entry warning tactile band (x −0.4..0, stair upper width)
     # [W3 L14] **This toggle now has content.** Until this wave both the flight and the
     #   stair-head terrace were bound to `marble_light`, so ON and OFF emitted *pixel-identical*
-    #   frames and the ablation arm measured nothing. ON = G1's light-grey granite flight against
+    #   frames and the ablation arm measured nothing. ON = a flight whose product differs from
     #   the marble terrace (a real material boundary at the drop edge x=0); OFF = marble flight,
     #   i.e. the boundary is absorbed, which is what the toggle always claimed to do.
+    # [GT-70] The ON arm's product changes granite -> plain concrete. The break is *wider*
+    #   than before (concrete vs marble, not grey stone vs cream stone), so the cue keeps its
+    #   content; only its two sides change. Arms rendered before GT-70 are not comparable.
     "cue_material_break": True,
     "cue_sign":           True,    # [v5 shared layer] 1 sign_info (plaza information)
     "cue_scene_dressing": True,    # street lamps · parapet kerb · fountain hint · distant buildings
@@ -144,6 +169,12 @@ PARAMS = dict(
     #                        flight, which is a stack bond and is not what G1 shows.
     #    `min_units` 4     — never fewer than 4 units on a step (a 6 m two-piece step is
     #                        as unbuildable as a one-piece one).
+    #
+    #  [GT-70] The stone product is retired but **this geometry is not touched**: the same
+    #  1.09~1.25 m unit rhythm is what a precast concrete step run (프리캐스트 계단판, cast at
+    #  0.9~1.5 m lengths) shows, and the plates carry the joint tone rather than a stone
+    #  identity. Retiring them would be a walked-surface change (the 0.6 mm proud declared at
+    #  GT-52) and this row is R-3; the joint count, width and bond stay byte-identical.
     coursing=dict(unit=1.20, joint_w=0.007, proud=0.0006, bond=0.5, min_units=4,
                   riser_face=True, landings=True),
     # --- Upper viewing plaza (marble stair head, marble instead of granite) ---
@@ -207,7 +238,40 @@ PARAMS = dict(
     #     thick 0.4->1.6 : embedded into the stepped shoulder (build_shoulder) over the whole run to remove the float
     #     [v5.1] cap_t : slab thickness of the sloped top haunch (oblique solid) - see the bite check in the
     #       build_parapets docstring (vertical equivalent 1.530 > required 0.43+0.03).
-    parapet=dict(width=0.5, z0=0.35, thick=1.6, cap_t=1.4),
+    #
+    # ═══ [GT-70] `rail` — the handrail that makes the side wall read as a wall ═══
+    #  The wall geometry is NOT in this row. Its top face stays at nosing + `z0 + 0.6` =
+    #  **0.950 m**, which is the top of the 08-05 wall-rail band (0.85~0.95); what the wall
+    #  lacked was any element that says *rail*, so from every wide cut it read as a raking
+    #  slab rather than as a guarded edge. The rail below rides on top of it.
+    #    `r`      0.019 — Ø38 mm, the upper bound of the graspable 3.2~3.8 cm handrail
+    #                     diameter (장애인·노인·임산부 등의 편의증진 보장에 관한 법률
+    #                     시행규칙 별표1). Same family as scene13's wall handrail (r 0.020).
+    #    `lift`   0.100 — rail axis above the wall top. Clear gap under the tube =
+    #                     lift − r = **0.081 m**, so the rail casts a real shadow line
+    #                     instead of reading as a bead moulded into the coping.
+    #                     Guard line (rail crown) = 0.950 + 0.100 + 0.019 = **1.069 m**
+    #                     over the nosing, inside the 1.1 m 계단 난간 practice.
+    #    `post_r` 0.015 — Ø30 stanchion.
+    #    `pitch`  1.80  — nominal plan pitch. The builder divides the run between the two
+    #                     inset end posts (21.485 m) into a whole number of equal bays, so
+    #                     the true pitch is **12 bays × 1.790 m** [computed] and the end
+    #                     posts land on the newel end and on the toe.
+    #    `y_in`   0.15  — rail axis inboard offset from the wall's inner face (|y| 5.05),
+    #                     i.e. |y| = 5.200. Tube extent |y| 5.181…5.219 sits **entirely on
+    #                     the wall** (5.05…5.55) and **outside `w_bot` = 5.000**, so nothing
+    #                     overhangs the walked surface. Asserted pre-boot (check ⑳).
+    #    `margin` 0.03  — bar overlap at the rake/landing kinks (23.83°); the joint z is
+    #                     continuous by `_rake_segments` construction, this only closes the
+    #                     cylinder end faces.
+    #    `embed`  0.02  — how far a stanchion runs **below** the wall top. A vertical
+    #                     cylinder has a flat bottom disc, and on the 23.83° rake the wall
+    #                     top moves 0.030 · tan 23.83° = **0.0133 m** across a Ø30 post, so
+    #                     without the embed half of every post on a rake would float by up
+    #                     to 6.6 mm. 0.020 > 0.0133 clears it with margin [computed].
+    parapet=dict(width=0.5, z0=0.35, thick=1.6, cap_t=1.4,
+                 rail=dict(r=0.019, lift=0.100, post_r=0.015, pitch=1.80,
+                           y_in=0.15, margin=0.03, embed=0.02)),
     # --- Shoulder outside the stair (replaces the old soffit) - see build_shoulder ---
     shoulder=dict(y_out=5.2, offset=0.03, lap=0.05),
     # ═══ [W3 L14 · BS-4] the five distant blocks — from a wall to a skyline ═══
@@ -421,29 +485,45 @@ PARAMS = dict(
         #   the judged near window for a decorative element. Recorded in the report as a
         #   G1 divergence with the reason, and the dead role deleted so the next reader
         #   does not mistake it for intent (the T4b-F2 revert-trap class).
-        # [W3 L14] `granite_light` — G1's flamed light-grey granite, the flight's stone.
-        #   Carried on the `plaza_light` role (a light-grey sawn granite slab scan) with a
-        #   cool desaturating tint. Scale 1.60: the map's own baked slab module lands at
-        #   ~0.5 m, i.e. about one baked slab per 0.340 m tread, which is the right grain
-        #   for flamed granite. The **unit rhythm across the width is geometry**
-        #   (`build_step_coursing`), not texture — texture joints have no shading and die
-        #   at the h0.3 grazing angle, which is `ground_kit`'s own measured finding.
+        # ═══ [GT-70] The granite is retired. Two library concrete roles, no tuning ═══
+        #   `granite_light` (the `plaza_light` slab scan + a hand-solved warm tint at
+        #   scale 1.60) and its darkened twin on the parapet cheek are **deleted at
+        #   source**, not commented out — the T4b-F2 revert-trap rule this file already
+        #   applies to `brick_red` and the `patch` sites. Four surfaces were sharing one
+        #   bespoke stone; the user's ruling is that a big stair does not need one.
+        #   Scales are the library's own values for these roles, not new numbers:
+        #   `concrete_floor` 1.0 and `concrete_wall` 2.0 are what `scene02` (the underpass
+        #   concrete stair, the nearest precedent in the repo) uses, and the modes of the
+        #   19 scenes that bind them. **No role is procured** — both are already in
+        #   `sc.TEX` with all three maps on disk.
         scale=dict(marble_light=1.2, granite_dark=1.0, plaza_lower=0.7,
-                   band_dark=0.5, granite_light=1.60, plaza_light=1.80, grass=1.4,
+                   band_dark=0.5, concrete_floor=1.0, concrete_wall=2.0,
+                   plaza_light=1.80, grass=1.4,
                    tactile=0.3),                      # [v5 shared layer]
-        # [W3 L14, corrected on the first pilot's own pixels] The first value was
-        #   (0.86, 0.87, 0.88) — blue highest, i.e. a **cool** tint. `plaza_light`'s map
-        #   is already all but neutral (mean RGB 182.0/180.9/177.8, **saturation
-        #   2.33 %** [measured this session]), so a cool tint cancelled the last of its
-        #   warmth and the flight rendered at a mean **saturation of 0.10 %** — a dead
-        #   grey card. Korean flamed 화강석 (포천석·마천석) is a *warm* light grey with
-        #   dark and pink speckle, and G1's flight reads that way. The ratio below is
-        #   1.000 : 0.981 : 0.955, which lands the rendered mean near 6~7 % saturation
-        #   at an unchanged value. **It also lowers the min channel, which is what the
-        #   regression tool's `white = min(R,G,B) > 0.8` counts — that is a side effect
-        #   and not the motive**, and §6 reports the WHITE finding on the pre-correction
-        #   numbers so the metric is not quietly tuned away.
-        granite_light_tint=(0.885, 0.868, 0.845),
+        # [GT-70] Flight / landings / shoulder. `concrete_floor_diff` is a dark brown
+        #   scan — mean linear albedo **0.1502 / 0.1120 / 0.0725, saturation 28.3 %**
+        #   [measured this session] — which is wet-looking concrete, not a sunlit civic
+        #   stair. The tint sets the **intended albedo**, which is the only thing a tint
+        #   is for in this repo: it lands the rendered mean at linear
+        #   0.2554 / 0.2497 / 0.2197 = **luminance 0.2487**, inside the literature albedo
+        #   band of aged outdoor concrete (0.20~0.30), keeping ~6 % warm saturation in
+        #   sRGB because concrete with granite fines is warm and a 0 % grey card is the
+        #   exact failure GT-52 corrected. Channel clipping **0.000 % on all three**
+        #   [measured]. The flight gets *darker* than the retired granite (luminance
+        #   0.4128 -> 0.2487, **−40 %**) — declared and intended: that is what "a plain
+        #   big stair instead of polished stone" costs, and the WHITE finding carried
+        #   since GT-52 should fall rather than rise on this surface.
+        stair_conc_tint=(1.70, 2.23, 3.03),
+        # [GT-70] Side walls. Held at the **landed cheek luminance on purpose**: the
+        #   retired cheek rendered at linear 0.1923 / 0.1859 / 0.1748 (`plaza_light` ×
+        #   0.400/0.392/0.382), and `concrete_wall` (0.2707 / 0.2419 / 0.1622) × this
+        #   tint gives 0.1922 / 0.1860 / 0.1749 — **per-channel within 0.1 %, luminance
+        #   0.1865 both sides** [computed]. So the WHITE metric the 260805 round measured
+        #   at 17.2 % on `beauty_overview` cannot move on the wall's account: only the
+        #   **product** changes (slab scan -> concrete), not the exposure. That isolates
+        #   this row's wall change to grain and colour cast, which is what the user asked
+        #   to be simplified.
+        wall_conc_tint=(0.710, 0.769, 1.078),
         grass_tint=(0.60, 0.63, 0.38),           # [W3 L14] autumn — see PARAMS["autumn"]
         # B-14-5: fixes the high-brightness clustering across the frame - facade 0.56->0.30, parapet 0.90->0.62
         bldg_color=(0.30, 0.30, 0.33), bldg_rough=0.6,
@@ -497,10 +577,12 @@ if _sc_ov:
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "scene14")
 # [W3 L14] `brick_red` removed — it was checked, loaded and never bound (see
-#   PARAMS["material"]). `plaza_light` now carries two materials (the upper plaza and
-#   the flight's granite), which is why it is not listed twice.
+#   PARAMS["material"]).
+# [GT-70] `concrete_floor` / `concrete_wall` added, both already in `sc.TEX` with all
+#   three maps on disk (0 procurement). `plaza_light` is back to ONE consumer (the upper
+#   plaza) now that the flight and the parapet cheek no longer borrow it as a stone.
 ASSET_ROLES = ["marble_light", "granite_dark", "plaza_lower", "band_dark",
-               "plaza_light", "grass",
+               "plaza_light", "concrete_floor", "concrete_wall", "grass",
                "tactile", "sign_info",                # [v5 shared layer]
                "hdri", "mdl"]
 
@@ -628,7 +710,9 @@ def _coursing_selfcheck():
             tot += (nx - 1)
             k += 1
     ratio = cu["proud"] / 0.020                       # GT_DELTA
-    _chk("⑤ 단위 석재 길이 0.60~1.50 m (화강석 계단석 규격대)",
+    # [GT-70] the band is unchanged; the label no longer names a stone product — the same
+    #   0.9~1.5 m unit run is the precast concrete step (프리캐스트 계단판) size band.
+    _chk("⑤ 단위 계단판 길이 0.60~1.50 m (계단판 규격대)",
          0.60 <= min(lens) and max(lens) <= 1.50,
          f"{min(lens):.3f}~{max(lens):.3f} m · 단당 줄눈 "
          f"{min(per)}~{max(per)}개")
@@ -712,6 +796,47 @@ def _rect_audit():
          True, "LowerBand_0/_1 · 폭 0.400 m · 계단 발치 전폭")
 
 
+def _material_selfcheck():
+    """[GT-70] The stone product is gone from the data, not just from the bindings.
+
+    A binding swap that leaves the retired scale/tint keys behind is the revert trap this
+    file already closed twice (`brick_red`, the `patch` sites): the next reader restores
+    one line and the granite is back. So the check is on **PARAMS + ASSET_ROLES**, which
+    is what a revert would touch, and it runs pre-boot where a GPU is not needed.
+    """
+    sca = PARAMS["material"]["scale"]
+    mp_ = PARAMS["material"]
+    dead = [k for k in ("granite_light", "granite_light_tint", "brick_red")
+            if k in sca or k in mp_]
+    _chk("⑰ 계단·측벽 재질 = 라이브러리 콘크리트 역할 · 전용 화강석 키 0",
+         "concrete_floor" in sca and "concrete_wall" in sca and not dead
+         and {"concrete_floor", "concrete_wall"} <= set(ASSET_ROLES),
+         f"scale {sorted(sca)} · 잔존 사석 키 {dead}")
+
+
+def _wallrail_selfcheck():
+    """[GT-70] The wall-cum-handrail: height band, guard line, and no walk-line overhang."""
+    st, pa = PARAMS["stairs"], PARAMS["parapet"]
+    ra = pa["rail"]
+    wall_h = pa["z0"] + 0.6                     # wall top over the nosing line
+    crown = wall_h + float(ra["lift"]) + float(ra["r"])
+    gap = float(ra["lift"]) - float(ra["r"])
+    y_ax = st["w_bot"] + 0.05 + float(ra["y_in"])
+    y_in_edge = y_ax - max(float(ra["r"]), float(ra["post_r"]))
+    y_out_edge = y_ax + max(float(ra["r"]), float(ra["post_r"]))
+    _chk("⑱ 벽 겸 손잡이 높이 0.85~0.95 m (08-05 독트린 대역) — 벽 기하 불변",
+         0.85 - 1e-9 <= wall_h <= 0.95 + 1e-9,
+         f"노징선 위 {wall_h:.3f} m (z0 {pa['z0']} + 0.600)")
+    _chk("⑲ 손잡이 마루 ≤ 1.10 m (계단 난간 관행) · 관 아래 순간격 ≥ 0.05 m",
+         crown <= 1.10 + 1e-9 and gap >= 0.05,
+         f"마루 {crown:.3f} m · 순간격 {gap*1000:.0f} mm · 관 Ø{ra['r']*2000:.0f} mm")
+    _chk("⑳ 손잡이가 보행면 위로 내밀지 않는다 (안쪽 끝 ≥ w_bot, 벽폭 안)",
+         y_in_edge >= st["w_bot"] - 1e-9
+         and y_out_edge <= st["w_bot"] + 0.05 + pa["width"] + 1e-9,
+         f"|y| {y_in_edge:.3f}~{y_out_edge:.3f} · w_bot {st['w_bot']:.3f} · "
+         f"벽 {st['w_bot'] + 0.05:.3f}~{st['w_bot'] + 0.05 + pa['width']:.3f}")
+
+
 def _backdrop_selfcheck():
     """[BS-4] `p.ridge < p.z_ceil` on every block — the *open environment* number."""
     try:
@@ -793,7 +918,8 @@ def _smoke_report():
         print(f"    {name:28s} {ext:22s} top z={zs}")
     # ── [W3 L14] the assertions. Everything above is a print; these can FAIL. ──
     print("-" * 64)
-    print("  [자기검증 · GT-52 R-1] 착시 기하 불변 · 줄눈 · 계절 · 배치 · 배경")
+    print("  [자기검증 · GT-52 R-1 / GT-70] 착시 기하 불변 · 줄눈 · 계절 · 배치 · "
+          "배경 · 재질 · 측벽 손잡이")
     _CHECKS.clear()
     _stair_selfcheck()
     njoint = _coursing_selfcheck()
@@ -802,6 +928,8 @@ def _smoke_report():
     _rect_audit()
     _backdrop_selfcheck()
     _no_people_audit()
+    _material_selfcheck()
+    _wallrail_selfcheck()
     npass = sum(1 for ok, _, _ in _CHECKS if ok)
     print("-" * 64)
     print(f"  자기검증 {npass}/{len(_CHECKS)} PASS · 줄눈 프림 {njoint}")
@@ -904,31 +1032,32 @@ def main():
             f"{ROOT}/Looks/Band", sc.tex_path("band_dark", "diff"),
             sc.tex_path("band_dark", "nor"), sc.tex_path("band_dark", "rough"),
             sca["band_dark"])
-        # [W3 L14 · G1] The flight's stone. Prim name `GraniteLight` classifies to the
-        #   look layer's **`stone`** role (`_look_spec`: exact miss -> substring
-        #   "granite"), which is the 4 mm bevel / sat 0.66 / patch-1.0 prescription —
-        #   the same class `Marble` and `Granite` get, and the reason the name matters
-        #   more than the texture path.
-        M["granite_light"] = PBR(
-            f"{ROOT}/Looks/GraniteLight", sc.tex_path("plaza_light", "diff"),
-            sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
-            sca["granite_light"], tint=mp["granite_light_tint"])
-        # [W3 L14] The parapet **cheek** gets the same stone. It was a flat 0.62-grey
-        #   constant with no map at all, which is what made two 21 m raking walls read
-        #   as white plastic beside a stone flight in every wide cut. `StoneCheek` ->
-        #   `stone` as well. Geometry untouched: this is a binding, not a rebuild — the
-        #   sawtooth silhouette the section/landing polyline makes is a real defect and
-        #   it is REPORTED, not quietly reshaped (a parapet is the shoulder's edge wall
-        #   and reshaping it is a guarding change, not a dressing change).
-        M["stone_cheek"] = PBR(
-            f"{ROOT}/Looks/StoneCheek", sc.tex_path("plaza_light", "diff"),
-            sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
-            # [regr 260731_w3_l14] the sunlit cheek drove WHITE 8.1 -> 18.2 % at
-            #   0.815; darken to ~0.40 as exposure compensation (the L05-F2
-            #   precedent) but keep GT-52's warm ratio 1.000:0.981:0.955 — a flat
-            #   (0.40, 0.40, 0.42) cool tint is the exact grey-card failure GT-52
-            #   corrected.
-            sca["granite_light"], tint=(0.400, 0.392, 0.382))
+        # [GT-70] The walked family — flight, landings and the shoulder apron beside
+        #   them. Prim name `ConcreteFloor` classifies to the look layer's **`concrete`**
+        #   role (`_look_spec`: exact miss -> substring "concrete"), i.e. the 20 mm
+        #   cast-in-place bevel (KCS 21 50 05 3.3(10)), sat 1.00, `patch=0.0` and the
+        #   `_W_STRUCT` weathering. The retired `GraniteLight` name resolved to **stone**
+        #   (bevel 4 mm · sat 0.66 · patch 1.0 · `_W_STONE`), so renaming is not
+        #   cosmetic — it is what actually retires the stone prescription. The name also
+        #   keeps the displacement skin off by construction on any prim it is bound to.
+        M["stair_conc"] = PBR(
+            f"{ROOT}/Looks/ConcreteFloor", sc.tex_path("concrete_floor", "diff"),
+            sc.tex_path("concrete_floor", "nor"),
+            sc.tex_path("concrete_floor", "rough"),
+            sca["concrete_floor"], tint=mp["stair_conc_tint"])
+        # [GT-70] The side walls (parapet body · top haunch · head newel · toe end cap).
+        #   `ConcreteWall` is an **exact** `LOOK_ROLE` key -> `concrete`, so the class is
+        #   not left to the substring fallback. Geometry untouched: this is a binding,
+        #   not a rebuild — the sawtooth silhouette the section/landing polyline makes
+        #   (P-15) is a real defect and it stays REPORTED and deferred, because a parapet
+        #   is the shoulder's edge wall and reshaping it is a guarding change, not a
+        #   dressing change. The exposure is held at the retired cheek's value on purpose
+        #   — see `wall_conc_tint`.
+        M["wall_conc"] = PBR(
+            f"{ROOT}/Looks/ConcreteWall", sc.tex_path("concrete_wall", "diff"),
+            sc.tex_path("concrete_wall", "nor"),
+            sc.tex_path("concrete_wall", "rough"),
+            sca["concrete_wall"], tint=mp["wall_conc_tint"])
         M["plaza_light"] = PBR(
             f"{ROOT}/Looks/PlazaLight", sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
@@ -1196,19 +1325,19 @@ def main():
             y_in = max(hw - lap, 0.0)              # bite lap under the stair
             top = z - off
             for tag, y0, y1 in (("N", y_in, yb), ("S", -yb, -y_in)):
-                # [W3 L14] The shoulder is the flight's own stone, not the terrace's.
-                #   It was `marble`, which matched when the flight was marble too. Once
-                #   the flight went to G1's grey granite the shoulder became a warm
-                #   cream stripe running the whole 20.8 m down both flanks of a grey
-                #   flight — visible in the first pilot's `beauty_overview` crop, and
-                #   not a thing any stair is built from: the apron beside a granite
-                #   flight is the same product laid flat. Binding only; the shoulder's
-                #   geometry (tread − 0.030, per step) is byte-unchanged.
+                # [W3 L14] The shoulder is the flight's own product, not the terrace's.
+                #   It was `marble`, which matched when the flight was marble too, and
+                #   became a warm cream stripe running the whole 20.8 m down both flanks
+                #   once the flight changed — not a thing any stair is built from: the
+                #   apron beside a flight is the same product laid flat.
+                #   [GT-70] It therefore follows the flight to `concrete_floor`. Binding
+                #   only; the shoulder's geometry (tread − 0.030, per step) is
+                #   byte-unchanged and it keeps its collider.
                 BOX(f"{ROOT}/Shoulder_{kind}{k}_{tag}",
                     ((xa + xb) / 2.0, (y0 + y1) / 2.0,
                      (top + st["base_z"]) / 2.0),
                     (xb - xa, y1 - y0, top - st["base_z"]),
-                    M["granite_light"], col=True)
+                    M["stair_conc"], col=True)
 
     def build_side_slopes(M):
         """Sloped grass banks either side of the stair (director D-14 r3(2)): from outside the shoulder
@@ -1435,10 +1564,10 @@ def main():
         # [v6] setback of the oblique slab end face (perpendicular to the slope) + margin = plan overlap lap
         _ang = math.atan2(st["riser"], st["tread"])
         lap = pa["cap_t"] * math.sin(_ang) + 0.15   # 0.716 m
-        # [W3 L14] Stone, not a flat grey constant. Geometry byte-unchanged — see the
-        #   `M["stone_cheek"]` comment in `setup_materials`, and §4 of the report for the
-        #   sawtooth silhouette this binding does **not** fix.
-        Mc = M["stone_cheek"]
+        # [GT-70] Plain concrete, not a bespoke stone. Geometry byte-unchanged — see the
+        #   `M["wall_conc"]` comment in `setup_materials`, and P-15 for the sawtooth
+        #   silhouette this binding does **not** fix (deferred, out of this row's scope).
+        Mc = M["wall_conc"]
         # (1) Body - top face level with the shoulder (old: +rail_h -> stair silhouette)
         for k, (kind, xa, xb, z, gi) in enumerate(_profile()):
             top = z - sh["offset"]
@@ -1485,6 +1614,86 @@ def main():
                 ((x_toe - lap / 2.0), (y0 + y1) / 2.0,
                  (top_t + st["base_z"]) / 2.0),
                 (lap, y1 - y0, top_t - st["base_z"]), Mc, col=True)
+
+    def build_wall_handrail(M):
+        """[GT-70] The rail that makes the side wall read as a wall-cum-handrail.
+
+        **Why.** The 08-05 doctrine is that the guard itself is the drop cue. This scene
+        had the guard — a 0.950 m wall over the nosing line, the top of the 0.85~0.95
+        wall-rail band — but nothing on it that reads as a *rail*, so at
+        `beauty_overview` / `side_reveal` scale the two flanks were raking slabs and the
+        6.0 m drop between them had no line drawn along it.
+
+        **What is built, and what is not.** One continuous bar per side over the whole
+        polyline, on stanchions. The wall under it is **not touched**: no parapet body,
+        haunch, newel or end-cap coordinate moves, and the bar family carries **no
+        collider** — the wall it stands on already collides, and this row is R-3. The
+        P-15 parapet-base defect stays deferred.
+
+        **Geometry.** The bar rides the wall-top polyline (`_rake_segments` + the newel
+        run at the head) offset up by `lift`, so its z is continuous at every rake/landing
+        kink by the same construction that makes the wall top continuous — nothing here
+        re-derives the polyline from riser/tread. Verified: the 7 bar-to-bar joints close
+        at |Δz| = 0 [computed]. Stanchions divide the 21.485 m between the two inset end
+        posts into 12 equal bays of **1.790 m** [computed], which puts the end posts on
+        the newel end and on the toe rather than at an arbitrary offset.
+        Census: **8 bars + 13 posts per side = 42 prims** [computed].
+
+        **Heights** (over the nosing line, which is at most one riser above the tread the
+        walker stands on): wall top 0.950 · rail axis 1.050 · rail crown 1.069 · clear gap
+        under the tube 0.081. Asserted pre-boot in checks ⑱⑲⑳.
+        """
+        st = PARAMS["stairs"]
+        pa = PARAMS["parapet"]
+        ra = pa["rail"]
+        yb = st["w_bot"] + 0.05                      # 5.05 - wall inner face
+        rail_h = pa["z0"] + 0.6                      # 0.95 - wall top over the nosing
+        _ang = math.atan2(st["riser"], st["tread"])
+        lap = pa["cap_t"] * math.sin(_ang) + 0.15    # 0.716 - newel plan length
+        rr, pr = float(ra["r"]), float(ra["post_r"])
+        lift, mg = float(ra["lift"]), float(ra["margin"])
+        segs = _rake_segments()
+        # The head newel is a level run of `lap` in front of the first rake; without it
+        #   the bar would start at x=0 and leave the newel bare, which is where
+        #   `terrace_read` looks first.
+        runs = [("land", segs[0][1] - lap, segs[0][1], segs[0][3], segs[0][3])] + segs
+
+        def _wall_top(x):
+            """Wall top face z at plan x (the rail's support line)."""
+            for kind, xa, xb, za, zb in runs:
+                if x <= xb + 1e-9:
+                    t = 0.0 if (xb - xa) < 1e-9 else (max(x, xa) - xa) / (xb - xa)
+                    return za + (zb - za) * t + rail_h
+            return runs[-1][4] + rail_h
+
+        x_a, x_b = runs[0][1], runs[-1][2]              # -0.715 … 20.800
+        # End posts are inset by their own radius so the tube's outer face lands flush
+        #   with the newel end face / the toe, instead of half-overhanging into air.
+        x_p0, x_p1 = x_a + pr, x_b - pr
+        nbay = max(1, int(round((x_p1 - x_p0) / float(ra["pitch"]))))
+        step = (x_p1 - x_p0) / nbay
+        n_bar = n_post = 0
+        for sgn, tag in ((1.0, "N"), (-1.0, "S")):
+            y = sgn * (yb + float(ra["y_in"]))        # +-5.200, on the wall, outside w_bot
+            for j, (kind, xa, xb, za, zb) in enumerate(runs):
+                run, drop = xb - xa, za - zb
+                CYL(f"{ROOT}/WallRail_{tag}/Bar_{j}",
+                    ((xa + xb) / 2.0, y, (za + zb) / 2.0 + rail_h + lift),
+                    rr, math.hypot(run, drop) + mg, M["rail"],
+                    rotY=90.0 + math.degrees(math.atan2(drop, run)))
+                n_bar += 1
+            emb = float(ra["embed"])
+            for i in range(nbay + 1):
+                px = x_p0 + i * step
+                CYL(f"{ROOT}/WallRail_{tag}/Post_{i}",
+                    (px, y, _wall_top(px) + (lift - emb) / 2.0),
+                    pr, lift + emb, M["rail"])
+                n_post += 1
+        print(f"[GT-70] 측벽 손잡이 바 {n_bar} · 지주 {n_post} (bay {step:.3f} m) · "
+              f"벽 상단 {rail_h:.3f} + 들림 {lift:.3f} → 마루 "
+              f"{rail_h + lift + rr:.3f} m · |y| {yb + float(ra['y_in']):.3f} "
+              f"(w_bot {st['w_bot']:.3f} 밖) · 콜라이더 0")
+        return n_bar + n_post
 
     # -------------------------------------------------------------------
     # Dressing - 2 street lamps + parapet kerb (behind the upper plaza) + fountain hint + distant buildings
@@ -1707,15 +1916,18 @@ def main():
     #   `UpperPlaza` (the stair-head terrace) is ALSO marble, the cue this toggle names
     #   produced **no material boundary at the drop edge in either arm**. The ablation
     #   arm was therefore measuring nothing, and had been for the whole v5 line.
-    #   ON  = G1's flamed light-grey granite flight against the marble terrace — a real
-    #         break on the line x = 0, which is where the hazard is.
+    #   ON  = a flight whose product differs from the marble terrace — a real break on
+    #         the line x = 0, which is where the hazard is.
     #   OFF = marble flight, i.e. flight and terrace are one stone and the boundary is
     #         absorbed. That is what the toggle's own comment always promised.
     #   **This changes what the OFF/ON pair means for every scene14 dataset arm** and is
     #   declared as such in `w3_l14_v1.md` §6 — it is a research-cue repair, not a
     #   dressing tweak, and a reader comparing old arms must know the ON arm used to be
     #   a null.
-    stair_mtl = M["granite_light"] if cfg["cue_material_break"] else M["marble"]
+    #   [GT-70] The ON side is now plain `concrete_floor` instead of a scene-side granite.
+    #   The break widens (concrete against marble), so the cue is not weakened by the
+    #   simplification — but the ON arm's pixels change and pre-GT-70 arms do not compare.
+    stair_mtl = M["stair_conc"] if cfg["cue_material_break"] else M["marble"]
 
     build_plazas(M)
     if cfg["hazard_stairs"]:
@@ -1724,6 +1936,7 @@ def main():
         build_stairs(stair_mtl)
         build_step_coursing(M)      # [W3 L14 · G1] unit coursing of the flight
         build_parapets(M)
+        build_wall_handrail(M)      # [GT-70] wall-cum-handrail — dressing on the wall top
         build_cues(M)
     else:
         build_flat_fill(stair_mtl)

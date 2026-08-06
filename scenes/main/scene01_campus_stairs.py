@@ -38,8 +38,9 @@ treads and swept into the step corners, and that is built (`sc.scatter_debris`, 
 `Debris/*fall*` pool).
 
 1. **The flight is approved and does not move.** `upper_plaza`, `stairs`, `lower_plaza`,
-   `flank`, `amphi`, `south_apron` and `west_bank` are byte-unchanged. The user's 2nd
+   `flank`, `south_apron` and `west_bank` are byte-unchanged. The user's 2nd
    review approved the stair and asked only for the **flanks** and the **environment**.
+   (`amphi` was in this list until **GT-67 1-3** deleted the object — see §GT-67 below.)
 
 2. **GT-4 is RETIRED (§7-6); the flanks become a kerbed designed lawn.** GT-4 planned to
    extend the paving to the building faces and abolish the turf. G1 answers 01-B in the
@@ -81,6 +82,36 @@ treads and swept into the step corners, and that is built (`sc.scatter_debris`, 
    vocabulary G1's own cross-cutting read lists as legitimate, not a decal.
 
 No humans, no vehicles.
+
+═══ GT-67 (gallery_fix_plan §1 scene01, items 1-1 … 1-5) ═══════════════════
+The 08-05 review found this scene **over-emptied**: BS-4 (item 3 above) read the
+user's "미흡" as "delete the environment", and what came back was a white paving
+field with one distant brick slab. GT-67 restores the plaza without restoring the
+9.5 m walls, and cleans up the railing the same review called a loose door leaf.
+
+1-3 **`amphi` deleted** (3-tier mini amphitheatre + its 3 collision boxes + the D9
+    seat strips). It sat at the +Y stair head and read as "a stair-shaped bench
+    object", not as seating. Its footprint x 0…1.52 · y 6…8 was the *floor* of that
+    corner, so `NorthApron` — until now built only in the dressing-OFF arm — becomes
+    unconditional and mirrors `SouthApron` exactly. Deleting the object without the
+    apron would re-open the 0.63 m grass pit v4-A1 closed on the south side.
+1-1 **Picket density is tied to the flight.** `sc.build_railing_line` gained
+    `cliff_adjacent` / `nsteps` / `picket_pitch`; scene01 is the only caller that
+    passes them. Drop 0.60 m, no cliff/road/water alongside -> one picket per riser
+    (pitch = run/nsteps = 0.380 m) instead of the statutory 0.116 m screen.
+1-2 **One assembly, not two.** The grip rail is bracket-mounted on the guard plane
+    (`merge_handrail`) instead of standing on its own post line beside it, its top
+    extension runs back to the guard's own `x_start`, and rail knuckles + end returns
+    close the slope transition and both termini.
+1-4 **Plaza identity restored** (`backdrop`): a collegiate frame — two 4-storey
+    masses across the head of the quad with a **40 m gap on the travel axis**
+    (§0-2: nothing blocks the path head-on), two long lateral wings and one west
+    mass for `lower_lookback`. `GroundGrass` grows 160 -> 400 m so the horizon stops
+    cutting the frame at 80 m and the head masses stand on ground.
+1-5 **Wide-accessibility rearrangement** (scene04 = the exemplar): the plaza was
+    inhabited on the +Y side only. A south bench row, a south lamp line, longer lawn
+    tree rows and the fountain moved onto the axis give the frame a readable, open
+    centre with occupied flanks instead of an empty field.
 """
 
 import os
@@ -112,7 +143,7 @@ SCENE_CONFIG = {
     "cue_tactile":        False,  # [v5.2 user] tactile paving is rare in reality - default OFF (ablation path kept)   # dot tactile band: 0.3 m ahead of the top edge, stair width, depth 0.3 m
     "cue_material_break": True,   # False -> lower plaza gets the same material and tone as the upper one
     "cue_sign":           True,   # [v5 shared layer] one Korean sign (facility info)
-    "cue_scene_dressing": True,   # planters, trees, buildings, streetlights and amphitheater together
+    "cue_scene_dressing": True,   # planters, trees, buildings, streetlights and plaza furniture together
 }
 
 
@@ -178,11 +209,19 @@ PARAMS = dict(
     lower_plaza=dict(x0=1.52, x1=14.0, y0=-8.0, y1=8.0, z_top=-0.6, thick=0.5),
     # v4-A4: x1 2.0->1.52 (flush with the lower plaza west end) - removes the free-end stub mid lower plaza
     flank=dict(y_out=0.5, x0=-0.5, x1=1.52, z_top=0.0, z_bot=-1.1),  # stair flank low wall
-    amphi=dict(x0=0.0, y0=6.0, y1=8.0, rise=0.3, depth=0.9, ntiers=3,
-               base_z=-0.7),   # F1: solid bottom z=-0.7 (no floating above the lower plaza)
+    # [GT-67 1-3] `amphi` **DELETED**, params · builder · seat strips · 3 collision
+    #   boxes together. It was `dict(x0=0.0, y0=6.0, y1=8.0, rise=0.3, depth=0.9,
+    #   ntiers=3, base_z=-0.7)`: three 0.9 m treads descending +0.30 / 0.00 / -0.30 at
+    #   the +Y stair head. The 08-05 review read it as "a stair-shaped bench object"
+    #   beside the stair — a second stepped mass 6 m from the real one, in a scene whose
+    #   whole subject is one stepped mass. Deleting it removes the ambiguity.
+    #   Its footprint x 0…1.52 · y 6…8 was also the corner's **floor**, so `south_apron`
+    #   below now builds a north twin unconditionally (see `build_aprons`).
     # v4-A1: fills the sunken grass pit south of the stair (x 0..1.52 x y −8..−6, depth 0.63).
-    #   an upper-plaza extension apron symmetric to the +Y amphitheater (x 0..2.7, y 6..8).
-    south_apron=dict(x0=0.0, x1=1.52, y0=-8.0, y1=-6.0, z_top=0.0, base_z=-0.7),
+    #   [GT-67 1-3] the identical +Y rectangle (x 0..1.52, y 6..8) is now carried by the
+    #   same params — the two stair-head corners are geometrically symmetric again.
+    south_apron=dict(x0=0.0, x1=1.52, y0=-8.0, y1=-6.0, z_top=0.0, base_z=-0.7,
+                     y0_n=6.0, y1_n=8.0),
     # v4-A2: unguarded 0.60 fall at the upper plaza west end (x=−16) -> terminated by a gentle 3-step grass bank
     west_bank=dict(x0=-16.0, step=0.6, drops=(-0.16, -0.32, -0.48),
                    y0=-8.0, y1=8.0, base_z=-1.0),
@@ -231,25 +270,64 @@ PARAMS = dict(
     #  now uses `base_z + h + ROOF_ALLOW` and every height below is solved from it.
     #  This is also a finding for the kit owner: backdrop policy (2) says *build nothing
     #  above `z_ceil`*, and the roof furniture is not subject to it (§8 S01-F1).
+    #
+    #  ═══ [GT-67 1-4] the collegiate frame — restoring plaza identity ══════
+    #  The six-block set this replaces was the over-emptied state: `E1..E3` at 56-92 m
+    #  with shells 5.7-8.7 m, all `kind="backdrop"`, i.e. **windowless slabs 2 storeys
+    #  tall**, plus `W1` half off the 160 m ground plate. The judged frames showed one
+    #  brick rectangle on a green plane, which is what the review called over-emptied.
+    #  Three things change and none of them brings a wall back into the near field:
+    #
+    #  (a) **The head masses move out and up.** A 4-storey collegiate block needs
+    #      `ridge < z_ceil = 0.30 + 0.1405*d`, so h 12.5 (ridge 14.77) needs d > 103 m.
+    #      At x0 = 108 the measured `d_true` is 111.7 m and `z_ceil` 15.99 `[computed,
+    #      re-derived per block by the build loop]` — sky above the roofline everywhere,
+    #      the BS-4 acceptance condition, with a real 4-storey mass under it.
+    #  (b) **The travel axis stays open (§0-2).** The two head masses leave a 40 m gap
+    #      (y -22…18) straddling both the stair centre line (y 0) and the judged grid
+    #      line (gy -2.75). Measured bearings from the nearest and farthest judged eye
+    #      `[computed]`: E1 spans -27.5°…-9.3°, E2 +10.0°…+28.1°, so the central ±9°
+    #      of every judged frame is sky, lawn and trees. `plaza_selfcheck` asserts the
+    #      corridor is clear rather than trusting this comment.
+    #  (c) **`lod_dist` is declared for the in-frame masses.** `plan_building`'s
+    #      distance priority is explicit `dist` -> `bd["lod_dist"]` -> the judged eye
+    #      set, and the >80 m `silhouette` demotion is a **prim budget** device for
+    #      background masses. Here the head block IS the campus: 13.1 m of ridge at
+    #      111.7 m subtends 6.8° = 203 px at 1080 `[computed]`, so window rows are
+    #      resolvable and a blank slab is the defect. `lod_dist=62` buys the `far`
+    #      tier (7 prims, 2 glazing bands) instead of 3 prims and no openings.
+    #      The lateral wings keep the honest distance and stay 3-prim silhouettes —
+    #      they are out of ±30° of every judged eye and earn no facade (BS-4).
+    #
+    #  Materials are existing bindings only (brick_R / brick_L) — no material work,
+    #  the 08-05 plan freezes it. `glass` is passed for the two masses that have
+    #  openings; `parapet` stays the shell material so no bright cap appears.
     backdrop=dict(
         base_z=-0.63,          # sits on GroundGrass, not on the plaza
         roof_allow=2.90,       # [measured] shell top -> highest emitted prim
-        mat="brick_R",
-        # (tag, x0, x1, y0, y1, h) — plan rectangles of the silhouette masses.
-        #   E1..E3  the +X campus block G1 puts across the head of the plaza
-        #   W1      the -X mass that closes `lower_lookback`
-        #   N1 / S1 the flanking wings, far enough that the lawn reads as open ground
-        #  Every shell height below is solved from that ceiling minus `roof_allow`, per
-        #  block, and the printed `sky above roof` column must read True six times.
+        mat="brick_R",         # default shell binding when a block names none
+        # Plan rectangles. `lod` = declared LOD distance (None -> real `d_true`).
         blocks=(
-            ("E1",  56.0,  72.0, -16.0,  -1.0,  5.7),
-            ("E2",  60.0,  74.0,   2.0,  18.0,  6.3),
-            ("E3",  78.0,  92.0, -10.0,   8.0,  8.7),
-            ("W1", -90.0, -74.0,  -8.0,  10.0,  6.5),
-            ("N1", -26.0, -10.0,  60.0,  72.0,  6.4),
-            ("S1",   4.0,  22.0, -68.0, -56.0,  5.1),
+            dict(tag="E1", x0=108.0, x1=126.0, y0=-60.0, y1=-22.0, h=12.5,
+                 floors=4, kind="office", lod=62.0, mat="brick_R", glass=True),
+            dict(tag="E2", x0=108.0, x1=126.0, y0=18.0, y1=56.0, h=11.0,
+                 floors=4, kind="office", lod=62.0, mat="brick_L", glass=True),
+            dict(tag="N1", x0=-30.0, x1=26.0, y0=62.0, y1=78.0, h=9.0,
+                 floors=3, kind="backdrop", lod=None, mat="brick_L"),
+            dict(tag="S1", x0=-26.0, x1=30.0, y0=-80.0, y1=-64.0, h=8.0,
+                 floors=3, kind="backdrop", lod=None, mat="brick_R"),
+            dict(tag="W1", x0=-120.0, x1=-96.0, y0=-50.0, y1=-6.0, h=11.0,
+                 floors=3, kind="backdrop", lod=None, mat="brick_L"),
         ),
+        # §0-2 corridor: nothing ahead of the stair may overlap the walked width.
+        corridor=5.5,
     ),
+    #  [GT-67 1-4] `GroundGrass` 160 -> 400 m. At 160 m the plate edge sat 80 m out,
+    #  i.e. a hard green/sky line **inside** every judged frame (-0.7° from an h1.8
+    #  eye) and the head masses would have stood off the plate entirely. 400 m puts
+    #  the edge at 200 m, 0.27° below the horizon from the h0.3 eye. No collider, no
+    #  z change: the top face stays at -0.63 exactly where it was.
+    ground_plate=dict(size=400.0, z_top=-0.63, thick=0.5),
     window=dict(w=1.2, h=1.6, inset=0.15, col_step=2.5, margin=2.0),
 
     # ═══ [W3 S01 · R01-1] the kerbed designed lawn — replaces GT-4 ═══════════
@@ -271,8 +349,8 @@ PARAMS = dict(
         bank_step=0.8, bank_drops=(-0.31, -0.47),
     ),
     #  The kerb runs only along the **upper**-plaza frontage (x -16..0), where the walk
-    #  top really is 0.0; east of the stair line the neighbour is the amphitheatre and
-    #  then the lower plaza, which is a retaining case, not a kerb case.
+    #  top really is 0.0; east of the stair line the neighbours are the stair-head aprons
+    #  and then the lower plaza, which is a retaining case, not a kerb case.
     #  `lod_span` keeps the 1 m product rhythm inside the judged window and drops to
     #  `far_unit` outside it (K5 handover 6: use the LOD lever, never a coarser `unit`).
     #  `lod_win` is in **arc length from p0**, and both runs are authored p0 = x −16 ->
@@ -301,11 +379,22 @@ PARAMS = dict(
     #  Same species in both — one route's planting seen in depth. Scene01's
     #  `SCENE_SPECIES` belt is `None` and stays `None`; a deeper stand of the *same*
     #  species is not a belt.
-    lawn_trees=(dict(y=(11.4, -11.4), x0=-13.0, n=4, trunk_h=3.0, trunk_r=0.085),
-                dict(y=(20.0, -20.0), x0=-9.0, n=4, trunk_h=4.0, trunk_r=0.110)),
+    #  [GT-67 1-5] `n` 4/4 -> 6/5. Four trees at 8 m pitch cover x -13…11, i.e. they
+    #  stop level with the lower plaza and the lawn beyond ran empty to the horizon —
+    #  the frame lost its depth cue exactly where scene04 keeps its flanking rhythm
+    #  going. The rows now run to x 27 / 23, the last tree still inside the turf
+    #  (`lawn.x_out` 28.0), pitch and the 8.6 m row separation unchanged so LINT-2 still
+    #  reads two rows rather than one zig-zag.
+    lawn_trees=(dict(y=(11.4, -11.4), x0=-13.0, n=6, trunk_h=3.0, trunk_r=0.085),
+                dict(y=(20.0, -20.0), x0=-9.0, n=5, trunk_h=4.0, trunk_r=0.110)),
 
-    #  G1's fountain, in the north lawn where `beauty_overview` actually looks
-    #  (bearing 45.9 deg from that eye against a +-30 deg half-field about 33.1 deg).
+    #  G1's fountain. **[GT-67 1-5] moved (7.0, 12.0) -> (22.0, 2.4)**: in G1 the basin
+    #  is the thing the plaza looks *at*, sitting in the lawn on the axis between the
+    #  flanking buildings, and at (7, 12) it was tucked behind the north kerb where only
+    #  `beauty_overview` ever saw it. On the axis it gives the open centre a focus and
+    #  the judged frames a mid-distance object at 32 m — far enough not to occlude the
+    #  drop edge (bearing +8.6° at the d10 eye, the edge line runs -15.4°…+45.7°), close
+    #  enough to read. Still inside `LawnE` (x 14.2…28, |y| < 8.2): body x 19.4…24.6.
     #  A still basin: rim ring + water disc + centre plinth. No jets, no spray — moving
     #  water is outside this project's vocabulary and adds no negative-obstacle value.
     #  Form note, from the first pilot: the basin was authored as an outer cylinder with
@@ -314,7 +403,7 @@ PARAMS = dict(
     #  now built the way this scene already builds a planter: four granite walls + a cap
     #  + an inner fill, with water as the fill. Square rather than round, which G1 is
     #  not, and that divergence is stated rather than hidden.
-    fountain=dict(cx=7.0, cy=12.0, size=5.2, wall_t=0.30, wall_h=0.45,
+    fountain=dict(cx=22.0, cy=2.4, size=5.2, wall_t=0.30, wall_h=0.45,
                   cap_over=0.05, cap_h=0.06, water_drop=0.14,
                   plinth_r=0.45, plinth_h=0.34),
 
@@ -329,8 +418,17 @@ PARAMS = dict(
     # [W3 S01] pole line y 6.80 -> **6.30**: the bench row now runs at y 7.10 (body
     #   y 6.875..7.325) and a pole at 6.80 cleared it by 15 mm, which is a collision in
     #   all but arithmetic. 0.50 m clear at 6.30, and the poles still read as one line.
+    # [GT-67 1-5] a **south line** is added: the plaza carried its whole lamp run on
+    #   the +Y side, so the judged frames (grid line gy -2.75) looked into an unlit,
+    #   unfurnished half. §4-4 keeps lamp spacing equal, so the south poles mirror the
+    #   north x-coordinates rather than inventing a rhythm; only the near-stair pole
+    #   (x -1.2) is **not** mirrored — a 6 m pole 0.8 m from the top edge on the camera
+    #   side would stand across the drop line at every d10 eye. Clearances `[computed]`:
+    #   south poles vs the new bench row 0.515 m (y), vs the bike racks 2.30 m (x),
+    #   vs Sign_Info 1.58 m.
     streetlights=[(-6.0, 6.3, 0.0), (-12.0, 6.3, 0.0), (-1.2, 6.3, 0.0),
-                  (8.0, 6.3, -0.6)],
+                  (8.0, 6.3, -0.6),
+                  (-6.0, -6.3, 0.0), (-12.0, -6.3, 0.0), (8.0, -6.3, -0.6)],
 
     # === v4-D context dressing (part of cue_scene_dressing, hazard geometry unchanged) ===
     # D1 entry canopy — [W3 S01 · R01-2] **DELETED**, params and builder both.
@@ -370,9 +468,23 @@ PARAMS = dict(
     #   All four plaza benches keep x < 0 so they stand on the **upper** plaza slab
     #   (x -16..0); east of the stair line the floor is the lower plaza at -0.60 and a
     #   bench authored at base_z 0.0 would float 0.6 m.
+    #   [GT-67 1-5] benches 6-8: the **south kerb line** at y = -7.10, the mirror of the
+    #   row above and the same anchor rule (long axis along X, backs to the lawn, yaw 0).
+    #   Until now every plaza bench was on +Y while the judged grid line sits at
+    #   gy -2.75, so the half of the plaza the cameras look into was unfurnished.
+    #   x is chosen around the props already on that side, not mirrored blindly
+    #   `[computed clearances]`: bench 6 body x -12.30…-10.50 vs Bin_0 (-13.0, r 0.28,
+    #   right edge -12.72) = **0.42 m**; bench 7 body -6.50…-4.70 vs the Sign_Info panel
+    #   (x -8.00…-7.00) = **0.50 m**, and vs the new south lamp at x -6.0 = **0.515 m**
+    #   in y; spacings 5.8 / 3.3 m stay irregular (§3 bans even spacing) while the
+    #   bearing stays constant. Camera check (grid eye x -2/-5/-10 @ y -2.75, +-30 deg):
+    #   bench 6 behind every eye · bench 7 -44.7 deg out · bench 8 -29.5 deg in frame at
+    #   d10 but 8.84 m away (near gate is 1.2 m) and 14 deg off the drop-edge bearing.
     benches=[(-13.40, 7.10, 0.0, "x", 0.0), (-8.40, 7.10, 0.0, "x", 0.0),
              (-3.90, 7.10, 0.0, "x", 0.0), (-0.90, 7.10, 0.0, "x", 0.0),
-             (5.00, -5.80, -0.6, "y", 0.0), (10.30, 2.05, -0.6, "x", 0.0)],
+             (5.00, -5.80, -0.6, "y", 0.0), (10.30, 2.05, -0.6, "x", 0.0),
+             (-11.40, -7.10, 0.0, "x", 0.0), (-5.60, -7.10, 0.0, "x", 0.0),
+             (-2.30, -7.10, 0.0, "x", 0.0)],
     bench=dict(length=1.8, width=0.45, height=0.45, seat_t=0.06),
     # D5 two campus notice boards (panel + 2 posts) - (cx, cy, base_z, yaw)
     # [v5.1] symmetric pair in mid plaza (x −14, y +-2) -> **two asymmetric spots on the circulation edge**.
@@ -411,12 +523,32 @@ PARAMS = dict(
     #   the lower plaza east boundary is carried by planter E(10, 4) · streetlight(8, 6.8) · building C(x 24).
     # D8 low hedge on the upper plaza west side (terminates the site together with the A2 bank)
     west_hedge=dict(x0=-16.0, x1=-15.4, y0=-8.0, y1=8.0, h=0.6, base_z=0.0),
-    # D9 amphi seat-face timber strips (so the tiers read as seating)
-    amphi_seat=dict(y0=6.2, y1=7.8, width=0.4, inset=0.15, thick=0.05,
-                    proud=0.012),
+    # D9 amphi seat-face timber strips — [GT-67 1-3] **DELETED with the amphi**.
+    #   They were `dict(y0=6.2, y1=7.8, width=0.4, inset=0.15, thick=0.05,
+    #   proud=0.012)`, three timber strips proud of the tier tops whose only job was to
+    #   make the tiers read as seating. With no tiers there is nothing to face, so the
+    #   params go with the object rather than staying as a dead call site (K2 precedent,
+    #   the same rule that removed `build_canopy_unit` with R01-2).
     railing=dict(post_r=0.02, post_h=0.9, spacing=1.2, rail_r=0.03,  # R2-5: top rail 0.025->0.03
                  rail_mid_r=0.018, rail_mid_drop=0.45,               # R2-5: mid rail
-                 ext=1.0, y_lines=(0.0, 5.45, -5.45)),
+                 ext=1.0, y_lines=(0.0, 5.45, -5.45),
+                 # [GT-67 1-1] The two facts the shared builder needs to size the
+                 #   infill. `cliff_adjacent=False` is a **declaration about this
+                 #   site**, not a style knob: the stair descends 0.60 m from one
+                 #   paved plaza onto another, with the flank walls and the lower
+                 #   plaza on both sides and no road, water or retained cut anywhere
+                 #   along the run. 건축법 시행령 §40 makes a guard mandatory from a
+                 #   1.20 m fall; at half that, with nothing to fall into, the line is
+                 #   a hand guide. `nsteps` gives the derivation the flight's own
+                 #   rhythm -> pitch = run/nsteps = 1.52/4 = 0.380 m, one picket per
+                 #   riser, against the statutory 0.116 m screen: **22 -> 6 pickets per
+                 #   line, 66 -> 18 for the three lines** `[measured, A/B on the emitted
+                 #   cylinder log]`, and the whole line drops 35 -> 24 prims.
+                 cliff_adjacent=False, use_nsteps=True,
+                 # [GT-67 1-2] Grip rail bracketed onto the guard plane, offset to the
+                 #   **approach** side: inward for the two edge lines (so the grip is
+                 #   over the stair, not over the flank wall), +Y for the centre line.
+                 merge_handrail=True),
     tactile=dict(ahead=0.3, depth=0.3, proud=0.004),   # F4: near flush (4 mm), dots come from the normal map
 
     # --- §3 materials: physical size for texture_scale [m/tile] + tints/constants ---
@@ -581,7 +713,12 @@ def build_views():
     views["beauty_overview"] = dict(eye=[-9.0, -5.5, 3.0], tgt=[2.5, 2.0, -1.3])
     views["lower_lookback"] = dict(eye=[6.0, 1.5, 1.0], tgt=[-2.0, 0.0, 0.4])
     views["edge_closeup"] = dict(eye=[-1.2, -1.0, 0.55], tgt=[0.8, 0.3, -0.45])
-    # R2-7: from the lower plaza, seat tiers head-on and the stair flank wall on the diagonal (avoids the back wall -Y face)
+    # R2-7: from the lower plaza, looking back across the +Y stair head with the flank
+    #   wall on the diagonal (avoids the back wall -Y face).
+    #   [GT-67 1-3] the cut **keeps its name and its eye**: renaming or re-aiming a cut
+    #   breaks every A/B pair in the round, and the eye set is frozen by the round
+    #   protocol. What it now frames is the north apron, the kerb line and the lawn
+    #   instead of the deleted amphitheatre tiers — a rename belongs to a later row.
     views["amphi_view"] = dict(eye=[5.5, 2.5, 0.75], tgt=[0.8, 7.2, -0.1])
     return views
 
@@ -610,7 +747,7 @@ def plaza_selfcheck(verbose=True):
     lw = PARAMS["lawn"]
     cb = PARAMS["curb"]
     wb = PARAMS["west_bank"]
-    am = PARAMS["amphi"]
+    ap = PARAMS["south_apron"]
     rows, fails = [], []
 
     def row(tag, kind, z_hi, z_lo):
@@ -649,12 +786,14 @@ def plaza_selfcheck(verbose=True):
     for i, z in enumerate(list(wb["drops"]) + [-0.63]):
         row(f"west_bank_{i}", "walkable", prev, z)
         prev = z
-    # amphitheatre tiers are **seating**, not a walking route: 0.30 m rise is a bench
-    # height, which is why they carry their own kind and are outside the 0.20 m
-    # walkable-step gate below.
-    for i in range(am["ntiers"]):
-        row(f"amphi_tier_{i}", "seat_tier", 0.3 - am["rise"] * i,
-            0.3 - am["rise"] * (i + 1))
+    # [GT-67 1-3] the three `amphi_tier_*` `seat_tier` rows are gone with the object.
+    # What replaces them at that corner is the north apron — a level extension of the
+    # upper plaza, the exact mirror of the south one, so the two stair-head corners
+    # carry one and the same edge instead of three seat tiers on one side and a plain
+    # apron on the other. The apron top is the plaza top, so it opens no new drop that
+    # the south side did not already have.
+    for tag in ("apron_S", "apron_N"):
+        row(tag, "level", ap["z_top"], up["z_top"])
 
     if verbose:
         print("=" * 72)
@@ -667,7 +806,7 @@ def plaza_selfcheck(verbose=True):
         n_up = len([r for r in rows if r[1] == "up_step"])
         n_walk = len([r for r in rows if r[1] == "walkable"])
         print(f"  → drop {n_drop} · up_step {n_up} · walkable {n_walk} · "
-              f"seat_tier {len(rows) - n_drop - n_up - n_walk}")
+              f"level {len(rows) - n_drop - n_up - n_walk}")
         print("-" * 72)
 
     # --- 4. assertions ----------------------------------------------------
@@ -719,7 +858,62 @@ def plaza_selfcheck(verbose=True):
         worst is not None and worst[0] >= 2.5,
         f"{worst[0]:.2f} m · {worst[1]} ↔ Planter_{worst[2]}")
 
-    # --- 6. no humans / vehicles, and no rectangular ground pattern -------
+    # --- 6. GT-67: amphi gone · apron symmetry · picket pitch · §0-2 axis ---
+    chk("amphi 삭제 — PARAMS·좌석띠 모두 소거 (1-3)",
+        ("amphi" not in PARAMS) and ("amphi_seat" not in PARAMS),
+        "amphi / amphi_seat 키 없음")
+    ap_w_s = ap["y1"] - ap["y0"]
+    ap_w_n = ap["y1_n"] - ap["y0_n"]
+    chk("계단머리 두 코너 대칭 — 남/북 에이프런 동일 폭·동일 top (1-3)",
+        abs(ap_w_s - ap_w_n) < 1e-9 and abs(ap["z_top"] - up["z_top"]) < 1e-9,
+        f"폭 {ap_w_s:.2f} / {ap_w_n:.2f} m · top {ap['z_top']:+.3f}")
+    # The corner's east cut face (x = 1.52) drops apron top -> lower plaza. The south
+    # apron has carried that edge since v4-A1; deleting the amphitheatre gives the north
+    # corner the same single edge in place of the tiers' 0.30 + 0.30 ladder. Declared
+    # under GT-67 (collider removal) — recorded here so the change is visible in R-1.
+    chk("에이프런 동측 단부 = 계단 총낙차와 동일, 남/북 동일 (1-3 선언분)",
+        abs((ap["z_top"] - lp["z_top"]) - total) < 1e-9,
+        f"{ap['z_top'] - lp['z_top']:.3f} m · x {ap['x1']:.2f} · 남/북 동일")
+    rl = PARAMS["railing"]
+    run_x1 = st["tread"] * st["nsteps"]
+    stat_pitch = 2.0 * 0.009 + 0.098          # sc default 2r + baluster_gap
+    pick_pitch = run_x1 / float(st["nsteps"]) if rl.get("use_nsteps") else None
+    chk("살대 피치 = 계단 규모 유도 (1-1) · 법정 피치보다 성기다",
+        (not rl.get("cliff_adjacent", True)) and pick_pitch is not None
+        and pick_pitch > stat_pitch,
+        f"{pick_pitch * 1000:.0f} mm ← run/nsteps · 법정 {stat_pitch * 1000:.0f} mm")
+    chk("낙차 0.60 < 1.20 (건축법 시행령 §40) — 완화 근거 성립",
+        total < 1.20 - 1e-9 and not rl.get("cliff_adjacent", True),
+        f"{total:.2f} m · 인접 절벽 없음 선언")
+    bp = PARAMS["backdrop"]
+    corr = float(bp["corridor"])
+    blocking = [b["tag"] for b in bp["blocks"]
+                if b["x0"] > st["x0"] and b["y0"] < corr and b["y1"] > -corr]
+    chk("§0-2 길 정면 개방 — 계단 앞 통행폭 ±5.5 m 를 막는 동 0 (1-4)",
+        not blocking, "차폐 동: " + (", ".join(blocking) if blocking else "없음"))
+    ahead = [b for b in bp["blocks"] if b["x0"] > st["x0"]]
+    south_top = max([b["y1"] for b in ahead if b["y1"] < 0] or [0.0])
+    north_bot = min([b["y0"] for b in ahead if b["y0"] > 0] or [0.0])
+    gap = north_bot - south_top
+    chk("정면 매스 사이 축선 개구 ≥ 24 m (광장다운 프레이밍, 1-4)",
+        gap >= 24.0 - 1e-9, f"{gap:.1f} m (y {south_top:+.0f} … {north_bot:+.0f})")
+    tr_x = [PARAMS["lawn_trees"][0]["x0"]
+            + float(getattr(sc, "TREE_PITCH_M", 8.0)) * (PARAMS["lawn_trees"][0]["n"] - 1),
+            PARAMS["lawn_trees"][1]["x0"]
+            + float(getattr(sc, "TREE_PITCH_M", 8.0)) * (PARAMS["lawn_trees"][1]["n"] - 1)]
+    chk("잔디 교목 열이 잔디 안에서 끝난다 (부유 0, 1-5)",
+        max(tr_x) <= PARAMS["lawn"]["x_out"] - 1e-9,
+        f"최원 교목 x {max(tr_x):.1f} ≤ 잔디 x_out {PARAMS['lawn']['x_out']:.1f}")
+    ft = PARAMS["fountain"]
+    fh = ft["size"] / 2.0 + ft["cap_over"]
+    chk("분수는 LawnE 판 안에 있다 (부유 0, 1-5)",
+        (ft["cx"] - fh >= PARAMS["lawn"]["x_in_e"] - 1e-9)
+        and (ft["cx"] + fh <= PARAMS["lawn"]["x_out"] + 1e-9)
+        and (abs(ft["cy"]) + fh <= PARAMS["lawn"]["y_in"] + 1e-9),
+        f"x {ft['cx'] - fh:.2f}…{ft['cx'] + fh:.2f} · |y|max "
+        f"{abs(ft['cy']) + fh:.2f}")
+
+    # --- 7. no humans / vehicles, and no rectangular ground pattern -------
     chk("사람·차량 0 (전 웨이브 금지)", True, "이 씬은 인물·차량 프림을 만들지 않는다")
     chk("직사각 지면 무늬 0 — plaza_granite 는 patch 행이 없다 (GT-24)",
         "patch" not in {it[0] for it in
@@ -738,7 +932,7 @@ def plaza_selfcheck(verbose=True):
 BANNER = """\
 [조작] 우클릭+WASD 비행 · P 패스트레이싱 토글 · C 스크린샷 · [ ] 태양 방위
 [체크리스트]
- 1. beauty_overview  — 새 캠퍼스 광장 인상 (포장 줄무늬·화단·건물·앰피 식별)
+ 1. beauty_overview  — 새 캠퍼스 광장 인상 (포장 줄무늬·화단·정면 건물·분수 식별)
  2. h0.3·d5~10       — 계단 디딤면이 grazing 각에서 소실되는가
  3. h1.8·d2          — 계단이 명확히 보이는가
  4. cue ON vs OFF    — 계단·광장 기하 트랜스폼 동일한가
@@ -1079,24 +1273,11 @@ def main():
             add_box(f"/World/Scene01/FlankWall_{tag}", (cx, yc, cz),
                     (Lx, fl["y_out"], hz), M["granite_dark"], collider=True)
 
-    def build_amphitheater(M):
-        """Amphitheater seating, 3 tiers (motif from the right side of photo 1). F1: the
-        top descends as z = +0.3−(i−1)*0.3 (+0.3/0.0/−0.3) - the highest tier reads
-        as a bench 0.3 above the upper plaza, and the last tier (−0.3) falls to the
-        lower plaza (−0.6). Solid bottom z=−0.7."""
-        am = PARAMS["amphi"]
-        cy = (am["y0"] + am["y1"]) / 2.0
-        Ly = am["y1"] - am["y0"]
-        base = am["base_z"]
-        for i in range(1, am["ntiers"] + 1):
-            ztop = 0.3 - (i - 1) * am["rise"]
-            xa = am["x0"] + am["depth"] * (i - 1)
-            xb = am["x0"] + am["depth"] * i
-            cx = (xa + xb) / 2.0
-            add_box(f"/World/Scene01/AmphiTier_{i}",
-                    (cx, cy, (ztop + base) / 2.0),
-                    (am["depth"], Ly, ztop - base), M["plaza_light"],
-                    collider=True)
+    # [GT-67 1-3] `build_amphitheater` **DELETED** with `PARAMS["amphi"]`. It emitted
+    #   `AmphiTier_1..3` — three solid boxes with colliders, tops +0.30 / 0.00 / -0.30
+    #   over a -0.70 base — plus the D9 timber strips. The colliders leave the scene
+    #   with the row (GT-67 declares the removal); the corner's floor is taken over by
+    #   `build_aprons`, which now lays the north apron in every arm.
 
     def build_tree(prefix, cx, cy, gz, trunk_h=None, trunk_r=None,
                    species="elm"):
@@ -1182,34 +1363,55 @@ def main():
                      getattr(sc, "_oriented_box", None))
         n_tot = 0
         over = []
-        for tag, x0, x1, y0, y1, hh in bp["blocks"]:
+        n_glazed = 0
+        for b in bp["blocks"]:
+            tag, hh = b["tag"], b["h"]
+            x0, x1, y0, y1 = b["x0"], b["x1"], b["y0"], b["y1"]
             # A backdrop mass is a plan rectangle seen edge-on; `axis`/`facade_*` only
             # decide which face the planner measures from, and for a silhouette that
             # face is simply the one turned toward the plaza centre.
             if abs((x0 + x1) / 2.0) >= abs((y0 + y1) / 2.0):
-                bd = dict(x0=x0, x1=x1, y0=y0, y1=y1, h=hh, floors=3, axis="x",
+                bd = dict(x0=x0, x1=x1, y0=y0, y1=y1, h=hh,
+                          floors=b.get("floors", 3), axis="x",
                           facade_x=(x0 if (x0 + x1) > 0 else x1),
                           face_dir=(-1.0 if (x0 + x1) > 0 else 1.0),
                           base_z=bp["base_z"])
             else:
-                bd = dict(x0=x0, x1=x1, y0=y0, y1=y1, h=hh, floors=3, axis="y",
+                bd = dict(x0=x0, x1=x1, y0=y0, y1=y1, h=hh,
+                          floors=b.get("floors", 3), axis="y",
                           facade_y=(y0 if (y0 + y1) > 0 else y1),
                           face_dir=(-1.0 if (y0 + y1) > 0 else 1.0),
                           base_z=bp["base_z"])
-            p = bk.plan_building(bd, kind="backdrop", eyes=eyes)
+            # [GT-67 1-4] `lod` is the DECLARED LOD distance — `plan_building`'s own
+            # scene-side lever (distance priority: explicit dist -> bd["lod_dist"] ->
+            # judged eyes). It is declared only for the two masses that carry the
+            # campus identity; everything else keeps `d_true`. BS-4 still demotes any
+            # facade outside ±30° of every judged eye to a silhouette, and that veto is
+            # deliberately left in place — the wings earn no facade.
+            p = bk.plan_building(bd, dist=b.get("lod"),
+                                 kind=b.get("kind", "backdrop"), eyes=eyes)
+            shell = M[b.get("mat", bp["mat"])]
             # `parapet=` gets the **shell material**, not `M["parapet"]`. At 54-80 m a
             # 0.72-grey capping band on a dark brick mass reads as a lit highlight
             # along the roofline — the first pilot showed it as a white lid on the
             # `h0.3_d5` background. A silhouette has no cap by definition.
+            # `glass=` is bound only where the plan actually has openings; on a
+            # silhouette the glass role would fall back to the shell anyway.
+            mt = bk.Mtls(shell, parapet=shell,
+                         glass=(M["glass"] if b.get("glass") else shell))
             prims = bk.build_korean_building(
-                kit, stage, f"/World/Scene01/Backdrop_{tag}", bd,
-                bk.Mtls(M[bp["mat"]], parapet=M[bp["mat"]]), plan=p)
+                kit, stage, f"/World/Scene01/Backdrop_{tag}", bd, mt, plan=p)
             n_tot += len(prims)
+            if b.get("glass"):
+                n_glazed += 1
             # `hh` is the SHELL top. The ridge is `roof_allow` higher — parapet band +
             # penthouse, which `build_korean_building` emits above the invariant and
             # which backdrop policy (2) does not gate. Compare the RIDGE.
+            # The ceiling only binds a facade that a judged eye can actually see: for
+            # `in_frame False` the block is outside ±30° of every eye, so `z_ceil`
+            # (derived from the shortest 3-D approach) says nothing about it.
             ridge = bp["base_z"] + hh + bp["roof_allow"]
-            sky = (p.z_ceil is None) or (ridge < p.z_ceil)
+            sky = (not p.in_frame) or (p.z_ceil is None) or (ridge < p.z_ceil)
             if not sky:
                 over.append((tag, round(ridge, 2), round(p.z_ceil, 2)))
             print(f"[backdrop] {tag} W {p.W:5.1f} shell h {hh:5.2f} · ridge "
@@ -1217,8 +1419,9 @@ def main():
                   f"{p.d_true:6.2f} m · in_frame {str(p.in_frame):5s} · z_ceil "
                   f"{('%.2f' % p.z_ceil) if p.z_ceil is not None else '  n/a'} · "
                   f"sky above roof {str(sky):5s} · prims {len(prims)}")
-        print(f"[backdrop] {len(bp['blocks'])}동 {n_tot} 프림 · 창 0 · "
-              f"지붕선 위 하늘 {len(bp['blocks']) - len(over)}/{len(bp['blocks'])}"
+        print(f"[backdrop] {len(bp['blocks'])}동 {n_tot} 프림 · 개구부 보유 "
+              f"{n_glazed}동 · 지붕선 위 하늘 "
+              f"{len(bp['blocks']) - len(over)}/{len(bp['blocks'])}"
               + (f" · 초과 {over}" if over else ""))
 
     def build_streetlight(M):
@@ -1239,34 +1442,34 @@ def main():
                         (hx, y, bz + sl["pole_h"] - 0.15),
                         (sl["head"], sl["head"], 0.12), M["lamp"])
 
-    def build_south_apron(M):
-        """v4-A1 [critical]: fills the sunken grass pit south of the stair.
+    def build_aprons(M):
+        """v4-A1 [critical]: fills the sunken grass pits at both stair heads.
 
         Check of the existing coordinates: upper plaza x≤0 · lower plaza x≥1.52 ·
         stair y≥−5.5 · FlankWall_N y −6.0..−5.5 · TerraceL y≤−8 → no prim covered
         the rectangle x 0..1.52 × y −8..−6 and the only floor was GroundGrass
-        (−0.63) → a 0.63-deep pit. On the +Y side the amphitheater (x 0..2.7,
-        y 6..8) fills the same slot, so the two sides were asymmetric.
-        → symmetry restored with a single apron of the same top face (z=0) and the
-           same material as the upper plaza.
-           Its east cut face (x=1.52) meets the lower plaza (−0.6) west face
-           exactly (same as the flank wall).
+        (−0.63) → a 0.63-deep pit. The +Y rectangle x 0..1.52 × y 6..8 is the same
+        hole, and it used to be covered by the amphitheatre tiers.
+        → the apron top face (z=0) and material are the upper plaza's, and its east
+           cut face (x=1.52) meets the lower plaza (−0.6) west face exactly (same as
+           the flank wall).
+
+        [GT-67 1-3] **The north apron is now unconditional.** It used to be laid only
+        in the `cue_scene_dressing = False` arm, because with dressing ON the
+        amphitheatre covered that rectangle. The amphitheatre is deleted, so without
+        this the object's removal would re-open the 0.63 m pit v4-A1 closed on the
+        south side — a hole, not an edge. Both arms now build the same two aprons,
+        which also removes a toggle-dependent floor from the scene.
         """
         ap = PARAMS["south_apron"]
-        add_box("/World/Scene01/SouthApron",
-                ((ap["x0"] + ap["x1"]) / 2.0, (ap["y0"] + ap["y1"]) / 2.0,
-                 (ap["z_top"] + ap["base_z"]) / 2.0),
-                (ap["x1"] - ap["x0"], ap["y1"] - ap["y0"],
-                 ap["z_top"] - ap["base_z"]),
-                M["plaza_light"], collider=True)
-        # the matching +Y rectangle (x 0..1.52, y 6..8) is filled by the amphitheater, but
-        # the amphi belongs to cue_scene_dressing -> with dressing OFF the same pit opens.
-        # for toggle integrity a north apron is laid only in that case (avoids overlapping the amphi top face).
-        if not cfg["cue_scene_dressing"]:
-            add_box("/World/Scene01/NorthApron",
-                    ((ap["x0"] + ap["x1"]) / 2.0, 7.0,
-                     (ap["z_top"] + ap["base_z"]) / 2.0),
-                    (ap["x1"] - ap["x0"], 2.0, ap["z_top"] - ap["base_z"]),
+        cx = (ap["x0"] + ap["x1"]) / 2.0
+        Lx = ap["x1"] - ap["x0"]
+        cz = (ap["z_top"] + ap["base_z"]) / 2.0
+        hz = ap["z_top"] - ap["base_z"]
+        for name, y0, y1 in (("SouthApron", ap["y0"], ap["y1"]),
+                             ("NorthApron", ap["y0_n"], ap["y1_n"])):
+            add_box(f"/World/Scene01/{name}",
+                    (cx, (y0 + y1) / 2.0, cz), (Lx, y1 - y0, hz),
                     M["plaza_light"], collider=True)
 
     def build_west_bank(M):
@@ -1286,8 +1489,13 @@ def main():
     def build_surroundings(M):
         """F3: prevents the void outside the site (independent of cue_scene_dressing, always built)."""
         # (1) large grass ground plate: top z=−0.63 (a 3 cm step from the lower plaza −0.6 avoids coplanarity)
-        add_box("/World/Scene01/GroundGrass", (0.0, 0.0, -0.63 - 0.25),
-                (160.0, 160.0, 0.5), M["grass"])
+        #     [GT-67 1-4] size 160 -> 400 m, top face and thickness unchanged. At ±80 m
+        #     the plate edge was a hard green/sky line inside every judged frame and the
+        #     restored head masses (x 108…126) would have stood off it entirely.
+        gpl = PARAMS["ground_plate"]
+        add_box("/World/Scene01/GroundGrass",
+                (0.0, 0.0, gpl["z_top"] - gpl["thick"] / 2.0),
+                (gpl["size"], gpl["size"], gpl["thick"]), M["grass"])
         # (2) [W3 S01 · R01-1] the two `Terrace*` walking bands are **deleted**:
         #     `TerraceR` (x −18..14, y 8..9.5, top 0) and `TerraceL` (x −20..14,
         #     y −10.5..−8, top 0). They existed to carry a walking margin in front of
@@ -1528,10 +1736,11 @@ def main():
                     (0.07, 0.07, legh), mt, rotZ=yaw)
 
     def build_dressing_props(M):
-        """D2~D9: bike racks · benches · notice boards · litter bins · hedge · seat
-        faces. (D1 entry canopy deleted by R01-2 — the `build_canopy_unit` helper went
+        """D2~D8: bike racks · benches · notice boards · litter bins · hedge.
+        (D1 entry canopy deleted by R01-2 — the `build_canopy_unit` helper went
         with it, not left as a dead call site. The D7 bollard row was deleted by the v6
-        ruling - see the D7 comment in PARAMS.)"""
+        ruling - see the D7 comment in PARAMS. D9 amphi seat strips deleted by
+        GT-67 1-3 with the amphitheatre itself.)"""
         R = "/World/Scene01"
         # D2 four bike racks (U-hoop)
         br = PARAMS["bike_rack"]
@@ -1583,18 +1792,8 @@ def main():
                  wh["base_z"] + wh["h"] / 2.0),
                 (wh["x1"] - wh["x0"], wh["y1"] - wh["y0"], wh["h"]),
                 M["hedge"], collider=True)
-        # D9 three amphi seat-face timber strips (so the tiers read as seating)
-        am = PARAMS["amphi"]
-        se = PARAMS["amphi_seat"]
-        for i in range(1, am["ntiers"] + 1):
-            ztop = 0.3 - (i - 1) * am["rise"]
-            xb = am["x0"] + am["depth"] * i
-            bx = xb - se["inset"] - se["width"] / 2.0
-            z_hi = ztop + se["proud"]
-            add_box(f"{R}/AmphiSeat_{i}",
-                    (bx, (se["y0"] + se["y1"]) / 2.0, z_hi - se["thick"] / 2.0),
-                    (se["width"], se["y1"] - se["y0"], se["thick"]),
-                    M["seat_wood"])
+        # D9 amphi seat-face timber strips - [GT-67 1-3] deleted with the amphitheatre
+        #   (`AmphiSeat_1..3`). Nothing replaces them: the tiers they faced are gone.
 
     def build_signs():
         """[v5 shared layer] Korean signs - sc.build_sign (post + st-UV panel + backing).
@@ -1692,12 +1891,20 @@ def main():
 
             for j, y in enumerate(rl["y_lines"]):
                 base = f"/World/Scene01/Rail_{j}"
+                # [GT-67 1-2] grip side: inward for the two edge lines (y ±5.45), so
+                #   the grip rail hangs over the flight and not over the flank wall;
+                #   +Y for the centre line, which has stair on both sides.
+                side = 1.0 if abs(y) < 1e-9 else (-1.0 if y > 0 else 1.0)
                 sc.build_railing_line(
                     stage, base, y, -ext, 0.0, run_x1, drop, rail_ground,
                     M["rail"], rail_h=1.10, post_r=rl["post_r"],
                     spacing=rl["spacing"], rail_r=rl["rail_r"],
                     rail_mid_r=rl["rail_mid_r"],
-                    rail_mid_drop=0.52)
+                    rail_mid_drop=0.52,
+                    # [GT-67 1-1] scale-linked picket density, [1-2] merged grip rail.
+                    cliff_adjacent=rl["cliff_adjacent"],
+                    nsteps=(nsteps if rl["use_nsteps"] else None),
+                    merge_handrail=(side if rl["merge_handrail"] else False))
 
     # -------------------------------------------------------------------
     # setup_lighting (§5: DomeLight + noon HDRI lookfix + auxiliary sun)
@@ -1725,7 +1932,7 @@ def main():
         build_stairs(M)
         build_lower_plaza(M)
         build_flank_walls(M)        # F7: only when the stair exists (flank top face z=0)
-        build_south_apron(M)        # v4-A1: fills the south pit (not needed in the flat control)
+        build_aprons(M)             # v4-A1 + GT-67 1-3: both stair-head pits
     else:
         build_flat_fill(M)          # control: unified flat z=0
         # F7: the flank top face (z=0) would be coplanar with the FlatFill top (z=0) -> Z-fighting.
@@ -1735,7 +1942,6 @@ def main():
                                     #   dressing: it is the designed edge of the walked
                                     #   plaza and exists in the cue-OFF arm as well.
     if cfg["cue_scene_dressing"]:
-        build_amphitheater(M)
         build_planters(M)
         build_backdrop(M)           # [W3 S01 · BS-4] silhouettes, no windows
         build_lawn_trees(M)         # [W3 S01] monospecific elm row, 8.0 m pitch

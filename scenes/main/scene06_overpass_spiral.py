@@ -22,6 +22,11 @@ Hazard (= the reality of falling short of code)
   descent (the 5 m interior void + the entry passage) is concealed.
   Third — the annular void inside the spiral (r 0.5~1.5, depth 5 m) has an inner
   railing but no kick plate, so it is open at robot height.
+  [GT-68 · 08-05] Axes 1 and 3 above are kept as written for history but are **no longer
+  the build**: axis 1 went with the 08-05 continuous-guard doctrine, and axis 3 goes with
+  the glazed guard landed here (shoe + pane from the tread up, both runs). Neither axis
+  was ever a GT registry entry — the drop edges, the 5.005 m well drop and every walking
+  surface are untouched by this row.
 
 GT drop invariance: the cue_railing toggle only turns railing prims on and off. The
   transforms of spiral, landing, deck and column, and the riser / radius / azimuth
@@ -66,6 +71,11 @@ W3 S06 — the G6 rebuild (user: "정체성 그렇게 안 겹치도록 이미지
     2. the railing is **bronze/brown horizontal tube, 4 rails** — against scene11's
        painted-steel vertical bar. This pair IS the identity separation the user asked
        for, so it is geometry and colour, not a texture swap;
+       **[GT-68 · 08-05 supersedes the section, not the identity]** the deck run had
+       already gone to glass under a bronze cap (`DeckGlass_*`), so the tube survived
+       only on the spiral and the one structure carried two guard languages. Every run
+       is now the same three parts — steel shoe · laminated pane · **bronze cap** — and
+       the bronze is what still separates 06 from scene11's painted steel;
     3. the deck is carried on **white tapered V-form pillars**, not plain cylinders.
   Plus G6's foreground boundary set (timber road guardrail with yellow reflective bands,
   green mesh fence, 야면석-edged bed with ornamental grasses and a tripod-staked sapling)
@@ -89,9 +99,12 @@ Camera axis note [v6 verdict revision · supervisor approved — scene11 precede
   On this axis the profile straight ahead of the robot (x=3.5, y decreasing) is
     y −13.0…−13.5 column-head top z 5.000 (**flush with the deck — the basis of the continuity misread**)
     y −13.5…−14.5 annular void (inner r 0.5…1.5) → ground −0.005 = **drop 5.005 m**
-    y −14.44     inner railing (top 4.456 — 0.54 m below the deck face)
+    y −14.56     inner guard (cap top 4.506 — 0.494 m below the deck face)
+                 [GT-68] was y −14.44 / top 4.456 when the inner run stood at r 1.44
     y −14.5…−16.3 spiral treads (near azimuth 270°, top ≈3.46) = 1.54 m below the deck
-    y −16.36     outer railing — **azimuth 270° is the edge of the damaged arc (180~270)**
+    y −16.24     outer guard — **azimuth 270° is the edge of the damaged arc (180~270)**
+                 [GT-68] the −16.36 printed here was stale from outer_r 3.36 (GT-6 took it
+                 to 3.24); the guard radius itself is unchanged by this row
     y < −16.3    ground −0.005 = drop 5.005 m
   So the damaged-railing arc (180~270°) enters the centre-to-right of the frame and the
   GT drop is present in every h0.3/h0.9/h1.8 shot. The ground approach (the old grid
@@ -250,8 +263,11 @@ PARAMS = dict(
     #    absent from TACTILE_SITES and ground_kit would raise B11 on it.
     gkit=dict(joint_step=9.0, wear=((3.5, -12.2), (3.5, -0.5)), wear_w=2.0,
               gully=[(2.35, -11.0), (4.65, -11.0), (2.35, -4.0), (4.65, -4.0)]),
+    # [GT-68] `glass_t` was a literal 0.019 inside `build_deck_rail`. It is lifted into
+    #   PARAMS unchanged because the spiral and landing runs now read the SAME key — the
+    #   section is shared by construction, not by two copies of the same number.
     rail_bay=dict(post_t=0.10, post_h=1.28, n_bay=13, joint=0.05,
-                  kick_h=0.12, cap_h=0.06, cap_over=0.03,
+                  kick_h=0.12, cap_h=0.06, cap_over=0.03, glass_t=0.019,
                   baluster_r=0.018, n_baluster=5),
     #   deck support columns - they land on the sidewalk outside the kerb (y +-8.0…8.6). y +-9.0 is
     #   0.7 m clear of the spiral outer edge (C.y −13 + r 3.3 = −9.7), so no interference.
@@ -305,20 +321,42 @@ PARAMS = dict(
     #   extends to +-150 and handles the §A-4 horizon closure.
     ground=dict(x0=-150.0, x1=150.0, y0=-150.0, y1=150.0, z_top=-0.16,
                 thick=1.40),
-    # --- spiral railing (cue_railing) --- continuous bronze tube guard
-    #   [W3 S06 · R06-2] G6 guards helix and deck with **bronze/brown horizontal tubes**;
-    #     G11 guards scene11 with **painted-steel vertical bars**. That pair is the formal
-    #     identity separation the user asked for ("정체성 그렇게 안 겹치도록"), so the section,
-    #     the rail count and the colour are all load-bearing here, not dressing.
+    # --- spiral + landing guard (cue_railing) --- glass panes under a bronze cap
+    #   [W3 S06 · R06-2] G6 guards helix and deck with **bronze/brown** metal; G11 guards
+    #     scene11 with **painted-steel vertical bars**. That pair is the formal identity
+    #     separation the user asked for ("정체성 그렇게 안 겹치도록"), and the bronze cap
+    #     carries it after GT-68 replaced the tube section.
     #   [W3 S06 · GT-6] `outer_r` **3.36 -> 3.24**. At 3.36 the posts stood **60 mm outboard of
     #     the tread edge** (r_out 3.30) — floating in air off the slab, the S06-A finding.
     #     3.24 puts the post centreline 60 mm INBOARD, which is where a real post baseplate goes.
-    #   Two continuous rails and evenly spaced posts make the spiral read as a
-    #   conventional pedestrian guard instead of a damaged set piece.  `inner_r`
-    #   stays 6 cm inside the inner tread edge so its bases remain supported.
-    railing=dict(outer_r=3.24, inner_r=1.44, rail_h=1.10, rails=2, bottom=0.55,
-                 pipe_r=0.024, post_r=0.030,
-                 post_step_deg=20.0, seg_per_deg=0.25),
+    #   [GT-68 · 08-05 gallery] the spiral was the last 2-rail tube run in a structure whose
+    #     deck guard is already glass + bronze cap (`DeckGlass_*`). Both spiral runs and both
+    #     landing lobes are rebuilt from the deck's own three parts (steel shoe · laminated
+    #     pane · bronze cap); the widths are READ from `deck`/`rail_bay` at build time
+    #     (`_guard_section`), so the runs cannot drift into three sections. `rails`,
+    #     `bottom`, `pipe_r`, `post_step_deg` and `seg_per_deg` are gone with the tube —
+    #     Q2 (how many horizontal rails) is answered by the unification, not by a count.
+    #   [GT-68] `inner_r` **1.44 -> 1.56** = tread r_in 1.50 + 0.06, the mirror of the outer
+    #     60 mm inset. The old note claimed 1.44 kept the bases supported and it did not:
+    #     the whole footprint (posts r 1.41…1.47) lay INSIDE the tread inner edge 1.50, i.e.
+    #     in mid-air over the annular void [measured]. Clear stair width between the guard
+    #     faces: 1.600 m at the shoe (3.200 − 1.600) and 1.540 m at the cap, the narrowest
+    #     section, against the 1.20 m statutory minimum [computed].
+    #   [GT-68] `steps_per_bay` 2 -> **13 bays**, the deck's own `rail_bay.n_bay`. The deck
+    #     rule is "one pane per bay between posts"; on the curve the bay is pinned to the
+    #     stair rhythm so every post lands on a riser line. Bay chord 1.296 m at the outer
+    #     run (0.65 of the deck's 2.00 m) is set by the facet limit, not by taste: a 2.00 m
+    #     bay on r 3.24 bows 158 mm off the arc against 65 mm here [computed].
+    #   [GT-68] `joint` 0.020 against the deck's 0.050 — the deck value is a post-shoulder
+    #     allowance on a 2.00 m straight bay; on the 0.624 m inner bay it would cut the pane
+    #     from 0.486 to 0.368 m, i.e. 59 % of the bay instead of 78 % [computed].
+    #     0.020 sits inside the real laminated-glass joint band (12…20 mm).
+    #   `arc_seg` 1 = each pane is ONE flat facet with its ends on the guard circle. Real
+    #     curved balustrades are built from flat panes; a subdivided pane would be a
+    #     procedural tell.
+    railing=dict(outer_r=3.24, inner_r=1.56, rail_h=1.10,
+                 steps_per_bay=2, landing_bays=3, arc_seg=1,
+                 post_r=0.030, post_embed=0.05, joint=0.020),
     # --- tactile paving (cue_tactile) ---
     #   lower: in front of the azimuth-180 deg entry passage (sidewalk) / upper: deck south-end stair head
     tactile=dict(low=(-0.45, 0.20, -13.95, -12.05), low_z=0.0,
@@ -596,6 +634,123 @@ def _in_landing(az, r):
 
 
 # ===========================================================================
+# [C1a] guard geometry (GT-68) - one glazed family for spiral · landing · deck
+# ===========================================================================
+def _guard_bays():
+    """Azimuth boundaries of the spiral guard bays (n_bay+1 values, a0 … a0+sweep).
+
+    The deck rule is one pane per bay between posts. On the curve the bay is pinned to the
+    stair's own rhythm — `railing.steps_per_bay` treads per bay — so every post lands on a
+    riser line and 26/2 gives **13 bays, the deck's `rail_bay.n_bay` exactly**."""
+    sp, rl = PARAMS["spiral"], PARAMS["railing"]
+    n = max(1, int(sp["n"]) // max(1, int(rl["steps_per_bay"])))
+    d = sp["sweep"] / float(n)
+    return [sp["a0"] + k * d for k in range(n + 1)]
+
+
+def _guard_section(raked):
+    """Guard cross-section as z offsets from the walking line the run stands on.
+
+    Every value is read from the deck guard's own PARAMS, so the spiral, the landing lobes
+    and `build_deck_rail` cannot drift into three sections.
+      raked=False (landing lobes, deck level): shoe 0…0.120 · pane 0.120…0.950 · bronze cap
+        0.950…1.010 — bit-identical to `DeckKick_*`/`DeckGlass_*`/`DeckPanelCap_*`.
+      raked=True (spiral runs): the same parts fitted under the stair guard height
+        `railing.rail_h`, with **cap top = rail_h so the guard height is unchanged**.
+        The shoe top carries an extra riser/2 because `_spiral_z_at` is the MID-step line:
+        the treads sit +-0.096 about it, so a shoe pinned to the line alone would float
+        96 mm clear of the tread at every step start. With the top at kick_h + riser/2 and
+        the bottom at -kick_h the exposed kick runs 0.120…0.312 m and the shoe stays buried
+        by >= 0.024 m everywhere [computed]. Pane height 0.824 m against the deck's 0.830."""
+    rb, dk, rl = PARAMS["rail_bay"], PARAMS["deck"], PARAMS["railing"]
+    if not raked:
+        return dict(kick_bot=0.0, kick_top=rb["kick_h"],
+                    glass_top=dk["panel_h"],
+                    cap_top=dk["panel_h"] + rb["cap_h"],
+                    post_bot=-rl["post_embed"])
+    half = PARAMS["spiral"]["riser"] / 2.0
+    return dict(kick_bot=-rb["kick_h"], kick_top=rb["kick_h"] + half,
+                glass_top=rl["rail_h"] - rb["cap_h"], cap_top=rl["rail_h"],
+                post_bot=-rb["kick_h"])
+
+
+def _landing_guard_arcs():
+    """Azimuth arcs of the landing guard, ended on the deck's own edge lines.
+
+    `_landing_arcs` clips the SLAB where the deck edges cross the rim r_out 3.30; the guard
+    stands at `railing.outer_r` 3.24 and therefore crosses those same edges at a different
+    azimuth (62.422 vs 62.964 deg). Ending the guard on the slab azimuth would leave its
+    terminal post 27 mm off the deck rail line; ending it here puts the post exactly on
+    x = deck.x0 / deck.x1, where the deck guard already stands, so the junction is one
+    newel instead of two near-coincident posts. The arc stays inside the slab lobe at both
+    ends, and the slab sliver left beyond it lies inside the deck plan, where the deck's
+    own run guards it — no gap opens in the guard line."""
+    la, dk, rl = PARAMS["landing"], PARAMS["deck"], PARAMS["railing"]
+    half = (dk["x1"] - dk["x0"]) / 2.0
+    ac = math.degrees(math.acos(min(1.0, half / rl["outer_r"])))
+    return [(la["a0"], ac), (180.0 - ac, la["a1"])]
+
+
+def _raked_sector_mesh(stage, path, cx, cy, r_in, r_out, a0_deg, a1_deg,
+                       zb0, zt0, zb1, zt1, mtl=None, arc_seg=1):
+    """Annular-sector prism whose bottom and top faces RAKE linearly across the span.
+
+    `scene_common._annular_sector_mesh` takes one z_bot/z_top pair, so on a helix it can
+    only step the guard once per bay. Here the pair is given per end ray, which makes the
+    panel a **parallelogram in elevation**: bottom and top edges follow the walking line,
+    end faces stay plumb — what a raked balustrade panel is.
+    This is also why the tube guard could ride `build_helix_ramp` and a 0.82 m pane cannot:
+    that builder tilts the whole box about its radial axis, so at the inner run's 31.6 deg
+    helix angle the 0.824 m pane head would swing 0.432 m along the tangent — 69 % of the
+    0.624 m bay chord — and open a slot beside every (plumb) post [computed].
+    `arc_seg=1` leaves the panel ONE flat facet with both ends exactly on the guard circle.
+    Point order per ring i: [inner_bot, outer_bot, inner_top, outer_top], the same
+    arithmetic as `_annular_sector_mesh`. No collider: this scene's guard carries none
+    (see `_obstacle_boxes`)."""
+    from pxr import Gf, UsdGeom, Vt
+    n = max(1, int(arc_seg))
+    a0, a1 = math.radians(a0_deg), math.radians(a1_deg)
+    pts = []
+    for i in range(n + 1):
+        f = i / float(n)
+        a = a0 + (a1 - a0) * f
+        zb = zb0 + (zb1 - zb0) * f
+        zt = zt0 + (zt1 - zt0) * f
+        ca, sa = math.cos(a), math.sin(a)
+        ix, iy = cx + r_in * ca, cy + r_in * sa
+        ox, oy = cx + r_out * ca, cy + r_out * sa
+        pts += [Gf.Vec3f(ix, iy, zb), Gf.Vec3f(ox, oy, zb),
+                Gf.Vec3f(ix, iy, zt), Gf.Vec3f(ox, oy, zt)]
+
+    def v(i, k):                                   # k: 0 ib, 1 ob, 2 it, 3 ot
+        return i * 4 + k
+    counts, idx = [], []
+
+    def quad(a_, b_, c_, d_):
+        counts.append(4)
+        idx.extend([a_, b_, c_, d_])
+    for i in range(n):
+        quad(v(i, 2), v(i, 3), v(i + 1, 3), v(i + 1, 2))     # top (raked)
+        quad(v(i, 0), v(i + 1, 0), v(i + 1, 1), v(i, 1))     # bottom (raked)
+        quad(v(i, 1), v(i + 1, 1), v(i + 1, 3), v(i, 3))     # outer face
+        quad(v(i, 0), v(i, 2), v(i + 1, 2), v(i + 1, 0))     # inner face
+    quad(v(0, 0), v(0, 1), v(0, 3), v(0, 2))                 # plumb end at a0
+    quad(v(n, 0), v(n, 2), v(n, 3), v(n, 1))                 # plumb end at a1
+    m = UsdGeom.Mesh.Define(stage, path)
+    m.CreatePointsAttr(Vt.Vec3fArray(pts))
+    m.CreateFaceVertexCountsAttr(Vt.IntArray(counts))
+    m.CreateFaceVertexIndicesAttr(Vt.IntArray(idx))
+    m.CreateSubdivisionSchemeAttr(UsdGeom.Tokens.none)
+    lo = Gf.Vec3f(min(p[0] for p in pts), min(p[1] for p in pts),
+                  min(p[2] for p in pts))
+    hi = Gf.Vec3f(max(p[0] for p in pts), max(p[1] for p in pts),
+                  max(p[2] for p in pts))
+    m.CreateExtentAttr([lo, hi])
+    sc._bind_mtl(m.GetPrim(), mtl)
+    return m
+
+
+# ===========================================================================
 # [C1b] camera numeric-check base - AABB obstacles + solid lookup (single ray-march source)
 #   [v6 verdict instruction] check the basis for the grid-axis move and the mise-en-scene re-aim by coordinates.
 #   follows the scene08 `_obstacle_boxes` / `_solid_at` convention as-is.
@@ -765,8 +920,9 @@ def _obstacle_boxes():
     for i, xe in enumerate((dk["x0"], dk["x1"])):
         boxes.append((f"DeckRail_{i}", xe - 0.09, xe + 0.09, dk["y0"], dk["y1"],
                       dk["z_top"], dk["z_top"] + rb["post_h"]))
-    # the spiral railing (pipe r0.03·post r0.03) is thinner than the camera radius, so it is
-    #   excluded from AABB collision checks (it is a ring, so a box AABB gives false positives).
+    # the spiral guard (pane 19 mm · shoe 80 mm · post r0.03) is thinner than the camera
+    #   radius, so it is excluded from AABB collision checks (it is a ring, so a box AABB
+    #   gives false positives). GT-68 changed the section, not this exclusion.
     return boxes
 
 
@@ -843,9 +999,57 @@ def _smoke_report():
     print(f"    연속성 판정: {'OK' if bad == 0 else f'FAIL({bad})'}")
     # ── guard continuity ──
     a0, a1 = sp["a0"], sp["a0"] + sp["sweep"]
-    print(f"  [난간 연속성] 내·외측 가드 방위 [{a0:.0f}, {a1:.0f}] 전 구간 연결")
-    print(f"    높이 {rl['rail_h']:.2f} m · 가로대 {rl['rails']}본 · "
-          f"기둥 간격 {rl['post_step_deg']:.0f}° → OK")
+    rb = PARAMS["rail_bay"]
+    bays = _guard_bays()
+    gs, gl = _guard_section(True), _guard_section(False)
+    bay_deg = (a1 - a0) / float(len(bays) - 1)
+    print("  [가드 통일 GT-68] 유리판 + 브론즈 캡 — 데크(DeckGlass) 계열로 통일")
+    print(f"    내·외측 가드 방위 [{a0:.0f}, {a1:.0f}] 전 구간 연결 · 베이 "
+          f"{len(bays)-1}개 ({rl['steps_per_bay']}단/베이 {bay_deg:.4f}°) = 데크 베이 "
+          f"{rb['n_bay']}개와 동수 → "
+          f"{'OK' if len(bays)-1 == rb['n_bay'] else 'FAIL'}")
+    for tag, rad in (("외측", rl["outer_r"]), ("내측", rl["inner_r"])):
+        ch = 2.0 * rad * math.sin(math.radians(bay_deg / 2.0))
+        sag = rad * (1.0 - math.cos(math.radians(bay_deg / 2.0)))
+        pitch = math.degrees(math.atan2(sp["riser"] * rl["steps_per_bay"], ch))
+        print(f"    {tag} r{rad:.2f}: 베이 현 {ch:.3f} m · 패싯 새기타 "
+              f"{sag*1000:5.1f} mm · 헬릭스 경사 {pitch:5.2f}° → "
+              f"{'OK' if sag <= 0.08 else 'FAIL'}(≤80 mm)")
+    print(f"    단면(보행선 기준, 데크 값 그대로): 슈 {gs['kick_bot']:+.3f}…"
+          f"{gs['kick_top']:+.3f} · 유리 {gs['kick_top']:+.3f}…"
+          f"{gs['glass_top']:+.3f} (판高 {gs['glass_top']-gs['kick_top']:.3f} m, "
+          f"데크 {dk['panel_h']-rb['kick_h']:.3f}) · 캡 {gs['glass_top']:+.3f}…"
+          f"{gs['cap_top']:+.3f}")
+    ek_lo = gs["kick_top"] - sp["riser"] / 2.0
+    ek_hi = gs["kick_top"] + sp["riser"] / 2.0
+    bury = -gs["kick_bot"] - sp["riser"] / 2.0
+    print(f"    가드고 {rl['rail_h']:.2f} m 불변(캡 상면 = rail_h) · 노출 킥 "
+          f"{ek_lo:.3f}…{ek_hi:.3f} m · 최소 매립 {bury:.3f} m → "
+          f"{'OK' if ek_lo >= rb['kick_h'] - 1e-9 and bury > 0 else 'FAIL'}")
+    cap_dk = dk["z_top"] + gl["cap_top"]
+    cap_ld = la["top_z"] + gl["cap_top"]
+    cap_sp = _spiral_z_at(a0) + gs["cap_top"]
+    d1, d2 = abs(cap_ld - cap_dk), abs(cap_sp - cap_ld)
+    print(f"    [캡 라인 연속] 데크 {cap_dk:.3f} → 랜딩 {cap_ld:.3f} "
+          f"(Δ{d1*1000:.0f} mm) → 나선 접합(방위 {a0:.0f}°) {cap_sp:.3f} "
+          f"(Δ{d2*1000:.0f} mm, 뉴얼 지름 {2*rl['post_r']*1000:.0f} mm 안) → "
+          f"{'OK' if d1 < 1e-6 and d2 <= 2*rl['post_r'] else 'FAIL'}")
+    ga, sl = _landing_guard_arcs(), _landing_arcs()
+    print(f"    랜딩 가드 호 [{ga[0][0]:.3f},{ga[0][1]:.3f}]·[{ga[1][0]:.3f},"
+          f"{ga[1][1]:.3f}] ⊂ 슬래브 로브 [{sl[0][0]:.3f},{sl[0][1]:.3f}] · "
+          f"종단 x = 데크 연단 {dk['x0']:.2f}/{dk['x1']:.2f} → "
+          f"{'OK' if ga[0][1] <= sl[0][1] + 1e-9 else 'FAIL'}")
+    sh = dk["parapet_t"] / 2.0
+    foot = ((rl["inner_r"] - sh, rl["inner_r"] + sh),
+            (rl["outer_r"] - sh, rl["outer_r"] + sh))
+    on_tread = all(sp["r_in"] - 0.01 <= f0 and f1 <= sp["r_out"] for f0, f1 in foot)
+    clr_cap = (rl["outer_r"] - sh - rb["cap_over"]) \
+        - (rl["inner_r"] + sh + rb["cap_over"])
+    print(f"    슈 반경대 내측 [{foot[0][0]:.3f},{foot[0][1]:.3f}] · 외측 "
+          f"[{foot[1][0]:.3f},{foot[1][1]:.3f}] ⊂ 디딤 [{sp['r_in']:.2f},"
+          f"{sp['r_out']:.2f}] → {'OK' if on_tread else 'FAIL'}")
+    print(f"    가드 사이 유효폭 슈 {(rl['outer_r']-sh)-(rl['inner_r']+sh):.3f} m "
+          f"· 캡 {clr_cap:.3f} m ≥ 1.20 → {'OK' if clr_cap >= 1.20 else 'FAIL'}")
     # ── deck clearance · column interference ──
     deck_bot = dk["z_top"] - dk["thick"]
     print(f"  [데크] 상면 {dk['z_top']:.2f} 저면 {deck_bot:.2f} · 차도 상면 "
@@ -1164,7 +1368,8 @@ BANNER = """\
 [체크리스트]
  1. h0.3 그리드(데크 종주) — 기둥머리 상면(5.000)과 원측 지면이 하나의 평면으로
                             읽혀 환형 보이드(5.005 m)·나선 하강이 은닉되나
- 2. broken_rail    — 상부 외측 가드(연속 2단 가로대)가 평범한 보행 가드로 읽히는가
+ 2. broken_rail    — 상부 외측 가드(유리판+브론즈 캡)가 데크 가드와 같은 계열로
+                     읽히는가 · 베이 조인트·캡 라인이 랜딩에서 끊기지 않는가
  3. spiral_up      — 나선 내부 상행(피치 +19°): 랜딩 소핏이 상단을 막았나
  3b. d2 프리셋      — h0.9/h1.8 은 pitch −20/−28° : 연단·디딤이 프레임 안인가
  3c. 태양 az 145    — 그리드 피사면(+Y향)·deck_entry 상반의 암부가 걷혔나
@@ -1791,45 +1996,65 @@ def main():
                               M["leaf_b"] if (k + r) % 2 == 0 else M["leaf_a"])
 
     # -------------------------------------------------------------------
-    # cues - railing (damaged variant) · tactile paving · nosing
+    # cues - glazed guard (GT-68) · tactile paving · nosing
     # -------------------------------------------------------------------
-    def _rail_offsets():
-        """Rail heights above the tread line, `props_kit.build_tube_railing`'s own formula.
+    def _guard_run(prefix, rad, bays, z_of, off, M):
+        """One glazed guard run: steel shoe · laminated pane · bronze cap, one set per bay.
 
-        [W3 S06 · G6] `bottom + (rail_h − bottom)*r/(rails−1)`, r = 0…rails−1. The template
-        cannot be *called* here — it takes a polyline and lays every tube with `rotY=90`,
-        i.e. along +X, so it is correct only for an X-aligned run (its own docstring says
-        the axis-aligned case "is the only case shipped"). A helix is neither. The section,
-        the rail count, the 1.10 m height and the clear-span arithmetic are therefore
-        reproduced here against the template rather than re-invented; see the report's
-        findings section, where the template's axis restriction is filed."""
-        rl = PARAMS["railing"]
-        n = max(2, int(rl["rails"]))
-        span = rl["rail_h"] - rl["bottom"]
-        return [rl["bottom"] + span * r / float(n - 1) for r in range(n)]
+        [GT-68] The same code builds the raked spiral runs and the level landing lobes —
+        `z_of(a)` returns the walking-line z at azimuth a and the section comes from
+        `_guard_section`, so the only difference between the two is that line. Radial
+        widths are the deck's: shoe `deck.parapet_t`, pane `rail_bay.glass_t`, cap the
+        shoe + `rail_bay.cap_over` each side.
+        The angular deductions reproduce the deck's own bay arithmetic — the deck takes
+        (post half-width + joint) off the shoe/cap and one further joint off the pane
+        (`DeckKick` 1.80 m, `DeckGlass` 1.70 m in a 2.00 m bay); here the same clearances
+        are read as arc at the run's radius, which is what keeps the joint gap constant
+        (0.020 m) on runs whose bay chord differs 2.08x. Returns the bay count."""
+        rl, rb, dk = PARAMS["railing"], PARAMS["rail_bay"], PARAMS["deck"]
+        j, half_t = rl["joint"], dk["parapet_t"] / 2.0
+        d_sc = math.degrees((rl["post_r"] + j) / rad)          # shoe / cap
+        d_gl = math.degrees((rl["post_r"] + 2.0 * j) / rad)    # pane (one joint more)
+        parts = (("Shoe", d_sc, half_t, off["kick_bot"], off["kick_top"],
+                  M["steel"]),
+                 ("Glass", d_gl, rb["glass_t"] / 2.0, off["kick_top"],
+                  off["glass_top"], M["glass"]),
+                 ("Cap", d_sc, half_t + rb["cap_over"], off["glass_top"],
+                  off["cap_top"], M["rail"]))
+        for k in range(len(bays) - 1):
+            for tag, dd, hw, zb, zt, mtl in parts:
+                b0, b1 = bays[k] + dd, bays[k + 1] - dd
+                _raked_sector_mesh(
+                    stage, f"{prefix}/{tag}_{k}", CX, CY, rad - hw, rad + hw,
+                    b0, b1, z_of(b0) + zb, z_of(b0) + zt,
+                    z_of(b1) + zb, z_of(b1) + zt, mtl,
+                    arc_seg=rl["arc_seg"])
+        return len(bays) - 1
 
-    def _pipe_arc(tag, rad, a0, a1, z_off, pipe_r, M):
-        """One pipe rail following the spiral tread line (approximated with helix_ramp)."""
-        rl = PARAMS["railing"]
-        nseg = max(4, int(round((a1 - a0) * rl["seg_per_deg"])))
-        sc.build_helix_ramp(stage, f"{ROOT}/Rail{tag}", CX, CY,
-                            rad - pipe_r, rad + pipe_r, a0, a1, nseg,
-                            _spiral_z_at(a0) + z_off,
-                            _spiral_z_at(a1) + z_off,
-                            pipe_r*2.0, M["rail"], collider=False,
-                            top_face=True)
+    def _guard_posts(prefix, rad, bays, z_of, off, M, tops=None, skip=()):
+        """Plumb mullions at the bay joints (= riser lines on the spiral runs).
 
-    def _posts(tag, rad, a0, a1, M):
+        Top flush with the cap so the cap line reads unbroken across the post — the deck's
+        posts run past its cap only because a separate tube handrail sits above them at
+        `deck.parapet_h`, which is the road barrier, not the stair guard. Steel like
+        `DeckRailPost_*`: after GT-68 the bronze is carried by the cap, which is where the
+        06/11 identity separation lives.
+        `tops[k]` overrides one post's top z (the junction newel), `skip` drops a post that
+        another run already carries."""
         rl = PARAMS["railing"]
-        npost = max(2, int(round((a1 - a0) / rl["post_step_deg"])))
-        for k in range(npost + 1):
-            a = a0 + (a1 - a0) * k / float(npost)
-            zt = _spiral_z_at(a)
-            px = CX + rad * math.cos(math.radians(a))
-            py = CY + rad * math.sin(math.radians(a))
-            CYL(f"{ROOT}/RailPost{tag}_{k}",
-                (px, py, zt + rl["rail_h"]/2.0), rl["post_r"],
-                rl["rail_h"] + 0.10, M["rail"])
+        tops = tops or {}
+        n = 0
+        for k, a in enumerate(bays):
+            if k in skip:
+                continue
+            zb = z_of(a) + off["post_bot"]
+            zt = tops.get(k, z_of(a) + off["cap_top"])
+            CYL(f"{prefix}_{k}",
+                (CX + rad * math.cos(math.radians(a)),
+                 CY + rad * math.sin(math.radians(a)), (zb + zt) / 2.0),
+                rl["post_r"], zt - zb, M["steel"])
+            n += 1
+        return n
 
     def build_deck_rail(M):
         """[v6 verdict (1)] deck sound railing — post segmentation + alternating sound-panel
@@ -1871,7 +2096,8 @@ def main():
                 BOX(f"{ROOT}/DeckGlass_{i}_{k}",
                     (xe, yc, zt + rb["kick_h"]
                      + (dk["panel_h"] - rb["kick_h"])/2.0),
-                    (0.019, Ly - 2*rb["joint"], dk["panel_h"] - rb["kick_h"]),
+                    (rb["glass_t"], Ly - 2*rb["joint"],
+                     dk["panel_h"] - rb["kick_h"]),
                     M["glass"])
                 BOX(f"{ROOT}/DeckPanelCap_{i}_{k}",
                     (xe, yc, zt + dk["panel_h"] + rb["cap_h"]/2.0),
@@ -1883,41 +2109,48 @@ def main():
 
     def build_cues(M):
         rl = PARAMS["railing"]
-        a0, a1 = sp["a0"], sp["a0"] + sp["sweep"]
         if cfg["cue_railing"]:
-            # Both sides use the same uninterrupted guard profile.  The old outer
-            # run resumed only after 270°, leaving posts with no rails for a full
-            # quadrant and making the walking edge appear broken.
-            offs = _rail_offsets()
-            _posts("Outer", rl["outer_r"], a0, a1, M)
-            for r, zo in enumerate(offs):
-                _pipe_arc(f"OuterR{r}", rl["outer_r"], a0, a1, zo,
-                          rl["pipe_r"], M)
-            _posts("Inner", rl["inner_r"], a0, a1, M)
-            for r, zo in enumerate(offs):
-                _pipe_arc(f"InnerR{r}", rl["inner_r"], a0, a1, zo,
-                          rl["pipe_r"], M)
-            # deck sound railing (both sides) - [v6 verdict (1)] post segmentation + alternating open bays
+            # [GT-68] ONE guard family for the whole route — steel shoe · laminated pane ·
+            #   bronze cap. Spiral runs are raked off `_spiral_z_at`, the landing lobes are
+            #   level off `landing.top_z`, the deck run is `build_deck_rail`; all three take
+            #   their section from `_guard_section`, i.e. from `deck`/`rail_bay`.
+            #   Both spiral runs are uninterrupted over the full sweep (the pre-08-05 outer
+            #   run resumed only after 270°, leaving a quadrant of posts with no infill).
+            la, rb = PARAMS["landing"], PARAMS["rail_bay"]
+            bays = _guard_bays()
+            gs, gl = _guard_section(True), _guard_section(False)
+            cap_land = la["top_z"] + gl["cap_top"]
+            n_bay = 0
+            for tag, rad in (("Outer", rl["outer_r"]), ("Inner", rl["inner_r"])):
+                n_bay += _guard_run(f"{ROOT}/Rail{tag}", rad, bays,
+                                    _spiral_z_at, gs, M)
+                # the outer run's azimuth-a0 post is the junction NEWEL: the landing guard
+                #   dies into it, so it is carried up to the landing cap top and the 6 mm
+                #   step between the two cap lines closes inside the 60 mm post [computed].
+                _guard_posts(f"{ROOT}/RailPost{tag}", rad, bays, _spiral_z_at,
+                             gs, M, tops={0: cap_land} if tag == "Outer" else None)
+            # landing lobes = the run that carries the guard from the deck onto the spiral.
+            #   Ended on the deck edge LINE (`_landing_guard_arcs`) rather than on the slab
+            #   clip azimuth, so the terminal post stands on the deck rail line and the two
+            #   guards share one newel instead of crossing 27 mm apart.
+            for i, (pa0, pa1) in enumerate(_landing_guard_arcs()):
+                nb = max(1, int(rl["landing_bays"]))
+                lb = [pa0 + (pa1 - pa0) * k / float(nb) for k in range(nb + 1)]
+                n_bay += _guard_run(f"{ROOT}/LandingParapet_{i}", rl["outer_r"],
+                                    lb, lambda a: la["top_z"], gl, M)
+                # the lobe that ends on the spiral a0 ray hands its last post to the newel
+                shared = {nb} if abs(lb[-1] - sp["a0"]) < 1e-6 else ()
+                _guard_posts(f"{ROOT}/LandingParapet_{i}/Post", rl["outer_r"],
+                             lb, lambda a: la["top_z"], gl, M, skip=shared)
+            # deck run - [v6 verdict (1)] post segmentation, glazed bays (W3 S06 · G6)
             build_deck_rail(M)
-            la = PARAMS["landing"]
-            # [W3 S06] the parapet arcs are pinned to the **same clip azimuths as the landing
-            #   lobes** (they were hand-set to 62/118, a 1 deg guess at the same number), so
-            #   the guard now ends exactly where the slab it stands on ends.
-            for i, (pa0, pa1) in enumerate(_landing_arcs()):
-                sc.build_arc_steps(stage, f"{ROOT}/LandingParapet_{i}", CX, CY,
-                                   la["r_out"] - 0.09, la["r_out"], pa0, pa1,
-                                   max(4, int((pa1-pa0)/6.0)),
-                                   la["top_z"] + PARAMS["deck"]["panel_h"],
-                                   la["top_z"] - 0.10, M["panel"],
-                                   collider=False)
-                # coping - removes the pure-white untextured panel impression (C-3)
-                sc.build_arc_steps(stage, f"{ROOT}/LandingCoping_{i}", CX, CY,
-                                   la["r_out"] - 0.12, la["r_out"] + 0.03,
-                                   pa0, pa1, max(4, int((pa1-pa0)/6.0)),
-                                   la["top_z"] + PARAMS["deck"]["panel_h"]
-                                   + 0.07,
-                                   la["top_z"] + PARAMS["deck"]["panel_h"],
-                                   M["curb"], collider=False)
+            print(f"[GT-68] guard unified · glass+bronze cap · spiral "
+                  f"{len(bays)-1} bays x 2 runs + landing "
+                  f"{int(rl['landing_bays'])} bays x 2 lobes = {n_bay} panes · "
+                  f"cap line deck {PARAMS['deck']['z_top']+gl['cap_top']:.3f} / "
+                  f"landing {cap_land:.3f} / spiral "
+                  f"{_spiral_z_at(sp['a0'])+gs['cap_top']:.3f} · guard h "
+                  f"{rl['rail_h']:.2f} (unchanged) · deck bays {rb['n_bay']}")
         if cfg["cue_tactile"]:
             tc = PARAMS["tactile"]
             lx0, lx1, ly0, ly1 = tc["low"]

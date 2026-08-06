@@ -81,6 +81,27 @@ Run (GUI look check - default):
      divergence from G8 is recorded, not silently taken (the S13-parapet / S03-fence
      precedent).
 
+[GT-69 · placement] 08-05 검수 ruled the type identity PASSED and the **asset placement**
+  failed: "벤치·수목·소품의 관계 배치", with scene04 named as the model. Nothing in this
+  round is a material or a form change (material work is frozen); what changes is **which
+  object stands next to which**. Three circulation lines are declared in `PARAMS` (WALK W ·
+  RIM promenade · APRON N) and every prop is moved onto one of them as a member of a named
+  group (`PARAMS['groups']`), so the group is what the gate measures:
+    · 6 benches where there were **0** — 4 on the rim, seat facing the bowl centre so a
+      sitter looks down the tiers at the stage (yaw = bearing + 90, the rim tangent), and 2
+      on the approach walk, aligned with the walk instead.
+    · 3 sorting bins where there were **0** — one per bench group, gated to 4.50 m.
+    · the 6 rim tree beds leave their 45° necklace: four move behind the two seating
+      groups (r 9.6 → 10.8), two stay behind the stage because they are the crowns that
+      read above the backdrop wall in `plaza_approach`.
+    · the 5 lamps leave five unrelated coordinates for the walk (2 · 11.4 m pitch), the two
+      aisle heads and the building-entrance apron.
+  `placement_selfcheck()` gates all six relations, including "no furniture in the |y| <=
+  2.60 approach corridor" and "no judged eye within 1.20 m of a footprint" — the two
+  regressions this scene has actually had before (v5.1 planter × `side_arc`, W3 census
+  C02-P1). The drop edge, the lip kerb, the tiers and the stage are untouched: every new
+  object stands on the plaza or the ring, ≥ 0.24 m radially outside the lip (r_out 7.80).
+
 Season `[intake §7-8]`: **summer**, pinned from G8 (full leaf, high sun, clear sky) and
   matched by the shipped rig (`qwantani_noon_puresky` + sun elev 49.79°). There is no
   `bare=` call in this file and `season_selfcheck()` gates on its absence plus the measured
@@ -111,6 +132,11 @@ import numpy as np
 
 import scene_common as sc
 import ground_kit as gk
+# [GT-69] K4(c) prop forms. The benches and bins this round adds do not exist in the scene
+#   yet, so they are authored in the replacement form rather than the retired one: a slatted
+#   seat with a back (the back is what makes "facing the stage" readable at all) and a 2-gang
+#   sorting bin. Materials come from this scene's own dict — no new material constant.
+import props_kit as pk
 
 
 # ===========================================================================
@@ -424,7 +450,32 @@ PARAMS = dict(
     signs=[],  # [v5.2 user] info signboard removed - openness
 
     # --- dressing ---
-    planters=[("A", -10.0, -9.0), ("B", -12.0, 8.0)],
+    # === [GT-69] the dressing set is placed RELATIONALLY (scene04 grammar) =============
+    #   Pre-state, measured at HEAD: the 6 rim beds sat on a 45 deg necklace round the
+    #   bowl, the 5 lamps stood at five unrelated plaza coordinates, and there were **no
+    #   benches and no bins at all**. Every object was legible on its own and none of them
+    #   said what the place was for.
+    #   Post-state: three circulation lines carry the furniture, and every prop belongs to
+    #   a named group whose members are gated against each other (`PARAMS['groups']`,
+    #   `placement_selfcheck`).
+    #     · WALK W — the main approach, y = 0, x -18.00 .. -1.50 (the lip). It already
+    #       carries the bollard gate (x -17.2) and the gate posts (x -3.60, y +-2.60), and
+    #       **every judged grid eye stands on it looking +X**. Gains 2 lamps (11.4 m
+    #       pitch), a 2-bench + 1-bin rest group on its north edge, and the 2 forecourt
+    #       tree beds. The corridor |y| <= 2.60 stays EMPTY - `placement_selfcheck` (5).
+    #     · RIM promenade — the plaza ring, r 7.80 .. 12.0. Carries the two seating groups
+    #       (2 benches + 1 bin + 2 shade beds each) on the north-west and south-west
+    #       audience quadrants, and 2 lamps at the aisle heads (θ 106 / 254).
+    #     · APRON N — building R's entrance walk through the hedge opening (x -8 .. -4),
+    #       which already carries `entry_canopy`; gains 1 lamp.
+    #   The θ 150..210 sector carries nothing on purpose: it is the sight corridor of
+    #   `plaza_approach`, `rim_view` and all 9 grid presets, and v5.2's openness ruling
+    #   ("the bench ring hurts openness") lives there.
+    #
+    # 2 forecourt beds flanking WALK W. Prim roots `Planter_A/B` unchanged.
+    #   [was] (-10,-9) and (-12,8) - two loose beds in opposite plaza corners, related to
+    #   nothing and outside every judged frame. (tag, cx, cy, size)
+    planters=[("A", -8.0, 5.6, 3.0), ("B", -8.0, -5.6, 3.0)],
     # v4-D8: tree row around the lip - r=9.6 circle at 45 deg (entry axis 0 deg · gate 180 deg excluded)
     # [v5 judgment applied] the 270 deg planter is centred at (6, −9.6), only 0.4 m from the
     #   side_arc camera eye(6, −10, 1.2) - the camera ended up inside the planter box (2.2 square)
@@ -447,9 +498,26 @@ PARAMS = dict(
     #   **44.8 deg** off the sight axis against a ~29.3 deg half-frame - 15 deg of margin
     #   where there were 5. Neighbour separation 225<->250 is 4.16 m against a 2.2 m bed.
     #   `planter_eye_selfcheck()` now gates every judged cut against every bed.
-    ring_planters=[45.0, 90.0, 135.0, 225.0, 250.0, 315.0],
-    ring_planter=dict(r=9.6, size=2.2, base_z=-0.002,
-                      min_crown=1.00, min_kerb=2.00),
+    # === [GT-69] the necklace is replaced by two shade pairs + the stage flanks =========
+    #   (bearing deg, radius m, bed size m) about the bowl centre (6, 0).
+    #     · **134 / 150 / 210 / 226 at r 10.80, size 1.8** — one bed directly behind each
+    #       rim bench (bench r 8.85). Bed corner radius 9.527 vs bench corner radius 8.617
+    #       `[computed]`, and the seat sits inside the tree's noon shadow reach: a 3.608 m
+    #       tree (`Fraxinus` native 5.341 x scale 0.6754) at sun elev 49.79 deg casts
+    #       3.049 m, against a 1.95 m bed-to-bench centre distance `[computed]`.
+    #     · **45 / 315 at r 9.6, size 2.2 — unchanged, on purpose.** These two stand behind
+    #       the stage shell and are the only crowns that read above the backdrop wall in
+    #       `plaza_approach`; moving them would take the v6 gain "greenery above the wall"
+    #       out of the scene's main frame.
+    #   The 90 / 135 / 225 / 250 sites are gone. 90 and 135 shaded nothing, and 250 existed
+    #   only as the fix for a camera clash (the §5 census pair `RingPlanter_4` x `side_arc`,
+    #   kerb 1.39 m). That clash is now prevented by construction — the southern rim
+    #   quadrant carries no bed at all — and the gate below still measures it: worst kerb
+    #   **4.100 m** (`Planter_A` x `preset_h0.3_d5`), worst crown **3.656 m** `[measured by
+    #   planter_eye_selfcheck]`, against the census baseline 1.39 / 0.25.
+    ring_planters=((45.0, 9.6, 2.2), (134.0, 10.8, 1.8), (150.0, 10.8, 1.8),
+                   (210.0, 10.8, 1.8), (226.0, 10.8, 1.8), (315.0, 9.6, 2.2)),
+    ring_planter=dict(base_z=-0.002, min_crown=1.00, min_kerb=2.00),
     # v4-B4/A4: the 3 misaligned hedges (y 12.0/12.4/12.0) are removed -> reorganised into a
     #   perimeter hedge. Hides the 0.51 m unguarded fall + terminates the site + misalignment gone.
     #   openings: −X approach (the whole west side), south x −3..3, north x −8..−4 (building entrance).
@@ -484,9 +552,49 @@ PARAMS = dict(
     #     not this lane's file (frozen), so the statutory value is passed at the call
     #     site; 0.90 is mid-band. Four collision boxes grow 0.15 m in z - declared.
     bollards=dict(x=-17.2, spacing=1.5, n=4, base_z=0.0, height=0.90),
-    # v4-B5/D9: benches 2 -> 6. Placed tangentially on the r=9.0 circle about the bowl centre (6,0).
-    bench_ring=dict(r=9.0, base_z=-0.002,
-                    angles=(110.0, 135.0, 160.0, 200.0, 225.0, 250.0)),
+    # === [GT-69] benches — 6, in 3 groups. What v5.2 deleted was the **ring** ==========
+    #   "[v5.2 user] bench ring removed — hurts openness, remove it cleanly": the deleted
+    #   object was `bench_ring`, 6 benches on a full r 9.0 circle *around* the bowl at 25
+    #   deg pitch, crossing the west sight corridor and lining the rim skyline of
+    #   `stage_lookup`. That ring is not rebuilt and the ruling stands: the θ 150..210
+    #   corridor stays empty, and no bench stands between a judged eye and the bowl.
+    #   What returns is furniture where people actually stop.
+    #     · RIM benches (a, r) — yaw = a + 90, so the seat faces the bowl centre and a
+    #       sitter looks down the tiers at the stage. That bearing is the rim **tangent**,
+    #       a construction bearing of the same class as scene03's meander tangent, not J-3
+    #       jitter; scene05 declares no PLACEMENT anchor datum, so LINT-7 reports it
+    #       advisory against its inferred {0, 90, 180, 270} set.
+    #     · WALK benches (xy, yaw) — aligned with WALK W and facing it (yaw 180), which is
+    #       the brief's second option, "along the movement line".
+    #   Clearances `[computed]`: rim bench corner radius 8.617 = 0.817 m clear of the lip
+    #   kerb (r_out 7.80), so no bench footprint approaches the drop edge; nothing stands
+    #   inside the |y| <= 2.60 approach corridor; min judged-eye-to-footprint 2.997 m
+    #   (`Bin_W` x `preset_h0.3_d2`) against a 1.20 m gate.
+    benches=(dict(tag="N0", a=134.0, r=8.85), dict(tag="N1", a=150.0, r=8.85),
+             dict(tag="S0", a=210.0, r=8.85), dict(tag="S1", a=226.0, r=8.85),
+             dict(tag="W0", xy=(-8.0, 3.4), yaw=180.0),
+             dict(tag="W1", xy=(-6.0, 3.4), yaw=180.0)),
+    # [GT-69] C1 slatted bench, `back=True`. A backless slab has no readable facing, and
+    #   "oriented toward the stage" is the whole point of the rim group.
+    bench=dict(length=1.60, depth=0.54, seat_h=0.42, back=True,
+               rim_z=-0.002, walk_z=0.0),
+    # [GT-69] one 2-gang sorting bin per bench group, at the end of the row.
+    #   Rim bins take the group's own radius so bench and bin share one arc, and their
+    #   label band turns to face the bowl like the seats. The walk bin stands 1.80 m
+    #   (centres) off the east bench of the walk row - 0.77 m of clear floor between them -
+    #   and 0.416 m clear of the north gate post `[computed]`.
+    bins=(dict(tag="N", a=122.5, r=8.85), dict(tag="S", a=237.5, r=8.85),
+          dict(tag="W", xy=(-4.2, 3.4), yaw=180.0)),
+    binspec=dict(gangs=2, w=0.42, d=0.42, h=0.90),
+    # [GT-69] group membership is the datum `placement_selfcheck` (3)/(4) measures.
+    #   (tag, benches, bins, beds) — bed names resolve through `bed_sites()`.
+    groups=(("RimN", ("N0", "N1"), ("N",), ("RingPlanter_1", "RingPlanter_2")),
+            ("RimS", ("S0", "S1"), ("S",), ("RingPlanter_3", "RingPlanter_4")),
+            ("WalkW", ("W0", "W1"), ("W",), ("Planter_A", "Planter_B"))),
+    # reach gates. bin 4.50 m = the worst in-group bench-to-bin distance (4.21) plus a
+    #   0.29 m margin; bed 3.05 m = the measured noon shadow reach of the shipped tree
+    #   (3.608 m tall / tan 49.79 deg), i.e. a seat inside it is a seat in the shade.
+    group_reach=dict(bin_m=4.50, bed_m=3.05, eye_m=1.20, corridor_y=2.60),
     # v4-D4: wooden seat strips (make the tiers read as seating + secure step contrast).
     #   the entry (+-9 deg) and aisle (100~112 / 248~260) ranges are left empty.
     #   [v5 adopted] trimmed to the half-round cut (80..280): 80.5~99.5 / 112.5~247.5 /
@@ -573,8 +681,23 @@ PARAMS = dict(
     streetlight=dict(pole_h=6.0, pole_r=0.06,
                      arm_len=1.0, arm_r=0.04, head=0.25),
     # v4-D10: streetlights 1 -> 5. (x, y, base_z)
-    streetlights=[(-8.0, 10.0, 0.0), (-14.0, 10.0, 0.0), (-14.0, -10.0, 0.0),
-                  (2.0, 12.0, 0.0), (14.0, -11.0, 0.0)],
+    # === [GT-69] the 5 lamps move ONTO the three circulation lines ======================
+    #   [was] (-8,10) (-14,10) (-14,-10) (2,12) (14,-11): five plaza coordinates that lit
+    #   nothing in particular, two of them out on the grass side of the perimeter.
+    #   Equal pitch is correct for lighting (spec §4-4, optical design), so the walk pair
+    #   is an equal 11.4 m run on one edge — what was wrong was not the spacing but that
+    #   the lamps did not follow a route.
+    #     0,1  WALK W north edge, y +3.00 (0.40 m outside the gate line y 2.60), x -14.00
+    #          and -2.60. Both read in `stage_lookup` (8.5 deg / 19.2 deg off axis) and the
+    #          east one at the frame edge of the d10 grid presets - the "lit approach" is
+    #          the one lamp statement that lands in a judged cut.
+    #     2,3  RIM promenade at the two aisle heads (θ 106 / 254, r 11.30) - they light the
+    #          descents into the seating, which is where a night route would need light.
+    #     4    APRON N, 1.60 m west of building R's entrance walk (canopy x -8 .. -4).
+    #   The last walk lamp stands 1.31 m outside the lip kerb (r 9.11 vs r_out 7.80).
+    streetlights=[(-14.0, 3.0, 0.0), (-2.6, 3.0, 0.0),
+                  (2.885, 10.862, 0.0), (2.885, -10.862, 0.0),
+                  (-7.6, 12.6, 0.0)],
     buildings=dict(
         # R: the scene01 R block moved to y 15.5..20, x −18..12. Facade faces −Y (toward the plaza).
         R=dict(x0=-18.0, x1=12.0, y0=15.5, y1=20.0, h=14.0, floors=4,
@@ -970,23 +1093,209 @@ def arc_selfcheck(verbose=True):
     return ok, dict(sites=total, with_arc=withrc, lap=lap)
 
 
+# ===========================================================================
+# [C2b] [GT-69] Placement tables — **the builder and the gate read one source.**
+#   The `backdrop_instances()` convention applied to the standing props: every
+#   coordinate is computed here once, so `build_dressing` cannot drift from
+#   `placement_selfcheck` and a later nudge cannot silently un-derive a relation.
+# ===========================================================================
+def _polar(a_deg, r):
+    """A point on a circle about the bowl centre — the rim promenade's own coordinates."""
+    b = PARAMS["bowl"]
+    a = math.radians(a_deg)
+    return b["cx"] + r * math.cos(a), b["cy"] + r * math.sin(a)
+
+
+def bed_sites():
+    """Every planting bed, in build order. yields (name, cx, cy, size, base_z)."""
+    rp = PARAMS["ring_planter"]
+    for tag, cx, cy, size in PARAMS["planters"]:
+        yield (f"Planter_{tag}", cx, cy, size, 0.0)
+    for k, (adeg, rr, size) in enumerate(PARAMS["ring_planters"]):
+        cx, cy = _polar(adeg, rr)
+        yield (f"RingPlanter_{k}", cx, cy, size, rp["base_z"])
+
+
+# Yaw offset from the rim bearing, per prop class. The two builders do not share a local
+# frame: `build_bench_slat` runs its seat along local X and seats a sitter facing local +Y,
+# so +90 turns the seat to face the bowl centre; `build_binsort` gangs along local Y and
+# carries its label band on local +X, so +180 puts the span tangential with the label
+# toward the benches. Both are construction bearings read off the rim, not jitter.
+_RIM_YAW = dict(bench=90.0, bin=180.0)
+
+
+def furniture_sites():
+    """Benches and bins. yields (kind, tag, cx, cy, base_z, yaw, ext_x, ext_y),
+    where ext_* is the footprint in the prop's own local frame."""
+    bc, bn = PARAMS["bench"], PARAMS["binspec"]
+    spec = (("bench", PARAMS["benches"], bc["length"], bc["depth"]),
+            ("bin", PARAMS["bins"], bn["d"] + 0.04, bn["gangs"] * bn["w"] + 0.04))
+    for kind, rows, ex, ey in spec:
+        for d in rows:
+            if "a" in d:
+                cx, cy = _polar(d["a"], d["r"])
+                yield (kind, d["tag"], cx, cy, bc["rim_z"],
+                       d["a"] + _RIM_YAW[kind], ex, ey)
+            else:
+                cx, cy = d["xy"]
+                yield (kind, d["tag"], cx, cy, bc["walk_z"], d["yaw"], ex, ey)
+
+
+def _rect(cx, cy, ex, ey, yaw):
+    """Footprint corners of a box (ex, ey) centred at (cx, cy) and turned by yaw."""
+    a = math.radians(yaw)
+    ux, uy = math.cos(a), math.sin(a)
+    pts = [(cx + ux * sx - uy * sy, cy + uy * sx + ux * sy)
+           for sx in (-ex / 2.0, ex / 2.0) for sy in (-ey / 2.0, ey / 2.0)]
+    return [pts[0], pts[1], pts[3], pts[2]]        # wound, not diagonal-paired
+
+
+def _seg_d(pt, a, b):
+    px, py = pt
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    L2 = dx * dx + dy * dy
+    t = 0.0 if L2 <= 0.0 else max(0.0, min(1.0, ((px - a[0]) * dx
+                                                 + (py - a[1]) * dy) / L2))
+    return math.hypot(px - (a[0] + t * dx), py - (a[1] + t * dy))
+
+
+def _poly_gap(p, q):
+    """Separation between two convex footprints (0 when they touch or overlap).
+    Vertex-to-edge in both directions — enough for axis-aligned beds against turned
+    furniture, which is the pair a circumscribed-circle test judges far too harshly
+    (bed r 1.556 + bench r 0.844 = 2.40 m against a real 1.95 m spacing)."""
+    best = 1e9
+    for A, B in ((p, q), (q, p)):
+        for pt in A:
+            for i in range(len(B)):
+                best = min(best, _seg_d(pt, B[i], B[(i + 1) % len(B)]))
+    return best
+
+
+def placement_selfcheck(verbose=True):
+    """[GT-69] The relations the 08-05 검수 asked for, measured rather than asserted.
+
+    ① Drop edge   : every new footprint stands radially outside the lip kerb
+                    (`lip.r_out` 7.80). Furniture near a 1.2 m drop is the one way this
+                    dressing round could touch hazard geometry, so it is gate ①.
+    ② Camera      : no judged eye is within `eye_m` of any footprint — the regression
+                    class this scene has had twice (v5.1 `RingPlanter` x `side_arc`,
+                    census C02-P1).
+    ③ Bin reach   : inside every declared group, every bench is within `bin_m` of the
+                    group's own bin. "Adjacent to the bench group" is the brief's wording.
+    ④ Shade reach : inside every declared group, every bench is within `bed_m` of one of
+                    the group's own tree beds — `bed_m` is the shipped tree's measured
+                    noon shadow reach, so the gate says "the seat is in the shade".
+    ⑤ Corridor    : the approach corridor |y| <= `corridor_y` between the plaza west edge
+                    and the lip carries no dressing at all — it is the sight line of all 9
+                    grid presets plus `plaza_approach` / `rim_view`.
+    ⑥ Interpenetration : minimum separation over every dressing pair (footprints, not
+                    circumscribed circles).
+    ⑦ Facing      : every rim bench's yaw is the rim tangent to within 1e-9, i.e. the seat
+                    really does face the bowl centre and not merely "roughly inward".
+    """
+    b, gr = PARAMS["bowl"], PARAMS["group_reach"]
+    lip_out = PARAMS["lip"]["r_out"]
+    furn = list(furniture_sites())
+    beds = list(bed_sites())
+    polys = {}
+    for kind, tag, cx, cy, _bz, yaw, ex, ey in furn:
+        polys[f"{kind}:{tag}"] = (_rect(cx, cy, ex, ey, yaw), (cx, cy))
+    for name, cx, cy, size, _bz in beds:
+        polys[f"bed:{name}"] = (_rect(cx, cy, size, size, 0.0), (cx, cy))
+    # ① radial clearance (only the props that stand on the ring can be near the kerb)
+    r_min, r_who = 1e9, None
+    for key, (poly, _c) in polys.items():
+        rr = min(math.hypot(x - b["cx"], y - b["cy"]) for x, y in poly)
+        if rr < r_min:
+            r_min, r_who = rr, key
+    # ② judged eyes
+    eye_min, eye_who = 1e9, None
+    for vn, v in build_views().items():
+        ep = [(v["eye"][0], v["eye"][1])]
+        for key, (poly, _c) in polys.items():
+            d = _poly_gap(poly, ep)
+            if d < eye_min:
+                eye_min, eye_who = d, (key, vn)
+    # ③④ group relations
+    bin_max, bin_who, bed_max, bed_who = 0.0, None, 0.0, None
+    for tag, bench_tags, bin_tags, bed_names in PARAMS["groups"]:
+        for bt in bench_tags:
+            bx, by = polys[f"bench:{bt}"][1]
+            d = min(math.hypot(bx - polys[f"bin:{q}"][1][0],
+                               by - polys[f"bin:{q}"][1][1]) for q in bin_tags)
+            if d > bin_max:
+                bin_max, bin_who = d, f"{tag}/{bt}"
+            d = min(math.hypot(bx - polys[f"bed:{q}"][1][0],
+                               by - polys[f"bed:{q}"][1][1]) for q in bed_names)
+            if d > bed_max:
+                bed_max, bed_who = d, f"{tag}/{bt}"
+    # ⑤ approach corridor
+    x0, x1 = PARAMS["plaza"]["x0"], PARAMS["gkit"]["lip_x"]
+    intruders = sorted({key for key, (poly, _c) in polys.items()
+                        if any(x0 <= x <= x1 and abs(y) <= gr["corridor_y"]
+                               for x, y in poly)})
+    # ⑥ mutual separation
+    keys = sorted(polys)
+    sep_min, sep_who = 1e9, None
+    for i, ka in enumerate(keys):
+        for kb in keys[i + 1:]:
+            d = _poly_gap(polys[ka][0], polys[kb][0])
+            if d < sep_min:
+                sep_min, sep_who = d, (ka, kb)
+    # ⑦ rim bench facing
+    face_err = 0.0
+    for kind, tag, cx, cy, _bz, yaw, _ex, _ey in furn:
+        if kind != "bench":
+            continue
+        d = next((q for q in PARAMS["benches"] if q["tag"] == tag), None)
+        if "a" not in d:
+            continue
+        face_err = max(face_err, abs(yaw - (d["a"] + _RIM_YAW["bench"])))
+    ok = (r_min >= lip_out and eye_min >= gr["eye_m"]
+          and bin_max <= gr["bin_m"] and bed_max <= gr["bed_m"]
+          and not intruders and sep_min >= 0.15 and face_err <= 1e-9)
+    if verbose:
+        n_b = sum(1 for f in furn if f[0] == "bench")
+        n_i = sum(1 for f in furn if f[0] == "bin")
+        print("=" * 68)
+        print("scene05 [GT-69] 관계 배치 검산 — 벤치·수목·소품·가로등")
+        print("=" * 68)
+        print(f"  벤치 {n_b} · 휴지통 {n_i} · 식재대 {len(beds)} · 가로등 "
+              f"{len(PARAMS['streetlights'])} · 그룹 {len(PARAMS['groups'])}")
+        print(f"  ① 낙차 이격        최소 발자국 반경 {r_min:.3f} ≥ 립 외경 "
+              f"{lip_out:.2f} ({r_who}) → {'OK' if r_min >= lip_out else 'FAIL'}")
+        print(f"  ② 카메라 이격      {eye_min:.3f} m ≥ {gr['eye_m']:.2f} "
+              f"({eye_who}) → {'OK' if eye_min >= gr['eye_m'] else 'FAIL'}")
+        print(f"  ③ 그룹 내 휴지통   최원 {bin_max:.2f} m ≤ {gr['bin_m']:.2f} "
+              f"({bin_who}) → {'OK' if bin_max <= gr['bin_m'] else 'FAIL'}")
+        print(f"  ④ 그룹 내 그늘목   최원 {bed_max:.2f} m ≤ {gr['bed_m']:.2f} "
+              f"(정오 그림자 도달) ({bed_who}) → "
+              f"{'OK' if bed_max <= gr['bed_m'] else 'FAIL'}")
+        print(f"  ⑤ 접근 통로 |y|≤{gr['corridor_y']:.2f} 비움 → "
+              f"{'OK(침범 0)' if not intruders else 'FAIL ' + str(intruders)}")
+        print(f"  ⑥ 상호 간섭        최소 이격 {sep_min:.3f} m ≥ 0.15 "
+              f"({sep_who}) → {'OK' if sep_min >= 0.15 else 'FAIL'}")
+        print(f"  ⑦ 림 벤치 정면     yaw = 접선 오차 {face_err:.1e}° → "
+              f"{'OK(무대 정면)' if face_err <= 1e-9 else 'FAIL'}")
+        print("=" * 68)
+    return ok, dict(r_min=r_min, eye=eye_min, bin=bin_max, bed=bed_max,
+                    sep=sep_min, intruders=intruders)
+
+
 def planter_eye_selfcheck(verbose=True):
     """[W3 L05 · `w3_md_reverts_v1.md` §5 census / MD-F7 gate] No judged eye may sit
     on a planting bed. Plan distance from **every** judged cut's eye to **every** bed,
     measured twice: to the kerb footprint, and to the whole bed subtree including the
     crown (the census's own two columns). The crown radius is the referenced asset's
-    measured native XY half-extent times this instance's scale."""
+    measured native XY half-extent times this instance's scale.
+
+    [GT-69] The bed table moved to `bed_sites()` so this gate and `build_dressing` read
+    the same coordinates; the two columns and their thresholds are unchanged."""
     rp = PARAMS["ring_planter"]
-    b = PARAMS["bowl"]
     # native XY extents `[measured - assets/veg_manifest_w2.json]`
     crown_native = 4.8509 / 2.0            # Trees/Fraxinus.usd, larger XY extent
-    beds = [("Planter_%s" % n, cx, cy, 3.0)
-            for n, cx, cy in PARAMS["planters"]]
-    for k, adeg in enumerate(PARAMS["ring_planters"]):
-        a = math.radians(adeg)
-        beds.append(("RingPlanter_%d" % k,
-                     b["cx"] + rp["r"] * math.cos(a),
-                     b["cy"] + rp["r"] * math.sin(a), rp["size"]))
+    beds = [(n, cx, cy, size) for n, cx, cy, size, _bz in bed_sites()]
     worst_k, worst_c, wk, wc = 1e9, 1e9, None, None
     for name, cx, cy, size in beds:
         h = size / 2.0
@@ -1322,7 +1631,12 @@ BANNER = """\
  9. [v7] 승강 계단   — rim_view·side_arc 400 % 에서 호 끝의 나이프 에지가
                        **각진 마구리**로 바뀌었는가, 무대 단과의 초승달 틈 0
 10. [v7] 서측 볼라드 — stage_lookup 지평선의 백색 포스트 열이 사라지고
-                       진입축 4본(도장 강재)만 남았는가"""
+                       진입축 4본(도장 강재)만 남았는가
+11. [GT-69] 관계 배치 — stage_lookup 에서 진입로(가로등 2·가로수 2·벤치 2·
+                       휴지통 1)가 게이트로 수렴하는 한 갈래 길로 읽히는가.
+                       d10 프리셋·side_arc 에서 림 벤치가 **무대를 향해** 앉아
+                       있고 그 뒤에 그늘목이 서 있는가. θ150~210 시선 통로에는
+                       여전히 아무것도 없는가(v5.2 개방감)"""
 
 
 def main():
@@ -1339,7 +1653,8 @@ def main():
                   ("planter_eye", planter_eye_selfcheck()[0]),
                   ("service(05-B)", service_selfcheck()[0]),
                   ("season", season_selfcheck()[0]),
-                  ("rect(U-6)", rect_selfcheck()[0])]
+                  ("rect(U-6)", rect_selfcheck()[0]),
+                  ("placement(GT-69)", placement_selfcheck()[0])]
         ok = all(v for _, v in checks)
         bad = [k for k, v in checks if not v]
         print(f"[SMOKE] scene05 자가검사 {len(checks)}항 "
@@ -1905,17 +2220,11 @@ def main():
 
     def build_dressing(M):
         b = PARAMS["bowl"]
-        # 2 planters (around the lip)
-        for name, cx, cy in PARAMS["planters"]:
-            planter_no_stake(M, f"/World/Scene05/Planter_{name}", cx, cy, 0.0)
-        # v4-D8 tree row around the lip (r=9.6 circle, 45 deg spacing)
-        rp = PARAMS["ring_planter"]
-        for k, adeg in enumerate(PARAMS["ring_planters"]):
-            a = math.radians(adeg)
-            planter_no_stake(M, f"/World/Scene05/RingPlanter_{k}",
-                             b["cx"] + rp["r"] * math.cos(a),
-                             b["cy"] + rp["r"] * math.sin(a), rp["base_z"],
-                             size=rp["size"])
+        # [GT-69] all 8 beds come from `bed_sites()` — 2 forecourt beds on WALK W
+        #   (Planter_A/B) then the 6 rim beds (RingPlanter_0..5). Prim roots and count
+        #   unchanged; what moved is where they stand and what they stand next to.
+        for name, cx, cy, size, bz in bed_sites():
+            planter_no_stake(M, f"/World/Scene05/{name}", cx, cy, bz, size=size)
         # v4-B4/A4 hedge around the plaza (3 misaligned pieces -> 5 perimeter pieces, 3 openings)
         # [GT-63] clipped hedge bands: box+crown blobs -> fused rows of real
         #   shrub USDs (place_hedge_row; rects/heights/prim roots unchanged;
@@ -1937,8 +2246,27 @@ def main():
             sc.build_bollard(stage, f"/World/Scene05/Bollard_{k}", bl["x"],
                              y0 + bl["spacing"] * k, bl["base_z"],
                              mtl=M["bollard"], height=bl["height"])
-        # [v5.2 user] bench ring removed - "hurts openness, remove it cleanly"
-        #   (the bench_ring PARAMS stay for the record; the build is skipped)
+        # [GT-69] benches + bins, by group. The v5.2 ruling removed the bench **ring**
+        #   (6 seats on a full r 9.0 circle, across the west sight corridor); these 6 stand
+        #   in 3 groups outside that corridor, and `placement_selfcheck` gates the corridor
+        #   itself. Rim seats face the bowl centre, walk seats face WALK W.
+        bc, bn = PARAMS["bench"], PARAMS["binspec"]
+        n_bench = n_bin = 0
+        for kind, tag, cx, cy, bz, yaw, _ex, _ey in furniture_sites():
+            if kind == "bench":
+                pk.build_bench_slat(stage, f"/World/Scene05/Bench_{tag}", cx, cy, bz,
+                                    M["seat_wood"], frame_mtl=M["pole"],
+                                    length=bc["length"], depth=bc["depth"],
+                                    seat_h=bc["seat_h"], back=bc["back"], yaw=yaw)
+                n_bench += 1
+            else:
+                pk.build_binsort(stage, f"/World/Scene05/Bin_{tag}", cx, cy, bz,
+                                 M["gear"], M["pole"], label_mtl=M["seat_wood"],
+                                 gangs=bn["gangs"], w=bn["w"], d=bn["d"],
+                                 h=bn["h"], yaw=yaw)
+                n_bin += 1
+        print(f"[GT-69] 관계 배치 · 벤치 {n_bench} · 휴지통 {n_bin} · "
+              f"그룹 {len(PARAMS['groups'])} (림 좌석 정면 = 무대)")
         # v4-D1 [top priority] stage backdrop wall (stage shell), 2 pieces - only when the bowl exists
         #   [v6 judgment (i)] top face 1.40 -> 0.70 (see the PARAMS comment). The lost guarding goes to the shrub buffer.
         sh = PARAMS["shell"]

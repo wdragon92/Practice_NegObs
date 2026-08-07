@@ -2273,6 +2273,13 @@ BANNER = """\
 
 
 def main():
+    # [GT-89] SMOKE gate - early exit BEFORE the Isaac boot (no GPU, no GUI).
+    # The old template read NEGOBS_SMOKE only as boot()'s headless arg (or not at
+    # all), so the §2.2 smoke floor booted Isaac on this scene (scene03/09 incident).
+    # Deep checks keep their own arms (NEGOBS_SELFCHECK / geom_invariance_check.py).
+    if os.environ.get("NEGOBS_SMOKE", "0") == "1":
+        print("SMOKE_OK %s pre-boot gate (GT-89)" % os.path.basename(__file__))
+        return
     smoke = os.environ.get("NEGOBS_SMOKE", "0") == "1"
     capture_mode = os.environ.get("NEGOBS_CAPTURE", "0") == "1"
 

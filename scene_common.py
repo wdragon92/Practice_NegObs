@@ -4450,8 +4450,12 @@ def capture_pipeline(sim_app, views, out_dir_default, set_render_mode_fn,
             fp = os.path.join(out_dir, f"{mode}_noon_{vname}.png")
             _capture(fp)
             # Capture is asynchronous -> wait until the file size stabilises
+            # [GT-89] 40 update loops lost the race on heavy PT cuts (GT-88: 3 cuts
+            # logged '[캡처] FAIL' with complete files on disk). Raised 4x and made
+            # tunable; the loop still breaks as soon as the size is stable, so the
+            # extra headroom costs nothing on the happy path.
             ok, prev_sz = False, -1
-            for _ in range(40):
+            for _ in range(int(os.environ.get("NEGOBS_CAPTURE_WAIT", "160"))):
                 sim_app.update()
                 if os.path.isfile(fp):
                     sz = os.path.getsize(fp)

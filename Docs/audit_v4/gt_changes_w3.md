@@ -1607,4 +1607,66 @@ GT-73 과 동일 기법 계열)·미러 과장 완화·트레드 가시성 회�
 (기하·재질 무변경 — HEAD 해시 비트동일로 증명) + 캡처 안정화 대기 한계(scene_common 40루프,
 GT-88 레이스) 상향. 시각 "스킨" 재작업 의미로 판독될 경우 별도 웨이브(사용자 확인 대기 기록).
 **GT 판정**: R-0 인프라(레지스트리·렌더 무영향). round 불요(해시 증명), SMOKE 전수 재실행.
+**§4 착지기록** (2026-08-07): 감사 = 정적 스캔(main() 내 boot 호출 이전 NEGOBS_SMOKE 조기 종료
+유무). 게이트 정상 10씬(01·02·06·08·11·12·13·14·17·21) · **함정 23씬** — main 11씬
+(03=SMOKE 부재·04·05·07·09·10·15·16·18·19·20 = boot(headless) 인자로만 소비) + batch1 12씬
+전부(동일 템플릿). 조치 = ①23씬 main() 선두에 균일 게이트 블록 일괄 삽입(프린트 1행+return,
+`[GT-89]` 태그) ②scene_common 캡처 안정화 대기 40→**160루프**(`NEGOBS_CAPTURE_WAIT` 환경
+가변, 크기 안정 시 조기 break 유지 — GT-88 레이스 귀속 해소). 증명(실행 기록) =
+①`py_compile` 24파일 OK ②SMOKE 전수 `NEGOBS_SMOKE=1 timeout 90` 33/33 rc0, 전 씬 0.1~1.0 s
+— **부팅 0건** ③기하 해시 비트동일: `geom_invariance_check.py --baseline` 사전/사후 JSON 대조
+— 33씬 × 3암(mtl0/mtl1/v1) 해시·프림수 **전부 동일**(HEAD c8c7e2d, R-4/R-6 33/33 PASS 양측)
+④`placement_lint --scenes all` rc0 ⑤`building_kit.py` rc0. 의미 변화 기록: 07/09/10 등
+'부팅 후 조립 스모크' 경로는 게이트 뒤 도달 불가 — 조립 검증은 geom_invariance(CPU 조립
+33/33)가 전담, 심층 팔(NEGOBS_SELFCHECK)은 불변. "old skins"가 비주얼 재작업 의미였는지는
+별도 웨이브 질문으로 유지(STATUS).
+**Status: LANDED (R-0 인프라 — round 불요)**
+
+## 46. GT-90 — scene16 상부 도로 확폭·구조 스케일업 (통로 심도 동결 해제) (선신고)
+
+**Authority**: 08-07 사용자 — "widen s16's road a bit and scale it up more so it can be
+worked on neatly. Since I'm trying to keep the existing framework intact, it looks messy."
+→ GT-79 가 지킨 기존 틀(통로 심도 동결)이 지저분함의 원인이라는 진단 = **동결 해제 승인**.
+원장 행 35 잔여 결정(하부 유효고 1.75 m 표준 미달)을 본 행이 흡수·해소한다.
+**Scope**: `scenes/main/scene16_canopy_shadow.py` — 상부 도로 확폭 + 구조 전반 스케일 상향,
+하부 통로 유효고 표준(≥2.5 m) 회복. 캐노피 그림자 밴드(T20 정체성)·계단·GT 라벨 불변.
+§4-9(전주 금지)·§4-10(차량 금지)·P4/P7/P8 소거 상태 유지. x=0 종단 포스트(판정 밴드 내)
+본 행에서 재판정. **주의 기록**: GT-71 헤지 A/B 파일럿(같은 씬, 검수 대기)은 본 개편으로
+A/B 대조 오염 — 사용자 지시 우선(GT-59 전례), 파일럿은 개편 후 재스테이지 필요.
+**GT 판정**: R-1 + R-3 + FRAME 선언. Round `260807_w3_fixqueue3`, baseline `260806_w3_fixqueue2`.
+**Status: OPEN (선신고)**
+
+## 47. GT-91 — scene03 곡선 접속교 재정형 (GT-83 3차 기각) (선신고)
+
+**Authority**: 08-07 사용자 — "What is s03 talking about? … What is that shape.." —
+GT-83 3차의 곡선 남향 고가(42.40 m·17현·R_min 7.53)를 형태 불명으로 기각.
+**Scope**: `scenes/main/scene03_riverbank.py` — 근측 접속을 읽히는 문법으로 재정형.
+백드롭 거더교 본체(7피어 8.0 m 등간격·저형 거더 = v4-D1 강 정체성) 보존(비판-의도 지도
+CROSS-scene03). 낙차선 x=0 미횡단·산책로 불가침(08-06 룰링 승계)·§4-8 대기원근 금지·
+P-13 무연석 유지. meander_air 차폐 38.9 % 귀속분은 재정형 결과로 재측정.
+**GT 판정**: R-3 + FRAME 선언. Round `260807_w3_fixqueue3`, baseline `260806_w3_fixqueue2`.
+**Status: OPEN (선신고)**
+
+## 48. GT-92 — scene06 육교 계단 접속 차폐 해소 (선신고)
+
+**Authority**: 08-07 사용자 — "In s06, the stair connection at the overpass is blocked,
+isn't it." + "두 육교 씬에 Fable 서브에이전트" — 본 행은 그 판독을 기록한다:
+**두 육교 씬 = scene06(overpass_spiral)·scene11(footbridge)** (라이브러리의 실제 육교 2씬;
+scene03 교량은 백드롭 거더교로 육교 아님). 판독이 다르면 사용자 정정으로 재범위.
+**Scope**: `scenes/main/scene06_overpass_spiral.py` — 육교↔계단 접속 차폐 해소(통행 연속).
+축1 결손 난간·축3 개방 환형 보이드 부활 금지(GT-57 독트린), 5.005 m 웰·보행면·낙차 불변,
+GT-68 유리+bronze cap 가드 계열 유지. W4 재판정(로봇높이 개구) 입력 이동 여부 기록.
+구현 = **Fable 서브에이전트**(08-07 사용자 지시) + 오케스트레이터 접속부 렌더 검수(08-06 교훈).
+**GT 판정**: R-3 선언. Round `260807_w3_fixqueue3`, baseline `260806_w3_fixqueue2`.
+**Status: OPEN (선신고)**
+
+## 49. GT-93 — scene11 철물 과다 감량 (선신고)
+
+**Authority**: 08-07 사용자 — "S11 is way too full of iron bars and all that.."
+**Scope**: `scenes/main/scene11_footbridge_stairs.py` — 난간·가드·부재 과밀 감량·정리
+(H-plan 정체성·보행 연속성 유지). 불변: 판정 원점 (15.00, 0, 5.50)·데크 런 축 +X·
+hazard①(랜딩 외연 1.10 저난간 = 판정 단서)·그레이팅 축. 기하로 가독성 확보, 카메라
+프리셋 무수정(R17-1 일반 원칙). GT-80 테이퍼(1.667/1.383)는 감량 후 재평가 대상.
+구현 = **Fable 서브에이전트**(08-07 사용자 지시) + 오케스트레이터 접속부 렌더 검수.
+**GT 판정**: R-3 + FRAME 선언. Round `260807_w3_fixqueue3`, baseline `260806_w3_fixqueue2`.
 **Status: OPEN (선신고)**

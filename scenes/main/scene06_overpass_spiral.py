@@ -41,6 +41,27 @@ Hazard (= the reality of falling short of code)
   concealment table, the camera-collision set and every sight-line block fraction are
   byte-identical to the pre-row run [measured, diff of the SMOKE logs].
 
+  [GT-92 · 08-07] Passage un-blocking — two prim-level blockages, nothing else. The
+  gallery read "the stair connection at the overpass is blocked" and both causes were
+  real, each a blind spot of an earlier row:
+  (1) GT-76 cut the deck rail at the landing newel but still ran the WEST rail from the
+  slab corner, so its apron-return bay (kick + pane + cap on the x 2.0 line,
+  y −13.000…−10.128) stood across the deck↔west-lobe crossing — the ONLY floor route to
+  the spiral head (step 0 is entered over the az-180 ray at x 0.20…2.00, wholly west of
+  that line). The bay guarded no edge (floor z 5.000 on both sides of the line); it is
+  now a formal opening between two bronze-headed newels (DeckNewel_S0 at (2.0, −10.128),
+  shared with the arriving landing guard · the spiral's own a0 inner newel at
+  (1.94, −13.0), which also retires the near-coincident DeckNewel_E0 six centimetres
+  away). The EAST apron bay stays closed on purpose: the east lobe's az-0 radial edge is
+  unguarded over the spiral (drop 2.9…5.0 m) and may not be exposed by this R-3 row.
+  (2) The north verge tree row carried (3.6, 20.2) — a dropped minus sign against the
+  south row's (−3.6, −20.2) — standing mid-flight-B (tread top 1.160 there), trunk
+  through the treads, canopy over x 2.5…4.7 = 73 % of the stair width [measured]. Moved
+  to (−3.4, 20.2); `_corridor_hits` now asserts the north stair corridor too.
+  Drop registry, well depth 5.005, every walking-surface z, both spiral guard runs, the
+  landing lobes and the h0.3 concealment table are untouched; the W4 carry-over
+  (robot-height opening closure, GT-68) is not an input of any change here.
+
 GT drop invariance: the cue_railing toggle only turns railing prims on and off. The
   transforms of spiral, landing, deck and column, and the riser / radius / azimuth
   values, never change under any toggle.
@@ -71,6 +92,15 @@ Walking continuity self-check table (entry → up → deck → down → exit)
   [W3 S06] the 0.190 / 0.002 pair above was the old 4.998 landing: one short riser at the
   top of the flight and a 2 mm lip at the deck joint. GT-29's +2 mm removes both — the
   flight now runs 26 identical 0.192 risers and the landing is flush with the deck.
+  [GT-92] Row 6 was true in z and false in plan until this row: the deck rail's WEST
+  apron-return bay stood on the x 2.0 line over y −13.000…−10.128 — the only stretch
+  where deck slab (east) and landing west lobe (west) meet at one floor — so rows 5/6
+  connected on paper and were fenced in build. That bay is now the formal opening (see
+  `build_deck_rail`). Row 11 as written is STALE and left for the history: the built
+  sidewalk ends at yn1 19.0 and the flight foot (y 22.2) lands on lawn z −0.16
+  (Δ 0.168 m, 3.2 m past the pavement). Not repaired here — new pavement at the foot
+  is a ground-plan / drop-registry change beyond this row's R-3 scope; recorded as a
+  residual grounding defect owed its own row.
 
 ────────────────────────────────────────────────────────────────────────────
 W3 S06 — the G6 rebuild (user: "정체성 그렇게 안 겹치도록 이미지 참조해서 나선 구조 고쳐줘")
@@ -442,11 +472,19 @@ PARAMS = dict(
         # street tree row - [v6 verdict C-2] one row on the verge (y ∓20.2). 7 m spacing +- jitter
         #   turns the sidewalk-grass boundary into a **line** (openness = a boundary existing).
         #   The spiral outer edge (y −16.3) and the area under the deck are left clear.
+        #   [GT-92] the NORTH row must skip the north stair exactly as the south row's
+        #   13.8 m gap (−3.6 → 10.2) skips the spiral: the stair plan is x 2.0…5.0,
+        #   y 13.0…22.2, the row rides y 20.2, and the tree AABB is ±1.1, so
+        #   x ∈ [0.9, 6.1] is banned. The old (3.6, 20.2) — a dropped minus sign against
+        #   the south row's (−3.6, −20.2) — stood mid-flight-B (tread top 1.160 there),
+        #   trunk through the treads, canopy over x 2.5…4.7 = 73 % of the stair width
+        #   [measured]. Moved to (−3.4, 20.2): rhythm 6.8 m then the 13.8 m skip, the
+        #   south row's own figures, and `_corridor_hits` now asserts the corridor.
         trees=((-38.2, -20.2), (-31.0, -20.2), (-24.4, -20.2), (-17.6, -20.2),
                (-10.4, -20.2), (-3.6, -20.2), (10.2, -20.2),
                (17.0, -20.2), (24.2, -20.2), (31.4, -20.2), (38.0, -20.2),
                (-31.2, 20.2), (-24.0, 20.2), (-17.4, 20.2), (-10.2, 20.2),
-               (3.6, 20.2), (10.4, 20.2), (17.2, 20.2), (24.0, 20.2),
+               (-3.4, 20.2), (10.4, 20.2), (17.2, 20.2), (24.0, 20.2),
                (31.0, 20.2)),
         # [v5.1 §3] benches sit beside an anchor (street tree) - no anchorless placement mid-field.
         benches=((-24.4, -18.4, -6.0), (17.0, -18.4, 5.0), (-17.4, 18.4, 175.0)),
@@ -796,7 +834,12 @@ def _deck_rail_y():
     bay** from the deck's south edge to the newel (2.872 m, the stretch where the landing rim
     is outboard of the deck edge and the guard is therefore doubled today), then the 13
     regular bays from the newel to the north stair head at 1.779 m each. Nothing is removed:
-    the guard is continuous over the whole slab edge and the two runs now share one post."""
+    the guard is continuous over the whole slab edge and the two runs now share one post.
+    [GT-92] On the WEST side the apron stretch is no longer a bay but the OPENING through
+    which the deck connects to the west landing lobe and the spiral head — the "doubled
+    today" above was the tell: a rail doubled over a floor-to-floor line guards nothing.
+    The bay split this function returns is unchanged; `build_deck_rail` reads it and
+    starts the west run at `yj`."""
     dk, rl = PARAMS["deck"], PARAMS["railing"]
     half = (dk["x1"] - dk["x0"]) / 2.0
     yj = PARAMS["spiral"]["cy"] + math.sqrt(max(0.0, rl["outer_r"] ** 2 - half ** 2))
@@ -981,9 +1024,13 @@ def _solid_at(x, y, z):
                 and dp["z_bot"] <= z <= dk["z_top"] - dk["thick"]:
             return f"DeckPost_{i}"
     rb = PARAMS["rail_bay"]
+    # [GT-92] the WEST run starts at the landing newel yj — its apron stretch is the
+    #   deck↔lobe opening, so the solid band must not claim it (single ray-march source).
+    yj_rail, _ = _deck_rail_y()
     for i, xe in enumerate((dk["x0"], dk["x1"])):
+        y_lo = yj_rail if i == 0 else dk["y0"]
         if abs(x - xe) <= max(dk["parapet_t"], rb["post_t"]) / 2.0 \
-                and dk["y0"] <= y <= dk["y1"] \
+                and y_lo <= y <= dk["y1"] \
                 and dk["z_top"] <= z <= dk["z_top"] + rb["post_h"]:
             return f"DeckRail_{i}"
     # ── north stair (rot group) ──
@@ -1031,14 +1078,17 @@ def _obstacle_boxes():
                   gz + bh))
     dk = PARAMS["deck"]
     rb = PARAMS["rail_bay"]
+    yj_rail, _ = _deck_rail_y()
     for i, xe in enumerate((dk["x0"], dk["x1"])):
-        boxes.append((f"DeckRail_{i}", xe - 0.09, xe + 0.09, dk["y0"], dk["y1"],
+        y_lo = yj_rail if i == 0 else dk["y0"]
+        boxes.append((f"DeckRail_{i}", xe - 0.09, xe + 0.09, y_lo, dk["y1"],
                       dk["z_top"], dk["z_top"] + rb["post_h"]))
     # the spiral guard (pane 19 mm · shoe/upstand 80…112 mm · mullion 100 mm) is thinner than
     #   the camera radius, so it is excluded from AABB collision checks (it is a ring, so a
     #   box AABB gives false positives). GT-68 and GT-76 changed the section, not this
-    #   exclusion. The `DeckRail_i` box above still spans the whole slab edge: GT-76 cut the
-    #   RUN into an apron return bay plus 13 regular bays, it did not shorten it.
+    #   exclusion. [GT-92] the WEST `DeckRail_0` box now starts at the landing newel yj:
+    #   the run itself is shortened there — its apron stretch is the deck↔lobe opening.
+    #   The EAST box still spans the whole slab edge (its apron bay stays closed).
     return boxes
 
 
@@ -1182,6 +1232,21 @@ def _smoke_report():
           f" · 에이프런 리턴 1 + 정규 {len(ybays)-2} 베이 "
           f"({(dk['y1']-yj)/(len(ybays)-2):.3f} m) → "
           f"{'OK' if abs(ybays[1]-yj) < 1e-9 else 'FAIL'}")
+    # [GT-92] passage opening — the deck↔west-lobe crossing the west apron bay sealed
+    xw = PARAMS["spiral"]["cx"] - rl["inner_r"]           # a0 inner newel = south jamb
+    clr = (yj - rl["newel_t"]/2.0) - (dk["y0"] + rl["newel_t"]/2.0)
+    flush = abs(la["top_z"] - dk["z_top"])
+    print(f"    [GT-92 개구] 서측 런 y {yj:.3f}→{dk['y1']:.3f} · 개구 x {dk['x0']:.3f}"
+          f" 선, y {dk['y0']:.3f}…{yj:.3f} 유효폭 {clr:.3f} m ≥ 1.20 · 잼 뉴얼 "
+          f"S({dk['x0']:.2f},{yj:.3f})/a0내측({xw:.2f},{PARAMS['spiral']['cy']:.1f})"
+          f" · 횡단 바닥 데크 {dk['z_top']:.3f} = 로브 {la['top_z']:.3f} "
+          f"(Δ{flush*1000:.0f} mm) → "
+          f"{'OK' if clr >= 1.20 and flush < 1e-9 else 'FAIL'}")
+    print(f"    [GT-92 경로] 개구 → 서측 로브(az 117.036…180, r 0.48…3.30, z "
+          f"{la['top_z']:.3f}) → az180 레이 x {PARAMS['spiral']['cx']-sp['r_out']:.2f}"
+          f"…{PARAMS['spiral']['cx']-sp['r_in']:.2f} → 단0 상면 "
+          f"{_spiral_top_z(0):+.3f} (Δ{la['top_z']-_spiral_top_z(0):.3f} = riser) → "
+          f"{'OK' if abs(la['top_z']-_spiral_top_z(0)-sp['riser']) < 1e-9 else 'FAIL'}")
     sh = dk["parapet_t"] / 2.0
     foot = ((rl["inner_r"] - sh, rl["inner_r"] + sh),
             (rl["outer_r"] - sh, rl["outer_r"] + sh))
@@ -1276,8 +1341,8 @@ def _smoke_report():
         print(f"    d={d:2d}  eye ({gx:+.2f}, {ey:+.2f}, "
               f"{gz+0.3:.2f}~{gz+1.8:.2f}) · 데크 위 "
               f"{'OK' if on_deck else 'FAIL'}")
-    print(f"    시선 회랑(데크 x {dk['x0']:.1f}…{dk['x1']:.1f} / 나선 r≤4.2) "
-          f"드레싱 침입: {_corridor_hits()} 개 → "
+    print(f"    시선·보행 회랑(데크 x {dk['x0']:.1f}…{dk['x1']:.1f} / 나선 r≤4.2 / "
+          f"북측 계단 y 13.0…22.2 [GT-92]) 드레싱 침입: {_corridor_hits()} 개 → "
           f"{'OK' if _corridor_hits() == 0 else 'FAIL'}")
 
     # ── front profile (grid axis x=3.5, decreasing y) - is the drop GT in the frame ──
@@ -1448,12 +1513,18 @@ def _to_world(p, org):
 
 def _corridor_hits():
     """[v6 revision] sight corridor = (1) the deck run corridor (x 2…5, y −13…13, grid axis)
-    (2) the front of the spiral opening (r ≤ 4.2 from the centre — the h0.3 near frame).
+    (2) the front of the spiral opening (r ≤ 4.2 from the centre — the h0.3 near frame)
+    (3) [GT-92] the north stair corridor (x 2…5 ⊕ tree AABB 1.1, y 13…22.2 ⊕ 1.1 at the
+    foot) — the band (1)/(2) never covered, which is exactly where the (3.6, 20.2) tree
+    stood through flight B until this row.
     Dressing (street trees·lamps·bollards·benches·stop pole) entering here would hide
-    the drop → the count must be 0."""
+    the drop or block the walked route → the count must be 0."""
     d = PARAMS["dress"]
     sp = PARAMS["spiral"]
     dk = PARAMS["deck"]
+    no = PARAMS["north"]
+    ny0 = no["pivot"][1]
+    ny1 = ny0 + 2.0 * no["n"] * no["tread"] + no["land_len"]
     pts = list(d["trees"]) + [(x, y) for x, y in d["lamps"]] \
         + [(x, y) for x, y in d["bollards"]] \
         + [(b[0], b[1]) for b in d["benches"]] + [d["bus_pole"][:2]]
@@ -1462,6 +1533,8 @@ def _corridor_hits():
         if dk["x0"] <= x <= dk["x1"] and dk["y0"] <= y <= dk["y1"]:
             n += 1
         elif math.hypot(x - sp["cx"], y - sp["cy"]) <= 4.2:
+            n += 1
+        elif dk["x0"] - 1.1 <= x <= dk["x1"] + 1.1 and ny0 <= y <= ny1 + 1.1:
             n += 1
     return n
 
@@ -1548,8 +1621,11 @@ BANNER = """\
  5. ground_approach/graze — 지상 접근에서 진입 통로·내측 보이드가 읽히나
  6. overview       — [GT-76] 나선·데크·북측 계단이 **하나의 제품**으로 읽히는가
                      (업스탠드+슈+유리+브론즈 캡 1계열 · 캡 라인 6.100 전 구간 동일)
- 7. 데크 난간      — 유리 베이 + 연속 캡 · 종단 3곳 뉴얼(연단/랜딩/북측) 마감
- 8. 경계·지평      — 식재대·가로수 열·원경 수목 띠로 지평이 폐쇄됐나"""
+ 7. 데크 난간      — 유리 베이 + 연속 캡 · 종단 뉴얼(동측 연단/랜딩/북측) 마감
+ 8. 경계·지평      — 식재대·가로수 열·원경 수목 띠로 지평이 폐쇄됐나
+ 9. [GT-92] 접속    — 서측 에이프런 개구(잼 뉴얼 2본, 유효 2.742 m)로 데크→로브→
+                     단0 이 열렸는가 · 동측 에이프런 베이는 폐쇄 유지(az0 로브 연단)
+                     · 북측 계단 회랑에 수목 0(구 (3.6,20.2) → (−3.4,20.2))"""
 
 
 # ===========================================================================
@@ -2385,7 +2461,27 @@ def main():
         arriving landing guard shares a post instead of crossing the deck run in mid-bay.
         (3) The round tube that floated 0.240 m over the cap on 1.28 m posts, ended in a raw
         cut circle at both deck ends and had no counterpart on any stair run, is gone; the
-        cap at 1.100 m is the guard head on every run of the structure."""
+        cap at 1.100 m is the guard head on every run of the structure.
+
+        [GT-92] The WEST run no longer starts at the slab corner y0 but at the landing
+        newel yj = −10.128. Its apron-return stretch (kick 5.000…5.120 · pane
+        5.085…6.040 · cap 6.015…6.100, all on the x 2.000 line over y −13.000…−10.128)
+        stood over a line with FLOOR at z 5.000 on BOTH sides — deck slab east, landing
+        west lobe west — so it guarded no edge; what it did was seal the only floor
+        crossing between the deck and the lobe, and the lobe is the only way onto the
+        spiral head (step 0, az 180…191.5°, is entered over the az-180 ray at
+        x 0.20…2.00, wholly west of the line). The 08-07 gallery read exactly that:
+        "the stair connection at the overpass is blocked". The stretch is now a FORMAL
+        OPENING, 2.742 m clear between two bronze-headed posts — DeckNewel_S0
+        (2.0, −10.128), shared with the arriving landing-lobe guard, and the spiral's
+        own a0 inner newel (1.94, −13.0) — so every guard member still dies into a
+        newel (no raw cut) and the guard line runs unbroken around the drop rim:
+        deck cap → S newel → landing lobe cap (r 3.24, az 117.578…180) → a0 newels →
+        spiral caps. DeckNewel_E0, which overlapped that inner newel by construction
+        (centres 60 mm apart), is retired with the bay. The EAST apron bay is kept
+        closed on purpose: the east lobe's az-0 radial edge stands unguarded over the
+        spiral (drop 2.9…5.0 m), so opening it would expose a drop this row has no
+        authority to declare."""
         dk = PARAMS["deck"]
         rb = PARAMS["rail_bay"]
         y0, y1 = dk["y0"], dk["y1"]
@@ -2394,14 +2490,17 @@ def main():
         nb = len(ybays) - 1
         zt = dk["z_top"]
         for i, xe in enumerate((dk["x0"], dk["x1"])):
+            west = (i == 0)
+            # [GT-92] west run: apron stretch = opening; east run: full span
+            y_lo = yj if west else y0
             # continuous shoe + continuous cap, end to end
             BOX(f"{ROOT}/DeckKick_{i}",
-                (xe, (y0 + y1)/2.0, zt + (gl["kick_bot"] + gl["kick_top"])/2.0),
-                (dk["parapet_t"], y1 - y0, gl["kick_top"] - gl["kick_bot"]),
+                (xe, (y_lo + y1)/2.0, zt + (gl["kick_bot"] + gl["kick_top"])/2.0),
+                (dk["parapet_t"], y1 - y_lo, gl["kick_top"] - gl["kick_bot"]),
                 M["steel"])
             BOX(f"{ROOT}/DeckPanelCap_{i}",
-                (xe, (y0 + y1)/2.0, zt + (gl["cap_bot"] + gl["cap_top"])/2.0),
-                (dk["parapet_t"] + 2*rb["cap_over"], y1 - y0,
+                (xe, (y_lo + y1)/2.0, zt + (gl["cap_bot"] + gl["cap_top"])/2.0),
+                (dk["parapet_t"] + 2*rb["cap_over"], y1 - y_lo,
                  gl["cap_top"] - gl["cap_bot"]), M["rail"])
             # intermediate mullions — k 0/1/nb are newels (well rim · landing · north head)
             for k in range(2, nb):
@@ -2411,6 +2510,8 @@ def main():
                     (rb["post_t"], rb["post_t"],
                      gl["post_top"] - gl["post_bot"]), M["steel"])
             for k in range(nb):
+                if west and k == 0:
+                    continue      # [GT-92] the west apron bay is the opening — no pane
                 ya = ybays[k] + rb["post_t"]/2.0 + rb["joint"]
                 yb = ybays[k+1] - rb["post_t"]/2.0 - rb["joint"]
                 yc, Ly = (ya + yb)/2.0, yb - ya
@@ -2431,14 +2532,18 @@ def main():
                     (rb["glass_t"], Ly - 2*rb["joint"],
                      gl["glass_top"] - gl["glass_bot"]),
                     M["glass"])
-            # newels — the three points where this run ENDS or hands over. `E` is the deck's
-            #   south corner on the well rim: the run's cap used to stop there with a bare
-            #   0.14 x 0.085 cut face standing over the 5.005 m drop, in every grid frame.
-            for tag, ye in (("E", y0), ("S", yj), ("N", y1)):
+            # newels — the points where this run ENDS or hands over. `E` (the slab corner
+            #   on the well rim) survives on the EAST side only: [GT-92] the west run now
+            #   ends at the landing newel `S`, and the opening's south jamb is the
+            #   spiral's own a0 inner newel 60 mm away — with the bay gone, keeping E0
+            #   would leave two overlapping newels at one corner.
+            tags = (("S", yj), ("N", y1)) if west else \
+                   (("E", y0), ("S", yj), ("N", y1))
+            for tag, ye in tags:
                 _newel(f"{ROOT}/DeckNewel_{tag}{i}", xe, ye, 0.0,
                        zt + gl["post_bot"], zt + gl["cap_bot"],
                        zt + gl["cap_top"], M)
-        return 2 * nb
+        return 2 * nb - 1        # [GT-92] west run carries nb−1 panes (opening), east nb
 
     def build_cues(M):
         rl = PARAMS["railing"]
@@ -2511,7 +2616,8 @@ def main():
             cap_sp = _spiral_z_at(sp["a0"]) + gs["cap_top"]
             print(f"[GT-76] guard unified · upstand+shoe+pane+bronze cap · spiral "
                   f"{len(bays)-1} bays x 2 runs + landing "
-                  f"{int(rl['landing_bays'])} x 2 + deck {len(ybays)-1} x 2 + "
+                  f"{int(rl['landing_bays'])} x 2 + deck {len(ybays)-2}(W, 개구 "
+                  f"[GT-92])+{len(ybays)-1}(E) + "
                   f"north {int(PARAMS['north']['bays'])*2+1} x 2 = {n_bay} panes · "
                   f"cap line deck {PARAMS['deck']['z_top']+gl['cap_top']:.3f} = "
                   f"landing {cap_land:.3f} = spiral {cap_sp:.3f} "

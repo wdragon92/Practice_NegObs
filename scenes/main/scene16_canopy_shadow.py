@@ -60,9 +60,9 @@ are the same archetype, so G2 is effectively this scene's own reference.
    count and the causeless placement, not the shape.
 
 4. **U-5 is already satisfied** and is only *stated* here, not changed: canopy
-   x −1.00…+4.60 against a descent of x 0.00…4.48 (14 × 0.32) — the roof covers the whole
-   flight plus 1.00 m of approach. 16 is the in-library model for the continuous-canopy
-   form (02-A), not a defect.
+   x −1.00…+6.52 against a descent of x 0.00…6.40 (20 × 0.32, GT-90) — the roof covers
+   the whole flight plus 1.00 m of approach. 16 is the in-library model for the
+   continuous-canopy form (02-A), not a defect.
 
 DEFERRED to a Lane-1 follow-up (recorded, not attempted here): **K4(b)** street-row species,
 and the `PLACEMENT` block that would promote the eight `placement_lint` `nodata` WARNs into
@@ -111,6 +111,27 @@ GT note: the two kerb lines are a **new 150 mm linear drop** at x 7.80 / 13.80 (
 `build_curb_line` `gt_drop`), 7.80 m east of the judged stair head. The scene's registered
 hazard inputs — `edges=[("stair_top", 0.00)]`, `voids=((0.00, −1.50, 4.48, 1.50),)` and
 `TACTILE_SITES["scene16"]` — are unchanged, but the GT cache needs a re-run.
+
+═══ GT-90 — scale-up: the depth freeze is lifted (08-07 user) ════════════════
+User: *"widen s16's road a bit and scale it up more so it can be worked on neatly.
+Since I'm trying to keep the existing framework intact, it looks messy."* — the 1.75 m
+compromise GT-79 recorded above was read by the user as the mess, and the instruction
+lifts the invert freeze that forced it. Same framework, one size up:
+
+  * descent 14 × 0.150 → **20 × 0.150 = 3.000 m** (run 6.40), invert −2.100 → **−3.000**
+    → clear headroom under the box **2.650 m** (soffit −0.350 unchanged) — the statutory
+    2.30–2.50 band is now met with margin instead of missed by 0.55.
+  * carriageway 6.00 → **7.00 m** (two 3.50 lanes, centre x 13.22); the whole street
+    corridor shifts east with the longer west flight (fw 7.52…18.92, kerb faces
+    9.72 / 16.72, kerb backs 9.52 / **16.92 = east stair head**, box pv 9.47…16.97 —
+    the kb1-equals-stair-head idiom and the 3.07 m west open-cut are both preserved).
+  * east exit stair 16.92…23.32, trench walls/guard to 23.32, plaza east edge 22 → 28,
+    building C facade 26 → 32, street-wall gap = new fw0…fw1, and every prop GT-79 sited
+    against the old corridor (planters B/C, bench 3, streetlight 2, east hedge, bollard
+    row) moves east by the same construction it was first sited with.
+  * hazard registry follows `pit`/`stairs` automatically (R-1 re-derive): void
+    (0, −1.5, 6.40, 1.5), drop 3.000. Canopy x1 4.60 → 6.52 keeps the roof over the
+    whole flight — the T20 shadow-band identity is untouched.
 """
 
 import os
@@ -157,36 +178,39 @@ SCENE_CONFIG = {
 # [B] PARAMS
 # ===========================================================================
 PARAMS = dict(
-    walk=dict(x_w=-12.0, x_e=22.0, y_s=-8.0, y_n=8.0, z_top=0.0, thick=0.5),
+    # [GT-90] x_e 22 → 28: the east stair now tops at 23.32 and the bollard row moved
+    #   with it, so the plaza floor must run past both (formerly it ended at 22).
+    walk=dict(x_w=-12.0, x_e=28.0, y_s=-8.0, y_n=8.0, z_top=0.0, thick=0.5),
     # descending pit (trench): stair width 3 (y +-1.5), outer wall faces +-1.8
-    pit=dict(x0=0.0, x1=4.48, y0=-1.5, y1=1.5),
-    # 14 steps x riser 0.15 · tread 0.32 -> drop 2.1m, run 4.48m
-    stairs=dict(x0=0.0, riser=0.15, tread=0.32, nsteps=14,
-                y0=-1.5, y1=1.5, z_top=0.0, base_z=-2.6),
+    pit=dict(x0=0.0, x1=6.40, y0=-1.5, y1=1.5),
+    # [GT-90] 20 steps x riser 0.15 · tread 0.32 -> drop 3.0m, run 6.40m (was 14/2.1/4.48
+    #   — the invert freeze GT-79 recorded is lifted by the 08-07 user instruction)
+    stairs=dict(x0=0.0, riser=0.15, tread=0.32, nsteps=20,
+                y0=-1.5, y1=1.5, z_top=0.0, base_z=-3.5),
     # lower passage (plaza_lower), continuing +X and rising again at the east exit stair.
-    passage=dict(x0=4.48, x1=14.0, z_top=-2.1, base_z=-2.6),
+    passage=dict(x0=6.40, x1=16.92, z_top=-3.0, base_z=-3.5),
     # [audit v4 A1] east exit stair - there used to be a full-width blocking wall (Wall_E) at x=14,
     #   so you went down 2.1 m, walked 9.5 m and hit a dead end with no way out.
     #   A descending stair is built inside a rot_group 180 deg (pivot x=(14+18.48)/2) and maps
     #   to an ascending stair: local x=14(z=0) -> world x=18.48, local x=18.48(z=-2.1) ->
     #   world x=14.0 (flush with the passage top). This completes the scene as an "underpass".
-    east_stairs=dict(x0=14.0, riser=0.15, tread=0.32, nsteps=14,
-                     y0=-1.5, y1=1.5, z_top=0.0, base_z=-2.6),
+    east_stairs=dict(x0=16.92, riser=0.15, tread=0.32, nsteps=20,
+                     y0=-1.5, y1=1.5, z_top=0.0, base_z=-3.5),
     # [realism v1] `x_start` retired — it is now derived as x0 − ext_top.
     east_rail=dict(y=1.43),
-    # east end of wall·trench = top of the east stair (14.0 + 14*0.32 = 18.48)
-    wall=dict(thick=0.3, y_in=1.5, parapet_top=0.15, base_z=-2.6, x1=18.48),
+    # east end of wall·trench = top of the east stair (16.92 + 20*0.32 = 23.32) [GT-90]
+    wall=dict(thick=0.3, y_in=1.5, parapet_top=0.15, base_z=-3.5, x1=23.32),
 
-    # canopy: covers the whole stair (x 0..4.48) + 1m past the head (x -1). Roof z=2.6, 4 columns.
-    canopy=dict(x0=-1.0, x1=4.6, y0=-2.0, y1=2.0, z_roof=2.6, post_r=0.13,
+    # canopy: covers the whole stair (x 0..6.40) + 1m past the head (x -1). Roof z=2.6, 4 columns.
+    canopy=dict(x0=-1.0, x1=6.52, y0=-2.0, y1=2.0, z_roof=2.6, post_r=0.13,
                 roof_t=0.14, base_z=-0.05),
 
     # cue
     # [audit v4 B1] perim_rail y 1.9 -> 1.65. y=1.9 sat outside the parapet (y 1.5..1.8), leaving
     #   a 15 cm gap between the post foot (z=0.15) and the sidewalk (z=0). y=1.65 is the
     #   parapet wall centreline -> the posts sit exactly on the parapet top (0.15).
-    #   x1 4.48 -> 18.48 : guards the whole trench (including the east exit stair).
-    perim_rail=dict(y=1.65, x0=0.0, x1=18.48, x_rear=None,
+    #   x1 -> wall.x1 23.32 : guards the whole trench (including the east exit stair).
+    perim_rail=dict(y=1.65, x0=0.0, x1=23.32, x_rear=None,
                     parapet_top=0.15, rail_h=0.9, post_r=0.03,
                     rail_r=0.03, rail_mid_r=0.018, mid_h=0.45, spacing=1.2),
     # ═══ [realism v1] Stair rail → statutory handrail (§15(3)/(4)) ══════════
@@ -253,12 +277,18 @@ PARAMS = dict(
     #    the 0.30 m wall on both faces (so no coplanar face with the wall), capped at
     #    +0.280, i.e. 0.130 above the parapet. It is what the split guardrail's end post
     #    stands on.
-    xroad=dict(car0=7.80, car1=13.80, kb0=7.60, kb1=14.00,
-               pv0=7.55, pv1=14.05, fw0=5.60, fw1=16.00,
+    # [GT-90] corridor one size up and shifted east with the longer west flight:
+    #   fw0  7.52 ─ footway ─ kb0 9.52 │ kerb 0.20 │ car0 9.72
+    #     … 7.00 m two-lane carriageway (3.50 lanes, centre 13.22) …
+    #   car1 16.72 │ kerb 0.20 │ kb1 16.92 ─ footway ─ fw1 18.92
+    #   kb1 16.92 = east stair head (idiom preserved) · pv = kb ∓ 0.05 ·
+    #   west open-cut pv0 − passage.x0 = 9.47 − 6.40 = 3.07 m (unchanged by design).
+    xroad=dict(car0=9.72, car1=16.72, kb0=9.52, kb1=16.92,
+               pv0=9.47, pv1=16.97, fw0=7.52, fw1=18.92,
                y0=-70.0, y1=70.0, z_road=-0.130, thick=0.50,
                box_soffit=-0.350, box_wear=-0.180,
                pier=dict(length=0.36, out=0.02, top=0.280),
-               lane=dict(centre_x=10.80, w_centre=0.15, w_edge=0.15,
+               lane=dict(centre_x=13.22, w_centre=0.15, w_edge=0.15,
                          edge_in=0.25, proud=0.003)),
     # [GT-79 · K5] `build_curb_line` arguments. Identical section to scene02 GT-2:
     #   exposure 0.150 above the carriageway datum −0.130 → kerb top +0.020, i.e.
@@ -313,24 +343,27 @@ PARAMS = dict(
     ),
 
     # surrounding ground / dressing
-    #   gx1 14.5 -> 19.0 : also clears the east exit stair footprint (x 14..18.48) from the grass.
-    ground=dict(size=140.0, z_top=-0.03, gx0=-0.5, gx1=19.0, gy0=-1.85, gy1=1.85),
+    #   gx1 19.0 -> 23.8 [GT-90]: clears the east exit stair footprint (x 16.92..23.32).
+    ground=dict(size=140.0, z_top=-0.03, gx0=-0.5, gx1=23.8, gy0=-1.85, gy1=1.85),
     # [GT-79] B (8.00, −4.50) and C (12.00, 5.00) stood **inside** the new carriageway
     #   (x 7.80…13.80): a 3.00 m planter box centred at x 8.00 spans 6.50…9.50, C spans
     #   10.50…13.50 `[computed]`. Both move to the far footway (x 15.70…18.70), east of
     #   the kerb back 14.00 and west of the bollard block 20.20, where they read as the
     #   planting of the street the passage comes up onto. A and D are unchanged — they
     #   are the two that share the judged frame with the stair.
+    # [GT-90] B/C 17.2 → 20.6: east of the new kerb back 16.92 + 2.0 footway (18.92),
+    #   west of the bollard block 25.0 — the same siting rule, one corridor east.
     planters=[dict(name="A", cx=-4.0, cy=4.0, base_z=0.0),
-              dict(name="B", cx=17.2, cy=-4.6, base_z=0.0),
-              dict(name="C", cx=17.2, cy=4.6, base_z=0.0),
+              dict(name="B", cx=20.6, cy=-4.6, base_z=0.0),
+              dict(name="C", cx=20.6, cy=4.6, base_z=0.0),
               dict(name="D", cx=2.0, cy=6.5, base_z=0.0)],
     planter=dict(size=3.0, curb_h=0.45, curb_t=0.25, cap_over=0.05,
                  cap_h=0.05, grass_h=0.40),
     buildings=dict(
         # blocks the distant vista (+X horizon): facade -X plane
-        C=dict(x0=26.0, x1=32.0, y0=-12.0, y1=12.0, h=12.0, floors=4,
-               axis="x", facade_x=26.0, face_dir=-1.0),
+        # [GT-90] 26→32: keeps the 4 m band between the plaza east edge (28) and the facade.
+        C=dict(x0=32.0, x1=38.0, y0=-12.0, y1=12.0, h=12.0, floors=4,
+               axis="x", facade_x=32.0, face_dir=-1.0),
         # the -X horizon is closed too (only one side used to be blocked, leaving the other empty)
         D=dict(x0=-30.0, x1=-24.0, y0=-14.0, y1=14.0, h=15.0, floors=5,
                axis="x", facade_x=-24.0, face_dir=1.0),
@@ -404,18 +437,20 @@ PARAMS = dict(
     #  moves `[computed]`.
     backdrop=dict(
         base_z=-0.35,             # foot buried below the walk (0.0) and the grass (−0.03)
+        # [GT-90] the corridor gap moves to the new fw0…fw1 (7.52…18.92); the tall pair
+        #   stays east of the flight (the r2 rule), heights/materials unchanged.
         S=dict(y0=-24.0, y1=-10.0, facade_y=-10.0, face_dir=1.0, blocks=(
             (-16.0,  -8.0, 12.0, 4, "city_stone"),
             (-8.0,   -2.0, 10.4, 3, "city_plaster"),
-            (-2.0,    5.6, 13.2, 4, "city_wall"),
-            (16.0,   21.0, 22.0, 7, "city_plaster"),
-            (21.0,   26.0, 15.2, 5, "city_stone"))),
+            (-2.0,    7.52, 13.2, 4, "city_wall"),
+            (18.92,  23.92, 22.0, 7, "city_plaster"),
+            (23.92,  28.92, 15.2, 5, "city_stone"))),
         N=dict(y0=10.0, y1=24.0, facade_y=10.0, face_dir=-1.0, blocks=(
             (-16.0,  -9.0, 11.2, 3, "city_wall"),
             (-9.0,   -2.5, 13.6, 4, "city_stone"),
-            (-2.5,    5.6,  9.8, 3, "city_plaster"),
-            (16.0,   21.5, 21.0, 7, "city_stone"),
-            (21.5,   26.0, 19.0, 6, "city_plaster"))),
+            (-2.5,    7.52,  9.8, 3, "city_plaster"),
+            (18.92,  24.42, 21.0, 7, "city_stone"),
+            (24.42,  28.92, 19.0, 6, "city_plaster"))),
         # The verge the street wall cannot cover: the 2 m strips between the walk edge
         # (|y| = 8) and the new building line (|y| = 10), plus the 4 m band between the
         # walk's east end (x 22) and building C's facade (x 26) — a lawn closing a
@@ -431,12 +466,15 @@ PARAMS = dict(
         #   of z `[computed]` — a z-fight. At pv0/pv1 the apron's cut face meets the
         #   carriageway slab's face back to back instead, and the 0.05 m it gives up is
         #   covered by the street footway plate above it (top 0.000 vs apron −0.020).
+        # [GT-90] strips cut on the new pv0/pv1 (9.47/16.97) and extended to the moved
+        #   building C facade (32); east strip = plaza end (28) → facade (32), starting
+        #   4.68 m past the trench end at 23.32 (still nothing over the void, GT-V).
         apron=dict(z_top=-0.02, thick=0.30, strips=(
-            (-16.0, -10.0,  7.55, -8.0),
-            (14.05, -10.0, 26.0,  -8.0),
-            (-16.0,   8.0,  7.55, 10.0),
-            (14.05,   8.0, 26.0,  10.0),
-            (22.0,   -8.0, 26.0,   8.0))),
+            (-16.0, -10.0,  9.47, -8.0),
+            (16.97, -10.0, 32.0,  -8.0),
+            (-16.0,   8.0,  9.47, 10.0),
+            (16.97,   8.0, 32.0,  10.0),
+            (28.0,   -8.0, 32.0,   8.0))),
     ),
 
     # --- context dressing (cue_scene_dressing) : "a downtown plaza with an underpass entrance" ---
@@ -461,19 +499,24 @@ PARAMS = dict(
     #   runs 0.3 m across the pedestrian approach face (west, x 20.2..20.5).
     #   Camera: 21~30 m away in every preset (eye x <= −0.5, looking +X) -
     #   zero near occlusion, unrelated to the judging subject (stairs·canopy shadow, x 0..4.6).
-    bollards=dict(x=20.5, ys=(-3.75, -2.25, -0.75, 0.75, 2.25, 3.75),
-                  block=dict(x0=20.2, x1=20.5, y0=-4.05, y1=4.05)),
+    # [GT-90] 20.5 → 25.3: beyond the new east exit stair head (23.32), same rule.
+    bollards=dict(x=25.3, ys=(-3.75, -2.25, -0.75, 0.75, 2.25, 3.75),
+                  block=dict(x0=25.0, x1=25.3, y0=-4.05, y1=4.05)),
     # [GT-79] bench 2 (9.00, 5.00) sat in the carriageway → moved to the far footway at
     #   (17.00, 6.90), 0.80 m clear of planter C (y 3.10…6.10) `[computed]`.
-    benches=[(-5.0, 5.5, 180.0), (-5.0, -5.5, 0.0), (17.0, 6.9, 180.0)],
+    # [GT-90] bench 3 17.0 → 20.2: east of the new kerb back, 0.80 m clear of planter C.
+    benches=[(-5.0, 5.5, 180.0), (-5.0, -5.5, 0.0), (20.2, 6.9, 180.0)],
     # [GT-79] streetlight 2 (9.00, −6.50) sat in the carriageway. It becomes the **road's
     #   own** light on the east street footway (x 14.00…16.00): pole at x 15.00, arms
     #   ±0.90 → 14.10…15.90, inside the footway. Shadow runs +X (0.845 × 5.00 = 4.23 m,
     #   to x 19.23), i.e. away from the judged stair band `[computed]`.
-    streetlights=[(-3.0, 6.5), (15.0, -6.5)],
+    # [GT-90] light 2 15.0 → 17.92: pole mid-footway (16.92…18.92), arms ±0.90 inside.
+    streetlights=[(-3.0, 6.5), (17.92, -6.5)],
     streetlight=dict(pole_h=5.0, pole_r=0.07, arm_len=0.9, arm_r=0.04,
                      head=0.24),
-    hedges=[(-12.0, 6.5, -9.0, 7.3), (14.0, -7.3, 18.0, -6.5)],
+    # [GT-90] east hedge starts at the new kerb back 16.92 (was 14.0), same 4 m length.
+    #   GT-71 A/B contamination is declared in the ledger row — the pilot re-stages.
+    hedges=[(-12.0, 6.5, -9.0, 7.3), (16.92, -7.3, 20.92, -6.5)],
     # 2 sidewalk paving bands (indicate the plaza scale)
     walk_bands=dict(ys=(-6.0, 6.0), width=0.45, z=0.007),
     # [v5 shared layer] Korean signs - (tag, TEX key, cx, cy, base_z, yaw, w, h)
@@ -642,7 +685,7 @@ BANNER = """\
  3. under_canopy       — 암부 속 황색 노징이 저대비로 잔존하는가
  4. cue ON vs OFF      — nosing/railing/tactile 토글 시 기하 트랜스폼 불변
  5. 재질·태양방위      — [ ]키로 그림자가 계단을 덮는 방위 확인·Z파이팅 없는가
- 6. [v4] 동측 출구 계단(x14→18.48 상승)·둘레난간 파라펫 접지·사인 게이트
+ 6. [v4·GT-90] 동측 출구 계단(x16.92→23.32 상승)·둘레난간 파라펫 접지·사인 게이트
  7. [v5] 공통 레이어 — 점자띠(하부 랜딩·볼라드) + sign_exit(진입부 y +2.6) 판독
  8. [W3] 점자 2본 — 계단머리 경고(x −0.90…−0.30, 낙차 있음) + 주출입구(x −6.00…−5.40,
         낙차 없음)가 한 프레임에 같이 읽히는가(§7-4 BOTH BANDS)
@@ -1307,10 +1350,13 @@ def main():
               f"{PARAMS['stairs']['tread'] * PARAMS['stairs']['nsteps']:.2f} 에 "
               f"신규 그림자 0 — 캐노피가 계속 그림자 소유")
         if cfg["hazard_stairs"]:
-            print(f"[GT-79] 복개 박스 x {pv0:.2f}…{pv1:.2f} · 슬래브 "
+            # [GT-90] the freeze note is retired with the freeze: assert the statutory
+            #   band instead of documenting the miss.
+            assert head >= 2.30, f"지하보도 유효고 {head:.3f} < 2.30 (GT-90 위반)"
+            print(f"[GT-79·GT-90] 복개 박스 x {pv0:.2f}…{pv1:.2f} · 슬래브 "
                   f"{r['z_road'] - r['box_soffit']:.3f} m · 소핏 "
                   f"{r['box_soffit']:+.3f} · 유효고 {head:.3f} m "
-                  f"(지하보도 기준 2.30 미달 — 통로 바닥 −2.100 동결에 따른 결과, 문서화) · "
+                  f"(지하보도 기준 2.30–2.50 충족 — GT-90 동결 해제) · "
                   f"서측 개착 {pv0 - PARAMS['passage']['x0']:.2f} m · "
                   f"동측 입구 = 동측 계단머리 {PARAMS['east_stairs']['x0']:.2f}")
 

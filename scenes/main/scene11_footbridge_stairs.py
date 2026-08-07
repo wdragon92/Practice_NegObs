@@ -62,10 +62,10 @@ Hazard (= the reality of falling short of the code)
   sidewalk (−0.005). At h0.3 the balustrade's lower band is open, so the far
   sidewalk and roadway show through and the floor reads as continuous. This is the
   drop the h0.3 preset grid frames head-on (grid origin unchanged at 15.00/0/5.50).
-  ② **The east mid landings (z = 2.75) have no kickplate.** At h0.3 the railing bars
-  pass above the field of view and the band below is open, so the 2.755 m drop past
-  the landing reads as "the floor continues". The **west** mid landings carry the
-  kickplate on the matched edge class — the code-compliant control.
+  ② **The east mid landings (z = 2.75) have no kickplate.** At h0.3 the railing
+  tubes pass above the field of view and the band below is open, so the 2.755 m
+  drop past the landing reads as "the floor continues". The **west** mid landings
+  carry the kickplate on the matched edge class — the code-compliant control.
   **Honest limitation of R11-1**: the asymmetric H means the mid landings are
   no longer *identical* boxes (east 1.80 × 3.70, west 1.80 × 1.80). The control
   pair is therefore held on the **matched edge class** — each landing's 1.80 m
@@ -109,14 +109,21 @@ Walking-continuity self-check table — an H offers **four** routes off the deck
   All four feet stand on the continuous sidewalk slab (y −60…60), so each connects to
   the scene edge without a spur (§0-2).
 
-Guard doctrine (GT-80 edge finishing) — one member class per surface class:
+Guard doctrine (GT-80 edge finishing · GT-93 iron reduction) — one member class per
+  surface class, ONE guard language for the whole structure:
   landings are guarded by `build_guard_run` (a CONTINUOUS polyline: shared corner
-  post, kick band, 100 mm 안목 balusters, top + mid rail, knuckle cap at every node
-  and run end); flights are guarded by `build_railing_line` starting **at** the stair
-  head (`x_start == x_top`, so it emits no horizontal extension). The two meet
+  post, kick band, top + mid rail, knuckle cap at every node and run end); flights
+  are guarded by `build_railing_line` starting **at** the stair head
+  (`x_start == x_top`, so it emits no horizontal extension). The two meet
   end-to-end on the same line (`rail.y_inset` inboard of the pad edge), so a hand runs
   deck rail → head guard → rake rail → mid-landing guard → rake rail → foot newel
   without a break, a doubled line or an open cylinder mouth.
+  [GT-93 · 08-07 user: "S11 is way too full of iron bars and all that.."] the infill
+  everywhere is **horizontal painted-steel tube** (kick band + mid rail(s) + top
+  rail), the deck guard drops 1.95 → 1.20 m, and the picket screens (deck 384,
+  flights 976, landings ~250) plus the four tower-head mesh grids are retired.
+  Guard LINES, heights of the landing guards (1.10) and every terminus are
+  unchanged — the reduction is infill and height only, never coverage.
 
 ────────────────────────────────────────────────────────────────────────────
 4-box opening convention: no cavity pierces the ground (deck and stairs are all
@@ -214,28 +221,33 @@ PARAMS = dict(
               kickplate=True),
     # --- footbridge deck (width 2.4, runs along x) ---
     deck=dict(x0=-13.20, x1=13.20, y0=-1.20, y1=1.20, z_top=5.50, thick=0.40,
-              panel_h=1.80, panel_t=0.07, rail_z=1.95, rail_r=0.035),
+              panel_t=0.07, rail_z=1.20, rail_r=0.035),
     #   [v6 ruling (5)] the old noise railing = **one large unbroken panel** (26.4 m long).
     #   with no posts, joints, top cap or see-through bays the deck read as a concrete
     #   bunker corridor, and its shadow side turned 30~45 % of the grid cuts pure black ((4)).
-    #   -> posts every 2.2 m + **alternating noise-panel / open bays**. make_pbr has no
-    #   transparency input (a literal "clear polycarbonate" cannot be built), so the
-    #   see-through stretch is built as **open bays with vertical balusters** - the light
-    #   and sight purpose is identical, and it matches real Korean footbridge practice (partial noise panels).
-    #   post_h 1.98 = top rail centre rail_z 1.95 + pipe radius 0.035 -> the post
+    #   [W3 S11 · G11] The noise panels were then **deleted** outright and every bay became
+    #   an open vertical-baluster bay at the statutory 100 mm 안목.
+    #   [GT-93 · 08-07 user: "S11 is way too full of iron bars and all that.."] That build
+    #   over-shot in the other direction: a 1.95 m top rail carried by 1.98 m posts with a
+    #   full-height 0.118 m-pitch picket screen turned the whole deck into a **cage
+    #   corridor** (deck_walk at h1.6 saw nothing but bars), and the flights and tower
+    #   heads repeated the vocabulary. The deck guard is re-cut to the standard Korean
+    #   footbridge section, the OTHER real vocabulary (horizontal painted-steel tube):
+    #     · top rail centre `rail_z` 1.95 → **1.20 m** (표준 대역 1.10~1.30) — the guard
+    #       drops below eye/chest height and the corridor opens up;
+    #     · infill = **two horizontal mid tubes** (`mid_zs`) + the 0.16 m kick band,
+    #       NOT a picket screen — max opening 0.40 m centre-to-centre (0.80→1.20)
+    #       [computed from mid_zs];
+    #     · the 384-baluster screen, the per-bay kick segmentation and the GT-80
+    #       two-step end-bay taper are all retired (see `build_deck_rails`).
+    #   post_h 1.235 = top rail centre rail_z 1.20 + pipe radius 0.035 -> the post
     #   **carries** the rail (so the rail does not float as in the old build).
-    #   [W3 S11 · G11] The noise panels are **deleted**. G11 shows a Korean arterial
-    #   footbridge whose deck balustrade is a **uniform vertical-baluster guard** for its
-    #   whole length — no acoustic infill anywhere on the span — and the v6 "bunker
-    #   corridor / pure-black shadow side" finding was a symptom of the panels, not of the
-    #   bay rhythm. Every bay is now an open baluster bay, and the baluster pitch is put on
-    #   the statutory 안목: `baluster_gap` 0.100 m clear (도로안전시설 지침, the same value
-    #   `scene_common.BALUSTER_CLEAR_MAX` gates on `build_railing_line`). The old local loop
-    #   ran 6 balusters per 2.05 m bay = **0.32 m clear**, i.e. 3.2× the statute, and it was
-    #   invisible to the K4(a) gate because it is scene-local geometry, not a kit call.
-    rail_bay=dict(post_t=0.10, post_h=1.98, n_bay=12, joint=0.05,
-                  kick_h=0.16, cap_h=0.07, cap_over=0.03,
-                  baluster_r=0.009, baluster_gap=0.100),
+    #   The statutory-안목 doctrine (도로안전시설 지침 100 mm) recorded here previously is
+    #   consciously superseded **for this scene** by the GT-93 user ruling — the ledger row
+    #   carries the authority; the horizontal-tube section is itself a common compliant
+    #   Korean 육교 guard, and the see-through identity (§S) only gets stronger.
+    rail_bay=dict(post_t=0.08, post_h=1.235, n_bay=8,
+                  kick_h=0.16, mid_zs=(0.45, 0.80), mid_r=0.022),
     #   support piers - they land on the sidewalk outside the kerb (x +-10.5…11.1). Up to the deck soffit.
     deck_posts=dict(xs=(-11.80, 11.80), y=0.0, r=0.40, z_bot=-0.30,
                     cap_sx=1.0, cap_sy=2.8, cap_h=0.36),
@@ -299,8 +311,13 @@ PARAMS = dict(
                 thick=1.40),
     # --- railings (cue_railing) ---
     #   rail_h 1.10 (footbridge standard). Kickplates on the landings only - missing on the east side (the hazard).
+    #   [GT-93] flight rails carry NO picket infill any more (`baluster_r=0.0` at the
+    #   call sites, the scene18 opt-out channel): top tube + mid tube + posts, the same
+    #   horizontal-tube language as the deck guard. Post `spacing` 1.00 → 1.60 m (still
+    #   inside the ≤2.0 m practice band) — 16 rake lines × ~61 pickets was the single
+    #   largest iron mass in the scene (976 prims measured).
     rail=dict(rail_h=1.10, post_r=0.026, rail_r=0.032, rail_mid_r=0.022,
-              rail_mid_drop=0.52, spacing=1.00, y_inset=0.03),
+              rail_mid_drop=0.52, spacing=1.60, y_inset=0.03),
     # --- tactile paving (cue_tactile) : 4 stair head/foot locations ---
     #  [W2-D Sec.12.4] scene11 = registered sites `stair_top` / `stair_foot`,
     #  p = 0.54 (Seoul 2015: 430 of 797 km of footway conforming), statutory
@@ -525,14 +542,15 @@ PARAMS = dict(
         soil_tint=(0.42, 0.44, 0.34),
         curb_tint=(0.86, 0.83, 0.78),           # light granite 연석 (S06-B B-1)
         line_white=(0.55, 0.55, 0.52), line_yellow=(0.52, 0.40, 0.06),
-        # [W3 S11 · G11] railings, balusters, mesh panels and stringers are the **same
-        #   beige-tan paint job** as the girder in the photograph — one paint spec for the
+        # [W3 S11 · G11] railings, posts and stringers are the **same beige-tan
+        #   paint job** as the girder in the photograph — one paint spec for the
         #   whole structure, which is how a real 육교 is coated. The old dark teal
         #   (0.050, 0.098, 0.108) and near-black steel (0.055) are gone.
+        #   ([GT-93] the balusters and mesh panels that shared this spec are deleted.)
         rail_color=(0.300, 0.270, 0.235), rail_rough=0.55, rail_metallic=0.12,
         steel_color=(0.262, 0.236, 0.205), steel_rough=0.55,
         steel_metallic=0.12,
-        mesh_color=(0.238, 0.214, 0.186), mesh_rough=0.62,
+        # [GT-93] mesh_color/mesh_rough deleted with the tower-head mesh screens.
         # [v6 ruling C-3 family] panel_rough 0.18 = near-specular -> sky reflection makes it look
         #   like a large white board. Lowered to the real gloss of painted steel sheet (0.48).
         panel_color=(0.075, 0.095, 0.105), panel_rough=0.48,
@@ -907,8 +925,8 @@ def _seg_blocks(o0, o1, g0, g1, tol=0.08):
 def _guard_termini():
     """World points where a guard run may end without meeting another guard run.
 
-    Two classes only: the four **deck-rail end posts** (0.10 m box, and the deck-side
-    rake rail's first post stands inside it, so the deck screen's end standard is the
+    Two classes only: the four **deck-rail end posts** (0.08 m box, and the deck-side
+    rake rail's first post stands inside it, so the deck guard's end standard is the
     stair rail's newel), and each **flight-B foot**, where `build_rail_end` sets a
     newel and knuckle caps. Anything else is a rail terminating in mid-air."""
     dk = PARAMS["deck"]
@@ -1669,9 +1687,13 @@ def build_views():
     #   because the completed north leg now occupies part of the upper frame that was
     #   open sky. It stands under the east SOUTH flight A, which the leg completion
     #   does not touch, and the sight-line block test is unchanged.
+    #   [GT-93] still unmoved; sky 13.9 → 16.3 % (smoke-measured) because the
+    #   tower-head mesh grids came out of the upper frame — inside the ≤30 % gate.
     out["under_grating"] = dict(eye=[14.10, -7.90, 2.00],
                                 tgt=[14.10, -5.76, 4.38])
-    # deck_walk: pedestrian view along the deck (h1.6) — now an all-open baluster corridor
+    # deck_walk: pedestrian view along the deck (h1.6) — [GT-93] the guard is now a
+    #   1.20 m horizontal-tube rail, so the h1.6 eye sees OVER it (old: a 1.95 m
+    #   full-height picket fence filled the frame on both sides)
     out["deck_walk"] = dict(eye=[-9.00, 0.00, 7.10], tgt=[8.00, 0.00, 6.30])
     # midlanding: robot view on the east mid landing (h0.3) - head-on at the open band left by the missing kickplate
     mx, my = _local_to_world("east", (a_A1 + a_M1) / 2.0 - 0.55, (bA1 + bB0) / 2.0)
@@ -1710,7 +1732,7 @@ def build_views():
 
 BANNER = """\
 [조작] 우클릭+WASD 비행 · P 패스트레이싱 토글 · C 스크린샷 · [ ] 태양 방위
-[체크리스트 — GT-80 S11 H형 완결(다리 4련)]
+[체크리스트 — GT-80 S11 H형 완결(다리 4련) · GT-93 철물 감량]
  1. overview         — **H형인가**: 계단 타워 2기가 차도(±Y)에 평행하고 상판이
                        그 사이를 건너는가 · 타워마다 다리 2련 = 발 4개 ·
                        비대칭(서=직선 타워 / 동=스위치백 타워)
@@ -1727,8 +1749,9 @@ BANNER = """\
                        2개 겹쳐 서 있지 않은가 · 계단 발치 난간 끝에 뉴엘/캡이
                        있는가 · 중간 가로대가 참에서 끊기지 않는가
  5. under_grating    — 역광: 라이저 부재 하부 투시 + 슬릿 투광 스트라이프
- 6. deck_walk        — **방음판 폐지** 후 전 구간 개방 간살 회랑(G11) ·
-                       간살 안목 100 mm · 상판 유효고 5.25 m
+ 6. deck_walk        — [GT-93] 상판 가드 = **1.20 m 수평 강관 3단**(중간 2단 +
+                       상부) + 킥밴드 · h1.6 시선이 가드 **위로** 넘어가는가 ·
+                       픽켓 담장·격자 스크린 잔존 0 · 상판 유효고 5.25 m
  7. sidewalk_approach— 안내 사인이 접근자를 마주보는지 · 트렌치 그레이팅 ·
                        보도/연석(1 m 단위 줄눈)/식재대로 '육교' 즉독
  8. [G11] 도장색     — 상판 거더·계단 스트링거·난간이 **베이지톤 도장**인가
@@ -1889,11 +1912,8 @@ def main():
         M["steel"] = PBR(f"{ROOT}/Looks/Steel", diffuse_color=mp["steel_color"],
                          metallic=mp["steel_metallic"],
                          roughness_const=mp["steel_rough"])
-        # [G11] the expanded-metal infill panel at each tower head, built as a real bar
-        #   grid (make_pbr has no transparency input, so a literal perforated sheet is
-        #   not buildable — the grid is the honest construction, not a fake).
-        M["mesh"] = PBR(f"{ROOT}/Looks/Mesh", diffuse_color=mp["mesh_color"],
-                        metallic=0.10, roughness_const=mp["mesh_rough"])
+        # [GT-93] M["mesh"] (expanded-metal look for the tower-head screens) deleted
+        #   with its only consumer, `build_mesh_panel`.
         M["panel"] = PBR(f"{ROOT}/Looks/Panel", diffuse_color=mp["panel_color"],
                          roughness_const=mp["panel_rough"])
         M["pole"] = PBR(f"{ROOT}/Looks/Pole", diffuse_color=mp["pole_color"],
@@ -2058,11 +2078,17 @@ def main():
     #   x0_pad : west end of the top landing, everything after it descends in +X. kick = kickplate or not.
     # -------------------------------------------------------------------
     # -------------------------------------------------------------------
-    # [W3 S11 · GT-80] shared landing balustrade — the deck-end / landing-perimeter
-    #   guard G11 shows: posts, a kick band, vertical balusters at the statutory
-    #   100 mm 안목, a capping top rail and a mid rail. Used wherever
+    # [W3 S11 · GT-80] shared landing guard — the deck-end / landing-perimeter
+    #   guard: posts, a kick band, a capping top rail and a mid rail. Used wherever
     #   `build_railing_line` (a *stair* railing: it needs a run and a drop) does not
     #   apply, i.e. on every landing.
+    #   [GT-93] the statutory-안목 picket screen this run used to carry (0.118 m pitch,
+    #   ~250 pickets over the four landings) is retired with the rest of the scene's
+    #   picket vocabulary — the guard is now the same horizontal-tube section as the
+    #   deck rail and the flight rails. hazard ① is untouched: the run's LINE and its
+    #   1.10 m height are exactly what they were; only the infill between kick band
+    #   and top rail opened up (which is the very band the h0.3 concealment axis
+    #   already relied on being open).
     # -------------------------------------------------------------------
     def build_guard_run(M, prefix, pts, z_base, height=None, kick=0.16,
                         post_pitch=2.0, post_t=0.08):
@@ -2078,7 +2104,6 @@ def main():
             each terminus so no rail shows an open cylinder mouth.
         Nothing here touches a walked surface: guard members only."""
         ra = PARAMS["rail"]
-        rb = PARAMS["rail_bay"]
         if height is None:
             height = float(ra["rail_h"])
         P = [(float(p[0]), float(p[1])) for p in pts]
@@ -2086,9 +2111,7 @@ def main():
             return 0
         z_rail = z_base + height
         z_mid_rail = z_rail - float(ra["rail_mid_drop"])
-        pitch = 2.0 * rb["baluster_r"] + rb["baluster_gap"]
         npost = 0
-        nbal = 0
         made = 0
         # one post per node — corners shared, never doubled
         for nx, ny in P:
@@ -2116,15 +2139,6 @@ def main():
                 (L if along_x else 0.05, 0.05 if along_x else L, kick),
                 M["rail"])
             made += 1
-            bz0, bz1 = z_base + kick, z_rail - float(ra["rail_r"])
-            n_b = max(2, int(L / pitch))
-            for b in range(n_b):
-                t = L * (b + 0.5) / n_b
-                CYL(f"{prefix}/Bal_{nbal}",
-                    (x0 + ux * t, y0 + uy * t, (bz0 + bz1) / 2.0),
-                    rb["baluster_r"], bz1 - bz0, M["rail"])
-                nbal += 1
-                made += 1
             for tag, zz, rr in (("TopRail", z_rail, float(ra["rail_r"])),
                                 ("MidRail", z_mid_rail,
                                  float(ra["rail_mid_r"]))):
@@ -2160,54 +2174,13 @@ def main():
         return 3
 
     # -------------------------------------------------------------------
-    # [W3 S11 · G11] expanded-metal infill panel over the tower head — the
-    #   triangular mesh sheet the photograph shows above the stair top. Built as a
-    #   real bar grid: `make_pbr` has no transparency input, so a perforated sheet
-    #   cannot be a texture; the grid is the honest construction.
+    # [GT-93] `build_mesh_panel` (the trapezoidal expanded-metal bar grid over each
+    #   tower head, ~22 prims × 4 legs) is DELETED. G11 does show such a sheet, but
+    #   the 08-07 user ruling ("way too full of iron bars and all that") reads the
+    #   four 2.0 m-tall grids — rising to z 7.50, 0.90 m above even the old deck
+    #   fence — as the loudest part of the cage. The guard runs beneath them are
+    #   continuous and unchanged, so nothing protective is lost.
     # -------------------------------------------------------------------
-    def build_mesh_panel(M, prefix, p0, p1, z_bot_fn, z_top, pitch=0.22):
-        """Trapezoidal expanded-metal infill: a horizontal top edge over a raked
-        bottom edge — the panel G11 shows at the head of its left tower, filling the
-        triangle between the stair's rake rail and the deck rail level.
-
-        `z_bot_fn(s)` gives the bottom edge at arc length `s` along p0→p1, so the
-        panel follows the flight instead of being a flat rectangle. Bars only: the
-        material layer has no transparency input, so a perforated sheet is not
-        buildable and a solid box would be a lie about what you can see through."""
-        x0, y0 = float(p0[0]), float(p0[1])
-        x1, y1 = float(p1[0]), float(p1[1])
-        L = math.hypot(x1 - x0, y1 - y0)
-        ux, uy = (x1 - x0) / L, (y1 - y0) / L
-        along_x = abs(ux) > abs(uy)
-        t = 0.014
-        made = 0
-        nv = max(2, int(L / pitch))
-        for i in range(nv):
-            s = L * (i + 0.5) / nv
-            zb = float(z_bot_fn(s))
-            if z_top - zb < 0.05:
-                continue
-            BOX(f"{prefix}/V_{i}", (x0 + ux*s, y0 + uy*s, (zb + z_top)/2.0),
-                (t, t, z_top - zb), M["mesh"])
-            made += 1
-        # horizontals only across the stretch where the trapezoid is tall enough
-        z_lo = min(float(z_bot_fn(0.0)), float(z_bot_fn(L)))
-        nh = max(1, int((z_top - z_lo) / pitch))
-        for j in range(nh):
-            zz = z_lo + (z_top - z_lo) * (j + 0.5) / nh
-            # clip to the part of the run whose bottom edge is already below zz
-            ss = [L * (k + 0.5) / (nv * 2) for k in range(nv * 2)]
-            inside = [s for s in ss if z_bot_fn(s) <= zz]
-            if len(inside) < 2:
-                continue
-            sa, sb = min(inside), max(inside)
-            Ls = sb - sa
-            sc_ = (sa + sb) / 2.0
-            BOX(f"{prefix}/H_{j}", (x0 + ux*sc_, y0 + uy*sc_, zz),
-                (Ls if along_x else t, t if along_x else Ls, t), M["mesh"])
-            made += 1
-        return made
-
     # -------------------------------------------------------------------
     # One descending LEG of an H tower. Authored in the canonical local frame
     #   (descent → local +a, local b = flight width) and placed by
@@ -2322,6 +2295,11 @@ def main():
             #   two baluster screens in one plane. Landings are guarded by
             #   `build_guard_run`, flights by `build_railing_line`, and the two meet
             #   end-to-end on the same `y_inset` line.
+            # [GT-93] `baluster_r=0.0` = the kit's picket opt-out (scene18 precedent):
+            #   each rake line is now top tube + mid tube + posts only. The statutory
+            #   100 mm-안목 screen is consciously retired on the 08-07 user ruling
+            #   (ledger row GT-93 carries the authority) — the guard LINES, their
+            #   1.10 m height and their termini are byte-identical to GT-80.
             for k, bb in enumerate((BA0 + ins, BA1 - ins)):
                 sc.build_railing_line(
                     stage, f"{prefix}/RailA_{k}", _B(bb), _A(0.0), _A(0.0),
@@ -2329,18 +2307,18 @@ def main():
                     rail_h=ra["rail_h"], post_r=ra["post_r"],
                     spacing=ra["spacing"], rail_r=ra["rail_r"],
                     rail_mid_r=ra["rail_mid_r"],
-                    rail_mid_drop=ra["rail_mid_drop"])
+                    rail_mid_drop=ra["rail_mid_drop"], baluster_r=0.0)
                 sc.build_railing_line(
                     stage, f"{pb}/RailB_{k}", _B(bb), _A(a_b0), _A(a_b0),
                     RUN, DROP, _gnd(a_b0, Z_MID), M["rail"],
                     rail_h=ra["rail_h"], post_r=ra["post_r"],
                     spacing=ra["spacing"], rail_r=ra["rail_r"],
                     rail_mid_r=ra["rail_mid_r"],
-                    rail_mid_drop=ra["rail_mid_drop"])
+                    rail_mid_drop=ra["rail_mid_drop"], baluster_r=0.0)
                 # stair-foot newel: flight B's rails end at grade, the one terminus a
                 #   pedestrian meets at eye level. Everything else on the run is closed
                 #   by the next member (RailA's foot by the mid-landing guard, RailA's
-                #   head by the head guard / the deck rail's 0.10 m end post at
+                #   head by the head guard / the deck rail's 0.08 m end post at
                 #   x ±13.20, which the rail's first post stands inside).
                 build_rail_end(M, pb, f"Foot{k}", _A(a_b0) + RUN, _B(bb),
                                Z_MID - DROP)
@@ -2356,27 +2334,9 @@ def main():
                                 [(_A(A_HEAD), _B(BA1 - ins)),
                                  (_A(0.0), _B(BA1 - ins))],
                                 Z_TOP, height=ra["rail_h"])
-            # G11's expanded-metal sheet at the tower head, in the **stair plane**
-            #   (a 0…3.0), filling the trapezoid between flight A's rake rail and a
-            #   horizontal top 0.90 m above the deck rail. One per leg, so the two
-            #   heads of a tower read alike.
-            #   It is deliberately NOT across the head landing's outer face: the pilot
-            #   round `260731_w3_s11` measured that placement filling the whole
-            #   h1.8_d2 / h0.9_d2 frame (mean 122.6 → 76.2, dark +34.3 pp) — the panel
-            #   became a fence photographed at 2 m, and G11 does not put it there.
-            #   [GT-80] hung 0.015 m outboard of the pad edge (b = BA1 + 0.015) instead
-            #   of on it: at b = BA1 the 0.014 m bars overlapped the rake rail's
-            #   0.026 m posts by 3 mm [computed], which is an interpenetration, and a
-            #   real infill panel is bolted to the outside face of the guard anyway.
-            mesh_run = 3.0
-            rake = st["riser"] / st["tread"]
-
-            def _mesh_bot(s, _z0=Z_TOP + ra["rail_h"], _r=rake):
-                return _z0 - _r * s
-            build_mesh_panel(M, f"{prefix}/HeadMesh",
-                             (_A(0.0), _B(BA1 + 0.015)),
-                             (_A(mesh_run), _B(BA1 + 0.015)),
-                             _mesh_bot, Z_TOP + ra["rail_h"] + 0.90)
+            # [GT-93] the G11 expanded-metal sheet that hung here (HeadMesh, one per
+            #   leg, top at Z_TOP + rail_h + 0.90 = z 7.50) is deleted — see the
+            #   build_mesh_panel deletion record above.
             # mid-landing perimeter — every edge that carries the 2.755 m drop, and
             #   ONLY those. [GT-80] the old build guarded "Outer" (a = A_M1) on both
             #   forms; on a straight leg that line is where flight B's top riser is, so
@@ -2478,87 +2438,52 @@ def main():
         return build_tower(M, "west")
 
     # -------------------------------------------------------------------
-    # deck noise panels + longitudinal railing (cue_railing)
+    # deck longitudinal guard (cue_railing)
     # -------------------------------------------------------------------
     def build_deck_rails(M):
-        """[W3 S11 · G11] The deck guard is a **uniform vertical-baluster railing** for
-        the whole span — no acoustic infill. G11 shows exactly that, and it also closes
-        the v6 finding for good: the alternating noise-panel bays were what turned the
-        shadow side of the corridor into a 30~45 % pure-black band, so deleting them is
-        the same fix carried to its end rather than a new experiment.
+        """[GT-93] The deck guard is a **horizontal-tube railing at the standard
+        Korean footbridge height**: posts every 3.3 m, a 0.16 m kick band, two
+        intermediate tubes and a 1.20 m top tube (표준 대역 1.10~1.30).
 
-        The baluster pitch is now the statutory 안목 (`baluster_gap` 0.100 m clear). The
-        previous local loop ran 6 balusters per 2.05 m bay = **0.32 m clear**, 3.2× the
-        limit — invisible to the K4(a) gate because this is scene-local geometry, not a
-        `build_railing_line` call. GT-neutral (railing prims only)."""
+        History, kept short (full record at the `deck` PARAMS): v6 noise panels →
+        W3 full-height picket screen (1.95 m × 0.118 m pitch = 384 pickets + 30
+        posts + 24 kick segments + taper sub-bays = 448 prims) → 08-07 user: the
+        scene is "way too full of iron bars". This section is 26 prims, and the
+        deck_walk corridor reads over the guard instead of through it.
+
+        [GT-93 · GT-80 taper re-evaluated] The end-bay two-step taper
+        (1.667/1.383 m) existed to bridge a 0.85 m head-height jump down to the
+        1.10 m landing guard. At 1.20 m the whole jump is 0.10 m, absorbed at the
+        shared deck-end post like any real 육교 does it — the taper is retired with
+        the fence height that justified it. hazard ① (the 1.10 m outer rail on the
+        head landing's free edge) is untouched, as before.
+        GT-neutral (railing prims only)."""
         dk = PARAMS["deck"]
         rb = PARAMS["rail_bay"]
         x0, x1 = dk["x0"], dk["x1"]
         nb = int(rb["n_bay"])
         L = (x1 - x0) / float(nb)
         zt = dk["z_top"]
-        pitch = 2.0 * rb["baluster_r"] + rb["baluster_gap"]
         for i, ye in enumerate((dk["y0"], dk["y1"])):
             for k in range(nb + 1):                      # posts
                 BOX(f"{ROOT}/DeckRailPost_{i}_{k}",
                     (x0 + k*L, ye, zt + rb["post_h"]/2.0),
                     (rb["post_t"], rb["post_t"], rb["post_h"]), M["steel"])
-            # [08-06 orchestrator, GT-80 pass 2 — "connection between the bridge and
-            #   the stairs" / "naturally continuous form"] The 1.95 m fence used to
-            #   stop dead at the deck-end post while the head-landing guard carries on
-            #   at 1.10 m — a bare 0.85 m step at every fork. Korean 육교 fences taper
-            #   at the stairhead, so each END bay is now a **stepped transition**: two
-            #   sub-bays at 1.667 / 1.383 m stepping the head down to the landing
-            #   guard's 1.10 m line, balusters trimmed to each local rail, one shared
-            #   sub-post at the split. hazard ① (the 1.10 m outer rail on the head
-            #   landing's free edge) is untouched — the taper happens on the deck's own
-            #   side lines, before the landing.
-            tp1 = dk["rail_z"] - (dk["rail_z"] - 1.10) / 3.0          # 1.667
-            tp2 = dk["rail_z"] - 2.0 * (dk["rail_z"] - 1.10) / 3.0   # 1.383
-            for k in range(nb):
-                xa = x0 + k*L + rb["post_t"]/2.0 + rb["joint"]
-                xb = x0 + (k+1)*L - rb["post_t"]/2.0 - rb["joint"]
-                xc, Lx = (xa + xb)/2.0, xb - xa
-                BOX(f"{ROOT}/DeckKick_{i}_{k}",
-                    (xc, ye, zt + rb["kick_h"]/2.0),
-                    (Lx, dk["panel_t"], rb["kick_h"]), M["rail"])
-                taper = (k == 0) or (k == nb - 1)
-                if taper:
-                    # sub-bay order: the LOWER rail sits toward the deck end.
-                    lo_first = (k == 0)
-                    xm = (xa + xb) / 2.0
-                    BOX(f"{ROOT}/DeckRailPost_{i}_{k}m",
-                        (xm, ye, zt + rb["post_h"]/2.0),
-                        (rb["post_t"], rb["post_t"], rb["post_h"]), M["steel"])
-                    subs = (((xa, xm), tp2 if lo_first else tp1),
-                            ((xm, xb), tp1 if lo_first else tp2))
-                    for s_i, ((sxa, sxb), hz) in enumerate(subs):
-                        CYL(f"{ROOT}/DeckRailStep_{i}_{k}_{s_i}",
-                            ((sxa + sxb)/2.0, ye, zt + hz),
-                            dk["rail_r"], sxb - sxa, M["rail"], rotY=90.0)
-                        nbal = max(2, int((sxb - sxa) / pitch))
-                        bz0 = zt + rb["kick_h"]
-                        bz1 = zt + hz - 0.06
-                        for b in range(nbal):
-                            xb_ = sxa + (b + 0.5) * (sxb - sxa) / float(nbal)
-                            CYL(f"{ROOT}/DeckBal_{i}_{k}_{s_i}{b}",
-                                (xb_, ye, (bz0 + bz1)/2.0), rb["baluster_r"],
-                                bz1 - bz0, M["rail"])
-                    continue
-                nbal = max(2, int(Lx / pitch))
-                bz0 = zt + rb["kick_h"]
-                bz1 = zt + dk["rail_z"] - 0.06
-                for b in range(nbal):
-                    xb_ = xa + (b + 0.5) * Lx / float(nbal)
-                    CYL(f"{ROOT}/DeckBal_{i}_{k}_{b}",
-                        (xb_, ye, (bz0 + bz1)/2.0), rb["baluster_r"],
-                        bz1 - bz0, M["rail"])
-            # main top rail now spans only the full-height run between the two taper
-            #   bays; its ends land inside the taper-boundary posts.
+            # one continuous kick band per side (the per-bay segmentation carried
+            #   no information the 3.3 m post rhythm does not already give)
+            BOX(f"{ROOT}/DeckKick_{i}",
+                ((x0 + x1)/2.0, ye, zt + rb["kick_h"]/2.0),
+                (x1 - x0, dk["panel_t"], rb["kick_h"]), M["rail"])
+            # two intermediate tubes + the top tube. All three run the full span;
+            #   their ends sit at the deck-end post centres (x ±13.20), i.e. buried
+            #   0.04 m inside the 0.08 m posts — no open cylinder mouth (GT-57).
+            for m_i, mz in enumerate(rb["mid_zs"]):
+                CYL(f"{ROOT}/DeckRailMid_{i}_{m_i}",
+                    ((x0 + x1)/2.0, ye, zt + float(mz)),
+                    rb["mid_r"], x1 - x0, M["rail"], rotY=90.0)
             CYL(f"{ROOT}/DeckRail_{i}",
-                ((dk["x0"]+dk["x1"])/2.0, ye, dk["z_top"] + dk["rail_z"]),
-                dk["rail_r"], (dk["x1"]-dk["x0"]) - 2.0*L + rb["post_t"],
-                M["rail"], rotY=90.0)
+                ((x0 + x1)/2.0, ye, zt + dk["rail_z"]),
+                dk["rail_r"], x1 - x0, M["rail"], rotY=90.0)
 
     # -------------------------------------------------------------------
     # sign (cue_sign) - footbridge guidance sign_info

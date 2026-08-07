@@ -1634,7 +1634,9 @@ worked on neatly. Since I'm trying to keep the existing framework intact, it loo
 본 행에서 재판정. **주의 기록**: GT-71 헤지 A/B 파일럿(같은 씬, 검수 대기)은 본 개편으로
 A/B 대조 오염 — 사용자 지시 우선(GT-59 전례), 파일럿은 개편 후 재스테이지 필요.
 **GT 판정**: R-1 + R-3 + FRAME 선언. Round `260807_w3_fixqueue3`, baseline `260806_w3_fixqueue2`.
-**Status: OPEN (선신고)**
+**§4 착지기록** (2026-08-07): 구현 = 오케스트레이터 직접(s03·s16) + **Fable 서브에이전트 2기**(s06·s11 — 08-07 사용자 지시) + 오케스트레이터 접속부 렌더 검수(08-06 교훈 이행). 통합 floor — py_compile 4파일 OK · SMOKE 전수 33/33 OK(GT-89 게이트, 부팅 0) · geom_invariance R-4/R-6 33/33 PASS · placement_lint HEAD stash A/B 동수(260=260, 신규 ERROR/WARN 0) · building_kit OK. round `260807_w3_fixqueue3`(4씬 59컷, regr PASS21/FAIL26/WARN10/INFO2 — 전량 FRAME/OCCL 선언 계열, **GRAZE/DARK 신규 0**: s06 preset_h0.3_d2 GRAZE [의심] 1건은 에지대역 y170~312 육안 대조로 기각[소거된 서측 유리판 자리의 그림자 후퇴·잔여 패널 재배열이며 가드선 무절단 연속 — 낙차 은닉 유지] · s16 under_canopy DARK 는 INFO 이월). gallery: `_review/260807_w3_fixqueue3`(사용자 검수 대기).
+- 낙차 2.1→**3.0 m**(20단×0.15·run 6.40) · 하부 유효고 1.75→**2.65 m**(법정 2.30–2.50 충족, `assert head>=2.30` 코드 내장 — 원장 행 35 잔여 결정 본 행으로 해소) · 차도 6.0→**7.0 m**(3.5 m 2차로, 중앙 13.22) · 가로 회랑 동측 이동(fw 7.52…18.92 · **kb1 16.92 = 동측 계단머리 관용구 유지** · 서측 개착 3.07 m 유지) · 동측 계단 16.92→23.32 · 광장 x_e 22→28 · 건물 C 파사드 26→32 · 백드롭 개구 = 신규 fw0…fw1 · 소품 연쇄 이동(플랜터 B/C 20.6 · 벤치3 20.2 · 가로등2 17.92 · 동측 헤지 16.92…20.92 · 볼라드 25.3). 조립 568프림. 육안(approach·beauty_overview·shadow_band): 지하보도 문법·T20 그림자 밴드·황색 경고띠 성립, 협착감 해소. **GT-71 A/B 오염 확정 기재** — 파일럿은 본 개편 착지 후 재스테이지.
+**Status: OPEN (사용자 검수 대기)**
 
 ## 47. GT-91 — scene03 곡선 접속교 재정형 (GT-83 3차 기각) (선신고)
 
@@ -1645,7 +1647,9 @@ GT-83 3차의 곡선 남향 고가(42.40 m·17현·R_min 7.53)를 형태 불명�
 CROSS-scene03). 낙차선 x=0 미횡단·산책로 불가침(08-06 룰링 승계)·§4-8 대기원근 금지·
 P-13 무연석 유지. meander_air 차폐 38.9 % 귀속분은 재정형 결과로 재측정.
 **GT 판정**: R-3 + FRAME 선언. Round `260807_w3_fixqueue3`, baseline `260806_w3_fixqueue2`.
-**Status: OPEN (선신고)**
+**§4 착지기록** (2026-08-07): 구현 = 오케스트레이터 직접(s03·s16) + **Fable 서브에이전트 2기**(s06·s11 — 08-07 사용자 지시) + 오케스트레이터 접속부 렌더 검수(08-06 교훈 이행). 통합 floor — py_compile 4파일 OK · SMOKE 전수 33/33 OK(GT-89 게이트, 부팅 0) · geom_invariance R-4/R-6 33/33 PASS · placement_lint HEAD stash A/B 동수(260=260, 신규 ERROR/WARN 0) · building_kit OK. round `260807_w3_fixqueue3`(4씬 59컷, regr PASS21/FAIL26/WARN10/INFO2 — 전량 FRAME/OCCL 선언 계열, **GRAZE/DARK 신규 0**: s06 preset_h0.3_d2 GRAZE [의심] 1건은 에지대역 y170~312 육안 대조로 기각[소거된 서측 유리판 자리의 그림자 후퇴·잔여 패널 재배열이며 가드선 무절단 연속 — 낙차 은닉 유지] · s16 under_canopy DARK 는 INFO 이월). gallery: `_review/260807_w3_fixqueue3`(사용자 검수 대기).
+- **패스3 전면 롤백**: 곡선 남향 고가(11현·T피어 4·남단 교두) 삭제, `near_approach_chords`·`_ang`·`napp_*`/`send_*` 파라미터 동반 삭제(−3,621자+빌드 블록 −3,142자). 근측 = **패스2 정식 단부 교두 회귀**(`bridgehead("Near", land_dir=-1)` — 교좌 선반·페데스탈·흉벽·접속슬래브·단부 포스트·벨트 코스) + 석재 세굴 에이프런. 프림 2049→**1866**. `NEGOBS_SELFCHECK`: **사행 OK·강폭 OK** — meander_air 차폐 38.9→**24.4 %**(<35), 패스3 선언 FAIL·R_min 7.53 미달 선언 동반 은퇴. 육안(meander_air·bank_oblique·levee_walk): 곡선 리본 소거·수변 개방·우연 단부 교두 문법. 본교(7피어 8.0 m 등간격 저형 거더 = v4-D1 강 정체성)·낙차선 x=0·산책로 불변.
+**Status: OPEN (사용자 검수 대기)**
 
 ## 48. GT-92 — scene06 육교 계단 접속 차폐 해소 (선신고)
 
@@ -1658,7 +1662,9 @@ scene03 교량은 백드롭 거더교로 육교 아님). 판독이 다르면 사
 GT-68 유리+bronze cap 가드 계열 유지. W4 재판정(로봇높이 개구) 입력 이동 여부 기록.
 구현 = **Fable 서브에이전트**(08-07 사용자 지시) + 오케스트레이터 접속부 렌더 검수(08-06 교훈).
 **GT 판정**: R-3 선언. Round `260807_w3_fixqueue3`, baseline `260806_w3_fixqueue2`.
-**Status: OPEN (선신고)**
+**§4 착지기록** (2026-08-07): 구현 = 오케스트레이터 직접(s03·s16) + **Fable 서브에이전트 2기**(s06·s11 — 08-07 사용자 지시) + 오케스트레이터 접속부 렌더 검수(08-06 교훈 이행). 통합 floor — py_compile 4파일 OK · SMOKE 전수 33/33 OK(GT-89 게이트, 부팅 0) · geom_invariance R-4/R-6 33/33 PASS · placement_lint HEAD stash A/B 동수(260=260, 신규 ERROR/WARN 0) · building_kit OK. round `260807_w3_fixqueue3`(4씬 59컷, regr PASS21/FAIL26/WARN10/INFO2 — 전량 FRAME/OCCL 선언 계열, **GRAZE/DARK 신규 0**: s06 preset_h0.3_d2 GRAZE [의심] 1건은 에지대역 y170~312 육안 대조로 기각[소거된 서측 유리판 자리의 그림자 후퇴·잔여 패널 재배열이며 가드선 무절단 연속 — 낙차 은닉 유지] · s16 under_canopy DARK 는 INFO 이월). gallery: `_review/260807_w3_fixqueue3`(사용자 검수 대기).
+- 원인 2건 수치 확정: ①서측 에이프런-리턴 베이 3부재(DeckKick_0·DeckGlass_0_0·DeckPanelCap_0)가 데크↔서측 랜딩 로브의 유일 횡단선(x 2.0, y −13…−10.128, 양측 z 5.000 동일면)을 점유 — 아무 연단도 지키지 않는 이중 가드 ②`dress.trees` (3.6, 20.2) 부호 누락 → 북측 플라이트 B 관통(수관 = 계단 폭 73 %). 수리: 서측 **잼 뉴얼 2본 결속 정식 개구**(유효 2.742 m, 가드선 무절단 연속: 데크 캡→S뉴얼→로브 캡→a0 뉴얼→나선 캡, 이중 뉴얼 E0 퇴역) · 동측 베이 **의도 폐쇄 유지**(az-0 방사 연단 무가드 2.9~5.0 m — 개방은 별도 행) · 수목 (−3.4, 20.2) 이설 · 검산 정합(`_corridor_hits` 북측 회랑 신설·`_smoke_report` GT-92 2행). 프림 1506→**1503**. **W4 입력 이동 없음**(정면 프로파일·h0.3 은닉표 로그 바이트 동일 실측). 잔여 선언: 북측 발단 잔디 착지 Δ0.168 m — 별도 행 요망. 육안(deck_entry·ground_approach): 개구 성립·차단판 소거.
+**Status: OPEN (사용자 검수 대기)**
 
 ## 49. GT-93 — scene11 철물 과다 감량 (선신고)
 
@@ -1669,4 +1675,6 @@ hazard①(랜딩 외연 1.10 저난간 = 판정 단서)·그레이팅 축. 기�
 프리셋 무수정(R17-1 일반 원칙). GT-80 테이퍼(1.667/1.383)는 감량 후 재평가 대상.
 구현 = **Fable 서브에이전트**(08-07 사용자 지시) + 오케스트레이터 접속부 렌더 검수.
 **GT 판정**: R-3 + FRAME 선언. Round `260807_w3_fixqueue3`, baseline `260806_w3_fixqueue2`.
-**Status: OPEN (선신고)**
+**§4 착지기록** (2026-08-07): 구현 = 오케스트레이터 직접(s03·s16) + **Fable 서브에이전트 2기**(s06·s11 — 08-07 사용자 지시) + 오케스트레이터 접속부 렌더 검수(08-06 교훈 이행). 통합 floor — py_compile 4파일 OK · SMOKE 전수 33/33 OK(GT-89 게이트, 부팅 0) · geom_invariance R-4/R-6 33/33 PASS · placement_lint HEAD stash A/B 동수(260=260, 신규 ERROR/WARN 0) · building_kit OK. round `260807_w3_fixqueue3`(4씬 59컷, regr PASS21/FAIL26/WARN10/INFO2 — 전량 FRAME/OCCL 선언 계열, **GRAZE/DARK 신규 0**: s06 preset_h0.3_d2 GRAZE [의심] 1건은 에지대역 y170~312 육안 대조로 기각[소거된 서측 유리판 자리의 그림자 후퇴·잔여 패널 재배열이며 가드선 무절단 연속 — 낙차 은닉 유지] · s16 under_canopy DARK 는 INFO 이월). gallery: `_review/260807_w3_fixqueue3`(사용자 검수 대기).
+- 철물 2,248→**482프림(−78.6 %)**: 데크 가드 448→26(난간고 1.95→**1.20 m** 표준 대역, 수평 3선+킥밴드 연속 1매, 픽켓 384 전량 삭제) · 계단 레일 1,312→288(픽켓 976→0 [`baluster_r=0.0` 옵트아웃, scene18 선례] · 포스트 피치 1.00→1.60) · 참 가드런 372→140 · 타워 격자 스크린 88→**0**(함수·재질 동반 삭제). **GT-80 테이퍼 은퇴**(1.20 m 감고로 단차 0.85→0.10 — 행 명시 재평가 조항 이행). 씬 5,598→**3,832**. 보존 실측: 판정 원점 (15.00, 0, 5.50)·hazard① 낙차 5.505·h0.3 은닉 3거리·4경로 보행 연속·그레이팅 축·끝단 종결 0/68 전부 OK. 06↔11 분리축은 GT-68 bronze cap 담당으로 무충돌(도장강 수직봉 어휘 은퇴). under_grating 하늘 13.9→16.3 %(스크린 제거 귀속, ≤30 게이트 내). 육안(deck_walk·overview): 새장 소거·가드 위 원경 개방·실물 육교 문법.
+**Status: OPEN (사용자 검수 대기)**

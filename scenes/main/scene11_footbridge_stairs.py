@@ -2279,15 +2279,17 @@ def main():
             BOX(f"{prefix}/{name}",
                 (_A((a0+a1)/2.0), (ylo+yhi)/2.0, ztop - pad_t/2.0),
                 (a1-a0, yhi-ylo, pad_t), M["metal"], col=True)
-            ci = float(TW["col_inset"])
-            for i, (ca, cb) in enumerate(((a0+ci, b0+ci), (a0+ci, b1-ci),
-                                          (a1-ci, b0+ci), (a1-ci, b1-ci))):
-                zt = ztop - pad_t
-                CYL(f"{prefix}/{name}Col_{i}",
-                    (_A(ca), _B(cb), (float(TW['col_z_bot'])+zt)/2.0),
-                    float(TW["col_r"]), zt - float(TW["col_z_bot"]),
-                    M["metal"], col=True)
-                cols.append((_A(ca), _B(cb)))
+            # [GT-102 · 08-11 user] ONE BIG column per landing — the four slim
+            #   corner posts mixed vocabularies with the deck's r0.40 piers ("네
+            #   기둥으로 받치고.. 큰 기둥으로 받치고.. 왔다갔다"). Same radius as
+            #   the deck piers, centred under the pad.
+            zt = ztop - pad_t
+            R_ = float(PARAMS["deck_posts"]["r"])
+            ca, cb = (a0 + a1) / 2.0, (b0 + b1) / 2.0
+            CYL(f"{prefix}/{name}Col",
+                (_A(ca), _B(cb), (float(TW['col_z_bot'])+zt)/2.0),
+                R_, zt - float(TW["col_z_bot"]), M["metal"], col=True)
+            cols.append((_A(ca), _B(cb)))
 
         # ── head landing — a CROSS landing, built by the primary leg only ──
         if with_head:

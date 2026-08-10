@@ -182,29 +182,6 @@ Geometry correction (supervisor ruling applied):
     65.0 m with an 18.37 % bow). Levee, slope, stair, drop edge x=0, water level, riprap,
     P-13, the far-tree stand and every camera preset are untouched.
 ────────────────────────────────────────────────────────────────────────────
-[GT-91 · pass-3 near viaduct ROLLED BACK]  User verdict on the landed pass 3 (08-07):
-  *"What is s03 talking about? … What is that shape.."* — the curved southward ribbon,
-  built exactly because the straight continuation is unbuildable (pass-2 arithmetic, which
-  still stands), does not read as a bridge from any judged eye: `bank_oblique` sees it as a
-  featureless concrete band across the foreground, `levee_walk` as a blank mass at frame
-  right. The 08-06 "어떻게든" ruling is thereby superseded by the user's own review of its
-  best answer.
-
-  What replaces it: **the near end terminates honestly.** `PierWall_Near` (run-over wall
-  pier) reverts to a full pass-2 **end bridgehead** — seat stopping at the bearing shelf,
-  pedestals, back wall, approach slab, parapet end posts, belt courses — plus the pass-2
-  stone scour apron it stood on. The main crossing (7-per-bay girder vocabulary, +2.90 deck,
-  T-piers, 23.0 m far approach to s 88) is untouched: the scene keeps its v4-D1 river-
-  identity backdrop, and the road reads as continuing beyond the modelled world exactly as
-  the far side already does. Nothing else moves; the tree at (13.4, −6.0) keeps its GT-83
-  siting (still 2.08 m clear of the apron — re-verified against the remaining members).
-
-  Measured consequences: `river_view_selfcheck` loses the chord occluders — `meander_air`
-  occlusion returns 51/131 = 38.9 % → **32/131 = 24.4 %**, back under its own 35 % line, so
-  the declared ruling-caused FAIL retires with the ruling. The R_min 7.53 shortfall
-  declaration retires the same way (no curve, no radius). `napp_*`/`send_*` params and
-  `near_approach_chords()` are deleted with their only two clients.
-────────────────────────────────────────────────────────────────────────────
 """
 
 import os
@@ -669,11 +646,43 @@ PARAMS = dict(
                 apron_out=0.80, apron_xout=0.05, apron_top=-1.55,  # stone scour apron (near only)
                 # --- [GT-83 p2] far approach viaduct ---
                 appr_len=23.0, appr_grade=0.025, appr_pier_x=(7.7, 15.4),
-                pier_far_w=8.40,       # far head only — [GT-91] near head is an end bridgehead again
-                # --- [GT-91] pass-3 near curved viaduct DELETED (user 08-07: "What is
-                #   that shape") — `napp_*` and `send_*` went with it. The near head is a
-                #   pass-2 end bridgehead again; see the GT-91 docstring section.
-                ),
+                pier_far_w=8.40, pier_near_w=9.60,       # both heads become wall piers
+                # --- [GT-83 pass 3] near approach: curved southward viaduct -----------
+                # The alignment is a **chord polyline**, not an arc primitive, because every
+                #   river-parallel element in this scene is already chorded (`river_band`) and
+                #   a chord run can be built by the same `build_slope` section as the deck.
+                # `napp_deltas` — per-chord heading change. 11 chords, **eased at both ends**
+                #   (4.5 / 9×9 / 4.5): the entry step is halved so the joint with the frozen
+                #   main deck kinks by only **2.25°**, and the exit step is halved into the
+                #   river-parallel run. Max inter-chord kink **9.00°**, mean 7.03°.
+                # `napp_curve_len` 13.0 m — the binding number. s_hold = 14.50 − 1.13·R and the
+                #   deck must stay off the promenade, so this is the longest (largest-radius)
+                #   transition the cross-section allows: 13.0 m of arc -> **s_hold 5.29**,
+                #   R_min 7.53 m. 14.5 m would give R 8.4 but drop the deck edge to s −0.72.
+                # `napp_ypar` — the river-parallel run's y stations, held at s_hold in the
+                #   meander frame so the ribbon follows the same bend as the bands under it.
+                #   It ends at y −45.8, **1.7 m inside** the modelled ground (y −47.5).
+                # `napp_grade` 2.0 % with an 8.0 m parabolic `napp_vlen` off the level deck —
+                #   the grade is 0 at the bridgehead and only reaches 2.0 % 8 m out, so there
+                #   is no pitch step where the ribbon leaves the frozen span.
+                # `napp_lead` 1.30 m — chord 0 is extended BACK past the deck end (> abut_t/2
+                #   1.10), so the main deck's end face is buried inside it.
+                # `napp_pier_j` — chord joints carrying a T-pier. Joint 6 rather than 5:
+                #   at joint 5 the Ø2.20 column would span s 7.41…9.61 and clip the 둔치 cycle
+                #   track (s ≥ 9.4) by 0.21 m; at joint 6 it spans **6.45…8.65**, clear by
+                #   0.75 m [measured]. Joints 11/13/15 all sit at s 5.29.
+                napp_curve_len=13.0,
+                napp_deltas=(4.5, 9.0, 9.0, 9.0, 9.0, 9.0, 9.0, 9.0, 9.0, 9.0, 4.5),
+                napp_ypar=(-23.0, -28.0, -33.0, -38.0, -42.5, -45.8),
+                napp_grade=0.020, napp_vlen=8.0, napp_lead=1.30,
+                napp_pier_j=(6, 11, 13, 15),
+                # south end bridgehead, narrowed: the corridor between the promenade (s −1.0)
+                #   and the cycle track (s 9.4) is 10.4 m wide and the standard head is 10.20,
+                #   which would leave 0.1 m either side. At −1.80/−1.40 the seat is 7.20 and
+                #   the footing 7.60, measuring **s 1.59…8.95 / 1.37…9.15** -> 0.45 m and
+                #   0.25 m of clear ground. The 9.00 m deck simply cantilevers over it, which
+                #   is what a deck does.
+                send_over=-1.80, send_foot_over=-1.40),
     # D2 far-side city silhouette (horizon closure + river-width scale anchor). base_z=far_bank top
     # [v5.1] Pulled in to s 55->48 with the narrower channel (far beach stays 14 m wide), and
     #   each block goes in its own rot_group for the meander tangent + placement jitter (yaw +-4 deg).
@@ -963,6 +972,86 @@ def river_segments(y_gap=None):
     return out
 
 
+def _ang(a):
+    """Normalise a bearing difference to (−180, 180]."""
+    return (a + 180.0) % 360.0 - 180.0
+
+
+def near_approach_chords():
+    """[GT-83 pass 3] Chord polyline of the **near-side approach viaduct**.
+
+    One function, two clients — `build_river` stands the geometry on it and
+    `river_view_selfcheck` tests occlusion against it — so the occluder can never drift
+    away from the thing it models.
+
+    Shape: leave the near bridgehead on the deck axis, turn 90.0° left over
+    `napp_curve_len` (per-chord steps `napp_deltas`, eased at both ends), then hold the
+    meander cross-section coordinate reached at the end of the turn down the `napp_ypar`
+    stations. Because the parallel run is expressed in the **meander frame** it follows
+    exactly the same bend as the 둔치 bands beneath it.
+
+    Elevation: a parabolic vertical curve of length `napp_vlen` off the level deck, then a
+    constant `napp_grade`. The whole profile is dropped by one `z_stagger`, so no face of
+    the approach is ever coplanar with the frozen main deck it grows out of.
+
+    Returns `(chords, s_hold)` where each chord is a dict with the world end points, the
+    chord bearing, the top-of-deck elevations and the **mitre extensions** (`back`/`fwd`)
+    that make consecutive chords overlap instead of leaving a wedge open on the outside of
+    the turn: `back/fwd = (deck half width + cope_out) · tan(kink/2)`.
+    """
+    bg = PARAMS["bridge"]
+    stag = PARAMS["meander"]["z_stagger"]
+    cy = (bg["y0"] + bg["y1"]) / 2.0
+    cx = (bg["x0"] + bg["x1"]) / 2.0
+    dx0 = river_dx(cy)
+    yaw = river_yaw(cy)
+    cc, ss = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
+    pvx, pvy = dx0 + cx, cy
+    # the near deck end, carried through the bridge group's own pivot rotation
+    ex, ey = dx0 + bg["x0"], cy
+    p0 = (pvx + (ex - pvx) * cc - (ey - pvy) * ss,
+          pvy + (ex - pvx) * ss + (ey - pvy) * cc)
+    a0 = 180.0 + yaw                       # travel bearing leaving the bridgehead
+    n = len(bg["napp_deltas"])
+    seg = bg["napp_curve_len"] / n
+    pts, brs = [p0], []
+    b = a0
+    for d in bg["napp_deltas"]:
+        bc = b + d / 2.0                   # chord bearing = the mid-arc heading
+        pts.append((pts[-1][0] + seg * math.cos(math.radians(bc)),
+                    pts[-1][1] + seg * math.sin(math.radians(bc))))
+        brs.append(bc)
+        b += d
+    s_hold = pts[-1][0] - river_dx(pts[-1][1])
+    for yk in bg["napp_ypar"]:
+        pts.append((river_dx(yk) + s_hold, yk))
+        brs.append(math.degrees(math.atan2(pts[-1][1] - pts[-2][1],
+                                           pts[-1][0] - pts[-2][0])))
+    grade, vlen = bg["napp_grade"], bg["napp_vlen"]
+
+    def z_of(t):
+        if t <= vlen:
+            return bg["deck_top"] - stag - grade * t * t / (2.0 * vlen)
+        return bg["deck_top"] - stag - grade * (t - vlen / 2.0)
+
+    href = (bg["y1"] - bg["y0"]) / 2.0 + bg["cope_out"]
+    out, t = [], 0.0
+    for i in range(len(pts) - 1):
+        (x0, y0), (x1, y1) = pts[i], pts[i + 1]
+        ln = math.hypot(x1 - x0, y1 - y0)
+        d_prev = abs(_ang(brs[i] - (brs[i - 1] if i else a0)))
+        d_next = abs(_ang(brs[i + 1] - brs[i])) if i + 1 < len(brs) else 0.0
+        out.append(dict(
+            i=i, brg=brs[i], L=ln, x0=x0, y0=y0, x1=x1, y1=y1,
+            mx=(x0 + x1) / 2.0, my=(y0 + y1) / 2.0,
+            z0=z_of(t), z1=z_of(t + ln),
+            back=(bg["napp_lead"] if i == 0
+                  else href * math.tan(math.radians(d_prev / 2.0))),
+            fwd=href * math.tan(math.radians(d_next / 2.0))))
+        t += ln
+    return out, s_hold
+
+
 def tint_jitter(color, seed, amp=None):
     """[v5.1 global convention 4] Per-instance ±amp colour jitter (seed-deterministic)."""
     if amp is None:
@@ -1180,7 +1269,21 @@ def river_view_selfcheck(verbose=True):
                           bg["y0"] - bg["abut_over"] / 2.0,
                           bg["y1"] + bg["abut_over"] / 2.0,
                           bg["abut_z0"], _atop))
-    # [GT-91] the pass-3 chord occluders are gone with the pass-3 viaduct.
+    # **[GT-83 pass 3] the near approach viaduct.** It lives in 17 rot groups of its own, so
+    #   it cannot go in `rot_boxes` (one shared pivot/yaw); it gets its own list, tested with
+    #   the same `_seg_hits_rot_box` against each chord's own frame. The geometry comes from
+    #   `near_approach_chords()` — the SAME call the builder uses — so this occluder can
+    #   never drift away from the structure it models. Each box spans soffit -> parapet top
+    #   over the chord's full deck width: a deck really is solid, and unlike the piers there
+    #   is no void here to model.
+    napp_boxes = []
+    for _c in near_approach_chords()[0]:
+        napp_boxes.append(((_c["mx"] - _c["L"] / 2.0 - _c["back"],
+                            _c["mx"] + _c["L"] / 2.0 + _c["fwd"],
+                            _c["my"] - deck_hw, _c["my"] + deck_hw,
+                            min(_c["z0"], _c["z1"]) - bg["deck_thick"],
+                            max(_c["z0"], _c["z1"]) + bg["parapet_h"]),
+                           (_c["mx"], _c["my"]), _c["brg"]))
     boxes = []
     # trees: crown (sphere blobs) and trunk kept separate - one solid box would falsely count
     #   the empty space under the crown as occlusion (build_tree: th = trunk_h·U(0.85,1.25)).
@@ -1246,7 +1349,9 @@ def river_view_selfcheck(verbose=True):
         occ = sum(1 for _, _, _, p in pts
                   if any(_seg_hits_box(eye, p, b) for b in boxes)
                   or any(_seg_hits_rot_box(eye, p, b, b_piv, b_yawd)
-                         for b in rot_boxes))
+                         for b in rot_boxes)
+                  or any(_seg_hits_rot_box(eye, p, _b, _pv, _br)
+                         for _b, _pv, _br in napp_boxes))
         span = pts[-1][0] - pts[0][0]
         pit = math.degrees(math.atan2(tgt[2] - eye[2],
                                       math.hypot(tgt[0] - eye[0],
@@ -1254,10 +1359,25 @@ def river_view_selfcheck(verbose=True):
         diag[name] = dict(pitch=round(pit, 1), y_span=round(span, 1),
                           bow_pct=round(100.0 * dev / TU, 2),
                           occluded=occ, n=len(pts), judge=judge)
-        # [GT-91] The pass-3 declared FAIL (meander_air 51/131 = 38.9 % > 35 %) retires
-        #   with the pass-3 viaduct: occlusion returns to the pass-2 arithmetic
-        #   (32/131 = 24.4 %), back under the criterion that was deliberately never tuned.
-        #   The threshold is still exactly where v6 put it.
+        # **[GT-83 pass 3] The 35 % occlusion criterion is LEFT EXACTLY WHERE IT WAS, and
+        #   `meander_air` now exceeds it — on purpose, by ruling, and it is reported as a
+        #   failure rather than tuned away.** Measured, on this scene's own sampling:
+        #     occlusion 32/131 = **24.4 %** -> 51/131 = **38.9 %** once the 08-06 ruling's
+        #     near-side approach exists. The 19 extra samples come from the three chords
+        #     immediately outboard of the near bridgehead: they fill the wedge of sky between
+        #     the frozen deck's end face and the levee, through which this camera used to see
+        #     the waterline at y −3.5…+12.5. **No alignment avoids it** — the whole sweep
+        #     measures 36.6…38.9 % (eased/uniform/front-loaded turns, transition 9.5…14.5 m),
+        #     and relocating the one tree in the corridor recovers nothing (51/131 either way).
+        #   What the criterion is a proxy FOR is unharmed, and that is measured too: on the
+        #   **visible** samples only, `meander_air` still spans **65.0 m** of waterline with an
+        #   **18.37 %** bow (criteria: 40 m and 5 %), against 65.0 m / 20.41 % before the
+        #   approach; `bank_oblique` is untouched at 26/119 = 21.8 %.
+        #   Raising the threshold to make this pass would be tuning a gate to a result, which
+        #   this file refuses to do elsewhere (see the v7 note in this same function). So the
+        #   number stands, the cut reports FAIL, and the trade — a road that goes somewhere
+        #   against 14.5 points of waterline occlusion in one aerial cut — is a ruling for the
+        #   supervisor, recorded here with the arithmetic rather than absorbed silently.
         if judge and (span < 40.0 or dev / TU < 0.05
                       or occ > len(pts) * 0.35):
             ok = False
@@ -2154,24 +2274,19 @@ def main():
                        (bdx + px, deck_cy, cap_bot + bg["cap_h"] / 2.0),
                        (bg["cap_t"], bg["cap_w"], bg["cap_h"]),
                        M["concrete_dark"], collider=True)
-        # ---- the two banks [GT-91] ---------------------------------------------------
-        # FAR: the crossing does not stop — wall pier + 23.0 m approach viaduct to the
-        #   modelled edge (pass-2 state, unchanged).
-        # NEAR: **the crossing terminates honestly.** The pass-3 run-over wall pier and its
-        #   curved southward viaduct are rolled back (user 08-07: "What is that shape") —
-        #   the near end is a full pass-2 END bridgehead again (seat to the bearing shelf,
-        #   pedestals, back wall, approach slab, end posts, belts), standing on the pass-2
-        #   stone scour apron. Land side is −x: the deck arrives from +x here.
+        # ---- both banks: the crossing does NOT stop at either bank ------------------
+        # **[GT-83 pass 3]** Both GT-83 abutments become **wall piers**, because the
+        #   carriageway runs over both of them now. Each top is sunk `cap_bite` into the
+        #   girder band, so the graded approach soffit meets it without a gap at either edge
+        #   (the soffit falls at most 0.05 m over the pier's own 2.20 m length).
+        #   The near one keeps the pass-2 stone apron and belt courses: it still stands on the
+        #   floodplain and is still the tallest thing in `meander_air`'s right-hand band, but
+        #   it is a 5.05 m pier now, not a 7.45 m dead end.
         appr_len = bg["appr_len"]
         appr_drop = bg["appr_grade"] * appr_len
         wp_top = soffit + bg["cap_bite"]
-        bridgehead("Near", bdx + bg["x0"], deck_cy, bg["deck_top"], -1.0)
-        ap_h = bg["apron_top"] - (bg["foot_z0"] - 0.05)
-        sc.add_box(stage, f"{bgrp}/Head_Near_Apron",
-                   (bdx + bg["x0"], deck_cy, bg["foot_z0"] - 0.05 + ap_h / 2.0),
-                   (bg["foot_t"] + 2.0 * bg["apron_xout"],
-                    deck_ly + bg["foot_over"] + 2.0 * bg["apron_out"], ap_h),
-                   M["rock"], collider=True)
+        wall_pier(f"{bgrp}/PierWall_Near", bdx + bg["x0"], deck_cy, wp_top,
+                  bg["pier_near_w"], apron=True, belts=True)
         wall_pier(f"{bgrp}/PierWall_Far", bdx + bg["x1"], deck_cy, wp_top,
                   bg["pier_far_w"])
         # far approach viaduct. It starts `joint` BEFORE x1, with its profile raised by
@@ -2201,6 +2316,52 @@ def main():
         #   approach's end face is buried 1.10 m inside the seat with nothing coincident.
         bridgehead("End", bdx + bg["x1"] + appr_len, deck_cy,
                    bg["deck_top"] - appr_drop - stag, 1.0)
+        # ---- near approach: the curved southward viaduct [GT-83 pass 3] --------------
+        # The ribbon is a chord polyline (`near_approach_chords`), one rot group per chord,
+        #   each carrying the SAME `deck_run` section as the frozen span. Three things make
+        #   it read as one continuous form rather than 17 boxes:
+        #     · **mitre overlaps** — every chord is extended by `back`/`fwd` =
+        #       (4.55) · tan(kink/2) at each end, so consecutive boxes interpenetrate and the
+        #       wedge that a plain butt joint would open on the outside of the turn is filled.
+        #       Chord 0's back extension is `napp_lead` 1.30 m > `abut_t`/2, so the frozen
+        #       deck's own end face is buried inside it.
+        #     · **eased steps** — 2.25° at the bridgehead, 9.00° max anywhere.
+        #     · **one profile** — `near_approach_chords` hands each chord its own start/end
+        #       elevation off a single parabolic-then-constant curve, so the grade is 0 where
+        #       it leaves the level span and there is no pitch step anywhere.
+        nchords, s_hold = near_approach_chords()
+        for c in nchords:
+            g_i = (c["z0"] - c["z1"]) / c["L"] if c["L"] > 1e-9 else 0.0
+            run = c["back"] + c["L"] + c["fwd"]
+            grp = sc.build_rot_group(stage, f"{ROOT}/NApp_{c['i']}",
+                                     (c["mx"], c["my"]), c["brg"])
+            deck_run(f"{grp}/R", c["mx"] - c["L"] / 2.0 - c["back"], c["my"],
+                     run, c["z0"] + g_i * c["back"], g_i * run)
+            if c["i"] in bg["napp_pier_j"]:
+                # T-pier at this chord's START joint, authored inside the chord's own group
+                # so the hammerhead cap is square to the ribbon it carries.
+                n_sof = c["z0"] - bg["deck_thick"]
+                n_cap_top = n_sof + bg["cap_bite"]
+                n_cap_bot = n_cap_top - bg["cap_h"]
+                n_col_h = (n_cap_bot + stag) - bg["pier_z0"]
+                sc.add_cylinder(stage, f"{grp}/NAppPier",
+                                (c["mx"] - c["L"] / 2.0, c["my"],
+                                 bg["pier_z0"] + n_col_h / 2.0),
+                                bg["pier_r"], n_col_h, M["concrete_dark"],
+                                collider=True)
+                sc.add_box(stage, f"{grp}/NAppPierCap",
+                           (c["mx"] - c["L"] / 2.0, c["my"],
+                            n_cap_bot + bg["cap_h"] / 2.0),
+                           (bg["cap_t"], bg["cap_w"], bg["cap_h"]),
+                           M["concrete_dark"], collider=True)
+        # south end bridgehead, at the modelled ground's south edge (y −45.8, 1.7 m inside
+        #   the y −47.5 band end). Narrowed seat/footing — see `send_over` in PARAMS.
+        last = nchords[-1]
+        sgrp = sc.build_rot_group(stage, f"{ROOT}/NAppHead",
+                                  (last["x1"], last["y1"]), last["brg"])
+        bridgehead("SEnd", last["x1"], last["y1"], last["z1"], 1.0,
+                   over=bg["send_over"], foot_over=bg["send_foot_over"],
+                   prefix=f"{sgrp}/Head_SEnd")
         # v4-D2: 3 far-side city blocks (base_z = far_bank top −3.2)
         # [v5.1] meander tangent + per-block yaw jitter (global convention 3 - no axis-aligned row of 3)
         for key, bd in PARAMS["city"].items():

@@ -1404,7 +1404,19 @@ scene16 A/B 사용자 검수 후 별도 행으로 확산.
 불투명 중복 차폐 미고려(보수적 과대판정 방향) · 개방 리프 AABB 근사 · 샘플 간격 ~2 m.
 처분 라운드 개시 시 무관 8 = 실유리 유지/전환 후보, 차폐 23 = 불투명/재배치 후보 — 사용자
 "천천히 볼게" 보류 상태, 렌더 A/B 최종 확인 동반 권고.
-**Status: HELD (유리 추가 검토 — 08-10(2) 정정: '금지' 아님 · 확산·파일럿 처분 보류)**
+**08-11 frosted A/B 파일럿 착지** (사용자 "유리부터 작업해볼까?" — 5차 frosted 제안 실행):
+scene13 `NEGOBS_GLASS_FROST=1` 팔 신설 — 차폐 23 = OmniGlass `frosting_roughness` 0.35(env
+`NEGOBS_GLASS_FROST_ROUGH`) · 무관 8 = 클리어 0.0(신규 `Looks/GlassVClear`). 경계 판정
+`glass_boundary_check_s13.py` 08-11 HEAD 재실행 = 23/8 동일 확인 후 명단 고정(Canopy
+N7·N8·N9·N10·S1·S10 + DoorTransom·DoorSidelight). 기본 팔(FROST=0)은 클리어 재질 미생성·
+전 바인딩 불변 — 파일럿 전 빌드와 동일. floor: py_compile OK · SMOKE 양팔 OK ·
+geom_invariance R-4/R-6 33/33 PASS · placement_lint stash A/B 신규 0 · building_kit OK.
+round `260811_w3_s13frost_a`(현행)/`_b`(frosted) 15컷×2 PT_FAST · regr A/B
+(`regr_260811_w3_s13frost.json`) FAIL13/WARN1 — 전량 FRAME/PHOTO/DARK/GRAZE, 유리 재질
+전환 귀속. 육안(entry_approach·bollard_walk·stair_head): 차폐 프로스트 젖빛 — 유리 너머
+경계·배경 뭉개짐 성립 · 무관 8 클리어 실유리 판독 · 파이어플라이/순흑 병리 0. gallery
+`_review/260811_w3_s13frost_a`·`_b` (검수 대기).
+**Status: HELD (유리 추가 검토 — frosted A/B 파일럿 착지·gallery 검수 대기 · 확산 계속 보류)**
 
 ## 30. GT-74 — scene01 광장 2차: 양측 건물·이중 중간레일 버그·부유 기둥 (선신고)
 

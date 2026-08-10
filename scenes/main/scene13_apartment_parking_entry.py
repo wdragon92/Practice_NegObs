@@ -148,6 +148,23 @@ import props_kit as pk
 
 
 # ===========================================================================
+# [GT-73 frosted pilot · 08-11 user] NEGOBS_GLASS_FROST=1 splits the 31 vision
+# panes by the `scripts/glass_boundary_check_s13.py` verdict (08-10(4), re-run
+# 08-11 at HEAD — same 23/8): the 23 boundary-occluding panes take OmniGlass
+# `frosting_roughness` = NEGOBS_GLASS_FROST_ROUGH (PT rough transmission — the
+# descent behind them mushes instead of showing sharp), the 8 irrelevant panes
+# go clear (frosting 0.0). Only meaningful with NEGOBS_GLASS_MDL=glass; OmniPBR
+# has no transmission to frost. Default arm (FROST=0) authors no new material
+# and binds exactly as before — byte-identical to the pre-pilot build.
+# Clear-pane names are the checker's world-AABB verdict at the frozen s13
+# geometry; if s13 geometry ever moves, re-run the checker before trusting them.
+GLASS_FROST = os.environ.get("NEGOBS_GLASS_FROST", "0") == "1"
+GLASS_FROST_ROUGH = float(os.environ.get("NEGOBS_GLASS_FROST_ROUGH", "0.35"))
+GLASS_CLEAR_BAYS = {"N7", "N8", "N9", "N10", "S1", "S10"}  # Canopy/Glass_* 무관 6
+#   + StairCanopy/DoorTransom · DoorSidelight (bound directly at their sites) = 8
+
+
+# ===========================================================================
 # [A] SCENE_CONFIG — standard 7 keys. Only hazard_stairs toggles geometry (openings filled).
 # ===========================================================================
 SCENE_CONFIG = {
@@ -1932,6 +1949,9 @@ def _smoke_report():
     print("    A/B: NEGOBS_GLASS_V1=0 → 구 Looks/Glass 상수로 make_pbr 폴백 · "
           "NEGOBS_GLASS_MDL=glass → OmniGlass.mdl (PT 에서 OmniPBR opacity 가 "
           "불투명하게 나오면 이 스위치 하나로 전환)")
+    print(f"    frosted 파일럿 팔 = {'ON' if GLASS_FROST else 'OFF(기본 — 파일럿 전 빌드와 동일)'} · "
+          f"NEGOBS_GLASS_FROST=1 → 차폐 23 frosting {GLASS_FROST_ROUGH:.2f} · "
+          f"무관 8 클리어 (경계 판정 = glass_boundary_check_s13, 08-11 재실행 23/8 확인)")
 
     # ── [08-06 · GT-64] road network · master plan · shadows · street rows ──
     _smoke_gt64(sh, po)
@@ -2181,13 +2201,31 @@ def main():
         #   `Looks/Glass` constants to make_pbr — the fallback is the previous look.
         M["glass_v"] = sc.make_glass(
             stage, f"{ROOT}/Looks/GlassV", color=mp["glass_v_color"],
-            opacity=mp["glass_v_opacity"], roughness=mp["glass_v_rough"],
+            opacity=mp["glass_v_opacity"],
+            roughness=(GLASS_FROST_ROUGH if GLASS_FROST
+                       else mp["glass_v_rough"]),
             ior=mp["glass_v_ior"], opaque_color=mp["glass_color"],
             opaque_roughness=mp["glass_rough"])
+        # [GT-73 frosted pilot] clear arm for the 8 boundary-irrelevant panes.
+        #   FROST=0 aliases the same material — no new prim, bindings unchanged.
+        M["glass_vc"] = (sc.make_glass(
+            stage, f"{ROOT}/Looks/GlassVClear", color=mp["glass_v_color"],
+            opacity=mp["glass_v_opacity"], roughness=0.0,
+            ior=mp["glass_v_ior"], opaque_color=mp["glass_color"],
+            opaque_roughness=mp["glass_rough"])
+            if GLASS_FROST else M["glass_v"])
         print(f"[GT-73 유리 투명화] 백엔드 = {sc.glass_backend()} · 불투명도 "
               f"{mp['glass_v_opacity']:.2f} · 적용 = 램프 커튼월 · 계단박스 "
               f"W/N · 동측 고정유리 · 문짝/트랜섬/측창 (건물 창호는 기존 불투명 "
               f"Looks/Glass 유지)")
+        if GLASS_FROST:
+            print(f"[GT-73 frosted 파일럿] 차폐 23 = frosting "
+                  f"{GLASS_FROST_ROUGH:.2f} · 무관 8 = 클리어 0.00 "
+                  f"(Canopy {sorted(GLASS_CLEAR_BAYS)} + DoorTransom + "
+                  f"DoorSidelight)"
+                  + ("" if sc.GLASS_MDL in ("glass", "omniglass") else
+                     " · 경고: NEGOBS_GLASS_MDL=glass 아님 — OmniPBR 은 "
+                     "투과 블러 불가, 이 팔은 무의미"))
         M["parapet"] = PBR(f"{ROOT}/Looks/Parapet",
                            diffuse_color=mp["parapet_color"],
                            roughness_const=mp["parapet_rough"])
@@ -3021,7 +3059,9 @@ def main():
                 BOX(f"{ROOT}/Canopy/Glass_{tag}{b}",
                     ((ga_ + gb_) / 2.0, sgn * cp["y_col"],
                      (gz0 + gz1) / 2.0),
-                    (gb_ - ga_, gl["t"], gz1 - gz0), M["glass_v"])
+                    (gb_ - ga_, gl["t"], gz1 - gz0),
+                    M["glass_vc" if f"{tag}{b}" in GLASS_CLEAR_BAYS
+                      else "glass_v"])
                 n_glass += 1
         # [08-05 3차] solid end wall over the portal head — closes the box and
         #   masks Ground_E's west face (the green band portal_look showed).
@@ -3196,7 +3236,7 @@ def main():
              (ea["door_z1"] + ea["head_h"] - lp + beam_soffit + em) / 2.0),
             (ea["glass_t"], jy1 - jy0,
              beam_soffit + em - ea["door_z1"] - ea["head_h"] + lp),
-            M["glass_v"])
+            M["glass_vc"])
         st_w = ea["stile"]
         #  glazing mullion + fixed sidelight between the leaf and the north jamb.
         #  Both lap `lap` UP into the head member instead of stopping flush on its
@@ -3213,7 +3253,7 @@ def main():
             (ex, (sy0 + sy1) / 2.0,
              (ea["kick_h"] - lp + ea["door_z1"] + lp) / 2.0),
             (ea["glass_t"], sy1 - sy0, ea["door_z1"] - ea["kick_h"] + 2 * lp),
-            M["glass_v"])
+            M["glass_vc"])
         n_gp += 1
         #  ── the single leaf, modelled OPEN ────────────────────────────────
         #  Leaf-local (u along the leaf from the hinge, v across its thickness).

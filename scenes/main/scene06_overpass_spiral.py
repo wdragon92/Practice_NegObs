@@ -213,7 +213,13 @@ PARAMS = dict(
     #   steps south off the corridor end straight onto the winding stair (head-on). The
     #   end's WEST remainder x 2.0…3.26 stays the open 5.005 m drop (the scene's trap —
     #   see deck.grid_x). GT-95's tangent-bevel apparatus is removed with this.
-    spiral=dict(cx=6.5, cy=-13.0, r_in=1.5, r_out=3.3, a0=180.0, sweep=300.0,
+    # [GT-98 · 08-11 user 8차] r_out 3.3 → **4.5** (= cx − deck.x0 [computed]): the tread
+    #   band widens 1.8 → 3.0 m so the top edge takes the FULL corridor end x [2.0, 5.0]
+    #   ("계단으로 넘어가는 부분에서 너비가 안 맞잖아"). The open-drop remainder is gone —
+    #   s=0 reclassifies to a helical-stair-descent negative obstacle (R-1 re-derive,
+    #   W4 re-adjudication candidate); the judged axis returns to the corridor centre
+    #   (deck.grid_x 3.5).
+    spiral=dict(cx=6.5, cy=-13.0, r_in=1.5, r_out=4.5, a0=180.0, sweep=300.0,
                 n=26, riser=0.192, z0=5.0, base_drop=0.5,
                 mesh=True, arc_seg=6),
     # [W3 S06 · G6 · GT-6 "fascia stepped"] The v6 fascia was a **continuous helical ribbon**
@@ -227,13 +233,14 @@ PARAMS = dict(
     #   step**, its top pinned 2 mm BELOW that step's own tread face (the tread keeps the
     #   walked surface) and its outer radius flush with `r_out` — the scallop of G6, and a
     #   sawtooth of exactly 0 because there is no longer an interpolated line to sawtooth.
-    fascia=dict(r_in=3.20, r_out=3.30, drop_below=0.002, thick=0.62, arc_seg=6),
+    # [GT-98] fascia follows the widened rim: 3.20/3.30 -> 4.40/4.50
+    fascia=dict(r_in=4.40, r_out=4.50, drop_below=0.002, thick=0.62, arc_seg=6),
     #   soffit : one lower helical slab (RC spiral slab) — G6's continuous helicoid soffit.
     #     `top_face=True` is the NF-1 fix (`scene_common.build_helix_ramp`): the builder
     #     places the box CENTRE and then tilts about it, so the surface it was asked to put
     #     at z_top actually landed (t/2)(1/cos−1) high and (t/2)sin off along the tangent.
     #     Measured on this ring at HEAD: 63.0 mm tangential, +13.03 mm lift.
-    soffit=dict(r_in=1.46, r_out=3.34, thick=0.34, drop=0.42,
+    soffit=dict(r_in=1.46, r_out=4.54, thick=0.34, drop=0.42,   # [GT-98] r_out 3.34->4.54
                 seg_per_deg=0.5, top_face=True),
     # central column r0.5 (brief). The 1.0 m annular void between it and r_in 1.5 is
     #   guarded by the inner railing but has no kick plate - open at robot height (extra hazard).
@@ -263,7 +270,7 @@ PARAMS = dict(
     #   (5.005 m sheer drop at s=0) would stop being what the axis judges. Forced move,
     #   declared per X2; margins to west rail / stair edge ≥ 0.6 m [computed].
     deck=dict(x0=2.0, x1=5.0, y0=-13.0, y1=13.0, z_top=5.0, thick=0.35,
-              parapet_h=1.25, parapet_t=0.08, panel_h=1.04, grid_x=2.6),
+              parapet_h=1.25, parapet_t=0.08, panel_h=1.04, grid_x=3.5),  # [GT-98] axis back to centre
 
     # === [W2-D ground_kit] P9 bridge_deck (spec §5.3 row "06 deck") ========
     # The h0.3 grid of this scene runs **along the deck**: origin = deck south
@@ -430,8 +437,11 @@ PARAMS = dict(
     #     off the rim plane: no coplanar face anywhere on the run [computed].
     #   `post_r` is retired — the mullion is now the deck's own `rail_bay.post_t` square,
     #     radially oriented on the curves, so 06 carries ONE mullion section end to end.
-    railing=dict(outer_r=3.24, inner_r=1.56, rail_h=1.196,
-                 steps_per_bay=2, landing_bays=3, arc_seg=1,  # landing_bays [GT-95] inert
+    # [GT-98] outer_r 3.24 → 4.44 (0.06 inset from the new rim) · steps_per_bay 2 → 1:
+    #   at r 4.44 a 2-step bay's flat pane bows 90 mm off the arc — over the 80 mm gate —
+    #   so the run goes to 26 one-step bays (deck 13 bays × 2, integer rhythm kept).
+    railing=dict(outer_r=4.44, inner_r=1.56, rail_h=1.196,
+                 steps_per_bay=1, landing_bays=3, arc_seg=1,  # landing_bays [GT-95] inert
                  cap_seg_deg=2.0, up_top=0.108, up_bot=-0.30,
                  up_side=0.050, up_rim=0.002, newel_t=0.13,
                  post_embed=0.05, joint=0.020),
@@ -458,8 +468,11 @@ PARAMS = dict(
         # [v5.1 §3] benches sit beside an anchor (street tree) - no anchorless placement mid-field.
         benches=((-24.4, -18.4, -6.0), (17.0, -18.4, 5.0), (-17.4, 18.4, 175.0)),
         # bollard row - outer boundary of the spiral entry passage (sidewalk / roadway split)
+        #   [GT-98] east trio 9/12/15 → 10.6/12.8/15.0: the widened tower rim (r 4.5)
+        #   reached the 9.0 bollard (r 4.47 — inside the sight corridor, practically on
+        #   the fascia); the row resumes east of the tower at an even 2.2 m pitch.
         bollards=((-6.0, -9.30), (-3.0, -9.30), (0.0, -9.30),
-                  (9.0, -9.30), (12.0, -9.30), (15.0, -9.30)),
+                  (10.6, -9.30), (12.8, -9.30), (15.0, -9.30)),
         # bus stop pole (stop sign) - prop shared with the overpass world
         bus_pole=(24.0, -9.20, 3.2),
     ),
@@ -1065,17 +1078,17 @@ def _smoke_report():
     print(f"  [GT-97 정면 접속] 상두 에지 = 방위-{sp['a0']:.0f}° 방사선 "
           f"x [{jx_out:.3f}, {jx_in:.3f}] · y {jy:.3f} = 데크 남단 {dk['y0']:.1f} "
           f"⊂ 단부 [{dk['x0']:.1f}, {dk['x1']:.1f}] → {'OK' if ok_line else 'FAIL'}")
-    gx_o = sp["cx"] + rl["outer_r"] * math.cos(a0r_)   # 3.260 — 경계 뉴얼
-    gx_i = sp["cx"] + rl["inner_r"] * math.cos(a0r_)   # 4.940 — E뉴얼 합류
-    trap0, trap1 = dk["x0"], gx_o
+    # [GT-98] 전폭 접속 — 양 런 상두가 데크 E뉴얼 쌍에 대칭 합류(자체 상두 뉴얼 폐지)
+    gx_o = sp["cx"] + rl["outer_r"] * math.cos(a0r_)   # 2.060 — 서측 E뉴얼 합류
+    gx_i = sp["cx"] + rl["inner_r"] * math.cos(a0r_)   # 4.940 — 동측 E뉴얼 합류
     gxx = dk.get("grid_x", 0.0)
-    print(f"    내측 가드 상두 x {gx_i:.3f} ↔ 동측 E뉴얼 x {dk['x1']:.2f} "
-          f"(Δ{abs(dk['x1']-gx_i)*1000:.0f} mm ⊂ 뉴얼) · 외측 상두 x {gx_o:.3f} = "
-          f"계단대/함정 경계 포스트")
-    print(f"    함정 잔부(개방 낙차) x [{trap0:.2f}, {trap1:.2f}] 폭 "
-          f"{trap1-trap0:.2f} m · 판정축 grid_x {gxx:.2f} — 이격 서측 "
-          f"{gxx-trap0:.2f} / 동측 {trap1-gxx:.2f} m → "
-          f"{'OK' if trap0+0.5 <= gxx <= trap1-0.5 else 'FAIL'}")
+    ok_m = abs(gx_o - dk["x0"]) <= 0.10 and abs(dk["x1"] - gx_i) <= 0.10
+    print(f"    외측 상두 x {gx_o:.3f} ↔ 서측 E뉴얼 {dk['x0']:.2f} "
+          f"(Δ{abs(gx_o-dk['x0'])*1000:.0f} mm ⊂ 뉴얼) · 내측 상두 x {gx_i:.3f} ↔ "
+          f"동측 E뉴얼 {dk['x1']:.2f} (Δ{abs(dk['x1']-gx_i)*1000:.0f} mm) → "
+          f"{'OK' if ok_m else 'FAIL'}")
+    print(f"    함정 잔부 소멸(계단 전폭) — s=0 GT = 나선 계단 하강형으로 재분류 · "
+          f"판정축 grid_x {gxx:.2f} = 통로 중심 복원")
     # ── walking continuity table ──
     print("  [보행 연속성 검증표]")
     rows = [
@@ -1115,10 +1128,13 @@ def _smoke_report():
     gs, gl = _guard_section(True), _guard_section(False)
     bay_deg = (a1 - a0) / float(len(bays) - 1)
     print("  [가드 통일 GT-76] 업스탠드 + 슈 + 유리판 + 브론즈 캡 — 전 구간 1계열")
+    # [GT-98] r 4.44 에서 2단 베이는 판 새기타 90 mm(>80 게이트) — 26 개 1단 베이로
+    #   가고, 데크 13 베이와는 정수비(×2)로 리듬을 잇는다.
+    ratio = (len(bays) - 1) / float(rb["n_bay"])
     print(f"    내·외측 가드 방위 [{a0:.0f}, {a1:.0f}] 전 구간 연결 · 베이 "
           f"{len(bays)-1}개 ({rl['steps_per_bay']}단/베이 {bay_deg:.4f}°) = 데크 베이 "
-          f"{rb['n_bay']}개와 동수 → "
-          f"{'OK' if len(bays)-1 == rb['n_bay'] else 'FAIL'}")
+          f"{rb['n_bay']}개 × {ratio:.0f} (정수비) → "
+          f"{'OK' if abs(ratio - round(ratio)) < 1e-9 else 'FAIL'}")
     # [GT-76] the cap is ONE member per run now, so what matters is the FACET sagitta of the
     #   member, not the bay chord sagitta the old per-bay chain carried.
     cap_sag = rl["outer_r"] * (1.0 - math.cos(math.radians(rl["cap_seg_deg"]
@@ -1265,7 +1281,8 @@ def _smoke_report():
         print(f"    d={d:2d}  eye ({gx:+.2f}, {ey:+.2f}, "
               f"{gz+0.3:.2f}~{gz+1.8:.2f}) · 데크 위 "
               f"{'OK' if on_deck else 'FAIL'}")
-    print(f"    시선 회랑(데크 x {dk['x0']:.1f}…{dk['x1']:.1f} / 나선 r≤4.2) "
+    print(f"    시선 회랑(데크 x {dk['x0']:.1f}…{dk['x1']:.1f} / 나선 "
+          f"r≤{PARAMS['spiral']['r_out']+0.9:.1f}) "
           f"드레싱 침입: {_corridor_hits()} 개 → "
           f"{'OK' if _corridor_hits() == 0 else 'FAIL'}")
 
@@ -1439,7 +1456,8 @@ def _to_world(p, org):
 
 def _corridor_hits():
     """[v6 revision] sight corridor = (1) the deck run corridor (x 2…5, y −13…13, grid axis)
-    (2) the front of the spiral opening (r ≤ 4.2 from the centre — the h0.3 near frame).
+    (2) the front of the spiral opening (r ≤ r_out+0.9 from the centre — the h0.3
+    near frame; [GT-98] follows the widened rim).
     Dressing (street trees·lamps·bollards·benches·stop pole) entering here would hide
     the drop → the count must be 0."""
     d = PARAMS["dress"]
@@ -1452,7 +1470,7 @@ def _corridor_hits():
     for x, y in pts:
         if dk["x0"] <= x <= dk["x1"] and dk["y0"] <= y <= dk["y1"]:
             n += 1
-        elif math.hypot(x - sp["cx"], y - sp["cy"]) <= 4.2:
+        elif math.hypot(x - sp["cx"], y - sp["cy"]) <= sp["r_out"] + 0.9:
             n += 1
     return n
 
@@ -1827,8 +1845,34 @@ def main():
         co = PARAMS["column"]
         CYL(f"{ROOT}/Column", (CX, CY, (co["z_top"]+co["z_bot"])/2.0),
             co["r"], co["z_top"]-co["z_bot"], M["concrete"], col=True)
-        # [GT-95] landing prims gone (GT-6 lobes → GT-94 west quarter → deleted): the
-        #   stair top meets the deck's bevelled SW corner directly — see `build_deck`.
+        # [GT-98 · 08-11 user] radial support ribs — the mast finally READS as carrying
+        #   the helix ("계단 지지대 역할을 하는 것처럼 보이게 축을 좀 달아줘"): one level
+        #   concrete rib per deck-bay-rhythm station (13), column face → soffit underside
+        #   across the 1.0 m annular slot. A radial member under a helicoid is naturally
+        #   LEVEL (soffit z varies with azimuth, not radius), so each rib is a plain
+        #   radial box whose top face meets the soffit bottom at its own azimuth.
+        spl = PARAMS["spiral"]
+        so_ = PARAMS["soffit"]
+        rib_n, rib_w, rib_d = 13, 0.16, 0.24
+        r0_ = co["r"] - 0.05                      # laps into the column
+        r1_ = so_["r_in"] + 0.05                  # laps under the soffit inner rim
+        rc_, rL_ = (r0_ + r1_) / 2.0, r1_ - r0_
+        made_ribs = 0
+        for k in range(rib_n):
+            a_k = spl["a0"] + (k + 0.5) * spl["sweep"] / float(rib_n)
+            z_top_rib = _soffit_z(a_k) - so_["thick"]
+            if z_top_rib - rib_d < 0.05:          # the last turns dive to grade
+                continue
+            BOX(f"{ROOT}/SpiralRib_{k}",
+                (CX + rc_ * math.cos(math.radians(a_k)),
+                 CY + rc_ * math.sin(math.radians(a_k)),
+                 z_top_rib - rib_d / 2.0),
+                (rL_, rib_w, rib_d), M["concrete"], rotZ=a_k)
+            made_ribs += 1
+        print(f"[GT-98] 지지 리브 {made_ribs}/{rib_n}본 — 기둥(r {co['r']:.2f})→소핏 "
+              f"내연(r {so_['r_in']:.2f}), 레벨 방사재·소핏 저면 접합")
+        # [GT-95] landing prims gone (GT-6 lobes → GT-94 west quarter → deleted); [GT-97]
+        #   the stair meets the deck's open south end head-on — see `build_deck`.
 
     # -------------------------------------------------------------------
     # overpass deck + support columns
@@ -2456,19 +2500,20 @@ def main():
             for tag, rad, ups in runs:
                 n_bay += _guard_run(f"{ROOT}/Rail{tag}", rad, bays,
                                     _spiral_z_at, gs, M, upstand=ups)
-                # both terminals are newels, so the run's own posts skip them
+                # both terminals land on newels, so the run's own posts skip them
                 _guard_posts(f"{ROOT}/RailPost{tag}", rad, bays, _spiral_z_at,
                              gs, M, skip={0, len(bays) - 1})
-                for k, a in ((0, sp["a0"]), (len(bays) - 1, a_end)):
+                # [GT-98] the TOP terminals have no newels of their own any more: with
+                #   the full-width stair the outer run ends Δ60 mm from the WEST deck
+                #   E newel (2,−13) and the inner run Δ60 mm from the EAST one (5,−13)
+                #   — both merge into those deck-founded newels (GT-76 one-newel rule,
+                #   now symmetric). Only the bottom (a_end) newels are built here.
+                for k, a in ((len(bays) - 1, a_end),):
                     zw = _spiral_z_at(a)
                     _newel(f"{ROOT}/Newel{tag}_{k}",
                            CX + rad * math.cos(math.radians(a)),
                            CY + rad * math.sin(math.radians(a)), a,
-                           # the top newel stands on the deck end line, so it is founded
-                           # on the lower of the two floors it serves [GT-97]
-                           min(zw + gs["up_bot"],
-                               PARAMS["deck"]["z_top"] + gl["post_bot"])
-                           if k == 0 else zw + gs["up_bot"],
+                           zw + gs["up_bot"],
                            zw + gs["cap_bot"], zw + gs["cap_top"], M)
             # deck run - [v6 verdict (1)] post segmentation, glazed bays (W3 S06 · G6)
             n_bay += build_deck_rail(M)

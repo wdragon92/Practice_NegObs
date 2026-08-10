@@ -1391,7 +1391,8 @@ scene16 A/B 사용자 검수 후 별도 행으로 확산.
   → OmniGlass / `NEGOBS_GLASS_V1=0` → 불투명 폴백 — 신규 재질에만 스코프, 기존 재질 무간섭).
   scene13 유리 31프림 적용. 육안: entry_approach에서 유리 홀이 반투명 판독(너머 수목·내부 가시),
   "slightly transparent" 성립. **확산(s06 등)은 사용자 검수 후 별도 행.**
-**Status: OPEN (사용자 검수 대기)**
+**08-10 사용자 룰링**: 확산 **기각** + **유리 소재 라이브러리 전반 사용 금지** — "유리로 가 버리면 NegObs 의 경계가 hidden 인지 보인다고 해야 할지가 애매해져서" = 투명 재질은 negative-obstacle 경계의 가시성 판정(라벨 의미론)을 모호하게 만든다. scene13 파일럿(31프림)의 롤백 여부·`make_glass` 처리(불투명 폴백 `NEGOBS_GLASS_V1=0` 일괄 적용 등)는 차기 세션 재지시 대기.
+**Status: CLOSED (확산 기각 — 유리 금지 룰링)**
 
 ## 30. GT-74 — scene01 광장 2차: 양측 건물·이중 중간레일 버그·부유 기둥 (선신고)
 
@@ -1634,7 +1635,8 @@ worked on neatly. Since I'm trying to keep the existing framework intact, it loo
 본 행에서 재판정. **주의 기록**: GT-71 헤지 A/B 파일럿(같은 씬, 검수 대기)은 본 개편으로
 A/B 대조 오염 — 사용자 지시 우선(GT-59 전례), 파일럿은 개편 후 재스테이지 필요.
 **GT 판정**: R-1 + R-3 + FRAME 선언. Round `260807_w3_fixqueue3`, baseline `260806_w3_fixqueue2`.
-**Status: OPEN (선신고)**
+**08-10 사용자 정정**: 본 행의 착지분(commit 8b919eb, round `260807_w3_fixqueue3`)은 사용자 지시로 **전면 revert**(commit f40e13c — 4씬 기하 해시가 라운드 이전 베이스라인과 비트동일 복원 확인, GT-89 게이트 유지). 구현이 사용자 의도와 불일치. 재지시 대기 — 구판독으로 재착지 금지.
+**Status: WITHDRAWN (revert — 재지시 대기)**
 
 ## 47. GT-91 — scene03 곡선 접속교 재정형 (GT-83 3차 기각) (선신고)
 
@@ -1645,7 +1647,8 @@ GT-83 3차의 곡선 남향 고가(42.40 m·17현·R_min 7.53)를 형태 불명�
 CROSS-scene03). 낙차선 x=0 미횡단·산책로 불가침(08-06 룰링 승계)·§4-8 대기원근 금지·
 P-13 무연석 유지. meander_air 차폐 38.9 % 귀속분은 재정형 결과로 재측정.
 **GT 판정**: R-3 + FRAME 선언. Round `260807_w3_fixqueue3`, baseline `260806_w3_fixqueue2`.
-**Status: OPEN (선신고)**
+**08-10 사용자 정정**: 본 행의 착지분(commit 8b919eb, round `260807_w3_fixqueue3`)은 사용자 지시로 **전면 revert**(commit f40e13c — 4씬 기하 해시가 라운드 이전 베이스라인과 비트동일 복원 확인, GT-89 게이트 유지). **판독 오류의 본체**: Authority 인용문("What is s03 talking about? … What is that shape..")은 곡선 남향 고가의 **기각이 아니라 meander_air 차폐 38.9 % 수치의 의미 설명 요청(질문)**이었다. 롤백 지시가 아니었으므로 본 행의 전제 자체가 무효 — 씬은 GT-83 3차 상태(곡선 고가 + 선언 FAIL 38.9 %)로 복원됨. 퍼센트 설명은 08-10 세션 보고로 전달.
+**Status: WITHDRAWN (오판독 — 행 무효)**
 
 ## 48. GT-92 — scene06 육교 계단 접속 차폐 해소 (선신고)
 
@@ -1658,7 +1661,8 @@ scene03 교량은 백드롭 거더교로 육교 아님). 판독이 다르면 사
 GT-68 유리+bronze cap 가드 계열 유지. W4 재판정(로봇높이 개구) 입력 이동 여부 기록.
 구현 = **Fable 서브에이전트**(08-07 사용자 지시) + 오케스트레이터 접속부 렌더 검수(08-06 교훈).
 **GT 판정**: R-3 선언. Round `260807_w3_fixqueue3`, baseline `260806_w3_fixqueue2`.
-**Status: OPEN (선신고)**
+**08-10 사용자 정정**: 본 행의 착지분(commit 8b919eb, round `260807_w3_fixqueue3`)은 사용자 지시로 **전면 revert**(commit f40e13c — 4씬 기하 해시가 라운드 이전 베이스라인과 비트동일 복원 확인, GT-89 게이트 유지). 구현이 사용자 의도와 불일치("왜 이리 내 말을 이해를 못했는지"). 재지시 대기 — 구판독으로 재착지 금지.
+**Status: WITHDRAWN (revert — 재지시 대기)**
 
 ## 49. GT-93 — scene11 철물 과다 감량 (선신고)
 
@@ -1669,4 +1673,5 @@ hazard①(랜딩 외연 1.10 저난간 = 판정 단서)·그레이팅 축. 기�
 프리셋 무수정(R17-1 일반 원칙). GT-80 테이퍼(1.667/1.383)는 감량 후 재평가 대상.
 구현 = **Fable 서브에이전트**(08-07 사용자 지시) + 오케스트레이터 접속부 렌더 검수.
 **GT 판정**: R-3 + FRAME 선언. Round `260807_w3_fixqueue3`, baseline `260806_w3_fixqueue2`.
-**Status: OPEN (선신고)**
+**08-10 사용자 정정**: 본 행의 착지분(commit 8b919eb, round `260807_w3_fixqueue3`)은 사용자 지시로 **전면 revert**(commit f40e13c — 4씬 기하 해시가 라운드 이전 베이스라인과 비트동일 복원 확인, GT-89 게이트 유지). 구현이 사용자 의도와 불일치. 재지시 대기 — 구판독으로 재착지 금지.
+**Status: WITHDRAWN (revert — 재지시 대기)**

@@ -97,8 +97,10 @@ Walking-continuity self-check table — an H offers **four** routes off the deck
   2  W-N straight     y  1.20 →  8.24 → mid 10.04 → foot  17.08              0.125/step
   3  W-S straight     y −1.20 → −8.24 → mid −10.04 → foot −17.08             0.125/step
   4  E-S switchback   y −1.20 → −8.24 (lane x 13.20…15.00) → mid −10.04
+     [GT-96 · 08-11] the EAST tower descends ONCE — its mirror leg (old row 5,
+     E-N) read as a diamond/X in elevation and the user removed it; the freed
+     head face is closed by the ribbon guard (L run). H stands on three feet.
                       → back to y −1.20 (lane x 15.10…16.90)                 0.125/step
-  5  E-N switchback   y  1.20 →  8.24 → mid 10.04
                       → back to y  1.20 (lane x 15.10…16.90)                 0.125/step
   6  four feet → sidewalk            z 0.000 → −0.005                        0.005
 
@@ -213,8 +215,12 @@ PARAMS = dict(
     west=dict(pivot=(-14.10, 1.20), rot=90.0, kind="straight",
               kickplate=True),
     # --- footbridge deck (width 2.4, runs along x) ---
+    # [GT-96 · 08-11 user] rail_z 1.95 -> **1.25**: the 1.95 deck fence was the old
+    #   noise-rail height surviving its panels — one of four mixed guard vocabularies
+    #   the user read as untidy. One ribbon height for the whole H now; the stepped
+    #   end-bay tapers die with the step they existed to hide.
     deck=dict(x0=-13.20, x1=13.20, y0=-1.20, y1=1.20, z_top=5.50, thick=0.40,
-              panel_h=1.80, panel_t=0.07, rail_z=1.95, rail_r=0.035),
+              panel_h=1.80, panel_t=0.07, rail_z=1.25, rail_r=0.035),
     #   [v6 ruling (5)] the old noise railing = **one large unbroken panel** (26.4 m long).
     #   with no posts, joints, top cap or see-through bays the deck read as a concrete
     #   bunker corridor, and its shadow side turned 30~45 % of the grid cuts pure black ((4)).
@@ -233,7 +239,7 @@ PARAMS = dict(
     #   `scene_common.BALUSTER_CLEAR_MAX` gates on `build_railing_line`). The old local loop
     #   ran 6 balusters per 2.05 m bay = **0.32 m clear**, i.e. 3.2× the statute, and it was
     #   invisible to the K4(a) gate because it is scene-local geometry, not a kit call.
-    rail_bay=dict(post_t=0.10, post_h=1.98, n_bay=12, joint=0.05,
+    rail_bay=dict(post_t=0.10, post_h=1.29, n_bay=12, joint=0.05,  # [GT-96] 1.98->1.29
                   kick_h=0.16, cap_h=0.07, cap_over=0.03,
                   baluster_r=0.009, baluster_gap=0.100),
     #   support piers - they land on the sidewalk outside the kerb (x +-10.5…11.1). Up to the deck soffit.
@@ -697,8 +703,16 @@ def _tower_legs(tag):
     a_head = _tower_nodes()[0]
     # world y of the head landing's back edge = the second leg's stair head
     py2 = (py - a_head) if rot < 0.0 else (py + a_head)
-    return ((f"{tag}_{'N' if rot > 0 else 'S'}", (px, py), rot, 1.0),
+    legs = ((f"{tag}_{'N' if rot > 0 else 'S'}", (px, py), rot, 1.0),
             (f"{tag}_{'S' if rot > 0 else 'N'}", (px, py2), -rot, -1.0))
+    # [GT-96 · 08-11 user] the EAST tower loses its mirror leg: the double-switchback
+    #   pair stacked as a diamond/X in elevation ("계단 다이아 형태로 할 거 같으면
+    #   한쪽은 없애면 좋겠어. 굳이 저렇겐 안 만들거든"). The judged cuts keep the
+    #   primary (midlanding frames the east SOUTH landing) — east_N goes. GT-80's
+    #   "an H has four feet" premise is amended by the user: east descends once.
+    if tag == "east":
+        return legs[:1]
+    return legs
 
 
 def _all_legs():
@@ -858,6 +872,11 @@ def _leg_lines(tag, piv, rot, bs, with_head):
         g.append(("HeadGuardOuter", (a_head, bA1 - ins), (0.0, bA1 - ins)))
         f.append(("Head_outer", (a_head, bA1), (0.0, bA1)))
         o.append(("DeckThreshold", (a_head, bA0), (0.0, bA0)))
+        if len(_tower_legs(tag)) == 1:
+            # [GT-96] no second leg any more: its stair-head face is a 5.505 m
+            #   free edge now, closed by the ribbon guard (build side matches).
+            g.append(("HeadGuardBack", (a_head, bA0 + ins), (a_head, bA1 - ins)))
+            f.append(("Head_back", (a_head, bA0), (a_head, bA1)))
 
     def _map(rows):
         return [(f"{tag}_{'N' if rot > 0 else 'S'}.{nm}",
@@ -1180,8 +1199,10 @@ def _smoke_report():
     print(f"    R11-1 비대칭 H (직선 타워 + 스위치백 타워) "
           f"{'OK' if asym else 'FAIL'}")
     n_legs = len(_all_legs())
-    print(f"    다리 수 {n_legs} · 발(하단) 수 {n_legs} → H형 4각 "
-          f"{'OK' if n_legs == 4 else 'FAIL'}")
+    # [GT-96 · 08-11 user] the east tower descends ONCE now (diamond read removed):
+    #   GT-80's four-feet premise is amended — the H stands on THREE feet.
+    print(f"    다리 수 {n_legs} · 발(하단) 수 {n_legs} → 개정 H형(동측 단일) 3각 "
+          f"{'OK' if n_legs == 3 else 'FAIL'}")
     print(f"  [타워 로컬 마디 a] 상부참 {a_head:.2f}…0.00 · A 0.00…{a_A1:.2f} "
           f"· 중간참 {a_A1:.2f}…{a_M1:.2f} · B(직선) {a_M1:.2f}…{a_B1:.2f} "
           f"/ B(스위치백) {a_A1:.2f}→0.00 @ b {bB0:.2f}…{bB1:.2f}")
@@ -1281,8 +1302,8 @@ def _smoke_report():
         print(f"      계단 하단 ({fx:+.2f}, {fy:+.2f}) ⊂ 보도 "
               f"{'OK' if on_walk else 'FAIL'} · 보도 y {wk['y0']:+.0f}…"
               f"{wk['y1']:+.0f} 연속 → 장면 경계까지 접속 OK (§0-2)")
-    print(f"    네 발 모두 보도 착지 {n_foot}/4 "
-          f"{'OK' if n_foot == 4 else 'FAIL'}")
+    print(f"    발 전부 보도 착지 {n_foot}/{len(_all_legs())} "
+          f"{'OK' if n_foot == len(_all_legs()) else 'FAIL'}")
 
     # ── [GT-80] H 완결 게이트: 개구부 폐쇄 0 · 자유 연단 난간 100 % ─────────
     #   The 08-06 audit read "the deck dead-ends into a rail with a building face on
@@ -2223,7 +2244,7 @@ def main():
     #   `with_head` marks the leg that owns the SHARED head landing (pad, columns,
     #   outer guard) — built once per tower, not once per leg.
     # -------------------------------------------------------------------
-    def build_leg(M, prefix, piv, bs, kind, kick, with_head):
+    def build_leg(M, prefix, piv, bs, kind, kick, with_head, solo=False):
         px, py = float(piv[0]), float(piv[1])
         ra = PARAMS["rail"]
         ins = float(ra["y_inset"])
@@ -2352,9 +2373,13 @@ def main():
             #   is guarded on the `y_inset` line so the two rake rails continue it
             #   without a 0.03 m jog at the corner.
             if with_head:
-                build_guard_run(M, f"{prefix}/HeadGuardOuter",
-                                [(_A(A_HEAD), _B(BA1 - ins)),
-                                 (_A(0.0), _B(BA1 - ins))],
+                pts_head = [(_A(A_HEAD), _B(BA1 - ins)),
+                            (_A(0.0), _B(BA1 - ins))]
+                if solo:
+                    # [GT-96] single-leg tower: the retired second-leg face is
+                    #   closed too — one continuous L run, shared corner post.
+                    pts_head.insert(0, (_A(A_HEAD), _B(BA0 + ins)))
+                build_guard_run(M, f"{prefix}/HeadGuardOuter", pts_head,
                                 Z_TOP, height=ra["rail_h"])
             # G11's expanded-metal sheet at the tower head, in the **stair plane**
             #   (a 0…3.0), filling the trapezoid between flight A's rake rail and a
@@ -2368,7 +2393,11 @@ def main():
             #   of on it: at b = BA1 the 0.014 m bars overlapped the rake rail's
             #   0.026 m posts by 3 mm [computed], which is an interpenetration, and a
             #   real infill panel is bolted to the outside face of the guard anyway.
-            mesh_run = 3.0
+            # [GT-96] the sheet is re-anchored INTO the fence line: top = the deck
+            #   ribbon height (rail_z 1.25) instead of +0.90 above the rail — the
+            #   old value made it a free-standing billboard over the head. Run
+            #   shortened so the triangle reads like G11's modest head infill.
+            mesh_run = 1.6
             rake = st["riser"] / st["tread"]
 
             def _mesh_bot(s, _z0=Z_TOP + ra["rail_h"], _r=rake):
@@ -2376,7 +2405,7 @@ def main():
             build_mesh_panel(M, f"{prefix}/HeadMesh",
                              (_A(0.0), _B(BA1 + 0.015)),
                              (_A(mesh_run), _B(BA1 + 0.015)),
-                             _mesh_bot, Z_TOP + ra["rail_h"] + 0.90)
+                             _mesh_bot, Z_TOP + PARAMS["deck"]["rail_z"])
             # mid-landing perimeter — every edge that carries the 2.755 m drop, and
             #   ONLY those. [GT-80] the old build guarded "Outer" (a = A_M1) on both
             #   forms; on a straight leg that line is where flight B's top riser is, so
@@ -2466,7 +2495,8 @@ def main():
             suffix = "" if i == 0 else ("N" if rot > 0 else "S")
             prefix = sc.build_rot_group(
                 stage, f"{ROOT}/{tag.capitalize()}Tower{suffix}", piv, rot)
-            build_leg(M, prefix, piv, bs, kind, kick, with_head=(i == 0))
+            build_leg(M, prefix, piv, bs, kind, kick, with_head=(i == 0),
+                      solo=(len(_tower_legs(tag)) == 1))
             print(f"[S11-H] {lnm} pivot ({piv[0]:+.2f},{piv[1]:+.2f}) "
                   f"rot {rot:+.1f}° bsign {bs:+.0f} · {kind} · "
                   f"kickplate {'有' if kick else '無'}")
@@ -2503,18 +2533,9 @@ def main():
                 BOX(f"{ROOT}/DeckRailPost_{i}_{k}",
                     (x0 + k*L, ye, zt + rb["post_h"]/2.0),
                     (rb["post_t"], rb["post_t"], rb["post_h"]), M["steel"])
-            # [08-06 orchestrator, GT-80 pass 2 — "connection between the bridge and
-            #   the stairs" / "naturally continuous form"] The 1.95 m fence used to
-            #   stop dead at the deck-end post while the head-landing guard carries on
-            #   at 1.10 m — a bare 0.85 m step at every fork. Korean 육교 fences taper
-            #   at the stairhead, so each END bay is now a **stepped transition**: two
-            #   sub-bays at 1.667 / 1.383 m stepping the head down to the landing
-            #   guard's 1.10 m line, balusters trimmed to each local rail, one shared
-            #   sub-post at the split. hazard ① (the 1.10 m outer rail on the head
-            #   landing's free edge) is untouched — the taper happens on the deck's own
-            #   side lines, before the landing.
-            tp1 = dk["rail_z"] - (dk["rail_z"] - 1.10) / 3.0          # 1.667
-            tp2 = dk["rail_z"] - 2.0 * (dk["rail_z"] - 1.10) / 3.0   # 1.383
+            # [GT-96] the stepped end-bay tapers are RETIRED with the height they
+            #   bridged: at rail_z 1.25 the fork step down to the 1.10 landing guard
+            #   is 0.15 m and knuckles at the shared end post — no transition bays.
             for k in range(nb):
                 xa = x0 + k*L + rb["post_t"]/2.0 + rb["joint"]
                 xb = x0 + (k+1)*L - rb["post_t"]/2.0 - rb["joint"]
@@ -2522,29 +2543,6 @@ def main():
                 BOX(f"{ROOT}/DeckKick_{i}_{k}",
                     (xc, ye, zt + rb["kick_h"]/2.0),
                     (Lx, dk["panel_t"], rb["kick_h"]), M["rail"])
-                taper = (k == 0) or (k == nb - 1)
-                if taper:
-                    # sub-bay order: the LOWER rail sits toward the deck end.
-                    lo_first = (k == 0)
-                    xm = (xa + xb) / 2.0
-                    BOX(f"{ROOT}/DeckRailPost_{i}_{k}m",
-                        (xm, ye, zt + rb["post_h"]/2.0),
-                        (rb["post_t"], rb["post_t"], rb["post_h"]), M["steel"])
-                    subs = (((xa, xm), tp2 if lo_first else tp1),
-                            ((xm, xb), tp1 if lo_first else tp2))
-                    for s_i, ((sxa, sxb), hz) in enumerate(subs):
-                        CYL(f"{ROOT}/DeckRailStep_{i}_{k}_{s_i}",
-                            ((sxa + sxb)/2.0, ye, zt + hz),
-                            dk["rail_r"], sxb - sxa, M["rail"], rotY=90.0)
-                        nbal = max(2, int((sxb - sxa) / pitch))
-                        bz0 = zt + rb["kick_h"]
-                        bz1 = zt + hz - 0.06
-                        for b in range(nbal):
-                            xb_ = sxa + (b + 0.5) * (sxb - sxa) / float(nbal)
-                            CYL(f"{ROOT}/DeckBal_{i}_{k}_{s_i}{b}",
-                                (xb_, ye, (bz0 + bz1)/2.0), rb["baluster_r"],
-                                bz1 - bz0, M["rail"])
-                    continue
                 nbal = max(2, int(Lx / pitch))
                 bz0 = zt + rb["kick_h"]
                 bz1 = zt + dk["rail_z"] - 0.06
@@ -2553,11 +2551,11 @@ def main():
                     CYL(f"{ROOT}/DeckBal_{i}_{k}_{b}",
                         (xb_, ye, (bz0 + bz1)/2.0), rb["baluster_r"],
                         bz1 - bz0, M["rail"])
-            # main top rail now spans only the full-height run between the two taper
-            #   bays; its ends land inside the taper-boundary posts.
+            # [GT-96] main top rail spans end to end again (no taper bays), its
+            #   ends landing inside the deck-end posts.
             CYL(f"{ROOT}/DeckRail_{i}",
                 ((dk["x0"]+dk["x1"])/2.0, ye, dk["z_top"] + dk["rail_z"]),
-                dk["rail_r"], (dk["x1"]-dk["x0"]) - 2.0*L + rb["post_t"],
+                dk["rail_r"], (dk["x1"]-dk["x0"]) + rb["post_t"],
                 M["rail"], rotY=90.0)
 
     # -------------------------------------------------------------------

@@ -1931,5 +1931,21 @@ building_kit rc0. round `260811_w3_s06trim`(15컷). **R-3**: regr vs `260811_w3_
 동측 3피트).
 **GT 판정**(승급): 레그 제거 = 보행면 철거 — R-1(레지스트리 재유도) + R-3 + FRAME 선언
 (팬스 −0.7 m 전 컷 상부 개방 + 동측 매스 절반 소거). hazard ①(동측 헤드 랜딩 1.10 저난간)
-존치 확인을 착지기록에 명기. Round `260810_w3_s11ribbon`, baseline `260806_w3_fixqueue2`.
-**Status: OPEN (선신고 — 구현 착수)**
+존치 확인을 착지기록에 명기. Round `260811_w3_s11ribbon`, baseline `260806_w3_fixqueue2`.
+**§4 착지기록** (2026-08-11): 구현 = ① `deck.rail_z` 1.95→**1.25**·`rail_bay.post_h`
+1.98→1.29 — 데크 리본 단일 높이, 상부 레일 전장 복원 ② 양단 2단 스텝 테이퍼 일습 삭제
+(1.25→1.10 포크 단차 0.15 는 공유 단부 포스트에서 너클) ③ HeadMesh 빌보드(+0.90) →
+팬스 라인 정착(상단 = rail_z 1.25, run 3.0→1.6 — G11 급 소형 삼각 인필) ④ **동측 미러
+레그(east_N) 삭제** — `_tower_legs` 단일 원천 수정(동측 1레그 반환), C1c 모델에
+HeadGuardBack/Head_back 신설 + 빌드 측 HeadGuardOuter 를 L-런으로 확장(비운 두부면 폐합,
+공유 코너 포스트), H 4각 검사 → 개정 3각 검사(발 착지 3/3), 독스트링 표 갱신 ⑤ hazard
+①(동측 헤드 랜딩 자유연 1.10 저난간) **존치 확인** — 판정 레그(east_S, midlanding 컷 피사)
+불변. **floor**: py_compile OK · SMOKE rc0(개정 3각 OK·보행 연속성 3루트 OK) ·
+geom_invariance R-4/R-6 3암 일치 · placement_lint **HEAD-stash A/B 판정 델타 0**(프림
+5598→**4610**, −988 = east_N 일습) · building_kit rc0. **round** `260811_w3_s11ribbon`
+(15컷 58.4 s). **R-3**: regr vs `260806_w3_fixqueue2` — FAIL 2 · WARN 7 · PASS 6, **전량
+FRAME 계열 선언 변화 귀속**(팬스 −0.70 m 전 컷 상부 개방 + 동측 매스 소거; GRAZE/DARK 신규
+0). **육안(X3)**: `pt_noon_overview` — 단일 높이 리본이 데크→계단→랜딩을 한 줄로 감고,
+동측이 실물 육교 문법의 단일 스위치백으로 읽힘(다이아 소거), 테이퍼·빌보드 소멸. gallery:
+`_review/260811_w3_s11ribbon`.
+**Status: OPEN (착지 — 사용자 검수 대기)**

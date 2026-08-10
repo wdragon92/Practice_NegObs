@@ -57,7 +57,8 @@ Walking continuity self-check table (entry → up → deck → down → exit)
   4  Spiral up 26 steps/25 rises  riser 0.192 × 25 = 4.800          0.192/step
      (centre angle of step i = 180 + (i+0.5)·11.53846°, top = 5.0 −(i+1)·0.192)
   5  Top step 0 → round landing   step 0 top 4.808 → landing 5.000  0.192
-     (landing = north-half annular landing r 0.48…3.30, clipped at the deck
+     (landing [GT-94] = west quarter-form connector r 0.48…3.30 only —
+      east lobe deleted 08-10; previously north-half annulus clipped at the deck
       edge to azimuth 0~62.964° and 117.036~180° — GT-29)
   6  Landing → overpass deck      landing 5.000 → deck 5.000        0.000
   7  Deck run                     x 2.0…5.0, y −13.0…13.0, z 5.0    —
@@ -227,6 +228,10 @@ PARAMS = dict(
     #   guarded by the inner railing but has no kick plate - open at robot height (extra hazard).
     column=dict(r=0.5, z_bot=-0.30, z_top=5.00),
     # circular landing atop the spiral (= widened deck south end). North half only - south half is stair.
+    #   [GT-94 · 08-10 user] of the north half, only the WEST quarter-form connector
+    #   (deck west edge 117.036° → stair top 180°) is BUILT — the east lobe was a
+    #   route-less half-round collar and is deleted in `_landing_arcs`. a0=0.0 is kept
+    #   as the annulus datum for the clip math and the retired east-newel branch.
     #   r_in 0.48 : embedded 2 cm into the column (r0.5) to avoid coplanarity.
     #   [W3 S06 · GT-6, the row's own +2 mm] top_z **4.998 -> 5.000**. The 2 mm offset bought
     #     z-fighting immunity against the deck at the price of a 2 mm step in the walked route
@@ -693,7 +698,14 @@ def _landing_arcs():
         return [(la["a0"], la["a1"])]
     half = (dk["x1"] - dk["x0"]) / 2.0
     ac = math.degrees(math.acos(min(1.0, half / la["r_out"])))
-    return [(la["a0"], ac), (180.0 - ac, la["a1"])]
+    # [GT-94 · 08-10 user] the EAST lobe [a0, ac] is DELETED, not clipped. It carried no
+    #   route — the walked path is stair top (180°) → west lobe → deck west edge — and it
+    #   read as a half-round collar bulging past the deck (x 5.0→6.8) and wrapping the
+    #   column ("계단이랑 통로랑 연결되는 반원 … 그 부분 이상한 거 못 느끼겠어?"). What
+    #   remains is the quarter-form connector the route actually uses. The well opening
+    #   this reopens is on the EAST side, behind the judged approach axis (grid runs -Y
+    #   at x 3.5); the s=0 drop edge and the h0.3 cylinder-silhouette axis are untouched.
+    return [(180.0 - ac, la["a1"])]
 
 
 def _in_landing(az, r):
@@ -781,7 +793,9 @@ def _landing_guard_arcs():
     la, dk, rl = PARAMS["landing"], PARAMS["deck"], PARAMS["railing"]
     half = (dk["x1"] - dk["x0"]) / 2.0
     ac = math.degrees(math.acos(min(1.0, half / rl["outer_r"])))
-    return [(la["a0"], ac), (180.0 - ac, la["a1"])]
+    # [GT-94] the east guard arc (and its free-end LandingNewel) leaves with the east
+    #   lobe — see `_landing_arcs`. One arc remains: deck west edge line → spiral a0.
+    return [(180.0 - ac, la["a1"])]
 
 
 def _deck_rail_y():
@@ -1172,10 +1186,16 @@ def _smoke_report():
           f"(Δ{d2*1000:.0f} mm) = 북측 계단 두부 {cap_no:.3f} (Δ{d3*1000:.0f} mm)"
           f" → {'OK' if max(d1, d2, d3) < 1e-6 else 'FAIL'}")
     ga, sl = _landing_guard_arcs(), _landing_arcs()
-    print(f"    랜딩 가드 호 [{ga[0][0]:.3f},{ga[0][1]:.3f}]·[{ga[1][0]:.3f},"
-          f"{ga[1][1]:.3f}] ⊂ 슬래브 로브 [{sl[0][0]:.3f},{sl[0][1]:.3f}] · "
+    # [GT-94] 로브 수 가변(동측 로브 삭제로 1개) — 가드 호가 자기 슬래브 로브 안에
+    #   있는지 쌍별로 검사한다.
+    ga_s = "·".join(f"[{a0:.3f},{a1:.3f}]" for a0, a1 in ga)
+    sl_s = "·".join(f"[{a0:.3f},{a1:.3f}]" for a0, a1 in sl)
+    ok_ga = len(ga) == len(sl) and all(
+        s0 - 1e-9 <= g0 and g1 <= s1 + 1e-9
+        for (g0, g1), (s0, s1) in zip(ga, sl))
+    print(f"    랜딩 가드 호 {ga_s} ⊂ 슬래브 로브 {sl_s} · "
           f"종단 x = 데크 연단 {dk['x0']:.2f}/{dk['x1']:.2f} → "
-          f"{'OK' if ga[0][1] <= sl[0][1] + 1e-9 else 'FAIL'}")
+          f"{'OK' if ok_ga else 'FAIL'}")
     yj, ybays = _deck_rail_y()
     print(f"    [데크↔랜딩 접합] 데크 난간 분절 y {dk['y0']:.3f} → 뉴얼 "
           f"{yj:.3f}(= 랜딩 가드가 x {dk['x1']:.2f} 를 지나는 점) → {dk['y1']:.3f}"
@@ -1832,10 +1852,12 @@ def main():
         CYL(f"{ROOT}/Column", (CX, CY, (co["z_top"]+co["z_bot"])/2.0),
             co["r"], co["z_top"]-co["z_bot"], M["concrete"], col=True)
         la = PARAMS["landing"]
-        # [W3 S06 · GT-6] landing = **two lobes**, clipped at the deck edge azimuth, built as
+        # [W3 S06 · GT-6] landing = lobes clipped at the deck edge azimuth, built as
         #   true sectors. The old note here recorded a 0.11 deg overshoot past 180 deg as
         #   "no effect"; with `mesh=True` the overshoot is 0.00 deg by construction, and the
         #   9.196 m² slab interpenetration the full annulus caused is down to 4.166 m².
+        #   [GT-94] one lobe now — the west quarter connector; the east lobe is deleted
+        #   (`_landing_arcs`), taking its parapet run and free-end newel with it.
         for k, (pa0, pa1) in enumerate(_landing_arcs()):
             nseg = max(2, int(round(la["seg"] * (pa1 - pa0) / 180.0)))
             sc.build_arc_steps(stage, f"{ROOT}/Landing_{k}", CX, CY, la["r_in"],
@@ -2497,7 +2519,9 @@ def main():
                              lb, lambda a: la["top_z"], gl, M, skip={0, nb})
                 if abs(lb[0] - la["a0"]) < 1e-6:
                     # the free end of the east lobe (azimuth 0) — the only run terminal that
-                    #   meets no other run, so it needs its own newel to stop being a cut face
+                    #   meets no other run, so it needs its own newel to stop being a cut face.
+                    #   [GT-94] dormant since the east lobe was deleted (`_landing_arcs`);
+                    #   kept so the record reads — no remaining arc starts at a0.
                     _newel(f"{ROOT}/LandingNewel_{i}",
                            CX + rl["outer_r"] * math.cos(math.radians(lb[0])),
                            CY + rl["outer_r"] * math.sin(math.radians(lb[0])),
@@ -2511,7 +2535,8 @@ def main():
             cap_sp = _spiral_z_at(sp["a0"]) + gs["cap_top"]
             print(f"[GT-76] guard unified · upstand+shoe+pane+bronze cap · spiral "
                   f"{len(bays)-1} bays x 2 runs + landing "
-                  f"{int(rl['landing_bays'])} x 2 + deck {len(ybays)-1} x 2 + "
+                  f"{int(rl['landing_bays'])} x {len(_landing_guard_arcs())}"
+                  f" [GT-94] + deck {len(ybays)-1} x 2 + "
                   f"north {int(PARAMS['north']['bays'])*2+1} x 2 = {n_bay} panes · "
                   f"cap line deck {PARAMS['deck']['z_top']+gl['cap_top']:.3f} = "
                   f"landing {cap_land:.3f} = spiral {cap_sp:.3f} "

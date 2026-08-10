@@ -50,19 +50,20 @@ Walking continuity self-check table (entry → up → deck → down → exit)
 
   #  Segment                      Coordinates (world, m)            Step
   ─  ───────────────────────────  ────────────────────────────────  ──────
-  1  South sidewalk approach      (x −30…0.2, y −13.0, z −0.005)    —
-  2  Spiral lower entry [GT-95]   az 57.04~117.04° at grade —       0.000
-     under-DECK opening (soffit 4.65); the west sidewalk mouth (az 180)
-     passes UNDER the stair (soffit ≈3.44) and wraps to the opening.
-     (spiral centre C = (3.5, −13.0))
-  3  Step up onto bottom step 25  az 45.50~57.04°, top z=+0.008     0.013
+  1  South sidewalk approach      (x −30…3.2, y −13.0, z −0.005)    —
+  2  Spiral lower entry [GT-97]   az 120~180° at grade, no steps    0.000
+     — the tower's NW open court (no landing, no roof), fed by the
+     west sidewalk. (spiral centre C = (6.5, −13.0) — tower moved
+     +3.0 m EAST so the stair meets the deck's open south end.)
+  3  Step up onto bottom step 25  az 108.46~120°, top z=+0.008      0.013
   4  Spiral up 26 steps/25 rises  riser 0.192 × 25 = 4.800          0.192/step
-     (centre angle of step i = 117.0357 + (i+0.5)·11.53846°, top = 5.0 −(i+1)·0.192)
-  5  Top step 0 → DECK (direct)   step 0 top 4.808 → deck 5.000     0.192
-     [GT-95] no landing: the deck's SW corner is bevelled along the tread-0
-     ray (117.0357° = deck west-edge rim crossing), so the stair springs
-     straight off the corridor end. (History: GT-6 two lobes → GT-94 west
-     quarter → GT-95 deleted.)
+     (centre angle of step i = 180 + (i+0.5)·11.53846°, top = 5.0 −(i+1)·0.192)
+  5  Top step 0 → DECK (head-on)  step 0 top 4.808 → deck 5.000     0.192
+     [GT-97] the top tread's start edge IS the deck end line segment
+     x 3.2…5.0 at y −13: walk south off the corridor end straight onto
+     the winding stair. End's west remainder x 2.0…3.26 stays the open
+     5.005 m drop (trap). (History: GT-6 lobes → GT-94 → GT-95 bevel →
+     GT-97 head-on, tower east.)
   7  Deck run                     x 2.0…5.0, y −13.0…13.0, z 5.0    —
      (clearance over the roadway y −8…8 = 4.65 −(−0.15) = 4.80 m)
   8  North stair A, 13 steps      y 13.0…16.9, z 5.0 → 2.504        0.192/step
@@ -204,14 +205,15 @@ PARAMS = dict(
     #     = **7.08125x** — 190.9 mm of tooth, in 24 teeth, on the landing seam. The sector
     #     mesh is exact at both rays, which is also what makes the **chord margin 1.03 -> 1.000**
     #     term of GT-6 real rather than nominal: a true sector needs no wedge-gap cover.
-    # [GT-95 · 08-10 user] a0 180 → **117.0357** = 180 − degrees(acos(1.5/3.3)) [computed]:
-    #   the TOP tread's start ray now IS the deck west-edge/rim crossing line, so the stair
-    #   springs directly off the corridor end ("계단을 통로 끝부분에 바로 연결"). Winding,
-    #   sweep 300°, 26 steps, riser — all unchanged; fascia/soffit/guards derive from a0.
-    #   Ground entry rotates with it: tread-free sector [57.04°, 117.04°] = under the DECK
-    #   (soffit 4.65 roof); the west sidewalk mouth (az 180) becomes an under-stair pass
-    #   (soffit at az 180 ≈ 3.44 m [computed] — pedestrian headroom holds).
-    spiral=dict(cx=3.5, cy=-13.0, r_in=1.5, r_out=3.3, a0=117.0357, sweep=300.0,
+    # [GT-97 · 08-10 user 7차] "통로 남쪽 끝이 어짜피 뚫려있잖아. 거길 바로 연결할 수
+    #   있도록 계단부를 통째로 동쪽으로 이동해서" — the WHOLE tower moves +3.0 m east:
+    #   cx 3.5 → **6.5** (= deck.x1 + r_in [computed]) and the phase returns to a0 **180**.
+    #   The top tread's start edge is then the azimuth-180 ray = the segment (3.2,−13)…
+    #   (5.0,−13) — ON the deck's open south-end line, hugging its EAST side: the walker
+    #   steps south off the corridor end straight onto the winding stair (head-on). The
+    #   end's WEST remainder x 2.0…3.26 stays the open 5.005 m drop (the scene's trap —
+    #   see deck.grid_x). GT-95's tangent-bevel apparatus is removed with this.
+    spiral=dict(cx=6.5, cy=-13.0, r_in=1.5, r_out=3.3, a0=180.0, sweep=300.0,
                 n=26, riser=0.192, z0=5.0, base_drop=0.5,
                 mesh=True, arc_seg=6),
     # [W3 S06 · G6 · GT-6 "fascia stepped"] The v6 fascia was a **continuous helical ribbon**
@@ -255,8 +257,13 @@ PARAMS = dict(
     #   separate round tube floating 0.240 m above the cap on over-long posts, and that tube
     #   ended in a raw cut circle in mid-air at both deck ends [measured, `pt_noon_overview`].
     #   `parapet_h` is retired with the tube and kept only so the history reads.
+    # [GT-97] `grid_x` 2.6: the judged grid axis leaves the deck centreline (3.5) for the
+    #   centre of the end's OPEN remainder x 2.0…3.26 — with the stair now occupying the
+    #   end's east band, the centreline axis would fall onto treads and the registered GT
+    #   (5.005 m sheer drop at s=0) would stop being what the axis judges. Forced move,
+    #   declared per X2; margins to west rail / stair edge ≥ 0.6 m [computed].
     deck=dict(x0=2.0, x1=5.0, y0=-13.0, y1=13.0, z_top=5.0, thick=0.35,
-              parapet_h=1.25, parapet_t=0.08, panel_h=1.04),
+              parapet_h=1.25, parapet_t=0.08, panel_h=1.04, grid_x=2.6),
 
     # === [W2-D ground_kit] P9 bridge_deck (spec §5.3 row "06 deck") ========
     # The h0.3 grid of this scene runs **along the deck**: origin = deck south
@@ -279,11 +286,10 @@ PARAMS = dict(
     #  * NO tactile: spec §12.4 puts scene06 on **hold** (the "full width" of a
     #    helical flight is undefined; supervisor call, filed with M10), so it is
     #    absent from TACTILE_SITES and ground_kit would raise B11 on it.
-    # [GT-95] wear-lane start -12.2 → -10.0 and the south scupper pair y -11.0 → -9.6:
-    #   the paved field now ends at the bevel-apex line y ≈ -10.06 (see build_ground_kit),
-    #   so nothing may sit south of it — the old positions would float over the threshold.
-    gkit=dict(joint_step=9.0, wear=((3.5, -10.0), (3.5, -0.5)), wear_w=2.0,
-              gully=[(2.35, -9.6), (4.65, -9.6), (2.35, -4.0), (4.65, -4.0)]),
+    # [GT-97] wear/gully back to their original stations (the GT-95 bevel exclusion is
+    #   retired — the slab is a full rectangle again).
+    gkit=dict(joint_step=9.0, wear=((3.5, -12.2), (3.5, -0.5)), wear_w=2.0,
+              gully=[(2.35, -11.0), (4.65, -11.0), (2.35, -4.0), (4.65, -4.0)]),
     # [GT-68] `glass_t` was a literal 0.019 inside `build_deck_rail`. It is lifted into
     #   PARAMS unchanged because the spiral and landing runs now read the SAME key — the
     #   section is shared by construction, not by two copies of the same number.
@@ -686,22 +692,8 @@ def _soffit_z(a_deg):
 #   east-lobe deletion → GT-95 full removal). The stair top meets the deck directly.
 
 
-def _deck_bevel():
-    """[GT-95] The deck's SW bevel edge = the spiral top-tread ray from the well centre.
-
-    Returns (y_apex, x_of(y)): the ray leaves (cx, cy) = (3.5, -13) at azimuth `spiral.a0`
-    and crosses the deck west edge x0 = 2.0 exactly at the rim, y_apex = cy +
-    r_out*sin(a0) = **-10.0606** [computed]. West of x_of(y) (for cy <= y <= y_apex) the
-    slab is cut; the line itself is the tread-0 edge — the corridor end the stair springs
-    from ("계단을 통로 끝부분에 바로 연결")."""
-    sp = PARAMS["spiral"]
-    a = math.radians(sp["a0"])
-    y_apex = sp["cy"] + sp["r_out"] * math.sin(a)
-    slope = math.cos(a) / math.sin(a)          # dx/dy along the ray (negative)
-
-    def x_of(y):
-        return sp["cx"] + (y - sp["cy"]) * slope
-    return y_apex, x_of
+# [GT-97] `_deck_bevel` deleted — the GT-95 SW bevel is gone: the deck is a plain
+#   rectangle again and the stair meets its OPEN south end head-on (tower moved east).
 
 
 # ===========================================================================
@@ -767,19 +759,11 @@ def _guard_section(raked):
                 post_bot=up - 0.06, post_top=cap_bot + 0.02)
 
 
-def _outer_guard_top_az():
-    """[GT-95] Azimuth where the spiral OUTER guard line (r 3.24) crosses the deck west
-    edge x0 — the outer run's top terminus on the deck rail line.
-
-    The old landing guard (`_landing_guard_arcs`, deleted with the landing) ended on the
-    deck edge LINE rather than the slab azimuth for the same reason this does: ending on
-    the tread ray would leave the terminal post ~30 mm off the deck rail line. The outer
-    run now starts here (117.578° [computed]) and hands its top end to `DeckNewel_S0`
-    (GT-76 one-newel junction pattern); the 0.54° sliver back to the tread ray 117.0357°
-    sits inside that newel's footprint, exactly as GT-76 recorded for the old junction."""
-    dk, rl = PARAMS["deck"], PARAMS["railing"]
-    half = (dk["x1"] - dk["x0"]) / 2.0
-    return 180.0 - math.degrees(math.acos(min(1.0, half / rl["outer_r"])))
+# [GT-97] `_outer_guard_top_az` deleted with the bevel junction: both spiral runs end
+#   at a0 = 180 again. The INNER top terminal (x 4.94, y −13) merges into the deck EAST
+#   rail's E newel at (5, −13) — Δ60 mm inside the newel footprint; the OUTER top
+#   terminal (x 3.26, y −13) is a free-standing newel on the end line, the boundary
+#   post between the stair band and the open-drop remainder.
 
 
 def _deck_rail_y():
@@ -797,34 +781,6 @@ def _deck_rail_y():
     n = int(PARAMS["rail_bay"]["n_bay"])
     bays = [dk["y0"]] + [yj + (dk["y1"] - yj) * k / float(n) for k in range(n + 1)]
     return yj, bays
-
-
-def _tri_prism(stage, path, xy3, z_bot, z_top, mtl):
-    """[GT-95] Vertical triangular prism (3 plan points, flat top/bottom) + collider.
-
-    Used for the deck's SW bevel piece — the slab corner the stair-head ray cuts. The
-    walker crosses it stepping off the corridor onto tread 0, so unlike the guards it
-    CARRIES a collider (walked surface)."""
-    from pxr import Gf, UsdGeom, UsdPhysics, Vt
-    pts = ([Gf.Vec3f(x, y, z_bot) for x, y in xy3]
-           + [Gf.Vec3f(x, y, z_top) for x, y in xy3])
-    counts = [3, 3, 4, 4, 4]
-    idx = [0, 2, 1,            # bottom (wound down)
-           3, 4, 5,            # top
-           0, 1, 4, 3,         # side 0-1
-           1, 2, 5, 4,         # side 1-2
-           2, 0, 3, 5]         # side 2-0
-    m = UsdGeom.Mesh.Define(stage, path)
-    m.CreatePointsAttr(Vt.Vec3fArray(pts))
-    m.CreateFaceVertexCountsAttr(Vt.IntArray(counts))
-    m.CreateFaceVertexIndicesAttr(Vt.IntArray(idx))
-    m.CreateSubdivisionSchemeAttr(UsdGeom.Tokens.none)
-    lo = Gf.Vec3f(min(p[0] for p in pts), min(p[1] for p in pts), z_bot)
-    hi = Gf.Vec3f(max(p[0] for p in pts), max(p[1] for p in pts), z_top)
-    m.CreateExtentAttr([lo, hi])
-    sc._bind_mtl(m.GetPrim(), mtl)
-    UsdPhysics.CollisionAPI.Apply(m.GetPrim())
-    return m
 
 
 def _raked_sector_mesh(stage, path, cx, cy, r_in, r_out, a0_deg, a1_deg,
@@ -987,13 +943,10 @@ def _solid_at(x, y, z):
         sz = _soffit_z(a_c)
         if so["r_in"] <= r <= so["r_out"] and sz - so["thick"] <= z <= sz:
             return "SpiralSoffit"
-    # ── deck·support columns·deck railing ──
+    # ── deck·support columns·deck railing ── ([GT-97] plain rectangle again)
     if dk["x0"] <= x <= dk["x1"] and dk["y0"] <= y <= dk["y1"] \
             and dk["z_top"] - dk["thick"] <= z <= dk["z_top"]:
-        # [GT-95] SW bevel: west of the top-tread ray the slab is cut
-        y_apex, x_of = _deck_bevel()
-        if not (y <= y_apex and x < x_of(y)):
-            return "Deck"
+        return "Deck"
     dp = PARAMS["deck_posts"]
     for i, py in enumerate(dp["ys"]):
         # [W3 S06] V-form: one conservative envelope covering footing + both splayed legs.
@@ -1098,24 +1051,31 @@ def _smoke_report():
           f"{(sp['a0']+sp['n']*sd) % 360:.2f}]  상면 "
           f"{_spiral_top_z(sp['n']-1):+.3f}")
     # ── entry opening: the azimuth band the stair does not occupy ──
-    free0 = (sp["a0"] + sp["sweep"]) % 360.0          # [GT-95] 57.04°
-    free1 = sp["a0"] % 360.0                          # 117.04°
-    deck_soffit = dk["z_top"] - dk["thick"]
+    free0 = (sp["a0"] + sp["sweep"]) % 360.0          # 120°
+    free1 = sp["a0"] % 360.0                          # 180°
     print(f"  [진입 개구] 지상 무단(無段) 방위 [{free0:.2f}, {free1:.2f}] "
-          f"= {free1-free0:.1f}° — 데크(소핏 {deck_soffit:.3f}) 하부 [GT-95]")
-    print(f"    개구 유효고 = 데크 소핏 {deck_soffit:.3f} − 지면 "
-          f"{PARAMS['walk']['z_top']:+.3f} = "
-          f"{deck_soffit-PARAMS['walk']['z_top']:.3f} m → "
-          f"{'OK' if deck_soffit-PARAMS['walk']['z_top'] > 2.1 else 'FAIL'}")
-    mouth_soffit = _soffit_z(180.0)
-    print(f"    서측 보도 어귀(방위 180°) = 계단 하부 통과 — 소핏 {mouth_soffit:.3f} "
-          f"− 지면 = {mouth_soffit-PARAMS['walk']['z_top']:.3f} m → "
-          f"{'OK' if mouth_soffit-PARAMS['walk']['z_top'] > 2.1 else 'FAIL'}")
-    y_apex, x_of = _deck_bevel()
-    print(f"  [GT-95 직결] 베벨 정점 ({dk['x0']:.3f}, {y_apex:.3f}) = 서연 림 교차 · "
-          f"단0 시작방위 {sp['a0']:.4f}° = 데크 남서 사선(정합 "
-          f"{abs(dk['x0']-x_of(y_apex))*1000:.1f} mm) → "
-          f"{'OK' if abs(dk['x0']-x_of(y_apex)) < 1e-3 else 'FAIL'}")
+          f"= {free1-free0:.1f}° — 타워 북서 개방 코트 [GT-97: 랜딩·데크 지붕 없음, "
+          f"서측 보도 어귀 자연 연장]")
+    # [GT-97] head-on junction: the top tread's start edge lies ON the deck end line
+    a0r_ = math.radians(sp["a0"])
+    jx_in = sp["cx"] + sp["r_in"] * math.cos(a0r_)     # 5.000 [computed]
+    jx_out = sp["cx"] + sp["r_out"] * math.cos(a0r_)   # 3.200
+    jy = sp["cy"] + sp["r_in"] * math.sin(a0r_)        # -13.000
+    ok_line = abs(jy - dk["y0"]) < 1e-9 and dk["x0"] <= jx_out < jx_in <= dk["x1"] + 1e-9
+    print(f"  [GT-97 정면 접속] 상두 에지 = 방위-{sp['a0']:.0f}° 방사선 "
+          f"x [{jx_out:.3f}, {jx_in:.3f}] · y {jy:.3f} = 데크 남단 {dk['y0']:.1f} "
+          f"⊂ 단부 [{dk['x0']:.1f}, {dk['x1']:.1f}] → {'OK' if ok_line else 'FAIL'}")
+    gx_o = sp["cx"] + rl["outer_r"] * math.cos(a0r_)   # 3.260 — 경계 뉴얼
+    gx_i = sp["cx"] + rl["inner_r"] * math.cos(a0r_)   # 4.940 — E뉴얼 합류
+    trap0, trap1 = dk["x0"], gx_o
+    gxx = dk.get("grid_x", 0.0)
+    print(f"    내측 가드 상두 x {gx_i:.3f} ↔ 동측 E뉴얼 x {dk['x1']:.2f} "
+          f"(Δ{abs(dk['x1']-gx_i)*1000:.0f} mm ⊂ 뉴얼) · 외측 상두 x {gx_o:.3f} = "
+          f"계단대/함정 경계 포스트")
+    print(f"    함정 잔부(개방 낙차) x [{trap0:.2f}, {trap1:.2f}] 폭 "
+          f"{trap1-trap0:.2f} m · 판정축 grid_x {gxx:.2f} — 이격 서측 "
+          f"{gxx-trap0:.2f} / 동측 {trap1-gxx:.2f} m → "
+          f"{'OK' if trap0+0.5 <= gxx <= trap1-0.5 else 'FAIL'}")
     # ── walking continuity table ──
     print("  [보행 연속성 검증표]")
     rows = [
@@ -1203,18 +1163,13 @@ def _smoke_report():
     print(f"    [캡 라인 연속] 데크 {cap_dk:.3f} = 나선 접합(방위 {a0:.1f}°) "
           f"{cap_sp:.3f} (Δ{d1*1000:.0f} mm) = 북측 계단 두부 {cap_no:.3f} "
           f"(Δ{d2*1000:.0f} mm) → {'OK' if max(d1, d2) < 1e-6 else 'FAIL'}")
-    # [GT-95] 랜딩 가드 검산은 랜딩과 함께 소멸 — 외측 가드 상두 종단이 데크 연단
-    #   선(x0) 위 뉴얼에 앉는지가 후계 검산이다.
-    ga_top = _outer_guard_top_az()
-    gx = sp["cx"] + rl["outer_r"] * math.cos(math.radians(ga_top))
-    print(f"    외측 가드 상두 종단 방위 {ga_top:.3f}° → x {gx:.3f} = 데크 서연 "
-          f"{dk['x0']:.2f} (DeckNewel_S0 합류) → "
-          f"{'OK' if abs(gx - dk['x0']) < 1e-6 else 'FAIL'}")
+    # [GT-97] 랜딩·베벨 검산 소멸 — 상두 종단은 정면 접속 검산([GT-97 정면 접속] 블록)
+    #   이 전담한다. 데크 레일은 양측 대칭(에이프런 복원) 검산만 남는다.
     yj, ybays = _deck_rail_y()
-    print(f"    [데크↔나선 직결 GT-95] 뉴얼 y {yj:.3f}(= 외측 가드 r{rl['outer_r']:.2f} "
-          f"가 데크 연단을 지나는 점) · 서측 = 뉴얼→{dk['y1']:.1f}(에이프런 없음, 계단 "
-          f"인계) · 동측 = {dk['y0']:.1f}→ 에이프런 1 + 정규 {len(ybays)-2} 베이 "
-          f"({(dk['y1']-yj)/(len(ybays)-2):.3f} m) → "
+    print(f"    [데크 레일 분절] 양측 대칭: {dk['y0']:.1f} → 뉴얼 {yj:.3f} "
+          f"(에이프런 리턴 1) + 정규 {len(ybays)-2} 베이 "
+          f"({(dk['y1']-yj)/(len(ybays)-2):.3f} m) → {dk['y1']:.1f} · "
+          f"동측 E뉴얼(x {dk['x1']:.1f}, y {dk['y0']:.1f}) = 나선 내측 상두 합류점 → "
           f"{'OK' if abs(ybays[1]-yj) < 1e-9 else 'FAIL'}")
     sh = dk["parapet_t"] / 2.0
     foot = ((rl["inner_r"] - sh, rl["inner_r"] + sh),
@@ -1463,12 +1418,14 @@ def _smoke_report():
 
 
 def _grid_shift():
-    """[v6 revision · supervisor approved] grid origin = **deck south end = edge of the
-    spiral opening** (3.5, −13.0, 5.000). The old origin (west end of the spiral outer
-    edge, at grade) had no drop in front of the robot, so an h0.3 concealment judgement
-    was impossible — the same argument as the scene11 precedent."""
+    """[v6 revision · supervisor approved] grid origin = **deck south end** (y −13, z 5).
+    The old origin (west end of the spiral outer edge, at grade) had no drop in front of
+    the robot, so an h0.3 concealment judgement was impossible — scene11 precedent.
+    [GT-97] x = `deck.grid_x` 2.6 (was the centreline 3.5): the axis now runs down the
+    end's open WEST remainder so s=0 stays the registered 5.005 m sheer drop — the east
+    band of the end is the relocated stair head (see the deck dict note)."""
     dk = PARAMS["deck"]
-    return ((dk["x0"] + dk["x1"]) / 2.0, dk["y0"], dk["z_top"])
+    return (dk.get("grid_x", (dk["x0"] + dk["x1"]) / 2.0), dk["y0"], dk["z_top"])
 
 
 def _to_world(p, org):
@@ -1540,23 +1497,27 @@ def build_views():
     #   **raise tgt only**, lifting the pitch +11.0 deg -> +18.8 deg. The sight end (x 5.30,
     #   r 2.55, azimuth 45 deg) sits at z 2.75, below the landing underside (4.498), so the frame
     #   top is capped by the **landing soffit** and the tread ribbon (azimuth 0~300 deg, z 1.9~2.9) fills the lower and middle frame.
-    out["spiral_up"] = dict(eye=[1.70, -11.20, 1.45], tgt=[5.30, -11.20, 2.75])
-    # deck_entry: entering the spiral descent from the deck (pedestrian view h1.6).
-    out["deck_entry"] = dict(eye=[3.50, -9.50, 6.60], tgt=[4.60, -14.60, 4.30])
+    # [GT-97] tower-following eyes shift +3.0 x with the tower (X2 — same subject).
+    out["spiral_up"] = dict(eye=[4.70, -11.20, 1.45], tgt=[8.30, -11.20, 2.75])
+    # deck_entry: entering the stair head from the deck (pedestrian view h1.6).
+    #   [GT-97] tgt re-aimed at the head-on junction band (end line, east half); the
+    #   sight ray ends just short of the top treads — they are the SUBJECT, and a tgt
+    #   beyond them would trip the sight-block gate on its own subject.
+    out["deck_entry"] = dict(eye=[3.50, -9.50, 6.60], tgt=[3.95, -13.30, 4.90])
     # broken_rail: close-up of the upper outer-guard arc (azimuth 225 deg, r3.3, z 4.155).
     #   [08-05] the missing-rail hazard is gone (continuous guard doctrine); the
     #   name is kept so regression rounds keep pairing.
     #   eye to the southwest - lit-face normal 203.2 deg, 58 deg from sun az 145 -> lambert
     #   +0.340 (lower than the +0.645 at v6 az 205 but still front lit, SMOKE per-shot table).
-    out["broken_rail"] = dict(eye=[-1.42, -16.44, 5.60],
-                              tgt=[1.17, -15.33, 4.16])
+    out["broken_rail"] = dict(eye=[1.58, -16.44, 5.60],
+                              tgt=[4.17, -15.33, 4.16])
     # ground_approach: h0.9 shot preserving the old grid axis (ground sidewalk approach, west -> east).
     #   tgt aims above the entry passage so it does not fall inside the central column (r0.5).
-    out["ground_approach"] = dict(eye=[-6.30, -13.00, 0.90],
-                                  tgt=[2.30, -13.40, 1.60])
+    out["ground_approach"] = dict(eye=[-3.30, -13.00, 0.90],
+                                  tgt=[5.30, -13.40, 1.60])
     # ground_graze: oblique ground grazing - shot reinforcing the cylindrical-silhouette concealment.
-    out["ground_graze"] = dict(eye=[-5.00, -17.50, 0.35],
-                               tgt=[3.20, -12.60, 0.90])
+    out["ground_graze"] = dict(eye=[-2.00, -17.50, 0.35],
+                               tgt=[6.20, -12.60, 0.90])
     # overview: high-angle view of the whole overpass (roadway·deck·spiral·north stair at once).
     #   [v7] moving the sun az 205 -> 145 kills the lit face of the old viewpoint (southwest
     #   −16,−28; normal 228 deg) at lambert +0.074 = the terminator. Pulling the viewpoint west
@@ -1878,16 +1839,14 @@ def main():
     def build_ground_kit(M):
         g = PARAMS["gkit"]
         dk = PARAMS["deck"]
-        # [GT-95] the paved field stops on the bevel-apex line: south of y_apex the deck
-        #   is the bare-concrete stair-head threshold (DeckSE + DeckSW), a straight
-        #   full-width material break — no dressing floats over the bevel cut. The grid
-        #   origin / well_edge datum stays at dk.y0 = -13 (s=0 unchanged).
-        y_apex, _ = _deck_bevel()
+        # [GT-97] full-rectangle paving again (GT-95's threshold band retired with the
+        #   bevel). Origin x follows the judged axis `deck.grid_x` (2.6 — the open-drop
+        #   remainder), well_edge s=0 datum unchanged at y0.
         gp = gk.plan_ground(
             "bridge_deck",
-            region=(dk["x0"], y_apex, dk["x1"], dk["y1"]),
+            region=(dk["x0"], dk["y0"], dk["x1"], dk["y1"]),
             z=dk["z_top"], gy=0.0,
-            origin=(3.5, dk["y0"], dk["z_top"]), axis="-y",
+            origin=(dk["grid_x"], dk["y0"], dk["z_top"]), axis="-y",
             edges=[("well_edge", 0.0)],
             dists=(2, 5, 10), scene="scene06",
             tactile=(),                 # §12.4 - hold (supervisor call, M10)
@@ -1913,35 +1872,18 @@ def main():
 
     def build_deck(M):
         dk = PARAMS["deck"]
-        sp_ = PARAMS["spiral"]
         # [W2-0 · P-A] Registered before the slab exists, because `_skin_wanted`
         # is evaluated inside `sc.add_box`. (The deck is 3.0 m wide, i.e. under
         # the 4.0 m skin threshold today, so this is a forward guard.)
         sc.skin_exclude(f"{ROOT}/Deck")
-        sc.skin_exclude(f"{ROOT}/DeckSE")
-        sc.skin_exclude(f"{ROOT}/DeckSW")
-        # [GT-95] the slab is a PENTAGON now — the SW corner is bevelled along the spiral
-        #   top-tread ray so the stair springs directly off the corridor end. Built as
-        #   north BOX + south-east BOX + the bevel triangle as a prism mesh; the three
-        #   pieces share plane faces (no gap, no overlap beyond the shared faces).
-        y_apex, _bx = _deck_bevel()
+        # [GT-97] one plain rectangular slab again — GT-95's pentagon split (bevel) is
+        #   retired with the tower's move east; the stair now meets the OPEN south end.
+        #   (DeckApronTile stays deleted — its landing-sliver job never returns.)
         BOX(f"{ROOT}/Deck",
-            ((dk["x0"]+dk["x1"])/2.0, (y_apex+dk["y1"])/2.0,
+            ((dk["x0"]+dk["x1"])/2.0, (dk["y0"]+dk["y1"])/2.0,
              dk["z_top"] - dk["thick"]/2.0),
-            (dk["x1"]-dk["x0"], dk["y1"]-y_apex, dk["thick"]),
+            (dk["x1"]-dk["x0"], dk["y1"]-dk["y0"], dk["thick"]),
             M["deck"], col=True)
-        BOX(f"{ROOT}/DeckSE",
-            ((sp_["cx"]+dk["x1"])/2.0, (dk["y0"]+y_apex)/2.0,
-             dk["z_top"] - dk["thick"]/2.0),
-            (dk["x1"]-sp_["cx"], y_apex-dk["y0"], dk["thick"]),
-            M["deck"], col=True)
-        _tri_prism(stage, f"{ROOT}/DeckSW",
-                   [(sp_["cx"], dk["y0"]), (sp_["cx"], y_apex),
-                    (dk["x0"], y_apex)],
-                   dk["z_top"] - dk["thick"], dk["z_top"], M["deck"])
-        # [GT-95] DeckApronTile deleted with the landing: its job was masking the
-        #   lobe-sliver UV patch under the deck plan; there is no lobe and the new
-        #   threshold is the bevel edge itself.
         # [W3 S06 · G6] tapered V-form pillars
         dp = PARAMS["deck_posts"]
         z1 = dk["z_top"] - dk["thick"]
@@ -2432,28 +2374,25 @@ def main():
         nb = len(ybays) - 1
         zt = dk["z_top"]
         for i, xe in enumerate((dk["x0"], dk["x1"])):
-            # [GT-95] WEST run (i=0) has no apron bay: the slab corner is bevelled and
-            #   the spiral outer guard takes over at the S newel. Its shoe/cap start at
-            #   yj; the EAST run keeps the full y0…y1 apron over the straight deck end.
-            yr0 = yj if i == 0 else y0
-            k_lo = 1 if i == 0 else 0
+            # [GT-97] symmetric again — both runs carry the apron return bay over the
+            #   full slab edge (the GT-95 west trim is retired with the bevel).
             # continuous shoe + continuous cap, end to end
             BOX(f"{ROOT}/DeckKick_{i}",
-                (xe, (yr0 + y1)/2.0, zt + (gl["kick_bot"] + gl["kick_top"])/2.0),
-                (dk["parapet_t"], y1 - yr0, gl["kick_top"] - gl["kick_bot"]),
+                (xe, (y0 + y1)/2.0, zt + (gl["kick_bot"] + gl["kick_top"])/2.0),
+                (dk["parapet_t"], y1 - y0, gl["kick_top"] - gl["kick_bot"]),
                 M["steel"])
             BOX(f"{ROOT}/DeckPanelCap_{i}",
-                (xe, (yr0 + y1)/2.0, zt + (gl["cap_bot"] + gl["cap_top"])/2.0),
-                (dk["parapet_t"] + 2*rb["cap_over"], y1 - yr0,
+                (xe, (y0 + y1)/2.0, zt + (gl["cap_bot"] + gl["cap_top"])/2.0),
+                (dk["parapet_t"] + 2*rb["cap_over"], y1 - y0,
                  gl["cap_top"] - gl["cap_bot"]), M["rail"])
-            # intermediate mullions — k 0/1/nb are newels (well rim · landing · north head)
+            # intermediate mullions — k 0/1/nb are newels (well rim · hand-over · north head)
             for k in range(2, nb):
                 BOX(f"{ROOT}/DeckRailPost_{i}_{k}",
                     (xe, ybays[k],
                      zt + (gl["post_bot"] + gl["post_top"])/2.0),
                     (rb["post_t"], rb["post_t"],
                      gl["post_top"] - gl["post_bot"]), M["steel"])
-            for k in range(k_lo, nb):
+            for k in range(nb):
                 ya = ybays[k] + rb["post_t"]/2.0 + rb["joint"]
                 yb = ybays[k+1] - rb["post_t"]/2.0 - rb["joint"]
                 yc, Ly = (ya + yb)/2.0, yb - ya
@@ -2474,18 +2413,16 @@ def main():
                     (rb["glass_t"], Ly - 2*rb["joint"],
                      gl["glass_top"] - gl["glass_bot"]),
                     M["glass"])
-            # newels — the points where this run ENDS or hands over. `E` is the deck's
-            #   south corner on the well rim: the run's cap used to stop there with a bare
-            #   0.14 x 0.085 cut face standing over the 5.005 m drop, in every grid frame.
-            #   [GT-95] the WEST run has no south corner any more (bevel) — it gets S
-            #   (spiral hand-over) + N only; the EAST run keeps E·S·N.
-            newels = (("S", yj), ("N", y1)) if i == 0 else \
-                     (("E", y0), ("S", yj), ("N", y1))
-            for tag, ye in newels:
+            # newels — the three points where this run ENDS or hands over. `E` is the
+            #   deck's south corner: the run's cap used to stop there with a bare cut
+            #   face over the drop. [GT-97] symmetric E·S·N again; the EAST E newel
+            #   (5, −13) additionally receives the spiral INNER guard's top terminal
+            #   (x 4.94 — Δ60 mm inside the newel footprint).
+            for tag, ye in (("E", y0), ("S", yj), ("N", y1)):
                 _newel(f"{ROOT}/DeckNewel_{tag}{i}", xe, ye, 0.0,
                        zt + gl["post_bot"], zt + gl["cap_bot"],
                        zt + gl["cap_top"], M)
-        return 2 * nb - 1
+        return 2 * nb
 
     def build_cues(M):
         rl = PARAMS["railing"]
@@ -2507,69 +2444,41 @@ def main():
             #   never encroaches on the 5.005 m drop). The walking-side face is `up_side`
             #   0.050 off the rail line on both, so the clear stair width between the two
             #   upstands is 1.580 m against the 1.20 m statutory minimum [computed].
-            # [GT-95] the two runs no longer share one bay list at the top: the OUTER run
-            #   starts on the deck edge line (`_outer_guard_top_az` 117.578°) and hands its
-            #   top end to `DeckNewel_S0` — no newel of its own there (GT-76 one-newel
-            #   junction); the INNER run keeps the tread ray a0 and its top newel also
-            #   founds the head-closure panel (deck level), mirroring the retired
-            #   a0-newel/landing relation.
-            ga_top = _outer_guard_top_az()
-            runs = (("Outer", rl["outer_r"], [ga_top] + bays[1:], False,
+            # [GT-97] both runs share the bay list again, terminals at a0 = 180 and
+            #   a_end. Top newels: the INNER one stands 60 mm west of the deck EAST
+            #   rail's E newel (5, −13) — the two read as one junction; the OUTER one
+            #   (x 3.26, y −13) is the boundary post between the stair band and the
+            #   end's open-drop remainder. Both founded min(raked, deck floor).
+            runs = (("Outer", rl["outer_r"],
                      (rl["outer_r"] - rl["up_side"], fa["r_out"] + rl["up_rim"])),
-                    ("Inner", rl["inner_r"], bays, True,
+                    ("Inner", rl["inner_r"],
                      (sp["r_in"] + rl["up_rim"], rl["inner_r"] + rl["up_side"])))
-            for tag, rad, rbays, top_newel, ups in runs:
-                n_bay += _guard_run(f"{ROOT}/Rail{tag}", rad, rbays,
+            for tag, rad, ups in runs:
+                n_bay += _guard_run(f"{ROOT}/Rail{tag}", rad, bays,
                                     _spiral_z_at, gs, M, upstand=ups)
-                # both terminals land on newels, so the run's own posts skip them
-                _guard_posts(f"{ROOT}/RailPost{tag}", rad, rbays, _spiral_z_at,
-                             gs, M, skip={0, len(rbays) - 1})
-                ends = (((0, sp["a0"]), (len(rbays) - 1, a_end)) if top_newel
-                        else ((len(rbays) - 1, a_end),))
-                for k, a in ends:
+                # both terminals are newels, so the run's own posts skip them
+                _guard_posts(f"{ROOT}/RailPost{tag}", rad, bays, _spiral_z_at,
+                             gs, M, skip={0, len(bays) - 1})
+                for k, a in ((0, sp["a0"]), (len(bays) - 1, a_end)):
                     zw = _spiral_z_at(a)
                     _newel(f"{ROOT}/Newel{tag}_{k}",
                            CX + rad * math.cos(math.radians(a)),
                            CY + rad * math.sin(math.radians(a)), a,
-                           # the top newel also receives the head-closure panel, so it is
-                           # founded on the lower of the two floors it serves [GT-95]
+                           # the top newel stands on the deck end line, so it is founded
+                           # on the lower of the two floors it serves [GT-97]
                            min(zw + gs["up_bot"],
                                PARAMS["deck"]["z_top"] + gl["post_bot"])
                            if k == 0 else zw + gs["up_bot"],
                            zw + gs["cap_bot"], zw + gs["cap_top"], M)
-            # [GT-95] head-closure panel: a deck-level guard piece along the bevel ray,
-            #   column face → inner top newel. It closes the r 0.5…1.5 slot between the
-            #   well interior and the corridor end that opened when the landing died —
-            #   same shoe·pane·cap family, so the head reads as one product line.
-            co_ = PARAMS["column"]
-            dkz = PARAMS["deck"]["z_top"]
-            r_a = co_["r"] - 0.06                   # laps into the column face
-            r_b = rl["inner_r"] - rl["newel_t"]/2.0 - rb["joint"]
-            r_c, Lr = (r_a + r_b)/2.0, r_b - r_a
-            hx = CX + r_c * math.cos(math.radians(sp["a0"]))
-            hy = CY + r_c * math.sin(math.radians(sp["a0"]))
-            BOX(f"{ROOT}/HeadCloseKick",
-                (hx, hy, dkz + (gl["kick_bot"] + gl["kick_top"])/2.0),
-                (Lr, PARAMS["deck"]["parapet_t"],
-                 gl["kick_top"] - gl["kick_bot"]), M["steel"], rotZ=sp["a0"])
-            BOX(f"{ROOT}/HeadCloseGlass",
-                (hx, hy, dkz + (gl["glass_bot"] + gl["glass_top"])/2.0),
-                (Lr - 2*rb["joint"], rb["glass_t"],
-                 gl["glass_top"] - gl["glass_bot"]), M["glass"], rotZ=sp["a0"])
-            BOX(f"{ROOT}/HeadCloseCap",
-                (hx, hy, dkz + (gl["cap_bot"] + gl["cap_top"])/2.0),
-                (Lr, PARAMS["deck"]["parapet_t"] + 2*rb["cap_over"],
-                 gl["cap_top"] - gl["cap_bot"]), M["rail"], rotZ=sp["a0"])
-            n_bay += 1
             # deck run - [v6 verdict (1)] post segmentation, glazed bays (W3 S06 · G6)
             n_bay += build_deck_rail(M)
             n_bay += build_north_guard(M)
             yj, ybays = _deck_rail_y()
             cap_dk_ = PARAMS["deck"]["z_top"] + gl["cap_top"]
             cap_sp = _spiral_z_at(sp["a0"]) + gs["cap_top"]
-            print(f"[GT-76·GT-95] guard unified · upstand+shoe+pane+bronze cap · spiral "
-                  f"{len(bays)-1} bays x 2 runs(상두 직결·랜딩 없음) + head-close 1 + "
-                  f"deck {len(ybays)-1} x 2 − 서측 에이프런 1 + "
+            print(f"[GT-76·GT-97] guard unified · upstand+shoe+pane+bronze cap · spiral "
+                  f"{len(bays)-1} bays x 2 runs(단부 정면 접속·랜딩 없음) + "
+                  f"deck {len(ybays)-1} x 2 + "
                   f"north {int(PARAMS['north']['bays'])*2+1} x 2 = {n_bay} panes · "
                   f"cap line deck {cap_dk_:.3f} = spiral {cap_sp:.3f} "
                   f"(Δ{abs(cap_sp-cap_dk_)*1000:.0f} mm) · 캡 연속 1本/run · "

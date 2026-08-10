@@ -307,9 +307,14 @@ PARAMS = dict(
     #   the pane is HOUSED by: the pane used to start exactly at the shoe top and stop exactly
     #   at the cap bottom, i.e. two coplanar faces per bay and a pane that reads as laid
     #   against the metal instead of set into it.
+    # [GT-99] cap_grip 0.025 → 0.065: a flat pane CHORDS the widened arc (bay-mid
+    #   sagitta 22.5 mm at r 4.44), so from an inner-above eye a sightline could pass
+    #   over the pane's top edge and under the helical cap — the lens-shaped open band
+    #   `deck_entry` showed at every bay top. 65 mm of pane-into-cap lap closes it for
+    #   all depressions ≥ ~19° [computed: atan(0.065/0.0225)] — every judged eye.
     rail_bay=dict(post_t=0.10, post_h=1.10, n_bay=13, joint=0.05,
                   kick_h=0.12, cap_h=0.06, cap_over=0.03, glass_t=0.019,
-                  glass_set=0.035, cap_grip=0.025,
+                  glass_set=0.035, cap_grip=0.065,
                   baluster_r=0.018, n_baluster=5),
     #   deck support columns - they land on the sidewalk outside the kerb (y +-8.0…8.6). y +-9.0 is
     #   0.7 m clear of the spiral outer edge (C.y −13 + r 3.3 = −9.7), so no interference.
@@ -1853,24 +1858,36 @@ def main():
         #   radial box whose top face meets the soffit bottom at its own azimuth.
         spl = PARAMS["spiral"]
         so_ = PARAMS["soffit"]
-        rib_n, rib_w, rib_d = 13, 0.16, 0.24
+        # [GT-99] the single 0.24-deep blade read as a sharp fin below the soffit rim
+        #   ("아래쪽으로 날카롭게 튀어나온"). Re-formed as a STEPPED CORBEL: a slim
+        #   full-length top slab flush under the soffit (its outer end tucked 20 mm
+        #   inside the rim shadow), plus a deeper haunch on the column half — the
+        #   classic bracket profile, no sharp far edge hanging in air.
+        rib_n, rib_w = 13, 0.16
+        slab_d, haunch_d = 0.10, 0.14
         r0_ = co["r"] - 0.05                      # laps into the column
-        r1_ = so_["r_in"] + 0.05                  # laps under the soffit inner rim
+        r1_ = so_["r_in"] - 0.02                  # tucked inside the soffit rim
         rc_, rL_ = (r0_ + r1_) / 2.0, r1_ - r0_
+        rh1_ = r0_ + rL_ * 0.55                   # haunch reaches 55 % of the span
+        rhc_, rhL_ = (r0_ + rh1_) / 2.0, rh1_ - r0_
         made_ribs = 0
         for k in range(rib_n):
             a_k = spl["a0"] + (k + 0.5) * spl["sweep"] / float(rib_n)
             z_top_rib = _soffit_z(a_k) - so_["thick"]
-            if z_top_rib - rib_d < 0.05:          # the last turns dive to grade
+            if z_top_rib - slab_d - haunch_d < 0.05:   # the last turns dive to grade
                 continue
+            ca_, sa_ = math.cos(math.radians(a_k)), math.sin(math.radians(a_k))
             BOX(f"{ROOT}/SpiralRib_{k}",
-                (CX + rc_ * math.cos(math.radians(a_k)),
-                 CY + rc_ * math.sin(math.radians(a_k)),
-                 z_top_rib - rib_d / 2.0),
-                (rL_, rib_w, rib_d), M["concrete"], rotZ=a_k)
+                (CX + rc_ * ca_, CY + rc_ * sa_, z_top_rib - slab_d / 2.0),
+                (rL_, rib_w, slab_d), M["concrete"], rotZ=a_k)
+            BOX(f"{ROOT}/SpiralRibHaunch_{k}",
+                (CX + rhc_ * ca_, CY + rhc_ * sa_,
+                 z_top_rib - slab_d - haunch_d / 2.0),
+                (rhL_, rib_w, haunch_d), M["concrete"], rotZ=a_k)
             made_ribs += 1
-        print(f"[GT-98] 지지 리브 {made_ribs}/{rib_n}본 — 기둥(r {co['r']:.2f})→소핏 "
-              f"내연(r {so_['r_in']:.2f}), 레벨 방사재·소핏 저면 접합")
+        print(f"[GT-98·GT-99] 지지 리브 {made_ribs}/{rib_n}본 — 계단식 코벨(슬래브 "
+              f"{slab_d:.2f}+헌치 {haunch_d:.2f}), 기둥(r {co['r']:.2f})→소핏 내연 "
+              f"20 mm 안쪽, 소핏 저면 접합")
         # [GT-95] landing prims gone (GT-6 lobes → GT-94 west quarter → deleted); [GT-97]
         #   the stair meets the deck's open south end head-on — see `build_deck`.
 

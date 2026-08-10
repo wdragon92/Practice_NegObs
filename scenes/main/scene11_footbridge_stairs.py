@@ -96,10 +96,11 @@ Walking-continuity self-check table — an H offers **four** routes off the deck
        · guarded on the outer edge only (b = BA1) — the 5.505 m free edge
   2  W-N straight     y  1.20 →  8.24 → mid 10.04 → foot  17.08              0.125/step
   3  W-S straight     y −1.20 → −8.24 → mid −10.04 → foot −17.08             0.125/step
-  4  E-S switchback   y −1.20 → −8.24 (lane x 13.20…15.00) → mid −10.04
-     [GT-96 · 08-11] the EAST tower descends ONCE — its mirror leg (old row 5,
-     E-N) read as a diamond/X in elevation and the user removed it; the freed
-     head face is closed by the ribbon guard (L run). H stands on three feet.
+  4  E-N switchback   y  1.20 →  8.24 (lane x 13.20…15.00) → mid 10.04
+     [GT-96 2판 · 08-11] the EAST tower descends ONCE, to the NORTH — the mirror
+     pair read as a diamond/X and the user removed one side; the SOUTH leg went
+     (its foot crowded the bus shelter), the freed head face is closed by the
+     ribbon guard (L run). H stands on three feet.
                       → back to y −1.20 (lane x 15.10…16.90)                 0.125/step
                       → back to y  1.20 (lane x 15.10…16.90)                 0.125/step
   6  four feet → sidewalk            z 0.000 → −0.005                        0.005
@@ -711,7 +712,9 @@ def _tower_legs(tag):
     #   primary (midlanding frames the east SOUTH landing) — east_N goes. GT-80's
     #   "an H has four feet" premise is amended by the user: east descends once.
     if tag == "east":
-        return legs[:1]
+        # [GT-96 2판 · 08-11 user] keep the NORTH leg, not the south: the bus shelter
+        #   sits by the south foot ("버스정류장이 있어서 반대껄 살렸으면 좋았을 것").
+        return legs[1:]
     return legs
 
 
@@ -890,11 +893,15 @@ def _leg_lines(tag, piv, rot, bs, with_head):
 def _plan_lines():
     """(guards, openings, free_edges) for the whole H, in world coordinates."""
     G, O, F = [], [], []
-    for i, (tag, _nm, piv, rot, bs) in enumerate(_all_legs()):
-        g, o, f = _leg_lines(tag, piv, rot, bs, with_head=(i % 2 == 0))
-        G += g
-        O += o
-        F += f
+    # [GT-96 2판] with_head = each tower's FIRST leg (the old i % 2 assumed two legs
+    #   per tower and, at three legs, hung the west head on its mirror — symmetric so
+    #   the world segments coincided, but structurally wrong; fixed with the swap).
+    for tag in ("east", "west"):
+        for j, (_nm, piv, rot, bs) in enumerate(_tower_legs(tag)):
+            g, o, f = _leg_lines(tag, piv, rot, bs, with_head=(j == 0))
+            G += g
+            O += o
+            F += f
     return G, O, F
 
 
@@ -1690,8 +1697,9 @@ def build_views():
     #   because the completed north leg now occupies part of the upper frame that was
     #   open sky. It stands under the east SOUTH flight A, which the leg completion
     #   does not touch, and the sight-line block test is unchanged.
-    out["under_grating"] = dict(eye=[14.10, -7.90, 2.00],
-                                tgt=[14.10, -5.76, 4.38])
+    # [GT-96 2판] mirrored +Y with the kept NORTH leg (fixed-coordinate cut).
+    out["under_grating"] = dict(eye=[14.10, 7.90, 2.00],
+                                tgt=[14.10, 5.76, 4.38])
     # deck_walk: pedestrian view along the deck (h1.6) — now an all-open baluster corridor
     out["deck_walk"] = dict(eye=[-9.00, 0.00, 7.10], tgt=[8.00, 0.00, 6.30])
     # midlanding: robot view on the east mid landing (h0.3) - head-on at the open band left by the missing kickplate
@@ -1715,8 +1723,9 @@ def build_views():
     #   sky 37.3 → 37.3 % · tower 12.7 → 12.5 % · footway 10.9 → **17.2 %** · d 8.78 → 10.31 m.
     #   **This is a mise-en-scène cut, not one of the 9 judge presets** — those come out of
     #   `sc.grid_views` above and are byte-identical across both rounds.
+    #   [GT-96 2판] tgt y −1.20 → +1.20: the surviving east foot is the NORTH one.
     out["sidewalk_approach"] = dict(eye=[19.60, 8.60, 0.90],
-                                    tgt=[16.40, -1.20, 2.80])
+                                    tgt=[16.40, 1.20, 2.80])
     # overview: high-angle full view of the footbridge (6 lanes, deck and both towers at once)
     out["overview"] = dict(eye=[44.00, -34.00, 17.00], tgt=[0.00, 2.00, 3.60])
     # stair_head: [W3 S11 · new] the H-plan puts the stair head 1.20 m off the deck axis,
@@ -1733,7 +1742,7 @@ BANNER = """\
 [조작] 우클릭+WASD 비행 · P 패스트레이싱 토글 · C 스크린샷 · [ ] 태양 방위
 [체크리스트 — GT-80 S11 H형 완결(다리 4련)]
  1. overview         — **H형인가**: 계단 타워 2기가 차도(±Y)에 평행하고 상판이
-                       그 사이를 건너는가 · 타워마다 다리 2련 = 발 4개 ·
+                       그 사이를 건너는가 · 서측 2련 + 동측 1련[GT-96 2판] = 발 3개 ·
                        비대칭(서=직선 타워 / 동=스위치백 타워)
  1b. deck_walk 끝     — 상판 끝이 **난간 벽으로 막히지 않고** 십자 참에서 좌우로
                        계단이 갈라져 내려가는가 (구: 난간 + 배경 벽면)

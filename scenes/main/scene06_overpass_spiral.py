@@ -2510,22 +2510,33 @@ def main():
             #   rail's E newel (5, −13) — the two read as one junction; the OUTER one
             #   (x 3.26, y −13) is the boundary post between the stair band and the
             #   end's open-drop remainder. Both founded min(raked, deck floor).
-            runs = (("Outer", rl["outer_r"],
+            # [GT-100] the OUTER run opens with ONE LEVEL bay (tread-0's azimuth
+            #   span, cap held at the deck's 6.100), then knuckles 0.192 at its first
+            #   post and rakes — the west junction no longer bends plan curvature and
+            #   rake at a single free corner (the north stair guard's landing detail,
+            #   same family). The INNER run stays fully raked (east junction reads
+            #   clean — user confirmed).
+            n_bay += _guard_run(f"{ROOT}/RailOuterHead", rl["outer_r"],
+                                bays[:2], lambda a: PARAMS["deck"]["z_top"],
+                                gl, M)
+            _guard_posts(f"{ROOT}/RailPostOuterHead", rl["outer_r"], bays[:2],
+                         lambda a: PARAMS["deck"]["z_top"], gl, M, skip={0})
+            runs = (("Outer", rl["outer_r"], bays[1:],
                      (rl["outer_r"] - rl["up_side"], fa["r_out"] + rl["up_rim"])),
-                    ("Inner", rl["inner_r"],
+                    ("Inner", rl["inner_r"], bays,
                      (sp["r_in"] + rl["up_rim"], rl["inner_r"] + rl["up_side"])))
-            for tag, rad, ups in runs:
-                n_bay += _guard_run(f"{ROOT}/Rail{tag}", rad, bays,
+            for tag, rad, rbays, ups in runs:
+                n_bay += _guard_run(f"{ROOT}/Rail{tag}", rad, rbays,
                                     _spiral_z_at, gs, M, upstand=ups)
                 # both terminals land on newels, so the run's own posts skip them
-                _guard_posts(f"{ROOT}/RailPost{tag}", rad, bays, _spiral_z_at,
-                             gs, M, skip={0, len(bays) - 1})
+                _guard_posts(f"{ROOT}/RailPost{tag}", rad, rbays, _spiral_z_at,
+                             gs, M, skip={0, len(rbays) - 1})
                 # [GT-98] the TOP terminals have no newels of their own any more: with
                 #   the full-width stair the outer run ends Δ60 mm from the WEST deck
                 #   E newel (2,−13) and the inner run Δ60 mm from the EAST one (5,−13)
                 #   — both merge into those deck-founded newels (GT-76 one-newel rule,
                 #   now symmetric). Only the bottom (a_end) newels are built here.
-                for k, a in ((len(bays) - 1, a_end),):
+                for k, a in ((len(rbays) - 1, a_end),):
                     zw = _spiral_z_at(a)
                     _newel(f"{ROOT}/Newel{tag}_{k}",
                            CX + rad * math.cos(math.radians(a)),

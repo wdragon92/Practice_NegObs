@@ -449,10 +449,7 @@ PARAMS = dict(
     # [GT-98] outer_r 3.24 → 4.44 (0.06 inset from the new rim) · steps_per_bay 2 → 1:
     #   at r 4.44 a 2-step bay's flat pane bows 90 mm off the arc — over the 80 mm gate —
     #   so the run goes to 26 one-step bays (deck 13 bays × 2, integer rhythm kept).
-    # [GT-101 3판] outer_r 4.44 -> 4.46: shoe 4.42..4.50 ends exactly ON the rim,
-    #   and the guard line sits 40 mm (not 60) off the deck rail — the whole plan
-    #   jog now hides inside the newel body ('모서리가 튀어나온 부분이 없어야지').
-    railing=dict(outer_r=4.46, inner_r=1.56, rail_h=1.196,
+    railing=dict(outer_r=4.44, inner_r=1.56, rail_h=1.196,
                  steps_per_bay=1, landing_bays=3, arc_seg=1,  # landing_bays [GT-95] inert
                  cap_seg_deg=2.0, up_top=0.108, up_bot=-0.30,
                  up_side=0.050, up_rim=0.002, newel_t=0.13,
@@ -1865,35 +1862,29 @@ def main():
         #   radial box whose top face meets the soffit bottom at its own azimuth.
         spl = PARAMS["spiral"]
         so_ = PARAMS["soffit"]
-        # [GT-101 3판 · 13차] the CORBEL form returns — "코벨 철회가 아니라 코벨
-        #   자체를 조금씩 올리라는 말": stepped slab+haunch as GT-99, the whole
-        #   profile LIFTED (hang 0.24 -> 0.18) and every bottom clamped above grade —
-        #   all 13 stations built, none omitted.
-        rib_n, rib_w = 13, 0.16
-        slab_d, haunch_d = 0.08, 0.10
+        # [GT-101 · 08-11 user] the stepped corbel is retired ("리브는 저게 뭐야") —
+        #   ONE slim member per station, ALL 13 built: where the soffit dives to
+        #   grade the rib's bottom is simply lifted to sit on the ground ("조금씩만
+        #   더 올리면 쉽게 풀리는 문제"), never omitted.
+        rib_n, rib_w, rib_d = 13, 0.16, 0.14
         r0_ = co["r"] - 0.05                      # laps into the column
         r1_ = so_["r_in"] - 0.02                  # tucked inside the soffit rim
         rc_, rL_ = (r0_ + r1_) / 2.0, r1_ - r0_
-        rh1_ = r0_ + rL_ * 0.55
-        rhc_, rhL_ = (r0_ + rh1_) / 2.0, rh1_ - r0_
         made_ribs = 0
         for k in range(rib_n):
             a_k = spl["a0"] + (k + 0.5) * spl["sweep"] / float(rib_n)
             z_top_rib = _soffit_z(a_k) - so_["thick"]
-            z_sb = max(z_top_rib - slab_d, 0.02)
-            z_hb = max(z_sb - haunch_d, 0.02)
+            z_bot_rib = max(z_top_rib - rib_d, 0.02)
+            if z_top_rib - z_bot_rib < 0.03:      # fully buried — ground carries it
+                continue
             ca_, sa_ = math.cos(math.radians(a_k)), math.sin(math.radians(a_k))
-            if z_top_rib - z_sb >= 0.03:
-                BOX(f"{ROOT}/SpiralRib_{k}",
-                    (CX + rc_ * ca_, CY + rc_ * sa_, (z_top_rib + z_sb) / 2.0),
-                    (rL_, rib_w, z_top_rib - z_sb), M["concrete"], rotZ=a_k)
-                made_ribs += 1
-            if z_sb - z_hb >= 0.03:
-                BOX(f"{ROOT}/SpiralRibHaunch_{k}",
-                    (CX + rhc_ * ca_, CY + rhc_ * sa_, (z_sb + z_hb) / 2.0),
-                    (rhL_, rib_w, z_sb - z_hb), M["concrete"], rotZ=a_k)
-        print(f"[GT-101 3판] 지지 코벨 {made_ribs}/{rib_n}본 — 슬래브 {slab_d:.2f}+"
-              f"헌치 {haunch_d:.2f}(행잉 0.18, 저부 클램프·생략 없음)")
+            BOX(f"{ROOT}/SpiralRib_{k}",
+                (CX + rc_ * ca_, CY + rc_ * sa_,
+                 (z_top_rib + z_bot_rib) / 2.0),
+                (rL_, rib_w, z_top_rib - z_bot_rib), M["concrete"], rotZ=a_k)
+            made_ribs += 1
+        print(f"[GT-101] 지지 리브 {made_ribs}/{rib_n}본 — 단일 부재 {rib_d:.2f}, "
+              f"저부 바닥 클램프(생략 없음), 기둥(r {co['r']:.2f})→소핏 내연")
         # [GT-95] landing prims gone (GT-6 lobes → GT-94 west quarter → deleted); [GT-97]
         #   the stair meets the deck's open south end head-on — see `build_deck`.
 
@@ -2548,17 +2539,13 @@ def main():
             #   cap facets and pane chords ride the SAME polyline — zero gap by
             #   construction — and the slope change at each post (≤5°) hides in the
             #   post/cap thickness, so the hand-line stays continuous.
-            # [GT-101 3판 · 13차] the ease weights change to SMOOTHSTEP over THREE
-            #   bays: the start slope at the junction drops to ~3° (the quadratic
-            #   left a visible 9° bend right where the deck cap hands over — the
-            #   'corner' the user flagged). Same polyline for cap and panes (0-gap).
-            span = 3.0 * _step_deg()
+            span = 2.0 * _step_deg()
             ease_pts = []
-            for b in bays[:4]:
+            for b in bays[:3]:
                 t = min(1.0, (b - sp["a0"]) / span)
                 h = _spiral_z_at(b)
-                w = 1.0 - (3.0 * t * t - 2.0 * t ** 3)
-                ease_pts.append((b, h + (_spiral_z_at(sp["a0"]) - h) * w))
+                ease_pts.append((b, h + (_spiral_z_at(sp["a0"]) - h)
+                                 * (1.0 - t) ** 2))
 
             def _ease_out_z(a):
                 if a >= ease_pts[-1][0] - 1e-9:
@@ -2568,19 +2555,6 @@ def main():
                         f = (a - b0_) / (b1_ - b0_)
                         return z0_ + (z1_ - z0_) * f
                 return _spiral_z_at(a)
-            # [GT-101 3판] blend cap over the WEST junction: a level cap piece from
-            #   the deck cap's end across the newel to the sweep start (plan angle
-            #   ~1.7deg) — both butt ends vanish under one continuous line.
-            bx0, by0 = PARAMS["deck"]["x0"], -15.55
-            bx1 = CX + rl["outer_r"] * math.cos(math.radians(sp["a0"]))
-            by1 = CY + rl["outer_r"] * math.sin(math.radians(sp["a0"]))
-            bl = math.hypot(bx1 - bx0, by1 - by0) + 0.10
-            bang = math.degrees(math.atan2(bx1 - bx0, -(by1 - by0)))
-            BOX(f"{ROOT}/RailOuterBlendCap",
-                ((bx0 + bx1) / 2.0, (by0 + by1) / 2.0,
-                 PARAMS["deck"]["z_top"] + (gl["cap_bot"] + gl["cap_top"]) / 2.0),
-                (PARAMS["deck"]["parapet_t"] + 2 * rb["cap_over"], bl,
-                 gl["cap_top"] - gl["cap_bot"]), M["rail"], rotZ=bang)
             runs = (("Outer", rl["outer_r"], _ease_out_z,
                      (rl["outer_r"] - rl["up_side"], fa["r_out"] + rl["up_rim"])),
                     ("Inner", rl["inner_r"], _spiral_z_at,

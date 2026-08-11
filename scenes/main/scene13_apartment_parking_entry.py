@@ -160,6 +160,15 @@ import props_kit as pk
 # geometry; if s13 geometry ever moves, re-run the checker before trusting them.
 GLASS_FROST = os.environ.get("NEGOBS_GLASS_FROST", "0") == "1"
 GLASS_FROST_ROUGH = float(os.environ.get("NEGOBS_GLASS_FROST_ROUGH", "0.35"))
+# [GT-73 · 08-11(2)] frosted-pane transmission colour. OmniGlass has no diffuse lobe, so
+#   `glass_color` multiplies the transmitted light: the OmniPBR-era tint (0.55,0.66,0.68)
+#   acted as an absorber and the frosted panes went dark (measured on the A/B round:
+#   curtain wall −30 %, info booth −67 %). Real acid-etched glass scatters with little
+#   absorption — near-white. Applied to the frosted 23 only; the 8 clear panes keep the
+#   real-glass tint, and the FROST=0 arm never reads this value.
+GLASS_FROST_COLOR = tuple(
+    float(v) for v in os.environ.get(
+        "NEGOBS_GLASS_FROST_COLOR", "0.90,0.92,0.92").split(","))
 GLASS_CLEAR_BAYS = {"N7", "N8", "N9", "N10", "S1", "S10"}  # Canopy/Glass_* 무관 6
 #   + StairCanopy/DoorTransom · DoorSidelight (bound directly at their sites) = 8
 
@@ -906,9 +915,25 @@ PARAMS = dict(
         #   gravel diff average ~0.45 x tint 0.21 ~ 0.095 (top of the sRGB rule band),
         #   B is set below R to kill the blue cast (the old colour had B > R = the navy).
         asphalt_color=(0.135, 0.135, 0.145), asphalt_rough=0.88,  # (kept, unused)
-        asphalt_tint=(0.215, 0.210, 0.198), asphalt_scale=0.35,
-        # Tyre polish bands — wheel tracks where the aggregate is pressed dark and smooth
-        polish_color=(0.048, 0.047, 0.044), polish_rough=0.46,
+        # [GT-107 · 08-11] scale 0.35 KEPT — the arg is metres per texture tile (the v6
+        #   note "scale 0.35 m" is literal); a first-pass 2.8 misread it as repeats and
+        #   blew the aggregate up to boulder size on the render. Reverted same-day.
+        #   Dry-probe (GT-107 4차) proved the pale "carpet runners" are the asphalt
+        #   look-class's own macro patch variation ON Drive_Main (no prim exists at
+        #   y ±1.48), and a follow-up A/B proved THIS TINT NEVER REACHES THE PROMOTED
+        #   RENDER — the look layer derives its own equalising tint per class, so the
+        #   field tone and its patch contrast belong to 레버1(공통 재질 재보정, 승인·
+        #   별도 슬롯)에서 룩 클래스 차원으로 다뤄야 한다. Value kept neutral for the
+        #   day the promotion honours it; do not expect scene-side edits here to move
+        #   the screen.
+        asphalt_tint=(0.148, 0.150, 0.154), asphalt_scale=0.35,
+        # Tyre polish bands — wheel tracks where the aggregate is pressed dark and smooth.
+        #   [GT-107] 0.048 → (0.055,0.055,0.056) / rough 0.46 → 0.88: a pressed track is
+        #   the SAME asphalt slightly darker and just as matte. Field effective tone =
+        #   gravel(≈0.45) × tint 0.150 ≈ 0.068 [computed] → track sits ~20 % under it in
+        #   the same neutral family; rough matches the field's 0.88 so the band cannot
+        #   lift to a sky-sheen strip at the grazing judged eye.
+        polish_color=(0.055, 0.055, 0.056), polish_rough=0.88,
         paint_color=(0.70, 0.70, 0.66), paint_rough=0.62,   # no pure white (<0.8)
         rail_color=(0.66, 0.68, 0.70), rail_metallic=0.7, rail_rough=0.42,
         bollard_color=(0.30, 0.31, 0.33), bollard_metallic=0.4,
@@ -2161,7 +2186,12 @@ def main():
             f"{ROOT}/Looks/Asphalt", sc.tex_path("gravel", "diff"),
             sc.tex_path("gravel", "nor"), sc.tex_path("gravel", "rough"),
             mp["asphalt_scale"], tint=mp["asphalt_tint"])
-        M["polish"] = PBR(f"{ROOT}/Looks/Polish",
+        # [GT-107 · 08-11] path renamed Polish → TyreTrack: the realism look layer's
+        #   stone family claims the token "polish" (polished stone), so `Looks/Polish`
+        #   was being PROMOTED to flagstone texture — the actual "카펫 조각" runners.
+        #   "TyreTrack" matches no family token → constant-colour class, so the wheel
+        #   band renders exactly the warm-dark constants above (subtle pressed track).
+        M["polish"] = PBR(f"{ROOT}/Looks/TyreTrack",
                           diffuse_color=mp["polish_color"],
                           roughness_const=mp["polish_rough"])
         M["paint"] = PBR(f"{ROOT}/Looks/Paint", diffuse_color=mp["paint_color"],
@@ -2200,7 +2230,10 @@ def main():
         #   `opaque_*` feeds the NEGOBS_GLASS_V1=0 arm, which hands exactly the old
         #   `Looks/Glass` constants to make_pbr — the fallback is the previous look.
         M["glass_v"] = sc.make_glass(
-            stage, f"{ROOT}/Looks/GlassV", color=mp["glass_v_color"],
+            stage, f"{ROOT}/Looks/GlassV",
+            # [08-11(2)] frost arm gets the milky near-white transmission colour —
+            #   the tint-as-absorber darkening was the round-b finding.
+            color=(GLASS_FROST_COLOR if GLASS_FROST else mp["glass_v_color"]),
             opacity=mp["glass_v_opacity"],
             roughness=(GLASS_FROST_ROUGH if GLASS_FROST
                        else mp["glass_v_rough"]),
@@ -2220,7 +2253,9 @@ def main():
               f"Looks/Glass 유지)")
         if GLASS_FROST:
             print(f"[GT-73 frosted 파일럿] 차폐 23 = frosting "
-                  f"{GLASS_FROST_ROUGH:.2f} · 무관 8 = 클리어 0.00 "
+                  f"{GLASS_FROST_ROUGH:.2f} · 유백 색 "
+                  f"{tuple(round(c, 2) for c in GLASS_FROST_COLOR)} · "
+                  f"무관 8 = 클리어 0.00 "
                   f"(Canopy {sorted(GLASS_CLEAR_BAYS)} + DoorTransom + "
                   f"DoorSidelight)"
                   + ("" if sc.GLASS_MDL in ("glass", "omniglass") else
@@ -2346,13 +2381,16 @@ def main():
         #   [GT-64] the E-W pair runs on to the junction so the wheel tracks do not
         #   stop mid-carriageway; the N-S pair is the same section turned 90°.
         for tag, yc in (("L", -0.85), ("R", 0.85)):
-            BOX(f"{ROOT}/DrivePolish_{tag}",
+            # [GT-107] prim renamed DrivePolish→DriveTrack (and XRoad below): the look
+            #   layer scans path tokens and "polish" belongs to the stone family — the
+            #   geometry name was re-promoting what the material rename had just fixed.
+            BOX(f"{ROOT}/DriveTrack_{tag}",
                 ((xg["car1"] + dr["x1"]) / 2.0, yc,
                  z + dr["proud"] - 0.006),
                 (dr["x1"] - xg["car1"], 0.55, 0.02), M["polish"])
         for tag, xc in (("L", xr["cx"] - xr["polish_off"]),
                         ("R", xr["cx"] + xr["polish_off"])):
-            BOX(f"{ROOT}/XRoadPolish_{tag}",
+            BOX(f"{ROOT}/XRoadTrack_{tag}",
                 (xc, (xg["y0"] + xg["y1"]) / 2.0, z + dr["proud"] - 0.006),
                 (0.55, xg["y1"] - xg["y0"], 0.02), M["polish"])
         # road centre guide line — dashes stop clear of the junction (a real

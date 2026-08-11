@@ -150,6 +150,18 @@ TACTILE_ALBEDO_CAP = 0.55      # Tactile paving exception (statutory yellow, sma
 #    one the GPU round should confirm on the scene07/scene10 d2/d5 crops (redteam rider 3).
 DECAL_Z_EPS = 0.0002           # Step between decal families
 DECAL_Z_SUB = 0.0001           # Step between kinds inside one family (stains)
+
+# [GT-107 · 08-11 user] "바닥에 카펫 이상한 모양 자른 것처럼 노이즈" — at the judged eye
+#   distances (2~10 m, PT_FAST) the discrete-shape decal classes read as cut-outs laid on
+#   the paving, not as soiling: crack polylines render as bent wire, stain fields as
+#   high-contrast patches (incl. the "drip" dot trails), and the GT-24 precedent already
+#   retired the plaza cut patch for exactly this reading ("이상한 사각형 무늬"). The two
+#   classes are therefore not emitted by `plan_ground`; vocabulary, builders and the R3
+#   z ladder stay registered (append-only), and `NEGOBS_DECAL_FULL=1` restores the old
+#   field for A/B. wear_lane / weed / patch(asphalt) / relaid are untouched — they are
+#   either same-material low-contrast tone or real saw-cut practice.
+DECAL_QUIET = os.environ.get("NEGOBS_DECAL_FULL", "0") != "1"
+_QUIET_SURFACE = ("crack", "stain")
 DECAL_Z_ORDER = {
     "edge_break":  0,          # material-boundary transition band (lowest - it *is* the ground)
     "silt_band":   1,          # waterline film / silt drift
@@ -3162,6 +3174,12 @@ def _compose_ops(profile, prof, ctx, tactile_sites, sites, extras_args):
                 f"({profile}/{ctx.get('scene')}). 등재된 어휘: {SURFACE_KINDS}. "
                 "새 어휘는 SURFACE_KINDS·빌더·(데칼이면) DECAL_Z_ORDER 를 "
                 "먼저 등재하라 — 조용히 0개로 떨어지던 경로는 막혔다.")
+        if DECAL_QUIET and what in _QUIET_SURFACE:
+            # [GT-107] the row is declared by the profile but not emitted — the skip is
+            #   logged (not silent) so a census diff against the profile table is honest.
+            print(f"    [GT-107 데칼 정온] surface '{what}' 미발행 "
+                  f"({profile}/{ctx.get('scene')}) — NEGOBS_DECAL_FULL=1 로 복원")
+            continue
         if what == "patch":
             # * The material dict **must** be passed as the kw `mtls=`. Passed positionally it
             #   does not match the `apply_ground` substitution rules (@string / kw mtl* / kw mtls)

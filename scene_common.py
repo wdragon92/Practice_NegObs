@@ -165,7 +165,8 @@ TEX["paving_interlock"] = dict(dir=ASSETS_DIR, diff="paving_interlock_diff.jpg",
                                nor="paving_interlock_nor.jpg",
                                rough="paving_interlock_rough.jpg")
 SIGNS_DIR = os.path.join(ASSETS_DIR, "signs")
-for _s in ("warn_fall", "caution_step", "exit", "info", "no_entry"):
+# [GT-106] "underpass" — 지하보도 guidance plate (blue class, gen_signs.py).
+for _s in ("warn_fall", "caution_step", "exit", "info", "no_entry", "underpass"):
     TEX[f"sign_{_s}"] = dict(dir=SIGNS_DIR, diff=f"sign_{_s}.png")
 
 OVERCAST_HDRI = "kloofendal_overcast_4k.exr"
@@ -1971,6 +1972,8 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
                        cliff_adjacent=True, nsteps=None, picket_pitch=None,
                        merge_handrail=False, foot_pickets=False):
     """One guardrail line (a generalisation of scene01 build_cues). Top rail + mid rail + posts.
+    [GT-105] `rail_mid_r <= 0` suppresses the mid rail (and its knuckle) entirely —
+    for callers whose baluster infill already carries the screen.
       y        : rail Y position
       x_start  : x where the horizontal extension starts (x_start..x_top is horizontal)
       x_top    : x where the slope starts (descending by drop towards +X from here)
@@ -2052,8 +2055,14 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
     # is byte-identical to GT-67.
     grip_wanted = bool(merge_handrail) and bool(LOOK_GEO) and bool(handrail) \
         and float(run) > 0.3
+    # [GT-105] `rail_mid_r <= 0` = the caller declares NO intermediate rail: its infill
+    #   already carries the statutory screen (full-height balusters), so a mid bar would
+    #   only cross the panel as a foreign horizontal (scene11 "통로 중간의 바"). Guard
+    #   clause only — every pre-existing call site passes a positive radius and stays
+    #   byte-identical (GT-67 Scope contract).
+    mid_wanted = (not grip_wanted) and float(rail_mid_r) > 0.0
     _seg("RailTop", rail_r, 0.0)
-    if not grip_wanted:
+    if mid_wanted:
         _seg("RailMid", rail_mid_r, rail_mid_drop)
     x_end = x_top + run
 
@@ -2184,7 +2193,7 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
 
     if merge_handrail:
         knuckles = [("RailTop", rail_r, 0.0)]
-        if not grip_wanted:
+        if mid_wanted:
             knuckles.append(("RailMid", rail_mid_r, rail_mid_drop))
         for tag, r_j, z_off in knuckles:
             prims.append(add_cylinder(
@@ -2271,10 +2280,12 @@ def build_railing_line(stage, prefix, y, x_start, x_top, run, drop, ground_fn,
                         GRIP_NEWEL_R, h_n, mtl))
         except Exception as e:
             print(f"[룩v1][경고] 손잡이 실패 {prefix}: {e}")
-            if grip_wanted:
+            if grip_wanted and float(rail_mid_r) > 0.0:
                 # [GT-74 2] Degradation: the grip rail is what replaced the guard's
                 # mid rail. Without it the guard would be a single top rail, so the
                 # mid rail (and its knuckle) come back rather than leaving a gap.
+                # [GT-105] Unless the caller opted out of the mid rail entirely
+                # (`rail_mid_r <= 0`) — a single top rail is then the declared form.
                 _seg("RailMid", rail_mid_r, rail_mid_drop)
                 prims.append(add_cylinder(
                     stage, f"{prefix}/RailMidKnuckle",

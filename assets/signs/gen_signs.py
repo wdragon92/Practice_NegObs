@@ -44,6 +44,9 @@ panel("sign_caution_step", (768, 768), (245, 197, 12), (20, 20, 20),
 panel("sign_exit", (768, 384), (16, 74, 146), (255, 255, 255), "출구  →")
 panel("sign_info", (768, 512), (16, 74, 146), (255, 255, 255),
       "안내", sub="INFORMATION")
+# [GT-106] 지하보도 portal plate — same blue guidance class (실존 관행물, v5.2 유지군)
+panel("sign_underpass", (768, 512), (16, 74, 146), (255, 255, 255),
+      "지하보도", sub="UNDERPASS")
 # Prohibition (white / red border)
 panel("sign_no_entry", (768, 512), (245, 245, 245), (30, 30, 30),
       "진입금지", border=(190, 24, 24))

@@ -306,6 +306,9 @@ PARAMS = dict(
                 thick=1.40),
     # --- railings (cue_railing) ---
     #   rail_h 1.10 (footbridge standard). Kickplates on the landings only - missing on the east side (the hazard).
+    # [GT-105] `rail_mid_*` retired — the descending guards run a single top rail over
+    #   the picket screen (ribbon language). Keys kept so the ledger of what the old
+    #   build read stays greppable; no builder reads them any more.
     rail=dict(rail_h=1.10, post_r=0.026, rail_r=0.032, rail_mid_r=0.022,
               rail_mid_drop=0.52, spacing=1.00, y_inset=0.03),
     # --- tactile paving (cue_tactile) : 4 stair head/foot locations ---
@@ -526,7 +529,12 @@ PARAMS = dict(
         #   diffuse = tex*brightness + add to compress the contrast (linear
         #   p5 0.0116/p95 0.216 -> 0.045/0.090), and desaturation erases the colour split.
         #   expected result: linear median 0.051 ~ sRGB 63 = painted-steel dark grey.
-        metal_albedo=dict(brightness=0.587, add=0.213, desaturation=0.78),
+        # [GT-107 · 08-11 user] 0.587/0.213/0.78 → 0.42/0.30/0.92: at the judged eye
+        #   the residual rust-map variation still read as white peeling ("카펫 조각")
+        #   on the walked pads. Mean albedo is preserved (0.45×0.42+0.30 ≈ 0.489 vs
+        #   0.477 [computed]); the texture's own range shrinks another 28 % and the
+        #   rust hue split closes — painted steel, relief carried by nor/rough only.
+        metal_albedo=dict(brightness=0.42, add=0.30, desaturation=0.92),
         concrete_tint=(0.72, 0.77, 0.92),
         parapet_tint=(0.78, 0.83, 0.99),
         soil_tint=(0.42, 0.44, 0.34),
@@ -624,6 +632,7 @@ if _sc_ov:
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "scene11")
 ASSET_ROLES = ["paving_interlock", "metal_rust", "concrete_wall",
+               "concrete_floor",   # [GT-107] walked-slab family (see M["concrete"])
                "granite_dark", "plaza_light", "brick_red", "grass", "tactile",
                "sign_info", "hdri", "mdl"]
 
@@ -1248,8 +1257,11 @@ def _smoke_report():
     print(f"  [위험①] 상판 진행 끝 = 동측 상부참 외측 연단 x {gx0:.2f} · "
           f"상면 {gz0:.3f} → 보도 {gz:+.3f} 낙차 {gz0-gz:.3f} m "
           f"{'OK' if gz0-gz >= 0.3 else 'FAIL'}")
-    print(f"    난간 하부 개방대(0…"
-          f"{PARAMS['rail']['rail_h']-PARAMS['rail']['rail_mid_drop']:.2f} m)가 "
+    # [GT-105] 중간 가로대 소거 후에도 은닉축 불변: h0.3 시선은 살대 사이(안목
+    #   0.100)로 통과한다 — 개방 판독의 담체는 원래부터 살대 스크린이지 중간
+    #   가로대(z 0.58, 눈높이 위)가 아니었다.
+    print(f"    난간 개방부(킥 상단 {0.16:.2f}…상부 레일 "
+          f"{PARAMS['rail']['rail_h']:.2f} m, 살대 안목 0.100)가 "
           f"h0.3 시야를 통과 → 원거리 보도·차도면이 비쳐 '바닥 연속' 오독")
     # ── hazard ② : missing kickplate on the east mid landings ──
     print(f"  [위험②] 동측 중간참 킥플레이트 {'有' if e['kickplate'] else '無'} "
@@ -1862,10 +1874,15 @@ def main():
                                 sc.tex_path("metal_rust", "rough"),
                                 s["metal_rust"], tint=mp["metal_tint"],
                                 albedo=mp["metal_albedo"])
+        # [GT-107 · 08-11 user] concrete_wall → concrete_floor: this material skins
+        #   WALKED slabs (deck slab, landings, pier caps), and the wall texture's
+        #   whitewash blotches read on a floor as "카펫 이상한 모양 자른" peeling.
+        #   The parapet (vertical) keeps concrete_wall below — that is what the
+        #   texture is for. Scale key unchanged (same tiling density class).
         M["concrete"] = PBR(f"{ROOT}/Looks/Concrete",
-                            sc.tex_path("concrete_wall", "diff"),
-                            sc.tex_path("concrete_wall", "nor"),
-                            sc.tex_path("concrete_wall", "rough"),
+                            sc.tex_path("concrete_floor", "diff"),
+                            sc.tex_path("concrete_floor", "nor"),
+                            sc.tex_path("concrete_floor", "rough"),
                             s["concrete_wall"], tint=mp["concrete_tint"])
         M["soil"] = PBR(f"{ROOT}/Looks/Soil", sc.tex_path("grass", "diff"),
                         sc.tex_path("grass", "nor"),
@@ -2102,8 +2119,9 @@ def main():
           · a corner carries **one shared post**. Two abutting 2-point runs stacked
             two coincident 0.08 m posts on the shared node — identical coplanar faces,
             i.e. z-fighting, at every mid-landing corner.
-          · a **mid rail** at `rail_mid_drop`, so the flight rail's mid line does not
-            dead-end where it meets the landing.
+          · ~~a mid rail at `rail_mid_drop`~~ — [GT-105 · 08-11 user] deleted: the
+            flight rails no longer carry a mid line to meet, and the middle horizontal
+            read as a second vocabulary crossing the picket screen.
           · a **knuckle cap** at every node and both run ends, closing each mitre and
             each terminus so no rail shows an open cylinder mouth.
         Nothing here touches a walked surface: guard members only."""
@@ -2115,7 +2133,9 @@ def main():
         if len(P) < 2:
             return 0
         z_rail = z_base + height
-        z_mid_rail = z_rail - float(ra["rail_mid_drop"])
+        # [GT-105] mid rail deleted from the landing/head guards: the balusters below
+        #   run kick → top at the statutory 안목, so the middle horizontal carried no
+        #   screen and read as a second vocabulary against the GT-96 ribbon.
         pitch = 2.0 * rb["baluster_r"] + rb["baluster_gap"]
         npost = 0
         nbal = 0
@@ -2155,20 +2175,17 @@ def main():
                     rb["baluster_r"], bz1 - bz0, M["rail"])
                 nbal += 1
                 made += 1
-            for tag, zz, rr in (("TopRail", z_rail, float(ra["rail_r"])),
-                                ("MidRail", z_mid_rail,
-                                 float(ra["rail_mid_r"]))):
-                CYL(f"{prefix}/{tag}_{s_i}",
-                    ((x0 + x1) / 2.0, (y0 + y1) / 2.0, zz), rr, L, M["rail"],
-                    rotY=(90.0 if along_x else 0.0),
-                    rotX=(0.0 if along_x else 90.0))
-                made += 1
+            CYL(f"{prefix}/TopRail_{s_i}",
+                ((x0 + x1) / 2.0, (y0 + y1) / 2.0, z_rail),
+                float(ra["rail_r"]), L, M["rail"],
+                rotY=(90.0 if along_x else 0.0),
+                rotX=(0.0 if along_x else 90.0))
+            made += 1
         for i, (nx, ny) in enumerate(P):
-            for tag, zz, rr in (("TopCap", z_rail, float(ra["rail_r"])),
-                                ("MidCap", z_mid_rail, float(ra["rail_mid_r"]))):
-                CYL(f"{prefix}/{tag}_{i}", (nx, ny, zz), rr * 1.15, 2.2 * rr,
-                    M["rail"])
-                made += 1
+            rr = float(ra["rail_r"])
+            CYL(f"{prefix}/TopCap_{i}", (nx, ny, z_rail), rr * 1.15, 2.2 * rr,
+                M["rail"])
+            made += 1
         return made
 
     def build_rail_end(M, prefix, tag, x, y, z_base, height=None):
@@ -2182,12 +2199,12 @@ def main():
             height = float(ra["rail_h"])
         BOX(f"{prefix}/{tag}Newel", (x, y, z_base + height / 2.0),
             (0.08, 0.08, height), M["steel"])
-        for nm, zz, rr in (("Top", z_base + height, float(ra["rail_r"])),
-                           ("Mid", z_base + height - float(ra["rail_mid_drop"]),
-                            float(ra["rail_mid_r"]))):
-            CYL(f"{prefix}/{tag}Cap{nm}", (x, y, zz), rr * 1.15, 2.2 * rr,
-                M["rail"])
-        return 3
+        # [GT-105] top cap only — the flight rails this newel closes no longer carry
+        #   a mid rail, so a mid-height cap would cap nothing.
+        rr = float(ra["rail_r"])
+        CYL(f"{prefix}/{tag}CapTop", (x, y, z_base + height), rr * 1.15,
+            2.2 * rr, M["rail"])
+        return 2
 
     # -------------------------------------------------------------------
     # [W3 S11 · G11] expanded-metal infill panel over the tower head — the
@@ -2355,20 +2372,22 @@ def main():
             #   `build_guard_run`, flights by `build_railing_line`, and the two meet
             #   end-to-end on the same `y_inset` line.
             for k, bb in enumerate((BA0 + ins, BA1 - ins)):
+                # [GT-105 · 08-11 user] `rail_mid_r=0` — the flight guard drops its mid
+                #   rail: the full-height picket screen already carries the 안목, and the
+                #   extra horizontal crossed every raked panel as the "통로 중간의 바".
+                #   One top rail + pickets = the GT-96 ribbon language on the rake.
                 sc.build_railing_line(
                     stage, f"{prefix}/RailA_{k}", _B(bb), _A(0.0), _A(0.0),
                     RUN, DROP, _gnd(0.0, Z_TOP), M["rail"],
                     rail_h=ra["rail_h"], post_r=ra["post_r"],
                     spacing=ra["spacing"], rail_r=ra["rail_r"],
-                    rail_mid_r=ra["rail_mid_r"],
-                    rail_mid_drop=ra["rail_mid_drop"])
+                    rail_mid_r=0.0)
                 sc.build_railing_line(
                     stage, f"{pb}/RailB_{k}", _B(bb), _A(a_b0), _A(a_b0),
                     RUN, DROP, _gnd(a_b0, Z_MID), M["rail"],
                     rail_h=ra["rail_h"], post_r=ra["post_r"],
                     spacing=ra["spacing"], rail_r=ra["rail_r"],
-                    rail_mid_r=ra["rail_mid_r"],
-                    rail_mid_drop=ra["rail_mid_drop"])
+                    rail_mid_r=0.0)
                 # stair-foot newel: flight B's rails end at grade, the one terminus a
                 #   pedestrian meets at eye level. Everything else on the run is closed
                 #   by the next member (RailA's foot by the mid-landing guard, RailA's

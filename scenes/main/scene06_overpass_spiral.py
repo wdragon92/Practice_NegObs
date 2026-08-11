@@ -316,7 +316,15 @@ PARAMS = dict(
     #   over the pane's top edge and under the helical cap — the lens-shaped open band
     #   `deck_entry` showed at every bay top. 65 mm of pane-into-cap lap closes it for
     #   all depressions ≥ ~19° [computed: atan(0.065/0.0225)] — every judged eye.
-    rail_bay=dict(post_t=0.10, post_h=1.10, n_bay=13, joint=0.05,
+    # [GT-104 · 08-11 user] "난간 유리도 길게 늘리면 어떡해?" — measured on HEAD
+    #   (smoke): newel yj = −11.821, so the apron pane y0…yj ran 4.179 m against a
+    #   field pane of 1.679 m pre-GT-101 — already two widths on one run — and the
+    #   GT-101 shift stretched the field to 1.909 m (29.0 total). The one uniform
+    #   split with the newel still on a bay boundary is `apron_bays` 2 (2.089 m) +
+    #   `n_bay` 12 (2.068 m): Δ21 mm, one ~2.08 m module over the whole run, near
+    #   the run's original 2.0 design module. The GT-98 "26:13 = 2:1" rhythm note is
+    #   superseded by the width-uniformity check in the self-check.
+    rail_bay=dict(post_t=0.10, post_h=1.10, n_bay=12, apron_bays=2, joint=0.05,
                   kick_h=0.12, cap_h=0.06, cap_over=0.03, glass_t=0.019,
                   glass_set=0.035, cap_grip=0.065,
                   baluster_r=0.018, n_baluster=5),
@@ -801,7 +809,12 @@ def _deck_rail_y():
     half = (dk["x1"] - dk["x0"]) / 2.0
     yj = PARAMS["spiral"]["cy"] + math.sqrt(max(0.0, rl["outer_r"] ** 2 - half ** 2))
     n = int(PARAMS["rail_bay"]["n_bay"])
-    bays = [dk["y0"]] + [yj + (dk["y1"] - yj) * k / float(n) for k in range(n + 1)]
+    # [GT-104] the apron span y0…yj is no longer ONE bay: it splits into `apron_bays`
+    #   equal panes (1.957 m) against the field's 1.927 m, so the run reads one module.
+    #   The newel stays ON a bay boundary — index `apron_bays` — for GT-76 hand-over.
+    na = int(PARAMS["rail_bay"]["apron_bays"])
+    bays = [dk["y0"] + (yj - dk["y0"]) * k / float(na) for k in range(na)] \
+        + [yj + (dk["y1"] - yj) * k / float(n) for k in range(n + 1)]
     return yj, bays
 
 
@@ -1137,13 +1150,16 @@ def _smoke_report():
     gs, gl = _guard_section(True), _guard_section(False)
     bay_deg = (a1 - a0) / float(len(bays) - 1)
     print("  [가드 통일 GT-76] 업스탠드 + 슈 + 유리판 + 브론즈 캡 — 전 구간 1계열")
-    # [GT-98] r 4.44 에서 2단 베이는 판 새기타 90 mm(>80 게이트) — 26 개 1단 베이로
-    #   가고, 데크 13 베이와는 정수비(×2)로 리듬을 잇는다.
-    ratio = (len(bays) - 1) / float(rb["n_bay"])
+    # [GT-98] r 4.44 에서 2단 베이는 판 새기타 90 mm(>80 게이트) — 26 개 1단 베이.
+    # [GT-104] GT-98 의 '데크 13 베이 2:1 정수비' 리듬 검산은 폐지 — 눈이 읽는 것은
+    #   판폭이므로, 데크 전 런(에이프런 3 + 필드 12)의 판폭 균일성으로 대체한다.
+    _, _yb = _deck_rail_y()
+    _w = [_yb[k + 1] - _yb[k] for k in range(len(_yb) - 1)]
     print(f"    내·외측 가드 방위 [{a0:.0f}, {a1:.0f}] 전 구간 연결 · 베이 "
-          f"{len(bays)-1}개 ({rl['steps_per_bay']}단/베이 {bay_deg:.4f}°) = 데크 베이 "
-          f"{rb['n_bay']}개 × {ratio:.0f} (정수비) → "
-          f"{'OK' if abs(ratio - round(ratio)) < 1e-9 else 'FAIL'}")
+          f"{len(bays)-1}개 ({rl['steps_per_bay']}단/베이 {bay_deg:.4f}°) · "
+          f"데크 판폭 모듈 {min(_w):.3f}~{max(_w):.3f} m "
+          f"(Δ{(max(_w)-min(_w))*1000:.0f} mm ≤ 100) → "
+          f"{'OK' if max(_w) - min(_w) <= 0.10 else 'FAIL'}")
     # [GT-76] the cap is ONE member per run now, so what matters is the FACET sagitta of the
     #   member, not the bay chord sagitta the old per-bay chain carried.
     cap_sag = rl["outer_r"] * (1.0 - math.cos(math.radians(rl["cap_seg_deg"]
@@ -1191,11 +1207,14 @@ def _smoke_report():
     # [GT-97] 랜딩·베벨 검산 소멸 — 상두 종단은 정면 접속 검산([GT-97 정면 접속] 블록)
     #   이 전담한다. 데크 레일은 양측 대칭(에이프런 복원) 검산만 남는다.
     yj, ybays = _deck_rail_y()
-    print(f"    [데크 레일 분절] 양측 대칭: {dk['y0']:.1f} → 뉴얼 {yj:.3f} "
-          f"(에이프런 리턴 1) + 정규 {len(ybays)-2} 베이 "
-          f"({(dk['y1']-yj)/(len(ybays)-2):.3f} m) → {dk['y1']:.1f} · "
-          f"동측 E뉴얼(x {dk['x1']:.1f}, y {dk['y0']:.1f}) = 나선 내측 상두 합류점 → "
-          f"{'OK' if abs(ybays[1]-yj) < 1e-9 else 'FAIL'}")
+    _na = int(PARAMS["rail_bay"]["apron_bays"])
+    _nf = int(PARAMS["rail_bay"]["n_bay"])
+    print(f"    [데크 레일 분절 · GT-104] 양측 대칭: {dk['y0']:.1f} → 뉴얼 {yj:.3f} "
+          f"(에이프런 {_na} 베이 {(yj-dk['y0'])/_na:.3f} m) + 필드 {_nf} 베이 "
+          f"({(dk['y1']-yj)/_nf:.3f} m) → {dk['y1']:.1f} · 뉴얼 = 베이 경계 "
+          f"[{_na}] · 동측 E뉴얼(x {dk['x1']:.1f}, y {dk['y0']:.1f}) = 나선 내측 "
+          f"상두 합류점 → "
+          f"{'OK' if abs(ybays[_na]-yj) < 1e-9 and len(ybays) == _na+_nf+1 else 'FAIL'}")
     sh = dk["parapet_t"] / 2.0
     foot = ((rl["inner_r"] - sh, rl["inner_r"] + sh),
             (rl["outer_r"] - sh, rl["outer_r"] + sh))
@@ -2464,8 +2483,13 @@ def main():
                 (xe, (y0 + y1)/2.0, zt + (gl["cap_bot"] + gl["cap_top"])/2.0),
                 (dk["parapet_t"] + 2*rb["cap_over"], y1 - y0,
                  gl["cap_top"] - gl["cap_bot"]), M["rail"])
-            # intermediate mullions — k 0/1/nb are newels (well rim · hand-over · north head)
-            for k in range(2, nb):
+            # intermediate mullions — k 0 / apron_bays / nb are newels (well rim ·
+            #   hand-over · north head). [GT-104] the hand-over newel moved from the
+            #   fixed index 1 to `apron_bays` when the apron span gained its sub-bays.
+            na = int(rb["apron_bays"])
+            for k in range(1, nb):
+                if k == na:
+                    continue
                 BOX(f"{ROOT}/DeckRailPost_{i}_{k}",
                     (xe, ybays[k],
                      zt + (gl["post_bot"] + gl["post_top"])/2.0),

@@ -199,6 +199,25 @@ PARAMS = dict(
     perim_rail=dict(y=1.65, x0=0.0, x1=36.60, x_rear=None,
                     parapet_top=0.15, rail_h=0.9, post_r=0.03,
                     rail_r=0.03, rail_mid_r=0.018, mid_h=0.45, spacing=1.2),
+    # ═══ [GT-106 · 08-11 user] portal package — "차가 삐끗하면 추락" ═══════════
+    #  Measured: the box mouth pv0 7.55 sat 0.05 m behind the kerb back kb0 7.60 — a
+    #  car mounting the kerb dropped into the open slot (floor −3.00) after 5 cm; the
+    #  east stair foot WAS the kerb back. Structural cure, not a fence: the deck
+    #  extends west to the stair foot (w0 6.40 — the 1.15 m slot dies, the strip
+    #  behind the kerb becomes walkable structure) and east over the lowest ~3 steps
+    #  (w1 31.15 — headroom above the x 31.15 tread ≥ 2.20). A 0.90 m concrete
+    #  headwall stands on each new deck edge: rigid vehicle barrier AND the frame
+    #  that makes the mouth read as a 지하보도 portal. Clearances [computed]:
+    #  west face 6.60 → kerb body 7.60 = 1.00 m · east face 30.95 → kerb back
+    #  30.40 = 0.55 m · canopy posts (6.6, ±2.0) vs wall y ±1.80 = 0.20 m.
+    portal=dict(w0=6.40, w1=31.15, t=0.20, top=0.90),
+    #  Passage luminaires — recessed soffit battens + one SphereLight each
+    #  (scene02 GT-3 / scene13 enclosed-volume recipe; intensity = scene13's
+    #  garage value for a daylight-sealed volume). 5 stations ≈ 4.5 m pitch over
+    #  the covered run; single centre row (clear width 3.0).
+    plamp=dict(xs=(9.8, 14.3, 18.8, 23.3, 27.8), y=0.0,
+               length=1.20, w=0.14, t=0.06, embed=0.02,
+               radius=0.10, intensity=160000.0, color=(0.93, 0.96, 1.0)),
     # ═══ [realism v1] Stair rail → statutory handrail (§15(3)/(4)) ══════════
     #  Old: `y=1.4, x_start=-0.5, rail_h=0.9, post_r=0.02, rail_r=0.03,
     #        rail_mid_r=0.018, rail_mid_drop=0.45, spacing=1.2` through
@@ -280,6 +299,8 @@ PARAMS = dict(
                pv0=7.55, pv1=30.25, fw0=5.60, fw1=32.20,
                y0=-70.0, y1=70.0, z_road=-0.130, thick=0.50,
                box_soffit=-0.350, box_wear=-0.180,
+               # [GT-106] pier geometry retired — the portal headwalls terminate the
+               #   parapets and carry the rail ends. Values kept for the ledger trail.
                pier=dict(length=0.36, out=0.02, top=0.280),
                lane=dict(dividers=(11.30, 14.80, 23.00, 26.50),
                          med_edge=(18.05, 19.75),
@@ -520,7 +541,13 @@ PARAMS = dict(
     #     approach(−7,0) 25.7 deg (frame edge) · shadow_band(−5,0) outside at 37.4 deg ·
     #     under_canopy(−0.5,0) behind · beauty_overview(−7,−5) 23.6 deg at the edge
     #     -> none of them hides the judging subject (stairs·shadow) at frame centre.
-    signs=[("Exit", "sign_exit", -1.6, 2.6, 0.0, 180.0, 0.9, 0.45)],
+    signs=[("Exit", "sign_exit", -1.6, 2.6, 0.0, 180.0, 0.9, 0.45),
+           # [GT-106] "지하보도" guidance plate at the west portal, facing the
+           #   approach like the exit sign (yaw 180). Standing clear of the
+           #   headwall end (x 6.70 > 6.60) on the south verge outside the wall
+           #   band (y −2.05 < −1.80); real-practice plate, v5.2 policy class
+           #   ("실존 관행물 유지" — sign_info 계열).
+           ("Underpass", "sign_underpass", 6.70, -2.05, 0.0, 180.0, 1.10, 0.40)],
 
     material=dict(
         # `brick_red` 2.0 is the library-wide value BS-1 will re-derive (0.90–1.10) across
@@ -801,6 +828,10 @@ def main():
         M["parapet"] = PBR(f"{ROOT}/Looks/Parapet",
                            diffuse_color=mp["parapet_color"],
                            roughness_const=mp["parapet_rough"])
+        # [GT-106] passage luminaire batten housing — light comes from the
+        #   SphereLight, the housing is a plain pale enclosure (scene13 값).
+        M["lamp"] = PBR(f"{ROOT}/Looks/Lamp", diffuse_color=(0.78, 0.78, 0.74),
+                        roughness_const=0.4)
         M["curb"] = PBR(f"{ROOT}/Looks/Curb", diffuse_color=mp["curb_color"],
                         roughness_const=mp["curb_rough"])
         # [GT-79] carriageway + kerb product + the two paint tones.
@@ -1027,26 +1058,24 @@ def main():
         p = PARAMS["pit"]
         wl = PARAMS["wall"]
         r = PARAMS["xroad"]
-        pi = r["pier"]
+        po = PARAMS["portal"]
         y_out = wl["y_in"] + wl["thick"]          # 1.8
         y_ctr = (wl["y_in"] + y_out) / 2.0
         top = wl["parapet_top"]
         bot = wl["base_z"]
         sof = r["box_soffit"]
-        runs = (("", p["x0"], r["pv0"], top),          # approach trench, parapet on
-                ("_Box", r["pv0"], r["pv1"], sof),     # under the carriageway, capped
-                ("_E", r["pv1"], wl["x1"], top))       # far trench, parapet on
+        # [GT-106] the capped (decked) run now spans portal w0…w1, not pv0…pv1 —
+        #   the deck extension moved both mouths. The end piers are retired: the
+        #   parapet cut ends die into the portal headwalls (build_road), which also
+        #   carry the perimeter rail terminations the piers used to hold.
+        runs = (("", p["x0"], po["w0"], top),          # approach trench, parapet on
+                ("_Box", po["w0"], po["w1"], sof),     # decked run, capped at soffit
+                ("_E", po["w1"], wl["x1"], top))       # far trench, parapet on
         for sgn, tag in ((-1.0, "S"), (1.0, "N")):
             for sfx, xa, xb, zt in runs:
                 BOX(f"{ROOT}/Wall_{tag}{sfx}",
                     ((xa + xb) / 2.0, sgn * y_ctr, (zt + bot) / 2.0),
                     (xb - xa, wl["thick"], zt - bot), M["wall"], col=True)
-            for k, xc in enumerate((r["pv0"] - pi["length"] / 2.0,
-                                    r["pv1"] + pi["length"] / 2.0)):
-                BOX(f"{ROOT}/WallPier_{tag}{k}",
-                    (xc, sgn * y_ctr, (sof + pi["top"]) / 2.0),
-                    (pi["length"], wl["thick"] + 2.0 * pi["out"],
-                     pi["top"] - sof), M["parapet"], col=True)
         # (audit v4 A1) east blocking wall Wall_E removed - the east exit stair stands there instead.
 
     def build_stairs(stair_mtl, passage_mtl):
@@ -1230,19 +1259,22 @@ def main():
             #   wanted"; this is that row. Judgment: the bare top+mid rail stub dying
             #   in air at the stair head read as unfinished product, and every other
             #   termination of the same rail family already carries the post.
-            pi = PARAMS["xroad"]["pier"]
-            c_w = PARAMS["xroad"]["pv0"] - pi["length"] / 2.0
-            c_e = PARAMS["xroad"]["pv1"] + pi["length"] / 2.0
+            # [GT-106] the runs now die INTO the portal headwall faces (w0 west
+            #   face / w1 east face) — the end piers that used to carry the split
+            #   ends are retired with the deck extension. The x 0.00 terminating
+            #   post (GT-103 · row-35) is unchanged.
+            po = PARAMS["portal"]
+            c_w, c_e = po["w0"], po["w1"]
             n_pr = 0
             for sgn, tag in ((-1.0, "S"), (1.0, "N")):
                 n_pr += hrail(f"{ROOT}/PerimRail_{tag}", sgn * pr["y"],
                               pr["x0"], c_w, ends=(True, True))
                 n_pr += hrail(f"{ROOT}/PerimRail_{tag}_E", sgn * pr["y"],
                               c_e, pr["x1"], ends=(True, True))
-            print(f"[GT-103] 피트 둘레난간 2런×2측 · 지주 {n_pr} "
-                  f"(끝기둥 8 — 서측 x {pr['x0']:.2f}/{c_w:.2f} · 동측 x "
-                  f"{c_e:.2f}/{pr['x1']:.2f}) · x 0.00 종단 포스트 신설 "
-                  f"(row-35 재판정 — 스텁 종단 해소)")
+            print(f"[GT-103·106] 피트 둘레난간 2런×2측 · 지주 {n_pr} "
+                  f"(끝기둥 8 — 서런 x {pr['x0']:.2f}…{c_w:.2f} 헤드월 결속 · "
+                  f"동런 {c_e:.2f}…{pr['x1']:.2f} 헤드월 결속) · x 0.00 종단 "
+                  f"포스트 유지 (row-35)")
 
     # -------------------------------------------------------------------
     # [GT-79] the crossed road — carriageway · kerbs · markings · covered box
@@ -1260,10 +1292,12 @@ def main():
           `Road/Lane*`       4 dashed white dividers · 2 yellow median solids · 2 white
                              edge solids (the old single centre yellow is superseded)
 
-        The trench band is the only part that is decked. West of the box the trench
-        stays open for 1.15 m between the stair foot (6.40) and the mouth (7.55), and
-        east of it the box mouth opens straight onto the east exit stair foot (30.20),
-        which is the open-cut / box / open-cut section a real 지하보도 has.
+        The trench band is the only part that is decked. [GT-106] The deck now runs
+        stair foot to stair shoulder (portal w0 6.40 … w1 31.15): the old 1.15 m open
+        slot behind the west kerb and the bare east stair mouth AT the kerb back were
+        the "차가 삐끗하면 추락" finding, so each mouth got structure (portal deck) and
+        a 0.90 m headwall — the open-cut / box / open-cut section a real 지하보도 has,
+        with the portal frame it has too.
         """
         r = PARAMS["xroad"]
         w = PARAMS["walk"]
@@ -1287,6 +1321,41 @@ def main():
                 (pxl, 2.0 * y_out, wear - sof), M["wall"], col=True)
             BOX(f"{ROOT}/Road/BoxWear", (pxc, 0.0, (wear + zr) / 2.0),
                 (pxl, 2.0 * y_out, zr - wear), M["asphalt"])
+            # [GT-106] portal deck extensions — west to the stair foot (the 1.15 m
+            #   open slot behind the kerb dies; top at footway 0.000, walkable) and
+            #   east over the lowest ~3 steps (tread at w1 ≈ −2.55 → clearance
+            #   2.20 ≥ 2.1). Each laps 0.05 into the box slab (embed idiom).
+            po = PARAMS["portal"]
+            for tag, xa, xb in (("W", po["w0"], pv0 + 0.05),
+                                ("E", pv1 - 0.05, po["w1"])):
+                BOX(f"{ROOT}/Road/PortalDeck_{tag}",
+                    ((xa + xb) / 2.0, 0.0, (sof + 0.0) / 2.0),
+                    (xb - xa, 2.0 * y_out, 0.0 - sof), M["wall"], col=True)
+            # [GT-106] portal headwalls — 0.90 m concrete upstands on the new deck
+            #   edges: the rigid barrier a kerb-mounting car meets before the drop,
+            #   and the frame that reads as a 지하보도 mouth. Collides with nothing:
+            #   kerb bodies 7.60…7.80 / 30.20…30.40, canopy posts (6.6, ±2.0).
+            for tag, xa in (("W", po["w0"]), ("E", po["w1"] - po["t"])):
+                BOX(f"{ROOT}/Road/PortalHead_{tag}",
+                    (xa + po["t"] / 2.0, 0.0, po["top"] / 2.0),
+                    (po["t"], 2.0 * y_out, po["top"]), M["parapet"], col=True)
+            # [GT-106] passage luminaires — recessed battens + SphereLight under the
+            #   soffit (scene02 GT-3 / scene13 recipe). The daylight mouths shrank
+            #   with the deck extension, so the lit interior is what keeps the lower
+            #   passage legible ("지하도 아래가 보여야지").
+            from pxr import Gf, UsdGeom, UsdLux
+            la = PARAMS["plamp"]
+            bz = sof - la["t"] / 2.0 + la["embed"]
+            for k, lx in enumerate(la["xs"]):
+                BOX(f"{ROOT}/Road/LampBatten_{k}", (lx, la["y"], bz),
+                    (la["w"], la["length"], la["t"]), M["lamp"])
+                lt = UsdLux.SphereLight.Define(stage, f"{ROOT}/Road/Light_{k}")
+                lt.CreateRadiusAttr(float(la["radius"]))
+                lt.CreateIntensityAttr(float(la["intensity"]))
+                lt.CreateColorAttr(Gf.Vec3f(*[float(c) for c in la["color"]]))
+                UsdGeom.Xformable(lt.GetPrim()).AddTranslateOp().Set(
+                    Gf.Vec3d(float(lx), float(la["y"]),
+                             float(sof - la["t"] - 0.02)))
         # Street footways: the plaza is the footway inside |y| ≤ 8, so these only run
         #   from the plaza edge out to the rim. Top 0.000 — 20 mm above the BS-4 apron
         #   and 30 mm above the grass, so both are covered with no coplanar face.
@@ -1381,21 +1450,40 @@ def main():
         #   elevation → shadow length 0.845 × height, always toward +X. The westernmost
         #   member GT-79 adds is the west end pier at x = pv0 − pier/2 − pier/2.
         _sun_tan = math.tan(math.radians(PARAMS["light"]["noon_sun_elev"]))
-        _west = min(r["fw0"], r["pv0"] - r["pier"]["length"])
-        print(f"[GT-79] 태양 검증 · 그림자 방위 0°(+X) · 고도 "
+        # [GT-106] the westernmost new member is now the west portal headwall face
+        #   (x 6.40, h 0.90): shadow azimuth 0° (+X) throws its shadow EAST onto the
+        #   portal deck, so the judged stair band (x < 6.40) still takes shadow from
+        #   the canopy alone — T20 ownership unchanged.
+        _west = min(r["fw0"], PARAMS["portal"]["w0"])
+        print(f"[GT-79·106] 태양 검증 · 그림자 방위 0°(+X) · 고도 "
               f"{PARAMS['light']['noon_sun_elev']:.2f}° (그림자 길이 "
-              f"{1.0 / _sun_tan:.3f}×높이) · 신규 부재 최서단 x {_west:+.2f} → "
-              f"판정 계단대역 x 0.00…"
+              f"{1.0 / _sun_tan:.3f}×높이) · 신규 부재 최서단 x {_west:+.2f} "
+              f"(서측 헤드월, 그림자 +X 낙하) → 판정 계단대역 x 0.00…"
               f"{PARAMS['stairs']['tread'] * PARAMS['stairs']['nsteps']:.2f} 에 "
               f"신규 그림자 0 — 캐노피가 계속 그림자 소유")
         if cfg["hazard_stairs"]:
-            print(f"[GT-103] 복개 박스 x {pv0:.2f}…{pv1:.2f} "
-                  f"({pv1 - pv0:.2f} m) · 슬래브 "
-                  f"{r['z_road'] - r['box_soffit']:.3f} m · 소핏 "
-                  f"{r['box_soffit']:+.3f} · 유효고 {head:.3f} m "
-                  f"(≥ 2.5 표준 {'충족 — row-35 해소' if head >= 2.5 else 'FAIL'}) · "
-                  f"서측 개착 {pv0 - PARAMS['passage']['x0']:.2f} m · "
-                  f"동측 입구 = 동측 계단 발치 {PARAMS['east_stairs']['x0']:.2f}")
+            po = PARAMS["portal"]
+            es = PARAMS["east_stairs"]
+            # [GT-106] minimum clearance over the covered east treads: tread top at
+            #   the mouth w1 = −riser × ceil((w1 − foot)/tread 단수 역산) — report the
+            #   worst (easternmost covered) tread.
+            _n_cov = max(0, int((po["w1"] - es["x0"] - 1e-9) // es["tread"]) + 1)
+            _bot = es["z_top"] - es["riser"] * es["nsteps"]
+            _tread_top = _bot + es["riser"] * _n_cov
+            _clr_e = r["box_soffit"] - _tread_top
+            print(f"[GT-103·106] 복개 x {po['w0']:.2f}…{po['w1']:.2f} "
+                  f"(도로부 {pv1 - pv0:.2f} + 포털 데크 서 "
+                  f"{pv0 - po['w0']:.2f}/동 {po['w1'] - pv1:.2f} m) · 소핏 "
+                  f"{r['box_soffit']:+.3f} · 통로 유효고 {head:.3f} m "
+                  f"(≥ 2.5 {'충족 — row-35 해소' if head >= 2.5 else 'FAIL'}) · "
+                  f"동측 복개 디딤 {_n_cov}단 최소 유효고 {_clr_e:.2f} "
+                  f"(≥ 2.1 {'OK' if _clr_e >= 2.1 else 'FAIL'}) · 헤드월 2기 "
+                  f"h {po['top']:.2f}(연석 이격 서 "
+                  f"{r['kb0'] - (po['w0'] + po['t']):.2f}/동 "
+                  f"{po['w1'] - po['t'] - r['kb1']:.2f} m) · 통로 조명 "
+                  f"{len(PARAMS['plamp']['xs'])}등 (소핏 배튼+SphereLight, "
+                  f"scene02 GT-3 전례) · 개착 잔여 서 0.00…{po['w0']:.2f} · 동 "
+                  f"{po['w1']:.2f}…{PARAMS['wall']['x1']:.2f}")
 
     # -------------------------------------------------------------------
     # [W3 S16 · BS-4] G2 street wall — both verges, kind="backdrop"

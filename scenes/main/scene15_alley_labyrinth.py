@@ -82,6 +82,24 @@ Goal     : assemble 25 steps (25° bend after 12 steps + a 1.5 m landing) + 12 p
       `ground` block.
   Report: Docs/reports/w3_l15_v1.md · GT row GT-42.
 
+[GT-111 · K2 다세대 + K7 옥상] 제안서 §3.3. 이 씬의 결손은 프롭이 아니라 **유형**이었다:
+  코퍼스 79동 중 다세대가 1동뿐이라 "단층 슬래브집 사이에 1990~2000년대 3~4층 빌라가
+  끼어든다"는 감천·이화동의 결정적 대비가 통째로 비어 있었다.
+    · **K2 4층 다세대 2동 신설** — 필로티 2.90 + 2.80×3 = 11.30 + 파라펫 1.20,
+      9.0 × 8.0(베이 4.50), h > 10 이므로 일조사선 상부 1단 1.60 후퇴, 필로티 개구
+      4.60 × 2.10, 무창 측벽의 노출 가스 입상관(각 층 바닥 +1.00 에 황색 띠 0.030 2줄),
+      계량기함, 옥외 계단 1련, 창 층당 4개(침실 1.50×1.40 · 거실 2.10×1.50, 격자 없음).
+      **배치는 골목 벽선 밖 배후에만** — 상부동 골목면 y −4.50(회랑 남단 −0.90 까지
+      3.60 m · 대지 석축까지 쳐도 2.77 m), 하부동 회전군 로컬 y −4.20(3.30 m ·
+      석축 2.47 m). 기존 12동 + backdrop 4동의 파사드 y 는
+      한 값도 건드리지 않았고, 재질 슬롯도 뒤에 덧붙여 기존 16동 틴트가 바이트 동일하다.
+      낙차·계단 상면 z·회랑 폭 전부 불변 → 이 라운드의 GT 결과는 전량 신설 매스 귀속.
+    · **K7 보완** — 평지붕 주택 3동에 옥상 난간(살대, h 1.00~1.10 · 파라펫 1.20 은
+      2005-07-18 이전 스톡에 연대 불일치)과 물탱크 2기. v5.1 이 지운 것은 물탱크라는
+      사물이 아니라 12동 복제였으므로, 여기서는 서로 다른 치수 2기·지붕 3장뿐이고
+      모든 부재가 파사드 평면보다 실내쪽(지붕 오버행 0.14 보다도 안쪽)에 선다.
+  좌표 게이트: NEGOBS_SELFCHECK=1 (섹션 8·9 가 배후 이격과 골목 침범 0 을 재유도).
+
 Run (GUI look check — default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
@@ -292,6 +310,98 @@ PARAMS = dict(
         dict(cx=11.05, cy=-2.18, base_z=-4.25, w=4.1, d=2.6, h=2.9, tint=0,
              face=1, grp=True),
     ],
+    # ═══════════════════════════════════════════════════════════════════════
+    # [GT-111] K2 다세대 2동 — 제안서 §3.3 "달동네를 달동네로 만드는 대비"
+    # ═══════════════════════════════════════════════════════════════════════
+    #  코퍼스 79동 중 다세대는 1동뿐이고, 감천·이화동 실경은 단층 슬래브집 사이에
+    #  1990~2000년대 3~4층 빌라가 반드시 섞인다. 그 대비가 이 씬의 결손이었다.
+    #
+    #  **불가침 조건과 그 이행 방법**. 이 씬의 연구 정체성은 골목 협곡 판독과
+    #  4.25 m 낙차 은닉이고, 코드는 이미 A-15-1/2 로 "회전 그룹 내부 y ±0.58/±0.88"
+    #  을 고정해 두었다. 신설 매스는 그 선을 넘지 않는 정도가 아니라 **기존 주택 열
+    #  뒤(배후)** 에만 선다:
+    #    · 상부동(A) 골목 벽선(=옹벽 외면 |y| 1.40) 밖, House[1]/[3] 뒷면(y −3.78)
+    #      너머 → 골목면 y −4.50. 골목 남단(−0.90)까지 **3.60 m**, 지형 채움인 대지
+    #      석축(y −3.70)까지 쳐도 **2.77 m** 이격 `[computed — selfcheck §8]`
+    #    · 하부동(B) 회전군 로컬, House[11] 뒷면(local y −3.48) 너머 → 골목면
+    #      local y −4.20. 하부 골목 남단(−0.90)까지 **3.30 m**(석축 2.47 m)
+    #  두 동 모두 남측(−Y) 열 배후다. 남측 주택이 일부러 낮게(2.5~3 m) 유지된 열
+    #  (director r1 C-15(3))이라 낮은 지붕 너머로 4층 매스가 서고, **그림자는 골목에
+    #  닿지 않는다**: 태양 방향 (0.6415, 0.0731, −0.7636) `[derived — noon_dome_rot
+    #  −110 + SUN_AZ_OFFSET 153 + hdri_sun_rotz_offset 233.5 = rotZ 276.5°, elev
+    #  49.79°]` → 높이 12.50 m 의 그림자가 y 방향으로 +1.20 m 밖에 못 가서 A 동은
+    #  y −3.30 에서 멈춘다(골목 남단까지 2.40 m 여유). B 동은 회전군 로컬로 환산하면
+    #  그림자가 **−3.35 m**, 즉 골목 **반대쪽**으로 간다 `[computed]`.
+    #
+    #  **입면 방위**. +Y 를 북(코드가 이미 y+ 를 north 로 부른다 — rail.wall_y 주석)
+    #  으로 두면 두 동 모두 골목이 북측이다 → 일조사선 후퇴 1.60 은 **골목쪽 최상층**
+    #  이 물러난다. 골목에서 계단식 후퇴가 그대로 읽히는, 원하는 배치다.
+    #  필로티 개구(주차)는 골목 반대편(뒷길)을 향한다 — 계단 골목으로는 차가 못 들어
+    #  오므로 개구를 골목쪽에 두면 거짓말이 된다. 보행 진입은 골목쪽, 차량 진입은
+    #  뒷길이라는 산동네 다세대의 실제 접근 구조.
+    #
+    #  **재질**: 제안서 §3.3 재질군은 도기질 타일 1롤을 권했으나 결재 7-5(신규 롤
+    #  조달 안 함)에 따라 **기존 plaster 틴트 계열**로 시공했다. 이건 흡수한 게 아니라
+    #  기록된 이탈이다 — 타일 롤이 들어오면 K2 2동만 재바인딩하면 된다.
+    villa=dict(
+        w=9.0, d=8.0, bay=4.50,        # 2세대/층, 베이 4.50 (BAY_VILLA)
+        piloti_h=2.90, floor_h=2.80, n_res=3,   # 필로티 + 기준층 3개 = 11.30
+        setback=1.60,                  # [law] 시행령 §86① h 11.30 > 10.0 → 상부 1단
+        parapet_h=1.20, parapet_t=0.20,
+        slab_t=0.30,                   # 2층 바닥 슬래브(필로티 머리)
+        piloti_open_w=4.60, piloti_open_h=2.10,   # 주차 1대가 들어가는 최소 개구
+        wall_t=0.30, core_w=2.20, core_d=2.60,    # 계단실/현관 코어
+        win_bed=(1.50, 1.40), sill_bed=0.90,      # 골목쪽 침실창 (격자 금지)
+        win_liv=(2.10, 1.50), sill_liv=0.60,      # 뒷길쪽 거실창
+        skirt_h=0.85, skirt_t=0.03,               # 걸레받이(기존 주택과 동일 어휘)
+        roof_deck_t=0.10, terr_rail_h=1.00, terr_rail_t=0.15,
+        pod_margin=1.50,               # 대지 석축(언덕 성토) 여유
+        # 노출 가스 입상관 — K2 를 K2 로 만드는 결정적 수직선. [law] KGS FU551:
+        #   건축물 외벽 노출배관은 **각 층 바닥으로부터 1 m 높이에 폭 3 cm 황색 띠
+        #   2줄**. 무창 측벽(E8)에 세워 4층 후퇴 구간에서도 끊기지 않게 했다.
+        gas=dict(pipe_r=0.010, wall_gap=0.060, y_off=2.00, z_bot=0.30,
+                 band_r=0.013, band_w=0.030, band_off=1.00, band_gap=0.055,
+                 valve_z=1.80, valve_r=0.045, valve_h=0.22,      # 주밸브 1.60~2.00
+                 handle_r=0.012, handle_l=0.16, branch_len=1.20),
+        meter=dict(w=1.10, h=0.60, t=0.24, z0=1.20, y_off=0.90),  # 계량기함 1.20~1.80
+        # 옥외 계단 1련 — 무창 측벽(입상관 반대쪽)에 붙여 세로로 태운다. 골목쪽
+        #   면은 기존 주택 뒷면과 0.72 m 밖에 안 떨어져 있어 계단이 들어갈 수 없다.
+        stair=dict(riser=0.18125, tread=0.26, n=16, width=1.10, y_off=0.30,
+                   wall_h=0.90, wall_t=0.12),
+    ),
+    #  cy 는 골목면(cy + d/2)에서 역산: A 골목면 −4.50 / B 골목면 local −4.20.
+    #  pod_seal 은 언덕 성토를 기존 주택 뒷면 안쪽 0.08 m 까지 물려 4.35 m 틈을 막는
+    #  값(동일 평면 = Z-파이팅이라 겹치게 둔다). 파사드 평면(−1.38 / local −0.88)
+    #  근처에는 얼씬도 하지 않는다.
+    villas=[
+        dict(tag="A", cx=-6.60, cy=-8.50, base_z=0.0, grp=False, tint=2,
+             riser_side=+1, pod_seal=-3.70),
+        dict(tag="B", cx=11.05, cy=-8.20, base_z=-4.25, grp=True, tint=1,
+             riser_side=-1, pod_seal=-3.40),
+    ],
+    # ═══════════════════════════════════════════════════════════════════════
+    # [GT-111] K7 보완 — 옥상 난간(살대) + 물탱크. 신규 유형이 아니라 유형이 요구한 것
+    # ═══════════════════════════════════════════════════════════════════════
+    #  **v5.1 판정과의 관계를 숨기지 않는다.** v5.1 은 사용자 판정("조형물 빼라")로
+    #  옥상 물탱크를 **전량 삭제**했다. 그때 실패한 것은 물탱크라는 사물이 아니라
+    #  *같은 위치·같은 크기로 12동 전부에 복제된 프롭 카탈로그*였다(파일 상단 주석이
+    #  그렇게 적고 있다). GT-111 은 그 실패 모드를 정면으로 피한다: **2기뿐, 서로 다른
+    #  치수, 서로 다른 층·방향**. 난간도 12동이 아니라 판정 컷에 지붕이 실제로 드는
+    #  3동에만 선다.
+    #  난간 높이 1.00~1.10 — [law] 2005-07-18 이전 스톡이므로 파라펫 1.20 은 연대
+    #  불일치다(제안서 §3.3 킷 갭 ④). 살대형(수직 살)이고 파이프 가로대형이 아니다.
+    #  **골목 침범 0**: 모든 부재는 파사드 평면에서 실내쪽으로 setback 만큼 물러나
+    #  선다 → 이미 0.14 m 골목 위로 나와 있는 지붕 오버행보다도 안쪽이다.
+    #  collider=False: 지붕 위 4 m, 로봇이 닿지 않는다. 충돌 상자를 늘리는 것은
+    #  GT-41 선례(반대 방향)로 금지 — 화분 관목이 collider 가 아닌 것과 같은 판단.
+    roofline=dict(
+        rail=[dict(house=4, h=1.05, pitch=0.155, setback=0.10, end=0.05),
+              dict(house=6, h=1.00, pitch=0.170, setback=0.10, end=0.05),
+              dict(house=8, h=1.08, pitch=0.145, setback=0.12, end=0.05)],
+        #  u = cx 로부터의 x 오프셋, v = 파사드 평면에서 실내쪽 깊이
+        tank=[dict(house=4, r=0.50, h=1.20, stand=0.15, u=-0.55, v=1.15),
+              dict(house=8, r=0.45, h=1.00, stand=0.12, u=+0.90, v=1.30)],
+    ),
     # opposite hill backdrop (distant horizon closure, the slope across the valley - not a dead-end wall)
     backdrop=[
         dict(cx=24.0, cy=8.0, base_z=-1.5, w=4.5, d=4.0, h=5.0, tint=1, face=-1),
@@ -476,6 +586,18 @@ PARAMS = dict(
         #   Korean outdoor units are light warm grey painted sheet; the louvre and fan shadow
         #   do the darkening, not the albedo.
         gear_color=(0.360, 0.355, 0.345), gear_rough=0.62,    # AC outdoor unit
+        # ═══ [GT-111] K7 옥상 난간 · 물탱크 · K2 가스 입상관 ═══
+        #  옥상 난간은 **개축이 아니라 원래 있던 것**이므로 §5.1 연령 사다리의
+        #  1970~80년대 행 = 분체도장 연강이 백화된 상태다. `pipe_*`(STS304 신품
+        #  레트로핏)를 재사용하면 era_consistency §4.4 mismatch 1 을 이 씬에서 두
+        #  번째로 저지르게 된다 — 그래서 별도 재질이다. metallic 0 (도장면).
+        roofrail_color=(0.305, 0.312, 0.300), roofrail_rough=0.80,
+        #  물탱크: 청색 PE(고밀도폴리에틸렌) 물탱크. 노후 저층 스톡의 표준품.
+        tank_color=(0.235, 0.325, 0.395), tank_rough=0.58,
+        #  가스배관 본체는 회백색 도장, 식별 띠만 황색. 대면적 순백 금지 관례에
+        #  맞춰 띠도 최대 채널 0.80 으로 잡았다(띠 폭 30 mm — 대면적이 아니다).
+        gas_pipe_color=(0.620, 0.610, 0.585), gas_pipe_rough=0.55,
+        gas_band_color=(0.800, 0.620, 0.080), gas_band_rough=0.60,
         valley_tint=(0.85, 0.85, 0.82),
     ),
 
@@ -627,6 +749,194 @@ def _facade_for(pot):
     return best
 
 
+# ---------------------------------------------------------------------------
+# [GT-111] K2 매스 유도 — 빌더와 자가검증이 **같은 함수**를 읽는다
+#
+#   신설 매스의 좌표를 빌더 안에만 두면 R-1 게이트는 "코드가 만들었다고 주장하는 것"
+#   을 검사하게 된다. 층 레벨과 상자 목록을 모듈 레벨로 끌어올려 두 쪽이 같은 유도를
+#   공유하면, 자가검증이 실제로 조립되는 상자를 그대로 잰다.
+# ---------------------------------------------------------------------------
+def villa_levels(vs):
+    """(base, [2F, 3F, 4F 바닥 z], 옥상 슬래브 z) — PARAMS 에서 재유도."""
+    v = PARAMS["villa"]
+    b = float(vs["base_z"])
+    flr = [b + v["piloti_h"]]
+    for _ in range(int(v["n_res"]) - 1):
+        flr.append(flr[-1] + v["floor_h"])
+    return b, flr, flr[-1] + v["floor_h"]
+
+
+def villa_parts(vs):
+    """K2 1동의 상자 부재 전량. dict(name, c, s, m, col, rotX) 리스트.
+
+    m 은 재질 키(빌더가 슬롯 재질로 해석). 실린더(가스배관)와 창(패널+프레임)은
+    빌더 쪽에 남지만, 둘 다 이 상자들의 y 범위 안에 들어오므로 AABB 는 여기서 닫힌다.
+    """
+    v = PARAMS["villa"]
+    w, d = v["w"], v["d"]
+    cx, cy = float(vs["cx"]), float(vs["cy"])
+    b, flr, top = villa_levels(vs)
+    x0, x1 = cx - w / 2.0, cx + w / 2.0
+    y_alley, y_road = cy + d / 2.0, cy - d / 2.0     # +Y = 골목쪽(북) / −Y = 뒷길
+    t, hw = v["wall_t"], v["piloti_h"] - v["slab_t"]
+    P = []
+
+    def A(nm, c, s, m, col=True, rotX=0.0):
+        P.append(dict(name=nm, c=tuple(float(q) for q in c),
+                      s=tuple(float(q) for q in s), m=m, col=col,
+                      rotX=float(rotX)))
+
+    # 0) 대지 석축(성토). 언덕은 주택 상자들 자신이 만들고 있고 주택 열 뒤는 계곡
+    #    슬래브(−4.35)까지 비어 있다 → 신설 동도 같은 방식으로 자기 단을 만든다.
+    #    골목쪽 끝(pod_seal)은 기존 주택 뒷면 안쪽 0.08 m 로 물려 틈을 봉한다.
+    vz = PARAMS["valley"]["z_top"]
+    pm = v["pod_margin"]
+    px0, px1 = x0 - pm, x1 + pm
+    py0, py1 = y_road - pm, float(vs["pod_seal"])
+    A("Podium", ((px0 + px1) / 2.0, (py0 + py1) / 2.0, (vz + b) / 2.0),
+      (px1 - px0, py1 - py0, b - vz), "retwall")
+
+    # 1) 필로티(1층) — 개구는 뒷길쪽 1개소. 3면은 벽, 골목쪽은 주차 뒷벽.
+    A("Piloti/Slab", (cx, cy, b + hw + v["slab_t"] / 2.0), (w, d, v["slab_t"]),
+      "concrete")
+    A("Piloti/WallAlley", (cx, y_alley - t / 2.0, b + hw / 2.0), (w, t, hw),
+      "concrete")
+    A("Piloti/WallSide_W", (x0 + t / 2.0, cy, b + hw / 2.0), (t, d, hw),
+      "concrete")
+    A("Piloti/WallSide_E", (x1 - t / 2.0, cy, b + hw / 2.0), (t, d, hw),
+      "concrete")
+    pw = (w - v["piloti_open_w"]) / 2.0
+    A("Piloti/Pier_W", (x0 + pw / 2.0, y_road + t / 2.0, b + hw / 2.0),
+      (pw, t, hw), "concrete")
+    A("Piloti/Pier_E", (x1 - pw / 2.0, y_road + t / 2.0, b + hw / 2.0),
+      (pw, t, hw), "concrete")
+    oh = v["piloti_open_h"]
+    A("Piloti/Lintel", (cx, y_road + t / 2.0, b + (oh + hw) / 2.0),
+      (v["piloti_open_w"], t, hw - oh), "concrete")
+    A("Piloti/Core", (x1 - t - v["core_w"] / 2.0,
+                      y_alley - t - v["core_d"] / 2.0, b + hw / 2.0),
+      (v["core_w"], v["core_d"], hw), "concrete")
+
+    # 2) 기준층 매스 + 일조사선 상부 1단 후퇴(북=골목쪽으로 물러난다)
+    A("Block", (cx, cy, (flr[0] + flr[-1]) / 2.0),
+      (w, d, flr[-1] - flr[0]), "plaster")
+    d4 = d - v["setback"]
+    cy4 = y_road + d4 / 2.0
+    A("Block4F", (cx, cy4, (flr[-1] + top) / 2.0), (w, d4, top - flr[-1]),
+      "plaster")
+
+    # 3) 후퇴로 생긴 테라스(1.60 m) — 방수면 + 난간벽
+    A("TerraceDeck", (cx, (y_road + d4 + y_alley) / 2.0,
+                      flr[-1] + v["roof_deck_t"] / 2.0),
+      (w, y_alley - (y_road + d4), v["roof_deck_t"]), "slab", col=False)
+    A("TerraceRail", (cx, y_alley - v["terr_rail_t"] / 2.0,
+                      flr[-1] + v["terr_rail_h"] / 2.0),
+      (w, v["terr_rail_t"], v["terr_rail_h"]), "plaster")
+
+    # 4) 옥상 — 방수 데크 + 파라펫 1.20 (K2 는 파라펫, K7 은 난간. 연대가 다르다)
+    pt, pah = v["parapet_t"], v["parapet_h"]
+    A("RoofDeck", (cx, cy4, top + v["roof_deck_t"] / 2.0),
+      (w - 2 * pt, d4 - 2 * pt, v["roof_deck_t"]), "slab", col=False)
+    A("Parapet_N", (cx, cy4 + d4 / 2.0 - pt / 2.0, top + pah / 2.0),
+      (w, pt, pah), "plaster")
+    A("Parapet_S", (cx, cy4 - d4 / 2.0 + pt / 2.0, top + pah / 2.0),
+      (w, pt, pah), "plaster")
+    A("Parapet_W", (x0 + pt / 2.0, cy4, top + pah / 2.0),
+      (pt, d4 - 2 * pt, pah), "plaster")
+    A("Parapet_E", (x1 - pt / 2.0, cy4, top + pah / 2.0),
+      (pt, d4 - 2 * pt, pah), "plaster")
+
+    # 5) 걸레받이(기존 주택과 동일 어휘) · 계량기함
+    A("Skirt", (cx, y_alley + v["skirt_t"] / 2.0, b + v["skirt_h"] / 2.0),
+      (w, v["skirt_t"], v["skirt_h"]), "skirt", col=False)
+    rs = float(vs["riser_side"])
+    mo = v["meter"]
+    A("MeterBox", (cx + rs * (w / 2.0 + mo["t"] / 2.0), cy + mo["y_off"],
+                   b + mo["z0"] + mo["h"] / 2.0), (mo["t"], mo["w"], mo["h"]),
+      "gear", col=False)
+
+    # 6) 옥외 계단 1련 + 난간벽(경사 상자 1개 = rotX)
+    ss, st = -rs, v["stair"]
+    sxa = cx + ss * (w / 2.0 - 0.05)
+    sxb = cx + ss * (w / 2.0 + st["width"])
+    sy0 = y_road + st["y_off"]
+    for i in range(1, int(st["n"]) + 1):
+        ya, yb = sy0 + (i - 1) * st["tread"], sy0 + i * st["tread"]
+        zt = b + i * st["riser"]
+        A(f"OutStair/Step_{i}", ((sxa + sxb) / 2.0, (ya + yb) / 2.0,
+                                 (b + zt) / 2.0),
+          (abs(sxb - sxa), st["tread"], zt - b), "concrete")
+    run, rise = st["n"] * st["tread"], st["n"] * st["riser"]
+    ang = math.degrees(math.atan2(rise, run))
+    ar = math.radians(ang)
+    A("OutStair/Stringer",
+      (sxb - ss * st["wall_t"] / 2.0,
+       sy0 + run / 2.0 - (st["wall_h"] / 2.0) * math.sin(ar),
+       b + rise / 2.0 + (st["wall_h"] / 2.0) * math.cos(ar)),
+      (st["wall_t"], math.hypot(run, rise), st["wall_h"]), "concrete",
+      rotX=ang)
+    return P
+
+
+def villa_aabb(vs, skip=()):
+    """1동의 프레임 로컬 AABB. 경사 난간벽은 회전 후 폭으로 감싼다.
+
+    skip=("Podium",) 로 부르면 **건물 외피만** 남는다. 석축(성토)은 기존 주택 뒷면
+    안쪽까지 묻히는 지형 채움이라 화면 판정에 섞으면 숫자가 거짓말을 한다 —
+    회랑 이격은 석축 포함(보수적)으로, 프러스텀 진입은 건물만으로 잰다.
+    """
+    lo = [1e9] * 3
+    hi = [-1e9] * 3
+    for p in villa_parts(vs):
+        if p["name"] in skip:
+            continue
+        sx, sy, sz = p["s"]
+        if abs(p["rotX"]) > 1e-9:
+            a = math.radians(p["rotX"])
+            sy, sz = (abs(sy * math.cos(a)) + abs(sz * math.sin(a)),
+                      abs(sy * math.sin(a)) + abs(sz * math.cos(a)))
+        for k, (c, s) in enumerate(zip(p["c"], (sx, sy, sz))):
+            lo[k] = min(lo[k], c - s / 2.0)
+            hi[k] = max(hi[k], c + s / 2.0)
+    # 가스 입상관은 측벽 밖으로 wall_gap + 2r 만큼만 나온다 — 계단(1.10)보다 안쪽
+    g = PARAMS["villa"]["gas"]
+    xg = vs["cx"] + vs["riser_side"] * (PARAMS["villa"]["w"] / 2.0
+                                        + g["wall_gap"] + 2 * g["band_r"])
+    lo[0], hi[0] = min(lo[0], xg), max(hi[0], xg)
+    # 창 프레임은 벽면 +0.03 까지만 돌출한다 (`_opening`)
+    lo[1] -= 0.03
+    hi[1] += 0.03
+    return tuple(lo), tuple(hi)
+
+
+def _bend_to_world(x, y):
+    """회전군 로컬 → 월드 (pivot (5.1, 0), +25°)."""
+    bd = PARAMS["bend"]
+    px, py = bd["pivot"]
+    a = math.radians(bd["deg"])
+    dx, dy = x - px, y - py
+    return (px + dx * math.cos(a) - dy * math.sin(a),
+            py + dx * math.sin(a) + dy * math.cos(a))
+
+
+def roofline_items():
+    """K7 옥상 부재의 (종류, house, 프레임, 부재 y, 파사드 y, 상면 z, 최고 z)."""
+    out = []
+    rt = PARAMS["house"]["roof_t"]
+    for kind, key in (("난간", "rail"), ("물탱크", "tank")):
+        for it in PARAMS["roofline"][key]:
+            hs = PARAMS["houses"][it["house"]]
+            yf = hs["cy"] + hs["face"] * (hs["d"] / 2.0)
+            off = it["setback"] if key == "rail" else it["v"]
+            zr = hs["base_z"] + hs["h"] + rt
+            ztop = zr + (it["h"] if key == "rail"
+                         else it["stand"] + it["h"])
+            out.append(dict(kind=kind, house=it["house"], grp=bool(hs.get("grp")),
+                            y=yf - hs["face"] * off, yf=yf, z=zr, ztop=ztop,
+                            h=it["h"], spec=it, hs=hs))
+    return out
+
+
 def alley_selfcheck(verbose=True):
     fails = []
 
@@ -747,6 +1057,168 @@ def alley_selfcheck(verbose=True):
     # (7) The standing library rule, asserted rather than assumed.
     chk("사람·차량 0", True, "이 씬은 어느 축에서도 사람·차량을 만들지 않는다")
 
+    # ── (8) [GT-111] K2 신설 매스 — 배후 배치의 수치 증빙 ──────────────────
+    #   "골목 시선에 개입하지 않는다"를 말이 아니라 좌표로 닫는다. 세 겹으로 잰다:
+    #     ① 골목 회랑 밴드까지의 이격 (같은 프레임 안에서)
+    #     ② 기존 파사드/뒷면 평면과의 관계 (무접촉 + 성토 봉합만 의도적 겹침)
+    #     ③ 판정 눈 9개(−d, 0, h)의 시선축 대비 방위각 — 화면 밖인지 안인지
+    if verbose:
+        print("-" * 72)
+        print("[R-1 · GT-111] 신설 K2 매스 — 프레임 로컬 AABB")
+        print("  동   프레임   외피        x                y                z")
+    band = {False: ("상부 골목", PARAMS["upper_alley"]["y0"]),
+            True: ("하부 골목", PARAMS["lower_alley"]["y0"])}
+    for vs in PARAMS["villas"]:
+        lo, hi = villa_aabb(vs)
+        blo, bhi = villa_aabb(vs, skip=("Podium",))
+        g = bool(vs["grp"])
+        if verbose:
+            for nm, (a, b) in (("건물", (blo, bhi)), ("석축", (lo, hi))):
+                print(f"  {vs['tag']}    {'회전군' if g else '월드  '}   {nm}   "
+                      f"{a[0]:+7.2f}…{b[0]:+7.2f}  {a[1]:+7.2f}…{b[1]:+7.2f}  "
+                      f"{a[2]:+7.2f}…{b[2]:+7.2f}")
+        # ① 골목 회랑 이격 — 두 동 모두 −Y 이므로 hi[1] 이 골목에 가장 가깝다
+        lbl, y_edge = band[g]
+        gap = y_edge - hi[1]               # y_edge < 0, 신설은 그보다 더 −Y
+        chk(f"K2-{vs['tag']} · {lbl} 회랑(y {y_edge:+.2f}) 이격",
+            gap > 1.0, f"{gap:+.3f} m (신설 최근접 y {hi[1]:+.3f})")
+        # 계단 회랑(±0.60)까지도 같이 재둔다 — 낙차가 걸린 폭은 이쪽이다
+        chk(f"K2-{vs['tag']} · 계단 회랑(y −0.60) 이격",
+            hi[1] < -0.60, f"{-0.60 - hi[1]:+.3f} m")
+        # ② 같은 프레임의 기존 주택 평면과의 관계
+        near_f, near_r = None, None
+        for i, hs in enumerate(PARAMS["houses"]):
+            if bool(hs.get("grp")) != g or hs["cy"] > 0:
+                continue
+            yf = hs["cy"] + hs["face"] * (hs["d"] / 2.0)     # 골목쪽 파사드
+            yr = hs["cy"] - hs["face"] * (hs["d"] / 2.0)     # 뒷면
+            if near_f is None or abs(yf - hi[1]) < abs(near_f[1] - hi[1]):
+                near_f = (i, yf)
+            if near_r is None or abs(yr - hi[1]) < abs(near_r[1] - hi[1]):
+                near_r = (i, yr)
+        chk(f"K2-{vs['tag']} · 기존 파사드 평면 무접촉",
+            near_f is not None and hi[1] < near_f[1] - 1.0,
+            f"House[{near_f[0]}] 파사드 y={near_f[1]:+.2f} — "
+            f"{near_f[1] - hi[1]:+.3f} m 뒤")
+        seal = float(vs["pod_seal"]) - near_r[1]
+        chk(f"K2-{vs['tag']} · 성토 봉합 = 뒷면 안쪽 0<δ≤0.15",
+            0.0 < seal <= 0.15,
+            f"House[{near_r[0]}] 뒷면 y={near_r[1]:+.2f} · 석축 {vs['pod_seal']:+.2f} "
+            f"→ δ {seal * 1000:+.0f} mm (동일 평면 회피)")
+        # ③ 판정 눈 프러스텀 — 방위각 하나로 때우지 않고 실제로 화면에 드는지 센다.
+        #    눈 (−d, 0, h), 시선 +X · 피치 −10° (`sc.grid_views`), f 1663.4 px /
+        #    1920×1080 → 반화각 수평 30.0° · 수직 18.0° `[computed]`.
+        pl = [(blo[0], blo[1]), (bhi[0], blo[1]), (bhi[0], bhi[1]),
+              (blo[0], bhi[1])]
+        pl += [((a[0] + b[0]) / 2.0, (a[1] + b[1]) / 2.0)
+               for a, b in zip(pl, pl[1:] + pl[:1])]
+        pl = [_bend_to_world(*p) if g else p for p in pl]
+        zs = (blo[2], (blo[2] + bhi[2]) / 2.0, bhi[2])
+        pp = math.radians(-10.0)
+        tu, tv = math.tan(math.radians(30.0)), math.tan(math.radians(18.0))
+        in_eyes, az_min, lat = [], 180.0, 1e9
+        for hh in (0.3, 0.9, 1.8):
+            for dd in (2, 5, 10):
+                hit = False
+                for (qx, qy) in pl:
+                    lat = min(lat, abs(qy))
+                    px_, py_ = qx + dd, qy
+                    if px_ > 0:
+                        az_min = min(az_min,
+                                     abs(math.degrees(math.atan2(py_, px_))))
+                    for qz in zs:
+                        pz_ = qz - hh
+                        fd = px_ * math.cos(pp) + pz_ * math.sin(pp)
+                        if fd <= 0:
+                            continue
+                        if (abs(-py_ / fd) <= tu
+                                and abs((-px_ * math.sin(pp)
+                                         + pz_ * math.cos(pp)) / fd) <= tv):
+                            hit = True
+                if hit:
+                    in_eyes.append(f"h{hh}·d{dd}")
+        chk(f"K2-{vs['tag']} · 판정 눈 프러스텀 진입",
+            True,
+            f"9개 중 {len(in_eyes)}개 — {', '.join(in_eyes) or '없음'} · "
+            f"최소 |az| {az_min:.1f}° (반화각 30.0°) · 시선축(y=0) 평면 이격 "
+            f"{lat:.2f} m")
+
+        # ④ 기존 매스와의 교차 — 허용되는 겹침은 성토 봉합(석축×뒷집) 뿐이다.
+        #    지붕 오버행(0.14)까지 포함해서 잰다.
+        def _ov(a0, a1, b0, b1):
+            return min(a1, b1) - max(a0, b0)
+
+        ro = PARAMS["house"]["roof_over"]
+        bad, seal_hits = [], []
+        for i, hs in enumerate(PARAMS["houses"]):
+            if bool(hs.get("grp")) != g:
+                continue
+            hb = ((hs["cx"] - hs["w"] / 2.0 - ro, hs["cx"] + hs["w"] / 2.0 + ro),
+                  (hs["cy"] - hs["d"] / 2.0 - ro, hs["cy"] + hs["d"] / 2.0 + ro),
+                  (PARAMS["valley"]["z_top"],
+                   hs["base_z"] + hs["h"] + PARAMS["house"]["roof_t"]))
+            for tag, a, b in (("건물", blo, bhi), ("석축", lo, hi)):
+                ov = [_ov(a[k], b[k], *hb[k]) for k in range(3)]
+                if min(ov) > 0:
+                    (seal_hits if tag == "석축" else bad).append(
+                        f"{tag}×House[{i}] Δy {ov[1] * 1000:+.0f} mm")
+        wl = [(_bend_to_world(x, y) if g else (x, y))
+              for x in (lo[0], hi[0]) for y in (lo[1], hi[1])]
+        wx = (min(p[0] for p in wl), max(p[0] for p in wl))
+        wy = (min(p[1] for p in wl), max(p[1] for p in wl))
+        bmin = 1e9
+        for i, bh in enumerate(PARAMS["backdrop"]):
+            bb = ((bh["cx"] - bh["w"] / 2.0 - ro, bh["cx"] + bh["w"] / 2.0 + ro),
+                  (bh["cy"] - bh["d"] / 2.0 - ro, bh["cy"] + bh["d"] / 2.0 + ro))
+            sep = max(-_ov(wx[0], wx[1], *bb[0]), -_ov(wy[0], wy[1], *bb[1]))
+            if sep <= 0:
+                bad.append(f"석축×Backdrop[{i}]")
+            bmin = min(bmin, sep)
+        # 봉합 겹침의 허용 상한 = 의도한 물림 0.08 + 지붕 오버행 0.14 + 창 프레임
+        #   여유 0.03 = 0.25. 건물 외피는 단 한 건도 겹치면 안 된다.
+        cap = 0.08 + ro + 0.03 + 1e-6
+        chk(f"K2-{vs['tag']} · 기존 매스 교차 = 성토 봉합뿐",
+            not bad and seal_hits
+            and all(float(s.split()[-2]) / 1000.0 <= cap for s in seal_hits),
+            f"허용(석축) {seal_hits} · 상한 {cap * 1000:.0f} mm · "
+            f"위반(건물) {bad or '없음'} · "
+            f"backdrop 최소 이격 {bmin:+.2f} m (월드 AABB)")
+
+    # ── (9) [GT-111] K7 옥상 부재 — 골목 위로 나가지 않음 + 연대 정합 ────────
+    over = PARAMS["house"]["roof_over"]
+    for it in roofline_items():
+        hs, sp = it["hs"], it["spec"]
+        # 부재는 파사드 평면보다 실내쪽이어야 한다 (지붕 오버행보다도 안쪽)
+        inner = (abs(it["y"]) - abs(it["yf"])) * (1 if abs(it["y"]) >
+                                                  abs(it["yf"]) else -1)
+        half = (sp["setback"] if it["kind"] == "난간" else sp["r"])
+        edge = abs(it["y"]) - half - abs(it["yf"])
+        chk(f"K7 {it['kind']}@House[{it['house']}] 골목 침범 0",
+            abs(it["y"]) > abs(it["yf"]) and edge > -1e-9,
+            f"부재 y={it['y']:+.3f} vs 파사드 {it['yf']:+.3f} "
+            f"(실내쪽 {inner * 1000:+.0f} mm · 오버행 −{over:.2f} 보다 안쪽) · "
+            f"상면 z {it['z']:+.2f} → 최고 {it['ztop']:+.2f}")
+        # 지붕 판 안에 있는가 — x 는 부재 폭까지, y 는 셸 뒷면까지
+        xa, xb = hs["cx"] - hs["w"] / 2.0, hs["cx"] + hs["w"] / 2.0
+        if it["kind"] == "난간":
+            ia, ib = xa + sp["end"], xb - sp["end"]
+        else:
+            ia = hs["cx"] + sp["u"] - sp["r"]
+            ib = hs["cx"] + sp["u"] + sp["r"]
+        y_back = hs["cy"] - hs["face"] * (hs["d"] / 2.0)
+        chk(f"K7 {it['kind']}@House[{it['house']}] 지붕판 내",
+            xa <= ia and ib <= xb and abs(it["y"]) + half <= abs(y_back),
+            f"x [{ia:+.2f}, {ib:+.2f}] ⊂ [{xa:+.2f}, {xb:+.2f}] · "
+            f"뒷면 y {y_back:+.2f} 까지 {abs(y_back) - abs(it['y']) - half:+.3f} m")
+    rails = [r["h"] for r in PARAMS["roofline"]["rail"]]
+    chk("K7 난간 h 1.00~1.10 (파라펫 1.20 금지 — 2005-07-18 이전)",
+        all(1.00 <= h <= 1.10 for h in rails), f"{rails}")
+    chk("K7 물탱크 ≤ 2기 · 치수 상이 (v5.1 프롭 카탈로그 회귀 방지)",
+        len(PARAMS["roofline"]["tank"]) <= 2
+        and len({(t["r"], t["h"]) for t in PARAMS["roofline"]["tank"]})
+        == len(PARAMS["roofline"]["tank"]),
+        f"{[(t['house'], t['r'], t['h']) for t in PARAMS['roofline']['tank']]}")
+
     if verbose:
         print("-" * 72)
         print(f"[selfcheck] scene15 — {'OK' if not fails else 'FAIL ' + str(fails)}")
@@ -767,7 +1239,13 @@ BANNER = """\
  7. [W3 L15] 재질 진위    — 지붕이 목재 데크가 아니라 옥상 슬래브(우레탄·시멘트)인가 ·
                             바닥이 황갈색이 아니라 시멘트 회색인가 ·
                             화분에 구(球)가 아니라 실제 관목 USD 가 서 있는가
-                            (좌표 게이트: NEGOBS_SELFCHECK=1 python scene15_alley_labyrinth.py)"""
+                            (좌표 게이트: NEGOBS_SELFCHECK=1 python scene15_alley_labyrinth.py)
+ 8. [GT-111] K2/K7       — 단층 슬래브집 열 **뒤로** 4층 다세대가 서서 달동네 대비가
+                            생겼는가(골목 안으로는 한 뼘도 들어오지 않았는가) ·
+                            무창 측벽의 황색 띠 입상관이 K2 로 읽히는가 ·
+                            최상층 일조사선 후퇴(1.60)가 계단식으로 보이는가 ·
+                            옥상 난간(살대)이 파라펫이 아니라 난간으로 읽히는가 ·
+                            물탱크 2기가 '프롭 카탈로그'로 되돌아가지 않았는가"""
 
 
 def main():
@@ -856,7 +1334,11 @@ def main():
         # pastel plaster - [v5.1] 5 shared colours -> +-5 % tint jitter **per house instance**.
         #   No new material parameters (the existing 5 pastel · 2 roof colours stay as the base).
         #   Slot = houses index, then backdrop index.
-        specs = list(PARAMS["houses"]) + list(PARAMS["backdrop"])
+        # [GT-111] villas are appended **after** backdrop, so every pre-existing slot
+        #   (0…15) keeps the byte-identical tint it had — a tint shift on an old house
+        #   would contaminate the round's attribution before a single new prim is judged.
+        specs = (list(PARAMS["houses"]) + list(PARAMS["backdrop"])
+                 + list(PARAMS["villas"]))
         M["plaster_i"], M["roof_i"] = [], []
         for i, hs in enumerate(specs):
             base = mp["pastel"][hs["tint"] % len(mp["pastel"])]
@@ -920,6 +1402,24 @@ def main():
                         diffuse_color=mp["pipe_color"],
                         metallic=mp["pipe_metallic"],
                         roughness_const=mp["pipe_rough"])
+        # ── [GT-111] K7 옥상 부재 + K2 가스 입상관 ──
+        #   `Looks/Roofrail` 은 class metal 로 잡히되 metallic 0 = 분체도장 연강.
+        #   M["pipe"](STS304 신품)와 섞지 않는 이유는 PARAMS 주석 참조 — 원래
+        #   있던 난간과 어제 붙인 손잡이는 같은 물건이 아니다.
+        M["roofrail"] = PBR(f"{ROOT}/Looks/RoofrailSteel",
+                            diffuse_color=mp["roofrail_color"],
+                            metallic=0.0,
+                            roughness_const=mp["roofrail_rough"])
+        M["tank"] = PBR(f"{ROOT}/Looks/WaterTank",
+                        diffuse_color=mp["tank_color"],
+                        roughness_const=mp["tank_rough"])
+        M["gaspipe"] = PBR(f"{ROOT}/Looks/GasPipe",
+                           diffuse_color=mp["gas_pipe_color"],
+                           metallic=0.35,
+                           roughness_const=mp["gas_pipe_rough"])
+        M["gasband"] = PBR(f"{ROOT}/Looks/GasBand",
+                           diffuse_color=mp["gas_band_color"],
+                           roughness_const=mp["gas_band_rough"])
         return M
 
     # -------------------------------------------------------------------
@@ -1180,6 +1680,129 @@ def main():
         BOX(f"{prefix}/AC", (cx - w * 0.30, yf + face * 0.16,
                              base + ht * 0.78), (0.70, 0.32, 0.55), M["gear"])
 
+    # -------------------------------------------------------------------
+    # [GT-111] K2 다세대 — 씬 로컬 빌더 확장 (킷 배선 없음, 제안서 §3.3 킷 갭 ①)
+    #   `build_house` 의 어휘(셸 + 창 패널/프레임 + 걸레받이)를 그대로 물려받고
+    #   K2 가 실제로 요구하는 것 — 필로티·일조사선 후퇴·노출 입상관·옥외 계단 —
+    #   만 추가한다. 상자 부재는 전량 모듈 레벨 `villa_parts()` 에서 오고, 자가검증이
+    #   같은 함수를 읽으므로 R-1 게이트가 "만들었다는 주장"이 아니라 실물을 잰다.
+    # -------------------------------------------------------------------
+    def build_villa(prefix, vs, M, slot):
+        # 변위 스킨 제외. 석축(하부동 12.0×10.3×0.10)·필로티 슬래브(9.0×8.0×0.30)·
+        #   옥상 방수면(8.6×6.0×0.10)은 `_skin_wanted` 의 "크고 수평인 지면류" 조건을
+        #   그대로 만족해서 스킨 대상이 된다 — 건물 부재에 지면 미세요철을 얹을 이유가
+        #   없고, 모호하면 제외가 이 프로젝트의 기본값이다(UpperAlley 선례).
+        sc.skin_exclude(prefix)
+        v = PARAMS["villa"]
+        MK = dict(plaster=M["plaster_i"][slot], slab=M["roof_i"][slot],
+                  concrete=M["stair"], retwall=M["retwall"],
+                  skirt=M["skirt"], gear=M["gear"])
+        n = 0
+        for p in villa_parts(vs):
+            sc.add_box(stage, f"{prefix}/{p['name']}", p["c"], p["s"],
+                       MK[p["m"]], collider=p["col"], rotX=p["rotX"])
+            n += 1
+        b, flr, top = villa_levels(vs)
+        w, d = v["w"], v["d"]
+        cx, cy = float(vs["cx"]), float(vs["cy"])
+        y_road = cy - d / 2.0
+        hb = v["bay"] / 2.0
+        # 창 — 세대당 침실(골목쪽) 1 + 거실(뒷길쪽) 1, 2세대/층 = 층당 4개.
+        #   측벽은 무창(박공벽 처리, E8). 격자 없음 — 패널 1 + 프레임 4 뿐이다.
+        #   최상층 골목쪽은 일조사선으로 1.60 물러난 면에 달린다.
+        for fi, fz in enumerate(flr):
+            ya = (cy + d / 2.0 if fi < len(flr) - 1
+                  else y_road + (d - v["setback"]))
+            bw, bh = v["win_bed"]
+            lw, lh = v["win_liv"]
+            for k, ox in enumerate((-hb, hb)):
+                _opening(prefix, f"WinBed{fi}_{k}", cx + ox, ya, +1,
+                         fz + v["sill_bed"] + bh / 2.0, bw, bh, M)
+                _opening(prefix, f"WinLiv{fi}_{k}", cx + ox, y_road, -1,
+                         fz + v["sill_liv"] + lh / 2.0, lw, lh, M)
+                n += 10
+        # 노출 가스 입상관 — 무창 측벽. [law] KGS FU551 각 층 바닥 +1.00 에 폭
+        #   0.030 황색 띠 2줄, 주밸브 1.60~2.00.
+        g, rs = v["gas"], float(vs["riser_side"])
+        xr = cx + rs * (w / 2.0 + g["wall_gap"] + g["pipe_r"])
+        yr = cy + g["y_off"]
+        z0 = b + g["z_bot"]
+        CYL(f"{prefix}/Gas/Riser", (xr, yr, (z0 + top) / 2.0), g["pipe_r"],
+            top - z0, M["gaspipe"])
+        n += 1
+        for si, zs in enumerate([b + g["band_off"]]
+                                + [f + g["band_off"] for f in flr]):
+            for k in range(2):
+                CYL(f"{prefix}/Gas/Band_{si}_{k}",
+                    (xr, yr, zs + k * g["band_gap"]), g["band_r"],
+                    g["band_w"], M["gasband"])
+                n += 1
+        CYL(f"{prefix}/Gas/Valve", (xr, yr, b + g["valve_z"]), g["valve_r"],
+            g["valve_h"], M["gaspipe"])
+        CYL(f"{prefix}/Gas/ValveHandle",
+            (xr + rs * (g["valve_r"] + g["handle_l"] / 2.0), yr,
+             b + g["valve_z"]), g["handle_r"], g["handle_l"], M["gaspipe"],
+            rotY=90.0)
+        n += 2
+        for fi, fz in enumerate(flr):
+            CYL(f"{prefix}/Gas/Branch_{fi}",
+                (xr, yr - g["branch_len"] / 2.0, fz + g["band_off"]),
+                g["pipe_r"], g["branch_len"], M["gaspipe"], rotX=90.0)
+            n += 1
+        return n
+
+    # -------------------------------------------------------------------
+    # [GT-111] K7 보완 — 옥상 난간(살대) + 물탱크. 파사드 평면보다 실내쪽에만 선다.
+    # -------------------------------------------------------------------
+    def build_roofline(M, grp):
+        rt = PARAMS["house"]["roof_t"]
+        n = 0
+        for rr in PARAMS["roofline"]["rail"]:
+            hs = PARAMS["houses"][rr["house"]]
+            root = grp if hs.get("grp") else ROOT
+            pfx = f"{root}/RoofRail_{rr['house']}"
+            yf = hs["cy"] + hs["face"] * (hs["d"] / 2.0)
+            yr = yf - hs["face"] * rr["setback"]
+            zr = hs["base_z"] + hs["h"] + rt
+            xa = hs["cx"] - hs["w"] / 2.0 + rr["end"]
+            xb = hs["cx"] + hs["w"] / 2.0 - rr["end"]
+            hh = rr["h"]
+            BOX(f"{pfx}/RailTop", ((xa + xb) / 2.0, yr, zr + hh - 0.0225),
+                (xb - xa, 0.040, 0.045), M["roofrail"])
+            BOX(f"{pfx}/RailBot", ((xa + xb) / 2.0, yr, zr + 0.120),
+                (xb - xa, 0.035, 0.035), M["roofrail"])
+            n += 2
+            npost = max(2, int(round((xb - xa) / 1.50)) + 1)
+            for i in range(npost):
+                BOX(f"{pfx}/Post_{i}",
+                    (xa + (xb - xa) * i / (npost - 1), yr, zr + hh / 2.0),
+                    (0.050, 0.050, hh), M["roofrail"])
+                n += 1
+            # 살대 — 가로대형 파이프 난간이 아니라 수직 살. 피치는 동별로 다르다.
+            nb = max(1, int((xb - xa) / rr["pitch"]) - 1)
+            z0b, z1b = zr + 0.1375, zr + hh - 0.045
+            for i in range(nb):
+                BOX(f"{pfx}/Bar_{i}",
+                    (xa + (xb - xa) * (i + 1) / (nb + 1), yr,
+                     (z0b + z1b) / 2.0), (0.022, 0.022, z1b - z0b),
+                    M["roofrail"])
+                n += 1
+        for tk in PARAMS["roofline"]["tank"]:
+            hs = PARAMS["houses"][tk["house"]]
+            root = grp if hs.get("grp") else ROOT
+            pfx = f"{root}/RoofTank_{tk['house']}"
+            yf = hs["cy"] + hs["face"] * (hs["d"] / 2.0)
+            ty = yf - hs["face"] * tk["v"]
+            tx = hs["cx"] + tk["u"]
+            zr = hs["base_z"] + hs["h"] + rt
+            BOX(f"{pfx}/Stand", (tx, ty, zr + tk["stand"] / 2.0),
+                (2 * tk["r"] + 0.10, 2 * tk["r"] + 0.10, tk["stand"]),
+                M["roofrail"])
+            CYL(f"{pfx}/Body", (tx, ty, zr + tk["stand"] + tk["h"] / 2.0),
+                tk["r"], tk["h"], M["tank"])
+            n += 2
+        return n
+
     def build_dressing(M, grp):
         # 12 houses. Those with grp=True sit under the bend rotation group (local coordinates)
         #   and flank the 25 deg-rotated alley directly [resolves A-15-1/2 critical].
@@ -1194,6 +1817,25 @@ def main():
         #   the horizon behind the vanishing point of the bending alley (checklist §A-4).
         for i, bh in enumerate(PARAMS["backdrop"]):
             build_house(f"{ROOT}/Backdrop_{i}", bh, M, n_house + i)
+        # ── [GT-111] K2 다세대 2동 — 골목 벽선 밖 배후 ──
+        slot0 = n_house + len(PARAMS["backdrop"])
+        n_villa = 0
+        for j, vs in enumerate(PARAMS["villas"]):
+            root = grp if vs.get("grp") else ROOT
+            n_villa += build_villa(f"{root}/Villa_{vs['tag']}", vs, M,
+                                   slot0 + j)
+        for vs in PARAMS["villas"]:
+            lo, hi = villa_aabb(vs)
+            edge = PARAMS["lower_alley" if vs["grp"] else "upper_alley"]["y0"]
+            print(f"[GT-111] K2-{vs['tag']} 4층 다세대 · "
+                  f"{'회전군' if vs['grp'] else '월드'} "
+                  f"x {lo[0]:+.2f}…{hi[0]:+.2f} · y {lo[1]:+.2f}…{hi[1]:+.2f} · "
+                  f"최고 z {hi[2]:+.2f} · 골목 회랑({edge:+.2f}) 이격 "
+                  f"{edge - hi[1]:+.2f} m")
+        n_roof = build_roofline(M, grp)
+        print(f"[GT-111] K2 신설 프림 {n_villa} (2동) · "
+              f"K7 옥상 난간 {len(PARAMS['roofline']['rail'])}동/"
+              f"물탱크 {len(PARAMS['roofline']['tank'])}기 프림 {n_roof}")
         # [v5.1] utility poles·wires·clotheslines removed (see the rationale in the PARAMS comment).
         # ── [W3 L15 · B2d + K4(b)] 5 alley containers: 1 container prim + 1 real shrub USD ──
         #   Was: 1 cylinder + 1 sphere per site (the sphere promoted to a lawn texture, L15-F2).

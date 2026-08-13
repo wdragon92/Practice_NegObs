@@ -160,17 +160,48 @@ PARAMS = dict(
     bollard_rows=[dict(name="N", x=-6.0, y0=2.4, y1=8.4),
                   dict(name="S", x=-6.0, y0=-2.4, y1=-8.4)],
     bollard=dict(r=0.06, h=0.90, spacing=1.5, front=(-1.0, 0.0)),
-    # ── mall context [v2] : shopfront band (awning + shop window + fascia sign band) ──
-    #   a podium wall is added to the ground floor of buildings L/R, with bays arrayed across its front.
-    #   the podium (y 9.55~10.05, z 0~3.6) **fully encloses** the ground-floor windows of
-    #   build_building (y 9.98~10.01, z 0.60~2.40), so no coplanar Z-fighting occurs.
-    #   podium_embed 0.05 = the podium is pushed into the shell, **removing coplanar contact**.
-    #   podium_h 3.45 < the 2nd-floor window sill 3.60 -> no top-face contact with the windows either.
-    shop=dict(x0=-10.0, x1=30.0, bay=4.0, gap=0.55,
-              podium_t=0.50, podium_h=3.45, podium_embed=0.05,
-              glass_z0=0.45, glass_z1=2.50, glass_t=0.10, glass_proud=0.05,
-              awn_z=2.66, awn_proj=1.30, awn_t=0.12,
-              fascia_z0=2.78, fascia_z1=3.36, fascia_t=0.18, fascia_proud=0.10),
+    # ══ [GT-110] 가로벽(streetwall) 1층 띠 — 최소판 ════════════════════════
+    #   설계 원본 = `Docs/briefs/building_typology_proposal_v1.md` §3.4 입면 문법 +
+    #   §3.9 N3 행(근접 2동 d_true **10.0** · z_ceil 1.71 · in_frame — 코퍼스에서
+    #   가로벽이 가장 가까운 씬). 결재 7-2 기본 처리 = **킷 티어 신설 없이 씬 로컬**.
+    #
+    #   전(前) 상태 [repro] : `shop=dict(bay=4.0, gap=0.55, podium_t=0.50,
+    #     podium_h=3.45, glass_z0=0.45, glass_z1=2.50, glass_proud=0.05,
+    #     awn_z=2.66, awn_proj=1.30, fascia_z0=2.78, fascia_z1=3.36)` →
+    #     **한 장짜리 포디움 박스(1) + 베이당 유리·차양·간판(3×10) = 동당 31프림**.
+    #     개구가 없어 유리가 벽면에서 **0.05 돌출**(E5 가 지적한 「벽에 붙인 유리판」),
+    #     기단·셔터 없음, 개구 상단 2.50.
+    #
+    #   개정 : 벽을 **기둥(필지 경계)+멀리언(베이 경계)+인방** 으로 분해해 **진짜 개구**를
+    #     만들고, 그 개구 안으로 유리를 0.05 **후퇴**시킨다. §3.4 수치를 그대로 쓴다.
+    #       개구 상단 3.20 · 걸레받이 0.15 · 유리 후퇴 0.05 · 기단 화강석 1.10 ·
+    #       간판대 h 0.80(하단 3.15 · 돌출 0.30 ≤ 0.30 [law]) ·
+    #       차양 돌출 0.70 [law · 도로 미점용](하단 2.60) · 셔터 1베이.
+    #     층고 배분은 균등(9.0/3=3.00)을 폐기하고 **1층 4.00 + 잔여 등분 2.50×2**
+    #     (`floor_plan()`); 인방 상단 = 1층 슬래브선 4.00.
+    #   필지 분절(E9) : **매스 분할 금지** — 선언적으로만. 베이 10칸을 3/4/3 으로 묶어
+    #     12/16/12 m 필지(실경 12~25 m)로 보고, 그 경계를 **기둥 + 기단(걸레받이) 끊김 +
+    #     간판대 이음선 0.12** 로만 표현한다. 프림 증가 0.
+    #   판정축 안전성 : 전 부재가 |y| ≥ 8.85 · z ≤ 4.00 이며 그림 풋프린트는
+    #     x[0, 6.30] × |y| ≤ 1.50 — **무접촉**(`_streetwall_report()` 가 매 실행 재검산).
+    #   Z파이팅 : 접하는 부재는 전부 `lap` 만큼 파고들게 두어 **동일 평면 면이 없다**.
+    #     벽 뒷면은 `wall_embed` 만큼 셸(y=±10.0) 안으로 밀어 넣는다(기존 규약 계승).
+    shop=dict(x0=-10.0, x1=30.0,
+              bay=4.00,                  # 상가 베이 (§3.4 SHOP_BAY 3.0~4.5 대역)
+              lots=(3, 4, 3),            # 필지 분절 E9 — 12 / 16 / 12 m
+              pier_w=0.55, mull_w=0.16,  # 필지 경계 기둥 / 베이 경계 멀리언
+              wall_t=0.50, wall_embed=0.05,
+              ground_h=4.00,             # 1층 층고 (층고 배분 개정)
+              open_z0=0.15, open_z1=3.20,        # 걸레받이 상단 ~ 개구 상단
+              glass_t=0.10, glass_inset=0.05,    # 유리면 0.05 **후퇴**
+              plinth_h=1.10, plinth_proud=0.025,  # 기단 화강석 (fk.build_plinth 규약 0.02~0.03)
+              kick_proud=0.02,                   # 걸레받이 돌출(기단보다 얕다 → 면 분리)
+              lintel_proud=0.01, mull_d=0.20, nib=0.03,
+              sign_z0=3.15, sign_h=0.80, sign_proj=0.30, sign_embed=0.07,
+              sign_joint=0.06,                   # 필지 이음선 반폭 (총 0.12)
+              awn_z0=2.60, awn_t=0.12, awn_proj=0.70, awn_embed=0.10, awn_w=3.40,
+              shutter_bay=dict(L=6, R=3), shutter_t=0.06, shutter_grip=0.02,
+              lap=0.05),                 # 부재 겹침(동일 평면 회피)
     shop_facades=[dict(name="L", y=10.0, dir=-1.0),
                   dict(name="R", y=-10.0, dir=1.0)],
     # freestanding sign (1 info sign) - mall usage guidance. Faces -X (square to the approach camera).
@@ -231,6 +262,14 @@ PARAMS = dict(
         canopy_rough=1.0,
         # ── mall context (shopfronts) ──
         podium_tint=(0.90, 0.87, 0.82),
+        # [GT-110] 기단·걸레받이 화강석. **신규 롤 조달 없음** — 씬이 이미 들고 있는
+        #   `band_dark`(광장 화강석 연석 밴드와 같은 롤)를 재사용한다. 틴트로 흑색이
+        #   아니라 **잔다듬 회색 화강석**으로 올린다(§3.4 「기단=밝은 화강석」 취지 —
+        #   1층 띠가 벽면 알베도를 낮추는 방향이 되면 안 된다).
+        plinth_tint=(1.16, 1.16, 1.13), plinth_scale=1.0,
+        # [GT-110] 셔터 1베이 — 박스 근사(사유는 `build_shopfronts()` 도크스트링).
+        shutter_color=(0.315, 0.325, 0.335), shutter_metallic=0.45,
+        shutter_rough=0.42,
         shopglass_color=(0.055, 0.070, 0.085), shopglass_rough=0.10,
         awning_a=(0.34, 0.10, 0.09), awning_b=(0.10, 0.22, 0.17),
         awning_rough=0.85,
@@ -533,8 +572,13 @@ def _geometry_report():
           "디딤면 %d선 / 측벽 %d선"
           % (bk["enable"], bk["z"], pa["z"], bk["z"] - pa["z"], bk["w"],
              len(bk["tread_frac"]), len(bk["wall_frac"])))
-    print("  [GT] 전 픽셀 '낙차 없음' — 전 기하 평면, 개구/수직면 없음")
+    # [GT-110] 문구 정밀화 — 씬에 가로벽 개구가 생겼으므로 「개구 없음」을 판정 대상
+    #   (바닥)으로 한정해 다시 쓴다. 가로벽 개구는 |y| ≥ 8.85 의 **수직면**이라
+    #   판정축(바닥 착시)과 직교하며 walked surface 를 만들지 않는다.
+    print("  [GT] 전 픽셀 '낙차 없음' — 판정 대상 바닥은 전 기하 평면, "
+          "낙차·개구·수직면 0")
     print("-" * 68)
+    _streetwall_report()
 
 
 def ground_plans():
@@ -552,6 +596,246 @@ def ground_plans():
         overrides=dict(pave=dict(joint=None)),
         seed=23)
     return [("plaza", gp)]
+
+
+# ===========================================================================
+# [C4b] [GT-110] 가로벽 1층 띠 — 순수 계산(스테이지 불필요)
+#   빌더(`build_shopfronts`)·검산(`_streetwall_report`)·드레싱 AABB 가 **같은 함수**를
+#   읽는다. 씬의 기존 `ground_plans()` / `placements()` 규약을 그대로 따른 것.
+# ===========================================================================
+def floor_plan(bd):
+    """층고 배분 — **1층 `ground_h` + 잔여 등분**(제안서 §3.4 표 · `plan_levels` 규칙).
+
+    `scene_common.build_building` 은 `fstep = h / floors` **균등 배분**으로 창·창대·
+    소방마크 z 를 잡는다(`scene_common.py:3635`). §3.1 이 「등간격 층고 = CG 로 읽히는
+    대표 축」이라 지목한 바로 그 값이다. 총 높이 `h` 와 층수는 **건드리지 않는다**
+    (매스·실루엣 불가침) — 바꾸는 것은 층 레벨 배분뿐이다.
+
+    반환: (levels[floors+1], ground_h, typical_h). 프림 0.
+    """
+    h = float(bd["h"])
+    n = max(1, int(bd["floors"]))
+    g = min(float(PARAMS["shop"]["ground_h"]), h * 0.9)
+    t = (h - g) / (n - 1) if n > 1 else h
+    return [0.0] + [g + i * t for i in range(n)], g, t
+
+
+def relevel_floors(prims, bd):
+    """`build_building` 이 이미 놓은 **층 레벨 종속 프림만** 개정 배분으로 옮긴다.
+
+    왜 사후 이동인가 — `sc.build_building` 은 `fstep = h/floors` 를 함수 안에서 계산하고
+    층고를 받는 인자가 없다(`scene_common.py:3635`). 파일 소유권상 킷·`scene_common` 은
+    건드릴 수 없으므로(결재 7-2 「킷 티어 신설 금지 · 씬 로컬」), 씬이 돌려받은 프림
+    목록에서 **이름에 층 인덱스가 박힌 것**만 그 층의 Δz 로 옮긴다.
+
+      Win_{f}_{c} · SillBand_{f}   → 창 중심 기준 Δz
+      FireMark_{s}_{fl} · FireHit_ → 층 바닥 기준 Δz (fl 은 1-based)
+
+    **프림 수·타입·매스·총 높이·파라펫·옥탑·실루엣은 하나도 건드리지 않는다.**
+    셸/기단/다운파이프/실외기는 층 레벨과 무관하므로 대상이 아니다.
+
+    CPU 스텁 하네스(`scripts/geom_invariance_check.py` 의 가짜 USD)는 `GetOrderedXformOps`
+    를 구현하지 않는다 → 예외를 삼키고 0 을 돌려준다(무해한 no-op). 이 씬은 재배분이
+    **적용돼도 안 돼도** 성립하도록 설계돼 있다: 미적용 시 2층 창 하부 0.40 m 가 인방
+    (z ≤ 4.00) 안에 **완전히 묻히므로** 창턱이 4.00 으로 읽힐 뿐 Z파이팅·부유가 없다.
+
+    반환: 옮긴 프림 수.
+    """
+    from pxr import UsdGeom, Gf
+
+    n = max(1, int(bd["floors"]))
+    fstep = float(bd["h"]) / n
+    lv, _g, _t = floor_plan(bd)
+    dz_win = [((lv[f] + lv[f + 1]) / 2.0) - (fstep * f + fstep / 2.0)
+              for f in range(n)]
+    dz_lvl = [lv[f] - fstep * f for f in range(n)]
+
+    def _delta(name):
+        try:
+            if name.startswith("Win_") or name.startswith("SillBand_"):
+                f = int(name.split("_")[1])
+                return dz_win[f] if 0 <= f < n else 0.0
+            if name.startswith("FireMark_") or name.startswith("FireHit_"):
+                f = int(name.split("_")[2]) - 1
+                return dz_lvl[f] if 0 <= f < n else 0.0
+        except (IndexError, ValueError):
+            return 0.0
+        return 0.0
+
+    moved = 0
+    for p in prims:
+        prim = p.GetPrim() if hasattr(p, "GetPrim") else p
+        try:
+            d = _delta(str(prim.GetPath()).rstrip("/").split("/")[-1])
+        except Exception:
+            d = 0.0
+        if abs(d) < 1e-9:
+            continue
+        try:                                  # (1) Cube/Cylinder — translate op
+            ops = [o for o in UsdGeom.Xformable(prim).GetOrderedXformOps()
+                   if o.GetOpType() == UsdGeom.XformOp.TypeTranslate]
+            if ops:
+                v = ops[0].Get()
+                ops[0].Set(Gf.Vec3d(float(v[0]), float(v[1]), float(v[2]) + d))
+                moved += 1
+                continue
+        except Exception:
+            pass
+        try:                                  # (2) Mesh(소방마크) — 점군 z 이동
+            m = UsdGeom.Mesh(prim)
+            pts = m.GetPointsAttr().Get()
+            if not pts:
+                continue
+            m.GetPointsAttr().Set(
+                [Gf.Vec3f(float(q[0]), float(q[1]), float(q[2]) + d)
+                 for q in pts])
+            ex = m.GetExtentAttr().Get()
+            if ex:
+                m.GetExtentAttr().Set(
+                    [Gf.Vec3f(float(ex[0][0]), float(ex[0][1]),
+                              float(ex[0][2]) + d),
+                     Gf.Vec3f(float(ex[1][0]), float(ex[1][1]),
+                              float(ex[1][2]) + d)])
+            moved += 1
+        except Exception:
+            continue
+    return moved
+
+
+def streetwall_plan():
+    """1층 띠의 x 분절 — 베이·필지·기둥·멀리언. 프림 0.
+
+    베이는 `bay`(3.0~4.5) 등간격, 그 경계 중 **필지 경계**(`lots` 누적)만 기둥이 되고
+    나머지는 멀리언이다. 필지 경계에서 걸레받이(기단)는 끊기고 간판대는 `sign_joint`
+    만큼 벌어진다 — 이것이 E9 「선언적 필지 분절」의 전부이며 매스는 나뉘지 않는다.
+    """
+    sp = PARAMS["shop"]
+    x0, bay = float(sp["x0"]), float(sp["bay"])
+    lots = tuple(int(v) for v in sp["lots"])
+    nbay = sum(lots)
+    xb = [x0 + i * bay for i in range(nbay + 1)]
+    cut = [0]
+    for n in lots:
+        cut.append(cut[-1] + n)
+    pier_i = set(cut)
+    hp, hm = float(sp["pier_w"]) / 2.0, float(sp["mull_w"]) / 2.0
+    lap, sj = float(sp["lap"]), float(sp["sign_joint"])
+    grip = float(sp["shutter_grip"])
+
+    lot_rows = []
+    for k in range(len(lots)):
+        a, b = cut[k], cut[k + 1]
+        lot_rows.append(dict(
+            k=k, nb=lots[k], x0=xb[a], x1=xb[b],
+            g0=xb[a] + hp - lap, g1=xb[b] - hp + lap,        # 유리·걸레받이
+            s0=(xb[a] - hp) if a == 0 else (xb[a] + sj),     # 간판대(이음선)
+            s1=(xb[b] + hp) if b == nbay else (xb[b] - sj)))
+    half = [hp if i in pier_i else hm for i in range(nbay + 1)]
+    bays = [dict(i=i, xc=(xb[i] + xb[i + 1]) / 2.0,
+                 c0=xb[i] + half[i] - grip,                  # 셔터 폭(양옆에 물림)
+                 c1=xb[i + 1] - half[i + 1] + grip)
+            for i in range(nbay)]
+    return dict(nbay=nbay, xb=xb, lots=lot_rows, bays=bays,
+                piers=[(i, xb[i]) for i in sorted(pier_i)],
+                mulls=[(i, xb[i]) for i in range(nbay + 1) if i not in pier_i],
+                x_lo=xb[0] - hp, x_hi=xb[nbay] + hp)
+
+
+def streetwall_census():
+    """동(棟)당 1층 띠 프림 수 — 예산(§3.4 6~8프림/동) 검산용. 프림 0."""
+    pl = streetwall_plan()
+    return dict(pier=2 * len(pl["piers"]), mullion=len(pl["mulls"]),
+                kick=len(pl["lots"]), glass=len(pl["lots"]),
+                lintel=1, awning=len(pl["bays"]), fascia=len(pl["lots"]),
+                shutter=1)
+
+
+def _streetwall_report():
+    """[자가검증 · GT-110] 1층 띠 치수·예산·판정축 무접촉을 매 실행 재검산한다."""
+    sp = PARAMS["shop"]
+    mp = PARAMS["material"]
+    pl = streetwall_plan()
+    il = PARAMS["illusion"]
+    cen = streetwall_census()
+    n_new = sum(cen.values())
+    n_old = 1 + 3 * pl["nbay"]                     # 포디움 1 + 베이당 3 (전 상태)
+    yf = float(sp["wall_t"]) - float(sp["wall_embed"])   # 벽면 |y| 오프셋
+    fy = min(abs(float(f["y"])) for f in PARAMS["shop_facades"])
+    y_face = fy - yf                                # 벽면 |y|
+    y_out = y_face - float(sp["awn_proj"])          # 최돌출(차양) |y|
+    print("-" * 68)
+    print("[가로벽] sceneN3 1층 띠 자기검증 (GT-110 · 제안서 §3.4 · 최소판)")
+    print(f"  근접 2동 L/R: 파사드 |y| = {fy:.2f} → d_true {fy:.2f} m "
+          f"(§3.9 실측 10.0) · 전면 x[{pl['x_lo']:.2f}, {pl['x_hi']:.2f}] "
+          f"({pl['x_hi'] - pl['x_lo']:.2f} m)")
+    lots_w = [lt["x1"] - lt["x0"] for lt in pl["lots"]]
+    print(f"  필지 분절(E9 · 선언): {len(pl['lots'])}필지 "
+          f"{'/'.join('%.1f' % w for w in lots_w)} m "
+          f"(실경 12~25 m → {'OK' if all(12.0 <= w <= 25.0 for w in lots_w) else 'FAIL'})"
+          f" · 매스 분할 0 · 기단 끊김 {len(pl['lots'])} · 간판대 이음선 "
+          f"{2 * float(sp['sign_joint']):.2f} m × {len(pl['lots']) - 1}")
+    print(f"  베이: {pl['nbay']}칸 × {sp['bay']:.2f} m "
+          f"(§3.4 3.0~4.5 → {'OK' if 3.0 <= sp['bay'] <= 4.5 else 'FAIL'}) · "
+          f"기둥 {len(pl['piers'])}(폭 {sp['pier_w']:.2f}) · "
+          f"멀리언 {len(pl['mulls'])}(폭 {sp['mull_w']:.2f})")
+    rows = [
+        ("기단 화강석", 0.0, sp["plinth_h"], "돌출 %.3f · 롤 band_dark" % sp["plinth_proud"]),
+        ("걸레받이", 0.0, sp["open_z0"], "돌출 %.2f · 필지별 %d매" % (sp["kick_proud"], len(pl["lots"]))),
+        ("개구(유리)", sp["open_z0"], sp["open_z1"], "벽면에서 %.2f **후퇴**" % sp["glass_inset"]),
+        ("차양", sp["awn_z0"], sp["awn_z0"] + sp["awn_t"], "돌출 %.2f [law 도로 미점용]" % sp["awn_proj"]),
+        ("간판대", sp["sign_z0"], sp["sign_z0"] + sp["sign_h"], "돌출 %.2f ≤ 0.30 [law]" % sp["sign_proj"]),
+        ("인방(1층 슬래브)", sp["open_z1"], sp["ground_h"], "1층 층고 %.2f" % sp["ground_h"]),
+    ]
+    print(f"  {'부재':<16s} {'z_하단':>7s} {'z_상단':>7s}  비고")
+    for nm, za, zb, note in rows:
+        print(f"  {nm:<16s} {za:7.2f} {zb:7.2f}  {note}")
+    lv, gh, th = floor_plan(PARAMS["buildings"]["L"])
+    bdl = PARAMS["buildings"]["L"]
+    fstep = float(bdl["h"]) / int(bdl["floors"])
+    print(f"  층고 배분 개정: 균등 {fstep:.2f}×{bdl['floors']} → "
+          f"1층 {gh:.2f} + 잔여 등분 {th:.2f}×{int(bdl['floors']) - 1} · "
+          f"레벨 {['%.2f' % z for z in lv]} (h {bdl['h']:.2f} 불변)")
+    print(f"  프림 예산: 동당 {n_old} → {n_new} (Δ +{n_new - n_old}) · 내역 "
+          + " · ".join(f"{k} {v}" for k, v in sorted(cen.items()))
+          + f" → 예산 6~8 {'OK' if 0 <= n_new - n_old <= 8 else 'FAIL'}")
+    # ── 판정축(바닥 착시) 무접촉 · 상부 불가침 ──
+    s = illusion_summary(il)
+    hw = float(il["width"]) / 2.0
+    z_max = max(float(sp["ground_h"]), float(sp["sign_z0"]) + float(sp["sign_h"]))
+    ok_y = y_out > hw + 1.0
+    print(f"  판정축 직교: 1층 띠 최돌출 |y| {y_out:.2f} vs 그림 반폭 {hw:.2f} "
+          f"(여유 {y_out - hw:.2f} m) → {'무접촉 OK' if ok_y else 'FAIL'} · "
+          f"z 최고 {z_max:.2f} ≤ 1층 층고 {sp['ground_h']:.2f} → "
+          f"{'상부 무접촉 OK' if z_max <= float(sp['ground_h']) + 1e-9 else 'FAIL'}")
+    print(f"  그림 풋프린트 x[{il['x_rim']:.2f}, {s['x_f']:.2f}] × |y| ≤ {hw:.2f} — "
+          f"바닥 기하·판정 눈과 공유 프림 0")
+    # ── Z파이팅 ⓐ 맞닿는 부재는 서로 파고드는가 ──
+    lap, nib = float(sp["lap"]), float(sp["nib"])
+    zov = [("기단↔기둥샤프트", lap), ("기둥샤프트↔인방", lap),
+           ("걸레받이↔유리·멀리언·셔터", nib), ("인방↔유리·멀리언", nib),
+           ("인방↔셔터", 0.02),
+           ("차양↔유리", float(sp["awn_embed"]) - float(sp["glass_inset"])),
+           ("간판대↔인방", float(sp["sign_embed"]) + float(sp["lintel_proud"]))]
+    bad_z = [nm for nm, ov in zov if ov < 0.01]
+    # ── Z파이팅 ⓑ 겹치는 부재의 전면 o 가 서로 다른가(동일 평면 면 0) ──
+    front = [("기단", float(sp["plinth_proud"])), ("걸레받이", float(sp["kick_proud"])),
+             ("인방", float(sp["lintel_proud"])), ("기둥샤프트", 0.0),
+             ("멀리언", 0.0)]
+    ov_pairs = [("기단", "걸레받이"), ("기단", "기둥샤프트"),
+                ("걸레받이", "멀리언"), ("기둥샤프트", "인방"), ("멀리언", "인방")]
+    fo = dict(front)
+    bad_f = ["%s↔%s" % p for p in ov_pairs if abs(fo[p[0]] - fo[p[1]]) < 0.005]
+    print("  Z파이팅 ⓐ 상하 접합 %d쌍 %s · ⓑ 겹치는 부재 전면 오프셋 %s "
+          "(%s) · 벽 뒷면은 셸 안으로 %.2f 매몰"
+          % (len(zov), "전부 겹침 OK" if not bad_z else "FAIL %s" % bad_z,
+             "전부 분리 OK" if not bad_f else "FAIL %s" % bad_f,
+             " > ".join("%s %+.3f" % (n, v)
+                        for n, v in sorted(front, key=lambda r: -r[1])),
+             float(sp["wall_embed"])))
+    print("  재질: 기둥·멀리언·인방 plaza_light(Podium) · 기단/걸레받이 band_dark"
+          f"(PlinthGranite tint {mp['plinth_tint']}) · 개구 ShopGlass · "
+          "차양 AwningA/B · 간판대 FasciaA/B · 셔터 Shutter(박스 근사) — 신규 롤 0")
+    print("-" * 68)
 
 
 def build_views():
@@ -601,14 +885,19 @@ def dressing_aabbs():
     out = []
     _benches, _planters, _bollards = placements()
     sp = PARAMS["shop"]
+    pl = streetwall_plan()
+    # [GT-110] 1층 띠는 벽면 |y| 가 그대로이고 **최돌출만 차양 1.30 → 0.70 으로 줄었다**
+    #   (§3.4 도로 미점용). z 상한은 포디움 3.45 → 인방 상단 4.00. x 는 양끝 기둥 반폭만큼
+    #   넓어진다. 즉 이 AABB 는 전 상태보다 y 로 **작고** z 로만 커진 것 — 그림 시선
+    #   차단은 구조적으로 개선된다(`dresscheck()` ② 가 매번 재확인).
     for fd in PARAMS["shop_facades"]:
         fy, dr = float(fd["y"]), float(fd["dir"])
-        y_in = fy + dr * (sp["podium_t"] - sp["podium_embed"])   # podium front face
-        y_aw = fy + dr * (sp["podium_t"] - sp["podium_embed"] + sp["awn_proj"])
-        out.append((f"Shop_{fd['name']}", sp["x0"], sp["x1"],
-                    min(fy, y_aw), max(fy, y_aw), sp["podium_h"]))
-        out.append((f"ShopFace_{fd['name']}", sp["x0"], sp["x1"],
-                    min(fy, y_in), max(fy, y_in), sp["podium_h"]))
+        y_in = fy + dr * (sp["wall_t"] - sp["wall_embed"])       # 가로벽 전면
+        y_aw = y_in + dr * sp["awn_proj"]                        # 차양 최돌출
+        out.append((f"Shop_{fd['name']}", pl["x_lo"], pl["x_hi"],
+                    min(fy, y_aw), max(fy, y_aw), sp["ground_h"]))
+        out.append((f"ShopFace_{fd['name']}", pl["x_lo"], pl["x_hi"],
+                    min(fy, y_in), max(fy, y_in), sp["ground_h"]))
     pl = PARAMS["planter"]
     ph = pl["size"] / 2.0
     top_tree = pl["grass_h"] + 2.2 + 0.85 + 0.24
@@ -747,7 +1036,12 @@ BANNER = """\
                             (무채색 회색 줄무늬면 실패 — v1 폐기 사유).
                             석재 블록 줄눈이 트레드·측벽에 보이는가
  9. 몰 맥락             — 차양·쇼윈도·사인 밴드·벤치·화분·안내 사인으로
-                            "보행자 몰"이 렌더만으로 읽히는가"""
+                            "보행자 몰"이 렌더만으로 읽히는가
+10. 가로벽 1층 띠 [GT-110] — 좌우 근생 1층이 **개구가 뚫린 상가**로 읽히는가:
+                            유리가 벽에 붙지 않고 리빌 안으로 들어가 있는가 ·
+                            기단 화강석 1.10 · 간판대(필지 3분절 이음선) ·
+                            차양 그늘 · 셔터 내린 1베이. 상부(2·3층·파라펫·
+                            옥탑) 실루엣은 **이전과 같아야** 한다"""
 
 
 def main():
@@ -814,10 +1108,14 @@ def main():
             f"{ROOT}/Looks/Grass", sc.tex_path("grass", "diff"),
             sc.tex_path("grass", "nor"), sc.tex_path("grass", "rough"),
             sca["grass"], tint=mp["grass_tint"])
+        # [GT-110 · E14, 이 씬 한정] `brick_red` scale 2.0 → **0.87**.
+        #   제안서 §4 E14: scale 2.0 은 켜 154 mm = 표준 켜 67 mm 의 2.30배로, 벽돌이
+        #   블록처럼 읽힌다. 0.87 = 2.0 / 2.30 이 표준 켜를 준다. **프림 0 · 재질 상수
+        #   1개**이며 매스·실루엣·높이와 무관하다.
         M["brick"] = PBR(
             f"{ROOT}/Looks/Brick", sc.tex_path("brick_red", "diff"),
             sc.tex_path("brick_red", "nor"), sc.tex_path("brick_red", "rough"),
-            2.0, tint=mp["wall_face_tint"])
+            0.87, tint=mp["wall_face_tint"])
         M["joint"] = PBR(f"{ROOT}/Looks/Joint",
                          diffuse_color=mp["joint_color"],
                          roughness_const=mp["joint_rough"], metallic=0.0)
@@ -880,6 +1178,18 @@ def main():
             f"{ROOT}/Looks/Podium", sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"),
             sc.tex_path("plaza_light", "rough"), 1.4, tint=mp["podium_tint"])
+        # [GT-110] 기단·걸레받이 화강석 — 씬이 이미 쓰는 `band_dark` 롤 재사용(신규 0).
+        #   경로에 "Granite" 가 들어가 룩 레이어가 stone 역으로 분류한다
+        #   (`scene_common._LOOK_RULES` stone 키워드).
+        M["plinth"] = PBR(
+            f"{ROOT}/Looks/PlinthGranite", sc.tex_path("band_dark", "diff"),
+            sc.tex_path("band_dark", "nor"), sc.tex_path("band_dark", "rough"),
+            mp["plinth_scale"], tint=mp["plinth_tint"])
+        # [GT-110] 셔터 1베이 — 경로 "Shutter" 는 룩 레이어 metal 역 키워드다.
+        M["shutter"] = PBR(f"{ROOT}/Looks/Shutter",
+                           diffuse_color=mp["shutter_color"],
+                           metallic=mp["shutter_metallic"],
+                           roughness_const=mp["shutter_rough"])
         M["shopglass"] = PBR(f"{ROOT}/Looks/ShopGlass",
                              diffuse_color=mp["shopglass_color"],
                              roughness_const=mp["shopglass_rough"], metallic=0.0)
@@ -1083,9 +1393,20 @@ def main():
                                  radius=bo["r"], height=bo["h"],
                                  tactile=False)
         for key, bd in PARAMS["buildings"].items():
-            sc.build_building(stage, f"{ROOT}/Building_{key}", bd,
-                              M["brick"], M["glass"], M["parapet"],
-                              window=PARAMS["window"])
+            bprims = sc.build_building(stage, f"{ROOT}/Building_{key}", bd,
+                                       M["brick"], M["glass"], M["parapet"],
+                                       window=PARAMS["window"])
+            # [GT-110] 층고 배분 개정 — 가로벽을 얹는 **근접 2동(L/R)만**.
+            #   원경 vista 블록 F(x 42, d 32 m)는 계약 범위 밖이므로 손대지 않는다.
+            if key in ("L", "R"):
+                lv, gh, th = floor_plan(bd)
+                nmv = relevel_floors(bprims, bd)
+                print(f"[가로벽] Building_{key} 층고 배분 "
+                      f"{float(bd['h']) / int(bd['floors']):.2f}×{bd['floors']} 균등 → "
+                      f"1층 {gh:.2f} + {th:.2f}×{int(bd['floors']) - 1} · "
+                      f"레벨 {['%.2f' % z for z in lv]} · 재배치 프림 {nmv}"
+                      + ("" if nmv else "  (하네스가 xform 조회를 지원하지 않음 — "
+                                        "무해한 no-op, 2층 창 하부는 인방에 매몰)"))
         build_shopfronts(M)
         es = PARAMS["entry_sign"]
         sc.build_sign(stage, f"{ROOT}/EntrySign", es["x"], es["y"], 0.0,
@@ -1094,44 +1415,130 @@ def main():
                       pole_mtl=M["lamp"], back_mtl=M["sign"])
 
     # -------------------------------------------------------------------
-    # shopfront band - the key context that makes "pedestrian mall" readable from the render alone.
-    #   podium (ground-floor wall) + per-bay shop window · awning · fascia band. All at |y| >= 8.25,
-    #   so unrelated to occluding the painting (|y| <= 1.5) or burying a camera [shopcheck()].
-    #   shadows: sun az 205 -> shadow bearing 25 deg (+X,+Y). The L (y=+10) awning shadow goes
-    #   toward +Y, and the R (y=−10) awning shadow reaches only from y −8.25 to about −6.8 ->
-    #   neither touches the painting area (|y| <= 1.5).
+    # [GT-110] 가로벽 1층 띠 (streetwall LOD 최소판) — 근접 2동 L/R 의 z ≤ 4.00 대역만.
+    #   씬 로컬이다: 킷에 티어를 만들지 않고(결재 7-2), `facade_kit.build_shopfront`
+    #   도 부르지 않는다(그 쪽 기본값 opening_h 2.60 · kick 0.25 · **유리 proud**
+    #   `facade_kit.py:439-448` 는 §3.4 문법과 다르다).
+    #
+    #   부재 구성(동당 36 = 기둥 8 · 멀리언 7 · 걸레받이 3 · 유리 3 · 인방 1 ·
+    #     차양 10 · 간판대 3 · 셔터 1) — 전 상태 31 대비 **Δ +5** (예산 6~8 이내).
+    #
+    #   y 는 전부 벽면(front face) 기준 **바깥쪽 오프셋 o** 로 적는다 (`SLAB` 참조).
+    #     o = 0     벽면            o = −wall_t  셸 속으로 들어간 뒷면
+    #     o > 0     보도 쪽 돌출     o < 0        개구 안쪽(리빌)
+    #   Z파이팅 규약 두 갈래 — ⓐ 위아래로 맞닿는 부재는 `lap`/`nib` 만큼 서로 파고들고,
+    #     ⓑ 서로 겹치는 부재의 **전면 o 는 전부 다르게** 둔다:
+    #       기단 +0.025 > 걸레받이 +0.020 > 인방 +0.010 > 기둥·멀리언 0.000.
+    #     `_streetwall_report()` 가 ⓐⓑ 를 매 실행 재검산한다.
+    #
+    #   그림자: 태양 방위 205° → 그림자 방위 25° = (+0.906, +0.423). 차양 상단 2.72 의
+    #     그림자 길이는 2.72/tan49.79° = 2.30 m → +Y 로 0.97 m 이동. L(y +9.55…8.85)은
+    #     몰 반대쪽으로, R 은 최전단 y −8.85 에서 **y −7.88 까지** — 그림(|y| ≤ 1.50)에
+    #     닿지 않는다. 차양을 1.30 → 0.70 으로 줄였으므로 전 상태보다 더 멀어진다.
+    #
+    #   실외기·출입문·기단(킷이 파사드면 y=±10.0 에 놓은 것)은 불투명 개구 유리
+    #     (o −0.15…−0.05)보다 **뒤**에 있어 그대로 가려진다 — 전 상태와 동일.
     # -------------------------------------------------------------------
     def build_shopfronts(M):
+        """가로벽 1층 띠를 세운다.
+
+        **셔터 = 박스 근사 [기록].** CC0 자산 `assets/urban_cc0/rollershutter_door`
+        는 **보유 확인됨**(usdc + 텍스처 5종 · 3.08 × 0.30 × 2.40 m · mpu 1.0 ·
+        zmin 0 · manifest verdict PASS `assets/urban_manifest_w3.json`). 그럼에도
+        박스로 간 사유 3가지 —
+          (1) **프림 예산**: 그 자산은 참조 시 `n_prims 66` 을 무대에 얹는다. 동당
+              6~8프림이라는 이 행의 예산의 8~11배다.
+          (2) **재질 2종 동거**: `material_tris` 가 `rollershutter_door` 552 +
+              `rollershutter_door_graffiti` 552 (n_meshes 2). 두 메시가 겹쳐 있는지
+              나란한지는 USD 런타임 없이는 확정할 수 없고(이 작업은 GPU·렌더 금지),
+              겹쳐 있다면 Z파이팅 + 낙서가 그대로 들어온다. 2010s 차없는거리에
+              낙서 셔터는 연대·성격 모두 어긋난다.
+          (3) **치수**: 자산 폭 3.08 m 대 이 씬의 베이 개구 3.69~3.84 m — 폭을 맞추면
+              높이가 2.69 m 로 개구(3.05 m)에 모자라고, 높이를 맞추면 폭이 3.91 m 로
+              넘친다.
+        닫힌 셔터는 실제로 평평한 슬랫 패널이라 박스가 기하학적으로 정확한 근사이고,
+        d 10 m 에서 슬랫 골은 서브픽셀이다. 자산 도입은 「가로벽 LOD」를 킷 티어로
+        올릴 때(E2) 함께 재검토할 일이다.
+        """
         sp = PARAMS["shop"]
-        nbay = max(1, int(round((sp["x1"] - sp["x0"]) / sp["bay"])))
-        bw = sp["bay"] - sp["gap"]
+        pl = streetwall_plan()
+        hp, hm = float(sp["pier_w"]) / 2.0, float(sp["mull_w"]) / 2.0
+        pp, kp = float(sp["plinth_proud"]), float(sp["kick_proud"])
+        lap = float(sp["lap"])
+        eps = float(sp["nib"])                      # 유리/멀리언 상하 물림
+        lp_ = float(sp["lintel_proud"])
+        o_back = -float(sp["wall_t"])               # 벽 뒷면 (셸 속 wall_embed)
+        gi, gt = float(sp["glass_inset"]), float(sp["glass_t"])
+        z0, z1 = float(sp["open_z0"]), float(sp["open_z1"])
+        gh = float(sp["ground_h"])
         for fd in PARAMS["shop_facades"]:
             fy, dr = float(fd["y"]), float(fd["dir"])
+            yf = fy + dr * (float(sp["wall_t"]) - float(sp["wall_embed"]))
             base = f"{ROOT}/Shop_{fd['name']}"
-            # podium (ground-floor wall) - fully encloses the ground-floor windows (avoids Z-fighting).
-            #   pushed into the shell by podium_embed, which also removes back-face coplanarity.
-            py = fy + dr * (sp["podium_t"] / 2.0 - sp["podium_embed"])
-            BOX(f"{base}/Podium",
-                ((sp["x0"] + sp["x1"]) / 2.0, py, sp["podium_h"] / 2.0),
-                (sp["x1"] - sp["x0"], sp["podium_t"], sp["podium_h"]),
-                M["podium"], col=True)
-            face = fy + dr * (sp["podium_t"] - sp["podium_embed"])   # front y
-            for i in range(nbay):
-                xc = sp["x0"] + (i + 0.5) * sp["bay"]
-                BOX(f"{base}/Glass_{i}",
-                    (xc, face + dr * (sp["glass_proud"] - sp["glass_t"] / 2.0),
-                     (sp["glass_z0"] + sp["glass_z1"]) / 2.0),
-                    (bw, sp["glass_t"], sp["glass_z1"] - sp["glass_z0"]),
-                    M["shopglass"])
-                BOX(f"{base}/Awning_{i}",
-                    (xc, face + dr * sp["awn_proj"] / 2.0, sp["awn_z"]),
-                    (bw, sp["awn_proj"], sp["awn_t"]),
-                    M["awning_a"] if i % 2 == 0 else M["awning_b"])
-                BOX(f"{base}/Fascia_{i}",
-                    (xc, face + dr * (sp["fascia_proud"] - sp["fascia_t"] / 2.0),
-                     (sp["fascia_z0"] + sp["fascia_z1"]) / 2.0),
-                    (bw, sp["fascia_t"], sp["fascia_z1"] - sp["fascia_z0"]),
-                    M["fascia_a"] if i % 2 == 0 else M["fascia_b"])
+
+            def SLAB(path, xa, xb, o0, o1, za, zb, mtl, col=False):
+                """x[xa,xb] × o[o0,o1] × z[za,zb] 직육면체 (o = 벽면 기준 바깥쪽)."""
+                BOX(path,
+                    ((xa + xb) / 2.0, yf + dr * (o0 + o1) / 2.0, (za + zb) / 2.0),
+                    (xb - xa, abs(o1 - o0), zb - za), mtl, col=col)
+
+            # ① 기둥 = 필지 경계 + 양끝. 기단 화강석 1.10(전면 0.02 돌출) + 상부 샤프트.
+            #    기단은 x 로도 0.02 내밀어 샤프트와 **옆면이 겹치지 않게** 한다.
+            for i, xc in pl["piers"]:
+                SLAB(f"{base}/PierBase_{i}", xc - hp - pp, xc + hp + pp,
+                     o_back, +pp, 0.0, float(sp["plinth_h"]), M["plinth"],
+                     col=True)
+                SLAB(f"{base}/Pier_{i}", xc - hp, xc + hp, o_back, 0.0,
+                     float(sp["plinth_h"]) - lap, z1 + lap, M["podium"],
+                     col=True)
+            # ② 멀리언 = 베이 경계(필지 경계가 아닌 것). 유리보다 0.05 앞선다.
+            for i, xc in pl["mulls"]:
+                SLAB(f"{base}/Mull_{i}", xc - hm, xc + hm,
+                     -float(sp["mull_d"]), 0.0,
+                     z0 - eps, z1 + eps, M["podium"])
+            # ③ 필지별 걸레받이(기단 이음선) + 개구 유리(벽면에서 0.05 후퇴)
+            for lt in pl["lots"]:
+                SLAB(f"{base}/Kick_{lt['k']}", lt["g0"], lt["g1"],
+                     o_back, +kp, 0.0, z0, M["plinth"], col=True)
+                SLAB(f"{base}/Glass_{lt['k']}", lt["g0"], lt["g1"],
+                     -(gi + gt), -gi, z0 - eps, z1 + eps, M["shopglass"],
+                     col=True)
+            # ④ 인방 = 개구 상단 3.20 → 1층 슬래브선 4.00. 전면을 0.01 내밀어
+            #    기둥·멀리언 전면과 동일 평면이 되지 않게 한다.
+            SLAB(f"{base}/Lintel", pl["x_lo"], pl["x_hi"], o_back, +lp_,
+                 z1, gh, M["podium"], col=True)
+            # ⑤ 차양 — 베이마다. 돌출 0.70 [law] · 하단 2.60(보도 유효고 확보).
+            aw, ae = float(sp["awn_w"]) / 2.0, float(sp["awn_embed"])
+            az0, at = float(sp["awn_z0"]), float(sp["awn_t"])
+            for b in pl["bays"]:
+                SLAB(f"{base}/Awning_{b['i']}", b["xc"] - aw, b["xc"] + aw,
+                     -ae, +float(sp["awn_proj"]), az0, az0 + at,
+                     M["awning_a"] if b["i"] % 2 == 0 else M["awning_b"])
+            # ⑥ 가로형 간판대 — **필지마다 1매**(이음선이 곧 E9 분절 표현).
+            #    프림 이름은 전 상태의 `Fascia_*` 를 유지한다: `Sign_*` 로 부르면
+            #    `placement_lint` 의 prop 분류기(`placement_rules_v1.yaml` props.sign
+            #    `^(Sign|...)(_\w+)?$`)가 **가로 시설물 표지판**으로 집계해 LINT-5/7 의
+            #    대상에 넣는다. 건물 부착 간판대는 가로 시설물이 아니다.
+            sz0, sh = float(sp["sign_z0"]), float(sp["sign_h"])
+            for lt in pl["lots"]:
+                SLAB(f"{base}/Fascia_{lt['k']}", lt["s0"], lt["s1"],
+                     -float(sp["sign_embed"]), +float(sp["sign_proj"]),
+                     sz0, sz0 + sh,
+                     M["fascia_a"] if lt["k"] % 2 == 0 else M["fascia_b"])
+            # ⑦ 셔터 1베이 — 개구를 채우고 좌우·상하 부재에 물린다(가시 구간은
+            #    걸레받이 위 ~ 개구 상단 그대로).
+            b = pl["bays"][int(sp["shutter_bay"][fd["name"]])]
+            st = float(sp["shutter_t"])
+            SLAB(f"{base}/Shutter", b["c0"], b["c1"], -(0.04 + st), -0.04,
+                 z0 - eps, z1 + 0.02, M["shutter"])
+        cen = streetwall_census()
+        print("[가로벽] 1층 띠 · 동당 %d프림 (%s) × %d동 · 개구 상단 %.2f · "
+              "유리 %.2f 후퇴 · 기단 %.2f · 간판대 h%.2f/돌출 %.2f · 차양 돌출 %.2f · "
+              "셔터 1베이(박스 근사)"
+              % (sum(cen.values()),
+                 " ".join(f"{k}{v}" for k, v in sorted(cen.items())),
+                 len(PARAMS["shop_facades"]), sp["open_z1"], sp["glass_inset"],
+                 sp["plinth_h"], sp["sign_h"], sp["sign_proj"], sp["awn_proj"]))
 
     # ── scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")

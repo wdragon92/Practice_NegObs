@@ -550,11 +550,16 @@ PARAMS = dict(
            ("Underpass", "sign_underpass", 6.70, -2.05, 0.0, 180.0, 1.10, 0.40)],
 
     material=dict(
-        # `brick_red` 2.0 is the library-wide value BS-1 will re-derive (0.90–1.10) across
-        # 17 scenes in K3 — deliberately **not** touched here, and the new street-wall
-        # brick shell reads the same key so that sweep still lands in one place.
+        # [GT-108 ⑥ · survey §5 F7 / E14] `brick_red` 2.0 → **0.87**, this scene only.
+        #   2.0 m/tile stretches a face-brick map to 2.3× its real coursing, which is
+        #   what put a **measured 0.861 autocorrelation peak at 57 px** on scene11's
+        #   brick wall (§3.3) — at that stretch the repeat lands in the band the eye
+        #   reads as "pattern" rather than "material". 0.87 m is the map's real tile.
+        #   Ledger row 64 ⑥ limits the correction to the two scenes this batch touches;
+        #   the remaining 15 scenes stay on 2.0 and are declared as lever-1 spread, so
+        #   BS-1's K3 sweep still lands in one place for them.
         scale=dict(plaza_lower=0.7, plaza_light=1.80, grass=1.4,
-                   brick_red=2.0, tactile=0.3,
+                   brick_red=0.87, tactile=0.3,
                    concrete_wall=2.0, plaster=2.2, marble_light=1.6,
                    asphalt=3.0),          # [GT-79] PolyHaven asphalt_02, measured 3.0 m tile
         # [GT-79] Carriageway. Textured, never a constant: a carriageway is a **ground**
@@ -585,6 +590,20 @@ PARAMS = dict(
         city_stone_tint=(0.92, 0.90, 0.87),     # light granite / stone cladding
         city_plaster_tint=(0.95, 0.94, 0.90),   # warm beige render
         grass_tint=(0.55, 0.68, 0.42),
+        # [GT-108 ③ · survey §5 F8] The far field beyond the east stair head is the same
+        #   `grass` roll again at a darker tint and a **coarser tile** — s04's cheapest
+        #   lever (`scene04_parktrail.py:1205-1211`: `HedgeLeaf` = the litter roll at its
+        #   darkest tint), 0 new prims and 0 procurement. Two things are wrong with a far
+        #   plate carrying the near tile: a 1.4 m tile at 40+ m is **sub-pixel**, so it
+        #   averages to the constant plane §3.3 measured (`micro_sd` 0.81-4.47 on the
+        #   comparison scenes' grass), and a mown road verge and the rough ground behind
+        #   it are not the same green in the first place. 2.6 m puts the surviving
+        #   frequency on **clumps** rather than blades — the right thing to resolve at
+        #   that range — and the tint is held to **-10 % luminance** [computed: eff
+        #   linear 0.0684 -> 0.0617] because the plate boundary is an axis-parallel box
+        #   edge, which is failure condition (a) of survey §4.5's cut-out rule; at 10 %
+        #   it reads as a mow line, and a wider gap is what earns "카펫" verdicts.
+        grass_far_tint=(0.50, 0.61, 0.39), grass_far_scale=2.6,
         roof_color=(0.72, 0.72, 0.74), roof_rough=0.55,     # light grey roof
         post_color=(0.55, 0.55, 0.58), post_metallic=0.5, post_rough=0.5,
         wall_tint=(0.85, 0.85, 0.86),
@@ -778,6 +797,44 @@ def main():
             f"{ROOT}/Looks/Grass", sc.tex_path("grass", "diff"),
             sc.tex_path("grass", "nor"), sc.tex_path("grass", "rough"),
             sca["grass"], tint=mp["grass_tint"])
+        # [GT-108 ③] far field — same roll, darkest tint, coarser tile (see the
+        #   `grass_far_tint` note). Bound to `Grass_E` only: that plate starts at
+        #   x 37.2, i.e. beyond the east stair head at 36.60, so nothing on it is
+        #   nearer than ~43 m to any judged eye. `Grass_W` is **not** included even
+        #   though it is the symmetric plate — it starts at x −0.5, right at the pit
+        #   head, so its near edge is judged-frame foreground and a 2.6 m tile there
+        #   would read as blobs.
+        M["grass_far"] = PBR(
+            f"{ROOT}/Looks/GrassFar", sc.tex_path("grass", "diff"),
+            sc.tex_path("grass", "nor"), sc.tex_path("grass", "rough"),
+            mp["grass_far_scale"], tint=mp["grass_far_tint"])
+        # [GT-108 ③ · survey §4.4 / §5 F4] Paving tint split — **one roll, three tints**,
+        #   the cheapest tonal-variation lever there is ("the same texture - only the
+        #   tint differs, which is the cheapest legal way to get tonal variation without
+        #   a second 4K map", `scene04_parktrail.py:373-380`). The scene had a single
+        #   `Walk` covering plaza, street footway, median top, apron and the covered
+        #   passage — one continuous tone over ~1,900 m², which is what §2.2 read as
+        #   "면" rather than "재료". The three zones are real construction zones, not
+        #   decoration, and the boundaries are real joints (plaza edge, kerb line):
+        #     · `Walk`        plaza footway field — unchanged datum
+        #     · `WalkPassage` the covered passage floor. **+5 %**, deliberately the
+        #       lighter of the three: GT-106 landed on "지하도 아래가 보여야지", so the
+        #       one surface that must not lose legibility is the one under cover.
+        #     · `WalkEdge`    street footway outside the plaza + median top + street
+        #       apron — laid with the road works, and they take tyre spray off the
+        #       carriageway. **−7 %**.
+        #   Effective linear albedo 0.219 / 0.209 / 0.194 [computed: plaza_lower mean
+        #   0.220 x tint], max pairwise gap **0.025** — an order of magnitude inside
+        #   survey §7's "틴트 격차 ≤ 0.10", which is the number that separates "two
+        #   batches of the same block" from the cut-out artefact §4.5 anatomised.
+        for _k, _t in (("walk_passage", (1.05, 1.05, 1.05)),
+                       ("walk_edge", (0.93, 0.93, 0.94))):
+            M[_k] = PBR(
+                f"{ROOT}/Looks/Walk{_k.split('_')[1].capitalize()}",
+                sc.tex_path("plaza_lower", "diff"),
+                sc.tex_path("plaza_lower", "nor"),
+                sc.tex_path("plaza_lower", "rough"),
+                sca["plaza_lower"], tint=_t)
         M["brick"] = PBR(
             f"{ROOT}/Looks/Brick", sc.tex_path("brick_red", "diff"),
             sc.tex_path("brick_red", "nor"), sc.tex_path("brick_red", "rough"),
@@ -891,7 +948,7 @@ def main():
         BOX(f"{ROOT}/Grass_W", ((-H + gx0) / 2.0, 0.0, cz),
             (gx0 + H, g["size"], th), M["grass"])
         BOX(f"{ROOT}/Grass_E", ((gx1 + H) / 2.0, 0.0, cz),
-            (H - gx1, g["size"], th), M["grass"])
+            (H - gx1, g["size"], th), M["grass_far"])   # [GT-108 ③] far field
         # [GT-79] the S/N verge grass is cut on the carriageway slab (x pv0…pv1). The
         #   grass top is −0.030 and the carriageway datum −0.130, so grass left under
         #   the road would stand 100 mm proud of it `[computed]`. Cutting on pv0/pv1
@@ -1364,7 +1421,8 @@ def main():
                 BOX(f"{ROOT}/Road/Footway_{xt}{tag}",
                     ((xa + xb) / 2.0, (ya + yb) / 2.0,
                      w["z_top"] - w["thick"] / 2.0),
-                    (xb - xa, yb - ya, w["thick"]), M["walk"], col=True)
+                    (xb - xa, yb - ya, w["thick"]),
+                    M["walk_edge"], col=True)          # [GT-108 ③] road-side zone
         # [K5] kerb lines — the colour-only `M["curb"]` finally has geometry.
         kit = ik.kit_from_scene_common(sc, stage)
         ok_arris, got, msg = ik.check_arris_role(sc)
@@ -1399,7 +1457,8 @@ def main():
         fx1 = md["x1"] - kw["width"] + md["lap"]
         BOX(f"{ROOT}/Road/MedianFill",
             ((fx0 + fx1) / 2.0, 0.0, md["top"] - md["thick"] / 2.0),
-            (fx1 - fx0, r["y1"] - r["y0"], md["thick"]), M["walk"])
+            (fx1 - fx0, r["y1"] - r["y0"], md["thick"]),
+            M["walk_edge"])                            # [GT-108 ③] road-side zone
         # Markings. No crosswalk: the underpass **is** the crossing here, and the
         #   median is what makes that physical. 4 dashed white dividers (3 m paint /
         #   5 m gap, urban standard), 2 yellow solids flanking the island, 2 white
@@ -1527,7 +1586,8 @@ def main():
             BOX(f"{ROOT}/StreetApron_{i}",
                 ((ax0 + ax1) / 2.0, (ay0 + ay1) / 2.0,
                  ap["z_top"] - ap["thick"] / 2.0),
-                (ax1 - ax0, ay1 - ay0, ap["thick"]), M["walk"])
+                (ax1 - ax0, ay1 - ay0, ap["thick"]),
+                M["walk_edge"])                        # [GT-108 ③] road-side zone
         print(f"[backdrop] 가로벽 {n_tot} 프림 / {n_blk} 동 (프레임 안 {n_frame} · "
               f"BS-4 자동 강등 {n_blk - n_frame}) + 전면 포장 {len(ap['strips'])} "
               f"— 양측 잔디 대체 · [GT-79] x "
@@ -1654,7 +1714,9 @@ def main():
     M = setup_materials()
     stair_mtl = M["stair"] if cfg["cue_material_break"] else M["walk"]
     # passage material: the bright sidewalk material (plaza_lower) keeps the lower tone
-    passage_mtl = M["walk"]
+    # [GT-108 ③] now the +5 % arm of the paving tint split — same roll, same scale, only
+    #   the tint differs, and it moves in the direction GT-106's legibility ruling wants.
+    passage_mtl = M["walk_passage"]
 
     build_ground(M)
     if cfg["hazard_stairs"]:

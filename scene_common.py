@@ -302,6 +302,12 @@ def detail_source(cls):
         p = os.path.join(ASSETS_DIR, rel) if rel else None
         if not (p and os.path.isfile(p)):
             return (None, 0.0, 0.0)
+    # [GT-108 ②] Per-class `det_scale` [1/m]. Stated by `asphalt` only; every other class
+    # keeps the `_DETAIL_MAP` family value, so this is bit-identical outside asphalt.
+    # The env sweep knob still wins over both - it is the A/B arm.
+    _cs = (LOOK_CLASS.get(cls) or {}).get("det_scale")
+    if _cs:
+        inv = float(_cs)
     if DETAIL_SCALE_OVERRIDE > 0.0:
         inv = DETAIL_SCALE_OVERRIDE
     return (p, float(bump), float(inv))
@@ -359,6 +365,88 @@ _W_STRUCT = dict(grime=0.0, splash=0.0, streak=0.12, wrough=0.15)
 _W_STONE = dict(grime=0.0, splash=0.0, streak=0.08, wrough=0.12)
 _W_EDGE = dict(grime=0.0, splash=0.0, wrough=0.10)
 
+# --- `alb_max` / `alb_min` - per-class effective albedo band  [GT-108 ①②] -----
+# `s04_quality_gap_survey_v1.md` §5 F2 measured the mechanism: when the display value
+# clips at the top of the tone map the per-channel differences die with it, so
+# **a texture laid on a near-white surface still returns local sd ~0** (t1 §5.1:
+# w80 vs sat_mu Spearman **-0.630** over 33 scenes). Lowering the albedo is what brings
+# saturation and local contrast back - raising saturation is the banned direction.
+# The same mechanism runs the other way at the dark end: at an effective albedo of
+# 0.028-0.045 (the carriageways, §3.5) the texture's own contrast is multiplied down
+# with the mean and `micro_sd` collapses to **0.52**, the lowest surface in the repo.
+#
+# So the band is applied to the **effective linear albedo** (texture mean x base_color x
+# tint) - the number that actually reaches the frame - not to whatever the scene author
+# happened to type. Channels are scaled by one scalar, so **hue is preserved** (scene13's
+# `asphalt_tint[2] < [0]` blue-cast self-check reads the scene parameter and is untouched).
+#
+# Values [computed - texture linear means measured this session, 64px thumbnails,
+#         sRGB->linear per IEC 61966-2-1; physical bands from LBNL Heat Island Group /
+#         ACPA RT3.05, the same source t1 §5.2 cites]:
+#   ceiling **0.34**  - grey portland concrete solar reflectance: new 0.35-0.40,
+#     aged 0.20-0.30; only white cement reaches 0.70-0.80. 0.34 lands just under
+#     "new grey", i.e. t1 §5.2's landing point for T-1.
+#     Calibration check: `plaza_light` linear luminance **0.468** [measured] x T-1's
+#     approved 0.72 = **0.337** -> the ceiling reproduces T-1 to within 1 % **for all
+#     9 untinted-plaza_light scenes at once**, which is exactly the "9 scenes in one
+#     commit" condition t1 §5.2 attached to T-1. Anything already at or below the
+#     ceiling is passed through untouched, so scene16's `Stair` (already tinted to
+#     0.333) and its three street-wall shells (0.225/0.316/0.351-brick) do not move
+#     and the OCCL <25 constraint on the shaded facades is not disturbed.
+#   floor **0.10**    - aged asphalt concrete 0.10-0.18 (new 0.04-0.05); applied as a
+#     **geometric-mean soft floor**, so it is a target the dark end is pulled towards,
+#     not a value everything lands on - see `_albedo_band` for why the two ends differ.
+#     Every
+#     carriageway in the repo is an existing street, none is a fresh overlay, yet the
+#     measured effective albedos are 0.028 (s13) / 0.045 (s11) / 0.058 (s16) - i.e. all
+#     three sit **below new-laid asphalt**. This is the "등화 틴트" half of GT-107's
+#     carried-over finding: the promotion multiplier preserves the mean and therefore
+#     scales the texture's absolute contrast down with it.
+_ALB_BAND_LUMA = (0.2126, 0.7152, 0.0722)      # Rec.709 linear luminance
+
+
+def _albedo_band(cls, rgb, tex_mean=None):
+    """Clamp the effective linear albedo of `rgb` into the class band.
+
+    `rgb` is the `base_color` multiplier; `tex_mean` the bound texture's linear mean
+    (None for a constant-colour material, where `rgb` *is* the albedo). Returns
+    `(rgb, changed)`. Hue is preserved - one scalar on all three channels.
+
+    **The two ends are deliberately not symmetric.**
+      - The ceiling is **hard**: t1 §5.2 prescribes a definite landing value (T-1's
+        x0.72 -> 0.338) rather than a direction, and the materials that hit it are
+        overwhelmingly one shared kit constant repeated across scenes (17 of the 20
+        `Parapet` hits are the identical 0.718), so there is no authored tonal
+        structure up there to protect.
+      - The floor is **soft - the geometric mean** `sqrt(eff * alb_min)`. A hard floor
+        would be wrong here because scenes *do* author structure at the dark end:
+        sceneN2's subject is a fresh / cured / aged asphalt patch ladder at 0.030 /
+        0.050 / 0.068, and a fresh saw-cut patch really is 0.03-0.05 (GT-107 §Scope ②
+        kept that vocabulary on purpose). The geometric mean is monotone and maps a
+        ratio r to sqrt(r), so the ladder survives - 0.030/0.050/0.068 lifts to
+        0.055/0.071/0.083 with its ordering and roughly 3/4 of its spacing intact
+        `[computed]` - while the field carriageways still gain 31-62 %.
+    """
+    spec = LOOK_CLASS.get(cls) or {}
+    hi = spec.get("alb_max")
+    lo = spec.get("alb_min")
+    if hi is None and lo is None:
+        return rgb, False
+    eff = list(rgb) if tex_mean is None else [c * m for c, m in zip(rgb, tex_mean)]
+    lum = sum(c * w for c, w in zip(eff, _ALB_BAND_LUMA))
+    if lum <= 1e-6:
+        return rgb, False
+    k = 1.0
+    if hi is not None and lum > hi:
+        k = hi / lum
+    elif lo is not None and lum < lo:
+        k = math.sqrt(lo / lum)             # geometric-mean soft floor
+    if abs(k - 1.0) < 1e-4:
+        return rgb, False
+    LOOK_STATS["alb_band"] = LOOK_STATS.get("alb_band", 0) + 1
+    return [c * k for c in rgb], True
+
+
 LOOK_CLASS = {
     #                    bevel   sat   mdl        patch  detail
     # Individual chamfering of paving blocks **has no published domestic figure** (the body of KS F 4419 is paywalled,
@@ -366,11 +454,35 @@ LOOK_CLASS = {
     # Moreover round_edges applies to the **slab prim boundary**, not to individual blocks.
     # Individual block chamfers are already handled by the texture normal map, so the value here is for the slab
     # boundary and is kept below the curb (10 mm). [no basis - conservative choice]
+    # [GT-108 · survey §5 F3 / §7 pilot-A item 2] Grain recalibration for the two ground
+    # classes the pilot names alongside `asphalt` ("`concrete`/`paving`/`asphalt` 의
+    # `bump`·`detail`·`patch`·`tri_dither`·틴트 재보정"). Ledger row 64 ② states the
+    # carriageway numbers, but the pass line it sets — near-field `micro_sd` >= 8 on
+    # **s16, whose judged crop is plaza paving, not carriageway** — is only reachable
+    # through these. Measured starting point: s16 `approach` crop `micro_sd` 4.89,
+    # `tile_peak@8px` 0.843 [measured this session, `scripts/quality_metrics_probe.py`].
+    #   `det_scale` **4.0**: the family default 12.5 means an 8 cm tile, i.e. a 0.078 mm
+    #     texel — the `NEGOBS_DETAIL_SCALE` note above already calls that sub-pixel
+    #     (effective micro-slope 0.49 deg vs the 1.4 deg §1.2 judged visible) and already
+    #     recommends "2-4" to put the dominant band on real 0.5-3 mm aggregate. 4.0 is the
+    #     conservative end of that band. The env knob remains the A/B arm, so a round can
+    #     sweep or revoke this without a code edit.
+    #   `tri_dither` 0.35 -> **0.50**: at a 0.15 m wavelength this is, with normal
+    #     strength, one of only two knobs inside the 5x5 px window the metric measures
+    #     (§5 F3: "14 m 매크로는 micro_sd 를 못 올린다").
+    #   `bump` paving 1.4 -> 1.8 / concrete 1.6 -> 2.0: same reasoning as the existing
+    #     concrete note ("in shadow the grain only comes out through normal contrast").
+    #   `patch` is **not** touched for either - both are 0 on purpose (modular paving;
+    #     rotating patches fragments the block pattern, supervisor measurement E9).
+    #   sceneC2 is not exposed: §5 F3 warns a blanket raise would worsen its leaf ground,
+    #   but that ground is `soil`/`veg`, and neither is touched here.
     "paving":   dict(bevel=0.006, sat=1.00, mdl="ground", patch=0.0, detail=True,
-                     tex="paving_interlock", bump=1.4,
+                     tex="paving_interlock", bump=1.8, alb_max=0.34,
+                     tri_dither=0.50, det_scale=4.0,
                      tex_alts=("stone_flag", "paving_interlock", "plaster")),
     "concrete": dict(bevel=0.020, sat=1.00, mdl="ground", patch=0.0, detail=True,
-                     weather=_W_STRUCT, tex="concrete_floor", bump=1.6,
+                     weather=_W_STRUCT, tex="concrete_floor", bump=2.0,
+                     alb_max=0.34, tri_dither=0.50, det_scale=4.0,
                      tex_alts=("concrete_floor", "concrete_wall", "plaster")),
                      # concrete_wall(c@1/16 0.0345) → concrete_floor(0.129, x3.7).
                      # Diagnosis: if the local contrast of the promoted texture is low, promotion does not bring out the grain.
@@ -381,19 +493,50 @@ LOOK_CLASS = {
                      weather=dict(grime=0.0, splash=0.0, streak=0.10,
                                   wrough=0.15)),
     "stone":    dict(bevel=0.004, sat=0.66, mdl="ground", patch=1.0, detail=True,
-                     weather=_W_STONE, tex="stone_flag", bump=1.5,
+                     weather=_W_STONE, tex="stone_flag", bump=1.5, alb_max=0.34,
                      tex_alts=("stone_flag", "marble_light")),
                      # Bevel [no basis] conservatively lowered
+                     # alb_max: granite / 화강석 cladding reflectance 0.20-0.35, so the
+                     # shared 0.34 ceiling sits at the top of the real band. Only
+                     # `marble_light` (measured linear 0.350) is above it at all, and
+                     # then by 3 % - the class is effectively pass-through today
+                     # [computed]. It is stated so a future bright stone cannot walk in.
     "soil":     dict(bevel=0.000, sat=0.74, mdl="ground", patch=1.0, detail=True,
                      tex="dirt_park", bump=1.4,
                      tex_alts=("dirt_park", "gravel")),
     "gravel":   dict(bevel=0.000, sat=0.78, mdl="ground", patch=1.0, detail=True,
                      tex="gravel", bump=1.4),
     # tex: promote a constant-colour material to the texture of this TEX role (the intended albedo is preserved).
+    # [GT-108 ② · GT-107 carried-over finding] Carriageway recalibration. The measured
+    # body of the finding is `s04_quality_gap_survey_v1.md` §3.5: the s13 carriageway is
+    # `micro_sd` **0.52** / `flat%` **65.5** - the lowest surface measured anywhere in the
+    # repo - **while carrying a real texture**. So the defect is not "no map", it is that
+    # every one of the four knobs that can carry grain was working against it:
+    #   (a) effective albedo 0.028 [computed: gravel linear mean (0.389,0.262,0.155) x
+    #       scene tint (0.148,0.150,0.154)] = darker than new-laid asphalt, so the map's
+    #       own contrast is multiplied down with the mean       -> `alb_min` 0.10 (see band note)
+    #   (b) `patch_mix` 1.0 at a **4.0 m** wavelength on a carriageway = rotation cells the
+    #       size of a wheel track. The dry probe located the "카펫 러너" at y +-1.48 m
+    #       (2.96 m apart) with **no prim there** - i.e. it was this cell grid, not geometry
+    #                                                            -> patch 0.45 @ **1.8 m**,
+    #       small enough that no cell can line up into a longitudinal runner, still ~5
+    #       tiles per cell at the 0.35 m/tile the scenes use, so repetition break-up survives.
+    #   (c) `macro_amp` 0.12 at 14 m = a half-road brightness swell, the second long-wave
+    #       band the eyes read as "one lane is paler"           -> macro 0.06
+    #   (d) the only knobs that live in the 5x5 px window `micro_sd` measures are
+    #       `tri_dither` (0.15 m), normal strength and roughness noise (§5 F3 states this
+    #       explicitly: "14 m 매크로는 micro_sd 를 못 올린다")   -> tri_dither 0.35 -> 0.55,
+    #       bump 1.4 -> 2.1, rough_noise 0.22 -> 0.34, and the granular detail normal off
+    #       its sub-pixel default (1/tile 8.0 = 12.5 cm tile, texel 0.12 mm) down to
+    #       **3.0** = a 33 cm tile, inside the 2-4 band the `NEGOBS_DETAIL_SCALE` note
+    #       already recommends for exactly this reason.
+    # `asphalt_scale` is **not** touched - GT-107 §3 ruled it stays at 0.35 m/tile.
     # spec/bump: diagnosis P1/P3 - the road surface is excessively bright because of grazing gloss, so
     # specular_level is stated explicitly and shadow contrast is restored through normal strength.
-    "asphalt":  dict(bevel=0.006, sat=0.90, mdl="ground", patch=1.0, detail=True,
-                     tex="asphalt", spec=0.20, bump=1.4),
+    "asphalt":  dict(bevel=0.006, sat=0.90, mdl="ground", patch=0.45, detail=True,
+                     tex="asphalt", spec=0.20, bump=2.1, alb_min=0.10,
+                     patch_wl=1.8, macro=0.06, tri_dither=0.55,
+                     rough_noise=0.34, det_scale=3.0),
     # The 12 mm nosing is the **top of the IBC 1.6-14.3 mm range**. No domestic rule exists (exhaustively checked).
     "nosing":   dict(bevel=0.012, sat=1.00, mdl="ground", patch=0.0, detail=True,
                      weather=dict(grime=0.0, splash=0.0, wrough=0.10)),
@@ -468,7 +611,13 @@ LOOK_ROLE = {
     # Metal
     "Rail": "metal", "Steel": "metal", "Pole": "metal", "Post": "metal",
     "Lamp": "metal", "Bollard": "metal", "BollardBand": "paint",
-    "Grate": "metal", "Grating": "metal", "Gear": "metal", "Roof": "metal",
+    # [GT-108 ④ · survey §8-4 ①] `"Roof": "metal"` **deleted here**. It was a dead dict
+    #   entry - the same key is re-stated as `"Roof": "wood"` further down (the "2nd
+    #   diagnosis" block), and in a dict literal the last write wins, so `Roof` has been
+    #   classifying as **wood** all along. Deleting the dead half is bit-identical and
+    #   stops the table from documenting a rule the code does not run. A duplicate key
+    #   is invisible to `py_compile` and to `placement_lint`, which is why it survived.
+    "Grate": "metal", "Grating": "metal", "Gear": "metal",
     # Wood
     "Wood": "wood", "WoodDark": "wood", "SeatWood": "wood", "Bench": "wood",
     # Vegetation
@@ -481,7 +630,12 @@ LOOK_ROLE = {
     "Paint": "paint", "LineWhite": "paint", "LineYellow": "paint",
     "Band": "paint", "Tactile": "paint",
     # Glass, signs, emissive
-    "Glass": "glass", "Window": "glass", "Panel": "sign",
+    # [GT-108 ④ · survey §8-4 ②] `"Panel": "sign"` **deleted here** - same duplicate-key
+    #   trap: `"Panel": "metal"` two lines below wins, and metal is the intended answer
+    #   (`_LOOK_RULES` states it verbatim: "'panel' on its own is not a sign - in reality
+    #   they were guardrail panels and shelter roofs"). scene11's `Looks/Panel` is the
+    #   guard infill panel, so it was already landing on metal. Bit-identical deletion.
+    "Glass": "glass", "Window": "glass",
     # Of the 7 remaining classifier kinds only the clear ones are listed (Bag/Emit/Rubber/Snow are
     # deliberately left as misc = the minimal prescription - putting a concrete grain on an unknown
     # material is worse)
@@ -517,6 +671,7 @@ def look_report():
             f"const={r['const']} skip={r['skipped']} | 베벨={r['bevel']} "
             f"디테일={r['detail']} 스킨={r['skin']} "
             f"승격={r.get('promoted', 0)} 상수MDL={r.get('const_mdl', 0)} "
+            f"알베도밴드={r.get('alb_band', 0)} "
             f"웨더={r.get('weather', 0)} 나무={r.get('veg_asset', 0)} "
             f"간살={r.get('baluster', 0)} 관목={r.get('shrub', 0)} "
             f"손잡이={r.get('handrail', 0)} "
@@ -1657,7 +1812,18 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
     _bc = list(base_color) if base_color is not None else [1.0, 1.0, 1.0]
     if tint is not None:
         _bc = [c * t for c, t in zip(_bc, tint)]
-    if base_color is not None or tint is not None:
+    # [GT-108 ①②] Effective-albedo band. It must sit **here** and not at the scene call
+    # sites: this is the one place where all three routes (bound texture, promoted
+    # constant, constant-colour MDL) have already been folded into one number, and it is
+    # also the only place that knows the texture's own mean. `_bc` alone is not the
+    # albedo when a texture is bound - the MDL multiplies the two - so the texture mean
+    # is passed in and the clamp is computed on the product.
+    _band_tm = _texture_mean(diff) if diff is not None else None
+    _bc, _banded = _albedo_band(cls, _bc, _band_tm)
+    if base_color is not None or tint is not None or _banded:
+        # `_banded` is in the condition because an untinted textured material authors no
+        # base_color at all today (scene01's `PlazaLight` is the case that matters), and
+        # a ceiling that cannot author the input is a ceiling that does nothing.
         sh.CreateInput("base_color", C3).Set(Gf.Vec3f(*_bc))
     s = _GROUND_SCALE_FIX / float(scale_m)
     sh.CreateInput("texture_scale_a", F2).Set(Gf.Vec2f(s, s))
@@ -1666,18 +1832,23 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
     sh.CreateInput("use_blend", B).Set(False)
     # Repetition break-up - modular paving uses patch 0 (protects the pattern), natural ground 1
     sh.CreateInput("patch_mix_a", F).Set(float(spec.get("patch", 1.0)))
-    sh.CreateInput("patch_wavelength_a", F).Set(4.0)
+    # [GT-108 ②] `patch_wl` / `macro` / `rough_noise` / `tri_dither` become per-class
+    # overrides. **A class that does not state one keeps the literal that was here**, so
+    # every class except `asphalt` is bit-identical to before this row.
+    sh.CreateInput("patch_wavelength_a", F).Set(float(spec.get("patch_wl", 4.0)))
     # Constant-colour mode has no texture high frequencies, so a strong macro reads as blotching.
-    sh.CreateInput("macro_amp_a", F).Set(0.07 if diff is None else 0.12)
+    sh.CreateInput("macro_amp_a", F).Set(
+        float(spec.get("macro", 0.07 if diff is None else 0.12)))
     sh.CreateInput("macro_wavelength_a", F).Set(14.0)
     sh.CreateInput("desat_bright_a", F).Set(0.0 if diff is None else 0.30)
     sh.CreateInput("saturation_a", F).Set(
         _effective_sat(spec, diff, base_color))
-    sh.CreateInput("rough_noise_a", F).Set(0.22)
+    sh.CreateInput("rough_noise_a", F).Set(float(spec.get("rough_noise", 0.22)))
     sh.CreateInput("rough_noise_wavelength_a", F).Set(1.2)
     # Constant-colour mode has no texture, so no axis-transition streaking occurs ->
     # 6 dithering noise taps are pure waste. Set to 0 to cut the cost.
-    sh.CreateInput("tri_dither", F).Set(0.0 if diff is None else 0.35)
+    sh.CreateInput("tri_dither", F).Set(
+        0.0 if diff is None else float(spec.get("tri_dither", 0.35)))
     sh.CreateInput("tri_dither_wavelength", F).Set(0.15)
     sh.CreateInput("tri_weight_exp", F).Set(6.0)
     if roughness_const is not None:            # Constant roughness requested -> transplanted to floor

@@ -52,6 +52,14 @@ What this lane changed, and what it deliberately did not:
     an explicit `species=` at the call site.
   · **C6** — the local `build_bollard_std` (a bare cylinder + a band) is replaced by
     `props_kit.build_bollard_v2` (dome cap · base plate · anchor cover · band).
+  · **[GT-112] Backdrop typology (K6 관공서)** — the three masses were `floors=3` on
+    h 6.6-7.5, i.e. 2.20-2.50 m storeys. `floors` -> **2** (3.30/3.55/3.75) and a
+    scene-local elevation is laid over the kit silhouette: 기단 1.60 / 신부 / 코니스
+    0.40, an opening array at 개구율 0.20, and the 기단 material roll split on **E3
+    only** (`granite_dark`; E1/E2 keep `marble_light` as the comparison pair).
+    **`h` is frozen** - the margins under the frame ceiling are 0.58/0.66/0.58 m and
+    every local prim is checked to stay at or below the shell top, so the roofline,
+    `p.ridge` and the BS-4 gate are bit-identical. Source: typology proposal §3.8.
   · **NOT changed** — the self-occlusion geometry (18 × 0.15 = 2.70 m, tread 0.32, width 8),
     the stair/terrace/parapet/railing/nosing transforms, the camera presets, the lighting.
     The marble family is KEPT: the intake's "marble is the single brightest material family"
@@ -215,16 +223,76 @@ PARAMS = dict(
     #  −X. v5.2 §6's "emptiness is the default" applies to prims nobody can see.
     #  `mat` is the **shell material for the parapet too** — at 50–57 m a 0.72-grey cap
     #  on a stone silhouette reads as a lit roofline highlight (the S01 pilot defect).
+    #
+    #  ═══ [GT-112] K6 관공서 정합 — 높이는 1 mm 도 움직이지 않는다 ═══
+    #  Source: `Docs/briefs/building_typology_proposal_v1.md` §3.8 (:478-510). The three
+    #  masses already declare the K6 type in code ("G1's stone institutional block") but
+    #  carried **`floors=3` on h 6.6–7.5**, i.e. 2.20–2.50 m storeys — a storey height no
+    #  청사 has ever been built at. The proposal's own conclusion is that raising `h` is
+    #  **impossible** (the margins printed by group (5) below are 0.58 / 0.66 / 0.58 m,
+    #  and `plaza_selfcheck`'s twin gates — sky above the roofline, containment inside the
+    #  ground plate — are the reason), so the only sound path is to **lower the storey
+    #  count**: `floors` 3 → 2 gives 3.30 / 3.55 / 3.75 m, the 관공서 저층 band.
+    #  `floors` is a **plan-only** switch for `kind="backdrop"`: `_b_backdrop` branches on
+    #  it at `floors >= 12` (the setback upper mass) and nowhere else, so the shell, the
+    #  parapet, the penthouse, `p.ridge` and every prim the kit emits are **bit-identical
+    #  before and after**. What the switch really buys is `p.floor_h = h/floors`
+    #  (`plan_levels`, `_KIND_FH["backdrop"] = (4.0, 4.0)` ⇒ r = 1 ⇒ fh = h/n), which is
+    #  the datum the facade below is dimensioned from.
+    #
+    #  **`facade` — the scene-local elevation layer.** The kit's backdrop contract is
+    #  *silhouette only, no windows*, and it is not being renegotiated here: the kit path
+    #  still emits 0 windows. §3.8 asks for a horizontal tripartite and an opening array
+    #  on top of it, so this scene lays that on **locally**, under the same prim prefix,
+    #  with one hard invariant — **nothing rises above `base_z + h`**. The cornice's top
+    #  face *is* the shell top, the plinth and the openings live below it, so the roofline
+    #  against the sky (and therefore `p.ridge`, and therefore group (5)) is untouched.
+    #  Derivation (all of it re-derived boot-free in `_backdrop_facade_plan`):
+    #    · 3분절 — 기단 `base_h` 1.60 (§3.8; = `build_plinth`'s office band) / 신부
+    #      h − 2.00 / 코니스 `cornice_h` 0.40. The three sum to `h` **by construction**.
+    #    · 창 높이 = `floor_h − base_h − beam_h` = 1.30 / 1.55 / 1.75 — the tallest window
+    #      that fits the **ground** storey once the plinth takes 1.60 off its bottom and
+    #      the slab/beam zone 0.40 off its top. Upper rows repeat it (one window family
+    #      per building), sill at `floor_h + sill_up`, which lands every top-row head at
+    #      `h − 1.10`, i.e. a constant 0.70 m spandrel under the cornice on all three.
+    #    · 베이 = round(W / 3.60) at an even pitch; 개구율 `open_ratio` 0.20 is then met
+    #      **exactly** by solving the width: w = 0.20·W·h / (rows·bays·win_h). Definition
+    #      used: 개구부 면적 합 ÷ **입면 전면적 (W × h)** — the 창면적비 reading, the same
+    #      one §2.1's K5 arithmetic uses (1.60 × 2.20 × 7련 × 4층 ÷ 26.0 × 15.0 = 0.25).
+    #      A pier guard (`w ≤ 0.55 · pitch`) keeps a stone wall's piers wider than its
+    #      holes; measured 0.51 / 0.46 / 0.43 / 0.43, so it does not bind.
+    #    · 기단 재질 롤 분리 (E6 시험) — **E3 만** `granite_dark`; E1/E2 stay
+    #      `marble_light` as the declared comparison pair. Both roles are already in
+    #      `ASSET_ROLES` and `material.scale`, so **no texture is procured**.
+    #    · 면 선정 — the plaza-facing face (x = x0) always. A **return** face is glazed
+    #      only when its foreshortened area is ≥ `return_min` of the front face's from the
+    #      worst judged eye (the d2 preset, −2, 0): E1 −Y is back-facing (0.00) and +Y is
+    #      edge-on (0.00), E2 −Y measures 0.06, **E3 −Y measures 0.44** — so E3, and only
+    #      E3, gets its 18 m return elevation. Prims go where they are seen.
     backdrop=dict(
         base_z=-2.75,          # = ground top face (audit v4 B3: unset ⇒ the shell floats)
         mat="marble",          # G1: the institutional block is the same stone family
-        floors=3,
+        floors=2,              # [GT-112] 3 → 2 · 층고 h/2 = 3.30 / 3.55 / 3.75 (K6 저층)
+        seed_floors=3,         # [GT-112] 옥탑 지터 rng 동결 — `build_backdrop` 주석
         # (tag, x0, x1, y0, y1, h_shell) — plan rectangles, all on the ground plate
-        #   (x −41…69, y ±45), so none of them floats.
+        #   (x −41…69, y ±45), so none of them floats. **h is frozen** (GT-112).
         blocks=(
             ("E1", 48.0, 64.0, -18.0,  0.0, 6.6),   # centre-left collegiate mass
             ("E2", 52.0, 66.0,   4.0, 20.0, 7.1),   # centre-right collegiate mass
             ("E3", 50.0, 68.0,  22.0, 38.0, 7.5),   # G1's stone institutional block
+        ),
+        facade=dict(
+            base_h=1.60, cornice_h=0.40,            # §3.8 3분절 (신부 = h − 2.00)
+            beam_h=0.40, sill_up=0.90,              # slab/beam zone · upper-row sill
+            open_ratio=0.20,                        # §3.8 개구율 (창면적 ÷ W·h)
+            bay_target=3.60, pier_guard=0.55,       # 베이 피치 목표 · 개구/피치 상한
+            base_proud=0.10,                        # 기단은 대면적 매스 (판넬 0.025 아님)
+            cornice_proud=0.20,                     # 처마 돌출. 파라펫(0.10)보다 앞선다
+            win_t=0.05,                             # 유리면 두께 (inner face = WALL_PROUD)
+            return_min=0.20,                        # 측면 입면 시공 기준(전면 대비 면적비)
+            eye=(-2.0, 0.0),                        # the worst judged eye — d2 preset
+            base_mat="marble", base_roll={"E3": "granite"},   # E6 저위험 시험 = E3 한정
+            win_mat="window",                       # 기존 다크 글레이징 (신규 롤 0)
         ),
     ),
 
@@ -407,6 +475,131 @@ ASSET_ROLES = ["marble_light", "plaza_light", "granite_dark", "band_dark",
 
 
 # ===========================================================================
+# [C1-b] GT-112 — the backdrop elevation, derived once (pure, boot-free, 0 prims)
+# ===========================================================================
+def _backdrop_facade_plan(blk, bp):
+    """Every number of one block's K6 elevation, as data. **Pure** — no stage, no
+    `pxr`, no rng — so `build_backdrop` and `_l21_selfcheck` read the *same*
+    derivation instead of agreeing by hand (the S01-F1 lesson: a scene that
+    re-states the kit's arithmetic in a comment ships a mass it never checked).
+
+    Returns a dict::
+
+        tag, h, floor_h, base_z, top_z            — the storey datum
+        bands   [(z0, z1, name)]                  — 기단 / 신부 / 코니스, sum == h
+        rows    [(sill_z, head_z)]                — one per storey, ground row first
+        faces   [dict(name, axis, plane, fdir, u0, u1, W, bays, pitch,
+                      win_w, ratio, seen)]        — glazed elevations
+        prims   [(name, (cx,cy,cz), (sx,sy,sz), mat_key)]  — every local prim
+        top     max z of `prims`                  — the silhouette invariant
+
+    `axis="x"` ⇒ the wall is the plane x = `plane` and the horizontal run is world
+    **Y** (the plaza-facing elevation of all three blocks); `axis="y"` ⇒ the wall is
+    y = `plane`, horizontal run world **X** (a return elevation). `fdir` is the
+    outward sign on the normal axis, and it is always −1 here: every one of these
+    faces is turned back toward the plaza.
+    """
+    tag, x0, x1, y0, y1, h = blk
+    fa = bp["facade"]
+    base_z = float(bp["base_z"])
+    top_z = base_z + h
+    floors = max(1, int(bp["floors"]))
+    floor_h = h / floors
+    base_h, corn_h = float(fa["base_h"]), float(fa["cornice_h"])
+    # 3분절. The shaft is what is left, so the three bands sum to `h` identically —
+    # there is no third number to keep in step.
+    bands = [(base_z, base_z + base_h, "기단"),
+             (base_z + base_h, top_z - corn_h, "신부"),
+             (top_z - corn_h, top_z, "코니스")]
+    # One window family per building: the **ground** storey is the tight one (the
+    # plinth eats 1.60 off its bottom, the slab/beam zone 0.40 off its top), so it
+    # sets the height and every upper row repeats it.
+    win_h = floor_h - base_h - float(fa["beam_h"])
+    rows = []
+    for f in range(floors):
+        sill = (base_z + base_h) if f == 0 \
+            else (base_z + f * floor_h + float(fa["sill_up"]))
+        rows.append((sill, sill + win_h))
+
+    eye = tuple(float(v) for v in fa["eye"])
+
+    def _apparent(cx, cy, nx, ny, area):
+        """Foreshortened area of a face from the judged eye. Plan-view only: at
+        50–57 m the 0.3–1.8 m eye heights change the cosine by < 2 %."""
+        vx, vy = eye[0] - cx, eye[1] - cy
+        d = math.hypot(vx, vy)
+        return max(0.0, (vx * nx + vy * ny) / d) * area if d > 1e-9 else 0.0
+
+    # Candidate elevations: the plaza-facing one, then the two returns.
+    cand = [dict(name="front", axis="x", plane=x0, fdir=-1.0, u0=y0, u1=y1,
+                 cx=x0, cy=0.5 * (y0 + y1), nx=-1.0, ny=0.0),
+            dict(name="retS", axis="y", plane=y0, fdir=-1.0, u0=x0, u1=x1,
+                 cx=0.5 * (x0 + x1), cy=y0, nx=0.0, ny=-1.0),
+            dict(name="retN", axis="y", plane=y1, fdir=1.0, u0=x0, u1=x1,
+                 cx=0.5 * (x0 + x1), cy=y1, nx=0.0, ny=1.0)]
+    for c in cand:
+        c["W"] = abs(c["u1"] - c["u0"])
+        c["app"] = _apparent(c["cx"], c["cy"], c["nx"], c["ny"], c["W"] * h)
+    a_front = cand[0]["app"]
+    faces = []
+    for c in cand:
+        c["seen"] = 1.0 if c["name"] == "front" else (
+            c["app"] / a_front if a_front > 1e-9 else 0.0)
+        if c["seen"] < float(fa["return_min"]):
+            continue
+        W = c["W"]
+        bays = max(1, int(round(W / float(fa["bay_target"]))))
+        pitch = W / bays
+        # 개구율 is met **exactly** by solving the width — it is the declared
+        # quantity, so it is not left to whatever a rounded window size gives.
+        win_w = float(fa["open_ratio"]) * W * h / (len(rows) * bays * win_h)
+        c.update(bays=bays, pitch=pitch, win_w=win_w,
+                 ratio=(len(rows) * bays * win_w * win_h) / (W * h))
+        faces.append(c)
+
+    prims = []
+    # 기단 — a wrap box; mirrors `fk.build_plinth(wrap=True)`, which is what the
+    # builder actually calls, so this entry is the *second expression* the smoke
+    # measures (kit geometry stays kit-owned).
+    bp_ = float(fa["base_proud"])
+    prims.append(("PlinthStone",
+                  (0.5 * (x0 + x1), 0.5 * (y0 + y1), base_z + base_h / 2.0),
+                  (abs(x1 - x0) + 2 * bp_, abs(y1 - y0) + 2 * bp_, base_h),
+                  fa["base_roll"].get(tag, fa["base_mat"])))
+    # 코니스 — top face **is** the shell top: the roofline never moves.
+    cp = float(fa["cornice_proud"])
+    prims.append(("Cornice",
+                  (0.5 * (x0 + x1), 0.5 * (y0 + y1), top_z - corn_h / 2.0),
+                  (abs(x1 - x0) + 2 * cp, abs(y1 - y0) + 2 * cp, corn_h),
+                  bp["mat"]))
+    # 개구 — a flat panel whose inner face sits `fk.WALL_PROUD` outside the wall
+    # (the shell is a solid box: a recess buries the glass, a coplanar face
+    # z-fights — `facade_kit:96`).
+    t = float(fa["win_t"])
+    off = fk.WALL_PROUD + t / 2.0
+    for c in faces:
+        for f, (sill, head) in enumerate(rows):
+            for b in range(c["bays"]):
+                u = c["u0"] + (b + 0.5) * c["pitch"] * (1.0 if c["u1"] > c["u0"]
+                                                        else -1.0)
+                n = c["plane"] + c["fdir"] * off
+                cen = (n, u, 0.0) if c["axis"] == "x" else (u, n, 0.0)
+                siz = (t, c["win_w"], head - sill) if c["axis"] == "x" \
+                    else (c["win_w"], t, head - sill)
+                prims.append((f"Win_{c['name']}_F{f}_B{b}",
+                              (cen[0], cen[1], 0.5 * (sill + head)), siz,
+                              fa["win_mat"]))
+    return dict(tag=tag, h=h, floors=floors, floor_h=floor_h, base_z=base_z,
+                top_z=top_z, win_h=win_h, bands=bands, rows=rows, faces=faces,
+                prims=prims,
+                top=max(c[2] + s[2] / 2.0 for _n, c, s, _m in prims),
+                aabb=(min(c[0] - s[0] / 2.0 for _n, c, s, _m in prims),
+                      max(c[0] + s[0] / 2.0 for _n, c, s, _m in prims),
+                      min(c[1] - s[1] / 2.0 for _n, c, s, _m in prims),
+                      max(c[1] + s[1] / 2.0 for _n, c, s, _m in prims)))
+
+
+# ===========================================================================
 # [C2] Smoke - geometry self-verification before boot (early exit)
 # ===========================================================================
 def _smoke_report():
@@ -467,9 +660,10 @@ def _l21_selfcheck(drop, run):
 
     Groups: (1) the frozen self-occlusion identity · (2) the rectangles ban ·
     (3) the seasonal audit · (4) the judged-eye ↔ planting-bed census ·
-    (5) BS-4's frame-ceiling arithmetic · (6) species declaration · (7) C6 ·
-    (8) the undeclared terrace-flank drop (MEASURED and REPORTED, not asserted —
-    it is a declared open finding, L21-F1, and pretending it is fine would hide it).
+    (5) BS-4's frame-ceiling arithmetic · (5b) GT-112's K6 elevation · (6) species
+    declaration · (7) C6 · (8) the undeclared terrace-flank drop (MEASURED and
+    REPORTED, not asserted — it is a declared open finding, L21-F1, and pretending
+    it is fine would hide it).
     """
     st, pl, bp = PARAMS["stairs"], PARAMS["planting"], PARAMS["backdrop"]
     ok = [0, 0]
@@ -541,8 +735,80 @@ def _l21_selfcheck(drop, run):
               f"{ridge:4.2f} · 여유 {z_ceil - ridge:+.2f} m")
     chk("BS-4: 모든 배경동 지붕선 위 하늘 (ridge < z_ceil)",
         n_sky == len(bp["blocks"]), f"{n_sky}/{len(bp['blocks'])}")
-    chk("배경동 = 실루엣 (창 0) · 근경 폐색 매스 0",
+    chk("근경 폐색 매스 0 · 킷 경로 창 0 (`kind=\"backdrop\"` 강제 유지)",
         "buildings" not in PARAMS and "window" not in PARAMS)
+    # ── (5b) GT-112 — the K6 elevation. Everything below is re-derived from
+    #    `_backdrop_facade_plan`, the same function `build_backdrop` builds from,
+    #    so a drift between the drawing and the built prims cannot survive a smoke.
+    fa = bp["facade"]
+    plans = [_backdrop_facade_plan(b, bp) for b in bp["blocks"]]
+    gr = PARAMS["ground"]
+    plate = (gr["cx"] - gr["size_x"] / 2.0, gr["cx"] + gr["size_x"] / 2.0,
+             gr["cy"] - gr["size_y"] / 2.0, gr["cy"] + gr["size_y"] / 2.0)
+    for fp, (tag, x0, x1, y0, y1, hh) in zip(plans, bp["blocks"]):
+        b0, b1, b2 = fp["bands"]
+        print(f"      · {tag} 층수 {fp['floors']} · 층고 {fp['floor_h']:4.2f} · "
+              f"3분절 {b0[1]-b0[0]:4.2f}/{b1[1]-b1[0]:4.2f}/{b2[1]-b2[0]:4.2f} · "
+              f"창 {fp['faces'][0]['win_w']:4.2f}×{fp['win_h']:4.2f} · "
+              + " + ".join(f"{c['name']}({c['bays']}베이 @{c['pitch']:4.2f}, "
+                           f"개구율 {c['ratio']:.3f}, 면적비 {c['seen']:.2f})"
+                           for c in fp["faces"])
+              + f" · 기단 {fp['prims'][0][3]} · 로컬 {len(fp['prims'])}프림")
+    chk("GT-112 층수 = 2 · 층고 = h/2 ∈ [3.30, 3.75] (K6 관공서 저층)",
+        bp["floors"] == 2
+        and all(abs(f["floor_h"] - f["h"] / 2.0) < 1e-12
+                and 3.30 - 1e-9 <= f["floor_h"] <= 3.75 + 1e-9 for f in plans),
+        " / ".join(f"{f['tag']} {f['floor_h']:.2f}" for f in plans))
+    chk("GT-112 수평 3분절: 기단 1.60 + 신부 + 코니스 0.40 = h (합 항등)",
+        all(abs(sum(z1 - z0 for z0, z1, _n in f["bands"]) - f["h"]) < 1e-9
+            and abs((f["bands"][0][1] - f["bands"][0][0]) - fa["base_h"]) < 1e-12
+            and abs((f["bands"][2][1] - f["bands"][2][0])
+                    - fa["cornice_h"]) < 1e-12 for f in plans),
+        " / ".join(f"{f['tag']} 신부 {f['bands'][1][1]-f['bands'][1][0]:.2f}"
+                   for f in plans))
+    chk(f"GT-112 개구율 = {fa['open_ratio']:.2f} (창면적 ÷ W·h) · 전 입면",
+        all(abs(c["ratio"] - fa["open_ratio"]) < 1e-9
+            for f in plans for c in f["faces"]),
+        f"{sum(len(f['rows']) * c['bays'] for f in plans for c in f['faces'])}개 "
+        f"개구 · {sum(len(f['faces']) for f in plans)}개 입면")
+    chk("GT-112 조적 벽기둥 우위: 개구 폭 ≤ 0.55 × 베이 피치",
+        all(c["win_w"] <= fa["pier_guard"] * c["pitch"] + 1e-9
+            for f in plans for c in f["faces"]),
+        " / ".join(f"{f['tag']}·{c['name']} {c['win_w']/c['pitch']:.3f}"
+                   for f in plans for c in f["faces"]))
+    chk("GT-112 창은 신부 안에서만 (기단 위 · 코니스 아래 ≥ 보 영역 0.40)",
+        all(f["rows"][0][0] >= f["bands"][1][0] - 1e-9
+            and f["rows"][-1][1] <= f["bands"][1][1] - fa["beam_h"] + 1e-9
+            for f in plans),
+        " / ".join(f"{f['tag']} 코니스 하부 여백 "
+                   f"{f['bands'][1][1] - f['rows'][-1][1]:.2f}" for f in plans))
+    # **The gate that makes the whole row safe.** `plaza_selfcheck`'s first gate is
+    # sky above the roofline, and it is answered by group (5) only as long as this
+    # holds: the local elevation adds nothing above the shell top, so `ridge` — and
+    # the 0.58/0.66/0.58 m margins printed above — are the same numbers as before.
+    chk("GT-112 실루엣·전고 불변: 입면 프림 상단 ≤ base_z + h (전 동)",
+        all(f["top"] <= f["top_z"] + 1e-9 for f in plans),
+        " / ".join(f"{f['tag']} {f['top_z'] - f['top']:+.2f}" for f in plans))
+    # `plaza_selfcheck`'s second gate: every mass inside the ground plate. The
+    # proud bands (기단 0.10 · 코니스 0.20) are the only things that grew the plan
+    # rectangles, so they are what is measured — against the plate, not the shell.
+    worst_in = min((min(a[0] - plate[0], plate[1] - a[1],
+                        a[2] - plate[2], plate[3] - a[3]), f["tag"])
+                   for f in plans for a in [f["aabb"]])
+    chk("GT-112 지반면 내 포함: 입면 AABB ⊂ 지반 플레이트",
+        worst_in[0] >= 0.0,
+        f"최소 여유 {worst_in[0]:.2f} m ({worst_in[1]}) · 플레이트 x "
+        f"{plate[0]:.0f}…{plate[1]:.0f} y {plate[2]:.0f}…{plate[3]:.0f}")
+    chk("GT-112 기단 롤 분리(E6 시험): E3 = granite · E1/E2 = marble 비교쌍",
+        [f["prims"][0][3] for f in plans] == ["marble", "marble", "granite"]
+        and set(fa["base_roll"]) == {"E3"},
+        " / ".join(f"{f['tag']} {f['prims'][0][3]}" for f in plans))
+    chk("GT-112 신규 텍스처 조달 0 (기단·창 모두 기존 롤)",
+        all(k in ("marble", "granite", "window")
+            for f in plans for _n, _c, _s, k in f["prims"])
+        and "granite_dark" in ASSET_ROLES and "marble_light" in ASSET_ROLES,
+        f"granite_dark · marble_light · window(색상 상수) — ASSET_ROLES "
+        f"{len(ASSET_ROLES)}종 불변")
     # (6) species — declared, not inherited; one species per population
     chk("수종 선언: 가로수 단일종 · 전정수 단일종 · `species=` 명시",
         pl["tree_species"] in sc.VEG_SPECIES
@@ -607,7 +873,9 @@ BANNER = """\
  5. 재질/단서          — 대리석·단코·점자·밴드·Z파이팅·부유 없는가
  6. [v4] 지반·테라스 기단·파라펫 계단 위 안착·축선 조형물/깃대 열
  7. [v5] 공통 레이어 — 상단 점자띠 + sign_info(−3.2, −5.4) 판독
- 8. [W3 L21] 배경 — 지붕선 위 하늘 3/3, 창 0, 근경 폐색 매스 없음 (G1)
+ 8. [W3 L21] 배경 — 지붕선 위 하늘 3/3, 근경 폐색 매스 없음 (G1)
+ 8b.[GT-112] 배경 K6 — 기단 1.60(E3 만 짙은 화강석)·신부 창 2열·코니스 0.40 이
+    읽히는가 / 지붕선·전고는 이전 컷과 동일한가 (실루엣 불변이 시공 조건)
  9. [W3 L21] 계절 — 단코·디딤면 낙엽, 잔디 가을 색조, 나목 0 (G1 가을·유엽)
 10. [W3 L21] 식재 — 가로수 8주(ash 단일종)·전정 원형수 6주, 축선 y=0 공백
 11. [W3 L21] C6 볼라드 — 돔캡·베이스플레이트·앵커커버·반사띠 식별"""
@@ -908,12 +1176,30 @@ def main():
         (parapet band + penthouse) that lives above the total-height invariant — the
         S01-F1 defect, fixed in K-micro item 6. This scene reads it rather than
         carrying a hand-derived constant.
+
+        **[GT-112] The K6 elevation is laid on top, locally.** The kit path is
+        unchanged and still emits **0 windows** — `kind="backdrop"` is forced at
+        `plan_building` and that contract is not being renegotiated from a scene. The
+        3분절 and the opening array of §3.8 are authored here instead, from
+        `_backdrop_facade_plan`, under the same prim prefix. The invariant that makes
+        this safe is checked, not assumed: **every local prim's top is ≤ `p.top_z`**,
+        so the roofline against the sky, `p.ridge` and group (5)'s margins are the
+        same numbers they were before. `floors` 3 → 2 moves no kit prim either
+        (`_b_backdrop` branches on `floors` only at ≥ 12); it moves `p.floor_h`,
+        which is what the elevation is dimensioned from.
         """
         bp = PARAMS["backdrop"]
         eyes = bk.judged_eyes(0.0)
         kit = fk.Kit(sc.add_box, sc.add_cylinder,
                      getattr(sc, "_oriented_box", None))
+        # [GT-112] The look layer's displacement skin takes any horizontal slab
+        #   ≥ 4 m wide and ≤ 0.8 m thick (`sc._skin_wanted`), which the 0.40 m cornice
+        #   band would satisfy — a relief mesh on a 50 m distant roofline is pure
+        #   prim cost, and it would put geometry above the band it is skinning. The
+        #   whole backdrop prefix is excluded, so LOOK_GEO stays prim-neutral here.
+        sc.skin_exclude(f"{ROOT}/Backdrop_")
         n_tot, over = 0, []
+        n_fac, fac_rows = 0, []
         for tag, x0, x1, y0, y1, hh in bp["blocks"]:
             # A backdrop mass is a plan rectangle seen edge-on; `axis`/`facade_*` only
             # decide which face the planner measures from, and for a silhouette that is
@@ -921,7 +1207,21 @@ def main():
             bd = dict(x0=x0, x1=x1, y0=y0, y1=y1, h=hh, floors=bp["floors"],
                       axis="x", facade_x=x0, face_dir=-1.0,
                       base_z=bp["base_z"])
-            p = bk.plan_building(bd, kind="backdrop", eyes=eyes)
+            # [GT-112] **The seed is pinned, and this is not cosmetic.**
+            #   `plan_building` derives its default seed as
+            #   `_seed_of(kind, x0, y0, floors, h)` — `floors` is *in the seed*. So
+            #   3 → 2 would have re-drawn `_b_backdrop`'s penthouse jitter and slid
+            #   a 5.1 m roof box 2.4–4.7 m sideways on all three roofs: same size,
+            #   same top, but a **moved skyline** that no ledger row declared and
+            #   that the round's eyeball would have to attribute to something.
+            #   Pinning the seed's storey argument to `seed_floors` (the pre-GT-112
+            #   value) keeps the kit's prims bit-identical, so every changed pixel
+            #   in the round belongs to the elevation layer below. Measured, not
+            #   assumed: with the pin, the 9 kit prims diff clean under 3 vs 2.
+            p = bk.plan_building(
+                bd, kind="backdrop", eyes=eyes,
+                seed=bk._seed_of("backdrop", round(x0, 2), round(y0, 2),
+                                 int(bp["seed_floors"]), round(hh, 2)))
             prims = bk.build_korean_building(
                 kit, stage, f"{ROOT}/Backdrop_{tag}", bd,
                 bk.Mtls(M[bp["mat"]], parapet=M[bp["mat"]]), plan=p)
@@ -935,10 +1235,55 @@ def main():
                   f"{str(p.in_frame):5s} · z_ceil "
                   f"{('%.2f' % p.z_ceil) if p.z_ceil is not None else '  n/a'}"
                   f" · sky above roof {str(sky):5s} · prims {len(prims)}")
-        print(f"[backdrop] {len(bp['blocks'])}동 {n_tot} 프림 · 창 0 · "
+
+            # ── [GT-112] K6 elevation, scene-local, strictly under `p.top_z` ──
+            fp = _backdrop_facade_plan((tag, x0, x1, y0, y1, hh), bp)
+            # `p.floor_h` is the kit's storey datum; the elevation is dimensioned
+            # from `_backdrop_facade_plan`'s own h/floors. They must be the same
+            # number or the storey the drawing shows is not the storey the plan
+            # declares (`_KIND_FH["backdrop"]` = (4.0, 4.0) ⇒ r = 1 ⇒ fh = h/n).
+            if abs(p.floor_h - fp["floor_h"]) > 1e-9:
+                raise SystemExit(
+                    f"[GT-112] {tag} 층고 불일치: kit {p.floor_h:.4f} vs "
+                    f"씬 {fp['floor_h']:.4f}")
+            if fp["top"] > p.top_z + 1e-9:              # the one hard invariant
+                raise SystemExit(
+                    f"[GT-112] {tag} 입면 프림이 셸 상면을 넘었다: "
+                    f"{fp['top']:.4f} > {p.top_z:.4f}")
+            pre = f"{ROOT}/Backdrop_{tag}"
+            n_b = 0
+            for nm, cen, siz, mat in fp["prims"]:
+                if nm == "PlinthStone":
+                    # 기단 is kit-owned geometry (`build_plinth` wrap box, 1 prim);
+                    # the plan entry above is the second expression the smoke
+                    # measures for containment.
+                    n_b += len(fk.build_plinth(
+                        kit, stage, pre, x0, x1, y0, y1, bp["base_z"], M[mat],
+                        height=PARAMS["backdrop"]["facade"]["base_h"],
+                        proud=PARAMS["backdrop"]["facade"]["base_proud"],
+                        wrap=True))
+                else:
+                    kit.box(stage, f"{pre}/{nm}", cen, siz, M[mat])
+                    n_b += 1
+            n_fac += n_b
+            fac_rows.append((tag, fp, n_b))
+            b0, b1, b2 = fp["bands"]
+            print(f"[backdrop·입면] {tag} 층수 {fp['floors']} · 층고 "
+                  f"{fp['floor_h']:4.2f} · 기단 {b0[1]-b0[0]:4.2f} / 신부 "
+                  f"{b1[1]-b1[0]:4.2f} / 코니스 {b2[1]-b2[0]:4.2f} · 창 "
+                  f"{fp['faces'][0]['win_w']:4.2f}×{fp['win_h']:4.2f} · "
+                  + " + ".join(f"{c['name']} {len(fp['rows'])}열×{c['bays']}베이"
+                               f"(개구율 {c['ratio']:.3f}, 면적비 {c['seen']:.2f})"
+                               for c in fp["faces"])
+                  + f" · 기단재 {fp['prims'][0][3]} · 프림 {n_b} · 상단 "
+                    f"{fp['top']:.2f} ≤ 셸 상면 {p.top_z:.2f}")
+        print(f"[backdrop] {len(bp['blocks'])}동 {n_tot} 프림 · 킷 경로 창 0 · "
               f"지붕선 위 하늘 {len(bp['blocks']) - len(over)}/"
               f"{len(bp['blocks'])}" + (f" · 초과 {over}" if over else ""))
-        return n_tot
+        print(f"[backdrop·입면] GT-112 K6 정합 · 로컬 {n_fac} 프림 · 개구 "
+              f"{sum(len(f['rows']) * c['bays'] for _t, f, _n in fac_rows for c in f['faces'])}"
+              f"개 · 실루엣·전고 불변(전 동 상단 ≤ 셸 상면)")
+        return n_tot + n_fac
 
     def build_planting(M):
         """[W3 L21 · K4(b)] G1's civic planting — one broadleaf species, one dome species.

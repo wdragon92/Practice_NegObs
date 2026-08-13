@@ -506,8 +506,17 @@ PARAMS = dict(
         #   [v6] the deck and piers using concrete_floor (107,93,77, a warm brown earth) read as
         #   "rusted steel" (under_grating) -> swapped for concrete_wall (joints and tie holes) plus
         #   an equalising tint (0.72,0.77,0.92) = mean 102 ~ albedo 0.40, a neutral concrete.
+        # [GT-108 ⑥ · survey §3.3 / §5 F7] `brick_red` 2.0 → **0.87**, this scene only.
+        #   This is the one surface in the survey where the repeat was measured directly:
+        #   the s11 brick wall autocorrelates at **0.861 @ 57 px** — i.e. the pattern
+        #   visibly restarts every 57 px on screen, which is F7's definition of a tiling
+        #   artefact. The cause is the tile: 2.0 m/tile stretches the map to 2.3× real
+        #   coursing (a Korean 190 mm brick + 10 mm joint courses at 67 mm), which both
+        #   makes each brick oversized and drags the repeat period up into the band the
+        #   eye tracks. 0.87 m is the map's real tile. Ledger row 64 ⑥ scopes the
+        #   correction to this batch's two scenes; the other 15 are lever-1 spread.
         scale=dict(paving_interlock=1.0, metal_rust=0.55, concrete_wall=2.0,
-                   granite_dark=1.0, plaza_light=0.55, brick_red=2.0,
+                   granite_dark=1.0, plaza_light=0.55, brick_red=0.87,
                    grass=1.4, tactile=0.3),
         asphalt_color=(0.045, 0.045, 0.050), asphalt_rough=0.92,
         # [W3 S11 · G11 measured] The footbridge in the target photograph is painted the
@@ -1865,6 +1874,18 @@ def main():
                           sc.tex_path("paving_interlock", "nor"),
                           sc.tex_path("paving_interlock", "rough"),
                           s["paving_interlock"])
+        # [GT-108 ③ · survey §4.4] Tint split — same roll, second tint. The two
+        #   footways sit on opposite sides of a carriageway and are physically two
+        #   separate laying jobs; a single material across both is the "one continuous
+        #   tone" §2.2 read as "면". −6 % [computed: eff linear 0.268 → 0.252, gap
+        #   0.016, far inside survey §7's ≤ 0.10 rule], and the boundary is the road
+        #   itself, so there is no shared edge that could read as a cut-out (survey
+        #   §4.5 condition (a)).
+        M["paving_e"] = PBR(f"{ROOT}/Looks/PavingE",
+                            sc.tex_path("paving_interlock", "diff"),
+                            sc.tex_path("paving_interlock", "nor"),
+                            sc.tex_path("paving_interlock", "rough"),
+                            s["paving_interlock"], tint=(0.94, 0.94, 0.95))
         # steel stairs and landings - [v7 ruling (6)-1] metal_rust is used only as **relief (normal,
         #   roughness)**, while the albedo range is compressed with add/brightness and the rust /
         #   bare-metal colour split is removed with desaturation -> a "painted steel sheet with local rust" look.
@@ -1884,6 +1905,18 @@ def main():
                             sc.tex_path("concrete_floor", "nor"),
                             sc.tex_path("concrete_floor", "rough"),
                             s["concrete_wall"], tint=mp["concrete_tint"])
+        # [GT-108 ③] third tint on the concrete roll — the pier shafts and caps. They
+        #   are a separate pour from the deck they carry, they are vertical (so they
+        #   take run-down streaking the walked slab never gets) and they stand in the
+        #   splash zone of the carriageway. −8 % [computed: eff linear 0.088 → 0.081].
+        #   Kept on the `Concrete` name stem so `_look_spec` still lands on the concrete
+        #   class — the survey's §8-4 lesson is that the name **is** the classifier.
+        M["concrete_pier"] = PBR(f"{ROOT}/Looks/ConcretePier",
+                                 sc.tex_path("concrete_floor", "diff"),
+                                 sc.tex_path("concrete_floor", "nor"),
+                                 sc.tex_path("concrete_floor", "rough"),
+                                 s["concrete_wall"],
+                                 tint=tuple(c * 0.92 for c in mp["concrete_tint"]))
         M["soil"] = PBR(f"{ROOT}/Looks/Soil", sc.tex_path("grass", "diff"),
                         sc.tex_path("grass", "nor"),
                         sc.tex_path("grass", "rough"), 1.2,
@@ -1939,7 +1972,19 @@ def main():
         # [G11] the expanded-metal infill panel at each tower head, built as a real bar
         #   grid (make_pbr has no transparency input, so a literal perforated sheet is
         #   not buildable — the grid is the honest construction, not a fake).
-        M["mesh"] = PBR(f"{ROOT}/Looks/Mesh", diffuse_color=mp["mesh_color"],
+        # [GT-108 ④ · survey §8-4] `Looks/Mesh` → **`Looks/MeshSteel`**. "mesh" matches
+        #   no `_LOOK_RULES` token and no `LOOK_ROLE` key, so this expanded-metal panel
+        #   was falling to **`misc`** — the deliberately conservative bucket for genuinely
+        #   unknown materials — while it is plainly steel. Same failure mode as the four
+        #   §8-4 catalogued and as `PostTimber`/`Looks/Polish` before it: the name **is**
+        #   the classifier. Adding a "mesh" token to `_LOOK_RULES` would reclassify all
+        #   33 scenes, which ledger row 64 ④ scopes out, so the fix is local: the "steel"
+        #   token lands it on metal. Visual delta is the class bevel only, 0.003 → 0.002 m
+        #   — sub-pixel at the judged distance; metal carries no detail normal (nothing
+        #   procured, `_DETAIL_FALLBACK["metal"]` is empty) and stays an OmniPBR constant
+        #   in both classes, so `metallic=0.10` is unaffected.
+        M["mesh"] = PBR(f"{ROOT}/Looks/MeshSteel",
+                        diffuse_color=mp["mesh_color"],
                         metallic=0.10, roughness_const=mp["mesh_rough"])
         M["panel"] = PBR(f"{ROOT}/Looks/Panel", diffuse_color=mp["panel_color"],
                          roughness_const=mp["panel_rough"])
@@ -2002,7 +2047,9 @@ def main():
             BOX(f"{ROOT}/Walk_{i}",
                 ((xa+xb)/2.0, (wk["y0"]+wk["y1"])/2.0,
                  wk["z_top"] - wk["thick"]/2.0),
-                (xb-xa, wk["y1"]-wk["y0"], wk["thick"]), M["paving"], col=True)
+                (xb-xa, wk["y1"]-wk["y0"], wk["thick"]),
+                M["paving"] if i == 0 else M["paving_e"],   # [GT-108 ③]
+                col=True)
         # ── 보차도 경계석 · S06-B (K5 `build_curb_line`) ─────────────────────
         #   The `road_side` argument names **where the carriageway is** relative to the
         #   direction of travel p0→p1; the block body extends the other way. Both lines
@@ -2094,11 +2141,12 @@ def main():
         dp = PARAMS["deck_posts"]
         z1 = dk["z_top"] - dk["thick"]
         for i, px in enumerate(dp["xs"]):
+            # [GT-108 ③] pier tint — see `Looks/ConcretePier`
             CYL(f"{ROOT}/DeckPost_{i}", (px, dp["y"], (dp["z_bot"]+z1)/2.0),
-                dp["r"], z1-dp["z_bot"], M["concrete"], col=True)
+                dp["r"], z1-dp["z_bot"], M["concrete_pier"], col=True)
             BOX(f"{ROOT}/DeckCap_{i}",
                 (px, dp["y"], z1 - dp["cap_h"]/2.0),
-                (dp["cap_sx"], dp["cap_sy"], dp["cap_h"]), M["concrete"])
+                (dp["cap_sx"], dp["cap_sy"], dp["cap_h"]), M["concrete_pier"])
 
     # -------------------------------------------------------------------
     # one stair set (top landing -> A -> mid landing -> B). Serves local and world under prefix.

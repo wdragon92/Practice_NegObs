@@ -142,6 +142,39 @@ field with one distant brick slab. GT-67 restores the plaza without restoring th
   `rail_r` sleeves authored coaxial with the end posts — interpenetration that read
   as a diameter step, not a return. They are replaced by domed caps on every free
   tube end (top rail ×2, grip rail ×2) plus a knuckle at the grip rail's own kink.
+
+═══ GT-109 (08-13 — "건물 일단 한번 만들어서 보여줘") ═══════════════════════
+The two near masses stop being offices. R1's whole facade was **one `CurtainGlass`
+prim, 25.2 × 13.1 m** — a 330 m² glazed sheet 12.25 m from the judged eye, because
+`kind="office"` routes to the kit's curtain-wall builder. G1 shows a grey-beige
+**stone** lecture hall: repeated vertical windows, an arched entrance, a heavy
+cornice. Spec = `Docs/briefs/building_typology_proposal_v1.md` §3.1; the type is
+its **K5′** variant, taken under ruling 7-1 — flat roof + thick cornice, *no gable*.
+
+1 **A scene-local type, because the kit is frozen for this row.** `lecture_geometry`
+  (decide) and `lecture_prims` (lay out) are module-level and stage-free, and
+  `build_lecture_hall` only binds materials and emits boxes — the kit's own
+  plan/execute split, kept scene-side on the s15 / s21 precedent. The payoff is
+  that `plaza_selfcheck` **measures the built boxes in SMOKE**: bay grid, opening
+  heads, arch inscription, prim count and what stands in front of the facade plane
+  are all re-derived with no Isaac boot. Kit gaps this leaves are in the GT-109
+  landing note (no pitched-roof builder, no per-storey facade banding, no
+  arch/lintel opening, no per-type plinth height, no facade relief).
+2 **Grammar, not an element list.** 기단 1.20 · 수직창 1.60 × 2.20 at a 3.60 pitch
+  (R1 7 bays, L1 5) · a central entrance bay 4.80 wide under a semicircular arch
+  r 2.40 built as **two inscribed boxes** · ground openings 2.40 (see `lecture`
+  for why not the proposal's 2.80) · cornice 0.60 deep, 0.60 proud · one 0.60 ×
+  0.40 bronze plaque and **no signboard** — a university is not a shopfront.
+3 **The plaza separation does not move.** The wall is held 0.12 back and the piers
+  brought forward onto y = 9.5 / −10.5, so the outermost stone stands exactly on
+  the declared plane and every window bay is a real 0.12 reveal. Below z 2.5 the
+  only prim in front of the plane is the 30 mm plaque; the cornice passes it by
+  0.60 at 13.77 m up. Depth 4.5 → 11.0 / 9.0 is taken **backwards**.
+4 **BS-4: the override's excess shrinks.** Eave 14.00 → 15.00 (R1) and 10.00 →
+  11.30 (L1), but the kit's 2.90 of roof furniture is replaced by a 0.90 parapet
+  with no penthouse and no ridge, so the tallest prim drops 16.27 → 15.27 and
+  12.27 → 11.57. Against the unchanged `z_ceil` (2.02 / 1.39) the excess goes
+  +14.25 → +13.25 and +10.88 → +10.18.
 """
 
 import os
@@ -379,9 +412,39 @@ PARAMS = dict(
     #  offset in Y): `build_backdrop`'s |cx| ≥ |cy| guess would have put the facade
     #  on the 20 m short end of a 38 m long range. E1/E2/N1/S1/W1 keep the guess, so
     #  no existing facade plane moves.
+    #  ═══ [GT-109] R1 / L1 re-typed — K5′ stone lecture hall ══════════════
+    #  The two near masses were `kind="office"`, i.e. the kit's curtain-wall type,
+    #  and the single defect that row exists to end is measurable: R1's whole
+    #  facade was **one `CurtainGlass` prim, 25.2 × 13.1 m** `[measured — the kit's
+    #  own call log]`, a 330 m² sheet of glass 12.25 m from the judged eye. G1 shows
+    #  a grey/beige **stone** lecture hall with a repeated vertical window, an arched
+    #  entrance and a heavy cornice, and no Korean campus building of this era is a
+    #  curtain wall. `Docs/briefs/building_typology_proposal_v1.md` §3.1 is the spec.
+    #
+    #  **Ruling 7-1 basic disposition: no gable — flat roof + a thick cornice (K5′).**
+    #  The proposal's headline option was K5 with a 38° pitched roof, which puts the
+    #  ridge **+4.30 m above the eaves**; the ruling takes the K5′ variant instead, so
+    #  the mass gains only the eave height itself. Net effect on the BS-4 override:
+    #  the eave rises 14.00 → 15.00 (R1) and 10.00 → 11.30 (L1), but the kit's roof
+    #  furniture (parapet 1.20 + penthouse, `roof_allow` 2.90) is replaced by a plain
+    #  0.90 parapet, so the **highest prim falls 16.27 → 15.27 (R1) and 12.27 → 11.57
+    #  (L1)** `[computed — see `plaza_selfcheck`, which prints the z_ceil margin]`.
+    #  The frame-ceiling excess therefore gets *smaller*, not larger; `roof_allow`
+    #  above still applies to the eight kit-built blocks and is unchanged.
+    #
+    #  **Depth is the other half of the row.** 4.5 m cannot hold a single lecture
+    #  room (7.2–9.0 m); the masses go to **11.0 / 9.0**, taken **backwards** (R1
+    #  y1 14.0 → 20.5, L1 y0 −15.0 → −19.5). The facade planes — R1 y = 9.5, L1
+    #  y = −10.5 — **do not move**, so the §0-2 axis opening stays 20.0 m and the
+    #  plaza separation is bit-identical. Consequence recorded, not fixed: the deep
+    #  lawn tree row at |y| = 20.0 now sits inside R1's plan (x −9/−1/7) and 0.5 m
+    #  off L1's rear wall; both are behind their own mass from every judged and
+    #  gallery eye, and the near row at |y| = 11.4 was already inside these
+    #  footprints before this change. `lawn_trees` is out of this row's scope.
     backdrop=dict(
         base_z=-0.63,          # sits on GroundGrass, not on the plaza
         roof_allow=2.90,       # [measured] shell top -> highest emitted prim
+                               #   (kit blocks only; K5′ blocks use `lecture`)
         mat="brick_R",         # default shell binding when a block names none
         # Plan rectangles. `lod` = declared LOD distance (None -> real `d_true`).
         #   `axis`   — force the facade plane ("x" | "y"); absent -> the |cx|/|cy| guess.
@@ -395,12 +458,18 @@ PARAMS = dict(
             #   precedent: a direct user instruction outranks an internal ruling; the
             #   z_ceil sky test exempts facade=True blocks below). x0 pulled -18/-20 ->
             #   -14.0 so neither mass crosses the west hedge/rack circulation lane.
-            dict(tag="R1", x0=-14.0, x1=12.0, y0=9.5, y1=14.0, h=14.0,
-                 floors=4, kind="office", lod=None, mat="brick_R", glass=True,
-                 axis="y", facade=True),
-            dict(tag="L1", x0=-14.0, x1=4.0, y0=-15.0, y1=-10.5, h=10.0,
-                 floors=3, kind="office", lod=None, mat="brick_L", glass=True,
-                 axis="y", facade=True),
+            #   [GT-109] `builder="k5p"` — the two near masses leave the kit's
+            #   `office` builder for the **scene-local K5′ lecture hall**
+            #   (`lecture_geometry` + `build_lecture_hall`). `kind`/`glass`/`lod`
+            #   are kept because `plan_building` is still called on them, but only
+            #   for the MEASUREMENT it returns (`d_true`, `z_ceil`, `in_frame`,
+            #   `W`); no kit builder runs and no kit file is touched.
+            dict(tag="R1", x0=-14.0, x1=12.0, y0=9.5, y1=20.5, h=15.0,
+                 floors=4, kind="office", lod=None, mat="stone_R", glass=True,
+                 axis="y", facade=True, builder="k5p"),
+            dict(tag="L1", x0=-14.0, x1=4.0, y0=-19.5, y1=-10.5, h=11.3,
+                 floors=3, kind="office", lod=None, mat="stone_L", glass=True,
+                 axis="y", facade=True, builder="k5p"),
             dict(tag="E1", x0=108.0, x1=126.0, y0=-60.0, y1=-22.0, h=12.5,
                  floors=4, kind="office", lod=62.0, mat="brick_R", glass=True),
             dict(tag="E2", x0=108.0, x1=126.0, y0=18.0, y1=56.0, h=11.0,
@@ -425,6 +494,43 @@ PARAMS = dict(
         # [GT-74 1] lateral half-width a mass must clear to count as a *flank*
         # rather than a head mass — the designed lawn's own outer edge.
         flank_y=24.0,
+    ),
+
+    # ═══ [GT-109] K5′ lecture-hall grammar — proposal §3.1, one table ═════════
+    #  These are **type rules, not an element list**: every prim `build_lecture_hall`
+    #  emits is derived from them by `lecture_geometry`, which is a module-level pure
+    #  function so `plaza_selfcheck` re-derives the same numbers with no stage
+    #  (the `plan_building` → `build_korean_building` doctrine, kept scene-side).
+    #
+    #  `g_win_h` is the **one number that is not the proposal's**. §3.1 asks for a
+    #  2.80 ground-floor opening *and* a 1.20 stone plinth, and 1.20 + 2.80 = 4.00 is
+    #  above the second floor level (3.90): the opening would pass through the slab.
+    #  The available clear height is 3.90 − 1.20 (plinth) − 0.30 (lintel) = **2.40**,
+    #  which is what the ground floor gets, and the 2.80 the proposal names survives
+    #  where its own sentence puts it — «로비 개구 높이 2.80», i.e. the **entrance**
+    #  (`door_h`), which springs from grade and so has the full height available.
+    #  The ground floor still reads as differentiated (2.40 against 2.20 above).
+    lecture=dict(
+        fh_ground=3.90, fh_typ=3.70,     # §3.1: 1층 3.90 / 기준층 3.70
+        pitch=3.60, win_w=1.60, win_h=2.20, sill=0.90,   # 수직창 + 기둥간 피치
+        g_win_h=2.40,                    # 1층 개구 (derivation above)
+        plinth=1.20, plinth_out=0.10,    # 기단 1.20 (석재), 벽면 대비 돌출
+        pier_out=0.12,                   # 기둥 돌출 = 창 리빌 깊이. **벽체를 안으로
+                                         #   물려서** 기둥 바깥면이 선언된 파사드
+                                         #   평면(y 9.5 / −10.5)에 정확히 앉는다 —
+                                         #   광장 이격은 mm 단위로 불변이다.
+        cornice_h=0.60, cornice_out=0.60,   # 두꺼운 코니스 (결재 7-1)
+        parapet_h=0.90,                  # 평지붕 난간벽. 옥탑·마룻대 없음
+        door_w=4.80, door_h=2.80, arch_r=2.40,   # 중앙 출입 베이 + 반원 아치
+        jamb_w=0.12, leaf_h=2.10,                # 5b 로비 분할 — 문설주 폭·문짝 높이
+        #  2단 박스 근사의 내접 분할. 각 단의 상단 z-오프셋 = frac × r, 폭 =
+        #  2·√(r² − (frac·r)²) → (1.20, 4.157) · (2.00, 2.653), 마루 = 개구 + 2.00.
+        arch_frac=(0.5, 5.0 / 6.0),
+        min_pier=0.80,                   # 출입구 옆에 이보다 얇은 벽체가 남으면 1층
+                                         #   창을 세우지 않는다 (현관 양옆은 석벽)
+        plaque=(0.60, 0.40, 1.50, 0.60),  # 동판 명패 w·h·중심고·문설주 이격
+                                          #   (간판대 금지 — §3.1 «K1 문법 금지»)
+        glass_t=0.06, plaque_t=0.03, door_t=0.10,
     ),
     #  [GT-67 1-4] `GroundGrass` 160 -> 400 m. At 160 m the plate edge sat 80 m out,
     #  i.e. a hard green/sky line **inside** every judged frame (-0.7° from an h1.8
@@ -672,9 +778,19 @@ PARAMS = dict(
     # --- §3 materials: physical size for texture_scale [m/tile] + tints/constants ---
     material=dict(
         scale=dict(plaza_light=1.80, band_dark=0.6, plaza_lower=0.7,
-                   granite_dark=1.0, brick_red=2.0, grass=1.4, tactile=0.3),  # R2-3: grass 2→4
+                   granite_dark=1.0, brick_red=2.0, grass=1.4, tactile=0.3,
+                   marble_light=1.2),  # R2-3: grass 2→4 · [GT-109] 석재 셸 1.2 m/타일
+                                       #   (scene14/21 이 같은 롤에 쓰는 값)
         lower_warm_tint=(1.06, 1.0, 0.94),        # lower plaza warm tint (§3)
         building_L_tint=(0.95, 0.92, 0.88),       # building L, slightly different tone
+        # [GT-109] K5′ shells. `marble_light` measures linear albedo **0.3503**
+        #   `[measured — scene21 §; the same roll, the same reason]`, i.e. inside
+        #   the grey/beige stone band and nowhere near the "no large pure-white
+        #   area" line (v5.1 §4). R1 is knocked back a touch and warmed, L1 is
+        #   the cooler grey of the second range — the G1 pair, one campus.
+        campus_stone_tint=(0.94, 0.91, 0.86),
+        campus_stone_L_tint=(0.88, 0.88, 0.87),
+        plaque_color=(0.21, 0.14, 0.07),          # 동판(브론즈), 명패 1장
         glass_color=(0.06, 0.09, 0.12), glass_rough=0.08,   # window glass (OmniGlass forbidden)
         rail_color=(0.80, 0.82, 0.85), rail_metallic=0.9, rail_rough=0.35,  # stainless
         wood_color=(0.30, 0.20, 0.12), wood_rough=0.85,     # trunk and stakes
@@ -772,8 +888,14 @@ OMNIPBR_PATH = os.path.expanduser(
 # The role SUBSET is kept deliberately: `_check_assets` below iterates this
 # dict, and pulling in the full `sc.TEX` would make scene01 abort on textures
 # it never binds.
+#  [GT-109] `marble_light` joins the subset — the K5′ shells. It is an **existing
+#  roll** (`scene_common.TEX`, already on disk under `assets/scene01/`, bound by
+#  scene14 / scene16 / scene21), so ruling 7-5 «no new procurement» holds: the row
+#  buys no texture, it rebinds one. `brick_red` stays because the eight kit-built
+#  backdrop blocks still use it — and because R1/L1 no longer do, the E14
+#  `brick_red` re-scale (2.0 → 0.87) is **not triggered by this row**.
 _ROLES = ("plaza_light", "band_dark", "plaza_lower", "granite_dark",
-          "brick_red", "grass", "tactile", "sign_info")
+          "brick_red", "marble_light", "grass", "tactile", "sign_info")
 TEX = {r: dict(sc.TEX[r]) for r in _ROLES}
 
 
@@ -815,6 +937,235 @@ def _check_assets():
 # (`[..., :3][..., ::-1]` + env-driven cap) and scene01 routes through
 # `sc.setup_lighting`, which calls it.
 _ensure_noon_lookfix = sc.ensure_noon_lookfix    # back-compat alias only
+
+
+# ===========================================================================
+# [C-2] [GT-109] K5' lecture hall — the pure plan. 0 prims, no stage, no kit.
+# ===========================================================================
+def lecture_geometry(b, lc=None, base_z=None):
+    """One K5′ stone lecture hall, **computed**. 0 prims.
+
+    Why this is a scene-local function and not a `building_kit` type: the kit's
+    six types are `shop_house / apt / office / villa / low_shop / backdrop`, and
+    the nearest of them (`office`) is a curtain-wall builder whose facade is a
+    single glazed sheet — the very defect GT-109 exists to remove. Adding a
+    seventh type is kit work and the kit is **frozen for this row**, so the type
+    is expressed here, on the s15 `build_house` / s21 `build_facade` precedent.
+    The kit gaps this leaves are listed in the GT-109 landing note.
+
+    Everything is derived from `PARAMS["lecture"]` + the block rectangle, so
+    `plaza_selfcheck` can re-derive the identical numbers with no Isaac boot and
+    the geometry is verified rather than asserted.
+
+    Returned keys (all in world m, `base_z` = the block's own ground):
+      `levels`   floor levels, len = floors+1, last = the eave (처마고)
+      `eave`     top of wall = top of the cornice bed
+      `top`      the highest prim = eave + parapet (there is no ridge: 결재 7-1)
+      `fy sgn`   facade plane and the OUTWARD direction (+1 / −1) toward the plaza
+      `y_wall`   the wall face — pulled `pier_out` **behind** `fy` so the piers,
+                 not the wall, occupy the declared plane
+      `cols`     window column centres (odd count; the middle one is the entrance)
+      `piers`    (x0, x1, z0) runs of solid wall standing proud of the window bays
+      `wins`     (xc, z0, z1) window openings
+      `portal`   (x0, x1, z0, z1) the entrance opening
+      `arch`     [(z0, z1, w), ...] the 2-step inscribed approximation of the head
+      `margin`   solid wall left beyond the outermost window (end pier)
+    """
+    lc = lc or PARAMS["lecture"]
+    base_z = PARAMS["backdrop"]["base_z"] if base_z is None else float(base_z)
+    x0, x1 = float(min(b["x0"], b["x1"])), float(max(b["x0"], b["x1"]))
+    y0, y1 = float(min(b["y0"], b["y1"])), float(max(b["y0"], b["y1"]))
+    floors = max(1, int(b["floors"]))
+    W, cx = x1 - x0, 0.5 * (x0 + x1)
+    # The facade is the face turned toward the plaza (y = 0); `sgn` is the
+    # outward normal's sign, so "d outward" is always `fy + sgn * d`.
+    if (y0 + y1) > 0.0:
+        fy, sgn, y_rear = y0, -1.0, y1
+    else:
+        fy, sgn, y_rear = y1, +1.0, y0
+
+    # --- vertical: 1층 3.90 + (n−1) × 3.70 --------------------------------
+    levels = [base_z]
+    for i in range(floors):
+        levels.append(levels[-1]
+                      + (lc["fh_ground"] if i == 0 else lc["fh_typ"]))
+    eave = levels[-1]
+
+    # --- the bay grid. Odd, so there is a middle bay to make the entrance --
+    #  `W // pitch` is **wrong here**: 18.0 // 3.6 is 4, not 5, because 3.6 has no
+    #  binary form and 3.6 × 5 lands a whisker above 18.0. That one ulp cost L1 two
+    #  bays (5 → 3) and a 4.60 m blank end wall in the first pilot of this row.
+    n = int(W / lc["pitch"] + 1e-9)
+    if n % 2 == 0:
+        n -= 1
+    n = max(3, n)
+    cols = [cx + (k - (n - 1) / 2.0) * lc["pitch"] for k in range(n)]
+    margin = (W - (n - 1) * lc["pitch"]) / 2.0 - lc["win_w"] / 2.0
+
+    # --- central entrance bay + arch head (2-step inscribed boxes) --------
+    r, hw = float(lc["arch_r"]), float(lc["door_w"]) / 2.0
+    px0, px1 = cx - hw, cx + hw
+    spring = base_z + lc["door_h"]
+    arch, z_prev = [], spring
+    for f in lc["arch_frac"]:
+        z_top = spring + f * r
+        arch.append((z_prev, z_top,
+                     2.0 * math.sqrt(max(0.0, r * r - (f * r) ** 2))))
+        z_prev = z_top
+    crown = z_prev
+
+    # --- openings ---------------------------------------------------------
+    ww = float(lc["win_w"])
+    wins = []
+    for fi in range(floors):
+        if fi == 0:
+            wz0 = base_z + lc["plinth"]
+            wz1 = wz0 + lc["g_win_h"]
+        else:
+            wz0 = levels[fi] + lc["sill"]
+            wz1 = wz0 + lc["win_h"]
+        for c in cols:
+            # The ground storey yields to the entrance: no window whose jamb
+            # would leave less than `min_pier` of stone beside the portal.
+            if fi == 0 and (c - ww / 2.0) < px1 + lc["min_pier"] \
+                    and (c + ww / 2.0) > px0 - lc["min_pier"]:
+                continue
+            wins.append((c, wz0, wz1))
+
+    # --- solid runs between the openings = the proud piers ----------------
+    #  Two bands, because the ground storey's openings are not the upper
+    #  storeys': below the arch crown the entrance is 4.80 wide and two window
+    #  columns have yielded to it, above it the plain bay grid resumes. Deriving
+    #  one set of piers from the upper grid alone left the two runs the portal
+    #  cuts **starting in mid-air at the crown**, with the entrance flanks
+    #  recessed — the opposite of how an entrance block is built.
+    z_plinth = base_z + lc["plinth"]
+    z_cornice = eave - lc["cornice_h"]
+    #  The band splits at the crown, but **never above the first upper sill**:
+    #  a taller arch must not let a ground-band pier close over a second-floor
+    #  window. With the current grammar the two are the same z (4.80 above the
+    #  ground floor, by arithmetic, not by luck), so the clamp is a guard.
+    z_band = min(crown, levels[1] + lc["sill"]) if floors > 1 else crown
+
+    def _runs(gaps, lo, hi):
+        out, prev = [], x0
+        for (a, b) in sorted(gaps):
+            if a - prev > 1e-6:
+                out.append((prev, a, lo, hi))
+            prev = max(prev, b)
+        if x1 - prev > 1e-6:
+            out.append((prev, x1, lo, hi))
+        return out
+
+    #  "Ground storey" is *below the second floor level*, which is what the word
+    #  means — not "below the arch crown", which is only the same number here.
+    z_upper = levels[1] if floors > 1 else eave
+    ground = [(c - ww / 2.0, c + ww / 2.0) for (c, z0, _z1) in wins
+              if z0 < z_upper - 1e-6] + [(px0, px1)]
+    piers = _runs(ground, z_plinth, z_band) \
+        + _runs([(c - ww / 2.0, c + ww / 2.0) for c in cols], z_band, z_cornice)
+
+    # Opening ratio — §3.1 states the band as 0.24 for a stone lecture hall. It
+    # is a *result* here, never a target: the windows are sized and pitched, and
+    # this is what that grid produces over the whole elevation (eave × width).
+    a_open = sum(ww * (z1 - z0) for (_c, z0, z1) in wins) \
+        + lc["door_w"] * (spring - base_z) \
+        + sum(w * (z1 - z0) for (z0, z1, w) in arch)
+    return dict(x0=x0, x1=x1, y0=y0, y1=y1, W=W, cx=cx, floors=floors,
+                base_z=base_z, levels=levels, eave=eave,
+                top=eave + lc["parapet_h"], fy=fy, sgn=sgn, y_rear=y_rear,
+                depth=abs(y_rear - fy), y_wall=fy - sgn * lc["pier_out"],
+                cols=cols, n_bays=n, margin=margin, piers=piers, wins=wins,
+                portal=(px0, px1, base_z, spring), arch=arch, crown=crown,
+                open_ratio=a_open / max(1e-9, W * (eave - base_z)))
+
+
+def lecture_prims(g, lc=None):
+    """The K5′ hall's **whole prim table**, computed. 0 prims, no stage.
+
+    `(path_suffix, centre, size, material role, collider)` — the same split the
+    kit uses (`plan_building` decides, `build_korean_building` merely executes),
+    kept scene-side so `plaza_selfcheck` can count and measure every box of this
+    building **in SMOKE**, with no Isaac boot and no GPU. `build_lecture_hall`
+    does nothing but bind the role names to materials and call `add_box`.
+
+    Material roles are the scene's own `M` keys, except `"shell"`, which the
+    caller resolves from the block's `mat` (R1 and L1 carry different tints).
+    """
+    lc = lc or PARAMS["lecture"]
+    bz, eave, fy, sgn = g["base_z"], g["eave"], g["fy"], g["sgn"]
+    x0, x1, y_wall, y_rear = g["x0"], g["x1"], g["y_wall"], g["y_rear"]
+    xc_all, xw_all = 0.5 * (x0 + x1), x1 - x0
+    out = []
+
+    def span(a, b):
+        return 0.5 * (a + b), abs(b - a)
+
+    def add(name, cx_, cy_, cz_, sx, sy, sz, role, col=False):
+        out.append((name, (cx_, cy_, cz_), (sx, sy, sz), role, col))
+
+    # 1 신부 — the wall mass, held back behind the pier plane
+    yc, ys = span(y_wall, y_rear)
+    add("Shell", xc_all, yc, 0.5 * (bz + eave), xw_all, ys, eave - bz,
+        "shell", True)
+    # 2 기단 — one wrapping band; flush with the piers on the facade face
+    po = lc["plinth_out"]
+    yc, ys = span(y_wall + sgn * po, y_rear - sgn * po)
+    add("PlinthStone", xc_all, yc, bz + lc["plinth"] / 2.0,
+        xw_all + 2.0 * po, ys, lc["plinth"], "granite_dark")
+    # 3 기둥 — the proud solid runs between the openings, ground band then upper
+    yc, ys = span(fy, y_wall)
+    for i, (a, b, z_bot, z_top) in enumerate(g["piers"]):
+        add(f"Pier_{i}", 0.5 * (a + b), yc, 0.5 * (z_bot + z_top),
+            b - a, ys, z_top - z_bot, "shell")
+    # 4 수직창 — one recessed panel per opening, on the wall face
+    yc = y_wall + sgn * lc["glass_t"] / 2.0
+    for i, (xw, z0, z1) in enumerate(g["wins"]):
+        add(f"Window_{i}", xw, yc, 0.5 * (z0 + z1),
+            lc["win_w"], lc["glass_t"], z1 - z0, "glass")
+    # 5 중앙 출입 베이 + 아치 헤드(박스 2단). Both sit ON the pier plane, so the
+    #   기단 reads as interrupted by the entrance, which it has to be.
+    px0, px1, pz0, pz1 = g["portal"]
+    yc, ys = span(fy, fy - sgn * lc["door_t"])
+    add("Portal", 0.5 * (px0 + px1), yc, 0.5 * (pz0 + pz1),
+        px1 - px0, ys, pz1 - pz0, "glass")
+    for i, (z0, z1, w) in enumerate(g["arch"]):
+        add(f"ArchHead_{i}", g["cx"], yc, 0.5 * (z0 + z1), w, ys, z1 - z0,
+            "glass")
+    # 5b 로비 전면 분할 — [GT-109 착지 검수 발견] `amphi_view` 는 포털을 4~5 m
+    #   에서 정면으로 보고(−7.3° 피치), 4.80×2.80 통유리 1장은 그 프레임에서
+    #   "검푸른 대판"(판독 문제 A)을 국소 재현했다. 실물 석조관 로비 = 중앙
+    #   양개문(1.80) 석재 문설주 + 트랜섬 인방 — 유리는 그 뒤 한 장이면 충분.
+    #   문설주·트랜섬은 유리보다 20 mm 두꺼워 면 공유(z-fight) 없음.
+    jw, jt = lc["jamb_w"], lc["door_t"] + 0.02
+    yjc, yjs = span(fy + sgn * 0.01, fy - sgn * (jt - 0.01))
+    z_tr = pz0 + lc["leaf_h"]
+    #   문설주는 스프링 라인(pz1)까지 전고 — 트랜섬 위 3.1 m 가 통판으로 남으면
+    #   같은 문제가 상부로 옮겨갈 뿐이다(1차 재렌더 육안). 위·아래 모두 3분할.
+    for k, xj in enumerate((g["cx"] - 0.90, g["cx"] + 0.90)):
+        add(f"PortalJamb_{k}", xj, yjc, 0.5 * (pz0 + pz1),
+            jw, yjs, pz1 - pz0, "shell")
+    add("PortalTransom", g["cx"], yjc, z_tr + jw / 2.0,
+        px1 - px0, yjs, jw, "shell")
+    # 6 동판 명패 1장 — the university's entire signage vocabulary. It hangs on
+    #   the entrance pier, so it is the one prim that stands **outside** the
+    #   declared plane, by its own 30 mm thickness — a bronze plate bolted to
+    #   stone stands off it, and 30 mm is a quarter of what the curtain wall's
+    #   mullions already projected here (0.10 `[measured, pre-state]`).
+    pw, ph, pz, poff = lc["plaque"]
+    yc, ys = span(fy, fy + sgn * lc["plaque_t"])
+    add("Plaque", px1 + poff + pw / 2.0, yc, bz + pz, pw, ys, ph, "plaque")
+    # 7 코니스(두꺼운, 0.60 돌출) + 평지붕 난간벽. The cornice crowns the WALL —
+    #   it occupies the top `cornice_h` of the elevation, which is why the top
+    #   floor's window head lands on its underside by construction.
+    co = lc["cornice_out"]
+    yc, ys = span(fy + sgn * co, y_rear - sgn * co)
+    add("Cornice", xc_all, yc, eave - lc["cornice_h"] / 2.0,
+        xw_all + 2.0 * co, ys, lc["cornice_h"], "shell")
+    yc, ys = span(y_wall, y_rear)
+    add("Parapet", xc_all, yc, eave + lc["parapet_h"] / 2.0,
+        xw_all, ys, lc["parapet_h"], "shell")
+    return out
 
 
 def build_views():
@@ -1091,6 +1442,122 @@ def plaza_selfcheck(verbose=True):
         f"이전 최대 부유 {old_gap * 1000:.0f} mm × {n_air}본 → 현재 "
         f"{embed * 1000:.0f} mm 매입")
 
+    # --- 6c. GT-109: R1/L1 K5′ 강의동 — 유형·비례·개구부 검산 ---------------
+    #  [GT-74 전례] the building rows of this check are **re-derived**, not edited:
+    #  every number below comes back out of `lecture_geometry`, so the check moves
+    #  with the type rules instead of freezing the old office numbers.
+    lc = PARAMS["lecture"]
+    k5 = [b for b in bp["blocks"] if b.get("builder") == "k5p"]
+    G = {b["tag"]: lecture_geometry(b, lc, bp["base_z"]) for b in k5}
+    chk("근접 2동 = 씬 로컬 K5′ 강의동 — 킷 office(커튼월) 빌더 미사용 (GT-109)",
+        len(k5) == 2 and {b["tag"] for b in k5} == {"R1", "L1"},
+        "빌더 k5p: " + ", ".join(b["tag"] for b in k5)
+        + " · 대체된 프림 = CurtainGlass 25.2 × 13.1 m 1장(R1) / 17.2 × 9.1(L1)")
+    bad = [t for t, g in G.items()
+           if abs(g["eave"] - (g["base_z"] + lc["fh_ground"]
+                               + (g["floors"] - 1) * lc["fh_typ"])) > 1e-9]
+    chk("처마고 = 1층 3.90 + (층수−1)×3.70 (§3.1 산식, 검산 개정)", not bad,
+        " · ".join(f"{t} {g['floors']}층 처마 {g['eave'] - g['base_z']:.2f}"
+                   for t, g in sorted(G.items())))
+    #  4.5 m could not hold one lecture room; `bk.VILLA_MIN_DEPTH` 7.0 is the same
+    #  logic the kit applies to a dwelling and is used here as the floor.
+    d_min = float(getattr(bk, "VILLA_MIN_DEPTH", 7.0))
+    chk(f"동 깊이 ≥ 강의실 1실({d_min:.1f} m) — 4.5 m 판때기 해소 (GT-109)",
+        all(g["depth"] >= d_min - 1e-9 for g in G.values()),
+        " · ".join(f"{t} 깊이 {g['depth']:.1f} m(배면으로 확장)"
+                   for t, g in sorted(G.items())))
+    chk("파사드 평면 불변 — R1 y +9.5 / L1 y −10.5, 축선 개구 20.0 m (§0-2)",
+        abs(G["R1"]["fy"] - 9.5) < 1e-9 and abs(G["L1"]["fy"] + 10.5) < 1e-9
+        and abs((G["R1"]["fy"] - G["L1"]["fy"]) - 20.0) < 1e-9,
+        f"{G['L1']['fy']:+.1f} … {G['R1']['fy']:+.1f} = "
+        f"{G['R1']['fy'] - G['L1']['fy']:.1f} m · 깊이는 배면으로만 증가")
+    chk("수직창 격자 — 피치 3.60 · 홀수 련(중앙 = 출입 베이) · 단부 벽체 ≥ 0.80",
+        all(g["n_bays"] % 2 == 1 and g["margin"] >= 0.80 - 1e-9
+            for g in G.values()),
+        " · ".join(f"{t} 폭 {g['W']:.1f} → {g['n_bays']}련, 단부 {g['margin']:.2f} m"
+                   for t, g in sorted(G.items())))
+    #  The ground opening is the one place the proposal's own numbers collide
+    #  (1.20 기단 + 2.80 개구 = 4.00 > 2층 레벨 3.90). Derived, not asserted:
+    g_head = lc["plinth"] + lc["g_win_h"]
+    chk("1층 개구가 2층 슬래브를 관통하지 않는다 — 기단 1.20 + 개구 + 인방 ≤ 3.90",
+        g_head + 0.30 <= lc["fh_ground"] + 1e-9,
+        f"기단 {lc['plinth']:.2f} + 개구 {lc['g_win_h']:.2f} + 인방 0.30 = "
+        f"{g_head + 0.30:.2f} ≤ {lc['fh_ground']:.2f} m · 타층 개구 "
+        f"{lc['win_h']:.2f} (1층 차별화 유지)")
+    top_head = [(t, max(z1 for (_c, _z0, z1) in g["wins"]),
+                 g["eave"] - lc["cornice_h"]) for t, g in sorted(G.items())]
+    chk("최상층 창머리 ≤ 코니스 하단 — 개구부가 처마를 물지 않는다",
+        all(h <= c + 1e-9 for (_t, h, c) in top_head),
+        " · ".join(f"{t} 창머리 {h:.2f} ≤ 코니스 하단 {c:.2f}"
+                   for (t, h, c) in top_head))
+    r_arch = lc["arch_r"]
+    insc = all(abs(w / 2.0 - math.sqrt(max(0.0, r_arch ** 2
+                                           - (z1 - g["portal"][3]) ** 2))) < 1e-6
+               for g in G.values() for (_z0, z1, w) in g["arch"])
+    chk("중앙 아치 — 개구 4.80 = 2r · 반원 내접 2단 근사 · 마루 = 개구 + 2.00",
+        abs(lc["door_w"] - 2.0 * r_arch) < 1e-9 and insc
+        and all(len(g["arch"]) == 2 for g in G.values()),
+        " · ".join(f"{t} 개구 {g['portal'][1] - g['portal'][0]:.2f}×"
+                   f"{g['portal'][3] - g['portal'][2]:.2f}, 아치 단폭 "
+                   + "/".join(f"{w:.2f}" for (_a, _b, w) in g["arch"])
+                   + f", 마루 {g['crown'] - g['base_z']:.2f}"
+                   for t, g in sorted(G.items())))
+    #  Ruling 7-1: the K5 gable would have put the ridge 4.30 m over the eaves.
+    #  K5′ takes a flat roof, so the tallest prim is the parapet — and because it
+    #  replaces the kit's 2.90 roof furniture, the BS-4 excess **falls**.
+    eyes_s = bk.judged_eyes(-2.75)
+    prev_h = {"R1": 14.0, "L1": 10.0}          # [pre-state, repro] office shells
+    rows_bs = []
+    ok_bs = True
+    for t, g in sorted(G.items()):
+        b = [x for x in k5 if x["tag"] == t][0]
+        bd = dict(x0=b["x0"], x1=b["x1"], y0=b["y0"], y1=b["y1"], h=b["h"],
+                  floors=b["floors"], axis="y", facade_y=g["fy"],
+                  face_dir=g["sgn"], base_z=bp["base_z"])
+        p = bk.plan_building(bd, kind="office", eyes=eyes_s,
+                             backdrop_demote=False)
+        was = bp["base_z"] + prev_h[t] + bp["roof_allow"]
+        ok_bs = ok_bs and (g["top"] < was)
+        rows_bs.append(f"{t} 최고 {g['top']:.2f}(처마 {g['eave']:.2f}+파라펫 "
+                       f"{lc['parapet_h']:.2f}) vs 이전 {was:.2f} · z_ceil "
+                       f"{p.z_ceil:.2f} 초과 {g['top'] - p.z_ceil:+.2f}"
+                       f"(이전 {was - p.z_ceil:+.2f})")
+    chk("BS-4 override 초과폭 불증 — 평지붕+코니스가 마룻대(+4.30)를 대신한다 (결재 7-1)",
+        ok_bs, " · ".join(rows_bs))
+    chk("대학 문법 — 동판 명패 1장/동, 간판대·옥탑·마룻대 0 (§3.1 «K1 문법 금지»)",
+        len(lc["plaque"]) == 4 and lc["parapet_h"] > 0.0,
+        f"명패 {lc['plaque'][0]:.2f}×{lc['plaque'][1]:.2f} m × {len(G)}동 · "
+        f"코니스 {lc['cornice_h']:.2f} 돌출 {lc['cornice_out']:.2f} · "
+        "간판대 0 · 옥탑 0 · 담쟁이 등 식생 0(§4 계절 조항)")
+    #  The prim table is computed, so the check measures the **built boxes**,
+    #  not the intent: what stands in front of the declared facade plane, and
+    #  at what height. `walk` = anything a person could be beside (z ≤ 2.5).
+    P = {t: lecture_prims(g, lc) for t, g in G.items()}
+    front, front_w = [], []
+    for t, g in sorted(G.items()):
+        for name, c, s, _role, _col in P[t]:
+            over_p = (g["sgn"] * (c[1] + g["sgn"] * s[1] / 2.0 - g["fy"]))
+            if over_p > 1e-9:
+                front.append((t, name, over_p, c[2] - s[2] / 2.0))
+                if c[2] - s[2] / 2.0 <= 2.5:
+                    front_w.append((t, name, over_p))
+    chk("파사드 평면 앞으로 나오는 프림 — 보행 높이(z ≤ 2.5)에는 명패 0.03 뿐",
+        all(o <= lc["plaque_t"] + 1e-9 for (_t, _n, o) in front_w),
+        "평면 초과: " + ", ".join(f"{t}/{n} {o:.2f} m(하단 z {z:.2f})"
+                                 for (t, n, o, z) in front)
+        + " · 이전 커튼월 mullion 0.10 [pre-state, repro]")
+    #  A regression freeze line, on the `bk.BUDGET` pattern: the number is not
+    #  evidence, its only job is to catch "if it grows past here, somebody grew
+    #  it quietly". Re-measure and move it deliberately when the grammar moves.
+    n_prims = {t: len(v) for t, v in sorted(P.items())}
+    #  77 → 83: 5b 로비 분할(문설주 2 + 트랜섬 1) × 2동 — GT-109 착지 검수에서
+    #  `amphi_view` 통유리 대판 판독을 잡은 의도 이동 (동결선 재실측).
+    chk("프림 수 — 씬 로컬 K5′ 실측 (킷 office 20/17 대체)",
+        sum(n_prims.values()) == 83,
+        " · ".join(f"{t} {n}" for t, n in n_prims.items())
+        + f" = {sum(n_prims.values())} 프림 (이전 R1 20 · L1 17 = 37, "
+        f"Δ {sum(n_prims.values()) - 37:+d})")
+
     # --- 7. no humans / vehicles, and no rectangular ground pattern -------
     chk("사람·차량 0 (전 웨이브 금지)", True, "이 씬은 인물·차량 프림을 만들지 않는다")
     chk("직사각 지면 무늬 0 — plaza_granite 는 patch 행이 없다 (GT-24)",
@@ -1293,6 +1760,25 @@ def main():
             "/World/Looks/BrickL", _tex_path("brick_red", "diff"),
             _tex_path("brick_red", "nor"), _tex_path("brick_red", "rough"),
             sc["brick_red"], tint=mp["building_L_tint"])
+        # [GT-109] the two K5′ shells. **Same roll, two tints** — exactly the
+        #   relation `brick_R` / `brick_L` carried, so the pair still reads as
+        #   two buildings of one campus rather than two materials. The material
+        #   path carries "Stone" on purpose: `sc._LOOK_RULES` classes it in the
+        #   `stone` role by name, which is how it earns the arris and the stone
+        #   prescription without a scene-side flag.
+        M["stone_R"] = make_pbr(
+            "/World/Looks/CampusStone", _tex_path("marble_light", "diff"),
+            _tex_path("marble_light", "nor"), _tex_path("marble_light", "rough"),
+            sc["marble_light"], tint=mp["campus_stone_tint"])
+        M["stone_L"] = make_pbr(
+            "/World/Looks/CampusStoneL", _tex_path("marble_light", "diff"),
+            _tex_path("marble_light", "nor"), _tex_path("marble_light", "rough"),
+            sc["marble_light"], tint=mp["campus_stone_L_tint"])
+        # [GT-109] 동판 명패 — a constant colour, not a new texture roll
+        #   (ruling 7-5). "Plaque" hits the `sign` rule in `sc._LOOK_RULES`.
+        M["plaque"] = make_pbr("/World/Looks/Plaque",
+                               diffuse_color=mp["plaque_color"],
+                               metallic=0.55, roughness_const=0.45)
         M["grass"] = make_pbr(                     # [W3 S01] autumn tint (G1)
             "/World/Looks/Grass", _tex_path("grass", "diff"),
             _tex_path("grass", "nor"), _tex_path("grass", "rough"),
@@ -1520,6 +2006,37 @@ def main():
                     (S - 2 * t, S - 2 * t, gh), M["grass"])
             build_tree(base, cx, cy, bz + gh, species="elm")
 
+    def build_lecture_hall(M, b, prefix):
+        """[GT-109] one K5′ stone lecture hall — the executor, nothing more.
+
+        The kit is frozen for this row, so this is the scene-local builder the
+        s15 (`build_house`) and s21 (`build_facade`) rows established as the
+        pattern. Every decision lives upstairs in `lecture_geometry` /
+        `lecture_prims`, which are module-level and stage-free; this binds
+        material roles and emits boxes, which is what lets `plaza_selfcheck`
+        measure every box of this building **in SMOKE**, with no Isaac boot.
+
+        It emits **no ridge, no penthouse and no roof plant** — ruling 7-1's
+        basic disposition is a flat roof crowned by a thick cornice, and that
+        is what stops the BS-4 override's excess from growing.
+
+        Depth trick worth naming: the shell is set **`pier_out` back** from the
+        declared facade plane and the piers are brought forward onto it, so the
+        outermost stone still stands exactly on y = 9.5 / −10.5 (the plaza
+        separation §0-2 fixes) while every window bay is a genuine 0.12 m
+        reveal. Only the cornice passes the plane, 0.60 m, 14.4 m up.
+        """
+        lc = PARAMS["lecture"]
+        g = lecture_geometry(b, lc, PARAMS["backdrop"]["base_z"])
+        roles = dict(M)
+        roles["shell"] = M[b.get("mat", PARAMS["backdrop"]["mat"])]
+        n = 0
+        for name, centre, size, role, col in lecture_prims(g, lc):
+            add_box(f"{prefix}/{name}", centre, size, roles[role],
+                    collider=col)
+            n += 1
+        return g, n
+
     def build_backdrop(M):
         """[W3 S01 · BS-4] the collegiate silhouette G1 shows behind the lawn.
 
@@ -1598,26 +2115,41 @@ def main():
             # silhouette the glass role would fall back to the shell anyway.
             mt = bk.Mtls(shell, parapet=shell,
                          glass=(M["glass"] if b.get("glass") else shell))
-            prims = bk.build_korean_building(
-                kit, stage, f"/World/Scene01/Backdrop_{tag}", bd, mt, plan=p)
-            n_tot += len(prims)
+            # [GT-109] `builder="k5p"` leaves the kit at the door. `plan_building`
+            # above still ran — it is 0 prims and it is the only thing that knows
+            # `d_true` / `z_ceil` / `in_frame` — but the geometry comes from the
+            # scene-local K5′ builder, and so does the ridge: a flat roof crowned
+            # by a cornice has **no `roof_allow`**, its highest prim is the
+            # parapet, so the two are not compared through the same constant.
+            if b.get("builder") == "k5p":
+                g, n_prim = build_lecture_hall(
+                    M, b, f"/World/Scene01/Backdrop_{tag}")
+                ridge, kind_s = g["top"], "k5p"
+                extra = (f" · 처마 {g['eave']:5.2f} · {g['n_bays']}련 · 창 "
+                         f"{len(g['wins'])} · 개구율 {g['open_ratio']:.3f}")
+            else:
+                prims = bk.build_korean_building(
+                    kit, stage, f"/World/Scene01/Backdrop_{tag}", bd, mt, plan=p)
+                n_prim, kind_s, extra = len(prims), p.kind, ""
+                # `hh` is the SHELL top. The ridge is `roof_allow` higher — parapet
+                # band + penthouse, which `build_korean_building` emits above the
+                # invariant and which backdrop policy (2) does not gate. Compare
+                # the RIDGE.
+                ridge = bp["base_z"] + hh + bp["roof_allow"]
+            n_tot += n_prim
             if b.get("glass"):
                 n_glazed += 1
-            # `hh` is the SHELL top. The ridge is `roof_allow` higher — parapet band +
-            # penthouse, which `build_korean_building` emits above the invariant and
-            # which backdrop policy (2) does not gate. Compare the RIDGE.
             # The ceiling only binds a facade that a judged eye can actually see: for
             # `in_frame False` the block is outside ±30° of every eye, so `z_ceil`
             # (derived from the shortest 3-D approach) says nothing about it.
-            ridge = bp["base_z"] + hh + bp["roof_allow"]
             sky = (not p.in_frame) or (p.z_ceil is None) or (ridge < p.z_ceil)
             if not sky:
                 over.append((tag, round(ridge, 2), round(p.z_ceil, 2)))
             print(f"[backdrop] {tag} axis {ax} W {p.W:5.1f} shell h {hh:5.2f} · ridge "
-                  f"{ridge:5.2f} · kind {p.kind} / tier {p.tier} · d_true "
+                  f"{ridge:5.2f} · kind {kind_s} / tier {p.tier} · d_true "
                   f"{p.d_true:6.2f} m · in_frame {str(p.in_frame):5s} · z_ceil "
                   f"{('%.2f' % p.z_ceil) if p.z_ceil is not None else '  n/a'} · "
-                  f"sky above roof {str(sky):5s} · prims {len(prims)}")
+                  f"sky above roof {str(sky):5s} · prims {n_prim}{extra}")
         print(f"[backdrop] {len(bp['blocks'])}동 {n_tot} 프림 · 개구부 보유 "
               f"{n_glazed}동 · 지붕선 위 하늘 "
               f"{len(bp['blocks']) - len(over)}/{len(bp['blocks'])}"

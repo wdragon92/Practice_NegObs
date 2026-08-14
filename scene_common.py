@@ -487,11 +487,11 @@ LOOK_CLASS = {
     #   but that ground is `soil`/`veg`, and neither is touched here.
     "paving":   dict(bevel=0.006, sat=1.00, mdl="ground", patch=0.0, detail=True,
                      tex="paving_interlock", bump=1.8, alb_max=0.34,
-                     tri_dither=0.50, det_scale=4.0,
+                     tri_dither=0.50, det_scale=4.0, macro_wl=0.55,
                      tex_alts=("stone_flag", "paving_interlock", "plaster")),
     "concrete": dict(bevel=0.020, sat=1.00, mdl="ground", patch=0.0, detail=True,
                      weather=_W_STRUCT, tex="concrete_floor", bump=2.0,
-                     alb_max=0.34, tri_dither=0.50, det_scale=4.0,
+                     alb_max=0.34, tri_dither=0.50, det_scale=4.0, macro_wl=0.55,
                      tex_alts=("concrete_floor", "concrete_wall", "plaster")),
                      # concrete_wall(c@1/16 0.0345) → concrete_floor(0.129, x3.7).
                      # Diagnosis: if the local contrast of the promoted texture is low, promotion does not bring out the grain.
@@ -503,6 +503,7 @@ LOOK_CLASS = {
                                   wrough=0.15)),
     "stone":    dict(bevel=0.004, sat=0.66, mdl="ground", patch=1.0, detail=True,
                      weather=_W_STONE, tex="stone_flag", bump=1.5, alb_max=0.34,
+                     macro_wl=0.55,
                      tex_alts=("stone_flag", "marble_light")),
                      # Bevel [no basis] conservatively lowered
                      # alb_max: granite / 화강석 cladding reflectance 0.20-0.35, so the
@@ -544,14 +545,32 @@ LOOK_CLASS = {
     # specular_level is stated explicitly and shadow contrast is restored through normal strength.
     "asphalt":  dict(bevel=0.006, sat=0.90, mdl="ground", patch=0.45, detail=True,
                      tex="asphalt", spec=0.20, bump=2.1, alb_min=0.10,
-                     patch_wl=1.8, macro=0.06, tri_dither=0.55,
+                     patch_wl=1.8, macro=0.06, macro_wl=0.55, tri_dither=0.55,
                      rough_noise=0.34, det_scale=3.0),
-    # The 12 mm nosing is the **top of the IBC 1.6-14.3 mm range**. No domestic rule exists (exhaustively checked).
-    "nosing":   dict(bevel=0.012, sat=1.00, mdl="ground", patch=0.0, detail=True,
+    # [GT-114 ①] This class is now the **non-slip strip only** — GT-113 W6 moved
+    # tread/step names to the concrete family, so the 12 mm IBC nosing radius (a
+    # *tread-nose* figure) no longer belongs here: on a 6 mm strip it rolled the whole
+    # normal ("반투명 젤리"). 3 mm ≈ strip thickness / 2. Promotion + detail open the
+    # grain path for the drop edge's primary cue class; alb_max 0.50 backstops the
+    # pastel-lemon default this row also retires in `build_nosing`.
+    "nosing":   dict(bevel=0.003, sat=1.00, mdl="ground", patch=0.0, detail=True,
+                     tex="concrete_floor", det_scale=4.0, alb_max=0.50,
+                     macro_wl=0.55,
                      weather=dict(grime=0.0, splash=0.0, wrough=0.10)),
+    # [GT-114 ②] The curb promotion path — the GT-108 lever-1 carry-over item. A
+    # constant-colour curb could never promote (no tex role), so the second most
+    # important drop-edge cue class was the least treated surface in the corpus.
     "curb":     dict(bevel=0.010, sat=1.00, mdl="ground", patch=0.0, detail=True,
+                     tex="concrete_floor", det_scale=3.0, alb_max=0.34,
+                     macro_wl=0.55,
+                     tex_alts=("concrete_floor", "granite_dark"),
                      weather=_W_EDGE),   # Vertical curb R=10 (directive 321, figure 2.17)
-    "metal":    dict(bevel=0.002, sat=1.00, mdl="omni",   detail=True),
+    # [GT-114 ④] alb_max 0.50 — first value to flow through the GT-113 W1 omni wire.
+    # Rails at 0.818 / lamp posts at 0.877 linear were the corpus' pure-white metal
+    # band (galvanised/powder-coated reality is 0.35-0.55 diffuse). Painted bands,
+    # signs and tactile stay constant — they are different classes.
+    "metal":    dict(bevel=0.002, sat=1.00, mdl="omni",   detail=True,
+                     alb_max=0.50),
     # The library has only one dark wood (wood_dark, linear luminance 0.061), so bright
     # wood gets a large multiplier. Wood grain is strongly directional and stays quiet under
     # amplification, so the cap is raised for this class only.
@@ -589,8 +608,11 @@ LOOK_CLASS = {
     # **Warning (survey)**: the current intended colour of 0.72-0.78 maps to display sRGB 221-229 and clips at
     # the top of the tone mapping, so even with a texture the local standard deviation returns to 0.
     # The intended albedo must be lowered to 0.55-0.62 before promotion for any effect (TODO: apply after procurement).
+    # [GT-114 ③] alb_max 0.62 — the code's own TODO ("must be lowered to 0.55-0.62
+    # before promotion for any effect"), applied at its conservative top now that the
+    # snow texture is procured. C1's w80 81.6 % / flat_gnd 88.3 is this ceiling's case.
     "snow":     dict(bevel=0.000, sat=1.00, mdl="ground", patch=1.0, detail=True,
-                     tex="snow", bump=1.3),
+                     tex="snow", bump=1.3, alb_max=0.62),
     "misc":     dict(bevel=0.003, sat=1.00, mdl="omni",   detail=False),
 }
 
@@ -2014,7 +2036,13 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
     # Constant-colour mode has no texture high frequencies, so a strong macro reads as blotching.
     sh.CreateInput("macro_amp_a", F).Set(
         float(spec.get("macro", 0.07 if diff is None else 0.12)))
-    sh.CreateInput("macro_wavelength_a", F).Set(14.0)
+    # [GT-114 ⑤] The 14 m literal becomes a per-class spec ("macro_wl"). RTX probe:
+    # the slope metric's effective band is ground-scale 1 cm-75 cm (centre 2-10 cm);
+    # every albedo-modulation knob sat above it (14 m = 19×), which is the mechanical
+    # reason flat% closed while slope did not. Ground paving classes state 0.55 m —
+    # in-band with a 3-6 % amp; a class that states nothing keeps 14.0 = bit-identical.
+    sh.CreateInput("macro_wavelength_a", F).Set(
+        float(spec.get("macro_wl", 14.0)))
     sh.CreateInput("desat_bright_a", F).Set(0.0 if diff is None else 0.30)
     sh.CreateInput("saturation_a", F).Set(
         _effective_sat(spec, diff, base_color))
@@ -2254,8 +2282,13 @@ def build_arc_steps(stage, prefix, cx, cy, r_in, r_out, a0_deg, a1_deg, seg,
     return prims
 
 
+# [GT-114 ①] Default colour (0.85,0.72,0.10) → (0.60,0.48,0.10): linear luminance
+# 0.703 → 0.478. The old value tone-mapped to a pastel lemon (display ≈ (0.94,0.88,
+# 0.35)) that no worn safety-yellow strip reaches; the audit band is 0.40-0.50
+# [derived]. Scenes that pass their own colour are untouched here — the nosing-class
+# alb_max 0.50 band catches those at material creation instead.
 def build_nosing(stage, prefix, x0, y0, y1, riser, tread, n, base_z=0.0,
-                 mtl=None, color=(0.85, 0.72, 0.10), width=0.05, proud=0.001,
+                 mtl=None, color=(0.60, 0.48, 0.10), width=0.05, proud=0.001,
                  riser_list=None, tread_list=None, z_top=0.0):
     """Nosing anti-slip strip. A constant-colour box strip on the front edge (+X end) of each tread.
     With mtl=None a constant-colour material is created internally from color. width = strip width (X), proud = protrusion.

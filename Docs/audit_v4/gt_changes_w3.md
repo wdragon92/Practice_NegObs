@@ -2476,3 +2476,26 @@ beauty_overview — B동 매스가 우측 근경 진입[예측대로], 골목 �
 위험 기하·보행면·낙차 에지 접촉 0. 파일럿 렌더 1~2씬(s21 + s13) A/B 후 확산(§2.3).
 Round: GPU 가용 시 `260814_w4_r1wiring`(RT 파일럿 + PT 판정). baseline 최신 라운드.
 **Status: OPEN (선신고 — 시공 중)**
+
+## 70. GT-114 — R2 클래스 재보정 1차: 낙차 에지 단서 클래스(nosing·curb) + snow·metal 밴드 + macro 파장 (선신고)
+
+**Authority**: 08-14 사용자 3일 자율 위임(행 69 동일 발화 — "drop-off 계열에 집중").
+설계 원본 = 감사 §2.2(클래스 처방 공백) + RTX 조사 레버 0(macro_wavelength 대역) —
+GT-108 레버1 2차 이월 중 curb 항의 정식 처리.
+**Scope**(선신고 — LOOK_CLASS 표·build_nosing 기본색·macro_wl 스펙화, 전부 R-2):
+① **nosing**: tex="concrete_floor" 승격 경로 개통 + det_scale 4.0 + alb_max 0.50 +
+   bevel 0.012→0.003(W6 으로 tread/step 이 concrete 로 분리된 뒤라 이 클래스는 논슬립
+   스트립 전용 — 두께 6 mm 부재에 12 mm 반경은 형상 왜곡. IBC 12 mm 는 답면 코 근거였음).
+   `build_nosing` 기본색 (0.85,0.72,0.10)→(0.60,0.48,0.10) — 선형휘도 0.703→0.478
+   (감사 권고 0.40~0.50 대역 [derived], 파스텔 레몬 해소). 폭 통일(KS 50 mm)은 기하라
+   별행 이월. ② **curb**: tex="concrete_floor"+tex_alts(granite_dark)+det_scale 3.0+
+   alb_max 0.34 — 연석 승격 경로 개통(이월 항 본체). ③ **snow**: alb_max 0.62(코드 자필
+   TODO 0.55~0.62 상단 — C1 순백 81.6% 대응) + patch 유지. ④ **metal**: alb_max 0.50 —
+   W1 배선 경유 첫 발현(난간 0.818·등주 0.877·순백 계열 클램프. 도장 밴드·사인은 별
+   클래스라 불변). ⑤ **macro_wavelength_a** 14.0 하드코딩 → spec "macro_wl" 스펙화 +
+   paving/concrete/asphalt/stone 에 0.55 부여(RTX 실측: slope 실효 대역 지상 2~10 cm,
+   14 m 는 19배 위 — 레버 0). 타 클래스 기본 14.0 유지 = 비트동일.
+**GT 판정**: R-2 순수(기하 불변 — geom_invariance 33/33 증빙 예정). 낙차 에지 재질만
+접촉, 기하·보행면 불변. 파일럿 렌더(s13·s16·s21·C1·D4) 후 확산 판정. Round:
+`260814_w4_r1r2pilot`(R0 프로브 후 GPU 대기열). baseline 최신 라운드.
+**Status: OPEN (선신고 — 시공 중)**

@@ -636,9 +636,11 @@ LOOK_CLASS = {
 #   (지면 2~10 cm) 중앙. 채택(클래스 기본 승격)은 파일럿 실측 후 별행.
 MICRO_V1 = os.environ.get("NEGOBS_MICRO_V1", "") == "1"
 if MICRO_V1:
+    # 진폭은 파일럿 반복용으로 env 재정의 허용(기본 0.06 = RMS ≈ 3 %).
+    _MICRO_AMP = float(os.environ.get("NEGOBS_MICRO_AMP", "0.06"))
     for _c in ("asphalt", "paving", "concrete", "stone", "soil", "gravel",
                "turf"):
-        LOOK_CLASS[_c].update(micro=0.06, micro_wl=0.06)
+        LOOK_CLASS[_c].update(micro=_MICRO_AMP, micro_wl=0.06)
 
 PHYS_V1 = os.environ.get("NEGOBS_PHYS_V1", "") == "1"
 if PHYS_V1:

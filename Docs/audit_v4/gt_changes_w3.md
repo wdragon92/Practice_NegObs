@@ -2851,4 +2851,16 @@ micro/micro_wl 배선 ③ `NEGOBS_MICRO_V1=1` 팔 — 광물·입상 6클래스 
 micro 0.06(퍼린 2레벨 RMS ≈ 3 %) 주입, 기본 OFF 비트동일.
 **GT 판정**: R-2 팔. 파일럿 렌더 3씬(s13·s16·s03 — physpilot 과 동일 기준선) ON 팔
 ps_slope A/B. 채택(기본 승격)은 별행 — 전 코퍼스 룩 변화라 실측 후 판단.
-**Status: OPEN (선신고 — 시공 중)**
+**§4 착지기록 + 판정** (2026-08-16, rounds `260816_w4_micropilot`(3씬 44컷) ·
+`micropilot2`(s13, 진폭 0.15) · `micro_dnoff`/`base_dnoff`(s13 디노이저 OFF 2×2
+프로브)): **기각 — 2점 부정 결과 + 원인 특정.** ① 진폭 0.06(RMS≈3 %, 감사 제안값):
+slope 전 컷 ±0.03 · clipHi 불변. ② 진폭 0.15(RMS≈7.5 %): slope ±0.06, MAD 0.006~
+0.008 로 **노이즈가 픽셀에 실재하는데도** slope 무반응. ③ 2×2 분해 — 디노이저 OFF
+에서 micro ON≈OFF(C≈D, h0.3_d2 는 오히려 열세): **주입 옥타브는 디노이저와 무관하게
+slope 를 못 움직인다** — 감사 제안("대역 내 3 % RMS 주입이 slope·flat_gnd 를 닫는다")
+는 성립하지 않음. ④ 부수 확정: **디노이저 자체의 slope 비용 +0.09~+0.15 실측**(D vs
+A, 전 컷 일관 — `optixDenoiser/enabled=false`). R0 의 "디노이저 영향 ≈0" 판정은
+blendFactor 축 토글이었어서 enabled 축과 결론이 다르다 — **slope 잔여 격차의 실소유는
+재질이 아니라 렌더 설정(디노이저) 층**으로 이동. 단 디노이저 OFF 는 노이즈 트레이드
+오프가 있어 채택은 spp 예산과 함께 사용자 판정. v1.11 노브는 개방 존치(기본 항등),
+MICRO_V1 팔 존치·값 승격 없음. **Status: CLOSED (기각 — 디노이저 축 이관)**

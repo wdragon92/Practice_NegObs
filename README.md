@@ -45,11 +45,12 @@ scenes/batch1/                  배치1 12씬 (+ batch1_common.py)
 scenes/archive_v3/              v5에서 교체된 구 씬
 assets/                         텍스처·HDRI·MDL — 바이너리는 미추적, 다운로드 스크립트로 재현
 assets/signs/                   표지판 텍스처 + 생성기 gen_signs.py
-look_check/sceneNN/<round>/     렌더 산출물 (미추적, ~11GB)
+look_check/sceneNN/<round>/     렌더 산출물 (미추적, 실측 ~33GB — _experiments 8.4GB 포함)
 look_refs/                      나노바나나 레퍼런스 이미지·프롬프트
 scripts/                        측정·검증 도구 + 시트 생성기
-scripts/rounds/                 완료된 렌더 체인 보관
-run_*.sh (루트)                 진행 중 렌더 체인 — 종료 후 scripts/rounds/ 로 이동
+scripts/rounds/                 완료된 렌더 체인 보관 (일회성 체인은 종료 후 여기로)
+run_p2_all33.sh (루트)          상설 렌더 드라이버 — 라운드 태그를 인자로 받는 파라미터화
+                                드라이버라 루트 고정(문서가 줄 번호로 인용: s04 조사 §8-9)
 Docs/                           문서 → Docs/INDEX.md
 ```
 

@@ -1,0 +1,1 @@
+legacy/nanobanana_batch1_geometry_map.md

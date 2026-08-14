@@ -37,6 +37,6 @@
 
 ```bash
 sudo reboot   # 드라이버 재로드
-cd ~/Desktop/work_sy/Practice_NegObs && bash run_finalize_v3.sh   # 60~75분
+cd ~/Desktop/work_sy/Practice_NegObs && bash scripts/rounds/run_finalize_v3.sh   # 60~75분
 ```
 이후 남는 것: scene10 계곡 바닥·난간(소수정), scene15 beauty 카메라(부차), scene06/08/13 실내 PT 판정 결과에 따른 뷰 정리.

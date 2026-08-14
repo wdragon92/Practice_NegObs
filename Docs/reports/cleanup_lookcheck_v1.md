@@ -398,7 +398,7 @@ scene17 10.2, scene19 11.1) with identical values. Three runs, one number.
 - **`scenes/` is entirely tracked.** All 21 `scenes/main/scene*.py` and 12
   `scenes/batch1/scene*.py` are in `git ls-files`; `assets`, `look_check`,
   `scene_common.py` and the four `*_kit.py` entries are **tracked symlinks** to the repo
-  root (created by `scripts/reorg_scenes_main.sh`) and resolve correctly. Nothing untracked.
+  root (created by `scripts/rounds/reorg_scenes_main.sh`) and resolve correctly. Nothing untracked.
 - `scenes/archive_v3/` — 7 tracked v3 scene files, already segregated. **Not touched.**
 - `scripts/spike_realism.py` matched the `spike*` pattern but is **tracked** and is the
   live driver for `scripts/rounds/run_p1_spike.sh` — a tool, not debris. Left alone.

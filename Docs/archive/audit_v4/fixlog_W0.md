@@ -1,3 +1,5 @@
+> [ARCHIVED 2026-08-14 · 2차 이동] 인용 0 실측(문서 상호참조 인벤토리, repo_reorg_v1) · 활성 큐 무접촉 확인 — 원경로 Docs/audit_v4/fixlog_W0.md
+
 # fixlog_W0 — v6 공통 결함 수정 (scene_common + assets 전담)
 
 담당 : W0 (scene_common.py + assets 텍스처 단독, **씬 파일 무수정**)

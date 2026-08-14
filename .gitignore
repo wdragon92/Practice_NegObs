@@ -15,7 +15,8 @@ runs/
 wandb/
 *.log
 
-# Render outputs (regenerated per run, ~12GB after the 2026-07-30 cleanup).
+# Render outputs (regenerated per run; 실측 33GB @2026-08-14 — _experiments 8.4GB 단독 최대,
+# 정리 여부는 사용자 판정 사항: repo_reorg_v1.md §5).
 # The two index documents ARE tracked: look_check/ is the only place the round
 # inventory exists, so INDEX.md is its sole committed record (cleanup_lookcheck_v1.md).
 # NOTE: a trailing-slash `look_check/` would stop git descending into the directory

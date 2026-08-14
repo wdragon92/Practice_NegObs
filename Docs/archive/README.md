@@ -40,3 +40,15 @@
 
 2차 이동 전에는 위 근거가 해소됐는지(웨이브 종료 · GT-57/58/59 CLOSED · supersede note 착지)
 확인할 것.
+
+## 2차 이동 (2026-08-14, 부분)
+
+전 저장소 상호참조 인벤토리(411개 텍스트 파일 전수 grep — `reports/repo_reorg_v1.md`)로
+**인용 0 + 활성 큐 씬 무접촉**이 실측 확인된 9건만 이동. 각 파일 헤더에 ARCHIVED 추기.
+
+- `audit_v4/` ← fixlog_N3(s08/12) · fixlog_W0(v6 공통) · fixlog_W2(s07/10) · fixlog_Y1(s09 지붕)
+- `reports/` ← w3_cb2_v1 · w3_cb3_v1(batch1 종결) · w3_l12_v1(s12) · w3_p09_v1(s09)
+- `briefs/` ← process_revision_proposal_v1.md (SUPERSEDED 스텁 — 정본은 briefs/process_spec_v1.md)
+
+**잔류 유보(큐 접촉)**: fixlog_N1(s06/11)·W3(s13)·W6(s01/09/14)·X2(s06/07/10)·X3(s11/17),
+w3_cb4_v1(건물 킷 — 레버4 진행 중), props_audit_w1/C4(s21 재작업 대기). 해당 큐 종료 후 재판정.

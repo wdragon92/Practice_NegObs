@@ -1,3 +1,5 @@
+> [ARCHIVED 2026-08-14 · 2차 이동] 인용 0 실측(문서 상호참조 인벤토리, repo_reorg_v1) · 활성 큐 무접촉 확인 — 원경로 Docs/audit_v4/fixlog_W2.md
+
 # v6 판정 재수정 로그 — W-2 팀 (scene07 산사 자연석 / scene10 공원 데크 갈지자)
 
 작성 2026-07-27 · 근거 `Docs/audit_v4/judge_v6_rt_new7.md` §2·§4 + **감독 결정 2·3항** +

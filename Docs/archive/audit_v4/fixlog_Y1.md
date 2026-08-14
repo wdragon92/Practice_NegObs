@@ -1,3 +1,5 @@
+> [ARCHIVED 2026-08-14 · 2차 이동] 인용 0 실측(문서 상호참조 인벤토리, repo_reorg_v1) · 활성 큐 무접촉 확인 — 원경로 Docs/audit_v4/fixlog_Y1.md
+
 # fixlog_Y1 — scene09 사모정 지붕 셰이딩 버그 전담 디버그
 
 판정 입력 `judge_v8_rt.md` §4 ① (scene09 잔여1, 차단)
@@ -213,7 +215,7 @@ M["pav_roof"]  … (미지정)   ← 유일
 
 ## 4. RT 재렌더 검증 (`look_check/scene09/v8_rt2`)
 
-`scripts/run_v8_rt2_scene09.sh` — PT 배치(`pgrep -f "python scenes/main"`) 종료를
+`scripts/rounds/run_v8_rt2_scene09.sh` — PT 배치(`pgrep -f "python scenes/main"`) 종료를
 폴링 대기한 뒤 scene09 단독 RT 캡처.
 
 ### 지붕 픽셀 diff (park_vista, v8_rt ↔ v8_rt2, 동일 좌표)

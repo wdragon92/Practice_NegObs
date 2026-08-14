@@ -21,7 +21,7 @@
 
 ### 0-1. 렌더 조건 실측 (판정의 전제)
 
-`scripts/run_v7_all_rt.sh` · `run_v7_pt13.sh` · `run_v8_pt7.sh` 를 판독한 결과 **세 스크립트
+`scripts/rounds/run_v7_all_rt.sh` · `run_v7_pt13.sh` · `run_v8_pt7.sh` 를 판독한 결과 **세 스크립트
 모두 `NEGOBS_LOOK_V1` 을 설정하지 않는다** [실측]. `scene_common.py:172` 에서 `LOOK_V1` 기본값이
 OFF 이므로, v7/v8 렌더에는
 

@@ -1,3 +1,5 @@
+> [ARCHIVED 2026-08-14 · 2차 이동] 인용 0 실측 · 활성 큐 무접촉 확인 — 원경로 Docs/reports/w3_cb2_v1.md
+
 # CB-2 — ground_kit decal/jitter batch + the five F3 scenes
 
 > **Wave**: W3 · **Window**: 1 · **WP**: K1 (`ground_kit.py`) + S3 (the F3 co-landing group)

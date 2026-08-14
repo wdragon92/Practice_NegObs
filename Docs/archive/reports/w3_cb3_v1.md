@@ -1,3 +1,5 @@
+> [ARCHIVED 2026-08-14 · 2차 이동] 인용 0 실측 · 활성 큐 무접촉 확인 — 원경로 Docs/reports/w3_cb3_v1.md
+
 # CB-3 — batch1 furniture jitter abolition (K2 + S7/S8 call sites)
 
 > **Wave**: W3 · **Window**: 1 · **WP**: K2 · **Commit batch**: CB-3 · **Date**: 2026-07-31

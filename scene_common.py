@@ -631,6 +631,15 @@ LOOK_CLASS = {
 #   6클래스에 값을 주입한다: Oren-Nayar σ(광물 실측 문헌 대역 0.3~0.55)는 접지각
 #   자기음영을, grazing 하한대는 h0.3 지면 하늘광택("젖은 마루") 소거를 맡는다.
 #   채택(기본값 승격)은 파일럿 A/B 실측 후 별행.
+# [GT-127] 판정창 대역 마이크로 옥타브 파일럿 팔 — 기본 OFF = 비트동일.
+#   퍼린 2레벨 진폭 0.06 ≈ RMS 3 %(감사 제안값), 파장 0.06 m = slope 유효 대역
+#   (지면 2~10 cm) 중앙. 채택(클래스 기본 승격)은 파일럿 실측 후 별행.
+MICRO_V1 = os.environ.get("NEGOBS_MICRO_V1", "") == "1"
+if MICRO_V1:
+    for _c in ("asphalt", "paving", "concrete", "stone", "soil", "gravel",
+               "turf"):
+        LOOK_CLASS[_c].update(micro=0.06, micro_wl=0.06)
+
 PHYS_V1 = os.environ.get("NEGOBS_PHYS_V1", "") == "1"
 if PHYS_V1:
     for _c, _v in {"asphalt":  dict(diff_rough=0.45, grazing=0.25),
@@ -734,7 +743,8 @@ def look_report():
     det_pol = (f"detXovr={DETAIL_SCALE_OVERRIDE:g}" if DETAIL_SCALE_OVERRIDE > 0
                else "detX=class")
     return (f"[룩v1] MTL={int(LOOK_MTL)} GEO={int(LOOK_GEO)}"
-            f"{' PHYS=1' if PHYS_V1 else ''} | "
+            f"{' PHYS=1' if PHYS_V1 else ''}"
+            f"{' MICRO=1' if MICRO_V1 else ''} | "
             f"재질 ground={r['ground']} omni_tex={r['omni_tex']} "
             f"const={r['const']} skip={r['skipped']} | 베벨={r['bevel']} "
             f"디테일={r['detail']} 스킨={r['skin']} "
@@ -2085,6 +2095,11 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
     if spec.get("grazing") is not None:
         sh.CreateInput("grazing_reflectivity_a",
                        F).Set(float(spec["grazing"]))
+    # [GT-127] 판정창 대역 마이크로 옥타브(v1.11) — 스펙 키 없으면 미기록(기본 0).
+    if spec.get("micro") is not None:
+        sh.CreateInput("micro_amp_a", F).Set(float(spec["micro"]))
+        sh.CreateInput("micro_wavelength_a",
+                       F).Set(float(spec.get("micro_wl", 0.06)))
     # Constant-colour mode has no texture, so no axis-transition streaking occurs ->
     # 6 dithering noise taps are pure waste. Set to 0 to cut the cost.
     sh.CreateInput("tri_dither", F).Set(

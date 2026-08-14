@@ -2836,3 +2836,19 @@ bare Band 정확핀(paint)이 화강 밴드 포획(s20+⑫ 4씬 in-file 정정),
 D3 노견이 그레이징에서 골판 판독(잎날 텍스처 신축) · s07 원경 암면 녹색 잔존(줄무늬는
 소멸) · s14 파사드 순백(건물 큐 소관). **Status: OPEN (착지 — 검수 대기)**
 **Status: OPEN (선신고 — 시공 중)**
+
+## 83. GT-127 — 판정창 대역 알베도 마이크로 옥타브: MDL v1.11 개방 + 파일럿 (선신고)
+
+**Authority**: 08-14 사용자 3일 자율 위임(행 69). 근거 = 감사 §2 실측: slope 판정
+유효 대역은 화면 7.5~15 px = 지면 2~10 cm 인데 알베도 변조 3노브(macro 14 m·patch
+4 m·rough_noise 1.2 m)가 전부 대역 **위**에 있다 — "판정창 대역 내 3 % RMS 알베도
+주입이 slope·flat_gnd 를 부작용 없이 닫는다"(감사 제안). GT-125 기각으로 이 축이
+잔존 slope 레버 1순위로 승격된 것의 집행.
+**Scope**: ① `NegObsGround.mdl` v1.11.0 — `micro_amp_a`(기본 0.0)·
+`micro_wavelength_a`(기본 0.06 m) 개방, A/B 블렌드·unit_gain 뒤 최종 알베도에 스칼라
+곱 1항(기본 1.0 = 곱셈 항등 — 전 코퍼스 픽셀 동일) ② scene_common 스펙 키
+micro/micro_wl 배선 ③ `NEGOBS_MICRO_V1=1` 팔 — 광물·입상 6클래스 + turf 에
+micro 0.06(퍼린 2레벨 RMS ≈ 3 %) 주입, 기본 OFF 비트동일.
+**GT 판정**: R-2 팔. 파일럿 렌더 3씬(s13·s16·s03 — physpilot 과 동일 기준선) ON 팔
+ps_slope A/B. 채택(기본 승격)은 별행 — 전 코퍼스 룩 변화라 실측 후 판단.
+**Status: OPEN (선신고 — 시공 중)**

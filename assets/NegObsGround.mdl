@@ -47,6 +47,11 @@
  *      수평면 기저 축퇴 버그 수정 `horiz_gate`)은 일체 손대지 않았다.
  *
  * ---------------------------------------------------------------------------
+ * v1.11.0 (2026-08-16) — [GT-127] 판정창 대역 마이크로 옥타브: micro_amp_a(기본 0.0)
+ *   · micro_wavelength_a(기본 0.06 m). 최종 알베도에 스칼라 곱 1항 — 기본값이면
+ *   곱셈 항등이라 픽셀 동일. slope 유효 대역(지면 2~10 cm)에 앉는 유일한 알베도
+ *   노브다(기존 3노브 macro 14 m·patch 4 m·rough_noise 1.2 m 는 전부 대역 위).
+ *
  * v1.10.0 (2026-08-14) — [GT-117] 물리 파라미터 개방: diffuse_roughness_a(Oren-Nayar,
  *   기본 0.0 = 램버시안) · grazing_reflectivity_a(기본 1.0). 기본값 픽셀 동일 —
  *   값 부여는 별도 파일럿(선신고)에서만.
@@ -683,6 +688,10 @@ export material NegObsGround(
     //     되비추던 '젖은 광택' 판독(원경이 근경보다 밝아짐)의 감쇠 손잡이.
     uniform float diffuse_roughness_a = 0.0,
     uniform float grazing_reflectivity_a = 1.0,
+    // [v1.11.0 · GT-127] 판정창 대역(지면 2~10 cm) 알베도 마이크로 옥타브.
+    //   기본 0.0 → 곱셈 항등(픽셀 동일). 값 부여는 파일럿 팔에서만.
+    uniform float micro_amp_a = 0.0,
+    uniform float micro_wavelength_a = 0.06,
     uniform float bump_factor_a = 1.0 [[
         anno::description("세트 A 노멀맵 강도 배율 (bump_factor에 곱)") ]],
 
@@ -899,8 +908,15 @@ export material NegObsGround(
         float2(pw_w.x, pw_w.y), unit_cell_m, unit_cell_origin,
         unit_albedo_sigma, unit_accent_frac);
 
+    // [v1.11.0 · GT-127] 마이크로 옥타브 — unit_g 와 같은 '최종 알베도 스칼라 곱'
+    // 자리. micro_amp_a=0 (기본) 이면 정확히 1.0 = 곱셈 항등.
+    float micro_g = micro_amp_a > 0.0
+        ? math::clamp(1.0 + micro_amp_a *
+              (negobs_noise(micro_wavelength_a, 2, 31.7) * 2.0 - 1.0), 0.0, 2.0)
+        : 1.0;
+
     color albedo = (use_blend ? math::lerp(A.albedo, B.albedo, w) : A.albedo)
-                   * base_color * color(unit_g);
+                   * base_color * color(unit_g) * color(micro_g);
     float rough = use_blend ? math::lerp(A.rough, B.rough, w) : A.rough;
     float3 nrm_tex = use_blend
         ? math::normalize(math::lerp(A.nrm, B.nrm, w)) : A.nrm;

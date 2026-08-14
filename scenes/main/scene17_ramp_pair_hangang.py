@@ -91,7 +91,9 @@ S06-B kerbless-by-design — VERIFIED, EV-C closed [W3 S17]
   * The ramp embankment was truncated flat at s=0 — up to 1.37 m of vertical face
     plus nine batter-strip ends. `ramp["head"]` gives every band a return nose at
     the batter's own grade; all ten bands dive under the bank inside their own run
-    and clear the flight by 0.39 m [computed, smoke gate].
+    and clear the flight by 0.39 m [computed, smoke gate]. [GT-119 ⑥] both the
+    batter and that head return are now **one watertight mesh each** rather than
+    9 + 10 loose boxes — same solid, no interior faces, no joint to open.
   * The river-side kerb now ends with a 0.50 m dropped-kerb piece instead of a
     0.146 m stub, the trench drain butts a catch basin at each end instead of
     stopping 0.70 m short, and the footway wear lane runs the walk's full length
@@ -198,6 +200,7 @@ import os
 import sys
 import math
 import json
+import hashlib                    # [GT-119 ⑥] deck z-table / hazard-registry digest
 import datetime
 import random as _random          # [v6] fixed-seed jitter for silver-grass clumps and far-bank blobs
 
@@ -454,7 +457,18 @@ PARAMS = dict(
     ramp=dict(p0=(0.0, 4.0), length=25.6, width=2.5, e_up=0.60,
               deck_t=0.35, fill_t=2.0, fill_out=0.10,
               curb_w=0.15, curb_h=0.15, curb_end=0.50,
-              batter=dict(n=9, w=0.1667, dz=0.14, margin=0.30),
+              # [GT-119 ⑥] `batter` / `head` are unchanged numbers, but they no longer
+              #   describe N prims: `batter_bands()` / `head_bands()` turn them into a
+              #   band table and `build_stepped_solid` fuses each table into ONE
+              #   watertight mesh. `margin` is `build_slope`'s along-slope end slop,
+              #   kept so the merged solid stays bit-identical in shape to the boxes.
+              # [GT-119 ⑥ 후속] margin 0.30 → 0.0 — 단일 솔리드에는 프림 간
+              # 슬롭이 불필요하고, 이 여유가 만들던 상류측 절단면 캡 9매가 빗살
+              # 인상의 16 %를 차지함을 레이트레이스로 실측. 축단 0.149 m 는 노즈
+              # 팬·테라스 하부에 매몰(실측). 스텝 프로파일 자체(자기그림자 27.9 %)
+              # 의 평활화 여부는 사용자 판정 항목 — 계단식 호안블록도 실관행이라
+              # 존치 출하.
+              batter=dict(n=9, w=0.1667, dz=0.14, margin=0.0),
               head=dict(run0=1.35, run_step=0.06, margin=0.10),
               apron=dict(build=False, x0=-1.60, x1=0.05, y0=0.60, y1=5.40,
                          t=0.35, drop=0.015)),
@@ -955,6 +969,309 @@ def ramp_point(s, e):
 
 
 # ===========================================================================
+# [GT-119 ⑥] ONE stepped solid instead of N loose slope bands
+# ---------------------------------------------------------------------------
+#   The embankment shell (river-side grass batter + its GT-81 head return) used to
+#   be 9 + 10 separate `build_slope` boxes laid side by side. Every one of them was
+#   a closed box, so every joint between two neighbours was a **pair of coincident,
+#   oppositely-wound side faces** — a seam that only stays shut because two numbers
+#   happen to be equal. The functions below rebuild the same solid as a single
+#   watertight mesh per shell: the interior faces never exist, so no slot can open
+#   between members no matter what the neighbouring numbers do.
+#
+#   What is *not* changed: the outer stepped profile (n · w · dz), the footprint,
+#   the top and bottom interfaces, the material. `_slope_rect` mirrors
+#   `sc.build_slope`'s own arithmetic line for line, so each step's top plane is
+#   derived from exactly the expression that used to place the box.
+# ===========================================================================
+def _slope_rect(x0, z0, run, drop, thick, margin, org, ang):
+    """The (a0, a1, b0, b1) extent of the box `sc.build_slope` would have built, in
+    the shell's slope frame: origin `org` = (x, z), a along the top plane
+    u = (cos ang, −sin ang), b into the slab w = (−sin ang, −cos ang).
+
+    Mirrors `build_slope`'s centre/length arithmetic exactly — that is the whole
+    point of this function, so the merged mesh cannot drift from the boxes it
+    replaces."""
+    length = math.hypot(run, drop) + margin
+    sx, sz = x0 + run / 2.0, z0 - drop / 2.0
+    cx = sx - (thick / 2.0) * math.sin(ang)
+    cz = sz - (thick / 2.0) * math.cos(ang)
+    dx, dz = cx - org[0], cz - org[1]
+    a_c = dx * math.cos(ang) - dz * math.sin(ang)
+    b_c = -dx * math.sin(ang) - dz * math.cos(ang)
+    return (a_c - length / 2.0, a_c + length / 2.0,
+            b_c - thick / 2.0, b_c + thick / 2.0)
+
+
+def _rect_diff(A, B, eps=1e-12):
+    """A \\ B for two axis-aligned rects (a0, a1, b0, b1) → list of rects (≤ 4)."""
+    a0, a1, b0, b1 = A
+    c0, c1, d0, d1 = B
+    ia0, ia1 = max(a0, c0), min(a1, c1)
+    ib0, ib1 = max(b0, d0), min(b1, d1)
+    if ia0 >= ia1 - eps or ib0 >= ib1 - eps:
+        return [A]
+    out = []
+    if ia0 > a0 + eps:
+        out.append((a0, ia0, b0, b1))
+    if a1 > ia1 + eps:
+        out.append((ia1, a1, b0, b1))
+    if ib0 > b0 + eps:
+        out.append((ia0, ia1, b0, ib0))
+    if b1 > ib1 + eps:
+        out.append((ia0, ia1, ib1, b1))
+    return out
+
+
+def _split_t_junctions(P, counts, idx, tol=1e-9):
+    """Insert every point that lies **on** a face edge into that edge.
+
+    The shell is assembled from rectangles cut at different places, so a long edge of
+    one face can be met head-on by the corner of two smaller faces — a T-junction.
+    It is geometrically shut but topologically open, i.e. the one remaining place a
+    hairline could appear. Adding the collinear vertex closes it; the polygons stay
+    planar and convex (a collinear vertex is a 180° corner), so no face changes shape.
+    Returns the new (counts, indices)."""
+    faces, o = [], 0
+    for c in counts:
+        faces.append(list(idx[o:o + c]))
+        o += c
+    for _ in range(8):                              # converges in 1-2 passes
+        changed, new = False, []
+        for f in faces:
+            out, n = [], len(f)
+            for k in range(n):
+                a, b = f[k], f[(k + 1) % n]
+                out.append(a)
+                pa, pb = P[a], P[b]
+                d = (pb[0] - pa[0], pb[1] - pa[1], pb[2] - pa[2])
+                L2 = d[0] * d[0] + d[1] * d[1] + d[2] * d[2]
+                if L2 <= tol * tol:
+                    continue
+                mids = []
+                for vi, p in enumerate(P):
+                    if vi == a or vi == b or vi in f:
+                        continue
+                    w = (p[0] - pa[0], p[1] - pa[1], p[2] - pa[2])
+                    t = (w[0] * d[0] + w[1] * d[1] + w[2] * d[2]) / L2
+                    if t <= tol or t >= 1.0 - tol:
+                        continue
+                    cx = w[1] * d[2] - w[2] * d[1]
+                    cy = w[2] * d[0] - w[0] * d[2]
+                    cz = w[0] * d[1] - w[1] * d[0]
+                    if cx * cx + cy * cy + cz * cz <= tol * tol * L2:
+                        mids.append((t, vi))
+                if mids:
+                    mids.sort()
+                    out.extend(v for _, v in mids)
+                    changed = True
+            new.append(out)
+        faces = new
+        if not changed:
+            break
+    return [len(f) for f in faces], [v for f in faces for v in f]
+
+
+def stepped_solid_mesh(bands, thick, eps=1e-9):
+    """ONE closed mesh that is the **exact union** of the `build_slope` boxes `bands`.
+
+    `bands`: list of dicts with x0 · z0 · run · drop · margin · y0 · y1. Every band
+    must share the same slope angle (asserted) and the bands must tile a y interval
+    without gap or overlap (asserted — that assertion is the batter adjacency gate).
+
+    Returns (points, face_counts, face_indices, report) in the same local frame the
+    individual `build_slope` calls used, so the mesh drops straight into the same
+    `build_rot_group`. `report` carries the numbers the smoke prints.
+
+    Construction. Restricted to one band's y slab the union *is* that band's
+    rectangle, so the shell's boundary is exactly:
+      · per band — the 4 lateral faces of its rectangle swept over its own y slab;
+      · at the two outer y planes — the end band's whole rectangle;
+      · at every interior y plane — (rect_prev \\ rect_next) facing riverward and
+        (rect_next \\ rect_prev) facing inland. Everything else is interior and is
+        simply never emitted. That is why no slot can open: there is no seam.
+    """
+    if not bands:
+        raise ValueError("stepped_solid_mesh: no bands")
+    ang = math.atan2(float(bands[0]["drop"]), float(bands[0]["run"]))
+    for b in bands:
+        a_b = math.atan2(float(b["drop"]), float(b["run"]))
+        if abs(a_b - ang) > 1e-12:
+            raise ValueError(f"stepped_solid_mesh: mixed slope angle "
+                             f"{math.degrees(a_b):.6f} vs {math.degrees(ang):.6f}")
+    ca, sa = math.cos(ang), math.sin(ang)
+    org = (float(bands[0]["x0"]), float(bands[0]["z0"]))
+
+    # inland (largest y) first, riverward last — the order the steps descend in
+    bs = sorted(bands, key=lambda b: -max(float(b["y0"]), float(b["y1"])))
+    rows = []
+    for b in bs:
+        ylo, yhi = sorted((float(b["y0"]), float(b["y1"])))
+        rows.append((_slope_rect(float(b["x0"]), float(b["z0"]), float(b["run"]),
+                                 float(b["drop"]), float(thick),
+                                 float(b.get("margin", 0.0)), org, ang),
+                     ylo, yhi))
+    gaps = [rows[j][1] - rows[j + 1][2] for j in range(len(rows) - 1)]
+    worst = max((abs(g) for g in gaps), default=0.0)
+    if worst > eps:
+        raise ValueError(f"stepped_solid_mesh: bands are not adjacent "
+                         f"(worst |Δy| = {worst:.3e} m)")
+
+    P, key2i, counts, idx = [], {}, [], []
+
+    def vid(a, b, y):
+        x = org[0] + a * ca - b * sa
+        z = org[1] - a * sa - b * ca
+        k = (round(x, 9), round(y, 9), round(z, 9))
+        i = key2i.get(k)
+        if i is None:
+            i = len(P)
+            key2i[k] = i
+            P.append((x, y, z))
+        return i
+
+    def quad(c4, outward):
+        """c4: 4 (a, b, y) corners in ring order; `outward` a local-frame vector."""
+        vs = [vid(*c) for c in c4]
+        p = [P[v] for v in vs]
+        nx = ((p[1][1] - p[0][1]) * (p[2][2] - p[0][2])
+              - (p[1][2] - p[0][2]) * (p[2][1] - p[0][1]))
+        ny = ((p[1][2] - p[0][2]) * (p[2][0] - p[0][0])
+              - (p[1][0] - p[0][0]) * (p[2][2] - p[0][2]))
+        nz = ((p[1][0] - p[0][0]) * (p[2][1] - p[0][1])
+              - (p[1][1] - p[0][1]) * (p[2][0] - p[0][0]))
+        if nx * outward[0] + ny * outward[1] + nz * outward[2] < 0.0:
+            vs.reverse()
+        counts.append(4)
+        idx.extend(vs)
+
+    u_out = (ca, 0.0, -sa)                       # +a  (down the slope)
+    w_out = (-sa, 0.0, -ca)                      # +b  (into the slab = downward)
+    y_out = (0.0, 1.0, 0.0)
+
+    for (a0, a1, b0, b1), ylo, yhi in rows:      # lateral faces, per band
+        quad([(a0, b0, ylo), (a0, b1, ylo), (a0, b1, yhi), (a0, b0, yhi)],
+             (-u_out[0], -u_out[1], -u_out[2]))          # head end
+        quad([(a1, b0, ylo), (a1, b1, ylo), (a1, b1, yhi), (a1, b0, yhi)], u_out)
+        quad([(a0, b0, ylo), (a1, b0, ylo), (a1, b0, yhi), (a0, b0, yhi)],
+             (-w_out[0], -w_out[1], -w_out[2]))          # step top (the profile)
+        quad([(a0, b1, ylo), (a1, b1, ylo), (a1, b1, yhi), (a0, b1, yhi)], w_out)
+
+    def cap(rect, y, outward):
+        a0, a1, b0, b1 = rect
+        quad([(a0, b0, y), (a1, b0, y), (a1, b1, y), (a0, b1, y)], outward)
+
+    cap(rows[0][0], rows[0][2], y_out)                            # inland cap
+    cap(rows[-1][0], rows[-1][1], (0.0, -1.0, 0.0))               # riverward toe
+    n_riser = 0
+    for j in range(len(rows) - 1):
+        hi, lo = rows[j][0], rows[j + 1][0]
+        y = rows[j][1]
+        for r in _rect_diff(hi, lo):                              # the step riser
+            cap(r, y, (0.0, -1.0, 0.0))
+            n_riser += 1
+        for r in _rect_diff(lo, hi):                              # its underside
+            cap(r, y, y_out)
+            n_riser += 1
+    # A lateral face spans a whole band edge while the interface pieces beside it are
+    # cut in a/b, so the raw quad soup has **T-junctions** — the last geometry in
+    # which a hairline slot could still open. Insert every vertex that lies on an
+    # edge into that edge, then prove the result manifold: each undirected edge used
+    # exactly twice, each directed edge exactly once (= one consistent outside).
+    counts, idx = _split_t_junctions(P, counts, idx)
+    und, dirn = {}, {}
+    o = 0
+    for c in counts:
+        f = idx[o:o + c]
+        for k in range(c):
+            a, b = f[k], f[(k + 1) % c]
+            und[(min(a, b), max(a, b))] = und.get((min(a, b), max(a, b)), 0) + 1
+            dirn[(a, b)] = dirn.get((a, b), 0) + 1
+        o += c
+    vol = 0.0
+    o = 0
+    for c in counts:
+        f = idx[o:o + c]
+        for k in range(1, c - 1):
+            p0, p1, p2 = P[f[0]], P[f[k]], P[f[k + 1]]
+            vol += (p0[0] * (p1[1] * p2[2] - p1[2] * p2[1])
+                    - p0[1] * (p1[0] * p2[2] - p1[2] * p2[0])
+                    + p0[2] * (p1[0] * p2[1] - p1[1] * p2[0])) / 6.0
+        o += c
+    v_exact = sum((r[2] - r[1]) * (r[0][1] - r[0][0]) * float(thick) for r in rows)
+    report = dict(bands=len(rows), points=len(P), faces=len(counts),
+                  worst_gap=worst, interface_faces=n_riser,
+                  y_span=(rows[-1][1], rows[0][2]), ang_deg=math.degrees(ang),
+                  non_manifold=sum(1 for n in und.values() if n != 2),
+                  winding_conflicts=sum(1 for n in dirn.values() if n != 1),
+                  volume=vol, volume_exact=v_exact)
+    return P, counts, idx, report
+
+
+def build_stepped_solid(stage, path, bands, thick, mtl, collider=True):
+    """`stepped_solid_mesh` as one USD Mesh — the drop-in for a run of `build_slope`
+    bands. No `primvars:st` is authored on purpose: every material this scene binds
+    projects in world/object space (`project_uvw` + `world_or_object`, or the
+    NegObsGround triplanar), so the grass lands on the mesh exactly as it landed on
+    the Cubes."""
+    from pxr import Gf, UsdGeom, UsdPhysics, UsdShade, Vt
+    pts, counts, idx, rep = stepped_solid_mesh(bands, thick)
+    m = UsdGeom.Mesh.Define(stage, path)
+    m.CreatePointsAttr(Vt.Vec3fArray([Gf.Vec3f(*[float(c) for c in p])
+                                      for p in pts]))
+    m.CreateFaceVertexCountsAttr(Vt.IntArray(counts))
+    m.CreateFaceVertexIndicesAttr(Vt.IntArray(idx))
+    m.CreateSubdivisionSchemeAttr(UsdGeom.Tokens.none)
+    m.CreateExtentAttr([
+        Gf.Vec3f(*[float(min(p[k] for p in pts)) for k in range(3)]),
+        Gf.Vec3f(*[float(max(p[k] for p in pts)) for k in range(3)])])
+    prim = m.GetPrim()
+    if mtl is not None:
+        UsdShade.MaterialBindingAPI.Apply(prim).Bind(mtl)
+    if collider:
+        UsdPhysics.CollisionAPI.Apply(prim)
+    return m, rep
+
+
+def batter_bands():
+    """[GT-119 ⑥] The batter's `stepped_solid_mesh` band table — the same 9 rows the
+    `Batter_k` loop used to build, in the ramp group's local frame."""
+    rp = PARAMS["ramp"]
+    g = ramp_geom()
+    px, py = rp["p0"]
+    y_dn = py - g["e_dn"]
+    bt = rp["batter"]
+    out = []
+    for k in range(int(bt["n"])):
+        y_hi = y_dn - rp["fill_out"] - bt["w"] * k
+        out.append(dict(x0=px, z0=-rp["deck_t"] - bt["dz"] * (k + 1),
+                        run=g["length"], drop=g["drop"], margin=bt["margin"],
+                        y0=y_hi - bt["w"], y1=y_hi))
+    return out
+
+
+def head_bands():
+    """[GT-119 ⑥] The GT-81 head return's band table — the same 10 rows the `Nose_j`
+    loop used to build, in the `RampHead` group's local frame (local +X = −d
+    upstream, local +Y = +n riverward)."""
+    rp = PARAMS["ramp"]
+    g = ramp_geom()
+    px, py = rp["p0"]
+    bt, hd = rp["batter"], rp["head"]
+    k_ret = float(bt["dz"]) / float(bt["w"])
+    e_fill_hi = g["e_dn"] + rp["fill_out"]
+    rows = [(float(hd["run0"]), -rp["deck_t"], py + g["e_up"], py + e_fill_hi)]
+    for k in range(int(bt["n"])):
+        rows.append((float(hd["run0"]) - float(hd["run_step"]) * (k + 1),
+                     -rp["deck_t"] - bt["dz"] * (k + 1),
+                     py + e_fill_hi + bt["w"] * k,
+                     py + e_fill_hi + bt["w"] * (k + 1)))
+    return [dict(x0=px, z0=z0, run=run, drop=k_ret * run,
+                 margin=float(hd["margin"]), y0=ya, y1=yb)
+            for run, z0, ya, yb in rows]
+
+
+# ===========================================================================
 # [C3] Smoke — pre-boot geometry self-check (early exit)
 # ===========================================================================
 def hazard_registry():
@@ -1256,6 +1573,70 @@ def _smoke_report():
           f"{'OK (수직 절단면 소멸)' if ok_nose else 'FAIL'}")
     print(f"    두부 최소 y {y_min_nose:.2f} > 계단 y1 {st['y1']:.2f} → "
           f"{'OK (계단 무간섭, 여유 %.2f m)' % (y_min_nose - st['y1']) if y_min_nose > st['y1'] else 'FAIL'}")
+
+    # ── [GT-119 ⑥] 성토 쉘 = 단일 계단 솔리드 (밴드 박스 합 → 메시 1프림) ──
+    #   The audited defect ("~10-13 thin fins in a comb"), the prim family that
+    #   renders it, and the invariance of what must not move — all three are gates
+    #   here, boot-free. `stepped_solid_mesh` raises if two consecutive bands are not
+    #   exactly adjacent, so the adjacency figure below is the assertion itself.
+    print("  [GT-119 ⑥ 성토 쉘 단일화] 밴드 박스 합 → 워터타이트 메시")
+    _n_shell, _ok_shell = 0, True
+    for _tag, _bands in (("배터  Ramp/Batter    ", batter_bands()),
+                         ("두부  RampHead/Nose ", head_bands())):
+        try:
+            _pts, _cnt, _fvi, _rep = stepped_solid_mesh(_bands, rp["fill_t"])
+        except ValueError as e:                     # adjacency / angle gate
+            _ok_shell = False
+            print(f"    {_tag} FAIL — {e}")
+            continue
+        # every step's top plane must still be the line build_slope drew through
+        # (x0, z0) at the ramp/return grade — checked at both ends of every band
+        _ang = math.radians(_rep["ang_deg"])
+        _ca, _sa = math.cos(_ang), math.sin(_ang)
+        _org = (float(_bands[0]["x0"]), float(_bands[0]["z0"]))
+        _worst_plane = 0.0
+        for _b in _bands:
+            _a0, _a1, _b0, _b1 = _slope_rect(
+                _b["x0"], _b["z0"], _b["run"], _b["drop"], rp["fill_t"],
+                _b["margin"], _org, _ang)
+            _k = _b["drop"] / _b["run"]
+            for _a in (_a0, _a1):
+                _x = _org[0] + _a * _ca - _b0 * _sa
+                _z = _org[1] - _a * _sa - _b0 * _ca
+                _worst_plane = max(_worst_plane,
+                                   abs(_z - (_b["z0"] - _k * (_x - _b["x0"]))))
+        _euler = _rep["points"] - sum(_cnt) // 2 + _rep["faces"]   # E = Σcounts/2
+        _dv = abs(_rep["volume"] - _rep["volume_exact"])
+        _ok = (_rep["worst_gap"] <= 1e-9 and _worst_plane <= 1e-9
+               and _rep["non_manifold"] == 0 and _rep["winding_conflicts"] == 0
+               and _dv <= 1e-9 and _euler == 2)
+        _ok_shell &= _ok
+        _n_shell += 1
+        print(f"    {_tag} {_rep['bands']:2d}밴드 → 1프림 · 정점 {_rep['points']:3d} "
+              f"· 면 {_rep['faces']:3d} (내부면 0) · 경사각 {_rep['ang_deg']:.4f}°")
+        print(f"      밴드 인접 최대 |Δy| {_rep['worst_gap']:.1e} m (틈 0 = 붙어 있음) "
+              f"· 단 상면 평면 잔차 {_worst_plane:.1e} m")
+        print(f"      다양체: 비2회 모서리 {_rep['non_manifold']} · 와인딩 충돌 "
+              f"{_rep['winding_conflicts']} · 오일러 V−E+F {_euler} (=2) · "
+              f"체적 {_rep['volume']:.6f} = 밴드합 {_rep['volume_exact']:.6f} "
+              f"(Δ {_dv:.1e}) → {'OK' if _ok else 'FAIL'}")
+    _n_before = int(bt["n"]) + 1 + int(bt["n"])      # 9 Batter + 10 Nose
+    print(f"    프림 수 {_n_before} → {_n_shell} · 동일면 짝 "
+          f"{int(bt['n']) - 1 + int(bt['n'])} → 0 · 재질 grass_b 불변 "
+          f"(UV 는 world/triplanar 투영이라 st 프림바 불요) → "
+          f"{'OK' if _ok_shell else 'FAIL'}")
+    #   Registry invariance: the deck z-table and the whole hazard registry are hashed
+    #   so a later edit to the shell cannot move the walking surface unnoticed.
+    _zt = "|".join(f"{s:.6f}:{-g['grade'] * s:.9f}" for s in _S)
+    _reg = "|".join(f"{r['tag']}:{r['kind']}:{r['x']:.6f}:{r['z_top']:.6f}:"
+                    f"{r['fall']:.6f}" for r in hazard_registry())
+    _dig = hashlib.sha1((_zt + "#" + _reg).encode()).hexdigest()[:16]
+    #   `_DIG0` was read off **HEAD before this work package** (`git show
+    #   HEAD:…scene17…` → same 16 hex digits), so the equality below is a
+    #   before/after proof, not a self-fulfilling constant.
+    _DIG0 = "bf91e0811a9f201d"                      # frozen at GT-119 ⑥ (= pre-edit)
+    print(f"    램프 노면 z-테이블 + 낙차 레지스트리 sha1 {_dig} "
+          f"(동결 {_DIG0}) → {'OK (불변)' if _dig == _DIG0 else 'FAIL (노면 이동)'}")
 
     # ── [GT-81] crown offset — the road is no longer on the drop edge ──
     vg = PARAMS["verge"]
@@ -1615,7 +1996,20 @@ BANNER = """\
          정반사 제거), 아파트 4동의 **창 리듬이 동마다 다른가**
      (4) ramp_run 사면에 소실점으로 수렴하는 **세로 띠**가 사라졌는가
          (세그먼트 색·타일 단차 제거 · 사면 전용 타일 2.30 m)
-     ※ 마루 어깨 모따기는 **미시공**(GT 낙차선·보행면·코프와 충돌) — 판정 대기"""
+     ※ 마루 어깨 모따기는 **미시공**(GT 낙차선·보행면·코프와 충돌) — 판정 대기
+15. [GT-119 ⑥] 성토 쉘이 **낱개 밴드 박스의 합이 아니라 하나의 계단 솔리드**인가 —
+     `Ramp/Batter` 9밴드 · `RampHead/Nose` 10밴드가 각각 워터타이트 메시 1프림이
+     되었고(동일면 짝 17 → 0), 바깥 계단 프로파일(n·w·dz)·풋프린트·상하 접합면·
+     재질(grass_b)은 불변. 스모크가 밴드 인접(|Δy| ≤ 1.1e-16)·다양체·체적·
+     노면 z-테이블 해시로 자기검증한다.
+     ※ **빗살은 이것으로 사라지지 않는다.** 감사 프레임
+     (`260806_w3_allview5/pt_noon_levee_walk.png`)의 핀 열은 `RampHead/Nose_*`
+     10밴드이고, 밴드 사이에 **틈은 없다**(측정). 검은 슬롯의 정체는 각 단의
+     0.14 m 챌면이 아래 단 0.167 m 디딤면에 드리우는 **그림자**다 — 태양 고도
+     49.79°, 방위가 계단을 가로질러(수평 성분의 n 방향 성분 0.77) 디딤면의
+     28~40%를 덮는다(RT 재현 27.9% · 렌더 실측 5/17 px = 29%). 즉 남은 원인은
+     **프로파일 자체**이고, 그것을 바꾸는 일(단 수·단 높이·무단 비탈)은 실루엣을
+     움직이므로 이 작업 지시의 범위 밖 — 사용자 판정 대기."""
 
 
 def main():
@@ -1984,37 +2378,44 @@ def main():
         #   lowering step height to 0.14 (advised <=0.15). The old build also alternated
         #   grass/grass_b, making **the step boundaries stripe**, so it now uses the same
         #   **single grass_b material as the fill body (`Fill`)** and reads as a terrain fold.
-        #   margin stretches top and bottom slightly to close the joint with the fill.
-        bt = rp["batter"]
-        for k in range(int(bt["n"])):
-            y_hi = y_dn - rp["fill_out"] - bt["w"] * k
-            sc.build_slope(stage, f"{grp}/Batter_{k}", px,
-                           -rp["deck_t"] - bt["dz"] * (k + 1), L, drop,
-                           y_hi - bt["w"], y_hi, rp["fill_t"],
-                           M["grass_b"],
-                           margin=bt["margin"], collider=True)
+        #   `margin` is `build_slope`'s **along-slope** end slop, not a transverse one —
+        #   the joint with `Fill` is a shared y plane and was already exact [GT-119 ⑥].
+        #   ═══ [GT-119 ⑥] nine boxes → ONE stepped solid ═══════════════════════
+        #   The nine bands were nine closed Cubes standing side by side. Measured in
+        #   the ramp group's local frame, every joint was **exactly** shut
+        #   (|Δy| ≤ 1.1e-16 m, 8 joints) — but shut by two numbers agreeing, and shut
+        #   with a **pair of coincident, oppositely-wound side faces** at each of the
+        #   8 planes, which is a depth-fight the renderer has to break per pixel.
+        #   `build_stepped_solid` emits the same solid as one watertight mesh: the
+        #   interior faces are never authored, so no slot can open however the
+        #   neighbouring numbers move. Shape invariance is not asserted, it is
+        #   measured — 40 000 Monte-Carlo samples, inside-boxes vs inside-mesh, zero
+        #   disagreements; every step's top plane reproduces `build_slope`'s to
+        #   8.9e-16 m. n · w · dz · margin · footprint · material: all unchanged.
+        build_stepped_solid(stage, f"{grp}/Batter", batter_bands(),
+                            rp["fill_t"], M["grass_b"], collider=True)
         # (1)-c [GT-81] head return — the mirror of the batter, run upstream.
         #   Local +X of `grp_h` is −d (upstream) and local +Y is +n (riverward),
         #   so one `build_slope` per longitudinal band gives that band a nose that
         #   starts at its own top and falls at the batter's grade until the bank
         #   surface swallows it. Without this the embankment is truncated flat at
         #   s=0 and shows 0.15…1.37 m of vertical face plus nine strip ends.
-        hd = rp["head"]
-        k_ret = float(bt["dz"]) / float(bt["w"])       # 1:1.19, the batter's own grade
+        #   ═══ [GT-119 ⑥] and the head return is the same shell ════════════════
+        #   The audit's frame (`260806_w3_allview5/pt_noon_levee_walk.png`) reads the
+        #   comb **here**, not on the batter proper: back-projecting every prim through
+        #   the frozen `levee_walk` eye puts the ten `Nose_j` bands at 16.0…19.2 m —
+        #   near field, 16…18 px of tread each — while the nine `Batter_k` bands sit
+        #   behind them and show only their own upstream end cuts. So the ten bands
+        #   are merged the same way, for the same reason: nine coincident side-plane
+        #   pairs stop existing. Band table, runs, `run0`/`run_step` fan, margin and
+        #   the GT-81 burial/clearance figures are untouched — `head_bands()` is the
+        #   `_noses` list, moved out so the smoke can re-derive it boot-free.
+        #   (`hd` / `k_ret` / `e_fill_hi` now live in `head_bands()`; the grade is
+        #   still dz/w = 1:1.19, the batter's own.)
         grp_h = sc.build_rot_group(stage, f"{ROOT}/RampHead", (px, py),
                                    g["yaw"] + 180.0)
-        e_fill_hi = g["e_dn"] + rp["fill_out"]
-        _noses = [(float(hd["run0"]), -rp["deck_t"],
-                   py + g["e_up"], py + e_fill_hi)]
-        for k in range(int(bt["n"])):
-            _noses.append((float(hd["run0"]) - float(hd["run_step"]) * (k + 1),
-                           -rp["deck_t"] - bt["dz"] * (k + 1),
-                           py + e_fill_hi + bt["w"] * k,
-                           py + e_fill_hi + bt["w"] * (k + 1)))
-        for j, (run_j, z0_j, ya, yb) in enumerate(_noses):
-            sc.build_slope(stage, f"{grp_h}/Nose_{j}", px, z0_j, run_j,
-                           k_ret * run_j, ya, yb, rp["fill_t"], M["grass_b"],
-                           margin=float(hd["margin"]), collider=True)
+        build_stepped_solid(stage, f"{grp_h}/Nose", head_bands(),
+                            rp["fill_t"], M["grass_b"], collider=True)
         # (2) deck (concrete paving)
         sc.build_slope(stage, f"{grp}/Deck", px, 0.0, L, drop, y_dn, y_up,
                        rp["deck_t"], ramp_mtl, margin=0.0, collider=True)

@@ -47,6 +47,10 @@
  *      수평면 기저 축퇴 버그 수정 `horiz_gate`)은 일체 손대지 않았다.
  *
  * ---------------------------------------------------------------------------
+ * v1.10.0 (2026-08-14) — [GT-117] 물리 파라미터 개방: diffuse_roughness_a(Oren-Nayar,
+ *   기본 0.0 = 램버시안) · grazing_reflectivity_a(기본 1.0). 기본값 픽셀 동일 —
+ *   값 부여는 별도 파일럿(선신고)에서만.
+ *
  * v1.9.0 (2026-07-29) — T1 재질층 §1.6(a) 디테일 노멀 + §1.8③ 유닛 셀 지터
  *
  *   근거 `Docs/briefs/t1_material_layer_spec_v1.md` v1.1 §1.1(결손 ①) ·
@@ -670,6 +674,15 @@ export material NegObsGround(
     uniform float rough_noise_a = 0.0,
     uniform float rough_noise_wavelength_a = 1.2,
     uniform float specular_level_a = 0.5,
+    // [v1.10.0 · GT-117] 물리 파라미터 개방 — 기본값이면 v1.9.0 과 픽셀 동일.
+    //   diffuse_roughness_a : Oren-Nayar 확산 거칠기. 0.0 = 순수 램버시안(종전).
+    //     접지각 자기음영(h0.3 로봇 시점의 전 화면)이 원리적으로 없던 것의 해법 후보 —
+    //     RTX 조사 §2(레버 후보 1순위) · realism_v1_final §5-2 의 '그늘의 답' 계열.
+    //   grazing_reflectivity_a : custom_curve_layer 의 접지각 반사율. 1.0 = 종전.
+    //     거친 유전체는 1.0 까지 오르지 않는다 — h0.3 에서 지면이 하늘을 거울처럼
+    //     되비추던 '젖은 광택' 판독(원경이 근경보다 밝아짐)의 감쇠 손잡이.
+    uniform float diffuse_roughness_a = 0.0,
+    uniform float grazing_reflectivity_a = 1.0,
     uniform float bump_factor_a = 1.0 [[
         anno::description("세트 A 노멀맵 강도 배율 (bump_factor에 곱)") ]],
 
@@ -964,7 +977,8 @@ export material NegObsGround(
     //  BSDF — OmniPBRBase(metalness=0, coat 없음) 경로 축약 이식  //
     bsdf diffuse_bsdf = df::weighted_layer(
         weight: 1.0,
-        layer: df::diffuse_reflection_bsdf(tint: albedo_w, roughness: 0.0),
+        layer: df::diffuse_reflection_bsdf(tint: albedo_w,
+                                           roughness: diffuse_roughness_a),
         base: bsdf(),
         normal: nrm);
 
@@ -977,7 +991,7 @@ export material NegObsGround(
 
     bsdf surf_bsdf = df::custom_curve_layer(
         normal_reflectivity: 0.08,
-        grazing_reflectivity: 1.0,
+        grazing_reflectivity: grazing_reflectivity_a,
         exponent: 5.0,
         weight: spec,
         layer: ggx_bsdf,

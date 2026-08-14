@@ -358,7 +358,8 @@ def window_rows_visible(dist_m, floor_h, n_floors, ground_h=None, base_z=0.0,
 # [4] Priority 1 - granite plinth band
 # ===========================================================================
 def build_plinth(K, stage, prefix, x0, x1, y0, y1, base_z, mtl,
-                 height=1.10, proud=0.025, wrap=True, fac=None):
+                 height=1.10, proud=0.025, wrap=True, fac=None,
+                 door_gap=None):
     """Plinth stone band (ground level to about 1.2 m). **1 prim per building.**
 
     Survey priority **1** - it fills the bottom of the h0.3 frame directly, yet today
@@ -393,8 +394,49 @@ def build_plinth(K, stage, prefix, x0, x1, y0, y1, base_z, mtl,
         cy = 0.5 * (float(y0) + float(y1))
         sx = abs(float(x1) - float(x0)) + 2.0 * p
         sy = abs(float(y1) - float(y0)) + 2.0 * p
-        return [K.box(stage, f"{prefix}/PlinthStone", (cx, cy, zc),
-                      (sx, sy, h), mtl)]
+        if door_gap is None:
+            return [K.box(stage, f"{prefix}/PlinthStone", (cx, cy, zc),
+                          (sx, sy, h), mtl)]
+        # [GT-115 ⑧] The single wrap box crossed every entrance door and cut it
+        # in half at 1.10 m (audit N1~N4: "기단 띠가 출입문을 두 동강"). With a
+        # `door_gap=(axis, plane, center, width)` the wrap becomes 5 perimeter
+        # bands whose OUTER faces sit exactly where the wrap box's faces were, and
+        # the band on the door facade is split around the opening — so the door
+        # glass (facade +0.020) now reads through granite jambs (+0.025 proud).
+        # `door_gap=None` (all other callers) stays 1 box, byte-identical.
+        ax, plane, ctr, gw = door_gap
+        tb = 0.15                       # visual shell depth [derived — face-only]
+        lo_x, hi_x = float(x0) - p, float(x1) + p
+        lo_y, hi_y = float(y0) - p, float(y1) + p
+        g0, g1 = float(ctr) - float(gw) / 2.0, float(ctr) + float(gw) / 2.0
+        out = []
+
+        def band(tag, bx0, bx1, by0, by1):
+            if bx1 - bx0 > 1e-4 and by1 - by0 > 1e-4:
+                out.append(K.box(stage, f"{prefix}/PlinthStone_{tag}",
+                                 ((bx0 + bx1) / 2.0, (by0 + by1) / 2.0, zc),
+                                 (bx1 - bx0, by1 - by0, h), mtl))
+        if ax == "y":
+            door_lo = abs(float(plane) - float(y0)) <= \
+                abs(float(plane) - float(y1))
+            fy = (lo_y, lo_y + tb) if door_lo else (hi_y - tb, hi_y)
+            oy = (hi_y - tb, hi_y) if door_lo else (lo_y, lo_y + tb)
+            band("F0", lo_x, max(lo_x, g0), fy[0], fy[1])
+            band("F1", min(hi_x, g1), hi_x, fy[0], fy[1])
+            band("B", lo_x, hi_x, oy[0], oy[1])
+            band("W", lo_x, lo_x + tb, min(fy[1], oy[1]), max(fy[0], oy[0]))
+            band("E", hi_x - tb, hi_x, min(fy[1], oy[1]), max(fy[0], oy[0]))
+        else:
+            door_lo = abs(float(plane) - float(x0)) <= \
+                abs(float(plane) - float(x1))
+            fx = (lo_x, lo_x + tb) if door_lo else (hi_x - tb, hi_x)
+            ox = (hi_x - tb, hi_x) if door_lo else (lo_x, lo_x + tb)
+            band("F0", fx[0], fx[1], lo_y, max(lo_y, g0))
+            band("F1", fx[0], fx[1], min(hi_y, g1), hi_y)
+            band("B", ox[0], ox[1], lo_y, hi_y)
+            band("S", min(fx[1], ox[1]), max(fx[0], ox[0]), lo_y, lo_y + tb)
+            band("N", min(fx[1], ox[1]), max(fx[0], ox[0]), hi_y - tb, hi_y)
+        return out
     c = fac.world(fac.mid, p / 2.0, zc)
     s = fac.size(fac.width + 2.0 * p, p, h)
     return [K.box(stage, f"{prefix}/PlinthStone", c, s, mtl)]

@@ -597,6 +597,16 @@ LOOK_CLASS = {
     "veg":      dict(bevel=0.000, sat=0.76, mdl="omni",   detail=False,
                      tex="grass", bump=1.2, max_gain=7.0, tex_scale=1.4,
                      max_spread=3.0, tex_alts=("grass",)),
+    # [GT-118] Horizontal large-area lawn split out of `veg`. The 3-D canopy family
+    # must stay omni (real USD leaves — §2.1), but a 40 m lawn slab is *ground*: it
+    # needs the triplanar projection, macro modulation (mowing/dry-patch band ~1.6 m
+    # [derived]), patch rotation and saturation self-correction that the omni branch
+    # never ran — the audit's "녹색 사포" / F8 root. s17 had already escaped by
+    # renaming its planes `TurfSoil`; this promotes that workaround to a class.
+    "turf":     dict(bevel=0.000, sat=0.76, mdl="ground", patch=1.0,
+                     detail=False, tex="grass", bump=1.2, max_gain=7.0,
+                     tex_scale=1.4, max_spread=3.0, tex_alts=("grass",),
+                     macro=0.10, macro_wl=1.6),
     "water":    dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
     "glass":    dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
     "paint":    dict(bevel=0.000, sat=1.00, mdl="omni",   detail=False),
@@ -651,8 +661,8 @@ LOOK_ROLE = {
     "Grate": "metal", "Grating": "metal", "Gear": "metal",
     # Wood
     "Wood": "wood", "WoodDark": "wood", "SeatWood": "wood", "Bench": "wood",
-    # Vegetation
-    "Grass": "veg", "GrassB": "veg", "CanopyA": "veg", "CanopyB": "veg",
+    # Vegetation — [GT-118] Grass/GrassB are lawns -> turf; canopies stay veg.
+    "Grass": "turf", "GrassB": "turf", "CanopyA": "veg", "CanopyB": "veg",
     "Leaf": "veg", "LeafA": "veg", "LeafB": "veg", "Hedge": "veg",
     "Shrub": "veg", "Reed": "veg", "Moss": "veg",
     # Water
@@ -756,7 +766,9 @@ _LOOK_RULES = [
     # `Canopy`, bus-shelter roofs) matched it and became *grass promotion candidates*.
     # Real tree canopies keep their exact-match keys (`CanopyA`, `CanopyB`).
     # [W5] "forest", "scrub", "lily" added (scene07/09 backdrop vegetation fell to misc).
-    ("veg", ("grass", "leaf", "hedge", "shrub", "foliage", "reed",
+    # [GT-118] lawns before the canopy family — "grass"/"turf"/"lawn" are ground.
+    ("turf", ("grass", "turf", "lawn")),
+    ("veg", ("leaf", "hedge", "shrub", "foliage", "reed",
              "tuft", "tree", "moss", "treeline", "treepit", "verge",
              "forest", "scrub", "lily")),
     # Snow - the **largest single-material area across all 33 scenes** (sceneC1 88.5 %), yet it was stuck in misc
@@ -1384,11 +1396,12 @@ def _ground_skin(stage, path, center, size, mtl, amp_m=0.010,
 # diagnosis constant-colour vegetation (2.26 pp) and constant-colour wood (1.61 pp) were top dead-pixel sources.
 _CONST_MDL_CLASSES = {"paving", "concrete", "brick", "stone", "soil",
                       "gravel", "asphalt", "nosing", "curb", "snow",
-                      "veg", "wood"}
+                      "veg", "wood", "turf"}
 
 # Role classes that get a displacement skin (ground family only). Stairs, curbs and nosings are excluded -
 # they are drop edge geometry and are left alone under approval condition (2).
-_SKIN_CLASSES = {"paving", "concrete", "asphalt", "soil", "gravel", "stone"}
+_SKIN_CLASSES = {"paving", "concrete", "asphalt", "soil", "gravel", "stone",
+                 "turf"}   # [GT-118] lawn ground undulation — not a drop edge
 # A path containing one of these tokens gets no displacement even if it is ground (drop geometry, walking safety)
 #   "gkit" - all ground_kit output lives under `{ROOT}/GKit/...`. Some builders create areas over
 #   4 m, such as coating and wear bands, so without this token a ground_kit element would
@@ -2047,7 +2060,15 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
     sh.CreateInput("saturation_a", F).Set(
         _effective_sat(spec, diff, base_color))
     sh.CreateInput("rough_noise_a", F).Set(float(spec.get("rough_noise", 0.22)))
-    sh.CreateInput("rough_noise_wavelength_a", F).Set(1.2)
+    # [GT-117] 1.2 하드코딩 → 스펙화(rough_wl) + v1.10 물리 파라미터 배선.
+    # 값을 적는 클래스가 없는 오늘은 전부 기본값 = 비트동일.
+    sh.CreateInput("rough_noise_wavelength_a", F).Set(
+        float(spec.get("rough_wl", 1.2)))
+    if spec.get("diff_rough") is not None:
+        sh.CreateInput("diffuse_roughness_a", F).Set(float(spec["diff_rough"]))
+    if spec.get("grazing") is not None:
+        sh.CreateInput("grazing_reflectivity_a",
+                       F).Set(float(spec["grazing"]))
     # Constant-colour mode has no texture, so no axis-transition streaking occurs ->
     # 6 dithering noise taps are pure waste. Set to 0 to cut the cost.
     sh.CreateInput("tri_dither", F).Set(
@@ -3905,7 +3926,8 @@ def build_tree(stage, prefix, cx, cy, gz, wood_mtl, canopy_a_mtl, canopy_b_mtl,
 
 def build_planter(stage, prefix, cx, cy, base_z, curb_mtl, grass_mtl,
                   tree_mtls=None, size=3.0, curb_h=0.45, curb_t=0.25,
-                  cap_over=0.05, cap_h=0.05, grass_h=0.40, species=None):
+                  cap_over=0.05, cap_h=0.05, grass_h=0.40, species=None,
+                  shrubs=True):
     """Flower bed: 4 kerb walls + cap (overhang) + grass top surface (+ an optional tree).
     With tree_mtls=(wood, canopy_a, canopy_b) a tree is placed in the centre. Transplanted from scene01.
 
@@ -3939,7 +3961,10 @@ def build_planter(stage, prefix, cx, cy, base_z, curb_mtl, grass_mtl,
     # Bed shrubs - untrimmed bed shrubs are the real body of the "candy floss" problem.
     # (A trimmed hedge being box-shaped is the result of clipping and is actually correct.)
     # If there is a tree, keep the centre clear and seat them towards the corners.
-    if LOOK_GEO and veg_available():
+    # [GT-115 ⑧] `shrubs=False` opt-out — sceneN1 reuses this builder for its
+    # reflecting pool (grass slab swapped for water) and the unconditional planting
+    # put 3 shrubs in open water. Default True = byte-identical everywhere else.
+    if LOOK_GEO and shrubs and veg_available():
         inner = S / 2.0 - t - 0.25
         if inner > 0.35:
             r = inner * 0.62
@@ -3974,6 +3999,10 @@ def _fire_decal_mtl(stage, prefix):
                      roughness_const=0.55)
         _FIRE_MTL_CACHE[key] = m
     return m
+
+
+# [GT-115 ⑧] Door width shared by the entrance door and the plinth door gap.
+_DOOR_W = 1.8
 
 
 def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
@@ -4112,9 +4141,14 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
     try:
         fac = fk.facade_from_bd(bd)
         K = fk.Kit(add_box, add_cylinder)
+        # [GT-115 ⑧] The plinth band used to cross the entrance and cut the door
+        # in half at 1.10 m (N1~N4 audit). The gap is the door width + 0.30 jamb
+        # margin, on the door facade computed below (DW hoisted to here).
+        _dg = (("y", gy, cx, _DOOR_W + 0.30) if axis_y
+               else ("x", gx, cy, _DOOR_W + 0.30))
         prims += fk.build_plinth(K, stage, prefix, bd["x0"], bd["x1"],
                                  bd["y0"], bd["y1"], base, parapet_mtl,
-                                 height=1.10)
+                                 height=1.10, door_gap=_dg)
         # AC outdoor units - the **strongest Korean identification cue** named by the survey, and their
         # mounting height of 1.5-2.6 m is straight ahead at the robot viewpoint.
         prims += fk.build_aircon_units(K, stage, prefix, fac,
@@ -4133,7 +4167,7 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
     # -- (1) Lower storeys: entrance door ---------------------------------
     # The 2.1 m door height doubles as a **scale anchor**. The composition audit's central point was that
     # in a library with 0 people and 0 vehicles there is almost no cue for reading absolute size.
-    DW, DH = 1.8, 2.1
+    DW, DH = _DOOR_W, 2.1
     if axis_y:
         prims.append(add_box(stage, f"{prefix}/Door",
                              (cx, gy + fdir * 0.02, base + DH / 2.0),

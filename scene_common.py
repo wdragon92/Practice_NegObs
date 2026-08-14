@@ -626,6 +626,21 @@ LOOK_CLASS = {
     "misc":     dict(bevel=0.003, sat=1.00, mdl="omni",   detail=False),
 }
 
+# [GT-125] 물리 파라미터 값 부여 파일럿 팔 — 기본 OFF = 전 코퍼스 비트동일.
+#   GT-117 은 diff_rough/grazing 스펙 키를 개방만 했다(값 0건). 이 팔이 광물·입상
+#   6클래스에 값을 주입한다: Oren-Nayar σ(광물 실측 문헌 대역 0.3~0.55)는 접지각
+#   자기음영을, grazing 하한대는 h0.3 지면 하늘광택("젖은 마루") 소거를 맡는다.
+#   채택(기본값 승격)은 파일럿 A/B 실측 후 별행.
+PHYS_V1 = os.environ.get("NEGOBS_PHYS_V1", "") == "1"
+if PHYS_V1:
+    for _c, _v in {"asphalt":  dict(diff_rough=0.45, grazing=0.25),
+                   "paving":   dict(diff_rough=0.40, grazing=0.30),
+                   "concrete": dict(diff_rough=0.40, grazing=0.30),
+                   "stone":    dict(diff_rough=0.35, grazing=0.30),
+                   "soil":     dict(diff_rough=0.50, grazing=0.20),
+                   "gravel":   dict(diff_rough=0.55, grazing=0.20)}.items():
+        LOOK_CLASS[_c].update(_v)
+
 # --- `Looks/<name>` -> class -------------------------------------------------
 # Ordered by measured name frequency. An unlisted name falls to "misc" (the conservative default).
 LOOK_ROLE = {
@@ -718,7 +733,8 @@ def look_report():
     # before anyone noticed, and the unit-cell wiring sat uncalled for a version.
     det_pol = (f"detXovr={DETAIL_SCALE_OVERRIDE:g}" if DETAIL_SCALE_OVERRIDE > 0
                else "detX=class")
-    return (f"[룩v1] MTL={int(LOOK_MTL)} GEO={int(LOOK_GEO)} | "
+    return (f"[룩v1] MTL={int(LOOK_MTL)} GEO={int(LOOK_GEO)}"
+            f"{' PHYS=1' if PHYS_V1 else ''} | "
             f"재질 ground={r['ground']} omni_tex={r['omni_tex']} "
             f"const={r['const']} skip={r['skipped']} | 베벨={r['bevel']} "
             f"디테일={r['detail']} 스킨={r['skin']} "

@@ -2749,3 +2749,18 @@ GT-113 W4 로 개방한 MDL B-세트의 첫 실전 — A=grass_lawn(생존 잔�
 a91b83b(틴트 (1.32,1.18,1.02) 녹색 잔존 대역·블렌드 0.28). 파고라 구조·쐐기 폐합은
 동일 컷에서 성립 확인(GT-119② 참조). 2차분은 최종 allview 라운드에서 육안.
 **Status: OPEN (착지 — 2차 반복분 차기 라운드 검증)**
+
+## 81. GT-125 — 물리 파라미터 값 부여 파일럿: 광물·입상 6클래스 Oren-Nayar + grazing 감쇠 (선신고)
+
+**Authority**: 08-14 사용자 3일 자율 위임(행 69). GT-117 이 개방만 하고 값 0건으로
+닫은 그 별행 — 근거 = RTX 조사(감사 §5.3): 확산 순수 램버시안 → 접지각 자기음영
+원리 부재가 **slope 잔여 격차 후보 1순위**, grazing_reflectivity 1.0 → h0.3 지면
+하늘광택("젖은 마루"). s13 판정컷 실측 P1("grazing gloss 과다") 동근.
+**Scope**: `NEGOBS_PHYS_V1=1` 팔(기본 OFF = 전 코퍼스 비트동일) — LOOK_CLASS 주입:
+asphalt diff_rough 0.45/grazing 0.25 · paving/concrete 0.40/0.30 · stone 0.35/0.30 ·
+soil 0.50/0.20 · gravel 0.55/0.20 [대역 근거: Oren-Nayar σ 실측 문헌 광물 0.3~0.55,
+grazing 은 젖은막 소거 목적 하한대]. 기하·조명 불변(R-2 팔).
+**GT 판정**: R-2. 파일럿 렌더 3씬(s13 asphalt·s16 paving·s03 concrete/soil) ON 팔 —
+최신 기준선(r4batch/hzbatch) 대비 ps_slope·clipHi·grazing 컷 육안. 채택 시 기본값
+승격은 별행(전 코퍼스 룩 변화라 사용자 판정 후보).
+**Status: OPEN (선신고 — 시공 중)**

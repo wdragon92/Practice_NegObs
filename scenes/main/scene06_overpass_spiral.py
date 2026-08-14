@@ -580,11 +580,28 @@ PARAMS = dict(
         #   joints and tie holes, and (2) equalise the channels with a tint for **neutral grey**.
         #   tint (0.72,0.77,0.92) -> mean (101,102,102) ~ albedo 0.40 (§4 no pure white ·
         #   real concrete value). Fascia / parapet are a touch brighter (0.435) to split the layers.
+        # [GT-126 · audit valid-new] the v6 trade above bought neutral grey at the price of
+        #   concrete_wall's **form-tie holes**, and the audit caught the bill: the tie-hole
+        #   dimples repeat on the texture pitch as a lattice of bright "pearls" across the
+        #   deck top/underside, treads and rail bases (260811_w3_s06bay14 pt_noon_deck_entry,
+        #   ~260-300 px rows; in shadow the pearl vanishes -> it is the nor-map dimple
+        #   catching the sun, not albedo [measured: speck ~= field at (1755,690) in shade]).
+        #   Tie holes belong on VERTICAL formwork faces only - a trowel-finished slab has
+        #   none - so the slab/tread group (`concrete`, `deck`) moves to concrete_floor
+        #   (featureless trowel grain, the class-canonical tex), while fascia/parapet KEEP
+        #   concrete_wall (their joints+tie holes are the real article; their repeat is
+        #   decorrelated by the GT-113 W3 unit-cell jitter instead - see setup_materials).
+        #   The tints keep the RENDERED product bit-comparable, so the v6 neutral-grey
+        #   target survives the swap: linear tex means wall (0.2537,0.2433,0.1608) / floor
+        #   (0.1535,0.1202,0.0772) [measured, 4k full-res, IEC 61966-2-1 decode] ->
+        #   new_tint = wall_mean x old_tint / floor_mean per channel; product luminance
+        #   0.1835 (concrete) / 0.1932 (deck) is unchanged and stays under the class band
+        #   ceiling 0.34, so the albedo-band path is identical too.
         scale=dict(paving_interlock=1.0, concrete_wall=2.0,
                    granite_dark=1.0, brick_red=2.0, grass=1.4, tactile=0.3),
         asphalt_color=(0.045, 0.045, 0.050), asphalt_rough=0.92,
-        concrete_tint=(0.72, 0.77, 0.92),
-        deck_tint=(0.76, 0.81, 0.97),
+        concrete_tint=(1.190, 1.559, 1.916),
+        deck_tint=(1.256, 1.640, 2.020),
         parapet_tint=(0.78, 0.83, 0.99),
         soil_tint=(0.42, 0.44, 0.34),
         # S06-B item 3 — pale flamed granite kerb (G6), lifted off `granite_dark`
@@ -674,7 +691,8 @@ if _sc_ov:
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "scene06")
-ASSET_ROLES = ["paving_interlock", "concrete_wall", "granite_dark",
+ASSET_ROLES = ["paving_interlock", "concrete_wall", "concrete_floor",
+               "granite_dark",   # [GT-126] concrete_floor added - slab/tread group texture
                "brick_red", "grass", "tactile",   # [v5.2 user] arbitrary warning sign removed
                "hdri", "mdl"]
 
@@ -1647,15 +1665,19 @@ def main():
                           sc.tex_path("paving_interlock", "nor"),
                           sc.tex_path("paving_interlock", "rough"),
                           s["paving_interlock"])
+        # [GT-126] slab/tread group -> concrete_floor (trowel finish, no tie holes) with
+        #   product-preserving tints - see the `concrete_tint` note in PARAMS. The scale
+        #   ledger key stays `concrete_wall` on purpose: the calibrated 2.0 / 3.2 m tile
+        #   is a scene value, not a property of which map fills it.
         M["concrete"] = PBR(f"{ROOT}/Looks/Concrete",
-                            sc.tex_path("concrete_wall", "diff"),
-                            sc.tex_path("concrete_wall", "nor"),
-                            sc.tex_path("concrete_wall", "rough"),
+                            sc.tex_path("concrete_floor", "diff"),
+                            sc.tex_path("concrete_floor", "nor"),
+                            sc.tex_path("concrete_floor", "rough"),
                             s["concrete_wall"], tint=mp["concrete_tint"])
         M["deck"] = PBR(f"{ROOT}/Looks/DeckConcrete",
-                        sc.tex_path("concrete_wall", "diff"),
-                        sc.tex_path("concrete_wall", "nor"),
-                        sc.tex_path("concrete_wall", "rough"),
+                        sc.tex_path("concrete_floor", "diff"),
+                        sc.tex_path("concrete_floor", "nor"),
+                        sc.tex_path("concrete_floor", "rough"),
                         s["concrete_wall"] * 1.6, tint=mp["deck_tint"])
         # fascia·parapet·cheek - separate scale (3.2 m) so the formwork joints read large
         M["fascia"] = PBR(f"{ROOT}/Looks/Fascia",
@@ -1726,6 +1748,17 @@ def main():
                            sc.tex_path("concrete_wall", "nor"),
                            sc.tex_path("concrete_wall", "rough"),
                            s["concrete_wall"], tint=mp["parapet_tint"])
+        # [GT-126 · audit valid-new] fascia/parapet stay on concrete_wall (vertical
+        #   formwork - joints and tie holes are real there), so their tile repeat is
+        #   broken the GT-113 W3 way instead: one log-normal albedo scalar per texture
+        #   repeat. cell = the material's own tile (the world projection period), origin
+        #   = world 0 = the projection phase (contract U3), sigma/accent = the T1 §1.8-3
+        #   defaults 0.10/0.07. Shader-input authoring only (R-2): the prim set is
+        #   untouched, and with the look layer off the call is a no-op returning False.
+        for _nm, _mtl, _cell in (("fascia", M["fascia"], s["concrete_wall"] * 1.6),
+                                 ("parapet", M["parapet"], s["concrete_wall"])):
+            _wired = sc.wire_unit_cell_to(_mtl, (_cell, (0.0, 0.0)))
+            print(f"[GT-126] s06 unit_cell 배선({_nm}, cell {_cell:.1f} m) = {_wired}")
         M["wood"] = PBR(f"{ROOT}/Looks/Wood", diffuse_color=mp["wood_color"],
                         roughness_const=mp["wood_rough"])
         M["leaf_a"] = PBR(f"{ROOT}/Looks/LeafA", diffuse_color=mp["leaf_a"],

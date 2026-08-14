@@ -35,11 +35,24 @@ GT rule  : No drop (0 on every pixel). **The site descends at 5% together with t
      only toward −Y, so new shadows on the road are **0** (§check). The arms reach out over the
      corridor, giving the urban rhythm of 'roadway/sidewalk lighting'.
   (4) 3 plates on the wall face (south side = the sunlit face) + 1 information sign at the entry (Korean texture).
+      [GT-126 look-geo: the 3 plates are REMOVED - contentless white cards failed the identity
+       audit and the no-new-text rule leaves removal as the safe disposition. The entry sign stays.]
   (5) Entry bollards 2 -> 4 (2 rows) - rhythm at the pedestrian entry.
   (6) 2 distant low-rise buildings (L1·L2) - h5.0/4.2 roofs laid in front of the existing distant
      building F (h12) to form skyline tiers. Placed by calculation at x·y that keep them inside the
      corridor view angle (small |y|) and unoccluded by the walls.
   (7) GT invariant: every new element is an object standing on the ground - no new vertical drop, opening or level difference.
+
+[GT-126 look v1] audit v1 answers - **look-geo builds only, the baseline prim set is untouched**:
+  (a) 59 m guard-wall run articulated: contraction/expansion joint strips (stations from
+      infra_kit.wall_joint_positions), one Ø75 weep row @3.0 m, coping cap. Every element takes
+      its z from road_z(x) - the previous [realism v1] wiring used one constant band (z 0..wall_h)
+      over the whole run, so on the descending half the strips/bores floated above the crown.
+  (b) the 3 blank wall plates of v6-(4) are removed (identity audit: contentless white cards).
+  (c) far ridge: the 120x18x6 grass BOX (audit: constant-green wall, std 0.006) becomes 6 tilted
+      turf slabs with jittered crest/toe + RidgeSoil cut bands (silhouette + tint variation).
+  GT invariant: (a) is wall-face fittings + a crown cap 6 mm proud (no walkable surface moves),
+  (b) removes prims, (c) stays behind the landing at x>=100 - the ramp surface is bit-identical.
 ────────────────────────────────────────────────────────────────────────────
 
 Run (GUI look check - default):
@@ -157,6 +170,7 @@ PARAMS = dict(
                      head=0.24, y=-2.90),
     streetlights=[4.0, 15.0, 26.0],
     # --- [v6-(4)] Wall plates (south inner face = the sunlit face). proud toward +Y from y=−2.0 ---
+    #   [GT-126] baseline builds only - the look-geo build removes them (blank white cards).
     wall_plates=[dict(x=9.0), dict(x=18.0), dict(x=27.0)],
     wall_plate=dict(w=0.55, h=0.38, t=0.03, z_off=1.05,
                     face_w=0.42, face_h=0.26, face_t=0.012),
@@ -168,6 +182,38 @@ PARAMS = dict(
                     w=0.78, h=0.78),
     # --- [v6-(1)] Road expansion-joint transverse lines (flat plates proud 0.001, follow the slope) ---
     joints=dict(x0=4.0, x1=44.0, step=4.0, w=0.06, proud=0.001),
+
+    # ═══ [GT-126 look-geo] Wall-face articulation - joints · weep row · coping ══
+    #   Stations reuse `infra_kit.wall_joint_positions`: the 1.6 m guard wall is solved as a
+    #   "gravity" wall, so expansion bays land at 59/6 = 9.833 m `[computed]` (inside the
+    #   9-12 m practice band and 도로설계요령 3권 8-7편's <=10 m) and each bay splits once for
+    #   a 4.917 m contraction rhythm (ceiling 9 m). Groove widths follow the kit: contraction
+    #   7 mm (true size - the wall_run eye stands 1-3 m off the face, where 1 px ~ 1-2 mm, so
+    #   the real groove IS resolvable, unlike s08's 29 m read that widened it to 40 mm),
+    #   expansion 20 mm. Strips are dark and 1 mm proud (kit doctrine: a recess without
+    #   booleans is not worth the split; a proud dark strip reads as a groove).
+    #   Weep row: Ø75 @3.0 m, axis +Y, z = road_z(x)+0.40 (s08 GT-115⑩ band 0.30-0.50;
+    #   Ø75 = the commercial size under the guide's 100 mm that fits a 1.6 m wall).
+    #   Coping: h 0.10, oversail 0.030/side (30-50 mm practice band, lower bound - the removed
+    #   v6 plates stood 42 mm proud at z~1.05, so the crown cap encroaches LESS than what it
+    #   replaces), top +0.006 proud of the crown (s08 idiom) so no face is coplanar with the
+    #   wall top and the guardrail post bases sink 6 mm into the cap (no float, no z-fight).
+    wall_detail=dict(wall_type="gravity", contraction=9.0,
+                     groove_w=0.007, expansion_w=0.020, strip_t=0.02,
+                     weep_d=0.075, weep_spacing=3.0, weep_z=0.40,
+                     weep_depth=0.12,
+                     cope_h=0.10, cope_over=0.030, cope_proud=0.006),
+    # ═══ [GT-126 look-geo] Far ridge relief - replaces the FarRidge grass BOX ══
+    #   h_lo 6.8 > old box h 6.0: the horizon closure can only rise. The grazing ray from the
+    #   highest judged eye (beauty z 3.0) through the OLD box top edge (x=100, z=-DROP+6.0)
+    #   reaches z 4.75 at x=118 `[computed]`; the lowest new crest is -DROP+6.8 = 5.30, so
+    #   every former wall pixel still lands on a slab (margin >=0.55 m, re-checked in the
+    #   builder print). toe_jit+run_hi = 17.0 < 18.0 keeps every crest inside the old x1=118.
+    ridge_look=dict(segs=6, h_lo=6.8, h_hi=8.6, run_lo=9.5, run_hi=13.5,
+                    toe_jit=3.5, edge_jit=3.0, y_overlap=0.5, thick=3.0,
+                    soil_p=0.55, soil_y_inset=1.2,
+                    tint_a=(0.47, 0.58, 0.34), tint_b=(0.62, 0.66, 0.38),
+                    soil_rgb=(0.30, 0.25, 0.18)),
 
     # ═══ [W2 ground_kit] P8 ramp_road - spec §5.8 N4 row ════════════════════
     #  Prescription: L-shaped gutters 300 on both sides (y=+-1.85) · gully · 2 edge lines ·
@@ -478,10 +524,30 @@ def _dressing_probes(drop):
     es = PARAMS["entry_sign"]
     P.append(("진입사인·판", (es["x"], es["y"],
                              es["pole_h"] - es["h"] / 2.0 - 0.05)))
-    wp = PARAMS["wall_plate"]
-    for x in wall_plate_xs():
-        P.append((f"옹벽판x{x:.1f}", (x, -PARAMS["wall"]["y_in"] + 0.02,
-                                      road_z(x, drop) + wp["z_off"])))
+    if not sc.LOOK_GEO:               # [GT-126] the plates exist only in the baseline build
+        wp = PARAMS["wall_plate"]
+        for x in wall_plate_xs():
+            P.append((f"옹벽판x{x:.1f}", (x, -PARAMS["wall"]["y_in"] + 0.02,
+                                          road_z(x, drop) + wp["z_off"])))
+    else:                             # [GT-126] wall articulation - nearest-risk stations
+        #  South (camera-side) face only: the 2 joint strips and 2 weep bores closest to the
+        #  wall_run eye (x 5.5-10.6). All are 1 mm proud, so the check is about frame entry,
+        #  not occupancy - the ① in-frame proximity floor (1.0 m) is the judged criterion.
+        import infra_kit as ik
+        wd = PARAMS["wall_detail"]
+        wl_, ap_ = PARAMS["wall"], PARAMS["approach"]
+        con, exp = ik.wall_joint_positions(wl_["x_end"] - ap_["x0"],
+                                           wd["wall_type"], wd["contraction"])
+        for s in (con[2], exp[1]):    # x 10.58 · 5.67 [computed]
+            xj = ap_["x0"] + s
+            P.append((f"옹벽줄눈x{xj:.1f}",
+                      (xj, -wl_["y_in"] + 0.001,
+                       road_z(xj, drop) + wl_["wall_h"] - 0.5)))
+        for s in (2.5 + wd["weep_spacing"] * 6, 2.5 + wd["weep_spacing"] * 7):
+            xw = ap_["x0"] + s        # x 6.5 · 9.5 (pad 2.5 [computed])
+            P.append((f"옹벽배수공x{xw:.1f}",
+                      (xw, -wl_["y_in"] + 0.001,
+                       road_z(xw, drop) + wd["weep_z"])))
     bo = PARAMS["bollard"]
     for b in PARAMS["bollards"]:
         P.append((f"볼라드({b['cx']:+.1f},{b['cy']:+.1f})",
@@ -839,28 +905,88 @@ def main():
                  hh - DROP - dep / 2.0),
                 (wl["x_end"] - rp["run"] + 0.02, t, dep), M["wall"], col=True)
 
-            # [realism v1] Retaining wall detail - weep holes · expansion/contraction joints · coping.
-            # Survey finding: all 51 retaining walls in this scene were **plain blank walls**. A real retaining wall
-            # has φ100 weep holes about every 4m (Road Design Guide vol.3, part 8-7), a cantilever wall is
-            # broken by an expansion joint every 15~20m, and contraction joint grooves go in at 9m or less
-            # spacing. These repeated division lines are what let the wall face read at scale.
-            # No GT effect: they are wall-face fittings, so they do not change the ground z(x,y).
-            if sc.LOOK_GEO:            # weep holes / expansion joints = new prims (geometry)
-                try:
-                    import infra_kit as ik
-                    kit = ik.Kit(
-                        box=lambda pth, c, sz, m=None, col=False: sc.add_box(
-                            stage, pth, c, sz, m, collider=col),
-                        cyl=lambda pth, c, r, h, m=None, rotY=0.0, rotX=0.0,                             col=False: sc.add_cylinder(
-                                stage, pth, c, r, h, m, rotY=rotY),
-                        stage=stage)
-                    ik.build_retaining_wall_details(
-                        kit, f"{ROOT}/WallDet_{tag}",
-                        ap["x0"], wl["x_end"], ya, 0.0, hh,
-                        M["wall"], axis="x", normal_sign=-sgn,
-                        wall_t=t, wall_type="cantilever", coping=False)
-                except Exception as e:
-                    print(f"[룩v1][경고] 옹벽 상세 실패 {tag}: {e}")
+        # [GT-126 look-geo] Wall-face articulation - joint strips · weep row · coping.
+        #   Replaces the [realism v1] constant-band infra_kit call (a9a3b22). That call fixed
+        #   z_ground=0.0 · z_top=wall_h over the whole 59 m run, so on the descending half every
+        #   strip and bore floated above the crown (landing crown z=+0.10 vs strip top +1.60);
+        #   it also passed the **bright wall material** as `mtl_dark` (invisible articulation)
+        #   and its cyl adapter dropped rotX, so the weep bores stood as vertical pucks. The
+        #   builder below places every element off road_z(x); only the joint STATIONS still
+        #   come from infra_kit (the dimensioning logic survives, the constant band does not).
+        if sc.LOOK_GEO:
+            build_wall_details(M)
+
+    # -------------------------------------------------------------------
+    # [GT-126 look-geo] Retaining-wall articulation - every element follows road_z(x).
+    #   No GT effect: wall-face fittings (1 mm proud / embedded) plus a crown cap whose top is
+    #   +6 mm proud - nothing touches the ground z(x,y) and nothing enters the walk axis
+    #   (max face protrusion 30 mm at crown level vs the 42 mm the removed plates stood proud).
+    # -------------------------------------------------------------------
+    def build_wall_details(M):
+        import infra_kit as ik
+        wl = PARAMS["wall"]
+        ap = PARAMS["approach"]
+        rp = PARAMS["ramp"]
+        wd = PARAMS["wall_detail"]
+        x0, x1 = ap["x0"], wl["x_end"]
+        L = x1 - x0
+        hh, t, y_in = wl["wall_h"], wl["thick"], wl["y_in"]
+        con, exp = ik.wall_joint_positions(L, wd["wall_type"],
+                                           wd["contraction"])
+        # Weep stations - the kit's linear-row convention (centred residual split).
+        pitch = float(wd["weep_spacing"])
+        ncol = max(1, int(L // pitch))
+        pad = (L - pitch * (ncol - 1)) / 2.0
+        weep_s = [pad + pitch * k for k in range(ncol)]
+        ch, cover, cproud = wd["cope_h"], wd["cope_over"], wd["cope_proud"]
+        for sgn, tag in ((-1.0, "S"), (1.0, "N")):
+            y_face = sgn * y_in                    # corridor-side (inner) face
+            ns = -sgn                              # proud direction = into the corridor
+            base = f"{ROOT}/WallDet_{tag}"
+            # (1) joint strips - dark, 1 mm proud, sunk 20 mm below the local road so no
+            #     bottom face is coplanar with the road top; the head stops at crown-0.05,
+            #     inside the coping body (s08 idiom: every strip dies under the cap).
+            for kind, ss, w in (("JC", con, wd["groove_w"]),
+                                ("JE", exp, wd["expansion_w"])):
+                for i, s in enumerate(ss):
+                    xj = x0 + s
+                    rz = road_z(xj, DROP)
+                    zb, zt = rz - 0.02, rz + hh - 0.05
+                    BOX(f"{base}/{kind}_{i:02d}",
+                        (xj, y_face + ns * (0.001 - wd["strip_t"] / 2.0),
+                         (zb + zt) / 2.0),
+                        (w, wd["strip_t"], zt - zb), M["joint"])
+            # (2) weep row - horizontal Ø75 bores, cap 1 mm proud of the face (the streetlight
+            #     arm's rotX=90 idiom lays the cylinder axis along Y).
+            r_w = wd["weep_d"] / 2.0
+            dep = wd["weep_depth"]
+            for i, s in enumerate(weep_s):
+                xw = x0 + s
+                CYL(f"{base}/Weep_{i:02d}",
+                    (xw, y_face + ns * (0.001 - dep / 2.0),
+                     road_z(xw, DROP) + wd["weep_z"]),
+                    r_w, dep, M["joint"], rotX=90.0)
+            # (3) coping cap - 3 sections mirroring the wall body (0.02 overlaps, one
+            #     build_slope on the 5% half = no stepped approximation). Precast tone =
+            #     the existing parapet constant; top +cproud above the crown, so the wall
+            #     top face is enclosed (no coplanar pair) and the guardrail post bases
+            #     sink 6 mm into the cap instead of floating.
+            yc = sgn * (y_in + t / 2.0)
+            cw = t + 2.0 * cover
+            zt_ap = hh + cproud
+            BOX(f"{base}/CopeAppr",
+                ((ap["x0"] + ap["x1"]) / 2.0, yc, zt_ap - ch / 2.0),
+                (ap["x1"] - ap["x0"], cw, ch), M["parapet"])
+            sc.build_slope(stage, f"{base}/CopeSlope", rp["x0"], zt_ap,
+                           rp["run"], DROP, yc - cw / 2.0, yc + cw / 2.0,
+                           ch, M["parapet"], margin=0.0, collider=False)
+            BOX(f"{base}/CopeLand",
+                ((rp["run"] - 0.02 + x1) / 2.0, yc, zt_ap - DROP - ch / 2.0),
+                (x1 - rp["run"] + 0.02, cw, ch), M["parapet"])
+        print(f"[GT-126] 옹벽 분절: 면당 수축줄눈 {len(con)}·신축줄눈 {len(exp)}"
+              f"(신축 피치 {L / (len(exp) + 1):.2f} m) · 배수공 {len(weep_s)}공 "
+              f"@{pitch:.1f} m · 갓돌 3프림 — 전 요소 z=road_z(x) 추종, "
+              f"갓돌 상단 +{cproud * 1000:.0f} mm(동일면 회피)")
 
     # -------------------------------------------------------------------
     # cue - pipe rail on top of the retaining wall (optional)
@@ -945,6 +1071,9 @@ def main():
     # -------------------------------------------------------------------
     # [v6-(4)] 3 wall plates - the south (-Y) inner face is the sunlit face, so they read.
     #   proud toward +Y from the inner face y=-y_in. Backing plate + face plate, 2 boxes (scene02 pattern).
+    #   [GT-126] Baseline builds only. The look-geo build drops them: the audit read the
+    #   0.42x0.26 constant-colour face as a contentless white card matching no real fixture,
+    #   and the no-new-text rule leaves removal as the safe disposition (see build_dressing).
     # -------------------------------------------------------------------
     def build_wall_plates(M):
         wl = PARAMS["wall"]
@@ -990,6 +1119,68 @@ def main():
             n += 1
 
     # -------------------------------------------------------------------
+    # [GT-126 look-geo] Far ridge relief - replaces the single FarRidge grass BOX.
+    #   6 build_slope slabs: toe at ground level, crest 6.8-8.6 m, toe/run/edge jittered, so
+    #   the skyline steps in height AND depth instead of one straight 120 m top edge with
+    #   right-angle corners. Tint: 3-way far-turf rotation (GrassFar* names ride the GT-118
+    #   turf class -> triplanar + macro modulation under LOOK_MTL) + RidgeSoil cut bands
+    #   30 mm proud of the flank (exposed-soil macro variation, no new asset).
+    #   Closure: h_lo 6.8 > old h 6.0 - see the PARAMS ridge_look note; re-derived below.
+    # -------------------------------------------------------------------
+    def build_far_ridge(M):
+        fa, rl = PARAMS["far"], PARAMS["ridge_look"]
+        rg = fa["ridge"]
+        n = int(rl["segs"])
+        base_w = (rg["y1"] - rg["y0"]) / n
+        edges = [rg["y0"] + base_w * i for i in range(n + 1)]
+        for i in range(1, n):                     # end edges stay at ±60 (full span kept)
+            edges[i] += bc.jit_scalar(i, 0.0, "rgN4e",
+                                      -rl["edge_jit"], rl["edge_jit"])
+        mt_a = PBR(f"{ROOT}/Looks/GrassFarA", sc.tex_path("grass", "diff"),
+                   sc.tex_path("grass", "nor"), sc.tex_path("grass", "rough"),
+                   mp["scale"]["grass"], tint=rl["tint_a"])
+        mt_b = PBR(f"{ROOT}/Looks/GrassFarB", sc.tex_path("grass", "diff"),
+                   sc.tex_path("grass", "nor"), sc.tex_path("grass", "rough"),
+                   mp["scale"]["grass"], tint=rl["tint_b"])
+        m_soil = PBR(f"{ROOT}/Looks/RidgeSoil", diffuse_color=rl["soil_rgb"],
+                     roughness_const=0.95, specular_level=0.0)
+        mats = (mt_a, M["grass"], mt_b)
+        z_base = -DROP - 0.05                     # toe end face fully buried (ground -DROP)
+        crest_min = None
+        for i in range(n):
+            h = bc.jit_scalar(i, 1.0, "rgN4h", rl["h_lo"], rl["h_hi"])
+            run = bc.jit_scalar(i, 2.0, "rgN4r", rl["run_lo"], rl["run_hi"])
+            xf = rg["x0"] + bc.jit_scalar(i, 3.0, "rgN4x", 0.0, rl["toe_jit"])
+            y0 = edges[i]
+            # +0.5 overlap into the next segment: the shared y-plane side faces would be
+            # coplanar (z-fight); interpenetrating slabs of different tilt are not.
+            y1 = edges[i + 1] + (rl["y_overlap"] if i < n - 1 else 0.0)
+            sc.build_slope(stage, f"{ROOT}/FarRidge/Seg_{i}", xf, z_base,
+                           run, -(h + 0.05), y0, y1, rl["thick"],
+                           mats[i % 3], margin=0.0, collider=False)
+            crest = -DROP + h
+            crest_min = crest if crest_min is None else min(crest_min, crest)
+            if bc.jit_scalar(i, 4.0, "rgN4s", 0.0, 1.0) < rl["soil_p"]:
+                f0 = bc.jit_scalar(i, 5.0, "rgN4f", 0.28, 0.45)
+                fl = bc.jit_scalar(i, 6.0, "rgN4l", 0.16, 0.28)
+                xb = xf + f0 * run
+                zb = z_base + (h + 0.05) * f0 + 0.03      # parallel plane +30 mm
+                sc.build_slope(stage, f"{ROOT}/FarRidge/Soil_{i}", xb, zb,
+                               fl * run, -(h + 0.05) * fl,
+                               y0 + rl["soil_y_inset"],
+                               edges[i + 1] - rl["soil_y_inset"],
+                               0.06, m_soil, margin=0.0, collider=False)
+        # Closure re-derivation: extend the highest judged eye's grazing ray through the OLD
+        # box top edge (rg.x0, -DROP+rg.h) out to the deepest crest x (rg.x1) - every new
+        # crest must sit on or above it, else a former wall pixel opens to sky.
+        eye = build_views()["beauty_overview"]["eye"]
+        z_old = -DROP + rg["h"]
+        z_ray = eye[2] + (rg["x1"] - eye[0]) * (z_old - eye[2]) / (rg["x0"] - eye[0])
+        print(f"[GT-126] 원경 능선 {n}조각 · 최저 크레스트 z {crest_min:.2f} vs "
+              f"구 상자 실루엣 연장 z {z_ray:.2f} → "
+              f"{'폐쇄 유지 OK' if crest_min >= z_ray else 'FAIL(하늘 틈)'}")
+
+    # -------------------------------------------------------------------
     # Dressing - bollards + horizon closure by the distance (hedges · trees · ridge · buildings)
     # -------------------------------------------------------------------
     def build_dressing(M):
@@ -1007,7 +1198,8 @@ def main():
                                  height=bo["h"], tactile=False)
         build_guard(M)
         build_streetlights(M)
-        build_wall_plates(M)
+        if not sc.LOOK_GEO:            # [GT-126] blank plates - baseline only (audit: identity)
+            build_wall_plates(M)
         build_entry_sign(M)
         build_joints(M)
         fa = PARAMS["far"]
@@ -1019,11 +1211,15 @@ def main():
         for i, cy in enumerate(fa["tree_cys"]):
             sc.build_tree(stage, f"{ROOT}/FarTree_{i}", fa["tree_x"], cy,
                           -DROP, M["wood"], M["canopy_a"], M["canopy_b"])
-        rg = fa["ridge"]
-        BOX(f"{ROOT}/FarRidge",
-            ((rg["x0"] + rg["x1"]) / 2.0, (rg["y0"] + rg["y1"]) / 2.0,
-             -DROP + rg["h"] / 2.0),
-            (rg["x1"] - rg["x0"], rg["y1"] - rg["y0"], rg["h"]), M["grass"])
+        if sc.LOOK_GEO:                # [GT-126] articulated ridge (audit: constant-green wall)
+            build_far_ridge(M)
+        else:
+            rg = fa["ridge"]
+            BOX(f"{ROOT}/FarRidge",
+                ((rg["x0"] + rg["x1"]) / 2.0, (rg["y0"] + rg["y1"]) / 2.0,
+                 -DROP + rg["h"] / 2.0),
+                (rg["x1"] - rg["x0"], rg["y1"] - rg["y0"], rg["h"]),
+                M["grass"])
         for key, bd in PARAMS["buildings"].items():
             bd = dict(bd)
             bd["base_z"] = -DROP

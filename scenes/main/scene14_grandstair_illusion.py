@@ -510,6 +510,33 @@ PARAMS = dict(
         #   this row's wall change to grain and colour cast, which is what the user asked
         #   to be simplified.
         wall_conc_tint=(0.710, 0.769, 1.078),
+        # ═══ [GT-126] Terrace white — the marble shipped untinted ═══
+        #   `marble_light_diff` mean linear albedo **0.4425 / 0.3372 / 0.1938 =
+        #   luminance 0.3492** [measured this session, `_texture_mean` idiom], and
+        #   `M["marble"]` was the one walked-surface material in this scene with no
+        #   tint at all, so that mean WAS the effective albedo. The stone-class
+        #   ceiling (`alb_max` 0.34, GT-108) trims it only 2.6 % (k = 0.34/0.3492)
+        #   — pass-through in practice, and with the look layer off even that trim
+        #   disappears. Measured on `260815_w4_r4batch`: judged-cut h0.3_d5 ground
+        #   band (all terrace marble, x −9..0) **80.2 % of pixels above 0.8
+        #   display** — worst in the 33-scene corpus — led by the red channel
+        #   (0.4425 raw / 0.4308 banded; bright-px display mean 0.854/0.824/0.766).
+        #   GT-121(2) measured the same mechanism on s15: effective 0.30 still put
+        #   the band top over the display range at noon. Target restated in the
+        #   channel that clips (the GT-121 coordinate move): **max effective
+        #   channel ≤ the 0.34 class ceiling** → one scalar on all three channels,
+        #   0.34 / 0.4425 = 0.7683 → **0.768** (conservative truncation; hue
+        #   ratios untouched). Effective albedo = tint × texture mean =
+        #   0.3398 / 0.2589 / 0.1488, **luminance 0.2682** [computed] — inside the
+        #   light-stone/terrazzo band 0.25~0.35 and under the ceiling, so
+        #   `_albedo_band` passes it through and the number written here stays
+        #   true in both look arms. The GT-70 material break survives: marble
+        #   keeps +7.8 % luminance over the flight (0.2682 vs 0.2487) plus the
+        #   warm-cream vs neutral hue break (R/B 2.28 vs 1.16). Estimated display
+        #   p50 on the judged band 0.823 → **≈0.77** [computed — response fitted
+        #   on this round's own bright-px measurement, display ∝ eff^0.29].
+        #   Old value [repro]: no tint (effective = bare texture mean, Y 0.3492).
+        marble_tint=(0.768, 0.768, 0.768),
         grass_tint=(0.60, 0.63, 0.38),           # [W3 L14] autumn — see PARAMS["autumn"]
         # B-14-5: fixes the high-brightness clustering across the frame - facade 0.56->0.30, parapet 0.90->0.62
         bldg_color=(0.30, 0.30, 0.33), bldg_rough=0.6,
@@ -1011,10 +1038,13 @@ def main():
     def setup_materials():
         sca = mp["scale"]
         M = {}
+        # [GT-126] tint 0.768 — see `marble_tint` for the arithmetic: effective
+        #   albedo 0.3398/0.2589/0.1488 (Y 0.2682, light-stone band), replacing the
+        #   bare texture mean (Y 0.3492 = the corpus-worst white terrace).
         M["marble"] = PBR(
             f"{ROOT}/Looks/Marble", sc.tex_path("marble_light", "diff"),
             sc.tex_path("marble_light", "nor"), sc.tex_path("marble_light", "rough"),
-            sca["marble_light"])
+            sca["marble_light"], tint=mp["marble_tint"])
         M["granite"] = PBR(
             f"{ROOT}/Looks/Granite", sc.tex_path("granite_dark", "diff"),
             sc.tex_path("granite_dark", "nor"),
@@ -1024,7 +1054,7 @@ def main():
             sc.tex_path("plaza_lower", "nor"),
             sc.tex_path("plaza_lower", "rough"), sca["plaza_lower"])
         M["band"] = PBR(
-            f"{ROOT}/Looks/Band", sc.tex_path("band_dark", "diff"),
+            f"{ROOT}/Looks/BandDark", sc.tex_path("band_dark", "diff"),
             sc.tex_path("band_dark", "nor"), sc.tex_path("band_dark", "rough"),
             sca["band_dark"])
         # [GT-70] The walked family — flight, landings and the shoulder apron beside

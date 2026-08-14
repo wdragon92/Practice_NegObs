@@ -800,6 +800,26 @@ PARAMS = dict(
     material=dict(
         scale=dict(plaza_light=1.80, band_dark=0.9, plaza_lower=0.7,
                    granite_dark=1.0, brick_red=2.0, grass=1.4, tactile=0.3),
+        # ═══ [GT-126] 광장·티어 포장 톤 — 판정컷 clipHi 61.6 % 의 주인 ═══
+        #  260815_w4_r4batch 판정컷(h0.3_d5)은 표시휘도 > 0.75 화소가 **61.6 %**
+        #  (코퍼스 3위)이고, 그 프레임의 66 %가 이 한 재질이다 `[measured]`.
+        #  실효 알베도 0.3327 (= plaza_light 텍스처 선형평균 Y **0.4622**
+        #  `[measured, scene_common._texture_mean 64px]` × 구틴트 0.72)은 클래스
+        #  천장 `paving.alb_max` 0.34 의 1 % 아래 — `_albedo_band` 통과가 맞고,
+        #  우회도 아니다. 기전은 노출: 이 립(GAIN 1.77)에서는 천장값 자체가
+        #  표시역 상단을 넘는다(0.3327 × 1.77 = 0.589 선형 → 표시 0.79). 클립되면
+        #  채널차가 죽어 질감도 죽는 것이 F2 기전이고, GT-121 2차가 s15 골목에서
+        #  같은 것을 실측했다(0.30 이 판정컷 clipHi 52.7 %).
+        #  목표 **0.26** — 근거 두 겹: ① 실물 대역 0.25~0.34(콘크리트·밝은 석재,
+        #  GT-108 근거 계열)의 하단부 = 볕에 바랜 화강석 판석, 바닥 0.25 에 pin
+        #  하지 않는 여유 ② 판정컷 화소분포 재스케일 예보: 0.26 에서 clipHi
+        #  61.6 → **16.5 %**, 광장 중앙값 표시휘도 0.817 → 0.725(클립선 아래 —
+        #  질감 채널차 복원) `[computed]`.
+        #  틴트 = 목표 / 텍스처평균 Y = 0.26 / 0.4622 = **0.5626** — 중립 스칼라
+        #  하나라 색상 불변(색은 텍스처가 가진다). 진입 계단(plaza_lower 실효
+        #  0.21)·얼룩(0.167)과의 명도 서열 광장 > 계단 > 얼룩은 유지된다.
+        #  구값 `[repro — T1 T-1, 호출부 리터럴]`: (0.72, 0.72, 0.72) → 실효 0.3327
+        plaza_tint=(0.5626, 0.5626, 0.5626),
         lower_warm_tint=(1.06, 1.0, 0.94),        # stage warm tint
         grass_tint=(0.55, 0.68, 0.42),
         glass_color=(0.06, 0.09, 0.12), glass_rough=0.08,
@@ -851,11 +871,13 @@ PARAMS = dict(
         #   **pilot 2 -> pilot 3**, and the reason is exposure, not material.
         #   At 0.340 the sunlit wall face still measured **luma 0.75 · 50 % over
         #   the 0.8 line** `[measured, 200x230 px on plaza_approach]`, against the
-        #   pre-state's 0.444. The library's render runs hot: the plaza paving is
+        #   pre-state's 0.444. The library's render runs hot: the plaza paving was
         #   bound at a **realistic** 0.334 linear albedo (0.4644 texture x 0.72
         #   tint, inside the 0.35-0.45 band real 화강석 판석 occupies) and still
-        #   renders **luma 0.655 with 29.9 % of its area over 0.8 in the BASELINE
-        #   ITSELF**. So a wall at a physically correct 0.30-0.40 cannot satisfy
+        #   rendered **luma 0.655 with 29.9 % of its area over 0.8 in the BASELINE
+        #   ITSELF** (the same hot-exposure mechanism GT-126 later re-measured as
+        #   clipHi 61.6 % and answered by lowering `plaza_tint` to eff 0.26 —
+        #   see the material dict). So a wall at a physically correct 0.30-0.40 cannot satisfy
         #   v5.1 §4 in this rig. 0.200 is the value that lands the wall face on
         #   **luma ~0.60**, between the pre-state's 0.444 and the white line, and
         #   it is recorded as an exposure compensation rather than dressed up as a
@@ -1673,10 +1695,13 @@ def _srgb(u):
 
 # (label, texture role|None, material key|None, large area, horizontal, waiver reason|None)
 _ALBEDO_TABLE = [
-    ("광장·티어 포장",   "plaza_light", None,               True,  True,
-     "v7 판정 [경] '§4 경계선' — 01/05/14/18/19 가 무틴트 plaza_light 를 "
-     "공유하는 전 씬 공통 항목이라 씬 단독 하향 시 21씬 톤 정합이 깨진다. "
-     "판정 §11-6 이 요구한 것도 '전역' 규약이므로 감독 결정 대기."),
+    # [GT-126] 이 행은 v7 이후 무틴트(1,1,1) + 유예로 적혀 있었다 — 실제 결합은
+    #  호출부 리터럴 ×0.72 였는데 키가 None 이라 자가검사가 실값을 영영 못 봤고
+    #  (WAIVED 234.9 로 표류), 유예가 기다리던 '전역 규약'은 GT-108 클래스 밴드
+    #  (paving.alb_max 0.34)로 이미 착지했다. 틴트를 mp["plaza_tint"] 로 승격해
+    #  실값을 읽게 하고 유예를 해제한다 — 0.5626 에서 알베도 0.264 · 수평 예상
+    #  렌더 182 로 A·B 모두 통과 `[computed]`.
+    ("광장·티어 포장",   "plaza_light", "plaza_tint",       True,  True,  None),
     ("진입 계단 판석",   "plaza_lower", "lower_warm_tint",  True,  True,  None),
     ("잔디",             "grass",       "grass_tint",       True,  True,  None),
     ("둘레 생울타리",    "grass",       "hedge_tint",       False, False, None),
@@ -1889,10 +1914,10 @@ def main():
         M["plaza_light"] = sc.make_pbr(
             stage, "/World/Looks/PlazaLight", sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
-            scl["plaza_light"], tint=(0.72, 0.72, 0.72))   # [T1 T-1] x0.72
+            scl["plaza_light"], tint=mp["plaza_tint"])   # [GT-126] 구 [T1 T-1] x0.72
         # charcoal bands = dark granite (scene01 motif)
         M["band"] = sc.make_pbr(
-            stage, "/World/Looks/Band", sc.tex_path("granite_dark", "diff"),
+            stage, "/World/Looks/BandDark", sc.tex_path("granite_dark", "diff"),
             sc.tex_path("granite_dark", "nor"), sc.tex_path("granite_dark", "rough"),
             scl["band_dark"])
         M["granite_dark"] = sc.make_pbr(
@@ -1914,7 +1939,7 @@ def main():
             M["stage"] = sc.make_pbr(
                 stage, "/World/Looks/Stage", sc.tex_path("plaza_light", "diff"),
                 sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
-                scl["plaza_light"], tint=(0.72, 0.72, 0.72))   # [T1 T-1] x0.72
+                scl["plaza_light"], tint=mp["plaza_tint"])   # [GT-126] 구 [T1 T-1] x0.72
         # entry stair (for circulation) - blue-grey flagstone to contrast with the seating tiers
         M["plaza_lower"] = sc.make_pbr(
             stage, "/World/Looks/PlazaLower", sc.tex_path("plaza_lower", "diff"),

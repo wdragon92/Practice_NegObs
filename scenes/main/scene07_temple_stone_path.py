@@ -420,6 +420,19 @@ PARAMS = dict(
         ("SouthTerraceB", -1.80, STAIR_DROP, -34.0, -1.70, 1.20, "forest"),
         ("SouthScarp",    0.00, STAIR_DROP, -1.80, -1.66, 2.00, "rock"),
         ("NorthWall",     0.75, 2.00,        1.70,  2.15, 3.20, "rock"),
+        # [GT-126] StairCheekN — 북측 계단 뺨돌(측벽). `side_slope` showed the tread
+        #   ends and the NorthWall face **co-planar at y=1.70**: yaw-jittered slab
+        #   corners cross to y 1.7154 [measured, course table], so the wall face was
+        #   z-fighting the tread end faces (stair-shaped notches punched into the
+        #   masonry) and the across-course seam slots exposed wall texture floating
+        #   between slabs. The cheek encloses that joint instead of moving anything:
+        #   face at y=1.62 (0.08 m proud of the wall, so the treads visibly DIE INTO
+        #   a raking flank wall — 계단 옆막이, standard practice), north edge y=1.78
+        #   tucked into the wall body, top = chord + 0.22 (flank slab corner max is
+        #   chord + 0.058 [measured] → 0.16 m clearance; NorthWall crest is chord
+        #   + 0.75..+2.95, always above). No tread/bed/drop prim is touched — the
+        #   south drop edge, walk-line z and both wall *outer* faces are unchanged.
+        ("StairCheekN",   0.22, STAIR_DROP,  1.62,  1.78, 0.90, "rock"),
         ("NorthBank",     0.00, 2.00,        2.15, 44.00, 1.20, "grass"),
     ],
     # --- leaf-litter band (partial occlusion of stone edges) : thin slabs over the corridor (cx, cy, sx, sy) ---
@@ -578,10 +591,20 @@ PARAMS = dict(
                 tone="far"),
            dict(cx=88.0, cy=56.0, sx=13.0, sy=140.0, h=29.2, z0=-6.0,
                 tone="far")],
-    # ridge-crest forest bands : (ridge index, height) - build_hedge round crowns treat
-    # distant trees as a **silhouette band** rather than individuals (avoids the C-4 lollipop).
-    ridge_crest=[(0, 3.4, "near"), (1, 4.2, "near"), (2, 3.8, "near"),
-                 (3, 5.0, "far"), (4, 4.2, "far")],
+    # ridge-crest forest bands : (ridge index, height, tone, f0, f1) - build_hedge round
+    # crowns treat distant trees as a **silhouette band** rather than individuals (avoids
+    # the C-4 lollipop). GT-63 keeps this cheap idiom for the RidgeCrest family.
+    # [GT-126] f0/f1 = fractional span of the ridge's y extent. The near bands are split
+    #   into two segments of different height (Δh 0.5~0.7): one full-length band seeded
+    #   from a single centre gave crowns of one pitch and one apex line — the audited
+    #   "identical green domes in a row". Two segments re-seed the crown hash and stagger
+    #   the apex line; total band length is unchanged. [measured] crest prims 196 → 224
+    #   (+28: the lower-height segment draws a tighter crown pitch, h*1.2*0.9) — all
+    #   distant-mass spheres, declared backdrop cost.
+    ridge_crest=[(0, 3.4, "near", 0.00, 0.56), (0, 2.8, "near", 0.56, 1.00),
+                 (1, 4.2, "near", 0.00, 0.47), (1, 3.5, "near", 0.47, 1.00),
+                 (2, 3.8, "near", 0.00, 0.52), (2, 3.1, "near", 0.52, 1.00),
+                 (3, 5.0, "far", 0.00, 1.00), (4, 4.2, "far", 0.00, 1.00)],
     # individual trees only on the near ridge crest, a few (for edge silhouette variation)
     ridge_trees=[dict(ri=0, cy=-30.0), dict(ri=1, cy=-6.0),
                  dict(ri=1, cy=14.0), dict(ri=2, cy=38.0)],
@@ -601,7 +624,13 @@ PARAMS = dict(
     # --- materials ---
     material=dict(
         # [v6] rock_face = jointless natural rock for the stones / granite = lanterns·plinths
-        scale=dict(rock_wall=3.5, rock_face=0.95,
+        # [GT-126] rock_wall 3.5 → 4.6: at 3.5 the ~0.40 m block module repeated 3.5
+        #   times across the 12.2 m wall run and the same 7~8-block motif recurred in
+        #   frame (audit: "석축 텍스처가 명확한 타일 반복"). 4.6 puts blocks at ~0.53 m
+        #   (호박돌급 — the larger product is the correct one for a 1.8~3 m revetment)
+        #   and cuts the visible period count to 2.65. The residual periodicity is
+        #   killed by the per-period unit-cell albedo jitter wired in setup_materials.
+        scale=dict(rock_wall=4.6, rock_face=0.95,
                    granite=3.2, leaf_ground=2.0, gravel=0.35, grass=1.4,
                    dirt_park=1.10, moss=2.40),
         # [W3 S3-6 · GT-17] summer forest floor + the first moss tint in this scene.
@@ -631,11 +660,21 @@ PARAMS = dict(
         #   crest albedos are all scaled x1.42 (=0.456/0.323), staying under the pure-white
         #   ceiling of 0.72. Without this correction the "background pure-black fix" reverts
         #   - the SMOKE [v6 sun] block compares the albedo x lambert product against the v6 values.
+        # [GT-126] These five are now **effective-albedo targets**, not raw constants:
+        #   setup_materials realises each one as `rock_face` × (target / texture linear
+        #   mean), so tint×mean lands exactly on the value stated here and the SMOKE
+        #   [v6 태양] 휘도곱 preservation table keeps reading the true number. The
+        #   constant-colour ridge walls were the audited "세로 줄무늬 상수색 녹색 벽";
+        #   the texture is world-projected at ridge_tex_scale so the mottle reads as
+        #   soil/rock tonal bands on a far hillside, and the aerial-perspective tiering
+        #   (bluer + brighter with distance, v6/v7) is preserved bit-for-bit at the mean.
         ridge_near=(0.074, 0.088, 0.064),
         ridge_mid=(0.125, 0.139, 0.131),
         ridge_far=(0.202, 0.222, 0.250),
         crest_near=(0.060, 0.078, 0.051),     # ridge-crest forest band (near)
         crest_far=(0.102, 0.122, 0.111),
+        ridge_tex_scale=(22.0, 30.0, 40.0),   # near/mid/far projection [m per tile]
+        crest_tex_scale=6.0,                  # crown blobs — canopy-clump wavelength
         sign_back=(0.055, 0.050, 0.045),
         rail_color=(0.20, 0.18, 0.16), rail_metallic=0.25, rail_rough=0.75,
     ),
@@ -1692,6 +1731,40 @@ def _smoke_report():
     for nm, z0, drop, y0, y1, th, _m in P["slopes"]:
         print(f"    {nm:16s} z0 {z0:+6.2f} → {z0 - drop:+6.2f}  "
               f"y[{y0:7.2f},{y1:7.2f}] 두께 {th:.2f}")
+
+    # ── [GT-126] StairCheekN 포함검산 — 디딤판 무이동으로 벽·계단 얽힘 해소 ──
+    #   (a) 뺨돌 상단 라킹선(코드 z + z0)이 북측 플랭크 판의 모든 모서리 상단을
+    #       덮는가 (roll 모서리 + jz 포함), (b) yaw 지터 북측 모서리 y 가 뺨돌
+    #       북변(1.78) 안에 갇히는가, (c) 뺨돌 상단이 NorthWall 마루 아래인가.
+    ck = next(r for r in P["slopes"] if r[0] == "StairCheekN")
+    _, ck_z0, _ck_drop, ck_y0, ck_y1, _ck_th, _ = ck
+    hz = float(cp["thick"]) / 2.0
+    worst_dz, ymax_c = -9.9, -9.9
+    for c in COURSES:
+        for s in c["slabs"]:
+            if s["y1"] < float(cp["y1"]) - 1e-9:
+                continue
+            hy = (s["y1"] - s["y0"]) / 2.0
+            hx = (s["xb_f"] - s["xback"]) / 2.0
+            corner = (s["top"] + abs(hy * math.sin(math.radians(s["roll"]))))
+            worst_dz = max(worst_dz, corner - path_z(s["xb_f"]))
+            ymax_c = max(ymax_c, (s["y0"] + s["y1"]) / 2.0
+                         + abs(hx * math.sin(math.radians(s["yaw"])))
+                         + abs(hy * math.cos(math.radians(s["yaw"]))))
+    nw = next(r for r in P["slopes"] if r[0] == "NorthWall")
+    crest_min = min(nw[1] - nw[2] * (x / STAIR_RUN) - (path_z(x) + ck_z0)
+                    for x in (0.0, STAIR_RUN))
+    print(f"  [GT-126 뺨돌] 면 y={ck_y0:.2f} (디딤판 끝 {cp['y1']:.2f} 대비 "
+          f"{cp['y1'] - ck_y0:.2f} m 매입) · 상단 코드+{ck_z0:.2f}")
+    print(f"    (a) 플랭크 모서리 최고 코드+{worst_dz:.3f} → 여유 "
+          f"{ck_z0 - worst_dz:+.3f} m "
+          f"{'OK' if ck_z0 - worst_dz > 0.0 else 'FAIL(디딤판 관통)'}")
+    print(f"    (b) yaw 북측 모서리 y 최대 {ymax_c:.4f} ≤ {ck_y1:.2f} → "
+          f"{'OK' if ymax_c <= ck_y1 else 'FAIL(벽면 재관통)'}")
+    print(f"    (c) NorthWall 마루 대비 최소 여유 {crest_min:+.2f} m → "
+          f"{'OK' if crest_min > 0.0 else 'FAIL(마루 돌출)'} · "
+          f"디딤판·낙차연부·판정카메라 무수정 (probe diff 별도)")
+
     for x in (0.0, 3.0, 6.0, 9.0, 12.2):
         print(f"    x={x:5.1f}: 회랑 {path_z(x):+6.3f} / 남측테라스 "
               f"{path_z(x) - SIDE_DROP:+6.3f} (낙차 {SIDE_DROP:.2f}) / "
@@ -1821,7 +1894,21 @@ def main():
         # [v6] lanterns·plinths = jointless granite tone (old stone_cap = masonry texture -> chimney)
         M["stone_cap"] = tex("granite_dark", "/World/Looks/StoneCap",
                              sca["granite"], tint=mp["granite_tint"])
-        M["rock"] = tex("rock_wall", "/World/Looks/Rock", sca["rock_wall"])
+        # [GT-126] Masonry de-repetition: `unit_cell` = one cell per texture period
+        #   (cell == scale, origin 0, σ/악센트 = T1 §1.8-3 defaults). Adjacent repeats
+        #   of the block motif get different log-normal albedo gains, so the 4.6 m
+        #   period stops reading as wallpaper; the stone class's own patch rotation
+        #   (patch 1.0 @ 4 m) and macro band (0.12 @ 0.55 m, GT-108) stay untouched.
+        #   NB the MDL quantises **world XY** (`NegObsGround.mdl` `float2(pw_w.x,
+        #   pw_w.y)`), so on these x-running wall faces the cells land as 4.6 m
+        #   construction-section bands — the real 석축 구간 이음 tonal break. A
+        #   sub-metre cell here would column-stripe a vertical face (the plan grid
+        #   degenerates on walls); do not shrink it until the MDL projects the cell
+        #   on the dominant plane. GT-113 W3 (scene21 marble) is the wiring precedent;
+        #   the value is authored at creation because no ground_kit ledger covers the
+        #   wall family — the LOOK_MTL=0 arm ignores the kwarg (byte-identical).
+        M["rock"] = tex("rock_wall", "/World/Looks/Rock", sca["rock_wall"],
+                        unit_cell=(sca["rock_wall"], (0.0, 0.0)))
         M["leaf"] = tex("leaf_ground", "/World/Looks/Leaf",
                         sca["leaf_ground"], tint=mp["leaf_tint"])
         M["gravel"] = tex("gravel", "/World/Looks/Gravel", sca["gravel"],
@@ -1866,16 +1953,45 @@ def main():
                            tint=(0.82, 0.81, 0.79))
         M["gk_moss"] = tex("gravel", "/World/Looks/GkMoss", sca["gravel"],
                            tint=PARAMS["stone_mtl"]["tint_moss"])
-        for tone in ("near", "mid", "far"):
-            M[f"ridge_{tone}"] = sc.make_pbr(
-                stage, f"/World/Looks/Ridge_{tone}",
-                diffuse_color=mp[f"ridge_{tone}"], roughness_const=0.95,
-                specular_level=0.0)
-        for tone in ("near", "far"):
-            M[f"crest_{tone}"] = sc.make_pbr(
-                stage, f"/World/Looks/Crest_{tone}",
-                diffuse_color=mp[f"crest_{tone}"], roughness_const=1.0,
-                specular_level=0.0)
+        # [GT-126] Distant ridge + crest: constant colour → textured, same mean.
+        #   The audit read the ridge walls as "세로 줄무늬가 들어간 상수색 녹색 벽 =
+        #   무대 배경막". Two causes, two cures, no new asset:
+        #   · constant colour — replaced by `rock_face` (already in the tree) world-
+        #     projected at 22/30/40 m (ridges) and 6 m (crest crowns), so the mottle
+        #     reads as soil/rock tonal bands on a far hillside, not a flat card.
+        #   · striping — [measured, headless make_pbr probe] the old names
+        #     (`Ridge_near`…) matched no exact/strip key and fell through to the
+        #     **concrete** catch-all, whose `_W_STRUCT` weathering puts `streak
+        #     0.12` = run-down streaks on vertical faces — a 15~29 m face of
+        #     nothing but streak IS the audited "세로 줄무늬". The new
+        #     `Ridge_{i}`/`Crest_{i}` names strip to the `Ridge`/`Crest` table keys
+        #     → soil class → no streak, NegObsGround normal-weighted triplanar
+        #     (the B2 cure), so nothing can smear or streak a vertical face.
+        #   Tint = target / texture linear mean (per channel, `sc._texture_mean`), so
+        #   the effective albedo equals `ridge_*`/`crest_*` exactly and the v6/v7
+        #   luminance-preservation contract (SMOKE [v6 태양] table) still holds.
+        #   Multiplier spread max 2.4 — inside the F1 blue-noise cap of 3.0
+        #   [computed: rock_face linear mean (0.159, 0.118, 0.083)]. If PIL is
+        #   unavailable the mean is None and the old constants build verbatim.
+        _rf_mean = sc._texture_mean(sc.tex_path("rock_face", "diff"))
+
+        def _backdrop_mtl(path, target, scale, rough):
+            if _rf_mean:
+                tint = tuple(t / max(m, 1e-4)
+                             for t, m in zip(target, _rf_mean))
+                return tex("rock_face", path, scale, tint=tint,
+                           specular_level=0.0)
+            return sc.make_pbr(stage, path, diffuse_color=target,
+                               roughness_const=rough, specular_level=0.0)
+
+        for i, tone in enumerate(("near", "mid", "far")):
+            M[f"ridge_{tone}"] = _backdrop_mtl(
+                f"/World/Looks/Ridge_{i}", mp[f"ridge_{tone}"],
+                mp["ridge_tex_scale"][i], 0.95)
+        for i, tone in enumerate(("near", "far")):
+            M[f"crest_{tone}"] = _backdrop_mtl(
+                f"/World/Looks/Crest_{i}", mp[f"crest_{tone}"],
+                mp["crest_tex_scale"], 1.0)
         # [W3 S3-6 · GT-17] Summer forest floor. `dirt_park` is already in the tree and already
         #   tuned for this scene family; darkened and cooled it reads as damp mountain soil
         #   under a closed canopy, which is what G7's between-stone ground is.
@@ -2582,12 +2698,17 @@ def main():
         for i, r in enumerate(rg):
             BOX(f"{ROOT}/Ridge_{i}", (r["cx"], r["cy"], r["z0"] + r["h"] / 2.0),
                 (r["sx"], r["sy"], r["h"]), M[f"ridge_{r['tone']}"], col=True)
-        for n, (ri, hh, tone) in enumerate(PARAMS["ridge_crest"]):
+        # [GT-126] f0/f1 fractional spans: the near bands run as two segments of
+        #   different height (see the PARAMS row) so the crown hash re-seeds and the
+        #   apex line staggers — the audited single-height "green dome row" breaks
+        #   without leaving the GT-63 box+crown idiom.
+        for n, (ri, hh, tone, f0, f1) in enumerate(PARAMS["ridge_crest"]):
             r = rg[ri]
             top = r["z0"] + r["h"]
+            ya = r["cy"] - r["sy"] / 2.0
             sc.build_hedge(stage, f"{ROOT}/RidgeCrest_{n}",
-                           r["cx"] - r["sx"] * 0.62, r["cy"] - r["sy"] / 2.0,
-                           r["cx"] + r["sx"] * 0.62, r["cy"] + r["sy"] / 2.0,
+                           r["cx"] - r["sx"] * 0.62, ya + r["sy"] * f0,
+                           r["cx"] + r["sx"] * 0.62, ya + r["sy"] * f1,
                            hh, mtl=M[f"crest_{tone}"], base_z=top - 0.4)
         for i, t in enumerate(PARAMS["ridge_trees"]):
             r = rg[t["ri"]]

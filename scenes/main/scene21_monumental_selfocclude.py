@@ -937,7 +937,7 @@ def main():
             sc.tex_path("granite_dark", "nor"),
             sc.tex_path("granite_dark", "rough"), sca["granite_dark"])
         M["band"] = PBR(
-            f"{ROOT}/Looks/Band", sc.tex_path("band_dark", "diff"),
+            f"{ROOT}/Looks/BandDark", sc.tex_path("band_dark", "diff"),
             sc.tex_path("band_dark", "nor"), sc.tex_path("band_dark", "rough"),
             sca["band_dark"])
         M["grass"] = PBR(

@@ -237,6 +237,35 @@ Run (GUI look check - default):
   Species re-mix / run-splitting **would** cut the band, but that is a planting-design change to a
   backdrop the user has already ruled on twice (GT-63, GT-86), so it is filed, not taken.
 
+[GT-126] 260815_w4_r4batch judgment-cut tone tails (R-2 materials only, 0 prims, 0 geometry).
+  Measured on `pt_noon_preset_h0.3_d5` with the `shortcut_audit` metric (display luminance
+  > 0.75 / < 0.10): clipHi **56.8 %** / clipLo **14.8 %**. Region split [measured]:
+    clipHi — promenade pavers y 0.31-1.0 own **51.6 pp** of the 56.8 (sky 2.2 · far-tree
+      leaf sparkle 3.0). clipLo — far-shore tree band y 0.05-0.25 owns **8.8 pp**, the
+      shoreline hedge line y 0.25-0.31 **5.0 pp**, far pavers 1.0.
+  The bright tail is **not** a binding failure — `from_river` shows the water-mark band at
+  its authored hue (R/B 1.20 vs authored 1.196) and at the declared stain/stone ratio
+  (0.52 vs 0.476), so the tint family lands. The excess is **exposure**: the judged PT
+  noon gain on open horizontal ground measures **2.40-2.46** (paver lin 0.578-0.592 over
+  effective 0.241), where the v7 §4 machinery predicts with the RT-era GAIN 1.77. At the
+  measured gain the metric's clip line (disp 0.75) sits at effective albedo **0.211 —
+  inside the 0.20-0.35 weathered-granite band**, so no in-band stone clears the metric at
+  this exposure; what can move is the mean. Landing rule = GT-121 2차 (scene15): reproduce
+  its landing display (mean disp 0.725) under this scene's own gain → eff 0.197-0.202,
+  taken just inside the band: `stone_tint` **× 0.850** → effective 0.209 (bottom third,
+  floor respected), and the same factor to every ratio-authored tint (stain · moss ·
+  drystone · drystone_cap · stepstone) so the **waterline contrast — this scene's only
+  drop anchor — is preserved by construction** (the v7 / GT-41(2) idiom, third pass).
+  Projected on the shipped cut [computed]: paver clipHi 76.5 → 28.5 %, frame ≈ 24 %;
+  the residual is exposure-owned (GT-125's PHYS_V1 grazing arm is the next lever, not a
+  darker stone). The dark tail is **left**: 13.8 of its 14.8 pp are instanced-foliage
+  interiors (FarTree oak / FarHedge shrub prototypes — a scene-side bind cannot reach
+  into a prototype, `w3_t4b_v1.md` §1.2, the same fact as the magenta shrub row) plus
+  hedge-shadowed far-bank faces whose grass already rides an in-band 0.073 albedo —
+  that is shade, not a material tone error, and raising an in-band albedo to fight shade
+  is the banned direction (GT-108). The far-side black band therefore stays a shading /
+  asset question, not a tint this file owns; the waterline coping is untouched.
+
 Auto capture : NEGOBS_CAPTURE=1 python scene09_ghat_riverfront.py
 Assembly smoke: NEGOBS_SMOKE=1 python scene09_ghat_riverfront.py
 Self-check   : NEGOBS_SELFCHECK=1 python scene09_ghat_riverfront.py  (no boot)
@@ -962,13 +991,37 @@ PARAMS = dict(
         #   preserved by construction**, exactly as v7 preserved it through 0.90 → 0.64.
         #   Not scaled, deliberately: `gk_crack` (a flat 0.055 near-black) — darkening the paving
         #   only *widens* the crack contrast, and a crack is not a ratio of the stone it is in.
-        stone_tint=(0.524, 0.515, 0.491),      # was (0.64,0.63,0.60) ← (0.90,0.89,0.86)
+        # [GT-126] **× 0.850** — third exposure correction, same shape as the two above.
+        #   260815_w4_r4batch judgment cut clipHi 56.8 % (audit metric, disp > 0.75); the
+        #   pavers own 51.6 pp of it. Not a binding failure [measured — `from_river` renders
+        #   the stain band at its authored hue R/B 1.20 and the declared stain/stone ratio]:
+        #   the judged PT noon gain on open horizontal ground is **2.40-2.46** (paver lin
+        #   0.578-0.592 over effective 0.2411), so the v7 "expected render 176" above is an
+        #   RT-era prediction and stale under PT. At the measured gain the metric's clip line
+        #   sits at effective **0.211 — inside the 0.20-0.35 band** — so no legal stone albedo
+        #   clears the metric; the mean is brought under the line instead. Landing rule =
+        #   GT-121 2차 (s15 0.30 → 0.24): reproduce its landing display (mean disp 0.725)
+        #   under this scene's own gain → eff 0.197-0.202; taken just inside the band:
+        #   0.469 × 0.445 = **0.209** (measured-map luminance 0.205; bottom third, floor
+        #   respected), expected paver mean ≈ disp 0.73 ≈ 187 sRGB. Projected on the shipped
+        #   cut [computed]: paver clipHi 76.5 → 28.5 %, frame ≈ 24 %; the residual is texture
+        #   spread over an exposure whose clip line is in-band — exposure-owned (GT-125's
+        #   PHYS_V1 grazing arm is the next lever, not a darker stone).
+        #   **The same 0.850 goes to every tint authored as a ratio of this one** (`stain` ·
+        #   `moss` · `drystone` · `drystone_cap` · `stepstone`), so the ratios below survive
+        #   and the **waterline contrast — this scene's only drop anchor — is preserved by
+        #   construction**, exactly as 0.90 → 0.64 → 0.524 preserved it twice before.
+        #   `gk_crack` again not scaled (same reason as above). `quay_stone_tint` takes a
+        #   **partial** factor — see its own note (two-anchor conflict).
+        #   구값 `[repro — W3 P09 · GT-41 (2)]`: (0.524, 0.515, 0.491)
+        stone_tint=(0.445, 0.438, 0.417),      # was (0.524,0.515,0.491) ← (0.64,0.63,0.60) ← (0.90,0.89,0.86)
         # [v5 adopted] moss tint — the 2 steps just below the water (the 'wet band' of the water-level history).
         # [v7] **contrast ratio preserved** to match the stone_tint reduction (0.90→0.64).
         #   old moss/stone = 0.30/0.90 = 0.333 → new 0.64×0.333 = 0.213.
         #   (dropping the absolute value alone would kill the waterline cue with it — this scene's only drop anchor)
         # [W3 P09] × 0.818 again. moss/stone 0.3328 → **0.3321** [computed].
-        moss_tint=(0.174, 0.232, 0.151),       # was (0.213,0.284,0.185)
+        # [GT-126] × 0.850 with the paving. moss/stone 0.3321 → **0.3326** [computed].
+        moss_tint=(0.148, 0.197, 0.128),       # was (0.174,0.232,0.151) ← (0.213,0.284,0.185)
         deck_tint=(0.95, 0.88, 0.78),          # timber boardwalk planks (grey weathered wood)
         # [W3 S09 row (3)] the members under the plank deck are **not** the same tone as the
         #   walking face: a deck plank silvers in the weather, a joist in permanent shade does
@@ -991,8 +1044,12 @@ PARAMS = dict(
         #   These two faces are outside the ±30° cone of all three h0.3 presets (`fov_selfcheck`),
         #   so they cannot enter the wht% verification in either direction — the two halves of
         #   this tone row are cleanly separable, and they are separated in the report.
-        drystone_tint=(0.450, 0.425, 0.376),   # was (0.55,0.52,0.46)
-        drystone_cap_tint=(0.491, 0.466, 0.409),  # was (0.60,0.57,0.50) — coping, a shade lighter
+        # [GT-126] × 0.850 with the paving, for the same reason it had to move with GT-41 (2):
+        #   left alone, the field-stone wall comes out lighter than the machined slab — the
+        #   inverse of the physical claim it is built on. drystone/stone 0.8588 → **0.8607**,
+        #   cap/stone 0.9370 → **0.9371** [computed].
+        drystone_tint=(0.383, 0.361, 0.320),   # was (0.450,0.425,0.376) ← (0.55,0.52,0.46)
+        drystone_cap_tint=(0.417, 0.396, 0.348),  # was (0.491,0.466,0.409) — coping, a shade lighter
         # [W3 S09 row (6)] autumn hillside. The three tones are the two that dominate G9
         #   (ginkgo yellow, maple orange) plus the dark conifer band a Korean hillside always
         #   carries; `hill_c` is the far ridge and is deliberately **lighter and greyer**, not
@@ -1141,12 +1198,17 @@ PARAMS = dict(
         #   This is the tint the **waterline band** and the kit's **joint** lines both bind to
         #   (`build_ground_kit` M2: `joint=M["stain"]`), so holding the ratio holds the joint
         #   grid's legibility at the same time as the drop anchor's.
-        stain_tint=(0.245, 0.245, 0.215),      # was (0.299,0.299,0.263)
+        # [GT-126] × 0.850 with the paving. stain/stone 0.4676 → **0.4674** [computed] — the
+        #   band `from_river` measured at exactly its authored hue (R/B 1.20) keeps both its
+        #   hue and its contrast against the darkened stone.
+        stain_tint=(0.208, 0.208, 0.183),      # was (0.245,0.245,0.215) ← (0.299,0.299,0.263)
         # [W3 P09 · GT-41 (1)] 판석 디딤돌. A lawn-set stepping stone is a **different stone lot**
         #   from the sawn promenade slab beside it — soil splash and mower wear take it a shade
         #   down and a shade greyer. 0.92× the paving tint keeps it in the same albedo family
         #   (so `albedo_selfcheck` governs it) while separating it from the paving at 20 m.
-        stepstone_tint=(0.482, 0.474, 0.452),
+        # [GT-126] × 0.850 with the paving — the 0.92× family relation holds
+        #   (0.9199 → **0.9213** [computed]).
+        stepstone_tint=(0.410, 0.403, 0.384),  # was (0.482,0.474,0.452)
         # [GT-115 ⑨ (4)] 계선주. The four terrace posts were bound to `M["stone"]`, i.e. the
         #   promenade's `plaza_light` map — a **running-bond slab grid**, measured in
         #   `pt_noon_across_river.png` as joint lines wrapping each shaft. A quay post is one
@@ -1164,7 +1226,15 @@ PARAMS = dict(
         #   **0.214** = 0.90 × the promenade's 0.246 at the promenade's own hue ratio: a set post
         #   weathers a shade below the slab beside it, and it stays inside the 0.20–0.35 화강석
         #   band the `stone` class states [computed].
-        quay_stone_tint=(1.392, 1.813, 2.371),
+        # [GT-126] **× 0.9346, a partial factor — the two anchors above now conflict.** The
+        #   promenade dropped to 0.209, so holding 0.90× exactly would land 0.188, *outside*
+        #   the 0.20-0.35 band this row's own note claims; left alone at 0.214 the post comes
+        #   out *lighter* than the slab beside it (1.02×) — the same inversion the drystone
+        #   note forbids. The band wins (it is the class's own statement): effective luminance
+        #   0.214 → **0.200**, the band floor, post/slab 0.957 — "a shade below" survives
+        #   directionally. Level only; the ⑨(4) map choice and hue correction are untouched.
+        #   구값 `[repro — GT-115 ⑨ (4)]`: (1.392, 1.813, 2.371)
+        quay_stone_tint=(1.301, 1.694, 2.216),
         grass_tint=(0.55, 0.68, 0.42),
         # [B-09-3] rough 0.10 → 0.15 (eases the uniform bright teal clipping)
         water_color=(0.06, 0.11, 0.12), water_rough=0.15,

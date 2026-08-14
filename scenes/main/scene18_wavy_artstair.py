@@ -468,13 +468,37 @@ PARAMS = dict(
         #   **Stated honestly**: this is worth ~0.03 of display value on the
         #   0.826 the audit measured. The remaining ~0.79 is the tone/exposure
         #   path, which this ticket is explicitly not allowed to chase.
-        sand_tint=(0.866, 0.840, 0.797),       # G18's sand is a shade warmer
+        # [GT-126] Second descent — the 0.300 above still clips at noon.
+        #   Measured on 260815_w4_r4batch: the fixed noon exposure maps a
+        #   sunlit horizontal albedo ρ to rendered linear luminance ≈ 1.95·ρ
+        #   (sand display median 0.79 → linear 0.585 over ρ 0.300), and the
+        #   judge's clipHi line is display 0.75 = linear 0.522 — so ANY
+        #   horizontal field above ρ ≈ 0.27 clips at its median. The sand read
+        #   near-white in every seaward cut (own clip rate 77-93 %, bright
+        #   enough to desaturate past a warm-hue mask). Same failure, same
+        #   remedy as GT-121 2차 (scene15 alley floor 0.30 → 0.24): come down
+        #   INSIDE the physical band instead of chasing the tone path. Target
+        #   the band floor **0.250** (dry-quartz 0.25-0.40; the beach keeps a
+        #   1.14 value lead over the 0.220 promenade so it still reads as the
+        #   bright surface) — factor 0.250/0.2999 = **0.8336**, hue ratio
+        #   preserved exactly:
+        #     effective (0.3327, 0.2396, 0.1091) · luminance **0.2500**
+        #     (channel average 0.2271) · display median ~0.727 — texture back
+        #     under the clip line. Projected cut clipHi: oblique_down
+        #     57.1 → ~24 % · lower_lookback 32.2 → ~7 % · color_front
+        #     23.5 → ~7 %.
+        #   Old value `[repro — GT-115 ⑪]`: (0.866, 0.840, 0.797)
+        sand_tint=(0.722, 0.700, 0.664),       # G18's sand is a shade warmer
         # [GT-115 ⑪] wet swash sand, 35 % under the dry field:
         #   effective (0.2589, 0.1869, 0.0871) · luminance **0.1950** =
         #   0.650 x 0.300. The old (0.70, 0.68, 0.66) gave 0.2429, which was
         #   only 0.70 of the OLD dry value and 0.81 of the new one - i.e. after
         #   the dry sand comes down it would have all but vanished.
-        damp_tint=(0.562, 0.546, 0.530),       # wet sand darkens ~35 %
+        # [GT-126] follows the dry field by the same 0.8336 so the 35 % wet
+        #   step survives the recalibration: effective luminance **0.1625** =
+        #   0.650 × 0.2500, still inside the wet-sand band 0.15-0.25.
+        #   Old value `[repro — GT-115 ⑪]`: (0.562, 0.546, 0.530)
+        damp_tint=(0.468, 0.455, 0.442),       # wet sand darkens ~35 %
         # ── SEA ── the v6 defect and its fix, in three numbers.
         #   rough 0.22 -> 0.38 : at 0.4-5 deg grazing a 0.22 dielectric is a
         #     mirror and returned the sky, erasing the horizon. 0.38 spreads the
@@ -504,7 +528,21 @@ PARAMS = dict(
         #   (0.78/0.85)^2.2 = 0.826, so 0.74 x 0.826 -> **0.58** with margin.
         #   It is also the more faithful value: G18's 화강석 판석 promenade is a
         #   mid light grey, not white.
-        granite_tint=(0.58, 0.58, 0.572),
+        # [GT-126] The judgment cut (preset h0.3_d5) is 67 % promenade, and
+        #   the paving — NOT the sand — owned 98 % of its clipped pixels:
+        #   effective albedo 0.2678 (plaza_light linear mean lum 0.4622
+        #   `[measured, _texture_mean]` × 0.58) renders at display median
+        #   0.765, a hair over the clipHi line 0.75, so **45.6 %** of the
+        #   frame clipped while every albedo sat under the 0.34 ceiling. The
+        #   >0.8 white gate above measured a different threshold and stays
+        #   satisfied a fortiori. Target effective **0.220** (mid-grey flamed
+        #   granite, physical band 0.20-0.35, same GT-121 doctrine as the
+        #   sand) — factor 0.220/0.2678 = **0.8212**, hue ratio preserved:
+        #     effective (0.2231, 0.2199, 0.2091) · luminance **0.2198** ·
+        #     display median ~0.72 → judgment-cut clipHi projected
+        #     45.6 → **~6 %** (d2 47.5 → ~9 % · d10 45.9 → ~7 %).
+        #   Old value `[repro — GT-115 ⑪ white gate]`: (0.58, 0.58, 0.572)
+        granite_tint=(0.476, 0.476, 0.470),
         coping_tint=(0.62, 0.62, 0.61),
         tan_tint=(1.16, 1.02, 0.80),           # G18's warm tan edge band
         kerb_color=(0.58, 0.575, 0.56), kerb_rough=0.62,
@@ -1220,7 +1258,12 @@ def main():
             sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"),
             sc.tex_path("plaza_light", "rough"), scl["tread"],
-            tint=(0.66, 0.66, 0.645))
+            # [GT-126] ×0.8212 with the promenade (effective 0.3045 → 0.2501):
+            #   the treads are horizontal and fully sunlit, so they clipped
+            #   harder than the deck; the sawn-vs-flamed value break (×1.138
+            #   over `granite_tint`) is preserved exactly.
+            #   Old value `[repro]`: (0.66, 0.66, 0.645)
+            tint=(0.542, 0.542, 0.530))
         M["tan"] = sc.make_pbr(
             stage, "/World/Looks/PavingTanBand",
             sc.tex_path("plaza_lower", "diff"), sc.tex_path("plaza_lower", "nor"),

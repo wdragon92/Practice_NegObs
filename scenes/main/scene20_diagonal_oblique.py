@@ -82,6 +82,9 @@ import props_kit as pk
 #   same image); what autumn buys this scene is leaf litter and a warmed turf
 #   tone, both built below. Stated rather than skipped: "the leaf-off mechanism
 #   exists" is not a reason to fire it.
+#   [GT-126] The litter is cut to trace density — the canopy tuples this scene
+#   actually carries are summer green, and an autumn carpet under a green crown
+#   is a one-frame season contradiction (see the `litter=` PARAMS note).
 SEASON = "autumn"
 
 
@@ -369,19 +372,37 @@ PARAMS = dict(
                         block=dict(x0=16.7, x1=17.0, y0=-2.55, y1=2.55)),
     lower_benches=[(12.0, -1.85, 0.0), (12.0, 1.85, 0.0)],
 
-    # === [W3 L20 · season] autumn leaf litter (G1) ====================================
+    # === [W3 L20 · season] leaf litter — [GT-126] reduced to trace ====================
     #  Three regions, each with its own `edge_bias` because the sweeping pattern differs.
     #  The treads region lives **inside the 30 deg rot_group** and is authored in group
     #  local coordinates, so the litter follows the diagonal exactly as the stair does —
     #  scattering it in world space would lay a rectangular leaf field across a rotated
     #  flight. `ground_fn` seats each instance on the tread it actually lands on; without
     #  it a leaf on a 0.15 m riser floats.
-    litter=dict(treads=dict(cover=0.030, edge_bias=0.45, seed=10120),
-                foot=dict(cover=0.022, edge_bias=0.30, seed=20220),
-                plaza=dict(cover=0.012, edge_bias=1.20, seed=30320)),
+    #  [GT-126] cover 0.030/0.022/0.012 -> 0.006/0.004/0.002 (with the max_count caps in
+    #  `build_litter` cut to match). The audit caught the frame contradicting itself:
+    #  `canopy_a/b` below are the FULL summer-green tuples (identical to scene16's), yet
+    #  the ground carried an autumn carpet — and carried it on the paving only, with the
+    #  adjacent turf clean, which no wind does. The canopy is not touched (recolouring a
+    #  crown is a new-asset move, and the belt is shared vocabulary); the carpet is cut to
+    #  the handful of dry stray leaves that survives ANY season, which reads with a green
+    #  crown and needs no matching turf field. SEASON stays "autumn" — what autumn still
+    #  buys this scene is the warmed `grass_tint`, which contradicts nothing.
+    litter=dict(treads=dict(cover=0.006, edge_bias=0.45, seed=10120),
+                foot=dict(cover=0.004, edge_bias=0.30, seed=20220),
+                plaza=dict(cover=0.002, edge_bias=1.20, seed=30320)),
 
     material=dict(
-        scale=dict(plaza_light=1.80, band_dark=0.6, plaza_lower=0.7,
+        # [GT-126] band_dark 0.6 -> 1.80 · plaza_lower 0.7 -> 2.4. Both are unit-size
+        #   arithmetic, not taste: `band_dark_diff` carries ~5x8 stone units per tile, so
+        #   at 0.6 m/tile a unit is 0.12 x 0.075 m — below what the judged distances
+        #   resolve, and its directional grain mip-averages into the one-axis smear the
+        #   audit crops show on the bands and the wall coping. At 1.80 (the same scale_m
+        #   as the plaza_light field, i.e. the audit's "판석과 같은 실척") a unit is
+        #   0.36 x 0.225 m and survives as a unit. `plaza_lower_diff` carries ~12x6 setts
+        #   in a 2:1 image, so 0.7 gave 0.06 x 0.12 m micro-weave one frame away from the
+        #   0.6 m upper flags; 2.4 puts the sett on the real 0.2~0.3 m block module.
+        scale=dict(plaza_light=1.80, band_dark=1.80, plaza_lower=2.4,
                    grass=1.4, brick_red=2.0, tactile=0.3),
         lower_warm_tint=(1.06, 1.0, 0.94),
         # [W3 L20 · season] 0.55/0.68/0.42 -> 0.60/0.63/0.38: desaturated and warmed for
@@ -392,7 +413,17 @@ PARAMS = dict(
         glass_color=(0.06, 0.09, 0.12), glass_rough=0.08,
         rail_color=(0.80, 0.82, 0.85), rail_metallic=0.9, rail_rough=0.35,
         # [v5.1 §4] Parapet 0.90 -> 0.72 (no large pure-white areas)
-        parapet_color=(0.72, 0.72, 0.69), parapet_rough=0.6,
+        # [GT-126] 0.72 -> 0.32. The [GT-87] cheek walls bind this, and the audit
+        #   measured their faces at 0.87 screen luminance — a flawless white plane over
+        #   the very band 0.72 was meant to avoid, because 0.72 clips at the top of the
+        #   tone mapping (the LOOK_CLASS "snow" note documents 0.72-0.78 doing exactly
+        #   that). 0.32 sits inside the real concrete band (the look layer's own
+        #   `alb_max` 0.34 ceiling), so the promoted concrete grain has headroom to
+        #   read instead of blowing out. `Looks/Parapet` already classifies concrete
+        #   (LOOK_ROLE exact match), so texture promotion needs no rename here.
+        #   **Material only** — the walls are this scene's drop-edge guard (2.10 m fall),
+        #   so their geometry is frozen; no coping/thickness prim is added or moved.
+        parapet_color=(0.32, 0.32, 0.30), parapet_rough=0.6,
         # For dressing (dark constant-colour albedo convention)
         curb_color=(0.75, 0.75, 0.72), curb_rough=0.6,
         wood_color=(0.30, 0.20, 0.12), wood_rough=0.85,
@@ -525,8 +556,17 @@ def main():
             f"{ROOT}/Looks/Upper", sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
             sca["plaza_light"], tint=(0.72, 0.72, 0.72))   # [T1 T-1] x0.72
+        # [GT-126] `Looks/Band` -> `Looks/BandDark`. The bare name "Band" is pinned to
+        #   the **paint** class by LOOK_ROLE exact match (GT-113 W6 pinned the painted
+        #   bands there when the "band" keyword was retired) — but this material is
+        #   *textured dark granite*, so paint-class routing kept it on plain cubic
+        #   OmniPBR with no detail normal, no dither and no albedo band: half of the
+        #   band/coping smear the audit crops show. "BandDark" is the very name W6's
+        #   note names as the fixed case — it falls through to the concrete family via
+        #   its "dark" token and gets the ground treatment (triplanar + detail + band).
+        #   The dict key `M["band"]` and every bind site are unchanged.
         M["band"] = PBR(
-            f"{ROOT}/Looks/Band", sc.tex_path("band_dark", "diff"),
+            f"{ROOT}/Looks/BandDark", sc.tex_path("band_dark", "diff"),
             sc.tex_path("band_dark", "nor"), sc.tex_path("band_dark", "rough"),
             sca["band_dark"])
         M["lower"] = PBR(
@@ -549,7 +589,8 @@ def main():
         # [GT-87] `Looks/Rail` is gone with the tube guard it was the only binding for.
         #   `rail_color` / `rail_metallic` / `rail_rough` stay in PARAMS because the three
         #   bollard bodies below are derived from them — the wall takes `Looks/Parapet`
-        #   (concrete) and `Looks/Band` (dark granite coping), both already in this scene.
+        #   (concrete) and `Looks/BandDark` (dark granite coping), both already in this
+        #   scene.
         # [v5.1 §2/§4] Materials for the regulation bollards - 3 body variants (tint jitter +-5%) + reflective band.
         #   The band is small in area, so high luminance is allowed (unrelated to the no-large-pure-white-area rule).
         for _i, _f in enumerate((0.95, 1.0, 1.05)):
@@ -558,8 +599,14 @@ def main():
                 diffuse_color=tuple(min(c * _f, 1.0) for c in mp["rail_color"]),
                 metallic=mp["rail_metallic"],
                 roughness_const=mp["rail_rough"] * (1.0 + 0.05 * (_i - 1)))
+        # [GT-126] band (0.86,0.86,0.84) -> safety yellow. Against a body derived from
+        #   `rail_color` (0.80 grey) the old value was the same white — the band, whose
+        #   whole function is night-time contrast, vanished in every cut. The C6
+        #   regulation band is high-contrast against a light body (황색). `BollardBand`
+        #   classifies paint (constant colour kept by the look layer), so the cue
+        #   colour survives LOOK_V1 untouched.
         M["bollard_band"] = PBR(f"{ROOT}/Looks/BollardBand",
-                                diffuse_color=(0.86, 0.86, 0.84),
+                                diffuse_color=(0.80, 0.52, 0.05),
                                 roughness_const=0.35)
         M["parapet"] = PBR(f"{ROOT}/Looks/Parapet",
                            diffuse_color=mp["parapet_color"],
@@ -959,7 +1006,12 @@ def main():
         return n
 
     def build_litter(M):
-        """[W3 L20 · season] autumn leaf litter (G1).
+        """[W3 L20 · season] leaf litter — [GT-126] trace density (see PARAMS note).
+
+        The carpet-level cover contradicted the summer-green canopy tuples in the same
+        frame; what remains is the few stray dry leaves that read in any season. The
+        caps below are cut with the cover values so a future cover bump cannot silently
+        restore the carpet through the cap alone.
 
         The tread scatter is authored **inside the 30 deg rot_group**, in group-local
         coordinates, so it rotates with the flight; `stair_z` is the local ground
@@ -999,19 +1051,19 @@ def main():
             st["x0"], st["y0"] + inset, st["x0"] + tread * ns, st["y1"] - inset,
             0.0,
             cover=li["treads"]["cover"], edge_bias=li["treads"]["edge_bias"],
-            seed=li["treads"]["seed"], ground_fn=stair_z, max_count=90)
+            seed=li["treads"]["seed"], ground_fn=stair_z, max_count=14)
         n += sc.scatter_debris(
             stage, f"{grp}/Litter_Foot",
             lo["x0"], lo["y0"] + inset, lo["x0"] + 5.0, lo["y1"] - inset,
             lo["z_top"],
             cover=li["foot"]["cover"], edge_bias=li["foot"]["edge_bias"],
-            seed=li["foot"]["seed"], max_count=70)
+            seed=li["foot"]["seed"], max_count=10)
         n += sc.scatter_debris(
             stage, f"{ROOT}/Litter_Plaza",
             PARAMS["upper"]["x0"] + 0.5, -7.6, PARAMS["upper"]["x1"], 7.6, 0.0,
             cover=li["plaza"]["cover"], edge_bias=li["plaza"]["edge_bias"],
-            seed=li["plaza"]["seed"], max_count=60)
-        print(f"[litter] 낙엽 {n}개 (가을 · G1)")
+            seed=li["plaza"]["seed"], max_count=8)
+        print(f"[litter] 낙엽 {n}개 (미량 산잎 · GT-126)")
         return n
 
     def build_dressing(M):

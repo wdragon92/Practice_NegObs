@@ -52,6 +52,13 @@ Hazard (T4): an **irregular-riser sleeper stair** descending a gently sloped par
   Self-check (no boot, no GPU):
   `NEGOBS_SELFCHECK=1 python3 scene04_parktrail.py` (= `NEGOBS_SMOKE=1`).
 
+[GT-126 · repair] (1) x=0 seam: `build_slope`'s ±0.15 margin stands every slope slab
+  +0.038 (+0.058 trim) proud of the z=0 flat with an overhung end face — the "floating
+  plate / open slot" band. Buried by a 2-slab crest berm per flank (non-walking side,
+  colliders untouched) + a head sleeper under the landing lip (top −0.03, edge x=0/z=0
+  and the walking surfaces bit-identical). (2) Lombardy_Poplar retired from the tree
+  pools: its twig broom does not survive to the render at 04's scales (bare pole read).
+
 Consistency correction (against the director's brief §C):
   riser table sum = 1.45, tread table sum = 5.55.
   -> slope drop = 1.45 (not the brief text's 0.9/−1.5 approximation), lower flat z = −1.45 throughout.
@@ -270,17 +277,19 @@ PARAMS = dict(
     ),
     # (d) bare trunks - the G4 signature. Authored, not scattered: they frame the stair.
     #     (x, perpendicular offset from the walk, target height [m], species slot)
-    #     Species slots: 0 = birch · 1 = elm · 2 = poplar (all leaf-off capable, see TREES04).
-    trunks=[(-7.6, -4.35, 8.6, 2), (-6.1, 3.05, 4.1, 0), (-4.2, -3.15, 3.4, 1),
-            (-2.4, 2.60, 9.4, 2), (-0.9, -2.45, 3.8, 0), (0.7, 2.20, 4.6, 0),
-            (1.9, -2.10, 3.3, 1), (3.3, 2.45, 10.2, 2), (4.6, -2.35, 4.4, 0),
-            (5.9, 2.75, 3.6, 1), (7.4, -2.80, 9.0, 2), (8.8, 3.10, 4.8, 0),
-            (10.6, -3.40, 3.9, 1), (12.1, 3.60, 8.2, 2),
+    #     Species slots: 0 = birch · 1 = elm (leaf-off capable, see TREES04).
+    #     [GT-126] Slot 2 (poplar) retired — see the TREES04 note. The nine former slot-2
+    #     rows keep their positions and heights and alternate 0/1, so the tall rank stays.
+    trunks=[(-7.6, -4.35, 8.6, 0), (-6.1, 3.05, 4.1, 0), (-4.2, -3.15, 3.4, 1),
+            (-2.4, 2.60, 9.4, 1), (-0.9, -2.45, 3.8, 0), (0.7, 2.20, 4.6, 0),
+            (1.9, -2.10, 3.3, 1), (3.3, 2.45, 10.2, 0), (4.6, -2.35, 4.4, 0),
+            (5.9, 2.75, 3.6, 1), (7.4, -2.80, 9.0, 1), (8.8, 3.10, 4.8, 0),
+            (10.6, -3.40, 3.9, 1), (12.1, 3.60, 8.2, 0),
             # second rank - G4's flanks are a *stand*, not a row. These sit 6-11 m off the
             # walk and close the frame behind the first rank.
-            (-8.8, 7.40, 11.5, 2), (-5.0, -6.90, 4.6, 0), (-1.6, -7.80, 10.8, 2),
-            (2.2, 6.60, 4.2, 1), (6.2, -6.40, 11.0, 2), (9.6, 7.10, 4.9, 0),
-            (13.4, -7.60, 10.4, 2), (15.8, 6.20, 4.3, 1)],
+            (-8.8, 7.40, 11.5, 1), (-5.0, -6.90, 4.6, 0), (-1.6, -7.80, 10.8, 0),
+            (2.2, 6.60, 4.2, 1), (6.2, -6.40, 11.0, 1), (9.6, 7.10, 4.9, 0),
+            (13.4, -7.60, 10.4, 0), (15.8, 6.20, 4.3, 1)],
 
     # === [W3 S04-1] rope-on-timber-post handline (K4(c) new prop template) ==
     # **R04-1: DRESSING, NOT A GUARD.** Built in **both** hazard arms so its presence carries
@@ -532,10 +541,16 @@ ASSET_ROLES = ["dirt_park", "gravel", "leaf_ground", "wood_dark", "hdri", "mdl"]
 #   keep one shared prototype per species. Reported in `Docs/reports/w3_s04_v1.md` §7.
 #   `native` for a bare row is the **bare** zmax `[measured - usd-core, this session]`, so the
 #   0.8-1.8 % height shortfall the K4 note warns about does not apply here either.
+# [GT-126] `Lombardy_Poplar_bare` is retired from every 04 pool. The wrapper composes with
+#   the full twig broom in `/Root/trunk` (max radial extent 2.32 m at z 5.4-6.7 `[measured -
+#   usd-core 26.8, this WP]`), yet in every render round on file (260806 allview5 · 260814
+#   r0probe · 260815 datapilot) no placed instance shows any of it at the scales this scene
+#   draws (0.17-0.90 of a 13.42 m native) — each renders as a smooth branchless column, the
+#   audit's "민둥 기둥" finding. Birch/elm render their armature in the same frames at every
+#   scale, so the near/mid pool is those two; the far pool keeps the conifer unchanged.
 TREES04 = [
-    ("../veg_bare/Gray_Birch_bare.usda",       3.2960, 4, True),
-    ("../veg_bare/Elm_Sapling_bare.usda",      3.0424, 3, True),
-    ("../veg_bare/Lombardy_Poplar_bare.usda", 13.4221, 2, True),
+    ("../veg_bare/Gray_Birch_bare.usda",  3.2960, 4, True),
+    ("../veg_bare/Elm_Sapling_bare.usda", 3.0424, 3, True),
 ]
 TREES04_FAR = TREES04 + [("Trees/Douglas_Fir.usd", 6.0263, 2, False)]
 # Low turf patches. `(usd rel, native zmax [m], |zmin| [m], native half width [m], weight)`
@@ -1056,8 +1071,9 @@ def seasonal_audit():
         "낙엽 로브     leaf_ground + 웜 틴트 — 계절 일치 ✓",
         "낙엽 카드     VEG_DEBRIS 5종(마른 낙엽) — 늦가을 고정으로 적법화 ✓",
         "초지 포기     Grass_Short_A/B (green 0.537 · orange 0.177, 잔디 게이트) ✓",
-        "교목 근·중경  Gray_Birch·Elm_Sapling·Lombardy_Poplar **잎-off** "
-        "(래퍼 레이어 — 인스턴싱 프로토타입에서 leaves 제거 검증) ✓",
+        "교목 근·중경  Gray_Birch·Elm_Sapling **잎-off** "
+        "(래퍼 레이어 — 인스턴싱 프로토타입에서 leaves 제거 검증; "
+        "GT-126 Lombardy_Poplar 은퇴 — 렌더에서 가지 소실 → 민둥 기둥) ✓",
         "교목 원경     Douglas_Fir(상록 침엽 — 11월 산지 혼효림, PASS종) ✓ / "
         "Shumard_Oak 배제(MASH 인스턴서 → 잎 제거 불가) ✓",
         "배경 헤지대   leaf_ground + 어두운 틴트(34 m 원경 갈색 임상) ✓",
@@ -1268,6 +1284,24 @@ def main():
             sc.build_slope(stage, f"{ROOT}/SlopeTrim_{tag}", sl["x0"],
                            sl["z0"] + tov, run, drop, ty0, ty1, thk, M["dirt"],
                            collider=False)
+            # [GT-126] x=0 seam crest berm. `build_slope`'s default margin runs each slab
+            #   0.145 m past the top hinge, so its up-slope end stands +0.038 (+0.058 trim)
+            #   proud of the z=0 flat with a 14.6° overhung end face — the "floating plate +
+            #   open slot" band (step_detail / below_lookup, GT-126 audit). The three slabs
+            #   above stay bit-identical (SlopeDirt is a collider); the seam is buried from
+            #   the flank side instead, GT-119 s10 wedge precedent. The two crest slabs share
+            #   the ridge line (x −0.12, z +0.070 > lip max +0.058) so their bodies overlap
+            #   below it — no knife edge; ends dive below grade (up-slope top −0.005 at
+            #   x −0.70; down-slope feathers under the flank plane from x 0.123 and meets the
+            #   trim plane flush at x≈0, end x 0.66 top −0.258 < flank −0.172). |y| ≥ 0.9 —
+            #   the walking corridor and every registry value untouched.
+            cy0, cy1 = sorted((sgn * cy, sgn * fy))     # full flank: corridor edge → site
+            sc.build_slope(stage, f"{ROOT}/SeamCrestUp_{tag}", -0.70, -0.005,
+                           0.58, -0.075, cy0, cy1, 0.22, M["litter"],
+                           margin=0.0, collider=False)
+            sc.build_slope(stage, f"{ROOT}/SeamCrestDn_{tag}", -0.12, 0.070,
+                           0.78, 0.328, cy0, cy1, 0.22, M["litter"],
+                           margin=0.0, collider=False)
 
     def build_flat_fill(M):
         """hazard_stairs=False control: slope·stair·lower unified into a z=0 flat (litter).
@@ -1394,6 +1428,15 @@ def main():
         Ly = st["y1"] - st["y0"]
         thk = st["sleeper_thick"]
         over = st["sleeper_over"]
+        # [GT-126] Head sleeper. Every leading edge below carries a retaining timber, but
+        #   the top riser (x=0) had none, so below_lookup reads a lit landing lip over an
+        #   unlit slot — a floating board at the drop line (hazard-adjacent). Same 0.15
+        #   section, sunk so its top sits 0.03 under the landing: the drop edge stays the
+        #   x=0 / z=0 soil corner and no walking surface moves. Exposed face x ≤ 0.025 —
+        #   the tread's heel gap, never walked. No collider — the collision set is unchanged.
+        sc.add_box(stage, f"{ROOT}/Sleeper_Head",
+                   (st["x0"] - thk / 2.0 + 0.025, cy, st["z_top"] - 0.165),
+                   (thk, Ly, 0.27), M["wood_dark"])
         for i, (xa, xb, ztop) in enumerate(steps):
             riser_i = RISERS[i] if i < len(RISERS) else RISERS[-1]
             h = riser_i + over                       # sleeper height

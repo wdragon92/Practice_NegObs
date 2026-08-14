@@ -87,7 +87,10 @@ as a suburban residential road.
       fence, x 52..62) · 3 trees · **a treeline of 5 segments (x 74..76.4)** — the
       'huge white wall' (the ridge) that blocked the horizon in the r5 render is
       broken up by the treeline, and the ridge is given aerial-perspective colour
-      (darker when nearer: 0.135 → 0.175 → 0.215).
+      (darker when nearer). [GT-126 ③] the v6 colour-only fix was not enough — two
+      56 m flat-topped boxes still read as billboards, so the ridge is recut into
+      3 tiers × 2 offset masses (stepped tops, staggered side edges, front-to-back
+      overlap) in an olive-grey aerial ramp. See the `ridge` param note.
   (5) GT unchanged: every new element is an upright or thin plate above ground —
       no new opening and no new drop.
 ────────────────────────────────────────────────────────────────────────────
@@ -171,7 +174,7 @@ PARAMS = dict(
     # --- road-side concrete lip (flush with the road surface, width 0.15) ---
     lip=dict(y0=-0.65, y1=-0.50, top=0.002, x0=-0.30, base_z=-1.60),
     # --- asphalt roadway ---
-    # x1 96 : the ground has to reach the distant ridge (x 77..94), otherwise a void opens at its end
+    # x1 96 : the ground has to reach the distant ridge (x 77..96), otherwise a void opens at its end
     road=dict(y0=-8.20, y1=-0.65, x0=-22.0, x1=96.0, top=0.0, thick=1.60),
     dash=dict(y=-4.40, w=0.15, length=3.0, period=8.0, proud=0.002),
     edge_line=dict(y=-0.95, w=0.10, proud=0.002),
@@ -233,12 +236,33 @@ PARAMS = dict(
     window=dict(w=1.2, h=1.3, inset=0.15, col_step=3.0, margin=2.0),
     back_hedge=dict(cy=12.6, sy=1.4, length=26.0),
     back_hedges=[dict(cx=-8.0), dict(cx=18.0), dict(cx=44.0), dict(cx=68.0)],
-    # distant vista block (+X horizon): 2 ridge boxes. cy/sy stay inside the site y −42..+20.
+    # distant vista block (+X horizon): overlapping ridge masses. cy/sy stay inside the site y −42..+20.
     # [v6-(4)] aerial-perspective colour added - clears the 'white wall' of the r5 render (darker when nearer).
-    ridge=[dict(cx=80.0, cy=-8.0, h=6.0, sy=56.0, t=6.0,
-                color=(0.155, 0.175, 0.150)),
-           dict(cx=90.0, cy=-8.0, h=9.0, sy=56.0, t=8.0,
-                color=(0.205, 0.220, 0.235))],
+    # [GT-126 ③] the v6 pair (two 56 m flat-topped boxes, the far one blue-dominant
+    #   0.205/0.220/0.235) still read as sky-blue-grey billboards — the defect is the
+    #   silhouette, not the colour (audit HIGH; the v6 note itself records a colour-only
+    #   fix). Recut as 3 tiers × 2 offset masses: every top height distinct (stepped
+    #   skyline), side edges staggered in y, tiers overlap front-to-back — the audit's
+    #   own prescription (단차·전후 겹침; atmospheric blur stays forbidden). The back
+    #   tier is the full closure (y union −42..+20, seams volume-overlapped, no
+    #   coplanar face pair; x ≤ 96 = road end, so no ground void). Colours move to an
+    #   olive-grey aerial ramp, G > B on every face (no sky-colour card; nearer =
+    #   darker, as v6). `Ridge_*` still classifies soil → dirt_park promotion, and
+    #   every tint keeps max gain ≤ 3.0 and spread ≤ 2.95 against the dirt mean
+    #   (0.195,0.131,0.049) — clear of the 4.0 promotion gate and of the scene11
+    #   blue-noise band [computed].
+    ridge=[dict(cx=79.5, cy=-28.0, h=4.6, sy=26.0, t=5.0,      # front tier (x 77..83.5)
+                color=(0.148, 0.161, 0.107)),
+           dict(cx=81.0, cy=4.0, h=5.2, sy=30.0, t=5.0,
+                color=(0.152, 0.165, 0.110)),
+           dict(cx=86.0, cy=-12.0, h=6.4, sy=40.0, t=6.0,      # mid tier (x 83..90.5)
+                color=(0.170, 0.178, 0.122)),
+           dict(cx=87.5, cy=14.2, h=5.6, sy=10.4, t=6.0,
+                color=(0.174, 0.182, 0.126)),
+           dict(cx=91.5, cy=-21.0, h=7.8, sy=42.0, t=8.0,      # back tier = closure (x 87.5..96)
+                color=(0.194, 0.198, 0.140)),
+           dict(cx=92.0, cy=9.0, h=8.6, sy=22.0, t=8.0,
+                color=(0.198, 0.202, 0.143))],
     # [v6-(4)] treeline - x 74..76.4 in front of the ridge (x>=77). Varied heights avoid coplanar top faces.
     #   y stays inside the site (−42..+20). base_z −0.05 (avoids being coplanar with the ground top face).
     treeline=dict(x0=74.0, x1=76.4, span=13.0, base_z=-0.05,
@@ -268,11 +292,30 @@ PARAMS = dict(
     material=dict(
         scale=dict(concrete_wall=1.6, concrete_floor=1.2, grass=1.4,
                    leaf_ground=0.8, wood_dark=1.0, brick_red=2.0),
-        asphalt_color=(0.16, 0.16, 0.17), asphalt_rough=0.85,  # scene17 constant
+        # [GT-126 ②] aged-asphalt band. The scene17 constant (0.16,0.16,0.17) sat above
+        #   the 0.10..0.15 aged-asphalt albedo band and carried a blue cast, and the
+        #   carriageway read as bright grey concrete (audit HIGH). `Looks/Asphalt`
+        #   classifies exactly (LOOK_ROLE) → the GT-108 asphalt machinery applies
+        #   (asphalt-texture promotion · spec 0.20 · bump 2.1 · patch 0.45@1.8 m ·
+        #   alb_min 0.10 — the old 4 m panel-joint cell grid is gone with it), and
+        #   promotion preserves the declared constant as the **effective** albedo,
+        #   so the constant itself is recalibrated to mid-band, near-neutral.
+        asphalt_color=(0.12, 0.12, 0.122), asphalt_rough=0.85,
         paint_color=(0.72, 0.72, 0.68), paint_rough=0.60,
         wall_tint=(0.55, 0.53, 0.50),        # weathered darkening of the channel inner walls (texture multiplier)
         lip_tint=(0.82, 0.81, 0.78),         # lip and cover slab (light concrete)
-        dry_grass_tint=(0.62, 0.58, 0.34),   # dry grass verge
+        # [GT-126 ①] dormant tan-olive verge — the s10 GT-124 dormant-turf calibration
+        #   carried over. The old (0.62,0.58,0.34) was a *darkening* tint: applied to the
+        #   green-dominant grass_lawn_diff (linear mean R/G 0.55) it can only cut blue,
+        #   so R/G stayed 0.59 and the declared 'dry grass' verge rendered as irrigated
+        #   emerald lawn — the scene's own concealment mechanism (docstring: dry grass
+        #   overhangs the edge) was absent from the frame (audit HIGH). A multiplier >1
+        #   on R plus the dirt_park B-blend (dormant patches — see setup_materials)
+        #   lands the blended mean at R/G ≈ 0.95 tan-olive.
+        dry_grass_tint=(1.32, 1.18, 1.02),
+        #   the overhang strips read one step drier than the verge (the concealment cue
+        #   is *dry* grass flopped over the edge): blended R/G ≈ 1.09 straw.
+        overhang_tint=(1.45, 1.13, 0.98),
         leaf_tex_tint=(0.95, 0.72, 0.48),
         leaf_tints=((0.30, 0.14, 0.05), (0.38, 0.20, 0.06),
                     (0.25, 0.10, 0.04), (0.42, 0.28, 0.10)),
@@ -353,8 +396,11 @@ if _sc_ov:
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "sceneD3")
 
+# [GT-126] `dirt_park` = the dormant-turf B-blend source (s10 GT-124 idiom);
+#   `asphalt` = the promotion source the GT-108 asphalt class binds onto the
+#   constant-colour carriageway. Both must exist before boot, so they are gated here.
 ASSET_ROLES = ["concrete_wall", "concrete_floor", "grass", "leaf_ground",
-               "wood_dark", "brick_red", "hdri", "mdl"]
+               "wood_dark", "brick_red", "dirt_park", "asphalt", "hdri", "mdl"]
 
 
 # ===========================================================================
@@ -590,7 +636,10 @@ BANNER = """\
  8. [v6] 맥락 판독      — 전신주·전선/진입로/우편함·수거함/원경 주택열·수림대로
                           '교외 주택가 도로변'이 읽히는가
  9. [v6] 측구 시야      — 신규 요소가 전 뷰에서 개구·오버행을 전혀 안 가리는가
-10. [v6] 지평           — 능선이 백색 벽이 아니라 수림대+대기원근 층위로 읽히는가"""
+10. [v6·GT-126] 지평    — 능선이 간판형 평판이 아니라 수림대+단차·전후 겹침
+                          매스 층위(상단 스텝·측선 어긋남)로 읽히는가
+11. [GT-126] 재질       — 버지/오버행이 휴면 황갈(tan-olive) 대역인가 ·
+                          차도가 노후 아스팔트(암회, 판넬 줄눈 없음)로 읽히는가"""
 
 
 def main():
@@ -656,8 +705,21 @@ def main():
                           sca["concrete_wall"], tint=mp["wall_tint"])
         M["conc"] = tex("concrete_floor", f"{ROOT}/Looks/Conc",
                         sca["concrete_floor"], tint=mp["lip_tint"])
+        # [GT-126 ①] Looks/Grass → turf class (GT-118), so the ground-MDL B-blend
+        #   wiring is reachable: dormant patches ride on dirt_park exactly as s10
+        #   (GT-124 2차 numbers — blend 0.28, mottle wavelength 2.5 m; the 0.09 m
+        #   default is confetti-scale). One blend dict, two tints: the verge/yard
+        #   band and the one-step-drier overhang share the same dormant machinery.
+        _dormant = dict(diff=sc.tex_path("dirt_park", "diff"),
+                        nor=sc.tex_path("dirt_park", "nor"),
+                        rough=sc.tex_path("dirt_park", "rough"),
+                        scale_m=2.2, default=0.28, edge_noise=0.55,
+                        edge_wl=2.5)
         M["grass"] = tex("grass", f"{ROOT}/Looks/Grass", sca["grass"],
-                         tint=mp["dry_grass_tint"])
+                         tint=mp["dry_grass_tint"], blend=_dormant)
+        #   the name keeps a "grass" token (classifies turf) — only the tint moves.
+        M["grass_over"] = tex("grass", f"{ROOT}/Looks/GrassOver", sca["grass"],
+                              tint=mp["overhang_tint"], blend=_dormant)
         M["leafbed"] = tex("leaf_ground", f"{ROOT}/Looks/LeafBed",
                            sca["leaf_ground"], tint=mp["leaf_tex_tint"])
         M["wood"] = tex("wood_dark", f"{ROOT}/Looks/WoodTex", sca["wood_dark"])
@@ -863,8 +925,9 @@ def main():
             y_in = ch["top_half"] - rng.uniform(ov["over_lo"], ov["over_hi"])
             y_out = ch["top_half"] + rng.uniform(ov["out_lo"], ov["out_hi"])
             h = rng.uniform(ov["h_lo"], ov["h_hi"])
+            # [GT-126 ①] drier straw tint than the verge - the audit's gradation note.
             sc.build_hedge(stage, f"{ROOT}/Overhang_{i}", xa, y_in, xb, y_out,
-                           h, mtl=M["grass"], base_z=-0.04)  # r1: sunk into the verge surface (fixes floating)
+                           h, mtl=M["grass_over"], base_z=-0.04)  # r1: sunk into the verge surface (fixes floating)
 
     # -------------------------------------------------------------------
     # fallen leaves on the channel bed - patch plates + scattered ellipsoids (fixed seed)

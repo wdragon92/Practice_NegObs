@@ -25,9 +25,16 @@ Signature precondition [important]:
   invisible), and the lost direct light is compensated by raising dome_intensity.
 
 Concealment control [for director sweeps]:
-  thickness / nose_over / riser_cover in PARAMS["snow"] govern step-edge visibility.
-  The defaults are the geometry-map spec values (0.05 / 0.06 / 0.50); to bury the edges further
-  than the reference, raise them toward (0.09 / 0.12 / 0.85). See the PARAMS comments for detail.
+  thickness / chamfer in PARAMS["snow"] govern step-edge visibility (defaults 0.05 / 0.030).
+  **[GT-119 ③ · 08-15] `nose_over` / `riser_cover` / `lip_recess` / `side_over` are RETIRED.**
+  They built each tread's snow as a rigid slab pushed 60 mm past the riser with a set-back fin
+  under it - a 51 mm cantilever over a 35 mm shadow slot, i.e. an edge that reads *sharper*
+  than the bare concrete it was meant to hide (checklist item 2 defeated), and the same
+  +side_over spilled white tabs over the stringers on every step. The snow front face is now
+  flush with the riser plane (never proud) and the front-top edge carries a 45 deg chamfer.
+  To bury the edges further than the reference, raise thickness 0.05 -> 0.09 and
+  chamfer 0.030 -> 0.045; the front plane itself is not a sweep knob any more.
+  The concrete stair, the tread z, the drop registry and the nosing prims are bit-unchanged.
 
 Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
@@ -37,6 +44,7 @@ Run (GUI look check - default):
 
 Auto capture (headless):  NEGOBS_CAPTURE=1 python sceneC1_snow_stairs.py
 Smoke early exit:         NEGOBS_SMOKE=1  python sceneC1_snow_stairs.py
+Self-check (CPU, no boot):NEGOBS_SELFCHECK=1 python3 sceneC1_snow_stairs.py
 
 Coordinates: Z-up, m, travel axis +X, drop start edge = x=0.
 """
@@ -97,20 +105,36 @@ PARAMS = dict(
     stringer=dict(y_in=1.20, y_out=1.45, proud=0.02, x_head=0.05, x_tail=0.10,
                   thick=0.60),
 
-    # ─── snow layer [signature parameters] ──────────────────────────────
+    # ─── snow layer [signature parameters · GT-119 ③ re-cut] ────────────
     #  thickness   snow depth. Raising it thickens the ridge on the tread top so the
     #              edge contrast falls against the step height. Geometry-map spec 0.05. Sweep 0.05->0.09.
-    #  nose_over   forward nosing overhang (snow eave). Raising it covers the next step so the
-    #              nosing curls round and vanishes. Geometry-map spec 0.06. Sweep 0.06->0.12.
-    #  riser_cover fraction of the upper riser covered (0.5=upper half). Raising it shrinks the
-    #              dark band on the riser face so the profile approaches a ramp. Sweep 0.50->0.85.
-    #  lip_recess  how far the eave fin is set back from the slab front edge (rounded look).
-    #  side_over   width by which the snow spills over the stair flank (doubles as coplanar avoidance).
-    #  embed_*     depth buried into the solid below (Z-fighting guard, no visual effect).
+    #  chamfer     45 deg front-top chamfer (run = drop). **This is the edge-silhouette knob
+    #              that replaces the retired `nose_over`**: it takes material *off* the razor
+    #              corner instead of hanging material past the riser. Sweep 0.030->0.045.
+    #              Must satisfy 0 < chamfer < thickness (a chamfer as deep as the layer would
+    #              leave no front face at all).
+    #  cham_thick  chamfer wedge thickness measured perpendicular to its own face. Only has to
+    #              be deep enough to meet the bed under it: >= (thickness-chamfer) is plenty.
+    #  front_inset how far the snow front face sits **behind** the riser plane (>=0; 0 = flush).
+    #              Never negative - a positive number here is the only legal direction, and
+    #              raising it exposes the buried nosing band, so leave it at 0 unless ruled.
+    #  side_inset  y inset from the stair flank. Must stay inside the band
+    #              0.010 <= side_inset <= bank.y_in_over (0.020): below it the snow spills over
+    #              the stringer again (the white tabs), above it the snow stops short of the
+    #              bank and a bare concrete sliver opens along the flank.
+    #  rest_gap    the tread bed **rests this far above the tread** instead of biting into it.
+    #              A flush front face plus an embedded bottom would put a snow face in the same
+    #              plane as the riser (Z-fighting, checklist item 6). The gap is sealed to
+    #              within 1.1 deg of horizontal by the nosing band under it, so no camera in
+    #              build_views() (all >= 10 deg down) can see into it. Must exceed the nosing
+    #              proud (0.001).
+    #  back_bury   how far the bed's trailing edge bites into the step above (X) - the
+    #              coplanar-face guard at the back, where the snow is inside solid concrete.
+    #  embed_plate depth buried into the solid below on the approach plates (no visual effect).
     # ────────────────────────────────────────────────────────────────────
-    snow=dict(thickness=0.05, nose_over=0.06, riser_cover=0.50,
-              lip_recess=0.15, side_over=0.010,
-              embed_step=0.010, embed_plate=0.020,
+    snow=dict(thickness=0.05, chamfer=0.030, cham_thick=0.025,
+              front_inset=0.000, side_inset=0.015, rest_gap=0.002,
+              back_bury=0.010, embed_plate=0.020,
               rail_strip_w=0.08, rail_strip_t=0.05, rail_strip_lift=0.04),
 
     # One-sided railing (right in the reference). Stands on the bank face, same pitch as the stairs.
@@ -219,7 +243,9 @@ PARAMS = dict(
             dict(x0=6.5, x1=12.5, y0=-7.35, y1=-6.65, h=0.80, base="lower"),
             dict(x0=11.4, x1=12.1, y0=7.00, y1=15.5, h=0.80, base="lower"),
             dict(x0=11.4, x1=12.1, y0=-15.5, y1=-7.00, h=0.80, base="lower")],
-    hedge_cap=dict(over=0.05, t=0.05),
+    # [GT-119 ③] `over=0.05` retired - the cap now insets from the hedge outline
+    #   (SNOW_CAP_INSET) like every other object cap.
+    hedge_cap=dict(t=0.05),
     # 4 distant low-rise houses (snow-capped roof + chimney) - horizon closure + reads as residential.
     #   The lower 3 fill the mid/far frame of approach/grazing_top (in front of building C),
     #   the upper 1 forms the background with building D on the left of lower_lookback (az 161.4 deg).
@@ -328,6 +354,213 @@ def _dims():
     return run, drop, slope_k, lift
 
 
+def _steps():
+    """Per-step (xa, xb, ztop) - **the same call the concrete stair makes**.
+
+    `build_snow` used to recompute `x0 + tread*(i-1)` on its own, which differs from
+    `_stair_steps`' running sum in the last bits (step 3 ended at 0.9 for the snow and at
+    0.8999999999999999 for the concrete). Sharing the derivation makes "snow front <= riser
+    plane" an exact comparison instead of one that has to carry a float tolerance.
+    """
+    st = PARAMS["stairs"]
+    return sc._stair_steps(st["x0"], st["riser"], st["tread"], st["nsteps"],
+                           st["z_top"], None, None)
+
+
+def _bank_top(x):
+    """Top face of the side bank (= the nosing line raised by the snow depth) at x.
+    The stringer face is this + `stringer.proud`. Any snow that climbs above this line
+    while reaching past the stair flank surfaces as a white tab over the stringer."""
+    _run, _drop, slope_k, lift = _dims()
+    bk = PARAMS["bank"]
+    x0 = PARAMS["stairs"]["x0"] - bk["x_head"]
+    z0 = lift + slope_k * bk["x_head"]
+    return z0 - slope_k * (float(x) - x0)
+
+
+# ===========================================================================
+# [B2] [GT-119 ③] snow-layer geometry - one pure derivation, two consumers.
+#   `build_snow()` emits it and `snow_selfcheck()` measures it, so the gates are a
+#   measurement of what is actually built rather than a restatement of intent.
+#
+#   What was wrong (audit R4 · crop pt_noon_lower_lookback.png 520,600-1320,1000):
+#     (a) each tread's cap was a slab pushed `nose_over` = 60 mm past the riser, with a
+#         `lip_recess`-set-back fin under it covering only the upper `riser_cover` of the
+#         riser -> a 51 mm cantilever standing over a 35 mm dark slot. A cantilever + slot
+#         silhouette is *sharper* than the bare nosing it was supposed to bury, which is
+#         the exact opposite of checklist item 2.
+#     (b) `side_over` = +10 mm put the slab 10 mm outside the stair flank (+-1.25). Over the
+#         last 25 mm of that same overhang the slab top also climbed above `_bank_top(x)`
+#         (the overhang runs +X while the bank falls at SLOPE_K), so each step surfaced a
+#         white tab over the stringer - "regularly, on both sides, ~7 steps" in the crop.
+#   The re-cut touches snow only:
+#     Bed_i   flush box, front face **at** the riser plane, top at ztop + (t - chamfer)
+#     Slab_i  full-depth cap, set back from the front by `chamfer`
+#     Nose_i  45 deg chamfer wedge bridging the two (a rotY box via `build_slope`, always
+#             `margin=0.0` so its own front corner is its maximum x)
+#   and the same three-piece profile is applied at the drop start line x=0 (PlateTop /
+#   BedTop / NoseTop), where the old plate hung 60 mm over the 2.04 m drop.
+#   None of these prims carries a collider (snow is a look layer here) - see `build_snow`.
+# ===========================================================================
+def _snow_lat():
+    """(y_lo, y_hi) shared by every step-snow prim: stair width less `side_inset`."""
+    st = PARAMS["stairs"]
+    ins = float(PARAMS["snow"]["side_inset"])
+    return st["y0"] + ins, st["y1"] - ins
+
+
+def _sbox(tag, xs, ys, zs, riser=None, clip=False):
+    """A snow box + the two claims made about it: `riser` = the plane its front may not
+    pass, `clip` = "this one is cut to the stair width" (the tab gate's population)."""
+    return dict(tag=tag, form="box", x=(min(xs), max(xs)), y=(min(ys), max(ys)),
+                z=(min(zs), max(zs)), riser=riser, clip=clip)
+
+
+def _swedge(tag, x_front, z0, c, ys, thick, riser=None, clip=False):
+    """A 45 deg `build_slope` chamfer wedge ending exactly at `x_front`, + its AABB.
+
+    `x0` is derived as `x_front - c` and `run` as `x_front - x0`, so `x0 + run` is
+    `x_front` **bit-exactly** (Sterbenz: the difference of two nearby floats is exact, and
+    adding it back is correctly rounded to the original). Writing `run = c` instead would
+    let the wedge end one ulp past the riser plane and make the front gate a lie.
+    Profile vertices: back-top (x0,z0), front-top (x_front, z0-c), then both dropped by
+    `thick` along the face normal (-sin,-cos) - so the solid's **maximum x is its
+    front-top corner**, and nothing can reach past it (given `margin=0.0` at build time).
+    """
+    x0 = x_front - c
+    run = x_front - x0
+    ang = math.atan2(run, run)                  # 45 deg by construction
+    return dict(tag=tag, form="wedge", x0=x0, z0=z0, run=run, drop=run,
+                thick=thick, y=(min(ys), max(ys)), riser=riser, clip=clip,
+                x=(x0 - thick * math.sin(ang), x0 + run),
+                z=(z0 - run - thick * math.cos(ang), z0))
+
+
+def snow_solids():
+    """[GT-119 ③] Every prim of the stair/approach snow layer, derived once.
+
+    Returns a list of dicts: `form` "box" (x/y/z spans) or "wedge" (build_slope args +
+    the solid's AABB in x/y/z). `riser` carries the plane the solid's front must not
+    pass, for the solids that sit on a step.
+    """
+    st, tr, lo = PARAMS["stairs"], PARAMS["terrace"], PARAMS["lower"]
+    sn = PARAMS["snow"]
+    run, drop, _slope_k, _lift = _dims()
+    lower_top = st["z_top"] - drop - lo["z_gap"]
+    t = float(sn["thickness"])
+    c = float(sn["chamfer"])
+    fi = float(sn["front_inset"])
+    gap = float(sn["rest_gap"])
+    back = float(sn["back_bury"])
+    cth = float(sn["cham_thick"])
+    sy0, sy1 = _snow_lat()
+    ins = 0.10          # site-boundary inset of the big plates (60 m away, never in frame)
+    out = []
+
+    # (1) Upper approach plate + the drop-edge nose. The plate stops `chamfer` short and the
+    #     bed/wedge pair carries the edge, so the terrace snow no longer overhangs the drop.
+    xf = st["x0"] - fi
+    #     The plate must end **exactly** at the chamfer start (`xf - c`), the way each
+    #     tread's Slab_i does: end it any earlier and the wedge's own back face (a 45 deg
+    #     plane, not a vertical one) leaves a notch in the snow surface just before the nose.
+    out.append(_sbox("PlateTop", (tr["x0"] + ins, xf - c),
+                     (tr["y0"] + ins, tr["y1"] - ins),
+                     (tr["z_top"] - sn["embed_plate"], tr["z_top"] + t),
+                     riser=xf))
+    out.append(_sbox("BedTop", (xf - c - 0.012, xf), (sy0, sy1),
+                     (tr["z_top"] + gap, tr["z_top"] + t - c),
+                     riser=xf, clip=True))
+    out.append(_swedge("NoseTop", xf, tr["z_top"] + t, c, (sy0, sy1), cth,
+                       riser=xf, clip=True))
+
+    # (2) Per-tread bed + cap + chamfer. The last step needs no special case: its nose is
+    #     swallowed by the lower approach plate (which overlaps the last 50 mm, top face
+    #     2 mm lower), so the chamfer there is simply not on any silhouette.
+    for i, (xa, xb, ztop) in enumerate(_steps(), 1):
+        xf = xb - fi
+        out.append(_sbox(f"Bed_{i}", (xa - back, xf), (sy0, sy1),
+                         (ztop + gap, ztop + t - c), riser=xf, clip=True))
+        out.append(_sbox(f"Slab_{i}", (xa - back, xf - c), (sy0, sy1),
+                         (ztop + t - c - 0.005, ztop + t), riser=xf, clip=True))
+        out.append(_swedge(f"Nose_{i}", xf, ztop + t, c, (sy0, sy1), cth,
+                           riser=xf, clip=True))
+
+    # (3) Lower approach plate (50 mm overlap with the last step · top face 2 mm lower)
+    out.append(_sbox("PlateBot", (run - lo["x_back"], lo["x1"] - ins),
+                     (lo["y0"] + ins, lo["y1"] - ins),
+                     (lower_top - sn["embed_plate"], lower_top + t)))
+    return out
+
+
+# --- [GT-119 ③] object snow caps --------------------------------------------
+#  Audit item C: `cap()` added +0.05 on both axes with square corners, so every bench,
+#  lamp, sign, hedge and chimney wore a snow lid **wider than the thing under it**. Real
+#  snow recedes from an edge (it melts and shears off first where it is unsupported), so
+#  the lid now insets, and any lid big enough to show a rim gets a stepped crown - the
+#  cheapest chamfer there is - instead of one square 40~60 mm corner.
+SNOW_CAP_INSET = 0.020          # per-side recession from the support outline
+SNOW_CAP_MIN_FRAC = 0.60        # ... but a 60 mm plank still carries a ridge of snow
+SNOW_CAP_CROWN_MIN = 0.30       # crown (= 1-step chamfer) only where the rim is visible
+SNOW_CAP_CROWN_INSET = 0.020
+
+
+def cap_span(d, inset=SNOW_CAP_INSET):
+    """Snow-cap footprint over a support of width `d`: recede `inset` per side, floored at
+    SNOW_CAP_MIN_FRAC of the support so thin members keep a cap instead of a hairline."""
+    return max(float(d) - 2.0 * float(inset), float(d) * SNOW_CAP_MIN_FRAC)
+
+
+def cap_boxes(center, support, t, inset=SNOW_CAP_INSET):
+    """[GT-119 ③] Snow-cap boxes over a support of footprint `support` = (sx, sy).
+
+    `center`/`t` keep their old meaning (centre and thickness of the cap), so the cap's
+    **top face does not move**; only the outline shrinks and the rim gains a step.
+    Returns [(suffix, center, size), ...] - suffix "" is the base plate.
+    """
+    cx, cy, cz = [float(v) for v in center]
+    sx = cap_span(support[0], inset)
+    sy = cap_span(support[1], inset)
+    t = float(t)
+    if min(sx, sy) < SNOW_CAP_CROWN_MIN:
+        return [("", (cx, cy, cz), (sx, sy, t))]
+    ci = SNOW_CAP_CROWN_INSET
+    base_t, crown_t = t * 0.60, t * 0.55        # 0.15 t overlap -> no coplanar joint
+    return [("", (cx, cy, cz - t / 2.0 + base_t / 2.0), (sx, sy, base_t)),
+            ("_Crown", (cx, cy, cz + t / 2.0 - crown_t / 2.0),
+             (max(sx - 2.0 * ci, sx * 0.5), max(sy - 2.0 * ci, sy * 0.5),
+              crown_t))]
+
+
+def object_cap_supports():
+    """(name, support_sx, support_sy, inset) for every dressing snow cap - the table the
+    self-check runs `cap_boxes` over. It mirrors the call sites in `build_context` /
+    `build_dressing`; both read the same PARAMS, so a parameter move shows up in both."""
+    bs, lm, sp = PARAMS["bench"], PARAMS["lamp"], PARAMS["signpost"]
+    hs, po = PARAMS["house"], PARAMS["pole"]
+    rows = [("Pole/Cap", po["r"] * 2.0, po["r"] * 2.0, SNOW_CAP_INSET)]
+    for i in range(len(PARAMS["benches"])):
+        rows.append((f"Bench_{i}/SnowSeat", bs["length"], bs["width"],
+                     SNOW_CAP_INSET))
+        rows.append((f"Bench_{i}/SnowBack", bs["length"], 0.06, SNOW_CAP_INSET))
+    for i in range(len(PARAMS["lamps"])):
+        rows.append((f"Lamp_{i}/SnowHead", lm["head_w"], lm["head_l"],
+                     SNOW_CAP_INSET))
+        rows.append((f"Lamp_{i}/SnowTop", lm["pole_r"] * 2.0, lm["pole_r"] * 2.0,
+                     SNOW_CAP_INSET))
+    rows.append(("SignPost/SnowPanel", sp["panel_t"], sp["panel_w"],
+                 SNOW_CAP_INSET))
+    for i, hd in enumerate(PARAMS["hedges"]):
+        rows.append((f"Hedge_{i}_Snow", hd["x1"] - hd["x0"], hd["y1"] - hd["y0"],
+                     SNOW_CAP_INSET))
+    for i, hd in enumerate(PARAMS["houses"]):
+        rows.append((f"House_{i}/SnowRoof",
+                     (hd["x1"] - hd["x0"]) + 2.0 * hs["eave"],
+                     (hd["y1"] - hd["y0"]) + 2.0 * hs["eave"], hs["cap_inset"]))
+        rows.append((f"House_{i}/SnowChimney", hs["chimney_s"], hs["chimney_s"],
+                     SNOW_CAP_INSET))
+    return rows
+
+
 def ground_plans():
     """[W2 ground_kit] Ground plan - the scene assembly and the CPU check use the same function."""
     g = PARAMS["ground"]
@@ -365,6 +598,233 @@ def build_views():
     return views
 
 
+# ===========================================================================
+# [C3] [GT-119 ③] snow_selfcheck - R-1 drop-registry print + the snow-layer gates.
+#   CPU only, no Isaac, no GPU:  NEGOBS_SELFCHECK=1 python3 sceneC1_snow_stairs.py
+#   The same function arms NEGOBS_SMOKE (GT-89's pre-boot gate), so the ledger's
+#   "before/after bit identity" evidence is produced by the smoke floor itself.
+#
+#   `_DROP_REG_FROZEN` is the **pre-GT-119 derivation**, captured from the very
+#   `sc._stair_steps` call this file has always made. GT-119's invariant is that the
+#   concrete stair, the tread z, the drop line and the nosing prims do not move while the
+#   snow is re-cut, so the comparison is exact float identity, not a tolerance.
+# ===========================================================================
+_DROP_REG_FROZEN = dict(
+    kind="T1 straight flight · 12 x (riser 0.170 / tread 0.300)",
+    nsteps=12,
+    run=3.5999999999999996,
+    drop=2.04,
+    top_edge_x=0.0,
+    top_edge_z=0.0,
+    lower_z=-2.042,
+    corridor=(-1.25, 1.25),
+    steps=[(0.0, 0.3, -0.17), (0.3, 0.6, -0.34), (0.6, 0.8999999999999999, -0.51),
+           (0.8999999999999999, 1.2, -0.68), (1.2, 1.5, -0.8500000000000001),
+           (1.5, 1.8, -1.02), (1.8, 2.1, -1.19), (2.1, 2.4, -1.3599999999999999),
+           (2.4, 2.6999999999999997, -1.5299999999999998),
+           (2.6999999999999997, 2.9999999999999996, -1.6999999999999997),
+           (2.9999999999999996, 3.2999999999999994, -1.8699999999999997),
+           (3.2999999999999994, 3.599999999999999, -2.0399999999999996)],
+    nosing_x=[0.27499999999999997, 0.575, 0.8749999999999999, 1.175, 1.475,
+              1.7750000000000001, 2.075, 2.375, 2.675, 2.9749999999999996,
+              3.2749999999999995, 3.5749999999999993],
+    nosing_z=[-0.169, -0.339, -0.509, -0.679, -0.8490000000000001,
+              -1.0190000000000001, -1.189, -1.359, -1.529, -1.6989999999999998,
+              -1.8689999999999998, -2.0389999999999997],
+    nosing_y=(-1.23, 1.23),
+)
+
+
+def drop_registry():
+    """Re-derive the hazard/drop registry from the geometry that is actually built.
+
+    Nothing here is restated from a constant: the steps come from the same
+    `sc._stair_steps` call `build_stairs` makes, and the nosing rows from the same
+    (`xb - width/2`, `ztop + proud`) the `sc.build_nosing` loop makes. If a stair or
+    nosing parameter moved, these rows move and the identity assertion is what fails.
+    """
+    st, ns = PARAMS["stairs"], PARAMS["nosing"]
+    run, drop, _k, _lift = _dims()
+    steps = _steps()
+    return dict(
+        kind="T1 straight flight · %d x (riser %.3f / tread %.3f)"
+             % (st["nsteps"], st["riser"], st["tread"]),
+        nsteps=st["nsteps"], run=run, drop=drop,
+        top_edge_x=float(st["x0"]), top_edge_z=float(st["z_top"]),
+        lower_z=st["z_top"] - drop - PARAMS["lower"]["z_gap"],
+        corridor=(float(st["y0"]), float(st["y1"])),
+        steps=[(xa, xb, zt) for (xa, xb, zt) in steps],
+        nosing_x=[xb - ns["width"] / 2.0 for (_xa, xb, _zt) in steps],
+        nosing_z=[zt + ns["proud"] for (_xa, _xb, zt) in steps],
+        nosing_y=(st["y0"] + ns["y_inset"], st["y1"] - ns["y_inset"]),
+    )
+
+
+def _top_margin_vs_bank(s):
+    """How far a snow solid's top face stays **below** the bank/stringer plane, worst point.
+
+    box   : the top is flat, the bank falls with +x -> the worst point is the solid's x_hi.
+    wedge : the top falls at 45 deg while the bank falls at SLOPE_K < 1, so the margin only
+            grows with x -> the worst point is the back-top corner (x0, z0).
+    Negative means a corner of that solid has surfaced above the bank = the white tab.
+    """
+    if s["form"] == "wedge":
+        return _bank_top(s["x0"]) - s["z0"]
+    return _bank_top(s["x"][1]) - s["z"][1]
+
+
+def snow_selfcheck(verbose=True):
+    """[GT-119 ③] R-1 registry identity + the snow-layer gates. Returns (ok, npass, ntot)."""
+    st, sn, bk = PARAMS["stairs"], PARAMS["snow"], PARAMS["bank"]
+    reg = drop_registry()
+    solids = snow_solids()
+    on_stair = [s for s in solids if s.get("riser") is not None]
+    clipped = [s for s in solids if s.get("clip")]
+    fails = []
+    rows = []
+    #  In the twin (`snow_cover=False`) no snow prim is built and LIFT drops to 0, so the
+    #  four gates that measure the snow **against the bank/stair** have no subject. They
+    #  are reported SKIP rather than evaluated - a twin run must not fail the smoke floor.
+    snow_on = bool(SCENE_CONFIG["snow_cover"])
+
+    def chk(tag, ok, msg="", skip=False):
+        rows.append((tag, None if skip else bool(ok), msg))
+        if not skip and not ok:
+            fails.append(tag)
+
+    # --- 1. drop registry: before/after bit identity ----------------------
+    diff = [k for k in _DROP_REG_FROZEN
+            if _DROP_REG_FROZEN[k] != reg.get(k)]
+    chk("낙차 레지스트리 = GT-119 이전 유도값과 비트 동일 (콘크리트 계단·답면 z·"
+        "노징 프림 불변)", not diff,
+        "동일 필드 %d/%d" % (len(_DROP_REG_FROZEN) - len(diff),
+                             len(_DROP_REG_FROZEN))
+        + ("" if not diff else " · 불일치 " + ", ".join(diff)))
+
+    # --- 2. snow front face never passes the riser plane ------------------
+    fr = min((s["riser"] - s["x"][1] for s in on_stair), default=9.9)
+    chk("계단 눈 전면 ≤ 라이저 평면 (구 nose_over +60mm 캔틸레버 소멸)",
+        fr >= -1e-9,
+        "최소 여유 %+.1f mm · 프림 %d (0.0 = flush 설계값, 허용 1 nm = ulp)"
+        % (fr * 1000.0, len(on_stair)), skip=not snow_on)
+    chk("front_inset ≥ 0 · 0 < chamfer < thickness",
+        sn["front_inset"] >= 0.0 and 0.0 < sn["chamfer"] < sn["thickness"],
+        "front_inset %.3f · chamfer %.3f < thickness %.3f"
+        % (sn["front_inset"], sn["chamfer"], sn["thickness"]))
+
+    # --- 3. y extent: inside the stair flank, still overlapping the bank ---
+    ymax = max(max(abs(s["y"][0]), abs(s["y"][1])) for s in clipped)
+    chk("계단 눈 y 폭 ≤ 계단 폭 − 0.010 (스트링어 위 흰 탭 소멸)",
+        ymax <= st["y1"] - 0.010 + 1e-12,
+        "|y|max %.4f ≤ %.4f · 프림 %d (인셋 %.0f mm)"
+        % (ymax, st["y1"] - 0.010, len(clipped), sn["side_inset"] * 1000.0),
+        skip=not snow_on)
+    chk("눈이 뱅크 안쪽면(±%.3f)까지는 닿는다 — 측면 콘크리트 노출 0"
+        % (st["y1"] - bk["y_in_over"]),
+        ymax >= st["y1"] - bk["y_in_over"] - 1e-12
+        and sn["side_inset"] <= bk["y_in_over"] + 1e-12,
+        "겹침 %+.1f mm" % ((ymax - (st["y1"] - bk["y_in_over"])) * 1000.0),
+        skip=not snow_on)
+
+    # --- 4. no snow corner above the bank/stringer plane ------------------
+    #   Only the stair-width solids can produce a tab: they are the ones that reach past
+    #   the flank (+-1.235 > bank y_in 1.23). The two big approach plates are terrain, and
+    #   the lower one deliberately covers the bank's run-out tail.
+    tab = min(_top_margin_vs_bank(s) for s in clipped)
+    worst = min(clipped, key=_top_margin_vs_bank)["tag"]
+    chk("눈 상면 ≤ 뱅크/스트링어 평면 (탭 발생 기구 자체가 음수)",
+        tab >= 0.0, "최소 여유 %+.1f mm @ %s" % (tab * 1000.0, worst),
+        skip=not snow_on)
+
+    # --- 5. the resting gap and what it has to clear ----------------------
+    chk("rest_gap > 노징 돌출(proud) — 베드가 노징 위에 얹힌다",
+        sn["rest_gap"] > PARAMS["nosing"]["proud"],
+        "%.1f mm > %.1f mm" % (sn["rest_gap"] * 1000.0,
+                               PARAMS["nosing"]["proud"] * 1000.0))
+    #  Anything the terrace kit leaves proud under the drop-edge nose must fit inside
+    #  the same gap, or it would spear through the 20 mm nose block.
+    nose_x0 = st["x0"] - sn["front_inset"] - sn["chamfer"] - 0.012
+    sy0, sy1 = _snow_lat()
+    (_tag, gp), = ground_plans()
+    under = [e for e in gp["elements"]
+             if e["aabb"][3] > nose_x0 and e["aabb"][0] < st["x0"]
+             and e["aabb"][4] > sy0 and e["aabb"][1] < sy1]
+    worst_p = max([e["proud"] for e in under], default=0.0)
+    chk("낙차선 코 밑(x %.3f…%.3f) ground_kit proud < rest_gap"
+        % (nose_x0, st["x0"]),
+        worst_p < sn["rest_gap"],
+        "요소 %d · proud max %.1f mm < %.1f mm"
+        % (len(under), worst_p * 1000.0, sn["rest_gap"] * 1000.0))
+
+    # --- 6. object snow caps recede from their support --------------------
+    over = []
+    for name, sx, sy, inset in object_cap_supports():
+        cx = cap_span(sx, inset) - sx
+        cy = cap_span(sy, inset) - sy
+        over.append((max(cx, cy), name))
+    worst_c = max(over)
+    chk("물체 눈 캡이 지지체보다 크지 않다 (구 +0.05 돌출 → 음의 인셋)",
+        worst_c[0] < 0.0,
+        "최악 %+.1f mm @ %s · 캡 %d개" % (worst_c[0] * 1000.0, worst_c[1],
+                                          len(over)))
+
+    live = [r for r in rows if r[1] is not None]
+    npass = len([r for r in live if r[1]])
+    if verbose:
+        print("=" * 72)
+        print("sceneC1 [GT-119 ③] 눈 형상 재절단 자기검산 (부팅 0 · GPU 0)")
+        print("=" * 72)
+        print("[1] 위험/낙차 레지스트리 — 이번 수리에서 이동 0 (재유도값)")
+        print(f"    유형          {reg['kind']}")
+        print(f"    단수/런/낙차  {reg['nsteps']}단 · run {reg['run']:.3f} · "
+              f"drop {reg['drop']:.3f}")
+        print(f"    낙차 시작선   x={reg['top_edge_x']:.3f} · z={reg['top_edge_z']:.3f}"
+              f" → 하부 z={reg['lower_z']:.3f} · 회랑 |y| ≤ {reg['corridor'][1]:.2f}")
+        print("    답면 상단 z   "
+              + ", ".join(f"{s[2]:.3f}" for s in reg["steps"]))
+        print("    노징 x 중심   "
+              + ", ".join(f"{x:.3f}" for x in reg["nosing_x"]))
+        print(f"    동결값 대조   {'동일' if not diff else '불일치 ' + str(diff)}"
+              " (repr 수준 · 허용오차 없음)")
+        print("[2] 눈층 (프림 %d · 콜라이더 0 — 눈은 룩 레이어)%s"
+              % (len(solids),
+                 "" if snow_on else "  ※ 트윈 팔: 미생성, 형상 게이트 SKIP"))
+        print(f"    두께 {sn['thickness']:.3f} · 모따기 {sn['chamfer']:.3f}@45° · "
+              f"전면 인셋 {sn['front_inset']:.3f} · 측면 인셋 "
+              f"{sn['side_inset']:.3f} · 안착 간극 {sn['rest_gap']:.3f}")
+        print(f"    단 코 실루엣: 수직면 {(sn['thickness'] - sn['chamfer']) * 1000:.0f}"
+              f"mm + 45° 모따기 {sn['chamfer'] * 1000:.0f}mm "
+              f"(구: 60mm 캔틸레버 + 35mm 그림자 슬롯)")
+        print("[3] 게이트")
+        for tag, ok, msg in rows:
+            mark = "SKIP" if ok is None else ("PASS" if ok else "FAIL")
+            print(f"  [{mark}] {tag}" + (f" — {msg}" if msg else ""))
+        # --- consequence the ruling has to see (not a gate) ---------------
+        #   Snow that hides a face lying **on** the riser plane would have to be proud of
+        #   that plane, which the ruling forbids - so the measurement is reported, not
+        #   engineered away. `n_exp` excludes the noses the lower approach plate swallows.
+        ns = PARAMS["nosing"]
+        pb = [s for s in solids if s["tag"] == "PlateBot"][0]
+        n_exp = sum(1 for (_xa, xb, zt) in reg["steps"]
+                    if not (xb - ns["width"] >= pb["x"][0] - 1e-9
+                            and zt + ns["proud"] <= pb["z"][1] + 1e-9))
+        print("[4] 주의(게이트 아님) — 전면 flush 의 대가")
+        print(f"    라이저 평면이 눈에 덮이지 않으므로 노징 띠 전면 "
+              f"{(ns['proud'] + 0.005) * 1000:.0f}mm 가 x=xb 평면에 노출된다 "
+              f"({n_exp}단 · 나머지는 하부 평판에 매몰). "
+              f"상류 시점(approach·grazing_top·grid)에서는 답면 눈(베드)에 "
+              f"가려 보이지 않고 lower_lookback 에서만 보인다 "
+              f"(단 경사 29.5° > 각 시점 부각 11.8~22.4°).")
+        print("    처분 선택지: (a) 그대로 수용 (b) 눈 전면에 0.2mm 실링 물림 "
+              "(front_inset=-0.0002) (c) 이 팔에서 cue_nosing=False. "
+              "— 지시가 'never proud' 이므로 기본값은 (a).")
+        print("-" * 72)
+        print(f"게이트 {npass}/{len(live)} PASS"
+              + (f" · SKIP {len(rows) - len(live)}"
+                 if len(live) != len(rows) else ""))
+    return (not fails), npass, len(live)
+
+
 BANNER = """\
 [조작] 우클릭+WASD 비행 · P 패스트레이싱 토글 · C 스크린샷 · [ ] 태양 방위
 [체크리스트]
@@ -373,7 +833,10 @@ BANNER = """\
  3. rail_side          — 난간·콘크리트 스트링어가 유일 단서로 잔존하는가
  4. snow_cover ON/OFF  — 눈 제거 시 계단 코어 기하(단 위치·낙차) 불변인가
  5. 조명               — 무태양 저대비인가(경질 그림자 0), 눈 과노출/흑화 없는가
- 6. 재질·Z파이팅       — 눈/콘크리트 경계, 처마 핀, 평판 이음에 깜빡임 없는가"""
+ 6. 재질·Z파이팅       — 눈/콘크리트 경계, 모따기 웨지, 평판 이음에 깜빡임 없는가
+ 7. lower_lookback     — [GT-119 ③] 단 코가 45° 모따기 능선인가(캔틸레버·그림자 슬롯 0),
+                         스트링어 위 흰 탭 0인가
+ 8. 검산               — NEGOBS_SELFCHECK=1 python3 sceneC1_snow_stairs.py"""
 
 
 def main():
@@ -381,8 +844,19 @@ def main():
     # The old template read NEGOBS_SMOKE only as boot()'s headless arg (or not at
     # all), so the §2.2 smoke floor booted Isaac on this scene (scene03/09 incident).
     # Deep checks keep their own arms (NEGOBS_SELFCHECK / geom_invariance_check.py).
+    # [GT-119 ③] The gate now *measures* the snow layer instead of only announcing the
+    # early exit: the registry identity + the 9 snow gates are what the §2.2 smoke floor
+    # runs, so a shape regression fails on a GPU-less machine.
+    if os.environ.get("NEGOBS_SELFCHECK", "0") == "1":
+        _ok, _np, _nt = snow_selfcheck(verbose=True)
+        sys.exit(0 if _ok else 1)
     if os.environ.get("NEGOBS_SMOKE", "0") == "1":
-        print("SMOKE_OK %s pre-boot gate (GT-89)" % os.path.basename(__file__))
+        _ok, _np, _nt = snow_selfcheck(verbose=False)
+        print("SMOKE_%s %s pre-boot gate (GT-89) gates=%d/%d"
+              % ("OK" if _ok else "FAIL", os.path.basename(__file__), _np, _nt))
+        if not _ok:
+            snow_selfcheck(verbose=True)
+            sys.exit(1)
         return
     capture_mode = os.environ.get("NEGOBS_CAPTURE", "0") == "1"
     smoke_mode = os.environ.get("NEGOBS_SMOKE", "0") == "1"
@@ -585,83 +1059,34 @@ def main():
                 (x1 - x0, tr["y1"] - tr["y0"], z_hi - z_lo), M["snow"])
 
     # -------------------------------------------------------------------
-    # Snow layer [signature] - per-tread snow boxes (+eave fin) · approach plates · railing strip
-    #   * The eave fin is set back from the slab front edge by lip_recess and bites 5mm upward to
-    #     approximate a "rounded nosing" profile (no coplanar faces).
-    #   * The upper plate only reaches x0+nose_over, becoming an eave that covers the first riser
-    #     without blocking the drop space beneath it (honours the intent of regression guard §A-3).
+    # Snow layer [signature] - emits `snow_solids()` (see [B2] for the shape and the
+    #   GT-119 ③ reasoning). Nothing is computed here: the same list the self-check
+    #   measures is the list that gets built.
+    #   **Colliders: none.** Every box goes through BOX(col=False) and every wedge through
+    #   build_slope(collider=False), which is what the pre-GT-119 layer did too - the snow
+    #   is a look layer, the walked/collided surfaces are the concrete stair, the banks and
+    #   the two ground plates. So this repair moves no collision extent at all.
     # -------------------------------------------------------------------
     def build_snow(M):
         sn = PARAMS["snow"]
-        st = PARAMS["stairs"]
-        tr = PARAMS["terrace"]
-        lo = PARAMS["lower"]
-        t = sn["thickness"]
-        over = sn["nose_over"]
-        so = sn["side_over"]
-        sy0, sy1 = st["y0"] - so, st["y1"] + so
-        scy = (sy0 + sy1) / 2.0
-        sLy = sy1 - sy0
-        fLy = sLy - 0.010                    # eave fin width (narrower than the slab)
-
-        def _slab(tag, xa, xb, ztop, lip):
-            z_hi = ztop + t
-            z_lo = ztop - sn["embed_step"]
-            # Bury the trailing edge 1cm into the solid ahead (previous step / upper terrace) to avoid a coplanar face at x=xa
-            xa_s = xa - 0.010
-            xb_s = xb + (over if lip else 0.0)
-            BOX(f"{ROOT}/Snow/Slab_{tag}",
-                ((xa_s + xb_s) / 2.0, scy, (z_hi + z_lo) / 2.0),
-                (xb_s - xa_s, sLy, z_hi - z_lo), M["snow"])
-            if lip:
-                # 12mm bite - it must sit on a different plane from the next slab's trailing edge (10mm) so that
-                # no coplanar face appears even in sweeps that raise the concealment (riser_cover up).
-                fx0 = xb - 0.012
-                fx1 = xb + over * (1.0 - sn["lip_recess"])
-                fz_hi = ztop + 0.005                   # enclosed inside the slab
-                fz_lo = ztop - st["riser"] * sn["riser_cover"]
-                BOX(f"{ROOT}/Snow/Lip_{tag}",
-                    ((fx0 + fx1) / 2.0, scy, (fz_hi + fz_lo) / 2.0),
-                    (fx1 - fx0, fLy, fz_hi - fz_lo), M["snow"])
-
-        # (1) Upper approach plate + eave at the stair top edge.
-        #    0.1 inset from the site boundary - to avoid a coplanar face with the terrace box flanks
-        #    (the inset edge is 60m away, so it never enters the frame).
-        ins = 0.10
-        z_hi = tr["z_top"] + t
-        z_lo = tr["z_top"] - sn["embed_plate"]
-        px0 = tr["x0"] + ins
-        px1 = st["x0"] + over
-        BOX(f"{ROOT}/Snow/PlateTop",
-            ((px0 + px1) / 2.0, (tr["y0"] + tr["y1"]) / 2.0,
-             (z_hi + z_lo) / 2.0),
-            (px1 - px0, (tr["y1"] - tr["y0"]) - 2.0 * ins, z_hi - z_lo),
-            M["snow"])
-        lz_hi = st["z_top"] + 0.005
-        lz_lo = st["z_top"] - st["riser"] * sn["riser_cover"]
-        lx0 = st["x0"] - 0.012                  # different plane from the trailing edge of Slab_1 (10mm)
-        lx1 = st["x0"] + over * (1.0 - sn["lip_recess"])
-        BOX(f"{ROOT}/Snow/LipTop",
-            ((lx0 + lx1) / 2.0, scy, (lz_hi + lz_lo) / 2.0),
-            (lx1 - lx0, fLy, lz_hi - lz_lo), M["snow"])
-
-        # (2) Per-tread snow boxes (the last step joins the lower ground, so no eave)
-        for i in range(1, st["nsteps"] + 1):
-            xa = st["x0"] + st["tread"] * (i - 1)
-            xb = xa + st["tread"]
-            ztop = st["z_top"] - st["riser"] * i
-            _slab(str(i), xa, xb, ztop, lip=(i < st["nsteps"]))
-
-        # (3) Lower approach plate (5cm overlap with the last step slab · top face 2mm lower)
-        bx0 = RUN - lo["x_back"]
-        bx1 = lo["x1"] - ins
-        z_hi = LOWER_TOP + t
-        z_lo = LOWER_TOP - sn["embed_plate"]
-        BOX(f"{ROOT}/Snow/PlateBot",
-            ((bx0 + bx1) / 2.0, (lo["y0"] + lo["y1"]) / 2.0,
-             (z_hi + z_lo) / 2.0),
-            (bx1 - bx0, (lo["y1"] - lo["y0"]) - 2.0 * ins, z_hi - z_lo),
-            M["snow"])
+        n_box = n_wedge = 0
+        for s in snow_solids():
+            path = f"{ROOT}/Snow/{s['tag']}"
+            if s["form"] == "box":
+                (xa, xb), (ya, yb), (za, zb) = s["x"], s["y"], s["z"]
+                BOX(path, ((xa + xb) / 2.0, (ya + yb) / 2.0, (za + zb) / 2.0),
+                    (xb - xa, yb - ya, zb - za), M["snow"])
+                n_box += 1
+            else:
+                # margin=0.0 is load-bearing: the default 0.3 would extend the wedge
+                # 0.15 past both ends and put the chamfer back over the riser plane.
+                sc.build_slope(stage, path, s["x0"], s["z0"], s["run"], s["drop"],
+                               s["y"][0], s["y"][1], s["thick"], M["snow"],
+                               margin=0.0, collider=False)
+                n_wedge += 1
+        print(f"[눈층] 박스 {n_box} · 45° 모따기 웨지 {n_wedge} · 전면 = 라이저 평면 "
+              f"−{sn['front_inset'] * 1000.0:.0f}mm · 측면 인셋 "
+              f"{sn['side_inset'] * 1000.0:.0f}mm · 콜라이더 0")
 
     def build_rail_snow(M):
         """Snow strip on top of the railing - horizontal extension (box) + sloped part (build_slope thin plate)."""
@@ -775,10 +1200,12 @@ def main():
         CYL(f"{ROOT}/Pole", (po["cx"], po["cy"], base_top + po["h"] / 2.0),
             po["r"], po["h"], M["rail"], col=True)
         if cfg["snow_cover"]:
-            BOX(f"{ROOT}/Snow/PoleCap",
-                (po["cx"], po["cy"], base_top + po["h"] + po["cap_t"] / 2.0
-                 - 0.01),
-                (po["r"] * 2.4, po["r"] * 2.4, po["cap_t"]), M["snow"])
+            # [GT-119 ③] was r*2.4 = 20 % wider than the post it sits on
+            for _sfx, _c, _s in cap_boxes(
+                    (po["cx"], po["cy"],
+                     base_top + po["h"] + po["cap_t"] / 2.0 - 0.01),
+                    (po["r"] * 2.0, po["r"] * 2.0), po["cap_t"]):
+                BOX(f"{ROOT}/Snow/PoleCap{_sfx}", _c, _s, M["snow"])
         # Distant buildings - C(+X) is plinthed on the lower ground, D(-X) at terrace level
         low_base = LOWER_TOP if cfg["hazard_stairs"] else 0.0
         for key, bd in PARAMS["buildings"].items():
@@ -802,10 +1229,17 @@ def main():
         def base_of(kind):
             return LIFT if kind == "upper" else low_top
 
-        def cap(path, center, size):
-            """Snow cap thin plate - created only when snow_cover is ON (twin consistency)."""
+        def cap(path, center, support, t, inset=SNOW_CAP_INSET):
+            """Snow cap - created only when snow_cover is ON (twin consistency).
+
+            [GT-119 ③] `support` is the footprint of the thing being capped, **not** the
+            cap size: `cap_boxes` insets from it (audit item C - the old +0.05 on both
+            axes made every lid overhang its own object) and adds a stepped crown where
+            the rim is big enough to read.
+            """
             if cfg["snow_cover"]:
-                BOX(path, center, size, M["snow"])
+                for sfx, ctr, size in cap_boxes(center, support, t, inset):
+                    BOX(path + sfx, ctr, size, M["snow"])
 
         # (1) Bench (seat + 4 legs + back) - snow caps on the seat and the top of the back
         bs = PARAMS["bench"]
@@ -826,11 +1260,11 @@ def main():
                 (bs["length"], 0.06, bs["back_h"]), M["wood"])
             cap(f"{pfx}/SnowSeat",
                 (0.0, 0.0, bs["height"] + bs["cap_t"] / 2.0 - 0.012),
-                (bs["length"] + 0.05, bs["width"] + 0.05, bs["cap_t"]))
+                (bs["length"], bs["width"]), bs["cap_t"])
             cap(f"{pfx}/SnowBack",
                 (0.0, back_y,
                  bs["height"] + bs["back_h"] + bs["cap_t"] / 2.0 - 0.012),
-                (bs["length"] + 0.04, 0.11, bs["cap_t"]))
+                (bs["length"], 0.06), bs["cap_t"])
 
         # (2) Street lamp (pole + one-sided arm + head) - snow caps on the pole top and the head
         lm = PARAMS["lamp"]
@@ -853,10 +1287,10 @@ def main():
             cap(f"{pfx}/SnowHead",
                 (cx, hy, bz + lm["pole_h"] - 0.18 + lm["head_h"] / 2.0
                  + lm["cap_t"] / 2.0 - 0.010),
-                (lm["head_w"] + 0.04, lm["head_l"] + 0.04, lm["cap_t"]))
+                (lm["head_w"], lm["head_l"]), lm["cap_t"])
             cap(f"{pfx}/SnowTop",
                 (cx, cy, bz + lm["pole_h"] + lm["cap_t"] / 2.0 - 0.010),
-                (lm["pole_r"] * 2.6, lm["pole_r"] * 2.6, lm["cap_t"]))
+                (lm["pole_r"] * 2.0, lm["pole_r"] * 2.0), lm["cap_t"])
 
         # (3) Signpost (information sign) - snow cap on top of the panel
         sp = PARAMS["signpost"]
@@ -870,7 +1304,7 @@ def main():
             (sp["cx"], sp["cy"],
              bz + sp["panel_z"] + sp["panel_h"] / 2.0 + sp["cap_t"] / 2.0
              - 0.008),
-            (sp["panel_t"] + 0.05, sp["panel_w"] + 0.05, sp["cap_t"]))
+            (sp["panel_t"], sp["panel_w"]), sp["cap_t"])
 
         # (4) Hedge lines - a top snow cap (overhang) keeps them consistent with winter
         hc = PARAMS["hedge_cap"]
@@ -884,7 +1318,7 @@ def main():
                 (sx, sy, hd["h"]), M["hedge"], col=True)
             cap(f"{ROOT}/Hedge_{i}_Snow",
                 (cx, cy, bz + hd["h"] + hc["t"] / 2.0 - 0.015),
-                (sx + 2.0 * hc["over"], sy + 2.0 * hc["over"], hc["t"]))
+                (sx, sy), hc["t"])
 
         # (5) Distant low-rise houses - shell + eaved roof slab + snow cap + chimney + windows
         hs = PARAMS["house"]
@@ -905,8 +1339,8 @@ def main():
                 M[f"roof_{i}"])
             cap(f"{pfx}/SnowRoof",
                 (cx, cy, bz + h + hs["roof_t"] + hs["cap_t"] / 2.0 - 0.02),
-                (sx + 2.0 * (hs["eave"] - hs["cap_inset"]),
-                 sy + 2.0 * (hs["eave"] - hs["cap_inset"]), hs["cap_t"]))
+                (sx + 2.0 * hs["eave"], sy + 2.0 * hs["eave"]), hs["cap_t"],
+                inset=hs["cap_inset"])
             # Chimney (one side of the roof) + snow cap
             ch = hs["chimney_s"]
             chx = cx + sx * 0.28 * hd["face"]
@@ -919,7 +1353,7 @@ def main():
                 (chx, chy,
                  bz + h + hs["roof_t"] + hs["chimney_h"] + hs["cap_t"] / 2.0
                  - 0.02),
-                (ch + 0.06, ch + 0.06, hs["cap_t"]))
+                (ch, ch), hs["cap_t"])
             # Windows - the face toward the camera (face=-1 -> -X facade, +1 -> +X facade)
             # Bite the window plate (thickness 0.04) 1cm into the wall to avoid a coplanar face
             gx = (hd["x0"] if hd["face"] < 0 else hd["x1"]) \

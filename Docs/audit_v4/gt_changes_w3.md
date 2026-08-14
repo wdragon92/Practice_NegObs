@@ -2690,3 +2690,14 @@ Round: 차기 검증 라운드에 s16 포함. **Status: OPEN (선신고 — 시�
 build_building 사용 씬 전체 발현(LOOK_GEO 팔 한정 — OFF 팔 비트동일).
 **GT 판정**: R-3(프림 추가) · 유리·벽·보행면 불변. regr FRAME 선언 귀속.
 **Status: OPEN (선신고 — 시공 중)**
+
+## 79. GT-123 — 킷 역할-재질 접힘 해소 1차: 주철군 분리(s16·s21 파일럿) + 접힘 경고 계기 (선신고)
+
+**Authority**: 08-14 사용자 3일 자율 위임(행 69). 근거 = 감사 systemic:kit-materials
+(apply_ground 15역할이 씬에서 1~4재질로 접힘 — s21 15→4·s16 17→7, 맨홀이 "바닥에
+붙인 스티커"로 판독된 직접 원인) + r4batch 육안 잔여 소견(s16 맨홀 무늬 없는 원반).
+**Scope**: ① ground_kit `apply_ground` 에 역할-재질 접힘 경고(한 재질 객체에 4+ 역할
+몰리면 1행 경고 — 게이트 아님) ② s16·s21 파일럿: manhole/gully/trench_frame/
+gutter_cover 를 주철군 재질(`Looks/Ironwork` — granite_dark 소축척 × 암틴트, 신규
+조달 0)로 분리. marking/weed/stain 군 분리는 후속(감사 권고 4군 중 1군 우선).
+**GT 판정**: R-2(재질 전용). **Status: OPEN (선신고 — 시공 중)**

@@ -492,7 +492,22 @@ PARAMS = dict(
         #   0.8 m in front of an h0.3 eye is exactly the "large near-white area" the
         #   v5.1 §4 parapet ruling (0.90 -> 0.72) already outlawed, and Korean 화강암
         #   coping/kerb is mid-grey in reality, not cream.
-        wall_tile_tint=(0.88, 0.86, 0.80),      # G2's cream wall tile
+        # ═══ [GT-121] 반사면 알베도 복원 — 광량이 아니라 알베도 축 ═══════════
+        #  감사 실측: 정오컷 `260806_w3_allview5/pt_noon_inside_looking_up.png` 의
+        #  **45.78 %** 가 선형 Y<0.02(준흑)이고, 프레임 하단 1/3(계단 답면 근경)만
+        #  보면 **91.9 %** 가 준흑이다 `[실측, 이 세션 · PIL/Rec.709]`. 같은 컷에서
+        #  면별 렌더 휘도는 벽 타일 Y 0.050~0.080 · 답면 Y 0.014~0.027 — 즉
+        #  **어두운 쪽은 벽이 아니라 바닥면**이고, 그 바닥면은 텍스처 알베도가
+        #  0.115(갈색)인 `concrete_floor` 를 **무틴트**로 물고 있었다.
+        #  처방 축은 D4(GT-116 ①③)와 동일: 조명·돔·태양 파라미터는 손대지 않고
+        #  "텍스처 선형평균 × 틴트 = 실효 알베도" 를 실물 마감 대역으로 되돌린다.
+        #  (연구 타당성 문제 — "깊을수록 어둡다"가 낙차와 상관되면 안 된다.)
+        #  · 벽 타일  실효 Y 0.3975 → **0.3998** (요청 대역 0.35~0.45 · 상아 타일).
+        #    웜캐스트만 다듬는다(B +6.3 %): 실물 지하보도 벽은 유백/상아 자기타일.
+        #    ※ 룩 레이어 ON 이면 `LOOK_CLASS["paving"].alb_max = 0.34` 가
+        #      **0.34 로 깎는다**(GT-108 밴드, 색상비는 보존). 0.35~0.45 는
+        #      씬 측에서 도달 불가 — 실내 벽타일용 상한은 레버1(scene_common) 건.
+        wall_tile_tint=(0.877, 0.863, 0.850),   # 상아 벽타일 → 실효 Y 0.400
         granite_light_tint=(0.72, 0.71, 0.68),  # light granite coping / kerb / sill
         city_wall_tint=(0.94, 0.95, 0.97),      # cool grey concrete / tile
         city_stone_tint=(0.92, 0.90, 0.87),     # light granite / stone cladding
@@ -500,10 +515,32 @@ PARAMS = dict(
         canopy_roof=(0.62, 0.64, 0.66), canopy_roof_rough=0.42,
         canopy_col=(0.66, 0.68, 0.70), canopy_col_rough=0.30,
         canopy_span=(0.72, 0.73, 0.74), canopy_span_rough=0.45,
+        # [GT-121] 캐노피 3재질의 metallic 0.75/0.85/0.60 → **0.0**.
+        #  실물 지하보도 캐노피는 **도장 강재**(분체도장 알루미늄/강판)다. 도장면은
+        #  유전체이므로 metallic > 0 은 알베도를 금속 반사율(F0)로 오독시켜, 하강면
+        #  아래 어두운 공간에서 기둥이 "검은 거울"로 붙는다. 도장 = metallic 0 +
+        #  specular_level 0.5(유전체 F0 0.04 기준선) + 광택은 roughness 로만 표현.
+        #  ※ 감사 항목이면서 담당이 비어 있던 건 — GT-121 에서 함께 집행.
+        canopy_metallic=0.0, canopy_spec=0.5,
         soffit_lamp=(0.94, 0.96, 0.98), soffit_lamp_rough=0.25,
         grass_tint=(0.55, 0.68, 0.42),
         hedge_tint=(0.50, 0.64, 0.38),            # v4-B2 hedge (black-slab fix)
-        tunnel_tint=(0.32, 0.32, 0.34),           # Dark tunnel concrete tint
+        # [GT-121] 계단 답면·챌면 + 하부 랜딩 + 지하보도 바닥 (`concrete_floor`).
+        #  텍스처 선형평균 (0.146453, 0.110206, 0.073338) = Y 0.1153 · R/B **1.997**
+        #  → 갈색 흙/목재로 읽히는 "카펫 계열"의 본체(코퍼스 공통, 레버1 트랙).
+        #  이 씬은 감사 재량대로 **씬 측 중화 틴트**로 닫는다. 채널별 보정으로
+        #  실효 (0.3112, 0.2987, 0.2800) = **Y 0.300** · R/B **1.111** —
+        #  임상적 무채색이 아니라 화강석/콘크리트의 약한 온기만 남긴다.
+        #  대역 0.25~0.35(중성 회색 콘크리트) 안, 클래스 상한 0.34 아래 →
+        #  룩 밴드 무동작(선언 = 전달). 텍셀 최대 × 틴트 = (0.677,0.711,0.730)
+        #  이므로 클리핑 0 — 판석 줄눈/단 절단선이 살아난다 `[계산]`.
+        stair_tint=(2.125, 2.710, 3.818),
+        # [GT-121] 터널 내부(벽·천장). 기존 (0.32,0.32,0.34) 는 실효 Y **0.0761**
+        #  = 신품 아스팔트보다 어두운 **광 트랩**이었다(D4 GT-116 ③ 과 동일 결함).
+        #  실물 지하보도 내부는 백색/유백 타일 벽 + 백색 천장(0.45~0.6)이다.
+        #  실효 (0.3288, 0.3188, 0.3056) = **Y 0.320** 으로 복귀 — 어둠은 알베도가
+        #  아니라 **가림(개구 3.5×2.3 m, 조명 없음)** 이 만든다.
+        tunnel_tint=(1.240, 1.348, 1.909),        # 유백 타일 벽·천장 → 실효 Y 0.320
         asphalt_color=(0.045, 0.045, 0.047), asphalt_rough=0.75,  # v4-D1 road surface
         lane_color=(0.55, 0.55, 0.52),            # v4-D2 lane markings
         sign_color=(0.045, 0.085, 0.19), sign_face=(0.55, 0.56, 0.58),
@@ -574,6 +611,79 @@ ASSET_ROLES = ["plaza_lower", "concrete_floor", "concrete_wall", "grass",
                "plaza_light", "marble_light", "plaster",
                "sign_exit",     # [v5.2 user] Arbitrary warning placards removed
                "hdri", "mdl"]
+
+
+# ═══ [C1] [GT-121] 반사면 실효 알베도 표 ═══════════════════════════════════
+#   계산식은 한 줄이다 — **텍스처 선형평균 × 틴트 = 실효 알베도**.
+#   평균은 `scene_common._texture_mean`(PIL · usd-core 불요 · sRGB→선형
+#   IEC 61966-2-1 변환 후 평균)으로 이 세션에 실측했고, 텍스처 팩이 없는 기계에서도
+#   게이트가 도는 값으로 상수화해 둔다(scene15 `CONCRETE_FLOOR_MEAN` 선례).
+#   최대 텍셀은 512 px 썸네일 기준 — 채널별 틴트가 1.0 을 넘겨 무늬를 태우는지
+#   (판석 줄눈·단 절단선 소실) 보는 클리핑 게이트에 쓴다.
+_REC709 = (0.2126, 0.7152, 0.0722)
+TEX_MEAN_FALLBACK = {
+    "plaza_light":    (0.468647, 0.461974, 0.444882),   # Y 0.4622 · R/B 1.053
+    "concrete_floor": (0.146453, 0.110206, 0.073338),   # Y 0.1153 · R/B 1.997 ←갈색
+    "concrete_wall":  (0.265177, 0.236481, 0.160079),   # Y 0.2371 · R/B 1.657
+}
+TEX_MAX_FALLBACK = {
+    "plaza_light":    (0.7529, 0.7605, 0.7682),
+    "concrete_floor": (0.3185, 0.2623, 0.1912),
+    "concrete_wall":  (0.3564, 0.3231, 0.2346),
+}
+# 룩 레이어 ON(NEGOBS_LOOK_V1=1 = 판정 라운드 규약)에서 씬이 넘을 수 없는 천장.
+#   `LOOK_CLASS`: paving/concrete/stone/curb 전부 alb_max 0.34 (GT-108 밴드).
+#   밴드는 **휘도만** 스칼라로 깎고 색상비는 보존한다 → 선언 > 0.34 는 0.34 로 전달.
+LOOK_ALB_MAX = 0.34
+# (면 라벨, 이전 역할, 이전 틴트, 현 역할, 현 틴트키, 목표대역 lo/hi, 근거)
+#   "이전" = GT-121 직전 상태. 감사 실측컷(260806_w3_allview5)의 재질 상태와 같다.
+ALBEDO_SURFACES = (
+    ("스테어웰 벽 (WallTile_S/N)", "plaza_light", (0.88, 0.86, 0.80),
+     "plaza_light", "wall_tile_tint", (0.35, 0.45), "유백/상아 자기타일"),
+    ("계단 답면·챌면 + 하부 랜딩", "concrete_floor", (1.0, 1.0, 1.0),
+     "concrete_floor", "stair_tint", (0.25, 0.35), "중성 회색 콘크리트/화강석"),
+    ("지하보도 바닥 (Tunnel/Floor)", "concrete_wall", (0.32, 0.32, 0.34),
+     "concrete_floor", "stair_tint", (0.25, 0.35), "랜딩과 같은 보행 마감"),
+    ("터널 벽·천장 (Tunnel/Wall·Ceil)", "concrete_wall", (0.32, 0.32, 0.34),
+     "concrete_wall", "tunnel_tint", (0.25, 0.40), "유백 타일 벽 + 백색 천장"),
+)
+
+
+def _luma(c):
+    return sum(a * b for a, b in zip(c, _REC709))
+
+
+def tex_mean(role):
+    """역할 텍스처의 **선형** 평균. (값, 출처) — 실측 실패 시 표의 상수로 폴백."""
+    fn = getattr(sc, "_texture_mean", None)
+    try:
+        v = fn(sc.tex_path(role, "diff")) if fn else None
+        if v and min(v) > 1e-4:
+            return tuple(float(x) for x in v), "실측"
+    except Exception:
+        pass
+    return TEX_MEAN_FALLBACK[role], "상수"
+
+
+def albedo_rows():
+    """면별 (라벨, 이전 실효, 현 실효, 목표대역, 전달값, 최대텍셀, 출처, 근거).
+
+    빌더와 **같은 PARAMS 를 읽는다** — 표가 코드의 주장이 아니라 측정이 되도록.
+    `전달값` 은 룩 레이어 ON 에서 실제로 셰이더에 들어가는 값(클래스 천장 적용).
+    """
+    mp = PARAMS["material"]
+    rows = []
+    for lab, r0, t0, r1, key, band, why in ALBEDO_SURFACES:
+        m0, _s0 = tex_mean(r0)
+        m1, src = tex_mean(r1)
+        t1 = mp[key]
+        pre = tuple(c * t for c, t in zip(m0, t0))
+        eff = tuple(c * t for c, t in zip(m1, t1))
+        y = _luma(eff)
+        deliv = min(y, LOOK_ALB_MAX)
+        peak = max(c * t for c, t in zip(TEX_MAX_FALLBACK[r1], t1))
+        rows.append((lab, pre, eff, band, deliv, peak, src, why))
+    return rows
 
 
 def build_views():
@@ -688,6 +798,7 @@ def underpass_selfcheck(verbose=True):
     (2) GT-2 — `build_curb_line` run on a `dry_kit`: block rhythm, exposure, footway flush.
     (3) GT-3 — canopy coverage against the descent, enclosure closure, soffit pitch.
     (4) deleted prims are out of every hazard / collision list.
+    (5) GT-121 — 반사면 실효 알베도 표(텍스처 선형평균 × 틴트) + 도장 강재 metallic.
     Returns (ok, diag).
     """
     ok = True
@@ -880,6 +991,57 @@ def underpass_selfcheck(verbose=True):
     chk("scene_common 의 4주식 포치 빌더 호출 0",
         _needle not in src, "GT-3 은 씬 로컬 build_canopy 로 대체")
 
+    # ---------------- (5) GT-121 ----------------------------------------
+    #  감사 실측(정오컷 `260806_w3_allview5/pt_noon_inside_looking_up.png`):
+    #    선형 Y<0.02 = 45.78 % 전체 / 91.9 % 하단 1/3 · 면별 렌더 Y 벽 0.050~0.080
+    #    vs 답면 0.014~0.027 `[이 세션 실측]`. 처방 축 = 반사면 알베도(조명 불변).
+    print("\n[5] GT-121 반사면 실효 알베도 — 텍스처 선형평균 × 틴트 (D4 GT-116 선례)")
+    print("      면                                이전 Y →  현 Y   (R/B)  목표대역"
+          "    룩ON 전달  최대텍셀")
+    rows = albedo_rows()
+    for lab, pre, eff, band, deliv, peak, src_kind, why in rows:
+        print(f"      {lab:<32s} {_luma(pre):.4f} → {_luma(eff):.4f} "
+              f"({eff[0] / eff[2]:.2f})  {band[0]:.2f}~{band[1]:.2f}"
+              f"    {deliv:.4f}    {peak:.3f}  [{src_kind}] {why}")
+    for lab, pre, eff, band, deliv, peak, _sk, why in rows:
+        y0, y1 = _luma(pre), _luma(eff)
+        chk(f"{lab} — 실효 Y {band[0]:.2f}~{band[1]:.2f}",
+            band[0] - 1e-9 <= y1 <= band[1] + 1e-9,
+            f"{y0:.4f} → {y1:.4f} (×{y1 / max(y0, 1e-9):.2f}) · {why}")
+        # 채널별 틴트가 텍셀을 1.0 위로 태우면 무늬(줄눈·단 절단선)가 소실된다.
+        chk(f"{lab} — 텍셀 클리핑 0", peak <= 1.0 + 1e-9,
+            f"최대 텍셀 × 틴트 = {peak:.3f} ≤ 1.0")
+    # 바닥 계열은 "카펫 계열"의 갈색 캐스트를 중화하되 **약간의 온기는 남긴다**.
+    for lab, pre, eff, _b, _d, _p, _sk, _w in rows:
+        if not lab.startswith(("계단", "지하보도")):
+            continue
+        chk(f"{lab} — 웜캐스트 중화 (실효 R/B 1.03~1.25)",
+            1.03 <= eff[0] / eff[2] <= 1.25,
+            f"{pre[0] / pre[2]:.3f} → {eff[0] / eff[2]:.3f} (원본 텍스처 1.997)")
+    chk("광 트랩 0 — 내부 반사면 전달 알베도 전부 ≥ 0.25",
+        min(r[4] for r in rows) >= 0.25 - 1e-9,
+        f"최저 {min(r[4] for r in rows):.4f} ({min(rows, key=lambda r: r[4])[0]})")
+    _w0 = rows[0]
+    print(f"      · 벽 타일 선언 {_luma(_w0[2]):.4f} → 룩 ON 전달 "
+          f"{_w0[4]:.4f} — `LOOK_CLASS['paving'].alb_max` {LOOK_ALB_MAX:.2f} 가 "
+          f"휘도만 깎는다(색상비 보존). 요청 대역 0.35~0.45 는 씬 측 도달 불가 "
+          f"→ 실내 벽타일 상한은 **레버1(scene_common) 이월**")
+    mp = PARAMS["material"]
+    chk("캐노피 3재질 metallic = 0 — 도장 강재는 유전체",
+        abs(mp["canopy_metallic"]) < 1e-9,
+        f"0.75/0.85/0.60 → {mp['canopy_metallic']:.2f} · "
+        f"specular_level {mp['canopy_spec']:.2f} · rough "
+        f"{mp['canopy_roof_rough']:.2f}/{mp['canopy_col_rough']:.2f}/"
+        f"{mp['canopy_span_rough']:.2f} (도장 광택)")
+    chk("도장 유전체 specular_level ≈ 0.5", 0.45 <= mp["canopy_spec"] <= 0.55,
+        f"{mp['canopy_spec']:.2f}")
+    # needle assembled at runtime so this line cannot match itself (§4 선례와 동일)
+    _tok = 'metallic=mp["canopy_' + 'metallic"]'
+    chk("캐노피 3재질이 metallic 리터럴 없이 PARAMS 를 경유",
+        src.count(_tok) == 3, f"{src.count(_tok)}/3")
+    diag["albedo"] = {r[0]: round(_luma(r[2]), 4) for r in rows}
+    diag["albedo_delivered"] = {r[0]: round(r[4], 4) for r in rows}
+
     print(f"\n[SELFCHECK] scene02 CB-7 — {'PASS' if ok else 'FAIL'}")
     return ok, diag
 
@@ -955,15 +1117,22 @@ def main():
             f"{ROOT}/Looks/Sidewalk", sc.tex_path("plaza_lower", "diff"),
             sc.tex_path("plaza_lower", "nor"), sc.tex_path("plaza_lower", "rough"),
             sca["plaza_lower"])
+        # [GT-121] 계단 답면·챌면 / 하부 랜딩 / 지하보도 바닥 / 보도 보수 패치.
+        #   무틴트였던 `concrete_floor`(실효 Y 0.115 · 갈색)에 중화 틴트를 건다 —
+        #   틴트 유도와 실측 근거는 PARAMS["material"]["stair_tint"] 주석 참조.
         M["concrete_floor"] = PBR(
             f"{ROOT}/Looks/ConcreteFloor", sc.tex_path("concrete_floor", "diff"),
             sc.tex_path("concrete_floor", "nor"),
-            sc.tex_path("concrete_floor", "rough"), sca["concrete_floor"])
+            sc.tex_path("concrete_floor", "rough"), sca["concrete_floor"],
+            tint=mp["stair_tint"])
         M["concrete_wall"] = PBR(
             f"{ROOT}/Looks/ConcreteWall", sc.tex_path("concrete_wall", "diff"),
             sc.tex_path("concrete_wall", "nor"),
             sc.tex_path("concrete_wall", "rough"), sca["concrete_wall"])
-        # Tunnel interior: concrete_wall texture + dark tint (reinforces the dome-occluded dark zone)
+        # Tunnel interior: concrete_wall texture + tint.
+        # [GT-121] 옛 주석("어두운 터널 콘크리트 틴트 — 돔 가림 암부를 강화")은
+        #   **폐기**한다. 암부는 재질이 아니라 기하(개구 3.5×2.3 m·무조명)가
+        #   만들어야 하며, 알베도로 만든 암부는 낙차와 어둠을 상관시킨다.
         M["tunnel"] = PBR(
             f"{ROOT}/Looks/Tunnel", sc.tex_path("concrete_wall", "diff"),
             sc.tex_path("concrete_wall", "nor"),
@@ -1018,15 +1187,21 @@ def main():
             sc.tex_path("plaster", "nor"), sc.tex_path("plaster", "rough"),
             sca["plaster"], tint=mp["city_plaster_tint"])
         # [W3 CB-7 · GT-3] canopy
+        # [GT-121] 도장 강재 = metallic 0 + specular_level 0.5 (PARAMS 주석 참조).
         M["canopy_roof"] = PBR(f"{ROOT}/Looks/CanopyRoof",
                                diffuse_color=mp["canopy_roof"],
-                               metallic=0.75,
+                               metallic=mp["canopy_metallic"],
+                               specular_level=mp["canopy_spec"],
                                roughness_const=mp["canopy_roof_rough"])
         M["canopy_col"] = PBR(f"{ROOT}/Looks/CanopyPost",
-                              diffuse_color=mp["canopy_col"], metallic=0.85,
+                              diffuse_color=mp["canopy_col"],
+                              metallic=mp["canopy_metallic"],
+                              specular_level=mp["canopy_spec"],
                               roughness_const=mp["canopy_col_rough"])
         M["canopy_span"] = PBR(f"{ROOT}/Looks/CanopySpandrel",
-                               diffuse_color=mp["canopy_span"], metallic=0.6,
+                               diffuse_color=mp["canopy_span"],
+                               metallic=mp["canopy_metallic"],
+                               specular_level=mp["canopy_spec"],
                                roughness_const=mp["canopy_span_rough"])
         M["soffit_lamp"] = PBR(f"{ROOT}/Looks/Lamp02Soffit",
                                diffuse_color=mp["soffit_lamp"],
@@ -1346,8 +1521,12 @@ def main():
         Wy = 2.0 * y_in                            # 3.5 (opening width)
         thk = wl["thick"]                          # 0.3
         # Floor (top face floor_z)
+        # [GT-121] 바닥은 벽·천장과 **다른 마감**이다 — 실물 지하보도는 화강석/
+        #   콘크리트 바닥 위에 유백 타일 벽이 선다. 하부 랜딩·계단 답면과 같은
+        #   `concrete_floor`(실효 Y 0.300)를 물려 계단 발치 → 통로가 하나의 보행
+        #   마감으로 이어지게 한다. 재질 추가 0개 · 프림 수 불변.
         BOX(f"{ROOT}/Tunnel/Floor", (cx, 0.0, floor_z - thk / 2.0),
-            (tn["depth"], Wy, thk), M["tunnel"], col=True)
+            (tn["depth"], Wy, thk), M["concrete_floor"], col=True)
         # Ceiling (underside ceil_z). Starts at x0+thk - avoids Z-fighting between the ceiling underside
         #   and the underside of the rear lintel (x0..x0+thk), which faces down at z=ceil_z.
         ce_x0 = x0 + thk

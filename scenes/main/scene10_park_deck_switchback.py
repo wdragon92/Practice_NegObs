@@ -566,8 +566,29 @@ PARAMS = dict(
     #   `UpperTrail`/`UpperBody` widen to y 8.00 so the upper terrace meets the north bank,
     #   which retreats from y 2.60 to y 8.00 — the deck corridor needs the room the wall
     #   used to occupy.
+    #   [GT-119 ②] **seam laps.** The plate table's neighbours all met as exact butt
+    #   joints (measured: every adjacent pair 0.000 m overlap, no pair with a positive
+    #   gap). Three of them are now lapped 0.10 m so the joint is a solid interlock
+    #   rather than two coincident faces, and every lap is driven **under** the higher
+    #   neighbour so no top face, no exposed face and no silhouette moves:
+    #     UpperTrail thick 0.45 -> 0.55   — bottom −0.45 -> −0.55, 0.10 into `UpperBody`.
+    #                                       Top stays 0.000; the extra 0.10 of its south
+    #                                       face at y −1.60 is backed by `SouthBankCap`,
+    #                                       whose high end tucks north under the terrace.
+    #     LowerParkMain x0 −1.50 -> −1.60 — 0.10 west, buried inside `UpperBody`
+    #                                       (z −7.40..−0.45) north of y −1.60 and inside
+    #                                       `SouthBankBody` south of it `[computed]`.
+    #     LowerParkMain / LowerParkFar x1 44.00 -> 44.10 — 0.10 east, buried inside
+    #                                       `FarRidge` (z −8.50..3.50).
+    #   Left as butts, on purpose: `LowerParkMain|LowerParkFar` (y −13.00) — their tops
+    #   are the **same** z −6.620, so a lap would author exactly the coplanar overlap
+    #   `coplanar_census()` exists to forbid, and a butt between two coplanar faces
+    #   cannot open a wedge; and `FarHill|FarRidge` (x 44.00) — occluded from every
+    #   camera by the NorthBank crest (a sight line to it must clear z 7.16 at y 15,
+    #   and the highest eye in the scene is 1.80) and lapping it is the one case that
+    #   would have to add material **above** a neighbour's top face.
     plates=[
-        ("UpperTrail",   -40.0,  -1.5,  -1.60,  8.00,  0.00, 0.45, "grass"),
+        ("UpperTrail",   -40.0,  -1.5,  -1.60,  8.00,  0.00, 0.55, "grass"),
         ("UpperBody",    -40.0,  -1.5,  -1.60,  8.00, -0.45, 6.95, "rock"),
         # [GT-65] x1 −1.60 -> **−1.50**: the dirt trail stopped 0.10 m short of the
         #   entry deck (x0 −1.50) and the walk crossed a 0.10 m strip of bare grass
@@ -576,8 +597,8 @@ PARAMS = dict(
         #   invariant `_inv_10_trail_cut` is "xb <= −1.5", so the trail meets the deck
         #   exactly at the cut and never covers the stair corridor.
         ("TrailPath",    -40.0,  -1.5,  -0.85,  0.85,  0.002, 0.06, "dirt"),
-        ("LowerParkMain", -1.5,  44.0, -13.00,  8.00, -6.62, 1.50, "grass"),
-        ("LowerParkFar", -40.0,  44.0, -60.00, -13.00, -6.62, 1.50, "grass"),
+        ("LowerParkMain", -1.6,  44.1, -13.00,  8.00, -6.62, 1.50, "grass"),
+        ("LowerParkFar", -40.0,  44.1, -60.00, -13.00, -6.62, 1.50, "grass"),
         ("LowerPath",     -1.5,  44.0,  -4.40, -2.60, -6.618, 0.06, "dirt"),
         ("FarHill",      -40.0,  44.0,  15.00, 40.00,  7.16, 9.00, "grass"),
         # distant ridge across the valley (+X horizon closure)
@@ -638,7 +659,13 @@ PARAMS = dict(
     #   station, or the hillside is hollow and the `from_below` cut looks straight through
     #   it to the sky — measured on the 260731_w3_s10 pilot, a 4.8 m see-through band at
     #   the head. Highest corridor top is −0.255, so 7.00 m of body clears it with margin.
-    corridor=dict(y0=-2.60, y1=8.00, thick=7.00),
+    #   [GT-119 ②] `seam_lap` — the thickness that made the body deep enough is also what
+    #   made the **seams** open. `sc.build_slope` cuts a slab's end faces perpendicular to
+    #   its own top plane, not vertically, so where the profile kinks from steep to flat
+    #   (every flight foot) the two neighbours diverge below the shared crest and leave a
+    #   wedge open downward, `thick·sin(θa − θb)` wide at the far face = **3.05 m** at a
+    #   48 % foot. `corridor_slabs()` closes it; this is the margin it closes it *past*.
+    corridor=dict(y0=-2.60, y1=8.00, thick=7.00, seam_lap=0.100),
 
     # --- [GT-65 · §0-2] deck -> lower park hand-off -------------------------------
     #   The stair arrived at x 24.14 and stopped **on grass**: `LowerPath` (the lower
@@ -646,7 +673,9 @@ PARAMS = dict(
     #   and never meets it, and the arrival landing's forward edge was railed on top
     #   of that, so the descent dead-ended into its own guard. Two dirt strips carry
     #   the walking line on: `DeckExit` continues the deck axis east to the scene edge
-    #   (x 44 = `LowerParkMain` x1), `DeckExitLink` is the T onto `LowerPath`.
+    #   (x 44 = the scene edge, where `FarRidge` starts; `LowerParkMain` itself now runs
+    #   0.10 m further, into the ridge — GT-119 ② seam lap), `DeckExitLink` is the T
+    #   onto `LowerPath`.
     #   Both are **2 mm veneers over ground that already exists** (`LowerParkMain` top
     #   −6.620, corridor ground −6.620 past its last station) and are built **without
     #   colliders**: they add a trail reading, not a walking surface, so no collider,
@@ -1255,6 +1284,93 @@ def corridor_z(x):
                 return zb
             return za + (zb - za) * (x - xa) / (xb - xa)
     return GROUND_LINE[-1][1]
+
+
+def corridor_slabs():
+    """[GT-119 ②] The corridor ground slabs, **with their downhill seam laps**.
+
+    One row per `GROUND_LINE` segment, exactly as before; what is new is that a slab
+    which meets a flatter neighbour is run on **past the crest, along its own top
+    plane**, far enough to swallow that neighbour's far bottom corner.
+
+    Why it has to exist. `sc.build_slope` places a rotateY box whose end faces are
+    perpendicular to its own top plane, not vertical. At a crest where the profile
+    goes steep (θa) -> flat (θb), slab a's end face leans back toward −X by
+    `t·sin θa` at depth t while slab b's leans back only `t·sin θb`, so the two
+    faces fan apart below the shared crest point and the hillside between them is
+    **air**: a wedge `thick·sin(θa − θb)` wide at the far face, up to 3.05 m at a
+    48 % flight foot. Six of those exist, one per flight foot, and the
+    `260806_w3_allview5/pt_noon_from_below` cut caught the x = 15.30 one — a slot
+    torn vertically through the slope (window x1380-1500 y600-1000, **16.8 %** pure
+    RGB(0,0,0) `[measured]`) with the dome HDRI's below-horizon band showing through
+    it, framed by the underside of `Bank_NorthBank` and the north rim of
+    `Plate_LowerParkMain`.
+
+    Why this direction and no other. The lap runs the **steeper** slab downhill, so
+    every millimetre it gains is under the flatter slab it meets and under everything
+    downstream of that `[asserted]`. The top plane is the same line it always was, so
+    `max_i top_i(x) == corridor_z(x)` to machine epsilon — the deck, the posts, the
+    dressing seats and the collision surface are bit-identical. Running the *flatter*
+    slab back uphill instead would close the same wedge but raise the ground above its
+    uphill neighbour at every one of the five concave kinks, which is the one thing
+    a terrain repair may not do.
+
+    lap = thick·sin(θi − θi+1) + `corridor.seam_lap`. The first term is exactly the
+    distance from the crest to the neighbour's far bottom corner measured along this
+    slab's own axis (= `thick·|d_b × e_a|`), so the second is the true clear overlap.
+    Beyond the last segment the ground is `LowerParkMain`, i.e. level, so θ = 0.
+
+    The lap puts two coplanar `grass` side faces on the scarp plane y −2.600 over the
+    lapped run. That is not a new condition and not a new risk: the five **concave**
+    kinks have always overlapped by the mirror amount (up to 3.05 m — e.g. slab 9 laps
+    back over slab 8 across x 13.75..16.80), and that patch renders in
+    `260806_w3_allview5/pt_noon_from_below` as one continuous grass face with no
+    z-fight, no seam and no texture break `[measured]` — every corridor slab carries the
+    same material and the same world-projected skin, so coincident side faces shade
+    identically. `coplanar_census()` is untouched by any of it: it audits **horizontal
+    top** faces, and every lapped slab is one of the sloped ones (θ > 0).
+
+    Returns `[(name, x0, z0, run, drop, ang_deg, lap, x_end, z_end)]` — `x0/z0/run/drop`
+    are the `build_slope` arguments, `x_end/z_end` the lapped downhill end.
+    """
+    cg = PARAMS["corridor"]
+    thick, lapm = float(cg["thick"]), float(cg["seam_lap"])
+    segs = []
+    for i in range(len(GROUND_LINE) - 1):
+        (xa, za), (xb, zb) = GROUND_LINE[i], GROUND_LINE[i + 1]
+        if xb - xa < 1e-6:
+            continue
+        segs.append((i, xa, za, xb, zb, math.atan2(za - zb, xb - xa)))
+    out = []
+    for j, (i, xa, za, xb, zb, ang) in enumerate(segs):
+        nxt = segs[j + 1][5] if j + 1 < len(segs) else 0.0
+        lap = (thick * math.sin(ang - nxt) + lapm) if ang > nxt + 1e-12 else 0.0
+        xe, ze = xb + lap * math.cos(ang), zb - lap * math.sin(ang)
+        out.append((f"CorridorSlope_{i}", xa, za, xe - xa, za - ze,
+                    math.degrees(ang), lap, xe, ze))
+    return out
+
+
+def slab_top(slab, x):
+    """Top-plane z of one `corridor_slabs()` row at x, or None outside its run."""
+    _nm, xa, za, run, drop, _ad, _lap, xe, _ze = slab
+    if xa - 1e-9 <= x <= xe + 1e-9:
+        return za - drop * (x - xa) / max(run, 1e-12)
+    return None
+
+
+def slab_holds(slab, x, z):
+    """Is world point (x, ·, z) inside the slab's body? (rotateY box, local test.)"""
+    _nm, xa, za, run, drop, ang_deg, _lap, _xe, _ze = slab
+    ang = math.radians(ang_deg)
+    L, th = math.hypot(run, drop), float(PARAMS["corridor"]["thick"])
+    sx, sz = xa + run / 2.0, za - drop / 2.0
+    cx = sx - (th / 2.0) * math.sin(ang)
+    cz = sz - (th / 2.0) * math.cos(ang)
+    dx, dz = x - cx, z - cz
+    lx = dx * math.cos(ang) - dz * math.sin(ang)
+    lz = -dx * math.sin(ang) - dz * math.cos(ang)
+    return abs(lx) <= L / 2.0 + 1e-9 and abs(lz) <= th / 2.0 + 1e-9
 
 
 # ===========================================================================
@@ -2374,7 +2490,102 @@ def deck_module_selfcheck():
 
     print(f"    [deck_module_selfcheck GT-115 ⑭] "
           f"{'전항목 OK' if ok15 else '⚠ CHECK 항목 있음'}")
-    return ok_all and ok9 and ok10 and ok11 and ok15
+
+    # =====================================================================
+    # GT-119 ② — 지형 슬래브 이음(seam). from_below 컷의 쐐기 균열이 이 블록의
+    # 대상이고, 보행면·낙차 모서리·계단·데크·카메라·계절 핀은 건드리지 않는다.
+    # 이 블록이 있는 한 이음 결함군은 조용히 되돌아올 수 없다.
+    # =====================================================================
+    ok19 = True
+    cg = P["corridor"]
+    lapm = float(cg["seam_lap"])
+    print("\n  [deck_module_selfcheck] GT-119 ② — 지형 이음 · 회랑 쐐기 · "
+          "플레이트 물림")
+
+    # (1) corridor crests — every steep→flat crest must be lapped shut
+    print(f"    {'상류 슬래브':<18}{'하류 슬래브':<18}{'Δθ':>7}{'무이음 쐐기':>11}"
+          f"{'이음길이':>9}{'물림':>8}  판정")
+    for na, nb, dth, wedge, lap, inter, held in corridor_seam_census():
+        need = wedge + lapm if wedge > 1e-12 else 0.0
+        good = (lap >= need - 1e-9) and inter >= lapm - 1e-9 and \
+               (held or wedge <= 1e-12)
+        ok19 &= good
+        print(f"    {na:<18}{nb:<18}{dth:7.3f}{wedge:11.4f}{lap:9.4f}"
+              f"{inter:8.4f}  {'OK' if good else 'CHECK ← 쐐기 개방'}"
+              + ("" if wedge > 1e-12 else "  (오목 — 원래 물림)"))
+    print(f"      쐐기 = thick·sin(θa−θb) = 이음이 없을 때 먼 면에서 벌어지는 폭. "
+          f"최대 {max(r[3] for r in corridor_seam_census()):.4f} m — "
+          f"260806_w3_allview5/pt_noon_from_below 의 x 15.30 슬롯이 그 중 하나")
+    print(f"      이음길이 = 쐐기 + seam_lap {lapm:.3f} m, **자기 상면 평면을 따라 "
+          f"내리막으로만** 연장 (오르막 연장은 오목 꺾임마다 지면을 들어 올린다)")
+
+    # (2) the surface the lap must not have moved
+    xs0, xs1 = GROUND_LINE[0][0], GROUND_LINE[-1][0]
+    slabs = corridor_slabs()
+    dmax, dx_at = 0.0, xs0
+    for k in range(2001):
+        xq = xs0 + (xs1 - xs0) * k / 2000.0
+        tops = [t for t in (slab_top(s, xq) for s in slabs) if t is not None]
+        dq = abs(max(tops) - corridor_z(xq))
+        if dq > dmax:
+            dmax, dx_at = dq, xq
+    good = dmax <= 1e-9
+    ok19 &= good
+    print(f"    회랑 상면 불변 max|max_i top_i(x) − corridor_z(x)| = {dmax:.3e} m "
+          f"@ x {dx_at:+.3f} → {'OK (기계 오차 — 보행/콜라이더 비트동일)' if good else 'CHECK'}")
+    x_nose = max(s[7] for s in slabs)
+    over = [s[0] for s in slabs
+            if s[7] > xs1 + 1e-9 and (slab_top(s, s[7]) or 0.0) > GROUND_Z - 1e-9]
+    good = not over
+    ok19 &= good
+    print(f"    회랑 끝(x {xs1:.2f}) 너머로 나간 이음 코 최원단 x {x_nose:.3f} · "
+          f"하부공원 상면 {GROUND_Z:+.3f} 위로 솟은 슬래브 {len(over)}개 → "
+          f"{'OK (전부 매몰)' if good else 'CHECK ' + str(over)}")
+
+    # (3) the defect itself, measured: the south scarp must be solid top-to-toe
+    voids, first = 0, None
+    for k in range(801):
+        xq = xs0 + (xs1 - xs0) * k / 800.0
+        ztop = corridor_z(xq)
+        for j in range(41):
+            zq = ztop - (ztop - GROUND_Z) * j / 40.0 - 1e-6
+            if zq <= GROUND_Z:
+                continue
+            if not any(slab_holds(s, xq, zq) for s in slabs):
+                voids += 1
+                first = first or (xq, zq)
+    good = voids == 0
+    ok19 &= good
+    print(f"    남측 절토면 관통 probe {801*41}점(x {xs0:.2f}..{xs1:.2f} × "
+          f"상면→{GROUND_Z:+.2f}) · 빈 점 {voids}개 → "
+          f"{'OK (하늘이 비치는 열린 점 0)' if good else 'CHECK ' + str(first)}")
+
+    # (4) the axis-aligned plate seams
+    print(f"    {'플레이트 A':<15}{'플레이트 B':<15}{'종류':<6}"
+          f"{'Δx':>8}{'Δy':>8}{'Δz':>8}{'물림':>8}  판정")
+    for a, b, kind, why, ox, oy, oz, mg in plate_seam_census():
+        good = (mg >= lapm - 1e-9) if kind == "lap" else (abs(mg) <= 1e-9)
+        ok19 &= good
+        print(f"    {a:<15}{b:<15}{kind:<6}{ox:8.3f}{oy:8.3f}{oz:8.3f}{mg:8.3f}"
+              f"  {'OK' if good else 'CHECK'}")
+        print(f"      {why}")
+    print("      물림 = 세 축 최소 겹침. lap 은 ≥ seam_lap, butt 은 정확히 0 "
+          "(동일 평면에 놓인 두 평행면은 쐐기로 벌어질 수 없다)")
+    _cop19 = coplanar_census()
+    ok19 &= not _cop19
+    print(f"    이음 후 동일평면 재감사 → {len(_cop19)}쌍 "
+          f"{'OK (이음이 z-fighting 면을 만들지 않았다)' if not _cop19 else 'CHECK ' + str(_cop19[:3])}")
+    print("      남은 미봉 이음 1건 — Bank_NorthBank 발치(y 8.00, z 0.00)와 회랑 "
+          "벤치/하부공원(z −0.255~−6.62) 사이의 공동. 사면을 얇은 경사 슬래브로 "
+          "모델링한 결과이고, 회랑 폭 10.6 m 가 판정 컷에서 북쪽 가장자리를 "
+          "잘라내도록 설계되어 있어 어떤 카메라에서도 보이지 않는다. from_below "
+          "에서 하늘이 보인 것은 이 공동 **때문이 아니라** 위 (1) 의 쐐기를 통해 "
+          "그것을 들여다봤기 때문이며, 쐐기가 닫히면 시선 자체가 사라진다 — "
+          "지형 형상 변경이 필요하므로 별도 결재 대상")
+
+    print(f"    [deck_module_selfcheck GT-119 ②] "
+          f"{'전항목 OK' if ok19 else '⚠ CHECK 항목 있음'}")
+    return ok_all and ok9 and ok10 and ok11 and ok15 and ok19
 
 
 # ===========================================================================
@@ -2577,6 +2788,101 @@ def coplanar_census():
             if ov > 1e-9:
                 bad.append((na, nb, ov))
     return bad
+
+
+# ---------------------------------------------------------------------------
+# [GT-119 ②] terrain seam census — the anti-tear counterpart of coplanar_census
+# ---------------------------------------------------------------------------
+#   `coplanar_census` proves no two surfaces sit **on** each other. This proves no two
+#   terrain solids merely **touch**: every declared-adjacent pair either interlocks by
+#   at least `corridor.seam_lap`, or is a butt that is declared as one with a stated
+#   reason, and a butt is only allowed where the two faces are exactly coincident and
+#   parallel — a coincident parallel pair cannot fan open into a wedge, which is the
+#   failure mode this census exists for.
+#   (a, b, kind, why) — kind "lap" = must interlock, "butt" = must coincide exactly.
+PLATE_SEAMS = [
+    ("UpperTrail", "UpperBody", "lap",
+     "grass veneer laps into the rock body"),
+    ("UpperBody", "LowerParkMain", "lap",
+     "lower park runs west under the head body"),
+    ("LowerParkMain", "FarRidge", "lap",
+     "lower park runs east into the ridge"),
+    ("LowerParkFar", "FarRidge", "lap",
+     "far lower park runs east into the ridge"),
+    ("LowerParkMain", "LowerParkFar", "butt",
+     "tops coplanar at −6.620 — a lap would be a coplanar_census pair"),
+    ("FarHill", "FarRidge", "butt",
+     "occluded by the NorthBank crest (z 7.16 @ y 15) from every eye ≤ 1.80"),
+]
+
+
+def _plate_box(name):
+    for nm, x0, x1, y0, y1, zt, th, _m in PARAMS["plates"]:
+        if nm == name:
+            return ((x0, x1), (y0, y1), (zt - th, zt))
+    for nm, x0, x1, y0, y1, zt, th in PARAMS["exit_paths"]:
+        if nm == name:
+            return ((x0, x1), (y0, y1), (zt - th, zt))
+    raise KeyError(f"scene10: plate '{name}' not in PARAMS")
+
+
+def plate_seam_census():
+    """`[(a, b, kind, why, ov_x, ov_y, ov_z, margin)]` for every declared plate seam.
+
+    `margin` is the smallest per-axis overlap = the interlock depth (0 for a butt,
+    negative for an open gap)."""
+    out = []
+    for a, b, kind, why in PLATE_SEAMS:
+        ba, bb = _plate_box(a), _plate_box(b)
+        ov = tuple(min(ba[k][1], bb[k][1]) - max(ba[k][0], bb[k][0])
+                   for k in range(3))
+        out.append((a, b, kind, why) + ov + (min(ov),))
+    return out
+
+
+def _slab_obb(slab):
+    """(centre, half, axes) of one corridor slab in the x-z plane (y is shared)."""
+    _nm, xa, za, run, drop, ang_deg, _lap, _xe, _ze = slab
+    ang = math.radians(ang_deg)
+    L, th = math.hypot(run, drop), float(PARAMS["corridor"]["thick"])
+    sx, sz = xa + run / 2.0, za - drop / 2.0
+    ctr = (sx - (th / 2.0) * math.sin(ang), sz - (th / 2.0) * math.cos(ang))
+    axes = ((math.cos(ang), -math.sin(ang)), (-math.sin(ang), -math.cos(ang)))
+    return ctr, (L / 2.0, th / 2.0), axes
+
+
+def _slab_interlock(a, b):
+    """Separating-axis margin between two corridor slabs: >0 = interlock depth (the
+    minimum translation distance), 0 = they only touch, <0 = they are apart."""
+    ca, ha, Aa = _slab_obb(a)
+    cb, hb, Ab = _slab_obb(b)
+    d = (cb[0] - ca[0], cb[1] - ca[1])
+    worst = -1e18
+    for L in list(Aa) + list(Ab):
+        ra = sum(ha[k] * abs(Aa[k][0] * L[0] + Aa[k][1] * L[1]) for k in (0, 1))
+        rb = sum(hb[k] * abs(Ab[k][0] * L[0] + Ab[k][1] * L[1]) for k in (0, 1))
+        worst = max(worst, abs(d[0] * L[0] + d[1] * L[1]) - (ra + rb))
+    return -worst
+
+
+def corridor_seam_census():
+    """`[(a, b, dtheta, wedge_unlapped, lap, interlock, corner_in_a)]` per crest.
+
+    `wedge_unlapped` = `thick·sin(θa − θb)`, the width the seam would fan open to at the
+    far face with no lap — the defect, in metres. `corner_in_a` is the same statement
+    taken empirically: the downhill neighbour's far bottom corner must lie **inside**
+    the uphill slab's body, which is only true once the lap is there."""
+    slabs = corridor_slabs()
+    th = float(PARAMS["corridor"]["thick"])
+    out = []
+    for a, b in zip(slabs, slabs[1:]):
+        ta, tb = math.radians(a[5]), math.radians(b[5])
+        crest = (b[1], b[2])
+        corner = (crest[0] - th * math.sin(tb), crest[1] - th * math.cos(tb))
+        out.append((a[0], b[0], math.degrees(ta - tb),
+                    max(0.0, th * math.sin(ta - tb)), a[6],
+                    _slab_interlock(a, b), slab_holds(a, *corner)))
+    return out
 
 
 # [GT-77] top-face rectangles of the approach members a scattered dressing card can land
@@ -3101,7 +3407,14 @@ BANNER = """\
 14. [GT-115 ⑭] 마감  — 노두가 난간 살대를 관통하지 않는가(≥0.30 m) · 난간 런 끝이
                        리턴+갓기둥으로 죽는가 · 낙엽이 한 실루엣의 반복이 아닌가
                        (변형 3종·축척 ×3.22) · 정자에 보/서까래/처마/밑판이 있는가 ·
-                       난간 상면은 은화하고 이끼는 수직·음영면에만 남는가"""
+                       난간 상면은 은화하고 이끼는 수직·음영면에만 남는가
+15. [GT-119 ②] 이음  — 회랑 슬래브가 급경사→완경사 마루마다 쐐기로 벌어지지
+                       않는가(무이음 최대 3.049 m → 이음 후 물림 ≥0.100) ·
+                       남측 절토면 관통 probe 32 841점 중 열린 점 0인가 ·
+                       회랑 상면 max_i top_i(x) = corridor_z(x) 가 기계 오차
+                       안인가(보행·콜라이더 불변) · 플레이트 이음 6쌍이 lap
+                       ≥0.100 또는 정확한 butt 인가 · 이음이 동일평면 쌍을
+                       새로 만들지 않았는가"""
 
 
 def main():
@@ -3277,13 +3590,16 @@ def main():
         #   trail bench is actually built. The slab side faces at y = CORRIDOR_Y0 / Y1 are
         #   the natural scarps down to the lower park and up to the north bank — no
         #   masonry, no coping, no fortress.
+        #   [GT-119 ②] the run/drop now come from `corridor_slabs()`, which carries the
+        #   downhill seam lap. `margin` stays 0.0: `build_slope` adds margin to the
+        #   *length* and re-centres, i.e. it extends **both** ends, and an uphill
+        #   extension would lift the slab over its uphill neighbour at every concave
+        #   kink. The lap is asymmetric by construction, so it is authored into the
+        #   segment's own end point instead. Prim names and count are unchanged.
         cg = PARAMS["corridor"]
-        for i in range(len(GROUND_LINE) - 1):
-            (xa, za), (xb, zb) = GROUND_LINE[i], GROUND_LINE[i + 1]
-            if xb - xa < 1e-6:
-                continue
-            sc.build_slope(stage, f"{ROOT}/CorridorSlope_{i}", xa, za,
-                           xb - xa, za - zb, cg["y0"], cg["y1"],
+        for nm, xa, za, run, drop, _ang, _lap, _xe, _ze in corridor_slabs():
+            sc.build_slope(stage, f"{ROOT}/{nm}", xa, za,
+                           run, drop, cg["y0"], cg["y1"],
                            float(cg["thick"]), M["grass"], margin=0.0,
                            collider=True)
 

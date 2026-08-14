@@ -1051,10 +1051,16 @@ def main():
             seed=21)
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
+        # [GT-123] 주철군 분리 — 맨홀·빗물받이가 도료 상수와 접혀 있었다.
+        _iron = sc.make_pbr(stage, f"{ROOT}/Looks/Ironwork",
+                            sc.tex_path("granite_dark", "diff"),
+                            sc.tex_path("granite_dark", "nor"),
+                            sc.tex_path("granite_dark", "rough"),
+                            0.25, tint=(0.32, 0.32, 0.34))
         M2.update(joint=M["band"], crack=M["band"], patch=M["marble"],
-                  patch_cut=M["band"], manhole=M["band"], gully=M["band"],
-                  gutter=M["band"], gutter_cover=M["band"],
-                  trench=M["band"], trench_frame=M["band"],
+                  patch_cut=M["band"], manhole=_iron, gully=_iron,
+                  gutter=M["band"], gutter_cover=_iron,
+                  trench=M["band"], trench_frame=_iron,
                   marking=M["band"], weed=M["grass"], wear=M["granite"],
                   stain_dirt=M["granite"], stain_water=M["granite"])
         res = gk.apply_ground(kit, f"{ROOT}/GKit", gp, M2,

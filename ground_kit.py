@@ -2920,6 +2920,19 @@ def apply_ground(kit, prefix, plan, mtls, *, skin_exclude=None, scatter=None,
             raise ValueError(f"ground_kit: 알베도 상한 초과 {e['path']} "
                              f"{a} > {cap} (순백 대면적 금지 규약).")
 
+    # [GT-123] Role→material collapse metering. s21 mapped 15 roles onto 4
+    # materials (10 of them one paint constant) and the manhole read as a sticker —
+    # the kit cannot know intent, but it can SAY when distinct vocabularies are
+    # about to render identically. Warning only, not a gate.
+    _by_mtl = {}
+    for _k, _v in (mtls.items() if isinstance(mtls, dict) else ()):
+        _by_mtl.setdefault(id(_v), []).append(_k)
+    for _roles in _by_mtl.values():
+        if len(_roles) >= 4:
+            print(f"[ground_kit][경고] 역할-재질 접힘: {sorted(_roles)} "
+                  f"({len(_roles)}개 역할이 같은 재질 — 줄눈·맨홀·마킹이 한 장으로 "
+                  f"렌더된다. GT-123 분리 후보)")
+
     n_prims = 0
     for op in plan["ops"]:
         raw_kw, raw_args = dict(op.get("kw", {})), tuple(op.get("args", ()))

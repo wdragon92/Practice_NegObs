@@ -958,6 +958,14 @@ def main():
                          sc.tex_path("plaza_lower", "nor"),
                          sc.tex_path("plaza_lower", "rough"),
                          mp["scale"]["plaza_lower"], tint=(0.50, 0.51, 0.54))
+        # [GT-123] 주철군 — 맨홀/빗물받이/트렌치 프레임이 도료 상수(M["band"])와
+        # 한 장으로 접혀 "스티커" 판독이 됐다(감사 §2.2·s04 조사 §2.2). granite_dark
+        # 소축척 암틴트 = 주철 주물면 근사(신규 조달 0).
+        M["ironwork"] = PBR(f"{ROOT}/Looks/Ironwork",
+                            sc.tex_path("granite_dark", "diff"),
+                            sc.tex_path("granite_dark", "nor"),
+                            sc.tex_path("granite_dark", "rough"),
+                            0.25, tint=(0.32, 0.32, 0.34))
         M["asoil"] = PBR(f"{ROOT}/Looks/SoilWash",
                          sc.tex_path("plaza_lower", "diff"),
                          sc.tex_path("plaza_lower", "nor"),
@@ -1088,9 +1096,10 @@ def main():
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
         M2.update(joint=M["band"], crack=M["gk_crack"], patch=M["walk"],
-                  patch_cut=M["band"], manhole=M["band"], gully=M["band"],
-                  gutter=M["band"], gutter_cover=M["band"],
-                  trench=M["band"], trench_frame=M["band"],
+                  patch_cut=M["band"], manhole=M["ironwork"],
+                  gully=M["ironwork"],
+                  gutter=M["band"], gutter_cover=M["ironwork"],
+                  trench=M["band"], trench_frame=M["ironwork"],
                   marking=M["band"], weed=M["grass"], wear=M["wall"],
                   stain_dirt=M["wall"], stain_gum=M["gk_stain"],
                   stain_drip=M["wall"], tactile=M["tactile"])

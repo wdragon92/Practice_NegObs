@@ -1074,7 +1074,10 @@ PARAMS = dict(
         #   Derived instead from a straw target: **#7F734E**, linear (0.211, 0.173, 0.077),
         #   Y 0.174 → L* 48.8, R/G **1.22**, inside the project's ≤0.30 ground albedo clamp,
         #   clipped fraction **0.02 %** `[measured]`.
-        grass_tint=(3.40, 1.55, 3.30),
+        # [GT-124] 극단 틴트(3.40,1.55,3.30 — 잎날 구조 소거의 근인)를 완화하고
+        # 휴면 반점은 B-텍스처 블렌드(dirt_park)가 담당한다. R/B 상향은 유지하되
+        # 스펙클을 살리는 대역으로.
+        grass_tint=(1.85, 1.30, 1.75),
         leaf_tint=(0.88, 0.85, 0.80),
         dirt_tint=(0.78, 0.76, 0.72),          # [v6] saturation and value lowered (avoids confetti)
         rock_tint=(0.82, 0.82, 0.80),          # [v6] rubble greyed (removes the European rampart tone)
@@ -3497,8 +3500,20 @@ def main():
                             sca["rock_face"], tint=mp["rockface_tint"])
         M["coping"] = tex("concrete_wall", "/World/Looks/Coping",
                           sca["concrete_wall"], tint=mp["coping_tint"])
-        M["grass"] = tex("grass", "/World/Looks/Grass", sca["grass"],
-                         tint=mp["grass_tint"])
+        # [GT-124] W4 B-세트 첫 실사용: A=grass_lawn(생존) + B=dirt_park(고사
+        # 반점), blend_default 0.35 ± 엣지 노이즈, 모틀 파장 2.5 m(휴면 얼룩
+        # 스케일 — 기본 0.09 m 는 잔반점이라 확대). Looks/Grass → turf 클래스
+        # (GT-118)라 지면 MDL 경로 = B-세트 배선이 실제로 도달한다.
+        M["grass"] = sc.make_pbr(
+            stage, "/World/Looks/Grass",
+            sc.tex_path("grass", "diff"), sc.tex_path("grass", "nor"),
+            sc.tex_path("grass", "rough"), sca["grass"],
+            tint=mp["grass_tint"],
+            blend=dict(diff=sc.tex_path("dirt_park", "diff"),
+                       nor=sc.tex_path("dirt_park", "nor"),
+                       rough=sc.tex_path("dirt_park", "rough"),
+                       scale_m=2.2, default=0.35, edge_noise=0.5,
+                       edge_wl=2.5))
         M["leaf"] = tex("leaf_ground", "/World/Looks/Leaf",
                         sca["leaf_ground"], tint=mp["leaf_tint"])
         M["dirt"] = tex("dirt_park", "/World/Looks/Dirt", sca["dirt_park"],

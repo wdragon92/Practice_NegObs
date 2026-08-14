@@ -2701,3 +2701,15 @@ build_building 사용 씬 전체 발현(LOOK_GEO 팔 한정 — OFF 팔 비트�
 gutter_cover 를 주철군 재질(`Looks/Ironwork` — granite_dark 소축척 × 암틴트, 신규
 조달 0)로 분리. marking/weed/stain 군 분리는 후속(감사 권고 4군 중 1군 우선).
 **GT 판정**: R-2(재질 전용). **Status: OPEN (선신고 — 시공 중)**
+
+## 80. GT-124 — s10 휴면 잔디 이중 텍스처(A/B 블렌드 첫 실사용) + make_pbr blend 관통 (선신고)
+
+**Authority**: 08-14 사용자 3일 자율 위임(행 69). 근거 = 감사 s10 high(사면 카키 상수면
+— grass_lawn ×(3.40,1.55,3.30) 극단 틴트가 잎날 구조를 소거, "the map is the only
+lever" 코드 자인) + r4batch 육안 잔여 소견. 처방 = 감사 제안 그대로 "두 텍스처 블렌드":
+GT-113 W4 로 개방한 MDL B-세트의 첫 실전 — A=grass_lawn(생존 잔디)·B=dirt_park(고사
+반점), blend_default+엣지 노이즈 대역 확대(patch 스케일)로 휴면기 얼룩.
+**Scope**: ① scene_common make_pbr 에 blend= 관통(3개 _make_ground_pbr 호출부 —
+기본 None 비트동일) ② s10 사면·뱅크 잔디 재질: turf 클래스(GT-118 자동) + blend
+(dirt_park @2.5 m 모틀) + 극단 틴트 완화. 기하 불변(R-2).
+**Status: OPEN (선신고 — 시공 중)**

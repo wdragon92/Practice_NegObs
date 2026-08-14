@@ -1541,7 +1541,7 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
              tint=None, metallic=0.0, roughness_const=None,
              diffuse_color=None, bump=1.0, specular_level=None,
              emission_color=None, emission_intensity=None, uv_mode=False,
-             unit_cell=None):
+             unit_cell=None, blend=None):
     """OmniPBR material. With diff given it is a world-space projected texture, otherwise a constant colour.
     With specular_level given it calls sh.CreateInput("specular_level", Float).
     With emission_color + emission_intensity it is emissive (enable_emission) - for emissive
@@ -1569,7 +1569,7 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
                                     spec, tint=tint,
                                     roughness_const=roughness_const,
                                     specular_level=specular_level, bump=bump,
-                                    unit_cell=unit_cell, cls=cls)
+                                    unit_cell=unit_cell, cls=cls, blend=blend)
         # [realism v1] **Constant-colour materials are routed through the MDL too.**
         # More than half of all make_pbr calls in the 33 scenes pass a constant diffuse_color, and a
         # constant colour is by definition perfectly flat, i.e. the largest source of flat %. Without
@@ -1592,14 +1592,14 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
                     specular_level=(specular_level if specular_level is not None
                                     else spec.get("spec")),
                     bump=spec.get("bump", 1.0), base_color=pbc,
-                    unit_cell=unit_cell, cls=cls)
+                    unit_cell=unit_cell, cls=cls, blend=blend)
             LOOK_STATS["const_mdl"] = LOOK_STATS.get("const_mdl", 0) + 1
             return _make_ground_pbr(stage, path, None, None, None, scale_m,
                                     spec, tint=tint,
                                     roughness_const=roughness_const,
                                     specular_level=specular_level, bump=bump,
                                     base_color=diffuse_color,
-                                    unit_cell=unit_cell, cls=cls)
+                                    unit_cell=unit_cell, cls=cls, blend=blend)
         # Textured material -> bevel + detail normal.
         # **Constant-colour materials get the bevel too** - the first gate skipped constant colours
         # entirely, and constant colours are precisely the main source of flat %. Texturising is a

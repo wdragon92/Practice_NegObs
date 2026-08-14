@@ -1077,7 +1077,9 @@ PARAMS = dict(
         # [GT-124] 극단 틴트(3.40,1.55,3.30 — 잎날 구조 소거의 근인)를 완화하고
         # 휴면 반점은 B-텍스처 블렌드(dirt_park)가 담당한다. R/B 상향은 유지하되
         # 스펙클을 살리는 대역으로.
-        grass_tint=(1.85, 1.30, 1.75),
+        # [GT-124 2차] 1차 렌더 실측: (1.85,1.30,1.75)+블렌드 0.35 는 사구처럼
+        # 창백 — 녹색 잔존을 살리는 대역으로 하향, 고사 반점은 블렌드 축 유지.
+        grass_tint=(1.32, 1.18, 1.02),
         leaf_tint=(0.88, 0.85, 0.80),
         dirt_tint=(0.78, 0.76, 0.72),          # [v6] saturation and value lowered (avoids confetti)
         rock_tint=(0.82, 0.82, 0.80),          # [v6] rubble greyed (removes the European rampart tone)
@@ -3512,7 +3514,7 @@ def main():
             blend=dict(diff=sc.tex_path("dirt_park", "diff"),
                        nor=sc.tex_path("dirt_park", "nor"),
                        rough=sc.tex_path("dirt_park", "rough"),
-                       scale_m=2.2, default=0.35, edge_noise=0.5,
+                       scale_m=2.2, default=0.28, edge_noise=0.55,
                        edge_wl=2.5))
         M["leaf"] = tex("leaf_ground", "/World/Looks/Leaf",
                         sca["leaf_ground"], tint=mp["leaf_tint"])

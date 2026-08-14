@@ -51,7 +51,13 @@ Goal
   (1) circular bowl — arena floor + curved forecourt, no plane covers the cavity
   (2) **granite cascade** on the walk axis (sector 150..210 deg): 15 + 14 arc-step courses of
       riser 0.150 / tread 0.300 with a 1.20 m mid landing, 30 risers = 4.500 m
-  (3) **timber seating tiers** (sector 70..150 deg): 11 courses, riser 0.375 / tread 0.900
+  (3) **timber seating tiers** (sector 70..150 deg): 11 courses, riser 0.375 / tread 0.900.
+      **[GT-119 ⑤]** each seat is no longer one 5.2…14.6 m annular sector with no joint on
+      it — the deck is modulated into 34 boards of 2.602…3.657 m of arc (4·4·4·4·3·3·3·3·2·2·2
+      per course, every joint on a facet ray the core already carries) with 23 12 mm joints.
+      The joint is a **downward groove**: the seat top stays exactly on `−(i+1)·0.375` and a
+      dark liner floors every groove 56 mm below it, so nothing walked or sat on moved and no
+      joint is a hole.
   (4) **retail arcade** under a curved ring deck (sector 210..290 deg): shopfront glass at
       r = 17.0, deck edge at r = 14.0, round columns, wood-slat soffit
   (5) **control retaining wall** (sector 290..70 deg) — the far, on-axis edge; the surface the
@@ -207,8 +213,54 @@ PARAMS = dict(
     cascade=dict(riser=_RISER, tread=_TREAD, n_riser=_NRISER, n_built=_NBUILT,
                  land=_LAND, n_flight_a=15, arc_seg=20),
     # --- timber seating tiers ----------------------------------------------
+    #  [GT-119 ⑤] The seat surface shipped as ONE annular sector per course — 5.2…14.6 m of
+    #  unbroken arc carrying **not a single joint** `[computed — deck outer r 4.97…13.97 over
+    #  the 60 deg sector]`. No exterior decking is made in those lengths (stock tops out at
+    #  ~4 m), and on a plain wood-grained surface the butt joint is the ONLY thing that says
+    #  "boards" rather than "a wood-coloured slab": the tier bank was reading as a painted
+    #  ramp. The deck is therefore modulated, and every number below is derived, not styled:
+    #    nose_set    30 mm. **Not a new number** — it is v7's own `r_out - 0.03` deck inset,
+    #                promoted out of the builder so the module, the builder and the check all
+    #                read one radius instead of three copies of a literal.
+    #    board_max   3.70 m of arc, measured on the deck's OUTER edge because that is the
+    #                board's longest edge and the one that sets the stock length. It is the
+    #                ceiling that still fits a 4.00 m board with a cutting allowance, and it
+    #                is what makes the joint count fall MONOTONICALLY with radius —
+    #                4·4·4·4·3·3·3·3·2·2·2 over the 11 courses, i.e. **34 modules, 23
+    #                joints**, arc 2.602…3.657 m `[computed — tier_boards()]`. A 3.50 m
+    #                ceiling was tried first and refused: it drives the top course to 6
+    #                modules of 2.438 m against the 4 of 3.422 m directly under it, so the
+    #                WIDEST tier in the bank would carry the NARROWEST boards — a module
+    #                that inverts with radius reads as an error, not as a setting-out.
+    #    arc_seg     24 facets over the 60 deg sector = 2.5 deg each, **unchanged**. Module
+    #                counts are constrained to DIVISORS of it, so every joint lands on a
+    #                facet ray the tier mesh already has and no board invents an alignment
+    #                (the GT-115 ⑩ rule, applied to the second stepped bank).
+    #    board_gap   12 mm, held constant in metres by taking each joint's half-angle at its
+    #                own course's outer radius (a constant ANGLE would run 11.3 mm at the
+    #                back of the tread and 12.0 at the nose). Exterior decking is laid at
+    #                5-10 mm and a seat deck is set out at 10-15; 12 is the top of that band
+    #                and it is chosen by measurement: the nearest judged eye to this bank is
+    #                `pit_edge`, 14.0 m away `[computed]`, where one pixel spans
+    #                2·tan30°·14.0/1920 = **8.42 mm**, so a 12 mm joint is 1.43 px and a
+    #                6 mm one is 0.71 px — i.e. does not exist. Unlike GT-115 ⑩'s wall joint
+    #                this one **cannot** be widened to buy pixels: 40 mm between seat boards
+    #                is a heel trap, so the legibility is bought with groove DEPTH instead.
+    #    groove_bite 4 mm. The gap is a **downward groove, never a hole**. A dark liner runs
+    #                the whole course 4 mm INTO the concrete core and 4 mm PROUD of it, so
+    #                every joint has a floor 56 mm below the seat top, no face of the liner
+    #                is coplanar with the core top / the board soffit / the deck edges, and
+    #                the 56 mm of shadow — not the 12 mm of width — is what carries the read.
+    #                The seat top itself is untouched: the boards still finish exactly on the
+    #                course top `z = −(i+1)·riser`, which is the surface `_surface_z` reads.
+    #  **Declared shortfall**: the module is split in the ARC direction only. A real bank also
+    #  courses the 0.87 m tread into ~6 boards of 140 mm with a joint between each; that is 6x
+    #  the prim count on a surface that is deliberately outside every judged h0.3 frame.
+    #  Radial coursing stays an open item, in the shape GT-115 ⑩ left the weep grid.
     tiers=dict(riser=_TIER_RISER, tread=_TIER_TREAD, n=_NTIER, arc_seg=24,
-               plank_t=0.06),
+               plank_t=0.06, nose_set=0.03,
+               board_max=3.70, board_stock=4.00, board_gap=0.012,
+               groove_bite=0.004),
     # --- retail arcade under the ring deck ---------------------------------
     #     deck edge = the rim (r 14.0); shopfronts set back to r 17.0; the 3.0 m between them is
     #     the covered arcade walk. Clear height 3.70 m (deck soffit -0.80 to floor -4.50).
@@ -448,6 +500,8 @@ PARAMS = dict(
         flag_tint=(0.85, 0.85, 0.84),      # 0.476 -> 0.405
         cwall_tint=(0.85, 0.85, 0.84),     # 0.523 -> 0.445
         wood_tint=(0.72, 0.62, 0.50),
+        # [GT-119 ⑤] seat-board batch spread — multipliers on `wood_tint`, not new colours
+        wood_batch=(0.90, 1.10),
         bollard_color=(0.33, 0.33, 0.36), bollard_metallic=0.4,
         bollard_rough=0.5,
         glass_color=(0.055, 0.075, 0.090), glass_rough=0.10,
@@ -613,6 +667,56 @@ def tier_courses():
         out.append((r - tp["tread"], r, -(k + 1) * tp["riser"]))
         r -= tp["tread"]
     return out, round(r, 6)
+
+
+def tier_boards():
+    """[GT-119 ⑤] The seat-deck butt-joint module of every timber tier, solved once in polar.
+
+    Pure arithmetic (no USD), so the smoke run re-derives the module the builder lays rather
+    than trusting its print — the `cascade_courses()` / `ctrl_wall_details()` convention.
+
+    **The rule, in one line**: the module count is the SMALLEST divisor of `arc_seg` whose
+    board arc — measured on the deck's outer edge, the longest one — clears `board_max`.
+    Constraining it to a divisor is not tidiness: `_annular_sector_mesh` facets the 60 deg
+    sector into `arc_seg` chords, and a joint that fell between two of them would put the
+    board's own faceting out of phase with the core it sits on, i.e. would invent a second
+    alignment on a surface that already has one. On a divisor every joint sits on a ray the
+    tier mesh already carries, and each board is simply `arc_seg // n` of the course's own
+    facets — the same move GT-115 ⑩ made for the control wall's pour-bay joints.
+
+    **The joint is a groove, not a gap in the deck.** The two outer boards run flush to the
+    sector's own rays (a bank's end boards die into its end, they do not float 6 mm short of
+    it); only the n−1 INTERIOR boundaries open, each by `board_gap`/2 on either side. So the
+    seat gains n−1 joints and loses no arc at either end of the course.
+
+    Returns [dict] outermost first; every `z_top` is its course's own top, untouched.
+    """
+    tp = PARAMS["tiers"]
+    a0, a1 = PARAMS["sector"]["tier"]
+    seg = max(1, int(tp["arc_seg"]))
+    span = a1 - a0
+    div = [d for d in range(1, seg + 1) if seg % d == 0]
+    out = []
+    for i, (r_in, r_out, tz) in enumerate(tier_courses()[0]):
+        r_deck = r_out - float(tp["nose_set"])
+        arc = math.radians(span) * r_deck
+        n = next((d for d in div if arc / d <= float(tp["board_max"]) + 1e-9),
+                 seg)
+        #  half-joint in DEGREES at this course's own outer radius -> the joint is
+        #  `board_gap` wide at the nose and 0.7 mm narrower at the back of the tread
+        #  `[computed]`, which is the direction a wedge-shaped joint may err in.
+        half = math.degrees(float(tp["board_gap"]) / 2.0 / r_deck)
+        step = span / float(n)
+        spans = []
+        for k in range(n):
+            spans.append((a0 + k * step + (half if k else 0.0),
+                          a0 + (k + 1) * step - (half if k < n - 1 else 0.0)))
+        out.append(dict(i=i, r_in=r_in, r_out=r_out, r_deck=r_deck, z_top=tz,
+                        n=n, facets=seg // n, spans=spans,
+                        arc=arc / n, joint_deg=2.0 * half,
+                        joint_w=math.radians(2.0 * half) * r_deck,
+                        cover=1.0 - (n - 1) * math.radians(2.0 * half) / math.radians(span)))
+    return out
 
 
 def ctrl_wall_details():
@@ -1351,6 +1455,69 @@ def _smoke_report():
                        + [j[2] for j in d["joints"]]
                        + [w[0] for w in d["weeps"]])))
 
+    # ── 12. [GT-119 ⑤] 티어 좌판 판재 분절 — 인쇄값이 아니라 호에서 재계산 ────
+    print("  [좌판 판재 분절] 판재 마디·줄눈 폭·홈 바닥 (tier_boards 재검산)")
+    tb = tier_boards()
+    tseg = int(tp["arc_seg"])
+    a0t, a1t = PARAMS["sector"]["tier"]
+    bite = float(tp["groove_bite"])
+    arc_lo = min(m["arc"] for m in tb)
+    arc_hi = max(m["arc"] for m in tb)
+    n_board = sum(m["n"] for m in tb)
+    w_lo = min(m["joint_w"] * m["r_in"] / m["r_deck"] for m in tb)
+    w_hi = max(m["joint_w"] for m in tb)
+    print(f"    코스 {len(tb)} · 판재 {n_board}장 "
+          f"({'·'.join(str(m['n']) for m in tb)}) · 호길이 {arc_lo:.3f}~{arc_hi:.3f} m "
+          f"· 줄눈 {n_board - len(tb)}줄 · 폭 {w_lo * 1000:.2f}~{w_hi * 1000:.2f} mm "
+          f"· 홈 깊이 {(tp['plank_t'] - bite) * 1000:.0f} mm")
+    #  (a) the whole point of the repair: nothing a backside touches moved. The board top is
+    #      re-derived from the riser alone — NOT read back from the builder — and the walked
+    #      surface model is re-sampled on three rays of every course.
+    gate("좌판 상면 z 불변 — 판재 상면 = −(i+1)·riser (분절 전 값과 동일)",
+         all(abs(m["z_top"] + (m["i"] + 1) * tp["riser"]) < 1e-12 for m in tb),
+         f"z {tb[0]['z_top']:+.4f}…{tb[-1]['z_top']:+.4f} · Δ 0.000 mm")
+    gate("좌판 상면 z 불변 — _surface_z(티어 뱅크)가 코스 상면 그대로",
+         all(abs(_surface_z(*_pol((m["r_in"] + m["r_deck"]) / 2.0, aa))
+                 - m["z_top"]) < 1e-9
+             for m in tb for aa in (a0t + 0.5, 120.0, a1t - 0.5)))
+    #  (b) the joint is a groove, not an opening: a liner runs the FULL course arc under
+    #      every board, 4 mm into the core and 4 mm proud of it, so no joint can be seen
+    #      through and no face of it is coplanar with the core top or the board soffit.
+    gate("줄눈이 관통 아님 — 홈 바닥 라이너가 좌판 아래 존재",
+         0.0 < bite < tp["plank_t"],
+         f"바닥면 = 좌판 −{(tp['plank_t'] - bite) * 1000:.0f} mm · 코어 상면 "
+         f"+{bite * 1000:.0f} mm")
+    gate("라이너가 좌판·코어와 동일 평면 아님 (z-fighting 0)",
+         all(m["r_deck"] - bite > m["r_in"] + bite
+             and 2.0 * math.degrees(bite / m["r_deck"]) < (a1t - a0t)
+             for m in tb))
+    #  (c) stock length — the defect was 5.2…14.6 m of unbroken arc
+    gate(f"판재 호길이 ≤ 정척 {tp['board_stock']:.2f} m",
+         arc_hi <= float(tp["board_stock"]) + 1e-9, f"최대 {arc_hi:.3f} m")
+    gate("판재 호길이 2.5 m ~ 설계 상한 board_max",
+         arc_lo >= 2.5 - 1e-9 and arc_hi <= float(tp["board_max"]) + 1e-9,
+         f"{arc_lo:.3f}~{arc_hi:.3f} m (상한 {tp['board_max']:.2f})")
+    #  (d) alignment + setting-out: joints on the core's own facet rays, and a module that
+    #      never inverts with radius
+    gate("판재 경계가 티어 메시 페이싯 레이 위 (n | arc_seg)",
+         all(tseg % m["n"] == 0 and m["facets"] * m["n"] == tseg for m in tb),
+         f"arc_seg {tseg} · 판재당 페이싯 "
+         f"{'·'.join(str(m['facets']) for m in tb)}")
+    gate("마디 수가 반경에 대해 단조 (좁은 단이 넓은 판을 받지 않음)",
+         all(tb[k]["n"] >= tb[k + 1]["n"] for k in range(len(tb) - 1)),
+         "·".join(str(m["n"]) for m in tb))
+    gate("줄눈 폭 8~12 mm 전 구간 (뒤굽 끼임 폭 아님)",
+         w_lo >= 0.008 - 1e-9 and w_hi <= 0.012 + 1e-9,
+         f"{w_lo * 1000:.2f}~{w_hi * 1000:.2f} mm")
+    gate("좌판 유효 착좌면 ≥ 99 % (줄눈은 홈이지 결손 아님)",
+         min(m["cover"] for m in tb) >= 0.99,
+         f"최소 {min(m['cover'] for m in tb) * 100:.2f} %")
+    gate("판재 전량 티어 섹터 90..150° 내부 · 끝판은 섹터 레이에 밀착",
+         all(a0t - 1e-9 <= s0 < s1 <= a1t + 1e-9
+             for m in tb for s0, s1 in m["spans"])
+         and all(abs(m["spans"][0][0] - a0t) < 1e-12
+                 and abs(m["spans"][-1][1] - a1t) < 1e-12 for m in tb))
+
     # ── verdict ────────────────────────────────────────────────────────────
     nf = sum(1 for _n, c in gates if not c)
     print("-" * 76)
@@ -1545,6 +1712,18 @@ def main():
         M["asphalt_t"] = tex("asphalt", "AsphaltTex", sca["asphalt"])
         M["wood"] = tex("wood_dark", "Wood", sca["wood_dark"],
                         tint=mp["wood_tint"])
+        #  [GT-119 ⑤] Two more of the SAME roll at ±10 % of the same tint — a batch spread,
+        #  not new materials: same `wood_dark` texture, same scale, same look class
+        #  (`Wood_1`.rstrip("0123456789_") -> `Wood` -> LOOK_ROLE "wood" `[확인 —
+        #  scene_common._look_spec]`, so the look layer prescribes all three identically).
+        #  Joints alone still let 34 modules render as one continuous sheet cut by lines;
+        #  board-to-board tone is the other half of what reads as timber. ±10 % is the
+        #  conservative end — a real deck varies further — and it moves no albedo out of the
+        #  band the plaza tints were measured onto.
+        M["wood_s"] = [M["wood"]] + [
+            tex("wood_dark", f"Wood_{si}", sca["wood_dark"],
+                tint=tuple(round(c * f, 4) for c in mp["wood_tint"]))
+            for si, f in enumerate(mp["wood_batch"], start=1)]
         M["grass"] = tex("grass", "Grass", sca["grass"], tint=mp["grass_tint"])
         M["tactile"] = PBR(f"{ROOT}/Looks/Tactile",
                            sc.tex_path("tactile", "diff"),
@@ -1787,19 +1966,63 @@ def main():
               f"riser {cs['riser']:.3f} / tread {cs['tread']:.3f} → R1 면제")
 
     def build_tiers(M):
-        """Timber seating tiers — G8's amphitheatre bank. Seating, not circulation."""
+        """Timber seating tiers — G8's amphitheatre bank. Seating, not circulation.
+
+        **[GT-119 ⑤]** The core and the deck's own radii/heights are unchanged; what changes
+        is that the deck is no longer ONE 60 deg sector per course. It is `tier_boards()`'s
+        module — 2…4 boards per course, every joint on a facet ray the core already has —
+        and each joint is a 12 mm **groove**, not an opening:
+
+          seat top        z = tz              ← boards finish here, exactly as before
+          board soffit    z = tz − plank_t    ← = the core top, exactly as before
+          groove floor    z = tz − plank_t + groove_bite   (liner, 56 mm under the seat)
+          core top        z = tz − plank_t
+
+        so nothing a foot or a backside touches moved, and no joint can be seen through: the
+        liner runs the FULL course arc under every board and shows only where the boards part.
+        It is inset `groove_bite` from the deck's own radii and rays for the reason the
+        control-wall joints bite 4 mm into the wall — no face of it is coplanar with anything
+        it sits inside, so nothing z-fights. `M["grime"]` is the scene's existing ageing
+        constant (0.24) and is already the joint colour the K5 kerb run and the GT-115 ⑩ wall
+        joints bind, so the three joint languages in this scene read as one material; 0.24
+        against the board tints is the step that makes a shadow line legible `[computed]`.
+        """
         tp = PARAMS["tiers"]
         a0, a1 = PARAMS["sector"]["tier"]
-        courses, _r = tier_courses()
-        for i, (r_in, r_out, tz) in enumerate(courses):
+        mods = tier_boards()
+        bite = float(tp["groove_bite"])
+        shades = M["wood_s"]
+        nb = 0
+        for m in mods:
+            i, r_in, tz = m["i"], m["r_in"], m["z_top"]
             sc.build_arc_steps(stage, f"{ROOT}/TierCore_{i}", b["cx"], b["cy"],
-                               r_in, r_out, a0, a1, 1, tz - tp["plank_t"],
+                               r_in, m["r_out"], a0, a1, 1, tz - tp["plank_t"],
                                b["bank_base"], M["cfloor"], collider=True,
                                mesh=True, arc_seg=int(tp["arc_seg"]))
-            SECT(f"{ROOT}/TierDeck_{i}", r_in, r_out - 0.03, a0, a1,
-                 tz - tp["plank_t"], tz, M["wood"], arc_seg=int(tp["arc_seg"]))
-        print(f"[티어 뱅크] {len(courses)} 코스 · riser {tp['riser']:.3f} / tread "
+            ed = math.degrees(bite / m["r_deck"])
+            SECT(f"{ROOT}/TierGroove_{i}", r_in + bite, m["r_deck"] - bite,
+                 a0 + ed, a1 - ed, tz - tp["plank_t"] - bite,
+                 tz - tp["plank_t"] + bite, M["grime"],
+                 arc_seg=int(tp["arc_seg"]))
+            for k, (b0, b1) in enumerate(m["spans"]):
+                #  Shade index walks the BANK, not the course: the module count changes with
+                #  radius (4·4·4·4·3·3·3·3·2·2·2), so a running counter re-phases the 3-tone
+                #  cycle on every course by itself and the bank never grows a column of
+                #  same-tone boards. Deterministic by construction — no RNG, no seed.
+                SECT(f"{ROOT}/TierDeck_{i}_{k}", r_in, m["r_deck"], b0, b1,
+                     tz - tp["plank_t"], tz,
+                     shades[(2 * nb) % len(shades)], arc_seg=int(m["facets"]))
+                nb += 1
+        j = sum(m["n"] - 1 for m in mods)
+        print(f"[티어 뱅크] {len(mods)} 코스 · riser {tp['riser']:.3f} / tread "
               f"{tp['tread']:.3f} (관람석) · 섹터 {a0:.0f}..{a1:.0f}°")
+        print(f"[좌판 판재 GT-119⑤] 판재 {nb}장 "
+              f"({'·'.join(str(m['n']) for m in mods)}) · 호길이 "
+              f"{min(m['arc'] for m in mods):.3f}~{max(m['arc'] for m in mods):.3f} m "
+              f"(정척 {tp['board_stock']:.2f} m) · 줄눈 {j}줄 × "
+              f"{tp['board_gap'] * 1000:.0f} mm · 홈 깊이 "
+              f"{(tp['plank_t'] - bite) * 1000:.0f} mm (관통 0) · 색조 "
+              f"{len(shades)}종 · 좌판 상면 z 불변")
 
     def build_ctrl_wall(M):
         """The far, on-axis retaining wall — the surface the h0.3 illusion is read against.

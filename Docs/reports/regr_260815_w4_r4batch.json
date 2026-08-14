@@ -1,0 +1,6522 @@
+{
+  "pairs": [
+    {
+      "scene": "scene05",
+      "before": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene05/260806_w3_allview5",
+      "after": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene05/260815_w4_r4batch"
+    },
+    {
+      "scene": "scene08",
+      "before": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene08/260806_w3_allview5",
+      "after": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene08/260815_w4_r4batch"
+    },
+    {
+      "scene": "scene09",
+      "before": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene09/260806_w3_allview5",
+      "after": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene09/260815_w4_r4batch"
+    },
+    {
+      "scene": "scene10",
+      "before": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene10/260806_w3_allview5",
+      "after": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene10/260815_w4_r4batch"
+    },
+    {
+      "scene": "scene12",
+      "before": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene12/260806_w3_allview5",
+      "after": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene12/260815_w4_r4batch"
+    },
+    {
+      "scene": "scene13",
+      "before": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene13/260814_w4_r1r2pilot",
+      "after": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene13/260815_w4_r4batch"
+    },
+    {
+      "scene": "scene14",
+      "before": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene14/260806_w3_allview5",
+      "after": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene14/260815_w4_r4batch"
+    },
+    {
+      "scene": "scene16",
+      "before": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene16/260814_w4_r1r2pilot",
+      "after": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene16/260815_w4_r4batch"
+    },
+    {
+      "scene": "scene17",
+      "before": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene17/260806_w3_allview5",
+      "after": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene17/260815_w4_r4batch"
+    },
+    {
+      "scene": "scene18",
+      "before": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene18/260806_w3_allview5",
+      "after": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene18/260815_w4_r4batch"
+    },
+    {
+      "scene": "scene19",
+      "before": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene19/260806_w3_allview5",
+      "after": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene19/260815_w4_r4batch"
+    },
+    {
+      "scene": "scene21",
+      "before": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene21/260814_w4_r1r2pilot",
+      "after": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene21/260815_w4_r4batch"
+    },
+    {
+      "scene": "sceneC2",
+      "before": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/sceneC2/260806_w3_allview5",
+      "after": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/sceneC2/260815_w4_r4batch"
+    },
+    {
+      "scene": "sceneC4",
+      "before": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/sceneC4/260806_w3_allview5",
+      "after": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/sceneC4/260815_w4_r4batch"
+    },
+    {
+      "scene": "sceneD1",
+      "before": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/sceneD1/260806_w3_allview5",
+      "after": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/sceneD1/260815_w4_r4batch"
+    },
+    {
+      "scene": "sceneD2",
+      "before": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/sceneD2/260806_w3_allview5",
+      "after": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/sceneD2/260815_w4_r4batch"
+    },
+    {
+      "scene": "sceneN1",
+      "before": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/sceneN1/260806_w3_allview5",
+      "after": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/sceneN1/260815_w4_r4batch"
+    }
+  ],
+  "results": [
+    {
+      "scene": "scene05",
+      "view": "plaza_approach",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 149.07044982910156,
+        "after_dark": 3.5539641203703702,
+        "after_dark_near": 4.0891444830246915,
+        "after_clip": 0.0,
+        "after_white": 21.07465277777778,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 151.20953369140625,
+        "before_dark": 3.0198206018518516,
+        "before_dark_near": 3.380594135802469,
+        "before_clip": 0.0,
+        "before_white": 17.11935763888889,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 3.9552951388888893,
+        "diff_mean": 4.305578231811523,
+        "diff_frac": 18.96264146090535,
+        "d_mean": -2.1390838623046875,
+        "d_dark": 0.5341435185185186,
+        "newdark": 0.0349633487654321,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.014467592592592593,
+        "blk_shift": 11.11111111111111,
+        "blk_max": 15.840691191149858
+      }
+    },
+    {
+      "scene": "scene05",
+      "view": "preset_h0.3_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 177.25897216796875,
+        "after_dark": 1.7182677469135803,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 51.282262731481474,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene05",
+      "view": "preset_h0.3_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 161.513427734375,
+        "after_dark": 3.464747299382716,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 39.88657407407407,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene05",
+      "view": "preset_h0.3_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 179.25086975097656,
+        "after_dark": 1.9543306327160492,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 50.16601562500001,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene05",
+      "view": "preset_h0.9_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 167.67904663085938,
+        "after_dark": 2.5651523919753085,
+        "after_dark_near": 0.00012056327160493826,
+        "after_clip": 0.0,
+        "after_white": 47.90523726851852,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene05",
+      "view": "preset_h0.9_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 141.54518127441406,
+        "after_dark": 9.297984182098766,
+        "after_dark_near": 16.788315007716047,
+        "after_clip": 0.0,
+        "after_white": 0.32161458333333337,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene05",
+      "view": "preset_h0.9_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 165.6472625732422,
+        "after_dark": 2.94116512345679,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 45.89879918981482,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene05",
+      "view": "preset_h1.8_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 160.44888305664062,
+        "after_dark": 3.900077160493827,
+        "after_dark_near": 0.006872106481481482,
+        "after_clip": 0.0,
+        "after_white": 50.76396122685185,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene05",
+      "view": "preset_h1.8_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 151.52581787109375,
+        "after_dark": 2.841917438271605,
+        "after_dark_near": 0.40448977623456794,
+        "after_clip": 0.0,
+        "after_white": 0.1671730324074074,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene05",
+      "view": "preset_h1.8_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 149.68426513671875,
+        "after_dark": 4.44873649691358,
+        "after_dark_near": 6.422526041666667,
+        "after_clip": 0.0,
+        "after_white": 19.837239583333332,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene05",
+      "view": "rim_view",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 172.19850158691406,
+        "after_dark": 0.9932484567901235,
+        "after_dark_near": 0.5776186342592592,
+        "after_clip": 0.0,
+        "after_white": 0.26707175925925924,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 173.71270751953125,
+        "before_dark": 0.9446373456790124,
+        "before_dark_near": 0.5639949845679012,
+        "before_clip": 0.0,
+        "before_white": 0.4951533564814815,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.22808159722222227,
+        "diff_mean": 2.7028748989105225,
+        "diff_frac": 19.78417566872428,
+        "d_mean": -1.5142059326171875,
+        "d_dark": 0.04861111111111116,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 5.213824698176012
+      }
+    },
+    {
+      "scene": "scene05",
+      "view": "side_arc",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 126.04783630371094,
+        "after_dark": 5.231626157407407,
+        "after_dark_near": 0.7790798611111112,
+        "after_clip": 0.0,
+        "after_white": 0.6200086805555556,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 128.31689453125,
+        "before_dark": 4.421971450617284,
+        "before_dark_near": 0.7081886574074073,
+        "before_clip": 0.0,
+        "before_white": 1.4508101851851851,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.8308015046296295,
+        "diff_mean": 4.572309494018555,
+        "diff_frac": 23.103330761316872,
+        "d_mean": -2.2690582275390625,
+        "d_dark": 0.8096547067901234,
+        "newdark": 0.04822530864197531,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.009645061728395061,
+        "blk_shift": 4.861111111111112,
+        "blk_max": 20.584301809661866
+      }
+    },
+    {
+      "scene": "scene05",
+      "view": "stage_lookup",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 113.12189483642578,
+        "after_dark": 13.694782021604937,
+        "after_dark_near": 7.627314814814815,
+        "after_clip": 0.0,
+        "after_white": 8.614438657407407,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 114.3725814819336,
+        "before_dark": 13.245322145061728,
+        "before_dark_near": 7.007619598765433,
+        "before_clip": 0.0,
+        "before_white": 8.88939525462963,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.2749565972222232,
+        "diff_mean": 1.6948577165603638,
+        "diff_frac": 10.30394804526749,
+        "d_mean": -1.2506866455078125,
+        "d_dark": 0.44945987654320874,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 4.383888960655099
+      }
+    },
+    {
+      "scene": "scene08",
+      "view": "beauty_overview",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 106.82878875732422,
+        "after_dark": 20.039400077160494,
+        "after_dark_near": 5.281394675925926,
+        "after_clip": 0.0,
+        "after_white": 0.10749421296296297,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 107.61933898925781,
+        "before_dark": 20.11646412037037,
+        "before_dark_near": 5.448857060185185,
+        "before_clip": 0.0017843364197530865,
+        "before_white": 0.06749131944444445,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.04000289351851852,
+        "diff_mean": 3.170621395111084,
+        "diff_frac": 14.359326774691358,
+        "d_mean": -0.7905502319335938,
+        "d_dark": -0.07706404320987659,
+        "newdark": 0.0277295524691358,
+        "newdark_near": 0.06585249042145594,
+        "newdark_blob": 0.004822530864197531,
+        "blk_shift": 2.7777777777777777,
+        "blk_max": 14.894842426401738
+      }
+    },
+    {
+      "scene": "scene08",
+      "view": "facade_court",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 101.12857818603516,
+        "after_dark": 20.114342206790123,
+        "after_dark_near": 9.662181712962962,
+        "after_clip": 0.0,
+        "after_white": 0.0015190972222222222,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 100.62665557861328,
+        "before_dark": 20.360194830246915,
+        "before_dark_near": 9.682918595679011,
+        "before_clip": 0.0,
+        "before_white": 0.0016637731481481482,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.00014467592592592592,
+        "diff_mean": 1.5114790201187134,
+        "diff_frac": 8.787374614197532,
+        "d_mean": 0.501922607421875,
+        "d_dark": -0.24585262345679126,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 5.702445381757116
+      }
+    },
+    {
+      "scene": "scene08",
+      "view": "open_gap",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 133.431640625,
+        "after_dark": 12.604359567901236,
+        "after_dark_near": 0.04183545524691358,
+        "after_clip": 0.0,
+        "after_white": 2.930049189814815,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene08",
+      "view": "pit_edge",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 116.65337371826172,
+        "after_dark": 16.599729938271604,
+        "after_dark_near": 0.011091820987654322,
+        "after_clip": 0.0,
+        "after_white": 0.4790943287037037,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 118.52893829345703,
+        "before_dark": 16.563271604938272,
+        "before_dark_near": 0.02700617283950617,
+        "before_clip": 0.0,
+        "before_white": 0.5006510416666667,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.02155671296296302,
+        "diff_mean": 3.534423828125,
+        "diff_frac": 17.740547839506174,
+        "d_mean": -1.8755645751953125,
+        "d_dark": 0.03645833333333215,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 5.754550819699972
+      }
+    },
+    {
+      "scene": "scene08",
+      "view": "preset_h0.3_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 139.27381896972656,
+        "after_dark": 2.130545910493827,
+        "after_dark_near": 1.586009837962963,
+        "after_clip": 0.0,
+        "after_white": 3.9076244212962963,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene08",
+      "view": "preset_h0.3_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 126.78707885742188,
+        "after_dark": 5.405237268518519,
+        "after_dark_near": 0.4644097222222222,
+        "after_clip": 0.00048225308641975306,
+        "after_white": 3.794777199074074,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene08",
+      "view": "preset_h0.3_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 140.0557098388672,
+        "after_dark": 1.4430459104938271,
+        "after_dark_near": 0.08306809413580248,
+        "after_clip": 4.822530864197531e-05,
+        "after_white": 0.6916956018518519,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene08",
+      "view": "preset_h0.9_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 136.8398895263672,
+        "after_dark": 2.0410397376543212,
+        "after_dark_near": 0.15070408950617284,
+        "after_clip": 0.0,
+        "after_white": 2.1927806712962963,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene08",
+      "view": "preset_h0.9_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 105.49446868896484,
+        "after_dark": 12.779272762345679,
+        "after_dark_near": 3.0808738425925926,
+        "after_clip": 0.0007233796296296297,
+        "after_white": 1.2115885416666665,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene08",
+      "view": "preset_h0.9_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 123.68425750732422,
+        "after_dark": 6.786651234567902,
+        "after_dark_near": 0.16637731481481483,
+        "after_clip": 0.0,
+        "after_white": 2.0050636574074074,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene08",
+      "view": "preset_h1.8_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 127.38031005859375,
+        "after_dark": 5.983410493827161,
+        "after_dark_near": 0.031587577160493825,
+        "after_clip": 0.0,
+        "after_white": 0.3687065972222222,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene08",
+      "view": "preset_h1.8_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 95.51887512207031,
+        "after_dark": 13.968219521604938,
+        "after_dark_near": 12.623215663580249,
+        "after_clip": 0.0005304783950617284,
+        "after_white": 0.19545717592592593,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene08",
+      "view": "preset_h1.8_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 107.45925903320312,
+        "after_dark": 11.137249228395062,
+        "after_dark_near": 3.566382137345679,
+        "after_clip": 0.00014467592592592592,
+        "after_white": 1.1017795138888888,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene08",
+      "view": "stair_south",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 126.38629150390625,
+        "after_dark": 17.8389274691358,
+        "after_dark_near": 1.3874421296296295,
+        "after_clip": 0.0,
+        "after_white": 3.9408998842592595,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 127.07320404052734,
+        "before_dark": 17.637297453703702,
+        "before_dark_near": 1.4161361882716048,
+        "before_clip": 0.0,
+        "before_white": 3.131944444444444,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.8089554398148153,
+        "diff_mean": 5.04566764831543,
+        "diff_frac": 23.024707433127574,
+        "d_mean": -0.6869125366210938,
+        "d_dark": 0.20163001543209802,
+        "newdark": 0.01326195987654321,
+        "newdark_near": 0.03292624521072797,
+        "newdark_blob": 0.0,
+        "blk_shift": 2.083333333333333,
+        "blk_max": 14.460633504987129
+      }
+    },
+    {
+      "scene": "scene08",
+      "view": "underground_look",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 70.82807922363281,
+        "after_dark": 20.341965663580247,
+        "after_dark_near": 50.53771219135802,
+        "after_clip": 0.007667824074074073,
+        "after_white": 0.6636284722222222,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene09",
+      "view": "across_river",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 140.85401916503906,
+        "after_dark": 1.1745756172839505,
+        "after_dark_near": 0.15359760802469136,
+        "after_clip": 0.0,
+        "after_white": 0.08297164351851852,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 141.60374450683594,
+        "before_dark": 1.1115451388888888,
+        "before_dark_near": 0.10850694444444445,
+        "before_clip": 0.0,
+        "before_white": 0.4231770833333333,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.34020543981481477,
+        "diff_mean": 2.517942190170288,
+        "diff_frac": 12.630288708847736,
+        "d_mean": -0.749725341796875,
+        "d_dark": 0.0630304783950617,
+        "newdark": 0.059076003086419755,
+        "newdark_near": 0.017959770114942528,
+        "newdark_blob": 0.04822530864197531,
+        "blk_shift": 2.083333333333333,
+        "blk_max": 22.391074818392497
+      }
+    },
+    {
+      "scene": "scene09",
+      "view": "from_river",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 142.1199493408203,
+        "after_dark": 1.6928047839506175,
+        "after_dark_near": 0.23389274691358025,
+        "after_clip": 0.0,
+        "after_white": 0.25759548611111116,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene09",
+      "view": "g9_oblique",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 121.69750213623047,
+        "after_dark": 21.838782793209877,
+        "after_dark_near": 11.510175540123457,
+        "after_clip": 0.0,
+        "after_white": 7.998336226851851,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene09",
+      "view": "ghat_walk",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 177.2447509765625,
+        "after_dark": 0.7137345679012346,
+        "after_dark_near": 0.004460841049382716,
+        "after_clip": 0.0,
+        "after_white": 38.22424768518518,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 176.44757080078125,
+        "before_dark": 0.6683545524691358,
+        "before_dark_near": 0.005304783950617284,
+        "before_clip": 0.0,
+        "before_white": 33.23488136574074,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 4.989366319444443,
+        "diff_mean": 1.823707103729248,
+        "diff_frac": 8.085889274691358,
+        "d_mean": 0.79718017578125,
+        "d_dark": 0.0453800154320988,
+        "newdark": 0.028935185185185182,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.009645061728395061,
+        "blk_shift": 1.3888888888888888,
+        "blk_max": 19.372294491925174
+      }
+    },
+    {
+      "scene": "scene09",
+      "view": "landing_return",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 169.8032989501953,
+        "after_dark": 5.502218364197531,
+        "after_dark_near": 0.00036168981481481485,
+        "after_clip": 0.0,
+        "after_white": 3.9921151620370368,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene09",
+      "view": "park_vista",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 93.86945343017578,
+        "after_dark": 22.48316936728395,
+        "after_dark_near": 26.188753858024693,
+        "after_clip": 0.0,
+        "after_white": 0.006872106481481482,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 92.86409759521484,
+        "before_dark": 22.302324459876544,
+        "before_dark_near": 26.579861111111114,
+        "before_clip": 0.0,
+        "before_white": 0.014756944444444444,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.007884837962962962,
+        "diff_mean": 7.284148693084717,
+        "diff_frac": 26.57907343106996,
+        "d_mean": 1.0053558349609375,
+        "d_dark": 0.18084490740740478,
+        "newdark": 0.3833912037037037,
+        "newdark_near": 0.9339080459770116,
+        "newdark_blob": 0.03375771604938271,
+        "blk_shift": 13.194444444444445,
+        "blk_max": 31.390724855204496
+      }
+    },
+    {
+      "scene": "scene09",
+      "view": "preset_h0.3_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 168.09910583496094,
+        "after_dark": 10.251591435185185,
+        "after_dark_near": 0.1171875,
+        "after_clip": 0.0,
+        "after_white": 31.005714699074073,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene09",
+      "view": "preset_h0.3_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 139.653564453125,
+        "after_dark": 22.963541666666668,
+        "after_dark_near": 0.07294077932098765,
+        "after_clip": 0.0,
+        "after_white": 27.31344039351852,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene09",
+      "view": "preset_h0.3_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 159.0997772216797,
+        "after_dark": 14.884452160493828,
+        "after_dark_near": 0.0030140817901234567,
+        "after_clip": 0.0,
+        "after_white": 24.375361689814813,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene09",
+      "view": "preset_h0.9_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 156.3291015625,
+        "after_dark": 15.976851851851853,
+        "after_dark_near": 0.005304783950617284,
+        "after_clip": 0.0,
+        "after_white": 26.589554398148145,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene09",
+      "view": "preset_h0.9_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 114.45331573486328,
+        "after_dark": 23.470582561728396,
+        "after_dark_near": 0.6809413580246914,
+        "after_clip": 0.0,
+        "after_white": 7.427372685185185,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene09",
+      "view": "preset_h0.9_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 139.46688842773438,
+        "after_dark": 21.968074845679013,
+        "after_dark_near": 0.00024112654320987653,
+        "after_clip": 0.0,
+        "after_white": 22.16384548611111,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene09",
+      "view": "preset_h1.8_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 142.57781982421875,
+        "after_dark": 20.503954475308642,
+        "after_dark_near": 0.00012056327160493826,
+        "after_clip": 0.0,
+        "after_white": 22.105613425925927,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene09",
+      "view": "preset_h1.8_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 108.7303695678711,
+        "after_dark": 24.05584490740741,
+        "after_dark_near": 0.7266348379629629,
+        "after_clip": 0.0,
+        "after_white": 2.958767361111111,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene09",
+      "view": "preset_h1.8_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 122.49739837646484,
+        "after_dark": 22.483072916666664,
+        "after_dark_near": 0.24100597993827164,
+        "after_clip": 0.0,
+        "after_white": 12.030888310185185,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene09",
+      "view": "stair_flank_grazing",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 168.56103515625,
+        "after_dark": 0.39144483024691357,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 31.962022569444443,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene09",
+      "view": "stair_flank_raking",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 170.23536682128906,
+        "after_dark": 1.78882137345679,
+        "after_dark_near": 0.00036168981481481485,
+        "after_clip": 0.0,
+        "after_white": 0.13780381944444445,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene09",
+      "view": "waterline",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 145.3180389404297,
+        "after_dark": 16.246961805555554,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 6.873625578703704,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 146.75588989257812,
+        "before_dark": 16.022328317901234,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 9.228226273148147,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -2.354600694444443,
+        "diff_mean": 2.8885130882263184,
+        "diff_frac": 20.99308770576132,
+        "d_mean": -1.4378509521484375,
+        "d_dark": 0.22463348765431945,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 4.494185542010257
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "broken_rail",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 122.01996612548828,
+        "after_dark": 10.567804783950617,
+        "after_dark_near": 4.2092255015432105,
+        "after_clip": 0.0,
+        "after_white": 0.09483506944444445,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "from_below",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 135.84193420410156,
+        "after_dark": 4.914400077160494,
+        "after_dark_near": 7.348934220679013,
+        "after_clip": 0.0,
+        "after_white": 1.043402777777778,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 135.4484100341797,
+        "before_dark": 4.998939043209877,
+        "before_dark_near": 7.166280864197532,
+        "before_clip": 0.0,
+        "before_white": 0.9559461805555556,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.08745659722222232,
+        "diff_mean": 13.770666122436523,
+        "diff_frac": 56.01515882201647,
+        "d_mean": 0.393524169921875,
+        "d_dark": -0.08453896604938294,
+        "newdark": 0.09524498456790123,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.019290123456790122,
+        "blk_shift": 6.25,
+        "blk_max": 48.76959758562337
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "leaf_edge",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 10 % (최대 편차 60/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 135.09132385253906,
+        "after_dark": 2.462673611111111,
+        "after_dark_near": 2.7565586419753085,
+        "after_clip": 0.0,
+        "after_white": 0.2081886574074074,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 137.34007263183594,
+        "before_dark": 1.7645640432098768,
+        "before_dark_near": 1.9796489197530864,
+        "before_clip": 0.0,
+        "before_white": 0.34375,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.1355613425925926,
+        "diff_mean": 10.55036449432373,
+        "diff_frac": 50.52054398148148,
+        "d_mean": -2.248748779296875,
+        "d_dark": 0.6981095679012344,
+        "newdark": 0.8680555555555556,
+        "newdark_near": 0.7303639846743295,
+        "newdark_blob": 0.16878858024691357,
+        "blk_shift": 9.722222222222223,
+        "blk_max": 60.098748450921576
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "preset_h0.3_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 149.51956176757812,
+        "after_dark": 0.7064525462962963,
+        "after_dark_near": 0.0071132330246913575,
+        "after_clip": 0.0,
+        "after_white": 0.5925202546296297,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "preset_h0.3_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 142.4175567626953,
+        "after_dark": 0.8396508487654321,
+        "after_dark_near": 0.6301842206790124,
+        "after_clip": 0.0,
+        "after_white": 0.6857638888888888,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "preset_h0.3_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 146.14663696289062,
+        "after_dark": 0.7215470679012346,
+        "after_dark_near": 0.08764949845679011,
+        "after_clip": 0.0,
+        "after_white": 0.3004195601851852,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "preset_h0.9_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 144.04127502441406,
+        "after_dark": 1.0923996913580247,
+        "after_dark_near": 0.5524209104938272,
+        "after_clip": 0.0,
+        "after_white": 0.21643518518518517,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "preset_h0.9_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 116.96465301513672,
+        "after_dark": 2.091917438271605,
+        "after_dark_near": 2.8191309799382718,
+        "after_clip": 0.0,
+        "after_white": 0.20044849537037035,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "preset_h0.9_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 134.8868865966797,
+        "after_dark": 1.7105516975308641,
+        "after_dark_near": 1.0111641589506173,
+        "after_clip": 0.0,
+        "after_white": 0.22337962962962962,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "preset_h1.8_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 139.2264862060547,
+        "after_dark": 1.4226466049382718,
+        "after_dark_near": 1.0123697916666667,
+        "after_clip": 0.0,
+        "after_white": 0.076171875,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "preset_h1.8_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 124.11907958984375,
+        "after_dark": 2.1616994598765435,
+        "after_dark_near": 3.044704861111111,
+        "after_clip": 0.0,
+        "after_white": 0.3969907407407407,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "preset_h1.8_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 124.95269012451172,
+        "after_dark": 2.283613040123457,
+        "after_dark_near": 3.6250964506172836,
+        "after_clip": 0.0,
+        "after_white": 0.1642795138888889,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "reversal",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 15 % (최대 편차 88/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 138.0343780517578,
+        "after_dark": 7.046440972222221,
+        "after_dark_near": 5.064742476851851,
+        "after_clip": 0.0,
+        "after_white": 0.26157407407407407,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 138.34725952148438,
+        "before_dark": 6.800347222222222,
+        "before_dark_near": 5.802589699074074,
+        "before_clip": 0.0,
+        "before_white": 0.04463252314814815,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.21694155092592593,
+        "diff_mean": 18.824737548828125,
+        "diff_frac": 65.42737268518518,
+        "d_mean": -0.3128814697265625,
+        "d_dark": 0.2460937499999991,
+        "newdark": 1.2550636574074074,
+        "newdark_near": 0.33824233716475094,
+        "newdark_blob": 1.0657793209876543,
+        "blk_shift": 14.583333333333334,
+        "blk_max": 87.97216240983464
+      }
+    },
+    {
+      "scene": "scene10",
+      "view": "through_treads",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 42 % (최대 편차 82/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 128.1225128173828,
+        "after_dark": 7.199122299382717,
+        "after_dark_near": 0.019290123456790122,
+        "after_clip": 0.0,
+        "after_white": 3.1766493055555554,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 138.00836181640625,
+        "before_dark": 6.248456790123457,
+        "before_dark_near": 0.028573495370370367,
+        "before_clip": 0.0,
+        "before_white": 0.32978877314814814,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 2.8468605324074074,
+        "diff_mean": 50.001102447509766,
+        "diff_frac": 85.43799832818931,
+        "d_mean": -9.885848999023438,
+        "d_dark": 0.9506655092592595,
+        "newdark": 1.6215760030864197,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.5738811728395061,
+        "blk_shift": 42.36111111111111,
+        "blk_max": 81.93868094788232
+      }
+    },
+    {
+      "scene": "scene12",
+      "view": "bank_face",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 73.5154037475586,
+        "after_dark": 35.652247299382715,
+        "after_dark_near": 29.31809413580247,
+        "after_clip": 0.0,
+        "after_white": 0.020109953703703703,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene12",
+      "view": "beauty_overview",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 128.49563598632812,
+        "after_dark": 1.2053433641975309,
+        "after_dark_near": 1.7916907793209875,
+        "after_clip": 0.0,
+        "after_white": 0.537326388888889,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 126.67147827148438,
+        "before_dark": 1.1578896604938271,
+        "before_dark_near": 1.8006124614197532,
+        "before_clip": 0.0,
+        "before_white": 0.5266203703703703,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0107060185185186,
+        "diff_mean": 3.83054780960083,
+        "diff_frac": 22.768888245884774,
+        "d_mean": 1.82415771484375,
+        "d_dark": 0.04745370370370372,
+        "newdark": 0.038580246913580245,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.014467592592592593,
+        "blk_shift": 6.25,
+        "blk_max": 19.724672217967054
+      }
+    },
+    {
+      "scene": "scene12",
+      "view": "broken_span",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 141.50929260253906,
+        "after_dark": 3.204427083333333,
+        "after_dark_near": 4.256847993827161,
+        "after_clip": 0.0,
+        "after_white": 0.12181712962962962,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene12",
+      "view": "deck_walk",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 137.94517517089844,
+        "after_dark": 2.1127025462962963,
+        "after_dark_near": 0.8187451774691358,
+        "after_clip": 0.0,
+        "after_white": 0.10286458333333333,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 136.25770568847656,
+        "before_dark": 1.9645061728395061,
+        "before_dark_near": 0.8221209490740742,
+        "before_clip": 0.0,
+        "before_white": 0.10221354166666666,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0006510416666666713,
+        "diff_mean": 3.810612201690674,
+        "diff_frac": 15.141075102880658,
+        "d_mean": 1.687469482421875,
+        "d_dark": 0.14819637345679015,
+        "newdark": 0.3809799382716049,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.14949845679012347,
+        "blk_shift": 7.638888888888889,
+        "blk_max": 18.605580821085994
+      }
+    },
+    {
+      "scene": "scene12",
+      "view": "edge_void",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 124.20429992675781,
+        "after_dark": 1.8301986882716048,
+        "after_dark_near": 2.9176311728395063,
+        "after_clip": 0.0,
+        "after_white": 0.01685474537037037,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 124.18525695800781,
+        "before_dark": 1.8323688271604937,
+        "before_dark_near": 2.906659915123457,
+        "before_clip": 0.0,
+        "before_white": 0.015914351851851853,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0009403935185185175,
+        "diff_mean": 0.6922244429588318,
+        "diff_frac": 1.3587480709876543,
+        "d_mean": 0.01904296875,
+        "d_dark": -0.0021701388888888395,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 6.084051178552073
+      }
+    },
+    {
+      "scene": "scene12",
+      "view": "preset_h0.3_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 159.84315490722656,
+        "after_dark": 1.8721547067901234,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.5591724537037037,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene12",
+      "view": "preset_h0.3_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 154.69024658203125,
+        "after_dark": 3.188368055555556,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.5070167824074074,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene12",
+      "view": "preset_h0.3_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 159.11138916015625,
+        "after_dark": 2.310329861111111,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.34447337962962965,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene12",
+      "view": "preset_h0.9_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 145.35067749023438,
+        "after_dark": 3.6519579475308643,
+        "after_dark_near": 2.218002507716049,
+        "after_clip": 0.0,
+        "after_white": 0.20478877314814817,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene12",
+      "view": "preset_h0.9_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 123.423583984375,
+        "after_dark": 3.3065200617283947,
+        "after_dark_near": 0.047260802469135804,
+        "after_clip": 0.0,
+        "after_white": 0.43504050925925924,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene12",
+      "view": "preset_h0.9_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 141.6780242919922,
+        "after_dark": 2.7744020061728394,
+        "after_dark_near": 0.01398533950617284,
+        "after_clip": 0.0,
+        "after_white": 0.3684172453703704,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene12",
+      "view": "preset_h1.8_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 136.36944580078125,
+        "after_dark": 4.461371527777778,
+        "after_dark_near": 4.3939284336419755,
+        "after_clip": 0.0,
+        "after_white": 0.23111979166666666,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene12",
+      "view": "preset_h1.8_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 116.41255950927734,
+        "after_dark": 3.5082947530864197,
+        "after_dark_near": 0.9772858796296297,
+        "after_clip": 0.0,
+        "after_white": 0.5557002314814815,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene12",
+      "view": "preset_h1.8_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 127.90383911132812,
+        "after_dark": 3.3350694444444446,
+        "after_dark_near": 1.2161217206790123,
+        "after_clip": 0.0,
+        "after_white": 0.5953414351851852,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene12",
+      "view": "stair_join",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 121.19550323486328,
+        "after_dark": 4.396797839506173,
+        "after_dark_near": 6.888623649691358,
+        "after_clip": 0.0,
+        "after_white": 0.0007957175925925925,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 118.78772735595703,
+        "before_dark": 4.444878472222222,
+        "before_dark_near": 6.707658179012347,
+        "before_clip": 0.0,
+        "before_white": 7.233796296296296e-05,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0007233796296296296,
+        "diff_mean": 8.289480209350586,
+        "diff_frac": 35.34778485082305,
+        "d_mean": 2.40777587890625,
+        "d_dark": -0.04808063271604901,
+        "newdark": 0.10006751543209877,
+        "newdark_near": 0.24844348659003834,
+        "newdark_blob": 0.04822530864197531,
+        "blk_shift": 3.4722222222222223,
+        "blk_max": 22.01448229335145
+      }
+    },
+    {
+      "scene": "scene12",
+      "view": "under_deck",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 115.44660186767578,
+        "after_dark": 18.859375,
+        "after_dark_near": 29.85303337191358,
+        "after_clip": 0.0,
+        "after_white": 0.44429976851851855,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "beauty_overview",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 109.99016571044922,
+        "after_dark": 10.587287808641975,
+        "after_dark_near": 11.518132716049383,
+        "after_clip": 0.0,
+        "after_white": 0.49312789351851855,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 109.64109802246094,
+        "before_dark": 10.546344521604938,
+        "before_dark_near": 11.489076967592593,
+        "before_clip": 0.0,
+        "before_white": 0.5021701388888888,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.009042245370370294,
+        "diff_mean": 1.5829325914382935,
+        "diff_frac": 8.704909336419753,
+        "d_mean": 0.34906768798828125,
+        "d_dark": 0.04094328703703631,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 3.556900122751202
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "bollard_walk",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 115.72344970703125,
+        "after_dark": 7.417148919753086,
+        "after_dark_near": 0.02097800925925926,
+        "after_clip": 0.008487654320987654,
+        "after_white": 1.3778211805555556,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 115.904052734375,
+        "before_dark": 7.453510802469136,
+        "before_dark_near": 0.015673225308641976,
+        "before_clip": 0.008391203703703703,
+        "before_white": 1.369140625,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.00868055555555558,
+        "diff_mean": 1.5814063549041748,
+        "diff_frac": 10.659545396090534,
+        "d_mean": -0.18060302734375,
+        "d_dark": -0.0363618827160499,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 6.215905435212534
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "entry_approach",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 114.9712905883789,
+        "after_dark": 7.710648148148149,
+        "after_dark_near": 0.0,
+        "after_clip": 0.020495756172839504,
+        "after_white": 1.4444444444444444,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 114.88078308105469,
+        "before_dark": 7.685426311728396,
+        "before_dark_near": 0.0,
+        "before_clip": 0.021219135802469136,
+        "before_white": 1.4045862268518519,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.03985821759259256,
+        "diff_mean": 0.9230846762657166,
+        "diff_frac": 3.9904996141975313,
+        "d_mean": 0.09050750732421875,
+        "d_dark": 0.025221836419753174,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 3.0742346121526225
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "portal_look",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 56.88658905029297,
+        "after_dark": 16.062644675925927,
+        "after_dark_near": 3.340928819444444,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 56.878692626953125,
+        "before_dark": 16.049430941358025,
+        "before_dark_near": 3.3246527777777777,
+        "before_clip": 0.0,
+        "before_white": 0.0,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0,
+        "diff_mean": 0.5117899775505066,
+        "diff_frac": 0.334667566872428,
+        "d_mean": 0.00789642333984375,
+        "d_dark": 0.01321373456790198,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 1.6120217468321414
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h0.3_d10",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 121.81465148925781,
+        "after_dark": 3.601996527777778,
+        "after_dark_near": 0.1275559413580247,
+        "after_clip": 0.11752507716049382,
+        "after_white": 1.716941550925926,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 121.78345489501953,
+        "before_dark": 3.601176697530864,
+        "before_dark_near": 0.12767650462962962,
+        "before_clip": 0.11506558641975308,
+        "before_white": 1.7139033564814814,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.003038194444444642,
+        "diff_mean": 0.9990910887718201,
+        "diff_frac": 2.8331082818930042,
+        "d_mean": 0.03119659423828125,
+        "d_dark": 0.0008198302469142327,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 1.9698299574632472,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 0.32343182635766726,
+        "gz_dE": 0.44312083230264154,
+        "gz_dN": 0.11968900594497427,
+        "gz_agree": 0.5177083333333333,
+        "gz_row": 145,
+        "gz_band": [
+          124.4,
+          177.4
+        ],
+        "gz_haz_row": 149.0,
+        "gz_d": 10.0,
+        "gz_band_mu": 119.81297076178069,
+        "gz_step_b": 29.76,
+        "gz_step_a": 29.87,
+        "gz_step_ratio": 1.004,
+        "gz_step_off": 4,
+        "gz_step_dom": 67.42
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h0.3_d2",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 134.3723602294922,
+        "after_dark": 1.8459683641975306,
+        "after_dark_near": 0.022786458333333332,
+        "after_clip": 0.10421489197530863,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 134.73089599609375,
+        "before_dark": 1.8444251543209877,
+        "before_dark_near": 0.030864197530864196,
+        "before_clip": 0.10339506172839506,
+        "before_white": 0.0,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0,
+        "diff_mean": 1.471229910850525,
+        "diff_frac": 5.879613554526749,
+        "d_mean": -0.3585357666015625,
+        "d_dark": 0.0015432098765428837,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 1.0365336309724853,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 0.30856759756983543,
+        "gz_dE": 0.5136892803318664,
+        "gz_dN": 0.205121682762031,
+        "gz_agree": 0.8625,
+        "gz_row": 241,
+        "gz_band": [
+          169.6,
+          312.0
+        ],
+        "gz_haz_row": 248.7,
+        "gz_d": 2.0,
+        "gz_band_mu": 109.74830627441406,
+        "gz_step_b": 3.6,
+        "gz_step_a": 3.75,
+        "gz_step_ratio": 1.044,
+        "gz_step_off": 8,
+        "gz_step_dom": 7.31
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h0.3_d5",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 137.56741333007812,
+        "after_dark": 0.32373649691358025,
+        "after_dark_near": 0.11694637345679013,
+        "after_clip": 0.11983989197530864,
+        "after_white": 1.3250868055555556,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 137.55320739746094,
+        "before_dark": 0.32793209876543206,
+        "before_dark_near": 0.11682581018518517,
+        "before_clip": 0.12085262345679013,
+        "before_white": 1.3271846064814816,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.002097800925926041,
+        "diff_mean": 0.8164165616035461,
+        "diff_frac": 1.635304140946502,
+        "d_mean": 0.0142059326171875,
+        "d_dark": -0.0041956018518518046,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 0.6251614007097146,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 0.12397527356621654,
+        "gz_dE": 0.19774232934327113,
+        "gz_dN": 0.07376705577705459,
+        "gz_agree": 0.5729166666666666,
+        "gz_row": 141,
+        "gz_band": [
+          130.6,
+          211.8
+        ],
+        "gz_haz_row": 174.3,
+        "gz_d": 5.0,
+        "gz_band_mu": 123.6953353881836,
+        "gz_step_b": 38.05,
+        "gz_step_a": 38.09,
+        "gz_step_ratio": 1.001,
+        "gz_step_off": 33,
+        "gz_step_dom": 192.63
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h0.9_d10",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 119.7010498046875,
+        "after_dark": 6.0273919753086425,
+        "after_dark_near": 0.05304783950617284,
+        "after_clip": 0.08931327160493827,
+        "after_white": 2.6035879629629632,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 119.68109130859375,
+        "before_dark": 6.029272762345679,
+        "before_dark_near": 0.05365065586419753,
+        "before_clip": 0.08521412037037036,
+        "before_white": 2.6014178240740744,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0021701388888888395,
+        "diff_mean": 0.8161525726318359,
+        "diff_frac": 2.958767361111111,
+        "d_mean": 0.01995849609375,
+        "d_dark": -0.0018807870370363133,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 1.0215664798717512
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h0.9_d2",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 129.1431427001953,
+        "after_dark": 3.056809413580247,
+        "after_dark_near": 0.0030140817901234567,
+        "after_clip": 0.1519579475308642,
+        "after_white": 7.233796296296296e-05,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 129.1139373779297,
+        "before_dark": 3.0461998456790123,
+        "before_dark_near": 0.0032552083333333335,
+        "before_clip": 0.14896797839506173,
+        "before_white": 7.233796296296296e-05,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0,
+        "diff_mean": 0.9143542647361755,
+        "diff_frac": 2.3653227880658436,
+        "d_mean": 0.029205322265625,
+        "d_dark": 0.010609567901234573,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 1.0332986160832434
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h0.9_d5",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 138.18641662597656,
+        "after_dark": 1.9595389660493827,
+        "after_dark_near": 0.025318287037037035,
+        "after_clip": 0.17467206790123457,
+        "after_white": 2.8861400462962963,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 138.1954803466797,
+        "before_dark": 1.953559027777778,
+        "before_dark_near": 0.023871527777777776,
+        "before_clip": 0.16970486111111113,
+        "before_white": 2.8878761574074074,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.0017361111111111605,
+        "diff_mean": 0.8731467127799988,
+        "diff_frac": 2.354568544238683,
+        "d_mean": -0.009063720703125,
+        "d_dark": 0.005979938271604812,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 0.6213687047082885
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h1.8_d10",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 116.9848403930664,
+        "after_dark": 8.898533950617283,
+        "after_dark_near": 0.0025318287037037037,
+        "after_clip": 0.01171875,
+        "after_white": 1.3024450231481481,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 116.89555358886719,
+        "before_dark": 8.888840663580247,
+        "before_dark_near": 0.0022907021604938274,
+        "before_clip": 0.010320216049382717,
+        "before_white": 1.2605613425925926,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.04188368055555558,
+        "diff_mean": 0.9664284586906433,
+        "diff_frac": 4.488554526748971,
+        "d_mean": 0.08928680419921875,
+        "d_dark": 0.009693287037036313,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 2.4544941332884775
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h1.8_d2",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 125.25798034667969,
+        "after_dark": 2.8937596450617282,
+        "after_dark_near": 0.00012056327160493826,
+        "after_clip": 0.18103780864197533,
+        "after_white": 0.010416666666666668,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 125.24691009521484,
+        "before_dark": 2.8875868055555554,
+        "before_dark_near": 0.0,
+        "before_clip": 0.1828221450617284,
+        "before_white": 0.007161458333333333,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0032552083333333348,
+        "diff_mean": 1.2255504131317139,
+        "diff_frac": 4.056905864197531,
+        "d_mean": 0.01107025146484375,
+        "d_dark": 0.006172839506172867,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 0.8907686628114959
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h1.8_d5",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 131.21298217773438,
+        "after_dark": 5.97583912037037,
+        "after_dark_near": 0.036771797839506175,
+        "after_clip": 0.11762152777777778,
+        "after_white": 1.564525462962963,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 131.20220947265625,
+        "before_dark": 5.956018518518519,
+        "before_dark_near": 0.037495177469135804,
+        "before_clip": 0.11704282407407407,
+        "before_white": 1.5722656250000002,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.0077401620370372015,
+        "diff_mean": 1.0000065565109253,
+        "diff_frac": 3.4585101594650203,
+        "d_mean": 0.010772705078125,
+        "d_dark": 0.019820601851851194,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 0.7882256103508212
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "ramp_graze",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "BLOWN",
+          "msg": "과노출 mean 134.4 · 255클리핑 0.27 %  [이월 — 변화 없음, 회귀 아님]"
+        }
+      ],
+      "metrics": {
+        "after_mean": 134.38778686523438,
+        "after_dark": 3.259741512345679,
+        "after_dark_near": 0.013020833333333334,
+        "after_clip": 0.26576967592592593,
+        "after_white": 2.1956018518518516,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 134.4257354736328,
+        "before_dark": 3.2506269290123457,
+        "before_dark_near": 0.012297453703703703,
+        "before_clip": 0.2653838734567901,
+        "before_white": 2.168258101851852,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.027343749999999556,
+        "diff_mean": 0.9176075458526611,
+        "diff_frac": 2.881510416666667,
+        "d_mean": -0.0379486083984375,
+        "d_dark": 0.009114583333333481,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 0.5523537455734413,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 0.19842607710860433,
+        "gz_dE": 0.25156293851255185,
+        "gz_dN": 0.05313686140394752,
+        "gz_agree": 0.571875,
+        "gz_row": 274,
+        "gz_band": [
+          217.2,
+          312.4
+        ],
+        "gz_haz_row": 270.0,
+        "gz_d": 14.0,
+        "gz_band_mu": 113.57972524881708,
+        "gz_step_b": 2.62,
+        "gz_step_a": 2.71,
+        "gz_step_ratio": 1.033,
+        "gz_step_off": 4,
+        "gz_step_dom": 10.75
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "stair_head",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 57.427085876464844,
+        "after_dark": 4.105854552469135,
+        "after_dark_near": 8.745900848765432,
+        "after_clip": 0.0,
+        "after_white": 0.015842013888888888,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 57.383819580078125,
+        "before_dark": 4.089747299382716,
+        "before_dark_near": 8.761091820987655,
+        "before_clip": 0.0,
+        "before_white": 0.017216435185185185,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.0013744212962962972,
+        "diff_mean": 0.7788351774215698,
+        "diff_frac": 1.2745145318930042,
+        "d_mean": 0.04326629638671875,
+        "d_dark": 0.01610725308641925,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 0.555848785157167
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "beauty_overview",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 138.9123992919922,
+        "after_dark": 2.295090663580247,
+        "after_dark_near": 3.0080536265432096,
+        "after_clip": 0.0,
+        "after_white": 0.7020399305555556,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 138.45799255371094,
+        "before_dark": 1.9389949845679013,
+        "before_dark_near": 2.42283950617284,
+        "before_clip": 0.0,
+        "before_white": 0.6711516203703703,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.03088831018518523,
+        "diff_mean": 4.6227707862854,
+        "diff_frac": 32.005401234567906,
+        "d_mean": 0.45440673828125,
+        "d_dark": 0.3560956790123455,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 9.291603962040497
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "lower_lookup",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 110.55967712402344,
+        "after_dark": 1.1315104166666665,
+        "after_dark_near": 2.2468171296296293,
+        "after_clip": 0.0,
+        "after_white": 1.1188512731481481,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 113.89463806152344,
+        "before_dark": 0.7134934413580247,
+        "before_dark_near": 1.3793643904320987,
+        "before_clip": 0.0,
+        "before_white": 1.1412037037037037,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.02235243055555558,
+        "diff_mean": 3.4842464923858643,
+        "diff_frac": 25.993328832304524,
+        "d_mean": -3.3349609375,
+        "d_dark": 0.4180169753086418,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 5.555555555555555,
+        "blk_max": 16.492085377565047
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "preset_h0.3_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 190.20452880859375,
+        "after_dark": 0.3270640432098766,
+        "after_dark_near": 0.1851851851851852,
+        "after_clip": 0.0,
+        "after_white": 31.88715277777778,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "preset_h0.3_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 188.1969451904297,
+        "after_dark": 0.544849537037037,
+        "after_dark_near": 0.5424141589506173,
+        "after_clip": 0.0,
+        "after_white": 18.18677662037037,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "preset_h0.3_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 192.8737335205078,
+        "after_dark": 0.021653163580246913,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.2734375,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "preset_h0.9_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 190.09767150878906,
+        "after_dark": 0.033179012345679014,
+        "after_dark_near": 0.007957175925925927,
+        "after_clip": 0.0,
+        "after_white": 4.8671875,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "preset_h0.9_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 170.67324829101562,
+        "after_dark": 0.984230324074074,
+        "after_dark_near": 0.19169560185185186,
+        "after_clip": 0.0,
+        "after_white": 10.160228587962964,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "preset_h0.9_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 183.88929748535156,
+        "after_dark": 0.4293499228395062,
+        "after_dark_near": 0.004943094135802469,
+        "after_clip": 0.0,
+        "after_white": 7.784577546296297,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "preset_h1.8_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 182.60382080078125,
+        "after_dark": 0.2818769290123457,
+        "after_dark_near": 0.0010850694444444445,
+        "after_clip": 0.0,
+        "after_white": 7.860387731481482,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "preset_h1.8_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 164.17880249023438,
+        "after_dark": 1.1954089506172838,
+        "after_dark_near": 1.2610918209876543,
+        "after_clip": 0.0,
+        "after_white": 7.779730902777778,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "preset_h1.8_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 171.00473022460938,
+        "after_dark": 0.9320505401234568,
+        "after_dark_near": 0.6233121141975309,
+        "after_clip": 0.0,
+        "after_white": 9.56517650462963,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "side_reveal",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 149.10765075683594,
+        "after_dark": 0.09678819444444445,
+        "after_dark_near": 0.013623649691358024,
+        "after_clip": 0.0,
+        "after_white": 2.8161168981481484,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 150.25674438476562,
+        "before_dark": 0.08106674382716049,
+        "before_dark_near": 0.013623649691358024,
+        "before_clip": 0.0,
+        "before_white": 2.964626736111111,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.1485098379629628,
+        "diff_mean": 4.70684814453125,
+        "diff_frac": 33.19555362654321,
+        "d_mean": -1.1490936279296875,
+        "d_dark": 0.015721450617283958,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 4.166666666666666,
+        "blk_max": 14.099751650835628
+      }
+    },
+    {
+      "scene": "scene14",
+      "view": "terrace_read",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 167.69964599609375,
+        "after_dark": 0.7193287037037037,
+        "after_dark_near": 1.2448157793209875,
+        "after_clip": 0.0,
+        "after_white": 12.277271412037036,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 171.85708618164062,
+        "before_dark": 0.5408468364197531,
+        "before_dark_near": 1.0080295138888888,
+        "before_clip": 0.0,
+        "before_white": 17.13888888888889,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -4.861617476851853,
+        "diff_mean": 4.76076602935791,
+        "diff_frac": 20.79518711419753,
+        "d_mean": -4.157440185546875,
+        "d_dark": 0.17848186728395066,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 13.194444444444445,
+        "blk_max": 14.048787298011689
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "approach",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 157.4659423828125,
+        "after_dark": 4.002411265432099,
+        "after_dark_near": 0.039303626543209874,
+        "after_clip": 0.0,
+        "after_white": 1.1812789351851851,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 157.6670684814453,
+        "before_dark": 3.912615740740741,
+        "before_dark_near": 0.022063078703703703,
+        "before_clip": 0.0,
+        "before_white": 1.183666087962963,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.002387152777777901,
+        "diff_mean": 1.0496015548706055,
+        "diff_frac": 3.246109825102881,
+        "d_mean": -0.2011260986328125,
+        "d_dark": 0.08979552469135799,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 6.091394363812498
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "beauty_overview",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 152.5538330078125,
+        "after_dark": 5.777874228395062,
+        "after_dark_near": 0.022183641975308643,
+        "after_clip": 0.0,
+        "after_white": 1.474537037037037,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 153.06329345703125,
+        "before_dark": 5.732494212962963,
+        "before_dark_near": 0.015552662037037038,
+        "before_clip": 0.0,
+        "before_white": 1.4796730324074074,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.005135995370370461,
+        "diff_mean": 1.4688725471496582,
+        "diff_frac": 5.768293467078189,
+        "d_mean": -0.50946044921875,
+        "d_dark": 0.04538001543209891,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.6944444444444444,
+        "blk_max": 15.335938804557173
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "preset_h0.3_d10",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 167.5250244140625,
+        "after_dark": 2.0461998456790127,
+        "after_dark_near": 0.15854070216049385,
+        "after_clip": 0.0,
+        "after_white": 0.4937065972222222,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 167.6389617919922,
+        "before_dark": 1.9711612654320987,
+        "before_dark_near": 0.1607108410493827,
+        "before_clip": 0.0,
+        "before_white": 0.4983362268518519,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.004629629629629706,
+        "diff_mean": 0.9313656091690063,
+        "diff_frac": 2.1136509773662553,
+        "d_mean": -0.1139373779296875,
+        "d_dark": 0.07503858024691401,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 1.6884801858226979,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 1.4168430265229106,
+        "gz_dE": 1.509609978806874,
+        "gz_dN": 0.09276695228396326,
+        "gz_agree": 0.7125,
+        "gz_row": 138,
+        "gz_band": [
+          124.4,
+          177.4
+        ],
+        "gz_haz_row": 149.0,
+        "gz_d": 10.0,
+        "gz_band_mu": 137.4056854248047,
+        "gz_step_b": 52.62,
+        "gz_step_a": 52.18,
+        "gz_step_ratio": 0.992,
+        "gz_step_off": 11,
+        "gz_step_dom": 34.57
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "preset_h0.3_d2",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 139.28466796875,
+        "after_dark": 12.21238425925926,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.5308159722222222,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 139.4547882080078,
+        "before_dark": 12.06105324074074,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 0.5380497685185185,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.00723379629629628,
+        "diff_mean": 0.9974220395088196,
+        "diff_frac": 2.9762409979423867,
+        "d_mean": -0.1701202392578125,
+        "d_dark": 0.15133101851851904,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 2.9632956763708194,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 1.0058256494887492,
+        "gz_dE": 1.0761805110391665,
+        "gz_dN": 0.07035486155041723,
+        "gz_agree": 0.7770833333333333,
+        "gz_row": 246,
+        "gz_band": [
+          169.6,
+          312.0
+        ],
+        "gz_haz_row": 248.7,
+        "gz_d": 2.0,
+        "gz_band_mu": 108.0831527709961,
+        "gz_step_b": 124.13,
+        "gz_step_a": 123.79,
+        "gz_step_ratio": 0.997,
+        "gz_step_off": 3,
+        "gz_step_dom": 115.03
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "preset_h0.3_d5",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 158.93492126464844,
+        "after_dark": 4.937210648148148,
+        "after_dark_near": 0.01868730709876543,
+        "after_clip": 0.0,
+        "after_white": 0.5149016203703703,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 159.12918090820312,
+        "before_dark": 4.852189429012346,
+        "before_dark_near": 0.01892843364197531,
+        "before_clip": 0.0,
+        "before_white": 0.5131655092592592,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0017361111111111605,
+        "diff_mean": 1.0366615056991577,
+        "diff_frac": 2.850163966049383,
+        "d_mean": -0.1942596435546875,
+        "d_dark": 0.08502121913580218,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 3.1790996345105356,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 1.484796453346253,
+        "gz_dE": 1.5930186626310947,
+        "gz_dN": 0.10822220928484166,
+        "gz_agree": 0.7489583333333333,
+        "gz_row": 135,
+        "gz_band": [
+          130.6,
+          211.8
+        ],
+        "gz_haz_row": 174.3,
+        "gz_d": 5.0,
+        "gz_band_mu": 131.4832000732422,
+        "gz_step_b": 85.99,
+        "gz_step_a": 85.78,
+        "gz_step_ratio": 0.998,
+        "gz_step_off": 39,
+        "gz_step_dom": 53.85
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "preset_h0.9_d10",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 168.02188110351562,
+        "after_dark": 2.696903935185185,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 1.0338541666666665,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 168.14404296875,
+        "before_dark": 2.60252700617284,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 1.0446325231481481,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.010778356481481621,
+        "diff_mean": 0.8757057189941406,
+        "diff_frac": 2.218653549382716,
+        "d_mean": -0.122161865234375,
+        "d_dark": 0.09437692901234529,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 1.528013381095306
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "preset_h0.9_d2",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 94.1520767211914,
+        "after_dark": 24.864101080246915,
+        "after_dark_near": 32.05512152777778,
+        "after_clip": 0.0,
+        "after_white": 0.3122829861111111,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 94.34498596191406,
+        "before_dark": 24.697096836419753,
+        "before_dark_near": 31.949025848765434,
+        "before_clip": 0.0,
+        "before_white": 0.3174913194444445,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.00520833333333337,
+        "diff_mean": 1.1269350051879883,
+        "diff_frac": 3.59252829218107,
+        "d_mean": -0.19290924072265625,
+        "d_dark": 0.1670042438271615,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 3.951574049259918
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "preset_h0.9_d5",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 156.5906524658203,
+        "after_dark": 5.719087577160494,
+        "after_dark_near": 0.0018084490740740739,
+        "after_clip": 0.0,
+        "after_white": 1.9322916666666665,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 156.8382110595703,
+        "before_dark": 5.60619212962963,
+        "before_dark_near": 0.0020495756172839506,
+        "before_clip": 0.0,
+        "before_white": 1.9395978009259258,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.0073061342592593,
+        "diff_mean": 1.0574532747268677,
+        "diff_frac": 3.140914351851852,
+        "d_mean": -0.24755859375,
+        "d_dark": 0.11289544753086389,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 6.813886524402676
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "preset_h1.8_d10",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 164.0681610107422,
+        "after_dark": 3.6883680555555554,
+        "after_dark_near": 0.42498553240740744,
+        "after_clip": 0.0,
+        "after_white": 2.855107060185185,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 164.18991088867188,
+        "before_dark": 3.6195023148148144,
+        "before_dark_near": 0.42570891203703703,
+        "before_clip": 0.0,
+        "before_white": 2.8273292824074074,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.02777777777777768,
+        "diff_mean": 0.9934507012367249,
+        "diff_frac": 3.1429880401234565,
+        "d_mean": -0.1217498779296875,
+        "d_dark": 0.06886574074074092,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 5.423607805543639
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "preset_h1.8_d2",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 108.97859191894531,
+        "after_dark": 18.163676697530864,
+        "after_dark_near": 31.27097800925926,
+        "after_clip": 0.0,
+        "after_white": 0.006655092592592593,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 109.1406478881836,
+        "before_dark": 17.94159915123457,
+        "before_dark_near": 31.18851273148148,
+        "before_clip": 0.0,
+        "before_white": 0.004340277777777778,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0023148148148148147,
+        "diff_mean": 1.1376008987426758,
+        "diff_frac": 3.175122170781893,
+        "d_mean": -0.16205596923828125,
+        "d_dark": 0.22207754629629406,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 8.835030865304134
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "preset_h1.8_d5",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 142.0817108154297,
+        "after_dark": 7.395978009259259,
+        "after_dark_near": 7.639009452160493,
+        "after_clip": 0.0,
+        "after_white": 3.1421440972222223,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 142.28253173828125,
+        "before_dark": 7.315200617283951,
+        "before_dark_near": 7.622010030864197,
+        "before_clip": 0.0,
+        "before_white": 3.1548755787037037,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.0127314814814814,
+        "diff_mean": 1.100278377532959,
+        "diff_frac": 3.5671778549382713,
+        "d_mean": -0.2008209228515625,
+        "d_dark": 0.08077739197530764,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 8.570716113259067
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "shadow_band",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 156.13719177246094,
+        "after_dark": 4.520688657407407,
+        "after_dark_near": 0.02025462962962963,
+        "after_clip": 0.0,
+        "after_white": 2.2528211805555554,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 156.38510131835938,
+        "before_dark": 4.419367283950618,
+        "before_dark_near": 0.020134066358024692,
+        "before_clip": 0.0,
+        "before_white": 2.2844328703703702,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.03161168981481488,
+        "diff_mean": 0.9857627749443054,
+        "diff_frac": 2.7924704218106995,
+        "d_mean": -0.2479095458984375,
+        "d_dark": 0.10132137345678949,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 2.8397369087990114
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "under_canopy",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "DARK",
+          "msg": "암흑 mean 46.6 · dark 39.8 %  [이월 — 변화 없음, 회귀 아님]"
+        }
+      ],
+      "metrics": {
+        "after_mean": 46.60870361328125,
+        "after_dark": 39.80859375,
+        "after_dark_near": 32.64781057098766,
+        "after_clip": 0.0,
+        "after_white": 1.3290653935185186,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 46.595584869384766,
+        "before_dark": 39.72887731481482,
+        "before_dark_near": 32.49698591820987,
+        "before_clip": 0.0,
+        "before_white": 1.3245081018518519,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.004557291666666741,
+        "diff_mean": 0.8665210008621216,
+        "diff_frac": 1.0719360853909465,
+        "d_mean": 0.013118743896484375,
+        "d_dark": 0.07971643518518334,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 0.4872546133372282
+      }
+    },
+    {
+      "scene": "scene17",
+      "view": "across_river",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 114.3509521484375,
+        "after_dark": 2.2566068672839505,
+        "after_dark_near": 0.9200183256172839,
+        "after_clip": 0.0,
+        "after_white": 0.8591579861111112,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 113.1646499633789,
+        "before_dark": 2.4654224537037037,
+        "before_dark_near": 0.91796875,
+        "before_clip": 0.0,
+        "before_white": 0.8441116898148148,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.015046296296296391,
+        "diff_mean": 7.011336326599121,
+        "diff_frac": 27.50017682613169,
+        "d_mean": 1.1863021850585938,
+        "d_dark": -0.20881558641975317,
+        "newdark": 0.012056327160493827,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.004822530864197531,
+        "blk_shift": 2.7777777777777777,
+        "blk_max": 11.307478469834734
+      }
+    },
+    {
+      "scene": "scene17",
+      "view": "levee_walk",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 126.07759094238281,
+        "after_dark": 0.28525270061728397,
+        "after_dark_near": 0.5637538580246914,
+        "after_clip": 0.0,
+        "after_white": 0.3987991898148148,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 122.97608184814453,
+        "before_dark": 0.2875675154320988,
+        "before_dark_near": 0.5670090663580247,
+        "before_clip": 0.0,
+        "before_white": 0.4016203703703704,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.0028211805555555802,
+        "diff_mean": 3.8296239376068115,
+        "diff_frac": 17.65006108539095,
+        "d_mean": 3.1015090942382812,
+        "d_dark": -0.002314814814814825,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 12.5,
+        "blk_max": 20.03546991434918
+      }
+    },
+    {
+      "scene": "scene17",
+      "view": "pair_compare",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 122.10443115234375,
+        "after_dark": 0.36824845679012347,
+        "after_dark_near": 0.06401909722222222,
+        "after_clip": 0.0,
+        "after_white": 0.8166232638888888,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 117.9066390991211,
+        "before_dark": 0.41290509259259256,
+        "before_dark_near": 0.06486304012345678,
+        "before_clip": 0.0,
+        "before_white": 0.7559317129629629,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.06069155092592593,
+        "diff_mean": 5.9587016105651855,
+        "diff_frac": 25.189589763374485,
+        "d_mean": 4.197792053222656,
+        "d_dark": -0.04465663580246909,
+        "newdark": 0.0012056327160493826,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 10.416666666666668,
+        "blk_max": 21.343122466805397
+      }
+    },
+    {
+      "scene": "scene17",
+      "view": "preset_h0.3_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 148.27134704589844,
+        "after_dark": 1.7916184413580247,
+        "after_dark_near": 0.0333960262345679,
+        "after_clip": 0.0,
+        "after_white": 3.4262152777777777,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene17",
+      "view": "preset_h0.3_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 118.58051300048828,
+        "after_dark": 2.25757137345679,
+        "after_dark_near": 0.0024112654320987653,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene17",
+      "view": "preset_h0.3_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 117.8808364868164,
+        "after_dark": 2.0113329475308643,
+        "after_dark_near": 0.09657118055555555,
+        "after_clip": 0.0,
+        "after_white": 0.4165943287037037,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene17",
+      "view": "preset_h0.9_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 132.0002899169922,
+        "after_dark": 1.9428530092592593,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 4.633391203703704,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene17",
+      "view": "preset_h0.9_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 112.25011444091797,
+        "after_dark": 3.4163290895061724,
+        "after_dark_near": 2.884355709876543,
+        "after_clip": 0.0,
+        "after_white": 1.2141927083333333,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene17",
+      "view": "preset_h0.9_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 117.7459716796875,
+        "after_dark": 1.9286747685185186,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.03790509259259259,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene17",
+      "view": "preset_h1.8_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 118.41339874267578,
+        "after_dark": 1.8668981481481481,
+        "after_dark_near": 0.0060281635802469135,
+        "after_clip": 0.0,
+        "after_white": 1.003399884259259,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene17",
+      "view": "preset_h1.8_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 113.10344696044922,
+        "after_dark": 2.0910976080246915,
+        "after_dark_near": 0.3049045138888889,
+        "after_clip": 0.0,
+        "after_white": 1.3888888888888888,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene17",
+      "view": "preset_h1.8_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 115.22203063964844,
+        "after_dark": 1.847511574074074,
+        "after_dark_near": 0.2787422839506173,
+        "after_clip": 0.0,
+        "after_white": 0.7969473379629629,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene17",
+      "view": "ramp_run",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 117.26250457763672,
+        "after_dark": 0.9058641975308642,
+        "after_dark_near": 1.050708912037037,
+        "after_clip": 0.0,
+        "after_white": 0.5470196759259259,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 116.50926971435547,
+        "before_dark": 0.9007523148148148,
+        "before_dark_near": 1.042992862654321,
+        "before_clip": 0.0,
+        "before_white": 0.5383391203703703,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.00868055555555558,
+        "diff_mean": 3.7799832820892334,
+        "diff_frac": 21.06621334876543,
+        "d_mean": 0.75323486328125,
+        "d_dark": 0.005111882716049454,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 2.7777777777777777,
+        "blk_max": 17.801738522777825
+      }
+    },
+    {
+      "scene": "scene17",
+      "view": "toe_lookup",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 114.4766845703125,
+        "after_dark": 17.093171296296298,
+        "after_dark_near": 16.9775993441358,
+        "after_clip": 0.0,
+        "after_white": 0.10192418981481483,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene18",
+      "view": "color_front",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 128.3343048095703,
+        "after_dark": 8.136332947530864,
+        "after_dark_near": 1.0118875385802468,
+        "after_clip": 0.0,
+        "after_white": 0.15733506944444445,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 135.24871826171875,
+        "before_dark": 7.362654320987655,
+        "before_dark_near": 0.9642650462962963,
+        "before_clip": 0.0,
+        "before_white": 0.37384259259259256,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.2165075231481481,
+        "diff_mean": 8.023821830749512,
+        "diff_frac": 60.55433384773663,
+        "d_mean": -6.9144134521484375,
+        "d_dark": 0.7736786265432087,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 3.4722222222222223,
+        "blk_max": 11.422872284209092
+      }
+    },
+    {
+      "scene": "scene18",
+      "view": "lower_lookback",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 135.6627655029297,
+        "after_dark": 4.806520061728395,
+        "after_dark_near": 0.00012056327160493826,
+        "after_clip": 0.0,
+        "after_white": 0.09136284722222222,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene18",
+      "view": "oblique_down",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 179.75363159179688,
+        "after_dark": 0.05791859567901234,
+        "after_dark_near": 0.14443479938271606,
+        "after_clip": 0.0,
+        "after_white": 3.893373842592593,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 183.29112243652344,
+        "before_dark": 0.04070216049382716,
+        "before_dark_near": 0.10151427469135801,
+        "before_clip": 0.0,
+        "before_white": 5.096498842592593,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -1.2031249999999996,
+        "diff_mean": 4.382511615753174,
+        "diff_frac": 48.90133101851852,
+        "d_mean": -3.5374908447265625,
+        "d_dark": 0.017216435185185182,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 8.201501301364317
+      }
+    },
+    {
+      "scene": "scene18",
+      "view": "preset_h0.3_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 182.89666748046875,
+        "after_dark": 0.0018807870370370371,
+        "after_dark_near": 0.0012056327160493826,
+        "after_clip": 0.0,
+        "after_white": 14.003833912037036,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene18",
+      "view": "preset_h0.3_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 176.2214813232422,
+        "after_dark": 9.645061728395063e-05,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 17.713975694444446,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene18",
+      "view": "preset_h0.3_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 179.9652557373047,
+        "after_dark": 0.00048225308641975306,
+        "after_dark_near": 0.00012056327160493826,
+        "after_clip": 0.0,
+        "after_white": 12.295355902777779,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene18",
+      "view": "preset_h0.9_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 179.1355438232422,
+        "after_dark": 0.0005787037037037037,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 11.628616898148147,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene18",
+      "view": "preset_h0.9_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 171.84072875976562,
+        "after_dark": 0.0,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.2790798611111111,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene18",
+      "view": "preset_h0.9_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 178.3708038330078,
+        "after_dark": 0.002797067901234568,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 12.681423611111112,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene18",
+      "view": "preset_h1.8_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 177.61666870117188,
+        "after_dark": 0.0013503086419753088,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 8.846860532407408,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene18",
+      "view": "preset_h1.8_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 180.6892547607422,
+        "after_dark": 0.0,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.5085358796296297,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene18",
+      "view": "preset_h1.8_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 176.3252716064453,
+        "after_dark": 0.00998263888888889,
+        "after_dark_near": 0.02495659722222222,
+        "after_clip": 0.0,
+        "after_white": 7.543981481481482,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene18",
+      "view": "sea_beauty",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 163.57647705078125,
+        "after_dark": 0.19429976851851852,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 2.023509837962963,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 166.1168975830078,
+        "before_dark": 0.18349729938271606,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 1.2592592592592593,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.7642505787037035,
+        "diff_mean": 3.559216260910034,
+        "diff_frac": 32.11185056584362,
+        "d_mean": -2.5404205322265625,
+        "d_dark": 0.010802469135802462,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 3.4722222222222223,
+        "blk_max": 17.3277122507549
+      }
+    },
+    {
+      "scene": "scene18",
+      "view": "wave_raking",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 176.65757751464844,
+        "after_dark": 0.00028935185185185184,
+        "after_dark_near": 0.00048225308641975306,
+        "after_clip": 0.0,
+        "after_white": 12.803023726851853,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 176.9748077392578,
+        "before_dark": 0.0,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 8.530671296296296,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 4.272352430555557,
+        "diff_mean": 2.9438059329986572,
+        "diff_frac": 18.253761574074073,
+        "d_mean": -0.317230224609375,
+        "d_dark": 0.00028935185185185184,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 6.045069872009236
+      }
+    },
+    {
+      "scene": "scene19",
+      "view": "entry_gate",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 80.38330078125,
+        "after_dark": 17.42230902777778,
+        "after_dark_near": 25.399305555555557,
+        "after_clip": 0.0,
+        "after_white": 11.69285300925926,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 89.15360260009766,
+        "before_dark": 7.8558063271604945,
+        "before_dark_near": 11.195867091049383,
+        "before_clip": 0.0,
+        "before_white": 14.615596064814815,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -2.9227430555555554,
+        "diff_mean": 9.712261199951172,
+        "diff_frac": 60.703141075102884,
+        "d_mean": -8.770301818847656,
+        "d_dark": 9.566502700617285,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 9.343831918889386
+      }
+    },
+    {
+      "scene": "scene19",
+      "view": "lower_lookup",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        },
+        {
+          "sev": "WARN",
+          "code": "DARK",
+          "msg": "암흑 mean 31.8 · dark 58.5 %  [신규]"
+        }
+      ],
+      "metrics": {
+        "after_mean": 31.84005355834961,
+        "after_dark": 58.4669174382716,
+        "after_dark_near": 70.88517554012346,
+        "after_clip": 0.0,
+        "after_white": 0.018663194444444444,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene19",
+      "view": "preset_h0.3_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 139.77906799316406,
+        "after_dark": 3.1849440586419755,
+        "after_dark_near": 0.002893518518518519,
+        "after_clip": 0.0,
+        "after_white": 0.003978587962962963,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene19",
+      "view": "preset_h0.3_d3.5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 140.3052520751953,
+        "after_dark": 2.6208526234567904,
+        "after_dark_near": 0.004219714506172839,
+        "after_clip": 0.0,
+        "after_white": 0.032407407407407406,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene19",
+      "view": "preset_h0.3_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 142.7277069091797,
+        "after_dark": 2.3938078703703702,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.0259693287037037,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene19",
+      "view": "preset_h0.9_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 131.98695373535156,
+        "after_dark": 4.105758101851851,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.05179398148148148,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene19",
+      "view": "preset_h0.9_d3.5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 138.93038940429688,
+        "after_dark": 3.2880979938271606,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.027126736111111112,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene19",
+      "view": "preset_h0.9_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 143.18948364257812,
+        "after_dark": 3.228829089506173,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.014178240740740741,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene19",
+      "view": "preset_h1.8_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 132.1539764404297,
+        "after_dark": 5.445167824074074,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.34172453703703703,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene19",
+      "view": "preset_h1.8_d3.5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 140.860107421875,
+        "after_dark": 4.149305555555555,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.22070312499999997,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene19",
+      "view": "preset_h1.8_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 145.33792114257812,
+        "after_dark": 4.264805169753086,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.14113136574074073,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene19",
+      "view": "radial_nosing",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        },
+        {
+          "sev": "WARN",
+          "code": "DARK",
+          "msg": "암흑 mean 42.0 · dark 32.7 %  [신규]"
+        }
+      ],
+      "metrics": {
+        "after_mean": 42.02645492553711,
+        "after_dark": 32.67018711419753,
+        "after_dark_near": 6.528983410493828,
+        "after_clip": 0.0,
+        "after_white": 5.396050347222222,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene19",
+      "view": "roof_context",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 139.38299560546875,
+        "after_dark": 9.067660108024691,
+        "after_dark_near": 16.606867283950617,
+        "after_clip": 0.0,
+        "after_white": 10.060112847222221,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "scene19",
+      "view": "roof_skyline",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 138.33522033691406,
+        "after_dark": 0.1314139660493827,
+        "after_dark_near": 0.3285349151234568,
+        "after_clip": 0.0,
+        "after_white": 16.070457175925927,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 138.4486541748047,
+        "before_dark": 0.14684606481481483,
+        "before_dark_near": 0.36711516203703703,
+        "before_clip": 0.0,
+        "before_white": 16.65530960648148,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.5848524305555536,
+        "diff_mean": 3.639622449874878,
+        "diff_frac": 35.545765817901234,
+        "d_mean": -0.113433837890625,
+        "d_dark": -0.015432098765432112,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 3.2032216200845482
+      }
+    },
+    {
+      "scene": "scene19",
+      "view": "upper_approach",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 112.41297149658203,
+        "after_dark": 9.353925540123456,
+        "after_dark_near": 0.0033757716049382714,
+        "after_clip": 0.0,
+        "after_white": 0.5472366898148148,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 124.47500610351562,
+        "before_dark": 5.5364101080246915,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 1.1537181712962963,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.6064814814814815,
+        "diff_mean": 14.643506050109863,
+        "diff_frac": 83.78522055041152,
+        "d_mean": -12.062034606933594,
+        "d_dark": 3.817515432098764,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 8.164497211881894
+      }
+    },
+    {
+      "scene": "scene19",
+      "view": "winder_mid",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 69.7064437866211,
+        "after_dark": 31.34572723765432,
+        "after_dark_near": 3.6945408950617287,
+        "after_clip": 0.0,
+        "after_white": 10.668764467592592,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 74.93917083740234,
+        "before_dark": 21.772617669753085,
+        "before_dark_near": 1.515600887345679,
+        "before_clip": 0.0,
+        "before_white": 19.71636284722222,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -9.04759837962963,
+        "diff_mean": 5.313295364379883,
+        "diff_frac": 46.86000192901235,
+        "d_mean": -5.23272705078125,
+        "d_dark": 9.573109567901234,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.6944444444444444,
+        "blk_max": 10.828139384639599
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "crown_graze",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 161.0766143798828,
+        "after_dark": 1.627121913580247,
+        "after_dark_near": 0.0018084490740740739,
+        "after_clip": 0.0,
+        "after_white": 12.533781828703706,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 161.01065063476562,
+        "before_dark": 1.6385513117283952,
+        "before_dark_near": 0.0018084490740740739,
+        "before_clip": 0.0,
+        "before_white": 12.537977430555555,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.004195601851849418,
+        "diff_mean": 0.44897279143333435,
+        "diff_frac": 2.203494727366255,
+        "d_mean": 0.0659637451171875,
+        "d_dark": -0.01142939814814814,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 0.4957330411433958,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 0.5455245405259541,
+        "gz_dE": 0.6109346468360632,
+        "gz_dN": 0.06541010631010918,
+        "gz_agree": 0.6489583333333333,
+        "gz_row": 243,
+        "gz_band": [
+          203.9,
+          322.8
+        ],
+        "gz_haz_row": 270.0,
+        "gz_d": 10.0,
+        "gz_band_mu": 155.88037109375,
+        "gz_step_b": 9.72,
+        "gz_step_a": 9.71,
+        "gz_step_ratio": 0.999,
+        "gz_step_off": 27,
+        "gz_step_dom": 15.89
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "facade_front",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "UNCHANGED",
+          "msg": "이전 라운드와 사실상 동일(평균차 0.19 LSB · 4 LSB 초과 픽셀 0.017 %) — 재렌더·룩 토글이 이 컷에 반영되지 않았을 가능성"
+        }
+      ],
+      "metrics": {
+        "after_mean": 104.32015991210938,
+        "after_dark": 1.1570216049382716,
+        "after_dark_near": 0.3108121141975309,
+        "after_clip": 0.0,
+        "after_white": 1.5214120370370372,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 104.3090591430664,
+        "before_dark": 1.1583719135802468,
+        "before_dark_near": 0.3138261959876543,
+        "before_clip": 0.0,
+        "before_white": 1.521556712962963,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.00014467592592581902,
+        "diff_mean": 0.18511798977851868,
+        "diff_frac": 0.016782407407407406,
+        "d_mean": 0.01110076904296875,
+        "d_dark": -0.001350308641975273,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 0.11986924688361
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "oblique",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 175.53404235839844,
+        "after_dark": 0.17221257716049382,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 26.78667534722222,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 175.2471466064453,
+        "before_dark": 0.16565393518518517,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 26.759765625,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.026909722222221433,
+        "diff_mean": 1.5499123334884644,
+        "diff_frac": 12.262924382716049,
+        "d_mean": 0.286895751953125,
+        "d_dark": 0.006558641975308643,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 2.7151782681885805
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "preset_h0.3_d10",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 142.1010284423828,
+        "after_dark": 0.7644193672839505,
+        "after_dark_near": 0.02290702160493827,
+        "after_clip": 0.0,
+        "after_white": 0.12492766203703705,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 142.10885620117188,
+        "before_dark": 0.7626832561728395,
+        "before_dark_near": 0.022545331790123458,
+        "before_clip": 0.0,
+        "before_white": 0.1273871527777778,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.0024594907407407413,
+        "diff_mean": 0.39354005455970764,
+        "diff_frac": 0.20224086934156377,
+        "d_mean": -0.0078277587890625,
+        "d_dark": 0.0017361111111110494,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 0.10407770288441043,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": -0.042057294988224775,
+        "gz_dE": 0.05144363120598175,
+        "gz_dN": 0.09350092619420652,
+        "gz_agree": 0.5395833333333333,
+        "gz_row": 126,
+        "gz_band": [
+          124.4,
+          177.4
+        ],
+        "gz_haz_row": 149.0,
+        "gz_d": 10.0,
+        "gz_band_mu": 153.59339904785156,
+        "gz_step_b": 55.83,
+        "gz_step_a": 55.84,
+        "gz_step_ratio": 1.0,
+        "gz_step_off": 23,
+        "gz_step_dom": 1085.56
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "preset_h0.3_d2",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 146.2247772216797,
+        "after_dark": 1.6328607253086418,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 2.601200810185185,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 146.1522674560547,
+        "before_dark": 1.631365740740741,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 2.605685763888889,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.00448495370370372,
+        "diff_mean": 0.5109876394271851,
+        "diff_frac": 1.8188818158436215,
+        "d_mean": 0.072509765625,
+        "d_dark": 0.00149498456790087,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 0.5147739361364643,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 0.2879116013101013,
+        "gz_dE": 0.6143557918739145,
+        "gz_dN": 0.32644419056381324,
+        "gz_agree": 0.6854166666666667,
+        "gz_row": 194,
+        "gz_band": [
+          169.6,
+          312.0
+        ],
+        "gz_haz_row": 248.7,
+        "gz_d": 2.0,
+        "gz_band_mu": 176.4626007080078,
+        "gz_step_b": 13.84,
+        "gz_step_a": 13.89,
+        "gz_step_ratio": 1.003,
+        "gz_step_off": 55,
+        "gz_step_dom": 22.6
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "preset_h0.3_d5",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 143.36671447753906,
+        "after_dark": 0.8171778549382716,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.04998553240740741,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 143.3643035888672,
+        "before_dark": 0.8195891203703703,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 0.05056423611111111,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.0005787037037036993,
+        "diff_mean": 0.41086435317993164,
+        "diff_frac": 0.4743923611111111,
+        "d_mean": 0.002410888671875,
+        "d_dark": -0.002411265432098797,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 0.2322933978466608,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 0.5989695360455634,
+        "gz_dE": 0.6826752955854907,
+        "gz_dN": 0.08370575953992729,
+        "gz_agree": 0.6885416666666667,
+        "gz_row": 174,
+        "gz_band": [
+          130.6,
+          211.8
+        ],
+        "gz_haz_row": 174.3,
+        "gz_d": 5.0,
+        "gz_band_mu": 150.36334228515625,
+        "gz_step_b": 71.09,
+        "gz_step_a": 70.41,
+        "gz_step_ratio": 0.99,
+        "gz_step_off": 0,
+        "gz_step_dom": 103.13
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "preset_h0.9_d10",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 165.97251892089844,
+        "after_dark": 1.123119212962963,
+        "after_dark_near": 0.002170138888888889,
+        "after_clip": 0.0,
+        "after_white": 1.9657841435185186,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 165.9250946044922,
+        "before_dark": 1.1273148148148149,
+        "before_dark_near": 0.0024112654320987653,
+        "before_clip": 0.0,
+        "before_white": 1.967013888888889,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.0012297453703704608,
+        "diff_mean": 0.359281450510025,
+        "diff_frac": 1.6719553755144032,
+        "d_mean": 0.04742431640625,
+        "d_dark": -0.00419560185185186,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 0.8488710878971517
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "preset_h0.9_d2",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 161.67591857910156,
+        "after_dark": 1.8460648148148149,
+        "after_dark_near": 0.013020833333333334,
+        "after_clip": 0.0,
+        "after_white": 27.22808159722222,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 161.60107421875,
+        "before_dark": 1.8547935956790125,
+        "before_dark_near": 0.013141396604938273,
+        "before_clip": 0.0,
+        "before_white": 27.22923900462963,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.0011574074074083285,
+        "diff_mean": 0.5117692351341248,
+        "diff_frac": 2.541329089506173,
+        "d_mean": 0.0748443603515625,
+        "d_dark": -0.008728780864197594,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 0.6351876835032044
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "preset_h0.9_d5",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 163.9159698486328,
+        "after_dark": 1.2972125771604939,
+        "after_dark_near": 0.044849537037037035,
+        "after_clip": 0.0,
+        "after_white": 6.276041666666667,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 163.8437042236328,
+        "before_dark": 1.3099922839506173,
+        "before_dark_near": 0.044849537037037035,
+        "before_clip": 0.0,
+        "before_white": 6.265263310185184,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.010778356481482732,
+        "diff_mean": 0.4498429596424103,
+        "diff_frac": 2.320055298353909,
+        "d_mean": 0.072265625,
+        "d_dark": -0.012779706790123413,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 0.5838051386060954
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "preset_h1.8_d10",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 167.69583129882812,
+        "after_dark": 1.26953125,
+        "after_dark_near": 0.009283371913580247,
+        "after_clip": 0.0,
+        "after_white": 6.438223379629629,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 167.59339904785156,
+        "before_dark": 1.2781635802469136,
+        "before_dark_near": 0.009283371913580247,
+        "before_clip": 0.0,
+        "before_white": 6.43627025462963,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0019531249999991118,
+        "diff_mean": 0.4988345503807068,
+        "diff_frac": 3.224520961934156,
+        "d_mean": 0.1024322509765625,
+        "d_dark": -0.008632330246913567,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 0.5115351948730336
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "preset_h1.8_d2",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 165.21234130859375,
+        "after_dark": 1.9465181327160495,
+        "after_dark_near": 0.10573398919753088,
+        "after_clip": 0.0,
+        "after_white": 45.52690972222222,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 165.09324645996094,
+        "before_dark": 1.9498939043209877,
+        "before_dark_near": 0.10597511574074074,
+        "before_clip": 0.0,
+        "before_white": 45.54636863425926,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.01945891203703809,
+        "diff_mean": 0.6289284229278564,
+        "diff_frac": 3.7787422839506175,
+        "d_mean": 0.1190948486328125,
+        "d_dark": -0.0033757716049382935,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 0.9796070659141094
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "preset_h1.8_d5",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 164.21258544921875,
+        "after_dark": 1.6363329475308643,
+        "after_dark_near": 0.005545910493827161,
+        "after_clip": 0.0,
+        "after_white": 20.09845196759259,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 164.1100616455078,
+        "before_dark": 1.6468460648148147,
+        "before_dark_near": 0.005545910493827161,
+        "before_clip": 0.0,
+        "before_white": 20.10474537037037,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.006293402777778567,
+        "diff_mean": 0.5708298087120056,
+        "diff_frac": 3.471289866255144,
+        "d_mean": 0.1025238037109375,
+        "d_dark": -0.010513117283950324,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 0.5427964086290302
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "railing_line",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 185.63304138183594,
+        "after_dark": 0.998312114197531,
+        "after_dark_near": 0.042799961419753084,
+        "after_clip": 0.0,
+        "after_white": 39.2748119212963,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 185.51637268066406,
+        "before_dark": 1.0133584104938271,
+        "before_dark_near": 0.04243827160493827,
+        "before_clip": 0.0,
+        "before_white": 39.26837384259259,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.006438078703709493,
+        "diff_mean": 0.6223479509353638,
+        "diff_frac": 3.504099151234568,
+        "d_mean": 0.116668701171875,
+        "d_dark": -0.015046296296296169,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 0.5628955729416418
+      }
+    },
+    {
+      "scene": "sceneC2",
+      "view": "approach_walk",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 97.61583709716797,
+        "after_dark": 7.287278163580247,
+        "after_dark_near": 11.216121720679013,
+        "after_clip": 0.0,
+        "after_white": 0.07472511574074074,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 99.9585189819336,
+        "before_dark": 6.975501543209877,
+        "before_dark_near": 10.851538387345679,
+        "before_clip": 0.0,
+        "before_white": 0.09027777777777778,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.015552662037037035,
+        "diff_mean": 9.9530029296875,
+        "diff_frac": 36.09286586934156,
+        "d_mean": -2.342681884765625,
+        "d_dark": 0.31177662037037024,
+        "newdark": 0.08198302469135801,
+        "newdark_near": 0.14068486590038315,
+        "newdark_blob": 0.004822530864197531,
+        "blk_shift": 2.7777777777777777,
+        "blk_max": 19.133981405341245
+      }
+    },
+    {
+      "scene": "sceneC2",
+      "view": "beauty_side",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 85.02935028076172,
+        "after_dark": 4.398148148148148,
+        "after_dark_near": 3.0041956018518516,
+        "after_clip": 0.0,
+        "after_white": 0.04311342592592592,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 89.45365905761719,
+        "before_dark": 4.081356095679013,
+        "before_dark_near": 2.736665702160494,
+        "before_clip": 0.0,
+        "before_white": 0.05092592592592592,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.0078125,
+        "diff_mean": 12.488264083862305,
+        "diff_frac": 59.11262217078189,
+        "d_mean": -4.424308776855469,
+        "d_dark": 0.3167920524691352,
+        "newdark": 0.04943094135802469,
+        "newdark_near": 0.10775862068965517,
+        "newdark_blob": 0.004822530864197531,
+        "blk_shift": 2.083333333333333,
+        "blk_max": 28.0600142793959
+      }
+    },
+    {
+      "scene": "sceneC2",
+      "view": "buried_edge",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 101.12120056152344,
+        "after_dark": 15.008294753086421,
+        "after_dark_near": 14.920548804012345,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 99.92898559570312,
+        "before_dark": 14.783371913580249,
+        "before_dark_near": 14.795765817901236,
+        "before_clip": 0.0,
+        "before_white": 0.0,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0,
+        "diff_mean": 10.452622413635254,
+        "diff_frac": 26.415943287037035,
+        "d_mean": 1.1922149658203125,
+        "d_dark": 0.22492283950617242,
+        "newdark": 0.2170138888888889,
+        "newdark_near": 0.21551724137931033,
+        "newdark_blob": 0.024112654320987654,
+        "blk_shift": 13.194444444444445,
+        "blk_max": 41.55089750821084
+      }
+    },
+    {
+      "scene": "sceneC2",
+      "view": "preset_h0.3_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 128.32215881347656,
+        "after_dark": 9.433256172839506,
+        "after_dark_near": 12.522304205246915,
+        "after_clip": 0.0,
+        "after_white": 7.233796296296296e-05,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC2",
+      "view": "preset_h0.3_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 110.64495086669922,
+        "after_dark": 13.01027199074074,
+        "after_dark_near": 15.13647762345679,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC2",
+      "view": "preset_h0.3_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 120.13706970214844,
+        "after_dark": 13.91652199074074,
+        "after_dark_near": 18.17503375771605,
+        "after_clip": 0.0,
+        "after_white": 0.00014467592592592592,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC2",
+      "view": "preset_h0.9_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 131.05580139160156,
+        "after_dark": 5.844762731481482,
+        "after_dark_near": 7.858796296296296,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC2",
+      "view": "preset_h0.9_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 122.58184814453125,
+        "after_dark": 5.01244212962963,
+        "after_dark_near": 8.11475212191358,
+        "after_clip": 0.0,
+        "after_white": 0.1673900462962963,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC2",
+      "view": "preset_h0.9_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 115.56929016113281,
+        "after_dark": 8.08666087962963,
+        "after_dark_near": 12.999855324074074,
+        "after_clip": 0.0,
+        "after_white": 0.03819444444444445,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC2",
+      "view": "preset_h1.8_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 126.68656921386719,
+        "after_dark": 4.13671875,
+        "after_dark_near": 7.105034722222222,
+        "after_clip": 0.0,
+        "after_white": 0.5295862268518519,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC2",
+      "view": "preset_h1.8_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 129.17739868164062,
+        "after_dark": 3.240692515432099,
+        "after_dark_near": 3.7872540509259256,
+        "after_clip": 0.0,
+        "after_white": 0.4176070601851852,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC2",
+      "view": "preset_h1.8_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 122.96163940429688,
+        "after_dark": 4.580198688271605,
+        "after_dark_near": 8.400487075617285,
+        "after_clip": 0.0,
+        "after_white": 0.2211371527777778,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC2",
+      "view": "rail_cue",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 80.07000732421875,
+        "after_dark": 13.364728009259258,
+        "after_dark_near": 21.213348765432098,
+        "after_clip": 0.0,
+        "after_white": 0.0008680555555555555,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 83.65584564208984,
+        "before_dark": 13.061728395061728,
+        "before_dark_near": 20.84201388888889,
+        "before_clip": 0.0,
+        "before_white": 0.002170138888888889,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.0013020833333333335,
+        "diff_mean": 10.517313957214355,
+        "diff_frac": 41.30742026748971,
+        "d_mean": -3.5858383178710938,
+        "d_dark": 0.30299961419752997,
+        "newdark": 0.17119984567901234,
+        "newdark_near": 0.4250478927203065,
+        "newdark_blob": 0.014467592592592593,
+        "blk_shift": 8.333333333333332,
+        "blk_max": 29.00826228186341
+      }
+    },
+    {
+      "scene": "sceneC4",
+      "view": "approach",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 24 % (최대 편차 28/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 109.32295227050781,
+        "after_dark": 0.4253472222222222,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 116.28807067871094,
+        "before_dark": 0.34336419753086417,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 0.0627170138888889,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.0627170138888889,
+        "diff_mean": 9.770133018493652,
+        "diff_frac": 46.8865579989712,
+        "d_mean": -6.965118408203125,
+        "d_dark": 0.08198302469135804,
+        "newdark": 0.0024112654320987653,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 23.61111111111111,
+        "blk_max": 27.89184631672316
+      }
+    },
+    {
+      "scene": "sceneC4",
+      "view": "film_closeup",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 109.67284393310547,
+        "after_dark": 0.20100308641975306,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.00036168981481481485,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 115.33036804199219,
+        "before_dark": 0.15755208333333331,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 0.00043402777777777775,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -7.23379629629629e-05,
+        "diff_mean": 7.147428512573242,
+        "diff_frac": 43.35567772633745,
+        "d_mean": -5.657524108886719,
+        "d_dark": 0.04345100308641975,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 4.166666666666666,
+        "blk_max": 19.997239929698807
+      }
+    },
+    {
+      "scene": "sceneC4",
+      "view": "grazing_mirror",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 122.0552978515625,
+        "after_dark": 1.663966049382716,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 127.30052947998047,
+        "before_dark": 1.4205246913580247,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 1.2476851851851851,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -1.2476851851851851,
+        "diff_mean": 8.014068603515625,
+        "diff_frac": 39.672903806584365,
+        "d_mean": -5.245231628417969,
+        "d_dark": 0.24344135802469125,
+        "newdark": 0.01326195987654321,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 4.861111111111112,
+        "blk_max": 33.022676583159864,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": -0.16087768158150695,
+        "gz_dE": 7.898864400779221,
+        "gz_dN": 8.059742082360728,
+        "gz_agree": 0.6885416666666667,
+        "gz_row": 248,
+        "gz_band": [
+          189.0,
+          334.3
+        ],
+        "gz_haz_row": 270.0,
+        "gz_d": 7.0,
+        "gz_band_mu": 130.75093548636826,
+        "gz_step_b": 4.36,
+        "gz_step_a": 6.28,
+        "gz_step_ratio": 1.441,
+        "gz_step_off": 22,
+        "gz_step_dom": 0.79
+      }
+    },
+    {
+      "scene": "sceneC4",
+      "view": "lower_lookback",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 99.24957275390625,
+        "after_dark": 4.055025077160494,
+        "after_dark_near": 8.648847415123456,
+        "after_clip": 0.0,
+        "after_white": 6.188657407407407,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 106.11597442626953,
+        "before_dark": 2.5705536265432096,
+        "before_dark_near": 5.30297550154321,
+        "before_clip": 0.0,
+        "before_white": 6.544270833333334,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.3556134259259265,
+        "diff_mean": 8.843706130981445,
+        "diff_frac": 33.13930684156379,
+        "d_mean": -6.866401672363281,
+        "d_dark": 1.484471450617284,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 16.666666666666664,
+        "blk_max": 24.80481237114404
+      }
+    },
+    {
+      "scene": "sceneC4",
+      "view": "preset_h0.3_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 120.62217712402344,
+        "after_dark": 1.1654128086419753,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC4",
+      "view": "preset_h0.3_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 135.0329132080078,
+        "after_dark": 1.1535976080246912,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC4",
+      "view": "preset_h0.3_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 92.79706573486328,
+        "after_dark": 1.3701774691358024,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC4",
+      "view": "preset_h0.9_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 117.60289001464844,
+        "after_dark": 1.1741898148148149,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC4",
+      "view": "preset_h0.9_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 98.8802719116211,
+        "after_dark": 1.8584104938271604,
+        "after_dark_near": 0.3468605324074074,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC4",
+      "view": "preset_h0.9_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 102.54113006591797,
+        "after_dark": 1.4299768518518519,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC4",
+      "view": "preset_h1.8_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 110.85987091064453,
+        "after_dark": 1.2856385030864197,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC4",
+      "view": "preset_h1.8_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 98.79121398925781,
+        "after_dark": 1.9054783950617284,
+        "after_dark_near": 0.6882957175925926,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC4",
+      "view": "preset_h1.8_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 112.82233428955078,
+        "after_dark": 1.4658564814814816,
+        "after_dark_near": 0.14732831790123457,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD1",
+      "view": "bay_corner",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 123.1261215209961,
+        "after_dark": 14.027633101851853,
+        "after_dark_near": 3.400848765432099,
+        "after_clip": 0.0,
+        "after_white": 0.7822627314814815,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 122.58154296875,
+        "before_dark": 14.492139274691358,
+        "before_dark_near": 3.4788532021604937,
+        "before_clip": 0.0,
+        "before_white": 0.5958478009259259,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.18641493055555558,
+        "diff_mean": 2.4839518070220947,
+        "diff_frac": 14.755803112139917,
+        "d_mean": 0.5445785522460938,
+        "d_dark": -0.46450617283950457,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 4.3082519967295525
+      }
+    },
+    {
+      "scene": "sceneD1",
+      "view": "beauty_overview",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 156.20094299316406,
+        "after_dark": 0.28978587962962965,
+        "after_dark_near": 0.002893518518518519,
+        "after_clip": 0.0,
+        "after_white": 0.44111689814814814,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 156.44741821289062,
+        "before_dark": 0.2730034722222222,
+        "before_dark_near": 0.0022907021604938274,
+        "before_clip": 0.0,
+        "before_white": 0.44212962962962965,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.0010127314814815103,
+        "diff_mean": 2.0475621223449707,
+        "diff_frac": 10.644884902263374,
+        "d_mean": -0.2464752197265625,
+        "d_dark": 0.01678240740740744,
+        "newdark": 0.004822530864197531,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.6944444444444444,
+        "blk_max": 16.97557246992585
+      }
+    },
+    {
+      "scene": "sceneD1",
+      "view": "edge_approach",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 162.6368865966797,
+        "after_dark": 0.2369309413580247,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.36140046296296297,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 162.70973205566406,
+        "before_dark": 0.2408371913580247,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 0.3543836805555556,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.007016782407407385,
+        "diff_mean": 2.4052987098693848,
+        "diff_frac": 15.578832304526749,
+        "d_mean": -0.072845458984375,
+        "d_dark": -0.00390625,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 5.699821894469494
+      }
+    },
+    {
+      "scene": "sceneD1",
+      "view": "edge_graze",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 164.47515869140625,
+        "after_dark": 0.1374903549382716,
+        "after_dark_near": 0.23497781635802467,
+        "after_clip": 0.0,
+        "after_white": 6.48046875,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD1",
+      "view": "edge_walk",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 143.37118530273438,
+        "after_dark": 1.531346450617284,
+        "after_dark_near": 1.5576774691358024,
+        "after_clip": 0.0,
+        "after_white": 0.5086805555555556,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 143.5276336669922,
+        "before_dark": 1.5495756172839505,
+        "before_dark_near": 1.5788966049382716,
+        "before_clip": 0.0,
+        "before_white": 0.509982638888889,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.0013020833333333703,
+        "diff_mean": 1.2072877883911133,
+        "diff_frac": 6.1354648919753085,
+        "d_mean": -0.1564483642578125,
+        "d_dark": -0.01822916666666652,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 7.248638052248225
+      }
+    },
+    {
+      "scene": "sceneD1",
+      "view": "preset_h0.3_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 148.0447235107422,
+        "after_dark": 0.48625578703703703,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD1",
+      "view": "preset_h0.3_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 159.21888732910156,
+        "after_dark": 0.5893132716049383,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.08883101851851852,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD1",
+      "view": "preset_h0.3_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 152.05267333984375,
+        "after_dark": 0.02416087962962963,
+        "after_dark_near": 0.00012056327160493826,
+        "after_clip": 0.0,
+        "after_white": 0.11284722222222221,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD1",
+      "view": "preset_h0.9_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 154.07876586914062,
+        "after_dark": 0.49580439814814814,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.14988425925925927,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD1",
+      "view": "preset_h0.9_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 177.23736572265625,
+        "after_dark": 0.5041956018518519,
+        "after_dark_near": 0.9980227623456791,
+        "after_clip": 0.0,
+        "after_white": 3.3806423611111107,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD1",
+      "view": "preset_h0.9_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 162.57720947265625,
+        "after_dark": 0.1381172839506173,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.9147858796296297,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD1",
+      "view": "preset_h1.8_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 161.7491455078125,
+        "after_dark": 0.5206886574074074,
+        "after_dark_near": 1.1461950231481481,
+        "after_clip": 0.0,
+        "after_white": 1.7137586805555556,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD1",
+      "view": "preset_h1.8_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 179.52792358398438,
+        "after_dark": 0.12442129629629631,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 5.517216435185185,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD1",
+      "view": "preset_h1.8_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 172.66818237304688,
+        "after_dark": 0.2160011574074074,
+        "after_dark_near": 0.3657889660493827,
+        "after_clip": 0.0,
+        "after_white": 3.631438078703704,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD2",
+      "view": "approach",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 6 % (최대 편차 85/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 155.38653564453125,
+        "after_dark": 0.4907407407407407,
+        "after_dark_near": 0.0015673225308641976,
+        "after_clip": 0.0,
+        "after_white": 0.3168402777777778,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 155.11541748046875,
+        "before_dark": 0.8503568672839505,
+        "before_dark_near": 0.00048225308641975306,
+        "before_clip": 0.0,
+        "before_white": 1.4887152777777777,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -1.171875,
+        "diff_mean": 6.431321144104004,
+        "diff_frac": 27.36750900205761,
+        "d_mean": 0.2711181640625,
+        "d_dark": -0.35961612654320985,
+        "newdark": 0.01326195987654321,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 6.25,
+        "blk_max": 85.26818129594852
+      }
+    },
+    {
+      "scene": "sceneD2",
+      "view": "beauty_overview",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 143.00616455078125,
+        "after_dark": 1.1219618055555556,
+        "after_dark_near": 0.0007233796296296297,
+        "after_clip": 0.0,
+        "after_white": 0.07899305555555555,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 142.33514404296875,
+        "before_dark": 1.1486786265432098,
+        "before_dark_near": 0.00012056327160493826,
+        "before_clip": 0.0,
+        "before_white": 0.38418692129629634,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.3051938657407408,
+        "diff_mean": 3.5615322589874268,
+        "diff_frac": 25.55886702674897,
+        "d_mean": 0.6710205078125,
+        "d_dark": -0.026716820987654266,
+        "newdark": 0.0036168981481481477,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 1.3888888888888888,
+        "blk_max": 14.872889497402042
+      }
+    },
+    {
+      "scene": "sceneD2",
+      "view": "brink",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 105.4939193725586,
+        "after_dark": 24.94039351851852,
+        "after_dark_near": 0.9895833333333333,
+        "after_clip": 0.0,
+        "after_white": 0.9449508101851852,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 105.63135528564453,
+        "before_dark": 24.8975212191358,
+        "before_dark_near": 0.6413966049382716,
+        "before_clip": 0.0,
+        "before_white": 0.8629195601851852,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.08203125,
+        "diff_mean": 4.136016845703125,
+        "diff_frac": 22.281828703703706,
+        "d_mean": -0.1374359130859375,
+        "d_dark": 0.04287229938271864,
+        "newdark": 0.20616319444444445,
+        "newdark_near": 0.3681752873563218,
+        "newdark_blob": 0.038580246913580245,
+        "blk_shift": 0.6944444444444444,
+        "blk_max": 20.046427410176264
+      }
+    },
+    {
+      "scene": "sceneD2",
+      "view": "graze",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 148.55068969726562,
+        "after_dark": 0.03915895061728395,
+        "after_dark_near": 0.00048225308641975306,
+        "after_clip": 0.0,
+        "after_white": 0.49406828703703703,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 146.55030822753906,
+        "before_dark": 0.18725887345679013,
+        "before_dark_near": 0.00048225308641975306,
+        "before_clip": 0.0,
+        "before_white": 0.4254195601851852,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.06864872685185186,
+        "diff_mean": 4.326796054840088,
+        "diff_frac": 27.743537808641978,
+        "d_mean": 2.0003814697265625,
+        "d_dark": -0.14809992283950618,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 2.7777777777777777,
+        "blk_max": 51.14633972399099,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 1.979511023287019,
+        "gz_dE": 7.313415616759411,
+        "gz_dN": 5.333904593472392,
+        "gz_agree": 0.6364583333333333,
+        "gz_row": 265,
+        "gz_band": [
+          250.1,
+          286.1
+        ],
+        "gz_haz_row": 270.0,
+        "gz_d": 8.505292469985967,
+        "gz_band_mu": 133.2269744873047,
+        "gz_step_b": 5.72,
+        "gz_step_a": 5.66,
+        "gz_step_ratio": 0.99,
+        "gz_step_off": 5,
+        "gz_step_dom": 0.77
+      }
+    },
+    {
+      "scene": "sceneD2",
+      "view": "preset_h0.3_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 150.3227996826172,
+        "after_dark": 0.4467110339506173,
+        "after_dark_near": 0.00012056327160493826,
+        "after_clip": 0.0,
+        "after_white": 0.015986689814814815,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD2",
+      "view": "preset_h0.3_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 152.15200805664062,
+        "after_dark": 1.1492091049382716,
+        "after_dark_near": 0.0014467592592592594,
+        "after_clip": 0.0,
+        "after_white": 0.7215711805555556,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD2",
+      "view": "preset_h0.3_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 151.97604370117188,
+        "after_dark": 0.07021604938271606,
+        "after_dark_near": 0.0007233796296296297,
+        "after_clip": 0.0,
+        "after_white": 0.010561342592592593,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD2",
+      "view": "preset_h0.9_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 146.3432159423828,
+        "after_dark": 0.6082175925925926,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.3021556712962963,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD2",
+      "view": "preset_h0.9_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 147.2127685546875,
+        "after_dark": 6.732590663580247,
+        "after_dark_near": 16.627604166666668,
+        "after_clip": 0.0,
+        "after_white": 1.4711371527777777,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD2",
+      "view": "preset_h0.9_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 159.3917999267578,
+        "after_dark": 0.2645158179012346,
+        "after_dark_near": 0.002652391975308642,
+        "after_clip": 0.0,
+        "after_white": 0.46614583333333337,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD2",
+      "view": "preset_h1.8_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 146.29812622070312,
+        "after_dark": 0.8162615740740741,
+        "after_dark_near": 1.3147424768518519,
+        "after_clip": 0.0,
+        "after_white": 1.3616174768518519,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD2",
+      "view": "preset_h1.8_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 166.2372283935547,
+        "after_dark": 0.33781828703703703,
+        "after_dark_near": 0.8334538966049384,
+        "after_clip": 0.0,
+        "after_white": 1.4339554398148149,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD2",
+      "view": "preset_h1.8_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 155.58665466308594,
+        "after_dark": 1.1684510030864197,
+        "after_dark_near": 2.4028260030864197,
+        "after_clip": 0.0,
+        "after_white": 0.92578125,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneN1",
+      "view": "approach",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 154.22866821289062,
+        "after_dark": 2.2864583333333335,
+        "after_dark_near": 0.11863425925925926,
+        "after_clip": 0.0,
+        "after_white": 35.82241030092593,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 163.05364990234375,
+        "before_dark": 1.3201195987654322,
+        "before_dark_near": 0.08487654320987655,
+        "before_clip": 0.0,
+        "before_white": 61.426576967592595,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -25.604166666666664,
+        "diff_mean": 10.238885879516602,
+        "diff_frac": 69.49389146090536,
+        "d_mean": -8.824981689453125,
+        "d_dark": 0.9663387345679013,
+        "newdark": 0.0072337962962962955,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.004822530864197531,
+        "blk_shift": 8.333333333333332,
+        "blk_max": 35.457869346686806
+      }
+    },
+    {
+      "scene": "sceneN1",
+      "view": "band_edge_close",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 95.32688903808594,
+        "after_dark": 2.411699459876543,
+        "after_dark_near": 3.5257523148148144,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 109.66011047363281,
+        "before_dark": 2.328028549382716,
+        "before_dark_near": 3.373842592592593,
+        "before_clip": 0.0,
+        "before_white": 0.0,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0,
+        "diff_mean": 14.38297176361084,
+        "diff_frac": 97.2770865483539,
+        "d_mean": -14.333221435546875,
+        "d_dark": 0.08367091049382713,
+        "newdark": 0.0012056327160493826,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 9.830616609879058
+      }
+    },
+    {
+      "scene": "sceneN1",
+      "view": "band_grazing",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 148.37908935546875,
+        "after_dark": 2.7194251543209877,
+        "after_dark_near": 0.47803337191358025,
+        "after_clip": 0.0,
+        "after_white": 23.96903935185185,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 156.8024444580078,
+        "before_dark": 1.7728105709876545,
+        "before_dark_near": 0.1247829861111111,
+        "before_clip": 0.0,
+        "before_white": 49.10054976851852,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -25.131510416666668,
+        "diff_mean": 9.248188972473145,
+        "diff_frac": 66.38864776234567,
+        "d_mean": -8.423355102539062,
+        "d_dark": 0.9466145833333333,
+        "newdark": 0.01326195987654321,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.004822530864197531,
+        "blk_shift": 4.166666666666666,
+        "blk_max": 26.40124060318533,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": -3.239427298226535,
+        "gz_dE": 3.5533010045033704,
+        "gz_dN": 6.7927283027299055,
+        "gz_agree": 0.665625,
+        "gz_row": 266,
+        "gz_band": [
+          259.8,
+          278.3
+        ],
+        "gz_haz_row": 270.0,
+        "gz_d": 10.0,
+        "gz_band_mu": 194.67165219858722,
+        "gz_step_b": 4.85,
+        "gz_step_a": 6.58,
+        "gz_step_ratio": 1.357,
+        "gz_step_off": 4,
+        "gz_step_dom": 1.85
+      }
+    },
+    {
+      "scene": "sceneN1",
+      "view": "beauty_oblique",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 150.2811737060547,
+        "after_dark": 2.728202160493827,
+        "after_dark_near": 0.3415557484567901,
+        "after_clip": 0.0,
+        "after_white": 38.91145833333333,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 161.50732421875,
+        "before_dark": 1.3646315586419755,
+        "before_dark_near": 0.28911072530864196,
+        "before_clip": 0.0,
+        "before_white": 66.51576967592592,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -27.604311342592595,
+        "diff_mean": 12.169486045837402,
+        "diff_frac": 78.58154899691357,
+        "d_mean": -11.226150512695312,
+        "d_dark": 1.3635706018518516,
+        "newdark": 0.03737461419753086,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.03375771604938271,
+        "blk_shift": 18.055555555555554,
+        "blk_max": 43.08251720393733
+      }
+    },
+    {
+      "scene": "sceneN1",
+      "view": "preset_h0.3_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 179.3018341064453,
+        "after_dark": 1.339891975308642,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 40.747757523148145,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneN1",
+      "view": "preset_h0.3_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 162.4437255859375,
+        "after_dark": 2.3017939814814814,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 38.15082465277778,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneN1",
+      "view": "preset_h0.3_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 173.37161254882812,
+        "after_dark": 1.987847222222222,
+        "after_dark_near": 0.00036168981481481485,
+        "after_clip": 0.0,
+        "after_white": 38.66485821759259,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneN1",
+      "view": "preset_h0.9_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 174.11268615722656,
+        "after_dark": 1.4586226851851851,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 41.81698495370371,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneN1",
+      "view": "preset_h0.9_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 118.5593032836914,
+        "after_dark": 3.4885706018518516,
+        "after_dark_near": 1.8675250771604937,
+        "after_clip": 0.0,
+        "after_white": 8.853804976851851,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneN1",
+      "view": "preset_h0.9_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 160.25393676757812,
+        "after_dark": 2.6026234567901234,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 39.196614583333336,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneN1",
+      "view": "preset_h1.8_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 164.43276977539062,
+        "after_dark": 1.724440586419753,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 41.6693431712963,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneN1",
+      "view": "preset_h1.8_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 130.55007934570312,
+        "after_dark": 3.517939814814815,
+        "after_dark_near": 2.7396797839506175,
+        "after_clip": 0.0,
+        "after_white": 10.79246238425926,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneN1",
+      "view": "preset_h1.8_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 142.87615966796875,
+        "after_dark": 3.147424768518518,
+        "after_dark_near": 1.2873746141975309,
+        "after_clip": 0.0,
+        "after_white": 25.88917824074074,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    }
+  ]
+}

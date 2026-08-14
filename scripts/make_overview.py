@@ -5,7 +5,8 @@ import os, glob
 from PIL import Image, ImageDraw, ImageFont
 
 BASE = "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check"
-OUT = "/home/vislab/Desktop/work_sy/Practice_NegObs/Docs/audit_v4/scene_overview_v4.png"
+# v4 세대 시트는 Docs/archive/audit_v4/ 로 이동됨(08-05 1차 아카이브) — 재실행 산출물도 같은 곳에.
+OUT = "/home/vislab/Desktop/work_sy/Practice_NegObs/Docs/archive/audit_v4/scene_overview_v4.png"
 
 NAMES = {
     1: "캠퍼스 계단 (T1)", 2: "지하도 (T3)", 3: "하천 제방 (T5)",

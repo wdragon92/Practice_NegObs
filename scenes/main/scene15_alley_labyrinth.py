@@ -93,12 +93,51 @@ Goal     : assemble 25 steps (25° bend after 12 steps + a 1.5 m landing) + 12 p
       3.60 m · 대지 석축까지 쳐도 2.77 m), 하부동 회전군 로컬 y −4.20(3.30 m ·
       석축 2.47 m). 기존 12동 + backdrop 4동의 파사드 y 는
       한 값도 건드리지 않았고, 재질 슬롯도 뒤에 덧붙여 기존 16동 틴트가 바이트 동일하다.
+      (GT-121 정정: 슬롯 순서·지터 시드는 여전히 불변이지만, 틴트 **값**은 GT-121 이
+       팔레트 레벨을 ×1.50 이동시키면서 18 슬롯 전량 같이 움직였다 — 선언된 변경.)
       낙차·계단 상면 z·회랑 폭 전부 불변 → 이 라운드의 GT 결과는 전량 신설 매스 귀속.
     · **K7 보완** — 평지붕 주택 3동에 옥상 난간(살대, h 1.00~1.10 · 파라펫 1.20 은
       2005-07-18 이전 스톡에 연대 불일치)과 물탱크 2기. v5.1 이 지운 것은 물탱크라는
       사물이 아니라 12동 복제였으므로, 여기서는 서로 다른 치수 2기·지붕 3장뿐이고
       모든 부재가 파사드 평면보다 실내쪽(지붕 오버행 0.14 보다도 안쪽)에 선다.
   좌표 게이트: NEGOBS_SELFCHECK=1 (섹션 8·9 가 배후 이격과 골목 침범 0 을 재유도).
+
+[GT-121 · 골목 그늘 광 예산 — 알베도만, 조명은 손대지 않는다]
+  감사 실측(`260813_w4_s15villa`): **pt_noon_narrow_up 41.85 % · pt_noon_bend_landing
+  46.99 %** 픽셀이 표시값 0.05 미만. 정오에도 그늘진 골목 벽은 하늘광 + 맞은편 벽
+  바운스를 받아 0.2~0.3 을 유지해야 하는데, 이 씬에서는 회벽 결·창 프레임·단 코·
+  옥상 난간 실루엣이 **전부 같이 죽는다**. 이 씬의 연구 대상인 계단식 낙차가 정확히
+  그 그늘 안에 산다 — 미학이 아니라 타당성 문제다(GT-121 = GT-116/D4 방법론의 확장).
+    · **근인은 선언이 아니라 실효값이었다.** 파스텔 팔레트는 (0.78, 0.65, 0.60)…
+      처럼 0.6~0.8 로 적혀 있지만 그 값은 **곱수(tint)** 이고, 곱해지는
+      `plaster_diff.jpg` 의 선형 평균이 (0.40665, 0.36564, 0.35002) — 휘도 **0.3732**
+      다. 화면에 도달하는 실효 알베도는 0.245~0.284 `[measured, _texture_mean]`,
+      즉 한국 골목의 회벽/페인트 마감 대역(백색 회칠·크림·연회색 = 0.35~0.55)보다
+      **한참 아래**. D4 의 "백색 타일 벽인데 실효 0.21" 과 같은 결함이다.
+    · **v5.1 의 상한선은 잘못된 좌표계에 적혀 있었다.** `tint_jitter(cap=0.80)` 은
+      *적힌 값*의 상한이고, 텍스처 평균 0.40665 를 곱하면 실효 상한은 사실상
+      **0.325** 였다 — 순백(>0.8)을 막으라는 관례가 벽을 실물 마감 대역 **아래로**
+      묶고 있었던 셈. 이번 라운드는 관례를 폐기하지 않고 **의미가 성립하는 좌표계
+      (실효 알베도)로 재진술**한다: 실효 최대 채널 ≤ 0.80 → 틴트 상한
+      0.80 / 0.40665 = **1.96**.
+    · **바운스 예산 = 바닥.** 골목 바닥은 W3 L15 가 "휘도 불변, 색상만 이동"으로
+      고쳐 둔 탓에 실효 **0.1153** 에 그대로 묶여 있었다(그 라운드의 목표가 황갈색
+      제거였으니 옳은 조치였다). 그늘 골목의 아래쪽 벽 밴드를 밝히는 것은 바닥
+      반사뿐이므로 노후 시멘트 포장 대역 **0.30** 으로 올린다. W3 L15 의 "Y 불변"
+      성질은 여기서 **의도적으로 파기**되고, 그 사실을 셀프체크가 전후 Y 로 찍는다.
+    · **옹벽**(상부 골목 회랑의 벽)은 실효 **0.1086** — 어떤 실물 시멘트/석축 벽보다
+      어둡다. 노후 콘크리트 대역 **0.26** 으로 복귀. v5 판정이 요구한 "파사드와
+      값·색상·텍스처 스케일 분리"는 유지된다(0.26 vs 0.38~0.43 · 청회색 vs 파스텔 ·
+      scale 3.5 vs 2.0).
+  **손대지 않은 것**: 태양·돔 파라미터(`light`, `SUN_AZ_OFFSET` — 씬 공통 광학),
+  기하 전량, 낙차 레지스트리, 계단 재질 `stair_color`(B-15-1 판정값 0.20), 지붕 녹색
+  우레탄(별건), 걸레받이 유성페인트 0.108(어두운 것이 실물 — 백색 회칠이 아니다),
+  창유리 0.059, 가스 입상관·계량기, 카메라. 신규 요소 0.
+  팔레트는 **레벨만** ×1.50 이동한다 — 5 스와치의 채널비도, 스와치 사이의 편차
+  구조도, 인스턴스 ±5 % 지터의 시드/슬롯 순서도 그대로다(균일화 금지).
+  주의 — GT-111 이 적어 둔 "기존 16동 틴트 바이트 동일"은 그 라운드의 귀속 조건이었고,
+  이번 라운드는 **선언적으로** 18 슬롯 전량의 틴트를 같은 스칼라로 이동시킨다.
+  검증: NEGOBS_SELFCHECK=1 → 섹션 10 이 전/후 실효 알베도 표를 인쇄.
 
 Run (GUI look check — default):
     unset PYTHONPATH VIRTUAL_ENV
@@ -482,10 +521,38 @@ PARAMS = dict(
         # [v5.1 realism] global convention "no large pure-white (>0.8) areas" - the facades are
         #   the widest surfaces in this scene, so 0.90~0.95 channels blew out to white plates in noon light.
         #   Hue is kept and everything is dimmed to a max channel <=0.80 (about x0.86).
-        pastel=[(0.78, 0.65, 0.60), (0.65, 0.73, 0.78), (0.80, 0.76, 0.60),
-                (0.69, 0.77, 0.65), (0.77, 0.69, 0.77)],
+        # ═══ [GT-121] 레벨 ×1.50 — 구조는 그대로, 높이만 실물 마감 대역으로 ═══
+        #  **여기 적힌 숫자는 알베도가 아니라 곱수다.** `M["plaster_i"]` 는
+        #  `plaster_diff.jpg`(선형 평균 (0.40665, 0.36564, 0.35002), 휘도 0.3732
+        #  `[measured, _texture_mean]`)에 이 값을 곱한다 → v5.1 팔레트의 실효 알베도는
+        #  스와치 기준 **0.2526 / 0.2668 / 0.2831 / 0.2774 / 0.2665**, 인스턴스 지터까지
+        #  포함해 0.245~0.284 `[computed]`. 한국 골목 회벽(백색 회칠·크림·연회색)의
+        #  실측 대역은 **0.35~0.55** 이므로 전 슬롯이 대역 아래였고, 그것이 정오 그늘
+        #  골목이 통째로 죽는 결함의 주 원인이다(narrow_up 41.85 % <0.05).
+        #  ×1.50 후 실효 0.379~0.425(인스턴스 0.367~0.426) = 대역 하단~중단.
+        #  **v5.1 판정을 뒤집지 않는다**: v5.1 이 막은 것은 정오 순백판이고, 그 상한을
+        #  실효역으로 옮기면 0.80 이다. 위 값들의 실효 최대 채널은 **0.488** —
+        #  상한의 61 % 다. ACES 톤맵(op=6, AE off) 기준 직사광 파사드의 표시값 추정
+        #  0.75 → **0.83** `[computed — 실측 2점(바닥 0.1153→0.628 · 녹색 지붕
+        #  0.166→0.698)으로 응답 고정, 클립 없음: 라운드 전체 >0.95 픽셀 0.00 %]`.
+        #  **구조 보존**: 5 스와치 전부에 같은 스칼라 하나만 곱했다 → 채널비(색상)도,
+        #  스와치 사이의 값 편차도, `tint_jitter` 시드/슬롯 순서도 전부 불변. 균일화
+        #  금지 조건은 셀프체크 섹션 10 이 비율로 재유도해 증빙한다.
+        #  구값 `[repro — 대체된 v5.1 팔레트]`:
+        #    (0.78, 0.65, 0.60) (0.65, 0.73, 0.78) (0.80, 0.76, 0.60)
+        #    (0.69, 0.77, 0.65) (0.77, 0.69, 0.77)
+        pastel=[(1.170, 0.975, 0.900), (0.975, 1.095, 1.170),
+                (1.200, 1.140, 0.900), (1.035, 1.155, 0.975),
+                (1.155, 1.035, 1.155)],
         # [v5.1] per-instance tint jitter amplitude (+-5 %) - shared by facade·roof
         tint_jitter=0.05,
+        # [GT-121] 회벽 지터의 상한을 **실효 알베도 좌표계**로 재진술한 값.
+        #  `tint_jitter` 의 기본 cap=0.80 은 *적힌 값*의 상한이라, 텍스처 평균
+        #  0.40665 를 곱한 실효 상한이 사실상 0.325 였다 — 순백 금지 관례가 벽을
+        #  실물 마감 대역 아래로 묶는 부작용. 관례(실효 최대 채널 ≤ 0.80)는 유지하고
+        #  좌표계만 바로잡는다: 0.80 / 0.40665 = 1.9673 → **1.96**(보수적 절사).
+        #  지붕(cap 0.70)·화분(cap 0.70)은 상수색이라 이 값과 무관하게 그대로다.
+        pastel_cap=1.96,
         # ═══ [W3 L15] Roofs — 옥상 슬래브, not a timber deck ═══
         #  `Looks/Roof_*` resolved to `LOOK_ROLE["Roof"] = "wood"` (a scene07 temple fix) and
         #  `_promote_const_to_texture` bound **`wood_dark_diff.jpg`** at base_color
@@ -513,13 +580,35 @@ PARAMS = dict(
         #  (0.11567, 0.11567, 0.10988), tint = target / mean `[computed]`. A tint is folded into
         #  `base_color` as a multiply (`scene_common._make_ground_pbr`, fatal-C1 note), so this
         #  is exactly one albedo multiply and no photometric shift is introduced anywhere.
-        alley_tint=(0.7898, 1.0496, 1.4983),
+        # ═══ [GT-121] 그 "Y 불변" 조건을 여기서 **의도적으로 파기한다** ═══
+        #  W3 L15 의 목표는 황갈색 제거였고 휘도 동결은 그 라운드에서 옳은 보수 조치였다.
+        #  결과로 골목 바닥은 실효 알베도 **0.11525** 에 묶였다 — 노후 시멘트 포장의
+        #  실측 대역(0.20~0.35)보다 아래고, 신품 아스팔트(0.04~0.05) 쪽에 훨씬 가깝다.
+        #  그늘 골목에서 **아래쪽 벽 밴드를 밝히는 광원은 바닥 반사뿐**이므로(태양·돔은
+        #  씬 공통 광학이라 불변) 바운스 예산의 주인은 이 한 줄이다.
+        #  목표 **0.30** — 근거 두 겹: ① 실물 대역 0.20~0.35 의 상단부(볕에 바랜 시멘트
+        #  골목 바닥) ② 클래스 천장 `paving.alb_max` **0.34**(GT-108) 아래. 0.34 를
+        #  넘기면 `_albedo_band` 가 조용히 되-스케일해서 여기 적힌 값이 거짓이 된다.
+        #  색상은 그대로 1 : 1 : 0.95 — 목표 평균 (0.301086, 0.301086, 0.286031),
+        #  tint = 목표 / 텍스처 평균 `[computed]`. Rec.709 Y 0.11525 → **0.30000**.
+        #  부수 효과 하나가 의도를 되살린다: 줄눈·크랙·톱자국은 `M["stair"]`(0.1993)
+        #  인데 바닥이 0.11525 였으므로 **줄눈이 바닥보다 밝았다** — "어두운 절단선"
+        #  이라는 코드 자신의 선언과 반대. 0.30 에서 비로소 줄눈이 어두워진다.
+        #  구값 `[repro — 대체된 W3 L15 틴트]`: (0.7898, 1.0496, 1.4983)
+        alley_tint=(2.0559, 2.7320, 3.9002),
         #  The 2 repair patches keep `alley`'s texture but sit **+20 % in luminance**: a cement
         #   덧방 repair reads lighter than the aged surround it interrupts, and R15-1 makes the
         #  patches this scene's realism rather than its artefact, so they have to be legible.
         #  Same hue, same texture, one multiply (§3(ii): *"one tone, flush, crisp seam"*).
         #  The saw-cut seam stays on `M["stair"]`, i.e. dark — the cut, not the fill.
-        patch_tint=(0.9478, 1.2595, 1.7980),
+        #  [GT-121] 바닥이 0.30 으로 올라갔으므로 패치도 같이 올린다. 다만 **+20 %
+        #  관계는 클래스 천장에 막힌다**: 0.30 × 1.20 = 0.36 > `paving.alb_max` 0.34 라
+        #  `_albedo_band` 가 0.34 로 되-스케일해 버린다(그러면 패치·바닥 차이가 +3 %
+        #  로 뭉개져 R15-1 이 지키려던 "보수는 읽혀야 한다"가 깨진다). 천장 아래
+        #  최대치인 **0.336**(+12.0 %)로 잡고, 20 %에서 12 %로 줄어든 사실을 흡수하지
+        #  않고 여기 적어 둔다. 색상비 1 : 1 : 0.95 는 바닥과 동일.
+        #  구값 `[repro]`: (0.9478, 1.2595, 1.7980) → 실효 0.13830
+        patch_tint=(2.3026, 3.0599, 4.3682),
         #  Ground soiling gets its own material. It used to share `M["skirt"]` with the **wall
         #  dado**, which is a conflation: a splash-line dado on a wall and a dirt lobe on a
         #  floor are different materials that happen to both be dark. Splitting them lets the
@@ -527,13 +616,26 @@ PARAMS = dict(
         grime_color=(0.075, 0.072, 0.068), grime_rough=0.88,
         # B-15-1 [critical]: 0.60 pure white clipped in noon light and the tread/riser boundary
         #   was lost entirely (the drop label lost its visual evidence). Changed to 0.20 neutral concrete.
+        # [GT-121] **미변경**. 실효 0.1993 은 노후 콘크리트 대역(0.20~0.35) 하단에
+        #   이미 들어와 있고, 이 값은 낙차 판독(단 코 경계)을 걸고 내려진 B-15-1
+        #   판정값이다. 계단은 이번 라운드의 불가침 목록에 있다 — 재질도 포함해 동결.
         stair_color=(0.20, 0.20, 0.19), stair_rough=0.82,
         # [v5 judgment applied · critical] the 2 retaining-wall rows reused M["alley"] (pavement
         #   concrete_floor) as-is, so every h0.3/h0.9 preset became a context-free corridor of
         #   'brown plates left and right + a floor of the same material'. The dedicated retaining-wall
         #   material = plaster texture + blue-grey stonework tint (0.28 band, judgment recommends
         #   0.10~0.35) + scale 3.5, separated in value·hue·texture scale from the pastel facades (0.75~0.95) and the pavement.
-        retwall_tint=(0.30, 0.29, 0.27), retwall_rough=0.88,
+        # ═══ [GT-121] 0.28 밴드는 *적힌 값*이었다 — 실효는 0.1086 ═══
+        #  v5 판정이 인용한 "0.10~0.35 대역"은 알베도 대역인데, 코드는 그 숫자를
+        #  plaster 텍스처(평균 0.3732)의 **곱수** 자리에 넣었다 → 화면에 도달한 실효
+        #  알베도 **0.10855** `[measured]`. 어떤 실물 시멘트 옹벽·석축보다 어둡다.
+        #  노후 콘크리트 대역으로 복귀: 목표 **0.26**(= 0.20~0.30 의 상단, 클래스
+        #  천장 `concrete.alb_max` 0.34 아래), 색상비 1 : 0.869 : 0.775 불변(구 틴트에
+        #  스칼라 2.3942 하나만 곱했다) `[computed]`.
+        #  v5 가 요구한 **분리는 유지된다**: 값 0.26 vs 파사드 0.379~0.425(여전히
+        #  −35 % 어둡다) · 색상 청회색 vs 파스텔 · 텍스처 스케일 3.5 vs 2.0.
+        #  구값 `[repro]`: (0.30, 0.29, 0.27)
+        retwall_tint=(0.7183, 0.6943, 0.6464), retwall_rough=0.88,
         # [v5 judgment applied] the pot foliage used M["roof"][1] (0.45,0.45,0.47 grey) and
         #   rendered as a white blob in noon light -> dedicated deep-green constant colour + smaller radius.
         foliage_color=(0.13, 0.22, 0.11), foliage_rough=0.80,
@@ -550,6 +652,11 @@ PARAMS = dict(
         #   being a silhouette, while still holding the "no large pure-white area" job the
         #   v5.1 convention gave it. It no longer doubles as the ground grime material —
         #   see `grime_color`.
+        # [GT-121] **미변경**. 실효 0.1082 로 이번 라운드의 암부 집합 안에 있지만,
+        #   걸레받이는 백색 회칠이 아니라 **일부러 어두운 진회녹 유성페인트**다
+        #   (실물 대역 0.06~0.12). 회벽 대역(0.35~0.55)으로 끌어올리면 걸레받이라는
+        #   요소 자체가 사라진다 — 회벽이 0.38~0.43 으로 올라가면서 오히려 띠의
+        #   대비가 3.5 배로 커져 h0.3 그레이징 밴드에서 더 잘 읽힌다 `[computed]`.
         skirt_color=(0.098, 0.112, 0.100), skirt_rough=0.82,  # facade dado (유성페인트)
         # `rail_*` is now used ONLY by the ground_kit metal parts (manhole lid,
         #   gutter cover, trench frame) — the guardrail that used to own it is
@@ -718,7 +825,37 @@ def build_views():
 # `scene_common._texture_mean` (usd-core-free; PIL over the shipped 4k JPEG).
 # Kept as a constant so the gate still runs on a machine without the texture pack.
 CONCRETE_FLOOR_MEAN = (0.146453, 0.110206, 0.073338)
+# [GT-121] `plaster_diff.jpg` 선형 평균 — 같은 계기·같은 세션. 회벽 실효 알베도의
+#   나머지 절반이 이 숫자다(적힌 파스텔 값 × 이것 = 화면에 도달하는 알베도).
+PLASTER_MEAN = (0.406645, 0.365643, 0.350022)
 _REC709 = (0.2126, 0.7152, 0.0722)
+
+# ── [GT-121] 전(前) 상태 — 감사 대상 라운드 `260813_w4_s15villa` 의 값 ────────────
+#   전/후 표를 "지금 코드"와 "기억"으로 찍으면 감사가 불가능해지므로, 대체된 값을
+#   상수로 남기고 셀프체크가 **두 벌 다 계산**한다. 여기 적힌 것은 전부 그 라운드가
+#   실제로 렌더한 값이다 `[repro]`.
+GT121_BEFORE = dict(
+    pastel=[(0.78, 0.65, 0.60), (0.65, 0.73, 0.78), (0.80, 0.76, 0.60),
+            (0.69, 0.77, 0.65), (0.77, 0.69, 0.77)],
+    pastel_cap=0.80,
+    alley_tint=(0.7898, 1.0496, 1.4983),
+    patch_tint=(0.9478, 1.2595, 1.7980),
+    retwall_tint=(0.30, 0.29, 0.27),
+)
+#   조명은 이번 라운드의 불가침 조건이다(GT-121 Scope: "조명 파라미터는 씬 공통
+#   광학이라 불변 — 반사면 알베도만"). 말로 두지 않고 값으로 동결해 대조한다.
+GT121_LIGHT_FROZEN = dict(dome_intensity=1000.0, noon_dome_rot=-110.0,
+                          noon_sun_elev=49.79, noon_sun_intensity=2450.0,
+                          hdri_sun_rotz_offset=233.5, sun_az_offset=153.0)
+#   실물 마감 대역 `[survey — 한국 골목 회벽/포장, LBNL Heat Island Group 및
+#   ACPA RT3.05 계열 반사율표. scene_common `alb_max` 주석과 같은 출처]`
+GT121_BAND = dict(stucco=(0.35, 0.55),      # 백색 회칠·크림·연회색 도장
+                  floor=(0.30, 0.38),       # 볕에 바랜 시멘트 골목 포장
+                  retwall=(0.20, 0.34))     # 노후 콘크리트 옹벽·석축
+#   클래스 천장(`scene_common.LOOK_CLASS[...]["alb_max"]`) — 이 위로 올리면
+#   `_albedo_band` 가 조용히 되-스케일해서 PARAMS 값이 거짓이 된다.
+GT121_CLS_CAP = dict(alley=0.34, patch=0.34, retwall=0.34, stucco=None)
+
 # Species whose scanned texture carries bloom or autumn colour (K4-F1 / W2 audit A P0-2).
 SEASON_BANNED = ("Shrub/Rhododendron.usd", "Shrub/Forsythia.usd",
                  "Shrub/Burning_Bush.usd")
@@ -726,6 +863,32 @@ SEASON_BANNED = ("Shrub/Rhododendron.usd", "Shrub/Forsythia.usd",
 
 def _luma(c):
     return sum(a * b for a, b in zip(c, _REC709))
+
+
+# ---------------------------------------------------------------------------
+# [GT-121] 실효 알베도 = 텍스처 선형 평균 × 틴트
+#
+#   이 씬의 결함은 "적힌 값"과 "화면에 도달하는 값"이 다르다는 것 하나였다. 그래서
+#   자가검증도 적힌 값을 읽지 않고, 두 항을 곱해 실제로 렌더되는 알베도를 다시 만든다.
+#   텍스처 팩이 없는 기계에서도 게이트가 돌도록 실측 상수를 폴백으로 둔다(맨홀 게이트
+#   가 `CONCRETE_FLOOR_MEAN` 을 쓰는 것과 같은 규약).
+# ---------------------------------------------------------------------------
+def _tex_mean(role, fallback):
+    tm = getattr(sc, "_texture_mean", None)
+    try:
+        m = tm(sc.tex_path(role, "diff")) if tm else None
+        if m and min(m) > 1e-4:
+            return tuple(m)
+    except Exception:
+        pass
+    return tuple(fallback)
+
+
+def _eff_albedo(tex_mean, tint):
+    """실효 선형 알베도(RGB) — 상수색 재질은 tex_mean=None 으로 부른다."""
+    if tex_mean is None:
+        return tuple(float(c) for c in tint)
+    return tuple(m * t for m, t in zip(tex_mean, tint))
 
 
 def _facade_for(pot):
@@ -1026,20 +1189,19 @@ def alley_selfcheck(verbose=True):
         not (set(reach) & set(SEASON_BANNED)) and all(reach for _ in [0]),
         f"{used} → {[os.path.basename(w) for w in reach]}")
 
-    # (5) The alley tint is a hue move, not a photometric one.
-    mean = CONCRETE_FLOOR_MEAN
-    tm = getattr(sc, "_texture_mean", None)
-    try:
-        m2 = tm(sc.tex_path("concrete_floor", "diff")) if tm else None
-        if m2 and min(m2) > 1e-4:
-            mean = tuple(m2)
-    except Exception:
-        pass
+    # (5) The alley floor tint — hue rule kept, the W3 L15 luminance freeze retired.
+    #   원래 이 행은 "Rec.709 Y 불변"을 주장했다. GT-121 이 그 성질을 **의도적으로
+    #   파기**했으므로(암부 광 예산 = 바닥 반사), 주장을 조용히 지우지 않고 조건을
+    #   교체한 사실 자체를 인쇄한다: 색상 규칙(1 : 1 : 0.95)은 그대로 게이트로 남고,
+    #   휘도는 섹션 10 의 대역 판정이 대신 맡는다.
+    mean = _tex_mean("concrete_floor", CONCRETE_FLOOR_MEAN)
     t = PARAMS["material"]["alley_tint"]
-    y0, y1 = _luma(mean), _luma([c * k for c, k in zip(mean, t)])
-    chk("골목 바닥 틴트 = 색상만 이동 (Rec.709 Y 불변)", abs(y1 - y0) < 5e-4,
-        f"Y {y0:.5f} → {y1:.5f} (Δ {(y1 - y0) * 1e5:+.2f}e-5)")
-    tinted = [c * k for c, k in zip(mean, t)]
+    tinted = list(_eff_albedo(mean, t))
+    y0 = _luma(_eff_albedo(mean, GT121_BEFORE["alley_tint"]))
+    y1 = _luma(tinted)
+    chk("골목 바닥 — W3 L15 'Y 불변' 조건은 GT-121 이 파기 (기록)", True,
+        f"Y {y0:.5f} → {y1:.5f} (×{y1 / y0:.3f}) · 사유 = 그늘 골목 바운스 예산, "
+        f"조명 불변이 전제 (섹션 10 이 대역으로 판정)")
     chk("보정 후 색상비 1 : 1 : 0.95", abs(tinted[0] / tinted[1] - 1.0) < 2e-3
         and abs(tinted[2] / tinted[0] - 0.95) < 2e-3,
         f"R/G {tinted[0] / tinted[1]:.4f} · B/R {tinted[2] / tinted[0]:.4f}")
@@ -1219,6 +1381,145 @@ def alley_selfcheck(verbose=True):
         == len(PARAMS["roofline"]["tank"]),
         f"{[(t['house'], t['r'], t['h']) for t in PARAMS['roofline']['tank']]}")
 
+    # ── (10) [GT-121] 실효 알베도 전/후 표 + 대역 판정 ──────────────────────
+    #   이 씬의 결함은 좌표가 아니라 **곱셈**이었다. 그래서 이 절은 기하를 재지 않고,
+    #   렌더가 실제로 쓰는 값(텍스처 선형 평균 × 틴트)을 전(前)·후(後) 두 벌 만들어
+    #   나란히 찍은 뒤 실물 대역과 클래스 천장으로 판정한다.
+    mp = PARAMS["material"]
+    B = GT121_BEFORE
+    pl = _tex_mean("plaster", PLASTER_MEAN)
+    cf = _tex_mean("concrete_floor", CONCRETE_FLOOR_MEAN)
+
+    # 팔레트 5 스와치(지터 전) — 전/후를 같은 식으로 만든다.
+    sw_b = [_eff_albedo(pl, c) for c in B["pastel"]]
+    sw_a = [_eff_albedo(pl, c) for c in mp["pastel"]]
+    # 18 슬롯(주택 12 + backdrop 4 + villa 2) — 실제로 조립되는 인스턴스 값.
+    specs = (list(PARAMS["houses"]) + list(PARAMS["backdrop"])
+             + list(PARAMS["villas"]))
+
+    def _slots(palette, cap):
+        out = []
+        for i, hs in enumerate(specs):
+            base = palette[hs["tint"] % len(palette)]
+            out.append(_eff_albedo(pl, tint_jitter(base, i, cap=cap)))
+        return out
+
+    sl_b = _slots(B["pastel"], B["pastel_cap"])
+    sl_a = _slots(mp["pastel"], mp["pastel_cap"])
+    rows = [
+        ("주택·빌라 회벽 (18슬롯 최암)",
+         min(sl_b, key=_luma), min(sl_a, key=_luma), "stucco", "회벽"),
+        ("주택·빌라 회벽 (18슬롯 최명)",
+         max(sl_b, key=_luma), max(sl_a, key=_luma), "stucco", "회벽"),
+        ("골목 바닥 concrete_floor×tint",
+         _eff_albedo(cf, B["alley_tint"]), _eff_albedo(cf, mp["alley_tint"]),
+         "floor", "바닥"),
+        ("보수 패치 (동일 텍스처)",
+         _eff_albedo(cf, B["patch_tint"]), _eff_albedo(cf, mp["patch_tint"]),
+         None, "패치"),
+        ("옹벽 plaster×tint (계단 회랑 벽)",
+         _eff_albedo(pl, B["retwall_tint"]),
+         _eff_albedo(pl, mp["retwall_tint"]), "retwall", "옹벽"),
+        ("계단 상수색 (미변경 — B-15-1)",
+         mp["stair_color"], mp["stair_color"], None, "계단"),
+        ("걸레받이 유성페인트 (미변경)",
+         mp["skirt_color"], mp["skirt_color"], None, "걸레"),
+        ("지붕 우레탄/시멘트 (별건 — 미변경)",
+         mp["roof_tints"][0], mp["roof_tints"][0], None, "지붕"),
+        ("창유리 (미변경)", mp["window_color"], mp["window_color"], None, "유리"),
+    ]
+    if verbose:
+        print("-" * 72)
+        print("[R-2 · GT-121] 실효 알베도 = 텍스처 선형 평균 × 틴트 — 전 / 후")
+        print(f"  plaster 평균 {tuple(round(c, 5) for c in pl)} Y {_luma(pl):.4f} · "
+              f"concrete_floor 평균 {tuple(round(c, 5) for c in cf)} "
+              f"Y {_luma(cf):.4f}")
+        print("  면                                 전 Y     후 Y     배율   "
+              "후 (R,G,B)")
+        for nm, eb, ea, band, _ in rows:
+            print(f"  {nm:32s} {_luma(eb):.4f}   {_luma(ea):.4f}   "
+                  f"×{_luma(ea) / max(_luma(eb), 1e-9):.2f}   "
+                  f"({ea[0]:.3f}, {ea[1]:.3f}, {ea[2]:.3f})")
+
+    # ① 회벽 18슬롯 전량이 실물 마감 대역 안에 들어왔는가
+    lo, hi = GT121_BAND["stucco"]
+    bad = [i for i, e in enumerate(sl_a) if not (lo <= _luma(e) <= hi)]
+    chk(f"GT-121 회벽 18슬롯 실효 알베도 ∈ [{lo:.2f}, {hi:.2f}]", not bad,
+        f"{min(_luma(e) for e in sl_a):.4f}…{max(_luma(e) for e in sl_a):.4f} "
+        f"(전 {min(_luma(e) for e in sl_b):.4f}…"
+        f"{max(_luma(e) for e in sl_b):.4f}) · 대역 밖 {bad or '없음'}")
+    # ② 팔레트는 **레벨만** 움직였는가 — 채널비·스와치간 비가 전부 보존되는지
+    #    스칼라 하나로 재유도한다. 이게 깨지면 "균일화 금지" 조건이 깨진 것이다.
+    ks = [a / b for eb, ea in zip(sw_b, sw_a) for a, b in zip(ea, eb)]
+    k0 = ks[0] if ks else 0.0
+    #    부수 실측: 옛 cap 0.80 은 최명 스와치(0.80, 0.76, 0.60)의 R 채널에서
+    #    **지터 자체를 먹고 있었다** — 그 채널은 인스턴스마다 0.80 으로 눌려
+    #    "복붙 블록 방지"라는 `tint_jitter` 의 목적과 반대로 작동했다. 새 상한에서
+    #    복원되므로 몇 채널이 그랬는지 세어 남긴다.
+    eaten = sum(1 for i, hs in enumerate(specs)
+                for c in tint_jitter(B["pastel"][hs["tint"] % 5], i,
+                                     cap=B["pastel_cap"])
+                if abs(c - B["pastel_cap"]) < 1e-9)
+    chk("GT-121 팔레트 구조 보존 = 단일 스칼라 (색상·편차 불변)",
+        bool(ks) and max(abs(k / k0 - 1.0) for k in ks) < 1e-6,
+        f"스칼라 ×{k0:.4f} · 15 채널 최대 편차 "
+        f"{max(abs(k / k0 - 1.0) for k in ks) * 1e6:.2f}e-6 · 스와치 Y "
+        + " ".join(f"{_luma(e):.3f}" for e in sw_a)
+        + f" · 옛 cap 이 먹던 지터 채널 {eaten}/{3 * len(specs)} 복원")
+    # ③ v5.1 순백 금지 관례 — **실효 좌표계로** 재진술 (적힌 값이 아니라 도달값)
+    mx_a = max(max(e) for e in sl_a)
+    chk("GT-121 실효 최대 채널 ≤ 0.80 (v5.1 순백 관례, 실효역 재진술)",
+        mx_a <= 0.80,
+        f"{mx_a:.4f} (전 {max(max(e) for e in sl_b):.4f} — 옛 cap 0.80 은 *적힌* "
+        f"값 상한이라 실효 상한이 {0.80 * pl[0]:.3f} 였다) · 새 틴트 상한 "
+        f"{mp['pastel_cap']:.2f} = 0.80 / {pl[0]:.5f}")
+    # ④ 바닥·옹벽 대역 + 클래스 천장 — 천장을 넘기면 `_albedo_band` 가 조용히
+    #    되-스케일해서 PARAMS 에 적힌 값이 거짓이 된다.
+    #    `_EPS` = 틴트를 소수 4자리로 적은 데서 오는 반올림 오차(실측 1.0e-6).
+    #    대역 하한을 이것 때문에 통과 못 시키는 것은 게이트가 아니라 잡음이다.
+    _EPS = 1e-4
+    for nm, key, eff in (("골목 바닥", "floor",
+                          _eff_albedo(cf, mp["alley_tint"])),
+                         ("옹벽", "retwall",
+                          _eff_albedo(pl, mp["retwall_tint"]))):
+        lo, hi = GT121_BAND[key]
+        cap = GT121_CLS_CAP["alley" if key == "floor" else "retwall"]
+        y = _luma(eff)
+        chk(f"GT-121 {nm} 실효 ∈ [{lo:.2f}, {hi:.2f}] ∧ ≤ 클래스 천장 {cap:.2f}",
+            lo - _EPS <= y <= hi + _EPS and y <= cap + _EPS,
+            f"{y:.5f} (전 {_luma(_eff_albedo(cf if key == 'floor' else pl, B['alley_tint'] if key == 'floor' else B['retwall_tint'])):.5f})")
+    # ⑤ 패치는 바닥보다 밝되 천장에 막히지 않는가 (R15-1 — 보수는 읽혀야 한다)
+    y_f = _luma(_eff_albedo(cf, mp["alley_tint"]))
+    y_p = _luma(_eff_albedo(cf, mp["patch_tint"]))
+    chk("GT-121 패치 > 바닥 ∧ 패치 ≤ 0.34 (R15-1 가독)",
+        y_p > y_f and y_p <= GT121_CLS_CAP["patch"] + 1e-9,
+        f"바닥 {y_f:.4f} → 패치 {y_p:.4f} (+{(y_p / y_f - 1) * 100:.1f} %, "
+        f"천장 제약으로 W3 L15 의 +20 % 에서 축소)")
+    # ⑥ v5 판정의 "옹벽 ≠ 파사드" 값 분리가 살아 있는가
+    y_w = _luma(_eff_albedo(pl, mp["retwall_tint"]))
+    y_dark = min(_luma(e) for e in sl_a)
+    chk("GT-121 옹벽 < 최암 파사드 (v5 값 분리 유지)", y_w < y_dark,
+        f"옹벽 {y_w:.4f} vs 파사드 최암 {y_dark:.4f} "
+        f"(−{(1 - y_w / y_dark) * 100:.0f} %)")
+    # ⑦ 줄눈·크랙·톱자국(M["stair"])이 바닥보다 어두운가 — 코드 자신의 선언 복원
+    chk("GT-121 줄눈/톱자국이 바닥보다 어둡다 (선언 복원)",
+        _luma(mp["stair_color"]) < y_f,
+        f"줄눈 {_luma(mp['stair_color']):.4f} < 바닥 {y_f:.4f} "
+        f"(전에는 바닥 {_luma(_eff_albedo(cf, B['alley_tint'])):.4f} 이라 "
+        f"줄눈이 **더 밝았다**)")
+    # ⑧ 조명은 손대지 않았다 — 말이 아니라 값 대조 (GT-121 Scope)
+    lt = PARAMS["light"]
+    cur = dict(dome_intensity=lt["dome_intensity"],
+               noon_dome_rot=lt["noon_dome_rot"],
+               noon_sun_elev=lt["noon_sun_elev"],
+               noon_sun_intensity=lt["noon_sun_intensity"],
+               hdri_sun_rotz_offset=lt["hdri_sun_rotz_offset"],
+               sun_az_offset=PARAMS["SUN_AZ_OFFSET"])
+    drift = {k: (v, cur[k]) for k, v in GT121_LIGHT_FROZEN.items()
+             if abs(cur[k] - v) > 1e-9}
+    chk("GT-121 조명 파라미터 불변 (태양·돔·방위 — 반사면만 건드린다)",
+        not drift, f"{'변동 ' + str(drift) if drift else '6/6 동일'}")
+
     if verbose:
         print("-" * 72)
         print(f"[selfcheck] scene15 — {'OK' if not fails else 'FAIL ' + str(fails)}")
@@ -1245,7 +1546,13 @@ BANNER = """\
                             무창 측벽의 황색 띠 입상관이 K2 로 읽히는가 ·
                             최상층 일조사선 후퇴(1.60)가 계단식으로 보이는가 ·
                             옥상 난간(살대)이 파라펫이 아니라 난간으로 읽히는가 ·
-                            물탱크 2기가 '프롭 카탈로그'로 되돌아가지 않았는가"""
+                            물탱크 2기가 '프롭 카탈로그'로 되돌아가지 않았는가
+ 9. [GT-121] 그늘 광 예산 — narrow_up / bend_landing 에서 **그늘진 회벽이 검은 판이
+                            아니라 회벽으로 읽히는가**(결·창 프레임·단 코·옥상 난간
+                            실루엣이 살아났는가) · 골목 바닥이 노후 시멘트로 보이되
+                            직사광 구간(상부 골목·h0.3 근경)이 순백판으로 날아가지
+                            않았는가 · 파스텔 5색의 서로 다름이 유지되는가(균일화 금지)
+                            · 옹벽이 여전히 파사드보다 어두운 별개 재질로 읽히는가"""
 
 
 def main():
@@ -1342,10 +1649,16 @@ def main():
         M["plaster_i"], M["roof_i"] = [], []
         for i, hs in enumerate(specs):
             base = mp["pastel"][hs["tint"] % len(mp["pastel"])]
+            # [GT-121] `cap` 을 명시한다. 기본 0.80 은 *적힌 값*의 상한이라,
+            #   ×1.50 으로 올린 팔레트를 전 슬롯 0.80 으로 눌러 **균일화**시킨다
+            #   (= 이 라운드가 금지된 바로 그 결과). 상한은 실효 알베도 좌표계로
+            #   옮겨 `pastel_cap` 이 들고 있고, 셀프체크 ③ 이 실효 최대 채널
+            #   ≤ 0.80 을 다시 잰다.
             M["plaster_i"].append(PBR(
                 f"{ROOT}/Looks/Plaster_{i}", sc.tex_path("plaster", "diff"),
                 sc.tex_path("plaster", "nor"), sc.tex_path("plaster", "rough"),
-                sca["plaster"], tint=tint_jitter(base, i)))
+                sca["plaster"], tint=tint_jitter(base, i,
+                                                 cap=mp["pastel_cap"])))
             rbase = mp["roof_tints"][hs["tint"] % len(mp["roof_tints"])]
             # [W3 L15] `Looks/Roof_*` → `Looks/Slab_*`: the class table reads the prim name,
             #   and "Roof" is registered as **wood** (a temple-roof fix that does not belong to

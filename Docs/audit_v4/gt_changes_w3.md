@@ -2448,3 +2448,31 @@ beauty_overview — B동 매스가 우측 근경 진입[예측대로], 골목 �
 배정(코드 주석 «G1 stone institutional block»·연대조사 '청사·도서관' 근거)이 사용자 정체성
 판정(기념관)과 불일치 — 사용자 우선. 재작업 = 기념관 유형(전시·추모 계열 어휘) 재조사 후
 신규 세션에서. 본 회신으로 건물안 §3.8 s21 절은 무효.
+
+## 69. GT-113 — R1 룩 레이어 배선 수리 W1~W7: 감사 확정 결함의 정식 처리 (선신고)
+
+**Authority**: 08-14 사용자 — "해당 폴더에 대해 전권 줄테니까 3일동안 네가 차근차근 확인하면서
+프로젝트 향상시켜봐 … 일단 지금 있는 씬들 집중 … drop-off 계열에 집중 … cue랑 현실성, 그리고
+생각해야 할 요소들 체계적으로 잘 검토" (3일 자율 개선 위임). 설계 원본 =
+`reports/scene_audit_realism_survey_v1.md` §2.1 (배선·봉인 결함 W1~W7, 코드 대조 확정) —
+레버1 2차 이월 3건(행 64) 중 curb/등화의 기계적 원인이 W1·W2 에 귀속됨을 실측 특정.
+**Scope**(선신고 — 전부 scene_common/MDL/도구 층, 씬 파일 무수정):
+① W1 `make_pbr` OmniPBR 분기에 `_albedo_band`/`_effective_sat` 배선 — 상수색은 밴드+탈채도,
+   텍스처는 tint 밴드. **현 클래스 값 기준 비트동일**(omni 상수색 잔여 클래스 = metal·water·
+   glass·paint·sign·misc 전부 sat 1.0·밴드 미보유 — 값 부여는 GT-114 별행).
+② W2 `NEGOBS_DETAIL_SCALE` 강제 해소 — `run_data_render.py` 의 상시 설정 제거, `_DETAIL_MAP`
+   패밀리 기본 mineral 12.5→4.0 · granular 8.0→3.0(GT-108 클래스 값·RTX 조사 권장 1~4 대역
+   정합; metal 25.0 유지). env 는 A/B 스윕 전용으로 복원. `look_report()` 에 실효 det/override
+   1행 노출(사장 재발 방지 계기).
+③ W3 `wire_unit_cell_to(mtl, unit_cell)` 헬퍼 신설(기존 `_wire_unit_cell` 재사용, 기본 미호출
+   = 비트동일) + **파일럿 s21 1씬** 되먹임 1줄(plaza_granite 0.600 원장 값) — 확산은 검수 후.
+④ W4 `use_blend` 하드코딩 False → `_make_ground_pbr(blend=None)` 선택 인자 개방(기본 None =
+   비트동일, 값 주입은 후속 파일럿).
+⑤ W5 `_LOOK_RULES` 지형·배경·목재·배관 어휘 추가(hill/shore/bank/scrub/forest/terrain →
+   soil·veg / plank/joist → wood / pipe/gaspipe → metal) — misc 낙하 해소. ⑥ W6 키워드 충돌
+   4건(canopy→veg 제거·band 접미 한정·awning/membrane 분리·tread 분리 검토 — tread 는 nosing
+   유지가 옳은지 실측 후 결정). ⑦ W7 발광 재질 비발광 채널(bevel) 룩 통과 — emission 보존.
+**GT 판정**: 전 항목 R-2(재질 전용, 기하 해시 불변 — `geom_invariance_check` 33/33 증빙).
+위험 기하·보행면·낙차 에지 접촉 0. 파일럿 렌더 1~2씬(s21 + s13) A/B 후 확산(§2.3).
+Round: GPU 가용 시 `260814_w4_r1wiring`(RT 파일럿 + PT 판정). baseline 최신 라운드.
+**Status: OPEN (선신고 — 시공 중)**

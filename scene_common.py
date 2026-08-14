@@ -239,15 +239,24 @@ _DETAIL_NOR = os.path.join(S1_DIR, "concrete_wall_nor_dx.jpg")
 # It is wired here.
 #
 # The values are exactly the §1.6(b) table: (file, bump, 1/tile [1/m]).
+# [GT-113 W2] mineral 12.5 -> 4.0 / granular 8.0 -> 3.0. The spec-table values put the
+# texel at 0.078/0.12 mm — sub-pixel at every judged eye (the `NEGOBS_DETAIL_SCALE` note
+# below already called this out and recommended 2-4), and in practice every round script
+# since GT-108 masked them with a blanket `NEGOBS_DETAIL_SCALE=2` override, which in turn
+# nullified the per-class `det_scale` GT-108 authored. The family defaults now sit inside
+# the recommended 1-4 band themselves (matching GT-108's explicit class values: paving/
+# concrete 4.0, asphalt 3.0), the standing override is removed from `run_data_render.py`,
+# and the env knob returns to its designed role: an A/B sweep arm only.
+# metal 25.0 is kept — brushed scratches are legitimately fine and were never flagged.
 _DETAIL_MAP = {
-    "mineral":  ("detail_grain_mineral_nor.png",  0.85, 12.5),  # Paving, concrete, stone, curb, nosing
-    "granular": ("detail_grain_granular_nor.png", 0.70,  8.0),  # Soil, gravel, asphalt, snow
+    "mineral":  ("detail_grain_mineral_nor.png",  0.85, 4.0),   # Paving, concrete, stone, curb, nosing
+    "granular": ("detail_grain_granular_nor.png", 0.70, 3.0),   # Soil, gravel, asphalt, snow
     "metal":    ("detail_grain_brushed_nor.png",  0.55, 25.0),  # Metal (anisotropic scratches)
 }
 # When procedural generation fails or nothing was procured - what the repository already holds (0 procurement). §3.2 confirmed both families pass.
 _DETAIL_FALLBACK = {
-    "mineral":  ("scene01/plaster_nor_dx.jpg", 0.85, 12.5),   # macro 3.9 · slope −0.89 · RMS 0.159
-    "granular": ("scene01/asphalt_nor_dx.jpg", 0.70,  8.0),   # macro 3.2 · slope −0.66 · RMS 0.294
+    "mineral":  ("scene01/plaster_nor_dx.jpg", 0.85, 4.0),    # [GT-113 W2] follows _DETAIL_MAP
+    "granular": ("scene01/asphalt_nor_dx.jpg", 0.70, 3.0),
     "metal":    (None, 0.0, 0.0),                             # Nothing held at all (§3.2)
 }
 # Class -> family. **A class absent from here is explicitly prescribed no detail**:
@@ -627,8 +636,14 @@ LOOK_ROLE = {
     # Water
     "Water": "water",
     # Paint and markings - a constant colour is physically correct (not to be texturised)
+    # [GT-113 W6] The "band" *keyword* was removed from `_LOOK_RULES` (it swallowed
+    # textured stone bands like `BandDark`), so every genuinely *painted* band is
+    # pinned here by exact match instead — dock markings (BandBlack/BandYellow),
+    # the gas-riser yellow band, guard and lane bands.
     "Paint": "paint", "LineWhite": "paint", "LineYellow": "paint",
-    "Band": "paint", "Tactile": "paint",
+    "Band": "paint", "Tactile": "paint", "BandBlack": "paint",
+    "BandYellow": "paint", "GasBand": "paint", "GuardBand": "paint",
+    "LineBand": "paint",
     # Glass, signs, emissive
     # [GT-108 ④ · survey §8-4 ②] `"Panel": "sign"` **deleted here** - same duplicate-key
     #   trap: `"Panel": "metal"` two lines below wins, and metal is the intended answer
@@ -666,6 +681,11 @@ def look_report():
         return "[룩v1] OFF (MTL=0 GEO=0)"
     r = LOOK_STATS
     top = sorted(r["roles"].items(), key=lambda kv: -kv[1])[:8]
+    # [GT-113 W2] The effective detail policy must be visible in every round log —
+    # a blanket env override silently nullified per-class det_scale for six rounds
+    # before anyone noticed, and the unit-cell wiring sat uncalled for a version.
+    det_pol = (f"detXovr={DETAIL_SCALE_OVERRIDE:g}" if DETAIL_SCALE_OVERRIDE > 0
+               else "detX=class")
     return (f"[룩v1] MTL={int(LOOK_MTL)} GEO={int(LOOK_GEO)} | "
             f"재질 ground={r['ground']} omni_tex={r['omni_tex']} "
             f"const={r['const']} skip={r['skipped']} | 베벨={r['bevel']} "
@@ -675,7 +695,9 @@ def look_report():
             f"웨더={r.get('weather', 0)} 나무={r.get('veg_asset', 0)} "
             f"간살={r.get('baluster', 0)} 관목={r.get('shrub', 0)} "
             f"손잡이={r.get('handrail', 0)} "
-            f"산포={r.get('debris', 0)} | 역할 "
+            f"산포={r.get('debris', 0)} | {det_pol} "
+            f"유닛셀={r.get('unit_cell', 0)} "
+            f"omni탈채도={r.get('omni_sat', 0)} | 역할 "
             + ", ".join(f"{k}:{v}" for k, v in top))
 
 
@@ -695,27 +717,50 @@ _LOOK_RULES = [
     # Paint and markings - a constant colour is physically correct (not to be texturised)
     # joint/cutline = joint sealant. It used to be classified as asphalt, so **an asphalt grain was being
     # laid over the joints**. The paint family is correct.
+    # [GT-113 W6] "band" removed from the keyword list — scene01's `BandDark` is a
+    # *textured granite* band that the token routed to paint (mdl=omni, detail off,
+    # bevel 0). Painted-band materials keep their exact-match keys (`Band`,
+    # `BollardBand`) and the narrowed tokens below; `BandDark` now falls through to
+    # the concrete family via its "dark" token, which is the ground treatment it
+    # always needed. "dancheong" added — DancheongRed is temple paintwork, not
+    # concrete. "awning" added ([W6] it sat in the concrete family, so shop awnings
+    # were rendering with a concrete-floor grain; fabric is closest to the paint
+    # prescription: omni, constant colour, no mineral detail).
     ("paint", ("paint", "linewhite", "lineyellow", "roadpaint", "tactile",
-               "warn", "tape", "band", "stripe", "gauge", "joint", "cutline",
-               "lane")),   # **"lane" belongs here (road marking)** - caught before asphalt
+               "warn", "tape", "warnband", "bollardband", "stripe", "gauge",
+               "joint", "cutline", "lane", "dancheong", "awning")),
     # Vegetation
-    ("veg", ("grass", "leaf", "canopy", "hedge", "shrub", "foliage", "reed",
-             "tuft", "tree", "moss", "treeline", "treepit", "verge")),
+    # [GT-113 W6] "canopy" removed — structural shelter/roof canopies (scene16's
+    # `Canopy`, bus-shelter roofs) matched it and became *grass promotion candidates*.
+    # Real tree canopies keep their exact-match keys (`CanopyA`, `CanopyB`).
+    # [W5] "forest", "scrub", "lily" added (scene07/09 backdrop vegetation fell to misc).
+    ("veg", ("grass", "leaf", "hedge", "shrub", "foliage", "reed",
+             "tuft", "tree", "moss", "treeline", "treepit", "verge",
+             "forest", "scrub", "lily")),
     # Snow - the **largest single-material area across all 33 scenes** (sceneC1 88.5 %), yet it was stuck in misc
     # and received neither the constant-colour MDL nor a texture promotion.
     ("snow", ("snow", "frost")),
     # Water
     ("water", ("water", "sea", "tide", "wet")),
     # Metal
+    # [GT-113 W5] "pipe" (scene15 gas risers), "gantry" (scene13 — survey §8-4 ④
+    # confirmed unintended misc) added.
     ("metal", ("rail", "steel", "iron", "metal", "pole", "post", "lamp",
                "bollard", "gate", "fence", "grate", "grating", "galv",
                "rebar", "wire", "cable", "hvac", "crane", "gear", "shutter",
-               "mullion", "frame", "bin", "lid", "duck", "tool", "beak")),
+               "mullion", "frame", "bin", "lid", "duck", "tool", "beak",
+               "pipe", "gantry")),
     # Wood
+    # [GT-113 W5] "plank" (scene12's walking surface fell to misc), "joist" added.
     ("wood", ("wood", "deck", "bench", "seat", "sleeper", "pallet",
-              "stringer", "carton", "door")),
+              "stringer", "carton", "door", "plank", "joist")),
     # Drop edge - approved nosing 12 mm / curb 12 mm
-    ("nosing", ("nosing", "tread", "step")),
+    # [GT-113 W6] "tread"/"step" removed — a tread is the walking slab itself
+    # (concrete/stone family), and routing it here gave the whole step face the
+    # nosing prescription: no texture role, no tex_alts, so constant-colour treads
+    # could never promote and stayed dead flat — on the very surface this dataset
+    # teaches. They now land in the concrete family (last rule, tokens added there).
+    ("nosing", ("nosing",)),
     # **"verge" removed** - the Verge* materials of scene04 are grass verges (vegetation) yet were
     # receiving the curb prescription (13.4 % of the area). English verge means a shoulder or grass margin, not a curb.
     ("curb", ("curb", "coping", "cope", "kerb")),
@@ -725,7 +770,10 @@ _LOOK_RULES = [
     # Brick, rendered wall
     ("brick", ("brick", "plaster")),
     # Soil, gravel
-    ("soil", ("soil", "dirt", "earth", "mud", "leafbed")),
+    # [GT-113 W5] "hill"/"shore"/"terrain" — scene09's backdrop landforms fell to misc
+    # and rendered as untreated constants (survey F8's code root). Landform = soil.
+    ("soil", ("soil", "dirt", "earth", "mud", "leafbed", "hill", "shore",
+              "terrain")),
     ("gravel", ("gravel", "ballast", "debris", "rubble")),
     # Asphalt, carriageway
     # "lane" and "joint" moved to paint (lane dashes, joint sealant).
@@ -748,14 +796,21 @@ _LOOK_RULES = [
     #   texture promotion, the bevel and the detail normal like any other ground prim.
     #   Ordering safety: `concrete` is the **last** rule, so more specific earlier rules
     #   still win - `StoneStain` stays stone, `Asphalt` stays asphalt, `GkMoss` stays veg.
+    # [GT-113 W5/W6] "awning" moved to paint (fabric ≠ concrete grain). "tread"/"step"
+    # arrive here from the nosing rule (walking slabs are the concrete family).
+    # "hill"/"shore"/"terrain" (scene09 backdrop landforms), "basement"/"booth"
+    # (scene06/13 interiors), "mortar" (BedMortar) added — all were misc fall-throughs
+    # rendering as untreated OmniPBR constants (survey W5). "canopy" stays here so the
+    # structural canopies that used to mis-route to veg get the concrete treatment.
     ("concrete", ("concrete", "conc", "wall", "parapet", "shell", "slab",
                   "stair", "riser", "skirt", "fascia", "ceiling", "facade",
                   "bldg", "city", "house", "shed", "tunnel", "bridge",
                   "pier", "abutment", "crest", "ridge", "trough", "valley",
                   "container", "stage", "upper", "lower", "roof", "canopy",
-                  "awning", "trim", "grime", "dark", "skyline", "far",
+                  "trim", "grime", "dark", "skyline", "far",
                   "coating", "membrane", "stain", "wear", "crack", "silt",
-                  "efflor", "salt")),
+                  "efflor", "salt", "tread", "step",
+                  "basement", "booth", "mortar")),
 ]
 
 
@@ -1516,6 +1571,50 @@ def make_pbr(stage, path, diff=None, nor=None, rough=None, scale_m=1.0,
         # separate item (brief 2-7, awaiting a full audit) but the bevel needs no texture.
         LOOK_STATS["omni_tex" if diff is not None else "const"] += 1
         _look_omni = spec
+        # [GT-113 W1] The albedo band and self-correcting saturation now reach the
+        # OmniPBR branch too. Until here both governors were called only inside
+        # `_make_ground_pbr`, so every omni-routed class (metal, wood-tex, veg-tex,
+        # water, glass, paint, sign, misc) was structurally outside them — GT-108's
+        # "밝기 주인이 밴드 제외 대상" finding was this missing wire, not a class-table
+        # choice. Guarding is by class *data*, not code: today's omni classes carry no
+        # alb_max/alb_min and sat 1.0, so this block is bit-identical until a class
+        # states a value (GT-114). paint/sign/glass/water stay constant by that same
+        # data (v5.1 §4), which keeps cue colours untouched without a special case.
+        if diff is not None:
+            # Texture path — the multiplier that reaches the frame is the tint
+            # (OmniPBR: diffuse_tint × texture). Saturation cannot be applied here
+            # (OmniPBR has no saturation input and the texture is per-pixel), so the
+            # band alone is enforced; textured desaturation stays an MDL-only tool.
+            _tm = _texture_mean(diff)
+            if _tm is not None:
+                _t_in = list(tint) if tint is not None else [1.0, 1.0, 1.0]
+                _t_new, _t_chg = _albedo_band(cls, _t_in, _tm)
+                if _t_chg:
+                    tint = _t_new
+        elif diffuse_color is not None:
+            _c_new, _c_chg = _albedo_band(cls, list(diffuse_color), None)
+            if _c_chg:
+                diffuse_color = _c_new
+            _k = _effective_sat(spec, None, diffuse_color)
+            if _k < 0.999:
+                _lum = sum(c * w for c, w in
+                           zip(diffuse_color, _ALB_BAND_LUMA))
+                diffuse_color = [_lum + (c - _lum) * _k
+                                 for c in diffuse_color]
+                LOOK_STATS["omni_sat"] = LOOK_STATS.get("omni_sat", 0) + 1
+    elif LOOK_MTL and not uv_mode and emission_color is not None:
+        # [GT-113 W7] Emissive materials used to bypass the look layer wholesale
+        # (classification, bevel, metering — everything landed in `skipped`), so a
+        # D4-class scene whose only bright elements are emissive panels was fully
+        # outside the layer. Emission itself must not be governed (banding a light
+        # source dims the scene — the D4 darkness problem is the opposite defect),
+        # so only the non-emissive channels pass: role metering + the class bevel.
+        # Detail normals stay off (a light face has no mineral grain).
+        cls, spec = _look_spec(path)
+        _look_cls = cls
+        LOOK_STATS["roles"][cls] = LOOK_STATS["roles"].get(cls, 0) + 1
+        LOOK_STATS["emissive"] = LOOK_STATS.get("emissive", 0) + 1
+        _look_omni = dict(bevel=float(spec.get("bevel", 0.0)), detail=False)
     elif LOOK_MTL:
         LOOK_STATS["skipped"] += 1
 
@@ -1761,10 +1860,58 @@ def _vec2(a, b):
     return Gf.Vec2f(float(a), float(b))
 
 
+def wire_unit_cell_to(mtl, unit_cell):
+    """[GT-113 W3] Feed a ground_kit unit-cell ledger into an ALREADY-created ground
+    material, post-hoc.
+
+    `_wire_unit_cell` existed since v1.9 but had **zero callers** — `apply_ground`
+    returns `unit_cell` to the scene, the scenes print it, and nothing ever reached
+    `make_pbr(unit_cell=…)` because the field material is created long before the kit
+    runs. This helper closes that loop without reordering any scene: call it after
+    `apply_ground` with the material object and the returned ledger value. Authoring
+    shader inputs after creation is ordinary USD; nothing about the prim set changes
+    (R-2). Default absent call = byte-identical corpus.
+
+    Returns True when wired. False (with a warning) when the material's shader is not
+    NegObsGround — OmniPBR has no cell inputs, so wiring it would author dead attrs.
+    Contract violations (U3 origin / U4 no-module) still raise, as designed.
+    """
+    from pxr import UsdShade, Sdf
+    if unit_cell is None or not LOOK_MTL:
+        return False
+    # Normalise the ground_kit ledger row: `GROUND_DIMENSIONS["unit_cell"]` rows are
+    # `(cell_m, (ox, oy), source_str)` — the 3rd element is provenance, not sigma.
+    # A `(None, None, …)` row is an explicit no-module profile → silently no wiring
+    # (that is the U4-legal absence, distinct from the U4 *violation* of jittering it).
+    if len(unit_cell) > 2 and isinstance(unit_cell[2], str):
+        unit_cell = tuple(unit_cell[:2])
+    if unit_cell[0] is None:
+        return False
+    prim = mtl.GetPrim() if hasattr(mtl, "GetPrim") else None
+    if prim is None or not prim.IsValid():
+        return False
+    sh_prim = prim.GetStage().GetPrimAtPath(
+        prim.GetPath().AppendChild("Shader"))
+    if not sh_prim or not sh_prim.IsValid():
+        return False
+    sh = UsdShade.Shader(sh_prim)
+    try:
+        sub = sh.GetSourceAssetSubIdentifier("mdl")
+    except Exception:
+        sub = None
+    if sub != "NegObsGround":
+        print(f"[룩v1][경고] wire_unit_cell_to: {prim.GetPath()} 의 셰이더가 "
+              f"NegObsGround 가 아니다({sub}) — 셀 지터 미배선")
+        return False
+    F = Sdf.ValueTypeNames.Float
+    F2 = Sdf.ValueTypeNames.Float2
+    return _wire_unit_cell(sh, F, F2, unit_cell)
+
+
 def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
                      tint=None, roughness_const=None, specular_level=None,
                      bump=1.0, base_color=None, metallic=0.0,
-                     unit_cell=None, cls=None):
+                     unit_cell=None, cls=None, blend=None):
     """[realism v1] NegObsGround.mdl material - for the ground and slope families only.
 
     The `project_uvw` of OmniPBR is not triplanar but a **cubic projection**, so on a slope the
@@ -1829,7 +1976,35 @@ def _make_ground_pbr(stage, path, diff, nor, rough, scale_m, spec,
     sh.CreateInput("texture_scale_a", F2).Set(Gf.Vec2f(s, s))
     sh.CreateInput("bump_factor_a", F).Set(
         float(spec.get("bump", bump)))
-    sh.CreateInput("use_blend", B).Set(False)
+    # [GT-113 W4] `use_blend` was a hard-coded False, sealing the MDL's complete
+    # texture-set-B machinery (diffuse/normal/roughness_texture_b, per-vertex
+    # `blend_tw`/`blend_wb` cross-fade, edge noise) that v1.9 shipped for exactly the
+    # "0 px material transition" defect (survey F6). `blend=None` (every current call)
+    # stays byte-identical; a caller may pass
+    #   dict(diff=…, nor=…, rough=…, scale_m=…, default=…, edge_noise=…, edge_wl=…,
+    #        use_wb=…)
+    # to open the B set. The weight itself comes from the mesh primvar (or
+    # `blend_default`), so geometry-side painting stays the kit's job (R3 pilot).
+    if blend is None:
+        sh.CreateInput("use_blend", B).Set(False)
+    else:
+        sh.CreateInput("use_blend", B).Set(True)
+        if blend.get("diff"):
+            _tex("diffuse_texture_b", blend["diff"], "auto")
+        if blend.get("nor"):
+            _tex("normalmap_texture_b", blend["nor"], "raw")
+        if blend.get("rough"):
+            _tex("roughness_texture_b", blend["rough"], "raw")
+        _sb = _GROUND_SCALE_FIX / float(blend.get("scale_m", scale_m))
+        sh.CreateInput("texture_scale_b", F2).Set(Gf.Vec2f(_sb, _sb))
+        for _bk, _bv in (("blend_default", blend.get("default")),
+                         ("blend_edge_noise", blend.get("edge_noise")),
+                         ("blend_edge_wavelength", blend.get("edge_wl"))):
+            if _bv is not None:
+                sh.CreateInput(_bk, F).Set(float(_bv))
+        if blend.get("use_wb") is not None:
+            sh.CreateInput("blend_use_wb", B).Set(bool(blend["use_wb"]))
+        LOOK_STATS["blend"] = LOOK_STATS.get("blend", 0) + 1
     # Repetition break-up - modular paving uses patch 0 (protects the pattern), natural ground 1
     sh.CreateInput("patch_mix_a", F).Set(float(spec.get("patch", 1.0)))
     # [GT-108 ②] `patch_wl` / `macro` / `rough_noise` / `tri_dither` become per-class

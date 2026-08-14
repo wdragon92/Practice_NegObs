@@ -1062,6 +1062,11 @@ def main():
                               scatter=sc.scatter_debris)
         print(f"[ground_kit] scene21 P1 · 프림 {res['prims']} · "
               f"δmax {res['gt_delta_max']:.4f} · unit_cell {res['unit_cell']}")
+        # [GT-113 W3 파일럿] v1.9 이후 호출처 0 이던 unit_cell 지터를 킷 스테이지
+        # (테라스 대리석 — h0.3 판정컷 전경 지배면)에 되먹임. plaza_granite 0.600
+        # 원장 값 그대로, σ/악센트는 T1 §1.8-3 기본(0.10/0.07). 확산은 검수 후.
+        _wired = sc.wire_unit_cell_to(M["marble"], res["unit_cell"])
+        print(f"[ground_kit] scene21 unit_cell 배선(marble) = {_wired}")
         return res
 
     # -------------------------------------------------------------------

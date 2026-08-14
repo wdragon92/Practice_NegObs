@@ -179,9 +179,12 @@ def drive(args):
             NEGOBS_CAM_N=str(args.cams),
             # The judge render arm, unchanged, so a data cut and a judge cut of
             # the same scene differ only in what this round varies.
+            # [GT-113 W2] The standing NEGOBS_DETAIL_SCALE=2 override is removed:
+            # it silently nullified GT-108's per-class det_scale in every render.
+            # The class/family table now carries in-band values itself; the env
+            # knob is an A/B sweep arm only. (ROUGH_GAIN=0 was the default anyway.)
             NEGOBS_CAPTURE="1", NEGOBS_CAPTURE_MODE="pt",
             NEGOBS_PT_FAST="1", NEGOBS_LOOK_V1="1",
-            NEGOBS_DETAIL_SCALE="2", NEGOBS_DETAIL_ROUGH_GAIN="0",
             PYTHONUNBUFFERED="1",
         )
         cmd = [sys.executable, os.path.abspath(__file__), "--scene-proc",

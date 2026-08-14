@@ -951,6 +951,18 @@ def main():
         M["gk_stain"] = PBR(f"{ROOT}/Looks/GKitStain",
                             diffuse_color=(0.20, 0.20, 0.195),
                             roughness_const=0.86)
+        # [GT-120] 앵커 데칼 재질 2종 — 상수색 리본 금지(s18 재바인딩 전례):
+        # 보도 포장 롤에 암틴트만 얹어 모재와 같은 결로 얼룩을 만든다.
+        M["adrip"] = PBR(f"{ROOT}/Looks/DripStain",
+                         sc.tex_path("plaza_lower", "diff"),
+                         sc.tex_path("plaza_lower", "nor"),
+                         sc.tex_path("plaza_lower", "rough"),
+                         mp["scale"]["plaza_lower"], tint=(0.50, 0.51, 0.54))
+        M["asoil"] = PBR(f"{ROOT}/Looks/SoilWash",
+                         sc.tex_path("plaza_lower", "diff"),
+                         sc.tex_path("plaza_lower", "nor"),
+                         sc.tex_path("plaza_lower", "rough"),
+                         mp["scale"]["plaza_lower"], tint=(0.62, 0.55, 0.44))
         M["gate"] = PBR(f"{ROOT}/Looks/Gate", diffuse_color=mp["gate_color"],
                         roughness_const=mp["gate_rough"])
         M["lamp"] = PBR(f"{ROOT}/Looks/Lamp", diffuse_color=mp["lamp_color"],
@@ -1087,6 +1099,33 @@ def main():
                               scatter=sc.scatter_debris)
         print(f"[ground_kit] scene16 P3 · 프림 {res['prims']} · "
               f"δmax {res['gt_delta_max']:.4f} · unit_cell {res['unit_cell']}")
+        # ── [GT-120 · R3 파일럿] 위치 규칙 데칼 — 앵커 명시 발행 3종 ─────────
+        #  ① 캐노피 낙수선(x = canopy.x0): 씬이 :339 에서 자체 설계했다가
+        #     DECAL_QUIET 에 잃은 항목의 앵커판 복원. 연속 밴드는 GT-E2 위반
+        #     [computed :337]이므로 이산 로브 3매 — y 신장(낙수 흐름 방향 ⊥
+        #     에이브 라인이 아니라 에이브를 따라 점적 얼룩이 이어지는 실물).
+        #  ② 연석 접합 토사: 보도 횡단경사 1/50 하류 = 연석변(감사 §5.2 규칙 2).
+        #     W선 보도측(x < car0)·E선 보도측(x > car1) 각 1매, 연석 따라 신장.
+        #  ③ 볼라드 베이스: 금속 지주 하부 오염(규칙 3). 6기 소형 로브.
+        cp_, ro_ = PARAMS["canopy"], PARAMS["xroad"]
+        bo_ = PARAMS["bollards"]
+        wz_ = float(PARAMS["walk"]["z_top"])
+        n_a = 0
+        n_a += gk.build_anchored_stains(
+            kit, f"{ROOT}/GKit", [(cp_["x0"], -1.25, 0.20, 0.42, 90.0),
+                                  (cp_["x0"], 0.10, 0.24, 0.50, 90.0),
+                                  (cp_["x0"], 1.30, 0.18, 0.38, 90.0)],
+            M["adrip"], z=wz_, kind="drip", seed=161)["prims"]
+        n_a += gk.build_anchored_stains(
+            kit, f"{ROOT}/GKit", [(ro_["car0"] - 0.22, -5.5, 0.14, 0.95, 0.0),
+                                  (ro_["car1"] + 0.22, 5.0, 0.14, 1.10, 0.0)],
+            M["asoil"], z=wz_, kind="dirt", seed=162)["prims"]
+        n_a += gk.build_anchored_stains(
+            kit, f"{ROOT}/GKit",
+            [(bo_["x"], _by, 0.10, 0.10, None) for _by in bo_["ys"]],
+            M["adrip"], z=wz_, kind="drip", seed=163)["prims"]
+        print(f"[GT-120] 앵커 데칼 {n_a}매 — 낙수선 3·연석 토사 2·볼라드 베이스 "
+              f"{len(bo_['ys'])} (전부 위치 규칙 유도, 무작위 산포 0)")
         if "stair_top" in tactile_sites:
             need = gk.EDGE_K * gd["tactile_dot_h"][0]
             print(f"[점자·계단머리] x {head[0]:+.2f}…{head[2]:+.2f} · 첫 단 "

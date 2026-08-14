@@ -653,6 +653,34 @@ def main():
               f"emissive_intensity={pn['intensity']}) — 궤도 상공 미배치")
 
     # -------------------------------------------------------------------
+    # [GT-119 ④] 점형 돌기 실기하 — 밴드 1개당 PointInstancer 1프림 + 실린더
+    # 프로토타입 1개(인스턴스 공유). KS 300 블록 정렬 6×6, 피치 50 mm, 돌기
+    # r 17 mm × h 5 mm. Hydra 는 인스턴서 서브트리를 직접 그리지 않으므로
+    # 프로토타입은 인스턴서 하위에 둔다.
+    # -------------------------------------------------------------------
+    def _dots_relief(path, x0, x1, y0, y1, z_top, mtl):
+        from pxr import UsdGeom, Vt, Gf
+        inst = UsdGeom.PointInstancer.Define(stage, path)
+        proto = UsdGeom.Cylinder.Define(stage, f"{path}/proto")
+        proto.CreateRadiusAttr(0.017)
+        proto.CreateHeightAttr(0.005)
+        proto.CreateAxisAttr("Z")
+        sc._bind_mtl(proto.GetPrim(), mtl)
+        pts = []
+        zc = z_top + 0.0025                      # 실린더 중심(하면 = 밴드 상면)
+        xi = x0 + 0.025
+        while xi < x1 - 0.024:
+            yj = y0 + 0.025
+            while yj < y1 - 0.024:
+                pts.append(Gf.Vec3f(xi, yj, zc))
+                yj += 0.05
+            xi += 0.05
+        inst.CreatePrototypesRel().SetTargets([proto.GetPath()])
+        inst.CreateProtoIndicesAttr(Vt.IntArray([0] * len(pts)))
+        inst.CreatePositionsAttr(Vt.Vec3fArray(pts))
+        return len(pts)
+
+    # -------------------------------------------------------------------
     # cues - tactile paving / platform edge line / barrier railing at the platform end
     # -------------------------------------------------------------------
     def build_cues(M):
@@ -669,6 +697,16 @@ def main():
                     sc.build_tactile(stage, f"{ROOT}/Tactile_{k}",
                                      HA["x0"], HA["x1"], y0, y1, M["tactile"],
                                      z=HA["z_walk"], proud=tc["proud"])
+                    # [GT-119 ④] 실기하 점형 돌기 — 노멀맵 4 mm 평판은 h0.3
+                    # 그레이징(판정 1순위)에서 실루엣이 완전 평면으로 붙어
+                    # 인쇄 무늬가 됐다(감사 확정). KS 300 블록 × 6×6 돌기
+                    # (피치 50 mm)·돌기 h 5 mm(법령 6±1 하단)를 PointInstancer
+                    # 1프림/밴드로 — 프로토타입 실린더 1개 공유(§4-14 인스턴스
+                    # 규율). 밴드 상면 +4 mm 위에 돌기만 상향 돌출: 보행면 z·
+                    # 띠 위치·에지 이격 0.30 불변, 총고 9 mm < GT δ 20 mm.
+                    _dots_relief(f"{ROOT}/TactileDots_{k}", HA["x0"], HA["x1"],
+                                 y0, y1, HA["z_walk"] + tc["proud"],
+                                 M["tactile"])
                     k += 1
         if cfg["cue_nosing"]:
             ns = PARAMS["nosing"]

@@ -4096,6 +4096,39 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
             print(f"[룩v1][경고] 창 상한 계산 실패 {prefix}: {e}")
             nrows = bd["floors"]
 
+    # [GT-122] Window reveal frames — near tier only. The shell is a solid box, so
+    # a real recess is capped at 15 mm (see the recess note above) and noon facades
+    # read as zero-thickness prints. The audit's minimal prescription: 4 frame
+    # members per window (2 jambs, head, sill), 30 mm proud of the facade plane —
+    # the shadow line and the sill drip seat appear without moving the glass.
+    _near_frame = LOOK_GEO and float(
+        bd.get("lod_dist",
+               abs(bd["facade_y"] if axis_y else bd["facade_x"]))) <= 30.0
+    _FW, _FP = 0.06, 0.03           # member width · proudness [derived — audit band]
+
+    def _reveal(f, c, wx, wy, zc):
+        hw, hh_ = wd["w"] / 2.0, wd["h"] / 2.0
+        if axis_y:
+            yb = gy + fdir * _FP / 2.0
+            for tag, (bx, bz, sx, sz) in (
+                    ("J0", (wx - hw - _FW / 2.0, zc, _FW, wd["h"] + 2 * _FW)),
+                    ("J1", (wx + hw + _FW / 2.0, zc, _FW, wd["h"] + 2 * _FW)),
+                    ("H", (wx, zc + hh_ + _FW / 2.0, wd["w"], _FW)),
+                    ("S", (wx, zc - hh_ - _FW / 2.0, wd["w"], _FW))):
+                prims.append(add_box(stage, f"{prefix}/WinFrm_{f}_{c}_{tag}",
+                                     (bx, yb, bz), (sx, _FP, sz),
+                                     parapet_mtl))
+        else:
+            xb = gx + fdir * _FP / 2.0
+            for tag, (by, bz, sy, sz) in (
+                    ("J0", (wy - hw - _FW / 2.0, zc, _FW, wd["h"] + 2 * _FW)),
+                    ("J1", (wy + hw + _FW / 2.0, zc, _FW, wd["h"] + 2 * _FW)),
+                    ("H", (wy, zc + hh_ + _FW / 2.0, wd["w"], _FW)),
+                    ("S", (wy, zc - hh_ - _FW / 2.0, wd["w"], _FW))):
+                prims.append(add_box(stage, f"{prefix}/WinFrm_{f}_{c}_{tag}",
+                                     (xb, by, bz), (_FP, sy, sz),
+                                     parapet_mtl))
+
     for f in range(nrows):
         zc = base + fstep * f + fstep * 0.5
         if band_t > 1e-4:
@@ -4116,11 +4149,15 @@ def build_building(stage, prefix, bd, shell_mtl, glass_mtl, parapet_mtl,
                 prims.append(add_box(stage, f"{prefix}/Win_{f}_{c}",
                                      (xc, gy_win, zc), (wd["w"], WIN_T, wd["h"]),
                                      glass_mtl))
+                if _near_frame:
+                    _reveal(f, c, xc, None, zc)
             else:
                 yc = bd["y0"] + wd["margin"] + (c + 0.5) * (usable / ncols)
                 prims.append(add_box(stage, f"{prefix}/Win_{f}_{c}",
                                      (gx_win, yc, zc), (WIN_T, wd["w"], wd["h"]),
                                      glass_mtl))
+                if _near_frame:
+                    _reveal(f, c, None, yc, zc)
 
     # Parapet: Building Act Enforcement Decree §40 requires a rooftop guardrail of **at least 1.2 m**.
     # The old 0.5 fell short of the rule, and the distant silhouette was that much flatter.

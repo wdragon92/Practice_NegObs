@@ -1977,12 +1977,25 @@ def main():
         between the slope grass and the stair."""
         st = PARAMS["stairs"]
         tr = PARAMS["trim"]
-        # N side: y -0.95..-0.75, P side: y 0.75..0.95
-        for tag, y0, y1 in (("N", -0.95, st["y0"]), ("P", st["y1"], 0.95)):
+        # [GT-119 ①] The trim's inner face used to sit EXACTLY on the stair side
+        # plane (y = ±0.75). Two coplanar faces — one stepped, one sloped — leave a
+        # full-length sliver where neither wins, and the h0.3 stair_down cut read
+        # the tread-end sawtooth against the pure-black under-stair void (audit
+        # crop-confirmed, both sides). Cure: the trim now LAPS the tread ends by
+        # `lap` — the way a real stair cheek sits over the tread end. Tread top z,
+        # nosing line, drop registry and the outer trim face are unchanged; the
+        # clear walking width narrows 1.50 → 1.46 (declared in the ledger row).
+        lap = 0.02
+        for tag, y0, y1 in (("N", -0.95, st["y0"] + lap),
+                            ("P", st["y1"] - lap, 0.95)):
             sc.build_slope(stage, f"{ROOT}/Trim_{tag}", st["x0"], tr["z0"],
                            st["tread"] * st["nsteps"], tr["drop"], y0, y1,
                            tr["thick"], M["concrete"], margin=tr["margin"],
                            collider=True)
+        assert st["y0"] + lap > st["y0"] and st["y1"] - lap < st["y1"], \
+            "GT-119 ① trim lap must overlap the stair flank"
+        print(f"[GT-119 ①] 계단 치크 랩 {lap:.3f} m — 유효 보행폭 "
+              f"{(st['y1'] - st['y0']) - 2 * lap:.2f} m (측면 관통 슬롯 폐합)")
 
     def build_beach(M):
         """Beach, flat at z=-3.2 — two strips, dirt_park / grass (border s=12).

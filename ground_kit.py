@@ -751,6 +751,46 @@ def build_blot(kit, path, cx, cy, rx, ry, mtl, *, n=16, rough=0.35, seed=0,
                 points=pts, zs=zs)
 
 
+def build_anchored_stains(kit, prefix, anchors, mtl, *, z, kind="dirt",
+                          seed=0, z_fn=None):
+    """[GT-120 · R3] 위치 규칙 데칼 — **앵커 명시 발행** (DECAL_QUIET 독립).
+
+    GT-107 정온이 미발행 처리한 것은 *무작위 산포* 어휘다. 이 함수는 그 반대
+    극이다: 호출자가 "왜 거기 있는지"를 앵커 좌표로 명시할 때만 존재하며,
+    위치 규칙(캐노피 낙수선·연석 하류 토사·지주/볼라드 베이스…)이 곧 인자다.
+    기본 미호출 = 전 씬 비트동일. 실세계 근거는 감사 §5.2(백화=줄눈·물때=구배
+    하류·녹물=앵커 직하 — 전부 위치가 구조에서 유도되는 오염).
+
+    anchors: [(cx, cy, rx, ry, rot_deg), ...] — rot_deg 는 신장 방향(None=등방).
+    DEC-1 로브(단일면·무두께·비축평행 경계)를 회전 좌표계에서 생성한다.
+    Returns: dict(prims, aabbs)
+    """
+    if kind not in _STAIN_KINDS:
+        raise ValueError(f"ground_kit: stain kind 는 {_STAIN_KINDS} 중 하나.")
+    pr = decal_proud("stain", _STAIN_KINDS.index(kind))
+    n0 = kit.mark()
+    aabbs = []
+    for i, (cx, cy, rx, ry, rot) in enumerate(anchors):
+        path = f"{prefix}/Anchor_{kind}_{i}"
+        ring = _blot_ring(path, seed + i, 16, 0.35)
+        nn = len(ring)
+        c = math.cos(math.radians(rot or 0.0))
+        s = math.sin(math.radians(rot or 0.0))
+        pts = []
+        for j, rj in enumerate(ring):
+            a = 2.0 * math.pi * j / nn
+            lx = float(rx) * rj * math.cos(a)
+            ly = float(ry) * rj * math.sin(a)
+            pts.append((float(cx) + lx * c - ly * s,
+                        float(cy) + lx * s + ly * c))
+        zs = [(float(z_fn(px, py)) if z_fn is not None else float(z)) + pr
+              for px, py in pts]
+        _author_flat_mesh(kit, path, pts, zs, mtl)
+        aabbs.append((min(p_[0] for p_ in pts), min(p_[1] for p_ in pts),
+                      max(p_[0] for p_ in pts), max(p_[1] for p_ in pts)))
+    return dict(prims=kit.count_since(n0), aabbs=aabbs)
+
+
 def _author_flat_mesh(kit, path, pts, zs, mtl):
     """Author the DEC-1 lobe as one `UsdGeom.Mesh` single-face polygon.
 

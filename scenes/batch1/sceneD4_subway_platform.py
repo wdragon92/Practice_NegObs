@@ -137,7 +137,11 @@ PARAMS = dict(
     panel=dict(rows=(-5.0, 5.0), x0=-14.0, step=4.0, n=15,
                size_x=1.60, size_y=0.55, z0=3.32, z1=3.41,
                color=(0.90, 0.90, 0.86), rough=0.35,
-               emis=(1.0, 1.0, 0.95), intensity=12000.0),  # r1: 1500 left the platform pitch dark -> raised 8x
+               # [GT-116 ②-2] 12000 → 28000: 반사면 정상화(①③) 후에도 판정컷
+               # h0.3 지면대가 표시 0.10 미만 100% 로 실측(파일럿 r1r2pilot) —
+               # 실물 승강장은 실내 중 최상급 조도(수백 lux)라 광원 자체가 부족.
+               # r1 의 1500→12000 전례와 같은 축, 이번엔 실측 게이트(암부 하락)로 판정.
+               emis=(1.0, 1.0, 0.95), intensity=28000.0),  # r1: 1500 → 12000 → [GT-116] 28000
 
     # ── cue ──────────────────────────────────────────────────────────
     #  tactile paving: 0.30 back from the edge -> row 1 |y| 2.30..2.60, row 2 2.62..2.92
@@ -182,9 +186,11 @@ PARAMS = dict(
         lightboxes=[dict(x=16.0, sgn=-1.0), dict(x=12.0, sgn=1.0)],
         #   face_proud > frame_proud is required so the emissive face is not buried in the frame slab
         #   (the frame is a solid box - it spans w+2·frame, so it reads as a border).
+        # [GT-116 ④] 발광 1400: 순백 클립(>0.8 픽셀 94.96% 실측) 해소 —
+        # 주변 바운스가 커진 만큼(①③) 상대 균형은 유지된다. 무문자 컨벤션 불변.
         lightbox=dict(w=2.20, h=1.30, z_c=1.50, frame=0.09,
                       face_proud=0.095, frame_proud=0.075, embed=0.005,
-                      emis=(1.0, 0.96, 0.88), intensity=2400.0),
+                      emis=(1.0, 0.96, 0.88), intensity=1400.0),
         # 4 ceiling-hung station signs - |y|=2.6 inside the edge, 0.59 m above the highest
         #   camera (z 1.85). Panel bottom 2.44 / top 3.05, hanger rod -> ceiling 3.40.
         hangers=[dict(x=0.0, sgn=-1.0), dict(x=24.0, sgn=-1.0),
@@ -199,15 +205,27 @@ PARAMS = dict(
                    gravel=0.5, wood_dark=0.5, tactile=0.3),
         # ─ sRGB gamma convention (§A-1): "dark colours" live in 0.02~0.06.
         #   texture tints multiply, so (source albedo x tint) must land in that band.
-        ballast_tint=(0.155, 0.150, 0.145),   # gravel (~0.35) x -> ~0.052 [darkened]
-        sleeper_tint=(0.30, 0.28, 0.26),      # wood_dark(≈0.18) × → ≈0.052
+        # [GT-116 ③] 도상·침목을 실측 대역으로 복귀 — 0.052 는 신품 아스팔트보다
+        # 어두워 조명을 아무리 넣어도 흑으로 붙었다(감사 실측: 궤도 대역 픽셀
+        # 91%가 휘도<0.02). 노화 도상 0.10~0.20 / 침목 ~0.10.
+        ballast_tint=(0.375, 0.365, 0.350),   # gravel(~0.35) × → ~0.13
+        sleeper_tint=(0.56, 0.53, 0.50),      # wood_dark(≈0.18) × → ≈0.10
         facade_tint=(0.14, 0.14, 0.15),       # concrete_wall(≈0.45) × → ≈0.063
-        wall_tint=(0.90, 0.90, 0.88),         # white tile wall (bright - carries the indirect light)
-        rail_color=(0.045, 0.042, 0.038), rail_metallic=0.55, rail_rough=0.75,
+        # [GT-116 ①] "백색 타일 벽(간접광 운반)" 선언과 달리 실효 알베도가
+        # plaster 선형 0.238 × 0.90 ≈ 0.21(웜베이지)로 반사판 역할을 못 했다 —
+        # 코드 자필 진단("intensity 가 아니라 벽 알베도를 의심하라") 집행.
+        # 1.43배로 실효 0.34(코퍼스 콘크리트 상한 = 밴드 천장 정합).
+        wall_tint=(1.30, 1.30, 1.27),         # white tile wall → 실효 ~0.34
+        # [GT-116 ③] 레일 웹 = 녹갈(운행 레일의 실물 — 주행면만 광택, head_* 별도)
+        rail_color=(0.30, 0.17, 0.11), rail_metallic=0.25, rail_rough=0.85,
         head_color=(0.42, 0.42, 0.44), head_metallic=0.85, head_rough=0.14,
-        ceil_color=(0.20, 0.20, 0.21), ceil_rough=0.85,
+        # [GT-116 ①] 천장 0.20 = 광 트랩. 실측 지하철 천장은 백색 마감 —
+        # 코퍼스 상한(0.34)까지 상향(기구 주변 광 pool 성립 조건).
+        ceil_color=(0.34, 0.34, 0.35), ceil_rough=0.85,
         trim_color=(0.055, 0.055, 0.060), trim_rough=0.70,
-        tunnel_color=(0.022, 0.022, 0.026), tunnel_rough=0.95,
+        # [GT-116 ③] 0.022 → 0.10: "어두운 터널 개구" 목표는 유지하되 하드엣지
+        # 흑색 카드가 아니라 그늘 속 라이닝 콘크리트로 읽히는 대역.
+        tunnel_color=(0.10, 0.10, 0.105), tunnel_rough=0.95,
         joint_color=(0.045, 0.045, 0.048), joint_rough=0.90,
         door_color=(0.28, 0.30, 0.32), door_metallic=0.35, door_rough=0.45,
         bench_color=(0.22, 0.23, 0.25), bench_metallic=0.25, bench_rough=0.50,
@@ -381,9 +399,15 @@ def main():
             f"{ROOT}/Looks/Wall", sc.tex_path("plaster", "diff"),
             sc.tex_path("plaster", "nor"), sc.tex_path("plaster", "rough"),
             sca["plaster"], tint=mp["wall_tint"])
+        # [GT-116 ⑤] 마모 틴트 — 지금까지의 '낡은 회황토'(D13 기준)는 재질이
+        # 아니라 저노출의 산물이었다(감사 실측: 원 텍스처는 채도 최대 신품 황색,
+        # B채널 0.0006). 조명 정상화 후에도 기준이 유지되도록 마모를 재질에
+        # 고정한다. 한계: 곱셈 틴트는 B채널을 만들 수 없어 완전한 회색화는
+        # 텍스처 교체가 필요(후속 후보로 기록만).
         M["tactile"] = PBR(
             f"{ROOT}/Looks/Tactile", sc.tex_path("tactile", "diff"),
-            sc.tex_path("tactile", "nor"), None, sca["tactile"])
+            sc.tex_path("tactile", "nor"), None, sca["tactile"],
+            tint=(0.55, 0.52, 0.60))
         # ── constant colours ──
         M["rail"] = PBR(f"{ROOT}/Looks/Rail", diffuse_color=mp["rail_color"],
                         metallic=mp["rail_metallic"],
@@ -400,6 +424,13 @@ def main():
         M["tunnel"] = PBR(f"{ROOT}/Looks/Tunnel",
                           diffuse_color=mp["tunnel_color"],
                           roughness_const=mp["tunnel_rough"])
+        # [GT-116 ②③] 라이닝 링(터널보다 밝은 콘크리트) · 등기구 하우징(백색 스틸)
+        M["lining"] = PBR(f"{ROOT}/Looks/TunnelLining",
+                          diffuse_color=(0.16, 0.16, 0.17),
+                          roughness_const=0.90)
+        M["lum_housing"] = PBR(f"{ROOT}/Looks/LumHousing",
+                               diffuse_color=(0.42, 0.42, 0.44),
+                               metallic=0.10, roughness_const=0.45)
         M["joint"] = PBR(f"{ROOT}/Looks/Joint", diffuse_color=mp["joint_color"],
                          roughness_const=mp["joint_rough"])
         M["nosing"] = PBR(f"{ROOT}/Looks/Nosing",
@@ -573,6 +604,22 @@ def main():
              M["tunnel"])
         SPAN(f"{ROOT}/Bore_Cap", bo["x1"] - bo["cap_t"], bo["x1"],
              -bo["half_out"], bo["half_out"], bo["z0"], bo["z1"], M["tunnel"])
+        # [GT-116 ③] 라이닝 링 3기 + 케이블 트레이 1조 — "아래/안쪽에 무엇이
+        # 있는가" 단서의 최소 복원(감사: 개구가 하드엣지 흑색 카드로 읽힘).
+        # 링은 보어 내면에서 0.06 안쪽으로 세운 얇은 프레임(측벽 2 + 천장 1),
+        # 트레이는 남측 벽 z 1.05 의 얕은 선반. 전부 판정 밴드 밖(x>46.3).
+        ring_w, ring_t = 0.15, 0.06
+        for ri, rx in enumerate((48.5, 51.0, 53.5)):
+            for si, sgn in enumerate((-1.0, 1.0)):
+                SPAN(f"{ROOT}/Bore_Ring_{ri}_{si}", rx - ring_w / 2.0,
+                     rx + ring_w / 2.0,
+                     sgn * (bo["half_in"] - ring_t), sgn * bo["half_in"],
+                     bo["z0"] + 0.05, bo["z1"] - 0.30, M["lining"])
+            SPAN(f"{ROOT}/Bore_Ring_{ri}_T", rx - ring_w / 2.0,
+                 rx + ring_w / 2.0, -bo["half_in"], bo["half_in"],
+                 bo["z1"] - 0.30, bo["z1"] - 0.30 + ring_t, M["lining"])
+        SPAN(f"{ROOT}/Bore_Tray", bo["x0"] + 0.2, bo["x1"] - bo["cap_t"],
+             -bo["half_in"], -bo["half_in"] + 0.10, 1.05, 1.10, M["trim"])
 
     # -------------------------------------------------------------------
     # ceiling emissive panels - only the 2 rows above the platforms. Nothing above the track, deliberately.
@@ -587,6 +634,19 @@ def main():
                      x - pn["size_x"] / 2.0, x + pn["size_x"] / 2.0,
                      yc - pn["size_y"] / 2.0, yc + pn["size_y"] / 2.0,
                      pn["z0"], pn["z1"], M["panel"])
+                # [GT-116 ②] 트로퍼 베젤 4변 — 발광판 1장이 천장에 붙은 "흰
+                # 스티커"로 읽히던 것을 기구(하우징+디퓨저)로. 베젤 폭 0.06,
+                # 발광면보다 0.02 아래로 내려와 프레임 그림자를 만든다.
+                bz, bd_ = 0.06, 0.02
+                hx0, hx1 = x - pn["size_x"] / 2.0, x + pn["size_x"] / 2.0
+                hy0, hy1 = yc - pn["size_y"] / 2.0, yc + pn["size_y"] / 2.0
+                for tag, (bx0, bx1, by0, by1) in (
+                        ("W", (hx0 - bz, hx0, hy0 - bz, hy1 + bz)),
+                        ("E", (hx1, hx1 + bz, hy0 - bz, hy1 + bz)),
+                        ("S", (hx0, hx1, hy0 - bz, hy0)),
+                        ("N", (hx0, hx1, hy1, hy1 + bz))):
+                    SPAN(f"{ROOT}/PanelBezel_{k}_{tag}", bx0, bx1, by0, by1,
+                         pn["z0"] - bd_, pn["z1"], M["lum_housing"])
                 k += 1
         print(f"[조명] 천장 발광 패널 {k}장 "
               f"(열 {len(pn['rows'])} × {pn['n']}, 간격 {pn['step']} m, "

@@ -888,11 +888,14 @@ def main():
         # water feature (reflecting pool) - the "grass slab" of build_planter replaced by a water material.
         #   water top z = water_h(0.30) < kerb 0.45 -> all geometry z >= 0 (GT unchanged)
         po = PARAMS["pool"]
+        # [GT-115 ⑧] shrubs=False — build_planter 의 무조건 관목 식재가 수면 위에
+        # 철쭉 3주를 세웠다(감사 확정). 연못에는 식재 없음.
         sc.build_planter(stage, f"{ROOT}/Pool", po["cx"], po["cy"], 0.0,
                          M["curb"], M["water"], tree_mtls=None,
                          size=po["size"], curb_h=po["curb_h"],
                          curb_t=po["curb_t"], cap_over=po["cap_over"],
-                         cap_h=po["cap_h"], grass_h=po["water_h"])
+                         cap_h=po["cap_h"], grass_h=po["water_h"],
+                         shrubs=False)
         # [GT-63] clipped hedge bands: box+crown blobs -> fused rows of real
         #   shrub USDs (place_hedge_row; rects/heights/prim roots unchanged;
         #   legacy build_hedge fallback inside).

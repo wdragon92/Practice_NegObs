@@ -211,7 +211,30 @@ PARAMS = dict(
                top_z=-2.560, slope=0.026, thick=1.00),
     # Still-water level. Waterline x is DERIVED, never typed:
     #   x_w = x_break + (|water_z| - |beach_z|) / slope = 14 + 0.740/0.026
-    water=dict(x0=40.0, x_mid=1200.0, x1=6000.0, y_near=3000.0, y_far=6000.0,
+    # [GT-115 ⑪] **The plate is sized from the horizon, not chosen.** A finite
+    #   water plane's far edge subtends a depression `atan(dz / D)` from an eye
+    #   `dz` above the still-water plane; it is indistinguishable from the true
+    #   eye-line horizon once that angle is under HALF a rendered row. The judged
+    #   frame is 1920x1080 at vFOV 36 deg, so one row = 0.03333 deg and the
+    #   budget is 0.016667 deg = 2.909e-4 rad, i.e. **D >= 3437.6 x dz**:
+    #     preset_h0.3 dz 3.600 -> 12 375 m · preset_h0.9 4.200 -> 14 438
+    #     preset_h1.8 5.100 -> 17 532 · wave_raking 3.650 -> 12 547
+    #     color_front / lower_lookback 2.290 -> 7 872 · sea_beauty 4.920 -> 16 913
+    #     **oblique_down 6.500 -> 22 345 m  (the governing eye)**
+    #   `x1`/`y_far` = 24 000 clears the governing case by 7 %, and it clears it
+    #   at 30 deg off-axis too: the worst exit from `oblique_down`'s eye is the
+    #   -Y boundary at 24 007 / sin 48.1 deg = 32 258 m. v6's 6 000 m put the far
+    #   edge 0.0621 deg down = **1.9 rows below the horizon at oblique_down**,
+    #   which is the "water stops short of the horizon" the audit measured.
+    #   ★ `x0` 40.0 -> 0.00. The beach plate is finite in y (-105…520) while the
+    #   water started 40 m seaward of the revetment, so the wedge
+    #   `0 <= x <= 40, y > 520` was **modelled by nothing**: `sea_beauty` cols
+    #   62-67/240 trace water at t 1 500 m, then SKY, then sand at t 334 m
+    #   `[measured, _trace]` - a sky slit through the ground at the shoreline.
+    #   Running the water in to the revetment line closes it; everywhere the
+    #   beach exists the sand top (>= -3.300 for x <= 42.46) is above the water
+    #   plane, so nothing that is visible today changes.
+    water=dict(x0=0.0, x_mid=1200.0, x1=24000.0, y_near=3000.0, y_far=24000.0,
                top_z=-3.300, thick=2.00, far_drop=0.002),
     # Surf. 3 broken breaker lines + the swash edge, each cut into y segments
     #   with a jittered x centre so the line reads as a wave, not a ruler.
@@ -231,11 +254,42 @@ PARAMS = dict(
     #   Two levers, both cheap: the outer lines get half the width, and the
     #   outer two bind a SECOND, dimmer foam material — a real breaker line
     #   loses contrast with distance and a single albedo cannot express that.
+    #   [GT-115 ⑪] The audit still reads them as **axis-aligned white rectangles
+    #   with hard square ends**, and it is right: one box per drawn breaker can
+    #   only ever end in a 90 deg corner. Without an alpha map the ends cannot be
+    #   dissolved, so they are **tapered geometrically** instead - each breaker is
+    #   emitted as THREE boxes (head · body · tail). The two end pieces are
+    #   `tap_w` of the body width, `tap_h` of its height, stand `tap_proud`
+    #   instead of `proud` above the water (so at a 4-6 deg grazing eye they
+    #   subtend roughly a third of the body's rows and sink into the surface
+    #   rather than stopping at it), carry their own +-`tap_yaw` and are pushed
+    #   `tap_dx` of a width off the body axis, so the bar bends at both ends.
+    #   `rotz` 4.0 -> 9.0 as well: at grazing the old +-4 deg was inside the
+    #   width jitter and read as noise on a straight line, not as a direction.
+    #   **The prim budget is held**, which is why `seg_y`/`step` move with it:
+    #   3 boxes per breaker at the old 7.4/5.0 pacing is 918 foam prims against
+    #   a 979-prim scene. 14.0/9.4 keeps the overlap rule that makes the line
+    #   continuous (`step` x 1.15 = 10.81 < `seg_y` x 0.80 = 11.20, the two
+    #   jitter extremes) and lands on **489 boxes** vs the 305 this file drew
+    #   before `[computed]` - a longer breaker with a tapered, bent end reads
+    #   better than a short one with a square end anyway.
     surf=dict(lines=((-0.30, 0.80, 60), (4.10, 0.52, 50), (9.40, 0.28, 42),
                      (16.60, 0.22, 34)),
-              y0=-110.0, y1=250.0, seg_y=7.4, step=5.0, rotz=4.0,
-              jit_x=1.15, jit_w=0.45, proud=0.012, seed=1802),
+              y0=-110.0, y1=250.0, seg_y=14.0, step=9.4, rotz=9.0,
+              jit_x=1.15, jit_w=0.45, proud=0.012,
+              tap_f=0.26, tap_w=0.52, tap_h=0.45, tap_proud=0.004,
+              tap_yaw=4.0, tap_dx=0.34, seed=1802),
     # Damp sand landward of the swash (the tide-out signature of G18).
+    # [GT-115 ⑪] **It does issue** - `build_beach` (3) has emitted it since v7 and
+    #   `260806_w3_allview5/pt_noon_wave_raking.png` carries it at rows 404-419
+    #   `[measured]`, exactly where the geometry puts it (x 36.26…42.92, the run
+    #   that is landward of the derived waterline 42.4615 and still above the
+    #   water plane). What is missing is CONTRAST, not the band: it renders
+    #   (0.755, 0.702, 0.590) against dry sand (0.824, 0.780, 0.677) - a 8 %
+    #   display step for a 30 % linear one, because the dry sand sits in the
+    #   compressed top of the tone curve. Both levers are in `material` below:
+    #   the dry tint comes down out of the clip and the damp tint goes to 35 %
+    #   under it. The geometry (back/fwd/proud) is NOT touched.
     damp=dict(back=6.20, fwd=0.60, proud=0.012),
     # NOTE — wind-blown sand over the granite is delivered by `ground_kit`'s
     #   `silt_band` (see `gkit` below), NOT by hand-placed lobes. Rounds a/b
@@ -349,9 +403,23 @@ PARAMS = dict(
     # ══ horizon furniture ═══════════════════════════════════════════════════
     # Suspension bridge across the bay (G18's 광안대교 read). Deck + towers +
     #   two cable planes = 8 prims, at 2-4 km, i.e. a horizon silhouette.
+    # [GT-115 ⑪] **approach piers - the floating-bar defect.** Both towers stand
+    #   at x 900 / 1800, and both are outside every judged frustum: from
+    #   `wave_raking`'s eye a tower is at azimuth 64.6 / 46.6 deg against a
+    #   30 deg half-angle. The deck run that IS in frame (x 3248…4200) therefore
+    #   had nothing under it and rendered as a 2-row white bar with 8 rows of
+    #   open sky beneath it - `260806_w3_allview5/pt_noon_wave_raking.png`
+    #   col 60: bar rows 260-261, SKY rows 263-269, sea from row 271, and the
+    #   scene's own `_trace` classifies (60, 260) as **`bridge` at t = 4009 m**
+    #   `[measured]`. A deck 20 m over the sea at 4.6 km *belongs* above the
+    #   horizon line; what was missing is the support. A real bay crossing
+    #   carries its approach spans on piers, so 10 slim boxes seat it. `clear`
+    #   keeps a pier off a tower, and the suspended span between the towers gets
+    #   none - that is what makes it read as a suspension bridge.
     bridge=dict(x0=400.0, x1=4200.0, y=1900.0, w=26.0, deck_z=20.0, deck_t=3.2,
                 towers=(900.0, 1800.0), tower_h=90.0, tower_w=7.0,
-                cable_sag=14.0),
+                cable_sag=14.0,
+                pier_pitch=300.0, pier_w=4.6, pier_y=10.0, pier_clear=80.0),
     # Headland closing the far right (G18 shows one beyond the town).
     #   A ridge, not a box: 6 overlapping masses of different height give a
     #   stepped silhouette. Round b's 2 clean rectangles read as a green slab
@@ -380,8 +448,33 @@ PARAMS = dict(
         #   backwash ripple wavelength is 0.02-0.05 of the tile and real
         #   backwash ripples run 20-80 mm, so 1.0 m puts them at 20-50 mm.
         sand_scale=1.00,
-        sand_tint=(1.00, 0.97, 0.92),          # G18's sand is a shade warmer
-        damp_tint=(0.70, 0.68, 0.66),          # wet sand darkens ~30 %
+        # [GT-115 ⑪] **The 0.3235 above is the channel average, not the albedo
+        #   the code governs.** Re-measured this session with the repo's own
+        #   instrument (`scene_common._texture_mean`, sRGB->linear per IEC
+        #   61966-2-1, 64 px thumbnail, i.e. the exact number `_albedo_band`
+        #   would see):
+        #     texture linear mean (0.4607, 0.3423, 0.1644) · Rec.709 luminance
+        #       **0.3557** · channel average 0.3234  <- the docstring's figure
+        #     x `sand_tint` (1.00, 0.97, 0.92) -> effective (0.4607, 0.3320,
+        #       0.1512) · **luminance 0.3464** · channel average 0.3156
+        #   So the material was 0.346, not 0.324, and it is ABOVE the 0.34
+        #   ceiling every other ground class in the repo carries. It escapes the
+        #   clamp only because the path token routes it to `soil`, and `soil` is
+        #   one of the two ground classes that state no `alb_max` - the class
+        #   table is a Lane-1 file, so the correction is made scene-side.
+        #   x 0.86612 lands the effective luminance on **0.300** (channel
+        #   average 0.272), the dry end of the 0.25-0.40 dry-quartz band, with
+        #   the warm ratio 1.00 : 0.97 : 0.92 preserved exactly.
+        #   **Stated honestly**: this is worth ~0.03 of display value on the
+        #   0.826 the audit measured. The remaining ~0.79 is the tone/exposure
+        #   path, which this ticket is explicitly not allowed to chase.
+        sand_tint=(0.866, 0.840, 0.797),       # G18's sand is a shade warmer
+        # [GT-115 ⑪] wet swash sand, 35 % under the dry field:
+        #   effective (0.2589, 0.1869, 0.0871) · luminance **0.1950** =
+        #   0.650 x 0.300. The old (0.70, 0.68, 0.66) gave 0.2429, which was
+        #   only 0.70 of the OLD dry value and 0.81 of the new one - i.e. after
+        #   the dry sand comes down it would have all but vanished.
+        damp_tint=(0.562, 0.546, 0.530),       # wet sand darkens ~35 %
         # ── SEA ── the v6 defect and its fix, in three numbers.
         #   rough 0.22 -> 0.38 : at 0.4-5 deg grazing a 0.22 dielectric is a
         #     mirror and returned the sky, erasing the horizon. 0.38 spreads the
@@ -393,8 +486,15 @@ PARAMS = dict(
         # The far plate lightens toward the horizon (G18) WITHOUT closing the
         #   sea/sky value gap: it stays 26 % darker than the near sky band.
         water_far_color=(0.105, 0.140, 0.176), water_far_rough=0.52,
-        foam_color=(0.520, 0.545, 0.556), foam_rough=0.92,
-        foam_far_color=(0.360, 0.392, 0.408), foam_far_rough=0.95,
+        # [GT-115 ⑪] Foam out of the pure-white band. 0.520 linear = **0.748
+        #   display** (sRGB encode), i.e. it sat ON the ceiling the audit asked
+        #   for and had no margin at all once the sun term is applied; the
+        #   breaker lines therefore clipped to paper white and lost the taper
+        #   the geometry now carries. x 0.865 -> 0.450 linear = **0.706
+        #   display**, and the far pair follows by the same factor so the
+        #   near/far contrast ladder (the round-e lever) is untouched.
+        foam_color=(0.450, 0.471, 0.481), foam_rough=0.92,
+        foam_far_color=(0.311, 0.339, 0.353), foam_far_rough=0.95,
         # Structures
         # **WHITE gate, measured.** v6's paving sat at 20.2 % pure-white
         #   (>0.8) at `preset_h0.3_d2`; with the promenade now FULLY sunlit
@@ -647,6 +747,37 @@ def step_top(i):
     return -PARAMS["stair"]["riser"] * (i + 1)
 
 
+def bridge_piers():
+    """[GT-115 ⑪] Approach-span pier stations x [m] - DERIVED, never typed.
+
+    Piers march from `x0` at `pier_pitch`, and the deck end `x1` always carries
+    one: it is the end abutment, and without it the last bay overhangs into
+    open sky, which is the same bar-end the audit read at the other end. Two
+    stations are refused - anything inside the suspended span between the two
+    towers (that span is what makes it read as a suspension bridge) and
+    anything within `pier_clear` of a tower.
+
+    Lives at module level so `_macro_model` and `build_horizon` cannot disagree
+    about where the piers are (the `Beach_foreshore` / `beach_z` rule).
+    """
+    bd = PARAMS["bridge"]
+    ta, tb = min(bd["towers"]), max(bd["towers"])
+    out = []
+    n = int(math.floor((bd["x1"] - bd["x0"]) / bd["pier_pitch"]))
+    for i in range(1, n + 1):
+        x = bd["x0"] + i * bd["pier_pitch"]
+        if ta < x < tb:
+            continue
+        if min(abs(x - ta), abs(x - tb)) < bd["pier_clear"]:
+            continue
+        out.append(x)
+    if (abs(bd["x1"] - ta) >= bd["pier_clear"]
+            and abs(bd["x1"] - tb) >= bd["pier_clear"]
+            and (not out or abs(out[-1] - bd["x1"]) > 1e-6)):
+        out.append(bd["x1"])
+    return out
+
+
 # ===========================================================================
 # [C2] R-1 — hazard / drop registry, re-derived from the geometry and PRINTED
 #      (`gt_changes_w3.md` §1: "the scene's own self-check re-derives and
@@ -777,7 +908,10 @@ def _macro_model(hazard=True):
                 b["top_z"] + dz + b["slope"] * b["x_break"], -b["slope"], 0.0))
     pat.append(("water", w["x0"], w["x_mid"], -w["y_near"], w["y_near"],
                 w["top_z"] + dz, 0.0, 0.0))
-    pat.append(("water", w["x_mid"] - 5.0, w["x1"], -w["y_far"], w["y_far"],
+    # [GT-115 ⑪] the far plate now starts at `x0`, not `x_mid - 5`: the band
+    #   `x < x_mid, |y| > y_near` used to belong to neither plate and `sea_beauty`
+    #   looks straight down it. Same bound as `build_sea` - the two must agree.
+    pat.append(("water", w["x0"], w["x1"], -w["y_far"], w["y_far"],
                 w["top_z"] + dz - w["far_drop"], 0.0, 0.0))
     box = []                       # (name, x0,x1,y0,y1,z0,z1)
     for (x0, x1, y0, y1, h, _f) in P["city"]["wall"] + P["city"]["towers"]:
@@ -791,6 +925,12 @@ def _macro_model(hazard=True):
         box.append(("bridge", tx - bd["tower_w"] / 2.0, tx + bd["tower_w"] / 2.0,
                     bd["y"] - bd["w"] / 2.0, bd["y"] + bd["w"] / 2.0,
                     bd["deck_z"], bd["deck_z"] + bd["tower_h"]))
+    # [GT-115 ⑪] approach piers — carried in the analytic model as well, so the
+    #   coverage check sees the same silhouette the frame does.
+    for px in bridge_piers():
+        box.append(("bridge", px - bd["pier_w"] / 2.0, px + bd["pier_w"] / 2.0,
+                    bd["y"] - bd["pier_y"] / 2.0, bd["y"] + bd["pier_y"] / 2.0,
+                    w["top_z"] + dz - 2.0, bd["deck_z"] - bd["deck_t"]))
     for (x0, x1, y0, y1, h) in P["headland"]:
         box.append(("land", x0, x1, y0, y1, w["top_z"] + dz, h))
     bs = P["beds"]
@@ -1174,14 +1314,48 @@ def main():
         M["gk_iron"] = sc.make_pbr(stage, "/World/Looks/GKitIron",
                                    diffuse_color=(0.09, 0.09, 0.095),
                                    metallic=0.55, roughness_const=0.55)
-        M["gk_stain"] = sc.make_pbr(stage, "/World/Looks/GKitStain",
-                                    diffuse_color=(0.20, 0.20, 0.19),
-                                    roughness_const=0.85)
+        # [GT-115 ⑪] **Ground-class decal materials, ported from scene16.**
+        #   scene16 wrote the diagnosis down at its own `GKitCrack`/`GKitStain`:
+        #   a kit crack or stain bound to a texture-less constant "left it as a
+        #   dead flat ribbon". 18 carried the second half of that defect - the
+        #   crack element was bound to `gk_stain`, a constant 0.20 grey, so the
+        #   longest thin decal on the promenade was a flat grey ribbon AND it
+        #   was a stain's value rather than a crack's. Fixed on both counts, and
+        #   one step past scene16: instead of a constant that only gains grain
+        #   when `NEGOBS_LOOK_MTL=1` promotes it, each decal binds the
+        #   promenade's OWN granite map, so it carries the paving's grain in
+        #   both look arms and its albedo is the product the frame actually
+        #   receives. Tints are solved, not eyeballed [computed, `_texture_mean`
+        #   64 px, Rec.709 luminance]:
+        #     granite_dark tex luminance 0.0765 x 0.72   -> crack **0.0551**
+        #     plaza_light  tex luminance 0.4622 x 0.433  -> stain **0.1999**
+        #     plaza_light  tex luminance 0.4622 x 0.602  -> salt  **0.2779**
+        #   The stain and salt values are the ones the old constants declared
+        #   (0.20 / 0.29->0.278), so nothing but the grain moves; the crack goes
+        #   0.20 -> 0.055, which is scene16's `gk_crack` value.
+        #   Paths are UNCHANGED (`GKitStain` / `GKitSalt`) - both land in the
+        #   `concrete` look family via the W2-F1 decal vocabulary, and `GKitCrack`
+        #   joins them by the same rule.
+        M["gk_crack"] = sc.make_pbr(
+            stage, "/World/Looks/GKitCrack",
+            sc.tex_path("granite_dark", "diff"),
+            sc.tex_path("granite_dark", "nor"),
+            sc.tex_path("granite_dark", "rough"), scl["granite_dark"],
+            tint=(0.72, 0.72, 0.71))
+        M["gk_stain"] = sc.make_pbr(
+            stage, "/World/Looks/GKitStain",
+            sc.tex_path("plaza_light", "diff"),
+            sc.tex_path("plaza_light", "nor"),
+            sc.tex_path("plaza_light", "rough"), scl["plaza_light"],
+            tint=(0.433, 0.433, 0.425))
         # Salt efflorescence on a seafront granite promenade — the one bright
         #   stain, and it stays under the 0.30 cap (§5.1 18 row, explicit).
-        M["gk_salt"] = sc.make_pbr(stage, "/World/Looks/GKitSalt",
-                                   diffuse_color=(0.29, 0.29, 0.28),
-                                   roughness_const=0.90)
+        M["gk_salt"] = sc.make_pbr(
+            stage, "/World/Looks/GKitSalt",
+            sc.tex_path("plaza_light", "diff"),
+            sc.tex_path("plaza_light", "nor"),
+            sc.tex_path("plaza_light", "rough"), scl["plaza_light"],
+            tint=(0.602, 0.602, 0.592))
         return M
 
     # -------------------------------------------------------------------
@@ -1238,11 +1412,19 @@ def main():
                            margin=0.0, collider=False)
 
     def build_sea(M):
+        """Near sea + far haze plate. See `PARAMS["water"]` for the horizon
+        sizing arithmetic ([GT-115 ⑪]).
+
+        The far plate is the FULL sheet (`x0` … `x1`, ±`y_far`) and the near
+        plate is laid on top of it over the first 1.2 km; `far_drop` (2 mm)
+        keeps the two off a shared plane. Cutting the far plate at `x_mid - 5`
+        instead left the band `x < x_mid, |y| > y_near` unmodelled, and
+        `sea_beauty` looks straight along it."""
         w = PARAMS["water"]
         top = w["top_z"] + DZ
         _plate(f"{ROOT}/Sea_near", w["x0"], w["x_mid"], -w["y_near"],
                w["y_near"], top, top - w["thick"], M["sea"], collider=False)
-        _plate(f"{ROOT}/Sea_far", w["x_mid"] - 5.0, w["x1"], -w["y_far"],
+        _plate(f"{ROOT}/Sea_far", w["x0"], w["x1"], -w["y_far"],
                w["y_far"], top - w["far_drop"],
                top - w["far_drop"] - w["thick"], M["sea_far"], collider=False)
 
@@ -1252,14 +1434,27 @@ def main():
         A straight strip reads as a ruler, so each line is cut into y segments
         whose x centre and width are jittered by a seeded RNG. That is the
         cheapest thing that turns "a blue plane" into "the sea": in G18 the
-        surf lines are the single strongest sea cue after the horizon."""
+        surf lines are the single strongest sea cue after the horizon.
+
+        [GT-115 ⑪] **Tapered ends, no alpha.** Each breaker is now three boxes
+        instead of one: a full-width body over the middle `1 - 2*tap_f` of the
+        drawn length, and a head and a tail over `tap_f` each. The end pieces
+        are `tap_w` of the width and `tap_h` of the height, sit at `tap_proud`
+        rather than `proud` above the still-water plane, and carry their own
+        yaw and a `tap_dx` lateral offset. So a breaker no longer ends on a
+        90 deg corner at full section - it narrows, drops and bends away, which
+        at a 4-6 deg grazing eye is the only taper a solid box can express.
+        The three pieces overlap in y (`ov`) so the taper has no seam."""
         import random as _r
         sf = PARAMS["surf"]
         b, w = PARAMS["beach"], PARAMS["water"]
         rnd = _r.Random(sf["seed"])
         xw = waterline_x(hazard)
         top = w["top_z"] + DZ + sf["proud"]
+        top_t = w["top_z"] + DZ + sf["tap_proud"]
+        h_b, h_t = 0.12, 0.12 * sf["tap_h"]
         for li, (off, wid, nseg) in enumerate(sf["lines"]):
+            mtl = M["foam"] if li < 2 else M["foam_far"]
             span = sf["y1"]
             y = sf["y0"]
             k = 0
@@ -1267,11 +1462,23 @@ def main():
                 ly = sf["seg_y"] * rnd.uniform(0.80, 1.35)
                 cxs = xw + off + rnd.uniform(-sf["jit_x"], sf["jit_x"])
                 ww = wid * rnd.uniform(1.0 - sf["jit_w"], 1.0 + sf["jit_w"])
+                yaw = rnd.uniform(-sf["rotz"], sf["rotz"])
+                le = ly * sf["tap_f"]                  # head / tail length
+                lb = ly - 2.0 * le                     # body length
+                ov = le * 0.25                         # taper seam overlap
+                # (a) body — full section, the line's own axis
                 sc._oriented_box(
                     stage, f"{ROOT}/Surf_{li}_{k}",
-                    (cxs, y + ly / 2.0, top - 0.06), (ww, ly, 0.12),
-                    M["foam"] if li < 2 else M["foam_far"], collider=False,
-                    rotz=rnd.uniform(-sf["rotz"], sf["rotz"]))
+                    (cxs, y + le + lb / 2.0, top - h_b / 2.0),
+                    (ww, lb + 2.0 * ov, h_b), mtl, collider=False, rotz=yaw)
+                # (b) head / tail — narrower, lower, sunk, and bent off-axis
+                for tag, sgn, cy in (("a", -1.0, y + le / 2.0),
+                                     ("b", +1.0, y + le + lb + le / 2.0)):
+                    sc._oriented_box(
+                        stage, f"{ROOT}/Surf_{li}_{k}{tag}",
+                        (cxs + sgn * sf["tap_dx"] * ww, cy, top_t - h_t / 2.0),
+                        (ww * sf["tap_w"], le + ov, h_t), mtl, collider=False,
+                        rotz=yaw + sgn * rnd.uniform(0.4, 1.0) * sf["tap_yaw"])
                 # segments OVERLAP: `step` < the drawn length, so the breaker
                 #   line is continuous instead of a row of dashes
                 y += sf["step"] * rnd.uniform(0.75, 1.15)
@@ -1543,6 +1750,17 @@ def main():
                        sa + (sb - sa) * f - 1.2, sa + (sb - sa) * f + 1.2,
                        y0 + 1.0, y1 - 1.0, za, za - 0.9, M["cable"],
                        collider=False)
+        # [GT-115 ⑪] approach-span piers — the deck stops floating. Stations come
+        #   from `bridge_piers()` so `_macro_model` cannot drift from the USD;
+        #   each pier runs from the deck soffit down 2 m under the still-water
+        #   plane, so the sea plate cuts it off at the waterline.
+        py = bd["pier_y"] / 2.0
+        for pi, px in enumerate(bridge_piers()):
+            _plate(f"{ROOT}/Bridge_pier_{pi}", px - bd["pier_w"] / 2.0,
+                   px + bd["pier_w"] / 2.0, bd["y"] - py, bd["y"] + py,
+                   bd["deck_z"] - bd["deck_t"],
+                   PARAMS["water"]["top_z"] + DZ - 2.0, M["bridge"],
+                   collider=False)
         for i, (x0, x1, hy0, hy1, h) in enumerate(PARAMS["headland"]):
             _plate(f"{ROOT}/Headland_{i}", x0, x1, hy0, hy1, h,
                    PARAMS["water"]["top_z"] + DZ - 4.0, M["headland"],
@@ -1575,7 +1793,17 @@ def main():
         # `patch` = a granite slab REPLACEMENT, so it must be granite. Round b
         #   bound it to the warm tan band and the three repair patches rendered
         #   as large tan rectangles in the middle of the promenade.
-        M2.update(joint=M["gk_joint"], crack=M["gk_stain"], patch=M["coping"],
+        # [GT-115 ⑪] `crack` was bound to `gk_stain` — a stain's 0.20 grey, and a
+        #   texture-less constant, i.e. scene16's "dead flat ribbon" verbatim.
+        #   It now takes the dedicated dark granite decal. **Census, this HEAD**:
+        #   `plan_ground` prints `[GT-107 데칼 정온] surface 'crack'/'stain' 미발행`
+        #   and emits joints·2 manholes·2 gullies·3 patches·6 weed·2 silt only,
+        #   so NEITHER `crack` nor `stain_*` reaches a prim today `[measured, dry
+        #   plan]`; `wear` and `marking` are likewise unreachable (this profile
+        #   declares no `wear_lane` extra and no `marking` infra). The binding is
+        #   therefore for the `NEGOBS_DECAL_FULL=1` restore arm, which is exactly
+        #   where the defect would come back.
+        M2.update(joint=M["gk_joint"], crack=M["gk_crack"], patch=M["coping"],
                   patch_cut=M["gk_joint"], manhole=M["gk_iron"],
                   gully=M["gk_iron"], gutter=M["gk_iron"],
                   gutter_cover=M["gk_iron"], trench=M["gk_iron"],

@@ -1,0 +1,2482 @@
+{
+  "pairs": [
+    {
+      "scene": "scene13",
+      "before": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene13/260813_w4_s13tone",
+      "after": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene13/260814_w4_r1r2pilot"
+    },
+    {
+      "scene": "scene16",
+      "before": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene16/260813_w4_s16tone",
+      "after": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene16/260814_w4_r1r2pilot"
+    },
+    {
+      "scene": "scene21",
+      "before": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene21/260813_w4_s21civic",
+      "after": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/scene21/260814_w4_r1r2pilot"
+    },
+    {
+      "scene": "sceneC1",
+      "before": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/sceneC1/260806_w3_allview5",
+      "after": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/sceneC1/260814_w4_r1r2pilot"
+    },
+    {
+      "scene": "sceneD4",
+      "before": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/sceneD4/260806_w3_allview5",
+      "after": "/home/vislab/Desktop/work_sy/Practice_NegObs/look_check/sceneD4/260814_w4_r1r2pilot"
+    }
+  ],
+  "results": [
+    {
+      "scene": "scene13",
+      "view": "beauty_overview",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 109.64109802246094,
+        "after_dark": 10.546344521604938,
+        "after_dark_near": 11.489076967592593,
+        "after_clip": 0.0,
+        "after_white": 0.5021701388888888,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 108.35161590576172,
+        "before_dark": 12.28129822530864,
+        "before_dark_near": 12.742573302469134,
+        "before_clip": 0.0,
+        "before_white": 0.4875578703703704,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.014612268518518434,
+        "diff_mean": 2.747370719909668,
+        "diff_frac": 12.080713091563785,
+        "d_mean": 1.2894821166992188,
+        "d_dark": -1.7349537037037024,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 4.166666666666666,
+        "blk_max": 21.014040793935635
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "bollard_walk",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 26 % (최대 편차 90/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 115.904052734375,
+        "after_dark": 7.453510802469136,
+        "after_dark_near": 0.015673225308641976,
+        "after_clip": 0.008391203703703703,
+        "after_white": 1.369140625,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 109.39921569824219,
+        "before_dark": 8.876880787037036,
+        "before_dark_near": 1.4330150462962963,
+        "before_clip": 0.0,
+        "before_white": 1.824725115740741,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.4555844907407409,
+        "diff_mean": 9.616398811340332,
+        "diff_frac": 29.223781507201647,
+        "d_mean": 6.5048370361328125,
+        "d_dark": -1.4233699845679002,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 26.38888888888889,
+        "blk_max": 90.21098804676993
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "entry_approach",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 19 % (최대 편차 89/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 114.88078308105469,
+        "after_dark": 7.685426311728396,
+        "after_dark_near": 0.0,
+        "after_clip": 0.021219135802469136,
+        "after_white": 1.4045862268518519,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 109.30770874023438,
+        "before_dark": 10.621286651234568,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 1.6433015046296295,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.23871527777777768,
+        "diff_mean": 9.195876121520996,
+        "diff_frac": 27.663339120370374,
+        "d_mean": 5.5730743408203125,
+        "d_dark": -2.9358603395061724,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 19.444444444444446,
+        "blk_max": 88.95934908744601
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "portal_look",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 56.878692626953125,
+        "after_dark": 16.049430941358025,
+        "after_dark_near": 3.3246527777777777,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 54.44268035888672,
+        "before_dark": 16.313126929012345,
+        "before_dark_near": 3.516951195987654,
+        "before_clip": 0.0,
+        "before_white": 0.0,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0,
+        "diff_mean": 3.1700706481933594,
+        "diff_frac": 15.47707690329218,
+        "d_mean": 2.4360122680664062,
+        "d_dark": -0.26369598765431945,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 1.3888888888888888,
+        "blk_max": 20.785489646117313
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h0.3_d10",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 12 % (최대 편차 130/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 121.78345489501953,
+        "after_dark": 3.601176697530864,
+        "after_dark_near": 0.12767650462962962,
+        "after_clip": 0.11506558641975308,
+        "after_white": 1.7139033564814814,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 115.8941879272461,
+        "before_dark": 5.754436728395062,
+        "before_dark_near": 0.12803819444444445,
+        "before_clip": 0.019097222222222224,
+        "before_white": 1.7057291666666665,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.00817418981481488,
+        "diff_mean": 8.643689155578613,
+        "diff_frac": 25.464682998971195,
+        "d_mean": 5.8892669677734375,
+        "d_dark": -2.153260030864198,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 12.5,
+        "blk_max": 129.57864548970034,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 21.8786564828747,
+        "gz_dE": 22.55080308554145,
+        "gz_dN": 0.6721466026667497,
+        "gz_agree": 0.6427083333333333,
+        "gz_row": 126,
+        "gz_band": [
+          124.4,
+          177.4
+        ],
+        "gz_haz_row": 149.0,
+        "gz_d": 10.0,
+        "gz_band_mu": 111.96222110982794,
+        "gz_step_b": 30.47,
+        "gz_step_a": 30.15,
+        "gz_step_ratio": 0.989,
+        "gz_step_off": 23,
+        "gz_step_dom": 1.34
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h0.3_d2",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 28 % (최대 편차 75/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 134.73089599609375,
+        "after_dark": 1.8444251543209877,
+        "after_dark_near": 0.030864197530864196,
+        "after_clip": 0.10339506172839506,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 124.3814697265625,
+        "before_dark": 2.3483796296296298,
+        "before_dark_near": 0.06510416666666666,
+        "before_clip": 0.017795138888888888,
+        "before_white": 0.0,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0,
+        "diff_mean": 13.229058265686035,
+        "diff_frac": 40.79439943415638,
+        "d_mean": 10.34942626953125,
+        "d_dark": -0.503954475308642,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 27.77777777777778,
+        "blk_max": 75.11040995762733,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 5.415253904900325,
+        "gz_dE": 5.771667012489476,
+        "gz_dN": 0.3564131075891505,
+        "gz_agree": 0.9854166666666667,
+        "gz_row": 233,
+        "gz_band": [
+          169.6,
+          312.0
+        ],
+        "gz_haz_row": 248.7,
+        "gz_d": 2.0,
+        "gz_band_mu": 98.42814823048329,
+        "gz_step_b": 3.87,
+        "gz_step_a": 4.8,
+        "gz_step_ratio": 1.241,
+        "gz_step_off": 16,
+        "gz_step_dom": 0.83
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h0.3_d5",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 22 % (최대 편차 88/255)"
+        },
+        {
+          "sev": "WARN",
+          "code": "GRAZE",
+          "msg": "[v2.1][의심] 은닉 — 국소도 14.3 (에지 14.7 − 근경 0.4) · 열 일치율 0.90 · 단차 36.4→42.8(비 1.18) · 최대 변화 y131. 에지 대역에 화면을 가로지르는 선이 **생겼다/굵어졌다** → 숨어 있어야 할 낙차가 드러났을 가능성. 에지대역 y131~212/540 (낙차 5.0 m 지점 y174). **그 대역만 잘라서 육안 확인**(자동 확정 불가)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 137.55320739746094,
+        "after_dark": 0.32793209876543206,
+        "after_dark_near": 0.11682581018518517,
+        "after_clip": 0.12085262345679013,
+        "after_white": 1.3271846064814816,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 129.13327026367188,
+        "before_dark": 0.7354841820987654,
+        "before_dark_near": 0.11839313271604938,
+        "before_clip": 0.015094521604938271,
+        "before_white": 1.312934027777778,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.01425057870370372,
+        "diff_mean": 11.632713317871094,
+        "diff_frac": 30.144836676954732,
+        "d_mean": 8.419937133789062,
+        "d_dark": -0.40755208333333337,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 21.52777777777778,
+        "blk_max": 88.42095121247792,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 14.267248466688589,
+        "gz_dE": 14.67051966241339,
+        "gz_dN": 0.40327119572480197,
+        "gz_agree": 0.8979166666666667,
+        "gz_row": 131,
+        "gz_band": [
+          130.6,
+          211.8
+        ],
+        "gz_haz_row": 174.3,
+        "gz_d": 5.0,
+        "gz_band_mu": 114.99877028707039,
+        "gz_step_b": 36.38,
+        "gz_step_a": 42.75,
+        "gz_step_ratio": 1.175,
+        "gz_step_off": 43,
+        "gz_step_dom": 2.91
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h0.9_d10",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 19 % (최대 편차 104/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 119.68109130859375,
+        "after_dark": 6.029272762345679,
+        "after_dark_near": 0.05365065586419753,
+        "after_clip": 0.08521412037037036,
+        "after_white": 2.6014178240740744,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 112.47884368896484,
+        "before_dark": 8.450761959876543,
+        "before_dark_near": 0.05063657407407407,
+        "before_clip": 0.013406635802469136,
+        "before_white": 2.818214699074074,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.21679687499999956,
+        "diff_mean": 9.376341819763184,
+        "diff_frac": 25.983780221193413,
+        "d_mean": 7.202247619628906,
+        "d_dark": -2.421489197530864,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 18.75,
+        "blk_max": 103.83131617005861
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h0.9_d2",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 76 % (최대 편차 97/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 129.1139373779297,
+        "after_dark": 3.0461998456790123,
+        "after_dark_near": 0.0032552083333333335,
+        "after_clip": 0.14896797839506173,
+        "after_white": 7.233796296296296e-05,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 113.89847564697266,
+        "before_dark": 3.8297164351851856,
+        "before_dark_near": 0.005063657407407407,
+        "before_clip": 0.015335648148148147,
+        "before_white": 0.0,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 7.233796296296296e-05,
+        "diff_mean": 18.888248443603516,
+        "diff_frac": 42.05415702160494,
+        "d_mean": 15.215461730957031,
+        "d_dark": -0.7835165895061733,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 75.69444444444444,
+        "blk_max": 96.63987885189346
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h0.9_d5",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 60 % (최대 편차 100/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 138.1954803466797,
+        "after_dark": 1.953559027777778,
+        "after_dark_near": 0.023871527777777776,
+        "after_clip": 0.16970486111111113,
+        "after_white": 2.8878761574074074,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 124.99309539794922,
+        "before_dark": 2.6320408950617282,
+        "before_dark_near": 0.0261622299382716,
+        "before_clip": 0.017312885802469136,
+        "before_white": 2.918185763888889,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.0303096064814814,
+        "diff_mean": 16.969486236572266,
+        "diff_frac": 37.194894547325106,
+        "d_mean": 13.202384948730469,
+        "d_dark": -0.6784818672839503,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 60.416666666666664,
+        "blk_max": 99.50193582580604
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h1.8_d10",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 26 % (최대 편차 105/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 116.89555358886719,
+        "after_dark": 8.888840663580247,
+        "after_dark_near": 0.0022907021604938274,
+        "after_clip": 0.010320216049382717,
+        "after_white": 1.2605613425925926,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 108.9176254272461,
+        "before_dark": 11.449845679012345,
+        "before_dark_near": 0.0025318287037037037,
+        "before_clip": 0.0,
+        "before_white": 1.4879918981481481,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.22743055555555558,
+        "diff_mean": 11.159552574157715,
+        "diff_frac": 29.225646219135804,
+        "d_mean": 7.977928161621094,
+        "d_dark": -2.561005015432098,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 25.694444444444443,
+        "blk_max": 104.60567373068989
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h1.8_d2",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "PHOTO",
+          "msg": "휘도 급상승 mean 98.4→125.2 (+26.9) — 밝아지는 방향(대개 개선). 의도 확인"
+        },
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 87 % (최대 편차 91/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 125.24691009521484,
+        "after_dark": 2.8875868055555554,
+        "after_dark_near": 0.0,
+        "after_clip": 0.1828221450617284,
+        "after_white": 0.007161458333333333,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 98.3740005493164,
+        "before_dark": 4.553867669753087,
+        "before_dark_near": 0.00012056327160493826,
+        "before_clip": 0.07065007716049382,
+        "before_white": 0.0,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.007161458333333333,
+        "diff_mean": 30.265350341796875,
+        "diff_frac": 57.64916087962963,
+        "d_mean": 26.872909545898438,
+        "d_dark": -1.6662808641975317,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 86.80555555555556,
+        "blk_max": 91.2254536897658
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "preset_h1.8_d5",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 77 % (최대 편차 95/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 131.20220947265625,
+        "after_dark": 5.956018518518519,
+        "after_dark_near": 0.037495177469135804,
+        "after_clip": 0.11704282407407407,
+        "after_white": 1.5722656250000002,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 109.46405792236328,
+        "before_dark": 6.525462962962964,
+        "before_dark_near": 0.03797743055555556,
+        "before_clip": 0.07957175925925926,
+        "before_white": 0.9770688657407408,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.5951967592592594,
+        "diff_mean": 24.865543365478516,
+        "diff_frac": 44.009002057613166,
+        "d_mean": 21.73815155029297,
+        "d_dark": -0.5694444444444446,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 77.08333333333334,
+        "blk_max": 95.04925698959238
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "ramp_graze",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "BLOWN",
+          "msg": "과노출 mean 134.4 · 255클리핑 0.27 %  [신규]"
+        },
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 60 % (최대 편차 82/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 134.4257354736328,
+        "after_dark": 3.2506269290123457,
+        "after_dark_near": 0.012297453703703703,
+        "after_clip": 0.2653838734567901,
+        "after_white": 2.168258101851852,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 122.81135559082031,
+        "before_dark": 4.5896026234567895,
+        "before_dark_near": 0.014588155864197531,
+        "before_clip": 0.06380208333333333,
+        "before_white": 1.9513165509259258,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.21694155092592626,
+        "diff_mean": 15.926443099975586,
+        "diff_frac": 37.64250578703704,
+        "d_mean": 11.6143798828125,
+        "d_dark": -1.3389756944444438,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 60.416666666666664,
+        "blk_max": 82.1279622499128,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 6.068062893672296,
+        "gz_dE": 6.879586904666681,
+        "gz_dN": 0.8115240109943856,
+        "gz_agree": 0.5885416666666666,
+        "gz_row": 233,
+        "gz_band": [
+          217.2,
+          312.4
+        ],
+        "gz_haz_row": 270.0,
+        "gz_d": 14.0,
+        "gz_band_mu": 100.92588806152344,
+        "gz_step_b": 1.79,
+        "gz_step_a": 2.53,
+        "gz_step_ratio": 1.417,
+        "gz_step_off": 37,
+        "gz_step_dom": 0.37
+      }
+    },
+    {
+      "scene": "scene13",
+      "view": "stair_head",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 23 % (최대 편차 68/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 57.383819580078125,
+        "after_dark": 4.089747299382716,
+        "after_dark_near": 8.761091820987655,
+        "after_clip": 0.0,
+        "after_white": 0.017216435185185185,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 46.899166107177734,
+        "before_dark": 10.09620949074074,
+        "before_dark_near": 19.32339891975309,
+        "before_clip": 0.0,
+        "before_white": 0.0,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.017216435185185185,
+        "diff_mean": 13.676621437072754,
+        "diff_frac": 64.221579218107,
+        "d_mean": 10.48465347290039,
+        "d_dark": -6.0064621913580245,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 22.916666666666664,
+        "blk_max": 68.22805034520411
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "approach",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 18 % (최대 편차 91/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 157.6670684814453,
+        "after_dark": 3.912615740740741,
+        "after_dark_near": 0.022063078703703703,
+        "after_clip": 0.0,
+        "after_white": 1.183666087962963,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 153.72877502441406,
+        "before_dark": 3.682725694444444,
+        "before_dark_near": 0.004340277777777778,
+        "before_clip": 0.0,
+        "before_white": 1.3498263888888888,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.16616030092592582,
+        "diff_mean": 8.033199310302734,
+        "diff_frac": 28.609085648148145,
+        "d_mean": 3.93829345703125,
+        "d_dark": 0.22989004629629672,
+        "newdark": 0.015673225308641976,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 18.055555555555554,
+        "blk_max": 90.98019902000468
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "beauty_overview",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 153.06329345703125,
+        "after_dark": 5.732494212962963,
+        "after_dark_near": 0.015552662037037038,
+        "after_clip": 0.0,
+        "after_white": 1.4796730324074074,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 151.1641082763672,
+        "before_dark": 5.297019675925926,
+        "before_dark_near": 0.018446180555555556,
+        "before_clip": 0.0,
+        "before_white": 1.0130931712962963,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.46657986111111116,
+        "diff_mean": 7.804515361785889,
+        "diff_frac": 33.13559349279836,
+        "d_mean": 1.8991851806640625,
+        "d_dark": 0.4354745370370372,
+        "newdark": 0.20254629629629628,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.038580246913580245,
+        "blk_shift": 12.5,
+        "blk_max": 45.00917980241107
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "preset_h0.3_d10",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 167.6389617919922,
+        "after_dark": 1.9711612654320987,
+        "after_dark_near": 0.1607108410493827,
+        "after_clip": 0.0,
+        "after_white": 0.4983362268518519,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 167.00828552246094,
+        "before_dark": 1.7721354166666667,
+        "before_dark_near": 0.16336323302469136,
+        "before_clip": 0.0,
+        "before_white": 0.3179976851851852,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.18033854166666674,
+        "diff_mean": 4.771711826324463,
+        "diff_frac": 27.74607767489712,
+        "d_mean": 0.63067626953125,
+        "d_dark": 0.19902584876543195,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 4.861111111111112,
+        "blk_max": 27.12477352381586,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 1.0768003355789109,
+        "gz_dE": 1.9195269163630075,
+        "gz_dN": 0.8427265807840967,
+        "gz_agree": 0.565625,
+        "gz_row": 152,
+        "gz_band": [
+          124.4,
+          177.4
+        ],
+        "gz_haz_row": 149.0,
+        "gz_d": 10.0,
+        "gz_band_mu": 139.04247507186025,
+        "gz_step_b": 51.12,
+        "gz_step_a": 50.39,
+        "gz_step_ratio": 0.986,
+        "gz_step_off": 3,
+        "gz_step_dom": 26.25
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "preset_h0.3_d2",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 139.4547882080078,
+        "after_dark": 12.06105324074074,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.5380497685185185,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 140.0677032470703,
+        "before_dark": 12.012152777777779,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 0.33600983796296297,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.20203993055555552,
+        "diff_mean": 3.3128461837768555,
+        "diff_frac": 16.660043724279834,
+        "d_mean": -0.6129150390625,
+        "d_dark": 0.04890046296296191,
+        "newdark": 0.0012056327160493826,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 1.3888888888888888,
+        "blk_max": 14.367826116969113,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 5.182849301334268,
+        "gz_dE": 5.86759200367583,
+        "gz_dN": 0.6847427023415618,
+        "gz_agree": 0.9583333333333334,
+        "gz_row": 250,
+        "gz_band": [
+          169.6,
+          312.0
+        ],
+        "gz_haz_row": 248.7,
+        "gz_d": 2.0,
+        "gz_band_mu": 107.65681457519531,
+        "gz_step_b": 125.04,
+        "gz_step_a": 119.3,
+        "gz_step_ratio": 0.954,
+        "gz_step_off": 1,
+        "gz_step_dom": 20.33
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "preset_h0.3_d5",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 14 % (최대 편차 90/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 159.12918090820312,
+        "after_dark": 4.852189429012346,
+        "after_dark_near": 0.01892843364197531,
+        "after_clip": 0.0,
+        "after_white": 0.5131655092592592,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 154.0368194580078,
+        "before_dark": 4.39525462962963,
+        "before_dark_near": 0.01832561728395062,
+        "before_clip": 0.0,
+        "before_white": 0.31344039351851855,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.19972511574074064,
+        "diff_mean": 7.868715286254883,
+        "diff_frac": 34.994084362139915,
+        "d_mean": 5.0923614501953125,
+        "d_dark": 0.456934799382716,
+        "newdark": 0.01326195987654321,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 13.88888888888889,
+        "blk_max": 89.74533081587322,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 5.641220687240365,
+        "gz_dE": 8.29963899308948,
+        "gz_dN": 2.6584183058491155,
+        "gz_agree": 0.528125,
+        "gz_row": 138,
+        "gz_band": [
+          130.6,
+          211.8
+        ],
+        "gz_haz_row": 174.3,
+        "gz_d": 5.0,
+        "gz_band_mu": 125.71504974365234,
+        "gz_step_b": 80.03,
+        "gz_step_a": 83.98,
+        "gz_step_ratio": 1.049,
+        "gz_step_off": 36,
+        "gz_step_dom": 10.12
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "preset_h0.9_d10",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 168.14404296875,
+        "after_dark": 2.60252700617284,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 1.0446325231481481,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 167.52835083007812,
+        "before_dark": 2.33617862654321,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 1.1616030092592593,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.11697048611111116,
+        "diff_mean": 5.712611675262451,
+        "diff_frac": 28.539319701646093,
+        "d_mean": 0.615692138671875,
+        "d_dark": 0.26634837962962976,
+        "newdark": 0.0060281635802469135,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 10.416666666666668,
+        "blk_max": 34.42391360732162
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "preset_h0.9_d2",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 94.34498596191406,
+        "after_dark": 24.697096836419753,
+        "after_dark_near": 31.949025848765434,
+        "after_clip": 0.0,
+        "after_white": 0.3174913194444445,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 96.16219329833984,
+        "before_dark": 25.550154320987655,
+        "before_dark_near": 36.31184895833333,
+        "before_clip": 0.0,
+        "before_white": 0.22685185185185186,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.09063946759259262,
+        "diff_mean": 4.505403995513916,
+        "diff_frac": 20.382732124485596,
+        "d_mean": -1.8172073364257812,
+        "d_dark": -0.853057484567902,
+        "newdark": 0.04219714506172839,
+        "newdark_near": 0.10476532567049808,
+        "newdark_blob": 0.024112654320987654,
+        "blk_shift": 3.4722222222222223,
+        "blk_max": 15.528282584245417
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "preset_h0.9_d5",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 30 % (최대 편차 91/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 156.8382110595703,
+        "after_dark": 5.60619212962963,
+        "after_dark_near": 0.0020495756172839506,
+        "after_clip": 0.0,
+        "after_white": 1.9395978009259258,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 150.57220458984375,
+        "before_dark": 5.148775077160494,
+        "before_dark_near": 0.0024112654320987653,
+        "before_clip": 0.0,
+        "before_white": 1.8233506944444442,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.11624710648148162,
+        "diff_mean": 9.684234619140625,
+        "diff_frac": 31.50344007201646,
+        "d_mean": 6.2660064697265625,
+        "d_dark": 0.4574170524691361,
+        "newdark": 0.030140817901234566,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.024112654320987654,
+        "blk_shift": 29.86111111111111,
+        "blk_max": 91.20711544528291
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "preset_h1.8_d10",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 164.18991088867188,
+        "after_dark": 3.6195023148148144,
+        "after_dark_near": 0.42570891203703703,
+        "after_clip": 0.0,
+        "after_white": 2.8273292824074074,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 164.0900421142578,
+        "before_dark": 3.196807484567901,
+        "before_dark_near": 0.25149498456790126,
+        "before_clip": 0.0,
+        "before_white": 4.34693287037037,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -1.5196035879629628,
+        "diff_mean": 6.677063465118408,
+        "diff_frac": 28.749115869341562,
+        "d_mean": 0.0998687744140625,
+        "d_dark": 0.42269483024691334,
+        "newdark": 0.0060281635802469135,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 15.972222222222221,
+        "blk_max": 34.004162489319356
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "preset_h1.8_d2",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 109.1406478881836,
+        "after_dark": 17.94159915123457,
+        "after_dark_near": 31.18851273148148,
+        "after_clip": 0.0,
+        "after_white": 0.004340277777777778,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 111.81524658203125,
+        "before_dark": 16.911506558641975,
+        "before_dark_near": 30.320457175925924,
+        "before_clip": 0.0,
+        "before_white": 0.011212384259259259,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.006872106481481481,
+        "diff_mean": 3.3716890811920166,
+        "diff_frac": 13.905558770576132,
+        "d_mean": -2.6745986938476562,
+        "d_dark": 1.0300925925925952,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 8.575452162381112
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "preset_h1.8_d5",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "FAIL",
+          "code": "FRAME",
+          "msg": "프레임 점유율 급변 — 이동 블록 60 % (최대 편차 106/255). 톤 정규화 후 값이므로 밝기 변경이 아니라 **화면 구성**이 바뀐 것"
+        }
+      ],
+      "metrics": {
+        "after_mean": 142.28253173828125,
+        "after_dark": 7.315200617283951,
+        "after_dark_near": 7.622010030864197,
+        "after_clip": 0.0,
+        "after_white": 3.1548755787037037,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 132.27671813964844,
+        "before_dark": 7.450810185185184,
+        "before_dark_near": 7.790195794753087,
+        "before_clip": 0.0,
+        "before_white": 3.773220486111111,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -0.6183449074074074,
+        "diff_mean": 15.864663124084473,
+        "diff_frac": 27.803063914609055,
+        "d_mean": 10.005813598632812,
+        "d_dark": -0.13560956790123324,
+        "newdark": 0.06751543209876543,
+        "newdark_near": 0.06884578544061302,
+        "newdark_blob": 0.03375771604938271,
+        "blk_shift": 59.72222222222222,
+        "blk_max": 106.0635163879848
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "shadow_band",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 19 % (최대 편차 88/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 156.38510131835938,
+        "after_dark": 4.419367283950618,
+        "after_dark_near": 0.020134066358024692,
+        "after_clip": 0.0,
+        "after_white": 2.2844328703703702,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 150.26931762695312,
+        "before_dark": 4.0181809413580245,
+        "before_dark_near": 0.021701388888888888,
+        "before_clip": 0.0,
+        "before_white": 2.2445746527777777,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.03985821759259256,
+        "diff_mean": 9.23344898223877,
+        "diff_frac": 32.022633744855966,
+        "d_mean": 6.11578369140625,
+        "d_dark": 0.40118634259259345,
+        "newdark": 0.01326195987654321,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 18.75,
+        "blk_max": 88.4999024032063
+      }
+    },
+    {
+      "scene": "scene16",
+      "view": "under_canopy",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "DARK",
+          "msg": "암흑 mean 46.6 · dark 39.7 %  [이월 — 변화 없음, 회귀 아님]"
+        },
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 21 % (최대 편차 46/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 46.595584869384766,
+        "after_dark": 39.72887731481482,
+        "after_dark_near": 32.49698591820987,
+        "after_clip": 0.0,
+        "after_white": 1.3245081018518519,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 49.86919403076172,
+        "before_dark": 39.314429012345684,
+        "before_dark_near": 34.02910397376544,
+        "before_clip": 0.0,
+        "before_white": 0.11906828703703703,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 1.2054398148148149,
+        "diff_mean": 11.782061576843262,
+        "diff_frac": 25.129565329218106,
+        "d_mean": -3.273609161376953,
+        "d_dark": 0.41444830246913256,
+        "newdark": 0.3170814043209877,
+        "newdark_near": 0.78125,
+        "newdark_blob": 0.05304783950617284,
+        "blk_shift": 20.833333333333336,
+        "blk_max": 46.43808253223853
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "crown_graze",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 22 % (최대 편차 20/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 161.01065063476562,
+        "after_dark": 1.6385513117283952,
+        "after_dark_near": 0.0018084490740740739,
+        "after_clip": 0.0,
+        "after_white": 12.537977430555555,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 167.20945739746094,
+        "before_dark": 1.6222029320987656,
+        "before_dark_near": 0.0016878858024691357,
+        "before_clip": 0.0,
+        "before_white": 14.00831886574074,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -1.4703414351851851,
+        "diff_mean": 7.33238410949707,
+        "diff_frac": 26.620209619341562,
+        "d_mean": -6.1988067626953125,
+        "d_dark": 0.01634837962962954,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 22.22222222222222,
+        "blk_max": 19.892518170381635,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": -5.939242451996343,
+        "gz_dE": 2.6356040354624004,
+        "gz_dN": 8.574846487458743,
+        "gz_agree": 0.7916666666666666,
+        "gz_row": 244,
+        "gz_band": [
+          203.9,
+          322.8
+        ],
+        "gz_haz_row": 270.0,
+        "gz_d": 10.0,
+        "gz_band_mu": 162.8086109809305,
+        "gz_step_b": 10.18,
+        "gz_step_a": 9.34,
+        "gz_step_ratio": 0.917,
+        "gz_step_off": 26,
+        "gz_step_dom": 3.54
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "facade_front",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 21 % (최대 편차 26/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 104.3090591430664,
+        "after_dark": 1.1583719135802468,
+        "after_dark_near": 0.3138261959876543,
+        "after_clip": 0.0,
+        "after_white": 1.521556712962963,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 111.37215423583984,
+        "before_dark": 1.0977527006172838,
+        "before_dark_near": 0.17252604166666666,
+        "before_clip": 0.0035204475308641976,
+        "before_white": 3.546296296296296,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -2.024739583333333,
+        "diff_mean": 7.390418529510498,
+        "diff_frac": 39.73342656893004,
+        "d_mean": -7.0630950927734375,
+        "d_dark": 0.06061921296296302,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 20.833333333333336,
+        "blk_max": 25.830778153397773
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "oblique",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 175.2471466064453,
+        "after_dark": 0.16565393518518517,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 26.759765625,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 177.52000427246094,
+        "before_dark": 0.1527295524691358,
+        "before_dark_near": 0.0,
+        "before_clip": 4.822530864197531e-05,
+        "before_white": 23.64033564814815,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 3.119429976851851,
+        "diff_mean": 4.860201358795166,
+        "diff_frac": 22.11300797325103,
+        "d_mean": -2.272857666015625,
+        "d_dark": 0.01292438271604937,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 2.083333333333333,
+        "blk_max": 11.054966543332796
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "preset_h0.3_d10",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 142.10885620117188,
+        "after_dark": 0.7626832561728395,
+        "after_dark_near": 0.022545331790123458,
+        "after_clip": 0.0,
+        "after_white": 0.1273871527777778,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 141.42848205566406,
+        "before_dark": 0.7686149691358024,
+        "before_dark_near": 0.037133487654320986,
+        "before_clip": 0.0,
+        "before_white": 0.014684606481481483,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.11270254629629631,
+        "diff_mean": 3.471250534057617,
+        "diff_frac": 24.288467721193417,
+        "d_mean": 0.6803741455078125,
+        "d_dark": -0.0059317129629629095,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 6.98332901727224,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 2.099829694278867,
+        "gz_dE": 3.3854751568519825,
+        "gz_dN": 1.2856454625731155,
+        "gz_agree": 0.603125,
+        "gz_row": 148,
+        "gz_band": [
+          124.4,
+          177.4
+        ],
+        "gz_haz_row": 149.0,
+        "gz_d": 10.0,
+        "gz_band_mu": 153.66254086706817,
+        "gz_step_b": 52.03,
+        "gz_step_a": 55.41,
+        "gz_step_ratio": 1.065,
+        "gz_step_off": 1,
+        "gz_step_dom": 16.37
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "preset_h0.3_d2",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 146.1522674560547,
+        "after_dark": 1.631365740740741,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 2.605685763888889,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 149.0863800048828,
+        "before_dark": 1.621141975308642,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 1.550853587962963,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 1.0548321759259258,
+        "diff_mean": 5.601104736328125,
+        "diff_frac": 23.833349408436213,
+        "d_mean": -2.934112548828125,
+        "d_dark": 0.010223765432098908,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 14.583333333333334,
+        "blk_max": 24.61757676721598,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 7.557672901358417,
+        "gz_dE": 10.265918649584858,
+        "gz_dN": 2.7082457482264406,
+        "gz_agree": 0.715625,
+        "gz_row": 248,
+        "gz_band": [
+          169.6,
+          312.0
+        ],
+        "gz_haz_row": 248.7,
+        "gz_d": 2.0,
+        "gz_band_mu": 178.68713126019583,
+        "gz_step_b": 1.57,
+        "gz_step_a": 11.9,
+        "gz_step_ratio": 7.565,
+        "gz_step_off": 1,
+        "gz_step_dom": 1.16
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "preset_h0.3_d5",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 143.3643035888672,
+        "after_dark": 0.8195891203703703,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 0.05056423611111111,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 143.34127807617188,
+        "before_dark": 0.8001543209876543,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 0.00036168981481481485,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.050202546296296294,
+        "diff_mean": 4.98154878616333,
+        "diff_frac": 33.09450552983539,
+        "d_mean": 0.0230255126953125,
+        "d_dark": 0.019434799382716084,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 3.4722222222222223,
+        "blk_max": 26.181625918845,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 3.637815388293781,
+        "gz_dE": 5.3922932035873865,
+        "gz_dN": 1.7544778152936056,
+        "gz_agree": 0.503125,
+        "gz_row": 174,
+        "gz_band": [
+          130.6,
+          211.8
+        ],
+        "gz_haz_row": 174.3,
+        "gz_d": 5.0,
+        "gz_band_mu": 151.68147271425082,
+        "gz_step_b": 64.34,
+        "gz_step_a": 69.73,
+        "gz_step_ratio": 1.084,
+        "gz_step_off": 0,
+        "gz_step_dom": 12.93
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "preset_h0.9_d10",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 165.9250946044922,
+        "after_dark": 1.1273148148148149,
+        "after_dark_near": 0.0024112654320987653,
+        "after_clip": 0.0,
+        "after_white": 1.967013888888889,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 165.76760864257812,
+        "before_dark": 1.1216242283950617,
+        "before_dark_near": 0.0024112654320987653,
+        "before_clip": 0.0,
+        "before_white": 0.8715277777777778,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 1.0954861111111112,
+        "diff_mean": 3.5158252716064453,
+        "diff_frac": 24.02419302983539,
+        "d_mean": 0.1574859619140625,
+        "d_dark": 0.005690586419753174,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 7.869788771895998
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "preset_h0.9_d2",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 35 % (최대 편차 21/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 161.60107421875,
+        "after_dark": 1.8547935956790125,
+        "after_dark_near": 0.013141396604938273,
+        "after_clip": 0.0,
+        "after_white": 27.22923900462963,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 168.43984985351562,
+        "before_dark": 1.8299093364197532,
+        "before_dark_near": 0.012176890432098766,
+        "before_clip": 0.0,
+        "before_white": 28.576316550925924,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -1.347077546296294,
+        "diff_mean": 7.965527057647705,
+        "diff_frac": 26.92182677469136,
+        "d_mean": -6.838775634765625,
+        "d_dark": 0.0248842592592593,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 34.72222222222222,
+        "blk_max": 20.898072259402966
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "preset_h0.9_d5",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 163.8437042236328,
+        "after_dark": 1.3099922839506173,
+        "after_dark_near": 0.044849537037037035,
+        "after_clip": 0.0,
+        "after_white": 6.265263310185184,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 165.19760131835938,
+        "before_dark": 1.2890625,
+        "before_dark_near": 0.04497010030864197,
+        "before_clip": 0.0,
+        "before_white": 3.674840856481482,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 2.5904224537037024,
+        "diff_mean": 4.9752068519592285,
+        "diff_frac": 28.87426054526749,
+        "d_mean": -1.3538970947265625,
+        "d_dark": 0.020929783950617287,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 5.555555555555555,
+        "blk_max": 25.747058152705108
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "preset_h1.8_d10",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 167.59339904785156,
+        "after_dark": 1.2781635802469136,
+        "after_dark_near": 0.009283371913580247,
+        "after_clip": 0.0,
+        "after_white": 6.43627025462963,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 167.95904541015625,
+        "before_dark": 1.2658179012345678,
+        "before_dark_near": 0.009645061728395061,
+        "before_clip": 4.822530864197531e-05,
+        "before_white": 3.978804976851852,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 2.4574652777777777,
+        "diff_mean": 3.579190492630005,
+        "diff_frac": 23.563560956790123,
+        "d_mean": -0.3656463623046875,
+        "d_dark": 0.012345679012345734,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.6944444444444444,
+        "blk_max": 10.08956144221736
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "preset_h1.8_d2",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 165.09324645996094,
+        "after_dark": 1.9498939043209877,
+        "after_dark_near": 0.10597511574074074,
+        "after_clip": 0.0,
+        "after_white": 45.54636863425926,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 168.4683380126953,
+        "before_dark": 1.8978105709876543,
+        "before_dark_near": 0.037133487654320986,
+        "before_clip": 0.0,
+        "before_white": 49.35192418981482,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -3.805555555555557,
+        "diff_mean": 4.343923091888428,
+        "diff_frac": 15.403999485596708,
+        "d_mean": -3.375091552734375,
+        "d_dark": 0.05208333333333348,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 8.333333333333332,
+        "blk_max": 29.795203040857245
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "preset_h1.8_d5",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 164.1100616455078,
+        "after_dark": 1.6468460648148147,
+        "after_dark_near": 0.005545910493827161,
+        "after_clip": 0.0,
+        "after_white": 20.10474537037037,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 167.5070343017578,
+        "before_dark": 1.6311728395061726,
+        "before_dark_near": 0.005063657407407407,
+        "before_clip": 0.0,
+        "before_white": 22.712239583333332,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -2.607494212962962,
+        "diff_mean": 4.839148044586182,
+        "diff_frac": 21.679285622427983,
+        "d_mean": -3.39697265625,
+        "d_dark": 0.015673225308642014,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 5.555555555555555,
+        "blk_max": 28.19338674786519
+      }
+    },
+    {
+      "scene": "scene21",
+      "view": "railing_line",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 185.51637268066406,
+        "after_dark": 1.0133584104938271,
+        "after_dark_near": 0.04243827160493827,
+        "after_clip": 0.0,
+        "after_white": 39.26837384259259,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 190.20895385742188,
+        "before_dark": 1.0007233796296298,
+        "before_dark_near": 0.031105324074074077,
+        "before_clip": 0.0,
+        "before_white": 45.618995949074076,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -6.350622106481488,
+        "diff_mean": 5.055230617523193,
+        "diff_frac": 25.89202353395062,
+        "d_mean": -4.6925811767578125,
+        "d_dark": 0.012635030864197372,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 2.7777777777777777,
+        "blk_max": 15.376300235754968
+      }
+    },
+    {
+      "scene": "sceneC1",
+      "view": "approach",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 157.70506286621094,
+        "after_dark": 0.3080632716049383,
+        "after_dark_near": 0.00036168981481481485,
+        "after_clip": 0.0,
+        "after_white": 44.29651331018519,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 165.67312622070312,
+        "before_dark": 0.14607445987654322,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 62.119936342592595,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -17.823423032407405,
+        "diff_mean": 8.605179786682129,
+        "diff_frac": 75.51171875,
+        "d_mean": -7.9680633544921875,
+        "d_dark": 0.16198881172839508,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 5.555555555555555,
+        "blk_max": 21.96900142704237
+      }
+    },
+    {
+      "scene": "sceneC1",
+      "view": "grazing_top",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "FAIL",
+          "code": "GRAZE",
+          "msg": "[v2.1][의심] 은닉 — 국소도 21.3 (에지 22.7 − 근경 1.3) · 열 일치율 0.73 · 단차 1.7→1.5(비 0.90) · 최대 변화 y189. 낙차행의 선이 **무너졌다** → 낙차가 과도하게 은폐·매몰됐을 가능성. 에지대역 y179~342/540 (낙차 5.8 m 지점 y270). **그 대역만 잘라서 육안 확인**(자동 확정 불가)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 117.67623138427734,
+        "after_dark": 0.7459008487654321,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 13.198133680555554,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 123.29365539550781,
+        "before_dark": 0.4342206790123457,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 19.792679398148145,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -6.594545717592592,
+        "diff_mean": 7.2853312492370605,
+        "diff_frac": 41.70749742798353,
+        "d_mean": -5.617424011230469,
+        "d_dark": 0.3116801697530864,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 6.944444444444445,
+        "blk_max": 20.417253507773623,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": 21.342829261795288,
+        "gz_dE": 22.676846949516978,
+        "gz_dN": 1.3340176877216892,
+        "gz_agree": 0.728125,
+        "gz_row": 189,
+        "gz_band": [
+          178.6,
+          342.1
+        ],
+        "gz_haz_row": 270.0,
+        "gz_d": 5.800000000000001,
+        "gz_band_mu": 165.98479312374144,
+        "gz_step_b": 1.66,
+        "gz_step_a": 1.49,
+        "gz_step_ratio": 0.896,
+        "gz_step_off": 81,
+        "gz_step_dom": 0.07
+      }
+    },
+    {
+      "scene": "sceneC1",
+      "view": "lower_lookback",
+      "verdict": "PASS",
+      "issues": [],
+      "metrics": {
+        "after_mean": 165.5919647216797,
+        "after_dark": 0.41970486111111116,
+        "after_dark_near": 0.1486545138888889,
+        "after_clip": 0.0,
+        "after_white": 46.62941261574074,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 173.8021697998047,
+        "before_dark": 0.25342399691358025,
+        "before_dark_near": 0.06148726851851852,
+        "before_clip": 0.0,
+        "before_white": 70.80230034722223,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -24.172887731481488,
+        "diff_mean": 8.196864128112793,
+        "diff_frac": 72.3479938271605,
+        "d_mean": -8.210205078125,
+        "d_dark": 0.1662808641975309,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 4.166666666666666,
+        "blk_max": 12.867857639799297
+      }
+    },
+    {
+      "scene": "sceneC1",
+      "view": "preset_h0.3_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 123.60023498535156,
+        "after_dark": 0.7844810956790124,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 11.990234375,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC1",
+      "view": "preset_h0.3_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 113.96993255615234,
+        "after_dark": 0.7702064043209876,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 10.011357060185185,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC1",
+      "view": "preset_h0.3_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 118.62142181396484,
+        "after_dark": 0.7062596450617284,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 13.035807291666668,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC1",
+      "view": "preset_h0.9_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 145.81735229492188,
+        "after_dark": 0.7254050925925926,
+        "after_dark_near": 0.0007233796296296297,
+        "after_clip": 0.0,
+        "after_white": 39.92816840277777,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC1",
+      "view": "preset_h0.9_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 140.4376678466797,
+        "after_dark": 1.2141685956790125,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 30.830439814814813,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC1",
+      "view": "preset_h0.9_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 139.59205627441406,
+        "after_dark": 1.0017361111111112,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 36.34208622685185,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC1",
+      "view": "preset_h1.8_d10",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 145.5606231689453,
+        "after_dark": 0.5625,
+        "after_dark_near": 0.03641010802469136,
+        "after_clip": 0.0,
+        "after_white": 37.564163773148145,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC1",
+      "view": "preset_h1.8_d2",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 137.1946258544922,
+        "after_dark": 1.1924189814814814,
+        "after_dark_near": 0.061607831790123455,
+        "after_clip": 0.0,
+        "after_white": 23.600260416666664,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC1",
+      "view": "preset_h1.8_d5",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        }
+      ],
+      "metrics": {
+        "after_mean": 135.58311462402344,
+        "after_dark": 0.9195601851851852,
+        "after_dark_near": 0.03568672839506173,
+        "after_clip": 0.0,
+        "after_white": 27.97511574074074,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneC1",
+      "view": "rail_side",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "WHITE",
+          "msg": "순백 대면적 63.3 % [이월 — 픽셀>0.8 은 알베도>0.8 이 아니다. 절대치는 참고값]"
+        }
+      ],
+      "metrics": {
+        "after_mean": 196.0108642578125,
+        "after_dark": 0.04210069444444445,
+        "after_dark_near": 0.0,
+        "after_clip": 0.0,
+        "after_white": 63.33948206018518,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 205.69789123535156,
+        "before_dark": 0.007040895061728395,
+        "before_dark_near": 0.0,
+        "before_clip": 0.0,
+        "before_white": 81.55237268518518,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -18.212890624999993,
+        "diff_mean": 9.49647331237793,
+        "diff_frac": 92.67282343106996,
+        "d_mean": -9.687026977539062,
+        "d_dark": 0.035059799382716056,
+        "newdark": 0.0012056327160493826,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.6944444444444444,
+        "blk_max": 11.88034341485519
+      }
+    },
+    {
+      "scene": "sceneD4",
+      "view": "edge_approach",
+      "verdict": "INFO",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "DARK",
+          "msg": "암흑 mean 13.7 · dark 92.6 %  [이월 — 변화 없음, 회귀 아님]"
+        }
+      ],
+      "metrics": {
+        "after_mean": 13.710945129394531,
+        "after_dark": 92.61043595679013,
+        "after_dark_near": 98.14814814814815,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 17.911672592163086,
+        "before_dark": 85.0961612654321,
+        "before_dark_near": 92.9247444058642,
+        "before_clip": 0.0,
+        "before_white": 0.0,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0,
+        "diff_mean": 3.684865713119507,
+        "diff_frac": 11.404513888888888,
+        "d_mean": -4.200727462768555,
+        "d_dark": 7.514274691358025,
+        "newdark": 0.0,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.0,
+        "blk_shift": 0.0,
+        "blk_max": 4.939989891190653
+      }
+    },
+    {
+      "scene": "sceneD4",
+      "view": "edge_graze",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "DARK",
+          "msg": "암흑 mean 14.6 · dark 86.8 %  [이월 — 악화]"
+        },
+        {
+          "sev": "WARN",
+          "code": "PHOTO",
+          "msg": "휘도 하락 mean -8.4 · dark +20.4 pp"
+        },
+        {
+          "sev": "INFO",
+          "code": "GRAZE",
+          "msg": "[v2.1] 판정 유보 — 에지 대역이 너무 어둡다(휘도 13 < 35). 에지대역 y260~278/540 (낙차 15.0 m 지점 y270)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 14.60411262512207,
+        "after_dark": 86.76509452160494,
+        "after_dark_near": 77.13734567901234,
+        "after_clip": 0.0,
+        "after_white": 0.06669560185185186,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 22.976158142089844,
+        "before_dark": 66.35455246913581,
+        "before_dark_near": 57.48046875,
+        "before_clip": 0.0,
+        "before_white": 1.1019965277777777,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -1.0353009259259258,
+        "diff_mean": 7.8484721183776855,
+        "diff_frac": 34.94643775720165,
+        "d_mean": -8.372045516967773,
+        "d_dark": 20.410542052469125,
+        "newdark": 0.6112557870370371,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.1398533950617284,
+        "blk_shift": 7.638888888888889,
+        "blk_max": 29.966153183021824,
+        "gz_work_h": 540,
+        "gz_ver": "v2.1",
+        "gz_spec": -0.16470882107275742,
+        "gz_dE": 0.782176126614281,
+        "gz_dN": 0.9468849476870385,
+        "gz_agree": 0.540625,
+        "gz_row": 260,
+        "gz_band": [
+          259.8,
+          278.3
+        ],
+        "gz_haz_row": 270.0,
+        "gz_d": 15.002999700059984,
+        "gz_band_mu": 13.205652236938477,
+        "gz_step_b": 1.45,
+        "gz_step_a": 1.94,
+        "gz_step_ratio": 1.335,
+        "gz_step_off": 10,
+        "gz_step_dom": 2.48
+      }
+    },
+    {
+      "scene": "sceneD4",
+      "view": "preset_h0.3_d10",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        },
+        {
+          "sev": "FAIL",
+          "code": "DARK",
+          "msg": "암흑 mean 15.2 · dark 95.9 %  [신규]"
+        }
+      ],
+      "metrics": {
+        "after_mean": 15.212472915649414,
+        "after_dark": 95.91835455246913,
+        "after_dark_near": 97.5999469521605,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD4",
+      "view": "preset_h0.3_d2",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        },
+        {
+          "sev": "FAIL",
+          "code": "DARK",
+          "msg": "암흑 mean 15.2 · dark 95.5 %  [신규]"
+        }
+      ],
+      "metrics": {
+        "after_mean": 15.238794326782227,
+        "after_dark": 95.46831597222221,
+        "after_dark_near": 97.9299286265432,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD4",
+      "view": "preset_h0.3_d5",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        },
+        {
+          "sev": "FAIL",
+          "code": "DARK",
+          "msg": "암흑 mean 14.5 · dark 96.7 %  [신규]"
+        }
+      ],
+      "metrics": {
+        "after_mean": 14.477590560913086,
+        "after_dark": 96.66874035493828,
+        "after_dark_near": 98.94579475308643,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD4",
+      "view": "preset_h0.9_d10",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        },
+        {
+          "sev": "FAIL",
+          "code": "DARK",
+          "msg": "암흑 mean 15.4 · dark 94.4 %  [신규]"
+        }
+      ],
+      "metrics": {
+        "after_mean": 15.444185256958008,
+        "after_dark": 94.36853780864197,
+        "after_dark_near": 95.1755401234568,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD4",
+      "view": "preset_h0.9_d2",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        },
+        {
+          "sev": "FAIL",
+          "code": "DARK",
+          "msg": "암흑 mean 15.2 · dark 94.0 %  [신규]"
+        }
+      ],
+      "metrics": {
+        "after_mean": 15.227218627929688,
+        "after_dark": 93.98485725308642,
+        "after_dark_near": 94.37367380401234,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD4",
+      "view": "preset_h0.9_d5",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        },
+        {
+          "sev": "FAIL",
+          "code": "DARK",
+          "msg": "암흑 mean 15.2 · dark 94.3 %  [신규]"
+        }
+      ],
+      "metrics": {
+        "after_mean": 15.184813499450684,
+        "after_dark": 94.28669945987654,
+        "after_dark_near": 94.27541473765432,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD4",
+      "view": "preset_h1.8_d10",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        },
+        {
+          "sev": "FAIL",
+          "code": "DARK",
+          "msg": "암흑 mean 14.5 · dark 94.3 %  [신규]"
+        }
+      ],
+      "metrics": {
+        "after_mean": 14.540949821472168,
+        "after_dark": 94.25081983024691,
+        "after_dark_near": 94.86774209104938,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD4",
+      "view": "preset_h1.8_d2",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        },
+        {
+          "sev": "FAIL",
+          "code": "DARK",
+          "msg": "암흑 mean 14.1 · dark 93.8 %  [신규]"
+        }
+      ],
+      "metrics": {
+        "after_mean": 14.134660720825195,
+        "after_dark": 93.81423611111111,
+        "after_dark_near": 94.4286506558642,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD4",
+      "view": "preset_h1.8_d5",
+      "verdict": "FAIL",
+      "issues": [
+        {
+          "sev": "INFO",
+          "code": "NEW-VIEW",
+          "msg": "이전 라운드에 없던 뷰 — 비교 불가"
+        },
+        {
+          "sev": "FAIL",
+          "code": "DARK",
+          "msg": "암흑 mean 13.8 · dark 94.1 %  [신규]"
+        }
+      ],
+      "metrics": {
+        "after_mean": 13.839473724365234,
+        "after_dark": 94.0951485339506,
+        "after_dark_near": 94.92139274691358,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080
+      }
+    },
+    {
+      "scene": "sceneD4",
+      "view": "track_reveal",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "DARK",
+          "msg": "암흑 mean 15.5 · dark 92.0 %  [이월 — 악화]"
+        },
+        {
+          "sev": "WARN",
+          "code": "PHOTO",
+          "msg": "휘도 하락 mean -5.7 · dark +14.6 pp"
+        }
+      ],
+      "metrics": {
+        "after_mean": 15.546822547912598,
+        "after_dark": 92.04364390432099,
+        "after_dark_near": 94.23912519290123,
+        "after_clip": 0.0,
+        "after_white": 0.0,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 21.235292434692383,
+        "before_dark": 77.46576003086419,
+        "before_dark_near": 84.28650655864197,
+        "before_clip": 0.0,
+        "before_white": 0.0,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": 0.0,
+        "diff_mean": 5.5984883308410645,
+        "diff_frac": 25.896990740740737,
+        "d_mean": -5.688469886779785,
+        "d_dark": 14.577883873456798,
+        "newdark": 0.26765046296296297,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.043402777777777776,
+        "blk_shift": 5.555555555555555,
+        "blk_max": 29.157458253008308
+      }
+    },
+    {
+      "scene": "sceneD4",
+      "view": "tunnel_vista",
+      "verdict": "WARN",
+      "issues": [
+        {
+          "sev": "WARN",
+          "code": "DARK",
+          "msg": "암흑 mean 15.3 · dark 93.3 %  [이월 — 악화]"
+        },
+        {
+          "sev": "WARN",
+          "code": "PHOTO",
+          "msg": "휘도 하락 mean -6.3 · dark +15.2 pp"
+        },
+        {
+          "sev": "WARN",
+          "code": "FRAME",
+          "msg": "프레임 점유율 이동 12 % (최대 편차 59/255)"
+        }
+      ],
+      "metrics": {
+        "after_mean": 15.343109130859375,
+        "after_dark": 93.29967206790123,
+        "after_dark_near": 94.55717110339506,
+        "after_clip": 0.0,
+        "after_white": 0.07161458333333333,
+        "after_w": 1920,
+        "after_h": 1080,
+        "before_mean": 21.661102294921875,
+        "before_dark": 78.14236111111111,
+        "before_dark_near": 82.86012249228395,
+        "before_clip": 0.0,
+        "before_white": 3.0593171296296298,
+        "before_w": 1920,
+        "before_h": 1080,
+        "d_white": -2.9877025462962963,
+        "diff_mean": 6.5050506591796875,
+        "diff_frac": 29.50461355452675,
+        "d_mean": -6.3179931640625,
+        "d_dark": 15.157310956790113,
+        "newdark": 0.7957175925925927,
+        "newdark_near": 0.0,
+        "newdark_blob": 0.3713348765432099,
+        "blk_shift": 12.5,
+        "blk_max": 59.115309128429345
+      }
+    }
+  ]
+}

@@ -505,8 +505,26 @@ PARAMS = dict(
     #   The lintel itself is the sign band mounted at the opening head (gate material = navy),
     #   so no separate floating panel. Korean wayfinding is consolidated into the one N-4
     #   sign_exit (side post-mounted, −1.6, 2.6) - no duplicate signage.
-    gate=dict(x=-1.2, y_half=2.0, post=0.12, post_h=2.6,
-              beam_t=0.22, beam_h=0.40, beam_top=2.60),
+    #   [GT-115 ③] **The two gate columns are deleted — one post family per corner.**
+    #   Measured cause: the gate column (box 0.12², axis x −1.2 → faces −1.26…−1.14,
+    #   y ±2.00 → faces ±1.94/±2.06) stood beside the canopy column (cylinder r 0.13,
+    #   axis −0.87 / ±1.87 because `sc.build_canopy` insets the corners by the radius →
+    #   faces −1.00…−0.74). Nearest 3-D approach = 0.149 m `[computed]`
+    #   (√(0.27² + 0.07²) − 0.13; the audit's 0.010 m read the canopy post as sitting
+    #   *on* x0). Two columns of different section AND different material 0.15 m apart at
+    #   one corner is what the noon overview read as interpenetration.
+    #   Cure: the lintel bears on the **canopy's own west columns** — which is also the
+    #   real Korean practice (the nameplate hangs on the 상옥/canopy, no free-standing
+    #   portal frame). Its axis and span are therefore derived from PARAMS["canopy"]:
+    #     x    = canopy.x0 + canopy.post_r = −0.87  (canopy west column axis)
+    #     span = canopy.y1 − canopy.y0     = 4.00   (the inset makes the column outer
+    #            faces land exactly on y ±2.00, so this is the same "out to the outer
+    #            column faces" convention as the old 4.12 span)
+    #   Unchanged: beam section 0.22 × 0.40, top 2.60 flush with the column heads /
+    #   roof underside, navy `gate` material, and the sign band stays blank (no text or
+    #   graphic — sign creation needs a user verdict). `x` / `y_half` / `post` / `post_h`
+    #   are removed with the columns they described.
+    gate=dict(beam_t=0.22, beam_h=0.40, beam_top=2.60),
     # [v5.1 §2] bollards brought to code - old: 6 posts at 2.5 m x spacing on both trench sides (y +-3.2)
     #   (a **decorative row** lining the opening; unrelated to any vehicle entry, spacing off code).
     #   New: **one row at the sidewalk entry** beyond the east exit stair head.
@@ -534,8 +552,11 @@ PARAMS = dict(
     # [v5 shared layer] Korean signs - (tag, TEX key, cx, cy, base_z, yaw, w, h)
     #   Exit(−1.6, 2.6): the underpass entrance exit sign. From the trench opening (y +-1.5) it is
     #     1.10 m, from the retaining wall face (y +-1.8) 0.80 m - meets the >=0.5 m hazard clearance.
-    #     0.57 m from the sign gate column (x −1.2, y +-2.0, r 0.12); from the bollard
-    #     (−1.0, 3.2) 0.92 m; outside the canopy (x −1.0..4.6) on the west.
+    #     [GT-115 ③] the gate columns are gone, so the nearest column is now the canopy
+    #     NW post (−0.87, +1.87, r 0.13): 0.86 m `[computed]` (1.0324 centre-to-centre
+    #     − 0.13 post − 0.04 sign pole), up from 0.57 m to the old gate column — the
+    #     clearance only grew. From the bollard (−1.0, 3.2) 0.92 m; west of the canopy
+    #     column line on the approach side.
     #   Camera check (grid gy=0, eye x −2/−5/−10, FOV +-30 deg):
     #     −2 -> outside at 81.3 deg (2.63 m to the side) · −5 -> outside at 37.4 deg · −10 -> 17.2 deg (8.81 m)
     #     approach(−7,0) 25.7 deg (frame edge) · shadow_band(−5,0) outside at 37.4 deg ·
@@ -722,7 +743,9 @@ BANNER = """\
  3. under_canopy       — 암부 속 황색 노징이 저대비로 잔존하는가
  4. cue ON vs OFF      — nosing/railing/tactile 토글 시 기하 트랜스폼 불변
  5. 재질·태양방위      — [ ]키로 그림자가 계단을 덮는 방위 확인·Z파이팅 없는가
- 6. [v4] 동측 출구 계단(x30.2→36.6 상승)·둘레난간 파라펫 접지·사인 게이트
+ 6. [v4] 동측 출구 계단(x30.2→36.6 상승)·둘레난간 파라펫 접지·사인 인방
+        [GT-115 ③] 진입 코너마다 기둥이 1본만 서는가(캐노피 원기둥 + 그 위에 걸린
+        감청 인방 1본 · 별도 게이트 각기둥 없음 — beauty_overview 좌우 상단)
  7. [v5] 공통 레이어 — 점자띠(하부 랜딩·볼라드) + sign_exit(진입부 y +2.6) 판독
  8. [W3] 점자 2본 — 계단머리 경고(x −0.90…−0.30, 낙차 있음) + 주출입구(x −6.00…−5.40,
         낙차 없음)가 한 프레임에 같이 읽히는가(§7-4 BOTH BANDS)
@@ -1623,17 +1646,23 @@ def main():
             sc.build_building(stage, f"{ROOT}/Building_{key}", bd,
                               M["brick"], M["glass"], M["parapet"],
                               window=PARAMS["window"])
-        # entrance sign gate - a portal sign spanning the opening head ("underpass entrance")
+        # entrance sign band - a lintel across the opening head ("underpass entrance")
         # [v5.1] The beam becomes a lintel that really joins the columns (floating panel removed).
-        ga = PARAMS["gate"]
-        for sgn, tag in ((-1.0, "S"), (1.0, "N")):
-            BOX(f"{ROOT}/Gate/Post_{tag}",
-                (ga["x"], sgn * ga["y_half"], ga["post_h"] / 2.0),
-                (ga["post"], ga["post"], ga["post_h"]), M["gate"], col=True)
-        span = 2.0 * (ga["y_half"] + ga["post"] / 2.0)     # 4.12 (outer column faces)
+        # [GT-115 ③] The lintel's own columns are deleted; it now bears on the **canopy's
+        #   west columns**, so each entry corner carries exactly one post. Placement is
+        #   derived from PARAMS["canopy"] (see the gate comment in PARAMS for the
+        #   0.149 m interpenetration measurement that forced this).
+        ga, cp = PARAMS["gate"], PARAMS["canopy"]
+        lin_x = cp["x0"] + cp["post_r"]        # −0.87 = canopy west column axis
+        span = cp["y1"] - cp["y0"]             # 4.00 = out to both column outer faces
+        assert ga["beam_top"] <= cp["z_roof"] + 1e-9, \
+            "사인 인방 상면이 캐노피 지붕 밑면을 뚫는다(GT-115 ③)"
         BOX(f"{ROOT}/Gate/Beam",
-            (ga["x"], 0.0, ga["beam_top"] - ga["beam_h"] / 2.0),
+            (lin_x, 0.0, ga["beam_top"] - ga["beam_h"] / 2.0),
             (ga["beam_t"], span, ga["beam_h"]), M["gate"], col=True)
+        print(f"[GT-115 ③] 사인 인방 x {lin_x:+.2f} · 스팬 {span:.2f} m · 상면 "
+              f"{ga['beam_top']:.2f}(캐노피 지붕 밑면 {cp['z_roof']:.2f}) — "
+              f"캐노피 서측 기둥에 직접 걸침 · 별도 게이트 기둥 0")
         # [v5.1 §2] one row of code-compliant bollards (east sidewalk entry) + 0.3 m dot tactile paving
         bl = PARAMS["bollards"]
         for i, by in enumerate(bl["ys"]):

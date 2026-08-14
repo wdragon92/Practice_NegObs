@@ -175,6 +175,38 @@ step <= 0.17)
   scene has no across-water tree stand to put one on** (every tree is at
   y -8.5..-13, the land side). Recorded so a later sweep does not "fix" it.
 
+[GT-115 ⑦ · 08-14 crop review] Three machine defects, none of them touching the
+  hazard geometry (deck surface, its drop edge, the water plane, the reeds and
+  rubble, the cameras are all unchanged - this is an R-3 prim add/move/delete).
+  (A) **the two waterside bollards are deleted.** v5.1 §2 admits a bollard only
+      where vehicle entry is the concern - a sidewalk/road junction, a plaza or
+      ramp mouth. This scene has no carriageway at all; the pair stood 3.4 m off
+      the stair foot with nothing between them, one in open lawn and one out on
+      the riprap band past the lower plate edge, and neither carried a
+      reflective band or a base plate. s18 disposed of the identical case the
+      same way (no road → removed), so they are **not relocated**: there is no
+      vehicle line here to put them on. `PARAMS["lower_bollards"]` is deleted
+      rather than emptied (GT-66 precedent - a key left behind gets re-planted).
+  (B) **the streetlight luminaire gets a form.** It was `head × head × 0.12`,
+      an axis-aligned white cube on the arm end: no aim, no lens, no housing
+      depth. It is now a shallow shoebox canted nose-up on the arm, with an
+      inset dark lens plate on its soffit and a slip-fitter collar at the arm
+      joint. The cant is what aims it: tipping the outer nose up swings the
+      soffit normal down **and outward**, putting the beam on the promenade
+      band (y −4.6..−2.6) instead of on the lawn behind the pole. Geometry
+      only - no light prim, intensity or colour is added or moved.
+  (C) **the backdrop bridge gets an edge barrier and pier caps.** A deck box on
+      bare cylinders reads as a flying slab with the piers swallowed by its
+      underside. Two low parapet strips ride the deck's own top face, and each
+      shaft now stops at the soffit of a hammerhead cap that overhangs both
+      deck edges. It is far-field silhouette, outside the judgment band, so it
+      stays coarse: 2 + 4 prims, no railing, no articulation.
+  The lamp material key is renamed with (B): with the bollards gone the dark
+  painted-steel constant skins only the pole, arm and fitter, so
+  `bollard_*`/`Looks/Bollard` becomes `pole_*`/`Looks/PoleSteel`. Both names
+  classify **metal** in `scene_common.LOOK_ROLE`/`_LOOK_RULES`, so the look
+  layer is bit-identical; only the name stops advertising a deleted prop.
+
 Run (GUI look check - default):
     unset PYTHONPATH VIRTUAL_ENV
     conda activate env_isaaclab
@@ -318,14 +350,52 @@ PARAMS = dict(
     path=dict(x0=-40.0, x1=0.0, y0=-4.6, y1=-2.6, proud=0.002),   # decomposed-granite promenade
     benches=[(-13.0, -1.90, 0.0), (-6.5, -1.90, 0.0)],
     streetlights=[(-15.0, -2.30), (-2.0, -2.60)],
+    # === [GT-115 ⑦] the luminaire was a bare white cube =====================
+    #   `head × head × 0.12`, axis-aligned on the arm end: no aim, no lens, no
+    #   housing depth, so at any distance it read as a floating box. Minimal
+    #   real form, deterministic and identical on both poles:
+    #     · housing - a shallow shoebox, longer along the arm (`head_len` 0.34)
+    #       than it is wide (`head` 0.24) and only `head_h` 0.11 deep. A body
+    #       with a long axis, which a cube does not have.
+    #     · attitude - `rotX = −head_tilt`, i.e. the OUTER nose rides 12° high.
+    #       That is the mast-arm attitude and it is what aims the thing:
+    #       lifting the nose swings the soffit normal down **and outward**.
+    #       Aim, computed not asserted (smoke prints it): head sits at
+    #       y = ly − arm_len (−3.20 / −3.50) and z 4.35, so the beam axis lands
+    #       4.35·tan12° = 0.92 m further out, at y −4.12 / −4.42 - inside the
+    #       decomposed-granite path band (y −4.6..−2.6). The opposite cant
+    #       would throw it back onto the lawn behind the pole.
+    #     · lens - a thin plate on the soffit, inset `lens_margin` 30 mm on
+    #       every side so the housing wall shows around it. That inset IS the
+    #       readable thickness; the plate is darker than the housing
+    #       (`lens_color`) so it reads as a lens, not as more housing.
+    #     · fitter - a short collar straddling the arm/housing joint, so the
+    #       arm does not simply vanish into the box.
+    #   **No light emission changes**: no light prim, intensity or colour is
+    #   added or moved by this - the fix is geometry and one dark constant.
     streetlight=dict(pole_h=4.5, pole_r=0.07, arm_len=0.9, arm_r=0.04,
-                     head=0.24),
+                     head=0.24, head_len=0.34, head_h=0.11, head_tilt=12.0,
+                     lens_t=0.020, lens_margin=0.030,
+                     fitter_r=0.076, fitter_len=0.18),
     trees=[(-34.0, -9.0), (-27.0, -13.0), (-19.0, -8.5), (-9.0, -12.0),
            (-2.0, -9.0)],
     # --- lower floodplain dressing ---
     bikeroad=dict(x0=0.0, x1=48.0, y0=-8.0, y1=-5.0, proud=0.002),
     lower_benches=[(9.0, -3.4, 180.0), (19.0, -3.4, 180.0)],
-    lower_bollards=[(3.4, -1.6), (3.4, 1.6)],
+    # === [GT-115 ⑦] `lower_bollards` deleted (was [(3.4, −1.6), (3.4, 1.6)]) ==
+    #   v5.1 §2 admits a bollard only where **vehicle entry** is the concern -
+    #   a sidewalk/road junction, a plaza or ramp mouth. This scene has no
+    #   carriageway: the only paved run on the lower floodplain is the bike path
+    #   (y −8.0..−5.0), 3.4 m of open grass away, and the pair stood at the
+    #   stair foot with nothing between them and nothing that could pass. The
+    #   +1.6 post was not even on the ground it was drawn to guard - the lower
+    #   plate ends at y 1.25, so it stood out on the riprap band. Neither had a
+    #   reflective band or a base plate, so the purpose was unreadable as well
+    #   as absent. s18 disposed of the identical case the same way (no road →
+    #   removed), so these are **not relocated**: there is no vehicle line in
+    #   this scene to put them on. The key is deleted, not emptied, so nothing
+    #   can silently re-plant them (GT-66 precedent, stated above for the
+    #   picket infill).
     # reed / silver grass bands (waterfront vegetation)
     # === [v7 ruling §8 (3)] the 4 silver grass bands are **brown/olive cuboids** (C-5) ===
     #   symptom: at the centre of `bank_face` and the right of `beauty_overview`, rectangular
@@ -369,9 +439,30 @@ PARAMS = dict(
                 axis="y", facade_y=-26.0, face_dir=1.0, base_z=0.0),
     ),
     window=dict(w=1.2, h=1.6, inset=0.15, col_step=2.6, margin=2.0),
+    # === [GT-115 ⑦] the backdrop bridge was a deck box on bare cylinders ======
+    #   Two things made it read as a flying slab rather than a bridge: the deck
+    #   had a bare cut edge (no barrier of any kind, so nothing said "traffic
+    #   runs on top"), and the shafts ran straight into its underside, so the
+    #   load path vanished at the joint. Both are answered with the coarsest
+    #   form that carries the read, because this is **far-field silhouette,
+    #   outside the judgment band** and must not grow detail:
+    #     `parapet_h/_t` - one low strip per deck edge, on the deck's own top
+    #        face. At this distance a barrier is a silhouette line above the
+    #        deck, not a railing anyone resolves. Clear width left between them
+    #        is 4.00 − 2×0.28 = 3.44 m (smoke prints it).
+    #     `cap_h/_len/_over` - a hammerhead cap under the deck soffit at each
+    #        pier: 3.20 m along the span against Ø2.4 shafts, and 0.40 m proud
+    #        of both deck edges, so the cap beam has a silhouette of its own and
+    #        the shaft terminates on something. The shaft top drops from the
+    #        deck soffit (+4.80) to the cap soffit (+3.90) to make room.
+    #   6 prims total (2 parapets + 4 caps). No railing, no bearings, no
+    #   articulation - a far-field element that gets detail is a cost with no
+    #   reader.
     bridge=dict(x0=30.0, x1=34.0, y0=-6.0, y1=100.0, deck_top=6.0,
                 deck_t=1.2, pier_r=1.2, pier_x=32.0,
-                pier_ys=(-2.0, 18.0, 42.0, 66.0), pier_base=-3.6),
+                pier_ys=(-2.0, 18.0, 42.0, 66.0), pier_base=-3.6,
+                parapet_h=0.90, parapet_t=0.28,
+                cap_h=0.90, cap_len=3.20, cap_over=0.40),
     far_hedges=[dict(cx=-36.0, cy=-16.0, sx=1.2, length=20.0, h=1.6),
                 dict(cx=-20.0, cy=-19.0, sx=1.2, length=20.0, h=1.6),
                 dict(cx=6.0, cy=-19.0, sx=1.2, length=20.0, h=1.6)],
@@ -437,14 +528,27 @@ PARAMS = dict(
         #   been only 1.29x - the cue reads BETTER after the swap, not worse.
         guard_tint=(2.144, 2.258, 2.022),
         wood_color=(0.30, 0.20, 0.12), wood_rough=0.85,
-        bollard_color=(0.33, 0.33, 0.36), bollard_metallic=0.4,
-        bollard_rough=0.5,
+        # [GT-115 ⑦] `bollard_*` → `pole_*`. With the bollards deleted this dark
+        #   painted-steel constant skins exactly three prims - the streetlight
+        #   pole, its arm and the new fitter collar - and a key still named for
+        #   a prop the scene no longer has is precisely how a deleted prop walks
+        #   back in. **Values unchanged**, and `Looks/PoleSteel` classifies
+        #   `metal` on the `pole`/`steel` tokens exactly as `Looks/Bollard` did
+        #   by exact match, so the look layer sees no change at all.
+        pole_color=(0.33, 0.33, 0.36), pole_metallic=0.4,
+        pole_rough=0.5,
         glass_color=(0.06, 0.09, 0.12), glass_rough=0.08,
         # [v7 §4] parapet 0.90 -> 0.70 · luminaire 0.88 -> 0.78 (albedo cap 0.80).
         #   scene05 was already down at 0.72; only 12 still had 0.90 left.
         parapet_color=(0.70, 0.70, 0.68), parapet_rough=0.6,
         bridge_color=(0.05, 0.05, 0.055), bridge_rough=0.7,
         lamp_color=(0.78, 0.78, 0.75), lamp_rough=0.4,
+        # [GT-115 ⑦] luminaire lens face. A dark neutral far below the housing
+        #   (0.78) - that contrast is what makes the soffit plate read as a lens
+        #   instead of as more housing. `Looks/LampLens` hits the glass family on
+        #   its `lens` token, i.e. constant colour and no detail grain, which is
+        #   what a sealed lens is. **Not emissive** - this fix adds no light.
+        lens_color=(0.10, 0.10, 0.11), lens_rough=0.22,
         canopy_a=(0.025, 0.045, 0.015), canopy_b=(0.035, 0.060, 0.020),
         canopy_rough=1.0,
     ),
@@ -618,6 +722,9 @@ _ALBEDO_TABLE = [
     ("자전거도로 차선", None,             "paint_color",    False, True),
     ("파라펫",          None,             "parapet_color",  True,  False),
     ("가로등 등기구",   None,             "lamp_color",     False, False),
+    # [GT-115 ⑦] the new lens plate is a constant like the housing above it, so
+    #   it belongs in the same table rather than being exempt by being dark.
+    ("가로등 렌즈면",   None,             "lens_color",     False, False),
     ("억새 대",         "grass",          "reed_tint",      False, False),
 ]
 
@@ -856,7 +963,7 @@ def _obstacle_boxes():
     # One continuous railing run (AABB including posts and rails).
     boxes.append(("Rail", d["x0"], d["x1"], r["y"] - 0.06,
                   r["y"] + 0.06, 0.0, r["top_z"]))
-    # bench · streetlight · tree · reed · sign · bollard
+    # bench · streetlight · tree · reed
     for i, (bx, by, _yaw) in enumerate(PARAMS["benches"]):
         boxes.append((f"Bench_{i}", bx - 0.95, bx + 0.95, by - 0.25, by + 0.25,
                       0.0, 0.46))
@@ -865,6 +972,14 @@ def _obstacle_boxes():
                       by + 0.25, PARAMS["lower"]["z_top"],
                       PARAMS["lower"]["z_top"] + 0.46))
     sl = PARAMS["streetlight"]
+    # [GT-115 ⑦] the AABB is **unchanged** and that is a measurement, not an
+    #   oversight: the canted housing reaches
+    #   (head_len/2)·cos12 + (head_h/2)·sin12 = 0.178 m past the arm end and
+    #   (head_len/2)·sin12 + (head_h/2)·cos12 = 0.089 m above the head anchor
+    #   (z 4.35), and the fitter collar tops out at 4.476 - all inside the
+    #   existing 0.20 m arm-end margin, the ±0.15 m x half-width and pole_h.
+    #   The smoke re-derives both numbers so a later parameter change that
+    #   breaks the containment prints FAIL instead of silently escaping.
     for i, (lx, ly) in enumerate(PARAMS["streetlights"]):
         boxes.append((f"Streetlight_{i}", lx - 0.15, lx + 0.15,
                       ly - sl["arm_len"] - 0.2, ly + 0.2, 0.0, sl["pole_h"]))
@@ -875,10 +990,8 @@ def _obstacle_boxes():
         boxes.append((f"Reed_{i}", rd["x0"], rd["x1"], rd["y0"], rd["y1"],
                       rd["z"], rd["z"] + rd["h"]))
     # [v5.2 user] arbitrary warning signboards removed - sign AABB deleted.
-    for i, (bx, by) in enumerate(PARAMS["lower_bollards"]):
-        boxes.append((f"BollardLow_{i}", bx - 0.08, bx + 0.08, by - 0.08,
-                      by + 0.08, PARAMS["lower"]["z_top"],
-                      PARAMS["lower"]["z_top"] + 0.75))
+    # [GT-115 ⑦] waterside bollards removed - `BollardLow_*` AABBs deleted with
+    #   them (see PARAMS). Nothing replaces them: no prop stands there now.
     return boxes
 
 
@@ -932,9 +1045,19 @@ def _solid_at(x, y, z):
                 and PARAMS["rip_bot"] <= z < rp["z"]:
             return f"Riprap_{rp['tag']}"
     br = PARAMS["bridge"]
-    if br["x0"] <= x <= br["x1"] and br["y0"] <= y <= br["y1"] \
-            and br["deck_top"] - br["deck_t"] <= z <= br["deck_top"]:
-        return "BridgeDeck"
+    if br["x0"] <= x <= br["x1"] and br["y0"] <= y <= br["y1"]:
+        if br["deck_top"] - br["deck_t"] <= z <= br["deck_top"]:
+            return "BridgeDeck"
+        # [GT-115 ⑦] of the new bridge form, the edge parapets are the only part
+        #   standing ABOVE the deck, i.e. the only part that could ever occlude a
+        #   ray, so they are the only part registered here. The pier caps follow
+        #   the shafts, which this function has never carried (backdrop, never on
+        #   a judged ray). No view in `build_views` reaches x >= 30, so the branch
+        #   is inert today; it is written so the next re-aim cannot walk into it.
+        if br["deck_top"] < z <= br["deck_top"] + br["parapet_h"] and (
+                x <= br["x0"] + br["parapet_t"]
+                or x >= br["x1"] - br["parapet_t"]):
+            return "BridgeParapet"
     return None
 
 
@@ -1162,6 +1285,57 @@ def _smoke_report():
     print(f"    난간 높이 {r['top_z']:.2f} m — 조경설계기준 16.13.2(2) 1,100 충족 "
           f"(GT-43 기록 1.05 '열화된 가드' 정체성은 08-05 독트린으로 폐기 — 미복원)")
 
+    # ── [GT-115 ⑦] 볼라드 소거 · 등기구 형상 · 배경 교량 (전부 재유도해서 출력) ──
+    sl = PARAMS["streetlight"]
+    brg = PARAMS["bridge"]
+    pth = PARAMS["path"]
+    tilt = math.radians(sl["head_tilt"])
+    hz = PARAMS["upper"]["z_top"] + sl["pole_h"] - 0.15
+    aim = [ly - sl["arm_len"] - hz * math.tan(tilt)
+           for _lx, ly in PARAMS["streetlights"]]
+    aim_ok = all(pth["y0"] <= a <= pth["y1"] for a in aim)
+    hy_ext = ((sl["head_len"] / 2.0) * math.cos(tilt)
+              + (sl["head_h"] / 2.0) * math.sin(tilt))
+    hz_ext = ((sl["head_len"] / 2.0) * math.sin(tilt)
+              + (sl["head_h"] / 2.0) * math.cos(tilt))
+    fit_top = (PARAMS["upper"]["z_top"] + sl["pole_h"] - 0.1) + sl["fitter_r"]
+    box_ok = (hy_ext <= 0.20 and sl["head"] / 2.0 <= 0.15
+              and max(hz + hz_ext, fit_top) <= sl["pole_h"])
+    print("  [GT-115 ⑦ 수변 볼라드 · 등기구 · 배경 교량]")
+    print("    볼라드 0 기 — 'lower_bollards' 키 삭제 (v5.1 §2 차량 진입 우려 "
+          "지점 부재 · 차도 0 · s18 전례). 이설 없음, 재식재 불가")
+    print(f"    등기구 하우징 {sl['head']:.2f}(폭)×{sl['head_len']:.2f}(암축)"
+          f"×{sl['head_h']:.2f} m · 노즈 앙각 {sl['head_tilt']:.0f}° "
+          f"(rotX −{sl['head_tilt']:.0f}) · 렌즈 인셋 "
+          f"{sl['lens_margin']*1000:.0f} mm(= 하우징 벽 두께 노출)")
+    print(f"      조준점 y {' / '.join(f'{a:+.2f}' for a in aim)} vs 산책로 밴드 "
+          f"[{pth['y0']:+.1f},{pth['y1']:+.1f}] → "
+          f"{'OK(노면 조준)' if aim_ok else 'FAIL(밴드 밖 — 캔트 방향 확인)'}")
+    print(f"      틸트 후 반치수 y {hy_ext:.3f}(여유 0.200) · z {hz_ext:.3f} "
+          f"(상단 {hz+hz_ext:.3f}) · 피터 상단 {fit_top:.3f} (기둥 "
+          f"{sl['pole_h']:.2f}) → "
+          f"{'OK(카메라 AABB 불변)' if box_ok else 'FAIL(_obstacle_boxes 갱신 필요)'}")
+    deck_bot = brg["deck_top"] - brg["deck_t"]
+    cap_x = (brg["x1"] - brg["x0"]) + 2.0 * brg["cap_over"]
+    pier_top = deck_bot - brg["cap_h"]
+    ph_br = pier_top - brg["pier_base"]
+    clear = (brg["x1"] - brg["x0"]) - 2.0 * brg["parapet_t"]
+    hammer = (brg["cap_len"] / 2.0 > brg["pier_r"]
+              and cap_x / 2.0 > brg["pier_r"])
+    print("    교량 [원경 실루엣 — 판정 밴드 밖, 조대 유지]")
+    print(f"      방호벽 h {brg['parapet_h']:.2f} · t {brg['parapet_t']:.2f} "
+          f"양 에지 2매 (상면 {brg['deck_top']:+.2f} → "
+          f"{brg['deck_top']+brg['parapet_h']:+.2f}) · 상판 순폭 {clear:.2f} m "
+          f"→ {'OK' if clear > 2.5 else 'FAIL(차폭 잠식)'}")
+    print(f"      교각 캡 {cap_x:.2f}×{brg['cap_len']:.2f}×{brg['cap_h']:.2f} "
+          f"× {len(brg['pier_ys'])}기 · 축부 Ø{brg['pier_r']*2:.1f} 대비 여유 "
+          f"종 {brg['cap_len']/2.0-brg['pier_r']:+.2f} / 횡 "
+          f"{cap_x/2.0-brg['pier_r']:+.2f} m → "
+          f"{'OK(해머헤드 — 축보다 넓다)' if hammer else 'FAIL(캡이 축에 묻힌다)'}")
+    print(f"      교각 {brg['pier_base']:+.2f} → {pier_top:+.2f} "
+          f"(길이 {ph_br:.2f}) · 상판 저면 {deck_bot:+.2f} → "
+          f"{'OK(캡 저면 종단 — 상판 직접 관입 해소)' if ph_br > 0 and pier_top < deck_bot - 1e-9 else 'FAIL'}")
+
     # ── [W3 L12] season pin + river-view measurement ──
     season_audit()
     river_view_selfcheck()
@@ -1358,13 +1532,18 @@ BANNER = """\
  6. bank_face       — 데크면→에지→하부공간→사석→수제선이 수직으로 쌓이는가
                       (= GT 1.80 m 낙차의 시각적 근거 · 신설 컷)
  7. 원경            — 교량·아파트·갈대가 '한강 둔치'로 읽히는가
+                      [GT-115 ⑦] 교량이 방호벽(상판 양 에지)+교각 캡을 갖춰
+                      '판때기'가 아니라 교량 실루엣으로 읽히는가
  8. [v7] 수면       — edge_void·bank_face 에서 건물 반사가 흐려지고 잔물결
                       대역이 생겨 '인피니티 풀'이 아니라 강으로 읽히는가
  9. [v7] 억새       — bank_face 중앙·beauty_overview 우측이 갈색 육면체가
                       아니라 **줄기 사이로 배경이 비치는 대(stalk) 군락**인가
 10. [GT-43/66] 난간 — 착색방부목 Ø120 기둥 + Ø80 통나무 2단으로 읽히는가
                       (도장 강재 파이프·살대 인필 모두 아님)
-11. [v7] 지평       — +X(우측) 배후가 시가지 실루엣으로 닫혔는가"""
+11. [v7] 지평       — +X(우측) 배후가 시가지 실루엣으로 닫혔는가
+12. [GT-115 ⑦] 가로등 — 등기구가 민짜 큐브가 아니라 하향 렌즈면·하우징 두께를
+                      가진 기구로 읽히는가(암 끝 피터 포함) · 잔디/수변에
+                      고립돼 있던 볼라드 2본이 사라졌는가"""
 
 
 def main():
@@ -1394,8 +1573,13 @@ def main():
     mp = PARAMS["material"]
     ROOT = "/World/Scene12"
 
-    def BOX(path, center, size, mtl=None, col=False):
-        return sc.add_box(stage, path, center, size, mtl, collider=col)
+    # [GT-115 ⑦] `rotX` exposed - it already existed on `sc.add_box`, this wrapper
+    #   simply never passed it. The luminaire housing and its lens plate are the
+    #   customers. `sc.add_box` authors the op only when it is non-zero and every
+    #   other call site here passes 0.0, so those prims stay byte-identical.
+    def BOX(path, center, size, mtl=None, col=False, rotX=0.0):
+        return sc.add_box(stage, path, center, size, mtl, collider=col,
+                          rotX=rotX)
 
     def CYL(path, center, r, h, mtl=None, rotY=0.0, rotX=0.0, col=False):
         return sc.add_cylinder(stage, path, center, r, h, mtl,
@@ -1481,10 +1665,15 @@ def main():
             sca["wood_dark"], tint=mp["guard_tint"])
         M["wood"] = PBR(f"{ROOT}/Looks/Wood", diffuse_color=mp["wood_color"],
                         roughness_const=mp["wood_rough"])
-        M["bollard"] = PBR(f"{ROOT}/Looks/Bollard",
-                           diffuse_color=mp["bollard_color"],
-                           metallic=mp["bollard_metallic"],
-                           roughness_const=mp["bollard_rough"])
+        # [GT-115 ⑦] `Looks/Bollard` → `Looks/PoleSteel`. The scene has no bollard
+        #   left; this constant now skins the streetlight pole, arm and fitter and
+        #   nothing else. `Bollard` classified metal by exact match in LOOK_ROLE,
+        #   `PoleSteel` classifies metal on the `pole`/`steel` keyword rules, so
+        #   the look layer's treatment of these prims does not move.
+        M["pole"] = PBR(f"{ROOT}/Looks/PoleSteel",
+                        diffuse_color=mp["pole_color"],
+                        metallic=mp["pole_metallic"],
+                        roughness_const=mp["pole_rough"])
         M["glass"] = PBR(f"{ROOT}/Looks/Glass", diffuse_color=mp["glass_color"],
                          roughness_const=mp["glass_rough"], metallic=0.0)
         M["parapet"] = PBR(f"{ROOT}/Looks/Parapet",
@@ -1495,6 +1684,12 @@ def main():
                           roughness_const=mp["bridge_rough"])
         M["lamp"] = PBR(f"{ROOT}/Looks/Lamp", diffuse_color=mp["lamp_color"],
                         roughness_const=mp["lamp_rough"])
+        # [GT-115 ⑦] luminaire lens face - dark neutral, non-emissive. Named so it
+        #   lands in the glass family (`lens` token): constant colour, no detail
+        #   grain, which is the correct prescription for a sealed lens.
+        M["lamplens"] = PBR(f"{ROOT}/Looks/LampLens",
+                            diffuse_color=mp["lens_color"],
+                            roughness_const=mp["lens_rough"], metallic=0.0)
         M["canopy_a"] = PBR(f"{ROOT}/Looks/CanopyA",
                             diffuse_color=mp["canopy_a"],
                             roughness_const=mp["canopy_rough"],
@@ -1742,7 +1937,8 @@ def main():
     #   _build_tape_ribbon() deleted (history: v6 C-6, git 42d0308 and earlier).
 
     # -------------------------------------------------------------------
-    # dressing - reeds · bench · streetlight · tree · bike path · bollard
+    # dressing - reeds · bench · streetlight · tree · bike path
+    #   ([GT-115 ⑦] bollards removed - see PARAMS `lower_bollards`)
     # -------------------------------------------------------------------
     def build_dressing(M):
         u = PARAMS["upper"]
@@ -1764,20 +1960,44 @@ def main():
         for i, (bx, by, yaw) in enumerate(PARAMS["lower_benches"]):
             sc.build_bench(stage, f"{ROOT}/BenchLow_{i}", bx, by, lo["z_top"],
                            M["wood"], yaw=yaw)
-        for i, (bx, by) in enumerate(PARAMS["lower_bollards"]):
-            sc.build_bollard(stage, f"{ROOT}/BollardLow_{i}", bx, by,
-                             lo["z_top"], mtl=M["bollard"])
+        # [GT-115 ⑦] the `sc.build_bollard` loop is deleted with `lower_bollards`
+        #   (see PARAMS). Not relocated - this scene has no vehicle line to block.
         sl = PARAMS["streetlight"]
+        # [GT-115 ⑦] head attitude. `rotX = −head_tilt` lifts the OUTER nose, which
+        #   turns the soffit - and the lens plate on it - down and outward over the
+        #   promenade. `_head_off` carries an offset expressed in the housing's own
+        #   frame through that same rotation, so the plate stays flush with the
+        #   soffit by construction instead of being positioned by eye.
+        phi = math.radians(-sl["head_tilt"])
+        cph, sph = math.cos(phi), math.sin(phi)
+
+        def _head_off(dy, dz):
+            return (dy * cph - dz * sph, dy * sph + dz * cph)
+
+        lens_dy, lens_dz = _head_off(0.0,
+                                     -(sl["head_h"] + sl["lens_t"]) / 2.0)
         for i, (lx, ly) in enumerate(PARAMS["streetlights"]):
             base = f"{ROOT}/Streetlight_{i}"
+            z_arm = u["z_top"] + sl["pole_h"] - 0.1
+            hy = ly - sl["arm_len"]                     # head anchor (arm end)
+            hz = u["z_top"] + sl["pole_h"] - 0.15       # unchanged from the cube
             CYL(f"{base}/Pole", (lx, ly, u["z_top"] + sl["pole_h"] / 2.0),
-                sl["pole_r"], sl["pole_h"], M["bollard"], col=True)
-            CYL(f"{base}/Arm", (lx, ly - sl["arm_len"] / 2.0,
-                                u["z_top"] + sl["pole_h"] - 0.1),
-                sl["arm_r"], sl["arm_len"], M["bollard"], rotX=90.0)
-            BOX(f"{base}/Head", (lx, ly - sl["arm_len"],
-                                 u["z_top"] + sl["pole_h"] - 0.15),
-                (sl["head"], sl["head"], 0.12), M["lamp"])
+                sl["pole_r"], sl["pole_h"], M["pole"], col=True)
+            CYL(f"{base}/Arm", (lx, ly - sl["arm_len"] / 2.0, z_arm),
+                sl["arm_r"], sl["arm_len"], M["pole"], rotX=90.0)
+            # slip-fitter collar straddling the arm/housing joint: the canted
+            #   housing's rear face lands 0.16 m back from the anchor, so a collar
+            #   centred one length back is half buried in the housing and half
+            #   exposed on the arm - the arm no longer just ends inside a box.
+            CYL(f"{base}/Fitter", (lx, hy + sl["fitter_len"], z_arm),
+                sl["fitter_r"], sl["fitter_len"], M["pole"], rotX=90.0)
+            BOX(f"{base}/Head", (lx, hy, hz),
+                (sl["head"], sl["head_len"], sl["head_h"]), M["lamp"],
+                rotX=-sl["head_tilt"])
+            BOX(f"{base}/Lens", (lx, hy + lens_dy, hz + lens_dz),
+                (sl["head"] - 2.0 * sl["lens_margin"],
+                 sl["head_len"] - 2.0 * sl["lens_margin"], sl["lens_t"]),
+                M["lamplens"], rotX=-sl["head_tilt"])
         for i, (tx, ty) in enumerate(PARAMS["trees"]):
             sc.build_tree(stage, f"{ROOT}/Tree_{i}", tx, ty, u["z_top"],
                           M["wood"], M["canopy_a"], M["canopy_b"])
@@ -1804,13 +2024,33 @@ def main():
                               window=PARAMS["window"])
         br = PARAMS["bridge"]
         deck_c = br["deck_top"] - br["deck_t"] / 2.0
+        deck_bot = br["deck_top"] - br["deck_t"]
         BOX(f"{ROOT}/Bridge/Deck",
             ((br["x0"] + br["x1"]) / 2.0, (br["y0"] + br["y1"]) / 2.0, deck_c),
             (br["x1"] - br["x0"], br["y1"] - br["y0"], br["deck_t"]),
             M["bridge"], col=True)
-        pier_top = br["deck_top"] - br["deck_t"]
+        # [GT-115 ⑦] edge parapet - one low strip per deck edge, standing on the
+        #   deck's own top face. This is what says "traffic runs up there"; a bare
+        #   cut edge reads as a flying slab. Concrete (M["parapet"]) so the barrier
+        #   line separates from the dark girder tone at horizon distance.
+        for tag, cx in (("W", br["x0"] + br["parapet_t"] / 2.0),
+                        ("E", br["x1"] - br["parapet_t"] / 2.0)):
+            BOX(f"{ROOT}/Bridge/Parapet_{tag}",
+                (cx, (br["y0"] + br["y1"]) / 2.0,
+                 br["deck_top"] + br["parapet_h"] / 2.0),
+                (br["parapet_t"], br["y1"] - br["y0"], br["parapet_h"]),
+                M["parapet"])
+        # [GT-115 ⑦] hammerhead pier cap + the shaft stops at its soffit. The
+        #   shafts used to run straight into the deck underside, so the load path
+        #   ended nowhere. The cap is wider than the shaft on both axes and proud
+        #   of both deck edges, which is the whole silhouette the far field reads.
+        pier_top = deck_bot - br["cap_h"]
         ph = pier_top - br["pier_base"]
         for i, py in enumerate(br["pier_ys"]):
+            BOX(f"{ROOT}/Bridge/PierCap_{i}",
+                (br["pier_x"], py, deck_bot - br["cap_h"] / 2.0),
+                ((br["x1"] - br["x0"]) + 2.0 * br["cap_over"],
+                 br["cap_len"], br["cap_h"]), M["bridge"])
             CYL(f"{ROOT}/Bridge/Pier_{i}",
                 (br["pier_x"], py, br["pier_base"] + ph / 2.0),
                 br["pier_r"], ph, M["bridge"], col=True)

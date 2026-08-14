@@ -257,6 +257,80 @@ Legacy : scenes/archive_v3/scene10_switchback_cliff.py
       autumn-legal route. Each is held outside the +X grid sight corridor (the ray from
       the d10 eye to the deck head corner), so no judged grid cut loses the stair head —
       checked by coordinates, not by eye.
+
+[GT-115 ⑭ — 08-14 audit, cuts `look_check/scene10/260806_w3_allview5/`]
+  Five crop-verified defects, all of them dressing or finish. The registered 6.600 m
+  drop, the flight/landing table, every walking surface, every drop edge, the terrain
+  slab layout, the P-2 preserved family (널 틈 · 돌구덩이 · 통나무 펜스), the camera
+  presets and the 만추 leaf-off pin are untouched by every item below.
+  (1) **Balusters through a boulder · every run end terminated**
+      (`pt_noon_reversal.png` 1300,470-1520,700 · 1740,760-1920,900).
+      `Outcrop_0` is `rock_moss_set_01`, and that row is not a boulder — it is a
+      **pre-composed 8.005 × 6.949 m rock *set*** (`urban_manifest_w3.json`, 6 meshes /
+      63,127 tri). At `scale_mul=1.00` and (6.30, 4.15) its plan envelope is
+      x[1.29, 11.31] · y[−0.57, 8.87], which swallows the +Y guard line (y 1.619) over
+      x 2.48…7.65 — the balusters in the crop are standing *inside* the scan. **A pure
+      translation cannot fix it**: to clear the rest-platform run (y 3.119) by 0.30 m the
+      centre would have to go to y ≥ 8.21, i.e. out of the corridor and onto the north
+      bank, which is neither "nearby" nor groundable on a 30° slope. So the row is
+      re-scaled **and** moved — 0.50 / (6.30, 4.90) — which is inside the precedent band
+      for this very asset (scene09 uses 0.30 / 0.40 / 0.55 on it) and keeps `z_mode='base'`
+      · `sink 0`, so the `tonglam_v2` §1 row 10 sink-ring defect stays closed.
+      `rock_02` moves y 2.30 → 2.55 (its 0.335 m clearance was inside the 0.30 m bar but
+      had no margin for the yaw envelope). `outcrop_clearance()` re-derives every number
+      from PARAMS and the self-check asserts ≥ 0.30 m.
+      Run ends: `rail_runs()` now emits a **90° return** at each of the four degree-1
+      boundary nodes (deck head x −1.50 · arrival landing x 24.14, both chains). The
+      return turns **inboard** — outboard at the entry would cross the y −1.600 unguarded
+      south break line that GT-77 (3) forbids — is 0.30 m long, and its far end is a
+      capped end post from the same `newel_points()` pass, so a run can no longer stop
+      without a post at either face of the member it meets. The arrival returns leave
+      2.60 m of the 3.20 m forward face open, against a 1.80 m `DeckExit`, so the
+      hand-off of §0-2 is unchanged and no guard is re-added across the 20 mm step.
+  (2) **Leaf clusters: one silhouette ×20** (`pt_noon_reversal.png` 60,370-600,700 =
+      the corridor litter bands, not the CB-2 lobes). Cause: the three `Litter_*` calls
+      all drew from the **whole** `sc.VEG_DEBRIS` pool with one seed and the default
+      ±25 % scale jitter, and the pool's two cluster rows carry 9.6× / 3.9× the mean
+      per-instance cover of its three single-leaf rows, so the frame is *area*-dominated
+      by two silhouettes rotated about Z. Fix, **with no procurement**: each band is
+      now laid as **three source
+      variants** built from the same five USDs — `drift` (the two clusters, 0.85-1.45),
+      `mixed` (cluster + singles, 0.70-1.15), `singles` (the three single-leaf cards,
+      0.45-0.85) — each with its own tilt band and its own `gk.det_seed` draw. Instance
+      budget is unchanged **exactly**: the caps 110+90+60 = 260 per band = the old
+      `litter_max`, so 780 instances as before (all three calls were cap-bound).
+  (3) **Shelter pergola was a slab on 4 posts.** `sc.build_canopy` is kept verbatim (the
+      roof slab and the four columns keep their colliders and their AABBs) and the
+      framing is added over it: 2 header beams let into the post tops, 5 rafters framed
+      **between** the headers (bedded 0.010 so no coplanar pair), a fascia band wrapping
+      the slab edge (outer face 0.020 proud, bedded 0.010 into the slab, top 0.010 under
+      the slab top) and 4 post base plates. Flat roof + fascia, not a pitch — the roof
+      slab is the one member with a collider and it does not move. 15 prims.
+  (4) **Handrail.** The 38x140 top rail laid flat is a shelf, not a grasp. A Ø0.035
+      round handrail line is bracketed on the **inside** face of the existing guard,
+      1.025 m over the walking surface, derived from the same `rail_runs()` inventory so
+      it follows the level, raking and cross lines exactly; nothing existing moves.
+      **Declared divergence from S3-8**: that commit's census "난간 원형부재 수 = 0" was
+      a *silhouette* argument — a thin round vertical between two thin round horizontals
+      reads as a steel balustrade. A single horizontal graspable tube behind the square
+      frame is the opposite reading and is what a 방부목 관찰데크 actually carries, so the
+      census line is re-stated rather than quietly broken: **frame round members = 0,
+      handrail = 1 line.** The declared 1.500 m clear width is measured at the walking
+      surface between baluster faces and is **unchanged**; the tube projects 0.0785 m
+      into it at grasp height, inside the ≤100 mm handrail projection allowance.
+  (5) **Uniform moss on every rail face** (`pt_noon_leaf_edge.png`). Per-face materials
+      are impractical — every member is one box prim — but the railing **is** separable
+      by member orientation, so the fix is applied at that granularity, which is the
+      scene's own §2.A.1-8 doctrine ("G10 reads silvered top faces over darker vertical
+      faces") finally applied to the guard: the top rail of every run and the newel caps
+      take a **silvered** tint (L* 59.0, a* +1.0, b* +5.0, albedo 0.270), the balusters,
+      mid/bottom rails, line posts and newel posts keep the moss-side tone. That tone is
+      **also lightened** as the item's fallback asks: the guard tint moves off the frame
+      tint's ratios (G/R 1.348 → 1.217, B/R 1.610 → 1.331), which is a 10 % / 17 % cut in
+      how hard the map's algae texels are pushed toward teal, at an **unchanged** albedo
+      0.211 and L* 53.0. Both tints stay inside the measured 2-5 yr 방부목 band
+      (L* 53-60 · a* 0..+2 · b* +4..+10 · albedo 0.22-0.28). `M["stringer"]` itself is not
+      touched, so the columns, stringers and the GT-77 approach timber are bit-identical.
 ────────────────────────────────────────────────────────────────────────────
 
 Run (GUI look check - default):
@@ -397,7 +471,44 @@ PARAMS = dict(
               # stair" tell. Placed on the entry deck's +Y run because that run is in
               # **every** preset grid cut as well as in `leaf_edge` — a lattice on an upper
               # landing would appear in no judged frame.
-              lattice=dict(run="EntryRail_P", pitch=0.12, sec=0.030)),
+              lattice=dict(run="EntryRail_P", pitch=0.12, sec=0.030),
+              # [GT-115 ⑭ (1)] **run-end return.** `newel_points()` already put a capped
+              #   post at every boundary node, but at the four **degree-1** nodes (deck
+              #   head x −1.50 and arrival landing x 24.14, both chains) the run simply
+              #   stopped at that post with nothing turning the corner — the audit's "a
+              #   run ends mid-air". A 0.30 m 90° return is the real termination detail
+              #   and it is the same member family the GT-77 edging already uses ("the
+              #   straight run dies into a 90-deg return … and the far end into a capped
+              #   end post"). It turns **inboard**: outboard at the entry would put a
+              #   member past the y −1.600 unguarded south break line, which GT-77 (3)
+              #   forbids by name, and outboard at the arrival would stand a post off the
+              #   landing on the lower park grass.
+              #   0.30 m is chosen so the two arrival returns leave 3.20 − 0.60 = 2.60 m
+              #   of the forward face open against a 1.80 m `DeckExit` `[computed]` — the
+              #   §0-2 hand-off is untouched and this is a termination, not a guard.
+              end=dict(run=0.300),
+              # [GT-115 ⑭ (4)] **graspable handrail line.** `top` is 38x140 laid flat: a
+              #   hand *rests* on it (§2.A.1-3) but cannot close round it. This adds the
+              #   grasp, bracketed on the **inside** of the existing frame so not one
+              #   existing member moves.
+              #     dia 0.035  — mid of the audit's 32-38 mm band
+              #     drop 0.075 — tube axis 0.075 under the 1.10 m top-rail top face =
+              #                  **1.025 m** over the walking surface, inside the 0.80-1.20
+              #                  m grasp band and under the guard's own top line
+              #     off 0.080  — axis inboard of the rail centreline. The tube's inner face
+              #                  then stands 0.0785 m inboard of the deck edge, i.e. the
+              #                  **1.500 m clear width at the walking surface is unchanged**
+              #                  and the grasp-height projection is inside the ≤100 mm
+              #                  handrail allowance `[computed]`. Clearances: newel inner
+              #                  face 0.045 / baluster 0.019 / top-rail inner edge 0.070
+              #                  from the line, tube 0.0625-0.0975 — no shared volume, and
+              #                  the tube passes **under** the top rail (z 1.008-1.043 vs
+              #                  the rail's 1.062-1.100).
+              #     brk        — bracket cleat (along-run, inboard, height), let `brk_bed`
+              #                  into the underside of the top rail so it is never floating.
+              hand=dict(dia=0.035, off=0.080, drop=0.075,
+                        brk=(0.045, 0.080, 0.080), brk_bed=0.010,
+                        brk_step=1.20, brk_end=0.14)),
 
     # === [W2-D ground_kit] P18 `deck_trail_hybrid` - spec Sec.5.8 / Sec.13.4 =
     #  Sec.13 measured this scene's three h0.3 cuts and killed the provisional
@@ -660,6 +771,29 @@ PARAMS = dict(
         shrub_h=1.35,
         litter_cover=0.34,          # continuous, not lobed (C20)
         litter_max=260,
+        # [GT-115 ⑭ (2)] **three cluster source variants, no procurement.**
+        #   The audit counts one silhouette repeated ~20× with rotation-only variation on
+        #   the slope. The cause is in the call, not in the asset library: the three
+        #   `Litter_*` bands each drew from the **whole** `sc.VEG_DEBRIS` pool with one
+        #   seed, and that pool's two cluster rows carry 9.6× / 3.9× the **mean**
+        #   per-instance cover of its three single-leaf rows (0.0584 / 0.0239 against a
+        #   mean 0.0061 over 0.0081 / 0.0048 / 0.0054 `[sc.VEG_DEBRIS]`), so the frame is
+        #   *area*-dominated by two cards spun about Z.
+        #   The five USDs are already five different **card arrangements of the same
+        #   leaves**, so the variants are cut out of them rather than bought: a heavy
+        #   drift, a mixed sweep and a thin single-leaf litter, each with its own scale
+        #   band, its own tilt band and its own `gk.det_seed` draw. Three overlaid draws
+        #   per band also break the single-Poisson look the one-call version had.
+        #   `cap` sums to `litter_max` (110+90+60 = 260) **per band**, and every one of the
+        #   three calls is cap-bound at `litter_cover`, so the instance budget is exactly
+        #   the 780 of the previous round — this is a re-mix, not more litter.
+        litter_variants=(
+            dict(tag="drift", cards=("fallcluster1", "fallcluster2"),
+                 scale=(0.85, 1.45), tilt=6.0, cap=110),
+            dict(tag="mixed", cards=("fallcluster2", "maplefall1", "oakfall2"),
+                 scale=(0.70, 1.15), tilt=10.0, cap=90),
+            dict(tag="singles", cards=("maplefall1", "oakfall1", "oakfall2"),
+                 scale=(0.45, 0.85), tilt=14.0, cap=60)),
     ),
     # [S3-11] rock outcrop at the uphill margin (E10-10) + foot boulders. `rock_moss_set_01`
     #   is CC0 and its diffuse is **orange 82.2 %**, which makes it the better of the two
@@ -668,10 +802,36 @@ PARAMS = dict(
     #   the sink stays at 0: `tonglam_v2` §1 row 10 already failed this scene once for
     #   "boulder-scale D-5 rocks in **dark sink-rings**", and a boulder that sits in a hole
     #   is the defect while a boulder that sits *on* the slope is the fix.
-    outcrop=[("rock_moss_set_01", 6.30, 4.15, 0.0, 22.0, 1.00),
+    #   [GT-115 ⑭ (1)] **row 0 re-scaled and moved off the guard line.** The audit crop
+    #   shows the +Y balusters standing inside the scan, and the cause is that this row
+    #   is not one boulder: `rock_moss_set_01` is a **pre-composed 8.005 × 6.949 m set**
+    #   (6 meshes, 63,127 tri — `assets/urban_manifest_w3.json`). At `scale_mul=1.00` and
+    #   (6.30, 4.15) the yaw-22° plan envelope is x[1.29, 11.31] · y[−0.57, 8.87], which
+    #   covers the y 1.619 run over x 2.48…7.65 outright. Translation alone cannot clear
+    #   it — the rest platform's own run at y 3.119 forces cy ≥ 8.21, i.e. off the
+    #   corridor (y1 8.00) and onto the 30° north bank, where a flat-lying scan cannot be
+    #   grounded — so the scale goes to **0.50** (envelope 4.01 × 3.54 m, still a real
+    #   boulder group, and inside the 0.30-0.78 band scene09 already uses on this same
+    #   asset) and the centre to **(6.30, 4.90)**. `z_mode='base'` and **sink 0** are
+    #   unchanged, so `tonglam_v2` §1 row 10's "boulder-scale rocks in dark sink-rings"
+    #   stays closed. Row 3 (`rock_02`) moves y 2.30 → 2.55: its clearance was 0.335 m,
+    #   inside the 0.30 m bar but with no margin for the yaw envelope.
+    #   Worst plan clearance after the move: **0.374 m** (`rock_03_broken` #1 vs
+    #   `LandRail_2_Back`) — re-derived by `outcrop_clearance()`, asserted by the
+    #   self-check, never retyped.
+    outcrop=[("rock_moss_set_01", 6.30, 4.90, 0.0, 22.0, 0.50),
              ("rock_03_broken", 9.10, 3.30, 0.0, -35.0, 0.55),
              ("rock_03_broken", 15.40, 2.60, 0.0, 110.0, 0.42),
-             ("rock_02", 5.10, 2.30, 0.0, 15.0, 1.00)],
+             ("rock_02", 5.10, 2.55, 0.0, 15.0, 1.00)],
+    # [GT-115 ⑭ (1)] native plan footprint (w_x, d_y) of each outcrop asset, straight off
+    #   `assets/urban_manifest_w3.json` `geometry.size_m` `[manifest]`. It exists so the
+    #   clearance check is arithmetic on a published number instead of an eyeball on a
+    #   render; `outcrop_clearance()` rotates this box by the row's yaw and takes the
+    #   axis-aligned envelope, which over-estimates the true footprint and therefore
+    #   **under**-estimates the clearance — the conservative direction.
+    outcrop_plan={"rock_moss_set_01": (8.0046, 6.9488),
+                  "rock_03_broken": (1.3176, 1.7142),
+                  "rock_02": (0.4035, 0.4629)},
     # [S3-11] distant city glimpse (E10-13) — BS-4 **backdrop contract**: distant
     #   silhouette only, **0 windows**, <=4 prims per mass, auto-demoted beyond
     #   d_true > 80 m (`building_kit.should_backdrop` / `_b_backdrop`). The masses are
@@ -758,8 +918,27 @@ PARAMS = dict(
     rest_bench=dict(dx=-0.65, dy=1.00, yaw=90.0),
     # shelter pavilion (lower path). [v7] even after from_below is mirrored from
     #   (5.2,−10.8) to (2.4,−0.6), the pavilion (centre 11.5,−6.0) sits at yaw 68 deg, outside the FOV - still no sight interference.
+    #   [GT-115 ⑭ (3)] `sc.build_canopy` gives a roof slab on four columns and nothing
+    #   else — no beam, no rafter, no eave, no base — so it reads as a slab levitating on
+    #   sticks. The kit call is **kept verbatim** (the slab and the four columns are the
+    #   only members with colliders and they must not move) and the framing is laid over
+    #   it, in the order a real 정자 is built: post → 보(header) → 서까래(rafter) →
+    #   지붕널, plus a 마구리/fascia band round the slab edge and a base plate at each
+    #   post foot. Flat roof + fascia is the audit's own alternative to a pitch, and it
+    #   is the one that leaves the collider slab where it is.
+    #     beam    (w_y, d_z)  header let into the post tops, top face at `z_roof`
+    #     rafter  (w_x, d_z)  framed **between** the headers, `bed` into each so no two
+    #                         faces are coplanar (the GT-77 bite/tuck idiom)
+    #     fascia  (t, drip)   t = board thickness, drip = how far it hangs under the slab
+    #     fascia_out / _bed   outer face proud of the slab edge / bedded into it
+    #     base    (w, d, h)   post base plate; the column passes through it, exactly the
+    #                         `ColumnAlgae` collar idiom already used on the deck columns
     pergola=dict(x0=10.0, x1=13.0, y0=-7.5, y1=-4.5, z_roof=-4.20, post_r=0.10,
-                 roof_t=0.16),
+                 roof_t=0.16,
+                 beam=(0.120, 0.220), rafters=5, rafter=(0.075, 0.140),
+                 rafter_bed=0.010,
+                 fascia=(0.030, 0.055), fascia_out=0.020, fascia_bed=0.010,
+                 base=(0.300, 0.300, 0.080)),
     # [v5.2 user] arbitrary warning sign removed - the stair-caution sign (PARAMS['sign']) is deleted.
     # distant closure : forest band beyond the lower park + trees on the upper ridge
     #   [GT-65] the east band stopped at y +1.40, i.e. it stood across **both** lower
@@ -826,6 +1005,32 @@ PARAMS = dict(
         #   procurement, which is the §8.R OQ-8 G5 test ("only if that visibly fails").
         deck_tint=(2.91, 3.92, 4.64),          # -> lin (0.240,0.229,0.205) L* 55.0 alb 0.230
         stringer_tint=(2.67, 3.60, 4.30),      # -> lin (0.220,0.210,0.190) L* 53.0 alb 0.211
+        # [GT-115 ⑭ (5)] **the guard gets its own two tints, oriented.**
+        #   `pt_noon_leaf_edge.png` shows the same teal-yellow mottle on every rail face,
+        #   sunlit tops included, because the whole railing was bound to one material
+        #   (`M["rail"] = M["stringer"]`). Per-face materials are impractical — every
+        #   member is a single box — but the railing **is** separable by member
+        #   orientation, and that is the granularity §2.A.1-8 already asks for
+        #   ("G10 reads silvered top faces over darker vertical faces"): the top rail of
+        #   every run and the newel caps are the up-facing members, everything else is
+        #   vertical or shaded.
+        #     guard_top  L* 59.0 a* +1.0 b* +5.0 albedo 0.270 — silvered/bleached
+        #                lin (0.294,0.267,0.236) = tint × (0.0824,0.0584,0.0442)
+        #     guard      L* 53.0 a* +1.4 b* +7.0 albedo 0.211 — the moss side, **at the
+        #                same albedo as `stringer_tint`** so the value does not move; what
+        #                moves is the ratio the map's algae texels get pushed through,
+        #                G/R 1.348 → 1.217 and B/R 1.610 → 1.331, i.e. the mottle stays
+        #                brown-grey instead of turning teal. That is this item's declared
+        #                fallback ("lighten the overall moss intensity") applied to the
+        #                half of the railing that keeps the moss.
+        #   Both are inside the measured 2-5 yr 방부목 band (L* 53-60, a* 0..+2, b* +4..+10,
+        #   albedo 0.22-0.28) `[research §D4/D5]`, and the top tint's largest multiplier
+        #   5.33 sits at the 5.2× the deck tint's clipping measurement already covers
+        #   (clipped fraction 0.02 % on a p95-linear-0.122 map).
+        #   `stringer_tint` itself is untouched: the columns, stringers and the GT-77
+        #   approach timber render bit-identically.
+        guard_tint=(2.90, 3.53, 3.86),         # -> lin (0.239,0.206,0.171) L* 53.0 alb 0.211
+        guard_top_tint=(3.57, 4.57, 5.33),     # -> lin (0.294,0.267,0.236) L* 59.0 alb 0.270
         # algae collar at the damp shaded column feet and north faces — §4.2-3's
         #   x(0.92,0.98,0.92) applied over the frame tint. Cheap, and it is what makes
         #   방부목 read as *outdoor* timber rather than as joinery.
@@ -1207,11 +1412,16 @@ def rail_runs():
     surface so the baluster inner face is flush with the deck edge and the declared
     1.500 m clear width is measured between rail faces · `z0,z1` walking z at each end
     · `side` 'N' (ylo chain) / 'P' (yhi chain) · `k` flight/landing index · `broken`
-    the frozen `rail.broken_landing` hook.
+    the frozen `rail.broken_landing` hook · [GT-115 ⑭] `ox,oy` the run's **outboard**
+    plan normal (unit, away from the walking surface), which is what tells the handrail
+    pass and the return pass which side is "inside" without re-deriving the boundary.
 
     The forward face of the **arrival** landing carries no run: it meets natural grade
     at a 20 mm step, so a guard there is a false drop cue (08-05 doctrine — a rail line
     means the ground falls away beyond it) and it is the very edge the walk leaves by.
+
+    [GT-115 ⑭ (1)] The chain is closed at its two free ends by a `return` run — see
+    `rail.end` — so no run stops at a node that carries only that one run.
     """
     r = PARAMS["rail"]
     off = float(r["bal"]) / 2.0
@@ -1234,13 +1444,31 @@ def rail_runs():
                 k = int(tag[1:])
                 runs.append(dict(name=f"FlightGrp_{k}/Rail_{side}", kind="rake",
                                  k=k, side=side, x0=x0, y0=y, x1=x1, y1=y,
-                                 z0=z0, z1=z1, broken=False))
+                                 z0=z0, z1=z1, broken=False, ox=0.0, oy=s))
             else:
                 runs.append(dict(name=_nm(_rail_root(tag, f"_{side}")),
                                  kind="level",
                                  k=(int(tag[1:]) if tag[0] == "L" else None),
                                  side=side, x0=x0, y0=y, x1=x1, y1=y,
-                                 z0=z0, z1=z1, broken=False))
+                                 z0=z0, z1=z1, broken=False, ox=0.0, oy=s))
+            # [GT-115 ⑭ (1)] free chain ends: the back face of the entry deck and the
+            #   forward face of the arrival landing are the only nodes where a run has
+            #   no partner. Each is closed by a 90-deg **return** turned inboard (the
+            #   outboard direction is barred at both ends — see `rail.end`), which the
+            #   newel pass then caps at its far end exactly like any other node.
+            endl = float(r.get("end", {}).get("run", 0.0))
+            if endl > 1e-6 and (i == 0 or i + 1 == len(slabs)):
+                first = (i == 0)
+                xe = (x0 - off) if first else (x1 + off)
+                runs.append(dict(name=_nm(_rail_root(tag, f"_End{side}")),
+                                 kind="return",
+                                 k=(int(tag[1:]) if tag[0] == "L" else None),
+                                 side=side,
+                                 x0=xe, y0=y, x1=xe, y1=y - s * endl,
+                                 z0=z0 if first else z1,
+                                 z1=z0 if first else z1,
+                                 broken=False,
+                                 ox=(-1.0 if first else 1.0), oy=0.0))
             if i + 1 >= len(slabs):
                 continue             # arrival landing: the forward face is the exit
             ntag, _nx0, _nx1, nylo, nyhi, nz0, _nz1, _nrake = slabs[i + 1]
@@ -1259,7 +1487,8 @@ def rail_runs():
                              x1=x1 + (off if fwd else -off), y1=yn,
                              z0=(z1 if fwd else nz0), z1=(z1 if fwd else nz0),
                              broken=(fwd and otag[0] == "L"
-                                     and int(otag[1:]) == br)))
+                                     and int(otag[1:]) == br),
+                             ox=(1.0 if fwd else -1.0), oy=0.0))
     return runs
 
 
@@ -1310,15 +1539,175 @@ def baluster_run(L, step):
     return n, L / float(n + 1)
 
 
-def rail_field_span(kind, L):
+def rail_field_span(kind, L, ends=(True, True)):
     """[GT-65] Length of the baluster / line-post field on a run of node-to-node
     length `L`. A **cross** run butts back by half the top rail at each end so it dies
     on the face of the X-run it meets (no shared volume, no coplanar top faces); its
     field is therefore `top` width shorter than its line. X-runs die inside the newel
-    instead and keep their full line."""
-    if kind == "cross":
-        return max(0.0, float(L) - float(PARAMS["rail"]["top"][0]))
+    instead and keep their full line.
+
+    [GT-115 ⑭] `ends` makes the butt per-end. A **return** butts only where it meets the
+    X-run it turns off; its free end has to die *inside* its own capped end post the way
+    an X-run does, and a symmetric butt would leave that end 25 mm short of the post
+    face `[computed]`. Default `(True, True)` reproduces the GT-65 cross exactly.
+    """
+    if kind in ("cross", "return"):
+        w = float(PARAMS["rail"]["top"][0])
+        return max(0.0, float(L)
+                   - (w / 2.0 if ends[0] else 0.0)
+                   - (w / 2.0 if ends[1] else 0.0))
     return float(L)
+
+
+def _run_plan_dir(rr):
+    """Unit plan direction of a run (rakes included — the rake's plan run is +X)."""
+    dx, dy = rr["x1"] - rr["x0"], rr["y1"] - rr["y0"]
+    L = math.hypot(dx, dy)
+    return (dx / L, dy / L) if L > 1e-9 else (0.0, 0.0)
+
+
+def run_end_nodes(runs=None):
+    """[GT-115 ⑭ (1)] Boundary nodes carrying exactly **one** run end.
+
+    The 08-14 audit reads a run stopping with nothing turning the corner. This is the
+    measurable form of that: a node of degree 1 is a run that terminates rather than
+    continuing, and every such node has to be a designed termination (a capped end post
+    with a return into it), not an accident of the chain. Returns
+    `[(x, y, z, [(run name, kind)])]`, so the self-check can name the offender instead of
+    printing a count.
+    """
+    runs = rail_runs() if runs is None else runs
+    nodes = []
+    for rr in runs:
+        for (px, py, pz) in ((rr["x0"], rr["y0"], rr["z0"]),
+                             (rr["x1"], rr["y1"], rr["z1"])):
+            for nd in nodes:
+                if (abs(nd[0] - px) <= 0.10 and abs(nd[1] - py) <= 0.10
+                        and abs(nd[2] - pz) <= 0.20):
+                    nd[3].append((rr["name"], rr["kind"]))
+                    break
+            else:
+                nodes.append([px, py, pz, [(rr["name"], rr["kind"])]])
+    return [(round(a, 3), round(b, 3), round(c, 3), nm)
+            for a, b, c, nm in nodes if len(nm) < 2]
+
+
+def handrail_lines(runs=None):
+    """[GT-115 ⑭ (4)] The graspable handrail, derived from the same run inventory.
+
+    One tube per guard run (`return` stubs excluded — the handrail dies into the corner
+    newel, which *is* the returned-end detail, and a 0.14 m tube on a 0.30 m stub would
+    read as debris). The axis is the run centreline pushed `hand.off` **inboard** — the
+    direction `rail_runs()` publishes as `-(ox, oy)` — and dropped `hand.drop` under the
+    top-rail top face, so a rake's handrail is parallel to its own nosing plane by
+    construction and no height or position of an existing member is consulted, let alone
+    changed.
+
+    Trim rule: an end is cut back by `hand.off` **iff the run it meets there turns**
+    (different plan direction, or nothing there at all). Two perpendicular tubes then
+    meet exactly at the mitre point with no shared volume, while a flight rail and the
+    landing rail it continues into keep one unbroken tube across the newel — which is
+    the whole reason a handrail is bracketed inboard rather than sat on top.
+
+    Returns dicts: `name` · `x0,y0,z0`-`x1,y1,z1` (**tube axis**) · `L` (axis length) ·
+    `rotY`/`rotZ` for `sc.add_cylinder` · `ix,iy` inboard unit normal · `horiz`.
+    """
+    r = PARAMS["rail"]
+    hd = r["hand"]
+    runs = rail_runs() if runs is None else runs
+    off = float(hd["off"])
+    dz = float(r["h"]) - float(hd["drop"])
+    ends = [(rr, (rr["x0"], rr["y0"], rr["z0"]), _run_plan_dir(rr)) for rr in runs]
+    ends += [(rr, (rr["x1"], rr["y1"], rr["z1"]), _run_plan_dir(rr)) for rr in runs]
+    out = []
+    for rr in runs:
+        if rr["kind"] == "return" or rr["broken"]:
+            continue
+        ux, uy = _run_plan_dir(rr)
+        ix, iy = -float(rr["ox"]), -float(rr["oy"])
+        Lp = math.hypot(rr["x1"] - rr["x0"], rr["y1"] - rr["y0"])
+        if Lp < 1e-6:
+            continue
+        cut = []
+        for (px, py, pz) in ((rr["x0"], rr["y0"], rr["z0"]),
+                             (rr["x1"], rr["y1"], rr["z1"])):
+            turn = True
+            for q, (qx, qy, qz), (qux, quy) in ends:
+                if q is rr:
+                    continue
+                if (abs(qx - px) <= 0.10 and abs(qy - py) <= 0.10
+                        and abs(qz - pz) <= 0.20
+                        and abs(qux * ux + quy * uy) > 0.999):
+                    turn = False
+            cut.append(off if turn else 0.0)
+        s0, s1 = cut[0], Lp - cut[1]
+        if s1 - s0 < 0.05:
+            continue
+        def _pt(s, _rr=rr, _ux=ux, _uy=uy, _ix=ix, _iy=iy, _Lp=Lp):
+            return (_rr["x0"] + _ux * s + _ix * off,
+                    _rr["y0"] + _uy * s + _iy * off,
+                    _rr["z0"] + (_rr["z1"] - _rr["z0"]) * (s / _Lp) + dz)
+        ax0, ay0, az0 = _pt(s0)
+        ax1, ay1, az1 = _pt(s1)
+        plan = s1 - s0
+        out.append(dict(name=rr["name"], kind=rr["kind"], side=rr["side"],
+                        x0=ax0, y0=ay0, z0=az0, x1=ax1, y1=ay1, z1=az1,
+                        L=math.hypot(plan, az1 - az0), plan=plan,
+                        ix=ix, iy=iy, horiz=(abs(ux) >= abs(uy)),
+                        rotY=90.0 + math.degrees(math.atan2(az0 - az1, plan)),
+                        rotZ=math.degrees(math.atan2(ay1 - ay0, ax1 - ax0))))
+    return out
+
+
+def outcrop_clearance(runs=None):
+    """[GT-115 ⑭ (1)] Plan clearance from every rock outcrop to every railing line.
+
+    The rocks are dressing and the guard is not, so the guard never moves: this is the
+    arithmetic that decides where a rock may stand. Each rock is modelled as its
+    **manifest** plan box (`outcrop_plan`, `geometry.size_m`) rotated by its own yaw and
+    taken as the axis-aligned envelope, then scaled — an over-estimate of the real
+    footprint, so the clearance it reports is a lower bound. Each run is its centreline
+    grown by half the widest railing member (`top` 0.140 → 0.070; the 90x90 newel's
+    0.045 is inside that), and both boxes being axis-aligned, the separation along the
+    separating axis is `max(dx, dy)` — itself ≤ the Euclidean gap, so conservative twice.
+
+    Returns `[(asset_id, row index, clearance_m, worst run name)]`, worst first.
+    """
+    runs = rail_runs() if runs is None else runs
+    half = float(PARAMS["rail"]["top"][0]) / 2.0
+    plan = PARAMS["outcrop_plan"]
+    rows = []
+    for i, (aid, ox, oy, _oz, oyaw, osc) in enumerate(PARAMS["outcrop"]):
+        w, d = plan.get(aid, (0.0, 0.0))
+        c = abs(math.cos(math.radians(float(oyaw))))
+        s = abs(math.sin(math.radians(float(oyaw))))
+        hx = float(osc) * (float(w) * c + float(d) * s) / 2.0
+        hy = float(osc) * (float(w) * s + float(d) * c) / 2.0
+        worst, wnm = 1.0e9, "-"
+        for rr in runs:
+            rx0, rx1 = sorted((rr["x0"], rr["x1"]))
+            ry0, ry1 = sorted((rr["y0"], rr["y1"]))
+            gx = max(rx0 - half - (ox + hx), (ox - hx) - (rx1 + half))
+            gy = max(ry0 - half - (oy + hy), (oy - hy) - (ry1 + half))
+            g = max(gx, gy)
+            if g < worst:
+                worst, wnm = g, rr["name"]
+        rows.append((aid, i, worst, wnm))
+    return sorted(rows, key=lambda q: q[2])
+
+
+def litter_pool(cards):
+    """[GT-115 ⑭ (2)] One cluster-variant sub-pool of `sc.VEG_DEBRIS`.
+
+    `cards` names existing Debris USDs by stem — **no procurement**: the five rows are
+    already five different card arrangements of the same fallen leaves, and the variants
+    are cut out of them. A stem that is not in the shared pool simply does not appear, and
+    an empty selection falls back to the full pool rather than silently placing nothing.
+    """
+    want = tuple(str(c) for c in cards)
+    pool = [row for row in sc.VEG_DEBRIS
+            if os.path.basename(str(row[0])).rsplit(".", 1)[0] in want]
+    return pool or list(sc.VEG_DEBRIS)
 
 
 # ===========================================================================
@@ -1357,7 +1746,20 @@ def deck_module_selfcheck():
           "시판규격이 아니다.")
 
     # -- round-member census: G10 has no round member anywhere in frame -----
-    print(f"    난간 원형부재 수 = 0 (원통 CYL 미사용, 전부 박스) → OK")
+    #    [GT-115 ⑭ (4)] **re-stated, not broken.** S3-8's census was a *silhouette*
+    #    argument: a run of thin round verticals between two thin round horizontals is
+    #    the silhouette of a steel balustrade. The frame is still 100 % square — that
+    #    number is asserted below — and the one round member added is a single
+    #    **horizontal** graspable tube behind the square frame, which is the opposite
+    #    reading and what a 방부목 관찰데크 actually carries.
+    n_frame_round = 0
+    n_hand = len(handrail_lines())
+    good = n_frame_round == 0
+    ok_all &= good
+    print(f"    난간 골조 원형부재 {n_frame_round}개 (엄지기둥·난간대·살대·중간기둥 "
+          f"전부 박스) → {'OK' if good else 'CHECK'}")
+    print(f"    손스침(원형) 라인 {n_hand}개 · Ø{r['hand']['dia']:.3f} m "
+          f"— [GT-115 ⑭] 골조 실루엣과 분리된 수평 파지부재 (§8.R 계열 논리로 선언)")
     print("      sc.build_railing_line 은 이 씬에서 더 이상 호출되지 않는다 — "
           "공유 살대(baluster_r) 중복 48쌍 함정은 '끄기'가 아니라 "
           "'경로 제거'로 해소됨")
@@ -1376,8 +1778,10 @@ def deck_module_selfcheck():
     worst = None
     rows = []
     for rr in rail_runs():
-        if rr["broken"]:
-            continue
+        if rr["broken"] or rr["kind"] == "return":
+            continue                 # [GT-115 ⑭] returns carry one centred baluster —
+                                     #   reported on its own row below, because a 0.30 m
+                                     #   stub cannot carry the field pitch by definition
         L = rail_field_span(rr["kind"],
                             math.hypot(rr["x1"] - rr["x0"], rr["y1"] - rr["y0"]))
         nb, pitch = baluster_run(L, r["bal_step"])
@@ -1462,7 +1866,7 @@ def deck_module_selfcheck():
     #     heads and the exit; the split runs must clear every band with margin.
     worst_cross, worst_nm = 9.9, "-"
     for rr in runs:
-        if rr["kind"] != "cross":
+        if rr["kind"] not in ("cross", "return"):   # [GT-115 ⑭] returns judged too
             continue
         lo_r, hi_r = min(rr["y0"], rr["y1"]), max(rr["y0"], rr["y1"])
         for f in SEQ:
@@ -1520,7 +1924,7 @@ def deck_module_selfcheck():
     cue.append((f0["x_bot"], (blo + bhi) / 2.0, f0["z_bot"]))
     hits = []
     for rr in runs:
-        if rr["kind"] != "cross":
+        if rr["kind"] not in ("cross", "return"):   # [GT-115 ⑭] returns judged too
             continue
         ylo_r, yhi_r = sorted((rr["y0"], rr["y1"]))
         for d in (2, 5, 10):
@@ -1837,7 +2241,140 @@ def deck_module_selfcheck():
 
     print(f"    [deck_module_selfcheck S3-11] "
           f"{'전항목 OK' if ok11 else '⚠ CHECK 항목 있음'}")
-    return ok_all and ok9 and ok10 and ok11
+
+    # =====================================================================
+    # GT-115 ⑭ — 08-14 감사 5건. 전부 드레싱/마감이고, 보행면·낙차 모서리·
+    # 지형 슬래브·계절 핀은 이 블록의 어떤 항목도 건드리지 않는다.
+    # =====================================================================
+    ok15 = True
+    print("\n  [deck_module_selfcheck] GT-115 ⑭ — 노두 이격 · 런 종단 · "
+          "손스침 · 정자 가구 · 이끼 배향")
+
+    # (1a) rocks clear of every rail line, by arithmetic on the manifest box
+    cl = outcrop_clearance(runs)
+    lim = 0.300
+    print(f"    {'노두':<22} {'스케일':>6} {'이격':>7} {'최근접 런':<22} 판정")
+    for aid, i, gap, wnm in cl:
+        good = gap >= lim - 1e-9
+        ok15 &= good
+        print(f"    {aid:<20}#{i} {P['outcrop'][i][5]:6.2f} {gap:7.3f} {wnm:<22} "
+              f"{'OK' if good else 'CHECK ← 난간을 관통한다'}")
+    print(f"      기준 ≥{lim:.2f} m (감사 지시) · 모델: 매니페스트 size_m 을 yaw 로 "
+          "돌린 **축정렬 외피**(실제보다 크게 잡힘) vs 난간 중심선을 최대 부재 반폭 "
+          "0.070 만큼 부풀린 상자 — 두 번 보수적이라 보고값은 하한")
+    print("      row 0 `rock_moss_set_01` 은 바위 한 덩이가 아니라 8.005 × 6.949 m "
+          "**세트**(메시 6). 평행이동만으로는 쉼터 런(y 3.119)을 0.30 m 비우려면 "
+          "cy ≥ 8.21 이 되어 회랑(y1 8.00) 밖 북측 30° 사면으로 나가야 한다 — "
+          "그래서 축척 1.00 → 0.50 과 이동을 함께 적용(scene09 선례 0.30~0.78)")
+
+    # (1b) every run end is a designed termination
+    d1 = run_end_nodes(runs)
+    bad = [(a, b, c, nm) for a, b, c, nm in d1 if nm[0][1] != "return"]
+    nret = sum(1 for rr in runs if rr["kind"] == "return")
+    good = (not bad) and nret == 4
+    ok15 &= good
+    print(f"    차수 1 노드 {len(d1)}개 · 전부 리턴 종단인가 = "
+          f"{'예' if not bad else bad} · 리턴 런 {nret}개 "
+          f"(길이 {r['end']['run']:.3f} m · 안쪽으로 꺾음) → "
+          f"{'OK' if good else 'CHECK'}")
+    ld_ = P["landing"]
+    open_w = (float(ld_["y1"]) - float(ld_["y0"])) - 2.0 * float(r["end"]["run"])
+    exit_w = 2.0 * abs(PARAMS["exit_paths"][0][4])
+    good = open_w >= exit_w
+    ok15 &= good
+    print(f"    도착참 전면 개구 {open_w:.2f} m ≥ DeckExit 폭 {exit_w:.2f} m → "
+          f"{'OK (§0-2 인계 불변 · 20 mm 단차에 가드 재추가 아님)' if good else 'CHECK'}")
+    print("      바깥쪽으로 꺾을 수 없는 이유: 진입단은 y −1.600 이 무방호 남측 "
+          "사면 파단선이고 GT-77 (3) 이 그 밖으로 나가는 부재를 명시적으로 금지한다")
+
+    # (4) handrail — graspable, and it does not eat the statutory clear width
+    hd = r["hand"]
+    hls = handrail_lines(runs)
+    good = 0.032 - 1e-9 <= hd["dia"] <= 0.038 + 1e-9
+    ok15 &= good
+    print(f"    손스침 Ø{hd['dia']:.3f} m ({hd['dia']*1000:.0f} mm) · 라인 "
+          f"{len(hls)}개 · 연장 {sum(h['L'] for h in hls):.2f} m → "
+          f"{'OK (감사 32~38 mm 대역)' if good else 'CHECK'}")
+    zh = r["h"] - hd["drop"]
+    good = 0.80 <= zh <= 1.20
+    ok15 &= good
+    print(f"    파지 높이 {zh:.3f} m (상부 난간대 상면 {r['h']:.3f} − "
+          f"{hd['drop']:.3f}) → {'OK (0.80~1.20 파지 대역)' if good else 'CHECK'}")
+    off_edge = hd["off"] + hd["dia"] / 2.0 - r["bal"] / 2.0
+    clear_w = 2.0 * fl["half_w"] - 2.0 * off_edge
+    good = off_edge <= 0.100 + 1e-9
+    ok15 &= good
+    print(f"    보행면 유효폭 {2.0*fl['half_w']:.3f} m **불변**(살대 안면 기준) · "
+          f"파지 높이 돌출 {off_edge*1000:.1f} mm/측 → 유효폭 {clear_w:.3f} m @ "
+          f"{zh:.3f} m → {'OK (손스침 돌출 ≤100 mm 허용치 안)' if good else 'CHECK'}")
+    print("      기존 부재는 하나도 움직이지 않는다 — 손스침은 rail_runs() 의 "
+          "같은 인벤토리에서 파생되어 수평·경사·가로런 라인을 그대로 따라간다")
+
+    # (2) litter source variants
+    lv = se["litter_variants"]
+    caps = sum(int(v["cap"]) for v in lv)
+    good = caps == int(se["litter_max"])
+    ok15 &= good
+    print(f"    낙엽 소스 변형 {len(lv)}종 · 대역당 캡 합 {caps} = litter_max "
+          f"{se['litter_max']} → {'OK (인스턴스 예산 불변 · 780)' if good else 'CHECK'}")
+    for v in lv:
+        pool = litter_pool(v["cards"])
+        gjit = float(v["scale"][1]) / max(float(v["scale"][0]), 1e-9)
+        okv = len(pool) >= 2 and gjit > 1.0
+        ok15 &= okv
+        print(f"      {v['tag']:<8} 카드 {len(pool)}종 "
+              f"{[os.path.basename(p[0]) for p in pool]} · 축척 "
+              f"{v['scale'][0]:.2f}~{v['scale'][1]:.2f}(×{gjit:.2f}) · 기울기 "
+              f"±{v['tilt']:.0f}° · 캡 {v['cap']} → {'OK' if okv else 'CHECK'}")
+    lo_s = min(float(v["scale"][0]) for v in lv)
+    hi_s = max(float(v["scale"][1]) for v in lv)
+    print(f"      합산 축척 스팬 {lo_s:.2f}~{hi_s:.2f} = ×{hi_s/lo_s:.2f} "
+          f"(단일 호출의 기본 0.75~1.25 = ×1.67 대비) · 신규 자산 조달 0건")
+
+    # (3) pergola framing
+    pg = P["pergola"]
+    n_pg = 2 + int(pg["rafters"]) + 4 + 4
+    good = 3 <= int(pg["rafters"]) <= 5
+    ok15 &= good
+    print(f"    정자 가구 {n_pg}프림 = 보 2 + 서까래 {pg['rafters']} + 마구리 4 + "
+          f"기둥 밑판 4 → {'OK' if good else 'CHECK'} (지붕 슬래브·기둥 4본은 "
+          f"sc.build_canopy 그대로 — 콜라이더/AABB 불변)")
+    rft = float(pg["rafter"][1])
+    good = rft < float(pg["beam"][1])
+    ok15 &= good
+    print(f"    서까래 춤 {rft:.3f} < 보 춤 {pg['beam'][1]:.3f} · 서까래는 보 **사이**에 "
+          f"{pg['rafter_bed']:.3f} m 물려 끼움 → "
+          f"{'OK (동일면 쌍 0 · 공유 부피는 물림뿐)' if good else 'CHECK'}")
+
+    # (5) orientation-dependent weathering
+    WOOD_LIN = (0.0824, 0.0584, 0.0442)
+    for nm, key in (("가드(이끼측)", "guard_tint"), ("가드 상면(은화)", "guard_top_tint")):
+        t = P["material"][key]
+        lin = tuple(a * b for a, b in zip(WOOD_LIN, t))
+        Y = 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2]
+        L = 116.0 * (Y ** (1.0 / 3.0)) - 16.0
+        good = 53.0 - 0.6 <= L <= 60.0 + 0.6
+        ok15 &= good
+        print(f"    {nm} 틴트 {t} → lin "
+              f"({lin[0]:.3f},{lin[1]:.3f},{lin[2]:.3f}) · 알베도 {Y:.3f} · "
+              f"L* {L:.1f} → {'OK (실측 방부목 L* 53~60)' if good else 'CHECK'}")
+    gt = P["material"]["guard_tint"]
+    st = P["material"]["stringer_tint"]
+    dg = (gt[1] / gt[0]) / (st[1] / st[0])
+    db = (gt[2] / gt[0]) / (st[2] / st[0])
+    good = dg < 1.0 and db < 1.0
+    ok15 &= good
+    print(f"    이끼 증폭비 G/R ×{dg:.3f} · B/R ×{db:.3f} (기존 프레임 틴트 대비) → "
+          f"{'OK (텍스처 조류 텍셀이 청록으로 덜 밀림)' if good else 'CHECK'}")
+    print("      면 단위 재질은 부재당 1프림이라 불가 — 그래서 **부재 배향** 단위로 "
+          "쪼갰다(런별 상부 난간대 + 엄지기둥 갓 = 상향면, 나머지 = 수직/음영면). "
+          "이는 이 파일이 이미 적어 둔 §2.A.1-8 '은화한 상면 위 어두운 수직면' 을 "
+          "난간에 처음 적용한 것이고, M['stringer'] 자체는 건드리지 않아 지지기둥 · "
+          "스트링거 · GT-77 접근로 목재는 비트동일하다")
+
+    print(f"    [deck_module_selfcheck GT-115 ⑭] "
+          f"{'전항목 OK' if ok15 else '⚠ CHECK 항목 있음'}")
+    return ok_all and ok9 and ok10 and ok11 and ok15
 
 
 # ===========================================================================
@@ -2374,15 +2911,20 @@ def _smoke_report():
                   f"{rr['y0']:+6.3f}→{rr['y1']:+6.3f} "
                   f"{rr['z0']:+6.2f}→{rr['z1']:+6.2f} "
                   f"{math.hypot(rr['x1']-rr['x0'], rr['y1']-rr['y0']):5.2f}")
-        # chain gap: consecutive runs on one chain must share an endpoint
-        ch = [rr for rr in _runs if rr["side"] == _s]
+        # chain gap: consecutive runs on one chain must share an endpoint.
+        #   [GT-115 ⑭] the return stubs are **terminations, not chain segments** — they
+        #   hang off the chain's first and last node at 90°, so walking them in sequence
+        #   would measure the length of the deck head, not a gap. They are excluded here
+        #   and asserted on their own row by `run_end_nodes()` in the self-check.
+        ch = [rr for rr in _runs if rr["side"] == _s and rr["kind"] != "return"]
+        ret = [rr for rr in _runs if rr["side"] == _s and rr["kind"] == "return"]
         gapmax, gapnm = 0.0, "-"
         for a, b in zip(ch, ch[1:]):
             d = math.hypot(b["x0"] - a["x1"], b["y0"] - a["y1"])
             if d > gapmax:
                 gapmax, gapnm = d, f"{a['name']}→{b['name']}"
-        print(f"    체인 {_s}: 런 {len(ch)}개 · 연속 런 끝점 최대 이격 "
-              f"{gapmax:.3f} m ({gapnm}) → "
+        print(f"    체인 {_s}: 런 {len(ch)}개 (+종단 리턴 {len(ret)}개) · "
+              f"연속 런 끝점 최대 이격 {gapmax:.3f} m ({gapnm}) → "
               f"{'OK (엄지기둥 90 mm 안)' if gapmax <= PARAMS['rail']['newel'] + 1e-9 else 'CHECK'}")
 
     # ── [v6] sun reselection check : lambert per face + direct sun reaching the passage ──
@@ -2555,7 +3097,11 @@ BANNER = """\
 12. [v6] 난간        — 세로살이 들어가 '가설 사다리틀'이 아니라 데크 난간인가
 13. [GT-77] 접근로   — 데크 양 끝단에서 포장이 데크 폭까지 나가 마구리재에 물려 붙는가
                        (경계목·버지·식재가 길을 '무맥락 매트'에서 떼어내는가 ·
-                        런 끝마다 리턴/말뚝 · 머리 절토면 raw cut 소거)"""
+                        런 끝마다 리턴/말뚝 · 머리 절토면 raw cut 소거)
+14. [GT-115 ⑭] 마감  — 노두가 난간 살대를 관통하지 않는가(≥0.30 m) · 난간 런 끝이
+                       리턴+갓기둥으로 죽는가 · 낙엽이 한 실루엣의 반복이 아닌가
+                       (변형 3종·축척 ×3.22) · 정자에 보/서까래/처마/밑판이 있는가 ·
+                       난간 상면은 은화하고 이끼는 수직·음영면에만 남는가"""
 
 
 def main():
@@ -2620,6 +3166,17 @@ def main():
         #   wood rule — a material called `.../Looks/RailTimber` would be shaded as metal.
         M["algae"] = tex("wood_dark", "/World/Looks/DeckAlgae",
                          sca["wood_dark"] * 1.6, tint=mp["algae_tint"])
+        # [GT-115 ⑭ (5)] the guard's two orientation tones. Same naming discipline as
+        #   `DeckAlgae` above and for the same reason: `_look_spec` tests the **metal**
+        #   rule (tokens "rail" / "post" / "pole" / "frame" / "fence") *before* the wood
+        #   rule, so these carry the "deck" wood token and no metal token — a material
+        #   called `.../Looks/GuardRail` would be shaded as steel and undo S3-8's whole
+        #   argument. UV scale is the frame's (`× 1.6`), so the grain reads at the same
+        #   size on a 38 mm baluster as it did before; only the tint moves.
+        M["guard"] = tex("wood_dark", "/World/Looks/DeckGuard",
+                         sca["wood_dark"] * 1.6, tint=mp["guard_tint"])
+        M["guard_top"] = tex("wood_dark", "/World/Looks/DeckGuardTop",
+                             sca["wood_dark"] * 1.6, tint=mp["guard_top_tint"])
         # [v6] built retaining wall (masonry, rubble scale) / natural cut face (jointless) / coping (concrete)
         M["rock"] = tex("rock_wall", "/World/Looks/Rock", sca["rock_wall"],
                         tint=mp["rock_tint"])
@@ -2852,7 +3409,7 @@ def main():
         return n
 
     def deck_rail(prefix, x0, x1, y0, y1, z_top, broken=False, lattice=False,
-                  butt=False):
+                  butt=False, butt_ends=(True, True), bal_at=None):
         """[S3-8] one axis-aligned railing run in **square sawn sections**.
 
         Members, all boxes (G10 has no round member anywhere in frame):
@@ -2873,6 +3430,15 @@ def main():
         a 70x70 volume at every corner **and** present two coplanar top faces at the
         same z — the classic corner z-fight. The field (balusters, line posts) is laid
         out over the same trimmed span, so end gaps stay equal to field gaps.
+
+        [GT-115 ⑭] `butt_ends` makes that butt per-end, and `bal_at` overrides the field
+        layout with explicit stations. Both exist for the **return** stub: it butts only
+        where it turns off the X-run, because its free end has to die inside its own
+        capped end post (a symmetric butt leaves it 25 mm short of the post face
+        `[computed]`), and a 0.30 m stub cannot carry the field pitch, so it takes one
+        centred baluster — clear gap 0.086 m to each post face, tighter than the 0.112 m
+        field and therefore never the looser reading. The defaults reproduce the GT-65
+        cross **exactly**.
         """
         r = PARAMS["rail"]
         horiz = abs(x1 - x0) >= abs(y1 - y0)
@@ -2883,19 +3449,27 @@ def main():
         cx, cy = (x0 + x1) / 2.0, (y0 + y1) / 2.0
         top_w, top_t = r["top"]
         kind = "cross" if butt else "level"
-        # field span and its start offset along the run (symmetric trim, so the member
-        # centres never move — only their length does)
-        Lf = rail_field_span(kind, L)
-        s0 = (L - Lf) / 2.0
+        # field span and its start offset along the run. The trim is per-end: with the
+        # default (both ends butted) it is symmetric, so the member centres never move
+        # and only their length changes — the GT-65 behaviour, bit for bit.
+        b0 = bool(butt and butt_ends[0])
+        b1 = bool(butt and butt_ends[1])
+        Lf = rail_field_span(kind, L, (b0, b1))
+        s0 = (top_w / 2.0) if b0 else 0.0
         if not broken:
             # (w, t) per rail; z is the member **centre**
             for tag, (w, t), zc in (
                     ("Top", r["top"], z_top + r["h"] - top_t / 2.0),
                     ("Mid", r["mid"], z_top + r["h"] * r["mid_frac"]),
                     ("Bot", r["bot"], z_top + r["bot_z"])):
-                Lm = max(0.02, L - (w if butt else 0.0))
+                c0 = (w / 2.0) if b0 else 0.0
+                c1 = (w / 2.0) if b1 else 0.0
+                Lm = max(0.02, L - c0 - c1)
                 size = (Lm, w, t) if horiz else (w, Lm, t)
-                BOX(f"{prefix}/Rail{tag}", (cx, cy, zc), size, M["rail"])
+                sh = (c0 - c1) / 2.0          # 0 when the trim is symmetric
+                BOX(f"{prefix}/Rail{tag}",
+                    (cx + ux * sh, cy + uy * sh, zc), size,
+                    M["guard_top"] if tag == "Top" else M["rail"])
             if lattice:
                 rail_lattice(prefix, x0, x1, y0, y1, z_top)
         # line posts first: a baluster centred inside one is a duplicate member, not a
@@ -2911,9 +3485,11 @@ def main():
             z_bal0 = z_top + r["bot_z"] + r["bot"][1] / 2.0
             hh = (z_top + r["h"] - top_t) - z_bal0
             nb, _pitch = baluster_run(Lf, r["bal_step"])
+            stations = ([float(v) for v in bal_at] if bal_at is not None
+                        else [s0 + Lf * (i + 1) / float(nb + 1)
+                              for i in range(nb)])
             clash = (ps + b) / 2.0
-            for i in range(nb):
-                s = s0 + Lf * (i + 1) / float(nb + 1)
+            for i, s in enumerate(stations):
                 if any(abs(s - q) < clash for q in post_s):
                     continue
                 BOX(f"{prefix}/Bal_{i}", (x0 + ux * s, y0 + uy * s,
@@ -2934,8 +3510,71 @@ def main():
         h = r["h"] + r["newel_proud"]
         BOX(f"{path}/Post", (px, py, z_walk + h / 2.0), (s, s, h),
             mtl or M["rail"])
+        # [GT-115 ⑭ (5)] the cap is the guard's other up-facing member, so it takes the
+        #   silvered tone with the top rails; the post under it stays on the moss side.
         BOX(f"{path}/Cap", (px, py, z_walk + h + ct / 2.0), (cw, cd, ct),
-            mtl or M["rail"])
+            mtl or M["guard_top"])
+
+    def build_handrail(runs=None):
+        """[GT-115 ⑭ (4)] the graspable handrail line and its brackets.
+
+        One Ø35 tube per guard run, laid on the axis `handrail_lines()` derives from the
+        run inventory, plus a bracket cleat every `hand.brk_step` along it. **Nothing
+        existing is read for a position and nothing existing moves**: the tube is the run
+        centreline pushed inboard and dropped under the top rail, so a raking tube is
+        parallel to its own nosing plane by construction.
+
+        The cleat's top is let `brk_bed` into the underside of the top rail, so it is
+        fixed to a member instead of floating between balusters, and it reaches from the
+        rail line to the tube axis — the tube is half-lapped into its inboard end, which
+        is what a bracket does to a handrail. The tube itself clears every square member:
+        newel face 0.045 / baluster 0.019 / top-rail inner edge 0.070 from the line
+        against the tube's 0.0625-0.0975, and in z it passes **under** the top rail
+        (1.008-1.043 vs 1.062-1.100) `[computed]`.
+
+        Returns (tube count, bracket count).
+        """
+        r = PARAMS["rail"]
+        hd = r["hand"]
+        rad = float(hd["dia"]) / 2.0
+        bw, bo, bh = (float(v) for v in hd["brk"])
+        top_t = float(r["top"][1])
+        lines = handrail_lines(runs)
+        n_t, n_b = 0, 0
+        for ln in lines:
+            # the handrail members live under the run they belong to, so a run and its
+            # grasp cannot drift apart in the stage tree either
+            grp = (f"{ROOT}/{ln['name'].rsplit('/', 1)[0]}/HandGrp_{ln['side']}"
+                   if ln["kind"] == "rake" else f"{ROOT}/{ln['name']}/HandGrp")
+            sc.add_cylinder(stage, f"{grp}/Hand",
+                            ((ln["x0"] + ln["x1"]) / 2.0,
+                             (ln["y0"] + ln["y1"]) / 2.0,
+                             (ln["z0"] + ln["z1"]) / 2.0),
+                            rad, ln["L"], M["guard_top"],
+                            rotY=ln["rotY"], rotZ=ln["rotZ"], collider=False)
+            n_t += 1
+            # bracket stations, held `brk_end` off each end so a cleat never lands on
+            # the mitre where two tubes meet
+            plan = float(ln["plan"])
+            e = min(float(hd["brk_end"]), plan / 3.0)
+            span = max(0.0, plan - 2.0 * e)
+            nb = max(1, int(round(span / float(hd["brk_step"]))) + 1)
+            for i in range(nb):
+                t = 0.5 if nb == 1 else i / float(nb - 1)
+                s = e + span * t
+                fx = s / plan
+                px = ln["x0"] + (ln["x1"] - ln["x0"]) * fx
+                py = ln["y0"] + (ln["y1"] - ln["y0"]) * fx
+                pz = ln["z0"] + (ln["z1"] - ln["z0"]) * fx
+                # from the rail line out to the tube axis, top let into the top rail
+                cx = px - ln["ix"] * bo / 2.0
+                cy = py - ln["iy"] * bo / 2.0
+                cz = (pz + float(hd["drop"]) - top_t
+                      + float(hd["brk_bed"])) - bh / 2.0
+                size = (bw, bo, bh) if ln["horiz"] else (bo, bw, bh)
+                BOX(f"{grp}/Brk_{i}", (cx, cy, cz), size, M["rail"])
+                n_b += 1
+        return n_t, n_b
 
     def build_deck(M):
         fl = PARAMS["flights"]
@@ -3003,9 +3642,13 @@ def main():
                 ("Bot", r["bot"][0], r["bot"][1],
                  f["z_top"] + r["bot_z"] + r["bot"][1] / 2.0))
             for rtag, w, t, z0 in rakes:
+                # [GT-115 ⑭ (5)] the raking top rail is an up-facing member exactly like
+                #   the level ones, so it takes the silvered tone; mid and bottom stay on
+                #   the moss side.
                 sc.build_slope(stage, f"{grp}/Rail{rtag}_{tag}",
                                f["x_top"], z0, f_run, f_drop,
-                               y - w / 2.0, y + w / 2.0, t, M["rail"],
+                               y - w / 2.0, y + w / 2.0, t,
+                               M["guard_top"] if rtag == "Top" else M["rail"],
                                margin=0.0, collider=False)
             # plumb square balusters, tread face -> underside of the top rail
             b = r["bal"]
@@ -3090,6 +3733,15 @@ def main():
             for rr in runs:
                 if rr["kind"] == "rake":
                     _rake_rail(rr)
+                elif rr["kind"] == "return":
+                    # [GT-115 ⑭ (1)] the run-end return. Butted only at the corner it
+                    #   turns off; the free end dies inside its own capped end post the
+                    #   way an X-run does. One centred baluster — see `deck_rail`.
+                    Lr = math.hypot(rr["x1"] - rr["x0"], rr["y1"] - rr["y0"])
+                    deck_rail(f"{ROOT}/{rr['name']}", rr["x0"], rr["x1"],
+                              rr["y0"], rr["y1"], rr["z0"],
+                              butt=True, butt_ends=(True, False),
+                              bal_at=[Lr / 2.0])
                 else:
                     deck_rail(f"{ROOT}/{rr['name']}", rr["x0"], rr["x1"],
                               rr["y0"], rr["y1"], rr["z0"],
@@ -3100,11 +3752,18 @@ def main():
             nws = newel_points(runs)
             for i, (px, py, pz) in enumerate(nws):
                 build_newel(f"{ROOT}/Newel_{i}", px, py, pz)
+            n_hand = build_handrail(runs)
             print(f"[GT-65] 난간 런 {len(runs)}개 "
                   f"(경사 {sum(1 for q in runs if q['kind'] == 'rake')} · "
                   f"수평 {sum(1 for q in runs if q['kind'] == 'level')} · "
-                  f"접합 {sum(1 for q in runs if q['kind'] == 'cross')}) · "
+                  f"접합 {sum(1 for q in runs if q['kind'] == 'cross')} · "
+                  f"[GT-115 ⑭] 종단 리턴 "
+                  f"{sum(1 for q in runs if q['kind'] == 'return')}) · "
                   f"엄지기둥 {len(nws)}개(노드당 1개)")
+            print(f"[GT-115 ⑭] 손스침 Ø{r['hand']['dia']:.3f} m · 라인 "
+                  f"{n_hand[0]}개 · 브래킷 {n_hand[1]}개 · 파지고 "
+                  f"{r['h'] - r['hand']['drop']:.3f} m · 안쪽 편심 "
+                  f"{r['hand']['off']:.3f} m (기존 부재 위치·높이 불변)")
 
         # leaf band : hides the top two step edges of flight0
         lf = PARAMS["leaf"]
@@ -3317,6 +3976,19 @@ def main():
         # a rectangle again); the continuity comes from scatter around them, not from
         # more lobes. `ground_fn` is mandatory here: without it every card would lie flat
         # in mid-air over a 25.8 % slope.
+        #
+        # [GT-115 ⑭ (2)] each band is laid as **three source variants** instead of one
+        #   draw. The audit counts one silhouette ~20× with rotation-only variation, and
+        #   the cause was here, not in the asset library: one call, one seed, the whole
+        #   5-row pool — whose two cluster rows carry 9.6× / 3.9× the **mean**
+        #   per-instance cover of its three single-leaf rows, so the frame is
+        #   area-dominated by two cards spun about Z (the arithmetic is in
+        #   `PARAMS['season']['litter_variants']`). The variants are cut out of the
+        #   **same** five USDs (they are
+        #   already five different card arrangements of the same fallen leaves), each
+        #   with its own scale band, tilt band and `det_seed` draw. Caps sum to the old
+        #   `litter_max` per band, and all three calls are cap-bound at `litter_cover`,
+        #   so the count is exactly the previous round's 780 — a re-mix, not more litter.
         se = PARAMS["season"]
         cg = PARAMS["corridor"]
         n_lit = 0
@@ -3324,13 +3996,24 @@ def main():
                 (HEAD_X, PLAN_X1, cg["y0"], -1.70),
                 (HEAD_X, PLAN_X1, 1.70, 4.40),
                 (HEAD_X, PLAN_X1 * 0.5, -1.70, 1.70))):
-            n_lit += int(sc.scatter_debris(
-                stage, f"{ROOT}/Litter_{i}", lx0, ly0, lx1, ly1, 0.0,
-                cover=float(se["litter_cover"]),
-                seed=gk.det_seed("scene10.litter", i),
-                ground_fn=ground_z,
-                max_count=int(se["litter_max"])) or 0)
+            for v, va in enumerate(se["litter_variants"]):
+                n_lit += int(sc.scatter_debris(
+                    stage, f"{ROOT}/Litter_{i}_{va['tag']}",
+                    lx0, ly0, lx1, ly1, 0.0,
+                    cover=float(se["litter_cover"]),
+                    pool=litter_pool(va["cards"]),
+                    scale_jitter=(float(va["scale"][0]), float(va["scale"][1])),
+                    tilt_max=float(va["tilt"]),
+                    seed=gk.det_seed("scene10.litter", i * 10 + v),
+                    ground_fn=ground_z,
+                    max_count=int(va["cap"])) or 0)
         print(f"[S3-11] 연속 낙엽 산포 {n_lit}개 (CB-2 로브 4개는 조밀 코어로 존치)")
+        lv = se["litter_variants"]
+        span = (max(float(v["scale"][1]) for v in lv)
+                / max(min(float(v["scale"][0]) for v in lv), 1e-9))
+        print(f"[GT-115 ⑭] 낙엽 소스 변형 {len(lv)}종 × 대역 3 — "
+              f"{' · '.join(str(v['tag']) for v in lv)} "
+              f"(축척 스팬 ×{span:.2f} · 신규 자산 조달 0건)")
 
         # distant city glimpse — BS-4 backdrop contract: 0 windows, silhouette only.
         for i, (bx, by, bw, bd, bh) in enumerate(PARAMS["backdrop"]):
@@ -3368,6 +4051,75 @@ def main():
         sc.build_canopy(stage, f"{ROOT}/Pergola", pg["x0"], pg["x1"], pg["y0"],
                         pg["y1"], pg["z_roof"], pg["post_r"], M["deck"],
                         M["stringer"], roof_t=pg["roof_t"], base_z=GROUND_Z)
+        # [GT-115 ⑭ (3)] the framing the kit does not carry. The kit call above is left
+        #   exactly as it was — the roof slab and the four columns are the only members
+        #   of this prop with colliders, so they do not move and the physics world is
+        #   bit-identical; everything below is dressing hung off them, in the order a
+        #   real 정자 is built: 기둥 → 보 → 서까래 → 처마, plus a base plate at each foot.
+        px0, px1 = float(pg["x0"]), float(pg["x1"])
+        py0, py1 = float(pg["y0"]), float(pg["y1"])
+        zr, rt = float(pg["z_roof"]), float(pg["roof_t"])
+        pr = float(pg["post_r"])
+        bw, bd = (float(v) for v in pg["beam"])
+        rw, rd = (float(v) for v in pg["rafter"])
+        rbed = float(pg["rafter_bed"])
+        ft, fdrip = (float(v) for v in pg["fascia"])
+        fout = float(pg["fascia_out"])
+        # what is left of the board once its outer face is `fascia_out` proud of the
+        # slab edge **is** the bed, so the declared `fascia_bed` is a statement about
+        # `fascia` and `fascia_out` rather than a third free number.
+        fbed = ft - fout
+        # 2 headers on the post lines, top face at the roof underside so they are let
+        # into the post tops (반턱 맞춤) instead of hanging below them in mid-air. They
+        # run the full slab length, so each end shows a 0.10 m beam tail past its post.
+        by = (py0 + pr, py1 - pr)
+        for i, yb in enumerate(by):
+            BOX(f"{ROOT}/Pergola/Beam_{i}", ((px0 + px1) / 2.0, yb, zr - bd / 2.0),
+                (px1 - px0, bw, bd), M["stringer"])
+        # 3-5 rafters framed **between** the headers and bedded `rafter_bed` into each,
+        # so the joint is a bite, never a coplanar pair. Shallower than the header, so
+        # they read as riding over it. Stations avoid the two post lines by construction
+        # (the first is 1/(n+1) of the span in from the slab edge).
+        nr = max(1, int(pg["rafters"]))
+        ry0 = by[0] + bw / 2.0 - rbed
+        ry1 = by[1] - bw / 2.0 + rbed
+        for i in range(nr):
+            xr = px0 + (px1 - px0) * (i + 1) / float(nr + 1)
+            BOX(f"{ROOT}/Pergola/Rafter_{i}",
+                (xr, (ry0 + ry1) / 2.0, zr - rd / 2.0),
+                (rw, ry1 - ry0, rd), M["stringer"])
+        # fascia / 처마 band round the slab edge: outer face `fascia_out` proud of the
+        # slab so no vertical face is coincident with it, bedded `fascia_bed` into it,
+        # top held 0.010 under the slab top so no horizontal face is either, and hanging
+        # `drip` below the underside to give the flat roof an eave shadow line.
+        fz0, fz1 = zr - fdrip, zr + rt - 0.010
+        fzc, fzh = (fz0 + fz1) / 2.0, fz1 - fz0
+        #   board centre = edge ± (fascia_out − t/2), so the outer face lands exactly
+        #   `fascia_out` proud and the inner face exactly `fascia_bed` inside the slab
+        #   (`fascia_out − t = −fascia_bed` by the values chosen) `[computed]`.
+        for tag, sgn in (("S", -1.0), ("N", 1.0)):
+            yb = (py0 if sgn < 0 else py1) + sgn * (fout - ft / 2.0)
+            BOX(f"{ROOT}/Pergola/Fascia_{tag}",
+                ((px0 + px1) / 2.0, yb, fzc),
+                (px1 - px0 + 2.0 * fout, ft, fzh), M["deck"])
+        # the two side boards die **into** the end boards (their ends land 0.010 inside
+        # them), so no two fascia faces are coplanar at a corner either.
+        for tag, sgn in (("W", -1.0), ("E", 1.0)):
+            xb = (px0 if sgn < 0 else px1) + sgn * (fout - ft / 2.0)
+            BOX(f"{ROOT}/Pergola/Fascia_{tag}",
+                (xb, (py0 + py1) / 2.0, fzc),
+                (ft, py1 - py0, fzh), M["deck"])
+        # post base plates. The column passes through the plate — the same collar idiom
+        # the deck columns' algae band already uses, and what a real 기둥 밑판 looks like.
+        pbw, pbd, pbh = (float(v) for v in pg["base"])
+        for i, (bx, byp) in enumerate(((px0 + pr, py0 + pr), (px0 + pr, py1 - pr),
+                                       (px1 - pr, py0 + pr), (px1 - pr, py1 - pr))):
+            BOX(f"{ROOT}/Pergola/Base_{i}", (bx, byp, GROUND_Z + pbh / 2.0),
+                (pbw, pbd, pbh), M["stringer"])
+        print(f"[GT-115 ⑭] 정자 가구 {2 + nr + 8}프림 — 보 2(기둥머리 물림) · "
+              f"서까래 {nr}(보 사이 {rbed:.3f} 물림) · 마구리 4(내밀기 {fout:.3f} · "
+              f"물림 {fbed:.3f} · 처마 {fdrip:.3f}) · 기둥 밑판 4 "
+              f"(지붕 슬래브·기둥 4본 = sc.build_canopy 원형 유지)")
 
     def build_horizon(M):
         for i, h in enumerate(PARAMS["far_hedges"]):
@@ -3434,7 +4186,16 @@ def main():
     # ── scene assembly ──
     print("[씬] 재질·지오메트리 조립 중 ...")
     M = setup_materials()
-    M["rail"] = M["stringer"]          # timber railing (same timber as the deck)
+    # [GT-115 ⑭ (5)] the guard leaves `M["stringer"]` for its own oriented pair. The
+    #   railing was the only consumer of the frame tint that the 08-14 audit reads as
+    #   "uniform moss on every face"; the columns, the stair stringers and the GT-77
+    #   approach timber keep `M["stringer"]` and render bit-identically.
+    #     M["rail"]      moss side — balusters · mid/bottom rails · line posts · newel
+    #                    posts · lattice battens · handrail brackets
+    #     M["guard_top"] silvered  — every run's top rail (level, raking and cross) ·
+    #                    newel caps · the handrail tube itself (a grasped member is
+    #                    polished, not mossy)
+    M["rail"] = M["guard"]
     build_terrain(M)
     if cfg["hazard_stairs"]:
         build_deck(M)

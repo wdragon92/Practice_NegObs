@@ -117,9 +117,31 @@ PARAMS = dict(
     #     * the x range **cuts §8.4 (3)'s `−3.76…6.26` down to −3.76…0.00**:
     #       at x>0 the `\|y\|=3.60` locus is the side grass **slope** (z = −0.4706·x),
     #       so a flat z=0 band would float 2.24 m at x=4.76 `[computed]`.
+    #  ═══ [GT-115 ⑬ ③] lower entry walk contraction joints ═══════════════
+    #  (3) The audit row "the concrete walk has zero contraction joints for
+    #     10+ m" is measured on the **centre of `pt_noon_approach_walk`**, and
+    #     the walk that fills that centre is `LowerPath` (x RUN−1.0 … RUN+46),
+    #     **not** the approach path the §8.4 plan above covers. That plan runs
+    #     x −10.60 … −0.30, which in `approach_walk` (eye x −4.0, bearing +X)
+    #     is behind the eye and under the leaf field - so the plan's joint
+    #     vocabulary reached **0 of the judged pixels** while the 17 m of walk
+    #     that *is* judged carried no line at all `[frame check]`.
+    #     Same vocabulary as (1) - `joint_w` 0.05 wide, `joint_recess` −3 mm
+    #     read as tone, bound to `stone` - laid by a **direct**
+    #     `gk.build_joint_grid` call for the same reason the edge bands below
+    #     are direct: the region is outside the plan's `region`.
+    #     · pitch 2.40 m — inside the 1.5-3.0 m contraction band the row asks
+    #       for, and 0.74x the 3.24 m walk width (a walk joints at ~1x its
+    #       width, so a 3.0 m pitch would read as bay joints, not contraction).
+    #     · the grid origin is the **stair foot (x=RUN)**, so the first line
+    #       lands at RUN+2.40 and the slab abutting the bottom step stays whole.
+    #     · `pad1` 17.00 stops the run at RUN+17.00 = 21.76, exactly where the
+    #       centre far hedge closes the walk - lines past it render nothing.
+    #     GT: +0.6 mm proud plate, 7 prims. Not a drop (identical to (1)).
     gkit=dict(
         joint_x0=-10.60, joint_x1=-0.30, joint_step=3.0, joint_w=0.05,
         joint_recess=-0.003,
+        low_joint_pad0=0.40, low_joint_pad1=17.00, low_joint_step=2.40,
         edge_break_y=3.60, edge_break_x0=-3.76, edge_break_x1=0.0,
         edge_break_w=0.20,
     ),
@@ -161,6 +183,32 @@ PARAMS = dict(
     #   top face z 0.012~0.108, bottom face at most −0.012 -> buried into the ground full width (no floating).
     drift_geo=dict(cx=-1.75, len_x=3.30, cy=1.95, len_y=1.10, center_z=0.0,
                    thick=0.12, rotx=5.0),
+    # ── [GT-115 ⑬ ④] leaf-bank **section skin** scope ────────────────────────
+    #  The audit row "a brown flat plank lies diagonally on the leaf bed extending
+    #  onto the lawn (rail_cue bottom-left, 2 pieces; +1 at right 1720-1900,
+    #  640-680)" resolves to `build_leaf_sections`' **flank** skins, not to any
+    #  prop or decal. Projecting the W3 F3 plates into the rail_cue frame lands
+    #  `LeafSec_Drift_N` (y +2.502) at px 405,882 and `LeafSec_A_N` (y +2.402) at
+    #  466,836-477,914 - the two bottom-left "planks", 0.10 m apart with the dark
+    #  slot between them - and `LeafSec_C_S` (y −0.902) at 1740,638-1730,685 =
+    #  the "+1 at right" `[computed, hFOV 60 / vFOV 36.2]`.
+    #  Why they read as boards: each flank skin is a **constant-colour** plate
+    #  offset 2 mm outboard of its host, so its top edge is a crisp straight line
+    #  2 mm clear of the leaf mass and takes a specular highlight along its whole
+    #  length, while the 3D cards that cover the mound **top** never reach the
+    #  flank. Mound A's flanks sit at |y| 2.40 and the drifts' at |y| 2.50, i.e.
+    #  out past the corridor on the lawn - hence "extending onto the lawn".
+    #  Disposition: keep the **end** sections, drop the flank and drift skins.
+    #  The end sections are the case W3 F3 actually argued (mound A's 4.80 x 0.15
+    #  upstream face, aimed at every preset eye, and mound B's crest end at
+    #  x −0.25 which the module docstring calls this scene's identity); the flanks
+    #  are seen at ~14 deg grazing from every eye and are the ones that turned
+    #  into boards. With `leaf_ground` now at 5.6 m (item ①) a 0.15 m flank face
+    #  spans about one printed leaf, so it reverts to a soft brown band, not to
+    #  the "pressed-leaf laminate" F3 removed.
+    #  **Bank geometry is untouched** - these are 2 mm skins with no collider;
+    #  silhouette, extent, height and the straight cross-section are unchanged.
+    leaf_section=dict(end=True, flank=False, drift=False),
     # --- leaf (2) near-field scatter (flat ellipsoids) - count tunes the render cost ---
     leaf_scatter=dict(count=900, seed=2702,
                       scale=(0.038, 0.028, 0.006), jitter=(0.75, 1.30),  # r1: pancaked -> shrunk
@@ -192,6 +240,35 @@ PARAMS = dict(
                                cover=0.32, max_count=110),
                           dict(tag="down",  x0=6.26, x1=7.76, y0=-3.60, y1=3.60,
                                cover=0.32, max_count=110),
+                          # ── [GT-115 ⑬ ①] seam rects ────────────────────────
+                          # G2 splits the field into a card-**rich** core (0.55)
+                          # and card-**poor** skirts (0.32), and the step falls on
+                          # a hard rect edge: the judged crop
+                          # (`pt_noon_rail_cue` 300,780-1150,1060) looks straight
+                          # down the `|y| = 2.60` seam, where the printed
+                          # underlayer surfaces between the last core cards and
+                          # the thin side scatter. These rects **straddle** the
+                          # two worst seams and are appended, never inserted, so
+                          # k (= the seed offset) of the 5 rows above is
+                          # unchanged and their scatter stays bit-identical.
+                          # Combined cover 1-(1-c1)(1-c2):
+                          #   |y| 2.15-2.60  0.55 -> 0.67   (core + seam)
+                          #   |y| 2.60-3.15  0.32 -> 0.50   (side + seam)
+                          #   x −5.20..−4.20 0.32 -> 0.47   (up   + seamUp)
+                          #   x −4.20..−3.60 0.55 -> 0.65   (core + seamUp)
+                          # i.e. the 0.55|0.32 step becomes a 3-stage ramp.
+                          # +170 instances (50/50/70 `[computed]`) -> ~1,955
+                          # total, ~11.9 M logical tris, still under the 12 M
+                          # cap of ground_kit §8.3. The 4th seam (`core|down`
+                          # at x 6.26) is **left undone for that budget** - it
+                          # sits past the stair foot and outside every judged
+                          # crop.
+                          dict(tag="seamN", x0=-4.20, x1=2.60, y0=2.15, y1=3.15,
+                               cover=0.26, max_count=110),
+                          dict(tag="seamS", x0=-4.20, x1=2.60, y0=-3.15, y1=-2.15,
+                               cover=0.26, max_count=110),
+                          dict(tag="seamUp", x0=-5.20, x1=-3.60, y0=-3.60, y1=3.60,
+                               cover=0.22, max_count=90),
                       ]),
 
     # --- cue ---
@@ -274,10 +351,53 @@ PARAMS = dict(
         # "linoleum". 2.2 m matches the source texture's own physical scale, so
         # the plate reads as ground tone under the scatter rather than as a
         # competing second leaf layer.
-        scale=dict(stone_worn=1.1, dirt_park=1.0, grass=1.4, leaf_ground=2.2),
+        # [GT-115 ⑬ ①] leaf_ground 2.2 -> 5.6. The W2 note above set the plate's
+        # **physical** scale; the audit row measures the **screen** scale, which is
+        # what the "cards laid on a printed mat" seam is actually made of. In the
+        # judged crop, a bare patch of mound A's top (`pt_noon_rail_cue`
+        # 500,860-700,1040) sits at the same depth as the 3D cards beside it and a
+        # printed leaf there runs ~17.5 px against ~45 px for a `fallcluster` leaf -
+        # **ratio 2.57** `[measured]`. 2.2 x 2.57 = 5.65 -> 5.6, so a printed leaf
+        # grows 4.9 cm -> 12.5 cm and lands in the middle of the card size
+        # distribution (jitter 0.75-1.25 => 34-56 px). Texel density per printed
+        # leaf is unchanged either way (91 texels off the 4096² tile), and one tile
+        # now over-spans mound A (3.10 x 4.80), so repetition drops as well.
+        scale=dict(stone_worn=1.1, dirt_park=1.0, grass=1.4, leaf_ground=5.6),
         stone_tint=(0.88, 0.92, 0.84),        # stone moss tone (light)
-        grass_tint=(0.55, 0.62, 0.38),        # standard grass tint + autumn dryness
-        leaf_tex_tint=(0.95, 0.72, 0.48),     # leaf_ground texture autumn correction
+        # [GT-115 ⑬ ②] (0.55,0.62,0.38) -> (0.58,0.50,0.60). The lawn ROI of
+        # `pt_noon_approach_walk` measured sRGB 0.271/0.383/0.170 = **saturation
+        # 0.556** = artificial turf. The chroma is the *texture's* (grass_lawn_diff
+        # linear mean 0.0621/0.1115/0.0232 - the blue channel is nearly empty), so
+        # the only lever here is the tint: G is cut and B lifted until the rendered
+        # chroma lands at 0.365 with G still dominant (predicted render
+        # 0.279/0.340/0.216, luminance −16 %) `[computed from the ROI, per-channel
+        # sky-irradiance ratio 1.76/1.69/2.74]`. B > G **in the tint** is not a blue
+        # lawn - it is exactly the compensation the empty blue channel needs, and
+        # the 1.2x it asks for is far under the 2.9-3.8x that scene_common's F1 note
+        # warns amplifies blue texture noise.
+        grass_tint=(0.58, 0.50, 0.60),
+        # [GT-115 ⑬ ②] mowing-band / wear zones - multipliers on `grass_tint`, laid
+        # as **wide transverse bands** by splitting the lawn slabs along +X
+        # (`grass_bands`). No new asset and no overlay decal, so no z-fight and no
+        # added walked surface. The band width floor of `_GRASS_BAND_MIN` is
+        # load-bearing: `scene_common._skin_wanted` refuses the ground displacement
+        # skin below 4 m a side, so a finer stripe would silently flatten the very
+        # lawn it is meant to enrich.
+        grass_zone_mul=((1.000, 1.000, 1.000),   # 0 cut with the nap (reference)
+                        (1.055, 0.945, 1.030),   # 1 cut against the nap - lighter, duller
+                        (1.150, 0.885, 0.960),   # 2 dry / worn strip
+                        (0.930, 0.985, 1.045)),  # 3 damp / shaded strip
+        grass_zone_seq=(0, 1, 0, 2, 1, 0, 1, 3, 0, 1, 2, 0, 1, 0),
+        grass_band_x=5.0,
+        # [GT-115 ⑬ ①] leaf_ground autumn correction, re-aimed at the 3D cards.
+        # Sunlit-matched patches (60th-percentile luminance, same crop) give printed
+        # lin 0.3835/0.1761/0.0512 against card lin 0.3660/0.1399/0.0439
+        # `[measured]`: the printed layer is the **cooler and brighter** of the two
+        # (R/G 2.18 vs 2.62, luminance +17 %). (0.95,0.72,0.48) -> (0.94,0.60,0.41)
+        # rotates R/G by x1.19 and B/G by x1.03 - closing the hue gap - and takes
+        # −10.6 % off the plate's albedo luminance so the underlayer sits *below*
+        # the cards it lies under, which is where an underlayer belongs.
+        leaf_tex_tint=(0.94, 0.60, 0.41),
         # 4 leaf scatter colours (spec-fixed values - mid-tone constants, so the sRGB dark-colour rule does not apply)
         leaf_tints=((0.20, 0.09, 0.03), (0.26, 0.13, 0.04),   # r1: desaturated
                     (0.16, 0.07, 0.025), (0.30, 0.19, 0.06)),
@@ -368,6 +488,36 @@ LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "sceneC2")
 
 ASSET_ROLES = ["stone_worn", "leaf_ground", "dirt_park", "grass",
                "hdri", "mdl"]
+
+
+# [GT-115 ⑬ ②] Minimum lawn-band width. `scene_common._skin_wanted` declines the
+#   ground displacement skin on any slab under 4.0 m a side, so a mowing band cut
+#   finer than this would trade the lawn's relief for its stripe. 4.05 keeps a
+#   margin against float error.
+_GRASS_BAND_MIN = 4.05
+
+
+def grass_bands(x0, x1, phase=0):
+    """[GT-115 ⑬ ②] Split a lawn slab along +X into deterministic mowing bands.
+
+    Returns `[(bx0, bx1, zone), ...]`, `zone` indexing `material.grass_zone_mul`.
+    The band count is `round(span / grass_band_x)` walked down until every band
+    clears `_GRASS_BAND_MIN`, so the split can never cost the slab its skin.
+
+    `phase` offsets the zone sequence, so the upper lawn, the side slopes and the
+    lower lawn do not repeat one pattern. The N and S halves of a slab share a
+    single call (same x range, same phase), which is what makes a band read as
+    **one mow crossing the walk** rather than two unrelated stripes.
+    """
+    mz = PARAMS["material"]
+    seq = mz["grass_zone_seq"]
+    span = float(x1) - float(x0)
+    n = max(1, int(round(span / float(mz["grass_band_x"]))))
+    while n > 1 and span / n < _GRASS_BAND_MIN:
+        n -= 1
+    w = span / n
+    return [(x0 + i * w, x0 + (i + 1) * w, seq[(i + int(phase)) % len(seq)])
+            for i in range(n)]
 
 
 def ground_plans():
@@ -501,6 +651,15 @@ def main():
         M["dirt"] = tex("dirt_park", f"{ROOT}/Looks/Dirt", sca["dirt_park"])
         M["grass"] = tex("grass", f"{ROOT}/Looks/Grass", sca["grass"],
                          tint=mp["grass_tint"])
+        # [GT-115 ⑬ ②] mowing-band / wear zone variants. The Looks name must stay
+        #   `Grass<digit>`: `scene_common._look_spec` strips a trailing digit run
+        #   before its second lookup, so `Grass2` resolves to the same **turf**
+        #   class as `Grass` (ground MDL · patch · 1.6 m macro · saturation
+        #   self-correction). Any other suffix would drop the whole lawn to `misc`.
+        for _zi, _mul in enumerate(mp["grass_zone_mul"]):
+            M[f"grass{_zi}"] = tex(
+                "grass", f"{ROOT}/Looks/Grass{_zi}", sca["grass"],
+                tint=tuple(t * m for t, m in zip(mp["grass_tint"], _mul)))
         M["leafbed"] = tex("leaf_ground", f"{ROOT}/Looks/LeafBed",
                            sca["leaf_ground"], tint=mp["leaf_tex_tint"])
         # [W3 F3 · DEC-2 §10.5 "sceneC2 additionally"] The **vertical-face binding bug**.
@@ -559,20 +718,34 @@ def main():
             (up["x1"] - up["x0"], 2.0 * up["y_half"], up["thick"]),
             path_mtl, col=True)
         # (2) upper grass (outside the corridor, south·north)
+        #     [GT-115 ⑬ ②] one slab per side -> one **mowing band** per slab index.
+        #     Total volume, extent and top face are identical to the single slab
+        #     that was here; only the x cut lines and the bound tint change.
         for tag, ya, yb in (("N", up["y_half"], gr["y_edge"]),
                             ("S", -gr["y_edge"], -up["y_half"])):
-            BOX(f"{ROOT}/UpperGrass_{tag}",
-                ((up["x0"] + up["x1"]) / 2.0, (ya + yb) / 2.0,
-                 up["z_top"] - gr["thick"] / 2.0),
-                (up["x1"] - up["x0"], yb - ya, gr["thick"]), M["grass"],
-                col=True)
+            for bi, (bx0, bx1, zone) in enumerate(
+                    grass_bands(up["x0"], up["x1"], phase=0)):
+                BOX(f"{ROOT}/UpperGrass_{tag}_{bi}",
+                    ((bx0 + bx1) / 2.0, (ya + yb) / 2.0,
+                     up["z_top"] - gr["thick"] / 2.0),
+                    (bx1 - bx0, yb - ya, gr["thick"]), M[f"grass{zone}"],
+                    col=True)
         # (3) side grass slope (x 0..RUN, top face sunk 0.005 -> the upper·lower slabs cover it)
+        #     RUN 4.76 -> a single band; phase 4 continues the upper lawn's
+        #     sequence across the stair, so the mow does not restart at the crest.
+        _slope_zone = grass_bands(0.0, RUN, phase=4)[0][2]
         for tag, ya, yb in (("N", sl["y_in"], sl["y_edge"]),
                             ("S", -sl["y_edge"], -sl["y_in"])):
             sc.build_slope(stage, f"{ROOT}/SideSlope_{tag}", 0.0,
                            -sl["sink"], RUN, DROP, ya, yb, sl["thick"],
-                           M["grass"], margin=0.0, collider=True)
+                           M[f"grass{_slope_zone}"], margin=0.0, collider=True)
         # (4) lower entry path - under_lap underlap beneath the stair (anti-float) + 0.002 sink
+        # [GT-115 ⑬ ③] this walk now carries ground_kit joints, so it joins the
+        #   P-A skin-OFF register with `UpperPath`. It is a no-op today (the walk
+        #   is 3.24 m wide and `_skin_wanted` already declines under 4 m a side),
+        #   but the joint plates are +0.6 mm and a skin is +6.5~16.5 mm - the
+        #   declaration must not depend on the walk staying narrow.
+        sc.skin_exclude(f"{ROOT}/LowerPath")
         lx0 = RUN - lo["under_lap"]
         lx1 = RUN + lo["x_pad"]
         BOX(f"{ROOT}/LowerPath",
@@ -580,12 +753,16 @@ def main():
              Z_BOT - lo["sink"] - lo["thick"] / 2.0),
             (lx1 - lx0, 2.0 * lo["y_half"], lo["thick"]), path_mtl, col=True)
         # (5) lower grass (outside the corridor) - covers the slope end by 0.02 to seal the joint
+        #     [GT-115 ⑬ ②] banded like (2); phase 5 continues past the side slope.
         for tag, ya, yb in (("N", lo["y_half"], gr["y_edge"]),
                             ("S", -gr["y_edge"], -lo["y_half"])):
-            BOX(f"{ROOT}/LowerGrass_{tag}",
-                ((RUN - 0.02 + lx1) / 2.0, (ya + yb) / 2.0,
-                 Z_BOT - gr["thick"] / 2.0),
-                (lx1 - RUN + 0.02, yb - ya, gr["thick"]), M["grass"], col=True)
+            for bi, (bx0, bx1, zone) in enumerate(
+                    grass_bands(RUN - 0.02, lx1, phase=5)):
+                BOX(f"{ROOT}/LowerGrass_{tag}_{bi}",
+                    ((bx0 + bx1) / 2.0, (ya + yb) / 2.0,
+                     Z_BOT - gr["thick"] / 2.0),
+                    (bx1 - bx0, yb - ya, gr["thick"]), M[f"grass{zone}"],
+                    col=True)
 
     # -------------------------------------------------------------------
     # stone stair + coping on both flanks
@@ -651,17 +828,25 @@ def main():
 
         GT: none. Every plate stands on an existing vertical face above grade, adds no
         walked surface, no drop edge and no collider.
+
+        [GT-115 ⑬ ④] The scope is now `PARAMS['leaf_section']`. The **flank** and
+        **drift** skins are withdrawn: seen at ~14 deg grazing they turned into the
+        "brown flat plank … extending onto the lawn" the audit row names (see the
+        PARAMS note for the pixel identification). The **end** skins - the only ones
+        F3 argued from - stay.
         """
+        sec = PARAMS["leaf_section"]
         t = 0.002                              # skin offset off the host face
         for md in PARAMS["mound"]:
             nm, yh, th = md["name"], md["y_half"], md["thick"]
             # (1) upstream end section — vertical, `thick` tall, facing −X.
-            sc.add_box(stage, f"{ROOT}/LeafSec_{nm}_End",
-                       (md["x0"] - t, 0.0, md["z0"] - th / 2.0),
-                       (2.0 * t, 2.0 * yh, th), M["leafsec"], collider=False)
+            if sec["end"]:
+                sc.add_box(stage, f"{ROOT}/LeafSec_{nm}_End",
+                           (md["x0"] - t, 0.0, md["z0"] - th / 2.0),
+                           (2.0 * t, 2.0 * yh, th), M["leafsec"], collider=False)
             # (2) the two flanks — sloped exactly like the host plate, so the skin cannot
             #     shear off it at the downstream end.
-            for tag, sgn in (("N", 1.0), ("S", -1.0)):
+            for tag, sgn in (("N", 1.0), ("S", -1.0)) if sec["flank"] else ():
                 yy = sgn * (yh + t)
                 sc.build_slope(stage, f"{ROOT}/LeafSec_{nm}_{tag}",
                                md["x0"], md["z0"], md["run"], md["drop"],
@@ -669,7 +854,7 @@ def main():
                                M["leafsec"], margin=0.0, collider=False)
         # (3) the side drifts' outboard flanks.
         dg = PARAMS["drift_geo"]
-        for df in PARAMS["drift"]:
+        for df in PARAMS["drift"] if sec["drift"] else ():
             sgn = df["sgn"]
             sc._oriented_box(
                 stage, f"{ROOT}/LeafSec_Drift_{df['name']}",
@@ -982,8 +1167,29 @@ def main():
                 float(PARAMS["upper"]["z_top"]), M["leafbed"],
                 width=float(g["edge_break_w"]), scatter_only=False)
             n_eb += r["prim_count"]
+        # [GT-115 ⑬ ③] lower entry walk contraction joints. Direct builder call for
+        #   the same reason as the bands above (the region is outside the plan's
+        #   `region`), same vocabulary as the approach joints (w · recess · `stone`),
+        #   and switched off with them in the `NEGOBS_GKIT=0` arm (§7.5 A3).
+        #   The grid origin is the stair foot, so the tick set is RUN + 2.40·i.
+        #   In the `hazard_stairs=False` twin the walk is one flat slab at z=0, so
+        #   the joint z follows the same `Z_BOT`/0.0 switch the props use - laid at
+        #   Z_BOT there it would hang 2.24 m under the ground in the void.
+        n_lj = 0
+        if gk.GKIT_ON:
+            lo = PARAMS["lower"]
+            lj_z = (Z_BOT - float(lo["sink"])) if cfg["hazard_stairs"] else 0.0
+            r = gk.build_joint_grid(
+                kit, f"{ROOT}/GKit/LowerJoint",
+                (RUN + float(g["low_joint_pad0"]), -float(lo["y_half"]),
+                 RUN + float(g["low_joint_pad1"]), float(lo["y_half"])),
+                lj_z, M["stone"],
+                step_x=float(g["low_joint_step"]),
+                width=float(g["joint_w"]), recess=float(g["joint_recess"]),
+                origin_xy=(RUN, 0.0), seed=27)
+            n_lj = r["prim_count"]
         print(f"[ground_kit] sceneC2 P3 · 프림 {res['prims']} + 경계밴드 "
-              f"{n_eb} · 산포 0(낙엽 G2 가 담당) · "
+              f"{n_eb} + 하부보도 줄눈 {n_lj} · 산포 0(낙엽 G2 가 담당) · "
               f"δmax {res['gt_delta_max']:.4f} · unit_cell {res['unit_cell']}")
         return res
 
@@ -1016,8 +1222,14 @@ def main():
         x0, x1 = up["x0"], RUN + lo["x_pad"]
         # [W2-0 · P-A] the approach joints are laid in the control arm too -> skin OFF.
         sc.skin_exclude(f"{ROOT}/FlatPath")
-        BOX(f"{ROOT}/FlatFill", ((x0 + x1) / 2.0, 0.0, -gr["thick"] / 2.0),
-            (x1 - x0, 2.0 * gr["y_edge"], gr["thick"]), M["grass"], col=True)
+        # [GT-115 ⑬ ②] the twin's lawn is the same material, so it takes the same
+        #   mowing bands - a control that differs from its pair in look, not only in
+        #   geometry, is not a control.
+        for bi, (bx0, bx1, zone) in enumerate(grass_bands(x0, x1, phase=0)):
+            BOX(f"{ROOT}/FlatFill_{bi}",
+                ((bx0 + bx1) / 2.0, 0.0, -gr["thick"] / 2.0),
+                (bx1 - bx0, 2.0 * gr["y_edge"], gr["thick"]), M[f"grass{zone}"],
+                col=True)
         BOX(f"{ROOT}/FlatPath", ((x0 + x1) / 2.0, 0.0, 0.002 - 0.30),
             (x1 - x0, 2.0 * up["y_half"], 0.60),
             M["dirt"] if cfg["cue_material_break"] else M["grass"], col=True)

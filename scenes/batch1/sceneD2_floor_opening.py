@@ -89,15 +89,28 @@ PARAMS = dict(
     colonnade=dict(y_c=-6.2, size=0.45, h=3.2,
                    xs=[-6.5, -3.5, -0.5, 2.5, 5.5]),
 
-    # Rebar stubs: 6 straight (vertical) + 2 bent (_oriented_box approximation) + 1 hook
+    # Rebar stubs: 6 straight (vertical) + 2 bent (_oriented_box approximation)
+    #              + 1 hook — [GT-115 ⑥] the hook is the **bend of straight #0**, not a 10th bar
+    #              (prim count unchanged at 9).
     rebar=dict(r=0.006, h=0.36, z_c=0.13,
                straight=[(-0.20, -0.55), (-0.20, 0.60), (0.70, -0.95),
                          (1.55, 0.96), (2.20, -0.30), (2.22, 0.62)],
                bent=[(0.05, -0.98, 32.0, 18.0), (2.32, 0.05, 27.0, -64.0)],
                bent_len=0.42, bent_t=0.013,
-               # hook: placed to pierce the top of the straight stub at (-0.20,-0.55) (no floating)
-               hook=dict(cx=-0.20, cy=-0.42, z=0.293, lx=0.30, t=0.013,
-                         yaw=90.0)),
+               # [GT-115 ⑥] hook = a **90 deg standard hook bent at the top end of straight stub
+               #   `stub`** (an index into `straight`), not a bar of its own.
+               #   Was hook=dict(cx=-0.20, cy=-0.42, z=0.293, lx=0.30, yaw=90.0): a free 0.30 m bar
+               #   laid across the shaft of the stub at (-0.20,-0.55) at right angles, overshooting it
+               #   by 0.02 on one side and ending **0.28 m out in mid-air** on the other - a T, not a
+               #   hook (look_check/sceneD2/260731_w3_full/pt_noon_preset_h0.3_d2.png, px 1210-1480:
+               #   270x12 px of bar = 0.30x0.013 m `[measured]`).
+               #   leg 0.144 = 12*db (db = 2r = 0.012) = the code-minimum extension of a 90 deg hook,
+               #   less than half the old 0.30 (= 25*db, a bar length, not a hook).
+               #   yaw 208 deg: the leg runs off to -X/-Y, so (a) GT-V holds with room to spare - its
+               #   far end is x = -0.20 - 0.144*cos(28 deg) = -0.327, and the hook's greatest x is the
+               #   stub itself at -0.20 << the opening lip 0.0 `[computed]` - and (b) it is foreshortened
+               #   on the +X camera axis, so the fix cannot re-create a broadside bar silhouette.
+               hook=dict(stub=0, leg=0.144, t=0.013, yaw=208.0)),
 
     # ═══ [W2 ground_kit] P15 slab_construction - spec §5.8 D2 row ═══════════
     #  Prescription: **wear remnants** of the opening marking paint (20-30 % yellow left) · ink snap
@@ -139,10 +152,18 @@ PARAMS = dict(
     ),
 
     # Crushed concrete debris scatter (fixed seed)
+    #   [GT-115 ⑥] sink 0.35 -> 0.02. **All 46 fragments land on the cured slab**: the scatter box
+    #   (x -2.2..4.2, y -2.6..2.6) and the lip ring (x >= x0-0.55 = -0.55, |y| <= 1.30) both lie wholly
+    #   inside the deck (x -9.0..8.45, y -6.5..6.5) `[computed]`, so there is no soil-borne subset to
+    #   keep a sink for and the value can be uniform. Concrete that has set does not swallow 35 % of a
+    #   chip - the chips rest on it. 0.02 is not a burial but this file's standing anti-coplanarity
+    #   bite (a 0.09 chip bites ~1 mm), so no fragment sits exactly tangent to the slab top face.
+    #   The contact darkening that made the deep sink read as "seated" is a **render-side** matter
+    #   (PT contact shadow / AO) and is deliberately not faked here with geometry.
     debris=dict(seed=2907, count=46, perim_ratio=0.6,
                 x0=-2.2, x1=4.2, y0=-2.6, y1=2.6,
                 ring_lo=0.03, ring_hi=0.55,
-                s_lo=0.030, s_hi=0.130, sink=0.35),
+                s_lo=0.030, s_hi=0.130, sink=0.02),
 
     # cue (OFF by default - being unguarded is this scene's hazard essence)
     nosing=dict(width=0.15, proud=0.002, color=(0.85, 0.72, 0.10)),
@@ -158,8 +179,43 @@ PARAMS = dict(
         panels=[dict(cx=3.0), dict(cx=4.4), dict(cx=5.8)],
         panel=dict(w=1.15, t=0.055, h=2.35, y_c=6.10, tilt=12.0),
         # 2 spoil / gravel piles
-        piles=[dict(cx=6.1, cy=-4.6, sx=1.7, sy=1.15, sz=0.42),
-               dict(cx=-6.8, cy=4.1, sx=1.2, sy=0.9, sz=0.30)],
+        #   [GT-115 ⑥] v3. Each pile was a **single smooth SPH** (pile 0 = sx/sy/sz 1.7/1.15/0.42,
+        #   i.e. 3.4x2.3x0.84 m, sunk 0.06) - the exact "매끈한 조약돌" defect the r2 verdict already
+        #   forced out of `mounds` below, so it takes the same fix in the same style:
+        #     **3 lobes sharing one sink**, lobes = (dx, dy, sx, sy, sz), mounds' ratios kept -
+        #     flank lobe sz 0.72 / 0.66 x main, flank sx 0.62 / 0.69 x main, offset ~0.8 x main sx.
+        #   One thing the mounds did **not** need is added, because a 3 m prop is read at 4-7 m and
+        #   not at 26-33 m: a **toe**. An ellipsoid sitting tangent on the slab meets it with a
+        #   vertical rim (dz/dr -> -inf as r -> sx), and that hard contact ellipse *is* the pebble
+        #   line; real dumped material runs out past its toe as loose fragments. `toe` scatters them
+        #   on rim(bearing) + run, fixed seed, resting on the slab (see build_dressing).
+        #   Peak = deck z_top - sink + sz. Main-lobe flank angle = atan(sz/sy):
+        #     pile 0  atan(0.84/1.02) = 39.5 deg - crushed aggregate repose 35-40 deg
+        #     pile 1  atan(0.30/0.62) = 25.8 deg - a soil heap already spread/tracked over
+        #                                          (repose is a ceiling, not a target)
+        #   **Peaks (0.78 / 0.24) are unchanged and the lobe union stays inside the old ellipse**, so
+        #   this is a re-form, not a resize, and no sight-line number in this file moves
+        #   (wedge limit at x 6.1 is |y| 1.21 vs the pile's 4.60; at x -6.8 it is 0.24 vs 4.10).
+        #   Lobe-union extents `[computed]`:
+        #     pile 0  x -1.70..+1.42, y -1.04..+1.02  (was the 1.70/1.15 ellipse)
+        #     pile 1  x -0.98..+0.98, y -0.62..+0.66  (was the 1.20/0.90 ellipse)
+        #   Only the toe runs past that, and its reach is capped by the east formwork wall - run_hi
+        #   0.26 / s_hi 0.130 give a worst-case fragment AABB margin of **+0.086 m** to the inner face
+        #   x=8.00, +0.49 m to the deck's south edge, and **no overlap with any colonnade column**
+        #   (nearest fragment 0.24 m north of the x=5.5 column face) `[measured, taking the box
+        #   half-extent at its 45 deg worst case]`. Every toe fragment is clear of the opening (GT-V).
+        piles=[dict(cx=6.1, cy=-4.6, sink=0.06,
+                    lobes=[(0.00, 0.00, 1.10, 1.02, 0.84),
+                           (-0.92, 0.30, 0.78, 0.68, 0.60),
+                           (0.62, -0.34, 0.80, 0.70, 0.55)],
+                    toe=dict(seed=1156, n=26, run_lo=0.03, run_hi=0.26,
+                             s_lo=0.045, s_hi=0.130)),
+               dict(cx=-6.8, cy=4.1, sink=0.06,
+                    lobes=[(0.00, 0.00, 0.80, 0.62, 0.30),
+                           (-0.42, 0.22, 0.56, 0.44, 0.22),
+                           (0.46, -0.20, 0.52, 0.42, 0.20)],
+                    toe=dict(seed=1157, n=18, run_lo=0.03, run_hi=0.26,
+                             s_lo=0.040, s_hi=0.130))],
         # 2 outside earth mounds + distant ridge (closes the -Y horizon)
         #   v2 (context dressing): r2 verdict "the right mound reads as a smooth pebble, out of place" ->
         #   made **low and wide + split into 3 lobes** to become a spoil pile. Peak ~ gz-sink+sz.
@@ -663,7 +719,7 @@ def main():
                 (s, s, co["h"] - w["base"]), M["wall"], col=True)
 
     # -------------------------------------------------------------------
-    # Rebar stubs - 6 straight + 2 bent (_oriented_box) + 1 hook
+    # Rebar stubs - 6 straight + 2 bent (_oriented_box) + 1 hook (the bend of straight #0)
     # -------------------------------------------------------------------
     def build_rebar(M):
         rb = PARAMS["rebar"]
@@ -677,9 +733,22 @@ def main():
             zc = L * math.cos(math.radians(tilt)) / 2.0 - 0.055
             OBOX(f"{ROOT}/RebarBent_{i}", (cx, cy, zc), (t, t, L),
                  M["rebar"], rotz=yaw, rotx=tilt)
+        # [GT-115 ⑥] hook = the bend of straight stub `stub`, not a separate rod. The leg's inner
+        #   end sits **on that stub's axis at its top end** and runs out one way only, so the two
+        #   close into an L (bent-bar read) instead of a cross that pierces the shaft and floats.
+        #   · inner end buried r (0.006) inside the stub, and the leg half-thickness (0.0065)
+        #     covers that radius -> the corner has no gap and no overshoot.
+        #   · leg top face flush with the stub top (z_top - t/2) -> the bend is at the bar end,
+        #     which is where a hook is bent.
         hk = rb["hook"]
-        OBOX(f"{ROOT}/RebarHook", (hk["cx"], hk["cy"], hk["z"]),
-             (hk["lx"], hk["t"], hk["t"]), M["rebar"], rotz=hk["yaw"])
+        hx, hy = rb["straight"][int(hk["stub"])]
+        z_top = rb["z_c"] + rb["h"] / 2.0            # stub top end
+        hL, ht = float(hk["leg"]), float(hk["t"])
+        ha = math.radians(float(hk["yaw"]))
+        OBOX(f"{ROOT}/RebarHook",
+             (hx + math.cos(ha) * hL / 2.0, hy + math.sin(ha) * hL / 2.0,
+              z_top - ht / 2.0),
+             (hL, ht, ht), M["rebar"], rotz=float(hk["yaw"]))
 
     # -------------------------------------------------------------------
     # Crushed concrete debris - fixed-seed random (reproducibility). No placement inside the opening
@@ -721,13 +790,14 @@ def main():
             mtl = mats[placed % n_mat]
             sink = db["sink"]
             if placed % 3 == 2:
-                # Flattened ellipsoid: radius rz, centre z = rz*(1-2·sink) -> bottom buried
+                # Flattened ellipsoid: radius rz, centre z = rz*(1-2·sink) -> bottom at -rz·2·sink.
+                # [GT-115 ⑥] at sink 0.02 that is a ~1 mm bite = resting on the slab, not buried.
                 rz = s * 0.38
                 SPH(f"{ROOT}/Debris_{placed}",
                     (px, py, rz * (1.0 - 2.0 * sink)),
                     (s * 0.6, s * 0.5, rz), mtl)
             else:
-                # Box: height hz, centre z = hz*(0.5-sink) -> bottom at -hz·sink (buried)
+                # Box: height hz, centre z = hz*(0.5-sink) -> bottom at -hz·sink ([GT-115 ⑥] ~1 mm)
                 hz = s * rng.uniform(0.4, 0.8)
                 OBOX(f"{ROOT}/Debris_{placed}",
                      (px, py, hz * (0.5 - sink)),
@@ -792,11 +862,53 @@ def main():
         for i, px in enumerate(formpanel_xs()):      # v5.1 §3 even-spacing jitter
             OBOX(f"{ROOT}/FormPanel_{i}", (px, pn["y_c"], zc),
                  (pn["w"], pn["t"], pn["h"]), M["panel"], rotx=tilt)
+        z_slab = PARAMS["deck"]["z_top"]
         for i, pl in enumerate(dr["piles"]):
-            # The bottom bites only 0.06 below the slab top face (0) - embedded shallowly relative to sz so it
-            # does not pierce the slab (0.25 thick) and poke through the basement ceiling.
-            SPH(f"{ROOT}/Pile_{i}", (pl["cx"], pl["cy"], pl["sz"] - 0.06),
-                (pl["sx"], pl["sy"], pl["sz"]), M["gravel"])
+            # [GT-115 ⑥] (a) 3 lobes - the mounds recipe (see below), naming as sceneC1 Pile_{i}_{j}.
+            #   All three centres share one z, so `sink` cuts proportionally deeper into the flatter
+            #   flank lobes and the crest/shoulder silhouette breaks instead of reading as one dome.
+            #   sink 0.06 is still the only bite below the slab top face, so no lobe pierces the
+            #   0.25-thick slab and pokes through the basement ceiling (the original constraint).
+            for j, (dx, dy, sx, sy, sz) in enumerate(pl["lobes"]):
+                SPH(f"{ROOT}/Pile_{i}_{j}",
+                    (pl["cx"] + dx, pl["cy"] + dy, z_slab - pl["sink"]),
+                    (sx, sy, sz), M["gravel"])
+            # [GT-115 ⑥] (b) toe - loose material run out past the lobe rim, which is what turns the
+            #   ellipsoid's hard tangent contact line into a spread toe.
+            #   `_rim(th)` is the support radius of the 3-lobe **union** at bearing th (max over lobes
+            #   of the offset's projection + that lobe's ellipse support), so the toe follows the real
+            #   silhouette rather than a circle and stays dense where the lobes overhang.
+            #   The lobes' ground ellipse is sx*sqrt(1-(sink/sz)^2) >= 0.99*sx at sink 0.06, i.e. inside
+            #   the toe's own run jitter, so the equator semi-axes are used directly.
+            #   Fragments rest **on** the cured slab with the same 0.02 anti-coplanarity bite as the
+            #   debris scatter - see the `debris` note; they are not buried.
+            to = pl["toe"]
+            trng = random.Random(int(to["seed"]))
+            n_toe = int(to["n"])
+
+            def _rim(th, _lobes=pl["lobes"]):
+                c, sn = math.cos(th), math.sin(th)
+                return max(_dx * c + _dy * sn + math.hypot(_sx * c, _sy * sn)
+                           for _dx, _dy, _sx, _sy, _sz in _lobes)
+
+            for k in range(n_toe):
+                th = (2.0 * math.pi * (k + 0.5) / n_toe
+                      + trng.uniform(-0.11, 0.11))
+                rr = _rim(th) + trng.uniform(to["run_lo"], to["run_hi"])
+                px = pl["cx"] + math.cos(th) * rr
+                py = pl["cy"] + math.sin(th) * rr
+                fs = trng.uniform(to["s_lo"], to["s_hi"])
+                if k % 3 == 2:                       # rounded cobble
+                    rz = fs * 0.36
+                    SPH(f"{ROOT}/PileToe_{i}_{k}",
+                        (px, py, z_slab + rz * 0.96),
+                        (fs * 0.62, fs * 0.50, rz), M["gravel"])
+                else:                                # angular crushed chip
+                    hz = fs * trng.uniform(0.34, 0.62)
+                    OBOX(f"{ROOT}/PileToe_{i}_{k}",
+                         (px, py, z_slab + hz * 0.48),
+                         (fs, fs * trng.uniform(0.55, 1.0), hz), M["gravel"],
+                         rotz=trng.uniform(0.0, 90.0))
         gz = PARAMS["ground"]["z_top"]
         # Outside earth mounds - v2: split into 3 lobes and flattened (sink buries the bottom in the ground,
         #   breaking the 'smooth pebble' silhouette). Peak = gz - sink + sz.

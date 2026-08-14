@@ -167,6 +167,76 @@ Run (GUI look check - default):
   flowering ground cover (**P2**, no stock asset) · reflective water (**P4**) · a real `PLACEMENT`
   block (**P5**) · the ridge-crown device (**P3**).
 
+[GT-115 ⑨] 260806_w3_allview5 audit batch — seven rows, all measured off the shipped cuts
+  (`look_check/scene09/260806_w3_allview5/`). **The hazard rows are untouched**: waterline edge and
+  coping, water material (P4), the 36-step flight, the far-shore black-silhouette question and every
+  camera stay exactly as they were.
+  **The single mechanism behind three of the seven** is the look layer's constant-colour texture
+  **promotion** (`scene_common._promote_const_to_texture`) landing on objects the class prescription
+  was never sized for. It preserves the texture's *mean*, and it does that by multiplying the bound
+  texture per channel by `intended / texture_mean` — so on an object far smaller than the tile the
+  multiplier lands on **one unrepresentative texel patch**, not on the mean [measured, this session]:
+    · `Looks/Reed` → veg → `grass_lawn` @ 1.4 m tile with base_color **(3.99, 1.85, 5.46)**. A 44 mm
+      culm samples 1.5 % of one tile, and the ×5.46 on the grass map's near-empty blue channel is
+      exactly the "grey-lilac granite-speckled" amplification `scene_common:591-596` documents for
+      scene11's `leaf_far_*`. Measured on `pt_noon_across_river.png`: stems **(183,163,172)** —
+      blue **above** green on a material declared (0.232, 0.196, 0.118) warm brown. The plume's
+      down-facing cap, lit by sky only and multiplied ×5.46 in blue, is the **navy gap** under
+      every seed head. It also squeaked through the class spread cap by 1.7 % (2.95 vs 3.00).
+    · `Looks/PavRoof` → the keyword rule reads **"pav"** before it ever reaches "roof", so the
+      tiled hip roof classifies **paving** and promotes to `paving_interlock` = the grey
+      running-bond blocks in every cut.
+    · `Looks/PavFloor` → **paving** for the same reason, so the 누마루 rides the *ground* MDL with a
+      concrete detail normal, and its declared tint 0.78/0.60/0.42 on `wood_dark`
+      (linear mean 0.081/0.058/0.044) lands at an effective albedo of **0.038 luminance** — under
+      the roof's shade that is the measured RGB (4,4,6) black floor.
+  The fix for all three is the same and it is the promotion's own intent done honestly: **bind the
+  texture explicitly, in a role whose hue is already the declared hue**, so the multiplier is flat
+  (spread ≤ 1.27) and no channel can be amplified into a false colour. A literal constant is not
+  reachable from a scene file for a `_CONST_MDL_CLASSES` role without abusing `uv_mode`, and a
+  constant is the corpus' largest source of dead flat % anyway.
+    (1) **reeds** — `wood_dark` @ 0.28 m (a culm is lignified fibre, and the map is *already* brown:
+        tint (2.861, 3.403, 2.700), spread **1.26**, product = the declared brown to 4 dp) ·
+        seed head rebuilt as a **2-segment spindle** (r 1.9 → 0.85 × culm) seated 45 mm **into** the
+        culm, so the flat top and the navy joint gap are both gone by construction.
+    (2) **far ridge tone** — `hill_a/b/c` were 0.196–0.245 albedo = the measured band mean **47 %**
+        of the pastel blob belt, against the **6–12 %** vegetation reflectance band this file's
+        own `wood_color`/canopy note declares and applies to `canopy_a/b`. Levelled
+        ×0.55 / ×0.55 / ×0.49 → max channel 0.108 / 0.116 / 0.120.
+        `hill_d` (0.078) was already in band and does not move; the aerial-perspective ordering
+        GT-86 fixed (d < a < b < c in luminance) is preserved exactly [computed].
+    (3) **누마루** — class corrected to `wood` by naming (`PavFloorPlank`, the `Deck`/`Joist`
+        precedent in this same file) and the tint re-solved on the texture it actually rides:
+        (2.58, 2.83, 2.77) → effective albedo **0.170 luminance**, inside the 0.15–0.25 timber band.
+        Side effect, declared: the slab loses its `_ground_skin` (a mineral micro-relief mesh the
+        `paving` class was giving a timber floor) — 1 prim, LOOK_GEO arm only.
+    (4) **계선주** — bound to `rock_face`, which a survey of the registry this session shows is the
+        **only** stone role without a course pattern (plaza_light 6×6 slabs · granite_dark 5×5
+        stack bond · stone_worn running bond · sandstone ashlar · marble_light slabs · rock_wall
+        riprap) — the posts are monoliths and were wearing the promenade's slab grid — and cut
+        from Ø0.48 × H2.1 — a column — to **Ø0.30 × H0.90**, the real Korean quay-post band. No
+        self-check reads their size (`fov_selfcheck` does not list them); their collider AABBs
+        shrink with them.
+    (5) **기와지붕** — `granite_dark` with tint (1.434, 1.512, 1.680), which reproduces the declared
+        `roof_tile_color` **exactly**, so `roof_specular_selfcheck`'s predictions and the v8 Y1
+        finding stand unchanged; the map's own 5×5 module is *used*, not fought — tile 1.50 m puts
+        one cell on **0.30 m** = the 기와 course, which is the thing a staggered pavement bond can
+        never be · the ridge box becomes a **절병통** of 5 stacked discs (`add_disc`, 32-gon — the
+        analytic `Cylinder` Hydra tessellates coarsely is why it read as a chimney).
+    (6) **조경석** — the boulders were bedded a flat 0.10 m regardless of size; they are now sunk a
+        declared **fraction of their own height** (rocks 1/3, the stump keeps its shallow 0.08 —
+        G9's root feature sits *on* its moss bed).
+    (7) **오리배** — a dark seat well (`DuckCockpit`) breaks the smooth yellow mass. Hull, breast,
+        stern, wings, neck, head, beak and canopy dimensions are all unchanged.
+  **Not done, and why**: the fluorescent magenta shrub band. Its colour is not in this file and
+  cannot be reached from it — the carriers are `Shrub/Burning_Bush.usd` (bed B1) and the `sp=2`
+  runs of `far_hedges`, and their leaf basecolor has a **measured mean linear albedo of
+  (0.490, 0.293, 0.270)** — a 49 % red leaf — bound inside `BurningBush_leaf_Mat.mdl`, which
+  `place_shrubs` references as an **instanceable prototype**; a scene-side bind cannot reach into a
+  prototype (`w3_t4b_v1.md` §1.2, the same fact that forced the T4b wrapper for the bed boulders).
+  Species re-mix / run-splitting **would** cut the band, but that is a planting-design change to a
+  backdrop the user has already ruled on twice (GT-63, GT-86), so it is filed, not taken.
+
 Auto capture : NEGOBS_CAPTURE=1 python scene09_ghat_riverfront.py
 Assembly smoke: NEGOBS_SMOKE=1 python scene09_ghat_riverfront.py
 Self-check   : NEGOBS_SELFCHECK=1 python scene09_ghat_riverfront.py  (no boot)
@@ -523,6 +593,21 @@ PARAMS = dict(
                   fascia_inset=0.18, fascia_t=0.09,  # eave line tier 2 (buyeon / tiled eave)
                   roof_rise=1.15, corner_lift=0.16,  # 4-sided slope + corner lift
                   finial_r=0.11, finial_h=0.42,
+                  # [GT-115 ⑨ (5)] **절병통, not a chimney.** The apex member was a single
+                  #   `add_cylinder` — an analytic `UsdGeom.Cylinder`, which Hydra tessellates at
+                  #   its own low default (the octagon defect `scene_common.DISC_SEGMENTS`
+                  #   documents), so a 0.22 m-wide 0.42 m-tall drum on a ridge renders as a
+                  #   flat-sided box = the chimney in `pt_noon_across_river.png`. A Korean 절병통
+                  #   is a *stack*: 노반 base plate, 복발 bowl, a turned neck, 보주 bead, tip. Five
+                  #   `add_disc` members (32-gon, silhouette under our control) give that profile
+                  #   for 4 extra prims on one pavilion, and the total height stays **0.42** so the
+                  #   finial tip is still 4.71 and no other number in this file moves.
+                  #   (label, height fraction of finial_h, radius × finial_r)
+                  finial_stack=(("", 0.143, 1.41),        # 노반 — base plate, widest
+                                ("Bowl", 0.310, 1.14),    # 복발 — the bowl
+                                ("Neck", 0.214, 0.68),    # 목 — turned waist
+                                ("Bead", 0.238, 1.05),    # 보주 — the bead
+                                ("Tip", 0.095, 0.50)),    # 촉 — soft tip
                   rail_h=0.44, rail_t=0.07, rail_post_r=0.035, rail_n=3),
     # 4 stone posts. [W3 CB-1 · S09-C] **moved off the stair face onto the terrace.**
     #   Defect (w3_intake_06_10 S09-C, visible in look_check/scene09/260730_w2d_fix/
@@ -551,7 +636,17 @@ PARAMS = dict(
     #   (steps · landings · embankment · terrace) is untouched — these are props.
     #   The ±12.0 pair straddles the lawn bands' river-side corner; `lawn_proud` is
     #   0.03 m, so there is no step of consequence under the base.
-    land_posts=dict(r=0.24, h=2.1, x=-0.80, z=0.0,
+    #   [GT-115 ⑨ (4)] **Ø0.48 × H2.1 → Ø0.30 × H0.90.** Measured off
+    #   `260806_w3_allview5/pt_noon_across_river.png`: at 2.1 m tall and 0.48 across these read as
+    #   four *columns* standing on the promenade, not as quay posts — a Korean 계선주 / 말뚝 on a
+    #   park waterfront is 0.6–0.9 m of stone above the paving with a 0.25–0.35 shaft. r 0.15 /
+    #   h 0.90 is the top of that band (it still has to be seen from the water).
+    #   Nothing measures them: `fov_selfcheck()` does not list `land_posts`, and the two clearances
+    #   the block above derives improve rather than shrink — the footprint edge moves x −1.04 →
+    #   **−0.95** (pavilion eave tip −1.15, clearance 0.11 → **0.20 m**) and the gap to the pile row
+    #   at x −1.2 grows from 0.07 to **0.16 m** [computed]. They keep `collider=True`, so the four
+    #   element AABBs shrink with them (GT-8 class: element boxes move, the hazard list does not).
+    land_posts=dict(r=0.15, h=0.90, x=-0.80, z=0.0,
                     ys=(-12.0, -5.6, 5.6, 12.0)),
     # [v6 rework (3)] 2 lawn bands on the upper terrace — puts the evidence for "park" into the frame.
     #   Outside the stair width (y±5) · inside the terrace (x −30..0, y ±40). Top face proud by 0.03 (walk continuity).
@@ -641,7 +736,17 @@ PARAMS = dict(
               neck_r=0.115, neck_h=0.60, neck_lean=12.0,
               head=(0.24, 0.20, 0.20), beak=(0.30, 0.13, 0.09),
               canopy=(1.15, 1.10, 0.05), canopy_post_r=0.03,
-              hull_float=0.12),             # how far the hull centre floats above the water
+              hull_float=0.12,              # how far the hull centre floats above the water
+              # [GT-115 ⑨ (7)] **the seat well.** The v6 rework gave the boat a curved hull and
+              #   stopped there, so at 400 % it is still one smooth yellow mass with a canopy
+              #   floating over it — there is no opening, and a pedal boat is mostly opening.
+              #   One dark box does the whole job: 1.10 × 0.86 in plan (inside the 2.60 × 1.24
+              #   hull), top face **0.025 below the hull crown**, which is where the ellipsoid has
+              #   already fallen away at |y| > 0.227 [computed: 0.36·√(1−(y/0.62)²) = 0.335], so the
+              #   well **emerges through the flanks** and reads as a cut-away cockpit from the two
+              #   water cuts while staying a rectangle seen from `park_vista` above. Dimensions of
+              #   every existing part are untouched — this row adds one box and one material.
+              cockpit=(1.10, 0.86, 0.30), cockpit_dx=-0.12, cockpit_drop=0.025),
     # [v5 adopted] timber boardwalk — waterfront promenade on the upper terrace.
     #   [v6] x −4.0..−1.6 → **−10.0..−7.6** : swaps places with the new pavilion (plinth x −6.86..−1.54).
     #   0.74 m clear of the pavilion plinth and 7.6 m clear of the stair head (x=0)
@@ -737,11 +842,20 @@ PARAMS = dict(
     #   same material already carries — so instancing and the asset's own normal survive together.
     #   `rock_moss_set_01__mtlxoff.usda` / `tree_stump_01__mtlxoff.usda` are pre-authored and
     #   committed; nothing here writes into `assets/urban_wrap/`.
-    #   (asset, bed tag, u, v, target_h, yaw) — u/v are fractions of the bed footprint.
-    bed_features=[("tree_stump_01", "B2", 0.42, 0.52, 1.25, 24.0),
-                  ("rock_moss_set_01", "B1", 0.68, 0.40, 0.62, 137.0),
-                  ("rock_moss_set_01", "B3", 0.30, 0.58, 0.78, 291.0),
-                  ("rock_moss_set_01", "B4", 0.55, 0.46, 0.55, 63.0)],
+    #   [GT-115 ⑨ (6)] **`sink` is now declared per row, as a fraction of the feature's own
+    #   height.** Every row used to be bedded by the same flat 0.10 m, which on a 0.55 m boulder
+    #   is 18 % and on a 0.78 m one is 13 % — measured in `pt_noon_park_vista.png` the rocks read
+    #   as if *laid on* the mown surface, which is the one thing a 조경석 never is: Korean practice
+    #   sets a landscape stone with roughly **a third of its height buried** (지반 매입 1/3), and
+    #   the exposed part is the part that was above ground in the quarry. 0.33 for the three
+    #   boulders. The stump keeps a shallow **0.08** — G9's root feature sits *on* its moss bed and
+    #   burying a root plate to a third would delete the feature.
+    #   (asset, bed tag, u, v, target_h, yaw, sink) — u/v are fractions of the bed footprint,
+    #   `sink` is a fraction of `target_h`.
+    bed_features=[("tree_stump_01", "B2", 0.42, 0.52, 1.25, 24.0, 0.08),
+                  ("rock_moss_set_01", "B1", 0.68, 0.40, 0.62, 137.0, 0.33),
+                  ("rock_moss_set_01", "B3", 0.30, 0.58, 0.78, 291.0, 0.33),
+                  ("rock_moss_set_01", "B4", 0.55, 0.46, 0.55, 63.0, 0.33)],
     # [W3 S09] lily pads and floating leaf rafts — G9's right half. Thin discs on the water.
     #   **Sited beside the reed beds at |y| ≥ 19.6, not out in the open water**, for two reasons
     #   that agree: (a) `fov_selfcheck()` caught the first siting (|y| 9.8–15.5) **inside** the
@@ -767,7 +881,19 @@ PARAMS = dict(
     reed=dict(r=0.022, h_lo=1.1, h_hi=1.9, spread=0.85, tilt=9.0,
               # [W3 S09] plume = the buff seed head, 0.22 m of the culm top at 1.9x the radius.
               #   Autumn 갈대 is read by its plume, not by its stem.
-              plume_h=0.22, plume_r_mul=1.9),
+              plume_h=0.22, plume_r_mul=1.9,
+              # [GT-115 ⑨ (1)] The seed head was **one cylinder**: a flat top and a full-radius
+              #   down-facing cap sitting proud of a culm less than half its width. Both are
+              #   visible at 400 % in `260806_w3_allview5/pt_noon_across_river.png` — the flat
+              #   top reads as a cotton bud and the cap, lit by sky alone, is the dark ring at
+              #   the joint. A 갈대 panicle is a **spindle**: it carries its mass low and dies
+              #   away to a soft tip. Two stacked cylinders of decreasing radius are the cheapest
+              #   honest form of that (1 extra prim per plume, 102 in the scene) —
+              #     lower `plume_lo_frac` of the height at `plume_r_mul` × r  (the mass)
+              #     upper remainder at `plume_tip_mul` × r                     (the tip, 19 mm)
+              #   and the whole head is seated `plume_seat` **into** the culm so no gap can open
+              #   at the joint whatever the tilt.
+              plume_lo_frac=0.62, plume_tip_mul=0.85, plume_seat=0.045),
     # [v5 shared layer] Korean sign — (tag, TEX key, cx, cy, base_z, yaw, w, h)
     #   [v6] Info (−6.5, 5.5) → **(−7.0, −5.6)** : the +Y side is filled by the pavilion (plinth y 5.74~)
     #     and the deck (x −10.0..−7.6), leaving no room → moved to the symmetric position on the south side.
@@ -795,7 +921,22 @@ PARAMS = dict(
         #   The pink-beige sandstone of an Indian ghat was the main culprit keeping the "ghat" reading alive.
         #   No effect on hazard geometry or concealment behaviour (every step + terrace + embankment share
         #   one material, so homogeneity is unchanged). scale 1.5 → 1.1 (granite slab tile size).
-        scale=dict(stone=1.1, grass=1.4, wood_dark=0.9, wood_fine=0.45),
+        # [GT-115 ⑨] three world tile sizes join the table. All three exist because the object
+        #   they dress is far smaller than the promenade module the old entries were sized for,
+        #   and a world-projected map on an object smaller than its own tile is what the audit
+        #   batch is about (module docstring, the promotion mechanism):
+        #     `quay_stone` 0.38 — the 계선주 is Ø0.30 × 0.90, so at 0.38 m one post covers about
+        #       one tile of `rock_face`: the map's mean is what the post shows, and the mottle
+        #       runs at the grain size of a quarried block rather than as a pattern.
+        #     `roof_tile` 1.50 — **solved, not chosen.** `granite_dark` is a 5 × 5 module inside
+        #       its own tile [measured], so the world size of one cell is `scale / 5`; a Korean
+        #       기와 course is 0.30–0.35 m, and 1.50 / 5 = **0.30 m** puts the map's module
+        #       exactly on the real course module instead of somewhere between two of them.
+        #     `reed` 0.28 — a culm is 44 mm across and 1.1–1.9 m tall, so the tile has to be
+        #       *shorter than the stem* for the grain to run along it (4–7 repeats per culm) and
+        #       for neighbouring stems to sample different phases = free per-stem tone variation.
+        scale=dict(stone=1.1, grass=1.4, wood_dark=0.9, wood_fine=0.45,
+                   quay_stone=0.38, roof_tile=1.50, reed=0.28),
         # [v7 judgment §6 (3)] the stone tone swap landed as a **large near-white area**.
         #   `ghat_walk` paving RGB (223,222,221) · 65 % of the frame,
         #   and in `from_river` the 36 steps fused into "one white retaining wall", losing all step articulation.
@@ -863,8 +1004,18 @@ PARAMS = dict(
         #   in the same frame, on a mass 90-140 m away. Measured autumn hillside reflectance
         #   at that range sits in the 0.14-0.22 band, so the pair is re-levelled and the
         #   hue ratio (1 : 0.731 : 0.291 / 1 : 0.875 : 0.299) is preserved exactly.
-        hill_a=(0.196, 0.143, 0.057),          # 단풍 maple orange-red
-        hill_b=(0.210, 0.184, 0.063),          # 은행 ginkgo yellow
+        # [GT-115 ⑨ (2)] **levelled again, ×0.55 — into this file's own declared band.** GT-86
+        #   levelled these to 0.196–0.245 against a "measured autumn hillside 0.14–0.22" figure,
+        #   but that figure is a *hillside-with-haze* reflectance and it was applied to the crown
+        #   masses themselves, so the belt still renders as pastel blobs: measured band mean on
+        #   `260806_w3_allview5/pt_noon_park_vista.png` is **47 % linear** (bright crown faces
+        #   150–200 sRGB), against the **6–12 %** vegetation reflectance band this same PARAMS
+        #   block declares 60 lines below (`far_color`/canopy note) and applies to `canopy_a/b`.
+        #   The ×0.73 GT-86 used and the ×0.55 here compose to 0.40 of the pre-GT-86 tone; the
+        #   hue ratios (1 : 0.731 : 0.291 and 1 : 0.875 : 0.299) are preserved exactly, so the
+        #   ginkgo/maple separation the belt is built on survives the level change.
+        hill_a=(0.108, 0.079, 0.031),          # 단풍 maple orange-red   (was 0.196/0.143/0.057)
+        hill_b=(0.116, 0.101, 0.035),          # 은행 ginkgo yellow      (was 0.210/0.184/0.063)
         # [GT-86] the dark evergreen a Korean hillside always carries, added as a **fourth**
         #   tone. The three-tone belt gave every ridge one flat colour, which is the other
         #   half of the cloud read; `hill_mix` now draws per crown from four tones, and this
@@ -878,7 +1029,13 @@ PARAMS = dict(
         #   above `hill_a`/`hill_b` in value with a blue bias, which is also what G9 shows.
         # [GT-86] levelled with the pair above (x0.85 here, not x0.73: the haze tone must stay
         #   **above** hill_a/hill_b in value or aerial perspective inverts again).
-        hill_c=(0.196, 0.209, 0.245),          # far ridge, washed toward the sky
+        # [GT-115 ⑨ (2)] ×0.49 here, not ×0.55, for the same reason GT-86 used a different factor
+        #   on this row: the ceiling of the 6–12 % band is 0.12 on the max channel, and this tone
+        #   is the blue-biased one, so the flat ×0.55 would have put it at 0.135 = outside the band
+        #   the row is being levelled into. The ordering that carries aerial perspective survives
+        #   and is asserted by construction — Rec.709 luminance d **0.0716** < a **0.0817** <
+        #   b **0.0994** < c **0.1021** [computed], the same order as before this row.
+        hill_c=(0.096, 0.102, 0.120),          # far ridge, washed toward the sky (was 0.196/0.209/0.245)
         hill_rough=1.0,
         # [GT-86] the bare hillside under the canopy (the emerged landform caps). Deliberately
         #   duller and greyer than `grass_tint` (x0.72 / x0.66 / x0.79): it is only ever seen
@@ -891,7 +1048,21 @@ PARAMS = dict(
         #   on, or the fringe disappears into the ground in the degraded arm.
         scrub_tint=(0.232, 0.298, 0.196),
         # [v6 (1)] pavilion timber members — posts, tie beams, railing (reddish-brown pine) / raised floor (light floorboard)
-        pav_wood_tint=(0.68, 0.44, 0.28), pav_floor_tint=(0.78, 0.60, 0.42),
+        # [GT-115 ⑨ (3)] **`pav_floor_tint` 0.78/0.60/0.42 → 2.58/2.83/2.77.** The old triple was
+        #   authored as if it were an sRGB colour, but a tint is a *multiplier on the bound map*,
+        #   and the map is `wood_dark` — linear mean (0.081, 0.058, 0.044), luminance 0.062, the
+        #   darkest wood in the library (`scene_common:574` says so in as many words and raises the
+        #   class gain cap to 7.0 because of it). 0.78/0.60/0.42 on that is an effective albedo of
+        #   **0.038 luminance**, i.e. 3.8 % — a dark-stained plywood, in permanent shade under a
+        #   hip roof. Measured floor RGB in `pt_noon_park_vista.png`: **(4,4,6)**.
+        #   Re-solved rather than nudged: target 0.170 luminance (middle of the 0.15–0.25 timber
+        #   band a 누마루 마루널 actually sits in) at a floorboard ratio 1 : 0.78 : 0.58, i.e. an
+        #   effective albedo of (0.209, 0.163, 0.121); divide by the map's own mean and the tint
+        #   falls out as (2.58, 2.83, 2.77) [computed]. **It is near-neutral on purpose** — the
+        #   map is already the right hue, and the old triple double-counted its warmth, which is
+        #   the other half of why the floor went black rather than merely dark.
+        #   ×3 on a map whose mean is 0.062 is well inside the wood class's own 7.0 gain cap.
+        pav_wood_tint=(0.68, 0.44, 0.28), pav_floor_tint=(2.58, 2.83, 2.77),
         # [v8 judgment §4 (1)] the near-white roof was really a **specular additive term** (module
         #   docstring [v8 Y1] (b)(c)). Killing that term with `specular_level=0.0` leaves diffuse
         #   only, at (147,152,160) — still a light grey, so the albedo also drops x0.70.
@@ -899,10 +1070,34 @@ PARAMS = dict(
         #   The colour ratio (1 : 1.064 : 1.193) is preserved as is.
         roof_tile_color=(0.109, 0.116, 0.130), roof_tile_rough=0.72,  # Korean roof tile
         roof_tile_specular=0.0,                # [v8 Y1] the cause — see the comment below
+        # [GT-115 ⑨ (5)] **the roof was a grey running-bond block wall.** Cause, measured:
+        #   `Looks/PavRoof` never reaches the "roof" keyword — `_LOOK_RULES` tests **paving**
+        #   (rule 16) before **concrete** (rule 17, which owns "roof"), and paving's token list
+        #   contains **"pav"**. So the material classified `paving`, and a constant colour in a
+        #   `_CONST_MDL_CLASSES` role is promoted to its class texture: `paving_interlock`, i.e.
+        #   interlocking pavement blocks, laid over a 4-sided hip roof at a 1.2 m tile.
+        #   `roof_tile_color` stays the **declared albedo** (it is what `roof_specular_selfcheck`
+        #   predicts from, and the v8 Y1 finding is built on it); what changes is that the map is
+        #   now chosen and bound here instead of being guessed by the promoter:
+        #     `granite_dark` — linear mean (0.076, 0.077, 0.077), the only **neutral** map in the
+        #     registry, hence a tint of (1.434, 1.512, 1.680) whose channel spread is **1.17**:
+        #     nothing can be amplified into a false hue. Its own module is a 5 × 5 stack bond, and
+        #     that is why it is the right map here rather than in spite of it — a roof **is**
+        #     modular, and `scale["roof_tile"]` 1.50 lands one cell on **0.30 m**, the Korean
+        #     기와 course. `paving_interlock` could never do that: it is a *running* bond
+        #     (staggered), which is the one thing a course of roof tiles never is.
+        #   tint × map mean = (0.109, 0.116, 0.130) = `roof_tile_color`, to 4 dp [computed], so the
+        #   scene's own §4 albedo check and the v8 sRGB predictions are unchanged in value.
+        roof_tile_tint=(1.434, 1.512, 1.680),
         # [v6 (2)] duck boat — white (0.86) → yellow (at or below the §4 near-white cap of 0.8)
         duck_color=(0.78, 0.70, 0.25), duck_rough=0.45,
         duck_top_color=(0.52, 0.19, 0.17), duck_top_rough=0.55,  # canopy (red)
         beak_color=(0.74, 0.42, 0.07), beak_rough=0.5,
+        # [GT-115 ⑨ (7)] the seat well. Dark enough to read as an opening at 12–30 m (the two
+        #   water cuts) without going to black — a moulded GRP cockpit liner is a dark grey with a
+        #   little of the hull's warmth in it, and 0.06 is the same near-black floor the kit's own
+        #   crack decal uses (`gk_crack` 0.055), i.e. inside a value this scene already ships.
+        duck_seat_color=(0.062, 0.058, 0.054), duck_seat_rough=0.70,
         # [v6 side fix] 0.055/0.065/0.030 → raised. The reeds fused into black needles.
         # [W3 S09 · R09-1] **autumn.** A 갈대 stand in a Korean October is straw, not olive:
         #   the culm has gone over and the plume is buff. The measured reference is the library's
@@ -913,6 +1108,31 @@ PARAMS = dict(
         reed_color=(0.232, 0.196, 0.118), reed_rough=1.0,
         # plumes — the buff seed head that makes a reed bed read as a reed bed at 20 m
         reed_plume_color=(0.352, 0.318, 0.238), reed_plume_rough=1.0,
+        # [GT-115 ⑨ (1)] **the two colours above stay exactly as declared — they are now
+        #   reproduced through a map instead of being handed to the promoter.** Mechanism, from
+        #   `scene_common`: `Looks/Reed` classifies `veg` (exact-match table), veg is in
+        #   `_CONST_MDL_CLASSES`, so the constant was promoted to the class map `grass_lawn` with
+        #   `base_color = declared / map mean` = **(3.99, 1.85, 5.46)**. Promotion preserves the
+        #   map's *mean*; it cannot preserve the mean of a **sample**, and a 44 mm culm covers
+        #   1.5 % of a 1.4 m tile — so each stem takes one arbitrary texel patch and multiplies it
+        #   ×5.46 in the channel the grass map barely has (`scene_common:591-596` names this exact
+        #   failure on scene11's `leaf_far_*`). Measured on the shipped cut: stems
+        #   **(183,163,172) sRGB — blue above green**, on a material declared warm brown, wrapped
+        #   in the grass map's blade/soil structure stretched to a 1.4 m period = the "masonry
+        #   joint" reading. The plume's down-facing cap, sky-lit only, ×5.46 in blue, is the navy
+        #   gap at the joint.
+        #   Fix = bind a map whose **hue is already the declared hue**, so the multiplier is flat:
+        #   `wood_dark` (linear mean 0.081/0.058/0.044) is the library's dry-fibre map, and a
+        #   갈대 culm is lignified fibre with a visible longitudinal grain. Spread falls
+        #   **2.95 → 1.26** (stem) / **1.27** (plume): no channel can be pushed into a false hue
+        #   whatever patch a stem lands on. tint × map mean reproduces `reed_color` /
+        #   `reed_plume_color` to 4 dp [computed], so the §4 albedo rows below are unchanged in
+        #   value and only change which map they are measured against.
+        #   The two colour rows stay above as the **declaration of record**: they are what these
+        #   tints reproduce, and what any future re-map has to reproduce again. Nothing binds them
+        #   directly any more — the tint is the thing that reaches the frame.
+        reed_tint=(2.861, 3.403, 2.700),
+        reed_plume_tint=(4.340, 5.521, 5.446),
         lily_color=(0.086, 0.132, 0.062), lily_rough=0.62,
         # [B-09-4] 0.55 → 0.42: the water-mark band was weaker than the sandstone texture variation,
         #   so the waterline was not identifiable. (The contrast amount is kept identical after the stone swap.)
@@ -927,6 +1147,24 @@ PARAMS = dict(
         #   down and a shade greyer. 0.92× the paving tint keeps it in the same albedo family
         #   (so `albedo_selfcheck` governs it) while separating it from the paving at 20 m.
         stepstone_tint=(0.482, 0.474, 0.452),
+        # [GT-115 ⑨ (4)] 계선주. The four terrace posts were bound to `M["stone"]`, i.e. the
+        #   promenade's `plaza_light` map — a **running-bond slab grid**, measured in
+        #   `pt_noon_across_river.png` as joint lines wrapping each shaft. A quay post is one
+        #   quarried block: it has grain and it has no joints anywhere.
+        #   **Map chosen by inspection of the registry, not by name** [measured, this session]:
+        #   `plaza_light` 6 × 6 slabs · `granite_dark` 5 × 5 stack bond · `stone_worn` running
+        #   bond · `sandstone` ashlar · `marble_light` slabs · `rock_wall` riprap — every stone
+        #   role in the library carries a course pattern **except `rock_face`**, a continuous
+        #   bedrock scan. That is the one that can dress a monolith.
+        #   It is a warm brown (linear mean 0.159/0.118/0.083, ratio 1 : 0.743 : 0.523), so this
+        #   tint carries a hue correction as well as a level — spread **1.70**, and the post is
+        #   ~1 tile across at `quay_stone` 0.38, i.e. it samples the map's mean rather than one
+        #   arbitrary patch, which is the condition the reed row shows must hold before a
+        #   per-channel multiplier is safe. Effective albedo (0.221, 0.214, 0.197), luminance
+        #   **0.214** = 0.90 × the promenade's 0.246 at the promenade's own hue ratio: a set post
+        #   weathers a shade below the slab beside it, and it stays inside the 0.20–0.35 화강석
+        #   band the `stone` class states [computed].
+        quay_stone_tint=(1.392, 1.813, 2.371),
         grass_tint=(0.55, 0.68, 0.42),
         # [B-09-3] rough 0.10 → 0.15 (eases the uniform bright teal clipping)
         water_color=(0.06, 0.11, 0.12), water_rough=0.15,
@@ -998,7 +1236,11 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 LOOKCHECK_DIR = os.path.join(_HERE, "look_check", "scene09")
 
 # [v6 rework (3)] sandstone → plaza_light (light granite paving)
-ASSET_ROLES = ["plaza_light", "grass", "wood_dark", "sign_info", "hdri", "mdl"]
+# [GT-115 ⑨] `granite_dark` (기와지붕) and `rock_face` (계선주) join the gate — a role that is
+#   bound but not listed here fails at render time instead of at the asset gate, which is the
+#   whole point of `check_assets`.
+ASSET_ROLES = ["plaza_light", "granite_dark", "rock_face", "grass", "wood_dark",
+               "sign_info", "hdri", "mdl"]
 
 
 # ===========================================================================
@@ -1344,7 +1586,10 @@ _ALBEDO_TABLE = [
     ("물때(수위선) 밴드",     "plaza_light", "stain_tint",      True,  True),
     ("상부 잔디 밴드",        "grass",       "grass_tint",      True,  True),
     ("산책 데크(목)",         "wood_dark",   "deck_tint",       True,  True),
-    ("정자 기와지붕",         None,          "roof_tile_color", True,  True),
+    # [GT-115 ⑨] the roof is no longer a constant — it is `granite_dark` × `roof_tile_tint`,
+    #   which reproduces `roof_tile_color` exactly. The row follows the material so the check
+    #   keeps governing **what reaches the frame** rather than a number nothing binds any more.
+    ("정자 기와지붕",         "granite_dark", "roof_tile_tint", True,  True),
     ("정자 누마루(목)",       "wood_dark",   "pav_floor_tint",  False, True),
     ("오리배 선체",           None,          "duck_color",      False, False),
     # [W3 S09] the rows the renovation adds. The dry-stone wall is a **large vertical** face
@@ -1369,7 +1614,13 @@ _ALBEDO_TABLE = [
     ("가을 산능선 d(상록)",   None,          "hill_d",          True,  False),
     ("원경 산체(지형 캡)",    "grass",       "shore_tint",      True,  False),
     ("물가 관목 폴백",        "grass",       "scrub_tint",      False, False),
-    ("갈대 이삭",             None,          "reed_plume_color", False, False),
+    # [GT-115 ⑨] the reed pair and the quay posts. The plume row moves off the constant onto the
+    #   map it now rides (same value, different instrument); the culm and the 계선주 are **new
+    #   rows** — both are tints on a dark map, i.e. exactly the shape of parameter this check
+    #   exists to keep honest, and neither was governed before.
+    ("갈대 줄기",             "wood_dark",   "reed_tint",       False, False),
+    ("갈대 이삭",             "wood_dark",   "reed_plume_tint", False, False),
+    ("계선주(화강석)",        "rock_face",   "quay_stone_tint", False, False),
 ]
 
 
@@ -2366,6 +2617,12 @@ def main():
         #   whole stone, i.e. no visible stone character at all.
         M["stepstone"] = tex("plaza_light", "/World/Looks/StepStone",
                              sca["stone"] * 0.75, tint=mp["stepstone_tint"])
+        # [GT-115 ⑨ (4)] 계선주 — a monolith, so a **joint-free** map (`rock_face`; the survey of
+        #   every stone role is in the `quay_stone_tint` note). `QuayStone` classifies `stone`
+        #   through the keyword rule, so the post keeps the stone class's weathering, bevel and
+        #   0.34 albedo ceiling; only the slab grid is gone.
+        M["quay_stone"] = tex("rock_face", "/World/Looks/QuayStone",
+                              sca["quay_stone"], tint=mp["quay_stone_tint"])
         # [W2 fix batch F1] Ground-class decal materials for the kit — see the
         #   `scripts/const_color_audit.py` rule: a *ground* prim may not carry a
         #   texture-less constant. paint / metal / water / misc are excluded from
@@ -2380,15 +2637,35 @@ def main():
         # [v6 (1)] 2 pavilion timber materials + 1 roof tile
         M["pav_wood"] = tex("wood_dark", "/World/Looks/PavWood",
                             sca["wood_fine"], tint=mp["pav_wood_tint"])
-        M["pav_floor"] = tex("wood_dark", "/World/Looks/PavFloor",
-                             sca["wood_fine"], tint=mp["pav_floor_tint"])
+        # [GT-115 ⑨ (3)] path renamed `PavFloor` → **`PavFloorPlank`**. Not cosmetic: the keyword
+        #   classifier tests **wood** (rule 8) before **paving** (rule 16), and `PavFloor` carries
+        #   no wood token, so the 누마루 was landing in `paving` on the strength of "pav" — a
+        #   *ground* MDL route with a concrete detail normal and a mineral bevel on a timber
+        #   floor, and (with `sx`,`sy` ≥ 4 m and `sz` 0.23) a `_ground_skin` micro-relief mesh on
+        #   top of it. "plank" puts it in `wood`, which is where this file already puts the
+        #   boardwalk (`Looks/Deck`, `Looks/Joist`) — one class for one material family.
+        #   Declared consequence: **−1 prim** in the LOOK_GEO arm (the skin), and `bump` is passed
+        #   explicitly because the omni route takes it from the call, not from the class.
+        M["pav_floor"] = tex("wood_dark", "/World/Looks/PavFloorPlank",
+                             sca["wood_fine"], tint=mp["pav_floor_tint"],
+                             bump=1.3)
         # [v8 Y1] specular_level=0.0 — the **cause** of the near-white roof. Left unset,
         #   OmniPBR defaults to 0.5 (F0 0.04) and the wide GGX lobe at roughness 0.72
         #   caught the sun plus sky on the +Y roof faces (N·H 0.78) along the park_vista sight line,
         #   adding a linear +0.164 on top of the diffuse. Every other matte material in this scene
         #   (reed/far/canopy_a/canopy_b) is 0.0 — only pav_roof was missing it.
+        # [GT-115 ⑨ (5)] the constant is replaced by `granite_dark` × `roof_tile_tint`, which
+        #   reproduces the same declared albedo (see the PARAMS note) while taking the material
+        #   **out of the promoter's hands** — as a constant in the `paving` class it was being
+        #   given `paving_interlock`, i.e. pavement blocks on a hip roof. `specular_level` 0.0 is
+        #   unchanged and still the v8 Y1 fix; `roughness_const` now actually lands (the promotion
+        #   path dropped it — `scene_common:1576` passes `roughness_const=None`), so the matte
+        #   0.72 the v8 row declared is authored for the first time.
         M["pav_roof"] = sc.make_pbr(stage, "/World/Looks/PavRoof",
-                                    diffuse_color=mp["roof_tile_color"],
+                                    sc.tex_path("granite_dark", "diff"),
+                                    sc.tex_path("granite_dark", "nor"),
+                                    None, sca["roof_tile"],
+                                    tint=mp["roof_tile_tint"],
                                     roughness_const=mp["roof_tile_rough"],
                                     specular_level=mp["roof_tile_specular"])
         M["duck"] = sc.make_pbr(stage, "/World/Looks/Duck",
@@ -2400,10 +2677,32 @@ def main():
         M["beak"] = sc.make_pbr(stage, "/World/Looks/Beak",
                                 diffuse_color=mp["beak_color"],
                                 roughness_const=mp["beak_rough"])
+        # [GT-115 ⑨ (7)] the seat well. `Looks/Duck*` classifies `metal` (the keyword list owns
+        #   "duck"), which is **outside** `_CONST_MDL_CLASSES` — so this one legitimately stays a
+        #   constant colour, like the hull and the canopy it sits between.
+        #   Named `DuckCockpit` and **not** `DuckSeat`: "sea" is a `water`-rule token and it is a
+        #   substring of "seat", so a seat material would have been metered as water (rule 6 is
+        #   tested before rule 7). Verified against `_look_spec` before it was written.
+        M["duck_seat"] = sc.make_pbr(stage, "/World/Looks/DuckCockpit",
+                                     diffuse_color=mp["duck_seat_color"],
+                                     roughness_const=mp["duck_seat_rough"],
+                                     specular_level=0.0)
+        # [GT-115 ⑨ (1)] the culm and its seed head. Both were constants in the `veg` class and
+        #   both were therefore promoted to `grass_lawn` at a 1.4 m tile with a ×5.46 blue
+        #   multiplier — the pink-lilac rods and the navy joint gap in the shipped cut (see the
+        #   `reed_tint` note for the measurement). Binding `wood_dark` here keeps the declared
+        #   browns, flattens the multiplier to a 1.26 spread and puts the grain **along** the
+        #   culm at a tile shorter than the stem. `specular_level` 0.0 is unchanged (v8 Y1: every
+        #   matte material in this scene states it).
+        #   The roughness **map is deliberately not bound**: `tex()` would also author
+        #   `reflection_roughness_texture_influence = 1.0`, which overrides the constant, and
+        #   `reed_rough` 1.0 (fully matte) is a declared value of this scene, not an accident.
         M["reed"] = sc.make_pbr(stage, "/World/Looks/Reed",
-                                diffuse_color=mp["reed_color"],
+                                sc.tex_path("wood_dark", "diff"),
+                                sc.tex_path("wood_dark", "nor"),
+                                None, sca["reed"], tint=mp["reed_tint"],
                                 roughness_const=mp["reed_rough"],
-                                specular_level=0.0)
+                                specular_level=0.0, bump=1.1)
         M["grass"] = tex("grass", "/World/Looks/Grass", sca["grass"],
                          tint=mp["grass_tint"])
         # [GT-86] the emerged landform caps (bare hillside under the canopy) and the
@@ -2424,9 +2723,12 @@ def main():
         # [W3 S09] reed plume (buff seed head) + lily pad + the three autumn ridge tones.
         #   `far` (the retired building silhouette material) is deleted with row (6).
         M["reed_plume"] = sc.make_pbr(stage, "/World/Looks/ReedPlume",
-                                      diffuse_color=mp["reed_plume_color"],
+                                      sc.tex_path("wood_dark", "diff"),
+                                      sc.tex_path("wood_dark", "nor"),
+                                      None, sca["reed"],
+                                      tint=mp["reed_plume_tint"],
                                       roughness_const=mp["reed_plume_rough"],
-                                      specular_level=0.0)
+                                      specular_level=0.0, bump=1.1)
         M["lily"] = sc.make_pbr(stage, "/World/Looks/Lily",
                                 diffuse_color=mp["lily_color"],
                                 roughness_const=mp["lily_rough"],
@@ -2726,9 +3028,22 @@ def main():
                                  p["fascia_t"], p["roof_rise"],
                                  p["corner_lift"], M["pav_roof"])
         # (7) finial — ridge apex z_ap = 4.29
-        sc.add_cylinder(stage, f"{P}/Finial",
-                        (cx, cy, z_ap + p["finial_h"] / 2.0),
-                        p["finial_r"], p["finial_h"], M["pav_roof"])
+        # [GT-115 ⑨ (5)] **절병통 stack, not a drum.** One cylinder of constant radius reads as a
+        #   chimney on the ridge (measured in `260806_w3_allview5/pt_noon_across_river.png`), and
+        #   the analytic `UsdGeom.Cylinder` tessellates at Hydra's low default, which is what puts
+        #   the flat sides on it. `add_disc` is the library's answer to exactly that (32-gon,
+        #   `scene_common.DISC_SEGMENTS`), and stacking five of them at the declared radii gives
+        #   the turned profile a 절병통 actually has. Heights are fractions of `finial_h`, so the
+        #   total is still 0.42 and the tip still lands at 4.71 — no other number moves.
+        #   The **first member keeps the path `{P}/Finial`**, so the smoke run's material-binding
+        #   probe (which reads that exact path) is untouched.
+        _fz = z_ap
+        for _tag, _hf, _rm in p["finial_stack"]:
+            _fh = p["finial_h"] * float(_hf)
+            sc.add_disc(stage, f"{P}/Finial{'_' + _tag if _tag else ''}",
+                        (cx, cy, _fz + _fh / 2.0),
+                        p["finial_r"] * float(_rm), _fh, M["pav_roof"])
+            _fz += _fh
         # (8) gyeja railing — 3 sides N/E/S (west open for entry). Bottom rail + top rail + rail_n balusters
         rh, rt, rr = p["rail_h"], p["rail_t"], p["rail_post_r"]
         rails = (("N", cx, p["y1"] - pr, sx - 2 * pr, rt),
@@ -3084,7 +3399,8 @@ def main():
             return 0
         soil_drop = 0.12
         n = 0
-        for i, (aid, tag, u, v, th, yaw) in enumerate(PARAMS["bed_features"]):
+        for i, (aid, tag, u, v, th, yaw, sink) in enumerate(
+                PARAMS["bed_features"]):
             b = _bed_at(tag)
             if b is None:
                 continue
@@ -3092,14 +3408,21 @@ def main():
             py = b["y0"] + (b["y1"] - b["y0"]) * float(v)
             pz = float(b["top"]) - soil_drop
             try:
-                # `z_mode="base"` + a 0.10 m bed. Measured live on this run, the default
+                # `z_mode="base"` + a declared bed depth. Measured live on this run, the default
                 #   `grade` mode buries these rows: `tree_stump_01` carries **38.9 %** of its
                 #   triangles below its own origin (zmin −0.193 m) and `rock_moss_set_01`
                 #   **52.4 %** (zmin −0.661 m) — urban_kit prints both warnings and tells the
-                #   caller exactly this. A boulder set in a planting bed is bedded a hand's
-                #   depth, not sunk to its waist, and G9's root feature sits **on** its moss bed.
+                #   caller exactly this. `z_mode="base"` puts the lowest geometry on the z given,
+                #   so the bed depth is simply subtracted here.
+                # [GT-115 ⑨ (6)] the depth is **`sink` × the feature's own height**, not a flat
+                #   0.10 m. At 0.10 the three boulders were bedded 13–18 % and read as laid on
+                #   the mown surface (`pt_noon_park_vista.png`); a Korean 조경석 is set with about
+                #   a third of its height in the ground, which is also what stops it reading as
+                #   a prop. The stump keeps its shallow value — G9's root feature sits **on** its
+                #   moss bed and a third of 1.25 m would delete it.
                 uk.add_urban_asset(stage, f"{ROOT}/Bed_{tag}/Feat_{i}", aid,
-                                   pos_m=(px, py, pz - 0.10), yaw_deg=float(yaw),
+                                   pos_m=(px, py, pz - float(th) * float(sink)),
+                                   yaw_deg=float(yaw),
                                    target_h=float(th), scene="09", z_mode="base",
                                    instanceable=True, treatment="mtlxoff")
                 n += 1
@@ -3290,16 +3613,33 @@ def main():
                 #   looks like dead grass. Seated at the culm top and following its tilt —
                 #   `add_cylinder` rotates about the prim centre, so the top of a stem tilted
                 #   by (rx, ry) has moved, and the plume centre is placed on that same axis.
+                # [GT-115 ⑨ (1)] **spindle, seated into the culm.** Two members of decreasing
+                #   radius replace the single drum: the flat top and the sky-lit down-facing
+                #   cap were both visible at 400 % (the cap is the dark ring at the joint).
+                #   The stack starts `plume_seat` **below** the culm top, so the culm and the
+                #   plume overlap by 45 mm and no gap can open at any tilt; the axis unit
+                #   vector is now the exact composition `Ry(ry)·Rx(rx)·(0,0,1)` that
+                #   `add_cylinder` applies (op list [translate, rotZ, rotY, rotX] = points go
+                #   through rotX → rotY), instead of the small-angle form used before.
                 ph = rd["plume_h"]
-                d_up = hh / 2.0 + ph / 2.0
-                sr, sy_ = math.radians(ry), math.radians(rx)
-                sc.add_cylinder(
-                    stage, f"{ROOT}/ReedPlume_{ci}_{k}",
-                    (cx + dx + d_up * math.sin(sr),
-                     cy + dy - d_up * math.sin(sy_),
-                     gz + hh / 2.0 + d_up * math.cos(sr) * math.cos(sy_)),
-                    rd["r"] * rd["plume_r_mul"], ph, M["reed_plume"],
-                    rotY=ry, rotX=rx)
+                srx, sry = math.radians(rx), math.radians(ry)
+                ux = math.cos(srx) * math.sin(sry)
+                uy = -math.sin(srx)
+                uz = math.cos(srx) * math.cos(sry)
+                h_lo = ph * rd["plume_lo_frac"]
+                h_hi = ph - h_lo
+                # distance from the culm centre to each member's own centre, along that axis
+                d_lo = hh / 2.0 - rd["plume_seat"] + h_lo / 2.0
+                d_hi = hh / 2.0 - rd["plume_seat"] + h_lo + h_hi / 2.0
+                for lbl, d_up, seg_h, seg_r in (
+                        ("", d_lo, h_lo, rd["r"] * rd["plume_r_mul"]),
+                        ("Tip", d_hi, h_hi, rd["r"] * rd["plume_tip_mul"])):
+                    sc.add_cylinder(
+                        stage,
+                        f"{ROOT}/ReedPlume{lbl}_{ci}_{k}",
+                        (cx + dx + d_up * ux, cy + dy + d_up * uy,
+                         gz + hh / 2.0 + d_up * uz),
+                        seg_r, seg_h, M["reed_plume"], rotY=ry, rotX=rx)
 
     def build_signs():
         """[v5 shared layer / W3 S09] Korean information **lectern** (안내 거치대).
@@ -3379,11 +3719,15 @@ def main():
         #   the revetment at the landing top z. Now: one line at x = -0.80, z base 0.0,
         #   four y stations — see the PARAMS["land_posts"] block for the derivation.
         #   The prim names are kept as LandPost_* for continuity with the judgement files.
+        #   [GT-115 ⑨ (4)] material `M["stone"]` → **`M["quay_stone"]`** and Ø0.48 × H2.1 →
+        #   Ø0.30 × H0.90 (both derived in the `land_posts` PARAMS block). A 계선주 is one
+        #   quarried block: the promenade's `plaza_light` slab map was wrapping each shaft in
+        #   running-bond course lines, which is the one pattern a monolith cannot have.
         lp = PARAMS["land_posts"]
         for pi, yy in enumerate(lp["ys"]):
             sc.add_cylinder(stage, f"{ROOT}/LandPost_{pi}",
                             (lp["x"], yy, lp["z"] + lp["h"] / 2.0),
-                            lp["r"], lp["h"], M["stone"], collider=True)
+                            lp["r"], lp["h"], M["quay_stone"], collider=True)
         # 4 benches — [§3] beside anchors (pavilion · lawn band edge · deck), yaw jitter +-3~8 deg
         for i, (bx, by, yaw) in enumerate(PARAMS["benches"]):
             sc.build_bench(stage, f"{ROOT}/Bench_{i}", bx, by, 0.0, M["post"],
@@ -3430,6 +3774,15 @@ def main():
             sc.add_box(stage, f"{grp}/Beak",
                        (hxc + hd[0] + bk[0] / 2.0, by, hzc - 0.04), bk,
                        M["beak"])
+            # [GT-115 ⑨ (7)] the seat well — the one thing that separates a pedal boat from a
+            #   bath toy at 400 %. A single dark box, sunk `cockpit_drop` under the hull crown so
+            #   the ellipsoid's own fall-off exposes it through the flanks (derivation in the
+            #   `boat` PARAMS block). No existing part changes size or position.
+            ck = bt["cockpit"]
+            sc.add_box(stage, f"{grp}/Cockpit",
+                       (bx + bt["cockpit_dx"], by,
+                        hz + hl[2] - bt["cockpit_drop"] - ck[2] / 2.0),
+                       ck, M["duck_seat"])
             # Canopy — thin plate + 4 posts (was: a 0.45-high box = the main cause of the 'white box')
             #   Plate top face = 1.55 m above the water (the measured band for duck-boat canopies), slightly
             #   above the crown of the head (1.41 above the water) → it does not hide the head in silhouette.
@@ -3521,8 +3874,15 @@ def main():
             #   on a material that is correctly set — including `diffuse_color_constant`, which is
             #   demonstrably authored. Measured this session, not inferred. The probe now asks for
             #   both spellings and reports which factory actually built the material.
+            # [GT-115 ⑨ (5)] `roughness_a` is not an input `_make_ground_pbr` ever authors —
+            #   a constant roughness lands on **`rough_floor_a`** (`scene_common:2061`, with
+            #   `rough_mult_a` 0). So this row has been reporting "(미지정)" in every round on
+            #   the MDL side regardless of what the scene declared; corrected to the spelling
+            #   the factory actually writes. (The row this batch cares about: the promotion
+            #   path dropped `roughness_const` altogether, and now that the roof binds its map
+            #   here, the declared 0.72 reaches the material for the first time.)
             _PAIRS = (("diffuse_color_constant", "base_color_a"),
-                      ("reflection_roughness_constant", "roughness_a"),
+                      ("reflection_roughness_constant", "rough_floor_a"),
                       ("specular_level", "specular_level_a"),
                       ("metallic_constant", "metallic_a"))
             route = "make_pbr(OmniPBR 직결)"

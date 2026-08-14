@@ -55,7 +55,9 @@ Goal
   (4) **retail arcade** under a curved ring deck (sector 210..290 deg): shopfront glass at
       r = 17.0, deck edge at r = 14.0, round columns, wood-slat soffit
   (5) **control retaining wall** (sector 290..70 deg) — the far, on-axis edge; the surface the
-      h0.3 illusion is actually read against
+      h0.3 illusion is actually read against. **[GT-115 ⑩]** it is no longer a blank drum:
+      13 pour-bay joints at 3.007 m of arc, a head coping, and a row of 28 Ø75 weep bores
+      give the one surface the judgment reads against something of known size on it.
   (6) curved paving bands (annular) on both levels + a circular granite inlay in the arena
   (7) continuous parapet + glass balustrade over the guarded 220 deg, open over the cascade
   (8) a real **carriageway** with a K5 1 m-unit kerb — the lane markings v6 painted on bare
@@ -215,7 +217,62 @@ PARAMS = dict(
                 glass_z0=-4.30, glass_z1=-1.60, sill_h=0.20,
                 emis=(0.86, 0.90, 0.82), emis_int=180.0),
     # --- control retaining wall (far, on-axis) ------------------------------
-    ctrl=dict(wall_t=0.60, arc_seg=28),
+    #  [GT-115 ⑩] The wall shipped as ONE continuous drum — 4.500 m tall, 42.1 m of exposed
+    #  arc — carrying nothing but the vertical grain of `concrete_wall`'s diffuse map: no pour
+    #  joint, no coping, no weep hole, i.e. **not one element of known size** on the single
+    #  surface the h0.3 illusion is actually read against. A viewer has nothing to measure the
+    #  bowl with. Three families are added and every one of them is arc-parameterised off
+    #  `arc_seg`, so no new prim invents an alignment: `_annular_sector_mesh` facets the
+    #  180 deg sector into 28 chords of 180/28 = 6.42857 deg, and the joints land on those
+    #  facet RAYS while the weep bores land on the facet CENTRES (`ctrl_wall_details()`).
+    #    joint_every  vertical construction (pour-bay) joint every N facets. N = 2 ->
+    #                 12.857 deg = **3.007 m of arc** at the exposed face `[computed]`, which
+    #                 is the 3-4 m bay a curved cast-in-place wall is poured in (one form set
+    #                 per bay) and is well inside 도로설계요령 3권 8-7편 옹벽 6(다)'s
+    #                 contraction-joint ceiling of <= 9 m `[확인 —
+    #                 infra_kit.INFRA_DIMENSIONS["wall_contraction"]]`. 14 bays, 13 joints.
+    #    joint_w      40 mm, NOT the real 6-8 mm groove `[확인 — same source, "wall_groove_w"
+    #                 0.007]`, and standing PROUD rather than recessed. Both deviations are
+    #                 `infra_kit.build_retaining_wall_details`'s own documented answer ("a
+    #                 recess without booleans costs more than the effect is worth; a dark
+    #                 strip proud of the face reads as a groove at range"), and the width is
+    #                 the amount that survives THIS scene's judged read: the viewport is
+    #                 1920 px over 60 deg, so one pixel spans 16.4 mm at the 29 m the
+    #                 `pit_edge` eye stands from the far face `[computed]` — a true 7 mm
+    #                 groove is 0.43 px (it does not exist) and 40 mm is 2.4 px.
+    #    joint_proud  20 mm. Kept BELOW `cope_over` (40 mm) on purpose, so every strip dies
+    #                 under the coping's drip instead of poking through its edge.
+    #    cope_h/over  100 / 40 mm, both verbatim from the kit's defaults; the 40 mm is the
+    #                 midpoint of the 30-50 mm coping oversail `[추정 — "wall_cope_over",
+    #                 국내 규정 부재 확인]`. Oversail is applied to the BOWL face only: the
+    #                 back of the wall is buried against the plaza slab, where a drip nib has
+    #                 nothing to shed and would only z-fight the ring deck at r = 14.0.
+    #                 The cap is `cope_flush`-equivalent — its top sits at the +0.006 the
+    #                 plaza's own band overlays already use, so **the declared drop does not
+    #                 move** (kit rule: `cope_flush=False` is the only variant that adds
+    #                 `cope_h` to the GT, and it is not taken).
+    #    weep_*       Ø75 mm bores in a single row 0.400 m above the arena floor. The row is
+    #                 one bore per facet centre = **1.503 m of arc** `[computed]`, i.e. 2.7x
+    #                 denser than 도로설계요령's ~4 m weep spacing `[확인 — "weep_spacing"
+    #                 4.00]` and inside the 1.5-2 m a plaza wall is actually drilled at.
+    #                 Ø75 is one commercial size under the guide's 100 mm `[확인 — "weep_d"]`;
+    #                 it is what a 4.5 m architectural wall carries and it still renders
+    #                 4.6 px at 29 m. **Declared shortfall**: 건축법 시행규칙 §25's
+    #                 "3 ㎡ 마다 1개 이상" `[확인 — "weep_area"]` would want 63 bores over the
+    #                 189 ㎡ face; a single row of 28 is 1 per 6.8 ㎡. The 3 ㎡ rule is a GRID
+    #                 rule and satisfying it needs 2 more rows climbing the wall — 84 dark
+    #                 discs scattered over the exact surface the negative-obstacle judgment
+    #                 reads as "continuous ground", which is a tonal change to the research
+    #                 core. Row 1 only; the grid stays an open item.
+    #    weep_z       0.400 m. The kit's band is 300-500 mm `[추정 — "weep_z" 0.35, 원문 없음]`
+    #                 and 0.400 is picked inside it by measurement, not taste: the existing
+    #                 `CtrlGrime` band stands 6 mm proud up to floor_z + 0.32, so a bore at
+    #                 0.35 would have its lower rim (0.3125) clipped by that band. At 0.400
+    #                 the disc's bottom clears the band by 42.5 mm `[computed]`.
+    ctrl=dict(wall_t=0.60, arc_seg=28,
+              joint_every=2, joint_w=0.040, joint_proud=0.020,
+              cope_h=0.10, cope_over=0.040,
+              weep_every=1, weep_d=0.075, weep_z=0.400, weep_depth=0.12),
     # --- upper plaza (ring deck) -------------------------------------------
     #     one annulus r 14.0..26.0 about C, 16 sectors, thickness 0.80. The plaza is circular by
     #     construction: a rectangle with a circular hole cannot be tiled by boxes and annular
@@ -556,6 +613,69 @@ def tier_courses():
         out.append((r - tp["tread"], r, -(k + 1) * tp["riser"]))
         r -= tp["tread"]
     return out, round(r, 6)
+
+
+def ctrl_wall_details():
+    """[GT-115 ⑩] The control wall's surface articulation, solved once in polar.
+
+    Pure arithmetic (no USD), so the smoke run re-derives the same joints/bores/coping the
+    builder lays rather than trusting a print — the `cascade_courses()` convention.
+
+    **Why the two families sit on different radii.** `_annular_sector_mesh` facets the arc,
+    so the "cylindrical" face is really a 28-chord polygon: it touches `r_face` only ON the
+    rays and sags `r_face(1 − cos(step/2))` = **21.1 mm** inward at each facet centre
+    `[computed]`. A joint strip therefore goes on a ray, where the surface is exactly
+    `r_face` and the strip's 20 mm stand-off is a true 20 mm against everything within
+    ±20 mm of it; a weep bore goes on a facet centre, where it must be seated on the SAGGED
+    radius `r_mid` or its mouth would sit 21 mm inside the wall and never be seen. Placing
+    both on the mesh's own rays/centres is also what stops the articulation from fighting the
+    facet shading: no strip straddles a crease, no bore lands on one.
+
+    Returns a dict; angles are in the sector's own unwrapped 270..450 deg frame.
+    """
+    b = PARAMS["bowl"]
+    c = PARAMS["ctrl"]
+    a0, a1 = PARAMS["sector"]["ctrl"]
+    n = max(1, int(c["arc_seg"]))
+    step = (a1 - a0) / float(n)                      # 6.428571 deg
+    r_face = b["r_rim"] - c["wall_t"]                # 13.400 — the bowl-side face
+    r_mid = r_face * math.cos(math.radians(step / 2.0))       # 13.3789 — chord centre
+
+    # -- vertical pour-bay joints, on the facet rays ------------------------
+    k = max(1, int(c["joint_every"]))
+    half = math.degrees(float(c["joint_w"]) / 2.0 / r_face)
+    joints = [(a0 + i * step, a0 + i * step - half, a0 + i * step + half)
+              for i in range(k, n, k)]
+    joint_arc = math.radians(k * step) * r_face
+
+    # -- weep bores, on the facet centres -----------------------------------
+    kw = max(1, int(c["weep_every"]))
+    depth = float(c["weep_depth"])
+    #  mouth 1 mm proud of the chord face (the kit's own `hole_out` convention), bore driven
+    #  radially OUTWARD into the 0.60 m wall -> centre radius is mouth + depth/2.
+    r_bore = r_mid - 0.001 + depth / 2.0
+    z_weep = b["floor_z"] + float(c["weep_z"])
+    weeps = []
+    for i in range(0, n, kw):
+        a = a0 + (i + 0.5) * step
+        wx, wy = _pol(r_bore, a)
+        weeps.append((a, wx, wy, z_weep))
+    weep_arc = math.radians(kw * step) * r_face
+
+    # -- coping: front oversail only, top flush with the plaza band overlays --
+    cope = (r_face - float(c["cope_over"]), b["r_rim"] - 0.006,
+            -float(c["cope_h"]), 0.006)
+    return dict(
+        step=step, r_face=r_face, r_mid=r_mid, sag=r_face - r_mid,
+        joints=joints, joint_arc=joint_arc,
+        #  the strip bites 4 mm INTO the wall so no face of it is coplanar with the wall
+        #  face, and dies 20 mm INSIDE the coping soffit for the same reason (checklist 6).
+        joint_r=(r_face - float(c["joint_proud"]), r_face + 0.004),
+        joint_z=(b["floor_z"] - 0.02, -float(c["cope_h"]) + 0.02),
+        weeps=weeps, weep_arc=weep_arc, weep_r=float(c["weep_d"]) / 2.0,
+        z_weep=z_weep, cope=cope,
+        face_arc=math.radians(a1 - a0) * r_face,
+        n_prim=len(joints) + len(weeps) + 1)
 
 
 def _surface_z(x, y):
@@ -1193,6 +1313,44 @@ def _smoke_report():
     gate("계절: leaf-off 호출 없음 (G8 = 늦봄·만엽)", ("bare=" + "True") not in src)
     gate("사각 개구(v6 pit) 파라미터 소멸", "'pit'" not in pdump and '"pit"' not in pdump)
 
+    # ── 11. [GT-115 ⑩] 옹벽 표면 분절 — 인쇄값이 아니라 호에서 재계산 ────────
+    print("  [옹벽 분절] 타설 줄눈·물빠짐·갓돌 (ctrl_wall_details 재검산)")
+    cw = PARAMS["ctrl"]
+    d = ctrl_wall_details()
+    a_ctrl0 = PARAMS["sector"]["ctrl"][0]
+    n_weep = max(1, len(d["weeps"]))
+    gate("줄눈 호 피치 3.0~4.0 m (타설 베이)",
+         3.0 <= d["joint_arc"] <= 4.0,
+         f"{d['joint_arc']:.3f} m × {len(d['joints'])}줄 · 노출호 "
+         f"{d['face_arc']:.2f} m / 벽고 {abs(b['floor_z']):.3f} m")
+    gate("줄눈 피치 ≤ 수축이음 9 m [확인]", d["joint_arc"] <= 9.0 + 1e-9)
+    gate("줄눈이 벽 메시의 레이 위 = 기존 기하와 정렬",
+         all(abs((a - a_ctrl0) / d["step"]
+                 - round((a - a_ctrl0) / d["step"])) < 1e-9
+             for a, _s, _e in d["joints"]))
+    gate("물빠짐 호 피치 실무 1.5~2 m (≤ 도로설계요령 4 m [확인])",
+         1.5 <= d["weep_arc"] <= 2.0 and d["weep_arc"] <= 4.0,
+         f"{d['weep_arc']:.3f} m × {n_weep}공 = 1/"
+         f"{d['face_arc'] * abs(b['floor_z']) / n_weep:.1f} ㎡ "
+         f"(3 ㎡ 격자 규정 미달 — 선언된 이월)")
+    gate("물빠짐 입구가 현(chord) 실면에 착좌 — 21 mm 매몰 아님",
+         max(abs(_rad(wx, wy) - float(cw["weep_depth"]) / 2.0
+                 - (d["r_mid"] - 0.001))
+             for _a, wx, wy, _z in d["weeps"]) < 1e-6,
+         f"현 처짐 {d['sag'] * 1000:.1f} mm 보정")
+    gate("물빠짐 하단이 기존 그라임 밴드(+0.32) 위",
+         d["z_weep"] - d["weep_r"] > b["floor_z"] + 0.32,
+         f"여유 {(d['z_weep'] - d['weep_r'] - b['floor_z'] - 0.32) * 1000:.1f} mm")
+    gate("갓돌 내밈 > 줄눈 돌출 (줄눈이 물끊기 아래로 죽는다)",
+         float(cw["cope_over"]) > float(cw["joint_proud"]))
+    gate("갓돌이 낙차를 올리지 않음 · 파라펫(r 14.00) 무접촉",
+         d["cope"][3] <= 0.006 + 1e-9 and d["cope"][1] < b["r_rim"] - 1e-9)
+    gate("신규 프림 전부 ctrl 섹터 — 캐스케이드 개구 150..210° 무접촉",
+         all(_sector_of(a % 360.0) == "ctrl"
+             for a in ([j[1] for j in d["joints"]]
+                       + [j[2] for j in d["joints"]]
+                       + [w[0] for w in d["weeps"]])))
+
     # ── verdict ────────────────────────────────────────────────────────────
     nf = sum(1 for _n, c in gates if not c)
     print("-" * 76)
@@ -1306,7 +1464,9 @@ BANNER = """\
  3. underground_look   — 아레나에서 캐스케이드·티어·림이 곡선으로 읽히는가 (PT)
  4. stair_south        — 캐스케이드 명암 경계(사광 60°)와 측면 튜브 난간
  5. facade_court       — 아케이드 상점 파사드 약발광 (PT 8바운스 전제)
- 6. 재질/접지          — 환형 섹터 이음·Z파이팅·부유 없는가"""
+ 6. 재질/접지          — 환형 섹터 이음·Z파이팅·부유 없는가
+ 7. 옹벽면(GT-115⑩)   — 타설 줄눈 3.0 m 리듬·갓돌·물빠짐 열이 '크기를 잴 수 있는
+                        콘크리트 옹벽'으로 읽히는가 (pit_edge·beauty_overview)"""
 
 
 def main():
@@ -1642,7 +1802,28 @@ def main():
               f"{tp['tread']:.3f} (관람석) · 섹터 {a0:.0f}..{a1:.0f}°")
 
     def build_ctrl_wall(M):
-        """The far, on-axis retaining wall — the surface the h0.3 illusion is read against."""
+        """The far, on-axis retaining wall — the surface the h0.3 illusion is read against.
+
+        **[GT-115 ⑩]** The wall body below is unchanged; what is added is the articulation a
+        4.5 m cast-in-place wall cannot be without — pour-bay joints, a head coping and a row
+        of weep bores — so the drum finally carries objects of known size. Geometry is solved
+        in `ctrl_wall_details()`; nothing here is authored on a number of its own.
+
+        `infra_kit.build_retaining_wall_details` — which builds exactly these three families —
+        is **not called**, and the reason is the S08-F1 / GT-85 one again: it is an
+        axis-parallel straight-run builder (`axis="x"|"y"`, and its own docstring says a
+        skewed wall must be wrapped in a rotation group). On a 180 deg arc the chord-mount
+        workaround the guard and the kerb use does not survive contact with this particular
+        kit: (a) its coping is one straight box, so a 42 m arc would need one box per chord
+        and every chord joint would show as a kink on the pit edge — the plaza's most-read
+        silhouette; (b) its joints come from `wall_joint_positions()`, a bay split of a
+        STRAIGHT length, so per-chord calls would re-split each chord and scatter joints that
+        no longer correspond to anything in the arc; (c) it seats every detail on a flat face
+        `fy`, and this face is a 28-chord polygon whose radius swings 21 mm between rays and
+        facet centres. The kit's NUMBERS are used verbatim instead (cope 0.100/0.040, bore
+        depth 0.12, mouth 1 mm proud) and the run is re-laid in polar — the same client move
+        this file already makes for the cascade flank guard.
+        """
         c = PARAMS["ctrl"]
         a0, a1 = PARAMS["sector"]["ctrl"]
         SECT(f"{ROOT}/CtrlWall", b["r_rim"] - c["wall_t"], b["r_rim"], a0, a1,
@@ -1653,6 +1834,51 @@ def main():
              b["r_rim"] - c["wall_t"] + 0.001, a0, a1,
              b["floor_z"], b["floor_z"] + 0.32, M["grime"],
              arc_seg=int(c["arc_seg"]))
+        # ── [GT-115 ⑩] surface articulation — 0 new material rolls ──────────
+        d = ctrl_wall_details()
+        jr0, jr1 = d["joint_r"]
+        jz0, jz1 = d["joint_z"]
+        for i, (_a, ja0, ja1) in enumerate(d["joints"]):
+            #  `M["grime"]` is the scene's existing ageing constant and is already what the K5
+            #  kerb run binds for ITS joints (`joint_mtl=M["grime"]` in `build_curb`), so the
+            #  two joint languages in this scene read as one material. 0.24 against the wall's
+            #  ~0.445 is the 1.85:1 step that makes a joint line legible `[computed]`.
+            SECT(f"{ROOT}/CtrlJoint_{i}", jr0, jr1, ja0, ja1, jz0, jz1,
+                 M["grime"], arc_seg=1)
+        for i, (aa, wx, wy, wz) in enumerate(d["weeps"]):
+            #  The bore takes `M["grime"]` as well, and the choice is a look-layer one, not a
+            #  tonal one. `M["asphalt"]` (0.045) is this scene's darkest non-metallic constant
+            #  and a void does want to be darker than a stain — but `Looks/Asphalt` is a LIVE
+            #  look class (`sc.LOOK_ROLE["Asphalt"] = "asphalt"`: texture promotion,
+            #  `alb_min` 0.10, `patch` 0.45) and it is the class GT-108 is currently
+            #  recalibrating, so binding 28 Ø75 mm bores to it hands them to the carriageway's
+            #  albedo sweep and floors them at 0.10 anyway. `Looks/Grime` falls through
+            #  `_LOOK_RULES` to the **concrete** family — the same prescription as the wall
+            #  the bore is drilled into, which is where a bore mouth belongs. Against the
+            #  wall's ~0.445 it is a 1.85:1 step `[computed]`; if the gallery reads the row as
+            #  too pale the fix is a dedicated `Looks/WeepBore` roll, not a class steal.
+            #  `rotY=90` lays the cylinder's axis along +X and `rotZ` swings it onto the
+            #  bearing — the GT-85 `add_cylinder` op order, the only way to point a tube at
+            #  an arbitrary azimuth here. The D4 disc-facet rule (`sc.add_disc`) is not
+            #  applicable: that helper takes no rotation, and a Ø75 mm mouth is 4.6 px at the
+            #  29 m judged range, an order below any silhouette read.
+            CYL(f"{ROOT}/CtrlWeep_{i}", (wx, wy, wz), d["weep_r"],
+                float(c["weep_depth"]), M["grime"], rotY=90.0, rotZ=aa)
+        cr0, cr1, cz0, cz1 = d["cope"]
+        #  The coping is the CREST cap, and it is not a duplicate of `ParapetCope`: the B-1
+        #  guard stands 0.60 m back at r 14.00..14.30 (its cope spans 13.98..14.32 at
+        #  z 0.24..0.30), so the wall head between the pit edge (13.40) and the parapet foot
+        #  (14.00) was bare concrete slab edge. Nothing here reaches the parapet, the glass
+        #  balustrade or the 150..210 deg opening — the band stops at the ctrl sector's own
+        #  rays and 6 mm short of r_rim. Same `M["cope"]` roll the parapet already uses.
+        SECT(f"{ROOT}/CtrlCope", cr0, cr1, a0, a1, cz0, cz1, M["cope"],
+             arc_seg=int(c["arc_seg"]))
+        print(f"[옹벽 분절 GT-115⑩] 타설 줄눈 {len(d['joints'])} "
+              f"(호 피치 {d['joint_arc']:.3f} m · {len(d['joints']) + 1} 베이) · 물빠짐 Ø"
+              f"{float(c['weep_d']) * 1000:.0f} {len(d['weeps'])} "
+              f"(호 피치 {d['weep_arc']:.3f} m · z {d['z_weep']:+.3f}) · 갓돌 1 "
+              f"(내밈 {float(c['cope_over']) * 1000:.0f} mm) → 신규 프림 "
+              f"{d['n_prim']} (노출면 {d['face_arc']:.1f} m)")
 
     def build_arcade(M):
         """Retail arcade under a curved ring deck (G8's right-hand side).

@@ -740,8 +740,21 @@ PARAMS = dict(
                         arcs=((12.0, 78.0), (282.0, 348.0))),
     # v4-D2 2 lighting towers / D3 2 speaker stacks
     towers=[(10.5, -6.5), (10.5, 6.5)],
+    # === [GT-115 ①] the mount the towers never had: yoke arm + cap ====================
+    #   `arm_len` is the **pole axis -> head centre** distance, the same convention
+    #   `streetlight['arm_len']` already uses in this file, so the arm can be authored
+    #   axis-to-centre and no gap can open at either end.
+    #   0.50 clears the mast at every head: pole surface r 0.10, and the tipped
+    #   housing's half-extent along the arm is 0.175 x cos(rotX) + 0.125 x sin(rotX)
+    #   = 0.207 at worst (the steepest head), leaving **0.193 m** of bare arm between
+    #   the two `[measured, this file]`. Below 0.31 the pole would be inside the
+    #   housing again, which is the defect being fixed.
+    #   `cap_*`: the mast used to end as a bare cut cylinder above the top head. A
+    #   0.08 m disc at r 0.13 (a 30 mm brim over the pole) caps it, sunk cap_h/2 into
+    #   the pole so the joint is a lap, not a coplanar seam.
     tower=dict(pole_r=0.10, pole_h=5.5, head=(0.35, 0.35, 0.25),
-               head_z=(3.5, 4.3, 5.1), base_z=-0.002),
+               head_z=(3.5, 4.3, 5.1), base_z=-0.002,
+               arm_len=0.50, arm_r=0.035, cap_r=0.13, cap_h=0.08),
     speakers=[(7.8, -3.2), (7.8, 3.2)],
     speaker=dict(size=(0.6, 0.5, 0.9), n=2, base_z=-1.207),
     # v4-D7 entrance gate + sign
@@ -2467,15 +2480,64 @@ def main():
                                    sh["base_z"], M["wall_conc"], **ARC)
             build_backdrop_shrubs(M)
         # v4-D2 2 lighting towers (mast + 3 heads)
+        # === [GT-115 ①] the heads were skewered by their own mast =======================
+        #   was: `add_box` placed every head at the mast's own (tx, ty), so the Ø0.20 pole
+        #   ran straight **through** the 0.35 x 0.35 x 0.25 housing. There was no mount of
+        #   any kind, no tilt (the housings sat dead level while the stage they exist to
+        #   light is 4~6 m below them), and the mast ended in a bare cut cylinder
+        #   `[look_check/scene05/260806_w3_allview5/pt_noon_plaza_approach.png, crop 240-360 x 0-470]`.
+        #   now: each head hangs off a short yoke arm on the **stage side** of the mast and
+        #   is tilted down onto the podium centre - i.e. it reads as a floodlight aimed at
+        #   the performance surface, which is the only reason a mast like this stands here.
+        #     · bearing psi = atan2(cy - ty, cx - tx) toward the podium centre (b['cx'],
+        #       b['cy'] - the podium is concentric with the bowl), shared by arm and head.
+        #       Towers (10.5, -+6.5) -> psi = -+124.695 deg, D = 7.906 m.
+        #     · depression dep = atan((head z - podium top z) / (D - arm_len)); all three
+        #       heads of a stack aim at the SAME point, so they fan 30.435 / 34.820 /
+        #       38.784 deg below horizontal `[measured, this file]`.
+        #     · `add_box` applies scale -> rotX -> rotZ (see its docstring). An unrotated
+        #       box's aperture is its **bottom** face (local -Z, i.e. dep 90 deg), so the
+        #       rotation that buys a depression `dep` is rotX = 90 - dep - the housing is
+        #       tipped up onto its side and the 0.35 x 0.35 face becomes the lens, which is
+        #       exactly the pose a real tower flood sits in. rotZ = psi - 90 deg then swings
+        #       that lens onto the bearing (verified: the local -Z axis after
+        #       Rz(psi-90)Rx(90-dep) equals the unit vector head centre -> podium centre).
+        #     · the tipped housing measures 0.175 cos + 0.125 sin along the arm = 0.207 max,
+        #       so 0.193 m of yoke stays bare, and 0.429 m tall against the 0.80 m head
+        #       pitch, so neither the mast nor the head below is ever touched.
+        #   head_z, head size, pole_r, pole_h, base_z and the tower coordinates do not move,
+        #   and the towers stand on the plaza slab far outside any walking-surface, drop-edge
+        #   or hazard geometry, so nothing sealed is touched. No selfcheck and no obstacle
+        #   registry in this scene reads the head AABBs - `Tower` prims are authored in this
+        #   block and nowhere else, and scene05 has no `_grid_obstacles` (07/10 do) - so
+        #   there was nothing downstream to keep in step.
         tw = PARAMS["tower"]
+        aim_z = PARAMS["podium"]["top_z"]     # the face a performer stands on (-0.853)
         for k, (tx, ty) in enumerate(PARAMS["towers"]):
             sc.add_cylinder(stage, f"/World/Scene05/Tower_{k}/Pole",
                             (tx, ty, tw["base_z"] + tw["pole_h"] / 2.0),
                             tw["pole_r"], tw["pole_h"], M["pole"],
                             collider=True)
+            psi = math.degrees(math.atan2(b["cy"] - ty, b["cx"] - tx))
+            ux, uy = math.cos(math.radians(psi)), math.sin(math.radians(psi))
+            run = math.hypot(b["cx"] - tx, b["cy"] - ty) - tw["arm_len"]
             for hi, hz in enumerate(tw["head_z"]):
+                hzw = tw["base_z"] + hz
+                # yoke: pole axis -> head centre, laid on the bearing
+                # (rotY=90 puts the tube on +X, rotZ swings it to psi).
+                sc.add_cylinder(stage, f"/World/Scene05/Tower_{k}/Yoke_{hi}",
+                                (tx + ux * tw["arm_len"] / 2.0,
+                                 ty + uy * tw["arm_len"] / 2.0, hzw),
+                                tw["arm_r"], tw["arm_len"], M["pole"],
+                                rotY=90.0, rotZ=psi)
+                dep = math.degrees(math.atan2(hzw - aim_z, run))
                 sc.add_box(stage, f"/World/Scene05/Tower_{k}/Head_{hi}",
-                           (tx, ty, tw["base_z"] + hz), tw["head"], M["gear"])
+                           (tx + ux * tw["arm_len"], ty + uy * tw["arm_len"],
+                            hzw), tw["head"], M["gear"], rotZ=psi - 90.0,
+                           rotX=90.0 - dep)
+            sc.add_cylinder(stage, f"/World/Scene05/Tower_{k}/Cap",
+                            (tx, ty, tw["base_z"] + tw["pole_h"]),
+                            tw["cap_r"], tw["cap_h"], M["pole"])
         # [v6 judgment (ii)] the 2 v4-D3 speaker stacks are removed - "unidentifiable grey monoliths on stage".
         #   two untextured grey slabs with no grille, mount or tilt stood left and right of the stage,
         #   failing the v5.2 §6 test "would the scene be unreadable without it?".

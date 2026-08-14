@@ -157,7 +157,16 @@ PARAMS = dict(
                      n_pallet=1, n_box=1)],
         pallet=dict(w=1.20, d=1.00, h=0.145, top_t=0.030, bot_t=0.022,
                     string_w=0.10, string_h=0.090),
-        carton=dict(w=0.54, d=0.44, h=0.34, seed=5107),
+        # [GT-115 ⑤] Carton stacking is **relative to the layer below**, never to the
+        #   stack centre. jit_x/jit_y = the per-layer offset draw (m, on the support's
+        #   own axes), over_f = the hard overhang budget as a fraction of the carton
+        #   footprint (bound 17.7 %w · 18.0 %d incl. the twisted corner -> the contact
+        #   patch never drops below ~2/3 of the face; realised max at seed 5107 is
+        #   12.6 %w), yaw_j/yaw_max = the per-layer twist and its cumulative cap.
+        #   Layer pitch is exactly h (no voids).
+        carton=dict(w=0.54, d=0.44, h=0.34, seed=5107,
+                    jit_x=0.085, jit_y=0.068, over_f=0.18,
+                    yaw_j=2.8, yaw_max=5.0),
         # Forklift traffic paint (worn yellow) - 2 pairs of longitudinal aisles + 1 pair of cross aisles.
         #   Wear is staged with dash/gap + seeded dropout. All flush (proud <= 0.0019).
         lane=dict(w=0.11, t=0.010, proud_main=0.0012, proud_cross=0.0019,
@@ -826,6 +835,20 @@ def main():
         ph = pl["bot_t"] + pl["string_h"] + pl["top_t"]      # actual height (no voids)
         crng = random.Random(ct["seed"])
         ncar = len(mp["carton_colors"])
+
+        # [GT-115 ⑤] helpers for the carton static-equilibrium clamp
+        def clip(v, lim):
+            """Symmetric clamp to ±lim (a negative budget collapses to 0)."""
+            lim = max(float(lim), 0.0)
+            return max(-lim, min(lim, v))
+
+        def half_ext(w, d, deg):
+            """Half extents of a w×d box twisted by `deg`, measured on the
+            **un-twisted (support) axes** -> (hx, hy)."""
+            c = abs(math.cos(math.radians(deg)))
+            s = abs(math.sin(math.radians(deg)))
+            return (w / 2.0 * c + d / 2.0 * s, w / 2.0 * s + d / 2.0 * c)
+
         for st in yd["stacks"]:
             cx, cy, yaw = st["cx"], st["cy"], st["yaw"]
             a = math.radians(yaw)
@@ -851,15 +874,50 @@ def main():
                      (cx, cy, z0 + ph - pl["top_t"] / 2.0),
                      (pl["w"], pl["d"], pl["top_t"]), M["pallet"], rotz=yaw)
                 cnt["pallet"] += 1
+            # ── [GT-115 ⑤] Carton column - static equilibrium ─────────────────
+            #   Was: every layer drew its offset from the **stack centre** (±0.15/±0.11)
+            #   and its own yaw (±9°), so two neighbouring draws could differ by 0.30 m
+            #   = 56 % of the 0.54 m footprint (and 18° of twist) - the upper box hung
+            #   half over the void, which reads as a floating/CG-misplaced layer.
+            #   Now each layer is offset **relative to the layer that carries it** and
+            #   the offset is clamped so the overhang past the support edge stays within
+            #   over_f·footprint; the twist is drawn per layer and capped cumulatively;
+            #   the column as a whole is kept fully on the pallet deck it rides on.
+            #   z is the running sum of heights, so layers touch exactly (dz = h).
             zc0 = int(st["n_pallet"]) * ph
+            ox = oy = 0.0        # carton-centre offset from the stack axis (pallet frame)
+            th = 0.0             # carton twist relative to the pallet bearing (deg)
+            z_b = zc0            # bottom face of the layer being placed
             for b in range(int(st["n_box"])):
-                bx, by = place(crng.uniform(-0.15, 0.15),
-                               crng.uniform(-0.11, 0.11))
+                th_n = clip(th + crng.uniform(-ct["yaw_j"], ct["yaw_j"]),
+                            ct["yaw_max"])
+                # support = the pallet deck for the first layer, else the carton below.
+                #   The first layer may not overhang at all (over_f applies only to
+                #   carton-on-carton, where the two footprints are identical).
+                sup_w, sup_d = (pl["w"], pl["d"]) if b == 0 else (ct["w"], ct["d"])
+                sup_th = th if b else 0.0
+                ov = 0.0 if b == 0 else ct["over_f"]
+                hx, hy = half_ext(ct["w"], ct["d"], th_n - sup_th)
+                dx = clip(crng.uniform(-ct["jit_x"], ct["jit_x"]),
+                          sup_w / 2.0 + ov * ct["w"] - hx)
+                dy = clip(crng.uniform(-ct["jit_y"], ct["jit_y"]),
+                          sup_d / 2.0 + ov * ct["d"] - hy)
+                # the draw lives on the support's axes -> rotate back to the pallet frame
+                cs = math.cos(math.radians(sup_th))
+                ss = math.sin(math.radians(sup_th))
+                ox += dx * cs - dy * ss
+                oy += dx * ss + dy * cs
+                px, py = half_ext(ct["w"], ct["d"], th_n)
+                ox = clip(ox, pl["w"] / 2.0 - px)     # column stays on the pallet deck
+                oy = clip(oy, pl["d"] / 2.0 - py)
+                bx, by = place(ox, oy)
                 OBOX(f"{ROOT}/Carton_{tag}_{b}",
-                     (bx, by, zc0 + ct["h"] * (b + 0.5)),
+                     (bx, by, z_b + ct["h"] / 2.0),
                      (ct["w"], ct["d"], ct["h"]),
                      M[f"carton{crng.randrange(ncar)}"],
-                     rotz=yaw + crng.uniform(-9.0, 9.0))
+                     rotz=yaw + th_n)
+                z_b += ct["h"]   # layers touch: pitch = h exactly, no air gap
+                th = th_n
                 cnt["carton"] += 1
 
         # ── (2) Forklift traffic paint (worn yellow dashes) ──

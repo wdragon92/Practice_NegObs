@@ -97,6 +97,43 @@ S06-B kerbless-by-design — VERIFIED, EV-C closed [W3 S17]
     stopping 0.70 m short, and the footway wear lane runs the walk's full length
     in the walk's own material instead of being a 12 m concrete island.
 
+[GT-115 ⑮] 08-14 look audit — four finish defects, one declined
+  Evidence: `look_check/scene17/260806_w3_allview5/`. **No walked surface, no camera,
+  no season and no GT row moves in this batch** — stairs, ramp, kerbless edges (P-13)
+  and the no-railing custom are untouched, and nothing new is signed or propped.
+  (1) *The river was a mirror.* `water_rough` 0.06 -> **0.18** (`pt_noon_across_river`:
+      the far-bank towers and the bridge piers read upside down in the water). The
+      water path takes a material and nothing else — see `setup_materials`.
+  (2) *The reeds were toothpick bundles.* Ø44 mm bare culms (r 0.022) at a single 9°
+      tilt, scattered evenly over four rectangles of **mown terrace turf** 1.1…2.9 m
+      short of the water. -> culm radius **0.006** (±25 %), height spread 0.55…1.30×,
+      per-stem tilt 4…26°, a summer culm head on ~65 % of them, and the four bands
+      re-sited onto the **waterline** (x 26.5…28.45 against the measured waterline
+      x 28.478) as clumps, not as a scatter. Count is held (367 -> ~392 culms).
+  (3) *The far bank was a bead necklace under four identical facades.* The band goes
+      to the real-asset path (`sc.place_hedge_row` with `Shrub/Switchgrass.usd`, the
+      library's one riparian grass — GT-63/N1 precedent) whenever the vegetation
+      assets are live; the blob band stays as the LOOK_GEO=0 fallback but loses its
+      aligned specular (`specular_level=0`) and gains sink/height spread. The four
+      apartment blocks get **per-block window rhythms** (`window_var`) — they were
+      four heights sharing one 2.6 m column grid.
+  (4) *The bank read as one stretched texture with vertical banding.* The banding was
+      **built**: the 7 bank segments cycled three turf materials at two tile sizes, and
+      a segment joint is a constant-x line running the levee's whole 78 m, so in
+      `ramp_run`/`levee_walk` those joints converge on the vanishing point. The bank
+      now takes **one** turf material at its **own** tile size (2.30 m, decoupled from
+      the flat turf's 1.05/1.40/1.85) — the same rule this file already applies to the
+      ramp batter ("the old build alternated grass/grass_b, making the step boundaries
+      stripe" — `build_ramp` (1)-b).
+  **Declined — the crest chamfer.** The audit also asked for a chamfer strip rounding
+  the knife-edge crest. It is refused, not deferred: x=0 is the **frozen GT drop edge**
+  (`hazard_registry` derives `levee_crest` z_top 0.000 there and R17-1 (ii) freezes it),
+  the crest side of that line is walked turf (the 3.0 m verge + the two entry spurs),
+  and rounding a shoulder means **removing** material at the edge, i.e. moving a walked
+  z and the registry's z_top together. The cope (x −0.20…+0.05, top +0.050) already
+  occupies that line as well. Nothing can be added along the crest that rounds it
+  without touching one of the three.
+
 Goal
   (1) levee crest (sidewalk 3 + bike road 4 + 0.5 planting strip + 3.0 verge)
       + crest cope
@@ -473,10 +510,34 @@ PARAMS = dict(
     #        (2) spacing becomes a **random walk** of spacing x U(0.55, 1.60) (even spacing gone)
     #        (3) size 0.60~1.45x · height 0.70~1.25x jitter (band advised by the judgment)
     #        (4) back row bigger and taller, front row smaller and lower -> the band gains depth.
+    #   ═══ [GT-115 ⑮ (3)] the blobs go to the real-asset path ════════════════
+    #   The crop shows what the jitter could not fix: 180 ellipsoids of one family,
+    #   each with the sun's highlight in the same place on it, reading as a row of
+    #   identical glossy beads across the whole far bank. Two changes, in order:
+    #     · `real` — whenever the vegetation assets are live the band is built by
+    #       `sc.place_hedge_row` out of **`Shrub/Switchgrass.usd`**, the library's
+    #       only riparian grass row (VEG_SHRUBS: w 2.027 · h 1.372 · **8,934 tri**,
+    #       green 1.0000 / red 0.0000, no seasonal strip needed). This is GT-63's
+    #       N1 precedent; the pool is grass, **not** the helper's default clipped
+    #       Privet, because this band is 억새, not a hedge. Fusion at the loosened
+    #       pitch [computed]: scale = 1.7·sk/1.372, plan footprint 2.03·scale =
+    #       2.06…2.96 m against pitch = (2.027/1.372)·1.7·sk·0.80 = 1.65…2.37 m,
+    #       i.e. 20 % nominal overlap; the ±0.35 m along-row jitter can still open
+    #       a small gap, which on a **wild** stand is the point (GT-71 loosened the
+    #       same knob at the call site for the same reason).
+    #     · the blob band **stays** as the LOOK_GEO=0 fallback (v6 (b) removed
+    #       `build_hedge` boxes from this band and they must not come back through
+    #       `place_hedge_row`'s own fallback — hence the explicit asset guard in
+    #       `build_river`), but it loses the aligned highlight (`reed_far`,
+    #       `specular_level` 0) and gains sink/height spread so the skyline of the
+    #       band is no longer one even scallop. `far_band_blobs()` is its single
+    #       deterministic source, shared with the smoke census.
     far_hedge=dict(cx=76.0, sx=1.2, length=26.0, h=1.7, spacing=1.55,
                    rad=0.80,
                    rows=((-1.15, 1.18, 0.00), (0.00, 1.00, 0.37),
-                         (1.25, 0.82, 0.68))),
+                         (1.25, 0.82, 0.68)),
+                   real=dict(pool=("Shrub/Switchgrass.usd",), pitch_frac=0.80,
+                             jit_along=0.35, jit_across=0.25, end_margin=0.60)),
     far_hedges=[dict(cy=-26.0), dict(cy=3.0), dict(cy=32.0)],
     far_trees=[dict(cx=80.4, cy=-19.0), dict(cx=79.1, cy=7.0),
                dict(cx=80.9, cy=34.0)],
@@ -499,6 +560,19 @@ PARAMS = dict(
                axis="x", facade_x=90.5, face_dir=-1.0, base_z=-3.1),
     ),
     window=dict(w=1.2, h=1.6, inset=0.15, col_step=2.6, margin=2.0),
+    # [GT-115 ⑮ (3)] v6 (c) gave the four blocks four setbacks, four widths, four
+    #   heights and four tints — and then handed all four **the same window dict**,
+    #   so every facade repeated one 2.6 m column grid at one window size. At 90 m
+    #   that grid is the facade, which is why the crop still reads "4 identical
+    #   apartments" after (c). Per-block rhythm, base dict merged under it:
+    #     E 5 cols @2.60 · F 6 @2.95 · G 4 @2.42 · H 4 @2.78  [computed from
+    #     `ncols = int((Ly − 2·margin) / col_step)`; was 5/7/4/5 on one grid]
+    #   Shell boxes, heights, floors, setbacks and tints are **unchanged** — this is
+    #   a facade-rhythm edit only, and the blocks stay far backdrop.
+    window_var=dict(E=dict(col_step=2.60, w=1.20, h=1.60, margin=2.0),
+                    F=dict(col_step=2.95, w=1.35, h=1.45, margin=2.4),
+                    G=dict(col_step=2.42, w=1.10, h=1.70, margin=1.8),
+                    H=dict(col_step=2.78, w=1.28, h=1.52, margin=2.2)),
     bridge=dict(x0=42.0, x1=46.0, y0=-42.0, y1=60.0, deck_top=6.0,
                 deck_t=1.2, pier_r=1.2, pier_x=44.0,
                 pier_ys=(-30.0, -10.0, 12.0, 34.0, 54.0), pier_base=-3.7),
@@ -509,11 +583,37 @@ PARAMS = dict(
     #   straw bales / containers) replaced by **stalk clumps**, porting the scene09
     #   build_reeds rule (thin cylinders r0.022 · height jitter · slight tilt · fixed seed).
     #   The band rectangle stays; stalks are scattered inside it at density [stalks/m²].
-    reeds=[dict(x0=24.6, y0=-18.0, x1=26.4, y1=-6.5, h=1.35, seed=171),
-           dict(x0=24.9, y0=5.0, x1=26.6, y1=15.8, h=1.25, seed=172),
-           dict(x0=25.2, y0=26.0, x1=26.8, y1=33.4, h=1.40, seed=173),
-           dict(x0=7.4, y0=-27.0, x1=8.9, y1=-20.2, h=1.10, seed=174)],
-    reed=dict(r=0.022, density=6.0, h_lo=0.80, h_hi=1.12, tilt=9.0),
+    # ═══ [GT-115 ⑮ (2)] the culms were toothpicks, and they stood on a lawn ═══
+    #   Measured off `260806_w3_allview5/pt_noon_across_river.png` and the params
+    #   that made it: **r 0.022 = Ø44 mm** culms (a 갈대 culm is Ø5…10 mm, 억새
+    #   Ø4…8 mm), one **fixed 9° tilt** with only the azimuth drawn, height spread
+    #   0.80…1.12× (±16 %), and an **even scatter over a rectangle**. That is a
+    #   bundle of equal sticks crossing at one angle — the crop's "toothpicks".
+    #   The siting was the other half: three bands sat at x 24.6…26.8 and one at
+    #   x 7.4…8.9, i.e. on **mown terrace turf**, 1.1…2.9 m short of the water at
+    #   the near band and 19.6 m short at the fourth. Reeds are a waterline plant.
+    #   -> `r` 0.022 -> **0.006** (±`r_jit`), height 0.55…1.30×, tilt drawn per
+    #      stem over `tilt_lo…tilt_hi`, a **summer culm head** on `head` of them
+    #      (green, never the buff autumn plume scene09 builds — G3 pins summer and
+    #      scene12's season table records this scene as the no-plume call), and the
+    #      four rectangles re-cut onto the waterline band (the revetment hinge
+    #      x 27.50 … the measured waterline x 28.478, see `waterline_x`). Stems are
+    #      drawn **per clump** (`clump` m of band per tuft, `clump_sd` spread), not
+    #      per rectangle, so the band reads as tufts at the water's edge.
+    #   Count is held: 61.1 m² × 6.0 = 367 culms before, 65.3 m² × 6.0 = 392 after.
+    #   `reed_stems()` is the single deterministic source for build and smoke alike.
+    reeds=[dict(x0=26.60, y0=-18.0, x1=28.40, y1=-6.5, h=1.35, seed=171),
+           dict(x0=26.55, y0=5.0, x1=28.35, y1=15.8, h=1.25, seed=172),
+           dict(x0=26.70, y0=26.0, x1=28.45, y1=33.4, h=1.40, seed=173),
+           dict(x0=26.50, y0=-27.0, x1=28.30, y1=-20.2, h=1.10, seed=174)],
+    #   `clump` 1.30 m of band per tuft with a ±0.45 m spread is sized so the tufts
+    #   **overlap into one uneven band** rather than standing as isolated pom-poms:
+    #   at 1.30 m pitch a 14-culm tuft is ~0.9 m across, so the band is continuous but
+    #   its density visibly rises and falls along the water's edge [computed].
+    reed=dict(r=0.006, r_jit=0.25, density=6.0, h_lo=0.55, h_hi=1.30,
+              tilt_lo=4.0, tilt_hi=26.0, clump=1.30, clump_sd=0.45,
+              head=0.65, head_h=0.17, head_r_mul=3.2, head_seat=0.03,
+              head_bend=1.7),
     reed_tint=(0.42, 0.44, 0.26),
     terrace_trees=[(17.6, -14.2), (19.8, 8.6), (16.9, 30.1), (21.4, 39.7),
                    (18.2, -23.5)],
@@ -554,6 +654,35 @@ PARAMS = dict(
         grass_tint_d=(0.46, 0.60, 0.42),          # shaded, bluer-greyer
         grass_scale_c=1.05,
         grass_scale_d=1.85,
+        # ═══ [GT-115 ⑮ (4)] the bank gets ONE turf at its OWN tile size ═════════
+        #   `pt_noon_ramp_run` reads the bank as a single stretched sheet crossed by
+        #   long lines running to the vanishing point. Those lines are **built**, not
+        #   a texture artefact: `build_slope_faces` dealt `(grass, grass_c, grass_b)`
+        #   round-robin to the 7 bank segments, i.e. tints at **two different tile
+        #   sizes** (1.40 / 1.05 / 1.40) meeting on 6 constant-x joints that each run
+        #   the levee's full 78 m. F4's own rule says tone is dealt per **large** prim
+        #   and never between adjacent strips of one surface — the ramp batter was
+        #   fixed for exactly this ("the old build also alternated grass/grass_b,
+        #   making the step boundaries stripe", `build_ramp` (1)-b). A grass bank is
+        #   one surface, so it takes one material.
+        #   Tile size is then **decoupled from the flat turf**: 2.30 m against the
+        #   crest/terrace 1.05 / 1.40 / 1.85, which shares no low-integer ratio with
+        #   any of them (2.190 / 1.643 / 1.243), so the bank cannot repeat the plane's
+        #   grid. It is also the coarser choice on purpose — the bank's true surface
+        #   is 1.118× its plan run (1:2), and a world-projected tile lands ~11 % finer
+        #   on it than on the flat at the same `scale_m` [computed].
+        #   Within-surface variety comes from the turf class's own macro modulation
+        #   (LOOK_CLASS["turf"] macro 0.10 @1.6 m) instead of from construction seams.
+        grass_tint_slope=(0.51, 0.63, 0.39),
+        grass_scale_slope=2.30,
+        # [GT-115 ⑮ (2)] summer culm head — green-dominant (g/r 1.04, g/b 1.58), a
+        #   shade lighter than the culm. **Not** scene09's buff 갈대 plume: that is the
+        #   autumn read and G3 pins this scene to summer.
+        reed_head_tint=(0.47, 0.49, 0.31),
+        # [GT-115 ⑮ (3)] far-bank band, fallback arm — duller and, above all,
+        #   `specular_level=0` at the call site: 180 ellipsoids all carrying the sun
+        #   in the same spot is what made them read as one repeated bead.
+        reed_far_tint=(0.40, 0.44, 0.29),
         # [v7 judgment (11)-1] The `concrete_floor` diff average is sRGB (115.7,102.2,77.0) =
         #   a warm brown earth. The old tint (0.80,0.79,0.76) kept the channel ratio, so the
         #   render came out sRGB (98,87,69) — **brown**. Ramp deck · kerb · crest kerb ·
@@ -576,7 +705,16 @@ PARAMS = dict(
         #   constant-colour value as the target mean (albedo well under 0.30).
         asphalt_tint=(0.42, 0.42, 0.45),
         paint_color=(0.70, 0.70, 0.66), paint_rough=0.62,   # no pure white (<0.8)
-        water_color=(0.05, 0.10, 0.11), water_rough=0.06,
+        # ═══ [GT-115 ⑮ (1)] the river was a mirror slab ════════════════════════
+        #   At 0.06 the water is polished chrome: in `pt_noon_across_river` the
+        #   far-bank towers, their window grids and the two bridge piers are all
+        #   legible **upside down** in it, and the sky reflection is a hard edge.
+        #   The sibling river scenes already sit in a measured band — scene09 0.15,
+        #   scene12 0.14 (its own note: "less mirror-like") — and this reach is the
+        #   widest and most wind-fetched of the three (43.4 m of modelled water in
+        #   front of the eye, open to the whole Han), so it takes the top of that
+        #   band rather than its middle. Colour is unchanged.
+        water_color=(0.05, 0.10, 0.11), water_rough=0.18,
         rail_color=(0.66, 0.68, 0.70), rail_metallic=0.7, rail_rough=0.4,
         wood_color=(0.28, 0.19, 0.12), wood_rough=0.85,
         post_color=(0.33, 0.33, 0.36), post_metallic=0.35, post_rough=0.5,
@@ -660,6 +798,119 @@ def slope_z(xq):
         x += run
         z -= drop
     return z
+
+
+def revet_z(xq):
+    """[GT-115 ⑮ (2)] Ground z at the water's edge — terrace top out to the riprap
+    hinge, then the revetment's own grade.
+
+    The reed bands moved onto the waterline, so their culms can no longer all be
+    planted on one plane: between x 27.50 (`bank["x0"]`) and the waterline the ground
+    is the revetment face, dropping `bank["drop"]` over `bank["run"]`. Derived from
+    `PARAMS["bank"]`, never typed, so it follows the revetment if that ever moves."""
+    bk = PARAMS["bank"]
+    if xq <= float(bk["x0"]):
+        return float(_TERRACE_Z)
+    t = min(1.0, (float(xq) - float(bk["x0"])) / float(bk["run"]))
+    return float(_TERRACE_Z) - float(bk["drop"]) * t
+
+
+def waterline_x():
+    """[GT-115 ⑮ (2)] Where the revetment face meets the water surface — the line the
+    reed bands are cut against. 27.50 + 2.00·(0.22/0.45) = **28.478** [computed]."""
+    bk = PARAMS["bank"]
+    d = float(_TERRACE_Z) - float(PARAMS["water"]["z"])
+    return float(bk["x0"]) + float(bk["run"]) * min(1.0, d / float(bk["drop"]))
+
+
+def reed_stems(bi):
+    """[GT-115 ⑮ (2)] Deterministic culm layout of reed band `bi` — the **single**
+    source read by `build_dressing` and by the smoke census alike, so the printed
+    numbers are the built ones.
+
+    Culms are drawn **per clump**, not per rectangle: a reed stand at a waterline is
+    a run of tufts, and the even scatter over a rectangle is half of what read as a
+    bundle of toothpicks. Each clump centre walks along the band (`uniform` inside
+    its own slot, never on a fixed pitch), and its culms are spread around it by a
+    triangular jitter (two uniforms — `gauss` caches a second value across calls and
+    would couple the sequence to the call order).
+
+    Yields dicts: x, y, z (the **planted base**, on `revet_z`), h, r, tilt, az, head.
+    """
+    r_ = PARAMS["reeds"][int(bi)]
+    rd = PARAMS["reed"]
+    rnd = _random.Random(int(r_["seed"]))
+    x0, x1 = float(r_["x0"]), float(r_["x1"])
+    y0, y1 = float(r_["y0"]), float(r_["y1"])
+    n_tot = int(round((x1 - x0) * (y1 - y0) * float(rd["density"])))
+    n_cl = max(2, int(round((y1 - y0) / float(rd["clump"]))))
+    sd = float(rd["clump_sd"])
+    slot = (y1 - y0) / n_cl
+    for c in range(n_cl):
+        cy = y0 + (c + rnd.uniform(0.15, 0.85)) * slot
+        cx = rnd.uniform(x0 + 0.15, x1 - 0.15)
+        n_c = n_tot // n_cl + (1 if c < n_tot % n_cl else 0)
+        for _ in range(n_c):
+            jx = (rnd.uniform(-1.0, 1.0) + rnd.uniform(-1.0, 1.0)) * 0.5 * sd
+            jy = (rnd.uniform(-1.0, 1.0) + rnd.uniform(-1.0, 1.0)) * 0.8 * sd
+            px = min(max(cx + jx, x0), x1)
+            py = min(max(cy + jy, y0), y1)
+            yield dict(
+                x=px, y=py, z=revet_z(px),
+                h=float(r_["h"]) * rnd.uniform(float(rd["h_lo"]),
+                                               float(rd["h_hi"])),
+                r=float(rd["r"]) * rnd.uniform(1.0 - float(rd["r_jit"]),
+                                               1.0 + float(rd["r_jit"])),
+                tilt=rnd.uniform(float(rd["tilt_lo"]), float(rd["tilt_hi"])),
+                az=rnd.uniform(0.0, 360.0),
+                head=rnd.random() < float(rd["head"]))
+
+
+def stem_axis(tilt, az):
+    """[GT-115 ⑮ (2)] Unit axis of a culm tilted `tilt` deg on azimuth `az`.
+
+    `add_cylinder` authors `[translate, rotZ, rotY, rotX]` and USD applies the list in
+    reverse, so a culm is rotated **rotX then rotY** about its own centre. Local +Z
+    therefore lands on (cos rx · sin ry, −sin rx, cos rx · cos ry). Returned with the
+    two rotation arguments so the caller plants the base instead of the centre — at
+    the old fixed 9° the difference was 1.2 % of the height, at 26° it is 5.1 % and a
+    centre-planted culm hangs visibly off the ground. Returns (rotY, rotX, (ux,uy,uz))."""
+    ry = float(tilt) * math.cos(math.radians(float(az)))
+    rx = float(tilt) * math.sin(math.radians(float(az)))
+    ax, ay = math.radians(rx), math.radians(ry)
+    return ry, rx, (math.cos(ax) * math.sin(ay), -math.sin(ax),
+                    math.cos(ax) * math.cos(ay))
+
+
+def far_band_blobs():
+    """[GT-115 ⑮ (3)] Far-bank grass band, **fallback arm** (LOOK_GEO=0 or no assets):
+    the deterministic ellipsoid layout, shared by `build_river` and the smoke census.
+
+    v7 (11)-2 already made the spacing a random walk and jittered size and height; what
+    the crop still shows is a **skyline of equal scallops** carrying one highlight each.
+    So the base z is sunk per blob (`sink`) and the vertical radius spread is widened,
+    which breaks the top line as well as the pitch. Yields
+    (i, ri, k, (cx, cy, cz), (sx, sy, sz))."""
+    fh = PARAMS["far_hedge"]
+    fb = PARAMS["far_bank"]
+    for i, h in enumerate(PARAMS["far_hedges"]):
+        y_lo = float(h["cy"]) - fh["length"] / 2.0
+        y_hi = float(h["cy"]) + fh["length"] / 2.0
+        for ri, (dx, sk, phase) in enumerate(fh["rows"]):
+            rnd = _random.Random((i + 1) * 26417 ^ (ri + 1) * 6151)
+            yy = y_lo + fh["spacing"] * phase
+            k = 0
+            while yy <= y_hi:
+                hh = fh["h"] * sk * rnd.uniform(0.70, 1.25)
+                rr = fh["rad"] * sk * rnd.uniform(0.60, 1.45)
+                rz = hh * rnd.uniform(0.42, 0.68)
+                sink = rnd.uniform(0.00, 0.22) * hh
+                yield (i, ri, k,
+                       (fh["cx"] + dx + rnd.uniform(-0.30, 0.30), yy,
+                        fb["z_top"] + hh * 0.42 - sink),
+                       (fh["sx"] / 2.0 * sk * rnd.uniform(0.8, 1.4), rr, rz))
+                yy += fh["spacing"] * rnd.uniform(0.55, 1.60)
+                k += 1
 
 
 def ramp_geom():
@@ -1120,35 +1371,83 @@ def _smoke_report():
     print(f"    후퇴(x0) {len(xs)}종 {xs} · 이격 {gaps} (동일값 반복 없음: "
           f"{len(set(gaps)) == len(gaps)}) · far_bank "
           f"[{fbk['x0']:.0f},{fbk['x1']:.0f}] 내 {inside}")
+    # [GT-115 ⑮ (3)] 입면 리듬 — 창 열수는 동수마다 달라야 한다(구: 4동 동일 2.6 m 격자)
+    wv = PARAMS.get("window_var", {})
+    cols = []
+    for key, bd in fb2.items():
+        wd = dict(PARAMS["window"])
+        wd.update(wv.get(key, {}))
+        usable = (bd["y1"] - bd["y0"]) - 2.0 * wd["margin"]
+        cols.append((key, max(1, int(usable / wd["col_step"])), wd["col_step"],
+                     wd["w"], wd["h"]))
+    print("    [GT-115 ⑮ (3)] 창 리듬(동별): "
+          + " · ".join(f"{k} {n}열@{s:.2f}(창 {w:.2f}×{h:.2f})"
+                       for k, n, s, w, h in cols)
+          + f" → 열수/피치 반복 없음: "
+            f"{len(set(c[1:3] for c in cols)) == len(cols)}")
 
-    # ── [v6 judgment (b)] silver-grass clump check ──
+    # ── [v6 (b) · GT-115 ⑮ (2)(3)] reed clumps and the far-bank band ──
     rd = PARAMS["reed"]
-    tot_stalk = sum(int(round((r["x1"] - r["x0"]) * (r["y1"] - r["y0"])
-                              * rd["density"])) for r in PARAMS["reeds"])
     fh = PARAMS["far_hedge"]
-    import random as _rnd_chk
+    wl = waterline_x()
+    n_st = n_hd = 0
+    rr_lo = hh_lo = zz_lo = 1e9
+    rr_hi = hh_hi = zz_hi = -1e9
+    dx_lo, dx_hi = 1e9, -1e9
+    for bi in range(len(PARAMS["reeds"])):
+        for st in reed_stems(bi):
+            n_st += 1
+            n_hd += 1 if st["head"] else 0
+            rr_lo, rr_hi = min(rr_lo, st["r"]), max(rr_hi, st["r"])
+            hh_lo, hh_hi = min(hh_lo, st["h"]), max(hh_hi, st["h"])
+            zz_lo, zz_hi = min(zz_lo, st["z"]), max(zz_hi, st["z"])
+            dx_lo = min(dx_lo, wl - st["x"])
+            dx_hi = max(dx_hi, wl - st["x"])
+    print(f"  [억새 군락] 물가 {len(PARAMS['reeds'])}밴드 · 밀도 "
+          f"{rd['density']:.1f} 본/m² → 대 {n_st}본 · 이삭 {n_hd}개 "
+          f"({n_hd / max(n_st, 1) * 100:.0f}%, 목표 {rd['head'] * 100:.0f}%)")
+    print(f"    [GT-115 ⑮ (2)] 대 r {rr_lo * 1000:.1f}~{rr_hi * 1000:.1f} mm "
+          f"(구 44.0 mm) · 높이 {hh_lo:.2f}~{hh_hi:.2f} m · 기울기 "
+          f"{rd['tilt_lo']:.0f}~{rd['tilt_hi']:.0f}° (구 9° 고정) → "
+          f"{'OK (실 갈대 Ø5~10 mm 대역)' if 0.004 <= rr_lo and rr_hi <= 0.008 else 'FAIL'}")
+    print(f"    [GT-115 ⑮ (2)] 접지 z {zz_lo:+.3f}~{zz_hi:+.3f} (둔치 "
+          f"{_TERRACE_Z:+.2f} · 수면 {PARAMS['water']['z']:+.2f}) · 수변선 "
+          f"x {wl:.3f} 까지 {dx_hi:.2f}~{dx_lo:.2f} m → "
+          f"{'OK (물가 밴드)' if dx_lo >= -0.01 and dx_hi <= 2.2 else '확인 요'}")
+    rl = fh["real"]
+    veg_arm = (sc.LOOK_GEO and sc.veg_available()
+               and os.path.isfile(os.path.join(sc.VEG_DIR, rl["pool"][0])))
     n_far, gaps_far = 0, []
-    for i in range(len(PARAMS["far_hedges"])):
-        for ri, (dx, sk, phase) in enumerate(fh["rows"]):
-            r_ = _rnd_chk.Random((i + 1) * 26417 ^ (ri + 1) * 6151)
-            yy, prev = fh["spacing"] * phase, None
-            while yy <= fh["length"]:
-                r_.uniform(0.70, 1.25), r_.uniform(0.60, 1.45)
-                r_.uniform(-0.30, 0.30), r_.uniform(0.8, 1.4)
-                if prev is not None:
-                    gaps_far.append(round(yy - prev, 2))
-                prev = yy
-                yy += fh["spacing"] * r_.uniform(0.55, 1.60)
-                n_far += 1
-    print(f"  [억새 군락] 근경 {len(PARAMS['reeds'])}밴드 · 밀도 "
-          f"{rd['density']:.1f} 본/m² → 대 {tot_stalk}본 "
-          f"(r {rd['r']:.3f} · h {rd['h_lo']:.2f}~{rd['h_hi']:.2f}× · "
-          f"기울기 {rd['tilt']:.0f}°)")
-    print(f"    [v7 판정 ⑪-2] 건너편 억새: {len(PARAMS['far_hedges'])}띠 × "
-          f"{len(fh['rows'])}열(dx {[r[0] for r in fh['rows']]}) → 블롭 {n_far}개 · "
-          f"간격 {min(gaps_far):.2f}~{max(gaps_far):.2f} m "
-          f"(구: 1열 등간격 {fh['spacing']:.2f} 고정) → "
+    prev = {}
+    for i, ri, k, ctr, scl in far_band_blobs():
+        if (i, ri) in prev:
+            gaps_far.append(round(ctr[1] - prev[(i, ri)], 2))
+        prev[(i, ri)] = ctr[1]
+        n_far += 1
+    print(f"    [GT-115 ⑮ (3)] 건너편 억새: {len(PARAMS['far_hedges'])}띠 × "
+          f"{len(fh['rows'])}열(dx {[r[0] for r in fh['rows']]}) · 채택 팔 = "
+          f"{'실에셋 ' + rl['pool'][0] if veg_arm else '블롭 폴백'} "
+          f"(LOOK_GEO={sc.LOOK_GEO} · 식생 {sc.veg_available()})")
+    print(f"      폴백 팔 블롭 {n_far}개 · 간격 {min(gaps_far):.2f}~"
+          f"{max(gaps_far):.2f} m · 정반사 제거(reed_far specular 0) → "
           f"{'OK (등간격 소멸)' if len(set(gaps_far)) > len(gaps_far) * 0.5 else 'FAIL'}")
+
+    # ── [GT-115 ⑮ (1)(4)] look fixes that carry no geometry ──
+    _mpp = PARAMS["material"]
+    print(f"  [GT-115 ⑮ (1)] 수면 거칠기 {_mpp['water_rough']:.2f} "
+          f"(구 0.06 = 거울 · s09 0.15 / s12 0.14 대역) · build_water 는 mtl 만 "
+          f"받고 make_pbr 은 diff 없으면 nor 를 authoring 하지 않는다 → "
+          f"리플 노멀 미적용(사유 setup_materials 주석)")
+    print(f"  [GT-115 ⑮ (4)] 사면 turf 단일화 · 타일 "
+          f"{_mpp['grass_scale_slope']:.2f} m vs 평지 "
+          f"{_mpp['scale']['grass']:.2f}/{_mpp['grass_scale_c']:.2f}/"
+          f"{_mpp['grass_scale_d']:.2f} m → 세그먼트 이음 색·타일 단차 "
+          f"{len(PARAMS['slope']['segs']) - 1}개 소멸")
+    print("  [GT-115 ⑮ 보류] 마루 어깨 모따기 — **미시공**. x=0 은 동결된 GT 낙차선"
+          "(hazard_registry levee_crest z_top 0.000)이고 그 안쪽은 보행 turf"
+          "(verge 3.0 m + 진입 spur 2개), 어깨 라운딩은 낙차선에서 재료를 덜어내는"
+          " 일이라 보행 z 와 레지스트리 z_top 이 함께 움직인다. 코프(x −0.20…+0.05,"
+          " 상면 +0.050)도 같은 선 위에 있다 → 사용자 판정 대기.")
 
     # ── z ladder plate table ──
     lv = PARAMS["levee"]
@@ -1306,7 +1605,17 @@ BANNER = """\
                     무늬 배터 끝**이 사라지고 잔디 코가 사면으로 잠기는가
 13. [GT-81] 마감 — 강측 연석이 산책로 앞에서 0 높이로 낮아지는가, 트렌치가 양 끝
                     우수받이에 물리는가(흰 금속 띠가 아니라 어두운 주철인가),
-                    보도 마모대가 보도 재질로 전 구간 연속인가"""
+                    보도 마모대가 보도 재질로 전 구간 연속인가
+14. [GT-115 ⑮] 마감 4건 —
+     (1) across_river 수면에 건너편 아파트·교각이 **똑바로 읽히지 않는가**
+         (거울 → 산란, 거칠기 0.18)
+     (2) 억새가 **물가**에 군락으로 서는가, 대가 이쑤시개(Ø44 mm)가 아니라 가는
+         줄기 + 이삭인가(여름 녹색 이삭 · 갈색 가을 이삭이 아님)
+     (3) 건너편 둑이 **같은 구슬 반복**이 아닌가(실 switchgrass 융합열, 폴백은
+         정반사 제거), 아파트 4동의 **창 리듬이 동마다 다른가**
+     (4) ramp_run 사면에 소실점으로 수렴하는 **세로 띠**가 사라졌는가
+         (세그먼트 색·타일 단차 제거 · 사면 전용 타일 2.30 m)
+     ※ 마루 어깨 모따기는 **미시공**(GT 낙차선·보행면·코프와 충돌) — 판정 대기"""
 
 
 def main():
@@ -1395,6 +1704,16 @@ def main():
             f"{ROOT}/Looks/TurfSoilD", sc.tex_path("grass", "diff"),
             sc.tex_path("grass", "nor"), sc.tex_path("grass", "rough"),
             float(mp["grass_scale_d"]), tint=mp["grass_tint_d"])
+        # [GT-115 ⑮ (4)] Bank turf — one material for all 7 segments, at its own tile
+        #   size (`grass_scale_slope`). Kept in the `TurfSoil*` name family on purpose:
+        #   `_look_spec` reads the class off the material name and "turfsoilslope"
+        #   still resolves to LOOK_CLASS["turf"] (mdl="ground"), so the bank keeps the
+        #   triplanar projection the MDL exists for — "soft triplanar. Required on
+        #   slopes" — and only its tile size and tone move.
+        M["grass_slope"] = PBR(
+            f"{ROOT}/Looks/TurfSoilSlope", sc.tex_path("grass", "diff"),
+            sc.tex_path("grass", "nor"), sc.tex_path("grass", "rough"),
+            float(mp["grass_scale_slope"]), tint=mp["grass_tint_slope"])
         M["rock"] = PBR(
             f"{ROOT}/Looks/Rock", sc.tex_path("rock_wall", "diff"),
             sc.tex_path("rock_wall", "nor"), sc.tex_path("rock_wall", "rough"),
@@ -1412,6 +1731,21 @@ def main():
                            sca["asphalt"], tint=mp["asphalt_tint"])
         M["paint"] = PBR(f"{ROOT}/Looks/Paint", diffuse_color=mp["paint_color"],
                          roughness_const=mp["paint_rough"])
+        # [GT-115 ⑮ (1)] **What the water path supports, measured, not assumed.**
+        #   `sc.build_water(stage, path, x0, y0, x1, y1, z, thick, mtl)` takes a
+        #   material and nothing else — no normal, no texture, no scale — and the
+        #   material below is the whole of the water's look. `sc.make_pbr` does accept
+        #   `nor=`, but it authors `normalmap_texture` **only inside `if diff is not
+        #   None`**, so a ripple normal cannot be attached to a constant-colour water
+        #   without also giving it a diffuse texture, and the library has no water
+        #   texture role (`TEX` carries none). The look layer will not supply one
+        #   either: `water` is one of the roles v5.1 §4 deliberately keeps constant
+        #   (`_CONST_MDL_CLASSES` excludes it, LOOK_CLASS["water"] mdl="omni",
+        #   detail=False), i.e. it is excluded from both promotion and the detail
+        #   normal by design. -> **roughness raise alone**; a ripple needs either a
+        #   procured water normal + a `build_water` signature change (scene_common,
+        #   outside this file's ownership) or a displaced water mesh, and both are
+        #   larger than this batch.
         M["water"] = PBR(f"{ROOT}/Looks/Water", diffuse_color=mp["water_color"],
                          roughness_const=mp["water_rough"])
         # [W2 fix batch F5] Dark cast-iron for the kit's manhole / gully covers.
@@ -1456,6 +1790,23 @@ def main():
                         sc.tex_path("grass", "nor"),
                         sc.tex_path("grass", "rough"),
                         0.6, tint=PARAMS["reed_tint"])
+        # [GT-115 ⑮ (2)] the summer culm head. Same grass source at a finer tile so a
+        #   0.17 m head is not one texel of the culm's own tile, and no specular — a
+        #   seed head is a dry brush of florets, not a bead (the same `specular_level=0`
+        #   this file already gives the tree canopies).
+        M["reed_head"] = PBR(f"{ROOT}/Looks/ReedHead",
+                             sc.tex_path("grass", "diff"),
+                             sc.tex_path("grass", "nor"),
+                             sc.tex_path("grass", "rough"),
+                             0.35, tint=mp["reed_head_tint"],
+                             specular_level=0.0)
+        # [GT-115 ⑮ (3)] far-bank band, fallback arm — see `far_band_blobs`.
+        M["reed_far"] = PBR(f"{ROOT}/Looks/ReedFar",
+                            sc.tex_path("grass", "diff"),
+                            sc.tex_path("grass", "nor"),
+                            sc.tex_path("grass", "rough"),
+                            0.9, tint=mp["reed_far_tint"],
+                            specular_level=0.0)
         M["bridge"] = PBR(f"{ROOT}/Looks/Bridge",
                           diffuse_color=mp["bridge_color"],
                           roughness_const=mp["bridge_rough"])
@@ -1582,14 +1933,19 @@ def main():
         st = PARAMS["stairs"]
         nodes = slope_nodes()
         bands = (("S", sl["y0"], st["y0"]), ("N", st["y1"], sl["y1"]))
+        # [GT-115 ⑮ (4)] one material for the whole bank, at the bank's own tile size.
+        #   The round-robin `(grass, grass_c, grass_b)[i % 3]` that stood here put a
+        #   tint **and** tile-size step on all 6 segment joints, and a joint is a
+        #   constant-x line 78 m long — in `ramp_run` and `levee_walk` those lines run
+        #   to the vanishing point, which is the "vertical banding" of the audit cut.
+        #   Geometry, segment count, thickness, margins and colliders are untouched.
         for i, (run, drop) in enumerate(sl["segs"]):
             x0, z0 = nodes[i]
             mg = 0.0 if i == 0 else sl["margin"]
             for tag, y0, y1 in bands:
                 sc.build_slope(
                     stage, f"{ROOT}/Slope_{i}_{tag}", x0, z0, run, drop,
-                    y0, y1, sl["thick"],
-                    (M["grass"], M["grass_c"], M["grass_b"])[i % 3],
+                    y0, y1, sl["thick"], M["grass_slope"],
                     margin=mg, collider=True)
 
     # -------------------------------------------------------------------
@@ -1772,25 +2128,42 @@ def main():
         #     · y advances by a **random walk** (spacing x U(0.55,1.60)) -> even spacing gone
         #     · size 0.60~1.45x · height 0.70~1.25x jitter
         #   Grounding: centre z = z_top + hh*0.42, rz = hh*0.60 -> base 0.18hh below grade.
+        # [GT-115 ⑮ (3)] the band goes to real switchgrass whenever the assets are
+        #   live. The guard is explicit rather than left to `place_hedge_row`'s own
+        #   fallback: that fallback is `build_hedge`, i.e. the **box** idiom v6 (b)
+        #   removed from this very band ("khaki boxes reading as straw bales"), and a
+        #   26 m box would be a far worse regression than the blobs it replaced. So
+        #   the arm is chosen here — assets present -> fused real rows, otherwise the
+        #   (roughened) blob band — and the helper's fallback is never reached.
         fh = PARAMS["far_hedge"]
-        for i, h in enumerate(PARAMS["far_hedges"]):
-            y_lo = h["cy"] - fh["length"] / 2.0
-            y_hi = h["cy"] + fh["length"] / 2.0
-            for ri, (dx, sk, phase) in enumerate(fh["rows"]):
-                rnd = _random.Random((i + 1) * 26417 ^ (ri + 1) * 6151)
-                yy = y_lo + fh["spacing"] * phase
-                k = 0
-                while yy <= y_hi:
-                    hh = fh["h"] * sk * rnd.uniform(0.70, 1.25)
-                    rr = fh["rad"] * sk * rnd.uniform(0.60, 1.45)
-                    sc.add_sphere(stage, f"{ROOT}/FarReed_{i}_{ri}_{k}",
-                                  (fh["cx"] + dx + rnd.uniform(-0.30, 0.30),
-                                   yy, fb["z_top"] + hh * 0.42),
-                                  (fh["sx"] / 2.0 * sk * rnd.uniform(0.8, 1.4),
-                                   rr, hh * 0.60),
-                                  M["reed"])
-                    yy += fh["spacing"] * rnd.uniform(0.55, 1.60)
-                    k += 1
+        rl = fh["real"]
+        use_veg = (sc.LOOK_GEO and sc.veg_available()
+                   and os.path.isfile(os.path.join(sc.VEG_DIR, rl["pool"][0])))
+        n_far = 0
+        if use_veg:
+            for i, h in enumerate(PARAMS["far_hedges"]):
+                y_lo = h["cy"] - fh["length"] / 2.0
+                y_hi = h["cy"] + fh["length"] / 2.0
+                for ri, (dx, sk, phase) in enumerate(fh["rows"]):
+                    n_far += sc.place_hedge_row(
+                        stage, f"{ROOT}/FarReed_{i}_{ri}",
+                        fh["cx"] + dx - fh["sx"] / 2.0,
+                        y_lo + fh["spacing"] * phase,
+                        fh["cx"] + dx + fh["sx"] / 2.0, y_hi,
+                        fh["h"] * sk, ik.det_seed("scene17.farband", i, ri),
+                        pool=list(rl["pool"]), base_z=fb["z_top"],
+                        pitch_frac=float(rl["pitch_frac"]),
+                        jit_along=float(rl["jit_along"]),
+                        jit_across=float(rl["jit_across"]),
+                        end_margin=float(rl["end_margin"]),
+                        fallback_mtl=M["reed_far"])
+        else:
+            for i, ri, k, ctr, scl in far_band_blobs():
+                sc.add_sphere(stage, f"{ROOT}/FarReed_{i}_{ri}_{k}", ctr, scl,
+                              M["reed_far"])
+                n_far += 1
+        print(f"[GT-115 ⑮ (3)] 건너편 억새띠 {n_far}주 · "
+              f"{'실에셋 ' + rl['pool'][0] + ' (place_hedge_row 융합열)' if use_veg else '블롭 폴백(LOOK_GEO=0 또는 에셋 부재)'}")
         # [W3 S17 · K4(b)/K4-F4] **belt flip.** `SCENE_SPECIES["Scene17"] = ("poplar",
         #   "oak_black")` — 양버들 on the walked levee, 굴참나무-class broadleaf on the far
         #   bank. K4-F4 records that a declared belt is **inert until the scene passes
@@ -1819,11 +2192,16 @@ def main():
     def build_skyline(M):
         # [v6 judgment (c)] 2 alternating tints -> 4 cycled, so neighbours never repeat a tone.
         tones = (M["shell"], M["shell_c"], M["shell_b"], M["shell_d"])
+        # [GT-115 ⑮ (3)] per-block window rhythm — the base dict with the block's own
+        #   override laid over it, so a block without an entry is byte-identical to
+        #   before. Only `window` moves; the `bd` shells are untouched.
+        wv = PARAMS.get("window_var", {})
         for i, (key, bd) in enumerate(PARAMS["far_buildings"].items()):
+            wd = dict(PARAMS["window"])
+            wd.update(wv.get(key, {}))
             sc.build_building(stage, f"{ROOT}/FarBuilding_{key}", bd,
                               tones[i % len(tones)],
-                              M["glass"], M["parapet"],
-                              window=PARAMS["window"])
+                              M["glass"], M["parapet"], window=wd)
         br = PARAMS["bridge"]
         BOX(f"{ROOT}/Bridge/Deck",
             ((br["x0"] + br["x1"]) / 2.0, (br["y0"] + br["y1"]) / 2.0,
@@ -1844,19 +2222,41 @@ def main():
         tz = PARAMS["terrace"]["z_top"]
         # [v6 judgment (b)] silver grass = stalk clumps, scattered inside the band rectangle
         #   at density stalks/m² with a fixed seed (scene09 build_reeds rule). Height/tilt jitter.
+        # [GT-115 ⑮ (2)] waterline reed clumps. Layout comes from `reed_stems`, so the
+        #   smoke census counts the culms that are actually built. Each culm is planted
+        #   by its **base**: `add_cylinder` rotates about the prim centre, so a stem
+        #   centred at gz+h/2 and then tilted lifts its foot off the ground — invisible
+        #   at the old fixed 9°, a 5 % gap at 26°. The head follows the same axis at
+        #   `head_bend`× the culm's tilt, so the tip nods over instead of standing
+        #   straight out of a leaning stem — a bend for the price of the head's own prim.
         rd = PARAMS["reed"]
-        for i, r in enumerate(PARAMS["reeds"]):
-            rnd = _random.Random(int(r["seed"]))
-            area = (r["x1"] - r["x0"]) * (r["y1"] - r["y0"])
-            for k in range(int(round(area * rd["density"]))):
-                hh = r["h"] * rnd.uniform(rd["h_lo"], rd["h_hi"])
-                a = rnd.uniform(0.0, 360.0)
+        n_stem = n_head = 0
+        for i, _r in enumerate(PARAMS["reeds"]):
+            for k, st in enumerate(reed_stems(i)):
+                hh, rr = st["h"], st["r"]
+                ry, rx, u = stem_axis(st["tilt"], st["az"])
                 CYL(f"{ROOT}/Reed_{i}_{k}",
-                    (rnd.uniform(r["x0"], r["x1"]),
-                     rnd.uniform(r["y0"], r["y1"]), tz + hh / 2.0),
-                    rd["r"], hh, M["reed"],
-                    rotY=rd["tilt"] * math.cos(math.radians(a)),
-                    rotX=rd["tilt"] * math.sin(math.radians(a)))
+                    (st["x"] + u[0] * hh / 2.0, st["y"] + u[1] * hh / 2.0,
+                     st["z"] + u[2] * hh / 2.0),
+                    rr, hh, M["reed"], rotY=ry, rotX=rx)
+                n_stem += 1
+                if not st["head"]:
+                    continue
+                hz = float(rd["head_h"]) / 2.0
+                _ry2, _rx2, u2 = stem_axis(st["tilt"] * float(rd["head_bend"]),
+                                           st["az"])
+                d = hz - float(rd["head_seat"])
+                sc.add_sphere(
+                    stage, f"{ROOT}/ReedHead_{i}_{k}",
+                    (st["x"] + u[0] * hh + u2[0] * d,
+                     st["y"] + u[1] * hh + u2[1] * d,
+                     st["z"] + u[2] * hh + u2[2] * d),
+                    (rr * float(rd["head_r_mul"]), rr * float(rd["head_r_mul"]),
+                     hz), M["reed_head"])
+                n_head += 1
+        print(f"[GT-115 ⑮ (2)] 물가 억새 {len(PARAMS['reeds'])}군락 · 대 {n_stem}본 "
+              f"(r {rd['r']:.4f} ±{rd['r_jit'] * 100:.0f}%) · 이삭 {n_head}개 "
+              f"(수변선 x {waterline_x():.3f})")
         for i, (tx, ty) in enumerate(PARAMS["terrace_trees"]):
             sc.build_tree(stage, f"{ROOT}/TerraceTree_{i}", tx, ty, tz,
                           M["wood"], M["canopy_a"], M["canopy_b"])

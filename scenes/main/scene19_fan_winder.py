@@ -120,6 +120,78 @@ Type identity: the nosings are radial — no straight-line vanishing point.
     3.0 deg wide, 0.14 m proud of the guard crown — with the gate post kept as a **finial on
     the pier** so the prim path and the "post is the tell" reading both survive.
 
+[GT-115 ⑫] (2026-08-14, audit — "the green deck renders as 7 %-saturation grey-white ·
+  the repair patch is a thickness-less sticker · the fan treads carry an orthogonal joint grid")
+  ① **The green survives every promotion step — the declared constant was simply not green.**
+    Measured, not assumed. `/World/Looks/Coating` has no `LOOK_ROLE` exact key, so
+    `_look_spec` falls through to the keyword rules and the `"coating"` token puts it in the
+    **concrete** family (`scene_common._LOOK_RULES`, last rule). concrete is in
+    `_CONST_MDL_CLASSES`, so `make_pbr` runs `_promote_const_to_texture`, which takes
+    `concrete_floor` (linear mean **0.1465 / 0.1102 / 0.0733**) and authors
+    `base_color = intended / texture_mean` = (1.058, 1.842, 2.209). That product is
+    **exactly the declared colour again** — effective albedo 0.155/0.203/0.162,
+    lum **0.1898**, `G/R` **1.310** · `G/B` **1.253** [computed]. So the class promotion
+    neutralises nothing. Neither do the two suspects downstream: `_albedo_band` states
+    `alb_max 0.34` for concrete and nothing else, and 0.1898 is under it (no clamp);
+    `saturation_a` is `_effective_sat`, which returns **1.0** the moment a class states
+    `sat 1.00`, as concrete does; and `desat_bright_a 0.30` is applied inside
+    `negobs_layer` **before** the closing `* base_color` of the material
+    (`NegObsGround.mdl`), gated by `smoothstep(0.45, 0.75, lum)` on the *texture's* own
+    luminance (mean 0.115) — so at most it bleaches the texture's warm chroma, which can
+    only help the tint. **The whole washout is the declared constant**: a G only +31 % over
+    R and +25 % over B is a 0.236-saturation olive, and a white sun (1.0/0.969/0.935) plus
+    blue-sky ambient plus sRGB encoding land that at the 7 % the audit measured.
+    → `coating_color` (0.155, 0.203, 0.162) → **(0.120, 0.176, 0.115)**: lum **0.1597**,
+    `G/R` **1.467** (+47 %) · `G/B` **1.530** (+53 %) [computed]. 0.16 is not a split of the
+    difference — it is the **only value inside both bands on the table**: the audit's
+    0.10~0.16 and the director-approved M2 0.16~0.22 meet exactly there, so this row
+    lands the audit without overriding M2. Promotion still fires (max ratio 1.597,
+    spread 1.949 — both under the 4.0 gates), so the deck keeps its concrete-family grain.
+  ② **The roll seams already existed; they were bound to a material 3 % off the deck.**
+    `build_membrane` emits `int((y1-y0)/seam_pitch) − 1` = **11** seams at the 1.00 m
+    pitch this scene already passes (`gkit.seam_pitch`), full deck width, top z **+0.0010**
+    (1.0 mm proud), all inside the coat region x **4.80**…16.75 — i.e. 0.80 m clear of the
+    roof lip and 1.34 m clear of the threshold nosing (x0 3.46), so "avoid the stair area"
+    is satisfied by the region itself and needs no rule. What they lacked was contrast:
+    `membrane_seam` was bound to `M["gk_stain"]` (0.17/0.19/0.16 → lum **0.1836** =
+    **0.967x** the coat), a 3 % step — invisible, and the asphalt saw-cut vocabulary
+    besides. They now take `M["membrane_seam"]` = `/World/Looks/MembraneWeld`, the same
+    green at **x0.72** value (lum 0.1151), which is the heat-welded lap read one clear
+    step down from the field. (`MembraneSeam` is the obvious name and is a trap: `"sea"`
+    is a **water** token, so that name classifies to `water` — omni, no promotion, no
+    grain [measured]. `MembraneWeld` stays in the concrete family.)
+  ③ **The 덧방 routed to the asphalt class and rendered *duller* than the deck.**
+    `/World/Looks/PatchCoat` matched `("asphalt", (…, "patch"))`, which sits **above**
+    concrete in the rule order — so the urethane overcoat took the asphalt texture, the
+    asphalt grain knobs (`patch_mix` 0.45 @ 1.8 m · `rough_noise` 0.34 · `det_scale` 3.0)
+    and, decisively, that class's `spec` **0.20**, while the field coat (concrete, which
+    states no `spec`) keeps the MDL default **0.5**. The fresher, shinier repair was
+    therefore rendering at **0.4x the field's specular level** — the exact inverse of the
+    cue W3 L19 built it for. Its declared `roughness_const` 0.46 never arrives either: the
+    promotion branch of `make_pbr` calls `_make_ground_pbr(..., roughness_const=None)` on
+    purpose (diagnosis P1 — a roughness constant sets `rough_mult_a=0` and would discard
+    the promoted roughness map). `specular_level` **is** forwarded through that branch
+    (`specular_level if specular_level is not None else spec.get("spec")`), so it is the
+    one gloss lever that survives promotion, and this row uses it.
+    → both patch materials move into the membrane family (`MembraneRecoat` / `MembraneLap`,
+    `"membrane"` → concrete) and all four coat materials now state `specular_level`
+    explicitly: field **0.25** (chalked) · weld 0.35 · lap 0.42 · recoat **0.60** (fresh).
+  ④ **The patch geometry becomes a 덧방 instead of a rectangle.** `build_patch_field` lays
+    **one axis-aligned box per site** under a single scene-wide `yaw_deg` (0 in practice),
+    top z +0.0020 = **1.4 mm above the coat top** (+0.0006) — sub-pixel at the
+    `upper_approach` distance, which is the sticker the audit measured at x1620-1900 /
+    y620-680. A builder that lays one box cannot lay an irregular outline, so the **W3 L19
+    count ruling (4 → 2, sited on their two causes) is kept and only the builder moves**:
+    `surface` `("patch", 2)` → `("patch", 0)` and `build_membrane_patches` lays each 덧방
+    scene-side as **3 overlapping body lobes** (`MembraneRecoat`, top +0.0025 = 1.9 mm
+    proud of the coat, yaw ±5…18°) plus **2 feathered lap lobes** (`MembraneLap`, top
+    +0.0010) that break the outline where the coat was brushed out thin. Deterministic by
+    construction — the lobes are a declared literal table (`gkit.patch_lobes`), no RNG.
+    2.5 mm is two orders below `GT_DELTA` 0.020: dressing, not a GT row.
+  ⑤ **Investigated only, nothing changed — the orthogonal joint grid on the radial treads.**
+    The finding and the two candidate treatments are recorded at `M["step"]` in
+    `setup_materials`. No tread, parapet, ground, lighting or camera value moves in this row.
+
 Run / capture / smoke : the same env convention as scene05 and scene06.
     NEGOBS_CAPTURE=1 / NEGOBS_SMOKE=1 / NEGOBS_PARAMS_OVERRIDE / NEGOBS_SCENE_CONFIG
 
@@ -305,6 +377,35 @@ PARAMS = dict(
         patches=[(11.60, -0.60), (8.00, 2.60)],
         seam_pitch=1.00,
         wear_n=5,
+        # [GT-115 ⑫ ①] The kit's own albedo ledger for this profile is passed explicitly
+        #   instead of defaulting to `GROUND_DIMENSIONS["membrane_albedo"]` 0.19, so the
+        #   B9 declaration and the material actually bound (`coating_color`, lum 0.1597)
+        #   are the same number. 0.16 = the intersection of the audit band 0.10~0.16 and
+        #   the director-approved M2 band 0.16~0.22 — see the ledger note ①.
+        membrane_albedo=0.16,
+        # [GT-115 ⑫ ④] The 덧방 lobe table — **declared, never drawn from an RNG**, so the
+        #   outline is byte-identical on every run. (dx, dy, w, h, yaw°, role) in the
+        #   site's own frame; `body` lobes take `MembraneRecoat` at `patch_top`, `lap`
+        #   lobes take `MembraneLap` at `lap_top` (the coat brushed out thin past the body
+        #   edge, which is what stops the outline reading as a cut rectangle).
+        #   Site A (11.60, −0.60) reaches **west**, into drain 1's ponding ring; site B
+        #   (8.00, 2.60) is drawn out **along** the core-door → north-parapet walking line
+        #   that caused it. Measured envelopes [computed]: A x 10.977…12.127 · y −0.983…
+        #   −0.227 (1.15 x 0.76 m), which clears the `Gully_0` rim (x 10.75) by **0.227 m**;
+        #   B x 7.542…8.412 · y 2.055…3.312 (0.87 x 1.26 m), clearing the coat region's
+        #   north edge and the U_N inner face (y 3.75) by **0.438 m**.
+        patch_top=0.0025, lap_top=0.0010, lobe_t=0.030,
+        patch_lobes=[
+            [(-0.10,  0.00, 0.78, 0.62,   5.0, "body"),
+             ( 0.26,  0.13, 0.46, 0.40, -12.0, "body"),
+             (-0.34, -0.14, 0.42, 0.36,  18.0, "body"),
+             (-0.44,  0.06, 0.30, 0.44,   9.0, "lap"),
+             ( 0.18, -0.24, 0.40, 0.24,  -7.0, "lap")],
+            [( 0.00,  0.06, 0.60, 0.80,  -6.0, "body"),
+             ( 0.16, -0.30, 0.42, 0.40,  14.0, "body"),
+             (-0.20,  0.34, 0.38, 0.36, -16.0, "body"),
+             ( 0.02,  0.56, 0.34, 0.26,   8.0, "lap"),
+             (-0.30, -0.14, 0.24, 0.42, -11.0, "lap")]],
     ),
     # [GT-82(1)] **The three backdrop buildings are deleted, not disabled.**
     #   They were `C` (x44..54, h15), `D` (x−30..−16, h3.5) and `E` (x6..20·y16..42, h4.5),
@@ -470,7 +571,28 @@ PARAMS = dict(
         #   membrane collapsed to a single near-black blob in building shadow
         #   (`entry_gate` mean -47, `upper_approach` -57). Rescaled to luminance 0.19,
         #   the declared mid, keeping the green hue exactly.
-        coating_color=(0.155, 0.203, 0.162), coating_rough=0.72,
+        #   [GT-115 ⑫ ①] **Rebalanced, not rescaled.** The audit measured the rendered deck
+        #   at RGB 0.683/0.737/0.691 (display), i.e. **7 % saturation** — and the cause was
+        #   traced through the whole material path and found *here*, in the constant: the
+        #   promotion to `concrete_floor` reproduces this colour exactly (see ledger ①), so
+        #   an olive that is only +31 % G over R survives as an olive. The value moves to the
+        #   one point both governing bands share (0.16) and the hue is opened to the audit's
+        #   ≥ +40 % G: **lum 0.1597 · G/R 1.467 · G/B 1.530** [computed].
+        #   `coating_rough` is kept as the LOOK_MTL=0 arm's value; under LOOK_MTL=1 the
+        #   promotion branch drops `roughness_const` by design, which is why the gloss
+        #   hierarchy is carried by `*_spec` (specular_level) below — the one knob that
+        #   survives promotion (ledger ③).
+        coating_color=(0.120, 0.176, 0.115), coating_rough=0.72,
+        coating_spec=0.25,
+        # [GT-115 ⑫ ②] **The roll-seam weld.** The 11 seams `build_membrane` already lays at
+        #   the 1.00 m roll pitch were bound to `gk_stain` — lum 0.1836 against the coat's
+        #   0.1898, a **3 %** step, i.e. nothing, in the dark asphalt saw-cut vocabulary
+        #   19-4 exists to keep off this deck. A heat-welded lap on a urethane sheet is the
+        #   same coat doubled: same hue, one clear step **down** in value (x0.72 → lum
+        #   0.1151) and a shade glossier than the chalked field. Prim name `MembraneWeld`,
+        #   not `MembraneSeam` — `"sea"` is a **water** keyword token and would take the
+        #   seam out of the ground family altogether [measured].
+        seam_color=(0.086, 0.127, 0.083), seam_rough=0.62, seam_spec=0.35,
         # [W3 L19 · 19-4] **우레탄 덧방 (repair overcoat)** — its own material, because
         #   binding the patch to `coating` (what HEAD did) makes it invisible: same hue,
         #   same value, same roughness, 2 mm proud. The real tell of a 덧방 on a weathered
@@ -483,8 +605,18 @@ PARAMS = dict(
         #   survives a shadowed frame. `patch_lap` is the feathered coat edge — the same
         #   overcoat brushed thin, one step DOWN in value, never the dark `gk_stain`
         #   saw-cut line (that is the asphalt vocabulary this row exists to remove).
-        patch_coat_color=(0.183, 0.240, 0.191), patch_coat_rough=0.46,
-        patch_lap_color=(0.132, 0.173, 0.138), patch_lap_rough=0.60,
+        # [GT-115 ⑫ ①③] Both re-derived from the new field coat so the declared ratios are
+        #   unchanged: recoat = field **x1.18** in value (lum 0.1888), lap = field **x0.85**
+        #   (lum 0.1360), hue held (G/R 1.465/1.471 · G/B 1.529/1.531) [computed]. The
+        #   `*_rough` pair keeps the LOOK_MTL=0 direction (0.46 glossier than the field's
+        #   0.72); `*_spec` carries the same direction under LOOK_MTL=1, where the promoted
+        #   material's roughness constant is dropped and, worse, the old `PatchCoat` name
+        #   handed the recoat the **asphalt** class's `spec 0.20` against the field's
+        #   default 0.5 — the repair was rendering *duller* than the deck (ledger ③).
+        patch_coat_color=(0.142, 0.208, 0.136), patch_coat_rough=0.46,
+        patch_coat_spec=0.60,
+        patch_lap_color=(0.102, 0.150, 0.098), patch_lap_rough=0.60,
+        patch_lap_spec=0.42,
         nosing_color=(0.85, 0.72, 0.10), nosing_rough=0.7,
         hvac_color=(0.60, 0.61, 0.62), hvac_rough=0.5,      # [rooftop v3] HVAC unit
         # r5 judgment: a dark door was buried in the dark granite wall → painted steel plate in blue-grey for contrast
@@ -1210,7 +1342,11 @@ BANNER = """\
                      [옥상 v4] 수관 정상이 프레임 안에 온전히 들어오는가
                      [GT-82] 화단 박스·코어 벽이 검은 덩어리로 죽지 않는가
  8. roof_skyline   — [GT-82] 배경 건물 3동 삭제. 북측 파라펫 마루와 그 너머
-                     **6 m 아래 지반**만으로 옥상 높이가 읽히는가"""
+                     **6 m 아래 지반**만으로 옥상 높이가 읽히는가
+ 9. 도막 방수      — [GT-115 ⑫] 데크가 **녹색 우레탄**으로 읽히는가(실효 알베도
+                     0.16 · G가 R/B 대비 +47/+53 %) · 1.0 m 롤 이음이 보이는가
+                     (용접부 값 x0.72) · 덧방 2개소가 두께 있는 요철 외곽선으로
+                     읽히고 도막보다 광택이 높은가"""
 
 
 def main():
@@ -1268,6 +1404,34 @@ def main():
             sc.tex_path("plaza_lower", "nor"), sc.tex_path("plaza_lower", "rough"),
             scl["plaza_lower"], tint=mp["lower_warm_tint"])
         # step material = light plaza_light (contrasts with the granite_dark walls) [A-19(1)]
+        # [GT-115 ⑫ ⑤ — investigation only, **nothing here is changed**] Why the fan treads
+        #   carry an orthogonal joint grid, which is the winder-identity defect the audit
+        #   flagged. The grid is **not geometry**: `build_arc_steps` emits no joints. It is
+        #   this texture. `Step` has no `LOOK_ROLE` key and the `"step"` token lands it in
+        #   the concrete family (GT-113 W6), whose `mdl` is `"ground"`, so `_make_ground_pbr`
+        #   binds `plaza_light_diff.jpg` — a rectilinear slab pattern — and authors
+        #   `texture_scale_a = _GROUND_SCALE_FIX / 1.80`, i.e. **one texture period every
+        #   1.80 m of world X and world Y** (`material.scale.plaza_light`), identical on all
+        #   12 treads. `NegObsGround` is a world-space triplanar projection: it cannot know
+        #   the surface under it is an annular sector, so the joints run X/Y while the
+        #   nosings run radially — on sector 11 that is a full **90 °** of mismatch.
+        #   Two radial-consistent treatments, neither taken here (both need a verdict):
+        #   (a) **per-tread UV rotation.** `NegObsGround.mdl` already exposes
+        #       `texture_rotate_a` (default 0.0) and `_make_ground_pbr` never authors it, so
+        #       it is reachable **scene-side** without touching scene_common: build one Step
+        #       material per sector and set that input on the material's `/Shader` prim to
+        #       the sector's mid azimuth (`a0 + 3.75 + 7.5·i`). Cost is 12 materials for 1;
+        #       residual error inside a sector is ±3.75 °, ~4 mm of joint drift across a
+        #       2.8 m tread. It aligns the grid with each tread's own radial/tangential axes
+        #       — but the joints stay **straight**, and a real fan tread's joints are arcs.
+        #   (b) **engraved radial joints.** The honest article is 부채꼴 판석: joints on the
+        #       design rays plus concentric arcs at fixed r, cut as ~6 mm recesses (below
+        #       `GT_DELTA` 0.020) over a jointless tread texture. It is the only treatment
+        #       that reads radially in raking light — and it is **tread geometry**, i.e.
+        #       scene identity + hazard, so it is outside this row's instruction.
+        #   Recommendation: (a) as an A/B arm on `radial_nosing` / `winder_mid` first,
+        #   since it is scene-side and reversible; (b) only on an explicit verdict to
+        #   touch the treads.
         M["step"] = sc.make_pbr(
             stage, "/World/Looks/Step", sc.tex_path("plaza_light", "diff"),
             sc.tex_path("plaza_light", "nor"), sc.tex_path("plaza_light", "rough"),
@@ -1329,16 +1493,37 @@ def main():
                                 roughness_const=mp["door_rough"])
         # [W2-D · §5.6] urethane membrane waterproofing (green) — deck coat + parapet turn-up in the same colour.
         #   `[spec-doc]` Nara Marketplace R25BK00911379 "the surface colour is green".
+        # [GT-115 ⑫ ①③] The prim path (= the class token) is deliberately kept at
+        #   `Coating`: the concrete family is the **right** treatment for a deck coat (grain,
+        #   bevel, detail normal, structure weathering), the promotion preserves the intended
+        #   albedo exactly, and re-naming it into `paint` to dodge the promotion would be
+        #   semantically false. `specular_level` is stated because the promotion branch drops
+        #   `roughness_const`, so this is the only surviving handle on the field/repair gloss
+        #   hierarchy — 0.25 is a chalked, weathered coat against the MDL default 0.5.
         M["coating"] = sc.make_pbr(stage, "/World/Looks/Coating",
                                    diffuse_color=mp["coating_color"],
-                                   roughness_const=mp["coating_rough"])
+                                   roughness_const=mp["coating_rough"],
+                                   specular_level=mp["coating_spec"])
+        # [GT-115 ⑫ ②] the heat-welded roll seam — same coat, one step down in value.
+        M["membrane_seam"] = sc.make_pbr(stage, "/World/Looks/MembraneWeld",
+                                         diffuse_color=mp["seam_color"],
+                                         roughness_const=mp["seam_rough"],
+                                         specular_level=mp["seam_spec"])
         # [W3 L19 · 19-4] 우레탄 덧방 (repair overcoat) + its feathered lap edge.
-        M["patch_coat"] = sc.make_pbr(stage, "/World/Looks/PatchCoat",
+        # [GT-115 ⑫ ③] `PatchCoat`/`PatchLap` → `MembraneRecoat`/`MembraneLap`. The old
+        #   names matched the **asphalt** rule (`"patch"`), which sits above concrete, so a
+        #   urethane overcoat was taking the asphalt texture, the carriageway grain knobs and
+        #   `spec 0.20` — the "reads as asphalt" failure 19-4 exists to remove, arriving
+        #   through the material *name* instead of the material *binding*. `"membrane"` is a
+        #   concrete token, so both now get the same family as the deck they sit on.
+        M["patch_coat"] = sc.make_pbr(stage, "/World/Looks/MembraneRecoat",
                                       diffuse_color=mp["patch_coat_color"],
-                                      roughness_const=mp["patch_coat_rough"])
-        M["patch_lap"] = sc.make_pbr(stage, "/World/Looks/PatchLap",
+                                      roughness_const=mp["patch_coat_rough"],
+                                      specular_level=mp["patch_coat_spec"])
+        M["patch_lap"] = sc.make_pbr(stage, "/World/Looks/MembraneLap",
                                      diffuse_color=mp["patch_lap_color"],
-                                     roughness_const=mp["patch_lap_rough"])
+                                     roughness_const=mp["patch_lap_rough"],
+                                     specular_level=mp["patch_lap_spec"])
         M["gk_iron"] = sc.make_pbr(stage, "/World/Looks/GKitIron",
                                    diffuse_color=(0.09, 0.09, 0.095),
                                    metallic=0.55, roughness_const=0.55)
@@ -1410,17 +1595,27 @@ def main():
             # [W3 L19 · 19-4] `("patch", 4)` → `("patch", 2)`. Both survivors carry a
             #   cause (see PARAMS["gkit"]["patches"]); `patch_proud` is 0.002 m, two
             #   orders below `GT_DELTA` 0.020, so this is dressing, not a GT row.
+            # [GT-115 ⑫ ④] `("patch", 2)` → `("patch", 0)`. **The count ruling is not
+            #   revoked** — W3 L19's two 덧방, on their two declared causes, are still what
+            #   this deck carries; they are simply built by `build_membrane_patches` below,
+            #   because `build_patch_field` can only lay one axis-aligned box per site and
+            #   the audit's finding is precisely that one box reads as a sticker. The
+            #   `patch` / `patch_cut` bindings in `M2` are kept so a future `("patch", n)`
+            #   cannot silently fall back to the dark saw-cut stain.
             overrides=dict(infra=dict(gully=2),
-                           surface=(("patch", 2),
+                           surface=(("patch", 0),
                                     ("stain", ("water", "drip", "dirt")))),
             extras_args=dict(membrane=dict(seam_pitch=float(g["seam_pitch"]),
-                                           wear_n=int(g["wear_n"]))),
+                                           wear_n=int(g["wear_n"]),
+                                           albedo=float(g["membrane_albedo"]))),
             sites=dict(gully=[tuple(v) for v in g["drains"]],
                        patch=[tuple(v) for v in g["patches"]]),
             seed=19)
         kit = gk.kit_from_scene_common(sc, stage)
         M2 = dict(M)
-        M2.update(membrane=M["coating"], membrane_seam=M["gk_stain"],
+        # [GT-115 ⑫ ②] `membrane_seam` leaves `gk_stain` (lum 0.1836 = 0.967x the coat —
+        #   an invisible seam in the asphalt saw-cut vocabulary) for the welded lap coat.
+        M2.update(membrane=M["coating"], membrane_seam=M["membrane_seam"],
                   # [W3 L19 · 19-4] the 덧방 gets its own coat, and the lap edge is a
                   #   feathered coat rather than the dark asphalt saw-cut stain.
                   membrane_wear=M["coating"], patch=M["patch_coat"],
@@ -1436,6 +1631,48 @@ def main():
         print(f"[ground_kit] scene19 P6 · 프림 {res['prims']} · "
               f"δmax {res['gt_delta_max']:.4f} · unit_cell {res['unit_cell']}")
         return res
+
+    # -------------------------------------------------------------------
+    # [GT-115 ⑫ ④] 우레탄 덧방 (membrane repair overcoat) — built scene-side
+    # -------------------------------------------------------------------
+    def build_membrane_patches(M):
+        """The two 덧방 of W3 L19 · 19-4, with a real edge instead of a sticker.
+
+        Count and sites are unchanged (`gkit.patches` — drain 1's ponding ring and the
+        core-door walking line); only the builder moves off `build_patch_field`, whose
+        one axis-aligned box per site is the sticker the audit measured. Each 덧방 is
+        **3 body lobes** (`MembraneRecoat`, top `patch_top` = 2.5 mm over the deck = 1.9 mm
+        over the coat) + **2 lap lobes** (`MembraneLap`, top `lap_top` = 1.0 mm, the coat
+        brushed out thin past the body edge). Every lobe carries a small yaw, so the
+        outline is a stepped, overlapping edge and never a rectangle.
+
+        Deterministic: the lobe table is declared in PARAMS, so no RNG, no seed and no
+        dependence on call order. `lobe_t` 0.030 buries each lobe in the deck slab the
+        same way the kit's own decals do (proud is the top face, not the box height), and
+        2.5 mm is two orders below `GT_DELTA` 0.020 — dressing, not a GT row.
+        """
+        g = PARAMS["gkit"]
+        z0 = float(PARAMS["upper"]["top_z"])
+        th = float(g["lobe_t"])
+        n = 0
+        for si, (px, py) in enumerate(g["patches"]):
+            tag = chr(ord("A") + si)
+            # the prim index is the **table row**, not a per-role counter, so a prim path
+            #   points straight back at the line of `gkit.patch_lobes` that authored it
+            for li, (dx, dy, w, h, yaw, role) in enumerate(g["patch_lobes"][si]):
+                top = float(g["patch_top"] if role == "body" else g["lap_top"])
+                sc.add_box(stage,
+                           f"/World/Scene19/MembranePatch_{tag}_{role}{li}",
+                           (px + dx, py + dy, z0 + top - th / 2.0),
+                           (w, h, th),
+                           M["patch_coat"] if role == "body" else M["patch_lap"],
+                           rotZ=yaw)
+                n += 1
+        print(f"[덧방] GT-115 ⑫ 우레탄 덧방 {len(g['patches'])}개소 · 프림 {n} "
+              f"(본체 +{g['patch_top'] * 1000:.1f} mm · 랩 +{g['lap_top'] * 1000:.1f} mm "
+              f"— 도막 상면 +0.6 mm 대비 "
+              f"{(g['patch_top'] - 0.0006) * 1000:.1f} mm 돌출) · 요철 있는 외곽선")
+        return n
 
     # -------------------------------------------------------------------
     # winder 12 steps + newel + building L wall + outer parapet
@@ -1827,6 +2064,8 @@ def main():
     if hazard:
         build_cues(M)
     build_ground_kit(M)             # [W2-D] ground elements — after the dressing (scatter order convention)
+    # [GT-115 ⑫ ④] the 덧방 lie **on** the kit coat, so they are laid after it
+    build_membrane_patches(M)
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],
                                        PARAMS["SUN_AZ_OFFSET"])
 

@@ -205,6 +205,10 @@ PARAMS = dict(
     #     · From lower_lookback (eye +8.5) they are **farther** than the stairs, so cannot occlude.
     #   * No wet tint on the dot tactile (supervisor's call): the small slabs at
     #     x −6.06..−6.36 lie outside the upper water sheet (x −4.80..−1.40), so it is physical too.
+    #   * [GT-115 ④] The dot tactile is **no longer built** (`tactile=False` at the call
+    #     site) — from lower_lookback it printed as isolated yellow fragments at the post
+    #     feet, unrelated to the stair-head warning band. The wet-tint note above is kept
+    #     for the record; it is moot while the pad is off. Row geometry unchanged.
     bollard_rows=[dict(name="N", x=-6.0, y0=2.8, y1=5.8),
                   dict(name="S", x=-6.0, y0=-2.8, y1=-5.8)],
     bollard=dict(radius=0.06, height=0.90, spacing=1.5, front=(-1.0, 0.0)),
@@ -446,7 +450,23 @@ def ground_plans():
                    patch=[tuple(p) for p in g["wet_patches"]],
                    tactile=dict(stair_top=band)),
         #  L-shaped gutters belong at a carriageway edge — not on a civic grand-stair plaza.
-        overrides=dict(infra=dict(manhole=1, gully=2, gutter_L=0)),
+        #  [GT-115 ④] `surface` row taken over from the profile **minus `("weed", 8)`**.
+        #    P3 seeds its 8 tufts along `_weed_seed_lines`, which for this profile is the
+        #    step_x=3.0 joint grid — full-width transverse lines at x −9/−6/−3 — so 6 of
+        #    the 8 land in the open middle of the plaza (measured centres: −9.05/−0.29,
+        #    −8.96/+0.61, −5.96/+0.55, −2.96/+2.12, −2.12/+0.90, −3.90/+2.61) and 6 fall
+        #    inside the pt_noon_lower_lookback crop (1000,440–1600,560) [computed].
+        #    Two defects at once: (1) a maintained civic plaza does not grow tufts in the
+        #    field — the same call scene01's `plaza_granite` already carries (ground_kit
+        #    §13 A1, "weed 6 -> 0"); (2) the builder references `Shrub/Grass_Short_C.usd`
+        #    and never binds the scene's `weed` material, so the tufts keep the asset's
+        #    dry bright green while every other surface in frame is rain-darkened.
+        #    Placement is library-internal (`_weed_sites`), so the scene cannot restrict
+        #    it to real joints/edges from here — the row is dropped instead. `crack` and
+        #    `stain` are kept verbatim so NEGOBS_DECAL_FULL=1 still restores exactly what
+        #    the profile prescribes. Hard gates B6~B12 re-checked PASS, prims 18 -> 10.
+        overrides=dict(infra=dict(manhole=1, gully=2, gutter_L=0),
+                       surface=(("crack", 4), ("stain", ("dirt", "gum")))),
         seed=28)
     return [("upper", gp)]
 
@@ -960,6 +980,21 @@ def main():
             (0.030, bC["y1"] - bC["y0"], th), M["tide"])
         # (4) riser run-down streaks — vertical bands standing 3mm proud of the riser face.
         #    proud is staggered by k%3 so overlaps on the same step are never coplanar.
+        # [GT-115 ④] The centre offset carried the **wrong sign**. `xa + (0.020 - pr)/2`
+        #    with a 0.020+pr box spans x = xa−pr … xa+0.020, i.e. the 20 mm that is meant
+        #    to be the burial depth sat on the **air** side and only pr (3.0~4.0 mm) was
+        #    inside the solid. Because `_stair_steps` descends towards +X, the riser face
+        #    at x=xa is exposed towards **+X** (step i−1's solid is at x<xa), so each band
+        #    cantilevered 20 mm out over the tread below, showing its own top and side
+        #    faces. Bound to the near-black `tide` constant that read as free-standing
+        #    ~0.10 x 0.12 m black boxes standing on the treads — 5 of the 14 fall inside
+        #    the pt_noon_lower_lookback crop (300,620–900,960) [computed], which is the
+        #    audit's "unexplainable as any construction · CG artefact".
+        #    Negating the offset gives x = xa−0.020 … xa+pr: 20 mm buried in the riser,
+        #    pr proud, exactly what the line above has always described. Seed, count,
+        #    y positions, widths and the z ladder are untouched, so the streaks stay the
+        #    same dark run-down bands — they simply lie on the riser instead of standing
+        #    on the tread.
         rng = random.Random(int(wt["streak_seed"]))
         for k in range(int(wt["streak_n"])):
             i = rng.randint(2, st["nsteps"] - 1)
@@ -971,7 +1006,7 @@ def main():
             pr = wt["streak_proud"] + (k % 3) * 0.0005
             w = wt["streak_w"] * rng.uniform(0.55, 1.45)
             BOX(f"{ROOT}/Tide/Streak_{k}",
-                (xa + (0.020 - pr) / 2.0, y, (z_lo + z_hi) / 2.0),
+                (xa - (0.020 - pr) / 2.0, y, (z_lo + z_hi) / 2.0),
                 (0.020 + pr, w, z_hi - z_lo), M["tide"])
         print(f"[비] 치크 러노프 2 · 치크 tide 2 · 파사드 tide 1 · "
               f"라이저 스트릭 {int(wt['streak_n'])}줄 "
@@ -1046,14 +1081,26 @@ def main():
     # Dressing — 4 bollards + 2 distant buildings (horizon closure §A-4)
     # -------------------------------------------------------------------
     def build_dressing(M):
-        # Bollards [v5.1 §2] — one row at the plaza entrance (5.6 m gap at centre), band +
-        #   dot tactile in front (−X). No wet tint on it (outside the water sheets).
+        # Bollards [v5.1 §2] — one row at the plaza entrance (5.6 m gap at centre), post +
+        #   white band. The front dot tactile is off since [GT-115 ④] (see below).
         bo = PARAMS["bollard"]
+        # [GT-115 ④] Per-bollard dot tactile **off** (`tactile=False`). The pad is a
+        #   0.30 x 0.40 m slab flush against each post (x −6.36…−6.06, y cy+-0.20), and
+        #   from lower_lookback the two +Y posts print it as isolated yellow fragments at
+        #   px 1316..1367 / 1491..1547 — inside the audit crop (1000,440–1600,560), and
+        #   0.6~1.6 m of bare granite away from the actual warning band at x −1.60…−1.00
+        #   [computed], so it reads as debris rather than as guidance. The statutory
+        #   점형블록 marks a crossing or a stair head, not the foot of every post on an
+        #   open plaza; this row has no carriageway to guard (5.6 m pedestrian gap at
+        #   centre) and the stair head already carries its own band. Same call the other
+        #   five batch1 bollard scenes make (D1/N1/N2/N3/N4). Post, white band, spacing,
+        #   row geometry and `bollard.front` are untouched.
         for name, bx, by in bollard_points():
             bc.build_bollard_v51(stage, f"{ROOT}/Bollard_{name}", bx, by, 0.0,
                                  None, M["rail"], M["bollard_band"],
                                  M["tactile"], front_dir=bo["front"],
-                                 radius=bo["radius"], height=bo["height"])
+                                 radius=bo["radius"], height=bo["height"],
+                                 tactile=False)
         low_base = LOWER_TOP if cfg["hazard_stairs"] else 0.0
         for key, bd in PARAMS["buildings"].items():
             b = dict(bd)

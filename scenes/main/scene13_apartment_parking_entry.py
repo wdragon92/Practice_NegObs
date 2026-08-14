@@ -46,6 +46,12 @@ Hazard
   doorway — that is now the primary drop cue, backed by the centre guard line and
   the coped east rim. GT-73 makes the glazing translucent, so the descent also
   reads *through* the fixed panes.
+  [08-14 · GT-115 ②] The centre guard's landing return gets a code-length
+  termination: 350 mm of level handrail past the landing nosing (was 80) before
+  the 180° bend, then the two base-plated legs down to the landing slab —
+  수평 연장 + 하향 절곡. A wall fixing was measured and rejected (no enclosure
+  face within bracket reach, and every route crosses a walked band). Parameter
+  only (`stair_handrail.u_off`): no prim added, nothing walked moved.
 
 [W3 S13 · G13] What the target image changed (ruling `w3_intake_v2_images.md` §7-5)
   U-5 ("지하 진입로는 캐노피를 진입로 끝까지") is read **real-practice**, not literally:
@@ -658,10 +664,51 @@ PARAMS = dict(
     #   the registered drop edge x 11.20 by 5 mm. `newel_x` 11.14 for the same
     #   reason — plate x 11.095…11.185, 15 mm inside the rim, and the level
     #   returns start AT the newel so the raking tube meets it, not past it.
+    # [08-14 audit · GT-115 ②] "계단실 핸드레일 상단이 아무데도 안 붙은 사각
+    #   프레임으로 공중에서 끝남" — cut look_check/scene13/260813_w4_s13tone/
+    #   pt_noon_stair_head.png, centre-right. Re-measured against the built
+    #   geometry BEFORE changing anything, because the ledger allows two branches
+    #   (벽 물림 / 하향 절곡) and only one of them is buildable here:
+    #   · The frame the audit ringed IS the landing U-return (UNewel_A/B +
+    #     UTurn{Top,Mid} + UStub{Top,Mid}). Projected into that cut `[computed]`
+    #     (eye 11.10/4.30/1.60 → tgt 6.60/4.90/−2.20, Isaac hFOV 60) its two top
+    #     corners fall at px (1005, 448) and (1149, 436) and the west leg's base
+    #     plate at (1000, 676) — the pixels the finding names. `rail_runs` is empty
+    #     and `side_mode` is "glass", so StairHandrail is the scene's ONLY rail
+    #     assembly: no other candidate exists.
+    #   · It is NOT in mid air. Both legs are `_foot_post`ed on the landing slab
+    #     top (`stair.mid_z` −1.98) with `tread_embed` 20 mm and a 12 mm base plate
+    #     seated 3 mm into the slab, and both tubes lap their raking runs across
+    #     x_turn. "공중에서 끝남" is a mis-read of the cut — the down-return branch
+    #     of the ledger's remedy was already built by GT-72.
+    #   · What IS below standard is the LEVEL RUN. `u_off` 0.08 gave only 80 mm of
+    #     horizontal handrail past the landing nosing before the 180° bend, where
+    #     피난·방화구조 등의 기준에 관한 규칙 §15 asks for **≥ 300 mm** of 수평
+    #     연장 at a handrail end and continuity across the 계단참. 80 mm is why the
+    #     return reads as a welded gate frame instead of a rail turning onto the
+    #     landing: the bend starts before the eye can see any level rail at all.
+    #   → `u_off` 0.08 → **0.35** (350 mm, 50 mm over the code minimum). This is
+    #     the ONE number that carries the termination — the U, its two legs, their
+    #     plates and the level stubs are all derived from `x_turn − u_off`. Nothing
+    #     else moves: `h`/`mid_h`/`inset`/`post_xs`/`r`, the raking runs, the head
+    #     and foot terminations, the flights, the landing slab, the registered
+    #     3.96 m drop edge at x 11.20 and every hazard-registry row are untouched.
+    #   Wall fixing — the ledger's other branch — is NOT buildable at the landing
+    #   `[computed]`. From the rail lines the nearest enclosure faces are
+    #   ShaftWall_N inner y 6.65 (1.35 m from rail line B y 5.30), TrenchWall_N
+    #   north y 3.30 (1.60 m from rail line A y 4.90, the skirt infill having taken
+    #   the walked surface out to it) and ShaftWall_W inner x 5.25 (2.00 m west of
+    #   the new U). None is a "short bracket" away, and every route to one crosses
+    #   the switchback's own walked band at 0.85 m: a N or S arm cuts flight B /
+    #   flight A, and a W arm walls the landing into two halves and severs the
+    #   180° turn between the flights. Walking surfaces may not move (GT-115 scope
+    #   = 보행면 불변), so the termination takes the 하향 절곡 branch instead.
+    #   Landing turn left clear after the move: 7.25 − 5.25 = 2.00 m ≥ the 1.40 m
+    #   flight width `[computed]`, i.e. the 계단참 depth rule still holds.
     stair_handrail=dict(r=0.02, h=0.85, mid_h=0.45, inset=0.05,
                         post_r=0.022, post_xs=(8.35, 9.25, 10.15),
                         plate_r=0.045, plate_t=0.012, tread_embed=0.02,
-                        u_off=0.08, newel_x=11.14, jamb_x=11.30,
+                        u_off=0.35, newel_x=11.14, jamb_x=11.30,
                         jamb_embed=0.04, foot_newel_x=11.32),
     # [08-06 user · GT-72] "there is a space at the side of the stairs — extend it
     #   further to fill the gap". Two open slots, both infilled here. NEITHER the
@@ -1959,6 +2006,23 @@ def _smoke_report():
           f"[{PARAMS['corridor']['y0']:.2f},{PARAMS['corridor']['y1']:.2f}] 내 "
           f"{'OK' if PARAMS['corridor']['y0'] < y_rb_ < PARAMS['corridor']['y1'] else 'FAIL'}) "
           f"→ 공중 종단 0")
+    #  ── [08-14 audit · GT-115 ②] landing termination = 수평 연장 + 하향 절곡 ──
+    x_u_ = st_["x_turn"] - hr_["u_off"]
+    ext_ok_ = hr_["u_off"] >= 0.30
+    turn_ok_ = x_u_ - st_["land_x0"] >= st_["width"]
+    print(f"    [GT-115 ② 랜딩 종단] 수평 연장 {hr_['u_off'] * 1000:.0f} mm ≥ 300 "
+          f"(피난방화규칙 §15 손잡이 끝 수평부) → {'OK' if ext_ok_ else 'FAIL'} · "
+          f"하향 절곡 = U 뉴얼 2본 x {x_u_:.2f} → 참 상면 z {st_['mid_z']:.2f} 착지 "
+          f"(매입 {hr_['tread_embed'] * 1000:.0f} mm + 베이스 플레이트 r"
+          f"{hr_['plate_r']:.3f}, 참 x [{st_['land_x0']:.2f},{st_['x_turn']:.2f}] 내 "
+          f"{'OK' if st_['land_x0'] < x_u_ - hr_['plate_r'] and x_u_ + hr_['plate_r'] < st_['x_turn'] else 'FAIL'})")
+    print(f"    벽 물림 불가(실측): 레일선~최근접 벽면 N(ShaftWall_N 내면 "
+          f"{st_['y_b1']:.2f}) {st_['y_b1'] - y_rb_:.2f} · S(TrenchWall_N 북면 "
+          f"{si_['skirt_y0']:.2f}) {y_ra_ - si_['skirt_y0']:.2f} · W(ShaftWall_W "
+          f"내면 {st_['land_x0']:.2f}) {x_u_ - st_['land_x0']:.2f} m — 어느 "
+          f"브래킷 경로도 0.85 m 높이로 보행 밴드를 횡단(W 는 참을 양분) → "
+          f"하향 절곡 채택 · 참 잔여 회전 깊이 {x_u_ - st_['land_x0']:.2f} ≥ 계단 "
+          f"너비 {st_['width']:.2f} → {'OK' if turn_ok_ else 'FAIL'}")
 
     # ── [08-06 · GT-73] glass transparency pilot (material-only, R-2) ──
     mp_ = PARAMS["material"]
@@ -2085,6 +2149,7 @@ BANNER = """\
  2. ramp_graze·h0.3  — 램프 하강이 평면으로 압축되고 개구 너머가 연속되는가(특색)
  3. bollard_walk     — 계단박스 외짝문 개방·NW/NE 코너 포스트·문 하부 포장(GT-72)
  4. stair_head       — 측부 갭 폐합(남측 슬롯·중앙 웰)·기둥 답면 착지·Top/Mid 종단 결속(GT-72)
+                       + 랜딩 종단 수평 연장 350 mm 뒤 하향 절곡(GT-115 ②)
  5. portal_look      — 포털 유효고·소핏 조명 하 램프 판독(PT 필수 — 캐노피 하부 선언 컷)
  6. beauty_overview  — 정남향 판상 4동 2×2 그리드·남북 교차로 + 개방 문짝 읽힘(GT-72)"""
 
@@ -2820,6 +2885,13 @@ def main():
         # U-return round the landing's west nose. GT-72: the U now carries the MID
         #   tube as well (both flights' mid tubes used to die free at x_turn) and
         #   stands on two newels footed on the landing — it used to float.
+        # [08-14 audit · GT-115 ②] the same U is now a **code-length termination**:
+        #   `u_off` 0.08 → 0.35 gives 350 mm of level handrail past the landing
+        #   nosing (피난방화규칙 §15 ≥ 300 mm) before the 180° bend, and the two
+        #   legs below are the 하향 절곡 that lands the rail end on the landing
+        #   slab. A wall fixing was measured and rejected — see the PARAMS note.
+        #   Only x_u shifts; every raking run, post station and plate radius is
+        #   the GT-72 value, so this adds NO prim and moves nothing walked.
         x_u = st["x_turn"] - hr["u_off"]
         z_top_u = st["mid_z"] + hr["h"]
         z_mid_u = st["mid_z"] + hr["mid_h"]
@@ -2876,6 +2948,13 @@ def main():
               f"+ 베이스 플레이트) · 튜브 {n_tube}본 · 종단 = 머리 뉴얼+잼 매입 "
               f"{hr['jamb_embed'] * 1000:.0f} mm · U 뉴얼 2 (Top+Mid) · 복도 "
               f"뉴얼 x {foot_x:.2f} → 공중 종단 0")
+        print(f"[GT-115 ② 랜딩 종단] U 수평 연장 {hr['u_off'] * 1000:.0f} mm "
+              f"(≥300, 피난방화규칙 §15) · 절곡점 x {x_u:.2f} · 하향 뉴얼 2본 → "
+              f"참 상면 z {st['mid_z']:.2f} 착지 · 참 잔여 회전 깊이 "
+              f"{x_u - st['land_x0']:.2f} m ≥ 계단 너비 {st['width']:.2f} · "
+              f"벽 물림 불가(최근접 벽면 N {st['y_b1'] - y_rb:.2f} / S "
+              f"{y_ra - si['skirt_y0']:.2f} / W {x_u - st['land_x0']:.2f} m, "
+              f"브래킷 경로가 보행 밴드 횡단)")
 
     # -------------------------------------------------------------------
     # Basement — corridor + garage (floor · walls · columns · bay lines · dim lights)

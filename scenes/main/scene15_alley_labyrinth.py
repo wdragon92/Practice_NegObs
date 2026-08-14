@@ -595,7 +595,11 @@ PARAMS = dict(
         #  인데 바닥이 0.11525 였으므로 **줄눈이 바닥보다 밝았다** — "어두운 절단선"
         #  이라는 코드 자신의 선언과 반대. 0.30 에서 비로소 줄눈이 어두워진다.
         #  구값 `[repro — 대체된 W3 L15 틴트]`: (0.7898, 1.0496, 1.4983)
-        alley_tint=(2.0559, 2.7320, 3.9002),
+        #  [GT-121 2차] hzbatch 실측: 0.30 은 판정컷 clipHi 2.5→52.7 % (정오 노출에서
+        #  대역 상단이 표시역을 넘김 — 텍스처 소거). 목표를 대역 중앙 **0.24** 로 하향
+        #  (바운스 예산은 구값 대비 여전히 ×2.08). 틴트 = 구틴트 × 0.8.
+        #  구값 `[repro — GT-121 1차]`: (2.0559, 2.7320, 3.9002)
+        alley_tint=(1.6447, 2.1856, 3.1202),
         #  The 2 repair patches keep `alley`'s texture but sit **+20 % in luminance**: a cement
         #   덧방 repair reads lighter than the aged surround it interrupts, and R15-1 makes the
         #  patches this scene's realism rather than its artefact, so they have to be legible.
@@ -608,7 +612,9 @@ PARAMS = dict(
         #  최대치인 **0.336**(+12.0 %)로 잡고, 20 %에서 12 %로 줄어든 사실을 흡수하지
         #  않고 여기 적어 둔다. 색상비 1 : 1 : 0.95 는 바닥과 동일.
         #  구값 `[repro]`: (0.9478, 1.2595, 1.7980) → 실효 0.13830
-        patch_tint=(2.3026, 3.0599, 4.3682),
+        #  [GT-121 2차] 바닥 0.24 하향에 동행 — +12 % 관계 유지(0.2688, 천장 여유 복원).
+        #  구값 `[repro — GT-121 1차]`: (2.3026, 3.0599, 4.3682)
+        patch_tint=(1.8421, 2.4479, 3.4946),
         #  Ground soiling gets its own material. It used to share `M["skirt"]` with the **wall
         #  dado**, which is a conflation: a splash-line dado on a wall and a dirt lobe on a
         #  floor are different materials that happen to both be dark. Splitting them lets the

@@ -331,6 +331,41 @@ Legacy : scenes/archive_v3/scene10_switchback_cliff.py
       0.211 and L* 53.0. Both tints stay inside the measured 2-5 yr 방부목 band
       (L* 53-60 · a* 0..+2 · b* +4..+10 · albedo 0.22-0.28). `M["stringer"]` itself is not
       touched, so the columns, stringers and the GT-77 approach timber are bit-identical.
+
+[GT-129 ② — 08-16 fresh audit, cuts `look_check/scene10/260816_w4_final33_on/`]
+  **A hole in the world, and a self-check that had already excused it.** The grid cuts
+  show an untextured constant blue-grey polygon at the north side of the corridor —
+  `pt_noon_preset_h1.8_d2` window 0,565,560,835, core (250,660)-(500,760) RGB
+  0.552/0.592/0.633 with σ 0.004-0.028, i.e. a flat below-horizon dome band matching no
+  ground material, reproduced on h1.8_d5 (450,585,627,745), h1.8_d10 (355,558,630,600 —
+  a horizontal grey band behind the lawn with rocks and leaves in silhouette against it)
+  and h0.9_d2 (0,580,105,880) `[measured]`.
+  **Cause, exactly.** Not a seam and not the GT-119 ② wedge family: the strip
+  {y = 8.00, corridor_z(x) ≤ z ≤ 0.000} is authored by **no prim at all**.
+  `Bank_NorthBank` is a thin rotX slab whose 9.00 m thickness is perpendicular to its
+  own top plane, so all of it lies uphill of the line (y 8.00, z 0.000) and its foot is
+  a bare edge with nothing under it; `CorridorSlope_*` boxes carry material only
+  **below** their top plane, which at y 8.00 has already descended to −0.255…−6.620. A
+  ray that leaves the corridor northward above the bench and below the bank foot leaves
+  the world. Re-traced off the prim inventory, every audited window is exactly the set
+  of rays that do this, and the four windows close to **0 below-horizon sky pixels**
+  once the strip is solid `[computed]`.
+  **The self-check knew.** GT-119 ② printed this cavity as "남은 미봉 이음 1건 … 회랑 폭
+  10.6 m 가 판정 컷에서 북쪽 가장자리를 잘라내도록 설계되어 있어 어떤 카메라에서도
+  보이지 않는다". That premise is arithmetically wrong: at 60° hFOV the d2 eye's north
+  bound is |y| < 0.577·(x + 2), which passes y 8.00 at x 11.9, so 12 m of the north rim
+  is inside every grid frame. The note is replaced by a probe (32 841 points) that
+  fails if the strip ever opens again.
+  **Fix — one additive box, `Plate_NorthCutFill`** (`PARAMS['north_fill']`): the
+  hillside body the corridor bench was cut out of, x −1.50…44.10 · y 8.00…15.00 ·
+  z 0.000 down 14.00 m, material `grass` (the same skin the corridor's own scarps
+  carry, so the new cut face and the bench read as one hillside), `col=False`.
+  Nothing moves: no slab, no plate, no ybank, no walking surface, no drop edge, no
+  collider, no camera. Its top face is buried under the bank's top plane
+  (z = 1.0229·(y − 8) ≥ 0) everywhere except along the foot line, so it adds no visible
+  horizontal face and no `coplanar_census` pair; its south face butts the corridor
+  slabs' north faces on the exact plane y 8.00, which by the `PLATE_SEAMS` rule cannot
+  fan open into a wedge. Prim delta **+1**.
 ────────────────────────────────────────────────────────────────────────────
 
 Run (GUI look check - default):
@@ -666,6 +701,50 @@ PARAMS = dict(
     #   wedge open downward, `thick·sin(θa − θb)` wide at the far face = **3.05 m** at a
     #   48 % foot. `corridor_slabs()` closes it; this is the margin it closes it *past*.
     corridor=dict(y0=-2.60, y1=8.00, thick=7.00, seam_lap=0.100),
+
+    # --- [GT-129 ②] north cut face — the hillside body the corridor bench was cut out
+    #     of. **This is the "남은 미봉 이음 1건" the GT-119 ② self-check declared and
+    #     wrote off as invisible; the 260816_w4_final33_on grid cuts prove it is not.**
+    #   The cavity, stated exactly: `Bank_NorthBank` is a *thin slab* whose top plane
+    #   runs (y 8.00, z 0.000) -> (y 15.00, z 7.160) and whose 9.00 m thickness is
+    #   measured **perpendicular**, i.e. it all lies uphill-and-north of that plane —
+    #   at its own foot the slab is a single edge, with nothing under it. The corridor
+    #   bench meanwhile descends from −0.255 to −6.620 behind its north face at y 8.00,
+    #   and a `CorridorSlope_*` box only carries material **below** its top plane. So
+    #   the strip {y = 8.00, corridor_z(x) ≤ z ≤ 0.000} is authored by nothing at all,
+    #   and a ray that leaves the corridor northward above the bench and below the bank
+    #   foot exits the world: measured on `pt_noon_preset_h1.8_d2` (window 0,565,560,835,
+    #   core RGB 0.552/0.592/0.633 σ 0.004-0.028 = a flat below-horizon dome band) and
+    #   reproduced on h1.8_d5 · h1.8_d10 · h0.9_d2 `[measured]`. The GT-119 ② note's
+    #   premise — "회랑 폭 10.6 m 가 판정 컷에서 북쪽 가장자리를 잘라낸다" — is arithmetically
+    #   wrong at 60 deg hFOV: the d2 eye's north bound is |y| < 0.577·(x + 2), which
+    #   passes y 8.00 at x 11.9, i.e. 12 m of the north rim is inside every grid frame.
+    #   The fix is one **additive** box and nothing else — no slab moves, `col=False`
+    #   (the bench under it already carries the collision surface, so the physics world
+    #   and every hazard AABB stay bit-identical), material `grass` = the same skin the
+    #   corridor's own scarps carry, so the new face and the bench read as one hillside.
+    #   Numbers, each one derived and not chosen:
+    #     y0 8.00  = `corridor.y1` exactly — a **butt** against the corridor slabs' north
+    #                faces. Both planes are exactly y 8.00 and parallel, so by the
+    #                `PLATE_SEAMS` rule a coincident parallel pair cannot fan open into a
+    #                wedge; and it is the one value that neither buries the bench's north
+    #                rim (y0 < 8.00) nor leaves a slot (y0 > 8.00).
+    #     y1 15.00 = `NorthBank` y_hi = where `FarHill` (z −1.84..7.16) takes over.
+    #     z_top 0.000 = `NorthBank` z_lo. The bank's top plane is z = 1.0229·(y − 8) ≥ 0
+    #                over the whole run, so this face is buried under the bank everywhere
+    #                except along the foot line itself — it adds no visible top face and
+    #                no `coplanar_census` pair (`UpperTrail` is the only other 0.000 top
+    #                and it stops at y 8.00 **and** x −1.50, so both overlaps are 0).
+    #     x0 −1.50 = the corridor's own start = `UpperBody`/`UpperTrail` x1. West of it
+    #                the terrace body is solid to y 8.00, so there is no sight line to
+    #                close and no reason to run material under the terrace.
+    #     x1 44.10 = `LowerParkMain`'s east end — the same 0.10 m lap into `FarRidge`
+    #                (x0 44.00) GT-119 ② gave the lower park.
+    #     thick 14.00 > 13.62 = 0.000 − (GROUND_Z − `corridor.thick`), the deepest
+    #                corridor slab underside, so the plane y 8.00 is solid from grade to
+    #                below the bench's own floor with 0.38 m to spare.
+    north_fill=dict(x0=-1.50, x1=44.10, y0=8.00, y1=15.00,
+                    z_top=0.00, thick=14.00),
 
     # --- [GT-65 · §0-2] deck -> lower park hand-off -------------------------------
     #   The stair arrived at x 24.14 and stopped **on grass**: `LowerPath` (the lower
@@ -2580,17 +2659,72 @@ def deck_module_selfcheck():
     ok19 &= not _cop19
     print(f"    이음 후 동일평면 재감사 → {len(_cop19)}쌍 "
           f"{'OK (이음이 z-fighting 면을 만들지 않았다)' if not _cop19 else 'CHECK ' + str(_cop19[:3])}")
-    print("      남은 미봉 이음 1건 — Bank_NorthBank 발치(y 8.00, z 0.00)와 회랑 "
-          "벤치/하부공원(z −0.255~−6.62) 사이의 공동. 사면을 얇은 경사 슬래브로 "
-          "모델링한 결과이고, 회랑 폭 10.6 m 가 판정 컷에서 북쪽 가장자리를 "
-          "잘라내도록 설계되어 있어 어떤 카메라에서도 보이지 않는다. from_below "
-          "에서 하늘이 보인 것은 이 공동 **때문이 아니라** 위 (1) 의 쐐기를 통해 "
-          "그것을 들여다봤기 때문이며, 쐐기가 닫히면 시선 자체가 사라진다 — "
-          "지형 형상 변경이 필요하므로 별도 결재 대상")
-
     print(f"    [deck_module_selfcheck GT-119 ②] "
           f"{'전항목 OK' if ok19 else '⚠ CHECK 항목 있음'}")
-    return ok_all and ok9 and ok10 and ok11 and ok15 and ok19
+
+    # =====================================================================
+    # GT-129 ② — 북측 절토면(Plate_NorthCutFill). GT-119 ② 가 "남은 미봉 이음
+    # 1건 · 어떤 카메라에서도 보이지 않는다"고 적어 넘긴 공동이 260816_w4_final33_on
+    # 격자 컷 4장에서 하늘로 뚫려 나온 자리다. 이 블록이 있는 한 그 주장은
+    # 다시 무증빙으로 통과하지 못한다.
+    # =====================================================================
+    ok29 = True
+    nf, nb = P["north_fill"], _ybank_row("NorthBank")
+    print("\n  [deck_module_selfcheck] GT-129 ② — 북측 절토면 · 회랑↔북사면 공동")
+    for tag, got, want, why in (
+            ("y0 = corridor.y1", nf["y0"], float(cg["y1"]),
+             "회랑 슬래브 북면과 정확히 동일 평면인 butt — 평행 일치면은 쐐기로 "
+             "벌어질 수 없고, 벤치 북단을 묻지도 슬롯을 남기지도 않는 유일한 값"),
+            ("y1 = NorthBank y_hi", nf["y1"], float(nb[3]),
+             "FarHill(z −1.84..7.16)이 이어받는 y"),
+            ("z_top = NorthBank z_lo", nf["z_top"], float(nb[6]),
+             "북사면 발치 표고 = 이 자리의 원지반고"),
+            ("x1 = LowerParkMain x1", nf["x1"],
+             float(_plate_box("LowerParkMain")[0][1]),
+             "FarRidge(x0 44.00) 안으로 0.10 m 물림 — GT-119 ② 와 동일 이음")):
+        good = abs(float(got) - float(want)) <= 1e-9
+        ok29 &= good
+        print(f"    {tag:<24}{float(got):9.3f} = {float(want):9.3f}  "
+              f"{'OK' if good else 'CHECK'}")
+        print(f"      {why}")
+    need = float(nf["z_top"]) - (GROUND_Z - float(cg["thick"]))
+    good = float(nf["thick"]) >= need
+    ok29 &= good
+    print(f"    thick {float(nf['thick']):.3f} ≥ 최심 회랑 슬래브 저면까지 "
+          f"{need:.3f} m → {'OK' if good else 'CHECK'} "
+          f"(여유 {float(nf['thick']) - need:+.3f} m)")
+
+    # the defect itself, measured: the plane y = corridor.y1 must be solid from the
+    # bench top up to grade, over the whole run the grid cameras can see.
+    xs0 = GROUND_LINE[0][0]
+    xs1 = float(nf["x1"])
+    voids, first = 0, None
+    for k in range(801):
+        xq = xs0 + (xs1 - xs0) * k / 800.0
+        ztop = corridor_z(xq)
+        for j in range(41):
+            zq = ztop + (float(nf["z_top"]) - ztop) * j / 40.0
+            if not (nf["x0"] - 1e-9 <= xq <= nf["x1"] + 1e-9
+                    and float(nf["z_top"]) - float(nf["thick"]) - 1e-9
+                    <= zq <= float(nf["z_top"]) + 1e-9):
+                voids += 1
+                first = first or (round(xq, 3), round(zq, 3))
+    good = voids == 0
+    ok29 &= good
+    print(f"    북측 절토면 관통 probe {801*41}점(x {xs0:.2f}..{xs1:.2f} × "
+          f"회랑 상면→{float(nf['z_top']):+.2f}) · 빈 점 {voids}개 → "
+          f"{'OK (하늘이 비치는 열린 점 0)' if good else 'CHECK ' + str(first)}")
+    print(f"      결함 실측 — pt_noon_preset_h1.8_d2 0,565,560,835 코어 RGB "
+          f"0.552/0.592/0.633 σ 0.004~0.028(하늘 계열 상수면), h1.8_d5·h1.8_d10·"
+          f"h0.9_d2 재현. 60 deg hFOV 에서 d2 시야의 북쪽 한계는 |y| < 0.577·(x+2) "
+          f"이므로 y {float(cg['y1']):.2f} 는 x {float(cg['y1'])/0.5774 - 2:.1f} 에서 "
+          f"프레임에 들어온다 — GT-119 ② 의 '보이지 않는다'는 산술적으로 틀렸다")
+    print(f"      Plate_NorthCutFill 은 col=False · 상면 z {float(nf['z_top']):+.3f} 은 "
+          f"북사면 상면(z = 1.0229·(y−8) ≥ 0) 아래에 전부 묻힌다 — 보행면·낙차 "
+          f"에지·hazard AABB·coplanar_census 어느 것도 움직이지 않는다")
+    print(f"    [deck_module_selfcheck GT-129 ②] "
+          f"{'전항목 OK' if ok29 else '⚠ CHECK 항목 있음'}")
+    return ok_all and ok9 and ok10 and ok11 and ok15 and ok19 and ok29
 
 
 # ===========================================================================
@@ -2829,6 +2963,14 @@ def _plate_box(name):
         if nm == name:
             return ((x0, x1), (y0, y1), (zt - th, zt))
     raise KeyError(f"scene10: plate '{name}' not in PARAMS")
+
+
+def _ybank_row(name):
+    """One `PARAMS['ybanks']` row: (name, x0,x1, y_hi,z_hi, y_lo,z_lo, thick, mtl)."""
+    for row in PARAMS["ybanks"]:
+        if row[0] == name:
+            return row
+    raise KeyError(f"scene10: ybank '{name}' not in PARAMS")
 
 
 def plate_seam_census():
@@ -3419,7 +3561,13 @@ BANNER = """\
                        회랑 상면 max_i top_i(x) = corridor_z(x) 가 기계 오차
                        안인가(보행·콜라이더 불변) · 플레이트 이음 6쌍이 lap
                        ≥0.100 또는 정확한 butt 인가 · 이음이 동일평면 쌍을
-                       새로 만들지 않았는가"""
+                       새로 만들지 않았는가
+16. [GT-129 ②] 절토면 — 북측 절토면(Plate_NorthCutFill)이 회랑 상면에서 원지반고
+                       z 0.000 까지 y 8.00 평면을 메우는가(관통 probe 32 841점 중
+                       열린 점 0 — GT-119 ② 가 '보이지 않는다'고 넘긴 공동이
+                       격자 컷 4장에서 하늘로 뚫렸다) · y0/y1/z_top/x1 이 각각
+                       corridor.y1 · NorthBank y_hi · NorthBank z_lo ·
+                       LowerParkMain x1 과 일치하는가"""
 
 
 def main():
@@ -3427,6 +3575,14 @@ def main():
     # The old template read NEGOBS_SMOKE only as boot()'s headless arg (or not at
     # all), so the §2.2 smoke floor booted Isaac on this scene (scene03/09 incident).
     # Deep checks keep their own arms (NEGOBS_SELFCHECK / geom_invariance_check.py).
+    # [GT-129 ②] scene10 never wired that arm, so `_smoke_report()` — which is where
+    #   `deck_module_selfcheck()` (and now the north-cut-face probe) actually runs —
+    #   was unreachable from `main()` and the GPU-less floor could not read it. The
+    #   arm is report-only and exits 0 exactly like the SMOKE gate above: it adds a
+    #   way to *see* the checks, not a new pass/fail gate.
+    if os.environ.get("NEGOBS_SELFCHECK", "0") == "1":
+        _smoke_report()
+        return
     if os.environ.get("NEGOBS_SMOKE", "0") == "1":
         print("SMOKE_OK %s pre-boot gate (GT-89)" % os.path.basename(__file__))
         return
@@ -3619,6 +3775,19 @@ def main():
                            run, drop, cg["y0"], cg["y1"],
                            float(cg["thick"]), M["grass"], margin=0.0,
                            collider=True)
+        # [GT-129 ②] the north cut face. `Bank_NorthBank` is a thin slab that carries
+        #   no material under its own foot (y 8.00, z 0.000) and a `CorridorSlope_*`
+        #   box carries none above its top plane, so the strip between them was air and
+        #   the grid cuts looked through it into the dome. This box is the hillside body
+        #   the bench was cut out of — see `PARAMS['north_fill']` for every number.
+        #   `col=False`: the bench underneath already carries the collision surface, so
+        #   no walking surface, no drop edge and no hazard AABB moves.
+        nf = PARAMS["north_fill"]
+        BOX(f"{ROOT}/Plate_NorthCutFill",
+            ((nf["x0"] + nf["x1"]) / 2.0, (nf["y0"] + nf["y1"]) / 2.0,
+             nf["z_top"] - nf["thick"] / 2.0),
+            (nf["x1"] - nf["x0"], nf["y1"] - nf["y0"], nf["thick"]),
+            M["grass"], col=False)
 
     # -------------------------------------------------------------------
     # [GT-77 · §0-2] approach-path finishing at the two deck ends

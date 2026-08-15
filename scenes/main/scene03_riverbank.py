@@ -400,9 +400,25 @@ PARAMS = dict(
     #   "widen it" cannot both be honoured — the amplitude is already at 35.6 deg of bank
     #   tangent and 45 deg is oxbow — so the ruling decides, and the shortfall is declared
     #   rather than engineered away.
+    # [GT-129] `end_cap` — the terminal-seg end cap (see `river_end_geom`). A water surface
+    #   can never show a castellated silhouette, and the last seg's yaw makes one: the cap is
+    #   an un-yawed slab per water band, laid on the tooth row so the far edge is ONE straight
+    #   world segment. `dz` puts it 3 mm below its own band (> the 1.5 mm seg stagger), so the
+    #   meandering band always wins where the two overlap and only the notches read the cap;
+    #   `tuck` hides the cap's near face under the water body, `over` carries the straight edge
+    #   past the longest tooth. Nothing here moves the water z, the waterline (s 18.2) or any
+    #   surface a judging camera reads.
     water=dict(x0=16.5, y0=-40.0, x1=54.0, y1=40.0, z=-3.35,
                bands=((16.5, 26.0, 0.06), (26.0, 38.0, 0.10),
-                      (38.0, 54.0, 0.15))),
+                      (38.0, 54.0, 0.15)),
+               #   Measured on this scene's own numbers: last seg yaw 32.27°, so the cap
+               #   spans y 46.483…49.944 against a tooth row of 46.827…48.849 — 0.34 m of
+               #   live water over the near face, 1.10 m of straight edge past the longest
+               #   tooth (screen clearance −0.42/−0.66/−0.57 % of frame half-height on
+               #   river_along/meander_air/bank_oblique = 2.3…3.6 px; `over` 0.50 halves that
+               #   to ~1.3 px, which the caps' 5.5 mm depth under the water no longer clearly
+               #   dominates at the grazing river_along horizon).
+               end_cap=dict(tuck=0.25, over=1.00, dz=0.003)),
     far_bank=dict(x0=52.0, x1=88.0, y0=-40.0, y1=40.0, z_top=-3.2, thick=0.4),
     # v4-B3/D11: 3 far_hedge slabs (60 m grass-texture strips) drew regular hatching stripes
     #   on the horizon and read as a printed backdrop -> replaced by 7 tree lines.
@@ -972,6 +988,72 @@ def river_segments(y_gap=None):
     return out
 
 
+# --- [GT-129] the +Y terminal end of the meander bands ---------------------
+WATER_MAX_W = 3.5          # the `max_w` river_band() lays the 3 water bands with
+WATER_Z_STEP = 0.002       # its `z_bias` step between bands (anti Z-fight)
+
+
+def river_end_geom():
+    """[GT-129] Closed form of a meander band's **last (+Y) seg end edge**.
+
+    `river_band` lays each seg as an axis-aligned box inside a rot group yawed by
+    `river_yaw(yc)`, so at the assembly's last seg that rotation **tilts the end edge**:
+    across one sub-band of width w the edge travels `w·tan(yaw)` in world Y, and because
+    sub-bands are butted in world X the assembly's end comes out as a **sawtooth of pitch w
+    and amplitude w·tan|yaw|**. At the last seg (yc = +45.0) the tilt is 32.27°, i.e. 2.0 m
+    of Y across each 3.2 m water sub-band, over 12 sub-bands (3+4+5). Nothing at all is
+    modelled beyond y = +47.5, so from every +Y-looking cut that sawtooth **is** the water's
+    silhouette against the sky — audit v4 GT-129, measured in `260816_w4_final33_on` as
+    12 teeth of 54 px pitch in `meander_air`, a 5~6 px staircase in `bank_oblique` and a
+    serrated right horizon in `river_along`.
+    The −Y end needs no such treatment and gets none: at yc = −45.0 the cosine and cubic
+    terms of `river_ddx` very nearly cancel (yaw = +0.83°), so that end is flat to 0.044 m,
+    and it is behind every camera in `build_views()` (checked: 0 of its 24 corners project
+    inside any frustum).
+
+    Returns dict(yc, yaw, x_shear, y_lo, y_hi):
+      world corner at the sub-band boundary of cross-section s
+        x = river_dx(yc) + s − x_shear
+        y = (y_lo + y_hi)/2 ∓ (w/2)·tan(yaw)     (− on the boundary's −X corner, + on its +X)
+      `y_lo`/`y_hi` bracket **any** sub-band up to `WATER_MAX_W` wide, so a cap laid on them
+      swallows the whole tooth row whatever the sub-band split turns out to be.
+    One function, two clients — `build_river` stands the end cap on it and
+    `river_view_selfcheck` tests the silhouette against it — so neither can drift from the
+    geometry it describes.
+    """
+    mn = PARAMS["meander"]
+    yc, _ylo, yhi, _cl, _ch = river_segments(None)[-1]
+    yaw = river_yaw(yc)
+    cw = math.cos(math.radians(yaw))
+    y_mid = yhi + mn["over"] * cw / 2.0
+    half = WATER_MAX_W / 2.0 * abs(math.tan(math.radians(yaw)))
+    return dict(yc=yc, yaw=yaw,
+                x_shear=((yhi - yc) / cw + mn["over"] / 2.0)
+                * math.sin(math.radians(yaw)),
+                y_lo=y_mid - half, y_hi=y_mid + half)
+
+
+def water_end_cap():
+    """[GT-129] The end-cap slabs, `(x0, x1, y0, y1, z)` in water-band order.
+
+    Single source for `build_river` (which stands them up) and `river_view_selfcheck` (which
+    tests the silhouette against them). x spans are exactly the bands' own end corners, so
+    the caps butt on the seams the bands already have and never reach outside the channel.
+    **One z for all three**, below the LOWEST band top (`WATER_Z_STEP` per band plus the
+    1.5 mm seg stagger): the meandering bands then always win where they overlap a cap, and
+    the far edge is a single coplanar straight line. Carrying the per-band z step into the
+    caps instead would put a ~1 px riser back into the grazing `river_along` horizon at each
+    band seam — measurably (1.12 px, 5 reversals), which is the very thing the cap removes.
+    """
+    wt = PARAMS["water"]
+    ec, eg = wt["end_cap"], river_end_geom()
+    z = (wt["z"] - WATER_Z_STEP * (len(wt["bands"]) - 1)
+         - PARAMS["meander"]["z_stagger"] - ec["dz"])
+    xb = river_dx(eg["yc"]) - eg["x_shear"]
+    return [(xb + s0, xb + s1, eg["y_lo"] - ec["tuck"], eg["y_hi"] + ec["over"], z)
+            for s0, s1, _rgh in wt["bands"]]
+
+
 def _ang(a):
     """Normalise a bearing difference to (−180, 180]."""
     return (a + 180.0) % 360.0 - 180.0
@@ -1320,6 +1402,29 @@ def river_view_selfcheck(verbose=True):
         boxes.append((cdx + bd["x0"], cdx + bd["x1"], bd["y0"], bd["y1"],
                       bd["base_z"], bd["base_z"] + bd["h"]))
 
+    # --- [GT-129] terminal-end silhouette of the water ----------------------
+    #   The relation this encodes: **no meander band end may reach past the end cap**, i.e.
+    #   the far edge of the water is the cap's single straight world segment and never the
+    #   sawtooth of the last seg. Both sides come out of `river_end_geom()`, the same call
+    #   `build_river` builds the cap from, so this cannot certify geometry that is not there.
+    #   Reported per cut as the worst tooth's screen clearance under the cap line, in % of the
+    #   frame half-height (negative = under the line = no castellation). Screen space rather
+    #   than world space on purpose: what the audit measured was a silhouette in a frame.
+    _eg, _caps = river_end_geom(), water_end_cap()
+    _zw = PARAMS["water"]["z"]
+    _tan = math.tan(math.radians(_eg["yaw"]))
+    _ymid = (_eg["y_lo"] + _eg["y_hi"]) / 2.0
+    _xb = river_dx(_eg["yc"]) - _eg["x_shear"]
+    teeth = []
+    for _s0, _s1, _rgh in PARAMS["water"]["bands"]:
+        _n = max(1, int(math.ceil(abs(_s1 - _s0) / WATER_MAX_W)))
+        _w = (_s1 - _s0) / _n
+        for _j in range(_n):                       # both end corners of every sub-band
+            teeth.append((_xb + _s0 + _w * _j, _ymid - _w / 2.0 * _tan, _zw))
+            teeth.append((_xb + _s0 + _w * (_j + 1), _ymid + _w / 2.0 * _tan, _zw))
+    cap_edge = ((_caps[0][0], _caps[0][3], _caps[0][4]),      # the one straight far edge
+                (_caps[-1][1], _caps[-1][3], _caps[-1][4]))
+
     # (cut name, is it a judging cut) - the bow floor is not applied to mise-en-scene-only cuts.
     diag, ok = {}, True
     for name, judge in (("river_along", False), ("meander_air", True),
@@ -1356,9 +1461,23 @@ def river_view_selfcheck(verbose=True):
         pit = math.degrees(math.atan2(tgt[2] - eye[2],
                                       math.hypot(tgt[0] - eye[0],
                                                  tgt[1] - eye[1])))
+        # [GT-129] worst tooth vs the cap line at the same u (a straight 3D segment
+        #   projects to a straight screen segment, so the line is exact, not a fit).
+        qa, qb = proj(cap_edge[0]), proj(cap_edge[1])
+        tdv = None
+        if qa and qb and abs(qb[0] - qa[0]) > 1e-9:
+            tdv = -1e9
+            for tp in teeth:
+                qt = proj(tp)
+                if qt is None:
+                    continue
+                tdv = max(tdv, qt[1] - (qa[1] + (qb[1] - qa[1])
+                                        * (qt[0] - qa[0]) / (qb[0] - qa[0])))
         diag[name] = dict(pitch=round(pit, 1), y_span=round(span, 1),
                           bow_pct=round(100.0 * dev / TU, 2),
-                          occluded=occ, n=len(pts), judge=judge)
+                          occluded=occ, n=len(pts), judge=judge,
+                          tooth_pct=(None if tdv is None
+                                     else round(100.0 * tdv / TV, 3)))
         # **[GT-83 pass 3] The 35 % occlusion criterion is LEFT EXACTLY WHERE IT WAS, and
         #   `meander_air` now exceeds it — on purpose, by ruling, and it is reported as a
         #   failure rather than tuned away.** Measured, on this scene's own sampling:
@@ -1381,6 +1500,11 @@ def river_view_selfcheck(verbose=True):
         if judge and (span < 40.0 or dev / TU < 0.05
                       or occ > len(pts) * 0.35):
             ok = False
+        # [GT-129] a castellated water edge fails every cut, mise-en-scene included: the
+        #   defect is a physical impossibility, not a legibility target, so it carries no
+        #   judging/mise-en-scene split and no tolerance band.
+        if tdv is None or tdv >= 0.0:
+            ok = False
     if verbose:
         print("=" * 64)
         print("scene03 [v6] 종방향 컷 — 사행 판독성 + 차폐 검산")
@@ -1390,8 +1514,13 @@ def river_view_selfcheck(verbose=True):
                   f" pitch{d.get('pitch', 0):+6.1f}°  "
                   f"프레임내 수변 y {d.get('y_span', 0):5.1f} m  "
                   f"직선대비 휨 {d.get('bow_pct', 0):5.2f}% 프레임반폭  "
-                  f"차폐 {d.get('occluded', 0)}/{d.get('n', 0)}")
+                  f"차폐 {d.get('occluded', 0)}/{d.get('n', 0)}  "
+                  f"끝니 여유 "
+                  f"{d['tooth_pct'] if d.get('tooth_pct') is not None else float('nan'):+7.3f}"
+                  f"% 프레임반높이")
         print("  판정컷 기준: 종방향 ≥40 m · 휨 ≥5 % · 차폐 ≤35 %")
+        print("  [GT-129] 끝니 여유 < 0 = 사행 밴드 끝 톱니가 끝단 캡 선 아래 → 수면 실루엣 직선 "
+              "(전 컷 공통 기준)")
         print("  (3차원 직선은 어떤 투영에서도 직선 → 휨 > 0 자체가 사행 신호)")
         print(f"  → {'OK' if ok else 'FAIL'}")
         print("=" * 64)
@@ -2049,8 +2178,24 @@ def main():
         #   and the far bank. A 1.5 mm stagger between bands avoids coplanar Z-fighting.
         for bi, (bs0, bs1, _) in enumerate(wt["bands"]):
             river_band(f"{ROOT}/Water_{bi}", bs0, bs1, wt["z"], 0.4,
-                       M[f"water_{bi}"], max_w=3.5, z_bias=-0.002 * bi,
-                       collider=False)
+                       M[f"water_{bi}"], max_w=WATER_MAX_W,
+                       z_bias=-WATER_Z_STEP * bi, collider=False)
+        # [GT-129] terminal end cap. The last seg's 32.27° yaw leaves the water assembly
+        #   ending in a 12-tooth sawtooth (2.0 m of Y per 3.2 m sub-band) with nothing
+        #   modelled behind it, so all three +Y-looking cuts silhouette a castellated water
+        #   edge against the sky. One un-yawed slab per band, in that band's own material and
+        #   3 mm under it, carries the surface across the notches to a **single straight end
+        #   line** — the least invasive of the two directions in the audit, because the
+        #   alternative (running the bands on to a far horizon) would put open water where
+        #   the modelled world, banks included, simply stops at y ≈ 48.
+        #   x span = exactly the band's own end corners (`river_end_geom`), so the caps butt
+        #   each other on the same seams the bands already have and never reach past the
+        #   channel; the near face sits `tuck` under live water. collider=False, like the
+        #   bands: this is far-view silhouette only.
+        for bi, (cx0, cx1, cy0, cy1, cz) in enumerate(water_end_cap()):
+            sc.build_slope(stage, f"{ROOT}/WaterEnd_{bi}", cx0, cz,
+                           cx1 - cx0, 0.0, cy0, cy1, 0.4,
+                           M[f"water_{bi}"], margin=0.0, collider=False)
         fb = PARAMS["far_bank"]
         river_band(f"{ROOT}/FarBank", fb["x0"], fb["x1"], fb["z_top"],
                    fb["thick"], M["grass"], max_w=12.0)

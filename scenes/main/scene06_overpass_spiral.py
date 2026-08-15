@@ -333,12 +333,17 @@ PARAMS = dict(
     # [W3 S06 · G6 point 3] the deck is carried on white **tapered "V"-form pillars**, not on
     #   plain cylinders. This is the third design question G6 settles outright and it is the
     #   single most recognisable thing about the real structure: two splayed legs rising from
-    #   one small footing to the deck soffit, each tapering as it rises. Modelled as `n_seg`
-    #   stacked cylinders per leg with a linear radius taper (a Cylinder cannot taper), tilted
-    #   about X so the splay opens along the deck axis. `r` is kept as the FOOTING radius so
-    #   the camera-collision AABB and `_solid_at` keep a single conservative envelope.
+    #   one small footing to the deck soffit, each tapering as it rises. `r` is kept as the
+    #   FOOTING radius so the camera-collision AABB and `_solid_at` keep a single
+    #   conservative envelope.
+    # [GT-129] Each leg is now **one** `_tapered_leg_mesh` frustum (`seg` = silhouette
+    #   sides) instead of `n_seg=5` stacked cylinders. The stack's centres were on the
+    #   correct axis, but its 5 constant-radius drums put a 26 mm radius ledge at each of
+    #   the 4 joints and the lit cap ellipse below each ledge read as a pipe coupling —
+    #   "laterally offset drum stack". A cast column has no joints; the frustum has none.
+    #   `seg=32` follows the `scene_common.DISC_SEGMENTS` silhouette precedent.
     deck_posts=dict(x=3.5, ys=(-9.0, 9.0), r=0.35, z_bot=-0.30,
-                    splay=0.95, leg_r0=0.30, leg_r1=0.17, n_seg=5),
+                    splay=0.95, leg_r0=0.30, leg_r1=0.17, seg=32),
     # --- north entry stair (rot_group 90 deg - local +X descent becomes world +Y descent) ---
     #   rotation: (x,y) -> (16.5 − y, 9.5 + x)  [pivot (3.5,13.0), +90 deg]
     #   local y 11.5…14.5 -> world x 2.0…5.0 (matches the deck width)
@@ -892,6 +897,85 @@ def _raked_sector_mesh(stage, path, cx, cy, r_in, r_out, a0_deg, a1_deg,
                   max(p[2] for p in pts))
     m.CreateExtentAttr([lo, hi])
     sc._bind_mtl(m.GetPrim(), mtl)
+    return m
+
+
+def _tapered_leg_mesh(stage, path, p0, p1, r0, r1, mtl=None, seg=32,
+                      collider=False):
+    """ONE monolithic circular frustum: p0 (radius r0) → p1 (radius r1).
+
+    [GT-129] The V-pier legs were built as `n_seg` stacked `UsdGeom.Cylinder` drums
+    with a per-drum radius step, because a Cylinder cannot taper. The drum *centres*
+    were right — they sat exactly on the leg's true axis — but a stack of constant-radius
+    drums under a taper leaves a **26 mm radius ledge at every joint**, and the lit cap
+    ellipse of the fatter drum below reads as a pipe coupling. At 3x the leg therefore
+    rendered as five offset pipe sections zigzagging to the crosshead
+    [audit `260816_w4_final33_on`, `pt_noon_overview` 1160,520,1320,820]. A concrete
+    column is cast monolithic, so the drums are replaced by one frustum: the barrel is a
+    single ruled surface from footing to soffit and the taper is continuous — no joint,
+    no ledge, no cap ellipse anywhere on the visible run.
+    The ring basis is derived from the axis and the points are authored in **world
+    space**, so an inclined leg needs no rotate op at all and its foot/head land exactly
+    on the design axis (this is what keeps the foot centred on its pad). Normals are
+    faceVarying: radial-plus-slope on the barrel (smooth, and correct for a cone —
+    `rad·L + az·(r0−r1)` is orthogonal to the ruling), axial on the two caps. Both caps
+    are buried anyway (foot inside the footing pad, head inside the cap beam).
+    """
+    from pxr import Gf, UsdGeom, UsdPhysics, Vt
+    n = max(3, int(seg))
+    r0, r1 = float(r0), float(r1)
+
+    def _cross(a, b):
+        return [a[1]*b[2] - a[2]*b[1], a[2]*b[0] - a[0]*b[2],
+                a[0]*b[1] - a[1]*b[0]]
+
+    def _unit(v):
+        d = math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2])
+        return [c / d for c in v]
+    ax = [float(p1[j]) - float(p0[j]) for j in range(3)]
+    L = math.sqrt(ax[0]*ax[0] + ax[1]*ax[1] + ax[2]*ax[2])
+    az = [c / L for c in ax]
+    ref = (0.0, 1.0, 0.0) if abs(az[1]) < 0.9 else (1.0, 0.0, 0.0)
+    ux = _unit(_cross(az, ref))
+    uy = _cross(az, ux)                       # (ux, uy, az) right-handed
+    ring = [(math.cos(2.0*math.pi*k/n), math.sin(2.0*math.pi*k/n))
+            for k in range(n)]
+    pts = []
+    for c, r in ((p0, r0), (p1, r1)):
+        for ca, sa in ring:
+            pts.append(Gf.Vec3f(*[float(c[j]) + r*(ca*ux[j] + sa*uy[j])
+                                  for j in range(3)]))
+    counts, idx, nrm = [], [], []
+    dr = r0 - r1
+    for k in range(n):                        # barrel (outward winding, as add_disc)
+        k2 = (k + 1) % n
+        counts.append(4)
+        idx += [k, k2, k2 + n, k + n]
+        for kk in (k, k2, k2, k):
+            ca, sa = ring[kk]
+            rad = [ca*ux[j] + sa*uy[j] for j in range(3)]
+            nrm.append(Gf.Vec3f(*_unit([rad[j]*L + az[j]*dr
+                                        for j in range(3)])))
+    counts.append(n)                          # head cap (+axis)
+    idx += list(range(n, 2 * n))
+    nrm += [Gf.Vec3f(*az)] * n
+    counts.append(n)                          # foot cap (−axis)
+    idx += list(range(n - 1, -1, -1))
+    nrm += [Gf.Vec3f(*[-c for c in az])] * n
+    m = UsdGeom.Mesh.Define(stage, path)
+    m.CreatePointsAttr(Vt.Vec3fArray(pts))
+    m.CreateFaceVertexCountsAttr(Vt.IntArray(counts))
+    m.CreateFaceVertexIndicesAttr(Vt.IntArray(idx))
+    m.CreateNormalsAttr(Vt.Vec3fArray(nrm))
+    m.SetNormalsInterpolation(UsdGeom.Tokens.faceVarying)
+    m.CreateSubdivisionSchemeAttr(UsdGeom.Tokens.none)
+    lo = Gf.Vec3f(*[min(p[j] for p in pts) for j in range(3)])
+    hi = Gf.Vec3f(*[max(p[j] for p in pts) for j in range(3)])
+    m.CreateExtentAttr([lo, hi])
+    prim = m.GetPrim()
+    sc._bind_mtl(prim, mtl)
+    if collider:
+        UsdPhysics.CollisionAPI.Apply(prim)
     return m
 
 
@@ -2023,9 +2107,6 @@ def main():
             BOX(f"{ROOT}/DeckFoot_{i}", (dp["x"], py, dp["z_bot"] + 0.22),
                 (1.10, 1.10, 0.44), M["concrete"], col=True)
             z0 = dp["z_bot"] + 0.36
-            H = z1 - z0
-            tilt = math.degrees(math.atan2(dp["splay"], H))
-            L = math.hypot(dp["splay"], H)         # true leg length along its own axis
             # The splay opens **across the deck (+-X)**, not along it. Two reasons, both
             # measured: (a) the V then reads frontally, which is the axis `overview`,
             # `ground_approach` and `ground_graze` actually look down; (b) a +-Y splay of
@@ -2033,14 +2114,17 @@ def main():
             # spiral's r_out 3.30 plan footprint (centre distance 4.000 − 3.30 = 0.70 m of
             # clearance is all there is). Across the deck the leg heads sit at x 2.55/4.45,
             # inside the 3.0 m deck width and 4.11 m from the spiral centre.
+            # [GT-129] one frustum per leg, foot on the springing point (both legs share
+            #   it, 0.08 m inside the pad) and head on the soffit, 0.32 m up inside the
+            #   cap beam. The collider now covers the WHOLE leg, which is what `_solid_at`
+            #   above has always modelled (z_bot … deck soffit); before, only the bottom
+            #   drum carried one.
             for s, sgn in enumerate((-1.0, 1.0)):
-                for k in range(dp["n_seg"]):
-                    tm = (k + 0.5) / float(dp["n_seg"])
-                    rr = dp["leg_r0"] + (dp["leg_r1"] - dp["leg_r0"]) * tm
-                    CYL(f"{ROOT}/DeckPost_{i}/Leg_{s}_{k}",
-                        (dp["x"] + sgn * dp["splay"] * tm, py, z0 + H * tm),
-                        rr, L / dp["n_seg"] * 1.06, M["concrete"],
-                        rotY=sgn * tilt, col=(k == 0))
+                _tapered_leg_mesh(stage, f"{ROOT}/DeckPost_{i}/Leg_{s}",
+                                  (dp["x"], py, z0),
+                                  (dp["x"] + sgn * dp["splay"], py, z1),
+                                  dp["leg_r0"], dp["leg_r1"], M["concrete"],
+                                  seg=dp["seg"], collider=True)
             # column-head cap beam spanning the two leg heads
             BOX(f"{ROOT}/DeckCap_{i}", (dp["x"], py, z1 - 0.16),
                 (dk["x1"]-dk["x0"]+0.4, 0.9, 0.32), M["concrete"])

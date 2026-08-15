@@ -1078,6 +1078,67 @@ def villa_aabb(vs, skip=()):
     return tuple(lo), tuple(hi)
 
 
+# ---------------------------------------------------------------------------
+# [GT-129] 파사드 개구부 배치 — 개구부는 서로 겹치지 않는다
+#
+#   **결함(회귀)**: `build_house` 는 창 중심을 `cx ± 0.28·w` 에 **고정**하고 문을
+#   `cx` 에 두었다. `_opening` 의 프레임 외곽 반폭은 창 0.35+0.06=0.41 · 문
+#   0.45+0.06=0.51 이므로 두 개구부 사이 순 벽체(피어)는
+#       pier = 0.28·w − (0.41 + 0.51) = 0.28·w − 0.92
+#   이고, w < 3.286 인 동에서 **음수**가 된다. 12동 중 6동(House 0·1·4·5·6·7)이
+#   여기 걸려 문선 상자와 창 프레임/유리 상자가 같은 벽면에서 실제로 관통했다
+#   (House[6] −136 mm × z 겹침 980 mm, House[5] −276 mm). 렌더에서는 문선이 이웃
+#   창유리 앞을 지나는 '겹쳐 흐르는 액자' 로 보였다 — 감사 GT-129 ⑤.
+#
+#   **정정**: 고정 비율을 버리고 여유(clearance)에서 배치를 유도한다. 개구부 크기
+#   (창 0.70×1.00 · 문 0.90×1.90)와 프레임 폭 0.06 은 그대로다.
+#     ① 문 중앙 + 좌우 창 2 — `off_min = 0.51+PIER+0.41 ≤ off ≤ w/2−RET−0.41`
+#        구간이 비지 않을 때만. 기존 리듬 0.28·w 를 그 구간으로 클램프하므로
+#        이미 적법하던 동(8~11 · Backdrop 4동)은 **비트 동일**하게 남는다.
+#     ② 좁은 파사드(w < 3.14) — 문 0.90 과 창 0.70 은 프레임까지 1.02 + 0.82 라
+#        피어·모서리 여백을 두면 셋이 물리적으로 안 들어간다. 감천·이화동의 폭
+#        2.3~2.8 m 단칸 슬래브집 실경대로 **문 + 창 1** 로 내려가고, 둘을 파사드
+#        양 끝(모서리 여백 RET)으로 밀어 넓은 피어를 만든다. 문이 붙는 쪽은
+#        `face` 부호로 갈라 12동이 같은 리듬으로 반복되지 않게 한다.
+#   기하를 늘리거나 창 치수를 바꾸지 않는다 — 좁은 동에서 창 1개가 줄 뿐이다.
+# ---------------------------------------------------------------------------
+FACADE_PIER = 0.12          # 개구부 사이 최소 순 벽체
+FACADE_RET = 0.12           # 파사드 모서리 최소 벽체 여백
+FACADE_FRAME_W = 0.06       # `_opening` 프레임 살 폭 (외곽 반폭 = 개구 반폭 + 이 값)
+
+
+def facade_openings(hs):
+    """1개 동의 파사드 개구부 전량 — dict(tag, cx, z, w, h, half) 리스트.
+
+    빌더(`build_house`)와 자가검증이 **같은 함수**를 읽는다(K2 선례). `half` 는
+    프레임까지 포함한 외곽 반폭이라, 겹침 판정이 실제 상자와 같은 수를 쓴다.
+    """
+    h = PARAMS["house"]
+    w = float(hs["w"])
+    cx = float(hs["cx"])
+    base = float(hs["base_z"])
+    hw = h["win_w"] / 2.0 + FACADE_FRAME_W
+    hd = h["door_w"] / 2.0 + FACADE_FRAME_W
+    z_win = base + float(hs["h"]) * 0.55
+    z_door = base + h["door_h"] / 2.0
+
+    def _w(tag, x):
+        return dict(tag=tag, cx=x, z=z_win, w=h["win_w"], h=h["win_h"], half=hw)
+
+    def _d(x):
+        return dict(tag="Door", cx=x, z=z_door, w=h["door_w"], h=h["door_h"],
+                    half=hd)
+
+    off_min = hd + FACADE_PIER + hw
+    off_max = w / 2.0 - FACADE_RET - hw
+    if off_min <= off_max:
+        off = min(max(0.28 * w, off_min), off_max)
+        return [_w("Win_0", cx - off), _d(cx), _w("Win_1", cx + off)]
+    s = -1.0 if int(hs["face"]) < 0 else 1.0
+    return [_d(cx + s * (w / 2.0 - FACADE_RET - hd)),
+            _w("Win_0", cx - s * (w / 2.0 - FACADE_RET - hw))]
+
+
 def _bend_to_world(x, y):
     """회전군 로컬 → 월드 (pivot (5.1, 0), +25°)."""
     bd = PARAMS["bend"]
@@ -1386,6 +1447,47 @@ def alley_selfcheck(verbose=True):
         and len({(t["r"], t["h"]) for t in PARAMS["roofline"]["tank"]})
         == len(PARAMS["roofline"]["tank"]),
         f"{[(t['house'], t['r'], t['h']) for t in PARAMS['roofline']['tank']]}")
+
+    # ── (9-2) [GT-129] 파사드 개구부 — 같은 벽면에서 서로 겹치지 않는다 ──────
+    #   회귀의 원인은 고정 비율 `cx ± 0.28·w` 였다(문선 외곽 반폭 0.51 + 창 0.41
+    #   = 0.92 > 0.28·w 인 6개 동에서 상자가 관통). 배치를 만드는
+    #   `facade_openings` 를 그대로 읽어 순 벽체(피어)와 모서리 여백을 잰다.
+    fo_worst = None
+    for fo_lbl, fo_list in (("House", PARAMS["houses"]),
+                            ("Backdrop", PARAMS["backdrop"])):
+        for fo_i, fo_hs in enumerate(fo_list):
+            fo_ops = sorted(facade_openings(fo_hs), key=lambda o: o["cx"])
+            fo_w = float(fo_hs["w"])
+            fo_cx = float(fo_hs["cx"])
+            fo_pier = [(fo_ops[k + 1]["cx"] - fo_ops[k + 1]["half"])
+                       - (fo_ops[k]["cx"] + fo_ops[k]["half"])
+                       for k in range(len(fo_ops) - 1)]
+            fo_ret = [(fo_ops[0]["cx"] - fo_ops[0]["half"]) - (fo_cx - fo_w / 2.0),
+                      (fo_cx + fo_w / 2.0) - (fo_ops[-1]["cx"] + fo_ops[-1]["half"])]
+            fo_min = min(fo_pier + fo_ret)
+            if fo_worst is None or fo_min < fo_worst[0]:
+                fo_worst = (fo_min, f"{fo_lbl}[{fo_i}]")
+            chk(f"GT-129 {fo_lbl}[{fo_i}] 개구부 {len(fo_ops)}개 · 겹침 0",
+                min(fo_pier) >= FACADE_PIER - 1e-9
+                and min(fo_ret) >= FACADE_RET - 1e-9,
+                f"피어 {[f'{p * 1000:+.0f}' for p in fo_pier]} · 모서리 "
+                f"{[f'{r * 1000:+.0f}' for r in fo_ret]} mm "
+                f"(하한 {FACADE_PIER * 1000:.0f} / {FACADE_RET * 1000:.0f})")
+    chk("GT-129 전 동 최소 여유 > 0 (수리 전 최악 House[5] 피어 −276 mm)",
+        fo_worst is not None and fo_worst[0] > 0,
+        f"최악 {fo_worst[1]} {fo_worst[0] * 1000:+.0f} mm")
+    #   걸레받이 띠(base ~ base+0.85)가 창유리를 가로지르지 않는가 — 창은
+    #   `0.55·h` 밴드에 있으므로 낮은 동일수록 빠듯하다.
+    fo_sill = []
+    for fo_i, fo_hs in enumerate(PARAMS["houses"]):
+        for fo_op in facade_openings(fo_hs):
+            if fo_op["tag"] == "Door":
+                continue
+            fo_sill.append((fo_op["z"] - fo_op["h"] / 2.0 - FACADE_FRAME_W
+                            - float(fo_hs["base_z"]) - 0.85, fo_i))
+    chk("GT-129 창 하단 > 걸레받이 상단(base+0.85)",
+        min(s[0] for s in fo_sill) > 0,
+        f"최소 여유 {min(fo_sill)[0] * 1000:+.0f} mm @House[{min(fo_sill)[1]}]")
 
     # ── (10) [GT-121] 실효 알베도 전/후 표 + 대역 판정 ──────────────────────
     #   이 씬의 결함은 좌표가 아니라 **곱셈**이었다. 그래서 이 절은 기하를 재지 않고,
@@ -1976,12 +2078,11 @@ def main():
             (w, d, top - bot), shell_mtl, col=True)
         # facade (alley-side) wall plane: face=-1 -> -Y face (y=cy-d/2), face=+1 -> +Y face
         yf = cy + face * (d / 2.0)
-        z_win = base + ht * 0.55
-        for c, off in enumerate((-w * 0.28, w * 0.28)):
-            _opening(prefix, f"Win_{c}", cx + off, yf, face, z_win,
-                     h["win_w"], h["win_h"], M)
-        _opening(prefix, "Door", cx, yf, face, base + h["door_h"] / 2.0,
-                 h["door_w"], h["door_h"], M)
+        # [GT-129] 개구부 배치는 `facade_openings` 가 여유에서 유도한다 —
+        #   고정 비율 `cx ± 0.28·w` 는 좁은 동에서 문선과 창을 관통시켰다.
+        for op in facade_openings(hs):
+            _opening(prefix, op["tag"], op["cx"], yf, face, op["z"],
+                     op["w"], op["h"], M)
         # roof slab (overhang)
         BOX(f"{prefix}/Roof", (cx, cy, top + h["roof_t"] / 2.0),
             (w + 2 * h["roof_over"], d + 2 * h["roof_over"], h["roof_t"]),

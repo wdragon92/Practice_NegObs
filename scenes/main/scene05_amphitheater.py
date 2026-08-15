@@ -376,13 +376,41 @@ PARAMS = dict(
     #   `under` / `z_cascade` are the NEW guard, and they exist because removing the box
     #   overshoot removes the cover it accidentally gave against a *different* solid: the
     #   podium is a `UsdGeom.Cylinder`, whose visual tessellation pulls its face-centre
-    #   radius in to `3.0*cos(pi/n)` (**14.4 mm at n=32**, the exact v4-A1 failure). A
-    #   sector that stops at exactly 3.000 therefore leaves a crescent against the drawn
-    #   cylinder. So the innermost step and the cheeks run **0.10 m under** the podium
-    #   (r_in 3.000 -> 2.900, a 100 mm lap against a 14.4 mm worst-case dip) and drop
-    #   **3 mm** (top -0.853 -> -0.856) so the lapped ring is not coplanar with the podium
-    #   top disc - the radial+z counterpart of v4-A1, and the same 3 mm cascade the stage
-    #   already uses (-1.200 > -1.203 > -1.207). A 3 mm rise onto the podium is not a step.
+    #   radius in to `3.0*cos(pi/n)`. A sector that stops at exactly 3.000 therefore leaves
+    #   a crescent against the drawn cylinder. So the innermost step and the cheeks run
+    #   **under** the podium and drop **3 mm** (top -0.853 -> -0.856) so the lapped ring is
+    #   not coplanar with the podium top disc - the radial+z counterpart of v4-A1, and the
+    #   same 3 mm cascade the stage already uses (-1.200 > -1.203 > -1.207). A 3 mm rise
+    #   onto the podium is not a step.
+    # === [GT-129] the lap was sized against the WRONG n — `cyl_radial` ===================
+    #   W3 L05 wrote the lap as "100 mm against a 14.4 mm worst-case dip", where 14.4 mm is
+    #   `3.0*(1-cos(pi/32))`. **n is not 32.** A `UsdGeom.Cylinder` gprim is imaged through
+    #   `UsdImaging`'s cylinder adapter, which generates its mesh with **numRadial = 10** —
+    #   a decagon. Apothem `3.0*cos(pi/10)` = **2.8532**, i.e. a **146.8 mm** dip, so the
+    #   old `under=0.10` (r_in 2.900) left the sector's inner boundary standing **outside**
+    #   the drawn wall for `|a - facet midpoint| < acos(2.8532/2.900)` = 10.31 deg.
+    #   The decagon's facet midpoints are 18 + 36k deg, i.e. **126 / 162 / 198 / 234** — all
+    #   four fall inside the two access-stair arcs (+cheeks: 127..163 / 197..233), so every
+    #   run got two open crescents, up to 46.8 mm wide and open all the way down to the
+    #   stage disc top (-1.207): a **0.354 m deep bottomless slot**. Measured on
+    #   `260816_w4_final33_on/pt_noon_rim_view.png`:
+    #     · 162 deg (and its mirror 198) — the crescent runs 151.7..163 and its upper lip
+    #       steps down 0.175 m where the top course hands over to the cheek at 160: the
+    #       **Z-shaped black slot**, predicted x 460..642 vs measured 477..653.
+    #     · 126 deg (and its mirror 234) — 9.5 deg off the podium's tangent bearing (117.5)
+    #       as seen from `rim_view`, so the same crescent projects into a near-tangent
+    #       sliver that reads as an **acute wedge blade** rising out of the stage floor;
+    #       the crescent shuts at 136.31 deg = x 294, measured black slit ends at x 288.
+    #   Fix (junction only — no arc, no top-face z, no outer radius, no new prim):
+    #   `under` **0.10 -> 0.35**. r_in 3.000 -> 2.650, which is 0.203 m *inside* the decagon
+    #   apothem, so the lapped ring is swallowed by the podium solid at every azimuth and
+    #   the crescent cannot exist. The lap is now 2.4x the true dip (the L05 "2x" rule read
+    #   against the right n), and it still clears a hypothetical n=7 (apothem 2.7032).
+    #   What the fix does NOT move: the visible tread (r 3.0..3.375), the course top faces
+    #   (-1.028 / -0.856), the cheek top (-1.031), the arcs, the podium disc. Only the
+    #   *buried* inner boundary of the innermost course and of the 4 cheeks travels inward.
+    #   Gated by `podium_step_selfcheck` ③ (lap vs the declared `cyl_radial`) and the new
+    #   ⑦ (nothing may surface outside the drawn wall).
     # === [GT-75] the cheek is RAKED to the bottom course — `cheek_level` ================
     #   Verdict this round: "계단이 너무 튄다 / 좀 더 깔끔하게 붙여라". Traced in
     #   `260806_w3_fixqueue/pt_noon_side_arc.png`: the run itself is fine, the **run end**
@@ -407,14 +435,18 @@ PARAMS = dict(
     #   · nothing is left raw: the top course's arc-end face (0.175 m) lands on the cheek,
     #     the bottom course's on a 3 mm reveal over it, and the cheek's own end face
     #     (0.172 m) lands on the apron. `cheek_overlap` 0.2° still buries the junction.
-    #   · the cheek keeps the `under` 0.10 m lap, and at −1.031 that lap sits **inside**
+    #   · the cheek keeps the `under` lap, and at −1.031 that lap sits **inside**
     #     the podium cylinder (−1.607..−0.853), so the lap can never be exposed.
     #   Gated by `podium_step_selfcheck` ⑤⑥ (end ladder · no coplanar top pair).
-    podium=dict(r=3.0, top_z=-0.853, base_z=-1.607,
+    # `cyl_radial` = the radial segment count `UsdImaging` gives a `UsdGeom.Cylinder`
+    #   gprim (10). It is declared, not guessed: the crescents it predicts land on the
+    #   measured pixels (GT-129 above). Every consumer of the podium's *drawn* radius
+    #   reads it from here so the lap can never again be sized against a wrong n.
+    podium=dict(r=3.0, top_z=-0.853, base_z=-1.607, cyl_radial=10,
                 steps=dict(radii=(3.75, 3.375, 3.0),
                            tops=(-1.028, -0.853),
                            seg=12, base_z=-1.6,
-                           under=0.10, z_cascade=0.003,
+                           under=0.35, z_cascade=0.003,
                            arcs=((130.0, 160.0), (200.0, 230.0)),
                            cheek_deg=3.2, cheek_overlap=0.2, cheek_level=0)),
     # === v4-A2/A3 [critical] entry stair redesign ===
@@ -1175,8 +1207,9 @@ def podium_step_selfcheck(verbose=True):
       ② arc-end protrusion — the a0/a1 caps are exactly radial: 0.000 mm;
       ③ **the lap that replaces what the box overshoot used to hide**: a
          `UsdGeom.Cylinder` is drawn as a polygon whose face centres pull in to
-         `r·cos(π/n)`. At the pessimistic n = 32 that is 14.4 mm on r 3.0, so the
-         innermost step must underlap the podium by more than that;
+         `r·cos(π/n)`, and **n is `PARAMS["podium"]["cyl_radial"]`, not a guess**
+         (GT-129: the gate used to hard-code 32 and passed a lap that was 47 mm short
+         of the real 146.8 mm dip), so the innermost step must underlap by more;
       ④ the lapped ring must **not** be coplanar with the podium top disc.
 
     [GT-75] two end-finish gates, because ①~④ measure the RUN and the round's verdict
@@ -1189,6 +1222,19 @@ def podium_step_selfcheck(verbose=True):
       ⑥ **no coplanar top pair** — the cheek shares an r window and a 0.2° azimuth
          window with both courses, so its top face must sit a real distance from theirs
          (either the 3 mm cascade or a full riser), never on the same plane.
+
+    [GT-129] one **surfacing** gate, because ①~⑥ all measure the run and none of them
+    could see the run's *buried* half come back out of the floor:
+      ⑦ **nothing surfaces outside the drawn wall** — the lapped inner boundary
+         `radii[-1] − under` must lie inside the podium's **drawn** wall (apothem
+         `r·cos(π/cyl_radial)`) with real margin. When it does not, the overshoot is not
+         a hairline: the sector's inner edge stands proud of the decagon for
+         `|Δa| < acos(apothem / r_in)` about every facet midpoint, and because the step
+         body starts at `base_z` −1.6 while the podium's own solid has already ended, the
+         crescent is **open to the stage disc top −1.207** — a 0.354 m deep slot that
+         reads black from every eye height, and, seen near the podium's tangent bearing,
+         as a knife-edge blade rising out of the stage floor. Margin 0.15 m is the
+         decagon-to-n=7 spread, so the gate holds even if the imaging count changes.
     """
     po = PARAMS["podium"]
     ps = po["steps"]
@@ -1206,9 +1252,19 @@ def podium_step_selfcheck(verbose=True):
         rows.append((i, a0, a1, r_in, r_out, ztop, gap, over))
     gap_max = max(r[6] for r in rows)
     over_max = max(r[7] for r in rows)
-    # ③ the worst tessellation this lap has to survive
-    cyl_dip = po["r"] * (1.0 - math.cos(math.pi / 32.0))
+    # ③ the tessellation this lap actually has to survive — read from the declaration,
+    #   never assumed (GT-129: a hard-coded 32 hid a 146.8 mm dip behind a 100 mm lap).
+    n_rad = int(po["cyl_radial"])
+    cyl_dip = po["r"] * (1.0 - math.cos(math.pi / n_rad))
     lap = ps["under"]
+    # ⑦ [GT-129] the lapped inner boundary vs the podium's DRAWN wall (apothem)
+    apothem = po["r"] * math.cos(math.pi / n_rad)
+    r_lap = ps["radii"][-1] - ps["under"]
+    clear = apothem - r_lap
+    pierce_ok = clear >= 0.15
+    # the crescent this would open if the lap ever went short again (0 when buried)
+    surf_deg = (math.degrees(math.acos(min(1.0, apothem / r_lap)))
+                if r_lap > apothem else 0.0)
     # ④ coplanarity with the podium top disc
     dz = abs((po["top_z"] - ps["z_cascade"]) - po["top_z"])
     # ⑤/⑥ [GT-75] the run END. `z_apron` is the stage rim top face the flight stands on.
@@ -1228,7 +1284,7 @@ def podium_step_selfcheck(verbose=True):
     cheek_ok = dz_cheek >= 0.001
     ok = (gap_max <= 0.002 and over_max <= 1e-9
           and lap >= 2.0 * cyl_dip and 0.001 <= dz <= 0.010
-          and ladder_ok and cheek_ok)
+          and ladder_ok and cheek_ok and pierce_ok)
     if verbose:
         print("=" * 68)
         print("scene05 [W3 L05·K4(d)] 승강 계단 아크 쐐기 검산 — 진성 환형섹터")
@@ -1242,7 +1298,7 @@ def podium_step_selfcheck(verbose=True):
         print(f"  ② 호끝 돌출 {over_max*1000:.3f} mm (구 42 mm → seg12 10.6 mm) → "
               f"{'OK(구조적으로 0)' if over_max <= 1e-9 else 'FAIL'}")
         print(f"  ③ 포디움 겹침 {lap*1000:.0f} mm ≥ 2×실린더 테셀레이션 처짐 "
-              f"{cyl_dip*1000:.1f} mm(n=32) → "
+              f"{cyl_dip*1000:.1f} mm(n={n_rad}, 선언값) → "
               f"{'OK' if lap >= 2.0 * cyl_dip else 'FAIL'}")
         print(f"  ④ 상면 캐스케이드 {dz*1000:.0f} mm (동일면 z-fighting 회피) → "
               f"{'OK' if 0.001 <= dz <= 0.010 else 'FAIL'}")
@@ -1258,9 +1314,14 @@ def podium_step_selfcheck(verbose=True):
               f"(구 포디움 레벨 0.347 m) · 단 상면과의 최소 이격 "
               f"{dz_cheek*1000:.0f} mm ≥ 1 → "
               f"{'OK(동일면 0)' if cheek_ok else 'FAIL'}")
+        print(f"  ⑦ 바닥 관통      겹침단 내경 {r_lap:.3f} vs 실제 그려지는 벽 "
+              f"(정십각형 아포뎀) {apothem:.3f} — 여유 {clear*1000:.0f} mm ≥ 150 · "
+              f"부상 반각 {surf_deg:.2f}° (구 under 0.10 = 10.31°, 슬롯 깊이 0.354 m) → "
+              f"{'OK(전 방위 매몰)' if pierce_ok else 'FAIL'}")
         print("=" * 68)
     return ok, dict(gap=gap_max, over=over_max, lap=lap, cyl_dip=cyl_dip, dz=dz,
-                    proud=proud, dz_cheek=dz_cheek,
+                    proud=proud, dz_cheek=dz_cheek, apothem=apothem, clear=clear,
+                    surf_deg=surf_deg, n_radial=n_rad,
                     r_rise=r_rise, e_rise=e_rise)
 
 
@@ -1843,6 +1904,10 @@ BANNER = """\
                        내려앉아 계단 리듬을 잇는가(구 0.347 m 민무늬 판벽)
  9-2.[GT-75] 측벽 관입 — side_arc·plaza_approach 의 남측 cut_wall 외면에서
                        **튀어나온 초록 바위(관목 로브)가 사라졌는가**
+ 9-3.[GT-129] 무대 바닥 관통 — rim_view·side_arc 400 % 에서 방위 126/162/198/234°
+                       (포디움 실린더 십각형 패싯 중점) 에 **칼날 쐐기·Z자 검은 슬롯이
+                       한 곳도 남지 않았는가**. 계단 상면과 포디움 상면 사이는 3 mm
+                       리빌 한 줄이어야 하고, 그 아래로 들여다보이는 구멍이 없어야 한다
 10. [v7] 서측 볼라드 — stage_lookup 지평선의 백색 포스트 열이 사라지고
                        진입축 4본(도장 강재)만 남았는가
 11. [GT-69] 관계 배치 — stage_lookup 에서 진입로(가로등 2·가로수 2·벤치 2·

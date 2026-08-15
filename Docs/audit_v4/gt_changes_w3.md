@@ -2864,3 +2864,18 @@ blendFactor 축 토글이었어서 enabled 축과 결론이 다르다 — **slop
 재질이 아니라 렌더 설정(디노이저) 층**으로 이동. 단 디노이저 OFF 는 노이즈 트레이드
 오프가 있어 채택은 spp 예산과 함께 사용자 판정. v1.11 노브는 개방 존치(기본 항등),
 MICRO_V1 팔 존치·값 승격 없음. **Status: CLOSED (기각 — 디노이저 축 이관)**
+
+## 84. GT-128 — 분류기 W8: "deck" 키워드 함정 정확핀 2건 (선신고)
+
+**Authority**: 08-14 사용자 3일 자율 위임(행 69) + 사용자 08-16 지시("해볼 수 있는 것
+더"). 근거 = GT-126 ⑪ 관찰(원장 행 82 ⓑ): wood 키워드 "deck" 가 콘크리트 데크를
+포획 — ① s06 `DeckConcrete` = **판정 보행면**(나선 데크 슬래브)이 wood 클래스(omni,
+목재 승격 후보)로 우회, 콘크리트 계열 지면 처방(트라이플래너·디테일·밴드) 전체 누락
+② s18 `BridgeDeck` = 원경 고가 콘크리트 상판 동일 우회. 열거 실측: deck 포함 명칭
+12종 중 이 2건만 콘크리트 — 나머지(Deck/DeckWood/DeckGuard*/DeckStain* 등)는 목재가
+맞다. ridge/crest 는 기왕 정확·접두핀으로 처리 완료라 키워드 이동 불요("Bridge"⊃
+"ridge" 충돌 — 이동 금지 근거 명기).
+**Scope**: LOOK_ROLE 정확핀 2건 — `"DeckConcrete": "concrete"` · `"BridgeDeck":
+"concrete"`. 검증 = 전 Looks 명칭 열거 분류 diff(의도 2건 외 0건) + s06·s18 단독
+A/B 렌더 육안(판정면 룩 변화 = 선언 귀속).
+**GT 판정**: R-2(분류만). **Status: OPEN (선신고 — 시공 중)**

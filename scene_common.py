@@ -718,6 +718,12 @@ LOOK_ROLE = {
     # Ridge/Crest is a natural ridge, not concrete.
     "Roof": "wood", "Roof_": "wood", "Ridge": "soil", "Ridge_": "soil",
     "Crest_": "soil", "Crest": "soil",
+    # [GT-128 W8] The wood keyword "deck" swallows concrete decks. Only these two of
+    # the 12 Deck*/BridgeDeck names are concrete — s06's judged spiral-deck slab and
+    # s18's distant highway deck; every other Deck* name really is timber. (ridge/
+    # crest stay keyword-free in soil: "Bridge" contains "ridge", so moving the
+    # token would reroute bridges to soil — exact/prefix pins above cover landforms.)
+    "DeckConcrete": "concrete", "BridgeDeck": "concrete",
     "Sign": "sign", "SignFace": "sign", "SignBack": "sign",
 }
 

@@ -2878,4 +2878,7 @@ MICRO_V1 팔 존치·값 승격 없음. **Status: CLOSED (기각 — 디노이�
 **Scope**: LOOK_ROLE 정확핀 2건 — `"DeckConcrete": "concrete"` · `"BridgeDeck":
 "concrete"`. 검증 = 전 Looks 명칭 열거 분류 diff(의도 2건 외 0건) + s06·s18 단독
 A/B 렌더 육안(판정면 룩 변화 = 선언 귀속).
-**GT 판정**: R-2(분류만). **Status: OPEN (선신고 — 시공 중)**
+**GT 판정**: R-2(분류만).
+**§4 착지기록** (2026-08-16): 핀 2건 시공·열거 diff 의도 2건뿐·geom 33/33·검증 렌더
+`260816_w4_w8deck`(s06·s18) 완료. **육안 미실시**(사용자 중단 지시 — 연장분 결산
+`reports/autonomy_run_extension_260816.md` 참조). **Status: OPEN (착지 — 육안 대기)**

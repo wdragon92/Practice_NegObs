@@ -377,6 +377,15 @@ def scene_proc(scene_file, scene_key, out_dir, conds, n_cam, base_seed):
         vp.camera_path = Sdf.Path(CAM)
         print(f"[data] viewport camera {was} -> {vp.camera_path}", flush=True)
 
+        # Opt-in depth sidecar (spec D4). Attached HERE — after the camera is
+        # bound, before the render-settings block below — so that block
+        # re-asserts /rtx/pathtracing/* over anything the render product
+        # disturbed. Unset NEGOBS_DATA_SIDECARS => `depth_ann is None` and every
+        # branch guarded by it below is dead.
+        sidecars = _sidecars_on()
+        depth_ann, depth_rp = (_depth_attach(CAM, sim_app) if sidecars
+                               else (None, None))
+
         set_render_mode_fn("PathTracing")
         st = carb.settings.get_settings()
         st.set("/rtx/pathtracing/spp", sc.PT_FAST["spp"])
@@ -406,6 +415,20 @@ def scene_proc(scene_file, scene_key, out_dir, conds, n_cam, base_seed):
             return os.path.isfile(fp)
 
         os.makedirs(out_dir, exist_ok=True)
+        if sidecars:
+            # Once per scene process: geometry does not move between cuts, and
+            # the hazard arm is fixed for the whole process (spec D5).
+            try:
+                # the scene module's own globals: _capture's caller is the
+                # scene file's main(), see _scene_oracle
+                try:
+                    _ns = sys._getframe(1).f_globals
+                except Exception:
+                    _ns = None
+                _heightmap_write(pre, out_dir, scene_key, _ns)
+            except Exception as e:
+                print(f"[sidecar] heightmap FAILED — {type(e).__name__}: "
+                      f"{str(e)[:200]}", flush=True)
         rec_path = os.path.join(out_dir, "variation.json")
         prev_rec = _read_scene_json(out_dir)
         cuts = {c["file"]: c for c in prev_rec.get("cuts", [])}
@@ -430,7 +453,11 @@ def scene_proc(scene_file, scene_key, out_dir, conds, n_cam, base_seed):
                 fname = f"{cid}__s{base_seed}__{i:04d}.png"
                 fp = os.path.join(out_dir, fname)
                 if fname in cuts and os.path.isfile(fp) \
-                        and cuts[fname].get("ok"):
+                        and cuts[fname].get("ok") \
+                        and (depth_ann is None
+                             or (cuts[fname].get("depth")
+                                 and os.path.isfile(os.path.join(
+                                     out_dir, cuts[fname]["depth"])))):
                     continue                        # resumable
                 st1 = pre.check(eye, s["yaw"], s["pitch"], s["hfov"])
                 rows = vk.look_at_rows(eye, s["yaw"], s["pitch"], s["roll"])
@@ -439,6 +466,18 @@ def scene_proc(scene_file, scene_key, out_dir, conds, n_cam, base_seed):
                 for _ in range(sc.PT_FAST["warmup"]):
                     sim_app.update()
                 ok = cap(fp)
+                # Depth AFTER the RGB capture returns: `cap` has already waited
+                # for the PathTracing accumulation to settle, so this is the
+                # depth of the frame that was written, not of the frame before.
+                depth_name, depth_how = None, None
+                if depth_ann is not None and ok:
+                    arr, depth_how = _depth_fetch(depth_ann, sim_app,
+                                                  sc.PT_FAST["subframes"])
+                    if arr is not None:
+                        depth_name = _depth_write(arr, fp)
+                    else:
+                        print(f"[sidecar] {fname}: no depth ({depth_how})",
+                              flush=True)
                 # flat_near is a JUDGE filter: on the data channel it would throw
                 # away the hardest 2 % of near-range samples for a reason imported
                 # from a render-failure detector (SP-3 §4.3 rider 2).
@@ -469,6 +508,9 @@ def scene_proc(scene_file, scene_key, out_dir, conds, n_cam, base_seed):
                     render=dict(mode="pt", total_spp=sc.PT_FAST["total_spp"],
                                 warmup=sc.PT_FAST["warmup"]),
                     stage1=st1, img=img, frame_budget=fb)
+                if depth_name:
+                    cuts[fname]["depth"] = depth_name
+                    cuts[fname]["depth_fetch"] = depth_how
                 if (i + 1) % 8 == 0 or i + 1 == n_cam:
                     _write_scene_json(rec_path, scene_key, base_seed, gy,
                                       cond_ids, cuts, t_run,
@@ -478,6 +520,31 @@ def scene_proc(scene_file, scene_key, out_dir, conds, n_cam, base_seed):
         ctl.apply_cond("L0")
         _write_scene_json(rec_path, scene_key, base_seed, gy, cond_ids, cuts,
                           t_run, hold.get("light0"))
+        if depth_ann is not None:
+            _depth_detach(depth_ann, depth_rp, sim_app)
+            # Hard exit, sidecar arm ONLY. Measured on the 08-19 probe: with a
+            # replicator render product alive, Kit's plugin unload faults
+            # ("omni.syntheticdata.plugin Failed to acquire interface
+            # omni::graph::core::INode while unloading all plugins") and the
+            # subprocess dies with SIGSEGV *after* every artefact is already on
+            # disk. Detaching the annotator and destroying the render product
+            # first (above) does not prevent it. That -11 is not cosmetic:
+            # `drive()` only advances `done_conds` when the subprocess returned
+            # 0 (:202), so the round would lose its scene-level resume and every
+            # scene would read as a failure in the manifest.
+            #
+            # Nothing is skipped by exiting here. variation.json and every
+            # sidecar are already written; and the scene's own
+            # `simulation_app.close()` after `capture_pipeline` has ALREADY been
+            # unreachable at this HEAD, because the `del math` below raises
+            # UnboundLocalError (`math` is imported in `scene_proc`, so `del`
+            # makes it a local of `_capture` that is never assigned). That
+            # pre-existing defect is left exactly as it is — it fires in the
+            # default path too, harmlessly, and a render night is not when to
+            # change the default path.
+            sys.stdout.flush()
+            sys.stderr.flush()
+            os._exit(0)
         del math
 
     sc.grid_views = _grid
@@ -485,6 +552,341 @@ def scene_proc(scene_file, scene_key, out_dir, conds, n_cam, base_seed):
     sc.capture_pipeline = _capture
     sys.argv = [scene_file]
     runpy.run_path(scene_file, run_name="__main__")
+
+
+# ===========================================================================
+# opt-in sidecars — NEGOBS_DATA_SIDECARS=1 (spec D4 depth, D5 heightmap)
+# ===========================================================================
+# NOTHING in this section runs unless NEGOBS_DATA_SIDECARS == "1". With the
+# variable unset no function below is ever called, no module below is ever
+# imported, and the render path is the pre-patch driver unchanged. Every import
+# these helpers need is done INSIDE the helper, so a broken/absent replicator
+# cannot break a default round at import time.
+SIDECAR_ENV = "NEGOBS_DATA_SIDECARS"
+# `distance_to_image_plane` = orthogonal distance to the image plane (the "Z
+# depth" a pinhole reprojection wants), NOT `distance_to_camera`, which is
+# radial range. See experiments/mainrun_0819/CAM_CONVENTION.md §5.
+DEPTH_ANNOTATOR = "distance_to_image_plane"
+# Per-scene height field: x in [-2, 14], y in [-8, 8], 0.05 m, z[y_idx, x_idx].
+HM_X0, HM_Y0, HM_STEP, HM_NX, HM_NY = -2.0, -8.0, 0.05, 321, 321
+HM_SPAN, HM_MARCH, HM_EPS = 14.0, 0.10, 0.005
+HM_BUDGET_S = 420.0
+# Scenes whose walked surface is an annular-sector mesh (scene_common.py:2250
+# `_annular_sector_mesh` / :2789 `build_arc_steps`). The world AABB of a 36..52
+# deg arc at r ~ 15 is a ~20 x 12 m box (Docs/reports/w3_s08_v1.md:219-221), so
+# `AabbPrefilter.ground_z` reads far too high over them. Each of these scene
+# modules carries its own exact oracle and it is used to correct the AABB read:
+#   "solid_at"  — `_solid_at(x, y, z) -> name|None`, marched DOWNWARDS from the
+#                 AABB top at the same 0.10 m step the scenes' own sight-line
+#                 checks use (scene08_sunken_plaza.py:1376-1378), then bisected.
+#   "height_xy" — a direct 2.5-D surface function `f(x, y) -> z`.
+SIDECAR_ORACLES = {
+    "scene06": ("_solid_at", "solid_at"),      # scene06:1036
+    "scene08": ("_solid_at", "solid_at"),      # scene08:1068
+    "scene11": ("_solid_at", "solid_at"),      # scene11:988
+    "scene12": ("_solid_at", "solid_at"),      # scene12:998
+    "scene19": ("_solid_at", "solid_at"),      # scene19:937
+    # scene07 exposes BOTH `path_z(x)` (:782, the corridor centre profile only)
+    # and `ground_z(x, y)` (:794, the same profile plus the north cut slope and
+    # the south terrace). The 2-D one is a strict superset of the 1-D one, so it
+    # is what gets used; `oracle` in the meta records which.
+    "scene07": ("ground_z", "height_xy"),
+}
+
+
+def _sidecars_on():
+    return os.environ.get(SIDECAR_ENV) == "1"
+
+
+def _depth_attach(cam_path, sim_app):
+    """Replicator render product + depth annotator on the driver's OWN camera.
+
+    Returns the annotator, or None (round then simply has no depth sidecars —
+    an absent annotator must never abort a render night).
+
+    Called BEFORE the `/rtx/pathtracing/*` block in `_capture`, so that block
+    re-asserts every render setting a render product may have disturbed
+    (SPEC_EXTRACTED.md (e), risk (i)).
+    """
+    try:
+        import omni.kit.app
+        mgr = omni.kit.app.get_app().get_extension_manager()
+        if not mgr.is_extension_enabled("omni.replicator.core"):
+            mgr.set_extension_enabled_immediate("omni.replicator.core", True)
+            for _ in range(10):
+                sim_app.update()
+        import omni.replicator.core as rep
+        rp = rep.create.render_product(cam_path, (vk.RES_W, vk.RES_H))
+        ann = rep.AnnotatorRegistry.get_annotator(DEPTH_ANNOTATOR)
+        ann.attach(rp)
+        for _ in range(10):
+            sim_app.update()
+        print(f"[sidecar] depth {DEPTH_ANNOTATOR} attached to {cam_path} "
+              f"{vk.RES_W}x{vk.RES_H}", flush=True)
+        return ann, rp
+    except Exception as e:
+        print(f"[sidecar] depth annotator UNAVAILABLE — "
+              f"{type(e).__name__}: {str(e)[:200]}", flush=True)
+        return None, None
+
+
+def _depth_detach(ann, rp, sim_app):
+    """Tear the annotator and its render product down BEFORE Isaac unloads its
+    plugins.
+
+    Measured on the 08-19 patch probe: without this the replicator /
+    omni.syntheticdata teardown order faults and the scene subprocess exits
+    -11 (SIGSEGV) after every artefact is already safely on disk. That exit
+    code is not cosmetic — `run_data_render.py` only advances `done_conds` when
+    the subprocess returned 0, so a -11 silently costs the round its
+    scene-level resume and makes every scene look like a failure in the
+    manifest.
+    """
+    for tag, fn in (("detach", lambda: ann.detach()),
+                    ("destroy", lambda: rp.destroy())):
+        try:
+            fn()
+        except Exception as e:
+            print(f"[sidecar] depth {tag} failed: {type(e).__name__}: "
+                  f"{str(e)[:120]}", flush=True)
+    for _ in range(5):
+        sim_app.update()
+    print("[sidecar] depth annotator torn down", flush=True)
+
+
+def _depth_fetch(ann, sim_app, subframes):
+    """(array|None, how). Fetched only AFTER `cap()` has returned, so the depth
+    belongs to the same converged PathTracing frame as the PNG.
+
+    PT accumulation means the first fetch of a freshly attached annotator can
+    come back empty or all-zero; the escalation below is tried in order and the
+    step that worked is recorded per cut as `depth_fetch`, so the round says on
+    disk what it actually needed.
+    """
+    import numpy as np
+    plan = (("t0", 0), ("t1", 1), ("t4", 4), ("orch", -1))
+    for how, ticks in plan:
+        if ticks > 0:
+            for _ in range(ticks):
+                sim_app.update()
+        elif ticks < 0:
+            try:
+                import omni.replicator.core as rep
+                rep.orchestrator.step(rt_subframes=int(subframes))
+            except Exception as e:
+                print(f"[sidecar] orchestrator.step failed: {e}", flush=True)
+                return None, "fail"
+        try:
+            a = ann.get_data()
+        except Exception as e:
+            print(f"[sidecar] depth get_data failed: {e}", flush=True)
+            return None, "fail"
+        a = np.asarray(a)
+        if a.ndim == 3:
+            a = a[..., 0]
+        if a.shape == (vk.RES_H, vk.RES_W) and np.any(a != 0):
+            return a, how
+    return None, "empty"
+
+
+def _depth_write(a, fp_png):
+    """`<png stem>.depth.npy`, float16 metres, +inf where nothing was hit.
+
+    float16 is 4 MB/cut instead of 8 and its 2^-10 relative step is ~1 cm at
+    10 m — an order below the 0.30 m hazard threshold. Non-finite (sky) stays
+    non-finite; anything beyond float16 range (65504 m) is sky by any reading
+    and lands on +inf too. A `.npy` sidecar is deliberately not a `.png`:
+    `check_data_run.py:256-261` fails a round on any orphan PNG.
+    """
+    import numpy as np
+    out = os.path.splitext(fp_png)[0] + ".depth.npy"
+    a = np.asarray(a, np.float32)
+    a = np.where(np.isfinite(a), a, np.float32(np.inf))
+    with np.errstate(over="ignore", invalid="ignore"):
+        a16 = a.astype(np.float16)
+    np.save(out, a16)
+    return os.path.basename(out)
+
+
+def _aabb_grid(pre, xs, ys, top=60.0):
+    """(Z, info) — `AabbPrefilter.ground_z` over the whole grid, NaN = no hit.
+
+    The per-cell call costs ~134 us at 3000 prims, i.e. ~14 s for 321x321 per
+    scene per arm. The downward ray from z=top over axis-aligned boxes reduces
+    exactly to `max(hi_z)` over the boxes whose XY footprint contains the cell,
+    so it is computed box-major instead — and then VERIFIED against
+    `pre.ground_z` itself on a lattice of sample cells. If they ever disagree
+    the fast result is thrown away and the authority's own loop is run.
+    """
+    import numpy as np
+    X, Y = np.meshgrid(xs, ys)                     # (ny, nx)
+    Z = np.full(X.shape, np.nan)
+    lo, hi = pre.lo, pre.hi
+    for k in range(lo.shape[0]):
+        if lo[k, 2] >= top:
+            continue
+        m = ((X >= lo[k, 0]) & (X <= hi[k, 0])
+             & (Y >= lo[k, 1]) & (Y <= hi[k, 1]))
+        if not m.any():
+            continue
+        v = min(float(hi[k, 2]), top)
+        cur = Z[m]
+        Z[m] = np.where(np.isnan(cur), v, np.maximum(cur, v))
+    bad, worst = 0, 0.0
+    probes = [(j, i) for j in range(0, len(ys), 17)
+              for i in range(0, len(xs), 17)]
+    for j, i in probes:
+        a = pre.ground_z(float(xs[i]), float(ys[j]), top=top,
+                         default=float("nan"))
+        b = float(Z[j, i])
+        if (a != a) != (b != b):
+            bad += 1
+        elif a == a:
+            worst = max(worst, abs(a - b))
+    if bad or worst > 1e-9:
+        print(f"[sidecar] box-major grid disagrees with ground_z "
+              f"({bad} nan-mismatch, worst {worst:.3g}) — using the per-cell "
+              f"loop", flush=True)
+        for j in range(len(ys)):
+            for i in range(len(xs)):
+                Z[j, i] = pre.ground_z(float(xs[i]), float(ys[j]), top=top,
+                                       default=float("nan"))
+        return Z, dict(mode="ground_z_loop", verified=len(probes))
+    return Z, dict(mode="box_major", verified=len(probes),
+                   worst_abs=round(worst, 12))
+
+
+def _scene_oracle(scene_key, ns=None):
+    """(name, mode, callable) pulled off the running scene module.
+
+    `ns` is the scene module's own `__dict__`, taken in `_capture` from its
+    caller's frame — `capture_pipeline` is monkey-patched onto `scene_common`,
+    so `_capture`'s caller IS the scene file's `main()` and its `f_globals` are
+    the scene module's globals. That is exact and does not depend on any
+    import machinery. The `sys.modules["__main__"]` fallback covers the same
+    ground a second way: `runpy.run_path(..., run_name="__main__")` installs the
+    scene file there for the duration of the run.
+    """
+    spec = SIDECAR_ORACLES.get(scene_key)
+    if not spec:
+        return None, None, None
+    name, mode = spec
+    fn = (ns or {}).get(name)
+    if not callable(fn):
+        fn = getattr(sys.modules.get("__main__"), name, None)
+    if not callable(fn):
+        print(f"[sidecar] {scene_key}: oracle {name!r} absent from the scene "
+              f"module — keeping the raw AABB heightmap", flush=True)
+        return None, None, None
+    return name, mode, fn
+
+
+def _oracle_correct(Z, xs, ys, fn, mode, t0):
+    """(Z, n_fallback, timed_out). Correct the AABB read where the scene has an
+    exact oracle. NaN cells stay NaN: the oracles answer for EVERY (x, y),
+    including outside the scene, so the AABB mask is what says where the scene
+    is. `max(hi_z)` over the containing boxes is an upper bound on the true
+    surface, so the march is always downwards from it.
+    """
+    n_fb = 0
+    ny, nx = Z.shape
+    for j in range(ny):
+        y = float(ys[j])
+        if time.time() - t0 > HM_BUDGET_S:
+            return Z, n_fb, True
+        for i in range(nx):
+            z0 = float(Z[j, i])
+            if z0 != z0:
+                continue
+            x = float(xs[i])
+            if mode == "height_xy":
+                try:
+                    Z[j, i] = float(fn(x, y))
+                except Exception:
+                    n_fb += 1
+                continue
+            z = z0 - HM_EPS
+            try:
+                if fn(x, y, z) is not None:
+                    continue                # the AABB was already exact here
+                prev, hit = z, None
+                z -= HM_MARCH
+                while z >= z0 - HM_SPAN:
+                    if fn(x, y, z) is not None:
+                        hit = z
+                        break
+                    prev, z = z, z - HM_MARCH
+            except Exception:
+                n_fb += 1
+                continue
+            if hit is None:
+                n_fb += 1                   # nothing under it: keep the AABB
+                continue
+            hz, lz = prev, hit
+            for _ in range(6):
+                mid = 0.5 * (hz + lz)
+                if fn(x, y, mid) is not None:
+                    lz = mid
+                else:
+                    hz = mid
+            Z[j, i] = lz
+    return Z, n_fb, False
+
+
+def _heightmap_write(pre, out_dir, scene_key, ns=None):
+    """`heightmap.npy` (float32, z[y_idx, x_idx], NaN = no hit) +
+    `heightmap_meta.json`. Once per scene process, after assembly, before the
+    cut loop — the geometry does not move between cuts."""
+    import numpy as np
+    t0 = time.time()
+    xs = HM_X0 + HM_STEP * np.arange(HM_NX)
+    ys = HM_Y0 + HM_STEP * np.arange(HM_NY)
+    Z, info = _aabb_grid(pre, xs, ys)
+    raw = Z.copy()
+    name, mode, fn = _scene_oracle(scene_key, ns)
+    n_fb, timed_out = 0, False
+    if fn is not None:
+        Z, n_fb, timed_out = _oracle_correct(Z, xs, ys, fn, mode, t0)
+        if timed_out:
+            print(f"[sidecar] {scene_key}: oracle pass exceeded "
+                  f"{HM_BUDGET_S:.0f} s — reverting to the raw AABB grid",
+                  flush=True)
+            Z, name, mode = raw, None, None
+    fin = np.isfinite(Z)
+    d = Z[fin] - raw[fin] if name else np.zeros(1)
+    np.save(os.path.join(out_dir, "heightmap.npy"), Z.astype(np.float32))
+    meta = dict(
+        x0=HM_X0, y0=HM_Y0, step=HM_STEP, nx=HM_NX, ny=HM_NY,
+        order="z[y_idx,x_idx]",
+        # Stated outright because it is the easy mistake: cameras stand at
+        # x = -d with d up to 12 m, so most camera FEET are OUTSIDE this grid.
+        # `cam.ground_z` in the cut record is the camera's own reference ground;
+        # do not index the heightmap for it (a negative index wraps silently).
+        x_range=[HM_X0, round(HM_X0 + HM_STEP * (HM_NX - 1), 6)],
+        y_range=[HM_Y0, round(HM_Y0 + HM_STEP * (HM_NY - 1), 6)],
+        solid_at_used=bool(name and mode == "solid_at"),
+        oracle=(f"{name}(x,y,z)" if mode == "solid_at"
+                else f"{name}(x,y)" if name else None),
+        scene=scene_key,
+        arm_config=os.environ.get("NEGOBS_SCENE_CONFIG") or None,
+        nodata="NaN",
+        source="variation_kit.AabbPrefilter.ground_z(top=60.0)",
+        aabb_grid=info, n_prims=pre.n,
+        oracle_mode=mode, oracle_fallback_cells=int(n_fb),
+        oracle_timed_out=bool(timed_out),
+        oracle_max_drop=(round(float(-d.min()), 4) if name and d.size else 0.0),
+        n_finite=int(fin.sum()), n_total=int(Z.size),
+        z_min=(round(float(Z[fin].min()), 4) if fin.any() else None),
+        z_max=(round(float(Z[fin].max()), 4) if fin.any() else None),
+        sec=round(time.time() - t0, 2),
+    )
+    with open(os.path.join(out_dir, "heightmap_meta.json"), "w",
+              encoding="utf-8") as f:
+        json.dump(meta, f, ensure_ascii=False, indent=1)
+    print(f"[sidecar] heightmap {scene_key}: {meta['n_finite']}/{meta['n_total']}"
+          f" cells, z {meta['z_min']}..{meta['z_max']}, oracle {meta['oracle']}"
+          f", {meta['sec']:.1f} s", flush=True)
+    return meta
 
 
 def _frame_budget_advice(gk, plan, s, gy):

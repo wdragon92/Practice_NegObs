@@ -1,0 +1,13 @@
+site_id,type,dist_m,azimuth,cam_height_m,gt_cells,tier,notes
+EX_SUNKEN01,descending_stairs,3.0,-5,1.65,C1;C2,V,EXAMPLE ROW / 선큰광장 하행계단 12단 약 2.2m / 계단면 전체 보임 / 거리=레이저
+EX_SUNKEN01,descending_stairs,6.0,-5,1.65,C2,E,EXAMPLE ROW / 3보 후퇴 지점 / 계단면 안보이고 상단 엣지선만 / 거리=보폭
+EX_SUNKEN01,descending_stairs,9.5,-3,1.70,C2;C3,H,EXAMPLE ROW / 화단+난간에 개구부 완전 가림 / 컨텍스트=난간 라인·경고표지
+EX_UNDERPASS02,descending_stairs,4.0,12,1.60,D1;D2,V,EXAMPLE ROW / 지하보도 입구 하행계단 / 계단참까지 보임
+EX_UNDERPASS02,descending_stairs,8.0,14,1.60,D2;D3,H,EXAMPLE ROW / 캐노피+가로수에 가림 / 컨텍스트=캐노피 하단선·난간
+EX_SUBWAY03,descending_stairs,5.5,-20,1.75,B2,E,EXAMPLE ROW / 지하철 출입구 / 상부 구조물로 내부 미시 엣지선만 / 탐색(캐노피 형상 sim 미포함)
+EX_RIVERBANK04,embankment,7.0,0,1.70,C2;C3,E,EXAMPLE ROW / 하천 제방 약 1.8m / 잔디 크레스트로 지면 꺾임만 보임 / 탐색
+EX_RIVERBANK04,embankment,12.0,0,1.70,C3,H,EXAMPLE ROW / 관목열에 완전 가림 / 컨텍스트=눈높이 아래 식생 상단선 / 탐색
+EX_DOCK05,loading_dock,3.5,25,1.55,E1;E2,V,EXAMPLE ROW / 물류 하역장 단차 1.2m / 탐색
+EX_DITCH06,ditch,5.0,-15,1.65,B2,E,EXAMPLE ROW / 캠퍼스 배수로 폭0.8 깊0.6 / 그레이팅 없는 구간 / 탐색
+EX_CTRL07,none,na,na,1.65,none,N,EXAMPLE ROW / 무위험 대조 / EX_SUNKEN01 부지에서 반대방향 평지 보도 / 동일 시간대·조명
+EX_CTRL08,curb_only,na,na,1.70,none,N,EXAMPLE ROW / 하드 네거티브 / 연석 0.15m만 존재 / 연석은 hazard 아님

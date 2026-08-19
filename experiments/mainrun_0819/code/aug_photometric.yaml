@@ -1,0 +1,26 @@
+# RESERVE photometric-augmentation config — every block is OFF by default.
+# Consumed by polar_dataset._apply_photometric; wire it in with
+#   train_polar.py --aug --aug-config aug_photometric.yaml
+# Without --aug-config, --aug uses the built-in mild ColorJitter(0.2,0.2,0.2,0.02) instead.
+#
+# Rationale for keeping this off: the campaign measured strong aug as a NET LOSS at this data
+# scale (-0.007 mIoU, REPORT §6-4). Geometry aug is deliberately absent here — a horizontal flip
+# needs the sector permutation (polar_dataset.flip_with_permutation), and crops/rotations would
+# move hazards across sector and band boundaries, silently corrupting the 15-cell label.
+# RGB arm only. The depth arm is never photometrically augmented.
+
+color_jitter:
+  enabled: false
+  brightness: 0.2    # torchvision ColorJitter: factor sampled from [1-b, 1+b]
+  contrast: 0.2
+  saturation: 0.2
+  hue: 0.02          # keep tiny: hue rotation is what makes soil/grass cues drift
+
+gaussian_noise:
+  enabled: false
+  sigma: 4.0         # in 0-255 units, added after jitter, before normalisation
+
+jpeg:
+  enabled: false     # sim renders are noise-free; JPEG is the cheapest real-camera surrogate
+  q_min: 70
+  q_max: 95

@@ -1,0 +1,43 @@
+{
+  "train": [
+    "scene01",
+    "scene02",
+    "scene03",
+    "scene04",
+    "scene06",
+    "scene08",
+    "scene09",
+    "scene12",
+    "scene16",
+    "scene17",
+    "scene20",
+    "scene21",
+    "sceneC1",
+    "sceneC4",
+    "sceneD1",
+    "sceneD2",
+    "sceneN1",
+    "sceneN2",
+    "sceneN4",
+    "sceneN5"
+  ],
+  "val": [
+    "scene10",
+    "sceneD3"
+  ],
+  "test": [
+    "scene05",
+    "scene07",
+    "scene14",
+    "scene15",
+    "scene18",
+    "sceneC2",
+    "sceneN3"
+  ],
+  "hold": [
+    "scene11",
+    "scene13",
+    "scene19",
+    "sceneD4"
+  ]
+}

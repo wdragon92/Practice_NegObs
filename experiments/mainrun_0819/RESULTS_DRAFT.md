@@ -139,3 +139,138 @@ fire at p ≈ 0.98 across 5–8 cells, i.e. the RGB FA rate is concentrated, not
 9. **Twin pairing is incomplete.** 51 of 168 test pairs (and 183 of 792 corpus-wide) fail the pose
    match on `ground_z`. Scene C2 — the dominant false-alarm scene — contributes zero pairs, so the
    causal analysis and the FA analysis do not cover the same scenes.
+
+---
+
+## Night 0820→0821 update
+
+*Appended 2026-08-21 by the NIGHTRUN 0820 cycle (`Docs/experiment/OVERNIGHT_BRIEF_0820_v1.md`, D1).
+**Nothing above this line was modified.** Everything here is CPU re-analysis of the frozen recipe-v2
+artefacts under `experiments/dayrun_0820/runs/v2/` (grid `PROVISIONAL-GRID-V1`, 20 cells,
+τ_op = 0.5, seeds 42/43/44); the GPU tracks (YOLO s43/44, aux, the C2 control round, the hole probe)
+did not run — the GPU was held by another process all night — so the four-row main table is
+unchanged. Sources: `nightrun_0820/narrative/diag_v2/DIAG_V2.md`, `TWIN_STRATIFICATION.md`,
+`STRADDLE_REPORT.md`, `tau_curves/TAU_CURVES.md`.*
+
+### N.1 Correction to §5.3 — the H-tier claim is a **band-3b** claim
+
+The 8 m band split (v2) makes the far row decomposable for the first time, and the H-tier twin Δ is
+**not** uniform across it. On the 96 H-tier pose-matched pairs, RGB's Δ is **+0.293 ± 0.087** in
+band 3b `[8,12)` m (s42 point 0.185, 95 % CI [0.138, 0.233], clear of zero) but **−0.031 ± 0.054**
+in band 3a `[5,8)` m (s42 −0.049, CI [−0.127, **+0.017**], **containing zero**); on s42 the off arm's
+mean probability over those 3a cells is in fact *higher* than the on arm's (0.292 vs 0.243), and only
+55 % of the 33 pairs have Δ > 0. Depth is positive in both bands (3a +0.534, 3b +0.411, both CIs
+clear of zero) and B2 only in 3b (+0.112 vs +0.058 with a CI containing zero).
+
+**Wording to adopt.** The sentence "removing the hazard still lowers the RGB model's probability on
+H frames" must be qualified as *far-band*: RGB's context response to a hazard it cannot see is
+demonstrated for band 3b and **is not demonstrated for band 3a**, where its H-tier firing is
+consistent with the standing prior rather than with the hazard. Do not state the H result for the
+H tier as a whole in the RGB row.
+
+### N.2 New footnote to the twin table — the pairing tolerance does not inflate the headline
+
+D20 rescued 54 test twin pairs under a `|Δground_z| ≤ 0.15 m` tolerance, so those pairs' two arms
+differ slightly in input. Re-stratifying (pose audit: `ground_z` is the *only* key that ever differs;
+EXACT = all five pose keys equal to 1e-6, n = 312; TOL = the tolerance layer, n = 54):
+
+> **Footnote (draft).** Recomputed on the 312 pairs whose camera pose matches to 1e-6 on all five
+> keys, the H-tier twin Δ is **rgb 0.285 / depth 0.407 / b2 0.110** — identical to the published
+> values to four decimals, because **none of the 54 tolerance-rescued pairs is H tier** (they are 33
+> V and 21 H_weak/none). All nine runs' EXACT-only 95 % CIs exclude zero. The D20 tolerance enlarges
+> the V-tier sample; it is not a premise of the H-tier causal claim.
+
+The all-tier Δ is a different matter and needs its own caveat: the published kept-pair value sits
+**+0.041 (rgb) / +0.001 (depth) / +0.037 (b2)** above the EXACT-only value, because the TOL layer
+concentrates in `scene07` (24 pairs) and `sceneC2` (24 pairs) whose Δ are unusually large (0.740 and
+0.688 against 0.26–0.28 in the EXACT layer). `sceneC2`'s off arm is the non-appearance-preserving
+toggle, so part of that Δ is "the dressing went away", not "the drop went away". Quote the all-tier
+Δ with this caveat, or quote the EXACT-only value.
+
+### N.3 New paragraph for §5.2 — why τ_op = 0.5 is the reported operating point
+
+A full τ sweep (0.05–0.95, three seeds, three models, frozen probability dumps) shows the
+(H recall − FA) trade-off is **flat where it matters**: over τ ∈ [0.30, 0.70] its amplitude is 0.095
+for RGB, 0.026 for Depth and 0.013 for B2. Moving RGB to the sweep's argmax (τ = 0.35) buys
+**0.016** — and that argmax is (i) an artefact of averaging, since the per-seed optima are 0.30 /
+0.95 / 0.15, and (ii) fitted **on test**, which this project's protocol forbids (τ* is always fitted
+on val). τ = 0.5 is a pre-registered, model-neutral threshold that keeps the four rows comparable.
+Two facts belong beside it: Depth's logits are near-saturated, so its curve is essentially flat over
+τ ∈ [0.2, 0.7] and its low H recall is a model property, not a threshold choice (H recall 0.667 at
+τ = 0.15 against 0.438 at 0.5, but FA rises 0.042 → 0.184); and **B2 never exceeds H − FA = +0.033
+at any threshold**, so its absence of H-tier performance is not a thresholding problem.
+
+### N.4 Correction to §5.5 and to the FA narrative — the false alarms moved
+
+§5.5's "all four selected off-arm false alarms come from a single scene (C2), i.e. the RGB FA rate is
+concentrated, not diffuse" **does not reproduce at v2**, and its replacement runs the other way:
+
+| RGB off-arm false alarms | v1 (s42, 168 off frames) | v2 (3-seed mean, 408 off frames) |
+|---|---|---|
+| `sceneC2` frame FA | **0.875** (21/24) | **0.069** — and exactly 0.000 on two of three seeds |
+| `sceneC2` share of all cell fires | 47.8 % | **0.5 %** |
+| top-2 scene concentration | 86.9 % (C2 + N3) | **54.3 %** (scene15 + N3) |
+| scenes with zero fires | 3 | **0** |
+| dominant FA source | `sceneC2` | **`scene15`** (0.699 frame FA, 33.4 % of fires) |
+| corpus frame FA | 0.274 | **0.359** (and 0.429 on the *identical* 168 main-round frames) |
+
+So v2 traded one scene's confident, localised hallucination for **lower-amplitude firing spread across
+every ordinary test scene**, and the total went up rather than down. The rise is not a denominator
+effect: it happened on the same 168 frames v1 measured. RGB's residual FA must be argued as a
+threshold/prior issue, not as a single-scene defect. **For Depth the opposite holds** — `sceneC2` is
+now **76.1 %** of its cell fires (v1: 68.0 %) while its overall frame FA fell 0.161 → 0.042 — so the
+"confident C2 hallucination" caveat migrates from the RGB arm to the Depth arm and belongs in the
+limitations section as a Depth caveat. The appearance-preserving C2 control (prepared, not yet
+rendered) is therefore a control for Depth's residual FA and for RGB's *former* behaviour.
+
+The prior-coupling line also needs softening. Bias initialisation plus the 8 m split did **not**
+break the coupling between the per-cell training prior and the off-arm false-alarm geography: the
+Spearman ρ is still +0.848 (RGB, 3-seed mean, p ≤ 3.5 × 10⁻⁵), down from v1's +0.963. What halved is
+the gain, not the ranking — FA ÷ prior on the far row is **0.234** against v1's 0.377, and on band 2
+**0.062** against 0.243. The claim to make is "**the far-band standing bias was reduced roughly
+two-fold, not removed**".
+
+### N.5 Draft paragraph for §5.6 — grid straddling and cell over-blocking
+
+Two structural facts about the V1 grid, measured on the on-arm frames that carry at least one
+GT-positive cell (test 327 / corpus 1038), belong in the threats-to-validity section.
+
+**(a) Straddling is the default, and it is not a failure mode.** 93.6 % of test frames (96.8 % of the
+corpus) light cells in two or more sectors or bands; the median frame lights 8 cells across 5 sectors.
+Sector boundaries are crossed 66–86 % of the time; band boundaries depend sharply on range — 8.3 % at
+2 m, 28.4 % at 5 m and **65.1 % at the new 8 m boundary**. This is geometry, not a labelling defect:
+a ditch or a stair edge is metres wide and a far wedge is large, so one hazard instance covers several
+cells. Two consequences. The frame-recall rule ("detected if any GT-positive cell crosses τ") is not a
+lenient convention but the smallest measurable unit on this grid; and low cell-level F1 is partly
+structural, since a single instance demands a median of 8 cells while the model lights only the ones it
+is most confident about. We therefore report frame metrics as primary and cell F1 as secondary. Testing
+whether straddled frames are *missed* more often gives no support: the miss-rate difference
+(straddling − flat) is −0.309 … +0.084 across seeds, negative in 2 of 3, with **no seed showing a
+significantly positive difference**; restricted to the new 8 m boundary it is −0.354 … −0.088. The
+honest reading is "no evidence that straddling hurts", not "straddling helps" — the flat stratum is
+only 21 frames.
+
+**(b) A positive cell is not a blocked cell.** Using the label's 5 cm height-map-difference footprint
+against the analytic sample capacity of each wedge, the median hazard occupancy of a GT-positive cell
+is 0.288 in band 1, 0.655 in band 2, 0.610 in band 3a and 0.861 in band 3b — i.e. **over-blocking
+(the traversable fraction of a cell that the grid nonetheless marks positive) is worst up close:
+71 % in band 1, 34 % in band 2, 14 % in band 3b**. The distribution is bimodal (Q3 ≥ 0.99 in bands
+2/3a/3b, Q1 0.16–0.31), so the median alone hides it. Practical statement for the paper: treating
+predicted-positive cells as no-go areas would forbid a large share of walkable ground at close range,
+which is the quantitative reason this grid is positioned as an **early-warning** representation rather
+than a local path-planning one. It is also a warning for drop-type generalisation: a 0.5–1.5 m hole
+occupies only **1–3 %** of an `[8,12)` m cell, so "the cell lights up" means something physically
+different there than it does for the wide ditches of this corpus, and any hole-probe recall must be
+read together with that occupancy gap.
+
+### N.6 One §5.4 clarification — the range axis is camera standoff, not the band label
+
+§5.4 reads the band decomposition as a distance effect. At v2 that reading is only safe for the V
+tier. The v2 H set carries **zero GT cells in bands 1 and 2** and every one of its 96 frames has a
+GT cell in band 3b, so "H recall" is arithmetically far-band H recall (identical to band-3b H recall
+in 8 of 9 runs). Comparing band 3a against band 3b for the H tier compares two *different frame sets*
+(33 vs 96) and gives an unstable answer — Depth's 3b − 3a gap is −0.230 / −0.168 / **+0.165** across
+seeds, and on the 33 frames carrying GT in both bands Depth is in fact *better* far (0.697 vs 0.515).
+The variable that behaves monotonically is the camera standoff `cam.d`: H frame recall runs
+0.917 / 0.644 / 0.587 for RGB and 0.833 / 0.733 / **0.000** for Depth over `d < 7` / `7–9` / `≥ 9` m
+(n = 24 / 30 / 42, unanimous across the three seeds). Report the standoff form, not the band form.

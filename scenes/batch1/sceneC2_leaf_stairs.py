@@ -78,6 +78,19 @@ SCENE_CONFIG = {
     "cue_scene_dressing": True,    # autumn trees·hedges·distant ridges, all together
     # ─ identity toggle: False -> remove every leaf mound·scatter = same-geometry twin ─
     "leaf_cover":         True,
+    # ─ [D25 · nightrun_0820 C2] appearance-preserving OFF arm, **opt-in** ─────
+    #   Absent/False  -> both existing arms are untouched (ON = the branch below,
+    #                    OFF = build_flat_fill, byte for byte).
+    #   True (only legal with hazard_stairs=False) -> remove ONLY the hazard
+    #   geometry: stair + coping + descending side slopes + the 2.24 m lower
+    #   ground are replaced by a flat continuation of the approach at z=0, while
+    #   the leaf mound, the leaf scatter and the one railing line keep their ON
+    #   transforms. DIAG_V1 §3.1/§3.3 (`experiments/dayrun_0820/narrative/
+    #   diag_v1/DIAG_V1.md`) showed the plain OFF arm deletes the mound and the
+    #   railing too, which (a) makes the off arm a materially different picture
+    #   and (b) moved the camera's own ground datum (0.130 -> 0.0163 m), which is
+    #   why sceneC2 contributed 0 twin pairs. See the guard right below PARAMS.
+    "keep_dressing":      False,
 }
 
 
@@ -481,6 +494,33 @@ if _sc_ov:
 
 
 # ===========================================================================
+# [B'] keep_dressing — the D25 control arm, resolved ONCE at module scope
+# ===========================================================================
+#   Every use below reads this constant, so `grep KEEP_DRESSING` is the whole
+#   audit surface. False (the default, and the value in both existing arms)
+#   makes every guarded expression collapse to exactly what it was before the
+#   patch — the same opt-in discipline as D4's NEGOBS_DATA_SIDECARS.
+#   The two contradictions below are FATAL rather than silently resolved: an arm
+#   whose config does not say what it means must not render 24 cuts and be
+#   discovered later in a metrics table.
+KEEP_DRESSING = bool(SCENE_CONFIG.get("keep_dressing", False))
+if KEEP_DRESSING:
+    if SCENE_CONFIG.get("hazard_stairs", True):
+        raise SystemExit(
+            "[FATAL sceneC2] keep_dressing=True requires hazard_stairs=False — "
+            "with the hazard ON there is nothing to keep and the arm would be "
+            "an unlabelled duplicate of the ON arm. Fix the render config.")
+    if not SCENE_CONFIG.get("leaf_cover", True):
+        raise SystemExit(
+            "[FATAL sceneC2] keep_dressing=True contradicts leaf_cover=False — "
+            "the leaf mound IS the dressing this arm exists to preserve.")
+    print("[keep_dressing] sceneC2 ON — hazard geometry only (stair·coping·"
+          "side slopes·lower ground -> flat z=0); leaf mound A/B/C · drifts · "
+          "leaf scatter · railing keep their ON transforms; lower-anchored "
+          "dressing rides the fill (z=0). Camera datum untouched (x<0).")
+
+
+# ===========================================================================
 # [C] path constants + required texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -618,6 +658,12 @@ def main():
     DROP = RISER * NSTEP                       # 2.24
     Z_BOT = st["z_top"] - DROP                 # −2.24
     SLOPE = RISER / TREAD                      # 0.4706 (nosing line slope)
+    # [D25] datum for everything the ON arm anchors to the LOWER ground. In the
+    #   keep_dressing arm the descent is filled in, so the lower ground IS z=0 —
+    #   the same switch `build_park_context` (low_z) and `build_ground_kit`
+    #   (lj_z) already make for the plain OFF arm. With the flag off this is
+    #   `Z_BOT` and every expression below is unchanged.
+    Z_LOW = 0.0 if KEEP_DRESSING else Z_BOT
 
     def BOX(path, center, size, mtl=None, col=False):
         return sc.add_box(stage, path, center, size, mtl, collider=col)
@@ -701,11 +747,20 @@ def main():
     # -------------------------------------------------------------------
     # ground - upper/lower/side slopes are **placed as separate pieces** (never covering the stair corridor)
     # -------------------------------------------------------------------
-    def build_terrain(M):
+    def build_terrain(M, flat=False):
+        """`flat=True` ([D25] keep_dressing arm): the SAME prim vocabulary,
+        materials and mowing bands, with the descent taken out — side slope drop
+        0, lower ground at z=0, and the lower walk extended upstream to x=0 so
+        the corridor the stair used to fill is not left as a hole. Everything at
+        x < 0 (approach path, upper lawns) is built by the identical statements
+        in both modes, which is what keeps `AabbPrefilter.ground_z(-d, y)` — the
+        camera datum, sampled only at x = -d < 0 — byte-identical to the ON arm."""
         up = PARAMS["upper"]
         lo = PARAMS["lower"]
         sl = PARAMS["slopes"]
         gr = PARAMS["ground"]
+        drop = 0.0 if flat else DROP
+        z_bot = 0.0 if flat else Z_BOT
         path_mtl = M["dirt"] if cfg["cue_material_break"] else M["stone"]
 
         # (1) upper approach path (dirt) - x1=+0.02 overlaps the stair and carries the step-1 riser face
@@ -737,7 +792,7 @@ def main():
         for tag, ya, yb in (("N", sl["y_in"], sl["y_edge"]),
                             ("S", -sl["y_edge"], -sl["y_in"])):
             sc.build_slope(stage, f"{ROOT}/SideSlope_{tag}", 0.0,
-                           -sl["sink"], RUN, DROP, ya, yb, sl["thick"],
+                           -sl["sink"], RUN, drop, ya, yb, sl["thick"],
                            M[f"grass{_slope_zone}"], margin=0.0, collider=True)
         # (4) lower entry path - under_lap underlap beneath the stair (anti-float) + 0.002 sink
         # [GT-115 ⑬ ③] this walk now carries ground_kit joints, so it joins the
@@ -746,11 +801,15 @@ def main():
         #   but the joint plates are +0.6 mm and a skin is +6.5~16.5 mm - the
         #   declaration must not depend on the walk staying narrow.
         sc.skin_exclude(f"{ROOT}/LowerPath")
-        lx0 = RUN - lo["under_lap"]
+        # [D25] `flat`: the walk starts at the old drop edge instead of one
+        #   under_lap upstream of the stair FOOT — without it the corridor
+        #   x 0.02…3.76 · |y|<1.58 (which the stair solid fills in the ON arm)
+        #   would be an open hole in the ground.
+        lx0 = 0.0 if flat else RUN - lo["under_lap"]
         lx1 = RUN + lo["x_pad"]
         BOX(f"{ROOT}/LowerPath",
             ((lx0 + lx1) / 2.0, 0.0,
-             Z_BOT - lo["sink"] - lo["thick"] / 2.0),
+             z_bot - lo["sink"] - lo["thick"] / 2.0),
             (lx1 - lx0, 2.0 * lo["y_half"], lo["thick"]), path_mtl, col=True)
         # (5) lower grass (outside the corridor) - covers the slope end by 0.02 to seal the joint
         #     [GT-115 ⑬ ②] banded like (2); phase 5 continues past the side slope.
@@ -760,7 +819,7 @@ def main():
                     grass_bands(RUN - 0.02, lx1, phase=5)):
                 BOX(f"{ROOT}/LowerGrass_{tag}_{bi}",
                     ((bx0 + bx1) / 2.0, (ya + yb) / 2.0,
-                     Z_BOT - gr["thick"] / 2.0),
+                     z_bot - gr["thick"] / 2.0),
                     (bx1 - bx0, yb - ya, gr["thick"]), M[f"grass{zone}"],
                     col=True)
 
@@ -879,6 +938,13 @@ def main():
                    m["drop"] / m["run"]) for m in PARAMS["mound"]]
 
         def terrain_z(x, y):
+            if KEEP_DRESSING:
+                # [D25] the fill IS the ground in this arm, so the leaves lie on
+                # it. (The plain OFF arm keeps the historical behaviour — it
+                # laid the scatter on the STAIR profile, which is why every leaf
+                # at x>0 sank under its flat slab, DIAG_V1 §3.1 row 4. Not fixed
+                # here: that arm must stay byte-identical.)
+                return 0.0
             if x <= 0.0:
                 return 0.0
             if x >= RUN:
@@ -998,7 +1064,7 @@ def main():
             if t["where"] == "upper":
                 gx, gz = t["cx"], 0.0
             else:
-                gx, gz = RUN + t["cx"], Z_BOT
+                gx, gz = RUN + t["cx"], Z_LOW      # [D25] Z_LOW == Z_BOT unless keep_dressing
             sc.build_tree(stage, f"{ROOT}/Tree_{i}", gx, t["cy"], gz,
                           M["wood"], M["canopy_a"], M["canopy_b"])
         build_park_context(M)
@@ -1208,10 +1274,10 @@ def main():
             sc.build_hedge(stage, f"{ROOT}/FarHedge_{i}",
                            fx - fh["sx"] / 2.0, h["cy"] - fh["length"] / 2.0,
                            fx + fh["sx"] / 2.0, h["cy"] + fh["length"] / 2.0,
-                           fh["h"], base_z=Z_BOT)
+                           fh["h"], base_z=Z_LOW)   # [D25] Z_LOW == Z_BOT unless keep_dressing
         for i, r in enumerate(PARAMS["ridge"]):
             BOX(f"{ROOT}/Ridge_{i}",
-                (RUN + r["x_pad"], 0.0, Z_BOT + r["h"] / 2.0),
+                (RUN + r["x_pad"], 0.0, Z_LOW + r["h"] / 2.0),
                 (r["t"], r["sy"], r["h"]), M["ridge"], col=True)
 
     def build_flat_fill(M):
@@ -1245,6 +1311,16 @@ def main():
             build_leaf_mound(M)
         build_leaf_scatter(M)
         build_cues(M)
+    elif KEEP_DRESSING:
+        # [D25] hazard-only removal. No `build_stairs` (stair + coping = the
+        #   hazard), no `build_flat_fill` (its lawn slab spans the WALK corridor
+        #   and carries the +16 mm displacement skin — that slab, not the mound,
+        #   is what moved the old off arm's camera datum, DIAG_V1 §3.3).
+        #   `leaf_cover` is guaranteed True by the module-scope guard.
+        build_terrain(M, flat=True)
+        build_leaf_mound(M)
+        build_leaf_scatter(M)
+        build_cues(M)               # the descending railing line, ON transform
     else:
         build_flat_fill(M)
         if cfg["leaf_cover"]:

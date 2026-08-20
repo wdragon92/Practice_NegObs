@@ -409,3 +409,274 @@ Two findings, sharper than the mid-training preview above suggested:
 | decisions / open items | [`DECISIONS.md`](DECISIONS.md) · [`GAP_REPORT.md`](GAP_REPORT.md) · [`SPEC_CONFLICTS.md`](SPEC_CONFLICTS.md) |
 | panels | [`viz/`](viz/) (12 png) · audit overlays [`audit_samples/`](audit_samples/) (30 png) |
 | eval / bootstrap code | [`code/eval_polar.py`](code/eval_polar.py) · [`code/bootstrap.py`](code/bootstrap.py) · [`code/twin_analysis.py`](code/twin_analysis.py) |
+
+---
+
+## Night 0820→0821 update
+
+*Appended 2026-08-21 (NIGHTRUN 0820, brief P3-D1). **Append only — §1–§13 above are unmodified.**
+Every number here is a CPU recomputation over the **frozen** recipe-v2 artefacts
+(`experiments/dayrun_0820/runs/v2/{rgb,depth,b2}_s{42,43,44}`, corpus `dataset_manifest_v2_full.json`
+2832 frames, split `split_v2_full.json`, grid `PROVISIONAL-GRID-V1` = 5 sectors × 4 bands
+[0,2)/[2,5)/[5,8)/[8,12) m, τ_op = 0.5). v2 test = 816 frames = 408 on (V 180 · E 45 · H 96 ·
+H_weak 6 · none_in_fov 81) + 408 off. **Note the denominator change from §4 above**, which is the
+v1 336-frame test — v1 and v2 numbers are not directly comparable except on the byte-identical
+subsets explicitly named below. No GPU ran: YOLO s43/44, the aux run, the C2 control round and the
+hole probe are all prepared-not-run, so the 4-row headline table is unchanged.*
+
+Sources, in order of citation: `nightrun_0820/narrative/diag_v2/DIAG_V2.md` (+ `diag_v2_numbers.json`) ·
+`nightrun_0820/TWIN_STRATIFICATION.md` · `nightrun_0820/STRADDLE_REPORT.md` ·
+`nightrun_0820/tau_curves/TAU_CURVES.md` (+ `tau_curves.csv`, `tau_best.json`).
+Sanity gate: the recomputed all-band twin Δ reproduces every run's `twin/twin_pairs.csv`
+`delta_score` to **max |dev| = 0.0000 on all 9 runs**, and the seed means reproduce
+`runs/v2/SEED_TABLE.md` §1–§2 exactly — these are the published statistics split, not a
+second measurement.
+
+### N.1 Twin Δ stratified by pairing exactness (B5) — the D20 tolerance audit
+
+Strata over the 408 test twin pairs: **EXACT** = all five pose keys (`d`, `h_rel`, `yaw`, `pitch`,
+`ground_z`) equal within 1e-6, n = 312 · **TOL** = `|Δground_z| ∈ (1e-6, 0.15]`, n = 54 (the layer
+D20 rescued) · **EXCL** = `|Δground_z| > 0.15`, n = 42, never in any published number. Pose audit:
+**no pair anywhere differs on a key other than `ground_z`**. Pairing is model-independent, so the
+strata are identical across all 9 runs.
+
+| stratum | n | V | E | **H** | H_weak/none | carries ≥1 GT+ cell |
+|---|---|---|---|---|---|---|
+| EXACT | 312 | 132 | 45 | **96** | 39 | 279 |
+| TOL | 54 | 33 | 0 | **0** | 21 | 33 |
+| EXCL | 42 | 15 | 0 | 0 | 27 | 15 |
+
+**H-tier twin Δ, EXACT-only vs published (kept = EXACT + TOL), 3-seed mean ± range/2**
+
+| model | EXACT-only H Δ | published H Δ | difference | EXACT CI excludes 0 |
+|---|---|---|---|---|
+| rgb | **0.285 ± 0.094** | 0.285 ± 0.094 | **+0.0000** | 3/3 seeds |
+| depth | **0.407 ± 0.037** | 0.407 ± 0.037 | **+0.0000** | 3/3 seeds |
+| b2 | **0.110 ± 0.059** | 0.110 ± 0.059 | **+0.0000** | 3/3 seeds |
+
+Per-seed EXACT-only H Δ [95 % CI, 10 000× paired bootstrap, seed 42, `code/bootstrap.py`]:
+rgb 0.1701 [0.1243, 0.2181] · 0.3587 [0.3113, 0.4071] · 0.3267 [0.2478, 0.4066];
+depth 0.4131 [0.3242, 0.5039] · 0.4403 [0.3533, 0.5291] · 0.3666 [0.2854, 0.4494];
+b2 0.0735 [0.0342, 0.1124] · 0.0688 [0.0511, 0.0881] · 0.1867 [0.1287, 0.2499]. **9/9 exclude 0.**
+
+The identity is structural, not luck: the TOL layer contains **0 H-tier and 0 E-tier pairs**.
+
+**All-tier Δ is a different story — it is inflated by the TOL layer.** Published (kept) minus
+EXACT-only: **rgb +0.041 · depth +0.001 · b2 +0.037**. TOL Δ runs 0.41–0.72 against EXACT's 0.26–0.28
+(rgb), and 48 of the 54 TOL pairs sit in two scenes — `scene07` (24, Δ_rgb 0.740) and `sceneC2`
+(24, Δ_rgb 0.688, the non-appearance-preserving toggle). Measured `|Δground_z|` in the TOL layer:
+0.0012 / 0.0015 / 0.003 / 0.004 / 0.0163 / 0.0164 / 0.1137 m (EXCL: 3.57 / 4.02 m = scene datum change).
+
+### N.2 H-tier twin Δ by band (B2-ii) — the band-3b restriction
+
+96 H pairs, 3-seed mean ± range/2 · s42 point [95 % CI].
+
+| band | n pairs | GT cells | RGB | Depth | B2 |
+|---|---|---|---|---|---|
+| 3a `[5,8)` | 33 | 126 | **−0.031 ± 0.054** · −0.049 [−0.127, **+0.017**] **CI ∋ 0** | +0.534 ± 0.183 · 0.632 [0.472, 0.782] | +0.058 ± 0.060 · −0.020 [−0.098, **+0.044**] **CI ∋ 0** |
+| 3b `[8,12)` | 96 | 345 | **+0.293 ± 0.087** · 0.185 [0.138, 0.233] | +0.411 ± 0.031 · 0.413 [0.324, 0.502] | +0.112 ± 0.064 · 0.090 [0.059, 0.124] |
+| all | 96 | 471 | 0.285 ± 0.094 · 0.170 [0.124, 0.218] | 0.407 ± 0.037 · 0.413 [0.324, 0.502] | 0.110 ± 0.059 · 0.073 [0.034, 0.114] |
+
+RGB s42, H tier, band 3a: mean p(on) = 0.243 vs mean p(off) = **0.292** (off higher); 55 % of the 33
+pairs have Δ > 0. **The H claim is a band-3b claim for RGB and must not be stated for band 3a.**
+All-tier by band (366 kept pairs), for reference: RGB 0.044 / 0.321 / 0.301 / 0.309 and Depth
+0.280 / 0.612 / 0.659 / 0.599 over bands 1 / 2 / 3a / 3b — every band × model cell excludes 0 on the
+s42 bootstrap.
+
+### N.3 The Depth H-recall decline is composition, not regression (B1)
+
+**Premise, measured.** The v2 H set is far-*exclusive*: 0 of 96 H frames carry a GT cell in band 1 or
+band 2, 96/96 carry one in band 3b, 33/96 also in 3a; `cam.d` mean 8.57 m (4.59–11.21) against V's
+4.99 m; 75 of 96 come from the boost rounds. H frame recall therefore equals band-3b H frame recall
+in 8 of the 9 runs (exception B2 s43: 38/96 vs 35/96).
+
+**Control on the byte-identical frames** (v2 test's 21 main-round H frames = v1 test's 21 H frames,
+verified by frame-id set equality against `dataset_manifest_v1.json` + `split_v1.json`):
+
+| H frame recall | v1 recipe s42 (§4 above) | v2 recipe, same 21 frames, 3-seed mean ± range/2 | v2, the 75 new boost H frames |
+|---|---|---|---|
+| RGB | 0.3333 | **0.952 ± 0.048** | 0.613 ± 0.173 |
+| Depth | **0.7143** | **0.857 ± 0.000** (18/21, all seeds) | 0.320 ± 0.040 |
+| B2 | — | 0.349 ± 0.071 | 0.196 ± 0.207 |
+
+v2-Depth **beats** v1-Depth on v1's own H frames. The headline 0.714 → 0.438 is therefore **100 % a
+test-set composition change.**
+
+**The working range axis is camera standoff, not the band label — H frame recall, 3-seed mean [per seed]**
+
+| standoff | n frames | RGB | Depth | B2 |
+|---|---|---|---|---|
+| `d < 7` m | 24 | 0.917 [0.875/1.000/0.875] | 0.833 [0.750/1.000/0.750] | 0.333 |
+| `7 ≤ d < 9` m | 30 | 0.644 [0.500/0.933/0.500] | 0.733 [0.700/0.700/0.800] | 0.133 |
+| **`d ≥ 9` m** | **42** | **0.587** [0.500/0.762/0.500] | **0.000 [0.000/0.000/0.000]** | 0.238 |
+
+Check: (24·0.833 + 30·0.733 + 42·0)/96 = 0.438 = Depth's SEED_TABLE H recall. The band form of the
+test is not usable — Depth's 3b − 3a gap is −0.230 / −0.168 / **+0.165** across seeds, and on the 33
+H frames carrying GT in *both* bands Depth is better far (frame 0.697 vs 0.515).
+
+**Band-restricted H recall (frame / cell), 3-seed mean ± range/2:** 3a (33 fr, 126 cells) RGB
+0.101 ± 0.091 / 0.042 · Depth 0.515 ± 0.182 / 0.595 · B2 0.202 ± 0.258 / 0.087 · 3b (96 fr, 345 cells)
+RGB 0.688 ± 0.141 / 0.454 · Depth 0.438 ± 0.031 / 0.516 · B2 0.219 ± 0.141 / 0.100.
+
+### N.4 Prior ↔ false-alarm coupling, v1 → v2 (B2-i)
+
+Spearman ρ between the 20-cell train positive rate (768 on-arm frames of the 19 train scenes) and the
+20-cell off-arm predicted-positive rate (408 test off frames, τ = 0.5). Own implementation, same code
+path as `diag_v1.py`; permutation p from 200 000 shuffles.
+
+| ρ (prior ↔ off-arm FA) | s42 | s43 | s44 | model mean | p range |
+|---|---|---|---|---|---|
+| RGB | +0.800 | +0.915 | +0.829 | **+0.848** | 5.0e−6 … 3.5e−5 |
+| Depth | +0.682 | +0.637 | +0.466 | +0.595 | 8.7e−4 … 4.0e−2 |
+| B2 | +0.905 | +0.874 | +0.772 | +0.850 | 5.0e−6 … 1.5e−4 |
+
+| statistic | v1 (15 cells, s42) | v2 | reading |
+|---|---|---|---|
+| ρ, RGB | **+0.9626** | **+0.848** | coupling survives, weaker by ~0.11 ρ |
+| **FA ÷ prior, far row** | 0.377 (band 3) | **0.234** (3b) · 0.122 (3a) | **magnitude halved** |
+| FA ÷ prior, band 2 | 0.243 | **0.062** | ~4× smaller |
+| band-1 FA | 0.000 | **0.000** (all models, all seeds) | inert near band replicates at 20 cells |
+
+Off-arm firing rate by band, 3-seed mean: RGB 0.136 / 0.041 / 0.010 / 0.000 and Depth
+0.012 / 0.013 / 0.011 / 0.000 and B2 0.097 / 0.033 / 0.009 / 0.000 over bands 3b / 3a / 2 / 1.
+Train prior by band (on-arm): 3b 0.583 · 3a 0.334 · 2 0.160 · 1 0.045 (the `config.json`
+`train_positive_rate` bias vector is exactly half of this, being computed over both arms; ranks
+identical). **Claim to publish: the far-band standing bias was reduced roughly two-fold, not removed.**
+
+### N.5 Off-arm false alarms by scene (B2-iii) — the geography moved
+
+3-seed mean, 408 test off frames, τ = 0.5.
+
+| test off scene | n off | RGB frame FA [per seed] | RGB cell-fire share | Depth frame FA | Depth share | B2 frame FA | B2 share |
+|---|---|---|---|---|---|---|---|
+| `scene15` | 72 | **0.699 ± 0.194** [0.889/0.500/0.708] | **33.4 %** | 0.097 ± 0.104 | 17.7 % | 0.338 ± 0.486 | 17.4 % |
+| `sceneN3` | 24 | 0.806 ± 0.146 | 20.9 % | 0.042 ± 0.062 | 2.8 % | 0.500 ± 0.354 | 17.8 % |
+| `scene18` | 72 | 0.352 ± 0.236 | 16.2 % | **0.000** | 0.0 % | 0.037 ± 0.056 | 1.6 % |
+| `scene05` | 72 | 0.389 ± 0.312 | 14.8 % | 0.028 ± 0.021 | 3.4 % | 0.356 ± 0.153 | 36.4 % |
+| `scene14` | 72 | 0.269 ± 0.229 | 13.3 % | **0.000** | 0.0 % | 0.065 ± 0.062 | 3.6 % |
+| `scene07` | 72 | 0.032 ± 0.049 | 1.0 % | **0.000** | 0.0 % | 0.250 ± 0.208 | 12.9 % |
+| **`sceneC2`** | 24 | **0.069 ± 0.104** [0.208/0.000/0.000] | **0.5 %** | **0.292 ± 0.125** | **76.1 %** | 0.403 ± 0.271 | 10.3 % |
+| **all off** | 408 | **0.359 ± 0.127** | — | **0.042 ± 0.029** | — | 0.238 ± 0.143 | — |
+| *v1 anchor, s42, 168 off* | 168 | *0.2738* | — | *0.1607* | — | — | — |
+
+v1 → v2 for RGB: `sceneC2` frame FA **0.875 → 0.069**, its share of cell fires **47.8 % → 0.5 %**,
+fires per off frame 5.04 → 0.083 (60× lower), top-2 scene concentration 86.9 % → **54.3 %**, scenes
+with zero fires 3 → 0, dominant source `sceneC2` → **`scene15`**. For Depth the concentration went the
+other way: `sceneC2` 68.0 % → **76.1 %** of cell fires while overall frame FA fell 0.161 → 0.042.
+
+**The FA rise is not a denominator effect.** RGB off-arm frame FA on the *identical* 168 main-round
+off frames: 3-seed mean **0.387** [0.429 / 0.482 / 0.250] against v1 s42's 0.274 on the same frames;
+the 240 new boost off frames are the quieter half (0.339). Depth: main 0.060 vs boost 0.029.
+B2: main 0.331 vs boost 0.172. Caveat for all per-scene rows: 24–72 off frames of a single scene
+(B2 on `scene15` reads 0.014 / 0.986 / 0.014 across seeds).
+
+### N.6 τ sweep (B3) — the operating-point evidence
+
+3-seed mean, test, frame metrics. Full grid τ = 0.05…0.95 step 0.05 in `tau_curves/tau_curves.csv`.
+
+| model | argmax τ of (H − FA) | H / FA / H−FA there | H / FA / H−FA at τ = 0.5 | loss from using 0.5 | amplitude of H−FA over τ∈[0.30,0.70] | per-seed argmax |
+|---|---|---|---|---|---|---|
+| rgb | 0.35 | 0.809 / 0.464 / **+0.345** | 0.688 / 0.359 / +0.329 | **0.016** | 0.095 | 0.30 / **0.95** / 0.15 |
+| depth | 0.15 | 0.667 / 0.184 / **+0.483** | 0.438 / 0.042 / +0.396 | 0.087 | 0.026 | **0.80** / 0.10 / 0.15 |
+| b2 | 0.05 | 0.569 / 0.536 / **+0.033** | 0.229 / 0.238 / −0.009 | 0.042 | 0.013 | 0.20 / 0.60 / 0.05 |
+| yolo s42 | 0.10 | 0.010 / 0.010 / +0.001 | (τ .25) 0.000 / 0.005 / −0.005 | 0.006 | — | — |
+
+**The τ = 0.5 column reproduces `runs/v2/SEED_TABLE.md` §1 exactly** (same function, same dumps).
+Per-seed operating points (the 9+1 scatter): rgb (FA, H) = (0.375, 0.594) / (0.478, 0.875) /
+(0.223, 0.594); depth (0.052, 0.406) / (0.007, 0.469) / (0.066, 0.438); b2 (0.211, 0.083) /
+(0.395, 0.396) / (0.108, 0.208); **YOLO s42 @ τ 0.25 = (0.005, 0.000)** with E recall 0.000 and
+V 0.117 — the detector baseline sits on the origin, as `runs/yolo_s42/eval_test/metrics.json`
+records. Decision recorded: **τ_op = 0.5 retained** (YOLO row 0.25). The argmax column is a
+diagnostic of how much 0.5 costs, **not** a candidate list: it is fitted on test, and the per-seed
+argmax does not reproduce.
+
+Depth's curve is flat over τ ∈ [0.2, 0.7] (FA 0.164 → 0.017), i.e. its logits are near-saturated —
+its low H recall is a model property, not a threshold choice. B2's H − FA never exceeds +0.033 at
+**any** τ.
+
+### N.7 Grid straddling and cell occupancy (B4)
+
+Frame set = on-arm frames carrying ≥1 GT-positive cell (test 327 / corpus 1038).
+Inputs: `dayrun_0820/annotations/labels_v1_full.json` + `runs/v2/rgb_s{42,43,44}/eval_test/per_frame.csv`.
+
+**(i) Boundary crossing rates** (frame basis / unit basis, where a unit is a (frame, sector) pair for
+a band boundary and a (frame, band) pair for a sector boundary):
+
+| boundary | test frames | test rate | test unit basis | corpus rate | corpus unit basis |
+|---|---|---|---|---|---|
+| sector A/B | 249/327 | 76.1 % | 79.4 % | 67.6 % | 76.4 % |
+| sector B/C | 276/327 | 84.4 % | 86.4 % | 80.9 % | 82.6 % |
+| sector C/D | 258/327 | 78.9 % | 84.6 % | 82.4 % | 81.7 % |
+| sector D/E | 225/327 | 68.8 % | 81.6 % | 66.2 % | 75.8 % |
+| band 2 m (1/2) | 27/327 | 8.3 % | 31.0 % | 8.1 % | 29.6 % |
+| band 5 m (2/3a) | 93/327 | 28.4 % | 43.0 % | 26.0 % | 44.2 % |
+| **band 8 m (3a/3b)** | 213/327 | **65.1 %** | **63.8 %** | 55.8 % | 52.5 % |
+
+Straddling frame (≥2 sectors or ≥2 bands): **306/327 = 93.6 %** test, 1005/1038 = 96.8 % corpus.
+Median GT-positive cells per frame 8 (test) / 6 (corpus); median sectors spanned 5.
+**Reconciliation with DAYRUN ②ⓒ's 62.7 %:** that value is the pre-augmentation labels
+(`labels_v1.json`), train + eligible scenes, on-arm, (frame, sector) unit basis. The same file's full
+on arm gives 66.3 %; the post-augmentation whole corpus gives 52.5 %. The metric did not change — the
+corpus did (D21's boost added far E/H frames, many of them single-band 3b). **Quote exactly one of
+these with its scope stated.**
+
+**(ii) miss × straddle cross-tab, RGB v2, τ = 0.5** (miss = no GT-positive cell reaches p ≥ 0.5):
+
+| seed | n | miss rate (straddling) | miss rate (flat) | diff [95 % CI, 10k bootstrap] |
+|---|---|---|---|---|
+| 42 | 327 | 0.275 | 0.190 | +0.084 [−0.105, +0.249] |
+| 43 | 327 | 0.072 | 0.381 | **−0.309 [−0.526, −0.102]** |
+| 44 | 327 | 0.441 | 0.571 | −0.130 [−0.351, +0.100] |
+| pooled (not independent) | 981 | 0.263 | 0.381 | −0.118 [−0.240, +0.005] |
+
+8 m boundary only: diff −0.354 [−0.456, −0.252] (s42) · −0.088 [−0.163, −0.015] (s43) ·
+−0.091 [−0.203, +0.023] (s44). H-tier subtable: +0.083 / −0.238 / −0.393 [−0.648, −0.102].
+**Verdict: no seed shows straddling significantly increasing misses.** The flat stratum is only
+21/327 frames (6.4 %), so this is "no evidence of harm", not "evidence of benefit".
+
+**(iii) Occupancy and over-blocking of GT-positive cells.** Occupancy = the label's 5 cm
+height-map-difference footprint samples in the cell ÷ the wedge's analytic capacity
+`N(band) = 0.5·dθ·(r_out² − r_in²)/step²`, dθ = 12.44°, step = 0.05 m (N = 173.7 / 911.9 / 1693.5 /
+3473.9). Estimator validated by the corpus maximum observed ratio, 1.0018–1.0121 (clipped to 1.0).
+
+| band | n GT+ cells (test) | occ Q1 | **occ median** | occ Q3 | **over-blocking median** | corpus occ median | corpus over-block median |
+|---|---|---|---|---|---|---|---|
+| 1 `[0,2)` | 117 | 0.115 | **0.288** | 0.472 | **0.712** | 0.121 | 0.879 |
+| 2 `[2,5)` | 378 | 0.172 | **0.655** | 0.992 | **0.345** | 0.625 | 0.375 |
+| 3a `[5,8)` | 870 | 0.158 | **0.610** | 0.993 | **0.390** | 0.521 | 0.479 |
+| 3b `[8,12)` | 1326 | 0.306 | **0.861** | 0.999 | **0.139** | 0.693 | 0.307 |
+| all | 2691 | 0.204 | **0.726** | 0.998 | **0.274** | — | — |
+
+Distribution is bimodal (Q3 ≥ 0.99 in bands 2/3a/3b, Q1 0.16–0.31) — do not summarise by the median
+alone. Forward-looking figure for the hole probe: a 0.5 × 0.5 m hole is ~100 of 3474 samples, i.e.
+**1–3 % occupancy of an `[8,12)` m cell**.
+
+### N.8 Final-val cell coverage (B6) — the §5.3-of-`P1_GRID_V1` flag is cleared
+
+Final val = `scene08` · `scene20` · `sceneD3`, 288 frames (on 144 / off 144, 90 hazard frames).
+Positive frames per cell from `_v2_full` `polar_gt` (gated and pre-gate identical; 0 cells withheld):
+
+| cell | A | B | C | D | E | band total |
+|---|---|---|---|---|---|---|
+| band 1 `[0,2)` | **6** | 9 | 9 | 12 | 9 | 45 (6.6 %) |
+| band 2 `[2,5)` | 21 | 24 | 24 | 27 | 21 | 117 (17.1 %) |
+| band 3a `[5,8)` | 33 | 36 | 39 | 33 | 33 | 174 (25.4 %) |
+| band 3b `[8,12)` | 60 | 72 | 78 | 78 | 60 | 348 (50.9 %) |
+
+**All 20 cells carry ≥6 positive frames — the "val cell 1A has no positives" flag is cleared** (it was
+measured on the *old* val: scene10 · 17 · D3). Two dependencies to record: `scene08` alone supplies
+the entire band-1 row, and **new caveat on the D19 selector** — 50.9 % of val positives sit in band 3b,
+band 1 holds 6.6 %, and val contains only **6 H frames of 90 hazard frames (6.7 %, + 3 H_weak)**
+against test's 96/327 (29.4 %). The val cell-F1 selector therefore weights the paper's most important
+axis (H tier) and its weakest band almost not at all; checkpoint and τ* selection are effectively
+decided by far-range V-tier performance. Changing the selector requires retraining and is **not**
+recommended inside the 8/24 freeze — carried as a caveat, not an action.
+
+### N.9 What is prepared but not measured (so no number here is missing by accident)
+
+| item | state | expected cost when the GPU frees |
+|---|---|---|
+| YOLO s43 / s44 (3-seed row 4) | prepared, not run — `runs/yolo_s42/eval_test/metrics.json` remains the only seed | ~70 min |
+| aux pixel-loss run + paired ablation | prepared, dry-run clean | ~25 min |
+| C2/N3 appearance-preserving off arm | scene patch + hash/pose gate + rehearsal done. Reference old-off rows recomputed from frozen predictions (s42, τ 0.5): `sceneC2` FA_frame 0.208, cells/frame 0.25, mean max p 0.228, twin Δ_frame 0.476, Δ_score 0.481; `sceneN3` FA_frame 1.000, cells/frame 5.00, mean max p 0.915, Δ_frame 0.031, Δ_score n/a (no GT-positive cell) | ~15 min (render 6–8 min) |
+| hole zero-shot probe (3 scenes, 144 frames, 9 frozen checkpoints) | CPU gate all-pass, evaluation-only by construction | render 12–20 min + eval 5–10 min GPU (or ~15 min CPU) |

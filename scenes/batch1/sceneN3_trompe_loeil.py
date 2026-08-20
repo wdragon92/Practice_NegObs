@@ -85,6 +85,17 @@ SCENE_CONFIG = {
     "cue_nosing":         True,   # a bright nosing line at the front of each tread (painted nosing)
     "cue_sign":           False,  # [optional] not implemented - key reserved only
     "cue_scene_dressing": True,   # streetlight (real-shadow cue)·planters·benches·bollards·buildings
+    # ─ [D25 · nightrun_0820 C2 track] appearance-preserving OFF arm, **opt-in** ─
+    #   Absent/False -> both existing arms are untouched (ON = painting built,
+    #   OFF = pure flat mall), byte for byte.
+    #   True (only legal with hazard_stairs=False) -> the OFF arm keeps the
+    #   mural. In THIS scene the hazard geometry is the empty set — every prim is
+    #   planar, the "drop" is 1 mm of paint (module docstring) — so "remove only
+    #   the hazard geometry" removes nothing and the arm is structurally the ON
+    #   arm carrying the OFF label. That is the point: it isolates the dressing /
+    #   painted-cue response from the geometry response with the twin pose held
+    #   byte-identical. Do not read it as a rendering of "hazard removed".
+    "keep_dressing":      False,
 }
 
 
@@ -317,6 +328,31 @@ _sc_ov = os.environ.get("NEGOBS_SCENE_CONFIG", "")
 if _sc_ov:
     _deep_update(SCENE_CONFIG, json.loads(_sc_ov))
     print(f"[SCENE_CONFIG] override 적용: {_sc_ov}")
+
+
+# ===========================================================================
+# [B'] keep_dressing — the D25 control arm, resolved ONCE at module scope
+# ===========================================================================
+#   `grep KEEP_DRESSING` is the whole audit surface: one guarded call site.
+#   False (the default, and the value in both existing arms) leaves the assembly
+#   exactly as it was before the patch.
+KEEP_DRESSING = bool(SCENE_CONFIG.get("keep_dressing", False))
+if KEEP_DRESSING:
+    if SCENE_CONFIG.get("hazard_stairs", True):
+        raise SystemExit(
+            "[FATAL sceneN3] keep_dressing=True requires hazard_stairs=False — "
+            "with the painting toggle ON this arm would be an unlabelled "
+            "duplicate of the ON arm. Fix the render config.")
+    if not SCENE_CONFIG.get("cue_scene_dressing", True):
+        raise SystemExit(
+            "[FATAL sceneN3] keep_dressing=True contradicts "
+            "cue_scene_dressing=False — the mall dressing is half of what this "
+            "arm exists to preserve.")
+    print("[keep_dressing] sceneN3 ON — this scene has NO hazard geometry to "
+          "remove (all prims planar, the 'drop' is 1 mm of paint), so the arm "
+          "keeps the trompe-l'oeil mural and the mall dressing exactly as the "
+          "ON arm: structurally identical, OFF label. Dressing-response "
+          "control, not a hazard-removal render.")
 
 
 # ===========================================================================
@@ -1544,7 +1580,7 @@ def main():
     print("[씬] 재질·지오메트리 조립 중 ...")
     M = setup_materials()
     build_plaza(M)
-    if cfg["hazard_stairs"]:
+    if cfg["hazard_stairs"] or KEEP_DRESSING:   # [D25] see the module-scope guard
         build_painting(M)
     build_joints(M)                              # runs over the painting - built after it
     if cfg["cue_scene_dressing"]:

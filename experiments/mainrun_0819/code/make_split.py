@@ -10,6 +10,12 @@ are dropped from the eligible pool and from the global tier histogram, and they 
 "PROVISIONAL-HOLD (아침 결재 대상)". Accepts a comma list or @path.json (the array gates.py writes
 to annotations/hold_scenes.json). All PROOF checks are expressed against the eligible pool so a
 held-out scene keeps them green instead of reading as an unassigned-scene failure.
+
+--move-h-scene-to-val (SPLIT v2, brief 0820 Phase 4) repairs the v1 defect that val carried ZERO
+strict-H frames, which made the checkpoint selector blind to the headline metric. Among the TRAIN
+scenes carrying >= --move-h-min (default 5) strict-H frames it moves the one with the FEWEST to
+val: enough H to score, the least H supervision surrendered. **test is untouched** (train -> val
+only), so the forced-test rule (--force-test scene14) and the headline test set are unchanged.
 """
 from __future__ import annotations
 
@@ -105,6 +111,13 @@ def main(argv=None):
     p.add_argument("--exclude-scenes", default="",
                    help="D14 PROVISIONAL-HOLD: comma list of scene ids, or @path.json "
                         "(e.g. @annotations/hold_scenes.json). Held scenes go to NO split.")
+    p.add_argument("--move-h-scene-to-val", action="store_true",
+                   help="[split v2] move the TRAIN H-carrying scene with the FEWEST strict-H "
+                        "frames (subject to >= --move-h-min) into val. test untouched.")
+    p.add_argument("--move-h-min", type=int, default=5,
+                   help="[split v2] minimum strict-H frames for a scene to be movable (default 5)")
+    p.add_argument("--dry-run", action="store_true",
+                   help="print the proofs and the move decision; write NO files")
     a = p.parse_args(argv)
 
     rng = random.Random(a.seed)
@@ -155,14 +168,48 @@ def main(argv=None):
         if cand:
             val = sorted([cand[0]] + list(val)[: a.n_val - 1])
     train = sorted(s for s in rem if s not in val)
+    val = sorted(val)
+
+    # ---- split v2: give val some strict-H so the selector can see the headline metric -------
+    moved, move_cands, move_note = None, [], ""
+    if a.move_h_scene_to_val:
+        move_cands = sorted((s for s in train if S[s]["strict_h"] > 0),
+                            key=lambda s: (S[s]["strict_h"], s))
+        eligible = [s for s in move_cands if S[s]["strict_h"] >= a.move_h_min]
+        if eligible:
+            moved = eligible[0]                       # fewest strict-H among the eligible
+            train = sorted(s for s in train if s != moved)
+            val = sorted(val + [moved])
+            move_note = (f"moved `{moved}` (strict-H {S[moved]['strict_h']}) train -> val: the "
+                         f"FEWEST strict-H among train H-scenes with >= {a.move_h_min} "
+                         f"(candidates: "
+                         + ", ".join(f"{s}={S[s]['strict_h']}" for s in move_cands)
+                         + f"). Keeps the largest H block ("
+                         + (", ".join(f"{s}={S[s]['strict_h']}" for s in move_cands
+                                      if s != moved) or "none")
+                         + ") in train for supervision while val gains "
+                         f"{S[moved]['strict_h']} H frames to select checkpoints on. "
+                         f"test untouched.")
+        else:
+            move_note = (f"NO MOVE: no train scene reaches --move-h-min {a.move_h_min} strict-H "
+                         f"(train H-scenes: "
+                         + (", ".join(f"{s}={S[s]['strict_h']}" for s in move_cands) or "none")
+                         + "). val stays H-free and the trainer will fall back to val cell-F1 "
+                           "for checkpoint selection (it prints a loud warning).")
+        print(f"[split v2] {move_note}")
 
     split = dict(train=train, val=sorted(val), test=sorted(test))
-    with open(a.out, "w") as f:
-        # `hold` is a RECORD, not a subset: consumers index the file by subset name
-        # ("train"/"val"/"test"), so the held scenes are simply reachable by nobody.
-        json.dump(dict(split, hold=held), f, indent=2)
+    if not a.dry_run:
+        with open(a.out, "w") as f:
+            # `hold` is a RECORD, not a subset: consumers index the file by subset name
+            # ("train"/"val"/"test"), so the held scenes are simply reachable by nobody.
+            json.dump(dict(split, hold=held), f, indent=2)
 
     # ---- proof -------------------------------------------------------------
+    val_h = sum(S[s]["strict_h"] for s in val)
+    val_h_before = val_h - (S[moved]["strict_h"] if moved else 0)
+    val_pos = any(S[s]["tier"].get(t, 0) > 0 for s in val for t in ("V", "E"))
+    test_before_move = list(test)          # the move is train->val only; test is never touched
     where = {}
     for k, v in split.items():
         for s in v:
@@ -200,23 +247,55 @@ def main(argv=None):
         f"{'PASS' if (set(test) & set(hn)) or not hn else 'FAIL'}",
         (f"PROOF-7b [D18] forced-into-test: {force_test or 'none'}"
          + (f" (MISSING from eligible pool: {missing_ft})" if missing_ft else "") + " -> PASS"),
-        f"PROOF-9 [D18] val is strict-H-free (H reserved for train/test) and has >=1 positive scene: "
-        f"H-in-val={sum(S[s]['strict_h'] for s in val)}, "
-        f"pos-scenes={[s for s in val if any(S[s]['tier'].get(t,0)>0 for t in ('V','E'))]} -> "
-        f"{'PASS' if sum(S[s]['strict_h'] for s in val) == 0 and any(S[s]['tier'].get(t,0)>0 for s in val for t in ('V','E')) else 'WARN'}",
+        (f"PROOF-9 [v2] val carries strict-H (selector can see the headline metric) and >=1 "
+         f"positive scene: H-in-val={val_h}, "
+         f"pos-scenes={[s for s in val if any(S[s]['tier'].get(t,0)>0 for t in ('V','E'))]} -> "
+         f"{'PASS' if val_h > 0 and val_pos else 'WARN'}"
+         if a.move_h_scene_to_val else
+         f"PROOF-9 [D18] val is strict-H-free (H reserved for train/test) and has >=1 positive "
+         f"scene: H-in-val={val_h}, "
+         f"pos-scenes={[s for s in val if any(S[s]['tier'].get(t,0)>0 for t in ('V','E'))]} -> "
+         f"{'PASS' if val_h == 0 and val_pos else 'WARN'}"),
         f"PROOF-10 PROVISIONAL-HOLD scenes appear in NO split: "
         f"{held or 'none held'}, {len(held_in_split)} leaked -> "
         f"{'PASS' if not held_in_split else 'FAIL ' + str(held_in_split)}"
         + (f"  **--exclude-scenes ids not in manifest: {missing_excl}**" if missing_excl else ""),
     ]
+    if a.move_h_scene_to_val:
+        test_ok = sorted(test) == sorted(test_before_move)
+        proof.append(
+            f"PROOF-11 [v2] H-scene moved train->val: moved={moved or 'NONE'} "
+            f"(strict-H {S[moved]['strict_h'] if moved else 0}; candidates "
+            + (", ".join(f"{s}={S[s]['strict_h']}" for s in move_cands) or "none")
+            + f"), val strict-H now {val_h} (was {val_h_before}), train strict-H "
+            f"{sum(S[s]['strict_h'] for s in train)}, test UNCHANGED {sorted(test)} -> "
+            f"{'PASS' if (moved and val_h > 0 and test_ok and moved not in test) else 'FAIL'}")
 
-    L = ["# SPLIT_PROPOSAL — PROVISIONAL — 아침 승인 대상", "",
+    L = ["# SPLIT_PROPOSAL v2 — PROVISIONAL 승인 대상" if a.move_h_scene_to_val
+         else "# SPLIT_PROPOSAL — PROVISIONAL — 아침 승인 대상", "",
          f"manifest: `{a.manifest}` · seed {a.seed} · {N} eligible scenes "
          f"({len(all_scenes)} in manifest − {len(held)} held) / {len(man['frames'])} frames "
          f"({len(frame_held)} held out)",
          f"hard-negative arg: {a.hard_negatives}"
          + (f"  **not found in manifest: {missing_hn}**" if missing_hn else ""),
          f"test L1-to-global tier distance (incl. off-arm preference term): {ts:.4f}; val {vs:.4f}", ""]
+
+    if a.move_h_scene_to_val:
+        L += ["## v2 change — one train H-scene moved to val (PROVISIONAL 승인 대상)", "",
+              "**Why.** In split v1 val carried 0 strict-H frames, so the checkpoint selector "
+              "(and tau*) could not see the headline metric at all; recipe v2 scores checkpoints "
+              "with `0.5*val_cell_F1 + 0.5*val_H_frame_recall`, which needs H frames in val.", "",
+              f"**Rule.** Among TRAIN scenes with >= {a.move_h_min} strict-H frames, move the one "
+              "with the FEWEST to val. **test is untouched** (train -> val only), so "
+              f"`--force-test {a.force_test or 'none'}` and the headline test set are unchanged.",
+              "", f"**Decision.** {move_note}", "",
+              "| candidate train H-scene | strict-H frames | moved |", "|---|---|---|"]
+        L += [f"| {s} | {S[s]['strict_h']} | {'**YES**' if s == moved else 'no'} |"
+              for s in move_cands] or ["| none | 0 | — |"]
+        L += ["", f"val strict-H: {val_h_before} → **{val_h}** · train strict-H: "
+              f"{sum(S[s]['strict_h'] for s in train) + (S[moved]['strict_h'] if moved else 0)} → "
+              f"**{sum(S[s]['strict_h'] for s in train)}** · test strict-H: "
+              f"**{sum(S[s]['strict_h'] for s in test)}** (unchanged)", ""]
 
     L += ["## PROVISIONAL-HOLD (아침 결재 대상)", ""]
     if held:
@@ -260,13 +339,19 @@ def main(argv=None):
                  + " | ".join(str(st["tier"][t]) for t in TIERS) + " |")
     L += ["", "## Violation proof", "", "```"] + proof + ["```", "",
           f"top-strict-H pool (top {top_k} by strict-H frame count): {must_h}", ""]
-    with open(a.report, "w") as f:
-        f.write("\n".join(L))
+    if not a.dry_run:
+        with open(a.report, "w") as f:
+            f.write("\n".join(L))
 
     for ln in proof:
         print(ln)
-    print(f"[split] train={len(train)} val={len(val)} test={len(test)} "
-          f"hold={len(held)}{' ' + str(held) if held else ''} -> {a.out}, {a.report}")
+    tag = "[split DRY-RUN, nothing written]" if a.dry_run else "[split]"
+    print(f"{tag} train={len(train)} val={len(val)} test={len(test)} "
+          f"hold={len(held)}{' ' + str(held) if held else ''}"
+          + (f" moved={moved}" if a.move_h_scene_to_val else "")
+          + ("" if a.dry_run else f" -> {a.out}, {a.report}"))
+    if a.dry_run:
+        print(f"  train={train}\n  val={val}\n  test={test}")
     return 0 if all("FAIL" not in x for x in proof) else 1
 
 

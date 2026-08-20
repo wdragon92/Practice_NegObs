@@ -8,7 +8,8 @@ GT source : per-scene TWIN heightmap DIFF (footprint v2, D10) --
             A near-boundary STEP gate then drops components that fall gradually
             (ramps) and keeps the ones that fall >= hazard_depth within
             STEP_RUN_M of the lip (stairs, vertical drops).  What survives is
-            projected into the camera-frame polar grid (gridspec_v0.json).
+            projected into the camera-frame polar grid (`--grid`, default
+            gridspec_v0.json; gridspec_v1.json = the D19 20-cell refinement).
 Tier source: depth reprojection (int_px, referenced to z_off) + near-edge
             polyline visibility.
 D14        : the gated footprint remains the training GT (`polar_gt`), and the
@@ -19,7 +20,7 @@ D14        : the gated footprint remains the training GT (`polar_gt`), and the
 Camera convention is taken VERBATIM from the render driver
 (`variation_kit.dir_of` + `variation_kit.look_at_rows`, quoted in cam_basis()).
 """
-import argparse, json, math, os, sys
+import argparse, json, math, os, re, sys
 import numpy as np
 
 W_IMG, H_IMG = 1920, 1080
@@ -67,7 +68,12 @@ TAU_EDGE = (0.02, 0.05, 0.10)
 TAU_INT_DEF, TAU_EDGE_DEF = 50, 0.05   # taus used for tier_strict
 HM_DEFAULT = dict(x0=-2.0, y0=-8.0, step=0.05)
 
-GT_SOURCE = "derived-heightmapdiff-gridv0-PROVISIONAL"
+GT_SOURCE_FMT = "derived-heightmapdiff-{grid}-PROVISIONAL"
+GT_SOURCE = GT_SOURCE_FMT.format(grid="gridv0")
+"""Legacy constant = the v0 string, kept so an importer that never sees a
+gridspec still gets the historical value.  Everything that HAS a gridspec must
+call `gt_source_of(grid)` instead: the grid identity belongs in the provenance
+string, so a V1 run is not silently stamped `gridv0` (D19 / DAYRUN Phase 1)."""
 FOOTPRINT_VERSION = "v2-diff-stepgate"
 TIER_SOURCE = "derived-depth-v0-strict"
 GATE_POLICY = "train-on-gated; pregate preserved per D14"
@@ -135,8 +141,37 @@ def project(pts, eye, cam):
 # --------------------------------------------------------------------------- #
 # polar grid
 # --------------------------------------------------------------------------- #
+def n_cells(grid):
+    """Cells in this gridspec.  The ONLY place the count is computed."""
+    return int(grid["n_bands"]) * int(grid["n_sectors"])
+
+
+def grid_slug(grid):
+    """`PROVISIONAL-GRID-V1` -> `gridv1` (provenance-string fragment).
+
+    The V0 spelling is load-bearing: `gt_source_of(gridspec_v0)` must reproduce the
+    historical `derived-heightmapdiff-gridv0-PROVISIONAL` byte for byte, or every
+    mainrun_0819 artefact stops matching its own labels.
+    """
+    v = str(grid.get("version", "")).upper()
+    m = re.search(r"GRID-?(V[0-9A-Z]+)", v)
+    return "grid" + (m.group(1).lower() if m else
+                     re.sub(r"[^a-z0-9]+", "", v.lower()) or "unknown")
+
+
+def gt_source_of(grid):
+    """Provenance string for labels derived on `grid`.  Carries the grid identity
+    so a V1 label file can never be mistaken for a V0 one downstream."""
+    return GT_SOURCE_FMT.format(grid=grid_slug(grid))
+
+
 def polar_cells(XX, YY, eye, yaw, grid):
-    """Cell index per grid point (-1 = outside the 15 wedges), plus az/range."""
+    """Cell index per grid point (-1 = outside every wedge), plus az/range.
+
+    Band and sector counts come from `grid` alone -- no cell count is spelled as
+    a literal anywhere in this stack, so V0 (3x5=15) and V1 (4x5=20) are the same
+    code path with a different json.
+    """
     cy, sy = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
     dx, dy = XX - eye[0], YY - eye[1]
     xc, yc = dx * cy + dy * sy, -dx * sy + dy * cy      # rotate by -yaw about Z
@@ -390,7 +425,7 @@ def label_scene(arm, scene, sdir, off_dir, grid):
     void, void_off = ~np.isfinite(hm), ~np.isfinite(hm_off)
     void_any = void | void_off
     hz = float(grid["hazard_depth_m"])
-    ncell = grid["n_bands"] * grid["n_sectors"]
+    ncell = n_cells(grid)
 
     # ---- footprint v2: twin heightmap difference (D10) ----------------------
     diff = np.where(void_any, np.nan, hm_off - hm)
@@ -608,14 +643,16 @@ def main():
     if orphan:
         print(f"[labeler] WARN {len(orphan)} on-arm scenes skipped (no off twin): "
               f"{orphan[:5]}", file=sys.stderr)
+    gt_src = gt_source_of(grid)
     os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
     json.dump(dict(grid=grid, cam_convention_source=CAM_SRC,
-                   meta=dict(gt_source=GT_SOURCE, tier_source=TIER_SOURCE,
+                   meta=dict(gt_source=gt_src, tier_source=TIER_SOURCE,
                              footprint=FOOTPRINT_VERSION,
+                             n_cells=n_cells(grid),
                              interior_margin_m=INTERIOR_MARGIN_M,
                              rim_tol_m=RIM_TOL_M, lip_max_pts=LIP_MAX_PTS,
                              step_run_m=STEP_RUN_M, gate_policy=GATE_POLICY),
-                   gt_source=GT_SOURCE, footprint=FOOTPRINT_VERSION,
+                   gt_source=gt_src, footprint=FOOTPRINT_VERSION,
                    tau_strict=dict(tau_int=TAU_INT_DEF, tau_edge=TAU_EDGE_DEF),
                    scene_void=sv, scene_footprint=sv, warnings=warns, frames=frames),
               open(a.out, "w"), indent=1)

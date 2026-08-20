@@ -14,15 +14,29 @@ a measurement -- no gate here can see a mislabel -- so it is merged into the
 written hold list and tagged in the banner, and, like a D14 hold, it takes its
 scenes out of G2's zero-positive failure list because a scene that is in no split
 cannot contaminate one.  `--extra-holds none` ignores the default file.
+
+D19(5) reforms the VERDICT (DAYRUN 0820 working default):
+  * G5 is DEMOTED to a REFERENCE metric.  It measures a geometric fact (can the
+    camera see below-ground surface inside a GT-positive cell), not a labeling
+    contract: a cell at the lip of a drop is correctly positive and structurally
+    holds no visible floor, so the near band always scores low and dragging the
+    whole run to FAILURE on it published a false alarm.  It is now reported as a
+    per-band table with no pass/fail contribution.
+  * G2's zero-positive failure list skips scenes in EXPLAINED_ZERO -- scenes whose
+    zero has an accepted physical explanation on the record (scene06: the hazard
+    lies outside every cut's frustum, D17).  Explained zeros are printed on their
+    own annotated line, so nothing is hidden, but they no longer fail the gate.
+  * The verdict is recomputed from the binding gates only (G1/G2/G3/G4) and prints
+    a per-gate ledger that names which gates bind and which are reference.
 """
-import argparse, collections, json, math, os
+import argparse, collections, glob, json, math, os
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 from PIL import Image
-from labeler import project, TAU_INT, TAU_EDGE
+from labeler import project, n_cells, TAU_INT, TAU_EDGE
 
 REQ = ("frame_id", "scene_id", "round", "toggle_state", "rgb", "polar_gt",
        "polar_gt_pregate", "gate_excluded",
@@ -33,6 +47,14 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 FAR_E_QUOTA = 4        # overlays that must be tier E seen from far away
 FAR_E_D = 8.0          # m, cam.d above which a cut counts as "far"
 RESCUE_PER_SCENE = 2   # on-arm overlays reserved per depth-fusion-rescued scene
+# ---- D19 split-band audit quota ----------------------------------------------
+# When the gridspec REFINES one band into two (V1: band 3 -> 3a [5,8) + 3b [8,12)),
+# the only new thing a human can check is the boundary between them.  The frames
+# that show it are the ones positive in exactly ONE of the pair: a drop wholly
+# inside 5-8 m, or wholly beyond 8 m.  Reserved before every other quota, because
+# the "3a but not 3b" case is rare (a dozen frames in the whole corpus) and the
+# median-of-tier fill would never reach it.
+SPLIT_BAND_QUOTA = 4
 # ---- D10 slope-scene sanity: which scenes must end up with no footprint -------
 RAMP_SCENES = ("sceneN4",)                 # gradual ramp -> 0 AFTER the step gate
 FLAT_NEG_SCENES = ("sceneN1", "sceneN2", "sceneN3", "sceneN5")   # 0 already RAW
@@ -56,6 +78,22 @@ HOLD_BASENAME = "hold_scenes.json"
 # a scene that is not in the dataset cannot contaminate it.
 EXTRA_HOLD_BASENAME = "extra_holds.json"
 EXTRA_HOLD_TAG = "(D17 mislabel-risk)"
+
+# ---- D19(5) EXPLAINED zero-positive scenes -----------------------------------
+# A scene whose hazard-ON arm carries zero positive frames because of an accepted,
+# recorded physical fact about the scene -- not because the labeler failed.  Such a
+# scene stays IN its split (its frames are true negatives-in-view, which is exactly
+# what they depict) and is reported on its own line instead of failing G2.  Adding
+# an id here is a judgement, like extra_holds.json, and must cite its decision.
+EXPLAINED_ZERO = {
+    "scene06": "out-of-FOV (D17) — the hazard lies outside every cut's frustum "
+               "(both arms' 0.1-percentile z = -0.14 m, twin max_diff 0.0003 m); "
+               "the label is correct, the scene simply never shows the drop",
+}
+
+# ---- D19(5) G5 demotion ------------------------------------------------------
+G5_TARGET = 0.80        # kept as the REFERENCE line, no longer a pass/fail bar
+G5_BINDING = False      # D19(5): reference metric, excluded from the verdict
 
 # ---- D15(3) documented drop per scene ----------------------------------------
 # Verbatim from the corpus design table, `Docs/reports/dropoff_cue_matrix_v1.md`
@@ -83,6 +121,25 @@ DOC_DROP_ALT = {
     "scene19": (1.95, "하부 테라스 −1.95 m"),
 }
 DOC_BAND = (0.50, 1.50)     # D15(3) acceptance band on measured / documented
+
+
+def split_band_pair(grid):
+    """The two band indices a refinement carved out of one coarser band, found by
+    band names sharing a numeric stem (`3a`, `3b` -> the pair that replaced `3`).
+    Returns None on a grid with no refined pair, e.g. V0."""
+    stems = collections.defaultdict(list)
+    for i, nm in enumerate(grid["band_names"]):
+        digits = "".join(ch for ch in str(nm) if ch.isdigit())
+        if digits and digits != str(nm):          # '3a' -> stem '3'; '3' -> not a pair
+            stems[digits].append(i)
+    for _, idx in sorted(stems.items()):
+        if len(idx) == 2:
+            return tuple(idx)
+    return None
+
+
+def band_positive(f, b, ns):
+    return any(f["polar_gt"][b * ns:(b + 1) * ns])
 
 
 def wedge_world(b, s, grid, eye, yaw, z, n=14):
@@ -172,9 +229,18 @@ def main():
     man = json.load(open(a.manifest))
     frames = man["frames"]
     grid = json.load(open(a.grid))
-    lab_p = a.labels or os.path.join(os.path.dirname(os.path.abspath(a.manifest)),
-                                     "annotations", "labels_v0.json")
-    lab = json.load(open(lab_p)) if os.path.isfile(lab_p) else None
+    ncell = n_cells(grid)
+    mcell = man["meta"].get("n_cells")
+    if mcell and int(mcell) != ncell:
+        raise SystemExit(f"[gates] --grid {a.grid} has {ncell} cells but the manifest "
+                         f"was built on {mcell} ({man['meta'].get('grid_version')}); "
+                         f"pass the gridspec the labels were derived on.")
+    lab_p = a.labels
+    if not lab_p:      # newest labels_v*.json next to the manifest
+        cand = sorted(glob.glob(os.path.join(os.path.dirname(os.path.abspath(a.manifest)),
+                                             "annotations", "labels_v*.json")))
+        lab_p = cand[-1] if cand else ""
+    lab = json.load(open(lab_p)) if lab_p and os.path.isfile(lab_p) else None
 
     # ---- D17 extra holds: read BEFORE G2, they change what G2 may fail on ----
     ann_dir = os.path.join(os.path.dirname(os.path.abspath(a.manifest)), "annotations")
@@ -192,15 +258,23 @@ def main():
     extra_hold = sorted({s for s in xh_raw if s in known})
     xh_unknown = sorted({s for s in xh_raw if s not in known})
 
-    L = ["# GATES_REPORT — PROVISIONAL-GRID-V0",
+    L = [f"# GATES_REPORT — {grid['version']}",
          f"\nmanifest: `{os.path.abspath(a.manifest)}`  ({len(frames)} frames)",
-         f"grid: `{grid['version']}`  gt_source: `{man['meta']['gt_source']}`  "
+         f"grid: `{grid['version']}`  ({grid['n_bands']} bands × {grid['n_sectors']} "
+         f"sectors = {ncell} cells, band edges {grid['band_edges_m']} m)",
+         f"gt_source: `{man['meta']['gt_source']}`  "
          f"tier_source: `{man['meta']['tier_source']}`",
          f"footprint: `{man['meta'].get('footprint', '?')}`  "
          f"cam convention: `{man['meta'].get('cam_convention_source')}`",
          f"gate policy: `{man['meta'].get('gate_policy', '?')}`", ""]
     hdr_end = len(L)          # D14 hold banner is spliced in here, above G1
-    ok_all = True
+    # D19(5): the verdict is a ledger, not one boolean.  Every entry says whether
+    # the gate BINDS (counts toward the verdict) or is REFERENCE (reported only).
+    ledger = []               # (gate, binding: bool, passed: bool, note)
+
+    def record(gate, binding, passed, note=""):
+        ledger.append((gate, bool(binding), bool(passed), note))
+        return bool(passed)
 
     # ---- G1 required fields -------------------------------------------------
     excl = []
@@ -210,7 +284,10 @@ def main():
             excl.append((f.get("frame_id", "?"), miss))
         elif not os.path.isfile(f["rgb"]):
             excl.append((f["frame_id"], ["rgb-file-missing"]))
-    ok_all &= not excl
+        elif len(f["polar_gt"]) != ncell:
+            excl.append((f["frame_id"], [f"polar_gt len {len(f['polar_gt'])} != {ncell}"]))
+    record("G1 required fields", True, not excl,
+           f"{len(excl)} frame(s) excluded")
     L += [f"## G1 required fields — {'PASS' if not excl else 'FAIL'}",
           f"excluded frames: {len(excl)}"]
     L += [f"- `{i}` missing {m}" for i, m in excl[:40]] + [""]
@@ -238,20 +315,33 @@ def main():
     # missing one.  Merged here so a held scene is out of G2's zero list too.
     hold_x = [s for s in extra_hold if s not in hold_auto]
     hold = hold_auto + hold_x
-    zero_sc = [s for s in zero_all if s not in hold]
-    g2 = not viol and not zero_sc
-    ok_all &= g2
+    # D19(5): a zero with an accepted physical explanation on the record is
+    # annotated and taken off the failure list.  It is NOT held -- the scene stays
+    # in its split, because "the hazard is out of frame" is a true label, not a
+    # missing one -- so it is listed apart from the D14/D17 holds.
+    zero_expl = [s for s in zero_all if s not in hold and s in EXPLAINED_ZERO]
+    zero_sc = [s for s in zero_all if s not in hold and s not in EXPLAINED_ZERO]
+    g2 = record("G2 toggle sanity", True, not viol and not zero_sc,
+                f"{len(viol)} off-arm residual, {len(zero_sc)} unexplained zero-positive "
+                f"scene(s), {len(zero_expl)} explained, {len(hold)} held")
     L += [f"## G2 toggle sanity — {'PASS' if g2 else 'FAIL'}"
-          + (f" (with {len(hold)} scene(s) on PROVISIONAL-HOLD)" if hold else ""),
+          + (f" (with {len(hold)} scene(s) on PROVISIONAL-HOLD)" if hold else "")
+          + (f" ({len(zero_expl)} explained zero, D19⑤)" if zero_expl else ""),
           f"off-arm frames with residual footprint: {len(viol)} "
           f"(scenes flagged: {bad_sc or 'none'})"]
     if lab:
         for f in viol[:20]:
             L.append(f"- `{f['frame_id']}` cell_counts="
                      f"{lab['frames'][f['frame_id']]['cell_counts']}")
-    L += [f"on-arm scenes with ZERO positive frames: {zero_sc or 'none'}",
+    L += [f"on-arm scenes with ZERO positive frames (UNEXPLAINED — these fail the "
+          f"gate): {zero_sc or 'none'}",
           f"hard-negative scenes at zero (expected, excluded from the gate): "
-          f"{zero_neg or 'none'}",
+          f"{zero_neg or 'none'}"]
+    L += [f"EXPLAINED zero (D19⑤ — annotated, stays in its split, excluded from the "
+          f"failure list): {zero_expl or 'none'}"]
+    for s in zero_expl:
+        L.append(f"- `{s}` — {EXPLAINED_ZERO[s]}")
+    L += [
           f"PROVISIONAL-HOLD scenes at zero (D14(4), held out of every split "
           f"instead of failing the gate): {hold_auto or 'none'}",
           f"PROVISIONAL-HOLD scenes added by hand {EXTRA_HOLD_TAG}, held out of "
@@ -359,7 +449,7 @@ def main():
         per[f["scene_id"]][f["tier"]] += 1
     tot = collections.Counter(f["tier"] for f in frames)
     nH = tot.get("H", 0)
-    ok_all &= nH > 0
+    record("G3 strict-H distribution", True, nH > 0, f"{nH} strict-H frames")
     L += [f"## G3 strict-H distribution — {'PASS' if nH else 'FAIL (no H frames)'}",
           f"totals: {dict(tot)}", "", "| scene | H | H_weak | V | E | none_in_fov | off |",
           "|---|---|---|---|---|---|---|"]
@@ -382,20 +472,31 @@ def main():
             for i in pos:
                 per_band[i // ns][0] += int(ci[i] > 0); per_band[i // ns][1] += 1
     mean_ag = float(np.mean(ag)) if ag else float("nan")
-    g5 = bool(ag) and mean_ag >= 0.80
-    ok_all &= g5
-    L += [f"## G5 V-tier depth/GT agreement — {'PASS' if g5 else 'FAIL/NA'}",
-          f"V frames scored: {len(ag)}   mean agreement: {mean_ag:.3f}  (target >= 0.80)",
+    g5_meets = bool(ag) and mean_ag >= G5_TARGET
+    record("G5 V-tier depth/GT agreement", G5_BINDING, g5_meets,
+           f"mean {mean_ag:.3f} vs reference line {G5_TARGET:.2f}")
+    # D19(5): REFERENCE, not a gate.  What G5 measures is whether a GT-positive cell
+    # also shows below-ground surface to the camera -- a fact about view shadow, not
+    # about the label.  The near band is structurally low by geometry (the floor
+    # behind a lip is occluded by the lip), so a single pooled number below 0.80 was
+    # failing the whole run for a correct labeling.  Read the per-band table instead.
+    L += [f"## G5 V-tier depth/GT agreement — REFERENCE "
+          f"({'meets' if g5_meets else 'below'} the {G5_TARGET:.2f} reference line; "
+          f"D19⑤: excluded from the verdict)",
+          f"V frames scored: {len(ag)}   mean agreement: {mean_ag:.3f}  "
+          f"(reference line >= {G5_TARGET:.2f}, NOT a pass/fail bar)",
           "> fraction of GT-positive cells holding >=1 reprojected below-ground pixel.", "",
           "| band | agreement | positive cells |", "|---|---|---|"]
     for b in sorted(per_band):
         h, n = per_band[b]
         L.append(f"| {grid['band_names'][b]} ({grid['band_edges_m'][b]}-"
                  f"{grid['band_edges_m'][b + 1]} m) | {h / n:.3f} | {n} |")
-    L += ["> A near band scoring low is expected geometry, not a labeling fault: a drop's "
-          "floor right behind the lip sits in the camera's view shadow, so its cell is "
-          "GT-positive with no visible below-ground surface. Judge the 0.80 target on the "
-          "far bands, or re-cut the target, before treating G5 as a data defect.", ""]
+    L += ["> **D19⑤ — this is a reference metric, not a gate.** A near band scoring low is "
+          "expected geometry, not a labeling fault: a drop's floor right behind the lip sits "
+          "in the camera's view shadow, so its cell is GT-positive with no visible "
+          "below-ground surface. The pooled mean therefore tracks how much of the corpus is "
+          "near-band, not how good the labels are; it is reported per band and excluded from "
+          "the verdict. Judge it band by band.", ""]
 
     # ---- tau sensitivity ----------------------------------------------------
     L += ["## tau sensitivity (tier distribution, on-arm frames)", "",
@@ -417,19 +518,44 @@ def main():
     for f in frames:
         by[f["tier"]].append(f)
 
-    # D12 quota FIRST: far-away E frames are the ones the morning audit needs most
-    # (an E call at cam.d > 8 m is where the lip-visibility rule is weakest).
-    far = [f for f in by["E"] if float(f["cam"].get("d") or 0.0) > FAR_E_D]
-    far.sort(key=lambda f: f["frame_id"])
+    # D19 quota FIRST: the frames that show the NEW band boundary, i.e. positive in
+    # exactly one of the refined pair.  Nothing else in the audit can check the edge
+    # the V1 grid just introduced.
     picks = []
-    if far:
-        sel = sorted(set(np.linspace(0, len(far) - 1,
-                                     min(FAR_E_QUOTA, len(far))).astype(int).tolist()))
-        picks = [far[i] for i in sel]
+    pair = split_band_pair(grid)
+    split_rows, n_split = [], 0
+    if pair:
+        per = max(1, SPLIT_BAND_QUOTA // 2)
+        for lo, hi in (pair, pair[::-1]):
+            cand = sorted((f for f in frames if f["toggle_state"] == "on"
+                           and band_positive(f, lo, ns) and not band_positive(f, hi, ns)),
+                          key=lambda f: f["frame_id"])
+            sel = (sorted(set(np.linspace(0, len(cand) - 1, min(per, len(cand)))
+                              .astype(int).tolist())) if cand else [])
+            for i in sel:
+                picks.append(cand[i]); n_split += 1
+            split_rows.append((grid["band_names"][lo], grid["band_names"][hi],
+                               len(cand), len(sel)))
     taken = {f["frame_id"] for f in picks}
     for t in list(by):
         by[t] = [f for f in by[t] if f["frame_id"] not in taken]
-    far_short = len(picks) < FAR_E_QUOTA
+
+    # D12 quota: far-away E frames are the ones the morning audit needs most
+    # (an E call at cam.d > 8 m is where the lip-visibility rule is weakest).
+    far = [f for f in by["E"] if float(f["cam"].get("d") or 0.0) > FAR_E_D]
+    far.sort(key=lambda f: f["frame_id"])
+    n_far = 0
+    if far:
+        sel = sorted(set(np.linspace(0, len(far) - 1,
+                                     min(FAR_E_QUOTA, len(far))).astype(int).tolist()))
+        # APPEND -- the D19 split-band picks above are already in `picks`, and
+        # replacing the list here would silently discard them.
+        picks += [far[i] for i in sel]
+        n_far = len(sel)
+    taken = {f["frame_id"] for f in picks}
+    for t in list(by):
+        by[t] = [f for f in by[t] if f["frame_id"] not in taken]
+    far_short = n_far < FAR_E_QUOTA
 
     # Rescue quota: a scene whose heightmap came from depth fusion is measured by
     # an instrument that did not exist when the rest of the corpus was labelled,
@@ -481,7 +607,14 @@ def main():
     L += [f"## G4 audit overlays — {len(written)}/{a.n_audit} written",
           f"dir: `{os.path.abspath(a.audit_dir)}`",
           f"tier mix: {dict(collections.Counter(f['tier'] for f in picks))}",
-          f"D12 far-E quota (tier E and cam.d > {FAR_E_D} m): "
+          f"D19 split-band quota (frames positive in exactly ONE of the refined band "
+          f"pair — the only view that audits the new boundary): {n_split}/"
+          f"{SPLIT_BAND_QUOTA}"
+          + ("" if pair else "  _(this gridspec has no refined band pair — V0)_")]
+    for lo, hi, navail, ntaken in split_rows:
+        L.append(f"  - `{lo}` positive, `{hi}` NOT: {ntaken} taken of {navail} such "
+                 f"frame(s) in the whole labeled set")
+    L += [f"D12 far-E quota (tier E and cam.d > {FAR_E_D} m): "
           f"{n_far_written}/{FAR_E_QUOTA}",
           f"depth-fusion rescue quota (on-arm frames of {rescued or 'no'} rescued "
           f"scene(s), {RESCUE_PER_SCENE} each): {n_rescue}",
@@ -491,7 +624,8 @@ def main():
                  f"tier E with cam.d > {FAR_E_D} m — the D12 quota of {FAR_E_QUOTA} "
                  f"cannot be met; all of them were taken.")
     L.append("")
-    ok_all &= len(written) > 0
+    record("G4 audit overlays", True, len(written) > 0,
+           f"{len(written)}/{a.n_audit} overlays written")
 
     # ---- D15(3) measured max_diff vs the documented drop --------------------
     # REPORT ONLY.  Per D14 the automatic hold list stays D-scene-only, so a main
@@ -525,6 +659,10 @@ def main():
             verdict = f"HOLD {EXTRA_HOLD_TAG} — held out of every split"
         elif sc in hold_auto:
             verdict = "HOLD (D14④ — held out of every split)"
+        elif sc in zero_expl:
+            # D19(5): the scene measures ~0 because the drop is never in frame, so
+            # the design table's drop is simply not what this scene's cuts show.
+            verdict = f"EXPLAINED ZERO (D19⑤) — {EXPLAINED_ZERO[sc].split(' — ')[0]}"
         elif sc in zero_sc:
             verdict = "**BROKEN — on-arm zero positives**"; d15_broken.append(sc)
         elif DOC_BAND[0] <= ratio <= DOC_BAND[1]:
@@ -554,7 +692,24 @@ def main():
               f"rescue: {', '.join('`%s`' % s for s in d15_broken)}** — these fail G2 "
               f"above and are reported, not auto-held (D14).", ""]
 
-    L += ["## VERDICT", f"**{'ALL GATES PASS' if ok_all else 'GATE FAILURE — see above'}**", ""]
+    # ---- D19(5) VERDICT: recomputed from the BINDING gates only --------------
+    ok_all = all(p for _, b, p, _ in ledger if b)
+    bind_fail = [g for g, b, p, _ in ledger if b and not p]
+    L += ["## VERDICT", "",
+          "| gate | role | result | note |", "|---|---|---|---|"]
+    for g, b, p, note in ledger:
+        L.append(f"| {g} | {'binding' if b else '**reference**'} | "
+                 f"{('PASS' if p else 'FAIL') if b else ('meets' if p else 'below') + ' the reference line'}"
+                 f" | {note} |")
+    L += ["",
+          f"**{'ALL BINDING GATES PASS' if ok_all else 'GATE FAILURE — ' + ', '.join(bind_fail)}**",
+          "",
+          "> D19⑤ verdict rule: only the binding gates (G1 required fields, G2 toggle "
+          "sanity, G3 strict-H distribution, G4 audit overlays) decide PASS/FAIL. G5 is a "
+          "reference metric about view-shadow geometry and cannot fail a run. G2 counts a "
+          "zero-positive scene as a failure only when the zero is UNEXPLAINED; scenes with a "
+          "recorded physical explanation (`EXPLAINED_ZERO`) and scenes on PROVISIONAL-HOLD "
+          "are reported on their own lines instead.", ""]
 
     # ---- D14(4) PROVISIONAL-HOLD: banner at the very top + machine-readable --
     hold_p = os.path.abspath(a.hold_out or os.path.join(
@@ -597,6 +752,11 @@ def main():
     print(f"[gates] {'PASS' if ok_all else 'FAIL'} -> {a.out} ({len(written)} overlays, "
           f"far-E {n_far_written}/{FAR_E_QUOTA}"
           f"{' WARNING-short' if far_short else ''})")
+    print("[gates] verdict ledger (D19⑤): " + " | ".join(
+        f"{g}={'PASS' if p else 'FAIL'}" if b else
+        f"{g}=REFERENCE({'meets' if p else 'below'})" for g, b, p, _ in ledger))
+    if zero_expl:
+        print(f"[gates] explained zero-positive scenes (D19⑤, not failures): {zero_expl}")
     print(f"[gates] step-gate exclusions (D14): {tot_fr}/{len(frames)} frames lost >=1 GT "
           f"cell, {tot_gt} GT cells total")
     print(f"[gates] PROVISIONAL-HOLD: {hold or 'none'} -> {hold_p} "

@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
 """End-to-end test on analytically ray-cast synthetic round pairs.
 
-Fixture 1 (legacy, 15 checks -- unchanged):
+GRID-PARAMETERISED (D19 / DAYRUN 0820 Phase 1).  `--grid` selects the gridspec the
+whole suite runs on; with no argument it runs EVERY gridspec in this directory
+(v0 = 3x5 = 15 cells, v1 = 4x5 = 20 cells) so that neither grid can rot.  Nothing
+below spells a cell count, a band count or a cell index as a literal: expectations
+are either hand-computed per grid version (`EXPECT_GT`) or derived from the
+gridspec plus the fixture's own geometry, so adding a band is a json edit.
+
+Fixture 1 (legacy, hand-computed polar GT):
   World: flat ground z=0, rectangular pit x in [0,4], y in [-1,3], floor z=-1.
   Camera: eye (-3,0,1.5), yaw 0, pitch -10, roll 0, hfov 62.2.
   Cut 0000 = clear view.  Cut 0001 = same pose, a 2 m wall baked at x=-0.5 in the
@@ -30,18 +37,79 @@ Fixture 3 (D14 preservation + PROVISIONAL-HOLD):
                  make_split.py --exclude-scenes must keep it out of every split
                  with its PROOF checks still green.
 """
-import json, os, subprocess, sys, tempfile
+import argparse, json, os, subprocess, sys, tempfile
 import numpy as np
 from PIL import Image
-from labeler import cam_basis, focal_px, polar_cells, W_IMG, H_IMG
+from labeler import (cam_basis, focal_px, polar_cells, n_cells, grid_slug,
+                     gt_source_of, W_IMG, H_IMG)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PY = sys.executable
 PIT = (0.0, 4.0, -1.0, 3.0, -1.0)          # x0,x1,y0,y1,floor_z
 CAM = dict(eye=[-3.0, 0.0, 1.5], ground_z=0.0, d=3.0, h_rel=1.5, yaw=0.0,
            pitch=-10.0, roll=0.0, hfov=62.2, focal=17.37, aperture=20.955, tier="CAM-1")
-EXPECT_GT = [0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0]
+
+# Hand-computed polar GT of the legacy pit fixture, one vector per gridspec.
+#   pit x in [0,4], y in [-1,3]; eye (-3,0), yaw 0  ->  the footprint spans
+#   3.00 m to 7.62 m of range and |az| <= 31.1 deg only for sectors A-D.
+#   V0 (bands [0,2)/[2,5)/[5,12)) : band2 A-D + band3 A-D.
+#   V1 (bands [0,2)/[2,5)/[5,8)/[8,12)) : the SAME cells, with V0's band 3 landing
+#       entirely in 3a because the farthest pit corner is 7.62 m < 8 m -- band 3b
+#       must be empty.  That is the "pit lands in the correct new band" assertion.
+EXPECT_GT = {
+    "PROVISIONAL-GRID-V0": [0, 0, 0, 0, 0,  1, 1, 1, 1, 0,  1, 1, 1, 1, 0],
+    "PROVISIONAL-GRID-V1": [0, 0, 0, 0, 0,  1, 1, 1, 1, 0,  1, 1, 1, 1, 0,
+                            0, 0, 0, 0, 0],
+}
 X0, Y0, ST, N = -2.0, -8.0, 0.05, 321
+
+
+def grids():
+    """Every gridspec shipped next to this file, ascending by filename."""
+    return sorted(os.path.join(HERE, b) for b in os.listdir(HERE)
+                  if b.startswith("gridspec_") and b.endswith(".json"))
+
+
+def expect_gt(grid):
+    v = grid["version"]
+    if v not in EXPECT_GT:
+        raise SystemExit(f"synth_test: no hand-computed EXPECT_GT for gridspec {v}; "
+                         f"add one rather than deriving it from the code under test")
+    e = EXPECT_GT[v]
+    assert len(e) == n_cells(grid), f"EXPECT_GT[{v}] has {len(e)} cells, grid has {n_cells(grid)}"
+    return e
+
+
+def footprint_range(pit, cam):
+    """(min, max) ground range from the eye over the pit rectangle, on the same
+    5 cm lattice the labeler uses.  Independent of the grid -- it is the fixture's
+    geometry, and it is what says WHICH band the pit must land in."""
+    x0, x1, y0, y1, _ = pit
+    X, Y = np.meshgrid(X0 + np.arange(N) * ST, Y0 + np.arange(N) * ST)
+    m = (X >= x0) & (X <= x1) & (Y >= y0) & (Y <= y1)
+    r = np.hypot(X[m] - cam["eye"][0], Y[m] - cam["eye"][1])
+    return float(r.min()), float(r.max())
+
+
+def bands_spanned(grid, r_lo, r_hi):
+    """Band indices whose [lo,hi) range interval meets [r_lo, r_hi]."""
+    e = grid["band_edges_m"]
+    return {b for b in range(grid["n_bands"]) if r_hi >= e[b] and r_lo < e[b + 1]}
+
+
+def bands_positive(grid, gt):
+    ns = grid["n_sectors"]
+    return {i // ns for i, v in enumerate(gt) if v}
+
+
+def fold_to_v0(grid, gt):
+    """Collapse a V1 (4-band) GT vector back onto the V0 (3-band) indexing, i.e.
+    OR band 3a with band 3b.  Returns None when `grid` is not a V0 refinement."""
+    ns, nb = grid["n_sectors"], grid["n_bands"]
+    if nb != 4 or grid.get("nested_in") != "PROVISIONAL-GRID-V0":
+        return None
+    return [gt[b * ns + s] if b < 2 else (gt[2 * ns + s] | gt[3 * ns + s])
+            for b in range(3) for s in range(ns)]
 
 
 def render_depth(cam, pit, wall=None):
@@ -120,8 +188,20 @@ def write_arm(root, arm, pit):
 RAMP_K, RAMP_LEN = 0.125, 8.0        # 1.0 m of fall over 8 m of run, no step
 SLOPE_K = 0.05                       # 0.2 m of fall over 4 m of walkway
 SPIT = (4.0, 8.0, -1.0, 3.0, -1.2)   # x0,x1,y0,y1,floor_z of the vertical pit
-FAR_WALKWAY_CELL = 14                # band 3 x sector E: sloped walkway only,
-#                                      the pit never reaches that azimuth
+FAR_WALKWAY_SECTOR = 4               # sector E: sloped walkway only, the pit never
+#                                      reaches that azimuth
+FAR_WALKWAY_FIRST_BAND = 2           # ... and only beyond 5 m does the slope reach
+#                                      the 0.3 m the retired v0 rule fired on
+
+
+def far_walkway_cells(grid):
+    """The cells the retired v0 ground-plane rule swept up on the sloped walkway:
+    sector E of every band from 5 m outward.  Under V0 that is one cell (band 3);
+    under V1 the same ground is cells 3a-E and 3b-E, so the check follows the
+    gridspec instead of naming an index."""
+    ns = grid["n_sectors"]
+    return [b * ns + FAR_WALKWAY_SECTOR
+            for b in range(FAR_WALKWAY_FIRST_BAND, grid["n_bands"])]
 
 
 def _safe(v):
@@ -263,15 +343,16 @@ def run(*args):
     return p
 
 
-def legacy_fixture(ok):
+def legacy_fixture(ok, gpath):
+    grid = json.load(open(gpath))
     root = tempfile.mkdtemp(prefix="negobs_synth_")
     on = write_arm(root, "on", PIT)
     off = write_arm(root, "off", None)
-    lab_p = os.path.join(root, "annotations", "labels_v0.json")
+    lab_p = os.path.join(root, "annotations", f"labels_{grid_slug(grid)}.json")
     man_p = os.path.join(root, "dataset_manifest_v1.json")
 
     r = run("labeler.py", "--on-round", on, "--off-round", off,
-            "--grid", os.path.join(HERE, "gridspec_v0.json"), "--out", lab_p)
+            "--grid", gpath, "--out", lab_p)
     assert r.returncode == 0, "labeler.py failed"
     L = json.load(open(lab_p))["frames"]
     a = L["on/synthpit/L0__s20260819__0000.png"]
@@ -282,8 +363,26 @@ def legacy_fixture(ok):
         ok.append(cond)
         print(f"[{'PASS' if cond else 'FAIL'}] {name} {extra}")
 
-    chk("polar_gt == hand-computed [band2/3 x sectors A-D]",
-        a["polar_gt"] == EXPECT_GT, f"got {a['polar_gt']}")
+    exp = expect_gt(grid)
+    chk(f"polar_gt == hand-computed for {grid['version']} "
+        f"({n_cells(grid)} cells: bands {grid['band_names']})",
+        a["polar_gt"] == exp, f"got {a['polar_gt']}")
+    # --- the pit must land in the band the fixture's own geometry says it does ---
+    r_lo, r_hi = footprint_range(PIT, CAM)
+    want_b = bands_spanned(grid, r_lo, r_hi)
+    got_b = bands_positive(grid, a["polar_gt"])
+    chk(f"pit lands in exactly the band(s) its {r_lo:.2f}–{r_hi:.2f} m range span "
+        f"reaches: {sorted(grid['band_names'][b] for b in want_b)}",
+        got_b == want_b,
+        f"positive bands {sorted(grid['band_names'][b] for b in got_b)} "
+        f"vs expected {sorted(grid['band_names'][b] for b in want_b)} "
+        f"(edges {grid['band_edges_m']})")
+    fold = fold_to_v0(grid, a["polar_gt"])
+    if fold is not None:
+        chk("V1 nests in V0: folding 3a|3b back together reproduces the V0 GT "
+            "exactly (the refinement adds resolution, not positives)",
+            fold == EXPECT_GT["PROVISIONAL-GRID-V0"],
+            f"folded={fold}")
     chk("clear cut: int_px > 0", a["raw_vis"]["int_px"] > 0, f"int_px={a['raw_vis']['int_px']}")
     chk("clear cut: edge_ratio ~1", (a["raw_vis"]["edge_ratio"] or 0) >= 0.90,
         f"edge_ratio={a['raw_vis']['edge_ratio']} proj={a['raw_vis']['edge_projected']}")
@@ -304,11 +403,20 @@ def legacy_fixture(ok):
             "--off-round", off, "--out", man_p)
     chk("build_manifest.py runs", r.returncode == 0)
     M = json.load(open(man_p))
-    chk("manifest: 4 frames, abs paths, grid tagged",
+    chk("manifest: 4 frames, abs paths, grid + cell count tagged from the gridspec",
         len(M["frames"]) == 4 and all(os.path.isabs(f["rgb"]) for f in M["frames"])
-        and M["meta"]["grid_version"] == "PROVISIONAL-GRID-V0")
+        and M["meta"]["grid_version"] == grid["version"]
+        and M["meta"]["n_cells"] == n_cells(grid)
+        and all(len(f["polar_gt"]) == n_cells(grid) for f in M["frames"]),
+        f"grid_version={M['meta']['grid_version']} n_cells={M['meta'].get('n_cells')}")
+    chk("manifest gt_source carries THIS grid's identity (not a stale v0 stamp), "
+        "and the V0 spelling is unchanged from mainrun_0819",
+        M["meta"]["gt_source"] == gt_source_of(grid)
+        and gt_source_of({"version": "PROVISIONAL-GRID-V0"})
+            == "derived-heightmapdiff-gridv0-PROVISIONAL",
+        M["meta"]["gt_source"])
 
-    r = run("gates.py", "--manifest", man_p, "--labels", lab_p,
+    r = run("gates.py", "--manifest", man_p, "--labels", lab_p, "--grid", gpath,
             "--out", os.path.join(root, "GATES_REPORT.md"),
             "--audit-dir", os.path.join(root, "audit_samples"), "--n-audit", "4")
     chk("gates.py runs and writes overlays", r.returncode == 0
@@ -331,7 +439,7 @@ def legacy_fixture(ok):
     return root
 
 
-def slope_fixture(ok):
+def slope_fixture(ok, gpath):
     """D10 footprint-v2 fixtures: gradual ramp (must vanish) + sloped approach
     to a real pit (pit must survive, walkway must stay clean)."""
     root = tempfile.mkdtemp(prefix="negobs_synthv2_")
@@ -347,12 +455,12 @@ def slope_fixture(ok):
     write_v2_scene(root, "off", "sceneN4", hm_ramp_off, s_ramp_off)
     write_v2_scene(root, "off", "synthstairs", hm_st_off, s_st_off)
     off = write_v2_scene(root, "off", "synthslope", hm_slope_off, s_slope_off)
-    lab_p = os.path.join(root, "annotations", "labels_v0.json")
+    grid = json.load(open(gpath))
+    lab_p = os.path.join(root, "annotations", f"labels_{grid_slug(grid)}.json")
     man_p = os.path.join(root, "dataset_manifest_v1.json")
-    grid = json.load(open(os.path.join(HERE, "gridspec_v0.json")))
 
     r = run("labeler.py", "--on-round", on, "--off-round", off,
-            "--grid", os.path.join(HERE, "gridspec_v0.json"), "--out", lab_p)
+            "--grid", gpath, "--out", lab_p)
     assert r.returncode == 0, "labeler.py failed on the v2 fixtures"
     LAB = json.load(open(lab_p))
     L = LAB["frames"]
@@ -432,12 +540,14 @@ def slope_fixture(ok):
         f"gt={''.join(map(str, slope['polar_gt']))} tier={slope['tier_strict']} "
         f"int_px={slope['raw_vis']['int_px']}")
     gt0, n0 = v0_rule_gt(hm_slope_on, grid)
+    far_cells = far_walkway_cells(grid)
+    far_names = [f"{grid['band_names'][c // grid['n_sectors']]}"
+                 f"{grid['sector_names'][c % grid['n_sectors']]}" for c in far_cells]
     chk("slope: v0 rule swept the far walkway into the footprint",
-        n0 > n_changed and gt0[FAR_WALKWAY_CELL] == 1,
+        n0 > n_changed and any(gt0[c] == 1 for c in far_cells),
         f"v0 cells={n0} vs v2 {n_changed}; v0 gt={''.join(map(str, gt0))}")
-    chk("slope: v2 rule leaves the sloped walkway clean (cell "
-        f"{FAR_WALKWAY_CELL} = band3/sector E)",
-        slope["polar_gt"][FAR_WALKWAY_CELL] == 0,
+    chk(f"slope: v2 rule leaves the sloped walkway clean (cells {far_names})",
+        all(slope["polar_gt"][c] == 0 for c in far_cells),
         f"v2 gt={''.join(map(str, slope['polar_gt']))}")
     chk("slope: int_px references z_off, not cam.ground_z "
         "(no fallback pixels on a void-free twin)",
@@ -451,9 +561,11 @@ def slope_fixture(ok):
         and slope["footprint"]["hm_cells_excluded"] == 0,
         f"pregate={''.join(map(str, slope['polar_gt_pregate']))} "
         f"n={slope['gate_excluded']['n']}")
-    chk("labels carry the D10/D11 provenance",
+    chk("labels carry the D10/D11 provenance + this grid's identity and cell count",
         LAB["meta"]["footprint"] == "v2-diff-stepgate"
-        and LAB["meta"]["gt_source"] == "derived-heightmapdiff-gridv0-PROVISIONAL"
+        and LAB["meta"]["gt_source"] == gt_source_of(grid)
+        and LAB["meta"]["n_cells"] == n_cells(grid)
+        and LAB["grid"]["version"] == grid["version"]
         and LAB["meta"]["interior_margin_m"] == 0.15
         and LAB["meta"]["rim_tol_m"] == 0.35 and LAB["meta"]["lip_max_pts"] == 200,
         str(LAB["meta"]))
@@ -463,8 +575,8 @@ def slope_fixture(ok):
             "--off-round", off, "--out", man_p)
     chk("build_manifest.py runs on the v2 fixtures", r.returncode == 0)
     M = json.load(open(man_p))
-    chk("manifest gt_source bumped to the twin-diff string",
-        M["meta"]["gt_source"] == "derived-heightmapdiff-gridv0-PROVISIONAL"
+    chk("manifest gt_source bumped to the twin-diff string for THIS grid",
+        M["meta"]["gt_source"] == gt_source_of(grid)
         and M["meta"]["footprint"] == "v2-diff-stepgate", str(M["meta"]["gt_source"]))
     mf = {f["frame_id"]: f for f in M["frames"]}
     mramp = mf["on/sceneN4/L0__s20260819__0000.png"]
@@ -479,10 +591,22 @@ def slope_fixture(ok):
         M["meta"].get("gate_policy") == "train-on-gated; pregate preserved per D14",
         str(M["meta"].get("gate_policy")))
     rep_p = os.path.join(root, "GATES_REPORT.md")
-    r = run("gates.py", "--manifest", man_p, "--labels", lab_p, "--out", rep_p,
+    r = run("gates.py", "--manifest", man_p, "--labels", lab_p, "--grid", gpath,
+            "--out", rep_p,
             "--audit-dir", os.path.join(root, "audit_samples"), "--n-audit", "4")
     rep = open(rep_p).read() if os.path.isfile(rep_p) else ""
     chk("gates.py runs on the v2 fixtures", r.returncode == 0)
+    chk("GATES_REPORT header names the gridspec actually used",
+        rep.startswith(f"# GATES_REPORT — {grid['version']}"),
+        rep.splitlines()[0] if rep else "empty")
+    chk("D19⑤: G5 is reported as a REFERENCE metric and the verdict ledger "
+        "marks it non-binding",
+        "## G5 V-tier depth/GT agreement — REFERENCE" in rep
+        and "| G5 V-tier depth/GT agreement | **reference** |" in rep,
+        [l for l in rep.splitlines() if l.startswith("## G5")][:1])
+    chk("D19⑤: the verdict line speaks of BINDING gates",
+        "ALL BINDING GATES PASS" in rep or "GATE FAILURE —" in rep,
+        [l for l in rep.splitlines() if l.startswith("**ALL") or l.startswith("**GATE")][:1])
     n4_line = [l for l in rep.splitlines() if l.startswith("| sceneN4 |") and "|" in l]
     chk("GATES_REPORT lists sceneN4 in the slope sanity table and it reads OK",
         any(l.strip().endswith("OK |") for l in n4_line), " / ".join(n4_line[-1:]))
@@ -514,16 +638,17 @@ def slope_fixture(ok):
 MAKE_SPLIT = os.path.join(os.path.dirname(HERE), "make_split.py")
 
 
-def hold_fixture(ok):
+def hold_fixture(ok, gpath):
     """D14(4) hold path: sceneD1's twin arms are identical, so its hazard-ON arm has
     zero positive frames.  That is NOT a designed hard negative (it is not one of
     N1-N5), so gates.py must hold the scene out of every split -- banner at the top
     of the report + machine-readable hold_scenes.json -- rather than fail G2 on it."""
+    grid = json.load(open(gpath))
     root = tempfile.mkdtemp(prefix="negobs_hold_")
     hm_flat, s_flat = ramp_world(False)          # flat ground, identical twin arms
     on = write_v2_scene(root, "on", "sceneD1", hm_flat, s_flat)
     off = write_v2_scene(root, "off", "sceneD1", hm_flat, s_flat)
-    lab_p = os.path.join(root, "annotations", "labels_v0.json")
+    lab_p = os.path.join(root, "annotations", f"labels_{grid_slug(grid)}.json")
     man_p = os.path.join(root, "dataset_manifest_v1.json")
     rep_p = os.path.join(root, "GATES_REPORT.md")
     hold_p = os.path.join(root, "annotations", "hold_scenes.json")
@@ -534,7 +659,7 @@ def hold_fixture(ok):
 
     print("\n--- fixture 3: PROVISIONAL-HOLD (D14 ④) ---")
     r = run("labeler.py", "--on-round", on, "--off-round", off,
-            "--grid", os.path.join(HERE, "gridspec_v0.json"), "--out", lab_p)
+            "--grid", gpath, "--out", lab_p)
     assert r.returncode == 0, "labeler.py failed on the hold fixture"
     d1 = json.load(open(lab_p))["frames"]["on/sceneD1/L0__s20260819__0000.png"]
     chk("hold fixture: sceneD1 on-arm is all-negative before AND after the gate "
@@ -544,7 +669,8 @@ def hold_fixture(ok):
     r = run("build_manifest.py", "--labels", lab_p, "--on-round", on,
             "--off-round", off, "--out", man_p)
     assert r.returncode == 0, "build_manifest.py failed on the hold fixture"
-    r = run("gates.py", "--manifest", man_p, "--labels", lab_p, "--out", rep_p,
+    r = run("gates.py", "--manifest", man_p, "--labels", lab_p, "--grid", gpath,
+            "--out", rep_p,
             "--audit-dir", os.path.join(root, "audit_samples"), "--n-audit", "2")
     chk("gates.py runs on the hold fixture", r.returncode == 0)
     rep = open(rep_p).read() if os.path.isfile(rep_p) else ""
@@ -560,8 +686,13 @@ def hold_fixture(ok):
         "zero-positive list stays empty",
         any(l.startswith("## G2") and "PASS" in l and "PROVISIONAL-HOLD" in l
             for l in rep.splitlines())
-        and "on-arm scenes with ZERO positive frames: none" in rep,
+        and "on-arm scenes with ZERO positive frames (UNEXPLAINED — these fail "
+            "the gate): none" in rep,
         " / ".join(l for l in rep.splitlines() if l.startswith("## G2")))
+    chk("hold: D19⑤ explained-zero line is present and empty on this fixture "
+        "(sceneD1's zero is HELD, not explained)",
+        "EXPLAINED zero (D19⑤" in rep and "excluded from the failure list): none" in rep,
+        [l for l in rep.splitlines() if l.startswith("EXPLAINED zero")][:1])
     for ln in rep.splitlines()[:14]:
         if ln.strip():
             print("    " + ln.rstrip())
@@ -569,9 +700,10 @@ def hold_fixture(ok):
     return hold_p
 
 
-def split_fixture(ok, hold_p):
+def split_fixture(ok, hold_p, gpath):
     """D14(4) make_split integration: the held scene must land in NO split while
     every PROOF check stays green (they are expressed against the eligible pool)."""
+    ncell = n_cells(json.load(open(gpath)))
     root = tempfile.mkdtemp(prefix="negobs_split_")
     man_p = os.path.join(root, "dataset_manifest_v1.json")
     out_p = os.path.join(root, "split_v1.json")
@@ -582,15 +714,15 @@ def split_fixture(ok, hold_p):
     for i, s in enumerate(scenes):
         neg = s in held or s == "sceneN3"
         for j in range(2):
-            gt = [0] * 15
+            gt = [0] * ncell
             if not neg:
-                gt[(i + j) % 15] = 1
+                gt[(i + j) % ncell] = 1
             frames.append(dict(frame_id=f"on/{s}/{j:04d}.png", scene_id=s, round="r_on",
                                toggle_state="on", tier=("H" if (i % 3 == 0 and j == 0)
                                                         else "V" if j == 0 else "E"),
                                polar_gt=gt))
             frames.append(dict(frame_id=f"off/{s}/{j:04d}.png", scene_id=s, round="r_off",
-                               toggle_state="off", tier="off", polar_gt=[0] * 15))
+                               toggle_state="off", tier="off", polar_gt=[0] * ncell))
     json.dump(dict(meta=dict(note="synthetic split fixture"), frames=frames),
               open(man_p, "w"))
 
@@ -625,18 +757,48 @@ def split_fixture(ok, hold_p):
     return root
 
 
-def main():
+def run_suite(gpath):
+    grid = json.load(open(gpath))
+    banner = (f"{grid['version']}  ({grid['n_bands']} bands x {grid['n_sectors']} "
+              f"sectors = {n_cells(grid)} cells, edges {grid['band_edges_m']} m)")
+    print("\n" + "=" * 78)
+    print(f"=== SYNTH SUITE on {os.path.basename(gpath)} — {banner}")
+    print("=" * 78)
     ok_legacy, ok_v2, ok_hold = [], [], []
-    legacy_fixture(ok_legacy)
-    slope_fixture(ok_v2)
-    hold_p = hold_fixture(ok_hold)
-    split_fixture(ok_hold, hold_p)
-    print(f"\nRESULT legacy fixture : {sum(ok_legacy)}/{len(ok_legacy)} checks passed")
-    print(f"RESULT footprint v2   : {sum(ok_v2)}/{len(ok_v2)} checks passed")
-    print(f"RESULT D14 hold/split : {sum(ok_hold)}/{len(ok_hold)} checks passed")
+    legacy_fixture(ok_legacy, gpath)
+    slope_fixture(ok_v2, gpath)
+    hold_p = hold_fixture(ok_hold, gpath)
+    split_fixture(ok_hold, hold_p, gpath)
+    print(f"\nRESULT [{grid['version']}] legacy fixture : "
+          f"{sum(ok_legacy)}/{len(ok_legacy)} checks passed")
+    print(f"RESULT [{grid['version']}] footprint v2   : "
+          f"{sum(ok_v2)}/{len(ok_v2)} checks passed")
+    print(f"RESULT [{grid['version']}] D14 hold/split : "
+          f"{sum(ok_hold)}/{len(ok_hold)} checks passed")
     ok = ok_legacy + ok_v2 + ok_hold
-    print(f"RESULT: {sum(ok)}/{len(ok)} checks passed")
-    return 0 if all(ok) else 1
+    print(f"RESULT [{grid['version']}]: {sum(ok)}/{len(ok)} checks passed")
+    return ok
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--grid", default="", help="gridspec json to run the suite on; "
+                    "default = every gridspec_*.json in this directory")
+    a = ap.parse_args()
+    paths = [os.path.abspath(a.grid)] if a.grid else grids()
+    if not paths:
+        raise SystemExit("synth_test: no gridspec_*.json found next to this file")
+    tot, per = [], []
+    for p in paths:
+        r = run_suite(p)
+        tot += r
+        per.append((os.path.basename(p), sum(r), len(r)))
+    print("\n" + "=" * 78)
+    for b, s, n in per:
+        print(f"RESULT {b:24s}: {s}/{n} checks passed  "
+              f"{'OK' if s == n else '*** FAILURES ***'}")
+    print(f"RESULT: {sum(tot)}/{len(tot)} checks passed across {len(paths)} gridspec(s)")
+    return 0 if all(tot) else 1
 
 
 if __name__ == "__main__":

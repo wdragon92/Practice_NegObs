@@ -1,20 +1,18 @@
-"""RESERVE — DO NOT RUN TONIGHT unless the strict-H recall in the first table is unusable.
+"""RETIRED (0820, recipe v2) — the oversampler now lives in train_polar.py.
 
-Identical to train_polar.py except that frames with tier=="H" are drawn --oversample-strict-h times
-more often, via a WeightedRandomSampler over the train subset (epoch length is kept equal to the
-un-oversampled train set so that "epoch" stays comparable across arms).
+Strict-H oversampling was folded into the main trainer as `--oversample-h K` (train_polar.
+make_sampler + train_polar.is_strict_h), so all three models share one code path and one config
+record. This file stays only as a compatibility shim for the old flag name:
 
-  python train_oversample.py --input rgb --oversample-strict-h 4 ... (same flags as train_polar)
+    python train_oversample.py --oversample-strict-h 4 ...   ==   python train_polar.py --oversample-h 4 ...
 
-Reserve status: only the import + sampler self-check below has been executed.
+Difference vs the 0819 prototype: "strict-H" is now tier=='H' AND the hazard-ON arm AND >=1
+GT-positive cell (make_split's own rule), not tier=='H' alone.
 """
 from __future__ import annotations
 
 import os
 import sys
-
-import torch
-from torch.utils.data import WeightedRandomSampler
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import train_polar  # noqa: E402
@@ -23,23 +21,22 @@ import train_polar  # noqa: E402
 def build_argparser():
     p = train_polar.build_argparser(desc=__doc__)
     p.add_argument("--oversample-strict-h", type=float, default=4.0,
-                   help="weight multiplier for tier=='H' train frames (1.0 == off)")
+                   help="DEPRECATED alias of train_polar --oversample-h (1.0 == off)")
     return p
 
 
 def make_sampler(ds, args):
-    k = float(getattr(args, "oversample_strict_h", 1.0))
-    if k <= 1.0:
-        return None
-    w = [k if (r.get("tier") == "H") else 1.0 for r in ds.items]
-    n_h = sum(1 for x in w if x > 1.0)
-    print(f"[oversample] tier-H frames {n_h}/{len(w)} weighted x{k}")
-    return WeightedRandomSampler(torch.as_tensor(w, dtype=torch.double), num_samples=len(w),
-                                 replacement=True)
+    """Kept as an importable name; delegates to the folded-in implementation."""
+    return train_polar.make_sampler(ds, args)
 
 
 def main(argv=None):
-    train_polar.make_sampler = make_sampler       # hook swap; train_polar calls it by module lookup
+    parser = build_argparser()
+    args = parser.parse_args(argv)
+    k = float(args.oversample_strict_h)
+    if k > 1.0 and float(args.oversample_h) <= 1.0:   # honour the legacy flag
+        argv = list(sys.argv[1:] if argv is None else argv) + ["--oversample-h", str(k)]
+        print(f"[oversample] --oversample-strict-h {k:g} -> --oversample-h {k:g} (shim)")
     return train_polar.main(argv, parser=build_argparser())
 
 

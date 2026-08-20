@@ -1,0 +1,16 @@
+{
+  "version": "PROVISIONAL-GRID-V1",
+  "n_sectors": 5,
+  "sector_edges_deg": [31.1, 18.66, 6.22, -6.22, -18.66, -31.1],
+  "sector_names": ["A", "B", "C", "D", "E"],
+  "note": "A=image-left=+azimuth(CCW,left of forward). Cell az = camera-frame horizontal azimuth atan2(y_c,x_c). Sectors are BYTE-IDENTICAL to gridspec_v0.json -- V1 changes the range bands only.",
+  "n_bands": 4,
+  "band_edges_m": [0.0, 2.0, 5.0, 8.0, 12.0],
+  "band_names": ["1", "2", "3a", "3b"],
+  "cell_index": "band*5+sector",
+  "hazard_depth_m": 0.3,
+  "positive_rule": "any footprint sample in wedge",
+  "nested_in": "PROVISIONAL-GRID-V0",
+  "nesting_note": "V1 is a strict REFINEMENT of V0: bands 1 and 2 are unchanged (cells 0-9 keep their V0 index and meaning), and V0's band 3 [5,12) m is split exactly at 8 m into 3a [5,8) and 3b [8,12). Hence V0_cell(10+s) == V1_cell(10+s) OR V1_cell(15+s), the outer radius (12 m) and the angular coverage are unchanged, so the set of ground points inside the grid is identical and every frame-level property that depends only on grid COVERAGE (any-cell-positive, therefore the none_in_fov tier, and the lip seed mask cell>=0, therefore edge_ratio) is invariant between V0 and V1.",
+  "rollback": "swap this file for gridspec_v0.json and re-run labeler.py + build_manifest.py; nothing else is parameterised on the grid."
+}

@@ -433,6 +433,11 @@ def scene_proc(scene_file, scene_key, out_dir, conds, n_cam, base_seed):
         prev_rec = _read_scene_json(out_dir)
         cuts = {c["file"]: c for c in prev_rec.get("cuts", [])}
 
+        # Opt-in camera-band override (D19 (1), boost rounds). `None` unless
+        # NEGOBS_CAM_BAND_OVERRIDE is set, and then `_camband_redraw` below is
+        # never called — see the section at the bottom of this file.
+        camband = _camband_resolve(scene_key)
+
         t_run = time.time()
         for cid in cond_ids:
             c = ctl.apply_cond(cid)
@@ -442,6 +447,8 @@ def scene_proc(scene_file, scene_key, out_dir, conds, n_cam, base_seed):
                   f"evc {c['ev_comp']:+.2f}", flush=True)
             for i in range(n_cam):
                 s = vk.sample_camera(scene_key, i, base_seed, gy=gy)
+                if camband is not None:
+                    s = _camband_redraw(s, camband, scene_key, i, base_seed)
                 d_az = vk.sample_daz(scene_key, cid, i, base_seed,
                                      role=vk.ROLE_DATA)
                 ctl(d_az)
@@ -552,6 +559,127 @@ def scene_proc(scene_file, scene_key, out_dir, conds, n_cam, base_seed):
     sc.capture_pipeline = _capture
     sys.argv = [scene_file]
     runpy.run_path(scene_file, run_name="__main__")
+
+
+# ===========================================================================
+# opt-in camera band override — NEGOBS_CAM_BAND_OVERRIDE (D19 (1), boost rounds)
+# ===========================================================================
+# NOTHING in this section changes a default round. With the variable unset,
+# `_camband_resolve` returns None on its first statement, `_camband_redraw` is
+# never called, and every camera is byte-for-byte what `vk.sample_camera`
+# produced. Same discipline as the sidecar section below.
+#
+# WHY. The 08-19 corpus draws d LogU[1.2, 12] and h U[0.25, 1.90] across the
+# whole band, so the corners that generate occluded (H) and rim-only (E) frames
+# are sampled thinly — test ended with H 21 / E 9. D19 (1) declares two biased
+# bands for the additive boost rounds:
+#     H-boost  {"d_min":6,"d_max":12,"h_min":0.25,"h_max":1.0}   far + low
+#     E-boost  {"d_min":6,"d_max":12,"h_min":1.2,"h_max":1.9}    far + high
+# Only the keys PRESENT in the JSON are overridden; an absent key keeps its
+# `vk.CAM_DIST` value. The DISTRIBUTION FAMILY is unchanged — d stays
+# log-uniform, h stays uniform (`variation_kit.py:615-617`) — and
+# pitch / yaw / roll / hfov / yoff are never touched at all.
+#
+# WHICH RNG STREAM. The redraw uses its own stream, `vk.rng(scene, "camband",
+# idx, seed)`, not the "cam" stream `sample_camera` already consumed. Two
+# consequences, both wanted:
+#   * yaw / pitch / roll / hfov / y for cut i are the SAME numbers the unbiased
+#     sampler drew for that cut, so d and h are the only axes that moved;
+#   * the stream is a pure function of (scene, idx, seed) exactly like every
+#     other derived stream (`variation_kit.py:121-137`), so the hazard-on and
+#     hazard-off arms of a boost round stay exact twins (D2's whole point).
+#
+# CAM-2. `vk.CAM2_SCENES` (scene02, scene15, sceneD4, scene11) carry a
+# STRUCTURAL h <= `vk.CAM2_H_MAX` = 1.20 ceiling (`variation_kit.py:592-595`) —
+# above it the camera is inside geometry. The requested h band is INTERSECTED
+# with that ceiling and can never be pushed past it. If the intersection comes
+# out empty or degenerate — which is exactly what E-boost [1.2, 1.9] does to a
+# CAM-2 scene — the CAP WINS: the scene falls back to its capped base h band
+# and prints a line saying the boost there is distance-only. A silent
+# ceiling-break or a silent zero-width band would both be worse.
+#
+# REJECTION LOGIC IS UNTOUCHED. The override only changes the numbers in `s`;
+# `pre.ground_z`, `pre.check` (stage 1) and `vk.image_filter` (stage 2) all run
+# afterwards on the overridden eye exactly as before.
+CAMBAND_ENV = "NEGOBS_CAM_BAND_OVERRIDE"
+CAMBAND_KEYS = ("d_min", "d_max", "h_min", "h_max")
+# metres. A band narrower than this is treated as empty: 24 cuts at one fixed
+# height is not a sample, it is a constant.
+CAMBAND_MIN_WIDTH = 0.01
+
+
+def _camband_resolve(scene_key):
+    """Effective `(d_lo, d_hi, h_lo, h_hi)` for this scene, or None when the
+    override is absent. Prints one line per scene process. Raises SystemExit on
+    a malformed spec — a boost round must fail loudly, never fall back to the
+    default band while still writing into a directory named `*_boost_*`."""
+    raw = os.environ.get(CAMBAND_ENV)
+    if not raw:
+        return None
+    try:
+        ov = json.loads(raw)
+        if not isinstance(ov, dict):
+            raise ValueError("not a JSON object")
+        unknown = sorted(k for k in ov if k not in CAMBAND_KEYS)
+        if unknown:
+            raise ValueError(f"unknown key(s) {unknown}; "
+                             f"expected any of {list(CAMBAND_KEYS)}")
+        ov = {k: float(v) for k, v in ov.items()}
+    except Exception as e:
+        raise SystemExit(f"[camband] {CAMBAND_ENV}={raw!r} is not usable — "
+                         f"{type(e).__name__}: {e}")
+
+    b_d_lo, b_d_hi = vk.CAM_DIST["d"]
+    b_h_lo, b_h_hi = vk.CAM_DIST["h"]
+    cap = vk.CAM2_H_MAX if scene_key in vk.CAM2_SCENES else None
+    if cap is not None:                       # the tier ceiling, as sampled
+        b_h_hi = min(b_h_hi, cap)
+
+    d_lo = ov.get("d_min", b_d_lo)
+    d_hi = ov.get("d_max", b_d_hi)
+    r_h_lo = ov.get("h_min", b_h_lo)
+    r_h_hi = ov.get("h_max", b_h_hi)
+
+    if cap is None:
+        h_lo, h_hi = r_h_lo, r_h_hi
+    else:
+        i_lo, i_hi = max(r_h_lo, vk.CAM_DIST["h"][0]), min(r_h_hi, cap)
+        if i_hi - i_lo < CAMBAND_MIN_WIDTH:
+            print(f"[camband] {scene_key}: CAM-2 CEILING WINS — requested h "
+                  f"[{r_h_lo:.3f}, {r_h_hi:.3f}] intersected with the tier band "
+                  f"[{vk.CAM_DIST['h'][0]:.2f}, {cap:.2f}] is empty/degenerate. "
+                  f"Falling back to [{b_h_lo:.2f}, {b_h_hi:.2f}]; this scene's "
+                  f"boost is DISTANCE-ONLY.", flush=True)
+            h_lo, h_hi = b_h_lo, b_h_hi
+        else:
+            if (i_lo, i_hi) != (r_h_lo, r_h_hi):
+                print(f"[camband] {scene_key}: CAM-2 intersect — requested h "
+                      f"[{r_h_lo:.3f}, {r_h_hi:.3f}] clipped to "
+                      f"[{i_lo:.3f}, {i_hi:.3f}] (cap {cap:.2f}).", flush=True)
+            h_lo, h_hi = i_lo, i_hi
+
+    if not (0.0 < d_lo < d_hi) or not (0.0 < h_lo < h_hi):
+        raise SystemExit(f"[camband] {scene_key}: refusing an inverted or "
+                         f"non-positive band — d [{d_lo}, {d_hi}] "
+                         f"h [{h_lo}, {h_hi}]")
+    print(f"[camband] {scene_key}: d LogU[{d_lo:.3f}, {d_hi:.3f}] · "
+          f"h U[{h_lo:.3f}, {h_hi:.3f}]  (tier band was d [{b_d_lo}, {b_d_hi}] "
+          f"h [{b_h_lo}, {b_h_hi}]); pitch/yaw/roll/hfov/yoff unchanged.",
+          flush=True)
+    return (d_lo, d_hi, h_lo, h_hi)
+
+
+def _camband_redraw(s, band, scene_key, idx, base_seed):
+    """Return a copy of one camera sample with ONLY `d` and `h_rel` redrawn
+    inside `band`, from the independent "camband" stream. Same distribution
+    families and same rounding as `variation_kit.py:615-617`."""
+    import math as _m                     # `_capture` deletes its own `math`
+    d_lo, d_hi, h_lo, h_hi = band
+    r = vk.rng(scene_key, "camband", idx, base_seed)
+    out = dict(s)
+    out["d"] = round(_m.exp(r.uniform(_m.log(d_lo), _m.log(d_hi))), 4)
+    out["h_rel"] = round(r.uniform(h_lo, h_hi), 4)
+    return out
 
 
 # ===========================================================================

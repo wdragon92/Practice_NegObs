@@ -37,6 +37,7 @@ import argparse
 import glob
 import hashlib
 import json
+import math
 import os
 import sys
 
@@ -82,7 +83,48 @@ railing line (y = 1.45 +- post radius, PARAMS['rail']['y']) and of the coping
 band (|y| 1.28..1.62, PARAMS['coping']).  Those two are structures, not ground,
 and the height map reads their AABB tops."""
 COPING_Y_IN = 1.28         # sceneC2 PARAMS['coping']['y_in']
+COPING_Y_OUT = 1.62        # sceneC2 PARAMS['coping']['y_out']
 COPING_X0 = -0.25          # -PARAMS['coping']['ext'] -- the coping starts upstream of the edge
+
+
+def _slope_aabb_x0(x0, z0, run, drop, thick, margin=0.0):
+    """World AABB x-min of a `scene_common.build_slope` plate (:2749).
+
+    `build_slope` authors ONE rotateY'd Cube, so its world AABB is the bound of a
+    tilted box, which overhangs the analytic top-face span at both ends by the
+    thickness corner.  The height map reads AABB tops, not surfaces (see the
+    module docstring), so a mask written against the analytic `x0` is too narrow
+    by exactly that overhang."""
+    ang = math.atan2(drop, run)
+    L = math.hypot(run, drop) + margin
+    cx = (x0 + run / 2.0) - (thick / 2.0) * math.sin(ang)
+    return cx - ((L / 2.0) * abs(math.cos(ang)) + (thick / 2.0) * abs(math.sin(ang)))
+
+
+_SLOPE = 0.16 / 0.34       # PARAMS['stairs'] riser/tread -- the nosing line
+_C_RUN = 0.34 * 14 + 2 * 0.25      # RUN + 2*PARAMS['coping']['ext']
+COPING_AABB_X0 = _slope_aabb_x0(
+    COPING_X0, -_SLOPE * COPING_X0 + 0.12, _C_RUN, _SLOPE * _C_RUN, 0.55)
+"""-0.48419 m: the upstream end of `Coping_N/S`'s **world AABB**, 0.234 m upstream
+of the analytic `x0 = -0.25`.
+
+`build_stairs` builds the coping with `build_slope(cx0=-ext, cz0=+0.237647,
+crun=5.26, cdrop=2.4753, thick=0.55, margin=0.0)`, i.e. a 5.813 m box tilted
+25.20 deg.  Its AABB is x [-0.48419, 5.010], z_max **+0.237647** -- the top-face
+corner at x=-0.25, carried 0.234 m upstream by the tilt.  Every 5 cm column whose
+centre lands in that overhang therefore reads +0.23765 in the ON arm and drops to
+LeafMound_A's AABB top (+0.13000) once `build_stairs` is skipped -- 39 cells at
+x in {-0.45,-0.40,-0.35}, |y| in [1.30, 1.60], **all coping, no dressing**.
+
+The coping is hazard geometry by construction: `sceneC2_leaf_stairs.py:1315`
+("No `build_stairs` (stair + coping = the hazard)") and the `keep_dressing`
+docstring's removal list (stair + coping + side slopes + lower ground).  The
+plate's solid, as opposed to its AABB, is buried over this whole span -- it sits
+below z=0 for x <= -0.375 and inside LeafMound_A's 0.15 m plate at x=-0.35..-0.325,
+first clearing the leaf surface only at x ~ -0.30 `[computed]` -- so not one pixel
+of the 24 cuts changes here.  Widened in x, and simultaneously **tightened in y**
+to the coping's own `y_out`: a difference outside |y| <= 1.62 cannot be the coping
+and must still fail."""
 MOUND_B = dict(x0=-0.25, x1=1.02, y_half=1.33)
 """sceneC2 PARAMS['mound'] entry B (x0 -0.25, run 1.27, y_half 1.33): the burial
 ramp whose crest is the scene's identity.  Its AABB is what the height map reads
@@ -150,14 +192,20 @@ def check_geometry_C2(on_dir, new_dir, rep):
     # -- (c1b) the rest of the approach may differ ONLY in the coping band -----
     #    The stone coping is stair furniture and starts 0.25 m upstream of the
     #    drop edge (PARAMS['coping'] ext), so removing the hazard legitimately
-    #    changes x in [-0.25, 0) at |y| in [1.28, 1.62]. Anything else at x<0
-    #    means dressing moved, and that is a failure.
+    #    changes x < 0 at |y| in [1.28, 1.62]. Anything else at x<0 means
+    #    dressing moved, and that is a failure.
+    #    The band runs upstream to the coping's **AABB** end, not its analytic
+    #    x0: the height map reads AABB tops and the plate is a tilted box, so it
+    #    reaches 0.234 m further upstream than the surface does (COPING_AABB_X0).
     rest = (XX < DROP_EDGE_X) & (np.abs(YY) > DATUM_Y) & fin
     off = rest & (np.abs(Znew - Zon) > EQ_TOL_M)
-    stray = off & ~((np.abs(YY) >= COPING_Y_IN - 1e-9) & (XX >= COPING_X0 - float(mon["step"])))
+    band = ((np.abs(YY) >= COPING_Y_IN - 1e-9) & (np.abs(YY) <= COPING_Y_OUT + 1e-9)
+            & (XX >= COPING_AABB_X0 - 1e-9))
+    stray = off & ~band
     rep.check("C2 rest of x<0 differs only in the coping band", not stray.any(),
-              f"{int(off.sum())} differing cells, all in |y|>={COPING_Y_IN} & x>={COPING_X0} "
-              f"(the removed coping)" if not stray.any() else
+              f"{int(off.sum())} differing cells, all in {COPING_Y_IN}<=|y|<={COPING_Y_OUT} & "
+              f"x>={COPING_AABB_X0:.5f} (the removed coping, AABB extent)"
+              if not stray.any() else
               f"{int(stray.sum())} cells outside the coping band differ, e.g. "
               f"x={float(XX[stray][0]):.2f} y={float(YY[stray][0]):.2f} "
               f"({float(Zon[stray][0]):+.5f} -> {float(Znew[stray][0]):+.5f})")

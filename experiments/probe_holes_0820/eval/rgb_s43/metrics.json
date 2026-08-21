@@ -1,0 +1,491 @@
+{
+  "input_mode": "rgb",
+  "subset": "probe",
+  "ckpt": "/home/vislab/Desktop/work_sy/Practice_NegObs/experiments/dayrun_0820/runs/v2/rgb_s43/best.pt",
+  "tau_op": 0.5,
+  "tau_star": 0.5,
+  "tau_star_val_f1": null,
+  "n_boot": 10000,
+  "seed": 42,
+  "counts": {
+    "n_frames": 144,
+    "n_on": 72,
+    "n_off": 72,
+    "n_hazard_frames": 72,
+    "n_scenes": 3,
+    "n_pos_cells": 189,
+    "n_cells": 20,
+    "n_V": 15,
+    "n_E": 27,
+    "n_H": 30
+  },
+  "per_frame_csv": "/home/vislab/Desktop/work_sy/Practice_NegObs/experiments/probe_holes_0820/eval/rgb_s43/per_frame.csv",
+  "grid": {
+    "version": "PROVISIONAL-GRID-V1",
+    "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/experiments/mainrun_0819/code/labeling/gridspec_v1.json",
+    "n_sectors": 5,
+    "n_bands": 4,
+    "n_cells": 20,
+    "band_edges_m": [
+      0.0,
+      2.0,
+      5.0,
+      8.0,
+      12.0
+    ],
+    "band_names": [
+      "1",
+      "2",
+      "3a",
+      "3b"
+    ],
+    "sector_names": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E"
+    ],
+    "cell_ids": [
+      "A1",
+      "B1",
+      "C1",
+      "D1",
+      "E1",
+      "A2",
+      "B2",
+      "C2",
+      "D2",
+      "E2",
+      "A3a",
+      "B3a",
+      "C3a",
+      "D3a",
+      "E3a",
+      "A3b",
+      "B3b",
+      "C3b",
+      "D3b",
+      "E3b"
+    ]
+  },
+  "point": {
+    "op": {
+      "cell_f1": 0.12121212121212122,
+      "cell_recall": 0.09523809523809523,
+      "cell_precision": 0.16666666666666666,
+      "frame_det_rate": 0.1388888888888889,
+      "frame_recall_V": 0.2,
+      "cell_recall_V": 0.08888888888888889,
+      "frame_recall_E": 0.0,
+      "cell_recall_E": 0.0,
+      "frame_recall_H": 0.23333333333333334,
+      "cell_recall_H": 0.1728395061728395,
+      "band1_cell_recall": 0.0,
+      "band1_cell_fpr_off": 0.0,
+      "band2_cell_recall": 0.09649122807017543,
+      "band2_cell_fpr_off": 0.041666666666666664,
+      "band3_cell_recall": 0.16666666666666666,
+      "band3_cell_fpr_off": 0.03333333333333333,
+      "band4_cell_recall": 0.07407407407407407,
+      "band4_cell_fpr_off": 0.05277777777777778,
+      "frame_fa_off": 0.18055555555555555,
+      "cell_fpr_off": 0.03194444444444444,
+      "cell_fpr_on_neg": 0.035171862509992005
+    },
+    "star": {
+      "cell_f1": 0.12121212121212122,
+      "cell_recall": 0.09523809523809523,
+      "cell_precision": 0.16666666666666666,
+      "frame_det_rate": 0.1388888888888889,
+      "frame_recall_V": 0.2,
+      "cell_recall_V": 0.08888888888888889,
+      "frame_recall_E": 0.0,
+      "cell_recall_E": 0.0,
+      "frame_recall_H": 0.23333333333333334,
+      "cell_recall_H": 0.1728395061728395,
+      "band1_cell_recall": 0.0,
+      "band1_cell_fpr_off": 0.0,
+      "band2_cell_recall": 0.09649122807017543,
+      "band2_cell_fpr_off": 0.041666666666666664,
+      "band3_cell_recall": 0.16666666666666666,
+      "band3_cell_fpr_off": 0.03333333333333333,
+      "band4_cell_recall": 0.07407407407407407,
+      "band4_cell_fpr_off": 0.05277777777777778,
+      "frame_fa_off": 0.18055555555555555,
+      "cell_fpr_off": 0.03194444444444444,
+      "cell_fpr_on_neg": 0.035171862509992005
+    }
+  },
+  "ci": {
+    "op": {
+      "cell_f1": {
+        "point": 0.12121212121212122,
+        "lo": 0.05323004433889569,
+        "hi": 0.18729147510836724,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "cell_recall": {
+        "point": 0.09523809523809523,
+        "lo": 0.03829280648429585,
+        "hi": 0.16216569973114472,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "cell_precision": {
+        "point": 0.16666666666666666,
+        "lo": 0.08163265306122448,
+        "hi": 0.25263157894736843,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "frame_det_rate": {
+        "point": 0.1388888888888889,
+        "lo": 0.06329113924050633,
+        "hi": 0.2222222222222222,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "frame_recall_V": {
+        "point": 0.2,
+        "lo": 0.0,
+        "hi": 0.42857142857142855,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "cell_recall_V": {
+        "point": 0.08888888888888889,
+        "lo": 0.0,
+        "hi": 0.21739130434782608,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "frame_recall_E": {
+        "point": 0.0,
+        "lo": 0.0,
+        "hi": 0.0,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "cell_recall_E": {
+        "point": 0.0,
+        "lo": 0.0,
+        "hi": 0.0,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "frame_recall_H": {
+        "point": 0.23333333333333334,
+        "lo": 0.08823529411764706,
+        "hi": 0.39285714285714285,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "cell_recall_H": {
+        "point": 0.1728395061728395,
+        "lo": 0.056338028169014086,
+        "hi": 0.3111111111111111,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "band1_cell_recall": {
+        "point": 0.0,
+        "lo": 0.0,
+        "hi": 0.0,
+        "n_boot": 10000,
+        "n_valid": 9982
+      },
+      "band1_cell_fpr_off": {
+        "point": 0.0,
+        "lo": 0.0,
+        "hi": 0.0,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "band2_cell_recall": {
+        "point": 0.09649122807017543,
+        "lo": 0.018344453711426192,
+        "hi": 0.19298245614035087,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "band2_cell_fpr_off": {
+        "point": 0.041666666666666664,
+        "lo": 0.0,
+        "hi": 0.0945945945945946,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "band3_cell_recall": {
+        "point": 0.16666666666666666,
+        "lo": 0.03333333333333333,
+        "hi": 0.3448275862068966,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "band3_cell_fpr_off": {
+        "point": 0.03333333333333333,
+        "lo": 0.005633802816901409,
+        "hi": 0.0705927601809954,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "band4_cell_recall": {
+        "point": 0.07407407407407407,
+        "lo": 0.0,
+        "hi": 0.17391304347826086,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "band4_cell_fpr_off": {
+        "point": 0.05277777777777778,
+        "lo": 0.024691358024691357,
+        "hi": 0.0853341463414634,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "frame_fa_off": {
+        "point": 0.18055555555555555,
+        "lo": 0.09522200772200773,
+        "hi": 0.27631578947368424,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "cell_fpr_off": {
+        "point": 0.03194444444444444,
+        "lo": 0.011267605633802818,
+        "hi": 0.058333333333333334,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "cell_fpr_on_neg": {
+        "point": 0.035171862509992005,
+        "lo": 0.017473929544787027,
+        "hi": 0.05621542769507176,
+        "n_boot": 10000,
+        "n_valid": 10000
+      }
+    },
+    "star": {
+      "cell_f1": {
+        "point": 0.12121212121212122,
+        "lo": 0.05323004433889569,
+        "hi": 0.18729147510836724,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "cell_recall": {
+        "point": 0.09523809523809523,
+        "lo": 0.03829280648429585,
+        "hi": 0.16216569973114472,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "cell_precision": {
+        "point": 0.16666666666666666,
+        "lo": 0.08163265306122448,
+        "hi": 0.25263157894736843,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "frame_det_rate": {
+        "point": 0.1388888888888889,
+        "lo": 0.06329113924050633,
+        "hi": 0.2222222222222222,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "frame_recall_V": {
+        "point": 0.2,
+        "lo": 0.0,
+        "hi": 0.42857142857142855,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "cell_recall_V": {
+        "point": 0.08888888888888889,
+        "lo": 0.0,
+        "hi": 0.21739130434782608,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "frame_recall_E": {
+        "point": 0.0,
+        "lo": 0.0,
+        "hi": 0.0,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "cell_recall_E": {
+        "point": 0.0,
+        "lo": 0.0,
+        "hi": 0.0,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "frame_recall_H": {
+        "point": 0.23333333333333334,
+        "lo": 0.08823529411764706,
+        "hi": 0.39285714285714285,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "cell_recall_H": {
+        "point": 0.1728395061728395,
+        "lo": 0.056338028169014086,
+        "hi": 0.3111111111111111,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "band1_cell_recall": {
+        "point": 0.0,
+        "lo": 0.0,
+        "hi": 0.0,
+        "n_boot": 10000,
+        "n_valid": 9982
+      },
+      "band1_cell_fpr_off": {
+        "point": 0.0,
+        "lo": 0.0,
+        "hi": 0.0,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "band2_cell_recall": {
+        "point": 0.09649122807017543,
+        "lo": 0.018344453711426192,
+        "hi": 0.19298245614035087,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "band2_cell_fpr_off": {
+        "point": 0.041666666666666664,
+        "lo": 0.0,
+        "hi": 0.0945945945945946,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "band3_cell_recall": {
+        "point": 0.16666666666666666,
+        "lo": 0.03333333333333333,
+        "hi": 0.3448275862068966,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "band3_cell_fpr_off": {
+        "point": 0.03333333333333333,
+        "lo": 0.005633802816901409,
+        "hi": 0.0705927601809954,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "band4_cell_recall": {
+        "point": 0.07407407407407407,
+        "lo": 0.0,
+        "hi": 0.17391304347826086,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "band4_cell_fpr_off": {
+        "point": 0.05277777777777778,
+        "lo": 0.024691358024691357,
+        "hi": 0.0853341463414634,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "frame_fa_off": {
+        "point": 0.18055555555555555,
+        "lo": 0.09522200772200773,
+        "hi": 0.27631578947368424,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "cell_fpr_off": {
+        "point": 0.03194444444444444,
+        "lo": 0.011267605633802818,
+        "hi": 0.058333333333333334,
+        "n_boot": 10000,
+        "n_valid": 10000
+      },
+      "cell_fpr_on_neg": {
+        "point": 0.035171862509992005,
+        "lo": 0.017473929544787027,
+        "hi": 0.05621542769507176,
+        "n_boot": 10000,
+        "n_valid": 10000
+      }
+    }
+  },
+  "sweep": {
+    "0.3": {
+      "cell_f1": 0.12121212121212122,
+      "cell_recall": 0.1164021164021164,
+      "cell_precision": 0.12643678160919541,
+      "frame_det_rate": 0.18055555555555555,
+      "frame_recall_V": 0.26666666666666666,
+      "cell_recall_V": 0.1111111111111111,
+      "frame_recall_E": 0.0,
+      "cell_recall_E": 0.0,
+      "frame_recall_H": 0.3,
+      "cell_recall_H": 0.20987654320987653,
+      "band1_cell_recall": 0.0,
+      "band1_cell_fpr_off": 0.0,
+      "band2_cell_recall": 0.09649122807017543,
+      "band2_cell_fpr_off": 0.041666666666666664,
+      "band3_cell_recall": 0.23333333333333334,
+      "band3_cell_fpr_off": 0.05555555555555555,
+      "band4_cell_recall": 0.14814814814814814,
+      "band4_cell_fpr_off": 0.10277777777777777,
+      "frame_fa_off": 0.2638888888888889,
+      "cell_fpr_off": 0.05,
+      "cell_fpr_on_neg": 0.0639488409272582
+    },
+    "0.5": {
+      "cell_f1": 0.12121212121212122,
+      "cell_recall": 0.09523809523809523,
+      "cell_precision": 0.16666666666666666,
+      "frame_det_rate": 0.1388888888888889,
+      "frame_recall_V": 0.2,
+      "cell_recall_V": 0.08888888888888889,
+      "frame_recall_E": 0.0,
+      "cell_recall_E": 0.0,
+      "frame_recall_H": 0.23333333333333334,
+      "cell_recall_H": 0.1728395061728395,
+      "band1_cell_recall": 0.0,
+      "band1_cell_fpr_off": 0.0,
+      "band2_cell_recall": 0.09649122807017543,
+      "band2_cell_fpr_off": 0.041666666666666664,
+      "band3_cell_recall": 0.16666666666666666,
+      "band3_cell_fpr_off": 0.03333333333333333,
+      "band4_cell_recall": 0.07407407407407407,
+      "band4_cell_fpr_off": 0.05277777777777778,
+      "frame_fa_off": 0.18055555555555555,
+      "cell_fpr_off": 0.03194444444444444,
+      "cell_fpr_on_neg": 0.035171862509992005
+    },
+    "0.7": {
+      "cell_f1": 0.09125475285171103,
+      "cell_recall": 0.06349206349206349,
+      "cell_precision": 0.16216216216216217,
+      "frame_det_rate": 0.08333333333333333,
+      "frame_recall_V": 0.13333333333333333,
+      "cell_recall_V": 0.044444444444444446,
+      "frame_recall_E": 0.0,
+      "cell_recall_E": 0.0,
+      "frame_recall_H": 0.13333333333333333,
+      "cell_recall_H": 0.12345679012345678,
+      "band1_cell_recall": 0.0,
+      "band1_cell_fpr_off": 0.0,
+      "band2_cell_recall": 0.07894736842105263,
+      "band2_cell_fpr_off": 0.03888888888888889,
+      "band3_cell_recall": 0.1,
+      "band3_cell_fpr_off": 0.030555555555555555,
+      "band4_cell_recall": 0.0,
+      "band4_cell_fpr_off": 0.025,
+      "frame_fa_off": 0.08333333333333333,
+      "cell_fpr_off": 0.02361111111111111,
+      "cell_fpr_on_neg": 0.02238209432454037
+    }
+  }
+}

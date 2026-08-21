@@ -95,6 +95,7 @@ USAGE
 from __future__ import annotations
 
 import glob
+import json
 import os
 import sys
 
@@ -175,6 +176,117 @@ def install():
     return rdr
 
 
+def _depoison(run, tag):
+    """Withdraw `done_conds` from any scene in `run` that produced ZERO cuts.
+
+    `run_data_render.drive` advances a scene's `done_conds` whenever the scene
+    SUBPROCESS returned 0 (`run_data_render.py:202`). That is a sound test for a
+    corpus scene but not for a crashing one: an Isaac scene process exits 0 even
+    when assembly raised, because the app's shutdown path reaches `os._exit(0)`
+    regardless. The first probe attempt therefore recorded
+
+        "probeH1": {"exit": 0, "cuts": 0, "done_conds": ["L0","L5","L7"]}
+
+    and every later invocation answered `[skip] probeH1 — all 1 conditions
+    already done` and rendered nothing. The round was **unrecoverable by
+    re-running**, which is precisely what run_probe.sh promises it is — the
+    banner even says "re-run this script unchanged to resume".
+
+    A scene that produced no cuts has done no work and may not claim a
+    condition. Rewriting only that one field leaves every genuinely-rendered
+    scene byte-identical, keeps the shared corpus driver unmodified, and is what
+    makes the probe's resume mean what it says. Called on the way IN (to clear
+    poison an earlier attempt left) and on the way OUT (so a failure never
+    poisons the next attempt).
+    """
+    mf_path = os.path.join(vk.data_root(run), "manifest.json")
+    if not os.path.isfile(mf_path):
+        return
+    try:
+        with open(mf_path, encoding="utf-8") as fh:
+            mf = json.load(fh)
+    except (OSError, ValueError) as e:
+        print(f"[probe] [warn] manifest unreadable ({tag}): {e}")
+        return
+    cleared = []
+    for s, rec in (mf.get("scenes") or {}).items():
+        if not rec.get("cuts") and rec.get("done_conds"):
+            cleared.append(f"{s} {rec['done_conds']}")
+            rec["done_conds"] = []
+    if not cleared:
+        return
+    tmp = mf_path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as fh:
+        json.dump(mf, fh, ensure_ascii=False, indent=1)
+    os.replace(tmp, mf_path)
+    print(f"[probe] resume de-poisoned ({tag}) in {run}: withdrew done_conds "
+          f"from {len(cleared)} zero-cut scene(s) — {', '.join(cleared)}. "
+          f"They will be retried instead of skipped.")
+
+
+def _run_arg(argv, flag="--run"):
+    """The value of `flag` in `argv`, supporting both `--run X` and `--run=X`."""
+    for i, a in enumerate(argv):
+        if a == flag and i + 1 < len(argv):
+            return argv[i + 1]
+        if a.startswith(flag + "="):
+            return a.split("=", 1)[1]
+    return None
+
+
+def _check_run(run="260730_data_mini"):
+    """`scripts/check_data_run.py` on a probe round, with an EMPTY-ROUND guard.
+
+    check_data_run assumes a round has at least one cut — its check 3 ends in
+
+        nr = min(c["stage1"]["nearest_solid"] for c in cuts)   # :222
+
+    which raises `ValueError: min() arg is an empty sequence` when every scene
+    failed to render. That is what happened on the first probe attempt, and the
+    traceback was actively harmful: it buried the REAL failure (a scene-assembly
+    error 60 lines higher up) under a second, meaningless one, and it made the
+    checker look like the broken component.
+
+    A round with no cuts is a RENDER failure, not a checker failure. Say so in
+    one line, name where the real traceback is, and return non-zero without a
+    traceback of our own. `check_data_run.py` is a corpus script shared with the
+    frozen rounds and is not modified for the probe's benefit.
+    """
+    import check_data_run                                       # noqa: E402
+    root = vk.data_root(run)
+    mf = os.path.join(root, "manifest.json")
+    if not os.path.isfile(mf):
+        print(f"[probe] [FAIL] check-run {run}: no manifest at {mf} — the "
+              f"render never got as far as writing one. Nothing to check.")
+        return 1
+
+    n_cuts = 0
+    for p in sorted(glob.glob(os.path.join(root, "*", "*", "variation.json"))):
+        try:
+            with open(p, encoding="utf-8") as fh:
+                n_cuts += len(json.load(fh).get("cuts") or [])
+        except (OSError, ValueError) as e:
+            print(f"[probe] [warn] unreadable {p}: {e}")
+    if n_cuts == 0:
+        print(f"[probe] [FAIL] check-run {run}: 0 cuts on disk across "
+              f"{len(glob.glob(os.path.join(root, '*', '*')))} scene dir(s). "
+              f"The render produced nothing, so there is nothing to check — "
+              f"this is NOT a checker finding. Read the render traceback "
+              f"higher up in logs/probe.log (the first '[py stderr]' block).")
+        return 1
+
+    try:
+        return check_data_run.main(run)
+    except ValueError as e:
+        # A partially-rendered round can still starve an aggregate the checker
+        # takes over all cuts. Same verdict, same reason: fix the render.
+        print(f"[probe] [FAIL] check-run {run}: check_data_run raised "
+              f"{type(e).__name__}: {e} on a {n_cuts}-cut round — the round is "
+              f"partial or degenerate. Treat it as a render failure, not a "
+              f"checker bug.")
+        return 1
+
+
 def main(argv):
     rdr = install()
     if argv and argv[0] == "--scene-proc":
@@ -184,14 +296,20 @@ def main(argv):
         # is the azimuth-ledger conformance test), so the round checker has to
         # come through the same shim or it exits with "not in the SP-2 azimuth
         # ledger" on the first probe scene.
-        import check_data_run                                     # noqa: E402
-        return check_data_run.main(*argv[1:])
+        return _check_run(*argv[1:])
     if not any(a.startswith("--scenes") for a in argv):
         argv = list(argv) + ["--scenes", ",".join(PROBE_SCENES)]
     print(f"[probe] ledger rows injected: {list(PROBE_SCENES)} "
           f"(class C', daz_data {vk.ledger('probeH1')['daz_data']:.0f} deg) · "
           f"split '{PROBE_SPLIT}' · corpus split UNCHANGED (33 scenes verified)")
-    return rdr.main(argv)
+    run = _run_arg(argv)
+    if run:
+        _depoison(run, "pre")
+    try:
+        return rdr.main(argv)
+    finally:
+        if run:
+            _depoison(run, "post")
 
 
 if __name__ == "__main__":

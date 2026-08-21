@@ -1,0 +1,7 @@
+{
+ "train": [],
+ "val": [],
+ "test": ["sceneC2", "sceneN3"],
+ "hold": [],
+ "note": "ctrl_dressing only. Both scenes are test scenes in split_v2_full.json, so the RGB v2 checkpoints never trained on them; this file just tells eval_polar which subset to walk."
+}

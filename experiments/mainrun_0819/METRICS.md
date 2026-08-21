@@ -680,3 +680,285 @@ recommended inside the 8/24 freeze — carried as a caveat, not an action.
 | aux pixel-loss run + paired ablation | prepared, dry-run clean | ~25 min |
 | C2/N3 appearance-preserving off arm | scene patch + hash/pose gate + rehearsal done. Reference old-off rows recomputed from frozen predictions (s42, τ 0.5): `sceneC2` FA_frame 0.208, cells/frame 0.25, mean max p 0.228, twin Δ_frame 0.476, Δ_score 0.481; `sceneN3` FA_frame 1.000, cells/frame 5.00, mean max p 0.915, Δ_frame 0.031, Δ_score n/a (no GT-positive cell) | ~15 min (render 6–8 min) |
 | hole zero-shot probe (3 scenes, 144 frames, 9 frozen checkpoints) | CPU gate all-pass, evaluation-only by construction | render 12–20 min + eval 5–10 min GPU (or ~15 min CPU) |
+
+---
+
+## Resume chain 0821
+
+*Appended 2026-08-21 (GPU freed 11:46, chain A1 → A2 → C2 → C1 complete). **Append only — §1–§13
+and the `Night 0820→0821 update` section above are unmodified.** This section supersedes **N.9**,
+which listed these four items as prepared-not-measured; every row of N.9 is now closed here.
+Denominators unchanged from the night section: v2 test = 816 frames = 408 on (V 180 · E 45 · H 96 ·
+H_weak 6 · none_in_fov 81) + 408 off, grid `PROVISIONAL-GRID-V1` (5 sectors × 4 bands
+[0,2)/[2,5)/[5,8)/[8,12) m). **These are new measurements, not re-analysis.***
+
+### R.1 YOLOv8n detector baseline, 3 seeds (A1) — main-table row 4
+
+Source `experiments/dayrun_0820/runs/yolo_s{42,43,44}/eval_test/metrics.json`, block `point.op`.
+τ = **0.25** for this row only (approval item #1: τ_op 0.5 for U-Net rows, 0.25 for the detector row).
+`tau_star` = `tau_op` = 0.25 in all three files; `tau_star_val_f1` is null (not fitted).
+Mapping rule `experiments/dayrun_0820/code/yolo/det2cell.py`, documented in
+`experiments/dayrun_0820/METRICS_NOTES_yolo.md`.
+
+| metric | s42 | s43 | s44 | mean | ±range/2 | sd |
+|---|---|---|---|---|---|---|
+| frame_recall_V | 0.1167 | 0.1611 | 0.1722 | **0.1500** | 0.0278 | 0.0294 |
+| **frame_recall_E** | **0.0000** | **0.0000** | **0.0000** | **0.0000** | 0.0000 | 0.0000 |
+| **frame_recall_H** | **0.0000** | **0.0000** | **0.0000** | **0.0000** | 0.0000 | 0.0000 |
+| frame_det_rate | 0.0642 | 0.0887 | 0.0948 | 0.0826 | 0.0153 | 0.0162 |
+| frame_fa_off | 0.0049 | 0.0245 | 0.0417 | 0.0237 | 0.0184 | 0.0184 |
+| cell_f1 | 0.0248 | 0.0293 | 0.0252 | 0.0264 | 0.0023 | 0.0025 |
+| cell_recall | 0.0126 | 0.0152 | 0.0130 | 0.0136 | 0.0013 | 0.0014 |
+| cell_precision | 0.6071 | 0.3868 | 0.4217 | 0.4719 | 0.1102 | 0.1184 |
+| cell_fpr_off | 0.00037 | 0.00159 | 0.00245 | 0.00147 | 0.00104 | 0.00105 |
+| cell_fpr_on_neg | 0.00347 | 0.00951 | 0.00512 | 0.00603 | 0.00302 | 0.00311 |
+| **cell_recall_V** | 0.0182 | 0.0220 | 0.0188 | 0.0196 | 0.0019 | 0.0020 |
+| **cell_recall_E** | **0.0000** | **0.0000** | **0.0000** | **0.0000** | 0.0000 | 0.0000 |
+| **cell_recall_H** | **0.0000** | **0.0000** | **0.0000** | **0.0000** | 0.0000 | 0.0000 |
+| band1_cell_recall | 0.1026 | 0.1624 | 0.1026 | 0.1225 | 0.0299 | 0.0345 |
+| band2_cell_recall | 0.0476 | 0.0582 | 0.0608 | 0.0556 | 0.0066 | 0.0070 |
+| band3_cell_recall | 0.0023 | 0.0000 | 0.0000 | 0.0008 | 0.0011 | 0.0013 |
+| band4_cell_recall | 0.0015 | 0.0000 | 0.0000 | 0.0005 | 0.0008 | 0.0009 |
+| band1_cell_fpr_off | 0.00049 | 0.00441 | 0.00735 | 0.00408 | 0.00343 | 0.00344 |
+| band2_cell_fpr_off | 0.00098 | 0.00196 | 0.00245 | 0.00180 | 0.00074 | 0.00075 |
+| band3_cell_fpr_off | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 |
+| band4_cell_fpr_off | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 |
+
+`mean ± range/2` is the convention of `SEED_TABLE.md` §1 and is what the table row quotes; the sample
+sd is given so either can be cited without recomputation. For the headline V figure the two agree to
+two decimals (0.028 vs 0.029).
+
+**D22 ceiling — confirmed, zero leak.** E and H recall are identically 0 on all three seeds at both
+frame and cell level. This is the constructive bound of the `det2cell` rule (a box over hazard pixels
+cannot exist for a hazard with no visible pixels), measured before training by the oracle-box
+diagnostic in `METRICS_NOTES_yolo.md` §3. Nonzero here = mapping leak; the alarm did not fire on any
+seed.
+
+**Sub-operating-threshold exception (footnote-level).** From the `sweep` blocks, at τ = 0.10 —
+*below* the operating point — s42 and s44 each show `frame_recall_H` = 0.010417 (= 1 hazard frame of
+96) with `cell_recall_H` 0.00212 and 0.00637 respectively; s43 stays at 0.000. At τ = 0.25, 0.50 and
+above, all three are exactly 0. Attribution: a single low-confidence box landing in a near band via
+the mapping's documented near-band bias (`METRICS_NOTES_yolo.md` §2), not H-tier detection.
+
+**Band shape.** All detector recall is near-band: band 1 0.1225, band 2 0.0556, bands 3a/3b ≈ 0.
+Off-arm cell FPR is likewise confined to bands 1–2 (bands 3a/3b exactly 0 on every seed).
+
+### R.2 Auxiliary pixel-loss ablation, rgb s42 (A2) — appendix, NOT main table
+
+Arm `experiments/dayrun_0820/runs/v2/rgb_s42_aux/eval_test/metrics.json` · paired comparison
+`experiments/dayrun_0820/runs/v2/compare_aux_vs_base_s42/METRICS_SECTION.md` §3.
+816 common frames, paired percentile bootstrap 10000×, seed 42, threshold 0.5, A = aux, B = base
+`rgb_s42`. Config delta is a single variable: `aux_enabled=True`, `aux_lambda=0.5`, 648 amodal masks
+(`experiments/dayrun_0820/annotations/amodal`); encoder `resnet34-unet-aux` 24.447 M, selector
+`0.5*val_f1 + 0.5*val_h_frame_recall`, `oversample_h` 4.0, `aug` off, `hflip` on — all identical to
+base. `tau_star` 0.43 (fitted on val) but the comparison and both point tables use τ = 0.5.
+
+| metric | aux (A) | base (B) | A−B [95 % CI] | CI ∌ 0 |
+|---|---|---|---|---|
+| cell_f1 | 0.5255 | 0.4852 | **+0.0403** [0.0001, 0.0786] | yes (lower bound 1e-4) |
+| cell_recall | 0.4274 | 0.4322 | −0.0048 [−0.0488, 0.0377] | no |
+| cell_precision | 0.6821 | 0.5530 | **+0.1291** [0.0885, 0.1690] | yes |
+| frame_det_rate | 0.5627 | 0.7309 | **−0.1682** [−0.2296, −0.1064] | yes |
+| frame_recall_V | 0.6389 | 0.8278 | **−0.1889** [−0.2551, −0.1257] | yes |
+| frame_recall_E | 0.0000 | 0.6000 | **−0.6000** [−0.7436, −0.4528] | yes |
+| **frame_recall_H** | 0.7188 | 0.5938 | +0.1250 [**−0.0096**, 0.2526] | **no** |
+| cell_recall_V | 0.4630 | 0.4893 | −0.0263 [−0.0758, 0.0205] | no |
+| cell_recall_E | 0.0000 | 0.3592 | **−0.3592** [−0.4556, −0.2626] | yes |
+| **cell_recall_H** | 0.6072 | 0.2527 | **+0.3546** [0.2768, 0.4302] | yes |
+| band1_cell_recall | 0.0000 | 0.0000 | 0.0000 [0.0000, 0.0000] | no |
+| band2_cell_recall | 0.3810 | 0.3360 | +0.0450 [−0.0129, 0.1066] | no |
+| band3_cell_recall | 0.3793 | 0.4103 | −0.0310 [−0.0984, 0.0336] | no |
+| band4_cell_recall | 0.5098 | 0.5121 | −0.0023 [−0.0577, 0.0517] | no |
+| band2_cell_fpr_off | 0.0010 | 0.0088 | −0.0078 [−0.0154, −0.0019] | yes |
+| band3_cell_fpr_off | 0.0221 | 0.0662 | **−0.0441** [−0.0591, −0.0301] | yes |
+| band4_cell_fpr_off | 0.0691 | 0.1358 | **−0.0667** [−0.0867, −0.0467] | yes |
+| frame_fa_off | 0.1667 | 0.3750 | **−0.2083** [−0.2531, −0.1646] | yes |
+| cell_fpr_off | 0.0230 | 0.0527 | **−0.0297** [−0.0372, −0.0222] | yes |
+| cell_fpr_on_neg | 0.0636 | 0.0933 | −0.0296 [−0.0450, −0.0142] | yes |
+
+Aux-arm bootstrap CIs at its own operating point (from `rgb_s42_aux/eval_test/METRICS_SECTION.md`
+§1a): frame recall V 0.6389 [0.5684, 0.7090] · E 0.0000 [0.0000, 0.0000] · H 0.7188 [0.6279, 0.8081] ·
+frame det rate 0.5627 [0.5093, 0.6172] · frame FA off 0.1667 [0.1311, 0.2028] · cell FPR off
+0.0230 [0.0167, 0.0300] · cell F1 0.5255 [0.4755, 0.5717].
+
+**Twin evidence (independent of the paired table).** `rgb_s42_aux/twin/twin_analysis.md`: 408 pairs,
+366 pose-matched (42 excluded, tol 0.15), 312 carrying ≥1 GT cell, delta_score > 0 in 284/312.
+Δ_score by tier — V 0.4927 [0.4302, 0.5528]\* · E 0.0337 [0.0119, 0.0611]\* · **H 0.3256 [0.2701,
+0.3826]\*** · all 0.3675 [0.3261, 0.4087]\*. Against base `rgb_s42` (twin all 0.310, twin H 0.170,
+`SEED_TABLE.md` §3) the **H-tier twin Δ nearly doubles, 0.170 → 0.326**.
+
+**Caveats attached to every citation of this block.** (i) The frame-level H gain +0.1250 has a CI
+containing zero — quote the cell-level +0.3546 or nothing. (ii) n = 1 seed, against a base RGB
+3-seed H spread of ±0.141 (`SEED_TABLE.md` §1), so the frame-level move is inside seed noise.
+(iii) Position is appendix / development narrative; the main table stays at four rows (approval #2).
+
+### R.3 Dressing-preserving off-arm control, sceneC2 + sceneN3 (C2)
+
+Source `experiments/nightrun_0820/ctrl_dressing/CTRL_TABLE.md` (+ `ctrl_numbers.json`).
+τ = 0.5, RGB recipe-v2 checkpoints, seeds 42/43/44. **old off** = `dataset/260819_main_off` (toggle
+also deleted the leaf mound, the railing, and in N3 the mural) · **new off** =
+`dataset/260820_ctrloff` (`keep_dressing`: hazard geometry only). Both pair against the **same** on
+arm `dataset/260819_main_on`. Every off frame carries all-zero GT, so `FA_frame` is a pure
+false-alarm rate. 24 frames per scene-arm; pairs kept 24/24 in every cell of the table.
+
+**Twin Δ_frame (pose-matched, tol 0.15 m):**
+
+| scene | arm | s42 | s43 | s44 | mean ±half-range | Δ_score mean |
+|---|---|---|---|---|---|---|
+| sceneC2 | **old off** | 0.476 | 0.738 | 0.884 | **0.699 ±0.204** | 0.688 ±0.178 |
+| sceneC2 | **new off** | 0.185 | 0.214 | 0.090 | **0.163 ±0.062** | 0.151 ±0.060 |
+| sceneN3 | old off | 0.031 | 0.098 | 0.052 | 0.060 ±0.033 | n/a (no GT-positive cell on on-arm) |
+| sceneN3 | **new off** | 0.000 | −0.001 | −0.002 | **−0.001 ±0.001** | n/a |
+
+**Decomposition.** (0.699 − 0.163) / 0.699 = **0.767** → **≈77 % of the old sceneC2 delta was the
+removed dressing, ≈23 % (0.163) is the hazard geometry itself.** The residual is same-signed on all
+three seeds.
+
+**Off-arm firing (pure false alarms, all-zero GT):**
+
+| scene | arm | s42 | s43 | s44 | FA_frame mean ±half-range | cells/frame | mean max p |
+|---|---|---|---|---|---|---|---|
+| sceneC2 | old off | 0.208 | 0.000 | 0.000 | 0.069 ±0.104 | 0.08 ±0.12 | 0.115 ±0.110 |
+| sceneC2 | **new off** | 0.500 | 0.625 | 0.917 | **0.681 ±0.208** | 2.11 ±0.33 | 0.651 ±0.142 |
+| sceneN3 | old off | 1.000 | 0.708 | 0.708 | 0.806 ±0.146 | 2.97 ±1.90 | 0.750 ±0.133 |
+| sceneN3 | new off | 1.000 | 0.917 | 0.750 | 0.889 ±0.125 | 4.01 ±2.42 | 0.811 ±0.103 |
+
+Reading per `CTRL_TABLE.md` §4: `FA_frame(new) > FA_frame(old)` = **the dressing is what the model
+fires on**. With dressing present and hazard absent the model fires on 68 % of safe frames at mean
+max p 0.651 — cue-consistent, and a shortcut. Limitations section, not results.
+
+**sceneN3 null control.** Its dressing is a wall mural (1–2 mm of paint on flat floor), so the
+`keep_dressing` off arm is structurally the on arm — heightmap gate: `max |new−on| = 0.000000 m`,
+NaN pattern equal. Expected twin Δ ≈ 0; measured **−0.001 ±0.001**. The apparatus contributes no
+delta of its own.
+
+**Pairing QC.** Shared on-arm rows 48 per seed; `max |dp|` between the new evaluation and the frozen
+one = **0.00e+00 on all three seeds** (threshold for voiding the comparison is ~1e-5). Both off arms
+therefore see byte-identical on-arm predictions.
+
+**Relation to the headline.** This corrects the **all-tier** twin Δ only. `sceneC2` contributes zero
+H-tier pose-matched pairs (§7.1 and N.1 above), so the §5.3 headline H claim is untouched — N.1
+already showed the H-tier Δ unchanged to four decimals under exact-pose-only stratification.
+
+**Gate history (method note, and a corrected number).** The first gate pass returned **24 PASS /
+1 FAIL of 25** and evaluation was correctly refused (`logs/eval.log:32–35`, brief §4 C2 "게이트 통과
+후에만 평가"). The failing check was *"C2 rest of x<0 differs only in the coping band"*: 39 cells
+outside the declared coping band differed, e.g. x = −0.45, y = −1.60, +0.23765 → +0.13000. Adjudication
+found the cause to be the **gate's own mask**, not the scene: the removed coping is a rotated box, and
+the check bounded it by an axis-aligned box, so the AABB overhang put genuinely-coping cells outside
+the band the check would accept. Evidence that no scene, pose or appearance property changed: the
+**camera datum strip** (x<0, |y| ≤ 0.9 — the only region `AabbPrefilter.ground_z(-d, y)` ever samples)
+was `max |new−on| = 0.000000 m over 1440 cells` **in the failing pass as well as the passing one**,
+and `sceneC2`/`sceneN3` cam dicts were byte-equal on all 24/24 cuts in both. Mound-B footprint
+likewise 0.000000 m over 1326 cells. The mask was corrected to the rotated extent and the gate
+returned **25 checks · 0 FAIL · 0 WARN** (`logs/eval.log:67–69`), with the same check now reporting
+117 differing cells all inside `1.28 ≤ |y| ≤ 1.62 & x ≥ −0.48419`. **No pixel was re-rendered between
+the two gate passes**; the numbers in the tables above come from the single render that both passes
+examined.
+
+### R.4 Hole-type zero-shot probe, 3 scenes × 144 frames × 9 checkpoints (C1)
+
+Sources `experiments/probe_holes_0820/PROBE_TABLE.md` (+ `PROBE_TABLE.json`) and `TIER_TABLE.md`.
+Manifest `dataset_manifest_probe.json`, rounds `260821_probe_on` / `260821_probe_off`, 144 frames
+(3 scenes × 24 on + 24 off), grid `PROVISIONAL-GRID-V1`, checkpoints = the nine frozen recipe-v2 runs
+under `experiments/dayrun_0820/runs/v2`. **τ = 0.5, frozen by absolute rule 3 and NOT refitted**
+(`val` deliberately empty in `split_probe.json`). **Evaluation only — no probe frame may ever enter
+training** (brief §4 C1).
+
+**Tier design landed as specified** (`TIER_TABLE.md`, per scene-arm, on rows, 24 frames each):
+
+| scene | GT-positive | V | E | H | design intent | met |
+|---|---|---|---|---|---|---|
+| probeH1 | 24 | **15** | 3 | 6 | V-dominant | yes |
+| probeH2 | 24 | 0 | **24** | 0 | pure E | yes (24/24) |
+| probeH3 | 24 | 0 | 0 | **24** | pure H | yes (24/24) |
+
+Off arms: 24 frames each, 0 GT-positive, all "other". Every on-row GT-positive count equals the frame
+count, so no cut put the hole outside the 12 m grid.
+
+**Per-scene frame recall and off-arm FA @ τ = 0.5:**
+
+| ckpt | H1 recall | H1 FA | H2 recall (pure E) | H2 FA | **H3 recall (pure H)** | **H3 FA** |
+|---|---|---|---|---|---|---|
+| rgb_s42 | 0.083 | 0.000 | 0.000 | 0.000 | **0.083** | 0.167 |
+| rgb_s43 | 0.125 | 0.000 | 0.000 | 0.000 | **0.292** | 0.542 |
+| rgb_s44 | 0.000 | 0.000 | 0.000 | 0.000 | **0.125** | 0.250 |
+| depth_s42 | 0.125 | 0.125 | 0.125 | 0.375 | **0.500** | 0.500 |
+| depth_s43 | 0.000 | 0.125 | 0.000 | 0.000 | **0.625** | 0.625 |
+| depth_s44 | 0.000 | 0.000 | 0.000 | 0.000 | **0.375** | 0.500 |
+| b2_s42 | 0.000 | 0.000 | 0.000 | 0.042 | 0.250 | 0.333 |
+| **b2_s43** | **1.000** | **0.917** | 0.167 | 0.750 | 0.625 | 0.750 |
+| b2_s44 | 0.000 | 0.000 | 0.000 | 0.000 | 0.250 | 0.250 |
+
+*(PROBE_TABLE §2 also reports rgb H3 recall as 0.083 / 0.292 / 0.125; the headline §1 table gives
+rgb_s44 H-tier recall 0.100 because §1 pools all H-tier frames across the three scenes — 30 H frames
+= 24 from H3 + 6 from H1 — rather than the 24 of H3 alone. Both are correct; state which denominator
+is in use. The pooled §1 H figures are rgb 0.067 / 0.233 / 0.100, depth 0.400 / 0.500 / 0.300,
+b2 0.200 / 0.700 / 0.200.)*
+
+**The split.** Pure-H (probeH3) recall: **RGB 0.083 / 0.292 / 0.125, Depth 0.500 / 0.625 / 0.375** —
+Depth roughly triples RGB. This **inverts the main table**, where RGB leads Depth on the H tier
+(0.688 ± 0.141 vs 0.438 ± 0.031, §4 / `SEED_TABLE.md` §1). Pure-E (probeH2) recall collapses for both
+(RGB 0.000 on all seeds; Depth 0.125 / 0.000 / 0.000).
+
+**probeH2 adjacent hazard-free sector metric — COMPUTED**, `PROBE_TABLE.md` §3. Definition: the
+hazard sits in one lateral sector; `adjacent` = one sector away in the same band, `far` = two or more.
+
+| ckpt | adj cells | adj fired | adj cell rate | adj frame rate | far cell rate |
+|---|---|---|---|---|---|
+| rgb_s42 / rgb_s43 / rgb_s44 | 48 | 0 | 0.000 | 0.000 | 0.000 |
+| depth_s43 / depth_s44 | 48 | 0 | 0.000 | 0.000 | 0.000 |
+| b2_s42 / b2_s44 | 48 | 0 | 0.000 | 0.000 | 0.000 |
+| **depth_s42** | 48 | 6 | **0.125** | 0.250 | **0.000** |
+| **b2_s43** | 48 | 9 | **0.188** | 0.375 | 0.045 |
+
+Seven of nine fire on zero adjacent cells. `depth_s42` = clean angular blur (adjacent 0.125 against a
+far rate of exactly 0.000). `b2_s43` = nonzero far rate too, consistent with the outlier reading below.
+
+**Outlier flag — `b2_s43`.** Frame recall 1.000 on probeH1 with off-arm **FA 0.917** on the same
+scene, 0.750 on both others, headline cell FPR 0.240 and frame FA 0.806. Its sibling seeds score
+0.000 recall / 0.000 FA on probeH1. This is a firing-rate artefact, not detection. **Do not average
+B2 probe numbers over seeds; always show FA beside recall.** More generally, across the probe FA
+tracks recall (Depth H3: recall 0.500/0.625/0.375 against FA 0.500/0.625/0.500), so the probe
+evidences transfer of a *firing tendency* at least as much as transfer of discrimination.
+
+**Twin analysis** ran at the DEFAULT pose tolerance `--tol 1e-6` (not the D20 0.15 m rescue), per
+`PROBE_TABLE.md` §4; per-checkpoint files at `experiments/probe_holes_0820/eval/<ckpt>/twin/twin_analysis.md`.
+
+**Fix history (method notes — three bugs between first launch and the numbers above).**
+1. **Illegal prim name → silent empty `SdfPath`.** `probe_common.build_kerb_line` composed prim paths
+   as `f"{root}/Kerb_{int(round(y*100))}"`; at y = −3.60 this yields `Kerb_-360`, and a leading dash
+   is not a valid USD identifier. `SdfPath.AppendChild` **warns and returns an empty path** rather
+   than raising (`logs/probe.log:597`, "Invalid prim name 'Kerb_-360'"), so the failure surfaced one
+   call later as `UsdGeom.Cube.Define(stage, <>)` → `Tf.ErrorException: Path must be an absolute
+   path: <>` (`logs/probe.log:599–625`). Every render died; **all three scenes × both arms produced 0
+   cuts.** Only reachable after Isaac boot, which is why the pre-boot CPU gate (47/47 PASS, D29) and
+   the `NEGOBS_SMOKE=1` gate (6/6) both missed it.
+2. **Poisoned resume — Isaac exits 0 on scene failure.** Because the failing invocations still exited
+   0, the driver marked conditions done and the resume path would have *skipped* the empty work
+   (`logs/probe.log:3279–3280`: "0 cuts on disk across 3 scene dir(s) … this is NOT a checker
+   finding"). Fixed with a de-poison pass that withdraws `done_conds` from any zero-cut scene before
+   retrying (`logs/probe.log:3296`: withdrew L0/L5/L7 from all three scenes). Without it the chain
+   would have reported "resumed successfully" over an empty dataset.
+3. **Checker crash on the empty run.** The post-render checker assumed ≥1 cut and crashed instead of
+   reporting; it now emits the explicit zero-cut diagnostic quoted above, which is what pointed at the
+   render traceback rather than at itself.
+   After the fixes, a 1-scene GPU smoke verified a fit of −0.600 before the full probe, which then ran
+   clean: probeH1 on/off 24 cuts each at 3.672 / 3.852 s per cut, probeH2 3.698 / 3.578, probeH3
+   3.425 / 3.599 — **72 cuts per arm, 259.0 s and 264.8 s wall including 3 boots each**
+   (`logs/probe.log:4836–7354`).
+
+### R.5 N.9 closure
+
+| N.9 item | state now | where |
+|---|---|---|
+| YOLO s43 / s44 (3-seed row 4) | **measured** — row 4 final, E/H ceiling confirmed 3/3 | R.1 |
+| aux pixel-loss run + paired ablation | **measured** — appendix row, 1 seed | R.2 |
+| C2/N3 appearance-preserving off arm | **measured** — 3 RGB seeds, gate 25/25 | R.3 |
+| hole zero-shot probe | **measured** — 144 frames × 9 checkpoints | R.4 |
+
+Still open (optional, not blocking): **Depth-arm C2 control evaluation.** D28 justifies it
+(`sceneC2` is 76.1 % of Depth's off-arm cell fires) and the recommendation in the morning report was
+RGB 3 seeds + Depth 3 seeds; only the RGB 3 seeds were run in this chain. The rendered
+`260820_ctrloff` round is reusable as-is, so the outstanding cost is checkpoint inference only.
+The RGB result stands without it.

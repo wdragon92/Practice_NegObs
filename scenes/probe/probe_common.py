@@ -303,11 +303,30 @@ def probe_light():
 # ===========================================================================
 # [5] Small builders every probe uses (Isaac primitives only)
 # ===========================================================================
+def prim_tag(v, scale=100.0):
+    """A centimetre tag for a prim NAME, safe for a signed coordinate.
+
+    A USD prim name is an identifier — `[A-Za-z_][A-Za-z0-9_]*` — so the '-' of a
+    negative coordinate is illegal in it. `SdfPath` does not raise on that: it
+    logs `Invalid prim name` and evaluates the WHOLE path to the empty path
+    `<>`, and the failure only surfaces one frame later as
+    `Tf.ErrorException: Path must be an absolute path: <>` out of
+    `UsdGeom.Cube.Define`. The kerbs of all three probes sit at y < 0, so every
+    scene died on its first kerb.
+
+    'N' for the negative half is the convention already in the repo
+    (`props_kit.py:267`, signed post tags). Sign is kept, not dropped, so the
+    two kerbs of a run stay distinct prims (y=-3.60 -> Kerb_N360, y=+3.60 ->
+    Kerb_360).
+    """
+    return f"{int(round(float(v) * scale))}".replace("-", "N")
+
+
 def build_kerb_line(BOX, root, mtl, y, x0, x1, top=0.12, width=0.18,
                     z_base=PAVING_Z):
     """A granite kerb run along `y`. Present in BOTH arms — it is the paved-area
     boundary, not a hazard cue."""
-    BOX(f"{root}/Kerb_{int(round(y * 100))}",
+    BOX(f"{root}/Kerb_{prim_tag(y)}",
         ((x0 + x1) / 2.0, y, z_base + top / 2.0 - 0.01),
         (x1 - x0, width, top), mtl)
 

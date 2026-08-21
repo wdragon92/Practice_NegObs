@@ -274,3 +274,169 @@ seeds, and on the 33 frames carrying GT in both bands Depth is in fact *better* 
 The variable that behaves monotonically is the camera standoff `cam.d`: H frame recall runs
 0.917 / 0.644 / 0.587 for RGB and 0.833 / 0.733 / **0.000** for Depth over `d < 7` / `7–9` / `≥ 9` m
 (n = 24 / 30 / 42, unanimous across the three seeds). Report the standoff form, not the band form.
+
+---
+
+## Resume chain 0821
+
+*Appended 2026-08-21 after the GPU freed at 11:46. **Nothing above this line was modified.** These
+are the four GPU tracks that the night cycle left as PREPARED-NOT-RUN (A1 YOLO seeds, A2 aux
+ablation, C2 dressing control, C1 hole probe), now measured. Unlike the `Night 0820→0821 update`
+section above — which was re-analysis of frozen artefacts — this section contains **new
+measurements**, so §5.2's main table gains its fourth row here.*
+
+Provenance, in order of citation:
+`experiments/dayrun_0820/runs/yolo_s{42,43,44}/eval_test/metrics.json` ·
+`experiments/dayrun_0820/runs/v2/SEED_TABLE.md` §4–§5 ·
+`experiments/dayrun_0820/runs/v2/compare_aux_vs_base_s42/METRICS_SECTION.md` §3 ·
+`experiments/nightrun_0820/ctrl_dressing/CTRL_TABLE.md` ·
+`experiments/probe_holes_0820/{PROBE_TABLE.md, TIER_TABLE.md}`.
+
+### R.1 §5.2 row 4 is final — the detector baseline's ceiling is constructive, and it holds
+
+The YOLOv8n row of the main table now carries three seeds. On the 816-frame v2 test set at the
+detector's own confidence threshold τ = 0.25, it reaches **frame recall 0.150 ± 0.028 on the V tier
+and exactly 0.000 on both the E and the H tier, on every seed** (0.117 / 0.161 / 0.172 for V;
+0.000 / 0.000 / 0.000 for E and H, at cell level as well as frame level). Off-arm frame false alarms
+run 0.005 / 0.025 / 0.042.
+
+The zero is the point of the row, and it must be presented as **constructive rather than empirical**.
+The detector's output is a set of image-space boxes; the `det2cell` rule projects each box onto the
+ground plane to decide which polar cell it occupies. A hazard in the E tier contributes only a rim,
+and a hazard in the H tier contributes **no pixels at all** — so there is no box to project, and the
+mapping can emit no cell. E and H recall are therefore not merely expected to be near zero, they are
+*constructively bounded* at zero, a bound already measured before training via the oracle-box
+diagnostic (D22; `METRICS_NOTES_yolo.md` §3). What three seeds add is the assurance that the
+implementation honours the bound: **a nonzero E or H number would have been a mapping-leak alarm,
+and across three independently trained detectors the alarm never fired.** The one sub-threshold
+exception belongs in a footnote and nowhere else — in the τ = 0.10 sweep row, seeds 42 and 44 each
+light exactly one hazard frame of 96 (recall 0.0104), which is a single low-confidence box caught by
+the mapping's documented near-band bias, not H-tier perception.
+
+The sentence for the paper is therefore not "the detector performs poorly on invisible hazards" —
+that would invite the reply that a better detector would do better. It is: **any method whose output
+is a bounding box over visible hazard pixels has an identically zero ceiling on the E and H tiers,
+independent of detector quality, and this row measures that ceiling rather than a model.** That is
+what motivates the cell-classification formulation, and it is the cleanest single justification for
+the paper's framing. Do not report the V column as a comparative result: at 0.150 with cell
+precision 0.472 ± 0.110 it is a floor on a task the detector was not trained to do, and the FA
+column's 8-fold seed range (0.005 → 0.042) will not support any comparison against a U-Net arm.
+
+### R.2 The auxiliary pixel loss trades the E tier for precision and for H-tier localisation
+
+One development-narrative ablation, RGB seed 42 only, adds a per-pixel auxiliary loss on 648 amodal
+hazard masks (`aux_lambda` 0.5) to an otherwise byte-identical recipe — same encoder, same selector,
+same oversampling, same seed. Paired against its own base arm on the 816 common frames (percentile
+bootstrap, 10000×), the result is not "better" or "worse" but a **change of operating character**.
+
+What it buys is confirmed. Cell precision rises **+0.129** [0.089, 0.169] and off-arm frame false
+alarms **halve, 0.375 → 0.167** (Δ −0.208 [−0.253, −0.165]); cell FPR falls 0.053 → 0.023. Most
+relevant to this paper's thesis, **H-tier cell recall rises +0.355** [0.277, 0.430] — 0.253 → 0.607,
+the largest confirmed effect in the comparison — and the independent twin evidence agrees, with the
+H-tier on/off Δ nearly doubling from 0.170 to 0.326. Cell F1 improves +0.040, with a CI whose lower
+bound is 0.0001; report that as "improved, marginally significant", not as a headline.
+
+What it costs is equally clear and larger in one place: **the E tier collapses completely.** Frame
+recall on rim-only hazards goes 0.600 → **0.000** (Δ −0.600 [−0.744, −0.453]), cell recall
+0.359 → 0.000. V recall falls 0.828 → 0.639 and the overall frame detection rate follows,
+0.731 → 0.563. Supervising the network toward hazard *pixels* appears to sharpen it onto
+high-confidence, well-supported evidence and to cost it exactly the marginal-evidence tier.
+
+Two limits must travel with this paragraph. First, the frame-level H gain that reads best in a
+summary, +0.125, has a **confidence interval containing zero** ([−0.010, 0.253]); only the
+cell-level gain is statistically supported, so the claim must be written at cell level. Second,
+**n = 1 seed**, against a base RGB arm whose own three-seed H spread is ±0.141 — a single-seed
+frame-level move of +0.125 sits inside seed noise. This belongs in an appendix and a future-work
+sentence, never in the main table (approval item #2 default: main table stays at four rows).
+
+### R.3 The C2 false alarms decompose: roughly three quarters dressing, one quarter hazard geometry
+
+§5.6 records an unresolved confound. `sceneC2`'s hazard-off arm deleted not only the stair drop but
+the scene's dressing — the leaf mound, the railing — so the on/off difference measured there mixed
+"the hazard is gone" with "the scene looks different". A dedicated control round now separates them.
+A second off arm was rendered with `keep_dressing`: hazard geometry removed, every dressing element
+holding its on-arm transform, and the camera datum strip byte-equal to the on arm so both off arms
+pair against the *same* on frames at pose tolerance zero.
+
+The split is large and one-directional. Against the shared on arm, the old off arm's paired frame
+delta is **0.699 ± 0.204** across three RGB seeds; the dressing-preserving off arm's is
+**0.163 ± 0.062**. Roughly **77 % of what looked like the model's response to the removed hazard was
+its response to the removed dressing**, and about **23 % survives as a response to the hazard
+geometry itself**. The residual is small but consistent in sign on all three seeds
+(0.185 / 0.214 / 0.090).
+
+The control also produces an uncomfortable second number that must be reported with the first. On
+the dressing-preserving off arm — frames that carry an all-zero ground truth, so every fire is a
+false alarm — the frame false-alarm rate is **0.681 ± 0.208**, against 0.069 ± 0.104 on the old off
+arm, with 2.11 cells firing per frame and a mean max probability of 0.651. Read plainly: when the
+leaf mound and the railing remain but the drop does not, **the model fires confidently on ground
+that is safe**. This is not a contradiction of the previous paragraph, it is its mechanism — the
+model is using the dressing as a cue for hazard, which is precisely why removing the dressing
+suppressed its response in the old arm. Stated positively it is cue-consistent behaviour; stated
+operationally it is a shortcut, and it belongs in the limitations section, not in the results
+narrative.
+
+`sceneN3` served as the null control and behaved as designed. Its dressing is a wall mural, 1–2 mm
+of paint on flat floor, so the dressing-preserving off arm is *structurally identical* to the on arm;
+its twin delta must be zero, and it measures **−0.001 ± 0.001** (per-seed 0.000 / −0.001 / −0.002).
+The measurement apparatus introduces no delta of its own, which is what licenses reading C2's 0.163
+as signal.
+
+Finally, and importantly for §5.3: **this control does not touch the headline causal claim.** The
+twin analysis behind that claim already excludes `sceneC2` entirely — it contributes zero H-tier
+pose-matched pairs — and the night cycle's exact-pose stratification showed the H-tier delta
+unchanged to four decimals when only byte-identical pose pairs are used. The dressing confound was
+always confined to the *all-tier* delta, and it is that number, not the headline, which this control
+corrects.
+
+### R.4 The hole probe splits RGB and Depth along a semantic/geometric line
+
+Three purpose-built scenes, never trained on, probe a drop *type* absent from the corpus: a
+0.5–1.5 m hole rather than a wide ditch or a stair edge. The tier design landed as specified —
+`probeH1` is V-dominant (15 V / 3 E / 6 H of 24 on-frames), `probeH2` is **pure E, all 24 frames**,
+`probeH3` is **pure H, all 24 frames** — so for the first time the E and H claims can be tested on
+frames that are *only* E or *only* H. All nine frozen recipe-v2 checkpoints were run at the frozen
+τ = 0.5, with no refitting (`val` is deliberately empty in the probe split).
+
+**Zero-shot transfer largely fails for RGB and partially succeeds for Depth, and the two failures
+have different shapes.** On the pure-H scene, RGB recall is **0.083 / 0.292 / 0.100** across seeds
+while Depth reaches **0.500 / 0.625 / 0.375** — Depth roughly triples RGB on the tier where neither
+model can see the hazard. This inverts the ordering of the main table, where RGB leads Depth on the
+H tier (0.688 vs 0.438), and the inversion is the finding. RGB's H-tier competence on the training
+corpus is *semantic context*: it has learned what the surroundings of a ditch or a stair look like,
+and a hole in a corridor does not supply those surroundings. Depth's is *geometric*: whatever
+range-discontinuity signature it keys on survives the change of drop type, degraded but present.
+**The RGB result is scene-vocabulary-bound; the Depth result is closer to type-general.** On the
+pure-E scene both collapse almost totally (RGB 0.000 on all three seeds; Depth 0.125 / 0.000 / 0.000),
+so the E-tier claim in this paper should be read as corpus-specific until a probe with more E variety
+exists.
+
+Two numbers stop this from being read as a clean story. First, **`b2_s43` is a trigger-happy
+outlier**: it scores 1.000 frame recall on `probeH1` — but with an off-arm false-alarm rate of
+**0.917** on the same scene, and 0.750 on both other scenes. It is not detecting holes, it is firing
+almost everywhere, and its apparent recall is an artefact of that. Its sibling seeds `b2_s42` and
+`b2_s44` both score 0.000 on `probeH1` with FA 0.000. Any per-seed table must show the FA column
+beside the recall column, and no B2 probe number should be quoted as a mean over three seeds.
+Second, the false-alarm rates rise with recall throughout the probe — Depth's pure-H recall of
+0.500 / 0.625 / 0.375 comes with off-arm FA of 0.500 / 0.625 / 0.500 — which means the probe
+demonstrates **transfer of a firing tendency at least as much as transfer of discrimination**, and
+should be written that way.
+
+The corridor-preserving scene supplies one further diagnostic. In `probeH2` the hazard occupies a
+single lateral sector and the neighbouring sectors in the same band are hazard-free, so firing there
+distinguishes angular blur around a correct answer from a scene-level prior. Seven of nine
+checkpoints fire on **zero** adjacent cells; the exceptions are `b2_s43` (9 of 48 adjacent cells,
+adjacent frame rate 0.375, against a far-cell rate of 0.045) and `depth_s42` (6 of 48, 0.125,
+against a far rate of **0.000**). For `depth_s42` the pattern is clean angular blur — misplacement
+beside a correct answer, not a broadcast. For `b2_s43` the far rate is nonzero too, consistent with
+the trigger-happy reading above.
+
+The probe is evaluation-only by construction and no probe frame may enter training; it changes no
+number in §5.2 and its role in the paper is to bound the generalisation claim, in the limitations
+section: **the H-tier result is demonstrated for the drop types in this corpus, and the RGB arm's
+version of it does not survive a change of drop type.**
+
+> R.4 부기 (panel-audited): Depth's apparent hole-transfer recall is largely saturation
+> firing (all far cells at 1.00 on hit frames; probe off-arm FA .5-.625). Honest phrasing:
+> neither modality transfers cleanly zero-shot; Depth's recall is partly an OOD broad-firing
+> artifact, RGB stays conservative (low recall AND low FA).

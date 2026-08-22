@@ -116,3 +116,20 @@ NEGOBS_CAPTURE_DIR=look_check/scene01/myrun \
 
 ⚠ `Docs/surveys/realism_gap_2026-07-28/ZZ_synthesis.md` 는 격차 조사 **원안**이며
 서술 다수가 이후 정정됐습니다. `realism_v1_final.md` §3(정정 목록)을 먼저 보십시오.
+
+---
+
+## 실험 캠페인 현황 (2026-08-19 ~ 08-21, AISP 제출용)
+
+씬 라이브러리 위에서 본실험 3사이클이 완료된 상태입니다. **새로 합류하는 독자(사람/AI)의 판독 순서**:
+
+1. `Docs/experiment/` — 사이클별 지시서 3부 (설계 의도의 정본)
+2. `experiments/nightrun_0820/MORNING_REPORT_0821.md` — 최신 종합 보고 + 승인 대기 항목
+3. `experiments/mainrun_0819/DECISIONS.md` — 자율 판단 전체 원장 (D1~D30)
+4. `experiments/mainrun_0819/{METRICS.md, RESULTS_DRAFT.md}` — 수치 정본 + 논문 초안 절
+5. `experiments/dayrun_0820/runs/v2/SEED_TABLE.md` — 본 표 (3모델×3시드 + YOLO 행 + 부록)
+
+핵심 산출: 트윈 코퍼스 2,832프레임(`dataset/`, git 미포함) · PROVISIONAL-GRID-V1 20칸 라벨 ·
+RGB/Depth/B2/YOLO 4행 표 · 진단(diag_v1/v2)·대조군(ctrl_dressing)·hole 프로브(probe_holes_0820).
+렌더 산출물(`dataset/`, `look_check/`)과 재생성 가능 대용량은 gitignore로 제외되어 있습니다 —
+재현 명령은 각 실험 디렉토리의 README/코드 참조.

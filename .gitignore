@@ -91,3 +91,4 @@ experiments/dayrun_0820/annotations/amodal/
 experiments/*/audit_samples*/
 
 # public-repo fix (D35/R3): keep small result artifacts visible on GitHub
+experiments/dayrun_0820/yolo26n.pt

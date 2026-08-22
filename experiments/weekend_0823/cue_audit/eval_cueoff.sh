@@ -47,6 +47,7 @@ LOCK_WAIT=3600
 LOCK_RC=201
 
 MODELS="rgb depth b2"
+MAIN=/home/vislab/Desktop/work_sy/Practice_NegObs/experiments/mainrun_0819
 SEEDS="42 43 44"
 PHASES="1 2 3"
 SETS="lineage twin"
@@ -164,7 +165,8 @@ infer_one() {   # infer_one <set> <stem> <arm> <scene> <model> <seed>
   mkdir -p "$out"
   flock -o -w "$LOCK_WAIT" -E "$LOCK_RC" "$LOCK" bash -c "$PRE
 cd '$CODE'
-python3 eval_polar.py --manifest '$man' --split '$SPLIT' --subset test \
+EVAL=eval_polar.py; [ '$model' = b2 ] && EVAL='$MAIN/b2_polar/eval_b2_polar.py'
+python3 \$EVAL --manifest '$man' --split '$SPLIT' --subset test \
         --ckpt '$ck' --input '$inp' --grid '$GRID' \
         --tau-op $TAU --tau-star $TAU --out '$out'" >> "$LOG" 2>&1
   local rc=$?

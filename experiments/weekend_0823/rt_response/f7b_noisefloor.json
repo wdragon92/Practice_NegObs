@@ -1,0 +1,142 @@
+{
+ "threshold_255": 2,
+ "groups": {
+  "noise_floor__N3_on_vs_keepdressing_off": {
+   "name": "noise_floor__N3_on_vs_keepdressing_off",
+   "n_pairs": 24,
+   "frac_diff_median": 0.4421494020061728,
+   "frac_diff_mean": 0.41589554398148154,
+   "frac_diff_max": 0.5920823688271605,
+   "n_diff_px_median": 916841.0,
+   "n_diff_px_ge8_median": 27571.0,
+   "n_diff_px_ge32_median": 50.0,
+   "mean_diff_over_changed_median": 3.1892186788111836,
+   "max_diff_median": 57.0
+  },
+  "hazard_only__C2_on_vs_keepdressing_off": {
+   "name": "hazard_only__C2_on_vs_keepdressing_off",
+   "n_pairs": 24,
+   "frac_diff_median": 0.6125776427469136,
+   "frac_diff_mean": 0.6019738618827161,
+   "frac_diff_max": 0.9658960262345679,
+   "n_diff_px_median": 1270241.0,
+   "n_diff_px_ge8_median": 875005.0,
+   "n_diff_px_ge32_median": 698077.5,
+   "mean_diff_over_changed_median": 61.86798076145301,
+   "max_diff_median": 225.0
+  },
+  "full_toggle__sceneN3_main_round": {
+   "name": "full_toggle__sceneN3",
+   "n_pairs": 24,
+   "frac_diff_median": 0.18129075038580247,
+   "frac_diff_mean": 0.259003202964249,
+   "frac_diff_max": 0.5457161458333334,
+   "n_diff_px_median": 375924.5,
+   "n_diff_px_ge8_median": 146639.5,
+   "n_diff_px_ge32_median": 79274.5,
+   "mean_diff_over_changed_median": 24.30495336146326,
+   "max_diff_median": 138.5
+  },
+  "full_toggle__sceneC2_main_round": {
+   "name": "full_toggle__sceneC2",
+   "n_pairs": 24,
+   "frac_diff_median": 0.9343752411265432,
+   "frac_diff_mean": 0.9113295717592592,
+   "frac_diff_max": 0.988434124228395,
+   "n_diff_px_median": 1937520.5,
+   "n_diff_px_ge8_median": 1540716.0,
+   "n_diff_px_ge32_median": 1078386.0,
+   "mean_diff_over_changed_median": 49.89182807945551,
+   "max_diff_median": 222.0
+  },
+  "full_toggle__scene14_main_round": {
+   "name": "full_toggle__scene14",
+   "n_pairs": 24,
+   "frac_diff_median": 0.2272634548611111,
+   "frac_diff_mean": 0.31745947064686214,
+   "frac_diff_max": 0.9042674575617284,
+   "n_diff_px_median": 471253.5,
+   "n_diff_px_ge8_median": 344684.5,
+   "n_diff_px_ge32_median": 226810.5,
+   "mean_diff_over_changed_median": 44.31724719107066,
+   "max_diff_median": 200.5
+  },
+  "full_toggle__scene15_main_round": {
+   "name": "full_toggle__scene15",
+   "n_pairs": 24,
+   "frac_diff_median": 0.27378833912037037,
+   "frac_diff_mean": 0.2821456846386317,
+   "frac_diff_max": 0.6366681134259259,
+   "n_diff_px_median": 567727.5,
+   "n_diff_px_ge8_median": 90375.5,
+   "n_diff_px_ge32_median": 56847.5,
+   "mean_diff_over_changed_median": 18.55693231481525,
+   "max_diff_median": 143.0
+  },
+  "tiercheck__scene14__H": {
+   "name": "scene14/H",
+   "n_pairs": 60,
+   "frac_diff_median": 0.1968701774691358,
+   "frac_diff_mean": 0.22303758359053497,
+   "frac_diff_max": 0.45632282021604936,
+   "n_diff_px_median": 408230.0,
+   "n_diff_px_ge8_median": 246934.0,
+   "n_diff_px_ge32_median": 156977.0,
+   "mean_diff_over_changed_median": 36.22324635248509,
+   "max_diff_median": 193.0
+  },
+  "tiercheck__scene14__none_in_fov": {
+   "name": "scene14/none_in_fov",
+   "n_pairs": 6,
+   "frac_diff_median": 0.17202883873456792,
+   "frac_diff_mean": 0.22375779642489713,
+   "frac_diff_max": 0.43721305941358024,
+   "n_diff_px_median": 356719.0,
+   "n_diff_px_ge8_median": 142719.0,
+   "n_diff_px_ge32_median": 83705.5,
+   "mean_diff_over_changed_median": 21.438934509022207,
+   "max_diff_median": 194.0
+  },
+  "tiercheck__scene14__V": {
+   "name": "scene14/V",
+   "n_pairs": 6,
+   "frac_diff_median": 0.6510443190586419,
+   "frac_diff_mean": 0.6266806520061728,
+   "frac_diff_max": 0.9042674575617284,
+   "n_diff_px_median": 1350005.5,
+   "n_diff_px_ge8_median": 892413.0,
+   "n_diff_px_ge32_median": 450238.5,
+   "mean_diff_over_changed_median": 39.049591402230874,
+   "max_diff_median": 204.0
+  },
+  "tiercheck__scene15__H": {
+   "name": "scene15/H",
+   "n_pairs": 36,
+   "frac_diff_median": 0.19679639274691357,
+   "frac_diff_mean": 0.2650177228009259,
+   "frac_diff_max": 0.7047241512345679,
+   "n_diff_px_median": 408077.0,
+   "n_diff_px_ge8_median": 17639.5,
+   "n_diff_px_ge32_median": 7106.5,
+   "mean_diff_over_changed_median": 4.779122872978316,
+   "max_diff_median": 143.0
+  },
+  "tiercheck__scene15__V": {
+   "name": "scene15/V",
+   "n_pairs": 30,
+   "frac_diff_median": 0.2560503472222222,
+   "frac_diff_mean": 0.2817945441100822,
+   "frac_diff_max": 0.6697241512345679,
+   "n_diff_px_median": 530946.0,
+   "n_diff_px_ge8_median": 49473.5,
+   "n_diff_px_ge32_median": 26151.5,
+   "mean_diff_over_changed_median": 18.55693231481525,
+   "max_diff_median": 136.0
+  }
+ },
+ "provenance": {
+  "noise_floor": "dataset/260819_main_on/sceneN3 vs dataset/260820_ctrloff/sceneN3 (keep_dressing; heightmap max|\u0394| = 0.000000 m per ctrl_dressing/CTRL_TABLE.md)",
+  "hazard_only": "dataset/260819_main_on/sceneC2 vs dataset/260820_ctrloff/sceneC2 (keep_dressing)",
+  "full_toggle": "dataset/260819_main_on/<scene> vs dataset/260819_main_off/<scene> (the ordinary corpus twin: hazard geometry AND everything else inside the scene builder's hazard_stairs branch)"
+ }
+}

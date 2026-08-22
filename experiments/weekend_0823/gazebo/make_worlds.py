@@ -80,11 +80,38 @@ WALL_T = 0.20
 STRIP_X0, STRIP_X1 = X_LIP - 0.30, X_LIP   # tactile warning-block strip, flush to the lip
 STRIP_HY = NOTCH_HY
 
+# --- gz_drop3 (H composition) -------------------------------------------------------------
+# A planter/parapet standing ON THE DECK in front of the lip.  Its top must clear h0.3 (so
+# the sight line RISES past it and nothing at or below ground is ever seen again) and must
+# still sit low enough under h0.9 that the descending sight line has not reached z = 0 by the
+# far side of the pit.  0.55 body + 0.06 planting cap = 0.61 m satisfies both -- see the
+# derivation table in worlds/README.md §6.
+D3_PIT_X0, D3_PIT_X1 = X_LIP, 15.0      # pit is SHORT on purpose: the far wall must stay
+D3_PIT_HY = 0.90                        # inside the occluder's shadow at h0.9/d2
+D3_DROP = 0.72
+D3_OCC_X0, D3_OCC_X1 = 11.60, X_LIP     # planter footprint, far face flush with the lip
+D3_OCC_HY = 1.10                        # wider than the pit -> no lateral leak (README §6)
+D3_OCC_BODY_H = 0.55
+D3_OCC_CAP_H = 0.06
+D3_STRIP_X0, D3_STRIP_X1 = 11.30, 11.60  # warning strip IN FRONT of the planter (camera side)
+
+# --- gz_drop4 (E composition) -------------------------------------------------------------
+# Visible far-wall band = W*h/d; int_px (labeler counts on a DS=4 depth map, TAU_INT_DEF=50)
+#   int_px_DS = (W*h/d) * L / (R^2 * 5.0742e-6),   R = d + W
+# so E needs a SMALL opening area.  0.25 m along X x 1.00 m across = an open expansion joint
+# / missing grating strip: 14 px at h0.3_d10 and 42 px at h0.9_d10, both under 50.
+D4_W = 0.25                             # trench extent ALONG the walking direction
+D4_HY = 0.50                            # half of the 1.00 m lateral opening
+D4_DROP = 0.70
+D4_STRIP_X0, D4_STRIP_X1 = 11.40, 11.70  # set back 0.30 m from the lip -- see warning_strip_model
+
 MAT_DECK = "Gazebo/Grey"
 MAT_PIT = "Gazebo/DarkGrey"
 MAT_STEP = "Gazebo/Grey"
 MAT_RAIL = "Gazebo/White"
 MAT_WALL = "Gazebo/PaintedWall"
+MAT_OCC = "Gazebo/Bricks"
+MAT_OCC_CAP = "Gazebo/Grass"
 MAT_STRIP = "Gazebo/Yellow"
 MAT_DOT = "Gazebo/ZincYellow"
 
@@ -218,20 +245,28 @@ def guard_rail_segments(y, x0, x1, *, return_leg=None):
     return segs
 
 
-def warning_strip_model(name):
-    """Tactile paving strip flush to the lip: one yellow base slab + a grid of raised dots.
+def warning_strip_model(name, x0=None, x1=None, hy=None):
+    """Tactile paving strip: one yellow base slab + a grid of raised dots.
 
     All of it lives in ONE link as many <visual> elements (cheap; no collision needed --
     the slab is 6 mm and the robot drives over it).
+
+    x0/x1 default to flush-with-the-lip.  gz_drop4 sets them back by 0.30 m on purpose: a
+    6 mm proud slab sitting ON the lip becomes the binding silhouette for a grazing camera
+    and shrinks the visible far-wall band ~5x, which would make that world's E tier an
+    artefact of the paving rather than of the trench geometry.
     """
+    x0 = STRIP_X0 if x0 is None else x0
+    x1 = STRIP_X1 if x1 is None else x1
+    hy = STRIP_HY if hy is None else hy
     vis = [f"""
         <visual name="slab">
-          <pose>{_pose((STRIP_X0 + STRIP_X1) / 2.0, 0.0, 0.003)}</pose>
-          <geometry><box><size>{STRIP_X1 - STRIP_X0:.6g} {2 * STRIP_HY:.6g} 0.006</size></box></geometry>
+          <pose>{_pose((x0 + x1) / 2.0, 0.0, 0.003)}</pose>
+          <geometry><box><size>{x1 - x0:.6g} {2 * hy:.6g} 0.006</size></box></geometry>
           <material><script><uri>file://media/materials/scripts/gazebo.material</uri>
             <name>{MAT_STRIP}</name></script></material>
         </visual>"""]
-    xs = [STRIP_X0 + 0.05, (STRIP_X0 + STRIP_X1) / 2.0, STRIP_X1 - 0.05]
+    xs = [x0 + 0.05, (x0 + x1) / 2.0, x1 - 0.05]
     ys = [-1.00 + 0.125 * i for i in range(17)]
     k = 0
     for x in xs:
@@ -343,6 +378,50 @@ FOOTER = """
   </world>
 </sdf>
 """
+
+
+def deck_with_notch(nx0, nx1, nhy):
+    """Upper deck (top z = 0) covering the whole footprint MINUS a rectangular notch.
+
+    Four slabs: two full-length side wings, a near slab up to the notch, a far slab past it.
+    The wings' inner faces (thickness DECK_T) double as the notch's side walls, which is why
+    DECK_T must stay deeper than any hazard floor.
+    """
+    wing_hy = (DECK_HY - nhy) / 2.0
+    wing_cy = nhy + wing_hy
+    cx_all, sx_all = (DECK_X0 + FAR_X) / 2.0, FAR_X - DECK_X0
+    return [
+        box_model("deck_left", cx_all, wing_cy, -DECK_T / 2.0,
+                  sx_all, 2 * wing_hy, DECK_T, MAT_DECK),
+        box_model("deck_right", cx_all, -wing_cy, -DECK_T / 2.0,
+                  sx_all, 2 * wing_hy, DECK_T, MAT_DECK),
+        box_model("deck_near", (DECK_X0 + nx0) / 2.0, 0.0, -DECK_T / 2.0,
+                  nx0 - DECK_X0, 2 * nhy, DECK_T, MAT_DECK),
+        box_model("deck_far", (nx1 + FAR_X) / 2.0, 0.0, -DECK_T / 2.0,
+                  FAR_X - nx1, 2 * nhy, DECK_T, MAT_DECK),
+    ]
+
+
+def deck_solid():
+    """The ctrl arm's ground: one continuous slab, same top surface, no hole."""
+    return [box_model("deck", (DECK_X0 + FAR_X) / 2.0, 0.0, -DECK_T / 2.0,
+                      FAR_X - DECK_X0, 2 * DECK_HY, DECK_T, MAT_DECK)]
+
+
+def planter_model(name):
+    """The gz_drop3 occluder: a brick planter box with a planting cap on top.
+
+    DRESSING, not hazard -- it stands on the deck at z = 0 and is byte-identical in both
+    twin arms.  Body and cap share a footprint so the silhouette the occlusion maths uses
+    is a clean rectangle of height D3_OCC_BODY_H + D3_OCC_CAP_H.
+    """
+    cx = (D3_OCC_X0 + D3_OCC_X1) / 2.0
+    sx = D3_OCC_X1 - D3_OCC_X0
+    sy = 2 * D3_OCC_HY
+    body = box_model(name, cx, 0.0, D3_OCC_BODY_H / 2.0, sx, sy, D3_OCC_BODY_H, MAT_OCC)
+    cap = box_model(name + "_cap", cx, 0.0, D3_OCC_BODY_H + D3_OCC_CAP_H / 2.0,
+                    sx, sy, D3_OCC_CAP_H, MAT_OCC_CAP, collision=False)
+    return [body, cap]
 
 
 def flanking_walls():

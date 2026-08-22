@@ -11,3 +11,4 @@
 - 04:05 CUE-OFF 구현 에이전트 가동(플라시보 팔 포함). rt-response·프로토콜·c2-3a·gazebo·V2S큐 병행 중.
 - 04:20 Gazebo prep 착지(D37): 월드4+도구+격리 PASS. H/E 월드 추가 지시.
 - 04:40 3a·C2 감사 착지(D38): #4=안A 권고, C2 3중 확정(포즈 집중·dressing 44%·hgrad 예측).
+- 04:55 프로토콜 R2판 착지(D39): AUC 사전등록·N-cue 필수·band1 관측불가 발견.

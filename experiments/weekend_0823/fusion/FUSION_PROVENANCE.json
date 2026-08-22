@@ -1,0 +1,39 @@
+{
+  "rule": "p_unet>=0.50 OR p_yolo>=0.25",
+  "tau_u": 0.5,
+  "tau_y": 0.25,
+  "phi": "2q for q<0.25 ; 0.5+(q-0.25)*2/3 for q>=0.25",
+  "grid": "PROVISIONAL-GRID-V1",
+  "per_seed": {
+    "42": {
+      "unet_csv": "/home/vislab/Desktop/work_sy/Practice_NegObs/experiments/dayrun_0820/runs/v2/rgb_s42/eval_test/per_frame.csv",
+      "yolo_csv": "/home/vislab/Desktop/work_sy/Practice_NegObs/experiments/dayrun_0820/runs/yolo_s42/cells_test/per_frame.csv",
+      "n_frames": 816,
+      "n_cells": 20,
+      "cells_fired_unet": 2103,
+      "cells_fired_yolo": 56,
+      "cells_fired_fused": 2150,
+      "cells_added_by_yolo": 47
+    },
+    "43": {
+      "unet_csv": "/home/vislab/Desktop/work_sy/Practice_NegObs/experiments/dayrun_0820/runs/v2/rgb_s43/eval_test/per_frame.csv",
+      "yolo_csv": "/home/vislab/Desktop/work_sy/Practice_NegObs/experiments/dayrun_0820/runs/yolo_s43/cells_test/per_frame.csv",
+      "n_frames": 816,
+      "n_cells": 20,
+      "cells_fired_unet": 2203,
+      "cells_fired_yolo": 106,
+      "cells_fired_fused": 2300,
+      "cells_added_by_yolo": 97
+    },
+    "44": {
+      "unet_csv": "/home/vislab/Desktop/work_sy/Practice_NegObs/experiments/dayrun_0820/runs/v2/rgb_s44/eval_test/per_frame.csv",
+      "yolo_csv": "/home/vislab/Desktop/work_sy/Practice_NegObs/experiments/dayrun_0820/runs/yolo_s44/cells_test/per_frame.csv",
+      "n_frames": 816,
+      "n_cells": 20,
+      "cells_fired_unet": 1153,
+      "cells_fired_yolo": 83,
+      "cells_fired_fused": 1226,
+      "cells_added_by_yolo": 73
+    }
+  }
+}

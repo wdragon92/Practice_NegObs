@@ -1,0 +1,57 @@
+[
+  {
+    "name": "identity",
+    "family": "identity",
+    "param": 0.0
+  },
+  {
+    "name": "bright_0.6",
+    "family": "brightness",
+    "param": 0.6
+  },
+  {
+    "name": "bright_0.8",
+    "family": "brightness",
+    "param": 0.8
+  },
+  {
+    "name": "bright_1.2",
+    "family": "brightness",
+    "param": 1.2
+  },
+  {
+    "name": "bright_1.4",
+    "family": "brightness",
+    "param": 1.4
+  },
+  {
+    "name": "gamma_0.7",
+    "family": "gamma",
+    "param": 0.7
+  },
+  {
+    "name": "gamma_1.4",
+    "family": "gamma",
+    "param": 1.4
+  },
+  {
+    "name": "exp_-1",
+    "family": "exposure",
+    "param": -1.0
+  },
+  {
+    "name": "exp_-0.5",
+    "family": "exposure",
+    "param": -0.5
+  },
+  {
+    "name": "exp_+0.5",
+    "family": "exposure",
+    "param": 0.5
+  },
+  {
+    "name": "exp_+1",
+    "family": "exposure",
+    "param": 1.0
+  }
+]

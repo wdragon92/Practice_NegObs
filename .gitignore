@@ -12,14 +12,14 @@ venv/
 logs/
 outputs/
 # runs/: keep text artifacts public (D35/R3); exclude binaries below
-runs/**/*.pt
-runs/**/weights/
-runs/**/*.png
-runs/**/*.jpg
-runs/**/pred_*/
-runs/**/events.out*
-runs/**/*.npy
-runs/**/per_frame*.csv.bak
+**/runs/**/*.pt
+**/runs/**/weights/
+**/runs/**/*.png
+**/runs/**/*.jpg
+**/runs/**/pred_*/
+**/runs/**/events.out*
+**/runs/**/*.npy
+**/runs/**/per_frame*.csv.bak
 wandb/
 *.log
 

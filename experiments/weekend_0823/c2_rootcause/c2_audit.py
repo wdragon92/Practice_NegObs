@@ -432,6 +432,65 @@ def c2_cond_split():
     return out
 
 
+def _rank(x):
+    x = np.asarray(x, float)
+    o = np.argsort(x, kind="mergesort")
+    r = np.empty(len(x))
+    i = 0
+    while i < len(x):
+        j = i
+        while j + 1 < len(x) and x[o[j + 1]] == x[o[i]]:
+            j += 1
+        r[o[i:j + 1]] = 0.5 * (i + j) + 1.0
+        i = j + 1
+    return r
+
+
+def _pearson(a, b):
+    a = np.asarray(a, float) - np.mean(a)
+    b = np.asarray(b, float) - np.mean(b)
+    d = np.sqrt(float((a * a).sum()) * float((b * b).sum()))
+    return float((a * b).sum() / d) if d > 0 else float("nan")
+
+
+def _spearman(a, b, n_perm=20000, seed=42):
+    ra, rb = _rank(a), _rank(b)
+    rho = _pearson(ra, rb)
+    rng = np.random.default_rng(seed)
+    hits = sum(1 for _ in range(n_perm)
+               if abs(_pearson(rng.permutation(ra), rb)) >= abs(rho) - 1e-12)
+    return rho, (hits + 1) / (n_perm + 1)
+
+
+def farband_starvation(per_frame):
+    """Discriminator #2 for hypothesis H2: does far-band PIXEL SHARE predict far-cell firing
+    across all 136 distinct OFF-arm inputs, or only in the extreme tail?"""
+    off = [r for r in per_frame if r["arm"] == "off"]
+    out = {}
+    for m in MODELS:
+        far, y, sc = [], [], []
+        for r in off:
+            fid = r["frame_id"]
+            p = np.mean([PF[(m, s)][fid]["p"] for s in SEEDS], axis=0)
+            far.append(r["frac_band3a"] + r["frac_band3b"])
+            y.append(float(p[10:20].max()))       # the ten far cells (bands 3a + 3b)
+            sc.append(r["scene"])
+        rho, pv = _spearman(far, y)
+        order = np.argsort(far)
+        groups = {"bottom10": order[:10], "rank11_30": order[10:30],
+                  "rank31_105": order[30:105], "top31": order[105:]}
+        out[m] = dict(n=len(far), spearman_rho=rho, perm_p=pv,
+                      group_means={k: dict(n=len(v),
+                                           mean_max_far_p=float(np.mean([y[i] for i in v])),
+                                           n_over_tau=int(sum(y[i] >= TAU for i in v)),
+                                           scenes={s: int(sum(1 for i in v if sc[i] == s))
+                                                   for s in TEST if any(sc[i] == s for i in v)})
+                                   for k, v in groups.items()},
+                      bottom10=[dict(scene=sc[i], frame_id=off[i]["frame_id"],
+                                     far_share=far[i], max_far_p=y[i]) for i in order[:10]])
+    return out
+
+
 def main():
     REP["purpose"] = ("CPU-3 / WEEKEND_BRIEF_0823 sec 6.3 -- systematic difference audit of "
                       "sceneC2 vs the other test scenes.  No scene edited.")
@@ -444,9 +503,12 @@ def main():
     ds, pf = depth_stats()
     REP["depth_stats"] = ds
     REP["feature_discrimination"] = feature_discrimination(pf)
+    REP["farband_starvation"] = farband_starvation(pf)
     REP["heightmap_meta"] = heightmap_meta()
     REP["source_audit"] = source_audit()
     REP["camera_audit"] = camera_audit()
+    REP["ctrl_arm_audit"] = ctrl_arm_audit()
+    REP["c2_cond_split"] = c2_cond_split()
     with open(os.path.join(OUT, "c2_audit_numbers.json"), "w") as fh:
         json.dump(REP, fh, indent=1, default=float)
     return REP

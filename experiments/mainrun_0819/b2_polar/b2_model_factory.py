@@ -1,13 +1,14 @@
-"""SegFormer-B2 (MiT-B2 encoder) -> [B,15] polar-cell logits. Drop-in twin of code/model_factory.py.
+"""SegFormer-B2 (MiT-B2 encoder) -> [B,n_cells] polar-cell logits. Twin of code/model_factory.py.
 
 Same contract as code/model_factory.py so train_polar.py needs no edits:
-    build(input_mode) -> nn.Module ; forward([B,C,512,512]) -> [B,15] raw logits (BCEWithLogitsLoss)
+    build(input_mode, classes=N) -> nn.Module ; forward([B,C,512,512]) -> [B,N] raw logits
+`classes` comes from the gridspec (15 on V0, 20 on V1) — nothing here hard-codes a cell count.
 
 Route A (default, HARNESS_NOTES §6 option (ii), verified in env_seg 2026-08-19):
-    SegformerForImageClassification.from_pretrained(<hf_local>/nvidia__mit-b2, num_labels=15,
+    SegformerForImageClassification.from_pretrained(<hf_local>/nvidia__mit-b2, num_labels=N,
         problem_type="multi_label_classification", ignore_mismatched_sizes=True,
         local_files_only=True)
-    = MiT-B2 encoder + mean-pool over tokens + Linear(512,15).  24.204 M params.
+    = MiT-B2 encoder + mean-pool over tokens + Linear(512,N).  24.204 M params at N=15.
     Only classifier.{weight,bias} are re-initialised (ckpt is the 1000-class ImageNet head);
     every encoder tensor loads.  NOTE: the hidden width is 512, not the 768 quoted in
     HARNESS_NOTES §6 — mit-b2's last-stage hidden_sizes entry is 512.
@@ -33,11 +34,17 @@ Run everything with PYTHONNOUSERSITE=1 (this machine's ~/.local shadows env_seg)
 from __future__ import annotations
 
 import os
+import sys
 
 import torch
 import torch.nn as nn
 
-N_CELLS = 15
+_CODE = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir, "code"))
+if _CODE not in sys.path:
+    sys.path.insert(0, _CODE)
+import gridspec  # noqa: E402
+
+N_CELLS = gridspec.load(None).n_cells      # V0 default (15) — explicit `classes=` overrides it
 IMG_SIZE = 512
 
 LOCAL_MIT_B2 = ("/home/vislab/Desktop/work_sy/Practice_Segmentation/campaign/data/hf_local/"
@@ -48,10 +55,11 @@ CAMPAIGN_HARNESS = "/home/vislab/Desktop/work_sy/Practice_Segmentation/campaign/
 class B2PolarNet(nn.Module):
     """Wrapper that returns ONLY the [B,15] logits, whichever route built the backbone."""
 
-    def __init__(self, net, in_channels: int, route: str, pool_dense: bool):
+    def __init__(self, net, in_channels: int, route: str, pool_dense: bool, classes: int = N_CELLS):
         super().__init__()
         self.net = net
         self.in_channels = in_channels
+        self.classes = int(classes)
         self.route = route            # "imgcls" (A) | "semseg-gap" (B)
         self.pool_dense = pool_dense  # route B needs the spatial mean
 
@@ -67,6 +75,17 @@ class B2PolarNet(nn.Module):
     def encoder_parameters(self):
         enc = getattr(self.net, "segformer", None)
         return (enc if enc is not None else self.net).parameters()
+
+    def final_classifier(self):
+        """Module whose bias the prior-init writes (train_polar.set_prior_bias).
+
+        route A: net.classifier == Linear(512, N).  route B: net.decode_head.classifier ==
+        Conv2d(768, N, 1) -- writing its bias is exactly a per-cell logit offset, because
+        route B's forward is a spatial mean of that conv's output."""
+        m = getattr(self.net, "classifier", None)
+        if m is None:
+            m = getattr(getattr(self.net, "decode_head", None), "classifier", None)
+        return m
 
 
 def _build_imgcls(classes: int, pretrained: bool):
@@ -103,8 +122,10 @@ def _build_semseg_gap(classes: int, pretrained: bool):
 
 
 def build(input_mode: str = "rgb", encoder_weights="imagenet", dropout: float = 0.0,
-          classes: int = N_CELLS, force_route: str | None = None) -> B2PolarNet:
+          classes: int | None = None, force_route: str | None = None, grid=None) -> B2PolarNet:
     """encoder_weights: "imagenet" -> load the local mit-b2 checkpoint; None -> config only.
+
+    classes wins if given; else grid.n_cells; else the V0 default (15).
 
     `dropout` is accepted for signature parity with code/model_factory.py; SegFormer's dropout
     lives in the config (classifier_dropout_prob) and is left at the checkpoint default, so a
@@ -114,6 +135,9 @@ def build(input_mode: str = "rgb", encoder_weights="imagenet", dropout: float = 
         raise ValueError(f"input_mode must be 'rgb' or 'depth', got {input_mode!r}")
     if not os.path.isdir(LOCAL_MIT_B2):
         raise FileNotFoundError(f"local mit-b2 dir missing: {LOCAL_MIT_B2}")
+    if classes is None:
+        classes = gridspec.load(grid).n_cells if grid is not None else N_CELLS
+    classes = int(classes)
     in_ch = 3 if input_mode == "rgb" else 1
     pretrained = encoder_weights is not None
 
@@ -122,7 +146,7 @@ def build(input_mode: str = "rgb", encoder_weights="imagenet", dropout: float = 
             net = _build_imgcls(classes, pretrained)
             if dropout and dropout > 0:
                 net.config.classifier_dropout_prob = float(dropout)
-            return B2PolarNet(net, in_ch, "imgcls", pool_dense=False)
+            return B2PolarNet(net, in_ch, "imgcls", pool_dense=False, classes=classes)
         except Exception as e:   # noqa: BLE001 - any import/API drift falls through to route B
             if force_route == "imgcls":
                 raise
@@ -130,14 +154,17 @@ def build(input_mode: str = "rgb", encoder_weights="imagenet", dropout: float = 
                   f"({type(e).__name__}: {e}); falling back to route B (semseg + GAP)")
 
     net = _build_semseg_gap(classes, pretrained)
-    return B2PolarNet(net, in_ch, "semseg-gap", pool_dense=True)
+    return B2PolarNet(net, in_ch, "semseg-gap", pool_dense=True, classes=classes)
 
 
 if __name__ == "__main__":  # CPU self-check:  CUDA_VISIBLE_DEVICES="" python b2_model_factory.py
+    n = int(sys.argv[1]) if len(sys.argv) > 1 else N_CELLS
     for mode, ch in (("rgb", 3), ("depth", 1)):
-        m = build(mode).eval()
+        m = build(mode, classes=n).eval()
         with torch.no_grad():
             out = m(torch.randn(2, ch, 64, 64))
-        assert out.shape == (2, N_CELLS), out.shape
-        print(f"{mode:5s} route={m.route} in_ch={ch} out={tuple(out.shape)} "
+        assert out.shape == (2, n), out.shape
+        fc = m.final_classifier()
+        assert fc is not None and fc.bias.numel() == n, "final_classifier must expose an N-bias"
+        print(f"{mode:5s} route={m.route} in_ch={ch} out={tuple(out.shape)} cells={n} "
               f"params={sum(p.numel() for p in m.parameters()) / 1e6:.3f}M")

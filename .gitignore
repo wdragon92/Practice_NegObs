@@ -75,3 +75,9 @@ Docs/reference_photos/expanded/*
 # whole tree is ignored and `dataset/<run>/manifest.json` is reproducible from
 # `scripts/run_data_render.py` + the run stamp.
 dataset/
+
+# dayrun/nightrun heavy artifacts (regenerable; kept out of the public repo)
+experiments/dayrun_0820/venv_yolo/
+experiments/dayrun_0820/yolo_ds/
+experiments/dayrun_0820/annotations/amodal/
+experiments/*/audit_samples*/

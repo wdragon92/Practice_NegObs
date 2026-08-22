@@ -4,7 +4,8 @@
       /home/vislab/miniconda3/envs/env_seg/bin/python dryrun.py
 
 Part 1 — optimisation loop: build the model on CPU, fabricate 2 batches of random
-         [4,3,512,512] images + random 15-dim multi-hot targets, run forward + backward +
+         [4,3,512,512] images + random n_cells-dim multi-hot targets (--grid selects
+         the gridspec: 15 cells on V0, 20 on V1), run forward + backward +
          AdamW step twice, assert the loss is finite at both steps, report params and per-step
          wall time.
 Part 2 — interface compatibility: fabricate a 4-frame manifest + split in a tempdir (same
@@ -34,8 +35,11 @@ for _p in (CODE, HERE):
         sys.path.insert(0, _p)
 
 import b2_model_factory  # noqa: E402
-from polar_dataset import IMG_SIZE, N_CELLS, PolarGridDataset  # noqa: E402
+import gridspec  # noqa: E402
+from polar_dataset import IMG_SIZE, PolarGridDataset  # noqa: E402
 
+GRID = gridspec.load(None)          # `python dryrun.py --grid gridspec_v1.json` swaps this
+N_CELLS = GRID.n_cells
 BATCH = 4
 STEPS = 2
 LR = 6e-5
@@ -50,7 +54,7 @@ def opt_loop(route=None):
     banner(f"part 1: build + {STEPS} forward/backward/step on CPU (route={route or 'auto'})")
     torch.manual_seed(0)
     t0 = time.time()
-    model = b2_model_factory.build("rgb", force_route=route)
+    model = b2_model_factory.build("rgb", force_route=route, classes=N_CELLS)
     build_s = time.time() - t0
     n_par = sum(p.numel() for p in model.parameters())
     n_tr = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -113,8 +117,8 @@ def fake_manifest(tmp, n_scenes=2, n_per=2):
             np.save(dpath, rng.random((96, 128)).astype(np.float32) * 8.0)
             gt = [0] * N_CELLS
             if not off:
-                for b in range(3):
-                    gt[b * 5 + int(rng.integers(0, 5))] = 1
+                for b in range(GRID.n_bands):
+                    gt[b * GRID.n_sectors + int(rng.integers(0, GRID.n_sectors))] = 1
             frames.append(dict(
                 frame_id=fid, scene_id=scene, round="r0",
                 toggle_state="off" if off else "on", rgb=rgbp, depth=dpath, polar_gt=gt,
@@ -136,7 +140,7 @@ def dataset_interface(model_route=None):
         man, sp, n = fake_manifest(tmp)
         print(f"    tempdir    : {tmp} ({n} frames, 2 scenes)")
 
-        ds = PolarGridDataset(man, sp, "train", "rgb", train_aug=False, img_size=IMG_SIZE)
+        ds = PolarGridDataset(man, sp, "train", "rgb", train_aug=False, img_size=IMG_SIZE, grid=GRID)
         x, y, meta = ds[0]
         assert x.shape == (3, IMG_SIZE, IMG_SIZE), x.shape
         assert y.shape == (N_CELLS,) and y.dtype == torch.float32, (y.shape, y.dtype)
@@ -146,13 +150,13 @@ def dataset_interface(model_route=None):
         print(f"    normalise  : x mean {float(x.mean()):+.3f} std {float(x.std()):.3f} "
               f"(ImageNet-normalised, matches mit-b2 preprocessor_config)")
 
-        dsv = PolarGridDataset(man, sp, "val", "rgb", train_aug=False, img_size=IMG_SIZE)
+        dsv = PolarGridDataset(man, sp, "val", "rgb", train_aug=False, img_size=IMG_SIZE, grid=GRID)
         ld = DataLoader(ds, batch_size=2, shuffle=False, num_workers=0, drop_last=False)
         xb, yb, mb = next(iter(ld))
         assert xb.shape == (2, 3, IMG_SIZE, IMG_SIZE), xb.shape
         assert yb.shape == (2, N_CELLS), yb.shape
 
-        model = b2_model_factory.build("rgb", force_route=model_route).eval()
+        model = b2_model_factory.build("rgb", force_route=model_route, classes=N_CELLS).eval()
         with torch.no_grad():
             out = model(xb)
             loss = nn.BCEWithLogitsLoss()(out, yb)
@@ -162,10 +166,10 @@ def dataset_interface(model_route=None):
               f"BCE {float(loss):.6f}  (train={len(ds)} val={len(dsv)})")
 
         # depth arm parity (1ch -> expanded to 3ch inside the wrapper)
-        dsd = PolarGridDataset(man, sp, "train", "depth", train_aug=False, img_size=IMG_SIZE)
+        dsd = PolarGridDataset(man, sp, "train", "depth", train_aug=False, img_size=IMG_SIZE, grid=GRID)
         xd, _, _ = dsd[0]
         assert xd.shape == (1, IMG_SIZE, IMG_SIZE), xd.shape
-        md = b2_model_factory.build("depth", force_route=model_route).eval()
+        md = b2_model_factory.build("depth", force_route=model_route, classes=N_CELLS).eval()
         with torch.no_grad():
             od = md(xd[None])
         assert od.shape == (1, N_CELLS), od.shape
@@ -175,6 +179,11 @@ def dataset_interface(model_route=None):
 
 
 def main():
+    global GRID, N_CELLS
+    if "--grid" in sys.argv:
+        GRID = gridspec.load(sys.argv[sys.argv.index("--grid") + 1])
+        N_CELLS = GRID.n_cells
+    print(f"[dryrun] grid {GRID.summary()}")
     if os.environ.get("CUDA_VISIBLE_DEVICES", None) != "":
         print("[dryrun] WARNING: CUDA_VISIBLE_DEVICES is not '' — forcing CPU anyway", file=sys.stderr)
         os.environ["CUDA_VISIBLE_DEVICES"] = ""

@@ -100,3 +100,14 @@
   cam.ground_z(183쌍) — 4키는 전부 일치(에이전트 감사 반영, 기본 키셋에 ground_z 포함).
 - viz 12장(경로 버그 1건 수정). hitH/missH 육안: s14 far밴드 선제 예측(0.82) /
   s15 골목 미검출(0.09) — 해석 명료. 보너스 seed43 훈련 가동. 보고 3부 조립 중.
+
+## 04:10 — 야간 임무 완료 (커밋 완료)
+- seed43 착지·반영: 수렴 건강(@ep13, ep1 붕괴 재현 안 됨)이나 H 0.048/E 0.000 —
+  희소 티어 시드 불안정성 확인, 원인 = val H 0장(D18)이라 선택이 H에 눈멂.
+  논문 표는 다중 시드 범위 표기 권장으로 문서화.
+- 최종 산출: METRICS.md / RESULTS_DRAFT.md / MORNING_REPORT.md(결정 7건) /
+  GAP_REPORT.md / CITATIONS.md / SPEC 3부 / 분리·게이트 보고 / viz 12 /
+  audit 30 / realworld / b2_polar(dry GREEN) / 예비탄 2종(미실행).
+- Tier1 전 항목 + Tier2 전 항목 + 보너스 seed43 완료. Grad-CAM 미실행(코드 부재,
+  구현 노트만). 예비탄·보강 렌더는 결재 대기. 커밋 1건(pathspec, 체크포인트/감사PNG
+  제외). GPU 반환 상태.

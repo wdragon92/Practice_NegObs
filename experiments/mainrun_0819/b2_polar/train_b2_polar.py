@@ -1,7 +1,8 @@
 """SegFormer-B2 arm of the polar hazard-grid run. Thin wrapper over ../code/train_polar.py.
 
 Identical to train_polar.py in every respect (CLI flags, dataset, BCEWithLogitsLoss, AdamW +
-linear-decay-to-0 LambdaLR, val cell-F1 early stopper, config.json/metrics.csv/best.pt/last.pt
+linear-decay-to-0 LambdaLR, recipe-v2 selection score `0.5*val_F1 + 0.5*val_H_frame_recall`,
+--grid / --hflip / --oversample-h / --bias-init, config.json/metrics.csv/best.pt/last.pt
 layout) EXCEPT:
   * the model comes from b2_model_factory.build (local MiT-B2, offline) instead of the
     resnet34-U-Net+aux-head factory;
@@ -27,8 +28,12 @@ train_polar's own pre-CUDA guard (nvidia-smi free >= 6 GB, exit 202) still appli
 
 BRIDGE NOTE: train_polar.main() hardcodes cfg["encoder"]="resnet34-unet-aux" in the run's
 config.json. We cannot reach that local dict, so this wrapper rewrites the encoder/model/route
-keys in <out>/config.json after main() returns (also on exception, via finally). params_m in
-that file is computed from the live model and is already correct.
+keys in <out>/config.json after main() returns (also on exception, via finally). params_m,
+n_cells and grid_version in that file are computed from the live model/grid and already correct.
+
+CELL COUNT: train_polar calls `model_factory.build(input, classes=grid.n_cells)`, and the proxy
+below forwards `classes` to b2_model_factory, so `--grid gridspec_v1.json` yields a Linear(512,20)
+head with no edit here. The prior bias-init reaches it through B2PolarNet.final_classifier().
 """
 from __future__ import annotations
 

@@ -1,0 +1,19 @@
+{
+  "version": "PROVISIONAL-GRID-V2S",
+  "n_sectors": 10,
+  "sector_edges_deg": [31.1, 24.88, 18.66, 12.44, 6.22, 0.0, -6.22, -12.44, -18.66, -24.88, -31.1],
+  "sector_names": ["Aa", "Ab", "Ba", "Bb", "Ca", "Cb", "Da", "Db", "Ea", "Eb"],
+  "note": "Aa=image-left=+azimuth(CCW,left of forward). Cell az = camera-frame horizontal azimuth atan2(y_c,x_c). NAMING: every V1 sector letter X in {A,B,C,D,E} is bisected into Xa (the LEFT/higher-azimuth half) and Xb (the RIGHT/lower-azimuth half), so the V1 letter is still readable off the V2S name and the sector pair (Xa,Xb) is exactly V1 sector X. Sector width 6.22 deg = half of V1's 12.44 deg; every V1 edge survives (31.1/18.66/6.22/-6.22/-18.66/-31.1) and five new interior edges are added at 24.88/12.44/0.0/-12.44/-24.88. Cell id = sector name + band name, e.g. Aa1, Cb2, Db3a, Eb3b (2-char sector prefix, then the band name -- the trailing a/b of band 3a/3b is the BAND letter, the second char of the sector prefix is the SECTOR half).",
+  "n_bands": 4,
+  "band_edges_m": [0.0, 2.0, 5.0, 8.0, 12.0],
+  "band_names": ["1", "2", "3a", "3b"],
+  "cell_index": "band*10+sector",
+  "hazard_depth_m": 0.3,
+  "positive_rule": "any footprint sample in wedge",
+  "nested_in": "PROVISIONAL-GRID-V1",
+  "sector_pairs": [[0, 1], [2, 3], [4, 5], [6, 7], [8, 9]],
+  "folds_to_v1_sector": ["A", "A", "B", "B", "C", "C", "D", "D", "E", "E"],
+  "nesting_note": "V2S is a strict ANGULAR refinement of V1: the band edges, the outer radius (12 m) and the total angular coverage (+-31.1 deg) are byte-identical to gridspec_v1.json, and each V1 sector s is cut exactly in half into V2S sectors 2s (left half) and 2s+1 (right half). FOLDING LAW: V1_cell(b*5+s) == V2S_cell(b*10+2s) OR V2S_cell(b*10+2s+1) for every band b and V1 sector s. Because the set of ground points inside the grid is identical, every frame-level property that depends only on grid COVERAGE (any-cell-positive, therefore the none_in_fov tier, and the lip seed mask cell>=0, therefore edge_ratio and the V/E/H tier map) is invariant between V1 and V2S. hflip: the sector permutation has NO fixed centre sector at an even sector count -- it is the pairing (1<->10, 2<->9, ..., 5<->6) in 1-based terms, which is exactly what the generic gridspec.Grid.flip_perm formula band*ns+(ns-1-sector) produces; nothing may hard-code it.",
+  "status": "TEST TRACK -- PROVISIONAL-GRID-V1 remains the canon until PROJECT_STATE_0823 12.6 adoption is ruled by the user.",
+  "rollback": "delete/ignore this file and keep passing --grid gridspec_v1.json; V1 labels, manifests, splits, runs and reports are untouched by this track (append-only isolation, PS 12.6)."
+}

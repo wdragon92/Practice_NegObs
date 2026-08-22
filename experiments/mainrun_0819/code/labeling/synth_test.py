@@ -56,10 +56,22 @@ CAM = dict(eye=[-3.0, 0.0, 1.5], ground_z=0.0, d=3.0, h_rel=1.5, yaw=0.0,
 #   V1 (bands [0,2)/[2,5)/[5,8)/[8,12)) : the SAME cells, with V0's band 3 landing
 #       entirely in 3a because the farthest pit corner is 7.62 m < 8 m -- band 3b
 #       must be empty.  That is the "pit lands in the correct new band" assertion.
+#   V2S (the same 4 bands, 10 sectors Aa..Eb): the SAME ground, each V1 sector cut
+#       in half, so folding the sector PAIRS (2s | 2s+1) back together must
+#       reproduce the V1 vector above.  Derived from the fixture's own geometry
+#       (atan2 over the 5 cm lattice + an explicit interval scan of
+#       sector_edges_deg / band_edges_m), never from polar_cells: the pit's
+#       azimuth span over the lattice is -18.43 deg .. +45 deg, so Eb/Ea (the
+#       right-hand fifth, az < -18.66) stay empty in every band, and in band 3a
+#       the far corner reaches Da but not Db.
 EXPECT_GT = {
     "PROVISIONAL-GRID-V0": [0, 0, 0, 0, 0,  1, 1, 1, 1, 0,  1, 1, 1, 1, 0],
     "PROVISIONAL-GRID-V1": [0, 0, 0, 0, 0,  1, 1, 1, 1, 0,  1, 1, 1, 1, 0,
                             0, 0, 0, 0, 0],
+    "PROVISIONAL-GRID-V2S": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                             1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
+                             1, 1, 1, 1, 1, 1, 1, 0, 0, 0,
+                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 }
 X0, Y0, ST, N = -2.0, -8.0, 0.05, 321
 
@@ -188,20 +200,35 @@ def write_arm(root, arm, pit):
 RAMP_K, RAMP_LEN = 0.125, 8.0        # 1.0 m of fall over 8 m of run, no step
 SLOPE_K = 0.05                       # 0.2 m of fall over 4 m of walkway
 SPIT = (4.0, 8.0, -1.0, 3.0, -1.2)   # x0,x1,y0,y1,floor_z of the vertical pit
-FAR_WALKWAY_SECTOR = 4               # sector E: sloped walkway only, the pit never
-#                                      reaches that azimuth
+FAR_WALKWAY_AZ_FRACTION = 0.2        # the sloped walkway occupies the RIGHTMOST
+#                                      fifth of the grid's azimuth span (V0/V1
+#                                      sector E) and the pit never reaches that
+#                                      azimuth.  Stated as a FRACTION of the span,
+#                                      not as a sector index: at 5 sectors it is
+#                                      index 4, at 10 (V2S) it is indices 8 and 9.
 FAR_WALKWAY_FIRST_BAND = 2           # ... and only beyond 5 m does the slope reach
 #                                      the 0.3 m the retired v0 rule fired on
 
 
+def far_walkway_sectors(grid):
+    """Sector indices whose whole wedge lies inside the walkway's azimuth window
+    (the rightmost FAR_WALKWAY_AZ_FRACTION of the grid's angular coverage)."""
+    e = [float(x) for x in grid["sector_edges_deg"]]      # DESCENDING
+    lo, hi = e[-1], e[0]
+    cut = lo + (hi - lo) * FAR_WALKWAY_AZ_FRACTION        # left edge of the window
+    return [s for s in range(grid["n_sectors"]) if e[s] <= cut + 1e-9]
+
+
 def far_walkway_cells(grid):
     """The cells the retired v0 ground-plane rule swept up on the sloped walkway:
-    sector E of every band from 5 m outward.  Under V0 that is one cell (band 3);
-    under V1 the same ground is cells 3a-E and 3b-E, so the check follows the
-    gridspec instead of naming an index."""
+    the walkway's azimuth window, every band from 5 m outward.  Under V0 that is
+    one cell (band 3, sector E); under V1 the same ground is cells 3a-E and 3b-E;
+    under V2S it is Ea/Eb of both bands -- the check follows the gridspec
+    geometry instead of naming an index."""
     ns = grid["n_sectors"]
-    return [b * ns + FAR_WALKWAY_SECTOR
-            for b in range(FAR_WALKWAY_FIRST_BAND, grid["n_bands"])]
+    return [b * ns + s
+            for b in range(FAR_WALKWAY_FIRST_BAND, grid["n_bands"])
+            for s in far_walkway_sectors(grid)]
 
 
 def _safe(v):

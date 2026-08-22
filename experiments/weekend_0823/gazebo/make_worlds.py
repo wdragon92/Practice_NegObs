@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Generate the weekend_0823 Gazebo Classic drop-off worlds (CPU only, no sim launched).
 
-Emits four SDF 1.6 worlds into ./worlds/ :
+Emits eight SDF 1.6 worlds into ./worlds/ -- four hazards, each with its twin control.
+Between them they cover all three visibility tiers (see worlds/README.md §8):
 
-    gz_drop1.world       descending stair into a sunken pit, 4 risers x 0.18 m = 0.72 m drop
-    gz_drop1_ctrl.world  twin control -- stair + pit removed, deck continuous.  Dressing kept.
-    gz_drop2.world       platform edge, sheer 0.80 m drop, guard rail on the +Y side only
-    gz_drop2_ctrl.world  twin control -- lower level raised flush.  Dressing kept.
+    gz_drop1.world       [V] descending stair into a sunken pit, 4 x 0.18 m = 0.72 m drop
+    gz_drop2.world       [V] platform edge, sheer 0.80 m drop, guard rail on the +Y side only
+    gz_drop3.world       [H] 0.72 m pit hidden behind a 0.61 m planter; cues stay visible
+    gz_drop4.world       [E] 0.25 x 1.00 m open trench, 0.70 m deep; rim seen, interior not
+    gz_drop*_ctrl.world  twin controls -- hazard geometry removed, ALL dressing kept
 
 Design rules (why the files look the way they do)
 -------------------------------------------------
@@ -36,7 +38,7 @@ Design rules (why the files look the way they do)
 
 Usage
 -----
-    python3 make_worlds.py                 # regenerate all four worlds
+    python3 make_worlds.py                 # regenerate all eight worlds
     python3 make_worlds.py --outdir /tmp/x # elsewhere
     python3 make_worlds.py --cams h0.3_d2,h0.9_d5   # fewer cameras (lighter GPU load)
 
@@ -85,12 +87,12 @@ STRIP_HY = NOTCH_HY
 # the sight line RISES past it and nothing at or below ground is ever seen again) and must
 # still sit low enough under h0.9 that the descending sight line has not reached z = 0 by the
 # far side of the pit.  0.55 body + 0.06 planting cap = 0.61 m satisfies both -- see the
-# derivation table in worlds/README.md §6.
+# derivation table in worlds/README.md §8.2.
 D3_PIT_X0, D3_PIT_X1 = X_LIP, 15.0      # pit is SHORT on purpose: the far wall must stay
 D3_PIT_HY = 0.90                        # inside the occluder's shadow at h0.9/d2
 D3_DROP = 0.72
 D3_OCC_X0, D3_OCC_X1 = 11.60, X_LIP     # planter footprint, far face flush with the lip
-D3_OCC_HY = 1.10                        # wider than the pit -> no lateral leak (README §6)
+D3_OCC_HY = 1.10                        # wider than the pit -> no lateral leak (README §8.2)
 D3_OCC_BODY_H = 0.55
 D3_OCC_CAP_H = 0.06
 D3_STRIP_X0, D3_STRIP_X1 = 11.30, 11.60  # warning strip IN FRONT of the planter (camera side)
@@ -442,17 +444,8 @@ def world_drop1(hazard: bool):
     if hazard:
         # deck split around the notch: left / right wings run the full length, the near slab
         # stops at the lip, and a far slab closes the pit at x = 20.
-        wing_hy = (DECK_HY - NOTCH_HY) / 2.0
-        wing_cy = NOTCH_HY + wing_hy
-        m.append(box_model("deck_left", (DECK_X0 + FAR_X) / 2.0, wing_cy, -DECK_T / 2.0,
-                           FAR_X - DECK_X0, 2 * wing_hy, DECK_T, MAT_DECK))
-        m.append(box_model("deck_right", (DECK_X0 + FAR_X) / 2.0, -wing_cy, -DECK_T / 2.0,
-                           FAR_X - DECK_X0, 2 * wing_hy, DECK_T, MAT_DECK))
-        m.append(box_model("deck_near", (DECK_X0 + X_LIP) / 2.0, 0.0, -DECK_T / 2.0,
-                           X_LIP - DECK_X0, 2 * NOTCH_HY, DECK_T, MAT_DECK))
         pit_x1 = 20.0
-        m.append(box_model("deck_far", (pit_x1 + FAR_X) / 2.0, 0.0, -DECK_T / 2.0,
-                           FAR_X - pit_x1, 2 * NOTCH_HY, DECK_T, MAT_DECK))
+        m += deck_with_notch(X_LIP, pit_x1, NOTCH_HY)
         # treads 1..N-1 (the last riser lands straight on the pit floor)
         bot = -(DROP1 + 0.48)
         for i in range(1, N_RISERS):
@@ -465,15 +458,62 @@ def world_drop1(hazard: bool):
         m.append(box_model("pit_floor", (pit_x0 + pit_x1) / 2.0, 0.0, -DROP1 - 0.24,
                            pit_x1 - pit_x0, 2 * NOTCH_HY, 0.48, MAT_PIT))
     else:
-        # ctrl arm: one continuous deck.  Same footprint, same top surface, no hole.
-        m.append(box_model("deck", (DECK_X0 + FAR_X) / 2.0, 0.0, -DECK_T / 2.0,
-                           FAR_X - DECK_X0, 2 * DECK_HY, DECK_T, MAT_DECK))
+        m += deck_solid()      # ctrl arm: same footprint, same top surface, no hole
 
     m += flanking_walls()
     # --- dressing (identical in both arms) ---
     m.append(rail_model("rail_py", guard_rail_segments(+RAIL_Y, RAIL_X0, RAIL_X1)))
     m.append(rail_model("rail_my", guard_rail_segments(-RAIL_Y, RAIL_X0, RAIL_X1)))
     m.append(warning_strip_model("warn_strip"))
+    return m
+
+
+def world_drop3(hazard: bool):
+    """H composition: a 0.72 m pit whose rim AND interior are hidden by a planter in front.
+
+    The hazard must stay INFERABLE (PS §6-3), so three cues survive in every frame:
+    the warning strip in front of the planter, the planter itself (edge protection), and the
+    guard rails terminating exactly at the lip.  See worlds/README.md §8.2 for the per-preset
+    occlusion derivation.
+    """
+    m = []
+    if hazard:
+        m += deck_with_notch(D3_PIT_X0, D3_PIT_X1, D3_PIT_HY)
+        m.append(box_model("pit_floor", (D3_PIT_X0 + D3_PIT_X1) / 2.0, 0.0,
+                           -D3_DROP - 0.24, D3_PIT_X1 - D3_PIT_X0, 2 * D3_PIT_HY,
+                           0.48, MAT_PIT))
+    else:
+        m += deck_solid()
+
+    m += flanking_walls()
+    # --- dressing (identical in both arms) ---
+    m += planter_model("planter")
+    m.append(rail_model("rail_py", guard_rail_segments(+RAIL_Y, RAIL_X0, RAIL_X1)))
+    m.append(rail_model("rail_my", guard_rail_segments(-RAIL_Y, RAIL_X0, RAIL_X1)))
+    m.append(warning_strip_model("warn_strip", D3_STRIP_X0, D3_STRIP_X1, STRIP_HY))
+    return m
+
+
+def world_drop4(hazard: bool):
+    """E composition: a narrow open trench across the walkway -- rim visible, interior not.
+
+    0.25 m along X x 1.00 m across x 0.70 m deep.  The size is set by the tier arithmetic,
+    not by taste: int_px_DS = (W*h/d)*L / (R^2 * 5.0742e-6) has to fall under TAU_INT_DEF=50
+    at the d10 presets while the rim stays fully visible (edge_ratio ~ 1.0 >> TAU_EDGE 0.05).
+    """
+    m = []
+    if hazard:
+        m += deck_with_notch(X_LIP, X_LIP + D4_W, D4_HY)
+        m.append(box_model("trench_floor", X_LIP + D4_W / 2.0, 0.0, -D4_DROP - 0.15,
+                           D4_W, 2 * D4_HY, 0.30, MAT_PIT))
+    else:
+        m += deck_solid()
+
+    m += flanking_walls()
+    # --- dressing (identical in both arms) ---
+    m.append(rail_model("rail_py", guard_rail_segments(+RAIL_Y, RAIL_X0, RAIL_X1)))
+    m.append(rail_model("rail_my", guard_rail_segments(-RAIL_Y, RAIL_X0, RAIL_X1)))
+    m.append(warning_strip_model("warn_strip", D4_STRIP_X0, D4_STRIP_X1, STRIP_HY))
     return m
 
 
@@ -507,19 +547,43 @@ SPECS = [
      "gz_drop2 -- platform edge, sheer 0.80 m drop, guard rail on the +Y side only"),
     ("gz_drop2_ctrl", world_drop2, False,
      "gz_drop2_ctrl -- TWIN CONTROL of gz_drop2: lower level raised flush, dressing identical"),
+    ("gz_drop3", world_drop3, True,
+     "gz_drop3 -- H composition: 0.72 m pit hidden behind a 0.61 m planter, cues left visible"),
+    ("gz_drop3_ctrl", world_drop3, False,
+     "gz_drop3_ctrl -- TWIN CONTROL of gz_drop3: pit removed, planter + cues identical"),
+    ("gz_drop4", world_drop4, True,
+     "gz_drop4 -- E composition: 0.25 x 1.00 m open trench, 0.70 m deep; rim seen, interior not"),
+    ("gz_drop4_ctrl", world_drop4, False,
+     "gz_drop4_ctrl -- TWIN CONTROL of gz_drop4: trench filled, dressing identical"),
 ]
 
 
 def main():
+    global D3_OCC_BODY_H, D4_HY
     ap = argparse.ArgumentParser()
     ap.add_argument("--outdir", default=os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                                      "worlds"))
     ap.add_argument("--cams", default="", help="comma list of camera keys to keep (default all)")
+    ap.add_argument("--d3-occ", type=float, default=None, metavar="M",
+                    help="gz_drop3 parapet BODY height (default %.2f; +%.2f cap on top). "
+                         "Raising it widens the H margin; lowering it below h0.9 - (pit "
+                         "length)*... starts leaking the far wall at h0.9_d2 first."
+                         % (D3_OCC_BODY_H, D3_OCC_CAP_H))
+    ap.add_argument("--d4-lat", type=float, default=None, metavar="M",
+                    help="gz_drop4 trench lateral opening (default %.2f m). int_px scales "
+                         "linearly with it: 0.45 m also buys E at preset_h0.3_d5, at the "
+                         "cost of the trench no longer spanning the walkway."
+                         % (2 * D4_HY))
     ap.add_argument("--depth", action="store_true",
                     help="make the negobs cameras depth sensors (RGB + 32FC1 metric depth "
                          "from one plugin) so the frozen Depth/B2 models can be fed too. "
                          "Off by default: costs extra render, and infer_photo.py is RGB-only.")
     args = ap.parse_args()
+
+    if args.d3_occ is not None:
+        D3_OCC_BODY_H = args.d3_occ
+    if args.d4_lat is not None:
+        D4_HY = args.d4_lat / 2.0
 
     keep = [c for c in args.cams.split(",") if c.strip()] or None
     cams = build_cameras(keep)

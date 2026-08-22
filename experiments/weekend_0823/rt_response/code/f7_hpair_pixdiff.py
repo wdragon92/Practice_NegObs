@@ -57,50 +57,7 @@ pairs.sort(key=lambda f: f["frame_id"])
 assert len(pairs) == 96, len(pairs)
 
 
-# ----------------------------------------------------------------- wedge rasteriser
-def wedge_mask(cells, cam):
-    """Binary 1080x1920 mask of the ground wedges of `cells`, projected with the
-    frame's own camera (labeler.project / labeler.cam_basis).  Eye at the origin of
-    its own ground frame (common.synth_eye convention): eye=(0,0,h_rel), ground z=0."""
-    eye = np.array([0.0, 0.0, float(cam["h_rel"])])
-    yaw = float(cam["yaw"])
-    camd = {"yaw": yaw, "pitch": float(cam["pitch"]), "roll": float(cam["roll"]),
-            "hfov": float(cam["hfov"])}
-    asc = np.asarray(grid["sector_edges_deg"], float)[::-1]
-    ns = grid["n_sectors"]
-    edges = np.asarray(grid["band_edges_m"], float)
-    img = Image.new("L", (W, H), 0)
-    dr = ImageDraw.Draw(img)
-    drew = 0
-    for c in cells:
-        b, s = c // ns, c % ns
-        az_lo, az_hi = asc[ns - 1 - s], asc[ns - s]
-        az = np.radians(np.linspace(az_lo, az_hi, ARC) + yaw)   # camera az -> world az
-        r_lo, r_hi = max(edges[b], 0.10), edges[b + 1]
-        ring = np.concatenate([
-            np.stack([r_hi * np.cos(az), r_hi * np.sin(az)], 1),
-            np.stack([r_lo * np.cos(az[::-1]), r_lo * np.sin(az[::-1])], 1)])
-        pts = np.concatenate([ring, np.zeros((len(ring), 1))], 1)
-        px, py, zc, _ = LB.project(pts, eye, camd)
-        ok = zc > 0.05
-        if ok.sum() < 3:
-            continue
-        poly = [(float(x), float(y)) for x, y in zip(px[ok], py[ok])]
-        dr.polygon(poly, fill=255)
-        drew += 1
-    return np.asarray(img) > 0, drew
-
-
-def amodal_mask(frame_id):
-    rec = bb.get(frame_id, {})
-    name = rec.get("mask")
-    if not name:
-        return np.zeros((H, W), bool)
-    p = os.path.join(AMODAL_DIR, name)
-    if not os.path.exists(p):
-        return np.zeros((H, W), bool)
-    m = Image.open(p).convert("L").resize((W, H), Image.NEAREST)
-    return np.asarray(m) > 0
+from wedge_util import wedge_mask, amodal_mask  # noqa: E402  (shared with the panel figure)
 
 
 # ----------------------------------------------------------------- main loop

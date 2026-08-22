@@ -284,7 +284,7 @@ for t in TIERS:
 L.append("\n## Control B — hazard-blind baseline (the off twin's detections vs the on frame's GT boxes)\n")
 L.append("Same scene, same camera cut, same dressing, hazard geometry deleted.  Any hit here is a box "
          "the detector would have produced **without** the hazard, so it bounds how much of the on-arm "
-         "rate is hazard-conditional.  τ_conf = 0.25, 3-seed mean.\n")
+         "rate is hazard-conditional.  3-seed mean, at both confidence levels.\n")
 for tc in TAU_CONFS:
     L.append(f"\n**τ_conf = {tc}**\n")
     L.append("| tier | n | on-arm IoU>0 | off-twin IoU>0 (hazard-blind) | on − off | "

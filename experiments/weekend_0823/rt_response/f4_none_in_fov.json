@@ -1,0 +1,570 @@
+{
+ "tau": 0.5,
+ "runs": {
+  "rgb_s42": {
+   "n_none_in_fov": 81,
+   "fire_rate_none_in_fov": 0.7901234567901234,
+   "frame_fa_off": 0.375,
+   "cells_per_frame_none_in_fov": 4.222222222222222,
+   "mean_max_p_none_in_fov": 0.7581504320987655,
+   "per_scene": {
+    "scene07": {
+     "n": 51,
+     "fire_rate": 0.7254901960784313
+    },
+    "scene14": {
+     "n": 6,
+     "fire_rate": 0.5
+    },
+    "sceneN3": {
+     "n": 24,
+     "fire_rate": 1.0
+    }
+   },
+   "ratio_to_reported_fa": 2.1069958847736623,
+   "sceneN3": {
+    "n_on": 24,
+    "n_off": 24,
+    "on_fire_rate": 1.0,
+    "off_fire_rate": 1.0,
+    "on_mean_max_p": 0.9458188750000001,
+    "off_mean_max_p": 0.9147467499999999,
+    "on_cells_per_frame": 6.833333333333333,
+    "off_cells_per_frame": 5.0,
+    "on_tiers": [
+     "none_in_fov"
+    ]
+   }
+  },
+  "rgb_s43": {
+   "n_none_in_fov": 81,
+   "fire_rate_none_in_fov": 0.9629629629629629,
+   "frame_fa_off": 0.47794117647058826,
+   "cells_per_frame_none_in_fov": 3.1604938271604937,
+   "mean_max_p_none_in_fov": 0.8814008024691357,
+   "per_scene": {
+    "scene07": {
+     "n": 51,
+     "fire_rate": 1.0
+    },
+    "scene14": {
+     "n": 6,
+     "fire_rate": 1.0
+    },
+    "sceneN3": {
+     "n": 24,
+     "fire_rate": 0.875
+    }
+   },
+   "ratio_to_reported_fa": 2.0148148148148146,
+   "sceneN3": {
+    "n_on": 24,
+    "n_off": 24,
+    "on_fire_rate": 0.875,
+    "off_fire_rate": 0.7083333333333334,
+    "on_mean_max_p": 0.7452878750000002,
+    "off_mean_max_p": 0.6477507083333333,
+    "on_cells_per_frame": 1.875,
+    "off_cells_per_frame": 1.2083333333333333,
+    "on_tiers": [
+     "none_in_fov"
+    ]
+   }
+  },
+  "rgb_s44": {
+   "n_none_in_fov": 81,
+   "fire_rate_none_in_fov": 0.6419753086419753,
+   "frame_fa_off": 0.22303921568627452,
+   "cells_per_frame_none_in_fov": 1.8641975308641976,
+   "mean_max_p_none_in_fov": 0.6271378641975309,
+   "per_scene": {
+    "scene07": {
+     "n": 51,
+     "fire_rate": 0.6078431372549019
+    },
+    "scene14": {
+     "n": 6,
+     "fire_rate": 0.5
+    },
+    "sceneN3": {
+     "n": 24,
+     "fire_rate": 0.75
+    }
+   },
+   "ratio_to_reported_fa": 2.878306878306878,
+   "sceneN3": {
+    "n_on": 24,
+    "n_off": 24,
+    "on_fire_rate": 0.75,
+    "off_fire_rate": 0.7083333333333334,
+    "on_mean_max_p": 0.7380493333333332,
+    "off_mean_max_p": 0.6862685000000001,
+    "on_cells_per_frame": 3.2083333333333335,
+    "off_cells_per_frame": 2.7083333333333335,
+    "on_tiers": [
+     "none_in_fov"
+    ]
+   }
+  },
+  "depth_s42": {
+   "n_none_in_fov": 81,
+   "fire_rate_none_in_fov": 0.5925925925925926,
+   "frame_fa_off": 0.051470588235294115,
+   "cells_per_frame_none_in_fov": 4.888888888888889,
+   "mean_max_p_none_in_fov": 0.5608444814814815,
+   "per_scene": {
+    "scene07": {
+     "n": 51,
+     "fire_rate": 0.8823529411764706
+    },
+    "scene14": {
+     "n": 6,
+     "fire_rate": 0.0
+    },
+    "sceneN3": {
+     "n": 24,
+     "fire_rate": 0.125
+    }
+   },
+   "ratio_to_reported_fa": 11.513227513227513,
+   "sceneN3": {
+    "n_on": 24,
+    "n_off": 24,
+    "on_fire_rate": 0.125,
+    "off_fire_rate": 0.125,
+    "on_mean_max_p": 0.11066,
+    "off_mean_max_p": 0.11049187500000002,
+    "on_cells_per_frame": 0.125,
+    "off_cells_per_frame": 0.125,
+    "on_tiers": [
+     "none_in_fov"
+    ]
+   }
+  },
+  "depth_s43": {
+   "n_none_in_fov": 81,
+   "fire_rate_none_in_fov": 0.4444444444444444,
+   "frame_fa_off": 0.007352941176470588,
+   "cells_per_frame_none_in_fov": 4.037037037037037,
+   "mean_max_p_none_in_fov": 0.40943755555555567,
+   "per_scene": {
+    "scene07": {
+     "n": 51,
+     "fire_rate": 0.7058823529411765
+    },
+    "scene14": {
+     "n": 6,
+     "fire_rate": 0.0
+    },
+    "sceneN3": {
+     "n": 24,
+     "fire_rate": 0.0
+    }
+   },
+   "ratio_to_reported_fa": 60.44444444444444,
+   "sceneN3": {
+    "n_on": 24,
+    "n_off": 24,
+    "on_fire_rate": 0.0,
+    "off_fire_rate": 0.0,
+    "on_mean_max_p": 0.0024536250000000005,
+    "off_mean_max_p": 0.002454625,
+    "on_cells_per_frame": 0.0,
+    "off_cells_per_frame": 0.0,
+    "on_tiers": [
+     "none_in_fov"
+    ]
+   }
+  },
+  "depth_s44": {
+   "n_none_in_fov": 81,
+   "fire_rate_none_in_fov": 0.4444444444444444,
+   "frame_fa_off": 0.0661764705882353,
+   "cells_per_frame_none_in_fov": 4.407407407407407,
+   "mean_max_p_none_in_fov": 0.4831422592592593,
+   "per_scene": {
+    "scene07": {
+     "n": 51,
+     "fire_rate": 0.7058823529411765
+    },
+    "scene14": {
+     "n": 6,
+     "fire_rate": 0.0
+    },
+    "sceneN3": {
+     "n": 24,
+     "fire_rate": 0.0
+    }
+   },
+   "ratio_to_reported_fa": 6.716049382716049,
+   "sceneN3": {
+    "n_on": 24,
+    "n_off": 24,
+    "on_fire_rate": 0.0,
+    "off_fire_rate": 0.0,
+    "on_mean_max_p": 0.101174125,
+    "off_mean_max_p": 0.101158875,
+    "on_cells_per_frame": 0.0,
+    "off_cells_per_frame": 0.0,
+    "on_tiers": [
+     "none_in_fov"
+    ]
+   }
+  },
+  "b2_s42": {
+   "n_none_in_fov": 81,
+   "fire_rate_none_in_fov": 0.5185185185185185,
+   "frame_fa_off": 0.2107843137254902,
+   "cells_per_frame_none_in_fov": 1.7407407407407407,
+   "mean_max_p_none_in_fov": 0.546061037037037,
+   "per_scene": {
+    "scene07": {
+     "n": 51,
+     "fire_rate": 0.6078431372549019
+    },
+    "scene14": {
+     "n": 6,
+     "fire_rate": 0.0
+    },
+    "sceneN3": {
+     "n": 24,
+     "fire_rate": 0.4583333333333333
+    }
+   },
+   "ratio_to_reported_fa": 2.4599483204134365,
+   "sceneN3": {
+    "n_on": 24,
+    "n_off": 24,
+    "on_fire_rate": 0.4583333333333333,
+    "off_fire_rate": 0.375,
+    "on_mean_max_p": 0.467753625,
+    "off_mean_max_p": 0.3937804166666667,
+    "on_cells_per_frame": 1.5833333333333333,
+    "off_cells_per_frame": 1.1666666666666667,
+    "on_tiers": [
+     "none_in_fov"
+    ]
+   }
+  },
+  "b2_s43": {
+   "n_none_in_fov": 81,
+   "fire_rate_none_in_fov": 0.9259259259259259,
+   "frame_fa_off": 0.3946078431372549,
+   "cells_per_frame_none_in_fov": 7.172839506172839,
+   "mean_max_p_none_in_fov": 0.8387656049382717,
+   "per_scene": {
+    "scene07": {
+     "n": 51,
+     "fire_rate": 1.0
+    },
+    "scene14": {
+     "n": 6,
+     "fire_rate": 0.3333333333333333
+    },
+    "sceneN3": {
+     "n": 24,
+     "fire_rate": 0.9166666666666666
+    }
+   },
+   "ratio_to_reported_fa": 2.346445824706694,
+   "sceneN3": {
+    "n_on": 24,
+    "n_off": 24,
+    "on_fire_rate": 0.9166666666666666,
+    "off_fire_rate": 0.9166666666666666,
+    "on_mean_max_p": 0.7889552916666666,
+    "off_mean_max_p": 0.7921364166666667,
+    "on_cells_per_frame": 4.625,
+    "off_cells_per_frame": 4.583333333333333,
+    "on_tiers": [
+     "none_in_fov"
+    ]
+   }
+  },
+  "b2_s44": {
+   "n_none_in_fov": 81,
+   "fire_rate_none_in_fov": 0.4691358024691358,
+   "frame_fa_off": 0.10784313725490197,
+   "cells_per_frame_none_in_fov": 1.5061728395061729,
+   "mean_max_p_none_in_fov": 0.4720609012345679,
+   "per_scene": {
+    "scene07": {
+     "n": 51,
+     "fire_rate": 0.5882352941176471
+    },
+    "scene14": {
+     "n": 6,
+     "fire_rate": 0.5
+    },
+    "sceneN3": {
+     "n": 24,
+     "fire_rate": 0.20833333333333334
+    }
+   },
+   "ratio_to_reported_fa": 4.3501683501683495,
+   "sceneN3": {
+    "n_on": 24,
+    "n_off": 24,
+    "on_fire_rate": 0.20833333333333334,
+    "off_fire_rate": 0.20833333333333334,
+    "on_mean_max_p": 0.23021379166666667,
+    "off_mean_max_p": 0.21162133333333333,
+    "on_cells_per_frame": 0.875,
+    "off_cells_per_frame": 0.7083333333333334,
+    "on_tiers": [
+     "none_in_fov"
+    ]
+   }
+  }
+ },
+ "model_mean": {
+  "rgb": {
+   "fire_rate_none_in_fov": {
+    "mean": 0.7983539094650206,
+    "half_range": 0.16049382716049382,
+    "per_seed": [
+     0.7901234567901234,
+     0.9629629629629629,
+     0.6419753086419753
+    ]
+   },
+   "frame_fa_off": {
+    "mean": 0.3586601307189543,
+    "half_range": 0.12745098039215685,
+    "per_seed": [
+     0.375,
+     0.47794117647058826,
+     0.22303921568627452
+    ]
+   },
+   "cells_per_frame_none_in_fov": {
+    "mean": 3.082304526748971,
+    "half_range": 1.1790123456790123,
+    "per_seed": [
+     4.222222222222222,
+     3.1604938271604937,
+     1.8641975308641976
+    ]
+   },
+   "mean_max_p_none_in_fov": {
+    "mean": 0.7555630329218106,
+    "half_range": 0.12713146913580237,
+    "per_seed": [
+     0.7581504320987655,
+     0.8814008024691357,
+     0.6271378641975309
+    ]
+   },
+   "ratio_to_reported_fa": {
+    "mean": 2.3333725259651183,
+    "half_range": 0.43174603174603177,
+    "per_seed": [
+     2.1069958847736623,
+     2.0148148148148146,
+     2.878306878306878
+    ]
+   },
+   "sceneN3": {
+    "on_fire_rate": {
+     "mean": 0.875,
+     "per_seed": [
+      1.0,
+      0.875,
+      0.75
+     ]
+    },
+    "off_fire_rate": {
+     "mean": 0.8055555555555557,
+     "per_seed": [
+      1.0,
+      0.7083333333333334,
+      0.7083333333333334
+     ]
+    },
+    "on_mean_max_p": {
+     "mean": 0.8097186944444444,
+     "per_seed": [
+      0.9458188750000001,
+      0.7452878750000002,
+      0.7380493333333332
+     ]
+    },
+    "off_mean_max_p": {
+     "mean": 0.7495886527777778,
+     "per_seed": [
+      0.9147467499999999,
+      0.6477507083333333,
+      0.6862685000000001
+     ]
+    }
+   }
+  },
+  "depth": {
+   "fire_rate_none_in_fov": {
+    "mean": 0.49382716049382713,
+    "half_range": 0.07407407407407407,
+    "per_seed": [
+     0.5925925925925926,
+     0.4444444444444444,
+     0.4444444444444444
+    ]
+   },
+   "frame_fa_off": {
+    "mean": 0.041666666666666664,
+    "half_range": 0.029411764705882353,
+    "per_seed": [
+     0.051470588235294115,
+     0.007352941176470588,
+     0.0661764705882353
+    ]
+   },
+   "cells_per_frame_none_in_fov": {
+    "mean": 4.4444444444444455,
+    "half_range": 0.42592592592592604,
+    "per_seed": [
+     4.888888888888889,
+     4.037037037037037,
+     4.407407407407407
+    ]
+   },
+   "mean_max_p_none_in_fov": {
+    "mean": 0.48447476543209883,
+    "half_range": 0.0757034629629629,
+    "per_seed": [
+     0.5608444814814815,
+     0.40943755555555567,
+     0.4831422592592593
+    ]
+   },
+   "ratio_to_reported_fa": {
+    "mean": 26.224573780129333,
+    "half_range": 26.864197530864196,
+    "per_seed": [
+     11.513227513227513,
+     60.44444444444444,
+     6.716049382716049
+    ]
+   },
+   "sceneN3": {
+    "on_fire_rate": {
+     "mean": 0.041666666666666664,
+     "per_seed": [
+      0.125,
+      0.0,
+      0.0
+     ]
+    },
+    "off_fire_rate": {
+     "mean": 0.041666666666666664,
+     "per_seed": [
+      0.125,
+      0.0,
+      0.0
+     ]
+    },
+    "on_mean_max_p": {
+     "mean": 0.07142925,
+     "per_seed": [
+      0.11066,
+      0.0024536250000000005,
+      0.101174125
+     ]
+    },
+    "off_mean_max_p": {
+     "mean": 0.07136845833333334,
+     "per_seed": [
+      0.11049187500000002,
+      0.002454625,
+      0.101158875
+     ]
+    }
+   }
+  },
+  "b2": {
+   "fire_rate_none_in_fov": {
+    "mean": 0.6378600823045267,
+    "half_range": 0.22839506172839508,
+    "per_seed": [
+     0.5185185185185185,
+     0.9259259259259259,
+     0.4691358024691358
+    ]
+   },
+   "frame_fa_off": {
+    "mean": 0.23774509803921565,
+    "half_range": 0.14338235294117646,
+    "per_seed": [
+     0.2107843137254902,
+     0.3946078431372549,
+     0.10784313725490197
+    ]
+   },
+   "cells_per_frame_none_in_fov": {
+    "mean": 3.4732510288065845,
+    "half_range": 2.833333333333333,
+    "per_seed": [
+     1.7407407407407407,
+     7.172839506172839,
+     1.5061728395061729
+    ]
+   },
+   "mean_max_p_none_in_fov": {
+    "mean": 0.6189625144032922,
+    "half_range": 0.1833523518518519,
+    "per_seed": [
+     0.546061037037037,
+     0.8387656049382717,
+     0.4720609012345679
+    ]
+   },
+   "ratio_to_reported_fa": {
+    "mean": 3.052187498429493,
+    "half_range": 1.0018612627308277,
+    "per_seed": [
+     2.4599483204134365,
+     2.346445824706694,
+     4.3501683501683495
+    ]
+   },
+   "sceneN3": {
+    "on_fire_rate": {
+     "mean": 0.5277777777777778,
+     "per_seed": [
+      0.4583333333333333,
+      0.9166666666666666,
+      0.20833333333333334
+     ]
+    },
+    "off_fire_rate": {
+     "mean": 0.49999999999999994,
+     "per_seed": [
+      0.375,
+      0.9166666666666666,
+      0.20833333333333334
+     ]
+    },
+    "on_mean_max_p": {
+     "mean": 0.4956409027777777,
+     "per_seed": [
+      0.467753625,
+      0.7889552916666666,
+      0.23021379166666667
+     ]
+    },
+    "off_mean_max_p": {
+     "mean": 0.4658460555555555,
+     "per_seed": [
+      0.3937804166666667,
+      0.7921364166666667,
+      0.21162133333333333
+     ]
+    }
+   }
+  }
+ },
+ "per_scene": {},
+ "provenance": {
+  "input": "experiments/dayrun_0820/runs/v2/*/eval_test/per_frame.csv",
+  "definition": "none_in_fov = toggle_state 'on', tier 'none_in_fov'; GT is all-zero, so frame firing rate = false-alarm rate on a tier that is in no denominator"
+ }
+}

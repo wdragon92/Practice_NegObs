@@ -41,7 +41,7 @@ An IoU > 0 hit against a facade-sized amodal box is cheap, so the box geometry h
 
 ## Control B — hazard-blind baseline (the off twin's detections vs the on frame's GT boxes)
 
-Same scene, same camera cut, same dressing, hazard geometry deleted.  Any hit here is a box the detector would have produced **without** the hazard, so it bounds how much of the on-arm rate is hazard-conditional.  τ_conf = 0.25, 3-seed mean.
+Same scene, same camera cut, same dressing, hazard geometry deleted.  Any hit here is a box the detector would have produced **without** the hazard, so it bounds how much of the on-arm rate is hazard-conditional.  3-seed mean, at both confidence levels.
 
 
 **τ_conf = 0.25**

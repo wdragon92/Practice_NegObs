@@ -1,0 +1,2 @@
+epoch,train_loss,val_loss,val_f1,val_recall,val_fpr,lr,sec
+1,0.395989,0.780613,0.173196,0.325581,0.239512,3.000e-04,7.08

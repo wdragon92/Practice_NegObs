@@ -147,3 +147,8 @@ frame detection rate with it (0.731 → 0.563).
 Write the claim at cell level or not at all. (ii) n = 1 seed. Given that the base rgb arm's own
 3-seed H spread is ±0.141 (section 1), a single-seed +0.125 frame-level move is inside seed noise.
 Nothing here supports a recipe change inside the 8/24 freeze; it supports a "future work" paragraph.
+
+> **[정정 부기, weekend_0823 D41]** §5.2의 `cell_recall_H +0.3546` 유의 주장(프레임
+> i.i.d. 부트스트랩 CI [0.0001,…])은 씬-클러스터 재표집에서 [−0.1429, 0.4625]로
+> 0을 포함 — **유의 주장 철회**. aux의 생존 효과는 FA/정밀도 계열만
+> (`frame_fa_off`·`cell_fpr_off`·`frame_recall_V`). 원장: weekend_0823/rt_response/F5.

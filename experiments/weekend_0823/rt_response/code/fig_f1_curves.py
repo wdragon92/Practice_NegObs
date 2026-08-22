@@ -98,11 +98,14 @@ axes[0].set_ylabel("frame recall", fontsize=8.5, color=INK2)
 
 # direct labels on the H panel
 ax = axes[0]
-for m, xpos, yoff in (("depth", 0.44, 0.075), ("rgb", 0.52, -0.085), ("b2", 0.70, -0.085)):
+# direct labels sit beside each curve at the FA = 0.10 reporting point, where the
+# three are maximally separated; a surface-coloured box keeps them off the guides
+for m, yoff in (("depth", 0.045), ("rgb", -0.030), ("b2", -0.045)):
     mu, _lo, _hi = mean_curve(m, "H")
-    i = np.searchsorted(FA_GRID, xpos)
-    ax.text(FA_GRID[i], mu[i] + yoff, LABEL[m], color=COLOR[m], fontsize=8.2,
-            fontweight="bold", ha="center", va="center")
+    y = mu[np.searchsorted(FA_GRID, 0.10)] + yoff
+    ax.text(0.155, y, LABEL[m], color=COLOR[m], fontsize=8.2, fontweight="bold",
+            ha="left", va="center", zorder=8,
+            bbox=dict(facecolor=SURFACE, edgecolor="none", pad=1.2))
 
 handles = [Line2D([], [], color=COLOR[m], linewidth=2.0, label=LABEL[m]) for m in MODELS]
 handles += [

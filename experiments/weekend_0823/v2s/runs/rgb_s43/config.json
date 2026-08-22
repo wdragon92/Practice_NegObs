@@ -159,5 +159,12 @@
     -1.378986167813166
   ],
   "n_val_strict_h": 6,
-  "selection_metric": "0.5*val_f1 + 0.5*val_h_frame_recall"
+  "selection_metric": "0.5*val_f1 + 0.5*val_h_frame_recall",
+  "best_sel_score": 0.734830805134189,
+  "best_epoch": 7,
+  "stop_reason": "early_stop@22",
+  "steps": 4224,
+  "best_val_f1": 0.46966161026837805,
+  "best_val_h_recall": 1.0,
+  "selection_fallback_to_f1": false
 }

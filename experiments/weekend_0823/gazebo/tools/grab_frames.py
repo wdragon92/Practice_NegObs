@@ -53,18 +53,37 @@ def decode(msg: Image) -> np.ndarray:
     return np.ascontiguousarray(arr)
 
 
+def decode_depth(msg: Image) -> np.ndarray:
+    """sensor_msgs/Image (32FC1 from a Gazebo depth sensor) -> HxW float32 METRES.
+
+    polar_dataset.load_depth_m() reads .npy as metres directly, so nothing is rescaled here.
+    Gazebo writes +inf (or the far clip) where nothing was hit; those stay as-is and are
+    clipped downstream by DEPTH_CLIP_M.
+    """
+    if msg.encoding != "32FC1":
+        raise SystemExit(f"[fatal] depth encoding {msg.encoding!r}, expected 32FC1")
+    a = np.frombuffer(msg.data, dtype=np.float32)
+    return np.ascontiguousarray(a.reshape(msg.height, msg.step // 4)[:, : msg.width])
+
+
 class Grabber(Node):
     def __init__(self, targets, outdir, tag, n, settle):
         super().__init__("gz_frame_grabber")
         self.outdir, self.tag, self.n, self.settle = outdir, tag, n, settle
         self.t0 = time.time()
-        self.count = {v: 0 for _, v in targets}
+        self.count = {v: 0 for _, v, _ in targets}
+        self.dcount = {}
         self.saved = []
         self.subs = []
-        for topic, view in targets:
+        for topic, view, dtopic in targets:
             self.subs.append(self.create_subscription(
                 Image, topic, self._make_cb(topic, view), BEST_EFFORT))
             self.get_logger().info(f"subscribed  {topic}  ->  {view}")
+            if dtopic:
+                self.dcount[view] = 0
+                self.subs.append(self.create_subscription(
+                    Image, dtopic, self._make_depth_cb(dtopic, view), BEST_EFFORT))
+                self.get_logger().info(f"subscribed  {dtopic}  ->  {view} (depth)")
 
     def _make_cb(self, topic, view):
         def cb(msg):
@@ -79,16 +98,32 @@ class Grabber(Node):
             img = decode(msg)
             from PIL import Image as PImage
             fn = f"{self.tag}_{view}_{i:03d}.png"
-            path = os.path.join(self.outdir, fn)
-            PImage.fromarray(img).save(path)
-            self.saved.append(dict(file=fn, view=view, topic=topic,
+            PImage.fromarray(img).save(os.path.join(self.outdir, fn))
+            self.saved.append(dict(file=fn, view=view, topic=topic, kind="rgb",
                                    w=int(msg.width), h=int(msg.height),
                                    encoding=msg.encoding))
             self.get_logger().info(f"saved {fn}  ({msg.width}x{msg.height})")
         return cb
 
+    def _make_depth_cb(self, topic, view):
+        def cb(msg):
+            if time.time() - self.t0 < self.settle:
+                return
+            i = self.dcount[view]
+            if i >= self.n:
+                return
+            self.dcount[view] = i + 1
+            fn = f"{self.tag}_{view}_{i:03d}_depth.npy"
+            np.save(os.path.join(self.outdir, fn), decode_depth(msg))
+            self.saved.append(dict(file=fn, view=view, topic=topic, kind="depth_m",
+                                   w=int(msg.width), h=int(msg.height),
+                                   encoding=msg.encoding))
+            self.get_logger().info(f"saved {fn}  ({msg.width}x{msg.height}, float32 metres)")
+        return cb
+
     def done(self):
-        return all(v >= self.n for v in self.count.values())
+        return (all(v >= self.n for v in self.count.values())
+                and all(v >= self.n for v in self.dcount.values()))
 
 
 def live_image_topics(node):
@@ -125,9 +160,16 @@ def main():
     for c in cams:
         if want and c["view"] not in want and c["key"] not in want:
             continue
-        hits = [t for t in live if t.startswith(f"/gzcam/{c['key']}/") and t.endswith("image_raw")]
+        # The exact leaf that gazebo_ros_camera resolves "~/image_raw" to depends on the
+        # plugin's node name, so match on the namespace we control and sort by path length:
+        # the shortest hit is the colour topic, ".../depth/image_raw" is the depth one.
+        hits = sorted((t for t in live
+                       if t.startswith(f"/gzcam/{c['key']}/") and t.endswith("image_raw")),
+                      key=len)
         if hits:
-            targets.append((hits[0], c["view"]))
+            dtopic = next((t for t in hits if "/depth/" in t), None)
+            colour = next((t for t in hits if "/depth/" not in t), hits[0])
+            targets.append((colour, c["view"], dtopic))
         else:
             missing.append(c["key"])
     if missing:

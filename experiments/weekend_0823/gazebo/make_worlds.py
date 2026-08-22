@@ -256,6 +256,10 @@ def warning_strip_model(name):
 def camera_model(cam):
     w, h = cam["res"]
     ns = f"/gzcam/{cam['key']}"
+    # A `depth` sensor publishes BOTH the colour image and a 32FC1 metric depth image from
+    # one plugin, so --depth costs one sensor, not two.  polar_dataset.load_depth_m() eats
+    # float32 metres straight from .npy, so no unit conversion is needed downstream.
+    stype = "depth" if cam.get("depth") else "camera"
     # NOTE: the link carries a sensor only -- no <visual>, no <collision>.  All cameras sit
     # on the y = 0 axis looking +X, so a visible body would appear in the frame of every
     # camera behind it.
@@ -264,7 +268,7 @@ def camera_model(cam):
       <static>true</static>
       <pose>{_pose(cam['x'], cam['y'], cam['z'], 0.0, cam['pitch'], 0.0)}</pose>
       <link name="link">
-        <sensor name="{cam['key']}" type="camera">
+        <sensor name="{cam['key']}" type="{stype}">
           <camera name="{cam['key']}">
             <horizontal_fov>{cam['hfov']:.6f}</horizontal_fov>
             <image><width>{w}</width><height>{h}</height><format>R8G8B8</format></image>
@@ -432,10 +436,18 @@ def main():
     ap.add_argument("--outdir", default=os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                                      "worlds"))
     ap.add_argument("--cams", default="", help="comma list of camera keys to keep (default all)")
+    ap.add_argument("--depth", action="store_true",
+                    help="make the negobs cameras depth sensors (RGB + 32FC1 metric depth "
+                         "from one plugin) so the frozen Depth/B2 models can be fed too. "
+                         "Off by default: costs extra render, and infer_photo.py is RGB-only.")
     args = ap.parse_args()
 
     keep = [c for c in args.cams.split(",") if c.strip()] or None
     cams = build_cameras(keep)
+    if args.depth:
+        for c in cams:
+            if c["family"] == "negobs":
+                c["depth"] = True
     os.makedirs(args.outdir, exist_ok=True)
 
     cam_sdf = "\n    <!-- ===== capture cameras (sensor-only links, no visible body) ===== -->" \

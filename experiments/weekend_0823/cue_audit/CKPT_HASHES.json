@@ -1,0 +1,50 @@
+{
+ "recorded": "2026-08-23T04:05:27",
+ "ckpts": {
+  "experiments/dayrun_0820/runs/v2/b2_s42/best.pt": {
+   "sha256": "67dc906b9f3b66ec157feb3d3bfefcdef7471b1259579838d749c84386783a39",
+   "mtime": 1787224745.382,
+   "bytes": 96954368
+  },
+  "experiments/dayrun_0820/runs/v2/b2_s43/best.pt": {
+   "sha256": "a7a4973d054bee82679f6133aef5fab26a3679dbf98e19c0d9888a394326723d",
+   "mtime": 1787225263.035,
+   "bytes": 96954368
+  },
+  "experiments/dayrun_0820/runs/v2/b2_s44/best.pt": {
+   "sha256": "d329d4f478f422c0912100a2e9a63a8c74a726b36e01396b25e5862f6980a4c3",
+   "mtime": 1787225986.622,
+   "bytes": 96954368
+  },
+  "experiments/dayrun_0820/runs/v2/depth_s42/best.pt": {
+   "sha256": "cd54ad309649420ab48511584597009515c7b997556d16840f0b48baf90fd0c1",
+   "mtime": 1787223519.758,
+   "bytes": 97924270
+  },
+  "experiments/dayrun_0820/runs/v2/depth_s43/best.pt": {
+   "sha256": "21362f99940cf2c80f05c05de76ed7941ebba52a9c2dd610dfa0774627e0c48a",
+   "mtime": 1787224069.285,
+   "bytes": 97924270
+  },
+  "experiments/dayrun_0820/runs/v2/depth_s44/best.pt": {
+   "sha256": "b133b595413ebe83685164324f9ac665c61a17cd893dcd0e5d2309374b727a2b",
+   "mtime": 1787224304.792,
+   "bytes": 97924270
+  },
+  "experiments/dayrun_0820/runs/v2/rgb_s42/best.pt": {
+   "sha256": "3b8eb927941ec6c96b917d856c568b58c5577fc64faf4411be37f3306b4296ab",
+   "mtime": 1787220809.86,
+   "bytes": 97949358
+  },
+  "experiments/dayrun_0820/runs/v2/rgb_s43/best.pt": {
+   "sha256": "e45b337976b41a0c05f9de5dd253f788a0434bad3974cc1eeaaeb9b830bd6994",
+   "mtime": 1787221836.668,
+   "bytes": 97949358
+  },
+  "experiments/dayrun_0820/runs/v2/rgb_s44/best.pt": {
+   "sha256": "fab60377db7e0177161c3c1321d663bf0e29fe560a49a7fd4a7825721a6cd845",
+   "mtime": 1787222915.351,
+   "bytes": 97949358
+  }
+ }
+}

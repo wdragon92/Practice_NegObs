@@ -153,20 +153,42 @@ def _clip(poly, edge):
     return out
 
 
-def aabb_px(box, eye, cam):
+def crest_visible(C, eye):
+    """Boolean mask: corners NOT hidden under the drop-start lip.
+
+    World convention (scene_common.py:13): travel axis +X, drop start edge x = 0,
+    and in all three CUE-OFF scenes the walked crest is the plane z = 0 for x <= 0.
+    The sight ray that grazes the lip (x=0, z=0) from an eye at (-d, ., h) has
+    z(x) = -h * x / d beyond the lip, so a point at x > 0 with z below that ray is
+    occluded BY THE SCENE'S OWN CREST.  This is the same grazing-concealment
+    geometry H_CUE_AUDIT sec.2.2 identifies as the occluder of every strict-H
+    frame in the corpus, so it is the one occluder that must not be ignored when
+    ranking placebo candidates.  Nothing else is modelled.
+    """
+    d = -float(eye[0])
+    h = float(eye[2])
+    if d <= 0:
+        return np.ones(len(C), dtype=bool)
+    x, z = C[:, 0], C[:, 2]
+    return (x <= 0.0) | (z > (-h * x / d))
+
+
+def aabb_px(box, eye, cam, crest=False):
     """Clipped hull area in px^2 of one world AABB (x0,x1,y0,y1,z0,z1)."""
     x0, x1, y0, y1, z0, z1 = box
     C = np.array([[x, y, z] for x in (x0, x1) for y in (y0, y1) for z in (z0, z1)])
     px, py, zc = project(C, eye, cam)
-    front = zc > 0.05
-    if front.sum() < 3:
+    ok = zc > 0.05
+    if crest:
+        ok = ok & crest_visible(C, eye)
+    if ok.sum() < 3:
         return 0.0
-    return _hull_area_clipped(px[front], py[front])
+    return _hull_area_clipped(px[ok], py[ok])
 
 
-def group_px(boxes, eye, cam):
+def group_px(boxes, eye, cam, crest=False):
     """Sum of the per-box clipped areas (double counts overlaps -> upper bound)."""
-    return float(sum(aabb_px(b, eye, cam) for b in boxes))
+    return float(sum(aabb_px(b, eye, cam, crest) for b in boxes))
 
 
 # --------------------------------------------------------------------------- groups
@@ -212,6 +234,9 @@ def groups_scene12():
     G["PLA_uppertrees"] = [
         (tx - 0.9, tx + 0.9, ty - 0.9, ty + 0.9, u["z_top"], u["z_top"] + 3.3)
         for tx, ty in P["trees"]]
+    G["PLA_apartments(far bank)"] = [
+        (bd["x0"], bd["x1"], bd["y0"], bd["y1"], bd.get("base_z", 0.0),
+         bd.get("base_z", 0.0) + bd["h"]) for bd in P["far_buildings"].values()]
     G["PLA_farhedges"] = [
         (fh["cx"] - fh["sx"] / 2, fh["cx"] + fh["sx"] / 2,
          fh["cy"] - fh["length"] / 2, fh["cy"] + fh["length"] / 2,
@@ -233,6 +258,9 @@ def groups_scene17():
                              for tx, ty in P["terrace_trees"]]
     G["CUE_reeds"] = [(r["x0"], r["x1"], r["y0"], r["y1"], -3.2, -3.2 + r["h"])
                       for r in P["reeds"]]
+    G["PLA_apartments(far bank)"] = [
+        (bd["x0"], bd["x1"], bd["y0"], bd["y1"], bd.get("base_z", 0.0),
+         bd.get("base_z", 0.0) + bd["h"]) for bd in P["far_buildings"].values()]
     G["PLA_terracebenches"] = [
         (bx - 0.95, bx + 0.95, by - 0.25, by + 0.25, tz, tz + 0.46)
         for bx, by, _ in P["terrace_benches"]]
@@ -299,6 +327,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--scenes", default="scene12,scene17,scene20")
     ap.add_argument("--all-cuts", action="store_true")
+    ap.add_argument("--crest", action="store_true",
+                    help="drop AABB corners hidden under the drop-start lip ray")
     ap.add_argument("--out", default=os.path.join(AUDIT, "PLACEBO_PIXEL_MASS.csv"))
     a = ap.parse_args()
     H = h_frames()
@@ -321,7 +351,7 @@ def main():
             for c in sel:
                 eye, cam = c["cam"]["eye"], c["cam"]
                 for g, boxes in G.items():
-                    acc[g].append(group_px(boxes, eye, cam))
+                    acc[g].append(group_px(boxes, eye, cam, crest=a.crest))
             for g in G:
                 v_ = np.asarray(acc[g])
                 rows.append(dict(
@@ -343,7 +373,8 @@ def main():
             cur = k
             print(f"\n=== {r['scene']} · {r['round']} · n={r['n_frames']} "
                   f"{'cuts' if a.all_cuts else 'strict-H frames'} "
-                  f"(AABB upper bound, occlusion NOT modelled) ===")
+                  f"(AABB upper bound, crest-occlusion "
+                  f"{'MODELLED' if a.crest else 'NOT modelled'}) ===")
             print(f"{'group':40s} {'mean px':>10s} {'median':>10s} "
                   f"{'% frame':>8s} {'zero':>5s}")
         print(f"{r['group']:40s} {r['mean_px']:10.0f} {r['median_px']:10.0f} "

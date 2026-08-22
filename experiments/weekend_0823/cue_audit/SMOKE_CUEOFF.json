@@ -1,0 +1,64 @@
+{
+ "what": "CUE-OFF arm-C 1-frame smoke",
+ "out": "/home/vislab/Desktop/work_sy/Practice_NegObs/experiments/weekend_0823/cue_audit/SMOKE_CUEOFF.json",
+ "scenes": {
+  "scene12": {
+   "dir": "experiments/weekend_0823/cue_audit/smoke/scene12",
+   "rc": 0,
+   "cuts": 1,
+   "sec": 0.0,
+   "ground_z": 0.0,
+   "ground_z_canonical": 0.0,
+   "ground_z_delta": 0.0,
+   "eye": [
+    -7.9544,
+    -0.1396,
+    1.2958
+   ],
+   "eye_canonical": [
+    -7.9544,
+    -0.1396,
+    1.2958
+   ],
+   "hm_z_min": -2.4003,
+   "hm_z_max": 0.002,
+   "arm_config": "{\"hazard_stairs\": false, \"keep_dressing\": true}"
+  },
+  "scene17": {
+   "dir": "experiments/weekend_0823/cue_audit/smoke/scene17",
+   "rc": 0,
+   "cuts": 1,
+   "sec": 0.0,
+   "ground_z": -0.0,
+   "ground_z_canonical": -0.0,
+   "ground_z_delta": 0.0,
+   "eye": [
+    -10.6918,
+    -0.2529,
+    0.6795
+   ],
+   "eye_canonical": [
+    -10.6918,
+    -0.2529,
+    0.6795
+   ],
+   "hm_z_min": -0.0,
+   "hm_z_max": 0.05,
+   "arm_config": "{\"hazard_stairs\": false, \"keep_dressing\": true}"
+  },
+  "scene20": {
+   "dir": "experiments/weekend_0823/cue_audit/smoke/scene20",
+   "rc": null,
+   "cuts": 0,
+   "sec": null,
+   "ground_z": null,
+   "ground_z_canonical": null,
+   "ground_z_delta": null,
+   "eye": null,
+   "eye_canonical": null,
+   "hm_z_min": null,
+   "hm_z_max": null,
+   "arm_config": null
+  }
+ }
+}

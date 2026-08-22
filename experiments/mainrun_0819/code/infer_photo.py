@@ -142,14 +142,21 @@ def ckpt_n_cells(ck):
     return None
 
 
-def load_model(ckpt_path, grid):
+def load_model(ckpt_path, grid, encoder=None):
     ck = torch.load(ckpt_path, map_location="cpu", weights_only=False)
     n = ckpt_n_cells(ck)
     if n is not None and n != grid.n_cells:
         raise SystemExit(
             f"[fatal] checkpoint {os.path.basename(ckpt_path)} was trained on {n} cells but "
             f"--grid says {grid.n_cells} ({grid.version}) -- wrong --grid or wrong --ckpt")
-    model = model_factory.build("rgb", encoder_weights=None, classes=grid.n_cells)
+    # [0823 D45] rebuild the encoder the ckpt was TRAINED on, not a hard-coded resnet34; the
+    # kwarg is only forwarded when non-default so the b2 factory swap (tools/infer_photo_b2.py,
+    # whose build() has no encoder_name) is untouched.
+    _def = getattr(model_factory, "ENCODER", "resnet34")
+    _get = getattr(model_factory, "encoder_from_config", lambda c, default=_def: default)
+    enc = encoder or _get(ck.get("config") if isinstance(ck, dict) else None, _def)
+    model = model_factory.build("rgb", encoder_weights=None, classes=grid.n_cells,
+                                **({} if enc == _def else {"encoder_name": enc}))
     model.load_state_dict(ck["state_dict"] if isinstance(ck, dict) and "state_dict" in ck else ck)
     model.eval()
     return model, (ck.get("config", {}) if isinstance(ck, dict) else {})

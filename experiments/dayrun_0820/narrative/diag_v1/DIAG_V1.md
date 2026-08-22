@@ -142,8 +142,10 @@ all-band twin Δ is, arithmetically, the band-3 twin Δ.*
 The brief's test was: *if band-3 Δ is small relative to band 1/2, far-band firing is
 prior/scene-shape rather than hazard evidence.* Measured, band 3 is the **largest** RGB Δ
 (0.348), 5.5× band 1 (0.064) and 1.2× band 2 (0.289), with a CI that clears 0 by a wide margin.
-So **on twin-matched pairs, far-band firing does track the hazard.** Removing a 0.3 m+ drop that
-contributes no visible pixels still costs the RGB model 0.35 of probability in band 3.
+So **on twin-matched pairs, far-band firing does track the hazard.** Removing a 0.3 m+ drop whose own surface
+and rim project to zero pixels still costs the RGB model 0.35 of probability in band 3 — noting
+that the removal also deletes everything the scene builder places in the same branch, and that the
+two renders are not pixel-identical (§RT.6).
 
 But the two diagnostics are measured on **disjoint frame sets**, and that is the finding:
 

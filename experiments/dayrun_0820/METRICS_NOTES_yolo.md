@@ -165,8 +165,8 @@ The other 21 `none_in_fov` frames do get a mask (hazard visible in the image but
 outside the polar wedge); their detections almost always ground-project to `cell = −1`
 and are dropped, but they are a known small source of GT-less boxes in training.
 
-**One honest ugliness.** For a fully occluded hazard the amodal box necessarily covers
-whatever stands in front of it — in `scene14` the box spans the building facade behind
+**One honest ugliness.** When the hazard contributes zero pixels of its own surface, the
+amodal box necessarily covers whatever stands in front of it — in `scene14` the box spans the building facade behind
 which the drop hides. That is what "amodal" means and it is the correct target for an
 aux pixel loss (Phase 6), but it is also why asking a detector to reproduce it is a
 strange task, and part of why §3 row 1 is what it is.

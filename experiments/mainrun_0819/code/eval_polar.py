@@ -11,6 +11,10 @@ RECIPE v2 additions (0820, brief Phase 4/7):
   * per-band false alarms (band<i>_cell_fpr_off) next to the per-band recalls.
   * the per_frame.csv header is now the authority on cell ids: read_per_frame infers them, so an
     old 15-cell CSV still parses under a 20-cell default and a mismatch fails loudly.
+
+ENCODER (0823 D45): the model is rebuilt with the encoder the CHECKPOINT was trained on, read
+back from its embedded config["encoder"] ("<name>-unet-aux"); --encoder overrides. Pre-0823
+checkpoints carry no such name and resolve to resnet34, exactly as before.
 """
 from __future__ import annotations
 
@@ -43,22 +47,56 @@ def headline_keys(grid):
 
 
 # ------------------------------------------------------------------ inference / io
+DEFAULT_ENCODER = getattr(model_factory, "ENCODER", "resnet34")   # before any factory hook swap
+_encoder_from_config = getattr(model_factory, "encoder_from_config",
+                               lambda cfg, default=DEFAULT_ENCODER: default)
+
+
+def ckpt_encoder(ck, override=None):
+    """Which U-Net encoder to rebuild for this checkpoint [0823 D45].
+
+    The ckpt embeds the training config, whose "encoder" key is "<name>-unet-aux". Building a
+    hard-coded resnet34 for a checkpoint trained on tu-convnext_tiny / resnet50 dies on
+    load_state_dict (the exact bug b2_polar/eval_b2_polar.py exists to work around), so read it
+    back instead. Missing / unparseable / pre-0823 -> resnet34, i.e. the old behaviour.
+    NOTE the b2 checkpoints embed the pre-_fix_config label ("resnet34-unet-aux") and are
+    evaluated through eval_b2_polar's proxy anyway, so they resolve to the default and no
+    encoder_name kwarg is ever forwarded to the proxy.
+    """
+    if override:
+        return override
+    cfg = ck.get("config") if isinstance(ck, dict) else None
+    return _encoder_from_config(cfg, DEFAULT_ENCODER)
+
+
 @torch.no_grad()
 def infer(ckpt_path, manifest, split, subset, input_mode, img_size, batch, workers, device,
-          grid=None):
+          grid=None, encoder=None):
     grid = gridspec.load(grid)
     ds = PolarGridDataset(manifest, split, subset, input_mode, train_aug=False, img_size=img_size,
                           grid=grid)
     dl = DataLoader(ds, batch_size=batch, shuffle=False, num_workers=workers,
                     pin_memory=(device.type == "cuda"))
-    model = model_factory.build(input_mode, encoder_weights=None, classes=grid.n_cells).to(device)
     # map_location="cpu" is mandatory (a GPU-side RNG ByteTensor broke resume in the campaign)
     ck = torch.load(ckpt_path, map_location="cpu", weights_only=False)
     if isinstance(ck, dict) and ck.get("n_cells") not in (None, grid.n_cells):
         raise SystemExit(f"[fatal] checkpoint was trained on {ck['n_cells']} cells "
                          f"({ck.get('grid_version')}) but --grid says {grid.n_cells} "
                          f"({grid.version}) -- wrong --grid or wrong --ckpt")
-    model.load_state_dict(ck["state_dict"] if "state_dict" in ck else ck)
+    enc = ckpt_encoder(ck, encoder)
+    # kwarg only when non-default: b2_polar's _FactoryProxy.build takes no encoder_name
+    kw = {} if enc == DEFAULT_ENCODER else {"encoder_name": enc}
+    print(f"[model] encoder={enc}" + ("" if kw else " (default)"))
+    model = model_factory.build(input_mode, encoder_weights=None, classes=grid.n_cells,
+                                **kw).to(device)
+    sd = ck["state_dict"] if "state_dict" in ck else ck
+    try:
+        model.load_state_dict(sd)
+    except RuntimeError as e:
+        raise SystemExit(f"[fatal] state_dict does not fit a '{enc}' U-Net -- the checkpoint's "
+                         f"encoder was not recovered correctly (config['encoder']="
+                         f"{(ck.get('config') or {}).get('encoder') if isinstance(ck, dict) else None!r}). "
+                         f"Pass --encoder to override.\n{e}")
     model.eval()
     fid, sid, tier, tog, P, G = [], [], [], [], [], []
     for x, y, m in dl:
@@ -253,6 +291,9 @@ def main(argv=None):
     p.add_argument("--subset", default="test")
     p.add_argument("--ckpt", default=None, help="omit only if --per-frame-a is given")
     p.add_argument("--input", choices=["rgb", "depth"], default="rgb")
+    p.add_argument("--encoder", default=None, metavar="NAME",
+                   help="[0823 D45] override the encoder; default = read it back from the "
+                        "checkpoint's config['encoder'] (pre-0823 ckpts -> resnet34)")
     p.add_argument("--out", required=True)
     p.add_argument("--tau-op", type=float, default=0.5)
     p.add_argument("--tau-star", default="auto", help="'auto' (fit on val) or a float")
@@ -279,7 +320,7 @@ def main(argv=None):
         if not (a.ckpt and a.manifest and a.split):
             p.error("--ckpt, --manifest and --split are required unless --per-frame-a is given")
         d = infer(a.ckpt, a.manifest, a.split, a.subset, a.input, a.img_size, a.batch, a.workers,
-                  dev, grid)
+                  dev, grid, a.encoder)
     pf = os.path.join(a.out, "per_frame.csv")
     write_per_frame(d, pf, grid)
 
@@ -287,7 +328,7 @@ def main(argv=None):
     if str(a.tau_star).lower() == "auto":
         if a.ckpt and a.manifest and a.split:
             dv = infer(a.ckpt, a.manifest, a.split, "val", a.input, a.img_size, a.batch,
-                       a.workers, dev, grid)
+                       a.workers, dev, grid, a.encoder)
             tau_star, tau_star_f1 = fit_tau_star(dv, grid)
             write_per_frame(dv, os.path.join(a.out, "per_frame_val.csv"), grid)
         else:

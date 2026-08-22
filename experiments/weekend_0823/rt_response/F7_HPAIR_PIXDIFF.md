@@ -46,7 +46,7 @@ Two reference regions, both projected with the canonical labeler camera model: t
 | scene15 | ≥8/255 | 0.236 | 0.417 | **0.433** | 0.157 |
 | scene15 | ≥32/255 | 0.458 | 0.468 | **0.861** | 0.112 |
 
-**Caveat that must travel with the amodal column.** For a fully occluded hazard the amodal silhouette necessarily covers the occluder as well — in scene14 it spans the plaza and the building base the drop hides behind (`METRICS_NOTES_yolo.md` §4 says so explicitly).  A high containment share therefore means *the residual is co-located with the hazard's line of sight*, not *the residual is the hazard's own pixels*.
+**Caveat that must travel with the amodal column.** When the hazard contributes zero pixels of its own surface, the amodal silhouette necessarily covers the occluder as well — in scene14 it spans the plaza and the building base the drop hides behind (`METRICS_NOTES_yolo.md` §4 says so explicitly).  A high containment share therefore means *the residual is co-located with the hazard's line of sight*, not *the residual is the hazard's own pixels*.
 
 
 ## 3. scene14 vs scene15 — the split that matters

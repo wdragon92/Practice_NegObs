@@ -1,0 +1,2 @@
+{"train": [], "val": [], "hold": [],
+ "test": ["scene12", "scene17", "scene20"]}

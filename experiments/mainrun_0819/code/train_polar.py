@@ -16,6 +16,14 @@ RECIPE v2 (0820, brief Phase 4 — all three models share it):
                     (WeightedRandomSampler, epoch length unchanged) — folded in from the
                     train_oversample.py prototype.
 
+ENCODER AXIS (0823 D45, `--encoder NAME`, default resnet34 = every pre-0823 run unchanged):
+  the U-Net backbone is a flag now, so the new-models track (tu-convnext_tiny, resnet50) varies
+  ONE variable against the v2 recipe. The name is recorded in config.json as "<NAME>-unet-aux"
+  and eval_polar rebuilds the model from THAT string, not from a hard-coded resnet34 — without
+  that round-trip a non-default checkpoint dies on load_state_dict (the b2-bridge bug class).
+  Non-default names are only forwarded when actually asked for, so b2_polar's factory proxy
+  (which takes no encoder_name) keeps working untouched.
+
 AUX PIXEL LOSS (0820 brief Phase 6, OPTIONAL, default OFF — omit the flag and this file behaves
 exactly as it did for the v2 queue, down to the metrics.csv header and the config.json key set):
   * --aux-mask-dir DIR  turns it on: the train dataset also yields the frame's amodal mask
@@ -66,6 +74,13 @@ from polar_dataset import IMG_SIZE, PolarGridDataset, load_aug_config  # noqa: E
 MIN_FREE_MB = 6144
 EXIT_GPU_BUSY = 202
 PRIOR_CLAMP = (1e-4, 1.0 - 1e-4)
+# captured at import, i.e. BEFORE any factory hook swap (b2_polar rebinds train_polar.model_factory
+# to a proxy that has no ENCODER attribute and whose build() takes no encoder_name)
+DEFAULT_ENCODER = getattr(model_factory, "ENCODER", "resnet34")
+# config["encoder"] label writer, likewise captured before any hook swap. f"{enc}-unet-aux",
+# i.e. "resnet34-unet-aux" on the default -> pre-0823 config.json files are unchanged.
+model_factory_label = getattr(model_factory, "config_encoder_label",
+                              lambda enc=DEFAULT_ENCODER: f"{enc}-unet-aux")
 
 
 def build_argparser(desc=__doc__):
@@ -73,6 +88,10 @@ def build_argparser(desc=__doc__):
     p.add_argument("--manifest", required=True)
     p.add_argument("--split", required=True)
     p.add_argument("--input", choices=["rgb", "depth"], required=True)
+    p.add_argument("--encoder", default=DEFAULT_ENCODER, metavar="NAME",
+                   help="[0823 D45] smp encoder for the U-Net, incl. timm-universal 'tu-*' "
+                        f"(default {DEFAULT_ENCODER}; the default path is unchanged). "
+                        "Recorded in config.json as '<NAME>-unet-aux' — eval_polar reads it back.")
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--out", required=True, help="RUNDIR")
     p.add_argument("--max-epochs", type=int, default=150)
@@ -291,17 +310,22 @@ def main(argv=None, parser=None):
     else:
         print(f"[sel] val strict-H frames: {n_val_h} -> sel_score = 0.5*val_f1 + 0.5*val_h_recall")
 
-    # the kwarg is passed ONLY when aux is on: b2_polar's _FactoryProxy forwards **kw to
-    # b2_model_factory.build, which has no use_mask_head (and phase 6 is RGB-U-Net-only).
+    # each kwarg is passed ONLY when it is actually asked for: b2_polar's _FactoryProxy forwards
+    # **kw to b2_model_factory.build, which has neither use_mask_head (phase 6 is RGB-U-Net-only)
+    # nor encoder_name (its backbone IS the encoder axis). Default flags -> the pre-0823 call.
+    fkw = {}
+    if aux_on:
+        fkw["use_mask_head"] = True
+    if args.encoder != DEFAULT_ENCODER:
+        fkw["encoder_name"] = args.encoder
     try:
-        model = model_factory.build(args.input, classes=grid.n_cells,
-                                    **({"use_mask_head": True} if aux_on else {})).to(device)
+        model = model_factory.build(args.input, classes=grid.n_cells, **fkw).to(device)
     except TypeError as e:
-        if not aux_on:
+        if not fkw:
             raise
-        raise SystemExit(f"[fatal] --aux-mask-dir needs a factory that accepts use_mask_head; "
+        raise SystemExit(f"[fatal] {sorted(fkw)} needs a factory that accepts it; "
                          f"{getattr(model_factory, '__name__', model_factory)} refused it ({e}). "
-                         f"Phase 6 is the RGB U-Net (code/model_factory.py) only.")
+                         f"--aux-mask-dir / --encoder are code/model_factory.py (U-Net) only.")
     if aux_on:
         print(f"[aux] pixel BCE ON  lambda={args.aux_lambda:g}  masks {dtr.n_aux_found} found / "
               f"{dtr.n_aux_missing} missing-as-empty of {len(dtr)} train frames  "
@@ -319,9 +343,13 @@ def main(argv=None, parser=None):
     else:
         sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda e: 1.0)
 
-    cfg = dict(vars(args), device=device.type, n_train=len(dtr), n_val=len(dva),
+    # 'encoder' is dropped from the args block and re-added below as the LABEL, so the config.json
+    # key ORDER and (on the default encoder) its exact contents stay identical to the v2 queue's.
+    argsd = {k: v for k, v in vars(args).items() if k != "encoder"}
+    cfg = dict(argsd, device=device.type, n_train=len(dtr), n_val=len(dva),
                n_cells=grid.n_cells, grid_version=grid.version, grid_path=grid.path,
-               cell_ids=grid.cell_ids, encoder="resnet34-unet-aux",
+               cell_ids=grid.cell_ids,
+               encoder=model_factory_label(args.encoder),   # "resnet34-unet-aux" on the default
                params_m=round(sum(p.numel() for p in model.parameters()) / 1e6, 3),
                dropped_no_depth=dtr.n_dropped_no_depth + dva.n_dropped_no_depth,
                recipe="v2", hflip=hflip, oversampled=sampler is not None,
@@ -340,7 +368,8 @@ def main(argv=None, parser=None):
         cfg.pop("aux_lambda", None)
     with open(os.path.join(args.out, "config.json"), "w") as f:
         json.dump(cfg, f, indent=2)
-    print(f"[cfg] {args.input} train={len(dtr)} val={len(dva)} batches/ep={len(ltr)} "
+    print(f"[cfg] {args.input} enc={args.encoder} params={cfg['params_m']:g}M "
+          f"train={len(dtr)} val={len(dva)} batches/ep={len(ltr)} "
           f"cells={grid.n_cells} hflip={hflip} oversample={args.oversample_h:g} "
           f"bias={args.bias_init} dev={device.type}"
           + (f" aux={args.aux_lambda:g}" if aux_on else ""))

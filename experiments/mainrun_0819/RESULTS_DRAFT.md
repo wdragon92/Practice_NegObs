@@ -15,8 +15,12 @@ held out of every split for label-integrity reasons (§5.6), leaving 29 scenes /
 scene-wise into 20 train / 2 val / 7 test. Each frame is labelled on a polar grid of 5 azimuth
 sectors × 3 distance bands ([0,2), [2,5), [5,12) m); a cell is positive when a ≥0.30 m drop
 footprint falls inside its wedge. Frames are stratified by an evidence tier — **V** (drop interior
-visible), **E** (only the rim visible), **H** (hazard contributes no visible pixels; *strict* by
-construction and stable across all nine (τ_int, τ_edge) settings). Test carries 111 V / 9 E / 21 H
+visible), **E** (only the rim visible), **H** (the hazard prism re-projects to **zero contributing
+pixels** — no interior surface, no visible rim; *strict* by construction). This is a **geometric**
+predicate on the hazard's own projection and it does **not** mean the two twin arms render the same
+image: all 96 test H pairs differ optically (§RT-C). The nine-setting (τ_int, τ_edge) sweep is not
+evidence of robustness — `tier_of` defines H as `int_px == 0 ∧ edge_vis == 0`, which neither
+threshold enters (§RT.7-b). Test carries 111 V / 9 E / 21 H
 hazard-on frames plus 168 hazard-off frames, 981 positive cells.
 
 Both models are ResNet-34 U-Net encoders with a 15-way pooled classification head (24.4 M params,
@@ -44,12 +48,16 @@ reported as a multi-seed range (or with an H-aware selection protocol) in the fi
 RGB−Depth gap direction survives both seeds; its magnitude on H does not have a stable RGB point
 estimate yet.
 
-Paired over the same 336 test frames, Depth beats RGB on cell F1 by 0.248 [0.190, 0.308] and on
-frame-level H recall by 0.381 [0.053, 0.688], while RGB false-alarms more on the off arm by
-0.113 [0.041, 0.188] — all three intervals exclude zero. The E tier is the one place RGB is
-nominally ahead (+0.111), but with 9 frames its paired interval [0.000, 0.375] includes zero and we
-make no claim there. Cell-level H recall (Δ = −0.267 [−0.600, 0.084]) also fails to clear zero,
-i.e. the H-tier advantage is established at the frame level and not yet at the cell level.
+Paired over the same 336 test frames, Depth beats RGB on cell F1 by 0.248 [0.190, 0.308] and
+false-alarms less on the off arm by 0.113 [0.041, 0.188]; both intervals exclude zero under frame
+resampling and the FA interval survives scene-cluster resampling. The frame-level H difference is
++0.381 as a point estimate and we print **no interval for it**: the 21 v1 H frames come from two
+scenes (scene14, scene15), and a two-cluster bootstrap can enumerate only three distinct multisets
+(§RT.5). The E tier is the one place RGB is nominally ahead (+0.111), on 9 frames drawn from a
+**single** scene; we print no interval and make no claim there. The cell-level H difference
+(−0.267) likewise carries no reportable interval. Nothing about the H tier is "established at the
+frame level" — the frame-level and cell-level readings simply differ, and neither is supported by a
+resampling unit coarser than the frame.
 
 Threshold behaviour differs by modality: val-fitted thresholds are τ* = 0.36 for RGB (recall up,
 FA up to 0.339) and τ* = 0.70 for Depth (precision 0.839, but cell F1 *falls* to 0.583). Because
@@ -67,15 +75,22 @@ scene C2 entirely and 21 of 24 scene07 pairs. Across the 117 kept pairs Δ is
 **0.348 [0.286, 0.410]** for RGB and **0.561 [0.497, 0.623]** for Depth, positive on 88/93 and
 90/93 of the GT-carrying pairs respectively.
 
-The tier breakdown is the result that matters. On **H** frames — where the hazard contributes no
-visible pixels at all — removing the hazard still lowers the RGB model's probability by
-**0.240 [0.156, 0.331]**. Since no hazard pixel exists in either image of an H pair, the model's
-response must be driven by the surrounding context (railing terminations, path truncation, the
-change in what the far ground plane does), which is exactly the mechanism this work sets out to
-demonstrate. The corresponding Depth value is 0.584 [0.448, 0.714]. One caution: on the
-hard-negative scene N3, which has no hazard in either arm, the RGB model's frame-level Δ is still
-0.252 while Depth's is 0.000 — the RGB arm is partly responding to the *dressing* that the toggle
-removes, and a dressing-invariant control is needed before the causal claim is tightened.
+The tier breakdown is the result that matters. On **H** frames — where the hazard's own surface and
+rim project to zero pixels, though the frame is *not* unchanged (§RT-C) — removing the hazard still
+lowers the RGB model's probability by **0.240** (no interval: two scene clusters, §RT.5). No pixel
+of the hazard *surface* exists in either image, but the two images are not identical: the median H
+pair differs on 4.51 % of the frame at ≥ 32/255, 1 872× the renderer's own nondeterminism floor,
+and the toggle removes every object the scene builder places in the same branch (in scene14 the
+shoulder massif, side slopes, coursing, parapets, cues and litter). The twin therefore establishes
+**that** the response is caused by the hazard's presence in the scene; it does **not** establish
+**which** image property carries the causation, and the CUE-OFF intervention (D46) shows the RGB arm
+firing at FA 1.000 on the cue vocabulary with the drop absent. The honest claim is **cue
+association, not cue inference**. The corresponding Depth value is 0.584 [0.448, 0.714]. One
+caution, now measured rather than anticipated: the dressing-invariant control was run (§R.3). On the
+hard-negative scene N3 the RGB arm fires on **0.75–1.00 of frames in *both* arms** at mean max p
+0.74–0.95, so its Δ ≈ 0 records saturation, not silence; the Depth arm is genuinely quiet there
+(0.000–0.125) and B2 is mixed. The caution is **arm-specific** and belongs in the limitations
+section as the clearest single measurement of scene-level shortcut behaviour in the RGB arm.
 
 ## 5.4 Distance bands: everything is a far-field result
 
@@ -114,7 +129,11 @@ fire at p ≈ 0.98 across 5–8 cells, i.e. the RGB FA rate is concentrated, not
    (one scene legitimately all-negative; the below-ground-visibility target unmet in the near band).
 3. **Tier instrument is a substitute.** V/E/H come from depth re-projection, not from the
    semantic-ID instrument the protocol specifies (it does not exist in the repo). Strict-H is
-   insensitive to both thresholds across nine settings; the V/E boundary is not (V 417–453).
+   invariant to both thresholds **by definition**, not by measurement — the sweep could not have
+   moved it (§RT.7-b). What the corpus shows instead is that `edge_ratio` is bimodal (exactly 0, or
+   ≥ 0.44), so the E/H boundary is independent of τ_edge and the swept grid {0.02, 0.05, 0.10} lies
+   entirely inside an interval containing no data. τ_int = 50 px is the threshold that does move
+   results (V 726 → 657, H_weak 0 → 57 over a 1 → 200 sweep).
    Transparent occluders cannot be detected at all, so three scenes need a human check before H
    membership is final.
 4. **Simulation only.** All frames are rendered. No real-world evaluation exists yet, and the
@@ -129,8 +148,9 @@ fire at p ≈ 0.98 across 5–8 cells, i.e. the RGB FA rate is concentrated, not
    loss falls by an order of magnitude, on a 2-scene / 96-frame / H-free validation set. Either the
    RGB arm learns little past epoch 1, or checkpoint selection was too noisy to rank epochs. RGB
    numbers are therefore a **lower bound**, and the RGB−Depth gap an **upper bound**.
-7. **Small H test stratum.** 21 strict-H frames / 90 cells in test. This is why the H intervals are
-   wide enough to swallow effects of ±0.3, and why the frame- and cell-level H comparisons disagree.
+7. **Small H test stratum.** 21 strict-H frames / 90 cells in test. This is why no H interval is
+   reportable at all: 21 frames from two geometries are not 21 independent samples, and the frame-
+   and cell-level H readings disagree because both are dominated by the same two scenes.
    A prepared +8-camera re-render of the two test H scenes would roughly double the stratum.
 8. **Four held scenes.** `sceneD4` (indoor, dark exposure and roof-blinded height map) and
    `scene11 / scene13 / scene19` (hazard toggle also moves the camera's own ground, or the near
@@ -162,11 +182,11 @@ mean probability over those 3a cells is in fact *higher* than the on arm's (0.29
 55 % of the 33 pairs have Δ > 0. Depth is positive in both bands (3a +0.534, 3b +0.411, both CIs
 clear of zero) and B2 only in 3b (+0.112 vs +0.058 with a CI containing zero).
 
-**Wording to adopt.** The sentence "removing the hazard still lowers the RGB model's probability on
-H frames" must be qualified as *far-band*: RGB's context response to a hazard it cannot see is
-demonstrated for band 3b and **is not demonstrated for band 3a**, where its H-tier firing is
-consistent with the standing prior rather than with the hazard. Do not state the H result for the
-H tier as a whole in the RGB row.
+**Wording to adopt.** Three qualifications travel with the sentence, not one. (i) *far-band*:
+demonstrated for band 3b, not for band 3a. (ii) *viewpoint*: not demonstrated at robot camera height
+(h < 0.6 m, Δ_3b = +0.120, pose-clustered CI [−0.010, +0.129]; `weekend_0823/a3_viewpoint/`).
+(iii) *scene*: carried by scene14; on scene15 the RGB Δ is −.010/.209/−.058 (§RT-B). State it as
+"for cameras at ≥ 0.6 m and hazards at ≥ 8 m, in the scene that carries the effect".
 
 ### N.2 New footnote to the twin table — the pairing tolerance does not inflate the headline
 
@@ -177,7 +197,10 @@ EXACT = all five pose keys equal to 1e-6, n = 312; TOL = the tolerance layer, n 
 > **Footnote (draft).** Recomputed on the 312 pairs whose camera pose matches to 1e-6 on all five
 > keys, the H-tier twin Δ is **rgb 0.285 / depth 0.407 / b2 0.110** — identical to the published
 > values to four decimals, because **none of the 54 tolerance-rescued pairs is H tier** (they are 33
-> V and 21 H_weak/none). All nine runs' EXACT-only 95 % CIs exclude zero. The D20 tolerance enlarges
+> V and 21 H_weak/none). All nine runs' EXACT-only point estimates are positive; the accompanying
+> 95 % intervals were computed with frames as the resampling unit over two H scenes and are
+> **withdrawn** (§RT.5). Report the per-scene value beside that scene's off-arm false-alarm rate
+> instead. The D20 tolerance enlarges
 > the V-tier sample; it is not a premise of the H-tier causal claim.
 
 The all-tier Δ is a different matter and needs its own caveat: the published kept-pair value sits
@@ -300,25 +323,31 @@ and exactly 0.000 on both the E and the H tier, on every seed** (0.117 / 0.161 /
 0.000 / 0.000 / 0.000 for E and H, at cell level as well as frame level). Off-arm frame false alarms
 run 0.005 / 0.025 / 0.042.
 
-The zero is the point of the row, and it must be presented as **constructive rather than empirical**.
+The zero is the point of the row, and it must be presented as **a property of our ground-projection
+adapter**, measured — not as a property of detection.
 The detector's output is a set of image-space boxes; the `det2cell` rule projects each box onto the
-ground plane to decide which polar cell it occupies. A hazard in the E tier contributes only a rim,
-and a hazard in the H tier contributes **no pixels at all** — so there is no box to project, and the
-mapping can emit no cell. E and H recall are therefore not merely expected to be near zero, they are
-*constructively bounded* at zero, a bound already measured before training via the oracle-box
-diagnostic (D22; `METRICS_NOTES_yolo.md` §3). What three seeds add is the assurance that the
+ground plane to decide which polar cell it occupies. A hazard in the H tier contributes no pixels
+**of its own surface**, and `det2cell` projects a box's bottom edge onto the ground plane; feeding
+the amodal ground-truth boxes in as confidence-1.0 detections therefore yields E = H = 0.000
+**before any training** (D22 oracle diagnostic). That fixes the zero as a property of **this
+adapter**. It is not a bound on detectors: with the adapter removed and scoring done in image space,
+the detector does place boxes near hidden hazards at 0.066 of H frames (IoU > 0) — see §RT-D for the
+bound that actually holds. What three seeds add is the assurance that the
 implementation honours the bound: **a nonzero E or H number would have been a mapping-leak alarm,
 and across three independently trained detectors the alarm never fired.** The one sub-threshold
 exception belongs in a footnote and nowhere else — in the τ = 0.10 sweep row, seeds 42 and 44 each
 light exactly one hazard frame of 96 (recall 0.0104), which is a single low-confidence box caught by
 the mapping's documented near-band bias, not H-tier perception.
 
-The sentence for the paper is therefore not "the detector performs poorly on invisible hazards" —
-that would invite the reply that a better detector would do better. It is: **any method whose output
-is a bounding box over visible hazard pixels has an identically zero ceiling on the E and H tiers,
-independent of detector quality, and this row measures that ceiling rather than a model.** That is
-what motivates the cell-classification formulation, and it is the cleanest single justification for
-the paper's framing. Do not report the V column as a comparative result: at 0.150 with cell
+The sentence for the paper is therefore not "the detector performs poorly on hazards that contribute
+no pixels" —
+that would invite the reply that a better detector would do better. It is: **an amodal-trained
+detector — taught to draw boxes over hazards it cannot see — produces no hazard-conditional evidence
+on the hidden tier: its image-space hit rate on hazard-ON frames (0.066) is indistinguishable from
+its rate on the hazard-deleted twin of the same cut (0.076), a twin-conditional rate of −0.010,
+against +0.337 on the visible tier.** That is the bound this row supports, it is stronger than the
+adapter statement, and it is what motivates the cell-classification formulation. Do not generalise
+to "any method whose output is a bounding box". Do not report the V column as a comparative result: at 0.150 with cell
 precision 0.472 ± 0.110 it is a floor on a task the detector was not trained to do, and the FA
 column's 8-fold seed range (0.005 → 0.042) will not support any comparison against a U-Net arm.
 
@@ -331,10 +360,14 @@ bootstrap, 10000×), the result is not "better" or "worse" but a **change of ope
 
 What it buys is confirmed. Cell precision rises **+0.129** [0.089, 0.169] and off-arm frame false
 alarms **halve, 0.375 → 0.167** (Δ −0.208 [−0.253, −0.165]); cell FPR falls 0.053 → 0.023. Most
-relevant to this paper's thesis, **H-tier cell recall rises +0.355** [0.277, 0.430] — 0.253 → 0.607,
-the largest confirmed effect in the comparison — and the independent twin evidence agrees, with the
-H-tier on/off Δ nearly doubling from 0.170 to 0.326. Cell F1 improves +0.040, with a CI whose lower
-bound is 0.0001; report that as "improved, marginally significant", not as a headline.
+relevant to this paper's thesis, H-tier cell recall rises **+0.355** (0.253 → 0.607) with a
+frame-i.i.d. interval of [0.277, 0.430] that **does not survive scene-cluster resampling**
+([−0.143, 0.463], §RT.5) — the interval was measuring within-scene variation across the same two H
+scenes. Report the point estimate as suggestive and **withdraw the significance claim**. The twin
+evidence moves in the same direction (H-tier Δ 0.170 → 0.326) and is subject to the same two-scene
+limitation. Cell F1 improves +0.040; its frame-i.i.d. interval [0.0001, 0.0786] becomes
+[−0.258, 0.205] under scene resampling, so report it as **not significant**, not as "marginally
+significant".
 
 What it costs is equally clear and larger in one place: **the E tier collapses completely.** Frame
 recall on rim-only hazards goes 0.600 → **0.000** (Δ −0.600 [−0.744, −0.453]), cell recall
@@ -342,9 +375,11 @@ recall on rim-only hazards goes 0.600 → **0.000** (Δ −0.600 [−0.744, −0
 0.731 → 0.563. Supervising the network toward hazard *pixels* appears to sharpen it onto
 high-confidence, well-supported evidence and to cost it exactly the marginal-evidence tier.
 
-Two limits must travel with this paragraph. First, the frame-level H gain that reads best in a
-summary, +0.125, has a **confidence interval containing zero** ([−0.010, 0.253]); only the
-cell-level gain is statistically supported, so the claim must be written at cell level. Second,
+Two limits must travel with this paragraph. First, **neither** H gain is statistically supported.
+The frame-level +0.125 contains zero under both resampling units ([−0.010, 0.253] frame-i.i.d.;
+[−0.417, 0.450] scene-cluster), and the cell-level +0.355 contains zero under scene resampling. What
+survives clustering is the false-alarm/precision family only (`frame_fa_off`, `cell_fpr_off`,
+`frame_recall_V`). Second,
 **n = 1 seed**, against a base RGB arm whose own three-seed H spread is ±0.141 — a single-seed
 frame-level move of +0.125 sits inside seed noise. This belongs in an appendix and a future-work
 sentence, never in the main table (approval item #2 default: main table stays at four rows).
@@ -376,13 +411,18 @@ suppressed its response in the old arm. Stated positively it is cue-consistent b
 operationally it is a shortcut, and it belongs in the limitations section, not in the results
 narrative.
 
-`sceneN3` served as the null control and behaved as designed. Its dressing is a wall mural, 1–2 mm
-of paint on flat floor, so the dressing-preserving off arm is *structurally identical* to the on arm;
-its twin delta must be zero, and it measures **−0.001 ± 0.001** (per-seed 0.000 / −0.001 / −0.002).
-The measurement apparatus introduces no delta of its own, which is what licenses reading C2's 0.163
-as signal.
+`sceneN3` behaved as designed **in the narrow sense that the apparatus introduces no delta of its
+own** — its dressing is a wall mural, 1–2 mm of paint on flat floor, the dressing-preserving off arm
+is structurally identical to the on arm (heightmap max |Δ| = 0.000000 m), and the twin delta
+measures **−0.001 ± 0.001** (per-seed 0.000 / −0.001 / −0.002). That licenses reading C2's 0.163 as
+signal. It does **not** mean the models passed: Δ ≈ 0 here because **both arms are saturated for the
+RGB arm, not because both are silent** — RGB fires on 0.75–1.00 of these pure-negative frames at
+mean max p 0.74–0.95. Depth is genuinely quiet (0.000–0.125) and B2 is mixed. The null control is a
+**pass for the apparatus and a failure for the RGB model**, and it must not be written as a blanket
+"control passed".
 
-Finally, and importantly for §5.3: **this control does not touch the headline causal claim.** The
+Finally, and importantly for §5.3: **this control does not touch the H-tier twin claim** (as scoped
+by §RT-B — per scene, no interval). The
 twin analysis behind that claim already excludes `sceneC2` entirely — it contributes zero H-tier
 pose-matched pairs — and the night cycle's exact-pose stratification showed the H-tier delta
 unchanged to four decimals when only byte-identical pose pairs are used. The dressing confound was
@@ -401,10 +441,15 @@ frames that are *only* E or *only* H. All nine frozen recipe-v2 checkpoints were
 **Zero-shot transfer largely fails for RGB and partially succeeds for Depth, and the two failures
 have different shapes.** On the pure-H scene, RGB recall is **0.083 / 0.292 / 0.100** across seeds
 while Depth reaches **0.500 / 0.625 / 0.375** — Depth roughly triples RGB on the tier where neither
-model can see the hazard. This inverts the ordering of the main table, where RGB leads Depth on the
-H tier (0.688 vs 0.438), and the inversion is the finding. RGB's H-tier competence on the training
-corpus is *semantic context*: it has learned what the surroundings of a ditch or a stair look like,
-and a hole in a corridor does not supply those surroundings. Depth's is *geometric*: whatever
+model can see the hazard. There is no ordering to invert. The main table reads RGB's H recall at an
+off-arm FA of 0.359 and Depth's at 0.042; at matched false-alarm rates Depth leads RGB on the hidden
+tier at **every** operating point (0.781 vs 0.729 at FA 0.359; 0.510 vs 0.326 at FA 0.10; 0.479 vs
+0.243 at FA 0.05). The probe's Depth-over-RGB result is therefore **consistent with** the corpus,
+not contrary to it (§RT-A). RGB's H-tier firing on the training corpus is **association with the
+corpus's cue vocabulary**, not inference from it: 44.7 % of its H-tier fires also occur on the
+hazard-deleted twin (§RT-B), and the CUE-OFF arms show it firing at FA 1.000 on the cue vocabulary
+alone with no drop present (D46). A hole in a corridor supplies neither the vocabulary nor the drop,
+and the arm does not transfer. Depth's is *geometric*: whatever
 range-discontinuity signature it keys on survives the change of drop type, degraded but present.
 **The RGB result is scene-vocabulary-bound; the Depth result is closer to type-general.** On the
 pure-E scene both collapse almost totally (RGB 0.000 on all three seeds; Depth 0.125 / 0.000 / 0.000),
@@ -433,8 +478,10 @@ the trigger-happy reading above.
 
 The probe is evaluation-only by construction and no probe frame may enter training; it changes no
 number in §5.2 and its role in the paper is to bound the generalisation claim, in the limitations
-section: **the H-tier result is demonstrated for the drop types in this corpus, and the RGB arm's
-version of it does not survive a change of drop type.**
+section: **the H-tier result is demonstrated for the drop types, the cue vocabulary and the scenes
+of this corpus; the RGB arm's version of it survives neither a change of drop type nor removal of
+the cue vocabulary (D46), and it is not a claim of advantage over the range arm at a matched
+false-alarm rate (§RT-A).**
 
 > R.4 부기 (panel-audited): Depth's apparent hole-transfer recall is largely saturation
 > firing (all far cells at 1.00 on hit frames; probe off-arm FA .5-.625). Honest phrasing:

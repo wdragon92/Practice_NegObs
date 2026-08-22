@@ -280,15 +280,34 @@ def main(argv=None):
 # --------------------------------------------------------------------------- #
 # unit check -- synthetic bbox with a hand-computed expected cell set
 # --------------------------------------------------------------------------- #
-def unit_check(grid, spec, gpath):
-    """Three assertions, all with answers worked out from gridspec_v1.json by hand.
+def _cell_by_hand(spec, az_deg, rng_m):
+    """The cell a ground point (azimuth, range) belongs to, re-derived from the
+    gridspec by an explicit interval scan -- deliberately NOT the searchsorted
+    path `LB.polar_cells` takes, so assertion 2 below still compares the mapping
+    against an independent answer.  -1 = outside the grid.
 
-    gridspec_v1: sector_edges_deg = [31.1, 18.66, 6.22, -6.22, -18.66, -31.1] (descending,
-    +az = image LEFT), names A..E; band_edges_m = [0, 2, 5, 8, 12], names 1/2/3a/3b;
-    cell = band*5 + sector.  So a ground point at (az = +20 deg, range = 3.0 m) is
-    sector A (index 0, since +20 lies in [18.66, 31.1)) and band 2 (index 1, since
-    3.0 lies in [2, 5)) -> cell 1*5 + 0 = 5 -> id 'A2'; (az = -20, r = 3.0) -> sector E
-    (index 4) -> cell 9 -> 'E2'.
+    Worked example on gridspec_v1 (sector_edges_deg [31.1, 18.66, 6.22, -6.22,
+    -18.66, -31.1] descending, +az = image LEFT, names A..E; band_edges_m
+    [0, 2, 5, 8, 12], names 1/2/3a/3b; cell = band*5 + sector): az = +20 deg,
+    r = 3.0 m is sector A (index 0, +20 lies in [18.66, 31.1)) and band 2
+    (index 1, 3.0 lies in [2, 5)) -> 1*5 + 0 = 5 -> 'A2'; (-20, 3.0) -> sector E
+    (index 4) -> 9 -> 'E2'.  On gridspec_v2s the SAME two points land in the
+    right half of A and the left half of E -- which is why the expected indices
+    are computed here instead of being spelled as {5, 9}.
+    """
+    e = [float(x) for x in spec["sector_edges_deg"]]        # DESCENDING
+    b = [float(x) for x in spec["band_edges_m"]]            # ASCENDING
+    ns, nb = int(spec["n_sectors"]), int(spec["n_bands"])
+    s = next((i for i in range(ns) if e[i + 1] <= az_deg < e[i]), None)
+    k = next((j for j in range(nb) if b[j] <= rng_m < b[j + 1]), None)
+    return -1 if (s is None or k is None) else k * ns + s
+
+
+def unit_check(grid, spec, gpath):
+    """Three assertions.  The expected cells of assertion 2 are re-derived from
+    the gridspec by `_cell_by_hand` (an explicit interval scan), so the check is
+    grid-generic: it holds on gridspec_v1 (20 cells) and on gridspec_v2s (40
+    cells, PS 12.6) without an index literal anywhere in this function.
     """
     ok = True
     cam = dict(yaw=0.0, pitch=-10.0, roll=0.0, hfov=62.2, h_rel=1.0)
@@ -316,11 +335,13 @@ def unit_check(grid, spec, gpath):
                      eye[1] + 3.0 * np.sin(np.radians(-20)), gz]])
     tp, tq, tz, tin = LB.project(tgt, eye, cam)
     exp_cells, _ = cells_of_points(tgt, eye, cam["yaw"], spec)
-    want_lr = {5, 9}
+    want_lr = {_cell_by_hand(spec, +20.0, 3.0), _cell_by_hand(spec, -20.0, 3.0)}
+    want_ids = sorted(grid.cell_ids[c] for c in want_lr)
     print(f"[unit] endpoint targets  az=+20/-20 deg, r=3.0 m -> pixels "
           f"({tp[0]:.1f},{tq[0]:.1f}) / ({tp[1]:.1f},{tq[1]:.1f})   cells "
           f"{[grid.cell_ids[c] for c in exp_cells]} = {set(exp_cells.tolist())} "
-          f"[{'ok' if set(exp_cells.tolist()) == want_lr else 'XX'} expected {{A2, E2}} = {want_lr}]")
+          f"[{'ok' if set(exp_cells.tolist()) == want_lr else 'XX'} expected "
+          f"{{{', '.join(want_ids)}}} = {want_lr}]")
     ok &= set(exp_cells.tolist()) == want_lr
     ok &= bool(tin.all() and abs(tq[0] - tq[1]) < 1e-6)   # same image row, as a bbox edge must be
 
@@ -354,10 +375,14 @@ def unit_check(grid, spec, gpath):
     import tempfile
     want_hdr = (["frame_id", "scene_id", "tier", "toggle_state"]
                 + [f"p_{c}" for c in grid.cell_ids] + [f"g_{c}" for c in grid.cell_ids])
+    # two arbitrary cells; their COLUMN NAMES are read off the gridspec, never
+    # spelled as V1 literals ('C2'/'C3a' are indices 7/12 on V1 but not on V2S)
+    i_p, i_g = 7, 12
+    id_p, id_g = grid.cell_ids[i_p], grid.cell_ids[i_g]
     z = np.zeros(grid.n_cells)
-    z[7] = 0.42
+    z[i_p] = 0.42
     g = np.zeros(grid.n_cells)
-    g[7] = g[12] = 1
+    g[i_p] = g[i_g] = 1
     with tempfile.TemporaryDirectory() as td:
         p = os.path.join(td, "per_frame.csv")
         write_per_frame([("on/scene04/x.png", "scene04", "V", "on", z, g),
@@ -369,7 +394,8 @@ def unit_check(grid, spec, gpath):
             rows = list(rd)
         cells = [c[2:] for c in hdr if c.startswith("p_")]     # read_per_frame's own inference
         good = (hdr == want_hdr and cells == list(grid.cell_ids) and len(rows) == 2
-                and abs(float(rows[0]["p_C2"]) - 0.42) < 1e-9 and int(rows[0]["g_C3a"]) == 1)
+                and abs(float(rows[0][f"p_{id_p}"]) - 0.42) < 1e-9
+                and int(rows[0][f"g_{id_g}"]) == 1)
     ok &= good
     print(f"[unit] per_frame.csv header == eval_polar contract ({len(want_hdr)} cols, "
           f"{len(grid.cell_ids)} cells inferred from the header)   "

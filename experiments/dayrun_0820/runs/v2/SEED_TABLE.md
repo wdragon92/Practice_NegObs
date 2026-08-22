@@ -6,6 +6,8 @@ root `/home/vislab/Desktop/work_sy/Practice_NegObs/experiments/dayrun_0820/runs/
 
 ## 1. Headline table (tau_op = 0.5)
 
+> **읽는 법(필수).** H 열의 rgb 0.688과 depth 0.438은 **서로 다른 운용점**의 값이다 — off팔 FA가 0.359 대 0.042로 8.6배 차이난다. FA를 맞추면 전 지점에서 Depth ≥ RGB이다(FA .359: .781 vs .729 · FA .10: .510 vs .326 · FA .05: .479 vs .243, `rt_response/F1_FA_MATCHED.md`). 이 표의 H 열을 모델 간 비교로 인용할 때는 반드시 FA 정합 표를 병기한다.
+
 | model | n seeds | frame_recall_H | frame_recall_E | frame_recall_V | frame_det_rate | frame_fa_off | cell_fpr_off | cell_f1 | cell_recall | cell_precision | band1_cell_recall | band2_cell_recall | band3_cell_recall | band4_cell_recall | band1_cell_fpr_off | band2_cell_fpr_off | band3_cell_fpr_off | band4_cell_fpr_off |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | rgb | 3 | 0.688 ± 0.141 | 0.556 ± 0.378 | 0.796 ± 0.164 | 0.730 ± 0.179 | 0.359 ± 0.127 | 0.047 ± 0.016 | 0.450 ± 0.102 | 0.385 ± 0.125 | 0.566 ± 0.021 | 0.000 ± 0.000 | 0.265 ± 0.097 | 0.297 ± 0.103 | 0.511 ± 0.206 | 0.000 ± 0.000 | 0.010 ± 0.004 | 0.041 ± 0.021 | 0.136 ± 0.064 |
@@ -19,6 +21,8 @@ root `/home/vislab/Desktop/work_sy/Practice_NegObs/experiments/dayrun_0820/runs/
 | rgb | 3 | 0.314 ± 0.007 | 0.285 ± 0.094 | 0.55 ± 0.20 | 19.0 ± 8.0 |
 | depth | 3 | 0.608 ± 0.078 | 0.407 ± 0.037 | 0.39 ± 0.20 | 16.0 ± 13.5 |
 | b2 | 3 | 0.234 ± 0.038 | 0.110 ± 0.059 | 0.45 ± 0.00 | 5.7 ± 3.5 |
+
+> twin delta (H tier)는 **2개 씬(scene14 60 · scene15 36)** 위에서 계산된 pooled 값이다. 씬별로는 scene14가 효과를 전담하고 scene15는 0과 구별되지 않는다(rgb −.010/.209/−.058). 신뢰구간은 보고하지 않는다(§RT.5).
 
 ## 3. Per-seed detail
 
@@ -68,12 +72,16 @@ V figure is 0.029, i.e. the same to two decimals; quote either, but say which.)
 
 #### 4.2 What the row establishes
 
-**The D22 constructive ceiling is confirmed on all three seeds, with zero mapping leak.**
+**The D22 adapter ceiling is confirmed on all three seeds, with zero mapping leak.**
 `frame_recall_E` and `frame_recall_H` are **exactly 0.000 on 42, 43 and 44** — cell-level too
-(`cell_recall_E` = `cell_recall_H` = 0.000 everywhere). Per `METRICS_NOTES_yolo.md` §1 and §3 this
-is the *required* result, not a disappointment: the `det2cell` mapping projects a detected box onto
-the ground plane, so a hazard with no visible pixels can produce no box and therefore no cell. A
-nonzero E/H number here would have been a **mapping-leak alarm**, and the alarm did not fire.
+(`cell_recall_E` = `cell_recall_H` = 0.000 everywhere). This is the *required* result for **our
+adapter**: `det2cell` projects a detected box's bottom edge onto the ground plane, and the
+oracle-box diagnostic already fixes E = H = 0.000 before training. `METRICS_NOTES_yolo.md` §0 states
+the scope explicitly — *"every property of that adapter is a property of the adapter"*. **This row
+is not evidence that detection has a zero ceiling**; that question is answered adapter-free in
+`METRICS.md` §RT.3, where the image-space H hit rate is 0.066 and its twin-conditional value is
+−0.010. A nonzero E/H number here would have been a **mapping-leak alarm**, and the alarm did not
+fire.
 
 Two honest footnotes:
 
@@ -114,14 +122,14 @@ only `aux_enabled=True`, `aux_lambda=0.5`, 648 amodal masks
 
 | metric | aux | base | Δ [95 % CI] | CI excludes 0 |
 |---|---|---|---|---|
-| cell_f1 | 0.5255 | 0.4852 | **+0.0403** [0.0001, 0.0786] | yes (barely) |
+| cell_f1 | 0.5255 | 0.4852 | **+0.0403** [0.0001, 0.0786] frame-i.i.d. · [−0.2580, 0.2054] scene-cluster | **no (withdrawn, §RT.5)** |
 | cell_precision | 0.6821 | 0.5530 | **+0.1291** [0.0885, 0.1690] | yes |
 | cell_recall | 0.4274 | 0.4322 | −0.0048 [−0.0488, 0.0377] | no |
 | frame_fa_off | 0.1667 | 0.3750 | **−0.2083** [−0.2531, −0.1646] | yes |
 | cell_fpr_off | 0.0230 | 0.0527 | **−0.0297** [−0.0372, −0.0222] | yes |
 | cell_fpr_on_neg | 0.0636 | 0.0933 | −0.0296 [−0.0450, −0.0142] | yes |
 | **frame_recall_H** | 0.7188 | 0.5938 | +0.1250 [**−0.0096**, 0.2526] | **no** |
-| **cell_recall_H** | 0.6072 | 0.2527 | **+0.3546** [0.2768, 0.4302] | yes |
+| **cell_recall_H** | 0.6072 | 0.2527 | **+0.3546** [0.2768, 0.4302] frame-i.i.d. · **[−0.1429, 0.4625] scene-cluster** | **no (withdrawn, §RT.5 / D41⑤)** |
 | frame_recall_E | 0.0000 | 0.6000 | **−0.6000** [−0.7436, −0.4528] | yes |
 | cell_recall_E | 0.0000 | 0.3592 | **−0.3592** [−0.4556, −0.2626] | yes |
 | frame_recall_V | 0.6389 | 0.8278 | **−0.1889** [−0.2551, −0.1257] | yes |
@@ -132,19 +140,22 @@ only `aux_enabled=True`, `aux_lambda=0.5`, 648 amodal masks
 #### 5.2 Reading — a precision/H trade bought with the E tier
 
 The pixel-loss arm is **not uniformly better or worse; it moves the operating character**. It buys
-precision (+0.129, CI clear) and halves false alarms (0.375 → 0.167, CI clear) while *raising the
-H-tier cell recall by +0.355* — the single largest confirmed effect in the table, and the one that
-matters for this paper's thesis. The twin evidence agrees independently: the H-tier twin Δ nearly
-doubles, 0.170 → 0.326.
+precision (+0.129, CI clear) and halves false alarms (0.375 → 0.167, CI clear) while raising the
+H-tier cell recall by **+0.355** as a point estimate. This was previously described as the largest
+*confirmed* effect in the table; that description is **withdrawn** — under scene-cluster resampling
+the interval is [−0.1429, 0.4625] and includes zero, because the frame-level interval was measuring
+variation within the same two H scenes. The twin evidence moves the same way (H-tier Δ
+0.170 → 0.326) and rests on the same two scenes. What survives clustering is the precision /
+false-alarm family only.
 
 **The price is the E tier, and it is total.** `frame_recall_E` goes 0.600 → **0.000**
 (CI [−0.744, −0.453]); cell-level E recall 0.359 → 0.000. Rim-only hazards, which the base arm
 partly caught, become invisible to the aux arm. V recall also falls 0.828 → 0.639 and the overall
 frame detection rate with it (0.731 → 0.563).
 
-**Two caveats that must travel with this row.** (i) The headline-sounding H gain at *frame* level,
-+0.125, has a **CI containing zero** ([−0.010, 0.253]); only the *cell*-level H gain is confirmed.
-Write the claim at cell level or not at all. (ii) n = 1 seed. Given that the base rgb arm's own
+**Two caveats that must travel with this row.** (i) Neither H gain is confirmed. Frame level +0.125
+contains zero under both units; cell level +0.355 contains zero under scene resampling. Write the H
+claim as a point estimate with the two-scene caveat, or not at all. (ii) n = 1 seed. Given that the base rgb arm's own
 3-seed H spread is ±0.141 (section 1), a single-seed +0.125 frame-level move is inside seed noise.
 Nothing here supports a recipe change inside the 8/24 freeze; it supports a "future work" paragraph.
 

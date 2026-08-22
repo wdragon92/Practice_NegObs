@@ -63,7 +63,8 @@ Searched: `tau_int`, `tau_edge`, `rim_band`, `rim`, `interior_visible`, `edge_ar
   `experiments/mainrun_0819/realworld/PROTOCOL_SHOOT.md:22,46` — a *sibling agent's* real-shoot
   protocol written tonight, i.e. the spec side, not the repo side. Its own definition
   (`PROTOCOL_SHOOT.md:26-30`): V = hazard interior visible, E = only the rim/edge line visible,
-  H = hazard contributes no pixels; tier decided in the order V→E→H.
+  H = hazard contributes no pixels **of its own surface or rim** (`int_px == 0 ∧ edge_vis == 0`);
+  tier decided in the order V→E→H.
 * `rim` in code (`scene_common.py:1341,1496`) is a slab/manhole geometry word, unrelated.
 * No interior-surface or rim-band semantic ID exists — see (f): the repo authors **zero**
   USD semantics.

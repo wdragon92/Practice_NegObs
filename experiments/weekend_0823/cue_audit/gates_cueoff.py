@@ -47,6 +47,7 @@ GEOM_PARTNER = {"B2": "A", "B1": "A", "P": "A"}
 CAM_KEYS = ("d", "h_rel", "yaw", "pitch", "roll", "hfov", "ground_z")
 TOL_EXACT = 1e-6
 TOL_TOL = 0.02                    # metres -- the `pose_tol` stratum ceiling
+MIN_PAIRED_H = 10                 # PREREG sec.4.5-3
 TIERS5 = ("V", "E", "H", "H_weak", "none_in_fov")
 
 # round stem -> (scene, lineage corpus round for G0)
@@ -60,6 +61,7 @@ LINEAGE = {
 
 FAILS = []
 NOTES = []
+G7_BANNER = []
 
 
 def fail(gate, msg):
@@ -111,11 +113,43 @@ def cuts_of(sdir):
     return {c["file"]: c for c in (cu.values() if isinstance(cu, dict) else cu)}
 
 
-def load_labels(stem, arm):
+LABEL_SETS = ("lineage", "twin")
+
+
+def load_labels(stem, arm, scene=None, lset="lineage"):
+    """Label file for one (label set, round stem, arm, scene).
+
+    A2 FIX (D49-2 / R4 F5).  This used to look for `<stem>_<arm>.json`, a name the
+    labeller has never written: `eval_cueoff.sh` phase 1 emits
+    `<set>__<stem>_<arm>__<scene>.json`.  The lookup therefore missed EVERY label
+    file, so G2's polar_gt clause, G4 and G5 reported "labels absent -- skipped"
+    and would have kept reporting it however often the battery was re-run.  R4
+    read that as a 27-minute timing race; it is a path bug, and the timing is
+    incidental.  The old name is still accepted so nothing that used it breaks.
+    """
+    if scene is not None:
+        p = os.path.join(LABELS, f"{lset}__{stem}_{arm}__{scene}.json")
+        if os.path.isfile(p):
+            return json.load(open(p))
+        return None
     p = os.path.join(LABELS, f"{stem}_{arm}.json")
     if not os.path.isfile(p):
         return None
     return json.load(open(p))
+
+
+def paired_h_frames(la, lb, scene):
+    """frame ids that are strict-H in BOTH arms (the JUDGED population, sec.4.2)."""
+    out = []
+    for fid, fa in la["frames"].items():
+        if not fid.startswith("on/") or f"/{scene}/" not in fid:
+            continue
+        fb = lb["frames"].get(fid)
+        if fb is None:
+            continue
+        if fa.get("tier_strict") == "H" and fb.get("tier_strict") == "H":
+            out.append(fid)
+    return sorted(out)
 
 
 # --------------------------------------------------------------------------- gates
@@ -214,12 +248,24 @@ def g1_smoke(R):
 
 
 def g2_geometry(R):
-    print("\n[G2] hazard geometry invariant (polar_gt byte-identical, heightmap hash)")
+    """G2, at the three scopes A2 separates (D49-2).
+
+    scope 1  heightmap.npy sha256          — global, what the 8 logged FAILs used
+    scope 2  polar_gt, ALL on-frames       — scene scope
+    scope 3  polar_gt, PAIRED-H frames     — the JUDGED population, which is the
+                                             only population PREREG sec.4.5-2 can
+                                             actually void, because sec.4.2 judges
+                                             on paired-H frames and nothing else
+    A global heightmap difference is reported as a BREACH-GLOBAL and then
+    adjudicated at scopes 2-3 instead of being inherited from one sibling case
+    (the D44 over-generalisation R4 F4 caught).
+    """
+    print("\n[G2] hazard geometry invariant (heightmap hash · polar_gt scene · "
+          "polar_gt judged)")
     for (stem, arm), scenes in sorted(R.items()):
         partner = GEOM_PARTNER.get(arm)
         if not partner or (stem, partner) not in R:
             continue
-        la, lb = load_labels(stem, arm), load_labels(stem, partner)
         for sc, d in sorted(scenes.items()):
             ref = R[(stem, partner)].get(sc)
             if not ref:
@@ -227,32 +273,49 @@ def g2_geometry(R):
             ha = os.path.join(d, "heightmap.npy")
             hb = os.path.join(ref, "heightmap.npy")
             tag = f"{stem} {sc} {arm} vs {partner}"
+            hm_differs = None
             if os.path.isfile(ha) and os.path.isfile(hb):
-                if sha256(ha) != sha256(hb):
-                    fail("G2", f"{tag}: heightmap.npy differs -- a cue_* toggle "
-                               f"moved the hazard geometry. REGULATION BREACH.")
+                hm_differs = sha256(ha) != sha256(hb)
+                if hm_differs:
+                    fail("G2-hash", f"{tag}: heightmap.npy differs -- clause 2 of "
+                                    f"G2 FAILS at global scope. Adjudicated "
+                                    f"per-case below and in G2_ADJUDICATION.csv "
+                                    f"(D49-2); NOT inherited from a sibling case. "
+                                    f"The material question is the polar_gt clause "
+                                    f"on the judged population, printed next.")
                 else:
                     ok("G2", f"{tag}: heightmap.npy sha256 identical")
             else:
                 note(f"G2: {tag}: heightmap.npy missing on one side")
-            if la is None or lb is None:
-                note(f"G2: {tag}: labels absent -- polar_gt check deferred")
-                continue
-            diff = []
-            for fn in sorted(cuts_of(d)):
-                ka, kb = f"on/{sc}/{fn}", f"on/{sc}/{fn}"
-                fa, fb = la["frames"].get(ka), lb["frames"].get(kb)
-                if fa is None or fb is None:
+            for lset in LABEL_SETS:
+                la = load_labels(stem, arm, sc, lset)
+                lb = load_labels(stem, partner, sc, lset)
+                if la is None or lb is None:
+                    note(f"G2: {tag} [{lset}]: labels absent -- polar_gt deferred")
                     continue
-                if fa["polar_gt"] != fb["polar_gt"]:
-                    diff.append(fn)
-            if diff:
-                fail("G2", f"{tag}: polar_gt differs on {len(diff)} frame(s) "
-                           f"{diff[:3]} -- the hazard is NOT invariant across the "
-                           f"cue toggle; the arms are not comparable.")
-            else:
-                ok("G2", f"{tag}: polar_gt byte-identical on all "
-                         f"{len(cuts_of(d))} frames")
+                allf = [f"on/{sc}/{fn}" for fn in sorted(cuts_of(d))]
+                diff = [f for f in allf
+                        if f in la["frames"] and f in lb["frames"]
+                        and la["frames"][f]["polar_gt"] != lb["frames"][f]["polar_gt"]]
+                pair = paired_h_frames(lb, la, sc)          # lb = arm A side
+                dpair = [f for f in pair
+                         if la["frames"][f]["polar_gt"] != lb["frames"][f]["polar_gt"]]
+                if dpair:
+                    fail("G2", f"{tag} [{lset}]: polar_gt differs on "
+                               f"{len(dpair)}/{len(pair)} PAIRED-H frames "
+                               f"{[os.path.basename(x) for x in dpair[:3]]} -- the "
+                               f"judged population is scored on two different "
+                               f"sheets. PREREG sec.4.5-2 VOIDS this pair.")
+                elif diff:
+                    note(f"G2 SCENE-SCOPE ONLY: {tag} [{lset}]: polar_gt differs on "
+                         f"{len(diff)}/{len(allf)} frames "
+                         f"{[os.path.basename(x) for x in diff[:3]]}, but 0 of the "
+                         f"{len(pair)} PAIRED-H frames. The differing frames are "
+                         f"outside the judged population; the paired comparison "
+                         f"stands, the scene-level footprint claim does not.")
+                else:
+                    ok("G2", f"{tag} [{lset}]: polar_gt byte-identical on all "
+                             f"{len(allf)} frames (paired-H {len(pair)})")
 
 
 def g3_pose(R):
@@ -305,75 +368,93 @@ def g3_pose(R):
 
 
 def g4_tiers(R):
+    """G4 = the obligation PREREG sec.4.2 nails down: re-derive the tier PER ARM and
+    report the H->E migration count.  Runs per label set, because the two sets
+    tier the same frames differently (scene12's on arm is V in `twin`, H in
+    `lineage`), and `tier migration | none` printed with no gate behind it was
+    exactly R4 F5's complaint."""
     print("\n[G4] 5-category tier re-derivation per arm + H->E migration")
-    table = {}
-    for (stem, arm), scenes in sorted(R.items()):
-        lab = load_labels(stem, arm)
-        if lab is None:
-            note(f"G4: labels for {stem}_{arm} absent -- skipped")
-            continue
-        for sc in sorted(scenes):
-            c = collections.Counter()
-            for fid, f in lab["frames"].items():
-                if f"/{sc}/" not in fid:
+    rows = []
+    for lset in LABEL_SETS:
+        table = {}
+        for (stem, arm), scenes in sorted(R.items()):
+            for sc in sorted(scenes):
+                lab = load_labels(stem, arm, sc, lset)
+                if lab is None:
+                    note(f"G4 [{lset}]: labels for {stem}_{arm}/{sc} absent -- skipped")
                     continue
-                c[f.get("tier_strict", "?")] += 1
-            table[(stem, sc, arm)] = c
-            ok("G4", f"{stem} {sc} {arm}: " + " · ".join(
-                f"{t} {c.get(t, 0)}" for t in TIERS5)
-                + (f" · other {sum(v for k, v in c.items() if k not in TIERS5)}"
-                   if any(k not in TIERS5 for k in c) else ""))
-    # migration, frame by frame
-    for (stem, sc, arm), _ in sorted(table.items()):
-        if arm == "A" or (stem, sc, "A") not in table:
-            continue
-        la, lb = load_labels(stem, arm), load_labels(stem, "A")
-        if la is None or lb is None:
-            continue
-        mig = collections.Counter()
-        for fid, f in lb["frames"].items():
-            if f"/{sc}/" not in fid:
+                c = collections.Counter()
+                for fid, f in lab["frames"].items():
+                    if f"/{sc}/" not in fid or not fid.startswith("on/"):
+                        continue
+                    c[f.get("tier_strict", "?")] += 1
+                table[(stem, sc, arm)] = c
+                line = (f"{lset:8s} {stem:15s} {sc:8s} {arm:2s}: " + " · ".join(
+                    f"{t} {c.get(t, 0)}" for t in TIERS5))
+                rows.append(line)
+                ok("G4", line)
+        for (stem, sc, arm) in sorted(table):
+            if arm == "A" or (stem, sc, "A") not in table:
                 continue
-            g = la["frames"].get(fid)
-            if g is None:
+            la = load_labels(stem, arm, sc, lset)
+            lb = load_labels(stem, "A", sc, lset)
+            if la is None or lb is None:
                 continue
-            t0, t1 = f.get("tier_strict"), g.get("tier_strict")
-            if t0 != t1:
-                mig[f"{t0}->{t1}"] += 1
-        paired_h = sum(1 for fid, f in lb["frames"].items()
-                       if f"/{sc}/" in fid and f.get("tier_strict") == "H"
-                       and (la["frames"].get(fid) or {}).get("tier_strict") == "H")
-        msg = (f"{stem} {sc} A->{arm}: paired-H {paired_h}"
-               + (f" · migrations {dict(mig)}" if mig else " · no tier movement"))
-        if mig.get("H->E"):
-            note(f"G4 {msg}  -> {mig['H->E']} H->E frames EXCLUDED from the "
-                 f"primary readout and reported (CUEOFF_CANDIDATES sec.5-4)")
-        else:
-            ok("G4", msg)
-        if arm in ("B1", "B2", "P") and paired_h < 10:
-            fail("G4", f"{stem} {sc} A/{arm}: paired-H {paired_h} < 10 -- "
-                       f"PREREG sec.4.5-3 voids this scene-arm")
+            mig = collections.Counter()
+            for fid, f in lb["frames"].items():
+                if f"/{sc}/" not in fid or not fid.startswith("on/"):
+                    continue
+                g = la["frames"].get(fid)
+                if g is None:
+                    continue
+                t0, t1 = f.get("tier_strict"), g.get("tier_strict")
+                if t0 != t1:
+                    mig[f"{t0}->{t1}"] += 1
+            ph = len(paired_h_frames(lb, la, sc))
+            msg = (f"{lset:8s} {stem:15s} {sc:8s} A->{arm:2s}: paired-H {ph}"
+                   + (f" · migrations {dict(mig)}" if mig else " · no tier movement"))
+            rows.append(msg)
+            if mig.get("H->E"):
+                note(f"G4 {msg}  -> {mig['H->E']} H->E frames EXCLUDED from the "
+                     f"primary readout and reported (CUEOFF_CANDIDATES sec.5-4)")
+            else:
+                ok("G4", msg)
+            if arm in ("B1", "B2", "P") and ph < MIN_PAIRED_H:
+                fail("G4", f"[{lset}] {stem} {sc} A/{arm}: paired-H {ph} < "
+                           f"{MIN_PAIRED_H} -- PREREG sec.4.5-3 VOIDS this "
+                           f"scene-arm (verdict blocks included, not only table rows)")
+    return rows
 
 
 def g5_armC(R):
     print("\n[G5] arm C carries an all-zero polar_gt on every frame")
-    for (stem, arm), scenes in sorted(R.items()):
-        if arm != "C":
-            continue
-        lab = load_labels(stem, arm)
-        if lab is None:
-            note(f"G5: labels for {stem}_C absent -- skipped")
-            continue
-        for sc in sorted(scenes):
-            bad = [fid for fid, f in lab["frames"].items()
-                   if f"/{sc}/" in fid and sum(f["polar_gt"]) > 0]
-            n = sum(1 for fid in lab["frames"] if f"/{sc}/" in fid)
-            if bad:
-                fail("G5", f"{stem} {sc} C: {len(bad)}/{n} frames carry a POSITIVE "
-                           f"polar_gt -- the hazard-off surgery left a drop, or the "
-                           f"heightmap oracle re-imposed the ON profile. {bad[:3]}")
-            else:
-                ok("G5", f"{stem} {sc} C: {n}/{n} frames all-zero GT")
+    for lset in LABEL_SETS:
+        for (stem, arm), scenes in sorted(R.items()):
+            if arm != "C":
+                continue
+            for sc in sorted(scenes):
+                lab = load_labels(stem, arm, sc, lset)
+                if lab is None:
+                    note(f"G5 [{lset}]: labels for {stem}_C/{sc} absent -- skipped")
+                    continue
+                bad = [fid for fid, f in lab["frames"].items()
+                       if f"/{sc}/" in fid and fid.startswith("on/")
+                       and sum(f["polar_gt"]) > 0]
+                n = sum(1 for fid in lab["frames"]
+                        if f"/{sc}/" in fid and fid.startswith("on/"))
+                if bad:
+                    fail("G5", f"[{lset}] {stem} {sc} C: {len(bad)}/{n} frames carry a "
+                               f"POSITIVE polar_gt -- the hazard-off surgery left a "
+                               f"drop, or the heightmap oracle re-imposed the ON "
+                               f"profile. {bad[:3]}")
+                elif lset == "twin":
+                    note(f"G5 VACUOUS: {lset} {stem} {sc} C: {n}/{n} all-zero GT, but "
+                         f"in the `twin` set arm C IS the reference surface, so 0 is "
+                         f"constitutive and carries no information (R4 F5).")
+                else:
+                    ok("G5", f"[{lset}] {stem} {sc} C: {n}/{n} frames all-zero GT "
+                             f"-- the hand-patched `_solid_at` (PREREG sec.6.1) did "
+                             f"NOT leave a hazard behind")
 
 
 def g7_footprint(R):
@@ -404,17 +485,49 @@ def g7_footprint(R):
         return note("G7: no label file yet -- run eval_cueoff.sh phase 1")
     print(f"  {'label file':52s} {'scene':9s} {'src':6s} {'src_off':8s} "
           f"{'cells_raw':>10s} {'max_diff':>9s}")
+    banner = []
     for lf, sc, src, srco, cr, md in rows:
-        deg = " <-- DEGENERATE" if (cr is not None and cr < 1000) else ""
+        arm = lf.rsplit("__", 1)[0].rsplit("_", 1)[-1]
+        small = cr is not None and cr < 1000
+        # arm C has no hazard: an empty footprint there is the definition of the
+        # arm, not a defect.  Separating the two is the whole point of A1.2-3 --
+        # the v1 gate lumped 6 constitutive zeros in with the real degeneracy and
+        # made the banner unreadable.
+        kind = ("BY-DESIGN (hazard-off arm)" if (small and arm == "C")
+                else "DEGENERATE" if small else "")
+        tagtxt = f" <-- {kind}" if kind else ""
         print(f"  {lf[:52]:52s} {sc:9s} {str(src):6s} {str(srco):8s} "
-              f"{str(cr):>10s} {str(md):>9s}{deg}")
-        if deg:
+              f"{str(cr):>10s} {str(md):>9s}{tagtxt}")
+        if kind == "DEGENERATE":
+            banner.append(f"{lf} ({sc}) cells_raw={cr}")
             note(f"G7 DEGENERATE FOOTPRINT: {lf} / {sc} cells_raw={cr} "
                  f"max_diff={md} -- every recall number for this scene-set is "
                  f"scored against that sliver and MUST carry the caveat "
                  f"(PREREG A1.1). Not a stop condition: the degeneracy is a "
                  f"finding, not a bug in this run.")
-    ok("G7", f"{len(rows)} scene-arm footprints tabled")
+    # ---- boost-lineage degeneracy accounting (D49-2 / A1.1) ------------------
+    #   The same scene labelled from the two references is the cleanest possible
+    #   measurement of how much the missing `fuse_heightmap.py` step costs.
+    pair = {}
+    for lf, sc, src, srco, cr, md in rows:
+        lset, rest = lf.split("__", 1)
+        stem_arm = rest.rsplit("__", 1)[0]
+        pair.setdefault((stem_arm, sc), {})[lset] = cr
+    acct = []
+    for (sa, sc), d in sorted(pair.items()):
+        if "lineage" in d and "twin" in d and d["lineage"] != d["twin"]:
+            r = (d["twin"] / d["lineage"]) if d["lineage"] else float("inf")
+            acct.append(f"{sa} {sc}: lineage {d['lineage']} vs twin {d['twin']} "
+                        f"cells ({r:.0f}x)")
+    if acct:
+        note("G7 BOOST-LINEAGE DEGENERACY ACCOUNTING (A1.1): the `lineage` "
+             "reference is the boost round, which never ran fuse_heightmap.py; "
+             "the `twin` reference is arm C of this round, which did. Where they "
+             "disagree, the lineage footprint is the degenerate one: "
+             + " · ".join(acct))
+    G7_BANNER.extend(banner)
+    ok("G7", f"{len(rows)} scene-arm footprints tabled · "
+             f"{len(banner)} DEGENERATE (non-C)")
 
 
 def g6_ckpt():
@@ -463,9 +576,10 @@ def main():
         pose_detail = g3_pose(R)
     else:
         pose_detail = []
+    tier_rows = []
     if a.stage in ("post", "all"):
         g2_geometry(R)
-        g4_tiers(R)
+        tier_rows = g4_tiers(R)
         g5_armC(R)
         g7_footprint(R)
 
@@ -484,6 +598,14 @@ def main():
         f.write(f"stage `{a.stage}` · rounds "
                 f"`{sorted(k[0] + '_' + k[1] for k in R)}`\n\n")
         f.write(f"**{'FAIL ' + str(len(FAILS)) if FAILS else 'ALL GATES PASS'}**\n\n")
+        if G7_BANNER:
+            f.write("> ## DEGENERATE FOOTPRINT BANNER (PREREG A1.2-3)\n>\n"
+                    "> Every recall number computed against the following "
+                    "scene-labelset pairs is scored on a footprint sliver, not on "
+                    "the hazard:\n>\n")
+            for b in G7_BANNER:
+                f.write(f"> - `{b}`\n")
+            f.write(">\n")
         if FAILS:
             f.write("## Failures\n\n")
             for g, m in FAILS:
@@ -492,6 +614,9 @@ def main():
         if pose_detail:
             f.write("## G3 pose strata (per scene x arm)\n\n```\n")
             f.write("\n".join(pose_detail) + "\n```\n\n")
+        if tier_rows:
+            f.write("## G4 tier re-derivation + migration (per label set)\n\n```\n")
+            f.write("\n".join(tier_rows) + "\n```\n\n")
         if NOTES:
             f.write("## Notes\n\n")
             for m in NOTES:

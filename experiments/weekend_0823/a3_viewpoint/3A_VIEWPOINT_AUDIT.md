@@ -243,7 +243,8 @@ Sentence A is the recommended one. Both are written to drop into the existing §
 > height (h < 0.6 m, Δ_3b = +0.120, pose-clustered CI [−0.010, +0.129]) nor anywhere in band 3a
 > (Δ_3a = −0.031, CI [−0.127, +0.017]). We therefore state the result as conditional on viewpoint:
 > *for cameras at ≥ 0.6 m and hazards at ≥ 8 m, removing the hazard measurably lowers the model's
-> probability on frames where the hazard contributes no pixels.*
+> probability on frames where the hazard's own surface and rim contribute no pixels — a geometric
+> condition, not an optically empty one (§RT.6).*
 >
 > **한국어 (내부 판독문).** RGB의 H 티어 반사실 반응은 밴드가 아니라 **시점**에 의존한다 — 중·고
 > 카메라 높이에서는 성립(Δ_3b = +0.343 / +0.478, CI 0 배제)하고 12 m까지 모든 거리 구간에서

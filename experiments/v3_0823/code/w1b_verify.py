@@ -61,19 +61,26 @@ HAZ_DEPTH = float(GRID["hazard_depth_m"])
 # `W1B_ARM=B`  (기본)  → 착지한 `260826_v3w1_lib_B*` · 산출 `w1b_*`  (W1-B 재현 그대로)
 # `W1B_ARM=B2`         → T레버 보충본 `260826_v3w1_lib_B2*` · **12씬만** · 산출 `w1b2_*`
 # 어느 쪽이든 코퍼스 A팔·D팔·구off 참조와 게이트 술어는 **한 글자도 다르지 않다**.
+# --- W1-B3 보충 웨이브 스위치 (DECISIONS **D90 ①** · 세그 3차 `w1d_seg3.json`) ---
+# `W1B_ARM=B3` → 레버 추가 재렌더 `260827_v3w1_lib_B3*` · **5씬만** · 산출 `w1b3_*`
+# 게이트 술어·A팔·D팔 참조는 B/B2 와 **한 글자도 다르지 않다**(계기 동일성).
 ARM = os.environ.get("W1B_ARM", "B")
-if ARM not in ("B", "B2"):
-    raise SystemExit(f"W1B_ARM must be B or B2, got {ARM!r}")
-TAG = "w1b" if ARM == "B" else "w1b2"
+if ARM not in ("B", "B2", "B3"):
+    raise SystemExit(f"W1B_ARM must be B, B2 or B3, got {ARM!r}")
+TAG = {"B": "w1b", "B2": "w1b2", "B3": "w1b3"}[ARM]
 B2_SCENES = set("scene02 scene08 scene09 scene12 scene16 scene17 scene20 "
                 "scene21 sceneC1 sceneC4 sceneD1 sceneD3".split())
+B3_SCENES = set("scene01 scene09 scene21 sceneC1 sceneC4".split())
 
 
 def _sel(ss):
-    """B2 웨이브는 T레버를 보충한 12씬만 다시 찍었다."""
-    return [s for s in ss if ARM == "B" or s in B2_SCENES]
+    """B2 는 T레버 보충 12씬 · B3 는 레버 추가 5씬만 다시 찍었다."""
+    if ARM == "B":
+        return list(ss)
+    return [s for s in ss if s in (B2_SCENES if ARM == "B2" else B3_SCENES)]
 
-B = f"260826_v3w1_lib_{ARM}"
+B = ("260827_v3w1_lib_B3" if ARM == "B3"
+     else f"260826_v3w1_lib_{ARM}")
 BANDS = {
     "base": (B, "260819_main_on",
              _sel("scene01 scene02 scene06 scene08 scene09 scene12 scene16 scene17 "
@@ -228,6 +235,78 @@ def seg_audit(d, cuts):
                 over_discriminating=(len(hs) > len(poses)),
                 stale_signature=stale_signature,
                 collide_examples=collide)
+
+
+# --------------------------------------------------------------------------
+# T2-seg — 세그 3차 소유권으로 설명되는 `cells_raw` 갈림 (DECISIONS **D90 ①**)
+# --------------------------------------------------------------------------
+# **문제.** 낙차를 위에서 덮는 단서(난간 상판·데크형 드레싱)를 지우면 하향 광선이
+# 그 아래의 **원래 있던** 낙차를 새로 읽는다. 그래서 씬 전역 `cells_raw` 는 갈리는데
+# **훈련 라벨 `polar_gt` 는 비트 동일**하다. 높이맵 계기만으로는 이것과 "레버가
+# 지면을 진짜로 팠다"를 구별할 수 없다 — 두 검정이 같은 하향 광선을 공유하기 때문.
+#
+# **세그가 가른다.** `w1d_seg3.json` 의 규칙 S4(덮개)는 갈린 셀의 **과반이 그 단서
+# 자신의 픽셀**임을 컷별 ID 마스크로 실증한 쌍에만 붙는다. 그 경우 Δ는 가림
+# 인공물이고 낙차 기하는 불변이다.
+#
+# **본 파일은 판정을 바꾸지 않는다.** `vg01_pass` 의 의미는 한 글자도 건드리지 않고
+# (기본 = 보수적 격리), `vg01_t2seg` · `vg01_pass_seg3` · `quarantine_if_seg3_admitted`
+# 를 **추가로 계산해 인쇄**한다. 어느 쪽을 코퍼스에 쓸지는 결재 사안이다
+# (`build_corpus_v3.py --admit-seg3`).
+def _seg3_released():
+    """(scene, cue) -> seg3 판정 행. 없으면 빈 dict."""
+    p3 = os.path.join(V3, "w1d_seg3.json")
+    if not os.path.exists(p3):
+        return {}
+    d = json.load(open(p3, encoding="utf-8"))
+    return {(r["scene"], r["cue"]): r for r in d["pairs"]}
+
+
+def _added_levers(scene):
+    """B3 레시피가 **직전 웨이브 대비 새로 끈** cue 키 목록."""
+    rc = os.path.join(V3, "render_configs_v3")
+    cur = os.path.join(rc, f"{scene}_B3.json")
+    if not os.path.exists(cur):
+        return None
+    new = json.load(open(cur, encoding="utf-8"))
+    prev = {}
+    for suf in ("_B2", "_B"):
+        q = os.path.join(rc, f"{scene}{suf}.json")
+        if os.path.exists(q):
+            prev = json.load(open(q, encoding="utf-8"))
+            break
+    return sorted(k for k, v in new.items()
+                  if k.startswith("cue_") and v is False and prev.get(k) is not False)
+
+
+def t2seg_verdict(scene, hd, gt_ok, cells_ok, SEG3):
+    """T2-seg 자격 판정 — 네 조건 **전부**."""
+    if ARM != "B3":
+        return None
+    add = _added_levers(scene)
+    if add is None:
+        return None
+    ok_gt = bool(gt_ok) and not bool(cells_ok)
+    pure_add = (hd or {}).get("fp_only_A") == 0
+    per_cue, all_ok = [], True
+    for c in add:
+        r = SEG3.get((scene, c)) or {}
+        rule = (r.get("t3_rule") or "")[:2]
+        rel = (r.get("final") == "장식")
+        dcell = r.get("d_cells_raw")
+        # Δ에 기여하지 않는 키(Δcells_raw = 0)는 규칙과 무관하게 무해하다.
+        good = rel and (dcell == 0 or rule == "S4")
+        all_ok = all_ok and good
+        per_cue.append(dict(cue=c, seg3_final=r.get("final"), rule=rule,
+                            own_S=r.get("own_S"), d_cells_raw=dcell, ok=good))
+    return dict(added_levers=add, per_cue=per_cue,
+                polar_gt_identical=bool(gt_ok), cells_raw_identical=bool(cells_ok),
+                fp_only_A=(hd or {}).get("fp_only_A"),
+                fp_only_B=(hd or {}).get("fp_only_B"),
+                pure_addition=bool(pure_add),
+                eligible=bool(ok_gt and pure_add and all_ok and add),
+                rule="polar_gt 비트동일 ∧ cells_raw 갈림 ∧ fp_only_A = 0(순증) ∧ "
+                     "추가 레버 전부가 seg3 해제(S4 덮개 또는 Δcells_raw = 0)")
 
 
 def hm_diff(da, db, do):
@@ -426,6 +505,7 @@ def load_corpus():
 
 
 def main():
+    SEG3 = _seg3_released()
     labA = os.path.join(ANN, f"{TAG}_A.json")
     labB = os.path.join(ANN, f"{TAG}_B.json")
     labAC = os.path.join(ANN, f"{TAG}_Acorpus.json")
@@ -685,6 +765,13 @@ def main():
                 row["vg01_tier"] = tier
                 row["vg01_pass"] = tier in ("T1", "T2")
                 row["vg01_state"] = tier + ("" if row["vg01_pass"] else " → 격리")
+                # --- T2-seg: 판정은 그대로, 자격만 추가로 계산·인쇄 (D90 ①) ---
+                t2s = t2seg_verdict(s, hd, gt_ok, cells_ok, SEG3)
+                if t2s is not None:
+                    row["vg01_t2seg"] = t2s
+                    row["vg01_pass_seg3"] = bool(row["vg01_pass"] or t2s["eligible"])
+                else:
+                    row["vg01_pass_seg3"] = row["vg01_pass"]
             if have_labels and row["vg01_pass"] is False:
                 rx = ("계획 §7.4: 실패한 키만 금지 + 남은 키로 씬당 1회 재렌더"
                       if row["vg01_tier"] == "T3-geom" else
@@ -735,6 +822,16 @@ def main():
                       for r in sc if r.get("training_gt_identical")
                       and r.get("scene_footprint_identical") is False],
         quarantine=q,
+        n_pass_seg3=sum(1 for r in sc if r.get("vg01_pass_seg3")),
+        t2seg_eligible=[dict(scene=r["scene"], band=r["band"],
+                             tier=r.get("vg01_tier"), **r["vg01_t2seg"])
+                        for r in sc if (r.get("vg01_t2seg") or {}).get("eligible")],
+        quarantine_if_seg3_admitted=[
+            dict(scene=r["scene"], band=r["band"]) for r in sc
+            if r.get("vg01_pass_seg3") is False],
+        seg3_note="T2-seg 는 **판정을 바꾸지 않는다** — `quarantine` 은 종전 의미 그대로다. "
+                  "`quarantine_if_seg3_admitted` 는 D90 ① 결재 시의 목록이며 "
+                  "`build_corpus_v3.py --admit-seg3` 가 그것을 읽는다.",
         note="바이트층은 계기와 무관한 구성적 진술이다. 라벨러층은 그 위에 "
              "정본 GT 산술을 얹은 것 — 둘 다 통과해야 PASS.")
     out["corpus_tie"] = dict(

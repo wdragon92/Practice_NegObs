@@ -83,19 +83,26 @@ GRID_PATH = os.path.join(LABDIR, "gridspec_v1.json")
 # `W1B_ARM=B`  (기본)  → 착지한 `260826_v3w1_lib_B*` · 산출 `w1b_*`  (W1-B 재현 그대로)
 # `W1B_ARM=B2`         → T레버 보충본 `260826_v3w1_lib_B2*` · **12씬만** · 산출 `w1b2_*`
 # 어느 쪽이든 코퍼스 A팔·D팔·구off 참조와 게이트 술어는 **한 글자도 다르지 않다**.
+# --- W1-B3 보충 웨이브 스위치 (DECISIONS **D90 ①** · 세그 3차 `w1d_seg3.json`) ---
+# `W1B_ARM=B3` → 레버 추가 재렌더 `260827_v3w1_lib_B3*` · **5씬만** · 산출 `w1b3_*`
+# 게이트 술어·A팔·D팔 참조는 B/B2 와 **한 글자도 다르지 않다**(계기 동일성).
 ARM = os.environ.get("W1B_ARM", "B")
-if ARM not in ("B", "B2"):
-    raise SystemExit(f"W1B_ARM must be B or B2, got {ARM!r}")
-TAG = "w1b" if ARM == "B" else "w1b2"
+if ARM not in ("B", "B2", "B3"):
+    raise SystemExit(f"W1B_ARM must be B, B2 or B3, got {ARM!r}")
+TAG = {"B": "w1b", "B2": "w1b2", "B3": "w1b3"}[ARM]
 B2_SCENES = set("scene02 scene08 scene09 scene12 scene16 scene17 scene20 "
                 "scene21 sceneC1 sceneC4 sceneD1 sceneD3".split())
+B3_SCENES = set("scene01 scene09 scene21 sceneC1 sceneC4".split())
 
 
 def _sel(ss):
-    """B2 웨이브는 T레버를 보충한 12씬만 다시 찍었다."""
-    return [s for s in ss if ARM == "B" or s in B2_SCENES]
+    """B2 는 T레버 보충 12씬 · B3 는 레버 추가 5씬만 다시 찍었다."""
+    if ARM == "B":
+        return list(ss)
+    return [s for s in ss if s in (B2_SCENES if ARM == "B2" else B3_SCENES)]
 
-B = f"260826_v3w1_lib_{ARM}"
+B = ("260827_v3w1_lib_B3" if ARM == "B3"
+     else f"260826_v3w1_lib_{ARM}")
 
 D = "260826_v3w1_lib_D"
 BANDS = {

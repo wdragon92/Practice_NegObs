@@ -65,17 +65,22 @@ def onwired_registry():
     return out
 
 
-def built_levers(b2_scenes):
+def built_levers(b2_scenes, b3_scenes=frozenset()):
+    """B팔 정본 트리는 **B3 > B2 > B** (나중 웨이브가 이긴다 · D90 ①)."""
     import glob
+
+    def tree_of(sc):
+        if sc in b3_scenes:
+            return "B3"
+        return "B2" if sc in b2_scenes else "B"
+
     out = {}
     for p in sorted(glob.glob(os.path.join(V3, "render_configs_v3", "*_B*.json"))):
         base = os.path.basename(p)[:-5]
         scene, _, tag = base.rpartition("_")
-        if tag not in ("B", "B2"):
+        if tag not in ("B", "B2", "B3"):
             continue
-        if tag == "B2" and scene not in b2_scenes:
-            continue
-        if tag == "B" and scene in b2_scenes:
+        if tree_of(scene) != tag:
             continue
         cfg = json.load(open(p, encoding="utf-8"))
         out[scene] = {CUE2KEY[c] for c, v in cfg.items()
@@ -99,8 +104,9 @@ def main(argv=None):
     F = man["frames"]
     meta = man["meta"]
     B2S = set(meta["b2_scenes"])
+    B3S = set(meta.get("b3_scenes") or ())
     ONW = onwired_registry()
-    BUILT = built_levers(B2S)
+    BUILT = built_levers(B2S, B3S)
     QU = json.load(open(os.path.join(V3, "corpus_v3_quarantine.json"),
                         encoding="utf-8"))
 

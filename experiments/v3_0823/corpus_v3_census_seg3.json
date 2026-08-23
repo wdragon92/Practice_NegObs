@@ -1,20 +1,20 @@
 {
  "doc": "corpus_v3_census",
  "version": "1.0",
- "manifest": "experiments/v3_0823/dataset_manifest_v3.json",
- "created": "2026-08-24T07:32:16",
- "n_frames": 3606,
+ "manifest": "experiments/v3_0823/dataset_manifest_v3_seg3.json",
+ "created": "2026-08-24T07:35:04",
+ "n_frames": 3654,
  "census": {
   "by_arm": {
    "A": 936,
-   "B": 624,
+   "B": 672,
    "C": 1029,
    "D": 1017
   },
   "by_arm_split": {
    "A/train": 672,
    "A/val": 264,
-   "B/train": 360,
+   "B/train": 408,
    "B/val": 264,
    "C/train": 765,
    "C/val": 264,
@@ -22,18 +22,18 @@
    "D/val": 264
   },
   "by_tier": {
-   "E": 63,
+   "E": 66,
    "H": 372,
    "H_weak": 48,
-   "V": 903,
+   "V": 948,
    "none_in_fov": 270,
    "off": 1950
   },
   "by_split_tier": {
-   "train/E": 39,
+   "train/E": 42,
    "train/H": 186,
    "train/H_weak": 42,
-   "train/V": 687,
+   "train/V": 732,
    "train/none_in_fov": 174,
    "train/off": 1422,
    "val/E": 24,
@@ -54,10 +54,10 @@
    "A/val/H_weak": 3,
    "A/val/V": 108,
    "A/val/none_in_fov": 48,
-   "B/train/E": 18,
+   "B/train/E": 21,
    "B/train/H": 93,
    "B/train/H_weak": 21,
-   "B/train/V": 201,
+   "B/train/V": 246,
    "B/train/none_in_fov": 27,
    "B/val/E": 12,
    "B/val/H": 93,
@@ -72,6 +72,7 @@
   },
   "by_scene_arm": {
    "scene01/A": 24,
+   "scene01/B": 24,
    "scene01/C": 24,
    "scene01/D": 24,
    "scene02/A": 24,
@@ -114,6 +115,7 @@
    "scene20/C": 72,
    "scene20/D": 72,
    "scene21/A": 24,
+   "scene21/B": 24,
    "scene21/C": 24,
    "scene21/D": 24,
    "sceneC1/A": 48,
@@ -153,8 +155,8 @@
    "sceneN5/C": 24,
    "sceneN5/D": 24
   },
-  "hazard_positive_frames": 1386,
-  "hazard_arm_frames": 1560,
+  "hazard_positive_frames": 1434,
+  "hazard_arm_frames": 1608,
   "n_scenes": 24
  },
  "val_strict_h": {
@@ -189,14 +191,14 @@
    "R": {
     "cue": "cue_railing",
     "n_scenes": 13,
-    "n": 2121,
+    "n": 2169,
     "a": 696,
-    "b": 288,
+    "b": 336,
     "c": 573,
     "d": 564,
-    "cue_rate": 0.5983,
-    "hazard_rate": 0.4639,
-    "r": 0.2069,
+    "cue_rate": 0.5851,
+    "hazard_rate": 0.4758,
+    "r": 0.1728,
     "interpretable": true
    },
    "Ta": {
@@ -215,72 +217,72 @@
    "N": {
     "cue": "cue_nosing",
     "n_scenes": 7,
-    "n": 999,
+    "n": 1023,
     "a": 264,
-    "b": 216,
+    "b": 240,
     "c": 264,
     "d": 255,
-    "cue_rate": 0.5285,
-    "hazard_rate": 0.4805,
-    "r": 0.0414,
+    "cue_rate": 0.5161,
+    "hazard_rate": 0.4927,
+    "r": 0.0151,
     "interpretable": true
    },
    "T": {
     "cue": "cue_material_break",
     "n_scenes": 24,
-    "n": 3606,
+    "n": 3654,
     "a": 936,
-    "b": 624,
+    "b": 672,
     "c": 1029,
     "d": 1017,
-    "cue_rate": 0.5449,
-    "hazard_rate": 0.4326,
-    "r": 0.0966,
+    "cue_rate": 0.5378,
+    "hazard_rate": 0.4401,
+    "r": 0.0788,
     "interpretable": true
    },
    "Sg": {
     "cue": "cue_sign",
     "n_scenes": 8,
-    "n": 1263,
+    "n": 1311,
     "a": 336,
-    "b": 264,
+    "b": 312,
     "c": 336,
     "d": 327,
-    "cue_rate": 0.5321,
-    "hazard_rate": 0.4751,
-    "r": 0.0533,
+    "cue_rate": 0.5126,
+    "hazard_rate": 0.4943,
+    "r": 0.0117,
     "interpretable": true
    },
    "V": {
     "cue": "cue_scene_dressing",
     "n_scenes": 24,
-    "n": 3606,
+    "n": 3654,
     "a": 1032,
-    "b": 528,
+    "b": 576,
     "c": 1029,
     "d": 1017,
-    "cue_rate": 0.5715,
-    "hazard_rate": 0.4326,
-    "r": 0.1588,
+    "cue_rate": 0.564,
+    "hazard_rate": 0.4401,
+    "r": 0.139,
     "interpretable": true
    },
    "_max": [
     "R",
-    0.2069
+    0.1728
    ]
   },
   "fact_level": {
    "R": {
     "cue": "cue_railing",
     "n_scenes": 13,
-    "n": 2121,
+    "n": 2169,
     "a": 579,
-    "b": 246,
+    "b": 294,
     "c": 690,
     "d": 606,
-    "cue_rate": 0.5983,
-    "hazard_rate": 0.389,
-    "r": 0.1685,
+    "cue_rate": 0.5851,
+    "hazard_rate": 0.4025,
+    "r": 0.1302,
     "interpretable": true
    },
    "Ta": {
@@ -299,58 +301,58 @@
    "N": {
     "cue": "cue_nosing",
     "n_scenes": 7,
-    "n": 999,
+    "n": 1023,
     "a": 249,
-    "b": 201,
+    "b": 225,
     "c": 279,
     "d": 270,
-    "cue_rate": 0.5285,
-    "hazard_rate": 0.4505,
-    "r": 0.045,
+    "cue_rate": 0.5161,
+    "hazard_rate": 0.4633,
+    "r": 0.0171,
     "interpretable": true
    },
    "T": {
     "cue": "cue_material_break",
     "n_scenes": 24,
-    "n": 3606,
+    "n": 3654,
     "a": 837,
-    "b": 549,
+    "b": 597,
     "c": 1128,
     "d": 1092,
-    "cue_rate": 0.5449,
-    "hazard_rate": 0.3844,
-    "r": 0.0936,
+    "cue_rate": 0.5378,
+    "hazard_rate": 0.3924,
+    "r": 0.074,
     "interpretable": true
    },
    "Sg": {
     "cue": "cue_sign",
     "n_scenes": 8,
-    "n": 1263,
+    "n": 1311,
     "a": 318,
-    "b": 246,
+    "b": 294,
     "c": 354,
     "d": 345,
-    "cue_rate": 0.5321,
-    "hazard_rate": 0.4466,
-    "r": 0.0572,
+    "cue_rate": 0.5126,
+    "hazard_rate": 0.4668,
+    "r": 0.0131,
     "interpretable": true
    },
    "V": {
     "cue": "cue_scene_dressing",
     "n_scenes": 24,
-    "n": 3606,
+    "n": 3654,
     "a": 930,
-    "b": 456,
+    "b": 504,
     "c": 1131,
     "d": 1089,
-    "cue_rate": 0.5715,
-    "hazard_rate": 0.3844,
-    "r": 0.1588,
+    "cue_rate": 0.564,
+    "hazard_rate": 0.3924,
+    "r": 0.1369,
     "interpretable": true
    },
    "_max": [
-    "R",
-    0.1685
+    "V",
+    0.1369
    ]
   },
   "counterfactuals": {
@@ -371,12 +373,12 @@
     "V": 0.1393
    },
    "balanced": {
-    "R": 0.1463,
+    "R": 0.1318,
     "Ta": 0.0,
     "N": 0.0,
     "T": 0.0,
     "Sg": 0.0,
-    "V": 0.0748
+    "V": 0.07
    }
   },
   "counterfactual_legend": {
@@ -385,68 +387,16 @@
    "revive_and_skip": "위 + D74 ⑤ 미렌더 168컷을 찍은 경우 (**A와 바이트 동일 = 학습 이중 가중**이라 D74 가 거부한 경로)",
    "balanced": "씬별로 A/B = C/D 항등식을 강제해 잘라낸 경우 (PREREG §4.5 팔 수준 톱업 조항의 as-built 판)"
   },
-  "vg09_remedy": {
-   "R": {
-    "r_asbuilt": 0.2069,
-    "b_arm_keeps_key": [
-     {
-      "scene": "scene08",
-      "n_B": 48,
-      "levers": [
-       "Sg",
-       "T",
-       "V"
-      ]
-     },
-     {
-      "scene": "scene20",
-      "n_B": 72,
-      "levers": [
-       "T",
-       "V"
-      ]
-     }
-    ],
-    "arm_imbalance_A_without_B": [
-     {
-      "scene": "scene01",
-      "n_A": 24,
-      "n_B": 0
-     },
-     {
-      "scene": "scene10",
-      "n_A": 24,
-      "n_B": 0
-     },
-     {
-      "scene": "scene12",
-      "n_A": 72,
-      "n_B": 0
-     },
-     {
-      "scene": "scene16",
-      "n_A": 24,
-      "n_B": 0
-     },
-     {
-      "scene": "scene21",
-      "n_A": 24,
-      "n_B": 0
-     }
-    ],
-    "r_if_key_added_to_all_B": 0.0815,
-    "prescription": "PREREG §4.5 마지막 행 — VG-CLS 재확인 후 레버 추가, 불가능하면 **상수 키로 승격 표기**하고 사유 인쇄"
-   }
-  },
+  "vg09_remedy": {},
   "threshold": 0.2,
   "protocol": "ACCOUNTING §4.9-3 — ① 주변분포 병기 ② 토글 가능 키 한정 ③ 키별 산출 ④ 상수 키 별도 표기. 모집단은 **수리된 hazgate**(--mode full) 위에서 잡는다 (PREREG §4.4 규약 4).",
   "constant_keys": [],
   "arm_level_phi": {
    "a": 936,
-   "b": 624,
+   "b": 672,
    "c": 1029,
    "d": 1017,
-   "r": 0.0966,
+   "r": 0.0788,
    "note": "팔 수준 φ 는 설계상 자동 0 에 가깝다 — **단독 인용 금지** (§4.9-3 ③)"
   }
  },
@@ -454,21 +404,21 @@
   "authority": "D58 ② · 계획 §4.4.5 (문자대로면 1.000 완전 교락 · 계획 예측 0.0033)",
   "arms_BD_x_new": {
    "a": 240,
-   "b": 1401,
+   "b": 1449,
    "c": 240,
    "d": 1725,
-   "r": 0.0354
+   "r": 0.0295
   },
   "hazard_arm_x_new": {
    "a": 240,
-   "b": 1320,
+   "b": 1368,
    "c": 240,
    "d": 1806,
-   "r": 0.0533
+   "r": 0.047
   },
   "by_scene_family": {
    "legacy33/A": 816,
-   "legacy33/B": 504,
+   "legacy33/B": 552,
    "legacy33/C": 909,
    "legacy33/D": 897,
    "new/A": 120,
@@ -500,10 +450,10 @@
     "max": 6744
    },
    "B_arm": {
-    "n": 620,
+    "n": 668,
     "zeros": 234,
-    "p50": 91034,
-    "p90": 789787,
+    "p50": 94981,
+    "p90": 767342,
     "max": 1396894
    },
    "A_strict_H": {
@@ -538,7 +488,7 @@
     "AC_arm_false_absent_rate": 0.04803,
     "A_strict_H_masked": 3,
     "A_strict_H_masked_rate": 0.0185,
-    "B_arm_present": 386,
+    "B_arm_present": 434,
     "youden": 0.93824
    },
    {
@@ -549,7 +499,7 @@
     "AC_arm_false_absent_rate": 0.04803,
     "A_strict_H_masked": 3,
     "A_strict_H_masked_rate": 0.0185,
-    "B_arm_present": 386,
+    "B_arm_present": 434,
     "youden": 0.93824
    },
    {
@@ -560,7 +510,7 @@
     "AC_arm_false_absent_rate": 0.05146,
     "A_strict_H_masked": 3,
     "A_strict_H_masked_rate": 0.0185,
-    "B_arm_present": 386,
+    "B_arm_present": 434,
     "youden": 0.93481
    },
    {
@@ -571,7 +521,7 @@
     "AC_arm_false_absent_rate": 0.05146,
     "A_strict_H_masked": 3,
     "A_strict_H_masked_rate": 0.0185,
-    "B_arm_present": 383,
+    "B_arm_present": 431,
     "youden": 0.93481
    },
    {
@@ -582,7 +532,7 @@
     "AC_arm_false_absent_rate": 0.05317,
     "A_strict_H_masked": 3,
     "A_strict_H_masked_rate": 0.0185,
-    "B_arm_present": 369,
+    "B_arm_present": 417,
     "youden": 0.93996
    },
    {
@@ -593,7 +543,7 @@
     "AC_arm_false_absent_rate": 0.05489,
     "A_strict_H_masked": 3,
     "A_strict_H_masked_rate": 0.0185,
-    "B_arm_present": 363,
+    "B_arm_present": 411,
     "youden": 0.94511
    },
    {
@@ -604,7 +554,7 @@
     "AC_arm_false_absent_rate": 0.05832,
     "A_strict_H_masked": 6,
     "A_strict_H_masked_rate": 0.037,
-    "B_arm_present": 354,
+    "B_arm_present": 399,
     "youden": 0.94168
    },
    {
@@ -615,7 +565,7 @@
     "AC_arm_false_absent_rate": 0.07376,
     "A_strict_H_masked": 12,
     "A_strict_H_masked_rate": 0.0741,
-    "B_arm_present": 336,
+    "B_arm_present": 381,
     "youden": 0.92624
    },
    {
@@ -626,7 +576,7 @@
     "AC_arm_false_absent_rate": 0.13722,
     "A_strict_H_masked": 21,
     "A_strict_H_masked_rate": 0.1296,
-    "B_arm_present": 330,
+    "B_arm_present": 375,
     "youden": 0.86278
    },
    {
@@ -637,7 +587,7 @@
     "AC_arm_false_absent_rate": 0.20069,
     "A_strict_H_masked": 51,
     "A_strict_H_masked_rate": 0.3148,
-    "B_arm_present": 276,
+    "B_arm_present": 321,
     "youden": 0.79931
    }
   ],
@@ -649,7 +599,7 @@
    "AC_arm_false_absent_rate": 0.05489,
    "A_strict_H_masked": 3,
    "A_strict_H_masked_rate": 0.0185,
-   "B_arm_present": 363,
+   "B_arm_present": 411,
    "youden": 0.94511
   },
   "d_arm_leak": {
@@ -662,7 +612,7 @@
  },
  "channels": {
   "cue": {
-   "idseg_strict": 3243,
+   "idseg_strict": 3291,
    "geometric_fallback": 363,
    "fallback_by_reason": {
     "no_strict_idseg": 216,
@@ -678,7 +628,7 @@
   },
   "gt_void": {
    "frames_with_void": 765,
-   "frames_with_void_pct": 21.21,
+   "frames_with_void_pct": 20.94,
    "total_void_cells": 4227,
    "by_arm": {
     "A": 282,
@@ -716,13 +666,13 @@
   }
  },
  "quarantine": {
-  "n_frames": 162,
+  "n_frames": 114,
   "by_arm": {
-   "B": 144,
+   "B": 96,
    "C": 3,
    "D": 15
   },
-  "unit_ledger_n": 13,
+  "unit_ledger_n": 11,
   "seg_collision_cuts": 160,
   "absent_not_quarantined": {
    "b_arm_skip": {
@@ -744,26 +694,26 @@
   "command": "python3 experiments/v3_0823/code/build_corpus_v3.py && python3 experiments/v3_0823/code/corpus_v3_measure.py",
   "rows": {
    "행 5 — v3 train/val 프레임 회계": {
-    "total": 3606,
+    "total": 3654,
     "by_arm": {
      "A": 936,
-     "B": 624,
+     "B": 672,
      "C": 1029,
      "D": 1017
     },
     "by_split": {
-     "train": 2550,
+     "train": 2598,
      "val": 1056
     },
     "tier": {
-     "E": 63,
+     "E": 66,
      "H": 372,
      "H_weak": 48,
-     "V": 903,
+     "V": 948,
      "none_in_fov": 270,
      "off": 1950
     },
-    "quarantined": 162
+    "quarantined": 114
    },
    "행 1 — 단서 존재 판정 임계 k": {
     "status": "**제안**",

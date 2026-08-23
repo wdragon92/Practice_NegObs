@@ -1444,5 +1444,109 @@
    },
    "changed": true
   }
- ]
+ ],
+ "seg3": {
+  "source": "experiments/v3_0823/w1d_seg3.json",
+  "created": "2026-08-24T06:59:51",
+  "authority": "DECISIONS D90 ① · W1-D §6.4 · §10 W1D-5(b)",
+  "rules": {
+   "S0": "분쟁(판정불가) 쌍에만 발동",
+   "S1": "polar_gt 상이 → 구조물(번복 불가)",
+   "S2": "귀속 픽셀 < 200 → 기권",
+   "S3": "cover_A ≥ 0.50 → 구조물(면소유)",
+   "S4": "own_S ≥ 0.50 → 장식(덮개)",
+   "S5": "over_B < 0.005 → 장식(이격)",
+   "S6": "그 밖 → 장식(상재)"
+  },
+  "n_released": 9,
+  "released": [
+   {
+    "scene": "scene01",
+    "cue": "cue_railing",
+    "key": "R",
+    "basis": "S4 덮개 own_S=1.000 ≥ 0.50 (S=69셀)"
+   },
+   {
+    "scene": "scene01",
+    "cue": "cue_scene_dressing",
+    "key": "V",
+    "basis": "S4 덮개 own_S=0.968 ≥ 0.50 (S=8533셀)"
+   },
+   {
+    "scene": "scene03",
+    "cue": "cue_scene_dressing",
+    "key": "V",
+    "basis": "S6 상재 — cover_A=0.147 · over_B=0.256 · Δfp=0"
+   },
+   {
+    "scene": "scene09",
+    "cue": "cue_scene_dressing",
+    "key": "V",
+    "basis": "S5 이격 over_B=0.0037 < 0.005"
+   },
+   {
+    "scene": "scene10",
+    "cue": "cue_scene_dressing",
+    "key": "V",
+    "basis": "S5 이격 over_B=0.0006 < 0.005"
+   },
+   {
+    "scene": "scene21",
+    "cue": "cue_nosing",
+    "key": "N",
+    "basis": "S6 상재 — cover_A=0.314 · over_B=0.982 · Δfp=0"
+   },
+   {
+    "scene": "scene21",
+    "cue": "cue_railing",
+    "key": "R",
+    "basis": "S4 덮개 own_S=0.995 ≥ 0.50 (S=208셀)"
+   },
+   {
+    "scene": "sceneC1",
+    "cue": "cue_railing",
+    "key": "R",
+    "basis": "S5 이격 over_B=0.0009 < 0.005"
+   },
+   {
+    "scene": "sceneC1",
+    "cue": "cue_scene_dressing",
+    "key": "V",
+    "basis": "S6 상재 — cover_A=0.101 · over_B=0.031 · Δfp=0"
+   }
+  ],
+  "toggle_forbidden_after": [
+   {
+    "scene": "scene02",
+    "cue": "cue_scene_dressing",
+    "reason": "S1 VG-01 경성 — polar_gt 4프레임 상이"
+   },
+   {
+    "scene": "scene04",
+    "cue": "cue_scene_dressing",
+    "reason": "S0 범위 밖 — 검정 1·2 일치, 3차 미발동"
+   },
+   {
+    "scene": "scene08",
+    "cue": "cue_railing",
+    "reason": "S0 범위 밖 — 검정 1·2 일치, 3차 미발동"
+   },
+   {
+    "scene": "scene10",
+    "cue": "cue_railing",
+    "reason": "S0 범위 밖 — 검정 1·2 일치, 3차 미발동"
+   },
+   {
+    "scene": "scene20",
+    "cue": "cue_railing",
+    "reason": "S0 범위 밖 — 검정 1·2 일치, 3차 미발동"
+   },
+   {
+    "scene": "sceneC4",
+    "cue": "cue_scene_dressing",
+    "reason": "S0 범위 밖 — 검정 1·2 일치, 3차 미발동"
+   }
+  ],
+  "note": "검정 3(세그 소유권)은 **판정불가 쌍에만** 발동한다(S0). `toggle_forbidden_final`(W1-D 15쌍)은 원문 그대로 두고 이 블록이 그 뒤의 상태를 기록한다."
+ }
 }

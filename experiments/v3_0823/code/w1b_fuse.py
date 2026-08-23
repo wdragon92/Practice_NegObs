@@ -91,19 +91,25 @@ import fuse_heightmap as FH                                     # noqa: E402
 # **C3-4 (동일-시점 융합 강제)**: 같은 포즈 집합·같은 `n_views` — VG-10 과
 #   VG-datum 이 강제 장치이며 팔 간 `n_views` 불일치는 하드 실패다.
 ARM = os.environ.get("W1B_ARM", "B")
-if ARM not in ("B", "B2", "C"):
-    raise SystemExit(f"W1B_ARM must be B, B2 or C, got {ARM!r}")
-TAG = {"B": "w1b", "B2": "w1b2", "C": "w1c"}[ARM]
+if ARM not in ("B", "B2", "B3", "C"):
+    raise SystemExit(f"W1B_ARM must be B, B2, B3 or C, got {ARM!r}")
+TAG = {"B": "w1b", "B2": "w1b2", "B3": "w1b3", "C": "w1c"}[ARM]
 B2_SCENES = set("scene02 scene08 scene09 scene12 scene16 scene17 scene20 "
                 "scene21 sceneC1 sceneC4 sceneD1 sceneD3".split())
+B3_SCENES = set("scene01 scene09 scene21 sceneC1 sceneC4".split())
 
 
 def _sel(ss):
-    """B2 웨이브는 T레버를 보충한 12씬만 다시 찍었다."""
-    return [s for s in ss if ARM != "B2" or s in B2_SCENES]
+    """B2 는 T레버 보충 12씬 · B3(D90 ①) 는 레버 추가 5씬만 다시 찍었다."""
+    if ARM == "B2":
+        return [s for s in ss if s in B2_SCENES]
+    if ARM == "B3":
+        return [s for s in ss if s in B3_SCENES]
+    return list(ss)
 
 
-B = ("260827_v3w1_lib_C" if ARM == "C" else f"260826_v3w1_lib_{ARM}")
+B = ("260827_v3w1_lib_C" if ARM == "C" else
+     "260827_v3w1_lib_B3" if ARM == "B3" else f"260826_v3w1_lib_{ARM}")
 # 밴드 -> (팔 라운드, 그 밴드의 씬)
 if ARM == "C":
     # 계획 §1.2 C열 — B팔에 없는 s03·s04·s10 이 들어오고 s06 이 살아 있다

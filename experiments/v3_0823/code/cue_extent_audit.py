@@ -122,6 +122,9 @@ B_ROUNDS = [("260826_v3w1_lib_B", "base"), ("260826_v3w1_lib_B_h", "h"),
             ("260826_v3w1_lib_B_e", "e"), ("260826_v3w1_lib_B_e2", "e2")]
 B2_ROUNDS = [("260826_v3w1_lib_B2", "base"), ("260826_v3w1_lib_B2_h", "h"),
              ("260826_v3w1_lib_B2_e", "e"), ("260826_v3w1_lib_B2_e2", "e2")]
+# [08-24 · D90 ①] 세그 3차 판정이 해제한 레버를 더해 다시 찍은 5씬 = B3 트리.
+B3_ROUNDS = [("260827_v3w1_lib_B3", "base"), ("260827_v3w1_lib_B3_h", "h"),
+             ("260827_v3w1_lib_B3_e", "e"), ("260827_v3w1_lib_B3_e2", "e2")]
 D_ROUNDS = [("260826_v3w1_lib_D", "base"), ("260826_v3w1_lib_D_h", "h"),
             ("260826_v3w1_lib_D_e", "e"), ("260826_v3w1_lib_D_e2", "e2")]
 # [08-24 · 코퍼스 v3 조립] C 웨이브가 착지했다(W1C_REPORT §8.2 — 816/816컷 · fetch=orch
@@ -136,6 +139,14 @@ W2_SCENES = ("sceneH6", "sceneH7")
 # W1B2 §7 코퍼스 매니페스트 지시 — 이 12씬의 B팔 정본은 B2 트리다.
 B2_SCENES = set("scene02 scene08 scene09 scene12 scene16 scene17 scene20 "
                 "scene21 sceneC1 sceneC4 sceneD1 sceneD3".split())
+# D90 ① — 이 5씬의 B팔 정본은 **B3 트리**다 (B3 > B2 > B).
+B3_SCENES = set("scene01 scene09 scene21 sceneC1 sceneC4".split())
+
+
+def b_tree_of(scene):
+    if scene in B3_SCENES:
+        return "B3"
+    return "B2" if scene in B2_SCENES else "B"
 # 무낙차 4씬 — v2 on팔이 그대로 C팔이다(계획 §1.0 첫 항목). A팔이라는 말이 성립하지 않는다.
 NODROP_SCENES = ("sceneN1", "sceneN2", "sceneN4", "sceneN5")
 
@@ -457,13 +468,11 @@ def _pair_index():
     for rnd, band in A_ROUNDS:
         for f in glob.glob(os.path.join(DATA, rnd, "*", "*", "*.idseg.npz")):
             A[(os.path.basename(os.path.dirname(f)), band, os.path.basename(f))] = f
-    for rounds in (B_ROUNDS, B2_ROUNDS):
+    for rounds, tg in ((B_ROUNDS, "B"), (B2_ROUNDS, "B2"), (B3_ROUNDS, "B3")):
         for rnd, band in rounds:
             for f in glob.glob(os.path.join(DATA, rnd, "*", "*", "*.idseg.npz")):
                 sc = os.path.basename(os.path.dirname(f))
-                if rounds is B2_ROUNDS and sc not in B2_SCENES:
-                    continue
-                if rounds is B_ROUNDS and sc in B2_SCENES:
+                if b_tree_of(sc) != tg:
                     continue
                 B[(sc, band, os.path.basename(f))] = f
     # 신규 씬 프로브: A팔 vs B팔 (전 cue OFF) — 전 단서 집합이 그대로 나온다
@@ -515,13 +524,11 @@ def b_arm_survivors(workers=12):
     """B팔(단서 레버 OFF · 위험 ON)에서도 보이는 컴포넌트."""
     from concurrent.futures import ProcessPoolExecutor
     jobs = collections.defaultdict(list)
-    for rounds in (B_ROUNDS, B2_ROUNDS):
+    for rounds, tg in ((B_ROUNDS, "B"), (B2_ROUNDS, "B2"), (B3_ROUNDS, "B3")):
         for rnd, _b in rounds:
             for f in glob.glob(os.path.join(DATA, rnd, "*", "*", "*.idseg.npz")):
                 sc = os.path.basename(os.path.dirname(f))
-                if rounds is B2_ROUNDS and sc not in B2_SCENES:
-                    continue
-                if rounds is B_ROUNDS and sc in B2_SCENES:
+                if b_tree_of(sc) != tg:
                     continue
                 jobs[sc].append(f)
     for sp in PROBE_PRIMARY:
@@ -544,10 +551,10 @@ def b_arm_survivors(workers=12):
 
 def _lever_keys(scene):
     """그 씬의 B팔 레버(꺼진 cue 키) — 실제로 찍은 설정 파일이 최종 사실이다."""
-    for suf in ("_B2", "_B"):
+    for suf in ("_B3", "_B2", "_B"):
         p = os.path.join(V3, "render_configs_v3", f"{scene}{suf}.json")
         if os.path.exists(p):
-            if suf == "_B" and scene in B2_SCENES:
+            if b_tree_of(scene) != suf[1:]:
                 continue
             cfg = json.load(open(p, encoding="utf-8"))
             return [ALLKEY[k] for k, v in cfg.items()
@@ -972,7 +979,10 @@ def build_label_index():
                      note="교정 GT 정본(v2corr) · on 측"))
 
     # ---- B팔: W1-B / W1-B2 게이트 라벨 ------------------------------------
-    for fn, tag in (("w1b_B.json", "B"), ("w1b2_B.json", "B2")):
+    for fn, tag in (("w1b_B.json", "B"), ("w1b2_B.json", "B2"),
+                    ("w1b3_B.json", "B3")):
+        if not os.path.exists(os.path.join(ANN, fn)):
+            continue
         d = json.load(open(os.path.join(ANN, fn), encoding="utf-8"))
         n = 0
         for k, v in d["frames"].items():
@@ -980,9 +990,7 @@ def build_label_index():
             if side != "on":
                 continue
             # B2 씬은 B2 라벨이, 나머지는 B 라벨이 정본.
-            if tag == "B2" and scene not in B2_SCENES:
-                continue
-            if tag == "B" and scene in B2_SCENES:
+            if b_tree_of(scene) != tag:
                 continue
             idx[("B", scene, band, stem)] = dict(
                 hazard=_haz(v), n_cells=int(sum(v.get("polar_gt") or [])),
@@ -1107,15 +1115,12 @@ def collect_jobs():
             add(f, sc, "A", band, rnd)
             acct["A"] += 1
     # B팔 (B2 우선 · W1B2 §7)
-    for rounds, tag in ((B2_ROUNDS, "B2"), (B_ROUNDS, "B")):
+    for rounds, tag in ((B3_ROUNDS, "B3"), (B2_ROUNDS, "B2"), (B_ROUNDS, "B")):
         for rnd, band in rounds:
             for f in sorted(glob.glob(os.path.join(DATA, rnd, "*", "*", "*.idseg.npz"))):
                 sc = os.path.basename(os.path.dirname(f))
-                if tag == "B2" and sc not in B2_SCENES:
-                    acct["B2_skip_not_canonical"] += 1
-                    continue
-                if tag == "B" and sc in B2_SCENES:
-                    acct["B_skip_superseded_by_B2"] += 1
+                if b_tree_of(sc) != tag:
+                    acct[f"{tag}_skip_not_canonical"] += 1
                     continue
                 add(f, sc, "B", band, rnd)
                 acct["B"] += 1
@@ -1823,13 +1828,11 @@ def validate_attrib(attrib, args):
             sc = os.path.basename(os.path.dirname(f))
             A[(sc, band, os.path.basename(f))] = f
     B = {}
-    for rounds in (B_ROUNDS, B2_ROUNDS):
+    for rounds, tg in ((B_ROUNDS, "B"), (B2_ROUNDS, "B2"), (B3_ROUNDS, "B3")):
         for rnd, band in rounds:
             for f in glob.glob(os.path.join(DATA, rnd, "*", "*", "*.idseg.npz")):
                 sc = os.path.basename(os.path.dirname(f))
-                if rounds is B2_ROUNDS and sc not in B2_SCENES:
-                    continue
-                if rounds is B_ROUNDS and sc in B2_SCENES:
+                if b_tree_of(sc) != tg:
                     continue
                 B[(sc, band, os.path.basename(f))] = f
     common = sorted(set(A) & set(B))

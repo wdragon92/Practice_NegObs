@@ -1,0 +1,231 @@
+{
+ "doc": "w1b3_fuse_audit",
+ "version": "1.0",
+ "arm": "B3",
+ "b_round": "260827_v3w1_lib_B3",
+ "rule": "코퍼스 **A팔**이 융합을 쓰는 (밴드,씬)에만 B팔 융합 사이드카를 쓴다 — B는 on팔이고 중심 게이트가 A/B 동일성이므로 계기 짝이 A다. 그리고 **재융합하지 않는다**: 융합은 시점 의존이라 단서(=가림막) 제거만으로 fp가 갈린다(scene02 실측 262셀). AABB 바이트 동일로 기하 불변이 증명된 (밴드,씬)에 한해 **A팔 융합본을 공유**한다. 밴드 라운드는 base 융합본 복사(AABB sha 동일 확인 후).",
+ "share_rule_caveat": "공유한 씬에서는 VG-01 라벨러층이 독립 검사가 아니다 — 판정 근거는 AABB 바이트층. refuse_vs_A에 재융합본과 A의 차이를 남긴다.",
+ "divergence_from_w1d": "w1d_fuse.py는 구off팔을 계기 권위로 삼았다(D가 off팔이므로). scene08이 두 규칙이 갈리는 유일한 씬이다 — 코퍼스에서 on=aabb · off=fused.",
+ "agree_band_m": 0.01,
+ "flag_p90_m": 0.3,
+ "wrote": [],
+ "flagged": [],
+ "problems": [],
+ "rows": [
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_B3",
+   "scene": "scene01",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": 0.0003,
+    "p90_abs": 0.0005
+   },
+   "corpus_on_fused": false,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 68574,
+   "aabb_finite": 103041,
+   "both": 68574,
+   "med_abs": 0.0005,
+   "p90_abs": 0.0008,
+   "max_abs": 0.4494,
+   "fused_z": [
+    -0.601,
+    0.02
+   ],
+   "aabb_z": [
+    -0.6,
+    0.003
+   ],
+   "action": "keep aabb"
+  },
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_B3",
+   "scene": "scene09",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": 0.0055,
+    "p90_abs": 0.0077
+   },
+   "corpus_on_fused": false,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 28421,
+   "aabb_finite": 103041,
+   "both": 28421,
+   "med_abs": 0.0007,
+   "p90_abs": 0.0022,
+   "max_abs": 0.1804,
+   "fused_z": [
+    -5.193,
+    0.0
+   ],
+   "aabb_z": [
+    -5.19,
+    0.001
+   ],
+   "action": "keep aabb"
+  },
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_B3",
+   "scene": "scene21",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": 0.0004,
+    "p90_abs": 0.0005
+   },
+   "corpus_on_fused": false,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 52429,
+   "aabb_finite": 103041,
+   "both": 52429,
+   "med_abs": 0.0056,
+   "p90_abs": 0.009,
+   "max_abs": 3.6156,
+   "fused_z": [
+    -2.702,
+    0.735
+   ],
+   "aabb_z": [
+    -2.75,
+    0.914
+   ],
+   "action": "keep aabb"
+  },
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_B3",
+   "scene": "sceneC1",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": 0.0003,
+    "p90_abs": 0.0005
+   },
+   "corpus_on_fused": false,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 66668,
+   "aabb_finite": 103041,
+   "both": 66668,
+   "med_abs": 0.0009,
+   "p90_abs": 0.0016,
+   "max_abs": 2.0914,
+   "fused_z": [
+    -1.994,
+    0.061
+   ],
+   "aabb_z": [
+    -1.992,
+    0.098
+   ],
+   "action": "keep aabb"
+  },
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_B3",
+   "scene": "sceneC4",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": 0.0003,
+    "p90_abs": 0.0005
+   },
+   "corpus_on_fused": false,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 42681,
+   "aabb_finite": 103041,
+   "both": 42681,
+   "med_abs": 0.005,
+   "p90_abs": 0.0083,
+   "max_abs": 4.8578,
+   "fused_z": [
+    -2.096,
+    0.879
+   ],
+   "aabb_z": [
+    -2.097,
+    2.958
+   ],
+   "action": "keep aabb"
+  },
+  {
+   "band": "h",
+   "round": "260827_v3w1_lib_B3_h",
+   "scene": "scene09",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": null,
+    "p90_abs": null
+   },
+   "corpus_on_fused": false,
+   "corpus_a_round": "260820_boost_h_on",
+   "action": "keep aabb"
+  },
+  {
+   "band": "e",
+   "round": "260827_v3w1_lib_B3_e",
+   "scene": "scene09",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": null,
+    "p90_abs": null
+   },
+   "corpus_on_fused": false,
+   "corpus_a_round": "260820_boost_e_on",
+   "action": "keep aabb"
+  },
+  {
+   "band": "e",
+   "round": "260827_v3w1_lib_B3_e",
+   "scene": "sceneC1",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": null,
+    "p90_abs": null
+   },
+   "corpus_on_fused": false,
+   "corpus_a_round": "260820_boost_e_on",
+   "action": "keep aabb"
+  },
+  {
+   "band": "e",
+   "round": "260827_v3w1_lib_B3_e",
+   "scene": "sceneC4",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": null,
+    "p90_abs": null
+   },
+   "corpus_on_fused": false,
+   "corpus_a_round": "260820_boost_e_on",
+   "action": "keep aabb"
+  },
+  {
+   "band": "e2",
+   "round": "260827_v3w1_lib_B3_e2",
+   "scene": "sceneC4",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": null,
+    "p90_abs": null
+   },
+   "corpus_on_fused": false,
+   "corpus_a_round": "260820_boost_e2_on",
+   "action": "keep aabb"
+  }
+ ]
+}

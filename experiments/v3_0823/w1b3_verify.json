@@ -1,0 +1,2793 @@
+{
+ "doc": "w1b3_verify",
+ "version": "1.0",
+ "arm": "B3",
+ "b_round": "260827_v3w1_lib_B3",
+ "plan": "RENDER_PLAN_V3 §4.2 · §6.1 (VG-01·VG-08·VG-10·VG-datum) · D74",
+ "gates": [
+  "VG-01",
+  "VG-08",
+  "VG-10",
+  "VG-datum"
+ ],
+ "have_labels": true,
+ "rounds": {
+  "260827_v3w1_lib_B3": {
+   "band": "base",
+   "n_scenes": 5,
+   "png": 120,
+   "depth": 120,
+   "idseg_files": 120,
+   "heightmap": 5,
+   "expected_cuts": 120,
+   "in_process_sec": 476.8,
+   "disk_gb": 0.941,
+   "vg08_pass": true
+  },
+  "260827_v3w1_lib_B3_h": {
+   "band": "h",
+   "n_scenes": 1,
+   "png": 24,
+   "depth": 24,
+   "idseg_files": 24,
+   "heightmap": 1,
+   "expected_cuts": 24,
+   "in_process_sec": 106.9,
+   "disk_gb": 0.216,
+   "vg08_pass": true
+  },
+  "260827_v3w1_lib_B3_e": {
+   "band": "e",
+   "n_scenes": 3,
+   "png": 72,
+   "depth": 72,
+   "idseg_files": 72,
+   "heightmap": 3,
+   "expected_cuts": 72,
+   "in_process_sec": 350.2,
+   "disk_gb": 0.593,
+   "vg08_pass": true
+  },
+  "260827_v3w1_lib_B3_e2": {
+   "band": "e2",
+   "n_scenes": 1,
+   "png": 24,
+   "depth": 24,
+   "idseg_files": 24,
+   "heightmap": 1,
+   "expected_cuts": 24,
+   "in_process_sec": 261.6,
+   "disk_gb": 0.2,
+   "vg08_pass": true
+  }
+ },
+ "scenes": [
+  {
+   "scene": "scene01",
+   "band": "base",
+   "b_round": "260827_v3w1_lib_B3",
+   "a_round": "260819_main_on",
+   "vg01_bytes": {
+    "hm_sha_A": "3b763c20439f2359",
+    "hm_sha_B": "18b86b36d043a1a7",
+    "hm_bytes_equal": false,
+    "meta_geo_equal": false,
+    "meta_geo_diff": {
+     "z_max": [
+      6.0,
+      0.0026
+     ]
+    },
+    "n_prims": {
+     "A": 370,
+     "B": 73
+    },
+    "arm_config": {
+     "A": "{\"hazard_stairs\": true}",
+     "B": "{\"hazard_stairs\": true, \"cue_material_break\": false, \"cue_sign\": false, \"cue_railing\": false, \"cue_scene_dressing\": false}"
+    },
+    "fused_A": false,
+    "fused_B": false
+   },
+   "gate_off_round": "260826_v3w1_lib_D",
+   "off_round": "260819_main_off",
+   "hm_diff": {
+    "aabb": {
+     "bytes_equal": false,
+     "n_cells_diff": 9132,
+     "n_cells_diff_ge_hz": 9132,
+     "max_abs_diff": 6.0,
+     "fp_A": 75866,
+     "fp_B": 84468,
+     "fp_symdiff": 8602,
+     "geometry_gt_invariant": false
+    },
+    "instrument": {
+     "A": "aabb",
+     "B": "aabb",
+     "off": "aabb",
+     "matched": true
+    },
+    "n_cells_diff": 9132,
+    "n_cells_diff_ge_hz": 9132,
+    "max_abs_diff": 6.0,
+    "fp_A": 75866,
+    "fp_B": 84468,
+    "fp_symdiff": 8602,
+    "fp_only_A": 0,
+    "fp_only_B": 8602,
+    "diff_inside_fp_union": 8602,
+    "void_A": 0,
+    "void_B": 0,
+    "A_z_in_diff_cells": [
+     -0.2,
+     6.0,
+     -0.2
+    ],
+    "B_z_in_diff_cells": [
+     -0.6,
+     0.001,
+     -0.6
+    ],
+    "A_above_B_frac": 1.0
+   },
+   "hm_diff_guoff_ref": {
+    "fp_A": 75866,
+    "fp_B": 84998,
+    "fp_symdiff": 9132,
+    "fp_only_A": 0,
+    "fp_only_B": 9132
+   },
+   "datum": {
+    "n_cuts": 24,
+    "n_a": 24,
+    "n_b": 24,
+    "tiers": {
+     "datum_exact": 24,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "verdict": "datum_exact",
+    "fail_cuts": [],
+    "n_fail_cuts": 0
+   },
+   "lever": {
+    "n_cuts_sampled": 6,
+    "rgb_mean_abs": 41.7524,
+    "rgb_frac_changed": 0.60056,
+    "rgb_max_of_means": 85.9014,
+    "n_prims": {
+     "A": 370,
+     "B": 73,
+     "delta": -297
+    },
+    "idseg_n_ids": {
+     "A": null,
+     "B": [
+      16,
+      20,
+      23,
+      25,
+      29,
+      30,
+      32,
+      35
+     ]
+    },
+    "fired": true,
+    "levers": [
+     "material_break",
+     "railing",
+     "scene_dressing",
+     "sign"
+    ]
+   },
+   "seg": {
+    "n_cuts": 24,
+    "n_sidecars": 24,
+    "missing": 0,
+    "n_poses": 8,
+    "n_unique_masks": 8,
+    "n_ids_distinct": [
+     16,
+     20,
+     23,
+     25,
+     29,
+     30,
+     32,
+     35
+    ],
+    "fetch": [
+     "orch"
+    ],
+    "distinct": true,
+    "n_pose_collisions": 0,
+    "n_light_dependent_poses": 0,
+    "over_discriminating": false,
+    "stale_signature": false,
+    "collide_examples": {}
+   },
+   "vg01_labeler": {
+    "cells_raw": {
+     "A": 75866,
+     "B": 84468,
+     "equal": false,
+     "delta": 8602
+    },
+    "max_diff": {
+     "A": 0.6,
+     "B": 0.6
+    },
+    "hm_source": {
+     "A": "aabb",
+     "B": "aabb",
+     "off_A": "aabb",
+     "off_B": "aabb",
+     "matched": true
+    },
+    "void": {
+     "A": 0,
+     "B": 0,
+     "equal": true
+    },
+    "n_frames": 24,
+    "polar_gt_equal": 24,
+    "polar_gt_pregate_equal": 24,
+    "gate_excluded_equal": 24,
+    "all_frames_equal": true,
+    "mismatches": [],
+    "n_mismatch": 0
+   },
+   "corpus_tie": {
+    "corpus_round": "260819_main_on",
+    "a_overlay": null,
+    "label_used": "w1b_Acorpus(구off 기준)",
+    "label_source": "original",
+    "n_compared": 24,
+    "n_equal": 24,
+    "n_missing_in_corpus": 0,
+    "reproduces": true
+   },
+   "training_gt_identical": true,
+   "scene_footprint_identical": false,
+   "vg01_tier": "T3-geom",
+   "vg01_pass": false,
+   "vg01_state": "T3-geom → 격리",
+   "vg01_t2seg": {
+    "added_levers": [
+     "cue_railing",
+     "cue_scene_dressing"
+    ],
+    "per_cue": [
+     {
+      "cue": "cue_railing",
+      "seg3_final": "장식",
+      "rule": "S4",
+      "own_S": 1.0,
+      "d_cells_raw": 69,
+      "ok": true
+     },
+     {
+      "cue": "cue_scene_dressing",
+      "seg3_final": "장식",
+      "rule": "S4",
+      "own_S": 0.9684,
+      "d_cells_raw": 8533,
+      "ok": true
+     }
+    ],
+    "polar_gt_identical": true,
+    "cells_raw_identical": false,
+    "fp_only_A": 0,
+    "fp_only_B": 8602,
+    "pure_addition": true,
+    "eligible": true,
+    "rule": "polar_gt 비트동일 ∧ cells_raw 갈림 ∧ fp_only_A = 0(순증) ∧ 추가 레버 전부가 seg3 해제(S4 덮개 또는 Δcells_raw = 0)"
+   },
+   "vg01_pass_seg3": true
+  },
+  {
+   "scene": "scene09",
+   "band": "base",
+   "b_round": "260827_v3w1_lib_B3",
+   "a_round": "260819_main_on",
+   "vg01_bytes": {
+    "hm_sha_A": "9523e4e60551c426",
+    "hm_sha_B": "696107ced66af9c9",
+    "hm_bytes_equal": false,
+    "meta_geo_equal": false,
+    "meta_geo_diff": {
+     "z_max": [
+      4.29,
+      0.0006
+     ]
+    },
+    "n_prims": {
+     "A": 2231,
+     "B": 1163
+    },
+    "arm_config": {
+     "A": "{\"hazard_stairs\": true}",
+     "B": "{\"hazard_stairs\": true, \"cue_sign\": false, \"cue_material_break\": false, \"cue_scene_dressing\": false}"
+    },
+    "fused_A": false,
+    "fused_B": false
+   },
+   "gate_off_round": "260826_v3w1_lib_D",
+   "off_round": "260819_main_off",
+   "hm_diff": {
+    "aabb": {
+     "bytes_equal": false,
+     "n_cells_diff": 992,
+     "n_cells_diff_ge_hz": 992,
+     "max_abs_diff": 4.29,
+     "fp_A": 87954,
+     "fp_B": 87954,
+     "fp_symdiff": 0,
+     "geometry_gt_invariant": true
+    },
+    "instrument": {
+     "A": "aabb",
+     "B": "aabb",
+     "off": "aabb",
+     "matched": true
+    },
+    "n_cells_diff": 992,
+    "n_cells_diff_ge_hz": 992,
+    "max_abs_diff": 4.29,
+    "fp_A": 87954,
+    "fp_B": 87954,
+    "fp_symdiff": 0,
+    "fp_only_A": 0,
+    "fp_only_B": 0,
+    "diff_inside_fp_union": 79,
+    "void_A": 0,
+    "void_B": 0,
+    "A_z_in_diff_cells": [
+     -4.011,
+     4.29,
+     4.29
+    ],
+    "B_z_in_diff_cells": [
+     -5.19,
+     0.0,
+     0.0
+    ],
+    "A_above_B_frac": 1.0
+   },
+   "hm_diff_guoff_ref": {
+    "fp_A": 87954,
+    "fp_B": 88867,
+    "fp_symdiff": 913,
+    "fp_only_A": 0,
+    "fp_only_B": 913
+   },
+   "datum": {
+    "n_cuts": 24,
+    "n_a": 24,
+    "n_b": 24,
+    "tiers": {
+     "datum_exact": 24,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "verdict": "datum_exact",
+    "fail_cuts": [],
+    "n_fail_cuts": 0
+   },
+   "lever": {
+    "n_cuts_sampled": 6,
+    "rgb_mean_abs": 2.4989,
+    "rgb_frac_changed": 0.07605,
+    "rgb_max_of_means": 7.6674,
+    "n_prims": {
+     "A": 2231,
+     "B": 1163,
+     "delta": -1068
+    },
+    "idseg_n_ids": {
+     "A": null,
+     "B": [
+      13929,
+      29370,
+      30117,
+      30182,
+      30479,
+      30708,
+      31350,
+      31372
+     ]
+    },
+    "fired": true,
+    "levers": [
+     "material_break",
+     "scene_dressing",
+     "sign"
+    ]
+   },
+   "seg": {
+    "n_cuts": 24,
+    "n_sidecars": 24,
+    "missing": 0,
+    "n_poses": 8,
+    "n_unique_masks": 18,
+    "n_ids_distinct": [
+     13929,
+     29370,
+     30117,
+     30182,
+     30479,
+     30708,
+     31350,
+     31372
+    ],
+    "fetch": [
+     "orch"
+    ],
+    "distinct": true,
+    "n_pose_collisions": 0,
+    "n_light_dependent_poses": 7,
+    "over_discriminating": true,
+    "stale_signature": false,
+    "collide_examples": {},
+    "prim_normalized": [
+     {
+      "cuts": [
+       "L0__s20260819__0000.png",
+       "L5__s20260819__0000.png",
+       "L7__s20260819__0000.png"
+      ],
+      "n_paths_visible": 241,
+      "prim_path_sets_equal": true,
+      "per_prim_pixel_counts_equal": true,
+      "n_labels": 87902
+     }
+    ]
+   },
+   "vg01_labeler": {
+    "cells_raw": {
+     "A": 87954,
+     "B": 87954,
+     "equal": true,
+     "delta": 0
+    },
+    "max_diff": {
+     "A": 5.2065,
+     "B": 5.2065
+    },
+    "hm_source": {
+     "A": "aabb",
+     "B": "aabb",
+     "off_A": "aabb",
+     "off_B": "aabb",
+     "matched": true
+    },
+    "void": {
+     "A": 0,
+     "B": 0,
+     "equal": true
+    },
+    "n_frames": 24,
+    "polar_gt_equal": 24,
+    "polar_gt_pregate_equal": 24,
+    "gate_excluded_equal": 24,
+    "all_frames_equal": true,
+    "mismatches": [],
+    "n_mismatch": 0
+   },
+   "corpus_tie": {
+    "corpus_round": "260819_main_on",
+    "a_overlay": null,
+    "label_used": "w1b_Acorpus(구off 기준)",
+    "label_source": "original",
+    "n_compared": 24,
+    "n_equal": 24,
+    "n_missing_in_corpus": 0,
+    "reproduces": true
+   },
+   "training_gt_identical": true,
+   "scene_footprint_identical": true,
+   "vg01_tier": "T2",
+   "vg01_pass": true,
+   "vg01_state": "T2",
+   "vg01_t2seg": {
+    "added_levers": [
+     "cue_scene_dressing"
+    ],
+    "per_cue": [
+     {
+      "cue": "cue_scene_dressing",
+      "seg3_final": "장식",
+      "rule": "S5",
+      "own_S": null,
+      "d_cells_raw": 0,
+      "ok": true
+     }
+    ],
+    "polar_gt_identical": true,
+    "cells_raw_identical": true,
+    "fp_only_A": 0,
+    "fp_only_B": 0,
+    "pure_addition": true,
+    "eligible": false,
+    "rule": "polar_gt 비트동일 ∧ cells_raw 갈림 ∧ fp_only_A = 0(순증) ∧ 추가 레버 전부가 seg3 해제(S4 덮개 또는 Δcells_raw = 0)"
+   },
+   "vg01_pass_seg3": true
+  },
+  {
+   "scene": "scene21",
+   "band": "base",
+   "b_round": "260827_v3w1_lib_B3",
+   "a_round": "260819_main_on",
+   "vg01_bytes": {
+    "hm_sha_A": "8347f5c2a9daded4",
+    "hm_sha_B": "39e7e7ea6d99fb3a",
+    "hm_bytes_equal": false,
+    "meta_geo_equal": false,
+    "meta_geo_diff": {
+     "z_max": [
+      8.0,
+      0.9137
+     ]
+    },
+    "n_prims": {
+     "A": 364,
+     "B": 41
+    },
+    "arm_config": {
+     "A": "{\"hazard_stairs\": true}",
+     "B": "{\"hazard_stairs\": true, \"cue_scene_dressing\": false, \"cue_sign\": false, \"cue_material_break\": false, \"cue_railing\": false, \"cue_nosing\": false}"
+    },
+    "fused_A": false,
+    "fused_B": false
+   },
+   "gate_off_round": "260826_v3w1_lib_D",
+   "off_round": "260819_main_off",
+   "hm_diff": {
+    "aabb": {
+     "bytes_equal": false,
+     "n_cells_diff": 3481,
+     "n_cells_diff_ge_hz": 979,
+     "max_abs_diff": 8.0,
+     "fp_A": 14456,
+     "fp_B": 14664,
+     "fp_symdiff": 208,
+     "geometry_gt_invariant": false
+    },
+    "instrument": {
+     "A": "aabb",
+     "B": "aabb",
+     "off": "aabb",
+     "matched": true
+    },
+    "n_cells_diff": 3481,
+    "n_cells_diff_ge_hz": 979,
+    "max_abs_diff": 8.0,
+    "fp_A": 14456,
+    "fp_B": 14664,
+    "fp_symdiff": 208,
+    "fp_only_A": 0,
+    "fp_only_B": 208,
+    "diff_inside_fp_union": 625,
+    "void_A": 0,
+    "void_B": 0,
+    "A_z_in_diff_cells": [
+     -2.249,
+     8.0,
+     0.927
+    ],
+    "B_z_in_diff_cells": [
+     -2.75,
+     0.0,
+     -2.7
+    ],
+    "A_above_B_frac": 1.0
+   },
+   "hm_diff_guoff_ref": {
+    "fp_A": 14456,
+    "fp_B": 14962,
+    "fp_symdiff": 506,
+    "fp_only_A": 0,
+    "fp_only_B": 506
+   },
+   "datum": {
+    "n_cuts": 24,
+    "n_a": 24,
+    "n_b": 24,
+    "tiers": {
+     "datum_exact": 24,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "verdict": "datum_exact",
+    "fail_cuts": [],
+    "n_fail_cuts": 0
+   },
+   "lever": {
+    "n_cuts_sampled": 6,
+    "rgb_mean_abs": 34.2723,
+    "rgb_frac_changed": 0.72346,
+    "rgb_max_of_means": 80.9463,
+    "n_prims": {
+     "A": 364,
+     "B": 41,
+     "delta": -323
+    },
+    "idseg_n_ids": {
+     "A": null,
+     "B": [
+      5,
+      12,
+      18,
+      23,
+      29,
+      31,
+      50,
+      53
+     ]
+    },
+    "fired": true,
+    "levers": [
+     "material_break",
+     "nosing",
+     "railing",
+     "scene_dressing",
+     "sign"
+    ]
+   },
+   "seg": {
+    "n_cuts": 24,
+    "n_sidecars": 24,
+    "missing": 0,
+    "n_poses": 8,
+    "n_unique_masks": 8,
+    "n_ids_distinct": [
+     5,
+     12,
+     18,
+     23,
+     29,
+     31,
+     50,
+     53
+    ],
+    "fetch": [
+     "orch"
+    ],
+    "distinct": true,
+    "n_pose_collisions": 0,
+    "n_light_dependent_poses": 0,
+    "over_discriminating": false,
+    "stale_signature": false,
+    "collide_examples": {}
+   },
+   "vg01_labeler": {
+    "cells_raw": {
+     "A": 14456,
+     "B": 14664,
+     "equal": false,
+     "delta": 208
+    },
+    "max_diff": {
+     "A": 2.75,
+     "B": 2.75
+    },
+    "hm_source": {
+     "A": "aabb",
+     "B": "aabb",
+     "off_A": "aabb",
+     "off_B": "aabb",
+     "matched": true
+    },
+    "void": {
+     "A": 0,
+     "B": 0,
+     "equal": true
+    },
+    "n_frames": 24,
+    "polar_gt_equal": 24,
+    "polar_gt_pregate_equal": 24,
+    "gate_excluded_equal": 24,
+    "all_frames_equal": true,
+    "mismatches": [],
+    "n_mismatch": 0
+   },
+   "corpus_tie": {
+    "corpus_round": "260819_main_on",
+    "a_overlay": null,
+    "label_used": "w1b_Acorpus(구off 기준)",
+    "label_source": "original",
+    "n_compared": 24,
+    "n_equal": 24,
+    "n_missing_in_corpus": 0,
+    "reproduces": true
+   },
+   "training_gt_identical": true,
+   "scene_footprint_identical": false,
+   "vg01_tier": "T3-geom",
+   "vg01_pass": false,
+   "vg01_state": "T3-geom → 격리",
+   "vg01_t2seg": {
+    "added_levers": [
+     "cue_nosing",
+     "cue_railing"
+    ],
+    "per_cue": [
+     {
+      "cue": "cue_nosing",
+      "seg3_final": "장식",
+      "rule": "S6",
+      "own_S": null,
+      "d_cells_raw": 0,
+      "ok": true
+     },
+     {
+      "cue": "cue_railing",
+      "seg3_final": "장식",
+      "rule": "S4",
+      "own_S": 0.9954,
+      "d_cells_raw": 208,
+      "ok": true
+     }
+    ],
+    "polar_gt_identical": true,
+    "cells_raw_identical": false,
+    "fp_only_A": 0,
+    "fp_only_B": 208,
+    "pure_addition": true,
+    "eligible": true,
+    "rule": "polar_gt 비트동일 ∧ cells_raw 갈림 ∧ fp_only_A = 0(순증) ∧ 추가 레버 전부가 seg3 해제(S4 덮개 또는 Δcells_raw = 0)"
+   },
+   "vg01_pass_seg3": true
+  },
+  {
+   "scene": "sceneC1",
+   "band": "base",
+   "b_round": "260827_v3w1_lib_B3",
+   "a_round": "260819_main_on",
+   "vg01_bytes": {
+    "hm_sha_A": "13e243cd6d80ca99",
+    "hm_sha_B": "86c4845bb3cb5e10",
+    "hm_bytes_equal": false,
+    "meta_geo_equal": false,
+    "meta_geo_diff": {
+     "z_max": [
+      4.08,
+      0.0983
+     ]
+    },
+    "n_prims": {
+     "A": 490,
+     "B": 82
+    },
+    "arm_config": {
+     "A": "{\"hazard_stairs\": true}",
+     "B": "{\"hazard_stairs\": true, \"cue_nosing\": false, \"cue_material_break\": false, \"cue_railing\": false, \"cue_scene_dressing\": false, \"cue_tactile\": false}"
+    },
+    "fused_A": false,
+    "fused_B": false
+   },
+   "gate_off_round": "260826_v3w1_lib_D",
+   "off_round": "260819_main_off",
+   "hm_diff": {
+    "aabb": {
+     "bytes_equal": false,
+     "n_cells_diff": 4712,
+     "n_cells_diff_ge_hz": 4712,
+     "max_abs_diff": 4.0187,
+     "fp_A": 68846,
+     "fp_B": 68846,
+     "fp_symdiff": 0,
+     "geometry_gt_invariant": true
+    },
+    "instrument": {
+     "A": "aabb",
+     "B": "aabb",
+     "off": "aabb",
+     "matched": true
+    },
+    "n_cells_diff": 4712,
+    "n_cells_diff_ge_hz": 4712,
+    "max_abs_diff": 4.0187,
+    "fp_A": 68846,
+    "fp_B": 68846,
+    "fp_symdiff": 0,
+    "fp_only_A": 0,
+    "fp_only_B": 0,
+    "diff_inside_fp_union": 3512,
+    "void_A": 0,
+    "void_B": 0,
+    "A_z_in_diff_cells": [
+     -1.192,
+     4.08,
+     -1.157
+    ],
+    "B_z_in_diff_cells": [
+     -1.992,
+     0.061,
+     -1.992
+    ],
+    "A_above_B_frac": 1.0
+   },
+   "hm_diff_guoff_ref": {
+    "fp_A": 68846,
+    "fp_B": 69949,
+    "fp_symdiff": 1103,
+    "fp_only_A": 0,
+    "fp_only_B": 1103
+   },
+   "datum": {
+    "n_cuts": 24,
+    "n_a": 24,
+    "n_b": 24,
+    "tiers": {
+     "datum_exact": 24,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "verdict": "datum_exact",
+    "fail_cuts": [],
+    "n_fail_cuts": 0
+   },
+   "lever": {
+    "n_cuts_sampled": 6,
+    "rgb_mean_abs": 50.5069,
+    "rgb_frac_changed": 0.80312,
+    "rgb_max_of_means": 74.8635,
+    "n_prims": {
+     "A": 490,
+     "B": 82,
+     "delta": -408
+    },
+    "idseg_n_ids": {
+     "A": null,
+     "B": [
+      6,
+      8,
+      9,
+      10,
+      14,
+      15,
+      16,
+      19
+     ]
+    },
+    "fired": true,
+    "levers": [
+     "material_break",
+     "nosing",
+     "railing",
+     "scene_dressing",
+     "tactile"
+    ]
+   },
+   "seg": {
+    "n_cuts": 24,
+    "n_sidecars": 24,
+    "missing": 0,
+    "n_poses": 8,
+    "n_unique_masks": 16,
+    "n_ids_distinct": [
+     6,
+     8,
+     9,
+     10,
+     14,
+     15,
+     16,
+     19
+    ],
+    "fetch": [
+     "orch"
+    ],
+    "distinct": true,
+    "n_pose_collisions": 0,
+    "n_light_dependent_poses": 8,
+    "over_discriminating": true,
+    "stale_signature": false,
+    "collide_examples": {},
+    "prim_normalized": [
+     {
+      "cuts": [
+       "L4__s20260819__0000.png",
+       "L5__s20260819__0000.png",
+       "L7__s20260819__0000.png"
+      ],
+      "n_paths_visible": 9,
+      "prim_path_sets_equal": true,
+      "per_prim_pixel_counts_equal": true,
+      "n_labels": 82
+     }
+    ]
+   },
+   "vg01_labeler": {
+    "cells_raw": {
+     "A": 68846,
+     "B": 68846,
+     "equal": true,
+     "delta": 0
+    },
+    "max_diff": {
+     "A": 2.042,
+     "B": 2.042
+    },
+    "hm_source": {
+     "A": "aabb",
+     "B": "aabb",
+     "off_A": "aabb",
+     "off_B": "aabb",
+     "matched": true
+    },
+    "void": {
+     "A": 0,
+     "B": 0,
+     "equal": true
+    },
+    "n_frames": 24,
+    "polar_gt_equal": 24,
+    "polar_gt_pregate_equal": 24,
+    "gate_excluded_equal": 24,
+    "all_frames_equal": true,
+    "mismatches": [],
+    "n_mismatch": 0
+   },
+   "corpus_tie": {
+    "corpus_round": "260819_main_on",
+    "a_overlay": null,
+    "label_used": "w1b_Acorpus(구off 기준)",
+    "label_source": "original",
+    "n_compared": 24,
+    "n_equal": 24,
+    "n_missing_in_corpus": 0,
+    "reproduces": true
+   },
+   "training_gt_identical": true,
+   "scene_footprint_identical": true,
+   "vg01_tier": "T2",
+   "vg01_pass": true,
+   "vg01_state": "T2",
+   "vg01_t2seg": {
+    "added_levers": [
+     "cue_railing",
+     "cue_scene_dressing",
+     "cue_tactile"
+    ],
+    "per_cue": [
+     {
+      "cue": "cue_railing",
+      "seg3_final": "장식",
+      "rule": "S5",
+      "own_S": null,
+      "d_cells_raw": 0,
+      "ok": true
+     },
+     {
+      "cue": "cue_scene_dressing",
+      "seg3_final": "장식",
+      "rule": "S6",
+      "own_S": null,
+      "d_cells_raw": 0,
+      "ok": true
+     },
+     {
+      "cue": "cue_tactile",
+      "seg3_final": "장식",
+      "rule": "S2",
+      "own_S": null,
+      "d_cells_raw": 0,
+      "ok": true
+     }
+    ],
+    "polar_gt_identical": true,
+    "cells_raw_identical": true,
+    "fp_only_A": 0,
+    "fp_only_B": 0,
+    "pure_addition": true,
+    "eligible": false,
+    "rule": "polar_gt 비트동일 ∧ cells_raw 갈림 ∧ fp_only_A = 0(순증) ∧ 추가 레버 전부가 seg3 해제(S4 덮개 또는 Δcells_raw = 0)"
+   },
+   "vg01_pass_seg3": true
+  },
+  {
+   "scene": "sceneC4",
+   "band": "base",
+   "b_round": "260827_v3w1_lib_B3",
+   "a_round": "260819_main_on",
+   "vg01_bytes": {
+    "hm_sha_A": "8e96dce49f5f9309",
+    "hm_sha_B": "d3499fd67806ed3c",
+    "hm_bytes_equal": false,
+    "meta_geo_equal": true,
+    "meta_geo_diff": {},
+    "n_prims": {
+     "A": 778,
+     "B": 635
+    },
+    "arm_config": {
+     "A": "{\"hazard_stairs\": true}",
+     "B": "{\"hazard_stairs\": true, \"cue_railing\": false, \"cue_material_break\": false, \"cue_tactile\": false}"
+    },
+    "fused_A": false,
+    "fused_B": false
+   },
+   "gate_off_round": "260826_v3w1_lib_D",
+   "off_round": "260819_main_off",
+   "hm_diff": {
+    "aabb": {
+     "bytes_equal": false,
+     "n_cells_diff": 1158,
+     "n_cells_diff_ge_hz": 246,
+     "max_abs_diff": 0.93,
+     "fp_A": 67031,
+     "fp_B": 67031,
+     "fp_symdiff": 0,
+     "geometry_gt_invariant": true
+    },
+    "instrument": {
+     "A": "aabb",
+     "B": "aabb",
+     "off": "aabb",
+     "matched": true
+    },
+    "n_cells_diff": 1158,
+    "n_cells_diff_ge_hz": 246,
+    "max_abs_diff": 0.93,
+    "fp_A": 67031,
+    "fp_B": 67031,
+    "fp_symdiff": 0,
+    "fp_only_A": 0,
+    "fp_only_B": 0,
+    "diff_inside_fp_union": 0,
+    "void_A": 0,
+    "void_B": 0,
+    "A_z_in_diff_cells": [
+     0.928,
+     0.93,
+     0.928
+    ],
+    "B_z_in_diff_cells": [
+     -0.0,
+     0.081,
+     0.081
+    ],
+    "A_above_B_frac": 1.0
+   },
+   "hm_diff_guoff_ref": {
+    "fp_A": 67482,
+    "fp_B": 67482,
+    "fp_symdiff": 0,
+    "fp_only_A": 0,
+    "fp_only_B": 0
+   },
+   "datum": {
+    "n_cuts": 24,
+    "n_a": 24,
+    "n_b": 24,
+    "tiers": {
+     "datum_exact": 24,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "verdict": "datum_exact",
+    "fail_cuts": [],
+    "n_fail_cuts": 0
+   },
+   "lever": {
+    "n_cuts_sampled": 6,
+    "rgb_mean_abs": 3.4954,
+    "rgb_frac_changed": 0.0954,
+    "rgb_max_of_means": 8.3161,
+    "n_prims": {
+     "A": 778,
+     "B": 635,
+     "delta": -143
+    },
+    "idseg_n_ids": {
+     "A": null,
+     "B": [
+      169,
+      213,
+      232,
+      240,
+      257,
+      278,
+      279,
+      284
+     ]
+    },
+    "fired": true,
+    "levers": [
+     "material_break",
+     "railing",
+     "tactile"
+    ]
+   },
+   "seg": {
+    "n_cuts": 24,
+    "n_sidecars": 24,
+    "missing": 0,
+    "n_poses": 8,
+    "n_unique_masks": 8,
+    "n_ids_distinct": [
+     169,
+     213,
+     232,
+     240,
+     257,
+     278,
+     279,
+     284
+    ],
+    "fetch": [
+     "orch"
+    ],
+    "distinct": true,
+    "n_pose_collisions": 0,
+    "n_light_dependent_poses": 0,
+    "over_discriminating": false,
+    "stale_signature": false,
+    "collide_examples": {}
+   },
+   "vg01_labeler": {
+    "cells_raw": {
+     "A": 67031,
+     "B": 67031,
+     "equal": true,
+     "delta": 0
+    },
+    "max_diff": {
+     "A": 2.097,
+     "B": 2.097
+    },
+    "hm_source": {
+     "A": "aabb",
+     "B": "aabb",
+     "off_A": "aabb",
+     "off_B": "aabb",
+     "matched": true
+    },
+    "void": {
+     "A": 0,
+     "B": 0,
+     "equal": true
+    },
+    "n_frames": 24,
+    "polar_gt_equal": 24,
+    "polar_gt_pregate_equal": 24,
+    "gate_excluded_equal": 24,
+    "all_frames_equal": true,
+    "mismatches": [],
+    "n_mismatch": 0
+   },
+   "corpus_tie": {
+    "corpus_round": "260819_main_on",
+    "a_overlay": null,
+    "label_used": "w1b_Acorpus(구off 기준)",
+    "label_source": "original",
+    "n_compared": 24,
+    "n_equal": 24,
+    "n_missing_in_corpus": 0,
+    "reproduces": true
+   },
+   "training_gt_identical": true,
+   "scene_footprint_identical": true,
+   "vg01_tier": "T2",
+   "vg01_pass": true,
+   "vg01_state": "T2",
+   "vg01_t2seg": {
+    "added_levers": [
+     "cue_tactile"
+    ],
+    "per_cue": [
+     {
+      "cue": "cue_tactile",
+      "seg3_final": "장식",
+      "rule": "S2",
+      "own_S": null,
+      "d_cells_raw": 0,
+      "ok": true
+     }
+    ],
+    "polar_gt_identical": true,
+    "cells_raw_identical": true,
+    "fp_only_A": 0,
+    "fp_only_B": 0,
+    "pure_addition": true,
+    "eligible": false,
+    "rule": "polar_gt 비트동일 ∧ cells_raw 갈림 ∧ fp_only_A = 0(순증) ∧ 추가 레버 전부가 seg3 해제(S4 덮개 또는 Δcells_raw = 0)"
+   },
+   "vg01_pass_seg3": true
+  },
+  {
+   "scene": "scene09",
+   "band": "h",
+   "b_round": "260827_v3w1_lib_B3_h",
+   "a_round": "260820_boost_h_on",
+   "vg01_bytes": {
+    "hm_sha_A": "9523e4e60551c426",
+    "hm_sha_B": "696107ced66af9c9",
+    "hm_bytes_equal": false,
+    "meta_geo_equal": false,
+    "meta_geo_diff": {
+     "z_max": [
+      4.29,
+      0.0006
+     ]
+    },
+    "n_prims": {
+     "A": 2231,
+     "B": 1163
+    },
+    "arm_config": {
+     "A": "{\"hazard_stairs\": true}",
+     "B": "{\"hazard_stairs\": true, \"cue_sign\": false, \"cue_material_break\": false, \"cue_scene_dressing\": false}"
+    },
+    "fused_A": false,
+    "fused_B": false
+   },
+   "gate_off_round": "260826_v3w1_lib_D_h",
+   "off_round": "260820_boost_h_off",
+   "hm_diff": {
+    "aabb": {
+     "bytes_equal": false,
+     "n_cells_diff": 992,
+     "n_cells_diff_ge_hz": 992,
+     "max_abs_diff": 4.29,
+     "fp_A": 87954,
+     "fp_B": 87954,
+     "fp_symdiff": 0,
+     "geometry_gt_invariant": true
+    },
+    "instrument": {
+     "A": "aabb",
+     "B": "aabb",
+     "off": "aabb",
+     "matched": true
+    },
+    "n_cells_diff": 992,
+    "n_cells_diff_ge_hz": 992,
+    "max_abs_diff": 4.29,
+    "fp_A": 87954,
+    "fp_B": 87954,
+    "fp_symdiff": 0,
+    "fp_only_A": 0,
+    "fp_only_B": 0,
+    "diff_inside_fp_union": 79,
+    "void_A": 0,
+    "void_B": 0,
+    "A_z_in_diff_cells": [
+     -4.011,
+     4.29,
+     4.29
+    ],
+    "B_z_in_diff_cells": [
+     -5.19,
+     0.0,
+     0.0
+    ],
+    "A_above_B_frac": 1.0
+   },
+   "hm_diff_guoff_ref": {
+    "fp_A": 87954,
+    "fp_B": 88867,
+    "fp_symdiff": 913,
+    "fp_only_A": 0,
+    "fp_only_B": 913
+   },
+   "datum": {
+    "n_cuts": 24,
+    "n_a": 24,
+    "n_b": 24,
+    "tiers": {
+     "datum_exact": 24,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "verdict": "datum_exact",
+    "fail_cuts": [],
+    "n_fail_cuts": 0
+   },
+   "lever": {
+    "n_cuts_sampled": 6,
+    "rgb_mean_abs": 1.2052,
+    "rgb_frac_changed": 0.06983,
+    "rgb_max_of_means": 1.497,
+    "n_prims": {
+     "A": 2231,
+     "B": 1163,
+     "delta": -1068
+    },
+    "idseg_n_ids": {
+     "A": null,
+     "B": [
+      30707,
+      31566,
+      31572,
+      31614,
+      31742,
+      31819,
+      31849,
+      31952
+     ]
+    },
+    "fired": true,
+    "levers": [
+     "material_break",
+     "scene_dressing",
+     "sign"
+    ]
+   },
+   "seg": {
+    "n_cuts": 24,
+    "n_sidecars": 24,
+    "missing": 0,
+    "n_poses": 8,
+    "n_unique_masks": 23,
+    "n_ids_distinct": [
+     30707,
+     31566,
+     31572,
+     31614,
+     31742,
+     31819,
+     31849,
+     31952
+    ],
+    "fetch": [
+     "orch"
+    ],
+    "distinct": true,
+    "n_pose_collisions": 0,
+    "n_light_dependent_poses": 8,
+    "over_discriminating": true,
+    "stale_signature": false,
+    "collide_examples": {},
+    "prim_normalized": [
+     {
+      "cuts": [
+       "L0__s20260820__0000.png",
+       "L5__s20260820__0000.png",
+       "L7__s20260820__0000.png"
+      ],
+      "n_paths_visible": 417,
+      "prim_path_sets_equal": true,
+      "per_prim_pixel_counts_equal": true,
+      "n_labels": 87902
+     }
+    ]
+   },
+   "vg01_labeler": {
+    "cells_raw": {
+     "A": 87954,
+     "B": 87954,
+     "equal": true,
+     "delta": 0
+    },
+    "max_diff": {
+     "A": 5.2065,
+     "B": 5.2065
+    },
+    "hm_source": {
+     "A": "aabb",
+     "B": "aabb",
+     "off_A": "aabb",
+     "off_B": "aabb",
+     "matched": true
+    },
+    "void": {
+     "A": 0,
+     "B": 0,
+     "equal": true
+    },
+    "n_frames": 24,
+    "polar_gt_equal": 24,
+    "polar_gt_pregate_equal": 24,
+    "gate_excluded_equal": 24,
+    "all_frames_equal": true,
+    "mismatches": [],
+    "n_mismatch": 0
+   },
+   "corpus_tie": {
+    "corpus_round": "260820_boost_h_on",
+    "a_overlay": null,
+    "label_used": "w1b_Acorpus(구off 기준)",
+    "label_source": "original",
+    "n_compared": 24,
+    "n_equal": 24,
+    "n_missing_in_corpus": 0,
+    "reproduces": true
+   },
+   "training_gt_identical": true,
+   "scene_footprint_identical": true,
+   "vg01_tier": "T2",
+   "vg01_pass": true,
+   "vg01_state": "T2",
+   "vg01_t2seg": {
+    "added_levers": [
+     "cue_scene_dressing"
+    ],
+    "per_cue": [
+     {
+      "cue": "cue_scene_dressing",
+      "seg3_final": "장식",
+      "rule": "S5",
+      "own_S": null,
+      "d_cells_raw": 0,
+      "ok": true
+     }
+    ],
+    "polar_gt_identical": true,
+    "cells_raw_identical": true,
+    "fp_only_A": 0,
+    "fp_only_B": 0,
+    "pure_addition": true,
+    "eligible": false,
+    "rule": "polar_gt 비트동일 ∧ cells_raw 갈림 ∧ fp_only_A = 0(순증) ∧ 추가 레버 전부가 seg3 해제(S4 덮개 또는 Δcells_raw = 0)"
+   },
+   "vg01_pass_seg3": true
+  },
+  {
+   "scene": "scene09",
+   "band": "e",
+   "b_round": "260827_v3w1_lib_B3_e",
+   "a_round": "260820_boost_e_on",
+   "vg01_bytes": {
+    "hm_sha_A": "9523e4e60551c426",
+    "hm_sha_B": "696107ced66af9c9",
+    "hm_bytes_equal": false,
+    "meta_geo_equal": false,
+    "meta_geo_diff": {
+     "z_max": [
+      4.29,
+      0.0006
+     ]
+    },
+    "n_prims": {
+     "A": 2231,
+     "B": 1163
+    },
+    "arm_config": {
+     "A": "{\"hazard_stairs\": true}",
+     "B": "{\"hazard_stairs\": true, \"cue_sign\": false, \"cue_material_break\": false, \"cue_scene_dressing\": false}"
+    },
+    "fused_A": false,
+    "fused_B": false
+   },
+   "gate_off_round": "260826_v3w1_lib_D_e",
+   "off_round": "260820_boost_e_off",
+   "hm_diff": {
+    "aabb": {
+     "bytes_equal": false,
+     "n_cells_diff": 992,
+     "n_cells_diff_ge_hz": 992,
+     "max_abs_diff": 4.29,
+     "fp_A": 87954,
+     "fp_B": 87954,
+     "fp_symdiff": 0,
+     "geometry_gt_invariant": true
+    },
+    "instrument": {
+     "A": "aabb",
+     "B": "aabb",
+     "off": "aabb",
+     "matched": true
+    },
+    "n_cells_diff": 992,
+    "n_cells_diff_ge_hz": 992,
+    "max_abs_diff": 4.29,
+    "fp_A": 87954,
+    "fp_B": 87954,
+    "fp_symdiff": 0,
+    "fp_only_A": 0,
+    "fp_only_B": 0,
+    "diff_inside_fp_union": 79,
+    "void_A": 0,
+    "void_B": 0,
+    "A_z_in_diff_cells": [
+     -4.011,
+     4.29,
+     4.29
+    ],
+    "B_z_in_diff_cells": [
+     -5.19,
+     0.0,
+     0.0
+    ],
+    "A_above_B_frac": 1.0
+   },
+   "hm_diff_guoff_ref": {
+    "fp_A": 87954,
+    "fp_B": 88867,
+    "fp_symdiff": 913,
+    "fp_only_A": 0,
+    "fp_only_B": 913
+   },
+   "datum": {
+    "n_cuts": 24,
+    "n_a": 24,
+    "n_b": 24,
+    "tiers": {
+     "datum_exact": 24,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "verdict": "datum_exact",
+    "fail_cuts": [],
+    "n_fail_cuts": 0
+   },
+   "lever": {
+    "n_cuts_sampled": 6,
+    "rgb_mean_abs": 1.3941,
+    "rgb_frac_changed": 0.04659,
+    "rgb_max_of_means": 1.9833,
+    "n_prims": {
+     "A": 2231,
+     "B": 1163,
+     "delta": -1068
+    },
+    "idseg_n_ids": {
+     "A": null,
+     "B": [
+      31348,
+      32029,
+      32035,
+      32119,
+      32153,
+      32156,
+      32194,
+      32196
+     ]
+    },
+    "fired": true,
+    "levers": [
+     "material_break",
+     "scene_dressing",
+     "sign"
+    ]
+   },
+   "seg": {
+    "n_cuts": 24,
+    "n_sidecars": 24,
+    "missing": 0,
+    "n_poses": 8,
+    "n_unique_masks": 24,
+    "n_ids_distinct": [
+     31348,
+     32029,
+     32035,
+     32119,
+     32153,
+     32156,
+     32194,
+     32196
+    ],
+    "fetch": [
+     "orch"
+    ],
+    "distinct": true,
+    "n_pose_collisions": 0,
+    "n_light_dependent_poses": 8,
+    "over_discriminating": true,
+    "stale_signature": false,
+    "collide_examples": {},
+    "prim_normalized": [
+     {
+      "cuts": [
+       "L0__s20260820__0000.png",
+       "L5__s20260820__0000.png",
+       "L7__s20260820__0000.png"
+      ],
+      "n_paths_visible": 434,
+      "prim_path_sets_equal": true,
+      "per_prim_pixel_counts_equal": true,
+      "n_labels": 87902
+     }
+    ]
+   },
+   "vg01_labeler": {
+    "cells_raw": {
+     "A": 87954,
+     "B": 87954,
+     "equal": true,
+     "delta": 0
+    },
+    "max_diff": {
+     "A": 5.2065,
+     "B": 5.2065
+    },
+    "hm_source": {
+     "A": "aabb",
+     "B": "aabb",
+     "off_A": "aabb",
+     "off_B": "aabb",
+     "matched": true
+    },
+    "void": {
+     "A": 0,
+     "B": 0,
+     "equal": true
+    },
+    "n_frames": 24,
+    "polar_gt_equal": 24,
+    "polar_gt_pregate_equal": 24,
+    "gate_excluded_equal": 24,
+    "all_frames_equal": true,
+    "mismatches": [],
+    "n_mismatch": 0
+   },
+   "corpus_tie": {
+    "corpus_round": "260820_boost_e_on",
+    "a_overlay": null,
+    "label_used": "w1b_Acorpus(구off 기준)",
+    "label_source": "original",
+    "n_compared": 24,
+    "n_equal": 24,
+    "n_missing_in_corpus": 0,
+    "reproduces": true
+   },
+   "training_gt_identical": true,
+   "scene_footprint_identical": true,
+   "vg01_tier": "T2",
+   "vg01_pass": true,
+   "vg01_state": "T2",
+   "vg01_t2seg": {
+    "added_levers": [
+     "cue_scene_dressing"
+    ],
+    "per_cue": [
+     {
+      "cue": "cue_scene_dressing",
+      "seg3_final": "장식",
+      "rule": "S5",
+      "own_S": null,
+      "d_cells_raw": 0,
+      "ok": true
+     }
+    ],
+    "polar_gt_identical": true,
+    "cells_raw_identical": true,
+    "fp_only_A": 0,
+    "fp_only_B": 0,
+    "pure_addition": true,
+    "eligible": false,
+    "rule": "polar_gt 비트동일 ∧ cells_raw 갈림 ∧ fp_only_A = 0(순증) ∧ 추가 레버 전부가 seg3 해제(S4 덮개 또는 Δcells_raw = 0)"
+   },
+   "vg01_pass_seg3": true
+  },
+  {
+   "scene": "sceneC1",
+   "band": "e",
+   "b_round": "260827_v3w1_lib_B3_e",
+   "a_round": "260820_boost_e_on",
+   "vg01_bytes": {
+    "hm_sha_A": "13e243cd6d80ca99",
+    "hm_sha_B": "86c4845bb3cb5e10",
+    "hm_bytes_equal": false,
+    "meta_geo_equal": false,
+    "meta_geo_diff": {
+     "z_max": [
+      4.08,
+      0.0983
+     ]
+    },
+    "n_prims": {
+     "A": 490,
+     "B": 82
+    },
+    "arm_config": {
+     "A": "{\"hazard_stairs\": true}",
+     "B": "{\"hazard_stairs\": true, \"cue_nosing\": false, \"cue_material_break\": false, \"cue_railing\": false, \"cue_scene_dressing\": false, \"cue_tactile\": false}"
+    },
+    "fused_A": false,
+    "fused_B": false
+   },
+   "gate_off_round": "260826_v3w1_lib_D_e",
+   "off_round": "260820_boost_e_off",
+   "hm_diff": {
+    "aabb": {
+     "bytes_equal": false,
+     "n_cells_diff": 4712,
+     "n_cells_diff_ge_hz": 4712,
+     "max_abs_diff": 4.0187,
+     "fp_A": 68846,
+     "fp_B": 68846,
+     "fp_symdiff": 0,
+     "geometry_gt_invariant": true
+    },
+    "instrument": {
+     "A": "aabb",
+     "B": "aabb",
+     "off": "aabb",
+     "matched": true
+    },
+    "n_cells_diff": 4712,
+    "n_cells_diff_ge_hz": 4712,
+    "max_abs_diff": 4.0187,
+    "fp_A": 68846,
+    "fp_B": 68846,
+    "fp_symdiff": 0,
+    "fp_only_A": 0,
+    "fp_only_B": 0,
+    "diff_inside_fp_union": 3512,
+    "void_A": 0,
+    "void_B": 0,
+    "A_z_in_diff_cells": [
+     -1.192,
+     4.08,
+     -1.157
+    ],
+    "B_z_in_diff_cells": [
+     -1.992,
+     0.061,
+     -1.992
+    ],
+    "A_above_B_frac": 1.0
+   },
+   "hm_diff_guoff_ref": {
+    "fp_A": 68846,
+    "fp_B": 69949,
+    "fp_symdiff": 1103,
+    "fp_only_A": 0,
+    "fp_only_B": 1103
+   },
+   "datum": {
+    "n_cuts": 24,
+    "n_a": 24,
+    "n_b": 24,
+    "tiers": {
+     "datum_exact": 24,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "verdict": "datum_exact",
+    "fail_cuts": [],
+    "n_fail_cuts": 0
+   },
+   "lever": {
+    "n_cuts_sampled": 6,
+    "rgb_mean_abs": 55.2132,
+    "rgb_frac_changed": 0.73907,
+    "rgb_max_of_means": 64.9476,
+    "n_prims": {
+     "A": 490,
+     "B": 82,
+     "delta": -408
+    },
+    "idseg_n_ids": {
+     "A": null,
+     "B": [
+      9,
+      10,
+      13,
+      14,
+      16
+     ]
+    },
+    "fired": true,
+    "levers": [
+     "material_break",
+     "nosing",
+     "railing",
+     "scene_dressing",
+     "tactile"
+    ]
+   },
+   "seg": {
+    "n_cuts": 24,
+    "n_sidecars": 24,
+    "missing": 0,
+    "n_poses": 8,
+    "n_unique_masks": 16,
+    "n_ids_distinct": [
+     9,
+     10,
+     13,
+     14,
+     16
+    ],
+    "fetch": [
+     "orch"
+    ],
+    "distinct": true,
+    "n_pose_collisions": 0,
+    "n_light_dependent_poses": 8,
+    "over_discriminating": true,
+    "stale_signature": false,
+    "collide_examples": {},
+    "prim_normalized": [
+     {
+      "cuts": [
+       "L4__s20260820__0000.png",
+       "L5__s20260820__0000.png",
+       "L7__s20260820__0000.png"
+      ],
+      "n_paths_visible": 16,
+      "prim_path_sets_equal": true,
+      "per_prim_pixel_counts_equal": true,
+      "n_labels": 82
+     }
+    ]
+   },
+   "vg01_labeler": {
+    "cells_raw": {
+     "A": 68846,
+     "B": 68846,
+     "equal": true,
+     "delta": 0
+    },
+    "max_diff": {
+     "A": 2.042,
+     "B": 2.042
+    },
+    "hm_source": {
+     "A": "aabb",
+     "B": "aabb",
+     "off_A": "aabb",
+     "off_B": "aabb",
+     "matched": true
+    },
+    "void": {
+     "A": 0,
+     "B": 0,
+     "equal": true
+    },
+    "n_frames": 24,
+    "polar_gt_equal": 24,
+    "polar_gt_pregate_equal": 24,
+    "gate_excluded_equal": 24,
+    "all_frames_equal": true,
+    "mismatches": [],
+    "n_mismatch": 0
+   },
+   "corpus_tie": {
+    "corpus_round": "260820_boost_e_on",
+    "a_overlay": null,
+    "label_used": "w1b_Acorpus(구off 기준)",
+    "label_source": "original",
+    "n_compared": 24,
+    "n_equal": 24,
+    "n_missing_in_corpus": 0,
+    "reproduces": true
+   },
+   "training_gt_identical": true,
+   "scene_footprint_identical": true,
+   "vg01_tier": "T2",
+   "vg01_pass": true,
+   "vg01_state": "T2",
+   "vg01_t2seg": {
+    "added_levers": [
+     "cue_railing",
+     "cue_scene_dressing",
+     "cue_tactile"
+    ],
+    "per_cue": [
+     {
+      "cue": "cue_railing",
+      "seg3_final": "장식",
+      "rule": "S5",
+      "own_S": null,
+      "d_cells_raw": 0,
+      "ok": true
+     },
+     {
+      "cue": "cue_scene_dressing",
+      "seg3_final": "장식",
+      "rule": "S6",
+      "own_S": null,
+      "d_cells_raw": 0,
+      "ok": true
+     },
+     {
+      "cue": "cue_tactile",
+      "seg3_final": "장식",
+      "rule": "S2",
+      "own_S": null,
+      "d_cells_raw": 0,
+      "ok": true
+     }
+    ],
+    "polar_gt_identical": true,
+    "cells_raw_identical": true,
+    "fp_only_A": 0,
+    "fp_only_B": 0,
+    "pure_addition": true,
+    "eligible": false,
+    "rule": "polar_gt 비트동일 ∧ cells_raw 갈림 ∧ fp_only_A = 0(순증) ∧ 추가 레버 전부가 seg3 해제(S4 덮개 또는 Δcells_raw = 0)"
+   },
+   "vg01_pass_seg3": true
+  },
+  {
+   "scene": "sceneC4",
+   "band": "e",
+   "b_round": "260827_v3w1_lib_B3_e",
+   "a_round": "260820_boost_e_on",
+   "vg01_bytes": {
+    "hm_sha_A": "8e96dce49f5f9309",
+    "hm_sha_B": "d3499fd67806ed3c",
+    "hm_bytes_equal": false,
+    "meta_geo_equal": true,
+    "meta_geo_diff": {},
+    "n_prims": {
+     "A": 778,
+     "B": 635
+    },
+    "arm_config": {
+     "A": "{\"hazard_stairs\": true}",
+     "B": "{\"hazard_stairs\": true, \"cue_railing\": false, \"cue_material_break\": false, \"cue_tactile\": false}"
+    },
+    "fused_A": false,
+    "fused_B": false
+   },
+   "gate_off_round": "260826_v3w1_lib_D_e",
+   "off_round": "260820_boost_e_off",
+   "hm_diff": {
+    "aabb": {
+     "bytes_equal": false,
+     "n_cells_diff": 1158,
+     "n_cells_diff_ge_hz": 246,
+     "max_abs_diff": 0.93,
+     "fp_A": 67031,
+     "fp_B": 67031,
+     "fp_symdiff": 0,
+     "geometry_gt_invariant": true
+    },
+    "instrument": {
+     "A": "aabb",
+     "B": "aabb",
+     "off": "aabb",
+     "matched": true
+    },
+    "n_cells_diff": 1158,
+    "n_cells_diff_ge_hz": 246,
+    "max_abs_diff": 0.93,
+    "fp_A": 67031,
+    "fp_B": 67031,
+    "fp_symdiff": 0,
+    "fp_only_A": 0,
+    "fp_only_B": 0,
+    "diff_inside_fp_union": 0,
+    "void_A": 0,
+    "void_B": 0,
+    "A_z_in_diff_cells": [
+     0.928,
+     0.93,
+     0.928
+    ],
+    "B_z_in_diff_cells": [
+     -0.0,
+     0.081,
+     0.081
+    ],
+    "A_above_B_frac": 1.0
+   },
+   "hm_diff_guoff_ref": {
+    "fp_A": 67482,
+    "fp_B": 67482,
+    "fp_symdiff": 0,
+    "fp_only_A": 0,
+    "fp_only_B": 0
+   },
+   "datum": {
+    "n_cuts": 24,
+    "n_a": 24,
+    "n_b": 24,
+    "tiers": {
+     "datum_exact": 24,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "verdict": "datum_exact",
+    "fail_cuts": [],
+    "n_fail_cuts": 0
+   },
+   "lever": {
+    "n_cuts_sampled": 6,
+    "rgb_mean_abs": 4.117,
+    "rgb_frac_changed": 0.12613,
+    "rgb_max_of_means": 6.0932,
+    "n_prims": {
+     "A": 778,
+     "B": 635,
+     "delta": -143
+    },
+    "idseg_n_ids": {
+     "A": null,
+     "B": [
+      141,
+      194,
+      239,
+      247,
+      259,
+      274,
+      280,
+      289
+     ]
+    },
+    "fired": true,
+    "levers": [
+     "material_break",
+     "railing",
+     "tactile"
+    ]
+   },
+   "seg": {
+    "n_cuts": 24,
+    "n_sidecars": 24,
+    "missing": 0,
+    "n_poses": 8,
+    "n_unique_masks": 8,
+    "n_ids_distinct": [
+     141,
+     194,
+     239,
+     247,
+     259,
+     274,
+     280,
+     289
+    ],
+    "fetch": [
+     "orch"
+    ],
+    "distinct": true,
+    "n_pose_collisions": 0,
+    "n_light_dependent_poses": 0,
+    "over_discriminating": false,
+    "stale_signature": false,
+    "collide_examples": {}
+   },
+   "vg01_labeler": {
+    "cells_raw": {
+     "A": 67031,
+     "B": 67031,
+     "equal": true,
+     "delta": 0
+    },
+    "max_diff": {
+     "A": 2.097,
+     "B": 2.097
+    },
+    "hm_source": {
+     "A": "aabb",
+     "B": "aabb",
+     "off_A": "aabb",
+     "off_B": "aabb",
+     "matched": true
+    },
+    "void": {
+     "A": 0,
+     "B": 0,
+     "equal": true
+    },
+    "n_frames": 24,
+    "polar_gt_equal": 24,
+    "polar_gt_pregate_equal": 24,
+    "gate_excluded_equal": 24,
+    "all_frames_equal": true,
+    "mismatches": [],
+    "n_mismatch": 0
+   },
+   "corpus_tie": {
+    "corpus_round": "260820_boost_e_on",
+    "a_overlay": null,
+    "label_used": "w1b_Acorpus(구off 기준)",
+    "label_source": "original",
+    "n_compared": 24,
+    "n_equal": 24,
+    "n_missing_in_corpus": 0,
+    "reproduces": true
+   },
+   "training_gt_identical": true,
+   "scene_footprint_identical": true,
+   "vg01_tier": "T2",
+   "vg01_pass": true,
+   "vg01_state": "T2",
+   "vg01_t2seg": {
+    "added_levers": [
+     "cue_tactile"
+    ],
+    "per_cue": [
+     {
+      "cue": "cue_tactile",
+      "seg3_final": "장식",
+      "rule": "S2",
+      "own_S": null,
+      "d_cells_raw": 0,
+      "ok": true
+     }
+    ],
+    "polar_gt_identical": true,
+    "cells_raw_identical": true,
+    "fp_only_A": 0,
+    "fp_only_B": 0,
+    "pure_addition": true,
+    "eligible": false,
+    "rule": "polar_gt 비트동일 ∧ cells_raw 갈림 ∧ fp_only_A = 0(순증) ∧ 추가 레버 전부가 seg3 해제(S4 덮개 또는 Δcells_raw = 0)"
+   },
+   "vg01_pass_seg3": true
+  },
+  {
+   "scene": "sceneC4",
+   "band": "e2",
+   "b_round": "260827_v3w1_lib_B3_e2",
+   "a_round": "260820_boost_e2_on",
+   "vg01_bytes": {
+    "hm_sha_A": "8e96dce49f5f9309",
+    "hm_sha_B": "d3499fd67806ed3c",
+    "hm_bytes_equal": false,
+    "meta_geo_equal": true,
+    "meta_geo_diff": {},
+    "n_prims": {
+     "A": 778,
+     "B": 635
+    },
+    "arm_config": {
+     "A": "{\"hazard_stairs\": true}",
+     "B": "{\"hazard_stairs\": true, \"cue_railing\": false, \"cue_material_break\": false, \"cue_tactile\": false}"
+    },
+    "fused_A": false,
+    "fused_B": false
+   },
+   "gate_off_round": "260826_v3w1_lib_D_e2",
+   "off_round": "260820_boost_e2_off",
+   "hm_diff": {
+    "aabb": {
+     "bytes_equal": false,
+     "n_cells_diff": 1158,
+     "n_cells_diff_ge_hz": 246,
+     "max_abs_diff": 0.93,
+     "fp_A": 67031,
+     "fp_B": 67031,
+     "fp_symdiff": 0,
+     "geometry_gt_invariant": true
+    },
+    "instrument": {
+     "A": "aabb",
+     "B": "aabb",
+     "off": "aabb",
+     "matched": true
+    },
+    "n_cells_diff": 1158,
+    "n_cells_diff_ge_hz": 246,
+    "max_abs_diff": 0.93,
+    "fp_A": 67031,
+    "fp_B": 67031,
+    "fp_symdiff": 0,
+    "fp_only_A": 0,
+    "fp_only_B": 0,
+    "diff_inside_fp_union": 0,
+    "void_A": 0,
+    "void_B": 0,
+    "A_z_in_diff_cells": [
+     0.928,
+     0.93,
+     0.928
+    ],
+    "B_z_in_diff_cells": [
+     -0.0,
+     0.081,
+     0.081
+    ],
+    "A_above_B_frac": 1.0
+   },
+   "hm_diff_guoff_ref": {
+    "fp_A": 67482,
+    "fp_B": 67482,
+    "fp_symdiff": 0,
+    "fp_only_A": 0,
+    "fp_only_B": 0
+   },
+   "datum": {
+    "n_cuts": 24,
+    "n_a": 24,
+    "n_b": 24,
+    "tiers": {
+     "datum_exact": 24,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "verdict": "datum_exact",
+    "fail_cuts": [],
+    "n_fail_cuts": 0
+   },
+   "lever": {
+    "n_cuts_sampled": 6,
+    "rgb_mean_abs": 2.7534,
+    "rgb_frac_changed": 0.10939,
+    "rgb_max_of_means": 4.8179,
+    "n_prims": {
+     "A": 778,
+     "B": 635,
+     "delta": -143
+    },
+    "idseg_n_ids": {
+     "A": null,
+     "B": [
+      167,
+      178,
+      198,
+      201,
+      207,
+      212,
+      217,
+      242
+     ]
+    },
+    "fired": true,
+    "levers": [
+     "material_break",
+     "railing",
+     "tactile"
+    ]
+   },
+   "seg": {
+    "n_cuts": 24,
+    "n_sidecars": 24,
+    "missing": 0,
+    "n_poses": 8,
+    "n_unique_masks": 8,
+    "n_ids_distinct": [
+     167,
+     178,
+     198,
+     201,
+     207,
+     212,
+     217,
+     242
+    ],
+    "fetch": [
+     "orch"
+    ],
+    "distinct": true,
+    "n_pose_collisions": 0,
+    "n_light_dependent_poses": 0,
+    "over_discriminating": false,
+    "stale_signature": false,
+    "collide_examples": {}
+   },
+   "vg01_labeler": {
+    "cells_raw": {
+     "A": 67031,
+     "B": 67031,
+     "equal": true,
+     "delta": 0
+    },
+    "max_diff": {
+     "A": 2.097,
+     "B": 2.097
+    },
+    "hm_source": {
+     "A": "aabb",
+     "B": "aabb",
+     "off_A": "aabb",
+     "off_B": "aabb",
+     "matched": true
+    },
+    "void": {
+     "A": 0,
+     "B": 0,
+     "equal": true
+    },
+    "n_frames": 24,
+    "polar_gt_equal": 24,
+    "polar_gt_pregate_equal": 24,
+    "gate_excluded_equal": 24,
+    "all_frames_equal": true,
+    "mismatches": [],
+    "n_mismatch": 0
+   },
+   "corpus_tie": {
+    "corpus_round": "260820_boost_e2_on",
+    "a_overlay": null,
+    "label_used": "w1b_Acorpus(구off 기준)",
+    "label_source": "original",
+    "n_compared": 24,
+    "n_equal": 24,
+    "n_missing_in_corpus": 0,
+    "reproduces": true
+   },
+   "training_gt_identical": true,
+   "scene_footprint_identical": true,
+   "vg01_tier": "T2",
+   "vg01_pass": true,
+   "vg01_state": "T2",
+   "vg01_t2seg": {
+    "added_levers": [
+     "cue_tactile"
+    ],
+    "per_cue": [
+     {
+      "cue": "cue_tactile",
+      "seg3_final": "장식",
+      "rule": "S2",
+      "own_S": null,
+      "d_cells_raw": 0,
+      "ok": true
+     }
+    ],
+    "polar_gt_identical": true,
+    "cells_raw_identical": true,
+    "fp_only_A": 0,
+    "fp_only_B": 0,
+    "pure_addition": true,
+    "eligible": false,
+    "rule": "polar_gt 비트동일 ∧ cells_raw 갈림 ∧ fp_only_A = 0(순증) ∧ 추가 레버 전부가 seg3 해제(S4 덮개 또는 Δcells_raw = 0)"
+   },
+   "vg01_pass_seg3": true
+  }
+ ],
+ "problems": [
+  "base/scene01: **VG-01 T3-geom 실패** — B팔 격리. 계획 §7.4: 실패한 키만 금지 + 남은 키로 씬당 1회 재렌더",
+  "base/scene21: **VG-01 T3-geom 실패** — B팔 격리. 계획 §7.4: 실패한 키만 금지 + 남은 키로 씬당 1회 재렌더"
+ ],
+ "accounting": {
+  "total_cuts": 240,
+  "in_process_gpu_h": 0.3321,
+  "planned_cuts": 576,
+  "plan_table_b_arm": 816,
+  "wave": "B3",
+  "skipped_d74": {
+   "scenes": {
+    "scene03": 72,
+    "scene04": 72,
+    "scene10": 24
+   },
+   "cuts": 168,
+   "why": "레버 0 → B ≡ A 바이트 동일 (DECISIONS D74 ⑤)"
+  },
+  "note": "계획 §1.2 표의 B팔 '합(프레임) 792'는 scene06 보류(24컷)를 뺀 값. D72 ③이 보류를 해제해 분모는 816이고, D74 ⑤ 스킵 168을 빼 648이 예산."
+ },
+ "vg_01": {
+  "n_pairs": 10,
+  "n_pass": 8,
+  "n_pending": 0,
+  "tiers": {
+   "T1": 0,
+   "T2": 8,
+   "T3-instr": 0,
+   "T3-geom": 2
+  },
+  "tier_legend": {
+   "T1": "높이맵 바이트 동일 — 레버가 GT를 건드릴 수 없음(구성적 보증)",
+   "T2": "바이트는 갈리나 fp 대칭차 0 · cells_raw·polar_gt 동일 — 차이가 보행면 **위**에만 있음(AABB가 제거된 수관/상판을 읽던 자리)",
+   "T3-instr": "원 AABB(시점 무관)에서 위험깊이 이상 차이 0셀 또는 발자국 대칭차 0 = 지면 기하가 GT 규모로 불변인데 라벨이 갈림 — **융합(깊이) 계기의 시점 의존성**이 원인. 처방은 레버 변경이 아니라 쌍의 GT 계기 확정",
+   "T3-geom": "AABB 기하가 위험 GT 안에서 움직임 — 그 레버는 구조물. 계획 §7.4: 그 키만 금지 + 남은 키로 재렌더"
+  },
+  "plan_text_note": "계획 §6.1 VG-01 문면의 `heightmap_meta.json 바이트 동일`은 **어떤 B팔에서도 만족 불가능**하다 — `arm_config`가 정의상 다르기 때문이다. 실질 조건은 `cells_raw`·`polar_gt` 두 절이며 본 판정은 그 둘을 조작적 기준으로 삼고, 바이트 동일은 더 강한 충분조건(T1)으로 별도 인쇄한다. 계획 문면 정정 대상.",
+  "n_hm_bytes_equal": 0,
+  "n_meta_geo_equal": 3,
+  "n_frames": 240,
+  "n_frames_gt_equal": 240,
+  "n_training_gt_identical": 10,
+  "n_scene_footprint_identical": 8,
+  "gt_only_pass": [
+   {
+    "scene": "scene01",
+    "band": "base",
+    "tier": "T3-geom",
+    "cells_raw": {
+     "A": 75866,
+     "B": 84468,
+     "equal": false,
+     "delta": 8602
+    }
+   },
+   {
+    "scene": "scene21",
+    "band": "base",
+    "tier": "T3-geom",
+    "cells_raw": {
+     "A": 14456,
+     "B": 14664,
+     "equal": false,
+     "delta": 208
+    }
+   }
+  ],
+  "quarantine": [
+   {
+    "scene": "scene01",
+    "band": "base",
+    "hm_bytes_equal": false,
+    "cells_raw": {
+     "A": 75866,
+     "B": 84468,
+     "equal": false,
+     "delta": 8602
+    },
+    "n_mismatch": 0
+   },
+   {
+    "scene": "scene21",
+    "band": "base",
+    "hm_bytes_equal": false,
+    "cells_raw": {
+     "A": 14456,
+     "B": 14664,
+     "equal": false,
+     "delta": 208
+    },
+    "n_mismatch": 0
+   }
+  ],
+  "n_pass_seg3": 10,
+  "t2seg_eligible": [
+   {
+    "scene": "scene01",
+    "band": "base",
+    "tier": "T3-geom",
+    "added_levers": [
+     "cue_railing",
+     "cue_scene_dressing"
+    ],
+    "per_cue": [
+     {
+      "cue": "cue_railing",
+      "seg3_final": "장식",
+      "rule": "S4",
+      "own_S": 1.0,
+      "d_cells_raw": 69,
+      "ok": true
+     },
+     {
+      "cue": "cue_scene_dressing",
+      "seg3_final": "장식",
+      "rule": "S4",
+      "own_S": 0.9684,
+      "d_cells_raw": 8533,
+      "ok": true
+     }
+    ],
+    "polar_gt_identical": true,
+    "cells_raw_identical": false,
+    "fp_only_A": 0,
+    "fp_only_B": 8602,
+    "pure_addition": true,
+    "eligible": true,
+    "rule": "polar_gt 비트동일 ∧ cells_raw 갈림 ∧ fp_only_A = 0(순증) ∧ 추가 레버 전부가 seg3 해제(S4 덮개 또는 Δcells_raw = 0)"
+   },
+   {
+    "scene": "scene21",
+    "band": "base",
+    "tier": "T3-geom",
+    "added_levers": [
+     "cue_nosing",
+     "cue_railing"
+    ],
+    "per_cue": [
+     {
+      "cue": "cue_nosing",
+      "seg3_final": "장식",
+      "rule": "S6",
+      "own_S": null,
+      "d_cells_raw": 0,
+      "ok": true
+     },
+     {
+      "cue": "cue_railing",
+      "seg3_final": "장식",
+      "rule": "S4",
+      "own_S": 0.9954,
+      "d_cells_raw": 208,
+      "ok": true
+     }
+    ],
+    "polar_gt_identical": true,
+    "cells_raw_identical": false,
+    "fp_only_A": 0,
+    "fp_only_B": 208,
+    "pure_addition": true,
+    "eligible": true,
+    "rule": "polar_gt 비트동일 ∧ cells_raw 갈림 ∧ fp_only_A = 0(순증) ∧ 추가 레버 전부가 seg3 해제(S4 덮개 또는 Δcells_raw = 0)"
+   }
+  ],
+  "quarantine_if_seg3_admitted": [],
+  "seg3_note": "T2-seg 는 **판정을 바꾸지 않는다** — `quarantine` 은 종전 의미 그대로다. `quarantine_if_seg3_admitted` 는 D90 ① 결재 시의 목록이며 `build_corpus_v3.py --admit-seg3` 가 그것을 읽는다.",
+  "note": "바이트층은 계기와 무관한 구성적 진술이다. 라벨러층은 그 위에 정본 GT 산술을 얹은 것 — 둘 다 통과해야 PASS."
+ },
+ "corpus_tie": {
+  "n_pairs": 10,
+  "n_reproduce": 10,
+  "deviating": []
+ },
+ "vg_datum": {
+  "n_pairs": 10,
+  "cut_tiers": {
+   "datum_exact": 240,
+   "datum_tol": 0,
+   "datum_fail": 0
+  },
+  "n_cuts": 240,
+  "pair_survival": "10/10",
+  "pair_survival_rate": 1.0,
+  "cut_survival": "240/240",
+  "quarantine": [],
+  "drift": []
+ },
+ "vg_10": {
+  "pose_delta_max": 0.0,
+  "n_pairs_nonzero": 0,
+  "nonzero": []
+ },
+ "lever_firing": {
+  "note": "VG-01은 '토글이 아예 안 걸려 B가 A의 복제본'인 실패를 만점으로 통과시킨다. 반대 방향 증거를 따로 잰다 — 프림 수 델타 · RGB 델타 · idseg n_ids 델타.",
+  "n_pairs": 10,
+  "n_fired": 10,
+  "not_fired": [],
+  "rows": [
+   {
+    "scene": "scene01",
+    "band": "base",
+    "levers": [
+     "material_break",
+     "railing",
+     "scene_dressing",
+     "sign"
+    ],
+    "d_prims": -297,
+    "rgb_mean_abs": 41.7524,
+    "rgb_frac_changed": 0.60056
+   },
+   {
+    "scene": "scene09",
+    "band": "base",
+    "levers": [
+     "material_break",
+     "scene_dressing",
+     "sign"
+    ],
+    "d_prims": -1068,
+    "rgb_mean_abs": 2.4989,
+    "rgb_frac_changed": 0.07605
+   },
+   {
+    "scene": "scene21",
+    "band": "base",
+    "levers": [
+     "material_break",
+     "nosing",
+     "railing",
+     "scene_dressing",
+     "sign"
+    ],
+    "d_prims": -323,
+    "rgb_mean_abs": 34.2723,
+    "rgb_frac_changed": 0.72346
+   },
+   {
+    "scene": "sceneC1",
+    "band": "base",
+    "levers": [
+     "material_break",
+     "nosing",
+     "railing",
+     "scene_dressing",
+     "tactile"
+    ],
+    "d_prims": -408,
+    "rgb_mean_abs": 50.5069,
+    "rgb_frac_changed": 0.80312
+   },
+   {
+    "scene": "sceneC4",
+    "band": "base",
+    "levers": [
+     "material_break",
+     "railing",
+     "tactile"
+    ],
+    "d_prims": -143,
+    "rgb_mean_abs": 3.4954,
+    "rgb_frac_changed": 0.0954
+   },
+   {
+    "scene": "scene09",
+    "band": "h",
+    "levers": [
+     "material_break",
+     "scene_dressing",
+     "sign"
+    ],
+    "d_prims": -1068,
+    "rgb_mean_abs": 1.2052,
+    "rgb_frac_changed": 0.06983
+   },
+   {
+    "scene": "scene09",
+    "band": "e",
+    "levers": [
+     "material_break",
+     "scene_dressing",
+     "sign"
+    ],
+    "d_prims": -1068,
+    "rgb_mean_abs": 1.3941,
+    "rgb_frac_changed": 0.04659
+   },
+   {
+    "scene": "sceneC1",
+    "band": "e",
+    "levers": [
+     "material_break",
+     "nosing",
+     "railing",
+     "scene_dressing",
+     "tactile"
+    ],
+    "d_prims": -408,
+    "rgb_mean_abs": 55.2132,
+    "rgb_frac_changed": 0.73907
+   },
+   {
+    "scene": "sceneC4",
+    "band": "e",
+    "levers": [
+     "material_break",
+     "railing",
+     "tactile"
+    ],
+    "d_prims": -143,
+    "rgb_mean_abs": 4.117,
+    "rgb_frac_changed": 0.12613
+   },
+   {
+    "scene": "sceneC4",
+    "band": "e2",
+    "levers": [
+     "material_break",
+     "railing",
+     "tactile"
+    ],
+    "d_prims": -143,
+    "rgb_mean_abs": 2.7534,
+    "rgb_frac_changed": 0.10939
+   }
+  ]
+ },
+ "vg_08": {
+  "n_pairs": 10,
+  "n_distinct": 10,
+  "n_cuts": 240,
+  "n_unique_masks": 137,
+  "n_missing_sidecars": 0,
+  "n_poses": 80,
+  "n_stale_signature": 0,
+  "n_pose_collisions": 0,
+  "n_light_dependent": 39,
+  "n_over_discriminating": 5,
+  "predicate": "판정(hard) = 포즈 간 충돌 0 이고 고유 마스크 수 ≥ 고유 포즈 수. 조건은 조명만 바꾸므로 같은 포즈의 컷은 마스크가 같은 것이 정상이고, **다른 포즈가 같은 마스크를 쓰면** stale이다. 관찰(soft) = 마스크 > 포즈 (조건이 프림 집합을 건드림 / 치환 조건이 별도 프로세스라 인스턴스 ID가 재부여됨)",
+  "over_discriminating": [
+   {
+    "scene": "scene09",
+    "band": "base",
+    "n_unique_masks": 18,
+    "n_poses": 8,
+    "n_light_dependent_poses": 7,
+    "prim_normalized": [
+     {
+      "cuts": [
+       "L0__s20260819__0000.png",
+       "L5__s20260819__0000.png",
+       "L7__s20260819__0000.png"
+      ],
+      "n_paths_visible": 241,
+      "prim_path_sets_equal": true,
+      "per_prim_pixel_counts_equal": true,
+      "n_labels": 87902
+     }
+    ]
+   },
+   {
+    "scene": "sceneC1",
+    "band": "base",
+    "n_unique_masks": 16,
+    "n_poses": 8,
+    "n_light_dependent_poses": 8,
+    "prim_normalized": [
+     {
+      "cuts": [
+       "L4__s20260819__0000.png",
+       "L5__s20260819__0000.png",
+       "L7__s20260819__0000.png"
+      ],
+      "n_paths_visible": 9,
+      "prim_path_sets_equal": true,
+      "per_prim_pixel_counts_equal": true,
+      "n_labels": 82
+     }
+    ]
+   },
+   {
+    "scene": "scene09",
+    "band": "h",
+    "n_unique_masks": 23,
+    "n_poses": 8,
+    "n_light_dependent_poses": 8,
+    "prim_normalized": [
+     {
+      "cuts": [
+       "L0__s20260820__0000.png",
+       "L5__s20260820__0000.png",
+       "L7__s20260820__0000.png"
+      ],
+      "n_paths_visible": 417,
+      "prim_path_sets_equal": true,
+      "per_prim_pixel_counts_equal": true,
+      "n_labels": 87902
+     }
+    ]
+   },
+   {
+    "scene": "scene09",
+    "band": "e",
+    "n_unique_masks": 24,
+    "n_poses": 8,
+    "n_light_dependent_poses": 8,
+    "prim_normalized": [
+     {
+      "cuts": [
+       "L0__s20260820__0000.png",
+       "L5__s20260820__0000.png",
+       "L7__s20260820__0000.png"
+      ],
+      "n_paths_visible": 434,
+      "prim_path_sets_equal": true,
+      "per_prim_pixel_counts_equal": true,
+      "n_labels": 87902
+     }
+    ]
+   },
+   {
+    "scene": "sceneC1",
+    "band": "e",
+    "n_unique_masks": 16,
+    "n_poses": 8,
+    "n_light_dependent_poses": 8,
+    "prim_normalized": [
+     {
+      "cuts": [
+       "L4__s20260820__0000.png",
+       "L5__s20260820__0000.png",
+       "L7__s20260820__0000.png"
+      ],
+      "n_paths_visible": 16,
+      "prim_path_sets_equal": true,
+      "per_prim_pixel_counts_equal": true,
+      "n_labels": 82
+     }
+    ]
+   }
+  ],
+  "prim_normalization_verdict": "인스턴스 ID는 평가마다 재번호된다. `마스크 > 포즈`인 단위를 프림 경로로 정규화해 확인한 결과 경로 집합과 경로별 픽셀 수가 전부 동일하면 무해하다. **VG-03은 바이트 해시가 아니라 이 정규화로 구현해야 한다.**",
+  "fetch_paths": [
+   "orch"
+  ],
+  "n_ids_range": [
+   5,
+   32196
+  ],
+  "failures": []
+ }
+}

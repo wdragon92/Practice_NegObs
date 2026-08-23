@@ -1,0 +1,2113 @@
+{
+ "doc": "corpus_v3_quarantine",
+ "version": "1.1",
+ "created": "2026-08-24T07:31:47",
+ "rule": "격리는 벌점이 아니며 **인쇄 누락만이 위반**이다 (AC-INSTR-1 C3-7).",
+ "n_frames_excluded": 114,
+ "by_scope": {
+  "train_exclude": 114
+ },
+ "by_arm": {
+  "B": 96,
+  "C": 3,
+  "D": 15
+ },
+ "unit_ledger": [
+  {
+   "arm": "D",
+   "scene": "scene02",
+   "band": "base",
+   "scope": "pair_quarantine",
+   "n_cuts": 9,
+   "reason": "VG-datum 쌍 격리",
+   "authority": "W1D_REPORT §3"
+  },
+  {
+   "arm": "D",
+   "scene": "scene10",
+   "band": "base",
+   "scope": "pair_quarantine",
+   "n_cuts": 3,
+   "reason": "VG-datum 쌍 격리",
+   "authority": "W1D_REPORT §3"
+  },
+  {
+   "arm": "D",
+   "scene": "sceneN1",
+   "band": "base",
+   "scope": "pair_quarantine",
+   "n_cuts": 3,
+   "reason": "VG-datum 쌍 격리",
+   "authority": "W1D_REPORT §3"
+  },
+  {
+   "arm": "C",
+   "scene": "scene10",
+   "band": "base",
+   "scope": "pair_quarantine",
+   "n_cuts": 3,
+   "reason": "VG-datum (A,C) 쌍 격리",
+   "authority": "W1C_REPORT §8.2"
+  },
+  {
+   "arm": "B",
+   "scene": "scene12",
+   "band": "base",
+   "scope": "train_exclude_unit",
+   "reason": "VG-01 씬층 격리 (융합 계기 시점 의존 / 원인 키 미규명)",
+   "authority": "w1b2_verify.json vg_01.quarantine · W1B §9.0 · P-19",
+   "revivable": "P-19 (W1B-2) 결재 시 복원 — `polar_gt` 는 비트 동일"
+  },
+  {
+   "arm": "B",
+   "scene": "scene16",
+   "band": "base",
+   "scope": "train_exclude_unit",
+   "reason": "VG-01 씬층 격리 (융합 계기 시점 의존 / 원인 키 미규명)",
+   "authority": "w1b2_verify.json vg_01.quarantine · W1B §9.0 · P-19",
+   "revivable": "P-19 (W1B-2) 결재 시 복원 — `polar_gt` 는 비트 동일"
+  },
+  {
+   "arm": "B",
+   "scene": "scene12",
+   "band": "e",
+   "scope": "train_exclude_unit",
+   "reason": "VG-01 씬층 격리 (융합 계기 시점 의존 / 원인 키 미규명)",
+   "authority": "w1b2_verify.json vg_01.quarantine · W1B §9.0 · P-19",
+   "revivable": "P-19 (W1B-2) 결재 시 복원 — `polar_gt` 는 비트 동일"
+  },
+  {
+   "arm": "B",
+   "scene": "scene12",
+   "band": "e2",
+   "scope": "train_exclude_unit",
+   "reason": "VG-01 씬층 격리 (융합 계기 시점 의존 / 원인 키 미규명)",
+   "authority": "w1b2_verify.json vg_01.quarantine · W1B §9.0 · P-19",
+   "revivable": "P-19 (W1B-2) 결재 시 복원 — `polar_gt` 는 비트 동일"
+  },
+  {
+   "arm": "B",
+   "scene": "scene12",
+   "band": "base",
+   "scope": "seg_exclude_unit",
+   "n_collisions": 1,
+   "reason": "VG-08 포즈 간 마스크 충돌(결정론적 stale) — 세그 기반 채널만 무효, 라벨·기하는 정상",
+   "authority": "W1B_REPORT §5.2 · W1B2 §1.5",
+   "ledger": "w1b2_verify.json"
+  },
+  {
+   "arm": "B",
+   "scene": "scene17",
+   "band": "h",
+   "scope": "seg_exclude_unit",
+   "n_collisions": 1,
+   "reason": "VG-08 포즈 간 마스크 충돌(결정론적 stale) — 세그 기반 채널만 무효, 라벨·기하는 정상",
+   "authority": "W1B_REPORT §5.2 · W1B2 §1.5",
+   "ledger": "w1b2_verify.json"
+  },
+  {
+   "arm": "D",
+   "scope": "seg_exclude_cuts",
+   "n_cuts": 152,
+   "reason": "idseg_fetch == 't0' (첫 컷 마스크 복제 = stale). D팔은 단서·위험 무라 세그 비하중이었으나 코퍼스에서는 단서 채널이 기하 fallback 으로 내려간다",
+   "authority": "W1D_REPORT §2.2 · D73 ①",
+   "ledger": "variation.json"
+  }
+ ],
+ "frames": [
+  {
+   "frame_id": "B/scene12/L0__s20260819__0000.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260819__0001.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260819__0002.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260819__0003.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260819__0004.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260819__0005.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260819__0006.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260819__0007.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260819__0000.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260819__0001.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260819__0002.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260819__0003.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260819__0004.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260819__0005.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260819__0006.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260819__0007.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260819__0000.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260819__0001.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260819__0002.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260819__0003.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260819__0004.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260819__0005.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260819__0006.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260819__0007.png",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L0__s20260819__0000.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L0__s20260819__0001.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L0__s20260819__0002.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L0__s20260819__0003.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L0__s20260819__0004.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L0__s20260819__0005.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L0__s20260819__0006.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L0__s20260819__0007.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L5__s20260819__0000.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L5__s20260819__0001.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L5__s20260819__0002.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L5__s20260819__0003.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L5__s20260819__0004.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L5__s20260819__0005.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L5__s20260819__0006.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L5__s20260819__0007.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L7__s20260819__0000.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L7__s20260819__0001.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L7__s20260819__0002.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L7__s20260819__0003.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L7__s20260819__0004.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L7__s20260819__0005.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L7__s20260819__0006.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene16/L7__s20260819__0007.png",
+   "scene_id": "scene16",
+   "arm": "B",
+   "band": "base",
+   "round": "260826_v3w1_lib_B2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260820__0000.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260820__0001.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260820__0002.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260820__0003.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260820__0004.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260820__0005.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260820__0006.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260820__0007.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260820__0000.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260820__0001.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260820__0002.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260820__0003.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260820__0004.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260820__0005.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260820__0006.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260820__0007.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260820__0000.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260820__0001.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260820__0002.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260820__0003.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260820__0004.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260820__0005.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260820__0006.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260820__0007.png::e",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e",
+   "round": "260826_v3w1_lib_B2_e",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260821__0000.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260821__0001.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260821__0002.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260821__0003.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260821__0004.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260821__0005.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260821__0006.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L0__s20260821__0007.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260821__0000.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260821__0001.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260821__0002.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260821__0003.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260821__0004.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260821__0005.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260821__0006.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L5__s20260821__0007.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260821__0000.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260821__0001.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260821__0002.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260821__0003.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260821__0004.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260821__0005.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260821__0006.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "B/scene12/L7__s20260821__0007.png::e2",
+   "scene_id": "scene12",
+   "arm": "B",
+   "band": "e2",
+   "round": "260826_v3w1_lib_B2_e2",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-01 씬층 격리 (씬×밴드 단위)",
+     "authority": "W1B §9.0 · P-19",
+     "ledger": "w1b*_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "C/scene10/L0__s20260819__0005.png",
+   "scene_id": "scene10",
+   "arm": "C",
+   "band": "base",
+   "round": "260827_v3w1_lib_C",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-datum (A,C) datum_fail |Δground_z|=0.25 m > 0.02",
+     "authority": "W1C_REPORT §8.2 (컷 생존 813/816)",
+     "ledger": "w1c_datum.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "C/scene10/L5__s20260819__0005.png",
+   "scene_id": "scene10",
+   "arm": "C",
+   "band": "base",
+   "round": "260827_v3w1_lib_C",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-datum (A,C) datum_fail |Δground_z|=0.25 m > 0.02",
+     "authority": "W1C_REPORT §8.2 (컷 생존 813/816)",
+     "ledger": "w1c_datum.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "C/scene10/L7__s20260819__0005.png",
+   "scene_id": "scene10",
+   "arm": "C",
+   "band": "base",
+   "round": "260827_v3w1_lib_C",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-datum (A,C) datum_fail |Δground_z|=0.25 m > 0.02",
+     "authority": "W1C_REPORT §8.2 (컷 생존 813/816)",
+     "ledger": "w1c_datum.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "D/scene10/L0__s20260819__0005.png",
+   "scene_id": "scene10",
+   "arm": "D",
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-datum datum_fail |Δground_z|=0.25 m > 0.02 (카메라 데이텀 스트립 프림 제거로 눈높이 붕괴 — 트윈 무효)",
+     "authority": "W1D_REPORT §3 · §8 (사용 가능 컷 897/912)",
+     "ledger": "w1d_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "D/scene10/L5__s20260819__0005.png",
+   "scene_id": "scene10",
+   "arm": "D",
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-datum datum_fail |Δground_z|=0.25 m > 0.02 (카메라 데이텀 스트립 프림 제거로 눈높이 붕괴 — 트윈 무효)",
+     "authority": "W1D_REPORT §3 · §8 (사용 가능 컷 897/912)",
+     "ledger": "w1d_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "D/scene10/L7__s20260819__0005.png",
+   "scene_id": "scene10",
+   "arm": "D",
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-datum datum_fail |Δground_z|=0.25 m > 0.02 (카메라 데이텀 스트립 프림 제거로 눈높이 붕괴 — 트윈 무효)",
+     "authority": "W1D_REPORT §3 · §8 (사용 가능 컷 897/912)",
+     "ledger": "w1d_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "D/sceneN1/L0__s20260819__0004.png",
+   "scene_id": "sceneN1",
+   "arm": "D",
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-datum datum_fail |Δground_z|=12.8 m > 0.02 (카메라 데이텀 스트립 프림 제거로 눈높이 붕괴 — 트윈 무효)",
+     "authority": "W1D_REPORT §3 · §8 (사용 가능 컷 897/912)",
+     "ledger": "w1d_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "D/sceneN1/L3__s20260819__0004.png",
+   "scene_id": "sceneN1",
+   "arm": "D",
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-datum datum_fail |Δground_z|=12.8 m > 0.02 (카메라 데이텀 스트립 프림 제거로 눈높이 붕괴 — 트윈 무효)",
+     "authority": "W1D_REPORT §3 · §8 (사용 가능 컷 897/912)",
+     "ledger": "w1d_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "D/sceneN1/L7__s20260819__0004.png",
+   "scene_id": "sceneN1",
+   "arm": "D",
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-datum datum_fail |Δground_z|=12.8 m > 0.02 (카메라 데이텀 스트립 프림 제거로 눈높이 붕괴 — 트윈 무효)",
+     "authority": "W1D_REPORT §3 · §8 (사용 가능 컷 897/912)",
+     "ledger": "w1d_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "D/scene02/L0__s20260819__0002.png",
+   "scene_id": "scene02",
+   "arm": "D",
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-datum datum_fail |Δground_z|=2.8236 m > 0.02 (카메라 데이텀 스트립 프림 제거로 눈높이 붕괴 — 트윈 무효)",
+     "authority": "W1D_REPORT §3 · §8 (사용 가능 컷 897/912)",
+     "ledger": "w1d_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "D/scene02/L0__s20260819__0004.png",
+   "scene_id": "scene02",
+   "arm": "D",
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-datum datum_fail |Δground_z|=2.8236 m > 0.02 (카메라 데이텀 스트립 프림 제거로 눈높이 붕괴 — 트윈 무효)",
+     "authority": "W1D_REPORT §3 · §8 (사용 가능 컷 897/912)",
+     "ledger": "w1d_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "D/scene02/L0__s20260819__0005.png",
+   "scene_id": "scene02",
+   "arm": "D",
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-datum datum_fail |Δground_z|=2.8236 m > 0.02 (카메라 데이텀 스트립 프림 제거로 눈높이 붕괴 — 트윈 무효)",
+     "authority": "W1D_REPORT §3 · §8 (사용 가능 컷 897/912)",
+     "ledger": "w1d_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "D/scene02/L5__s20260819__0002.png",
+   "scene_id": "scene02",
+   "arm": "D",
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-datum datum_fail |Δground_z|=2.8236 m > 0.02 (카메라 데이텀 스트립 프림 제거로 눈높이 붕괴 — 트윈 무효)",
+     "authority": "W1D_REPORT §3 · §8 (사용 가능 컷 897/912)",
+     "ledger": "w1d_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "D/scene02/L5__s20260819__0004.png",
+   "scene_id": "scene02",
+   "arm": "D",
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-datum datum_fail |Δground_z|=2.8236 m > 0.02 (카메라 데이텀 스트립 프림 제거로 눈높이 붕괴 — 트윈 무효)",
+     "authority": "W1D_REPORT §3 · §8 (사용 가능 컷 897/912)",
+     "ledger": "w1d_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "D/scene02/L5__s20260819__0005.png",
+   "scene_id": "scene02",
+   "arm": "D",
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-datum datum_fail |Δground_z|=2.8236 m > 0.02 (카메라 데이텀 스트립 프림 제거로 눈높이 붕괴 — 트윈 무효)",
+     "authority": "W1D_REPORT §3 · §8 (사용 가능 컷 897/912)",
+     "ledger": "w1d_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "D/scene02/L7__s20260819__0002.png",
+   "scene_id": "scene02",
+   "arm": "D",
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-datum datum_fail |Δground_z|=2.8236 m > 0.02 (카메라 데이텀 스트립 프림 제거로 눈높이 붕괴 — 트윈 무효)",
+     "authority": "W1D_REPORT §3 · §8 (사용 가능 컷 897/912)",
+     "ledger": "w1d_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "D/scene02/L7__s20260819__0004.png",
+   "scene_id": "scene02",
+   "arm": "D",
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-datum datum_fail |Δground_z|=2.8236 m > 0.02 (카메라 데이텀 스트립 프림 제거로 눈높이 붕괴 — 트윈 무효)",
+     "authority": "W1D_REPORT §3 · §8 (사용 가능 컷 897/912)",
+     "ledger": "w1d_verify.json"
+    }
+   ]
+  },
+  {
+   "frame_id": "D/scene02/L7__s20260819__0005.png",
+   "scene_id": "scene02",
+   "arm": "D",
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "split": "train",
+   "reasons": [
+    {
+     "scope": "train_exclude",
+     "reason": "VG-datum datum_fail |Δground_z|=2.8236 m > 0.02 (카메라 데이텀 스트립 프림 제거로 눈높이 붕괴 — 트윈 무효)",
+     "authority": "W1D_REPORT §3 · §8 (사용 가능 컷 897/912)",
+     "ledger": "w1d_verify.json"
+    }
+   ]
+  }
+ ],
+ "seg_collision_cuts": [
+  "B/scene12/base/L0__s20260819__0000",
+  "B/scene12/base/L5__s20260819__0000",
+  "B/scene12/base/L7__s20260819__0000",
+  "B/scene12/base/L7__s20260819__0001",
+  "B/scene17/h/L0__s20260820__0001",
+  "B/scene17/h/L5__s20260820__0001",
+  "B/scene17/h/L5__s20260820__0002",
+  "B/scene17/h/L7__s20260820__0001",
+  "D/scene01/base/L0__s20260819__0000",
+  "D/scene01/base/L0__s20260819__0001",
+  "D/scene01/base/L0__s20260819__0002",
+  "D/scene01/base/L0__s20260819__0003",
+  "D/scene01/base/L0__s20260819__0004",
+  "D/scene01/base/L0__s20260819__0005",
+  "D/scene01/base/L0__s20260819__0006",
+  "D/scene01/base/L0__s20260819__0007",
+  "D/scene01/base/L5__s20260819__0000",
+  "D/scene01/base/L5__s20260819__0001",
+  "D/scene01/base/L5__s20260819__0002",
+  "D/scene01/base/L5__s20260819__0003",
+  "D/scene01/base/L5__s20260819__0004",
+  "D/scene01/base/L5__s20260819__0005",
+  "D/scene01/base/L5__s20260819__0006",
+  "D/scene01/base/L5__s20260819__0007",
+  "D/scene01/base/L7__s20260819__0000",
+  "D/scene01/base/L7__s20260819__0001",
+  "D/scene01/base/L7__s20260819__0002",
+  "D/scene01/base/L7__s20260819__0003",
+  "D/scene01/base/L7__s20260819__0004",
+  "D/scene01/base/L7__s20260819__0005",
+  "D/scene01/base/L7__s20260819__0006",
+  "D/scene01/base/L7__s20260819__0007",
+  "D/scene02/base/L0__s20260819__0000",
+  "D/scene02/base/L0__s20260819__0001",
+  "D/scene02/base/L0__s20260819__0002",
+  "D/scene02/base/L0__s20260819__0003",
+  "D/scene02/base/L0__s20260819__0004",
+  "D/scene02/base/L0__s20260819__0005",
+  "D/scene02/base/L0__s20260819__0006",
+  "D/scene02/base/L0__s20260819__0007",
+  "D/scene02/base/L5__s20260819__0000",
+  "D/scene02/base/L5__s20260819__0001",
+  "D/scene02/base/L5__s20260819__0002",
+  "D/scene02/base/L5__s20260819__0003",
+  "D/scene02/base/L5__s20260819__0004",
+  "D/scene02/base/L5__s20260819__0005",
+  "D/scene02/base/L5__s20260819__0006",
+  "D/scene02/base/L5__s20260819__0007",
+  "D/scene02/base/L7__s20260819__0000",
+  "D/scene02/base/L7__s20260819__0001",
+  "D/scene02/base/L7__s20260819__0002",
+  "D/scene02/base/L7__s20260819__0003",
+  "D/scene02/base/L7__s20260819__0004",
+  "D/scene02/base/L7__s20260819__0005",
+  "D/scene02/base/L7__s20260819__0006",
+  "D/scene02/base/L7__s20260819__0007",
+  "D/scene03/base/L0__s20260819__0000",
+  "D/scene03/base/L0__s20260819__0001",
+  "D/scene03/base/L0__s20260819__0002",
+  "D/scene03/base/L0__s20260819__0003",
+  "D/scene03/base/L0__s20260819__0004",
+  "D/scene03/base/L0__s20260819__0005",
+  "D/scene03/base/L0__s20260819__0006",
+  "D/scene03/base/L0__s20260819__0007",
+  "D/scene03/base/L5__s20260819__0000",
+  "D/scene03/base/L5__s20260819__0001",
+  "D/scene03/base/L5__s20260819__0002",
+  "D/scene03/base/L5__s20260819__0003",
+  "D/scene03/base/L5__s20260819__0004",
+  "D/scene03/base/L5__s20260819__0005",
+  "D/scene03/base/L5__s20260819__0006",
+  "D/scene03/base/L5__s20260819__0007",
+  "D/scene03/base/L7__s20260819__0000",
+  "D/scene03/base/L7__s20260819__0001",
+  "D/scene03/base/L7__s20260819__0002",
+  "D/scene03/base/L7__s20260819__0003",
+  "D/scene03/base/L7__s20260819__0004",
+  "D/scene03/base/L7__s20260819__0005",
+  "D/scene03/base/L7__s20260819__0006",
+  "D/scene03/base/L7__s20260819__0007",
+  "D/scene04/base/L0__s20260819__0000",
+  "D/scene04/base/L0__s20260819__0001",
+  "D/scene04/base/L0__s20260819__0002",
+  "D/scene04/base/L0__s20260819__0003",
+  "D/scene04/base/L0__s20260819__0004",
+  "D/scene04/base/L0__s20260819__0005",
+  "D/scene04/base/L0__s20260819__0006",
+  "D/scene04/base/L0__s20260819__0007",
+  "D/scene04/base/L5__s20260819__0000",
+  "D/scene04/base/L5__s20260819__0001",
+  "D/scene04/base/L5__s20260819__0002",
+  "D/scene04/base/L5__s20260819__0003",
+  "D/scene04/base/L5__s20260819__0004",
+  "D/scene04/base/L5__s20260819__0005",
+  "D/scene04/base/L5__s20260819__0006",
+  "D/scene04/base/L5__s20260819__0007",
+  "D/scene04/base/L7__s20260819__0000",
+  "D/scene04/base/L7__s20260819__0001",
+  "D/scene04/base/L7__s20260819__0002",
+  "D/scene04/base/L7__s20260819__0003",
+  "D/scene04/base/L7__s20260819__0004",
+  "D/scene04/base/L7__s20260819__0005",
+  "D/scene04/base/L7__s20260819__0006",
+  "D/scene04/base/L7__s20260819__0007",
+  "D/scene06/base/L0__s20260819__0000",
+  "D/scene06/base/L0__s20260819__0001",
+  "D/scene06/base/L0__s20260819__0002",
+  "D/scene06/base/L0__s20260819__0003",
+  "D/scene06/base/L0__s20260819__0004",
+  "D/scene06/base/L0__s20260819__0005",
+  "D/scene06/base/L0__s20260819__0006",
+  "D/scene06/base/L0__s20260819__0007",
+  "D/scene06/base/L5__s20260819__0000",
+  "D/scene06/base/L5__s20260819__0001",
+  "D/scene06/base/L5__s20260819__0002",
+  "D/scene06/base/L5__s20260819__0003",
+  "D/scene06/base/L5__s20260819__0004",
+  "D/scene06/base/L5__s20260819__0005",
+  "D/scene06/base/L5__s20260819__0006",
+  "D/scene06/base/L5__s20260819__0007",
+  "D/scene06/base/L7__s20260819__0000",
+  "D/scene06/base/L7__s20260819__0001",
+  "D/scene06/base/L7__s20260819__0002",
+  "D/scene06/base/L7__s20260819__0003",
+  "D/scene06/base/L7__s20260819__0004",
+  "D/scene06/base/L7__s20260819__0005",
+  "D/scene06/base/L7__s20260819__0006",
+  "D/scene06/base/L7__s20260819__0007",
+  "D/scene08/base/L0__s20260819__0000",
+  "D/scene08/base/L0__s20260819__0001",
+  "D/scene08/base/L0__s20260819__0002",
+  "D/scene08/base/L0__s20260819__0003",
+  "D/scene08/base/L0__s20260819__0004",
+  "D/scene08/base/L0__s20260819__0005",
+  "D/scene08/base/L0__s20260819__0006",
+  "D/scene08/base/L0__s20260819__0007",
+  "D/scene08/base/L5__s20260819__0000",
+  "D/scene08/base/L5__s20260819__0001",
+  "D/scene08/base/L5__s20260819__0002",
+  "D/scene08/base/L5__s20260819__0003",
+  "D/scene08/base/L5__s20260819__0004",
+  "D/scene08/base/L5__s20260819__0005",
+  "D/scene08/base/L5__s20260819__0006",
+  "D/scene08/base/L5__s20260819__0007",
+  "D/scene08/base/L7__s20260819__0000",
+  "D/scene08/base/L7__s20260819__0001",
+  "D/scene08/base/L7__s20260819__0002",
+  "D/scene08/base/L7__s20260819__0003",
+  "D/scene08/base/L7__s20260819__0004",
+  "D/scene08/base/L7__s20260819__0005",
+  "D/scene08/base/L7__s20260819__0006",
+  "D/scene08/base/L7__s20260819__0007",
+  "D/scene09/base/L0__s20260819__0000",
+  "D/scene09/base/L0__s20260819__0001",
+  "D/scene09/base/L0__s20260819__0002",
+  "D/scene09/base/L0__s20260819__0003",
+  "D/scene09/base/L0__s20260819__0004",
+  "D/scene09/base/L0__s20260819__0005",
+  "D/scene09/base/L0__s20260819__0006",
+  "D/scene09/base/L0__s20260819__0007"
+ ],
+ "absent_not_quarantined": {
+  "b_arm_skip": {
+   "scene03": 72,
+   "scene04": 72,
+   "scene10": 24
+  },
+  "reason": "D74 ⑤ — 레버 0 이라 B ≡ A 바이트 동일. 중복 프레임은 학습 이중 가중이므로 **찍지 않았다**. 격리가 아니라 부재."
+ }
+}

@@ -69,6 +69,8 @@ B_ROUNDS = {"base": "260826_v3w1_lib_B", "h": "260826_v3w1_lib_B_h",
             "e": "260826_v3w1_lib_B_e", "e2": "260826_v3w1_lib_B_e2"}
 B2_ROUNDS = {"base": "260826_v3w1_lib_B2", "h": "260826_v3w1_lib_B2_h",
              "e": "260826_v3w1_lib_B2_e", "e2": "260826_v3w1_lib_B2_e2"}
+B3_ROUNDS = {"base": "260827_v3w1_lib_B3", "h": "260827_v3w1_lib_B3_h",
+             "e": "260827_v3w1_lib_B3_e", "e2": "260827_v3w1_lib_B3_e2"}
 C_ROUNDS = {"base": "260827_v3w1_lib_C", "h": "260827_v3w1_lib_C_h",
             "e": "260827_v3w1_lib_C_e", "e2": "260827_v3w1_lib_C_e2"}
 D_ROUNDS = {"base": "260826_v3w1_lib_D", "h": "260826_v3w1_lib_D_h",
@@ -79,6 +81,19 @@ W2_SCENES = ("sceneH6", "sceneH7")
 # W1B2 §7 — 이 12씬의 B팔 정본은 B2 트리
 B2_SCENES = set("scene02 scene08 scene09 scene12 scene16 scene17 scene20 "
                 "scene21 sceneC1 sceneC4 sceneD1 sceneD3".split())
+# DECISIONS **D90 ①** — 세그 3차 판정(`w1d_seg3.json`)이 장식으로 해제한 레버를
+# 더해 다시 찍은 5씬. 이 씬의 B팔 정본은 **B3 트리**이며 B2/B 트리를 대체한다
+# (프레임 수·씬×밴드 분포는 동일 — 레시피만 상위집합이다).
+B3_SCENES = set("scene01 scene09 scene21 sceneC1 sceneC4".split())
+
+
+def b_tree_of(scene):
+    """그 씬의 **B팔 정본 트리**. B3 > B2 > B (나중 웨이브가 이긴다)."""
+    if scene in B3_SCENES:
+        return "B3"
+    return "B2" if scene in B2_SCENES else "B"
+
+
 # 계획 §1.0 — v2 on팔이 그대로 C팔 (A팔이라는 말이 성립하지 않는다)
 NODROP = ("sceneN1", "sceneN2", "sceneN4", "sceneN5")
 # D74 ⑤ — 레버 0 이라 B ≡ A 바이트 동일 ⇒ 미렌더
@@ -107,7 +122,7 @@ def split_key(k):
 # --------------------------------------------------------------------------
 # 1. 격리 원장 — 웨이브 보고서의 **기계 산출**에서 읽는다 (손으로 옮기지 않는다)
 # --------------------------------------------------------------------------
-def load_quarantines():
+def load_quarantines(admit_seg3=False):
     """(scope, arm, scene, band, stem) → dict(reason, authority, ledger)"""
     Q = collections.defaultdict(list)          # (arm,scene,band,stem) → [entry]
     unit = []                                  # 단위(씬×밴드) 수준 기록
@@ -150,25 +165,30 @@ def load_quarantines():
     #     프레임 층 `polar_gt` 는 비트 동일이므로 라벨 손실은 0. 그러나 W1B §9.0 이
     #     "격리 4 씬×밴드 = 96컷을 제외한 552컷이 무조건부"라 적었으므로 **기본은 제외**
     #     하고 P-19(W1B-2) 결재로 되살릴 수 있게 태그를 남긴다.
-    for vf, tag in (("w1b_verify.json", "B"), ("w1b2_verify.json", "B2")):
+    for vf, tag in (("w1b_verify.json", "B"), ("w1b2_verify.json", "B2"),
+                    ("w1b3_verify.json", "B3")):
+        if not os.path.exists(os.path.join(V3, vf)):
+            continue
         d = json.load(open(os.path.join(V3, vf), encoding="utf-8"))
-        for q in d["vg_01"].get("quarantine", []):
+        qkey = ("quarantine_if_seg3_admitted"
+                if (admit_seg3 and "quarantine_if_seg3_admitted" in d["vg_01"])
+                else "quarantine")
+        for q in d["vg_01"].get(qkey, []):
             sc, bd = (q["scene"], q["band"]) if isinstance(q, dict) else q.split("/")
-            if tag == "B2" and sc not in B2_SCENES:
-                continue
-            if tag == "B" and sc in B2_SCENES:
+            if b_tree_of(sc) != tag:
                 continue
             unit.append(dict(arm="B", scene=sc, band=bd, scope="train_exclude_unit",
                              reason="VG-01 씬층 격리 (융합 계기 시점 의존 / 원인 키 미규명)",
-                             authority=f"{vf} vg_01.quarantine · W1B §9.0 · P-19",
+                             authority=f"{vf} vg_01.{qkey} · W1B §9.0 · P-19",
                              revivable="P-19 (W1B-2) 결재 시 복원 — `polar_gt` 는 비트 동일"))
     # --- VG-08 포즈 간 충돌 (세그만 격리) ----------------------------------
-    for vf, tag in (("w1b_verify.json", "B"), ("w1b2_verify.json", "B2")):
+    for vf, tag in (("w1b_verify.json", "B"), ("w1b2_verify.json", "B2"),
+                    ("w1b3_verify.json", "B3")):
+        if not os.path.exists(os.path.join(V3, vf)):
+            continue
         d = json.load(open(os.path.join(V3, vf), encoding="utf-8"))
         for f in d["vg_08"].get("failures", []):
-            if tag == "B2" and f["scene"] not in B2_SCENES:
-                continue
-            if tag == "B" and f["scene"] in B2_SCENES:
+            if b_tree_of(f["scene"]) != tag:
                 continue
             unit.append(dict(arm="B", scene=f["scene"], band=f["band"],
                              scope="seg_exclude_unit",
@@ -222,8 +242,11 @@ def load_gt():
         _s, scene, stem, band = split_key(f["frame_id"])
         A[(scene, band, stem)] = f
     labs = {}
-    for fn in ("w1b_A.json", "w1b_B.json", "w1b2_A.json", "w1b2_B.json"):
-        labs[fn] = json.load(open(os.path.join(ANN, fn), encoding="utf-8"))["frames"]
+    for fn in ("w1b_A.json", "w1b_B.json", "w1b2_A.json", "w1b2_B.json",
+               "w1b3_A.json", "w1b3_B.json"):
+        pth = os.path.join(ANN, fn)
+        labs[fn] = (json.load(open(pth, encoding="utf-8"))["frames"]
+                    if os.path.exists(pth) else {})
     w2 = {}
     for band, tag in (("w2base", "base"), ("w2h", "h"), ("w2h2", "h2")):
         for pair in ("ac", "bd"):
@@ -300,16 +323,14 @@ def onwired_registry():
 
 
 def built_levers():
-    """실제로 찍은 B/B2 설정 파일에서 **꺼진 키**를 읽는다 (최종 사실)."""
+    """실제로 찍은 B/B2/B3 설정 파일에서 **꺼진 키**를 읽는다 (최종 사실)."""
     out = {}
     for p in sorted(glob.glob(os.path.join(V3, "render_configs_v3", "*_B*.json"))):
         base = os.path.basename(p)[:-5]
         scene, _, tag = base.rpartition("_")
-        if tag not in ("B", "B2"):
+        if tag not in ("B", "B2", "B3"):
             continue
-        if tag == "B2" and scene not in B2_SCENES:
-            continue
-        if tag == "B" and scene in B2_SCENES:
+        if b_tree_of(scene) != tag:
             continue
         cfg = json.load(open(p, encoding="utf-8"))
         out[scene] = {CUE2KEY[c] for c, v in cfg.items()
@@ -369,6 +390,10 @@ def main(argv=None):
     ap.add_argument("--split-out", default=os.path.join(V3, "split_v3.json"))
     ap.add_argument("--revive-vg01", action="store_true",
                     help="P-19 결재 시 — VG-01 격리 96컷을 훈련에 되살린다")
+    ap.add_argument("--admit-seg3", action="store_true",
+                    help="D90 ① 결재 시 — VG-01 `T2-seg` 자격 유닛(polar_gt 비트 동일 · "
+                         "cells_raw 갈림 · 순증 · 추가 레버 전부 세그 3차 해제)을 "
+                         "격리에서 뺀다. 기본은 **비발동(보수적 격리)**.")
     args = ap.parse_args(argv)
 
     import labeler as LB
@@ -385,7 +410,7 @@ def main(argv=None):
     split_of.update({s: "val" for s in W2_SCENES})
 
     A_GT, LABS, W2L, v2meta = load_gt()
-    Q, QUNIT = load_quarantines()
+    Q, QUNIT = load_quarantines(args.admit_seg3)
     CUE, cue_acct = load_cue_index()
     ONW = onwired_registry()
     BUILT = built_levers()
@@ -395,7 +420,8 @@ def main(argv=None):
     for u in QUNIT:
         if u["scope"] != "seg_exclude_unit":
             continue
-        rounds = B2_ROUNDS if u["scene"] in B2_SCENES else B_ROUNDS
+        rounds = {"B3": B3_ROUNDS, "B2": B2_ROUNDS,
+                  "B": B_ROUNDS}[b_tree_of(u["scene"])]
         rd = rounds.get(u["band"])
         if not rd:
             continue
@@ -491,21 +517,20 @@ def main(argv=None):
             emit("A", sc, band, stem, rnd, p, g["polar_gt"], g["tier"],
                  dict(src="dataset_manifest_v2corr.json", rec=g))
     # ---------- B팔 ----------
-    for rounds, tag in ((B2_ROUNDS, "B2"), (B_ROUNDS, "B")):
+    for rounds, tag in ((B3_ROUNDS, "B3"), (B2_ROUNDS, "B2"), (B_ROUNDS, "B")):
         for band, rnd in rounds.items():
             for p in pngs(rnd):
                 sc = scene_of(p)
                 if sc not in LIB:
                     continue
-                if tag == "B2" and sc not in B2_SCENES:
-                    continue
-                if tag == "B" and sc in B2_SCENES:
+                if b_tree_of(sc) != tag:
                     continue
                 stem = os.path.basename(p)[:-4]
                 g = A_GT.get((sc, band, stem))
                 if g is None:
                     continue
-                lab = LABS["w1b2_B.json" if tag == "B2" else "w1b_B.json"]
+                lab = LABS[{"B3": "w1b3_B.json", "B2": "w1b2_B.json",
+                            "B": "w1b_B.json"}[tag]]
                 lk = f"on/{sc}/{stem}.png" + ("" if band == "base"
                                               else f"::boost_{band}")
                 lv = lab.get(lk) or {}
@@ -701,7 +726,8 @@ def main(argv=None):
         f["ignore"] = ig
 
     meta = dict(
-        doc="dataset_manifest_v3", version="1.0",
+        doc="dataset_manifest_v3", version="1.1",
+        version_note="1.1 = v3 코퍼스 + W1-B3 레버 추가분(D90 ①). 1.0 대비 프레임 수·분할·GT 세대는 불변이고 5씬의 B팔 라운드만 B3 트리로 바뀐다.",
         created=__import__("datetime").datetime.now().isoformat(timespec="seconds"),
         authority="RENDER_PLAN_V3.md → 웨이브 보고서 → DECISIONS D74–D89 → ACCOUNTING §2/§4",
         grid_version=grid["version"], n_cells=ncell,
@@ -710,9 +736,14 @@ def main(argv=None):
         tier_source=v2meta.get("tier_source"),
         footprint=v2meta.get("footprint"), gate_policy=v2meta.get("gate_policy"),
         split_source="experiments/dayrun_0820/split_v2_full.json (+ sceneH6·H7 = val)",
-        rounds=dict(A=A_ROUNDS, B=B_ROUNDS, B2=B2_ROUNDS, C=C_ROUNDS, D=D_ROUNDS,
-                    W2=W2_ROUNDS),
-        b2_scenes=sorted(B2_SCENES), nodrop_c_reuse=list(NODROP),
+        rounds=dict(A=A_ROUNDS, B=B_ROUNDS, B2=B2_ROUNDS, B3=B3_ROUNDS,
+                    C=C_ROUNDS, D=D_ROUNDS, W2=W2_ROUNDS),
+        b2_scenes=sorted(B2_SCENES), b3_scenes=sorted(B3_SCENES),
+        admit_seg3=bool(args.admit_seg3), revive_vg01=bool(args.revive_vg01),
+        b_tree_rule="B3 > B2 > B — 나중 웨이브가 그 씬의 B팔 정본이다. "
+                    "B3 = DECISIONS D90 ① 레버 추가 재렌더(세그 3차 "
+                    "`w1d_seg3.json` 해제분 · 씬×밴드 분포 불변).",
+        nodrop_c_reuse=list(NODROP),
         b_skip_d74=B_SKIP,
         n_frames=len(frames), n_quarantined=len(quar),
         cue_channel="원시 cue 픽셀 수만 저장 — **k 는 PREREG 미결**이므로 "
@@ -737,7 +768,7 @@ def main(argv=None):
               ensure_ascii=False, indent=1)
     log(f"[corpus] → {args.split_out}")
 
-    qout = dict(doc="corpus_v3_quarantine", version="1.0",
+    qout = dict(doc="corpus_v3_quarantine", version="1.1",
                 created=meta["created"],
                 rule="격리는 벌점이 아니며 **인쇄 누락만이 위반**이다 (AC-INSTR-1 C3-7).",
                 n_frames_excluded=len(quar),

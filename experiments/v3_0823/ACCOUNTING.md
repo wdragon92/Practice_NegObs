@@ -520,3 +520,14 @@ RT-A(`redteam/RT_LEDGER_A.md`) 차단급 판정 4건과 처분:
 | 계기판③ 분모 | FA_C = FA_D = **288프레임 = 5,760칸**, void 버킷 **공집합**(VG-void 1.0 전면) |
 | 완전 은닉 층 (D87 ①) | sceneH3 (A,C) 24/24 무정보 — 계기판① 별도 행, Δp 분포 보고 |
 | C/D 팔 GT | 전 씬 all-negative (AC-INSTR-1: C GT = 사양 상수 — 매니페스트 라벨러 행 사용 금지) |
+
+## 4.11 【동결 · 08-24】 PREREG_V3 동결 + k 봉인 + 최종 |r| (D91)
+
+- **PREREG_V3.md 동결**: sha256 `05f41322e52b8e085b4d678c57dba4ee984deff3bfcea960123ae586e9fcf56a` · 원본 PREREG_V3_FINAL_DRAFT.md(§9 붙임 포함)
+  의 사본 · 사후 수정 = 새 버전+delta note만 허용.
+- **k = 7,000 px 봉인**(px_canonical6) — 이후 변경은 동결 위반.
+- **훈련 정본 코퍼스** = `dataset_manifest_v3_seg3.json`(3,654프레임, T2-seg 2유닛
+  인정 — 자격 3조건·근거는 PREREG §9.1) · 보수판 3,606프레임은 민감도 대조 보존.
+- **최종 as-built 존재 |r|**: R 0.1728/Ta 0.0000/N 0.0151/T 0.0788/Sg 0.0117/V 0.1390 —
+  전 키 ≤0.2 (원장 VG09_CLEARING.md · corpus_v3_census_seg3.json · 08-24).
+- 면적 축 r_pb 0.1150(q99 0.0693) 잔존 — OPEN-9, 판정 비차단, 한계 인쇄 의무.

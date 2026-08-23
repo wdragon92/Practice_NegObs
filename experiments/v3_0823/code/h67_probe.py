@@ -193,7 +193,31 @@ def main(argv=None):
                #   (REG_AUDIT §8.4 (b))까지 겹쳐 **새 스탬프가 강제**된다.
                "260823_v3p5_h12reg2_A", "260823_v3p5_h12reg2_B",
                "260823_v3p5_h12reg2_C", "260823_v3p5_h12reg2_D",
-               "260823_v3p5_h67reg2_A", "260823_v3p5_h67reg2_C")
+               "260823_v3p5_h67reg2_A", "260823_v3p5_h67reg2_C",
+               # ══ W3 test-ext **본렌더** (D86 규정 트랙 완결로 게이트 개방) ══════
+               #   계획 §4.3 이 예약한 스탬프는 `260830_v3w3_ext_{A,B,C,D}` 였다.
+               #   두 가지를 고쳐 쓴다:
+               #   ① 날짜 — 실제 렌더일(260824)을 쓴다. 260830 은 계획 작성 시점의
+               #      예정일이고, `process_spec_v1.md:63-73` 의 <yymmdd> 는 라운드가
+               #      **실제로 돌아간 날**이다. 예정일을 박으면 원장이 거짓말한다.
+               #   ② **밴드 토큰** — 계획의 단일 스탬프는 한 씬의 두 밴드 draw 를
+               #      같은 디렉터리에 쓴다. D85 ⑦ 실측: **기존 출력 디렉터리가 존재하면
+               #      세그가 재생성되지 않는다**(REG_AUDIT §8.4 (b)). 두 번째 밴드가
+               #      첫 밴드의 `.idseg.npz` 를 물려받으면 VG-06 과 §12-5 의 k 가
+               #      조용히 거짓이 된다. D23 의 "팔은 라운드명 안에" 를 **밴드까지**
+               #      확장한다 — 밴드도 라운드명 안에 있어야 한다.
+               #   base = 밴드 오버라이드 없음(기본 CAM_DIST) · 전 6씬
+               #   h    = bands.H   (H1·H2·H3) · lat = bands.LAT (L1)
+               #   b2   = base 2차 draw, 시드 20260824 (N9·N11 — 계획 §3.2 "base2")
+               "260824_v3w3_extsmoke_A",
+               "260824_v3w3_extbase_A", "260824_v3w3_extbase_B",
+               "260824_v3w3_extbase_C", "260824_v3w3_extbase_D",
+               "260824_v3w3_exth_A", "260824_v3w3_exth_B",
+               "260824_v3w3_exth_C", "260824_v3w3_exth_D",
+               "260824_v3w3_extlat_A", "260824_v3w3_extlat_B",
+               "260824_v3w3_extlat_C", "260824_v3w3_extlat_D",
+               "260824_v3w3_extb2_A", "260824_v3w3_extb2_B",
+               "260824_v3w3_extb2_C", "260824_v3w3_extb2_D")
     if a.run not in allowed:
         raise SystemExit(f"[h67_probe] 라운드 스탬프 {a.run!r} 거부 — 허용 {allowed}")
 

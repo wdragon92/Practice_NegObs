@@ -1,0 +1,13 @@
+{
+ "train": [],
+ "val": [],
+ "test": [
+  "sceneH1",
+  "sceneH2",
+  "sceneH3",
+  "sceneL1",
+  "sceneN9",
+  "sceneN11"
+ ],
+ "hold": []
+}

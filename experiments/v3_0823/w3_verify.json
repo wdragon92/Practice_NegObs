@@ -1,0 +1,914 @@
+{
+ "260824_v3w3_extbase_A/sceneH1": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 93.3,
+  "sec_per_cut": 3.889
+ },
+ "260824_v3w3_extbase_B/sceneH1": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 53.7,
+  "sec_per_cut": 2.239
+ },
+ "260824_v3w3_extbase_C/sceneH1": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 89.3,
+  "sec_per_cut": 3.723
+ },
+ "260824_v3w3_extbase_D/sceneH1": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 47.4,
+  "sec_per_cut": 1.976
+ },
+ "260824_v3w3_exth_A/sceneH1": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 96.2,
+  "sec_per_cut": 4.008
+ },
+ "260824_v3w3_exth_B/sceneH1": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 56.4,
+  "sec_per_cut": 2.349
+ },
+ "260824_v3w3_exth_C/sceneH1": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 85.0,
+  "sec_per_cut": 3.54
+ },
+ "260824_v3w3_exth_D/sceneH1": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 54.3,
+  "sec_per_cut": 2.263
+ },
+ "260824_v3w3_extbase_A/sceneH2": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 152.4,
+  "sec_per_cut": 6.352
+ },
+ "260824_v3w3_extbase_B/sceneH2": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 91.4,
+  "sec_per_cut": 3.809
+ },
+ "260824_v3w3_extbase_C/sceneH2": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 142.8,
+  "sec_per_cut": 5.948
+ },
+ "260824_v3w3_extbase_D/sceneH2": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 85.0,
+  "sec_per_cut": 3.54
+ },
+ "260824_v3w3_exth_A/sceneH2": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 161.7,
+  "sec_per_cut": 6.739
+ },
+ "260824_v3w3_exth_B/sceneH2": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 90.4,
+  "sec_per_cut": 3.766
+ },
+ "260824_v3w3_exth_C/sceneH2": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 159.6,
+  "sec_per_cut": 6.649
+ },
+ "260824_v3w3_exth_D/sceneH2": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 84.6,
+  "sec_per_cut": 3.527
+ },
+ "260824_v3w3_extbase_A/sceneH3": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 116.4,
+  "sec_per_cut": 4.852
+ },
+ "260824_v3w3_extbase_B/sceneH3": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 83.4,
+  "sec_per_cut": 3.475
+ },
+ "260824_v3w3_extbase_C/sceneH3": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 109.2,
+  "sec_per_cut": 4.551
+ },
+ "260824_v3w3_extbase_D/sceneH3": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 83.6,
+  "sec_per_cut": 3.483
+ },
+ "260824_v3w3_exth_A/sceneH3": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 107.6,
+  "sec_per_cut": 4.484
+ },
+ "260824_v3w3_exth_B/sceneH3": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 81.9,
+  "sec_per_cut": 3.413
+ },
+ "260824_v3w3_exth_C/sceneH3": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 101.0,
+  "sec_per_cut": 4.21
+ },
+ "260824_v3w3_exth_D/sceneH3": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 82.2,
+  "sec_per_cut": 3.425
+ },
+ "260824_v3w3_extbase_A/sceneL1": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 85.1,
+  "sec_per_cut": 3.548
+ },
+ "260824_v3w3_extbase_B/sceneL1": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 41.8,
+  "sec_per_cut": 1.743
+ },
+ "260824_v3w3_extbase_C/sceneL1": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 82.6,
+  "sec_per_cut": 3.441
+ },
+ "260824_v3w3_extbase_D/sceneL1": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 37.2,
+  "sec_per_cut": 1.549
+ },
+ "260824_v3w3_extlat_A/sceneL1": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 92.5,
+  "sec_per_cut": 3.855
+ },
+ "260824_v3w3_extlat_B/sceneL1": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 42.2,
+  "sec_per_cut": 1.757
+ },
+ "260824_v3w3_extlat_C/sceneL1": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 81.9,
+  "sec_per_cut": 3.414
+ },
+ "260824_v3w3_extlat_D/sceneL1": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 38.5,
+  "sec_per_cut": 1.606
+ },
+ "260824_v3w3_extbase_A/sceneN9": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 97.7,
+  "sec_per_cut": 4.072
+ },
+ "260824_v3w3_extbase_B/sceneN9": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 39.6,
+  "sec_per_cut": 1.65
+ },
+ "260824_v3w3_extbase_C/sceneN9": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 97.3,
+  "sec_per_cut": 4.054
+ },
+ "260824_v3w3_extbase_D/sceneN9": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 37.7,
+  "sec_per_cut": 1.569
+ },
+ "260824_v3w3_extb2_A/sceneN9": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 101.3,
+  "sec_per_cut": 4.221
+ },
+ "260824_v3w3_extb2_B/sceneN9": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 50.4,
+  "sec_per_cut": 2.1
+ },
+ "260824_v3w3_extb2_C/sceneN9": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 115.6,
+  "sec_per_cut": 4.817
+ },
+ "260824_v3w3_extb2_D/sceneN9": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 51.8,
+  "sec_per_cut": 2.16
+ },
+ "260824_v3w3_extbase_A/sceneN11": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 97.2,
+  "sec_per_cut": 4.049
+ },
+ "260824_v3w3_extbase_B/sceneN11": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 50.1,
+  "sec_per_cut": 2.089
+ },
+ "260824_v3w3_extbase_C/sceneN11": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 105.9,
+  "sec_per_cut": 4.413
+ },
+ "260824_v3w3_extbase_D/sceneN11": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 47.2,
+  "sec_per_cut": 1.967
+ },
+ "260824_v3w3_extb2_A/sceneN11": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 107.8,
+  "sec_per_cut": 4.49
+ },
+ "260824_v3w3_extb2_B/sceneN11": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 49.9,
+  "sec_per_cut": 2.077
+ },
+ "260824_v3w3_extb2_C/sceneN11": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 95.7,
+  "sec_per_cut": 3.987
+ },
+ "260824_v3w3_extb2_D/sceneN11": {
+  "ok": true,
+  "png": 24,
+  "depth": 24,
+  "idseg": 24,
+  "stale": 0,
+  "hm": 1,
+  "n_cuts": 24,
+  "n_poses": 8,
+  "uniq_mask": 8,
+  "fetch": [
+   "orch"
+  ],
+  "seg_fresh": true,
+  "void_cov": 1.0,
+  "want": 24,
+  "sec": 45.9,
+  "sec_per_cut": 1.911
+ }
+}

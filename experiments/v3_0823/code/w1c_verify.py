@@ -235,12 +235,212 @@ def png_gray(p, step=2):
 
 
 # --------------------------------------------------------------------------- #
+def _unit(task):
+    """한 유닛((밴드, 씬))의 전 게이트를 계산한다 — 프로세스 풀의 작업 단위.
+
+    유닛끼리 공유 상태가 없으므로 (row, problems) 만 돌려주고 호출자가
+    합친다.  직렬 실행과 **같은 행**을 낸다.
+    """
+    band, cr, ar, orr, dr, s, no_optical = task
+    probs = []
+    arun = a_round(band, s, ar)
+    dc, da, do, dd = sdir(cr, s), sdir(arun, s), sdir(orr, s), sdir(dr, s)
+    row = dict(band=band, scene=s, c_round=cr, a_round=arun,
+               have=dict(C=bool(dc), A=bool(da), guoff=bool(do), D=bool(dd)))
+    if not dc:
+        row["error"] = "C 렌더 없음"
+        probs.append(f"{band}/{s}: C 렌더 없음")
+        return row, probs
+    cc, vc = cuts_of(dc)
+    row["n_cuts"] = len(cc)
+    row["n_ok"] = sum(1 for c in cc.values() if c.get("ok"))
+    row["sec_per_cut"] = vc.get("sec_per_cut")
+    row["n_idseg"] = sum(1 for c in cc.values() if c.get("idseg"))
+    row["n_stale_marker"] = len(glob.glob(os.path.join(dc, "*.idseg.STALE")))
+    row["n_idseg_stale_rec"] = sum(1 for c in cc.values()
+                                   if c.get("idseg_stale"))
+    row["n_idseg_retry"] = sum(1 for c in cc.values() if c.get("idseg_retry"))
+    try:
+        m = json.load(open(os.path.join(dc, "heightmap_meta.json"),
+                           encoding="utf-8"))
+        row["n_prims_C"] = m.get("n_prims")
+        row["arm_config_C"] = m.get("arm_config")
+    except Exception:
+        row["n_prims_C"] = None
+    row["c_polar_gt"] = "all_negative_spec_constant"
+    # C 가 D 가 되지 않았음을 **프림 수**로 먼저 본다 (가장 싼 반증).
+    #   이식이 없으면 `hazard=false` 가 단서까지 지워 C ≡ D 가 된다
+    #   (=구off, 계획 §1.2).  C 의 프림이 D 와 같거나 적으면 그 씬의
+    #   (A,C) 반사실은 통째로 무효다.
+    for tag, dd_ in (("A", da), ("D", dd)):
+        try:
+            mm = json.load(open(os.path.join(dd_, "heightmap_meta.json"),
+                                encoding="utf-8"))
+            row[f"n_prims_{tag}"] = mm.get("n_prims")
+        except Exception:
+            row[f"n_prims_{tag}"] = None
+    if (row.get("n_prims_C") and row.get("n_prims_D")
+            and row["n_prims_C"] <= row["n_prims_D"]):
+        probs.append(
+            f"{band}/{s}: **C 프림 {row['n_prims_C']} ≤ D 프림 "
+            f"{row['n_prims_D']}** — 이식이 듣지 않았다(C ≡ D = 구off)")
+
+    # ---------- VG-01-AC --------------------------------------------
+    if da and do and dd:
+        zA, gA, srcA = hm_of(da)
+        zC, gC, srcC = hm_of(dc)
+        zO, gO, _ = hm_of(do)
+        zD, gD, _ = hm_of(dd)
+        zC = LB.align_to(zC, gC, gA, zA.shape)
+        zO = LB.align_to(zO, gO, gA, zA.shape)
+        zD = LB.align_to(zD, gD, gA, zA.shape)
+        row["hm_instrument"] = dict(A=srcA, C=srcC)
+        finAO = np.isfinite(zA) & np.isfinite(zO)
+        fp_corpus = finAO & ((zO - zA) >= HAZ_DEPTH)
+        fin3 = np.isfinite(zA) & np.isfinite(zC) & np.isfinite(zD)
+        fp_ac = fin3 & ((zC - zA) >= HAZ_DEPTH)
+        miss = fp_corpus & ~fp_ac
+        extra = fp_ac & ~fp_corpus
+        finAC = np.isfinite(zA) & np.isfinite(zC)
+        dif = np.where(finAC, np.abs(zA - zC), 0.0)
+        offp = (dif > 0) & ~fp_corpus & ~fp_ac
+        # **C3-1 하드 실패** — 계기는 코퍼스 A팔에서 상속하며 팔별로
+        #   재선택하지 않는다.  A 가 `fused` 인데 C 가 `aabb` 면 두
+        #   높이맵이 **다른 자로 잰 것**이라 어떤 셀 비교도 의미가 없다
+        #   (스모크에서 실제로 잡혔다: scene02 A=fused / C=aabb 상태로
+        #   재면 144셀 "불일치" 가 나오는데 그건 계기차지 팔차가 아니다).
+        #   처방은 `W1B_ARM=C w1b_fuse.py --write` 를 verify **전에**
+        #   돌리는 것이고, 그때까지는 게이트가 판정을 거부한다.
+        if srcA != srcC:
+            tier = "instrument_mismatch"
+            probs.append(
+                f"{band}/{s}: **계기 불일치** A={srcA} C={srcC} — "
+                f"C3-1(계기 상속) 위반. `W1B_ARM=C w1b_fuse.py --write` "
+                f"를 먼저 돌릴 것. 이 행의 셀 수치는 판정에 쓰지 않는다")
+        else:
+            tier = ("hm_exact" if (miss.sum() == 0 and extra.sum() == 0)
+                    else "hm_tol_offprint" if miss.sum() == 0 else "hm_fail")
+        row["vg01_ac"] = dict(
+            tier=tier,
+            ok=(None if tier == "instrument_mismatch"
+                else tier != "hm_fail"),
+            instrument_A=srcA, instrument_C=srcC,
+            fp_corpus_cells=int(fp_corpus.sum()),
+            fp_AC_cells=int(fp_ac.sum()),
+            mismatch_cells=int(miss.sum()),
+            extra_cells=int(extra.sum()),
+            reproduction=(round(float((fp_corpus & fp_ac).sum())
+                                / float(fp_corpus.sum()), 6)
+                          if fp_corpus.any() else None),
+            offprint_diff_cells=int(offp.sum()),
+            offprint_max_abs_dz=round(float(dif[offp].max()), 6)
+            if offp.any() else 0.0,
+            void_equal=bool((~np.isfinite(zA) == ~np.isfinite(zC)).all()),
+            hm_sha_A=sha(os.path.join(da, "heightmap.npy"))[:12],
+            hm_sha_C=sha(os.path.join(dc, "heightmap.npy"))[:12])
+        if tier == "hm_fail":
+            probs.append(
+                f"{band}/{s}: VG-01-AC hm_fail — 발자국 안 불일치 "
+                f"{int(miss.sum())}셀 (계기판① 모집단 제외)")
+    else:
+        row["vg01_ac"] = dict(tier="no_reference", ok=None,
+                              why="A/구off/D 중 하나가 없다")
+
+    # ---------- C팔 연속성 게이트 (D58) ------------------------------
+    if da:
+        ca, _ = cuts_of(da)
+        extra_tok = cue_path_patterns(s)
+        common = sorted(set(ca) & set(cc))
+        ious, masses, locs, n_seg = [], [], [], 0
+        for f in common:
+            aA, lA = load_idseg(da, f)
+            aC, lC = load_idseg(dc, f)
+            mA_ = cue_mask(aA, lA, extra_tok)
+            mC_ = cue_mask(aC, lC, extra_tok)
+            if mA_ is None or mC_ is None or mA_.shape != mC_.shape:
+                continue
+            n_seg += 1
+            inter = float((mA_ & mC_).sum())
+            uni = float((mA_ | mC_).sum())
+            ious.append(inter / uni if uni else 1.0)
+            masses.append(float(mC_.sum()) / float(mA_.sum())
+                          if mA_.sum() else None)
+            # 변화 픽셀의 지형 국소성: 두 팔의 마스크가 다른 픽셀 중
+            # **단서가 아닌 쪽**(=지형/구조)의 비율.  낙차를 메운 팔이므로
+            # 변화는 지형에서 나야 정상이다.
+            ch = mA_ ^ mC_
+            locs.append(float(ch.sum()) / float(mA_.size))
+        masses = [x for x in masses if x is not None]
+        row["continuity"] = dict(
+            n_pose=len(common), n_pose_with_seg=n_seg,
+            cue_path_patterns=sorted(extra_tok)[:12],
+            iou_min=round(min(ious), 4) if ious else None,
+            iou_med=round(float(np.median(ious)), 4) if ious else None,
+            mass_ratio_min=round(min(masses), 4) if masses else None,
+            mass_ratio_med=round(float(np.median(masses)), 4)
+            if masses else None,
+            changed_frac_med=round(float(np.median(locs)), 6)
+            if locs else None,
+            # 세그 쌍이 하나도 없으면 **미측정**(None)이지 실패가 아니다.
+            #   A팔 세그 백필은 696/816 이고 격리 5유닛이 있다
+            #   (`W1B2_SEGFILL_REPORT` §2.4: scene08 base·e 깊이 씬 고유
+            #   불일치 2 + stale 3).  그 유닛을 실패로 부르면 백필의
+            #   기지 한계를 C팔의 결함으로 오기록하게 된다.
+            ok=(None if not ious else
+                (min(ious) >= CUE_IOU_MIN and bool(masses)
+                 and min(masses) >= CUE_MASS_MIN)),
+            threshold=dict(iou_min=CUE_IOU_MIN, mass_min=CUE_MASS_MIN))
+        if row["continuity"]["ok"] is False:
+            probs.append(
+                f"{band}/{s}: C팔 연속성 — cue IoU min "
+                f"{min(ious):.3f} · mass min "
+                f"{min(masses) if masses else float('nan'):.3f}")
+        if masses and max(masses) == 0.0:
+            probs.append(
+                f"{band}/{s}: **C팔에 단서 픽셀이 0** — C가 D와 같아졌다")
+
+        # ---------- (A,C) 광학차 --------------------------------------
+        if not no_optical:
+            ds = []
+            for f in common:
+                gA_ = png_gray(os.path.join(da, f))
+                gC_ = png_gray(os.path.join(dc, f))
+                if gA_ is None or gC_ is None or gA_.shape != gC_.shape:
+                    continue
+                d_ = np.abs(gA_ - gC_)
+                ds.append((float(d_.mean()),
+                           float((d_ > 8).mean()),
+                           float(np.sqrt((d_ ** 2).mean()))))
+            if ds:
+                mad = [x[0] for x in ds]
+                frac = [x[1] for x in ds]
+                rms = [x[2] for x in ds]
+                row["optical_ac"] = dict(
+                    n_pairs=len(ds),
+                    mad_med=round(float(np.median(mad)), 4),
+                    mad_p10=round(float(np.percentile(mad, 10)), 4),
+                    mad_p90=round(float(np.percentile(mad, 90)), 4),
+                    mad_min=round(min(mad), 4), mad_max=round(max(mad), 4),
+                    rms_med=round(float(np.median(rms)), 4),
+                    changed_frac_med=round(float(np.median(frac)), 6),
+                    zero_info_pairs=int(sum(1 for m in mad if m < 0.5)),
+                    note="grayscale |A−C|, 2x subsample; "
+                         "zero_info = mean abs diff < 0.5/255 levels")
+                if row["optical_ac"]["zero_info_pairs"]:
+                    probs.append(
+                        f"{band}/{s}: (A,C) 영정보 쌍 "
+                        f"{row['optical_ac']['zero_info_pairs']}개 "
+                        f"(계기판① 층화 입력)")
+    return row, probs
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=os.path.join(V3, "w1c_verify.json"))
     ap.add_argument("--scenes", default="")
     ap.add_argument("--bands", default="")
     ap.add_argument("--no-optical", action="store_true")
+    ap.add_argument("--workers", type=int, default=8)
     a = ap.parse_args()
     sf = [x for x in a.scenes.split(",") if x] or None
     bf = [x for x in a.bands.split(",") if x] or None
@@ -260,201 +460,28 @@ def main():
                         cue_mass_min=CUE_MASS_MIN),
         rows=[], problems=[])
 
+    tasks = []
     for band, (cr, ar, orr, dr, scs) in BANDS.items():
         if bf and band not in bf:
             continue
         for s in scs:
             if sf and s not in sf:
                 continue
-            arun = a_round(band, s, ar)
-            dc, da, do, dd = sdir(cr, s), sdir(arun, s), sdir(orr, s), sdir(dr, s)
-            row = dict(band=band, scene=s, c_round=cr, a_round=arun,
-                       have=dict(C=bool(dc), A=bool(da), guoff=bool(do), D=bool(dd)))
-            if not dc:
-                row["error"] = "C 렌더 없음"
-                out["problems"].append(f"{band}/{s}: C 렌더 없음")
-                out["rows"].append(row); continue
-            cc, vc = cuts_of(dc)
-            row["n_cuts"] = len(cc)
-            row["n_ok"] = sum(1 for c in cc.values() if c.get("ok"))
-            row["sec_per_cut"] = vc.get("sec_per_cut")
-            row["n_idseg"] = sum(1 for c in cc.values() if c.get("idseg"))
-            row["n_stale_marker"] = len(glob.glob(os.path.join(dc, "*.idseg.STALE")))
-            row["n_idseg_stale_rec"] = sum(1 for c in cc.values()
-                                           if c.get("idseg_stale"))
-            row["n_idseg_retry"] = sum(1 for c in cc.values() if c.get("idseg_retry"))
-            try:
-                m = json.load(open(os.path.join(dc, "heightmap_meta.json"),
-                                   encoding="utf-8"))
-                row["n_prims_C"] = m.get("n_prims")
-                row["arm_config_C"] = m.get("arm_config")
-            except Exception:
-                row["n_prims_C"] = None
-            row["c_polar_gt"] = "all_negative_spec_constant"
-            # C 가 D 가 되지 않았음을 **프림 수**로 먼저 본다 (가장 싼 반증).
-            #   이식이 없으면 `hazard=false` 가 단서까지 지워 C ≡ D 가 된다
-            #   (=구off, 계획 §1.2).  C 의 프림이 D 와 같거나 적으면 그 씬의
-            #   (A,C) 반사실은 통째로 무효다.
-            for tag, dd_ in (("A", da), ("D", dd)):
-                try:
-                    mm = json.load(open(os.path.join(dd_, "heightmap_meta.json"),
-                                        encoding="utf-8"))
-                    row[f"n_prims_{tag}"] = mm.get("n_prims")
-                except Exception:
-                    row[f"n_prims_{tag}"] = None
-            if (row.get("n_prims_C") and row.get("n_prims_D")
-                    and row["n_prims_C"] <= row["n_prims_D"]):
-                out["problems"].append(
-                    f"{band}/{s}: **C 프림 {row['n_prims_C']} ≤ D 프림 "
-                    f"{row['n_prims_D']}** — 이식이 듣지 않았다(C ≡ D = 구off)")
+            tasks.append((band, cr, ar, orr, dr, s, bool(a.no_optical)))
+    # 유닛((밴드,씬))은 서로 독립이다 — 816컷의 PNG/idseg 디코드가 이 파일의
+    #   전 비용이므로 프로세스 풀로 나눈다.  판정 자체는 유닛 안에서 닫혀 있어
+    #   병렬화가 결과를 바꾸지 않는다(같은 입력 -> 같은 행).
+    nw = max(1, min(a.workers, len(tasks)))
+    if nw > 1:
+        import concurrent.futures as _cf
+        with _cf.ProcessPoolExecutor(max_workers=nw) as ex:
+            results = list(ex.map(_unit, tasks))
+    else:
+        results = [_unit(t) for t in tasks]
+    for row, probs in results:
+        out["rows"].append(row)
+        out["problems"].extend(probs)
 
-            # ---------- VG-01-AC --------------------------------------------
-            if da and do and dd:
-                zA, gA, srcA = hm_of(da)
-                zC, gC, srcC = hm_of(dc)
-                zO, gO, _ = hm_of(do)
-                zD, gD, _ = hm_of(dd)
-                zC = LB.align_to(zC, gC, gA, zA.shape)
-                zO = LB.align_to(zO, gO, gA, zA.shape)
-                zD = LB.align_to(zD, gD, gA, zA.shape)
-                row["hm_instrument"] = dict(A=srcA, C=srcC)
-                finAO = np.isfinite(zA) & np.isfinite(zO)
-                fp_corpus = finAO & ((zO - zA) >= HAZ_DEPTH)
-                fin3 = np.isfinite(zA) & np.isfinite(zC) & np.isfinite(zD)
-                fp_ac = fin3 & ((zC - zA) >= HAZ_DEPTH)
-                miss = fp_corpus & ~fp_ac
-                extra = fp_ac & ~fp_corpus
-                finAC = np.isfinite(zA) & np.isfinite(zC)
-                dif = np.where(finAC, np.abs(zA - zC), 0.0)
-                offp = (dif > 0) & ~fp_corpus & ~fp_ac
-                # **C3-1 하드 실패** — 계기는 코퍼스 A팔에서 상속하며 팔별로
-                #   재선택하지 않는다.  A 가 `fused` 인데 C 가 `aabb` 면 두
-                #   높이맵이 **다른 자로 잰 것**이라 어떤 셀 비교도 의미가 없다
-                #   (스모크에서 실제로 잡혔다: scene02 A=fused / C=aabb 상태로
-                #   재면 144셀 "불일치" 가 나오는데 그건 계기차지 팔차가 아니다).
-                #   처방은 `W1B_ARM=C w1b_fuse.py --write` 를 verify **전에**
-                #   돌리는 것이고, 그때까지는 게이트가 판정을 거부한다.
-                if srcA != srcC:
-                    tier = "instrument_mismatch"
-                    out["problems"].append(
-                        f"{band}/{s}: **계기 불일치** A={srcA} C={srcC} — "
-                        f"C3-1(계기 상속) 위반. `W1B_ARM=C w1b_fuse.py --write` "
-                        f"를 먼저 돌릴 것. 이 행의 셀 수치는 판정에 쓰지 않는다")
-                else:
-                    tier = ("hm_exact" if (miss.sum() == 0 and extra.sum() == 0)
-                            else "hm_tol_offprint" if miss.sum() == 0 else "hm_fail")
-                row["vg01_ac"] = dict(
-                    tier=tier,
-                    ok=(None if tier == "instrument_mismatch"
-                        else tier != "hm_fail"),
-                    instrument_A=srcA, instrument_C=srcC,
-                    fp_corpus_cells=int(fp_corpus.sum()),
-                    fp_AC_cells=int(fp_ac.sum()),
-                    mismatch_cells=int(miss.sum()),
-                    extra_cells=int(extra.sum()),
-                    reproduction=(round(float((fp_corpus & fp_ac).sum())
-                                        / float(fp_corpus.sum()), 6)
-                                  if fp_corpus.any() else None),
-                    offprint_diff_cells=int(offp.sum()),
-                    offprint_max_abs_dz=round(float(dif[offp].max()), 6)
-                    if offp.any() else 0.0,
-                    void_equal=bool((~np.isfinite(zA) == ~np.isfinite(zC)).all()),
-                    hm_sha_A=sha(os.path.join(da, "heightmap.npy"))[:12],
-                    hm_sha_C=sha(os.path.join(dc, "heightmap.npy"))[:12])
-                if tier == "hm_fail":
-                    out["problems"].append(
-                        f"{band}/{s}: VG-01-AC hm_fail — 발자국 안 불일치 "
-                        f"{int(miss.sum())}셀 (계기판① 모집단 제외)")
-            else:
-                row["vg01_ac"] = dict(tier="no_reference", ok=None,
-                                      why="A/구off/D 중 하나가 없다")
-
-            # ---------- C팔 연속성 게이트 (D58) ------------------------------
-            if da:
-                ca, _ = cuts_of(da)
-                extra_tok = cue_path_patterns(s)
-                common = sorted(set(ca) & set(cc))
-                ious, masses, locs, n_seg = [], [], [], 0
-                for f in common:
-                    aA, lA = load_idseg(da, f)
-                    aC, lC = load_idseg(dc, f)
-                    mA_ = cue_mask(aA, lA, extra_tok)
-                    mC_ = cue_mask(aC, lC, extra_tok)
-                    if mA_ is None or mC_ is None or mA_.shape != mC_.shape:
-                        continue
-                    n_seg += 1
-                    inter = float((mA_ & mC_).sum())
-                    uni = float((mA_ | mC_).sum())
-                    ious.append(inter / uni if uni else 1.0)
-                    masses.append(float(mC_.sum()) / float(mA_.sum())
-                                  if mA_.sum() else None)
-                    # 변화 픽셀의 지형 국소성: 두 팔의 마스크가 다른 픽셀 중
-                    # **단서가 아닌 쪽**(=지형/구조)의 비율.  낙차를 메운 팔이므로
-                    # 변화는 지형에서 나야 정상이다.
-                    ch = mA_ ^ mC_
-                    locs.append(float(ch.sum()) / float(mA_.size))
-                masses = [x for x in masses if x is not None]
-                row["continuity"] = dict(
-                    n_pose=len(common), n_pose_with_seg=n_seg,
-                    cue_path_patterns=sorted(extra_tok)[:12],
-                    iou_min=round(min(ious), 4) if ious else None,
-                    iou_med=round(float(np.median(ious)), 4) if ious else None,
-                    mass_ratio_min=round(min(masses), 4) if masses else None,
-                    mass_ratio_med=round(float(np.median(masses)), 4)
-                    if masses else None,
-                    changed_frac_med=round(float(np.median(locs)), 6)
-                    if locs else None,
-                    # 세그 쌍이 하나도 없으면 **미측정**(None)이지 실패가 아니다.
-                    #   A팔 세그 백필은 696/816 이고 격리 5유닛이 있다
-                    #   (`W1B2_SEGFILL_REPORT` §2.4: scene08 base·e 깊이 씬 고유
-                    #   불일치 2 + stale 3).  그 유닛을 실패로 부르면 백필의
-                    #   기지 한계를 C팔의 결함으로 오기록하게 된다.
-                    ok=(None if not ious else
-                        (min(ious) >= CUE_IOU_MIN and bool(masses)
-                         and min(masses) >= CUE_MASS_MIN)),
-                    threshold=dict(iou_min=CUE_IOU_MIN, mass_min=CUE_MASS_MIN))
-                if row["continuity"]["ok"] is False:
-                    out["problems"].append(
-                        f"{band}/{s}: C팔 연속성 — cue IoU min "
-                        f"{min(ious):.3f} · mass min "
-                        f"{min(masses) if masses else float('nan'):.3f}")
-                if masses and max(masses) == 0.0:
-                    out["problems"].append(
-                        f"{band}/{s}: **C팔에 단서 픽셀이 0** — C가 D와 같아졌다")
-
-                # ---------- (A,C) 광학차 --------------------------------------
-                if not a.no_optical:
-                    ds = []
-                    for f in common:
-                        gA_ = png_gray(os.path.join(da, f))
-                        gC_ = png_gray(os.path.join(dc, f))
-                        if gA_ is None or gC_ is None or gA_.shape != gC_.shape:
-                            continue
-                        d_ = np.abs(gA_ - gC_)
-                        ds.append((float(d_.mean()),
-                                   float((d_ > 8).mean()),
-                                   float(np.sqrt((d_ ** 2).mean()))))
-                    if ds:
-                        mad = [x[0] for x in ds]
-                        frac = [x[1] for x in ds]
-                        rms = [x[2] for x in ds]
-                        row["optical_ac"] = dict(
-                            n_pairs=len(ds),
-                            mad_med=round(float(np.median(mad)), 4),
-                            mad_p10=round(float(np.percentile(mad, 10)), 4),
-                            mad_p90=round(float(np.percentile(mad, 90)), 4),
-                            mad_min=round(min(mad), 4), mad_max=round(max(mad), 4),
-                            rms_med=round(float(np.median(rms)), 4),
-                            changed_frac_med=round(float(np.median(frac)), 6),
-                            zero_info_pairs=int(sum(1 for m in mad if m < 0.5)),
-                            note="grayscale |A−C|, 2x subsample; "
-                                 "zero_info = mean abs diff < 0.5/255 levels")
-                        if row["optical_ac"]["zero_info_pairs"]:
-                            out["problems"].append(
-                                f"{band}/{s}: (A,C) 영정보 쌍 "
-                                f"{row['optical_ac']['zero_info_pairs']}개 "
-                                f"(계기판① 층화 입력)")
-            out["rows"].append(row)
 
     # ---------------- 집계 ---------------------------------------------------
     rows = [r for r in out["rows"] if "error" not in r]
@@ -528,8 +555,8 @@ def main():
     if "continuity_summary" in out:
         c = out["continuity_summary"]
         print(f"\n=== C팔 연속성 게이트 (D58) ===\n  통과 {c['n_pass']}/"
-              f"{c['n_units']} · 최소 cue IoU {c['iou_min_overall']}"
-              f" (문턱 {CUE_IOU_MIN})")
+              f"{c['n_judged']} (판정 대상) · 미측정 {c['n_unmeasured']}"
+              f" · 최소 cue IoU {c['iou_min_overall']} (문턱 {CUE_IOU_MIN})")
         if c["units_without_seg"]:
             print(f"  세그 부재 유닛: {c['units_without_seg']}")
     if "optical_summary" in out:

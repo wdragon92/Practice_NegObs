@@ -434,4 +434,4 @@
   것이고 본 표 resnet34도 동일 사용** → 신규모델 결함이 아니라 레시피 약점, **본 표에도
   해당되는 캐비앗(C3)으로 승격**. D45 질문의 답: "이 레시피에서 인코더를 바꿔 얻는 것은
   없다 — 표는 resnet34 3행 그대로". 산출 `experiments/weekend_0823/newmodels/FA_MATCHED.md`.
-  아침 보고 `experiments/weekend_0823/MORNING_REPORT_0824.md` 착지 — 결재 12건 상신.
+  아침 보고 `experiments/weekend_0823/MORNING_REPORT_0823.md` 착지 — 결재 12건 상신.

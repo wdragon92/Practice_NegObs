@@ -1,4 +1,4 @@
-# MORNING_REPORT_0824 — 주말 자율 창(08-23) 착지 보고
+# MORNING_REPORT_0823 — 주말 자율 창 착지 보고 (일 08-23 아침, 예정보다 하루 이른 마감)
 
 - **작성**: Claude Code · 2026-08-24 오전 · **결재**: 승용
 - **창**: 2026-08-23(일) 03:15 개시 ~ 08-24 오전 보고. 지시서 `Docs/experiment/WEEKEND_BRIEF_0823.md` v2.0.
@@ -523,7 +523,7 @@ D51은 "resnet50 ≈ resnet34 동급"으로 잠정 기록했으나, **오늘 FA-
   PS는 온보딩 정본이라 **새 세션이 여기서 낡은 주장을 그대로 물려받는다.** 지금이 정정 시점이다.
   Claude가 대체 문장 초안을 만들어 드리는 것도 가능하다(R6 형식 = 현재 문장 → 교체 문장).
 - **무응답 기본값**: **정정하지 않고 대기.** 대신 PS 해당 절에 **한 줄 배너만** 달 것을 권고한다 —
-  *"§5.1·§5.2·§6-4는 08-22 이전 상태다. 08-23 정정은 `experiments/weekend_0823/MORNING_REPORT_0824.md` §2 참조."*
+  *"§5.1·§5.2·§6-4는 08-22 이전 상태다. 08-23 정정은 `experiments/weekend_0823/MORNING_REPORT_0823.md` §2 참조."*
   (배너 삽입도 사용자 문서 수정이므로 **승인 후에만** 한다.)
 
 ---
@@ -615,7 +615,7 @@ CUE-OFF를 다시 돌린다면 바뀌어야 할 것 (`cue_audit/CUEOFF_RESULT_v2
 
 ```
 experiments/weekend_0823/
-├── MORNING_REPORT_0824.md        ← 이 문서
+├── MORNING_REPORT_0823.md        ← 이 문서
 ├── STATUS.md                     30분 심박 로그
 ├── v2s/V2S_ADOPTION.md           GPU-0 · 롤백 판정
 ├── cue_audit/

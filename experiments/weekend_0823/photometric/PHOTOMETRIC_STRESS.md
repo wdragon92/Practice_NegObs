@@ -234,7 +234,7 @@ CUDA_VISIBLE_DEVICES="" python experiments/weekend_0823/photometric/code/photo_c
 
 ## 7. 다음 행동
 
-1. 아침 보고 `MORNING_REPORT_0824.md` — 결재 #5 항목에 §5의 **채택 문장**과 §5.1의 단서 3개를
+1. 아침 보고 `MORNING_REPORT_0823.md` — 결재 #5 항목에 §5의 **채택 문장**과 §5.1의 단서 3개를
    그대로 적재. 기본값(무응답 시) = **무증강 유지**, 권고와 일치.
 2. `realworld/PROTOCOL_SHOOT.md`에 §5.2의 P-1 · P-2 · P-3 삽입 (지시서 §6.8 파일럿 준비 패키지).
 3. 한계 세트(지시서 §6.9)에 §4.2-4 한 줄: "광도 스트레스는 시뮬 휘도/톤 축만 분리한 val 진단이며,

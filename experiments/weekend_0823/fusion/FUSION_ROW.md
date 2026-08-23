@@ -262,7 +262,7 @@ python experiments/weekend_0823/fusion/code/analyze_fusion.py
 
 ## 9. 다음 행동
 
-1. 아침 보고 `MORNING_REPORT_0824.md` 결재란에 **"융합행 배치"** 안건 적재 —
+1. 아침 보고 `MORNING_REPORT_0823.md` 결재란에 **"융합행 배치"** 안건 적재 —
    본 문서 §6의 권고·근거·기본값을 그대로 옮긴다.
 2. `EXTENSION_LOG.md`에 본 문서 §7의 3개 후보를 계보와 함께 등재.
 3. 한계 세트(지시서 §6.9)에 band1 사각지대 문장 1줄 추가.

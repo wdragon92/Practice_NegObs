@@ -481,4 +481,4 @@ cd /home/vislab/Desktop/work_sy/Practice_NegObs
 ---
 
 *작성: 레드팀 R2 (방법론·통계). 이 문서는 진단이며, 정본 수치·정본 파일을 수정하지 않는다.
-반박 불가로 판단되는 지적(R1·R2·R5)은 `MORNING_REPORT_0824.md` 결재란으로 승격을 권고한다.*
+반박 불가로 판단되는 지적(R1·R2·R5)은 `MORNING_REPORT_0823.md` 결재란으로 승격을 권고한다.*

@@ -354,7 +354,7 @@ experiments/weekend_0823/a3_viewpoint/a3_viewpoint.py` (~9 min, CPU).
 
 ## 10. Next actions
 
-1. Put §6 안 A + §6.1 into `MORNING_REPORT_0824.md` 결재란 as the ruling #4 re-proposal, with 안 B
+1. Put §6 안 A + §6.1 into `MORNING_REPORT_0823.md` 결재란 as the ruling #4 re-proposal, with 안 B
    attached and its rejection reason.
 2. Patch `RESULTS_DRAFT.md` §N.1 with 안 A's English paragraph and add §6.1 to the limitations set
    (**pending 결재** — do not overwrite the existing §N.1 text until then).

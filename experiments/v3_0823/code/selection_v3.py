@@ -43,8 +43,16 @@ from typing import Iterable, Sequence
 H_DEF_ID = "hazard_H_v3:  tier=='H' and any(polar_gt)"
 
 
+# RT-B 재판정 (redteam/RT_LEDGER_B.md:340-350): 두 정의가 v2에서 일치하는 **기전**은
+#   labeler.py:527-528 `if arm == "off": t_strict = "off"` — off팔 프레임의 tier가 강제로
+#   "off"로 덮이므로 tier=="H" ∧ toggle_state=="off" 는 출하 라벨에서 성립 불가능하다.
+#   따라서 `N-3`은 **현재 결함이 아니라 문서 정리 대상**으로 강등됐고, 진짜 위험은 §D로 이동했다.
+
+
 def is_hazard_h(rec: dict) -> bool:
-    """정본 정의. 분모·분자 어디서든 **이 함수만** 쓴다."""
+    """정본 정의(레코드 수준). 분모·분자 어디서든 **이 함수만** 쓴다.
+    무시 마스크가 있는 코퍼스에서는 이 함수 대신 §D의 h_frame_recall_selection 을 쓴다
+    (마스크는 레코드가 아니라 칸 단위이므로)."""
     return rec.get("tier") == "H" and any(int(v) for v in rec["polar_gt"])
 
 
@@ -195,7 +203,120 @@ def select_epoch(rows: Sequence[dict], score_key: str) -> dict:
     return best
 
 
+# ---------------------------------------------------------------------------
+# §D  무시 마스크 규약 + FA 모집단 등록  (RT-B §5-③ 보강 처분)
+# ---------------------------------------------------------------------------
+# ── D-1  무시 마스크의 3단 사거리 (신설 규약) ────────────────────────────────
+#   손실   : 마스크 적용            (V3_DESIGN §5.1 — B팔 H 칸은 손실 제외)
+#   선택식 : **손실과 동일한 마스크 적용**   <-- 본 파일이 신설하는 규약
+#   평가   : 마스크 미적용          (ACCOUNTING §2-4 — 평가 분모·recall·FA 정의 불변)
+#
+#   왜 선택식에도 거나: **선택식은 평가가 아니라 훈련 루프의 일부다.** val에 B팔(위험−단서)
+#   H 프레임이 들어가면, 마스크 없는 선택식은 "모델이 무시하라고 배운 칸에서 발화한" 체크포인트를
+#   고른다 — 지도와 선택이 정반대를 요구하는 구성이고, MOD-07이 진단한 병의 v3판 재발이다
+#   (RT_LEDGER_B.md:548-553). 마스크된 칸은 **H 분자·H 분모·F1·FA 어디에도 기여하지 않는다.**
+#
+#   §2-4와 충돌하지 않는다: §2-4가 규율하는 것은 **평가 분모**이고, 여기서 마스크가 닿는 것은
+#   **val 위에서 계산되는 훈련 루프 내부 스칼라**다. 평가 코드 경로는 손대지 않는다.
+#
+#   v2 소급 적용: v2에는 무시 마스크가 **존재하지 않는다**(ignore = 전부 False) → 아래 함수들은
+#   마스크 없는 계산과 항등이고, 따라서 **v2 재현 검증 숫자는 이 규약에 영향받지 않는다.**
+#
+# ── D-2  FA 항의 모집단 등록 ─────────────────────────────────────────────────
+#   RT-B §5-③(다): FA 항에 FA_C(단서 있는 무위험)를 넣으면 선택이 ④-a층 목표를 직접 최적화해
+#   **계기판 ③이 자기 선택 기준을 재는 순환**이 된다 → FA 항은 **FA_D(청정 오경보) 권고**.
+#   그러나 v2에는 D팔 표본이 없고(ACCOUNTING §2-3), off팔은 씬별 8C/25D 혼합이며(§4.1),
+#   에폭별로 남은 통계량은 pooled `val_fpr` 하나뿐이다. 따라서 **하나의 식 · 하나의 정의**를
+#   유지하되 **모집단만 코퍼스가 선언**한다(선언값은 config.json 에 각인, 표에서 절대 혼용 금지).
+FA_POPULATIONS = {
+    # v2: D팔이 존재하지 않음 -> pooled val 칸 (선언된 근사, 재현 검증 전용)
+    "v2_all_val_cells": "val 전 칸의 FP/(FP+TN) — v2에는 D팔이 없다(ACCOUNTING §2-3·§4.1)",
+    # v3: 청정 오경보만 -> D팔(무위험·무단서) 칸 한정
+    "v3_D_arm_cells": "D팔(무위험·무단서) 칸 한정 FP/(FP+TN) = FA_D (RT-B §5-③(다) 권고)",
+}
+FA_POPULATION_DEFAULT_V2 = "v2_all_val_cells"
+FA_POPULATION_DEFAULT_V3 = "v3_D_arm_cells"
+
+# ── D-3  H 항 만개 조건 (공급 의존성 · 가정하지 않는다) ──────────────────────
+#   beta = n_H/(n_H+30) 은 n_H=30 에서 0.5 가 된다. 그러나 RT-B §7-#2 실측:
+#   **"val strict-H >= 30"의 공급원이 현 사양 안에 없다** — test-ext 씬은 val 로 쓸 수 없다
+#   (ACCOUNTING §2-9). 따라서 본 식은 30 을 **가정하지 않고** n_H 을 매 실행 실측해 beta 를
+#   만든다. 공급이 오기 전까지 beta = 6/36 = 0.1667 로 머물며, 그것이 정직한 상태다.
+H_FULL_WEIGHT_CONDITION = ("H 항 만개(beta=0.5)는 **훈련측 씬**에서 공급된 "
+                           "val strict-H >= 30 이 착지한 뒤에만 성립한다 "
+                           "(RT_LEDGER_B.md:643-656 · P-5 렌더 계획 의존)")
+
+
+def _mask_arrays(gt, ignore):
+    """ignore=None 이면 전부 유효. 반환 = valid(bool, gt 와 동형)."""
+    import numpy as np
+    gt = np.asarray(gt)
+    if ignore is None:
+        return np.ones_like(gt, dtype=bool)
+    ig = np.asarray(ignore, dtype=bool)
+    if ig.shape != gt.shape:
+        raise AssertionError(f"[VG-mask] ignore shape {ig.shape} != gt shape {gt.shape}")
+    return ~ig
+
+
+def cell_stats_selection(prob, gt, tau, ignore=None, fa_cells=None):
+    """선택식용 칸 통계. **마스크된 칸은 어디에도 기여하지 않는다.**
+    fa_cells = FA 항 모집단 불리언(칸 단위). None -> 유효 칸 전체(v2 규약)."""
+    import numpy as np
+    prob, gt = np.asarray(prob), np.asarray(gt)
+    valid = _mask_arrays(gt, ignore)
+    pred, pos = (prob >= tau), (gt > 0.5)
+    tp = float((pred & pos & valid).sum())
+    fp = float((pred & ~pos & valid).sum())
+    fn = float((~pred & pos & valid).sum())
+    f1 = 2 * tp / max(2 * tp + fp + fn, 1e-9)
+    fam = valid if fa_cells is None else (valid & np.asarray(fa_cells, dtype=bool))
+    fa_fp = float((pred & ~pos & fam).sum())
+    fa_tn = float((~pred & ~pos & fam).sum())
+    fa = fa_fp / max(fa_fp + fa_tn, 1e-9)
+    return f1, fa, int(valid.sum()), int(fam.sum())
+
+
+def h_frame_recall_selection(prob, gt, tier, tau, ignore=None):
+    """선택식용 H 프레임 recall. 정본 분모 = tier=='H' ∧ **마스크되지 않은** 양성 칸 >= 1.
+    적중 = 마스크되지 않은 양성 칸 중 하나 이상에서 발화. -> (h_hits, n_H)."""
+    import numpy as np
+    prob, gt = np.asarray(prob), np.asarray(gt)
+    tier = np.asarray(tier)
+    valid = _mask_arrays(gt, ignore)
+    pos_eff = (gt > 0.5) & valid                    # 유효 양성 칸
+    sel = (tier == "H") & pos_eff.any(1)            # <- 단일 분모 정의 (마스크 반영)
+    n = int(sel.sum())
+    if n == 0:
+        return 0, 0
+    hit = ((prob >= tau) & pos_eff)[sel].any(1)
+    return int(hit.sum()), n
+
+
+def compute_selection(prob, gt, tier, tau, *, ignore=None, fa_cells=None,
+                      lam: float = LAMBDA_FA, a: float = LAPLACE_A,
+                      n0: float = N0_HALF_TRUST,
+                      fa_population: str = FA_POPULATION_DEFAULT_V2) -> dict:
+    """**단일 진입점.** 훈련 루프는 이 함수만 호출한다.
+    VG-1 게이트는 여기서 함께 판정한다(확률을 이미 갖고 있는 유일한 지점)."""
+    if fa_population not in FA_POPULATIONS:
+        raise AssertionError(f"[VG-fa] 미등록 FA 모집단: {fa_population}")
+    f1, fa, n_valid, n_fa = cell_stats_selection(prob, gt, tau, ignore, fa_cells)
+    h, n_h = h_frame_recall_selection(prob, gt, tier, tau, ignore)
+    spread = output_spread([list(r) for r in prob])
+    gate = vg1_pass(spread)
+    s = sel_score_v3(f1, h, n_h, fa, lam=lam, a=a, n0=n0)
+    return {"S": (s if gate else float("-inf")), "S_ungated": s,
+            "f1": f1, "fa": fa, "h_hits": h, "n_H": n_h,
+            "beta": beta_weight(n_h, n0), "H_hat": (h_shrunk(h, n_h, a) if n_h else None),
+            "spread": spread, "vg1_pass": gate,
+            "n_valid_cells": n_valid, "n_fa_cells": n_fa,
+            "fa_population": fa_population, "ignore_applied": ignore is not None}
+
+
 if __name__ == "__main__":
     print(json.dumps({"H_DEF_ID": H_DEF_ID, "FORMULA_ID": FORMULA_ID,
-                      "VG1_SPREAD_MIN": VG1_SPREAD_MIN, "VG1_SOURCE": VG1_SOURCE},
+                      "VG1_STAGE": VG1_STAGE, "VG1_SPREAD_MIN": VG1_SPREAD_MIN,
+                      "VG1_SOURCE": VG1_SOURCE, "FA_POPULATIONS": FA_POPULATIONS,
+                      "H_FULL_WEIGHT_CONDITION": H_FULL_WEIGHT_CONDITION},
                      ensure_ascii=False, indent=2))

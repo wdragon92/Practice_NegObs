@@ -1,0 +1,3667 @@
+{
+ "doc": "render_plan_v3",
+ "version": "1.0",
+ "date": "2026-08-23",
+ "task": "v3 P-5",
+ "governing": [
+  "experiments/mainrun_0819/DECISIONS.md D58",
+  "Docs/experiment/V3_DESIGN_0823.md §4, §12",
+  "experiments/v3_0823/ACCOUNTING.md §2, §4",
+  "experiments/v3_0823/CUE_COVERAGE.md",
+  "experiments/v3_0823/FA_REALITY.md §3"
+ ],
+ "conds": [
+  "L0",
+  "L5",
+  "L7"
+ ],
+ "cams": 8,
+ "bands": {
+  "base": null,
+  "H": {
+   "d_min": 6,
+   "d_max": 12,
+   "h_min": 0.25,
+   "h_max": 1.0
+  },
+  "E": {
+   "d_min": 6,
+   "d_max": 12,
+   "h_min": 1.2,
+   "h_max": 1.9
+  },
+  "E2": {
+   "d_min": 4,
+   "d_max": 9,
+   "h_min": 0.3,
+   "h_max": 0.9
+  },
+  "LAT": {
+   "d_min": 3,
+   "d_max": 10,
+   "h_min": 0.4,
+   "h_max": 1.4
+  }
+ },
+ "gt_canon": "experiments/v3_0823/dataset_manifest_v2corr.json (G7_RELABEL §0, 정본 B)",
+ "test_core_excluded": [
+  "scene05",
+  "scene07",
+  "scene14",
+  "scene15",
+  "scene18",
+  "sceneC2",
+  "sceneN3"
+ ],
+ "hold_excluded": [
+  "scene11",
+  "scene13",
+  "scene19",
+  "sceneD4"
+ ],
+ "classification_probe": {
+  "pairs": [
+   [
+    "scene01",
+    "cue_railing"
+   ],
+   [
+    "scene02",
+    "cue_railing"
+   ],
+   [
+    "scene06",
+    "cue_railing"
+   ],
+   [
+    "scene08",
+    "cue_railing"
+   ],
+   [
+    "scene10",
+    "cue_railing"
+   ],
+   [
+    "scene16",
+    "cue_railing"
+   ],
+   [
+    "scene21",
+    "cue_railing"
+   ],
+   [
+    "sceneC1",
+    "cue_railing"
+   ],
+   [
+    "sceneC4",
+    "cue_railing"
+   ],
+   [
+    "scene02",
+    "cue_nosing"
+   ],
+   [
+    "scene16",
+    "cue_nosing"
+   ],
+   [
+    "scene21",
+    "cue_nosing"
+   ],
+   [
+    "sceneC1",
+    "cue_nosing"
+   ],
+   [
+    "sceneD1",
+    "cue_nosing"
+   ],
+   [
+    "sceneC1",
+    "cue_tactile"
+   ],
+   [
+    "sceneC4",
+    "cue_tactile"
+   ],
+   [
+    "scene06",
+    "cue_material_break"
+   ],
+   [
+    "sceneN1",
+    "cue_material_break"
+   ],
+   [
+    "sceneN2",
+    "cue_material_break"
+   ],
+   [
+    "sceneN5",
+    "cue_material_break"
+   ],
+   [
+    "scene01",
+    "cue_scene_dressing"
+   ],
+   [
+    "scene02",
+    "cue_scene_dressing"
+   ],
+   [
+    "scene03",
+    "cue_scene_dressing"
+   ],
+   [
+    "scene04",
+    "cue_scene_dressing"
+   ],
+   [
+    "scene06",
+    "cue_scene_dressing"
+   ],
+   [
+    "scene08",
+    "cue_scene_dressing"
+   ],
+   [
+    "scene09",
+    "cue_scene_dressing"
+   ],
+   [
+    "scene10",
+    "cue_scene_dressing"
+   ],
+   [
+    "scene16",
+    "cue_scene_dressing"
+   ],
+   [
+    "scene21",
+    "cue_scene_dressing"
+   ],
+   [
+    "sceneC1",
+    "cue_scene_dressing"
+   ],
+   [
+    "sceneC4",
+    "cue_scene_dressing"
+   ],
+   [
+    "sceneD1",
+    "cue_scene_dressing"
+   ],
+   [
+    "sceneD2",
+    "cue_scene_dressing"
+   ],
+   [
+    "sceneD3",
+    "cue_scene_dressing"
+   ],
+   [
+    "sceneN1",
+    "cue_scene_dressing"
+   ],
+   [
+    "sceneN2",
+    "cue_scene_dressing"
+   ],
+   [
+    "sceneN4",
+    "cue_scene_dressing"
+   ],
+   [
+    "sceneN5",
+    "cue_scene_dressing"
+   ]
+  ],
+  "cams": 4,
+  "conds": [
+   "L0"
+  ],
+  "arms": 2,
+  "cuts": 312,
+  "gate": "VG-CLS"
+ },
+ "scenes": [
+  {
+   "scene": "scene01",
+   "origin": "existing",
+   "role": "train",
+   "zone": "캠퍼스",
+   "drop_bearing": true,
+   "bond": "free",
+   "bands": [
+    "base"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "a_frames": 24,
+   "a_hazard_pos_frames": 24,
+   "keep_dressing_port": false,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "reuse",
+     "new_cuts": 0,
+     "frames": 24,
+     "rounds": [
+      "260819_main_on"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_B"
+     ],
+     "lever_floor": [
+      "cue_material_break"
+     ],
+     "lever_pending_vgcls": [
+      "cue_railing",
+      "cue_scene_dressing",
+      "cue_sign"
+     ],
+     "forbidden": [],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_C"
+     ],
+     "needs_keep_dressing_port": false,
+     "recipe": {
+      "hazard": false,
+      "cue": true,
+      "keep_dressing": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_D"
+     ],
+     "guoff_reuse_candidate": false,
+     "gate": null,
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "scene02",
+   "origin": "existing",
+   "role": "train",
+   "zone": "보도",
+   "drop_bearing": true,
+   "bond": "HZ",
+   "bands": [
+    "base"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "a_frames": 24,
+   "a_hazard_pos_frames": 24,
+   "keep_dressing_port": true,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "reuse",
+     "new_cuts": 0,
+     "frames": 24,
+     "rounds": [
+      "260819_main_on"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_B"
+     ],
+     "lever_floor": [
+      "cue_material_break"
+     ],
+     "lever_pending_vgcls": [
+      "cue_nosing",
+      "cue_railing",
+      "cue_scene_dressing",
+      "cue_sign"
+     ],
+     "forbidden": [],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_C"
+     ],
+     "needs_keep_dressing_port": true,
+     "recipe": {
+      "hazard": false,
+      "cue": true,
+      "keep_dressing": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 0,
+     "frames": 24,
+     "rounds": [
+      "260819_main_off"
+     ],
+     "guoff_reuse_candidate": true,
+     "gate": "VG-04",
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "scene03",
+   "origin": "existing",
+   "role": "train",
+   "zone": "제방·수변",
+   "drop_bearing": true,
+   "bond": "HZ",
+   "bands": [
+    "base",
+    "E",
+    "E2"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "a_frames": 72,
+   "a_hazard_pos_frames": 57,
+   "keep_dressing_port": true,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "reuse",
+     "new_cuts": 0,
+     "frames": 72,
+     "rounds": [
+      "260819_main_on",
+      "260820_boost_e_on",
+      "260820_boost_e2_on"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260826_v3w1_lib_B"
+     ],
+     "lever_floor": [
+      "cue_material_break"
+     ],
+     "lever_pending_vgcls": [
+      "cue_scene_dressing"
+     ],
+     "forbidden": [],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260826_v3w1_lib_C"
+     ],
+     "needs_keep_dressing_port": true,
+     "recipe": {
+      "hazard": false,
+      "cue": true,
+      "keep_dressing": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 0,
+     "frames": 72,
+     "rounds": [
+      "260819_main_off"
+     ],
+     "guoff_reuse_candidate": true,
+     "gate": "VG-04",
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "scene04",
+   "origin": "existing",
+   "role": "train",
+   "zone": "제방·수변",
+   "drop_bearing": true,
+   "bond": "free",
+   "bands": [
+    "base",
+    "E",
+    "E2"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "a_frames": 72,
+   "a_hazard_pos_frames": 72,
+   "keep_dressing_port": false,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "reuse",
+     "new_cuts": 0,
+     "frames": 72,
+     "rounds": [
+      "260819_main_on",
+      "260820_boost_e_on",
+      "260820_boost_e2_on"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260826_v3w1_lib_B"
+     ],
+     "lever_floor": [
+      "cue_material_break"
+     ],
+     "lever_pending_vgcls": [
+      "cue_scene_dressing"
+     ],
+     "forbidden": [],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260826_v3w1_lib_C"
+     ],
+     "needs_keep_dressing_port": false,
+     "recipe": {
+      "hazard": false,
+      "cue": true,
+      "keep_dressing": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260826_v3w1_lib_D"
+     ],
+     "guoff_reuse_candidate": false,
+     "gate": null,
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "scene06",
+   "origin": "existing",
+   "role": "train",
+   "zone": "보도",
+   "drop_bearing": true,
+   "bond": "HZpart",
+   "bands": [
+    "base"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "a_frames": 24,
+   "a_hazard_pos_frames": 0,
+   "keep_dressing_port": true,
+   "b_lever_clean": false,
+   "arms": {
+    "A": {
+     "source": "reuse",
+     "new_cuts": 0,
+     "frames": 24,
+     "rounds": [
+      "260819_main_on"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_C"
+     ],
+     "needs_keep_dressing_port": true,
+     "recipe": {
+      "hazard": false,
+      "cue": true,
+      "keep_dressing": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_D"
+     ],
+     "guoff_reuse_candidate": false,
+     "gate": null,
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "scene08",
+   "origin": "existing",
+   "role": "val",
+   "zone": "보도",
+   "drop_bearing": true,
+   "bond": "HZpart",
+   "bands": [
+    "base",
+    "E"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "a_frames": 48,
+   "a_hazard_pos_frames": 45,
+   "keep_dressing_port": true,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "reuse",
+     "new_cuts": 0,
+     "frames": 48,
+     "rounds": [
+      "260819_main_on",
+      "260820_boost_e_on"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260826_v3w1_lib_B"
+     ],
+     "lever_floor": [
+      "cue_material_break"
+     ],
+     "lever_pending_vgcls": [
+      "cue_railing",
+      "cue_scene_dressing",
+      "cue_sign"
+     ],
+     "forbidden": [],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260826_v3w1_lib_C"
+     ],
+     "needs_keep_dressing_port": true,
+     "recipe": {
+      "hazard": false,
+      "cue": true,
+      "keep_dressing": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260826_v3w1_lib_D"
+     ],
+     "guoff_reuse_candidate": false,
+     "gate": null,
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "scene09",
+   "origin": "existing",
+   "role": "train",
+   "zone": "제방·수변",
+   "drop_bearing": true,
+   "bond": "free",
+   "bands": [
+    "base",
+    "H",
+    "E"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "a_frames": 72,
+   "a_hazard_pos_frames": 72,
+   "keep_dressing_port": false,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "reuse",
+     "new_cuts": 0,
+     "frames": 72,
+     "rounds": [
+      "260819_main_on",
+      "260820_boost_h_on",
+      "260820_boost_e_on"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260826_v3w1_lib_B"
+     ],
+     "lever_floor": [
+      "cue_material_break"
+     ],
+     "lever_pending_vgcls": [
+      "cue_scene_dressing",
+      "cue_sign"
+     ],
+     "forbidden": [],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260826_v3w1_lib_C"
+     ],
+     "needs_keep_dressing_port": false,
+     "recipe": {
+      "hazard": false,
+      "cue": true,
+      "keep_dressing": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260826_v3w1_lib_D"
+     ],
+     "guoff_reuse_candidate": false,
+     "gate": null,
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "scene10",
+   "origin": "existing",
+   "role": "train",
+   "zone": "캠퍼스",
+   "drop_bearing": true,
+   "bond": "HZpart",
+   "bands": [
+    "base"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "a_frames": 24,
+   "a_hazard_pos_frames": 15,
+   "keep_dressing_port": true,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "reuse",
+     "new_cuts": 0,
+     "frames": 24,
+     "rounds": [
+      "260819_main_on"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_B"
+     ],
+     "lever_floor": [
+      "cue_material_break"
+     ],
+     "lever_pending_vgcls": [
+      "cue_railing",
+      "cue_scene_dressing"
+     ],
+     "forbidden": [],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_C"
+     ],
+     "needs_keep_dressing_port": true,
+     "recipe": {
+      "hazard": false,
+      "cue": true,
+      "keep_dressing": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_D"
+     ],
+     "guoff_reuse_candidate": false,
+     "gate": null,
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "scene12",
+   "origin": "existing",
+   "role": "train",
+   "zone": "제방·수변",
+   "drop_bearing": true,
+   "bond": "HZpart",
+   "bands": [
+    "base",
+    "E",
+    "E2"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "a_frames": 72,
+   "a_hazard_pos_frames": 72,
+   "keep_dressing_port": true,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "reuse",
+     "new_cuts": 0,
+     "frames": 72,
+     "rounds": [
+      "260819_main_on",
+      "260820_boost_e_on",
+      "260820_boost_e2_on"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260826_v3w1_lib_B"
+     ],
+     "lever_floor": [
+      "cue_material_break",
+      "cue_railing",
+      "cue_scene_dressing"
+     ],
+     "lever_pending_vgcls": [],
+     "forbidden": [],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260826_v3w1_lib_C"
+     ],
+     "needs_keep_dressing_port": true,
+     "recipe": {
+      "hazard": false,
+      "cue": true,
+      "keep_dressing": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260826_v3w1_lib_D"
+     ],
+     "guoff_reuse_candidate": false,
+     "gate": null,
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "scene16",
+   "origin": "existing",
+   "role": "train",
+   "zone": "캠퍼스",
+   "drop_bearing": true,
+   "bond": "HZpart",
+   "bands": [
+    "base"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "a_frames": 24,
+   "a_hazard_pos_frames": 24,
+   "keep_dressing_port": true,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "reuse",
+     "new_cuts": 0,
+     "frames": 24,
+     "rounds": [
+      "260819_main_on"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_B"
+     ],
+     "lever_floor": [
+      "cue_material_break"
+     ],
+     "lever_pending_vgcls": [
+      "cue_nosing",
+      "cue_railing",
+      "cue_scene_dressing",
+      "cue_sign"
+     ],
+     "forbidden": [],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_C"
+     ],
+     "needs_keep_dressing_port": true,
+     "recipe": {
+      "hazard": false,
+      "cue": true,
+      "keep_dressing": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_D"
+     ],
+     "guoff_reuse_candidate": false,
+     "gate": null,
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "scene17",
+   "origin": "existing",
+   "role": "train",
+   "zone": "제방·수변",
+   "drop_bearing": true,
+   "bond": "HZpart",
+   "bands": [
+    "base",
+    "H",
+    "E"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "a_frames": 72,
+   "a_hazard_pos_frames": 72,
+   "keep_dressing_port": true,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "reuse",
+     "new_cuts": 0,
+     "frames": 72,
+     "rounds": [
+      "260819_main_on",
+      "260820_boost_h_on",
+      "260820_boost_e_on"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260826_v3w1_lib_B"
+     ],
+     "lever_floor": [
+      "cue_material_break",
+      "cue_scene_dressing"
+     ],
+     "lever_pending_vgcls": [],
+     "forbidden": [],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260826_v3w1_lib_C"
+     ],
+     "needs_keep_dressing_port": true,
+     "recipe": {
+      "hazard": false,
+      "cue": true,
+      "keep_dressing": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260826_v3w1_lib_D"
+     ],
+     "guoff_reuse_candidate": false,
+     "gate": null,
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "scene20",
+   "origin": "existing",
+   "role": "val",
+   "zone": "보도",
+   "drop_bearing": true,
+   "bond": "HZpart",
+   "bands": [
+    "base",
+    "E",
+    "E2"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "a_frames": 72,
+   "a_hazard_pos_frames": 42,
+   "keep_dressing_port": true,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "reuse",
+     "new_cuts": 0,
+     "frames": 72,
+     "rounds": [
+      "260819_main_on",
+      "260820_boost_e_on",
+      "260820_boost_e2_on"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260826_v3w1_lib_B"
+     ],
+     "lever_floor": [
+      "cue_material_break"
+     ],
+     "lever_pending_vgcls": [
+      "cue_scene_dressing"
+     ],
+     "forbidden": [
+      "cue_railing"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260826_v3w1_lib_C"
+     ],
+     "needs_keep_dressing_port": true,
+     "recipe": {
+      "hazard": false,
+      "cue": true,
+      "keep_dressing": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260826_v3w1_lib_D"
+     ],
+     "guoff_reuse_candidate": false,
+     "gate": null,
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "scene21",
+   "origin": "existing",
+   "role": "train",
+   "zone": "보도",
+   "drop_bearing": true,
+   "bond": "HZpart",
+   "bands": [
+    "base"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "a_frames": 24,
+   "a_hazard_pos_frames": 24,
+   "keep_dressing_port": true,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "reuse",
+     "new_cuts": 0,
+     "frames": 24,
+     "rounds": [
+      "260819_main_on"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_B"
+     ],
+     "lever_floor": [
+      "cue_material_break"
+     ],
+     "lever_pending_vgcls": [
+      "cue_nosing",
+      "cue_railing",
+      "cue_scene_dressing",
+      "cue_sign"
+     ],
+     "forbidden": [],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_C"
+     ],
+     "needs_keep_dressing_port": true,
+     "recipe": {
+      "hazard": false,
+      "cue": true,
+      "keep_dressing": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_D"
+     ],
+     "guoff_reuse_candidate": false,
+     "gate": null,
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneC1",
+   "origin": "existing",
+   "role": "train",
+   "zone": "캠퍼스",
+   "drop_bearing": true,
+   "bond": "HZpart",
+   "bands": [
+    "base",
+    "E"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "a_frames": 48,
+   "a_hazard_pos_frames": 48,
+   "keep_dressing_port": true,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "reuse",
+     "new_cuts": 0,
+     "frames": 48,
+     "rounds": [
+      "260819_main_on",
+      "260820_boost_e_on"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260826_v3w1_lib_B"
+     ],
+     "lever_floor": [
+      "cue_material_break"
+     ],
+     "lever_pending_vgcls": [
+      "cue_nosing",
+      "cue_railing",
+      "cue_scene_dressing",
+      "cue_tactile"
+     ],
+     "forbidden": [],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260826_v3w1_lib_C"
+     ],
+     "needs_keep_dressing_port": true,
+     "recipe": {
+      "hazard": false,
+      "cue": true,
+      "keep_dressing": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260826_v3w1_lib_D"
+     ],
+     "guoff_reuse_candidate": false,
+     "gate": null,
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneC4",
+   "origin": "existing",
+   "role": "train",
+   "zone": "캠퍼스",
+   "drop_bearing": true,
+   "bond": "HZpart",
+   "bands": [
+    "base",
+    "E",
+    "E2"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "a_frames": 72,
+   "a_hazard_pos_frames": 69,
+   "keep_dressing_port": true,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "reuse",
+     "new_cuts": 0,
+     "frames": 72,
+     "rounds": [
+      "260819_main_on",
+      "260820_boost_e_on",
+      "260820_boost_e2_on"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260826_v3w1_lib_B"
+     ],
+     "lever_floor": [
+      "cue_material_break"
+     ],
+     "lever_pending_vgcls": [
+      "cue_railing",
+      "cue_scene_dressing",
+      "cue_tactile"
+     ],
+     "forbidden": [],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260826_v3w1_lib_C"
+     ],
+     "needs_keep_dressing_port": true,
+     "recipe": {
+      "hazard": false,
+      "cue": true,
+      "keep_dressing": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260826_v3w1_lib_D"
+     ],
+     "guoff_reuse_candidate": false,
+     "gate": null,
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneD1",
+   "origin": "existing",
+   "role": "train",
+   "zone": "보도",
+   "drop_bearing": true,
+   "bond": "HZpart",
+   "bands": [
+    "base"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "a_frames": 24,
+   "a_hazard_pos_frames": 24,
+   "keep_dressing_port": true,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "reuse",
+     "new_cuts": 0,
+     "frames": 24,
+     "rounds": [
+      "260819_main_on"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_B"
+     ],
+     "lever_floor": [
+      "cue_material_break"
+     ],
+     "lever_pending_vgcls": [
+      "cue_nosing",
+      "cue_scene_dressing"
+     ],
+     "forbidden": [],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_C"
+     ],
+     "needs_keep_dressing_port": true,
+     "recipe": {
+      "hazard": false,
+      "cue": true,
+      "keep_dressing": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_D"
+     ],
+     "guoff_reuse_candidate": false,
+     "gate": null,
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneD2",
+   "origin": "existing",
+   "role": "train",
+   "zone": "보도",
+   "drop_bearing": true,
+   "bond": "HZpart",
+   "bands": [
+    "base"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "a_frames": 24,
+   "a_hazard_pos_frames": 24,
+   "keep_dressing_port": true,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "reuse",
+     "new_cuts": 0,
+     "frames": 24,
+     "rounds": [
+      "260819_main_on"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_B"
+     ],
+     "lever_floor": [
+      "cue_material_break"
+     ],
+     "lever_pending_vgcls": [
+      "cue_scene_dressing"
+     ],
+     "forbidden": [],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_C"
+     ],
+     "needs_keep_dressing_port": true,
+     "recipe": {
+      "hazard": false,
+      "cue": true,
+      "keep_dressing": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_D"
+     ],
+     "guoff_reuse_candidate": false,
+     "gate": null,
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneD3",
+   "origin": "existing",
+   "role": "val",
+   "zone": "농로",
+   "drop_bearing": true,
+   "bond": "HZpart",
+   "bands": [
+    "base"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "a_frames": 24,
+   "a_hazard_pos_frames": 24,
+   "keep_dressing_port": true,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "reuse",
+     "new_cuts": 0,
+     "frames": 24,
+     "rounds": [
+      "260819_main_on"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_B"
+     ],
+     "lever_floor": [
+      "cue_material_break"
+     ],
+     "lever_pending_vgcls": [
+      "cue_scene_dressing"
+     ],
+     "forbidden": [],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_C"
+     ],
+     "needs_keep_dressing_port": true,
+     "recipe": {
+      "hazard": false,
+      "cue": true,
+      "keep_dressing": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_D"
+     ],
+     "guoff_reuse_candidate": false,
+     "gate": null,
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneN1",
+   "origin": "existing",
+   "role": "train",
+   "zone": "보도",
+   "drop_bearing": false,
+   "bond": "free",
+   "bands": [
+    "base"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "a_frames": 0,
+   "a_hazard_pos_frames": 0,
+   "keep_dressing_port": false,
+   "b_lever_clean": false,
+   "arms": {
+    "C": {
+     "source": "reuse",
+     "new_cuts": 0,
+     "frames": 24,
+     "rounds": [
+      "260819_main_on"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     },
+     "note": "무낙차 씬 — v2 on팔이 그대로 C팔"
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_D"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneN2",
+   "origin": "existing",
+   "role": "train",
+   "zone": "보도",
+   "drop_bearing": false,
+   "bond": "HZpart",
+   "bands": [
+    "base"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "a_frames": 0,
+   "a_hazard_pos_frames": 0,
+   "keep_dressing_port": false,
+   "b_lever_clean": false,
+   "arms": {
+    "C": {
+     "source": "reuse",
+     "new_cuts": 0,
+     "frames": 24,
+     "rounds": [
+      "260819_main_on"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     },
+     "note": "무낙차 씬 — v2 on팔이 그대로 C팔"
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_D"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneN4",
+   "origin": "existing",
+   "role": "train",
+   "zone": "보도",
+   "drop_bearing": false,
+   "bond": "free",
+   "bands": [
+    "base"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "a_frames": 0,
+   "a_hazard_pos_frames": 0,
+   "keep_dressing_port": false,
+   "b_lever_clean": false,
+   "arms": {
+    "C": {
+     "source": "reuse",
+     "new_cuts": 0,
+     "frames": 24,
+     "rounds": [
+      "260819_main_on"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     },
+     "note": "무낙차 씬 — v2 on팔이 그대로 C팔"
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_D"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneN5",
+   "origin": "existing",
+   "role": "train",
+   "zone": "보도",
+   "drop_bearing": false,
+   "bond": "free",
+   "bands": [
+    "base"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "a_frames": 0,
+   "a_hazard_pos_frames": 0,
+   "keep_dressing_port": false,
+   "b_lever_clean": false,
+   "arms": {
+    "C": {
+     "source": "reuse",
+     "new_cuts": 0,
+     "frames": 24,
+     "rounds": [
+      "260819_main_on"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     },
+     "note": "무낙차 씬 — v2 on팔이 그대로 C팔"
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 24,
+     "frames": 24,
+     "rounds": [
+      "260826_v3w1_lib_D"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneH1_berm_levee",
+   "origin": "new",
+   "role": "test-ext",
+   "zone": "제방·수변",
+   "family": "paired-H 둔덕형",
+   "drop_bearing": true,
+   "bands": [
+    "base",
+    "H"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "wave": "A",
+   "ladder": null,
+   "concealment": "제방 어깨 둔덕 마루가 하천측 낙차 개구를 가림",
+   "edge_owner": "둔덕 마루(BermCrest) 솔리드",
+   "note": null,
+   "a_frames": 48,
+   "keep_dressing_port": false,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_A"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_B"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_C"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_D"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneH2_landing_campus",
+   "origin": "new",
+   "role": "test-ext",
+   "zone": "캠퍼스",
+   "family": "paired-H 계단참형",
+   "drop_bearing": true,
+   "bands": [
+    "base",
+    "H"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "wave": "A",
+   "ladder": null,
+   "concealment": "중간 계단참 상단 코가 하행 단 전체를 가림",
+   "edge_owner": "계단참 상단 슬래브(LandingSlab)",
+   "note": null,
+   "a_frames": 48,
+   "keep_dressing_port": false,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_A"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_B"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_C"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_D"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneH3_bend_walk",
+   "origin": "new",
+   "role": "test-ext",
+   "zone": "보도",
+   "family": "paired-H 복도 굴절형",
+   "drop_bearing": true,
+   "bands": [
+    "base",
+    "H"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "wave": "A",
+   "ladder": null,
+   "concealment": "옹벽 굴절 모서리가 굴절 너머 하행 계단을 가림",
+   "edge_owner": "굴절 옹벽 모서리(BendWall)",
+   "note": null,
+   "a_frames": 48,
+   "keep_dressing_port": false,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_A"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_B"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_C"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_D"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneH4_berm_farm",
+   "origin": "new",
+   "role": "test-ext",
+   "zone": "농로",
+   "family": "paired-H 둔덕형",
+   "drop_bearing": true,
+   "bands": [
+    "base",
+    "H"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "wave": "B",
+   "ladder": null,
+   "concealment": "논둑 마루가 배수로 낙차를 가림",
+   "edge_owner": "논둑 마루(LeveeCrest)",
+   "note": null,
+   "a_frames": 48,
+   "keep_dressing_port": false,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_A"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_B"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_C"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_D"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneL1_lateral_canal",
+   "origin": "new",
+   "role": "test-ext",
+   "zone": "제방·수변",
+   "family": "측방 위험",
+   "drop_bearing": true,
+   "bands": [
+    "base",
+    "LAT"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "wave": "A",
+   "ladder": null,
+   "concealment": "측방(섹터 A/E) 수로 — 정면 시야 밖 위험",
+   "edge_owner": "측방 제방 어깨",
+   "note": null,
+   "a_frames": 48,
+   "keep_dressing_port": false,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_A"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_B"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_C"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_D"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneL2_lateral_ditch",
+   "origin": "new",
+   "role": "test-ext",
+   "zone": "농로",
+   "family": "측방 위험",
+   "drop_bearing": true,
+   "bands": [
+    "base",
+    "LAT"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "wave": "C",
+   "ladder": null,
+   "concealment": "측방 배수구",
+   "edge_owner": "갓길 노견",
+   "note": null,
+   "a_frames": 48,
+   "keep_dressing_port": false,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_A"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_B"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_C"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_D"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneN9_busstop_tactile",
+   "origin": "new",
+   "role": "test-ext",
+   "zone": "보도",
+   "family": "N-cue ★3",
+   "drop_bearing": true,
+   "bands": [
+    "base",
+    "base2"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "wave": "A",
+   "ladder": "L6 정류장 경고블록",
+   "concealment": null,
+   "edge_owner": null,
+   "note": null,
+   "a_frames": 48,
+   "keep_dressing_port": false,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_A"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_B"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_C"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_D"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneN11_ground_pattern",
+   "origin": "new",
+   "role": "test-ext",
+   "zone": "보도",
+   "family": "N-cue ★4",
+   "drop_bearing": true,
+   "bands": [
+    "base",
+    "base2"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "wave": "A",
+   "ladder": "L10 지면문양 삼중주(맨홀+수목격자+신축이음)",
+   "concealment": null,
+   "edge_owner": null,
+   "note": null,
+   "a_frames": 48,
+   "keep_dressing_port": false,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_A"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_B"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_C"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_D"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneN12_weak_stack",
+   "origin": "new",
+   "role": "test-ext",
+   "zone": "보도",
+   "family": "N-cue ★5",
+   "drop_bearing": true,
+   "bands": [
+    "base",
+    "base2"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "wave": "B",
+   "ladder": "L12 약단서 중첩(볼록거울+시선유도봉+그림자)",
+   "concealment": null,
+   "edge_owner": null,
+   "note": null,
+   "a_frames": 48,
+   "keep_dressing_port": false,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_A"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_B"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_C"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260830_v3w3_ext_D"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneH5_landing_campus2",
+   "origin": "new",
+   "role": "train",
+   "zone": "캠퍼스",
+   "family": "paired-H 계단참형",
+   "drop_bearing": true,
+   "bands": [
+    "base",
+    "H"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "wave": "B",
+   "ladder": null,
+   "concealment": "계단참",
+   "edge_owner": "계단참 상단 슬래브",
+   "note": null,
+   "a_frames": 48,
+   "keep_dressing_port": false,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_A"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_B"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_C"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_D"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneH6_berm_levee2",
+   "origin": "new",
+   "role": "val",
+   "zone": "제방·수변",
+   "family": "paired-H 둔덕형",
+   "drop_bearing": true,
+   "bands": [
+    "base",
+    "H",
+    "H2"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "wave": "A",
+   "ladder": null,
+   "concealment": "제방 둔덕",
+   "edge_owner": "둔덕 마루",
+   "note": "val strict-H ≥ 30 공급원 (DZ §4.3-3 선택지표 수리의 전제)",
+   "a_frames": 72,
+   "keep_dressing_port": false,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260828_v3w2_new_A"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260828_v3w2_new_B"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260828_v3w2_new_C"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 72,
+     "frames": 72,
+     "rounds": [
+      "260828_v3w2_new_D"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneH7_bend_walk2",
+   "origin": "new",
+   "role": "val",
+   "zone": "보도",
+   "family": "paired-H 복도 굴절형",
+   "drop_bearing": true,
+   "bands": [
+    "base",
+    "H"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "wave": "A",
+   "ladder": null,
+   "concealment": "옹벽 굴절 모서리",
+   "edge_owner": "굴절 옹벽 모서리",
+   "note": "val strict-H 2차 공급원 — 계열 다양화(H6=둔덕형과 다른 가족)",
+   "a_frames": 48,
+   "keep_dressing_port": false,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_A"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_B"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_C"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_D"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneE1_farrim_levee",
+   "origin": "new",
+   "role": "train",
+   "zone": "제방·수변",
+   "family": "E 원거리",
+   "drop_bearing": true,
+   "bands": [
+    "base",
+    "E"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "wave": "B",
+   "ladder": null,
+   "concealment": null,
+   "edge_owner": null,
+   "note": null,
+   "a_frames": 48,
+   "keep_dressing_port": false,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_A"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_B"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_C"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_D"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneE2_farrim_walk",
+   "origin": "new",
+   "role": "val",
+   "zone": "보도",
+   "family": "E 원거리",
+   "drop_bearing": true,
+   "bands": [
+    "base",
+    "E"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "wave": "C",
+   "ladder": null,
+   "concealment": null,
+   "edge_owner": null,
+   "note": null,
+   "a_frames": 48,
+   "keep_dressing_port": false,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_A"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_B"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_C"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_D"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneN6_planter_rail",
+   "origin": "new",
+   "role": "train",
+   "zone": "캠퍼스",
+   "family": "N-cue ★1",
+   "drop_bearing": true,
+   "bands": [
+    "base",
+    "base2"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "wave": "B",
+   "ladder": "L1 화단 난간",
+   "concealment": null,
+   "edge_owner": null,
+   "note": null,
+   "a_frames": 48,
+   "keep_dressing_port": false,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_A"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_B"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_C"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_D"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneN7_bollard_row",
+   "origin": "new",
+   "role": "train",
+   "zone": "보도",
+   "family": "N-cue ★1",
+   "drop_bearing": false,
+   "bands": [
+    "base",
+    "base2"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "wave": "C",
+   "ladder": "L2 볼라드 열",
+   "concealment": null,
+   "edge_owner": null,
+   "note": null,
+   "a_frames": 0,
+   "keep_dressing_port": false,
+   "b_lever_clean": true,
+   "arms": {
+    "C": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_C"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_D"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneN8_curbramp_tactile",
+   "origin": "new",
+   "role": "train",
+   "zone": "보도",
+   "family": "N-cue ★3",
+   "drop_bearing": true,
+   "bands": [
+    "base",
+    "base2"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "wave": "B",
+   "ladder": "L5 턱낮춤+점형블록",
+   "concealment": null,
+   "edge_owner": null,
+   "note": null,
+   "a_frames": 48,
+   "keep_dressing_port": false,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_A"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "B": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_B"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": false
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_C"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_D"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneN10_level_handrail",
+   "origin": "new",
+   "role": "val",
+   "zone": "캠퍼스",
+   "family": "N-cue ★3",
+   "drop_bearing": false,
+   "bands": [
+    "base",
+    "base2"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "wave": "C",
+   "ladder": "L7 평지 복도 손잡이",
+   "concealment": null,
+   "edge_owner": null,
+   "note": null,
+   "a_frames": 0,
+   "keep_dressing_port": false,
+   "b_lever_clean": true,
+   "arms": {
+    "C": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_C"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     }
+    },
+    "D": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260828_v3w2_new_D"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": false
+     }
+    }
+   }
+  },
+  {
+   "scene": "sceneC2r_leaf_redesign",
+   "origin": "new",
+   "role": "diag",
+   "zone": "캠퍼스",
+   "family": "sceneC2 재설계",
+   "drop_bearing": false,
+   "bands": [
+    "base",
+    "POSE"
+   ],
+   "conds": [
+    "L0",
+    "L5",
+    "L7"
+   ],
+   "cams": 8,
+   "wave": "C",
+   "ladder": null,
+   "concealment": null,
+   "edge_owner": null,
+   "note": "경사 통계 정규화 + 포즈 다양화. 진단·대조 전용, 훈련 미편입",
+   "a_frames": 48,
+   "keep_dressing_port": false,
+   "b_lever_clean": true,
+   "arms": {
+    "A": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260831_v3w4_diag_A"
+     ],
+     "recipe": {
+      "hazard": true,
+      "cue": true
+     }
+    },
+    "C": {
+     "source": "new",
+     "new_cuts": 48,
+     "frames": 48,
+     "rounds": [
+      "260831_v3w4_diag_C"
+     ],
+     "recipe": {
+      "hazard": false,
+      "cue": true
+     }
+    }
+   }
+  }
+ ],
+ "cuts_by_wave_arm": {
+  "w0_cls": 312,
+  "w1_A": 0,
+  "w1_B": 792,
+  "w1_C": 816,
+  "w1_D": 816,
+  "w2_A": 360,
+  "w2_B": 360,
+  "w2_C": 456,
+  "w2_D": 456,
+  "w3_A": 432,
+  "w3_B": 432,
+  "w3_C": 432,
+  "w3_D": 432,
+  "w4_A": 48,
+  "w4_C": 48
+ },
+ "totals": {
+  "new_cuts": 6192,
+  "reused_frames": 1008,
+  "training_frames": 5064,
+  "arms": {
+   "A": 1176,
+   "B": 1152,
+   "C": 1368,
+   "D": 1368
+  },
+  "gpu_h_mean": 10.04,
+  "gpu_h_p90": 13.16,
+  "disk_gb": 52.9
+ },
+ "correlation": {
+  "definition": "6-key manipulable cue set {R,Ta,N,T,Sg,V}; frame-level cue = idseg cue-prim pixels >= k (VG-11); frame-level hazard = >=1 positive cell in corrected polar GT",
+  "target": "|r| <= 0.2 (DZ §4.1)",
+  "predicted_recipe_level": 0.0051,
+  "predicted_frame_level": 0.004,
+  "frame_level_cells": {
+   "A": 1056,
+   "B": 1056,
+   "C": 1488,
+   "D": 1464
+  },
+  "rho_new_scene_assumed": 0.1,
+  "marginals": {
+   "hazard_present": 2112,
+   "hazard_absent": 2952,
+   "cue_present": 2544,
+   "cue_absent": 2520,
+   "n": 5064,
+   "p_hazard": 0.4171,
+   "p_cue": 0.5024
+  },
+  "constant_keys": {
+   "E": "edge_line_contrast — 부분(s05 LipCurb·s18 Band_tan)뿐, 사실상 토글 없음",
+   "Sh": "shadow_line — 토글 0/33. v3 `cue_shadow_caster` 신설로 신규 씬만 해소",
+   "F": "far_side_visible_depth — 낙차 기하 자체, 토글 불가",
+   "W": "water_surface — s09 `build_river`는 항상 ON(수평 폐합용)",
+   "Sp": "specular_change — C4 `wet_surface`는 조건 토글이지 단서 토글이 아님"
+  },
+  "per_key_r_if_B_removes_T_only": {
+   "R": {
+    "a": 1608,
+    "b": 0,
+    "c": 912,
+    "d": 912,
+    "n": 3432,
+    "r": 0.5648
+   },
+   "Ta": {
+    "a": 960,
+    "b": 0,
+    "c": 576,
+    "d": 576,
+    "n": 2112,
+    "r": 0.559
+   },
+   "N": {
+    "a": 1008,
+    "b": 0,
+    "c": 600,
+    "d": 600,
+    "n": 2208,
+    "r": 0.5599
+   },
+   "T": {
+    "a": 1176,
+    "b": 1152,
+    "c": 1368,
+    "d": 1368,
+    "n": 5064,
+    "r": 0.0051
+   },
+   "Sg": {
+    "a": 1152,
+    "b": 0,
+    "c": 672,
+    "d": 672,
+    "n": 2496,
+    "r": 0.562
+   },
+   "V": {
+    "a": 2328,
+    "b": 0,
+    "c": 1368,
+    "d": 1368,
+    "n": 5064,
+    "r": 0.5612
+   }
+  },
+  "per_key_r_if_B_maximal_removal": {
+   "R": {
+    "a": 888,
+    "b": 720,
+    "c": 912,
+    "d": 912,
+    "n": 3432,
+    "r": 0.0522
+   },
+   "Ta": {
+    "a": 480,
+    "b": 480,
+    "c": 576,
+    "d": 576,
+    "n": 2112,
+    "r": 0.0
+   },
+   "N": {
+    "a": 504,
+    "b": 504,
+    "c": 600,
+    "d": 600,
+    "n": 2208,
+    "r": 0.0
+   },
+   "T": {
+    "a": 1176,
+    "b": 1152,
+    "c": 1368,
+    "d": 1368,
+    "n": 5064,
+    "r": 0.0051
+   },
+   "Sg": {
+    "a": 576,
+    "b": 576,
+    "c": 672,
+    "d": 672,
+    "n": 2496,
+    "r": 0.0
+   },
+   "V": {
+    "a": 1176,
+    "b": 1152,
+    "c": 1368,
+    "d": 1368,
+    "n": 5064,
+    "r": 0.0051
+   }
+  },
+  "protocol": "ACCOUNTING §4.9-3: 주변분포 병기 + 토글가능 키 한정 + 키별 r; 상수 5키 별도 표기",
+  "sensitivity_to_cue_visibility_asymmetry": [
+   {
+    "delta": 0.0,
+    "r": 0.0031
+   },
+   {
+    "delta": 0.05,
+    "r": 0.0227
+   },
+   {
+    "delta": 0.1,
+    "r": 0.049
+   },
+   {
+    "delta": 0.2,
+    "r": 0.1035
+   },
+   {
+    "delta": 0.3,
+    "r": 0.1612
+   },
+   {
+    "delta": 0.35,
+    "r": 0.1917
+   },
+   {
+    "delta": 0.4,
+    "r": 0.2234
+   }
+  ],
+  "arm_x_scene_origin": 0.0033,
+  "arm_x_scene_origin_if_D58Q1_read_literally": 1.0
+ },
+ "gate_prefix_map": {
+  "source": "ACCOUNTING §4.3-4 (D57 (4)) promised this table; RT-B flagged it missing. Collisions: G2/G4/G5 mean DIFFERENT things in the two families. No retroactive renaming — new documents use the prefixed ids and cite old ones as '(구 G2=LG2)'.",
+  "LG": [
+   [
+    "LG1",
+    "required fields",
+    "gates.py:279-291"
+   ],
+   [
+    "LG2",
+    "toggle sanity — off-arm zero + on-arm coverage",
+    "gates.py:295-327"
+   ],
+   [
+    "LG3",
+    "strict-H distribution",
+    "gates.py:446-453"
+   ],
+   [
+    "LG4",
+    "audit overlays",
+    "gates.py:515,607"
+   ],
+   [
+    "LG5",
+    "V-tier depth/GT agreement — REFERENCE only since D19(5)",
+    "gates.py:462-483"
+   ]
+  ],
+  "CG": [
+   [
+    "CG0",
+    "격리 사본 무해성",
+    "PREREG_CUEOFF.md:224"
+   ],
+   [
+    "CG1",
+    "1프레임 실렌더 스모크",
+    ":225"
+   ],
+   [
+    "CG2",
+    "위험 기하 불변",
+    ":226"
+   ],
+   [
+    "CG3",
+    "포즈 동일성 (5키, <1e-6)",
+    ":227"
+   ],
+   [
+    "CG4",
+    "티어 재도출",
+    ":228"
+   ],
+   [
+    "CG5",
+    "C팔 GT 전영",
+    ":229"
+   ],
+   [
+    "CG6",
+    "평가는 추론만",
+    ":230"
+   ],
+   [
+    "CG7",
+    "발자국 건전성 (신설)",
+    ":401"
+   ]
+  ],
+  "collisions": [
+   [
+    "G2",
+    "LG2 toggle sanity",
+    "CG2 위험 기하 불변"
+   ],
+   [
+    "G4",
+    "LG4 audit overlays",
+    "CG4 티어 재도출"
+   ],
+   [
+    "G5",
+    "LG5 V-tier (참고)",
+    "CG5 C팔 GT 전영"
+   ]
+  ]
+ },
+ "val_strict_h": {
+  "requirement": "DZ §4.3-3 val strict-H >= 30 (현 val = 6, s20 교정 GT)",
+  "constraint": "test-ext 프레임은 val에 쓸 수 없다 (DZ §12-9 무대 순도)",
+  "yield_model": {
+   "H_band": 0.6,
+   "base_band": 0.2,
+   "basis": "s14 실적 60/72 = 0.83 (base+H+E 혼합) 대비 보수적"
+  },
+  "suppliers": [
+   {
+    "scene": "sceneH6_berm_levee2",
+    "split": "val",
+    "family": "둔덕형",
+    "bands": [
+     "base",
+     "H",
+     "H2"
+    ],
+    "a_cuts": 72,
+    "expected_strict_H": 33.6
+   },
+   {
+    "scene": "sceneH7_bend_walk2",
+    "split": "val",
+    "family": "복도 굴절형",
+    "bands": [
+     "base",
+     "H"
+    ],
+    "a_cuts": 48,
+    "expected_strict_H": 19.2
+   },
+   {
+    "scene": "scene20",
+    "split": "val",
+    "family": "(기존)",
+    "bands": [
+     "base",
+     "E",
+     "E2"
+    ],
+    "a_cuts": 72,
+    "expected_strict_H": 6
+   }
+  ],
+  "expected_total": 58.8,
+  "margin": "수율이 가정의 60%(H 0.36 / base 0.12)로 떨어져도 >= 30 유지",
+  "topup_rule": "미달 시 sceneH6/H7에 H 밴드 1개(24컷/팔) 추가, 씬당 2회 상한"
+ },
+ "labeling": {
+  "gt_void": {
+   "defect": "RT-A LAB-19 (ACCOUNTING §4.8-2): 미측정(void) 높이맵 칸이 GT 음성으로 인쇄된다. on팔 42.4% 프레임이 그리드 내 void 보유",
+   "requirement": "v3 라벨러는 `gt_void` 마스크 채널을 별도 기록한다 (void != negative)",
+   "denominator_rule": "평가 분모는 v2와 동일 유지(§2-4) — void를 분모에서 빼지 않는다. 대신 (a) 모든 표에 void 비율 병기 (b) FA_D/FA_C 분모에서는 grid 내 void>0 프레임을 'void 버킷'으로 격리 (VG-06 경계 버킷과 같은 취급)",
+   "scene_design_rule": "신규 씬은 낙차 발자국 전역에 실제 바닥 프림을 두어 heightmap 커버리지 1.0을 만든다 (개방 바닥 금지)",
+   "gate": "VG-void"
+  },
+  "pre_post_gate": {
+   "defect": "D57 (2): none_in_fov를 게이트 후 GT로 판정 (labeler.py:526)",
+   "requirement": "pre-gate/post-gate 사유를 별도 필드로 분리 기록",
+   "gate": "VG-14"
+  }
+ },
+ "smoke": {
+  "round": "260823_v3p5_segsmoke_A",
+  "scene": "scene01",
+  "annotator": "instance_id_segmentation",
+  "result": "PASS",
+  "idseg_fetch": "t0",
+  "n_ids_visible": 100,
+  "idToLabels": 491,
+  "npz_bytes": 48438,
+  "shape": [
+   1080,
+   1920
+  ],
+  "dtype": "uint16"
+ }
+}

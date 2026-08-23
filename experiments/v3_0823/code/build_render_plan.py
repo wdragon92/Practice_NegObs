@@ -82,6 +82,42 @@ ADJUDICATED_DECOR = {
     "scene12": ["cue_railing", "cue_scene_dressing"],
     "scene17": ["cue_scene_dressing", "cue_material_break"],
 }
+# CUE_COVERAGE.md §2.1 master table — keys that are default-True AND wired, i.e.
+# the only ones a B arm can actually REMOVE. Everything else ("off" = default
+# False, "사문" = declared but never read) is a CONSTANT KEY for that scene.
+# Order: R railing · Ta tactile · N nosing · T material_break · Sg sign · V dressing
+KEYS = ("R", "Ta", "N", "T", "Sg", "V")
+ONWIRED = {
+    "scene01": {"R", "T", "Sg", "V"},   "scene02": {"R", "N", "T", "Sg", "V"},
+    "scene03": {"T", "V"},              "scene04": {"T", "V"},
+    "scene06": {"R", "T", "V"},         "scene08": {"R", "T", "Sg", "V"},
+    "scene09": {"T", "Sg", "V"},        "scene10": {"R", "T", "V"},
+    "scene12": {"R", "T", "V"},         "scene16": {"R", "N", "T", "Sg", "V"},
+    "scene17": {"T", "V"},              "scene20": {"R", "T", "V"},
+    "scene21": {"R", "N", "T", "Sg", "V"},
+    "sceneC1": {"R", "Ta", "N", "T", "V"}, "sceneC4": {"R", "Ta", "T", "V"},
+    "sceneD1": {"N", "T", "V"},         "sceneD2": {"T", "V"},
+    "sceneD3": {"T", "V"},              "sceneN1": {"T", "V"},
+    "sceneN2": {"T", "V"},              "sceneN4": {"T", "V"},
+    "sceneN5": {"T", "V"},
+}
+# 13키 중 어떤 씬에서도 토글이 없는 5키 — CUE_COVERAGE §2.3. |r| 보고에서
+# "상수 키"로 별도 표기한다 (ACCOUNTING §4.9-3 ③).
+CONSTANT_KEYS = {
+    "E": "edge_line_contrast — 부분(s05 LipCurb·s18 Band_tan)뿐, 사실상 토글 없음",
+    "Sh": "shadow_line — 토글 0/33. v3 `cue_shadow_caster` 신설로 신규 씬만 해소",
+    "F": "far_side_visible_depth — 낙차 기하 자체, 토글 불가",
+    "W": "water_surface — s09 `build_river`는 항상 ON(수평 폐합용)",
+    "Sp": "specular_change — C4 `wet_surface`는 조건 토글이지 단서 토글이 아님",
+}
+
+
+def onwired(scene):
+    """removable keys for a scene. New scenes carry all 6 by the 표준 장비 rule
+    (CUE_COVERAGE §4-4 (1): 16키 전부 선언 + 전부 읽는 코드, 사문 0)."""
+    return ONWIRED.get(scene, set(KEYS))
+
+
 ZONE = {  # 생활권 유형 — OVERNIGHT_BRIEF_0819_v3.md:110
     "scene01": "캠퍼스", "scene02": "보도", "scene03": "제방·수변",
     "scene04": "제방·수변", "scene06": "보도", "scene08": "보도",
@@ -162,6 +198,10 @@ NEW = [
          family="paired-H 둔덕형", bands=["base", "H", "H2"], arms=4, wave="A",
          conceal="제방 둔덕", ladder=None, edge_owner="둔덕 마루",
          note="val strict-H ≥ 30 공급원 (DZ §4.3-3 선택지표 수리의 전제)"),
+    dict(key="sceneH7_bend_walk2", role="val", zone="보도",
+         family="paired-H 복도 굴절형", bands=["base", "H"], arms=4, wave="A",
+         conceal="옹벽 굴절 모서리", ladder=None, edge_owner="굴절 옹벽 모서리",
+         note="val strict-H 2차 공급원 — 계열 다양화(H6=둔덕형과 다른 가족)"),
     dict(key="sceneE1_farrim_levee", role="train", zone="제방·수변",
          family="E 원거리", bands=["base", "E"], arms=4, wave="B",
          conceal=None, ladder=None, edge_owner=None),
@@ -245,11 +285,29 @@ def main():
                          rounds=on_rounds,
                          recipe={"hazard": True, "cue": True})
         if b_ok:
+            # B LEVER = MAXIMAL REMOVAL, not material_break alone.
+            # ACCOUNTING §4.9-3 requires per-key r. A B arm that removes only T
+            # makes every OTHER key a de-facto constant (present in A and C, and
+            # in B too) => per-key r for R/Ta/N/Sg/V stays high however good the
+            # arm-level phi looks. So B removes every ON-wired key that VG-CLS
+            # clears as decorative; material_break is the guaranteed floor
+            # (prim set invariant => heightmap bit-identity by construction) and
+            # each further key is admitted only after VG-CLS/VG-01 clears it.
             lev = ["cue_material_break"]
-            lev += [c for c in ADJUDICATED_DECOR.get(s, [])
-                    if c != "cue_material_break"]
+            lev += sorted(set(ADJUDICATED_DECOR.get(s, []))
+                          - {"cue_material_break"})
+            pend = sorted({"R": "cue_railing", "Ta": "cue_tactile",
+                           "N": "cue_nosing", "Sg": "cue_sign",
+                           "V": "cue_scene_dressing"}[k]
+                          for k in onwired(s) if k != "T")
+            pend = [c for c in pend if c not in lev]
+            if s == "scene20":
+                pend = [c for c in pend if c != "cue_railing"]  # 구조물 실측
             arms["B"] = dict(source="new", new_cuts=n, frames=n,
-                             rounds=["260826_v3w1_lib_B"], lever=lev,
+                             rounds=["260826_v3w1_lib_B"],
+                             lever_floor=lev, lever_pending_vgcls=pend,
+                             forbidden=(["cue_railing"] if s == "scene20"
+                                        else []),
                              recipe={"hazard": True, "cue": False})
         arms["C"] = dict(source="new", new_cuts=n, frames=n,
                          rounds=["260826_v3w1_lib_C"],
@@ -315,6 +373,11 @@ def main():
         ("scene06", "cue_material_break"), ("sceneN1", "cue_material_break"),
         ("sceneN2", "cue_material_break"), ("sceneN5", "cue_material_break"),
     ]
+    # low-priority queue promoted INTO W0: the maximal-removal B lever needs
+    # `cue_scene_dressing` cleared per scene, and the same probe doubles as the
+    # VG-datum pre-check (dressing removal is exactly what moved ground_z in v2).
+    CLS_PAIRS += [(s, "cue_scene_dressing") for s in train_lib
+                  if s not in ("scene12", "scene17", "scene20")]
     cls_cuts = len(CLS_PAIRS) * 2 * 4
     cuts["w0_cls"] = cls_cuts
 
@@ -373,6 +436,50 @@ def main():
         d2 = fD + fC * (1 - MU + dlt)
         sens.append(dict(delta=dlt, r=round(abs(phi(a2, b2, c2, d2)), 4)))
 
+    # --- PER-KEY r (ACCOUNTING §4.9-3). Arm-level phi is ~0 BY CONSTRUCTION and
+    # cannot see degeneracy: if the B arm removes only T, then R/Ta/N/Sg/V are
+    # present in A, B AND C and absent only in D, which is a strong positive
+    # cue-hazard correlation that arm-level phi hides completely. Computed for
+    # two lever policies so the design choice is visible, not asserted.
+    def per_key(policy):
+        out = {}
+        for k in KEYS:
+            t = collections.Counter()
+            for s in tr:
+                ow = onwired(s["scene"])
+                if k not in ow:
+                    continue                       # constant-in-scene: no signal
+                for arm, v in s["arms"].items():
+                    f = v["frames"]
+                    haz = arm in ("A", "B")
+                    if arm == "D":
+                        x = 0
+                    elif arm == "B":
+                        if policy == "T_only":
+                            x = 0 if k == "T" else 1
+                        else:                       # maximal removal
+                            x = 0 if not (s["scene"] == "scene20"
+                                          and k == "R") else 1
+                    else:
+                        x = 1
+                    t[(haz, x)] += f
+            a, b = t[(True, 1)], t[(True, 0)]
+            c, d = t[(False, 1)], t[(False, 0)]
+            out[k] = dict(a=a, b=b, c=c, d=d, n=a + b + c + d,
+                          r=round(abs(phi(a, b, c, d)), 4))
+        return out
+
+    per_key_T_only = per_key("T_only")
+    per_key_max = per_key("maximal")
+
+    # marginals (protocol item 1) — printed WITH r, never r alone
+    marg = dict(
+        hazard_present=round(fA + fB), hazard_absent=round(fC + fD),
+        cue_present=round(fA + fC), cue_absent=round(fB + fD),
+        n=round(fA + fB + fC + fD),
+        p_hazard=round((fA + fB) / (fA + fB + fC + fD), 4),
+        p_cue=round((fA + fC) / (fA + fB + fC + fD), 4))
+
     # arm x scene-origin correlation (D58 (2) 부칙: new confound watch)
     ex = [s for s in tr if s["origin"] == "existing"]
     nw = [s for s in tr if s["origin"] == "new"]
@@ -425,10 +532,73 @@ def main():
             frame_level_cells=dict(A=round(fA), B=round(fB),
                                    C=round(fC), D=round(fD)),
             rho_new_scene_assumed=0.10,
+            marginals=marg,
+            constant_keys=CONSTANT_KEYS,
+            per_key_r_if_B_removes_T_only=per_key_T_only,
+            per_key_r_if_B_maximal_removal=per_key_max,
+            protocol="ACCOUNTING §4.9-3: 주변분포 병기 + 토글가능 키 한정 + 키별 r; "
+                     "상수 5키 별도 표기",
             sensitivity_to_cue_visibility_asymmetry=sens,
             arm_x_scene_origin=round(abs(r_origin), 4),
             arm_x_scene_origin_if_D58Q1_read_literally=round(
                 abs(r_origin_literal), 4)),
+        gate_prefix_map=dict(
+            source="ACCOUNTING §4.3-4 (D57 (4)) promised this table; RT-B flagged "
+                   "it missing. Collisions: G2/G4/G5 mean DIFFERENT things in the "
+                   "two families. No retroactive renaming — new documents use the "
+                   "prefixed ids and cite old ones as '(구 G2=LG2)'.",
+            LG=[("LG1", "required fields", "gates.py:279-291"),
+                ("LG2", "toggle sanity — off-arm zero + on-arm coverage",
+                 "gates.py:295-327"),
+                ("LG3", "strict-H distribution", "gates.py:446-453"),
+                ("LG4", "audit overlays", "gates.py:515,607"),
+                ("LG5", "V-tier depth/GT agreement — REFERENCE only since D19(5)",
+                 "gates.py:462-483")],
+            CG=[("CG0", "격리 사본 무해성", "PREREG_CUEOFF.md:224"),
+                ("CG1", "1프레임 실렌더 스모크", ":225"),
+                ("CG2", "위험 기하 불변", ":226"),
+                ("CG3", "포즈 동일성 (5키, <1e-6)", ":227"),
+                ("CG4", "티어 재도출", ":228"),
+                ("CG5", "C팔 GT 전영", ":229"),
+                ("CG6", "평가는 추론만", ":230"),
+                ("CG7", "발자국 건전성 (신설)", ":401")],
+            collisions=[("G2", "LG2 toggle sanity", "CG2 위험 기하 불변"),
+                        ("G4", "LG4 audit overlays", "CG4 티어 재도출"),
+                        ("G5", "LG5 V-tier (참고)", "CG5 C팔 GT 전영")]),
+        val_strict_h=dict(
+            requirement="DZ §4.3-3 val strict-H >= 30 (현 val = 6, s20 교정 GT)",
+            constraint="test-ext 프레임은 val에 쓸 수 없다 (DZ §12-9 무대 순도)",
+            yield_model=dict(H_band=0.60, base_band=0.20,
+                             basis="s14 실적 60/72 = 0.83 (base+H+E 혼합) 대비 보수적"),
+            suppliers=[
+                dict(scene="sceneH6_berm_levee2", split="val", family="둔덕형",
+                     bands=["base", "H", "H2"], a_cuts=72,
+                     expected_strict_H=round(24 * .20 + 24 * .60 + 24 * .60, 1)),
+                dict(scene="sceneH7_bend_walk2", split="val", family="복도 굴절형",
+                     bands=["base", "H"], a_cuts=48,
+                     expected_strict_H=round(24 * .20 + 24 * .60, 1)),
+                dict(scene="scene20", split="val", family="(기존)",
+                     bands=["base", "E", "E2"], a_cuts=72, expected_strict_H=6)],
+            expected_total=round(24 * .20 + 48 * .60 + 24 * .20 + 24 * .60 + 6, 1),
+            margin="수율이 가정의 60%(H 0.36 / base 0.12)로 떨어져도 >= 30 유지",
+            topup_rule="미달 시 sceneH6/H7에 H 밴드 1개(24컷/팔) 추가, 씬당 2회 상한"),
+        labeling=dict(
+            gt_void=dict(
+                defect="RT-A LAB-19 (ACCOUNTING §4.8-2): 미측정(void) 높이맵 칸이 "
+                       "GT 음성으로 인쇄된다. on팔 42.4% 프레임이 그리드 내 void 보유",
+                requirement="v3 라벨러는 `gt_void` 마스크 채널을 별도 기록한다 "
+                            "(void != negative)",
+                denominator_rule="평가 분모는 v2와 동일 유지(§2-4) — void를 분모에서 "
+                                 "빼지 않는다. 대신 (a) 모든 표에 void 비율 병기 "
+                                 "(b) FA_D/FA_C 분모에서는 grid 내 void>0 프레임을 "
+                                 "'void 버킷'으로 격리 (VG-06 경계 버킷과 같은 취급)",
+                scene_design_rule="신규 씬은 낙차 발자국 전역에 실제 바닥 프림을 두어 "
+                                  "heightmap 커버리지 1.0을 만든다 (개방 바닥 금지)",
+                gate="VG-void"),
+            pre_post_gate=dict(
+                defect="D57 (2): none_in_fov를 게이트 후 GT로 판정 (labeler.py:526)",
+                requirement="pre-gate/post-gate 사유를 별도 필드로 분리 기록",
+                gate="VG-14")),
         smoke=dict(round="260823_v3p5_segsmoke_A", scene="scene01",
                    annotator="instance_id_segmentation", result="PASS",
                    idseg_fetch="t0", n_ids_visible=100, idToLabels=491,
@@ -466,6 +636,15 @@ def main():
     for row in sens:
         print(f"   delta {row['delta']:.2f} -> |r| {row['r']:.4f}"
               + ("   <-- target 0.2 breached" if row["r"] > 0.2 else ""))
+    print(f"\nmarginals: {marg}")
+    print("\nper-key |r| (togglable keys only; constant keys listed separately)")
+    print(f"   {'key':4s} {'B=T only':>10s} {'B=maximal':>10s}   a/b/c/d (maximal)")
+    for k in KEYS:
+        t, m = per_key_T_only[k], per_key_max[k]
+        flag = "  <-- degenerate" if t["r"] > 0.2 else ""
+        print(f"   {k:4s} {t['r']:10.4f} {m['r']:10.4f}   "
+              f"{m['a']}/{m['b']}/{m['c']}/{m['d']}{flag}")
+    print(f"   constant keys (no toggle anywhere): {', '.join(CONSTANT_KEYS)}")
     print(f"\narm x scene-origin |r|            = {abs(r_origin):.4f}")
     print(f"same, if D58 Q1 read literally    = {abs(r_origin_literal):.4f}"
           f"   (B/D from new scenes ONLY)")

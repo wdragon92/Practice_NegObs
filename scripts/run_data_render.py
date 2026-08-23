@@ -385,6 +385,10 @@ def scene_proc(scene_file, scene_key, out_dir, conds, n_cam, base_seed):
         sidecars = _sidecars_on()
         depth_ann, depth_rp = (_depth_attach(CAM, sim_app) if sidecars
                                else (None, None))
+        # Opt-in ID-mask sidecar (v3 P-5). Rides the render product the depth
+        # annotator already made — a second render product would double the
+        # post-render cost for no gain. `None` unless NEGOBS_SEG_SIDECAR=1.
+        seg_ann = _seg_attach(depth_rp, sim_app) if sidecars else None
 
         set_render_mode_fn("PathTracing")
         st = carb.settings.get_settings()
@@ -485,6 +489,15 @@ def scene_proc(scene_file, scene_key, out_dir, conds, n_cam, base_seed):
                     else:
                         print(f"[sidecar] {fname}: no depth ({depth_how})",
                               flush=True)
+                seg_name, seg_how, seg_n = None, None, None
+                if seg_ann is not None and ok:
+                    sarr, smap, seg_how = _seg_fetch(seg_ann, sim_app,
+                                                     sc.PT_FAST["subframes"])
+                    if sarr is not None:
+                        seg_name, seg_n = _seg_write(sarr, smap, fp)
+                    else:
+                        print(f"[sidecar] {fname}: no idseg ({seg_how})",
+                              flush=True)
                 # flat_near is a JUDGE filter: on the data channel it would throw
                 # away the hardest 2 % of near-range samples for a reason imported
                 # from a render-failure detector (SP-3 §4.3 rider 2).
@@ -518,6 +531,10 @@ def scene_proc(scene_file, scene_key, out_dir, conds, n_cam, base_seed):
                 if depth_name:
                     cuts[fname]["depth"] = depth_name
                     cuts[fname]["depth_fetch"] = depth_how
+                if seg_name:
+                    cuts[fname]["idseg"] = seg_name
+                    cuts[fname]["idseg_fetch"] = seg_how
+                    cuts[fname]["idseg_n_ids"] = seg_n
                 if (i + 1) % 8 == 0 or i + 1 == n_cam:
                     _write_scene_json(rec_path, scene_key, base_seed, gy,
                                       cond_ids, cuts, t_run,
@@ -527,6 +544,8 @@ def scene_proc(scene_file, scene_key, out_dir, conds, n_cam, base_seed):
         ctl.apply_cond("L0")
         _write_scene_json(rec_path, scene_key, base_seed, gy, cond_ids, cuts,
                           t_run, hold.get("light0"))
+        if seg_ann is not None:
+            _seg_detach(seg_ann, sim_app)
         if depth_ann is not None:
             _depth_detach(depth_ann, depth_rp, sim_app)
             # Hard exit, sidecar arm ONLY. Measured on the 08-19 probe: with a
@@ -834,6 +853,138 @@ def _depth_write(a, fp_png):
         a16 = a.astype(np.float16)
     np.save(out, a16)
     return os.path.basename(out)
+
+
+# ===========================================================================
+# opt-in ID-mask sidecar — NEGOBS_SEG_SIDECAR=1  (v3 P-5, DZ §12-5 + D58 (1)(b))
+# ===========================================================================
+# NOTHING in this section runs unless NEGOBS_SEG_SIDECAR == "1" AND the depth
+# sidecar already built a render product. With the variable unset `_seg_attach`
+# returns None on its first statement and every branch guarded by it is dead —
+# same discipline as the depth section above.
+#
+# WHY instance_id AND NOT semantic_segmentation. `semantic_segmentation` and
+# `instance_segmentation` return "only semantically labelled entities"
+# (omni.replicator.core 1.11.35 annotators_default.py:1110, :1200), and this
+# repo's 46 scene files author ZERO `Semantics` prims — so both would come back
+# all-background until a scene-wide tagging pass exists.
+# `instance_id_segmentation` needs no semantics at all: it returns the RENDERER
+# instance id per pixel plus `idToLabels = {id: prim_path}`. Prim paths are
+# exactly what CUE_COVERAGE.md §2.2 already enumerated per (scene, cue_*)
+# toggle — `{ROOT}/Rail/Post_{i}`, `{ROOT}/Nosing`, `{ROOT}/StairWall_{tag}/*` —
+# so a prim-path prefix match turns this mask into (a) the cue mask that §12-5's
+# threshold k counts and (b) the occluder-vs-drop-rim ownership map that D58's
+# edge-ownership gate needs. No new authoring in 46 scene files.
+SEG_ENV = "NEGOBS_SEG_SIDECAR"
+SEG_ANNOTATOR = "instance_id_segmentation"
+
+
+def _seg_on():
+    return os.environ.get(SEG_ENV) == "1"
+
+
+def _seg_attach(rp, sim_app):
+    """Attach the id-mask annotator to the depth sidecar's OWN render product.
+
+    Returns the annotator, or None (the round then simply has no id masks — an
+    absent annotator must never abort a render night, same rule as depth).
+    """
+    if not _seg_on():
+        return None
+    if rp is None:
+        print(f"[sidecar] {SEG_ENV}=1 but there is no render product "
+              f"(NEGOBS_DATA_SIDECARS off, or the depth attach failed) — "
+              f"id masks skipped", flush=True)
+        return None
+    try:
+        import omni.replicator.core as rep
+        ann = rep.AnnotatorRegistry.get_annotator(SEG_ANNOTATOR)
+        ann.attach(rp)
+        for _ in range(10):
+            sim_app.update()
+        print(f"[sidecar] idseg {SEG_ANNOTATOR} attached (shares the depth "
+              f"render product)", flush=True)
+        return ann
+    except Exception as e:
+        print(f"[sidecar] idseg annotator UNAVAILABLE — "
+              f"{type(e).__name__}: {str(e)[:200]}", flush=True)
+        return None
+
+
+def _seg_detach(ann, sim_app):
+    """Detach BEFORE `_depth_detach` destroys the shared render product."""
+    try:
+        ann.detach()
+    except Exception as e:
+        print(f"[sidecar] idseg detach failed: {type(e).__name__}: "
+              f"{str(e)[:120]}", flush=True)
+    for _ in range(3):
+        sim_app.update()
+    print("[sidecar] idseg annotator torn down", flush=True)
+
+
+def _seg_fetch(ann, sim_app, subframes):
+    """(array|None, idToLabels|None, how). Same escalation ladder as
+    `_depth_fetch`, and called at the same point — after `cap()` returned — so
+    the mask belongs to the frame that was written.
+
+    `get_data()` on this annotator returns either a bare array or
+    `{"data": ndarray, "info": {"idToLabels": {...}}}` depending on the node
+    build; both shapes are accepted rather than assumed.
+    """
+    import numpy as np
+    plan = (("t0", 0), ("t1", 1), ("t4", 4), ("orch", -1))
+    for how, ticks in plan:
+        if ticks > 0:
+            for _ in range(ticks):
+                sim_app.update()
+        elif ticks < 0:
+            try:
+                import omni.replicator.core as rep
+                rep.orchestrator.step(rt_subframes=int(subframes))
+            except Exception as e:
+                print(f"[sidecar] idseg orchestrator.step failed: {e}",
+                      flush=True)
+                return None, None, "fail"
+        try:
+            raw = ann.get_data()
+        except Exception as e:
+            print(f"[sidecar] idseg get_data failed: {e}", flush=True)
+            return None, None, "fail"
+        info = None
+        if isinstance(raw, dict):
+            info = raw.get("info") or {}
+            raw = raw.get("data")
+        a = np.asarray(raw)
+        if a.ndim == 3:
+            a = a[..., 0]
+        if a.shape == (vk.RES_H, vk.RES_W) and int(a.max()) > 0:
+            id2l = None
+            if isinstance(info, dict):
+                id2l = info.get("idToLabels") or info.get("idToPrims")
+            return a, id2l, how
+    return None, None, "empty"
+
+
+def _seg_write(a, id2l, fp_png):
+    """(`<png stem>.idseg.npz` basename, n_ids). uint16 where it fits, else
+    uint32, compressed — an id map is huge flat regions and deflates ~40x.
+
+    `.npz` and not `.png` deliberately: `check_data_run.py:256-261` fails a
+    round on any orphan PNG, exactly as the depth sidecar's own note says.
+    The id->prim_path table rides INSIDE the npz as a json string, so a mask can
+    never get separated from the table that decodes it.
+    """
+    import numpy as np
+    out = os.path.splitext(fp_png)[0] + ".idseg.npz"
+    a = np.asarray(a)
+    ids = np.unique(a)
+    a = a.astype(np.uint16 if int(ids.max()) < 65535 else np.uint32)
+    np.savez_compressed(
+        out, idseg=a,
+        idToLabels=np.array(json.dumps(id2l or {}, ensure_ascii=False)),
+        annotator=np.array(SEG_ANNOTATOR))
+    return os.path.basename(out), int(ids.size)
 
 
 def _aabb_grid(pre, xs, ys, top=60.0):

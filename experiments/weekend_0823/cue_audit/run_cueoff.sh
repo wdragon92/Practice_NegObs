@@ -91,6 +91,14 @@ scene_file() {
 BAND_E='{"d_min":6,"d_max":12,"h_min":1.2,"h_max":1.9}'
 BAND_H='{"d_min":6,"d_max":12,"h_min":0.25,"h_max":1.0}'
 BAND_E2='{"d_min":4,"d_max":9,"h_min":0.3,"h_max":0.9}'
+# --- A2 / D49 repair band for scene20 -----------------------------------------
+# PREREG sec.4.5-3 voids scene20 at paired-H 6 < 10.  The pre-registration itself
+# names the remedy (sec.7 risk 2 -> R4 F14 -> D49 (a)): keep every arm, keep the
+# seed, and re-sample the CAMERA so the same scene yields more strict-H poses.
+# Lower and nearer eyes graze the mesa lip more often, which is the mechanism
+# that makes a frame strict-H in this corpus (H_CUE_AUDIT sec.2.2).
+# Nothing about the hypotheses, the arms or the thresholds moves.
+BAND_S20FIX='{"d_min":4,"d_max":8,"h_min":0.25,"h_max":0.6}'
 
 # --- the render matrix ------------------------------------------------------
 # stage | round stem | scene | band json | seed | arms
@@ -103,6 +111,7 @@ MATRIX="
 1|260823_cueoff|scene20|BAND_E2|20260821|A,B2,B1,P,C
 2|260823_cueoff2|scene12|BAND_E2|20260821|A,B2,B1,P,C
 3|260823_cueoff3|scene17|NONE|20260819|A,B1,P,C
+4|260823_cueoff_s20fix|scene20|BAND_S20FIX|20260821|A,B2,B1,P,C
 "
 
 STAGES="1 2"
@@ -114,6 +123,7 @@ SMOKE=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --stages)  STAGES="$(echo "$2" | tr ',' ' ')"; shift 2 ;;
+    --cams)    CAMS="$2"; shift 2 ;;
     --scenes)  SCENES_OVERRIDE="$2"; shift 2 ;;
     --arms)    ARMS_OVERRIDE="$2"; shift 2 ;;
     --dry-run) DRY=1; shift ;;
@@ -127,10 +137,12 @@ guard_run_name() {
   case "$1" in
     260823_cueoff_A|260823_cueoff_B1|260823_cueoff_B2|260823_cueoff_P|260823_cueoff_C|\
     260823_cueoff2_A|260823_cueoff2_B1|260823_cueoff2_B2|260823_cueoff2_P|260823_cueoff2_C|\
-    260823_cueoff3_A|260823_cueoff3_B1|260823_cueoff3_B2|260823_cueoff3_P|260823_cueoff3_C)
+    260823_cueoff3_A|260823_cueoff3_B1|260823_cueoff3_B2|260823_cueoff3_P|260823_cueoff3_C|\
+    260823_cueoff_s20fix_A|260823_cueoff_s20fix_B1|260823_cueoff_s20fix_B2|\
+    260823_cueoff_s20fix_P|260823_cueoff_s20fix_C)
       return 0 ;;
     *) echo "[fatal] refusing run stamp '$1' — this script only ever writes" >&2
-       echo "        dataset/260823_cueoff{,2,3}_{A,B1,B2,P,C}." >&2
+       echo "        dataset/260823_cueoff{,2,3,_s20fix}_{A,B1,B2,P,C}." >&2
        exit 4 ;;
   esac
 }
@@ -150,6 +162,7 @@ band_json() {
     BAND_E)  echo "$BAND_E" ;;
     BAND_H)  echo "$BAND_H" ;;
     BAND_E2) echo "$BAND_E2" ;;
+    BAND_S20FIX) echo "$BAND_S20FIX" ;;
     NONE)    echo "" ;;
     *) echo "[fatal] unknown band '$1'" >&2; exit 2 ;;
   esac

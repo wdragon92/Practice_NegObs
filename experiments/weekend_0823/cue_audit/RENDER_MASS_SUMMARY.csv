@@ -52,3 +52,15 @@ scene12,260823_cueoff2,A_vs_C,H_A,24,129876.6,89558.7,6.2633,4.319
 scene12,260823_cueoff2,A_vs_C,paired,0,0,0,0.0,0.0
 scene12,260823_cueoff2,A_vs_LINEAGE_ON,all,24,146.5,0.2,0.0071,0.0
 scene12,260823_cueoff2,A_vs_LINEAGE_ON,H_A,24,146.5,0.2,0.0071,0.0
+scene20,260823_cueoff_s20fix,A_vs_B1,all,48,926940.7,725253.2,44.702,34.9756
+scene20,260823_cueoff_s20fix,A_vs_B1,H_A,27,994320.7,733419.2,47.9514,35.3694
+scene20,260823_cueoff_s20fix,A_vs_B1,paired,27,994320.7,733419.2,47.9514,35.3694
+scene20,260823_cueoff_s20fix,A_vs_B2,all,48,174310.1,142378.4,8.4062,6.8662
+scene20,260823_cueoff_s20fix,A_vs_B2,H_A,27,190748.4,155775.1,9.1989,7.5123
+scene20,260823_cueoff_s20fix,A_vs_B2,paired,27,190748.4,155775.1,9.1989,7.5123
+scene20,260823_cueoff_s20fix,A_vs_P,all,48,211263.5,174093.9,10.1882,8.3957
+scene20,260823_cueoff_s20fix,A_vs_P,H_A,27,207531.0,173378.6,10.0082,8.3612
+scene20,260823_cueoff_s20fix,A_vs_P,paired,27,207531.0,173378.6,10.0082,8.3612
+scene20,260823_cueoff_s20fix,A_vs_C,all,48,297637.4,245082.4,14.3537,11.8192
+scene20,260823_cueoff_s20fix,A_vs_C,H_A,27,300260.9,245532.0,14.4802,11.8409
+scene20,260823_cueoff_s20fix,A_vs_C,paired,0,0,0,0.0,0.0

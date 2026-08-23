@@ -402,3 +402,352 @@ scene20은 원문대로 플라시보 보정 제외(발자국 60 659셀은 건전
 팔별·씬별 `cells_raw` · `max_diff` · `hm_source`를 표로 뽑고,
 `cells_raw < 1000`이면 그 씬-라벨세트에 **DEGENERATE 딱지**를 붙여 보고서 상단에 인쇄한다.
 숨기지 않는 것이 목적이고, 자동 중단은 하지 않는다(퇴화 자체가 결과이므로).
+
+---
+
+# AMENDMENT A2 — 2026-08-23T07:42+09:00 (POST-HOC — the results had already been read)
+
+**Legality, stated first and without softening.** A1 was legal because it was written
+before a single cut had rendered. **A2 is not.** It is written after
+`CUEOFF_RESULT.md` was produced, after D46 read it, and after red-team waves R4 and
+R5 attacked it. Anything in A2 that changed a number could have been chosen to
+change that number, and the reader is entitled to assume it was until shown
+otherwise. Three things limit the damage, and they are checkable:
+
+1. **No hypothesis, arm, threshold, metric or primary-leg lock moves.** τ_op stays
+   0.5, the seeds stay {42,43,44}, the checkpoints stay frozen (G6 re-verified),
+   `Δ_cue ≥ 0.15 − Δ_placebo` and `Δ_cue < 0.10` stay, `n ≥ 10` stays, and
+   §8-3's "do not swap B1↔B2 after seeing the result" is obeyed: scene12 and
+   scene20 keep **B2** as primary, scene17 keeps **B1**.
+2. **Every A2 clause fixes something a gate or a definition got wrong, not
+   something a result got wrong.** Each is listed below with the defect it
+   repairs and the direction it pushes the census.
+3. **The direction is against us.** Under A2 the primary census goes from
+   *0 CUE EVIDENCE / 5 SHORTCUT / 7 UNDECIDED* to
+   *0 CUE EVIDENCE / 2 SHORTCUT / 6 NO-EFFECT / 4 UNDECIDED / 12 VOID*. A2 deletes
+   claims; the one clause that could add a claim (A2-6) is the one flagged hardest.
+
+## A2-1 `same_sign((0,0,0))` — zero is not a direction
+
+`readout_cueoff.py` v1 L182-186 returned **True** for `all(x == 0)`, so a cell where
+the metric never moved was counted as "3/3 seeds agree on a sign" and fell into the
+SHORTCUT branch. All five v1 SHORTCUT verdicts in the primary lineage leg were
+exactly `(+0.000, +0.000, +0.000)`. That operational definition is nowhere in this
+pre-registration.
+
+The same predicate was **also wrong in the opposite direction**, which matters for
+judging whether A2-1 was chosen for its effect: `all(x > 0)` is False when one seed
+is exactly 0, so `(0.000, +0.083, 0.000)` was rejected as "seeds disagree" even
+though no seed disagrees with anything. The corrected definition removes six
+verdicts and adds two. It was not tuned.
+
+A2 defines:
+
+- **SAME-SIGN** — at least one non-zero Δ, and all non-zero Δ share a sign. The
+  count of non-zero seeds is printed in the label (`SAME-SIGN 1/3nz`), because
+  `(+0.667, 0, 0)` and `(+1.000, +0.667, +0.667)` are both same-sign under the
+  pre-registered rule and only the second is three seeds agreeing.
+- **NO-EFFECT** — every Δ is exactly 0. Its own verdict label, never SHORTCUT.
+
+Every NO-EFFECT verdict prints the one-sided 95 % upper bound on the per-frame flip
+rate given 0 flips in *n* paired frames, `p95 = 1 − 0.05^(1/n)`:
+n = 24 → **0.117**, n = 12 → 0.221, n = 6 → 0.393. **Seeds do not enlarge n** — the
+three seeds read the same frames, so pooling them would manufacture sample size.
+At n = 24 the bound (0.117) does **not** resolve this document's own SHORTCUT
+threshold (0.10); resolving 0.10 with zero flips needs n ≥ 29. §4.3's declared
+minimum detectable effect was therefore optimistic, and every NO-EFFECT cell says so
+on its face.
+
+## A2-2 `paired-H < 10` voids the VERDICT, not only the table row
+
+v1 stamped `VOID` on the table row and printed a verdict block underneath it anyway
+(R5 D-1: 12 verdict blocks on scene20, four of them positive SHORTCUT calls, from a
+scene §4.5-3 had already disqualified). A2 moves the gate inside `verdict()`.
+
+## A2-3 the hazard-off FALSE-ALARM FLOOR is published beside arm C
+
+Every `per_frame.csv` already carried the lineage hazard-off round as its
+`toggle_state == "off"` rows. v1's reader dropped them at the door, so arm C's FA was
+printed as an absolute number with no baseline. A2 prints the floor, the FA and the
+difference. It cuts both ways and both are reported: scene12 gains a far stronger
+contrast (rgb **.028 → 1.000**, b2 **.000 → 1.000**), and scene17 loses its claim
+outright (**.014 → .042**, i.e. nothing). In the `twin` label set the off rows *are*
+arm C, so the floor is constitutively equal to the FA and is suppressed rather than
+printed as if it meant something.
+
+## A2-4 `PRIMARY` is keyed by (scene, round stem)
+
+v1 keyed on scene alone, so `260823_cueoff` (band `boost_e`) and `260823_cueoff2`
+(band `boost_e2`) — different rounds, different camera bands, different masses —
+received the same hard-coded caption constants (R5 D-5).
+
+## A2-5 admissibility is graded on RENDERED pixel mass, not on AABB silhouettes
+
+§3 graded the placebo with `pixel_mass.py`, which projects a world AABB and reports
+the clipped hull area. That is an upper bound on a *silhouette*; it cannot see the
+shadow, ambient occlusion, GI bounce or shading a removed object was producing —
+which `rt_response/F7_HPAIR_PIXDIFF.md` had already shown dominates in this corpus.
+**All four grades in §3 are wrong, three of them anti-conservatively.** They are
+retracted here and replaced by `RENDER_MASS_SUMMARY.csv` (per-frame `max` channel
+absolute difference on the judged frames, thresholds ≥8/255 and ≥32/255, the F7
+canon). §3's text is left in place; this table overrides it.
+
+| leg | §3 claimed | rendered ≥32/255 | ratio P/cue | A2 grade |
+|---|---|---|---|---|
+| s12 `boost_e` P vs B2 | placebo 12–30× larger → conservative | 64,012 / 110,667 | **0.578** | ANTI-CONSERVATIVE |
+| s12 `boost_e` P vs B1 | placebo ~3.2× smaller → anti-conservative | 64,012 / 721,912 | **0.089** | SEVERELY ANTI-CONSERVATIVE |
+| s12 `boost_e2` P vs B2 | (inherited boost_e's constants) | 51,242 / 127,832 | **0.401** | ANTI-CONSERVATIVE |
+| s12 `boost_e2` P vs B1 | (inherited boost_e's constants) | 51,242 / 794,278 | **0.065** | SEVERELY ANTI-CONSERVATIVE |
+| s17 P vs B1 | placebo ~18× larger → strongly conservative | 342,269 / 616,554 | **0.555** | ANTI-CONSERVATIVE |
+| s20 P vs B2 | "no admissible placebo" | 157,834 / 173,690 | **0.909** | **MATCHED** |
+| s20 P vs B1 | "no admissible placebo" | 157,834 / 671,123 | **0.235** | SEVERELY ANTI-CONSERVATIVE |
+
+Grade ladder (fixed here, applied uniformly): ratio ≥ 1.25 CONSERVATIVE ·
+≥ 0.80 MATCHED · ≥ 0.25 ANTI-CONSERVATIVE · < 0.25 SEVERELY ANTI-CONSERVATIVE.
+**No leg in this study is conservative.** The G0 noise floor these ratios sit on is
+8 / 272 / 1 px ≥32/255 (s12 / s17 / s20), i.e. every mass above is 10³–10⁵× the
+floor and is real signal.
+
+## A2-6 scene20's placebo is restored — with the conflict of interest declared
+
+§3.3 excluded scene20's placebo from the primary rule. Its stated ground was that
+every piece of scene20 mesa furniture measures **0 px in 6/6 strict-H frames**.
+
+**That measurement is correct and A2 does not overturn it.** Verified corner by
+corner on the two judged eyes (x = −5.104 and x = −6.716, looking down +X): planters
+x = −12.3/−7.0, benches x = −12.9/−9.65/−5.4, streetlights x = −12.6/−7.0/−9.5,
+bollards x = −13.6, hedges x = −14.0 … −9.0. Every one is behind the camera or
+outside the 62° forward FOV. There is no projection bug in that row of the table.
+
+**The error is in the inference, not the measurement.** The arm that was actually
+rendered does not remove furniture. `scenes_cueoff/scene20_diagonal_oblique.py:1046`
+under `placebo_remove` removes **backdrop blocks E1 and E2** — a group §3.3's own
+table measures at 240 k px = 11.6 % of frame. §3.3 measured a non-removable set,
+found it empty, and concluded the arm was impossible, while the code removed a
+different, large, in-frame set. On the six judged frames the rendered arm P differs
+from arm A by **157,834 px ≥32/255 = 7.61 %**, which is **0.909×** arm B2's rendered
+mass: the best-matched cue/placebo pair in this study, on both thresholds.
+
+**The conflict of interest, stated plainly.** We already know what restoring this
+placebo does: it converts scene20's b2 leg into the only CUE EVIDENCE candidate the
+primary rule has ever produced (Δ_cue − Δ_placebo = +0.667). A restoration decided
+after seeing that is not a pre-registration. Three constraints are therefore
+attached, and they are binding:
+
+- **(a) The leg is not promoted by A2 alone.** At paired-H = 6 the scene stays VOID
+  under §4.5-3, which A2-2 now enforces on the verdict itself. A2-6 changes no
+  verdict in the existing rounds.
+- **(b) The only route to a verdict is a repair round**, `260823_cueoff_s20fix`
+  (§A2-10), whose decision rule is this document's §4.3 unchanged.
+- **(c) §3.3's original objection survives and is restated as a limitation**: the E
+  blocks stand on the valley floor with their feet cut by the mesa lip, which is the
+  same *form* the cue matrix reads as `geometry_silhouette`. A 0.909× mass match does
+  not make an object semantically inert. Any CUE EVIDENCE from this leg must be
+  reported with that sentence attached.
+
+## A2-7 byte-identical label-set blocks are folded
+
+scene17 and scene20 tier and score identically in both label sets, so their `twin`
+blocks were byte-for-byte copies of their `lineage` blocks (R5 D-5: 124 duplicated
+lines). Presented as eight scene×label-set blocks they read as eight replications;
+they are four. A2 folds them with the reason printed, and the census reports both
+the folded and unfolded counts.
+
+## A2-8 G2 is adjudicated at three scopes, and only one of them can void a pair
+
+`GATES_CUEOFF.md` logged **FAIL 8**, all of them `heightmap.npy differs`, and D44
+examined one case (s12 P-vs-A, 42 cells) and let the other seven inherit its
+verdict. A2 forbids inheritance. The scopes are:
+
+1. **heightmap sha256** — global, geometry-only, what the 8 FAILs actually measured.
+2. **`polar_gt` over all on-frames** — scene scope.
+3. **`polar_gt` over the PAIRED-H frames** — the judged population.
+
+**Only scope 3 can void a pair**, because §4.2 judges on paired-H frames and on
+nothing else, and §4.5-2's criterion is `polar_gt` byte identity, not heightmap
+identity. Scope 1 and 2 differences are reported as declared limitations on any
+*scene-level* claim. Per-case results are in `G2_ADJUDICATION.csv`.
+
+A separate defect is recorded here because it changes what R4 F5 concluded:
+`gates_cueoff.py::load_labels` looked for `labels/<stem>_<arm>.json`, a filename the
+labeller has never written (it writes `<set>__<stem>_<arm>__<scene>.json`). G2's
+`polar_gt` clause, **G4 and G5 were therefore never evaluated at all**, and would
+not have been however many times the battery was re-run. R4 read the 27-minute gap
+between the gate run and the label files as the cause; the cause is a path, and the
+gap is incidental. Fixed; G4/G5 now run.
+
+## A2-9 G4 reports EVERY tier migration, not only H→E
+
+§4.2 obliged reporting `H→E` migrations. The re-run finds **zero H→E anywhere** —
+and finds migrations in the other direction that §4.2 never asked about and that
+matter more:
+
+- `scene20 A→B1` and `A→B2`: **`none_in_fov → H` on 3 frames** (cut 0005, all three
+  light conditions). Removing the cheek wall re-exposes ground that the labeller's
+  twin difference then scores as drop footprint, enlarging `cells_raw` from
+  **60,659 to 61,961** and turning 3 GT-empty frames into strict-H frames. This is
+  the real content of R4's "different scoresheets" finding.
+- `twin / scene12 / boost_e2, A→B1`: **`V → H` on 18 frames.** The intervention
+  changes the *tier* of the frame, not only the score on it.
+
+A2 obliges reporting all of them. The pre-registered judged population is unaffected
+in every case (see A2-8 scope 3), but a claim about a scene's H census is not.
+
+## A2-10 the repair round `260823_cueoff_s20fix` — declared before it rendered
+
+At the moment of writing, `dataset/260823_cueoff_s20fix_*` contains **0 PNG files**
+(checked: `find dataset/260823_cueoff_s20fix_* -name '*.png' | wc -l` → 0, 07:41:57).
+The render was queued behind the GPU lock at 07:40:30 and the following is fixed
+before any cut of it exists.
+
+- **Scene, arms, seed, toggles, models, checkpoints, τ_op: identical to §2.** Same
+  five arms, same `render_configs/scene20_*.json`, same seed 20260821, same frozen
+  checkpoints, retraining 0.
+- **The only change is the camera band**, from `boost_e2`
+  `{"d_min":4,"d_max":9,"h_min":0.3,"h_max":0.9}` to
+  `{"d_min":4,"d_max":8,"h_min":0.25,"h_max":0.6}`, with `--cams 16` instead of 8.
+  Lower, nearer eyes graze the mesa lip more often, and grazing concealment is the
+  mechanism that makes a frame strict-H in this corpus (`H_CUE_AUDIT.md` §2.2). The
+  purpose is to raise paired-H past §4.5-3's n ≥ 10, and nothing else.
+- **Consequence accepted:** arm A of this round is no longer a bit-for-bit re-render
+  of the shipped corpus, so **gate G0 does not apply to it**. G0 remains verified on
+  the original rounds. G1–G7 all apply unchanged.
+- **Decision rule: §4.3 verbatim**, with primary `Δ_cue = Δ(A, B2)`, placebo
+  correction admissible per A2-6, A2-1/A2-2 counting.
+- **Pre-committed outcomes, all four written now:**
+  - paired-H ≥ 10 **and** (Δ_cue − Δ_placebo) ≥ 0.15 with same-sign non-zero Δ →
+    **CUE EVIDENCE**, reported as the study's first primary-rule positive, carrying
+    A2-6(c)'s limitation sentence and a "post-hoc restored placebo" flag.
+  - paired-H ≥ 10 and the corrected difference lands in [0.10, 0.15) → **UNDECIDED**.
+    It will not be rounded up, and the b2 leg will not be swapped for the rgb leg.
+  - paired-H ≥ 10 and Δ_cue < 0.10 with same-sign non-zero Δ → **SHORTCUT**.
+  - **paired-H still < 10 → VOID, and scene20 is abandoned as a judged scene.** We
+    will not re-roll the camera band a third time looking for a tenth frame. One
+    repair attempt, declared here, is the whole allowance.
+- **Reporting duty regardless of outcome:** the new paired-H count, the H yield of
+  the new band versus the old, and the rendered placebo/cue mass ratio recomputed on
+  the new frames, are published whether they help or not.
+
+## A2-12 appending A2 broke `G_PREREG`, and this is how that was handled
+
+Until this amendment existed, `PREREG_CUEOFF.md`'s **mtime** was the registration
+time, and `gates_cueoff.py::g_prereg` compared every rendered PNG against it — a
+clean mechanical proof that no artifact predated the registration. Appending A2
+moved that mtime to 07:43, **later than the 05:01 renders of the original rounds**,
+so the naive comparison would now fail on artifacts that are in fact in perfect
+order.
+
+The tempting fix is `touch -d '2026-08-23 04:09:35'`. **That was not done**, and it
+is recorded here that it was considered and rejected: rewriting a provenance
+timestamp to the value that makes the gate pass is the one operation a provenance
+gate must never perform, and nobody reading the file afterwards could tell it had
+happened.
+
+What was done instead:
+
+1. `g_prereg` now reads the timestamps the **document declares** — the original
+   `2026-08-23T03:55:45+09:00` and this amendment's `2026-08-23T07:42+09:00` — and
+   checks each round against the registration that covers it. Result: **504 rendered
+   frames, all postdating their registration** (456 vs the original, 48 vs A2).
+2. It prints a standing note that the **mtime form of the proof is no longer
+   available** for the pre-A2 rounds, and points at the independent corroboration on
+   record: red-team R4 verified the 03:55-prereg / 05:01-render ordering *before* A2
+   existed, from a file it did not write.
+3. `PREREG_HASHES.json` now freezes this document's sha256 the way `CKPT_HASHES.json`
+   freezes the checkpoints. It was recorded **after** A2 and therefore certifies the
+   file only from this moment on — it is not retroactive evidence and is not offered
+   as any.
+
+A2-12 is a weakening of the apparatus, not a repair of one, and it is listed with
+the others so that the ledger is complete.
+
+**A second custody failure in the same session, recorded for the same reason.** At
+~07:33 a diagnostic re-run of the patched gate battery was launched without `--out`.
+`gates_cueoff.py`'s default output path was `GATES_CUEOFF.md`, so **the original
+05:24:12 gate record was overwritten in place.** There was no backup and this
+repository is not under version control. The file has been reconstructed from a read
+taken earlier in the same session and is labelled **RECONSTRUCTED, NOT THE ORIGINAL
+BYTES**, with the corroborating quotations in `redteam/R4_cueoff.md` §F5 named on its
+face; the accidental output is kept outside the audit directory rather than deleted.
+The script's default output has been moved to `GATES_CUEOFF_v2.md` and it now refuses
+`--out GATES_CUEOFF.md` outright. A tool must not be able to destroy the record it
+supersedes by being run with no arguments, and the fact that this one could is a
+finding about the apparatus, not a footnote about a typo.
+
+## A2-11 what A2 does NOT repair
+
+- The degenerate scene12 footprint (A1.1) is untouched — fixing it would relabel the
+  world the frozen models learned. G7 now separates it from the constitutive zeros of
+  arm C and prints a banner.
+- Arm C's three different surgeries (§6) remain three different surgeries. A2 adds
+  the measurements (`A vs C` = 6.64 % / 4.32 % / 13.55 % / 11.19 % of frame at
+  ≥32/255 for s12·e / s12·e2 / s17 / s20) so the reader can see that arm C's
+  false-alarm rate tracks the optical size of its surgery.
+- **Two of the three scenes are training scenes** (scene12 train, scene17 train,
+  scene20 val; zero test scenes). No amendment can repair that, and A2 requires the
+  sentence to appear in the results document.
+
+---
+
+# AMENDMENT A2-13 — 2026-08-23T08:30+09:00 · the repair round hits §4.5-2, ruled before inference
+
+**State of the evidence at the moment of writing, so the reader can check what was and
+was not known.** `260823_cueoff_s20fix` has finished rendering arms A, B1, B2, P
+(arm C is still queued behind the GPU lock). The `lineage` labels for A/B1/B2/P exist.
+**No model has been run on this round: `find eval -path '*s20fix*' -name per_frame.csv`
+returns 0 at 08:29:15.** So at the time this ruling is fixed we know the ground truth
+and the tier census exactly, and we know **no recall number whatsoever**.
+
+## What the labels say
+
+| pair | paired-H | tier migrations | `polar_gt` differs on judged frames | footprint `cells_raw` |
+|---|---|---|---|---|
+| A vs **B1** | **27** | `V→H_weak` 6 | **6 / 27** | 60,659 → **61,961** |
+| A vs **B2** | **27** | none | **6 / 27** | 60,659 → **61,961** |
+| A vs **P** | **27** | none | **0 / 27** | 60,659 → 60,659 |
+
+The camera repair worked exactly as A2-10 intended: strict-H yield rose from 6/24
+(25 %) to **27/48 (56 %)**, and paired-H = 27 clears §4.5-3's n ≥ 10 with room to
+spare. **But a second voiding condition has appeared that A2-10 did not anticipate.**
+On six of the twenty-seven judged frames, arms B1 and B2 carry **one extra positive
+far-band cell** (3 → 4; `C3b` on cut 0005, `D3b` on cut 0014, in all three light
+conditions). That is §4.5-2's exact criterion — `polar_gt` byte identity — failing on
+the **judged** population, which A2-8 named as the only scope that can void a pair.
+
+## The ruling
+
+1. **PRIMARY: `Δ(A, B2)` and `Δ(A, B1)` in `260823_cueoff_s20fix` are VOID under
+   §4.5-2.** The scene is not judged on its primary leg. This is the literal reading of
+   the pre-registration, it is the reading A2-8 fixed before this round existed, and it
+   is applied here even though it costs the study its only cue-evidence candidate.
+2. **SECONDARY, pre-specified: re-score both arms on ARM A's GT cells.** This was
+   written into `CUEOFF_RESULT_v2.md` §2.2 at ~07:55, before these labels existed, as
+   the remedy to apply "had they differed". Scoring both arms on one scoresheet is
+   precisely §4.5-2's stated *purpose*, so the number is meaningful — but the rule as
+   written voids, and a purpose-based reading substituted for a text-based one after
+   the fact is how pre-registrations die. It is therefore reported as **SECONDARY /
+   EXPLORATORY and never promoted to a primary CUE EVIDENCE verdict, whatever it
+   shows.**
+3. **SENSITIVITY: the same re-scored on the INTERSECTION GT** (cells positive in both
+   arms). Published beside the secondary reading.
+4. **`Δ(A, P)` is unaffected** — GT byte-identical on all 27 judged frames — so the
+   placebo term is computed normally and the placebo/cue mass ratio is re-measured on
+   the new frames.
+5. **A2-10's one-repair allowance is spent.** We do not re-roll the camera band again,
+   and we do not go looking for a scene20 camera band whose B arms happen not to move
+   the footprint.
+
+## What this actually shows, and it is not a nuisance
+
+`cue_railing` in scene20 removes a **cheek wall**: a solid structure standing on the
+hazard, whose removal re-exposes ground that the labeller's twin difference
+`z_off − z_arm ≥ 0.30` then counts as part of the drop. The footprint grows by 1,302
+cells and one far-band polar cell lights up. **The guard is not a separable appearance
+cue in this scene; it is load-bearing for the hazard's own definition.**
+
+The pre-registration assumed `cue_railing` was an appearance-only toggle. **For
+scene20 that assumption is false**, it was false in the original round (§A2-8 cases
+7–8) and it is false in the repair round, and it is false for a geometric reason that
+no camera band can fix. That is a finding about the intervention design — the
+strongest kind, because it says which questions this apparatus cannot ask — and it
+should be reported as one rather than buried as a gate failure.

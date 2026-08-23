@@ -1,4 +1,42 @@
-# CUEOFF_RESULT — CUE-OFF intervention read-out
+# CUEOFF_RESULT — CUE-OFF intervention read-out  ·  **v1, SUPERSEDED**
+
+> # ⚠ SUPERSEDED BY `CUEOFF_RESULT_v2.md` (2026-08-23, PREREG amendment A2)
+>
+> **This file is preserved unedited as the record of what was reported at 06:03 on
+> 2026-08-23 and what decision D46 was taken on. Do not cite a number from it.**
+> Red-team waves R4 and R5 and decision D49 found the following defects in the
+> instrument that produced it. None of them is an arithmetic error — R5 re-computed
+> 15 spot values and a wide sweep and everything matched to four decimals — all of
+> them are counting and reporting defects:
+>
+> 1. **Five SHORTCUT verdicts here are `(0.000, 0.000, 0.000)`** and reached that
+>    label only because `same_sign((0,0,0))` returned `True`. In v2 they are
+>    NO-EFFECT, printed with the power bound that shows this sample cannot resolve
+>    its own 0.10 threshold (p95 = 0.117 at n = 24).
+> 2. **Twelve verdict blocks were issued for scene20**, whose paired-H = 6 < 10 had
+>    already voided it under PREREG §4.5-3. The table rows said VOID; the verdicts
+>    underneath them did not. In v2 the gate is inside the verdict.
+> 3. **The placebo admissibility grades quoted here come from AABB silhouette upper
+>    bounds and all four are wrong**, three anti-conservatively. Measured on the
+>    renders, no leg in this study is conservative. See A2-5.
+> 4. **scene20's placebo was excluded on a true measurement of the wrong objects.**
+>    The rendered arm P removes backdrop blocks E1/E2, not the mesa furniture §3.3
+>    measured at 0 px. See A2-6.
+> 5. **The hazard-off false-alarm floor was never printed**, so arm C's FA appears
+>    here as an absolute number. With the floor, scene12 reads .028 → 1.000 and
+>    scene17 reads .014 → .042. See A2-3.
+> 6. **G2 was reported as 8 failures and adjudicated from one case** (D44). All
+>    eight are adjudicated individually in v2.
+> 7. **G4, G5 and G2's `polar_gt` clause had never executed** — `load_labels` was
+>    looking for a filename the labeller does not write — so every
+>    `tier migration | none` printed below is an unverified default.
+> 8. **Half of this file is duplicated or empty**: scene17/scene20 `twin` blocks are
+>    byte-identical copies of their `lineage` blocks, and both scene12 `twin` blocks
+>    are all-`nan`.
+>
+> The re-adjudication of every scene under A2 is `CUEOFF_RESULT_v2.md`; the machine
+> tables are `READOUT_V2.md`; the amendment is `PREREG_CUEOFF.md` § AMENDMENT A2.
+
 
 Pre-registration: `PREREG_CUEOFF.md` (+ amendment A1). Every threshold below was fixed before the first cut was rendered; this file only substitutes numbers into it.
 

@@ -84,6 +84,7 @@ off_round() {
     260823_cueoff)  echo "$REPO/dataset/260820_boost_e_off" ;;   # s12 band e
     260823_cueoff2) echo "$REPO/dataset/260820_boost_e2_off" ;;  # s12 band e2, s20
     260823_cueoff3) echo "$REPO/dataset/260819_main_off" ;;
+    260823_cueoff_s20fix) echo "$REPO/dataset/260820_boost_e2_off" ;;  # A2/D49 s20 repair
     *) echo "" ;;
   esac
 }
@@ -95,6 +96,7 @@ scenes_of_stem() {
     260823_cueoff)  echo "scene12 scene17 scene20" ;;
     260823_cueoff2) echo "scene12" ;;
     260823_cueoff3) echo "scene17" ;;
+    260823_cueoff_s20fix) echo "scene20" ;;
   esac
 }
 
@@ -206,7 +208,10 @@ if case " $PHASES " in *" 3 "*) true ;; *) false ;; esac; then
   bash -c "$PRE
 python3 '$AUDIT/readout_cueoff.py' --eval-root '$OUTDIR' \
         --sets '$(echo $SETS | tr ' ' ',')' \
-        --out '$AUDIT/CUEOFF_RESULT.md'" 2>&1 | tee -a "$LOG"
+        --out '$AUDIT/READOUT_V2.md'" 2>&1 | tee -a "$LOG"
+  # NEVER write CUEOFF_RESULT.md again: it is the preserved v1 record (A2).
+  # The authored re-adjudication is CUEOFF_RESULT_v2.md; this phase regenerates
+  # only the machine tables.
 fi
 
 say "================================================================"

@@ -33,6 +33,7 @@ import glob
 import hashlib
 import json
 import os
+import re
 import sys
 
 REPO = "/home/vislab/Desktop/work_sy/Practice_NegObs"
@@ -153,28 +154,103 @@ def paired_h_frames(la, lb, scene):
 
 
 # --------------------------------------------------------------------------- gates
+DECLARED_TS = re.compile(r"(20\d\d-\d\d-\d\dT\d\d:\d\d(?::\d\d)?)\+09:00")
+A2_STEMS = ("260823_cueoff_s20fix",)     # rounds registered by AMENDMENT A2
+
+
+def _declared_times():
+    """(t_original, t_a2) as epoch seconds, parsed from the document's own header
+    lines, plus the file mtime.
+
+    Why not just the mtime any more (A2-12).  Until AMENDMENT A2 was appended, the
+    mtime WAS the registration time and this gate was a clean mechanical proof that
+    no artifact predated it.  Appending A2 -- which is legitimately post-hoc, and
+    which had to go next to the document it amends -- moved the mtime to 07:42,
+    later than the 05:01 renders of the original rounds, so the naive comparison
+    would now FAIL on artifacts that are in fact perfectly in order.  Rewriting the
+    mtime back with `touch -d` would make the number say what we want it to say,
+    which is the one thing a provenance gate must never do.  Instead the gate reads
+    the two timestamps the document DECLARES, checks each round against the one
+    that registered it, and states plainly that the mtime form of the proof is no
+    longer available for the pre-A2 rounds.
+    """
+    txt = open(PREREG, encoding="utf-8").read()
+    ts = DECLARED_TS.findall(txt)
+
+    def to_epoch(s):
+        if len(s) == 16:
+            s += ":00"
+        return datetime.datetime.strptime(s, "%Y-%m-%dT%H:%M:%S").timestamp()
+    t0 = to_epoch(ts[0]) if ts else None
+    i_a2 = txt.find("AMENDMENT A2")
+    t_a2 = None
+    if i_a2 >= 0:
+        m = DECLARED_TS.search(txt, i_a2)
+        if m:
+            t_a2 = to_epoch(m.group(1))
+    return t0, t_a2, os.path.getmtime(PREREG)
+
+
 def g_prereg(R):
     print("\n[G_PREREG] pre-registration predates every rendered artifact")
     if not os.path.isfile(PREREG):
         return fail("G_PREREG", f"{PREREG} does not exist")
-    t_pre = os.path.getmtime(PREREG)
-    newest_older = []
-    n = 0
-    for (stem, arm), scenes in R.items():
-        for sc, d in scenes.items():
+    t0, t_a2, t_mtime = _declared_times()
+    if t0 is None:
+        return fail("G_PREREG", "no declared timestamp in PREREG_CUEOFF.md header")
+    if t_a2 is not None:
+        note("G_PREREG A2-12: PREREG_CUEOFF.md carries a POST-HOC amendment (A2, "
+             f"declared {datetime.datetime.fromtimestamp(t_a2):%F %T}), so its mtime "
+             f"({datetime.datetime.fromtimestamp(t_mtime):%F %T}) is later than the "
+             f"pre-A2 renders and is NO LONGER a usable registration time. This gate "
+             f"now compares against the timestamps the document DECLARES, and the "
+             f"mtime-based form of the proof is not available for the pre-A2 rounds. "
+             f"Independent corroboration on record: red-team R4 verified the "
+             f"03:55 prereg / 05:01 render ordering before A2 existed. "
+             f"PREREG_HASHES.json freezes the file from here on.")
+    bad, n, n_a2 = [], 0, 0
+    for (stem, arm), scenes in sorted(R.items()):
+        t_ref = t_a2 if (stem in A2_STEMS and t_a2 is not None) else t0
+        which = "A2" if t_ref is t_a2 and stem in A2_STEMS else "original"
+        for sc, d in sorted(scenes.items()):
             for f in glob.glob(os.path.join(d, "*.png")):
                 n += 1
-                if os.path.getmtime(f) < t_pre:
-                    newest_older.append(os.path.relpath(f, REPO))
+                if which == "A2":
+                    n_a2 += 1
+                if os.path.getmtime(f) < t_ref:
+                    bad.append((os.path.relpath(f, REPO), which))
     if not n:
-        return note("G_PREREG: no rendered PNG yet -- vacuously satisfied so far "
-                    f"(PREREG mtime {datetime.datetime.fromtimestamp(t_pre)})")
-    if newest_older:
+        return note("G_PREREG: no rendered PNG yet -- vacuously satisfied so far")
+    if bad:
         return fail("G_PREREG",
-                    f"{len(newest_older)} artifact(s) PREDATE the prereg -- the "
-                    f"registration is not a registration. e.g. {newest_older[:3]}")
-    ok("G_PREREG", f"{n} rendered frames, all newer than PREREG "
-                   f"({datetime.datetime.fromtimestamp(t_pre):%Y-%m-%d %H:%M:%S})")
+                    f"{len(bad)} artifact(s) PREDATE the registration that covers "
+                    f"them -- the registration is not a registration. "
+                    f"e.g. {bad[:3]}")
+    ok("G_PREREG", f"{n} rendered frames all postdate their registration "
+                   f"({n - n_a2} vs the original "
+                   f"{datetime.datetime.fromtimestamp(t0):%F %T}"
+                   + (f", {n_a2} vs AMENDMENT A2 "
+                      f"{datetime.datetime.fromtimestamp(t_a2):%F %T}"
+                      if t_a2 is not None else "") + ")")
+    # freeze the document from here on, the way G6 freezes the checkpoints
+    p = os.path.join(AUDIT, "PREREG_HASHES.json")
+    cur = dict(sha256=sha256(PREREG), mtime=round(t_mtime, 3),
+               bytes=os.path.getsize(PREREG),
+               declared_original=datetime.datetime.fromtimestamp(t0).isoformat(),
+               declared_a2=(datetime.datetime.fromtimestamp(t_a2).isoformat()
+                            if t_a2 else None))
+    if not os.path.isfile(p):
+        json.dump(dict(recorded=datetime.datetime.now().isoformat(timespec="seconds"),
+                       note="Recorded AFTER amendment A2. It certifies the document "
+                            "from this moment on and says nothing about earlier edits.",
+                       prereg=cur), open(p, "w"), indent=1)
+        note(f"G_PREREG: PREREG sha256 recorded (first run) -> {os.path.basename(p)}")
+    else:
+        old = json.load(open(p))["prereg"]
+        if old["sha256"] != cur["sha256"]:
+            fail("G_PREREG", "PREREG_CUEOFF.md CHANGED since the snapshot in "
+                             "PREREG_HASHES.json -- an amendment that is not "
+                             "declared in the file is not an amendment.")
 
 
 def g0_lineage(R):
@@ -559,9 +635,17 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--stage", choices=["pre", "post", "all"], default="all")
     ap.add_argument("--prefix", default="260823_cueoff")
-    ap.add_argument("--out", default=os.path.join(AUDIT, "GATES_CUEOFF.md"))
+    # A2: the default output is NO LONGER GATES_CUEOFF.md.  That file is the
+    # preserved v1 record, and an `--out`-less run of this script destroyed the
+    # original once already (see its provenance notice).  A tool must not be able
+    # to overwrite the record it is superseding by being run with no arguments.
+    ap.add_argument("--out", default=os.path.join(AUDIT, "GATES_CUEOFF_v2.md"))
     a = ap.parse_args()
 
+    if os.path.basename(a.out) == "GATES_CUEOFF.md":
+        print("[fatal] refusing to write GATES_CUEOFF.md: it is the preserved v1 "
+              "record (see its provenance notice). Use --out GATES_CUEOFF_v2.md.")
+        return 2
     R = round_dirs(a.prefix)
     print(f"=== gates_cueoff · {datetime.datetime.now():%F %T} ===")
     print(f"rounds found: {sorted(k[0] + '_' + k[1] for k in R)}")

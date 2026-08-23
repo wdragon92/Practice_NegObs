@@ -40,6 +40,7 @@ UNITS = [
     ("260823_cueoff",  "scene17", "train", "260820_boost_h_off"),
     ("260823_cueoff",  "scene20", "train", "260820_boost_e2_off"),
     ("260823_cueoff2", "scene12", "test",  "260820_boost_e2_off"),
+    ("260823_cueoff_s20fix", "scene20", "train", "260820_boost_e2_off"),
 ]
 ARMS = ("B1", "B2", "P")
 DROP_TAU = 0.30          # labeler.py footprint threshold

@@ -1,37 +1,46 @@
 label_set,stem,scene,model,leg,pair,n_paired,verdict,folded,d_cue_mean,sign_class,placebo_ratio,placebo_grade
 lineage,260823_cueoff,scene12,rgb,primary,A_vs_B2,24,NO-EFFECT,False,0.0,NO-EFFECT,0.578,ANTI-CONSERVATIVE
 lineage,260823_cueoff,scene12,rgb,primary-twinconditional,A_vs_B2,24,NO-EFFECT,False,0.0,NO-EFFECT,,
-lineage,260823_cueoff,scene12,rgb,secondary,A_vs_B1,24,CUE EVIDENCE,False,0.375,SAME-SIGN,0.089,SEVERELY ANTI-CONSERVATIVE
+lineage,260823_cueoff,scene12,rgb,secondary,A_vs_B1,24,CUE EVIDENCE,False,0.375,SAME-SIGN 3/3nz,0.089,SEVERELY ANTI-CONSERVATIVE
 lineage,260823_cueoff,scene12,depth,primary,A_vs_B2,24,UNDECIDED,False,0.0833,MIXED,0.578,ANTI-CONSERVATIVE
-lineage,260823_cueoff,scene12,depth,primary-twinconditional,A_vs_B2,24,SHORTCUT,False,-0.0417,SAME-SIGN,,
+lineage,260823_cueoff,scene12,depth,primary-twinconditional,A_vs_B2,24,SHORTCUT,False,-0.0417,SAME-SIGN 1/3nz,,
 lineage,260823_cueoff,scene12,depth,secondary,A_vs_B1,24,UNDECIDED,False,0.0417,MIXED,0.089,SEVERELY ANTI-CONSERVATIVE
-lineage,260823_cueoff,scene12,b2,primary,A_vs_B2,24,SHORTCUT,False,0.0278,SAME-SIGN,0.578,ANTI-CONSERVATIVE
+lineage,260823_cueoff,scene12,b2,primary,A_vs_B2,24,SHORTCUT,False,0.0278,SAME-SIGN 1/3nz,0.578,ANTI-CONSERVATIVE
 lineage,260823_cueoff,scene12,b2,primary-twinconditional,A_vs_B2,24,NO-EFFECT,False,0.0,NO-EFFECT,,
-lineage,260823_cueoff,scene12,b2,secondary,A_vs_B1,24,CUE EVIDENCE,False,0.9722,SAME-SIGN,0.089,SEVERELY ANTI-CONSERVATIVE
-lineage,260823_cueoff,scene17,rgb,primary,A_vs_B1,24,UNDECIDED,False,0.1111,SAME-SIGN,0.555,ANTI-CONSERVATIVE
-lineage,260823_cueoff,scene17,rgb,primary-twinconditional,A_vs_B1,24,SHORTCUT,False,0.0833,SAME-SIGN,,
+lineage,260823_cueoff,scene12,b2,secondary,A_vs_B1,24,CUE EVIDENCE,False,0.9722,SAME-SIGN 3/3nz,0.089,SEVERELY ANTI-CONSERVATIVE
+lineage,260823_cueoff,scene17,rgb,primary,A_vs_B1,24,UNDECIDED,False,0.1111,SAME-SIGN 2/3nz,0.555,ANTI-CONSERVATIVE
+lineage,260823_cueoff,scene17,rgb,primary-twinconditional,A_vs_B1,24,SHORTCUT,False,0.0833,SAME-SIGN 1/3nz,,
 lineage,260823_cueoff,scene17,depth,primary,A_vs_B1,24,NO-EFFECT,False,0.0,NO-EFFECT,0.555,ANTI-CONSERVATIVE
 lineage,260823_cueoff,scene17,depth,primary-twinconditional,A_vs_B1,24,NO-EFFECT,False,0.0,NO-EFFECT,,
 lineage,260823_cueoff,scene17,b2,primary,A_vs_B1,24,NO-EFFECT,False,0.0,NO-EFFECT,0.555,ANTI-CONSERVATIVE
 lineage,260823_cueoff,scene17,b2,primary-twinconditional,A_vs_B1,24,NO-EFFECT,False,0.0,NO-EFFECT,,
-lineage,260823_cueoff,scene20,rgb,primary,A_vs_B2,6,VOID,False,0.2222,SAME-SIGN,0.909,MATCHED
-lineage,260823_cueoff,scene20,rgb,primary-twinconditional,A_vs_B2,6,VOID,False,0.2222,SAME-SIGN,,
-lineage,260823_cueoff,scene20,rgb,secondary,A_vs_B1,6,VOID,False,0.9444,SAME-SIGN,0.235,SEVERELY ANTI-CONSERVATIVE
+lineage,260823_cueoff,scene20,rgb,primary,A_vs_B2,6,VOID,False,0.2222,SAME-SIGN 1/3nz,0.909,MATCHED
+lineage,260823_cueoff,scene20,rgb,primary-twinconditional,A_vs_B2,6,VOID,False,0.2222,SAME-SIGN 1/3nz,,
+lineage,260823_cueoff,scene20,rgb,secondary,A_vs_B1,6,VOID,False,0.9444,SAME-SIGN 3/3nz,0.235,SEVERELY ANTI-CONSERVATIVE
 lineage,260823_cueoff,scene20,depth,primary,A_vs_B2,6,VOID,False,0.0,NO-EFFECT,0.909,MATCHED
 lineage,260823_cueoff,scene20,depth,primary-twinconditional,A_vs_B2,6,VOID,False,0.0,NO-EFFECT,,
 lineage,260823_cueoff,scene20,depth,secondary,A_vs_B1,6,VOID,False,0.0,NO-EFFECT,0.235,SEVERELY ANTI-CONSERVATIVE
-lineage,260823_cueoff,scene20,b2,primary,A_vs_B2,6,VOID,False,0.7778,SAME-SIGN,0.909,MATCHED
-lineage,260823_cueoff,scene20,b2,primary-twinconditional,A_vs_B2,6,VOID,False,0.7778,SAME-SIGN,,
-lineage,260823_cueoff,scene20,b2,secondary,A_vs_B1,6,VOID,False,1.0,SAME-SIGN,0.235,SEVERELY ANTI-CONSERVATIVE
+lineage,260823_cueoff,scene20,b2,primary,A_vs_B2,6,VOID,False,0.7778,SAME-SIGN 3/3nz,0.909,MATCHED
+lineage,260823_cueoff,scene20,b2,primary-twinconditional,A_vs_B2,6,VOID,False,0.7778,SAME-SIGN 3/3nz,,
+lineage,260823_cueoff,scene20,b2,secondary,A_vs_B1,6,VOID,False,1.0,SAME-SIGN 3/3nz,0.235,SEVERELY ANTI-CONSERVATIVE
 lineage,260823_cueoff2,scene12,rgb,primary,A_vs_B2,24,NO-EFFECT,False,0.0,NO-EFFECT,0.401,ANTI-CONSERVATIVE
 lineage,260823_cueoff2,scene12,rgb,primary-twinconditional,A_vs_B2,24,NO-EFFECT,False,0.0,NO-EFFECT,,
-lineage,260823_cueoff2,scene12,rgb,secondary,A_vs_B1,24,CUE EVIDENCE,False,0.375,SAME-SIGN,0.065,SEVERELY ANTI-CONSERVATIVE
-lineage,260823_cueoff2,scene12,depth,primary,A_vs_B2,24,SHORTCUT,False,0.0417,SAME-SIGN,0.401,ANTI-CONSERVATIVE
-lineage,260823_cueoff2,scene12,depth,primary-twinconditional,A_vs_B2,24,SHORTCUT,False,0.0417,SAME-SIGN,,
-lineage,260823_cueoff2,scene12,depth,secondary,A_vs_B1,24,SHORTCUT,False,0.0417,SAME-SIGN,0.065,SEVERELY ANTI-CONSERVATIVE
-lineage,260823_cueoff2,scene12,b2,primary,A_vs_B2,24,UNDECIDED,False,0.125,SAME-SIGN,0.401,ANTI-CONSERVATIVE
-lineage,260823_cueoff2,scene12,b2,primary-twinconditional,A_vs_B2,24,SHORTCUT,False,0.0278,SAME-SIGN,,
-lineage,260823_cueoff2,scene12,b2,secondary,A_vs_B1,24,CUE EVIDENCE,False,0.625,SAME-SIGN,0.065,SEVERELY ANTI-CONSERVATIVE
+lineage,260823_cueoff2,scene12,rgb,secondary,A_vs_B1,24,CUE EVIDENCE,False,0.375,SAME-SIGN 2/3nz,0.065,SEVERELY ANTI-CONSERVATIVE
+lineage,260823_cueoff2,scene12,depth,primary,A_vs_B2,24,SHORTCUT,False,0.0417,SAME-SIGN 1/3nz,0.401,ANTI-CONSERVATIVE
+lineage,260823_cueoff2,scene12,depth,primary-twinconditional,A_vs_B2,24,SHORTCUT,False,0.0417,SAME-SIGN 1/3nz,,
+lineage,260823_cueoff2,scene12,depth,secondary,A_vs_B1,24,SHORTCUT,False,0.0417,SAME-SIGN 1/3nz,0.065,SEVERELY ANTI-CONSERVATIVE
+lineage,260823_cueoff2,scene12,b2,primary,A_vs_B2,24,UNDECIDED,False,0.125,SAME-SIGN 3/3nz,0.401,ANTI-CONSERVATIVE
+lineage,260823_cueoff2,scene12,b2,primary-twinconditional,A_vs_B2,24,SHORTCUT,False,0.0278,SAME-SIGN 1/3nz,,
+lineage,260823_cueoff2,scene12,b2,secondary,A_vs_B1,24,CUE EVIDENCE,False,0.625,SAME-SIGN 3/3nz,0.065,SEVERELY ANTI-CONSERVATIVE
+lineage,260823_cueoff_s20fix,scene20,rgb,primary,A_vs_B2,27,VOID,False,0.1728,SAME-SIGN 2/3nz,1.113,MATCHED
+lineage,260823_cueoff_s20fix,scene20,rgb,primary-twinconditional,A_vs_B2,27,VOID,False,0.1728,SAME-SIGN 2/3nz,,
+lineage,260823_cueoff_s20fix,scene20,rgb,secondary,A_vs_B1,27,VOID,False,0.7778,SAME-SIGN 3/3nz,0.236,SEVERELY ANTI-CONSERVATIVE
+lineage,260823_cueoff_s20fix,scene20,depth,primary,A_vs_B2,27,VOID,False,0.0,NO-EFFECT,1.113,MATCHED
+lineage,260823_cueoff_s20fix,scene20,depth,primary-twinconditional,A_vs_B2,27,VOID,False,0.0,NO-EFFECT,,
+lineage,260823_cueoff_s20fix,scene20,depth,secondary,A_vs_B1,27,VOID,False,0.0,NO-EFFECT,0.236,SEVERELY ANTI-CONSERVATIVE
+lineage,260823_cueoff_s20fix,scene20,b2,primary,A_vs_B2,27,VOID,False,0.5926,SAME-SIGN 3/3nz,1.113,MATCHED
+lineage,260823_cueoff_s20fix,scene20,b2,primary-twinconditional,A_vs_B2,27,VOID,False,0.5926,SAME-SIGN 3/3nz,,
+lineage,260823_cueoff_s20fix,scene20,b2,secondary,A_vs_B1,27,VOID,False,0.9259,SAME-SIGN 3/3nz,0.236,SEVERELY ANTI-CONSERVATIVE
 twin,260823_cueoff,scene12,rgb,primary,A_vs_B2,0,VOID,False,nan,EMPTY,0.578,ANTI-CONSERVATIVE
 twin,260823_cueoff,scene12,rgb,primary-twinconditional,A_vs_B2,0,VOID,False,nan,EMPTY,,
 twin,260823_cueoff,scene12,rgb,secondary,A_vs_B1,0,VOID,False,nan,EMPTY,0.089,SEVERELY ANTI-CONSERVATIVE
@@ -41,21 +50,21 @@ twin,260823_cueoff,scene12,depth,secondary,A_vs_B1,0,VOID,False,nan,EMPTY,0.089,
 twin,260823_cueoff,scene12,b2,primary,A_vs_B2,0,VOID,False,nan,EMPTY,0.578,ANTI-CONSERVATIVE
 twin,260823_cueoff,scene12,b2,primary-twinconditional,A_vs_B2,0,VOID,False,nan,EMPTY,,
 twin,260823_cueoff,scene12,b2,secondary,A_vs_B1,0,VOID,False,nan,EMPTY,0.089,SEVERELY ANTI-CONSERVATIVE
-twin,260823_cueoff,scene17,rgb,primary,A_vs_B1,24,UNDECIDED,True,0.1111,SAME-SIGN,0.555,ANTI-CONSERVATIVE
-twin,260823_cueoff,scene17,rgb,primary-twinconditional,A_vs_B1,24,SHORTCUT,True,0.0833,SAME-SIGN,,
+twin,260823_cueoff,scene17,rgb,primary,A_vs_B1,24,UNDECIDED,True,0.1111,SAME-SIGN 2/3nz,0.555,ANTI-CONSERVATIVE
+twin,260823_cueoff,scene17,rgb,primary-twinconditional,A_vs_B1,24,SHORTCUT,True,0.0833,SAME-SIGN 1/3nz,,
 twin,260823_cueoff,scene17,depth,primary,A_vs_B1,24,NO-EFFECT,True,0.0,NO-EFFECT,0.555,ANTI-CONSERVATIVE
 twin,260823_cueoff,scene17,depth,primary-twinconditional,A_vs_B1,24,NO-EFFECT,True,0.0,NO-EFFECT,,
 twin,260823_cueoff,scene17,b2,primary,A_vs_B1,24,NO-EFFECT,True,0.0,NO-EFFECT,0.555,ANTI-CONSERVATIVE
 twin,260823_cueoff,scene17,b2,primary-twinconditional,A_vs_B1,24,NO-EFFECT,True,0.0,NO-EFFECT,,
-twin,260823_cueoff,scene20,rgb,primary,A_vs_B2,6,VOID,True,0.2222,SAME-SIGN,0.909,MATCHED
-twin,260823_cueoff,scene20,rgb,primary-twinconditional,A_vs_B2,6,VOID,True,0.2222,SAME-SIGN,,
-twin,260823_cueoff,scene20,rgb,secondary,A_vs_B1,6,VOID,True,0.9444,SAME-SIGN,0.235,SEVERELY ANTI-CONSERVATIVE
+twin,260823_cueoff,scene20,rgb,primary,A_vs_B2,6,VOID,True,0.2222,SAME-SIGN 1/3nz,0.909,MATCHED
+twin,260823_cueoff,scene20,rgb,primary-twinconditional,A_vs_B2,6,VOID,True,0.2222,SAME-SIGN 1/3nz,,
+twin,260823_cueoff,scene20,rgb,secondary,A_vs_B1,6,VOID,True,0.9444,SAME-SIGN 3/3nz,0.235,SEVERELY ANTI-CONSERVATIVE
 twin,260823_cueoff,scene20,depth,primary,A_vs_B2,6,VOID,True,0.0,NO-EFFECT,0.909,MATCHED
 twin,260823_cueoff,scene20,depth,primary-twinconditional,A_vs_B2,6,VOID,True,0.0,NO-EFFECT,,
 twin,260823_cueoff,scene20,depth,secondary,A_vs_B1,6,VOID,True,0.0,NO-EFFECT,0.235,SEVERELY ANTI-CONSERVATIVE
-twin,260823_cueoff,scene20,b2,primary,A_vs_B2,6,VOID,True,0.7778,SAME-SIGN,0.909,MATCHED
-twin,260823_cueoff,scene20,b2,primary-twinconditional,A_vs_B2,6,VOID,True,0.7778,SAME-SIGN,,
-twin,260823_cueoff,scene20,b2,secondary,A_vs_B1,6,VOID,True,1.0,SAME-SIGN,0.235,SEVERELY ANTI-CONSERVATIVE
+twin,260823_cueoff,scene20,b2,primary,A_vs_B2,6,VOID,True,0.7778,SAME-SIGN 3/3nz,0.909,MATCHED
+twin,260823_cueoff,scene20,b2,primary-twinconditional,A_vs_B2,6,VOID,True,0.7778,SAME-SIGN 3/3nz,,
+twin,260823_cueoff,scene20,b2,secondary,A_vs_B1,6,VOID,True,1.0,SAME-SIGN 3/3nz,0.235,SEVERELY ANTI-CONSERVATIVE
 twin,260823_cueoff2,scene12,rgb,primary,A_vs_B2,0,VOID,False,nan,EMPTY,0.401,ANTI-CONSERVATIVE
 twin,260823_cueoff2,scene12,rgb,primary-twinconditional,A_vs_B2,0,VOID,False,nan,EMPTY,,
 twin,260823_cueoff2,scene12,rgb,secondary,A_vs_B1,0,VOID,False,nan,EMPTY,0.065,SEVERELY ANTI-CONSERVATIVE
@@ -65,3 +74,12 @@ twin,260823_cueoff2,scene12,depth,secondary,A_vs_B1,0,VOID,False,nan,EMPTY,0.065
 twin,260823_cueoff2,scene12,b2,primary,A_vs_B2,0,VOID,False,nan,EMPTY,0.401,ANTI-CONSERVATIVE
 twin,260823_cueoff2,scene12,b2,primary-twinconditional,A_vs_B2,0,VOID,False,nan,EMPTY,,
 twin,260823_cueoff2,scene12,b2,secondary,A_vs_B1,0,VOID,False,nan,EMPTY,0.065,SEVERELY ANTI-CONSERVATIVE
+twin,260823_cueoff_s20fix,scene20,rgb,primary,A_vs_B2,27,VOID,True,0.1728,SAME-SIGN 2/3nz,1.113,MATCHED
+twin,260823_cueoff_s20fix,scene20,rgb,primary-twinconditional,A_vs_B2,27,VOID,True,0.1728,SAME-SIGN 2/3nz,,
+twin,260823_cueoff_s20fix,scene20,rgb,secondary,A_vs_B1,27,VOID,True,0.7778,SAME-SIGN 3/3nz,0.236,SEVERELY ANTI-CONSERVATIVE
+twin,260823_cueoff_s20fix,scene20,depth,primary,A_vs_B2,27,VOID,True,0.0,NO-EFFECT,1.113,MATCHED
+twin,260823_cueoff_s20fix,scene20,depth,primary-twinconditional,A_vs_B2,27,VOID,True,0.0,NO-EFFECT,,
+twin,260823_cueoff_s20fix,scene20,depth,secondary,A_vs_B1,27,VOID,True,0.0,NO-EFFECT,0.236,SEVERELY ANTI-CONSERVATIVE
+twin,260823_cueoff_s20fix,scene20,b2,primary,A_vs_B2,27,VOID,True,0.5926,SAME-SIGN 3/3nz,1.113,MATCHED
+twin,260823_cueoff_s20fix,scene20,b2,primary-twinconditional,A_vs_B2,27,VOID,True,0.5926,SAME-SIGN 3/3nz,,
+twin,260823_cueoff_s20fix,scene20,b2,secondary,A_vs_B1,27,VOID,True,0.9259,SAME-SIGN 3/3nz,0.236,SEVERELY ANTI-CONSERVATIVE

@@ -204,16 +204,39 @@ def paired_h(a, b):
     return sorted(both), mig
 
 
-def recall_H(d, fids):
+def recall_H(d, fids, gt=None):
+    """Frame recall on the judged frames.
+
+    `gt` overrides the arm's own GT vector (A2-13).  With gt=None each arm is
+    scored on its own sheet, which is what the pre-registration assumes and what
+    G2 is supposed to guarantee.  When G2's byte-identity clause fails ON THE
+    JUDGED FRAMES the two arms are on different sheets and the difference is not
+    a paired comparison; §4.5-2 VOIDS that pair, and the re-scored number below
+    is reported only as the declared secondary reading.
+    """
     if not fids:
         return float("nan")
     hit = 0
     for fid in fids:
         _, _, p, g = d[fid]
-        v = max_on_gt(p, g)
+        v = max_on_gt(p, gt[fid] if gt is not None else g)
         if v == v and v >= TAU:
             hit += 1
     return hit / len(fids)
+
+
+def gt_agreement(a, b, fids):
+    """(n_differing, gt_of_A, gt_of_INTERSECTION) over the judged frames."""
+    ndiff = 0
+    ga, gi = {}, {}
+    for fid in fids:
+        _, _, _, x = a[fid]
+        _, _, _, y = b[fid]
+        if x != y:
+            ndiff += 1
+        ga[fid] = x
+        gi[fid] = [1 if (u and v) else 0 for u, v in zip(x, y)]
+    return ndiff, ga, gi
 
 
 def recall_H_twin(d, twin, fids):
@@ -245,7 +268,15 @@ def fa_rate(d):
 
 
 def sign_class(vals):
-    """A2-1.  'SAME-SIGN' / 'NO-EFFECT' / 'MIXED' / 'EMPTY'."""
+    """A2-1.  `SAME-SIGN k/n nz` / `NO-EFFECT` / `MIXED` / `EMPTY`.
+
+    The non-zero count is carried in the label on purpose.  Under A2-1 both
+    (+0.667, 0.000, 0.000) and (+1.000, +0.667, +0.667) are same-sign, but only
+    the second is three seeds agreeing; the first is one seed moving and two
+    seeds flat.  The pre-registered rule does not distinguish them, so the rule
+    is applied unchanged and the distinction is PRINTED -- folding it away
+    silently is the same mistake v1 made in the other direction with (0, 0, 0).
+    """
     v = [x for x in vals if x == x]
     if not v:
         return "EMPTY"
@@ -253,7 +284,7 @@ def sign_class(vals):
     if not nz:
         return "NO-EFFECT"
     if all(x > 0 for x in nz) or all(x < 0 for x in nz):
-        return "SAME-SIGN"
+        return f"SAME-SIGN {len(nz)}/{len(v)}nz"
     return "MIXED"
 
 
@@ -289,24 +320,29 @@ def verdict(d_cue, d_pla, n_paired, n_seeds_needed=3):
                if p95 > THR_SHORTCUT else
                f", which this bound DOES resolve ({p95:.3f} <= {THR_SHORTCUT}).")
             + " Seeds do not enlarge n -- all three read the same frames.")
+    nz = len([x for x in dc if x != 0.0])
+    weak = ("" if nz >= len(dc) else
+            f" CAUTION: only {nz}/{len(dc)} seeds moved at all; the rest are "
+            f"exactly 0, so same-sign here is a weaker statement than three "
+            f"seeds agreeing (A2-1).")
     if cls == "MIXED":
         return "UNDECIDED", (f"seed signs disagree ({', '.join(f'{x:+.3f}' for x in dc)}) "
                              f"-- PREREG sec.4.5-4")
     if dp is None:
         if mean_c < THR_SHORTCUT:
             return "SHORTCUT", (f"D_cue {mean_c:+.3f} < {THR_SHORTCUT}, non-zero and "
-                                f"same-sign (no placebo available -- exploratory)")
+                                f"same-sign ({cls}; no placebo -- exploratory)." + weak)
         return "UNDECIDED", (f"D_cue {mean_c:+.3f} but no admissible placebo, so the "
                              f"cue-evidence branch cannot be evaluated")
     mean_p = sum(dp) / len(dp) if dp else float("nan")
     corr = mean_c - mean_p
     if corr >= THR_CUE:
         return "CUE EVIDENCE", (f"(D_cue {mean_c:+.3f}) - (D_placebo {mean_p:+.3f}) = "
-                                f"{corr:+.3f} >= {THR_CUE}, D_cue non-zero and 3/3 "
-                                f"same sign")
+                                f"{corr:+.3f} >= {THR_CUE}, D_cue non-zero and "
+                                f"same-sign ({cls})." + weak)
     if mean_c < THR_SHORTCUT:
         return "SHORTCUT", (f"D_cue {mean_c:+.3f} < {THR_SHORTCUT}, non-zero and "
-                            f"same-sign (placebo-corrected {corr:+.3f})")
+                            f"same-sign ({cls}; placebo-corrected {corr:+.3f})." + weak)
     return "UNDECIDED", (f"(D_cue {mean_c:+.3f}) - (D_placebo {mean_p:+.3f}) = {corr:+.3f}: "
                          f"between {THR_SHORTCUT} and {THR_CUE}")
 
@@ -442,27 +478,44 @@ def main():
                   "off) evaluated on the same cuts -- the true baseline for arm C. "
                   "It has been inside `per_frame.csv` since 06:03 and was never "
                   "printed (R4 F7)._"]
-        h2 = []
+        h2, warn = [], []
         for m in models:
             v = [fa_rate(armd[("C", m, s)])[0] for s in seeds if ("C", m, s) in armd]
-            if v:
-                h2.append(f"{m} {sum(v)/len(v):.3f}")
+            f = [fa_rate(armoff[("C", m, s)])[0] for s in seeds
+                 if armoff.get(("C", m, s))] if st != "twin" else []
+            if not v:
+                continue
+            mv = sum(v) / len(v)
+            mf = (sum(f) / len(f)) if f else float("nan")
+            h2.append((m, mv, mf))
+            if mv >= 0.40 and mf == mf and (mv - mf) < 0.15:
+                warn.append(f"{m}: FA {mv:.3f} clears the 0.40 bar, but the "
+                            f"hazard-off FLOOR is already {mf:.3f} -- the arm-C "
+                            f"excess is only {mv - mf:+.3f}. Read as a property of "
+                            f"the seed/scene, not of arm C")
+        acc = any(x[1] >= 0.40 for x in h2)
         L += ["", f"**H2 verdict for {scene}/{stem}/{st}** (PREREG sec.4.4 accepts at "
-              f"FA >= 0.40): " + " · ".join(h2) + " -> "
-              + ("**ACCEPTED**" if any(float(x.split()[1]) >= 0.40 for x in h2)
-                 else "**REJECTED**")
+              f"FA >= 0.40): "
+              + " · ".join(f"{m} {v:.3f}" + (f" (floor {fl:.3f}, excess {v-fl:+.3f})"
+                                             if fl == fl else "")
+                           for m, v, fl in h2)
+              + " -> " + ("**ACCEPTED**" if acc else "**REJECTED**")
               + ". (v1 printed the 0.40 baseline under every table and never issued "
-                "the verdict -- R5 D-8.)", ""]
+                "the verdict -- R5 D-8.)"]
+        if warn:
+            L += ["", "> **H2 CAVEAT (A2-3):** " + " · ".join(warn) + "."]
+        L += [""]
 
         # ---- H recall + deltas ------------------------------------------
         for m in models:
             L += [f"### {m} — paired strict-H recall and deltas", ""]
             rows = []
-            deltas, npairs = {}, {}
+            deltas, npairs, gt_note = {}, {}, {}
             for arm in ("B2", "B1", "P"):
                 if not any(k[0] == arm for k in armd):
                     continue
                 dcue, dtwin_c, ra, rb, npair, migs = [], [], [], [], [], {}
+                d_agt, d_int, gtbad = [], [], 0
                 for s in seeds:
                     da, db = armd.get(("A", m, s)), armd.get((arm, m, s))
                     if da is None or db is None:
@@ -471,20 +524,29 @@ def main():
                     for k, v in mig.items():
                         migs[k] = migs.get(k, 0) + v
                     npair.append(len(fids))
+                    nd, g_a, g_i = gt_agreement(da, db, fids)
+                    gtbad = max(gtbad, nd)
                     r_a, r_b = recall_H(da, fids), recall_H(db, fids)
                     ra.append(r_a)
                     rb.append(r_b)
                     dcue.append(r_a - r_b)
+                    if nd:
+                        d_agt.append(recall_H(da, fids, g_a) - recall_H(db, fids, g_a))
+                        d_int.append(recall_H(da, fids, g_i) - recall_H(db, fids, g_i))
                     tc = armd.get(("C", m, s))
                     if tc is not None:
                         dtwin_c.append(recall_H_twin(da, tc, fids)
                                        - recall_H_twin(db, tc, fids))
+                gt_note[arm] = (gtbad, d_agt, d_int)
                 deltas[arm] = (dcue, dtwin_c)
                 n = npair[0] if npair else 0
                 npairs[arm] = n
                 flag = ""
                 if n < MIN_PAIRED_H:
                     flag = f" **VOID (paired-H {n} < {MIN_PAIRED_H}, PREREG sec.4.5-3)**"
+                if gt_note.get(arm, (0,))[0]:
+                    flag += (f" **VOID (polar_gt differs on {gt_note[arm][0]}/{n} "
+                             f"JUDGED frames, PREREG sec.4.5-2 / A2-13)**")
                 rows.append(
                     f"| A vs {arm} | {n} | "
                     + " | ".join(f"{x:.3f}" for x in ra) + " | "
@@ -525,7 +587,16 @@ def main():
             if b in deltas:
                 dp = deltas["P"][0] if (prim["placebo"] and "P" in deltas) else None
                 n = npairs.get(b, 0)
-                lab, why = verdict(deltas[b][0], dp, n)
+                nd, d_agt, d_int = gt_note.get(b, (0, [], []))
+                if nd:
+                    lab, why = "VOID", (
+                        f"polar_gt differs between arm A and arm {b} on {nd}/{n} of "
+                        f"the JUDGED frames -- the two arms are scored on different "
+                        f"sheets, so recall_H(A) - recall_H({b}) is not a paired "
+                        f"comparison. PREREG sec.4.5-2 does not judge this scene. "
+                        f"(A2-13, ruled before any model was run on this round.)")
+                else:
+                    lab, why = verdict(deltas[b][0], dp, n)
                 L += [f"> ### VERDICT ({m}, primary D_cue = D(A,{b})"
                       + (", placebo-corrected" if dp is not None else ", NO placebo")
                       + f"): **{lab}**", f"> {why}", ""]
@@ -538,9 +609,36 @@ def main():
                                    placebo_ratio=round(ratios.get(b, float('nan')), 3)
                                    if b in ratios else None,
                                    placebo_grade=admissibility(ratios.get(b, float('nan')))))
+                if nd and d_agt:
+                    dpm = (sum(dp) / len(dp)) if dp else float("nan")
+                    l_a, _ = verdict(d_agt, dp, n)
+                    l_i, _ = verdict(d_int, dp, n)
+                    L += ["> **SECONDARY / EXPLORATORY (A2-13-2), re-scored on ARM A's "
+                          "GT so both arms share one sheet — NOT promotable to a "
+                          "primary verdict, whatever it shows:**  ",
+                          "> D_cue = " + ", ".join(f"{x:+.3f}" for x in d_agt)
+                          + f" (mean {sum(d_agt)/len(d_agt):+.3f}, {sign_class(d_agt)})"
+                          + (f" · D_placebo mean {dpm:+.3f} · corrected "
+                             f"{sum(d_agt)/len(d_agt) - dpm:+.3f}" if dpm == dpm else "")
+                          + f" · rule would say **{l_a}**  ",
+                          "> SENSITIVITY (A2-13-3), INTERSECTION GT: D_cue = "
+                          + ", ".join(f"{x:+.3f}" for x in d_int)
+                          + f" (mean {sum(d_int)/len(d_int):+.3f}, {sign_class(d_int)})"
+                          + (f" · corrected {sum(d_int)/len(d_int) - dpm:+.3f}"
+                             if dpm == dpm else "")
+                          + f" · rule would say **{l_i}**", ""]
                 if deltas[b][1]:
-                    lab2, why2 = verdict(deltas[b][1],
-                                         deltas["P"][1] if dp is not None else None, n)
+                    if nd:
+                        lab2, why2 = "VOID", (
+                            f"same sec.4.5-2 breach as the primary reading: the "
+                            f"twin-conditional metric is scored on each arm's own GT "
+                            f"cells too, so it inherits the two-scoresheet problem. "
+                            f"Raw value, reported but NOT a verdict: D = "
+                            + ", ".join(f"{x:+.3f}" for x in deltas[b][1])
+                            + f" (mean {sum(deltas[b][1])/len(deltas[b][1]):+.3f}).")
+                    else:
+                        lab2, why2 = verdict(deltas[b][1],
+                                             deltas["P"][1] if dp is not None else None, n)
                     L += [f"> twin-conditional (twin = arm C, R2 P3 primary metric): "
                           f"**{lab2}** — {why2}", ""]
                     census.append(dict(label_set=st, stem=stem, scene=scene, model=m,
@@ -559,7 +657,12 @@ def main():
             if "B1" in deltas and b != "B1":
                 dp = deltas["P"][0] if (prim["placebo"] and "P" in deltas) else None
                 n = npairs.get("B1", 0)
-                lab, why = verdict(deltas["B1"][0], dp, n)
+                nd1 = gt_note.get("B1", (0,))[0]
+                if nd1:
+                    lab, why = "VOID", (f"polar_gt differs on {nd1}/{n} judged frames "
+                                        f"-- PREREG sec.4.5-2 / A2-13")
+                else:
+                    lab, why = verdict(deltas["B1"][0], dp, n)
                 extra = ""
                 if "B1" in ratios:
                     extra = (f"  (placebo/cue ratio {ratios['B1']:.3f} = "

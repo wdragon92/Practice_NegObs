@@ -1,0 +1,103 @@
+{
+ "doc": "val strict-H ≥ 30 회계 (RENDER_PLAN_V3 §3.5)",
+ "target": 30,
+ "rounds": [
+  {
+   "tag": "base",
+   "stamp": "260824_v3w2_h67base",
+   "band": "base",
+   "scene": "sceneH6",
+   "n_A": 24,
+   "strict_H_A": 9,
+   "strict_H_B": 9,
+   "paired_H": 9,
+   "yield_A": 0.375,
+   "model": 0.2,
+   "tiers": {
+    "H": 9,
+    "V": 12,
+    "E": 3
+   }
+  },
+  {
+   "tag": "base",
+   "stamp": "260824_v3w2_h67base",
+   "band": "base",
+   "scene": "sceneH7",
+   "n_A": 24,
+   "strict_H_A": 12,
+   "strict_H_B": 12,
+   "paired_H": 12,
+   "yield_A": 0.5,
+   "model": 0.2,
+   "tiers": {
+    "none_in_fov": 12,
+    "H": 12
+   }
+  },
+  {
+   "tag": "h",
+   "stamp": "260824_v3w2_h67h",
+   "band": "H",
+   "scene": "sceneH6",
+   "n_A": 24,
+   "strict_H_A": 21,
+   "strict_H_B": 21,
+   "paired_H": 21,
+   "yield_A": 0.875,
+   "model": 0.6,
+   "tiers": {
+    "H": 21,
+    "E": 3
+   }
+  },
+  {
+   "tag": "h",
+   "stamp": "260824_v3w2_h67h",
+   "band": "H",
+   "scene": "sceneH7",
+   "n_A": 24,
+   "strict_H_A": 21,
+   "strict_H_B": 21,
+   "paired_H": 21,
+   "yield_A": 0.875,
+   "model": 0.6,
+   "tiers": {
+    "H": 21,
+    "none_in_fov": 3
+   }
+  },
+  {
+   "tag": "h2",
+   "stamp": "260824_v3w2_h67h2",
+   "band": "H",
+   "scene": "sceneH6",
+   "n_A": 24,
+   "strict_H_A": 24,
+   "strict_H_B": 24,
+   "paired_H": 24,
+   "yield_A": 1.0,
+   "model": 0.6,
+   "tiers": {
+    "H": 24
+   }
+  }
+ ],
+ "by_scene": {
+  "sceneH6": {
+   "n": 72,
+   "h": 54,
+   "ph": 54
+  },
+  "sceneH7": {
+   "n": 48,
+   "h": 33,
+   "ph": 33
+  }
+ },
+ "scene20_strict_H": 6,
+ "total_strict_H": 93,
+ "plan_expect_total": 58.8,
+ "ok": true,
+ "missing_rounds": []
+}

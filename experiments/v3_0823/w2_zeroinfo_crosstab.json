@@ -1,0 +1,37 @@
+{
+ "base/sceneH6": {
+  "n": 24,
+  "strict_H": 9,
+  "zero_info": 0,
+  "zero_info_H": 0,
+  "zero_info_gtpos": 0
+ },
+ "base/sceneH7": {
+  "n": 24,
+  "strict_H": 12,
+  "zero_info": 18,
+  "zero_info_H": 8,
+  "zero_info_gtpos": 8
+ },
+ "h/sceneH6": {
+  "n": 24,
+  "strict_H": 21,
+  "zero_info": 0,
+  "zero_info_H": 0,
+  "zero_info_gtpos": 0
+ },
+ "h/sceneH7": {
+  "n": 24,
+  "strict_H": 21,
+  "zero_info": 3,
+  "zero_info_H": 2,
+  "zero_info_gtpos": 2
+ },
+ "h2/sceneH6": {
+  "n": 24,
+  "strict_H": 24,
+  "zero_info": 6,
+  "zero_info_H": 6,
+  "zero_info_gtpos": 6
+ }
+}

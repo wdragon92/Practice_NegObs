@@ -1,0 +1,4708 @@
+{
+ "doc": "cue_extent_audit",
+ "version": "1.0",
+ "authority": "DECISIONS D82 ⓒ (룩체크 R7) · ACCOUNTING §4.9-3 (|r| 보고 규약)",
+ "generated": "2026-08-24T00:50:50",
+ "frame_px": 2073600,
+ "instrument": {
+  "source": ".idseg.npz (instance_id_segmentation · 프림 경로 디코드)",
+  "area_unit": "픽셀 · 프레임 대비 % 병기",
+  "attribution": "declared(GATED_ZONES) > empirical(팔 차분) > lexical(prims2+전역토큰)",
+  "blind_keys": [
+   "T"
+  ],
+  "blind_reason": "cue_material_break 는 24/32 씬에서 재질 재바인딩 전용 — 프림 집합 불변이므로 ID 마스크가 원리적으로 볼 수 없다 (CUE_COVERAGE §0-3 · W1B2 §2.2 ③)."
+ },
+ "scan_accounting": {
+  "A": 696,
+  "B": 648,
+  "B_skip_superseded_by_B2": 576,
+  "D_skip_stale": 152,
+  "D": 760
+ },
+ "n_stale_w1d_excluded": 152,
+ "label_provenance": [
+  {
+   "arm": "A",
+   "file": "dataset_manifest_v2corr.json",
+   "n": 1416,
+   "note": "교정 GT 정본(v2corr) · on 측"
+  },
+  {
+   "arm": "B",
+   "file": "w1b_B.json",
+   "n": 72,
+   "note": "z_off = D팔 (cue-대칭) · W1B §8.3"
+  },
+  {
+   "arm": "B",
+   "file": "w1b2_B.json",
+   "n": 576,
+   "note": "z_off = D팔 (cue-대칭) · W1B §8.3"
+  },
+  {
+   "arm": "D",
+   "file": "w1d_base.json",
+   "n": 528,
+   "note": "on 측 = D팔 base 라운드 (off = 260819_main_off)"
+  }
+ ],
+ "probe_label_provenance": [
+  {
+   "group": "h12",
+   "arm": "A",
+   "file": "h12_rev_ac_labels.json",
+   "side": "on",
+   "n": 32
+  },
+  {
+   "group": "h12",
+   "arm": "C",
+   "file": "h12_rev_ac_labels.json",
+   "side": "off",
+   "n": 32
+  },
+  {
+   "group": "h12",
+   "arm": "B",
+   "file": "h12_rev_bd_labels.json",
+   "side": "on",
+   "n": 32
+  },
+  {
+   "group": "h12",
+   "arm": "D",
+   "file": "h12_rev_bd_labels.json",
+   "side": "off",
+   "n": 32
+  },
+  {
+   "group": "h3",
+   "arm": "A",
+   "file": "h3l1_revh3_ac_labels.json",
+   "side": "on",
+   "n": 16
+  },
+  {
+   "group": "h3",
+   "arm": "C",
+   "file": "h3l1_revh3_ac_labels.json",
+   "side": "off",
+   "n": 16
+  },
+  {
+   "group": "h3",
+   "arm": "B",
+   "file": "h3l1_revh3_bd_labels.json",
+   "side": "on",
+   "n": 16
+  },
+  {
+   "group": "h3",
+   "arm": "D",
+   "file": "h3l1_revh3_bd_labels.json",
+   "side": "off",
+   "n": 16
+  },
+  {
+   "group": "l1",
+   "arm": "A",
+   "file": "h3l1_revl1_ac_labels.json",
+   "side": "on",
+   "n": 16
+  },
+  {
+   "group": "l1",
+   "arm": "C",
+   "file": "h3l1_revl1_ac_labels.json",
+   "side": "off",
+   "n": 16
+  },
+  {
+   "group": "l1",
+   "arm": "B",
+   "file": "h3l1_revl1_bd_labels.json",
+   "side": "on",
+   "n": 16
+  },
+  {
+   "group": "l1",
+   "arm": "D",
+   "file": "h3l1_revl1_bd_labels.json",
+   "side": "off",
+   "n": 16
+  },
+  {
+   "group": "n911",
+   "arm": "A",
+   "file": "n911_rev3_ac_labels.json",
+   "side": "on",
+   "n": 32
+  },
+  {
+   "group": "n911",
+   "arm": "C",
+   "file": "n911_rev3_ac_labels.json",
+   "side": "off",
+   "n": 32
+  },
+  {
+   "group": "n911",
+   "arm": "B",
+   "file": "n911_rev3_bd_labels.json",
+   "side": "on",
+   "n": 32
+  },
+  {
+   "group": "n911",
+   "arm": "D",
+   "file": "n911_rev3_bd_labels.json",
+   "side": "off",
+   "n": 32
+  },
+  {
+   "group": "h67",
+   "arm": "A",
+   "file": "h67_rev_labels.json",
+   "side": "on",
+   "n": 16
+  },
+  {
+   "group": "h12_r0",
+   "arm": "A",
+   "file": "h12_r0_ac_labels.json",
+   "side": "on",
+   "n": 16
+  },
+  {
+   "group": "h12_r0",
+   "arm": "C",
+   "file": "h12_r0_ac_labels.json",
+   "side": "off",
+   "n": 16
+  },
+  {
+   "group": "h12_r0",
+   "arm": "B",
+   "file": "h12_r0_bd_labels.json",
+   "side": "on",
+   "n": 16
+  },
+  {
+   "group": "h12_r0",
+   "arm": "D",
+   "file": "h12_r0_bd_labels.json",
+   "side": "off",
+   "n": 16
+  },
+  {
+   "group": "n911_rev",
+   "arm": "A",
+   "file": "n911_rev_ac_labels.json",
+   "side": "on",
+   "n": 32
+  },
+  {
+   "group": "n911_rev",
+   "arm": "C",
+   "file": "n911_rev_ac_labels.json",
+   "side": "off",
+   "n": 32
+  },
+  {
+   "group": "n911_rev",
+   "arm": "B",
+   "file": "n911_rev_bd_labels.json",
+   "side": "on",
+   "n": 32
+  },
+  {
+   "group": "n911_rev",
+   "arm": "D",
+   "file": "n911_rev_bd_labels.json",
+   "side": "off",
+   "n": 32
+  },
+  {
+   "group": "n911_rev2",
+   "arm": "A",
+   "file": "n911_rev2_ac_labels.json",
+   "side": "on",
+   "n": 32
+  },
+  {
+   "group": "n911_rev2",
+   "arm": "C",
+   "file": "n911_rev2_ac_labels.json",
+   "side": "off",
+   "n": 32
+  },
+  {
+   "group": "n911_rev2",
+   "arm": "B",
+   "file": "n911_rev2_bd_labels.json",
+   "side": "on",
+   "n": 32
+  },
+  {
+   "group": "n911_rev2",
+   "arm": "D",
+   "file": "n911_rev2_bd_labels.json",
+   "side": "off",
+   "n": 32
+  }
+ ],
+ "unlabeled": {},
+ "d_arm_label_by_vg02": 384,
+ "headline_P1": {
+  "marginals": {
+   "n": 2104,
+   "hazard_present": 1230,
+   "hazard_absent": 874,
+   "p_hazard": 0.5846,
+   "by_arm": {
+    "A": 696,
+    "B": 648,
+    "D": 760
+   },
+   "by_arm_hazard": {
+    "A:0": 57,
+    "A:1": 639,
+    "B:0": 69,
+    "B:1": 579,
+    "D:0": 748,
+    "D:1": 12
+   },
+   "n_scenes": 22,
+   "arms_missing": [
+    "C (미렌더 · 결재 대기 C-1)"
+   ]
+  },
+  "total_area_pct": {
+   "metric": "cue_area_total (% of frame)",
+   "r_pb": 0.4135,
+   "abs_r": 0.4135,
+   "cliffs_delta": 0.6361,
+   "hazard": {
+    "n": 1230,
+    "mean": 20.97,
+    "sd": 16.83,
+    "p10": 1.91,
+    "med": 18.48,
+    "p90": 48.12,
+    "max": 61.54
+   },
+   "no_hazard": {
+    "n": 874,
+    "mean": 6.6,
+    "sd": 13.66,
+    "p10": 0.0,
+    "med": 0.42,
+    "p90": 20.13,
+    "max": 82.18
+   },
+   "null_within_scene": {
+    "n": 3000,
+    "q50": 0.0608,
+    "q95": 0.0881,
+    "q99": 0.1009,
+    "max": 0.1167,
+    "p_emp": 0.0003
+   },
+   "null_free": {
+    "n": 3000,
+    "q50": 0.0139,
+    "q95": 0.0424,
+    "q99": 0.0578,
+    "max": 0.0927,
+    "p_emp": 0.0003
+   }
+  },
+  "obj_count": {
+   "metric": "cue_obj_count (distinct prim roots)",
+   "r_pb": 0.2849,
+   "abs_r": 0.2849,
+   "cliffs_delta": 0.716,
+   "hazard": {
+    "n": 1230,
+    "mean": 44.41,
+    "sd": 88.49,
+    "p10": 2,
+    "med": 16,
+    "p90": 110,
+    "max": 512
+   },
+   "no_hazard": {
+    "n": 874,
+    "mean": 3.54,
+    "sd": 6.41,
+    "p10": 0,
+    "med": 1,
+    "p90": 8,
+    "max": 58
+   },
+   "null_within_scene": {
+    "n": 3000,
+    "q50": 0.046,
+    "q95": 0.0761,
+    "q99": 0.0867,
+    "max": 0.1056,
+    "p_emp": 0.0003
+   },
+   "null_free": {
+    "n": 3000,
+    "q50": 0.0144,
+    "q95": 0.0435,
+    "q99": 0.0543,
+    "max": 0.0791,
+    "p_emp": 0.0003
+   }
+  },
+  "grp_count": {
+   "metric": "cue_group_count (installations)",
+   "r_pb": 0.4794,
+   "abs_r": 0.4794,
+   "cliffs_delta": 0.6739,
+   "hazard": {
+    "n": 1230,
+    "mean": 9.36,
+    "sd": 7.19,
+    "p10": 2,
+    "med": 8,
+    "p90": 19,
+    "max": 39
+   },
+   "no_hazard": {
+    "n": 874,
+    "mean": 2.68,
+    "sd": 3.86,
+    "p10": 0,
+    "med": 1,
+    "p90": 8,
+    "max": 31
+   },
+   "null_within_scene": {
+    "n": 3000,
+    "q50": 0.0757,
+    "q95": 0.1049,
+    "q99": 0.116,
+    "max": 0.1425,
+    "p_emp": 0.0003
+   },
+   "null_free": {
+    "n": 3000,
+    "q50": 0.0144,
+    "q95": 0.0429,
+    "q99": 0.057,
+    "max": 0.0755,
+    "p_emp": 0.0003
+   }
+  },
+  "per_key": {
+   "N": {
+    "cue": "nosing",
+    "n": 2056,
+    "n_scenes": 21,
+    "r_pb": 0.1125,
+    "abs_r": 0.1125,
+    "cliffs_delta": 0.0457,
+    "hazard": {
+     "n": 1182,
+     "mean": 0.16,
+     "sd": 0.94,
+     "p10": 0.0,
+     "med": 0.0,
+     "p90": 0.0,
+     "max": 7.42
+    },
+    "no_hazard": {
+     "n": 874,
+     "mean": 0.0,
+     "sd": 0.0,
+     "p10": 0.0,
+     "med": 0.0,
+     "p90": 0.0,
+     "max": 0.0
+    },
+    "null_within_scene": {
+     "n": 3000,
+     "q50": 0.0247,
+     "q95": 0.0543,
+     "q99": 0.0649,
+     "max": 0.0791,
+     "p_emp": 0.0003
+    }
+   },
+   "R": {
+    "cue": "railing",
+    "n": 2104,
+    "n_scenes": 22,
+    "r_pb": 0.2614,
+    "abs_r": 0.2614,
+    "cliffs_delta": 0.3228,
+    "hazard": {
+     "n": 1230,
+     "mean": 2.52,
+     "sd": 5.03,
+     "p10": 0.0,
+     "med": 0.0,
+     "p90": 9.72,
+     "max": 47.15
+    },
+    "no_hazard": {
+     "n": 874,
+     "mean": 0.36,
+     "sd": 1.25,
+     "p10": 0.0,
+     "med": 0.0,
+     "p90": 0.0,
+     "max": 7.43
+    },
+    "null_within_scene": {
+     "n": 3000,
+     "q50": 0.0507,
+     "q95": 0.0788,
+     "q99": 0.0898,
+     "max": 0.1184,
+     "p_emp": 0.0003
+    }
+   },
+   "Sg": {
+    "cue": "sign",
+    "n": 2104,
+    "n_scenes": 22,
+    "r_pb": 0.1286,
+    "abs_r": 0.1286,
+    "cliffs_delta": 0.1787,
+    "hazard": {
+     "n": 1230,
+     "mean": 0.13,
+     "sd": 0.53,
+     "p10": 0.0,
+     "med": 0.0,
+     "p90": 0.25,
+     "max": 7.11
+    },
+    "no_hazard": {
+     "n": 874,
+     "mean": 0.02,
+     "sd": 0.19,
+     "p10": 0.0,
+     "med": 0.0,
+     "p90": 0.0,
+     "max": 2.93
+    },
+    "null_within_scene": {
+     "n": 3000,
+     "q50": 0.0142,
+     "q95": 0.0383,
+     "q99": 0.0483,
+     "max": 0.0645,
+     "p_emp": 0.0003
+    }
+   },
+   "V": {
+    "cue": "scene_dressing",
+    "n": 2104,
+    "n_scenes": 22,
+    "r_pb": 0.3658,
+    "abs_r": 0.3658,
+    "cliffs_delta": 0.6248,
+    "hazard": {
+     "n": 1230,
+     "mean": 14.19,
+     "sd": 15.12,
+     "p10": 0.0,
+     "med": 6.77,
+     "p90": 36.42,
+     "max": 59.29
+    },
+    "no_hazard": {
+     "n": 874,
+     "mean": 3.15,
+     "sd": 11.81,
+     "p10": 0.0,
+     "med": 0.0,
+     "p90": 2.03,
+     "max": 76.99
+    },
+    "null_within_scene": {
+     "n": 3000,
+     "q50": 0.0719,
+     "q95": 0.0997,
+     "q99": 0.1121,
+     "max": 0.1311,
+     "p_emp": 0.0003
+    }
+   },
+   "Ux": {
+    "cue": "cue-확정·키미상(팔 차분만)",
+    "n": 39,
+    "n_scenes": 2,
+    "r_pb": null,
+    "abs_r": null,
+    "cliffs_delta": null,
+    "hazard": {
+     "n": 39,
+     "mean": 0.04,
+     "sd": 0.03,
+     "p10": 0.01,
+     "med": 0.03,
+     "p90": 0.07,
+     "max": 0.09
+    },
+    "no_hazard": {
+     "n": 0
+    },
+    "null_within_scene": null
+   },
+   "Gk": {
+    "cue": "ground_pattern(미분해)",
+    "n": 1068,
+    "n_scenes": 16,
+    "r_pb": -0.0728,
+    "abs_r": 0.0728,
+    "cliffs_delta": -0.082,
+    "hazard": {
+     "n": 740,
+     "mean": 6.12,
+     "sd": 7.56,
+     "p10": 0.22,
+     "med": 3.28,
+     "p90": 17.09,
+     "max": 46.83
+    },
+    "no_hazard": {
+     "n": 328,
+     "mean": 7.37,
+     "sd": 8.63,
+     "p10": 0.17,
+     "med": 4.95,
+     "p90": 19.0,
+     "max": 46.83
+    },
+    "null_within_scene": {
+     "n": 3000,
+     "q50": 0.0661,
+     "q95": 0.1012,
+     "q99": 0.1162,
+     "max": 0.1455,
+     "p_emp": 0.3819
+    }
+   }
+  },
+  "constant_keys": [
+   {
+    "key": "Mh",
+    "cue": "manhole",
+    "n_frames": 0,
+    "reason": "면적 상수 0 (프림 미생성 또는 씬 부족)"
+   },
+   {
+    "key": "Dr",
+    "cue": "drainage",
+    "n_frames": 0,
+    "reason": "면적 상수 0 (프림 미생성 또는 씬 부족)"
+   },
+   {
+    "key": "Jt",
+    "cue": "slab_joint",
+    "n_frames": 0,
+    "reason": "면적 상수 0 (프림 미생성 또는 씬 부족)"
+   }
+  ],
+  "blind_keys": [
+   {
+    "key": "T",
+    "cue": "material_break",
+    "reason": "재질 재바인딩 전용 — ID 마스크 불변. 면적 r 은 정의상 0이며 이 계기로는 측정 불가. 존재 |r| 쪽 값(W1-B2 0.0692)이 유일한 근거다."
+   }
+  ],
+  "arm_level_check": {
+   "note": "설계 수준(팔) 위험 × 총 단서 면적 — 프레임 GT 판정과 나란히 읽는다",
+   "r_pb": 0.5108,
+   "by_arm": {
+    "A": {
+     "n": 696,
+     "mean": 27.06,
+     "sd": 16.43,
+     "p10": 5.93,
+     "med": 26.99,
+     "p90": 50.69,
+     "max": 82.18
+    },
+    "B": {
+     "n": 648,
+     "mean": 15.7,
+     "sd": 17.12,
+     "p10": 0.21,
+     "med": 7.79,
+     "p90": 46.66,
+     "max": 67.85
+    },
+    "D": {
+     "n": 760,
+     "mean": 3.37,
+     "sd": 6.8,
+     "p10": 0.0,
+     "med": 0.26,
+     "p90": 10.62,
+     "max": 47.14
+    }
+   }
+  }
+ },
+ "density_symmetry": {
+  "note": "cue 팔 = 단서가 살아 있는 팔. 위험 씬은 A팔, N-cue 씬은 A·C 두 팔 모두 사실상 C팔(단서 有·위험 無 — run_n911_probe.sh §팔 사상)",
+  "groups": {
+   "P1 A팔 · H(legacy-33)": {
+    "n": 696,
+    "mean": 27.06,
+    "sd": 16.43,
+    "p10": 5.93,
+    "med": 26.99,
+    "p90": 50.69,
+    "max": 82.18
+   },
+   "P2 A팔 · H(new)": {
+    "n": 64,
+    "mean": 10.4,
+    "sd": 9.41,
+    "p10": 2.59,
+    "med": 5.9,
+    "p90": 25.26,
+    "max": 35.69
+   },
+   "P2 A팔 · L(new)": {
+    "n": 16,
+    "mean": 19.38,
+    "sd": 9.51,
+    "p10": 11.58,
+    "med": 15.85,
+    "p90": 36.01,
+    "max": 36.01
+   },
+   "P2 A팔 · N-cue(new)": {
+    "n": 32,
+    "mean": 27.97,
+    "sd": 7.06,
+    "p10": 16.28,
+    "med": 30.99,
+    "p90": 34.81,
+    "max": 35.26
+   },
+   "P2 C팔 · H(new)": {
+    "n": 48,
+    "mean": 9.56,
+    "sd": 8.76,
+    "p10": 2.68,
+    "med": 4.88,
+    "p90": 22.0,
+    "max": 32.29
+   },
+   "P2 C팔 · L(new)": {
+    "n": 16,
+    "mean": 19.38,
+    "sd": 9.51,
+    "p10": 11.58,
+    "med": 15.85,
+    "p90": 36.01,
+    "max": 36.01
+   },
+   "P2 C팔 · N-cue(new)": {
+    "n": 32,
+    "mean": 28.04,
+    "sd": 7.06,
+    "p10": 16.38,
+    "med": 31.0,
+    "p90": 34.84,
+    "max": 35.55
+   }
+  },
+  "contrast": {
+   "Hnew_A_vs_Ncue_cuearm": {
+    "H": {
+     "n": 64,
+     "mean": 10.4,
+     "sd": 9.41,
+     "p10": 2.59,
+     "med": 5.9,
+     "p90": 25.26,
+     "max": 35.69
+    },
+    "N": {
+     "n": 64,
+     "mean": 28.01,
+     "sd": 7.0,
+     "p10": 16.38,
+     "med": 30.99,
+     "p90": 34.81,
+     "max": 35.55
+    },
+    "ratio_mean": 0.371,
+    "cliffs_delta": -0.8145
+   },
+   "legacy33_A_vs_Ncue_cuearm": {
+    "legacy": {
+     "n": 696,
+     "mean": 27.06,
+     "sd": 16.43,
+     "p10": 5.93,
+     "med": 26.99,
+     "p90": 50.69,
+     "max": 82.18
+    },
+    "N": {
+     "n": 64,
+     "mean": 28.01,
+     "sd": 7.0,
+     "p10": 16.38,
+     "med": 30.99,
+     "p90": 34.81,
+     "max": 35.55
+    },
+    "ratio_mean": 0.966,
+    "cliffs_delta": -0.1301
+   },
+   "legacy33_A_vs_Hnew_A": {
+    "legacy": {
+     "n": 696,
+     "mean": 27.06,
+     "sd": 16.43,
+     "p10": 5.93,
+     "med": 26.99,
+     "p90": 50.69,
+     "max": 82.18
+    },
+    "Hnew": {
+     "n": 64,
+     "mean": 10.4,
+     "sd": 9.41,
+     "p10": 2.59,
+     "med": 5.9,
+     "p90": 25.26,
+     "max": 35.69
+    },
+    "ratio_mean": 2.602,
+    "cliffs_delta": 0.6552
+   }
+  },
+  "pending": [
+   "N9·N11 은 rev2 라운드까지 착지 — 이후 재렌더 시 --regen-hook 로 갱신",
+   "C 웨이브(정본 33씬 C팔) 미렌더 — 착지하면 대칭표가 바뀐다"
+  ]
+ },
+ "headline_P2": {
+  "n": 400,
+  "n_scenes": 8,
+  "hazard_present": 135,
+  "by_arm": {
+   "A": 112,
+   "B": 96,
+   "C": 96,
+   "D": 96
+  },
+  "r_pb": -0.112,
+  "abs_r": 0.112,
+  "hazard": {
+   "n": 135,
+   "mean": 7.05,
+   "sd": 9.86,
+   "p10": 0.0,
+   "med": 2.68,
+   "p90": 21.89,
+   "max": 36.01
+  },
+  "no_hazard": {
+   "n": 265,
+   "mean": 9.87,
+   "sd": 12.77,
+   "p10": 0.0,
+   "med": 2.57,
+   "p90": 31.45,
+   "max": 36.01
+  },
+  "null_within_scene": {
+   "n": 3000,
+   "q50": 0.1123,
+   "q95": 0.1607,
+   "q99": 0.1795,
+   "max": 0.2142,
+   "p_emp": 0.5035
+  }
+ },
+ "per_scene": {
+  "scene01|A": {
+   "scene": "scene01",
+   "arm": "A",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 24,
+   "area_pct": {
+    "n": 24,
+    "mean": 25.62,
+    "sd": 5.19,
+    "p10": 17.96,
+    "med": 25.9,
+    "p90": 35.03,
+    "max": 35.03
+   },
+   "obj": {
+    "n": 24,
+    "mean": 22.0,
+    "sd": 6.48,
+    "p10": 15.0,
+    "med": 22.0,
+    "p90": 31.0,
+    "max": 31.0
+   },
+   "by_key": {
+    "Dr": 0.0106,
+    "Jt": 0.08,
+    "R": 0.5261,
+    "V": 25.0015
+   }
+  },
+  "scene01|B": {
+   "scene": "scene01",
+   "arm": "B",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 24,
+   "area_pct": {
+    "n": 24,
+    "mean": 25.62,
+    "sd": 5.19,
+    "p10": 17.96,
+    "med": 25.9,
+    "p90": 35.03,
+    "max": 35.03
+   },
+   "obj": {
+    "n": 24,
+    "mean": 22.0,
+    "sd": 6.48,
+    "p10": 15.0,
+    "med": 22.0,
+    "p90": 31.0,
+    "max": 31.0
+   },
+   "by_key": {
+    "Dr": 0.0106,
+    "Jt": 0.08,
+    "R": 0.5261,
+    "V": 25.0015
+   }
+  },
+  "scene02|A": {
+   "scene": "scene02",
+   "arm": "A",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 24,
+   "area_pct": {
+    "n": 24,
+    "mean": 34.21,
+    "sd": 12.38,
+    "p10": 20.96,
+    "med": 29.6,
+    "p90": 59.29,
+    "max": 59.29
+   },
+   "obj": {
+    "n": 24,
+    "mean": 14.25,
+    "sd": 8.72,
+    "p10": 4.0,
+    "med": 16.0,
+    "p90": 26.0,
+    "max": 26.0
+   },
+   "by_key": {
+    "Dr": 0.011,
+    "Gk": 0.1312,
+    "Jt": 0.0448,
+    "Mh": 0.0464,
+    "R": 1.68,
+    "V": 32.293
+   }
+  },
+  "scene02|B": {
+   "scene": "scene02",
+   "arm": "B",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 15,
+   "area_pct": {
+    "n": 24,
+    "mean": 33.73,
+    "sd": 12.64,
+    "p10": 20.58,
+    "med": 27.84,
+    "p90": 59.29,
+    "max": 59.29
+   },
+   "obj": {
+    "n": 24,
+    "mean": 11.12,
+    "sd": 6.69,
+    "p10": 4.0,
+    "med": 11.0,
+    "p90": 21.0,
+    "max": 21.0
+   },
+   "by_key": {
+    "Dr": 0.011,
+    "Gk": 0.1312,
+    "Jt": 0.0448,
+    "Mh": 0.0464,
+    "R": 0.336,
+    "V": 33.1648
+   }
+  },
+  "scene03|A": {
+   "scene": "scene03",
+   "arm": "A",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 57,
+   "area_pct": {
+    "n": 72,
+    "mean": 15.95,
+    "sd": 8.74,
+    "p10": 6.89,
+    "med": 12.3,
+    "p90": 28.68,
+    "max": 38.71
+   },
+   "obj": {
+    "n": 72,
+    "mean": 13.25,
+    "sd": 2.78,
+    "p10": 7.0,
+    "med": 14.0,
+    "p90": 16.0,
+    "max": 17.0
+   },
+   "by_key": {
+    "Gk": 10.4968,
+    "V": 5.4519
+   }
+  },
+  "scene03|D": {
+   "scene": "scene03",
+   "arm": "D",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 48,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 48,
+    "mean": 11.77,
+    "sd": 7.93,
+    "p10": 4.92,
+    "med": 9.94,
+    "p90": 20.13,
+    "max": 35.03
+   },
+   "obj": {
+    "n": 48,
+    "mean": 2.44,
+    "sd": 0.62,
+    "p10": 2.0,
+    "med": 3.0,
+    "p90": 3.0,
+    "max": 3.0
+   },
+   "by_key": {
+    "Gk": 11.767
+   }
+  },
+  "scene04|A": {
+   "scene": "scene04",
+   "arm": "A",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 72,
+   "area_pct": {
+    "n": 72,
+    "mean": 8.96,
+    "sd": 5.24,
+    "p10": 4.61,
+    "med": 7.19,
+    "p90": 15.71,
+    "max": 23.09
+   },
+   "obj": {
+    "n": 72,
+    "mean": 21.5,
+    "sd": 4.54,
+    "p10": 16.0,
+    "med": 21.0,
+    "p90": 27.0,
+    "max": 30.0
+   },
+   "by_key": {
+    "Gk": 5.1933,
+    "Sg": 0.963,
+    "V": 2.8048
+   }
+  },
+  "scene04|D": {
+   "scene": "scene04",
+   "arm": "D",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 48,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 48,
+    "mean": 12.02,
+    "sd": 10.45,
+    "p10": 3.8,
+    "med": 7.87,
+    "p90": 28.91,
+    "max": 41.28
+   },
+   "obj": {
+    "n": 48,
+    "mean": 6.75,
+    "sd": 1.66,
+    "p10": 5.0,
+    "med": 7.0,
+    "p90": 9.0,
+    "max": 9.0
+   },
+   "by_key": {
+    "Gk": 12.0188
+   }
+  },
+  "scene06|B": {
+   "scene": "scene06",
+   "arm": "B",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 24,
+    "mean": 0.12,
+    "sd": 0.34,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 1.0,
+    "max": 1.0
+   },
+   "by_key": {
+    "Jt": 0.0001
+   }
+  },
+  "scene08|B": {
+   "scene": "scene08",
+   "arm": "B",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 48,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 45,
+   "area_pct": {
+    "n": 48,
+    "mean": 7.75,
+    "sd": 1.36,
+    "p10": 6.12,
+    "med": 7.73,
+    "p90": 9.99,
+    "max": 10.9
+   },
+   "obj": {
+    "n": 48,
+    "mean": 20.5,
+    "sd": 3.73,
+    "p10": 15.0,
+    "med": 21.0,
+    "p90": 26.0,
+    "max": 26.0
+   },
+   "by_key": {
+    "Gk": 0.1613,
+    "Mh": 0.0797,
+    "R": 7.5128,
+    "V": 0.0008
+   }
+  },
+  "scene08|D": {
+   "scene": "scene08",
+   "arm": "D",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "scene09|A": {
+   "scene": "scene09",
+   "arm": "A",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 48,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 48,
+   "area_pct": {
+    "n": 48,
+    "mean": 5.04,
+    "sd": 0.34,
+    "p10": 4.65,
+    "med": 5.02,
+    "p90": 5.66,
+    "max": 5.72
+   },
+   "obj": {
+    "n": 48,
+    "mean": 72.5,
+    "sd": 23.87,
+    "p10": 63.0,
+    "med": 65.0,
+    "p90": 117.0,
+    "max": 137.0
+   },
+   "by_key": {
+    "Jt": 0.2836,
+    "Sg": 0.0124,
+    "V": 4.7467
+   }
+  },
+  "scene09|B": {
+   "scene": "scene09",
+   "arm": "B",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 72,
+   "area_pct": {
+    "n": 72,
+    "mean": 4.65,
+    "sd": 0.89,
+    "p10": 3.53,
+    "med": 4.96,
+    "p90": 5.4,
+    "max": 5.72
+   },
+   "obj": {
+    "n": 72,
+    "mean": 64.62,
+    "sd": 26.7,
+    "p10": 35.0,
+    "med": 64.0,
+    "p90": 97.0,
+    "max": 137.0
+   },
+   "by_key": {
+    "Jt": 0.3726,
+    "Sg": 0.0083,
+    "V": 4.2713
+   }
+  },
+  "scene09|D": {
+   "scene": "scene09",
+   "arm": "D",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 64,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 64,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 64,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "scene10|A": {
+   "scene": "scene10",
+   "arm": "A",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 15,
+   "area_pct": {
+    "n": 24,
+    "mean": 24.41,
+    "sd": 12.58,
+    "p10": 8.81,
+    "med": 25.01,
+    "p90": 49.14,
+    "max": 49.14
+   },
+   "obj": {
+    "n": 24,
+    "mean": 57.12,
+    "sd": 17.59,
+    "p10": 33.0,
+    "med": 58.0,
+    "p90": 83.0,
+    "max": 83.0
+   },
+   "by_key": {
+    "Gk": 1.4033,
+    "R": 18.973,
+    "Sg": 1.4854,
+    "V": 2.5465
+   }
+  },
+  "scene10|D": {
+   "scene": "scene10",
+   "arm": "D",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 0.12,
+    "sd": 0.13,
+    "p10": 0.0,
+    "med": 0.14,
+    "p90": 0.33,
+    "max": 0.33
+   },
+   "obj": {
+    "n": 24,
+    "mean": 1.75,
+    "sd": 1.89,
+    "p10": 0.0,
+    "med": 2.0,
+    "p90": 4.0,
+    "max": 4.0
+   },
+   "by_key": {
+    "V": 0.116
+   }
+  },
+  "scene12|A": {
+   "scene": "scene12",
+   "arm": "A",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 48,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 48,
+   "area_pct": {
+    "n": 48,
+    "mean": 22.77,
+    "sd": 5.13,
+    "p10": 14.83,
+    "med": 22.49,
+    "p90": 30.32,
+    "max": 33.31
+   },
+   "obj": {
+    "n": 48,
+    "mean": 120.31,
+    "sd": 5.59,
+    "p10": 119.0,
+    "med": 122.0,
+    "p90": 124.0,
+    "max": 124.0
+   },
+   "by_key": {
+    "Gk": 5.2478,
+    "R": 6.2754,
+    "V": 11.2469
+   }
+  },
+  "scene12|B": {
+   "scene": "scene12",
+   "arm": "B",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 72,
+   "area_pct": {
+    "n": 72,
+    "mean": 7.37,
+    "sd": 6.67,
+    "p10": 0.55,
+    "med": 4.94,
+    "p90": 15.21,
+    "max": 29.93
+   },
+   "obj": {
+    "n": 72,
+    "mean": 1.83,
+    "sd": 0.47,
+    "p10": 1.0,
+    "med": 2.0,
+    "p90": 2.0,
+    "max": 2.0
+   },
+   "by_key": {
+    "Gk": 7.3745
+   }
+  },
+  "scene12|D": {
+   "scene": "scene12",
+   "arm": "D",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 72,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 72,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "scene16|A": {
+   "scene": "scene16",
+   "arm": "A",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 24,
+   "area_pct": {
+    "n": 24,
+    "mean": 42.26,
+    "sd": 9.35,
+    "p10": 24.47,
+    "med": 44.02,
+    "p90": 54.84,
+    "max": 54.84
+   },
+   "obj": {
+    "n": 24,
+    "mean": 33.75,
+    "sd": 5.45,
+    "p10": 28.0,
+    "med": 33.0,
+    "p90": 43.0,
+    "max": 43.0
+   },
+   "by_key": {
+    "Dr": 0.0894,
+    "Gk": 12.289,
+    "Jt": 0.0265,
+    "Mh": 0.0883,
+    "N": 1.24,
+    "R": 7.7797,
+    "Sg": 0.707,
+    "Ux": 0.0162,
+    "V": 20.0247
+   }
+  },
+  "scene16|B": {
+   "scene": "scene16",
+   "arm": "B",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 24,
+   "area_pct": {
+    "n": 24,
+    "mean": 16.32,
+    "sd": 8.91,
+    "p10": 1.63,
+    "med": 20.75,
+    "p90": 25.07,
+    "max": 25.07
+   },
+   "obj": {
+    "n": 24,
+    "mean": 6.0,
+    "sd": 3.39,
+    "p10": 2.0,
+    "med": 6.0,
+    "p90": 11.0,
+    "max": 11.0
+   },
+   "by_key": {
+    "Dr": 0.0893,
+    "Gk": 12.2905,
+    "Jt": 0.0265,
+    "Mh": 0.0883,
+    "R": 3.8296
+   }
+  },
+  "scene16|D": {
+   "scene": "scene16",
+   "arm": "D",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 9.84,
+    "sd": 7.62,
+    "p10": 0.03,
+    "med": 8.69,
+    "p90": 22.38,
+    "max": 22.38
+   },
+   "obj": {
+    "n": 24,
+    "mean": 5.5,
+    "sd": 3.5,
+    "p10": 2.0,
+    "med": 5.0,
+    "p90": 11.0,
+    "max": 11.0
+   },
+   "by_key": {
+    "Dr": 0.0816,
+    "Gk": 9.6471,
+    "Jt": 0.0265,
+    "Mh": 0.0883
+   }
+  },
+  "scene17|A": {
+   "scene": "scene17",
+   "arm": "A",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 72,
+   "area_pct": {
+    "n": 72,
+    "mean": 26.51,
+    "sd": 7.61,
+    "p10": 18.37,
+    "med": 27.55,
+    "p90": 32.19,
+    "max": 52.08
+   },
+   "obj": {
+    "n": 72,
+    "mean": 347.67,
+    "sd": 145.1,
+    "p10": 36.0,
+    "med": 404.0,
+    "p90": 495.0,
+    "max": 512.0
+   },
+   "by_key": {
+    "Dr": 1.039,
+    "Gk": 1.1623,
+    "Jt": 0.0572,
+    "Sg": 0.105,
+    "V": 24.1439
+   }
+  },
+  "scene17|B": {
+   "scene": "scene17",
+   "arm": "B",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 72,
+   "area_pct": {
+    "n": 72,
+    "mean": 2.34,
+    "sd": 6.32,
+    "p10": 0.03,
+    "med": 0.41,
+    "p90": 7.11,
+    "max": 28.79
+   },
+   "obj": {
+    "n": 72,
+    "mean": 2.06,
+    "sd": 1.24,
+    "p10": 1.0,
+    "med": 2.0,
+    "p90": 4.0,
+    "max": 5.0
+   },
+   "by_key": {
+    "Dr": 0.8453,
+    "Gk": 1.1577,
+    "Jt": 0.0567,
+    "V": 0.28
+   }
+  },
+  "scene17|D": {
+   "scene": "scene17",
+   "arm": "D",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 72,
+    "mean": 2.29,
+    "sd": 6.56,
+    "p10": 0.0,
+    "med": 0.08,
+    "p90": 6.71,
+    "max": 28.62
+   },
+   "obj": {
+    "n": 72,
+    "mean": 1.33,
+    "sd": 1.03,
+    "p10": 0.0,
+    "med": 1.0,
+    "p90": 3.0,
+    "max": 4.0
+   },
+   "by_key": {
+    "Dr": 1.0706,
+    "Gk": 1.1623,
+    "Jt": 0.0572
+   }
+  },
+  "scene20|A": {
+   "scene": "scene20",
+   "arm": "A",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 42,
+   "area_pct": {
+    "n": 72,
+    "mean": 42.44,
+    "sd": 15.51,
+    "p10": 30.32,
+    "med": 35.38,
+    "p90": 72.72,
+    "max": 82.18
+   },
+   "obj": {
+    "n": 72,
+    "mean": 16.83,
+    "sd": 3.75,
+    "p10": 12.0,
+    "med": 16.0,
+    "p90": 20.0,
+    "max": 26.0
+   },
+   "by_key": {
+    "Jt": 0.1627,
+    "Mh": 0.0289,
+    "R": 7.983,
+    "V": 34.2605
+   }
+  },
+  "scene20|B": {
+   "scene": "scene20",
+   "arm": "B",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 42,
+   "area_pct": {
+    "n": 72,
+    "mean": 19.36,
+    "sd": 18.24,
+    "p10": 7.93,
+    "med": 11.69,
+    "p90": 59.74,
+    "max": 67.85
+   },
+   "obj": {
+    "n": 72,
+    "mean": 2.71,
+    "sd": 1.22,
+    "p10": 1.0,
+    "med": 2.0,
+    "p90": 4.0,
+    "max": 5.0
+   },
+   "by_key": {
+    "Dr": 0.0279,
+    "Jt": 0.2179,
+    "Mh": 0.0289,
+    "R": 7.9787,
+    "V": 11.103
+   }
+  },
+  "scene20|D": {
+   "scene": "scene20",
+   "arm": "D",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 72,
+    "mean": 0.25,
+    "sd": 0.25,
+    "p10": 0.0,
+    "med": 0.21,
+    "p90": 0.61,
+    "max": 0.9
+   },
+   "obj": {
+    "n": 72,
+    "mean": 1.17,
+    "sd": 0.69,
+    "p10": 0.0,
+    "med": 1.0,
+    "p90": 2.0,
+    "max": 2.0
+   },
+   "by_key": {
+    "Dr": 0.001,
+    "Jt": 0.2179,
+    "Mh": 0.0289
+   }
+  },
+  "scene21|A": {
+   "scene": "scene21",
+   "arm": "A",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 24,
+   "area_pct": {
+    "n": 24,
+    "mean": 38.05,
+    "sd": 9.21,
+    "p10": 29.5,
+    "med": 35.96,
+    "p90": 59.47,
+    "max": 59.47
+   },
+   "obj": {
+    "n": 24,
+    "mean": 20.12,
+    "sd": 1.48,
+    "p10": 18.0,
+    "med": 20.0,
+    "p90": 23.0,
+    "max": 23.0
+   },
+   "by_key": {
+    "Dr": 0.0057,
+    "Gk": 5.854,
+    "Jt": 0.0567,
+    "Mh": 0.0104,
+    "N": 1.3492,
+    "R": 11.6086,
+    "V": 19.1648
+   }
+  },
+  "scene21|B": {
+   "scene": "scene21",
+   "arm": "B",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 24,
+   "area_pct": {
+    "n": 24,
+    "mean": 18.88,
+    "sd": 11.6,
+    "p10": 10.31,
+    "med": 16.22,
+    "p90": 47.55,
+    "max": 47.55
+   },
+   "obj": {
+    "n": 24,
+    "mean": 3.38,
+    "sd": 1.44,
+    "p10": 2.0,
+    "med": 3.0,
+    "p90": 7.0,
+    "max": 7.0
+   },
+   "by_key": {
+    "Dr": 0.0057,
+    "Gk": 5.854,
+    "Jt": 0.0567,
+    "Mh": 0.0104,
+    "N": 1.3493,
+    "R": 11.6086
+   }
+  },
+  "scene21|D": {
+   "scene": "scene21",
+   "arm": "D",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 5.93,
+    "sd": 15.91,
+    "p10": 0.0,
+    "med": 0.05,
+    "p90": 47.14,
+    "max": 47.14
+   },
+   "obj": {
+    "n": 24,
+    "mean": 1.0,
+    "sd": 1.62,
+    "p10": 0.0,
+    "med": 1.0,
+    "p90": 5.0,
+    "max": 5.0
+   },
+   "by_key": {
+    "Dr": 0.0056,
+    "Gk": 5.854,
+    "Jt": 0.0567,
+    "Mh": 0.0104
+   }
+  },
+  "sceneC1|A": {
+   "scene": "sceneC1",
+   "arm": "A",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 48,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 48,
+   "area_pct": {
+    "n": 48,
+    "mean": 50.82,
+    "sd": 3.14,
+    "p10": 46.66,
+    "med": 50.58,
+    "p90": 55.07,
+    "max": 55.93
+   },
+   "obj": {
+    "n": 48,
+    "mean": 21.31,
+    "sd": 4.47,
+    "p10": 14.0,
+    "med": 21.0,
+    "p90": 27.0,
+    "max": 29.0
+   },
+   "by_key": {
+    "Gk": 10.8987,
+    "R": 1.1159,
+    "Sg": 0.3476,
+    "V": 38.4532
+   }
+  },
+  "sceneC1|B": {
+   "scene": "sceneC1",
+   "arm": "B",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 48,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 48,
+   "area_pct": {
+    "n": 48,
+    "mean": 50.82,
+    "sd": 3.14,
+    "p10": 46.66,
+    "med": 50.58,
+    "p90": 55.07,
+    "max": 55.93
+   },
+   "obj": {
+    "n": 48,
+    "mean": 21.31,
+    "sd": 4.47,
+    "p10": 14.0,
+    "med": 21.0,
+    "p90": 27.0,
+    "max": 29.0
+   },
+   "by_key": {
+    "Gk": 10.8987,
+    "R": 1.1159,
+    "Sg": 0.3476,
+    "V": 38.4532
+   }
+  },
+  "sceneC1|D": {
+   "scene": "sceneC1",
+   "arm": "D",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 48,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 48,
+    "mean": 10.9,
+    "sd": 5.52,
+    "p10": 3.68,
+    "med": 10.62,
+    "p90": 19.0,
+    "max": 23.79
+   },
+   "obj": {
+    "n": 48,
+    "mean": 1.0,
+    "sd": 0.0,
+    "p10": 1.0,
+    "med": 1.0,
+    "p90": 1.0,
+    "max": 1.0
+   },
+   "by_key": {
+    "Gk": 10.8987
+   }
+  },
+  "sceneC4|A": {
+   "scene": "sceneC4",
+   "arm": "A",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 69,
+   "area_pct": {
+    "n": 72,
+    "mean": 35.77,
+    "sd": 8.37,
+    "p10": 23.31,
+    "med": 38.72,
+    "p90": 45.94,
+    "max": 52.38
+   },
+   "obj": {
+    "n": 72,
+    "mean": 11.38,
+    "sd": 2.51,
+    "p10": 8.0,
+    "med": 12.0,
+    "p90": 14.0,
+    "max": 16.0
+   },
+   "by_key": {
+    "Dr": 0.0771,
+    "Gk": 2.2179,
+    "Jt": 0.0571,
+    "Mh": 0.4798,
+    "R": 1.9192,
+    "V": 31.018
+   }
+  },
+  "sceneC4|B": {
+   "scene": "sceneC4",
+   "arm": "B",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 69,
+   "area_pct": {
+    "n": 72,
+    "mean": 34.74,
+    "sd": 8.06,
+    "p10": 23.24,
+    "med": 36.35,
+    "p90": 44.77,
+    "max": 49.93
+   },
+   "obj": {
+    "n": 72,
+    "mean": 9.46,
+    "sd": 2.43,
+    "p10": 6.0,
+    "med": 10.0,
+    "p90": 12.0,
+    "max": 14.0
+   },
+   "by_key": {
+    "Dr": 0.0771,
+    "Gk": 2.2179,
+    "Jt": 0.0571,
+    "Mh": 0.4798,
+    "V": 31.9056
+   }
+  },
+  "sceneC4|D": {
+   "scene": "sceneC4",
+   "arm": "D",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 72,
+    "mean": 0.66,
+    "sd": 0.48,
+    "p10": 0.18,
+    "med": 0.41,
+    "p90": 1.35,
+    "max": 1.76
+   },
+   "obj": {
+    "n": 72,
+    "mean": 2.58,
+    "sd": 0.87,
+    "p10": 2.0,
+    "med": 3.0,
+    "p90": 3.0,
+    "max": 4.0
+   },
+   "by_key": {
+    "Dr": 0.0771,
+    "Jt": 0.09,
+    "Mh": 0.4913
+   }
+  },
+  "sceneD1|A": {
+   "scene": "sceneD1",
+   "arm": "A",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 24,
+   "area_pct": {
+    "n": 24,
+    "mean": 46.84,
+    "sd": 14.53,
+    "p10": 21.88,
+    "med": 54.35,
+    "p90": 61.54,
+    "max": 61.54
+   },
+   "obj": {
+    "n": 24,
+    "mean": 72.62,
+    "sd": 18.45,
+    "p10": 47.0,
+    "med": 71.0,
+    "p90": 110.0,
+    "max": 110.0
+   },
+   "by_key": {
+    "Dr": 0.4686,
+    "Gk": 1.7393,
+    "Jt": 0.0844,
+    "N": 4.0671,
+    "Sg": 0.2868,
+    "Ux": 0.0407,
+    "V": 40.1562
+   }
+  },
+  "sceneD1|B": {
+   "scene": "sceneD1",
+   "arm": "B",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 24,
+   "area_pct": {
+    "n": 24,
+    "mean": 2.4,
+    "sd": 1.63,
+    "p10": 0.32,
+    "med": 2.27,
+    "p90": 5.84,
+    "max": 5.84
+   },
+   "obj": {
+    "n": 24,
+    "mean": 1.88,
+    "sd": 0.34,
+    "p10": 1.0,
+    "med": 2.0,
+    "p90": 2.0,
+    "max": 2.0
+   },
+   "by_key": {
+    "Dr": 0.5051,
+    "Gk": 1.7999,
+    "Jt": 0.0909
+   }
+  },
+  "sceneD1|D": {
+   "scene": "sceneD1",
+   "arm": "D",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 1.5,
+    "sd": 1.86,
+    "p10": 0.0,
+    "med": 1.53,
+    "p90": 5.49,
+    "max": 5.49
+   },
+   "obj": {
+    "n": 24,
+    "mean": 0.88,
+    "sd": 0.34,
+    "p10": 0.0,
+    "med": 1.0,
+    "p90": 1.0,
+    "max": 1.0
+   },
+   "by_key": {
+    "Gk": 1.4522,
+    "Jt": 0.0456
+   }
+  },
+  "sceneD2|A": {
+   "scene": "sceneD2",
+   "arm": "A",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 24,
+   "area_pct": {
+    "n": 24,
+    "mean": 8.55,
+    "sd": 2.83,
+    "p10": 3.59,
+    "med": 8.53,
+    "p90": 12.54,
+    "max": 12.54
+   },
+   "obj": {
+    "n": 24,
+    "mean": 59.62,
+    "sd": 18.84,
+    "p10": 28.0,
+    "med": 65.0,
+    "p90": 86.0,
+    "max": 86.0
+   },
+   "by_key": {
+    "Gk": 1.8044,
+    "Jt": 0.0854,
+    "V": 6.6635
+   }
+  },
+  "sceneD2|B": {
+   "scene": "sceneD2",
+   "arm": "B",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 24,
+   "area_pct": {
+    "n": 24,
+    "mean": 1.89,
+    "sd": 1.74,
+    "p10": 0.0,
+    "med": 1.39,
+    "p90": 4.94,
+    "max": 4.94
+   },
+   "obj": {
+    "n": 24,
+    "mean": 4.0,
+    "sd": 1.69,
+    "p10": 0.0,
+    "med": 5.0,
+    "p90": 5.0,
+    "max": 5.0
+   },
+   "by_key": {
+    "Gk": 1.8044,
+    "Jt": 0.0895
+   }
+  },
+  "sceneD2|D": {
+   "scene": "sceneD2",
+   "arm": "D",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 1.98,
+    "sd": 1.69,
+    "p10": 0.35,
+    "med": 1.39,
+    "p90": 4.94,
+    "max": 4.94
+   },
+   "obj": {
+    "n": 24,
+    "mean": 4.21,
+    "sd": 1.47,
+    "p10": 3.0,
+    "med": 5.0,
+    "p90": 5.0,
+    "max": 5.0
+   },
+   "by_key": {
+    "Gk": 1.883,
+    "Jt": 0.0929
+   }
+  },
+  "sceneD3|A": {
+   "scene": "sceneD3",
+   "arm": "A",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 24,
+   "area_pct": {
+    "n": 24,
+    "mean": 18.55,
+    "sd": 2.81,
+    "p10": 15.07,
+    "med": 17.85,
+    "p90": 24.31,
+    "max": 24.31
+   },
+   "obj": {
+    "n": 24,
+    "mean": 30.5,
+    "sd": 6.62,
+    "p10": 18.0,
+    "med": 34.0,
+    "p90": 38.0,
+    "max": 38.0
+   },
+   "by_key": {
+    "Gk": 1.8992,
+    "Jt": 0.5139,
+    "V": 16.1326
+   }
+  },
+  "sceneD3|B": {
+   "scene": "sceneD3",
+   "arm": "B",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 24,
+   "area_pct": {
+    "n": 24,
+    "mean": 2.41,
+    "sd": 2.74,
+    "p10": 0.0,
+    "med": 2.15,
+    "p90": 8.29,
+    "max": 8.29
+   },
+   "obj": {
+    "n": 24,
+    "mean": 1.0,
+    "sd": 0.88,
+    "p10": 0.0,
+    "med": 1.0,
+    "p90": 2.0,
+    "max": 2.0
+   },
+   "by_key": {
+    "Gk": 1.8992,
+    "Jt": 0.5139
+   }
+  },
+  "sceneD3|D": {
+   "scene": "sceneD3",
+   "arm": "D",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 2.6,
+    "sd": 2.92,
+    "p10": 0.0,
+    "med": 2.32,
+    "p90": 8.87,
+    "max": 8.87
+   },
+   "obj": {
+    "n": 24,
+    "mean": 1.0,
+    "sd": 0.88,
+    "p10": 0.0,
+    "med": 1.0,
+    "p90": 2.0,
+    "max": 2.0
+   },
+   "by_key": {
+    "Gk": 1.9586,
+    "Jt": 0.639
+   }
+  },
+  "sceneH1|A|h12": {
+   "scene": "sceneH1",
+   "arm": "A",
+   "group": "h12",
+   "family": "H(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 16,
+   "area_pct": {
+    "n": 16,
+    "mean": 20.19,
+    "sd": 7.31,
+    "p10": 7.78,
+    "med": 21.85,
+    "p90": 32.29,
+    "max": 32.29
+   },
+   "obj": {
+    "n": 16,
+    "mean": 21.5,
+    "sd": 11.02,
+    "p10": 4.0,
+    "med": 26.0,
+    "p90": 33.0,
+    "max": 33.0
+   },
+   "by_key": {
+    "Jt": 7.3025,
+    "R": 3.0729,
+    "Sg": 0.0029,
+    "Ta": 2.1061,
+    "V": 7.7009
+   }
+  },
+  "sceneH1|A|h12_r0": {
+   "scene": "sceneH1",
+   "arm": "A",
+   "group": "h12_r0",
+   "family": "H(new)",
+   "n": 8,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 8,
+   "area_pct": {
+    "n": 8,
+    "mean": 9.73,
+    "sd": 9.29,
+    "p10": 0.0,
+    "med": 10.44,
+    "p90": 23.36,
+    "max": 23.36
+   },
+   "obj": {
+    "n": 8,
+    "mean": 17.0,
+    "sd": 11.03,
+    "p10": 0.0,
+    "med": 23.0,
+    "p90": 27.0,
+    "max": 27.0
+   },
+   "by_key": {
+    "R": 3.3585,
+    "Ta": 0.6068,
+    "V": 5.7692
+   }
+  },
+  "sceneH1|B|h12": {
+   "scene": "sceneH1",
+   "arm": "B",
+   "group": "h12",
+   "family": "H(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 16,
+   "area_pct": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneH1|B|h12_r0": {
+   "scene": "sceneH1",
+   "arm": "B",
+   "group": "h12_r0",
+   "family": "H(new)",
+   "n": 8,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 8,
+   "area_pct": {
+    "n": 8,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 8,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneH1|C|h12": {
+   "scene": "sceneH1",
+   "arm": "C",
+   "group": "h12",
+   "family": "H(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 20.22,
+    "sd": 7.32,
+    "p10": 7.78,
+    "med": 21.85,
+    "p90": 32.29,
+    "max": 32.29
+   },
+   "obj": {
+    "n": 16,
+    "mean": 21.5,
+    "sd": 11.02,
+    "p10": 4.0,
+    "med": 26.0,
+    "p90": 33.0,
+    "max": 33.0
+   },
+   "by_key": {
+    "Jt": 7.3025,
+    "R": 3.0729,
+    "Sg": 0.0029,
+    "Ta": 2.1061,
+    "V": 7.7309
+   }
+  },
+  "sceneH1|C|h12_r0": {
+   "scene": "sceneH1",
+   "arm": "C",
+   "group": "h12_r0",
+   "family": "H(new)",
+   "n": 8,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 8,
+    "mean": 9.75,
+    "sd": 9.3,
+    "p10": 0.0,
+    "med": 10.49,
+    "p90": 23.37,
+    "max": 23.37
+   },
+   "obj": {
+    "n": 8,
+    "mean": 17.0,
+    "sd": 11.03,
+    "p10": 0.0,
+    "med": 23.0,
+    "p90": 27.0,
+    "max": 27.0
+   },
+   "by_key": {
+    "R": 3.3585,
+    "Ta": 0.6068,
+    "V": 5.7815
+   }
+  },
+  "sceneH1|D|h12": {
+   "scene": "sceneH1",
+   "arm": "D",
+   "group": "h12",
+   "family": "H(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneH1|D|h12_r0": {
+   "scene": "sceneH1",
+   "arm": "D",
+   "group": "h12_r0",
+   "family": "H(new)",
+   "n": 8,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 8,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 8,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneH2|A|h12": {
+   "scene": "sceneH2",
+   "arm": "A",
+   "group": "h12",
+   "family": "H(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 16,
+   "area_pct": {
+    "n": 16,
+    "mean": 3.42,
+    "sd": 0.66,
+    "p10": 2.36,
+    "med": 3.5,
+    "p90": 4.5,
+    "max": 4.5
+   },
+   "obj": {
+    "n": 16,
+    "mean": 5.62,
+    "sd": 1.02,
+    "p10": 5.0,
+    "med": 5.0,
+    "p90": 8.0,
+    "max": 8.0
+   },
+   "by_key": {
+    "Jt": 0.5476,
+    "N": 0.1578,
+    "R": 1.2478,
+    "Sg": 0.0552,
+    "Sh": 0.0436,
+    "Ta": 1.0509,
+    "V": 0.3133
+   }
+  },
+  "sceneH2|A|h12_r0": {
+   "scene": "sceneH2",
+   "arm": "A",
+   "group": "h12_r0",
+   "family": "H(new)",
+   "n": 8,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 8,
+   "area_pct": {
+    "n": 8,
+    "mean": 3.05,
+    "sd": 0.65,
+    "p10": 2.36,
+    "med": 3.21,
+    "p90": 3.97,
+    "max": 3.97
+   },
+   "obj": {
+    "n": 8,
+    "mean": 5.75,
+    "sd": 1.39,
+    "p10": 5.0,
+    "med": 5.0,
+    "p90": 8.0,
+    "max": 8.0
+   },
+   "by_key": {
+    "Jt": 0.6938,
+    "N": 0.1194,
+    "R": 1.0195,
+    "Sg": 0.1103,
+    "Sh": 0.0872,
+    "Ta": 0.7466,
+    "V": 0.2757
+   }
+  },
+  "sceneH2|B|h12": {
+   "scene": "sceneH2",
+   "arm": "B",
+   "group": "h12",
+   "family": "H(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 16,
+   "area_pct": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneH2|B|h12_r0": {
+   "scene": "sceneH2",
+   "arm": "B",
+   "group": "h12_r0",
+   "family": "H(new)",
+   "n": 8,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 8,
+   "area_pct": {
+    "n": 8,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 8,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneH2|C|h12": {
+   "scene": "sceneH2",
+   "arm": "C",
+   "group": "h12",
+   "family": "H(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 3.46,
+    "sd": 0.68,
+    "p10": 2.36,
+    "med": 3.5,
+    "p90": 4.44,
+    "max": 4.44
+   },
+   "obj": {
+    "n": 16,
+    "mean": 5.62,
+    "sd": 1.02,
+    "p10": 5.0,
+    "med": 5.0,
+    "p90": 8.0,
+    "max": 8.0
+   },
+   "by_key": {
+    "Jt": 0.5392,
+    "N": 0.157,
+    "R": 1.2992,
+    "Sg": 0.0552,
+    "Sh": 0.0436,
+    "Ta": 1.0446,
+    "V": 0.3216
+   }
+  },
+  "sceneH2|C|h12_r0": {
+   "scene": "sceneH2",
+   "arm": "C",
+   "group": "h12_r0",
+   "family": "H(new)",
+   "n": 8,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 8,
+    "mean": 3.03,
+    "sd": 0.61,
+    "p10": 2.36,
+    "med": 3.21,
+    "p90": 3.87,
+    "max": 3.87
+   },
+   "obj": {
+    "n": 8,
+    "mean": 5.75,
+    "sd": 1.39,
+    "p10": 5.0,
+    "med": 5.0,
+    "p90": 8.0,
+    "max": 8.0
+   },
+   "by_key": {
+    "Jt": 0.6938,
+    "N": 0.1194,
+    "R": 1.0195,
+    "Sg": 0.1103,
+    "Sh": 0.0872,
+    "Ta": 0.7466,
+    "V": 0.2525
+   }
+  },
+  "sceneH2|D|h12": {
+   "scene": "sceneH2",
+   "arm": "D",
+   "group": "h12",
+   "family": "H(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneH2|D|h12_r0": {
+   "scene": "sceneH2",
+   "arm": "D",
+   "group": "h12_r0",
+   "family": "H(new)",
+   "n": 8,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 8,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 8,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneH3|A|h3": {
+   "scene": "sceneH3",
+   "arm": "A",
+   "group": "h3",
+   "family": "H(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 12,
+   "area_pct": {
+    "n": 16,
+    "mean": 5.0,
+    "sd": 1.84,
+    "p10": 1.92,
+    "med": 4.88,
+    "p90": 8.2,
+    "max": 8.2
+   },
+   "obj": {
+    "n": 16,
+    "mean": 13.5,
+    "sd": 1.46,
+    "p10": 11.0,
+    "med": 14.0,
+    "p90": 15.0,
+    "max": 15.0
+   },
+   "by_key": {
+    "Bo": 0.8178,
+    "Cm": 0.166,
+    "Dr": 1.3857,
+    "Jt": 0.1179,
+    "Mh": 0.6746,
+    "N": 0.1984,
+    "Sg": 0.3766,
+    "Ta": 0.0021,
+    "Ux": 0.0019,
+    "V": 1.2553
+   }
+  },
+  "sceneH3|B|h3": {
+   "scene": "sceneH3",
+   "arm": "B",
+   "group": "h3",
+   "family": "H(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 12,
+   "area_pct": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 16,
+    "mean": 0.38,
+    "sd": 0.5,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 1.0,
+    "max": 1.0
+   },
+   "by_key": {
+    "Ux": 0.0003
+   }
+  },
+  "sceneH3|C|h3": {
+   "scene": "sceneH3",
+   "arm": "C",
+   "group": "h3",
+   "family": "H(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 5.0,
+    "sd": 1.84,
+    "p10": 1.92,
+    "med": 4.88,
+    "p90": 8.2,
+    "max": 8.2
+   },
+   "obj": {
+    "n": 16,
+    "mean": 13.5,
+    "sd": 1.46,
+    "p10": 11.0,
+    "med": 14.0,
+    "p90": 15.0,
+    "max": 15.0
+   },
+   "by_key": {
+    "Bo": 0.8178,
+    "Cm": 0.166,
+    "Dr": 1.3857,
+    "Jt": 0.1179,
+    "Mh": 0.6746,
+    "N": 0.1984,
+    "Sg": 0.3766,
+    "Ta": 0.0021,
+    "Ux": 0.0019,
+    "V": 1.2553
+   }
+  },
+  "sceneH3|D|h3": {
+   "scene": "sceneH3",
+   "arm": "D",
+   "group": "h3",
+   "family": "H(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 16,
+    "mean": 0.38,
+    "sd": 0.5,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 1.0,
+    "max": 1.0
+   },
+   "by_key": {
+    "Ux": 0.0003
+   }
+  },
+  "sceneH6|A|h67": {
+   "scene": "sceneH6",
+   "arm": "A",
+   "group": "h67",
+   "family": "H(new)",
+   "n": 8,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 8,
+   "area_pct": {
+    "n": 8,
+    "mean": 21.06,
+    "sd": 10.03,
+    "p10": 5.55,
+    "med": 25.02,
+    "p90": 35.69,
+    "max": 35.69
+   },
+   "obj": {
+    "n": 8,
+    "mean": 23.62,
+    "sd": 5.4,
+    "p10": 15.0,
+    "med": 24.0,
+    "p90": 30.0,
+    "max": 30.0
+   },
+   "by_key": {
+    "R": 3.4614,
+    "Sg": 0.1522,
+    "V": 17.4502
+   }
+  },
+  "sceneH7|A|h67": {
+   "scene": "sceneH7",
+   "arm": "A",
+   "group": "h67",
+   "family": "H(new)",
+   "n": 8,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 7,
+   "area_pct": {
+    "n": 8,
+    "mean": 4.92,
+    "sd": 3.45,
+    "p10": 1.32,
+    "med": 3.49,
+    "p90": 9.97,
+    "max": 9.97
+   },
+   "obj": {
+    "n": 8,
+    "mean": 7.88,
+    "sd": 1.13,
+    "p10": 7.0,
+    "med": 8.0,
+    "p90": 10.0,
+    "max": 10.0
+   },
+   "by_key": {
+    "Dr": 1.2089,
+    "Jt": 0.0596,
+    "Mh": 0.6148,
+    "N": 0.4971,
+    "Sg": 0.4255,
+    "Ta": 0.0043,
+    "V": 2.1069
+   }
+  },
+  "sceneL1|A|l1": {
+   "scene": "sceneL1",
+   "arm": "A",
+   "group": "l1",
+   "family": "L(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 16,
+   "area_pct": {
+    "n": 16,
+    "mean": 19.38,
+    "sd": 9.51,
+    "p10": 11.58,
+    "med": 15.85,
+    "p90": 36.01,
+    "max": 36.01
+   },
+   "obj": {
+    "n": 16,
+    "mean": 11.62,
+    "sd": 0.89,
+    "p10": 11.0,
+    "med": 11.0,
+    "p90": 13.0,
+    "max": 13.0
+   },
+   "by_key": {
+    "Dr": 0.0175,
+    "Jt": 0.2083,
+    "N": 0.9798,
+    "R": 3.466,
+    "Sh": 1.0852,
+    "Ta": 4.8597,
+    "V": 8.7669
+   }
+  },
+  "sceneL1|B|l1": {
+   "scene": "sceneL1",
+   "arm": "B",
+   "group": "l1",
+   "family": "L(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 16,
+   "area_pct": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneL1|C|l1": {
+   "scene": "sceneL1",
+   "arm": "C",
+   "group": "l1",
+   "family": "L(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 19.38,
+    "sd": 9.51,
+    "p10": 11.58,
+    "med": 15.85,
+    "p90": 36.01,
+    "max": 36.01
+   },
+   "obj": {
+    "n": 16,
+    "mean": 11.62,
+    "sd": 0.89,
+    "p10": 11.0,
+    "med": 11.0,
+    "p90": 13.0,
+    "max": 13.0
+   },
+   "by_key": {
+    "Dr": 0.0175,
+    "Jt": 0.2083,
+    "N": 0.9798,
+    "R": 3.466,
+    "Sh": 1.0852,
+    "Ta": 4.8597,
+    "V": 8.7669
+   }
+  },
+  "sceneL1|D|l1": {
+   "scene": "sceneL1",
+   "arm": "D",
+   "group": "l1",
+   "family": "L(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneN1|D": {
+   "scene": "sceneN1",
+   "arm": "D",
+   "group": null,
+   "family": "N-cue(legacy)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 0.69,
+    "sd": 1.19,
+    "p10": 0.0,
+    "med": 0.48,
+    "p90": 3.66,
+    "max": 3.66
+   },
+   "obj": {
+    "n": 24,
+    "mean": 1.0,
+    "sd": 1.14,
+    "p10": 0.0,
+    "med": 1.0,
+    "p90": 3.0,
+    "max": 3.0
+   },
+   "by_key": {
+    "Dr": 0.0904,
+    "Mh": 0.5958
+   }
+  },
+  "sceneN11|A|n911": {
+   "scene": "sceneN11",
+   "arm": "A",
+   "group": "n911",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 30.08,
+    "sd": 4.13,
+    "p10": 20.6,
+    "med": 31.4,
+    "p90": 35.26,
+    "max": 35.26
+   },
+   "obj": {
+    "n": 16,
+    "mean": 20.5,
+    "sd": 1.55,
+    "p10": 19.0,
+    "med": 20.0,
+    "p90": 23.0,
+    "max": 23.0
+   },
+   "by_key": {
+    "Bo": 0.2935,
+    "Dr": 1.3026,
+    "Jt": 0.252,
+    "Mh": 0.2326,
+    "Rm": 0.6314,
+    "Sg": 0.1621,
+    "Sh": 2.9539,
+    "Ta": 0.0941,
+    "Tg": 0.121,
+    "V": 24.0363
+   }
+  },
+  "sceneN11|A|n911_rev": {
+   "scene": "sceneN11",
+   "arm": "A",
+   "group": "n911_rev",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 30.08,
+    "sd": 4.13,
+    "p10": 20.6,
+    "med": 31.4,
+    "p90": 35.26,
+    "max": 35.26
+   },
+   "obj": {
+    "n": 16,
+    "mean": 20.5,
+    "sd": 1.55,
+    "p10": 19.0,
+    "med": 20.0,
+    "p90": 23.0,
+    "max": 23.0
+   },
+   "by_key": {
+    "Bo": 0.2935,
+    "Dr": 1.3026,
+    "Jt": 0.252,
+    "Mh": 0.2326,
+    "Rm": 0.6314,
+    "Sg": 0.1621,
+    "Sh": 2.9539,
+    "Ta": 0.0963,
+    "Tg": 0.121,
+    "V": 24.0363
+   }
+  },
+  "sceneN11|A|n911_rev2": {
+   "scene": "sceneN11",
+   "arm": "A",
+   "group": "n911_rev2",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 30.08,
+    "sd": 4.13,
+    "p10": 20.6,
+    "med": 31.4,
+    "p90": 35.26,
+    "max": 35.26
+   },
+   "obj": {
+    "n": 16,
+    "mean": 20.5,
+    "sd": 1.55,
+    "p10": 19.0,
+    "med": 20.0,
+    "p90": 23.0,
+    "max": 23.0
+   },
+   "by_key": {
+    "Bo": 0.2935,
+    "Dr": 1.3026,
+    "Jt": 0.252,
+    "Mh": 0.2326,
+    "Rm": 0.6314,
+    "Sg": 0.1621,
+    "Sh": 2.9539,
+    "Ta": 0.0963,
+    "Tg": 0.121,
+    "V": 24.0363
+   }
+  },
+  "sceneN11|B|n911": {
+   "scene": "sceneN11",
+   "arm": "B",
+   "group": "n911",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 1.94,
+    "sd": 1.0,
+    "p10": 0.86,
+    "med": 1.88,
+    "p90": 3.95,
+    "max": 3.95
+   },
+   "obj": {
+    "n": 16,
+    "mean": 1.0,
+    "sd": 0.0,
+    "p10": 1.0,
+    "med": 1.0,
+    "p90": 1.0,
+    "max": 1.0
+   },
+   "by_key": {
+    "V": 1.9426
+   }
+  },
+  "sceneN11|B|n911_rev": {
+   "scene": "sceneN11",
+   "arm": "B",
+   "group": "n911_rev",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 1.94,
+    "sd": 1.0,
+    "p10": 0.86,
+    "med": 1.88,
+    "p90": 3.95,
+    "max": 3.95
+   },
+   "obj": {
+    "n": 16,
+    "mean": 1.0,
+    "sd": 0.0,
+    "p10": 1.0,
+    "med": 1.0,
+    "p90": 1.0,
+    "max": 1.0
+   },
+   "by_key": {
+    "V": 1.9426
+   }
+  },
+  "sceneN11|B|n911_rev2": {
+   "scene": "sceneN11",
+   "arm": "B",
+   "group": "n911_rev2",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 1.94,
+    "sd": 1.0,
+    "p10": 0.86,
+    "med": 1.88,
+    "p90": 3.95,
+    "max": 3.95
+   },
+   "obj": {
+    "n": 16,
+    "mean": 1.0,
+    "sd": 0.0,
+    "p10": 1.0,
+    "med": 1.0,
+    "p90": 1.0,
+    "max": 1.0
+   },
+   "by_key": {
+    "V": 1.9426
+   }
+  },
+  "sceneN11|C|n911": {
+   "scene": "sceneN11",
+   "arm": "C",
+   "group": "n911",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 30.17,
+    "sd": 4.15,
+    "p10": 20.75,
+    "med": 31.45,
+    "p90": 35.55,
+    "max": 35.55
+   },
+   "obj": {
+    "n": 16,
+    "mean": 20.38,
+    "sd": 1.71,
+    "p10": 18.0,
+    "med": 20.0,
+    "p90": 23.0,
+    "max": 23.0
+   },
+   "by_key": {
+    "Bo": 0.2935,
+    "Dr": 1.3026,
+    "Jt": 0.252,
+    "Mh": 0.2326,
+    "Rm": 0.6314,
+    "Sg": 0.1621,
+    "Sh": 2.9374,
+    "Ta": 0.0941,
+    "Tg": 0.121,
+    "V": 24.1394
+   }
+  },
+  "sceneN11|C|n911_rev": {
+   "scene": "sceneN11",
+   "arm": "C",
+   "group": "n911_rev",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 30.17,
+    "sd": 4.15,
+    "p10": 20.75,
+    "med": 31.45,
+    "p90": 35.55,
+    "max": 35.55
+   },
+   "obj": {
+    "n": 16,
+    "mean": 20.38,
+    "sd": 1.71,
+    "p10": 18.0,
+    "med": 20.0,
+    "p90": 23.0,
+    "max": 23.0
+   },
+   "by_key": {
+    "Bo": 0.2935,
+    "Dr": 1.3026,
+    "Jt": 0.252,
+    "Mh": 0.2326,
+    "Rm": 0.6314,
+    "Sg": 0.1621,
+    "Sh": 2.9374,
+    "Ta": 0.0963,
+    "Tg": 0.121,
+    "V": 24.1394
+   }
+  },
+  "sceneN11|C|n911_rev2": {
+   "scene": "sceneN11",
+   "arm": "C",
+   "group": "n911_rev2",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 30.17,
+    "sd": 4.15,
+    "p10": 20.75,
+    "med": 31.45,
+    "p90": 35.55,
+    "max": 35.55
+   },
+   "obj": {
+    "n": 16,
+    "mean": 20.38,
+    "sd": 1.71,
+    "p10": 18.0,
+    "med": 20.0,
+    "p90": 23.0,
+    "max": 23.0
+   },
+   "by_key": {
+    "Bo": 0.2935,
+    "Dr": 1.3026,
+    "Jt": 0.252,
+    "Mh": 0.2326,
+    "Rm": 0.6314,
+    "Sg": 0.1621,
+    "Sh": 2.9374,
+    "Ta": 0.0963,
+    "Tg": 0.121,
+    "V": 24.1394
+   }
+  },
+  "sceneN11|D|n911": {
+   "scene": "sceneN11",
+   "arm": "D",
+   "group": "n911",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneN11|D|n911_rev": {
+   "scene": "sceneN11",
+   "arm": "D",
+   "group": "n911_rev",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneN11|D|n911_rev2": {
+   "scene": "sceneN11",
+   "arm": "D",
+   "group": "n911_rev2",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneN2|D": {
+   "scene": "sceneN2",
+   "arm": "D",
+   "group": null,
+   "family": "N-cue(legacy)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 0.93,
+    "sd": 0.92,
+    "p10": 0.0,
+    "med": 1.08,
+    "p90": 2.38,
+    "max": 2.38
+   },
+   "obj": {
+    "n": 24,
+    "mean": 0.88,
+    "sd": 0.61,
+    "p10": 0.0,
+    "med": 1.0,
+    "p90": 2.0,
+    "max": 2.0
+   },
+   "by_key": {
+    "Dr": 0.0001,
+    "Mh": 0.9305
+   }
+  },
+  "sceneN4|D": {
+   "scene": "sceneN4",
+   "arm": "D",
+   "group": null,
+   "family": "N-cue(legacy)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 12,
+   "area_pct": {
+    "n": 24,
+    "mean": 2.51,
+    "sd": 2.41,
+    "p10": 0.0,
+    "med": 2.63,
+    "p90": 7.24,
+    "max": 7.24
+   },
+   "obj": {
+    "n": 24,
+    "mean": 3.12,
+    "sd": 2.42,
+    "p10": 0.0,
+    "med": 4.0,
+    "p90": 6.0,
+    "max": 6.0
+   },
+   "by_key": {
+    "Dr": 0.0136,
+    "Gk": 2.4936
+   }
+  },
+  "sceneN5|D": {
+   "scene": "sceneN5",
+   "arm": "D",
+   "group": null,
+   "family": "N-cue(legacy)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 1.75,
+    "sd": 1.44,
+    "p10": 0.07,
+    "med": 2.12,
+    "p90": 4.79,
+    "max": 4.79
+   },
+   "obj": {
+    "n": 24,
+    "mean": 4.38,
+    "sd": 1.35,
+    "p10": 1.0,
+    "med": 5.0,
+    "p90": 5.0,
+    "max": 5.0
+   },
+   "by_key": {
+    "Dr": 0.005,
+    "Gk": 0.5572,
+    "Jt": 0.0566,
+    "Mh": 1.1271
+   }
+  },
+  "sceneN9|A|n911": {
+   "scene": "sceneN9",
+   "arm": "A",
+   "group": "n911",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 25.86,
+    "sd": 8.75,
+    "p10": 8.58,
+    "med": 30.14,
+    "p90": 34.81,
+    "max": 34.81
+   },
+   "obj": {
+    "n": 16,
+    "mean": 34.12,
+    "sd": 2.16,
+    "p10": 31.0,
+    "med": 35.0,
+    "p90": 37.0,
+    "max": 37.0
+   },
+   "by_key": {
+    "Bo": 0.1734,
+    "Dr": 0.1311,
+    "Jt": 0.0895,
+    "Mh": 0.2853,
+    "R": 0.1239,
+    "Rm": 0.0451,
+    "Sg": 0.2908,
+    "Sh": 3.3172,
+    "Ta": 0.3517,
+    "Tg": 0.366,
+    "V": 20.6842
+   }
+  },
+  "sceneN9|A|n911_rev": {
+   "scene": "sceneN9",
+   "arm": "A",
+   "group": "n911_rev",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 26.71,
+    "sd": 9.0,
+    "p10": 8.86,
+    "med": 31.53,
+    "p90": 35.09,
+    "max": 35.09
+   },
+   "obj": {
+    "n": 16,
+    "mean": 34.12,
+    "sd": 2.16,
+    "p10": 31.0,
+    "med": 35.0,
+    "p90": 37.0,
+    "max": 37.0
+   },
+   "by_key": {
+    "Bo": 0.1734,
+    "Dr": 0.1311,
+    "Jt": 0.0895,
+    "Mh": 0.2853,
+    "R": 0.1239,
+    "Rm": 0.0451,
+    "Sg": 0.2908,
+    "Sh": 3.3172,
+    "Ta": 1.2073,
+    "Tg": 0.366,
+    "V": 20.6821
+   }
+  },
+  "sceneN9|A|n911_rev2": {
+   "scene": "sceneN9",
+   "arm": "A",
+   "group": "n911_rev2",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 26.71,
+    "sd": 9.0,
+    "p10": 8.86,
+    "med": 31.53,
+    "p90": 35.09,
+    "max": 35.09
+   },
+   "obj": {
+    "n": 16,
+    "mean": 34.12,
+    "sd": 2.16,
+    "p10": 31.0,
+    "med": 35.0,
+    "p90": 37.0,
+    "max": 37.0
+   },
+   "by_key": {
+    "Bo": 0.1734,
+    "Dr": 0.1311,
+    "Jt": 0.0895,
+    "Mh": 0.2853,
+    "R": 0.1239,
+    "Rm": 0.0451,
+    "Sg": 0.2908,
+    "Sh": 3.3172,
+    "Ta": 1.2073,
+    "Tg": 0.366,
+    "V": 20.6821
+   }
+  },
+  "sceneN9|B|n911": {
+   "scene": "sceneN9",
+   "arm": "B",
+   "group": "n911",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneN9|B|n911_rev": {
+   "scene": "sceneN9",
+   "arm": "B",
+   "group": "n911_rev",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneN9|B|n911_rev2": {
+   "scene": "sceneN9",
+   "arm": "B",
+   "group": "n911_rev2",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneN9|C|n911": {
+   "scene": "sceneN9",
+   "arm": "C",
+   "group": "n911",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 25.92,
+    "sd": 8.73,
+    "p10": 8.68,
+    "med": 30.23,
+    "p90": 34.84,
+    "max": 34.84
+   },
+   "obj": {
+    "n": 16,
+    "mean": 34.12,
+    "sd": 2.16,
+    "p10": 31.0,
+    "med": 35.0,
+    "p90": 37.0,
+    "max": 37.0
+   },
+   "by_key": {
+    "Bo": 0.1734,
+    "Dr": 0.1311,
+    "Jt": 0.0895,
+    "Mh": 0.2853,
+    "R": 0.1239,
+    "Rm": 0.11,
+    "Sg": 0.2908,
+    "Sh": 3.3172,
+    "Ta": 0.3517,
+    "Tg": 0.366,
+    "V": 20.6842
+   }
+  },
+  "sceneN9|C|n911_rev": {
+   "scene": "sceneN9",
+   "arm": "C",
+   "group": "n911_rev",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 26.78,
+    "sd": 8.98,
+    "p10": 8.96,
+    "med": 31.62,
+    "p90": 35.11,
+    "max": 35.11
+   },
+   "obj": {
+    "n": 16,
+    "mean": 34.12,
+    "sd": 2.16,
+    "p10": 31.0,
+    "med": 35.0,
+    "p90": 37.0,
+    "max": 37.0
+   },
+   "by_key": {
+    "Bo": 0.1734,
+    "Dr": 0.1311,
+    "Jt": 0.0895,
+    "Mh": 0.2853,
+    "R": 0.1239,
+    "Rm": 0.11,
+    "Sg": 0.2908,
+    "Sh": 3.3172,
+    "Ta": 1.2073,
+    "Tg": 0.366,
+    "V": 20.6821
+   }
+  },
+  "sceneN9|C|n911_rev2": {
+   "scene": "sceneN9",
+   "arm": "C",
+   "group": "n911_rev2",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 26.78,
+    "sd": 8.98,
+    "p10": 8.96,
+    "med": 31.62,
+    "p90": 35.11,
+    "max": 35.11
+   },
+   "obj": {
+    "n": 16,
+    "mean": 34.12,
+    "sd": 2.16,
+    "p10": 31.0,
+    "med": 35.0,
+    "p90": 37.0,
+    "max": 37.0
+   },
+   "by_key": {
+    "Bo": 0.1734,
+    "Dr": 0.1311,
+    "Jt": 0.0895,
+    "Mh": 0.2853,
+    "R": 0.1239,
+    "Rm": 0.11,
+    "Sg": 0.2908,
+    "Sh": 3.3172,
+    "Ta": 1.2073,
+    "Tg": 0.366,
+    "V": 20.6821
+   }
+  },
+  "sceneN9|D|n911": {
+   "scene": "sceneN9",
+   "arm": "D",
+   "group": "n911",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneN9|D|n911_rev": {
+   "scene": "sceneN9",
+   "arm": "D",
+   "group": "n911_rev",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneN9|D|n911_rev2": {
+   "scene": "sceneN9",
+   "arm": "D",
+   "group": "n911_rev2",
+   "family": "N-cue(new)",
+   "n": 16,
+   "pop": "P2",
+   "primary": false,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  }
+ },
+ "outliers": {
+  "rule": "같은 (family, arm) 안에서 씬 평균 단서면적의 로버스트 z = (x−median)/(1.4826·MAD), |z| ≥ 3.5",
+  "n": 3,
+  "flags": [
+   {
+    "key": "sceneH6|A|h67",
+    "family": "H(new)",
+    "arm": "A",
+    "mean_area_pct": 21.06,
+    "family_median": 5.0,
+    "robust_z": 6.86,
+    "direction": "high"
+   },
+   {
+    "key": "sceneH1|A|h12",
+    "family": "H(new)",
+    "arm": "A",
+    "mean_area_pct": 20.19,
+    "family_median": 5.0,
+    "robust_z": 6.48,
+    "direction": "high"
+   },
+   {
+    "key": "sceneC1|B",
+    "family": "H(legacy-33)",
+    "arm": "B",
+    "mean_area_pct": 50.82,
+    "family_median": 7.75,
+    "robust_z": 3.75,
+    "direction": "high"
+   }
+  ]
+ },
+ "drivers": {
+  "base_r": 0.4135,
+  "note": "씬 하나를 모집단에서 뺐을 때의 r. delta 가 크게 **음수**면 그 씬이 상관을 만들고 있다(빼면 r 이 내려간다).",
+  "top_makers": [
+   {
+    "scene": "sceneC4",
+    "r_without": 0.3578,
+    "delta": -0.0557,
+    "n": 216
+   },
+   {
+    "scene": "sceneC1",
+    "r_without": 0.3795,
+    "delta": -0.034,
+    "n": 144
+   },
+   {
+    "scene": "scene10",
+    "r_without": 0.404,
+    "delta": -0.0095,
+    "n": 48
+   },
+   {
+    "scene": "scene21",
+    "r_without": 0.4063,
+    "delta": -0.0072,
+    "n": 72
+   },
+   {
+    "scene": "scene06",
+    "r_without": 0.4066,
+    "delta": -0.0069,
+    "n": 24
+   },
+   {
+    "scene": "scene01",
+    "r_without": 0.4069,
+    "delta": -0.0066,
+    "n": 48
+   },
+   {
+    "scene": "sceneN1",
+    "r_without": 0.407,
+    "delta": -0.0065,
+    "n": 24
+   },
+   {
+    "scene": "sceneN2",
+    "r_without": 0.4072,
+    "delta": -0.0063,
+    "n": 24
+   }
+  ],
+  "top_dampers": [
+   {
+    "scene": "scene17",
+    "r_without": 0.4211,
+    "delta": 0.0076,
+    "n": 216
+   },
+   {
+    "scene": "sceneD2",
+    "r_without": 0.4246,
+    "delta": 0.0111,
+    "n": 72
+   },
+   {
+    "scene": "scene04",
+    "r_without": 0.435,
+    "delta": 0.0215,
+    "n": 120
+   },
+   {
+    "scene": "scene09",
+    "r_without": 0.4403,
+    "delta": 0.0268,
+    "n": 184
+   },
+   {
+    "scene": "scene20",
+    "r_without": 0.4962,
+    "delta": 0.0826,
+    "n": 216
+   }
+  ]
+ },
+ "combined_P1P2": {
+  "n": 2504,
+  "hazard_present": 1365,
+  "r_pb": 0.3679,
+  "hazard": {
+   "n": 1365,
+   "mean": 19.59,
+   "sd": 16.8,
+   "p10": 0.62,
+   "med": 15.99,
+   "p90": 47.87,
+   "max": 61.54
+  },
+  "no_hazard": {
+   "n": 1139,
+   "mean": 7.36,
+   "sd": 13.53,
+   "p10": 0.0,
+   "med": 0.54,
+   "p90": 28.53,
+   "max": 82.18
+  },
+  "null_within_scene": {
+   "n": 3000,
+   "q50": 0.0644,
+   "q95": 0.0896,
+   "q99": 0.1009,
+   "max": 0.1212,
+   "p_emp": 0.0003
+  },
+  "note": "P1(정본 33씬 · C 결측)은 +방향, P2(신규 씬 · 2×2 완비)는 −방향이다. 합본은 두 힘의 현재 합력이지 어느 한쪽의 설계 진단이 아니다."
+ },
+ "c_wave_projection": {
+  "status": "투영(측정 아님) — C팔은 미렌더다",
+  "assumption": "C팔 프레임의 단서 면적 = 같은 씬 A팔 프레임의 면적 × κ",
+  "kappa": 1.0022,
+  "kappa_basis": "신규 씬 프로브 실측 A팔 n=96 · C팔 n=96 (같은 씬·같은 포즈, 위험 토글만 다름)",
+  "c_frames_planned": 912,
+  "c_frames_synthesised": 744,
+  "r_pb_projected": 0.1495,
+  "r_pb_asbuilt": 0.4135,
+  "null_q99_asbuilt": 0.1009,
+  "residual_drivers": [
+   {
+    "scene": "sceneC4",
+    "r_without": 0.1074,
+    "delta": -0.0421
+   },
+   {
+    "scene": "sceneC1",
+    "r_without": 0.1131,
+    "delta": -0.0363
+   },
+   {
+    "scene": "scene10",
+    "r_without": 0.1419,
+    "delta": -0.0075
+   },
+   {
+    "scene": "scene06",
+    "r_without": 0.143,
+    "delta": -0.0064
+   },
+   {
+    "scene": "sceneN1",
+    "r_without": 0.1433,
+    "delta": -0.0062
+   },
+   {
+    "scene": "sceneN2",
+    "r_without": 0.1433,
+    "delta": -0.0061
+   }
+  ],
+  "arm_imbalance": [
+   {
+    "scene": "scene03",
+    "A": 72,
+    "B": 0,
+    "D": 48,
+    "C_planned": 72,
+    "dAB": 72
+   },
+   {
+    "scene": "scene04",
+    "A": 72,
+    "B": 0,
+    "D": 48,
+    "C_planned": 72,
+    "dAB": 72
+   },
+   {
+    "scene": "scene06",
+    "A": 0,
+    "B": 24,
+    "D": 0,
+    "C_planned": 24,
+    "dAB": -24
+   },
+   {
+    "scene": "scene08",
+    "A": 0,
+    "B": 48,
+    "D": 24,
+    "C_planned": 48,
+    "dAB": -48
+   },
+   {
+    "scene": "scene09",
+    "A": 48,
+    "B": 72,
+    "D": 64,
+    "C_planned": 72,
+    "dAB": -24
+   },
+   {
+    "scene": "scene10",
+    "A": 24,
+    "B": 0,
+    "D": 24,
+    "C_planned": 24,
+    "dAB": 24
+   },
+   {
+    "scene": "scene12",
+    "A": 48,
+    "B": 72,
+    "D": 72,
+    "C_planned": 72,
+    "dAB": -24
+   }
+  ],
+  "arm_imbalance_note": "A팔만 있고 B팔이 없는 씬(D74 ⑤ 스킵분)과 그 반대는 위험 축과 단서 축을 씬 수준에서 다시 결속시킨다 — C가 착지해도 남는 잔차의 주된 정체다."
+ },
+ "threshold_proposal": {
+  "statistic": "|r_pb| (frame-level hazard × cue_area_total %) — 존재 |r| 과 같은 모집단 구성(as-built A/B/C/D), 같은 병기 규약(§4.9-3)",
+  "derivation": "문턱을 손으로 정하지 않는다. 위험 라벨을 **씬 안에서** 셔플한 귀무를 3000회 만들어 |r_pb| 의 분포를 측정하고, 그 **q99** 를 문턱으로 제안한다. 씬 내 셔플은 씬 구성·카메라 밴드가 만드는 구조를 유지한 채 위험-면적 결속만 끊으므로, 이 문턱을 넘는 값은 '씬 구성으로 설명되지 않는 계통적 초과'다.",
+  "null_within_scene": {
+   "n": 3000,
+   "q50": 0.0608,
+   "q95": 0.0881,
+   "q99": 0.1009,
+   "max": 0.1167,
+   "p_emp": 0.0003
+  },
+  "null_free": {
+   "n": 3000,
+   "q50": 0.0139,
+   "q95": 0.0424,
+   "q99": 0.0578,
+   "max": 0.0927,
+   "p_emp": 0.0003
+  },
+  "proposed_threshold": 0.1009,
+  "proposed_threshold_free": 0.0578,
+  "effect_size_floor": {
+   "statistic": "|Cliff's δ|",
+   "value": 0.147,
+   "basis": "Romano 2006 small-effect 경계 — r 이 문턱을 넘어도 δ 가 이 아래면 '통계적으로 보이나 실질적으로 작다'로 분류"
+  },
+  "secondary_gate": {
+   "statistic": "mean(area | hazard) / mean(area | no-hazard)",
+   "note": "비율은 부호와 크기를 한 눈에 준다. 문턱값은 측정 후 §4 에 기재."
+  }
+ },
+ "instrument_validation": {
+  "method": "visible(A,i) \\ visible(B,i) = 그 프레임에서 B레버가 지운 단서 프림 (제거는 가림을 풀 뿐 만들지 않으므로 정확하다)",
+  "measured_with": "렉시컬층만 (경험층 제거 · 홀드아웃)",
+  "n_pairs": 528,
+  "scenes": 13,
+  "overall_px_recall_lexical_only": 0.9899,
+  "note": "최종 귀속기는 여기에 경험층(정확 일치)을 얹으므로 이 차분 위에서의 recall 은 1.000 이다 — 그 1.000 은 자기참조라 인쇄하지 않는다.",
+  "per_scene": {
+   "scene01": {
+    "n_pairs": 24,
+    "removed_px": 0,
+    "note": "이 씬은 B레버가 지운 프림이 그 포즈들에서 보이지 않았다 (면적 0 — 검산 불가)"
+   },
+   "scene02": {
+    "n_pairs": 24,
+    "removed_px_per_frame": 27883.8,
+    "px_recall": 1.0,
+    "prim_recall": 1.0,
+    "top_missed": []
+   },
+   "scene09": {
+    "n_pairs": 48,
+    "removed_px": 0,
+    "note": "이 씬은 B레버가 지운 프림이 그 포즈들에서 보이지 않았다 (면적 0 — 검산 불가)"
+   },
+   "scene12": {
+    "n_pairs": 48,
+    "removed_px_per_frame": 363815.3,
+    "px_recall": 1.0,
+    "prim_recall": 1.0,
+    "top_missed": []
+   },
+   "scene16": {
+    "n_pairs": 24,
+    "removed_px_per_frame": 543209.8,
+    "px_recall": 0.9994,
+    "prim_recall": 0.9783,
+    "top_missed": [
+     [
+      "WalkBand_0",
+      103.0
+     ],
+     [
+      "StreetApron_3",
+      101.5
+     ],
+     [
+      "StreetApron_1",
+      95.8
+     ],
+     [
+      "StreetApron_0",
+      19.0
+     ],
+     [
+      "StreetApron_4",
+      16.9
+     ],
+     [
+      "WalkBand_1",
+      0.1
+     ]
+    ]
+   },
+   "scene17": {
+    "n_pairs": 72,
+    "removed_px_per_frame": 503519.2,
+    "px_recall": 0.9964,
+    "prim_recall": 0.9998,
+    "top_missed": [
+     [
+      "GreenStrip",
+      1500.5
+     ],
+     [
+      "WalkBand",
+      196.6
+     ],
+     [
+      "CrownLine_6",
+      96.5
+     ],
+     [
+      "FarReed_2_0",
+      14.4
+     ],
+     [
+      "FarReed_2_1",
+      4.9
+     ],
+     [
+      "FarReed_2_2",
+      2.3
+     ]
+    ]
+   },
+   "scene20": {
+    "n_pairs": 72,
+    "removed_px_per_frame": 486713.6,
+    "px_recall": 0.9941,
+    "prim_recall": 0.999,
+    "top_missed": [
+     [
+      "UpperPlaza",
+      2855.5
+     ]
+    ]
+   },
+   "scene21": {
+    "n_pairs": 24,
+    "removed_px_per_frame": 397401.0,
+    "px_recall": 1.0,
+    "prim_recall": 1.0,
+    "top_missed": []
+   },
+   "sceneC1": {
+    "n_pairs": 48,
+    "removed_px": 0,
+    "note": "이 씬은 B레버가 지운 프림이 그 포즈들에서 보이지 않았다 (면적 0 — 검산 불가)"
+   },
+   "sceneC4": {
+    "n_pairs": 72,
+    "removed_px_per_frame": 39797.1,
+    "px_recall": 1.0,
+    "prim_recall": 1.0,
+    "top_missed": []
+   },
+   "sceneD1": {
+    "n_pairs": 24,
+    "removed_px_per_frame": 923805.8,
+    "px_recall": 0.9991,
+    "prim_recall": 0.9512,
+    "top_missed": [
+     [
+      "WallLamp_S0",
+      194.6
+     ],
+     [
+      "WallLamp_S1",
+      186.8
+     ],
+     [
+      "WallLamp_S2",
+      170.1
+     ],
+     [
+      "WallLamp_S0_L",
+      110.8
+     ],
+     [
+      "WallLamp_S1_L",
+      103.6
+     ],
+     [
+      "WallLamp_S2_L",
+      78.9
+     ]
+    ]
+   },
+   "sceneD2": {
+    "n_pairs": 24,
+    "removed_px_per_frame": 138175.1,
+    "px_recall": 0.7752,
+    "prim_recall": 0.5495,
+    "top_missed": [
+     [
+      "FarPad",
+      2695.5
+     ],
+     [
+      "Crane_Jib",
+      2020.8
+     ],
+     [
+      "Bag_B_1_3",
+      1715.8
+     ],
+     [
+      "Bag_B_2_3",
+      1634.5
+     ],
+     [
+      "Bag_A_3_2",
+      1399.4
+     ],
+     [
+      "Crane_Mast",
+      1293.4
+     ]
+    ]
+   },
+   "sceneD3": {
+    "n_pairs": 24,
+    "removed_px_per_frame": 334524.6,
+    "px_recall": 0.952,
+    "prim_recall": 0.8558,
+    "top_missed": [
+     [
+      "Pole_0",
+      6772.1
+     ],
+     [
+      "Pole_1",
+      3079.8
+     ],
+     [
+      "Bin",
+      2902.6
+     ],
+     [
+      "Pole_2",
+      1556.9
+     ],
+     [
+      "Pole_3",
+      895.8
+     ],
+     [
+      "Driveway",
+      311.6
+     ]
+    ]
+   }
+  }
+ },
+ "elapsed_s": 55.9
+}

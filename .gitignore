@@ -93,4 +93,4 @@ experiments/*/audit_samples*/
 # public-repo fix (D35/R3): keep small result artifacts visible on GitHub
 experiments/dayrun_0820/yolo26n.pt
 **/cue_audit/smoke/
-experiments/weekend_0823/gazebo/frames/*.png
+experiments/weekend_0823/gazebo/frames/**/*.png

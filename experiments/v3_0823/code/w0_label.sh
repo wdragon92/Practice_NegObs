@@ -29,10 +29,17 @@ declare -A SC=(
 
 for arm in A Brail Bnose Btact Bmatl Bdress; do
   out="$OUT/w0_${arm}.json"
+  want=$(printf '%s' "${SC[$arm]}" | tr ',' '\n' | grep -c .)
+  have=$(ls -d "$REPO/dataset/260825_v3w0_cuecls_${arm}"/*/*/ 2>/dev/null | wc -l)
+  # 부분 렌더를 라벨링해 캐시로 굳히지 않는다 — 그 파일이 나중에 skip되면
+  # 판정이 조용히 표본 부족 위에 서게 된다.
+  if [ "$have" != "$want" ]; then
+    echo "[hold] $arm — 렌더 $have/$want 씬만 존재, 라벨링 보류"; continue
+  fi
   if [ -f "$out" ] && [ "${W0_FORCE:-0}" != "1" ]; then
     echo "[skip] $arm — $out exists"; continue
   fi
-  echo "=== labeling $arm (${SC[$arm]})"
+  echo "=== labeling $arm ($want 씬: ${SC[$arm]})"
   python3 "$LAB" --on-round "$REPO/dataset/260825_v3w0_cuecls_${arm}" \
       --off-round "$OFF" --grid "$GRID" --out "$out" \
       --scenes "${SC[$arm]}" --workers 8 2>&1 | tee -a "$LOG"

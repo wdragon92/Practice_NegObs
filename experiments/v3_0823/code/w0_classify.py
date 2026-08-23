@@ -1,0 +1,387 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""w0_classify.py — W0 구조물/장식 분류 (VG-CLS) + VG-datum 사전검사.
+
+RENDER_PLAN_V3 §4.2 (W0 프로브) · §6.1 (VG-01 / VG-CLS / VG-datum) · §1.2 (B팔 레버).
+
+무엇을 비교하나
+---------------
+(씬 × cue_*) 쌍마다 hazard=ON 아래 cue ON(A팔) / cue OFF(Bx팔) 두 렌더를 놓고
+
+  1. `heightmap.npy`   — sha256 · 셀별 |Δz| · 변화 셀 수 · void 이동 · `n_prims`
+  2. 라벨러 `cells_raw` — 낙차 발자국 셀 수. 두 팔 모두 같은 반사실면
+                          (`260819_main_off`, 같은 시드)을 z_off로 쓰므로
+                          Δcells_raw는 오직 그 팔의 높이맵 차이에서만 온다
+  3. `polar_gt`        — 판정 프레임(컷 4장) 위 비트 동일성
+  4. `cam.ground_z`    — VG-datum 사전검사 (드레싱 제거가 데이텀을 미는가)
+  5. RGB 평균 |Δ|      — 토글이 화면에서 아무 일도 하지 않았는지(무효 토글) 검사
+
+판정 규칙 — 결과를 보기 전에 못 박는다 (사후 선택 금지, ACCOUNTING §2-6)
+------------------------------------------------------------------------
+R1 **구조물** (토글 금지):  Δcells_raw ≠ 0  **또는**  polar_gt가 한 프레임이라도 다름.
+   → 그 cue 제거는 낙차 기하를 바꾼다. B팔 레버로 쓰면 A/B 위험-GT 동일성(VG-01)이 깨진다.
+R2 **장식** (B팔 레버 확정):  Δcells_raw = 0  **그리고**  polar_gt 4/4 동일.
+   · `장식(완전)`   heightmap sha256까지 동일 = VG-01 엄격 통과.
+   · `장식(지형외)` 높이맵은 움직였으나 낙차 발자국 밖 = 발자국·GT 불변.
+      (전례: scene12 `cue_railing` 54셀·5 mm·발자국 0셀 → 장식 — CUE_COVERAGE §4-2)
+R3 **판정불가**: (a) 한쪽 팔의 렌더/라벨이 없음, 또는
+   (b) **무효 토글** — heightmap sha 동일 ∧ n_prims 동일 ∧ RGB 평균|Δ| < 0.05 LSB.
+      키가 아무것도 건드리지 않았다는 뜻이므로 이 쌍은 증거를 갖지 않는다.
+R4 **VG-datum** (컷별, 파일명 일치 쌍):
+   `datum_exact` |Δground_z| < 1e-6 · `datum_tol` ≤ 0.02 m · `datum_fail` > 0.02 m.
+   datum_fail 컷이 1개라도 있으면 그 쌍은 **데이텀 이동 쌍**으로 등재한다.
+
+dz_max·변화 셀 수는 **증거이자 크기**로 인쇄하되 판정 기준으로 쓰지 않는다.
+지면 위에 선 볼라드(1 m)를 지우면 |Δz| = 1 m이 나오지만 낙차 발자국은 그대로다 —
+크기를 기준으로 삼으면 그런 장식이 전부 구조물로 오분류된다. 계획이 묻는 것은
+"낙차 기하가 바뀌는가"이고 그 기계 술어가 (발자국, polar_gt)다.
+
+사용:  python3 experiments/v3_0823/code/w0_classify.py
+산출:  experiments/v3_0823/w0_cuecls.json  (+ stdout 표)
+"""
+import glob
+import hashlib
+import json
+import os
+import sys
+
+import numpy as np
+
+REPO = "/home/vislab/Desktop/work_sy/Practice_NegObs"
+V3 = os.path.join(REPO, "experiments/v3_0823")
+ANN = os.path.join(V3, "annotations")
+STAMP = "260825_v3w0_cuecls"
+PLAN = os.path.join(V3, "render_plan_v3.json")
+
+ARM_OF_CUE = {
+    "cue_railing": "Brail",
+    "cue_nosing": "Bnose",
+    "cue_tactile": "Btact",
+    "cue_material_break": "Bmatl",
+    "cue_scene_dressing": "Bdress",
+}
+CUE_SHORT = {"cue_railing": "R", "cue_nosing": "N", "cue_tactile": "Ta",
+             "cue_material_break": "T", "cue_sign": "Sg",
+             "cue_scene_dressing": "V"}
+DATUM_EXACT = 1e-6
+DATUM_TOL = 0.02
+NOOP_RGB_LSB = 0.05
+POSE_KEYS = ("d", "h_rel", "yaw", "pitch", "roll", "hfov")
+
+# 이미 판정된 쌍 (CUE_COVERAGE §4-2 "이미 판정 끝난 4건") — 렌더하지 않고 승계한다.
+PRIOR = [
+    dict(scene="scene12", cue="cue_railing", verdict="장식",
+         source="CUE_COVERAGE §4-2 (P-3 실측)",
+         note="heightmap 54셀 · 최대 5 mm · 풋프린트 0셀 · polar_gt 24/24 동일"),
+    dict(scene="scene12", cue="cue_scene_dressing", verdict="장식",
+         source="CUE_COVERAGE §4-2 (P-3 실측)",
+         note="14,467셀 · 최대 5 mm · 풋프린트 0셀 · polar_gt 24/24 동일"),
+    dict(scene="scene17", cue="cue_scene_dressing", verdict="장식",
+         source="CUE_COVERAGE §4-2 (P-3 실측)",
+         note="heightmap sha256 동일 · 0셀 · polar_gt 24/24 동일"),
+    dict(scene="scene17", cue="cue_material_break", verdict="장식",
+         source="CUE_COVERAGE §4-2 (P-3 실측)",
+         note="scene17 `cue_scene_dressing` + `cue_material_break` 동시 = 장식(완전)"),
+    dict(scene="scene20", cue="cue_railing", verdict="구조물",
+         source="CUE_COVERAGE §4-2 (P-3 실측)",
+         note="치크월 12,656셀 · 최대 3.160 m · 풋프린트 +1,302셀 · polar_gt 6/27 상이"),
+]
+
+
+def sha256(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for c in iter(lambda: f.read(1 << 20), b""):
+            h.update(c)
+    return h.hexdigest()
+
+
+def scene_dir(run, scene):
+    g = glob.glob(os.path.join(REPO, "dataset", run, "*", scene, "variation.json"))
+    return os.path.dirname(g[0]) if g else None
+
+
+def cuts_of(d):
+    v = json.load(open(os.path.join(d, "variation.json"), encoding="utf-8"))
+    cu = v["cuts"]
+    return {c["file"]: c for c in (cu.values() if isinstance(cu, dict) else cu)}
+
+
+def load_labels(arm):
+    p = os.path.join(ANN, f"w0_{arm}.json")
+    if not os.path.exists(p):
+        return None
+    d = json.load(open(p, encoding="utf-8"))
+    cells = {}
+    for s in d.get("scene_footprint", []):
+        if s.get("arm") == "on" and "cells_raw" in s:
+            cells[s["scene"]] = s
+    return dict(frames=d.get("frames", {}), cells=cells,
+                warnings=d.get("warnings", []))
+
+
+def rgb_delta(pa, pb):
+    """(mean |Δ| in LSB, frac of pixels differing) or (None, None)."""
+    try:
+        from PIL import Image
+    except Exception:
+        return None, None
+    a = np.asarray(Image.open(pa).convert("RGB"), dtype=np.int16)
+    b = np.asarray(Image.open(pb).convert("RGB"), dtype=np.int16)
+    if a.shape != b.shape:
+        return None, None
+    d = np.abs(a - b)
+    return float(d.mean()), float((d.max(axis=2) > 0).mean())
+
+
+def geom_compare(da, db):
+    """heightmap A vs Bx."""
+    ha, hb = os.path.join(da, "heightmap.npy"), os.path.join(db, "heightmap.npy")
+    ma = json.load(open(os.path.join(da, "heightmap_meta.json"), encoding="utf-8"))
+    mb = json.load(open(os.path.join(db, "heightmap_meta.json"), encoding="utf-8"))
+    A, B = np.load(ha), np.load(hb)
+    out = dict(hm_sha_a=sha256(ha)[:16], hm_sha_b=sha256(hb)[:16],
+               n_prims_a=ma.get("n_prims"), n_prims_b=mb.get("n_prims"),
+               arm_config_a=ma.get("arm_config"), arm_config_b=mb.get("arm_config"),
+               grid_same=(ma.get("x0"), ma.get("y0"), ma.get("step"),
+                          ma.get("nx"), ma.get("ny")) ==
+                         (mb.get("x0"), mb.get("y0"), mb.get("step"),
+                          mb.get("nx"), mb.get("ny")))
+    out["hm_identical"] = out["hm_sha_a"] == out["hm_sha_b"]
+    if A.shape != B.shape or not out["grid_same"]:
+        out["dz_max"] = None
+        out["hm_cells_changed"] = None
+        out["void_delta"] = None
+        return out
+    fa, fb = np.isfinite(A), np.isfinite(B)
+    both = fa & fb
+    d = np.abs(A[both] - B[both]) if both.any() else np.zeros(1)
+    out["dz_max"] = round(float(d.max()), 6) if d.size else 0.0
+    out["hm_cells_changed"] = int((d > 1e-6).sum())
+    # 부호 있는 최대치도 남긴다: Bx가 A보다 낮아졌는지(제거) 높아졌는지
+    sd = (B[both] - A[both]) if both.any() else np.zeros(1)
+    out["dz_signed_min"] = round(float(sd.min()), 6) if sd.size else 0.0
+    out["dz_signed_max"] = round(float(sd.max()), 6) if sd.size else 0.0
+    out["void_delta"] = int(fb.sum()) - int(fa.sum())   # +: Bx가 더 많이 측정됨
+    return out
+
+
+def datum_compare(ca, cb, da, db):
+    """VG-datum + VG-10: 파일명 일치 컷쌍의 ground_z / 포즈 비교."""
+    common = sorted(set(ca) & set(cb))
+    rows, worst, tiers = [], 0.0, dict(datum_exact=0, datum_tol=0, datum_fail=0)
+    pose_worst = 0.0
+    for f in common:
+        a, b = ca[f]["cam"], cb[f]["cam"]
+        dz = abs(float(a["ground_z"]) - float(b["ground_z"]))
+        t = ("datum_exact" if dz < DATUM_EXACT
+             else "datum_tol" if dz <= DATUM_TOL else "datum_fail")
+        tiers[t] += 1
+        worst = max(worst, dz)
+        pk = max(abs(float(a[k]) - float(b[k])) for k in POSE_KEYS)
+        pe = max(abs(float(a["eye"][i]) - float(b["eye"][i])) for i in range(3))
+        pose_worst = max(pose_worst, pk, pe)
+        rows.append(dict(file=f, d_ground_z=round(dz, 8), tier=t,
+                         d_pose_max=round(max(pk, pe), 9)))
+    return dict(n_cuts=len(common), tiers=tiers,
+                ground_z_drift_max=round(worst, 8),
+                pose_delta_max=round(pose_worst, 9),
+                datum_verdict=("datum_fail" if tiers["datum_fail"]
+                               else "datum_tol" if tiers["datum_tol"]
+                               else "datum_exact"),
+                cuts=rows)
+
+
+def main():
+    pairs = [tuple(p) for p in
+             json.load(open(PLAN, encoding="utf-8"))["classification_probe"]["pairs"]]
+    labels = {a: load_labels(a) for a in ("A",) + tuple(sorted(set(ARM_OF_CUE.values())))}
+    rows, problems = [], []
+
+    for scene, cue in pairs:
+        arm = ARM_OF_CUE[cue]
+        r = dict(scene=scene, cue=cue, cue_short=CUE_SHORT.get(cue), arm=arm,
+                 round_a=f"{STAMP}_A", round_b=f"{STAMP}_{arm}")
+        da, db = scene_dir(f"{STAMP}_A", scene), scene_dir(f"{STAMP}_{arm}", scene)
+        if not da or not db:
+            r.update(verdict="판정불가", reason="render_missing",
+                     missing=[x for x, y in (("A", da), (arm, db)) if not y])
+            rows.append(r)
+            problems.append(f"{scene}/{cue}: {r['missing']} 팔 렌더 없음")
+            continue
+        r["dir_a"] = os.path.relpath(da, REPO)
+        r["dir_b"] = os.path.relpath(db, REPO)
+        r.update(geom_compare(da, db))
+
+        ca, cb = cuts_of(da), cuts_of(db)
+        r["datum"] = datum_compare(ca, cb, da, db)
+
+        # RGB 광학차 — 무효 토글 검사 (첫 컷 1장이면 충분하나 전 컷 평균을 쓴다)
+        md, fr = [], []
+        for f in sorted(set(ca) & set(cb)):
+            m, p = rgb_delta(os.path.join(da, f), os.path.join(db, f))
+            if m is not None:
+                md.append(m)
+                fr.append(p)
+        r["rgb_mean_abs_lsb"] = round(float(np.mean(md)), 5) if md else None
+        r["rgb_frac_px_changed"] = round(float(np.mean(fr)), 6) if fr else None
+
+        # 라벨러 — cells_raw + polar_gt
+        la, lb = labels.get("A"), labels.get(arm)
+        if not la or not lb or scene not in la["cells"] or scene not in lb["cells"]:
+            r["cells_raw_a"] = r["cells_raw_b"] = r["d_cells_raw"] = None
+            r["polar_gt_n_diff"] = r["polar_gt_n_cmp"] = None
+        else:
+            sa, sb = la["cells"][scene], lb["cells"][scene]
+            r["cells_raw_a"] = sa["cells_raw"]
+            r["cells_raw_b"] = sb["cells_raw"]
+            r["d_cells_raw"] = sb["cells_raw"] - sa["cells_raw"]
+            r["cells_kept_max_a"] = sa.get("cells_kept_max")
+            r["cells_kept_max_b"] = sb.get("cells_kept_max")
+            r["max_diff_a"] = sa.get("max_diff")
+            r["max_diff_b"] = sb.get("max_diff")
+            n_d = n_c = 0
+            diffs = []
+            for f in sorted(set(ca) & set(cb)):
+                ka, kb = f"on/{scene}/{f}", f"on/{scene}/{f}"
+                if ka in la["frames"] and kb in lb["frames"]:
+                    n_c += 1
+                    if la["frames"][ka]["polar_gt"] != lb["frames"][kb]["polar_gt"]:
+                        n_d += 1
+                        diffs.append(f)
+            r["polar_gt_n_cmp"] = n_c
+            r["polar_gt_n_diff"] = n_d
+            r["polar_gt_diff_frames"] = diffs
+            r["tier_a"] = [la["frames"][f"on/{scene}/{f}"].get("tier_strict")
+                           for f in sorted(set(ca) & set(cb))
+                           if f"on/{scene}/{f}" in la["frames"]]
+            r["tier_b"] = [lb["frames"][f"on/{scene}/{f}"].get("tier_strict")
+                           for f in sorted(set(ca) & set(cb))
+                           if f"on/{scene}/{f}" in lb["frames"]]
+
+        # ---- 판정 (위 R1/R2/R3 그대로) ----------------------------------
+        noop = (r.get("hm_identical") and
+                r.get("n_prims_a") == r.get("n_prims_b") and
+                r.get("rgb_mean_abs_lsb") is not None and
+                r["rgb_mean_abs_lsb"] < NOOP_RGB_LSB)
+        if r.get("d_cells_raw") is None or r.get("polar_gt_n_cmp") in (None, 0):
+            r.update(verdict="판정불가", reason="label_missing")
+            problems.append(f"{scene}/{cue}: 라벨 없음 (cells_raw/polar_gt 비교 불가)")
+        elif noop:
+            r.update(verdict="판정불가", reason="noop_toggle")
+            problems.append(f"{scene}/{cue}: 무효 토글 — 높이맵·프림수·RGB 전부 동일")
+        elif r["d_cells_raw"] != 0 or r["polar_gt_n_diff"] > 0:
+            r.update(verdict="구조물",
+                     reason=("footprint" if r["d_cells_raw"] != 0 else "") +
+                            ("+" if r["d_cells_raw"] != 0 and r["polar_gt_n_diff"] else "") +
+                            ("polar_gt" if r["polar_gt_n_diff"] else ""))
+        else:
+            r.update(verdict="장식",
+                     subtype=("완전" if r.get("hm_identical") else "지형외"),
+                     reason="footprint 0 · polar_gt 동일")
+        rows.append(r)
+
+    # ---- 산출 --------------------------------------------------------------
+    counts = {}
+    for r in rows:
+        counts[r["verdict"]] = counts.get(r["verdict"], 0) + 1
+    forbidden = sorted({(r["scene"], r["cue"]) for r in rows
+                        if r["verdict"] in ("구조물", "판정불가")} |
+                       {(p["scene"], p["cue"]) for p in PRIOR
+                        if p["verdict"] == "구조물"})
+    confirmed = {}
+    for r in rows:
+        if r["verdict"] == "장식":
+            confirmed.setdefault(r["scene"], []).append(r["cue"])
+    for p in PRIOR:
+        if p["verdict"] == "장식":
+            confirmed.setdefault(p["scene"], []).append(p["cue"])
+    for k in confirmed:
+        confirmed[k] = sorted(set(confirmed[k]))
+
+    # ---- 보조 진단: W0 A팔 vs 정본 구off(260819_main_off)의 데이텀 -----------
+    # v2의 183/792 탈락을 낳은 그 짝(on팔 ↔ off팔)을 같은 자로 재어 둔다.
+    # **교락 주의**: 구off는 hazard 제거 + hazard 분기 안의 cue 제거가 섞인
+    # 비균질 세대(ACCOUNTING §4.1)라 드레싱 단독 효과가 아니다. 참고치일 뿐이다.
+    corpus_ref = []
+    for scene in sorted({s for s, _ in pairs}):
+        da = scene_dir(f"{STAMP}_A", scene)
+        g = glob.glob(os.path.join(REPO, "dataset", "260819_main_off", "*", scene,
+                                   "variation.json"))
+        if not da or not g:
+            continue
+        do = os.path.dirname(g[0])
+        dd = datum_compare(cuts_of(da), cuts_of(do), da, do)
+        corpus_ref.append(dict(scene=scene, n_cuts=dd["n_cuts"], tiers=dd["tiers"],
+                               ground_z_drift_max=dd["ground_z_drift_max"],
+                               pose_delta_max=dd["pose_delta_max"],
+                               verdict=dd["datum_verdict"]))
+
+    datum_drift = [dict(scene=r["scene"], cue=r["cue"],
+                        ground_z_drift_max=r["datum"]["ground_z_drift_max"],
+                        tiers=r["datum"]["tiers"],
+                        verdict=r["datum"]["datum_verdict"])
+                   for r in rows if r.get("datum") and
+                   r["datum"]["datum_verdict"] != "datum_exact"]
+
+    out = dict(
+        doc="w0_cuecls", version="1.0", gate="VG-CLS", plan="RENDER_PLAN_V3 §4.2 · §6.1",
+        rounds=[f"{STAMP}_{a}" for a in ("A", "Brail", "Bnose", "Btact", "Bmatl", "Bdress")],
+        off_round_for_footprint="260819_main_off",
+        grid="gridspec_v1.json (20칸)",
+        rules=dict(
+            structural="Δcells_raw ≠ 0 또는 polar_gt 상이 프레임 ≥ 1",
+            decorative="Δcells_raw = 0 그리고 polar_gt 전 프레임 동일",
+            undecidable="렌더/라벨 부재, 또는 무효 토글(hm sha 동일 ∧ n_prims 동일 ∧ RGB<0.05 LSB)",
+            datum=f"exact<{DATUM_EXACT} · tol<={DATUM_TOL} m · fail>{DATUM_TOL} m"),
+        n_pairs=len(rows), verdict_counts=counts,
+        toggle_forbidden=[dict(scene=s, cue=c) for s, c in forbidden],
+        b_levers_confirmed=confirmed,
+        vg_datum_drift=datum_drift,
+        vg_datum_corpus_ref=corpus_ref,
+        prior_rulings=PRIOR,
+        problems=problems,
+        pairs=rows)
+    op = os.path.join(V3, "w0_cuecls.json")
+    json.dump(out, open(op, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+
+    # ---- stdout 표 ---------------------------------------------------------
+    hdr = (f"{'scene':9s} {'cue':20s} {'dz_max':>9s} {'hm셀':>7s} "
+           f"{'cells_raw A→B':>15s} {'Δfp':>6s} {'pgt':>5s} {'Δgz':>10s} "
+           f"{'RGB':>8s}  verdict")
+    print(hdr)
+    print("-" * len(hdr))
+    for r in rows:
+        dz = "—" if r.get("dz_max") is None else f"{r['dz_max']:.4f}"
+        cr = ("—" if r.get("cells_raw_a") is None
+              else f"{r['cells_raw_a']}→{r['cells_raw_b']}")
+        df = "—" if r.get("d_cells_raw") is None else f"{r['d_cells_raw']:+d}"
+        pg = ("—" if r.get("polar_gt_n_cmp") is None
+              else f"{r['polar_gt_n_diff']}/{r['polar_gt_n_cmp']}")
+        gz = ("—" if not r.get("datum")
+              else f"{r['datum']['ground_z_drift_max']:.6f}")
+        rg = "—" if r.get("rgb_mean_abs_lsb") is None else f"{r['rgb_mean_abs_lsb']:.3f}"
+        hc = "—" if r.get("hm_cells_changed") is None else f"{r['hm_cells_changed']}"
+        v = r["verdict"] + (f"({r['subtype']})" if r.get("subtype") else "")
+        print(f"{r['scene']:9s} {r['cue']:20s} {dz:>9s} {hc:>7s} {cr:>15s} "
+              f"{df:>6s} {pg:>5s} {gz:>10s} {rg:>8s}  {v} [{r.get('reason','')}]")
+    print()
+    print("verdict counts:", counts)
+    print("토글 금지 목록:", len(forbidden), forbidden)
+    print("VG-datum 비-exact 쌍:", len(datum_drift))
+    for d in datum_drift:
+        print("   ", d)
+    print("\n보조: A팔 vs 260819_main_off 데이텀 (교락 — 참고치)")
+    for c in corpus_ref:
+        if c["verdict"] != "datum_exact":
+            print("   ", c)
+    if problems:
+        print("\nPROBLEMS:")
+        for p in problems:
+            print("  -", p)
+    print(f"\n-> {op}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

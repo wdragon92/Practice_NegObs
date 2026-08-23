@@ -215,6 +215,7 @@
 | 광도·시점 그림 | `photometric/photometric_stress.png` · `a3_viewpoint/a3_viewpoint.png` | 2 | 제출가능 | — |
 | 홀 프로브 뷰 | `experiments/probe_holes_0820/eval/*/viz/` | 105 | 제출가능 | 디렉터리 이름이 `eval/`이라 규칙을 피해감(33 MB) |
 | **본 표(v2) 런 정성 패널** | `experiments/dayrun_0820/runs/v2/*/viz/` | **119** | **🔴 로컬 전용** | ⚠ **본 패키지 최대 누락위험.** 본 표 9런 + aux의 **v2 정성 패널 전량**이 `**/runs/**/*.png`로 GitHub에 **없다.** 즉 **논문 헤드라인(v2)의 정성 예시를 공개 리포에서 뽑을 방법이 현재 없다** — 위 mainrun 12장은 v1 스코프라 대체 불가. §6-C6이 처분 항목 |
+| **→ 처분 완료 (08-23 심야)** | `submission_0830/panels/` + `panels/PANELS.md` | **24** (6.29MB) | **제출가능** | 위 119장 중 선별 24장 추적화(H hit/miss 18 + aux 1 + off팔 FA 3 + Gazebo 2, 수치는 교정 GT 원장 재독) — **누락위험 1 해소**, §6-C6 종결. 잔여 구멍 6행은 PANELS.md §4 |
 | **YOLO 런 패널** | `experiments/dayrun_0820/runs/yolo_s{42,43,44}/` | **57** | **🔴 로컬 전용** | ⚠ 같은 규칙. 검출기 행 정성 예시 필요 시 별도 조치 |
 | **V2S 런 패널** | `experiments/weekend_0823/v2s/runs/*/viz/` | **104** | **🔴 로컬 전용** | V2S는 롤백이라 논문 비중 낮음 — 우선순위는 낮으나 기록 |
 | CUE-OFF 스모크 | `experiments/weekend_0823/cue_audit/smoke/scene{12,17,20}/` | 3 | **🔴 로컬 전용** | `**/cue_audit/smoke/` 규칙. **cue_audit에는 그 외 정성 패널이 없다** — 개입실험 절에 쓸 그림이 부재 |
@@ -295,7 +296,7 @@ PYTHONNOUSERSITE=1 CUDA_VISIBLE_DEVICES= /home/vislab/miniconda3/envs/env_seg/bi
 | **C-3** | hfov 수리 (SCOPE-08) | 훈련 hfov를 config 기록 + infer 경고 + 안내서 명시 | **촬영 전 필수**, Claude Code |
 | **C-4** | Gazebo depth 팔 | `--depth` 미빌드로 `*_depth.npy` 0건 | 다음 창 1순위 (`make_worlds.py --depth`) |
 | **C-5** | v3 창 발견용 그림 | `v3_0823/`에 그림 디렉터리 부재 | 필요 시 신규 제작 |
-| **C-6** | 정성 패널의 공개 경로 | 본 표 런 패널 119장이 `.gitignore`로 비공개 | 판단 필요 — 선별 컷을 추적 경로로 복사할지 |
+| **C-6** | 정성 패널의 공개 경로 | 본 표 런 패널 119장이 `.gitignore`로 비공개 | **종결(08-23 심야)** — 선별 24장을 `submission_0830/panels/`로 추적화(D71), 상세 PANELS.md |
 
 ---
 

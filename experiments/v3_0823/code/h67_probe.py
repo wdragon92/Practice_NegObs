@@ -73,6 +73,17 @@ NEW_SCENES = {
                     basis="v3 P-5 신설 (RENDER_PLAN_V3 §2.3 sceneL1_lateral_canal, "
                           "측방 test-ext). SP-2 스윕 미실시 — C' 기본값 승계, "
                           "방위 제약 미측정"),
+    # ── W3 test-ext (4차 빌더 런) — A안 순서의 **마지막 두 씬** ────────────────
+    #   §8 결재 1 A안 = H1·H2·H3 · H6·H7 · L1 · **N9·N11**. 앞의 여섯이 착지했으므로
+    #   이 런이 N-cue 쌍(★3 / ★4)이고 A안이 닫힌다.
+    "sceneN9": dict(split="test", cls="C'",
+                    basis="v3 P-5 신설 (RENDER_PLAN_V3 §2.4 sceneN9_busstop_tactile, "
+                          "N-cue ★3 test-ext). SP-2 스윕 미실시 — C' 기본값 승계, "
+                          "방위 제약 미측정"),
+    "sceneN11": dict(split="test", cls="C'",
+                     basis="v3 P-5 신설 (RENDER_PLAN_V3 §2.4 sceneN11_ground_pattern, "
+                           "N-cue ★4 test-ext). SP-2 스윕 미실시 — C' 기본값 승계, "
+                           "방위 제약 미측정"),
 }
 
 SCENE_FILE = {
@@ -82,6 +93,8 @@ SCENE_FILE = {
     "sceneH2": os.path.join(REPO, "scenes", "main", "sceneH2_landing_campus.py"),
     "sceneH3": os.path.join(REPO, "scenes", "main", "sceneH3_bend_walk.py"),
     "sceneL1": os.path.join(REPO, "scenes", "main", "sceneL1_lateral_canal.py"),
+    "sceneN9": os.path.join(REPO, "scenes", "main", "sceneN9_busstop_tactile.py"),
+    "sceneN11": os.path.join(REPO, "scenes", "main", "sceneN11_ground_pattern.py"),
 }
 
 
@@ -139,7 +152,39 @@ def main(argv=None):
                "260823_v3p5_h3l1probe_C", "260823_v3p5_h3l1probe_D",
                "260823_v3p5_h3l1rev_A", "260823_v3p5_h3l1rev_B",
                "260823_v3p5_h3l1rev_C", "260823_v3p5_h3l1rev_D",
-               "260823_v3p5_h3l1near_A", "260823_v3p5_h3l1near_C")
+               "260823_v3p5_h3l1near_A", "260823_v3p5_h3l1near_C",
+               # ── W3 test-ext 4차 빌더 런 (sceneN9 · sceneN11) ────────────────
+               #   4팔 완비가 test-ext 의무이므로 B·D 스탬프도 허용목록에 있다(§3.1).
+               #   `base2` 는 계획 §3.2 가 N-cue 씬에 배정한 **두 번째 base draw**
+               #   (밴드 사양이 아니라 시드가 다른 재추출)이므로 별도 스탬프를 준다.
+               "260823_v3p5_n911smoke_A",
+               "260823_v3p5_n911probe_A", "260823_v3p5_n911probe_B",
+               "260823_v3p5_n911probe_C", "260823_v3p5_n911probe_D",
+               "260823_v3p5_n911rev_A", "260823_v3p5_n911rev_B",
+               "260823_v3p5_n911rev_C", "260823_v3p5_n911rev_D",
+               "260823_v3p5_n911b2_A", "260823_v3p5_n911b2_B",
+               "260823_v3p5_n911b2_C", "260823_v3p5_n911b2_D",
+               # 개정 2차(R2 = 룩 재질) 확정 라운드. R1 라운드(`…rev_*`)는 R2 를
+               #   발동시킨 **증거**로 디스크에 보존한다 — 덮어쓰면 개정 사유가 사라진다.
+               "260823_v3p5_n911rev2_A", "260823_v3p5_n911rev2_B",
+               "260823_v3p5_n911rev2_C", "260823_v3p5_n911rev2_D",
+               # **D82 설치-규정 감사 수정 후 확정 라운드** (D82 ⓓ "수정 재렌더").
+               "260823_v3p5_n911rev3_A", "260823_v3p5_n911rev3_B",
+               "260823_v3p5_n911rev3_C", "260823_v3p5_n911rev3_D",
+               # **D82 ⓒ 밀도 대칭 수정 후 최종 확정 라운드**.
+               "260823_v3p5_n911rev4_A", "260823_v3p5_n911rev4_B",
+               "260823_v3p5_n911rev4_C", "260823_v3p5_n911rev4_D",
+               # ── D82 ⓐ·ⓓ 설치-규정 감사 후 확정 라운드 (위험 씬 6개) ──────────
+               #   `…rev_*` 는 감사를 발동시킨 **증거**로 보존한다 — 덮어쓰면 "점자블록
+               #   두 줄"의 원 프레임이 사라진다(n911rev2/rev3 와 같은 규율).
+               "260823_v3p5_h12regsmoke_A",
+               "260823_v3p5_h12reg_A", "260823_v3p5_h12reg_B",
+               "260823_v3p5_h12reg_C", "260823_v3p5_h12reg_D",
+               "260823_v3p5_h3l1regsmoke_A",
+               "260823_v3p5_h3l1reg_A", "260823_v3p5_h3l1reg_B",
+               "260823_v3p5_h3l1reg_C", "260823_v3p5_h3l1reg_D",
+               "260823_v3p5_h67regsmoke_A",
+               "260823_v3p5_h67reg_A", "260823_v3p5_h67reg_C")
     if a.run not in allowed:
         raise SystemExit(f"[h67_probe] 라운드 스탬프 {a.run!r} 거부 — 허용 {allowed}")
 

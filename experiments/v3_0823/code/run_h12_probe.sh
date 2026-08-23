@@ -155,7 +155,23 @@ case "$MODE" in
       done
     done
     ;;
-  *) say "[fatal] unknown mode '$MODE' (smoke|probe|near|rev)"; exit 2 ;;
+  regsmoke)
+    # D82 ⓐ·ⓓ 설치-규정 감사 수정 후 1프레임 위생 확인
+    for s in $SCENES; do
+      render "$s" 260823_v3p5_h12regsmoke_A L0 1 "$CFG_A" "" || FAILS=$((FAILS+1))
+    done
+    ;;
+  reg)
+    # D82 ⓐ·ⓓ 설치-규정 감사 수정 후 **확정 4팔 라운드**.
+    #   `…rev_*` 는 감사를 발동시킨 증거로 보존한다(덮어쓰지 않는다).
+    for s in $SCENES; do
+      for arm in A B C D; do
+        render "$s" "260823_v3p5_h12reg_$arm" "$CONDS" "$CAMS" \
+               "$(cfg_for "$s" "$arm")" "$BAND_H" || FAILS=$((FAILS+1))
+      done
+    done
+    ;;
+  *) say "[fatal] unknown mode '$MODE' (smoke|probe|near|rev|regsmoke|reg)"; exit 2 ;;
 esac
 
 T1=$(date +%s)
@@ -165,7 +181,10 @@ for r in 260823_v3p5_h12smoke_A \
          260823_v3p5_h12probe_C 260823_v3p5_h12probe_D \
          260823_v3p5_h12near_A 260823_v3p5_h12near_C \
          260823_v3p5_h12rev_A 260823_v3p5_h12rev_B \
-         260823_v3p5_h12rev_C 260823_v3p5_h12rev_D; do
+         260823_v3p5_h12rev_C 260823_v3p5_h12rev_D \
+         260823_v3p5_h12regsmoke_A \
+         260823_v3p5_h12reg_A 260823_v3p5_h12reg_B \
+         260823_v3p5_h12reg_C 260823_v3p5_h12reg_D; do
   d="$REPO/dataset/$r"
   [ -d "$d" ] || continue
   say "  dataset/$r: $(find "$d" -name '*.png' | wc -l) png · $(find "$d" -name '*.depth.npy' | wc -l) depth · $(find "$d" -name '*.idseg.npz' | wc -l) idseg · $(find "$d" -name 'heightmap.npy' | wc -l) heightmap"

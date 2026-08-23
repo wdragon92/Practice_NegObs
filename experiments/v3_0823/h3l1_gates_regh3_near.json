@@ -1,0 +1,146 @@
+{
+ "stamp": "260823_v3p5_h3l1near",
+ "split": "test",
+ "scenes": {
+  "sceneL1": {
+   "VG-01": {
+    "ok": false,
+    "note": "heightmap 없음"
+   },
+   "VG-02": {
+    "ok": false,
+    "note": "heightmap 없음"
+   },
+   "VG-datum/10": {
+    "C": {
+     "n_pairs": 4,
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0,
+     "survival": 1.0,
+     "max_abs_dz": 0.0,
+     "pose_mismatch": 0,
+     "pose_examples": [],
+     "ok": true
+    }
+   },
+   "VG-08": {
+    "A": {
+     "ok": true,
+     "n_cuts": 4,
+     "n_idseg": 4,
+     "n_poses": 4,
+     "n_distinct_hashes": 4,
+     "fetch": [
+      "orch"
+     ],
+     "n_ids_distinct": 4,
+     "per_cut_fresh": true
+    },
+    "C": {
+     "ok": true,
+     "n_cuts": 4,
+     "n_idseg": 4,
+     "n_poses": 4,
+     "n_distinct_hashes": 4,
+     "fetch": [
+      "orch"
+     ],
+     "n_ids_distinct": 4,
+     "per_cut_fresh": true
+    }
+   },
+   "VG-void": {
+    "A": {
+     "ok": true,
+     "coverage": 1.0,
+     "n_finite": 103041,
+     "n_total": 103041,
+     "z_min": -1.5,
+     "z_max": 4.45
+    },
+    "C": {
+     "ok": true,
+     "coverage": 1.0,
+     "n_finite": 103041,
+     "n_total": 103041,
+     "z_min": -0.0,
+     "z_max": 4.45
+    }
+   },
+   "tier_A": {},
+   "tier_B": {},
+   "paired_H": {
+    "n_A": 0,
+    "n_B": 0,
+    "n_paired": 0,
+    "n_frames": 0,
+    "files": []
+   },
+   "VG-06": {
+    "ok": false,
+    "lateral": true,
+    "ncue": false,
+    "n_frames": 0,
+    "n_occluder_pos": 0,
+    "n_hazard_pos": 0,
+    "n_hazard_pos_all": 0,
+    "cue_px_min": null,
+    "cue_px_max": null,
+    "context_px_max": 0,
+    "frames": []
+   },
+   "VG-07": {
+    "ok": true,
+    "n_pairs": 4,
+    "mean_abs": {
+     "min": 2.0215,
+     "p50": 3.4059,
+     "max": 4.8228,
+     "mean": 3.4141
+    },
+    "frac_gt8": {
+     "min": 0.032347,
+     "p50": 0.059753,
+     "max": 0.080248
+    },
+    "n_zero_info": 0,
+    "pairs": [
+     {
+      "file": "L0__s20260823__0000.png",
+      "mean_abs": 4.8228,
+      "frac_gt8": 0.080248,
+      "frac_gt32": 0.058457
+     },
+     {
+      "file": "L0__s20260823__0001.png",
+      "mean_abs": 2.5184,
+      "frac_gt8": 0.042705,
+      "frac_gt32": 0.024913
+     },
+     {
+      "file": "L0__s20260823__0002.png",
+      "mean_abs": 4.2935,
+      "frac_gt8": 0.0768,
+      "frac_gt32": 0.055308
+     },
+     {
+      "file": "L0__s20260823__0003.png",
+      "mean_abs": 2.0215,
+      "frac_gt8": 0.032347,
+      "frac_gt32": 0.019158
+     }
+    ]
+   },
+   "SECTOR-A": {
+    "ok": false,
+    "note": "polar_gt 없음"
+   },
+   "SECTOR-B": {
+    "ok": false,
+    "note": "polar_gt 없음"
+   },
+   "verdict": "미달 항목 있음"
+  }
+ }
+}

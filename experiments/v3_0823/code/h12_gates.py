@@ -109,6 +109,65 @@ PRIMS = {
              "/World/SceneL1/GKitWalk", "/World/SceneL1/TreeGrate_",
              "/World/SceneL1/Shadow/", "/World/SceneL1/Dress/"],
     ),
+    # ── 4차 빌더 런 · **N-cue 씬 (④-a 함정 표본)** ────────────────────────────
+    #   판정 기준이 H 씬·측방 씬과 또 다르다. 이 씬들에는 **낙차가 없으므로**
+    #     · VG-06(모서리 소속)은 적용 대상이 아니다 — 가림체도 낙차 구조물도 없다
+    #     · strict-H·paired-H 는 정의상 0 이고 그것이 정상이다
+    #   대신 판정층은 세 가지다 (`ncue=True` 가 그 전환이다):
+    #     (a) `gate_allneg`   전 팔·전 프레임 GT 올-음성 + **`cells_raw` = 0**
+    #     (b) `gate_cue_px`   단서 클래스별 픽셀 분포 (DZ §12-5 k 게이트의 데이터 원천)
+    #     (c) `gate_vg07(C,D)` 단서 ON↔OFF 광학차 (계기판 ③ 용량-반응 입력)
+    #   `hazard` 키는 **함정 기하**(낙차가 아님)를 가리킨다 — 측정만 하고 판정하지 않는다.
+    "sceneN9": dict(
+        ncue=True,
+        occluder=[],
+        # 함정 기하 = 승강장 경계 연석 0.200 m (임계 0.30 미만). 낙차 아님.
+        hazard=["/World/SceneN9/Road/", "/World/SceneN9/Curb/",
+                "/World/SceneN9/RoadFlush/"],
+        cue=["/World/SceneN9/Tactile/", "/World/SceneN9/Fence/",
+             "/World/SceneN9/Nosing/", "/World/SceneN9/Sign/",
+             "/World/SceneN9/Bollard_", "/World/SceneN9/Marking/",
+             "/World/SceneN9/GKitWalk", "/World/SceneN9/GKitPlat",
+             "/World/SceneN9/TreeGrate_", "/World/SceneN9/Shadow/",
+             "/World/SceneN9/Dress/"],
+        # **§12-5 k 게이트의 클래스 분해** — 어떤 단서가 화면을 차지하는가.
+        cue_groups=dict(
+            tactile=["/World/SceneN9/Tactile/"],
+            fence=["/World/SceneN9/Fence/"],
+            sign=["/World/SceneN9/Sign/"],
+            bollard=["/World/SceneN9/Bollard_"],
+            road_marking=["/World/SceneN9/Marking/"],
+            ground_pattern=["/World/SceneN9/GKitWalk", "/World/SceneN9/GKitPlat",
+                            "/World/SceneN9/TreeGrate_"],
+            shadow_caster=["/World/SceneN9/Shadow/"],
+            dressing=["/World/SceneN9/Dress/"],
+        ),
+    ),
+    "sceneN11": dict(
+        ncue=True,
+        occluder=[],
+        # 함정 기하 = 연속 식재대 토양면 −0.150 m (임계 0.30 미만). 낙차 아님.
+        hazard=["/World/SceneN11/Bed/", "/World/SceneN11/BedFill/"],
+        cue=["/World/SceneN11/GKitMall", "/World/SceneN11/Joint/",
+             "/World/SceneN11/TreeGrate_", "/World/SceneN11/Tactile",
+             "/World/SceneN11/Bollard_", "/World/SceneN11/Sign/",
+             "/World/SceneN11/Fence/", "/World/SceneN11/Nosing/",
+             "/World/SceneN11/Marking/", "/World/SceneN11/Shadow/",
+             "/World/SceneN11/Dress/"],
+        # L10 삼중주를 **세 성분으로 분해**한다 — 계획 §2.4 가 요구한
+        #   *"한 프레임에 서로 다른 세 종류 FA"* 를 픽셀로 검증하기 위해서다.
+        cue_groups=dict(
+            trio_manhole_joint=["/World/SceneN11/GKitMall"],
+            trio_tree_grate=["/World/SceneN11/TreeGrate_"],
+            trio_exp_joint=["/World/SceneN11/Joint/"],
+            tactile=["/World/SceneN11/Tactile"],
+            bollard=["/World/SceneN11/Bollard_"],
+            sign=["/World/SceneN11/Sign/"],
+            road_marking=["/World/SceneN11/Marking/"],
+            shadow_caster=["/World/SceneN11/Shadow/"],
+            dressing=["/World/SceneN11/Dress/"],
+        ),
+    ),
 }
 
 # gridspec_v1 — 섹터·밴드 이름표. `labeler.polar_cells` 가 `cell = band*5 + sector` 로
@@ -432,12 +491,16 @@ def gate_vg06(d, scene, h_files, var_cuts=()):
     #   정상 씬을 실패로 읽는다(SCENE_TEXT_BUILD §9 가 확정한 결함 4건과 같은 구조:
     #   *게이트를 어디에서 어떤 씬에 대해 세는가*). `lateral=True` 면 측정만 하고
     #   판정은 `gate_sectors` 로 넘긴다.
-    if cfg.get("lateral"):
+    if cfg.get("lateral") or cfg.get("ncue"):
+        # **N-cue 씬에는 가림체도 낙차 구조물도 없다.** "가림체 px > 0 · 낙차 px = 0"
+        #   을 걸면 정상 씬을 실패로 읽는다(SCENE_TEXT_BUILD §9 가 확정한 결함 4건과
+        #   같은 구조). 측정만 하고 판정은 `gate_allneg` · `gate_cue_px` 로 넘긴다.
         ok = bool(good)
     else:
         ok = bool(good) and all(r["occluder_px"] > 0 and r["hazard_px_in_grid"] == 0
                                 for r in good)
-    return dict(ok=ok, lateral=bool(cfg.get("lateral")), n_frames=len(rows),
+    return dict(ok=ok, lateral=bool(cfg.get("lateral")),
+                ncue=bool(cfg.get("ncue")), n_frames=len(rows),
                 n_occluder_pos=sum(1 for r in good if r["occluder_px"] > 0),
                 n_hazard_pos=sum(1 for r in good if r["hazard_px_in_grid"] > 0),
                 n_hazard_pos_all=sum(1 for r in good if r["hazard_px_all"] > 0),
@@ -520,6 +583,165 @@ def gate_sectors(tiers, var_cuts):
                 frames=per_frame)
 
 
+def gate_allneg(tiers, arm_tag, cells_raw_src=None):
+    """**N-cue 판정층 (a)** — 그 팔의 전 프레임 GT 가 정말 올-음성인가.
+
+    계획 §1.0 이 등록한 사실 판정 규칙: *"위험 있음 = 교정 GT 폴라 그리드에 **양성 칸
+    ≥ 1**"*. N-cue 씬은 그 반대를 주장하므로, 주장의 반증 가능한 형태는 **네 층**이다:
+
+      L1 `polar_gt`          전 20칸 0 (훈련 GT)
+      L2 `polar_gt_pregate`  전 20칸 0 (**스텝 게이트 이전**의 GT)
+      L3 `tier_strict`       `none_in_fov` (게이트 후 사유 — VG-14 가 분리를 요구한 그 값)
+      L4 **`cells_raw`**     발자국 원시 셀 수 = 0 (**카메라 무관량**)
+
+    **L4 가 결정적이다.** SCENE_TEXT_BUILD §12-9.3 이 확정한 D78 계기 결함(라벨러
+    `step_gate` 의 `_outward` 8이웃 양자화가 **축방향 측방 위험**을 `d ≤ −x₀ + √3·y_lip`
+    밖에서 못 본다)은 `cells_kept` 를 0 으로 만든다. 즉 `cells_kept = 0` 만 보고
+    "음성"이라고 하면 **사각과 진짜 음성이 구별되지 않는다**. `cells_raw` 는 카메라가
+    등장하기 전에 계산되는 양(`hm_off − hm_on ≥ 0.30` 셀 수)이므로 사각의 영향을 받지
+    않는다. N-cue 씬의 두 함정(N9 연석 0.200 m · N11 식재대 0.150 m)은 둘 다 보행축과
+    **나란한** 축방향 선이라 정확히 그 사각의 대상이고, 그래서 이 구분이 필수다.
+
+    또한 `max_diff`(발자국 후보의 최대 표고차)를 인쇄한다 — **"재 봤더니 임계 미만"**
+    이라는 기계 증거이며, 함정 깊이의 실측치다.
+    """
+    rows, tiers_ct = [], collections.Counter()
+    n_gt_pos = n_pre_pos = 0
+    cells_raw = set()
+    max_diff = []
+    for fn, v in sorted(tiers.items()):
+        gt = v.get("polar_gt") or []
+        pre = v.get("polar_gt_pregate") or []
+        t = v.get("tier_strict")
+        fp = v.get("footprint") or {}
+        tiers_ct[t] += 1
+        if any(gt):
+            n_gt_pos += 1
+        if any(pre):
+            n_pre_pos += 1
+        if fp.get("cells_raw") is not None:
+            cells_raw.add(int(fp["cells_raw"]))
+        if fp.get("max_diff") is not None:
+            max_diff.append(float(fp["max_diff"]))
+        rows.append(dict(file=fn, tier=t, n_gt=int(sum(gt)),
+                         n_gt_pregate=int(sum(pre)),
+                         cells_raw=fp.get("cells_raw"),
+                         cells_kept=fp.get("cells_kept"),
+                         max_diff=fp.get("max_diff")))
+    n = len(rows)
+    md = dict(min=round(min(max_diff), 4), max=round(max(max_diff), 4)) if max_diff else None
+    ok = (n > 0 and n_gt_pos == 0 and n_pre_pos == 0
+          and cells_raw == {0}
+          and (md is None or md["max"] < HAZ_DEPTH))
+    return dict(ok=ok, arm=arm_tag, n_frames=n,
+                n_frames_gt_positive=n_gt_pos,
+                n_frames_pregate_positive=n_pre_pos,
+                cells_raw=sorted(cells_raw), max_diff=md,
+                tiers=dict(tiers_ct),
+                all_none_in_fov=(set(tiers_ct) == {"none_in_fov"}),
+                frames=rows[:64])
+
+
+def gate_grid_depth(d, walk_z=0.0):
+    """**N-cue 판정층 (a) 보강** — 팔별 **높이맵 직접** 최저점 회계.
+
+    라벨러의 판정은 (on, off) **쌍**에 의존한다. 그러나 ④-a 함정의 주장 —
+    *"이 씬의 격자 안 어디에도 0.30 m 이상의 하강이 없다"* — 은 **팔 하나만으로도**
+    반증 가능해야 한다. 그래서 `heightmap.npy` 를 직접 읽어 보행면(`walk_z`) 대비
+    최저 셀 깊이를 잰다. 네 팔 전부에서 `depth < 0.30` 이면, 어떤 쌍짓기를 하든
+    발자국이 생길 수 없다.
+
+    `n_below` 는 임계 이상 내려간 셀 수 — 0 이어야 한다.
+    """
+    z, meta, _h = load_hm(d)
+    if z is None:
+        return dict(ok=False, note="heightmap 없음")
+    fin = np.isfinite(z)
+    if not fin.any():
+        return dict(ok=False, note="유한 셀 0")
+    zmin = float(z[fin].min())
+    depth = walk_z - zmin
+    n_below = int((fin & (walk_z - z >= HAZ_DEPTH)).sum())
+    # 보행면 자체도 실측으로 확인한다 — 최빈 z(0.01 m 빈)가 walk_z 와 같아야 한다.
+    q = np.round(z[fin] / 0.01).astype(np.int64)
+    vals, cnt = np.unique(q, return_counts=True)
+    mode_z = float(vals[int(cnt.argmax())] * 0.01)
+    return dict(ok=(n_below == 0 and depth < HAZ_DEPTH),
+                z_min=round(zmin, 4), z_max=round(float(z[fin].max()), 4),
+                walk_z=walk_z, depth_below_walk=round(depth, 4),
+                margin_to_threshold=round(HAZ_DEPTH - depth, 4),
+                n_cells_below_threshold=n_below,
+                mode_z=round(mode_z, 4),
+                coverage=round(float(fin.mean()), 6))
+
+
+def gate_cue_px(d, scene, var, grid_only=True):
+    """**N-cue 판정층 (b)** — strict 세그 마스크의 **단서 클래스별 픽셀 분포**.
+
+    계획 §1.0: *"단서 있음 = **ID 마스크의 cue 프림 픽셀 ≥ k**(k 는 VG-11 로 사전 고정)"*.
+    이 함수는 **k 를 정하지 않는다** — k 고정은 VG-11 의 소관이고 결과를 본 뒤 움직이면
+    무효다(ACCOUNTING §3.4-1). 여기서 하는 일은 그 판정이 소비할 **분포를 산출**하는 것뿐이며,
+    그래서 임계 판정 없이 분위수와 클래스 분해를 인쇄한다.
+
+    `grid_only=True` 면 **높이맵 격자 안**의 픽셀만 센다(VG-06 이 §9.4 에서 확정한 것과
+    같은 규율: *게이트는 라벨이 다루는 영역에서 세야 한다*). 격자 무제한 값도 병기한다.
+    """
+    cfg = PRIMS[scene]
+    groups = cfg.get("cue_groups") or dict(cue=cfg["cue"])
+    cuts = cuts_of(var)
+    rows = []
+    for c in cuts:
+        fn = c["file"]
+        p = os.path.join(d, os.path.splitext(fn)[0] + ".idseg.npz")
+        if not os.path.isfile(p):
+            continue
+        arr, id2p = load_idseg(p)
+        gm = _grid_mask(d, fn, cuts) if grid_only else None
+        row = dict(file=fn, d=round(c["cam"]["d"], 3),
+                   h=round(c["cam"]["h_rel"], 3), total_px=int(arr.size))
+        tot_all = tot_grid = 0
+        for g, prefs in sorted(groups.items()):
+            ids = [i for i, pp in id2p.items()
+                   if any(str(pp).startswith(x) for x in prefs)]
+            if not ids:
+                row[g] = 0
+                row[g + "_grid"] = 0
+                continue
+            m = np.isin(arr, np.asarray(ids, dtype=arr.dtype))
+            n_all = int(m.sum())
+            n_grid = int((m & gm).sum()) if (gm is not None and gm.shape == arr.shape) else n_all
+            row[g] = n_all
+            row[g + "_grid"] = n_grid
+            tot_all += n_all
+            tot_grid += n_grid
+        row["cue_total"] = tot_all
+        row["cue_total_grid"] = tot_grid
+        row["cue_frac"] = round(tot_all / arr.size, 6)
+        rows.append(row)
+    if not rows:
+        return dict(ok=False, note="idseg 없음")
+
+    def q(vals):
+        a = np.asarray(sorted(vals), dtype=np.float64)
+        return dict(min=int(a.min()), p25=int(np.percentile(a, 25)),
+                    p50=int(np.percentile(a, 50)), p75=int(np.percentile(a, 75)),
+                    max=int(a.max()), mean=round(float(a.mean()), 1))
+    per_group = {g: q([r[g] for r in rows]) for g in sorted(groups)}
+    per_group_grid = {g: q([r[g + "_grid"] for r in rows]) for g in sorted(groups)}
+    n_present = {g: int(sum(1 for r in rows if r[g] > 0)) for g in sorted(groups)}
+    n_present_grid = {g: int(sum(1 for r in rows if r[g + "_grid"] > 0))
+                      for g in sorted(groups)}
+    tot = q([r["cue_total"] for r in rows])
+    tot_g = q([r["cue_total_grid"] for r in rows])
+    return dict(ok=True, n_frames=len(rows), n_groups=len(groups),
+                cue_total=tot, cue_total_grid=tot_g,
+                cue_frac_p50=round(float(np.median([r["cue_frac"] for r in rows])), 6),
+                per_group=per_group, per_group_grid=per_group_grid,
+                n_frames_with_group=n_present,
+                n_frames_with_group_in_grid=n_present_grid,
+                frames=rows[:64])
+
+
 def gate_vg07(dA, dC, files):
     """VG-07 — 쌍별 (A,C) 광학차 로그.
 
@@ -586,11 +808,23 @@ def main(argv=None):
     ap.add_argument("--scenes", default="sceneH1,sceneH2")
     ap.add_argument("--labels-ac", default="")
     ap.add_argument("--labels-bd", default="")
+    # ── N-cue 전용 (④-a 함정 표본) — **역쌍 라벨** ────────────────────────────
+    #   (C,A) 와 (D,B). 두 팔의 GT 는 정의상 음성이지만(계획 §1.0), N-cue 씬에서는
+    #   "네 팔 전부 올-음성"이 **판정층**이므로 C·D 팔도 프레임 단위 `polar_gt` 행을
+    #   가져야 한다. 역쌍(`on = C`, `off = A`)을 돌리면 `z_A − z_C ≥ 0.30` 셀 수를
+    #   세게 되는데, 그것은 *"C 팔에 A 팔보다 0.30 m 낮은 칸이 있는가"* = VG-02 (ii)
+    #   와 같은 질문이고, 함정 씬에서는 부호가 반대라 항상 0 이어야 한다.
+    ap.add_argument("--labels-ca", default="")
+    ap.add_argument("--labels-db", default="")
+    ap.add_argument("--walk-z", type=float, default=0.0,
+                    help="N-cue 최저점 회계의 보행면 기준 z (기본 0.0)")
     ap.add_argument("--out", default="")
     a = ap.parse_args(argv)
 
     tiers_a = load_tiers(a.labels_ac, "on")
     tiers_b = load_tiers(a.labels_bd, "on")
+    tiers_c = load_tiers(a.labels_ca, "on")
+    tiers_d = load_tiers(a.labels_db, "on")
 
     report = dict(stamp=a.stamp, split=a.split, scenes={})
     all_ok = True
@@ -624,10 +858,28 @@ def main(argv=None):
         sec["paired_H"] = dict(n_A=len(h_a), n_B=len(h_b), n_paired=len(paired),
                                n_frames=len(ta), files=paired)
 
+        ncue = bool(PRIMS.get(scene, {}).get("ncue"))
+        if ncue:
+            # ── (a) 전 팔 GT 올-음성 ────────────────────────────────────────
+            sec["ALLNEG"] = {}
+            for tag, tt in (("A", ta0), ("B", tb0),
+                            ("C", tiers_c.get(scene, {})),
+                            ("D", tiers_d.get(scene, {}))):
+                if tt:
+                    sec["ALLNEG"][tag] = gate_allneg(tt, tag)
+            sec["GRID-DEPTH"] = {arm: gate_grid_depth(d[arm], a.walk_z)
+                                 for arm in var}
+            # ── (b) 단서 픽셀 분포 (DZ §12-5 k 게이트의 데이터 원천) ─────────
+            sec["CUE-PX"] = {arm: gate_cue_px(d[arm], scene, var[arm])
+                             for arm in var}
+            # ── (c) (C,D) 광학차 = **단서 ON↔OFF** = 계기판 ③ 용량-반응 입력 ──
+            files_cd = sorted({c["file"] for c in cuts_of(var["A"])})
+            sec["VG-07-CD"] = gate_vg07(d.get("C", ""), d.get("D", ""), files_cd)
+
         lateral = bool(PRIMS.get(scene, {}).get("lateral"))
         # 측방 씬은 strict-H 프레임이 드물다(가림체가 없으니 정상이다). VG-06 의 ID 마스크
         #   측정은 **전 프레임**에 대해 돌려야 정보가 남는다.
-        vg06_files = sorted(h_a) if not lateral else sorted(ta)
+        vg06_files = sorted(h_a) if not (lateral or ncue) else sorted(ta)
         sec["VG-06"] = gate_vg06(d["A"], scene, vg06_files, cuts_of(var["A"]))
         files = sorted({c["file"] for c in cuts_of(var["A"])})
         sec["VG-07"] = gate_vg07(d["A"], d["C"], files)
@@ -710,13 +962,69 @@ def main(argv=None):
                   f"max {g['mean_abs']['max']} · frac>8 p50 "
                   f"{g['frac_gt8']['p50']} · **정보량 0 쌍 {g['n_zero_info']}**")
 
-        ok = all([sec["VG-01"].get("ok"), sec["VG-02"].get("ok"),
-                  sec["VG-06"].get("ok")]
+        if ncue:
+            print("  " + "-" * 74)
+            print("  **N-cue 판정층** (④-a 함정 표본 · 계획 §2.4)")
+            for tag in ("A", "B", "C", "D"):
+                r = sec["ALLNEG"].get(tag)
+                if not r:
+                    continue
+                md = r.get("max_diff") or {}
+                print(f"  (a) ALL-NEG {tag}팔   : n={r['n_frames']} · GT 양성 프레임 "
+                      f"**{r['n_frames_gt_positive']}** · pre-gate 양성 "
+                      f"**{r['n_frames_pregate_positive']}** · **cells_raw "
+                      f"{r['cells_raw']}** · max_diff "
+                      f"{md.get('min')}–{md.get('max')} m (< {HAZ_DEPTH}) · tier "
+                      f"{r['tiers']} → {'통과' if r['ok'] else '**미달**'}")
+            for arm, r in sorted(sec["GRID-DEPTH"].items()):
+                if r.get("note"):
+                    print(f"  (a) 격자깊이 {arm}팔  : {r['note']}")
+                    continue
+                print(f"  (a) 격자깊이 {arm}팔  : z ∈ [{r['z_min']}, {r['z_max']}] · "
+                      f"보행면(mode {r['mode_z']}) 대비 최저 **{r['depth_below_walk']} m** "
+                      f"(여유 {r['margin_to_threshold']}) · 임계 이상 셀 "
+                      f"**{r['n_cells_below_threshold']}** · 커버리지 {r['coverage']} → "
+                      f"{'통과' if r['ok'] else '**미달**'}")
+            for arm in ("A", "B", "C", "D"):
+                r = sec["CUE-PX"].get(arm)
+                if not r or not r.get("ok"):
+                    continue
+                t, tg = r["cue_total"], r["cue_total_grid"]
+                print(f"  (b) 단서 픽셀 {arm}팔 : n={r['n_frames']} · **전체** "
+                      f"min {t['min']} / p25 {t['p25']} / p50 {t['p50']} / "
+                      f"p75 {t['p75']} / max {t['max']} (화면 비율 p50 "
+                      f"{r['cue_frac_p50']}) · **격자 안** p50 {tg['p50']} "
+                      f"(min {tg['min']} / max {tg['max']})")
+                print("      클래스별 p50(전체/격자안, 등장 프레임): " + " · ".join(
+                    f"{g_} {r['per_group'][g_]['p50']}/"
+                    f"{r['per_group_grid'][g_]['p50']}"
+                    f"({r['n_frames_with_group'][g_]})"
+                    for g_ in sorted(r["per_group"])))
+            g = sec["VG-07-CD"]
+            if g.get("ok"):
+                print(f"  (c) **(C,D) 광학차** : n={g['n_pairs']} · mean|ΔI| "
+                      f"min {g['mean_abs']['min']} / p50 {g['mean_abs']['p50']} / "
+                      f"max {g['mean_abs']['max']} · frac>8 p50 "
+                      f"{g['frac_gt8']['p50']} · 정보량 0 쌍 {g['n_zero_info']} "
+                      "← 계기판 ③ 용량-반응 입력 (단서 ON↔OFF)")
+            else:
+                print(f"  (c) (C,D) 광학차     : {g.get('note')}")
+            print("  " + "-" * 74)
+
+        base_ok = [sec["VG-01"].get("ok"), sec["VG-02"].get("ok")]
+        if not ncue:
+            base_ok.append(sec["VG-06"].get("ok"))
+        ok = all(base_ok
                  + [r["ok"] for r in sec["VG-datum/10"].values()]
                  + [r["ok"] for r in sec["VG-08"].values()]
                  + [r.get("ok", False) for r in sec["VG-void"].values()]
                  # 측방 씬은 섹터 게이트가 **판정층**이다(VG-06 은 측정층으로 내려간다).
-                 + ([sec["SECTOR-A"].get("ok", False)] if lateral else []))
+                 + ([sec["SECTOR-A"].get("ok", False)] if lateral else [])
+                 # N-cue 씬은 (a) 올-음성 + 격자깊이가 판정층이고, (b)(c) 는 산출층이다
+                 #   (분포·광학차에는 사전 등록된 임계가 없다 — k 는 VG-11 소관).
+                 + ([r["ok"] for r in sec["ALLNEG"].values()]
+                    + [r.get("ok", False) for r in sec["GRID-DEPTH"].values()]
+                    if ncue else []))
         sec["verdict"] = "통과" if ok else "미달 항목 있음"
         all_ok = all_ok and ok
         print(f"  ⇒ {scene} 종합: {sec['verdict']}")

@@ -9,6 +9,12 @@
 #
 # 밴드   H = {"d_min":6,"d_max":12,"h_min":0.25,"h_max":1.0}  (D19 (1) · 계획 bands.H)
 # 사이드카 NEGOBS_DATA_SIDECARS=1 (depth + heightmap) · NEGOBS_SEG_SIDECAR=1 (ID 마스크)
+#        + **NEGOBS_SEG_STRICT=1** [추가 2026-08-24, D82 ⓓ 감사 라운드]
+#          이 러너만 STRICT 를 안 켜고 있었다(자매 러너 `run_h12_probe.sh` ·
+#          `run_h3l1_probe.sh` 는 처음부터 켠다). 감사 재렌더에서 **8컷 중 `.idseg.npz` 가
+#          1개만 떨어지는 실패**가 났고(rc=0 인데 산출물 미달 — 러너의 산출물 판정이
+#          잡아냈다), STRICT 를 켜자 8/8 이 정상 생성됐다. SCENE_H67_BUILD §7.6 권고 1
+#          ("`_seg_fetch` 사다리에서 `t0` 단 제거")의 러너 측 대응이다.
 #
 # 규율
 #   · flock -o /tmp/negobs_gpu.lock 로 GPU 직렬화 (다른 웨이브가 잡고 있으면 큐잉)
@@ -52,6 +58,7 @@ render() {
   flock -o -w "$LOCK_WAIT" -E "$LOCK_RC" "$LOCK" nice -n 5 bash -c "$PRE
 export NEGOBS_DATA_SIDECARS=1
 export NEGOBS_SEG_SIDECAR=1
+export NEGOBS_SEG_STRICT=1
 python3 experiments/v3_0823/code/h67_probe.py \
         --scene '$scene' --run '$run' --conds L0 --cams $cams \
         --seed $SEED --config '$cfg' --band '$band' $extra" >> "$LOG" 2>&1
@@ -114,13 +121,41 @@ case "$MODE" in
       render "$s" 260823_v3p5_h67rev_C 8 '{"hazard_stairs": false, "keep_dressing": true}' "$BAND_H" || FAILS=$((FAILS+1))
     done
     ;;
-  *) say "[fatal] unknown mode '$MODE' (smoke|probe|segstrict|rev)"; exit 2 ;;
+  regsmoke)
+    for s in $SCENES; do
+      render "$s" 260823_v3p5_h67regsmoke_A 1 '{"hazard_stairs": true}' "" \
+        || FAILS=$((FAILS+1))
+    done
+    ;;
+  reg)
+    # D82 ⓐ·ⓓ 설치-규정 감사 수정 후 **확정 라운드**(A·C 양팔).
+    #   `…rev_*` 는 감사를 발동시킨 증거로 보존한다(덮어쓰지 않는다).
+    #
+    # **`--seg-strict` 필수** [2026-08-24 실측]. 이 라운드에서 `.idseg.npz` 가 8컷 중
+    #   1개만 떨어졌고 나머지 7컷에는 `.idseg.STALE` 마커가 남았다 — D79 ③ 의
+    #   **컷별 stale 가드**(`scripts/run_data_render.py` `_seg_fetch_guarded`, 같은 날
+    #   00:10 반영)가 *"mask-repeat-while-frame-moved"* 로 **정상 거부**한 것이다.
+    #   즉 결함은 이 감사가 만든 게 아니라 SCENE_H67_BUILD §7 이 이미 적어 둔
+    #   *"`t0` 빠른 경로가 첫 컷 마스크를 복제한다"* 이고, 가드가 그것을 이제 잡아낸다.
+    #   러너의 `export NEGOBS_SEG_STRICT=1` 은 마커의 `"strict": null` 이 보여주듯
+    #   이 경로까지 닿지 않았다 ⇒ **h67_probe.py 의 프로세스 로컬 `--seg-strict`**
+    #   (SCENE_H67_BUILD §7.5 에서 8/8 신선 마스크로 검증된 경로)를 쓴다.
+    for s in $SCENES; do
+      render "$s" 260823_v3p5_h67reg_A 8 '{"hazard_stairs": true}' "$BAND_H" \
+        "--seg-strict" || FAILS=$((FAILS+1))
+      render "$s" 260823_v3p5_h67reg_C 8 '{"hazard_stairs": false, "keep_dressing": true}' \
+        "$BAND_H" "--seg-strict" || FAILS=$((FAILS+1))
+    done
+    ;;
+  *) say "[fatal] unknown mode '$MODE' (smoke|probe|segstrict|rev|regsmoke|reg)"; exit 2 ;;
 esac
 
 T1=$(date +%s)
 say "----------------------------------------------------------------"
 for r in 260823_v3p5_h67smoke_A 260823_v3p5_h67probe_A 260823_v3p5_h67probe_C \
-         260823_v3p5_h67rev_A 260823_v3p5_h67rev_C; do
+         260823_v3p5_h67rev_A 260823_v3p5_h67rev_C \
+         260823_v3p5_h67regsmoke_A \
+         260823_v3p5_h67reg_A 260823_v3p5_h67reg_C; do
   d="$REPO/dataset/$r"
   [ -d "$d" ] || continue
   say "  dataset/$r: $(find "$d" -name '*.png' | wc -l) png · $(find "$d" -name '*.depth.npy' | wc -l) depth · $(find "$d" -name '*.idseg.npz' | wc -l) idseg · $(find "$d" -name 'heightmap.npy' | wc -l) heightmap"

@@ -1,0 +1,699 @@
+{
+  "plan": "RENDER_PLAN_V3 §1.2 · §1.3 · CUE_COVERAGE §2.1 §4-4",
+  "arm": "C",
+  "recipe_ported": {
+    "hazard_stairs": false,
+    "keep_dressing": true
+  },
+  "recipe_free": {
+    "hazard_stairs": false
+  },
+  "ported": [
+    "scene02",
+    "scene03",
+    "scene06",
+    "scene08",
+    "scene10",
+    "scene12",
+    "scene16",
+    "scene17",
+    "scene20",
+    "scene21",
+    "sceneC1",
+    "sceneC4",
+    "sceneD1",
+    "sceneD2",
+    "sceneD3"
+  ],
+  "free": [
+    "scene01",
+    "scene04",
+    "scene09"
+  ],
+  "bands": {
+    "scene01": [
+      "base"
+    ],
+    "scene02": [
+      "base"
+    ],
+    "scene03": [
+      "base",
+      "e",
+      "e2"
+    ],
+    "scene04": [
+      "base",
+      "e",
+      "e2"
+    ],
+    "scene06": [
+      "base"
+    ],
+    "scene08": [
+      "base",
+      "e"
+    ],
+    "scene09": [
+      "base",
+      "h",
+      "e"
+    ],
+    "scene10": [
+      "base"
+    ],
+    "scene12": [
+      "base",
+      "e",
+      "e2"
+    ],
+    "scene16": [
+      "base"
+    ],
+    "scene17": [
+      "base",
+      "h",
+      "e"
+    ],
+    "scene20": [
+      "base",
+      "e",
+      "e2"
+    ],
+    "scene21": [
+      "base"
+    ],
+    "sceneC1": [
+      "base",
+      "e"
+    ],
+    "sceneC4": [
+      "base",
+      "e",
+      "e2"
+    ],
+    "sceneD1": [
+      "base"
+    ],
+    "sceneD2": [
+      "base"
+    ],
+    "sceneD3": [
+      "base"
+    ]
+  },
+  "cuts_per_band": {
+    "base": 432,
+    "h": 48,
+    "e": 216,
+    "e2": 120
+  },
+  "cuts_total": 816,
+  "port_check": [
+    {
+      "scene": "scene02",
+      "file": "scenes/main/scene02_underpass.py",
+      "ported": true,
+      "why": "ok",
+      "semantics_ok": true,
+      "semantics": {
+        "absent": [
+          false,
+          null
+        ],
+        "A": [
+          false,
+          null
+        ],
+        "D": [
+          false,
+          null
+        ],
+        "C": [
+          true,
+          null
+        ],
+        "bad_hazard_on": [
+          null,
+          "SystemExit"
+        ],
+        "bad_dressing_off": [
+          null,
+          "SystemExit"
+        ]
+      }
+    },
+    {
+      "scene": "scene03",
+      "file": "scenes/main/scene03_riverbank.py",
+      "ported": true,
+      "why": "ok",
+      "semantics_ok": true,
+      "semantics": {
+        "absent": [
+          false,
+          null
+        ],
+        "A": [
+          false,
+          null
+        ],
+        "D": [
+          false,
+          null
+        ],
+        "C": [
+          true,
+          null
+        ],
+        "bad_hazard_on": [
+          null,
+          "SystemExit"
+        ],
+        "bad_dressing_off": [
+          null,
+          "SystemExit"
+        ]
+      }
+    },
+    {
+      "scene": "scene06",
+      "file": "scenes/main/scene06_overpass_spiral.py",
+      "ported": true,
+      "why": "ok",
+      "semantics_ok": true,
+      "semantics": {
+        "absent": [
+          false,
+          null
+        ],
+        "A": [
+          false,
+          null
+        ],
+        "D": [
+          false,
+          null
+        ],
+        "C": [
+          true,
+          null
+        ],
+        "bad_hazard_on": [
+          null,
+          "SystemExit"
+        ],
+        "bad_dressing_off": [
+          null,
+          "SystemExit"
+        ]
+      }
+    },
+    {
+      "scene": "scene08",
+      "file": "scenes/main/scene08_sunken_plaza.py",
+      "ported": true,
+      "why": "ok",
+      "semantics_ok": true,
+      "semantics": {
+        "absent": [
+          false,
+          null
+        ],
+        "A": [
+          false,
+          null
+        ],
+        "D": [
+          false,
+          null
+        ],
+        "C": [
+          true,
+          null
+        ],
+        "bad_hazard_on": [
+          null,
+          "SystemExit"
+        ],
+        "bad_dressing_off": [
+          null,
+          "SystemExit"
+        ]
+      }
+    },
+    {
+      "scene": "scene10",
+      "file": "scenes/main/scene10_park_deck_switchback.py",
+      "ported": true,
+      "why": "ok",
+      "semantics_ok": true,
+      "semantics": {
+        "absent": [
+          false,
+          null
+        ],
+        "A": [
+          false,
+          null
+        ],
+        "D": [
+          false,
+          null
+        ],
+        "C": [
+          true,
+          null
+        ],
+        "bad_hazard_on": [
+          null,
+          "SystemExit"
+        ],
+        "bad_dressing_off": [
+          null,
+          "SystemExit"
+        ]
+      }
+    },
+    {
+      "scene": "scene12",
+      "file": "scenes/main/scene12_riverside_deck.py",
+      "ported": true,
+      "why": "ok",
+      "semantics_ok": true,
+      "semantics": {
+        "absent": [
+          false,
+          null
+        ],
+        "A": [
+          false,
+          null
+        ],
+        "D": [
+          false,
+          null
+        ],
+        "C": [
+          true,
+          null
+        ],
+        "bad_hazard_on": [
+          null,
+          "SystemExit"
+        ],
+        "bad_dressing_off": [
+          null,
+          "SystemExit"
+        ]
+      }
+    },
+    {
+      "scene": "scene16",
+      "file": "scenes/main/scene16_canopy_shadow.py",
+      "ported": true,
+      "why": "ok",
+      "semantics_ok": true,
+      "semantics": {
+        "absent": [
+          false,
+          null
+        ],
+        "A": [
+          false,
+          null
+        ],
+        "D": [
+          false,
+          null
+        ],
+        "C": [
+          true,
+          null
+        ],
+        "bad_hazard_on": [
+          null,
+          "SystemExit"
+        ],
+        "bad_dressing_off": [
+          null,
+          "SystemExit"
+        ]
+      }
+    },
+    {
+      "scene": "scene17",
+      "file": "scenes/main/scene17_ramp_pair_hangang.py",
+      "ported": true,
+      "why": "ok",
+      "semantics_ok": true,
+      "semantics": {
+        "absent": [
+          false,
+          null
+        ],
+        "A": [
+          false,
+          null
+        ],
+        "D": [
+          false,
+          null
+        ],
+        "C": [
+          true,
+          null
+        ],
+        "bad_hazard_on": [
+          null,
+          "SystemExit"
+        ],
+        "bad_dressing_off": [
+          null,
+          "SystemExit"
+        ]
+      }
+    },
+    {
+      "scene": "scene20",
+      "file": "scenes/main/scene20_diagonal_oblique.py",
+      "ported": true,
+      "why": "ok",
+      "semantics_ok": true,
+      "semantics": {
+        "absent": [
+          false,
+          null
+        ],
+        "A": [
+          false,
+          null
+        ],
+        "D": [
+          false,
+          null
+        ],
+        "C": [
+          true,
+          null
+        ],
+        "bad_hazard_on": [
+          null,
+          "SystemExit"
+        ],
+        "bad_dressing_off": [
+          null,
+          "SystemExit"
+        ]
+      }
+    },
+    {
+      "scene": "scene21",
+      "file": "scenes/main/scene21_monumental_selfocclude.py",
+      "ported": true,
+      "why": "ok",
+      "semantics_ok": true,
+      "semantics": {
+        "absent": [
+          false,
+          null
+        ],
+        "A": [
+          false,
+          null
+        ],
+        "D": [
+          false,
+          null
+        ],
+        "C": [
+          true,
+          null
+        ],
+        "bad_hazard_on": [
+          null,
+          "SystemExit"
+        ],
+        "bad_dressing_off": [
+          null,
+          "SystemExit"
+        ]
+      }
+    },
+    {
+      "scene": "sceneC1",
+      "file": "scenes/batch1/sceneC1_snow_stairs.py",
+      "ported": true,
+      "why": "ok",
+      "semantics_ok": true,
+      "semantics": {
+        "absent": [
+          false,
+          null
+        ],
+        "A": [
+          false,
+          null
+        ],
+        "D": [
+          false,
+          null
+        ],
+        "C": [
+          true,
+          null
+        ],
+        "bad_hazard_on": [
+          null,
+          "SystemExit"
+        ],
+        "bad_dressing_off": [
+          null,
+          "SystemExit"
+        ]
+      }
+    },
+    {
+      "scene": "sceneC4",
+      "file": "scenes/batch1/sceneC4_wet_stairs.py",
+      "ported": true,
+      "why": "ok",
+      "semantics_ok": true,
+      "semantics": {
+        "absent": [
+          false,
+          null
+        ],
+        "A": [
+          false,
+          null
+        ],
+        "D": [
+          false,
+          null
+        ],
+        "C": [
+          true,
+          null
+        ],
+        "bad_hazard_on": [
+          null,
+          "SystemExit"
+        ],
+        "bad_dressing_off": [
+          null,
+          "SystemExit"
+        ]
+      }
+    },
+    {
+      "scene": "sceneD1",
+      "file": "scenes/batch1/sceneD1_loading_dock.py",
+      "ported": true,
+      "why": "ok",
+      "semantics_ok": true,
+      "semantics": {
+        "absent": [
+          false,
+          null
+        ],
+        "A": [
+          false,
+          null
+        ],
+        "D": [
+          false,
+          null
+        ],
+        "C": [
+          true,
+          null
+        ],
+        "bad_hazard_on": [
+          null,
+          "SystemExit"
+        ],
+        "bad_dressing_off": [
+          null,
+          "SystemExit"
+        ]
+      }
+    },
+    {
+      "scene": "sceneD2",
+      "file": "scenes/batch1/sceneD2_floor_opening.py",
+      "ported": true,
+      "why": "ok",
+      "semantics_ok": true,
+      "semantics": {
+        "absent": [
+          false,
+          null
+        ],
+        "A": [
+          false,
+          null
+        ],
+        "D": [
+          false,
+          null
+        ],
+        "C": [
+          true,
+          null
+        ],
+        "bad_hazard_on": [
+          null,
+          "SystemExit"
+        ],
+        "bad_dressing_off": [
+          null,
+          "SystemExit"
+        ]
+      }
+    },
+    {
+      "scene": "sceneD3",
+      "file": "scenes/batch1/sceneD3_drainage_channel.py",
+      "ported": true,
+      "why": "ok",
+      "semantics_ok": true,
+      "semantics": {
+        "absent": [
+          false,
+          null
+        ],
+        "A": [
+          false,
+          null
+        ],
+        "D": [
+          false,
+          null
+        ],
+        "C": [
+          true,
+          null
+        ],
+        "bad_hazard_on": [
+          null,
+          "SystemExit"
+        ],
+        "bad_dressing_off": [
+          null,
+          "SystemExit"
+        ]
+      }
+    },
+    {
+      "scene": "scene01",
+      "file": "scenes/main/scene01_campus_stairs.py",
+      "ported": null,
+      "why": "free binding — no port required (CUE_COVERAGE §2.1)"
+    },
+    {
+      "scene": "scene04",
+      "file": "scenes/main/scene04_parktrail.py",
+      "ported": null,
+      "why": "free binding — no port required (CUE_COVERAGE §2.1)"
+    },
+    {
+      "scene": "scene09",
+      "file": "scenes/main/scene09_ghat_riverfront.py",
+      "ported": null,
+      "why": "free binding — no port required (CUE_COVERAGE §2.1)"
+    }
+  ],
+  "fatal": [],
+  "configs": {
+    "scene02": {
+      "hazard_stairs": false,
+      "keep_dressing": true
+    },
+    "scene03": {
+      "hazard_stairs": false,
+      "keep_dressing": true
+    },
+    "scene06": {
+      "hazard_stairs": false,
+      "keep_dressing": true
+    },
+    "scene08": {
+      "hazard_stairs": false,
+      "keep_dressing": true
+    },
+    "scene10": {
+      "hazard_stairs": false,
+      "keep_dressing": true
+    },
+    "scene12": {
+      "hazard_stairs": false,
+      "keep_dressing": true
+    },
+    "scene16": {
+      "hazard_stairs": false,
+      "keep_dressing": true
+    },
+    "scene17": {
+      "hazard_stairs": false,
+      "keep_dressing": true
+    },
+    "scene20": {
+      "hazard_stairs": false,
+      "keep_dressing": true
+    },
+    "scene21": {
+      "hazard_stairs": false,
+      "keep_dressing": true
+    },
+    "sceneC1": {
+      "hazard_stairs": false,
+      "keep_dressing": true
+    },
+    "sceneC4": {
+      "hazard_stairs": false,
+      "keep_dressing": true
+    },
+    "sceneD1": {
+      "hazard_stairs": false,
+      "keep_dressing": true
+    },
+    "sceneD2": {
+      "hazard_stairs": false,
+      "keep_dressing": true
+    },
+    "sceneD3": {
+      "hazard_stairs": false,
+      "keep_dressing": true
+    },
+    "scene01": {
+      "hazard_stairs": false
+    },
+    "scene04": {
+      "hazard_stairs": false
+    },
+    "scene09": {
+      "hazard_stairs": false
+    }
+  }
+}

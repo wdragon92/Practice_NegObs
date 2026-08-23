@@ -1,0 +1,459 @@
+{
+ "doc": "w1c_fuse_audit",
+ "version": "1.0",
+ "arm": "C",
+ "b_round": "260827_v3w1_lib_C",
+ "rule": "코퍼스 **A팔**이 융합을 쓰는 (밴드,씬)에만 B팔 융합 사이드카를 쓴다 — B는 on팔이고 중심 게이트가 A/B 동일성이므로 계기 짝이 A다. 그리고 **재융합하지 않는다**: 융합은 시점 의존이라 단서(=가림막) 제거만으로 fp가 갈린다(scene02 실측 262셀). AABB 바이트 동일로 기하 불변이 증명된 (밴드,씬)에 한해 **A팔 융합본을 공유**한다. 밴드 라운드는 base 융합본 복사(AABB sha 동일 확인 후).",
+ "share_rule_caveat": "공유한 씬에서는 VG-01 라벨러층이 독립 검사가 아니다 — 판정 근거는 AABB 바이트층. refuse_vs_A에 재융합본과 A의 차이를 남긴다.",
+ "divergence_from_w1d": "w1d_fuse.py는 구off팔을 계기 권위로 삼았다(D가 off팔이므로). scene08이 두 규칙이 갈리는 유일한 씬이다 — 코퍼스에서 on=aabb · off=fused.",
+ "agree_band_m": 0.01,
+ "flag_p90_m": 0.3,
+ "wrote": [],
+ "flagged": [],
+ "problems": [
+  "base/scene01: B 렌더 없음",
+  "base/scene02: B 렌더 없음",
+  "base/scene03: B 렌더 없음",
+  "base/scene04: B 렌더 없음",
+  "base/scene06: B 렌더 없음",
+  "base/scene08: B 렌더 없음",
+  "base/scene09: B 렌더 없음",
+  "base/scene10: B 렌더 없음",
+  "base/scene12: B 렌더 없음",
+  "base/scene16: B 렌더 없음",
+  "base/scene17: B 렌더 없음",
+  "base/scene20: B 렌더 없음",
+  "base/scene21: B 렌더 없음",
+  "base/sceneC1: B 렌더 없음",
+  "base/sceneC4: B 렌더 없음",
+  "base/sceneD1: B 렌더 없음",
+  "base/sceneD2: B 렌더 없음",
+  "base/sceneD3: B 렌더 없음",
+  "h/scene09: B 렌더 없음",
+  "h/scene17: B 렌더 없음",
+  "e/scene03: B 렌더 없음",
+  "e/scene04: B 렌더 없음",
+  "e/scene08: B 렌더 없음",
+  "e/scene09: B 렌더 없음",
+  "e/scene12: B 렌더 없음",
+  "e/scene17: B 렌더 없음",
+  "e/scene20: B 렌더 없음",
+  "e/sceneC1: B 렌더 없음",
+  "e/sceneC4: B 렌더 없음",
+  "e2/scene03: B 렌더 없음",
+  "e2/scene04: B 렌더 없음",
+  "e2/scene12: B 렌더 없음",
+  "e2/scene20: B 렌더 없음",
+  "e2/sceneC4: B 렌더 없음"
+ ],
+ "rows": [
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_C",
+   "scene": "scene01",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": 0.0003,
+    "p90_abs": 0.0005
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_C",
+   "scene": "scene02",
+   "d_wave_audit": {
+    "corpus_off_fused": true,
+    "action": "write",
+    "med_abs": 0.0051,
+    "p90_abs": 0.008
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_C",
+   "scene": "scene03",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": 0.0003,
+    "p90_abs": 0.0017
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_C",
+   "scene": "scene04",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": 0.0004,
+    "p90_abs": 0.0006
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_C",
+   "scene": "scene06",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "FLAG:median (계기 불일치 — 쓰지 않음, 보고만)",
+    "med_abs": 0.0121,
+    "p90_abs": 0.0144
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_C",
+   "scene": "scene08",
+   "d_wave_audit": {
+    "corpus_off_fused": true,
+    "action": "write",
+    "med_abs": 2.4003,
+    "p90_abs": 4.5003
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_C",
+   "scene": "scene09",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": 0.0055,
+    "p90_abs": 0.0077
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_C",
+   "scene": "scene10",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "FLAG:p90>위험깊이 (계기 불일치 — 쓰지 않음, 보고만)",
+    "med_abs": 0.0005,
+    "p90_abs": 1.1958
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_C",
+   "scene": "scene12",
+   "d_wave_audit": {
+    "corpus_off_fused": true,
+    "action": "write",
+    "med_abs": 0.6,
+    "p90_abs": 1.361
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_C",
+   "scene": "scene16",
+   "d_wave_audit": {
+    "corpus_off_fused": true,
+    "action": "write",
+    "med_abs": 0.0005,
+    "p90_abs": 0.006
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_C",
+   "scene": "scene17",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": 0.0003,
+    "p90_abs": 0.0005
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_C",
+   "scene": "scene20",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": 0.0004,
+    "p90_abs": 0.0006
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_C",
+   "scene": "scene21",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": 0.0004,
+    "p90_abs": 0.0005
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_C",
+   "scene": "sceneC1",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": 0.0003,
+    "p90_abs": 0.0005
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_C",
+   "scene": "sceneC4",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": 0.0003,
+    "p90_abs": 0.0005
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_C",
+   "scene": "sceneD1",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": 0.0003,
+    "p90_abs": 0.0005
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_C",
+   "scene": "sceneD2",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": 0.0003,
+    "p90_abs": 0.0005
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "base",
+   "round": "260827_v3w1_lib_C",
+   "scene": "sceneD3",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": 0.0003,
+    "p90_abs": 0.0006
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "h",
+   "round": "260827_v3w1_lib_C_h",
+   "scene": "scene09",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": null,
+    "p90_abs": null
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "h",
+   "round": "260827_v3w1_lib_C_h",
+   "scene": "scene17",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": null,
+    "p90_abs": null
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "e",
+   "round": "260827_v3w1_lib_C_e",
+   "scene": "scene03",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": null,
+    "p90_abs": null
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "e",
+   "round": "260827_v3w1_lib_C_e",
+   "scene": "scene04",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": null,
+    "p90_abs": null
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "e",
+   "round": "260827_v3w1_lib_C_e",
+   "scene": "scene08",
+   "d_wave_audit": {
+    "corpus_off_fused": true,
+    "action": "copy-from-base",
+    "med_abs": null,
+    "p90_abs": null
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "e",
+   "round": "260827_v3w1_lib_C_e",
+   "scene": "scene09",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": null,
+    "p90_abs": null
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "e",
+   "round": "260827_v3w1_lib_C_e",
+   "scene": "scene12",
+   "d_wave_audit": {
+    "corpus_off_fused": true,
+    "action": "copy-from-base",
+    "med_abs": null,
+    "p90_abs": null
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "e",
+   "round": "260827_v3w1_lib_C_e",
+   "scene": "scene17",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": null,
+    "p90_abs": null
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "e",
+   "round": "260827_v3w1_lib_C_e",
+   "scene": "scene20",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": null,
+    "p90_abs": null
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "e",
+   "round": "260827_v3w1_lib_C_e",
+   "scene": "sceneC1",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": null,
+    "p90_abs": null
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "e",
+   "round": "260827_v3w1_lib_C_e",
+   "scene": "sceneC4",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": null,
+    "p90_abs": null
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "e2",
+   "round": "260827_v3w1_lib_C_e2",
+   "scene": "scene03",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": null,
+    "p90_abs": null
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "e2",
+   "round": "260827_v3w1_lib_C_e2",
+   "scene": "scene04",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": null,
+    "p90_abs": null
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "e2",
+   "round": "260827_v3w1_lib_C_e2",
+   "scene": "scene12",
+   "d_wave_audit": {
+    "corpus_off_fused": true,
+    "action": "copy-from-base",
+    "med_abs": null,
+    "p90_abs": null
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "e2",
+   "round": "260827_v3w1_lib_C_e2",
+   "scene": "scene20",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": null,
+    "p90_abs": null
+   },
+   "error": "B 렌더 없음"
+  },
+  {
+   "band": "e2",
+   "round": "260827_v3w1_lib_C_e2",
+   "scene": "sceneC4",
+   "d_wave_audit": {
+    "corpus_off_fused": false,
+    "action": "keep aabb",
+    "med_abs": null,
+    "p90_abs": null
+   },
+   "error": "B 렌더 없음"
+  }
+ ]
+}

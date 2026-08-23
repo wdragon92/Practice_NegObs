@@ -80,28 +80,52 @@ import fuse_heightmap as FH                                     # noqa: E402
 # `W1B_ARM=B`  (기본)  → 착지한 `260826_v3w1_lib_B*` · 산출 `w1b_*`  (W1-B 재현 그대로)
 # `W1B_ARM=B2`         → T레버 보충본 `260826_v3w1_lib_B2*` · **12씬만** · 산출 `w1b2_*`
 # 어느 쪽이든 코퍼스 A팔·D팔·구off 참조와 게이트 술어는 **한 글자도 다르지 않다**.
+# --- W1-C 웨이브 스위치 (DECISIONS D82 ② · PREREG_V3 §7.2 `AC-INSTR-1`) ------
+# `W1B_ARM=C`          → C팔 `260827_v3w1_lib_C*` · 18씬 · 산출 `w1c_*`
+# **C3-1 (계기 상속 · 팔 무관)**: (밴드,씬)의 계기 선택은 코퍼스 A팔에서
+#   상속하고 팔별로 재선택하지 않는다 — 아래 `corpus_on_fused()` 가 그것이고
+#   B/B2 와 **한 글자도 다르지 않다**.
+# **C3-5 (공유 금지 · 재융합 기본)**: A팔 융합본을 C에 공유하지 않는다.
+#   공유하면 그 씬의 VG-01/02 가 구성상 통과해 게이트가 무력화된다. C 는
+#   독립 재융합하고 게이트가 말하게 둔다. (`SHARE` 는 결재로만 열린다.)
+# **C3-4 (동일-시점 융합 강제)**: 같은 포즈 집합·같은 `n_views` — VG-10 과
+#   VG-datum 이 강제 장치이며 팔 간 `n_views` 불일치는 하드 실패다.
 ARM = os.environ.get("W1B_ARM", "B")
-if ARM not in ("B", "B2"):
-    raise SystemExit(f"W1B_ARM must be B or B2, got {ARM!r}")
-TAG = "w1b" if ARM == "B" else "w1b2"
+if ARM not in ("B", "B2", "C"):
+    raise SystemExit(f"W1B_ARM must be B, B2 or C, got {ARM!r}")
+TAG = {"B": "w1b", "B2": "w1b2", "C": "w1c"}[ARM]
 B2_SCENES = set("scene02 scene08 scene09 scene12 scene16 scene17 scene20 "
                 "scene21 sceneC1 sceneC4 sceneD1 sceneD3".split())
 
 
 def _sel(ss):
     """B2 웨이브는 T레버를 보충한 12씬만 다시 찍었다."""
-    return [s for s in ss if ARM == "B" or s in B2_SCENES]
+    return [s for s in ss if ARM != "B2" or s in B2_SCENES]
 
-B = f"260826_v3w1_lib_{ARM}"
-# 밴드 -> (B 라운드, 그 밴드의 씬)
-BANDS = {
-    "base": (B, _sel("scene01 scene02 scene06 scene08 scene09 scene12 scene16 scene17 "
-                     "scene20 scene21 sceneC1 sceneC4 sceneD1 sceneD2 sceneD3".split())),
-    "h":    (f"{B}_h", _sel("scene09 scene17".split())),
-    "e":    (f"{B}_e", _sel("scene08 scene09 scene12 scene17 scene20 sceneC1 "
-                            "sceneC4".split())),
-    "e2":   (f"{B}_e2", _sel("scene12 scene20 sceneC4".split())),
-}
+
+B = ("260827_v3w1_lib_C" if ARM == "C" else f"260826_v3w1_lib_{ARM}")
+# 밴드 -> (팔 라운드, 그 밴드의 씬)
+if ARM == "C":
+    # 계획 §1.2 C열 — B팔에 없는 s03·s04·s10 이 들어오고 s06 이 살아 있다
+    # (C 는 레버가 아니라 `hazard=False + keep_dressing` 이라 T 보류와 무관).
+    BANDS = {
+        "base": (B, "scene01 scene02 scene03 scene04 scene06 scene08 scene09 "
+                    "scene10 scene12 scene16 scene17 scene20 scene21 sceneC1 "
+                    "sceneC4 sceneD1 sceneD2 sceneD3".split()),
+        "h":    (f"{B}_h", "scene09 scene17".split()),
+        "e":    (f"{B}_e", "scene03 scene04 scene08 scene09 scene12 scene17 "
+                           "scene20 sceneC1 sceneC4".split()),
+        "e2":   (f"{B}_e2", "scene03 scene04 scene12 scene20 sceneC4".split()),
+    }
+else:
+    BANDS = {
+        "base": (B, _sel("scene01 scene02 scene06 scene08 scene09 scene12 scene16 scene17 "
+                         "scene20 scene21 sceneC1 sceneC4 sceneD1 sceneD2 sceneD3".split())),
+        "h":    (f"{B}_h", _sel("scene09 scene17".split())),
+        "e":    (f"{B}_e", _sel("scene08 scene09 scene12 scene17 scene20 sceneC1 "
+                                "sceneC4".split())),
+        "e2":   (f"{B}_e2", _sel("scene12 scene20 sceneC4".split())),
+    }
 # 코퍼스 A팔 라운드 (계기 권위). g7fixM 트리는 융합 사이드카를 얹은 심링크본이라
 # 그 씬에서는 M이 이긴다 (G7_RELABEL 정본 = 변형 B).
 A_ROUNDS = {

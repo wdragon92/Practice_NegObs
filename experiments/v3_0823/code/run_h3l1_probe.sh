@@ -141,9 +141,18 @@ case "$MODE" in
       render "$s" 260823_v3p5_h3l1smoke_A L0 1 "$CFG_A" "" || FAILS=$((FAILS+1))
     done
     ;;
-  probe|rev)
+  regsmoke)
+    # D82 ⓐ·ⓓ 설치-규정 감사 수정 후 1프레임 위생 확인
+    for s in $SCENES; do
+      render "$s" 260823_v3p5_h3l1regsmoke_A L0 1 "$CFG_A" "" || FAILS=$((FAILS+1))
+    done
+    ;;
+  probe|rev|reg)
     STAMP=260823_v3p5_h3l1probe
     [ "$MODE" = "rev" ] && STAMP=260823_v3p5_h3l1rev
+    # D82 ⓐ·ⓓ 설치-규정 감사 수정 후 **확정 4팔 라운드**.
+    #   `…rev_*` 는 감사를 발동시킨 증거로 보존한다(덮어쓰지 않는다).
+    [ "$MODE" = "reg" ] && STAMP=260823_v3p5_h3l1reg
     for s in $SCENES; do
       for arm in A B C D; do
         render "$s" "${STAMP}_$arm" "$CONDS" "$CAMS" \
@@ -159,7 +168,7 @@ case "$MODE" in
       done
     done
     ;;
-  *) say "[fatal] unknown mode '$MODE' (smoke|probe|rev|near)"; exit 2 ;;
+  *) say "[fatal] unknown mode '$MODE' (smoke|probe|rev|near|regsmoke|reg)"; exit 2 ;;
 esac
 
 T1=$(date +%s)
@@ -169,7 +178,10 @@ for r in 260823_v3p5_h3l1smoke_A \
          260823_v3p5_h3l1probe_C 260823_v3p5_h3l1probe_D \
          260823_v3p5_h3l1near_A 260823_v3p5_h3l1near_C \
          260823_v3p5_h3l1rev_A 260823_v3p5_h3l1rev_B \
-         260823_v3p5_h3l1rev_C 260823_v3p5_h3l1rev_D; do
+         260823_v3p5_h3l1rev_C 260823_v3p5_h3l1rev_D \
+         260823_v3p5_h3l1regsmoke_A \
+         260823_v3p5_h3l1reg_A 260823_v3p5_h3l1reg_B \
+         260823_v3p5_h3l1reg_C 260823_v3p5_h3l1reg_D; do
   d="$REPO/dataset/$r"
   [ -d "$d" ] || continue
   say "  dataset/$r: $(find "$d" -name '*.png' | wc -l) png · $(find "$d" -name '*.depth.npy' | wc -l) depth · $(find "$d" -name '*.idseg.npz' | wc -l) idseg · $(find "$d" -name 'heightmap.npy' | wc -l) heightmap"

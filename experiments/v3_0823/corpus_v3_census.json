@@ -1,0 +1,899 @@
+{
+ "doc": "corpus_v3_census",
+ "version": "1.0",
+ "manifest": "experiments/v3_0823/dataset_manifest_v3.json",
+ "created": "2026-08-24T06:43:10",
+ "n_frames": 3654,
+ "census": {
+  "by_arm": {
+   "A": 936,
+   "B": 672,
+   "C": 1029,
+   "D": 1017
+  },
+  "by_arm_split": {
+   "A/train": 672,
+   "A/val": 264,
+   "B/train": 408,
+   "B/val": 264,
+   "C/train": 765,
+   "C/val": 264,
+   "D/train": 753,
+   "D/val": 264
+  },
+  "by_tier": {
+   "E": 66,
+   "H": 372,
+   "H_weak": 48,
+   "V": 948,
+   "none_in_fov": 270,
+   "off": 1950
+  },
+  "by_split_tier": {
+   "train/E": 42,
+   "train/H": 186,
+   "train/H_weak": 42,
+   "train/V": 732,
+   "train/none_in_fov": 174,
+   "train/off": 1422,
+   "val/E": 24,
+   "val/H": 186,
+   "val/H_weak": 6,
+   "val/V": 216,
+   "val/none_in_fov": 96,
+   "val/off": 528
+  },
+  "by_arm_split_tier": {
+   "A/train/E": 21,
+   "A/train/H": 93,
+   "A/train/H_weak": 21,
+   "A/train/V": 486,
+   "A/train/none_in_fov": 51,
+   "A/val/E": 12,
+   "A/val/H": 93,
+   "A/val/H_weak": 3,
+   "A/val/V": 108,
+   "A/val/none_in_fov": 48,
+   "B/train/E": 21,
+   "B/train/H": 93,
+   "B/train/H_weak": 21,
+   "B/train/V": 246,
+   "B/train/none_in_fov": 27,
+   "B/val/E": 12,
+   "B/val/H": 93,
+   "B/val/H_weak": 3,
+   "B/val/V": 108,
+   "B/val/none_in_fov": 48,
+   "C/train/none_in_fov": 96,
+   "C/train/off": 669,
+   "C/val/off": 264,
+   "D/train/off": 753,
+   "D/val/off": 264
+  },
+  "by_scene_arm": {
+   "scene01/A": 24,
+   "scene01/B": 24,
+   "scene01/C": 24,
+   "scene01/D": 24,
+   "scene02/A": 24,
+   "scene02/B": 24,
+   "scene02/C": 24,
+   "scene02/D": 15,
+   "scene03/A": 72,
+   "scene03/C": 72,
+   "scene03/D": 72,
+   "scene04/A": 72,
+   "scene04/C": 72,
+   "scene04/D": 72,
+   "scene06/A": 24,
+   "scene06/B": 24,
+   "scene06/C": 24,
+   "scene06/D": 24,
+   "scene08/A": 48,
+   "scene08/B": 48,
+   "scene08/C": 48,
+   "scene08/D": 48,
+   "scene09/A": 72,
+   "scene09/B": 72,
+   "scene09/C": 72,
+   "scene09/D": 72,
+   "scene10/A": 24,
+   "scene10/C": 21,
+   "scene10/D": 21,
+   "scene12/A": 72,
+   "scene12/C": 72,
+   "scene12/D": 72,
+   "scene16/A": 24,
+   "scene16/C": 24,
+   "scene16/D": 24,
+   "scene17/A": 72,
+   "scene17/B": 72,
+   "scene17/C": 72,
+   "scene17/D": 72,
+   "scene20/A": 72,
+   "scene20/B": 72,
+   "scene20/C": 72,
+   "scene20/D": 72,
+   "scene21/A": 24,
+   "scene21/B": 24,
+   "scene21/C": 24,
+   "scene21/D": 24,
+   "sceneC1/A": 48,
+   "sceneC1/B": 48,
+   "sceneC1/C": 48,
+   "sceneC1/D": 48,
+   "sceneC4/A": 72,
+   "sceneC4/B": 72,
+   "sceneC4/C": 72,
+   "sceneC4/D": 72,
+   "sceneD1/A": 24,
+   "sceneD1/B": 24,
+   "sceneD1/C": 24,
+   "sceneD1/D": 24,
+   "sceneD2/A": 24,
+   "sceneD2/B": 24,
+   "sceneD2/C": 24,
+   "sceneD2/D": 24,
+   "sceneD3/A": 24,
+   "sceneD3/B": 24,
+   "sceneD3/C": 24,
+   "sceneD3/D": 24,
+   "sceneH6/A": 72,
+   "sceneH6/B": 72,
+   "sceneH6/C": 72,
+   "sceneH6/D": 72,
+   "sceneH7/A": 48,
+   "sceneH7/B": 48,
+   "sceneH7/C": 48,
+   "sceneH7/D": 48,
+   "sceneN1/C": 24,
+   "sceneN1/D": 21,
+   "sceneN2/C": 24,
+   "sceneN2/D": 24,
+   "sceneN4/C": 24,
+   "sceneN4/D": 24,
+   "sceneN5/C": 24,
+   "sceneN5/D": 24
+  },
+  "hazard_positive_frames": 1434,
+  "hazard_arm_frames": 1608,
+  "n_scenes": 24
+ },
+ "val_strict_h": {
+  "definition": "정의 B — tier=='H' ∧ any(polar_gt) (PREREG §4.3 · P-02)",
+  "by_arm": {
+   "A": 93,
+   "B": 93
+  },
+  "A_arm_total": 93,
+  "by_scene_A": {
+   "scene20": 6,
+   "sceneH6": 54,
+   "sceneH7": 33
+  },
+  "requirement": 30,
+  "ratio": 3.1,
+  "expect_D89": 93,
+  "match_D89": true,
+  "paired_H_total": 186,
+  "paired_H_val": 93,
+  "paired_H_by_scene": {
+   "scene09": 60,
+   "scene17": 33,
+   "scene20": 6,
+   "sceneH6": 54,
+   "sceneH7": 33
+  },
+  "n_H_definition_check": 0
+ },
+ "existence_r": {
+  "design_level": {
+   "R": {
+    "cue": "cue_railing",
+    "n_scenes": 13,
+    "n": 2169,
+    "a": 792,
+    "b": 240,
+    "c": 573,
+    "d": 564,
+    "cue_rate": 0.6293,
+    "hazard_rate": 0.4758,
+    "r": 0.2724,
+    "interpretable": true
+   },
+   "Ta": {
+    "cue": "cue_tactile",
+    "n_scenes": 4,
+    "n": 960,
+    "a": 360,
+    "b": 120,
+    "c": 240,
+    "d": 240,
+    "cue_rate": 0.625,
+    "hazard_rate": 0.5,
+    "r": 0.2582,
+    "interpretable": true
+   },
+   "N": {
+    "cue": "cue_nosing",
+    "n_scenes": 7,
+    "n": 1023,
+    "a": 288,
+    "b": 216,
+    "c": 264,
+    "d": 255,
+    "cue_rate": 0.5396,
+    "hazard_rate": 0.4927,
+    "r": 0.0629,
+    "interpretable": true
+   },
+   "T": {
+    "cue": "cue_material_break",
+    "n_scenes": 24,
+    "n": 3654,
+    "a": 936,
+    "b": 672,
+    "c": 1029,
+    "d": 1017,
+    "cue_rate": 0.5378,
+    "hazard_rate": 0.4401,
+    "r": 0.0788,
+    "interpretable": true
+   },
+   "Sg": {
+    "cue": "cue_sign",
+    "n_scenes": 8,
+    "n": 1311,
+    "a": 336,
+    "b": 312,
+    "c": 336,
+    "d": 327,
+    "cue_rate": 0.5126,
+    "hazard_rate": 0.4943,
+    "r": 0.0117,
+    "interpretable": true
+   },
+   "V": {
+    "cue": "cue_scene_dressing",
+    "n_scenes": 24,
+    "n": 3654,
+    "a": 1176,
+    "b": 432,
+    "c": 1029,
+    "d": 1017,
+    "cue_rate": 0.6034,
+    "hazard_rate": 0.4401,
+    "r": 0.2318,
+    "interpretable": true
+   },
+   "_max": [
+    "R",
+    0.2724
+   ]
+  },
+  "fact_level": {
+   "R": {
+    "cue": "cue_railing",
+    "n_scenes": 13,
+    "n": 2169,
+    "a": 675,
+    "b": 198,
+    "c": 690,
+    "d": 606,
+    "cue_rate": 0.6293,
+    "hazard_rate": 0.4025,
+    "r": 0.2445,
+    "interpretable": true
+   },
+   "Ta": {
+    "cue": "cue_tactile",
+    "n_scenes": 4,
+    "n": 960,
+    "a": 339,
+    "b": 105,
+    "c": 261,
+    "d": 255,
+    "cue_rate": 0.625,
+    "hazard_rate": 0.4625,
+    "r": 0.2654,
+    "interpretable": true
+   },
+   "N": {
+    "cue": "cue_nosing",
+    "n_scenes": 7,
+    "n": 1023,
+    "a": 273,
+    "b": 201,
+    "c": 279,
+    "d": 270,
+    "cue_rate": 0.5396,
+    "hazard_rate": 0.4633,
+    "r": 0.0678,
+    "interpretable": true
+   },
+   "T": {
+    "cue": "cue_material_break",
+    "n_scenes": 24,
+    "n": 3654,
+    "a": 837,
+    "b": 597,
+    "c": 1128,
+    "d": 1092,
+    "cue_rate": 0.5378,
+    "hazard_rate": 0.3924,
+    "r": 0.074,
+    "interpretable": true
+   },
+   "Sg": {
+    "cue": "cue_sign",
+    "n_scenes": 8,
+    "n": 1311,
+    "a": 318,
+    "b": 294,
+    "c": 354,
+    "d": 345,
+    "cue_rate": 0.5126,
+    "hazard_rate": 0.4668,
+    "r": 0.0131,
+    "interpretable": true
+   },
+   "V": {
+    "cue": "cue_scene_dressing",
+    "n_scenes": 24,
+    "n": 3654,
+    "a": 1074,
+    "b": 360,
+    "c": 1131,
+    "d": 1089,
+    "cue_rate": 0.6034,
+    "hazard_rate": 0.3924,
+    "r": 0.2391,
+    "interpretable": true
+   },
+   "_max": [
+    "Ta",
+    0.2654
+   ]
+  },
+  "counterfactuals": {
+   "revive_vg01": {
+    "R": 0.2025,
+    "Ta": 0.2582,
+    "N": 0.0368,
+    "T": 0.0462,
+    "Sg": 0.0068,
+    "V": 0.1894
+   },
+   "revive_and_skip": {
+    "R": 0.2092,
+    "Ta": 0.2582,
+    "N": 0.0368,
+    "T": 0.0871,
+    "Sg": 0.0068,
+    "V": 0.2198
+   },
+   "balanced": {
+    "R": 0.241,
+    "Ta": 0.2582,
+    "N": 0.05,
+    "T": 0.0,
+    "Sg": 0.0,
+    "V": 0.1766
+   }
+  },
+  "counterfactual_legend": {
+   "asbuilt": "현 매니페스트 그대로",
+   "revive_vg01": "P-19 결재로 VG-01 격리 96컷을 되살린 경우",
+   "revive_and_skip": "위 + D74 ⑤ 미렌더 168컷을 찍은 경우 (**A와 바이트 동일 = 학습 이중 가중**이라 D74 가 거부한 경로)",
+   "balanced": "씬별로 A/B = C/D 항등식을 강제해 잘라낸 경우 (PREREG §4.5 팔 수준 톱업 조항의 as-built 판)"
+  },
+  "vg09_remedy": {
+   "R": {
+    "r_asbuilt": 0.2724,
+    "b_arm_keeps_key": [
+     {
+      "scene": "scene01",
+      "n_B": 24,
+      "levers": [
+       "Sg",
+       "T"
+      ]
+     },
+     {
+      "scene": "scene08",
+      "n_B": 48,
+      "levers": [
+       "Sg",
+       "T",
+       "V"
+      ]
+     },
+     {
+      "scene": "scene20",
+      "n_B": 72,
+      "levers": [
+       "T",
+       "V"
+      ]
+     },
+     {
+      "scene": "scene21",
+      "n_B": 24,
+      "levers": [
+       "Sg",
+       "T",
+       "V"
+      ]
+     },
+     {
+      "scene": "sceneC1",
+      "n_B": 48,
+      "levers": [
+       "N",
+       "T"
+      ]
+     }
+    ],
+    "arm_imbalance_A_without_B": [
+     {
+      "scene": "scene10",
+      "n_A": 24,
+      "n_B": 0
+     },
+     {
+      "scene": "scene12",
+      "n_A": 72,
+      "n_B": 0
+     },
+     {
+      "scene": "scene16",
+      "n_A": 24,
+      "n_B": 0
+     }
+    ],
+    "r_if_key_added_to_all_B": 0.0542,
+    "prescription": "PREREG §4.5 마지막 행 — VG-CLS 재확인 후 레버 추가, 불가능하면 **상수 키로 승격 표기**하고 사유 인쇄"
+   },
+   "Ta": {
+    "r_asbuilt": 0.2582,
+    "b_arm_keeps_key": [
+     {
+      "scene": "sceneC1",
+      "n_B": 48,
+      "levers": [
+       "N",
+       "T"
+      ]
+     },
+     {
+      "scene": "sceneC4",
+      "n_B": 72,
+      "levers": [
+       "R",
+       "T"
+      ]
+     }
+    ],
+    "arm_imbalance_A_without_B": [],
+    "r_if_key_added_to_all_B": 0.0,
+    "prescription": "PREREG §4.5 마지막 행 — VG-CLS 재확인 후 레버 추가, 불가능하면 **상수 키로 승격 표기**하고 사유 인쇄"
+   },
+   "V": {
+    "r_asbuilt": 0.2318,
+    "b_arm_keeps_key": [
+     {
+      "scene": "scene01",
+      "n_B": 24,
+      "levers": [
+       "Sg",
+       "T"
+      ]
+     },
+     {
+      "scene": "scene02",
+      "n_B": 24,
+      "levers": [
+       "N",
+       "R",
+       "Sg",
+       "T"
+      ]
+     },
+     {
+      "scene": "scene09",
+      "n_B": 72,
+      "levers": [
+       "Sg",
+       "T"
+      ]
+     },
+     {
+      "scene": "sceneC1",
+      "n_B": 48,
+      "levers": [
+       "N",
+       "T"
+      ]
+     },
+     {
+      "scene": "sceneC4",
+      "n_B": 72,
+      "levers": [
+       "R",
+       "T"
+      ]
+     }
+    ],
+    "arm_imbalance_A_without_B": [
+     {
+      "scene": "scene03",
+      "n_A": 72,
+      "n_B": 0
+     },
+     {
+      "scene": "scene04",
+      "n_A": 72,
+      "n_B": 0
+     },
+     {
+      "scene": "scene10",
+      "n_A": 24,
+      "n_B": 0
+     },
+     {
+      "scene": "scene12",
+      "n_A": 72,
+      "n_B": 0
+     },
+     {
+      "scene": "scene16",
+      "n_A": 24,
+      "n_B": 0
+     }
+    ],
+    "r_if_key_added_to_all_B": 0.0788,
+    "prescription": "PREREG §4.5 마지막 행 — VG-CLS 재확인 후 레버 추가, 불가능하면 **상수 키로 승격 표기**하고 사유 인쇄"
+   }
+  },
+  "threshold": 0.2,
+  "protocol": "ACCOUNTING §4.9-3 — ① 주변분포 병기 ② 토글 가능 키 한정 ③ 키별 산출 ④ 상수 키 별도 표기. 모집단은 **수리된 hazgate**(--mode full) 위에서 잡는다 (PREREG §4.4 규약 4).",
+  "constant_keys": [],
+  "arm_level_phi": {
+   "a": 936,
+   "b": 672,
+   "c": 1029,
+   "d": 1017,
+   "r": 0.0788,
+   "note": "팔 수준 φ 는 설계상 자동 0 에 가깝다 — **단독 인용 금지** (§4.9-3 ③)"
+  }
+ },
+ "arm_x_scene_origin": {
+  "authority": "D58 ② · 계획 §4.4.5 (문자대로면 1.000 완전 교락 · 계획 예측 0.0033)",
+  "arms_BD_x_new": {
+   "a": 240,
+   "b": 1449,
+   "c": 240,
+   "d": 1725,
+   "r": 0.0295
+  },
+  "hazard_arm_x_new": {
+   "a": 240,
+   "b": 1368,
+   "c": 240,
+   "d": 1806,
+   "r": 0.047
+  },
+  "by_scene_family": {
+   "legacy33/A": 816,
+   "legacy33/B": 552,
+   "legacy33/C": 909,
+   "legacy33/D": 897,
+   "new/A": 120,
+   "new/B": 120,
+   "new/C": 120,
+   "new/D": 120
+  },
+  "plan_prediction": 0.0033
+ },
+ "k_derivation": {
+  "gate": "VG-11 · ACCOUNTING §2-5 · §3.4 미결 1번 (**PREREG 미결 — 봉인 전**)",
+  "measure": "px_canonical6 = 정본 6키(R·Ta·N·T·Sg·V)에 귀속된 프림 픽셀 합. `Gk`(지면 표면처리 미분해)·`Mh/Dr/Jt`(v3 신설 키)·`Ux` 는 제외. T 는 재질 재바인딩이라 ID 마스크 불변 ⇒ 면적 기여 0 (면적-불가시 키).",
+  "populations": {
+   "spec_present_AC": {
+    "n": 1749,
+    "zeros": 84,
+    "p05": 142,
+    "p10": 38644,
+    "p25": 135250,
+    "p50": 391048,
+    "min_nonzero": 142
+   },
+   "spec_absent_D": {
+    "n": 874,
+    "zeros": 862,
+    "p50": 0,
+    "p90": 0,
+    "p99": 3957,
+    "max": 6744
+   },
+   "B_arm": {
+    "n": 668,
+    "zeros": 234,
+    "p50": 94981,
+    "p90": 767342,
+    "max": 1396894
+   },
+   "A_strict_H": {
+    "n": 162,
+    "zeros": 3,
+    "min_nonzero": 7404,
+    "p05": 10132,
+    "p10": 38644,
+    "p50": 285256
+   }
+  },
+  "log_midpoint": {
+   "method": "VG-const 와 같은 유도 — 두 실측 극단의 **로그축 중점** (PREREG §4.1: √(붕괴 최대 × 비붕괴 최소)). 앵커를 둘 다 인쇄한다 — 어느 쪽을 쓰는지가 값을 7배 바꾼다.",
+   "neg_max": 6744,
+   "anchor_AC_min_nonzero": {
+    "value": 142,
+    "geometric_mean": 978.6,
+    "note": "A·C 전 프레임의 최소 비-0. 그 프레임은 sceneH7/base 의 **영정보 쌍**이라 '단서 없음'으로 읽는 것이 옳다 ⇒ 앵커로 부적합"
+   },
+   "anchor_A_strictH_min_nonzero": {
+    "value": 7404,
+    "geometric_mean": 7066.3,
+    "note": "지도가 실제로 걸리는 모집단(A팔 strict-H)의 최소 비-0 ⇒ **채택 앵커**"
+   }
+  },
+  "sweep": [
+   {
+    "k": 1,
+    "D_arm_false_present": 12,
+    "D_arm_false_present_rate": 0.01373,
+    "AC_arm_false_absent": 84,
+    "AC_arm_false_absent_rate": 0.04803,
+    "A_strict_H_masked": 3,
+    "A_strict_H_masked_rate": 0.0185,
+    "B_arm_present": 434,
+    "youden": 0.93824
+   },
+   {
+    "k": 100,
+    "D_arm_false_present": 12,
+    "D_arm_false_present_rate": 0.01373,
+    "AC_arm_false_absent": 84,
+    "AC_arm_false_absent_rate": 0.04803,
+    "A_strict_H_masked": 3,
+    "A_strict_H_masked_rate": 0.0185,
+    "B_arm_present": 434,
+    "youden": 0.93824
+   },
+   {
+    "k": 1000,
+    "D_arm_false_present": 12,
+    "D_arm_false_present_rate": 0.01373,
+    "AC_arm_false_absent": 90,
+    "AC_arm_false_absent_rate": 0.05146,
+    "A_strict_H_masked": 3,
+    "A_strict_H_masked_rate": 0.0185,
+    "B_arm_present": 434,
+    "youden": 0.93481
+   },
+   {
+    "k": 2074,
+    "D_arm_false_present": 12,
+    "D_arm_false_present_rate": 0.01373,
+    "AC_arm_false_absent": 90,
+    "AC_arm_false_absent_rate": 0.05146,
+    "A_strict_H_masked": 3,
+    "A_strict_H_masked_rate": 0.0185,
+    "B_arm_present": 431,
+    "youden": 0.93481
+   },
+   {
+    "k": 5000,
+    "D_arm_false_present": 6,
+    "D_arm_false_present_rate": 0.00686,
+    "AC_arm_false_absent": 93,
+    "AC_arm_false_absent_rate": 0.05317,
+    "A_strict_H_masked": 3,
+    "A_strict_H_masked_rate": 0.0185,
+    "B_arm_present": 417,
+    "youden": 0.93996
+   },
+   {
+    "k": 7000,
+    "D_arm_false_present": 0,
+    "D_arm_false_present_rate": 0.0,
+    "AC_arm_false_absent": 96,
+    "AC_arm_false_absent_rate": 0.05489,
+    "A_strict_H_masked": 3,
+    "A_strict_H_masked_rate": 0.0185,
+    "B_arm_present": 411,
+    "youden": 0.94511
+   },
+   {
+    "k": 10000,
+    "D_arm_false_present": 0,
+    "D_arm_false_present_rate": 0.0,
+    "AC_arm_false_absent": 102,
+    "AC_arm_false_absent_rate": 0.05832,
+    "A_strict_H_masked": 6,
+    "A_strict_H_masked_rate": 0.037,
+    "B_arm_present": 399,
+    "youden": 0.94168
+   },
+   {
+    "k": 20000,
+    "D_arm_false_present": 0,
+    "D_arm_false_present_rate": 0.0,
+    "AC_arm_false_absent": 129,
+    "AC_arm_false_absent_rate": 0.07376,
+    "A_strict_H_masked": 12,
+    "A_strict_H_masked_rate": 0.0741,
+    "B_arm_present": 381,
+    "youden": 0.92624
+   },
+   {
+    "k": 60000,
+    "D_arm_false_present": 0,
+    "D_arm_false_present_rate": 0.0,
+    "AC_arm_false_absent": 240,
+    "AC_arm_false_absent_rate": 0.13722,
+    "A_strict_H_masked": 21,
+    "A_strict_H_masked_rate": 0.1296,
+    "B_arm_present": 375,
+    "youden": 0.86278
+   },
+   {
+    "k": 100000,
+    "D_arm_false_present": 0,
+    "D_arm_false_present_rate": 0.0,
+    "AC_arm_false_absent": 351,
+    "AC_arm_false_absent_rate": 0.20069,
+    "A_strict_H_masked": 51,
+    "A_strict_H_masked_rate": 0.3148,
+    "B_arm_present": 321,
+    "youden": 0.79931
+   }
+  ],
+  "youden_best": {
+   "k": 7000,
+   "D_arm_false_present": 0,
+   "D_arm_false_present_rate": 0.0,
+   "AC_arm_false_absent": 96,
+   "AC_arm_false_absent_rate": 0.05489,
+   "A_strict_H_masked": 3,
+   "A_strict_H_masked_rate": 0.0185,
+   "B_arm_present": 411,
+   "youden": 0.94511
+  },
+  "d_arm_leak": {
+   "n_frames": 12,
+   "scenes": [
+    "scene10"
+   ],
+   "note": "D팔 잔존 단서 픽셀은 전량 scene10 의 V(scene_dressing) — `cue_railing` 이 `build_deck` 내부 멤버라 C·D 어느 쪽도 구조를 보존/제거할 수 없다는 W1C §8.3 의 구조적 한계와 같은 자리다."
+  }
+ },
+ "channels": {
+  "cue": {
+   "idseg_strict": 3291,
+   "geometric_fallback": 363,
+   "fallback_by_reason": {
+    "no_strict_idseg": 216,
+    "seg_quarantined": 147
+   },
+   "fallback_by_arm": {
+    "A": 120,
+    "B": 4,
+    "C": 96,
+    "D": 143
+   },
+   "note": "k 는 미결이므로 매니페스트는 **원시 픽셀 수만** 담는다 (ACCOUNTING §2-5 — 결과를 본 뒤 k 를 움직이면 무효)."
+  },
+  "gt_void": {
+   "frames_with_void": 765,
+   "frames_with_void_pct": 20.94,
+   "total_void_cells": 4227,
+   "by_arm": {
+    "A": 282,
+    "B": 90,
+    "C": 177,
+    "D": 216
+   },
+   "v2_reference": "v2 on팔 42.4 % (RT-A LAB-19 · AC §4.8-2)",
+   "note": "void 칸은 **음성이 아니다**. 평가 분모는 불변, FA_C/FA_D 분모에서만 격리."
+  },
+  "ignore_b_arm_h": {
+   "n": 186,
+   "authority": "PREREG §5.3 — B팔의 H 칸은 무시 마스크"
+  },
+  "ignore_bare_h_by_k": {
+   "1": 96,
+   "100": 96,
+   "1000": 96,
+   "5000": 107,
+   "20000": 128,
+   "60000": 143
+  },
+  "ignore_bare_h_unmeasurable": 28,
+  "lever_n": {
+   "zero_info_C_frames": 31,
+   "contradiction_frames": 20,
+   "by_scene_band": {
+    "scene02/base": 4,
+    "sceneH7/w2base": 18,
+    "sceneH7/w2h": 3,
+    "sceneH6/w2h2": 6
+   },
+   "status": "**예비채택 · 결재중** (D89 ⑤a). 매니페스트는 플래그만 담고 적용은 승인 후 훈련 시점.",
+   "predicate": "frac(|ΔI| > 8) < 0.001 (PREREG §2.1 층화 2 등록 술어)"
+  }
+ },
+ "quarantine": {
+  "n_frames": 114,
+  "by_arm": {
+   "B": 96,
+   "C": 3,
+   "D": 15
+  },
+  "unit_ledger_n": 11,
+  "seg_collision_cuts": 160,
+  "absent_not_quarantined": {
+   "b_arm_skip": {
+    "scene03": 72,
+    "scene04": 72,
+    "scene10": 24
+   },
+   "reason": "D74 ⑤ — 레버 0 이라 B ≡ A 바이트 동일. 중복 프레임은 학습 이중 가중이므로 **찍지 않았다**. 격리가 아니라 부재."
+  }
+ },
+ "accounting_3_4_proposal": {
+  "note": "**제안 (PROPOSE) — 적용 금지.** append 3요소: 원장 · 재집계 명령 · 측정일자.",
+  "ledger": [
+   "experiments/v3_0823/dataset_manifest_v3.json",
+   "experiments/v3_0823/split_v3.json",
+   "experiments/v3_0823/corpus_v3_quarantine.json",
+   "experiments/v3_0823/corpus_v3_census.json"
+  ],
+  "command": "python3 experiments/v3_0823/code/build_corpus_v3.py && python3 experiments/v3_0823/code/corpus_v3_measure.py",
+  "rows": {
+   "행 5 — v3 train/val 프레임 회계": {
+    "total": 3654,
+    "by_arm": {
+     "A": 936,
+     "B": 672,
+     "C": 1029,
+     "D": 1017
+    },
+    "by_split": {
+     "train": 2598,
+     "val": 1056
+    },
+    "tier": {
+     "E": 66,
+     "H": 372,
+     "H_weak": 48,
+     "V": 948,
+     "none_in_fov": 270,
+     "off": 1950
+    },
+    "quarantined": 114
+   },
+   "행 1 — 단서 존재 판정 임계 k": {
+    "status": "**제안**",
+    "proposal": 7000,
+    "derivation": "Youden J 최대 ∧ D팔 오탐 0 의 최소 k ∧ log-midpoint(D팔 max 6744, A팔 strict-H min-nonzero) 의 보수 하한",
+    "sealed": false
+   },
+   "행 7 — 무시 마스크 적용 셀 수": {
+    "b_arm_h_frames": 186,
+    "lever_n_frames": 31,
+    "gt_void_cells": 4227,
+    "note": "훈련 손실 전용 — 평가 분모 불변 (AC §2-4)"
+   }
+  }
+ }
+}

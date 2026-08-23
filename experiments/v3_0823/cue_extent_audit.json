@@ -2,7 +2,7 @@
  "doc": "cue_extent_audit",
  "version": "1.0",
  "authority": "DECISIONS D82 ⓒ (룩체크 R7) · ACCOUNTING §4.9-3 (|r| 보고 규약)",
- "generated": "2026-08-24T00:50:50",
+ "generated": "2026-08-24T06:04:25",
  "frame_px": 2073600,
  "instrument": {
   "source": ".idseg.npz (instance_id_segmentation · 프림 경로 디코드)",
@@ -17,8 +17,13 @@
   "A": 696,
   "B": 648,
   "B_skip_superseded_by_B2": 576,
+  "C": 816,
   "D_skip_stale": 152,
-  "D": 760
+  "D": 760,
+  "W2_A": 120,
+  "W2_B": 120,
+  "W2_C": 120,
+  "W2_D": 120
  },
  "n_stale_w1d_excluded": 152,
  "label_provenance": [
@@ -45,127 +50,218 @@
    "file": "w1d_base.json",
    "n": 528,
    "note": "on 측 = D팔 base 라운드 (off = 260819_main_off)"
+  },
+  {
+   "arm": "C",
+   "file": "(spec constant + v2corr 무낙차 재활용)",
+   "n": 912,
+   "note": "C GT = 사양 상수 전음성 · 라벨러 출력 미채택 (C3-2)"
+  },
+  {
+   "arm": "A/C",
+   "file": "w2_base_ac_labels.json",
+   "n": 96,
+   "note": "W2 sceneH6·H7 · band=w2base"
+  },
+  {
+   "arm": "B/D",
+   "file": "w2_base_bd_labels.json",
+   "n": 96,
+   "note": "W2 sceneH6·H7 · band=w2base"
+  },
+  {
+   "arm": "A/C",
+   "file": "w2_h_ac_labels.json",
+   "n": 96,
+   "note": "W2 sceneH6·H7 · band=w2h"
+  },
+  {
+   "arm": "B/D",
+   "file": "w2_h_bd_labels.json",
+   "n": 96,
+   "note": "W2 sceneH6·H7 · band=w2h"
+  },
+  {
+   "arm": "A/C",
+   "file": "w2_h2_ac_labels.json",
+   "n": 48,
+   "note": "W2 sceneH6·H7 · band=w2h2"
+  },
+  {
+   "arm": "B/D",
+   "file": "w2_h2_bd_labels.json",
+   "n": 48,
+   "note": "W2 sceneH6·H7 · band=w2h2"
   }
  ],
  "probe_label_provenance": [
   {
    "group": "h12",
    "arm": "A",
-   "file": "h12_rev_ac_labels.json",
+   "file": "w3_base_ac_labels.json",
    "side": "on",
-   "n": 32
+   "n": 72
   },
   {
    "group": "h12",
    "arm": "C",
-   "file": "h12_rev_ac_labels.json",
+   "file": "w3_base_ac_labels.json",
    "side": "off",
-   "n": 32
+   "n": 72
   },
   {
    "group": "h12",
    "arm": "B",
-   "file": "h12_rev_bd_labels.json",
+   "file": "w3_base_bd_labels.json",
    "side": "on",
-   "n": 32
+   "n": 72
   },
   {
    "group": "h12",
    "arm": "D",
-   "file": "h12_rev_bd_labels.json",
+   "file": "w3_base_bd_labels.json",
    "side": "off",
-   "n": 32
+   "n": 72
   },
   {
-   "group": "h3",
+   "group": "l1b",
    "arm": "A",
-   "file": "h3l1_revh3_ac_labels.json",
+   "file": "w3_base_ac_labels.json",
    "side": "on",
-   "n": 16
+   "n": 24
   },
   {
-   "group": "h3",
+   "group": "l1b",
    "arm": "C",
-   "file": "h3l1_revh3_ac_labels.json",
+   "file": "w3_base_ac_labels.json",
    "side": "off",
-   "n": 16
+   "n": 24
   },
   {
-   "group": "h3",
+   "group": "l1b",
    "arm": "B",
-   "file": "h3l1_revh3_bd_labels.json",
+   "file": "w3_base_bd_labels.json",
    "side": "on",
-   "n": 16
+   "n": 24
   },
   {
-   "group": "h3",
+   "group": "l1b",
    "arm": "D",
-   "file": "h3l1_revh3_bd_labels.json",
+   "file": "w3_base_bd_labels.json",
    "side": "off",
-   "n": 16
-  },
-  {
-   "group": "l1",
-   "arm": "A",
-   "file": "h3l1_revl1_ac_labels.json",
-   "side": "on",
-   "n": 16
-  },
-  {
-   "group": "l1",
-   "arm": "C",
-   "file": "h3l1_revl1_ac_labels.json",
-   "side": "off",
-   "n": 16
-  },
-  {
-   "group": "l1",
-   "arm": "B",
-   "file": "h3l1_revl1_bd_labels.json",
-   "side": "on",
-   "n": 16
-  },
-  {
-   "group": "l1",
-   "arm": "D",
-   "file": "h3l1_revl1_bd_labels.json",
-   "side": "off",
-   "n": 16
+   "n": 24
   },
   {
    "group": "n911",
    "arm": "A",
-   "file": "n911_rev3_ac_labels.json",
+   "file": "w3_base_ac_labels.json",
    "side": "on",
-   "n": 32
+   "n": 48
   },
   {
    "group": "n911",
    "arm": "C",
-   "file": "n911_rev3_ac_labels.json",
+   "file": "w3_base_ac_labels.json",
    "side": "off",
-   "n": 32
+   "n": 48
   },
   {
    "group": "n911",
    "arm": "B",
-   "file": "n911_rev3_bd_labels.json",
+   "file": "w3_base_bd_labels.json",
    "side": "on",
-   "n": 32
+   "n": 48
   },
   {
    "group": "n911",
    "arm": "D",
-   "file": "n911_rev3_bd_labels.json",
+   "file": "w3_base_bd_labels.json",
    "side": "off",
-   "n": 32
+   "n": 48
   },
   {
-   "group": "h67",
+   "group": "h3",
    "arm": "A",
-   "file": "h67_rev_labels.json",
+   "file": "w3_h_ac_labels.json",
    "side": "on",
-   "n": 16
+   "n": 72
+  },
+  {
+   "group": "h3",
+   "arm": "C",
+   "file": "w3_h_ac_labels.json",
+   "side": "off",
+   "n": 72
+  },
+  {
+   "group": "h3",
+   "arm": "B",
+   "file": "w3_h_bd_labels.json",
+   "side": "on",
+   "n": 72
+  },
+  {
+   "group": "h3",
+   "arm": "D",
+   "file": "w3_h_bd_labels.json",
+   "side": "off",
+   "n": 72
+  },
+  {
+   "group": "l1",
+   "arm": "A",
+   "file": "w3_lat_ac_labels.json",
+   "side": "on",
+   "n": 24
+  },
+  {
+   "group": "l1",
+   "arm": "C",
+   "file": "w3_lat_ac_labels.json",
+   "side": "off",
+   "n": 24
+  },
+  {
+   "group": "l1",
+   "arm": "B",
+   "file": "w3_lat_bd_labels.json",
+   "side": "on",
+   "n": 24
+  },
+  {
+   "group": "l1",
+   "arm": "D",
+   "file": "w3_lat_bd_labels.json",
+   "side": "off",
+   "n": 24
+  },
+  {
+   "group": "n911b2",
+   "arm": "A",
+   "file": "w3_b2_ac_labels.json",
+   "side": "on",
+   "n": 48
+  },
+  {
+   "group": "n911b2",
+   "arm": "C",
+   "file": "w3_b2_ac_labels.json",
+   "side": "off",
+   "n": 48
+  },
+  {
+   "group": "n911b2",
+   "arm": "B",
+   "file": "w3_b2_bd_labels.json",
+   "side": "on",
+   "n": 48
+  },
+  {
+   "group": "n911b2",
+   "arm": "D",
+   "file": "w3_b2_bd_labels.json",
+   "side": "off",
+   "n": 48
   },
   {
    "group": "h12_r0",
@@ -256,30 +352,595 @@
  "d_arm_label_by_vg02": 384,
  "headline_P1": {
   "marginals": {
-   "n": 2104,
+   "n": 3400,
+   "hazard_present": 1440,
+   "hazard_absent": 1960,
+   "p_hazard": 0.4235,
+   "by_arm": {
+    "A": 816,
+    "B": 768,
+    "C": 936,
+    "D": 880
+   },
+   "by_arm_hazard": {
+    "A:0": 72,
+    "A:1": 744,
+    "B:0": 84,
+    "B:1": 684,
+    "C:0": 936,
+    "D:0": 868,
+    "D:1": 12
+   },
+   "n_scenes": 24,
+   "arms_missing": []
+  },
+  "total_area_pct": {
+   "metric": "cue_area_total (% of frame)",
+   "r_pb": 0.1873,
+   "abs_r": 0.1873,
+   "cliffs_delta": 0.2587,
+   "hazard": {
+    "n": 1440,
+    "mean": 19.23,
+    "sd": 16.9,
+    "p10": 0.05,
+    "med": 15.57,
+    "p90": 47.87,
+    "max": 61.54
+   },
+   "no_hazard": {
+    "n": 1960,
+    "mean": 13.03,
+    "sd": 15.44,
+    "p10": 0.0,
+    "med": 6.89,
+    "p90": 34.45,
+    "max": 82.18
+   },
+   "null_within_scene": {
+    "n": 2000,
+    "q50": 0.0487,
+    "q95": 0.0709,
+    "q99": 0.082,
+    "max": 0.0925,
+    "p_emp": 0.0005
+   },
+   "null_free": {
+    "n": 2000,
+    "q50": 0.0118,
+    "q95": 0.0345,
+    "q99": 0.0441,
+    "max": 0.0566,
+    "p_emp": 0.0005
+   }
+  },
+  "obj_count": {
+   "metric": "cue_obj_count (distinct prim roots)",
+   "r_pb": 0.2241,
+   "abs_r": 0.2241,
+   "cliffs_delta": 0.2981,
+   "hazard": {
+    "n": 1440,
+    "mean": 39.09,
+    "sd": 82.88,
+    "p10": 1,
+    "med": 15,
+    "p90": 80,
+    "max": 512
+   },
+   "no_hazard": {
+    "n": 1960,
+    "mean": 13.03,
+    "sd": 19.94,
+    "p10": 0,
+    "med": 5,
+    "p90": 30,
+    "max": 114
+   },
+   "null_within_scene": {
+    "n": 2000,
+    "q50": 0.0323,
+    "q95": 0.0585,
+    "q99": 0.0695,
+    "max": 0.0833,
+    "p_emp": 0.0005
+   },
+   "null_free": {
+    "n": 2000,
+    "q50": 0.0118,
+    "q95": 0.0344,
+    "q99": 0.0456,
+    "max": 0.0608,
+    "p_emp": 0.0005
+   }
+  },
+  "grp_count": {
+   "metric": "cue_group_count (installations)",
+   "r_pb": 0.178,
+   "abs_r": 0.178,
+   "cliffs_delta": 0.2322,
+   "hazard": {
+    "n": 1440,
+    "mean": 8.56,
+    "sd": 7.12,
+    "p10": 1,
+    "med": 8,
+    "p90": 18,
+    "max": 39
+   },
+   "no_hazard": {
+    "n": 1960,
+    "mean": 6.11,
+    "sd": 6.36,
+    "p10": 0,
+    "med": 4,
+    "p90": 14,
+    "max": 33
+   },
+   "null_within_scene": {
+    "n": 2000,
+    "q50": 0.0413,
+    "q95": 0.0649,
+    "q99": 0.075,
+    "max": 0.0925,
+    "p_emp": 0.0005
+   },
+   "null_free": {
+    "n": 2000,
+    "q50": 0.0124,
+    "q95": 0.0342,
+    "q99": 0.0422,
+    "max": 0.063,
+    "p_emp": 0.0005
+   }
+  },
+  "per_key": {
+   "Ta": {
+    "cue": "tactile",
+    "n": 3400,
+    "n_scenes": 24,
+    "r_pb": -0.0061,
+    "abs_r": 0.0061,
+    "cliffs_delta": -0.005,
+    "hazard": {
+     "n": 1440,
+     "mean": 0.01,
+     "sd": 0.1,
+     "p10": 0.0,
+     "med": 0.0,
+     "p90": 0.0,
+     "max": 2.02
+    },
+    "no_hazard": {
+     "n": 1960,
+     "mean": 0.01,
+     "sd": 0.11,
+     "p10": 0.0,
+     "med": 0.0,
+     "p90": 0.0,
+     "max": 2.02
+    },
+    "null_within_scene": {
+     "n": 2000,
+     "q50": 0.0114,
+     "q95": 0.0324,
+     "q99": 0.0417,
+     "max": 0.0548,
+     "p_emp": 0.7216
+    }
+   },
+   "N": {
+    "cue": "nosing",
+    "n": 3328,
+    "n_scenes": 23,
+    "r_pb": 0.0611,
+    "abs_r": 0.0611,
+    "cliffs_delta": 0.0178,
+    "hazard": {
+     "n": 1392,
+     "mean": 0.15,
+     "sd": 0.88,
+     "p10": 0.0,
+     "med": 0.0,
+     "p90": 0.0,
+     "max": 7.42
+    },
+    "no_hazard": {
+     "n": 1936,
+     "mean": 0.06,
+     "sd": 0.55,
+     "p10": 0.0,
+     "med": 0.0,
+     "p90": 0.0,
+     "max": 7.42
+    },
+    "null_within_scene": {
+     "n": 2000,
+     "q50": 0.0193,
+     "q95": 0.0445,
+     "q99": 0.054,
+     "max": 0.0693,
+     "p_emp": 0.004
+    }
+   },
+   "R": {
+    "cue": "railing",
+    "n": 3400,
+    "n_scenes": 24,
+    "r_pb": 0.1608,
+    "abs_r": 0.1608,
+    "cliffs_delta": 0.1616,
+    "hazard": {
+     "n": 1440,
+     "mean": 2.43,
+     "sd": 4.97,
+     "p10": 0.0,
+     "med": 0.0,
+     "p90": 9.57,
+     "max": 47.15
+    },
+    "no_hazard": {
+     "n": 1960,
+     "mean": 1.13,
+     "sd": 2.96,
+     "p10": 0.0,
+     "med": 0.0,
+     "p90": 4.2,
+     "max": 28.83
+    },
+    "null_within_scene": {
+     "n": 2000,
+     "q50": 0.0111,
+     "q95": 0.031,
+     "q99": 0.041,
+     "max": 0.0594,
+     "p_emp": 0.0005
+    }
+   },
+   "Sg": {
+    "cue": "sign",
+    "n": 3400,
+    "n_scenes": 24,
+    "r_pb": 0.024,
+    "abs_r": 0.024,
+    "cliffs_delta": 0.0434,
+    "hazard": {
+     "n": 1440,
+     "mean": 0.13,
+     "sd": 0.5,
+     "p10": 0.0,
+     "med": 0.0,
+     "p90": 0.34,
+     "max": 7.11
+    },
+    "no_hazard": {
+     "n": 1960,
+     "mean": 0.11,
+     "sd": 0.45,
+     "p10": 0.0,
+     "med": 0.0,
+     "p90": 0.19,
+     "max": 7.11
+    },
+    "null_within_scene": {
+     "n": 2000,
+     "q50": 0.0205,
+     "q95": 0.0427,
+     "q99": 0.0508,
+     "max": 0.0632,
+     "p_emp": 0.4043
+    }
+   },
+   "Mh": {
+    "cue": "manhole",
+    "n": 480,
+    "n_scenes": 2,
+    "r_pb": -0.0046,
+    "abs_r": 0.0046,
+    "cliffs_delta": -0.0241,
+    "hazard": {
+     "n": 210,
+     "mean": 0.07,
+     "sd": 0.27,
+     "p10": 0.0,
+     "med": 0.0,
+     "p90": 0.0,
+     "max": 1.59
+    },
+    "no_hazard": {
+     "n": 270,
+     "mean": 0.07,
+     "sd": 0.25,
+     "p10": 0.0,
+     "med": 0.0,
+     "p90": 0.24,
+     "max": 1.59
+    },
+    "null_within_scene": {
+     "n": 2000,
+     "q50": 0.0511,
+     "q95": 0.1124,
+     "q99": 0.1409,
+     "max": 0.1748,
+     "p_emp": 0.961
+    }
+   },
+   "Dr": {
+    "cue": "drainage",
+    "n": 480,
+    "n_scenes": 2,
+    "r_pb": -0.0134,
+    "abs_r": 0.0134,
+    "cliffs_delta": -0.019,
+    "hazard": {
+     "n": 210,
+     "mean": 0.13,
+     "sd": 0.44,
+     "p10": 0.0,
+     "med": 0.0,
+     "p90": 0.47,
+     "max": 2.06
+    },
+    "no_hazard": {
+     "n": 270,
+     "mean": 0.14,
+     "sd": 0.46,
+     "p10": 0.0,
+     "med": 0.0,
+     "p90": 0.53,
+     "max": 2.49
+    },
+    "null_within_scene": {
+     "n": 2000,
+     "q50": 0.0598,
+     "q95": 0.1239,
+     "q99": 0.1511,
+     "max": 0.172,
+     "p_emp": 0.9175
+    }
+   },
+   "Jt": {
+    "cue": "slab_joint",
+    "n": 480,
+    "n_scenes": 2,
+    "r_pb": 0.0115,
+    "abs_r": 0.0115,
+    "cliffs_delta": -0.0152,
+    "hazard": {
+     "n": 210,
+     "mean": 0.01,
+     "sd": 0.02,
+     "p10": 0.0,
+     "med": 0.0,
+     "p90": 0.04,
+     "max": 0.1
+    },
+    "no_hazard": {
+     "n": 270,
+     "mean": 0.01,
+     "sd": 0.02,
+     "p10": 0.0,
+     "med": 0.0,
+     "p90": 0.03,
+     "max": 0.1
+    },
+    "null_within_scene": {
+     "n": 2000,
+     "q50": 0.0653,
+     "q95": 0.1275,
+     "q99": 0.153,
+     "max": 0.1991,
+     "p_emp": 0.934
+    }
+   },
+   "V": {
+    "cue": "scene_dressing",
+    "n": 3400,
+    "n_scenes": 24,
+    "r_pb": 0.1553,
+    "abs_r": 0.1553,
+    "cliffs_delta": 0.2266,
+    "hazard": {
+     "n": 1440,
+     "mean": 13.09,
+     "sd": 14.75,
+     "p10": 0.0,
+     "med": 5.11,
+     "p90": 35.61,
+     "max": 59.29
+    },
+    "no_hazard": {
+     "n": 1960,
+     "mean": 8.73,
+     "sd": 12.9,
+     "p10": 0.0,
+     "med": 0.0,
+     "p90": 27.15,
+     "max": 76.99
+    },
+    "null_within_scene": {
+     "n": 2000,
+     "q50": 0.0555,
+     "q95": 0.0781,
+     "q99": 0.0877,
+     "max": 0.0994,
+     "p_emp": 0.0005
+    }
+   },
+   "Ux": {
+    "cue": "cue-확정·키미상(팔 차분만)",
+    "n": 78,
+    "n_scenes": 2,
+    "r_pb": -0.648,
+    "abs_r": 0.648,
+    "cliffs_delta": -0.8402,
+    "hazard": {
+     "n": 39,
+     "mean": 0.04,
+     "sd": 0.03,
+     "p10": 0.01,
+     "med": 0.03,
+     "p90": 0.07,
+     "max": 0.09
+    },
+    "no_hazard": {
+     "n": 39,
+     "mean": 0.17,
+     "sd": 0.11,
+     "p10": 0.06,
+     "med": 0.13,
+     "p90": 0.32,
+     "max": 0.37
+    },
+    "null_within_scene": {
+     "n": 2000,
+     "q50": 0.0721,
+     "q95": 0.2077,
+     "q99": 0.2754,
+     "max": 0.3375,
+     "p_emp": 0.0005
+    }
+   },
+   "Gk": {
+    "cue": "ground_pattern(미분해)",
+    "n": 1551,
+    "n_scenes": 16,
+    "r_pb": -0.0318,
+    "abs_r": 0.0318,
+    "cliffs_delta": -0.0344,
+    "hazard": {
+     "n": 740,
+     "mean": 6.12,
+     "sd": 7.56,
+     "p10": 0.22,
+     "med": 3.28,
+     "p90": 17.09,
+     "max": 46.83
+    },
+    "no_hazard": {
+     "n": 811,
+     "mean": 6.62,
+     "sd": 7.97,
+     "p10": 0.19,
+     "med": 3.83,
+     "p90": 17.97,
+     "max": 46.83
+    },
+    "null_within_scene": {
+     "n": 2000,
+     "q50": 0.0363,
+     "q95": 0.0642,
+     "q99": 0.0773,
+     "max": 0.1012,
+     "p_emp": 0.6052
+    }
+   }
+  },
+  "constant_keys": [],
+  "blind_keys": [
+   {
+    "key": "T",
+    "cue": "material_break",
+    "reason": "재질 재바인딩 전용 — ID 마스크 불변. 면적 r 은 정의상 0이며 이 계기로는 측정 불가. 존재 |r| 쪽 값(W1-B2 0.0692)이 유일한 근거다."
+   }
+  ],
+  "arm_level_check": {
+   "note": "설계 수준(팔) 위험 × 총 단서 면적 — 프레임 GT 판정과 나란히 읽는다",
+   "r_pb": 0.2206,
+   "by_arm": {
+    "A": {
+     "n": 816,
+     "mean": 25.42,
+     "sd": 16.58,
+     "p10": 5.02,
+     "med": 24.69,
+     "p90": 49.09,
+     "max": 82.18
+    },
+    "B": {
+     "n": 768,
+     "mean": 13.24,
+     "sd": 16.73,
+     "p10": 0.0,
+     "med": 5.38,
+     "p90": 43.04,
+     "max": 67.85
+    },
+    "C": {
+     "n": 936,
+     "mean": 21.09,
+     "sd": 13.96,
+     "p10": 1.76,
+     "med": 20.54,
+     "p90": 41.6,
+     "max": 59.57
+    },
+    "D": {
+     "n": 880,
+     "mean": 2.91,
+     "sd": 6.43,
+     "p10": 0.0,
+     "med": 0.08,
+     "p90": 9.33,
+     "max": 47.14
+    }
+   }
+  }
+ },
+ "headline_P1_sub": {
+  "P1a_lib_22scenes": {
+   "label": "P1a · 기존 라이브러리 22씬 (A/B/C/D)",
+   "note": "D83 ①의 0.4135 와 같은 씬 모집단 · C팔이 실물로 들어왔다",
+   "n": 2920,
+   "n_scenes": 22,
    "hazard_present": 1230,
-   "hazard_absent": 874,
-   "p_hazard": 0.5846,
+   "by_arm": {
+    "A": 696,
+    "B": 648,
+    "C": 816,
+    "D": 760
+   },
+   "r_pb": 0.2094,
+   "abs_r": 0.2094,
+   "cliffs_delta": 0.2994,
+   "hazard": {
+    "n": 1230,
+    "mean": 20.97,
+    "sd": 16.83,
+    "p10": 1.91,
+    "med": 18.48,
+    "p90": 48.12,
+    "max": 61.54
+   },
+   "no_hazard": {
+    "n": 1690,
+    "mean": 13.95,
+    "sd": 15.69,
+    "p10": 0.0,
+    "med": 8.69,
+    "p90": 35.67,
+    "max": 82.18
+   },
+   "null_within_scene": {
+    "n": 2000,
+    "q50": 0.05,
+    "q95": 0.0743,
+    "q99": 0.0836,
+    "max": 0.1013,
+    "p_emp": 0.0005
+   }
+  },
+  "P1a_lib_noC": {
+   "label": "P1a⁻ · 같은 씬 · C팔 제외 (D83 재현 대조)",
+   "note": "D83 측정 당시 상태의 재현 — 0.4135 가 나와야 한다",
+   "n": 2104,
+   "n_scenes": 22,
+   "hazard_present": 1230,
    "by_arm": {
     "A": 696,
     "B": 648,
     "D": 760
    },
-   "by_arm_hazard": {
-    "A:0": 57,
-    "A:1": 639,
-    "B:0": 69,
-    "B:1": 579,
-    "D:0": 748,
-    "D:1": 12
-   },
-   "n_scenes": 22,
-   "arms_missing": [
-    "C (미렌더 · 결재 대기 C-1)"
-   ]
-  },
-  "total_area_pct": {
-   "metric": "cue_area_total (% of frame)",
    "r_pb": 0.4135,
    "abs_r": 0.4135,
    "cliffs_delta": 0.6361,
@@ -302,354 +963,61 @@
     "max": 82.18
    },
    "null_within_scene": {
-    "n": 3000,
-    "q50": 0.0608,
-    "q95": 0.0881,
-    "q99": 0.1009,
+    "n": 2000,
+    "q50": 0.0607,
+    "q95": 0.0882,
+    "q99": 0.1,
     "max": 0.1167,
-    "p_emp": 0.0003
-   },
-   "null_free": {
-    "n": 3000,
-    "q50": 0.0139,
-    "q95": 0.0424,
-    "q99": 0.0578,
-    "max": 0.0927,
-    "p_emp": 0.0003
+    "p_emp": 0.0005
    }
   },
-  "obj_count": {
-   "metric": "cue_obj_count (distinct prim roots)",
-   "r_pb": 0.2849,
-   "abs_r": 0.2849,
-   "cliffs_delta": 0.716,
-   "hazard": {
-    "n": 1230,
-    "mean": 44.41,
-    "sd": 88.49,
-    "p10": 2,
-    "med": 16,
-    "p90": 110,
-    "max": 512
-   },
-   "no_hazard": {
-    "n": 874,
-    "mean": 3.54,
-    "sd": 6.41,
-    "p10": 0,
-    "med": 1,
-    "p90": 8,
-    "max": 58
-   },
-   "null_within_scene": {
-    "n": 3000,
-    "q50": 0.046,
-    "q95": 0.0761,
-    "q99": 0.0867,
-    "max": 0.1056,
-    "p_emp": 0.0003
-   },
-   "null_free": {
-    "n": 3000,
-    "q50": 0.0144,
-    "q95": 0.0435,
-    "q99": 0.0543,
-    "max": 0.0791,
-    "p_emp": 0.0003
-   }
-  },
-  "grp_count": {
-   "metric": "cue_group_count (installations)",
-   "r_pb": 0.4794,
-   "abs_r": 0.4794,
-   "cliffs_delta": 0.6739,
-   "hazard": {
-    "n": 1230,
-    "mean": 9.36,
-    "sd": 7.19,
-    "p10": 2,
-    "med": 8,
-    "p90": 19,
-    "max": 39
-   },
-   "no_hazard": {
-    "n": 874,
-    "mean": 2.68,
-    "sd": 3.86,
-    "p10": 0,
-    "med": 1,
-    "p90": 8,
-    "max": 31
-   },
-   "null_within_scene": {
-    "n": 3000,
-    "q50": 0.0757,
-    "q95": 0.1049,
-    "q99": 0.116,
-    "max": 0.1425,
-    "p_emp": 0.0003
-   },
-   "null_free": {
-    "n": 3000,
-    "q50": 0.0144,
-    "q95": 0.0429,
-    "q99": 0.057,
-    "max": 0.0755,
-    "p_emp": 0.0003
-   }
-  },
-  "per_key": {
-   "N": {
-    "cue": "nosing",
-    "n": 2056,
-    "n_scenes": 21,
-    "r_pb": 0.1125,
-    "abs_r": 0.1125,
-    "cliffs_delta": 0.0457,
-    "hazard": {
-     "n": 1182,
-     "mean": 0.16,
-     "sd": 0.94,
-     "p10": 0.0,
-     "med": 0.0,
-     "p90": 0.0,
-     "max": 7.42
-    },
-    "no_hazard": {
-     "n": 874,
-     "mean": 0.0,
-     "sd": 0.0,
-     "p10": 0.0,
-     "med": 0.0,
-     "p90": 0.0,
-     "max": 0.0
-    },
-    "null_within_scene": {
-     "n": 3000,
-     "q50": 0.0247,
-     "q95": 0.0543,
-     "q99": 0.0649,
-     "max": 0.0791,
-     "p_emp": 0.0003
-    }
-   },
-   "R": {
-    "cue": "railing",
-    "n": 2104,
-    "n_scenes": 22,
-    "r_pb": 0.2614,
-    "abs_r": 0.2614,
-    "cliffs_delta": 0.3228,
-    "hazard": {
-     "n": 1230,
-     "mean": 2.52,
-     "sd": 5.03,
-     "p10": 0.0,
-     "med": 0.0,
-     "p90": 9.72,
-     "max": 47.15
-    },
-    "no_hazard": {
-     "n": 874,
-     "mean": 0.36,
-     "sd": 1.25,
-     "p10": 0.0,
-     "med": 0.0,
-     "p90": 0.0,
-     "max": 7.43
-    },
-    "null_within_scene": {
-     "n": 3000,
-     "q50": 0.0507,
-     "q95": 0.0788,
-     "q99": 0.0898,
-     "max": 0.1184,
-     "p_emp": 0.0003
-    }
-   },
-   "Sg": {
-    "cue": "sign",
-    "n": 2104,
-    "n_scenes": 22,
-    "r_pb": 0.1286,
-    "abs_r": 0.1286,
-    "cliffs_delta": 0.1787,
-    "hazard": {
-     "n": 1230,
-     "mean": 0.13,
-     "sd": 0.53,
-     "p10": 0.0,
-     "med": 0.0,
-     "p90": 0.25,
-     "max": 7.11
-    },
-    "no_hazard": {
-     "n": 874,
-     "mean": 0.02,
-     "sd": 0.19,
-     "p10": 0.0,
-     "med": 0.0,
-     "p90": 0.0,
-     "max": 2.93
-    },
-    "null_within_scene": {
-     "n": 3000,
-     "q50": 0.0142,
-     "q95": 0.0383,
-     "q99": 0.0483,
-     "max": 0.0645,
-     "p_emp": 0.0003
-    }
-   },
-   "V": {
-    "cue": "scene_dressing",
-    "n": 2104,
-    "n_scenes": 22,
-    "r_pb": 0.3658,
-    "abs_r": 0.3658,
-    "cliffs_delta": 0.6248,
-    "hazard": {
-     "n": 1230,
-     "mean": 14.19,
-     "sd": 15.12,
-     "p10": 0.0,
-     "med": 6.77,
-     "p90": 36.42,
-     "max": 59.29
-    },
-    "no_hazard": {
-     "n": 874,
-     "mean": 3.15,
-     "sd": 11.81,
-     "p10": 0.0,
-     "med": 0.0,
-     "p90": 2.03,
-     "max": 76.99
-    },
-    "null_within_scene": {
-     "n": 3000,
-     "q50": 0.0719,
-     "q95": 0.0997,
-     "q99": 0.1121,
-     "max": 0.1311,
-     "p_emp": 0.0003
-    }
-   },
-   "Ux": {
-    "cue": "cue-확정·키미상(팔 차분만)",
-    "n": 39,
-    "n_scenes": 2,
-    "r_pb": null,
-    "abs_r": null,
-    "cliffs_delta": null,
-    "hazard": {
-     "n": 39,
-     "mean": 0.04,
-     "sd": 0.03,
-     "p10": 0.01,
-     "med": 0.03,
-     "p90": 0.07,
-     "max": 0.09
-    },
-    "no_hazard": {
-     "n": 0
-    },
-    "null_within_scene": null
-   },
-   "Gk": {
-    "cue": "ground_pattern(미분해)",
-    "n": 1068,
-    "n_scenes": 16,
-    "r_pb": -0.0728,
-    "abs_r": 0.0728,
-    "cliffs_delta": -0.082,
-    "hazard": {
-     "n": 740,
-     "mean": 6.12,
-     "sd": 7.56,
-     "p10": 0.22,
-     "med": 3.28,
-     "p90": 17.09,
-     "max": 46.83
-    },
-    "no_hazard": {
-     "n": 328,
-     "mean": 7.37,
-     "sd": 8.63,
-     "p10": 0.17,
-     "med": 4.95,
-     "p90": 19.0,
-     "max": 46.83
-    },
-    "null_within_scene": {
-     "n": 3000,
-     "q50": 0.0661,
-     "q95": 0.1012,
-     "q99": 0.1162,
-     "max": 0.1455,
-     "p_emp": 0.3819
-    }
-   }
-  },
-  "constant_keys": [
-   {
-    "key": "Mh",
-    "cue": "manhole",
-    "n_frames": 0,
-    "reason": "면적 상수 0 (프림 미생성 또는 씬 부족)"
-   },
-   {
-    "key": "Dr",
-    "cue": "drainage",
-    "n_frames": 0,
-    "reason": "면적 상수 0 (프림 미생성 또는 씬 부족)"
-   },
-   {
-    "key": "Jt",
-    "cue": "slab_joint",
-    "n_frames": 0,
-    "reason": "면적 상수 0 (프림 미생성 또는 씬 부족)"
-   }
-  ],
-  "blind_keys": [
-   {
-    "key": "T",
-    "cue": "material_break",
-    "reason": "재질 재바인딩 전용 — ID 마스크 불변. 면적 r 은 정의상 0이며 이 계기로는 측정 불가. 존재 |r| 쪽 값(W1-B2 0.0692)이 유일한 근거다."
-   }
-  ],
-  "arm_level_check": {
-   "note": "설계 수준(팔) 위험 × 총 단서 면적 — 프레임 GT 판정과 나란히 읽는다",
-   "r_pb": 0.5108,
+  "P1b_full": {
+   "label": "P1b · v3 훈련 코퍼스 전체 (라이브러리 + H6·H7)",
+   "note": "실제로 학습에 들어가는 모집단",
+   "n": 3400,
+   "n_scenes": 24,
+   "hazard_present": 1440,
    "by_arm": {
-    "A": {
-     "n": 696,
-     "mean": 27.06,
-     "sd": 16.43,
-     "p10": 5.93,
-     "med": 26.99,
-     "p90": 50.69,
-     "max": 82.18
-    },
-    "B": {
-     "n": 648,
-     "mean": 15.7,
-     "sd": 17.12,
-     "p10": 0.21,
-     "med": 7.79,
-     "p90": 46.66,
-     "max": 67.85
-    },
-    "D": {
-     "n": 760,
-     "mean": 3.37,
-     "sd": 6.8,
-     "p10": 0.0,
-     "med": 0.26,
-     "p90": 10.62,
-     "max": 47.14
-    }
+    "A": 816,
+    "B": 768,
+    "C": 936,
+    "D": 880
+   },
+   "r_pb": 0.1873,
+   "abs_r": 0.1873,
+   "cliffs_delta": 0.2587,
+   "hazard": {
+    "n": 1440,
+    "mean": 19.23,
+    "sd": 16.9,
+    "p10": 0.05,
+    "med": 15.57,
+    "p90": 47.87,
+    "max": 61.54
+   },
+   "no_hazard": {
+    "n": 1960,
+    "mean": 13.03,
+    "sd": 15.44,
+    "p10": 0.0,
+    "med": 6.89,
+    "p90": 34.45,
+    "max": 82.18
+   },
+   "null_within_scene": {
+    "n": 2000,
+    "q50": 0.0487,
+    "q95": 0.0709,
+    "q99": 0.082,
+    "max": 0.0925,
+    "p_emp": 0.0005
    }
+  },
+  "d83_reference": {
+   "as_built_then": 0.4135,
+   "kappa_projection_then": 0.1495,
+   "null_q99_then": 0.1009,
+   "source": "CUE_EXTENT_AUDIT.md 승용 요약 1·2 (D83 ①)"
   }
  },
  "density_symmetry": {
@@ -664,171 +1032,182 @@
     "p90": 50.69,
     "max": 82.18
    },
+   "P1 A팔 · H(new)": {
+    "n": 120,
+    "mean": 15.95,
+    "sd": 14.12,
+    "p10": 1.33,
+    "med": 13.76,
+    "p90": 35.69,
+    "max": 49.74
+   },
    "P2 A팔 · H(new)": {
-    "n": 64,
-    "mean": 10.4,
-    "sd": 9.41,
-    "p10": 2.59,
-    "med": 5.9,
-    "p90": 25.26,
-    "max": 35.69
+    "n": 144,
+    "mean": 10.09,
+    "sd": 8.45,
+    "p10": 0.98,
+    "med": 6.58,
+    "p90": 23.77,
+    "max": 28.78
    },
    "P2 A팔 · L(new)": {
-    "n": 16,
-    "mean": 19.38,
-    "sd": 9.51,
-    "p10": 11.58,
-    "med": 15.85,
-    "p90": 36.01,
-    "max": 36.01
+    "n": 48,
+    "mean": 20.27,
+    "sd": 8.29,
+    "p10": 12.51,
+    "med": 16.16,
+    "p90": 34.01,
+    "max": 34.79
    },
    "P2 A팔 · N-cue(new)": {
-    "n": 32,
-    "mean": 27.97,
-    "sd": 7.06,
+    "n": 96,
+    "mean": 25.89,
+    "sd": 7.28,
     "p10": 16.28,
-    "med": 30.99,
-    "p90": 34.81,
-    "max": 35.26
+    "med": 27.76,
+    "p90": 32.9,
+    "max": 37.5
    },
    "P2 C팔 · H(new)": {
-    "n": 48,
-    "mean": 9.56,
-    "sd": 8.76,
-    "p10": 2.68,
-    "med": 4.88,
-    "p90": 22.0,
-    "max": 32.29
+    "n": 144,
+    "mean": 10.09,
+    "sd": 8.47,
+    "p10": 0.98,
+    "med": 6.58,
+    "p90": 23.8,
+    "max": 28.78
    },
    "P2 C팔 · L(new)": {
-    "n": 16,
-    "mean": 19.38,
-    "sd": 9.51,
-    "p10": 11.58,
-    "med": 15.85,
-    "p90": 36.01,
-    "max": 36.01
+    "n": 48,
+    "mean": 20.27,
+    "sd": 8.29,
+    "p10": 12.51,
+    "med": 16.16,
+    "p90": 34.01,
+    "max": 34.79
    },
    "P2 C팔 · N-cue(new)": {
-    "n": 32,
-    "mean": 28.04,
-    "sd": 7.06,
+    "n": 96,
+    "mean": 25.95,
+    "sd": 7.28,
     "p10": 16.38,
-    "med": 31.0,
-    "p90": 34.84,
-    "max": 35.55
+    "med": 27.67,
+    "p90": 32.93,
+    "max": 37.53
    }
   },
   "contrast": {
    "Hnew_A_vs_Ncue_cuearm": {
     "H": {
-     "n": 64,
-     "mean": 10.4,
-     "sd": 9.41,
-     "p10": 2.59,
-     "med": 5.9,
-     "p90": 25.26,
-     "max": 35.69
+     "n": 144,
+     "mean": 10.09,
+     "sd": 8.45,
+     "p10": 0.98,
+     "med": 6.58,
+     "p90": 23.77,
+     "max": 28.78
     },
     "N": {
-     "n": 64,
-     "mean": 28.01,
-     "sd": 7.0,
-     "p10": 16.38,
-     "med": 30.99,
-     "p90": 34.81,
-     "max": 35.55
+     "n": 192,
+     "mean": 25.92,
+     "sd": 7.26,
+     "p10": 16.28,
+     "med": 27.67,
+     "p90": 32.93,
+     "max": 37.53
     },
-    "ratio_mean": 0.371,
-    "cliffs_delta": -0.8145
+    "ratio_mean": 0.389,
+    "cliffs_delta": -0.8249
    },
    "legacy33_A_vs_Ncue_cuearm": {
     "legacy": {
-     "n": 696,
-     "mean": 27.06,
-     "sd": 16.43,
-     "p10": 5.93,
-     "med": 26.99,
-     "p90": 50.69,
+     "n": 816,
+     "mean": 25.42,
+     "sd": 16.58,
+     "p10": 5.02,
+     "med": 24.69,
+     "p90": 49.09,
      "max": 82.18
     },
     "N": {
-     "n": 64,
-     "mean": 28.01,
-     "sd": 7.0,
-     "p10": 16.38,
-     "med": 30.99,
-     "p90": 34.81,
-     "max": 35.55
+     "n": 192,
+     "mean": 25.92,
+     "sd": 7.26,
+     "p10": 16.28,
+     "med": 27.67,
+     "p90": 32.93,
+     "max": 37.53
     },
-    "ratio_mean": 0.966,
-    "cliffs_delta": -0.1301
+    "ratio_mean": 0.981,
+    "cliffs_delta": -0.0858
    },
    "legacy33_A_vs_Hnew_A": {
     "legacy": {
-     "n": 696,
-     "mean": 27.06,
-     "sd": 16.43,
-     "p10": 5.93,
-     "med": 26.99,
-     "p90": 50.69,
+     "n": 816,
+     "mean": 25.42,
+     "sd": 16.58,
+     "p10": 5.02,
+     "med": 24.69,
+     "p90": 49.09,
      "max": 82.18
     },
     "Hnew": {
-     "n": 64,
-     "mean": 10.4,
-     "sd": 9.41,
-     "p10": 2.59,
-     "med": 5.9,
-     "p90": 25.26,
-     "max": 35.69
+     "n": 144,
+     "mean": 10.09,
+     "sd": 8.45,
+     "p10": 0.98,
+     "med": 6.58,
+     "p90": 23.77,
+     "max": 28.78
     },
-    "ratio_mean": 2.602,
-    "cliffs_delta": 0.6552
+    "ratio_mean": 2.521,
+    "cliffs_delta": 0.591
    }
   },
   "pending": [
-   "N9·N11 은 rev2 라운드까지 착지 — 이후 재렌더 시 --regen-hook 로 갱신",
-   "C 웨이브(정본 33씬 C팔) 미렌더 — 착지하면 대칭표가 바뀐다"
+   "[08-24 해소] C 웨이브 착지 — C팔 816컷이 P1 에 들어왔다 (W1C §8.2)",
+   "[08-24 해소] P2 프로브를 W3 본렌더 as-built 로 교체 (D87)",
+   "[08-24] H6·H7 은 P2 프로브가 아니라 P1(훈련 코퍼스 val)로 이동 (W2)",
+   "B안 대기 3씬(H4·L2·N12) 미렌더 — 착지 시 --regen-hook"
   ]
  },
  "headline_P2": {
-  "n": 400,
-  "n_scenes": 8,
-  "hazard_present": 135,
+  "n": 1152,
+  "n_scenes": 6,
+  "hazard_present": 330,
   "by_arm": {
-   "A": 112,
-   "B": 96,
-   "C": 96,
-   "D": 96
+   "A": 288,
+   "B": 288,
+   "C": 288,
+   "D": 288
   },
-  "r_pb": -0.112,
-  "abs_r": 0.112,
+  "r_pb": -0.1066,
+  "abs_r": 0.1066,
   "hazard": {
-   "n": 135,
-   "mean": 7.05,
-   "sd": 9.86,
+   "n": 330,
+   "mean": 6.67,
+   "sd": 9.59,
    "p10": 0.0,
-   "med": 2.68,
-   "p90": 21.89,
-   "max": 36.01
+   "med": 0.0,
+   "p90": 23.34,
+   "max": 34.79
   },
   "no_hazard": {
-   "n": 265,
-   "mean": 9.87,
-   "sd": 12.77,
+   "n": 822,
+   "mean": 9.36,
+   "sd": 11.98,
    "p10": 0.0,
-   "med": 2.57,
-   "p90": 31.45,
-   "max": 36.01
+   "med": 1.76,
+   "p90": 29.29,
+   "max": 37.53
   },
   "null_within_scene": {
-   "n": 3000,
-   "q50": 0.1123,
-   "q95": 0.1607,
-   "q99": 0.1795,
-   "max": 0.2142,
-   "p_emp": 0.5035
+   "n": 2000,
+   "q50": 0.1,
+   "q95": 0.1316,
+   "q99": 0.1481,
+   "max": 0.1698,
+   "p_emp": 0.3728
   }
  },
  "per_scene": {
@@ -898,6 +1277,40 @@
     "Jt": 0.08,
     "R": 0.5261,
     "V": 25.0015
+   }
+  },
+  "scene01|C": {
+   "scene": "scene01",
+   "arm": "C",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 18.62,
+    "sd": 7.3,
+    "p10": 10.62,
+    "med": 16.0,
+    "p90": 32.13,
+    "max": 32.13
+   },
+   "obj": {
+    "n": 24,
+    "mean": 16.38,
+    "sd": 6.32,
+    "p10": 9.0,
+    "med": 17.0,
+    "p90": 25.0,
+    "max": 25.0
+   },
+   "by_key": {
+    "Dr": 0.0106,
+    "Jt": 0.08,
+    "R": 0.4783,
+    "V": 18.0553
    }
   },
   "scene02|A": {
@@ -972,6 +1385,40 @@
     "V": 33.1648
    }
   },
+  "scene02|C": {
+   "scene": "scene02",
+   "arm": "C",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 34.1,
+    "sd": 12.46,
+    "p10": 20.78,
+    "med": 29.71,
+    "p90": 59.29,
+    "max": 59.29
+   },
+   "obj": {
+    "n": 24,
+    "mean": 12.62,
+    "sd": 6.98,
+    "p10": 4.0,
+    "med": 15.0,
+    "p90": 22.0,
+    "max": 22.0
+   },
+   "by_key": {
+    "Gk": 0.116,
+    "N": 0.0963,
+    "R": 1.4445,
+    "V": 32.4446
+   }
+  },
   "scene03|A": {
    "scene": "scene03",
    "arm": "A",
@@ -1002,6 +1449,38 @@
    "by_key": {
     "Gk": 10.4968,
     "V": 5.4519
+   }
+  },
+  "scene03|C": {
+   "scene": "scene03",
+   "arm": "C",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 72,
+    "mean": 21.28,
+    "sd": 8.98,
+    "p10": 11.84,
+    "med": 19.8,
+    "p90": 32.18,
+    "max": 46.45
+   },
+   "obj": {
+    "n": 72,
+    "mean": 14.21,
+    "sd": 3.31,
+    "p10": 6.0,
+    "med": 16.0,
+    "p90": 16.0,
+    "max": 17.0
+   },
+   "by_key": {
+    "Gk": 10.4968,
+    "V": 10.7847
    }
   },
   "scene03|D": {
@@ -1068,6 +1547,39 @@
     "V": 2.8048
    }
   },
+  "scene04|C": {
+   "scene": "scene04",
+   "arm": "C",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 72,
+    "mean": 7.66,
+    "sd": 4.55,
+    "p10": 4.07,
+    "med": 6.67,
+    "p90": 12.1,
+    "max": 20.48
+   },
+   "obj": {
+    "n": 72,
+    "mean": 22.58,
+    "sd": 5.31,
+    "p10": 15.0,
+    "med": 23.0,
+    "p90": 29.0,
+    "max": 32.0
+   },
+   "by_key": {
+    "Gk": 4.2455,
+    "Sg": 0.963,
+    "V": 2.4479
+   }
+  },
   "scene04|D": {
    "scene": "scene04",
    "arm": "D",
@@ -1130,6 +1642,39 @@
     "Jt": 0.0001
    }
   },
+  "scene06|C": {
+   "scene": "scene06",
+   "arm": "C",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 11.33,
+    "sd": 0.57,
+    "p10": 10.59,
+    "med": 11.68,
+    "p90": 11.97,
+    "max": 11.97
+   },
+   "obj": {
+    "n": 24,
+    "mean": 18.0,
+    "sd": 8.38,
+    "p10": 8.0,
+    "med": 19.0,
+    "p90": 33.0,
+    "max": 33.0
+   },
+   "by_key": {
+    "R": 0.971,
+    "Sg": 0.0335,
+    "V": 10.3216
+   }
+  },
   "scene08|B": {
    "scene": "scene08",
    "arm": "B",
@@ -1162,6 +1707,40 @@
     "Mh": 0.0797,
     "R": 7.5128,
     "V": 0.0008
+   }
+  },
+  "scene08|C": {
+   "scene": "scene08",
+   "arm": "C",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 48,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 48,
+    "mean": 24.91,
+    "sd": 6.33,
+    "p10": 14.19,
+    "med": 25.79,
+    "p90": 33.96,
+    "max": 35.67
+   },
+   "obj": {
+    "n": 48,
+    "mean": 27.19,
+    "sd": 5.14,
+    "p10": 20.0,
+    "med": 30.0,
+    "p90": 33.0,
+    "max": 34.0
+   },
+   "by_key": {
+    "Gk": 0.1613,
+    "Mh": 0.0797,
+    "R": 6.7483,
+    "V": 17.9209
    }
   },
   "scene08|D": {
@@ -1259,6 +1838,35 @@
     "V": 4.2713
    }
   },
+  "scene09|C": {
+   "scene": "scene09",
+   "arm": "C",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 72,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 72,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
   "scene09|D": {
    "scene": "scene09",
    "arm": "D",
@@ -1320,6 +1928,39 @@
     "R": 18.973,
     "Sg": 1.4854,
     "V": 2.5465
+   }
+  },
+  "scene10|C": {
+   "scene": "scene10",
+   "arm": "C",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 6.77,
+    "sd": 3.53,
+    "p10": 2.88,
+    "med": 6.89,
+    "p90": 14.36,
+    "max": 14.36
+   },
+   "obj": {
+    "n": 24,
+    "mean": 15.0,
+    "sd": 6.3,
+    "p10": 6.0,
+    "med": 18.0,
+    "p90": 24.0,
+    "max": 24.0
+   },
+   "by_key": {
+    "Gk": 1.2224,
+    "Sg": 1.4859,
+    "V": 4.0576
    }
   },
   "scene10|D": {
@@ -1415,6 +2056,39 @@
    },
    "by_key": {
     "Gk": 7.3745
+   }
+  },
+  "scene12|C": {
+   "scene": "scene12",
+   "arm": "C",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 72,
+    "mean": 22.48,
+    "sd": 6.44,
+    "p10": 11.92,
+    "med": 22.65,
+    "p90": 30.75,
+    "max": 37.09
+   },
+   "obj": {
+    "n": 72,
+    "mean": 87.21,
+    "sd": 15.45,
+    "p10": 66.0,
+    "med": 85.0,
+    "p90": 110.0,
+    "max": 114.0
+   },
+   "by_key": {
+    "Gk": 7.199,
+    "R": 5.8124,
+    "V": 9.4665
    }
   },
   "scene12|D": {
@@ -1520,6 +2194,44 @@
     "R": 3.8296
    }
   },
+  "scene16|C": {
+   "scene": "scene16",
+   "arm": "C",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 40.7,
+    "sd": 11.91,
+    "p10": 20.35,
+    "med": 43.11,
+    "p90": 55.28,
+    "max": 55.28
+   },
+   "obj": {
+    "n": 24,
+    "mean": 33.75,
+    "sd": 6.63,
+    "p10": 26.0,
+    "med": 33.0,
+    "p90": 42.0,
+    "max": 42.0
+   },
+   "by_key": {
+    "Dr": 0.0816,
+    "Gk": 12.3009,
+    "Jt": 0.0265,
+    "Mh": 0.0883,
+    "R": 6.6512,
+    "Sg": 0.7102,
+    "Ux": 0.2279,
+    "V": 20.6103
+   }
+  },
   "scene16|D": {
    "scene": "scene16",
    "arm": "D",
@@ -1623,6 +2335,41 @@
     "V": 0.28
    }
   },
+  "scene17|C": {
+   "scene": "scene17",
+   "arm": "C",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 72,
+    "mean": 24.28,
+    "sd": 7.91,
+    "p10": 15.01,
+    "med": 25.31,
+    "p90": 30.66,
+    "max": 50.82
+   },
+   "obj": {
+    "n": 72,
+    "mean": 11.75,
+    "sd": 1.93,
+    "p10": 9.0,
+    "med": 12.0,
+    "p90": 15.0,
+    "max": 16.0
+   },
+   "by_key": {
+    "Dr": 1.0706,
+    "Gk": 1.1623,
+    "Jt": 0.0572,
+    "Sg": 0.1473,
+    "V": 21.8461
+   }
+  },
   "scene17|D": {
    "scene": "scene17",
    "arm": "D",
@@ -1723,6 +2470,39 @@
     "Mh": 0.0289,
     "R": 7.9787,
     "V": 11.103
+   }
+  },
+  "scene20|C": {
+   "scene": "scene20",
+   "arm": "C",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 72,
+    "mean": 23.51,
+    "sd": 3.76,
+    "p10": 18.77,
+    "med": 23.9,
+    "p90": 27.66,
+    "max": 32.47
+   },
+   "obj": {
+    "n": 72,
+    "mean": 15.33,
+    "sd": 3.03,
+    "p10": 11.0,
+    "med": 15.0,
+    "p90": 18.0,
+    "max": 23.0
+   },
+   "by_key": {
+    "Jt": 0.1627,
+    "Mh": 0.0289,
+    "V": 23.3144
    }
   },
   "scene20|D": {
@@ -1831,6 +2611,42 @@
     "R": 11.6086
    }
   },
+  "scene21|C": {
+   "scene": "scene21",
+   "arm": "C",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 35.78,
+    "sd": 9.81,
+    "p10": 26.46,
+    "med": 34.93,
+    "p90": 59.57,
+    "max": 59.57
+   },
+   "obj": {
+    "n": 24,
+    "mean": 17.88,
+    "sd": 2.63,
+    "p10": 14.0,
+    "med": 18.0,
+    "p90": 22.0,
+    "max": 22.0
+   },
+   "by_key": {
+    "Dr": 0.0057,
+    "Gk": 5.854,
+    "Jt": 0.0567,
+    "Mh": 0.0104,
+    "R": 14.657,
+    "V": 15.1958
+   }
+  },
   "scene21|D": {
    "scene": "scene21",
    "arm": "D",
@@ -1933,6 +2749,40 @@
     "V": 38.4532
    }
   },
+  "sceneC1|C": {
+   "scene": "sceneC1",
+   "arm": "C",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 48,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 48,
+    "mean": 43.73,
+    "sd": 5.11,
+    "p10": 34.61,
+    "med": 43.4,
+    "p90": 48.74,
+    "max": 52.51
+   },
+   "obj": {
+    "n": 48,
+    "mean": 21.12,
+    "sd": 4.72,
+    "p10": 14.0,
+    "med": 21.0,
+    "p90": 27.0,
+    "max": 29.0
+   },
+   "by_key": {
+    "Gk": 10.8987,
+    "R": 1.5099,
+    "Sg": 0.3476,
+    "V": 30.9709
+   }
+  },
   "sceneC1|D": {
    "scene": "sceneC1",
    "arm": "D",
@@ -2033,6 +2883,42 @@
     "Jt": 0.0571,
     "Mh": 0.4798,
     "V": 31.9056
+   }
+  },
+  "sceneC4|C": {
+   "scene": "sceneC4",
+   "arm": "C",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 72,
+    "mean": 31.4,
+    "sd": 8.27,
+    "p10": 20.72,
+    "med": 33.37,
+    "p90": 40.34,
+    "max": 46.4
+   },
+   "obj": {
+    "n": 72,
+    "mean": 11.58,
+    "sd": 2.8,
+    "p10": 9.0,
+    "med": 12.0,
+    "p90": 15.0,
+    "max": 17.0
+   },
+   "by_key": {
+    "Dr": 0.0771,
+    "Gk": 2.2536,
+    "Jt": 0.0897,
+    "Mh": 0.4913,
+    "R": 1.5128,
+    "V": 26.9792
    }
   },
   "sceneC4|D": {
@@ -2138,6 +3024,42 @@
     "Jt": 0.0909
    }
   },
+  "sceneD1|C": {
+   "scene": "sceneD1",
+   "arm": "C",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 38.59,
+    "sd": 13.79,
+    "p10": 16.71,
+    "med": 44.84,
+    "p90": 52.89,
+    "max": 52.89
+   },
+   "obj": {
+    "n": 24,
+    "mean": 71.62,
+    "sd": 18.45,
+    "p10": 46.0,
+    "med": 70.0,
+    "p90": 109.0,
+    "max": 109.0
+   },
+   "by_key": {
+    "Gk": 1.4349,
+    "Jt": 0.0429,
+    "N": 4.0671,
+    "Sg": 0.2868,
+    "Ux": 0.0407,
+    "V": 32.7202
+   }
+  },
   "sceneD1|D": {
    "scene": "sceneD1",
    "arm": "D",
@@ -2233,6 +3155,39 @@
    "by_key": {
     "Gk": 1.8044,
     "Jt": 0.0895
+   }
+  },
+  "sceneD2|C": {
+   "scene": "sceneD2",
+   "arm": "C",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 8.55,
+    "sd": 2.83,
+    "p10": 3.59,
+    "med": 8.53,
+    "p90": 12.54,
+    "max": 12.54
+   },
+   "obj": {
+    "n": 24,
+    "mean": 59.62,
+    "sd": 18.84,
+    "p10": 28.0,
+    "med": 65.0,
+    "p90": 86.0,
+    "max": 86.0
+   },
+   "by_key": {
+    "Gk": 1.8044,
+    "Jt": 0.0854,
+    "V": 6.6635
    }
   },
   "sceneD2|D": {
@@ -2332,6 +3287,39 @@
     "Jt": 0.5139
    }
   },
+  "sceneD3|C": {
+   "scene": "sceneD3",
+   "arm": "C",
+   "group": null,
+   "family": "H(legacy-33)",
+   "n": 24,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 18.55,
+    "sd": 2.81,
+    "p10": 15.07,
+    "med": 17.85,
+    "p90": 24.31,
+    "max": 24.31
+   },
+   "obj": {
+    "n": 24,
+    "mean": 30.5,
+    "sd": 6.62,
+    "p10": 18.0,
+    "med": 34.0,
+    "p90": 38.0,
+    "max": 38.0
+   },
+   "by_key": {
+    "Gk": 1.8992,
+    "Jt": 0.5139,
+    "V": 16.1326
+   }
+  },
   "sceneD3|D": {
    "scene": "sceneD3",
    "arm": "D",
@@ -2369,34 +3357,34 @@
    "arm": "A",
    "group": "h12",
    "family": "H(new)",
-   "n": 16,
+   "n": 24,
    "pop": "P2",
    "primary": true,
-   "hazard_frames": 16,
+   "hazard_frames": 24,
    "area_pct": {
-    "n": 16,
-    "mean": 20.19,
-    "sd": 7.31,
-    "p10": 7.78,
-    "med": 21.85,
-    "p90": 32.29,
-    "max": 32.29
+    "n": 24,
+    "mean": 19.45,
+    "sd": 6.44,
+    "p10": 4.89,
+    "med": 23.34,
+    "p90": 25.43,
+    "max": 25.43
    },
    "obj": {
-    "n": 16,
-    "mean": 21.5,
-    "sd": 11.02,
-    "p10": 4.0,
-    "med": 26.0,
+    "n": 24,
+    "mean": 22.38,
+    "sd": 7.19,
+    "p10": 12.0,
+    "med": 23.0,
     "p90": 33.0,
     "max": 33.0
    },
    "by_key": {
-    "Jt": 7.3025,
-    "R": 3.0729,
-    "Sg": 0.0029,
-    "Ta": 2.1061,
-    "V": 7.7009
+    "Jt": 1.8357,
+    "R": 6.5719,
+    "Sg": 0.0601,
+    "Ta": 0.8915,
+    "V": 10.0895
    }
   },
   "sceneH1|A|h12_r0": {
@@ -2432,17 +3420,52 @@
     "V": 5.7692
    }
   },
+  "sceneH1|A|h3": {
+   "scene": "sceneH1",
+   "arm": "A",
+   "group": "h3",
+   "family": "H(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 24,
+   "area_pct": {
+    "n": 24,
+    "mean": 19.67,
+    "sd": 6.52,
+    "p10": 7.78,
+    "med": 21.85,
+    "p90": 28.78,
+    "max": 28.78
+   },
+   "obj": {
+    "n": 24,
+    "mean": 21.38,
+    "sd": 10.82,
+    "p10": 4.0,
+    "med": 26.0,
+    "p90": 33.0,
+    "max": 33.0
+   },
+   "by_key": {
+    "Jt": 7.3025,
+    "R": 3.0754,
+    "Sg": 0.0029,
+    "Ta": 1.5844,
+    "V": 7.7012
+   }
+  },
   "sceneH1|B|h12": {
    "scene": "sceneH1",
    "arm": "B",
    "group": "h12",
    "family": "H(new)",
-   "n": 16,
+   "n": 24,
    "pop": "P2",
    "primary": true,
-   "hazard_frames": 16,
+   "hazard_frames": 24,
    "area_pct": {
-    "n": 16,
+    "n": 24,
     "mean": 0.0,
     "sd": 0.0,
     "p10": 0.0,
@@ -2451,7 +3474,7 @@
     "max": 0.0
    },
    "obj": {
-    "n": 16,
+    "n": 24,
     "mean": 0.0,
     "sd": 0.0,
     "p10": 0.0,
@@ -2490,39 +3513,68 @@
    },
    "by_key": {}
   },
+  "sceneH1|B|h3": {
+   "scene": "sceneH1",
+   "arm": "B",
+   "group": "h3",
+   "family": "H(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 24,
+   "area_pct": {
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
   "sceneH1|C|h12": {
    "scene": "sceneH1",
    "arm": "C",
    "group": "h12",
    "family": "H(new)",
-   "n": 16,
+   "n": 24,
    "pop": "P2",
    "primary": true,
    "hazard_frames": 0,
    "area_pct": {
-    "n": 16,
-    "mean": 20.22,
-    "sd": 7.32,
-    "p10": 7.78,
-    "med": 21.85,
-    "p90": 32.29,
-    "max": 32.29
+    "n": 24,
+    "mean": 19.48,
+    "sd": 6.45,
+    "p10": 4.89,
+    "med": 23.34,
+    "p90": 25.52,
+    "max": 25.52
    },
    "obj": {
-    "n": 16,
-    "mean": 21.5,
-    "sd": 11.02,
-    "p10": 4.0,
-    "med": 26.0,
+    "n": 24,
+    "mean": 22.38,
+    "sd": 7.19,
+    "p10": 12.0,
+    "med": 23.0,
     "p90": 33.0,
     "max": 33.0
    },
    "by_key": {
-    "Jt": 7.3025,
-    "R": 3.0729,
-    "Sg": 0.0029,
-    "Ta": 2.1061,
-    "V": 7.7309
+    "Jt": 1.8357,
+    "R": 6.5719,
+    "Sg": 0.0601,
+    "Ta": 0.8915,
+    "V": 10.1223
    }
   },
   "sceneH1|C|h12_r0": {
@@ -2558,17 +3610,52 @@
     "V": 5.7815
    }
   },
+  "sceneH1|C|h3": {
+   "scene": "sceneH1",
+   "arm": "C",
+   "group": "h3",
+   "family": "H(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 19.7,
+    "sd": 6.53,
+    "p10": 7.78,
+    "med": 21.86,
+    "p90": 28.78,
+    "max": 28.78
+   },
+   "obj": {
+    "n": 24,
+    "mean": 21.38,
+    "sd": 10.82,
+    "p10": 4.0,
+    "med": 26.0,
+    "p90": 33.0,
+    "max": 33.0
+   },
+   "by_key": {
+    "Jt": 7.3025,
+    "R": 3.0754,
+    "Sg": 0.0029,
+    "Ta": 1.5844,
+    "V": 7.7312
+   }
+  },
   "sceneH1|D|h12": {
    "scene": "sceneH1",
    "arm": "D",
    "group": "h12",
    "family": "H(new)",
-   "n": 16,
+   "n": 24,
    "pop": "P2",
    "primary": true,
    "hazard_frames": 0,
    "area_pct": {
-    "n": 16,
+    "n": 24,
     "mean": 0.0,
     "sd": 0.0,
     "p10": 0.0,
@@ -2577,7 +3664,7 @@
     "max": 0.0
    },
    "obj": {
-    "n": 16,
+    "n": 24,
     "mean": 0.0,
     "sd": 0.0,
     "p10": 0.0,
@@ -2616,41 +3703,68 @@
    },
    "by_key": {}
   },
+  "sceneH1|D|h3": {
+   "scene": "sceneH1",
+   "arm": "D",
+   "group": "h3",
+   "family": "H(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
   "sceneH2|A|h12": {
    "scene": "sceneH2",
    "arm": "A",
    "group": "h12",
    "family": "H(new)",
-   "n": 16,
+   "n": 24,
    "pop": "P2",
    "primary": true,
-   "hazard_frames": 16,
+   "hazard_frames": 24,
    "area_pct": {
-    "n": 16,
-    "mean": 3.42,
-    "sd": 0.66,
-    "p10": 2.36,
-    "med": 3.5,
-    "p90": 4.5,
-    "max": 4.5
+    "n": 24,
+    "mean": 3.67,
+    "sd": 4.15,
+    "p10": 0.0,
+    "med": 4.84,
+    "p90": 11.12,
+    "max": 11.12
    },
    "obj": {
-    "n": 16,
-    "mean": 5.62,
-    "sd": 1.02,
-    "p10": 5.0,
-    "med": 5.0,
-    "p90": 8.0,
-    "max": 8.0
+    "n": 24,
+    "mean": 2.5,
+    "sd": 2.23,
+    "p10": 0.0,
+    "med": 3.0,
+    "p90": 6.0,
+    "max": 6.0
    },
    "by_key": {
-    "Jt": 0.5476,
-    "N": 0.1578,
-    "R": 1.2478,
-    "Sg": 0.0552,
-    "Sh": 0.0436,
-    "Ta": 1.0509,
-    "V": 0.3133
+    "Jt": 0.1199,
+    "N": 0.2023,
+    "R": 0.7003,
+    "Ta": 2.6292,
+    "V": 0.0212
    }
   },
   "sceneH2|A|h12_r0": {
@@ -2690,17 +3804,54 @@
     "V": 0.2757
    }
   },
+  "sceneH2|A|h3": {
+   "scene": "sceneH2",
+   "arm": "A",
+   "group": "h3",
+   "family": "H(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 24,
+   "area_pct": {
+    "n": 24,
+    "mean": 3.95,
+    "sd": 0.76,
+    "p10": 2.65,
+    "med": 4.11,
+    "p90": 5.17,
+    "max": 5.17
+   },
+   "obj": {
+    "n": 24,
+    "mean": 5.62,
+    "sd": 1.01,
+    "p10": 5.0,
+    "med": 5.0,
+    "p90": 8.0,
+    "max": 8.0
+   },
+   "by_key": {
+    "Jt": 0.5469,
+    "N": 0.1578,
+    "R": 1.2478,
+    "Sg": 0.0552,
+    "Sh": 0.0436,
+    "Ta": 1.5857,
+    "V": 0.3133
+   }
+  },
   "sceneH2|B|h12": {
    "scene": "sceneH2",
    "arm": "B",
    "group": "h12",
    "family": "H(new)",
-   "n": 16,
+   "n": 24,
    "pop": "P2",
    "primary": true,
-   "hazard_frames": 16,
+   "hazard_frames": 24,
    "area_pct": {
-    "n": 16,
+    "n": 24,
     "mean": 0.0,
     "sd": 0.0,
     "p10": 0.0,
@@ -2709,7 +3860,7 @@
     "max": 0.0
    },
    "obj": {
-    "n": 16,
+    "n": 24,
     "mean": 0.0,
     "sd": 0.0,
     "p10": 0.0,
@@ -2748,41 +3899,68 @@
    },
    "by_key": {}
   },
+  "sceneH2|B|h3": {
+   "scene": "sceneH2",
+   "arm": "B",
+   "group": "h3",
+   "family": "H(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 24,
+   "area_pct": {
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
   "sceneH2|C|h12": {
    "scene": "sceneH2",
    "arm": "C",
    "group": "h12",
    "family": "H(new)",
-   "n": 16,
+   "n": 24,
    "pop": "P2",
    "primary": true,
    "hazard_frames": 0,
    "area_pct": {
-    "n": 16,
-    "mean": 3.46,
-    "sd": 0.68,
-    "p10": 2.36,
-    "med": 3.5,
-    "p90": 4.44,
-    "max": 4.44
+    "n": 24,
+    "mean": 3.67,
+    "sd": 4.15,
+    "p10": 0.0,
+    "med": 4.84,
+    "p90": 11.12,
+    "max": 11.12
    },
    "obj": {
-    "n": 16,
-    "mean": 5.62,
-    "sd": 1.02,
-    "p10": 5.0,
-    "med": 5.0,
-    "p90": 8.0,
-    "max": 8.0
+    "n": 24,
+    "mean": 2.5,
+    "sd": 2.23,
+    "p10": 0.0,
+    "med": 3.0,
+    "p90": 6.0,
+    "max": 6.0
    },
    "by_key": {
-    "Jt": 0.5392,
-    "N": 0.157,
-    "R": 1.2992,
-    "Sg": 0.0552,
-    "Sh": 0.0436,
-    "Ta": 1.0446,
-    "V": 0.3216
+    "Jt": 0.1199,
+    "N": 0.2023,
+    "R": 0.7003,
+    "Ta": 2.6292,
+    "V": 0.0212
    }
   },
   "sceneH2|C|h12_r0": {
@@ -2822,17 +4000,54 @@
     "V": 0.2525
    }
   },
+  "sceneH2|C|h3": {
+   "scene": "sceneH2",
+   "arm": "C",
+   "group": "h3",
+   "family": "H(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 3.92,
+    "sd": 0.74,
+    "p10": 2.65,
+    "med": 4.03,
+    "p90": 5.11,
+    "max": 5.11
+   },
+   "obj": {
+    "n": 24,
+    "mean": 5.62,
+    "sd": 1.01,
+    "p10": 5.0,
+    "med": 5.0,
+    "p90": 8.0,
+    "max": 8.0
+   },
+   "by_key": {
+    "Jt": 0.5469,
+    "N": 0.1578,
+    "R": 1.2478,
+    "Sg": 0.0552,
+    "Sh": 0.0436,
+    "Ta": 1.5857,
+    "V": 0.2807
+   }
+  },
   "sceneH2|D|h12": {
    "scene": "sceneH2",
    "arm": "D",
    "group": "h12",
    "family": "H(new)",
-   "n": 16,
+   "n": 24,
    "pop": "P2",
    "primary": true,
    "hazard_frames": 0,
    "area_pct": {
-    "n": 16,
+    "n": 24,
     "mean": 0.0,
     "sd": 0.0,
     "p10": 0.0,
@@ -2841,7 +4056,7 @@
     "max": 0.0
    },
    "obj": {
-    "n": 16,
+    "n": 24,
     "mean": 0.0,
     "sd": 0.0,
     "p10": 0.0,
@@ -2880,32 +4095,103 @@
    },
    "by_key": {}
   },
+  "sceneH2|D|h3": {
+   "scene": "sceneH2",
+   "arm": "D",
+   "group": "h3",
+   "family": "H(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneH3|A|h12": {
+   "scene": "sceneH3",
+   "arm": "A",
+   "group": "h12",
+   "family": "H(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 3,
+   "area_pct": {
+    "n": 24,
+    "mean": 8.77,
+    "sd": 6.39,
+    "p10": 0.98,
+    "med": 7.5,
+    "p90": 21.88,
+    "max": 21.88
+   },
+   "obj": {
+    "n": 24,
+    "mean": 9.38,
+    "sd": 4.15,
+    "p10": 3.0,
+    "med": 10.0,
+    "p90": 16.0,
+    "max": 16.0
+   },
+   "by_key": {
+    "Bo": 0.0959,
+    "Cm": 0.4011,
+    "Dr": 0.4192,
+    "Jt": 0.0223,
+    "Mh": 0.0434,
+    "N": 0.2224,
+    "R": 0.0157,
+    "Sg": 1.1276,
+    "Sh": 0.0877,
+    "Ta": 0.3058,
+    "Ux": 0.0058,
+    "V": 6.0192
+   }
+  },
   "sceneH3|A|h3": {
    "scene": "sceneH3",
    "arm": "A",
    "group": "h3",
    "family": "H(new)",
-   "n": 16,
+   "n": 24,
    "pop": "P2",
    "primary": true,
-   "hazard_frames": 12,
+   "hazard_frames": 18,
    "area_pct": {
-    "n": 16,
-    "mean": 5.0,
-    "sd": 1.84,
+    "n": 24,
+    "mean": 5.01,
+    "sd": 1.82,
     "p10": 1.92,
-    "med": 4.88,
+    "med": 4.89,
     "p90": 8.2,
     "max": 8.2
    },
    "obj": {
-    "n": 16,
-    "mean": 13.5,
-    "sd": 1.46,
-    "p10": 11.0,
-    "med": 14.0,
-    "p90": 15.0,
-    "max": 15.0
+    "n": 24,
+    "mean": 14.25,
+    "sd": 1.42,
+    "p10": 12.0,
+    "med": 15.0,
+    "p90": 16.0,
+    "max": 16.0
    },
    "by_key": {
     "Bo": 0.8178,
@@ -2915,9 +4201,40 @@
     "Mh": 0.6746,
     "N": 0.1984,
     "Sg": 0.3766,
-    "Ta": 0.0021,
+    "Ta": 0.0122,
     "Ux": 0.0019,
     "V": 1.2553
+   }
+  },
+  "sceneH3|B|h12": {
+   "scene": "sceneH3",
+   "arm": "B",
+   "group": "h12",
+   "family": "H(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 3,
+   "area_pct": {
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.01,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.03,
+    "max": 0.03
+   },
+   "obj": {
+    "n": 24,
+    "mean": 0.25,
+    "sd": 0.44,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 1.0,
+    "max": 1.0
+   },
+   "by_key": {
+    "Ux": 0.0036
    }
   },
   "sceneH3|B|h3": {
@@ -2925,12 +4242,12 @@
    "arm": "B",
    "group": "h3",
    "family": "H(new)",
-   "n": 16,
+   "n": 24,
    "pop": "P2",
    "primary": true,
-   "hazard_frames": 12,
+   "hazard_frames": 18,
    "area_pct": {
-    "n": 16,
+    "n": 24,
     "mean": 0.0,
     "sd": 0.0,
     "p10": 0.0,
@@ -2939,9 +4256,9 @@
     "max": 0.0
    },
    "obj": {
-    "n": 16,
+    "n": 24,
     "mean": 0.38,
-    "sd": 0.5,
+    "sd": 0.49,
     "p10": 0.0,
     "med": 0.0,
     "p90": 1.0,
@@ -2951,32 +4268,74 @@
     "Ux": 0.0003
    }
   },
+  "sceneH3|C|h12": {
+   "scene": "sceneH3",
+   "arm": "C",
+   "group": "h12",
+   "family": "H(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 8.76,
+    "sd": 6.39,
+    "p10": 0.98,
+    "med": 7.49,
+    "p90": 21.88,
+    "max": 21.88
+   },
+   "obj": {
+    "n": 24,
+    "mean": 9.38,
+    "sd": 4.15,
+    "p10": 3.0,
+    "med": 10.0,
+    "p90": 16.0,
+    "max": 16.0
+   },
+   "by_key": {
+    "Bo": 0.0959,
+    "Cm": 0.4011,
+    "Dr": 0.4192,
+    "Jt": 0.0223,
+    "Mh": 0.0434,
+    "N": 0.2224,
+    "R": 0.0145,
+    "Sg": 1.1276,
+    "Sh": 0.0877,
+    "Ta": 0.3058,
+    "Ux": 0.0058,
+    "V": 6.0192
+   }
+  },
   "sceneH3|C|h3": {
    "scene": "sceneH3",
    "arm": "C",
    "group": "h3",
    "family": "H(new)",
-   "n": 16,
+   "n": 24,
    "pop": "P2",
    "primary": true,
    "hazard_frames": 0,
    "area_pct": {
-    "n": 16,
-    "mean": 5.0,
-    "sd": 1.84,
+    "n": 24,
+    "mean": 5.01,
+    "sd": 1.82,
     "p10": 1.92,
-    "med": 4.88,
+    "med": 4.89,
     "p90": 8.2,
     "max": 8.2
    },
    "obj": {
-    "n": 16,
-    "mean": 13.5,
-    "sd": 1.46,
-    "p10": 11.0,
-    "med": 14.0,
-    "p90": 15.0,
-    "max": 15.0
+    "n": 24,
+    "mean": 14.25,
+    "sd": 1.42,
+    "p10": 12.0,
+    "med": 15.0,
+    "p90": 16.0,
+    "max": 16.0
    },
    "by_key": {
     "Bo": 0.8178,
@@ -2986,9 +4345,40 @@
     "Mh": 0.6746,
     "N": 0.1984,
     "Sg": 0.3766,
-    "Ta": 0.0021,
+    "Ta": 0.0122,
     "Ux": 0.0019,
     "V": 1.2553
+   }
+  },
+  "sceneH3|D|h12": {
+   "scene": "sceneH3",
+   "arm": "D",
+   "group": "h12",
+   "family": "H(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.01,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.03,
+    "max": 0.03
+   },
+   "obj": {
+    "n": 24,
+    "mean": 0.25,
+    "sd": 0.44,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 1.0,
+    "max": 1.0
+   },
+   "by_key": {
+    "Ux": 0.0036
    }
   },
   "sceneH3|D|h3": {
@@ -2996,12 +4386,12 @@
    "arm": "D",
    "group": "h3",
    "family": "H(new)",
-   "n": 16,
+   "n": 24,
    "pop": "P2",
    "primary": true,
    "hazard_frames": 0,
    "area_pct": {
-    "n": 16,
+    "n": 24,
     "mean": 0.0,
     "sd": 0.0,
     "p10": 0.0,
@@ -3010,9 +4400,9 @@
     "max": 0.0
    },
    "obj": {
-    "n": 16,
+    "n": 24,
     "mean": 0.38,
-    "sd": 0.5,
+    "sd": 0.49,
     "p10": 0.0,
     "med": 0.0,
     "p90": 1.0,
@@ -3022,124 +4412,51 @@
     "Ux": 0.0003
    }
   },
-  "sceneH6|A|h67": {
+  "sceneH6|A": {
    "scene": "sceneH6",
    "arm": "A",
-   "group": "h67",
+   "group": null,
    "family": "H(new)",
-   "n": 8,
-   "pop": "P2",
+   "n": 72,
+   "pop": "P1",
    "primary": true,
-   "hazard_frames": 8,
+   "hazard_frames": 72,
    "area_pct": {
-    "n": 8,
-    "mean": 21.06,
-    "sd": 10.03,
+    "n": 72,
+    "mean": 23.76,
+    "sd": 13.08,
     "p10": 5.55,
-    "med": 25.02,
-    "p90": 35.69,
-    "max": 35.69
+    "med": 24.63,
+    "p90": 42.78,
+    "max": 49.74
    },
    "obj": {
-    "n": 8,
-    "mean": 23.62,
-    "sd": 5.4,
-    "p10": 15.0,
-    "med": 24.0,
-    "p90": 30.0,
+    "n": 72,
+    "mean": 19.83,
+    "sd": 8.83,
+    "p10": 2.0,
+    "med": 22.0,
+    "p90": 29.0,
     "max": 30.0
    },
    "by_key": {
-    "R": 3.4614,
-    "Sg": 0.1522,
-    "V": 17.4502
+    "R": 5.4896,
+    "Sg": 0.0984,
+    "Ta": 0.1001,
+    "V": 18.0749
    }
   },
-  "sceneH7|A|h67": {
-   "scene": "sceneH7",
-   "arm": "A",
-   "group": "h67",
-   "family": "H(new)",
-   "n": 8,
-   "pop": "P2",
-   "primary": true,
-   "hazard_frames": 7,
-   "area_pct": {
-    "n": 8,
-    "mean": 4.92,
-    "sd": 3.45,
-    "p10": 1.32,
-    "med": 3.49,
-    "p90": 9.97,
-    "max": 9.97
-   },
-   "obj": {
-    "n": 8,
-    "mean": 7.88,
-    "sd": 1.13,
-    "p10": 7.0,
-    "med": 8.0,
-    "p90": 10.0,
-    "max": 10.0
-   },
-   "by_key": {
-    "Dr": 1.2089,
-    "Jt": 0.0596,
-    "Mh": 0.6148,
-    "N": 0.4971,
-    "Sg": 0.4255,
-    "Ta": 0.0043,
-    "V": 2.1069
-   }
-  },
-  "sceneL1|A|l1": {
-   "scene": "sceneL1",
-   "arm": "A",
-   "group": "l1",
-   "family": "L(new)",
-   "n": 16,
-   "pop": "P2",
-   "primary": true,
-   "hazard_frames": 16,
-   "area_pct": {
-    "n": 16,
-    "mean": 19.38,
-    "sd": 9.51,
-    "p10": 11.58,
-    "med": 15.85,
-    "p90": 36.01,
-    "max": 36.01
-   },
-   "obj": {
-    "n": 16,
-    "mean": 11.62,
-    "sd": 0.89,
-    "p10": 11.0,
-    "med": 11.0,
-    "p90": 13.0,
-    "max": 13.0
-   },
-   "by_key": {
-    "Dr": 0.0175,
-    "Jt": 0.2083,
-    "N": 0.9798,
-    "R": 3.466,
-    "Sh": 1.0852,
-    "Ta": 4.8597,
-    "V": 8.7669
-   }
-  },
-  "sceneL1|B|l1": {
-   "scene": "sceneL1",
+  "sceneH6|B": {
+   "scene": "sceneH6",
    "arm": "B",
-   "group": "l1",
-   "family": "L(new)",
-   "n": 16,
-   "pop": "P2",
+   "group": null,
+   "family": "H(new)",
+   "n": 72,
+   "pop": "P1",
    "primary": true,
-   "hazard_frames": 16,
+   "hazard_frames": 72,
    "area_pct": {
-    "n": 16,
+    "n": 72,
     "mean": 0.0,
     "sd": 0.0,
     "p10": 0.0,
@@ -3148,7 +4465,336 @@
     "max": 0.0
    },
    "obj": {
-    "n": 16,
+    "n": 72,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneH6|C": {
+   "scene": "sceneH6",
+   "arm": "C",
+   "group": null,
+   "family": "H(new)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 72,
+    "mean": 23.94,
+    "sd": 13.17,
+    "p10": 5.78,
+    "med": 25.14,
+    "p90": 42.88,
+    "max": 50.39
+   },
+   "obj": {
+    "n": 72,
+    "mean": 19.83,
+    "sd": 8.83,
+    "p10": 2.0,
+    "med": 22.0,
+    "p90": 29.0,
+    "max": 30.0
+   },
+   "by_key": {
+    "R": 5.4896,
+    "Sg": 0.0984,
+    "Ta": 0.1001,
+    "V": 18.2525
+   }
+  },
+  "sceneH6|D": {
+   "scene": "sceneH6",
+   "arm": "D",
+   "group": null,
+   "family": "H(new)",
+   "n": 72,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 72,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 72,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneH7|A": {
+   "scene": "sceneH7",
+   "arm": "A",
+   "group": null,
+   "family": "H(new)",
+   "n": 48,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 33,
+   "area_pct": {
+    "n": 48,
+    "mean": 4.23,
+    "sd": 3.54,
+    "p10": 0.01,
+    "med": 3.36,
+    "p90": 9.66,
+    "max": 9.97
+   },
+   "obj": {
+    "n": 48,
+    "mean": 6.56,
+    "sd": 2.95,
+    "p10": 1.0,
+    "med": 7.0,
+    "p90": 10.0,
+    "max": 10.0
+   },
+   "by_key": {
+    "Dr": 0.654,
+    "Jt": 0.0374,
+    "Mh": 0.3402,
+    "N": 0.2717,
+    "R": 0.0012,
+    "Sg": 0.5024,
+    "Ta": 0.2146,
+    "V": 2.2114
+   }
+  },
+  "sceneH7|B": {
+   "scene": "sceneH7",
+   "arm": "B",
+   "group": null,
+   "family": "H(new)",
+   "n": 48,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 33,
+   "area_pct": {
+    "n": 48,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 48,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneH7|C": {
+   "scene": "sceneH7",
+   "arm": "C",
+   "group": null,
+   "family": "H(new)",
+   "n": 48,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 48,
+    "mean": 4.32,
+    "sd": 3.61,
+    "p10": 0.01,
+    "med": 3.36,
+    "p90": 10.12,
+    "max": 10.15
+   },
+   "obj": {
+    "n": 48,
+    "mean": 6.56,
+    "sd": 2.95,
+    "p10": 1.0,
+    "med": 7.0,
+    "p90": 10.0,
+    "max": 10.0
+   },
+   "by_key": {
+    "Dr": 0.7375,
+    "Jt": 0.0374,
+    "Mh": 0.3402,
+    "N": 0.2717,
+    "R": 0.0018,
+    "Sg": 0.5024,
+    "Ta": 0.2146,
+    "V": 2.2114
+   }
+  },
+  "sceneH7|D": {
+   "scene": "sceneH7",
+   "arm": "D",
+   "group": null,
+   "family": "H(new)",
+   "n": 48,
+   "pop": "P1",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 48,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 48,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneL1|A|l1": {
+   "scene": "sceneL1",
+   "arm": "A",
+   "group": "l1",
+   "family": "L(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 24,
+   "area_pct": {
+    "n": 24,
+    "mean": 21.26,
+    "sd": 10.06,
+    "p10": 11.57,
+    "med": 15.84,
+    "p90": 34.79,
+    "max": 34.79
+   },
+   "obj": {
+    "n": 24,
+    "mean": 11.62,
+    "sd": 0.88,
+    "p10": 11.0,
+    "med": 11.0,
+    "p90": 13.0,
+    "max": 13.0
+   },
+   "by_key": {
+    "Dr": 0.0183,
+    "Jt": 0.2089,
+    "N": 0.9798,
+    "R": 3.4659,
+    "Sh": 1.0851,
+    "Ta": 6.7375,
+    "V": 8.7649
+   }
+  },
+  "sceneL1|A|l1b": {
+   "scene": "sceneL1",
+   "arm": "A",
+   "group": "l1b",
+   "family": "L(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 24,
+   "area_pct": {
+    "n": 24,
+    "mean": 19.27,
+    "sd": 6.09,
+    "p10": 12.51,
+    "med": 17.27,
+    "p90": 31.14,
+    "max": 31.14
+   },
+   "obj": {
+    "n": 24,
+    "mean": 11.5,
+    "sd": 0.88,
+    "p10": 11.0,
+    "med": 11.0,
+    "p90": 13.0,
+    "max": 13.0
+   },
+   "by_key": {
+    "Dr": 0.0867,
+    "Jt": 0.1664,
+    "N": 0.5009,
+    "R": 3.6796,
+    "Sh": 1.2263,
+    "Ta": 3.498,
+    "V": 10.1155
+   }
+  },
+  "sceneL1|B|l1": {
+   "scene": "sceneL1",
+   "arm": "B",
+   "group": "l1",
+   "family": "L(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 24,
+   "area_pct": {
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneL1|B|l1b": {
+   "scene": "sceneL1",
+   "arm": "B",
+   "group": "l1b",
+   "family": "L(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 24,
+   "area_pct": {
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 24,
     "mean": 0.0,
     "sd": 0.0,
     "p10": 0.0,
@@ -3163,36 +4809,73 @@
    "arm": "C",
    "group": "l1",
    "family": "L(new)",
-   "n": 16,
+   "n": 24,
    "pop": "P2",
    "primary": true,
    "hazard_frames": 0,
    "area_pct": {
-    "n": 16,
-    "mean": 19.38,
-    "sd": 9.51,
-    "p10": 11.58,
-    "med": 15.85,
-    "p90": 36.01,
-    "max": 36.01
+    "n": 24,
+    "mean": 21.26,
+    "sd": 10.06,
+    "p10": 11.57,
+    "med": 15.84,
+    "p90": 34.79,
+    "max": 34.79
    },
    "obj": {
-    "n": 16,
+    "n": 24,
     "mean": 11.62,
-    "sd": 0.89,
+    "sd": 0.88,
     "p10": 11.0,
     "med": 11.0,
     "p90": 13.0,
     "max": 13.0
    },
    "by_key": {
-    "Dr": 0.0175,
-    "Jt": 0.2083,
+    "Dr": 0.0183,
+    "Jt": 0.2089,
     "N": 0.9798,
-    "R": 3.466,
-    "Sh": 1.0852,
-    "Ta": 4.8597,
-    "V": 8.7669
+    "R": 3.4659,
+    "Sh": 1.0851,
+    "Ta": 6.7375,
+    "V": 8.7649
+   }
+  },
+  "sceneL1|C|l1b": {
+   "scene": "sceneL1",
+   "arm": "C",
+   "group": "l1b",
+   "family": "L(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 19.27,
+    "sd": 6.09,
+    "p10": 12.51,
+    "med": 17.27,
+    "p90": 31.14,
+    "max": 31.14
+   },
+   "obj": {
+    "n": 24,
+    "mean": 11.5,
+    "sd": 0.88,
+    "p10": 11.0,
+    "med": 11.0,
+    "p90": 13.0,
+    "max": 13.0
+   },
+   "by_key": {
+    "Dr": 0.0867,
+    "Jt": 0.1664,
+    "N": 0.5009,
+    "R": 3.6796,
+    "Sh": 1.2263,
+    "Ta": 3.498,
+    "V": 10.1155
    }
   },
   "sceneL1|D|l1": {
@@ -3200,12 +4883,12 @@
    "arm": "D",
    "group": "l1",
    "family": "L(new)",
-   "n": 16,
+   "n": 24,
    "pop": "P2",
    "primary": true,
    "hazard_frames": 0,
    "area_pct": {
-    "n": 16,
+    "n": 24,
     "mean": 0.0,
     "sd": 0.0,
     "p10": 0.0,
@@ -3214,7 +4897,36 @@
     "max": 0.0
    },
    "obj": {
-    "n": 16,
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneL1|D|l1b": {
+   "scene": "sceneL1",
+   "arm": "D",
+   "group": "l1b",
+   "family": "L(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 24,
     "mean": 0.0,
     "sd": 0.0,
     "p10": 0.0,
@@ -3261,23 +4973,23 @@
    "arm": "A",
    "group": "n911",
    "family": "N-cue(new)",
-   "n": 16,
+   "n": 24,
    "pop": "P2",
    "primary": true,
    "hazard_frames": 0,
    "area_pct": {
-    "n": 16,
-    "mean": 30.08,
-    "sd": 4.13,
+    "n": 24,
+    "mean": 28.2,
+    "sd": 3.33,
     "p10": 20.6,
-    "med": 31.4,
-    "p90": 35.26,
-    "max": 35.26
+    "med": 28.92,
+    "p90": 31.53,
+    "max": 31.53
    },
    "obj": {
-    "n": 16,
+    "n": 24,
     "mean": 20.5,
-    "sd": 1.55,
+    "sd": 1.53,
     "p10": 19.0,
     "med": 20.0,
     "p90": 23.0,
@@ -3293,7 +5005,7 @@
     "Sh": 2.9539,
     "Ta": 0.0941,
     "Tg": 0.121,
-    "V": 24.0363
+    "V": 22.1594
    }
   },
   "sceneN11|A|n911_rev": {
@@ -3376,26 +5088,66 @@
     "V": 24.0363
    }
   },
+  "sceneN11|A|n911b2": {
+   "scene": "sceneN11",
+   "arm": "A",
+   "group": "n911b2",
+   "family": "N-cue(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 23.32,
+    "sd": 7.79,
+    "p10": 6.86,
+    "med": 26.39,
+    "p90": 34.47,
+    "max": 34.47
+   },
+   "obj": {
+    "n": 24,
+    "mean": 21.0,
+    "sd": 2.04,
+    "p10": 18.0,
+    "med": 21.0,
+    "p90": 24.0,
+    "max": 24.0
+   },
+   "by_key": {
+    "Bo": 0.2341,
+    "Dr": 1.1835,
+    "Jt": 0.3922,
+    "Mh": 0.2098,
+    "Rm": 2.7413,
+    "Sg": 0.1022,
+    "Sh": 1.7481,
+    "Ta": 0.0516,
+    "Tg": 0.108,
+    "V": 16.5501
+   }
+  },
   "sceneN11|B|n911": {
    "scene": "sceneN11",
    "arm": "B",
    "group": "n911",
    "family": "N-cue(new)",
-   "n": 16,
+   "n": 24,
    "pop": "P2",
    "primary": true,
    "hazard_frames": 0,
    "area_pct": {
-    "n": 16,
+    "n": 24,
     "mean": 1.94,
-    "sd": 1.0,
+    "sd": 0.99,
     "p10": 0.86,
     "med": 1.88,
     "p90": 3.95,
     "max": 3.95
    },
    "obj": {
-    "n": 16,
+    "n": 24,
     "mean": 1.0,
     "sd": 0.0,
     "p10": 1.0,
@@ -3469,28 +5221,59 @@
     "V": 1.9426
    }
   },
+  "sceneN11|B|n911b2": {
+   "scene": "sceneN11",
+   "arm": "B",
+   "group": "n911b2",
+   "family": "N-cue(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 0.98,
+    "sd": 0.91,
+    "p10": 0.04,
+    "med": 0.54,
+    "p90": 2.86,
+    "max": 2.86
+   },
+   "obj": {
+    "n": 24,
+    "mean": 1.0,
+    "sd": 0.0,
+    "p10": 1.0,
+    "med": 1.0,
+    "p90": 1.0,
+    "max": 1.0
+   },
+   "by_key": {
+    "V": 0.9848
+   }
+  },
   "sceneN11|C|n911": {
    "scene": "sceneN11",
    "arm": "C",
    "group": "n911",
    "family": "N-cue(new)",
-   "n": 16,
+   "n": 24,
    "pop": "P2",
    "primary": true,
    "hazard_frames": 0,
    "area_pct": {
-    "n": 16,
-    "mean": 30.17,
-    "sd": 4.15,
+    "n": 24,
+    "mean": 28.29,
+    "sd": 3.33,
     "p10": 20.75,
-    "med": 31.45,
-    "p90": 35.55,
-    "max": 35.55
+    "med": 28.99,
+    "p90": 31.67,
+    "max": 31.67
    },
    "obj": {
-    "n": 16,
+    "n": 24,
     "mean": 20.38,
-    "sd": 1.71,
+    "sd": 1.69,
     "p10": 18.0,
     "med": 20.0,
     "p90": 23.0,
@@ -3506,7 +5289,7 @@
     "Sh": 2.9374,
     "Ta": 0.0941,
     "Tg": 0.121,
-    "V": 24.1394
+    "V": 22.2625
    }
   },
   "sceneN11|C|n911_rev": {
@@ -3589,17 +5372,57 @@
     "V": 24.1394
    }
   },
+  "sceneN11|C|n911b2": {
+   "scene": "sceneN11",
+   "arm": "C",
+   "group": "n911b2",
+   "family": "N-cue(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 23.35,
+    "sd": 7.83,
+    "p10": 6.77,
+    "med": 26.4,
+    "p90": 34.59,
+    "max": 34.59
+   },
+   "obj": {
+    "n": 24,
+    "mean": 21.0,
+    "sd": 2.04,
+    "p10": 18.0,
+    "med": 21.0,
+    "p90": 24.0,
+    "max": 24.0
+   },
+   "by_key": {
+    "Bo": 0.2341,
+    "Dr": 1.1835,
+    "Jt": 0.3922,
+    "Mh": 0.2098,
+    "Rm": 2.7413,
+    "Sg": 0.1022,
+    "Sh": 1.7374,
+    "Ta": 0.0516,
+    "Tg": 0.108,
+    "V": 16.5896
+   }
+  },
   "sceneN11|D|n911": {
    "scene": "sceneN11",
    "arm": "D",
    "group": "n911",
    "family": "N-cue(new)",
-   "n": 16,
+   "n": 24,
    "pop": "P2",
    "primary": true,
    "hazard_frames": 0,
    "area_pct": {
-    "n": 16,
+    "n": 24,
     "mean": 0.0,
     "sd": 0.0,
     "p10": 0.0,
@@ -3608,7 +5431,7 @@
     "max": 0.0
    },
    "obj": {
-    "n": 16,
+    "n": 24,
     "mean": 0.0,
     "sd": 0.0,
     "p10": 0.0,
@@ -3667,6 +5490,35 @@
    },
    "obj": {
     "n": 16,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
+  "sceneN11|D|n911b2": {
+   "scene": "sceneN11",
+   "arm": "D",
+   "group": "n911b2",
+   "family": "N-cue(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 24,
     "mean": 0.0,
     "sd": 0.0,
     "p10": 0.0,
@@ -3779,23 +5631,23 @@
    "arm": "A",
    "group": "n911",
    "family": "N-cue(new)",
-   "n": 16,
+   "n": 24,
    "pop": "P2",
    "primary": true,
    "hazard_frames": 0,
    "area_pct": {
-    "n": 16,
-    "mean": 25.86,
-    "sd": 8.75,
+    "n": 24,
+    "mean": 25.78,
+    "sd": 8.59,
     "p10": 8.58,
-    "med": 30.14,
-    "p90": 34.81,
-    "max": 34.81
+    "med": 30.06,
+    "p90": 34.74,
+    "max": 34.74
    },
    "obj": {
-    "n": 16,
+    "n": 24,
     "mean": 34.12,
-    "sd": 2.16,
+    "sd": 2.13,
     "p10": 31.0,
     "med": 35.0,
     "p90": 37.0,
@@ -3812,7 +5664,7 @@
     "Sh": 3.3172,
     "Ta": 0.3517,
     "Tg": 0.366,
-    "V": 20.6842
+    "V": 20.6064
    }
   },
   "sceneN9|A|n911_rev": {
@@ -3897,17 +5749,58 @@
     "V": 20.6821
    }
   },
+  "sceneN9|A|n911b2": {
+   "scene": "sceneN9",
+   "arm": "A",
+   "group": "n911b2",
+   "family": "N-cue(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 26.27,
+    "sd": 7.77,
+    "p10": 11.12,
+    "med": 29.29,
+    "p90": 37.5,
+    "max": 37.5
+   },
+   "obj": {
+    "n": 24,
+    "mean": 34.62,
+    "sd": 2.7,
+    "p10": 32.0,
+    "med": 34.0,
+    "p90": 40.0,
+    "max": 40.0
+   },
+   "by_key": {
+    "Bo": 0.2136,
+    "Dr": 0.1389,
+    "Jt": 0.0953,
+    "Mh": 0.2396,
+    "R": 0.1896,
+    "Rm": 0.0443,
+    "Sg": 0.2659,
+    "Sh": 4.2365,
+    "Ta": 0.2826,
+    "Tg": 0.462,
+    "V": 20.0973
+   }
+  },
   "sceneN9|B|n911": {
    "scene": "sceneN9",
    "arm": "B",
    "group": "n911",
    "family": "N-cue(new)",
-   "n": 16,
+   "n": 24,
    "pop": "P2",
    "primary": true,
    "hazard_frames": 0,
    "area_pct": {
-    "n": 16,
+    "n": 24,
     "mean": 0.0,
     "sd": 0.0,
     "p10": 0.0,
@@ -3916,7 +5809,7 @@
     "max": 0.0
    },
    "obj": {
-    "n": 16,
+    "n": 24,
     "mean": 0.0,
     "sd": 0.0,
     "p10": 0.0,
@@ -3984,28 +5877,57 @@
    },
    "by_key": {}
   },
+  "sceneN9|B|n911b2": {
+   "scene": "sceneN9",
+   "arm": "B",
+   "group": "n911b2",
+   "family": "N-cue(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
+  },
   "sceneN9|C|n911": {
    "scene": "sceneN9",
    "arm": "C",
    "group": "n911",
    "family": "N-cue(new)",
-   "n": 16,
+   "n": 24,
    "pop": "P2",
    "primary": true,
    "hazard_frames": 0,
    "area_pct": {
-    "n": 16,
-    "mean": 25.92,
-    "sd": 8.73,
+    "n": 24,
+    "mean": 25.85,
+    "sd": 8.57,
     "p10": 8.68,
-    "med": 30.23,
-    "p90": 34.84,
-    "max": 34.84
+    "med": 30.15,
+    "p90": 34.77,
+    "max": 34.77
    },
    "obj": {
-    "n": 16,
+    "n": 24,
     "mean": 34.12,
-    "sd": 2.16,
+    "sd": 2.13,
     "p10": 31.0,
     "med": 35.0,
     "p90": 37.0,
@@ -4022,7 +5944,7 @@
     "Sh": 3.3172,
     "Ta": 0.3517,
     "Tg": 0.366,
-    "V": 20.6842
+    "V": 20.6064
    }
   },
   "sceneN9|C|n911_rev": {
@@ -4107,17 +6029,58 @@
     "V": 20.6821
    }
   },
+  "sceneN9|C|n911b2": {
+   "scene": "sceneN9",
+   "arm": "C",
+   "group": "n911b2",
+   "family": "N-cue(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 26.32,
+    "sd": 7.76,
+    "p10": 11.19,
+    "med": 29.29,
+    "p90": 37.53,
+    "max": 37.53
+   },
+   "obj": {
+    "n": 24,
+    "mean": 34.62,
+    "sd": 2.7,
+    "p10": 32.0,
+    "med": 34.0,
+    "p90": 40.0,
+    "max": 40.0
+   },
+   "by_key": {
+    "Bo": 0.2136,
+    "Dr": 0.1388,
+    "Jt": 0.0953,
+    "Mh": 0.2396,
+    "R": 0.1896,
+    "Rm": 0.1022,
+    "Sg": 0.2659,
+    "Sh": 4.2365,
+    "Ta": 0.2826,
+    "Tg": 0.462,
+    "V": 20.0973
+   }
+  },
   "sceneN9|D|n911": {
    "scene": "sceneN9",
    "arm": "D",
    "group": "n911",
    "family": "N-cue(new)",
-   "n": 16,
+   "n": 24,
    "pop": "P2",
    "primary": true,
    "hazard_frames": 0,
    "area_pct": {
-    "n": 16,
+    "n": 24,
     "mean": 0.0,
     "sd": 0.0,
     "p10": 0.0,
@@ -4126,7 +6089,7 @@
     "max": 0.0
    },
    "obj": {
-    "n": 16,
+    "n": 24,
     "mean": 0.0,
     "sd": 0.0,
     "p10": 0.0,
@@ -4193,30 +6156,41 @@
     "max": 0.0
    },
    "by_key": {}
+  },
+  "sceneN9|D|n911b2": {
+   "scene": "sceneN9",
+   "arm": "D",
+   "group": "n911b2",
+   "family": "N-cue(new)",
+   "n": 24,
+   "pop": "P2",
+   "primary": true,
+   "hazard_frames": 0,
+   "area_pct": {
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "obj": {
+    "n": 24,
+    "mean": 0.0,
+    "sd": 0.0,
+    "p10": 0.0,
+    "med": 0.0,
+    "p90": 0.0,
+    "max": 0.0
+   },
+   "by_key": {}
   }
  },
  "outliers": {
   "rule": "같은 (family, arm) 안에서 씬 평균 단서면적의 로버스트 z = (x−median)/(1.4826·MAD), |z| ≥ 3.5",
-  "n": 3,
+  "n": 1,
   "flags": [
-   {
-    "key": "sceneH6|A|h67",
-    "family": "H(new)",
-    "arm": "A",
-    "mean_area_pct": 21.06,
-    "family_median": 5.0,
-    "robust_z": 6.86,
-    "direction": "high"
-   },
-   {
-    "key": "sceneH1|A|h12",
-    "family": "H(new)",
-    "arm": "A",
-    "mean_area_pct": 20.19,
-    "family_median": 5.0,
-    "robust_z": 6.48,
-    "direction": "high"
-   },
    {
     "key": "sceneC1|B",
     "family": "H(legacy-33)",
@@ -4229,165 +6203,223 @@
   ]
  },
  "drivers": {
-  "base_r": 0.4135,
+  "base_r": 0.1873,
   "note": "씬 하나를 모집단에서 뺐을 때의 r. delta 가 크게 **음수**면 그 씬이 상관을 만들고 있다(빼면 r 이 내려간다).",
   "top_makers": [
    {
     "scene": "sceneC4",
-    "r_without": 0.3578,
-    "delta": -0.0557,
-    "n": 216
+    "r_without": 0.1462,
+    "delta": -0.041,
+    "n": 288
    },
    {
     "scene": "sceneC1",
-    "r_without": 0.3795,
-    "delta": -0.034,
-    "n": 144
+    "r_without": 0.1518,
+    "delta": -0.0355,
+    "n": 192
    },
    {
     "scene": "scene10",
-    "r_without": 0.404,
-    "delta": -0.0095,
-    "n": 48
+    "r_without": 0.1754,
+    "delta": -0.0118,
+    "n": 72
    },
    {
-    "scene": "scene21",
-    "r_without": 0.4063,
-    "delta": -0.0072,
+    "scene": "scene01",
+    "r_without": 0.1812,
+    "delta": -0.0061,
     "n": 72
    },
    {
     "scene": "scene06",
-    "r_without": 0.4066,
-    "delta": -0.0069,
-    "n": 24
-   },
-   {
-    "scene": "scene01",
-    "r_without": 0.4069,
-    "delta": -0.0066,
+    "r_without": 0.1814,
+    "delta": -0.0059,
     "n": 48
    },
    {
     "scene": "sceneN1",
-    "r_without": 0.407,
-    "delta": -0.0065,
+    "r_without": 0.1827,
+    "delta": -0.0046,
     "n": 24
    },
    {
     "scene": "sceneN2",
-    "r_without": 0.4072,
-    "delta": -0.0063,
+    "r_without": 0.1828,
+    "delta": -0.0045,
+    "n": 24
+   },
+   {
+    "scene": "sceneN5",
+    "r_without": 0.183,
+    "delta": -0.0042,
     "n": 24
    }
   ],
   "top_dampers": [
    {
-    "scene": "scene17",
-    "r_without": 0.4211,
-    "delta": 0.0076,
-    "n": 216
+    "scene": "scene09",
+    "r_without": 0.1953,
+    "delta": 0.008,
+    "n": 256
    },
    {
-    "scene": "sceneD2",
-    "r_without": 0.4246,
-    "delta": 0.0111,
-    "n": 72
-   },
-   {
-    "scene": "scene04",
-    "r_without": 0.435,
-    "delta": 0.0215,
+    "scene": "scene08",
+    "r_without": 0.2003,
+    "delta": 0.0131,
     "n": 120
    },
    {
-    "scene": "scene09",
-    "r_without": 0.4403,
-    "delta": 0.0268,
-    "n": 184
+    "scene": "scene17",
+    "r_without": 0.2008,
+    "delta": 0.0135,
+    "n": 288
+   },
+   {
+    "scene": "sceneH6",
+    "r_without": 0.208,
+    "delta": 0.0207,
+    "n": 288
    },
    {
     "scene": "scene20",
-    "r_without": 0.4962,
-    "delta": 0.0826,
-    "n": 216
+    "r_without": 0.2156,
+    "delta": 0.0283,
+    "n": 288
    }
   ]
  },
  "combined_P1P2": {
-  "n": 2504,
-  "hazard_present": 1365,
-  "r_pb": 0.3679,
+  "n": 4552,
+  "hazard_present": 1770,
+  "r_pb": 0.1548,
   "hazard": {
-   "n": 1365,
-   "mean": 19.59,
-   "sd": 16.8,
-   "p10": 0.62,
-   "med": 15.99,
-   "p90": 47.87,
+   "n": 1770,
+   "mean": 16.89,
+   "sd": 16.53,
+   "p10": 0.0,
+   "med": 11.2,
+   "p90": 43.04,
    "max": 61.54
   },
   "no_hazard": {
-   "n": 1139,
-   "mean": 7.36,
-   "sd": 13.53,
+   "n": 2782,
+   "mean": 11.94,
+   "sd": 14.6,
    "p10": 0.0,
-   "med": 0.54,
-   "p90": 28.53,
+   "med": 4.94,
+   "p90": 32.18,
    "max": 82.18
   },
   "null_within_scene": {
-   "n": 3000,
-   "q50": 0.0644,
-   "q95": 0.0896,
-   "q99": 0.1009,
-   "max": 0.1212,
-   "p_emp": 0.0003
+   "n": 2000,
+   "q50": 0.0448,
+   "q95": 0.0632,
+   "q99": 0.0714,
+   "max": 0.0833,
+   "p_emp": 0.0005
   },
   "note": "P1(정본 33씬 · C 결측)은 +방향, P2(신규 씬 · 2×2 완비)는 −방향이다. 합본은 두 힘의 현재 합력이지 어느 한쪽의 설계 진단이 아니다."
  },
- "c_wave_projection": {
-  "status": "투영(측정 아님) — C팔은 미렌더다",
-  "assumption": "C팔 프레임의 단서 면적 = 같은 씬 A팔 프레임의 면적 × κ",
-  "kappa": 1.0022,
-  "kappa_basis": "신규 씬 프로브 실측 A팔 n=96 · C팔 n=96 (같은 씬·같은 포즈, 위험 토글만 다름)",
-  "c_frames_planned": 912,
-  "c_frames_synthesised": 744,
-  "r_pb_projected": 0.1495,
-  "r_pb_asbuilt": 0.4135,
-  "null_q99_asbuilt": 0.1009,
-  "residual_drivers": [
-   {
-    "scene": "sceneC4",
-    "r_without": 0.1074,
-    "delta": -0.0421
+ "c_wave_landing": {
+  "status": "[08-24] C팔 착지 — 이 절은 투영이 아니라 **투영 대 실측 대조**다",
+  "d83_projection": {
+   "r_pb_projected_then": 0.1495,
+   "kappa_then": 1.0022,
+   "basis": "D83 ① · CUE_EXTENT_AUDIT 승용 요약 2"
+  },
+  "kappa_corpus": 0.8119,
+  "kappa_corpus_basis": "라이브러리 16씬 · 같은 씬의 A팔 대 C팔 평균 면적비 (실측)",
+  "kappa_by_scene": {
+   "scene01": {
+    "A_mean": 25.618,
+    "C_mean": 18.624,
+    "kappa": 0.727
    },
-   {
-    "scene": "sceneC1",
-    "r_without": 0.1131,
-    "delta": -0.0363
+   "scene02": {
+    "A_mean": 34.206,
+    "C_mean": 34.101,
+    "kappa": 0.9969
    },
-   {
-    "scene": "scene10",
-    "r_without": 0.1419,
-    "delta": -0.0075
+   "scene03": {
+    "A_mean": 15.949,
+    "C_mean": 21.282,
+    "kappa": 1.3344
    },
-   {
-    "scene": "scene06",
-    "r_without": 0.143,
-    "delta": -0.0064
+   "scene04": {
+    "A_mean": 8.961,
+    "C_mean": 7.656,
+    "kappa": 0.8544
    },
-   {
-    "scene": "sceneN1",
-    "r_without": 0.1433,
-    "delta": -0.0062
+   "scene09": {
+    "A_mean": 5.043,
+    "C_mean": 0.0,
+    "kappa": 0.0
    },
-   {
-    "scene": "sceneN2",
-    "r_without": 0.1433,
-    "delta": -0.0061
+   "scene10": {
+    "A_mean": 24.408,
+    "C_mean": 6.766,
+    "kappa": 0.2772
+   },
+   "scene12": {
+    "A_mean": 22.77,
+    "C_mean": 22.478,
+    "kappa": 0.9872
+   },
+   "scene16": {
+    "A_mean": 42.261,
+    "C_mean": 40.697,
+    "kappa": 0.963
+   },
+   "scene17": {
+    "A_mean": 26.507,
+    "C_mean": 24.284,
+    "kappa": 0.9161
+   },
+   "scene20": {
+    "A_mean": 42.435,
+    "C_mean": 23.506,
+    "kappa": 0.5539
+   },
+   "scene21": {
+    "A_mean": 38.049,
+    "C_mean": 35.78,
+    "kappa": 0.9403
+   },
+   "sceneC1": {
+    "A_mean": 50.815,
+    "C_mean": 43.727,
+    "kappa": 0.8605
+   },
+   "sceneC4": {
+    "A_mean": 35.769,
+    "C_mean": 31.404,
+    "kappa": 0.878
+   },
+   "sceneD1": {
+    "A_mean": 46.843,
+    "C_mean": 38.593,
+    "kappa": 0.8239
+   },
+   "sceneD2": {
+    "A_mean": 8.553,
+    "C_mean": 8.553,
+    "kappa": 1.0
+   },
+   "sceneD3": {
+    "A_mean": 18.546,
+    "C_mean": 18.546,
+    "kappa": 1.0
    }
-  ],
+  },
+  "assumption": "잔여 투영: 아직 세그가 없는 C 자리(무낙차 4씬 재활용)만 A×κ 로 채운다",
+  "kappa": 1.0013,
+  "kappa_basis": "P2 신규 씬 실측 A팔 n=288 · C팔 n=288 (같은 씬·같은 포즈, 위험 토글만 다름)",
+  "c_frames_planned": 912,
+  "c_frames_synthesised": 0,
+  "r_pb_projected": null,
+  "r_pb_asbuilt": 0.1873,
+  "null_q99_asbuilt": 0.082,
+  "residual_drivers": [],
   "arm_imbalance": [
    {
     "scene": "scene03",
@@ -4450,25 +6482,25 @@
  },
  "threshold_proposal": {
   "statistic": "|r_pb| (frame-level hazard × cue_area_total %) — 존재 |r| 과 같은 모집단 구성(as-built A/B/C/D), 같은 병기 규약(§4.9-3)",
-  "derivation": "문턱을 손으로 정하지 않는다. 위험 라벨을 **씬 안에서** 셔플한 귀무를 3000회 만들어 |r_pb| 의 분포를 측정하고, 그 **q99** 를 문턱으로 제안한다. 씬 내 셔플은 씬 구성·카메라 밴드가 만드는 구조를 유지한 채 위험-면적 결속만 끊으므로, 이 문턱을 넘는 값은 '씬 구성으로 설명되지 않는 계통적 초과'다.",
+  "derivation": "문턱을 손으로 정하지 않는다. 위험 라벨을 **씬 안에서** 셔플한 귀무를 2000회 만들어 |r_pb| 의 분포를 측정하고, 그 **q99** 를 문턱으로 제안한다. 씬 내 셔플은 씬 구성·카메라 밴드가 만드는 구조를 유지한 채 위험-면적 결속만 끊으므로, 이 문턱을 넘는 값은 '씬 구성으로 설명되지 않는 계통적 초과'다.",
   "null_within_scene": {
-   "n": 3000,
-   "q50": 0.0608,
-   "q95": 0.0881,
-   "q99": 0.1009,
-   "max": 0.1167,
-   "p_emp": 0.0003
+   "n": 2000,
+   "q50": 0.0487,
+   "q95": 0.0709,
+   "q99": 0.082,
+   "max": 0.0925,
+   "p_emp": 0.0005
   },
   "null_free": {
-   "n": 3000,
-   "q50": 0.0139,
-   "q95": 0.0424,
-   "q99": 0.0578,
-   "max": 0.0927,
-   "p_emp": 0.0003
+   "n": 2000,
+   "q50": 0.0118,
+   "q95": 0.0345,
+   "q99": 0.0441,
+   "max": 0.0566,
+   "p_emp": 0.0005
   },
-  "proposed_threshold": 0.1009,
-  "proposed_threshold_free": 0.0578,
+  "proposed_threshold": 0.082,
+  "proposed_threshold_free": 0.0441,
   "effect_size_floor": {
    "statistic": "|Cliff's δ|",
    "value": 0.147,
@@ -4704,5 +6736,5 @@
    }
   }
  },
- "elapsed_s": 55.9
+ "elapsed_s": 64.2
 }

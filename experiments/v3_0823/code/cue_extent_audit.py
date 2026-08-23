@@ -124,33 +124,49 @@ B2_ROUNDS = [("260826_v3w1_lib_B2", "base"), ("260826_v3w1_lib_B2_h", "h"),
              ("260826_v3w1_lib_B2_e", "e"), ("260826_v3w1_lib_B2_e2", "e2")]
 D_ROUNDS = [("260826_v3w1_lib_D", "base"), ("260826_v3w1_lib_D_h", "h"),
             ("260826_v3w1_lib_D_e", "e"), ("260826_v3w1_lib_D_e2", "e2")]
+# [08-24 · 코퍼스 v3 조립] C 웨이브가 착지했다(W1C_REPORT §8.2 — 816/816컷 · fetch=orch
+# 816/816 · `.idseg.STALE` 0). D83 ②가 "미렌더 → PENDING"으로 남긴 칸이 실물로 채워진다.
+C_ROUNDS = [("260827_v3w1_lib_C", "base"), ("260827_v3w1_lib_C_h", "h"),
+            ("260827_v3w1_lib_C_e", "e"), ("260827_v3w1_lib_C_e2", "e2")]
+# W2 (sceneH6·H7 — **훈련측 val 공급 씬**). 훈련 코퍼스의 일부이므로 P1 에 들어간다.
+# 밴드 토큰이 라운드명에 있다(W2 §1.2 — 같은 디렉터리를 쓰면 세그가 재생성되지 않는다).
+W2_ROUNDS = [("260824_v3w2_h67base", "w2base"), ("260824_v3w2_h67h", "w2h"),
+             ("260824_v3w2_h67h2", "w2h2")]
+W2_SCENES = ("sceneH6", "sceneH7")
 # W1B2 §7 코퍼스 매니페스트 지시 — 이 12씬의 B팔 정본은 B2 트리다.
 B2_SCENES = set("scene02 scene08 scene09 scene12 scene16 scene17 scene20 "
                 "scene21 sceneC1 sceneC4 sceneD1 sceneD3".split())
+# 무낙차 4씬 — v2 on팔이 그대로 C팔이다(계획 §1.0 첫 항목). A팔이라는 말이 성립하지 않는다.
+NODROP_SCENES = ("sceneN1", "sceneN2", "sceneN4", "sceneN5")
 
 # P2 신규 씬 프로브 — (스탬프, 씬들, {팔: 라벨파일·side})
+# [08-24] **as-built 본렌더(W3)로 교체.** 구 `260823_v3p5_*rev` 프로브는 (ㄱ) 씬 파일
+# 수정 시각을 팔 사이에 걸친 라운드가 있고(D87 ② VG-ver) (ㄴ) 규정 감사 수정 전 기하다.
+# W3 본렌더는 6씬 전부 버전 일치 확인 · 게이트 48/48 (W3_REPORT §2·§3).
 PROBE_PRIMARY = [
-    dict(stamp="260823_v3p5_h12rev", scenes=["sceneH1", "sceneH2"], group="h12",
-         labels={"A": ("h12_rev_ac_labels.json", "on"), "C": ("h12_rev_ac_labels.json", "off"),
-                 "B": ("h12_rev_bd_labels.json", "on"), "D": ("h12_rev_bd_labels.json", "off")}),
-    dict(stamp="260823_v3p5_h3l1rev", scenes=["sceneH3"], group="h3",
-         labels={"A": ("h3l1_revh3_ac_labels.json", "on"), "C": ("h3l1_revh3_ac_labels.json", "off"),
-                 "B": ("h3l1_revh3_bd_labels.json", "on"), "D": ("h3l1_revh3_bd_labels.json", "off")}),
-    dict(stamp="260823_v3p5_h3l1rev", scenes=["sceneL1"], group="l1",
-         labels={"A": ("h3l1_revl1_ac_labels.json", "on"), "C": ("h3l1_revl1_ac_labels.json", "off"),
-                 "B": ("h3l1_revl1_bd_labels.json", "on"), "D": ("h3l1_revl1_bd_labels.json", "off")}),
-    dict(stamp="260823_v3p5_n911rev3", scenes=["sceneN9", "sceneN11"], group="n911",
-         labels={"A": ("n911_rev3_ac_labels.json", "on"), "C": ("n911_rev3_ac_labels.json", "off"),
-                 "B": ("n911_rev3_bd_labels.json", "on"), "D": ("n911_rev3_bd_labels.json", "off")}),
+    dict(stamp="260824_v3w3_extbase", scenes=["sceneH1", "sceneH2", "sceneH3"], group="h12",
+         labels={"A": ("w3_base_ac_labels.json", "on"), "C": ("w3_base_ac_labels.json", "off"),
+                 "B": ("w3_base_bd_labels.json", "on"), "D": ("w3_base_bd_labels.json", "off")}),
+    dict(stamp="260824_v3w3_extbase", scenes=["sceneL1"], group="l1b",
+         labels={"A": ("w3_base_ac_labels.json", "on"), "C": ("w3_base_ac_labels.json", "off"),
+                 "B": ("w3_base_bd_labels.json", "on"), "D": ("w3_base_bd_labels.json", "off")}),
+    dict(stamp="260824_v3w3_extbase", scenes=["sceneN9", "sceneN11"], group="n911",
+         labels={"A": ("w3_base_ac_labels.json", "on"), "C": ("w3_base_ac_labels.json", "off"),
+                 "B": ("w3_base_bd_labels.json", "on"), "D": ("w3_base_bd_labels.json", "off")}),
+    dict(stamp="260824_v3w3_exth", scenes=["sceneH1", "sceneH2", "sceneH3"], group="h3",
+         labels={"A": ("w3_h_ac_labels.json", "on"), "C": ("w3_h_ac_labels.json", "off"),
+                 "B": ("w3_h_bd_labels.json", "on"), "D": ("w3_h_bd_labels.json", "off")}),
+    dict(stamp="260824_v3w3_extlat", scenes=["sceneL1"], group="l1",
+         labels={"A": ("w3_lat_ac_labels.json", "on"), "C": ("w3_lat_ac_labels.json", "off"),
+                 "B": ("w3_lat_bd_labels.json", "on"), "D": ("w3_lat_bd_labels.json", "off")}),
+    dict(stamp="260824_v3w3_extb2", scenes=["sceneN9", "sceneN11"], group="n911b2",
+         labels={"A": ("w3_b2_ac_labels.json", "on"), "C": ("w3_b2_ac_labels.json", "off"),
+                 "B": ("w3_b2_bd_labels.json", "on"), "D": ("w3_b2_bd_labels.json", "off")}),
 ]
-# H6·H7 은 rev 에 A팔만 있다. (A,C) 쌍만 성립 — 그 사실을 그대로 기록한다.
-PROBE_H67 = [
-    dict(stamp="260823_v3p5_h67rev", arms={"A": "A"}, scenes=["sceneH6", "sceneH7"],
-         group="h67", labels={"A": ("h67_rev_labels.json", "on")}),
-    # `h67probe_{A,C}` 는 `idseg_fetch == "t0"`(stale · 첫 컷 마스크 복제)라
-    # 이 감사의 strict 요건을 만족하지 못한다 → 제외하고 그 사실을 기록한다.
-
-]
+P2_PRIMARY_GROUPS = ("h12", "h3", "l1", "l1b", "n911", "n911b2")
+P2_NCUE_GROUPS = ("n911", "n911b2")
+# H6·H7 은 W2 본렌더에서 4팔 완비됐다 → **P1(훈련 코퍼스)** 로 이동. P2 프로브 항목은 비운다.
+PROBE_H67 = []
 # 부차(기록만 · 헤드라인 비산입): 개정 전 라운드와 2차 draw
 PROBE_SECONDARY = [
     dict(stamp="260823_v3p5_h12probe", scenes=["sceneH1", "sceneH2"], group="h12_r0",
@@ -988,6 +1004,61 @@ def build_label_index():
         n += 1
     prov.append(dict(arm="D", file="w1d_base.json", n=n,
                      note="on 측 = D팔 base 라운드 (off = 260819_main_off)"))
+
+    # ---- C팔: **사양 상수 전음성** (AC-INSTR-1 C3-2) -----------------------
+    # 라벨러 출력을 쓰지 않는다. C 의 polar_gt 는 0 으로 고정이고 그 자리에 어떤
+    # 라벨러 행도 들어가지 않는다(W1C_REPORT §3.2 · ACCOUNTING §4.10).
+    # 여기서는 hazard=0 만 필요하므로 디스크의 컷 목록에서 직접 색인을 만든다.
+    nC = 0
+    for rnd, band in C_ROUNDS:
+        for vf in glob.glob(os.path.join(DATA, rnd, "*", "*", "variation.json")):
+            try:
+                d = json.load(open(vf, encoding="utf-8"))
+            except Exception:
+                continue
+            sc = d.get("scene")
+            for c in d.get("cuts", []):
+                stem = os.path.splitext(c["file"])[0]
+                idx[("C", sc, band, stem)] = dict(
+                    hazard=0, n_cells=0, tier="none_in_fov",
+                    src="spec_constant_all_negative (AC-INSTR-1 C3-2)")
+                nC += 1
+    # 무낙차 4씬 — v2 on팔이 그대로 C팔 (계획 §1.0). 재활용분이므로 A 라운드에 산다.
+    for f in man["frames"]:
+        if f.get("toggle_state") != "on":
+            continue
+        _s, scene, stem, band = _split_key(f["frame_id"])
+        if scene in NODROP_SCENES:
+            idx[("C", scene, band, stem)] = dict(
+                hazard=_haz(f), n_cells=int(sum(f.get("polar_gt") or [])),
+                tier=f.get("tier"),
+                src="dataset_manifest_v2corr.json (무낙차 on팔 = C팔 재활용)")
+            nC += 1
+    prov.append(dict(arm="C", file="(spec constant + v2corr 무낙차 재활용)", n=nC,
+                     note="C GT = 사양 상수 전음성 · 라벨러 출력 미채택 (C3-2)"))
+
+    # ---- W2 (sceneH6·H7) — 훈련측 val 씬. 4팔 전부 P1 에 들어간다 ---------
+    for tag, band in (("base", "w2base"), ("h", "w2h"), ("h2", "w2h2")):
+        for pair, (on_arm, off_arm) in (("ac", ("A", "C")), ("bd", ("B", "D"))):
+            p = os.path.join(ANN, f"w2_{tag}_{pair}_labels.json")
+            if not os.path.exists(p):
+                continue
+            d = json.load(open(p, encoding="utf-8"))
+            n = 0
+            for k, v in d["frames"].items():
+                side, scene, stem, _b = _split_key(k)
+                arm = on_arm if side == "on" else off_arm
+                if arm in ("C", "D"):        # 사양 상수 (W2 §3.5 로 반증 실패)
+                    idx[(arm, scene, band, stem)] = dict(
+                        hazard=0, n_cells=0, tier="none_in_fov",
+                        src="spec_constant_all_negative (AC-INSTR-1 C3-2)")
+                else:
+                    idx[(arm, scene, band, stem)] = dict(
+                        hazard=_haz(v), n_cells=int(sum(v.get("polar_gt") or [])),
+                        tier=v.get("tier_strict"), src=f"w2_{tag}_{pair}_labels.json")
+                n += 1
+            prov.append(dict(arm=f"{on_arm}/{off_arm}", file=f"w2_{tag}_{pair}_labels.json",
+                             n=n, note=f"W2 sceneH6·H7 · band={band}"))
     return idx, prov
 
 
@@ -1048,6 +1119,12 @@ def collect_jobs():
                     continue
                 add(f, sc, "B", band, rnd)
                 acct["B"] += 1
+    # C팔 (W1-C · 전 컷 fetch=orch)
+    for rnd, band in C_ROUNDS:
+        for f in sorted(glob.glob(os.path.join(DATA, rnd, "*", "*", "*.idseg.npz"))):
+            sc = os.path.basename(os.path.dirname(f))
+            add(f, sc, "C", band, rnd)
+            acct["C"] += 1
     # D팔 (stale 제외)
     for rnd, band in D_ROUNDS:
         for f in sorted(glob.glob(os.path.join(DATA, rnd, "*", "*", "*.idseg.npz"))):
@@ -1058,6 +1135,16 @@ def collect_jobs():
                 continue
             add(f, sc, "D", band, rnd)
             acct["D"] += 1
+    # W2 (sceneH6·H7 · 4팔) — 훈련 코퍼스 val 공급 씬
+    for stamp, band in W2_ROUNDS:
+        for arm in "ABCD":
+            rnd = f"{stamp}_{arm}"
+            for f in sorted(glob.glob(os.path.join(DATA, rnd, "*", "*", "*.idseg.npz"))):
+                sc = os.path.basename(os.path.dirname(f))
+                if sc not in W2_SCENES:
+                    continue
+                add(f, sc, arm, band, rnd)
+                acct[f"W2_{arm}"] += 1
     return jobs, acct, bf_ledger, len(stale)
 
 
@@ -1312,7 +1399,7 @@ def analyze(frames, attrib, args):
                                sorted(collections.Counter(
                                    (r["arm"], r["hazard"]) for r in rows).items())},
                 n_scenes=len({r["scene"] for r in rows}),
-                arms_missing=["C (미렌더 · 결재 대기 C-1)"])
+                arms_missing=[])
 
     def stat_block(vals, label, do_perm=True):
         r = point_biserial(g, vals)
@@ -1370,6 +1457,41 @@ def analyze(frames, attrib, args):
                "이 계기로는 측정 불가. 존재 |r| 쪽 값(W1-B2 0.0692)이 유일한 근거다.")]
     res["headline_P1"] = head
 
+    # ---- P1 하위 모집단 — D83 과 사과 대 사과로 읽기 위한 분해 -------------
+    # D83 ①의 0.4135 는 "라이브러리 22씬 · C팔 0" 상태의 수치다. C 가 들어온 뒤의
+    # 같은 모집단(P1a)과, H6·H7 까지 포함한 실제 훈련 코퍼스(P1b=전체)를 나란히 낸다.
+    def _sub(sel_rows, label, note):
+        if len(sel_rows) < 30:
+            return dict(label=label, n=len(sel_rows), note=note + " (n<30 · 미산출)")
+        gg = [r["hazard"] for r in sel_rows]
+        vv = [area_frac(r) for r in sel_rows]
+        ss = [r["scene"] for r in sel_rows]
+        rr = point_biserial(gg, vv)
+        a = [v for v, h in zip(vv, gg) if h == 1]
+        b = [v for v, h in zip(vv, gg) if h == 0]
+        return dict(label=label, note=note, n=len(sel_rows),
+                    n_scenes=len(set(ss)), hazard_present=sum(gg),
+                    by_arm=dict(collections.Counter(r["arm"] for r in sel_rows)),
+                    r_pb=round(rr, 4) if rr is not None else None,
+                    abs_r=round(abs(rr), 4) if rr is not None else None,
+                    cliffs_delta=round(cliffs_delta(a, b), 4) if (a and b) else None,
+                    hazard=describe(a), no_hazard=describe(b),
+                    null_within_scene=perm_null(gg, vv, n=args.perm, clusters=ss)
+                    if (a and b) else None)
+
+    lib = [r for r in rows if r["scene"] not in W2_SCENES]
+    res["headline_P1_sub"] = dict(
+        P1a_lib_22scenes=_sub(lib, "P1a · 기존 라이브러리 22씬 (A/B/C/D)",
+                              "D83 ①의 0.4135 와 같은 씬 모집단 · C팔이 실물로 들어왔다"),
+        P1a_lib_noC=_sub([r for r in lib if r["arm"] != "C"],
+                         "P1a⁻ · 같은 씬 · C팔 제외 (D83 재현 대조)",
+                         "D83 측정 당시 상태의 재현 — 0.4135 가 나와야 한다"),
+        P1b_full=_sub(rows, "P1b · v3 훈련 코퍼스 전체 (라이브러리 + H6·H7)",
+                      "실제로 학습에 들어가는 모집단"),
+        d83_reference=dict(as_built_then=0.4135, kappa_projection_then=0.1495,
+                           null_q99_then=0.1009,
+                           source="CUE_EXTENT_AUDIT.md 승용 요약 1·2 (D83 ①)"))
+
     # 팔 수준 대조 (설계 수준 위험 = 팔) — 프레임 GT 와 나란히 인쇄
     garm = [1 if r["arm"] in ("A", "B") else 0 for r in rows]
     r_arm = point_biserial(garm, tot)
@@ -1413,7 +1535,7 @@ def analyze(frames, attrib, args):
             and r["group"] not in ("h12_r0",)]
     ncueA = [area_frac(r) for r in prows
              if r["arm"] in ("A", "C") and famof(r["scene"]) == "N-cue(new)"
-             and r["group"] == "n911"]
+             and r["group"] in P2_NCUE_GROUPS]
     legA = [area_frac(r) for r in rows if r["arm"] == "A"]
     sym["contrast"] = {}
     if hazA and ncueA:
@@ -1431,12 +1553,14 @@ def analyze(frames, attrib, args):
             legacy=describe(legA), Hnew=describe(hazA),
             ratio_mean=round((sum(legA) / len(legA)) / max(1e-9, sum(hazA) / len(hazA)), 3),
             cliffs_delta=round(cliffs_delta(legA, hazA), 4))
-    sym["pending"] = ["N9·N11 은 rev2 라운드까지 착지 — 이후 재렌더 시 --regen-hook 로 갱신",
-                      "C 웨이브(정본 33씬 C팔) 미렌더 — 착지하면 대칭표가 바뀐다"]
+    sym["pending"] = ["[08-24 해소] C 웨이브 착지 — C팔 816컷이 P1 에 들어왔다 (W1C §8.2)",
+                      "[08-24 해소] P2 프로브를 W3 본렌더 as-built 로 교체 (D87)",
+                      "[08-24] H6·H7 은 P2 프로브가 아니라 P1(훈련 코퍼스 val)로 이동 (W2)",
+                      "B안 대기 3씬(H4·L2·N12) 미렌더 — 착지 시 --regen-hook"]
     res["density_symmetry"] = sym
 
     # P2 자체의 2×2 점이연 (신규 씬만 · 전 팔 존재)
-    p2 = [r for r in prows if r["group"] in ("h12", "h3", "l1", "n911", "h67")]
+    p2 = [r for r in prows if r["group"] in P2_PRIMARY_GROUPS]
     if p2:
         g2 = [r["hazard"] for r in p2]
         v2 = [area_frac(r) for r in p2]
@@ -1455,7 +1579,7 @@ def analyze(frames, attrib, args):
     # ======================================================================
     # 3. 씬별 표 + 이상치
     # ======================================================================
-    PRIMARY_G = ("h12", "h3", "l1", "n911", "h67")
+    PRIMARY_G = P2_PRIMARY_GROUPS
     per_scene = {}
     bysc = collections.defaultdict(list)
     for r in rows:
@@ -1527,7 +1651,7 @@ def analyze(frames, attrib, args):
 
     # 합본 (P1 + P2 primary) — 두 모집단이 서로 반대 방향으로 당긴다
     comb = rows + [r for r in prows
-                   if r["group"] in ("h12", "h3", "l1", "n911", "h67")]
+                   if r["group"] in P2_PRIMARY_GROUPS]
     gc = [r["hazard"] for r in comb]
     vc = [area_frac(r) for r in comb]
     sc_ = [r["scene"] for r in comb]
@@ -1542,17 +1666,37 @@ def analyze(frames, attrib, args):
              "합본은 두 힘의 현재 합력이지 어느 한쪽의 설계 진단이 아니다.")
 
     # ======================================================================
-    # 3c. C 웨이브 투영 — 빠진 칸이 채워지면 헤드라인 r 은 어디로 가는가
+    # 3c. C 웨이브 **착지 검증** — 투영이 맞았는가 (구 3c "투영" 절의 후속)
     # ======================================================================
-    #   as-built 코퍼스의 **무위험 프레임은 사실상 전부 D팔**이고 D는 단서까지 없다.
-    #   즉 "위험 없음 = 단서 없음"이 2×2 의 한 칸(C = 위험無·단서有)이 비어 있기
-    #   때문에 성립한다. 그 칸을 채우면 어떻게 되는지를 **투영**한다.
-    #   가정 하나: C팔의 단서 면적 ≈ A팔의 단서 면적 × κ.
-    #   κ 는 신규 씬 프로브의 **실측**에서 온다(같은 씬의 A팔·C팔 쌍).
+    #   [08-24] C팔이 실물로 들어왔다(816컷). 이 절은 더 이상 투영이 아니라
+    #   **투영 대 실측의 대조**다. 남은 투영은 아직 세그가 없는 자리
+    #   (무낙차 4씬 C 재활용 96컷 · 격리분)뿐이다.
     kA = [area_frac(r) for r in prows if r["arm"] == "A"
-          and r["group"] in ("h12", "h3", "l1", "n911")]
+          and r["group"] in P2_PRIMARY_GROUPS]
     kC = [area_frac(r) for r in prows if r["arm"] == "C"
-          and r["group"] in ("h12", "h3", "l1", "n911")]
+          and r["group"] in P2_PRIMARY_GROUPS]
+    # 코퍼스 자체에서 잰 κ (라이브러리 22씬 · 같은 씬의 A팔·C팔)
+    cA = collections.defaultdict(list)
+    cC = collections.defaultdict(list)
+    for r in rows:
+        if r["scene"] in W2_SCENES:
+            continue
+        if r["arm"] == "A":
+            cA[r["scene"]].append(area_frac(r))
+        elif r["arm"] == "C":
+            cC[r["scene"]].append(area_frac(r))
+    both = sorted(set(cA) & set(cC))
+    kappa_corpus = None
+    kappa_by_scene = {}
+    if both:
+        mA = sum(sum(cA[s]) for s in both) / max(1, sum(len(cA[s]) for s in both))
+        mC = sum(sum(cC[s]) for s in both) / max(1, sum(len(cC[s]) for s in both))
+        kappa_corpus = mC / max(1e-9, mA)
+        for s in both:
+            a = sum(cA[s]) / len(cA[s])
+            c = sum(cC[s]) / len(cC[s])
+            kappa_by_scene[s] = dict(A_mean=round(a, 3), C_mean=round(c, 3),
+                                     kappa=round(c / max(1e-9, a), 4))
     kappa = (sum(kC) / len(kC)) / max(1e-9, sum(kA) / len(kA)) if (kA and kC) else None
     plan = json.load(open(os.path.join(V3, "render_plan_v3.json"), encoding="utf-8"))
     cplan = {s["scene"]: s.get("arms", {}).get("C", {}).get("frames", 0)
@@ -1564,8 +1708,9 @@ def analyze(frames, attrib, args):
         for r in rows:
             if r["arm"] == "A":
                 byscene[r["scene"]].append(area_frac(r))
+        have_C = collections.Counter(r["scene"] for r in rows if r["arm"] == "C")
         for sc, vals in byscene.items():
-            want = cplan.get(sc, 0)
+            want = cplan.get(sc, 0) - have_C.get(sc, 0)   # **결측분만** 채운다
             if want <= 0 or not vals:
                 continue
             for i in range(want):
@@ -1596,11 +1741,16 @@ def analyze(frames, attrib, args):
         if a != b:
             imbal.append(dict(scene=sc, A=a, B=b, D=c.get("D", 0),
                               C_planned=cplan.get(sc, 0), dAB=a - b))
-    res["c_wave_projection"] = dict(
-        status="투영(측정 아님) — C팔은 미렌더다",
-        assumption="C팔 프레임의 단서 면적 = 같은 씬 A팔 프레임의 면적 × κ",
+    res["c_wave_landing"] = dict(
+        status="[08-24] C팔 착지 — 이 절은 투영이 아니라 **투영 대 실측 대조**다",
+        d83_projection=dict(r_pb_projected_then=0.1495, kappa_then=1.0022,
+                            basis="D83 ① · CUE_EXTENT_AUDIT 승용 요약 2"),
+        kappa_corpus=round(kappa_corpus, 4) if kappa_corpus else None,
+        kappa_corpus_basis=f"라이브러리 {len(both)}씬 · 같은 씬의 A팔 대 C팔 평균 면적비 (실측)",
+        kappa_by_scene=kappa_by_scene,
+        assumption="잔여 투영: 아직 세그가 없는 C 자리(무낙차 4씬 재활용)만 A×κ 로 채운다",
         kappa=round(kappa, 4) if kappa else None,
-        kappa_basis=f"신규 씬 프로브 실측 A팔 n={len(kA)} · C팔 n={len(kC)} "
+        kappa_basis=f"P2 신규 씬 실측 A팔 n={len(kA)} · C팔 n={len(kC)} "
                     "(같은 씬·같은 포즈, 위험 토글만 다름)",
         c_frames_planned=sum(v for k, v in cplan.items()
                              if k in {r['scene'] for r in rows}),
@@ -1788,7 +1938,7 @@ def print_tables(res):
         log(f"  {f['key']:<22} {f['family']:<14} mean={f['mean_area_pct']:<8} "
             f"med={f['family_median']:<8} z={f['robust_z']} {f['direction']}")
 
-    c = res.get("c_wave_projection") or {}
+    c = res.get("c_wave_landing") or {}
     if c.get("r_pb_projected") is not None:
         log(f"\n=== §3c C 웨이브 투영 === κ={c['kappa']} · 합성 C {c['c_frames_synthesised']}프레임 "
             f"→ r_pb {c['r_pb_asbuilt']} ⇒ **{c['r_pb_projected']}** (문턱 {c['null_q99_asbuilt']})")

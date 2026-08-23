@@ -262,12 +262,12 @@ pairs, 93 carry ≥1 GT-positive cell.
 | arm | tier | n pairs | Δ score (GT cells) [95% CI] | Δ frame (all cells) [95% CI] |
 |---|---|---|---|---|
 | RGB | V | 63 | 0.4062 [0.3242, 0.4885] | 0.4082 [0.3261, 0.4911] |
-| RGB | E | 9 | 0.1891 [0.0402, 0.3337] | 0.1891 [0.0402, 0.3337] |
-| RGB | H | 21 | 0.2398 [0.1556, 0.3313] | 0.2398 [0.1556, 0.3313] |
+| RGB | E | 9 | 0.1891 — **no interval** (1 scene cluster, §RT.5) | 0.1891 — **no interval** |
+| RGB | H | 21 | 0.2398 — **no interval** (2 scene clusters, §RT.5) | 0.2398 — **no interval** |
 | RGB | **all** | 117 | **0.3476 [0.2859, 0.4103]** | 0.3291 [0.2761, 0.3815] |
 | Depth | V | 63 | 0.6291 [0.5630, 0.6924] | 0.6262 [0.5600, 0.6896] |
-| Depth | E | 9 | 0.0301 [0.0056, 0.0564] | 0.0301 [0.0056, 0.0564] |
-| Depth | H | 21 | 0.5842 [0.4482, 0.7139] | 0.5920 [0.4616, 0.7161] |
+| Depth | E | 9 | 0.0301 — **no interval** (1 scene cluster, §RT.5) | 0.0301 — **no interval** |
+| Depth | H | 21 | 0.5842 — **no interval** (2 scene clusters, §RT.5) | 0.5920 — **no interval** |
 | Depth | **all** | 117 | **0.5610 [0.4972, 0.6227]** | 0.4458 [0.3823, 0.5105] |
 
 Sign consistency: RGB Δ > 0 on **88 of 93** GT-carrying pairs; Depth on **90 of 93**.
@@ -467,11 +467,16 @@ strata are identical across all 9 runs.
 
 **H-tier twin Δ, EXACT-only vs published (kept = EXACT + TOL), 3-seed mean ± range/2**
 
-| model | EXACT-only H Δ | published H Δ | difference | EXACT CI excludes 0 |
+| model | EXACT-only H Δ | published H Δ | difference | ~~EXACT CI excludes 0~~ **withdrawn (§RT.5)** |
 |---|---|---|---|---|
-| rgb | **0.285 ± 0.094** | 0.285 ± 0.094 | **+0.0000** | 3/3 seeds |
-| depth | **0.407 ± 0.037** | 0.407 ± 0.037 | **+0.0000** | 3/3 seeds |
-| b2 | **0.110 ± 0.059** | 0.110 ± 0.059 | **+0.0000** | 3/3 seeds |
+| rgb | **0.285 ± 0.094** | 0.285 ± 0.094 | **+0.0000** | **withdrawn** (was 3/3 seeds) |
+| depth | **0.407 ± 0.037** | 0.407 ± 0.037 | **+0.0000** | **withdrawn** (was 3/3 seeds) |
+| b2 | **0.110 ± 0.059** | 0.110 ± 0.059 | **+0.0000** | **withdrawn** (was 3/3 seeds) |
+
+The load-bearing column is `difference`. **+0.0000 is an identity, not a bootstrap result** — the TOL
+stratum contains 0 H-tier pairs, so the stratification cannot move the H-tier mean. The significance
+column is withdrawn because the H stratum spans 2 scene clusters (§RT.5); nothing in this subsection's
+conclusion rests on it.
 
 Per-seed EXACT-only H Δ [95 % CI, 10 000× paired bootstrap, seed 42, `code/bootstrap.py`]:
 rgb 0.1701 [0.1243, 0.2181] · 0.3587 [0.3113, 0.4071] · 0.3267 [0.2478, 0.4066];

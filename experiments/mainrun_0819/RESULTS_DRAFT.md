@@ -83,9 +83,19 @@ pair differs on 4.51 % of the frame at ≥ 32/255, 1 872× the renderer's own no
 and the toggle removes every object the scene builder places in the same branch (in scene14 the
 shoulder massif, side slopes, coursing, parapets, cues and litter). The twin therefore establishes
 **that** the response is caused by the hazard's presence in the scene; it does **not** establish
-**which** image property carries the causation, and the CUE-OFF intervention (D46) shows the RGB arm
-firing at FA 1.000 on the cue vocabulary with the drop absent. The honest claim is **cue
-association, not cue inference**. The corresponding Depth value is 0.584 [0.448, 0.714]. One
+**which** image property carries the causation. The CUE-OFF intervention was re-adjudicated on
+2026-08-23 (D50, `weekend_0823/cue_audit/CUEOFF_RESULT_v2.md`) and it does **not** license a
+cue-vocabulary reading. The pre-registered primary rule returned **zero CUE EVIDENCE** over 30 cells
+(2 SHORTCUT · 6 NO-EFFECT · 4 UNDECIDED · 18 VOID; only 12 judgeable at all), and the cue-only arm's
+false-alarm rate is **scene-scoped and monotone in the optical size of its own surgery, not in how
+much cue vocabulary it keeps**: arm C sits 58.4 % / 36.6 % / 13.1 % / 1.02 % of frame away from the
+hazard-off round in scene12·e2 / scene12·e / scene20 / scene17 and fires at FA 1.000 / 1.000 / 0.361
+/ **0.042** — and scene17, at the bottom of that ladder, is the arm that retains the *full* cue
+inventory. The one large candidate (scene20 repair round, b2, corrected **+0.506**, 3/3 seeds) is
+VOID under the pre-registered geometry-invariance rule and is **not promoted**. What this supports is
+instrument-neutral: the response is conditional on **the hazard's presence in the scene**, not on its
+pixels and not on any identified cue — **scene association, not cue inference**.
+The corresponding Depth value is 0.584 (no interval: same two scene clusters, §RT.5). One
 caution, now measured rather than anticipated: the dressing-invariant control was run (§R.3). On the
 hard-negative scene N3 the RGB arm fires on **0.75–1.00 of frames in *both* arms** at mean max p
 0.74–0.95, so its Δ ≈ 0 records saturation, not silence; the Depth arm is genuinely quiet there
@@ -446,12 +456,16 @@ off-arm FA of 0.359 and Depth's at 0.042; at matched false-alarm rates Depth lea
 tier at **every** operating point (0.781 vs 0.729 at FA 0.359; 0.510 vs 0.326 at FA 0.10; 0.479 vs
 0.243 at FA 0.05). The probe's Depth-over-RGB result is therefore **consistent with** the corpus,
 not contrary to it (§RT-A). RGB's H-tier firing on the training corpus is **association with the
-corpus's cue vocabulary**, not inference from it: 44.7 % of its H-tier fires also occur on the
-hazard-deleted twin (§RT-B), and the CUE-OFF arms show it firing at FA 1.000 on the cue vocabulary
-alone with no drop present (D46). A hole in a corridor supplies neither the vocabulary nor the drop,
-and the arm does not transfer. Depth's is *geometric*: whatever
+corpus's scene appearance**, not inference from a cue vocabulary: 44.7 % of its H-tier fires also
+occur on the hazard-deleted twin (§RT-B), and the re-adjudicated CUE-OFF intervention (D50,
+`CUEOFF_RESULT_v2.md`) shows the cue-only arm's false alarms tracking the **optical size** of the
+hazard-removing surgery rather than the cue inventory — FA 1.000 where that arm sits 36.6–58.4 % of
+frame from the hazard-off round (scene12), but **0.042** in scene17, which keeps the full cue
+vocabulary and is only 1.02 % of frame away. The pre-registered primary rule returned **zero CUE
+EVIDENCE** across all 30 cells. A hole in a corridor supplies neither that scene appearance nor the
+drop, and the arm does not transfer. Depth's is *geometric*: whatever
 range-discontinuity signature it keys on survives the change of drop type, degraded but present.
-**The RGB result is scene-vocabulary-bound; the Depth result is closer to type-general.** On the
+**The RGB result is scene-appearance-bound; the Depth result is closer to type-general.** On the
 pure-E scene both collapse almost totally (RGB 0.000 on all three seeds; Depth 0.125 / 0.000 / 0.000),
 so the E-tier claim in this paper should be read as corpus-specific until a probe with more E variety
 exists.
@@ -478,9 +492,11 @@ the trigger-happy reading above.
 
 The probe is evaluation-only by construction and no probe frame may enter training; it changes no
 number in §5.2 and its role in the paper is to bound the generalisation claim, in the limitations
-section: **the H-tier result is demonstrated for the drop types, the cue vocabulary and the scenes
-of this corpus; the RGB arm's version of it survives neither a change of drop type nor removal of
-the cue vocabulary (D46), and it is not a claim of advantage over the range arm at a matched
+section: **the H-tier result is demonstrated for the drop types, the dressing conventions and the
+scenes of this corpus; the RGB arm's version of it survives neither a change of drop type nor a
+wholesale strip of scene content (CUE-OFF arm B1) — though the re-adjudicated intervention cannot
+attribute that collapse to cues, its pre-registered primary rule having returned zero CUE EVIDENCE
+across 30 cells (D50) — and it is not a claim of advantage over the range arm at a matched
 false-alarm rate (§RT-A).**
 
 > R.4 부기 (panel-audited): Depth's apparent hole-transfer recall is largely saturation
@@ -528,7 +544,7 @@ Six new measurements on frozen artefacts change what §5.2–§5.6 and R.1–R.4
 
 > Two distinct bounds apply to the detector row and must not be conflated.  **(i)** Our ground-projection adapter cannot map a box to an E- or H-tier cell at all: feeding the amodal ground-truth boxes in as confidence-1.0 detections yields E = H = 0.000 before any training, so the zeros in the table are a property of the adapter.  **(ii)** Removing the adapter and scoring purely in image space — does any stored detection overlap any amodal ground-truth box — the detector does fire near hidden hazards at a low rate (0.066 of H frames at IoU > 0), but the identical measurement on the hazard-deleted twin of the same cut gives 0.076, so the **twin-conditional rate is −0.010: no hazard-conditional evidence at all**, against +0.337 on the visible tier where the same control shows the detector is strongly conditional.  The defensible statement is (ii), and it is the stronger one — an **amodal-trained** detector, taught to draw boxes over hazards it cannot see, still produces nothing conditional on the hazard when the hazard contributes no pixels.
 
-> We also state the limitation of our own baseline first: for a fully occluded hazard the amodal box is not determined by the image — in scene14 it spans the building facade the drop hides behind — so the detector was given a partly unlearnable target.  At the storage confidence floor (0.05) the twin-conditional H rate rises to 0.142, which we report alongside the operating-point value.
+> We also state the limitation of our own baseline first: for a hazard that contributes zero pixels of its own surface the amodal box is not determined by the image — in scene14 it spans the building facade the drop hides behind — so the detector was given a partly unlearnable target.  At the storage confidence floor (0.05) the twin-conditional H rate rises to 0.142, which we report alongside the operating-point value.
 
 
 ### RT-E  §5.6 / limitations — three numbers to publish before a reviewer finds them

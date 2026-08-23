@@ -1,3 +1,5 @@
+> **⚠ 정정 배너 (08-23 R6-b)**: 본 문서의 H-티어 밴드별 CI 주장(+0.293 'CI 0 배제', −0.031 'CI∋0', L230/L250 조건부 CI)은 test H가 2씬 클러스터라는 RT.5 철회 대상에 해당 — **구간 주장 전부 철회**, 부호·크기 대비와 포즈-클러스터 점추정만 유효. 안A/안B 문장의 CI 표현은 사용 전 클러스터 문구로 교체할 것.
+
 # 3A_VIEWPOINT_AUDIT — is the H-tier band-3a twin Δ ≈ 0 uniform, or viewpoint-concentrated?
 
 **Queue item.** CPU-2 of `Docs/experiment/WEEKEND_BRIEF_0823.md` §6.5 (material for 결재 #4).

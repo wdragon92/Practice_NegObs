@@ -4,9 +4,15 @@
 
 `build_render_plan.py:444 per_key()`의 정의를 **그대로** 옮겨 세 정책을 비교한다.
   P0 계획 가정 (maximal)  — s20/R만 빼고 전 키 제거 가능
-  P1 VG-CLS 확정만        — W0이 **장식으로 판정한 쌍만** 제거 (계획 §1.2 문면)
-  P2 판정불가를 장식으로  — 분쟁 16쌍이 W1의 D팔 대조로 전부 장식으로 풀렸을 때의 상한
+  P1 VG-CLS 확정만        — 그 판정표가 **장식으로 판정한 쌍만** 제거 (계획 §1.2 문면)
+  P2 판정불가를 장식으로  — 판정불가가 전부 장식으로 풀렸을 때의 상한
+
+인자 (2026-08-23 확장 · D72 ②):
+  --cls <path>   판정 원장 (기본 w0_cuecls.json).
+                 W1-D 재판정 뒤에는 `w1d_cuecls.json`을 넣는다. 그때의 **P1이
+                 확정 정책**이고 P2는 (판정불가가 남아 있다면) 그 상한이다.
 """
+import argparse
 import collections
 import json
 import math
@@ -19,8 +25,13 @@ KEYS = ("R", "Ta", "N", "T", "Sg", "V")
 CUE2KEY = {"cue_railing": "R", "cue_tactile": "Ta", "cue_nosing": "N",
            "cue_material_break": "T", "cue_sign": "Sg", "cue_scene_dressing": "V"}
 
+_ap = argparse.ArgumentParser()
+_ap.add_argument("--cls", default=os.path.join(V3, "w0_cuecls.json"))
+_args = _ap.parse_args()
+
 plan = json.load(open(os.path.join(V3, "render_plan_v3.json"), encoding="utf-8"))
-cls = json.load(open(os.path.join(V3, "w0_cuecls.json"), encoding="utf-8"))
+cls = json.load(open(_args.cls, encoding="utf-8"))
+print(f"[rimpact] 판정 원장 = {os.path.relpath(_args.cls, REPO)}")
 
 verdict = {(r["scene"], r["cue"]): r["verdict"] for r in cls["pairs"]}
 for p in cls["prior_rulings"]:

@@ -406,9 +406,15 @@ props:
     post_suffixes: ['', '/Post', '/Body']
     ignore_suffixes: ['/Band', '/Cap', '/Tactile', '/MtlBody', '/MtlBand', '/MtlTactile']
     # Bollard-carrying scenes, corrected fact C-9 (scene18's bollards were removed in v5.1).
+    # v3 (P-5, RENDER_PLAN_V3 §2.1) appends the new paired-H scenes as they land. The set is a
+    # REGISTRY, not a measurement: a scene that assembles bollards and is absent from it errors,
+    # and a scene listed here that assembles none errors too — so the append must accompany the
+    # scene, never precede it. sceneH6 (levee approach, 5 bollards on the 보차도 경계 at
+    # y = -4.20, pitch 1.50) and sceneH7 (walled-corridor mouth, 2 bollards) both assemble them.
     carrier_set: [scene02, scene03, scene05, scene06, scene08, scene11, scene12, scene13,
                   scene14, scene16, scene20, scene21, sceneC4, sceneD1, sceneN1, sceneN2,
-                  sceneN3, sceneN4, sceneN5]
+                  sceneN3, sceneN4, sceneN5,
+                  sceneH6, sceneH7]
 
   bench:
     mode: segment

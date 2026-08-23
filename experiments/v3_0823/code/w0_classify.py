@@ -38,7 +38,36 @@ dz_max·변화 셀 수는 **증거이자 크기**로 인쇄하되 판정 기준�
 
 사용:  python3 experiments/v3_0823/code/w0_classify.py
 산출:  experiments/v3_0823/w0_cuecls.json  (+ stdout 표)
+
+W1-D 재판정 확장 (2026-08-23 · DECISIONS D72 ② · W0_CUECLS §8)
+--------------------------------------------------------------
+W0의 판정불가 16쌍은 **참조 z_off가 cue-비대칭**이라서 생겼다. 그 참조를
+cue-대칭인 **D팔**로 갈아 끼우면 같은 사전등록 규칙으로 다시 판정할 수 있다.
+아래 세 인자만 추가했고 **기본값은 W0 그대로**라, 인자 없이 실행하면
+`w0_cuecls.json`을 바이트 동등하게 재현한다(사후 규칙 변경 없음).
+
+  --zoff-round   낙차 발자국 z_off 라운드            (기본 260819_main_off)
+  --ann-prefix   annotations/<prefix><arm>.json      (기본 w0_)
+  --out          산출 JSON                            (기본 w0_cuecls.json)
+  --hm-loader    검정 2의 높이맵 계기                (기본 aabb = W0 원본 동작)
+
+`--hm-loader`가 왜 필요한가 — W0에 있던 계기 불일치
+----------------------------------------------------
+검정 1(`cells_raw`)은 정본 라벨러가 계산하므로 `heightmap_fused.npy`가 있으면
+그것을 쓴다(`labeler.load_heightmap`). 그런데 W0의 검정 2(`fp_mask`/`cue_locus`)는
+`heightmap.npy`를 **날것으로** 읽었다. 정본 구off에 융합본이 있는 씬
+(scene02·scene07·scene08·scene12·scene16)에서 두 검정이 **서로 다른 면을 참조**한
+셈이고, 그런 씬에서는 AABB 차분이 0에 가까워 fp_A가 붕괴해 `fp∩ = 0`이
+자동으로 나온다 — 즉 검정 2가 **공허하게 "장식"** 을 찍는다.
+`--hm-loader labeler`가 이것을 라벨러와 같은 계기로 맞춘다. 기본값을 `aabb`로
+둔 것은 인자 없이 실행하면 `w0_cuecls.json`이 그대로 재현되어야 하기 때문이다.
+
+재판정 실행:
+  python3 .../w0_classify.py --zoff-round 260826_v3w1_lib_D \
+      --ann-prefix w1d_zoffD_ --hm-loader labeler \
+      --out experiments/v3_0823/w1d_cuecls.json
 """
+import argparse
 import glob
 import hashlib
 import json
@@ -52,6 +81,12 @@ V3 = os.path.join(REPO, "experiments/v3_0823")
 ANN = os.path.join(V3, "annotations")
 STAMP = "260825_v3w0_cuecls"
 PLAN = os.path.join(V3, "render_plan_v3.json")
+
+# --- 갈아 끼울 수 있는 부분 (기본값 = W0 원본 동작) --------------------------
+ZOFF_ROUND = "260819_main_off"      # 낙차 발자국의 반사실면
+ANN_PREFIX = "w0_"                  # annotations/<prefix><arm>.json
+OUT_PATH = os.path.join(V3, "w0_cuecls.json")
+HM_LOADER = "aabb"                  # 검정 2의 높이맵 계기: aabb | labeler
 
 ARM_OF_CUE = {
     "cue_railing": "Brail",
@@ -131,7 +166,7 @@ def cuts_of(d):
 
 
 def load_labels(arm):
-    p = os.path.join(ANN, f"w0_{arm}.json")
+    p = os.path.join(ANN, f"{ANN_PREFIX}{arm}.json")
     if not os.path.exists(p):
         return None
     d = json.load(open(p, encoding="utf-8"))
@@ -189,16 +224,33 @@ def geom_compare(da, db):
     return out
 
 
-def fp_mask(scene, z_arm):
+def _hm(d):
+    """(z, geo) — `HM_LOADER`가 'labeler'면 융합 사이드카가 이긴다."""
+    if HM_LOADER == "labeler":
+        sys.path.insert(0, os.path.join(REPO, "experiments/mainrun_0819/code/labeling"))
+        import labeler as LB
+        z, geo, _src = LB.load_heightmap(d)
+        return z, geo
+    z = np.load(os.path.join(d, "heightmap.npy"))
+    m = json.load(open(os.path.join(d, "heightmap_meta.json"), encoding="utf-8"))
+    return z, (m["x0"], m["y0"], m["step"])
+
+
+def fp_mask(scene, z_arm, geo_arm=None):
     """A팔 기준 낙차 발자국 마스크 (라벨러 footprint v2와 같은 식).
 
-    z_off = `260819_main_off` (정본 구off, 같은 시드). 라벨러가 쓰는 것과 동일.
+    z_off = `ZOFF_ROUND` (기본 260819_main_off = 정본 구off, 같은 시드).
+    라벨러에 넘기는 `--off-round`와 **반드시 같은 라운드**여야 한다.
     """
-    g = glob.glob(os.path.join(REPO, "dataset", "260819_main_off", "*", scene,
-                               "heightmap.npy"))
+    g = glob.glob(os.path.join(REPO, "dataset", ZOFF_ROUND, "*", scene,
+                               "variation.json"))
     if not g:
         return None
-    zo = np.load(g[0])
+    zo, geo_o = _hm(os.path.dirname(g[0]))
+    if geo_arm is not None and HM_LOADER == "labeler":
+        sys.path.insert(0, os.path.join(REPO, "experiments/mainrun_0819/code/labeling"))
+        import labeler as LB
+        zo = LB.align_to(zo, geo_o, geo_arm, z_arm.shape)
     if zo.shape != z_arm.shape:
         return None
     d = np.where(np.isfinite(zo) & np.isfinite(z_arm), zo - z_arm, np.nan)
@@ -229,11 +281,11 @@ def cue_locus(scene, da, db):
     그래서 단서의 기하 궤적 Δcue = {|z_A − z_B| > 0}가 A팔 발자국과 겹치는지를
     따로 잰다. 겹치면 (ㄱ), 안 겹치면 (ㄴ)이다.
     """
-    za = np.load(os.path.join(da, "heightmap.npy"))
-    zb = np.load(os.path.join(db, "heightmap.npy"))
+    za, geo_a = _hm(da)
+    zb, _geo_b = _hm(db)
     if za.shape != zb.shape:
         return None
-    fa = fp_mask(scene, za)
+    fa = fp_mask(scene, za, geo_a)
     if fa is None:
         return None
     both = np.isfinite(za) & np.isfinite(zb)
@@ -412,14 +464,14 @@ def main():
     for k in confirmed:
         confirmed[k] = sorted(set(confirmed[k]))
 
-    # ---- 보조 진단: W0 A팔 vs 정본 구off(260819_main_off)의 데이텀 -----------
+    # ---- 보조 진단: W0 A팔 vs z_off 라운드의 데이텀 -------------------------
     # v2의 183/792 탈락을 낳은 그 짝(on팔 ↔ off팔)을 같은 자로 재어 둔다.
     # **교락 주의**: 구off는 hazard 제거 + hazard 분기 안의 cue 제거가 섞인
     # 비균질 세대(ACCOUNTING §4.1)라 드레싱 단독 효과가 아니다. 참고치일 뿐이다.
     corpus_ref = []
     for scene in sorted({s for s, _ in pairs}):
         da = scene_dir(f"{STAMP}_A", scene)
-        g = glob.glob(os.path.join(REPO, "dataset", "260819_main_off", "*", scene,
+        g = glob.glob(os.path.join(REPO, "dataset", ZOFF_ROUND, "*", scene,
                                    "variation.json"))
         if not da or not g:
             continue
@@ -440,7 +492,9 @@ def main():
     out = dict(
         doc="w0_cuecls", version="1.0", gate="VG-CLS", plan="RENDER_PLAN_V3 §4.2 · §6.1",
         rounds=[f"{STAMP}_{a}" for a in ("A", "Brail", "Bnose", "Btact", "Bmatl", "Bdress")],
-        off_round_for_footprint="260819_main_off",
+        off_round_for_footprint=ZOFF_ROUND,
+        annotations_prefix=ANN_PREFIX,
+        hm_loader=HM_LOADER,
         grid="gridspec_v1.json (20칸)",
         rules=dict(
             structural="Δcells_raw ≠ 0 또는 polar_gt 상이 프레임 ≥ 1",
@@ -466,7 +520,7 @@ def main():
         prior_rulings=PRIOR,
         problems=problems,
         pairs=rows)
-    op = os.path.join(V3, "w0_cuecls.json")
+    op = OUT_PATH
     json.dump(out, open(op, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 
     # ---- stdout 표 ---------------------------------------------------------
@@ -514,4 +568,17 @@ def main():
 
 
 if __name__ == "__main__":
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--zoff-round", default=ZOFF_ROUND,
+                    help="낙차 발자국 z_off 라운드 (라벨러 --off-round와 동일해야 함)")
+    ap.add_argument("--ann-prefix", default=ANN_PREFIX,
+                    help="annotations/<prefix><arm>.json")
+    ap.add_argument("--out", default=OUT_PATH)
+    ap.add_argument("--hm-loader", choices=("aabb", "labeler"), default=HM_LOADER,
+                    help="검정 2의 높이맵 계기 (labeler = 융합 사이드카 우선)")
+    _a = ap.parse_args()
+    ZOFF_ROUND, ANN_PREFIX, OUT_PATH = _a.zoff_round, _a.ann_prefix, _a.out
+    HM_LOADER = _a.hm_loader
+    print(f"[cls] z_off={ZOFF_ROUND} · ann={ANN_PREFIX}*.json · hm={HM_LOADER} "
+          f"· out={OUT_PATH}")
     sys.exit(main())

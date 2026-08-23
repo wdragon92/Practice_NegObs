@@ -34,6 +34,12 @@ GRIDSPEC = os.path.join(ROOT, "experiments/mainrun_0819/code/labeling/gridspec_v
 MODELS = ["rgb", "depth", "b2"]
 SEEDS = [42, 43, 44]
 
+# Secondary / appendix architectures.  Same grid (PROVISIONAL-GRID-V1), same
+# tau_op = 0.5, byte-identical per_frame.csv header -> free to census, no GPU.
+NEW = os.path.join(ROOT, "experiments/weekend_0823/newmodels/runs")
+APPENDIX = [("resnet50", s, os.path.join(NEW, f"resnet50_s{s}")) for s in SEEDS] + \
+           [("convnext_tiny", s, os.path.join(NEW, f"tu-convnext_tiny_s{s}")) for s in SEEDS]
+
 
 def load_grid():
     g = json.load(open(GRIDSPEC))
@@ -55,13 +61,17 @@ def main():
 
     man = {f["frame_id"]: f for f in json.load(open(MANIFEST))["frames"]}
 
+    appendix = "--appendix" in sys.argv
+    todo = ([(m, s, os.path.join(RUNS, f"{m}_s{s}")) for m in MODELS for s in SEEDS]
+            if not appendix else APPENDIX)
+
     events = []
     recon = {}
 
-    for model in MODELS:
-        for seed in SEEDS:
+    if True:
+        for model, seed, run_dir in todo:
             run = f"{model}_s{seed}"
-            ev_dir = os.path.join(RUNS, run, "eval_test")
+            ev_dir = os.path.join(run_dir, "eval_test")
             mj = json.load(open(os.path.join(ev_dir, "metrics.json")))
             tau = float(mj["tau_op"])
             pub = mj["point"]["op"]
@@ -76,8 +86,18 @@ def main():
             # sanity: off-arm GT must be all zero
             off_gt_nonzero = 0
 
-            for arm, path in (("off", "per_frame_off.csv"), ("on", "per_frame_on.csv")):
-                for r in csv.DictReader(open(os.path.join(ev_dir, path))):
+            # the appendix runs ship only the combined per_frame.csv; split it on
+            # toggle_state so both paths feed the identical counter below
+            def arm_rows(arm):
+                p = os.path.join(ev_dir, f"per_frame_{arm}.csv")
+                if os.path.exists(p):
+                    return list(csv.DictReader(open(p)))
+                return [r for r in csv.DictReader(
+                    open(os.path.join(ev_dir, "per_frame.csv")))
+                    if r["toggle_state"] == arm]
+
+            for arm in ("off", "on"):
+                for r in arm_rows(arm):
                     fid = r["frame_id"]
                     tier = r["tier"]
                     scene = r["scene_id"]
@@ -149,13 +169,14 @@ def main():
                   f"events off={rc['n_off_fired_cells']} onneg={rc['n_on_neg_fired']}")
 
     os.makedirs(os.path.join(OUT, "logs"), exist_ok=True)
+    tag = "_appendix" if appendix else ""
     fields = list(events[0].keys())
-    with open(os.path.join(OUT, "fa_events_raw.csv"), "w", newline="") as fh:
+    with open(os.path.join(OUT, f"fa_events{tag}_raw.csv"), "w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=fields)
         w.writeheader()
         w.writerows(events)
-    json.dump(recon, open(os.path.join(OUT, "logs/fa_recount.json"), "w"), indent=2)
-    print(f"\ntotal events {len(events)} -> {OUT}/fa_events_raw.csv")
+    json.dump(recon, open(os.path.join(OUT, f"logs/fa_recount{tag}.json"), "w"), indent=2)
+    print(f"\ntotal events {len(events)} -> {OUT}/fa_events{tag}_raw.csv")
 
     # denominator table (identical across runs -- assert it)
     d = {r["n_on_neg_cells"] for r in recon.values()}

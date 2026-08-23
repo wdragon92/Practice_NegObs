@@ -1,0 +1,122 @@
+{
+  "_doc": "Curated scene-composition overlay for the CPU-2 FA census (manual tier).",
+  "_method": "Compiled 2026-08-23 from scene configs + Docs/reports/dropoff_cue_matrix_v1.md + experiments/v3_0823/CUE_COVERAGE.md + experiments/weekend_0823/cue_audit/H_CUE_AUDIT.md. Every field carries its file:line in `prov`.",
+  "_scoping_rule": "장식형 (decorative) is turned into an EVENT FLAG only where a specific installed object can be localised to a (sector, band) region of the polar grid. Scene-wide dressing is recorded as metadata (`decorative_present`) but is NOT converted into flags: a scene-wide flag would mark ~everything and destroy the family's discriminative content. 지형통계형 is likewise left to the mechanical rule (unseen cell / prior-saturated cell); the scene notes are used as corroboration in prose only. This keeps every number in the family table traceable to a mechanical rule or a measured heuristic, with manual overlay confined to 2 scenes.",
+  "_why_conservative": "The direct causal test for 장식형 already exists and returned nothing: the CUE-OFF round scored CUE EVIDENCE 0 / 30 cells on the pre-registered primary rule (ACCOUNTING.md:95, :103-104). A census cannot manufacture the evidence that ablation did not find.",
+
+  "scenes": {
+    "scene05": {
+      "identity": "sunken half-round outdoor theatre; lip 0.398 m -> 3 tiers -> stage -1.6 m",
+      "prov": "scenes/main/scene05_amphitheater.py:3,:10-17,:293-299",
+      "decorative_present": true,
+      "decorative_notes": "6 benches, 3 bins, 5 lamps, 6 rim tree beds on 3 circulation lines (:90-98); 4 gate bollards at x=-17.2 (BEHIND every judged viewpoint, out of grid) (:635); cue_scene_dressing=True (:177). cue_railing=False at the lip (:171); cut_wall (top +1.0) is a STRUCTURE guarding the yard drop (:518). LipCurb is a structure suspect (CUE_COVERAGE.md:252,:394-396).",
+      "decorative_regions": [],
+      "surrogate_line": true,
+      "surrogate_notes": "HEAVY and radially placed: charcoal granite bands w0.45 @3.2 m (:187,:215-219); concentric arc_bands r 8.0/9.5/11.0 + edge_band 11.85-12.00 crossing the approach axis at x=-5.0/-3.5/-2.0 (:201-219); manhole + 2 gullies (:282-285). The surrogate BEATS the real edge at h0.3_d10 (dropoff_cue_matrix_v1.md:221).",
+      "dark_scene": true,
+      "dark_notes": "bowl interior L 18-25; ~70% of the band's darkness is tier SHADOW not albedo (dropoff_cue_matrix_v1.md:302-304)",
+      "terrain_notes": "sunken bowl; grazing concealment hides the whole bowl at h0.3 (:20-21)",
+      "hazard": true,
+      "hazard_loc": "lip x=-1.5, dead ahead (:282)"
+    },
+
+    "scene07": {
+      "identity": "mountain-temple sparse stone path, 19 deg descent + UNGUARDED 1.8 m lateral retaining-wall drop",
+      "prov": "scenes/main/scene07_temple_stone_path.py:3,:19-23,:53,:167-169",
+      "decorative_present": true,
+      "decorative_notes": "Iljumun gate (:499), 2 stone lanterns (:509), Dharma hall (:517), 8 pines (:550), leaf-litter drifts (:438-449). Yamyeonseok kerb boulders on BOTH flanks at y=+-1.68, discontinuous (:286,:313). No guard by design: cue_railing/tactile/nosing all False, kerb_lines=[] explicitly empty (:149-150,:160,:747-750).",
+      "decorative_regions": [],
+      "surrogate_line": false,
+      "surrogate_notes": "ANTI-cue: plan_ground(natural=True) forbids all urban infra - no manhole/gully/gutter/marking (:368-370). Leaf-litter band deliberately ERASES the nosing cut lines (:23,:438-443).",
+      "dark_scene": false,
+      "dark_notes": "hard diagonal gate/wall shadow wedges (inside L~56 vs sunlit 165) deliberately NOT aligned with the drop - distractors, 'zero as a drop cue' (raw cue_matrix_result.json scene07 shadow_line)",
+      "terrain_notes": "19 deg descending corridor on a mountainside with a south scarp; at h0.3 nearly everything beyond the lip self-occludes",
+      "hazard": true,
+      "hazard_loc": "main descent x=0 dead ahead (:129); lateral 1.8 m drop at y~-1.7 = right of frame (:20). 51/72 on-arm test frames are none_in_fov (hazard outside the grid)."
+    },
+
+    "scene14": {
+      "identity": "Potemkin illusory civic grand stair, 40 steps, total drop 6.0 m",
+      "prov": "scenes/main/scene14_grandstair_illusion.py:5,:9-13,:35-38,:142-145",
+      "decorative_present": true,
+      "decorative_notes": "lamps (:235), 10 bollards at x=21.6 (OUT OF GRID from every judged viewpoint) (:363-365), benches (:354,:387), planters (:353), trees/flags/monument/hedges (:386,:393-394), autumn leaf litter (:53). Guard = raking side PARAPETS (top 0.950 m over the nosing line), built unconditionally, no cue_* key reaches them -> guard ablation impossible (CUE_COVERAGE.md:303-315).",
+      "decorative_regions": [],
+      "surrogate_line": true,
+      "surrogate_notes": "coursing joints 7 mm, one prim per joint per step, docstring rules a joint 'not a drop' GT-52 (:48-52,:187-188); transverse trench drain at x=-2.59 vs frame lip -2.40 (:203-217); 2 gullies (:216); 2 manholes (:218); band_dark on the lower plaza (:237-238). Cross-scene shortcut with s15 manhole x=-2.60 (dropoff_cue_matrix_v1.md:298).",
+      "dark_scene": false,
+      "dark_notes": "shadow_line ABSENT - noon sun leaves no cast shadow at the nosing lines; at h0.3 all three distances show NO dark region at the edge (dropoff_cue_matrix_v1.md:224)",
+      "terrain_notes": "flat civic plaza both levels; the 40 steps self-occlude so terrace reads continuous with lower plaza (H_CUE_AUDIT.md:101)",
+      "hazard": true,
+      "hazard_loc": "x=0 dead ahead; 60 strict-H frames, all test (H_CUE_AUDIT.md:86)"
+    },
+
+    "scene15": {
+      "identity": "hillside alley-stair labyrinth, 1.2 m corridor, 12+13 steps behind a 25 deg bend, drop 4.25 m",
+      "prov": "scenes/main/scene15_alley_labyrinth.py:3-14,:197-204",
+      "decorative_present": true,
+      "decorative_notes": "12 pastel houses + 2 villas + 4 backdrop blocks (:85-98,:324,:415); 5 flower pots + 2 AC units + skirting band (:17-22,:502); GT-111 rooftop railings on 3 flat roofs + 2 water tanks (:99-102); hedge crowns (:1881-1885). Freestanding code guardrail DELETED (:24-49); guard function carried by the flanking WALLS = structure (:36-44).",
+      "decorative_regions": [],
+      "surrogate_line": true,
+      "surrogate_notes": "DENSEST of the 7: transverse construction joints @3.0 m w0.010 (:253,:1891-1897); manhole phi0.648 at (-2.60,0) (:293); covered U gutter y=-0.75 (:298); 2 repair patches, the first spanning 86.6% of the d2 near window (:294-297); wall-floor grime band (:259); linear grating at the stair foot (:299-300); 3-5 cracks + 6-10 weeds (:260).",
+      "dark_scene": true,
+      "dark_notes": "DARKEST of the 7: 41.85% / 46.99% of pixels below display 0.05, and the研究 target drop lives exactly inside that shade (:106-110). Dark mouth beyond crest: floor L 193+-17 vs beyond-edge 74+-68.",
+      "terrain_notes": "hillside; walls crowd to 0.3 m compressing the FOV; 25 deg bend about pivot (5.1,0) hides the lower flight (:9-12,:204)",
+      "hazard": true,
+      "hazard_loc": "x=0 dead ahead, centred in the 1.2 m corridor (:151,:197); 36 strict-H frames all test"
+    },
+
+    "scene18": {
+      "identity": "beach-access revetment stair; granite promenade meets sand across a 2.560 m seaward revetment at x=0",
+      "prov": "scenes/main/scene18_wavy_artstair.py:2-3,:34-40,:158",
+      "_alias_warning": "filename still says wavy_artstair; the mural / colour-camouflage axis was DELETED by ruling 7-3 (:11-19). Docs/surveys/scene_composition_audit.md:231 calling this a 'mural stair' is STALE.",
+      "decorative_present": true,
+      "decorative_notes": "8 kerbed planting bed runs at x -17.60..-13.40 (:330-345); 12 stone benches at x=-12.55 (:353-356); double-globe + cobra-head lights at x=-15.60 (:357-360). All of these sit 12+ m LANDWARD of the edge, i.e. behind or at the far limit of the grid from the judged viewpoints. No guard: cue_railing=False, open revetment (:138-141); stringer cheeks are a KERB (0.120 m << 1.100 m guard height) (:175-181).",
+      "decorative_regions": [],
+      "surrogate_line": true,
+      "surrogate_notes": "tan paving band x -13.40..-12.60 (:202) and yellow guide strip x -12.50..-12.20 (:203,:566), both placed 12+ m landward ON PURPOSE so neither can be read as a hazard cue (:199-201) - but GuideStrip_* is built under NO toggle (cue_expansion_survey_v1.md:331). Plus slab joints, 2 manholes, 2 gullies, 3 patches, silt band (:304-325). The coping course x -0.35..0 is the REAL edge and a dark bar - material, not shadow (:194-195).",
+      "dark_scene": false,
+      "dark_notes": "shadow_line ABSENT: sand runs bright (199/187/159) right up to the coping band (raw cue_matrix_result.json scene18)",
+      "terrain_notes": "promenade z=0 -> 2.560 m revetment -> backshore apron -> 2.6% foreshore -> sea (:210-212)",
+      "hazard": true,
+      "hazard_loc": "x=0 dead ahead, full frame width (:84-86,:112); the flight itself is invisible in all 9 presets"
+    },
+
+    "sceneC2": {
+      "identity": "leaf-buried park stone stair (CONDITION variant: geometry invariant, cue buried); 14 steps, drop 2.24 m, first 3 steps buried",
+      "prov": "scenes/batch1/sceneC2_leaf_stairs.py:3-5,:13-22,:37",
+      "decorative_present": true,
+      "decorative_notes": "THE decisive case. ONE one-sided pipe railing at y=+1.45 (LEFT of travel), x_start=-1.60, h 0.90, post pitch 1.20 (:288-290,:1052). cue_railing=True - the ONLY ON-wired railing toggle among the 7 test-core scenes (:73; weekend_0823/cue_audit/scene_toggle_inventory.csv). It is the designed SOLE cue over the buried run (:17-18); raw cue_matrix_result.json rates railing_or_guard = STRONG. Also 2 benches, 2 bins, park lamps, pergola, 6 trees, hedges.",
+      "decorative_regions": [
+        {"sectors": ["A", "B"], "bands": ["1", "2", "3a", "3b"],
+         "object": "one-sided pipe railing y=+1.45, left of travel",
+         "note": "y=+1.45 gives az = atan(1.45/r): 16.2 deg at 5 m, 8.2 deg at 10 m -> sector B at range, sector A close in. Band is not resolvable without the per-frame view list, so all bands are flagged and the band dimension is NOT used as evidence."}
+      ],
+      "surrogate_line": false,
+      "surrogate_notes": "joints only: approach paving joints @3.0 m w0.05 (:117-132), lower-entry contraction joints pitch 2.40 (:133-153). Manhole/gully/gutter EXPLICITLY zero, and zero random patch/crack/grime/weed (:113-116,:586-587). One synthetic artifact: salmon-pink speckled crest band from the mip-blurred leaf_ground underlayer (dropoff_cue_matrix_v1.md:340).",
+      "dark_scene": false,
+      "dark_notes": "sun elevation lowered 49.79 -> 42.0 for the late-autumn premise (:435-471); crest's own shadow thrown downhill and hidden behind the crest; only baluster shadows on the mound (weak)",
+      "terrain_notes": "3 leaf mounds; mound B crests at x=-0.25, z=+0.20 ABOVE the approach, so the stair start edge geometrically disappears from the sight line (:41-49,:172-192)",
+      "hazard": true,
+      "hazard_loc": "2.24 m drop from x=0 dead ahead, buried; visible evidence is the railing diagonal on the LEFT (:22,:33,:288)"
+    },
+
+    "sceneN3": {
+      "identity": "trompe-l'oeil painted stair - HARD NEGATIVE, GT no-drop in every pixel; the 'drop' is 1 mm of paint",
+      "prov": "scenes/batch1/sceneN3_trompe_loeil.py:3-13,:92-94",
+      "decorative_present": true,
+      "decorative_notes": "1 streetlight at (0.6,-2.6) placed so its REAL shadow crosses the painting (:148-151); 4 planters (:152-155); 4 benches (:156-161); 2 bollard rows at x=-6.0, |y| 2.4-8.4, kept outside the painting AND behind the design eye (:162-173). cue_railing and cue_tactile are DEAD keys - declared, never read (:81-82; CUE_COVERAGE.md:176,:214).",
+      "decorative_regions": [
+        {"sectors": ["B", "C", "D"], "bands": ["2", "3a"],
+         "object": "painted nosing line + painted stair well (cue_nosing=True, classified '순수 도장 -> 장식 확정')",
+         "note": "painting footprint x 0..6.30, |y| <= 1.50 from the fake edge; design eye E=(-2.0,0,0.9). At the near presets (cam_d 1.4-2.3 m) that is bands 2-3a and sectors B-D. Deliberately NOT extended to band 3b so the flag can be falsified - see report 5.3. Provenance: :85, CUE_COVERAGE.md:227."}
+      ],
+      "surrogate_line": true,
+      "surrogate_notes": "THIS SCENE IS SURROGATE LINES: 1.2 m paving joint grid running STRAIGHT THROUGH the painting (a real opening would break them) (:14,:126-131); granite edge band y=5.0 (:144); painted stone block-joint hairlines inside the illusion (:117-121,:468-476); painted nosing line per tread (:85). Material trap: the fake dark risers are paint, so roughness matches the paving and the specular survives (:15).",
+      "dark_scene": false,
+      "dark_notes": "bright noon; the only dark region is the arcade shopfronts, called '검은 구멍' by the composition audit (Docs/surveys/scene_composition_audit.md:249)",
+      "terrain_notes": "COMPLETELY FLAT - plaza x -60..100, y -60..60, z_top 0; hazard geometry is the empty set (:123,:92-94)",
+      "hazard": false,
+      "hazard_loc": "none. Fake edge at x=0; painting x 0..6.30, |y| <= 1.50. On-arm test frames are 24/24 none_in_fov."
+    }
+  }
+}

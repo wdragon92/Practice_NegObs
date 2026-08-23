@@ -41,7 +41,10 @@ GRIDSPEC = os.path.join(ROOT, "experiments/mainrun_0819/code/labeling/gridspec_v
 
 DS = 4                      # depth/image downsample, same factor labeler.py uses
 GROUND_BAND_M = 0.30        # |height above local ground| accepted as "ground"
-EDGE_THRESH = 24.0          # Sobel |grad| (luma/px, at DS=4) counted as an edge px
+COH_MIN = 0.55              # structure-tensor coherence above which a pixel is
+                            # "on a line" rather than on isotropic texture
+HORIZ_MAX_DEG = 35.0        # line orientation within this of image-horizontal
+                            # (a ground-crossing line reads as near-horizontal)
 
 GRID = json.load(open(GRIDSPEC))
 NS, NB = GRID["n_sectors"], GRID["n_bands"]
@@ -65,6 +68,38 @@ def cell_of_pixels(dep, cam):
     return cell, dz + cam["h_rel"], good
 
 
+def line_structure(lum):
+    """Structure-tensor line mass.
+
+    A drop edge and its surrogates (slab joint, paint stripe, material seam) are
+    *coherent oriented* structure; grass / gravel / render noise is isotropic
+    texture with equally large raw gradients.  Plain |Sobel| cannot tell them
+    apart -- on these renders it flags >50 % of every cell.  Coherence
+    (l1-l2)/(l1+l2) of the smoothed structure tensor does.
+
+    Returns (line_mask, gmag) where line_mask is "strong AND coherent AND
+    near-image-horizontal", i.e. a candidate ground-crossing line pixel.
+    """
+    import cv2
+    gx = cv2.Sobel(lum, cv2.CV_32F, 1, 0, ksize=3)
+    gy = cv2.Sobel(lum, cv2.CV_32F, 0, 1, ksize=3)
+    gmag = np.hypot(gx, gy)
+    k = (5, 5)
+    jxx = cv2.boxFilter(gx * gx, -1, k)
+    jyy = cv2.boxFilter(gy * gy, -1, k)
+    jxy = cv2.boxFilter(gx * gy, -1, k)
+    tr = jxx + jyy
+    det = jxx * jyy - jxy * jxy
+    disc = np.sqrt(np.maximum(tr * tr - 4.0 * det, 0.0))
+    coh = np.where(tr > 1e-6, disc / np.maximum(tr, 1e-6), 0.0)
+    # dominant gradient orientation; the LINE runs perpendicular to it
+    theta_g = 0.5 * np.arctan2(2.0 * jxy, jxx - jyy)          # grad dir
+    line_ang = np.degrees(np.abs(np.arctan2(np.cos(theta_g), -np.sin(theta_g))))
+    line_ang = np.minimum(line_ang, 180.0 - line_ang)          # 0 = horizontal
+    strong = gmag > max(8.0, float(np.percentile(gmag, 90)))
+    return strong & (coh > COH_MIN) & (line_ang < HORIZ_MAX_DEG), gmag
+
+
 def one(args):
     fid, rec = args
     cam = rec["cam"]
@@ -73,17 +108,19 @@ def one(args):
     img = cv2.imread(rec["rgb"], cv2.IMREAD_COLOR)          # BGR uint8
     if img is None:
         return []
-    img = img[::DS, ::DS]
+    # INTER_AREA (proper low-pass) -- strided subsampling aliases the render's
+    # high-frequency ground texture into fake "edges".
+    h, w = img.shape[0] // DS, img.shape[1] // DS
+    img = cv2.resize(img, (w, h), interpolation=cv2.INTER_AREA)
     lum = (0.114 * img[..., 0] + 0.587 * img[..., 1] + 0.299 * img[..., 2]).astype(np.float32)
-    gx = cv2.Sobel(lum, cv2.CV_32F, 1, 0, ksize=3)
-    gy = cv2.Sobel(lum, cv2.CV_32F, 0, 1, ksize=3)
-    gmag = np.hypot(gx, gy)
+    line_mask, gmag = line_structure(lum)
 
     cell, hgt, good = cell_of_pixels(dep, cam)
     if cell.shape != lum.shape:                             # defensive crop
-        h = min(cell.shape[0], lum.shape[0]); w = min(cell.shape[1], lum.shape[1])
-        cell, hgt, good = cell[:h, :w], hgt[:h, :w], good[:h, :w]
-        lum, gmag = lum[:h, :w], gmag[:h, :w]
+        ch = min(cell.shape[0], lum.shape[0]); cw = min(cell.shape[1], lum.shape[1])
+        cell, hgt, good = cell[:ch, :cw], hgt[:ch, :cw], good[:ch, :cw]
+        lum, gmag = lum[:ch, :cw], gmag[:ch, :cw]
+        line_mask = line_mask[:ch, :cw]
 
     ground = good & (np.abs(hgt) < GROUND_BAND_M)
     fr_g = lum[ground & (cell >= 0)]
@@ -99,23 +136,20 @@ def one(args):
         ng = int(mg.sum())
         if n:
             v = lum[m]
-            g = gmag[m]
             r = dict(lum_mean=float(v.mean()), lum_median=float(np.median(v)),
                      lum_p10=float(np.percentile(v, 10)), lum_std=float(v.std()),
-                     edge_frac=float((g > EDGE_THRESH).mean()),
-                     grad_p90=float(np.percentile(g, 90)))
+                     line_frac=float(line_mask[m].mean()),
+                     grad_p90=float(np.percentile(gmag[m], 90)))
         else:
             r = dict(lum_mean=float("nan"), lum_median=float("nan"),
                      lum_p10=float("nan"), lum_std=float("nan"),
-                     edge_frac=float("nan"), grad_p90=float("nan"))
+                     line_frac=float("nan"), grad_p90=float("nan"))
         if ng:
-            vg = lum[mg]
-            gg = gmag[mg]
-            r["lum_median_ground"] = float(np.median(vg))
-            r["edge_frac_ground"] = float((gg > EDGE_THRESH).mean())
+            r["lum_median_ground"] = float(np.median(lum[mg]))
+            r["line_frac_ground"] = float(line_mask[mg].mean())
         else:
             r["lum_median_ground"] = float("nan")
-            r["edge_frac_ground"] = float("nan")
+            r["line_frac_ground"] = float("nan")
         rows.append(dict(frame_id=fid, scene_id=rec["scene_id"],
                          toggle_state=rec["toggle_state"], tier=rec.get("tier", ""),
                          cell=cid, cell_idx=ci, n_px=n, n_px_ground=ng,

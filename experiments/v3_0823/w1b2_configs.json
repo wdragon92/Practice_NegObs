@@ -1,0 +1,631 @@
+{
+ "doc": "w1b2_configs",
+ "version": "1.0",
+ "authority": [
+  "DECISIONS D75 ③",
+  "W1B_REPORT §8.1 · §7.1(PB_plusT)",
+  "RENDER_PLAN_V3 §1.2 바닥 규칙 (재질 재바인딩 전용)"
+ ],
+ "rule": "CONFIG_B2 = CONFIG_B ∪ {cue_material_break: false}; T 이외의 신규 노출 키는 결재 전까지 넣지 않는다",
+ "hazgate_if_only": "code/hazgate.json (옛 계보 · 그대로 보존)",
+ "hazgate_full": "code/hazgate_full.json (수리본)",
+ "n_scenes": 12,
+ "n_cuts": 576,
+ "held_pending_ruling": [
+  {
+   "scene": "sceneC1",
+   "cue": "cue_tactile",
+   "why": "프림 생성형 — VG-01 구성상 보증 불가 (W1B_REPORT §8.1 예외 3쌍). 결재 대기."
+  },
+  {
+   "scene": "sceneC4",
+   "cue": "cue_tactile",
+   "why": "프림 생성형 — VG-01 구성상 보증 불가 (W1B_REPORT §8.1 예외 3쌍). 결재 대기."
+  }
+ ],
+ "wrote": [],
+ "scenes": [
+  {
+   "scene": "scene02",
+   "bands": [
+    "base"
+   ],
+   "cuts": 24,
+   "levers_B": [
+    "cue_nosing",
+    "cue_railing",
+    "cue_sign"
+   ],
+   "add": [
+    "cue_material_break"
+   ],
+   "applied": [
+    "cue_material_break"
+   ],
+   "levers_B2": [
+    "cue_material_break",
+    "cue_nosing",
+    "cue_railing",
+    "cue_sign"
+   ],
+   "onwired_full": [
+    "cue_material_break",
+    "cue_nosing",
+    "cue_railing",
+    "cue_scene_dressing",
+    "cue_sign"
+   ],
+   "forbidden": [
+    "cue_scene_dressing"
+   ],
+   "config_B": {
+    "hazard_stairs": true,
+    "cue_nosing": false,
+    "cue_railing": false,
+    "cue_sign": false
+   },
+   "config": {
+    "hazard_stairs": true,
+    "cue_nosing": false,
+    "cue_railing": false,
+    "cue_sign": false,
+    "cue_material_break": false
+   },
+   "t_sites": [
+    {
+     "L": 1923,
+     "kind": "MATL_REBIND",
+     "dict_name": "M",
+     "src": "stair_mtl = M[\"concrete_floor\"] if cfg[\"cue_material_break\"] else M[\"sidewalk\"]"
+    }
+   ]
+  },
+  {
+   "scene": "scene08",
+   "bands": [
+    "base",
+    "e"
+   ],
+   "cuts": 48,
+   "levers_B": [
+    "cue_scene_dressing",
+    "cue_sign"
+   ],
+   "add": [
+    "cue_material_break"
+   ],
+   "applied": [
+    "cue_material_break"
+   ],
+   "levers_B2": [
+    "cue_material_break",
+    "cue_scene_dressing",
+    "cue_sign"
+   ],
+   "onwired_full": [
+    "cue_material_break",
+    "cue_railing",
+    "cue_scene_dressing",
+    "cue_sign"
+   ],
+   "forbidden": [
+    "cue_railing"
+   ],
+   "config_B": {
+    "hazard_stairs": true,
+    "cue_scene_dressing": false,
+    "cue_sign": false
+   },
+   "config": {
+    "hazard_stairs": true,
+    "cue_scene_dressing": false,
+    "cue_sign": false,
+    "cue_material_break": false
+   },
+   "t_sites": [
+    {
+     "L": 1949,
+     "kind": "MATL_REBIND",
+     "dict_name": "M",
+     "src": "mtl = M[\"granite\"] if cfg[\"cue_material_break\"] else M[\"paving\"]"
+    }
+   ]
+  },
+  {
+   "scene": "scene09",
+   "bands": [
+    "base",
+    "h",
+    "e"
+   ],
+   "cuts": 72,
+   "levers_B": [
+    "cue_sign"
+   ],
+   "add": [
+    "cue_material_break"
+   ],
+   "applied": [
+    "cue_material_break"
+   ],
+   "levers_B2": [
+    "cue_material_break",
+    "cue_sign"
+   ],
+   "onwired_full": [
+    "cue_material_break",
+    "cue_scene_dressing",
+    "cue_sign"
+   ],
+   "forbidden": [
+    "cue_scene_dressing"
+   ],
+   "config_B": {
+    "hazard_stairs": true,
+    "cue_sign": false
+   },
+   "config": {
+    "hazard_stairs": true,
+    "cue_sign": false,
+    "cue_material_break": false
+   },
+   "t_sites": [
+    {
+     "L": 2844,
+     "kind": "MATL_REBIND",
+     "dict_name": "M",
+     "src": "default = M[\"stone\"] if cfg[\"cue_material_break\"] else M[\"stain\"]"
+    },
+    {
+     "L": 2895,
+     "kind": "MATL_REBIND",
+     "dict_name": "M",
+     "src": "default = M[\"stone\"] if cfg[\"cue_material_break\"] else M[\"stain\"]"
+    }
+   ]
+  },
+  {
+   "scene": "scene12",
+   "bands": [
+    "base",
+    "e",
+    "e2"
+   ],
+   "cuts": 72,
+   "levers_B": [
+    "cue_railing",
+    "cue_scene_dressing"
+   ],
+   "add": [
+    "cue_material_break"
+   ],
+   "applied": [
+    "cue_material_break"
+   ],
+   "levers_B2": [
+    "cue_material_break",
+    "cue_railing",
+    "cue_scene_dressing"
+   ],
+   "onwired_full": [
+    "cue_material_break",
+    "cue_railing",
+    "cue_scene_dressing"
+   ],
+   "forbidden": [],
+   "config_B": {
+    "hazard_stairs": true,
+    "cue_railing": false,
+    "cue_scene_dressing": false
+   },
+   "config": {
+    "hazard_stairs": true,
+    "cue_railing": false,
+    "cue_scene_dressing": false,
+    "cue_material_break": false
+   },
+   "t_sites": [
+    {
+     "L": 1849,
+     "kind": "MATL_REBIND",
+     "dict_name": "M",
+     "src": "mtl = M[\"deckwood\"] if cfg[\"cue_material_break\"] else M[\"gravel\"]"
+    },
+    {
+     "L": 1895,
+     "kind": "MATL_REBIND",
+     "dict_name": "M",
+     "src": "mtl = M[\"deckwood\"] if cfg[\"cue_material_break\"] else M[\"gravel\"]"
+    }
+   ]
+  },
+  {
+   "scene": "scene16",
+   "bands": [
+    "base"
+   ],
+   "cuts": 24,
+   "levers_B": [
+    "cue_nosing",
+    "cue_railing",
+    "cue_scene_dressing",
+    "cue_sign"
+   ],
+   "add": [
+    "cue_material_break"
+   ],
+   "applied": [
+    "cue_material_break"
+   ],
+   "levers_B2": [
+    "cue_material_break",
+    "cue_nosing",
+    "cue_railing",
+    "cue_scene_dressing",
+    "cue_sign"
+   ],
+   "onwired_full": [
+    "cue_material_break",
+    "cue_nosing",
+    "cue_railing",
+    "cue_scene_dressing",
+    "cue_sign"
+   ],
+   "forbidden": [],
+   "config_B": {
+    "hazard_stairs": true,
+    "cue_nosing": false,
+    "cue_railing": false,
+    "cue_scene_dressing": false,
+    "cue_sign": false
+   },
+   "config": {
+    "hazard_stairs": true,
+    "cue_nosing": false,
+    "cue_railing": false,
+    "cue_scene_dressing": false,
+    "cue_sign": false,
+    "cue_material_break": false
+   },
+   "t_sites": [
+    {
+     "L": 1792,
+     "kind": "MATL_REBIND",
+     "dict_name": "M",
+     "src": "stair_mtl = M[\"stair\"] if cfg[\"cue_material_break\"] else M[\"walk\"]"
+    }
+   ]
+  },
+  {
+   "scene": "scene17",
+   "bands": [
+    "base",
+    "h",
+    "e"
+   ],
+   "cuts": 72,
+   "levers_B": [
+    "cue_scene_dressing"
+   ],
+   "add": [
+    "cue_material_break"
+   ],
+   "applied": [
+    "cue_material_break"
+   ],
+   "levers_B2": [
+    "cue_material_break",
+    "cue_scene_dressing"
+   ],
+   "onwired_full": [
+    "cue_material_break",
+    "cue_scene_dressing"
+   ],
+   "forbidden": [],
+   "config_B": {
+    "hazard_stairs": true,
+    "cue_scene_dressing": false
+   },
+   "config": {
+    "hazard_stairs": true,
+    "cue_scene_dressing": false,
+    "cue_material_break": false
+   },
+   "t_sites": [
+    {
+     "L": 2718,
+     "kind": "MATL_REBIND",
+     "dict_name": "M",
+     "src": "hard_mtl = M[\"conc\"] if cfg[\"cue_material_break\"] else M[\"paving\"]"
+    }
+   ]
+  },
+  {
+   "scene": "scene20",
+   "bands": [
+    "base",
+    "e",
+    "e2"
+   ],
+   "cuts": 72,
+   "levers_B": [
+    "cue_scene_dressing"
+   ],
+   "add": [
+    "cue_material_break"
+   ],
+   "applied": [
+    "cue_material_break"
+   ],
+   "levers_B2": [
+    "cue_material_break",
+    "cue_scene_dressing"
+   ],
+   "onwired_full": [
+    "cue_material_break",
+    "cue_railing",
+    "cue_scene_dressing"
+   ],
+   "forbidden": [
+    "cue_railing"
+   ],
+   "config_B": {
+    "hazard_stairs": true,
+    "cue_scene_dressing": false
+   },
+   "config": {
+    "hazard_stairs": true,
+    "cue_scene_dressing": false,
+    "cue_material_break": false
+   },
+   "t_sites": [
+    {
+     "L": 866,
+     "kind": "MATL_REBIND",
+     "dict_name": "M",
+     "src": "lower_mtl = M[\"lower\"] if cfg[\"cue_material_break\"] else M[\"upper\"]"
+    }
+   ]
+  },
+  {
+   "scene": "scene21",
+   "bands": [
+    "base"
+   ],
+   "cuts": 24,
+   "levers_B": [
+    "cue_scene_dressing",
+    "cue_sign"
+   ],
+   "add": [
+    "cue_material_break"
+   ],
+   "applied": [
+    "cue_material_break"
+   ],
+   "levers_B2": [
+    "cue_material_break",
+    "cue_scene_dressing",
+    "cue_sign"
+   ],
+   "onwired_full": [
+    "cue_material_break",
+    "cue_nosing",
+    "cue_railing",
+    "cue_scene_dressing",
+    "cue_sign"
+   ],
+   "forbidden": [
+    "cue_nosing",
+    "cue_railing"
+   ],
+   "config_B": {
+    "hazard_stairs": true,
+    "cue_scene_dressing": false,
+    "cue_sign": false
+   },
+   "config": {
+    "hazard_stairs": true,
+    "cue_scene_dressing": false,
+    "cue_sign": false,
+    "cue_material_break": false
+   },
+   "t_sites": [
+    {
+     "L": 1010,
+     "kind": "MATL_REBIND",
+     "dict_name": "M",
+     "src": "M[\"plaza\"] if cfg[\"cue_material_break\"] else M[\"marble\"], col=True)"
+    }
+   ]
+  },
+  {
+   "scene": "sceneC1",
+   "bands": [
+    "base",
+    "e"
+   ],
+   "cuts": 48,
+   "levers_B": [
+    "cue_nosing"
+   ],
+   "add": [
+    "cue_material_break",
+    "cue_tactile"
+   ],
+   "applied": [
+    "cue_material_break"
+   ],
+   "levers_B2": [
+    "cue_material_break",
+    "cue_nosing"
+   ],
+   "onwired_full": [
+    "cue_material_break",
+    "cue_nosing",
+    "cue_railing",
+    "cue_scene_dressing",
+    "cue_tactile"
+   ],
+   "forbidden": [
+    "cue_railing",
+    "cue_scene_dressing"
+   ],
+   "config_B": {
+    "hazard_stairs": true,
+    "cue_nosing": false
+   },
+   "config": {
+    "hazard_stairs": true,
+    "cue_nosing": false,
+    "cue_material_break": false
+   },
+   "t_sites": [
+    {
+     "L": 1375,
+     "kind": "MATL_REBIND",
+     "dict_name": "M",
+     "src": "stair_mtl = M[\"stair\"] if cfg[\"cue_material_break\"] else M[\"concrete\"]"
+    }
+   ]
+  },
+  {
+   "scene": "sceneC4",
+   "bands": [
+    "base",
+    "e",
+    "e2"
+   ],
+   "cuts": 72,
+   "levers_B": [
+    "cue_railing"
+   ],
+   "add": [
+    "cue_material_break",
+    "cue_tactile"
+   ],
+   "applied": [
+    "cue_material_break"
+   ],
+   "levers_B2": [
+    "cue_material_break",
+    "cue_railing"
+   ],
+   "onwired_full": [
+    "cue_material_break",
+    "cue_railing",
+    "cue_scene_dressing",
+    "cue_tactile"
+   ],
+   "forbidden": [
+    "cue_scene_dressing"
+   ],
+   "config_B": {
+    "hazard_stairs": true,
+    "cue_railing": false
+   },
+   "config": {
+    "hazard_stairs": true,
+    "cue_railing": false,
+    "cue_material_break": false
+   },
+   "t_sites": [
+    {
+     "L": 1247,
+     "kind": "MATL_REBIND",
+     "dict_name": "M",
+     "src": "stair_mtl = M[\"stone_damp\"] if cfg[\"cue_material_break\"] else M[\"plaza\"]"
+    }
+   ]
+  },
+  {
+   "scene": "sceneD1",
+   "bands": [
+    "base"
+   ],
+   "cuts": 24,
+   "levers_B": [
+    "cue_nosing",
+    "cue_scene_dressing"
+   ],
+   "add": [
+    "cue_material_break"
+   ],
+   "applied": [
+    "cue_material_break"
+   ],
+   "levers_B2": [
+    "cue_material_break",
+    "cue_nosing",
+    "cue_scene_dressing"
+   ],
+   "onwired_full": [
+    "cue_material_break",
+    "cue_nosing",
+    "cue_scene_dressing"
+   ],
+   "forbidden": [],
+   "config_B": {
+    "hazard_stairs": true,
+    "cue_nosing": false,
+    "cue_scene_dressing": false
+   },
+   "config": {
+    "hazard_stairs": true,
+    "cue_nosing": false,
+    "cue_scene_dressing": false,
+    "cue_material_break": false
+   },
+   "t_sites": [
+    {
+     "L": 1083,
+     "kind": "MATL_REBIND",
+     "dict_name": "M",
+     "src": "apron_mtl = M[\"asphalt\"] if cfg[\"cue_material_break\"] else M[\"deck\"]"
+    }
+   ]
+  },
+  {
+   "scene": "sceneD3",
+   "bands": [
+    "base"
+   ],
+   "cuts": 24,
+   "levers_B": [
+    "cue_scene_dressing"
+   ],
+   "add": [
+    "cue_material_break"
+   ],
+   "applied": [
+    "cue_material_break"
+   ],
+   "levers_B2": [
+    "cue_material_break",
+    "cue_scene_dressing"
+   ],
+   "onwired_full": [
+    "cue_material_break",
+    "cue_scene_dressing"
+   ],
+   "forbidden": [],
+   "config_B": {
+    "hazard_stairs": true,
+    "cue_scene_dressing": false
+   },
+   "config": {
+    "hazard_stairs": true,
+    "cue_scene_dressing": false,
+    "cue_material_break": false
+   },
+   "t_sites": [
+    {
+     "L": 835,
+     "kind": "MATL_REBIND",
+     "dict_name": "M",
+     "src": "lip_mtl = M[\"conc\"] if cfg[\"cue_material_break\"] else M[\"asphalt\"]"
+    }
+   ]
+  }
+ ]
+}

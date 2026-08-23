@@ -1,0 +1,3142 @@
+{
+ "doc": "w1b2_segfill",
+ "version": "1.0",
+ "authority": [
+  "DECISIONS D75 ④",
+  "W1B_REPORT §9 C-2 · §10 W1B-3"
+ ],
+ "procedure": "A팔 재렌더(SEG_SIDECAR+SEG_STRICT) → 전 컷 PNG sha256 바이트 동일 검증 → 동일한 씬에만 .idseg.npz 설치 (PNG·depth 폐기) · 불일치는 격리(무단 대체 금지)",
+ "install_path": "dataset/<정본 A 라운드>/<split>/<scene>/<stem>.idseg.npz  (+ idseg_backfill.json 원장; 정본 variation.json은 건드리지 않는다. g7fixM 오버레이 트리에는 같은 이름의 심링크를 건다)",
+ "install_criterion": "기하 대응 — heightmap sha256 동일 AND n_prims 동일 AND arm_config 동일 AND 포즈 7키+cam.eye Δ=0 AND 컷별 depth sha256 동일",
+ "criterion_note": "D75 ④ 문면의 'PNG 바이트 동일'은 만족 불가능하다 — PathTracing RGB는 프로세스 간 비트 재현되지 않는다. 대조 실험(260825_v3w0_cuecls_A vs 260819_main_on, 세그 변경 0, 19씬 76컷): PNG 0/76 · depth 73/76 · heightmap 19/19. 마스크는 조명·PT 잡음에 의존하지 않으므로 depth가 올바른 대응 증거다.",
+ "installed": true,
+ "n_units": 34,
+ "n_units_ok": 29,
+ "n_cuts": 816,
+ "n_cuts_png_identical": 0,
+ "png_identity_rate": 0.0,
+ "n_cuts_depth_identical": 783,
+ "geom_identity_rate": 0.959559,
+ "n_sidecars_installed": 696,
+ "seg_unavailable": [
+  {
+   "band": "base",
+   "scene": "scene06",
+   "status": "QUARANTINE_STALE",
+   "why": "포즈 간 마스크 충돌 1건 (stale)",
+   "n_png_differing": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": []
+  },
+  {
+   "band": "base",
+   "scene": "scene08",
+   "status": "QUARANTINE_GEOM_MISMATCH",
+   "why": "기하 대응 실패 — depth sha 9/24",
+   "n_png_differing": 24,
+   "n_depth_differing": 15,
+   "depth_diff_sample": [
+    {
+     "file": "L0__s20260819__0001.depth.npy",
+     "max_abs_m": 31.40625,
+     "n_finite_mask_diff": 0,
+     "n_px_diff": 454
+    },
+    {
+     "file": "L0__s20260819__0002.depth.npy",
+     "max_abs_m": 3.45312,
+     "n_finite_mask_diff": 0,
+     "n_px_diff": 1547
+    },
+    {
+     "file": "L0__s20260819__0003.depth.npy",
+     "max_abs_m": 31.48438,
+     "n_finite_mask_diff": 403,
+     "n_px_diff": 10780
+    },
+    {
+     "file": "L0__s20260819__0004.depth.npy",
+     "max_abs_m": 50.8125,
+     "n_finite_mask_diff": 323,
+     "n_px_diff": 11470
+    }
+   ]
+  },
+  {
+   "band": "h",
+   "scene": "scene09",
+   "status": "QUARANTINE_STALE",
+   "why": "포즈 간 마스크 충돌 1건 (stale)",
+   "n_png_differing": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": []
+  },
+  {
+   "band": "e",
+   "scene": "scene08",
+   "status": "QUARANTINE_GEOM_MISMATCH",
+   "why": "기하 대응 실패 — depth sha 6/24",
+   "n_png_differing": 24,
+   "n_depth_differing": 18,
+   "depth_diff_sample": [
+    {
+     "file": "L0__s20260820__0000.depth.npy",
+     "max_abs_m": 47.92188,
+     "n_finite_mask_diff": 52,
+     "n_px_diff": 11177
+    },
+    {
+     "file": "L0__s20260820__0001.depth.npy",
+     "max_abs_m": 44.07812,
+     "n_finite_mask_diff": 1,
+     "n_px_diff": 7185
+    },
+    {
+     "file": "L0__s20260820__0002.depth.npy",
+     "max_abs_m": 30.32812,
+     "n_finite_mask_diff": 0,
+     "n_px_diff": 3235
+    },
+    {
+     "file": "L0__s20260820__0003.depth.npy",
+     "max_abs_m": 51.5625,
+     "n_finite_mask_diff": 317,
+     "n_px_diff": 9894
+    }
+   ]
+  },
+  {
+   "band": "e2",
+   "scene": "scene12",
+   "status": "QUARANTINE_STALE",
+   "why": "포즈 간 마스크 충돌 1건 (stale)",
+   "n_png_differing": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": []
+  }
+ ],
+ "stale_carryover_total": 3,
+ "stale_at_cond_boundary_total": 0,
+ "over_discriminating": [
+  {
+   "band": "base",
+   "scene": "scene04",
+   "n_unique_masks": 11,
+   "n_poses": 8,
+   "prim_normalized_benign": true
+  },
+  {
+   "band": "base",
+   "scene": "scene09",
+   "n_unique_masks": 21,
+   "n_poses": 8,
+   "prim_normalized_benign": true
+  },
+  {
+   "band": "base",
+   "scene": "sceneC1",
+   "n_unique_masks": 16,
+   "n_poses": 8,
+   "prim_normalized_benign": true
+  },
+  {
+   "band": "h",
+   "scene": "scene09",
+   "n_unique_masks": 21,
+   "n_poses": 8,
+   "prim_normalized_benign": false
+  },
+  {
+   "band": "e",
+   "scene": "scene09",
+   "n_unique_masks": 22,
+   "n_poses": 8,
+   "prim_normalized_benign": true
+  },
+  {
+   "band": "e",
+   "scene": "sceneC1",
+   "n_unique_masks": 16,
+   "n_poses": 8,
+   "prim_normalized_benign": true
+  }
+ ],
+ "units": [
+  {
+   "band": "base",
+   "scene": "scene01",
+   "seg_round": "260826_v3a_segfill",
+   "a_round": "260819_main_on",
+   "seg_dir": "dataset/260826_v3a_segfill/val/scene01",
+   "a_dir": "dataset/260819_main_on/val/scene01",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    370,
+    370
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260819__0000.png",
+     "max": 21,
+     "mean": 0.42589,
+     "n_px_differing": 1113560,
+     "frac_px": 0.537018
+    },
+    {
+     "file": "L0__s20260819__0001.png",
+     "max": 42,
+     "mean": 0.39587,
+     "n_px_differing": 1014525,
+     "frac_px": 0.489258
+    },
+    {
+     "file": "L0__s20260819__0002.png",
+     "max": 48,
+     "mean": 0.38058,
+     "n_px_differing": 961458,
+     "frac_px": 0.463666
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260819__0000.png",
+    "L0__s20260819__0001.png",
+    "L0__s20260819__0002.png",
+    "L0__s20260819__0003.png",
+    "L0__s20260819__0004.png",
+    "L0__s20260819__0005.png",
+    "L0__s20260819__0006.png",
+    "L0__s20260819__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    80,
+    82,
+    83,
+    86,
+    112,
+    114,
+    139,
+    141
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "base",
+   "scene": "scene02",
+   "seg_round": "260826_v3a_segfill",
+   "a_round": "260819_main_on",
+   "seg_dir": "dataset/260826_v3a_segfill/val/scene02",
+   "a_dir": "dataset/260819_main_on/val/scene02",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    510,
+    510
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260819__0000.png",
+     "max": 69,
+     "mean": 0.73061,
+     "n_px_differing": 1437723,
+     "frac_px": 0.693346
+    },
+    {
+     "file": "L0__s20260819__0001.png",
+     "max": 76,
+     "mean": 0.64665,
+     "n_px_differing": 1382701,
+     "frac_px": 0.666812
+    },
+    {
+     "file": "L0__s20260819__0002.png",
+     "max": 68,
+     "mean": 0.66684,
+     "n_px_differing": 1162464,
+     "frac_px": 0.560602
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260819__0000.png",
+    "L0__s20260819__0001.png",
+    "L0__s20260819__0002.png",
+    "L0__s20260819__0003.png",
+    "L0__s20260819__0004.png",
+    "L0__s20260819__0005.png",
+    "L0__s20260819__0006.png",
+    "L0__s20260819__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    70,
+    85,
+    88,
+    207,
+    221,
+    258,
+    259,
+    261
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "base",
+   "scene": "scene03",
+   "seg_round": "260826_v3a_segfill",
+   "a_round": "260819_main_on",
+   "seg_dir": "dataset/260826_v3a_segfill/train/scene03",
+   "a_dir": "dataset/260819_main_on/train/scene03",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    1202,
+    1202
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260819__0000.png",
+     "max": 137,
+     "mean": 0.94073,
+     "n_px_differing": 1537193,
+     "frac_px": 0.741316
+    },
+    {
+     "file": "L0__s20260819__0001.png",
+     "max": 109,
+     "mean": 0.96286,
+     "n_px_differing": 1581767,
+     "frac_px": 0.762812
+    },
+    {
+     "file": "L0__s20260819__0002.png",
+     "max": 83,
+     "mean": 0.96927,
+     "n_px_differing": 1599593,
+     "frac_px": 0.771409
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260819__0000.png",
+    "L0__s20260819__0001.png",
+    "L0__s20260819__0002.png",
+    "L0__s20260819__0003.png",
+    "L0__s20260819__0004.png",
+    "L0__s20260819__0005.png",
+    "L0__s20260819__0006.png",
+    "L0__s20260819__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    13415,
+    14612,
+    15300,
+    15477,
+    15564,
+    18359,
+    19365,
+    19606
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "base",
+   "scene": "scene04",
+   "seg_round": "260826_v3a_segfill",
+   "a_round": "260819_main_on",
+   "seg_dir": "dataset/260826_v3a_segfill/train/scene04",
+   "a_dir": "dataset/260819_main_on/train/scene04",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    486,
+    486
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260819__0000.png",
+     "max": 37,
+     "mean": 0.92452,
+     "n_px_differing": 1583618,
+     "frac_px": 0.763705
+    },
+    {
+     "file": "L0__s20260819__0001.png",
+     "max": 39,
+     "mean": 1.14629,
+     "n_px_differing": 1557113,
+     "frac_px": 0.750923
+    },
+    {
+     "file": "L0__s20260819__0002.png",
+     "max": 37,
+     "mean": 1.11413,
+     "n_px_differing": 1497161,
+     "frac_px": 0.722011
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260819__0000.png",
+    "L0__s20260819__0001.png",
+    "L0__s20260819__0002.png",
+    "L0__s20260819__0003.png",
+    "L0__s20260819__0004.png",
+    "L0__s20260819__0005.png",
+    "L0__s20260819__0006.png",
+    "L0__s20260819__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 11,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    545,
+    557,
+    661,
+    671,
+    789,
+    812,
+    901,
+    947
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": true,
+   "prim_normalized_benign": true,
+   "n_prim_normalized_mismatch": 0,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "base",
+   "scene": "scene06",
+   "seg_round": "260826_v3a_segfill",
+   "a_round": "260819_main_on",
+   "seg_dir": "dataset/260826_v3a_segfill/test/scene06",
+   "a_dir": "dataset/260819_main_on/test/scene06",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    1450,
+    1450
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260819__0000.png",
+     "max": 23,
+     "mean": 0.5509,
+     "n_px_differing": 1193414,
+     "frac_px": 0.575528
+    },
+    {
+     "file": "L0__s20260819__0001.png",
+     "max": 27,
+     "mean": 0.43602,
+     "n_px_differing": 1070504,
+     "frac_px": 0.516254
+    },
+    {
+     "file": "L0__s20260819__0002.png",
+     "max": 22,
+     "mean": 0.5261,
+     "n_px_differing": 1153035,
+     "frac_px": 0.556055
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260819__0000.png",
+    "L0__s20260819__0001.png",
+    "L0__s20260819__0002.png",
+    "L0__s20260819__0003.png",
+    "L0__s20260819__0004.png",
+    "L0__s20260819__0005.png",
+    "L0__s20260819__0006.png",
+    "L0__s20260819__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 1,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    718,
+    1058,
+    1196,
+    1260,
+    1263,
+    1545,
+    1923,
+    2037
+   ],
+   "stale_carryover": [
+    {
+     "file": "L7__s20260819__0007.png",
+     "prev": "L7__s20260819__0006.png",
+     "cond": "L7",
+     "prev_cond": "L7",
+     "at_cond_boundary": false
+    }
+   ],
+   "n_stale_carryover": 1,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "QUARANTINE_STALE",
+   "why": "포즈 간 마스크 충돌 1건 (stale)"
+  },
+  {
+   "band": "base",
+   "scene": "scene08",
+   "seg_round": "260826_v3a_segfill",
+   "a_round": "260819_main_on",
+   "seg_dir": "dataset/260826_v3a_segfill/train/scene08",
+   "a_dir": "dataset/260819_main_on/train/scene08",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 9,
+   "n_depth_differing": 15,
+   "depth_diff_sample": [
+    {
+     "file": "L0__s20260819__0001.depth.npy",
+     "max_abs_m": 31.40625,
+     "n_finite_mask_diff": 0,
+     "n_px_diff": 454
+    },
+    {
+     "file": "L0__s20260819__0002.depth.npy",
+     "max_abs_m": 3.45312,
+     "n_finite_mask_diff": 0,
+     "n_px_diff": 1547
+    },
+    {
+     "file": "L0__s20260819__0003.depth.npy",
+     "max_abs_m": 31.48438,
+     "n_finite_mask_diff": 403,
+     "n_px_diff": 10780
+    },
+    {
+     "file": "L0__s20260819__0004.depth.npy",
+     "max_abs_m": 50.8125,
+     "n_finite_mask_diff": 323,
+     "n_px_diff": 11470
+    }
+   ],
+   "n_prims": [
+    688,
+    688
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260819__0000.png",
+     "max": 23,
+     "mean": 0.35726,
+     "n_px_differing": 907171,
+     "frac_px": 0.437486
+    },
+    {
+     "file": "L0__s20260819__0001.png",
+     "max": 60,
+     "mean": 0.21273,
+     "n_px_differing": 677586,
+     "frac_px": 0.326768
+    },
+    {
+     "file": "L0__s20260819__0002.png",
+     "max": 159,
+     "mean": 0.37718,
+     "n_px_differing": 810550,
+     "frac_px": 0.39089
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260819__0000.png",
+    "L0__s20260819__0001.png",
+    "L0__s20260819__0002.png",
+    "L0__s20260819__0003.png",
+    "L0__s20260819__0004.png",
+    "L0__s20260819__0005.png",
+    "L0__s20260819__0006.png",
+    "L0__s20260819__0007.png"
+   ],
+   "geom_match": false,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    109,
+    152,
+    182,
+    282,
+    311,
+    329,
+    367,
+    408
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "QUARANTINE_GEOM_MISMATCH",
+   "why": "기하 대응 실패 — depth sha 9/24"
+  },
+  {
+   "band": "base",
+   "scene": "scene09",
+   "seg_round": "260826_v3a_segfill",
+   "a_round": "260819_main_on",
+   "seg_dir": "dataset/260826_v3a_segfill/train/scene09",
+   "a_dir": "dataset/260819_main_on/train/scene09",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    2231,
+    2231
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260819__0000.png",
+     "max": 75,
+     "mean": 0.39195,
+     "n_px_differing": 913710,
+     "frac_px": 0.440639
+    },
+    {
+     "file": "L0__s20260819__0001.png",
+     "max": 92,
+     "mean": 0.49138,
+     "n_px_differing": 1115925,
+     "frac_px": 0.538158
+    },
+    {
+     "file": "L0__s20260819__0002.png",
+     "max": 106,
+     "mean": 0.35586,
+     "n_px_differing": 784974,
+     "frac_px": 0.378556
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260819__0000.png",
+    "L0__s20260819__0001.png",
+    "L0__s20260819__0002.png",
+    "L0__s20260819__0003.png",
+    "L0__s20260819__0004.png",
+    "L0__s20260819__0005.png",
+    "L0__s20260819__0006.png",
+    "L0__s20260819__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 21,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    14034,
+    29430,
+    30241,
+    30248,
+    30500,
+    30852,
+    31379,
+    31436
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": true,
+   "prim_normalized_benign": true,
+   "n_prim_normalized_mismatch": 0,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "base",
+   "scene": "scene10",
+   "seg_round": "260826_v3a_segfill",
+   "a_round": "260819_main_on",
+   "seg_dir": "dataset/260826_v3a_segfill/test/scene10",
+   "a_dir": "dataset/260819_main_on/test/scene10",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    1174,
+    1174
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260819__0000.png",
+     "max": 22,
+     "mean": 0.57228,
+     "n_px_differing": 1332390,
+     "frac_px": 0.642549
+    },
+    {
+     "file": "L0__s20260819__0001.png",
+     "max": 24,
+     "mean": 0.64873,
+     "n_px_differing": 1265703,
+     "frac_px": 0.610389
+    },
+    {
+     "file": "L0__s20260819__0002.png",
+     "max": 24,
+     "mean": 0.73484,
+     "n_px_differing": 1404432,
+     "frac_px": 0.677292
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260819__0000.png",
+    "L0__s20260819__0001.png",
+    "L0__s20260819__0002.png",
+    "L0__s20260819__0003.png",
+    "L0__s20260819__0004.png",
+    "L0__s20260819__0005.png",
+    "L0__s20260819__0006.png",
+    "L0__s20260819__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    202,
+    369,
+    433,
+    512,
+    542,
+    566,
+    864,
+    868
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "base",
+   "scene": "scene12",
+   "seg_round": "260826_v3a_segfill",
+   "a_round": "260819_main_on",
+   "seg_dir": "dataset/260826_v3a_segfill/test/scene12",
+   "a_dir": "dataset/260819_main_on/test/scene12",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    897,
+    897
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260819__0000.png",
+     "max": 33,
+     "mean": 0.48461,
+     "n_px_differing": 1001565,
+     "frac_px": 0.483008
+    },
+    {
+     "file": "L0__s20260819__0001.png",
+     "max": 33,
+     "mean": 0.43046,
+     "n_px_differing": 1062120,
+     "frac_px": 0.512211
+    },
+    {
+     "file": "L0__s20260819__0002.png",
+     "max": 71,
+     "mean": 0.64191,
+     "n_px_differing": 1210730,
+     "frac_px": 0.583878
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260819__0000.png",
+    "L0__s20260819__0001.png",
+    "L0__s20260819__0002.png",
+    "L0__s20260819__0003.png",
+    "L0__s20260819__0004.png",
+    "L0__s20260819__0005.png",
+    "L0__s20260819__0006.png",
+    "L0__s20260819__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    169,
+    176,
+    180,
+    184,
+    197,
+    200,
+    212,
+    237
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "base",
+   "scene": "scene16",
+   "seg_round": "260826_v3a_segfill",
+   "a_round": "260819_main_on",
+   "seg_dir": "dataset/260826_v3a_segfill/train/scene16",
+   "a_dir": "dataset/260819_main_on/train/scene16",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    743,
+    743
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260819__0000.png",
+     "max": 28,
+     "mean": 0.29574,
+     "n_px_differing": 979362,
+     "frac_px": 0.4723
+    },
+    {
+     "file": "L0__s20260819__0001.png",
+     "max": 21,
+     "mean": 0.29142,
+     "n_px_differing": 980875,
+     "frac_px": 0.47303
+    },
+    {
+     "file": "L0__s20260819__0002.png",
+     "max": 27,
+     "mean": 0.38522,
+     "n_px_differing": 1154386,
+     "frac_px": 0.556706
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260819__0000.png",
+    "L0__s20260819__0001.png",
+    "L0__s20260819__0002.png",
+    "L0__s20260819__0003.png",
+    "L0__s20260819__0004.png",
+    "L0__s20260819__0005.png",
+    "L0__s20260819__0006.png",
+    "L0__s20260819__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    287,
+    329,
+    347,
+    367,
+    376,
+    388,
+    394,
+    516
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "base",
+   "scene": "scene17",
+   "seg_round": "260826_v3a_segfill",
+   "a_round": "260819_main_on",
+   "seg_dir": "dataset/260826_v3a_segfill/train/scene17",
+   "a_dir": "dataset/260819_main_on/train/scene17",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    1050,
+    1050
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260819__0000.png",
+     "max": 59,
+     "mean": 0.74413,
+     "n_px_differing": 1451423,
+     "frac_px": 0.699953
+    },
+    {
+     "file": "L0__s20260819__0001.png",
+     "max": 45,
+     "mean": 0.86577,
+     "n_px_differing": 1523998,
+     "frac_px": 0.734953
+    },
+    {
+     "file": "L0__s20260819__0002.png",
+     "max": 48,
+     "mean": 0.9591,
+     "n_px_differing": 1530523,
+     "frac_px": 0.738099
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260819__0000.png",
+    "L0__s20260819__0001.png",
+    "L0__s20260819__0002.png",
+    "L0__s20260819__0003.png",
+    "L0__s20260819__0004.png",
+    "L0__s20260819__0005.png",
+    "L0__s20260819__0006.png",
+    "L0__s20260819__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    1617,
+    2554,
+    2615,
+    2706,
+    2750,
+    2875,
+    3022,
+    3090
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "base",
+   "scene": "scene20",
+   "seg_round": "260826_v3a_segfill",
+   "a_round": "260819_main_on",
+   "seg_dir": "dataset/260826_v3a_segfill/train/scene20",
+   "a_dir": "dataset/260819_main_on/train/scene20",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    175,
+    175
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260819__0000.png",
+     "max": 120,
+     "mean": 1.13851,
+     "n_px_differing": 1425747,
+     "frac_px": 0.687571
+    },
+    {
+     "file": "L0__s20260819__0001.png",
+     "max": 101,
+     "mean": 1.02076,
+     "n_px_differing": 1445654,
+     "frac_px": 0.697171
+    },
+    {
+     "file": "L0__s20260819__0002.png",
+     "max": 76,
+     "mean": 1.09006,
+     "n_px_differing": 1508579,
+     "frac_px": 0.727517
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260819__0000.png",
+    "L0__s20260819__0001.png",
+    "L0__s20260819__0002.png",
+    "L0__s20260819__0003.png",
+    "L0__s20260819__0004.png",
+    "L0__s20260819__0005.png",
+    "L0__s20260819__0006.png",
+    "L0__s20260819__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    50,
+    53,
+    57,
+    58,
+    59,
+    65,
+    66,
+    74
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "base",
+   "scene": "scene21",
+   "seg_round": "260826_v3a_segfill",
+   "a_round": "260819_main_on",
+   "seg_dir": "dataset/260826_v3a_segfill/train/scene21",
+   "a_dir": "dataset/260819_main_on/train/scene21",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    364,
+    364
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260819__0000.png",
+     "max": 131,
+     "mean": 0.93581,
+     "n_px_differing": 1421562,
+     "frac_px": 0.685553
+    },
+    {
+     "file": "L0__s20260819__0001.png",
+     "max": 95,
+     "mean": 0.73373,
+     "n_px_differing": 1191052,
+     "frac_px": 0.574389
+    },
+    {
+     "file": "L0__s20260819__0002.png",
+     "max": 69,
+     "mean": 0.58187,
+     "n_px_differing": 1109343,
+     "frac_px": 0.534984
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260819__0000.png",
+    "L0__s20260819__0001.png",
+    "L0__s20260819__0002.png",
+    "L0__s20260819__0003.png",
+    "L0__s20260819__0004.png",
+    "L0__s20260819__0005.png",
+    "L0__s20260819__0006.png",
+    "L0__s20260819__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    237,
+    240,
+    251,
+    297,
+    327,
+    329,
+    346,
+    368
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "base",
+   "scene": "sceneC1",
+   "seg_round": "260826_v3a_segfill",
+   "a_round": "260819_main_on",
+   "seg_dir": "dataset/260826_v3a_segfill/train/sceneC1",
+   "a_dir": "dataset/260819_main_on/train/sceneC1",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    490,
+    490
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L4__s20260819__0000.png",
+     "max": 7,
+     "mean": 0.15753,
+     "n_px_differing": 634681,
+     "frac_px": 0.306077
+    },
+    {
+     "file": "L4__s20260819__0001.png",
+     "max": 7,
+     "mean": 0.21566,
+     "n_px_differing": 803027,
+     "frac_px": 0.387262
+    },
+    {
+     "file": "L4__s20260819__0002.png",
+     "max": 9,
+     "mean": 0.23904,
+     "n_px_differing": 890712,
+     "frac_px": 0.429549
+    }
+   ],
+   "png_differing_files": [
+    "L4__s20260819__0000.png",
+    "L4__s20260819__0001.png",
+    "L4__s20260819__0002.png",
+    "L4__s20260819__0003.png",
+    "L4__s20260819__0004.png",
+    "L4__s20260819__0005.png",
+    "L4__s20260819__0006.png",
+    "L4__s20260819__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 16,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    113,
+    154,
+    164,
+    177,
+    192,
+    193,
+    207
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": true,
+   "prim_normalized_benign": true,
+   "n_prim_normalized_mismatch": 0,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "base",
+   "scene": "sceneC4",
+   "seg_round": "260826_v3a_segfill",
+   "a_round": "260819_main_on",
+   "seg_dir": "dataset/260826_v3a_segfill/train/sceneC4",
+   "a_dir": "dataset/260819_main_on/train/sceneC4",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    778,
+    778
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260819__0000.png",
+     "max": 101,
+     "mean": 0.19406,
+     "n_px_differing": 716088,
+     "frac_px": 0.345336
+    },
+    {
+     "file": "L0__s20260819__0001.png",
+     "max": 91,
+     "mean": 0.27373,
+     "n_px_differing": 792444,
+     "frac_px": 0.382159
+    },
+    {
+     "file": "L0__s20260819__0002.png",
+     "max": 96,
+     "mean": 0.28485,
+     "n_px_differing": 833075,
+     "frac_px": 0.401753
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260819__0000.png",
+    "L0__s20260819__0001.png",
+    "L0__s20260819__0002.png",
+    "L0__s20260819__0003.png",
+    "L0__s20260819__0004.png",
+    "L0__s20260819__0005.png",
+    "L0__s20260819__0006.png",
+    "L0__s20260819__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    197,
+    260,
+    311,
+    343,
+    348,
+    370,
+    384
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "base",
+   "scene": "sceneD1",
+   "seg_round": "260826_v3a_segfill",
+   "a_round": "260819_main_on",
+   "seg_dir": "dataset/260826_v3a_segfill/val/sceneD1",
+   "a_dir": "dataset/260819_main_on/val/sceneD1",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    316,
+    316
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260819__0000.png",
+     "max": 17,
+     "mean": 0.29572,
+     "n_px_differing": 961300,
+     "frac_px": 0.46359
+    },
+    {
+     "file": "L0__s20260819__0001.png",
+     "max": 14,
+     "mean": 0.8838,
+     "n_px_differing": 1523948,
+     "frac_px": 0.734929
+    },
+    {
+     "file": "L0__s20260819__0002.png",
+     "max": 18,
+     "mean": 0.2731,
+     "n_px_differing": 872362,
+     "frac_px": 0.420699
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260819__0000.png",
+    "L0__s20260819__0001.png",
+    "L0__s20260819__0002.png",
+    "L0__s20260819__0003.png",
+    "L0__s20260819__0004.png",
+    "L0__s20260819__0005.png",
+    "L0__s20260819__0006.png",
+    "L0__s20260819__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    61,
+    70,
+    78,
+    83,
+    87,
+    90,
+    104,
+    129
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "base",
+   "scene": "sceneD2",
+   "seg_round": "260826_v3a_segfill",
+   "a_round": "260819_main_on",
+   "seg_dir": "dataset/260826_v3a_segfill/train/sceneD2",
+   "a_dir": "dataset/260819_main_on/train/sceneD2",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    272,
+    272
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260819__0000.png",
+     "max": 17,
+     "mean": 0.4936,
+     "n_px_differing": 1093881,
+     "frac_px": 0.527527
+    },
+    {
+     "file": "L0__s20260819__0001.png",
+     "max": 20,
+     "mean": 0.84516,
+     "n_px_differing": 1460880,
+     "frac_px": 0.704514
+    },
+    {
+     "file": "L0__s20260819__0002.png",
+     "max": 20,
+     "mean": 0.44944,
+     "n_px_differing": 1140021,
+     "frac_px": 0.549779
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260819__0000.png",
+    "L0__s20260819__0001.png",
+    "L0__s20260819__0002.png",
+    "L0__s20260819__0003.png",
+    "L0__s20260819__0004.png",
+    "L0__s20260819__0005.png",
+    "L0__s20260819__0006.png",
+    "L0__s20260819__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    70,
+    120,
+    131,
+    134,
+    168,
+    174,
+    194
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "base",
+   "scene": "sceneD3",
+   "seg_round": "260826_v3a_segfill",
+   "a_round": "260819_main_on",
+   "seg_dir": "dataset/260826_v3a_segfill/train/sceneD3",
+   "a_dir": "dataset/260819_main_on/train/sceneD3",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    696,
+    696
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260819__0000.png",
+     "max": 45,
+     "mean": 1.00077,
+     "n_px_differing": 1606389,
+     "frac_px": 0.774686
+    },
+    {
+     "file": "L0__s20260819__0001.png",
+     "max": 48,
+     "mean": 0.66299,
+     "n_px_differing": 1335082,
+     "frac_px": 0.643847
+    },
+    {
+     "file": "L0__s20260819__0002.png",
+     "max": 123,
+     "mean": 1.56164,
+     "n_px_differing": 1813730,
+     "frac_px": 0.874677
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260819__0000.png",
+    "L0__s20260819__0001.png",
+    "L0__s20260819__0002.png",
+    "L0__s20260819__0003.png",
+    "L0__s20260819__0004.png",
+    "L0__s20260819__0005.png",
+    "L0__s20260819__0006.png",
+    "L0__s20260819__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    1213,
+    1282,
+    1539,
+    1620,
+    1677,
+    1743,
+    1755,
+    2204
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "h",
+   "scene": "scene09",
+   "seg_round": "260826_v3a_segfill_h",
+   "a_round": "260820_boost_h_on",
+   "seg_dir": "dataset/260826_v3a_segfill_h/train/scene09",
+   "a_dir": "dataset/260820_boost_h_on/train/scene09",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    2231,
+    2231
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260820__0000.png",
+     "max": 70,
+     "mean": 0.44358,
+     "n_px_differing": 1009137,
+     "frac_px": 0.486659
+    },
+    {
+     "file": "L0__s20260820__0001.png",
+     "max": 58,
+     "mean": 0.46139,
+     "n_px_differing": 1076233,
+     "frac_px": 0.519017
+    },
+    {
+     "file": "L0__s20260820__0002.png",
+     "max": 83,
+     "mean": 0.41191,
+     "n_px_differing": 889093,
+     "frac_px": 0.428768
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260820__0000.png",
+    "L0__s20260820__0001.png",
+    "L0__s20260820__0002.png",
+    "L0__s20260820__0003.png",
+    "L0__s20260820__0004.png",
+    "L0__s20260820__0005.png",
+    "L0__s20260820__0006.png",
+    "L0__s20260820__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 21,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 1,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    30470,
+    30558,
+    30865,
+    30992,
+    31676,
+    31738,
+    31800,
+    31881
+   ],
+   "stale_carryover": [
+    {
+     "file": "L5__s20260820__0006.png",
+     "prev": "L5__s20260820__0005.png",
+     "cond": "L5",
+     "prev_cond": "L5",
+     "at_cond_boundary": false
+    }
+   ],
+   "n_stale_carryover": 1,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": true,
+   "prim_normalized_benign": false,
+   "n_prim_normalized_mismatch": 1,
+   "status": "QUARANTINE_STALE",
+   "why": "포즈 간 마스크 충돌 1건 (stale)"
+  },
+  {
+   "band": "h",
+   "scene": "scene17",
+   "seg_round": "260826_v3a_segfill_h",
+   "a_round": "260820_boost_h_on",
+   "seg_dir": "dataset/260826_v3a_segfill_h/train/scene17",
+   "a_dir": "dataset/260820_boost_h_on/train/scene17",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    1050,
+    1050
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260820__0000.png",
+     "max": 20,
+     "mean": 0.56896,
+     "n_px_differing": 1179756,
+     "frac_px": 0.568941
+    },
+    {
+     "file": "L0__s20260820__0001.png",
+     "max": 22,
+     "mean": 0.53263,
+     "n_px_differing": 1077810,
+     "frac_px": 0.519777
+    },
+    {
+     "file": "L0__s20260820__0002.png",
+     "max": 25,
+     "mean": 0.60286,
+     "n_px_differing": 1113252,
+     "frac_px": 0.536869
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260820__0000.png",
+    "L0__s20260820__0001.png",
+    "L0__s20260820__0002.png",
+    "L0__s20260820__0003.png",
+    "L0__s20260820__0004.png",
+    "L0__s20260820__0005.png",
+    "L0__s20260820__0006.png",
+    "L0__s20260820__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    1858,
+    1950,
+    2067,
+    2325,
+    2556,
+    2687,
+    2701,
+    2887
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "e",
+   "scene": "scene03",
+   "seg_round": "260826_v3a_segfill_e",
+   "a_round": "260820_boost_e_on",
+   "seg_dir": "dataset/260826_v3a_segfill_e/train/scene03",
+   "a_dir": "dataset/260820_boost_e_on/train/scene03",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    1202,
+    1202
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260820__0000.png",
+     "max": 42,
+     "mean": 0.40482,
+     "n_px_differing": 967648,
+     "frac_px": 0.466651
+    },
+    {
+     "file": "L0__s20260820__0001.png",
+     "max": 35,
+     "mean": 0.33778,
+     "n_px_differing": 842245,
+     "frac_px": 0.406175
+    },
+    {
+     "file": "L0__s20260820__0002.png",
+     "max": 42,
+     "mean": 0.47432,
+     "n_px_differing": 1099640,
+     "frac_px": 0.530305
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260820__0000.png",
+    "L0__s20260820__0001.png",
+    "L0__s20260820__0002.png",
+    "L0__s20260820__0003.png",
+    "L0__s20260820__0004.png",
+    "L0__s20260820__0005.png",
+    "L0__s20260820__0006.png",
+    "L0__s20260820__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    15812,
+    15878,
+    16197,
+    18153,
+    18961,
+    20862,
+    20902,
+    21661
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "e",
+   "scene": "scene04",
+   "seg_round": "260826_v3a_segfill_e",
+   "a_round": "260820_boost_e_on",
+   "seg_dir": "dataset/260826_v3a_segfill_e/train/scene04",
+   "a_dir": "dataset/260820_boost_e_on/train/scene04",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    486,
+    486
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260820__0000.png",
+     "max": 33,
+     "mean": 1.19048,
+     "n_px_differing": 1606421,
+     "frac_px": 0.774701
+    },
+    {
+     "file": "L0__s20260820__0001.png",
+     "max": 37,
+     "mean": 1.19559,
+     "n_px_differing": 1633502,
+     "frac_px": 0.787761
+    },
+    {
+     "file": "L0__s20260820__0002.png",
+     "max": 44,
+     "mean": 1.11275,
+     "n_px_differing": 1561874,
+     "frac_px": 0.753219
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260820__0000.png",
+    "L0__s20260820__0001.png",
+    "L0__s20260820__0002.png",
+    "L0__s20260820__0003.png",
+    "L0__s20260820__0004.png",
+    "L0__s20260820__0005.png",
+    "L0__s20260820__0006.png",
+    "L0__s20260820__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    447,
+    556,
+    604,
+    607,
+    652,
+    655,
+    706,
+    809
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "e",
+   "scene": "scene08",
+   "seg_round": "260826_v3a_segfill_e",
+   "a_round": "260820_boost_e_on",
+   "seg_dir": "dataset/260826_v3a_segfill_e/train/scene08",
+   "a_dir": "dataset/260820_boost_e_on/train/scene08",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 6,
+   "n_depth_differing": 18,
+   "depth_diff_sample": [
+    {
+     "file": "L0__s20260820__0000.depth.npy",
+     "max_abs_m": 47.92188,
+     "n_finite_mask_diff": 52,
+     "n_px_diff": 11177
+    },
+    {
+     "file": "L0__s20260820__0001.depth.npy",
+     "max_abs_m": 44.07812,
+     "n_finite_mask_diff": 1,
+     "n_px_diff": 7185
+    },
+    {
+     "file": "L0__s20260820__0002.depth.npy",
+     "max_abs_m": 30.32812,
+     "n_finite_mask_diff": 0,
+     "n_px_diff": 3235
+    },
+    {
+     "file": "L0__s20260820__0003.depth.npy",
+     "max_abs_m": 51.5625,
+     "n_finite_mask_diff": 317,
+     "n_px_diff": 9894
+    }
+   ],
+   "n_prims": [
+    688,
+    688
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260820__0000.png",
+     "max": 178,
+     "mean": 0.62075,
+     "n_px_differing": 1030195,
+     "frac_px": 0.496815
+    },
+    {
+     "file": "L0__s20260820__0001.png",
+     "max": 135,
+     "mean": 0.36613,
+     "n_px_differing": 883472,
+     "frac_px": 0.426057
+    },
+    {
+     "file": "L0__s20260820__0002.png",
+     "max": 164,
+     "mean": 0.39865,
+     "n_px_differing": 917266,
+     "frac_px": 0.442354
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260820__0000.png",
+    "L0__s20260820__0001.png",
+    "L0__s20260820__0002.png",
+    "L0__s20260820__0003.png",
+    "L0__s20260820__0004.png",
+    "L0__s20260820__0005.png",
+    "L0__s20260820__0006.png",
+    "L0__s20260820__0007.png"
+   ],
+   "geom_match": false,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    194,
+    207,
+    233,
+    240,
+    288,
+    368,
+    378,
+    443
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "QUARANTINE_GEOM_MISMATCH",
+   "why": "기하 대응 실패 — depth sha 6/24"
+  },
+  {
+   "band": "e",
+   "scene": "scene09",
+   "seg_round": "260826_v3a_segfill_e",
+   "a_round": "260820_boost_e_on",
+   "seg_dir": "dataset/260826_v3a_segfill_e/train/scene09",
+   "a_dir": "dataset/260820_boost_e_on/train/scene09",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    2231,
+    2231
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260820__0000.png",
+     "max": 72,
+     "mean": 0.36245,
+     "n_px_differing": 854284,
+     "frac_px": 0.411981
+    },
+    {
+     "file": "L0__s20260820__0001.png",
+     "max": 58,
+     "mean": 0.3774,
+     "n_px_differing": 923940,
+     "frac_px": 0.445573
+    },
+    {
+     "file": "L0__s20260820__0002.png",
+     "max": 82,
+     "mean": 0.27549,
+     "n_px_differing": 653804,
+     "frac_px": 0.315299
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260820__0000.png",
+    "L0__s20260820__0001.png",
+    "L0__s20260820__0002.png",
+    "L0__s20260820__0003.png",
+    "L0__s20260820__0004.png",
+    "L0__s20260820__0005.png",
+    "L0__s20260820__0006.png",
+    "L0__s20260820__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 22,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    31410,
+    32092,
+    32098,
+    32182,
+    32218,
+    32225,
+    32262,
+    32266
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": true,
+   "prim_normalized_benign": true,
+   "n_prim_normalized_mismatch": 0,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "e",
+   "scene": "scene12",
+   "seg_round": "260826_v3a_segfill_e",
+   "a_round": "260820_boost_e_on",
+   "seg_dir": "dataset/260826_v3a_segfill_e/test/scene12",
+   "a_dir": "dataset/260820_boost_e_on/test/scene12",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    897,
+    897
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260820__0000.png",
+     "max": 34,
+     "mean": 0.53112,
+     "n_px_differing": 1093169,
+     "frac_px": 0.527184
+    },
+    {
+     "file": "L0__s20260820__0001.png",
+     "max": 33,
+     "mean": 0.42947,
+     "n_px_differing": 934210,
+     "frac_px": 0.450526
+    },
+    {
+     "file": "L0__s20260820__0002.png",
+     "max": 48,
+     "mean": 0.61591,
+     "n_px_differing": 1152730,
+     "frac_px": 0.555908
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260820__0000.png",
+    "L0__s20260820__0001.png",
+    "L0__s20260820__0002.png",
+    "L0__s20260820__0003.png",
+    "L0__s20260820__0004.png",
+    "L0__s20260820__0005.png",
+    "L0__s20260820__0006.png",
+    "L0__s20260820__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    197,
+    201,
+    215,
+    216,
+    220,
+    221,
+    222,
+    238
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24,
+   "overlay_linked": {
+    "round": "260820_boost_e_on_g7fixM",
+    "n": 25
+   }
+  },
+  {
+   "band": "e",
+   "scene": "scene17",
+   "seg_round": "260826_v3a_segfill_e",
+   "a_round": "260820_boost_e_on",
+   "seg_dir": "dataset/260826_v3a_segfill_e/train/scene17",
+   "a_dir": "dataset/260820_boost_e_on/train/scene17",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    1050,
+    1050
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260820__0000.png",
+     "max": 23,
+     "mean": 0.50309,
+     "n_px_differing": 1107759,
+     "frac_px": 0.53422
+    },
+    {
+     "file": "L0__s20260820__0001.png",
+     "max": 28,
+     "mean": 0.33448,
+     "n_px_differing": 920862,
+     "frac_px": 0.444089
+    },
+    {
+     "file": "L0__s20260820__0002.png",
+     "max": 19,
+     "mean": 0.52718,
+     "n_px_differing": 1173436,
+     "frac_px": 0.565893
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260820__0000.png",
+    "L0__s20260820__0001.png",
+    "L0__s20260820__0002.png",
+    "L0__s20260820__0003.png",
+    "L0__s20260820__0004.png",
+    "L0__s20260820__0005.png",
+    "L0__s20260820__0006.png",
+    "L0__s20260820__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    1945,
+    2064,
+    2118,
+    2806,
+    2938,
+    2953,
+    3069,
+    3244
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "e",
+   "scene": "scene20",
+   "seg_round": "260826_v3a_segfill_e",
+   "a_round": "260820_boost_e_on",
+   "seg_dir": "dataset/260826_v3a_segfill_e/train/scene20",
+   "a_dir": "dataset/260820_boost_e_on/train/scene20",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    175,
+    175
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260820__0000.png",
+     "max": 23,
+     "mean": 0.36034,
+     "n_px_differing": 972356,
+     "frac_px": 0.468922
+    },
+    {
+     "file": "L0__s20260820__0001.png",
+     "max": 33,
+     "mean": 0.42942,
+     "n_px_differing": 982519,
+     "frac_px": 0.473823
+    },
+    {
+     "file": "L0__s20260820__0002.png",
+     "max": 25,
+     "mean": 0.39887,
+     "n_px_differing": 868789,
+     "frac_px": 0.418976
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260820__0000.png",
+    "L0__s20260820__0001.png",
+    "L0__s20260820__0002.png",
+    "L0__s20260820__0003.png",
+    "L0__s20260820__0004.png",
+    "L0__s20260820__0005.png",
+    "L0__s20260820__0006.png",
+    "L0__s20260820__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    61,
+    62,
+    64,
+    66,
+    67,
+    69,
+    73,
+    74
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "e",
+   "scene": "sceneC1",
+   "seg_round": "260826_v3a_segfill_e",
+   "a_round": "260820_boost_e_on",
+   "seg_dir": "dataset/260826_v3a_segfill_e/train/sceneC1",
+   "a_dir": "dataset/260820_boost_e_on/train/sceneC1",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    490,
+    490
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L4__s20260820__0000.png",
+     "max": 56,
+     "mean": 1.50545,
+     "n_px_differing": 1736794,
+     "frac_px": 0.837574
+    },
+    {
+     "file": "L4__s20260820__0001.png",
+     "max": 46,
+     "mean": 1.16207,
+     "n_px_differing": 1397595,
+     "frac_px": 0.673995
+    },
+    {
+     "file": "L4__s20260820__0002.png",
+     "max": 50,
+     "mean": 1.69469,
+     "n_px_differing": 1698331,
+     "frac_px": 0.819025
+    }
+   ],
+   "png_differing_files": [
+    "L4__s20260820__0000.png",
+    "L4__s20260820__0001.png",
+    "L4__s20260820__0002.png",
+    "L4__s20260820__0003.png",
+    "L4__s20260820__0004.png",
+    "L4__s20260820__0005.png",
+    "L4__s20260820__0006.png",
+    "L4__s20260820__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 16,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    175,
+    183,
+    188,
+    196,
+    204,
+    223,
+    227,
+    234
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": true,
+   "prim_normalized_benign": true,
+   "n_prim_normalized_mismatch": 0,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "e",
+   "scene": "sceneC4",
+   "seg_round": "260826_v3a_segfill_e",
+   "a_round": "260820_boost_e_on",
+   "seg_dir": "dataset/260826_v3a_segfill_e/train/sceneC4",
+   "a_dir": "dataset/260820_boost_e_on/train/sceneC4",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    778,
+    778
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260820__0000.png",
+     "max": 184,
+     "mean": 1.44453,
+     "n_px_differing": 1805834,
+     "frac_px": 0.870869
+    },
+    {
+     "file": "L0__s20260820__0001.png",
+     "max": 147,
+     "mean": 1.64442,
+     "n_px_differing": 1818304,
+     "frac_px": 0.876883
+    },
+    {
+     "file": "L0__s20260820__0002.png",
+     "max": 152,
+     "mean": 1.60429,
+     "n_px_differing": 1790069,
+     "frac_px": 0.863266
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260820__0000.png",
+    "L0__s20260820__0001.png",
+    "L0__s20260820__0002.png",
+    "L0__s20260820__0003.png",
+    "L0__s20260820__0004.png",
+    "L0__s20260820__0005.png",
+    "L0__s20260820__0006.png",
+    "L0__s20260820__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    224,
+    299,
+    342,
+    344,
+    363,
+    368,
+    375,
+    400
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "e2",
+   "scene": "scene03",
+   "seg_round": "260826_v3a_segfill_e2",
+   "a_round": "260820_boost_e2_on",
+   "seg_dir": "dataset/260826_v3a_segfill_e2/train/scene03",
+   "a_dir": "dataset/260820_boost_e2_on/train/scene03",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    1202,
+    1202
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260821__0000.png",
+     "max": 78,
+     "mean": 1.27952,
+     "n_px_differing": 1488439,
+     "frac_px": 0.717804
+    },
+    {
+     "file": "L0__s20260821__0001.png",
+     "max": 83,
+     "mean": 1.53509,
+     "n_px_differing": 1710087,
+     "frac_px": 0.824695
+    },
+    {
+     "file": "L0__s20260821__0002.png",
+     "max": 109,
+     "mean": 1.00653,
+     "n_px_differing": 1519345,
+     "frac_px": 0.732709
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260821__0000.png",
+    "L0__s20260821__0001.png",
+    "L0__s20260821__0002.png",
+    "L0__s20260821__0003.png",
+    "L0__s20260821__0004.png",
+    "L0__s20260821__0005.png",
+    "L0__s20260821__0006.png",
+    "L0__s20260821__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    14507,
+    17773,
+    18497,
+    18618,
+    18672,
+    18822,
+    20148,
+    20248
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "e2",
+   "scene": "scene04",
+   "seg_round": "260826_v3a_segfill_e2",
+   "a_round": "260820_boost_e2_on",
+   "seg_dir": "dataset/260826_v3a_segfill_e2/train/scene04",
+   "a_dir": "dataset/260820_boost_e2_on/train/scene04",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    486,
+    486
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260821__0000.png",
+     "max": 44,
+     "mean": 0.91168,
+     "n_px_differing": 1382606,
+     "frac_px": 0.666766
+    },
+    {
+     "file": "L0__s20260821__0001.png",
+     "max": 34,
+     "mean": 0.98268,
+     "n_px_differing": 1545834,
+     "frac_px": 0.745483
+    },
+    {
+     "file": "L0__s20260821__0002.png",
+     "max": 55,
+     "mean": 0.95727,
+     "n_px_differing": 1471109,
+     "frac_px": 0.709447
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260821__0000.png",
+    "L0__s20260821__0001.png",
+    "L0__s20260821__0002.png",
+    "L0__s20260821__0003.png",
+    "L0__s20260821__0004.png",
+    "L0__s20260821__0005.png",
+    "L0__s20260821__0006.png",
+    "L0__s20260821__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    338,
+    516,
+    530,
+    552,
+    568,
+    598,
+    672,
+    814
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "e2",
+   "scene": "scene12",
+   "seg_round": "260826_v3a_segfill_e2",
+   "a_round": "260820_boost_e2_on",
+   "seg_dir": "dataset/260826_v3a_segfill_e2/test/scene12",
+   "a_dir": "dataset/260820_boost_e2_on/test/scene12",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    897,
+    897
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260821__0000.png",
+     "max": 19,
+     "mean": 0.40221,
+     "n_px_differing": 1018812,
+     "frac_px": 0.491325
+    },
+    {
+     "file": "L0__s20260821__0001.png",
+     "max": 14,
+     "mean": 0.36712,
+     "n_px_differing": 1009704,
+     "frac_px": 0.486933
+    },
+    {
+     "file": "L0__s20260821__0002.png",
+     "max": 21,
+     "mean": 0.36282,
+     "n_px_differing": 1048534,
+     "frac_px": 0.505659
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260821__0000.png",
+    "L0__s20260821__0001.png",
+    "L0__s20260821__0002.png",
+    "L0__s20260821__0003.png",
+    "L0__s20260821__0004.png",
+    "L0__s20260821__0005.png",
+    "L0__s20260821__0006.png",
+    "L0__s20260821__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 1,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    174,
+    178,
+    185,
+    198,
+    200,
+    201,
+    204
+   ],
+   "stale_carryover": [
+    {
+     "file": "L5__s20260821__0004.png",
+     "prev": "L5__s20260821__0003.png",
+     "cond": "L5",
+     "prev_cond": "L5",
+     "at_cond_boundary": false
+    }
+   ],
+   "n_stale_carryover": 1,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "QUARANTINE_STALE",
+   "why": "포즈 간 마스크 충돌 1건 (stale)"
+  },
+  {
+   "band": "e2",
+   "scene": "scene20",
+   "seg_round": "260826_v3a_segfill_e2",
+   "a_round": "260820_boost_e2_on",
+   "seg_dir": "dataset/260826_v3a_segfill_e2/train/scene20",
+   "a_dir": "dataset/260820_boost_e2_on/train/scene20",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    175,
+    175
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260821__0000.png",
+     "max": 114,
+     "mean": 1.16457,
+     "n_px_differing": 1412925,
+     "frac_px": 0.681387
+    },
+    {
+     "file": "L0__s20260821__0001.png",
+     "max": 112,
+     "mean": 1.07439,
+     "n_px_differing": 1081236,
+     "frac_px": 0.521429
+    },
+    {
+     "file": "L0__s20260821__0002.png",
+     "max": 88,
+     "mean": 1.01969,
+     "n_px_differing": 1356590,
+     "frac_px": 0.65422
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260821__0000.png",
+    "L0__s20260821__0001.png",
+    "L0__s20260821__0002.png",
+    "L0__s20260821__0003.png",
+    "L0__s20260821__0004.png",
+    "L0__s20260821__0005.png",
+    "L0__s20260821__0006.png",
+    "L0__s20260821__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    38,
+    40,
+    41,
+    43,
+    44,
+    45,
+    46,
+    58
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  },
+  {
+   "band": "e2",
+   "scene": "sceneC4",
+   "seg_round": "260826_v3a_segfill_e2",
+   "a_round": "260820_boost_e2_on",
+   "seg_dir": "dataset/260826_v3a_segfill_e2/train/sceneC4",
+   "a_dir": "dataset/260820_boost_e2_on/train/sceneC4",
+   "n_a": 24,
+   "n_seg": 24,
+   "n_png_identical": 0,
+   "n_png_differing": 24,
+   "png_identical": false,
+   "heightmap_sha_equal": true,
+   "n_depth_identical": 24,
+   "n_depth_differing": 0,
+   "depth_diff_sample": [],
+   "n_prims": [
+    778,
+    778
+   ],
+   "n_prims_equal": true,
+   "arm_config": [
+    "{\"hazard_stairs\": true}",
+    "{\"hazard_stairs\": true}"
+   ],
+   "arm_config_equal": true,
+   "pose_max_delta": 0.0,
+   "px_delta_sample": [
+    {
+     "file": "L0__s20260821__0000.png",
+     "max": 207,
+     "mean": 1.57185,
+     "n_px_differing": 1833516,
+     "frac_px": 0.884219
+    },
+    {
+     "file": "L0__s20260821__0001.png",
+     "max": 170,
+     "mean": 1.70234,
+     "n_px_differing": 1892224,
+     "frac_px": 0.912531
+    },
+    {
+     "file": "L0__s20260821__0002.png",
+     "max": 188,
+     "mean": 1.72456,
+     "n_px_differing": 1893317,
+     "frac_px": 0.913058
+    }
+   ],
+   "png_differing_files": [
+    "L0__s20260821__0000.png",
+    "L0__s20260821__0001.png",
+    "L0__s20260821__0002.png",
+    "L0__s20260821__0003.png",
+    "L0__s20260821__0004.png",
+    "L0__s20260821__0005.png",
+    "L0__s20260821__0006.png",
+    "L0__s20260821__0007.png"
+   ],
+   "geom_match": true,
+   "n_idseg": 24,
+   "n_unique_masks": 8,
+   "n_poses": 8,
+   "n_mask_pose_collisions": 0,
+   "fetch": [
+    "orch"
+   ],
+   "n_ids": [
+    217,
+    220,
+    241,
+    250,
+    285,
+    287,
+    294,
+    302
+   ],
+   "stale_carryover": [],
+   "n_stale_carryover": 0,
+   "n_stale_at_cond_boundary": 0,
+   "over_discriminating": false,
+   "status": "INSTALLED",
+   "installed": 24
+  }
+ ]
+}

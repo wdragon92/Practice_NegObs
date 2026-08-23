@@ -18,9 +18,9 @@ def f(x, n=4, dash="—"):
 
 
 print("### 표 1 — 쌍별 실측 (39쌍)\n")
-print("| 씬 | cue | dz_max (m) | Δ높이맵 셀 | n_prims A→B | cells_raw A→B | Δ풋프린트 | "
-      "polar_gt 상이 | Δground_z (m) | RGB 평균\\|Δ\\| | 판정 |")
-print("|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|")
+print("| 씬 | cue | 결속 | dz_max (m) | Δ높이맵 셀 | n_prims A→B | cells_raw A→B | Δ풋프린트 | "
+      "polar_gt 상이 | Δground_z (m) | RGB 평균\\|Δ\\| | 단서 궤적 (Δcue∩fp_A) | 검정1 | 검정2 | **판정** |")
+print("|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---|---|---|")
 for cue in ORDER:
     for r in [x for x in rows if x["cue"] == cue]:
         v = r["verdict"] + (f"({r['subtype']})" if r.get("subtype") else "")
@@ -32,9 +32,12 @@ for cue in ORDER:
         dfp = f"{r['d_cells_raw']:+d}" if r.get("d_cells_raw") is not None else "—"
         pg = (f"{r['polar_gt_n_diff']}/{r['polar_gt_n_cmp']}"
               if r.get("polar_gt_n_cmp") is not None else "—")
-        print(f"| {r['scene']} | `{cue}` | {f(r.get('dz_max'))} | "
+        lo = r.get("locus") or {}
+        lc = f"{lo.get('locus','—')} ({lo.get('dcue_in_fpA','—')})"
+        print(f"| {r['scene']} | `{cue}` | {r.get('bond','?')} | {f(r.get('dz_max'))} | "
               f"{f(r.get('hm_cells_changed'))} | {np_} | {cr} | {dfp} | {pg} | "
-              f"{f(gz,6)} | {f(r.get('rgb_mean_abs_lsb'),3)} | **{v}** |")
+              f"{f(gz,6)} | {f(r.get('rgb_mean_abs_lsb'),3)} | {lc} | "
+              f"{r.get('verdict_t1')} | {r.get('verdict_t2')} | **{v}** |")
 
 print("\n### 표 2 — VG-datum 3층 (전 39쌍)\n")
 print("| 씬 | cue | exact | tol | fail | max \\|Δground_z\\| | 최대 포즈차 | 판정 |")

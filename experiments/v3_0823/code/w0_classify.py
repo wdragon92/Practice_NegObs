@@ -88,6 +88,29 @@ PRIOR = [
 ]
 
 
+def load_bonds():
+    """(scene, cue) -> 결속: HZ(위험 분기 안) · free(자유) · hz?(혼합) · ABSENT.
+
+    참조로 쓰는 `260819_main_off`는 `hazard_*: false`뿐이라 **HZ 결속 단서는
+    사라지고 free 결속 단서는 남는다**(ACCOUNTING §4.1 비균질 세대).
+    검정 1의 위양성이 어느 쪽에서 나는지 읽는 열쇠라 함께 인쇄한다.
+    """
+    p = os.path.join(V3, "code/hazgate.json")
+    if not os.path.exists(p):
+        return {}
+    out = {}
+    for k, v in json.load(open(p, encoding="utf-8")).items():
+        tag, fn = k.split("::")
+        if tag not in ("main", "batch1"):
+            continue
+        s = fn.split("_")[0]
+        for c, rec in v["cue"].items():
+            out[(s, c)] = ("ABSENT" if rec is None
+                           else "HZ" if rec["all_hazard_gated"]
+                           else "hz?" if rec["any"] else "free")
+    return out
+
+
 def sha256(path):
     h = hashlib.sha256()
     with open(path, "rb") as f:
@@ -166,6 +189,68 @@ def geom_compare(da, db):
     return out
 
 
+def fp_mask(scene, z_arm):
+    """A팔 기준 낙차 발자국 마스크 (라벨러 footprint v2와 같은 식).
+
+    z_off = `260819_main_off` (정본 구off, 같은 시드). 라벨러가 쓰는 것과 동일.
+    """
+    g = glob.glob(os.path.join(REPO, "dataset", "260819_main_off", "*", scene,
+                               "heightmap.npy"))
+    if not g:
+        return None
+    zo = np.load(g[0])
+    if zo.shape != z_arm.shape:
+        return None
+    d = np.where(np.isfinite(zo) & np.isfinite(z_arm), zo - z_arm, np.nan)
+    return (np.isfinite(d)) & (d >= 0.3)
+
+
+def dilate(mask, r):
+    """r셀 반경 사각 팽창 (0.05 m 격자 · r=20 → STEP_RUN_M 1.0 m)."""
+    out = mask.copy()
+    for _ in range(r):
+        o = out.copy()
+        o[1:, :] |= out[:-1, :]
+        o[:-1, :] |= out[1:, :]
+        o[:, 1:] |= out[:, :-1]
+        o[:, :-1] |= out[:, 1:]
+        out = o
+    return out
+
+
+def cue_locus(scene, da, db):
+    """2차 진단 — **단서 프림이 낙차 발자국 위에 서 있는가.**
+
+    1차 통계(공유 z_off 위의 Δcells_raw)는 한 가지를 구별하지 못한다:
+      (ㄱ) 단서가 낙차 표면의 일부라서 지우면 낙차가 변한다   = 진짜 구조물
+      (ㄴ) 단서가 평지 위에 서 있고, **참조로 쓴 구off에도 그 단서가 그대로
+           남아 있어서** 단서를 지운 팔에서만 (z_off − z_on)이 커진 것 = 짝맞춤 인공물
+    v3의 실제 짝은 B↔D(둘 다 cue-off)라 (ㄴ)은 W1에서 발생하지 않는다.
+    그래서 단서의 기하 궤적 Δcue = {|z_A − z_B| > 0}가 A팔 발자국과 겹치는지를
+    따로 잰다. 겹치면 (ㄱ), 안 겹치면 (ㄴ)이다.
+    """
+    za = np.load(os.path.join(da, "heightmap.npy"))
+    zb = np.load(os.path.join(db, "heightmap.npy"))
+    if za.shape != zb.shape:
+        return None
+    fa = fp_mask(scene, za)
+    if fa is None:
+        return None
+    both = np.isfinite(za) & np.isfinite(zb)
+    dcue = both & (np.abs(za - zb) > 1e-6)
+    inter = dcue & fa
+    lip = dilate(fa, 20) & ~fa
+    return dict(
+        fp_A_cells=int(fa.sum()),
+        dcue_cells=int(dcue.sum()),
+        dcue_in_fpA=int(inter.sum()),
+        dcue_in_lip_1m=int((dcue & lip).sum()),
+        dz_max_in_fpA=(round(float(np.abs(za - zb)[inter].max()), 6)
+                       if inter.any() else 0.0),
+        locus=("낙차면" if inter.any() else
+               "립근방" if (dcue & lip).any() else "평지"))
+
+
 def datum_compare(ca, cb, da, db):
     """VG-datum + VG-10: 파일명 일치 컷쌍의 ground_z / 포즈 비교."""
     common = sorted(set(ca) & set(cb))
@@ -196,11 +281,13 @@ def main():
     pairs = [tuple(p) for p in
              json.load(open(PLAN, encoding="utf-8"))["classification_probe"]["pairs"]]
     labels = {a: load_labels(a) for a in ("A",) + tuple(sorted(set(ARM_OF_CUE.values())))}
+    bonds = load_bonds()
     rows, problems = [], []
 
     for scene, cue in pairs:
         arm = ARM_OF_CUE[cue]
         r = dict(scene=scene, cue=cue, cue_short=CUE_SHORT.get(cue), arm=arm,
+                 bond=bonds.get((scene, cue), "?"),
                  round_a=f"{STAMP}_A", round_b=f"{STAMP}_{arm}")
         da, db = scene_dir(f"{STAMP}_A", scene), scene_dir(f"{STAMP}_{arm}", scene)
         if not da or not db:
@@ -215,6 +302,7 @@ def main():
 
         ca, cb = cuts_of(da), cuts_of(db)
         r["datum"] = datum_compare(ca, cb, da, db)
+        r["locus"] = cue_locus(scene, da, db)
 
         # RGB 광학차 — 무효 토글 검사 (첫 컷 1장이면 충분하나 전 컷 평균을 쓴다)
         md, fr = [], []
@@ -279,6 +367,31 @@ def main():
             r.update(verdict="장식",
                      subtype=("완전" if r.get("hm_identical") else "지형외"),
                      reason="footprint 0 · polar_gt 동일")
+        # ---- 검정 2 (기하 궤적) ------------------------------------------
+        lo = r.get("locus")
+        r["verdict_t1"] = r["verdict"]          # 검정 1 = 사전등록 VG-01 통계
+        if lo is None or r["verdict"] == "판정불가":
+            r["verdict_t2"] = r["verdict"]
+        elif lo["dcue_in_fpA"] > 0:
+            r["verdict_t2"] = "구조물"
+        else:
+            r["verdict_t2"] = "장식"
+        r["verdicts_agree"] = (r["verdict_t1"] == r["verdict_t2"])
+
+        # ---- 종합 판정 -----------------------------------------------------
+        # 두 검정은 각각 한 방향으로 눈이 멀어 있다(§보고서 "왜 두 번 재는가").
+        #   검정 1: 참조 구off가 cue-비대칭 → 자유결속 단서에서 위양성
+        #   검정 2: fp_A가 단서에 가려짐   → 낙차 위를 덮는 단서에서 위음성
+        # 계획 §1.2는 "**장식으로 판정한 것만**" 레버로 허락한다. 두 검정이
+        # 엇갈리면 그 쌍은 장식으로 판정된 것이 아니므로 **판정불가**다.
+        if r["verdict"] == "판정불가":
+            pass
+        elif r["verdict_t1"] == r["verdict_t2"]:
+            r["verdict"] = r["verdict_t1"]
+        else:
+            r["verdict"] = "판정불가"
+            r["reason"] = f"검정 불일치 (t1={r['verdict_t1']} · t2={r['verdict_t2']}) — cue-대칭 off팔 없음"
+            r.pop("subtype", None)
         rows.append(r)
 
     # ---- 산출 --------------------------------------------------------------
@@ -337,6 +450,17 @@ def main():
         n_pairs=len(rows), verdict_counts=counts,
         toggle_forbidden=[dict(scene=s, cue=c) for s, c in forbidden],
         b_levers_confirmed=confirmed,
+        verdict_counts_t1={v: sum(1 for r in rows if r.get("verdict_t1") == v)
+                           for v in ("구조물", "장식", "판정불가")},
+        verdict_counts_t2={v: sum(1 for r in rows if r.get("verdict_t2") == v)
+                           for v in ("구조물", "장식", "판정불가")},
+        disagreements=[dict(scene=r["scene"], cue=r["cue"], bond=r.get("bond"),
+                            t1=r["verdict_t1"], t2=r["verdict_t2"],
+                            d_cells_raw=r.get("d_cells_raw"),
+                            dcue_cells=(r["locus"] or {}).get("dcue_cells"),
+                            dcue_in_fpA=(r["locus"] or {}).get("dcue_in_fpA"),
+                            dcue_in_lip_1m=(r["locus"] or {}).get("dcue_in_lip_1m"))
+                       for r in rows if not r.get("verdicts_agree", True)],
         vg_datum_drift=datum_drift,
         vg_datum_corpus_ref=corpus_ref,
         prior_rulings=PRIOR,
@@ -346,9 +470,9 @@ def main():
     json.dump(out, open(op, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 
     # ---- stdout 표 ---------------------------------------------------------
-    hdr = (f"{'scene':9s} {'cue':20s} {'dz_max':>9s} {'hm셀':>7s} "
+    hdr = (f"{'scene':9s} {'cue':20s} {'bond':5s} {'dz_max':>9s} {'hm셀':>7s} "
            f"{'cells_raw A→B':>15s} {'Δfp':>6s} {'pgt':>5s} {'Δgz':>10s} "
-           f"{'RGB':>8s}  verdict")
+           f"{'RGB':>8s}  검정1  검정2   종합")
     print(hdr)
     print("-" * len(hdr))
     for r in rows:
@@ -363,9 +487,15 @@ def main():
         rg = "—" if r.get("rgb_mean_abs_lsb") is None else f"{r['rgb_mean_abs_lsb']:.3f}"
         hc = "—" if r.get("hm_cells_changed") is None else f"{r['hm_cells_changed']}"
         v = r["verdict"] + (f"({r['subtype']})" if r.get("subtype") else "")
-        print(f"{r['scene']:9s} {r['cue']:20s} {dz:>9s} {hc:>7s} {cr:>15s} "
-              f"{df:>6s} {pg:>5s} {gz:>10s} {rg:>8s}  {v} [{r.get('reason','')}]")
+        lo = r.get("locus") or {}
+        loc = (f"{lo.get('locus','—'):4s} fp∩={lo.get('dcue_in_fpA','—')}")
+        print(f"{r['scene']:9s} {r['cue']:20s} {r.get('bond','?'):5s} {dz:>9s} "
+              f"{hc:>7s} {cr:>15s} {df:>6s} {pg:>5s} {gz:>10s} {rg:>8s}  "
+              f"t1={r['verdict_t1']:5s} t2={r['verdict_t2']:5s}  {v:12s} {loc}")
     print()
+    print("검정1(VG-01 통계):", out["verdict_counts_t1"])
+    print("검정2(기하 궤적) :", out["verdict_counts_t2"], "· 불일치",
+          len(out["disagreements"]))
     print("verdict counts:", counts)
     print("토글 금지 목록:", len(forbidden), forbidden)
     print("VG-datum 비-exact 쌍:", len(datum_drift))

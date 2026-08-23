@@ -21,7 +21,7 @@ echo "=== 1. 계기 정렬 (코퍼스 A팔이 융합을 쓰는 씬에만 B2 융�
 python3 "$C/w1b_fuse.py" --write
 
 echo "=== 2. 라벨링 (A 재라벨 + B2 라벨 · 같은 드라이버·z_off = D팔) ==="
-python3 "$C/w1b_label.py" --workers 8 "${W1B_FORCE:+--force}"
+python3 "$C/w1b_label.py" --workers 8 ${W1B_FORCE:+--force}
 
 echo "=== 3. 게이트 배터리 (회계 · VG-01 · VG-08 per-cut · VG-10 · VG-datum) ==="
 python3 "$C/w1b_verify.py"

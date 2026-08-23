@@ -63,6 +63,16 @@ NEW_SCENES = {
     "sceneH2": dict(split="test", cls="C'",
                     basis="v3 P-5 신설 (RENDER_PLAN_V3 §2.1 sceneH2_landing_campus, "
                           "test-ext). SP-2 스윕 미실시 — C' 기본값 승계, 방위 제약 미측정"),
+    # ── W3 test-ext (3차 빌더 런) — A안 순서의 다음 두 씬 ─────────────────────
+    #   §8 결재 1 A안 = H1·H2·H3 · H6·H7 · L1 · N9·N11. H6/H7(1차) · H1/H2(2차)가
+    #   착지했으므로 이 런은 **H3(복도 굴절형 test-ext) + L1(측방 test-ext)** 이다.
+    "sceneH3": dict(split="test", cls="C'",
+                    basis="v3 P-5 신설 (RENDER_PLAN_V3 §2.1 sceneH3_bend_walk, "
+                          "test-ext). SP-2 스윕 미실시 — C' 기본값 승계, 방위 제약 미측정"),
+    "sceneL1": dict(split="test", cls="C'",
+                    basis="v3 P-5 신설 (RENDER_PLAN_V3 §2.3 sceneL1_lateral_canal, "
+                          "측방 test-ext). SP-2 스윕 미실시 — C' 기본값 승계, "
+                          "방위 제약 미측정"),
 }
 
 SCENE_FILE = {
@@ -70,6 +80,8 @@ SCENE_FILE = {
     "sceneH7": os.path.join(REPO, "scenes", "main", "sceneH7_bend_walk2.py"),
     "sceneH1": os.path.join(REPO, "scenes", "main", "sceneH1_berm_levee.py"),
     "sceneH2": os.path.join(REPO, "scenes", "main", "sceneH2_landing_campus.py"),
+    "sceneH3": os.path.join(REPO, "scenes", "main", "sceneH3_bend_walk.py"),
+    "sceneL1": os.path.join(REPO, "scenes", "main", "sceneL1_lateral_canal.py"),
 }
 
 
@@ -119,7 +131,15 @@ def main(argv=None):
                "260823_v3p5_h12rev_A", "260823_v3p5_h12rev_B",
                "260823_v3p5_h12rev_C", "260823_v3p5_h12rev_D",
                # 근거리 비-H 대조 라운드 (퇴화 아님을 실렌더로 확인)
-               "260823_v3p5_h12near_A", "260823_v3p5_h12near_C")
+               "260823_v3p5_h12near_A", "260823_v3p5_h12near_C",
+               # ── W3 test-ext 3차 빌더 런 (sceneH3 · sceneL1) ───────────────
+               #   4팔 완비가 test-ext 의무이므로 B·D 스탬프도 허용목록에 있다(§3.1).
+               "260823_v3p5_h3l1smoke_A",
+               "260823_v3p5_h3l1probe_A", "260823_v3p5_h3l1probe_B",
+               "260823_v3p5_h3l1probe_C", "260823_v3p5_h3l1probe_D",
+               "260823_v3p5_h3l1rev_A", "260823_v3p5_h3l1rev_B",
+               "260823_v3p5_h3l1rev_C", "260823_v3p5_h3l1rev_D",
+               "260823_v3p5_h3l1near_A", "260823_v3p5_h3l1near_C")
     if a.run not in allowed:
         raise SystemExit(f"[h67_probe] 라운드 스탬프 {a.run!r} 거부 — 허용 {allowed}")
 

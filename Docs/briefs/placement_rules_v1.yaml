@@ -413,10 +413,13 @@ props:
     # y = -4.20, pitch 1.50) and sceneH7 (walled-corridor mouth, 2 bollards) both assemble them.
     # sceneH1 (levee maintenance road, 5 bollards on the 보차도 경계 at y = -4.50, pitch 1.50)
     # and sceneH2 (campus plaza mouth, 5 bollards at y = -5.20, pitch 1.50) likewise.
+    # sceneH3 (석축 골목 mouth, 2 bollards, central opening 2.28 m — the same VG-datum
+    # trade-off sceneH7 declared) and sceneL1 (levee approach plaza, 4 bollards on the
+    # 보차도 경계 at y = -4.30, pitch 1.50) likewise.
     carrier_set: [scene02, scene03, scene05, scene06, scene08, scene11, scene12, scene13,
                   scene14, scene16, scene20, scene21, sceneC4, sceneD1, sceneN1, sceneN2,
                   sceneN3, sceneN4, sceneN5,
-                  sceneH6, sceneH7, sceneH1, sceneH2]
+                  sceneH6, sceneH7, sceneH1, sceneH2, sceneH3, sceneL1]
 
   bench:
     mode: segment

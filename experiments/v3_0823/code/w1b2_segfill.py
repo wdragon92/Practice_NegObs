@@ -8,12 +8,44 @@
 다시 찍어 스크래치 트리에 넣었다(다른 것은 `NEGOBS_SEG_SIDECAR=1
 NEGOBS_SEG_STRICT=1` 하나뿐). 이 파일은 씬 프로세스마다
 
-  1. 재렌더 PNG를 정본 A 프레임과 **sha256 대조**하고,
-  2. **전 컷 바이트 동일**인 씬에만 `.idseg.npz`를 정본 프레임 옆에 설치하고,
-  3. 하나라도 다르면 **설치하지 않고 격리**한다 (`seg_unavailable`).
+  1. 재렌더물을 정본 A 프레임과 **sha256 대조**하고,
+  2. **대응이 실증된** 씬에만 `.idseg.npz`를 정본 프레임 옆에 설치하고,
+  3. 하나라도 어긋나면 **설치하지 않고 격리**한다 (`seg_unavailable`).
 
 정본 픽셀을 조용히 갈아치우는 일은 없다 — 재렌더의 PNG·depth·heightmap은
 **전부 폐기**하고 마스크만 취한다.
+
+**D75 ④의 "PNG 바이트 동일" 문면은 만족 불가능하다 — 대조 실험으로 실증했다**
+------------------------------------------------------------------------
+D75 ④는 "재렌더 → **바이트 동일** 검증 → idseg만 채택"이라 적었고, 근거로
+W0의 "sha256 재현성 19/19"를 들었다. 그런데 **W0가 잰 19/19는 `heightmap.npy`**
+(W0_CUECLS §1 부수 검증)이지 RGB PNG가 아니다. 세그 변경이 **하나도 없는**
+대조군으로 직접 쟀다 — `260825_v3w0_cuecls_A`(W0 A팔) vs 정본 `260819_main_on`,
+같은 씬·시드·조건·레시피, 19씬 76컷:
+
+    RGB PNG      sha256 동일   **0 / 76**  (평균 |Δ| 0.09–0.91 LSB · 최대 18–77 LSB)
+    depth 사이드카 sha256 동일  **73 / 76**  (불일치 3컷은 scene08 하나)
+    heightmap.npy sha256 동일  **19 / 19**  (= W0가 인용한 그 수)
+    포즈 7키 + cam.eye 차                **0.0** (W0 §1)
+
+즉 **PathTracing RGB는 프로세스 간 비트 재현되지 않는다**(몬테카를로 표본 잡음).
+반면 **기하는 비트 재현된다.** 그리고 `instance_id_segmentation` 마스크는
+조명·표본 잡음에 **의존하지 않는다** — 기하와 카메라만의 함수다. 그러므로 RGB
+바이트는 "이 마스크가 이 정본 프레임의 것인가"의 증거로 **부적합**하고, depth가
+그 자리에 정확히 맞는 증거다(계획 §6.1 VG-01 문면을 `cells_raw`+`polar_gt`로
+바꾼 W1B_REPORT §8.3과 같은 종류의 정정이다).
+
+⇒ **판정 기준 두 열을 나란히 인쇄하고, 설치는 기하 대응 기준으로 한다.**
+
+    ① D75 문면 (참고 열) : PNG sha256 전 컷 동일
+    ② **기하 대응 (설치 판정)** : `heightmap.npy` sha256 동일 **AND** `n_prims`
+       동일 **AND** `arm_config` 동일 **AND** 컷별 포즈 7키+`cam.eye` 차 **정확히 0**
+       **AND** 컷별 `.depth.npy` sha256 **동일**
+
+②는 ①보다 **약한 기준이 아니다.** 마스크가 의존하는 모든 것(기하·카메라)을
+비트 수준에서 묶고, 의존하지 않는 것(조명·PT 잡음)만 풀어 준다.
+②가 하나라도 어긋나면 그 씬 프로세스는 통째로 격리한다.
+설치분은 `idseg_backfill.json`이 파일 단위로 기록하므로 **되돌릴 수 있다**.
 
 설치 경로 규약
 --------------
@@ -73,6 +105,12 @@ BANDS = {
              "scene03 scene04 scene12 scene20 sceneC4".split()),
 }
 POSE_KEYS = ("d", "h_rel", "yaw", "pitch", "roll", "hfov", "ground_z")
+# G7_RELABEL 정본(변형 B)의 g7fixM 오버레이 트리는 **파일 단위 심링크**다. 정본
+# 라운드에 사이드카를 깔아도 저절로 보이지 않으므로, 설치분과 짝이 되는 심링크를
+# 같이 만든다 (오버레이 트리의 설계 그대로 — 실체는 정본에만 있다).
+OVERLAY = {("e", "scene08"): "260820_boost_e_on_g7fixM",
+           ("e", "scene12"): "260820_boost_e_on_g7fixM",
+           ("e2", "scene12"): "260820_boost_e2_on_g7fixM"}
 
 
 def sha256(p):
@@ -170,7 +208,7 @@ def check_unit(band, scene, install):
                     why=f"컷 집합 불일치 — A만 {sorted(set(apng)-set(spng))[:3]} · "
                         f"백필만 {sorted(set(spng)-set(apng))[:3]}")
 
-    # --- ① sha256 대조 (판정) -------------------------------------------------
+    # --- ① D75 문면: RGB PNG sha256 (참고 열 — 설치 판정에 쓰지 않는다) --------
     same, diff = [], []
     for f in apng:
         pa, pb = os.path.join(ad, f), os.path.join(sd, f)
@@ -180,13 +218,37 @@ def check_unit(band, scene, install):
         ha, hb = sha256(pa), sha256(pb)
         (same if ha == hb else diff).append(
             f if ha == hb else dict(file=f, sha_a=ha[:16], sha_seg=hb[:16]))
-    r["n_identical"], r["n_differing"] = len(same), len(diff)
-    r["identical"] = (len(diff) == 0 and len(same) == len(apng) > 0)
+    r["n_png_identical"], r["n_png_differing"] = len(same), len(diff)
+    r["png_identical"] = (len(diff) == 0 and len(same) == len(apng) > 0)
 
-    # --- ② 진단 (판정에 쓰지 않는다) ------------------------------------------
+    # --- ② 기하 대응 (설치 판정) ----------------------------------------------
     hma, hmb = os.path.join(ad, "heightmap.npy"), os.path.join(sd, "heightmap.npy")
     r["heightmap_sha_equal"] = (os.path.isfile(hma) and os.path.isfile(hmb)
                                 and sha256(hma) == sha256(hmb))
+    dsame, ddiff = 0, []
+    for f in apng:
+        nm = os.path.splitext(f)[0] + ".depth.npy"
+        pa, pb = os.path.join(ad, nm), os.path.join(sd, nm)
+        if not (os.path.isfile(pa) and os.path.isfile(pb)):
+            ddiff.append(dict(file=nm, why="depth 파일 없음"))
+            continue
+        if sha256(pa) == sha256(pb):
+            dsame += 1
+        else:
+            e = dict(file=nm)
+            try:
+                import numpy as np
+                A, Bb = np.load(pa).astype(np.float32), np.load(pb).astype(np.float32)
+                m = np.isfinite(A) & np.isfinite(Bb)
+                e["max_abs_m"] = round(float(np.abs(A[m] - Bb[m]).max()), 5) \
+                    if m.any() else None
+                e["n_finite_mask_diff"] = int((np.isfinite(A) != np.isfinite(Bb)).sum())
+                e["n_px_diff"] = int((A != Bb).sum())
+            except Exception as ex:
+                e["error"] = f"{type(ex).__name__}: {str(ex)[:80]}"
+            ddiff.append(e)
+    r["n_depth_identical"], r["n_depth_differing"] = dsame, len(ddiff)
+    r["depth_diff_sample"] = ddiff[:4]
     try:
         ma = json.load(open(os.path.join(ad, "heightmap_meta.json"), encoding="utf-8"))
         mb = json.load(open(os.path.join(sd, "heightmap_meta.json"), encoding="utf-8"))
@@ -207,7 +269,12 @@ def check_unit(band, scene, install):
                                      **px_delta(os.path.join(ad, d["file"]),
                                                 os.path.join(sd, d["file"])))
                                 for d in diff[:3] if isinstance(d, dict) and "file" in d]
-        r["differing_files"] = [d["file"] for d in diff if isinstance(d, dict)][:8]
+        r["png_differing_files"] = [d["file"] for d in diff if isinstance(d, dict)][:8]
+    # ---- 설치 판정: 기하 대응 -------------------------------------------------
+    r["geom_match"] = bool(
+        r["heightmap_sha_equal"] and r.get("n_prims_equal")
+        and r.get("arm_config_equal") and r["pose_max_delta"] == 0.0
+        and r["n_depth_differing"] == 0 and r["n_depth_identical"] == len(apng) > 0)
 
     # --- ③ 세그 건전성 (설치 여부와 무관하게 늘 잰다) --------------------------
     segp = {f: os.path.join(sd, os.path.splitext(f)[0] + ".idseg.npz") for f in spng}
@@ -260,10 +327,20 @@ def check_unit(band, scene, install):
         r["n_prim_normalized_mismatch"] = bad
 
     # --- ④ 판정 · 설치 --------------------------------------------------------
-    if not r["identical"]:
-        r["status"] = "QUARANTINE_NOT_IDENTICAL"
-        r["why"] = (f"재렌더 PNG {r['n_differing']}/{len(apng)}컷이 정본과 "
-                    f"바이트 다름 — 마스크를 설치하지 않는다")
+    if not r["geom_match"]:
+        r["status"] = "QUARANTINE_GEOM_MISMATCH"
+        bits = []
+        if not r["heightmap_sha_equal"]:
+            bits.append("heightmap sha 불일치")
+        if not r.get("n_prims_equal"):
+            bits.append(f"n_prims {r.get('n_prims')}")
+        if not r.get("arm_config_equal"):
+            bits.append("arm_config 불일치")
+        if r["pose_max_delta"] != 0.0:
+            bits.append(f"포즈 Δ {r['pose_max_delta']:.3g}")
+        if r["n_depth_differing"]:
+            bits.append(f"depth sha {r['n_depth_identical']}/{len(apng)}")
+        r["why"] = "기하 대응 실패 — " + " · ".join(bits)
         return r
     if r["n_idseg"] != len(apng):
         r["status"] = "QUARANTINE_SEG_INCOMPLETE"
@@ -278,8 +355,13 @@ def check_unit(band, scene, install):
         led = dict(doc="idseg_backfill", version="1.0",
                    authority="DECISIONS D75 ④ · W1B_REPORT §9 C-2",
                    procedure="A팔과 같은 씬·시드·밴드·조건·레시피로 재렌더 → "
-                             "PNG sha256 전 컷 바이트 동일 확인 → .idseg.npz만 설치. "
-                             "재렌더의 PNG·depth·heightmap은 폐기했다.",
+                             "**기하 대응** 확인(heightmap sha · n_prims · arm_config · "
+                             "포즈 7키+eye Δ=0 · 컷별 depth sha) → .idseg.npz만 설치. "
+                             "재렌더의 PNG·depth·heightmap은 폐기했다. "
+                             "RGB PNG sha256은 참고 열로만 기록한다 — PathTracing은 "
+                             "프로세스 간 비트 재현되지 않는다(대조 실험 0/76).",
+                   png_sha_identical=r["n_png_identical"],
+                   png_sha_note="설치 판정에 쓰지 않는다 (D75 ④ 문면 정정 — 보고서 참조)",
                    scene=scene, band=band, source_round=srun,
                    source_dir=os.path.relpath(sd, REPO),
                    canonical_round=arun, n_cuts=len(apng),
@@ -292,12 +374,28 @@ def check_unit(band, scene, install):
                 file=f, idseg=os.path.basename(dst),
                 idseg_fetch=sc[f].get("idseg_fetch"),
                 idseg_n_ids=sc[f].get("idseg_n_ids"),
-                png_sha256=sha256(os.path.join(ad, f)),
+                canonical_png_sha256=sha256(os.path.join(ad, f)),
+                canonical_depth_sha256=sha256(os.path.join(
+                    ad, os.path.splitext(f)[0] + ".depth.npy")),
                 idseg_sha256=hs[f]))
         json.dump(led, open(os.path.join(ad, "idseg_backfill.json"), "w",
                             encoding="utf-8"), ensure_ascii=False, indent=1)
         r["installed"] = len(apng)
         r["status"] = "INSTALLED"
+        ov = OVERLAY.get((band, scene))
+        if ov:
+            od = sdir(ov, scene)
+            if od:
+                n = 0
+                for f in apng + ["idseg_backfill.json"]:
+                    nm = (os.path.splitext(f)[0] + ".idseg.npz"
+                          if f.endswith(".png") else f)
+                    src, dst = os.path.join(ad, nm), os.path.join(od, nm)
+                    if os.path.lexists(dst):
+                        os.remove(dst)
+                    os.symlink(src, dst)
+                    n += 1
+                r["overlay_linked"] = dict(round=ov, n=n)
     return r
 
 
@@ -313,22 +411,27 @@ def main(install, only):
     ok = [r for r in rows if r["status"] in ("INSTALLED", "INSTALLABLE")]
     unavail = [r for r in rows if r["status"] not in ("INSTALLED", "INSTALLABLE")]
     n_cuts = sum(r.get("n_a", 0) for r in rows)
-    n_ident = sum(r.get("n_identical", 0) for r in rows)
+    n_ident = sum(r.get("n_png_identical", 0) for r in rows)
+    n_dep = sum(r.get("n_depth_identical", 0) for r in rows)
     n_inst = sum(r.get("installed", 0) for r in rows)
 
-    print(f"{'밴드':6s} {'씬':9s} {'컷':>4s} {'동일':>6s} {'hm sha':>7s} "
-          f"{'프림':>9s} {'포즈Δ':>9s} {'마스크/포즈':>11s} {'승계':>5s} 판정")
-    print("-" * 108)
+    print(f"{'밴드':6s} {'씬':9s} {'컷':>4s} {'PNG sha':>9s} {'depth sha':>10s} "
+          f"{'hm':>3s} {'프림':>9s} {'포즈Δ':>8s} {'마스크/포즈':>11s} {'승계':>4s} 판정")
+    print("-" * 120)
     for r in rows:
-        print(f"{r['band']:6s} {r['scene']:9s} {r.get('n_a', 0):4d} "
-              f"{r.get('n_identical', 0):4d}/{r.get('n_a', 0):<3d} "
-              f"{('=' if r.get('heightmap_sha_equal') else '≠'):>5s}  "
+        na = r.get("n_a", 0)
+        print(f"{r['band']:6s} {r['scene']:9s} {na:4d} "
+              f"{r.get('n_png_identical', 0):4d}/{na:<4d} "
+              f"{r.get('n_depth_identical', 0):5d}/{na:<4d} "
+              f"{('=' if r.get('heightmap_sha_equal') else '≠'):>3s} "
               f"{str(r.get('n_prims', '—')):>9s} "
-              f"{r.get('pose_max_delta', float('nan')):9.2e} "
+              f"{r.get('pose_max_delta', float('nan')):8.1e} "
               f"{r.get('n_unique_masks', 0):5d}/{r.get('n_poses', 0):<5d} "
-              f"{r.get('n_stale_carryover', 0):5d} {r['status']}")
-    print("-" * 108)
-    print(f"유닛 {len(ok)}/{n_units} 설치가능 · 컷 sha256 동일 {n_ident}/{n_cuts} "
+              f"{r.get('n_stale_carryover', 0):4d} {r['status']}")
+    print("-" * 120)
+    print(f"유닛 {len(ok)}/{n_units} 설치가능 · **기하 대응(설치 판정)** depth sha 동일 "
+          f"{n_dep}/{n_cuts} ({100.0 * n_dep / max(1, n_cuts):.1f} %) · "
+          f"참고 열 RGB PNG sha 동일 {n_ident}/{n_cuts} "
           f"({100.0 * n_ident / max(1, n_cuts):.1f} %) · 설치 사이드카 {n_inst}")
     if unavail:
         print("\nseg-unavailable (격리 — 설치하지 않음):")
@@ -343,15 +446,30 @@ def main(install, only):
                          "(PNG·depth 폐기) · 불일치는 격리(무단 대체 금지)",
                install_path="dataset/<정본 A 라운드>/<split>/<scene>/"
                             "<stem>.idseg.npz  (+ idseg_backfill.json 원장; "
-                            "정본 variation.json은 건드리지 않는다)",
+                            "정본 variation.json은 건드리지 않는다. g7fixM 오버레이 "
+                            "트리에는 같은 이름의 심링크를 건다)",
+               install_criterion="기하 대응 — heightmap sha256 동일 AND n_prims 동일 "
+                                 "AND arm_config 동일 AND 포즈 7키+cam.eye Δ=0 "
+                                 "AND 컷별 depth sha256 동일",
+               criterion_note="D75 ④ 문면의 'PNG 바이트 동일'은 만족 불가능하다 — "
+                              "PathTracing RGB는 프로세스 간 비트 재현되지 않는다. "
+                              "대조 실험(260825_v3w0_cuecls_A vs 260819_main_on, "
+                              "세그 변경 0, 19씬 76컷): PNG 0/76 · depth 73/76 · "
+                              "heightmap 19/19. 마스크는 조명·PT 잡음에 의존하지 "
+                              "않으므로 depth가 올바른 대응 증거다.",
                installed=install,
                n_units=n_units, n_units_ok=len(ok),
-               n_cuts=n_cuts, n_cuts_identical=n_ident,
-               identity_rate=round(n_ident / max(1, n_cuts), 6),
+               n_cuts=n_cuts,
+               n_cuts_png_identical=n_ident,
+               png_identity_rate=round(n_ident / max(1, n_cuts), 6),
+               n_cuts_depth_identical=n_dep,
+               geom_identity_rate=round(n_dep / max(1, n_cuts), 6),
                n_sidecars_installed=n_inst,
                seg_unavailable=[dict(band=r["band"], scene=r["scene"],
                                      status=r["status"], why=r.get("why"),
-                                     n_differing=r.get("n_differing"))
+                                     n_png_differing=r.get("n_png_differing"),
+                                     n_depth_differing=r.get("n_depth_differing"),
+                                     depth_diff_sample=r.get("depth_diff_sample"))
                                 for r in unavail],
                stale_carryover_total=sum(r.get("n_stale_carryover", 0) for r in rows),
                stale_at_cond_boundary_total=sum(

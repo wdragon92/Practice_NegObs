@@ -13,6 +13,8 @@ import os
 
 REPO = "/home/vislab/Desktop/work_sy/Practice_NegObs"
 V3 = os.path.join(REPO, "experiments/v3_0823")
+# W1B_ARM=B2 면 `w1b2_*` 기계 산출물에서 읽는다 (표 코드는 한 줄도 다르지 않다).
+TAG = "w1b2" if os.environ.get("W1B_ARM") == "B2" else "w1b"
 
 
 def J(n):
@@ -24,9 +26,9 @@ def n(x):
     return "—" if x is None else (f"{x:,}" if isinstance(x, int) else str(x))
 
 
-V = J("w1b_verify.json")
-R = J("w1b_rimpact.json")
-F = J("w1b_fuse_audit.json")
+V = J(f"{TAG}_verify.json")
+R = J(f"{TAG}_rimpact.json")
+F = J(f"{TAG}_fuse_audit.json")
 
 # ---------- §1 렌더 회계 ----------------------------------------------------
 print("### 1.1 컷 회계\n")

@@ -77,7 +77,45 @@ PRIMS = {
              "/World/SceneH2/GKit", "/World/SceneH2/TreeGrate_",
              "/World/SceneH2/Shadow/", "/World/SceneH2/Dress/"],
     ),
+    # ── 3차 빌더 런 (RENDER_PLAN_V3 §8 결재 1 A안 순서의 다음 두 씬) ───────────
+    "sceneH3": dict(
+        # 가림체 = **석축 L자 솔리드 하나**다. `Along`(회랑 북벽)과 `Flank`(계단실
+        #   서벽)는 같은 성토 옹벽체이고 그 교선이 이 씬의 은닉 모서리이므로 접두어를
+        #   `BendWall` 하나로 잡는다(갓돌 `AlongCap`·`FlankCap` 포함).
+        occluder=["/World/SceneH3/BendWall"],
+        hazard=["/World/SceneH3/Stair/", "/World/SceneH3/Lower/"],
+        # 낙차 구조물이 **아닌** 맥락 프림 — 계단실을 마감하는 담장·동측 석축은 4팔
+        #   공통 구조물이다. VG-06 판정에는 넣지 않고 화면 기여만 별도 인쇄한다.
+        context=["/World/SceneH3/WallS/", "/World/SceneH3/WallE/",
+                 "/World/SceneH3/Bank/"],
+        cue=["/World/SceneH3/HandrailW/", "/World/SceneH3/HandrailE/",
+             "/World/SceneH3/Mirror/", "/World/SceneH3/Tactile",
+             "/World/SceneH3/NosingWalk/", "/World/SceneH3/NosingStair/",
+             "/World/SceneH3/Sign/", "/World/SceneH3/Bollard_",
+             "/World/SceneH3/GKitWalk", "/World/SceneH3/TreeGrate_",
+             "/World/SceneH3/Shadow/", "/World/SceneH3/Dress/"],
+    ),
+    # **측방 씬** — 가림체가 없다. VG-06 의 "가림체가 종단 모서리를 소유한다"는
+    #   판정은 이 씬에 대해 **적용되지 않으며**(계획 §2.3 은 은닉을 요구하지 않는다),
+    #   대신 `gate_sectors` 가 폴라 GT 의 섹터 분포를 잰다. `lateral=True` 가 그 전환이다.
+    "sceneL1": dict(
+        lateral=True,
+        occluder=[],
+        hazard=["/World/SceneL1/CanalS/", "/World/SceneL1/CanalN/"],
+        cue=["/World/SceneL1/RailS/", "/World/SceneL1/RailN/",
+             "/World/SceneL1/Tactile", "/World/SceneL1/Nosing/",
+             "/World/SceneL1/Sign/", "/World/SceneL1/Bollard_",
+             "/World/SceneL1/Delineator/", "/World/SceneL1/GKitPlaza",
+             "/World/SceneL1/GKitWalk", "/World/SceneL1/TreeGrate_",
+             "/World/SceneL1/Shadow/", "/World/SceneL1/Dress/"],
+    ),
 }
+
+# gridspec_v1 — 섹터·밴드 이름표. `labeler.polar_cells` 가 `cell = band*5 + sector` 로
+#   싣고, 섹터 인덱스 0..4 는 A..E 이며 **A = 화면 왼쪽 = +방위각**이다.
+SECTOR_NAMES = ("A", "B", "C", "D", "E")
+BAND_NAMES = ("1", "2", "3a", "3b")
+LATERAL_SECTORS = ("A", "E")
 
 LABELER_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))))),
@@ -146,7 +184,7 @@ def px_by_prefix(arr, id2p, prefixes):
 # --------------------------------------------------------------------------- #
 # 게이트
 # --------------------------------------------------------------------------- #
-def gate_vg01(dA, dB, dC):
+def gate_vg01(dA, dB, dC, ta=None, tb=None):
     """VG-01 — A/B 위험-GT 동일성. **3층 보고**(본 런이 계획에 제안하는 확장).
 
     계획 §6.1 의 문면은 `heightmap.npy` **바이트 동일**이다. 그러나 이 판정은 실행 불가능한
@@ -162,6 +200,20 @@ def gate_vg01(dA, dB, dC):
         hm_tol_offprint — 다른 셀이 있으나 **전부 낙차 발자국 밖** → polar_gt 불변
         hm_fail        — 발자국 **안**에서 z 가 움직였다 → 그 키는 구조물(토글 금지)
     발자국은 A↔C 트윈에서 정의한다(`z_C − z_A ≥ hazard_depth`).
+
+    **3차 빌더 런의 정정 — 4층으로 늘린다.** sceneH3 R0 실측에서 `hm_fail`(발자국 안
+    611/5122 셀 · max |Δz| 1.259 m)이 나왔는데, 범인은 구조물이 아니라 **낙차 위에 떠 있는
+    벽면 계단 손잡이**였다. 손잡이는 A팔에 있고 B팔에서 사라지므로 그 셀의 높이맵 z 가
+    "손잡이 상단 → 계단 상면"으로 내려간다. 그러나 **그 셀은 여전히 발자국이다** —
+    낙차가 0.3 m 아래로 사라지는 것이 아니라 그 위에 있던 얇은 관이 없어질 뿐이다.
+    실측이 그것을 증명한다 `[260823_v3p5_h3l1probe · sceneH3]`:
+        **`polar_gt` 가 16프레임 전부 A↔B 비트 동일** · tier 분포도 동일(H 12 · none_in_fov 4)
+        발자국 `cells_kept` A 5120–5121 / B 5130 (0.2 % 차)
+        `max_diff` A **2.363 m** vs B **1.800 m**(= 10단 × 0.18, 진짜 낙차)
+    모델이 배우는 GT 는 20칸 `polar_gt` 이지 원시 높이맵이 아니므로, **결정층은 `polar_gt`**
+    여야 한다. 셀 z 가 움직였으나 `polar_gt` 가 전 프레임 동일한 경우를 `hm_gt_equal` 로
+    분리한다 — 이것은 SCENE_TEXT_BUILD §9 가 확정한 네 결함과 **같은 구조**의 다섯 번째
+    사례다(*게이트를 어느 양에 대해 세는가*).
     """
     zA, mA, hA = load_hm(dA)
     zB, mB, hB = load_hm(dB)
@@ -182,13 +234,23 @@ def gate_vg01(dA, dB, dC):
     n_fp = int(fp.sum())
     n_diff_fp = int(((diff > 0) & fp).sum())
     dmax_fp = float(diff[fp].max()) if n_fp else 0.0
+    # ── 4층 판정: `polar_gt` 동일성이 결정층이다 ────────────────────────────
+    gt_n = gt_same = None
+    if ta and tb:
+        common = sorted(set(ta) & set(tb))
+        gt_n = len(common)
+        gt_same = sum(1 for f in common
+                      if ta[f].get("polar_gt") == tb[f].get("polar_gt"))
+    gt_equal = (gt_n is not None and gt_n > 0 and gt_same == gt_n)
     tier = ("hm_exact" if same_bytes else
-            "hm_tol_offprint" if n_diff_fp == 0 else "hm_fail")
+            "hm_tol_offprint" if n_diff_fp == 0 else
+            "hm_gt_equal" if gt_equal else "hm_fail")
     return dict(ok=(tier != "hm_fail") and void_same, tier=tier,
                 bytes_equal=bool(same_bytes), n_cells_diff=n_diff,
                 max_abs_dz=round(dmax, 6),
                 n_footprint_cells=n_fp, n_cells_diff_in_footprint=n_diff_fp,
                 max_abs_dz_in_footprint=round(dmax_fp, 6),
+                polar_gt_frames=gt_n, polar_gt_equal_frames=gt_same,
                 void_mask_equal=void_same,
                 meta_equal=bool(mA == mB), hash_A=hA, hash_B=hB)
 
@@ -203,6 +265,15 @@ def gate_vg02(dA, dC, dD):
     (ii) A 대비 **C 가 더 낮은** 칸이 없을 것 (C 에만 있는 잔존 위험 = 제작 실패).
          A·C 는 둘 다 장식을 갖는 팔이라 이 비교는 장식에 오염되지 않는다.
     (iii) 참고로 A↔C 발자국 규모를 인쇄 — 이것이 실제 GT 다.
+
+    **3차 빌더 런의 정정 — C↔D 비교는 부호를 가려야 한다.** sceneH3 R0 에서 발자국 안
+    C↔D 가 **126셀** 나왔는데, C 는 `keep_dressing` 팔이라 **D 보다 프림이 많다**.
+    126셀 전부 `z_C − z_D ≥ 0.30`, 즉 **C 가 더 높은** 셀이었다 — 낙차 위 0.90 m 에 떠 있는
+    벽면 손잡이다. *"위로 솟은 부재"는 낙차가 아니다.* 절대값 비교(`|z_C − z_D|`)는 그
+    구분을 못 한다. ⇒ 판정층을 **`z_D − z_C ≥ depth`(C 에 구멍이 있다)** 하나로 좁히고,
+    반대 부호는 `cells_C_above_D`(= 보존된 장식·단서)로 따로 인쇄한다. C ≥ D 는
+    `keep_dressing` 의 정의상 항상 참이어야 하므로 `cells_C_below_D > 0` 이야말로
+    진짜 이상이다.
     """
     zA, _, _ = load_hm(dA)
     zC, _, _ = load_hm(dC)
@@ -213,8 +284,13 @@ def gate_vg02(dA, dC, dD):
     fp = f & ((zC - zA) >= HAZ_DEPTH)
     cd_all = int((f & (np.abs(zC - zD) >= HAZ_DEPTH)).sum())
     cd_fp = int((fp & (np.abs(zC - zD) >= HAZ_DEPTH)).sum())
+    # 부호 분해 — `below` 만이 "C 에 구멍" 이고 `above` 는 보존된 장식·단서다.
+    cd_fp_below = int((fp & ((zD - zC) >= HAZ_DEPTH)).sum())
+    cd_fp_above = int((fp & ((zC - zD) >= HAZ_DEPTH)).sum())
     resid = int((f & ((zA - zC) >= HAZ_DEPTH)).sum())
-    return dict(ok=(cd_fp == 0 and resid == 0),
+    return dict(ok=(cd_fp_below == 0 and resid == 0),
+                cells_C_below_D_in_footprint=cd_fp_below,
+                cells_C_above_D_in_footprint=cd_fp_above,
                 cells_C_vs_D_in_footprint=cd_fp, cells_C_vs_D_all=cd_all,
                 cells_resid_hazard_in_C=resid, cells_footprint_A=int(fp.sum()))
 
@@ -351,9 +427,17 @@ def gate_vg06(d, scene, h_files, var_cuts=()):
                                                  cfg.get("context") or []),
                          n_ids=int(len(np.unique(arr)))))
     good = [r for r in rows if "occluder_px" in r]
-    ok = bool(good) and all(r["occluder_px"] > 0 and r["hazard_px_in_grid"] == 0
-                            for r in good)
-    return dict(ok=ok, n_frames=len(rows),
+    # **측방 씬은 은닉 씬이 아니다.** 계획 §2.3 은 sceneL1 에 가림체를 요구하지 않고
+    #   낙차가 보이는 것이 정상이다 — 그 씬에 "가림체 px > 0 · 낙차 px = 0" 을 걸면
+    #   정상 씬을 실패로 읽는다(SCENE_TEXT_BUILD §9 가 확정한 결함 4건과 같은 구조:
+    #   *게이트를 어디에서 어떤 씬에 대해 세는가*). `lateral=True` 면 측정만 하고
+    #   판정은 `gate_sectors` 로 넘긴다.
+    if cfg.get("lateral"):
+        ok = bool(good)
+    else:
+        ok = bool(good) and all(r["occluder_px"] > 0 and r["hazard_px_in_grid"] == 0
+                                for r in good)
+    return dict(ok=ok, lateral=bool(cfg.get("lateral")), n_frames=len(rows),
                 n_occluder_pos=sum(1 for r in good if r["occluder_px"] > 0),
                 n_hazard_pos=sum(1 for r in good if r["hazard_px_in_grid"] > 0),
                 n_hazard_pos_all=sum(1 for r in good if r["hazard_px_all"] > 0),
@@ -361,6 +445,79 @@ def gate_vg06(d, scene, h_files, var_cuts=()):
                 cue_px_max=max([r["cue_px"] for r in good], default=None),
                 context_px_max=max([r["context_px"] for r in good], default=0),
                 frames=rows)
+
+
+def gate_sectors(tiers, var_cuts):
+    """**측방 씬 전용 게이트** — 라벨 `polar_gt` 의 **섹터 분포**를 잰다.
+
+    계획 §2.3 이 sceneL1 을 세우게 한 이유가 이 표다: *"현 test 에 측방 씬이 0개라
+    섹터 분해능(5→10)·밴드 세분을 '실용 정보량' 기준으로 재론할 측정 기반이 원리적으로
+    없다"* `[승용 결재 1 룰링]`. 그 측정 기반이란 **위험 질량이 실제로 어느 섹터에
+    실리는가**의 실측 분포이고, 이 함수가 그것을 라벨에서 직접 읽는다.
+
+    `polar_gt` 는 20원소(4밴드 × 5섹터, `cell = band*5 + sector`)의 0/1 벡터다.
+    두 층으로 집계한다 —
+      pos_rate[s]    프레임 수준: 그 섹터의 셀이 **하나라도** 양성인 프레임 비율
+      cell_share[s]  셀 수준: 양성 셀 총수 중 그 섹터의 몫
+    그리고 밴드×섹터 20칸 표를 그대로 인쇄한다(밴드 세분 재론의 입력).
+
+    판정 기준(사전 등록):
+      (a) 측방 A·E 의 셀 점유율 합이 B·D 합보다 클 것        ← "위험 질량이 A·E 에 집중"
+      (b) A 와 E 가 **둘 다** 프레임 양성률 ≥ 0.50 일 것      ← 양측 개거를 세운 이유
+      (c) 격자 밖(`none_in_fov`) 프레임 비율이 0.10 이하일 것 ← 밴드가 격자를 벗어나지 않음
+    """
+    n = 0
+    pos = {s: 0 for s in SECTOR_NAMES}
+    cells = {s: 0 for s in SECTOR_NAMES}
+    grid = [[0] * 5 for _ in range(4)]
+    n_cells_tot = 0
+    n_none = 0
+    per_frame = []
+    for fn, v in sorted(tiers.items()):
+        gt = v.get("polar_gt")
+        if not gt:
+            continue
+        n += 1
+        if v.get("tier_strict") == "none_in_fov":
+            n_none += 1
+        seen = set()
+        k = 0
+        for b in range(4):
+            for s in range(5):
+                if gt[b * 5 + s]:
+                    grid[b][s] += 1
+                    cells[SECTOR_NAMES[s]] += 1
+                    n_cells_tot += 1
+                    seen.add(SECTOR_NAMES[s])
+                    k += 1
+        for s in seen:
+            pos[s] += 1
+        cam = next((c["cam"] for c in var_cuts if c["file"] == fn), None)
+        per_frame.append(dict(
+            file=fn, tier=v.get("tier_strict"), n_cells=k,
+            sectors="".join(sorted(seen)),
+            d=round(cam["d"], 3) if cam else None,
+            h=round(cam["h_rel"], 3) if cam else None,
+            yaw=round(cam["yaw"], 3) if cam else None))
+    if not n:
+        return dict(ok=False, note="polar_gt 없음")
+    pr = {s: round(pos[s] / n, 4) for s in SECTOR_NAMES}
+    cs = {s: round(cells[s] / n_cells_tot, 4) if n_cells_tot else 0.0
+          for s in SECTOR_NAMES}
+    lat = cs["A"] + cs["E"]
+    mid = cs["B"] + cs["D"]
+    ok = (lat > mid
+          and min(pr["A"], pr["E"]) >= 0.50
+          and (n_none / n) <= 0.10)
+    return dict(ok=ok, n_frames=n, n_cells_total=n_cells_tot,
+                cells_per_frame=round(n_cells_tot / n, 3),
+                pos_rate=pr, cell_share=cs,
+                lateral_share=round(lat, 4), mid_share=round(mid, 4),
+                center_share=cs["C"],
+                none_in_fov=round(n_none / n, 4),
+                band_sector=dict(bands=list(BAND_NAMES),
+                                 sectors=list(SECTOR_NAMES), counts=grid),
+                frames=per_frame)
 
 
 def gate_vg07(dA, dC, files):
@@ -447,15 +604,16 @@ def main(argv=None):
             continue
 
         sec = {}
-        sec["VG-01"] = gate_vg01(d["A"], d["B"], d["C"])
+        ta0 = tiers_a.get(scene, {})
+        tb0 = tiers_b.get(scene, {})
+        sec["VG-01"] = gate_vg01(d["A"], d["B"], d["C"], ta0, tb0)
         sec["VG-02"] = gate_vg02(d["A"], d["C"], d["D"])
         sec["VG-datum/10"] = gate_datum_pose(var)
         sec["VG-08"] = {arm: gate_vg08(d[arm], var[arm]) for arm in var}
         sec["VG-void"] = {arm: gate_vg_void(d[arm]) for arm in var}
 
         # strict-H 프레임 목록 (A팔) · paired-H
-        ta = tiers_a.get(scene, {})
-        tb = tiers_b.get(scene, {})
+        ta, tb = ta0, tb0
         h_a = [f for f, v in ta.items() if v["tier_strict"] == "H"]
         h_b = [f for f, v in tb.items() if v["tier_strict"] == "H"]
         paired = sorted(set(h_a) & set(h_b))
@@ -466,9 +624,16 @@ def main(argv=None):
         sec["paired_H"] = dict(n_A=len(h_a), n_B=len(h_b), n_paired=len(paired),
                                n_frames=len(ta), files=paired)
 
-        sec["VG-06"] = gate_vg06(d["A"], scene, sorted(h_a), cuts_of(var["A"]))
+        lateral = bool(PRIMS.get(scene, {}).get("lateral"))
+        # 측방 씬은 strict-H 프레임이 드물다(가림체가 없으니 정상이다). VG-06 의 ID 마스크
+        #   측정은 **전 프레임**에 대해 돌려야 정보가 남는다.
+        vg06_files = sorted(h_a) if not lateral else sorted(ta)
+        sec["VG-06"] = gate_vg06(d["A"], scene, vg06_files, cuts_of(var["A"]))
         files = sorted({c["file"] for c in cuts_of(var["A"])})
         sec["VG-07"] = gate_vg07(d["A"], d["C"], files)
+        if lateral:
+            sec["SECTOR-A"] = gate_sectors(ta, cuts_of(var["A"]))
+            sec["SECTOR-B"] = gate_sectors(tb, cuts_of(var.get("B") or var["A"]))
 
         report["scenes"][scene] = sec
 
@@ -482,12 +647,15 @@ def main(argv=None):
               f"(max|Δz| {g.get('max_abs_dz')} m) · **발자국 안 다른 셀 "
               f"{g.get('n_cells_diff_in_footprint')}/{g.get('n_footprint_cells')} "
               f"(max|Δz| {g.get('max_abs_dz_in_footprint')} m)** · void 마스크 동일="
-              f"{g.get('void_mask_equal')} → {'통과' if g.get('ok') else '**미달**'}")
+              f"{g.get('void_mask_equal')} · **polar_gt 동일 "
+              f"{g.get('polar_gt_equal_frames')}/{g.get('polar_gt_frames')} 프레임** → "
+              f"{'통과' if g.get('ok') else '**미달**'}")
         print(f"         hash A={g.get('hash_A')} B={g.get('hash_B')}")
         g = sec["VG-02"]
-        print(f"  VG-02  C/D 음성      : **발자국 안 C↔D 낙차셀 "
-              f"{g.get('cells_C_vs_D_in_footprint')}** (무제한 "
-              f"{g.get('cells_C_vs_D_all')} = 장식) · C 잔존위험셀 "
+        print(f"  VG-02  C/D 음성      : **발자국 안 C가 D보다 낮은 셀 "
+              f"{g.get('cells_C_below_D_in_footprint')}** (C가 높은 셀 "
+              f"{g.get('cells_C_above_D_in_footprint')} = 보존된 장식·단서 · "
+              f"무제한 {g.get('cells_C_vs_D_all')}) · C 잔존위험셀 "
               f"{g.get('cells_resid_hazard_in_C')} · (참고 A↔C 발자국 "
               f"{g.get('cells_footprint_A')} 셀) → "
               f"{'통과' if g.get('ok') else '**미달**'}")
@@ -509,11 +677,32 @@ def main(argv=None):
         print(f"  paired-H            : A {p['n_A']} · B {p['n_B']} · "
               f"**둘 다 H = {p['n_paired']}** / {p['n_frames']}컷")
         g = sec["VG-06"]
-        print(f"  VG-06  모서리 소속   : H 프레임 {g['n_frames']} · 가림체>0 "
+        print(f"  VG-06  모서리 소속   : {'전' if lateral else 'H'} 프레임 "
+              f"{g['n_frames']} · 가림체>0 "
               f"{g['n_occluder_pos']} · **격자 안 낙차 구조물>0 {g['n_hazard_pos']}** "
               f"(격자 무제한 {g.get('n_hazard_pos_all')}) · "
               f"단서 px {g['cue_px_min']}–{g['cue_px_max']} · 맥락 px 최대 "
-              f"{g.get('context_px_max')} → {'통과' if g['ok'] else '**미달**'}")
+              f"{g.get('context_px_max')} → "
+              + ("**측정만** (측방 씬 — 은닉 요구 없음, 계획 §2.3)" if lateral
+                 else ('통과' if g['ok'] else '**미달**')))
+        for tag, arm in (("SECTOR-A", "A팔"), ("SECTOR-B", "B팔")):
+            g = sec.get(tag)
+            if not g or not g.get("n_frames"):
+                continue
+            print(f"  섹터 분포 {arm}      : n={g['n_frames']} · 프레임당 양성셀 "
+                  f"{g['cells_per_frame']}/20 · none_in_fov {g['none_in_fov']}")
+            print("      양성률  " + " · ".join(
+                f"{k} {v:.3f}" for k, v in g["pos_rate"].items()))
+            print("      셀점유  " + " · ".join(
+                f"{k} {v:.3f}" for k, v in g["cell_share"].items())
+                + f"  ⇒ **측방 A+E {g['lateral_share']:.3f}** vs 중간 B+D "
+                  f"{g['mid_share']:.3f} vs 정면 C {g['center_share']:.3f}"
+                + f" → {'통과' if g['ok'] else '**미달**'}")
+            bs = g["band_sector"]
+            print("      밴드×섹터 (양성 프레임 수)   " + "   ".join(bs["sectors"]))
+            for bi, bn in enumerate(bs["bands"]):
+                print(f"        밴드 {bn:<3s} " + " ".join(
+                    f"{c:3d}" for c in bs["counts"][bi]))
         g = sec["VG-07"]
         if g.get("ok"):
             print(f"  VG-07  (A,C) 광학차  : n={g['n_pairs']} · mean|ΔI| "
@@ -525,7 +714,9 @@ def main(argv=None):
                   sec["VG-06"].get("ok")]
                  + [r["ok"] for r in sec["VG-datum/10"].values()]
                  + [r["ok"] for r in sec["VG-08"].values()]
-                 + [r.get("ok", False) for r in sec["VG-void"].values()])
+                 + [r.get("ok", False) for r in sec["VG-void"].values()]
+                 # 측방 씬은 섹터 게이트가 **판정층**이다(VG-06 은 측정층으로 내려간다).
+                 + ([sec["SECTOR-A"].get("ok", False)] if lateral else []))
         sec["verdict"] = "통과" if ok else "미달 항목 있음"
         all_ok = all_ok and ok
         print(f"  ⇒ {scene} 종합: {sec['verdict']}")

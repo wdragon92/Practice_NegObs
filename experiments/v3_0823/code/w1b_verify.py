@@ -468,7 +468,8 @@ def main():
         total_sec += sec
     out["accounting"] = dict(
         total_cuts=total_cuts, in_process_gpu_h=round(total_sec / 3600, 4),
-        planned_cuts=648, plan_table_b_arm=816,
+        planned_cuts=(648 if ARM == "B" else 576), plan_table_b_arm=816,
+        wave=ARM,
         skipped_d74=dict(scenes=SKIPPED_D74, cuts=sum(SKIPPED_D74.values()),
                          why="레버 0 → B ≡ A 바이트 동일 (DECISIONS D74 ⑤)"),
         note="계획 §1.2 표의 B팔 '합(프레임) 792'는 scene06 보류(24컷)를 뺀 값. "

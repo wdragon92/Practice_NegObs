@@ -33,6 +33,13 @@ PLAN = {
     #   기대치의 근거: "H 밴드 24컷 × 수율 0.5(보수적; s14 실적은 0.83)" (§3.2 각주).
     "sceneH1": dict(bands=dict(base=24, H=24), a_cuts=48, expect=12.0),
     "sceneH2": dict(bands=dict(base=24, H=24), a_cuts=48, expect=12.0),
+    # ── 3차 빌더 런 (A안 순서의 다음 두 씬) ──────────────────────────────────
+    "sceneH3": dict(bands=dict(base=24, H=24), a_cuts=48, expect=12.0),
+    # **sceneL1 은 측방 씬이고 paired-H 목표가 없다**(계획 §3.2 표의 해당 열이 "—").
+    #   `expect=0.0` 는 "기대치 없음"의 표기이며, 이 스크립트의 수율 판정문은 이 씬에
+    #   대해 **무의미**하다(SCENE_TEXT_BUILD §5.4 의 근거리 대조 라운드와 같은 상황).
+    #   이 씬의 판정은 `h12_gates.py --lateral` 의 섹터 분포다.
+    "sceneL1": dict(bands=dict(base=24, LAT=24), a_cuts=48, expect=0.0),
 }
 # 계획의 보수적 수율 모형. **test-ext 는 §3.2 가 H 0.50 을 쓴다**(val 은 §3.5 가 0.60).
 YIELD_MODEL = dict(H=0.60, base=0.20)

@@ -1,0 +1,6 @@
+> The H tier is defined geometrically: the hazard prism re-projects to **zero contributing pixels** under the frame's depth buffer. That is not the same as the image being unchanged. Differencing all 96 test H twin pairs at native resolution, **no pair is identical**: the median pair differs on 4.5 % of the frame at ≥ 32/255, and the quietest pair still differs on 2,211 pixels — 44× the renderer's own nondeterminism floor, measured on a geometrically identical render pair. 81 % of that residual lies inside the amodal hazard silhouette. The honest claim is that the model recovers the hazard **without any pixel of the hazard surface itself**, from shading, occlusion and layout evidence that the hazard's presence produces elsewhere in the frame.
+>
+> Two qualifiers travel with every twin Δ in this paper: the intervention removes the hazard geometry **and everything the scene builder places inside the same branch**, and the twin identifies **that** the hazard caused the response, not **which image property** carries it.
+
+**배치**: §5.1 정의 + §5.3 트윈. **"fully occluded / 완전가림" 전 용례(리포 18곳)를 대체**한다 — 폐기어.
+**출처**: `RESULTS_DRAFT.md` RT-C · `rt_response/F7_HPAIR_PIXDIFF.md` · `redteam/R6_line_edits.md` (a) · caveat C4

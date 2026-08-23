@@ -1,0 +1,4 @@
+> Two distinct bounds apply to the detector row and must not be conflated. **(i)** Our ground-projection adapter cannot map a box to an E- or H-tier cell at all: feeding the amodal ground-truth boxes in as confidence-1.0 detections yields E = H = 0.000 before any training, so the zeros in the table are a property of the adapter. **(ii)** Removing the adapter and scoring purely in image space, the detector does fire near hidden hazards at a low rate (0.066 of H frames at IoU > 0), but the identical measurement on the hazard-deleted twin of the same cut gives 0.076, so the **twin-conditional rate is −0.010: no hazard-conditional evidence at all**, against +0.337 on the visible tier. The defensible statement is (ii), and it is the stronger one.
+
+**배치**: 본 표 4행(YOLO) 해설 · §5.2 row 4. **"검출 패러다임의 상한"으로 일반화하는 R.1 문장을 대체**한다.
+**출처**: `experiments/mainrun_0819/RESULTS_DRAFT.md` RT-D · `METRICS.md` §RT.3 · 표 T12

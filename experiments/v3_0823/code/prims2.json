@@ -1,0 +1,5166 @@
+{
+ "main::scene01_campus_stairs.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2609
+    ],
+    "guards": [
+     {
+      "L": 2609,
+      "end": 2648,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_railing_line"
+      ],
+      "prims": [
+       "/World/Scene01/Rail_{j}",
+       "/World/Scene01/Rail_"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     2570
+    ],
+    "guards": []
+   },
+   "cue_nosing": {
+    "declared": false
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1738
+    ],
+    "guards": [
+     {
+      "L": 1738,
+      "end": 1749,
+      "test": "cfg[\"cue_material_break\"]",
+      "calls": [
+       "make_pbr",
+       "_tex_path"
+      ],
+      "prims": [
+       "/World/Looks/PlazaLower"
+      ]
+     }
+    ]
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2695
+    ],
+    "guards": [
+     {
+      "L": 2695,
+      "end": 2696,
+      "test": "cfg[\"cue_sign\"]",
+      "calls": [
+       "build_signs"
+      ],
+      "prims": [
+       "/World/Looks/SignBack",
+       "/World/Looks/Sign{tag}",
+       "/World/Scene01/Sign_{tag}",
+       "/World/Looks/Sign",
+       "/World/Scene01/Sign_"
+      ]
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2685
+    ],
+    "guards": [
+     {
+      "L": 2685,
+      "end": 2691,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_planters",
+       "build_backdrop",
+       "build_lawn_trees",
+       "build_fountain",
+       "build_streetlight",
+       "build_dressing_props"
+      ],
+      "prims": [
+       "/World/Scene01/Planter_{spec['name']}",
+       "/World/Scene01/Planter_",
+       "{base}/Grass",
+       "{base}/Curb_{tag}",
+       "{base}/Cap_{tag}",
+       "/Grass",
+       "/Curb_",
+       "/Cap_",
+       "[backdrop] {tag} axis {ax} W {p.W} shell h {hh} · ridge {ridge} · kind {kind_s} / tier {p.tier} · d_true {p.d_true} m · in_frame {str(p.in_frame)} · z_ceil {'%.2f' % p.z_ceil if p.z_ceil is not None else '  n/a'} · sky above roof {str(sky)} · prims {n_prim}{extra}",
+       "[backdrop] {len(bp['blocks'])}동 {n_tot} 프림 · 개구부 보유 {n_glazed}동 · 지붕선 위 하늘 {len(bp['blocks']) - len(over)}/{len(bp['blocks'])}",
+       "/World/Scene01/Backdrop_{tag}",
+       " / tier ",
+       "/",
+       "/World/Scene01/Backdrop_"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "main::scene02_underpass.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1603
+    ],
+    "guards": [
+     {
+      "L": 1603,
+      "end": 1672,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_handrail"
+      ],
+      "prims": [
+       "{ROOT}/StairRail_{tag}",
+       "/StairRail_",
+       "[cue_railing] 계단 손잡이 2선 (φ{sr['dia'] * 1000} · h{sr['height'] * 1000} · 끝단연장 {sr['ext_top'] * 1000}/{sr['ext_bot'] * 1000}) · 프림 {n_hr} — 방호는 좌우 옹벽 + 피트 둘레 난간",
+       "/",
+       "{prefix}/Top",
+       "{prefix}/Mid",
+       "{prefix}/Post_{n}",
+       "/Top",
+       "/Mid",
+       "/Post_",
+       "{ROOT}/PerimRail_S",
+       "/PerimRail_S",
+       "{ROOT}/PerimRail_N",
+       "/PerimRail_N"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     1358,
+     1584
+    ],
+    "guards": [
+     {
+      "L": 1584,
+      "end": 1591,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "{ROOT}/Tactile_Land",
+       "/Tactile_Land"
+      ]
+     }
+    ]
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1569
+    ],
+    "guards": [
+     {
+      "L": 1569,
+      "end": 1575,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [
+       "build_nosing"
+      ],
+      "prims": [
+       "{ROOT}/Nosing",
+       "/Nosing"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1923
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1940
+    ],
+    "guards": [
+     {
+      "L": 1940,
+      "end": 1941,
+      "test": "cfg.get(\"cue_sign\") and cfg[\"hazard_stairs\"]",
+      "calls": [
+       "build_signs"
+      ],
+      "prims": [
+       "{ROOT}/Looks/SignBack",
+       "/Looks/SignBack",
+       "{ROOT}/Looks/Sign{tag}",
+       "{ROOT}/Sign_{tag}",
+       "/Looks/Sign",
+       "/Sign_"
+      ]
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1322,
+     1386,
+     1936
+    ],
+    "guards": [
+     {
+      "L": 1936,
+      "end": 1939,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing",
+       "build_backdrop",
+       "build_canopy"
+      ],
+      "prims": [
+       "{ROOT}/Sign/Panel",
+       "{ROOT}/Sign/Face",
+       "{ROOT}/Streetlight_{k}",
+       "{ROOT}/Building_{key}",
+       "{ROOT}/Hedge_{i}",
+       "/Sign/Panel",
+       "/Sign/Face",
+       "{ROOT}/Sign/Post_{tag}",
+       "{ROOT}/Bollard_{k}",
+       "{ROOT}/Bench_{k}",
+       "{ROOT}/Bin_{k}/Body",
+       "{ROOT}/Bin_{k}/Rim",
+       "{ROOT}/Planter_{k}",
+       "/Streetlight_"
+      ]
+     },
+     {
+      "L": 1322,
+      "end": 1326,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [],
+      "prims": []
+     },
+     {
+      "L": 1386,
+      "end": 1390,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [],
+      "prims": []
+     }
+    ]
+   }
+  }
+ },
+ "main::scene03_riverbank.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     2679
+    ],
+    "guards": [
+     {
+      "L": 2679,
+      "end": 2682,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_railing_line"
+      ],
+      "prims": [
+       "{ROOT}/Rail",
+       "/Rail"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     2690
+    ],
+    "guards": [
+     {
+      "L": 2690,
+      "end": 2697,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile",
+       "make_pbr"
+      ],
+      "prims": [
+       "{ROOT}/Tactile",
+       "/Tactile",
+       "{ROOT}/TactileMtl",
+       "/TactileMtl"
+      ]
+     }
+    ]
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     2684
+    ],
+    "guards": [
+     {
+      "L": 2684,
+      "end": 2688,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [
+       "build_nosing"
+      ],
+      "prims": [
+       "{ROOT}/Nosing",
+       "/Nosing"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2097
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2713
+    ],
+    "guards": [
+     {
+      "L": 2713,
+      "end": 2714,
+      "test": "cfg[\"cue_scene_dressing\"] and cfg[\"hazard_stairs\"]",
+      "calls": [
+       "build_dressing"
+      ],
+      "prims": [
+       "{ROOT}/Shrub",
+       "{ROOT}/Reed",
+       "{ROOT}/Pergola",
+       "{pgrp}/C",
+       "{ROOT}/Gauge/Post",
+       "{ROOT}/Bollard_{i}",
+       "{ROOT}/BollardBand_{i}",
+       "{ROOT}/BollardCap_{i}",
+       "{ROOT}/Bench_{i}",
+       "/Shrub",
+       "[03-D] 사면 관목 {placed_sh}/{len(shrub_pts)}주 (place_shrubs · 1 bed · role {hb['species']} · h {hb['target_h']} m)",
+       "{ROOT}/Tree_{i}",
+       "{ROOT}/TreeX_{i}",
+       "/Reed"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "main::scene04_parktrail.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     1779
+    ],
+    "guards": [
+     {
+      "L": 1779,
+      "end": 1799,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [],
+      "prims": [
+       "{ROOT}/LogRail/Rail",
+       "/LogRail/Rail",
+       "{ROOT}/LogRail/Post_{p}",
+       "/LogRail/Post_"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     1802
+    ],
+    "guards": [
+     {
+      "L": 1802,
+      "end": 1805,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "{ROOT}/Tactile",
+       "/Tactile"
+      ]
+     }
+    ]
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     1808
+    ],
+    "guards": [
+     {
+      "L": 1808,
+      "end": 1812,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [
+       "build_nosing"
+      ],
+      "prims": [
+       "{ROOT}/Nosing",
+       "/Nosing"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1247
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1826
+    ],
+    "guards": [
+     {
+      "L": 1826,
+      "end": 1847,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_nature",
+       "build_park_props",
+       "build_verge",
+       "build_handline"
+      ],
+      "prims": [
+       "{os.path.splitext(k.split('/')[-1])[0]} {v}",
+       "/",
+       "{ROOT}/Tree_{spec['name']}",
+       "{ROOT}/TreeX_{n}",
+       "{ROOT}/Bench_{n}",
+       "/Tree_",
+       "/TreeX_",
+       "/Bench_",
+       "v4-D1/D2/D5/D6/D11 - man-made props that make it read as a 'park trail'.",
+       "{ROOT}/SignPost/Post",
+       "{ROOT}/Board/Panel",
+       "{ROOT}/Board/Face",
+       "{ROOT}/Pergola",
+       "/SignPost/Post"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "main::scene05_amphitheater.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     2669
+    ],
+    "guards": [
+     {
+      "L": 2669,
+      "end": 2684,
+      "test": "cfg.get(\"cue_railing\")",
+      "calls": [
+       "build_arc_steps"
+      ],
+      "prims": [
+       "/World/Scene05/Rail/Post_{k}",
+       "/World/Scene05/Rail/Post_",
+       "/World/Scene05/Rail/Top"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     2686
+    ],
+    "guards": [
+     {
+      "L": 2686,
+      "end": 2688,
+      "test": "cfg.get(\"cue_tactile\")",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "/World/Scene05/Tactile"
+      ]
+     }
+    ]
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     2690
+    ],
+    "guards": [
+     {
+      "L": 2690,
+      "end": 2700,
+      "test": "cfg.get(\"cue_nosing\")",
+      "calls": [
+       "make_pbr",
+       "build_arc_steps"
+      ],
+      "prims": [
+       "/World/Looks/Nosing",
+       "/World/Scene05/Nosing_{i}",
+       "/World/Scene05/Nosing_"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1998,
+     2729
+    ],
+    "guards": [
+     {
+      "L": 1998,
+      "end": 2007,
+      "test": "cfg[\"cue_material_break\"]",
+      "calls": [
+       "make_pbr"
+      ],
+      "prims": [
+       "/World/Looks/Stage"
+      ]
+     },
+     {
+      "L": 2729,
+      "end": 2730,
+      "test": "cfg[\"cue_material_break\"]",
+      "calls": [
+       "build_lip"
+      ],
+      "prims": [
+       "/World/Scene05/LipCurb"
+      ]
+     }
+    ]
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     2739
+    ],
+    "guards": [
+     {
+      "L": 2739,
+      "end": 2740,
+      "test": "cfg.get(\"cue_sign\")",
+      "calls": [
+       "build_signs"
+      ],
+      "prims": [
+       "Places the PARAMS['signs'] list with sc.build_sign.\n        Warning/info boards are a facility cue adjacent to a drop (family ①) — the\n        coordinate check is in the PARAMS comment.",
+       "/World/Looks/SignBack",
+       "/World/Looks/Sign{tag}",
+       "/World/Scene05/Sign_{tag}",
+       "/World/Looks/Sign",
+       "/World/Scene05/Sign_"
+      ]
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2734
+    ],
+    "guards": [
+     {
+      "L": 2734,
+      "end": 2737,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing",
+       "build_seat_strips"
+      ],
+      "prims": [
+       "/World/Scene05/Gate/Lintel",
+       "/World/Scene05/EntryCanopy",
+       "/World/Scene05/{name}",
+       "/World/Scene05/Hedge_{j}",
+       "/World/Scene05/Bollard_{k}",
+       "/World/Scene05/Tower_{k}/Pole",
+       "/World/Scene05/Tower_{k}/Cap",
+       "/World/Scene05/Gate/Post_{tag}",
+       "/World/Scene05/Building_{key}",
+       "/World/Scene05/",
+       "/World/Scene05/Hedge_",
+       "/World/Scene05/Bollard_",
+       "/World/Scene05/Bench_{tag}",
+       "/World/Scene05/Bin_{tag}"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "main::scene06_overpass_spiral.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2649
+    ],
+    "guards": [
+     {
+      "L": 2649,
+      "end": 2733,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "_guard_bays",
+       "_guard_section",
+       "_step_deg",
+       "_spiral_z_at",
+       "_guard_run",
+       "_guard_posts",
+       "_newel",
+       "build_deck_rail",
+       "build_north_guard",
+       "_deck_rail_y"
+      ],
+      "prims": [
+       "{ROOT}/Rail{tag}",
+       "{ROOT}/RailPost{tag}",
+       "/Rail",
+       "/RailPost",
+       "{ROOT}/Newel{tag}_{k}",
+       "/Newel",
+       "[GT-76·GT-97] guard unified · upstand+shoe+pane+bronze cap · spiral {len(bays) - 1} bays x 2 runs(단부 정면 접속·랜딩 없음) + deck {len(ybays) - 1} x 2 + north {int(PARAMS['north']['bays']) * 2 + 1} x 2 = {n_bay} panes · cap line deck {cap_dk_} = spiral {cap_sp} (Δ{abs(cap_sp - cap_dk_) * 1000} mm) · 캡 연속 1本/run · newel {rl['newel_t']} sq",
+       " mm) · 캡 연속 1本/run · newel ",
+       "Azimuth boundaries of the spiral guard bays (n_bay+1 values, a0 … a0+sweep).\n\n    The deck rule is one pane per bay between posts. On the curve the bay is pinned to the\n    stair's own rhythm — `railing.steps_per_bay` treads per bay — so every post lands on a\n    riser line and 26/2 gives **13 bays, the deck's `rail_bay.n_bay` exactly**.",
+       "Guard cross-section as z offsets from the walking line the run stands on.\n\n    Every value is read from the deck guard's own PARAMS, so the spiral, the landing lobes,\n    the north stair and `build_deck_rail` cannot drift into four sections. Stacking order is\n    the same on every run — **upstand · steel shoe · laminated pane · bronze cap** — and each\n    part is HOUSED in the one below it (`glass_set`, `cap_grip`), so no two faces of the\n    assembly are ever coplanar.\n\n      raked=False (deck, landing lobes) — a level floor needs no upstand:\n        shoe 0…0.120 · pane 0.085…1.040 · cap 1.015…1.100 [computed].\n      raked=True (spiral runs, north flights AND the north mid-landing, which is referenced\n        to `z_mid − riser/2` so the three north segments join at 0 mm) — offsets from the\n        MID-step line: upstand -0.300…+0.108 · shoe +0.088…+0.228 · pane +0.193…+1.136 ·\n        cap +1.111…+1.196 [computed].\n\n    [GT-76] The raked branch is where the round's defect lived. `_spiral_z_at` is the MID-step\n    line and the treads sit +-riser/2 = +-0.096 m about it, so ANY member pinned to that line\n    is crossed by the tread edge once per step. The old shoe was pinned there and its exposed\n    height swung 0.120…0.312 m, 26x round the helix, with the stepped concrete rim cutting\n    across it in elevation. The fix is not to move the shoe but to give it something straight\n    to stand on: `up_top` +0.108 clears the highest tread edge (+0.096) by 12 mm, so the\n    upstand's own top IS the smooth raked line, the shoe sits 20 mm into it (`kick_bot`\n    +0.088) and the exposed kick is a **constant 0.120 m** everywhere [computed]. The upstand\n    bottom -0.300 is below the lowest fascia top (-0.098) and inside the step solid\n    (tread - base_drop = -0.596 at worst), so it is buried at every azimuth — no floating\n    edge, no gap [computed]. Pane height 0.943 m raked / 0.955 m level.",
+       "One glazed guard run on a curve: [upstand ·] shoe · panes · bronze cap.\n\n        [GT-68] `z_of(a)` returns the walking-line z at azimuth a and the section comes from\n        `_guard_section`, so the raked spiral runs and the level landing lobes are the same\n        code. Radial widths are the deck's: shoe `deck.parapet_t`, pane `rail_bay.glass_t`,\n        cap the shoe + `rail_bay.cap_over` each side.\n        [GT-76] Only the PANE is still per bay — that is what a laminated balustrade is, and\n        its ends are the only place a joint belongs. The angular deduction is read as arc at\n        the run's radius so the 0.020 m joint gap is constant on runs whose bay chord differs\n        2.08x; it is taken off `rail_bay.post_t/2` now that the mullion is the deck's square\n        section rather than a Ø60 tube. `upstand=(r_in, r_out)` casts the raked stringer the\n        run stands on — level runs pass None because a level floor has no stepped edge to\n        trim. Returns the pane count.",
+       "{prefix}/Glass_{k}",
+       "/Glass_",
+       "{path}/Post"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     2734
+    ],
+    "guards": [
+     {
+      "L": 2734,
+      "end": 2741,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "{ROOT}/TactileLow",
+       "/TactileLow",
+       "{ROOT}/TactileHigh",
+       "/TactileHigh"
+      ]
+     }
+    ]
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     2743
+    ],
+    "guards": [
+     {
+      "L": 2743,
+      "end": 2751,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [
+       "_step_deg",
+       "_spiral_top_z",
+       "build_arc_steps"
+      ],
+      "prims": [
+       "{ROOT}/Nosing_{i}",
+       "/Nosing_"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2763
+    ],
+    "guards": [
+     {
+      "L": 2763,
+      "end": 2764,
+      "test": "cfg[\"cue_material_break\"]",
+      "calls": [
+       "build_lanes"
+      ],
+      "prims": [
+       "{ROOT}/CenterLine_{i}",
+       "/CenterLine_",
+       "{ROOT}/Dash_{j}_{k}",
+       "/Dash_"
+      ]
+     }
+    ]
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2773
+    ],
+    "guards": [
+     {
+      "L": 2773,
+      "end": 2774,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing"
+      ],
+      "prims": [
+       "{ROOT}/Lamp_{i}",
+       "{ROOT}/BusPole",
+       "{ROOT}/BusSign",
+       "/Lamp_",
+       "{base}/Pole",
+       "{base}/Arm",
+       "{base}/Head",
+       "{ROOT}/Tree_{i}",
+       "{ROOT}/Bench_{i}",
+       "{ROOT}/Bollard_{i}",
+       "/BusPole",
+       "/BusSign",
+       "{ROOT}/Building_{key}",
+       "/Pole"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "main::scene07_temple_stone_path.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     2766
+    ],
+    "guards": [
+     {
+      "L": 2766,
+      "end": 2772,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_railing_line"
+      ],
+      "prims": [
+       "{ROOT}/Rail",
+       "/Rail"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     2773
+    ],
+    "guards": [
+     {
+      "L": 2773,
+      "end": 2777,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "/World/Looks/Tactile",
+       "{ROOT}/Tactile",
+       "/Tactile"
+      ]
+     }
+    ]
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     2778
+    ],
+    "guards": [
+     {
+      "L": 2778,
+      "end": 2788,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [],
+      "prims": [
+       "{ROOT}/Nose_{c['i']}_{s['k']}",
+       "/Nose_"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2079
+    ],
+    "guards": [
+     {
+      "L": 2079,
+      "end": 2080,
+      "test": "not cfg[\"cue_material_break\"]",
+      "calls": [],
+      "prims": []
+     }
+    ]
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     1280,
+     1689,
+     2810
+    ],
+    "guards": [
+     {
+      "L": 1280,
+      "end": 1283,
+      "test": "SCENE_CONFIG[\"cue_sign\"]",
+      "calls": [],
+      "prims": []
+     },
+     {
+      "L": 1689,
+      "end": 1694,
+      "test": "SCENE_CONFIG[\"cue_sign\"]",
+      "calls": [],
+      "prims": []
+     },
+     {
+      "L": 2810,
+      "end": 2811,
+      "test": "cfg[\"cue_sign\"] and cfg[\"hazard_stairs\"]",
+      "calls": [
+       "build_sign"
+      ],
+      "prims": [
+       "{ROOT}/SignInfo",
+       "/SignInfo"
+      ]
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2804
+    ],
+    "guards": [
+     {
+      "L": 2804,
+      "end": 2809,
+      "test": "cfg[\"cue_scene_dressing\"] and cfg[\"hazard_stairs\"]",
+      "calls": [
+       "build_gate",
+       "build_lanterns",
+       "build_hall",
+       "build_roof_cluster",
+       "build_nature"
+      ],
+      "prims": [
+       "{ROOT}/Gate/Beam",
+       "{ROOT}/Gate",
+       "{ROOT}/GateEave",
+       "{ROOT}/Gate/Post_{tag}",
+       "{ROOT}/Gate/Plinth_{tag}",
+       "/Gate/Beam",
+       "/Gate",
+       "/GateEave",
+       "/Gate/Post_",
+       "/Gate/Plinth_",
+       "{ROOT}/Lantern_{i}",
+       "/Lantern_",
+       "{pre}/Plinth",
+       "{pre}/Lower"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "main::scene08_sunken_plaza.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2459
+    ],
+    "guards": [
+     {
+      "L": 2459,
+      "end": 2461,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_guard",
+       "build_flank_rails"
+      ],
+      "prims": [
+       "Continuous parapet upstand + `props_kit.build_glass_balustrade` over 210..450 deg.\n\n        The G8 template is used **verbatim**: the kit builds one axis-aligned bay\n        (`sc.add_box(seg_len, panel_t, panel_h)` + a `rotY=90` cap), so every chord is mounted in\n        its own `sc.build_rot_group` at the chord bearing and the kit runs in that local frame.\n        Finding **S08-F1** (reported, not fixed here — kits are frozen this window): the kit\n        cannot be called directly on a non-X-aligned polyline, because the panel box and the cap\n        cylinder are both authored on world axes. The rot-group mount is the correct client-side\n        workaround; the kit should grow a `bearing`/`rotz` kwarg.\n        ",
+       "{ROOT}/Parapet",
+       "{ROOT}/ParapetCope",
+       "/Parapet",
+       "/ParapetCope",
+       "{ROOT}/GBGrp_{j}",
+       "{grp}/GB",
+       "/GBGrp_",
+       "/GB",
+       "R2 — a **raked** tube guard on each cascade flank, built in-scene [GT-85].\n\n        `props_kit.build_tube_railing` samples the ground once per polyline segment and lays\n        every rail with `rotY=90`, so on this 4.400 m descent it produced level tubes hanging\n        over posts that tracked the stair. The kit's SECTION is kept verbatim (4 rails, 0.120 m\n        bottom offset, tube 0.024 / post 0.030 -> clear span 0.279 m); only the geometry is\n        rebuilt, the same client move scene06 makes for its spiral guard.\n\n        Closure rules, and every one of them is asserted in the smoke run:\n          - rails are offsets from `flank_datum`, so the guard is one height over the stair;\n          - each post runs from the surface under it up to the top rail's CROWN, so the tube is\n            fully engaged in the post (post_r 0.030 > tube_r 0.024) and no post finishes short;\n          - every rail run ends on a post axis, so no cut face is exposed and every mitre is\n            hidden inside a newel — except the landing foot, which takes an elbow because a post\n            there would straddle a riser;\n          - both ends are level handrail extensions dying into an end newel on flat ground.\n        ",
+       "{ROOT}/FlankGrp_{tag}",
+       "/FlankGrp_",
+       "{grp}/Post_{i}",
+       "{grp}/Elbow_{k}"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     2462
+    ],
+    "guards": [
+     {
+      "L": 2462,
+      "end": 2463,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile_arc"
+      ],
+      "prims": [
+       "{ROOT}/TactileHead",
+       "/TactileHead"
+      ]
+     }
+    ]
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     1957
+    ],
+    "guards": [
+     {
+      "L": 1957,
+      "end": 1963,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [],
+      "prims": [
+       "{ROOT}/CascadeNosing_{i}",
+       "/CascadeNosing_"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1949
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2464
+    ],
+    "guards": [
+     {
+      "L": 2464,
+      "end": 2465,
+      "test": "cfg[\"cue_sign\"]",
+      "calls": [
+       "build_signs"
+      ],
+      "prims": [
+       "{ROOT}/Sign_exit",
+       "/Sign_exit"
+      ]
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2468
+    ],
+    "guards": [
+     {
+      "L": 2468,
+      "end": 2471,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_curb",
+       "build_dressing",
+       "build_backdrop"
+      ],
+      "prims": [
+       "{ROOT}/CurbGrp_{j}",
+       "/CurbGrp_",
+       "{grp}/Curb",
+       "/Curb",
+       "{ROOT}/PlazaPlanter_{i}",
+       "{ROOT}/ArenaBench_{i}",
+       "{ROOT}/PlazaBench_{i}",
+       "{ROOT}/Streetlight_{i}/Pole",
+       "{ROOT}/Streetlight_{i}/Head",
+       "{ROOT}/Bollard_{i}",
+       "/PlazaPlanter_",
+       "/ArenaBench_",
+       "/PlazaBench_",
+       "/Streetlight_"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "main::scene09_ghat_riverfront.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2844,
+     2895
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     3890
+    ],
+    "guards": [
+     {
+      "L": 3890,
+      "end": 3891,
+      "test": "cfg.get(\"cue_sign\")",
+      "calls": [
+       "build_signs"
+      ],
+      "prims": [
+       "[v5 shared layer / W3 S09] Korean information **lectern** (안내 거치대).\n\n        G9 carries exactly one, and it is a lectern, not a post-and-panel sign: a raked panel on\n        a low plinth, read from above by someone standing at it. `sc.build_sign` builds the\n        post-and-panel form, so the lectern is assembled here from the same panel material —\n        plinth (a stone body on two legs) + a `rotX`-raked panel at `panel_tilt` — and the panel\n        texture role is unchanged, so nothing downstream of `sign_info` moves.\n        ",
+       "/World/Looks/LecternBody",
+       "{ROOT}/Sign_{tag}",
+       "/World/Looks/Sign{tag}",
+       "/Sign_",
+       "{grp}/Head",
+       "{grp}/Panel",
+       "/World/Looks/Sign",
+       "{grp}/Leg_{s}",
+       "/Head",
+       "/Panel",
+       "/Leg_"
+      ]
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     3888
+    ],
+    "guards": [
+     {
+      "L": 3888,
+      "end": 3889,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing"
+      ],
+      "prims": [
+       "[v5 adopted / v6 rework / W3 S09] Lake park dressing — 6 waterfront boundary piles +\n        **1 timber samojeong** + 4 terrace stone posts + 4 benches + **1 duck boat (curved)** +\n        **5 terraced beds in dry-stone 자연석** + **a zigzag timber boardwalk** + 2 lawn bands +\n        10 street trees + 10 reed stands with plumes + 4 lily rafts.\n        [v6 §6 emptying] the 2 planters are deleted — the street trees on the lawn bands take over that role.\n        All outside the stair width (y±5) or on the terrace → hazard geometry unchanged, and\n        every element **W3 S09** adds is additionally asserted outside the ±30° FOV of all nine\n        grid presets by `fov_selfcheck()`.",
+       "{ROOT}/DeckPile_{i}",
+       "{ROOT}/DeckPileCap_{i}",
+       "{ROOT}/LandPost_{pi}",
+       "{ROOT}/Bench_{i}",
+       "{ROOT}/DuckBoat_{i}",
+       "{grp}/Hull",
+       "{grp}/Breast",
+       "{grp}/Stern",
+       "{grp}/Neck",
+       "{grp}/Head",
+       "{grp}/Beak",
+       "{grp}/Cockpit",
+       "{grp}/Canopy"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "main::scene10_park_deck_switchback.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     4232
+    ],
+    "guards": [
+     {
+      "L": 4232,
+      "end": 4268,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "_rake_rail",
+       "build_newel",
+       "build_handrail"
+      ],
+      "prims": [
+       "{ROOT}/{rr['name']}",
+       "/",
+       "{ROOT}/Newel_{i}",
+       "/Newel_",
+       "Every railing run in the scene, derived from the guarded boundary.\n\n    dict keys: `name` (prim root under ROOT) · `kind` 'level' (entry/landing side run)\n    / 'rake' (flight side run) / 'cross' (the run that closes a step in the boundary)\n    · `x0,y0,x1,y1` the rail **centreline**, already `bal/2` outboard of the walking\n    surface so the baluster inner face is flush with the deck edge and the declared\n    1.500 m clear width is measured between rail faces · `z0,z1` walking z at each end\n    · `side` 'N' (ylo chain) / 'P' (yhi chain) · `k` flight/landing index · `broken`\n    the frozen `rail.broken_landing` hook · [GT-115 ⑭] `ox,oy` the run's **outboard**\n    plan normal (unit, away from the walking surface), which is what tells the handrail\n    pass and the return pass which side is \"inside\" without re-deriving the boundary.\n\n    The forward face of the **arrival** landing carries no run: it meets natural grade\n    at a 20 mm step, so a guard there is a false drop cue (08-05 doctrine — a rail line\n    means the ground falls away beyond it) and it is the very edge the walk leaves by.\n\n    [GT-115 ⑭ (1)] The chain is closed at its two free ends by a `return` run — see\n    `rail.end` — so no run stops at a node that carries only that one run.\n    ",
+       "FlightGrp_{k}/Rail_{side}",
+       "/Rail_",
+       "[S3-8 · GT-65] the raking railing on one side of one flight.\n\n            The shared `sc.build_railing_line` is no longer called from this scene. It\n            emits `add_cylinder` posts and rails by construction, and round members are\n            exactly the defect S3-8 exists to remove (§2.A.1-1). The `baluster_r=0.0`\n            guard that used to sit here — the red team's 48 interpenetrating pairs if the\n            shared balusters were switched on — is therefore **preserved by construction\n            and strengthened**: there is no shared-baluster code path left to switch on,\n            so the trap is structurally removed rather than merely disabled.\n\n            The rails run parallel to the **nosing plane**, which passes through\n            (x_top, z_top) at slope riser/tread, so a rail top face at `top0 - slope·dx`\n            is exactly `rail.h` above the nosing line at every station.\n            The balusters stay **plumb** (KCS 34 50 10 3.2.6(3)) and are pitched\n            `bal_step` **horizontally**, so the clear gap is the same 0.112 m as on the\n            level runs rather than shrinking by cos(pitch).\n            The rail line sits **outboard** of the deck edge by half a baluster, so the\n            baluster's inner face is flush with the walking surface and the clear width\n            between the two railings is exactly the declared 1.500 m — a railing set\n            *inboard* would quietly eat 120 mm off the statutory 너비. Band pitch\n            `y_off = 0.85` then leaves 0.072 m between the inner rail lines of two\n            adjacent flights.\n\n            [GT-65] the line `y` and the head/foot stations now come from `rail_runs()`,\n            the same inventory the level runs and the newels come from — which is what\n            makes a flight rail and the landing rail it continues into **collinear**.\n            Newels are no longer built here: this function used to add its own at the\n            head and foot, 19 mm from the landing's, so every junction carried two\n            90x90 capped posts. They are built once, per boundary node, by the newel\n            pass below.\n            ",
+       "{ROOT}/FlightGrp_{f['k']}",
+       "/FlightGrp_",
+       "{grp}/Rail{rtag}_{tag}",
+       "/Rail",
+       "{grp}/Bal_{tag}_{i}",
+       "/Bal_"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     4673
+    ],
+    "guards": [
+     {
+      "L": 4673,
+      "end": 4678,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "/World/Looks/Tactile",
+       "{ROOT}/Tactile",
+       "/Tactile"
+      ]
+     }
+    ]
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     4679
+    ],
+    "guards": [
+     {
+      "L": 4679,
+      "end": 4686,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [
+       "build_nosing"
+      ],
+      "prims": [
+       "{ROOT}/NoseGrp_{f['k']}",
+       "/NoseGrp_",
+       "{grp}/Nose",
+       "/Nose"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     3718
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     4713
+    ],
+    "guards": [
+     {
+      "L": 4713,
+      "end": 4715,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_nature",
+       "build_props"
+      ],
+      "prims": [
+       "[S3-11] 낙엽수 잎-off {n_bare}/{len(PARAMS['trees'])}주 (Gray_Birch·Elm_Sapling·Lombardy_Poplar 로테이션 · assets/veg_bare/*_bare.usda 참조 래퍼 = 프로토타입 내부 합성)",
+       "{ROOT}/Shrub",
+       "[S3-11] 가을 관목 {placed}/{len(pts)}군 (Burning_Bush 적 30.2 % · Juniper 상록 — 개화종 제외)",
+       "[S3-11] 암반 노두 {n_out}/{len(PARAMS['outcrop'])}개 (z_mode=base · sink 0 · SimPBR 폴백 대신 rockface 상위 바인딩)",
+       "{ROOT}/Tree_{n}/Veg",
+       "/",
+       "주 (Gray_Birch·Elm_Sapling·Lombardy_Poplar 로테이션 · assets/veg_bare/*_bare.usda 참조 래퍼 = 프로토타입 내부 합성)",
+       "[S3-11][경고] 래퍼 미해결 {n_veg - n_bare}주 — 잎이 남는다 (assets/veg_bare/ 확인)",
+       "/Shrub",
+       "{ROOT}/Backdrop_{i}",
+       "/Tree_",
+       "/Veg",
+       "주 — 잎이 남는다 (assets/veg_bare/ 확인)",
+       "{ROOT}/Outcrop_{i}"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "main::scene11_footbridge_stairs.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2398,
+     2793
+    ],
+    "guards": [
+     {
+      "L": 2398,
+      "end": 2531,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "_A",
+       "build_railing_line",
+       "build_rail_end",
+       "_B",
+       "_gnd",
+       "build_guard_run",
+       "build_mesh_panel"
+      ],
+      "prims": [
+       "{prefix}/RailA_{k}",
+       "{pb}/RailB_{k}",
+       "/RailA_",
+       "/RailB_",
+       "{prefix}/HeadGuardOuter",
+       "/HeadGuardOuter",
+       "{prefix}/HeadMesh",
+       "/HeadMesh",
+       "{prefix}/MidGuard_{g_i}",
+       "/MidGuard_",
+       "{prefix}/MidKick{nm}",
+       "/MidKick",
+       "{prefix}/{tag}Newel",
+       "{prefix}/{tag}CapTop"
+      ]
+     },
+     {
+      "L": 2793,
+      "end": 2794,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_deck_rails"
+      ],
+      "prims": [
+       "{ROOT}/DeckRail_{i}",
+       "{ROOT}/DeckRailPost_{i}_{k}",
+       "{ROOT}/DeckKick_{i}_{k}",
+       "/DeckRail_",
+       "/DeckRailPost_",
+       "/DeckKick_",
+       "{ROOT}/DeckBal_{i}_{k}_{b}",
+       "/DeckBal_"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     2541
+    ],
+    "guards": [
+     {
+      "L": 2541,
+      "end": 2565,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "_oriented_box",
+       "_A",
+       "_B"
+      ],
+      "prims": [
+       "{prefix}/{nm}",
+       "/"
+      ]
+     }
+    ]
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2389
+    ],
+    "guards": [
+     {
+      "L": 2389,
+      "end": 2396,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [
+       "_stair_steps",
+       "build_nosing_tier",
+       "_A"
+      ],
+      "prims": [
+       "{pfx}/Nosing_{j}",
+       "/Nosing_"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2786
+    ],
+    "guards": [
+     {
+      "L": 2786,
+      "end": 2787,
+      "test": "cfg[\"cue_material_break\"]",
+      "calls": [
+       "build_lanes"
+      ],
+      "prims": [
+       "{ROOT}/CenterLine_{i}",
+       "/CenterLine_",
+       "{ROOT}/Dash_{j}_{k}",
+       "/Dash_"
+      ]
+     }
+    ]
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2795
+    ],
+    "guards": [
+     {
+      "L": 2795,
+      "end": 2796,
+      "test": "cfg[\"cue_sign\"]",
+      "calls": [
+       "build_signs"
+      ],
+      "prims": [
+       "{ROOT}/Sign_{i}",
+       "/Sign_"
+      ]
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2797
+    ],
+    "guards": [
+     {
+      "L": 2797,
+      "end": 2798,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing"
+      ],
+      "prims": [
+       "{ROOT}/Shelter",
+       "{ROOT}/ShelterBack",
+       "{ROOT}/ShelterRoute",
+       "{ROOT}/ShelterBench",
+       "{ROOT}/BusPole",
+       "{ROOT}/BusSign",
+       "{ROOT}/Lamp_{i}",
+       "/Shelter",
+       "/ShelterBack",
+       "{ROOT}/ShelterSide_{i}",
+       "/ShelterRoute",
+       "/ShelterBench",
+       "/BusPole",
+       "/BusSign"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "main::scene12_riverside_deck.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2066
+    ],
+    "guards": [
+     {
+      "L": 2066,
+      "end": 2067,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_railing"
+      ],
+      "prims": [
+       "{ROOT}/Rail/Post_{i}",
+       "{ROOT}/Rail/{nm}",
+       "/Rail/Post_",
+       "/Rail/"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     1900
+    ],
+    "guards": [
+     {
+      "L": 1900,
+      "end": 1903,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [
+       "build_nosing"
+      ],
+      "prims": [
+       "{ROOT}/Nosing",
+       "/Nosing"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1849,
+     1895
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2073
+    ],
+    "guards": [
+     {
+      "L": 2073,
+      "end": 2076,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_skyline",
+       "build_dressing"
+      ],
+      "prims": [
+       "{ROOT}/Bridge/Deck",
+       "{ROOT}/FarBuilding_{key}",
+       "/Bridge/Deck",
+       "{ROOT}/Bridge/Parapet_{tag}",
+       "{ROOT}/Bridge/PierCap_{i}",
+       "{ROOT}/Bridge/Pier_{i}",
+       "/FarBuilding_",
+       "/Bridge/Parapet_",
+       "/Bridge/PierCap_",
+       "/Bridge/Pier_",
+       "{ROOT}/BikeRoad",
+       "{ROOT}/Streetlight_{i}",
+       "/BikeRoad",
+       "{ROOT}/BikeLine_{tag}"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "main::scene13_apartment_parking_entry.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     3806
+    ],
+    "guards": [
+     {
+      "L": 3806,
+      "end": 3807,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_railings"
+      ],
+      "prims": [
+       "{ROOT}/Rail_{i}",
+       "{prefix}/{tag}",
+       "{prefix}/Post_{n}",
+       "/Rail_",
+       "/",
+       "/Post_"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     2626,
+     3598,
+     3808
+    ],
+    "guards": [
+     {
+      "L": 3808,
+      "end": 3809,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactiles"
+      ],
+      "prims": [
+       "{ROOT}/Tactile_StairHead",
+       "{ROOT}/Tactile_StairFoot",
+       "/Tactile_StairHead",
+       "/Tactile_StairFoot"
+      ]
+     },
+     {
+      "L": 3598,
+      "end": 3603,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "{ROOT}/Tactile_Bollard_{r}",
+       "/Tactile_Bollard_"
+      ]
+     }
+    ]
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     2707,
+     2723
+    ],
+    "guards": [
+     {
+      "L": 2707,
+      "end": 2710,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [
+       "build_nosing"
+      ],
+      "prims": [
+       "{grp}/Nosing",
+       "/Nosing"
+      ]
+     },
+     {
+      "L": 2723,
+      "end": 2727,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [
+       "build_nosing"
+      ],
+      "prims": [
+       "{ROOT}/StairB_Nosing",
+       "/StairB_Nosing"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     3787,
+     3788
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     3810
+    ],
+    "guards": [
+     {
+      "L": 3810,
+      "end": 3811,
+      "test": "cfg[\"cue_sign\"]",
+      "calls": [
+       "build_signs"
+      ],
+      "prims": [
+       "{ROOT}/Sign_{key}",
+       "/Sign_"
+      ]
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     3814
+    ],
+    "guards": [
+     {
+      "L": 3814,
+      "end": 3815,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing"
+      ],
+      "prims": [
+       "[K4(b) · GT-64] 노선대(route) 가로수 {n_tree}주 / 스테이션 {n_tree + len(dropped)} (제외 {len(dropped)}) · {len(PARAMS['tree_rows'])}행 도로망 추종 · 단일수종 '{TREE_SPECIES}' · 피치 {PARAMS['tree_pitch']} m (TREE_PITCH_M) · 수관 반경 {tree_crown_r()} m · 구조물 이격 ≥ {PARAMS['tree_clear']} m · 갓길대(verge) 화단수 {sum((1 for p in PARAMS['planters'] if p['tree']))}주 = SCENE_SPECIES['Scene13'] 행",
+       "{ROOT}/Streetlight_{i}",
+       "{ROOT}/Planter_{i}",
+       "{ROOT}/Tree_{r}_{k}",
+       "주 / 스테이션 ",
+       "{ROOT}/Hedge_{i}",
+       "{ROOT}/Bench_{i}",
+       "/Streetlight_",
+       "{base}/Pole",
+       "{base}/Arm",
+       "{base}/Head",
+       "{ROOT}/Building_{key}",
+       "/Planter_",
+       "/Tree_"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "main::scene14_grandstair_illusion.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     1838
+    ],
+    "guards": [
+     {
+      "L": 1838,
+      "end": 1860,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "_rake_segments",
+       "build_railing_line"
+      ],
+      "prims": [
+       "[v5.1] Haunch top face (= nosing line + rail_h) - the landing surface for the rail posts.\n                Instead of the old stepped top face it interpolates the rake/level polyline directly.",
+       "{ROOT}/Rail_{'N' if sgn > 0 else 'S'}",
+       "/Rail_",
+       "[v5.1] The **polyline** of the parapet top haunch - alternating section (rake) / landing (level).\n        Returns: (kind, x_a, x_b, z_a, z_b). The end z of a rake equals the z of the next landing\n        exactly, and the landing z equals the start z of the next rake, so **the joints have 0 level difference**.\n        z is the **nosing line** at that x (the line joining the front edges of the riser tops)."
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     1827
+    ],
+    "guards": [
+     {
+      "L": 1827,
+      "end": 1832,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "{ROOT}/Tactile_Top",
+       "/Tactile_Top"
+      ]
+     }
+    ]
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     1833
+    ],
+    "guards": [
+     {
+      "L": 1833,
+      "end": 1837,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [
+       "build_nosing"
+      ],
+      "prims": [
+       "{ROOT}/Nosing",
+       "/Nosing"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1882
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1900
+    ],
+    "guards": [
+     {
+      "L": 1900,
+      "end": 1901,
+      "test": "cfg[\"cue_sign\"]",
+      "calls": [
+       "build_signs"
+      ],
+      "prims": [
+       "{ROOT}/Looks/SignBack",
+       "/Looks/SignBack",
+       "{ROOT}/Looks/Sign{tag}",
+       "{ROOT}/Sign_{tag}",
+       "/Looks/Sign",
+       "/Sign_"
+      ]
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1894
+    ],
+    "guards": [
+     {
+      "L": 1894,
+      "end": 1895,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing"
+      ],
+      "prims": [
+       "Context dressing - the read word is \"monumental plaza\". All combinations of existing builders/primitives.\n        The old inventory was a single fountain on a 40x40 lower plaza, which scored emptiness 5/5.",
+       "{ROOT}/FountainRingO",
+       "{ROOT}/FountainRingM",
+       "{ROOT}/FountainWater",
+       "{ROOT}/MonumentBase",
+       "{ROOT}/MonumentShaft",
+       "{ROOT}/Streetlight_{jx}_{j}",
+       "{ROOT}/UpperCurb_{tag}",
+       "/FountainRingO",
+       "/FountainRingM",
+       "/FountainWater",
+       "{ROOT}/FountainNozzle_{k}",
+       "{ROOT}/TreeLow_{k}",
+       "{ROOT}/PlanterLow_{k}"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "main::scene15_alley_labyrinth.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     1206,
+     1997
+    ],
+    "guards": [
+     {
+      "L": 1997,
+      "end": 2029,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_handrail",
+       "_wall_pipe"
+      ],
+      "prims": [
+       "{ROOT}/WallPipe",
+       "/WallPipe",
+       "{grp}/WallPipe2",
+       "/WallPipe2"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1939
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2305
+    ],
+    "guards": [
+     {
+      "L": 2305,
+      "end": 2306,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing"
+      ],
+      "prims": [
+       "[GT-111] K2 신설 프림 {n_villa} (2동) · K7 옥상 난간 {len(PARAMS['roofline']['rail'])}동/물탱크 {len(PARAMS['roofline']['tank'])}기 프림 {n_roof}",
+       "{root}/House_{i}",
+       "{ROOT}/Backdrop_{i}",
+       "{root}/Villa_{vs['tag']}",
+       "동/물탱크 ",
+       "{root}/PotPlant_{i}",
+       "/House_",
+       "/Backdrop_",
+       "/Villa_",
+       "{root}/Pot_{i}",
+       "/PotPlant_",
+       "/Pot_"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "main::scene16_canopy_shadow.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1253,
+     1324
+    ],
+    "guards": [
+     {
+      "L": 1253,
+      "end": 1273,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_handrail"
+      ],
+      "prims": [
+       "{grp}/EastRail_{tag}",
+       "/EastRail_"
+      ]
+     },
+     {
+      "L": 1324,
+      "end": 1404,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_handrail"
+      ],
+      "prims": [
+       "{ROOT}/StairRail_{tag}",
+       "/StairRail_",
+       "One guardrail run. `ends` asks for a **terminating post** at a0 / a1;\n                the top and mid rails end on that post's axis, so the run has no rail\n                stub hanging in air.",
+       "{prefix}/Top",
+       "{prefix}/Mid",
+       "/Top",
+       "/Mid",
+       "{prefix}/Post_{n}",
+       "/Post_",
+       "{prefix}/{tag_e}",
+       "/",
+       "{ROOT}/PerimRail_{tag}",
+       "{ROOT}/PerimRail_{tag}_E",
+       "/PerimRail_"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     1243,
+     1310,
+     1720
+    ],
+    "guards": [
+     {
+      "L": 1243,
+      "end": 1248,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "{grp}/Tactile_East",
+       "/Tactile_East"
+      ]
+     },
+     {
+      "L": 1310,
+      "end": 1323,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "{ROOT}/Tactile_Land",
+       "/Tactile_Land"
+      ]
+     },
+     {
+      "L": 1720,
+      "end": 1725,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "{ROOT}/Tactile_Bollard",
+       "/Tactile_Bollard"
+      ]
+     }
+    ]
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1237,
+     1303
+    ],
+    "guards": [
+     {
+      "L": 1237,
+      "end": 1242,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [
+       "build_nosing"
+      ],
+      "prims": [
+       "{grp}/Nosing",
+       "/Nosing"
+      ]
+     },
+     {
+      "L": 1303,
+      "end": 1309,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [
+       "build_nosing"
+      ],
+      "prims": [
+       "{ROOT}/Nosing",
+       "/Nosing"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1792
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1828
+    ],
+    "guards": [
+     {
+      "L": 1828,
+      "end": 1829,
+      "test": "cfg.get(\"cue_sign\")",
+      "calls": [
+       "build_signs"
+      ],
+      "prims": [
+       "{ROOT}/Looks/SignBack",
+       "/Looks/SignBack",
+       "{ROOT}/Looks/Sign{tag}",
+       "{ROOT}/Sign_{tag}",
+       "/Looks/Sign",
+       "/Sign_"
+      ]
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1824
+    ],
+    "guards": [
+     {
+      "L": 1824,
+      "end": 1826,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing",
+       "build_backdrop"
+      ],
+      "prims": [
+       "{ROOT}/Gate/Beam",
+       "{ROOT}/Streetlight_{i}",
+       "[GT-71] 밀도 완화 파일럿(호출부 한정) · pitch_frac 0.53→0.62 · 지터 0.06/0.04→0.10/0.06 · 밴드 rect·h 0.8·seed·prim root 불변 · 설계 주수 11→9(실배치 {n_hedge} · 0 = build_hedge 폴백) · 공칭 중첩 46 %/39 %(최악 +0.13 m) — 융합 유지",
+       "{ROOT}/Planter_{pdef['name']}",
+       "{ROOT}/Building_{key}",
+       "/Gate/Beam",
+       "{ROOT}/Bollard_{i}",
+       "{ROOT}/Tactile_Bollard",
+       "{ROOT}/Bench_{i}",
+       "/Streetlight_",
+       "{base}/Pole",
+       "{ROOT}/Hedge_{i}",
+       "[GT-71] 밀도 완화 파일럿(호출부 한정) · pitch_frac 0.53→0.62 · 지터 0.06/0.04→0.10/0.06 · 밴드 rect·h 0.8·seed·prim root 불변 · 설계 주수 11→9(실배치 ",
+       " · 0 = build_hedge 폴백) · 공칭 중첩 46 %/39 %(최악 +0.13 m) — 융합 유지"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "main::scene17_ramp_pair_hangang.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     2706
+    ],
+    "guards": [
+     {
+      "L": 2706,
+      "end": 2709,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_railing_line"
+      ],
+      "prims": [
+       "{ROOT}/Rail",
+       "/Rail"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     2710
+    ],
+    "guards": [
+     {
+      "L": 2710,
+      "end": 2713,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [
+       "build_nosing"
+      ],
+      "prims": [
+       "{ROOT}/Nosing",
+       "/Nosing"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2718
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2731
+    ],
+    "guards": [
+     {
+      "L": 2731,
+      "end": 2734,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_skyline",
+       "build_dressing"
+      ],
+      "prims": [
+       "{ROOT}/Bridge/Deck",
+       "{ROOT}/FarBuilding_{key}",
+       "/Bridge/Deck",
+       "{ROOT}/Bridge/Pier_{i}",
+       "/FarBuilding_",
+       "/Bridge/Pier_",
+       "{ROOT}/KmSign/Pole",
+       "{ROOT}/KmSign/Panel",
+       "{ROOT}/TerraceTree_{i}",
+       "{ROOT}/CrownTree_{i}",
+       "{ROOT}/Bench_{i}",
+       "{ROOT}/Light{tag}_{i}",
+       "/KmSign/Pole",
+       "/KmSign/Panel"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "main::scene18_wavy_artstair.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     862,
+     875,
+     1890
+    ],
+    "guards": [
+     {
+      "L": 1890,
+      "end": 1900,
+      "test": "cfg.get(\"cue_railing\")",
+      "calls": [
+       "make_pbr",
+       "build_railing_line"
+      ],
+      "prims": [
+       "/World/Looks/RailStainless",
+       "{ROOT}/Rail_{tag}",
+       "/Rail_"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     876,
+     1872
+    ],
+    "guards": [
+     {
+      "L": 1872,
+      "end": 1878,
+      "test": "cfg.get(\"cue_tactile\")",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "/World/Looks/TactileWarn",
+       "{ROOT}/WarnBand",
+       "/WarnBand"
+      ]
+     }
+    ]
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     901,
+     1879
+    ],
+    "guards": [
+     {
+      "L": 1879,
+      "end": 1889,
+      "test": "cfg.get(\"cue_nosing\")",
+      "calls": [
+       "make_pbr"
+      ],
+      "prims": [
+       "/World/Looks/NosingStrip",
+       "{ROOT}/Nosing_{i}",
+       "/Nosing_"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1598
+    ],
+    "guards": [
+     {
+      "L": 1598,
+      "end": 1600,
+      "test": "cfg[\"cue_material_break\"]",
+      "calls": [
+       "_plate"
+      ],
+      "prims": [
+       "{ROOT}/Band_tan",
+       "/Band_tan"
+      ]
+     }
+    ]
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1914
+    ],
+    "guards": [
+     {
+      "L": 1914,
+      "end": 1919,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_edge_bands",
+       "build_beds",
+       "build_furniture",
+       "build_city",
+       "build_horizon"
+      ],
+      "prims": [
+       "Warm tan band + yellow guide strip along the LANDWARD edge (G18).\n\n        **Why the guide strip is scene-side and not a `ground_kit` tactile\n        site**: `ground_kit.TACTILE_OFF_REASON[\"scene18\"]` reads \"18 = wave-form,\n        irregular - laying a 300 mm grid on it is not practice\". That reason\n        died with the wave; the promenade is a flat granite route and G18 shows\n        a continuous yellow guide line along its landward edge. `ground_kit`\n        belongs to another lane this window, so the site is not registered\n        there and `plan_ground(tactile=())` stays. **The stale registry entry is\n        recorded as owed to Lane-1 in the report.**\n\n        **Fidelity deviation, stated**: G18's strip is a 선형(유도)블록 (bars).\n        The library's only tactile texture is 점형(warning, 36 dots). Using it\n        here would paint 120 m of statutory *warning* surface where none\n        belongs, so the strip is built at the correct width (0.30 m) and colour\n        with the tactile material and is kept 12.20 m clear of the drop edge,\n        where no reader can take it for a stair-head cue. The bar geometry is\n        owed to K4/K5.",
+       "/World/Looks/TactileGuide",
+       "{ROOT}/Band_tan",
+       "{ROOT}/GuideStrip_{i}",
+       "/Band_tan",
+       "/GuideStrip_",
+       "Kerbed raised planting beds. K5 deferred -> scene-side kerb.\n\n        [VEGETATION — R18-2, bounded procurement attempt: **NEGATIVE**]\n          Searched, this window, the three licensed sources the ruling names:\n            · Poly Haven models — full index pulled (521 assets): **0 palm,\n              0 umbrella/stone pine**. The only conifers are fir/pine/spruce\n              saplings of a temperate forest collection.\n            · ambientCG — a material library; it publishes no plant models.\n            · KOGL / 문화포털 — no reachable 3D vegetation catalogue.\n          So neither a palm nor an umbrella pine is procurable under the\n          CC0/KOGL doctrine, and NoAI / unverified-Sketchfab sources are barred.\n\n          The ruling's fallback is \"substitute pines only\". **That fallback is\n          itself blocked**, and the conflict is reported rather than worked\n          around: `Docs/briefs/placement_rules_v1.yaml` `species.retired`\n          lists **White_Pine and Yellow_Pine** — the repo's only two pines —\n          and LINT-4b's severity is `error`. Binding either would trade a look\n          gain for a hard linter failure. (The v6 scene *does* trip it: the\n          baseline lint on scene18 reports 1 LINT-4b ERROR because\n          `build_planter` -> `build_tree` drew White_Pine at random.)\n\n          Adopted, and stated plainly as a **less coastal read**:\n            · bed kind \"U\" = **Chinese_Juniper** (향나무) 2.60 m — evergreen,\n              §10.2 pass list, and a real Korean coastal-park planting.\n            · bed kind \"T\" = **Shumard_Oak** 7.60 m — the repo's zelkova/pin-oak\n              substitute, standing in for G18's tall bed.\n            · shrub mass  = Boxwood + Juniper ONLY (season pin: no Rhododendron\n              blossom, no Burning_Bush autumn red, no Forsythia).\n          Species are placed EXPLICITLY (not through `build_tree`'s random\n          pool), so LINT-4b goes 1 -> 0 and LINT-4's one-species-per-bed holds\n          by construction.",
+       "[식생] 교목 {placed_t} · 관목 {placed_s} (종 고정: Chinese_Juniper / Shumard_Oak — R18-2 폴백)",
+       "{ROOT}/Planter_{bi}/Soil",
+       "{ROOT}/Planter_{bi}/Shrub",
+       " (종 고정: Chinese_Juniper / Shumard_Oak — R18-2 폴백)",
+       "{ROOT}/Planter_{bi}/Kerb_{tag}",
+       "/Planter_",
+       "/Soil"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "main::scene19_fan_winder.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2021
+    ],
+    "guards": [
+     {
+      "L": 2021,
+      "end": 2030,
+      "test": "cfg.get(\"cue_railing\")",
+      "calls": [
+       "build_arc_steps",
+       "_step_top"
+      ],
+      "prims": [
+       "/World/Scene19/Rail_{i}",
+       "/World/Scene19/Rail_"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     2032
+    ],
+    "guards": [
+     {
+      "L": 2032,
+      "end": 2036,
+      "test": "cfg.get(\"cue_tactile\")",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "/World/Looks/Tactile",
+       "/World/Scene19/Tactile"
+      ]
+     }
+    ]
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     2038
+    ],
+    "guards": [
+     {
+      "L": 2038,
+      "end": 2051,
+      "test": "cfg.get(\"cue_nosing\")",
+      "calls": [
+       "make_pbr",
+       "_step_top",
+       "build_arc_steps"
+      ],
+      "prims": [
+       "/World/Looks/Nosing",
+       "/World/Scene19/Nosing_{i}",
+       "/World/Scene19/Nosing_"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     2062
+    ],
+    "guards": [
+     {
+      "L": 2062,
+      "end": 2063,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing"
+      ],
+      "prims": [
+       "/World/Scene19/Planter_A"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "main::scene20_diagonal_oblique.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     880,
+     1047,
+     1169,
+     1197
+    ],
+    "guards": [
+     {
+      "L": 880,
+      "end": 881,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_stair_walls"
+      ],
+      "prims": [
+       "{grp}/StairWall_{tag}",
+       "/StairWall_",
+       "{p}/Body",
+       "{p}/Haunch",
+       "{p}/Newel",
+       "{p}/EndCap",
+       "{p}/Cap_Head",
+       "{p}/Cap_Rake",
+       "{p}/Cap_Toe",
+       "/Body",
+       "/Haunch",
+       "/Newel",
+       "/EndCap",
+       "/Cap_Head"
+      ]
+     },
+     {
+      "L": 1197,
+      "end": 1198,
+      "test": "cfg[\"cue_railing\"] and not wall_ok",
+      "calls": [],
+      "prims": []
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     874,
+     891,
+     1076
+    ],
+    "guards": [
+     {
+      "L": 874,
+      "end": 879,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "{grp}/Tactile_Top",
+       "/Tactile_Top"
+      ]
+     },
+     {
+      "L": 1076,
+      "end": 1081,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "{ROOT}/Tactile_Bollard",
+       "/Tactile_Bollard"
+      ]
+     },
+     {
+      "L": 891,
+      "end": 896,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "{grp}/Tactile_LowBollard",
+       "/Tactile_LowBollard"
+      ]
+     }
+    ]
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     866
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     674,
+     884,
+     1360,
+     1363
+    ],
+    "guards": [
+     {
+      "L": 1360,
+      "end": 1361,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing"
+      ],
+      "prims": [
+       "{ROOT}/Streetlight_{i}",
+       "{ROOT}/AccessRamp",
+       "{ROOT}/Bollard_{i}",
+       "{ROOT}/Tactile_Bollard",
+       "{ROOT}/Planter_{i}",
+       "{ROOT}/Bench_{i}",
+       "/Streetlight_",
+       "{base}/Pole",
+       "{ROOT}/Hedge_{i}",
+       "/AccessRamp",
+       "/Bollard_",
+       "/Tactile_Bollard",
+       "/Planter_",
+       "/Bench_"
+      ]
+     },
+     {
+      "L": 1363,
+      "end": 1364,
+      "test": "cfg[\"hazard_stairs\"] and cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_litter"
+      ],
+      "prims": [
+       "{ROOT}/Diag",
+       "/Diag",
+       "{grp}/Litter_Tread",
+       "{grp}/Litter_Foot",
+       "{ROOT}/Litter_Plaza",
+       "/Litter_Tread",
+       "/Litter_Foot",
+       "/Litter_Plaza"
+      ]
+     },
+     {
+      "L": 674,
+      "end": 687,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [],
+      "prims": [
+       "{ROOT}/Band_{i}",
+       "/Band_"
+      ]
+     },
+     {
+      "L": 884,
+      "end": 899,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_bollard_std",
+       "build_tactile",
+       "build_bench"
+      ],
+      "prims": [
+       "{grp}/LowBollard_{i}",
+       "/LowBollard_",
+       "{grp}/Tactile_LowBollard",
+       "/Tactile_LowBollard",
+       "{grp}/LowBench_{i}",
+       "/LowBench_"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "main::scene21_monumental_selfocclude.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true,
+   "cue_nosing": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1446
+    ],
+    "guards": [
+     {
+      "L": 1446,
+      "end": 1451,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_railing_line"
+      ],
+      "prims": [
+       "{ROOT}/Rail_{k}",
+       "/Rail_"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     1394,
+     1456
+    ],
+    "guards": [
+     {
+      "L": 1394,
+      "end": 1399,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "{ROOT}/Tactile_Bollard",
+       "/Tactile_Bollard"
+      ]
+     },
+     {
+      "L": 1456,
+      "end": 1461,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "{ROOT}/Tactile_Top",
+       "/Tactile_Top"
+      ]
+     }
+    ]
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1452
+    ],
+    "guards": [
+     {
+      "L": 1452,
+      "end": 1455,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [
+       "build_nosing"
+      ],
+      "prims": [
+       "{ROOT}/Nosing",
+       "/Nosing"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1010
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1479
+    ],
+    "guards": [
+     {
+      "L": 1479,
+      "end": 1480,
+      "test": "cfg.get(\"cue_sign\")",
+      "calls": [
+       "build_signs"
+      ],
+      "prims": [
+       "{ROOT}/Looks/SignBack",
+       "/Looks/SignBack",
+       "{ROOT}/Looks/Sign{tag}",
+       "{ROOT}/Sign_{tag}",
+       "/Looks/Sign",
+       "/Sign_"
+      ]
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1473
+    ],
+    "guards": [
+     {
+      "L": 1473,
+      "end": 1476,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_facade",
+       "build_dressing",
+       "build_planting"
+      ],
+      "prims": [
+       "{ROOT}/FacadeWall",
+       "{ROOT}/Lintel",
+       "/FacadeWall",
+       "{ROOT}/FacadeWin_{j}",
+       "{ROOT}/Column_{j}",
+       "/Lintel",
+       "/FacadeWin_",
+       "/Column_",
+       "{ROOT}/Monument_Base",
+       "{ROOT}/Monument_Shaft",
+       "{ROOT}/Streetlight_{j}",
+       "{ROOT}/Flagpole_{j}",
+       "/Monument_Base",
+       "/Monument_Shaft"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneC1_snow_stairs.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": true,
+   "cue_material_break": true,
+   "cue_nosing": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "snow_cover": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1124
+    ],
+    "guards": [
+     {
+      "L": 1124,
+      "end": 1141,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_railing_line",
+       "build_rail_snow"
+      ],
+      "prims": [
+       "{ROOT}/StairRail_P",
+       "/StairRail_P",
+       "{ROOT}/Snow/RailStripFlat",
+       "{ROOT}/Snow/RailStripSlope",
+       "/Snow/RailStripFlat",
+       "/Snow/RailStripSlope"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     578
+    ],
+    "guards": []
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1113
+    ],
+    "guards": [
+     {
+      "L": 1113,
+      "end": 1120,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [
+       "build_nosing"
+      ],
+      "prims": [
+       "{ROOT}/Nosing",
+       "/Nosing"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1375
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1388
+    ],
+    "guards": [
+     {
+      "L": 1388,
+      "end": 1389,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing"
+      ],
+      "prims": [
+       "{ROOT}/Pole",
+       "/Pole",
+       "{ROOT}/Building_{key}",
+       "{ROOT}/Pile_{i}_{j}",
+       "{ROOT}/Snow/PoleCap{_sfx}",
+       "/Building_",
+       "/Pile_",
+       "/Snow/PoleCap"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneC2_leaf_stairs.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "leaf_cover": true,
+   "keep_dressing": false
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1042
+    ],
+    "guards": [
+     {
+      "L": 1042,
+      "end": 1057,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_railing_line"
+      ],
+      "prims": [
+       "Post landing face = coping top face (over the stair) / approach path ground.",
+       "{ROOT}/Rail",
+       "/Rail"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     1036
+    ],
+    "guards": [
+     {
+      "L": 1036,
+      "end": 1041,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "{ROOT}/Tactile_Top",
+       "/Tactile_Top"
+      ]
+     }
+    ]
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     1030
+    ],
+    "guards": [
+     {
+      "L": 1030,
+      "end": 1035,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [
+       "build_nosing"
+      ],
+      "prims": [
+       "{ROOT}/Nosing",
+       "/Nosing"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     764,
+     1301
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1329
+    ],
+    "guards": [
+     {
+      "L": 1329,
+      "end": 1330,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing"
+      ],
+      "prims": [
+       "{ROOT}/Tree_{i}",
+       "/Tree_"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneC4_wet_stairs.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": true,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "wet_surface": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1034
+    ],
+    "guards": [
+     {
+      "L": 1034,
+      "end": 1055,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_railing_line"
+      ],
+      "prims": [
+       "{ROOT}/StairRail_{tag}",
+       "/StairRail_"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     447
+    ],
+    "guards": []
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     1020
+    ],
+    "guards": [
+     {
+      "L": 1020,
+      "end": 1027,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [
+       "build_nosing"
+      ],
+      "prims": [
+       "{ROOT}/Nosing",
+       "/Nosing"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1247
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1262
+    ],
+    "guards": [
+     {
+      "L": 1262,
+      "end": 1263,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing"
+      ],
+      "prims": [
+       "{ROOT}/Bollard_{name}",
+       "{ROOT}/Building_{key}",
+       "/Bollard_",
+       "/Building_"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneD1_loading_dock.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     1092
+    ],
+    "guards": [
+     {
+      "L": 1092,
+      "end": 1093,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_railing"
+      ],
+      "prims": [
+       "{ROOT}/BayRail_Post_{nid[0]}",
+       "{ROOT}/BayRail_{tag}_{s}",
+       "/BayRail_Post_",
+       "/BayRail_"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1090
+    ],
+    "guards": [
+     {
+      "L": 1090,
+      "end": 1091,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [
+       "build_band"
+      ],
+      "prims": [
+       "{ROOT}/Band_{name}_Base",
+       "/Band_",
+       "{ROOT}/Band_{name}_S_{i}"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1083
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1098
+    ],
+    "guards": [
+     {
+      "L": 1098,
+      "end": 1100,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing",
+       "build_yard_dressing"
+      ],
+      "prims": [
+       "{ROOT}/ShutterWall",
+       "{ROOT}/Warehouse",
+       "/ShutterWall",
+       "{ROOT}/Door_{j}",
+       "/Warehouse",
+       "{ROOT}/Bollard_{i}",
+       "/Door_",
+       "{ROOT}/Door_{j}_Rib_{k}",
+       "/Bollard_",
+       "Logistics-warehouse loading dock context elements. **Drop geometry·paint band·bumpers·apron unchanged.**\n\n        ── Camera check (all views, basis for the coordinates) ─────────────\n        View: grid_views hfov 60 deg (half tan 0.577) · pitch −10 deg · 16:9 -> vfov 36 deg.\n        1) The only new solids on the deck are the 3 pallet stacks.\n           N1(−2.55, 7.80) / N2(−5.60, 10.20): **beyond the bay north lip (y=3)**.\n             · grid(gy=−4): frame left bound y <= −4+0.577·(x+10) -> at x=−2.55, y <= 0.30\n               -> y 7.8/10.2 are **outside the frame** (0 occlusion).\n             · edge_walk(eye −1.25,−9 -> tgt −0.75,0.5): 9.6 deg off axis (inside the frame) but\n               **farther away** than the bay·main-edge paint (y <= 3.35), so occlusion is impossible in principle.\n             · bay_corner(eye −1.10,−5.0,1.55, 27 deg down): horizontal 24.8 deg/vertical −4.3 deg ->\n               above the vfov upper bound (−27+18=−9 deg) -> outside the frame.\n           S1(−3.60, −7.40, total height 0.48): south staging.\n             · grid d10(eye −10,−4): frame right bound y >= −4−0.577·6.4 = −7.69 -> it clips.\n               The main-edge points this stack hides run from y −4+(10/6.4)(−3.4) = −9.31 ..\n               to the frame right bound −9.77, i.e. **only the 0.46 m rightmost corner span** (it hides\n               none of the central band·bay corner that are being judged).\n             · d5/d2·edge_approach·edge_graze: off axis or behind the camera -> irrelevant.\n             · beauty_overview(eye −9,−9.5,3.8): 30.4 deg off the view axis -> outside the frame border.\n        2) The traffic paint is flush (proud <= 0.0019) - no effect on hiding·occlusion.\n           The edge approach path (x −10..0 x y −5..−3) carries **0 solids** (paint only).\n        3) The far field (containers·light masts·warehouse blocks) is all x >= 7.4 = beyond the drop.\n           edge_graze(eye z 0.35, 2.4 m to the edge) hiding limit x = 1.2·2.4/0.35\n           = 8.23 m -> the containers' near end min x = 8.91(C2) is **outside the hiding limit**, so\n           they give far-field context without breaking the near-apron hiding.\n        4) The new prim closest to a camera position (eye of any view) = stack S1(−3.60,−7.40) <->\n           beauty_overview eye(−9.0,−9.5,3.8): horizontal 6.0 m·vertical 3.3 m -> not buried.\n        ",
+       "{ROOT}/DockSign_{j}",
+       "{ROOT}/DockSign_{j}_F",
+       "{ROOT}/WallLamp_S{j}",
+       "{ROOT}/WallLamp_S{j}_L"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneD2_floor_opening.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     828
+    ],
+    "guards": [
+     {
+      "L": 828,
+      "end": 850,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [],
+      "prims": [
+       "{ROOT}/OpenRail_Post_{i}",
+       "/OpenRail_Post_",
+       "{ROOT}/OpenRail_{tag}_{i}",
+       "/OpenRail_"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     814
+    ],
+    "guards": [
+     {
+      "L": 814,
+      "end": 827,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [],
+      "prims": [
+       "{ROOT}/Nosing_W",
+       "/Nosing_W",
+       "{ROOT}/Nosing_E",
+       "/Nosing_E",
+       "{ROOT}/Nosing_S",
+       "/Nosing_S",
+       "{ROOT}/Nosing_N",
+       "/Nosing_N"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1143
+    ],
+    "guards": [
+     {
+      "L": 1143,
+      "end": 1146,
+      "test": "not cfg[\"cue_material_break\"]",
+      "calls": [],
+      "prims": []
+     }
+    ]
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1162
+    ],
+    "guards": [
+     {
+      "L": 1162,
+      "end": 1164,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing",
+       "build_site_dressing"
+      ],
+      "prims": [
+       "{ROOT}/Ridge_S",
+       "{ROOT}/FormPanel_{i}",
+       "/Ridge_S",
+       "/FormPanel_",
+       "{ROOT}/Pile_{i}_{j}",
+       "{ROOT}/Mound_{i}_{j}",
+       "/Pile_",
+       "{ROOT}/PileToe_{i}_{k}",
+       "/Mound_",
+       "/PileToe_",
+       "Frame-stage construction-site context elements. **Opening, rebar stubs, debris and slab split unchanged.**\n\n        ── Camera checks (all views, basis of the coordinate calculations) ─────────────────────────────\n        grid_views(gy=0) hfov 60 deg (half tan 0.577) · pitch −10 deg · 16:9 -> vfov 36 deg.\n        [opening sight wedge] the sight lines from camera (−d,0) to the opening (x 0..2, |y| <= 0.75) satisfy\n          |y| <= 0.75·(px+d)/(d+1) at x=px  (d=10 is the widest).\n          Nearest new solid = tool box (−4.85, 1.70) -> wedge limit 0.39 ->\n          **clearance 1.31 m**. All the rest are 3 m or more. -> zero occlusion of the opening.\n        [4 mise-en-scene cuts]\n          approach(−4,0,0.9->1.2,0,−0.35): every new solid is either behind the camera or\n            51 deg+ off the view axis (hfov half 30 deg) -> out of frame.\n          brink(−1,0,1.6->1.6,0.15,−2.3): a downward cut directly over the opening. Nothing new within 3 m.\n          graze(−6,−0.25,0.35->2.5,0.05,0.02): reel 77 deg · tools 59 deg · bag pallet 56 deg\n            -> all out of frame. **The low-eye concealment framing is unchanged.**\n          beauty_overview(−5.2,−5,3.4->1.2,0.4,−0.9): bag pallet A enters at 26 deg off the view axis\n            (lower left of frame), but the sight line toward the opening's near lip is at z=2.40 m there,\n            far above the pallet's total height 0.55 m -> **zero occlusion** (it acts as a foreground prop only).\n        [distant tower crane - grazing the south end of the east wall]\n          Crane at (100, −40), mast top 14.2 / apex 15.4.\n          · Sight angle: bearing 21.8 deg from eye(−10,0) < hfov half 30 deg -> in frame.\n          · East wall (x 8.15, y −6.05..6.45, h 3.2) clearance check: the mast bearing line reaches\n            y = −40·18.15/110 = −6.60 < −6.05 at x=8.15 -> **passes outside the wall's south end**\n            (clearance 0.55 m).\n          · Colonnade columns (x 2.5·5.5, y −6.425..−5.975) check:\n            y=−4.55 at x=2.5, y=−5.64 at x=5.5 -> both north of the columns -> no occlusion.\n          · Elevation check: apex 15.4 m at ~110 m -> elevation 7.5 deg < frame top limit\n            (pitch −10 + vfov half 18 = +8.0 deg) -> **in frame all the way to the apex**.\n          · **Visible view = grid h*_d10 (the widest cut)**. In d5/d2 and graze it is hidden behind the\n            east wall (elevation 9.9 deg/12.7 deg) - an intended outcome (close cuts should have the\n            opening as their subject, so a distant prop is better kept out).\n        [distant ground pad] closes the void beyond the existing ground half 60 m (the crane is at 100 m).\n          Its top face −0.06 is below the existing ground −0.05, so the overlap is coplanar-free.\n        ",
+       "{ROOT}/FarPad",
+       "{ROOT}/Reel_Coil",
+       "{ROOT}/Crane_Mast"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneD3_drainage_channel.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "grass_overhang": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     1005
+    ],
+    "guards": [
+     {
+      "L": 1005,
+      "end": 1013,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_railing_line"
+      ],
+      "prims": [
+       "{ROOT}/Rail",
+       "/Rail"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     1014
+    ],
+    "guards": [
+     {
+      "L": 1014,
+      "end": 1019,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "{ROOT}/Tactile",
+       "/Tactile"
+      ]
+     }
+    ]
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     835
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1180,
+     1190
+    ],
+    "guards": [
+     {
+      "L": 1180,
+      "end": 1181,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing"
+      ],
+      "prims": [
+       "{ROOT}/Fence",
+       "{ROOT}/FenceCap",
+       "/Fence",
+       "/FenceCap",
+       "{ROOT}/Tree_{i}",
+       "{ROOT}/House_{key}",
+       "/Tree_",
+       "/House_"
+      ]
+     },
+     {
+      "L": 1190,
+      "end": 1191,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "_dressing_report"
+      ],
+      "prims": [
+       "[검산] v6 맥락 드레싱 × 카메라 (hFOV 60° / vFOV 36°)",
+       "  ④ 개구 에지 y=±{ch['top_half']} · 오버행/립 대역 |y|≤0.66",
+       "    우편함 y {mb['cy'] + mb['w'] / 2.0} / 수거함 y {bn['cy'] + bn['d'] / 2.0} (둘 다 갓길 y<{rd['y0']}) → {'OK' if mb['cy'] + mb['w'] / 2 < rd['y0'] and bn['cy'] + bn['d'] / 2 < rd['y0'] else 'FAIL'}",
+       " · 오버행/립 대역 |y|≤0.66",
+       " / 수거함 y "
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneD4_subway_platform.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": true,
+   "cue_material_break": true,
+   "cue_nosing": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     720
+    ],
+    "guards": [
+     {
+      "L": 720,
+      "end": 740,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [],
+      "prims": [
+       "{ROOT}/EndRail_{k}/{tag}",
+       "{ROOT}/EndRail_{k}/Post_{j}",
+       "/EndRail_",
+       "/",
+       "/Post_"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     687
+    ],
+    "guards": [
+     {
+      "L": 687,
+      "end": 710,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile",
+       "_dots_relief"
+      ],
+      "prims": [
+       "{ROOT}/Tactile_{k}",
+       "{ROOT}/TactileDots_{k}",
+       "/Tactile_",
+       "/TactileDots_",
+       "{path}/proto",
+       "/proto"
+      ]
+     }
+    ]
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     711
+    ],
+    "guards": [
+     {
+      "L": 711,
+      "end": 719,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [],
+      "prims": [
+       "{ROOT}/Nosing_{i}",
+       "/Nosing_"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     898
+    ],
+    "guards": [
+     {
+      "L": 898,
+      "end": 899,
+      "test": "cfg[\"cue_material_break\"]",
+      "calls": [
+       "build_facade"
+      ],
+      "prims": [
+       "{ROOT}/Facade_{i}",
+       "/Facade_"
+      ]
+     }
+    ]
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     905
+    ],
+    "guards": [
+     {
+      "L": 905,
+      "end": 907,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing",
+       "build_signage"
+      ],
+      "prims": [
+       "{ROOT}/Skirt_{k}",
+       "{ROOT}/Cornice_{k}",
+       "{ROOT}/Bench_{k}",
+       "/Skirt_",
+       "/Cornice_",
+       "{ROOT}/Door_{k}",
+       "/Bench_",
+       "/Door_",
+       "Platform signage. **The edge, track, tactile paving, emissive panels and lighting are all unchanged.**\n\n        ── Camera check (a PT-judged scene, so replaced by a coordinate check) ─────────\n        Eyes of all views: grid(gy −3.6) (−2/−5/−10, −3.6, 0.3~1.8) ·\n          edge_graze(−6, −2.55, 0.32) · edge_approach(8, −6.60, 1.60) ·\n          track_reveal(−3, −4.80, 1.85) · tunnel_vista(6, −3.40, 1.70).\n        1) Wall elements (band·name panel·lightbox): max projection y = ±(7.98−0.095)\n           = ±7.885. Max camera |y| = 6.60 (edge_approach) → **1.29 m clearance**,\n           zero burial or interference. 5.9 m clear of the walking surface (z 0) and the edge (|y|=2.0).\n        2) Ceiling-hung signs: |y| = 2.60 (0.6 m inside the edge, directly above the tactile paving 2.30~2.92),\n           panel bottom z 2.44. Max camera z = 1.85 (track_reveal) →\n           **vertical clearance 0.59 m**; the nearest camera, edge_graze (y −2.55, z 0.32),\n           is more than 6 m away in x → burial 0.\n           · FOV check: from edge_graze the x=0 sign is at elevation 19.5° > vfov half 18°\n             → it leaves the top of the frame, while the x=24 sign at 4.0° → in frame (distant).\n             Neither obstructs the **downward sight line to the edge line and track trough**.\n           · From track_reveal the x=0 sign is 23° above the optical axis → out of frame,\n             the x=24 sign 13.8° → in frame (upper). The track sight line is downward, so no interference.\n        3) x-range collision check: doors x{−8,6,20,34}(±0.50) / name panels x{−4,10,30}\n           near·{2,26} far (±0.80) / lightboxes x{16} near·{12} far (±1.10)\n           → no overlapping ranges on the same wall face. The benches (near −2,10,22,34 /\n           far 4,16,28) sit at y=±7.40, clear of the wall elements (|y| ≥ 7.905) in both z and y.\n        4) Line colour band z 2.30~2.55 — above the door tops 2.10 / name panel tops 2.05 /\n           lightbox tops 2.15, below the cornice bottom 3.08 → coplanarity 0.\n        ",
+       "Thin plate fixed to the inner face of a side wall. sgn=−1 near / +1 far.\n            The back is embedded into the wall by `embed`, removing coplanarity with the wall face.",
+       "{ROOT}/LineBand_{i}",
+       "{ROOT}/NamePlate_{i}",
+       "{ROOT}/NamePlate_{i}_Bar",
+       "{ROOT}/LightBox_{i}_Frame"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneN1_shadow_band.py": {
+  "defaults": {
+   "hazard_shadow_band": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     921
+    ],
+    "guards": [
+     {
+      "L": 921,
+      "end": 922,
+      "test": "cfg[\"cue_material_break\"]",
+      "calls": [
+       "build_joints"
+      ],
+      "prims": [
+       "{ROOT}/JointX_{n}",
+       "{ROOT}/JointY_{m}",
+       "/JointX_",
+       "/JointY_"
+      ]
+     }
+    ]
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     406,
+     925
+    ],
+    "guards": [
+     {
+      "L": 925,
+      "end": 926,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing"
+      ],
+      "prims": [
+       "{ROOT}/Pool",
+       "{ROOT}/Planter_{pdef['name']}",
+       "{ROOT}/Bench_{name}",
+       "{ROOT}/Bollard_{i}",
+       "{ROOT}/Streetlight_{name}",
+       "{base}/Pole",
+       "/Pool",
+       "{ROOT}/Hedge_{hg['name']}",
+       "{ROOT}/Building_{key}",
+       "/Planter_",
+       "/Bench_",
+       "/Bollard_",
+       "/Streetlight_",
+       "/Pole"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneN2_asphalt_patch.py": {
+  "defaults": {
+   "hazard_asphalt_patch": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     980,
+     1169
+    ],
+    "guards": [
+     {
+      "L": 1169,
+      "end": 1170,
+      "test": "cfg[\"cue_material_break\"]",
+      "calls": [
+       "build_joints"
+      ],
+      "prims": [
+       "{ROOT}/JointX_{i}",
+       "{ROOT}/JointY_{i}",
+       "/JointX_",
+       "/JointY_"
+      ]
+     },
+     {
+      "L": 980,
+      "end": 981,
+      "test": "not cfg[\"cue_material_break\"]",
+      "calls": [],
+      "prims": []
+     }
+    ]
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     530,
+     1173
+    ],
+    "guards": [
+     {
+      "L": 1173,
+      "end": 1175,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_markings",
+       "build_dressing"
+      ],
+      "prims": [
+       "{ROOT}/Mark/Arrow/Shaft",
+       "{ROOT}/Mark/Edge_{ed['name']}",
+       "/Mark/Arrow/Shaft",
+       "{ROOT}/Mark/Arrow/Head_{tag}",
+       "{ROOT}/Manhole/{tag}",
+       "/Mark/Edge_",
+       "/Mark/Arrow/Head_",
+       "/Manhole/",
+       "{ROOT}/Mark/{tag}_{si}_{i}",
+       "/Mark/",
+       "{ROOT}/Hedge",
+       "{ROOT}/LaneDash_{i}",
+       "{ROOT}/Curb_{tag}",
+       "{ROOT}/Walk_{tag}"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneN3_trompe_loeil.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "keep_dressing": false
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1346
+    ],
+    "guards": []
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1276
+    ],
+    "guards": [
+     {
+      "L": 1276,
+      "end": 1279,
+      "test": "not cfg[\"cue_material_break\"]",
+      "calls": [],
+      "prims": []
+     }
+    ]
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     346,
+     1586
+    ],
+    "guards": [
+     {
+      "L": 346,
+      "end": 348,
+      "test": "not SCENE_CONFIG.get(\"cue_scene_dressing\", True)",
+      "calls": [],
+      "prims": []
+     },
+     {
+      "L": 1586,
+      "end": 1587,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing"
+      ],
+      "prims": [
+       "{ROOT}/Lamp/Pole",
+       "{ROOT}/Lamp/Head",
+       "{ROOT}/EntrySign",
+       "/Lamp/Pole",
+       "/Lamp/Head",
+       "{ROOT}/Planter_{name}",
+       "{ROOT}/Bench_{name}",
+       "{ROOT}/Bollard_{name}",
+       "{ROOT}/Building_{key}",
+       "/EntrySign",
+       "/Planter_",
+       "/Bench_",
+       "/Bollard_",
+       "/Building_"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneN4_downhill_ramp.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     995
+    ],
+    "guards": [
+     {
+      "L": 995,
+      "end": 996,
+      "test": "not cfg[\"cue_railing\"]",
+      "calls": [],
+      "prims": []
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     840
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     367,
+     998,
+     1237,
+     1247
+    ],
+    "guards": [
+     {
+      "L": 1237,
+      "end": 1238,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing"
+      ],
+      "prims": [
+       "{ROOT}/Bollard_{i}",
+       "{ROOT}/FarHedge_{i}",
+       "{ROOT}/FarTree_{i}",
+       "{ROOT}/FarRidge",
+       "{ROOT}/Building_{key}",
+       "/Bollard_",
+       "/FarHedge_",
+       "/FarTree_",
+       "/FarRidge",
+       "/Building_"
+      ]
+     },
+     {
+      "L": 998,
+      "end": 1001,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [],
+      "prims": []
+     },
+     {
+      "L": 1247,
+      "end": 1248,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "_dressing_report"
+      ],
+      "prims": [
+       "[검산] v6 맥락 드레싱 × 카메라 (hFOV 60° / vFOV 36°)",
+       "  ④ 진입사인 판 y [{es['y'] - es['w'] / 2.0}, {sy1}] vs 옹벽 내면 {wl['y_in']} → 여유 {wl['y_in'] - sy1} m {'OK' if sy1 < wl['y_in'] else 'FAIL(관통)'}"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneN5_flush_grating.py": {
+  "defaults": {
+   "hazard_flush_grating": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1107
+    ],
+    "guards": [
+     {
+      "L": 1107,
+      "end": 1108,
+      "test": "cfg[\"cue_material_break\"]",
+      "calls": [
+       "build_joints"
+      ],
+      "prims": [
+       "{ROOT}/JointX_{i}_{k}",
+       "{ROOT}/JointY_{i}_{k}",
+       "/JointX_",
+       "/JointY_"
+      ]
+     }
+    ]
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     1111
+    ],
+    "guards": [
+     {
+      "L": 1111,
+      "end": 1113,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_roadway",
+       "build_dressing"
+      ],
+      "prims": [
+       "{ROOT}/Roadway",
+       "/Roadway",
+       "{ROOT}/Curb_{cd['name']}",
+       "{ROOT}/RoadDash_{i}",
+       "{ROOT}/RoadEdge_{ed['name']}",
+       "/Curb_",
+       "/RoadDash_",
+       "/RoadEdge_",
+       "{ROOT}/StreetTree_{td['name']}",
+       "{ROOT}/EntrySign",
+       "{ROOT}/Wall_{tag}",
+       "{ROOT}/WallCap_{tag}",
+       "{ROOT}/Planter_{pname}",
+       "/StreetTree_"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "probe::probeH1_near_hole.py": {
+  "defaults": {
+   "hazard_hole": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     298
+    ],
+    "guards": [
+     {
+      "L": 298,
+      "end": 302,
+      "test": "not cfg[\"cue_material_break\"]",
+      "calls": [],
+      "prims": []
+     }
+    ]
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     395
+    ],
+    "guards": [
+     {
+      "L": 395,
+      "end": 396,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing"
+      ],
+      "prims": [
+       "{ROOT}/Spoil",
+       "/Spoil"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "probe::probeH2_offpath_hole.py": {
+  "defaults": {
+   "hazard_hole": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     278
+    ],
+    "guards": [
+     {
+      "L": 278,
+      "end": 280,
+      "test": "not cfg[\"cue_material_break\"]",
+      "calls": [],
+      "prims": []
+     }
+    ]
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     360
+    ],
+    "guards": [
+     {
+      "L": 360,
+      "end": 361,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing"
+      ],
+      "prims": [
+       "{ROOT}/Spoil",
+       "/Spoil"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "probe::probeH3_hidden_hole.py": {
+  "defaults": {
+   "hazard_hole": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     277,
+     429
+    ],
+    "guards": [
+     {
+      "L": 429,
+      "end": 433,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_railing_run"
+      ],
+      "prims": []
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     336
+    ],
+    "guards": [
+     {
+      "L": 336,
+      "end": 338,
+      "test": "not cfg[\"cue_material_break\"]",
+      "calls": [],
+      "prims": []
+     }
+    ]
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     440
+    ],
+    "guards": [
+     {
+      "L": 440,
+      "end": 441,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing"
+      ],
+      "prims": [
+       "{ROOT}/Spoil",
+       "/Spoil"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "cueoff_port::scene12_riverside_deck.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     649,
+     2224,
+     2237
+    ],
+    "guards": [
+     {
+      "L": 2224,
+      "end": 2225,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_railing"
+      ],
+      "prims": [
+       "{ROOT}/Rail/Post_{i}",
+       "{ROOT}/Rail/{nm}",
+       "/Rail/Post_",
+       "/Rail/"
+      ]
+     },
+     {
+      "L": 2237,
+      "end": 2238,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_railing"
+      ],
+      "prims": [
+       "{ROOT}/Rail/Post_{i}",
+       "{ROOT}/Rail/{nm}",
+       "/Rail/Post_",
+       "/Rail/"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     1984
+    ],
+    "guards": [
+     {
+      "L": 1984,
+      "end": 1987,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [
+       "build_nosing"
+      ],
+      "prims": [
+       "{ROOT}/Nosing",
+       "/Nosing"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     650,
+     1933,
+     1979
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     625,
+     636,
+     651,
+     2243
+    ],
+    "guards": [
+     {
+      "L": 625,
+      "end": 627,
+      "test": "not SCENE_CONFIG.get(\"cue_scene_dressing\", True)",
+      "calls": [],
+      "prims": []
+     },
+     {
+      "L": 636,
+      "end": 638,
+      "test": "not SCENE_CONFIG.get(\"cue_scene_dressing\", True)",
+      "calls": [],
+      "prims": []
+     },
+     {
+      "L": 2243,
+      "end": 2246,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_skyline",
+       "build_dressing"
+      ],
+      "prims": [
+       "{ROOT}/Bridge/Deck",
+       "{ROOT}/FarBuilding_{key}",
+       "/Bridge/Deck",
+       "{ROOT}/Bridge/Parapet_{tag}",
+       "{ROOT}/Bridge/PierCap_{i}",
+       "{ROOT}/Bridge/Pier_{i}",
+       "/FarBuilding_",
+       "/Bridge/Parapet_",
+       "/Bridge/PierCap_",
+       "/Bridge/Pier_",
+       "{ROOT}/BikeRoad",
+       "{ROOT}/Streetlight_{i}",
+       "/BikeRoad",
+       "{ROOT}/BikeLine_{tag}"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "cueoff_port::scene17_ramp_pair_hangang.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     839,
+     2793
+    ],
+    "guards": [
+     {
+      "L": 2793,
+      "end": 2796,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_railing_line"
+      ],
+      "prims": [
+       "{ROOT}/Rail",
+       "/Rail"
+      ]
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     2797
+    ],
+    "guards": [
+     {
+      "L": 2797,
+      "end": 2800,
+      "test": "cfg[\"cue_nosing\"]",
+      "calls": [
+       "build_nosing"
+      ],
+      "prims": [
+       "{ROOT}/Nosing",
+       "/Nosing"
+      ]
+     }
+    ]
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     840,
+     2805
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     815,
+     826,
+     841,
+     2818
+    ],
+    "guards": [
+     {
+      "L": 815,
+      "end": 817,
+      "test": "not SCENE_CONFIG.get(\"cue_scene_dressing\", True)",
+      "calls": [],
+      "prims": []
+     },
+     {
+      "L": 826,
+      "end": 828,
+      "test": "not SCENE_CONFIG.get(\"cue_scene_dressing\", True)",
+      "calls": [],
+      "prims": []
+     },
+     {
+      "L": 2818,
+      "end": 2821,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_skyline",
+       "build_dressing"
+      ],
+      "prims": [
+       "{ROOT}/Bridge/Deck",
+       "{ROOT}/FarBuilding_{key}",
+       "/Bridge/Deck",
+       "{ROOT}/Bridge/Pier_{i}",
+       "/FarBuilding_",
+       "/Bridge/Pier_",
+       "{ROOT}/KmSign/Pole",
+       "{ROOT}/KmSign/Panel",
+       "{ROOT}/TerraceTree_{i}",
+       "{ROOT}/CrownTree_{i}",
+       "{ROOT}/Bench_{i}",
+       "{ROOT}/Light{tag}_{i}",
+       "/KmSign/Pole",
+       "/KmSign/Panel"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "cueoff_port::scene20_diagonal_oblique.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "keys": {
+   "cue_railing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     529,
+     965,
+     1146,
+     1268,
+     1296
+    ],
+    "guards": [
+     {
+      "L": 965,
+      "end": 966,
+      "test": "cfg[\"cue_railing\"]",
+      "calls": [
+       "build_stair_walls"
+      ],
+      "prims": [
+       "{grp}/StairWall_{tag}",
+       "/StairWall_",
+       "{p}/Body",
+       "{p}/Haunch",
+       "{p}/Newel",
+       "{p}/EndCap",
+       "{p}/Cap_Head",
+       "{p}/Cap_Rake",
+       "{p}/Cap_Toe",
+       "/Body",
+       "/Haunch",
+       "/Newel",
+       "/EndCap",
+       "/Cap_Head"
+      ]
+     },
+     {
+      "L": 1296,
+      "end": 1297,
+      "test": "cfg[\"cue_railing\"] and not wall_ok",
+      "calls": [],
+      "prims": []
+     }
+    ]
+   },
+   "cue_tactile": {
+    "declared": true,
+    "default": false,
+    "reads": [
+     959,
+     976,
+     1175
+    ],
+    "guards": [
+     {
+      "L": 959,
+      "end": 964,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "{grp}/Tactile_Top",
+       "/Tactile_Top"
+      ]
+     },
+     {
+      "L": 1175,
+      "end": 1180,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "{ROOT}/Tactile_Bollard",
+       "/Tactile_Bollard"
+      ]
+     },
+     {
+      "L": 976,
+      "end": 981,
+      "test": "cfg[\"cue_tactile\"]",
+      "calls": [
+       "build_tactile"
+      ],
+      "prims": [
+       "{grp}/Tactile_LowBollard",
+       "/Tactile_LowBollard"
+      ]
+     }
+    ]
+   },
+   "cue_nosing": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_material_break": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     530,
+     951
+    ],
+    "guards": []
+   },
+   "cue_sign": {
+    "declared": true,
+    "default": false,
+    "reads": [],
+    "guards": []
+   },
+   "cue_scene_dressing": {
+    "declared": true,
+    "default": true,
+    "reads": [
+     505,
+     516,
+     531,
+     739,
+     969,
+     1463,
+     1468,
+     1471
+    ],
+    "guards": [
+     {
+      "L": 505,
+      "end": 507,
+      "test": "not SCENE_CONFIG.get(\"cue_scene_dressing\", True)",
+      "calls": [],
+      "prims": []
+     },
+     {
+      "L": 516,
+      "end": 518,
+      "test": "not SCENE_CONFIG.get(\"cue_scene_dressing\", True)",
+      "calls": [],
+      "prims": []
+     },
+     {
+      "L": 1468,
+      "end": 1469,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_dressing"
+      ],
+      "prims": [
+       "{ROOT}/Streetlight_{i}",
+       "{ROOT}/AccessRamp",
+       "{ROOT}/Bollard_{i}",
+       "{ROOT}/Tactile_Bollard",
+       "{ROOT}/Planter_{i}",
+       "{ROOT}/Bench_{i}",
+       "/Streetlight_",
+       "{base}/Pole",
+       "{ROOT}/Hedge_{i}",
+       "/AccessRamp",
+       "/Bollard_",
+       "/Tactile_Bollard",
+       "/Planter_",
+       "/Bench_"
+      ]
+     },
+     {
+      "L": 1471,
+      "end": 1472,
+      "test": "cfg[\"hazard_stairs\"] and cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_litter"
+      ],
+      "prims": [
+       "{ROOT}/Diag",
+       "/Diag",
+       "{grp}/Litter_Tread",
+       "{grp}/Litter_Foot",
+       "{ROOT}/Litter_Plaza",
+       "/Litter_Tread",
+       "/Litter_Foot",
+       "/Litter_Plaza"
+      ]
+     },
+     {
+      "L": 739,
+      "end": 740,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_bands"
+      ],
+      "prims": [
+       "[CUE-OFF port] The charcoal mesa stripes, lifted OUT of `build_upper`.\n\n        Why this refactor exists -- it is a DATUM fix, not a tidy-up.  A band top\n        sits at `top + proud - 0.003 + 0.01` = **+0.0085 m**, and `build_upper`\n        is inside the hazard branch, so the canonical hazard-off arm loses the\n        bands and with them 8.5 mm of camera ground datum.  That shift is\n        measurable in the shipped corpus: `260820_boost_e2_on` cuts 0000/0001\n        carry `cam.ground_z` 0.0085 while their off twins carry 0.0.\n        Arm C (`keep_dressing`) is defined as \"hazard removed, DRESSING KEPT\",\n        and the bands ARE dressing -- so rebuilding them on the flat plaza is\n        both the semantically correct arm and the thing that makes arm C's\n        camera datum identical to arm A's.  The y clamp is a function of x\n        alone, so the rebuilt bands are coordinate-identical to arm A's.\n        (Arm B1 legitimately loses them -- that is the intervention -- and\n        PREREG sec.5.1 declares the resulting `pose_tol` stratum instead of\n        hiding it.)\n        ",
+       "{ROOT}/Band_{i}",
+       "/Band_"
+      ]
+     },
+     {
+      "L": 969,
+      "end": 984,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_bollard_std",
+       "build_tactile",
+       "build_bench"
+      ],
+      "prims": [
+       "{grp}/LowBollard_{i}",
+       "/LowBollard_",
+       "{grp}/Tactile_LowBollard",
+       "/Tactile_LowBollard",
+       "{grp}/LowBench_{i}",
+       "/LowBench_"
+      ]
+     },
+     {
+      "L": 1463,
+      "end": 1464,
+      "test": "cfg[\"cue_scene_dressing\"]",
+      "calls": [
+       "build_bands"
+      ],
+      "prims": [
+       "[CUE-OFF port] The charcoal mesa stripes, lifted OUT of `build_upper`.\n\n        Why this refactor exists -- it is a DATUM fix, not a tidy-up.  A band top\n        sits at `top + proud - 0.003 + 0.01` = **+0.0085 m**, and `build_upper`\n        is inside the hazard branch, so the canonical hazard-off arm loses the\n        bands and with them 8.5 mm of camera ground datum.  That shift is\n        measurable in the shipped corpus: `260820_boost_e2_on` cuts 0000/0001\n        carry `cam.ground_z` 0.0085 while their off twins carry 0.0.\n        Arm C (`keep_dressing`) is defined as \"hazard removed, DRESSING KEPT\",\n        and the bands ARE dressing -- so rebuilding them on the flat plaza is\n        both the semantically correct arm and the thing that makes arm C's\n        camera datum identical to arm A's.  The y clamp is a function of x\n        alone, so the rebuilt bands are coordinate-identical to arm A's.\n        (Arm B1 legitimately loses them -- that is the intervention -- and\n        PREREG sec.5.1 declares the resulting `pose_tol` stratum instead of\n        hiding it.)\n        ",
+       "{ROOT}/Band_{i}",
+       "/Band_"
+      ]
+     }
+    ]
+   }
+  }
+ }
+}

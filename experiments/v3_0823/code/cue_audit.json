@@ -1,0 +1,6171 @@
+{
+ "main::scene01_campus_stairs.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 203,
+  "reads": {
+   "cue_material_break": [
+    1738
+   ],
+   "cue_tactile": [
+    2570
+   ],
+   "cue_railing": [
+    2609
+   ],
+   "hazard_stairs": [
+    2672
+   ],
+   "cue_scene_dressing": [
+    2685
+   ],
+   "cue_sign": [
+    2695
+   ]
+  },
+  "guards": {
+   "cue_material_break": [
+    {
+     "line": 1738,
+     "end": 1749,
+     "negated": false,
+     "test": "cfg[\"cue_material_break\"]",
+     "calls": [
+      "make_pbr",
+      "_tex_path"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 2609,
+     "end": 2648,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "min",
+      "int",
+      "enumerate",
+      "build_railing_line",
+      "abs"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 2672,
+     "end": 2678,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_stairs",
+      "build_lower_plaza",
+      "build_flank_walls",
+      "build_aprons"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 2685,
+     "end": 2691,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_planters",
+      "build_backdrop",
+      "build_lawn_trees",
+      "build_fountain",
+      "build_streetlight",
+      "build_dressing_props"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_sign": [
+    {
+     "line": 2695,
+     "end": 2696,
+     "negated": false,
+     "test": "cfg[\"cue_sign\"]",
+     "calls": [
+      "build_signs"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 2800,
+  "tag": "main",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/main/scene01_campus_stairs.py"
+ },
+ "main::scene02_underpass.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 153,
+  "reads": {
+   "cue_scene_dressing": [
+    1322,
+    1386,
+    1936
+   ],
+   "cue_tactile": [
+    1358,
+    1584
+   ],
+   "cue_nosing": [
+    1569
+   ],
+   "cue_railing": [
+    1603
+   ],
+   "hazard_stairs": [
+    1909,
+    1926,
+    1940
+   ],
+   "cue_material_break": [
+    1923
+   ],
+   "cue_sign": [
+    1940
+   ]
+  },
+  "guards": {
+   "cue_scene_dressing": [
+    {
+     "line": 1322,
+     "end": 1326,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1386,
+     "end": 1390,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1936,
+     "end": 1939,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing",
+      "build_backdrop",
+      "build_canopy"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_nosing": [
+    {
+     "line": 1569,
+     "end": 1575,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "build_nosing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_tactile": [
+    {
+     "line": 1584,
+     "end": 1591,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 1603,
+     "end": 1672,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "min",
+      "max",
+      "int",
+      "build_handrail",
+      "len",
+      "print",
+      "CYL",
+      "hrail"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 1909,
+     "end": 1918,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "enumerate",
+      "Define",
+      "CreateRadiusAttr",
+      "CreateIntensityAttr",
+      "CreateColorAttr",
+      "Set",
+      "float",
+      "Vec3f",
+      "Vec3d",
+      "AddTranslateOp",
+      "Xformable",
+      "GetPrim"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1926,
+     "end": 1934,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_sidewalk",
+      "build_sill",
+      "build_stairs",
+      "build_walls",
+      "build_tunnel",
+      "build_cues"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1940,
+     "end": 1941,
+     "negated": false,
+     "test": "cfg.get(\"cue_sign\") and cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_signs"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_sign": [
+    {
+     "line": 1940,
+     "end": 1941,
+     "negated": false,
+     "test": "cfg.get(\"cue_sign\") and cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_signs"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 2036,
+  "tag": "main",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/main/scene02_underpass.py"
+ },
+ "main::scene03_riverbank.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "cfg_lineno": 204,
+  "reads": {
+   "cue_material_break": [
+    2097
+   ],
+   "cue_railing": [
+    2679
+   ],
+   "cue_nosing": [
+    2684
+   ],
+   "cue_tactile": [
+    2690
+   ],
+   "hazard_stairs": [
+    2703,
+    2713
+   ],
+   "cue_scene_dressing": [
+    2713
+   ]
+  },
+  "guards": {
+   "cue_railing": [
+    {
+     "line": 2679,
+     "end": 2682,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "build_railing_line"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_nosing": [
+    {
+     "line": 2684,
+     "end": 2688,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "build_nosing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_tactile": [
+    {
+     "line": 2690,
+     "end": 2697,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "build_tactile",
+      "make_pbr",
+      "tex_path"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 2703,
+     "end": 2710,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_slopes",
+      "build_stairs",
+      "build_trims",
+      "build_beach",
+      "build_riprap"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 2713,
+     "end": 2714,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"] and cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 2713,
+     "end": 2714,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"] and cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 2810,
+  "tag": "main",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/main/scene03_riverbank.py"
+ },
+ "main::scene04_parktrail.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "cfg_lineno": 97,
+  "reads": {
+   "hazard_stairs": [
+    588,
+    594,
+    1818
+   ],
+   "cue_material_break": [
+    1247
+   ],
+   "cue_railing": [
+    1779
+   ],
+   "cue_tactile": [
+    1802
+   ],
+   "cue_nosing": [
+    1808
+   ],
+   "cue_scene_dressing": [
+    1826
+   ]
+  },
+  "guards": {
+   "hazard_stairs": [
+    {
+     "line": 594,
+     "end": 595,
+     "negated": true,
+     "test": "not SCENE_CONFIG[\"hazard_stairs\"]",
+     "calls": [],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1818,
+     "end": 1822,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_slope_zone",
+      "build_sleeper_stairs"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 1779,
+     "end": 1799,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "slope_z",
+      "hypot",
+      "degrees",
+      "atan2",
+      "add_cylinder"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_tactile": [
+    {
+     "line": 1802,
+     "end": 1805,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_nosing": [
+    {
+     "line": 1808,
+     "end": 1812,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "build_nosing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 1826,
+     "end": 1847,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_nature",
+      "build_park_props",
+      "build_verge",
+      "build_handline",
+      "print",
+      "join",
+      "sorted",
+      "endswith",
+      "items",
+      "splitext",
+      "split",
+      "get",
+      "rope_pitch"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 1949,
+  "tag": "main",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/main/scene04_parktrail.py"
+ },
+ "main::scene05_amphitheater.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 169,
+  "reads": {
+   "cue_material_break": [
+    1998,
+    2729
+   ],
+   "hazard_stairs": [
+    2563,
+    2722
+   ],
+   "cue_railing": [
+    2669
+   ],
+   "cue_tactile": [
+    2686
+   ],
+   "cue_nosing": [
+    2690
+   ],
+   "cue_scene_dressing": [
+    2734
+   ],
+   "cue_sign": [
+    2739
+   ]
+  },
+  "guards": {
+   "cue_material_break": [
+    {
+     "line": 1998,
+     "end": 2007,
+     "negated": false,
+     "test": "cfg[\"cue_material_break\"]",
+     "calls": [
+      "make_pbr",
+      "tex_path"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 2729,
+     "end": 2730,
+     "negated": false,
+     "test": "cfg[\"cue_material_break\"]",
+     "calls": [
+      "build_lip"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 2563,
+     "end": 2571,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "enumerate",
+      "build_arc_steps",
+      "build_backdrop_shrubs"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 2669,
+     "end": 2684,
+     "negated": false,
+     "test": "cfg.get(\"cue_railing\")",
+     "calls": [
+      "range",
+      "radians",
+      "add_cylinder",
+      "cos",
+      "sin",
+      "build_arc_steps"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_tactile": [
+    {
+     "line": 2686,
+     "end": 2688,
+     "negated": false,
+     "test": "cfg.get(\"cue_tactile\")",
+     "calls": [
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_nosing": [
+    {
+     "line": 2690,
+     "end": 2700,
+     "negated": false,
+     "test": "cfg.get(\"cue_nosing\")",
+     "calls": [
+      "make_pbr",
+      "enumerate",
+      "build_arc_steps"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 2734,
+     "end": 2737,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing",
+      "build_seat_strips"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_sign": [
+    {
+     "line": 2739,
+     "end": 2740,
+     "negated": false,
+     "test": "cfg.get(\"cue_sign\")",
+     "calls": [
+      "build_signs"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 2834,
+  "tag": "main",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/main/scene05_amphitheater.py"
+ },
+ "main::scene06_overpass_spiral.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 180,
+  "reads": {
+   "cue_railing": [
+    2649
+   ],
+   "cue_tactile": [
+    2734
+   ],
+   "cue_nosing": [
+    2743
+   ],
+   "cue_material_break": [
+    2763
+   ],
+   "hazard_stairs": [
+    2765
+   ],
+   "cue_scene_dressing": [
+    2773
+   ]
+  },
+  "guards": {
+   "cue_railing": [
+    {
+     "line": 2649,
+     "end": 2733,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "_guard_bays",
+      "_guard_section",
+      "_step_deg",
+      "min",
+      "_spiral_z_at",
+      "append",
+      "zip",
+      "_guard_run",
+      "_guard_posts",
+      "_newel",
+      "len",
+      "cos",
+      "sin",
+      "radians",
+      "build_deck_rail",
+      "build_north_guard"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_tactile": [
+    {
+     "line": 2734,
+     "end": 2741,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_nosing": [
+    {
+     "line": 2743,
+     "end": 2751,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "_step_deg",
+      "range",
+      "_spiral_top_z",
+      "build_arc_steps"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_material_break": [
+    {
+     "line": 2763,
+     "end": 2764,
+     "negated": false,
+     "test": "cfg[\"cue_material_break\"]",
+     "calls": [
+      "build_lanes"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 2765,
+     "end": 2772,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_spiral",
+      "build_deck",
+      "build_ground_kit",
+      "build_north",
+      "build_cues"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 2773,
+     "end": 2774,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 2863,
+  "tag": "main",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/main/scene06_overpass_spiral.py"
+ },
+ "main::scene07_temple_stone_path.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "cfg_lineno": 147,
+  "reads": {
+   "cue_sign": [
+    1280,
+    1689,
+    2810
+   ],
+   "cue_material_break": [
+    2079
+   ],
+   "cue_railing": [
+    2766
+   ],
+   "cue_tactile": [
+    2773
+   ],
+   "cue_nosing": [
+    2778
+   ],
+   "hazard_stairs": [
+    2793,
+    2804,
+    2810,
+    2812
+   ],
+   "cue_scene_dressing": [
+    2804
+   ]
+  },
+  "guards": {
+   "cue_sign": [
+    {
+     "line": 1280,
+     "end": 1283,
+     "negated": false,
+     "test": "SCENE_CONFIG[\"cue_sign\"]",
+     "calls": [
+      "append"
+     ],
+     "prims": [
+      "SignPost"
+     ],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1689,
+     "end": 1694,
+     "negated": false,
+     "test": "SCENE_CONFIG[\"cue_sign\"]",
+     "calls": [
+      "insert"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 2810,
+     "end": 2811,
+     "negated": false,
+     "test": "cfg[\"cue_sign\"] and cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_sign"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_material_break": [
+    {
+     "line": 2079,
+     "end": 2080,
+     "negated": true,
+     "test": "not cfg[\"cue_material_break\"]",
+     "calls": [],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 2766,
+     "end": 2772,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "path_z",
+      "build_railing_line"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_tactile": [
+    {
+     "line": 2773,
+     "end": 2777,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "tactile_pbr",
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_nosing": [
+    {
+     "line": 2778,
+     "end": 2788,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "BOX"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 2793,
+     "end": 2802,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_terrain",
+      "build_stones",
+      "build_stone_dressing",
+      "build_kerb",
+      "build_ferns",
+      "build_leaf_masks",
+      "build_cues"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 2804,
+     "end": 2809,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"] and cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_gate",
+      "build_lanterns",
+      "build_hall",
+      "build_roof_cluster",
+      "build_nature"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 2810,
+     "end": 2811,
+     "negated": false,
+     "test": "cfg[\"cue_sign\"] and cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_sign"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 2812,
+     "end": 2813,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_ground_kit"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 2804,
+     "end": 2809,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"] and cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_gate",
+      "build_lanterns",
+      "build_hall",
+      "build_roof_cluster",
+      "build_nature"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 2910,
+  "tag": "main",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/main/scene07_temple_stone_path.py"
+ },
+ "main::scene08_sunken_plaza.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "cfg_lineno": 151,
+  "reads": {
+   "cue_material_break": [
+    1949
+   ],
+   "cue_nosing": [
+    1957
+   ],
+   "hazard_stairs": [
+    2452
+   ],
+   "cue_railing": [
+    2459
+   ],
+   "cue_tactile": [
+    2462
+   ],
+   "cue_sign": [
+    2464
+   ],
+   "cue_scene_dressing": [
+    2468
+   ]
+  },
+  "guards": {
+   "cue_nosing": [
+    {
+     "line": 1957,
+     "end": 1963,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "enumerate",
+      "SECT",
+      "int"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 2452,
+     "end": 2467,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_bowl_floor",
+      "build_cascade",
+      "build_tiers",
+      "build_ctrl_wall",
+      "build_arcade",
+      "build_ground_kit",
+      "build_guard",
+      "build_flank_rails",
+      "build_tactile_arc",
+      "build_signs"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 2459,
+     "end": 2461,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "build_guard",
+      "build_flank_rails"
+     ],
+     "prims": [],
+     "inside": [
+      "hazard_stairs"
+     ],
+     "inside_hazard": [
+      "hazard_stairs"
+     ]
+    }
+   ],
+   "cue_tactile": [
+    {
+     "line": 2462,
+     "end": 2463,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "build_tactile_arc"
+     ],
+     "prims": [],
+     "inside": [
+      "hazard_stairs"
+     ],
+     "inside_hazard": [
+      "hazard_stairs"
+     ]
+    }
+   ],
+   "cue_sign": [
+    {
+     "line": 2464,
+     "end": 2465,
+     "negated": false,
+     "test": "cfg[\"cue_sign\"]",
+     "calls": [
+      "build_signs"
+     ],
+     "prims": [],
+     "inside": [
+      "hazard_stairs"
+     ],
+     "inside_hazard": [
+      "hazard_stairs"
+     ]
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 2468,
+     "end": 2471,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_curb",
+      "build_dressing",
+      "build_backdrop"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 2559,
+  "tag": "main",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/main/scene08_sunken_plaza.py"
+ },
+ "main::scene09_ghat_riverfront.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "cfg_lineno": 301,
+  "reads": {
+   "cue_material_break": [
+    2844,
+    2895
+   ],
+   "hazard_stairs": [
+    3881
+   ],
+   "cue_scene_dressing": [
+    3888
+   ],
+   "cue_sign": [
+    3890
+   ]
+  },
+  "guards": {
+   "hazard_stairs": [
+    {
+     "line": 3881,
+     "end": 3886,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_stairs",
+      "build_embankment",
+      "build_ground_kit"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 3888,
+     "end": 3889,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_sign": [
+    {
+     "line": 3890,
+     "end": 3891,
+     "negated": false,
+     "test": "cfg.get(\"cue_sign\")",
+     "calls": [
+      "build_signs"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 4066,
+  "tag": "main",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/main/scene09_ghat_riverfront.py"
+ },
+ "main::scene10_park_deck_switchback.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "cfg_lineno": 399,
+  "reads": {
+   "cue_material_break": [
+    3718
+   ],
+   "cue_railing": [
+    4232
+   ],
+   "cue_tactile": [
+    4673
+   ],
+   "cue_nosing": [
+    4679
+   ],
+   "hazard_stairs": [
+    4702
+   ],
+   "cue_scene_dressing": [
+    4713
+   ]
+  },
+  "guards": {
+   "cue_railing": [
+    {
+     "line": 4232,
+     "end": 4268,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "rail_runs",
+      "str",
+      "_rake_rail",
+      "hypot",
+      "deck_rail",
+      "newel_points",
+      "enumerate",
+      "build_newel",
+      "build_handrail",
+      "print",
+      "len",
+      "sum"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_tactile": [
+    {
+     "line": 4673,
+     "end": 4678,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "tactile_pbr",
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_nosing": [
+    {
+     "line": 4679,
+     "end": 4686,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "band",
+      "build_nosing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 4702,
+     "end": 4711,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_deck",
+      "build_cues",
+      "build_approach",
+      "build_ground_kit"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 4713,
+     "end": 4715,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_nature",
+      "build_props"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 4813,
+  "tag": "main",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/main/scene10_park_deck_switchback.py"
+ },
+ "main::scene11_footbridge_stairs.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 169,
+  "reads": {
+   "cue_nosing": [
+    2389
+   ],
+   "cue_railing": [
+    2398,
+    2793
+   ],
+   "cue_tactile": [
+    2541
+   ],
+   "cue_material_break": [
+    2786
+   ],
+   "hazard_stairs": [
+    2788
+   ],
+   "cue_sign": [
+    2795
+   ],
+   "cue_scene_dressing": [
+    2797
+   ]
+  },
+  "guards": {
+   "cue_nosing": [
+    {
+     "line": 2389,
+     "end": 2396,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "enumerate",
+      "_stair_steps",
+      "build_nosing_tier",
+      "_A"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 2398,
+     "end": 2531,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "_A",
+      "min",
+      "int",
+      "enumerate",
+      "build_railing_line",
+      "build_rail_end",
+      "_B",
+      "_gnd",
+      "build_guard_run",
+      "insert",
+      "build_mesh_panel",
+      "float",
+      "append",
+      "hypot",
+      "BOX",
+      "abs"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 2793,
+     "end": 2794,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "build_deck_rails"
+     ],
+     "prims": [],
+     "inside": [
+      "hazard_stairs"
+     ],
+     "inside_hazard": [
+      "hazard_stairs"
+     ]
+    }
+   ],
+   "cue_tactile": [
+    {
+     "line": 2541,
+     "end": 2565,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "float",
+      "get",
+      "abs",
+      "sin",
+      "radians",
+      "_oriented_box",
+      "_A",
+      "_B"
+     ],
+     "prims": [
+      "TactileHead",
+      "TactileFoot"
+     ],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_material_break": [
+    {
+     "line": 2786,
+     "end": 2787,
+     "negated": false,
+     "test": "cfg[\"cue_material_break\"]",
+     "calls": [
+      "build_lanes"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 2788,
+     "end": 2794,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_deck",
+      "build_ground_kit",
+      "build_east",
+      "build_west",
+      "build_deck_rails"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_sign": [
+    {
+     "line": 2795,
+     "end": 2796,
+     "negated": false,
+     "test": "cfg[\"cue_sign\"]",
+     "calls": [
+      "build_signs"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 2797,
+     "end": 2798,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 2887,
+  "tag": "main",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/main/scene11_footbridge_stairs.py"
+ },
+ "main::scene12_riverside_deck.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "cfg_lineno": 244,
+  "reads": {
+   "cue_material_break": [
+    1849,
+    1895
+   ],
+   "cue_nosing": [
+    1900
+   ],
+   "hazard_stairs": [
+    2061,
+    2075
+   ],
+   "cue_railing": [
+    2066
+   ],
+   "cue_scene_dressing": [
+    2073
+   ]
+  },
+  "guards": {
+   "cue_nosing": [
+    {
+     "line": 1900,
+     "end": 1903,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "build_nosing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 2061,
+     "end": 2070,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_terrain",
+      "build_deck",
+      "build_ground_kit",
+      "build_stairs",
+      "build_railing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 2075,
+     "end": 2076,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [
+      "cue_scene_dressing"
+     ],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 2066,
+     "end": 2067,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "build_railing"
+     ],
+     "prims": [],
+     "inside": [
+      "hazard_stairs"
+     ],
+     "inside_hazard": [
+      "hazard_stairs"
+     ]
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 2073,
+     "end": 2076,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_skyline",
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 2164,
+  "tag": "main",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/main/scene12_riverside_deck.py"
+ },
+ "main::scene13_apartment_parking_entry.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "cfg_lineno": 185,
+  "reads": {
+   "cue_tactile": [
+    2626,
+    3598,
+    3808
+   ],
+   "cue_nosing": [
+    2707,
+    2723
+   ],
+   "cue_material_break": [
+    3787,
+    3788
+   ],
+   "hazard_stairs": [
+    3794
+   ],
+   "cue_railing": [
+    3806
+   ],
+   "cue_sign": [
+    3810
+   ],
+   "cue_scene_dressing": [
+    3814
+   ]
+  },
+  "guards": {
+   "cue_nosing": [
+    {
+     "line": 2707,
+     "end": 2710,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "build_nosing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 2723,
+     "end": 2727,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "build_nosing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_tactile": [
+    {
+     "line": 3598,
+     "end": 3603,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "build_tactile",
+      "cross_ramp_z"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 3808,
+     "end": 3809,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "build_tactiles"
+     ],
+     "prims": [],
+     "inside": [
+      "hazard_stairs"
+     ],
+     "inside_hazard": [
+      "hazard_stairs"
+     ]
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 3794,
+     "end": 3813,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_ramp",
+      "build_ground_kit",
+      "build_trench_walls",
+      "build_stair",
+      "build_underground",
+      "build_entry_gear",
+      "build_canopy_full",
+      "build_stair_canopy",
+      "build_wall_graphics",
+      "build_ramp_marks",
+      "build_bollards",
+      "build_railings",
+      "build_tactiles",
+      "build_signs"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 3806,
+     "end": 3807,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "build_railings"
+     ],
+     "prims": [],
+     "inside": [
+      "hazard_stairs"
+     ],
+     "inside_hazard": [
+      "hazard_stairs"
+     ]
+    }
+   ],
+   "cue_sign": [
+    {
+     "line": 3810,
+     "end": 3811,
+     "negated": false,
+     "test": "cfg[\"cue_sign\"]",
+     "calls": [
+      "build_signs"
+     ],
+     "prims": [],
+     "inside": [
+      "hazard_stairs"
+     ],
+     "inside_hazard": [
+      "hazard_stairs"
+     ]
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 3814,
+     "end": 3815,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 3903,
+  "tag": "main",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/main/scene13_apartment_parking_entry.py"
+ },
+ "main::scene14_grandstair_illusion.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "cfg_lineno": 115,
+  "reads": {
+   "cue_tactile": [
+    1827
+   ],
+   "cue_nosing": [
+    1833
+   ],
+   "cue_railing": [
+    1838
+   ],
+   "cue_material_break": [
+    1882
+   ],
+   "hazard_stairs": [
+    1885,
+    1897
+   ],
+   "cue_scene_dressing": [
+    1894
+   ],
+   "cue_sign": [
+    1900
+   ]
+  },
+  "guards": {
+   "cue_tactile": [
+    {
+     "line": 1827,
+     "end": 1832,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_nosing": [
+    {
+     "line": 1833,
+     "end": 1837,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "build_nosing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 1838,
+     "end": 1860,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "len",
+      "_rake_segments",
+      "max",
+      "build_railing_line"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 1885,
+     "end": 1893,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_shoulder",
+      "build_side_slopes",
+      "build_stairs",
+      "build_step_coursing",
+      "build_parapets",
+      "build_cues"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1897,
+     "end": 1898,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_autumn_litter"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 1894,
+     "end": 1895,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_sign": [
+    {
+     "line": 1900,
+     "end": 1901,
+     "negated": false,
+     "test": "cfg[\"cue_sign\"]",
+     "calls": [
+      "build_signs"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 1989,
+  "tag": "main",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/main/scene14_grandstair_illusion.py"
+ },
+ "main::scene15_alley_labyrinth.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 169,
+  "reads": {
+   "cue_railing": [
+    1206,
+    1997
+   ],
+   "cue_material_break": [
+    1939
+   ],
+   "hazard_stairs": [
+    2301
+   ],
+   "cue_scene_dressing": [
+    2305
+   ]
+  },
+  "guards": {
+   "cue_railing": [
+    {
+     "line": 1997,
+     "end": 2029,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "build_handrail",
+      "print",
+      "_wall_pipe",
+      "len"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 2301,
+     "end": 2304,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_stairs"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 2305,
+     "end": 2306,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 2401,
+  "tag": "main",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/main/scene15_alley_labyrinth.py"
+ },
+ "main::scene16_canopy_shadow.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 133,
+  "reads": {
+   "hazard_stairs": [
+    1072,
+    1439,
+    1446,
+    1564,
+    1594,
+    1799
+   ],
+   "cue_nosing": [
+    1237,
+    1303
+   ],
+   "cue_tactile": [
+    1243,
+    1310,
+    1720
+   ],
+   "cue_railing": [
+    1253,
+    1324
+   ],
+   "cue_material_break": [
+    1792
+   ],
+   "cue_scene_dressing": [
+    1824
+   ],
+   "cue_sign": [
+    1828
+   ]
+  },
+  "guards": {
+   "hazard_stairs": [
+    {
+     "line": 1072,
+     "end": 1073,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1439,
+     "end": 1442,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1446,
+     "end": 1486,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "BOX",
+      "enumerate",
+      "Define",
+      "CreateRadiusAttr",
+      "CreateIntensityAttr",
+      "CreateColorAttr",
+      "Set",
+      "float",
+      "Vec3f",
+      "Vec3d",
+      "AddTranslateOp",
+      "Xformable",
+      "GetPrim"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1594,
+     "end": 1616,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "max",
+      "int",
+      "print",
+      "len"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1799,
+     "end": 1818,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_walk",
+      "build_walls",
+      "build_stairs",
+      "build_east_exit",
+      "build_canopy",
+      "build_cues",
+      "print"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_nosing": [
+    {
+     "line": 1237,
+     "end": 1242,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "build_nosing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1303,
+     "end": 1309,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "build_nosing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_tactile": [
+    {
+     "line": 1243,
+     "end": 1248,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1310,
+     "end": 1323,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1720,
+     "end": 1725,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 1253,
+     "end": 1273,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "int",
+      "min",
+      "max",
+      "build_handrail",
+      "print"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1324,
+     "end": 1404,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "min",
+      "max",
+      "int",
+      "build_handrail",
+      "len",
+      "print",
+      "CYL",
+      "sum",
+      "hrail"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 1824,
+     "end": 1826,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing",
+      "build_backdrop"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_sign": [
+    {
+     "line": 1828,
+     "end": 1829,
+     "negated": false,
+     "test": "cfg.get(\"cue_sign\")",
+     "calls": [
+      "build_signs"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 1923,
+  "tag": "main",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/main/scene16_canopy_shadow.py"
+ },
+ "main::scene17_ramp_pair_hangang.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "cfg_lineno": 215,
+  "reads": {
+   "cue_railing": [
+    2706
+   ],
+   "cue_nosing": [
+    2710
+   ],
+   "cue_material_break": [
+    2718
+   ],
+   "hazard_stairs": [
+    2721,
+    2733
+   ],
+   "cue_scene_dressing": [
+    2731
+   ]
+  },
+  "guards": {
+   "cue_railing": [
+    {
+     "line": 2706,
+     "end": 2709,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "build_railing_line"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_nosing": [
+    {
+     "line": 2710,
+     "end": 2713,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "build_nosing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 2721,
+     "end": 2729,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_slope_faces",
+      "build_stairs",
+      "build_ramp",
+      "build_terrace",
+      "build_links",
+      "build_cues"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 2733,
+     "end": 2734,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [
+      "cue_scene_dressing"
+     ],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 2731,
+     "end": 2734,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_skyline",
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 2823,
+  "tag": "main",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/main/scene17_ramp_pair_hangang.py"
+ },
+ "main::scene18_wavy_artstair.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 133,
+  "reads": {
+   "hazard_stairs": [
+    757,
+    1228
+   ],
+   "cue_railing": [
+    862,
+    875,
+    1890
+   ],
+   "cue_tactile": [
+    876,
+    1872
+   ],
+   "cue_nosing": [
+    901,
+    1879
+   ],
+   "cue_material_break": [
+    1598
+   ],
+   "cue_scene_dressing": [
+    1914
+   ]
+  },
+  "guards": {
+   "cue_material_break": [
+    {
+     "line": 1598,
+     "end": 1600,
+     "negated": false,
+     "test": "cfg[\"cue_material_break\"]",
+     "calls": [
+      "_plate"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_tactile": [
+    {
+     "line": 1872,
+     "end": 1878,
+     "negated": false,
+     "test": "cfg.get(\"cue_tactile\")",
+     "calls": [
+      "tactile_pbr",
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_nosing": [
+    {
+     "line": 1879,
+     "end": 1889,
+     "negated": false,
+     "test": "cfg.get(\"cue_nosing\")",
+     "calls": [
+      "make_pbr",
+      "range",
+      "add_box",
+      "step_top"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 1890,
+     "end": 1900,
+     "negated": false,
+     "test": "cfg.get(\"cue_railing\")",
+     "calls": [
+      "make_pbr",
+      "build_railing_line"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 1914,
+     "end": 1919,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_edge_bands",
+      "build_beds",
+      "build_furniture",
+      "build_city",
+      "build_horizon"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 2019,
+  "tag": "main",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/main/scene18_wavy_artstair.py"
+ },
+ "main::scene19_fan_winder.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 218,
+  "reads": {
+   "cue_railing": [
+    2021
+   ],
+   "cue_tactile": [
+    2032
+   ],
+   "cue_nosing": [
+    2038
+   ],
+   "hazard_stairs": [
+    2056
+   ],
+   "cue_scene_dressing": [
+    2062
+   ]
+  },
+  "guards": {
+   "cue_railing": [
+    {
+     "line": 2021,
+     "end": 2030,
+     "negated": false,
+     "test": "cfg.get(\"cue_railing\")",
+     "calls": [
+      "range",
+      "build_arc_steps",
+      "_step_top"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_tactile": [
+    {
+     "line": 2032,
+     "end": 2036,
+     "negated": false,
+     "test": "cfg.get(\"cue_tactile\")",
+     "calls": [
+      "tactile_pbr",
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_nosing": [
+    {
+     "line": 2038,
+     "end": 2051,
+     "negated": false,
+     "test": "cfg.get(\"cue_nosing\")",
+     "calls": [
+      "make_pbr",
+      "range",
+      "_step_top",
+      "build_arc_steps"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 2062,
+     "end": 2063,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 2165,
+  "tag": "main",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/main/scene19_fan_winder.py"
+ },
+ "main::scene20_diagonal_oblique.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 94,
+  "reads": {
+   "cue_scene_dressing": [
+    674,
+    884,
+    1360,
+    1363
+   ],
+   "cue_material_break": [
+    866
+   ],
+   "cue_tactile": [
+    874,
+    891,
+    1076
+   ],
+   "cue_railing": [
+    880,
+    1047,
+    1169,
+    1197
+   ],
+   "hazard_stairs": [
+    1354,
+    1363
+   ]
+  },
+  "guards": {
+   "cue_scene_dressing": [
+    {
+     "line": 674,
+     "end": 687,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "min",
+      "BOX",
+      "abs"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 884,
+     "end": 899,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "enumerate",
+      "build_bollard_std",
+      "build_tactile",
+      "build_bench"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1360,
+     "end": 1361,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1363,
+     "end": 1364,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"] and cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_litter"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_tactile": [
+    {
+     "line": 874,
+     "end": 879,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 891,
+     "end": 896,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [
+      "cue_scene_dressing"
+     ],
+     "inside_hazard": []
+    },
+    {
+     "line": 1076,
+     "end": 1081,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 880,
+     "end": 881,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "build_stair_walls"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1197,
+     "end": 1198,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"] and not wall_ok",
+     "calls": [],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 1354,
+     "end": 1358,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_upper",
+      "build_diagonal"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1363,
+     "end": 1364,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"] and cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_litter"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 1461,
+  "tag": "main",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/main/scene20_diagonal_oblique.py"
+ },
+ "main::scene21_monumental_selfocclude.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true,
+   "cue_nosing": true
+  },
+  "cfg_lineno": 89,
+  "reads": {
+   "cue_material_break": [
+    1010
+   ],
+   "cue_tactile": [
+    1394,
+    1456
+   ],
+   "cue_railing": [
+    1446
+   ],
+   "cue_nosing": [
+    1452
+   ],
+   "hazard_stairs": [
+    1467
+   ],
+   "cue_scene_dressing": [
+    1473
+   ],
+   "cue_sign": [
+    1479
+   ]
+  },
+  "guards": {
+   "cue_tactile": [
+    {
+     "line": 1394,
+     "end": 1399,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1456,
+     "end": 1461,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 1446,
+     "end": 1451,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "enumerate",
+      "build_railing_line"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_nosing": [
+    {
+     "line": 1452,
+     "end": 1455,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "build_nosing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 1467,
+     "end": 1472,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_stairs",
+      "build_parapets",
+      "build_cues"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 1473,
+     "end": 1476,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_facade",
+      "build_dressing",
+      "build_planting"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_sign": [
+    {
+     "line": 1479,
+     "end": 1480,
+     "negated": false,
+     "test": "cfg.get(\"cue_sign\")",
+     "calls": [
+      "build_signs"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 1568,
+  "tag": "main",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/main/scene21_monumental_selfocclude.py"
+ },
+ "batch1::sceneC1_snow_stairs.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": true,
+   "cue_material_break": true,
+   "cue_nosing": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "snow_cover": true
+  },
+  "cfg_lineno": 70,
+  "reads": {
+   "snow_cover": [
+    353,
+    688,
+    1007,
+    1052,
+    1140,
+    1168,
+    1188,
+    1202,
+    1240,
+    1370,
+    1384
+   ],
+   "cue_tactile": [
+    578
+   ],
+   "cue_nosing": [
+    1113
+   ],
+   "cue_railing": [
+    1124
+   ],
+   "hazard_stairs": [
+    1210,
+    1227,
+    1377
+   ],
+   "cue_material_break": [
+    1375
+   ],
+   "cue_scene_dressing": [
+    1388
+   ]
+  },
+  "guards": {
+   "snow_cover": [
+    {
+     "line": 1052,
+     "end": 1059,
+     "negated": false,
+     "test": "cfg[\"snow_cover\"]",
+     "calls": [
+      "BOX"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1140,
+     "end": 1141,
+     "negated": false,
+     "test": "cfg[\"snow_cover\"]",
+     "calls": [
+      "build_rail_snow"
+     ],
+     "prims": [],
+     "inside": [
+      "cue_railing"
+     ],
+     "inside_hazard": []
+    },
+    {
+     "line": 1168,
+     "end": 1178,
+     "negated": false,
+     "test": "cfg[\"snow_cover\"] and gk.GKIT_ON",
+     "calls": [
+      "build_wear_lane",
+      "float",
+      "build_footprints",
+      "tuple",
+      "int"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1202,
+     "end": 1208,
+     "negated": false,
+     "test": "cfg[\"snow_cover\"]",
+     "calls": [
+      "cap_boxes",
+      "BOX"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1240,
+     "end": 1242,
+     "negated": false,
+     "test": "cfg[\"snow_cover\"]",
+     "calls": [
+      "cap_boxes",
+      "BOX"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1384,
+     "end": 1385,
+     "negated": false,
+     "test": "cfg[\"snow_cover\"]",
+     "calls": [
+      "build_snow"
+     ],
+     "prims": [],
+     "inside": [
+      "hazard_stairs"
+     ],
+     "inside_hazard": [
+      "hazard_stairs"
+     ]
+    }
+   ],
+   "cue_nosing": [
+    {
+     "line": 1113,
+     "end": 1120,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "build_nosing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 1124,
+     "end": 1141,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "min",
+      "build_railing_line",
+      "build_rail_snow"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 1377,
+     "end": 1387,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_terrace",
+      "build_lower",
+      "build_banks",
+      "build_stringers",
+      "build_stairs",
+      "build_cues",
+      "build_snow"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 1388,
+     "end": 1389,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 1487,
+  "tag": "batch1",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/batch1/sceneC1_snow_stairs.py"
+ },
+ "batch1::sceneC2_leaf_stairs.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "leaf_cover": true,
+   "keep_dressing": false
+  },
+  "cfg_lineno": 71,
+  "reads": {
+   "keep_dressing": [
+    506,
+    507,
+    666,
+    941,
+    1314
+   ],
+   "hazard_stairs": [
+    508,
+    1087,
+    1247,
+    1307
+   ],
+   "leaf_cover": [
+    513,
+    963,
+    1310,
+    1326
+   ],
+   "cue_material_break": [
+    764,
+    1301
+   ],
+   "cue_nosing": [
+    1030
+   ],
+   "cue_tactile": [
+    1036
+   ],
+   "cue_railing": [
+    1042
+   ],
+   "cue_scene_dressing": [
+    1329
+   ]
+  },
+  "guards": {
+   "keep_dressing": [
+    {
+     "line": 507,
+     "end": 517,
+     "negated": false,
+     "test": "KEEP_DRESSING",
+     "calls": [
+      "get",
+      "SystemExit",
+      "print"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 941,
+     "end": 947,
+     "negated": false,
+     "test": "KEEP_DRESSING",
+     "calls": [],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1314,
+     "end": 1327,
+     "negated": false,
+     "test": "KEEP_DRESSING",
+     "calls": [
+      "build_terrain",
+      "build_leaf_mound",
+      "build_leaf_scatter",
+      "build_cues"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 508,
+     "end": 510,
+     "negated": false,
+     "test": "SCENE_CONFIG.get(\"hazard_stairs\", True)",
+     "calls": [
+      "SystemExit"
+     ],
+     "prims": [],
+     "inside": [
+      "keep_dressing"
+     ],
+     "inside_hazard": []
+    },
+    {
+     "line": 1307,
+     "end": 1327,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_terrain",
+      "build_stairs",
+      "build_leaf_mound",
+      "build_leaf_scatter",
+      "build_cues"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "leaf_cover": [
+    {
+     "line": 513,
+     "end": 515,
+     "negated": true,
+     "test": "not SCENE_CONFIG.get(\"leaf_cover\", True)",
+     "calls": [
+      "SystemExit"
+     ],
+     "prims": [],
+     "inside": [
+      "keep_dressing"
+     ],
+     "inside_hazard": []
+    },
+    {
+     "line": 963,
+     "end": 966,
+     "negated": false,
+     "test": "cfg[\"leaf_cover\"]",
+     "calls": [
+      "max",
+      "abs"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1310,
+     "end": 1311,
+     "negated": false,
+     "test": "cfg[\"leaf_cover\"]",
+     "calls": [
+      "build_leaf_mound"
+     ],
+     "prims": [],
+     "inside": [
+      "hazard_stairs"
+     ],
+     "inside_hazard": [
+      "hazard_stairs"
+     ]
+    },
+    {
+     "line": 1326,
+     "end": 1327,
+     "negated": false,
+     "test": "cfg[\"leaf_cover\"]",
+     "calls": [
+      "build_leaf_scatter"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_nosing": [
+    {
+     "line": 1030,
+     "end": 1035,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "build_nosing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_tactile": [
+    {
+     "line": 1036,
+     "end": 1041,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 1042,
+     "end": 1057,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "min",
+      "max",
+      "build_railing_line"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 1329,
+     "end": 1330,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {
+   "KEEP_DRESSING": "keep_dressing"
+  },
+  "nlines": 1451,
+  "tag": "batch1",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/batch1/sceneC2_leaf_stairs.py"
+ },
+ "batch1::sceneC4_wet_stairs.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": true,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "wet_surface": true
+  },
+  "cfg_lineno": 66,
+  "reads": {
+   "cue_tactile": [
+    447
+   ],
+   "wet_surface": [
+    639,
+    1065,
+    1077,
+    1124,
+    1257,
+    1267,
+    1268
+   ],
+   "cue_nosing": [
+    1020
+   ],
+   "cue_railing": [
+    1034
+   ],
+   "hazard_stairs": [
+    1104,
+    1125,
+    1249
+   ],
+   "cue_material_break": [
+    1247
+   ],
+   "cue_scene_dressing": [
+    1262
+   ]
+  },
+  "guards": {
+   "cue_nosing": [
+    {
+     "line": 1020,
+     "end": 1027,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "build_nosing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 1034,
+     "end": 1055,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "min",
+      "build_railing_line"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 1249,
+     "end": 1261,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_upper",
+      "build_lower",
+      "build_banks",
+      "build_cheeks",
+      "build_stairs",
+      "build_tread_films",
+      "build_cues",
+      "build_water",
+      "build_rain_marks"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "wet_surface": [
+    {
+     "line": 1257,
+     "end": 1259,
+     "negated": false,
+     "test": "cfg[\"wet_surface\"]",
+     "calls": [
+      "build_water",
+      "build_rain_marks"
+     ],
+     "prims": [],
+     "inside": [
+      "hazard_stairs"
+     ],
+     "inside_hazard": [
+      "hazard_stairs"
+     ]
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 1262,
+     "end": 1263,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 1362,
+  "tag": "batch1",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/batch1/sceneC4_wet_stairs.py"
+ },
+ "batch1::sceneD1_loading_dock.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 47,
+  "reads": {
+   "cue_material_break": [
+    1083
+   ],
+   "hazard_stairs": [
+    1086,
+    1104
+   ],
+   "cue_nosing": [
+    1090
+   ],
+   "cue_railing": [
+    1092
+   ],
+   "cue_scene_dressing": [
+    1098
+   ]
+  },
+  "guards": {
+   "hazard_stairs": [
+    {
+     "line": 1086,
+     "end": 1096,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_apron",
+      "build_platform",
+      "build_bumpers",
+      "build_band",
+      "build_railing",
+      "build_parapets"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_nosing": [
+    {
+     "line": 1090,
+     "end": 1091,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "build_band"
+     ],
+     "prims": [],
+     "inside": [
+      "hazard_stairs"
+     ],
+     "inside_hazard": [
+      "hazard_stairs"
+     ]
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 1092,
+     "end": 1093,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "build_railing"
+     ],
+     "prims": [],
+     "inside": [
+      "hazard_stairs"
+     ],
+     "inside_hazard": [
+      "hazard_stairs"
+     ]
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 1098,
+     "end": 1100,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing",
+      "build_yard_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 1241,
+  "tag": "batch1",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/batch1/sceneD1_loading_dock.py"
+ },
+ "batch1::sceneD2_floor_opening.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 48,
+  "reads": {
+   "cue_nosing": [
+    814
+   ],
+   "cue_railing": [
+    828
+   ],
+   "cue_material_break": [
+    1143
+   ],
+   "hazard_stairs": [
+    1150
+   ],
+   "cue_scene_dressing": [
+    1162
+   ]
+  },
+  "guards": {
+   "cue_nosing": [
+    {
+     "line": 814,
+     "end": 827,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "BOX"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 828,
+     "end": 850,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "enumerate",
+      "CYL",
+      "range",
+      "hypot",
+      "abs"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_material_break": [
+    {
+     "line": 1143,
+     "end": 1146,
+     "negated": true,
+     "test": "not cfg[\"cue_material_break\"]",
+     "calls": [],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 1150,
+     "end": 1160,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_slab",
+      "build_skirt",
+      "build_lower",
+      "build_rebar",
+      "build_debris",
+      "build_cues"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 1162,
+     "end": 1164,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing",
+      "build_site_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 1303,
+  "tag": "batch1",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/batch1/sceneD2_floor_opening.py"
+ },
+ "batch1::sceneD3_drainage_channel.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "grass_overhang": true
+  },
+  "cfg_lineno": 122,
+  "reads": {
+   "cue_material_break": [
+    835
+   ],
+   "hazard_stairs": [
+    841,
+    1169
+   ],
+   "cue_railing": [
+    1005
+   ],
+   "cue_tactile": [
+    1014
+   ],
+   "grass_overhang": [
+    1173
+   ],
+   "cue_scene_dressing": [
+    1180,
+    1190
+   ]
+  },
+  "guards": {
+   "hazard_stairs": [
+    {
+     "line": 841,
+     "end": 845,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "plate"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1169,
+     "end": 1178,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_cover",
+      "build_channel",
+      "build_bed_leaf",
+      "build_overhang",
+      "build_culvert",
+      "build_cues"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 1005,
+     "end": 1013,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "build_railing_line"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_tactile": [
+    {
+     "line": 1014,
+     "end": 1019,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "grass_overhang": [
+    {
+     "line": 1173,
+     "end": 1174,
+     "negated": false,
+     "test": "cfg[\"grass_overhang\"]",
+     "calls": [
+      "build_overhang"
+     ],
+     "prims": [],
+     "inside": [
+      "hazard_stairs"
+     ],
+     "inside_hazard": [
+      "hazard_stairs"
+     ]
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 1180,
+     "end": 1181,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1190,
+     "end": 1191,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "_dressing_report"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 1280,
+  "tag": "batch1",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/batch1/sceneD3_drainage_channel.py"
+ },
+ "batch1::sceneD4_subway_platform.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": true,
+   "cue_material_break": true,
+   "cue_nosing": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 86,
+  "reads": {
+   "cue_tactile": [
+    687
+   ],
+   "cue_nosing": [
+    711
+   ],
+   "cue_railing": [
+    720
+   ],
+   "hazard_stairs": [
+    896
+   ],
+   "cue_material_break": [
+    898
+   ],
+   "cue_scene_dressing": [
+    905
+   ]
+  },
+  "guards": {
+   "cue_tactile": [
+    {
+     "line": 687,
+     "end": 710,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "sorted",
+      "build_tactile",
+      "_dots_relief"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_nosing": [
+    {
+     "line": 711,
+     "end": 719,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "enumerate",
+      "sorted",
+      "SPAN"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 720,
+     "end": 740,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "sorted",
+      "range",
+      "CYL",
+      "int",
+      "float"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 896,
+     "end": 901,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_track",
+      "build_facade"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_material_break": [
+    {
+     "line": 898,
+     "end": 899,
+     "negated": false,
+     "test": "cfg[\"cue_material_break\"]",
+     "calls": [
+      "build_facade"
+     ],
+     "prims": [],
+     "inside": [
+      "hazard_stairs"
+     ],
+     "inside_hazard": [
+      "hazard_stairs"
+     ]
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 905,
+     "end": 907,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing",
+      "build_signage"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 1029,
+  "tag": "batch1",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/batch1/sceneD4_subway_platform.py"
+ },
+ "batch1::sceneN1_shadow_band.py": {
+  "defaults": {
+   "hazard_shadow_band": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 51,
+  "reads": {
+   "cue_scene_dressing": [
+    406,
+    925
+   ],
+   "cue_material_break": [
+    921
+   ],
+   "hazard_shadow_band": [
+    923
+   ]
+  },
+  "guards": {
+   "cue_material_break": [
+    {
+     "line": 921,
+     "end": 922,
+     "negated": false,
+     "test": "cfg[\"cue_material_break\"]",
+     "calls": [
+      "build_joints"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_shadow_band": [
+    {
+     "line": 923,
+     "end": 924,
+     "negated": false,
+     "test": "cfg[\"hazard_shadow_band\"]",
+     "calls": [
+      "build_occluder"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 925,
+     "end": 926,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 1024,
+  "tag": "batch1",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/batch1/sceneN1_shadow_band.py"
+ },
+ "batch1::sceneN2_asphalt_patch.py": {
+  "defaults": {
+   "hazard_asphalt_patch": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 84,
+  "reads": {
+   "cue_scene_dressing": [
+    530,
+    1173
+   ],
+   "cue_material_break": [
+    980,
+    1169
+   ],
+   "hazard_asphalt_patch": [
+    1171
+   ]
+  },
+  "guards": {
+   "cue_material_break": [
+    {
+     "line": 980,
+     "end": 981,
+     "negated": true,
+     "test": "not cfg[\"cue_material_break\"]",
+     "calls": [],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1169,
+     "end": 1170,
+     "negated": false,
+     "test": "cfg[\"cue_material_break\"]",
+     "calls": [
+      "build_joints"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_asphalt_patch": [
+    {
+     "line": 1171,
+     "end": 1172,
+     "negated": false,
+     "test": "cfg[\"hazard_asphalt_patch\"]",
+     "calls": [
+      "build_patches"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 1173,
+     "end": 1175,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_markings",
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 1273,
+  "tag": "batch1",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/batch1/sceneN2_asphalt_patch.py"
+ },
+ "batch1::sceneN3_trompe_loeil.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "keep_dressing": false
+  },
+  "cfg_lineno": 78,
+  "reads": {
+   "keep_dressing": [
+    339,
+    340,
+    1583
+   ],
+   "hazard_stairs": [
+    341,
+    1583
+   ],
+   "cue_scene_dressing": [
+    346,
+    1586
+   ],
+   "cue_material_break": [
+    1276
+   ],
+   "cue_nosing": [
+    1346
+   ]
+  },
+  "guards": {
+   "keep_dressing": [
+    {
+     "line": 340,
+     "end": 351,
+     "negated": false,
+     "test": "KEEP_DRESSING",
+     "calls": [
+      "get",
+      "SystemExit",
+      "print"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1583,
+     "end": 1584,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"] or KEEP_DRESSING",
+     "calls": [
+      "build_painting"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 341,
+     "end": 343,
+     "negated": false,
+     "test": "SCENE_CONFIG.get(\"hazard_stairs\", True)",
+     "calls": [
+      "SystemExit"
+     ],
+     "prims": [],
+     "inside": [
+      "keep_dressing"
+     ],
+     "inside_hazard": []
+    },
+    {
+     "line": 1583,
+     "end": 1584,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"] or KEEP_DRESSING",
+     "calls": [
+      "build_painting"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 346,
+     "end": 348,
+     "negated": true,
+     "test": "not SCENE_CONFIG.get(\"cue_scene_dressing\", True)",
+     "calls": [
+      "SystemExit"
+     ],
+     "prims": [],
+     "inside": [
+      "keep_dressing"
+     ],
+     "inside_hazard": []
+    },
+    {
+     "line": 1586,
+     "end": 1587,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_material_break": [
+    {
+     "line": 1276,
+     "end": 1279,
+     "negated": true,
+     "test": "not cfg[\"cue_material_break\"]",
+     "calls": [
+      "float",
+      "tuple",
+      "zip"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {
+   "KEEP_DRESSING": "keep_dressing"
+  },
+  "nlines": 1686,
+  "tag": "batch1",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/batch1/sceneN3_trompe_loeil.py"
+ },
+ "batch1::sceneN4_downhill_ramp.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 85,
+  "reads": {
+   "cue_scene_dressing": [
+    367,
+    998,
+    1237,
+    1247
+   ],
+   "hazard_stairs": [
+    705
+   ],
+   "cue_material_break": [
+    840
+   ],
+   "cue_railing": [
+    995
+   ]
+  },
+  "guards": {
+   "cue_railing": [
+    {
+     "line": 995,
+     "end": 996,
+     "negated": true,
+     "test": "not cfg[\"cue_railing\"]",
+     "calls": [],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 998,
+     "end": 1001,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "print"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1237,
+     "end": 1238,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1247,
+     "end": 1248,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "_dressing_report"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 1336,
+  "tag": "batch1",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/batch1/sceneN4_downhill_ramp.py"
+ },
+ "batch1::sceneN5_flush_grating.py": {
+  "defaults": {
+   "hazard_flush_grating": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 52,
+  "reads": {
+   "hazard_flush_grating": [
+    867,
+    923,
+    1109
+   ],
+   "cue_material_break": [
+    1107
+   ],
+   "cue_scene_dressing": [
+    1111
+   ]
+  },
+  "guards": {
+   "hazard_flush_grating": [
+    {
+     "line": 867,
+     "end": 873,
+     "negated": true,
+     "test": "not cfg[\"hazard_flush_grating\"]",
+     "calls": [
+      "skin_exclude",
+      "BOX"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1109,
+     "end": 1110,
+     "negated": false,
+     "test": "cfg[\"hazard_flush_grating\"]",
+     "calls": [
+      "build_manholes"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_material_break": [
+    {
+     "line": 1107,
+     "end": 1108,
+     "negated": false,
+     "test": "cfg[\"cue_material_break\"]",
+     "calls": [
+      "build_joints"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 1111,
+     "end": 1113,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_roadway",
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 1212,
+  "tag": "batch1",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/batch1/sceneN5_flush_grating.py"
+ },
+ "probe::probeH1_near_hole.py": {
+  "defaults": {
+   "hazard_hole": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 104,
+  "reads": {
+   "hazard_hole": [
+    235,
+    236,
+    359
+   ],
+   "cue_material_break": [
+    298
+   ],
+   "cue_scene_dressing": [
+    395
+   ]
+  },
+  "guards": {
+   "cue_material_break": [
+    {
+     "line": 298,
+     "end": 302,
+     "negated": true,
+     "test": "not cfg[\"cue_material_break\"]",
+     "calls": [],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_hole": [
+    {
+     "line": 359,
+     "end": 367,
+     "negated": false,
+     "test": "cfg[\"hazard_hole\"]",
+     "calls": [
+      "pit_boxes",
+      "opening_rect",
+      "BOX"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 395,
+     "end": 396,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 481,
+  "tag": "probe",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/probe/probeH1_near_hole.py"
+ },
+ "probe::probeH2_offpath_hole.py": {
+  "defaults": {
+   "hazard_hole": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 94,
+  "reads": {
+   "hazard_hole": [
+    218,
+    219,
+    325
+   ],
+   "cue_material_break": [
+    278
+   ],
+   "cue_scene_dressing": [
+    360
+   ]
+  },
+  "guards": {
+   "cue_material_break": [
+    {
+     "line": 278,
+     "end": 280,
+     "negated": true,
+     "test": "not cfg[\"cue_material_break\"]",
+     "calls": [],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_hole": [
+    {
+     "line": 325,
+     "end": 333,
+     "negated": false,
+     "test": "cfg[\"hazard_hole\"]",
+     "calls": [
+      "pit_boxes",
+      "opening_rect",
+      "BOX"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 360,
+     "end": 361,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 444,
+  "tag": "probe",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/probe/probeH2_offpath_hole.py"
+ },
+ "probe::probeH3_hidden_hole.py": {
+  "defaults": {
+   "hazard_hole": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 102,
+  "reads": {
+   "hazard_hole": [
+    275,
+    276,
+    399
+   ],
+   "cue_railing": [
+    277,
+    429
+   ],
+   "cue_material_break": [
+    336
+   ],
+   "cue_scene_dressing": [
+    440
+   ]
+  },
+  "guards": {
+   "cue_material_break": [
+    {
+     "line": 336,
+     "end": 338,
+     "negated": true,
+     "test": "not cfg[\"cue_material_break\"]",
+     "calls": [],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_hole": [
+    {
+     "line": 399,
+     "end": 407,
+     "negated": false,
+     "test": "cfg[\"hazard_hole\"]",
+     "calls": [
+      "pit_boxes",
+      "opening_rect",
+      "BOX"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 429,
+     "end": 433,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "build_railing_run",
+      "int"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 440,
+     "end": 441,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 528,
+  "tag": "probe",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/probe/probeH3_hidden_hole.py"
+ },
+ "archive_v3::scene06_spiral_towerstone.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 47,
+  "reads": {
+   "cue_material_break": [
+    553
+   ],
+   "cue_railing": [
+    559
+   ],
+   "cue_tactile": [
+    576
+   ],
+   "cue_nosing": [
+    583
+   ],
+   "hazard_stairs": [
+    599
+   ],
+   "cue_scene_dressing": [
+    604
+   ]
+  },
+  "guards": {
+   "cue_material_break": [
+    {
+     "line": 553,
+     "end": 557,
+     "negated": false,
+     "test": "cfg.get(\"cue_material_break\")",
+     "calls": [
+      "build_arc_steps"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 559,
+     "end": 574,
+     "negated": false,
+     "test": "cfg.get(\"cue_railing\")",
+     "calls": [
+      "enumerate",
+      "range",
+      "build_arc_steps",
+      "radians",
+      "add_cylinder",
+      "cos",
+      "sin"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_tactile": [
+    {
+     "line": 576,
+     "end": 581,
+     "negated": false,
+     "test": "cfg.get(\"cue_tactile\")",
+     "calls": [
+      "make_pbr",
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_nosing": [
+    {
+     "line": 583,
+     "end": 594,
+     "negated": false,
+     "test": "cfg.get(\"cue_nosing\")",
+     "calls": [
+      "make_pbr",
+      "range",
+      "build_arc_steps"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 604,
+     "end": 605,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 707,
+  "tag": "archive_v3",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/archive_v3/scene06_spiral_towerstone.py"
+ },
+ "archive_v3::scene07_wornstone_temple.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "cfg_lineno": 51,
+  "reads": {
+   "cue_material_break": [
+    321
+   ],
+   "cue_railing": [
+    493
+   ],
+   "hazard_stairs": [
+    515,
+    526
+   ],
+   "cue_scene_dressing": [
+    526
+   ]
+  },
+  "guards": {
+   "cue_railing": [
+    {
+     "line": 493,
+     "end": 500,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "max",
+      "min",
+      "build_railing_line"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 515,
+     "end": 524,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_stairs",
+      "build_courtyard",
+      "build_approach",
+      "build_masonry",
+      "build_cues"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 526,
+     "end": 527,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"] and cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 526,
+     "end": 527,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"] and cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 624,
+  "tag": "archive_v3",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/archive_v3/scene07_wornstone_temple.py"
+ },
+ "archive_v3::scene08_stepwell_lattice.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "cfg_lineno": 48,
+  "reads": {
+   "cue_railing": [
+    606
+   ],
+   "cue_material_break": [
+    623
+   ],
+   "hazard_stairs": [
+    625
+   ],
+   "cue_scene_dressing": [
+    635
+   ]
+  },
+  "guards": {
+   "cue_railing": [
+    {
+     "line": 606,
+     "end": 616,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "CYL"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 625,
+     "end": 634,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_terrace",
+      "build_curb",
+      "build_well_shell",
+      "build_lattice",
+      "build_water",
+      "build_stain",
+      "build_cues"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 635,
+     "end": 636,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 725,
+  "tag": "archive_v3",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/archive_v3/scene08_stepwell_lattice.py"
+ },
+ "archive_v3::scene10_switchback_cliff.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "cfg_lineno": 55,
+  "reads": {
+   "cue_railing": [
+    442,
+    470
+   ],
+   "hazard_stairs": [
+    543
+   ],
+   "cue_scene_dressing": [
+    551
+   ]
+  },
+  "guards": {
+   "cue_railing": [
+    {
+     "line": 442,
+     "end": 444,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "_rails"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 470,
+     "end": 473,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "_rails"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 543,
+     "end": 549,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_flights",
+      "print"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 551,
+     "end": 552,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 672,
+  "tag": "archive_v3",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/archive_v3/scene10_switchback_cliff.py"
+ },
+ "archive_v3::scene11_grating_fireescape.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 39,
+  "reads": {
+   "cue_material_break": [
+    321
+   ],
+   "cue_railing": [
+    348
+   ],
+   "hazard_stairs": [
+    526
+   ],
+   "cue_scene_dressing": [
+    528
+   ]
+  },
+  "guards": {
+   "cue_railing": [
+    {
+     "line": 348,
+     "end": 390,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "min",
+      "max",
+      "int",
+      "build_railing_line",
+      "_line",
+      "flight_ground",
+      "_edge_rail"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 526,
+     "end": 527,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_fireescape"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 528,
+     "end": 529,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 624,
+  "tag": "archive_v3",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/archive_v3/scene11_grating_fireescape.py"
+ },
+ "archive_v3::scene12_cliff_plankwalk.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "cfg_lineno": 52,
+  "reads": {
+   "cue_railing": [
+    415
+   ],
+   "hazard_stairs": [
+    485
+   ],
+   "cue_scene_dressing": [
+    491
+   ]
+  },
+  "guards": {
+   "cue_railing": [
+    {
+     "line": 415,
+     "end": 416,
+     "negated": true,
+     "test": "not cfg[\"cue_railing\"]",
+     "calls": [],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "hazard_stairs": [
+    {
+     "line": 485,
+     "end": 489,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_planks",
+      "build_cues"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 491,
+     "end": 492,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 602,
+  "tag": "archive_v3",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/archive_v3/scene12_cliff_plankwalk.py"
+ },
+ "archive_v3::scene13_helical_parkingramp.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": true,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": true,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 35,
+  "reads": {
+   "cue_material_break": [
+    683
+   ],
+   "cue_railing": [
+    702
+   ],
+   "cue_tactile": [
+    722
+   ],
+   "cue_nosing": [
+    729
+   ],
+   "hazard_stairs": [
+    745
+   ],
+   "cue_scene_dressing": [
+    749
+   ],
+   "cue_sign": [
+    753
+   ]
+  },
+  "guards": {
+   "cue_material_break": [
+    {
+     "line": 683,
+     "end": 701,
+     "negated": false,
+     "test": "cfg.get(\"cue_material_break\")",
+     "calls": [
+      "build_helix_ramp",
+      "ramp_z"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 702,
+     "end": 721,
+     "negated": false,
+     "test": "cfg.get(\"cue_railing\")",
+     "calls": [
+      "build_helix_ramp",
+      "range",
+      "add_cylinder",
+      "ramp_z",
+      "cos",
+      "sin",
+      "radians",
+      "_pipe_rail"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_tactile": [
+    {
+     "line": 722,
+     "end": 728,
+     "negated": false,
+     "test": "cfg.get(\"cue_tactile\")",
+     "calls": [
+      "make_pbr",
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_nosing": [
+    {
+     "line": 729,
+     "end": 740,
+     "negated": false,
+     "test": "cfg.get(\"cue_nosing\")",
+     "calls": [
+      "make_pbr",
+      "range",
+      "build_arc_steps"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 749,
+     "end": 750,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_sign": [
+    {
+     "line": 753,
+     "end": 754,
+     "negated": false,
+     "test": "cfg.get(\"cue_sign\")",
+     "calls": [
+      "build_signs"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 851,
+  "tag": "archive_v3",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/scenes/archive_v3/scene13_helical_parkingramp.py"
+ },
+ "cueoff_port::scene12_riverside_deck.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "cfg_lineno": 244,
+  "reads": {
+   "hazard_stairs": [
+    619,
+    631,
+    648,
+    1091,
+    2219,
+    2245
+   ],
+   "cue_scene_dressing": [
+    625,
+    636,
+    651,
+    2243
+   ],
+   "cue_railing": [
+    649,
+    2224,
+    2237
+   ],
+   "cue_material_break": [
+    650,
+    1933,
+    1979
+   ],
+   "cue_nosing": [
+    1984
+   ]
+  },
+  "guards": {
+   "hazard_stairs": [
+    {
+     "line": 619,
+     "end": 621,
+     "negated": false,
+     "test": "SCENE_CONFIG.get(\"hazard_stairs\", True)",
+     "calls": [
+      "SystemExit"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 631,
+     "end": 633,
+     "negated": true,
+     "test": "not SCENE_CONFIG.get(\"hazard_stairs\", True)",
+     "calls": [
+      "SystemExit"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1091,
+     "end": 1094,
+     "negated": false,
+     "test": "not SCENE_CONFIG[\"hazard_stairs\"] \\\n            and 0.0 <= x <= lo[\"x1\"] and u[\"y0\"] <= y <= d[\"y1\"] \\\n            and (u[\"z_top\"] - u[\"thick\"]) <= z <= u[\"z_top\"]",
+     "calls": [],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 2219,
+     "end": 2240,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_terrain",
+      "build_deck",
+      "build_ground_kit",
+      "build_stairs",
+      "build_railing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 2245,
+     "end": 2246,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"] or KEEP_DRESSING",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [
+      "cue_scene_dressing"
+     ],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 625,
+     "end": 627,
+     "negated": true,
+     "test": "not SCENE_CONFIG.get(\"cue_scene_dressing\", True)",
+     "calls": [
+      "SystemExit"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 636,
+     "end": 638,
+     "negated": true,
+     "test": "not SCENE_CONFIG.get(\"cue_scene_dressing\", True)",
+     "calls": [
+      "SystemExit"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 2243,
+     "end": 2246,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_skyline",
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_nosing": [
+    {
+     "line": 1984,
+     "end": 1987,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "build_nosing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 2224,
+     "end": 2225,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "build_railing"
+     ],
+     "prims": [],
+     "inside": [
+      "hazard_stairs"
+     ],
+     "inside_hazard": [
+      "hazard_stairs"
+     ]
+    },
+    {
+     "line": 2237,
+     "end": 2238,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "build_railing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 2334,
+  "tag": "cueoff_port",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/experiments/weekend_0823/cue_audit/scenes_cueoff/scene12_riverside_deck.py"
+ },
+ "cueoff_port::scene17_ramp_pair_hangang.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "cfg_lineno": 215,
+  "reads": {
+   "hazard_stairs": [
+    809,
+    821,
+    838,
+    2808,
+    2820
+   ],
+   "cue_scene_dressing": [
+    815,
+    826,
+    841,
+    2818
+   ],
+   "cue_railing": [
+    839,
+    2793
+   ],
+   "cue_material_break": [
+    840,
+    2805
+   ],
+   "cue_nosing": [
+    2797
+   ]
+  },
+  "guards": {
+   "hazard_stairs": [
+    {
+     "line": 809,
+     "end": 811,
+     "negated": false,
+     "test": "SCENE_CONFIG.get(\"hazard_stairs\", True)",
+     "calls": [
+      "SystemExit"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 821,
+     "end": 823,
+     "negated": true,
+     "test": "not SCENE_CONFIG.get(\"hazard_stairs\", True)",
+     "calls": [
+      "SystemExit"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 2808,
+     "end": 2816,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_slope_faces",
+      "build_stairs",
+      "build_ramp",
+      "build_terrace",
+      "build_links",
+      "build_cues"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 2820,
+     "end": 2821,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"] or KEEP_DRESSING",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [
+      "cue_scene_dressing"
+     ],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 815,
+     "end": 817,
+     "negated": true,
+     "test": "not SCENE_CONFIG.get(\"cue_scene_dressing\", True)",
+     "calls": [
+      "SystemExit"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 826,
+     "end": 828,
+     "negated": true,
+     "test": "not SCENE_CONFIG.get(\"cue_scene_dressing\", True)",
+     "calls": [
+      "SystemExit"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 2818,
+     "end": 2821,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_skyline",
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 2793,
+     "end": 2796,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "build_railing_line"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_nosing": [
+    {
+     "line": 2797,
+     "end": 2800,
+     "negated": false,
+     "test": "cfg[\"cue_nosing\"]",
+     "calls": [
+      "build_nosing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 2915,
+  "tag": "cueoff_port",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/experiments/weekend_0823/cue_audit/scenes_cueoff/scene17_ramp_pair_hangang.py"
+ },
+ "cueoff_port::scene20_diagonal_oblique.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "cfg_lineno": 94,
+  "reads": {
+   "hazard_stairs": [
+    499,
+    511,
+    528,
+    1453,
+    1471
+   ],
+   "cue_scene_dressing": [
+    505,
+    516,
+    531,
+    739,
+    969,
+    1463,
+    1468,
+    1471
+   ],
+   "cue_railing": [
+    529,
+    965,
+    1146,
+    1268,
+    1296
+   ],
+   "cue_material_break": [
+    530,
+    951
+   ],
+   "cue_tactile": [
+    959,
+    976,
+    1175
+   ]
+  },
+  "guards": {
+   "hazard_stairs": [
+    {
+     "line": 499,
+     "end": 501,
+     "negated": false,
+     "test": "SCENE_CONFIG.get(\"hazard_stairs\", True)",
+     "calls": [
+      "SystemExit"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 511,
+     "end": 513,
+     "negated": true,
+     "test": "not SCENE_CONFIG.get(\"hazard_stairs\", True)",
+     "calls": [
+      "SystemExit"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1453,
+     "end": 1466,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"]",
+     "calls": [
+      "build_upper",
+      "build_diagonal"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1471,
+     "end": 1472,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"] and cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_litter"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_scene_dressing": [
+    {
+     "line": 505,
+     "end": 507,
+     "negated": true,
+     "test": "not SCENE_CONFIG.get(\"cue_scene_dressing\", True)",
+     "calls": [
+      "SystemExit"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 516,
+     "end": 518,
+     "negated": true,
+     "test": "not SCENE_CONFIG.get(\"cue_scene_dressing\", True)",
+     "calls": [
+      "SystemExit"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 739,
+     "end": 740,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_bands"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 969,
+     "end": 984,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "enumerate",
+      "build_bollard_std",
+      "build_tactile",
+      "build_bench"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1463,
+     "end": 1464,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_bands"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1468,
+     "end": 1469,
+     "negated": false,
+     "test": "cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_dressing"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1471,
+     "end": 1472,
+     "negated": false,
+     "test": "cfg[\"hazard_stairs\"] and cfg[\"cue_scene_dressing\"]",
+     "calls": [
+      "build_litter"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_tactile": [
+    {
+     "line": 959,
+     "end": 964,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 976,
+     "end": 981,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [
+      "cue_scene_dressing"
+     ],
+     "inside_hazard": []
+    },
+    {
+     "line": 1175,
+     "end": 1180,
+     "negated": false,
+     "test": "cfg[\"cue_tactile\"]",
+     "calls": [
+      "build_tactile"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ],
+   "cue_railing": [
+    {
+     "line": 965,
+     "end": 966,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"]",
+     "calls": [
+      "build_stair_walls"
+     ],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    },
+    {
+     "line": 1296,
+     "end": 1297,
+     "negated": false,
+     "test": "cfg[\"cue_railing\"] and not wall_ok",
+     "calls": [],
+     "prims": [],
+     "inside": [],
+     "inside_hazard": []
+    }
+   ]
+  },
+  "alias": {},
+  "nlines": 1573,
+  "tag": "cueoff_port",
+  "path": "/home/vislab/Desktop/work_sy/Practice_NegObs/experiments/weekend_0823/cue_audit/scenes_cueoff/scene20_diagonal_oblique.py"
+ }
+}

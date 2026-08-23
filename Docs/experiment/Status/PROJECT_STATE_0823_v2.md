@@ -1,5 +1,11 @@
 # PROJECT_STATE_0823_v2 — NegObs 온보딩 정본 (v2 · 08-23 오후)
 
+> **【정정 배너 · 2026-08-23 추가 · append-only】** G7 수리 실측(P-2): §1-6의 "본 표 recall 분모
+> 미오염"은 **H행 한정 참**이다 — 교정 GT에서 test V 180→219(+21.7%) · val V 75→96 · test
+> H_weak 6→9 이동, 코퍼스 strict-H 243→195(s12 48프레임 전량 V 재분류, D50 예측 재현),
+> **test H 96 불변**. 상세: `experiments/v3_0823/G7_RELABEL.md` · 회계: `ACCOUNTING.md` §4.2.
+
+
 - **지위**: 새 세션(Claude AI/Code 공통)의 **첫 필독 문서**. 구판 `PROJECT_STATE_0823.md`를 **대체**한다 —
   특히 구판 §5.1(RGB 우위)·§5.2(9/9 CI)·§6-4(H recall 해석)는 08-23 주말 창에서 무효화되었고
   본 문서가 정정판이다(결재 12 `[승용: "그런 RGB-DEPTH 비교 같은 낡은 문장들은 고쳐도 돼"]`).

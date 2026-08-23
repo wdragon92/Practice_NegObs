@@ -1,5 +1,11 @@
 # RENDER_PLAN_V3 — 코퍼스 v3 렌더 계획 정본
 
+> **【정정 배너 · 08-23 · append-only, MILESTONE_P1P5 §7 C1~C3 봉합】** 본 문서의 수치 단일
+> 원천은 `render_plan_v3.json`+`code/build_render_plan.py`다. 문면 불일치 3건은 json이 이긴다:
+> ① 신규 씬 수 = **19**(§8-1 제목의 "18개"는 오기) ② 씬 행렬 = **41행** ③ 승용요약 1의
+> 재활용 프레임 = **1,008**(1,176은 A팔 총량 — 두 값이 한 문장에 섞임). 상세: MILESTONE_P1P5.md §7.
+
+
 - **작성**: Claude Code · 2026-08-23 · **과업**: v3 창 **P-5** (`DECISIONS.md:533` D58 ⑧ "P-5 게이트 해제")
 - **지위**: 씬 제작 · 렌더 · 라벨링 · 훈련이 **이 문서를 실행한다**. 분모·모집단은 언제나
   `ACCOUNTING.md` 단일 참조이고, 본 문서와 ACCOUNTING이 충돌하면 **ACCOUNTING이 이긴다**.

@@ -58,3 +58,6 @@
   일치), b2 이동분 2건 **영구 검증 불가**. → 후속 큐 7.
 - 산출: `P4_SELECTION.md`(결재 7건) · `code/{selection_v3,reselect_p4,p4_selftest,p4_retrain_epoch,
   p4_verify}.py` · `code/p4_repro.sh` · `logs/p4_{reselect,verify}.json` · `reselect/`.
+- 마일스톤 보고서 착지(D70): MILESTONE_P1P5.md — 결재란 22건 통합, 원장 모순 7건 §7 보고,
+  RENDER_PLAN 문면 3건 정정 배너(신규 씬 19·행렬 41행·재활용 1,008 — 직전 심박의 "40씬"도
+  41행으로 정정). 패널 트랙·W0·H6/H7 진행 중.

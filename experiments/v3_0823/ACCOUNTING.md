@@ -375,3 +375,24 @@ test-core 영향: V 180→**219** · H_weak 6→**9** · none 81→**36** → �
 게이트)과 `G7_RELABEL.md` 집계 일치 확인. §4.2의 코퍼스 표(2832행)는 정확(재검증: hazard
 1038→1101). D55의 "분모 327→372" 기재도 같은 오류 — D59에서 정정. (원인: 오케스트레이터
 수기 계산, 이후 분모 숫자는 스크립트 산출만 등재.)
+
+## 4.5 【추가 · 08-23】 FA 센서스 모집단 등재 (CPU-2, FA_CENSUS.md §8 제안 승인 — **전부 구 GT 측정**)
+
+FA 사건 = (checkpoint, frame, cell), score≥τ_op ∧ GT==0. 두 층(OFF/ON_NEG) 합산 금지.
+아래는 **구 GT(공표 eval_test) 기준** — 교정 GT 재생성분은 착지 시 별도 행으로 append.
+
+| # | 모집단/수치 | 값 | 원장 | 재집계 |
+|---|---|---|---|---|
+| A | OFF층 노출 분모 | 8,160칸 (408×20) | `runs/v2/*/eval_test/per_frame_off.csv` | `code/fa_census_extract.py` |
+| B | ON_NEG층 노출 분모 (none_in_fov 포함) | 5,469칸 | 동상 per_frame_on.csv | 동상 |
+| C | none_in_fov ON_NEG 노출 기여 | 1,620/5,469 = 29.6% | 동상 | 동상 |
+| D | none_in_fov ON_NEG 사건 기여 | 2,673/4,713 = 56.7% (lift 1.92×) | `fa_events.csv` | `code/fa_census_analyze.py` |
+| E | 정본 9런 총 FA 사건 | 6,925 (OFF 2,212/ON_NEG 4,713) | 동상 | 동상 |
+| F | 공표치 대조 | 27/27 일치·불일치 0 | `logs/fa_recount.json` | `code/fa_census_extract.py` |
+| G | OFF층 FA 거리 법칙 | ∝ R^1.98 | `logs/fa_census_tables.json` | `code/fa_census_analyze.py` |
+| H | OFF 시드-다수결 3모델 동시 FA | 0/362 (rgb∩depth Jaccard 0.000) | `fa_events.csv` | 동상 |
+| I | 그리드-고정 검정 기울기 (7씬 OFF) | −0.058~+0.387 (내용추종≈±1) | `logs/fa_dose_response.json` | `code/fa_dose_response.py` |
+| J | 장식형 lift (국소화 2씬 OFF) | 1.01/0.98 (효과 없음) | `fa_events.csv`+`code/scene_knowledge.json` | `code/fa_census_analyze.py` |
+
+측정일 전부 2026-08-23. §3.4 미결 8번(none_in_fov 처리)은 행 A~D가 실측 기반을 공급 —
+규약 확정은 test-ext 정의 시.

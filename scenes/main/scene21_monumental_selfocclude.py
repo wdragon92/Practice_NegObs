@@ -463,6 +463,44 @@ if _sc_ov:
 
 
 # ===========================================================================
+# [B'] keep_dressing — the v3 arm C control, resolved ONCE at module scope
+# ===========================================================================
+#   Arm C = "hazard geometry removed, cue and dressing objects KEPT in their ON
+#   transforms" (RENDER_PLAN_V3 §1.2). The pattern is ported from
+#   `scenes/batch1/sceneC2_leaf_stairs.py:496-520`, verbatim in structure and in
+#   reasoning. Every use below reads this one constant, so `grep KEEP_DRESSING`
+#   is the whole audit surface, and False — the default, and the value both
+#   existing arms carry — makes every guarded expression collapse to exactly the
+#   pre-patch code path.
+#   The contradictions are FATAL rather than silently resolved: an arm whose
+#   config does not say what it means must not render 24 cuts and be discovered
+#   later in a metrics table (sceneC2:503-507, same reasoning).
+KEEP_DRESSING = bool(SCENE_CONFIG.get("keep_dressing", False))
+if KEEP_DRESSING:
+    if SCENE_CONFIG.get("hazard_stairs", True):
+        raise SystemExit(
+            "[FATAL scene21] keep_dressing=True requires hazard_stairs=False — "
+            "with the hazard ON there is nothing to keep and the arm would be "
+            "an unlabelled duplicate of arm A. Fix the render config.")
+    if not SCENE_CONFIG.get("cue_scene_dressing", True):
+        raise SystemExit(
+            "[FATAL scene21] keep_dressing=True contradicts "
+            "cue_scene_dressing=False — the dressing IS what this arm exists to "
+            "preserve.")
+    print("[keep_dressing] scene21 ON — the 18-step grand stair and its stone "
+          "parapets drop out and the run becomes the off arm's flat marble "
+          "plate (top z=0); the two stainless railing lines are rebuilt LEVEL "
+          "on that plate (same y ±1.30, same x span, same 0.90 m height), the "
+          "top tactile band keeps its terrace datum, and facade·flagpoles·"
+          "planting·litter·ground kit·sign were already outside the hazard "
+          "test. Step nosing is NOT rebuilt — it is the shape of the treads "
+          "(declared limit, see `build_cues`). Camera datum (x<0, |y|<=0.90) is "
+          "the Terrace plate (x −15.20…0.00, top 0.000) plus the unconditional "
+          "ground kit in EVERY arm: nothing in the hazard branch reaches west "
+          "of x −0.50, and the strip starts at x −1.20.")
+
+
+# ===========================================================================
 # [C] Paths + texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -1436,6 +1474,13 @@ def main():
         drop = st["nsteps"] * st["riser"]
 
         def stair_ground(x):
+            if KEEP_DRESSING:
+                # [v3 arm C] the fill IS the ground in this arm, so every post
+                #   foot and picket foot lands on z=0 (sceneC2:941 `terrain_z`,
+                #   the identical construct). `build_flat_fill` tops its plate at
+                #   `stairs.z_top` = 0.000 over exactly x [0.00, 5.76], which is
+                #   the span this callback is asked about.
+                return 0.0
             if x <= st["x0"]:
                 return 0.0
             if x >= st["x0"] + run:
@@ -1445,11 +1490,28 @@ def main():
 
         if cfg["cue_railing"]:
             for k, y in enumerate(PARAMS["railing"]["ys"]):
+                # [v3 arm C] `drop` is what tilts the rail: `build_railing_line`
+                #   lays the top/mid tubes from `run`/`drop` and uses `ground_fn`
+                #   only for the feet (scene_common:2471-2489). Flattening the
+                #   ground alone would leave the tube diving 2.70 m into the fill
+                #   while its posts stood on z=0, so the two switches are one
+                #   change: no drop, no slope. Everything else the cue IS — both
+                #   lines at y ±1.30, the x span, the 0.90 m rail height above
+                #   the walking surface, the statutory picket pitch — is
+                #   untouched, so the (A,C) cue mask keeps its pixels.
                 sc.build_railing_line(
                     stage, f"{ROOT}/Rail_{k}", y, st["x0"] - 0.5, st["x0"],
-                    run, drop, stair_ground, M["rail"],
-                    rail_h=PARAMS["railing"]["rail_h"])
-        if cfg["cue_nosing"]:
+                    run, (0.0 if KEEP_DRESSING else drop), stair_ground,
+                    M["rail"], rail_h=PARAMS["railing"]["rail_h"])
+        # [v3 arm C · DECLARED LIMIT] the nosing is one strip per TREAD, authored
+        #   from `z_top` downwards at −0.15·i; with the run filled to z=0.000 by a
+        #   0.5 m thick plate every strip below the first is entombed in it and
+        #   renders 0 px. A nosing is the marking of a step edge and there are no
+        #   step edges in this arm, so it is skipped rather than authored
+        #   invisible. Same species as scene16's; arm C keeps this scene's cues
+        #   that can stand on a flat plaza (railing, material break, sign,
+        #   dressing, ground kit). Flag off ⇒ the branch runs as before.
+        if cfg["cue_nosing"] and not KEEP_DRESSING:
             sc.build_nosing(
                 stage, f"{ROOT}/Nosing", st["x0"], st["y0"], st["y1"],
                 st["riser"], st["tread"], st["nsteps"], z_top=st["z_top"])
@@ -1467,6 +1529,26 @@ def main():
     if cfg["hazard_stairs"]:
         build_stairs(M)
         build_parapets(M)
+        build_cues(M)
+    elif KEEP_DRESSING:
+        # [v3 arm C] hazard-ONLY removal. The stair and the two stone parapets
+        #   ARE the drop (the parapets are `build_slope` boxes laid on the stair
+        #   line, +0.85 over it — they have nothing to stand on once the run is
+        #   flat), so they go, and `build_flat_fill` lays the same marble plate
+        #   the plain off arm lays. `build_cues` is then called exactly as the
+        #   hazard branch calls it: the railing lines come back level (see the
+        #   two switches inside), the tactile band is already authored at z=0.0
+        #   on the terrace and needs none.
+        #   Everything else this scene shows was never inside the hazard test —
+        #   `build_plazas` (terrace, lower plaza, the `cue_material_break`
+        #   binding and the two apron bands), `build_facade`, `build_dressing`,
+        #   `build_planting`, `build_ground_kit`, `build_litter`, `build_signs`.
+        #   NOTE, carried over from the plain off arm and NOT introduced here:
+        #   the fill spans only the stair run (x 0.00…5.76) while `LowerPlaza`
+        #   stays at −2.700, so a 2.70 m step survives at x = 5.76 in BOTH
+        #   hazard-off arms. It is the off arm's own geometry, identical in C and
+        #   in D; fixing it is a scene change, not a `keep_dressing` port.
+        build_flat_fill(M)
         build_cues(M)
     else:
         build_flat_fill(M)

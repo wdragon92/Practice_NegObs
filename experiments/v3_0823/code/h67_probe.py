@@ -217,7 +217,23 @@ def main(argv=None):
                "260824_v3w3_extlat_A", "260824_v3w3_extlat_B",
                "260824_v3w3_extlat_C", "260824_v3w3_extlat_D",
                "260824_v3w3_extb2_A", "260824_v3w3_extb2_B",
-               "260824_v3w3_extb2_C", "260824_v3w3_extb2_D")
+               "260824_v3w3_extb2_C", "260824_v3w3_extb2_D",
+               # ══ W2-lite **본렌더** — sceneH6 · sceneH7 (val 공급, 계획 §3.5) ══
+               #   test-ext(W3)와 같은 규율: 4팔 완비 + **밴드 토큰을 라운드명에**
+               #   (D23 확장 — 같은 스탬프로 두 밴드를 찍으면 두 번째가 첫 밴드의
+               #   `.idseg.npz` 를 물려받는다, REG_AUDIT §8.4 (b)).
+               #   base = 밴드 오버라이드 없음(기본 CAM_DIST) · H6·H7
+               #   h    = bands.H (d[6,12] h[0.25,1.0]) · H6·H7
+               #   h2   = bands.H **2차 draw**, 시드 20260824 — H6 만
+               #          (계획 §3.5 의 sceneH6 `bands: [base, H, H2]`,
+               #           수율 모형이 H 와 같은 0.60 을 준다 = 같은 밴드 재추출)
+               "260824_v3w2_h67smoke_A",
+               "260824_v3w2_h67base_A", "260824_v3w2_h67base_B",
+               "260824_v3w2_h67base_C", "260824_v3w2_h67base_D",
+               "260824_v3w2_h67h_A", "260824_v3w2_h67h_B",
+               "260824_v3w2_h67h_C", "260824_v3w2_h67h_D",
+               "260824_v3w2_h67h2_A", "260824_v3w2_h67h2_B",
+               "260824_v3w2_h67h2_C", "260824_v3w2_h67h2_D")
     if a.run not in allowed:
         raise SystemExit(f"[h67_probe] 라운드 스탬프 {a.run!r} 거부 — 허용 {allowed}")
 

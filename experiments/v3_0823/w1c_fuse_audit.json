@@ -8,44 +8,64 @@
  "divergence_from_w1d": "w1d_fuse.py는 구off팔을 계기 권위로 삼았다(D가 off팔이므로). scene08이 두 규칙이 갈리는 유일한 씬이다 — 코퍼스에서 on=aabb · off=fused.",
  "agree_band_m": 0.01,
  "flag_p90_m": 0.3,
- "wrote": [],
- "flagged": [],
- "problems": [
-  "base/scene01: B 렌더 없음",
-  "base/scene02: B 렌더 없음",
-  "base/scene03: B 렌더 없음",
-  "base/scene04: B 렌더 없음",
-  "base/scene06: B 렌더 없음",
-  "base/scene08: B 렌더 없음",
-  "base/scene09: B 렌더 없음",
-  "base/scene10: B 렌더 없음",
-  "base/scene12: B 렌더 없음",
-  "base/scene16: B 렌더 없음",
-  "base/scene17: B 렌더 없음",
-  "base/scene20: B 렌더 없음",
-  "base/scene21: B 렌더 없음",
-  "base/sceneC1: B 렌더 없음",
-  "base/sceneC4: B 렌더 없음",
-  "base/sceneD1: B 렌더 없음",
-  "base/sceneD2: B 렌더 없음",
-  "base/sceneD3: B 렌더 없음",
-  "h/scene09: B 렌더 없음",
-  "h/scene17: B 렌더 없음",
-  "e/scene03: B 렌더 없음",
-  "e/scene04: B 렌더 없음",
-  "e/scene08: B 렌더 없음",
-  "e/scene09: B 렌더 없음",
-  "e/scene12: B 렌더 없음",
-  "e/scene17: B 렌더 없음",
-  "e/scene20: B 렌더 없음",
-  "e/sceneC1: B 렌더 없음",
-  "e/sceneC4: B 렌더 없음",
-  "e2/scene03: B 렌더 없음",
-  "e2/scene04: B 렌더 없음",
-  "e2/scene12: B 렌더 없음",
-  "e2/scene20: B 렌더 없음",
-  "e2/sceneC4: B 렌더 없음"
+ "wrote": [
+  "260827_v3w1_lib_C/scene02 (재융합)",
+  "260827_v3w1_lib_C/scene12 (재융합)",
+  "260827_v3w1_lib_C/scene16 (재융합)",
+  "260827_v3w1_lib_C_e/scene12 (copy)",
+  "260827_v3w1_lib_C_e2/scene12 (copy)"
  ],
+ "flagged": [
+  {
+   "round": "260827_v3w1_lib_C",
+   "scene": "scene06",
+   "why": "median",
+   "med_abs": 0.0122,
+   "p90_abs": 0.0149,
+   "max_abs": 6.2469,
+   "fused_z": [
+    -0.148,
+    -0.122
+   ],
+   "aabb_z": [
+    -0.151,
+    6.1
+   ]
+  },
+  {
+   "round": "260827_v3w1_lib_C",
+   "scene": "scene08",
+   "why": "median+p90>위험깊이",
+   "med_abs": 2.3999,
+   "p90_abs": 4.5001,
+   "max_abs": 4.5011,
+   "fused_z": [
+    -0.001,
+    1.504
+   ],
+   "aabb_z": [
+    -4.501,
+    0.3
+   ]
+  },
+  {
+   "round": "260827_v3w1_lib_C",
+   "scene": "scene10",
+   "why": "p90>위험깊이",
+   "med_abs": 0.0005,
+   "p90_abs": 1.1953,
+   "max_abs": 10.5543,
+   "fused_z": [
+    -6.624,
+    1.831
+   ],
+   "aabb_z": [
+    -6.62,
+    7.16
+   ]
+  }
+ ],
+ "problems": [],
  "rows": [
   {
    "band": "base",
@@ -57,7 +77,24 @@
     "med_abs": 0.0003,
     "p90_abs": 0.0005
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 69651,
+   "aabb_finite": 103041,
+   "both": 69651,
+   "med_abs": 0.0003,
+   "p90_abs": 0.0005,
+   "max_abs": 5.4002,
+   "fused_z": [
+    -0.001,
+    2.122
+   ],
+   "aabb_z": [
+    -0.0,
+    6.0
+   ],
+   "action": "keep aabb"
   },
   {
    "band": "base",
@@ -69,7 +106,33 @@
     "med_abs": 0.0051,
     "p90_abs": 0.008
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": true,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 46609,
+   "aabb_finite": 103041,
+   "both": 46609,
+   "med_abs": 0.005,
+   "p90_abs": 2.8287,
+   "max_abs": 5.9583,
+   "fused_z": [
+    -0.023,
+    2.84
+   ],
+   "aabb_z": [
+    -0.014,
+    6.0
+   ],
+   "aabb_sha_equals_A_arm": false,
+   "refuse_vs_A": {
+    "A_fused_finite": 40557,
+    "B_refused_finite": 46609,
+    "med_abs": 0.002787,
+    "p90_abs": 2.827,
+    "max_abs": 3.433
+   },
+   "action": "write(refuse)",
+   "rule": "AABB 바이트가 갈리므로 공유 불가 — B를 독립 재융합하고 VG-01의 판정에 맡긴다"
   },
   {
    "band": "base",
@@ -81,7 +144,24 @@
     "med_abs": 0.0003,
     "p90_abs": 0.0017
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 71352,
+   "aabb_finite": 102822,
+   "both": 71143,
+   "med_abs": 0.0003,
+   "p90_abs": 0.0018,
+   "max_abs": 1.9041,
+   "fused_z": [
+    -0.003,
+    1.903
+   ],
+   "aabb_z": [
+    -0.002,
+    0.93
+   ],
+   "action": "keep aabb"
   },
   {
    "band": "base",
@@ -93,7 +173,24 @@
     "med_abs": 0.0004,
     "p90_abs": 0.0006
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 74725,
+   "aabb_finite": 103041,
+   "both": 74725,
+   "med_abs": 0.0004,
+   "p90_abs": 0.0062,
+   "max_abs": 2.6407,
+   "fused_z": [
+    -0.001,
+    2.343
+   ],
+   "aabb_z": [
+    0.0,
+    2.64
+   ],
+   "action": "keep aabb"
   },
   {
    "band": "base",
@@ -105,7 +202,24 @@
     "med_abs": 0.0121,
     "p90_abs": 0.0144
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 75900,
+   "aabb_finite": 103041,
+   "both": 75900,
+   "med_abs": 0.0122,
+   "p90_abs": 0.0149,
+   "max_abs": 6.2469,
+   "fused_z": [
+    -0.148,
+    -0.122
+   ],
+   "aabb_z": [
+    -0.151,
+    6.1
+   ],
+   "action": "FLAG:median (계기 불일치 — 쓰지 않음, 보고만)"
   },
   {
    "band": "base",
@@ -117,7 +231,24 @@
     "med_abs": 2.4003,
     "p90_abs": 4.5003
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 78456,
+   "aabb_finite": 103041,
+   "both": 78456,
+   "med_abs": 2.3999,
+   "p90_abs": 4.5001,
+   "max_abs": 4.5011,
+   "fused_z": [
+    -0.001,
+    1.504
+   ],
+   "aabb_z": [
+    -4.501,
+    0.3
+   ],
+   "action": "FLAG:median+p90>위험깊이 (계기 불일치 — 쓰지 않음, 보고만)"
   },
   {
    "band": "base",
@@ -129,7 +260,24 @@
     "med_abs": 0.0055,
     "p90_abs": 0.0077
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 83074,
+   "aabb_finite": 103041,
+   "both": 83074,
+   "med_abs": 0.0055,
+   "p90_abs": 0.0077,
+   "max_abs": 4.281,
+   "fused_z": [
+    0.006,
+    0.9
+   ],
+   "aabb_z": [
+    0.016,
+    4.29
+   ],
+   "action": "keep aabb"
   },
   {
    "band": "base",
@@ -141,7 +289,24 @@
     "med_abs": 0.0005,
     "p90_abs": 1.1958
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 29561,
+   "aabb_finite": 103041,
+   "both": 29561,
+   "med_abs": 0.0005,
+   "p90_abs": 1.1953,
+   "max_abs": 10.5543,
+   "fused_z": [
+    -6.624,
+    1.831
+   ],
+   "aabb_z": [
+    -6.62,
+    7.16
+   ],
+   "action": "FLAG:p90>위험깊이 (계기 불일치 — 쓰지 않음, 보고만)"
   },
   {
    "band": "base",
@@ -153,7 +318,33 @@
     "med_abs": 0.6,
     "p90_abs": 1.361
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": true,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 79163,
+   "aabb_finite": 103041,
+   "both": 79163,
+   "med_abs": 0.0006,
+   "p90_abs": 0.5992,
+   "max_abs": 1.2653,
+   "fused_z": [
+    -1.802,
+    1.265
+   ],
+   "aabb_z": [
+    -2.4,
+    0.002
+   ],
+   "aabb_sha_equals_A_arm": false,
+   "refuse_vs_A": {
+    "A_fused_finite": 77083,
+    "B_refused_finite": 79163,
+    "med_abs": 5.761e-08,
+    "p90_abs": 1.361,
+    "max_abs": 2.5597
+   },
+   "action": "write(refuse)",
+   "rule": "AABB 바이트가 갈리므로 공유 불가 — B를 독립 재융합하고 VG-01의 판정에 맡긴다"
   },
   {
    "band": "base",
@@ -165,7 +356,33 @@
     "med_abs": 0.0005,
     "p90_abs": 0.006
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": true,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 69316,
+   "aabb_finite": 103041,
+   "both": 69316,
+   "med_abs": 0.003,
+   "p90_abs": 2.7404,
+   "max_abs": 2.7409,
+   "fused_z": [
+    -0.124,
+    1.866
+   ],
+   "aabb_z": [
+    -0.114,
+    4.91
+   ],
+   "aabb_sha_equals_A_arm": false,
+   "refuse_vs_A": {
+    "A_fused_finite": 61189,
+    "B_refused_finite": 69316,
+    "med_abs": 0.01022,
+    "p90_abs": 2.882,
+    "max_abs": 3.8959
+   },
+   "action": "write(refuse)",
+   "rule": "AABB 바이트가 갈리므로 공유 불가 — B를 독립 재융합하고 VG-01의 판정에 맡긴다"
   },
   {
    "band": "base",
@@ -177,7 +394,24 @@
     "med_abs": 0.0003,
     "p90_abs": 0.0005
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 78367,
+   "aabb_finite": 103041,
+   "both": 78367,
+   "med_abs": 0.0003,
+   "p90_abs": 0.0005,
+   "max_abs": 0.0502,
+   "fused_z": [
+    -0.001,
+    0.05
+   ],
+   "aabb_z": [
+    -0.0,
+    0.05
+   ],
+   "action": "keep aabb"
   },
   {
    "band": "base",
@@ -189,7 +423,24 @@
     "med_abs": 0.0004,
     "p90_abs": 0.0006
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 78582,
+   "aabb_finite": 103041,
+   "both": 78582,
+   "med_abs": 0.0004,
+   "p90_abs": 0.0006,
+   "max_abs": 0.0092,
+   "fused_z": [
+    -0.001,
+    0.009
+   ],
+   "aabb_z": [
+    0.0,
+    0.008
+   ],
+   "action": "keep aabb"
   },
   {
    "band": "base",
@@ -201,7 +452,24 @@
     "med_abs": 0.0004,
     "p90_abs": 0.0005
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 17711,
+   "aabb_finite": 103041,
+   "both": 17711,
+   "med_abs": 0.0003,
+   "p90_abs": 0.0005,
+   "max_abs": 7.9784,
+   "fused_z": [
+    -0.217,
+    0.89
+   ],
+   "aabb_z": [
+    -2.75,
+    8.0
+   ],
+   "action": "keep aabb"
   },
   {
    "band": "base",
@@ -213,7 +481,24 @@
     "med_abs": 0.0003,
     "p90_abs": 0.0005
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 71572,
+   "aabb_finite": 103041,
+   "both": 71572,
+   "med_abs": 0.0003,
+   "p90_abs": 0.0005,
+   "max_abs": 4.0004,
+   "fused_z": [
+    0.049,
+    0.941
+   ],
+   "aabb_z": [
+    0.05,
+    4.08
+   ],
+   "action": "keep aabb"
   },
   {
    "band": "base",
@@ -225,7 +510,24 @@
     "med_abs": 0.0003,
     "p90_abs": 0.0005
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 54533,
+   "aabb_finite": 103041,
+   "both": 54533,
+   "med_abs": 0.0003,
+   "p90_abs": 0.0006,
+   "max_abs": 4.3597,
+   "fused_z": [
+    -0.001,
+    1.069
+   ],
+   "aabb_z": [
+    -0.0,
+    5.06
+   ],
+   "action": "keep aabb"
   },
   {
    "band": "base",
@@ -237,7 +539,24 @@
     "med_abs": 0.0003,
     "p90_abs": 0.0005
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 65058,
+   "aabb_finite": 103041,
+   "both": 65058,
+   "med_abs": 0.0003,
+   "p90_abs": 0.0005,
+   "max_abs": 0.9099,
+   "fused_z": [
+    -0.001,
+    0.91
+   ],
+   "aabb_z": [
+    0.0,
+    0.91
+   ],
+   "action": "keep aabb"
   },
   {
    "band": "base",
@@ -249,7 +568,24 @@
     "med_abs": 0.0003,
     "p90_abs": 0.0005
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 40842,
+   "aabb_finite": 103041,
+   "both": 40842,
+   "med_abs": 0.0003,
+   "p90_abs": 0.0006,
+   "max_abs": 3.1554,
+   "fused_z": [
+    -0.051,
+    1.824
+   ],
+   "aabb_z": [
+    -0.05,
+    3.2
+   ],
+   "action": "keep aabb"
   },
   {
    "band": "base",
@@ -261,7 +597,24 @@
     "med_abs": 0.0003,
     "p90_abs": 0.0006
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260819_main_on",
+   "n_views": 24,
+   "fused_finite": 71592,
+   "aabb_finite": 103041,
+   "both": 71592,
+   "med_abs": 0.0003,
+   "p90_abs": 0.0006,
+   "max_abs": 8.5003,
+   "fused_z": [
+    -0.001,
+    1.766
+   ],
+   "aabb_z": [
+    0.0,
+    8.5
+   ],
+   "action": "keep aabb"
   },
   {
    "band": "h",
@@ -273,7 +626,9 @@
     "med_abs": null,
     "p90_abs": null
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260820_boost_h_on",
+   "action": "keep aabb"
   },
   {
    "band": "h",
@@ -285,7 +640,9 @@
     "med_abs": null,
     "p90_abs": null
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260820_boost_h_on",
+   "action": "keep aabb"
   },
   {
    "band": "e",
@@ -297,7 +654,9 @@
     "med_abs": null,
     "p90_abs": null
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260820_boost_e_on",
+   "action": "keep aabb"
   },
   {
    "band": "e",
@@ -309,7 +668,9 @@
     "med_abs": null,
     "p90_abs": null
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260820_boost_e_on",
+   "action": "keep aabb"
   },
   {
    "band": "e",
@@ -321,7 +682,9 @@
     "med_abs": null,
     "p90_abs": null
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260820_boost_e_on_g7fixM",
+   "action": "keep aabb"
   },
   {
    "band": "e",
@@ -333,7 +696,9 @@
     "med_abs": null,
     "p90_abs": null
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260820_boost_e_on",
+   "action": "keep aabb"
   },
   {
    "band": "e",
@@ -345,7 +710,10 @@
     "med_abs": null,
     "p90_abs": null
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": true,
+   "corpus_a_round": "260820_boost_e_on_g7fixM",
+   "aabb_sha_equals_base_band": true,
+   "action": "copy-from-base"
   },
   {
    "band": "e",
@@ -357,7 +725,9 @@
     "med_abs": null,
     "p90_abs": null
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260820_boost_e_on",
+   "action": "keep aabb"
   },
   {
    "band": "e",
@@ -369,7 +739,9 @@
     "med_abs": null,
     "p90_abs": null
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260820_boost_e_on",
+   "action": "keep aabb"
   },
   {
    "band": "e",
@@ -381,7 +753,9 @@
     "med_abs": null,
     "p90_abs": null
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260820_boost_e_on",
+   "action": "keep aabb"
   },
   {
    "band": "e",
@@ -393,7 +767,9 @@
     "med_abs": null,
     "p90_abs": null
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260820_boost_e_on",
+   "action": "keep aabb"
   },
   {
    "band": "e2",
@@ -405,7 +781,9 @@
     "med_abs": null,
     "p90_abs": null
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260820_boost_e2_on",
+   "action": "keep aabb"
   },
   {
    "band": "e2",
@@ -417,7 +795,9 @@
     "med_abs": null,
     "p90_abs": null
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260820_boost_e2_on",
+   "action": "keep aabb"
   },
   {
    "band": "e2",
@@ -429,7 +809,10 @@
     "med_abs": null,
     "p90_abs": null
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": true,
+   "corpus_a_round": "260820_boost_e2_on_g7fixM",
+   "aabb_sha_equals_base_band": true,
+   "action": "copy-from-base"
   },
   {
    "band": "e2",
@@ -441,7 +824,9 @@
     "med_abs": null,
     "p90_abs": null
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260820_boost_e2_on",
+   "action": "keep aabb"
   },
   {
    "band": "e2",
@@ -453,7 +838,9 @@
     "med_abs": null,
     "p90_abs": null
    },
-   "error": "B 렌더 없음"
+   "corpus_on_fused": false,
+   "corpus_a_round": "260820_boost_e2_on",
+   "action": "keep aabb"
   }
  ]
 }

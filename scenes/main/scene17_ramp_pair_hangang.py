@@ -778,6 +778,63 @@ if _sc_ov:
     print(f"[SCENE_CONFIG] override 적용: {_sc_ov}")
 
 
+_CUEOFF_SCENE = "scene17"
+
+
+# ===========================================================================
+# [B'] keep_dressing / placebo_remove — v3 C팔 옵트인 키 (D82 ②)
+# ===========================================================================
+#   `experiments/weekend_0823/cue_audit/scenes_cueoff/scene17_*.py` 의 감사
+#   통과본을 **정본으로 승격**한 것이다(D82 ② additive 옵트인 키 채택, 기본값
+#   무변경 해시게이트 증명 조건).  두 플래그가 모두 False 이면 아래의 모든 가드
+#   표현식은 이식 이전의 코드 경로로 **정확히 붕괴**한다.
+#
+#   keep_dressing   D25/D30 패턴 (원본 `scenes/batch1/sceneC2_leaf_stairs.py`
+#                   :496-520).  C 팔 = 낙차 기하 제거, 단서·드레싱 유지.
+#   placebo_remove  D35/R2 §5.3-2 요구.  P 팔 = 위험·단서 유지, 비단서
+#                   오브젝트군을 유사 픽셀질량만큼 제거.  본 씬의 군은 강 건너
+#                   아파트 4동(실측 427 k px = 프레임의 20.6 %,
+#                   `PLACEBO_PIXEL_MASS_crest.csv`).
+KEEP_DRESSING = bool(SCENE_CONFIG.get("keep_dressing", False))
+PLACEBO_REMOVE = bool(SCENE_CONFIG.get("placebo_remove", False))
+if KEEP_DRESSING:
+    if SCENE_CONFIG.get("hazard_stairs", True):
+        raise SystemExit(
+            f"[FATAL {_CUEOFF_SCENE}] keep_dressing=True requires "
+            "hazard_stairs=False — with the hazard ON there is nothing to keep "
+            "and the arm would be an unlabelled duplicate of arm A. "
+            "Fix the render config.")
+    if not SCENE_CONFIG.get("cue_scene_dressing", True):
+        raise SystemExit(
+            f"[FATAL {_CUEOFF_SCENE}] keep_dressing=True contradicts "
+            "cue_scene_dressing=False — the dressing IS what this arm exists to "
+            "preserve.")
+if PLACEBO_REMOVE:
+    if not SCENE_CONFIG.get("hazard_stairs", True):
+        raise SystemExit(
+            f"[FATAL {_CUEOFF_SCENE}] placebo_remove=True requires "
+            "hazard_stairs=True — the placebo arm is a HAZARD-ON appearance "
+            "control (D35). With the hazard off it measures nothing.")
+    if not SCENE_CONFIG.get("cue_scene_dressing", True):
+        raise SystemExit(
+            f"[FATAL {_CUEOFF_SCENE}] placebo_remove=True with "
+            "cue_scene_dressing=False removes the placebo group twice over and "
+            "confounds arm P with arm B1. Fix the render config.")
+    if KEEP_DRESSING:
+        raise SystemExit(
+            f"[FATAL {_CUEOFF_SCENE}] placebo_remove and keep_dressing are "
+            "different arms (P and C) and must never be set together.")
+_ARM = ("C_hz0_cue1" if KEEP_DRESSING else
+        "P_hz1_placebo" if PLACEBO_REMOVE else
+        "A/B_hz%d_rail%d_mat%d_dress%d" % (
+            int(SCENE_CONFIG.get("hazard_stairs", True)),
+            int(SCENE_CONFIG.get("cue_railing", False)),
+            int(SCENE_CONFIG.get("cue_material_break", True)),
+            int(SCENE_CONFIG.get("cue_scene_dressing", True))))
+print(f"[CUE-OFF] {_CUEOFF_SCENE} arm={_ARM} keep_dressing={KEEP_DRESSING} "
+      f"placebo_remove={PLACEBO_REMOVE}")
+
+
 # ===========================================================================
 # [C] Paths + texture roles
 # ===========================================================================
@@ -2597,7 +2654,20 @@ def main():
         #   override laid over it, so a block without an entry is byte-identical to
         #   before. Only `window` moves; the `bd` shells are untouched.
         wv = PARAMS.get("window_var", {})
-        for i, (key, bd) in enumerate(PARAMS["far_buildings"].items()):
+        # ---- PLACEBO GROUP: the far-bank apartment blocks --------------------
+        #   scene17's placebo (PREREG_CUEOFF §3.2).  These stand 86-98 m away
+        #   ACROSS the river; what hides their feet is the FAR bank, not the near
+        #   crest, so they are not the "column whose base is hidden" pattern the
+        #   audit reads as this scene's geometry_silhouette (that is the TERRACE
+        #   lamp poles + km sign, and those are KEPT).  `far_side_visible_depth`
+        #   is the terrace/river itself, built by build_terrace/build_river,
+        #   which no arm touches.  Measured mass 427 k px = 20.6 % of frame in
+        #   33/33 strict-H frames -- ~18x what arm B1 removes, i.e. the placebo
+        #   over-matches the cue and the contrast is conservative.
+        #   The BRIDGE below is NOT removed (matrix reads cut-off piers as
+        #   geometry_silhouette in the sibling scene12).
+        for i, (key, bd) in enumerate([] if PLACEBO_REMOVE
+                                      else PARAMS["far_buildings"].items()):
             wd = dict(PARAMS["window"])
             wd.update(wv.get(key, {}))
             sc.build_building(stage, f"{ROOT}/FarBuilding_{key}", bd,
@@ -2620,7 +2690,15 @@ def main():
     # Near dressing — silver grass · benches · trees · lamps · signposts (irregular)
     # -------------------------------------------------------------------
     def build_dressing(M):
-        tz = PARAMS["terrace"]["z_top"]
+        # [C팔] 테라스는 `build_flat_fill` 로 z=0 까지 채워지므로, 테라스에
+        #   앵커된 모든 드레싱은 채움면 아래 파묻히는 대신 채움면을 타고
+        #   올라온다 (sceneC2:666 `Z_LOW` 전환과 같은 논거).  플래그가 꺼져
+        #   있으면 이것은 정본 `terrace.z_top` 이고 아래 모든 식은 바이트 불변.
+        #   **선언된 한계**(PREREG §7-4): C 팔은 드레싱 **오브젝트**를 보존하지,
+        #   테라스 램프 기둥을 "밑동이 가려진 기둥"으로 만들던 **마루 가림
+        #   관계**를 보존하지 않는다 — 낙차가 없으면 가릴 마루도 없고, 그것은
+        #   무낙차 팔에 내재적이다.
+        tz = 0.0 if KEEP_DRESSING else PARAMS["terrace"]["z_top"]
         # [v6 judgment (b)] silver grass = stalk clumps, scattered inside the band rectangle
         #   at density stalks/m² with a fixed seed (scene09 build_reeds rule). Height/tilt jitter.
         # [GT-115 ⑮ (2)] waterline reed clumps. Layout comes from `reed_stems`, so the
@@ -2730,8 +2808,13 @@ def main():
     build_river(M)                  # river and far bank always on (horizon closure)
     if cfg["cue_scene_dressing"]:
         build_skyline(M)            # apartments and bridge stay even in the flat control
-        if cfg["hazard_stairs"]:
+        if cfg["hazard_stairs"] or KEEP_DRESSING:
             build_dressing(M)
+    if PLACEBO_REMOVE:
+        print(f"[placebo_remove] scene17 — removed "
+              f"{len(PARAMS['far_buildings'])} far-bank apartment blocks. "
+              f"KEPT: bridge, terrace lamps, km sign, terrace trees/benches, "
+              f"reeds, material break, crown furniture.")
     build_ground_kit(M)             # [W2-D] ground elements — after dressing (scatter order rule)
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],

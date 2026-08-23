@@ -101,6 +101,42 @@ PRIMS = {
              "/World/SceneH3/GKitWalk", "/World/SceneH3/TreeGrate_",
              "/World/SceneH3/Shadow/", "/World/SceneH3/Dress/"],
     ),
+    # ── W2-lite (훈련측 **val** 공급 · 계획 §3.5) ────────────────────────────
+    #   H6 = H1 의 형제(둔덕형) · H7 = H3 의 형제(복도 굴절형). 접두어는 **루트 앵커**이며
+    #   프림 인벤토리는 `.idseg.npz` 의 `idToLabels` 실측으로 대조했다(2026-08-24).
+    "sceneH6": dict(
+        # H1 과 같은 이유로 마루(`BermCrest`)만 세지 않고 **성토체 전체**를 잡는다 —
+        #   사면(`Ground/BermRise_*` 48개)·성토(`Ground/BermFill`)가 같은 둔덕이다.
+        occluder=["/World/SceneH6/BermCrest", "/World/SceneH6/Ground/BermRise",
+                  "/World/SceneH6/Ground/BermFill"],
+        # 낙차 구조물 = SCENE_H67_BUILD §4 가 VG-06 실측에 쓴 그 세 접두어.
+        hazard=["/World/SceneH6/RetainWall/", "/World/SceneH6/Riprap/",
+                "/World/SceneH6/Water/"],
+        # 대안(對岸) 제방은 4팔 공통 구조물이고 낙차 기하가 아니다 — 화면 기여만 인쇄.
+        context=["/World/SceneH6/FarBank/"],
+        cue=["/World/SceneH6/Rail/", "/World/SceneH6/Tactile",
+             "/World/SceneH6/Nosing/", "/World/SceneH6/Sign/",
+             "/World/SceneH6/Bollard_", "/World/SceneH6/Delineator/",
+             "/World/SceneH6/GKitWalk", "/World/SceneH6/GKitApproach",
+             "/World/SceneH6/TreeGrate_", "/World/SceneH6/Shadow/",
+             "/World/SceneH6/Dress/"],
+    ),
+    "sceneH7": dict(
+        # 가림체 = 굴절 옹벽 L자 솔리드 (`Along`·`AlongCap`·`Flank`·`FlankCap`).
+        occluder=["/World/SceneH7/BendWall"],
+        # **루트 앵커 필수** — `/World/SceneH7/Lower/` 는 하부 통로(낙차)이고
+        #   `/World/SceneH7/Walk/Lower` 는 상부 보도 하단 구간(구조물)이다.
+        #   부분문자열 `"/Lower"` 를 쓰면 둘이 섞인다 (SCENE_H67_BUILD §3.4 경고).
+        hazard=["/World/SceneH7/Stair/", "/World/SceneH7/Lower/"],
+        context=["/World/SceneH7/WallN/", "/World/SceneH7/WallE/",
+                 "/World/SceneH7/Bank/", "/World/SceneH7/Walk/"],
+        cue=["/World/SceneH7/HandrailW/", "/World/SceneH7/HandrailE/",
+             "/World/SceneH7/LevelRail/", "/World/SceneH7/Tactile",
+             "/World/SceneH7/NosingWalk/", "/World/SceneH7/NosingStair/",
+             "/World/SceneH7/Sign/", "/World/SceneH7/Bollard_",
+             "/World/SceneH7/GKitWalk", "/World/SceneH7/TreeGrate_",
+             "/World/SceneH7/Shadow/", "/World/SceneH7/Dress/"],
+    ),
     # **측방 씬** — 가림체가 없다. VG-06 의 "가림체가 종단 모서리를 소유한다"는
     #   판정은 이 씬에 대해 **적용되지 않으며**(계획 §2.3 은 은닉을 요구하지 않는다),
     #   대신 `gate_sectors` 가 폴라 GT 의 섹터 분포를 잰다. `lateral=True` 가 그 전환이다.

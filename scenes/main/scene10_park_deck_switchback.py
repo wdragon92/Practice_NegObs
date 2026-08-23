@@ -1220,6 +1220,42 @@ if _sc_ov:
 
 
 # ===========================================================================
+# [B'] keep_dressing — the v3 arm C control, resolved ONCE at module scope
+# ===========================================================================
+#   Arm C = "hazard geometry removed, cue and dressing objects KEPT in their ON
+#   transforms" (RENDER_PLAN_V3 §1.2). The pattern is ported from
+#   `scenes/batch1/sceneC2_leaf_stairs.py:496-520`, verbatim in structure and in
+#   reasoning. Every use below reads this one constant, so `grep KEEP_DRESSING`
+#   is the whole audit surface, and False — the default, and the value both
+#   existing arms carry — makes every guarded expression collapse to exactly the
+#   pre-patch code path.
+#   The contradictions are FATAL rather than silently resolved: an arm whose
+#   config does not say what it means must not render 24 cuts and be discovered
+#   later in a metrics table (sceneC2:503-507, same reasoning).
+KEEP_DRESSING = bool(SCENE_CONFIG.get("keep_dressing", False))
+if KEEP_DRESSING:
+    if SCENE_CONFIG.get("hazard_stairs", True):
+        raise SystemExit(
+            "[FATAL scene10] keep_dressing=True requires hazard_stairs=False — "
+            "with the hazard ON there is nothing to keep and the arm would be "
+            "an unlabelled duplicate of arm A. Fix the render config.")
+    if not SCENE_CONFIG.get("cue_scene_dressing", True):
+        raise SystemExit(
+            "[FATAL scene10] keep_dressing=True contradicts "
+            "cue_scene_dressing=False — the dressing IS what this arm exists to "
+            "preserve.")
+    print("[keep_dressing] scene10 ON — the switchback deck and its GT-77 "
+          "approach members (both dimensioned off the deck ends) drop out and "
+          "the run becomes the same flat z=0 deck the off arm builds; the trail "
+          "ground kit (plan A), `build_cues` and the trees·shrubs·waymarker·"
+          "bench·pergola dressing keep their ON transforms. The entry-deck "
+          "plank gaps (plan B) go with the deck that carries them. Camera datum "
+          "(x<0, |y|<=0.90): `Plate_TrailPath` + plan A stand over the strip in "
+          "this arm exactly as in arm A; only the x>=-1.50 entry bay differs, "
+          "and that bay IS the intervention.")
+
+
+# ===========================================================================
 # [C] paths / asset roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -3829,8 +3865,20 @@ def main():
         a = gk.apply_ground(kit, f"{ROOT}/GKit", ground_plan(), M2,
                             skin_exclude=sc.skin_exclude,
                             scatter=sc.scatter_debris)
-        b = gk.apply_ground(kit, f"{ROOT}/GKitDeck", ground_plan_deck(), M2,
-                            skin_exclude=sc.skin_exclude)
+        # [v3 arm C] Plan A (above) is the park **trail**: its region is
+        #   x [−12.00, −1.50] × y [−0.85, 0.85] on `Plate_TrailPath`, which
+        #   `build_terrain` builds in every arm — i.e. it is free-standing ground
+        #   dressing that happens to sit dead inside the camera datum strip, so
+        #   arm C must keep it or its `cam.ground_z` walks away from arm A's.
+        #   Plan B is the **entry-deck plank gaps**: its z is `entry.top`
+        #   (−0.005) and the deck that carries it is hazard geometry built by
+        #   `build_deck`, so in arm C the strips would hang over the corridor
+        #   bench with nothing under them. It goes with the deck. With the flag
+        #   off the call is made with the same arguments, in the same order, as
+        #   before; only `prims` is read from the result (the print below).
+        b = (dict(prims=0, instances=0) if KEEP_DRESSING else
+             gk.apply_ground(kit, f"{ROOT}/GKitDeck", ground_plan_deck(), M2,
+                             skin_exclude=sc.skin_exclude))
         # 10-2 · [W3 F3 / DEC-2 feather ring] - the boundary treatment for the leaf drifts,
         #   now written against the **new masks**. The outline it used to chase (dE76 27.3,
         #   the strongest boundary Sec.13.3 found) was a rectangle's; a lobe has no straight
@@ -4707,6 +4755,34 @@ def main():
         #   does — the `hazard_stairs=False` control arm keeps its bare flat plate.
         build_approach(M)
         build_ground_kit(M)          # [W2-D] trail + entry-deck ground elements
+    elif KEEP_DRESSING:
+        # [v3 arm C] hazard-ONLY removal. Same flat plate the plain off arm
+        #   lays (`build_flat_fill`, x [0.00, PLAN_X1] × the landing band, top
+        #   z = 0), then the two builders the `else` branch drops for no reason
+        #   other than that they were parked inside the hazard test:
+        #     `build_cues`      — the tactile / nosing equipment cues. Both keys
+        #        are False in this scene's A-arm defaults, so today this call
+        #        emits nothing; it is here because CUE_COVERAGE §4-4 rule (3)
+        #        forbids leaving a cue builder hazard-bound, and because the
+        #        tactile band is authored at z = 0.0 (`build_cues`, base of the
+        #        deck head) which is exactly the flat plate's top — it needs no
+        #        datum switch. The nosing sub-branch is stair-bound and would
+        #        have nothing to sit on; see the declared limit below.
+        #     `build_ground_kit`— plan A only (see the guard in its body): the
+        #        trail surface kit and the two "trail"-zone leaf rings live at
+        #        x [−12.00, −1.50], |y| <= 0.85 + pad, which is the camera datum
+        #        strip itself.
+        #   NOT rebuilt, on purpose: `build_deck` (the hazard) and
+        #   `build_approach` — GT-77 above says it plainly, the approach members
+        #   are dimensioned off the deck ends and only exist when the deck does.
+        #   DECLARED LIMIT (the sibling of scene17's, PREREG §7-4): `cue_railing`
+        #   is a deck member (`build_deck`, `if cfg["cue_railing"]`), so arm C
+        #   cannot preserve it — with the deck gone there is no edge to guard.
+        #   Arm C keeps this scene's free cues (material break, dressing, ground
+        #   kit) and declares the railing lost.
+        build_flat_fill(M)
+        build_cues(M)
+        build_ground_kit(M)
     else:
         build_flat_fill(M)
     build_horizon(M)

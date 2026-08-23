@@ -489,13 +489,26 @@ def scene_proc(scene_file, scene_key, out_dir, conds, n_cam, base_seed):
                     else:
                         print(f"[sidecar] {fname}: no depth ({depth_how})",
                               flush=True)
-                seg_name, seg_how, seg_n = None, None, None
+                seg_name, seg_how, seg_n, seg_bad = None, None, None, None
                 if seg_ann is not None and ok:
-                    sarr, smap, seg_how = _seg_fetch(seg_ann, sim_app,
-                                                     sc.PT_FAST["subframes"])
+                    # Per-cut stale validation + re-fetch (D79 ③). `seg_ann` is
+                    # non-None only when `_seg_attach` was handed a LIVE render
+                    # product, and the only maker of one is `_depth_attach`
+                    # (:391) — so `depth_ann` is non-None too and the depth
+                    # block above has just run for THIS cut, binding `arr`
+                    # (possibly None). That is why this cut's depth array is
+                    # available as the "the frame really moved" witness without
+                    # a single new statement outside this branch. The `if` is
+                    # belt-and-braces for a future refactor, not a live case.
+                    sarr, smap, seg_how, seg_try, seg_bad = _seg_fetch_guarded(
+                        seg_ann, sim_app, sc.PT_FAST["subframes"],
+                        arr if depth_ann is not None else None,
+                        dict(eye=[round(v, 4) for v in eye], yaw=s["yaw"],
+                             pitch=s["pitch"], hfov=s["hfov"]),
+                        scene_key, cid, fname, fp)
                     if sarr is not None:
                         seg_name, seg_n = _seg_write(sarr, smap, fp)
-                    else:
+                    elif seg_bad is None:
                         print(f"[sidecar] {fname}: no idseg ({seg_how})",
                               flush=True)
                 # flat_near is a JUDGE filter: on the data channel it would throw
@@ -535,6 +548,17 @@ def scene_proc(scene_file, scene_key, out_dir, conds, n_cam, base_seed):
                     cuts[fname]["idseg"] = seg_name
                     cuts[fname]["idseg_fetch"] = seg_how
                     cuts[fname]["idseg_n_ids"] = seg_n
+                    # Only when a re-fetch was actually needed, so `idseg_fetch`
+                    # keeps meaning "which rung of the ladder produced this"
+                    # and the round-level `'t0' in fetch` assertion is untouched.
+                    if seg_try:
+                        cuts[fname]["idseg_retry"] = seg_try
+                elif seg_bad is not None:
+                    # Refused: no `idseg` key at all, so any consumer that keys
+                    # off `idseg` skips this cut exactly as it would skip a cut
+                    # whose fetch came back empty; `idseg_stale` is the positive
+                    # record for verifiers that want to know WHY.
+                    cuts[fname]["idseg_stale"] = seg_bad
                 if (i + 1) % 8 == 0 or i + 1 == n_cam:
                     _write_scene_json(rec_path, scene_key, base_seed, gy,
                                       cond_ids, cuts, t_run,
@@ -877,6 +901,11 @@ def _depth_write(a, fp_png):
 # edge-ownership gate needs. No new authoring in 46 scene files.
 SEG_ENV = "NEGOBS_SEG_SIDECAR"
 SEG_ANNOTATOR = "instance_id_segmentation"
+# Per-cut stale guard (D79 ③). Both names are read ONLY from
+# `_seg_fetch_guarded`, which is called ONLY from inside `if seg_ann is not
+# None`. See the long note above `_seg_prev` at the bottom of this section.
+SEG_RETRY_ENV = "NEGOBS_SEG_RETRY"
+SEG_RETRY_DEFAULT = 3
 
 
 def _seg_on():
@@ -1007,6 +1036,213 @@ def _seg_write(a, id2l, fp_png):
         idToLabels=np.array(json.dumps(id2l or {}, ensure_ascii=False)),
         annotator=np.array(SEG_ANNOTATOR))
     return os.path.basename(out), int(ids.size)
+
+
+# ---------------------------------------------------------------------------
+# per-cut stale guard — D79 ③ / W1B2_SEGFILL_REPORT.md §3.1 / D75 ②
+# ---------------------------------------------------------------------------
+# NOTHING below runs unless the opt-in branch runs: every function here is
+# called only from `_seg_fetch_guarded`, and `_seg_fetch_guarded` is called
+# only from inside `if seg_ann is not None and ok:` in `_capture`, which needs
+# NEGOBS_SEG_SIDECAR=1 AND a live render product (`_seg_attach`). The state is
+# lazily created on first call (`_seg_prev`), so with the sidecar off not even
+# an empty dict is allocated.
+#
+# WHAT IS BEING GUARDED. `NEGOBS_SEG_STRICT=1` removed the DETERMINISTIC
+# staleness — the `t0` rung never re-evaluated the annotator, so every cut of a
+# multi-cut scene process came back byte-identical to cut 0 (see `_seg_fetch`'s
+# own note). It did NOT remove a much rarer race: at a cut boundary the
+# annotator sometimes returns its PREVIOUS evaluation even after
+# `rep.orchestrator.step()` has returned. Measured over three landed waves:
+#     260826_v3w1_lib_B    1 / 648 cuts   scene20/e2   (condition boundary)
+#     260826_v3w1_lib_B2   2 / 576 cuts   scene12/base, scene17/h  (mid-cond.)
+#     260826_v3a_segfill   3 / 816 cuts   scene06, scene09, scene12 (mid-cond.)
+# i.e. 0.15-0.37 %, NOT deterministic, NOT bound to a scene, to a cut index or
+# to a condition boundary — 5 of the 5 newest cases are mid-condition and the
+# positions move between rounds (W1B2_SEGFILL_REPORT.md §3.1 corrects D75 ②'s
+# "condition boundary, deterministic" wording). A round-level detector such as
+# the `IDSEG-STALE` block in `scripts/rounds/run_260826_v3w1_lib_b2.sh` ("one
+# unique mask over N cuts") cannot see a 1-in-576 case, and being post-hoc it
+# cannot stop it either. D79 ③ therefore promotes a per-cut check INSIDE the
+# renderer to a prerequisite of the C wave, to be done inside the opt-in branch
+# with the default path unchanged.
+#
+# WHY A BARE HASH COMPARISON WOULD BE WRONG. "this mask equals the previous
+# mask" is NOT by itself evidence of a fault: two cuts that look at the same
+# geometry from the same pose legitimately share a mask, and instance ids are
+# re-issued per evaluation, which is exactly why W1-B had to correct VG-03 to
+# ban round-level hash comparison (D75 ②). A repeat is a fault only when the
+# FRAME demonstrably moved. So the mask hash is always paired with a WITNESS:
+#     "depth" — sha of THIS cut's depth array. Preferred, and in practice
+#               always available, because `_seg_attach` returns non-None only
+#               when `_depth_attach` already built the shared render product.
+#     "pose"  — sha of (eye, yaw, pitch, hfov); the fallback for a cut whose
+#               depth fetch came back empty/failed. Weaker (equal poses do not
+#               prove equal pixels) but it only ever errs towards KEEPING data.
+# stale := mask_sha == prev_mask_sha AND witness moved, with witness kinds
+# matching. Both equal => a genuinely identical frame, which is legal.
+
+
+def _seg_retries():
+    """How many re-fetches a cut gets before its mask is refused.
+
+    `NEGOBS_SEG_RETRY`, default `SEG_RETRY_DEFAULT` (3). A garbage value falls
+    back to the default rather than aborting: the whole sidecar's rule is that
+    it may never take a render night down (same rule as depth).
+    """
+    try:
+        n = int(os.environ.get(SEG_RETRY_ENV, SEG_RETRY_DEFAULT))
+    except (TypeError, ValueError):
+        n = SEG_RETRY_DEFAULT
+    return max(0, n)
+
+
+def _seg_sha(a):
+    """16 hex chars of sha256 over an array's CONTENT.
+
+    dtype and shape go into the digest before the bytes, so two different
+    readings of the same buffer can never collide. 16 chars = 64 bits, i.e. a
+    collision needs ~4e9 masks before it is even likely — four orders above a
+    whole corpus, and a collision would only ever cost one re-fetch anyway.
+    """
+    import hashlib
+    import numpy as np
+    a = np.ascontiguousarray(a)
+    h = hashlib.sha256()
+    h.update(str(a.dtype).encode())
+    h.update(str(a.shape).encode())
+    h.update(a.tobytes())
+    return h.hexdigest()[:16]
+
+
+def _seg_witness(depth_arr, cam_sig):
+    """(kind, sha) — the "the frame really moved" evidence for one cut.
+
+    `depth_arr` is the array `_depth_fetch` just returned for THIS cut (None if
+    that fetch came back empty). `cam_sig` is the pose fallback. Returning the
+    KIND alongside the digest matters: a depth sha and a pose sha are not
+    comparable, and `_seg_verdict` refuses to compare across kinds rather than
+    inventing a difference that would discard a good mask.
+    """
+    if depth_arr is not None:
+        return "depth", _seg_sha(depth_arr)
+    import hashlib
+    blob = json.dumps(cam_sig, sort_keys=True, default=str).encode()
+    return "pose", hashlib.sha256(blob).hexdigest()[:16]
+
+
+def _seg_verdict(cur, prev):
+    """(is_stale, why) for two `(mask_sha, witness_kind, witness_sha)` triples.
+
+    PURE — no numpy, no annotator, no filesystem — so the whole decision can be
+    unit-tested with synthetic values (`experiments/v3_0823/code/
+    w1c_seg_stale_test.py`) without a GPU. Every non-stale answer names its
+    reason so the log and the `.idseg.STALE` marker say WHY, not just WHAT.
+    """
+    if prev is None:
+        return False, "first-cut"
+    if cur[0] != prev[0]:
+        return False, "mask-changed"
+    if cur[1] != prev[1]:
+        # depth witness on one cut, pose witness on the other: nothing can be
+        # concluded, so keep the mask. This costs nothing in practice — the
+        # kind only changes if a depth fetch failed, which is already logged.
+        return False, "witness-kind-mismatch"
+    if cur[2] == prev[2]:
+        # Same mask AND same frame: a genuinely identical frame. Legal.
+        return False, "identical-frame"
+    return True, "mask-repeat-while-frame-moved"
+
+
+def _seg_prev():
+    """The one piece of cross-cut state: the last ACCEPTED cut's triple.
+
+    Created on the FIRST CALL and hung off this function, not off the module:
+    with the sidecar off `_seg_fetch_guarded` is never called, so not even an
+    empty dict is ever allocated — the same "dead unless opted in" discipline
+    the rest of this section is written to. Process-local by construction,
+    which is exactly the right scope: `drive()` starts ONE subprocess per scene
+    (:190-195), so this dict can never leak from one scene into the next.
+
+    A REFUSED cut deliberately does NOT update it — the comparison base stays
+    the last mask that was actually WRITTEN, so an annotator that gets stuck
+    keeps failing every following cut instead of silently re-baselining onto
+    its own bad output.
+    """
+    st = getattr(_seg_prev, "st", None)
+    if st is None:
+        st = {}
+        _seg_prev.st = st
+    return st
+
+
+def _seg_stale_marker(info, fp_png):
+    """`<png stem>.idseg.STALE` — the receipt for a refused mask.
+
+    Written INSTEAD OF the `.idseg.npz`, never beside a good one, so "file
+    present" is an unambiguous per-cut fault flag for downstream verifiers.
+    `.STALE` is deliberately not a `.png`: `check_data_run.py:256-261` fails a
+    round on any orphan PNG and enumerates nothing else, so this file is
+    invisible to it — same reasoning as the `.npy`/`.npz` sidecars.
+    """
+    out = os.path.splitext(fp_png)[0] + ".idseg.STALE"
+    try:
+        with open(out, "w", encoding="utf-8") as f:
+            json.dump(info, f, ensure_ascii=False, indent=1, sort_keys=True)
+    except Exception as e:
+        print(f"[sidecar] idseg STALE marker could not be written: "
+              f"{type(e).__name__}: {str(e)[:120]}", flush=True)
+        return None
+    return os.path.basename(out)
+
+
+def _seg_fetch_guarded(ann, sim_app, subframes, depth_arr, cam_sig,
+                       scene_key, cid, fname, fp_png):
+    """(array|None, id2l|None, how, n_retry, stale_info|None).
+
+    `_seg_fetch` plus the per-cut validation and the re-fetch loop. Three exits:
+      fresh mask   -> (a, id2l, how, n, None)      caller writes the .npz
+      no mask      -> (None, None, how, n, None)   caller logs "no idseg"
+      still stale  -> (None, None, how, n, info)   marker written, caller
+                                                   records `idseg_stale`
+    The last two both return `a is None` on purpose: a refused mask must be
+    handled exactly like an absent one, i.e. the render CONTINUES. An absent or
+    refused sidecar may never abort a render night (the depth sidecar's rule).
+    """
+    st = _seg_prev()
+    n_max = _seg_retries()
+    tried = 0
+    while True:
+        a, id2l, how = _seg_fetch(ann, sim_app, subframes)
+        if a is None:
+            return None, None, how, tried, None
+        cur = (_seg_sha(a),) + _seg_witness(depth_arr, cam_sig)
+        stale, why = _seg_verdict(cur, st.get("prev"))
+        if not stale:
+            st["prev"] = cur
+            if tried:
+                print(f"[sidecar] idseg {fname}: recovered after {tried} "
+                      f"re-fetch(es) — mask {cur[0]} ({why})", flush=True)
+            return a, id2l, how, tried, None
+        if tried >= n_max:
+            info = dict(scene=scene_key, file=fname, cond=cid,
+                        annotator=SEG_ANNOTATOR, fetch=how, retries=tried,
+                        reason=why, witness=cur[1],
+                        prev_idseg_sha=st["prev"][0], idseg_sha=cur[0],
+                        prev_witness_sha=st["prev"][2], witness_sha=cur[2],
+                        strict=os.environ.get("NEGOBS_SEG_STRICT"))
+            info["marker"] = _seg_stale_marker(info, fp_png)
+            print(f"[sidecar] idseg REFUSED {fname}: still identical to the "
+                  f"previous accepted cut's mask ({cur[0]}) after {tried} "
+                  f"re-fetch(es) while the {cur[1]} witness moved "
+                  f"({st['prev'][2]} -> {cur[2]}) — no .idseg.npz written, "
+                  f".idseg.STALE marker instead", flush=True)
+            return None, None, how, tried, info
+        tried += 1
+        print(f"[sidecar] idseg STALE {fname}: mask {cur[0]} equals the "
+              f"previous accepted cut's while the {cur[1]} witness moved "
+              f"({st['prev'][2]} -> {cur[2]}) — re-fetch {tried}/{n_max}",
+              flush=True)
 
 
 def _aabb_grid(pre, xs, ys, top=60.0):

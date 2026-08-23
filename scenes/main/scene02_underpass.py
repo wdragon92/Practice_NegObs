@@ -594,6 +594,42 @@ if _sc_ov:
 
 
 # ===========================================================================
+# [B'] keep_dressing — the arm-C control, resolved ONCE at module scope
+# ===========================================================================
+#   Ported from scenes/batch1/sceneC2_leaf_stairs.py:496-520. Arm C of the v3
+#   plan (RENDER_PLAN_V3 §1.2) is `{"hazard_stairs": false, "keep_dressing":
+#   true}` with every `cue_*` left at its arm-A default: the DROP geometry goes,
+#   the cue and dressing objects stay in the transform they have with the hazard
+#   ON. Every use below reads this one constant, so `grep KEEP_DRESSING` is the
+#   whole audit surface, and with the key absent from SCENE_CONFIG (the value in
+#   both existing arms) every guarded expression collapses to exactly the
+#   pre-patch code path.
+#   The two contradictions below are FATAL rather than silently resolved: an arm
+#   whose config does not say what it means must not render 24 cuts and be
+#   discovered later in a metrics table (sceneC2:503-507, verbatim reasoning).
+KEEP_DRESSING = bool(SCENE_CONFIG.get("keep_dressing", False))
+if KEEP_DRESSING:
+    if SCENE_CONFIG.get("hazard_stairs", True):
+        raise SystemExit(
+            "[FATAL scene02] keep_dressing=True requires hazard_stairs=False — "
+            "with the hazard ON there is nothing to keep and the arm would be "
+            "an unlabelled duplicate of arm A. Fix the render config.")
+    if not SCENE_CONFIG.get("cue_scene_dressing", True):
+        raise SystemExit(
+            "[FATAL scene02] keep_dressing=True contradicts "
+            "cue_scene_dressing=False — the dressing IS what this arm exists "
+            "to preserve.")
+    print("[keep_dressing] scene02 ON — hazard geometry only (pit · stair · "
+          "landing · retaining walls · tunnel bore · flood sill -> flat "
+          "sidewalk at z=0); the 3-sided pit perimeter railing (+0.18..+1.08, "
+          "this scene's grazing-angle identity cue) and the rest of "
+          "`build_cues` keep their ON transforms; building · hedge · lamps · "
+          "canopy · backdrop · ground_kit are already outside the hazard "
+          "branch. Camera datum untouched — the strip x in [-12,-1.2] · "
+          "|y|<=0.90 reads z=0.000 in both arms.")
+
+
+# ===========================================================================
 # [C] Path constants + required texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -1930,6 +1966,32 @@ def main():
         build_walls(M)
         build_tunnel(M)
         build_cues(M, stair_mtl)
+    elif KEEP_DRESSING:
+        # [arm C] hazard-only removal. Everything that CARRIES the 3.38 m drop
+        #   goes — the pit, the stair, the landing, the retaining walls, the
+        #   tunnel bore, and the flood sill with them: `hazard_registry()`
+        #   labels the sill an UP-STEP, and a 침수방지 단차 exists only to keep
+        #   water out of a pit that is no longer there.
+        #   `build_flat_fill` is the SAME z=0 slab the plain OFF arm lays, so
+        #   the camera datum strip (x<0 · |y|<=0.90 · d in [1.2,12], i.e.
+        #   x in [-12,-1.2]) reads 0.000 in arm A (Walk_W, `skin_exclude`d) and
+        #   0.000 here (FlatWalkA, in the same `slabs` tuple at :1374) —
+        #   the sill's west face is x=-1.20, the exact inner edge of that strip,
+        #   so it never won a `ground_z` sample in arm A either. `build_ground_kit`
+        #   already runs in both arms below, identical plan and seed.
+        #   `build_cues` comes back because arm C is the "cue vocabulary without
+        #   the drop" arm (sceneC2:1314 keeps its descending railing line the
+        #   same way): the pit perimeter railing stands clear on the fill at
+        #   +0.18..+1.08. Its stair-bound siblings — 19 of the 20 nosing strips,
+        #   both stair handrails, the z=-3.2 landing tactile band — keep their ON
+        #   transforms and are therefore UNDER the fill. That is recorded, not
+        #   "fixed": this scene has no lower ground that survives the fill to
+        #   ride (the landing is a 0.6 x 3.5 m patch at the bottom of a
+        #   stairwell, not a floodplain like scene12's `lower.z_top`), and
+        #   lifting a raked handrail to z=0 would invent geometry. The A-vs-C
+        #   cue-mask gate measures what actually survives.
+        build_flat_fill(M)
+        build_cues(M, stair_mtl)
     else:
         build_flat_fill(M)          # Control: unified flat ground at z=0 (no pit, so no cues on it)
     build_ground_kit(M)             # [W2-D] both arms — GT-E4 twin parity
@@ -1937,6 +1999,14 @@ def main():
         build_dressing(M)
         build_backdrop(M)           # [W3 CB-7 · BS-4] G2 street wall, both verges
         build_canopy(M)             # [W3 CB-7 · GT-3] after the walls it springs from
+    # [arm C] deliberately NOT `or KEEP_DRESSING` (CUE_COVERAGE §4-4 rule (3)
+    #   asks for it, and this is the declared exception): the single sign is the
+    #   tunnel EXIT marker at (7.80, -1.40, z=-3.20) with a 2.1 m pole, i.e. it
+    #   stands on the landing INSIDE the bore. Fill the pit and it is buried
+    #   whole (top z=-1.10 against a fill underside of -0.50); raise it to z=0
+    #   and it becomes an exit sign in the middle of an open footway with no
+    #   exit — a fabricated cue, not an ON transform. `cue_sign` is therefore
+    #   absent from arm C for this scene, the same as arm D.
     if cfg.get("cue_sign") and cfg["hazard_stairs"]:
         build_signs()               # [v5 shared layer] (Exit is inside the tunnel -> requires the pit)
 

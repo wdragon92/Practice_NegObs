@@ -559,6 +559,50 @@ if _sc_ov:
 
 
 # ===========================================================================
+# [B'] keep_dressing — the arm-C control, resolved ONCE at module scope
+# ===========================================================================
+#   Ported from scenes/batch1/sceneC2_leaf_stairs.py:496-520. Arm C of the v3
+#   plan (RENDER_PLAN_V3 §1.2) is `{"hazard_stairs": false, "keep_dressing":
+#   true}` with every `cue_*` left at its arm-A default: the DROP geometry goes,
+#   the cue and dressing objects stay in the transform they have with the hazard
+#   ON. Every use below reads this one constant, so `grep KEEP_DRESSING` is the
+#   whole audit surface, and with the key absent from SCENE_CONFIG (the value in
+#   both existing arms) every guarded expression collapses to exactly the
+#   pre-patch code path.
+#   The three cue builders of this scene sit INSIDE the `hazard_stairs` branch
+#   (`build_guard` / `build_flank_rails` / `build_tactile_arc` / `build_signs`,
+#   :2459-2465) — CUE_COVERAGE §4-4 rule (3) — and so does `build_ground_kit`,
+#   whose `gkit.region` (-11.0, -4.0, -0.95, 4.0) is very nearly the camera datum
+#   strip itself. Both are restored in the third branch below; the ground_kit one
+#   is a DATUM fix, not a cue fix (see the comment there).
+#   The two contradictions below are FATAL rather than silently resolved: an arm
+#   whose config does not say what it means must not render 48 cuts and be
+#   discovered later in a metrics table (sceneC2:503-507, verbatim reasoning).
+KEEP_DRESSING = bool(SCENE_CONFIG.get("keep_dressing", False))
+if KEEP_DRESSING:
+    if SCENE_CONFIG.get("hazard_stairs", True):
+        raise SystemExit(
+            "[FATAL scene08] keep_dressing=True requires hazard_stairs=False — "
+            "with the hazard ON there is nothing to keep and the arm would be "
+            "an unlabelled duplicate of arm A. Fix the render config.")
+    if not SCENE_CONFIG.get("cue_scene_dressing", True):
+        raise SystemExit(
+            "[FATAL scene08] keep_dressing=True contradicts "
+            "cue_scene_dressing=False — the dressing IS what this arm exists "
+            "to preserve.")
+    print("[keep_dressing] scene08 ON — hazard geometry only (bowl floor · "
+          "30-riser cascade · timber tiers · control wall · arcade -> the "
+          "`FlatBowl` z=0 disc over r 0..14); the rim parapet + glass "
+          "balustrade (z 0..+0.30/+1.10) and the cascade-head tactile arc keep "
+          "their ON transforms and stand clear on the fill, the flank tube "
+          "rails and the facility sign keep theirs and go under it. Upper "
+          "plaza, curb, dressing and CBD wall are already outside the hazard "
+          "branch. `build_ground_kit` is restored so the camera datum strip "
+          "(x in [-12,-1.2] · |y|<=0.90, inside gkit.region x -11..-0.95) "
+          "carries the SAME ground prims as arm A.")
+
+
+# ===========================================================================
 # [B2] PLACEMENT — the geometry-free datum block `scripts/placement_lint.py` reads
 #      statically (spec §10.4). Declared, and where it is empty the emptiness is a
 #      finding rather than an omission (the scene04 / scene07 precedent).
@@ -2455,6 +2499,39 @@ def main():
         build_tiers(M)
         build_ctrl_wall(M)
         build_arcade(M)
+        build_ground_kit(M)
+        if cfg["cue_railing"]:
+            build_guard(M)
+            build_flank_rails(M)
+        if cfg["cue_tactile"]:
+            build_tactile_arc(M)
+        if cfg["cue_sign"]:
+            build_signs(M)
+    elif KEEP_DRESSING:
+        # [arm C] hazard-only removal. `build_flat_fill` is the SAME `FlatBowl`
+        #   disc the plain OFF arm lays (r 0.001..14 at z=0), so the two
+        #   hazard-off arms share one ground.
+        #   `build_ground_kit` is restored as a CAMERA-DATUM fix, not as a cue:
+        #   `gkit.region` is (-11.0, -4.0, -0.95, 4.0) and the datum strip is
+        #   x in [-12,-1.2] · |y|<=0.90, so the two overlap almost exactly. The
+        #   plaza-ring plan decorates `build_plaza`, which is unconditional at
+        #   :2451 and therefore present in BOTH arms — dropping its joints,
+        #   cracks, stains and weeds here would move `cam.ground_z` under arm C
+        #   only and kill (A,C) pairs on the pose gate, which is the measured v2
+        #   failure mode. The second plan `ground_plan_arena()` lands its single
+        #   gully on `bowl.floor_z` = -4.500, i.e. 4.5 m under the fill: it is
+        #   occluded, and its AABB top can never win a `ground_z` sample against
+        #   the disc at 0.000.
+        #   The cue builders keep their own `cfg` guards and their ON transforms
+        #   — the parapet/balustrade ring (r 14.0..14.3, z 0..+1.10) and the
+        #   tactile arc (r 14.3..14.9, +6 mm) stand clear on the fill; the
+        #   cascade flank rails ride `flank_datum`/`_surface_z` down the removed
+        #   cascade and the facility sign stands on `_FLOOR_Z`, so both go under
+        #   it. That is recorded, not "fixed": `_surface_z` is the scene's own
+        #   `_solid_at` oracle surface (read by the depth sidecar, :1068) and
+        #   must not be switched, and a raked 4.4 m guard has no single lower
+        #   datum to ride the way scene12's floodplain props do.
+        build_flat_fill(M)
         build_ground_kit(M)
         if cfg["cue_railing"]:
             build_guard(M)

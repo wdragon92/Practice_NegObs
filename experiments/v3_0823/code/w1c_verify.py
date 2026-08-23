@@ -210,16 +210,21 @@ def cue_mask(a, lab, extra):
     """
     if a is None or lab is None:
         return None
-    m = np.zeros(a.shape, bool)
+    # ID 를 먼저 모아 **한 번의 `np.isin`** 으로 마스크를 만든다.
+    #   순진한 `for id: m |= (a == id)` 는 1920×1080 배열을 id 수(수백)만큼
+    #   전수 비교하므로 컷당 10^9 원소 연산이 되어 이 파일의 전 비용을 잡아먹는다.
+    ids = []
     for k, v in lab.items():
         path = v if isinstance(v, str) else (v or {}).get("class", "")
         if not is_cue_path(str(path), extra):
             continue
         try:
-            m |= (a == int(k))
+            ids.append(int(k))
         except (TypeError, ValueError):
             continue
-    return m
+    if not ids:
+        return np.zeros(a.shape, bool)
+    return np.isin(a, np.asarray(ids, dtype=a.dtype))
 
 
 def png_gray(p, step=2):

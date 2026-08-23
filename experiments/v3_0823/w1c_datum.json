@@ -1,0 +1,2406 @@
+{
+  "repair": "REPAIR-3 pairing-datum instrument (D82 ②)",
+  "lineage": "w1d_verify.py:274-282 ring-median walk level",
+  "thresholds": {
+    "datum_exact": 1e-06,
+    "datum_tol": 0.02,
+    "ring_cells": 20,
+    "ring_min": 50
+  },
+  "known_datum_defects": {
+    "scene02/base": 2.8236,
+    "scene10/base": 0.25,
+    "sceneN1/base": 12.8
+  },
+  "mode": "both",
+  "rows": [
+    {
+      "band": "base",
+      "scene": "scene01",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": -0.0,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.0,
+        "max_dev_X": 0.0,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 15410,
+        "fp_corpus_cells": 75866,
+        "walk_z_strip": -0.0,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.0,
+        "strip_max_dev_X": 0.0,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.0
+      }
+    },
+    {
+      "band": "base",
+      "scene": "scene02",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 9,
+          "datum_tol": 15,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0165,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_tol"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": 0.011384,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 15,
+          "instr_one_off": 0,
+          "instr_both_off": 9
+        },
+        "max_dev_A": 2.828616,
+        "max_dev_X": 2.828616,
+        "n_off_cuts": 9,
+        "off_cuts": [
+          {
+            "file": "L0__s20260819__0002.png",
+            "arm_off": "both",
+            "a_ground_z": 2.84,
+            "x_ground_z": 2.84,
+            "walk_z": 0.011384,
+            "d_a": 2.828616,
+            "d_x": 2.828616
+          },
+          {
+            "file": "L0__s20260819__0004.png",
+            "arm_off": "both",
+            "a_ground_z": 2.84,
+            "x_ground_z": 2.84,
+            "walk_z": 0.011384,
+            "d_a": 2.828616,
+            "d_x": 2.828616
+          },
+          {
+            "file": "L0__s20260819__0005.png",
+            "arm_off": "both",
+            "a_ground_z": 2.84,
+            "x_ground_z": 2.84,
+            "walk_z": 0.011384,
+            "d_a": 2.828616,
+            "d_x": 2.828616
+          },
+          {
+            "file": "L5__s20260819__0002.png",
+            "arm_off": "both",
+            "a_ground_z": 2.84,
+            "x_ground_z": 2.84,
+            "walk_z": 0.011384,
+            "d_a": 2.828616,
+            "d_x": 2.828616
+          },
+          {
+            "file": "L5__s20260819__0004.png",
+            "arm_off": "both",
+            "a_ground_z": 2.84,
+            "x_ground_z": 2.84,
+            "walk_z": 0.011384,
+            "d_a": 2.828616,
+            "d_x": 2.828616
+          },
+          {
+            "file": "L5__s20260819__0005.png",
+            "arm_off": "both",
+            "a_ground_z": 2.84,
+            "x_ground_z": 2.84,
+            "walk_z": 0.011384,
+            "d_a": 2.828616,
+            "d_x": 2.828616
+          },
+          {
+            "file": "L7__s20260819__0002.png",
+            "arm_off": "both",
+            "a_ground_z": 2.84,
+            "x_ground_z": 2.84,
+            "walk_z": 0.011384,
+            "d_a": 2.828616,
+            "d_x": 2.828616
+          },
+          {
+            "file": "L7__s20260819__0004.png",
+            "arm_off": "both",
+            "a_ground_z": 2.84,
+            "x_ground_z": 2.84,
+            "walk_z": 0.011384,
+            "d_a": 2.828616,
+            "d_x": 2.828616
+          }
+        ],
+        "verdict": "instr_both_off",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 18551,
+        "fp_corpus_cells": 717,
+        "walk_z_strip": 0.012066,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 15,
+          "instr_one_off": 0,
+          "instr_both_off": 9
+        },
+        "strip_verdict": "instr_both_off",
+        "strip_max_dev_A": 2.827934,
+        "strip_max_dev_X": 2.827934,
+        "strip_off_cuts": [
+          {
+            "file": "L0__s20260819__0002.png",
+            "arm_off": "both",
+            "a_ground_z": 2.84,
+            "x_ground_z": 2.84,
+            "walk_z": 0.012066,
+            "d_a": 2.827934,
+            "d_x": 2.827934
+          },
+          {
+            "file": "L0__s20260819__0004.png",
+            "arm_off": "both",
+            "a_ground_z": 2.84,
+            "x_ground_z": 2.84,
+            "walk_z": 0.012066,
+            "d_a": 2.827934,
+            "d_x": 2.827934
+          },
+          {
+            "file": "L0__s20260819__0005.png",
+            "arm_off": "both",
+            "a_ground_z": 2.84,
+            "x_ground_z": 2.84,
+            "walk_z": 0.012066,
+            "d_a": 2.827934,
+            "d_x": 2.827934
+          },
+          {
+            "file": "L5__s20260819__0002.png",
+            "arm_off": "both",
+            "a_ground_z": 2.84,
+            "x_ground_z": 2.84,
+            "walk_z": 0.012066,
+            "d_a": 2.827934,
+            "d_x": 2.827934
+          },
+          {
+            "file": "L5__s20260819__0004.png",
+            "arm_off": "both",
+            "a_ground_z": 2.84,
+            "x_ground_z": 2.84,
+            "walk_z": 0.012066,
+            "d_a": 2.827934,
+            "d_x": 2.827934
+          },
+          {
+            "file": "L5__s20260819__0005.png",
+            "arm_off": "both",
+            "a_ground_z": 2.84,
+            "x_ground_z": 2.84,
+            "walk_z": 0.012066,
+            "d_a": 2.827934,
+            "d_x": 2.827934
+          },
+          {
+            "file": "L7__s20260819__0002.png",
+            "arm_off": "both",
+            "a_ground_z": 2.84,
+            "x_ground_z": 2.84,
+            "walk_z": 0.012066,
+            "d_a": 2.827934,
+            "d_x": 2.827934
+          },
+          {
+            "file": "L7__s20260819__0004.png",
+            "arm_off": "both",
+            "a_ground_z": 2.84,
+            "x_ground_z": 2.84,
+            "walk_z": 0.012066,
+            "d_a": 2.827934,
+            "d_x": 2.827934
+          }
+        ],
+        "strip_n_off_cuts": 9,
+        "ring_vs_strip_m": 0.000683
+      },
+      "datum_defect_scene": 2.8236
+    },
+    {
+      "band": "base",
+      "scene": "scene03",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": 0.0,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.002,
+        "max_dev_X": 0.002,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 9582,
+        "fp_corpus_cells": 67695,
+        "walk_z_strip": 0.0015,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.0035,
+        "strip_max_dev_X": 0.0035,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.0015
+      }
+    },
+    {
+      "band": "base",
+      "scene": "scene04",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": 0.0,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.006,
+        "max_dev_X": 0.006,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 14691,
+        "fp_corpus_cells": 53543,
+        "walk_z_strip": 0.002,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.004,
+        "strip_max_dev_X": 0.004,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.002
+      }
+    },
+    {
+      "band": "base",
+      "scene": "scene06",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": -0.15101,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.01901,
+        "max_dev_X": 0.01901,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "grid_median",
+        "ring_cells": 0,
+        "fp_corpus_cells": 0,
+        "walk_z_strip": -0.15101,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.01901,
+        "strip_max_dev_X": 0.01901,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.0
+      }
+    },
+    {
+      "band": "base",
+      "scene": "scene08",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": 0.005615,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.000385,
+        "max_dev_X": 0.000385,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 4496,
+        "fp_corpus_cells": 66547,
+        "walk_z_strip": 0.00573,
+        "strip_cells": 609,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.00027,
+        "strip_max_dev_X": 0.00027,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.000115
+      }
+    },
+    {
+      "band": "base",
+      "scene": "scene09",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 0,
+          "datum_tol": 24,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0165,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_tol"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": 0.01648,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.01648,
+        "max_dev_X": 2e-05,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 6420,
+        "fp_corpus_cells": 87954,
+        "walk_z_strip": 0.01648,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.01648,
+        "strip_max_dev_X": 2e-05,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.0
+      }
+    },
+    {
+      "band": "base",
+      "scene": "scene10",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 21,
+          "datum_tol": 0,
+          "datum_fail": 3
+        },
+        "ground_z_drift_max": 0.25,
+        "n_fail_cuts": 3,
+        "fail_cuts": [
+          {
+            "file": "L0__s20260819__0005.png",
+            "d_ground_z": 0.25,
+            "a_ground_z": -0.005,
+            "x_ground_z": -0.255
+          },
+          {
+            "file": "L5__s20260819__0005.png",
+            "d_ground_z": 0.25,
+            "a_ground_z": -0.005,
+            "x_ground_z": -0.255
+          },
+          {
+            "file": "L7__s20260819__0005.png",
+            "d_ground_z": 0.25,
+            "a_ground_z": -0.005,
+            "x_ground_z": -0.255
+          }
+        ],
+        "verdict": "datum_fail"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": -1.45,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 0,
+          "instr_one_off": 0,
+          "instr_both_off": 24
+        },
+        "max_dev_A": 1.4665,
+        "max_dev_X": 1.4665,
+        "n_off_cuts": 24,
+        "off_cuts": [
+          {
+            "file": "L0__s20260819__0000.png",
+            "arm_off": "both",
+            "a_ground_z": 0.0165,
+            "x_ground_z": 0.0165,
+            "walk_z": -1.45,
+            "d_a": 1.4665,
+            "d_x": 1.4665
+          },
+          {
+            "file": "L0__s20260819__0001.png",
+            "arm_off": "both",
+            "a_ground_z": 0.0165,
+            "x_ground_z": 0.0165,
+            "walk_z": -1.45,
+            "d_a": 1.4665,
+            "d_x": 1.4665
+          },
+          {
+            "file": "L0__s20260819__0002.png",
+            "arm_off": "both",
+            "a_ground_z": 0.0165,
+            "x_ground_z": 0.0165,
+            "walk_z": -1.45,
+            "d_a": 1.4665,
+            "d_x": 1.4665
+          },
+          {
+            "file": "L0__s20260819__0003.png",
+            "arm_off": "both",
+            "a_ground_z": 0.0165,
+            "x_ground_z": 0.0165,
+            "walk_z": -1.45,
+            "d_a": 1.4665,
+            "d_x": 1.4665
+          },
+          {
+            "file": "L0__s20260819__0004.png",
+            "arm_off": "both",
+            "a_ground_z": 0.0165,
+            "x_ground_z": 0.0165,
+            "walk_z": -1.45,
+            "d_a": 1.4665,
+            "d_x": 1.4665
+          },
+          {
+            "file": "L0__s20260819__0005.png",
+            "arm_off": "both",
+            "a_ground_z": -0.005,
+            "x_ground_z": -0.255,
+            "walk_z": -1.45,
+            "d_a": 1.445,
+            "d_x": 1.195
+          },
+          {
+            "file": "L0__s20260819__0006.png",
+            "arm_off": "both",
+            "a_ground_z": 0.0165,
+            "x_ground_z": 0.0165,
+            "walk_z": -1.45,
+            "d_a": 1.4665,
+            "d_x": 1.4665
+          },
+          {
+            "file": "L0__s20260819__0007.png",
+            "arm_off": "both",
+            "a_ground_z": 0.0165,
+            "x_ground_z": 0.0165,
+            "walk_z": -1.45,
+            "d_a": 1.4665,
+            "d_x": 1.4665
+          }
+        ],
+        "verdict": "instr_both_off",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 8648,
+        "fp_corpus_cells": 11225,
+        "walk_z_strip": 0.016452,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 21,
+          "instr_one_off": 0,
+          "instr_both_off": 3
+        },
+        "strip_verdict": "instr_both_off",
+        "strip_max_dev_A": 0.021452,
+        "strip_max_dev_X": 0.271452,
+        "strip_off_cuts": [
+          {
+            "file": "L0__s20260819__0005.png",
+            "arm_off": "both",
+            "a_ground_z": -0.005,
+            "x_ground_z": -0.255,
+            "walk_z": 0.016452,
+            "d_a": 0.021452,
+            "d_x": 0.271452
+          },
+          {
+            "file": "L5__s20260819__0005.png",
+            "arm_off": "both",
+            "a_ground_z": -0.005,
+            "x_ground_z": -0.255,
+            "walk_z": 0.016452,
+            "d_a": 0.021452,
+            "d_x": 0.271452
+          },
+          {
+            "file": "L7__s20260819__0005.png",
+            "arm_off": "both",
+            "a_ground_z": -0.005,
+            "x_ground_z": -0.255,
+            "walk_z": 0.016452,
+            "d_a": 0.021452,
+            "d_x": 0.271452
+          }
+        ],
+        "strip_n_off_cuts": 3,
+        "ring_vs_strip_m": 1.466452
+      },
+      "datum_defect_scene": 0.25
+    },
+    {
+      "band": "base",
+      "scene": "scene12",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": -0.000415,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.001215,
+        "max_dev_X": 0.001215,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 8238,
+        "fp_corpus_cells": 33605,
+        "walk_z_strip": -0.000372,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.001172,
+        "strip_max_dev_X": 0.001172,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 4.3e-05
+      }
+    },
+    {
+      "band": "base",
+      "scene": "scene16",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": -0.000464,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.006464,
+        "max_dev_X": 0.006464,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 15875,
+        "fp_corpus_cells": 10318,
+        "walk_z_strip": -0.000214,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.006214,
+        "strip_max_dev_X": 0.006214,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.00025
+      }
+    },
+    {
+      "band": "base",
+      "scene": "scene17",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 12,
+          "datum_tol": 12,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.006,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_tol"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": -0.0,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.006,
+        "max_dev_X": 0.006,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 10127,
+        "fp_corpus_cells": 65833,
+        "walk_z_strip": -0.0,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.006,
+        "strip_max_dev_X": 0.006,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.0
+      }
+    },
+    {
+      "band": "base",
+      "scene": "scene20",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": 0.0,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.0085,
+        "max_dev_X": 0.0085,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 8940,
+        "fp_corpus_cells": 60659,
+        "walk_z_strip": 0.0,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.0085,
+        "strip_max_dev_X": 0.0085,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.0
+      }
+    },
+    {
+      "band": "base",
+      "scene": "scene21",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": 0.0,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.0012,
+        "max_dev_X": 0.0012,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 12852,
+        "fp_corpus_cells": 14456,
+        "walk_z_strip": 0.0,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.0012,
+        "strip_max_dev_X": 0.0012,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.0
+      }
+    },
+    {
+      "band": "base",
+      "scene": "sceneC1",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": 0.05,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.0012,
+        "max_dev_X": 0.0012,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 8798,
+        "fp_corpus_cells": 68846,
+        "walk_z_strip": 0.0512,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.0012,
+        "strip_max_dev_X": 0.0012,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.0012
+      }
+    },
+    {
+      "band": "base",
+      "scene": "sceneC4",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 21,
+          "datum_tol": 3,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0004,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_tol"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": -0.0,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.0064,
+        "max_dev_X": 0.006,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 9472,
+        "fp_corpus_cells": 67482,
+        "walk_z_strip": -0.0,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.0064,
+        "strip_max_dev_X": 0.006,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.0
+      }
+    },
+    {
+      "band": "base",
+      "scene": "sceneD1",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": 0.0,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.002,
+        "max_dev_X": 0.002,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 4918,
+        "fp_corpus_cells": 94647,
+        "walk_z_strip": 0.0,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.002,
+        "strip_max_dev_X": 0.002,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.0
+      }
+    },
+    {
+      "band": "base",
+      "scene": "sceneD2",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": 0.0,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 21,
+          "instr_one_off": 0,
+          "instr_both_off": 3
+        },
+        "max_dev_A": 0.05,
+        "max_dev_X": 0.05,
+        "n_off_cuts": 3,
+        "off_cuts": [
+          {
+            "file": "L0__s20260819__0006.png",
+            "arm_off": "both",
+            "a_ground_z": -0.05,
+            "x_ground_z": -0.05,
+            "walk_z": 0.0,
+            "d_a": 0.05,
+            "d_x": 0.05
+          },
+          {
+            "file": "L5__s20260819__0006.png",
+            "arm_off": "both",
+            "a_ground_z": -0.05,
+            "x_ground_z": -0.05,
+            "walk_z": 0.0,
+            "d_a": 0.05,
+            "d_x": 0.05
+          },
+          {
+            "file": "L7__s20260819__0006.png",
+            "arm_off": "both",
+            "a_ground_z": -0.05,
+            "x_ground_z": -0.05,
+            "walk_z": 0.0,
+            "d_a": 0.05,
+            "d_x": 0.05
+          }
+        ],
+        "verdict": "instr_both_off",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 3520,
+        "fp_corpus_cells": 1160,
+        "walk_z_strip": 0.0,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 21,
+          "instr_one_off": 0,
+          "instr_both_off": 3
+        },
+        "strip_verdict": "instr_both_off",
+        "strip_max_dev_A": 0.05,
+        "strip_max_dev_X": 0.05,
+        "strip_off_cuts": [
+          {
+            "file": "L0__s20260819__0006.png",
+            "arm_off": "both",
+            "a_ground_z": -0.05,
+            "x_ground_z": -0.05,
+            "walk_z": 0.0,
+            "d_a": 0.05,
+            "d_x": 0.05
+          },
+          {
+            "file": "L5__s20260819__0006.png",
+            "arm_off": "both",
+            "a_ground_z": -0.05,
+            "x_ground_z": -0.05,
+            "walk_z": 0.0,
+            "d_a": 0.05,
+            "d_x": 0.05
+          },
+          {
+            "file": "L7__s20260819__0006.png",
+            "arm_off": "both",
+            "a_ground_z": -0.05,
+            "x_ground_z": -0.05,
+            "walk_z": 0.0,
+            "d_a": 0.05,
+            "d_x": 0.05
+          }
+        ],
+        "strip_n_off_cuts": 3,
+        "ring_vs_strip_m": 0.0
+      }
+    },
+    {
+      "band": "base",
+      "scene": "sceneD3",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": 0.0,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.006,
+        "max_dev_X": 0.006,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 11760,
+        "fp_corpus_cells": 2520,
+        "walk_z_strip": 0.0,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.006,
+        "strip_max_dev_X": 0.006,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.0
+      }
+    },
+    {
+      "band": "h",
+      "scene": "scene09",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C_h",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 0,
+          "datum_tol": 24,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0165,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_tol"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": 0.01648,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.01648,
+        "max_dev_X": 2e-05,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 6420,
+        "fp_corpus_cells": 87954,
+        "walk_z_strip": 0.01648,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.01648,
+        "strip_max_dev_X": 2e-05,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.0
+      }
+    },
+    {
+      "band": "h",
+      "scene": "scene17",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C_h",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": -0.0,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.006,
+        "max_dev_X": 0.006,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 10127,
+        "fp_corpus_cells": 65833,
+        "walk_z_strip": -0.0,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.006,
+        "strip_max_dev_X": 0.006,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.0
+      }
+    },
+    {
+      "band": "e",
+      "scene": "scene03",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C_e",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": 0.0,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.002,
+        "max_dev_X": 0.002,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 9582,
+        "fp_corpus_cells": 67695,
+        "walk_z_strip": 0.0015,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.0035,
+        "strip_max_dev_X": 0.0035,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.0015
+      }
+    },
+    {
+      "band": "e",
+      "scene": "scene04",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C_e",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": 0.0,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.006,
+        "max_dev_X": 0.006,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 14691,
+        "fp_corpus_cells": 53543,
+        "walk_z_strip": 0.002,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.004,
+        "strip_max_dev_X": 0.004,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.002
+      }
+    },
+    {
+      "band": "e",
+      "scene": "scene08",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C_e",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": -0.000331,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.006331,
+        "max_dev_X": 0.006331,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "grid_median",
+        "ring_cells": 0,
+        "fp_corpus_cells": 0,
+        "walk_z_strip": 0.00573,
+        "strip_cells": 609,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.00027,
+        "strip_max_dev_X": 0.00027,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.00606
+      }
+    },
+    {
+      "band": "e",
+      "scene": "scene09",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C_e",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 0,
+          "datum_tol": 24,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0165,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_tol"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": 0.01648,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.01648,
+        "max_dev_X": 2e-05,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 6420,
+        "fp_corpus_cells": 87954,
+        "walk_z_strip": 0.01648,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.01648,
+        "strip_max_dev_X": 2e-05,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.0
+      }
+    },
+    {
+      "band": "e",
+      "scene": "scene12",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C_e",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": -0.000556,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.000556,
+        "max_dev_X": 0.000556,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 2411,
+        "fp_corpus_cells": 50,
+        "walk_z_strip": -0.000372,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.000372,
+        "strip_max_dev_X": 0.000372,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.000185
+      }
+    },
+    {
+      "band": "e",
+      "scene": "scene17",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C_e",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": -0.0,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.006,
+        "max_dev_X": 0.006,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 10127,
+        "fp_corpus_cells": 65833,
+        "walk_z_strip": -0.0,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.006,
+        "strip_max_dev_X": 0.006,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.0
+      }
+    },
+    {
+      "band": "e",
+      "scene": "scene20",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C_e",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": 0.0,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.0085,
+        "max_dev_X": 0.0085,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 8940,
+        "fp_corpus_cells": 60659,
+        "walk_z_strip": 0.0,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.0085,
+        "strip_max_dev_X": 0.0085,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.0
+      }
+    },
+    {
+      "band": "e",
+      "scene": "sceneC1",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C_e",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": 0.05,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.0012,
+        "max_dev_X": 0.0012,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 8798,
+        "fp_corpus_cells": 68846,
+        "walk_z_strip": 0.0512,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.0012,
+        "strip_max_dev_X": 0.0012,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.0012
+      }
+    },
+    {
+      "band": "e",
+      "scene": "sceneC4",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C_e",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": -0.0,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.0,
+        "max_dev_X": 0.0,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 9472,
+        "fp_corpus_cells": 67482,
+        "walk_z_strip": -0.0,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.0,
+        "strip_max_dev_X": 0.0,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.0
+      }
+    },
+    {
+      "band": "e2",
+      "scene": "scene03",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C_e2",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": 0.0,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.002,
+        "max_dev_X": 0.002,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 9582,
+        "fp_corpus_cells": 67695,
+        "walk_z_strip": 0.0015,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.0035,
+        "strip_max_dev_X": 0.0035,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.0015
+      }
+    },
+    {
+      "band": "e2",
+      "scene": "scene04",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C_e2",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": 0.0,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.006,
+        "max_dev_X": 0.006,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 14691,
+        "fp_corpus_cells": 53543,
+        "walk_z_strip": 0.002,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.004,
+        "strip_max_dev_X": 0.004,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.002
+      }
+    },
+    {
+      "band": "e2",
+      "scene": "scene12",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C_e2",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": -0.000556,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.000556,
+        "max_dev_X": 0.000556,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 2411,
+        "fp_corpus_cells": 50,
+        "walk_z_strip": -0.000372,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.000372,
+        "strip_max_dev_X": 0.000372,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.000185
+      }
+    },
+    {
+      "band": "e2",
+      "scene": "scene20",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C_e2",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 24,
+          "datum_tol": 0,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.0,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_exact"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": 0.0,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.0085,
+        "max_dev_X": 0.0085,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 8940,
+        "fp_corpus_cells": 60659,
+        "walk_z_strip": 0.0,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.0085,
+        "strip_max_dev_X": 0.0085,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.0
+      }
+    },
+    {
+      "band": "e2",
+      "scene": "sceneC4",
+      "other_arm": "C",
+      "other_round": "260827_v3w1_lib_C_e2",
+      "have": {
+        "C": true,
+        "A": true,
+        "guoff": true,
+        "D": true
+      },
+      "camera": {
+        "mode": "camera",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "tiers": {
+          "datum_exact": 21,
+          "datum_tol": 3,
+          "datum_fail": 0
+        },
+        "ground_z_drift_max": 0.006,
+        "n_fail_cuts": 0,
+        "fail_cuts": [],
+        "verdict": "datum_tol"
+      },
+      "instrument": {
+        "mode": "instrument",
+        "other_arm": "C",
+        "n_cuts": 24,
+        "walk_z": -0.0,
+        "tol": 0.02,
+        "tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "max_dev_A": 0.006,
+        "max_dev_X": 0.0,
+        "n_off_cuts": 0,
+        "off_cuts": [],
+        "verdict": "instr_exact",
+        "walk_z_source": "ring_1m",
+        "ring_cells": 9472,
+        "fp_corpus_cells": 67482,
+        "walk_z_strip": -0.0,
+        "strip_cells": 612,
+        "strip_tiers": {
+          "instr_exact": 24,
+          "instr_one_off": 0,
+          "instr_both_off": 0
+        },
+        "strip_verdict": "instr_exact",
+        "strip_max_dev_A": 0.006,
+        "strip_max_dev_X": 0.0,
+        "strip_off_cuts": [],
+        "strip_n_off_cuts": 0,
+        "ring_vs_strip_m": 0.0
+      }
+    }
+  ],
+  "problems": [],
+  "camera_summary": {
+    "n_pairs": 34,
+    "cut_tiers": {
+      "datum_exact": 708,
+      "datum_tol": 105,
+      "datum_fail": 3
+    },
+    "pair_survival": "33/34",
+    "cut_survival": "813/816",
+    "quarantine": [
+      "scene10/base"
+    ]
+  },
+  "instrument_summary": {
+    "n_pairs": 34,
+    "cut_tiers": {
+      "instr_exact": 780,
+      "instr_one_off": 0,
+      "instr_both_off": 36
+    },
+    "pair_clean": "31/34",
+    "localised": [
+      {
+        "scene": "scene02",
+        "band": "base",
+        "arms": [
+          "both"
+        ],
+        "n_off": 9,
+        "walk_z": 0.011384,
+        "max_dev_A": 2.828616,
+        "max_dev_X": 2.828616
+      },
+      {
+        "scene": "scene10",
+        "band": "base",
+        "arms": [
+          "both"
+        ],
+        "n_off": 24,
+        "walk_z": -1.45,
+        "max_dev_A": 1.4665,
+        "max_dev_X": 1.4665
+      },
+      {
+        "scene": "sceneD2",
+        "band": "base",
+        "arms": [
+          "both"
+        ],
+        "n_off": 3,
+        "walk_z": 0.0,
+        "max_dev_A": 0.05,
+        "max_dev_X": 0.05
+      }
+    ]
+  }
+}

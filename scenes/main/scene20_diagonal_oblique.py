@@ -468,6 +468,66 @@ if _sc_ov:
     print(f"[SCENE_CONFIG] override 적용: {_sc_ov}")
 
 
+_CUEOFF_SCENE = "scene20"
+
+
+# ===========================================================================
+# [B'] keep_dressing / placebo_remove — v3 C팔 옵트인 키 (D82 ②)
+# ===========================================================================
+#   `experiments/weekend_0823/cue_audit/scenes_cueoff/scene20_*.py` 의 감사
+#   통과본을 **정본으로 승격**한 것이다(D82 ② additive 옵트인 키 채택, 기본값
+#   무변경 해시게이트 증명 조건).  두 플래그가 모두 False 이면 아래의 모든 가드
+#   표현식은 이식 이전의 코드 경로로 **정확히 붕괴**한다.
+#
+#   keep_dressing   D25/D30 패턴 (원본 `scenes/batch1/sceneC2_leaf_stairs.py`
+#                   :496-520).  C 팔 = 낙차 기하 제거, 단서·드레싱 유지.
+#   placebo_remove  D35/R2 §5.3-2 요구.  본 씬의 군은 백드롭 블록 E1·E2 이며,
+#                   **AMBER(탐색 전용, PREREG_CUEOFF §3.3)** 로 등급이 낮다 —
+#                   실측 질량은 `PLACEBO_PIXEL_MASS_crest.csv`.
+#
+#   주의 — scene20 의 `cue_railing`(치크월)은 **구조물 실측**(12,656셀 · 3.160 m)
+#   이라 계획 §1.2 에서 **영구 금지 레버**다.  C 팔은 레버를 쓰지 않으므로
+#   해당 없음.
+KEEP_DRESSING = bool(SCENE_CONFIG.get("keep_dressing", False))
+PLACEBO_REMOVE = bool(SCENE_CONFIG.get("placebo_remove", False))
+if KEEP_DRESSING:
+    if SCENE_CONFIG.get("hazard_stairs", True):
+        raise SystemExit(
+            f"[FATAL {_CUEOFF_SCENE}] keep_dressing=True requires "
+            "hazard_stairs=False — with the hazard ON there is nothing to keep "
+            "and the arm would be an unlabelled duplicate of arm A. "
+            "Fix the render config.")
+    if not SCENE_CONFIG.get("cue_scene_dressing", True):
+        raise SystemExit(
+            f"[FATAL {_CUEOFF_SCENE}] keep_dressing=True contradicts "
+            "cue_scene_dressing=False — the dressing IS what this arm exists to "
+            "preserve.")
+if PLACEBO_REMOVE:
+    if not SCENE_CONFIG.get("hazard_stairs", True):
+        raise SystemExit(
+            f"[FATAL {_CUEOFF_SCENE}] placebo_remove=True requires "
+            "hazard_stairs=True — the placebo arm is a HAZARD-ON appearance "
+            "control (D35). With the hazard off it measures nothing.")
+    if not SCENE_CONFIG.get("cue_scene_dressing", True):
+        raise SystemExit(
+            f"[FATAL {_CUEOFF_SCENE}] placebo_remove=True with "
+            "cue_scene_dressing=False removes the placebo group twice over and "
+            "confounds arm P with arm B1. Fix the render config.")
+    if KEEP_DRESSING:
+        raise SystemExit(
+            f"[FATAL {_CUEOFF_SCENE}] placebo_remove and keep_dressing are "
+            "different arms (P and C) and must never be set together.")
+_ARM = ("C_hz0_cue1" if KEEP_DRESSING else
+        "P_hz1_placebo" if PLACEBO_REMOVE else
+        "A/B_hz%d_rail%d_mat%d_dress%d" % (
+            int(SCENE_CONFIG.get("hazard_stairs", True)),
+            int(SCENE_CONFIG.get("cue_railing", False)),
+            int(SCENE_CONFIG.get("cue_material_break", True)),
+            int(SCENE_CONFIG.get("cue_scene_dressing", True))))
+print(f"[CUE-OFF] {_CUEOFF_SCENE} arm={_ARM} keep_dressing={KEEP_DRESSING} "
+      f"placebo_remove={PLACEBO_REMOVE}")
+
+
 # ===========================================================================
 # [C] Path constants + required texture roles
 # ===========================================================================
@@ -672,19 +732,37 @@ def main():
             M["upper"], col=True)
         # Bands (charcoal stripes running along Y, a scaled-down scene01 motif)
         if cfg["cue_scene_dressing"]:
-            bd = PARAMS["band"]
-            x = bd["x0"]
-            i = 0
-            while x <= bd["x1"] + 1e-6:
-                # [W2-D] Clamp the +y end to the mesa boundary (axis-aligned plaza union 30 deg wedge).
-                y_hi = min(bd["y_half"], bd["mesa_slope"] * abs(x))
-                y_lo = -bd["y_half"]
-                if y_hi - y_lo > 0.30:      # Skip the band if no length remains
-                    BOX(f"{ROOT}/Band_{i}",
-                        (x, (y_lo + y_hi) / 2.0, top + bd["proud"] - 0.003),
-                        (bd["width"], y_hi - y_lo, 0.02), M["band"])
-                x += bd["spacing"]
-                i += 1
+            build_bands(M, top)
+
+    def build_bands(M, top):
+        """[C팔 이식] 메사의 목탄색 줄무늬를 `build_upper` 에서 **밖으로** 뽑아냈다.
+
+        이 리팩터가 존재하는 이유 — 정리가 아니라 **데이텀 수리**다.  띠 상면은
+        `top + proud − 0.003 + 0.01` = **+0.0085 m** 이고 `build_upper` 는 낙차
+        분기 안에 있으므로, 정본의 낙차-OFF 팔은 띠를 잃고 그와 함께 카메라 지면
+        데이텀 8.5 mm 를 잃는다.  그 이동은 출하된 코퍼스에서 측정된다:
+        `260820_boost_e2_on` 컷 0000/0001 은 `cam.ground_z` 0.0085 를 갖는데
+        짝인 off 팔은 0.0 을 갖는다.
+        C 팔(`keep_dressing`)은 "낙차 제거, **드레싱 유지**" 로 정의되고 띠는
+        **드레싱**이다 — 그러므로 평평해진 광장 위에 띠를 다시 짓는 것이
+        의미상 옳은 팔이면서 동시에 C 팔의 카메라 데이텀을 A 팔과 동일하게
+        만드는 조치다.  y 클램프가 x 만의 함수라서 다시 지은 띠는 A 팔의 것과
+        좌표까지 동일하다.  (B1 팔은 정당하게 띠를 잃는다 — 그것이 개입이고,
+        PREREG §5.1 이 그 결과인 `pose_tol` 층을 숨기지 않고 선언한다.)
+        """
+        bd = PARAMS["band"]
+        x = bd["x0"]
+        i = 0
+        while x <= bd["x1"] + 1e-6:
+            # [W2-D] Clamp the +y end to the mesa boundary (axis-aligned plaza union 30 deg wedge).
+            y_hi = min(bd["y_half"], bd["mesa_slope"] * abs(x))
+            y_lo = -bd["y_half"]
+            if y_hi - y_lo > 0.30:      # Skip the band if no length remains
+                BOX(f"{ROOT}/Band_{i}",
+                    (x, (y_lo + y_hi) / 2.0, top + bd["proud"] - 0.003),
+                    (bd["width"], y_hi - y_lo, 0.02), M["band"])
+            x += bd["spacing"]
+            i += 1
 
     # -------------------------------------------------------------------
     # [W2-D] ground_kit - P1 plaza_granite (spec §5.1 scene20 row)
@@ -945,7 +1023,21 @@ def main():
                      getattr(sc, "_oriented_box", None))
         n_tot = 0
         over = []
-        for tag, x0, x1, y0, y1, hh in bp["blocks"]:
+        # ---- PLACEBO GROUP (AMBER -- exploratory only, PREREG §3.3) ---------
+        #   The E blocks are the ONLY removable in-frame mass in scene20's 6
+        #   strict-H frames: every piece of mesa furniture measures 0 px in 6/6
+        #   (PLACEBO_PIXEL_MASS_crest.csv), being either behind the camera
+        #   (bollards, x -13.6) or outside the 62 deg forward FOV.  The E blocks
+        #   are 240 k px = 11.6 % of frame -- but they stand on the VALLEY floor
+        #   with their feet cut by the mesa lip, which is the same FORM the
+        #   matrix reads as geometry_silhouette.  The only defence is that the
+        #   canonical matrix §2.4 s20 judged the `cue_railing=False` arm's h0.3
+        #   frames "effectively drop-evidence-free" WITH the backdrop present.
+        #   That is thin, so this arm is rendered and tabled but EXCLUDED from
+        #   the placebo-corrected primary rule.
+        _blocks = [b for b in bp["blocks"]
+                   if not (PLACEBO_REMOVE and b[0].startswith("E"))]
+        for tag, x0, x1, y0, y1, hh in _blocks:
             # A silhouette is a plan rectangle seen edge-on; `axis`/`facade_*` only pick
             # which face the planner measures from, and that face is the one turned
             # toward the plaza centre.
@@ -981,7 +1073,7 @@ def main():
                   f"{p.d_true:6.2f} m · in_frame {str(p.in_frame):5s} · z_ceil "
                   f"{('%.2f' % p.z_ceil) if p.z_ceil is not None else '  n/a'} · "
                   f"하늘 {str(sky):5s} · 프림 {len(prims)}")
-        n_b = len(bp["blocks"])
+        n_b = len(_blocks)
         print(f"[backdrop] {n_b}동 {n_tot} 프림 · 창 0 · 지붕선 위 하늘 "
               f"{n_b - len(over)}/{n_b}" + (f" · 초과 {over}" if over else ""))
         return n_tot, over
@@ -1354,6 +1446,15 @@ def main():
     if cfg["hazard_stairs"]:
         build_upper(M)
         build_diagonal(M)
+    elif KEEP_DRESSING:
+        # [C팔] 낙차만 제거.  `build_flat_fill` 은 여기서 안전하다 — scene12 와
+        #   달리 이 씬의 `FlatPlaza` 는 이미 `skin_exclude` 돼 있고 상면이
+        #   딱딱한 0.000 이다 — 그러나 메사에 타고 있던 **드레싱**이 함께
+        #   돌아와야 한다.  아니면 C 팔은 A 팔 대비 카메라 데이텀 8.5 mm 를
+        #   조용히 잃는다.  `build_bands` 주석 참조.
+        build_flat_fill(M)
+        if cfg["cue_scene_dressing"]:
+            build_bands(M, PARAMS["upper"]["z_top"])
     else:
         build_flat_fill(M)
     _bd_over = []
@@ -1362,6 +1463,10 @@ def main():
     build_ground_kit(M)             # [W2-D] Ground elements - after dressing (scatter-order convention)
     if cfg["hazard_stairs"] and cfg["cue_scene_dressing"]:
         build_litter(M)             # season dressing - strictly after build_diagonal (rot_group)
+    if PLACEBO_REMOVE:
+        print("[placebo_remove] scene20 — removed backdrop blocks E1·E2 "
+              "(AMBER: exploratory only, PREREG §3.3). KEPT: cheek walls, "
+              "bands, belt, bollards, planters, benches, streetlights, hedges.")
     if not plaza_selfcheck(_bd_over):
         raise SystemExit("scene20 self-check 실패")
     # [v5.2 user] Arbitrary warning placards removed - cue_sign placement deleted.

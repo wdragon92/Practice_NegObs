@@ -16,6 +16,15 @@ D14        : the gated footprint remains the training GT (`polar_gt`), and the
             same wedge test is run a second time on the RAW pre-gate footprint
             (`polar_gt_pregate` + `gate_excluded`) so that nothing the step gate
             removes is lost -- reverting the gate is a field swap, not a redo.
+D78 (3)/D82 (2)
+           : the near-boundary probe has an OPT-IN second mode
+            (`--boundary-mode component` / $NEGOBS_LABELER_BOUNDARY, see
+            BOUNDARY_QUANTISED / BOUNDARY_COMPONENT below) that replaces the
+            8-neighbour quantised `_outward` with a per-cell component-boundary
+            scan, fixing the axis-parallel lateral blind spot.  The DEFAULT is
+            unchanged and bit-for-bit historical; the new mode is NOT GT-invariant
+            on the v2 corpus (measured: experiments/v3_0823/code/
+            w1c_labeler_boundary.py --verify-v2 -> w1c_labeler_invariance.json).
 
 Camera convention is taken VERBATIM from the render driver
 (`variation_kit.dir_of` + `variation_kit.look_at_rows`, quoted in cam_basis()).
@@ -289,6 +298,124 @@ def _outward(XX, YY, eye):
     return np.rint(dx / n).astype(np.int32), np.rint(dy / n).astype(np.int32)
 
 
+# --------------------------------------------------------------------------- #
+# near-boundary direction field -- D78 (3) lateral blind spot / D82 (2) root fix
+# --------------------------------------------------------------------------- #
+BOUNDARY_QUANTISED = "quantised"
+"""HISTORICAL default.  `_outward` quantises the exact toward-camera direction to
+ONE of the 8 neighbours (`rint(dx/n), rint(dy/n)`) and `_near_boundary` probes
+that single neighbour.  For a hazard running PARALLEL to the walking axis (a
+lateral canal, a kerb beside the path) the quantised direction points ALONG the
+lip once |dy|/n < 0.5, i.e. beyond `d <= -x0 + sqrt(3)*y_lip` (8.13 m measured on
+sceneL1; real cuts at d = 8.50 / 8.69 m): the probed neighbour is another
+footprint cell, no near boundary is found, `comps_kept` / `cells_kept` collapse to
+0 and the frame gets a FALSE-NEGATIVE GT (DECISIONS.md D78 (3);
+scenes/main/sceneL1_lateral_canal.py, sceneN9_busstop_tactile.py)."""
+
+BOUNDARY_COMPONENT = "component"
+"""OPT-IN root fix (D82 (2)).  Instead of probing one quantised neighbour, scan
+ALL neighbours of every footprint cell (`_NBR8`; `_NBR4` available) and take the
+per-cell direction of the BEST walkable one, where
+
+    walkable  = (not footprint) and (not void)          -- as `_near_boundary`
+    admissible= dot((neighbour - cell), toward_camera_unit) > 0
+                i.e. the neighbour lies in the camera-facing half-space, which is
+                what keeps the "near / walkable side of the lip" semantics.
+
+TIE-BREAK (deterministic, reproducible): among the admissible walkable
+neighbours take the one whose UNIT direction has the LARGEST dot product with the
+exact toward-camera unit vector (= the smallest angle to it); exact ties go to the
+neighbour that comes FIRST in the fixed `_NBR8` ordering, because the scan keeps
+an incumbent and only replaces it on a STRICTLY greater dot.
+
+The result is an ox/oy FIELD that varies per cell, a drop-in for the constant
+quantised pair: `step_gate`'s inward ray march and `edge_points`'s lip emission
+already index `ox[iy, ix]` / `oy[iy, ix]`.  Cells with no admissible walkable
+neighbour keep (0, 0), which `_near_boundary` discards for free (the neighbour is
+then the cell itself, hence footprint, hence not walkable).
+
+Because the quantised neighbour is itself always admissible (its dot with the
+toward-camera unit vector is a sum of same-sign terms and cannot be zero for a
+unit vector), the component boundary set is a SUPERSET of the quantised one: this
+mode can only ADD near-boundary cells, never remove them.  The per-cell DIRECTION
+may still differ where a better-aligned walkable neighbour exists, so the mode is
+NOT declared GT-invariant by construction -- it is verified
+(experiments/v3_0823/code/w1c_labeler_boundary.py --verify-v2)."""
+
+BOUNDARY_ENV = "NEGOBS_LABELER_BOUNDARY"
+"""Env override, e.g. `NEGOBS_LABELER_BOUNDARY=component`.  Precedence:
+explicit argument > environment > `BOUNDARY_MODE`."""
+
+BOUNDARY_MODE = BOUNDARY_QUANTISED
+"""Module default.  MUST stay `quantised`: every frozen artefact under
+experiments/ was labelled with it and the v2 corpus is byte-compared against it."""
+
+_NBR8 = ((1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1))
+"""Fixed neighbour ordering as (d_ix, d_iy) -- counter-clockwise from +x.  ix
+indexes X (XX = x0 + ix*step) and iy indexes Y, so (d_ix, d_iy) is also the world
+XY direction up to the common cell size.  The ORDER is load-bearing: it is the
+tie-break, so it must never be shuffled."""
+
+_NBR4 = ((1, 0), (0, 1), (-1, 0), (0, -1))
+"""4-connected subset, matching `connected_components`.  Enough to fix the
+axis-parallel blind spot on its own, but `_NBR8` is the default because the
+quantised mode can emit diagonals and only the 8-neighbourhood is guaranteed to
+be a superset of it."""
+
+
+def resolve_boundary_mode(mode=None):
+    """explicit argument > $NEGOBS_LABELER_BOUNDARY > BOUNDARY_MODE."""
+    if mode is None:
+        mode = os.environ.get(BOUNDARY_ENV) or BOUNDARY_MODE
+    mode = str(mode).strip().lower()
+    if mode not in (BOUNDARY_QUANTISED, BOUNDARY_COMPONENT):
+        raise ValueError(f"boundary mode must be {BOUNDARY_QUANTISED!r} or "
+                         f"{BOUNDARY_COMPONENT!r}, got {mode!r}")
+    return mode
+
+
+def _outward_component(XX, YY, eye, fp, void, nbrs=_NBR8):
+    """Per-cell outward step from the COMPONENT-BOUNDARY SCAN (BOUNDARY_COMPONENT).
+
+    Returns (ox, oy) int32 fields shaped like `fp`; (0, 0) means "this footprint
+    cell has no admissible walkable neighbour", i.e. not a near boundary.
+    """
+    dx, dy = eye[0] - XX, eye[1] - YY
+    n = np.hypot(dx, dy)
+    n = np.where(n == 0, 1.0, n)
+    tx, ty = dx / n, dy / n                       # exact toward-camera unit field
+    walk = (~fp) & (~void)
+    ny, nx = fp.shape
+    ox = np.zeros(fp.shape, np.int32)
+    oy = np.zeros(fp.shape, np.int32)
+    best = np.zeros(fp.shape, np.float64)         # 0 => the dot > 0 half-space test
+    for dix, diy in nbrs:
+        w = np.zeros(fp.shape, bool)
+        ys = slice(max(0, -diy), ny - max(0, diy))
+        xs = slice(max(0, -dix), nx - max(0, dix))
+        yt = slice(max(0, diy), ny - max(0, -diy))
+        xt = slice(max(0, dix), nx - max(0, -dix))
+        w[ys, xs] = walk[yt, xt]                  # w[i] = walkable at i + offset
+        dot = (dix * tx + diy * ty) / math.hypot(dix, diy)
+        take = fp & w & (dot > best)              # strict => first offset wins ties
+        ox = np.where(take, dix, ox)
+        oy = np.where(take, diy, oy)
+        best = np.where(take, dot, best)
+    return ox.astype(np.int32), oy.astype(np.int32)
+
+
+def outward_field(XX, YY, eye, fp=None, void=None, mode=None, nbrs=None):
+    """Outward step for the near-boundary test, in whichever mode is selected.
+
+    `quantised` (default) is `_outward` verbatim -- same call, same bytes.
+    """
+    if resolve_boundary_mode(mode) == BOUNDARY_COMPONENT:
+        if fp is None or void is None:
+            raise ValueError("BOUNDARY_COMPONENT needs (fp, void) to scan")
+        return _outward_component(XX, YY, eye, fp, void, nbrs or _NBR8)
+    return _outward(XX, YY, eye)
+
+
 def _near_boundary(seed, fp, void, ox, oy):
     """Cells of `seed` whose toward-camera 4-neighbour is walkable ground.
 
@@ -309,7 +436,8 @@ def _near_boundary(seed, fp, void, ox, oy):
     return iy[m], ix[m], jy[m], jx[m]
 
 
-def step_gate(fp, comp, n_raw, void, hm_on, ox, oy, st, hz):
+def step_gate(fp, comp, n_raw, void, hm_on, ox, oy, st, hz,
+              *, boundary_mode=None, XX=None, YY=None, eye=None):
     """D10 near-boundary STEP gate, applied per connected component.
 
     For every near-boundary cell we walk the inward ray (away from the camera,
@@ -322,11 +450,19 @@ def step_gate(fp, comp, n_raw, void, hm_on, ox, oy, st, hz):
     Returns (kept mask, stats dict).  `comps_no_boundary` is the diagnostic that
     separates "failed the step test" from "the camera never saw a near rim of
     this component at all" (component walled in by void or by the map edge).
+
+    `boundary_mode` (D82 (2), opt-in): with BOUNDARY_COMPONENT the passed-in
+    ox/oy are REPLACED by a per-cell field scanned off THIS footprint, so the
+    inward ray marches along each boundary cell's own outward normal.  Needs the
+    geometry (XX, YY, eye) to know where the camera is.  Default = None resolves
+    to BOUNDARY_QUANTISED and the ox/oy handed in are used untouched.
     """
     stat = dict(comps_raw=n_raw, comps_kept=0, comps_no_boundary=0,
                 boundary_cells=0, boundary_pass=0)
     if n_raw == 0:
         return np.zeros_like(fp), stat
+    if resolve_boundary_mode(boundary_mode) == BOUNDARY_COMPONENT:
+        ox, oy = _outward_component(XX, YY, eye, fp, void)
     iy, ix, jy, jx = _near_boundary(fp, fp, void, ox, oy)
     stat["boundary_cells"] = int(iy.size)
     if iy.size == 0:
@@ -354,7 +490,8 @@ def step_gate(fp, comp, n_raw, void, hm_on, ox, oy, st, hz):
     return np.isin(comp, keep), stat
 
 
-def edge_points(fp, void, hm, XX, YY, eye, cell, approach_z, ox, oy):
+def edge_points(fp, void, hm, XX, YY, eye, cell, approach_z, ox, oy,
+                *, boundary_mode=None):
     """Near-boundary (drop-lip) points: footprint cells whose neighbour toward
     the camera is walkable ground.  The emitted point is the LIP -- XY midway
     between the two cells, Z of the walkable side -- because that is the part of
@@ -364,7 +501,14 @@ def edge_points(fp, void, hm, XX, YY, eye, cell, approach_z, ox, oy):
     the entire far half of the map: the lip must lie INSIDE the polar grid (that
     is the edge the label is about), and its walkable side must not sit above
     standing ground + LIP_WALL_TOP_M (that is a wall top, not a drop lip).
+
+    `boundary_mode` (D82 (2), opt-in): with BOUNDARY_COMPONENT the ox/oy handed
+    in are REPLACED by a per-cell field scanned off the GATED footprint given
+    here -- the same footprint `_near_boundary` judges "walkable" against, so the
+    lip midpoints stay consistent with the mask the label is about.
     """
+    if resolve_boundary_mode(boundary_mode) == BOUNDARY_COMPONENT:
+        ox, oy = _outward_component(XX, YY, eye, fp, void)
     iy, ix, jy, jx = _near_boundary(fp & (cell >= 0), fp, void, ox, oy)
     if iy.size == 0:
         return np.zeros((0, 3))
@@ -410,7 +554,8 @@ def scene_dirs(round_dir):
     return out
 
 
-def label_scene(arm, scene, sdir, off_dir, grid):
+def label_scene(arm, scene, sdir, off_dir, grid, boundary_mode=None):
+    bmode = resolve_boundary_mode(boundary_mode)
     var = json.load(open(os.path.join(sdir, "variation.json")))
     hm, geo, hm_src = load_heightmap(sdir)
     same = os.path.abspath(off_dir) == os.path.abspath(sdir)
@@ -448,7 +593,8 @@ def label_scene(arm, scene, sdir, off_dir, grid):
         eye = np.asarray(cam["eye"], dtype=np.float64)
         az_z = float(cam["ground_z"])                  # reference only (v2 uses z_off)
         ox, oy = _outward(XX, YY, eye)
-        fp, gstat = step_gate(fp_raw, comp_raw, n_comp_raw, void_any, hm, ox, oy, st, hz)
+        fp, gstat = step_gate(fp_raw, comp_raw, n_comp_raw, void_any, hm, ox, oy, st, hz,
+                              boundary_mode=bmode, XX=XX, YY=YY, eye=eye)
         kept_comps.append(gstat["comps_kept"]); kept_cells.append(int(fp.sum()))
         no_bnd.append(gstat["comps_no_boundary"])
         cell, _ = polar_cells(XX, YY, eye, cam["yaw"], grid)
@@ -504,7 +650,8 @@ def label_scene(arm, scene, sdir, off_dir, grid):
             rv["int_px_fallback"] = int(hit_fb.sum())
             rv["cell_int_px"] = np.bincount(hc[hc >= 0], minlength=ncell).astype(int).tolist()
 
-            E = edge_points(fp, void_any, hm, XX, YY, eye, cell, az_z, ox, oy)
+            E = edge_points(fp, void_any, hm, XX, YY, eye, cell, az_z, ox, oy,
+                            boundary_mode=bmode)
             if E.shape[0]:
                 px, py, zc, ok = project(E, eye, cam)
                 rv["edge_projected"] = int(ok.sum())
@@ -571,13 +718,18 @@ def label_scene(arm, scene, sdir, off_dir, grid):
                    comps_no_boundary_max=max(no_bnd) if no_bnd else 0,
                    max_diff=round(max_diff, 4) if np.isfinite(max_diff) else None,
                    n_cuts=len(cuts))
+    if bmode != BOUNDARY_QUANTISED:
+        # stamped ONLY when the run is off the historical path, so a default run
+        # still writes the frozen key set byte for byte
+        summary["boundary_mode"] = bmode
     return frames, summary, warn
 
 
 def _worker(t):
-    arm, scene, sdir, off_dir, gpath = t
+    arm, scene, sdir, off_dir, gpath = t[:5]
+    bmode = t[5] if len(t) > 5 else None
     try:
-        return label_scene(arm, scene, sdir, off_dir, json.load(open(gpath)))
+        return label_scene(arm, scene, sdir, off_dir, json.load(open(gpath)), bmode)
     except Exception as e:                                   # keep the run alive
         return {}, dict(scene=scene, arm=arm, error=f"{type(e).__name__}: {e}"), \
             [f"{arm}/{scene}: FAILED {type(e).__name__}: {e}"]
@@ -610,8 +762,15 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--scenes", default="")
     ap.add_argument("--workers", type=int, default=1)
+    ap.add_argument("--boundary-mode", default=None,
+                    choices=[BOUNDARY_QUANTISED, BOUNDARY_COMPONENT],
+                    help="near-boundary scan (D82 (2)).  Omit = the historical "
+                         f"{BOUNDARY_QUANTISED} path, bit for bit; "
+                         f"{BOUNDARY_COMPONENT} = per-cell component-boundary "
+                         f"scan (also settable via ${BOUNDARY_ENV}).")
     a = ap.parse_args()
 
+    bmode = resolve_boundary_mode(a.boundary_mode)
     grid = json.load(open(a.grid))
     keep = set(x for x in a.scenes.split(",") if x)
     on, off = scene_dirs(a.on_round), scene_dirs(a.off_round)
@@ -625,8 +784,8 @@ def main():
     # footprint v2 needs BOTH arms of a scene; an on-arm scene whose off twin has
     # not rendered yet is skipped loudly rather than labelled against a guess.
     orphan = sorted(set(on) - set(off))
-    tasks = [("on", s, d, off[s], a.grid) for s, d in sorted(on.items()) if s in off] + \
-            [("off", s, d, d, a.grid) for s, d in sorted(off.items())]
+    tasks = [("on", s, d, off[s], a.grid, bmode) for s, d in sorted(on.items()) if s in off] + \
+            [("off", s, d, d, a.grid, bmode) for s, d in sorted(off.items())]
     if a.workers > 1:
         import multiprocessing as mp
         with mp.Pool(a.workers) as p:
@@ -644,14 +803,17 @@ def main():
         print(f"[labeler] WARN {len(orphan)} on-arm scenes skipped (no off twin): "
               f"{orphan[:5]}", file=sys.stderr)
     gt_src = gt_source_of(grid)
+    lmeta = dict(gt_source=gt_src, tier_source=TIER_SOURCE,
+                 footprint=FOOTPRINT_VERSION,
+                 n_cells=n_cells(grid),
+                 interior_margin_m=INTERIOR_MARGIN_M,
+                 rim_tol_m=RIM_TOL_M, lip_max_pts=LIP_MAX_PTS,
+                 step_run_m=STEP_RUN_M, gate_policy=GATE_POLICY)
+    if bmode != BOUNDARY_QUANTISED:
+        lmeta["boundary_mode"] = bmode      # absent on the historical path
     os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
     json.dump(dict(grid=grid, cam_convention_source=CAM_SRC,
-                   meta=dict(gt_source=gt_src, tier_source=TIER_SOURCE,
-                             footprint=FOOTPRINT_VERSION,
-                             n_cells=n_cells(grid),
-                             interior_margin_m=INTERIOR_MARGIN_M,
-                             rim_tol_m=RIM_TOL_M, lip_max_pts=LIP_MAX_PTS,
-                             step_run_m=STEP_RUN_M, gate_policy=GATE_POLICY),
+                   meta=lmeta,
                    gt_source=gt_src, footprint=FOOTPRINT_VERSION,
                    tau_strict=dict(tau_int=TAU_INT_DEF, tau_edge=TAU_EDGE_DEF),
                    scene_void=sv, scene_footprint=sv, warnings=warns, frames=frames),

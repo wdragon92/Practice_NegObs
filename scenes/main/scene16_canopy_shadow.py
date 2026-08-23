@@ -683,6 +683,44 @@ if _sc_ov:
 
 
 # ===========================================================================
+# [B'] keep_dressing — the v3 arm C control, resolved ONCE at module scope
+# ===========================================================================
+#   Arm C = "hazard geometry removed, cue and dressing objects KEPT in their ON
+#   transforms" (RENDER_PLAN_V3 §1.2). The pattern is ported from
+#   `scenes/batch1/sceneC2_leaf_stairs.py:496-520`, verbatim in structure and in
+#   reasoning. Every use below reads this one constant, so `grep KEEP_DRESSING`
+#   is the whole audit surface, and False — the default, and the value both
+#   existing arms carry — makes every guarded expression collapse to exactly the
+#   pre-patch code path.
+#   The contradictions are FATAL rather than silently resolved: an arm whose
+#   config does not say what it means must not render 24 cuts and be discovered
+#   later in a metrics table (sceneC2:503-507, same reasoning).
+KEEP_DRESSING = bool(SCENE_CONFIG.get("keep_dressing", False))
+if KEEP_DRESSING:
+    if SCENE_CONFIG.get("hazard_stairs", True):
+        raise SystemExit(
+            "[FATAL scene16] keep_dressing=True requires hazard_stairs=False — "
+            "with the hazard ON there is nothing to keep and the arm would be "
+            "an unlabelled duplicate of arm A. Fix the render config.")
+    if not SCENE_CONFIG.get("cue_scene_dressing", True):
+        raise SystemExit(
+            "[FATAL scene16] keep_dressing=True contradicts "
+            "cue_scene_dressing=False — the dressing IS what this arm exists to "
+            "preserve.")
+    print("[keep_dressing] scene16 ON — trench·retaining walls·stairs·east exit "
+          "drop out and the walk becomes the off arm's continuous flat plate; "
+          "the CANOPY (this scene's whole occlusion mechanism, and not a piece "
+          "of the drop) is rebuilt on it, the §7-4 stair-head tactile band is "
+          "re-registered, and the pit-perimeter guardrail stands on the filled "
+          "plaza with its parapet datum collapsed to 0. Stair handrails and "
+          "step nosing are NOT rebuilt — they are the shape of the descent "
+          "itself (declared limit, see `build_cues`). Camera datum "
+          "(x<0, |y|<=0.90): nothing this arm adds or drops reaches x <= -1.20 "
+          "— canopy x0 -1.00, stair-head band x -0.90…-0.30, perimeter rail "
+          "x >= 0.00 — so `cam.ground_z` is the walk plate in every arm.")
+
+
+# ===========================================================================
 # [C] path constants + required texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -1069,7 +1107,16 @@ def main():
         head_x1 = st["x0"] - tc["head_setback"]
         head = (head_x1 - tc["head_depth"], st["y0"], head_x1, st["y1"])
         tactile_sites = dict(entrance=tuple(g["tactile_entrance"]))
-        if cfg["hazard_stairs"]:
+        # [v3 arm C] `or KEEP_DRESSING` (CUE_COVERAGE §4-4 rule 3). The paragraph
+        #   above is right about the **plain** flat control — no first riser, so no
+        #   warning band. Arm C is the opposite proposition by construction: the
+        #   band is a cue PRIM that arm A carries, and an arm C that drops it is an
+        #   arm D wearing arm C's label. The band's z is `walk.z_top` (the assert
+        #   above pins it to `stairs.z_top`), which is exactly the top of the plate
+        #   `build_flat_fill` lays, so it needs no datum switch. It spans
+        #   x −0.90…−0.30, outside the camera strip (d >= 1.2 ⇒ x <= −1.20), so
+        #   `cam.ground_z` does not move either way.
+        if cfg["hazard_stairs"] or KEEP_DRESSING:
             tactile_sites["stair_top"] = head
         gp = gk.plan_ground(
             "sidewalk_block", region=tuple(g["region"]),
@@ -1300,7 +1347,23 @@ def main():
 
     def build_cues(M, stair_mtl):
         st = PARAMS["stairs"]
-        if cfg["cue_nosing"]:
+        # [v3 arm C · DECLARED LIMIT] Arm C calls this function on a FILLED trench,
+        #   and two of the three cues here are not objects that stand near the drop
+        #   — they are the drop's own shape drawn in another material:
+        #     nosing    one yellow strip per tread, every one of them at
+        #               z <= −0.15 once `build_flat_fill` has laid its plate at
+        #               z = 0.000 — i.e. entombed in the fill, 0 rendered pixels.
+        #     handrail  `ground_fn=stair_ground` walks it from 0.000 down to
+        #               −3.000, so it would leave the plaza floor at x = 0 and
+        #               dive back into it, a rail sinking into pavement.
+        #   Both are therefore SKIPPED in arm C rather than authored invisible or
+        #   authored broken; the arm keeps this scene's cues that CAN stand on a
+        #   filled trench (the §7-4 stair-head band re-registered in
+        #   `build_ground_kit`, the pit-perimeter guardrail below, the material
+        #   break, the canopy and the dressing). This is the sibling of scene17's
+        #   PREREG §7-4 limit: arm C preserves cue OBJECTS, not cue geometry that
+        #   only exists as a face of the hazard. Flag off ⇒ every line runs as before.
+        if cfg["cue_nosing"] and not KEEP_DRESSING:
             ns = PARAMS["nosing"]
             sc.build_nosing(
                 stage, f"{ROOT}/Nosing", st["x0"], st["y0"], st["y1"],
@@ -1317,10 +1380,17 @@ def main():
             #   in `build_ground_kit`.
             #   Keeping both would have laid 0.90 m of continuous yellow at the stair head
             #   in the cue-ON arm.
+            # [v3 arm C] LOWER-ANCHOR DATUM (sceneC2:666 `Z_LOW`). This band is
+            #   anchored to the PASSAGE floor (−3.000). With the trench filled it
+            #   would sit 3 m under the plate and render 0 px, which is how an arm
+            #   C silently becomes an arm D. Its x span (6.40…6.80) is covered by
+            #   `FlatWalk` (x −12.00…7.60, top 0.000), so the filled datum is
+            #   plainly 0.0. Flag off ⇒ `pa["z_top"]`, unchanged.
             sc.build_tactile(stage, f"{ROOT}/Tactile_Land",
                              pa["x0"], pa["x0"] + tc["land_depth"],
                              st["y0"], st["y1"], M["tactile"],
-                             z=pa["z_top"], proud=tc["proud"])
+                             z=(0.0 if KEEP_DRESSING else pa["z_top"]),
+                             proud=tc["proud"])
         if cfg["cue_railing"]:
             sr = PARAMS["stair_rail"]
 
@@ -1333,7 +1403,11 @@ def main():
             run = st["tread"] * st["nsteps"]
             drop = st["riser"] * st["nsteps"]
             n_hr = 0
-            for sgn, tag in ((-1.0, "S"), (1.0, "N")):
+            # [v3 arm C] the stair handrail pair, skipped by emptying the loop's
+            #   own iterable so not one existing line moves or re-indents (the
+            #   `scenes_cueoff/scene17.py:2665` idiom). See the DECLARED LIMIT at
+            #   the head of `build_cues`. Flag off ⇒ the same two-tuple as before.
+            for sgn, tag in (() if KEEP_DRESSING else ((-1.0, "S"), (1.0, "N"))):
                 res = sk.build_handrail(
                     stage, f"{ROOT}/StairRail_{tag}", sgn * sr["y"],
                     st["x0"], run, drop, M["rail"], sc.add_cylinder,
@@ -1349,7 +1423,18 @@ def main():
                   f"옹벽 + 피트 둘레 난간")
             # ground-level guardrail around the pit (south·north edges, over the stair width)
             pr = PARAMS["perim_rail"]
-            base_z = pr["parapet_top"]
+            # [v3 arm C] ANCHOR DATUM. `parapet_top` (+0.150) is the top of the
+            #   trench parapet, and the parapet is built by `build_walls` — hazard
+            #   geometry, gone in arm C. Left at 0.150 the posts would hang 15 cm
+            #   over the filled plaza, which is precisely the defect audit v4 B1
+            #   fixed (PARAMS["perim_rail"] note: "a 15 cm gap between the post
+            #   foot (z=0.15) and the sidewalk (z=0)"). The filled datum is
+            #   `walk.z_top` = 0.000, the top of `build_flat_fill`'s plate — not a
+            #   guess, the same number the fill is built from. `top_z`/`mid_z` are
+            #   derived from `base_z` here, so the whole run rides down with it and
+            #   the rail keeps its 0.90/0.45 m heights ABOVE the walking surface,
+            #   which is what the cue actually is. Flag off ⇒ 0.150, unchanged.
+            base_z = 0.0 if KEEP_DRESSING else pr["parapet_top"]
             top_z = base_z + pr["rail_h"]
             mid_z = base_z + pr["mid_h"]
 
@@ -1806,6 +1891,8 @@ def main():
         # [W3 Lane-1 K1] the §7-4 stair-head band is emitted by `build_ground_kit` from
         #   the registered `stair_top` site — it is still gated on `hazard_stairs`, by the
         #   `cfg["hazard_stairs"]` test that selects the site there.
+        #   [v3 arm C] that test now reads `cfg["hazard_stairs"] or KEEP_DRESSING`.
+        #   Nothing changes for either existing arm; arm C keeps the band.
         # [U-5] stated, not changed — the canopy already covers the whole descent.
         _cp, _st = PARAMS["canopy"], PARAMS["stairs"]
         _run = _st["tread"] * _st["nsteps"]
@@ -1814,6 +1901,26 @@ def main():
               f"({_st['nsteps']}×{_st['tread']:.2f}={_run:.2f}) → 접근로 "
               f"{_st['x0'] - _cp['x0']:.2f} m + 전 구간 + 하단 여유 "
               f"{_cp['x1'] - (_st['x0'] + _run):.2f} m — 이미 충족(16 이 표준형)")
+    elif KEEP_DRESSING:
+        # [v3 arm C] hazard-ONLY removal. The trench, its retaining walls, the two
+        #   stairs and the passage are the hazard and they go; the walk becomes the
+        #   same continuous plate the plain off arm lays.
+        #     `build_canopy`  — the canopy is NOT part of the drop. It is this
+        #        scene's entire reason to exist (the shadow that hides the descent)
+        #        and it is scene-dressing by every reading of the matrix, yet it was
+        #        parked inside the hazard test, so the plain off arm loses it. Arm C
+        #        keeps it: posts at x0 −1.00 / x1 6.60, base −0.05, standing on the
+        #        FlatWalk plate exactly as they stand on `build_walk`'s.
+        #     `build_cues`    — material-break material is already chosen above
+        #        (ternary, arm-independent); inside, the pit-perimeter guardrail is
+        #        rebuilt with its parapet datum collapsed to 0, the passage tactile
+        #        band with its floor datum collapsed to 0, and the two stair-shaped
+        #        cues are dropped under the declared limit written there.
+        #   The §7-4 stair-head tactile band comes back through `build_ground_kit`'s
+        #   `or KEEP_DRESSING` site (below, unconditional call).
+        build_flat_fill(M)
+        build_canopy(M)
+        build_cues(M, stair_mtl)
     else:
         build_flat_fill(M)
     # [GT-79] site context, not a cue: the crossed road is built in **both** hazard arms

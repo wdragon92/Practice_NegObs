@@ -692,6 +692,53 @@ if _sc_ov:
 
 
 # ===========================================================================
+# [B'] keep_dressing — the arm-C control, resolved ONCE at module scope
+# ===========================================================================
+#   Ported from scenes/batch1/sceneC2_leaf_stairs.py:496-520. Arm C of the v3
+#   plan (RENDER_PLAN_V3 §1.2) is `{"hazard_stairs": false, "keep_dressing":
+#   true}` with every `cue_*` left at its arm-A default: the DROP geometry goes,
+#   the cue and dressing objects stay in the transform they have with the hazard
+#   ON. Every use below reads this one constant, so `grep KEEP_DRESSING` is the
+#   whole audit surface, and with the key absent from SCENE_CONFIG (the value in
+#   both existing arms) every guarded expression collapses to exactly the
+#   pre-patch code path.
+#   DECLARED CAVEAT for this scene, because it is the sharpest one in the port
+#   set: `build_cues` here is 100 % structure-bound. The spiral guard runs are
+#   raked off `_spiral_z_at` (z 5.0 -> 0.0 over the 300° sweep), `build_deck_rail`
+#   sits on `deck.z_top` = 5.0 and `build_north_guard` on the north flight — and
+#   arm C removes all three structures. Keeping the cues in their ON transforms
+#   therefore leaves a guard line standing in air where the deck was, the same
+#   way sceneC2's arm C keeps a railing descending into its fill (:1314). That is
+#   the arm's definition — "cue vocabulary without the hazard" — and it is
+#   recorded here rather than silently softened; `:2770`'s "no geometry means no
+#   railing (prevents floating)" remains true of the plain OFF arm.
+#   The two contradictions below are FATAL rather than silently resolved: an arm
+#   whose config does not say what it means must not render 24 cuts and be
+#   discovered later in a metrics table (sceneC2:503-507, verbatim reasoning).
+KEEP_DRESSING = bool(SCENE_CONFIG.get("keep_dressing", False))
+if KEEP_DRESSING:
+    if SCENE_CONFIG.get("hazard_stairs", True):
+        raise SystemExit(
+            "[FATAL scene06] keep_dressing=True requires hazard_stairs=False — "
+            "with the hazard ON there is nothing to keep and the arm would be "
+            "an unlabelled duplicate of arm A. Fix the render config.")
+    if not SCENE_CONFIG.get("cue_scene_dressing", True):
+        raise SystemExit(
+            "[FATAL scene06] keep_dressing=True contradicts "
+            "cue_scene_dressing=False — the dressing IS what this arm exists "
+            "to preserve.")
+    print("[keep_dressing] scene06 ON — hazard geometry only (spiral tower · "
+          "overpass deck · deck ground_kit · north flight -> `build_flat_control` "
+          "paving at grade); `build_cues` keeps its ON transforms (spiral guard "
+          "raked 5.0->0.0, deck run at z=5.0, north guard) and stands free of "
+          "the removed structure — declared, see the caveat above. Site, lane "
+          "paint and dressing are already outside the hazard branch. Camera "
+          "datum untouched: the strip x in [-12,-1.2] · |y|<=0.90 reads the "
+          "carriageway (road.z_top -0.150 / lane paint -0.132) in both arms, "
+          "and nothing this branch adds or drops reaches x<0.")
+
+
+# ===========================================================================
 # [C] paths + texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -2768,6 +2815,21 @@ def main():
         build_ground_kit(M)    # [W2-D] deck ground elements (deck must exist)
         build_north(M)
         build_cues(M)          # no geometry means no railing (prevents floating)
+    elif KEEP_DRESSING:
+        # [arm C] hazard-only removal. `build_flat_control` is the SAME slab the
+        #   plain OFF arm lays (10.0 x 10.0 paving centred on the spiral at
+        #   (6.5, -16.0)), so the two hazard-off arms share one ground and the
+        #   camera datum strip — x in [-12,-1.2] · |y|<=0.90, i.e. the
+        #   carriageway — is untouched by this branch in either direction: every
+        #   prim it drops (spiral r<=4.5 about (6.5,-16), deck x 2..5, deck
+        #   ground_kit, north flight y 11.5..14.5) and every prim it keeps sits
+        #   at x >= 1.5. `build_ground_kit` is NOT restored: its plan is
+        #   `origin=(3.5,-13,5) axis=-y`, i.e. it decorates the DECK FACE, and
+        #   the deck is exactly what this arm removes.
+        #   `build_cues` IS restored — that is the whole arm — with the
+        #   free-standing-guard caveat declared at the module block above.
+        build_flat_control(M)
+        build_cues(M)
     else:
         build_flat_control(M)
     if cfg["cue_scene_dressing"]:

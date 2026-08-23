@@ -588,6 +588,70 @@ if _sc_ov:
     print(f"[SCENE_CONFIG] override 적용: {_sc_ov}")
 
 
+_CUEOFF_SCENE = "scene12"
+
+
+# ===========================================================================
+# [B'] keep_dressing / placebo_remove — v3 C팔 옵트인 키 (D82 ②)
+# ===========================================================================
+#   이 블록은 `experiments/weekend_0823/cue_audit/scenes_cueoff/scene12_*.py`
+#   의 감사 통과본을 **정본으로 승격**한 것이다(D82 ② additive 옵트인 키 채택,
+#   기본값 무변경 해시게이트 증명 조건).  두 플래그가 모두 False 이면 아래의
+#   모든 가드 표현식은 이식 이전의 코드 경로로 **정확히 붕괴**한다 — 그것이
+#   A 팔(기본 설정)의 렌더가 이식 전후로 기하 동일해야 한다는 게이트의 근거다.
+#
+#   keep_dressing   D25/D30 패턴, 원본 `scenes/batch1/sceneC2_leaf_stairs.py`
+#                   :496-520 .  C 팔 = 낙차 기하만 제거, 단서·드레싱 오브젝트는
+#                   ON 변환 그대로 유지.
+#   placebo_remove  D35/R2 §5.3-2 요구.  P 팔 = 위험과 단서를 모두 남기고
+#                   비단서 오브젝트군을 유사 픽셀질량만큼 제거.  본 씬의 군은
+#                   아래에 명시돼 있고 실측 질량은
+#                   `experiments/weekend_0823/cue_audit/PLACEBO_PIXEL_MASS_crest.csv`.
+#
+#   `grep KEEP_DRESSING` · `grep PLACEBO_REMOVE` 가 감사 표면의 전부다.
+#   모순 설정은 조용히 해소하지 않고 **FATAL** 이다: 설정이 자기 의도를 말하지
+#   못하는 팔이 24컷을 찍고 나중에 지표표에서 발견되는 일이 없어야 한다
+#   (sceneC2:503-507 의 논거 그대로).
+KEEP_DRESSING = bool(SCENE_CONFIG.get("keep_dressing", False))
+PLACEBO_REMOVE = bool(SCENE_CONFIG.get("placebo_remove", False))
+if KEEP_DRESSING:
+    if SCENE_CONFIG.get("hazard_stairs", True):
+        raise SystemExit(
+            f"[FATAL {_CUEOFF_SCENE}] keep_dressing=True requires "
+            "hazard_stairs=False — with the hazard ON there is nothing to keep "
+            "and the arm would be an unlabelled duplicate of arm A. "
+            "Fix the render config.")
+    if not SCENE_CONFIG.get("cue_scene_dressing", True):
+        raise SystemExit(
+            f"[FATAL {_CUEOFF_SCENE}] keep_dressing=True contradicts "
+            "cue_scene_dressing=False — the dressing IS what this arm exists to "
+            "preserve.")
+if PLACEBO_REMOVE:
+    if not SCENE_CONFIG.get("hazard_stairs", True):
+        raise SystemExit(
+            f"[FATAL {_CUEOFF_SCENE}] placebo_remove=True requires "
+            "hazard_stairs=True — the placebo arm is a HAZARD-ON appearance "
+            "control (D35). With the hazard off it measures nothing.")
+    if not SCENE_CONFIG.get("cue_scene_dressing", True):
+        raise SystemExit(
+            f"[FATAL {_CUEOFF_SCENE}] placebo_remove=True with "
+            "cue_scene_dressing=False removes the placebo group twice over and "
+            "confounds arm P with arm B1. Fix the render config.")
+    if KEEP_DRESSING:
+        raise SystemExit(
+            f"[FATAL {_CUEOFF_SCENE}] placebo_remove and keep_dressing are "
+            "different arms (P and C) and must never be set together.")
+_ARM = ("C_hz0_cue1" if KEEP_DRESSING else
+        "P_hz1_placebo" if PLACEBO_REMOVE else
+        "A/B_hz%d_rail%d_mat%d_dress%d" % (
+            int(SCENE_CONFIG.get("hazard_stairs", True)),
+            int(SCENE_CONFIG.get("cue_railing", False)),
+            int(SCENE_CONFIG.get("cue_material_break", True)),
+            int(SCENE_CONFIG.get("cue_scene_dressing", True))))
+print(f"[CUE-OFF] {_CUEOFF_SCENE} arm={_ARM} keep_dressing={KEEP_DRESSING} "
+      f"placebo_remove={PLACEBO_REMOVE}")
+
+
 # ===========================================================================
 # [C] paths + texture roles
 # ===========================================================================
@@ -1001,13 +1065,37 @@ def _solid_at(x, y, z):
     check** (ray march).
     Covers: upper and lower floodplain, shoulder riprap, grass slope, deck slab
     and beams, stair solid, revetment riprap tiers, backdrop bridge deck.
-    (Props are handled by _obstacle_boxes.)"""
+    (Props are handled by _obstacle_boxes.)
+
+    [C팔 이식 · 이 파일이 찾아낸 함정]
+    `scripts/run_data_render.py:SIDECAR_ORACLES["scene12"] = ("_solid_at",
+    "solid_at")`: 높이맵 사이드카는 AABB 판독 지점에서 이 오라클을 **아래로**
+    행진시켜 진짜 보행면을 복원한다.  아래 정본 본문은 PARAMS 의 순수 함수라
+    `hazard_stairs` 를 모르므로, 낙차-OFF 팔에서 **그림은 평평한데 높이맵에는
+    ON 팔의 계단 프로파일**을 다시 씌운다 — 사이드카가 사진에 없는 −0.68 m
+    하강을 싣고, 라벨러의 `diff = z_off − z_on` 이 C 팔에 **거짓 양성
+    polar_gt 를 제조**한다.  게이트가 잡아 주긴 하겠으나, 게이트가 있다는 것이
+    결함을 작성해도 되는 이유는 아니다.
+
+    **범위 제한(v3 정본 승격 시 추가된 제약)**: 이 수리는 `KEEP_DRESSING`
+    에서만 발화한다.  주말 격리본은 `not hazard_stairs` 전체에 걸었는데, 그러면
+    이미 착지한 D 팔(`260826_v3w1_lib_D`, 낙차 OFF·단서 OFF)의 높이맵 오라클이
+    같이 바뀌어 그 웨이브의 재현성과 (A,B) 게이트 z_off 권위(D75 ①)가 깨진다.
+    D 팔에도 같은 결함이 잠복해 있다는 사실은 **보고 대상**이지 여기서 조용히
+    고칠 사안이 아니다(W1C_REPORT 소견).  C 팔이 실제로 채우는 영역(x ≥ 0)
+    에서만 낙차-OFF 답을 먼저 준다; x < 0 은 C 팔도 같은 `build_terrain` +
+    `build_deck` 을 짓기 때문에 정본 본문이 이미 옳다.
+    """
     u = PARAMS["upper"]
     sh = PARAMS["shoulder"]
     lo = PARAMS["lower"]
     d = PARAMS["deck"]
     st = PARAMS["stair"]
     sp = PARAMS["slope"]
+    if KEEP_DRESSING \
+            and 0.0 <= x <= lo["x1"] and u["y0"] <= y <= d["y1"] \
+            and (u["z_top"] - u["thick"]) <= z <= u["z_top"]:
+        return "CueOffFill"
     # upper floodplain A (west of the deck: up to the crest) / B (deck section: up to the deck south edge)
     if u["x0"] <= x <= u["x_split"] and u["y0"] <= y <= u["y_crest"] \
             and u["z_top"] - u["thick"] <= z < u["z_top"]:
@@ -1912,6 +2000,39 @@ def main():
             (lo["x1"] - u["x0"], lo["y1"] - u["y0"], u["thick"]),
             M["grass"], col=True)
 
+    def build_cueoff_fill(M):
+        """[C팔] 낙차만 제거 · 데이텀 보존 (D30 규율).
+
+        위의 평범한 OFF 팔은 **덱까지 포함해 세계 전체**를 88 × 23 m 잔디
+        슬래브 하나로 갈아 치운다.  그 슬래브는 카메라 스트립을 가로지르는데,
+        카메라 스트립을 가로지르는 슬래브야말로 sceneC2 의 지면 데이텀을
+        0.130 → 0.0163 m 로 옮겨 D17 off 팔의 트윈 쌍을 0으로 만든 그것이다
+        (D30).  그래서 C 팔은 `build_flat_fill` 을 **부르지 않는다.**
+        `build_terrain` / `build_deck` / `build_ground_kit` 을 A 팔과 **같은
+        인자·같은 순서**로 부르고 — 그래서 `Deck/Slab`(상면 정확히 0.000,
+        `skin_exclude` 적용, 경로 토큰 `deck` 이 `_SKIN_DENY` 에 있음)이 여전히
+        모든 (x<0, |y|≤0.9) 카메라 표본 아래 첫 AABB 다 — 립 **너머**만 채운다:
+
+            x ∈ [0, lower.x1] , y ∈ [upper.y0, deck.y1] , 상면 z = 0
+
+        x ≥ 0 에 갇힌 슬래브는 어떤 x < 0 표본에서도 첫 하강 히트가 될 수 없다.
+        카메라 데이텀은 운이 아니라 **구성상** 보존된다.  두께 `upper.thick`
+        = 1.4 m > 0.8 이라 `_skin_wanted`(scene_common:1307)가 변위 스킨을
+        거절하므로 채움면 상면은 0.000 + 6..16 mm 가 아니라 딱딱한 0.000 이다.
+        """
+        u = PARAMS["upper"]
+        lo = PARAMS["lower"]
+        d = PARAMS["deck"]
+        sc.skin_exclude(f"{ROOT}/CueOffFill")
+        BOX(f"{ROOT}/CueOffFill",
+            ((0.0 + lo["x1"]) / 2.0, (u["y0"] + d["y1"]) / 2.0,
+             u["z_top"] - u["thick"] / 2.0),
+            (lo["x1"] - 0.0, d["y1"] - u["y0"], u["thick"]),
+            M["grass"], col=True)
+        print(f"[keep_dressing] scene12 fill x[0.00 {lo['x1']:.2f}] "
+              f"y[{u['y0']:.2f} {d['y1']:.2f}] top z=0.000 · deck/terrain/"
+              f"ground_kit untouched (camera datum = arm A by construction)")
+
     # -------------------------------------------------------------------
     # Railing - one continuous river-side run: Ø120 posts + 2 Ø80 log rails.
     #   [GT-66] The `Rail/Baluster_*` loop (129 Ø40 dowels, col=True) is deleted;
@@ -1943,22 +2064,38 @@ def main():
     def build_dressing(M):
         u = PARAMS["upper"]
         lo = PARAMS["lower"]
+        # [C팔] keep_dressing 팔에서는 하부 범람원이 z=0 까지 채워지므로, ON 팔이
+        #   **하부 레벨에 앵커**한 모든 것이 채움면 아래 파묻히는 대신 채움면을
+        #   타고 올라온다 — sceneC2 가 `Z_LOW`(sceneC2:666)로 하는 그 전환이다.
+        #   플래그가 꺼져 있으면 이것은 `lo["z_top"]` 이고 아래 모든 식은
+        #   바이트 불변이다.
+        lz = 0.0 if KEEP_DRESSING else lo["z_top"]
+        # `lo["thick"]` 슬래브는 상면 기준으로 아래로 작성되므로 상면만 중요하다;
+        #   `lz_off` 가 슬래브 전체를 함께 옮긴다.
+        lz_off = lz - lo["z_top"]
         # bike path (lower floodplain) + 2 white edge lines
         br = PARAMS["bikeroad"]
         BOX(f"{ROOT}/BikeRoad",
             ((br["x0"] + br["x1"]) / 2.0, (br["y0"] + br["y1"]) / 2.0,
-             lo["z_top"] - lo["thick"] / 2.0 + br["proud"]),
+             lz - lo["thick"] / 2.0 + br["proud"]),
             (br["x1"] - br["x0"], br["y1"] - br["y0"], lo["thick"]),
             M["asphalt"], col=True)
         for tag, yc in (("Lo", br["y0"] + 0.15), ("Hi", br["y1"] - 0.15)):
             BOX(f"{ROOT}/BikeLine_{tag}",
-                ((br["x0"] + br["x1"]) / 2.0, yc, lo["z_top"] + 0.005),
+                ((br["x0"] + br["x1"]) / 2.0, yc, lz + 0.005),
                 (br["x1"] - br["x0"], 0.10, 0.02), M["paint"])
-        for i, (bx, by, yaw) in enumerate(PARAMS["benches"]):
-            sc.build_bench(stage, f"{ROOT}/Bench_{i}", bx, by, u["z_top"],
-                           M["wood"], yaw=yaw)
+        # ---- PLACEBO GROUP (1/3): upper-floodplain benches -------------------
+        #   Matrix scene12 gives these NO cue credit; matrix B6 proposes an upper
+        #   promenade bench as the archetypal NON-hazard counter-example object.
+        #   y = -1.90, i.e. the promenade side, 3.15 m clear of the camera strip.
+        if not PLACEBO_REMOVE:
+            for i, (bx, by, yaw) in enumerate(PARAMS["benches"]):
+                sc.build_bench(stage, f"{ROOT}/Bench_{i}", bx, by, u["z_top"],
+                               M["wood"], yaw=yaw)
+        # LOWER benches are NOT placebo material: matrix §2.4 names them, with the
+        #   white-lined bike road, as scene12's "lower-level-only" evidence at h0.3.
         for i, (bx, by, yaw) in enumerate(PARAMS["lower_benches"]):
-            sc.build_bench(stage, f"{ROOT}/BenchLow_{i}", bx, by, lo["z_top"],
+            sc.build_bench(stage, f"{ROOT}/BenchLow_{i}", bx, by, lz,
                            M["wood"], yaw=yaw)
         # [GT-115 ⑦] the `sc.build_bollard` loop is deleted with `lower_bollards`
         #   (see PARAMS). Not relocated - this scene has no vehicle line to block.
@@ -1976,7 +2113,15 @@ def main():
 
         lens_dy, lens_dz = _head_off(0.0,
                                      -(sl["head_h"] + sl["lens_t"]) / 2.0)
-        for i, (lx, ly) in enumerate(PARAMS["streetlights"]):
+        # ---- PLACEBO GROUP (2/3): promenade streetlights ---------------------
+        #   No cue credit in the matrix.  These stand on the UPPER floodplain at
+        #   y -2.30 / -2.60 with their feet on the camera's own z=0 plane, so
+        #   they are NOT the "column whose base is hidden" pattern the matrix
+        #   reads as geometry_silhouette (that pattern is scene17's terrace
+        #   poles, §2.4 s17).  R2 §5.3-2 names the utility pole as a placebo
+        #   archetype.
+        for i, (lx, ly) in enumerate([] if PLACEBO_REMOVE
+                                     else PARAMS["streetlights"]):
             base = f"{ROOT}/Streetlight_{i}"
             z_arm = u["z_top"] + sl["pole_h"] - 0.1
             hy = ly - sl["arm_len"]                     # head anchor (arm end)
@@ -2003,16 +2148,31 @@ def main():
                           M["wood"], M["canopy_a"], M["canopy_b"])
         # [v7 ruling §8 (3)] silver grass = a **stalk stand** (the old build_hedge cuboid is dropped).
         #   scene17 W-5 / scene09 build_reeds convention. The band rectangles are unchanged.
+        # Reeds are a CUE (matrix: vegetation_edge M, the band that traces the
+        #   waterline) -- never placebo material.  Bands 3 and 5 are planted on
+        #   the LOWER floodplain (`z == lower.z_top`), so in the keep_dressing
+        #   arm they ride the fill with everything else; bands 1/2/4 sit on the
+        #   revetment at -1.75, which no arm touches.
         for i, rd, k, px, py, hh, ry, rx in reed_instances():
-            CYL(f"{ROOT}/Reed_{i}_{k}", (px, py, rd["z"] + hh / 2.0),
+            rz = rd["z"] + (lz_off if abs(rd["z"] - lo["z_top"]) < 1e-9 else 0.0)
+            CYL(f"{ROOT}/Reed_{i}_{k}", (px, py, rz + hh / 2.0),
                 PARAMS["reed"]["r"], hh, M["reed"], rotY=ry, rotX=rx)
-        for i, fh in enumerate(PARAMS["far_hedges"]):
+        # ---- PLACEBO GROUP (3/3): far hedges (cy -16 .. -19) -----------------
+        #   20 m rows of clipped hedge 16-19 m south of the walk axis, on the
+        #   upper plane, for horizon closure.  No cue credit; nowhere near the
+        #   drop edge (y = +1.25) or the stair (x = 0).
+        for i, fh in enumerate([] if PLACEBO_REMOVE else PARAMS["far_hedges"]):
             sc.build_hedge(stage, f"{ROOT}/FarHedge_{i}",
                            fh["cx"] - fh["sx"] / 2.0,
                            fh["cy"] - fh["length"] / 2.0,
                            fh["cx"] + fh["sx"] / 2.0,
                            fh["cy"] + fh["length"] / 2.0, fh["h"],
                            base_z=u["z_top"])
+        if PLACEBO_REMOVE:
+            print(f"[placebo_remove] scene12 — removed {len(PARAMS['benches'])} "
+                  f"upper bench · {len(PARAMS['streetlights'])} streetlight · "
+                  f"{len(PARAMS['far_hedges'])} far hedge. KEPT: railing, reeds, "
+                  f"bike lines, lower benches, bridge, apartments, material break.")
 
     def build_skyline(M):
         """Backdrop - 3 apartment blocks across the river + bridge + 1 south-side town
@@ -2066,13 +2226,25 @@ def main():
         if cfg["cue_railing"]:
             build_railing(M)
         # [v5.2 user] arbitrary warning signboards removed - cue_sign placement deleted.
+    elif KEEP_DRESSING:
+        # [C팔] 낙차만 제거.  `build_stairs` 가 낙차이고 **그것만** 빠진다;
+        #   `build_flat_fill` 은 의도적으로 부르지 않는다(그 슬래브가 카메라
+        #   스트립을 가로지른다 — `build_cueoff_fill` 주석).  난간은 ON 변환을
+        #   그대로 유지한다: 난간은 **단서**이고, C 팔은 단서 어휘만으로 모델이
+        #   발화하는지를 묻기 위해 존재한다.
+        build_terrain(M)
+        build_deck(M)
+        build_ground_kit(M)
+        build_cueoff_fill(M)
+        if cfg["cue_railing"]:
+            build_railing(M)
     else:
         build_flat_fill(M)
     build_riprap(M)                     # revetment, water and backdrop are always on (horizon closure)
     build_river(M)
     if cfg["cue_scene_dressing"]:
         build_skyline(M)
-        if cfg["hazard_stairs"]:
+        if cfg["hazard_stairs"] or KEEP_DRESSING:
             build_dressing(M)
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],

@@ -910,6 +910,49 @@ if _sc_ov:
 
 
 # ===========================================================================
+# [B'] keep_dressing — the arm-C control, resolved ONCE at module scope
+# ===========================================================================
+#   Ported from scenes/batch1/sceneC2_leaf_stairs.py:496-520. Arm C of the v3
+#   plan (RENDER_PLAN_V3 §1.2) is `{"hazard_stairs": false, "keep_dressing":
+#   true}` with every `cue_*` left at its arm-A default: the DROP geometry goes,
+#   the cue and dressing objects stay in the transform they have with the hazard
+#   ON. Every use below reads this one constant, so `grep KEEP_DRESSING` is the
+#   whole audit surface, and with the key absent from SCENE_CONFIG (the value in
+#   both existing arms) every guarded expression collapses to exactly the
+#   pre-patch code path.
+#   THIS SCENE IS THE ONE THE PORT EXISTS FOR. `:2713` reads
+#   `if cfg["cue_scene_dressing"] and cfg["hazard_stairs"]`, i.e. the whole
+#   dressing layer — bollards, benches, shrubs, trees, reeds, pergola, gauge —
+#   DIES with the hazard (CUE_COVERAGE binding class HZ). Without the third
+#   branch below, arm C would be byte-identical to arm D and the (A,C)
+#   counterfactual would measure nothing.
+#   The two contradictions below are FATAL rather than silently resolved: an arm
+#   whose config does not say what it means must not render 72 cuts and be
+#   discovered later in a metrics table (sceneC2:503-507, verbatim reasoning).
+KEEP_DRESSING = bool(SCENE_CONFIG.get("keep_dressing", False))
+if KEEP_DRESSING:
+    if SCENE_CONFIG.get("hazard_stairs", True):
+        raise SystemExit(
+            "[FATAL scene03] keep_dressing=True requires hazard_stairs=False — "
+            "with the hazard ON there is nothing to keep and the arm would be "
+            "an unlabelled duplicate of arm A. Fix the render config.")
+    if not SCENE_CONFIG.get("cue_scene_dressing", True):
+        raise SystemExit(
+            "[FATAL scene03] keep_dressing=True contradicts "
+            "cue_scene_dressing=False — the dressing IS what this arm exists "
+            "to preserve, and this scene's dressing is HZ-bound (:2713).")
+    print("[keep_dressing] scene03 ON — hazard geometry only (side slopes · "
+          "20-step stair · trims · beach · riprap -> one z=0 fill from the "
+          "levee crest to x18); `build_dressing` is restored over that fill "
+          "(:2713) and everything the ON arm stands on the BEACH datum "
+          "(beach.z_top -3.20) rides it up to z=0; `slope_z` returns 0.0 so the "
+          "slope shrubs sit on the fill instead of inside it. Cues "
+          "(`build_cues`), ground_kit and the river are already outside the "
+          "hazard branch. Camera datum untouched — the strip x in [-12,-1.2] · "
+          "|y|<=0.90 is levee crest in both arms and carries no dressing.")
+
+
+# ===========================================================================
 # [C] paths (scene_common owns the actual texture·mdl·hdri assets)
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -1880,6 +1923,15 @@ def main():
     # slope top z(x) - approximate landing height for shrubs (linear z0->z0-drop over x0..x0+run)
     # -------------------------------------------------------------------
     def slope_z(x):
+        # [arm C] the fill IS the ground in the keep_dressing arm — the side
+        #   slope is not built, so the shrub beds that read their landing height
+        #   from here would otherwise be planted 0.69…1.83 m INSIDE a z=0 slab.
+        #   Same switch as sceneC2's `terrain_z` (:941). This function has
+        #   exactly two callers, both inside `build_dressing` (:2591, :2607), so
+        #   nothing else in the scene changes; with the flag off it is unreached
+        #   and the two lines below are byte-unchanged.
+        if KEEP_DRESSING:
+            return 0.0
         sl = PARAMS["slope"]
         t = max(0.0, min((x - sl["x0"]) / sl["run"], 1.0))
         return sl["z0"] - sl["drop"] * t
@@ -2556,6 +2608,25 @@ def main():
     # prop builders (cue_scene_dressing)
     # -------------------------------------------------------------------
     def build_dressing(M):
+        # [arm C] LOWER-ANCHOR DATUM. `build_flat_fill` lays ONE z=0 slab from
+        #   the levee crest out to `beach.x1` = 18.0, so in the keep_dressing arm
+        #   the beach IS z=0 and every prop the ON arm stands on the beach must
+        #   ride the fill instead of being buried 3.20 m under it — the same
+        #   switch scene12's isolated port makes with `lz` (:2070) and sceneC2
+        #   with `Z_LOW` (:666). The test is an EXACT match against
+        #   `beach.z_top`, not a threshold: the four beach anchors in PARAMS
+        #   (`benches` rows 2-3, `trees` via `bz`, `trees_extra` rows 3-5,
+        #   `reeds.base_z`) are all authored as that same literal −3.2.
+        #   NOT remapped, on purpose: `gauge` (z0 −3.35) is driven into the
+        #   RIVERBED, not the beach, and the river is unchanged in this arm.
+        #   With the flag off `kd_z` is the identity and returns its argument
+        #   unchanged, so every call site below is byte-identical to the
+        #   pre-patch expression.
+        _BZ_ON = PARAMS["beach"]["z_top"]
+
+        def kd_z(z):
+            return 0.0 if (KEEP_DRESSING and abs(z - _BZ_ON) < 1e-9) else z
+
         # 2 levee-crest bollards (either side of the spur - stop vehicles at the stair entry).
         # [v5.1 global convention 2] h 0.90 · r 0.075 · white reflective band on top.
         bo = PARAMS["bollard"]
@@ -2574,7 +2645,7 @@ def main():
         #   yaw = local tangent + a given (non-integer) angle.
         for i, (bx, by, bz_, yaw) in enumerate(PARAMS["benches"]):
             sc.build_bench(stage, f"{ROOT}/Bench_{i}", river_dx(by) + bx, by,
-                           bz_, M["wood_dark"], yaw=yaw + river_yaw(by))
+                           kd_z(bz_), M["wood_dark"], yaw=yaw + river_yaw(by))
         # v4-B1 / [v5.1 re-fix]: slope shrubs = 3 overlapping flattened ellipsoids.
         #   The sloped slab (v4) was identified as an 'angular slab' in the v5 ruling, so it is dropped.
         #   The gradient enters only via placement height (slope_z) - an axis-aligned solid of revolution has no cut face.
@@ -2612,20 +2683,21 @@ def main():
               if placed_sh else
               f"[03-D] 관목 에셋 부재 -> 타원체 폴백 {len(shrub_pts)}개")
         # 2 beach trees (crown top below the levee-crest eye height - anchor) + 6 more from v4-D10
-        bz = PARAMS["beach"]["z_top"]
+        bz = kd_z(PARAMS["beach"]["z_top"])
         for i, t in enumerate(PARAMS["trees"]):
             tree_no_stake(M, f"{ROOT}/Tree_{i}", river_dx(t["cy"]) + t["cx"],
                           t["cy"], bz, slot=i)
         for i, t in enumerate(PARAMS["trees_extra"]):
             tree_no_stake(M, f"{ROOT}/TreeX_{i}", river_dx(t["cy"]) + t["cx"],
-                          t["cy"], t["gz"], slot=i + 2)
+                          t["cy"], kd_z(t["gz"]), slot=i + 2)
         # v4-D5: reed band (waterline transition) - [v5.1] meander band following the waterline curvature
         # [GT-83] `y_gap` cuts the band open across the near bridgehead. `river_segments`
         #   drops a seg wholly inside the gap and clips the two straddling it (their
         #   clip_lo/clip_hi flags suppress the usual `over` extension), so the cut ends land
         #   on the gap line instead of overshooting into the abutment.
         rd = PARAMS["reeds"]
-        river_band(f"{ROOT}/Reed", rd["x0"], rd["x1"], rd["base_z"] + rd["h"],
+        river_band(f"{ROOT}/Reed", rd["x0"], rd["x1"],
+                   kd_z(rd["base_z"]) + rd["h"],
                    rd["h"], M["reed"], max_w=1.0, collider=False,
                    y_gap=rd["y_gap"])
         # v4-D6: levee-crest cycle track centre line + 2 distance markers
@@ -2706,11 +2778,29 @@ def main():
         build_trims(M)
         build_beach(M)
         build_riprap(M)
+    elif KEEP_DRESSING:
+        # [arm C] hazard-only removal. The C and D grounds are the SAME slab
+        #   here — `build_flat_fill` already lays the meander-banded z=0 fill
+        #   from the crest to x18 and there is no cue builder inside the hazard
+        #   branch to restore (`build_cues` is unconditional at :2715). The
+        #   branch exists anyway for two reasons: it is where the arm is
+        #   declared for `grep KEEP_DRESSING`, and it pins C's ground so a later
+        #   D-only edit to the `else` arm cannot silently follow C.
+        #   What actually separates C from D in this scene is `build_dressing`
+        #   below — see the guard at :2713.
+        build_flat_fill(M)
     else:
         build_flat_fill(M)          # control: everything flattened to z=0
     build_ground_kit(M)             # [W2-D] both arms — GT-E4 twin parity
     build_river(M)                  # water·far bank are always on (far-view evidence)
-    if cfg["cue_scene_dressing"] and cfg["hazard_stairs"]:
+    # [arm C · CUE_COVERAGE §4-4 rule (3)] the `and cfg["hazard_stairs"]` term is
+    #   what makes this scene binding class HZ: the entire dressing layer dies
+    #   with the drop, so without `or KEEP_DRESSING` on the SAME line arm C would
+    #   be a byte-identical duplicate of arm D. Dressing is not hazard geometry —
+    #   bollards, benches, shrubs, trees, reeds, pergola and the gauge are all
+    #   free-standing props — so it comes back over the fill, with the beach-
+    #   anchored ones lifted to the fill top by `kd_z` inside `build_dressing`.
+    if cfg["cue_scene_dressing"] and (cfg["hazard_stairs"] or KEEP_DRESSING):
         build_dressing(M)
     build_cues(M)
 

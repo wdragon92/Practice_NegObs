@@ -71,6 +71,15 @@ def adjacent(c1, c2):
 
 
 def main():
+    # --corr: run the whole census against the G7-corrected GT (정본 B).
+    # Photometry is NOT regenerated -- it depends only on the images and camera,
+    # never on GT, so cell_photometry.csv is shared by both modes.
+    corr = "--corr" in sys.argv
+    tag = "_v2corr" if corr else ""
+    pf = (os.path.join(OUT, "eval_v2corr/rgb_s42/per_frame.csv") if corr else
+          os.path.join(ROOT, "experiments/dayrun_0820/runs/v2/rgb_s42/"
+                             "eval_test/per_frame.csv"))
+
     # ---------- inputs -------------------------------------------------------
     man = {f["frame_id"]: f for f in json.load(open(MANIFEST))["frames"]}
     photo = {}
@@ -84,21 +93,22 @@ def main():
     LINE_P75 = float(np.percentile(vis_lf, 75))
     LINE_P95 = float(np.percentile(vis_lf, 95))
 
-    ev = list(csv.DictReader(open(os.path.join(OUT, "fa_events_raw.csv"))))
+    ev = list(csv.DictReader(open(os.path.join(OUT, f"fa_events{tag}_raw.csv"))))
     for e in ev:
         e["seed"] = int(e["seed"])
 
-    # GT-positive cells per on-arm frame (for the SURROGATE bleed guard)
-    gtpos = {}
-    for fid, f in man.items():
-        gtpos[fid] = {CELL_IDS[i] for i, v in enumerate(f["polar_gt"]) if v}
+    test_rows = list(csv.DictReader(open(pf)))
+
+    # GT-positive cells per frame, taken from the SAME dump the events came from
+    # (the g_* columns) rather than from the manifest, so the GT generation used
+    # by the numerator and by the denominator can never drift apart.
+    gtpos = {r["frame_id"]: {c for c in CELL_IDS if int(r["g_" + c])}
+             for r in test_rows}
 
     # ---------- prior-saturation: fire rate per (model,scene,stratum,cell) ----
     # denominator = frames of that scene in that stratum, per model (seed-pooled
     # majority), so a cell that is on regardless of content shows up as ~1.0
     frames_of = defaultdict(set)                   # (scene,stratum) -> frames
-    pf = os.path.join(ROOT, "experiments/dayrun_0820/runs/v2/rgb_s42/eval_test/per_frame.csv")
-    test_rows = list(csv.DictReader(open(pf)))
     for r in test_rows:
         strat = "OFF" if r["toggle_state"] == "off" else "ON_NEG"
         frames_of[(r["scene_id"], strat)].add(r["frame_id"])
@@ -199,7 +209,7 @@ def main():
             n_families=len(fams), families="|".join(fams), method=method,
         ))
 
-    with open(os.path.join(OUT, "fa_events.csv"), "w", newline="") as fh:
+    with open(os.path.join(OUT, f"fa_events{tag}.csv"), "w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=list(out[0].keys()))
         w.writeheader()
         w.writerows(out)
@@ -209,7 +219,7 @@ def main():
                         LINE_P90=round(LINE_P90, 4), LINE_P75=round(LINE_P75, 4),
                         LINE_P95=round(LINE_P95, 4), SAT_RATE=SAT_RATE,
                         outer_band=OUTER_BAND, edge_sectors=sorted(EDGE_SECTORS))}
-    recon = json.load(open(os.path.join(OUT, "logs/fa_recount.json")))
+    recon = json.load(open(os.path.join(OUT, f"logs/fa_recount{tag}.json")))
 
     # T1 volume
     t1 = {}
@@ -232,11 +242,19 @@ def main():
                 none_in_fov_share=len(nif) / len(on) if on else 0.0,
             )
     T["t1_volume"] = t1
+    # measured, never hard-coded: the G7 relabel moves none_in_fov 81 -> 39 on
+    # test-core, so a literal here would silently misreport the corrected run.
+    nif_frames = [r["frame_id"] for r in test_rows
+                  if r["toggle_state"] != "off" and r["tier"] == "none_in_fov"]
+    nif_cells = sum(1 for f in nif_frames for c in CELL_IDS if c not in gtpos[f])
     T["denominators"] = dict(off_cells=8160, off_frames=408,
                              on_neg_cells=recon["rgb_s42"]["n_on_neg_cells"],
                              on_frames=408,
-                             none_in_fov_frames=81,
-                             none_in_fov_cells=81 * 20)
+                             none_in_fov_frames=len(nif_frames),
+                             none_in_fov_cells=nif_cells,
+                             on_tier=dict(Counter(
+                                 r["tier"] for r in test_rows
+                                 if r["toggle_state"] != "off").most_common()))
 
     # T2 seed persistence  (unit = (frame,cell), per model, per stratum)
     t2 = {}
@@ -442,10 +460,10 @@ def main():
             tier=dict(Counter(e["tier"] for e in sel).most_common()),
             cell=cell_rate)
 
-    json.dump(T, open(os.path.join(OUT, "logs/fa_census_tables.json"), "w"),
+    json.dump(T, open(os.path.join(OUT, f"logs/fa_census_tables{tag}.json"), "w"),
               indent=2, ensure_ascii=False)
     print(json.dumps(T["params"], ensure_ascii=False))
-    print("events", len(out), "-> fa_events.csv ; tables -> logs/fa_census_tables.json")
+    print(f"events {len(out)} -> fa_events{tag}.csv ; tables -> logs/fa_census_tables{tag}.json")
     print("T2 persistence:", json.dumps({k: round(v["share_ge2"], 3)
                                          for k, v in t2.items()}))
     print("T4 triple:", json.dumps({k: v for k, v in t4.items() if k.startswith("TRIPLE")}))

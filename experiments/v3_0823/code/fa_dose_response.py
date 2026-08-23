@@ -18,6 +18,7 @@ curves go flat.  Output: experiments/v3_0823/logs/fa_dose_response.json
 import csv
 import json
 import os
+import sys
 from collections import defaultdict
 
 import numpy as np
@@ -29,13 +30,19 @@ NRUN = 9
 
 
 def main():
+    # --corr: G7-corrected GT (정본 B).  Photometry is GT-independent and is
+    # shared by both modes; only the at-risk universe and the events change.
+    corr = "--corr" in sys.argv
+    tag = "_v2corr" if corr else ""
     photo = {(r["frame_id"], r["cell"]): r
              for r in csv.DictReader(open(os.path.join(OUT, "cell_photometry.csv")))}
-    pf = os.path.join(ROOT, "experiments/dayrun_0820/runs/v2/rgb_s42/eval_test/per_frame.csv")
+    pf = (os.path.join(OUT, "eval_v2corr/rgb_s42/per_frame.csv") if corr else
+          os.path.join(ROOT, "experiments/dayrun_0820/runs/v2/rgb_s42/"
+                             "eval_test/per_frame.csv"))
     rows = list(csv.DictReader(open(pf)))
 
     fa = defaultdict(int)
-    for e in csv.DictReader(open(os.path.join(OUT, "fa_events.csv"))):
+    for e in csv.DictReader(open(os.path.join(OUT, f"fa_events{tag}.csv"))):
         fa[(e["frame_id"], e["cell"])] += 1
 
     # at-risk universe: one record per (frame, cell) with 9 trials each
@@ -112,7 +119,7 @@ def main():
     # camera-relative band no matter how far back the camera goes -> slope ~ 0.
     # ------------------------------------------------------------------ #
     MID = {"1": 1.0, "2": 3.5, "3a": 6.5, "3b": 10.0}
-    raw = list(csv.DictReader(open(os.path.join(OUT, "fa_events_raw.csv"))))
+    raw = list(csv.DictReader(open(os.path.join(OUT, f"fa_events{tag}_raw.csv"))))
     lock = {}
     for sc in sorted({r["scene_id"] for r in raw}):
         S = [r for r in raw if r["scene_id"] == sc and r["stratum"] == "OFF"]
@@ -138,7 +145,7 @@ def main():
              "|slope| ~ 1 => FA tracks a fixed scene feature.",
         scenes=lock)
 
-    json.dump(res, open(os.path.join(OUT, "logs/fa_dose_response.json"), "w"), indent=2)
+    json.dump(res, open(os.path.join(OUT, f"logs/fa_dose_response{tag}.json"), "w"), indent=2)
 
     print("===== GRID-LOCKED vs CONTENT-LOCKED (OFF) =====")
     for sc, v in lock.items():
@@ -159,7 +166,7 @@ def main():
                     continue
                 print(f"     {slc:18s} " + "  ".join(
                     f"Q{c['q']}:{c['fa_rate']:.4f}(n{c['n_cells']})" for c in cur))
-    print("\n-> logs/fa_dose_response.json")
+    print(f"\n-> logs/fa_dose_response{tag}.json")
 
 
 if __name__ == "__main__":

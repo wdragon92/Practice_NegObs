@@ -62,8 +62,19 @@ def main():
     man = {f["frame_id"]: f for f in json.load(open(MANIFEST))["frames"]}
 
     appendix = "--appendix" in sys.argv
+    # --corr: score the SAME checkpoints against the G7-corrected GT (정본 B).
+    # The dumps carry identical scores and identical off-arm GT; only the on-arm
+    # g_* columns move.  Verified: 0 differing score cells, 165 differing GT
+    # cells per run.  Appendix architectures have no corrected-GT dumps.
+    corr = "--corr" in sys.argv
+    if corr and appendix:
+        sys.exit("resnet50/convnext_tiny have no corrected-GT dumps; "
+                 "--corr and --appendix are mutually exclusive.")
     todo = ([(m, s, os.path.join(RUNS, f"{m}_s{s}")) for m in MODELS for s in SEEDS]
             if not appendix else APPENDIX)
+    if corr:
+        todo = [(m, s, os.path.join(OUT, "eval_v2corr", f"{m}_s{s}"))
+                for m in MODELS for s in SEEDS]
 
     events = []
     recon = {}
@@ -71,7 +82,8 @@ def main():
     if True:
         for model, seed, run_dir in todo:
             run = f"{model}_s{seed}"
-            ev_dir = os.path.join(run_dir, "eval_test")
+            # the corrected-GT dumps put the csvs at the run root, not eval_test/
+            ev_dir = (run_dir if corr else os.path.join(run_dir, "eval_test"))
             mj = json.load(open(os.path.join(ev_dir, "metrics.json")))
             tau = float(mj["tau_op"])
             pub = mj["point"]["op"]
@@ -169,7 +181,7 @@ def main():
                   f"events off={rc['n_off_fired_cells']} onneg={rc['n_on_neg_fired']}")
 
     os.makedirs(os.path.join(OUT, "logs"), exist_ok=True)
-    tag = "_appendix" if appendix else ""
+    tag = "_appendix" if appendix else ("_v2corr" if corr else "")
     fields = list(events[0].keys())
     with open(os.path.join(OUT, f"fa_events{tag}_raw.csv"), "w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=fields)

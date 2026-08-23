@@ -575,3 +575,13 @@
   정리 권고. ASSUMPTION_LEDGER 결함①/LAB-13 철회 배너 append. 산출: TWIN_TOL_RESOLUTION.md
   + ACCOUNTING §4.6(에이전트 직접 append). **P-1 census 건에 이어 두 번째 "불일치가
   오인이었던" 사례** — 교훈: 파일 계보(런 세대) 확인 없는 수치 인용이 유령 결함을 만든다.
+
+- **D62 (일 밤) RT-A 착지 — 차단급 4건·신규 행 31건·실측 반전 2건**: `redteam/RT_LEDGER_A.md`.
+  차단급: ① EVL-12 FA-정합 축(frame any-fire)이 Depth 칸당 부담 은폐 → 양축 병기 규약
+  (ACCOUNTING §4.7, 재작도 즉시) ② LAB-19 void=음성 인쇄(on팔 42.4% 프레임) → v3 라벨
+  사양 gt_void 분리, P-5 주입 ③ LAB-26 check_twins가 트윈 정의 4번째 자리(ground_z
+  미검사) ④ SCOPE-08 추론 hfov 69° vs 훈련 62.2° — 파일럿 AUC 오독 위험, 촬영 전 수리.
+  실측 반전: LAB-01(0.3m)은 hz 0.20-0.40 전구간 분모 불변으로 **강등**하되 (hz×STEP_RUN_M)
+  결합 벼랑(hz 0.5에서 s14 GT 전멸, test H의 60/96) 신규 행 / LAB-07 τ_edge는 죽은 상수,
+  대신 τ_int가 H_weak 보고 분모를 조용히 줄임(eval TIERS에 H_weak recall 행 부재) 발견.
+  31행은 RT-B 착지 후 대장에 일괄 append 예정. §4.2 오기 독립 재확인(§4.4로 기종결).

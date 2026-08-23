@@ -1,0 +1,438 @@
+{
+ "doc": "w1b_configs",
+ "version": "1.0",
+ "rule": "LEVERS = ONWIRED(hazgate) − FORBIDDEN(w1d_readjudication.toggle_forbidden_final); CONFIG = {hazard: true} + {lever: false}",
+ "authority": [
+  "RENDER_PLAN_V3 §1.2 · §4.4.4",
+  "W1D_REPORT §6.6",
+  "w1d_readjudication.json toggle_forbidden_final (15)",
+  "DECISIONS D74 ⑤ (레버 0 → 스킵)"
+ ],
+ "table_66_crosscheck": "PASS (18/18 씬 ON·배선·레버 일치)",
+ "skipped_d74": [
+  "scene03",
+  "scene04",
+  "scene10"
+ ],
+ "no_b_arm": [
+  "sceneN1",
+  "sceneN2",
+  "sceneN4",
+  "sceneN5"
+ ],
+ "n_render_scenes": 15,
+ "n_levers_total": 28,
+ "wrote": [],
+ "scenes": [
+  {
+   "scene": "scene01",
+   "hazard_keys": [
+    "hazard_stairs"
+   ],
+   "onwired": [
+    "cue_material_break",
+    "cue_railing",
+    "cue_scene_dressing",
+    "cue_sign"
+   ],
+   "forbidden": [
+    "cue_railing",
+    "cue_scene_dressing"
+   ],
+   "levers": [
+    "cue_material_break",
+    "cue_sign"
+   ],
+   "n_levers": 2,
+   "config": {
+    "hazard_stairs": true,
+    "cue_material_break": false,
+    "cue_sign": false
+   },
+   "disposition": "render"
+  },
+  {
+   "scene": "scene02",
+   "hazard_keys": [
+    "hazard_stairs"
+   ],
+   "onwired": [
+    "cue_nosing",
+    "cue_railing",
+    "cue_scene_dressing",
+    "cue_sign"
+   ],
+   "forbidden": [
+    "cue_scene_dressing"
+   ],
+   "levers": [
+    "cue_nosing",
+    "cue_railing",
+    "cue_sign"
+   ],
+   "n_levers": 3,
+   "config": {
+    "hazard_stairs": true,
+    "cue_nosing": false,
+    "cue_railing": false,
+    "cue_sign": false
+   },
+   "disposition": "render"
+  },
+  {
+   "scene": "scene03",
+   "hazard_keys": [
+    "hazard_stairs"
+   ],
+   "onwired": [
+    "cue_scene_dressing"
+   ],
+   "forbidden": [
+    "cue_scene_dressing"
+   ],
+   "levers": [],
+   "n_levers": 0,
+   "config": {
+    "hazard_stairs": true
+   },
+   "disposition": "SKIP (B ≡ A · D74 ⑤)"
+  },
+  {
+   "scene": "scene04",
+   "hazard_keys": [
+    "hazard_stairs"
+   ],
+   "onwired": [
+    "cue_scene_dressing"
+   ],
+   "forbidden": [
+    "cue_scene_dressing"
+   ],
+   "levers": [],
+   "n_levers": 0,
+   "config": {
+    "hazard_stairs": true
+   },
+   "disposition": "SKIP (B ≡ A · D74 ⑤)"
+  },
+  {
+   "scene": "scene06",
+   "hazard_keys": [
+    "hazard_stairs"
+   ],
+   "onwired": [
+    "cue_material_break",
+    "cue_railing",
+    "cue_scene_dressing"
+   ],
+   "forbidden": [],
+   "levers": [
+    "cue_material_break",
+    "cue_railing",
+    "cue_scene_dressing"
+   ],
+   "n_levers": 3,
+   "config": {
+    "hazard_stairs": true,
+    "cue_material_break": false,
+    "cue_railing": false,
+    "cue_scene_dressing": false
+   },
+   "disposition": "render"
+  },
+  {
+   "scene": "scene08",
+   "hazard_keys": [
+    "hazard_stairs"
+   ],
+   "onwired": [
+    "cue_railing",
+    "cue_scene_dressing",
+    "cue_sign"
+   ],
+   "forbidden": [
+    "cue_railing"
+   ],
+   "levers": [
+    "cue_scene_dressing",
+    "cue_sign"
+   ],
+   "n_levers": 2,
+   "config": {
+    "hazard_stairs": true,
+    "cue_scene_dressing": false,
+    "cue_sign": false
+   },
+   "disposition": "render"
+  },
+  {
+   "scene": "scene09",
+   "hazard_keys": [
+    "hazard_stairs"
+   ],
+   "onwired": [
+    "cue_scene_dressing",
+    "cue_sign"
+   ],
+   "forbidden": [
+    "cue_scene_dressing"
+   ],
+   "levers": [
+    "cue_sign"
+   ],
+   "n_levers": 1,
+   "config": {
+    "hazard_stairs": true,
+    "cue_sign": false
+   },
+   "disposition": "render"
+  },
+  {
+   "scene": "scene10",
+   "hazard_keys": [
+    "hazard_stairs"
+   ],
+   "onwired": [
+    "cue_railing",
+    "cue_scene_dressing"
+   ],
+   "forbidden": [
+    "cue_railing",
+    "cue_scene_dressing"
+   ],
+   "levers": [],
+   "n_levers": 0,
+   "config": {
+    "hazard_stairs": true
+   },
+   "disposition": "SKIP (B ≡ A · D74 ⑤)"
+  },
+  {
+   "scene": "scene12",
+   "hazard_keys": [
+    "hazard_stairs"
+   ],
+   "onwired": [
+    "cue_railing",
+    "cue_scene_dressing"
+   ],
+   "forbidden": [],
+   "levers": [
+    "cue_railing",
+    "cue_scene_dressing"
+   ],
+   "n_levers": 2,
+   "config": {
+    "hazard_stairs": true,
+    "cue_railing": false,
+    "cue_scene_dressing": false
+   },
+   "disposition": "render"
+  },
+  {
+   "scene": "scene16",
+   "hazard_keys": [
+    "hazard_stairs"
+   ],
+   "onwired": [
+    "cue_nosing",
+    "cue_railing",
+    "cue_scene_dressing",
+    "cue_sign"
+   ],
+   "forbidden": [],
+   "levers": [
+    "cue_nosing",
+    "cue_railing",
+    "cue_scene_dressing",
+    "cue_sign"
+   ],
+   "n_levers": 4,
+   "config": {
+    "hazard_stairs": true,
+    "cue_nosing": false,
+    "cue_railing": false,
+    "cue_scene_dressing": false,
+    "cue_sign": false
+   },
+   "disposition": "render"
+  },
+  {
+   "scene": "scene17",
+   "hazard_keys": [
+    "hazard_stairs"
+   ],
+   "onwired": [
+    "cue_scene_dressing"
+   ],
+   "forbidden": [],
+   "levers": [
+    "cue_scene_dressing"
+   ],
+   "n_levers": 1,
+   "config": {
+    "hazard_stairs": true,
+    "cue_scene_dressing": false
+   },
+   "disposition": "render"
+  },
+  {
+   "scene": "scene20",
+   "hazard_keys": [
+    "hazard_stairs"
+   ],
+   "onwired": [
+    "cue_railing",
+    "cue_scene_dressing"
+   ],
+   "forbidden": [
+    "cue_railing"
+   ],
+   "levers": [
+    "cue_scene_dressing"
+   ],
+   "n_levers": 1,
+   "config": {
+    "hazard_stairs": true,
+    "cue_scene_dressing": false
+   },
+   "disposition": "render"
+  },
+  {
+   "scene": "scene21",
+   "hazard_keys": [
+    "hazard_stairs"
+   ],
+   "onwired": [
+    "cue_nosing",
+    "cue_railing",
+    "cue_scene_dressing",
+    "cue_sign"
+   ],
+   "forbidden": [
+    "cue_nosing",
+    "cue_railing"
+   ],
+   "levers": [
+    "cue_scene_dressing",
+    "cue_sign"
+   ],
+   "n_levers": 2,
+   "config": {
+    "hazard_stairs": true,
+    "cue_scene_dressing": false,
+    "cue_sign": false
+   },
+   "disposition": "render"
+  },
+  {
+   "scene": "sceneC1",
+   "hazard_keys": [
+    "hazard_stairs"
+   ],
+   "onwired": [
+    "cue_nosing",
+    "cue_railing",
+    "cue_scene_dressing"
+   ],
+   "forbidden": [
+    "cue_railing",
+    "cue_scene_dressing"
+   ],
+   "levers": [
+    "cue_nosing"
+   ],
+   "n_levers": 1,
+   "config": {
+    "hazard_stairs": true,
+    "cue_nosing": false
+   },
+   "disposition": "render"
+  },
+  {
+   "scene": "sceneC4",
+   "hazard_keys": [
+    "hazard_stairs"
+   ],
+   "onwired": [
+    "cue_railing",
+    "cue_scene_dressing"
+   ],
+   "forbidden": [
+    "cue_scene_dressing"
+   ],
+   "levers": [
+    "cue_railing"
+   ],
+   "n_levers": 1,
+   "config": {
+    "hazard_stairs": true,
+    "cue_railing": false
+   },
+   "disposition": "render"
+  },
+  {
+   "scene": "sceneD1",
+   "hazard_keys": [
+    "hazard_stairs"
+   ],
+   "onwired": [
+    "cue_nosing",
+    "cue_scene_dressing"
+   ],
+   "forbidden": [],
+   "levers": [
+    "cue_nosing",
+    "cue_scene_dressing"
+   ],
+   "n_levers": 2,
+   "config": {
+    "hazard_stairs": true,
+    "cue_nosing": false,
+    "cue_scene_dressing": false
+   },
+   "disposition": "render"
+  },
+  {
+   "scene": "sceneD2",
+   "hazard_keys": [
+    "hazard_stairs"
+   ],
+   "onwired": [
+    "cue_material_break",
+    "cue_scene_dressing"
+   ],
+   "forbidden": [],
+   "levers": [
+    "cue_material_break",
+    "cue_scene_dressing"
+   ],
+   "n_levers": 2,
+   "config": {
+    "hazard_stairs": true,
+    "cue_material_break": false,
+    "cue_scene_dressing": false
+   },
+   "disposition": "render"
+  },
+  {
+   "scene": "sceneD3",
+   "hazard_keys": [
+    "hazard_stairs"
+   ],
+   "onwired": [
+    "cue_scene_dressing"
+   ],
+   "forbidden": [],
+   "levers": [
+    "cue_scene_dressing"
+   ],
+   "n_levers": 1,
+   "config": {
+    "hazard_stairs": true,
+    "cue_scene_dressing": false
+   },
+   "disposition": "render"
+  }
+ ]
+}

@@ -1,0 +1,611 @@
+{
+ "doc": "w1b_rimpact",
+ "version": "1.0",
+ "cls_ledger": "experiments/v3_0823/w1d_cuecls.json",
+ "b_landed_cuts": 648,
+ "b_landed_by_scene": {
+  "scene01": 24,
+  "scene02": 24,
+  "scene06": 24,
+  "scene08": 48,
+  "scene09": 72,
+  "scene12": 72,
+  "scene16": 24,
+  "scene17": 72,
+  "scene20": 72,
+  "scene21": 24,
+  "sceneC1": 48,
+  "sceneC4": 72,
+  "sceneD1": 24,
+  "sceneD2": 24,
+  "sceneD3": 24
+ },
+ "b_skipped_d74": {
+  "scene03": 72,
+  "scene04": 72,
+  "scene10": 24,
+  "cuts": 168
+ },
+ "built_levers": {
+  "scene01": [
+   "Sg",
+   "T"
+  ],
+  "scene02": [
+   "N",
+   "R",
+   "Sg"
+  ],
+  "scene06": [
+   "R",
+   "T",
+   "V"
+  ],
+  "scene08": [
+   "Sg",
+   "V"
+  ],
+  "scene09": [
+   "Sg"
+  ],
+  "scene12": [
+   "R",
+   "V"
+  ],
+  "scene16": [
+   "N",
+   "R",
+   "Sg",
+   "V"
+  ],
+  "scene17": [
+   "V"
+  ],
+  "scene20": [
+   "V"
+  ],
+  "scene21": [
+   "Sg",
+   "V"
+  ],
+  "sceneC1": [
+   "N"
+  ],
+  "sceneC4": [
+   "R"
+  ],
+  "sceneD1": [
+   "N",
+   "V"
+  ],
+  "sceneD2": [
+   "T",
+   "V"
+  ],
+  "sceneD3": [
+   "V"
+  ]
+ },
+ "vg01_quarantine": {
+  "scene12": [
+   "base",
+   "e",
+   "e2"
+  ],
+  "scene16": [
+   "base"
+  ]
+ },
+ "vg01_ready": true,
+ "c_arm_note": "C팔 미렌더 — C 프레임은 계획값. keep_dressing 결재 후 재계산 필요.",
+ "hazgate_blind_spot": {
+  "what": "hazgate.py는 cue 배선을 `if` 문 조건절에서만 수집한다(ast.If). 삼항식/표현식 자리는 cue[k]=null로 기록되고, W1D §6.6의 ON·배선 열과 본 웨이브 레버 집합이 그것을 물려받았다.",
+  "n_pairs": 23,
+  "pairs": [
+   {
+    "scene": "scene02",
+    "cue": "cue_material_break",
+    "n_sites": 1,
+    "lines": [
+     1923
+    ]
+   },
+   {
+    "scene": "scene03",
+    "cue": "cue_material_break",
+    "n_sites": 1,
+    "lines": [
+     2097
+    ]
+   },
+   {
+    "scene": "scene04",
+    "cue": "cue_material_break",
+    "n_sites": 1,
+    "lines": [
+     1247
+    ]
+   },
+   {
+    "scene": "scene08",
+    "cue": "cue_material_break",
+    "n_sites": 1,
+    "lines": [
+     1949
+    ]
+   },
+   {
+    "scene": "scene09",
+    "cue": "cue_material_break",
+    "n_sites": 2,
+    "lines": [
+     2844,
+     2895
+    ]
+   },
+   {
+    "scene": "scene10",
+    "cue": "cue_material_break",
+    "n_sites": 1,
+    "lines": [
+     3718
+    ]
+   },
+   {
+    "scene": "scene12",
+    "cue": "cue_material_break",
+    "n_sites": 2,
+    "lines": [
+     1849,
+     1895
+    ]
+   },
+   {
+    "scene": "scene13",
+    "cue": "cue_material_break",
+    "n_sites": 2,
+    "lines": [
+     3787,
+     3788
+    ]
+   },
+   {
+    "scene": "scene14",
+    "cue": "cue_material_break",
+    "n_sites": 1,
+    "lines": [
+     1882
+    ]
+   },
+   {
+    "scene": "scene15",
+    "cue": "cue_material_break",
+    "n_sites": 1,
+    "lines": [
+     1939
+    ]
+   },
+   {
+    "scene": "scene16",
+    "cue": "cue_material_break",
+    "n_sites": 1,
+    "lines": [
+     1792
+    ]
+   },
+   {
+    "scene": "scene17",
+    "cue": "cue_material_break",
+    "n_sites": 1,
+    "lines": [
+     2718
+    ]
+   },
+   {
+    "scene": "scene20",
+    "cue": "cue_material_break",
+    "n_sites": 1,
+    "lines": [
+     866
+    ]
+   },
+   {
+    "scene": "scene21",
+    "cue": "cue_material_break",
+    "n_sites": 1,
+    "lines": [
+     1010
+    ]
+   },
+   {
+    "scene": "sceneC1",
+    "cue": "cue_material_break",
+    "n_sites": 1,
+    "lines": [
+     1375
+    ]
+   },
+   {
+    "scene": "sceneC1",
+    "cue": "cue_tactile",
+    "n_sites": 1,
+    "lines": [
+     578
+    ]
+   },
+   {
+    "scene": "sceneC2",
+    "cue": "cue_material_break",
+    "n_sites": 2,
+    "lines": [
+     764,
+     1301
+    ]
+   },
+   {
+    "scene": "sceneC4",
+    "cue": "cue_material_break",
+    "n_sites": 1,
+    "lines": [
+     1247
+    ]
+   },
+   {
+    "scene": "sceneC4",
+    "cue": "cue_tactile",
+    "n_sites": 1,
+    "lines": [
+     447
+    ]
+   },
+   {
+    "scene": "sceneD1",
+    "cue": "cue_material_break",
+    "n_sites": 1,
+    "lines": [
+     1083
+    ]
+   },
+   {
+    "scene": "sceneD3",
+    "cue": "cue_material_break",
+    "n_sites": 1,
+    "lines": [
+     835
+    ]
+   },
+   {
+    "scene": "sceneN3",
+    "cue": "cue_nosing",
+    "n_sites": 1,
+    "lines": [
+     1346
+    ]
+   },
+   {
+    "scene": "sceneN4",
+    "cue": "cue_material_break",
+    "n_sites": 1,
+    "lines": [
+     840
+    ]
+   }
+  ]
+ },
+ "threshold": 0.2,
+ "d_wave_v_r": 0.1824,
+ "d74_skip_check": {
+  "claim": "D74 ⑤: 중복 168컷 스킵은 'r 불변 (removable() 기모델링)'",
+  "method": "PB_noskip = PB_asbuilt + 스킵 3씬의 B 프레임을 계획값으로 복원",
+  "delta_r": {
+   "R": 0.0054,
+   "Ta": 0.0,
+   "N": 0.0,
+   "T": 0.0179,
+   "Sg": 0.0,
+   "V": 0.0264
+  }
+ },
+ "policies": {
+  "P1_plan": {
+   "R": {
+    "n_scenes": 20,
+    "a": 1056,
+    "b": 552,
+    "c": 912,
+    "d": 912,
+    "r": 0.1581
+   },
+   "Ta": {
+    "n_scenes": 11,
+    "a": 480,
+    "b": 480,
+    "c": 576,
+    "d": 576,
+    "r": 0.0
+   },
+   "N": {
+    "n_scenes": 14,
+    "a": 528,
+    "b": 480,
+    "c": 600,
+    "d": 600,
+    "r": 0.0237
+   },
+   "T": {
+    "n_scenes": 31,
+    "a": 1176,
+    "b": 1152,
+    "c": 1368,
+    "d": 1368,
+    "r": 0.0051
+   },
+   "Sg": {
+    "n_scenes": 15,
+    "a": 576,
+    "b": 576,
+    "c": 672,
+    "d": 672,
+    "r": 0.0
+   },
+   "V": {
+    "n_scenes": 31,
+    "a": 1584,
+    "b": 744,
+    "c": 1368,
+    "d": 1368,
+    "r": 0.1824
+   }
+  },
+  "PB_asbuilt": {
+   "R": {
+    "n_scenes": 20,
+    "a": 1032,
+    "b": 552,
+    "c": 912,
+    "d": 912,
+    "r": 0.1527
+   },
+   "Ta": {
+    "n_scenes": 11,
+    "a": 600,
+    "b": 360,
+    "c": 576,
+    "d": 576,
+    "r": 0.1253
+   },
+   "N": {
+    "n_scenes": 14,
+    "a": 528,
+    "b": 480,
+    "c": 600,
+    "d": 600,
+    "r": 0.0237
+   },
+   "T": {
+    "n_scenes": 31,
+    "a": 1752,
+    "b": 408,
+    "c": 1368,
+    "d": 1368,
+    "r": 0.3213
+   },
+   "Sg": {
+    "n_scenes": 15,
+    "a": 576,
+    "b": 576,
+    "c": 672,
+    "d": 672,
+    "r": 0.0
+   },
+   "V": {
+    "n_scenes": 31,
+    "a": 1416,
+    "b": 744,
+    "c": 1368,
+    "d": 1368,
+    "r": 0.156
+   }
+  },
+  "PB_hazgate": {
+   "R": {
+    "n_scenes": 20,
+    "a": 1032,
+    "b": 552,
+    "c": 912,
+    "d": 912,
+    "r": 0.1527
+   },
+   "Ta": {
+    "n_scenes": 9,
+    "a": 360,
+    "b": 360,
+    "c": 456,
+    "d": 456,
+    "r": 0.0
+   },
+   "N": {
+    "n_scenes": 14,
+    "a": 528,
+    "b": 480,
+    "c": 600,
+    "d": 600,
+    "r": 0.0237
+   },
+   "T": {
+    "n_scenes": 15,
+    "a": 432,
+    "b": 408,
+    "c": 600,
+    "d": 600,
+    "r": 0.0141
+   },
+   "Sg": {
+    "n_scenes": 15,
+    "a": 576,
+    "b": 576,
+    "c": 672,
+    "d": 672,
+    "r": 0.0
+   },
+   "V": {
+    "n_scenes": 31,
+    "a": 1416,
+    "b": 744,
+    "c": 1368,
+    "d": 1368,
+    "r": 0.156
+   }
+  },
+  "PB_gated": {
+   "R": {
+    "n_scenes": 20,
+    "a": 1032,
+    "b": 456,
+    "c": 912,
+    "d": 912,
+    "r": 0.1955
+   },
+   "Ta": {
+    "n_scenes": 11,
+    "a": 600,
+    "b": 360,
+    "c": 576,
+    "d": 576,
+    "r": 0.1253
+   },
+   "N": {
+    "n_scenes": 14,
+    "a": 528,
+    "b": 456,
+    "c": 600,
+    "d": 600,
+    "r": 0.0364
+   },
+   "T": {
+    "n_scenes": 31,
+    "a": 1656,
+    "b": 408,
+    "c": 1368,
+    "d": 1368,
+    "r": 0.31
+   },
+   "Sg": {
+    "n_scenes": 15,
+    "a": 576,
+    "b": 552,
+    "c": 672,
+    "d": 672,
+    "r": 0.0106
+   },
+   "V": {
+    "n_scenes": 31,
+    "a": 1416,
+    "b": 648,
+    "c": 1368,
+    "d": 1368,
+    "r": 0.1866
+   }
+  },
+  "PB_plusT": {
+   "R": {
+    "n_scenes": 20,
+    "a": 1032,
+    "b": 552,
+    "c": 912,
+    "d": 912,
+    "r": 0.1527
+   },
+   "Ta": {
+    "n_scenes": 11,
+    "a": 600,
+    "b": 360,
+    "c": 576,
+    "d": 576,
+    "r": 0.1253
+   },
+   "N": {
+    "n_scenes": 14,
+    "a": 528,
+    "b": 480,
+    "c": 600,
+    "d": 600,
+    "r": 0.0237
+   },
+   "T": {
+    "n_scenes": 31,
+    "a": 1176,
+    "b": 984,
+    "c": 1368,
+    "d": 1368,
+    "r": 0.0442
+   },
+   "Sg": {
+    "n_scenes": 15,
+    "a": 576,
+    "b": 576,
+    "c": 672,
+    "d": 672,
+    "r": 0.0
+   },
+   "V": {
+    "n_scenes": 31,
+    "a": 1416,
+    "b": 744,
+    "c": 1368,
+    "d": 1368,
+    "r": 0.156
+   }
+  },
+  "PB_noskip": {
+   "R": {
+    "n_scenes": 20,
+    "a": 1056,
+    "b": 552,
+    "c": 912,
+    "d": 912,
+    "r": 0.1581
+   },
+   "Ta": {
+    "n_scenes": 11,
+    "a": 600,
+    "b": 360,
+    "c": 576,
+    "d": 576,
+    "r": 0.1253
+   },
+   "N": {
+    "n_scenes": 14,
+    "a": 528,
+    "b": 480,
+    "c": 600,
+    "d": 600,
+    "r": 0.0237
+   },
+   "T": {
+    "n_scenes": 31,
+    "a": 1920,
+    "b": 408,
+    "c": 1368,
+    "d": 1368,
+    "r": 0.3392
+   },
+   "Sg": {
+    "n_scenes": 15,
+    "a": 576,
+    "b": 576,
+    "c": 672,
+    "d": 672,
+    "r": 0.0
+   },
+   "V": {
+    "n_scenes": 31,
+    "a": 1584,
+    "b": 744,
+    "c": 1368,
+    "d": 1368,
+    "r": 0.1824
+   }
+  }
+ }
+}

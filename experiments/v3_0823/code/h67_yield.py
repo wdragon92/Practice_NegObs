@@ -25,12 +25,18 @@ import json
 import os
 import sys
 
-# 계획 §3.5 의 수율 가정과 씬별 A팔 컷 배분
+# 계획 §3.5(val) · §3.2(test-ext) 의 수율 가정과 씬별 A팔 컷 배분
 PLAN = {
     "sceneH6": dict(bands=dict(base=24, H=24, H2=24), a_cuts=72, expect=33.6),
     "sceneH7": dict(bands=dict(base=24, H=24), a_cuts=48, expect=19.2),
+    # ── test-ext (§3.2 표) — 팔당 48프레임 · paired-H 기대 ≥ 12 ────────────────
+    #   기대치의 근거: "H 밴드 24컷 × 수율 0.5(보수적; s14 실적은 0.83)" (§3.2 각주).
+    "sceneH1": dict(bands=dict(base=24, H=24), a_cuts=48, expect=12.0),
+    "sceneH2": dict(bands=dict(base=24, H=24), a_cuts=48, expect=12.0),
 }
-YIELD_MODEL = dict(H=0.60, base=0.20)      # 계획의 보수적 수율 모형
+# 계획의 보수적 수율 모형. **test-ext 는 §3.2 가 H 0.50 을 쓴다**(val 은 §3.5 가 0.60).
+YIELD_MODEL = dict(H=0.60, base=0.20)
+YIELD_MODEL_EXT = dict(H=0.50, base=0.20)
 
 
 def variation_of(round_dir, scene):
@@ -45,7 +51,10 @@ def main(argv=None):
     ap.add_argument("--off", required=True)
     ap.add_argument("--band", default="H", choices=["H", "base"],
                     help="이 프로브가 뽑은 밴드 — pro-rata 기대치의 기준")
+    ap.add_argument("--split", default="val", choices=["val", "ext"],
+                    help="val = §3.5 수율 모형(H 0.60) · ext = §3.2 test-ext 모형(H 0.50)")
     a = ap.parse_args(argv)
+    model = YIELD_MODEL_EXT if a.split == "ext" else YIELD_MODEL
 
     L = json.load(open(a.labels, encoding="utf-8"))
     frames = L["frames"]
@@ -76,7 +85,7 @@ def main(argv=None):
         n_h = tiers.get("H", 0)
         p_h = n_h / n
         plan = PLAN.get(scene, dict(expect=0.0, a_cuts=n))
-        pro = YIELD_MODEL[a.band]
+        pro = model[a.band]
         gate = 0.60 * pro                       # "pro-rata 기대의 60 % 미만이면 개정"
         print(f"\n[{scene}]  n_on={n}  n_off={len(off)}")
         print("  tier 분포 : " + " · ".join(f"{k}={v}" for k, v in sorted(tiers.items())))

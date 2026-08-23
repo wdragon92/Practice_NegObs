@@ -53,11 +53,23 @@ NEW_SCENES = {
     "sceneH7": dict(split="val", cls="C'",
                     basis="v3 P-5 신설 (RENDER_PLAN_V3 §2.1 sceneH7_bend_walk2). "
                           "SP-2 스윕 미실시 — C' 기본값 승계, 방위 제약 미측정"),
+    # ── W3 test-ext (2차 빌더 런) ─────────────────────────────────────────────
+    #   `split="test"` 는 **디렉터리 배치**일 뿐이고, test-core 7씬과 섞이지 않는다
+    #   (씬 키가 다르다). test-ext 의 무대 순도(§12-9)는 훈련 매니페스트가 이 씬 키를
+    #   포함하지 않는 것으로 강제되며, 그 강제는 W3 매니페스트 빌더 소관이다.
+    "sceneH1": dict(split="test", cls="C'",
+                    basis="v3 P-5 신설 (RENDER_PLAN_V3 §2.1 sceneH1_berm_levee, test-ext). "
+                          "SP-2 스윕 미실시 — C' 기본값 승계, 방위 제약 미측정"),
+    "sceneH2": dict(split="test", cls="C'",
+                    basis="v3 P-5 신설 (RENDER_PLAN_V3 §2.1 sceneH2_landing_campus, "
+                          "test-ext). SP-2 스윕 미실시 — C' 기본값 승계, 방위 제약 미측정"),
 }
 
 SCENE_FILE = {
     "sceneH6": os.path.join(REPO, "scenes", "main", "sceneH6_berm_levee2.py"),
     "sceneH7": os.path.join(REPO, "scenes", "main", "sceneH7_bend_walk2.py"),
+    "sceneH1": os.path.join(REPO, "scenes", "main", "sceneH1_berm_levee.py"),
+    "sceneH2": os.path.join(REPO, "scenes", "main", "sceneH2_landing_campus.py"),
 }
 
 
@@ -98,7 +110,16 @@ def main(argv=None):
     # 라운드명 가드 (VG-12) — 이 스크립트가 쓸 수 있는 스탬프만 허용한다.
     allowed = ("260823_v3p5_h67smoke_A", "260823_v3p5_h67smoke_C",
                "260823_v3p5_h67probe_A", "260823_v3p5_h67probe_C",
-               "260823_v3p5_h67rev_A", "260823_v3p5_h67rev_C")
+               "260823_v3p5_h67rev_A", "260823_v3p5_h67rev_C",
+               # ── W3 test-ext 2차 빌더 런 (sceneH1 · sceneH2) ──────────────
+               #   4팔 완비가 test-ext 의무이므로 B·D 스탬프도 허용목록에 있다(§3.1).
+               "260823_v3p5_h12smoke_A",
+               "260823_v3p5_h12probe_A", "260823_v3p5_h12probe_B",
+               "260823_v3p5_h12probe_C", "260823_v3p5_h12probe_D",
+               "260823_v3p5_h12rev_A", "260823_v3p5_h12rev_B",
+               "260823_v3p5_h12rev_C", "260823_v3p5_h12rev_D",
+               # 근거리 비-H 대조 라운드 (퇴화 아님을 실렌더로 확인)
+               "260823_v3p5_h12near_A", "260823_v3p5_h12near_C")
     if a.run not in allowed:
         raise SystemExit(f"[h67_probe] 라운드 스탬프 {a.run!r} 거부 — 허용 {allowed}")
 

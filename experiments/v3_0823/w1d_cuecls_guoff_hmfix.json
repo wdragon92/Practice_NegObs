@@ -1,0 +1,4503 @@
+{
+ "doc": "w0_cuecls",
+ "version": "1.0",
+ "gate": "VG-CLS",
+ "plan": "RENDER_PLAN_V3 §4.2 · §6.1",
+ "rounds": [
+  "260825_v3w0_cuecls_A",
+  "260825_v3w0_cuecls_Brail",
+  "260825_v3w0_cuecls_Bnose",
+  "260825_v3w0_cuecls_Btact",
+  "260825_v3w0_cuecls_Bmatl",
+  "260825_v3w0_cuecls_Bdress"
+ ],
+ "off_round_for_footprint": "260819_main_off",
+ "annotations_prefix": "w0_",
+ "hm_loader": "labeler",
+ "grid": "gridspec_v1.json (20칸)",
+ "rules": {
+  "structural": "Δcells_raw ≠ 0 또는 polar_gt 상이 프레임 ≥ 1",
+  "decorative": "Δcells_raw = 0 그리고 polar_gt 전 프레임 동일",
+  "undecidable": "렌더/라벨 부재, 또는 무효 토글(hm sha 동일 ∧ n_prims 동일 ∧ RGB<0.05 LSB)",
+  "datum": "exact<1e-06 · tol<=0.02 m · fail>0.02 m"
+ },
+ "n_pairs": 39,
+ "verdict_counts": {
+  "판정불가": 14,
+  "장식": 17,
+  "구조물": 8
+ },
+ "toggle_forbidden": [
+  {
+   "scene": "scene01",
+   "cue": "cue_railing"
+  },
+  {
+   "scene": "scene01",
+   "cue": "cue_scene_dressing"
+  },
+  {
+   "scene": "scene02",
+   "cue": "cue_scene_dressing"
+  },
+  {
+   "scene": "scene03",
+   "cue": "cue_scene_dressing"
+  },
+  {
+   "scene": "scene04",
+   "cue": "cue_scene_dressing"
+  },
+  {
+   "scene": "scene08",
+   "cue": "cue_railing"
+  },
+  {
+   "scene": "scene09",
+   "cue": "cue_scene_dressing"
+  },
+  {
+   "scene": "scene10",
+   "cue": "cue_railing"
+  },
+  {
+   "scene": "scene10",
+   "cue": "cue_scene_dressing"
+  },
+  {
+   "scene": "scene16",
+   "cue": "cue_scene_dressing"
+  },
+  {
+   "scene": "scene20",
+   "cue": "cue_railing"
+  },
+  {
+   "scene": "scene21",
+   "cue": "cue_nosing"
+  },
+  {
+   "scene": "scene21",
+   "cue": "cue_railing"
+  },
+  {
+   "scene": "scene21",
+   "cue": "cue_scene_dressing"
+  },
+  {
+   "scene": "sceneC1",
+   "cue": "cue_railing"
+  },
+  {
+   "scene": "sceneC1",
+   "cue": "cue_scene_dressing"
+  },
+  {
+   "scene": "sceneC4",
+   "cue": "cue_scene_dressing"
+  },
+  {
+   "scene": "sceneD1",
+   "cue": "cue_scene_dressing"
+  },
+  {
+   "scene": "sceneD2",
+   "cue": "cue_scene_dressing"
+  },
+  {
+   "scene": "sceneD3",
+   "cue": "cue_scene_dressing"
+  },
+  {
+   "scene": "sceneN1",
+   "cue": "cue_scene_dressing"
+  },
+  {
+   "scene": "sceneN4",
+   "cue": "cue_scene_dressing"
+  },
+  {
+   "scene": "sceneN5",
+   "cue": "cue_scene_dressing"
+  }
+ ],
+ "b_levers_confirmed": {
+  "scene02": [
+   "cue_nosing",
+   "cue_railing"
+  ],
+  "scene06": [
+   "cue_material_break",
+   "cue_railing",
+   "cue_scene_dressing"
+  ],
+  "scene16": [
+   "cue_nosing",
+   "cue_railing"
+  ],
+  "sceneC4": [
+   "cue_railing",
+   "cue_tactile"
+  ],
+  "sceneC1": [
+   "cue_nosing",
+   "cue_tactile"
+  ],
+  "sceneD1": [
+   "cue_nosing"
+  ],
+  "sceneN1": [
+   "cue_material_break"
+  ],
+  "sceneN2": [
+   "cue_material_break",
+   "cue_scene_dressing"
+  ],
+  "sceneN5": [
+   "cue_material_break"
+  ],
+  "scene08": [
+   "cue_scene_dressing"
+  ],
+  "scene12": [
+   "cue_railing",
+   "cue_scene_dressing"
+  ],
+  "scene17": [
+   "cue_material_break",
+   "cue_scene_dressing"
+  ]
+ },
+ "verdict_counts_t1": {
+  "구조물": 19,
+  "장식": 20,
+  "판정불가": 0
+ },
+ "verdict_counts_t2": {
+  "구조물": 11,
+  "장식": 28,
+  "판정불가": 0
+ },
+ "disagreements": [
+  {
+   "scene": "scene01",
+   "cue": "cue_railing",
+   "bond": "free",
+   "t1": "구조물",
+   "t2": "장식",
+   "d_cells_raw": 111,
+   "dcue_cells": 111,
+   "dcue_in_fpA": 0,
+   "dcue_in_lip_1m": 111
+  },
+  {
+   "scene": "scene21",
+   "cue": "cue_railing",
+   "bond": "HZ",
+   "t1": "구조물",
+   "t2": "장식",
+   "d_cells_raw": 208,
+   "dcue_cells": 264,
+   "dcue_in_fpA": 0,
+   "dcue_in_lip_1m": 264
+  },
+  {
+   "scene": "sceneC1",
+   "cue": "cue_railing",
+   "bond": "HZ",
+   "t1": "장식",
+   "t2": "구조물",
+   "d_cells_raw": 0,
+   "dcue_cells": 99,
+   "dcue_in_fpA": 2,
+   "dcue_in_lip_1m": 77
+  },
+  {
+   "scene": "scene21",
+   "cue": "cue_nosing",
+   "bond": "HZ",
+   "t1": "장식",
+   "t2": "구조물",
+   "d_cells_raw": 0,
+   "dcue_cells": 2919,
+   "dcue_in_fpA": 2641,
+   "dcue_in_lip_1m": 278
+  },
+  {
+   "scene": "scene01",
+   "cue": "cue_scene_dressing",
+   "bond": "free",
+   "t1": "구조물",
+   "t2": "장식",
+   "d_cells_raw": 9021,
+   "dcue_cells": 9021,
+   "dcue_in_fpA": 0,
+   "dcue_in_lip_1m": 7651
+  },
+  {
+   "scene": "scene02",
+   "cue": "cue_scene_dressing",
+   "bond": "hz?",
+   "t1": "구조물",
+   "t2": "장식",
+   "d_cells_raw": 11596,
+   "dcue_cells": 62752,
+   "dcue_in_fpA": 0,
+   "dcue_in_lip_1m": 338
+  },
+  {
+   "scene": "scene03",
+   "cue": "cue_scene_dressing",
+   "bond": "HZ",
+   "t1": "장식",
+   "t2": "구조물",
+   "d_cells_raw": 0,
+   "dcue_cells": 835,
+   "dcue_in_fpA": 811,
+   "dcue_in_lip_1m": 0
+  },
+  {
+   "scene": "scene21",
+   "cue": "cue_scene_dressing",
+   "bond": "free",
+   "t1": "구조물",
+   "t2": "장식",
+   "d_cells_raw": 298,
+   "dcue_cells": 298,
+   "dcue_in_fpA": 0,
+   "dcue_in_lip_1m": 0
+  },
+  {
+   "scene": "sceneD1",
+   "cue": "cue_scene_dressing",
+   "bond": "free",
+   "t1": "구조물",
+   "t2": "장식",
+   "d_cells_raw": 66,
+   "dcue_cells": 66,
+   "dcue_in_fpA": 0,
+   "dcue_in_lip_1m": 18
+  },
+  {
+   "scene": "sceneD2",
+   "cue": "cue_scene_dressing",
+   "bond": "free",
+   "t1": "구조물",
+   "t2": "장식",
+   "d_cells_raw": 3129,
+   "dcue_cells": 5020,
+   "dcue_in_fpA": 0,
+   "dcue_in_lip_1m": 0
+  },
+  {
+   "scene": "sceneD3",
+   "cue": "cue_scene_dressing",
+   "bond": "free",
+   "t1": "구조물",
+   "t2": "장식",
+   "d_cells_raw": 2644,
+   "dcue_cells": 2644,
+   "dcue_in_fpA": 0,
+   "dcue_in_lip_1m": 0
+  },
+  {
+   "scene": "sceneN1",
+   "cue": "cue_scene_dressing",
+   "bond": "free",
+   "t1": "구조물",
+   "t2": "장식",
+   "d_cells_raw": 718,
+   "dcue_cells": 1486,
+   "dcue_in_fpA": 0,
+   "dcue_in_lip_1m": 0
+  },
+  {
+   "scene": "sceneN4",
+   "cue": "cue_scene_dressing",
+   "bond": "free",
+   "t1": "구조물",
+   "t2": "장식",
+   "d_cells_raw": 1376,
+   "dcue_cells": 1376,
+   "dcue_in_fpA": 0,
+   "dcue_in_lip_1m": 0
+  },
+  {
+   "scene": "sceneN5",
+   "cue": "cue_scene_dressing",
+   "bond": "free",
+   "t1": "구조물",
+   "t2": "장식",
+   "d_cells_raw": 400,
+   "dcue_cells": 807,
+   "dcue_in_fpA": 0,
+   "dcue_in_lip_1m": 0
+  }
+ ],
+ "vg_datum_drift": [
+  {
+   "scene": "scene06",
+   "cue": "cue_material_break",
+   "ground_z_drift_max": 0.0015,
+   "tiers": {
+    "datum_exact": 3,
+    "datum_tol": 1,
+    "datum_fail": 0
+   },
+   "verdict": "datum_tol"
+  },
+  {
+   "scene": "sceneN1",
+   "cue": "cue_material_break",
+   "ground_z_drift_max": 0.001,
+   "tiers": {
+    "datum_exact": 3,
+    "datum_tol": 1,
+    "datum_fail": 0
+   },
+   "verdict": "datum_tol"
+  },
+  {
+   "scene": "scene02",
+   "cue": "cue_scene_dressing",
+   "ground_z_drift_max": 2.84,
+   "tiers": {
+    "datum_exact": 3,
+    "datum_tol": 0,
+    "datum_fail": 1
+   },
+   "verdict": "datum_fail"
+  },
+  {
+   "scene": "scene04",
+   "cue": "cue_scene_dressing",
+   "ground_z_drift_max": 0.005,
+   "tiers": {
+    "datum_exact": 3,
+    "datum_tol": 1,
+    "datum_fail": 0
+   },
+   "verdict": "datum_tol"
+  }
+ ],
+ "vg_datum_corpus_ref": [
+  {
+   "scene": "scene01",
+   "n_cuts": 4,
+   "tiers": {
+    "datum_exact": 4,
+    "datum_tol": 0,
+    "datum_fail": 0
+   },
+   "ground_z_drift_max": 0.0,
+   "pose_delta_max": 0.0,
+   "verdict": "datum_exact"
+  },
+  {
+   "scene": "scene02",
+   "n_cuts": 4,
+   "tiers": {
+    "datum_exact": 1,
+    "datum_tol": 3,
+    "datum_fail": 0
+   },
+   "ground_z_drift_max": 0.0165,
+   "pose_delta_max": 0.0165,
+   "verdict": "datum_tol"
+  },
+  {
+   "scene": "scene03",
+   "n_cuts": 4,
+   "tiers": {
+    "datum_exact": 4,
+    "datum_tol": 0,
+    "datum_fail": 0
+   },
+   "ground_z_drift_max": 0.0,
+   "pose_delta_max": 0.0,
+   "verdict": "datum_exact"
+  },
+  {
+   "scene": "scene04",
+   "n_cuts": 4,
+   "tiers": {
+    "datum_exact": 4,
+    "datum_tol": 0,
+    "datum_fail": 0
+   },
+   "ground_z_drift_max": 0.0,
+   "pose_delta_max": 0.0,
+   "verdict": "datum_exact"
+  },
+  {
+   "scene": "scene06",
+   "n_cuts": 4,
+   "tiers": {
+    "datum_exact": 4,
+    "datum_tol": 0,
+    "datum_fail": 0
+   },
+   "ground_z_drift_max": 0.0,
+   "pose_delta_max": 0.0,
+   "verdict": "datum_exact"
+  },
+  {
+   "scene": "scene08",
+   "n_cuts": 4,
+   "tiers": {
+    "datum_exact": 4,
+    "datum_tol": 0,
+    "datum_fail": 0
+   },
+   "ground_z_drift_max": 0.0,
+   "pose_delta_max": 0.0,
+   "verdict": "datum_exact"
+  },
+  {
+   "scene": "scene09",
+   "n_cuts": 4,
+   "tiers": {
+    "datum_exact": 0,
+    "datum_tol": 4,
+    "datum_fail": 0
+   },
+   "ground_z_drift_max": 0.0165,
+   "pose_delta_max": 0.0165,
+   "verdict": "datum_tol"
+  },
+  {
+   "scene": "scene10",
+   "n_cuts": 4,
+   "tiers": {
+    "datum_exact": 4,
+    "datum_tol": 0,
+    "datum_fail": 0
+   },
+   "ground_z_drift_max": 0.0,
+   "pose_delta_max": 0.0,
+   "verdict": "datum_exact"
+  },
+  {
+   "scene": "scene16",
+   "n_cuts": 4,
+   "tiers": {
+    "datum_exact": 4,
+    "datum_tol": 0,
+    "datum_fail": 0
+   },
+   "ground_z_drift_max": 0.0,
+   "pose_delta_max": 0.0,
+   "verdict": "datum_exact"
+  },
+  {
+   "scene": "scene21",
+   "n_cuts": 4,
+   "tiers": {
+    "datum_exact": 4,
+    "datum_tol": 0,
+    "datum_fail": 0
+   },
+   "ground_z_drift_max": 0.0,
+   "pose_delta_max": 0.0,
+   "verdict": "datum_exact"
+  },
+  {
+   "scene": "sceneC1",
+   "n_cuts": 4,
+   "tiers": {
+    "datum_exact": 4,
+    "datum_tol": 0,
+    "datum_fail": 0
+   },
+   "ground_z_drift_max": 0.0,
+   "pose_delta_max": 0.0,
+   "verdict": "datum_exact"
+  },
+  {
+   "scene": "sceneC4",
+   "n_cuts": 4,
+   "tiers": {
+    "datum_exact": 4,
+    "datum_tol": 0,
+    "datum_fail": 0
+   },
+   "ground_z_drift_max": 0.0,
+   "pose_delta_max": 0.0,
+   "verdict": "datum_exact"
+  },
+  {
+   "scene": "sceneD1",
+   "n_cuts": 4,
+   "tiers": {
+    "datum_exact": 4,
+    "datum_tol": 0,
+    "datum_fail": 0
+   },
+   "ground_z_drift_max": 0.0,
+   "pose_delta_max": 0.0,
+   "verdict": "datum_exact"
+  },
+  {
+   "scene": "sceneD2",
+   "n_cuts": 4,
+   "tiers": {
+    "datum_exact": 4,
+    "datum_tol": 0,
+    "datum_fail": 0
+   },
+   "ground_z_drift_max": 0.0,
+   "pose_delta_max": 0.0,
+   "verdict": "datum_exact"
+  },
+  {
+   "scene": "sceneD3",
+   "n_cuts": 4,
+   "tiers": {
+    "datum_exact": 2,
+    "datum_tol": 2,
+    "datum_fail": 0
+   },
+   "ground_z_drift_max": 0.004,
+   "pose_delta_max": 0.004,
+   "verdict": "datum_tol"
+  },
+  {
+   "scene": "sceneN1",
+   "n_cuts": 4,
+   "tiers": {
+    "datum_exact": 4,
+    "datum_tol": 0,
+    "datum_fail": 0
+   },
+   "ground_z_drift_max": 0.0,
+   "pose_delta_max": 0.0,
+   "verdict": "datum_exact"
+  },
+  {
+   "scene": "sceneN2",
+   "n_cuts": 4,
+   "tiers": {
+    "datum_exact": 4,
+    "datum_tol": 0,
+    "datum_fail": 0
+   },
+   "ground_z_drift_max": 0.0,
+   "pose_delta_max": 0.0,
+   "verdict": "datum_exact"
+  },
+  {
+   "scene": "sceneN4",
+   "n_cuts": 4,
+   "tiers": {
+    "datum_exact": 4,
+    "datum_tol": 0,
+    "datum_fail": 0
+   },
+   "ground_z_drift_max": 0.0,
+   "pose_delta_max": 0.0,
+   "verdict": "datum_exact"
+  },
+  {
+   "scene": "sceneN5",
+   "n_cuts": 4,
+   "tiers": {
+    "datum_exact": 2,
+    "datum_tol": 2,
+    "datum_fail": 0
+   },
+   "ground_z_drift_max": 0.002,
+   "pose_delta_max": 0.002,
+   "verdict": "datum_tol"
+  }
+ ],
+ "prior_rulings": [
+  {
+   "scene": "scene12",
+   "cue": "cue_railing",
+   "verdict": "장식",
+   "source": "CUE_COVERAGE §4-2 (P-3 실측)",
+   "note": "heightmap 54셀 · 최대 5 mm · 풋프린트 0셀 · polar_gt 24/24 동일"
+  },
+  {
+   "scene": "scene12",
+   "cue": "cue_scene_dressing",
+   "verdict": "장식",
+   "source": "CUE_COVERAGE §4-2 (P-3 실측)",
+   "note": "14,467셀 · 최대 5 mm · 풋프린트 0셀 · polar_gt 24/24 동일"
+  },
+  {
+   "scene": "scene17",
+   "cue": "cue_scene_dressing",
+   "verdict": "장식",
+   "source": "CUE_COVERAGE §4-2 (P-3 실측)",
+   "note": "heightmap sha256 동일 · 0셀 · polar_gt 24/24 동일"
+  },
+  {
+   "scene": "scene17",
+   "cue": "cue_material_break",
+   "verdict": "장식",
+   "source": "CUE_COVERAGE §4-2 (P-3 실측)",
+   "note": "scene17 `cue_scene_dressing` + `cue_material_break` 동시 = 장식(완전)"
+  },
+  {
+   "scene": "scene20",
+   "cue": "cue_railing",
+   "verdict": "구조물",
+   "source": "CUE_COVERAGE §4-2 (P-3 실측)",
+   "note": "치크월 12,656셀 · 최대 3.160 m · 풋프린트 +1,302셀 · polar_gt 6/27 상이"
+  }
+ ],
+ "problems": [],
+ "pairs": [
+  {
+   "scene": "scene01",
+   "cue": "cue_railing",
+   "cue_short": "R",
+   "arm": "Brail",
+   "bond": "free",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Brail",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/val/scene01",
+   "dir_b": "dataset/260825_v3w0_cuecls_Brail/val/scene01",
+   "hm_sha_a": "3b763c20439f2359",
+   "hm_sha_b": "6d6a0dfff06ac8a7",
+   "n_prims_a": 370,
+   "n_prims_b": 334,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_railing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 1.727905,
+   "hm_cells_changed": 111,
+   "dz_signed_min": -1.727905,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 75866,
+    "dcue_cells": 111,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 111,
+    "dz_max_in_fpA": 0.0,
+    "locus": "립근방"
+   },
+   "rgb_mean_abs_lsb": 1.00852,
+   "rgb_frac_px_changed": 0.668565,
+   "cells_raw_a": 75866,
+   "cells_raw_b": 75977,
+   "d_cells_raw": 111,
+   "cells_kept_max_a": 75866,
+   "cells_kept_max_b": 75977,
+   "max_diff_a": 0.6,
+   "max_diff_b": 1.7279,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "tier_b": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "verdict": "판정불가",
+   "reason": "검정 불일치 (t1=구조물 · t2=장식) — cue-대칭 off팔 없음",
+   "verdict_t1": "구조물",
+   "verdict_t2": "장식",
+   "verdicts_agree": false
+  },
+  {
+   "scene": "scene02",
+   "cue": "cue_railing",
+   "cue_short": "R",
+   "arm": "Brail",
+   "bond": "HZ",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Brail",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/val/scene02",
+   "dir_b": "dataset/260825_v3w0_cuecls_Brail/val/scene02",
+   "hm_sha_a": "022f007892a56839",
+   "hm_sha_b": "022f007892a56839",
+   "n_prims_a": 510,
+   "n_prims_b": 471,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_railing\": false}",
+   "grid_same": true,
+   "hm_identical": true,
+   "dz_max": 0.0,
+   "hm_cells_changed": 0,
+   "dz_signed_min": 0.0,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 427,
+    "dcue_cells": 0,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.0,
+    "locus": "평지"
+   },
+   "rgb_mean_abs_lsb": 1.6347,
+   "rgb_frac_px_changed": 0.457105,
+   "cells_raw_a": 427,
+   "cells_raw_b": 427,
+   "d_cells_raw": 0,
+   "cells_kept_max_a": 0,
+   "cells_kept_max_b": 0,
+   "max_diff_a": 0.9164,
+   "max_diff_b": 0.9164,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "tier_b": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "verdict": "장식",
+   "subtype": "완전",
+   "reason": "footprint 0 · polar_gt 동일",
+   "verdict_t1": "장식",
+   "verdict_t2": "장식",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "scene06",
+   "cue": "cue_railing",
+   "cue_short": "R",
+   "arm": "Brail",
+   "bond": "HZ",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Brail",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/test/scene06",
+   "dir_b": "dataset/260825_v3w0_cuecls_Brail/test/scene06",
+   "hm_sha_a": "88b39bdbb65f607e",
+   "hm_sha_b": "783823953e98f218",
+   "n_prims_a": 1450,
+   "n_prims_b": 1228,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_railing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 6.251062,
+   "hm_cells_changed": 1924,
+   "dz_signed_min": -6.251062,
+   "dz_signed_max": 0.000313,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 0,
+    "dcue_cells": 1924,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.0,
+    "locus": "평지"
+   },
+   "rgb_mean_abs_lsb": 1.20958,
+   "rgb_frac_px_changed": 0.572121,
+   "cells_raw_a": 0,
+   "cells_raw_b": 0,
+   "d_cells_raw": 0,
+   "cells_kept_max_a": 0,
+   "cells_kept_max_b": 0,
+   "max_diff_a": 0.0003,
+   "max_diff_b": 0.0,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "tier_b": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "verdict": "장식",
+   "subtype": "지형외",
+   "reason": "footprint 0 · polar_gt 동일",
+   "verdict_t1": "장식",
+   "verdict_t2": "장식",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "scene08",
+   "cue": "cue_railing",
+   "cue_short": "R",
+   "arm": "Brail",
+   "bond": "HZ",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Brail",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/scene08",
+   "dir_b": "dataset/260825_v3w0_cuecls_Brail/train/scene08",
+   "hm_sha_a": "ea2425e4a5dcad11",
+   "hm_sha_b": "59853a53271e4332",
+   "n_prims_a": 688,
+   "n_prims_b": 530,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_railing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 0.294,
+   "hm_cells_changed": 79037,
+   "dz_signed_min": -0.294,
+   "dz_signed_max": 0.00075,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 66547,
+    "dcue_cells": 79037,
+    "dcue_in_fpA": 62879,
+    "dcue_in_lip_1m": 15108,
+    "dz_max_in_fpA": 0.000375,
+    "locus": "낙차면"
+   },
+   "rgb_mean_abs_lsb": 6.28683,
+   "rgb_frac_px_changed": 0.673066,
+   "cells_raw_a": 66547,
+   "cells_raw_b": 66552,
+   "d_cells_raw": 5,
+   "cells_kept_max_a": 64965,
+   "cells_kept_max_b": 64967,
+   "max_diff_a": 4.5066,
+   "max_diff_b": 4.5063,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "V",
+    "V",
+    "V",
+    "H_weak"
+   ],
+   "tier_b": [
+    "V",
+    "V",
+    "V",
+    "H_weak"
+   ],
+   "verdict": "구조물",
+   "reason": "footprint",
+   "verdict_t1": "구조물",
+   "verdict_t2": "구조물",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "scene10",
+   "cue": "cue_railing",
+   "cue_short": "R",
+   "arm": "Brail",
+   "bond": "HZ",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Brail",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/test/scene10",
+   "dir_b": "dataset/260825_v3w0_cuecls_Brail/test/scene10",
+   "hm_sha_a": "4ff62649ededf92b",
+   "hm_sha_b": "f5d6c352f3e0e7ec",
+   "n_prims_a": 1174,
+   "n_prims_b": 374,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_railing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 1.895,
+   "hm_cells_changed": 2858,
+   "dz_signed_min": -1.895,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 11225,
+    "dcue_cells": 2858,
+    "dcue_in_fpA": 1001,
+    "dcue_in_lip_1m": 542,
+    "dz_max_in_fpA": 1.895,
+    "locus": "낙차면"
+   },
+   "rgb_mean_abs_lsb": 9.35059,
+   "rgb_frac_px_changed": 0.841698,
+   "cells_raw_a": 11225,
+   "cells_raw_b": 11310,
+   "d_cells_raw": 85,
+   "cells_kept_max_a": 11225,
+   "cells_kept_max_b": 11310,
+   "max_diff_a": 4.05,
+   "max_diff_b": 4.05,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "V"
+   ],
+   "tier_b": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "V"
+   ],
+   "verdict": "구조물",
+   "reason": "footprint",
+   "verdict_t1": "구조물",
+   "verdict_t2": "구조물",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "scene16",
+   "cue": "cue_railing",
+   "cue_short": "R",
+   "arm": "Brail",
+   "bond": "HZ",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Brail",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/scene16",
+   "dir_b": "dataset/260825_v3w0_cuecls_Brail/train/scene16",
+   "hm_sha_a": "7ecb8062c6b262bc",
+   "hm_sha_b": "7ecb8062c6b262bc",
+   "n_prims_a": 743,
+   "n_prims_b": 673,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_railing\": false}",
+   "grid_same": true,
+   "hm_identical": true,
+   "dz_max": 0.0,
+   "hm_cells_changed": 0,
+   "dz_signed_min": 0.0,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 356,
+    "dcue_cells": 0,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.0,
+    "locus": "평지"
+   },
+   "rgb_mean_abs_lsb": 5.74355,
+   "rgb_frac_px_changed": 0.82471,
+   "cells_raw_a": 356,
+   "cells_raw_b": 356,
+   "d_cells_raw": 0,
+   "cells_kept_max_a": 42,
+   "cells_kept_max_b": 42,
+   "max_diff_a": 1.4656,
+   "max_diff_b": 1.4656,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "H",
+    "H",
+    "none_in_fov",
+    "H"
+   ],
+   "tier_b": [
+    "H",
+    "H",
+    "none_in_fov",
+    "H"
+   ],
+   "verdict": "장식",
+   "subtype": "완전",
+   "reason": "footprint 0 · polar_gt 동일",
+   "verdict_t1": "장식",
+   "verdict_t2": "장식",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "scene21",
+   "cue": "cue_railing",
+   "cue_short": "R",
+   "arm": "Brail",
+   "bond": "HZ",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Brail",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/scene21",
+   "dir_b": "dataset/260825_v3w0_cuecls_Brail/train/scene21",
+   "hm_sha_a": "8347f5c2a9daded4",
+   "hm_sha_b": "e32300850473fc8b",
+   "n_prims_a": 364,
+   "n_prims_b": 218,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_railing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 3.68,
+   "hm_cells_changed": 264,
+   "dz_signed_min": -3.68,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 14456,
+    "dcue_cells": 264,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 264,
+    "dz_max_in_fpA": 0.0,
+    "locus": "립근방"
+   },
+   "rgb_mean_abs_lsb": 6.74352,
+   "rgb_frac_px_changed": 0.407467,
+   "cells_raw_a": 14456,
+   "cells_raw_b": 14664,
+   "d_cells_raw": 208,
+   "cells_kept_max_a": 14456,
+   "cells_kept_max_b": 14664,
+   "max_diff_a": 2.75,
+   "max_diff_b": 2.75,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "V",
+    "V",
+    "V",
+    "E"
+   ],
+   "tier_b": [
+    "V",
+    "V",
+    "V",
+    "E"
+   ],
+   "verdict": "판정불가",
+   "reason": "검정 불일치 (t1=구조물 · t2=장식) — cue-대칭 off팔 없음",
+   "verdict_t1": "구조물",
+   "verdict_t2": "장식",
+   "verdicts_agree": false
+  },
+  {
+   "scene": "sceneC1",
+   "cue": "cue_railing",
+   "cue_short": "R",
+   "arm": "Brail",
+   "bond": "HZ",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Brail",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/sceneC1",
+   "dir_b": "dataset/260825_v3w0_cuecls_Brail/train/sceneC1",
+   "hm_sha_a": "13e243cd6d80ca99",
+   "hm_sha_b": "fe38200920e72072",
+   "n_prims_a": 490,
+   "n_prims_b": 431,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_railing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 0.968,
+   "hm_cells_changed": 99,
+   "dz_signed_min": -0.968,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L4__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L4__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L4__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L4__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 68846,
+    "dcue_cells": 99,
+    "dcue_in_fpA": 2,
+    "dcue_in_lip_1m": 77,
+    "dz_max_in_fpA": 0.869,
+    "locus": "낙차면"
+   },
+   "rgb_mean_abs_lsb": 2.84671,
+   "rgb_frac_px_changed": 0.854671,
+   "cells_raw_a": 68846,
+   "cells_raw_b": 68846,
+   "d_cells_raw": 0,
+   "cells_kept_max_a": 68846,
+   "cells_kept_max_b": 68846,
+   "max_diff_a": 2.042,
+   "max_diff_b": 2.042,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "tier_b": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "verdict": "판정불가",
+   "reason": "검정 불일치 (t1=장식 · t2=구조물) — cue-대칭 off팔 없음",
+   "verdict_t1": "장식",
+   "verdict_t2": "구조물",
+   "verdicts_agree": false
+  },
+  {
+   "scene": "sceneC4",
+   "cue": "cue_railing",
+   "cue_short": "R",
+   "arm": "Brail",
+   "bond": "HZ",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Brail",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/sceneC4",
+   "dir_b": "dataset/260825_v3w0_cuecls_Brail/train/sceneC4",
+   "hm_sha_a": "8e96dce49f5f9309",
+   "hm_sha_b": "f1985d1ea0058073",
+   "n_prims_a": 778,
+   "n_prims_b": 636,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_railing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 0.93,
+   "hm_cells_changed": 246,
+   "dz_signed_min": -0.93,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 67482,
+    "dcue_cells": 246,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 194,
+    "dz_max_in_fpA": 0.0,
+    "locus": "립근방"
+   },
+   "rgb_mean_abs_lsb": 1.10125,
+   "rgb_frac_px_changed": 0.411147,
+   "cells_raw_a": 67482,
+   "cells_raw_b": 67482,
+   "d_cells_raw": 0,
+   "cells_kept_max_a": 67482,
+   "cells_kept_max_b": 67482,
+   "max_diff_a": 2.102,
+   "max_diff_b": 2.102,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "tier_b": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "verdict": "장식",
+   "subtype": "지형외",
+   "reason": "footprint 0 · polar_gt 동일",
+   "verdict_t1": "장식",
+   "verdict_t2": "장식",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "scene02",
+   "cue": "cue_nosing",
+   "cue_short": "N",
+   "arm": "Bnose",
+   "bond": "HZ",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bnose",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/val/scene02",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bnose/val/scene02",
+   "hm_sha_a": "022f007892a56839",
+   "hm_sha_b": "022f007892a56839",
+   "n_prims_a": 510,
+   "n_prims_b": 490,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_nosing\": false}",
+   "grid_same": true,
+   "hm_identical": true,
+   "dz_max": 0.0,
+   "hm_cells_changed": 0,
+   "dz_signed_min": 0.0,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 427,
+    "dcue_cells": 0,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.0,
+    "locus": "평지"
+   },
+   "rgb_mean_abs_lsb": 0.20918,
+   "rgb_frac_px_changed": 0.346765,
+   "cells_raw_a": 427,
+   "cells_raw_b": 427,
+   "d_cells_raw": 0,
+   "cells_kept_max_a": 0,
+   "cells_kept_max_b": 0,
+   "max_diff_a": 0.9164,
+   "max_diff_b": 0.9164,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "tier_b": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "verdict": "장식",
+   "subtype": "완전",
+   "reason": "footprint 0 · polar_gt 동일",
+   "verdict_t1": "장식",
+   "verdict_t2": "장식",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "scene16",
+   "cue": "cue_nosing",
+   "cue_short": "N",
+   "arm": "Bnose",
+   "bond": "HZ",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bnose",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/scene16",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bnose/train/scene16",
+   "hm_sha_a": "7ecb8062c6b262bc",
+   "hm_sha_b": "7ecb8062c6b262bc",
+   "n_prims_a": 743,
+   "n_prims_b": 703,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_nosing\": false}",
+   "grid_same": true,
+   "hm_identical": true,
+   "dz_max": 0.0,
+   "hm_cells_changed": 0,
+   "dz_signed_min": 0.0,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 356,
+    "dcue_cells": 0,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.0,
+    "locus": "평지"
+   },
+   "rgb_mean_abs_lsb": 1.56962,
+   "rgb_frac_px_changed": 0.786667,
+   "cells_raw_a": 356,
+   "cells_raw_b": 356,
+   "d_cells_raw": 0,
+   "cells_kept_max_a": 42,
+   "cells_kept_max_b": 42,
+   "max_diff_a": 1.4656,
+   "max_diff_b": 1.4656,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "H",
+    "H",
+    "none_in_fov",
+    "H"
+   ],
+   "tier_b": [
+    "H",
+    "H",
+    "none_in_fov",
+    "H"
+   ],
+   "verdict": "장식",
+   "subtype": "완전",
+   "reason": "footprint 0 · polar_gt 동일",
+   "verdict_t1": "장식",
+   "verdict_t2": "장식",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "scene21",
+   "cue": "cue_nosing",
+   "cue_short": "N",
+   "arm": "Bnose",
+   "bond": "HZ",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bnose",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/scene21",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bnose/train/scene21",
+   "hm_sha_a": "8347f5c2a9daded4",
+   "hm_sha_b": "ec114f674151c300",
+   "n_prims_a": 364,
+   "n_prims_b": 346,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_nosing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 2.001,
+   "hm_cells_changed": 2919,
+   "dz_signed_min": -2.001,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 14456,
+    "dcue_cells": 2919,
+    "dcue_in_fpA": 2641,
+    "dcue_in_lip_1m": 278,
+    "dz_max_in_fpA": 2.001,
+    "locus": "낙차면"
+   },
+   "rgb_mean_abs_lsb": 0.7967,
+   "rgb_frac_px_changed": 0.3387,
+   "cells_raw_a": 14456,
+   "cells_raw_b": 14456,
+   "d_cells_raw": 0,
+   "cells_kept_max_a": 14456,
+   "cells_kept_max_b": 14456,
+   "max_diff_a": 2.75,
+   "max_diff_b": 2.75,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "V",
+    "V",
+    "V",
+    "E"
+   ],
+   "tier_b": [
+    "V",
+    "V",
+    "V",
+    "E"
+   ],
+   "verdict": "판정불가",
+   "reason": "검정 불일치 (t1=장식 · t2=구조물) — cue-대칭 off팔 없음",
+   "verdict_t1": "장식",
+   "verdict_t2": "구조물",
+   "verdicts_agree": false
+  },
+  {
+   "scene": "sceneC1",
+   "cue": "cue_nosing",
+   "cue_short": "N",
+   "arm": "Bnose",
+   "bond": "HZ",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bnose",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/sceneC1",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bnose/train/sceneC1",
+   "hm_sha_a": "13e243cd6d80ca99",
+   "hm_sha_b": "13e243cd6d80ca99",
+   "n_prims_a": 490,
+   "n_prims_b": 478,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_nosing\": false}",
+   "grid_same": true,
+   "hm_identical": true,
+   "dz_max": 0.0,
+   "hm_cells_changed": 0,
+   "dz_signed_min": 0.0,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L4__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L4__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L4__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L4__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 68846,
+    "dcue_cells": 0,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.0,
+    "locus": "평지"
+   },
+   "rgb_mean_abs_lsb": 1.7054,
+   "rgb_frac_px_changed": 0.844099,
+   "cells_raw_a": 68846,
+   "cells_raw_b": 68846,
+   "d_cells_raw": 0,
+   "cells_kept_max_a": 68846,
+   "cells_kept_max_b": 68846,
+   "max_diff_a": 2.042,
+   "max_diff_b": 2.042,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "tier_b": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "verdict": "장식",
+   "subtype": "완전",
+   "reason": "footprint 0 · polar_gt 동일",
+   "verdict_t1": "장식",
+   "verdict_t2": "장식",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "sceneD1",
+   "cue": "cue_nosing",
+   "cue_short": "N",
+   "arm": "Bnose",
+   "bond": "HZ",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bnose",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/val/sceneD1",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bnose/val/sceneD1",
+   "hm_sha_a": "44536a8d1b15c6ff",
+   "hm_sha_b": "00927663e0b18bcb",
+   "n_prims_a": 316,
+   "n_prims_b": 226,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_nosing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 0.0035,
+   "hm_cells_changed": 2091,
+   "dz_signed_min": -0.0035,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 94647,
+    "dcue_cells": 2091,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 2091,
+    "dz_max_in_fpA": 0.0,
+    "locus": "립근방"
+   },
+   "rgb_mean_abs_lsb": 2.04373,
+   "rgb_frac_px_changed": 0.524491,
+   "cells_raw_a": 94647,
+   "cells_raw_b": 94647,
+   "d_cells_raw": 0,
+   "cells_kept_max_a": 94647,
+   "cells_kept_max_b": 94647,
+   "max_diff_a": 1.2,
+   "max_diff_b": 1.2,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "tier_b": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "verdict": "장식",
+   "subtype": "지형외",
+   "reason": "footprint 0 · polar_gt 동일",
+   "verdict_t1": "장식",
+   "verdict_t2": "장식",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "sceneC1",
+   "cue": "cue_tactile",
+   "cue_short": "Ta",
+   "arm": "Btact",
+   "bond": "ABSENT",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Btact",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/sceneC1",
+   "dir_b": "dataset/260825_v3w0_cuecls_Btact/train/sceneC1",
+   "hm_sha_a": "13e243cd6d80ca99",
+   "hm_sha_b": "13e243cd6d80ca99",
+   "n_prims_a": 490,
+   "n_prims_b": 489,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_tactile\": false}",
+   "grid_same": true,
+   "hm_identical": true,
+   "dz_max": 0.0,
+   "hm_cells_changed": 0,
+   "dz_signed_min": 0.0,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L4__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L4__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L4__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L4__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 68846,
+    "dcue_cells": 0,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.0,
+    "locus": "평지"
+   },
+   "rgb_mean_abs_lsb": 0.16476,
+   "rgb_frac_px_changed": 0.318201,
+   "cells_raw_a": 68846,
+   "cells_raw_b": 68846,
+   "d_cells_raw": 0,
+   "cells_kept_max_a": 68846,
+   "cells_kept_max_b": 68846,
+   "max_diff_a": 2.042,
+   "max_diff_b": 2.042,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "tier_b": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "verdict": "장식",
+   "subtype": "완전",
+   "reason": "footprint 0 · polar_gt 동일",
+   "verdict_t1": "장식",
+   "verdict_t2": "장식",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "sceneC4",
+   "cue": "cue_tactile",
+   "cue_short": "Ta",
+   "arm": "Btact",
+   "bond": "ABSENT",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Btact",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/sceneC4",
+   "dir_b": "dataset/260825_v3w0_cuecls_Btact/train/sceneC4",
+   "hm_sha_a": "8e96dce49f5f9309",
+   "hm_sha_b": "689b2e92b2981297",
+   "n_prims_a": 778,
+   "n_prims_b": 777,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_tactile\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 0.006,
+   "hm_cells_changed": 912,
+   "dz_signed_min": -0.006,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 67482,
+    "dcue_cells": 912,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.0,
+    "locus": "평지"
+   },
+   "rgb_mean_abs_lsb": 3.74892,
+   "rgb_frac_px_changed": 0.393041,
+   "cells_raw_a": 67482,
+   "cells_raw_b": 67482,
+   "d_cells_raw": 0,
+   "cells_kept_max_a": 67482,
+   "cells_kept_max_b": 67482,
+   "max_diff_a": 2.102,
+   "max_diff_b": 2.102,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "tier_b": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "verdict": "장식",
+   "subtype": "지형외",
+   "reason": "footprint 0 · polar_gt 동일",
+   "verdict_t1": "장식",
+   "verdict_t2": "장식",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "scene06",
+   "cue": "cue_material_break",
+   "cue_short": "T",
+   "arm": "Bmatl",
+   "bond": "free",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bmatl",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/test/scene06",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bmatl/test/scene06",
+   "hm_sha_a": "88b39bdbb65f607e",
+   "hm_sha_b": "9cf9987540d099e9",
+   "n_prims_a": 1450,
+   "n_prims_b": 1414,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_material_break\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 5.2e-05,
+   "hm_cells_changed": 2154,
+   "dz_signed_min": 0.0,
+   "dz_signed_max": 5.2e-05,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 3,
+     "datum_tol": 1,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0015,
+    "pose_delta_max": 0.0015,
+    "datum_verdict": "datum_tol",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0015,
+      "tier": "datum_tol",
+      "d_pose_max": 0.0015
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 0,
+    "dcue_cells": 2154,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.0,
+    "locus": "평지"
+   },
+   "rgb_mean_abs_lsb": 5.65164,
+   "rgb_frac_px_changed": 0.609847,
+   "cells_raw_a": 0,
+   "cells_raw_b": 0,
+   "d_cells_raw": 0,
+   "cells_kept_max_a": 0,
+   "cells_kept_max_b": 0,
+   "max_diff_a": 0.0003,
+   "max_diff_b": 0.0003,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "tier_b": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "verdict": "장식",
+   "subtype": "지형외",
+   "reason": "footprint 0 · polar_gt 동일",
+   "verdict_t1": "장식",
+   "verdict_t2": "장식",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "sceneN1",
+   "cue": "cue_material_break",
+   "cue_short": "T",
+   "arm": "Bmatl",
+   "bond": "free",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bmatl",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/sceneN1",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bmatl/train/sceneN1",
+   "hm_sha_a": "6b2ebb53aef0ff62",
+   "hm_sha_b": "80f7a973da9bee6c",
+   "n_prims_a": 597,
+   "n_prims_b": 533,
+   "arm_config_a": "{\"hazard_shadow_band\": true}",
+   "arm_config_b": "{\"hazard_shadow_band\": true, \"cue_material_break\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 0.001,
+   "hm_cells_changed": 6551,
+   "dz_signed_min": -0.001,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 3,
+     "datum_tol": 1,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.001,
+    "pose_delta_max": 0.001,
+    "datum_verdict": "datum_tol",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.001,
+      "tier": "datum_tol",
+      "d_pose_max": 0.001
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 0,
+    "dcue_cells": 6551,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.0,
+    "locus": "평지"
+   },
+   "rgb_mean_abs_lsb": 3.24284,
+   "rgb_frac_px_changed": 0.660857,
+   "cells_raw_a": 0,
+   "cells_raw_b": 0,
+   "d_cells_raw": 0,
+   "cells_kept_max_a": 0,
+   "cells_kept_max_b": 0,
+   "max_diff_a": 0.0,
+   "max_diff_b": 0.001,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "tier_b": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "verdict": "장식",
+   "subtype": "지형외",
+   "reason": "footprint 0 · polar_gt 동일",
+   "verdict_t1": "장식",
+   "verdict_t2": "장식",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "sceneN2",
+   "cue": "cue_material_break",
+   "cue_short": "T",
+   "arm": "Bmatl",
+   "bond": "hz?",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bmatl",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/sceneN2",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bmatl/train/sceneN2",
+   "hm_sha_a": "ad2cb90200ba2fa1",
+   "hm_sha_b": "34ee6e1d3b65bb00",
+   "n_prims_a": 846,
+   "n_prims_b": 805,
+   "arm_config_a": "{\"hazard_asphalt_patch\": true}",
+   "arm_config_b": "{\"hazard_asphalt_patch\": true, \"cue_material_break\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 0.0012,
+   "hm_cells_changed": 2858,
+   "dz_signed_min": -0.0012,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 0,
+    "dcue_cells": 2858,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.0,
+    "locus": "평지"
+   },
+   "rgb_mean_abs_lsb": 2.40184,
+   "rgb_frac_px_changed": 0.602265,
+   "cells_raw_a": 0,
+   "cells_raw_b": 0,
+   "d_cells_raw": 0,
+   "cells_kept_max_a": 0,
+   "cells_kept_max_b": 0,
+   "max_diff_a": 0.0,
+   "max_diff_b": 0.0006,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "tier_b": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "verdict": "장식",
+   "subtype": "지형외",
+   "reason": "footprint 0 · polar_gt 동일",
+   "verdict_t1": "장식",
+   "verdict_t2": "장식",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "sceneN5",
+   "cue": "cue_material_break",
+   "cue_short": "T",
+   "arm": "Bmatl",
+   "bond": "free",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bmatl",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/sceneN5",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bmatl/train/sceneN5",
+   "hm_sha_a": "631a589f0b4ec441",
+   "hm_sha_b": "2db5ecc23036ad0c",
+   "n_prims_a": 1113,
+   "n_prims_b": 1087,
+   "arm_config_a": "{\"hazard_flush_grating\": true}",
+   "arm_config_b": "{\"hazard_flush_grating\": true, \"cue_material_break\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 0.0006,
+   "hm_cells_changed": 685,
+   "dz_signed_min": -0.0006,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 0,
+    "dcue_cells": 685,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.0,
+    "locus": "평지"
+   },
+   "rgb_mean_abs_lsb": 1.07689,
+   "rgb_frac_px_changed": 0.50182,
+   "cells_raw_a": 0,
+   "cells_raw_b": 0,
+   "d_cells_raw": 0,
+   "cells_kept_max_a": 0,
+   "cells_kept_max_b": 0,
+   "max_diff_a": 0.0,
+   "max_diff_b": 0.0006,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "tier_b": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "verdict": "장식",
+   "subtype": "지형외",
+   "reason": "footprint 0 · polar_gt 동일",
+   "verdict_t1": "장식",
+   "verdict_t2": "장식",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "scene01",
+   "cue": "cue_scene_dressing",
+   "cue_short": "V",
+   "arm": "Bdress",
+   "bond": "free",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bdress",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/val/scene01",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bdress/val/scene01",
+   "hm_sha_a": "3b763c20439f2359",
+   "hm_sha_b": "af0d79d75c8ca430",
+   "n_prims_a": 370,
+   "n_prims_b": 112,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_scene_dressing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 6.0,
+   "hm_cells_changed": 9021,
+   "dz_signed_min": -6.0,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 75866,
+    "dcue_cells": 9021,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 7651,
+    "dz_max_in_fpA": 0.0,
+    "locus": "립근방"
+   },
+   "rgb_mean_abs_lsb": 37.47031,
+   "rgb_frac_px_changed": 0.883752,
+   "cells_raw_a": 75866,
+   "cells_raw_b": 84887,
+   "d_cells_raw": 9021,
+   "cells_kept_max_a": 75866,
+   "cells_kept_max_b": 84399,
+   "max_diff_a": 0.6,
+   "max_diff_b": 6.0,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "tier_b": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "verdict": "판정불가",
+   "reason": "검정 불일치 (t1=구조물 · t2=장식) — cue-대칭 off팔 없음",
+   "verdict_t1": "구조물",
+   "verdict_t2": "장식",
+   "verdicts_agree": false
+  },
+  {
+   "scene": "scene02",
+   "cue": "cue_scene_dressing",
+   "cue_short": "V",
+   "arm": "Bdress",
+   "bond": "hz?",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bdress",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/val/scene02",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bdress/val/scene02",
+   "hm_sha_a": "022f007892a56839",
+   "hm_sha_b": "9729b96656b627f3",
+   "n_prims_a": 510,
+   "n_prims_b": 179,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_scene_dressing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 6.04,
+   "hm_cells_changed": 62752,
+   "dz_signed_min": -6.04,
+   "dz_signed_max": 0.029793,
+   "void_delta": -207,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 3,
+     "datum_tol": 0,
+     "datum_fail": 1
+    },
+    "ground_z_drift_max": 2.84,
+    "pose_delta_max": 2.84,
+    "datum_verdict": "datum_fail",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 2.84,
+      "tier": "datum_fail",
+      "d_pose_max": 2.84
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 427,
+    "dcue_cells": 62752,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 338,
+    "dz_max_in_fpA": 0.0,
+    "locus": "립근방"
+   },
+   "rgb_mean_abs_lsb": 44.64006,
+   "rgb_frac_px_changed": 0.999813,
+   "cells_raw_a": 427,
+   "cells_raw_b": 12023,
+   "d_cells_raw": 11596,
+   "cells_kept_max_a": 0,
+   "cells_kept_max_b": 10913,
+   "max_diff_a": 0.9164,
+   "max_diff_b": 6.0401,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 4,
+   "polar_gt_diff_frames": [
+    "L0__s20260819__0000.png",
+    "L0__s20260819__0001.png",
+    "L0__s20260819__0002.png",
+    "L0__s20260819__0003.png"
+   ],
+   "tier_a": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "tier_b": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "verdict": "판정불가",
+   "reason": "검정 불일치 (t1=구조물 · t2=장식) — cue-대칭 off팔 없음",
+   "verdict_t1": "구조물",
+   "verdict_t2": "장식",
+   "verdicts_agree": false
+  },
+  {
+   "scene": "scene03",
+   "cue": "cue_scene_dressing",
+   "cue_short": "V",
+   "arm": "Bdress",
+   "bond": "HZ",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bdress",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/scene03",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bdress/train/scene03",
+   "hm_sha_a": "8cb81afb77dd1040",
+   "hm_sha_b": "38e5ab26bbc160c3",
+   "n_prims_a": 1202,
+   "n_prims_b": 1150,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_scene_dressing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 0.9305,
+   "hm_cells_changed": 835,
+   "dz_signed_min": -0.9305,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 67695,
+    "dcue_cells": 835,
+    "dcue_in_fpA": 811,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.9005,
+    "locus": "낙차면"
+   },
+   "rgb_mean_abs_lsb": 4.57313,
+   "rgb_frac_px_changed": 0.641569,
+   "cells_raw_a": 67695,
+   "cells_raw_b": 67695,
+   "d_cells_raw": 0,
+   "cells_kept_max_a": 64592,
+   "cells_kept_max_b": 64592,
+   "max_diff_a": 3.2035,
+   "max_diff_b": 3.2035,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "tier_b": [
+    "H",
+    "H",
+    "H",
+    "V"
+   ],
+   "verdict": "판정불가",
+   "reason": "검정 불일치 (t1=장식 · t2=구조물) — cue-대칭 off팔 없음",
+   "verdict_t1": "장식",
+   "verdict_t2": "구조물",
+   "verdicts_agree": false
+  },
+  {
+   "scene": "scene04",
+   "cue": "cue_scene_dressing",
+   "cue_short": "V",
+   "arm": "Bdress",
+   "bond": "free",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bdress",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/scene04",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bdress/train/scene04",
+   "hm_sha_a": "c95bcdbe7ea1e5e4",
+   "hm_sha_b": "936e0a3334cd8120",
+   "n_prims_a": 486,
+   "n_prims_b": 284,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_scene_dressing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 4.09,
+   "hm_cells_changed": 35844,
+   "dz_signed_min": -4.09,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 3,
+     "datum_tol": 1,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.005,
+    "pose_delta_max": 0.005,
+    "datum_verdict": "datum_tol",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.005,
+      "tier": "datum_tol",
+      "d_pose_max": 0.005
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 53543,
+    "dcue_cells": 35844,
+    "dcue_in_fpA": 27130,
+    "dcue_in_lip_1m": 3456,
+    "dz_max_in_fpA": 0.969633,
+    "locus": "낙차면"
+   },
+   "rgb_mean_abs_lsb": 31.97007,
+   "rgb_frac_px_changed": 0.931255,
+   "cells_raw_a": 53543,
+   "cells_raw_b": 57430,
+   "d_cells_raw": 3887,
+   "cells_kept_max_a": 53543,
+   "cells_kept_max_b": 57301,
+   "max_diff_a": 1.4501,
+   "max_diff_b": 4.09,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 2,
+   "polar_gt_diff_frames": [
+    "L0__s20260819__0000.png",
+    "L0__s20260819__0002.png"
+   ],
+   "tier_a": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "tier_b": [
+    "H",
+    "V",
+    "V",
+    "V"
+   ],
+   "verdict": "구조물",
+   "reason": "footprint+polar_gt",
+   "verdict_t1": "구조물",
+   "verdict_t2": "구조물",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "scene06",
+   "cue": "cue_scene_dressing",
+   "cue_short": "V",
+   "arm": "Bdress",
+   "bond": "free",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bdress",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/test/scene06",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bdress/test/scene06",
+   "hm_sha_a": "88b39bdbb65f607e",
+   "hm_sha_b": "88b39bdbb65f607e",
+   "n_prims_a": 1450,
+   "n_prims_b": 731,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_scene_dressing\": false}",
+   "grid_same": true,
+   "hm_identical": true,
+   "dz_max": 0.0,
+   "hm_cells_changed": 0,
+   "dz_signed_min": 0.0,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 0,
+    "dcue_cells": 0,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.0,
+    "locus": "평지"
+   },
+   "rgb_mean_abs_lsb": 10.87791,
+   "rgb_frac_px_changed": 0.686373,
+   "cells_raw_a": 0,
+   "cells_raw_b": 0,
+   "d_cells_raw": 0,
+   "cells_kept_max_a": 0,
+   "cells_kept_max_b": 0,
+   "max_diff_a": 0.0003,
+   "max_diff_b": 0.0003,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "tier_b": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "verdict": "장식",
+   "subtype": "완전",
+   "reason": "footprint 0 · polar_gt 동일",
+   "verdict_t1": "장식",
+   "verdict_t2": "장식",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "scene08",
+   "cue": "cue_scene_dressing",
+   "cue_short": "V",
+   "arm": "Bdress",
+   "bond": "free",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bdress",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/scene08",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bdress/train/scene08",
+   "hm_sha_a": "ea2425e4a5dcad11",
+   "hm_sha_b": "64cc680d2c1a6509",
+   "n_prims_a": 688,
+   "n_prims_b": 421,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_scene_dressing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 0.00025,
+   "hm_cells_changed": 28,
+   "dz_signed_min": -0.00025,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 66547,
+    "dcue_cells": 28,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.0,
+    "locus": "평지"
+   },
+   "rgb_mean_abs_lsb": 19.70267,
+   "rgb_frac_px_changed": 0.93211,
+   "cells_raw_a": 66547,
+   "cells_raw_b": 66547,
+   "d_cells_raw": 0,
+   "cells_kept_max_a": 64965,
+   "cells_kept_max_b": 64965,
+   "max_diff_a": 4.5066,
+   "max_diff_b": 4.5066,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "V",
+    "V",
+    "V",
+    "H_weak"
+   ],
+   "tier_b": [
+    "V",
+    "V",
+    "V",
+    "H_weak"
+   ],
+   "verdict": "장식",
+   "subtype": "지형외",
+   "reason": "footprint 0 · polar_gt 동일",
+   "verdict_t1": "장식",
+   "verdict_t2": "장식",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "scene09",
+   "cue": "cue_scene_dressing",
+   "cue_short": "V",
+   "arm": "Bdress",
+   "bond": "free",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bdress",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/scene09",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bdress/train/scene09",
+   "hm_sha_a": "9523e4e60551c426",
+   "hm_sha_b": "696107ced66af9c9",
+   "n_prims_a": 2231,
+   "n_prims_b": 1167,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_scene_dressing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 4.29,
+   "hm_cells_changed": 992,
+   "dz_signed_min": -4.29,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 87954,
+    "dcue_cells": 992,
+    "dcue_in_fpA": 79,
+    "dcue_in_lip_1m": 14,
+    "dz_max_in_fpA": 1.800586,
+    "locus": "낙차면"
+   },
+   "rgb_mean_abs_lsb": 1.02537,
+   "rgb_frac_px_changed": 0.320685,
+   "cells_raw_a": 87954,
+   "cells_raw_b": 88867,
+   "d_cells_raw": 913,
+   "cells_kept_max_a": 87954,
+   "cells_kept_max_b": 87954,
+   "max_diff_a": 5.2065,
+   "max_diff_b": 5.2065,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "V",
+    "H",
+    "V",
+    "H"
+   ],
+   "tier_b": [
+    "V",
+    "H",
+    "H",
+    "H"
+   ],
+   "verdict": "구조물",
+   "reason": "footprint",
+   "verdict_t1": "구조물",
+   "verdict_t2": "구조물",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "scene10",
+   "cue": "cue_scene_dressing",
+   "cue_short": "V",
+   "arm": "Bdress",
+   "bond": "free",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bdress",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/test/scene10",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bdress/test/scene10",
+   "hm_sha_a": "4ff62649ededf92b",
+   "hm_sha_b": "98bf54913a9f0f14",
+   "n_prims_a": 1174,
+   "n_prims_b": 1128,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_scene_dressing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 2.58,
+   "hm_cells_changed": 4053,
+   "dz_signed_min": -2.58,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 11225,
+    "dcue_cells": 4053,
+    "dcue_in_fpA": 240,
+    "dcue_in_lip_1m": 40,
+    "dz_max_in_fpA": 0.45,
+    "locus": "낙차면"
+   },
+   "rgb_mean_abs_lsb": 5.79624,
+   "rgb_frac_px_changed": 0.879383,
+   "cells_raw_a": 11225,
+   "cells_raw_b": 14986,
+   "d_cells_raw": 3761,
+   "cells_kept_max_a": 11225,
+   "cells_kept_max_b": 11265,
+   "max_diff_a": 4.05,
+   "max_diff_b": 4.05,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "V"
+   ],
+   "tier_b": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "V"
+   ],
+   "verdict": "구조물",
+   "reason": "footprint",
+   "verdict_t1": "구조물",
+   "verdict_t2": "구조물",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "scene16",
+   "cue": "cue_scene_dressing",
+   "cue_short": "V",
+   "arm": "Bdress",
+   "bond": "free",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bdress",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/scene16",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bdress/train/scene16",
+   "hm_sha_a": "7ecb8062c6b262bc",
+   "hm_sha_b": "d8c32d4b2f5bb850",
+   "n_prims_a": 743,
+   "n_prims_b": 456,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_scene_dressing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 4.91,
+   "hm_cells_changed": 4484,
+   "dz_signed_min": -4.91,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 356,
+    "dcue_cells": 4484,
+    "dcue_in_fpA": 256,
+    "dcue_in_lip_1m": 3501,
+    "dz_max_in_fpA": 0.38365,
+    "locus": "낙차면"
+   },
+   "rgb_mean_abs_lsb": 17.31168,
+   "rgb_frac_px_changed": 0.98372,
+   "cells_raw_a": 356,
+   "cells_raw_b": 1096,
+   "d_cells_raw": 740,
+   "cells_kept_max_a": 42,
+   "cells_kept_max_b": 39,
+   "max_diff_a": 1.4656,
+   "max_diff_b": 1.8492,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "H",
+    "H",
+    "none_in_fov",
+    "H"
+   ],
+   "tier_b": [
+    "H",
+    "H",
+    "none_in_fov",
+    "H"
+   ],
+   "verdict": "구조물",
+   "reason": "footprint",
+   "verdict_t1": "구조물",
+   "verdict_t2": "구조물",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "scene21",
+   "cue": "cue_scene_dressing",
+   "cue_short": "V",
+   "arm": "Bdress",
+   "bond": "free",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bdress",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/scene21",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bdress/train/scene21",
+   "hm_sha_a": "8347f5c2a9daded4",
+   "hm_sha_b": "0281ed40159e0762",
+   "n_prims_a": 364,
+   "n_prims_b": 208,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_scene_dressing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 8.0,
+   "hm_cells_changed": 298,
+   "dz_signed_min": -8.0,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 14456,
+    "dcue_cells": 298,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.0,
+    "locus": "평지"
+   },
+   "rgb_mean_abs_lsb": 30.11377,
+   "rgb_frac_px_changed": 0.714242,
+   "cells_raw_a": 14456,
+   "cells_raw_b": 14754,
+   "d_cells_raw": 298,
+   "cells_kept_max_a": 14456,
+   "cells_kept_max_b": 14456,
+   "max_diff_a": 2.75,
+   "max_diff_b": 8.0,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "V",
+    "V",
+    "V",
+    "E"
+   ],
+   "tier_b": [
+    "V",
+    "V",
+    "V",
+    "E"
+   ],
+   "verdict": "판정불가",
+   "reason": "검정 불일치 (t1=구조물 · t2=장식) — cue-대칭 off팔 없음",
+   "verdict_t1": "구조물",
+   "verdict_t2": "장식",
+   "verdicts_agree": false
+  },
+  {
+   "scene": "sceneC1",
+   "cue": "cue_scene_dressing",
+   "cue_short": "V",
+   "arm": "Bdress",
+   "bond": "free",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bdress",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/sceneC1",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bdress/train/sceneC1",
+   "hm_sha_a": "13e243cd6d80ca99",
+   "hm_sha_b": "5f660aeb464dd52a",
+   "n_prims_a": 490,
+   "n_prims_b": 154,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_scene_dressing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 4.018667,
+   "hm_cells_changed": 4613,
+   "dz_signed_min": -4.018667,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L4__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L4__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L4__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L4__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 68846,
+    "dcue_cells": 4613,
+    "dcue_in_fpA": 3510,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.835,
+    "locus": "낙차면"
+   },
+   "rgb_mean_abs_lsb": 47.41521,
+   "rgb_frac_px_changed": 0.966731,
+   "cells_raw_a": 68846,
+   "cells_raw_b": 69949,
+   "d_cells_raw": 1103,
+   "cells_kept_max_a": 68846,
+   "cells_kept_max_b": 68846,
+   "max_diff_a": 2.042,
+   "max_diff_b": 4.0187,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "tier_b": [
+    "V",
+    "V",
+    "H",
+    "V"
+   ],
+   "verdict": "구조물",
+   "reason": "footprint",
+   "verdict_t1": "구조물",
+   "verdict_t2": "구조물",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "sceneC4",
+   "cue": "cue_scene_dressing",
+   "cue_short": "V",
+   "arm": "Bdress",
+   "bond": "free",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bdress",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/sceneC4",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bdress/train/sceneC4",
+   "hm_sha_a": "8e96dce49f5f9309",
+   "hm_sha_b": "385bf03f4cbedaeb",
+   "n_prims_a": 778,
+   "n_prims_b": 281,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_scene_dressing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 5.043559,
+   "hm_cells_changed": 8515,
+   "dz_signed_min": -5.043559,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 67482,
+    "dcue_cells": 8515,
+    "dcue_in_fpA": 5925,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 5.043559,
+    "locus": "낙차면"
+   },
+   "rgb_mean_abs_lsb": 48.57101,
+   "rgb_frac_px_changed": 0.995156,
+   "cells_raw_a": 67482,
+   "cells_raw_b": 70052,
+   "d_cells_raw": 2570,
+   "cells_kept_max_a": 67482,
+   "cells_kept_max_b": 67482,
+   "max_diff_a": 2.102,
+   "max_diff_b": 7.1456,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "tier_b": [
+    "V",
+    "V",
+    "V",
+    "H"
+   ],
+   "verdict": "구조물",
+   "reason": "footprint",
+   "verdict_t1": "구조물",
+   "verdict_t2": "구조물",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "sceneD1",
+   "cue": "cue_scene_dressing",
+   "cue_short": "V",
+   "arm": "Bdress",
+   "bond": "free",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bdress",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/val/sceneD1",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bdress/val/sceneD1",
+   "hm_sha_a": "44536a8d1b15c6ff",
+   "hm_sha_b": "b9d9f8278ad6e728",
+   "n_prims_a": 316,
+   "n_prims_b": 145,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_scene_dressing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 0.91,
+   "hm_cells_changed": 66,
+   "dz_signed_min": -0.91,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 94647,
+    "dcue_cells": 66,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 18,
+    "dz_max_in_fpA": 0.0,
+    "locus": "립근방"
+   },
+   "rgb_mean_abs_lsb": 17.19879,
+   "rgb_frac_px_changed": 0.944532,
+   "cells_raw_a": 94647,
+   "cells_raw_b": 94713,
+   "d_cells_raw": 66,
+   "cells_kept_max_a": 94647,
+   "cells_kept_max_b": 94656,
+   "max_diff_a": 1.2,
+   "max_diff_b": 1.2,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "tier_b": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "verdict": "판정불가",
+   "reason": "검정 불일치 (t1=구조물 · t2=장식) — cue-대칭 off팔 없음",
+   "verdict_t1": "구조물",
+   "verdict_t2": "장식",
+   "verdicts_agree": false
+  },
+  {
+   "scene": "sceneD2",
+   "cue": "cue_scene_dressing",
+   "cue_short": "V",
+   "arm": "Bdress",
+   "bond": "free",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bdress",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/sceneD2",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bdress/train/sceneD2",
+   "hm_sha_a": "a416fcde19ac629a",
+   "hm_sha_b": "d5f6f196803715f3",
+   "n_prims_a": 272,
+   "n_prims_b": 97,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_scene_dressing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 2.274364,
+   "hm_cells_changed": 5020,
+   "dz_signed_min": -2.274364,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 1160,
+    "dcue_cells": 5020,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.0,
+    "locus": "평지"
+   },
+   "rgb_mean_abs_lsb": 3.02168,
+   "rgb_frac_px_changed": 0.712709,
+   "cells_raw_a": 1160,
+   "cells_raw_b": 4289,
+   "d_cells_raw": 3129,
+   "cells_kept_max_a": 1160,
+   "cells_kept_max_b": 1160,
+   "max_diff_a": 2.9836,
+   "max_diff_b": 2.9836,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "V",
+    "E",
+    "V",
+    "E"
+   ],
+   "tier_b": [
+    "V",
+    "E",
+    "V",
+    "E"
+   ],
+   "verdict": "판정불가",
+   "reason": "검정 불일치 (t1=구조물 · t2=장식) — cue-대칭 off팔 없음",
+   "verdict_t1": "구조물",
+   "verdict_t2": "장식",
+   "verdicts_agree": false
+  },
+  {
+   "scene": "sceneD3",
+   "cue": "cue_scene_dressing",
+   "cue_short": "V",
+   "arm": "Bdress",
+   "bond": "free",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bdress",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/sceneD3",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bdress/train/sceneD3",
+   "hm_sha_a": "400e7d69391d687a",
+   "hm_sha_b": "a2511768302a721c",
+   "n_prims_a": 696,
+   "n_prims_b": 512,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_scene_dressing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 8.5,
+   "hm_cells_changed": 2644,
+   "dz_signed_min": -8.5,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 2520,
+    "dcue_cells": 2644,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.0,
+    "locus": "평지"
+   },
+   "rgb_mean_abs_lsb": 12.99278,
+   "rgb_frac_px_changed": 0.795207,
+   "cells_raw_a": 2520,
+   "cells_raw_b": 5164,
+   "d_cells_raw": 2644,
+   "cells_kept_max_a": 2520,
+   "cells_kept_max_b": 2520,
+   "max_diff_a": 0.8,
+   "max_diff_b": 8.5,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "tier_b": [
+    "V",
+    "V",
+    "V",
+    "V"
+   ],
+   "verdict": "판정불가",
+   "reason": "검정 불일치 (t1=구조물 · t2=장식) — cue-대칭 off팔 없음",
+   "verdict_t1": "구조물",
+   "verdict_t2": "장식",
+   "verdicts_agree": false
+  },
+  {
+   "scene": "sceneN1",
+   "cue": "cue_scene_dressing",
+   "cue_short": "V",
+   "arm": "Bdress",
+   "bond": "free",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bdress",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/sceneN1",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bdress/train/sceneN1",
+   "hm_sha_a": "6b2ebb53aef0ff62",
+   "hm_sha_b": "95580ec9429e4a5c",
+   "n_prims_a": 597,
+   "n_prims_b": 74,
+   "arm_config_a": "{\"hazard_shadow_band\": true}",
+   "arm_config_b": "{\"hazard_shadow_band\": true, \"cue_scene_dressing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 5.2,
+   "hm_cells_changed": 1486,
+   "dz_signed_min": -5.2,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 0,
+    "dcue_cells": 1486,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.0,
+    "locus": "평지"
+   },
+   "rgb_mean_abs_lsb": 18.1769,
+   "rgb_frac_px_changed": 0.920133,
+   "cells_raw_a": 0,
+   "cells_raw_b": 718,
+   "d_cells_raw": 718,
+   "cells_kept_max_a": 0,
+   "cells_kept_max_b": 0,
+   "max_diff_a": 0.0,
+   "max_diff_b": 5.2,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "tier_b": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "verdict": "판정불가",
+   "reason": "검정 불일치 (t1=구조물 · t2=장식) — cue-대칭 off팔 없음",
+   "verdict_t1": "구조물",
+   "verdict_t2": "장식",
+   "verdicts_agree": false
+  },
+  {
+   "scene": "sceneN2",
+   "cue": "cue_scene_dressing",
+   "cue_short": "V",
+   "arm": "Bdress",
+   "bond": "free",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bdress",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/sceneN2",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bdress/train/sceneN2",
+   "hm_sha_a": "ad2cb90200ba2fa1",
+   "hm_sha_b": "27d775e0387c403f",
+   "n_prims_a": 846,
+   "n_prims_b": 60,
+   "arm_config_a": "{\"hazard_asphalt_patch\": true}",
+   "arm_config_b": "{\"hazard_asphalt_patch\": true, \"cue_scene_dressing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 0.0038,
+   "hm_cells_changed": 4729,
+   "dz_signed_min": -0.0038,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 0,
+    "dcue_cells": 4729,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.0,
+    "locus": "평지"
+   },
+   "rgb_mean_abs_lsb": 17.54286,
+   "rgb_frac_px_changed": 0.972549,
+   "cells_raw_a": 0,
+   "cells_raw_b": 0,
+   "d_cells_raw": 0,
+   "cells_kept_max_a": 0,
+   "cells_kept_max_b": 0,
+   "max_diff_a": 0.0,
+   "max_diff_b": 0.0038,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "tier_b": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "verdict": "장식",
+   "subtype": "지형외",
+   "reason": "footprint 0 · polar_gt 동일",
+   "verdict_t1": "장식",
+   "verdict_t2": "장식",
+   "verdicts_agree": true
+  },
+  {
+   "scene": "sceneN4",
+   "cue": "cue_scene_dressing",
+   "cue_short": "V",
+   "arm": "Bdress",
+   "bond": "free",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bdress",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/sceneN4",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bdress/train/sceneN4",
+   "hm_sha_a": "631c7b182edec797",
+   "hm_sha_b": "39e09d554befc8a6",
+   "n_prims_a": 1237,
+   "n_prims_b": 100,
+   "arm_config_a": "{\"hazard_stairs\": true}",
+   "arm_config_b": "{\"hazard_stairs\": true, \"cue_scene_dressing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 4.394489,
+   "hm_cells_changed": 1376,
+   "dz_signed_min": -4.394489,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 0,
+    "dcue_cells": 1376,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.0,
+    "locus": "평지"
+   },
+   "rgb_mean_abs_lsb": 11.68099,
+   "rgb_frac_px_changed": 0.874148,
+   "cells_raw_a": 0,
+   "cells_raw_b": 1376,
+   "d_cells_raw": 1376,
+   "cells_kept_max_a": 0,
+   "cells_kept_max_b": 1358,
+   "max_diff_a": 0.2055,
+   "max_diff_b": 4.6,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 2,
+   "polar_gt_diff_frames": [
+    "L0__s20260819__0001.png",
+    "L0__s20260819__0002.png"
+   ],
+   "tier_a": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "tier_b": [
+    "none_in_fov",
+    "V",
+    "V",
+    "none_in_fov"
+   ],
+   "verdict": "판정불가",
+   "reason": "검정 불일치 (t1=구조물 · t2=장식) — cue-대칭 off팔 없음",
+   "verdict_t1": "구조물",
+   "verdict_t2": "장식",
+   "verdicts_agree": false
+  },
+  {
+   "scene": "sceneN5",
+   "cue": "cue_scene_dressing",
+   "cue_short": "V",
+   "arm": "Bdress",
+   "bond": "free",
+   "round_a": "260825_v3w0_cuecls_A",
+   "round_b": "260825_v3w0_cuecls_Bdress",
+   "dir_a": "dataset/260825_v3w0_cuecls_A/train/sceneN5",
+   "dir_b": "dataset/260825_v3w0_cuecls_Bdress/train/sceneN5",
+   "hm_sha_a": "631a589f0b4ec441",
+   "hm_sha_b": "9231e43510c45d1c",
+   "n_prims_a": 1113,
+   "n_prims_b": 777,
+   "arm_config_a": "{\"hazard_flush_grating\": true}",
+   "arm_config_b": "{\"hazard_flush_grating\": true, \"cue_scene_dressing\": false}",
+   "grid_same": true,
+   "hm_identical": false,
+   "dz_max": 2.1994,
+   "hm_cells_changed": 807,
+   "dz_signed_min": -2.1994,
+   "dz_signed_max": 0.0,
+   "void_delta": 0,
+   "datum": {
+    "n_cuts": 4,
+    "tiers": {
+     "datum_exact": 4,
+     "datum_tol": 0,
+     "datum_fail": 0
+    },
+    "ground_z_drift_max": 0.0,
+    "pose_delta_max": 0.0,
+    "datum_verdict": "datum_exact",
+    "cuts": [
+     {
+      "file": "L0__s20260819__0000.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0001.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0002.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     },
+     {
+      "file": "L0__s20260819__0003.png",
+      "d_ground_z": 0.0,
+      "tier": "datum_exact",
+      "d_pose_max": 0.0
+     }
+    ]
+   },
+   "locus": {
+    "fp_A_cells": 0,
+    "dcue_cells": 807,
+    "dcue_in_fpA": 0,
+    "dcue_in_lip_1m": 0,
+    "dz_max_in_fpA": 0.0,
+    "locus": "평지"
+   },
+   "rgb_mean_abs_lsb": 22.20721,
+   "rgb_frac_px_changed": 0.881763,
+   "cells_raw_a": 0,
+   "cells_raw_b": 400,
+   "d_cells_raw": 400,
+   "cells_kept_max_a": 0,
+   "cells_kept_max_b": 0,
+   "max_diff_a": 0.0,
+   "max_diff_b": 2.1994,
+   "polar_gt_n_cmp": 4,
+   "polar_gt_n_diff": 0,
+   "polar_gt_diff_frames": [],
+   "tier_a": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "tier_b": [
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov",
+    "none_in_fov"
+   ],
+   "verdict": "판정불가",
+   "reason": "검정 불일치 (t1=구조물 · t2=장식) — cue-대칭 off팔 없음",
+   "verdict_t1": "구조물",
+   "verdict_t2": "장식",
+   "verdicts_agree": false
+  }
+ ]
+}

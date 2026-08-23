@@ -71,6 +71,13 @@ BOOST = {
 }
 BASE_OFFS = ["260819_main_off"]
 AGREE_BAND_M = 0.01          # 코퍼스의 "두 계기가 일치" 대역 (실측 0.0005 ~ 0.006)
+FLAG_P90_M = 0.30            # = gridspec hazard_depth. 중앙값이 숨기는 국소 결함용.
+# 왜 p90도 보나 — `fuse_heightmap.py` 의 scene16 교훈 그대로다:
+#   *"the ON median hides the fault: the AABB ON is right everywhere EXCEPT over
+#     the roofed passage, where it reads the deck at +2.16 instead of the floor
+#     at −3.00"* (median 0.006 · p90 2.87).
+# 두 계기의 불일치가 **위험깊이를 넘으면** 그 셀은 발자국을 만들거나 지울 수 있다.
+# 중앙값만 보면 지붕 밑 통로 하나짜리 결함을 통째로 놓친다.
 
 
 def sdir(run, scene):
@@ -134,10 +141,14 @@ def main(write):
             if write:
                 FH.write_pair(d, hm, meta)
                 wrote.append(f"{D}/{s}")
-        elif row["med_abs"] > AGREE_BAND_M:
-            row["action"] = "FLAG (계기 불일치 — 쓰지 않음, 보고만)"
-            flagged.append(dict(round=D, scene=s, med_abs=row["med_abs"],
-                                p90_abs=row["p90_abs"], max_abs=row["max_abs"]))
+        elif row["med_abs"] > AGREE_BAND_M or row["p90_abs"] > FLAG_P90_M:
+            why = ("median" if row["med_abs"] > AGREE_BAND_M else "") + \
+                  ("+" if row["med_abs"] > AGREE_BAND_M and row["p90_abs"] > FLAG_P90_M else "") + \
+                  ("p90>위험깊이" if row["p90_abs"] > FLAG_P90_M else "")
+            row["action"] = f"FLAG:{why} (계기 불일치 — 쓰지 않음, 보고만)"
+            flagged.append(dict(round=D, scene=s, why=why, med_abs=row["med_abs"],
+                                p90_abs=row["p90_abs"], max_abs=row["max_abs"],
+                                fused_z=row["fused_z"], aabb_z=row["aabb_z"]))
         else:
             row["action"] = "keep aabb"
         rows.append(row)
@@ -195,7 +206,7 @@ def main(write):
     out = dict(doc="w1d_fuse_audit", version="1.0",
                rule="정본 구off팔이 융합을 쓰는 (라운드,씬)에만 D팔 융합 사이드카를 쓴다. "
                     "밴드 라운드는 base 밴드 융합본을 복사한다(AABB sha 동일 확인 후).",
-               agree_band_m=AGREE_BAND_M, wrote=wrote, flagged=flagged,
+               agree_band_m=AGREE_BAND_M, flag_p90_m=FLAG_P90_M, wrote=wrote, flagged=flagged,
                problems=problems, rows=rows)
     op = os.path.join(V3, "w1d_fuse_audit.json")
     json.dump(out, open(op, "w", encoding="utf-8"), ensure_ascii=False, indent=1)

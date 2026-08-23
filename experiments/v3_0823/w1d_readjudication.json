@@ -1,0 +1,1448 @@
+{
+ "doc": "w1d_readjudication",
+ "version": "1.0",
+ "before": {
+  "source": "w0_cuecls.json",
+  "z_off": "260819_main_off",
+  "counts": {
+   "판정불가": 16,
+   "장식": 17,
+   "구조물": 6
+  },
+  "n_forbidden": 23
+ },
+ "after": {
+  "source": "w1d_cuecls.json",
+  "z_off": "260826_v3w1_lib_D",
+  "counts": {
+   "판정불가": 10,
+   "장식": 25,
+   "구조물": 4
+  },
+  "n_forbidden": 15
+ },
+ "rule_unchanged": true,
+ "transitions": {
+  "구조물->구조물": 3,
+  "구조물->판정불가": 3,
+  "장식->장식": 17,
+  "판정불가->구조물": 1,
+  "판정불가->장식": 8,
+  "판정불가->판정불가": 7
+ },
+ "n_moved": 12,
+ "n_resolved": 9,
+ "n_new_disputes": 3,
+ "resolved": [
+  {
+   "scene": "scene08",
+   "cue": "cue_railing",
+   "before": "판정불가",
+   "after": "구조물"
+  },
+  {
+   "scene": "scene16",
+   "cue": "cue_scene_dressing",
+   "before": "판정불가",
+   "after": "장식(지형외)"
+  },
+  {
+   "scene": "scene21",
+   "cue": "cue_scene_dressing",
+   "before": "판정불가",
+   "after": "장식(지형외)"
+  },
+  {
+   "scene": "sceneD1",
+   "cue": "cue_scene_dressing",
+   "before": "판정불가",
+   "after": "장식(지형외)"
+  },
+  {
+   "scene": "sceneD2",
+   "cue": "cue_scene_dressing",
+   "before": "판정불가",
+   "after": "장식(지형외)"
+  },
+  {
+   "scene": "sceneD3",
+   "cue": "cue_scene_dressing",
+   "before": "판정불가",
+   "after": "장식(지형외)"
+  },
+  {
+   "scene": "sceneN1",
+   "cue": "cue_scene_dressing",
+   "before": "판정불가",
+   "after": "장식(지형외)"
+  },
+  {
+   "scene": "sceneN4",
+   "cue": "cue_scene_dressing",
+   "before": "판정불가",
+   "after": "장식(지형외)"
+  },
+  {
+   "scene": "sceneN5",
+   "cue": "cue_scene_dressing",
+   "before": "판정불가",
+   "after": "장식(지형외)"
+  }
+ ],
+ "new_disputes": [
+  {
+   "scene": "scene09",
+   "cue": "cue_scene_dressing",
+   "before": "구조물",
+   "after": "판정불가"
+  },
+  {
+   "scene": "scene10",
+   "cue": "cue_scene_dressing",
+   "before": "구조물",
+   "after": "판정불가"
+  },
+  {
+   "scene": "sceneC1",
+   "cue": "cue_scene_dressing",
+   "before": "구조물",
+   "after": "판정불가"
+  }
+ ],
+ "toggle_forbidden_final": [
+  {
+   "scene": "scene01",
+   "cue": "cue_railing"
+  },
+  {
+   "scene": "scene01",
+   "cue": "cue_scene_dressing"
+  },
+  {
+   "scene": "scene02",
+   "cue": "cue_scene_dressing"
+  },
+  {
+   "scene": "scene03",
+   "cue": "cue_scene_dressing"
+  },
+  {
+   "scene": "scene04",
+   "cue": "cue_scene_dressing"
+  },
+  {
+   "scene": "scene08",
+   "cue": "cue_railing"
+  },
+  {
+   "scene": "scene09",
+   "cue": "cue_scene_dressing"
+  },
+  {
+   "scene": "scene10",
+   "cue": "cue_railing"
+  },
+  {
+   "scene": "scene10",
+   "cue": "cue_scene_dressing"
+  },
+  {
+   "scene": "scene20",
+   "cue": "cue_railing"
+  },
+  {
+   "scene": "scene21",
+   "cue": "cue_nosing"
+  },
+  {
+   "scene": "scene21",
+   "cue": "cue_railing"
+  },
+  {
+   "scene": "sceneC1",
+   "cue": "cue_railing"
+  },
+  {
+   "scene": "sceneC1",
+   "cue": "cue_scene_dressing"
+  },
+  {
+   "scene": "sceneC4",
+   "cue": "cue_scene_dressing"
+  }
+ ],
+ "b_levers_final": {
+  "scene02": [
+   "cue_nosing",
+   "cue_railing"
+  ],
+  "scene06": [
+   "cue_material_break",
+   "cue_railing",
+   "cue_scene_dressing"
+  ],
+  "scene16": [
+   "cue_nosing",
+   "cue_railing",
+   "cue_scene_dressing"
+  ],
+  "sceneC4": [
+   "cue_railing",
+   "cue_tactile"
+  ],
+  "sceneC1": [
+   "cue_nosing",
+   "cue_tactile"
+  ],
+  "sceneD1": [
+   "cue_nosing",
+   "cue_scene_dressing"
+  ],
+  "sceneN1": [
+   "cue_material_break",
+   "cue_scene_dressing"
+  ],
+  "sceneN2": [
+   "cue_material_break",
+   "cue_scene_dressing"
+  ],
+  "sceneN5": [
+   "cue_material_break",
+   "cue_scene_dressing"
+  ],
+  "scene08": [
+   "cue_scene_dressing"
+  ],
+  "scene21": [
+   "cue_scene_dressing"
+  ],
+  "sceneD2": [
+   "cue_scene_dressing"
+  ],
+  "sceneD3": [
+   "cue_scene_dressing"
+  ],
+  "sceneN4": [
+   "cue_scene_dressing"
+  ],
+  "scene12": [
+   "cue_railing",
+   "cue_scene_dressing"
+  ],
+  "scene17": [
+   "cue_material_break",
+   "cue_scene_dressing"
+  ]
+ },
+ "pairs": [
+  {
+   "scene": "scene01",
+   "cue": "cue_railing",
+   "short": "R",
+   "bond": "free",
+   "before": {
+    "verdict": "판정불가",
+    "t1": "구조물",
+    "t2": "장식",
+    "cells_raw_a": 75866,
+    "cells_raw_b": 75977,
+    "d_cells_raw": 111,
+    "polar_gt_n_diff": 0,
+    "fp_A": 75866,
+    "dcue_in_fpA": 0,
+    "locus": "립근방"
+   },
+   "after": {
+    "verdict": "판정불가",
+    "t1": "구조물",
+    "t2": "장식",
+    "cells_raw_a": 75866,
+    "cells_raw_b": 75935,
+    "d_cells_raw": 69,
+    "polar_gt_n_diff": 0,
+    "fp_A": 75866,
+    "dcue_in_fpA": 0,
+    "locus": "립근방"
+   },
+   "changed": false
+  },
+  {
+   "scene": "scene02",
+   "cue": "cue_railing",
+   "short": "R",
+   "bond": "HZ",
+   "before": {
+    "verdict": "장식(완전)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 427,
+    "cells_raw_b": 427,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "장식(완전)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 0,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": false
+  },
+  {
+   "scene": "scene06",
+   "cue": "cue_railing",
+   "short": "R",
+   "bond": "HZ",
+   "before": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 0,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 0,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": false
+  },
+  {
+   "scene": "scene08",
+   "cue": "cue_railing",
+   "short": "R",
+   "bond": "HZ",
+   "before": {
+    "verdict": "판정불가",
+    "t1": "구조물",
+    "t2": "장식",
+    "cells_raw_a": 66547,
+    "cells_raw_b": 66552,
+    "d_cells_raw": 5,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "구조물",
+    "t1": "구조물",
+    "t2": "구조물",
+    "cells_raw_a": 66547,
+    "cells_raw_b": 66552,
+    "d_cells_raw": 5,
+    "polar_gt_n_diff": 0,
+    "fp_A": 66547,
+    "dcue_in_fpA": 62879,
+    "locus": "낙차면"
+   },
+   "changed": true
+  },
+  {
+   "scene": "scene10",
+   "cue": "cue_railing",
+   "short": "R",
+   "bond": "HZ",
+   "before": {
+    "verdict": "구조물",
+    "t1": "구조물",
+    "t2": "구조물",
+    "cells_raw_a": 11225,
+    "cells_raw_b": 11310,
+    "d_cells_raw": 85,
+    "polar_gt_n_diff": 0,
+    "fp_A": 11225,
+    "dcue_in_fpA": 1001,
+    "locus": "낙차면"
+   },
+   "after": {
+    "verdict": "구조물",
+    "t1": "구조물",
+    "t2": "구조물",
+    "cells_raw_a": 11225,
+    "cells_raw_b": 11310,
+    "d_cells_raw": 85,
+    "polar_gt_n_diff": 0,
+    "fp_A": 11225,
+    "dcue_in_fpA": 1001,
+    "locus": "낙차면"
+   },
+   "changed": false
+  },
+  {
+   "scene": "scene16",
+   "cue": "cue_railing",
+   "short": "R",
+   "bond": "HZ",
+   "before": {
+    "verdict": "장식(완전)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 356,
+    "cells_raw_b": 356,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 39,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "장식(완전)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 39,
+    "cells_raw_b": 39,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 39,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": false
+  },
+  {
+   "scene": "scene21",
+   "cue": "cue_railing",
+   "short": "R",
+   "bond": "HZ",
+   "before": {
+    "verdict": "판정불가",
+    "t1": "구조물",
+    "t2": "장식",
+    "cells_raw_a": 14456,
+    "cells_raw_b": 14664,
+    "d_cells_raw": 208,
+    "polar_gt_n_diff": 0,
+    "fp_A": 14456,
+    "dcue_in_fpA": 0,
+    "locus": "립근방"
+   },
+   "after": {
+    "verdict": "판정불가",
+    "t1": "구조물",
+    "t2": "장식",
+    "cells_raw_a": 14456,
+    "cells_raw_b": 14664,
+    "d_cells_raw": 208,
+    "polar_gt_n_diff": 0,
+    "fp_A": 14456,
+    "dcue_in_fpA": 0,
+    "locus": "립근방"
+   },
+   "changed": false
+  },
+  {
+   "scene": "sceneC1",
+   "cue": "cue_railing",
+   "short": "R",
+   "bond": "HZ",
+   "before": {
+    "verdict": "판정불가",
+    "t1": "장식",
+    "t2": "구조물",
+    "cells_raw_a": 68846,
+    "cells_raw_b": 68846,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 68846,
+    "dcue_in_fpA": 2,
+    "locus": "낙차면"
+   },
+   "after": {
+    "verdict": "판정불가",
+    "t1": "장식",
+    "t2": "구조물",
+    "cells_raw_a": 68846,
+    "cells_raw_b": 68846,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 68846,
+    "dcue_in_fpA": 2,
+    "locus": "낙차면"
+   },
+   "changed": false
+  },
+  {
+   "scene": "sceneC4",
+   "cue": "cue_railing",
+   "short": "R",
+   "bond": "HZ",
+   "before": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 67482,
+    "cells_raw_b": 67482,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 67482,
+    "dcue_in_fpA": 0,
+    "locus": "립근방"
+   },
+   "after": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 67031,
+    "cells_raw_b": 67031,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 67031,
+    "dcue_in_fpA": 0,
+    "locus": "립근방"
+   },
+   "changed": false
+  },
+  {
+   "scene": "scene02",
+   "cue": "cue_nosing",
+   "short": "N",
+   "bond": "HZ",
+   "before": {
+    "verdict": "장식(완전)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 427,
+    "cells_raw_b": 427,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "장식(완전)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 0,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": false
+  },
+  {
+   "scene": "scene16",
+   "cue": "cue_nosing",
+   "short": "N",
+   "bond": "HZ",
+   "before": {
+    "verdict": "장식(완전)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 356,
+    "cells_raw_b": 356,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 39,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "장식(완전)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 39,
+    "cells_raw_b": 39,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 39,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": false
+  },
+  {
+   "scene": "scene21",
+   "cue": "cue_nosing",
+   "short": "N",
+   "bond": "HZ",
+   "before": {
+    "verdict": "판정불가",
+    "t1": "장식",
+    "t2": "구조물",
+    "cells_raw_a": 14456,
+    "cells_raw_b": 14456,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 14456,
+    "dcue_in_fpA": 2641,
+    "locus": "낙차면"
+   },
+   "after": {
+    "verdict": "판정불가",
+    "t1": "장식",
+    "t2": "구조물",
+    "cells_raw_a": 14456,
+    "cells_raw_b": 14456,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 14456,
+    "dcue_in_fpA": 2641,
+    "locus": "낙차면"
+   },
+   "changed": false
+  },
+  {
+   "scene": "sceneC1",
+   "cue": "cue_nosing",
+   "short": "N",
+   "bond": "HZ",
+   "before": {
+    "verdict": "장식(완전)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 68846,
+    "cells_raw_b": 68846,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 68846,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "장식(완전)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 68846,
+    "cells_raw_b": 68846,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 68846,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": false
+  },
+  {
+   "scene": "sceneD1",
+   "cue": "cue_nosing",
+   "short": "N",
+   "bond": "HZ",
+   "before": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 94647,
+    "cells_raw_b": 94647,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 94647,
+    "dcue_in_fpA": 0,
+    "locus": "립근방"
+   },
+   "after": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 94647,
+    "cells_raw_b": 94647,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 94647,
+    "dcue_in_fpA": 0,
+    "locus": "립근방"
+   },
+   "changed": false
+  },
+  {
+   "scene": "sceneC1",
+   "cue": "cue_tactile",
+   "short": "Ta",
+   "bond": "ABSENT",
+   "before": {
+    "verdict": "장식(완전)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 68846,
+    "cells_raw_b": 68846,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 68846,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "장식(완전)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 68846,
+    "cells_raw_b": 68846,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 68846,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": false
+  },
+  {
+   "scene": "sceneC4",
+   "cue": "cue_tactile",
+   "short": "Ta",
+   "bond": "ABSENT",
+   "before": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 67482,
+    "cells_raw_b": 67482,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 67482,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 67031,
+    "cells_raw_b": 67031,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 67031,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": false
+  },
+  {
+   "scene": "scene06",
+   "cue": "cue_material_break",
+   "short": "T",
+   "bond": "free",
+   "before": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 0,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 0,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": false
+  },
+  {
+   "scene": "sceneN1",
+   "cue": "cue_material_break",
+   "short": "T",
+   "bond": "free",
+   "before": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 0,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 0,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": false
+  },
+  {
+   "scene": "sceneN2",
+   "cue": "cue_material_break",
+   "short": "T",
+   "bond": "hz?",
+   "before": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 0,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 0,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": false
+  },
+  {
+   "scene": "sceneN5",
+   "cue": "cue_material_break",
+   "short": "T",
+   "bond": "free",
+   "before": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 0,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 0,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": false
+  },
+  {
+   "scene": "scene01",
+   "cue": "cue_scene_dressing",
+   "short": "V",
+   "bond": "free",
+   "before": {
+    "verdict": "판정불가",
+    "t1": "구조물",
+    "t2": "장식",
+    "cells_raw_a": 75866,
+    "cells_raw_b": 84887,
+    "d_cells_raw": 9021,
+    "polar_gt_n_diff": 0,
+    "fp_A": 75866,
+    "dcue_in_fpA": 0,
+    "locus": "립근방"
+   },
+   "after": {
+    "verdict": "판정불가",
+    "t1": "구조물",
+    "t2": "장식",
+    "cells_raw_a": 75866,
+    "cells_raw_b": 84399,
+    "d_cells_raw": 8533,
+    "polar_gt_n_diff": 0,
+    "fp_A": 75866,
+    "dcue_in_fpA": 0,
+    "locus": "립근방"
+   },
+   "changed": false
+  },
+  {
+   "scene": "scene02",
+   "cue": "cue_scene_dressing",
+   "short": "V",
+   "bond": "hz?",
+   "before": {
+    "verdict": "판정불가",
+    "t1": "구조물",
+    "t2": "장식",
+    "cells_raw_a": 427,
+    "cells_raw_b": 12023,
+    "d_cells_raw": 11596,
+    "polar_gt_n_diff": 4,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "판정불가",
+    "t1": "구조물",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 8533,
+    "d_cells_raw": 8533,
+    "polar_gt_n_diff": 4,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": false
+  },
+  {
+   "scene": "scene03",
+   "cue": "cue_scene_dressing",
+   "short": "V",
+   "bond": "HZ",
+   "before": {
+    "verdict": "판정불가",
+    "t1": "장식",
+    "t2": "구조물",
+    "cells_raw_a": 67695,
+    "cells_raw_b": 67695,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 67695,
+    "dcue_in_fpA": 811,
+    "locus": "낙차면"
+   },
+   "after": {
+    "verdict": "판정불가",
+    "t1": "장식",
+    "t2": "구조물",
+    "cells_raw_a": 67695,
+    "cells_raw_b": 67695,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 67695,
+    "dcue_in_fpA": 811,
+    "locus": "낙차면"
+   },
+   "changed": false
+  },
+  {
+   "scene": "scene04",
+   "cue": "cue_scene_dressing",
+   "short": "V",
+   "bond": "free",
+   "before": {
+    "verdict": "구조물",
+    "t1": "구조물",
+    "t2": "구조물",
+    "cells_raw_a": 53543,
+    "cells_raw_b": 57430,
+    "d_cells_raw": 3887,
+    "polar_gt_n_diff": 2,
+    "fp_A": 53543,
+    "dcue_in_fpA": 27130,
+    "locus": "낙차면"
+   },
+   "after": {
+    "verdict": "구조물",
+    "t1": "구조물",
+    "t2": "구조물",
+    "cells_raw_a": 53331,
+    "cells_raw_b": 57052,
+    "d_cells_raw": 3721,
+    "polar_gt_n_diff": 0,
+    "fp_A": 53331,
+    "dcue_in_fpA": 27064,
+    "locus": "낙차면"
+   },
+   "changed": false
+  },
+  {
+   "scene": "scene06",
+   "cue": "cue_scene_dressing",
+   "short": "V",
+   "bond": "free",
+   "before": {
+    "verdict": "장식(완전)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 0,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "장식(완전)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 0,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": false
+  },
+  {
+   "scene": "scene08",
+   "cue": "cue_scene_dressing",
+   "short": "V",
+   "bond": "free",
+   "before": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 66547,
+    "cells_raw_b": 66547,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 66547,
+    "cells_raw_b": 66547,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 66547,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": false
+  },
+  {
+   "scene": "scene09",
+   "cue": "cue_scene_dressing",
+   "short": "V",
+   "bond": "free",
+   "before": {
+    "verdict": "구조물",
+    "t1": "구조물",
+    "t2": "구조물",
+    "cells_raw_a": 87954,
+    "cells_raw_b": 88867,
+    "d_cells_raw": 913,
+    "polar_gt_n_diff": 0,
+    "fp_A": 87954,
+    "dcue_in_fpA": 79,
+    "locus": "낙차면"
+   },
+   "after": {
+    "verdict": "판정불가",
+    "t1": "장식",
+    "t2": "구조물",
+    "cells_raw_a": 87954,
+    "cells_raw_b": 87954,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 87954,
+    "dcue_in_fpA": 79,
+    "locus": "낙차면"
+   },
+   "changed": true
+  },
+  {
+   "scene": "scene10",
+   "cue": "cue_scene_dressing",
+   "short": "V",
+   "bond": "free",
+   "before": {
+    "verdict": "구조물",
+    "t1": "구조물",
+    "t2": "구조물",
+    "cells_raw_a": 11225,
+    "cells_raw_b": 14986,
+    "d_cells_raw": 3761,
+    "polar_gt_n_diff": 0,
+    "fp_A": 11225,
+    "dcue_in_fpA": 240,
+    "locus": "낙차면"
+   },
+   "after": {
+    "verdict": "판정불가",
+    "t1": "장식",
+    "t2": "구조물",
+    "cells_raw_a": 11225,
+    "cells_raw_b": 11225,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 11225,
+    "dcue_in_fpA": 240,
+    "locus": "낙차면"
+   },
+   "changed": true
+  },
+  {
+   "scene": "scene16",
+   "cue": "cue_scene_dressing",
+   "short": "V",
+   "bond": "free",
+   "before": {
+    "verdict": "판정불가",
+    "t1": "구조물",
+    "t2": "장식",
+    "cells_raw_a": 356,
+    "cells_raw_b": 1096,
+    "d_cells_raw": 740,
+    "polar_gt_n_diff": 0,
+    "fp_A": 39,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 39,
+    "cells_raw_b": 39,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 39,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": true
+  },
+  {
+   "scene": "scene21",
+   "cue": "cue_scene_dressing",
+   "short": "V",
+   "bond": "free",
+   "before": {
+    "verdict": "판정불가",
+    "t1": "구조물",
+    "t2": "장식",
+    "cells_raw_a": 14456,
+    "cells_raw_b": 14754,
+    "d_cells_raw": 298,
+    "polar_gt_n_diff": 0,
+    "fp_A": 14456,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 14456,
+    "cells_raw_b": 14456,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 14456,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": true
+  },
+  {
+   "scene": "sceneC1",
+   "cue": "cue_scene_dressing",
+   "short": "V",
+   "bond": "free",
+   "before": {
+    "verdict": "구조물",
+    "t1": "구조물",
+    "t2": "구조물",
+    "cells_raw_a": 68846,
+    "cells_raw_b": 69949,
+    "d_cells_raw": 1103,
+    "polar_gt_n_diff": 0,
+    "fp_A": 68846,
+    "dcue_in_fpA": 3510,
+    "locus": "낙차면"
+   },
+   "after": {
+    "verdict": "판정불가",
+    "t1": "장식",
+    "t2": "구조물",
+    "cells_raw_a": 68846,
+    "cells_raw_b": 68846,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 68846,
+    "dcue_in_fpA": 3510,
+    "locus": "낙차면"
+   },
+   "changed": true
+  },
+  {
+   "scene": "sceneC4",
+   "cue": "cue_scene_dressing",
+   "short": "V",
+   "bond": "free",
+   "before": {
+    "verdict": "구조물",
+    "t1": "구조물",
+    "t2": "구조물",
+    "cells_raw_a": 67482,
+    "cells_raw_b": 70052,
+    "d_cells_raw": 2570,
+    "polar_gt_n_diff": 0,
+    "fp_A": 67482,
+    "dcue_in_fpA": 5925,
+    "locus": "낙차면"
+   },
+   "after": {
+    "verdict": "구조물",
+    "t1": "구조물",
+    "t2": "구조물",
+    "cells_raw_a": 67031,
+    "cells_raw_b": 67482,
+    "d_cells_raw": 451,
+    "polar_gt_n_diff": 0,
+    "fp_A": 67031,
+    "dcue_in_fpA": 5474,
+    "locus": "낙차면"
+   },
+   "changed": false
+  },
+  {
+   "scene": "sceneD1",
+   "cue": "cue_scene_dressing",
+   "short": "V",
+   "bond": "free",
+   "before": {
+    "verdict": "판정불가",
+    "t1": "구조물",
+    "t2": "장식",
+    "cells_raw_a": 94647,
+    "cells_raw_b": 94713,
+    "d_cells_raw": 66,
+    "polar_gt_n_diff": 0,
+    "fp_A": 94647,
+    "dcue_in_fpA": 0,
+    "locus": "립근방"
+   },
+   "after": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 94647,
+    "cells_raw_b": 94647,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 94647,
+    "dcue_in_fpA": 0,
+    "locus": "립근방"
+   },
+   "changed": true
+  },
+  {
+   "scene": "sceneD2",
+   "cue": "cue_scene_dressing",
+   "short": "V",
+   "bond": "free",
+   "before": {
+    "verdict": "판정불가",
+    "t1": "구조물",
+    "t2": "장식",
+    "cells_raw_a": 1160,
+    "cells_raw_b": 4289,
+    "d_cells_raw": 3129,
+    "polar_gt_n_diff": 0,
+    "fp_A": 1160,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 1160,
+    "cells_raw_b": 1160,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 1160,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": true
+  },
+  {
+   "scene": "sceneD3",
+   "cue": "cue_scene_dressing",
+   "short": "V",
+   "bond": "free",
+   "before": {
+    "verdict": "판정불가",
+    "t1": "구조물",
+    "t2": "장식",
+    "cells_raw_a": 2520,
+    "cells_raw_b": 5164,
+    "d_cells_raw": 2644,
+    "polar_gt_n_diff": 0,
+    "fp_A": 2520,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 2520,
+    "cells_raw_b": 2520,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 2520,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": true
+  },
+  {
+   "scene": "sceneN1",
+   "cue": "cue_scene_dressing",
+   "short": "V",
+   "bond": "free",
+   "before": {
+    "verdict": "판정불가",
+    "t1": "구조물",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 718,
+    "d_cells_raw": 718,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 0,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": true
+  },
+  {
+   "scene": "sceneN2",
+   "cue": "cue_scene_dressing",
+   "short": "V",
+   "bond": "free",
+   "before": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 0,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 0,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": false
+  },
+  {
+   "scene": "sceneN4",
+   "cue": "cue_scene_dressing",
+   "short": "V",
+   "bond": "free",
+   "before": {
+    "verdict": "판정불가",
+    "t1": "구조물",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 1376,
+    "d_cells_raw": 1376,
+    "polar_gt_n_diff": 2,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 0,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": true
+  },
+  {
+   "scene": "sceneN5",
+   "cue": "cue_scene_dressing",
+   "short": "V",
+   "bond": "free",
+   "before": {
+    "verdict": "판정불가",
+    "t1": "구조물",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 400,
+    "d_cells_raw": 400,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "after": {
+    "verdict": "장식(지형외)",
+    "t1": "장식",
+    "t2": "장식",
+    "cells_raw_a": 0,
+    "cells_raw_b": 0,
+    "d_cells_raw": 0,
+    "polar_gt_n_diff": 0,
+    "fp_A": 0,
+    "dcue_in_fpA": 0,
+    "locus": "평지"
+   },
+   "changed": true
+  }
+ ]
+}

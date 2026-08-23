@@ -933,7 +933,29 @@ def _seg_fetch(ann, sim_app, subframes):
     build; both shapes are accepted rather than assumed.
     """
     import numpy as np
-    plan = (("t0", 0), ("t1", 1), ("t4", 4), ("orch", -1))
+    # NEGOBS_SEG_STRICT=1 — skip the t0/t1/t4 rungs and go straight to the
+    # Replicator orchestrator step.  DEFAULT OFF: the ladder below is unchanged
+    # for every caller that does not opt in.
+    #
+    # WHY THE OPT-IN EXISTS (h67build, SCENE_H67_BUILD.md §7; verified again on
+    # W1-D `260826_v3w1_lib_D`).  The `t0` rung takes ZERO extra ticks, so the
+    # `instance_id_segmentation` annotator is never re-evaluated: shape matches
+    # and `max() > 0`, so the ladder reports success and stops.  In a MULTI-CUT
+    # scene process every `.idseg.npz` therefore comes back BYTE-IDENTICAL to
+    # the first cut's, while `.depth.npy` (whose ladder needs `orch`) updates
+    # normally.  Measured on W1-D scene01/02/03/04: 1 unique idseg hash per 6
+    # cuts vs 6 unique depth hashes, `idseg_n_ids` constant across all 24 cuts.
+    # The P-5 smoke could not see this because it rendered ONE cut, where stale
+    # and fresh are indistinguishable.
+    #
+    # It matters because VG-06 (edge ownership) and DZ §12-5's cue threshold k
+    # are PER-CUT judgements; on stale masks they would silently inspect cut 0
+    # and replicate that verdict over the whole round.
+    #
+    # Cost, measured by h67build on the same geometry: 5.101 -> 5.225 s/cut and
+    # 5.689 -> 5.050 s/cut, i.e. inside run-to-run noise.
+    plan = (("orch", -1),) if os.environ.get("NEGOBS_SEG_STRICT") == "1" \
+        else (("t0", 0), ("t1", 1), ("t4", 4), ("orch", -1))
     for how, ticks in plan:
         if ticks > 0:
             for _ in range(ticks):

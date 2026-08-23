@@ -34,14 +34,30 @@ W0_CUECLS §3이 잰 바로 그 기전이다.
        `polar_gt`는 구성상 올-제로, `tier = "off"`. 계획의 VG-02는 이 진술이며
        본 파일은 그것을 그대로 기록한다 — 측정이 아니라 구성이다.
   (ㄴ) **실질 결함 사냥 (본 파일의 판정)**: "위험 토글이 실제로 낙차를
-       지웠는가"만 남는다. 정본 코퍼스의 낙차 발자국
-       `fp_corpus = {z_구off − z_A ≥ 0.3}` 안에서, D가 **여전히 꺼져 있는** 셀
-       `resid = fp_corpus ∩ {z_구off − z_D ≥ 0.3}`를 센다.
-       · D가 낙차를 메웠으면 그 셀에서 `z_D ≈ z_구off` → resid = 0.
-       · D에 낙차가 남았으면 `z_D ≈ z_A` → resid ≈ fp_corpus.
-       `resid`는 단서 제거에 **면역**이다 — 단서는 지면을 올리지 낙차를 파지
-       않으므로 `fp_corpus` 밖에서만 움직인다.
+       지웠는가"만 남는다. 판정자는 **D 자신의 높이맵**이다.
+
+       왜 D 자신인가 — 초안이 틀렸던 자리를 적어 둔다. 처음에는
+       `resid = fp_corpus ∩ {z_구off − z_D ≥ 0.3}`(구off 대비 D가 여전히 낮은
+       셀)로 재려 했다. 그런데 scene04에서 288셀이 걸렸고, 그 셀들의 값은
+       `z_D = 0.000`(평평한 메운 지면) · `z_구off ∈ [0.722, 0.971]` ·
+       `z_A ∈ [−0.700, 0.426]`이었다. 즉 **구off에만 서 있는 자유결속 소품**이
+       낙차처럼 보인 것이다(소품은 밑 지면에 재앵커되므로 낙차 발자국 **안**에도
+       설 수 있다 — 초안이 "단서는 발자국 밖에서만 움직인다"고 가정한 바로 그 자리).
+       구off를 참조로 쓰는 한 이 오염은 제거되지 않는다.
+
+       **D팔에는 단서가 하나도 없다.** 그러므로 D의 높이맵은 그 자체가 맨 지형이고,
+       "D에 낙차가 있는가"는 D 안에서 닫힌 질문이 된다:
+
+           ring    = dilate(fp_corpus, 1.0 m) − fp_corpus      (발자국 둘레)
+           walk_z  = median(z_D[ring])                          (D의 보행면 높이)
+           resid   = fp_corpus ∩ {walk_z − z_D ≥ 0.3}           (D 안의 함몰)
+
+       · D가 낙차를 메웠으면 발자국 자리도 보행면 높이라 resid = 0.
+       · D에 낙차가 남았으면 발자국 자리가 보행면보다 깊어 resid ≈ fp_corpus.
+       단서가 없으니 단서 오염이 **원리적으로** 불가능하다.
        resid > 0 인 씬은 **씬 결함**으로 격리한다.
+       보조 지표 `fill_rate` = |fp_corpus ∩ {z_D − z_A ≥ 0.3}| / |fp_corpus| 도
+       함께 인쇄한다(코퍼스 발자국을 D가 위험깊이 이상 들어올렸는가).
        프레임 단위로도 인쇄한다: 정본 라벨러의 `polar_cells`를 그대로 빌려
        resid 발자국을 D팔 각 컷의 폴라 그리드에 투영한다(스텝게이트 없이 =
        보수적). 이 값이 전 컷 0이면 **D팔은 전 칸 음성**이다.
@@ -83,6 +99,19 @@ BANDS = {
 }
 DATUM_EXACT, DATUM_TOL = 1e-6, 0.02
 POSE_KEYS = ("d", "h_rel", "yaw", "pitch", "roll", "hfov")
+
+
+def dilate(mask, r):
+    """r셀 반경 사각 팽창 (0.05 m 격자 · r=20 → 1.0 m = labeler.STEP_RUN_M)."""
+    out = mask.copy()
+    for _ in range(r):
+        o = out.copy()
+        o[1:, :] |= out[:-1, :]
+        o[:-1, :] |= out[1:, :]
+        o[:, 1:] |= out[:, :-1]
+        o[:, :-1] |= out[:, 1:]
+        out = o
+    return out
 
 
 def sha256(p):
@@ -154,9 +183,10 @@ def main():
         root = os.path.join(REPO, "dataset", drun)
         png = len(glob.glob(os.path.join(root, "*", "*", "*.png")))
         dep = len(glob.glob(os.path.join(root, "*", "*", "*.depth.npy")))
-        seg = len(glob.glob(os.path.join(root, "*", "*", "*.idseg.npz")))
+        segn = len(glob.glob(os.path.join(root, "*", "*", "*.idseg.npz")))
         hm = len(glob.glob(os.path.join(root, "*", "*", "heightmap.npy")))
         sec = 0.0
+        seg = dict(t0=0, orch=0, other=0, cuts=0, uniq=0, stale_scenes=[])
         for s in scs:
             d = sdir(drun, s)
             if not d:
@@ -164,14 +194,31 @@ def main():
                 continue
             cu, var = cuts_of(d)
             sec += float(var.get("sec_per_cut") or 0) * len(cu)
+            # --- ID 마스크 stale 인구조사 (D73 ① · SCENE_H67_BUILD §7) -------
+            hs, n_t0 = set(), 0
+            for c in cu.values():
+                seg["cuts"] += 1
+                f = c.get("idseg_fetch")
+                seg["t0" if f == "t0" else "orch" if f == "orch" else "other"] += 1
+                if f == "t0":
+                    n_t0 += 1
+                p = os.path.join(d, os.path.splitext(c["file"])[0] + ".idseg.npz")
+                if os.path.isfile(p):
+                    hs.add(sha256(p))
+            seg["uniq"] += len(hs)
+            if n_t0:
+                seg["stale_scenes"].append(dict(scene=s, stale_cuts=n_t0,
+                                                cuts=len(cu), uniq_masks=len(hs)))
         gb = sum(os.path.getsize(os.path.join(dp, f))
                  for dp, _, fs in os.walk(root) for f in fs) / 2**30
         out["rounds"][drun] = dict(band=band, n_scenes=len(scs), png=png,
-                                   depth=dep, idseg=seg, heightmap=hm,
+                                   depth=dep, idseg_files=segn, heightmap=hm,
                                    expected_cuts=24 * len(scs),
                                    in_process_sec=round(sec, 1),
                                    disk_gb=round(gb, 3),
-                                   vg08_pass=(seg == png == dep == 24 * len(scs)))
+                                   idseg=seg,
+                                   vg08_pass=(segn == png == dep == 24 * len(scs)),
+                                   vg08_fresh=(seg["t0"] == 0))
         total_cuts += png
         total_sec += sec
     out["accounting"] = dict(total_cuts=total_cuts,
@@ -222,20 +269,32 @@ def main():
             cd, _ = cuts_of(dd)
             row["datum"] = datum_pose(ca, cd)
 
-            # ---- VG-02 실질 검사: 낙차 잔차 -----------------------------
+            # ---- VG-02 실질 검사: D 자신 안의 낙차 잔차 -------------------
             fin = np.isfinite(za) & np.isfinite(zo) & np.isfinite(zd)
             fp_corpus = fin & ((zo - za) >= HAZ_DEPTH)
+            finD = np.isfinite(zd)
+            ring = dilate(fp_corpus, 20) & ~fp_corpus & finD
+            if ring.sum() >= 50:
+                walk_z = float(np.median(zd[ring]))
+                walk_src = "ring_1m"
+            else:                                  # 발자국이 격자를 덮은 경우
+                walk_z = float(np.median(zd[finD])) if finD.any() else float("nan")
+                walk_src = "grid_median"
+            resid = fp_corpus & finD & ((walk_z - zd) >= HAZ_DEPTH)
+            lifted = fp_corpus & fin & ((zd - za) >= HAZ_DEPTH)
+            # 참고치 — 구off 참조판(단서 오염 있음). 판정에는 쓰지 않는다.
             still_low = fin & ((zo - zd) >= HAZ_DEPTH)
-            resid = fp_corpus & still_low
             row["negative_gt"] = dict(
                 fp_corpus_cells=int(fp_corpus.sum()),
-                d_below_guoff_cells=int(still_low.sum()),
+                walk_z=round(walk_z, 4), walk_z_source=walk_src,
+                ring_cells=int(ring.sum()),
                 resid_cells=int(resid.sum()),
-                artifact_cells_outside_fp=int((still_low & ~fp_corpus).sum()),
+                depth_max_in_resid=(round(float((walk_z - zd)[resid].max()), 4)
+                                    if resid.any() else 0.0),
                 fill_rate=(None if not fp_corpus.any()
-                           else round(1.0 - resid.sum() / fp_corpus.sum(), 6)),
-                dz_max_in_resid=(round(float((zo - zd)[resid].max()), 4)
-                                 if resid.any() else 0.0))
+                           else round(float(lifted.sum()) / float(fp_corpus.sum()), 6)),
+                ref_guoff_d_below_cells=int(still_low.sum()),
+                ref_guoff_in_fp_cells=int((still_low & fp_corpus).sum()))
 
             # 프레임 단위 — 정본 라벨러의 폴라 격자를 그대로 빌린다
             x0, y0, st = ga
@@ -301,8 +360,10 @@ def main():
                  for r in neg if not r["vg02_all_negative"]],
         total_fp_corpus_cells=sum(r["negative_gt"]["fp_corpus_cells"] for r in neg),
         total_resid_cells=sum(r["negative_gt"]["resid_cells"] for r in neg),
-        total_artifact_cells=sum(r["negative_gt"]["artifact_cells_outside_fp"]
-                                 for r in neg))
+        min_fill_rate=min([r["negative_gt"]["fill_rate"] for r in neg
+                           if r["negative_gt"]["fill_rate"] is not None] or [None]),
+        ref_guoff_total_cells=sum(r["negative_gt"]["ref_guoff_d_below_cells"]
+                                  for r in neg))
     base = [r for r in out["scenes"] if r["band"] == "base"]
     out["vg_04"] = dict(
         note="D팔 높이맵 sha256 == 정본 구off 높이맵 sha256 인 씬 = 구off가 실제로 "
@@ -317,8 +378,10 @@ def main():
     print("=== 렌더 회계 ===")
     for r, v in out["rounds"].items():
         print(f"  {r:26s} {v['png']:4d}/{v['expected_cuts']:4d} png · depth {v['depth']:4d} "
-              f"· idseg {v['idseg']:4d} · hm {v['heightmap']:2d} · {v['disk_gb']:6.2f} GB "
-              f"· VG-08 {'PASS' if v['vg08_pass'] else 'FAIL'}")
+              f"· idseg {v['idseg_files']:4d} · hm {v['heightmap']:2d} · {v['disk_gb']:6.2f} GB "
+              f"· VG-08 {'PASS' if v['vg08_pass'] else 'FAIL'}"
+              f" · 마스크 {v['idseg']['uniq']}/{v['idseg']['cuts']} 고유"
+              f" · stale컷 {v['idseg']['t0']}")
     print(f"  합계 {out['accounting']['total_cuts']}컷 · in-process "
           f"{out['accounting']['in_process_gpu_h']} GPU-h")
     print("\n=== VG-datum (A,D) 3층 ===")
@@ -333,9 +396,10 @@ def main():
           "· 0 아닌 쌍", out["vg_10"]["n_pairs_nonzero"])
     print("\n=== VG-02 (D팔 전 칸 음성 — 낙차 잔차 실측) ===")
     print(f"  {out['vg_02']['n_all_negative']}/{out['vg_02']['n_scene_band']} 씬×밴드 통과 · "
-          f"코퍼스 발자국 {out['vg_02']['total_fp_corpus_cells']}셀 중 잔차 "
-          f"{out['vg_02']['total_resid_cells']}셀 · 단서제거 인공물(발자국 밖) "
-          f"{out['vg_02']['total_artifact_cells']}셀")
+          f"코퍼스 발자국 {out['vg_02']['total_fp_corpus_cells']}셀 중 D 안 함몰 잔차 "
+          f"{out['vg_02']['total_resid_cells']}셀 · 최소 fill_rate "
+          f"{out['vg_02']['min_fill_rate']} · (참고: 구off 참조판 "
+          f"{out['vg_02']['ref_guoff_total_cells']}셀 — 단서 오염 포함)")
     for d_ in out["vg_02"]["defects"]:
         print("   DEFECT", d_)
     print("\n=== VG-04 실증 (D == 구off ?) ===")

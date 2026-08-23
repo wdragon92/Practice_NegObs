@@ -1,0 +1,690 @@
+{
+ "doc": "w1d_fuse_audit",
+ "version": "1.0",
+ "rule": "정본 구off팔이 융합을 쓰는 (라운드,씬)에만 D팔 융합 사이드카를 쓴다. 밴드 라운드는 base 밴드 융합본을 복사한다(AABB sha 동일 확인 후).",
+ "agree_band_m": 0.01,
+ "flag_p90_m": 0.3,
+ "wrote": [
+  "260826_v3w1_lib_D/scene02",
+  "260826_v3w1_lib_D/scene08",
+  "260826_v3w1_lib_D/scene12",
+  "260826_v3w1_lib_D/scene16",
+  "260826_v3w1_lib_D_e/scene08 (copy)",
+  "260826_v3w1_lib_D_e/scene12 (copy)",
+  "260826_v3w1_lib_D_e2/scene12 (copy)"
+ ],
+ "flagged": [
+  {
+   "round": "260826_v3w1_lib_D",
+   "scene": "scene06",
+   "why": "median",
+   "med_abs": 0.0121,
+   "p90_abs": 0.0144,
+   "max_abs": 0.1412,
+   "fused_z": [
+    -0.148,
+    -0.122
+   ],
+   "aabb_z": [
+    -0.151,
+    -0.005
+   ]
+  },
+  {
+   "round": "260826_v3w1_lib_D",
+   "scene": "scene10",
+   "why": "p90>위험깊이",
+   "med_abs": 0.0005,
+   "p90_abs": 1.1958,
+   "max_abs": 10.6156,
+   "fused_z": [
+    -6.624,
+    0.015
+   ],
+   "aabb_z": [
+    -6.62,
+    7.16
+   ]
+  }
+ ],
+ "problems": [],
+ "rows": [
+  {
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "scene": "scene01",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "n_views": 24,
+   "fused_finite": 70781,
+   "aabb_finite": 103041,
+   "both": 70781,
+   "med_abs": 0.0003,
+   "p90_abs": 0.0005,
+   "max_abs": 0.0198,
+   "fused_z": [
+    -0.001,
+    0.02
+   ],
+   "aabb_z": [
+    -0.0,
+    0.003
+   ],
+   "action": "keep aabb"
+  },
+  {
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "scene": "scene02",
+   "corpus_off_fused": true,
+   "corpus_off_round": "260819_main_off",
+   "n_views": 24,
+   "fused_finite": 72780,
+   "aabb_finite": 103041,
+   "both": 72780,
+   "med_abs": 0.0051,
+   "p90_abs": 0.008,
+   "max_abs": 0.0117,
+   "fused_z": [
+    0.006,
+    0.016
+   ],
+   "aabb_z": [
+    0.0,
+    0.019
+   ],
+   "action": "write"
+  },
+  {
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "scene": "scene03",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "n_views": 24,
+   "fused_finite": 78440,
+   "aabb_finite": 102822,
+   "both": 78231,
+   "med_abs": 0.0003,
+   "p90_abs": 0.0017,
+   "max_abs": 0.0352,
+   "fused_z": [
+    -0.003,
+    0.005
+   ],
+   "aabb_z": [
+    -0.002,
+    0.035
+   ],
+   "action": "keep aabb"
+  },
+  {
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "scene": "scene04",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "n_views": 24,
+   "fused_finite": 86429,
+   "aabb_finite": 103041,
+   "both": 86429,
+   "med_abs": 0.0004,
+   "p90_abs": 0.0006,
+   "max_abs": 0.0028,
+   "fused_z": [
+    -0.001,
+    0.002
+   ],
+   "aabb_z": [
+    0.0,
+    0.002
+   ],
+   "action": "keep aabb"
+  },
+  {
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "scene": "scene06",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "n_views": 24,
+   "fused_finite": 75919,
+   "aabb_finite": 103041,
+   "both": 75919,
+   "med_abs": 0.0121,
+   "p90_abs": 0.0144,
+   "max_abs": 0.1412,
+   "fused_z": [
+    -0.148,
+    -0.122
+   ],
+   "aabb_z": [
+    -0.151,
+    -0.005
+   ],
+   "action": "FLAG:median (계기 불일치 — 쓰지 않음, 보고만)"
+  },
+  {
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "scene": "scene08",
+   "corpus_off_fused": true,
+   "corpus_off_round": "260819_main_off",
+   "n_views": 24,
+   "fused_finite": 78771,
+   "aabb_finite": 103041,
+   "both": 78771,
+   "med_abs": 2.4003,
+   "p90_abs": 4.5003,
+   "max_abs": 4.5063,
+   "fused_z": [
+    -0.001,
+    0.006
+   ],
+   "aabb_z": [
+    -4.501,
+    0.006
+   ],
+   "action": "write"
+  },
+  {
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "scene": "scene09",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "n_views": 24,
+   "fused_finite": 84153,
+   "aabb_finite": 103041,
+   "both": 84153,
+   "med_abs": 0.0055,
+   "p90_abs": 0.0077,
+   "max_abs": 0.0103,
+   "fused_z": [
+    0.006,
+    0.016
+   ],
+   "aabb_z": [
+    0.016,
+    0.016
+   ],
+   "action": "keep aabb"
+  },
+  {
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "scene": "scene10",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "n_views": 24,
+   "fused_finite": 28375,
+   "aabb_finite": 103041,
+   "both": 28375,
+   "med_abs": 0.0005,
+   "p90_abs": 1.1958,
+   "max_abs": 10.6156,
+   "fused_z": [
+    -6.624,
+    0.015
+   ],
+   "aabb_z": [
+    -6.62,
+    7.16
+   ],
+   "action": "FLAG:p90>위험깊이 (계기 불일치 — 쓰지 않음, 보고만)"
+  },
+  {
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "scene": "scene12",
+   "corpus_off_fused": true,
+   "corpus_off_round": "260819_main_off",
+   "n_views": 24,
+   "fused_finite": 84517,
+   "aabb_finite": 103041,
+   "both": 84517,
+   "med_abs": 0.6,
+   "p90_abs": 1.361,
+   "max_abs": 1.3619,
+   "fused_z": [
+    -1.802,
+    0.001
+   ],
+   "aabb_z": [
+    -2.4,
+    -0.0
+   ],
+   "action": "write"
+  },
+  {
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "scene": "scene16",
+   "corpus_off_fused": true,
+   "corpus_off_round": "260819_main_off",
+   "n_views": 24,
+   "fused_finite": 79436,
+   "aabb_finite": 103041,
+   "both": 79436,
+   "med_abs": 0.0005,
+   "p90_abs": 0.006,
+   "max_abs": 0.1336,
+   "fused_z": [
+    -0.124,
+    0.02
+   ],
+   "aabb_z": [
+    -0.114,
+    0.02
+   ],
+   "action": "write"
+  },
+  {
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "scene": "scene17",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "n_views": 24,
+   "fused_finite": 78367,
+   "aabb_finite": 103041,
+   "both": 78367,
+   "med_abs": 0.0003,
+   "p90_abs": 0.0005,
+   "max_abs": 0.0502,
+   "fused_z": [
+    -0.001,
+    0.05
+   ],
+   "aabb_z": [
+    -0.0,
+    0.05
+   ],
+   "action": "keep aabb"
+  },
+  {
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "scene": "scene20",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "n_views": 24,
+   "fused_finite": 78808,
+   "aabb_finite": 103041,
+   "both": 78808,
+   "med_abs": 0.0004,
+   "p90_abs": 0.0006,
+   "max_abs": 0.0009,
+   "fused_z": [
+    -0.001,
+    0.001
+   ],
+   "aabb_z": [
+    0.0,
+    0.001
+   ],
+   "action": "keep aabb"
+  },
+  {
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "scene": "scene21",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "n_views": 24,
+   "fused_finite": 17799,
+   "aabb_finite": 103041,
+   "both": 17799,
+   "med_abs": 0.0004,
+   "p90_abs": 0.0005,
+   "max_abs": 0.0011,
+   "fused_z": [
+    -0.001,
+    0.001
+   ],
+   "aabb_z": [
+    -2.75,
+    0.001
+   ],
+   "action": "keep aabb"
+  },
+  {
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "scene": "sceneC1",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "n_views": 24,
+   "fused_finite": 81522,
+   "aabb_finite": 103041,
+   "both": 81522,
+   "med_abs": 0.0003,
+   "p90_abs": 0.0005,
+   "max_abs": 0.0017,
+   "fused_z": [
+    0.049,
+    0.051
+   ],
+   "aabb_z": [
+    0.05,
+    0.051
+   ],
+   "action": "keep aabb"
+  },
+  {
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "scene": "sceneC4",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "n_views": 24,
+   "fused_finite": 78066,
+   "aabb_finite": 103041,
+   "both": 78066,
+   "med_abs": 0.0003,
+   "p90_abs": 0.0005,
+   "max_abs": 0.0009,
+   "fused_z": [
+    -0.001,
+    0.001
+   ],
+   "aabb_z": [
+    -0.0,
+    -0.0
+   ],
+   "action": "keep aabb"
+  },
+  {
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "scene": "sceneD1",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "n_views": 24,
+   "fused_finite": 65752,
+   "aabb_finite": 103041,
+   "both": 65752,
+   "med_abs": 0.0003,
+   "p90_abs": 0.0005,
+   "max_abs": 0.0023,
+   "fused_z": [
+    -0.001,
+    0.002
+   ],
+   "aabb_z": [
+    0.0,
+    0.002
+   ],
+   "action": "keep aabb"
+  },
+  {
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "scene": "sceneD2",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "n_views": 24,
+   "fused_finite": 46421,
+   "aabb_finite": 103041,
+   "both": 46421,
+   "med_abs": 0.0003,
+   "p90_abs": 0.0005,
+   "max_abs": 3.1901,
+   "fused_z": [
+    -0.051,
+    0.181
+   ],
+   "aabb_z": [
+    -0.05,
+    3.2
+   ],
+   "action": "keep aabb"
+  },
+  {
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "scene": "sceneD3",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "n_views": 24,
+   "fused_finite": 76016,
+   "aabb_finite": 103041,
+   "both": 76016,
+   "med_abs": 0.0003,
+   "p90_abs": 0.0006,
+   "max_abs": 0.0062,
+   "fused_z": [
+    -0.001,
+    0.006
+   ],
+   "aabb_z": [
+    0.0,
+    0.006
+   ],
+   "action": "keep aabb"
+  },
+  {
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "scene": "sceneN1",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "n_views": 24,
+   "fused_finite": 78867,
+   "aabb_finite": 103041,
+   "both": 78867,
+   "med_abs": 0.0004,
+   "p90_abs": 0.0006,
+   "max_abs": 0.0009,
+   "fused_z": [
+    -0.001,
+    0.001
+   ],
+   "aabb_z": [
+    0.0,
+    0.0
+   ],
+   "action": "keep aabb"
+  },
+  {
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "scene": "sceneN2",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "n_views": 24,
+   "fused_finite": 79527,
+   "aabb_finite": 103041,
+   "both": 79527,
+   "med_abs": 0.0004,
+   "p90_abs": 0.0006,
+   "max_abs": 0.0009,
+   "fused_z": [
+    -0.001,
+    0.001
+   ],
+   "aabb_z": [
+    0.0,
+    0.0
+   ],
+   "action": "keep aabb"
+  },
+  {
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "scene": "sceneN4",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "n_views": 24,
+   "fused_finite": 23483,
+   "aabb_finite": 103041,
+   "both": 23483,
+   "med_abs": 0.0003,
+   "p90_abs": 0.0005,
+   "max_abs": 1.6056,
+   "fused_z": [
+    -0.001,
+    1.589
+   ],
+   "aabb_z": [
+    0.0,
+    1.606
+   ],
+   "action": "keep aabb"
+  },
+  {
+   "band": "base",
+   "round": "260826_v3w1_lib_D",
+   "scene": "sceneN5",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "n_views": 24,
+   "fused_finite": 77954,
+   "aabb_finite": 103041,
+   "both": 77954,
+   "med_abs": 0.0004,
+   "p90_abs": 0.0007,
+   "max_abs": 0.0999,
+   "fused_z": [
+    -0.002,
+    0.044
+   ],
+   "aabb_z": [
+    0.0,
+    0.099
+   ],
+   "action": "keep aabb"
+  },
+  {
+   "band": "h",
+   "round": "260826_v3w1_lib_D_h",
+   "scene": "scene09",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "action": "keep aabb"
+  },
+  {
+   "band": "h",
+   "round": "260826_v3w1_lib_D_h",
+   "scene": "scene17",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "action": "keep aabb"
+  },
+  {
+   "band": "e",
+   "round": "260826_v3w1_lib_D_e",
+   "scene": "scene03",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "action": "keep aabb"
+  },
+  {
+   "band": "e",
+   "round": "260826_v3w1_lib_D_e",
+   "scene": "scene04",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "action": "keep aabb"
+  },
+  {
+   "band": "e",
+   "round": "260826_v3w1_lib_D_e",
+   "scene": "scene08",
+   "corpus_off_fused": true,
+   "corpus_off_round": "260820_boost_e_off_g7fixM",
+   "aabb_sha_equals_base_band": true,
+   "action": "copy-from-base"
+  },
+  {
+   "band": "e",
+   "round": "260826_v3w1_lib_D_e",
+   "scene": "scene09",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "action": "keep aabb"
+  },
+  {
+   "band": "e",
+   "round": "260826_v3w1_lib_D_e",
+   "scene": "scene12",
+   "corpus_off_fused": true,
+   "corpus_off_round": "260820_boost_e_off_g7fixM",
+   "aabb_sha_equals_base_band": true,
+   "action": "copy-from-base"
+  },
+  {
+   "band": "e",
+   "round": "260826_v3w1_lib_D_e",
+   "scene": "scene17",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "action": "keep aabb"
+  },
+  {
+   "band": "e",
+   "round": "260826_v3w1_lib_D_e",
+   "scene": "scene20",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "action": "keep aabb"
+  },
+  {
+   "band": "e",
+   "round": "260826_v3w1_lib_D_e",
+   "scene": "sceneC1",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "action": "keep aabb"
+  },
+  {
+   "band": "e",
+   "round": "260826_v3w1_lib_D_e",
+   "scene": "sceneC4",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "action": "keep aabb"
+  },
+  {
+   "band": "e2",
+   "round": "260826_v3w1_lib_D_e2",
+   "scene": "scene03",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "action": "keep aabb"
+  },
+  {
+   "band": "e2",
+   "round": "260826_v3w1_lib_D_e2",
+   "scene": "scene04",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "action": "keep aabb"
+  },
+  {
+   "band": "e2",
+   "round": "260826_v3w1_lib_D_e2",
+   "scene": "scene12",
+   "corpus_off_fused": true,
+   "corpus_off_round": "260820_boost_e2_off_g7fixM",
+   "aabb_sha_equals_base_band": true,
+   "action": "copy-from-base"
+  },
+  {
+   "band": "e2",
+   "round": "260826_v3w1_lib_D_e2",
+   "scene": "scene20",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "action": "keep aabb"
+  },
+  {
+   "band": "e2",
+   "round": "260826_v3w1_lib_D_e2",
+   "scene": "sceneC4",
+   "corpus_off_fused": false,
+   "corpus_off_round": null,
+   "action": "keep aabb"
+  }
+ ]
+}

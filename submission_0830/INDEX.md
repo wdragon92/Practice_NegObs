@@ -257,7 +257,7 @@
 |---|---|---|---|---|
 | **A-1** | **YOLO 3런** (`SEED_TABLE.md` §4 V행 0.150 ± 0.028 및 :69-71, :93-95) | 본 표 4행 중 유일하게 미측정. E/H=0은 논리적 불변이나 **V행은 미측정** | `run_queue_v2.sh`의 yolo 블록을 `--manifest .../v3_0823/dataset_manifest_v2corr.json`으로 1회 재실행 (τ 0.25 고정) | Claude Code (GPU, flock) |
 | **A-2** | **`rgb_s42_aux` 1런** (`SEED_TABLE.md` §5 aux 부록 V·cell_f1·cell_precision) | 부록 표가 구 GT 분모 위에 있음 | `code/rescore_v2corr.sh`에 `rgb_s42_aux` 추가 후 1런 | Claude Code (GPU) |
-| **A-3** | **부록 인코더 6런** (resnet50 ×3, convnext ×3) | 교정 덤프 없음. 스크립트가 `--corr`+`--appendix`를 상호 배타로 강제 | 우선순위 **하** — FA-정합 H는 구조적 불변이므로 부록에 "구 GT 측정" 태그만 붙여도 무방 | 판단 필요 |
+| **A-3** | **부록 인코더 6런** (resnet50 ×3, convnext ×3) | 교정 덤프 없음. 스크립트가 `--corr`+`--appendix`를 상호 배타로 강제 | 우선순위 **하** — FA-정합 H는 구조적 불변이므로 부록에 "구 GT 측정" 태그만 붙여도 무방 | **종결(08-24, D80)** — 6런 재채점 완료(게이트 4/4·H행 불변·FA-정합 H열 불변), `V2_RESCORE.md` §7. 구 GT 태그 제거 가능 |
 
 ### B. 이미 측정됐고 **문서에 반영만 하면** 되는 것 (GPU 0)
 

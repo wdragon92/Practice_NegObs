@@ -615,3 +615,146 @@ FA_D [.025 .000 .050] · b2 FA_C [.271 .625 .458] / FA_D [.203 .364 .061].
    본 문서 §0 배너가 근거. 같은 §4.2의 **코퍼스 표(V 693→801 · H 243→195 · Hw 30→33 · none 378→315)는
    원장 실측과 일치하므로 정정 불필요**하고, 코퍼스 hazard 분모는 **1038 → 1101**이다.
 5. **v3 A/B 기준선 고정**: 앞으로 v2 쪽 수치는 본 문서 **§1.2 표**를 인용한다.
+
+---
+
+# §7 【APPEND · 08-23 22:49】 부록 인코더 6런 재채점 (A-3 / D69)
+
+*append-only. §0–§6은 한 자도 수정하지 않았다. 목적: 제출 INDEX 재발행 목록 A-3 —
+부록 행에서 **"구 GT 측정" 태그 제거**.*
+
+**한 줄 결론.** 부록 6런(resnet50 ×3 · tu-convnext_tiny ×3) 전부 교정 GT로 재채점 완료.
+**확률 비트 동일 · H 행 6/6 완전 불변**, σ 초과는 2건(둘 다 §2와 같은 기전)이며,
+**FA-정합 부록표(`newmodels/FA_MATCHED.md` §1)는 H 열이 소수 3자리까지 그대로 성립**한다.
+
+## 7.1 프로비넌스 · 재생성
+
+가중치는 **디스크에 존재**한다(재훈련 없음): `experiments/weekend_0823/newmodels/runs/<run>/best.pt`
+(resnet50 130.6 MB × 3 · tu-convnext_tiny × 3). 공표 부록표 출처는
+`experiments/weekend_0823/newmodels/FA_MATCHED.md` (§1 FA-정합 · §2 τ=0.5 무정합) ·
+`newmodels/runs/<run>/eval_test/metrics.json`.
+
+```bash
+R=/home/vislab/Desktop/work_sy/Practice_NegObs
+tmux new-session -d -s a3rescore
+tmux send-keys -t a3rescore "bash $R/experiments/v3_0823/code/rescore_a3_appendix.sh" Enter
+PYTHONNOUSERSITE=1 CUDA_VISIBLE_DEVICES= /home/vislab/miniconda3/envs/env_seg/bin/python \
+  $R/experiments/v3_0823/code/rescore_a3_tables.py     # -> eval_v2corr/rescore_a3_tables.json
+```
+
+공표 호출(`weekend_0823/code/run_newmodels.sh:93-94`)과의 차이는 **§0과 동일한 두 줄뿐**:
+`--manifest` → `dataset_manifest_v2corr.json`, `--tau-star auto` → **공표 고정값**
+(resnet50 .72/.36/.58 · convnext .31/.30/.33). `--encoder` 플래그는 **주지 않는다** —
+eval_polar가 ckpt의 `config["encoder"]`에서 되읽는다(D45). 로그에 `[model] encoder=resnet50` ·
+`encoder=tu-convnext_tiny`로 정상 복원 확인. 나머지(`--input rgb --subset test --tau-op 0.5
+--tau-sweep 0.3,0.5,0.7 --grid gridspec_v1.json`, n-boot = eval_polar 기본 10000) 동일.
+
+**런타임 2분 55초** (22:46:52 → 22:48:47, 런당 19–20 s). D69 A-3 "GPU 유휴 시 실행" 지침대로
+매 invocation을 `flock -o /tmp/negobs_gpu.lock`로 감싸고 201/202에 backoff·재시도하도록 짰다 —
+동시 가동 중이던 씬 빌더(tmux `ncuebuild`)와 충돌 0회, 대기 0회.
+
+산출: `eval_v2corr/{resnet50,tu-convnext_tiny}_s{42,43,44}/{metrics.json,per_frame.csv,METRICS_SECTION.md,DONE}`
+· `eval_v2corr/A3_DONE` · `eval_v2corr/rescore_a3_tables.json` · 로그 `eval_v2corr/logs/rescore_a3.log`.
+*(공표 부록 런과 동일하게 `per_frame_{on,off}.csv`·twin은 만들지 않았다 — 부록 트랙은 원래 없었다.)*
+
+## 7.2 무결성 게이트 — 3/3 통과 (정본 9런과 동일 기준)
+
+| 게이트 | 실측 | 판정 |
+|---|---|---|
+| 확률 불변 | **6/6 런 `max|Δp| = 0.000e+00`** | ✅ |
+| frame_id 집합 동일 | 6/6 True | ✅ |
+| **H 행 불변** | **6/6 `frame_recall_H`·`cell_recall_H` 완전 동일** | ✅ |
+| off팔 불변 | 6/6 `frame_fa_off`·`cell_fpr_off` Δ = 0.0000 | ✅ |
+
+| run | frame_recall_H 공표 → 교정 | frame_fa_off 공표 → 교정 |
+|---|---|---|
+| resnet50_s42 | 0.4688 → 0.4688 | 0.2132 → 0.2132 |
+| resnet50_s43 | 0.2396 → 0.2396 | 0.3431 → 0.3431 |
+| resnet50_s44 | 0.2188 → 0.2188 | 0.1912 → 0.1912 |
+| tu-convnext_tiny_s42 | 0.8438 → 0.8438 | 1.0000 → 1.0000 |
+| tu-convnext_tiny_s43 | 1.0000 → 1.0000 | 1.0000 → 1.0000 |
+| tu-convnext_tiny_s44 | 0.6250 → 0.6250 | 0.7279 → 0.7279 |
+
+**구 분모(327) 대조도 정본 9런과 똑같이 닫힌다** — 6/6 런 × 전 tier가 공표치와 소수 4자리까지 동일
+(`rescore_a3_tables.json:runs.*.corrected_at_old_denom`). ⇒ 부록 델타도 **분모 성장 단일 기전**이다.
+
+## 7.3 부록 헤드라인 — 교정 GT (τ_op 0.5 · 분모 V 219 · E 45 · H 96 · Hw 9 · det 369 · off 408)
+
+| 인코더 | n | cell_f1 | frame_det_rate | recall V | recall E | recall H | recall H_weak | frame_fa_off | cell_fpr_off |
+|---|---|---|---|---|---|---|---|---|---|
+| resnet50 | 3 | 0.476 ± 0.073 | 0.600 ± 0.075 | 0.763 ± 0.078 | 0.430 ± 0.256 | **0.309 ± 0.125** | 0.593 ± 0.167 | **0.249 ± 0.076** | 0.033 ± 0.006 |
+| tu-convnext_tiny | 3 | 0.223 ± 0.116 | 0.815 ± 0.229 | 0.798 ± 0.269 | 0.956 ± 0.067 | **0.823 ± 0.188** | 0.444 ± 0.500 | **0.909 ± 0.136** | 0.081 ± 0.054 |
+| *(참고) resnet34 = 정본* | 3 | 0.456 ± 0.117 | 0.717 ± 0.199 | 0.760 ± 0.203 | 0.556 ± 0.378 | 0.688 ± 0.141 | 0.815 ± 0.222 | 0.359 ± 0.127 | 0.047 ± 0.016 |
+
+보조: cell_recall resnet50 0.392 ± 0.075 · convnext 0.176 ± 0.128 ·
+cell_precision resnet50 **0.614 ± 0.079** · convnext **0.387 ± 0.023**.
+
+## 7.4 델타 vs 공표 부록 수치
+
+기준: `newmodels/FA_MATCHED.md` §2(τ=0.5 무정합 표) + `newmodels/runs/<run>/eval_test/metrics.json`.
+**공표치 재계산이 FA_MATCHED §1·§2와 소수 3자리까지 일치**함을 먼저 확인했다
+(resnet50 H .309 · E .430 · V .778 · FA .249 / convnext H .823 · E .956 · V .824 · FA .909 ✓).
+
+| 인코더 | metric | 공표 | 교정 | **Δ** | σ(교정) | \|Δ\|/σ |
+|---|---|---|---|---|---|---|
+| resnet50 | cell_f1 | 0.4595 | 0.4758 | +0.0163 | 0.0783 | 0.21 |
+| resnet50 | cell_recall | 0.3868 | 0.3915 | +0.0046 | 0.0810 | 0.06 |
+| resnet50 | cell_precision | 0.5720 | 0.6136 | +0.0416 | 0.0823 | 0.50 |
+| resnet50 | frame_det_rate | 0.5851 | 0.5998 | +0.0147 | 0.0861 | 0.17 |
+| resnet50 | **frame_recall_V** | 0.7778 | 0.7626 | **−0.0152** | 0.0780 | 0.20 |
+| resnet50 | frame_recall_E | 0.4296 | 0.4296 | **0.0000** | 0.2651 | 0 |
+| resnet50 | **frame_recall_H** | 0.3090 | 0.3090 | **0.0000** | 0.1387 | 0 |
+| resnet50 | **frame_recall_H_weak** | 0.3889 | 0.5926 | **+0.2037** | 0.1697 | **★ 1.20** |
+| resnet50 | frame_fa_off | 0.2492 | 0.2492 | **0.0000** | 0.0821 | 0 |
+| resnet50 | cell_fpr_off | 0.0327 | 0.0327 | **0.0000** | 0.0060 | 0 |
+| convnext_tiny | cell_f1 | 0.2106 | 0.2230 | +0.0124 | 0.1214 | 0.10 |
+| convnext_tiny | cell_recall | 0.1692 | 0.1761 | +0.0069 | 0.1381 | 0.05 |
+| convnext_tiny | **cell_precision** | 0.3545 | 0.3866 | **+0.0321** | 0.0231 | **★ 1.39** |
+| convnext_tiny | frame_det_rate | 0.8328 | 0.8148 | −0.0180 | 0.2412 | 0.07 |
+| convnext_tiny | **frame_recall_V** | 0.8241 | 0.7976 | **−0.0265** | 0.2933 | 0.09 |
+| convnext_tiny | frame_recall_E | 0.9556 | 0.9556 | **0.0000** | 0.0770 | 0 |
+| convnext_tiny | **frame_recall_H** | 0.8229 | 0.8229 | **0.0000** | 0.1884 | 0 |
+| convnext_tiny | frame_recall_H_weak | 0.3333 | 0.4444 | +0.1111 | 0.5092 | 0.22 |
+| convnext_tiny | frame_fa_off | 0.9093 | 0.9093 | **0.0000** | 0.1571 | 0 |
+| convnext_tiny | cell_fpr_off | 0.0808 | 0.0808 | **0.0000** | 0.0600 | 0 |
+
+**σ 초과 2건 — 둘 다 §2에서 이미 본 기전, 새 현상 아님.**
+
+1. **convnext_tiny `cell_precision` +0.032 (1.39 σ)** — §2.1의 depth `cell_precision` +0.051(1.65 σ)과
+   **같은 기전**: 양성 칸 2,691→2,856으로 늘면서 이미 켜져 있던 칸이 FP→TP로 재분류된다.
+   convnext는 τ=0.5에서 거의 상시 발화하므로(FA 0.909) 새 양성 칸을 **전부** 주워 담아
+   σ가 유난히 작은데도(0.023) 비율이 커졌다. **모델이 좋아진 게 아니라 정답지가 온 것**이다.
+   resnet50(+0.042, 0.50 σ)·resnet34(+0.026, 0.63 σ)도 같은 방향.
+2. **resnet50 `frame_recall_H_weak` +0.204 (1.20 σ)** — **분모 6→9의 퇴화 행. 인용 금지**
+   (§2.1의 depth H_weak 항목과 동일 취급). 실체는 신규 H_weak 3장 중 resnet50이 일부를 잡는다는 것뿐.
+
+**정확히 0인 칸**: `frame_recall_H` · `frame_recall_E` · `frame_fa_off` · `cell_fpr_off` — 6/6 런.
+정본 9런과 같은 이유(H·E 프레임과 off팔 408은 교정 대상이 아니고 확률이 비트 동일).
+
+**FA-정합 부록표(`FA_MATCHED.md` §1)의 운명**: H 열 **전 지점 불변** —
+resnet50 .479/.267/.115/.056 · convnext .358/.160/.073/.031 (교정 전후 동일), 따라서
+Δ(r50−r34) −0.250/−0.215/−0.212/−0.188 · Δ(convnext−r34) −0.372/−0.323/−0.253/−0.212도 **그대로**다.
+§3.1의 이유와 동일: τ는 off팔에서만, 값은 H 96프레임에서만 나온다.
+**V 열만 이동** — resnet50 .819→.820 / .759→.743 / .654→.626 / .524→.493 ·
+convnext .252→.213 / .104→.091 / .039→.033 / .013→.012.
+
+## 7.5 FA 인구조사(FA census)의 부록 계층 — **이제 재생성 가능**
+
+`code/fa_census_extract.py:70-73`은 지금 `--corr`와 `--appendix`를 **상호배타로 하드 차단**하고
+있고 그 사유가 *"resnet50/convnext_tiny have no corrected-GT dumps"* 인데, **§7.1로 그 전제가
+해소됐다** — 6런의 교정 GT 덤프가 `eval_v2corr/`에 정본 9런과 나란히 존재한다. 따라서 부록 계층은
+**GPU 없이 재생성 가능**하며, 필요한 것은 `:71-73`의 guard 제거와 `:76-78`의 `corr` 분기에
+`APPENDIX` 경로를 `eval_v2corr/<run>`으로 매핑하는 **한 곳의 수정**뿐이다(본 작업 범위 밖 —
+후속 큐 6번). 참고로 census 두 계층 중 **`OFF`(2,212건)는 교정 불변**이고
+**`ON_NEG`(4,713건)만 줄어든다**(온팔 음성 칸 165개/런이 양성으로 전환) — 부록 행에 붙은
+"구 GT 측정" 태그가 정확히 이 `ON_NEG` 계층 때문이었다. 부록 런은 `per_frame_{on,off}.csv`를
+싣지 않지만 추출기가 `:101-108`에서 결합본을 즉석 분할하므로 추가 산출물은 필요 없다.
+
+## 7.6 §6.4 후속 큐 갱신
+
+* ~~(신규)~~ **A-3 부록 6런 재채점 — 완료**(본 §7). 제출 INDEX의 부록 행에서 **"구 GT 측정" 태그
+  제거 가능**. 인용처는 `newmodels/FA_MATCHED.md` §1(H 열 **수정 불필요**) · §2(**V·cell 열 교체**,
+  H·E·FA 열 불변) · `eval_v2corr/rescore_a3_tables.json`.
+* **6. (신규) `fa_census_extract.py`의 `--corr --appendix` 조합 해금** — §7.5 참조.
+* §6.4의 1(YOLO 3런)·2(`rgb_s42_aux` 1런)는 **여전히 미착수**. 부록 인코더와 달리 이 둘은
+  본 재채점(정본 9 + 부록 6 = 15런)에 포함되지 않았다.

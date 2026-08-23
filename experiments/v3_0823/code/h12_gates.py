@@ -13,6 +13,8 @@
     VG-06   모서리 소속             A팔 strict-H 프레임의 ID 마스크에서
                                     가림체 px > 0 · 낙차 구조물 px = 0
     VG-07   (A,C) 광학차 로그       쌍별 픽셀 차 통계 + 분포 (D58 층화의 입력)
+    WHITE   순백 대면적 (산출층)     **공식 = frac(min-channel > 0.8)** [D85 채택]
+                                    구 `frac(max>0.8)` 은 deprecated 로 한 번 더 인쇄
     paired-H                        A·B 가 **둘 다** strict-H 인 프레임 수 (§3.2 하한 12)
 
 사용
@@ -22,6 +24,10 @@
         --labels-ac experiments/v3_0823/annotations/h12_ac_labels.json \
         --labels-bd experiments/v3_0823/annotations/h12_bd_labels.json \
         --out experiments/v3_0823/h12_gates.json
+
+    # WHITE 지표만 (라벨 불요 · A팔 png 만 읽는다 — h67 계열 2팔 라운드에도 쓴다)
+    $PY experiments/v3_0823/code/h12_gates.py --white-only \
+        --root dataset --stamp 260823_v3p5_h67reg --split val --scenes sceneH7
 """
 from __future__ import annotations
 
@@ -183,6 +189,30 @@ LABELER_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
 HAZ_DEPTH = 0.30           # gridspec_v1 hazard_depth_m
 DATUM_TOL = 0.02           # VG-datum 3층 임계 (ACCOUNTING §4.9-5)
 POSE_KEYS = ("d", "h_rel", "yaw", "pitch", "roll", "hfov")
+
+# --------------------------------------------------------------------------- #
+# WHITE — v5.1 §4 "순백(>0.8) 대면적 금지" 의 **픽셀층 지표**
+# --------------------------------------------------------------------------- #
+# **공식 지표는 `frac(min-channel > 0.8)` 이다** [D85 채택 · REG_AUDIT §6.1].
+#
+#   구 지표 `frac(max-channel > 0.8)` 은 **한 채널만** 0.8 을 넘으면 센다. KS 규정색
+#   황색 점자블록은 RGB ≈ (0.85, 0.79, 0.14) 이라 **정의상 항상 걸린다** — 즉 규정이
+#   지시한 색을 규약 위반으로 오분류한다. sceneL1 이 정확히 그렇게 걸렸다:
+#   `frac(max>0.8)` 중앙값 0.1487 인데 점자블록 픽셀 2,235,340 중 **전 채널 > 0.8 인
+#   픽셀은 0개**였다(REG_AUDIT §6 픽셀 귀속 실측).
+#   "순백"의 옳은 정의는 **무채색 고휘도 = 전 채널 > 0.8** 이고, 그 판정식이
+#   `min-channel > 0.8` 이다. `scripts/regression_check.py` 의 `WHITE_LEVEL`(=204/255,
+#   `full.min(-1)` 위에서 잰다)이 이미 같은 정의를 쓰고 있었다 — 이 스크립트가
+#   코퍼스 지표를 그쪽에 맞춘 것이지 새 지표를 만든 것이 아니다.
+#
+# **알베도 규약으로는 못 막는다**: `paving_interlock` 은 `alb_max 0.34` 클램프
+#   대상인데도 정오 직사광 + 톤매핑을 거치면 화면에서 순백으로 날아간다(sceneH7
+#   `M["paving"]` 실측). ⇒ 측정·게이팅은 **알베도 층이 아니라 픽셀 층**이다.
+#
+# 산출층이다(판정층 아님). 사전 등록된 임계가 없으므로 `verdict` 에 들어가지 않고,
+#   절대값이 아니라 **개정 전후의 이동**이 판단 재료다(regression_check 의 WHITE 와 같은 규율).
+WHITE_T = 0.8              # 채널값 임계 (0..1). 204/255 = 0.8 과 같은 자리
+WHITE_SKY_CUT = 3          # 하늘 배제용 상단 1/3 컷 — regression_check `[h // 3:]` 와 동일
 
 
 # --------------------------------------------------------------------------- #
@@ -785,6 +815,53 @@ def gate_vg07(dA, dC, files):
                 pairs=rows)
 
 
+def gate_white(d, files):
+    """WHITE — 순백 대면적 지표 (v5.1 §4 · D85 채택).
+
+    **공식**  `white`      = frac(min-channel > 0.8)  — 전 프레임
+              `white_gnd`  = 같은 식을 **하단 2/3** 에서 (하늘 배제. regression_check
+                             `WHITE_LEVEL` 과 정의·측정면이 모두 같다)
+    **폐기예정** `white_max_deprecated` = frac(max-channel > 0.8)
+              — 포화 황색(KS 규정색 점자블록)을 순백으로 오분류한다. **마지막으로
+                한 번 더 인쇄**하고 다음 개정에서 뺀다(REG_AUDIT §6.1 · 부록 A).
+
+    프레임별로 재고 씬 단위로 min / p50 / max 를 낸다. 판정층이 아니라 산출층이다.
+    """
+    try:
+        from PIL import Image
+    except Exception as e:                      # pragma: no cover
+        return dict(ok=False, note=f"PIL 없음: {e}")
+    rows = []
+    for fn in files:
+        p = os.path.join(d, fn)
+        if not os.path.isfile(p):
+            continue
+        a = np.asarray(Image.open(p).convert("RGB"), dtype=np.float32) / 255.0
+        h = a.shape[0]
+        mn, mx = a.min(-1), a.max(-1)
+        rows.append(dict(
+            file=fn,
+            white=round(float((mn > WHITE_T).mean()), 6),
+            white_gnd=round(float((mn[h // WHITE_SKY_CUT:] > WHITE_T).mean()), 6),
+            white_max_deprecated=round(float((mx > WHITE_T).mean()), 6),
+            mean=round(float(255.0 * a.mean()), 2),
+        ))
+    if not rows:
+        return dict(ok=False, note="프레임 없음")
+
+    def q(key):
+        v = np.array([r[key] for r in rows], dtype=np.float64)
+        return dict(min=round(float(v.min()), 6),
+                    p50=round(float(np.median(v)), 6),
+                    max=round(float(v.max()), 6))
+
+    return dict(ok=True, n_frames=len(rows), metric="frac(min-channel > 0.8)",
+                threshold=WHITE_T,
+                white=q("white"), white_gnd=q("white_gnd"),
+                white_max_deprecated=q("white_max_deprecated"),
+                mean=q("mean"), frames=rows[:64])
+
+
 # --------------------------------------------------------------------------- #
 def load_tiers(labels_path, arm_tag="on"):
     """labeler 산출 JSON → {scene: {file: tier}}."""
@@ -819,7 +896,40 @@ def main(argv=None):
     ap.add_argument("--walk-z", type=float, default=0.0,
                     help="N-cue 최저점 회계의 보행면 기준 z (기본 0.0)")
     ap.add_argument("--out", default="")
+    # WHITE 지표만 낸다. 라벨도 B·D 팔도 필요 없으므로 h67 계열(A·C 2팔, split=val)
+    #   라운드에도 그대로 쓸 수 있다 — 지표 구현을 한 곳에만 둔다.
+    ap.add_argument("--white-only", action="store_true")
     a = ap.parse_args(argv)
+
+    if a.white_only:
+        rep = dict(stamp=a.stamp, split=a.split, metric="frac(min-channel > 0.8)",
+                   scenes={})
+        for scene in [s for s in a.scenes.split(",") if s]:
+            dA = arm_dir(a.root, a.stamp, "A", a.split, scene)
+            var = load_variation(dA)
+            if not var:
+                print(f"[{scene}] A팔 없음 ({dA}) — 건너뜀")
+                continue
+            g = gate_white(dA, sorted({c["file"] for c in cuts_of(var)}))
+            rep["scenes"][scene] = g
+            if not g.get("ok"):
+                print(f"[{scene}] WHITE — {g.get('note')}")
+                continue
+            w, wg, dep = g["white"], g["white_gnd"], g["white_max_deprecated"]
+            print(f"[{scene}] {a.stamp}_A/{a.split} · n={g['n_frames']}")
+            print(f"  **공식 frac(min>0.8)** p50 {w['p50']:.4f} · "
+                  f"min {w['min']:.4f} · max {w['max']:.4f}")
+            print(f"  하단2/3(하늘 배제)     p50 {wg['p50']:.4f} · "
+                  f"max {wg['max']:.4f}")
+            print(f"  [deprecated] frac(max>0.8) p50 {dep['p50']:.4f} · "
+                  f"max {dep['max']:.4f}")
+            print(f"  mean p50 {g['mean']['p50']}")
+        if a.out:
+            os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
+            json.dump(rep, open(a.out, "w", encoding="utf-8"),
+                      ensure_ascii=False, indent=1)
+            print(f"\n[out] {a.out}")
+        return 0
 
     tiers_a = load_tiers(a.labels_ac, "on")
     tiers_b = load_tiers(a.labels_bd, "on")
@@ -883,6 +993,8 @@ def main(argv=None):
         sec["VG-06"] = gate_vg06(d["A"], scene, vg06_files, cuts_of(var["A"]))
         files = sorted({c["file"] for c in cuts_of(var["A"])})
         sec["VG-07"] = gate_vg07(d["A"], d["C"], files)
+        # A팔 = 단서·위험 전부 ON = 룩이 가장 밝은 팔이다. 순백 지표는 여기서 잰다.
+        sec["WHITE"] = gate_white(d["A"], files)
         if lateral:
             sec["SECTOR-A"] = gate_sectors(ta, cuts_of(var["A"]))
             sec["SECTOR-B"] = gate_sectors(tb, cuts_of(var.get("B") or var["A"]))
@@ -961,6 +1073,19 @@ def main(argv=None):
                   f"min {g['mean_abs']['min']} / p50 {g['mean_abs']['p50']} / "
                   f"max {g['mean_abs']['max']} · frac>8 p50 "
                   f"{g['frac_gt8']['p50']} · **정보량 0 쌍 {g['n_zero_info']}**")
+        g = sec["WHITE"]
+        if g.get("ok"):
+            w, wg = g["white"], g["white_gnd"]
+            print(f"  WHITE  순백 대면적   : n={g['n_frames']} · **공식 "
+                  f"frac(min>0.8) p50 {w['p50']:.4f}** (min {w['min']:.4f} / "
+                  f"max {w['max']:.4f}) · 하단2/3 p50 {wg['p50']:.4f} "
+                  f"(max {wg['max']:.4f}) · mean p50 {g['mean']['p50']}")
+            dep = g["white_max_deprecated"]
+            print(f"         [deprecated] 구 지표 frac(max>0.8) p50 "
+                  f"{dep['p50']:.4f} / max {dep['max']:.4f} — 포화 황색을 순백으로 "
+                  f"오분류한다. 참고용 마지막 인쇄 (REG_AUDIT §6.1)")
+        elif g.get("note"):
+            print(f"  WHITE  순백 대면적   : {g['note']}")
 
         if ncue:
             print("  " + "-" * 74)

@@ -184,7 +184,16 @@ def main(argv=None):
                "260823_v3p5_h3l1reg_A", "260823_v3p5_h3l1reg_B",
                "260823_v3p5_h3l1reg_C", "260823_v3p5_h3l1reg_D",
                "260823_v3p5_h67regsmoke_A",
-               "260823_v3p5_h67reg_A", "260823_v3p5_h67reg_C")
+               "260823_v3p5_h67reg_A", "260823_v3p5_h67reg_C",
+               # ── D85 채택분 종결 라운드 (룩 층 전용 · sceneH2 · sceneH7 만) ──────
+               #   백색 지표를 `min-channel` 로 교체하면서 함께 채택된 두 건
+               #   (H7 `paving_tint` 신설 · H2 `plaza_tint` 톤 완화)의 재프로브다.
+               #   **`…reg_*` 를 덮어쓰지 않는다** — 그 라운드가 D85 의 근거 프레임이고,
+               #   기존 산출 디렉터리가 있으면 세그가 재생성되지 않는다는 성질
+               #   (REG_AUDIT §8.4 (b))까지 겹쳐 **새 스탬프가 강제**된다.
+               "260823_v3p5_h12reg2_A", "260823_v3p5_h12reg2_B",
+               "260823_v3p5_h12reg2_C", "260823_v3p5_h12reg2_D",
+               "260823_v3p5_h67reg2_A", "260823_v3p5_h67reg2_C")
     if a.run not in allowed:
         raise SystemExit(f"[h67_probe] 라운드 스탬프 {a.run!r} 거부 — 허용 {allowed}")
 

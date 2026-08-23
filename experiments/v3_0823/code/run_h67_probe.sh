@@ -147,7 +147,18 @@ case "$MODE" in
         "$BAND_H" "--seg-strict" || FAILS=$((FAILS+1))
     done
     ;;
-  *) say "[fatal] unknown mode '$MODE' (smoke|probe|segstrict|rev|regsmoke|reg)"; exit 2 ;;
+  reg2)
+    # D85 채택분(**룩 층 전용**) 종결 라운드 — sceneH7 `paving_tint` 신설.
+    #   `--seg-strict` 는 `reg` 와 같은 이유로 필수다(위 주석). 기존 산출 디렉터리가
+    #   있으면 세그가 재생성되지 않으므로(§8.4 (b)) **새 스탬프**를 쓴다.
+    for s in $SCENES; do
+      render "$s" 260823_v3p5_h67reg2_A 8 '{"hazard_stairs": true}' "$BAND_H" \
+        "--seg-strict" || FAILS=$((FAILS+1))
+      render "$s" 260823_v3p5_h67reg2_C 8 '{"hazard_stairs": false, "keep_dressing": true}' \
+        "$BAND_H" "--seg-strict" || FAILS=$((FAILS+1))
+    done
+    ;;
+  *) say "[fatal] unknown mode '$MODE' (smoke|probe|segstrict|rev|regsmoke|reg|reg2)"; exit 2 ;;
 esac
 
 T1=$(date +%s)
@@ -155,7 +166,8 @@ say "----------------------------------------------------------------"
 for r in 260823_v3p5_h67smoke_A 260823_v3p5_h67probe_A 260823_v3p5_h67probe_C \
          260823_v3p5_h67rev_A 260823_v3p5_h67rev_C \
          260823_v3p5_h67regsmoke_A \
-         260823_v3p5_h67reg_A 260823_v3p5_h67reg_C; do
+         260823_v3p5_h67reg_A 260823_v3p5_h67reg_C \
+         260823_v3p5_h67reg2_A 260823_v3p5_h67reg2_C; do
   d="$REPO/dataset/$r"
   [ -d "$d" ] || continue
   say "  dataset/$r: $(find "$d" -name '*.png' | wc -l) png · $(find "$d" -name '*.depth.npy' | wc -l) depth · $(find "$d" -name '*.idseg.npz' | wc -l) idseg · $(find "$d" -name 'heightmap.npy' | wc -l) heightmap"

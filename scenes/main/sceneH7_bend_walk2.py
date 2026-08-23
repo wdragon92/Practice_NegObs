@@ -298,6 +298,18 @@ PARAMS = dict(
         scale=dict(paving_interlock=1.0, plaza_light=1.80, granite_dark=1.80,
                    concrete_wall=2.0, concrete_floor=1.8, grass=1.4,
                    gravel=1.2, tactile=0.3, brick_red=2.0),
+        # [D85 채택 · REG_AUDIT §6.1 (2)] **보행면 틴트 신설**. 이 씬의 `M["paving"]`
+        #   (= `Walk/Upper` · `Walk/Step_*` · `Walk/Lower` · `FlatFill/Slot`)은 6씬 중
+        #   **유일하게 보행면 재질에 `tint=` 가 없었다** — 재질 3단 규약의 표준 이탈이다
+        #   (H1 `walk_tint` 0.66 · H3 0.62 · H6 `walk_tint` 0.72(화강석) · L1 0.64 ·
+        #   H2 `plaza_tint` 0.74). 그 결과 순백 `frac(min>0.8)` **중앙값 0.0703 으로 6씬
+        #   최고**였고 그 **93 %가 `Walk/Lower`(62.1 %) + `Walk/Upper`(31.1 %)** 였다
+        #   [260823_v3p5_h67reg_A 8컷 실측].
+        #   ※ `alb_max 0.34` 클램프만으로는 못 막는다 — 정오 직사광 + 톤매핑을 거치면
+        #     화면에서 날아간다. 순백은 알베도 층이 아니라 **픽셀 층**에서 잰다.
+        #   값은 형제 씬 sceneH3(`walk_tint` 0.62, 0.615, 0.60)과 **같은 자리**로 잡았다 —
+        #   둘 다 콘크리트/인터로킹 보도 회랑이고, 감사 권고도 "0.62 대"였다.
+        paving_tint=(0.62, 0.615, 0.60),    # 인터로킹 보도블록 (알베도 0.30 대)
         landing_tint=(0.72, 0.71, 0.68),
         wall_color=(0.315, 0.315, 0.30), wall_rough=0.62,   # alb_max 0.34 이하
         cap_tint=(0.64, 0.63, 0.60),
@@ -644,7 +656,7 @@ def main():
                           sc.tex_path("paving_interlock", "diff"),
                           sc.tex_path("paving_interlock", "nor"),
                           sc.tex_path("paving_interlock", "rough"),
-                          sca["paving_interlock"])
+                          sca["paving_interlock"], tint=mp["paving_tint"])
         M["granite"] = PBR(f"{ROOT}/Looks/Granite",
                            sc.tex_path("plaza_light", "diff"),
                            sc.tex_path("plaza_light", "nor"),

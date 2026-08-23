@@ -171,7 +171,21 @@ case "$MODE" in
       done
     done
     ;;
-  *) say "[fatal] unknown mode '$MODE' (smoke|probe|near|rev|regsmoke|reg)"; exit 2 ;;
+  reg2)
+    # D85 채택분(백색 지표 교체와 함께 채택된 **룩 층 전용** 수정) 종결 라운드.
+    #   sceneH2 `plaza_tint` 0.74 → 0.66 톤 완화. 기하는 한 글자도 안 건드렸으므로
+    #   수율·게이트는 `reg` 와 동일해야 하고, 그 "동일"이 이 라운드의 확인 대상이다.
+    #   포즈 집합을 `reg` 와 **완전히 같게** 두어야(같은 SEED · 같은 CAMS · 같은 CONDS)
+    #   전후 비교가 성립한다 ⇒ CAMS 기본값을 8 로 강제한다.
+    #   `…reg_*` 는 D85 의 근거 프레임이므로 덮어쓰지 않는다(새 스탬프).
+    for s in $SCENES; do
+      for arm in A B C D; do
+        render "$s" "260823_v3p5_h12reg2_$arm" "$CONDS" "${CAMS_REG2:-8}" \
+               "$(cfg_for "$s" "$arm")" "$BAND_H" || FAILS=$((FAILS+1))
+      done
+    done
+    ;;
+  *) say "[fatal] unknown mode '$MODE' (smoke|probe|near|rev|regsmoke|reg|reg2)"; exit 2 ;;
 esac
 
 T1=$(date +%s)
@@ -184,7 +198,9 @@ for r in 260823_v3p5_h12smoke_A \
          260823_v3p5_h12rev_C 260823_v3p5_h12rev_D \
          260823_v3p5_h12regsmoke_A \
          260823_v3p5_h12reg_A 260823_v3p5_h12reg_B \
-         260823_v3p5_h12reg_C 260823_v3p5_h12reg_D; do
+         260823_v3p5_h12reg_C 260823_v3p5_h12reg_D \
+         260823_v3p5_h12reg2_A 260823_v3p5_h12reg2_B \
+         260823_v3p5_h12reg2_C 260823_v3p5_h12reg2_D; do
   d="$REPO/dataset/$r"
   [ -d "$d" ] || continue
   say "  dataset/$r: $(find "$d" -name '*.png' | wc -l) png · $(find "$d" -name '*.depth.npy' | wc -l) depth · $(find "$d" -name '*.idseg.npz' | wc -l) idseg · $(find "$d" -name 'heightmap.npy' | wc -l) heightmap"

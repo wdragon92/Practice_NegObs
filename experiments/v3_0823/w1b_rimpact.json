@@ -1,6 +1,8 @@
 {
  "doc": "w1b_rimpact",
  "version": "1.0",
+ "wave": "B",
+ "b2_scenes": null,
  "cls_ledger": "experiments/v3_0823/w1d_cuecls.json",
  "b_landed_cuts": 648,
  "b_landed_by_scene": {

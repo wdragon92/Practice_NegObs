@@ -394,6 +394,13 @@ A·B·C 세 팔에 남고 D에만 없으면 T키의 r이 퇴화한다. §7의 �
 예외 3쌍만 판정이 필요하다 — `sceneC1`·`sceneC4`의 `cue_tactile`(촉지블록 프림 생성)과
 `sceneN3`의 `cue_nosing`. 그중 sceneN3는 **test-core**라 v3 훈련 밖이다.
 
+> **[수리 완료 — 2026-08-23 추가 · DECISIONS D75 ③ · W1-B2]** 상신 §10 W1B-1의 (a)안이 채택돼
+> 집행됐다. `hazgate.py`에 `--mode full`(모든 표현식 문맥에서 cue 읽기 수집)을 신설했고,
+> **옛 동작은 `--mode ifonly`(기본)로 그대로 재현된다**(착지본 39/39 레코드 바이트 동일 실증).
+> 수리본은 `code/hazgate_full.json`이고 `code/hazgate.json`은 옛 계보의 정본으로 **보존**한다.
+> 그 위에서 12씬 576컷을 `260826_v3w1_lib_B2*`로 재렌더했다(착지한 B 라운드는 덮어쓰지 않았다).
+> 결과·게이트·최종 키별 r은 **`W1B2_SEGFILL_REPORT.md`**. `CUE_COVERAGE.md`에 정정 배너를 붙였다.
+
 ### 8.2 융합 높이맵은 **시점 의존**이라 A/B가 원리적으로 갈린다 — 계기 규칙을 바꿨다
 
 `w1d_fuse.py`의 규칙은 "정본 **구off팔**이 융합을 쓰면 D도 쓴다"였다(D는 off팔이므로). B는 on팔이라

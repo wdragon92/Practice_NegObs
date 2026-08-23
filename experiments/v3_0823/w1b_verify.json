@@ -1,6 +1,8 @@
 {
  "doc": "w1b_verify",
  "version": "1.0",
+ "arm": "B",
+ "b_round": "260826_v3w1_lib_B",
  "plan": "RENDER_PLAN_V3 §4.2 · §6.1 (VG-01·VG-08·VG-10·VG-datum) · D74",
  "gates": [
   "VG-01",

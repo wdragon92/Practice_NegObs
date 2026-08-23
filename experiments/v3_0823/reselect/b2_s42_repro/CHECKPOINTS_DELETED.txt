@@ -1,0 +1,2 @@
+# b2_s42 재훈련은 원 런을 재현하지 못했다(epoch 1부터 발산) -> 체크포인트는 쓸모가 없어 삭제.
+# 증거는 metrics.csv + REPRO_CHECK.json 으로 보존. P4_SELECTION.md §3.4 참조.

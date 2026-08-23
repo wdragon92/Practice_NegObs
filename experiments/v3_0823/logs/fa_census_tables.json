@@ -131,7 +131,14 @@
     "on_neg_cells": 5469,
     "on_frames": 408,
     "none_in_fov_frames": 81,
-    "none_in_fov_cells": 1620
+    "none_in_fov_cells": 1620,
+    "on_tier": {
+      "V": 180,
+      "H": 96,
+      "none_in_fov": 81,
+      "E": 45,
+      "H_weak": 6
+    }
   },
   "t2_persistence": {
     "rgb|OFF": {

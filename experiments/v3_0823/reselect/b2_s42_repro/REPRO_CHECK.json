@@ -1,0 +1,21 @@
+{
+ "n_epochs_archived": 23,
+ "n_epochs_repro": 10,
+ "n_compared": 10,
+ "max_abs_diff": {
+  "val_loss": 0.1097189999999999,
+  "val_f1": 0.14462799999999998,
+  "val_recall": 0.37719199999999997,
+  "val_fpr": 0.083334,
+  "val_h_recall": 0.333334,
+  "sel_score": 0.238981,
+  "train_loss": 0.0028439999999999993
+ },
+ "first_divergence": {
+  "epoch": "1",
+  "col": "val_loss",
+  "d": 0.00016999999999994797
+ },
+ "identical": false,
+ "note": "P-4가 의도적으로 중단한 런 (재현 실패 확정 후 GPU 절약). n_compared는 중단 시점까지."
+}

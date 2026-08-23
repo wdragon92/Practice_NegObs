@@ -5,7 +5,7 @@ reselect_p4.py — P-4 재선택 드라이버 (CPU 전용).
 하는 일
   0) 분모 원장 재검산  : 두 정의 x 두 매니페스트 x 4 split  (결함 ③ 실측)
   1) sigma 잣대 재검증 : eval_v2corr/rescore_tables.json 에서 직접 (산문 인용 금지)
-  2) 게이트 VG-1 실측  : per_frame_val.csv(val 288) + per_frame_off.csv(test off 408)
+  2) 게이트 VG-const 실측  : per_frame_val.csv(val 288) + per_frame_off.csv(test off 408)
   3) 재선택            : 각 런 metrics.csv 에 구식/신식 점수 적용 -> 에폭 argmax 비교
   4) 사전등록 민감도   : lam in {0.5,1,2} x a in {0.5,1}
   5) 교정 GT val 재계산: 출하 체크포인트의 val 지표를 교정 매니페스트로 다시 계산
@@ -84,7 +84,7 @@ def sigma_yardstick():
     return out
 
 
-# ---------------------------------------------------------------- 2) VG-1 실측
+# ---------------------------------------------------------------- 2) VG-const 실측
 def read_pf(path):
     rows = []
     with open(path) as f:
@@ -123,7 +123,7 @@ def gate_measurements():
         base = f"{V2RUNS}/{run}/eval_test" if os.path.isdir(f"{V2RUNS}/{run}") \
             else f"{NMRUNS}/{run}/eval_test"
         rec = {}
-        # (a) 정본 게이트 무대 = val 전 프레임 (selection_v3.VG1_STAGE)
+        # (a) 정본 게이트 무대 = val 전 프레임 (selection_v3.VGCONST_STAGE)
         rec["val_all"] = spread_from_csv(f"{base}/per_frame_val.csv")
         # (b) 반례 기록용 = val 의 위험-없는 팔만 (퇴화 무대 — depth_s43 실측이 근거)
         rec["val_off"] = spread_from_csv(f"{base}/per_frame_val.csv",
@@ -137,7 +137,7 @@ def gate_measurements():
                                               lambda r: r["toggle_state"] == "off")
         for k in ("val_off", "val_all", "test_off"):
             if rec[k]:
-                rec[k]["vg1_pass"] = SV.vg1_pass(rec[k]["spread"])
+                rec[k]["vgconst_pass"] = SV.vgconst_pass(rec[k]["spread"])
         out[run] = rec
     return out
 
@@ -158,7 +158,7 @@ def reselect(run, n_h):
             e["h_int_err"] = abs(hf - e["h_hits"])
             e["sel_old"] = SV.sel_score_v2(e["val_f1"], e["val_h_recall"])[0]
             e["sel_old_logged_err"] = abs(e["sel_old"] - e["sel_score"])
-            e["vg1p"] = SV.vg1p_pass(e["val_f1"], e["val_recall"], e["val_fpr"])
+            e["vgconstp"] = SV.vgconstp_pass(e["val_f1"], e["val_recall"], e["val_fpr"])
             rows.append(e)
     res = {"run": run, "n_epochs": len(rows), "n_val_strict_h_cfg": cfg.get("n_val_strict_h"),
            "best_epoch_cfg": cfg.get("best_epoch"),
@@ -176,7 +176,7 @@ def reselect(run, n_h):
             for r in rows:
                 base = SV.sel_score_v3(r["val_f1"], r["h_hits"], n_h, r["val_fpr"],
                                        lam=lam, a=a)
-                r["_s"] = base if r["vg1p"] else float("-inf")
+                r["_s"] = base if r["vgconstp"] else float("-inf")
             new = SV.select_epoch(rows, "_s")
             res["grid"][f"lam{lam:g}_a{a:g}"] = {
                 "epoch": new["epoch"] if new else None,
@@ -189,7 +189,7 @@ def reselect(run, n_h):
             }
     res["primary"] = res["grid"][f"lam{SV.LAMBDA_FA:g}_a{SV.LAPLACE_A:g}"]
     res["epochs"] = [{k: r[k] for k in ("epoch", "val_f1", "val_recall", "val_fpr",
-                                        "val_h_recall", "h_hits", "sel_old", "vg1p")}
+                                        "val_h_recall", "h_hits", "sel_old", "vgconstp")}
                      for r in rows]
     return res
 
@@ -248,7 +248,7 @@ def val_under_corrected(run, n_h_cor):
 
 def main():
     out = {"formula": SV.FORMULA_ID, "h_def": SV.H_DEF_ID,
-           "vg1_threshold": SV.VG1_SPREAD_MIN, "vg1_source": SV.VG1_SOURCE,
+           "vgconst_threshold": SV.VGCONST_SPREAD_MIN, "vgconst_source": SV.VGCONST_SOURCE,
            "lam": SV.LAMBDA_FA, "a": SV.LAPLACE_A, "n0": SV.N0_HALF_TRUST}
     out["denominator_ledger"] = denom_ledger()
     n_h_val = out["denominator_ledger"]["corrected"]["val"]["defB_canonical"]
@@ -273,6 +273,34 @@ def main():
                    "d_fpr": abs(float(row["val_fpr"]) - v["val_fpr_oldGT_recomputed"])}
         gp[run]["pass"] = gp[run]["d_f1"] < 1e-4 and gp[run]["d_fpr"] < 1e-4
     out["gate_GP41"] = gp
+
+    # ---- 6) "전부 발화"가 이길 수 있는가 (§2.4 표의 원장) --------------------
+    #   전부발화: 전 칸 예측 양성 -> recall=1, fpr=1, F1 = 2p/(1+p) (p = val 양성 칸 비율)
+    sp = json.load(open(SPLIT))
+    fire = {}
+    for nm, path in (("old_gt", MAN_OLD), ("corrected_gt", MAN_COR)):
+        fr = [r for r in load_manifest(path) if r["scene_id"] in sp["val"]]
+        pos = sum(sum(int(v) for v in r["polar_gt"]) for r in fr)
+        p = pos / (20 * len(fr))
+        f1f = 2 * p / (1 + p)
+        fire[nm] = {"val_pos_cell_rate": p, "allfire_f1": f1f,
+                    "S_old_allfire": SV.sel_score_v2(f1f, 1.0)[0],
+                    "S_new_allfire_nH6": SV.sel_score_v3(f1f, 6, 6, 1.0),
+                    "S_new_allfire_nH30": SV.sel_score_v3(f1f, 30, 30, 1.0),
+                    "S_new_allsilent": SV.sel_score_v3(0.0, 0, n_h_val, 0.0)}
+    so_ref = fire["old_gt"]["S_old_allfire"]
+    sn_ref = fire["old_gt"]["S_new_allfire_nH6"]
+    beaten = {"per_run": {}, "total_epochs": 0, "old_beaten": 0, "new_beaten": 0}
+    for run, d in out["reselect"].items():
+        eps = d["epochs"]
+        ro = sum(1 for e in eps if SV.sel_score_v2(e["val_f1"], e["val_h_recall"])[0] < so_ref)
+        rn = sum(1 for e in eps
+                 if SV.sel_score_v3(e["val_f1"], e["h_hits"], n_h_val, e["val_fpr"]) < sn_ref)
+        beaten["per_run"][run] = {"n_epochs": len(eps), "old_beaten": ro, "new_beaten": rn}
+        beaten["total_epochs"] += len(eps)
+        beaten["old_beaten"] += ro
+        beaten["new_beaten"] += rn
+    out["allfire"] = {"reference": fire, "epochs_beaten_by_allfire": beaten}
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     json.dump(out, open(OUT, "w"), ensure_ascii=False, indent=1)
 
@@ -284,11 +312,11 @@ def main():
             f"{k}: B={dl[man][k]['defB_canonical']}/A={dl[man][k]['defA_legacy']}"
             f"(d{dl[man][k]['divergence']:+d})" for k in ("train", "val", "test", "hold")))
     print(f"  -> 정본 val H 분모 n_H = {n_h_val}")
-    print("\n### 2. VG-1 게이트 실측 (spread; 정본무대=val_all, 임계 %.g)" % SV.VG1_SPREAD_MIN)
-    print(f"  {'run':22s} {'val_all*':>10s} {'val_off':>10s} {'test_off':>10s}  {'VG1':>6s}")
+    print("\n### 2. VG-const 게이트 실측 (spread; 정본무대=val_all, 임계 %.g)" % SV.VGCONST_SPREAD_MIN)
+    print(f"  {'run':22s} {'val_all*':>10s} {'val_off':>10s} {'test_off':>10s}  {'VGc':>6s}")
     for run, g in out["gate"].items():
         f = lambda k: (f"{g[k]['spread']:.3e}" if g[k] else "n/a")
-        pv = (g["val_all"]["vg1_pass"] if g["val_all"] else None)
+        pv = (g["val_all"]["vgconst_pass"] if g["val_all"] else None)
         print(f"  {run:22s} {f('val_all'):>10s} {f('val_off'):>10s} {f('test_off'):>10s}  {str(pv):>6s}")
     print("\n### 3. 재선택 (primary lam=1 a=1)")
     print(f"  {'run':22s} {'ep_old':>6s} {'ep_new':>6s} {'same':>5s} {'cfg_ok':>6s} "
@@ -314,6 +342,16 @@ def main():
         print(f"  {run:12s} {v['n_H_corrected']:>6d} {v['h_hits_corrected']:>6d} "
               f"{v['val_f1_corrected']:>8.4f} {v['val_fpr_corrected']:>8.4f} "
               f"{v['val_f1_oldGT_recomputed']:>9.4f} {v['val_fpr_oldGT_recomputed']:>9.4f}")
+    fb = out["allfire"]["epochs_beaten_by_allfire"]
+    fr_ = out["allfire"]["reference"]["old_gt"]
+    print(f"\n### 6. '전부 발화'가 이기는 에폭 (val 양성칸비율 {fr_['val_pos_cell_rate']:.4f})")
+    print(f"  all-fire 점수: 구식 {fr_['S_old_allfire']:.4f} | 신식(n_H=6) "
+          f"{fr_['S_new_allfire_nH6']:.4f} | 신식(n_H=30) {fr_['S_new_allfire_nH30']:.4f} "
+          f"| 신식 전무발화 {fr_['S_new_allsilent']:.4f}")
+    print(f"  총 {fb['total_epochs']}에폭 중 -> 구식 {fb['old_beaten']} "
+          f"({fb['old_beaten'] / fb['total_epochs']:.1%}) · 신식 {fb['new_beaten']} "
+          f"({fb['new_beaten'] / fb['total_epochs']:.1%})")
+
     ok = all(v["pass"] for v in out["gate_GP41"].values())
     print(f"\n### G-P4-1 무결성 (per_frame_val.csv <-> metrics.csv 선택에폭 행): "
           f"{sum(v['pass'] for v in out['gate_GP41'].values())}/{len(out['gate_GP41'])} "

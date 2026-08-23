@@ -1,0 +1,16 @@
+{
+ "n_epochs_archived": 24,
+ "n_epochs_repro": 24,
+ "n_compared": 24,
+ "max_abs_diff": {
+  "val_loss": 0.0,
+  "val_f1": 0.0,
+  "val_recall": 0.0,
+  "val_fpr": 0.0,
+  "val_h_recall": 0.0,
+  "sel_score": 0.0,
+  "train_loss": 0.0
+ },
+ "first_divergence": null,
+ "identical": true
+}

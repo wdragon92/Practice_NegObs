@@ -7,7 +7,7 @@ p4_selftest.py — 게이트 G-P4-3: 정본 구현체 `selection_v3.py`가 등�
   T2  무시 마스크가 H 분모/분자에서 프레임을 실제로 뺀다
   T3  무시 마스크가 FA 항 분자에서 FP를 실제로 뺀다
   T4  FA 모집단 제한(FA_D 상당)이 FA 항만 바꾸고 F1/H를 안 바꾼다
-  T5  상수출력 -> VG-1 거부 -> S = -inf
+  T5  상수출력 -> VG-const 거부 -> S = -inf
   T6  미등록 FA 모집단 이름 -> 하드 실패
 """
 from __future__ import annotations
@@ -88,12 +88,12 @@ def main():
           f"f1/H 불변={abs(r4['f1'] - r0['f1']) < 1e-12}")
     ok &= t4
 
-    # ---- T5 상수출력 -> VG-1 거부 ------------------------------------------
+    # ---- T5 상수출력 -> VG-const 거부 ------------------------------------------
     const = np.full_like(prob, 0.5014) + np.random.default_rng(0).normal(0, 1e-6, prob.shape)
     r5 = SV.compute_selection(const, gt, tier, 0.5)
-    t5 = (not r5["vg1_pass"]) and r5["S"] == float("-inf")
-    print(f"T5 상수출력 -> VG-1 거부        : {'PASS' if t5 else 'FAIL'}  "
-          f"spread={r5['spread']:.2e} (<{SV.VG1_SPREAD_MIN:g}) S={r5['S']}")
+    t5 = (not r5["vgconst_pass"]) and r5["S"] == float("-inf")
+    print(f"T5 상수출력 -> VG-const 거부        : {'PASS' if t5 else 'FAIL'}  "
+          f"spread={r5['spread']:.2e} (<{SV.VGCONST_SPREAD_MIN:g}) S={r5['S']}")
     ok &= t5
 
     # ---- T6 미등록 모집단 -> 하드 실패 -------------------------------------

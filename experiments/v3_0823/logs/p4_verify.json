@@ -1,0 +1,788 @@
+{
+ "sigma": {
+  "rgb": {
+   "cell_f1": 0.12004472806140368,
+   "cell_recall": 0.13813472677981783,
+   "cell_precision": 0.041568768947327826,
+   "frame_det_rate": 0.19922539558130922,
+   "frame_recall_V": 0.2037130229312638,
+   "frame_recall_E": 0.37973349979189025,
+   "frame_recall_H": 0.16237976320958225,
+   "frame_fa_off": 0.12823414482505507,
+   "cell_fpr_off": 0.016864336260238588
+  },
+  "depth": {
+   "cell_f1": 0.03015531853317806,
+   "cell_recall": 0.031213567138873154,
+   "cell_precision": 0.0306914955345055,
+   "frame_det_rate": 0.016924113816797794,
+   "frame_recall_V": 0.04185000634662867,
+   "frame_recall_E": 0.0,
+   "frame_recall_H": 0.03125,
+   "frame_fa_off": 0.030612735286266658,
+   "cell_fpr_off": 0.008826082147073942
+  },
+  "b2": {
+   "cell_f1": 0.08986675695606507,
+   "cell_recall": 0.14338652121458872,
+   "cell_precision": 0.11485134268267239,
+   "frame_det_rate": 0.16690335057087072,
+   "frame_recall_V": 0.13099532682905068,
+   "frame_recall_E": 0.3079201435678004,
+   "frame_recall_H": 0.15728821740147395,
+   "frame_fa_off": 0.1452709952229161,
+   "cell_fpr_off": 0.030200812908695373
+  }
+ },
+ "runs": {
+  "rgb_s42": {
+   "model": "rgb",
+   "epoch_old": 9,
+   "epoch_new": 10,
+   "changed": true,
+   "shipped": {
+    "cell_f1": 0.48759830611010285,
+    "cell_recall": 0.42331932773109243,
+    "cell_precision": 0.5748930099857347,
+    "frame_det_rate": 0.7127371273712737,
+    "frame_recall_V": 0.776255707762557,
+    "frame_recall_E": 0.6,
+    "frame_recall_H": 0.59375,
+    "frame_fa_off": 0.375,
+    "cell_fpr_off": 0.05269607843137255
+   },
+   "new": {
+    "cell_f1": 0.20750812887969258,
+    "cell_recall": 0.12289915966386554,
+    "cell_precision": 0.6660341555977229,
+    "frame_det_rate": 0.3712737127371274,
+    "frame_recall_V": 0.5159817351598174,
+    "frame_recall_E": 0.13333333333333333,
+    "frame_recall_H": 0.16666666666666666,
+    "frame_fa_off": 0.0857843137254902,
+    "cell_fpr_off": 0.006495098039215687
+   },
+   "source_new": "reselect/eval/rgb_s42_ep10",
+   "delta": {
+    "cell_f1": -0.2800901772304103,
+    "cell_recall": -0.3004201680672269,
+    "cell_precision": 0.09114114561198827,
+    "frame_det_rate": -0.3414634146341463,
+    "frame_recall_V": -0.26027397260273966,
+    "frame_recall_E": -0.4666666666666667,
+    "frame_recall_H": -0.42708333333333337,
+    "frame_fa_off": -0.2892156862745098,
+    "cell_fpr_off": -0.046200980392156865
+   },
+   "repro_old_epoch": {
+    "cell_f1": 0.48759830611010285,
+    "cell_recall": 0.42331932773109243,
+    "cell_precision": 0.5748930099857347,
+    "frame_det_rate": 0.7127371273712737,
+    "frame_recall_V": 0.776255707762557,
+    "frame_recall_E": 0.6,
+    "frame_recall_H": 0.59375,
+    "frame_fa_off": 0.375,
+    "cell_fpr_off": 0.05269607843137255
+   },
+   "repro_max_abs_diff": 0.0,
+   "G_P4_2_pass": true,
+   "metrics_csv_repro": {
+    "n_epochs_archived": 24,
+    "n_epochs_repro": 24,
+    "n_compared": 24,
+    "max_abs_diff": {
+     "val_loss": 0.0,
+     "val_f1": 0.0,
+     "val_recall": 0.0,
+     "val_fpr": 0.0,
+     "val_h_recall": 0.0,
+     "sel_score": 0.0,
+     "train_loss": 0.0
+    },
+    "first_divergence": null,
+    "identical": true
+   },
+   "over_sigma": {
+    "cell_f1": true,
+    "cell_recall": true,
+    "cell_precision": true,
+    "frame_det_rate": true,
+    "frame_recall_V": true,
+    "frame_recall_E": true,
+    "frame_recall_H": true,
+    "frame_fa_off": true,
+    "cell_fpr_off": true
+   },
+   "n_over_sigma": 9,
+   "verdict": "FAIL",
+   "ratio": {
+    "cell_f1": 2.333215142002257,
+    "cell_recall": 2.1748344899982075,
+    "cell_precision": 2.192538964227545,
+    "frame_det_rate": 1.7139552597589696,
+    "frame_recall_V": 1.2776501416434258,
+    "frame_recall_E": 1.228932045559371,
+    "frame_recall_H": 2.6301512263082953,
+    "frame_fa_off": 2.2553718954423227,
+    "cell_fpr_off": 2.7395670768902964
+   }
+  },
+  "rgb_s43": {
+   "model": "rgb",
+   "epoch_old": 23,
+   "epoch_new": 23,
+   "changed": false,
+   "shipped": {
+    "cell_f1": 0.5570270804506819,
+    "cell_recall": 0.49334733893557425,
+    "cell_precision": 0.6395823876532002,
+    "frame_det_rate": 0.9186991869918699,
+    "frame_recall_V": 0.954337899543379,
+    "frame_recall_E": 0.9111111111111111,
+    "frame_recall_H": 0.875,
+    "frame_fa_off": 0.47794117647058826,
+    "cell_fpr_off": 0.059803921568627454
+   },
+   "new": {
+    "cell_f1": 0.5570270804506819,
+    "cell_recall": 0.49334733893557425,
+    "cell_precision": 0.6395823876532002,
+    "frame_det_rate": 0.9186991869918699,
+    "frame_recall_V": 0.954337899543379,
+    "frame_recall_E": 0.9111111111111111,
+    "frame_recall_H": 0.875,
+    "frame_fa_off": 0.47794117647058826,
+    "cell_fpr_off": 0.059803921568627454
+   },
+   "source_new": "동일 에폭 -> 출하 산출물 재사용 (eval_v2corr)",
+   "delta": {
+    "cell_f1": 0.0,
+    "cell_recall": 0.0,
+    "cell_precision": 0.0,
+    "frame_det_rate": 0.0,
+    "frame_recall_V": 0.0,
+    "frame_recall_E": 0.0,
+    "frame_recall_H": 0.0,
+    "frame_fa_off": 0.0,
+    "cell_fpr_off": 0.0
+   },
+   "over_sigma": {
+    "cell_f1": false,
+    "cell_recall": false,
+    "cell_precision": false,
+    "frame_det_rate": false,
+    "frame_recall_V": false,
+    "frame_recall_E": false,
+    "frame_recall_H": false,
+    "frame_fa_off": false,
+    "cell_fpr_off": false
+   },
+   "n_over_sigma": 0,
+   "verdict": "PASS",
+   "ratio": {
+    "cell_f1": 0.0,
+    "cell_recall": 0.0,
+    "cell_precision": 0.0,
+    "frame_det_rate": 0.0,
+    "frame_recall_V": 0.0,
+    "frame_recall_E": 0.0,
+    "frame_recall_H": 0.0,
+    "frame_fa_off": 0.0,
+    "cell_fpr_off": 0.0
+   }
+  },
+  "rgb_s44": {
+   "model": "rgb",
+   "epoch_old": 25,
+   "epoch_new": 25,
+   "changed": false,
+   "shipped": {
+    "cell_f1": 0.32327263656772265,
+    "cell_recall": 0.226890756302521,
+    "cell_precision": 0.562012142237641,
+    "frame_det_rate": 0.5203252032520326,
+    "frame_recall_V": 0.547945205479452,
+    "frame_recall_E": 0.15555555555555556,
+    "frame_recall_H": 0.59375,
+    "frame_fa_off": 0.22303921568627452,
+    "cell_fpr_off": 0.027696078431372548
+   },
+   "new": {
+    "cell_f1": 0.32327263656772265,
+    "cell_recall": 0.226890756302521,
+    "cell_precision": 0.562012142237641,
+    "frame_det_rate": 0.5203252032520326,
+    "frame_recall_V": 0.547945205479452,
+    "frame_recall_E": 0.15555555555555556,
+    "frame_recall_H": 0.59375,
+    "frame_fa_off": 0.22303921568627452,
+    "cell_fpr_off": 0.027696078431372548
+   },
+   "source_new": "동일 에폭 -> 출하 산출물 재사용 (eval_v2corr)",
+   "delta": {
+    "cell_f1": 0.0,
+    "cell_recall": 0.0,
+    "cell_precision": 0.0,
+    "frame_det_rate": 0.0,
+    "frame_recall_V": 0.0,
+    "frame_recall_E": 0.0,
+    "frame_recall_H": 0.0,
+    "frame_fa_off": 0.0,
+    "cell_fpr_off": 0.0
+   },
+   "over_sigma": {
+    "cell_f1": false,
+    "cell_recall": false,
+    "cell_precision": false,
+    "frame_det_rate": false,
+    "frame_recall_V": false,
+    "frame_recall_E": false,
+    "frame_recall_H": false,
+    "frame_fa_off": false,
+    "cell_fpr_off": false
+   },
+   "n_over_sigma": 0,
+   "verdict": "PASS",
+   "ratio": {
+    "cell_f1": 0.0,
+    "cell_recall": 0.0,
+    "cell_precision": 0.0,
+    "frame_det_rate": 0.0,
+    "frame_recall_V": 0.0,
+    "frame_recall_E": 0.0,
+    "frame_recall_H": 0.0,
+    "frame_fa_off": 0.0,
+    "cell_fpr_off": 0.0
+   }
+  },
+  "depth_s42": {
+   "model": "depth",
+   "epoch_old": 15,
+   "epoch_new": 15,
+   "changed": false,
+   "shipped": {
+    "cell_f1": 0.7364902506963789,
+    "cell_recall": 0.694327731092437,
+    "cell_precision": 0.7841043890865955,
+    "frame_det_rate": 0.7479674796747967,
+    "frame_recall_V": 0.9452054794520548,
+    "frame_recall_E": 0.6,
+    "frame_recall_H": 0.40625,
+    "frame_fa_off": 0.051470588235294115,
+    "cell_fpr_off": 0.004411764705882353
+   },
+   "new": {
+    "cell_f1": 0.7364902506963789,
+    "cell_recall": 0.694327731092437,
+    "cell_precision": 0.7841043890865955,
+    "frame_det_rate": 0.7479674796747967,
+    "frame_recall_V": 0.9452054794520548,
+    "frame_recall_E": 0.6,
+    "frame_recall_H": 0.40625,
+    "frame_fa_off": 0.051470588235294115,
+    "cell_fpr_off": 0.004411764705882353
+   },
+   "source_new": "동일 에폭 -> 출하 산출물 재사용 (eval_v2corr)",
+   "delta": {
+    "cell_f1": 0.0,
+    "cell_recall": 0.0,
+    "cell_precision": 0.0,
+    "frame_det_rate": 0.0,
+    "frame_recall_V": 0.0,
+    "frame_recall_E": 0.0,
+    "frame_recall_H": 0.0,
+    "frame_fa_off": 0.0,
+    "cell_fpr_off": 0.0
+   },
+   "over_sigma": {
+    "cell_f1": false,
+    "cell_recall": false,
+    "cell_precision": false,
+    "frame_det_rate": false,
+    "frame_recall_V": false,
+    "frame_recall_E": false,
+    "frame_recall_H": false,
+    "frame_fa_off": false,
+    "cell_fpr_off": false
+   },
+   "n_over_sigma": 0,
+   "verdict": "PASS",
+   "ratio": {
+    "cell_f1": 0.0,
+    "cell_recall": 0.0,
+    "cell_precision": 0.0,
+    "frame_det_rate": 0.0,
+    "frame_recall_V": 0.0,
+    "frame_recall_E": 0.0,
+    "frame_recall_H": 0.0,
+    "frame_fa_off": 0.0,
+    "cell_fpr_off": 0.0
+   }
+  },
+  "depth_s43": {
+   "model": "depth",
+   "epoch_old": 30,
+   "epoch_new": 30,
+   "changed": false,
+   "shipped": {
+    "cell_f1": 0.6977272727272728,
+    "cell_recall": 0.6449579831932774,
+    "cell_precision": 0.7599009900990099,
+    "frame_det_rate": 0.7154471544715447,
+    "frame_recall_V": 0.863013698630137,
+    "frame_recall_E": 0.6,
+    "frame_recall_H": 0.46875,
+    "frame_fa_off": 0.007352941176470588,
+    "cell_fpr_off": 0.0033088235294117647
+   },
+   "new": {
+    "cell_f1": 0.6977272727272728,
+    "cell_recall": 0.6449579831932774,
+    "cell_precision": 0.7599009900990099,
+    "frame_det_rate": 0.7154471544715447,
+    "frame_recall_V": 0.863013698630137,
+    "frame_recall_E": 0.6,
+    "frame_recall_H": 0.46875,
+    "frame_fa_off": 0.007352941176470588,
+    "cell_fpr_off": 0.0033088235294117647
+   },
+   "source_new": "동일 에폭 -> 출하 산출물 재사용 (eval_v2corr)",
+   "delta": {
+    "cell_f1": 0.0,
+    "cell_recall": 0.0,
+    "cell_precision": 0.0,
+    "frame_det_rate": 0.0,
+    "frame_recall_V": 0.0,
+    "frame_recall_E": 0.0,
+    "frame_recall_H": 0.0,
+    "frame_fa_off": 0.0,
+    "cell_fpr_off": 0.0
+   },
+   "over_sigma": {
+    "cell_f1": false,
+    "cell_recall": false,
+    "cell_precision": false,
+    "frame_det_rate": false,
+    "frame_recall_V": false,
+    "frame_recall_E": false,
+    "frame_recall_H": false,
+    "frame_fa_off": false,
+    "cell_fpr_off": false
+   },
+   "n_over_sigma": 0,
+   "verdict": "PASS",
+   "ratio": {
+    "cell_f1": 0.0,
+    "cell_recall": 0.0,
+    "cell_precision": 0.0,
+    "frame_det_rate": 0.0,
+    "frame_recall_V": 0.0,
+    "frame_recall_E": 0.0,
+    "frame_recall_H": 0.0,
+    "frame_fa_off": 0.0,
+    "cell_fpr_off": 0.0
+   }
+  },
+  "depth_s44": {
+   "model": "depth",
+   "epoch_old": 3,
+   "epoch_new": 3,
+   "changed": false,
+   "shipped": {
+    "cell_f1": 0.6770949720670391,
+    "cell_recall": 0.6365546218487395,
+    "cell_precision": 0.7231503579952268,
+    "frame_det_rate": 0.7235772357723578,
+    "frame_recall_V": 0.8904109589041096,
+    "frame_recall_E": 0.6,
+    "frame_recall_H": 0.4375,
+    "frame_fa_off": 0.0661764705882353,
+    "cell_fpr_off": 0.01911764705882353
+   },
+   "new": {
+    "cell_f1": 0.6770949720670391,
+    "cell_recall": 0.6365546218487395,
+    "cell_precision": 0.7231503579952268,
+    "frame_det_rate": 0.7235772357723578,
+    "frame_recall_V": 0.8904109589041096,
+    "frame_recall_E": 0.6,
+    "frame_recall_H": 0.4375,
+    "frame_fa_off": 0.0661764705882353,
+    "cell_fpr_off": 0.01911764705882353
+   },
+   "source_new": "동일 에폭 -> 출하 산출물 재사용 (eval_v2corr)",
+   "delta": {
+    "cell_f1": 0.0,
+    "cell_recall": 0.0,
+    "cell_precision": 0.0,
+    "frame_det_rate": 0.0,
+    "frame_recall_V": 0.0,
+    "frame_recall_E": 0.0,
+    "frame_recall_H": 0.0,
+    "frame_fa_off": 0.0,
+    "cell_fpr_off": 0.0
+   },
+   "over_sigma": {
+    "cell_f1": false,
+    "cell_recall": false,
+    "cell_precision": false,
+    "frame_det_rate": false,
+    "frame_recall_V": false,
+    "frame_recall_E": false,
+    "frame_recall_H": false,
+    "frame_fa_off": false,
+    "cell_fpr_off": false
+   },
+   "n_over_sigma": 0,
+   "verdict": "PASS",
+   "ratio": {
+    "cell_f1": 0.0,
+    "cell_recall": 0.0,
+    "cell_precision": 0.0,
+    "frame_det_rate": 0.0,
+    "frame_recall_V": 0.0,
+    "frame_recall_E": 0.0,
+    "frame_recall_H": 0.0,
+    "frame_fa_off": 0.0,
+    "cell_fpr_off": 0.0
+   }
+  },
+  "b2_s42": {
+   "model": "b2",
+   "epoch_old": 8,
+   "epoch_new": 1,
+   "changed": true,
+   "shipped": {
+    "cell_f1": 0.29210526315789476,
+    "cell_recall": 0.19432773109243698,
+    "cell_precision": 0.5879237288135594,
+    "frame_det_rate": 0.42005420054200543,
+    "frame_recall_V": 0.6712328767123288,
+    "frame_recall_E": 0.0,
+    "frame_recall_H": 0.08333333333333333,
+    "frame_fa_off": 0.2107843137254902,
+    "cell_fpr_off": 0.025122549019607844
+   },
+   "new": null,
+   "metrics_csv_repro": {
+    "n_epochs_archived": 23,
+    "n_epochs_repro": 10,
+    "n_compared": 10,
+    "max_abs_diff": {
+     "val_loss": 0.1097189999999999,
+     "val_f1": 0.14462799999999998,
+     "val_recall": 0.37719199999999997,
+     "val_fpr": 0.083334,
+     "val_h_recall": 0.333334,
+     "sel_score": 0.238981,
+     "train_loss": 0.0028439999999999993
+    },
+    "first_divergence": {
+     "epoch": "1",
+     "col": "val_loss",
+     "d": 0.00016999999999994797
+    },
+    "identical": false,
+    "note": "P-4가 의도적으로 중단한 런 (재현 실패 확정 후 GPU 절약). n_compared는 중단 시점까지."
+   },
+   "source_new": "UNRECOVERABLE — 재훈련이 원 런을 재현하지 못함(비결정론). 해당 에폭의 가중치는 복구 불가 -> 검증 대상에서 제외",
+   "verdict": "UNRECOVERABLE"
+  },
+  "b2_s43": {
+   "model": "b2",
+   "epoch_old": 1,
+   "epoch_new": 1,
+   "changed": false,
+   "shipped": {
+    "cell_f1": 0.46665474700518506,
+    "cell_recall": 0.4569327731092437,
+    "cell_precision": 0.47679941541834125,
+    "frame_det_rate": 0.7181571815718157,
+    "frame_recall_V": 0.8858447488584474,
+    "frame_recall_E": 0.5333333333333333,
+    "frame_recall_H": 0.3958333333333333,
+    "frame_fa_off": 0.3946078431372549,
+    "cell_fpr_off": 0.06850490196078432
+   },
+   "new": {
+    "cell_f1": 0.46665474700518506,
+    "cell_recall": 0.4569327731092437,
+    "cell_precision": 0.47679941541834125,
+    "frame_det_rate": 0.7181571815718157,
+    "frame_recall_V": 0.8858447488584474,
+    "frame_recall_E": 0.5333333333333333,
+    "frame_recall_H": 0.3958333333333333,
+    "frame_fa_off": 0.3946078431372549,
+    "cell_fpr_off": 0.06850490196078432
+   },
+   "source_new": "동일 에폭 -> 출하 산출물 재사용 (eval_v2corr)",
+   "delta": {
+    "cell_f1": 0.0,
+    "cell_recall": 0.0,
+    "cell_precision": 0.0,
+    "frame_det_rate": 0.0,
+    "frame_recall_V": 0.0,
+    "frame_recall_E": 0.0,
+    "frame_recall_H": 0.0,
+    "frame_fa_off": 0.0,
+    "cell_fpr_off": 0.0
+   },
+   "over_sigma": {
+    "cell_f1": false,
+    "cell_recall": false,
+    "cell_precision": false,
+    "frame_det_rate": false,
+    "frame_recall_V": false,
+    "frame_recall_E": false,
+    "frame_recall_H": false,
+    "frame_fa_off": false,
+    "cell_fpr_off": false
+   },
+   "n_over_sigma": 0,
+   "verdict": "PASS",
+   "ratio": {
+    "cell_f1": 0.0,
+    "cell_recall": 0.0,
+    "cell_precision": 0.0,
+    "frame_det_rate": 0.0,
+    "frame_recall_V": 0.0,
+    "frame_recall_E": 0.0,
+    "frame_recall_H": 0.0,
+    "frame_fa_off": 0.0,
+    "cell_fpr_off": 0.0
+   }
+  },
+  "b2_s44": {
+   "model": "b2",
+   "epoch_old": 8,
+   "epoch_new": 13,
+   "changed": true,
+   "shipped": {
+    "cell_f1": 0.3422658530114089,
+    "cell_recall": 0.22584033613445378,
+    "cell_precision": 0.7064622124863089,
+    "frame_det_rate": 0.43902439024390244,
+    "frame_recall_V": 0.6484018264840182,
+    "frame_recall_E": 0.0,
+    "frame_recall_H": 0.20833333333333334,
+    "frame_fa_off": 0.10784313725490197,
+    "cell_fpr_off": 0.010416666666666666
+   },
+   "new": null,
+   "metrics_csv_repro": null,
+   "source_new": "MISSING — 재훈련/채점 미완",
+   "verdict": "MISSING"
+  }
+ },
+ "models": {
+  "rgb": {
+   "old_mean": {
+    "cell_f1": 0.45596600770950246,
+    "cell_recall": 0.3811858076563959,
+    "cell_precision": 0.5921625132921919,
+    "frame_det_rate": 0.7172538392050587,
+    "frame_recall_V": 0.7595129375951294,
+    "frame_recall_E": 0.5555555555555555,
+    "frame_recall_H": 0.6875,
+    "frame_fa_off": 0.3586601307189543,
+    "cell_fpr_off": 0.04673202614379085
+   },
+   "new_mean": {
+    "cell_f1": 0.3626026152993657,
+    "cell_recall": 0.28104575163398693,
+    "cell_precision": 0.6225428951628547,
+    "frame_det_rate": 0.6034327009936766,
+    "frame_recall_V": 0.6727549467275494,
+    "frame_recall_E": 0.4000000000000001,
+    "frame_recall_H": 0.545138888888889,
+    "frame_fa_off": 0.2622549019607843,
+    "cell_fpr_off": 0.03133169934640523
+   },
+   "delta": {
+    "cell_f1": -0.09336339241013675,
+    "cell_recall": -0.100140056022409,
+    "cell_precision": 0.03038038187066272,
+    "frame_det_rate": -0.11382113821138207,
+    "frame_recall_V": -0.08675799086757996,
+    "frame_recall_E": -0.1555555555555554,
+    "frame_recall_H": -0.14236111111111105,
+    "frame_fa_off": -0.09640522875816998,
+    "cell_fpr_off": -0.015400326797385622
+   },
+   "ratio": {
+    "cell_f1": 0.7777383806674188,
+    "cell_recall": 0.7249448299994028,
+    "cell_precision": 0.7308463214091806,
+    "frame_det_rate": 0.5713184199196564,
+    "frame_recall_V": 0.42588338054780894,
+    "frame_recall_E": 0.40964401518645654,
+    "frame_recall_H": 0.876717075436098,
+    "frame_fa_off": 0.751790631814108,
+    "cell_fpr_off": 0.9131890256300988
+   },
+   "over_sigma": {
+    "cell_f1": false,
+    "cell_recall": false,
+    "cell_precision": false,
+    "frame_det_rate": false,
+    "frame_recall_V": false,
+    "frame_recall_E": false,
+    "frame_recall_H": false,
+    "frame_fa_off": false,
+    "cell_fpr_off": false
+   },
+   "n_over_sigma": 0,
+   "verdict": "PASS"
+  },
+  "depth": {
+   "old_mean": {
+    "cell_f1": 0.7037708318302301,
+    "cell_recall": 0.6586134453781513,
+    "cell_precision": 0.7557185790602774,
+    "frame_det_rate": 0.7289972899728997,
+    "frame_recall_V": 0.8995433789954338,
+    "frame_recall_E": 0.6,
+    "frame_recall_H": 0.4375,
+    "frame_fa_off": 0.041666666666666664,
+    "cell_fpr_off": 0.00894607843137255
+   },
+   "new_mean": {
+    "cell_f1": 0.7037708318302301,
+    "cell_recall": 0.6586134453781513,
+    "cell_precision": 0.7557185790602774,
+    "frame_det_rate": 0.7289972899728997,
+    "frame_recall_V": 0.8995433789954338,
+    "frame_recall_E": 0.6,
+    "frame_recall_H": 0.4375,
+    "frame_fa_off": 0.041666666666666664,
+    "cell_fpr_off": 0.00894607843137255
+   },
+   "delta": {
+    "cell_f1": 0.0,
+    "cell_recall": 0.0,
+    "cell_precision": 0.0,
+    "frame_det_rate": 0.0,
+    "frame_recall_V": 0.0,
+    "frame_recall_E": 0.0,
+    "frame_recall_H": 0.0,
+    "frame_fa_off": 0.0,
+    "cell_fpr_off": 0.0
+   },
+   "ratio": {
+    "cell_f1": 0.0,
+    "cell_recall": 0.0,
+    "cell_precision": 0.0,
+    "frame_det_rate": 0.0,
+    "frame_recall_V": 0.0,
+    "frame_recall_E": 0.0,
+    "frame_recall_H": 0.0,
+    "frame_fa_off": 0.0,
+    "cell_fpr_off": 0.0
+   },
+   "over_sigma": {
+    "cell_f1": false,
+    "cell_recall": false,
+    "cell_precision": false,
+    "frame_det_rate": false,
+    "frame_recall_V": false,
+    "frame_recall_E": false,
+    "frame_recall_H": false,
+    "frame_fa_off": false,
+    "cell_fpr_off": false
+   },
+   "n_over_sigma": 0,
+   "verdict": "PASS"
+  },
+  "b2": {
+   "verdict": "UNRECOVERABLE",
+   "reason": {
+    "b2_s42": "UNRECOVERABLE — 재훈련이 원 런을 재현하지 못함(비결정론). 해당 에폭의 가중치는 복구 불가 -> 검증 대상에서 제외",
+    "b2_s44": "MISSING — 재훈련/채점 미완"
+   }
+  }
+ },
+ "gates": {
+  "G_P4_2_retrain_reproduces_shipped": {
+   "rgb_s42": true,
+   "b2_s42": null,
+   "b2_s44": null
+  }
+ },
+ "fa_matched": {
+  "rgb_s42": {
+   "old": {
+    "0.359": {
+     "V": 0.7488584474885844,
+     "E": 0.5777777777777777,
+     "H": 0.5520833333333334,
+     "tau": 0.5512990000000001,
+     "fa_actual": 0.35784313725490197
+    },
+    "0.2": {
+     "V": 0.6301369863013698,
+     "E": 0.35555555555555557,
+     "H": 0.2708333333333333,
+     "tau": 0.7411070000000001,
+     "fa_actual": 0.19852941176470587
+    },
+    "0.1": {
+     "V": 0.5114155251141552,
+     "E": 0.13333333333333333,
+     "H": 0.10416666666666667,
+     "tau": 0.8811660000000001,
+     "fa_actual": 0.09803921568627451
+    },
+    "0.05": {
+     "V": 0.4429223744292237,
+     "E": 0.022222222222222223,
+     "H": 0.041666666666666664,
+     "tau": 0.9260710000000001,
+     "fa_actual": 0.049019607843137254
+    }
+   },
+   "new": {
+    "0.359": {
+     "V": 0.8447488584474886,
+     "E": 0.6666666666666666,
+     "H": 0.6458333333333334,
+     "tau": 0.18399900000000002,
+     "fa_actual": 0.35784313725490197
+    },
+    "0.2": {
+     "V": 0.7168949771689498,
+     "E": 0.4222222222222222,
+     "H": 0.3958333333333333,
+     "tau": 0.3073000000000001,
+     "fa_actual": 0.19852941176470587
+    },
+    "0.1": {
+     "V": 0.547945205479452,
+     "E": 0.13333333333333333,
+     "H": 0.19791666666666666,
+     "tau": 0.47800700000000007,
+     "fa_actual": 0.09803921568627451
+    },
+    "0.05": {
+     "V": 0.4200913242009132,
+     "E": 0.044444444444444446,
+     "H": 0.11458333333333333,
+     "tau": 0.6101990000000002,
+     "fa_actual": 0.049019607843137254
+    }
+   },
+   "delta_H": {
+    "0.359": 0.09375,
+    "0.2": 0.125,
+    "0.1": 0.09374999999999999,
+    "0.05": 0.07291666666666666
+   },
+   "delta_V": {
+    "0.359": 0.09589041095890416,
+    "0.2": 0.08675799086757996,
+    "0.1": 0.0365296803652968,
+    "0.05": -0.0228310502283105
+   }
+  }
+ }
+}

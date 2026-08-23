@@ -70,13 +70,13 @@ def count_hazard_h(records: Iterable[dict], *, strict: bool = True) -> tuple[int
     div = n_new - n_old
     if strict and div != 0:
         raise AssertionError(
-            f"[VG-0] H 분모 이중 정의 발산 {div}건 (B={n_new} vs A={n_old}). "
+            f"[VG-denom] H 분모 이중 정의 발산 {div}건 (B={n_new} vs A={n_old}). "
             "두 정의가 갈라지는 코퍼스다 — 조용히 진행 금지, ACCOUNTING 등재 후 재개.")
     return n_new, div
 
 
 # ---------------------------------------------------------------------------
-# §B  게이트 VG-1 — 상수출력 거부
+# §B  게이트 VG-const — 상수출력 거부
 # ---------------------------------------------------------------------------
 # 통계량: **val 전 프레임(288)** 에서의 프레임별 최대확률의 분포 폭
 #         spread = max_f (max_c p_fc) - min_f (max_c p_fc)
@@ -95,9 +95,9 @@ def count_hazard_h(records: Iterable[dict], *, strict: bool = True) -> tuple[int
 #   비붕괴 실측 최소 : convnext_tiny_s44  3.478e-01  (resnet34/50/b2 0.940~1.000)
 #   → 로그축 중점 sqrt(1.92e-4 * 3.478e-1) = 8.17e-03  → **1e-2 로 반올림 등재**
 #   여유: 최악 붕괴의 52배 위 · 최선 분리의 35배 아래 (로그축 대칭)
-VG1_SPREAD_MIN = 1e-2
-VG1_STAGE = "val_all_frames"
-VG1_SOURCE = ("experiments/weekend_0823/newmodels/FA_MATCHED.md:99-111 (test off팔 9런) + "
+VGCONST_SPREAD_MIN = 1e-2
+VGCONST_STAGE = "val_all_frames"
+VGCONST_SOURCE = ("experiments/weekend_0823/newmodels/FA_MATCHED.md:99-111 (test off팔 9런) + "
               "experiments/v3_0823/logs/p4_reselect.json::gate (val 무대 15런 재실측)")
 
 
@@ -109,16 +109,16 @@ def output_spread(prob_rows: Sequence[Sequence[float]]) -> float:
     return float(max(per_frame_max) - min(per_frame_max))
 
 
-def vg1_pass(spread: float) -> bool:
+def vgconst_pass(spread: float) -> bool:
     """True = 통과(상수출력 아님)."""
-    return bool(math.isfinite(spread) and spread >= VG1_SPREAD_MIN)
+    return bool(math.isfinite(spread) and spread >= VGCONST_SPREAD_MIN)
 
 
-# VG-1p — 소급 적용 가능한 **대리 게이트** (metrics.csv 만으로 판정).
+# VG-const-p — 소급 적용 가능한 **대리 게이트** (metrics.csv 만으로 판정).
 #   τ 고정 하에서 near-constant 출력은 전 칸이 τ의 한쪽에만 놓이므로
 #   결정 수준에서 '전무발화'(f1=0) 또는 '전부발화'(recall=fpr=1)로 나타난다.
-#   VG-1 의 필요조건이지 충분조건은 아니다 — 리포트에서 그렇게 표기할 것.
-def vg1p_pass(val_f1: float, val_recall: float, val_fpr: float, eps: float = 1e-3) -> bool:
+#   VG-const 의 필요조건이지 충분조건은 아니다 — 리포트에서 그렇게 표기할 것.
+def vgconstp_pass(val_f1: float, val_recall: float, val_fpr: float, eps: float = 1e-3) -> bool:
     if val_f1 <= eps:                                   # 전무발화
         return False
     if val_recall >= 1 - eps and val_fpr >= 1 - eps:    # 전부발화
@@ -187,7 +187,7 @@ def sel_score_v3(f1: float, h_hits: float, n_h: int, fa: float,
 
 FORMULA_ID = (f"S = (1-b)*val_cell_F1 + b*(h+{LAPLACE_A:g})/(n_H+{2*LAPLACE_A:g})"
               f" - {LAMBDA_FA:g}*val_cell_FPR,  b = n_H/(n_H+{N0_HALF_TRUST:g}),"
-              f"  gate VG-1: val-all max-prob spread >= {VG1_SPREAD_MIN:g}"
+              f"  gate VG-const: val-all max-prob spread >= {VGCONST_SPREAD_MIN:g}"
               f"  (tie -> earliest epoch)")
 
 
@@ -298,25 +298,25 @@ def compute_selection(prob, gt, tier, tau, *, ignore=None, fa_cells=None,
                       n0: float = N0_HALF_TRUST,
                       fa_population: str = FA_POPULATION_DEFAULT_V2) -> dict:
     """**단일 진입점.** 훈련 루프는 이 함수만 호출한다.
-    VG-1 게이트는 여기서 함께 판정한다(확률을 이미 갖고 있는 유일한 지점)."""
+    VG-const 게이트는 여기서 함께 판정한다(확률을 이미 갖고 있는 유일한 지점)."""
     if fa_population not in FA_POPULATIONS:
         raise AssertionError(f"[VG-fa] 미등록 FA 모집단: {fa_population}")
     f1, fa, n_valid, n_fa = cell_stats_selection(prob, gt, tau, ignore, fa_cells)
     h, n_h = h_frame_recall_selection(prob, gt, tier, tau, ignore)
     spread = output_spread([list(r) for r in prob])
-    gate = vg1_pass(spread)
+    gate = vgconst_pass(spread)
     s = sel_score_v3(f1, h, n_h, fa, lam=lam, a=a, n0=n0)
     return {"S": (s if gate else float("-inf")), "S_ungated": s,
             "f1": f1, "fa": fa, "h_hits": h, "n_H": n_h,
             "beta": beta_weight(n_h, n0), "H_hat": (h_shrunk(h, n_h, a) if n_h else None),
-            "spread": spread, "vg1_pass": gate,
+            "spread": spread, "vgconst_pass": gate,
             "n_valid_cells": n_valid, "n_fa_cells": n_fa,
             "fa_population": fa_population, "ignore_applied": ignore is not None}
 
 
 if __name__ == "__main__":
     print(json.dumps({"H_DEF_ID": H_DEF_ID, "FORMULA_ID": FORMULA_ID,
-                      "VG1_STAGE": VG1_STAGE, "VG1_SPREAD_MIN": VG1_SPREAD_MIN,
-                      "VG1_SOURCE": VG1_SOURCE, "FA_POPULATIONS": FA_POPULATIONS,
+                      "VGCONST_STAGE": VGCONST_STAGE, "VGCONST_SPREAD_MIN": VGCONST_SPREAD_MIN,
+                      "VGCONST_SOURCE": VGCONST_SOURCE, "FA_POPULATIONS": FA_POPULATIONS,
                       "H_FULL_WEIGHT_CONDITION": H_FULL_WEIGHT_CONDITION},
                      ensure_ascii=False, indent=2))

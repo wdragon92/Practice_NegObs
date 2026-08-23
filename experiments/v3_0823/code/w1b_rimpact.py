@@ -73,7 +73,19 @@ BAND_OF_ROUND = {"260826_v3w1_lib_B": "base", "260826_v3w1_lib_B_h": "h",
 ap = argparse.ArgumentParser()
 ap.add_argument("--cls", default=os.path.join(V3, "w1d_cuecls.json"))
 ap.add_argument("--verify", default=os.path.join(V3, "w1b_verify.json"))
+# --- W1-B2 보충 웨이브 (DECISIONS D75 ③) ------------------------------------
+# `--b2`를 주면 T레버를 보충한 12씬은 **B2 라운드**의 실측(프레임·설정·격리)을,
+# 나머지 3씬(scene01·scene06·sceneD2 — T가 이미 B 레버였다)은 **B 라운드**의
+# 실측을 쓴다. 정책 정의·모집단·φ 산술은 한 줄도 바뀌지 않는다.
+ap.add_argument("--b2", action="store_true")
+ap.add_argument("--verify2", default=os.path.join(V3, "w1b2_verify.json"))
 args = ap.parse_args()
+
+B2 = bool(args.b2)
+B2_SCENES = set("scene02 scene08 scene09 scene12 scene16 scene17 scene20 "
+                "scene21 sceneC1 sceneC4 sceneD1 sceneD3".split())
+B2_ROUNDS = {"260826_v3w1_lib_B2": "base", "260826_v3w1_lib_B2_h": "h",
+             "260826_v3w1_lib_B2_e": "e", "260826_v3w1_lib_B2_e2": "e2"}
 
 plan = json.load(open(os.path.join(V3, "render_plan_v3.json"), encoding="utf-8"))
 cls = json.load(open(args.cls, encoding="utf-8"))
@@ -97,12 +109,29 @@ for r in B_ROUNDS:
         landed[sc] += 1
         landed_band[sc].add(BAND_OF_ROUND[r])
 
+# --- B2 실측으로 덮어쓰기: 그 12씬의 프레임은 B2 트리에 있다 ------------------
+if B2:
+    b2_landed, b2_band = collections.Counter(), collections.defaultdict(set)
+    for r, band in B2_ROUNDS.items():
+        for p in glob.glob(os.path.join(REPO, "dataset", r, "*", "*", "*.png")):
+            sc = os.path.basename(os.path.dirname(p))
+            b2_landed[sc] += 1
+            b2_band[sc].add(band)
+    for sc, n in b2_landed.items():
+        landed[sc] = n                      # B2가 그 씬의 정본 B팔이다
+        landed_band[sc] = b2_band[sc]
+
 # ---------- ② 실측 레버 (찍은 설정 파일 그대로) -------------------------------
 built = {}
 for p in sorted(glob.glob(os.path.join(V3, "render_configs_v3", "*_B.json"))):
     sc = os.path.basename(p).replace("_B.json", "")
     cfg = json.load(open(p, encoding="utf-8"))
     built[sc] = {CUE2KEY[k] for k, v in cfg.items() if k in CUE2KEY and v is False}
+if B2:
+    for p in sorted(glob.glob(os.path.join(V3, "render_configs_v3", "*_B2.json"))):
+        sc = os.path.basename(p).replace("_B2.json", "")
+        cfg = json.load(open(p, encoding="utf-8"))
+        built[sc] = {CUE2KEY[k] for k, v in cfg.items() if k in CUE2KEY and v is False}
 
 # ---------- ③ VG-01 격리 ------------------------------------------------------
 quarantine = collections.defaultdict(set)          # scene -> {band}
@@ -111,7 +140,19 @@ if os.path.exists(args.verify):
     vv = json.load(open(args.verify, encoding="utf-8"))
     vg01_ready = bool(vv.get("have_labels"))
     for q in vv.get("vg_01", {}).get("quarantine", []):
+        if B2 and q["scene"] in B2_SCENES:
+            continue                        # 그 씬의 판정은 B2 게이트가 다시 낸다
         quarantine[q["scene"]].add(q["band"])
+if B2:
+    if not os.path.exists(args.verify2):
+        print(f"[warn] {os.path.relpath(args.verify2, REPO)} 없음 — "
+              f"B2 격리를 반영하지 못한다 (게이트 배터리를 먼저 돌릴 것)")
+        vg01_ready = False
+    else:
+        v2 = json.load(open(args.verify2, encoding="utf-8"))
+        vg01_ready = vg01_ready and bool(v2.get("have_labels"))
+        for q in v2.get("vg_01", {}).get("quarantine", []):
+            quarantine[q["scene"]].add(q["band"])
 
 # ---------- hazgate ONWIRED --------------------------------------------------
 HZ_ONWIRED = {}
@@ -245,7 +286,9 @@ P = {p: per_key(p) for p in POLICIES}
 
 n_land = sum(landed.values())
 skipped = {s: 0 for s in ("scene03", "scene04", "scene10")}
-out = dict(doc="w1b_rimpact", version="1.0",
+out = dict(doc=("w1b2_rimpact" if B2 else "w1b_rimpact"), version="1.0",
+           wave=("B2" if B2 else "B"),
+           b2_scenes=(sorted(B2_SCENES) if B2 else None),
            cls_ledger=os.path.relpath(args.cls, REPO),
            b_landed_cuts=n_land, b_landed_by_scene=dict(sorted(landed.items())),
            b_skipped_d74=dict(scene03=72, scene04=72, scene10=24, cuts=168),
@@ -266,7 +309,7 @@ out = dict(doc="w1b_rimpact", version="1.0",
            policies={p: P[p] for p in POLICIES})
 out["d74_skip_check"]["delta_r"] = {
     k: round(P["PB_noskip"][k]["r"] - P["PB_asbuilt"][k]["r"], 4) for k in KEYS}
-op = os.path.join(V3, "w1b_rimpact.json")
+op = os.path.join(V3, "w1b2_rimpact.json" if B2 else "w1b_rimpact.json")
 json.dump(out, open(op, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 
 print(f"[w1b_rimpact] 판정 원장 = {out['cls_ledger']} · B 실측 {n_land}컷 "

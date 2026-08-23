@@ -79,16 +79,32 @@ sys.path.insert(0, LABDIR)
 import labeler as LB                                            # noqa: E402
 
 GRID_PATH = os.path.join(LABDIR, "gridspec_v1.json")
-B = "260826_v3w1_lib_B"
+# --- W1-B2 보충 웨이브 스위치 (DECISIONS D75 ③ · W1B_REPORT §8.1) ----------
+# `W1B_ARM=B`  (기본)  → 착지한 `260826_v3w1_lib_B*` · 산출 `w1b_*`  (W1-B 재현 그대로)
+# `W1B_ARM=B2`         → T레버 보충본 `260826_v3w1_lib_B2*` · **12씬만** · 산출 `w1b2_*`
+# 어느 쪽이든 코퍼스 A팔·D팔·구off 참조와 게이트 술어는 **한 글자도 다르지 않다**.
+ARM = os.environ.get("W1B_ARM", "B")
+if ARM not in ("B", "B2"):
+    raise SystemExit(f"W1B_ARM must be B or B2, got {ARM!r}")
+TAG = "w1b" if ARM == "B" else "w1b2"
+B2_SCENES = set("scene02 scene08 scene09 scene12 scene16 scene17 scene20 "
+                "scene21 sceneC1 sceneC4 sceneD1 sceneD3".split())
+
+
+def _sel(ss):
+    """B2 웨이브는 T레버를 보충한 12씬만 다시 찍었다."""
+    return [s for s in ss if ARM == "B" or s in B2_SCENES]
+
+B = f"260826_v3w1_lib_{ARM}"
 
 D = "260826_v3w1_lib_D"
 BANDS = {
-    "base": (B, "scene01 scene02 scene06 scene08 scene09 scene12 scene16 scene17 "
-                "scene20 scene21 sceneC1 sceneC4 sceneD1 sceneD2 sceneD3".split()),
-    "h":    (f"{B}_h", "scene09 scene17".split()),
-    "e":    (f"{B}_e", "scene08 scene09 scene12 scene17 scene20 sceneC1 "
-                       "sceneC4".split()),
-    "e2":   (f"{B}_e2", "scene12 scene20 sceneC4".split()),
+    "base": (B, _sel("scene01 scene02 scene06 scene08 scene09 scene12 scene16 scene17 "
+                     "scene20 scene21 sceneC1 sceneC4 sceneD1 sceneD2 sceneD3".split())),
+    "h":    (f"{B}_h", _sel("scene09 scene17".split())),
+    "e":    (f"{B}_e", _sel("scene08 scene09 scene12 scene17 scene20 sceneC1 "
+                            "sceneC4".split())),
+    "e2":   (f"{B}_e2", _sel("scene12 scene20 sceneC4".split())),
 }
 # 게이트용 z_off = 밴드가 맞는 D팔 라운드 (cue-대칭 · B의 생산 짝)
 D_ROUND = dict(base=D, h=f"{D}_h", e=f"{D}_e", e2=f"{D}_e2")
@@ -159,7 +175,7 @@ def _work(t):
 
 def main(workers, force):
     os.makedirs(ANN, exist_ok=True)
-    outs = {a: os.path.join(ANN, f"w1b_{a}.json") for a in ("A", "B", "Acorpus")}
+    outs = {a: os.path.join(ANN, f"{TAG}_{a}.json") for a in ("A", "B", "Acorpus")}
     if not force and all(os.path.exists(p) for p in outs.values()):
         print(f"[skip] {list(outs.values())} 이미 존재 — --force 로 덮어쓴다")
         return 0
@@ -193,7 +209,7 @@ def main(workers, force):
     for arm, p in outs.items():
         a = acc[arm]
         json.dump(dict(grid=grid, cam_convention_source=LB.CAM_SRC,
-                       doc=f"w1b_{arm}", version="1.0",
+                       doc=f"{TAG}_{arm}", version="1.0", arm_wave=ARM,
                        driver="experiments/v3_0823/code/w1b_label.py",
                        note=("A·B 게이트 라벨은 z_off = **D팔**(cue-대칭 · B의 생산 짝). "
                              "Acorpus는 z_off = 구off로, 코퍼스 재현 대조 전용. "
@@ -215,7 +231,7 @@ def main(workers, force):
                        warnings=a["warns"] + missing, frames=a["frames"]),
                   open(p, "w"), indent=1)
         errs = [s for s in a["sv"] if "error" in s]
-        print(f"[w1b_label] {arm}: {len(a['frames'])} frames · {len(a['sv'])} 씬×밴드 "
+        print(f"[{TAG}_label] {arm}: {len(a['frames'])} frames · {len(a['sv'])} 씬×밴드 "
               f"· 오류 {len(errs)} · 경고 {len(a['warns'])} -> {p}")
         for e in errs[:5]:
             print("   ERROR", e["scene"], e.get("band"), e["error"])

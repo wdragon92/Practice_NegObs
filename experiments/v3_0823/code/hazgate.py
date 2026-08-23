@@ -1,18 +1,64 @@
-import ast, os, json
+"""hazgate.py — 씬 소스에서 `cue_*` 배선을 정적으로 수집한다.
+
+두 모드 (W1-B2 · DECISIONS D75 ③)
+---------------------------------
+`--mode ifonly` (**기본 · 옛 동작 그대로**)
+    cue 읽기를 **`if` 문의 조건절에서만** 수집한다. W0 프로브 → W1-D 재판정 →
+    W1D §6.6 레버표 → W1-B 레시피가 전부 이 모드의 산출(`hazgate.json`)에서
+    나왔으므로, 그 계보를 재현하려면 이 모드를 그대로 쓴다.
+
+`--mode full` (**W1-B2 수리본**)
+    cue 읽기를 **모든 표현식 문맥**에서 수집한다 — 삼항식
+    (`mtl = A if cfg["cue_material_break"] else B`), `cfg.get(...)` 호출,
+    불린 연산, 인자 등. 각 자리의 `hz`(위험 게이트 여부)는 **어휘적으로 그
+    자리를 감싸는 `if` 사슬**로 판정하며, 이는 ifonly 모드의 의미와 같다.
+    산출은 기본적으로 **다른 파일**(`hazgate_full.json`)에 쓴다 — w0/w1 원장은
+    `hazgate.json`을 계속 가리키고, 두 파일이 나란히 남아 차이를 감사할 수 있다.
+
+왜 필요한가 (W1B_REPORT §8.1)
+-----------------------------
+ifonly 모드는 라이브러리 전체에서 **23쌍**(`cue_material_break` 20 ·
+`cue_tactile` 2 · `cue_nosing` 1)을 "배선無"로 오기록했고, 그 손실이 4단계를
+타고 B팔 레시피에 도달해 **T키의 |r|이 0.31로 문턱 0.2를 넘겼다**.
+
+사용:
+    cd experiments/v3_0823/code
+    python3 hazgate.py                       # -> hazgate.json      (옛 동작)
+    python3 hazgate.py --mode full           # -> hazgate_full.json (수리본)
+    python3 hazgate.py --mode full --out X   # 임의 경로
+"""
+import argparse, ast, os, json, sys
 ROOT="/home/vislab/Desktop/work_sy/Practice_NegObs"
 DIRS=[("main","scenes/main"),("batch1","scenes/batch1"),("probe","scenes/probe"),
       ("cueoff_port","experiments/weekend_0823/cue_audit/scenes_cueoff")]
 KIT={"scene_common.py","batch1_common.py","probe_common.py","building_kit.py","facade_kit.py",
      "ground_kit.py","infra_kit.py","props_kit.py","stair_kit.py","urban_kit.py","variation_kit.py"}
 CUE=["cue_railing","cue_tactile","cue_nosing","cue_material_break","cue_sign","cue_scene_dressing"]
+
+_ap=argparse.ArgumentParser()
+_ap.add_argument("--mode",choices=("ifonly","full"),default="ifonly")
+_ap.add_argument("--out",default=None)
+_A=_ap.parse_args()
+FULL=(_A.mode=="full")
+OUTP=_A.out or ("hazgate_full.json" if FULL else "hazgate.json")
+
 def cs(n): return n.value if isinstance(n,ast.Constant) and isinstance(n.value,str) else None
 def bn(n): return n.id if isinstance(n,ast.Name) else (n.attr if isinstance(n,ast.Attribute) else None)
+
+def _read_key(x, keys):
+    """`x` 자체가 cfg/SCENE_CONFIG의 cue 읽기이면 그 키, 아니면 None."""
+    if isinstance(x,ast.Subscript) and cs(x.slice) in keys and bn(x.value) in ("cfg","SCENE_CONFIG"):
+        return cs(x.slice)
+    if isinstance(x,ast.Call) and isinstance(x.func,ast.Attribute) and x.func.attr=="get" \
+       and x.args and cs(x.args[0]) in keys and bn(x.func.value) in ("cfg","SCENE_CONFIG"):
+        return cs(x.args[0])
+    return None
 
 def key_in(test, keys):
     got=set()
     for x in ast.walk(test):
-        if isinstance(x,ast.Subscript) and cs(x.slice) in keys and bn(x.value) in ("cfg","SCENE_CONFIG"): got.add(cs(x.slice))
-        if isinstance(x,ast.Call) and isinstance(x.func,ast.Attribute) and x.func.attr=="get" and x.args and cs(x.args[0]) in keys and bn(x.func.value) in ("cfg","SCENE_CONFIG"): got.add(cs(x.args[0]))
+        k=_read_key(x,keys)
+        if k: got.add(k)
     return got
 
 out={}
@@ -51,6 +97,15 @@ for tag,d in DIRS:
         def visit(ch, fstack, hz):
             """Process ONE node `ch` then recurse into its children."""
             nf, nh = fstack, hz
+            # --- full 모드: `if` 조건절 밖의 cue 읽기도 센다 (W1-B2 · D75 ③) ----
+            # `ch` 자신만 본다 — 자식은 아래 재귀에서 각자 한 번씩 방문되므로
+            # 자리마다 정확히 한 번 기록된다. `ast.If`의 test는 아래 If 분기가
+            # 따로 처리하고 재귀하지 않으므로 중복 기록도 없다.
+            if FULL:
+                k = _read_key(ch, set(CUE))
+                if k:
+                    cueguard.append((k, getattr(ch, "lineno", -1),
+                                     fstack[-1] if fstack else "<module>", hz))
             if isinstance(ch, ast.FunctionDef):
                 nf = fstack + [ch.name]; nh = False
                 for st in ch.body: visit(st, nf, nh)
@@ -96,8 +151,16 @@ for tag,d in DIRS:
             rec[k]={"n":len(gs),"all_hazard_gated":allg,"any":anyg,
                     "sites":[{"L":g[1],"fn":g[2],"lex_hz":g[3],"fn_gated":g[2] in gated} for g in gs]}
         out[tag+"::"+fn]={"defaults":dflt,"hazard_keys":sorted(HZ),"cue":rec}
-json.dump(out,open("hazgate.json","w"),indent=1,ensure_ascii=False)
+out["__meta__"]={"doc":"hazgate","mode":_A.mode,
+                 "scan":("`if` 문 조건절만" if not FULL else
+                         "모든 표현식 문맥 (삼항식·cfg.get·불린·인자 포함)"),
+                 "authority":"W1B_REPORT §8.1 · DECISIONS D75 ③",
+                 "note":("옛 계보(W0→W1D §6.6→W1-B 레시피)의 정본" if not FULL
+                         else "W1-B2 수리본 — hazgate.json과 나란히 두고 감사한다")}
+json.dump(out,open(OUTP,"w"),indent=1,ensure_ascii=False)
+print(f"[hazgate] mode={_A.mode} -> {OUTP}")
 for n,e in out.items():
+    if "::" not in n: continue          # __meta__
     tags=[]
     for k in CUE:
         r=e["cue"][k]

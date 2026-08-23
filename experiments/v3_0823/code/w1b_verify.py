@@ -57,15 +57,31 @@ import labeler as LB                                            # noqa: E402
 GRID = json.load(open(os.path.join(LABDIR, "gridspec_v1.json"), encoding="utf-8"))
 HAZ_DEPTH = float(GRID["hazard_depth_m"])
 
-B = "260826_v3w1_lib_B"
+# --- W1-B2 보충 웨이브 스위치 (DECISIONS D75 ③ · W1B_REPORT §8.1) ----------
+# `W1B_ARM=B`  (기본)  → 착지한 `260826_v3w1_lib_B*` · 산출 `w1b_*`  (W1-B 재현 그대로)
+# `W1B_ARM=B2`         → T레버 보충본 `260826_v3w1_lib_B2*` · **12씬만** · 산출 `w1b2_*`
+# 어느 쪽이든 코퍼스 A팔·D팔·구off 참조와 게이트 술어는 **한 글자도 다르지 않다**.
+ARM = os.environ.get("W1B_ARM", "B")
+if ARM not in ("B", "B2"):
+    raise SystemExit(f"W1B_ARM must be B or B2, got {ARM!r}")
+TAG = "w1b" if ARM == "B" else "w1b2"
+B2_SCENES = set("scene02 scene08 scene09 scene12 scene16 scene17 scene20 "
+                "scene21 sceneC1 sceneC4 sceneD1 sceneD3".split())
+
+
+def _sel(ss):
+    """B2 웨이브는 T레버를 보충한 12씬만 다시 찍었다."""
+    return [s for s in ss if ARM == "B" or s in B2_SCENES]
+
+B = f"260826_v3w1_lib_{ARM}"
 BANDS = {
     "base": (B, "260819_main_on",
-             "scene01 scene02 scene06 scene08 scene09 scene12 scene16 scene17 "
-             "scene20 scene21 sceneC1 sceneC4 sceneD1 sceneD2 sceneD3".split()),
-    "h":    (f"{B}_h", "260820_boost_h_on", "scene09 scene17".split()),
+             _sel("scene01 scene02 scene06 scene08 scene09 scene12 scene16 scene17 "
+                  "scene20 scene21 sceneC1 sceneC4 sceneD1 sceneD2 sceneD3".split())),
+    "h":    (f"{B}_h", "260820_boost_h_on", _sel("scene09 scene17".split())),
     "e":    (f"{B}_e", "260820_boost_e_on",
-             "scene08 scene09 scene12 scene17 scene20 sceneC1 sceneC4".split()),
-    "e2":   (f"{B}_e2", "260820_boost_e2_on", "scene12 scene20 sceneC4".split()),
+             _sel("scene08 scene09 scene12 scene17 scene20 sceneC1 sceneC4".split())),
+    "e2":   (f"{B}_e2", "260820_boost_e2_on", _sel("scene12 scene20 sceneC4".split())),
 }
 A_OVERLAY = {("e", "scene08"): "260820_boost_e_on_g7fixM",
              ("e", "scene12"): "260820_boost_e_on_g7fixM",
@@ -410,16 +426,16 @@ def load_corpus():
 
 
 def main():
-    labA = os.path.join(ANN, "w1b_A.json")
-    labB = os.path.join(ANN, "w1b_B.json")
-    labAC = os.path.join(ANN, "w1b_Acorpus.json")
+    labA = os.path.join(ANN, f"{TAG}_A.json")
+    labB = os.path.join(ANN, f"{TAG}_B.json")
+    labAC = os.path.join(ANN, f"{TAG}_Acorpus.json")
     have_labels = os.path.exists(labA) and os.path.exists(labB)
     LA = json.load(open(labA, encoding="utf-8")) if have_labels else None
     LB_ = json.load(open(labB, encoding="utf-8")) if have_labels else None
     LAC = json.load(open(labAC, encoding="utf-8")) if os.path.exists(labAC) else None
     corpus, corpus_src = load_corpus()
 
-    out = dict(doc="w1b_verify", version="1.0",
+    out = dict(doc=f"{TAG}_verify", version="1.0", arm=ARM, b_round=B,
                plan="RENDER_PLAN_V3 §4.2 · §6.1 (VG-01·VG-08·VG-10·VG-datum) · D74",
                gates=["VG-01", "VG-08", "VG-10", "VG-datum"],
                have_labels=have_labels, rounds={}, scenes=[], problems=[])
@@ -527,7 +543,7 @@ def main():
             row["lever"]["levers"] = sorted(
                 k.replace("cue_", "") for k, v in
                 json.load(open(os.path.join(V3, "render_configs_v3",
-                                            f"{s}_B.json"), encoding="utf-8")).items()
+                                            f"{s}_{ARM}.json"), encoding="utf-8")).items()
                 if v is False)
             if row["lever"].get("fired") is False:
                 out["problems"].append(
@@ -801,7 +817,7 @@ def main():
         failures=[dict(scene=r["scene"], band=r["band"], **r["seg"])
                   for r in sg if not r["seg"]["distinct"]])
 
-    op = os.path.join(V3, "w1b_verify.json")
+    op = os.path.join(V3, f"{TAG}_verify.json")
     json.dump(out, open(op, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 
     # ---------- stdout -----------------------------------------------------

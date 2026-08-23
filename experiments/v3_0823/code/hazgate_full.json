@@ -1,0 +1,3882 @@
+{
+ "main::scene01_campus_stairs.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2609,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2570,
+      "fn": "build_ground_kit",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_nosing": null,
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1738,
+      "fn": "setup_materials",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2695,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2685,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::scene02_underpass.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1603,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": true,
+    "sites": [
+     {
+      "L": 1358,
+      "fn": "build_ground_kit",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1584,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1569,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1923,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1940,
+      "fn": "main",
+      "lex_hz": true,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "n": 3,
+    "all_hazard_gated": false,
+    "any": true,
+    "sites": [
+     {
+      "L": 1322,
+      "fn": "build_sidewalk",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 1386,
+      "fn": "build_flat_fill",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1936,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::scene03_riverbank.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2679,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2690,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2684,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 2097,
+      "fn": "build_stairs",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 2713,
+      "fn": "main",
+      "lex_hz": true,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::scene04_parktrail.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1779,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1802,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1808,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1247,
+      "fn": "make_mtls",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1826,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::scene05_amphitheater.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2669,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2686,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2690,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": true,
+    "sites": [
+     {
+      "L": 1998,
+      "fn": "setup_materials",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 2729,
+      "fn": "main",
+      "lex_hz": true,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2739,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2734,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::scene06_overpass_spiral.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 2649,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 2734,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 2743,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2763,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2773,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::scene07_temple_stone_path.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 2766,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 2773,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 2778,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2079,
+      "fn": "setup_materials",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": {
+    "n": 3,
+    "all_hazard_gated": false,
+    "any": true,
+    "sites": [
+     {
+      "L": 1280,
+      "fn": "_grid_obstacles",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1689,
+      "fn": "_smoke_report",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 2810,
+      "fn": "main",
+      "lex_hz": true,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 2804,
+      "fn": "main",
+      "lex_hz": true,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::scene08_sunken_plaza.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 2459,
+      "fn": "main",
+      "lex_hz": true,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 2462,
+      "fn": "main",
+      "lex_hz": true,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1957,
+      "fn": "build_cascade",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1949,
+      "fn": "build_cascade",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_sign": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 2464,
+      "fn": "main",
+      "lex_hz": true,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2468,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::scene09_ghat_riverfront.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": null,
+   "cue_tactile": null,
+   "cue_nosing": null,
+   "cue_material_break": {
+    "n": 2,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 2844,
+      "fn": "build_stairs",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 2895,
+      "fn": "build_embankment",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_sign": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 3890,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 3888,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::scene10_park_deck_switchback.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 4232,
+      "fn": "build_deck",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 4673,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 4679,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 3718,
+      "fn": "setup_materials",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 4713,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::scene11_footbridge_stairs.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": true,
+    "sites": [
+     {
+      "L": 2398,
+      "fn": "build_leg",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 2793,
+      "fn": "main",
+      "lex_hz": true,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2541,
+      "fn": "build_leg",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2389,
+      "fn": "build_leg",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2786,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2795,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2797,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::scene12_riverside_deck.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 2066,
+      "fn": "main",
+      "lex_hz": true,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_tactile": null,
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1900,
+      "fn": "build_stairs",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 2,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1849,
+      "fn": "build_deck",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 1895,
+      "fn": "build_stairs",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2073,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::scene13_apartment_parking_entry.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 3806,
+      "fn": "main",
+      "lex_hz": true,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 3,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 2626,
+      "fn": "build_ground_kit",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 3598,
+      "fn": "build_bollards",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 3808,
+      "fn": "main",
+      "lex_hz": true,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 2,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 2707,
+      "fn": "build_stair",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 2723,
+      "fn": "build_stair",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 3787,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 3788,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 3810,
+      "fn": "main",
+      "lex_hz": true,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 3814,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::scene14_grandstair_illusion.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1838,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1827,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1833,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1882,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1900,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1894,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::scene15_alley_labyrinth.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": true,
+    "sites": [
+     {
+      "L": 1206,
+      "fn": "alley_selfcheck",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1997,
+      "fn": "build_stairs",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_tactile": null,
+   "cue_nosing": null,
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1939,
+      "fn": "build_stairs",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2305,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::scene16_canopy_shadow.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 2,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1253,
+      "fn": "build_east_exit",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 1324,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 3,
+    "all_hazard_gated": false,
+    "any": true,
+    "sites": [
+     {
+      "L": 1243,
+      "fn": "build_east_exit",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 1310,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 1720,
+      "fn": "build_dressing",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 2,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1237,
+      "fn": "build_east_exit",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 1303,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1792,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1828,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1824,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::scene17_ramp_pair_hangang.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 2706,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_tactile": null,
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 2710,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2718,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2731,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::scene18_wavy_artstair.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 3,
+    "all_hazard_gated": false,
+    "any": true,
+    "sites": [
+     {
+      "L": 862,
+      "fn": "_stair_selfcheck",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 875,
+      "fn": "_stair_selfcheck",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1890,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": true,
+    "sites": [
+     {
+      "L": 876,
+      "fn": "_stair_selfcheck",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1872,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": true,
+    "sites": [
+     {
+      "L": 901,
+      "fn": "_stair_selfcheck",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1879,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1598,
+      "fn": "build_edge_bands",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1914,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::scene19_fan_winder.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 2021,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 2032,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 2038,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_material_break": null,
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 2062,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::scene20_diagonal_oblique.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 4,
+    "all_hazard_gated": false,
+    "any": true,
+    "sites": [
+     {
+      "L": 880,
+      "fn": "build_diagonal",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 1047,
+      "fn": "build_litter",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 1169,
+      "fn": "plaza_selfcheck",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1197,
+      "fn": "plaza_selfcheck",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 3,
+    "all_hazard_gated": false,
+    "any": true,
+    "sites": [
+     {
+      "L": 874,
+      "fn": "build_diagonal",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 891,
+      "fn": "build_diagonal",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 1076,
+      "fn": "build_dressing",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_nosing": null,
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 866,
+      "fn": "build_diagonal",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 4,
+    "all_hazard_gated": false,
+    "any": true,
+    "sites": [
+     {
+      "L": 674,
+      "fn": "build_upper",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 884,
+      "fn": "build_diagonal",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 1360,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1363,
+      "fn": "main",
+      "lex_hz": true,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::scene21_monumental_selfocclude.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true,
+   "cue_nosing": true
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1446,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": true,
+    "sites": [
+     {
+      "L": 1394,
+      "fn": "build_dressing",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1456,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1452,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1010,
+      "fn": "build_plazas",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1479,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1473,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::sceneH1_berm_levee.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": true,
+   "cue_nosing": true,
+   "cue_material_break": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true,
+   "cue_shadow_caster": true,
+   "cue_manhole": true,
+   "cue_tree_grate": true,
+   "cue_slab_joint": true,
+   "cue_drainage": true,
+   "cue_bollard": true,
+   "cue_delineator": false,
+   "keep_dressing": false,
+   "placebo_remove": false
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 475,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1347,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 476,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1349,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1351,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 4,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 476,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 816,
+      "fn": "build_terrain",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 818,
+      "fn": "build_terrain",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 819,
+      "fn": "build_terrain",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1353,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "n": 3,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 459,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 477,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1364,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::sceneH2_landing_campus.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": true,
+   "cue_nosing": true,
+   "cue_material_break": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true,
+   "cue_shadow_caster": true,
+   "cue_manhole": true,
+   "cue_tree_grate": true,
+   "cue_slab_joint": true,
+   "cue_drainage": true,
+   "cue_bollard": true,
+   "cue_planter_edge": true,
+   "keep_dressing": false,
+   "placebo_remove": false
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 411,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1169,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 412,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1171,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1173,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 4,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 412,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 680,
+      "fn": "build_plaza",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 683,
+      "fn": "build_plaza",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 684,
+      "fn": "build_plaza",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1175,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "n": 3,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 396,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 413,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1186,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::sceneH6_berm_levee2.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": true,
+   "cue_nosing": true,
+   "cue_material_break": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true,
+   "cue_shadow_caster": true,
+   "cue_manhole": true,
+   "cue_tree_grate": true,
+   "cue_slab_joint": true,
+   "cue_drainage": true,
+   "cue_bollard": true,
+   "cue_delineator": false,
+   "keep_dressing": false,
+   "placebo_remove": false
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 424,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1229,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 425,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1231,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1233,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 4,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 425,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 745,
+      "fn": "build_terrain",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 747,
+      "fn": "build_terrain",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 748,
+      "fn": "build_terrain",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1235,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "n": 3,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 408,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 426,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1246,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "main::sceneH7_bend_walk2.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": true,
+   "cue_nosing": true,
+   "cue_material_break": true,
+   "cue_sign": true,
+   "cue_scene_dressing": true,
+   "cue_shadow_caster": true,
+   "cue_manhole": true,
+   "cue_tree_grate": false,
+   "cue_slab_joint": true,
+   "cue_drainage": true,
+   "cue_bollard": true,
+   "cue_level_handrail": true,
+   "keep_dressing": false,
+   "placebo_remove": false
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 363,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1172,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 364,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1176,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1178,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 4,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 364,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 748,
+      "fn": "build_walk",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 751,
+      "fn": "build_walk",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 752,
+      "fn": "build_walk",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1180,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_scene_dressing": {
+    "n": 3,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 350,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 365,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1189,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneC1_snow_stairs.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": true,
+   "cue_material_break": true,
+   "cue_nosing": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "snow_cover": true
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1124,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 578,
+      "fn": "ground_plans",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1113,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1375,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1388,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneC2_leaf_stairs.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "leaf_cover": true,
+   "keep_dressing": false
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1042,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1036,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1030,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 764,
+      "fn": "build_terrain",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1301,
+      "fn": "build_flat_fill",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1329,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneC4_wet_stairs.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": true,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "wet_surface": true
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1034,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 447,
+      "fn": "ground_plans",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1020,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1247,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1262,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneD1_loading_dock.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1092,
+      "fn": "main",
+      "lex_hz": true,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_tactile": null,
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1090,
+      "fn": "main",
+      "lex_hz": true,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1083,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1098,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneD2_floor_opening.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 828,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_tactile": null,
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 814,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1143,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1162,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneD3_drainage_channel.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "grass_overhang": true
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1005,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1014,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_nosing": null,
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 835,
+      "fn": "build_ground",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1180,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1190,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneD4_subway_platform.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": true,
+   "cue_material_break": true,
+   "cue_nosing": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 720,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 687,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 711,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 898,
+      "fn": "main",
+      "lex_hz": true,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 905,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneN1_shadow_band.py": {
+  "defaults": {
+   "hazard_shadow_band": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "hazard_keys": [
+   "hazard_shadow_band"
+  ],
+  "cue": {
+   "cue_railing": null,
+   "cue_tactile": null,
+   "cue_nosing": null,
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 921,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 406,
+      "fn": "ground_plans",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 925,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneN2_asphalt_patch.py": {
+  "defaults": {
+   "hazard_asphalt_patch": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "hazard_keys": [
+   "hazard_asphalt_patch"
+  ],
+  "cue": {
+   "cue_railing": null,
+   "cue_tactile": null,
+   "cue_nosing": null,
+   "cue_material_break": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": true,
+    "sites": [
+     {
+      "L": 980,
+      "fn": "build_patches",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 1169,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 530,
+      "fn": "ground_plans",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1173,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneN3_trompe_loeil.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "keep_dressing": false
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": null,
+   "cue_tactile": null,
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1346,
+      "fn": "build_painting",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1276,
+      "fn": "mtl_of",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 346,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1586,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneN4_downhill_ramp.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 995,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_tactile": null,
+   "cue_nosing": null,
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 840,
+      "fn": "build_road",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 4,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 367,
+      "fn": "ground_plans",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 998,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1237,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1247,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "batch1::sceneN5_flush_grating.py": {
+  "defaults": {
+   "hazard_flush_grating": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "hazard_keys": [
+   "hazard_flush_grating"
+  ],
+  "cue": {
+   "cue_railing": null,
+   "cue_tactile": null,
+   "cue_nosing": null,
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1107,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 1111,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "probe::probeH1_near_hole.py": {
+  "defaults": {
+   "hazard_hole": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "hazard_keys": [
+   "hazard_hole"
+  ],
+  "cue": {
+   "cue_railing": null,
+   "cue_tactile": null,
+   "cue_nosing": null,
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 298,
+      "fn": "setup_materials",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 395,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "probe::probeH2_offpath_hole.py": {
+  "defaults": {
+   "hazard_hole": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "hazard_keys": [
+   "hazard_hole"
+  ],
+  "cue": {
+   "cue_railing": null,
+   "cue_tactile": null,
+   "cue_nosing": null,
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 278,
+      "fn": "setup_materials",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 360,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "probe::probeH3_hidden_hole.py": {
+  "defaults": {
+   "hazard_hole": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "hazard_keys": [
+   "hazard_hole"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 277,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 429,
+      "fn": "build_dressing",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_tactile": null,
+   "cue_nosing": null,
+   "cue_material_break": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 336,
+      "fn": "setup_materials",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 1,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 440,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "cueoff_port::scene12_riverside_deck.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 3,
+    "all_hazard_gated": false,
+    "any": true,
+    "sites": [
+     {
+      "L": 649,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 2224,
+      "fn": "main",
+      "lex_hz": true,
+      "fn_gated": false
+     },
+     {
+      "L": 2237,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_tactile": null,
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 1984,
+      "fn": "build_stairs",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 3,
+    "all_hazard_gated": false,
+    "any": true,
+    "sites": [
+     {
+      "L": 650,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1933,
+      "fn": "build_deck",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1979,
+      "fn": "build_stairs",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 4,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 625,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 636,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 651,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 2243,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "cueoff_port::scene17_ramp_pair_hangang.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": false,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_sign": false,
+   "cue_scene_dressing": true,
+   "cue_nosing": false
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": true,
+    "sites": [
+     {
+      "L": 839,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 2793,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_tactile": null,
+   "cue_nosing": {
+    "n": 1,
+    "all_hazard_gated": true,
+    "any": true,
+    "sites": [
+     {
+      "L": 2797,
+      "fn": "build_cues",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_material_break": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 840,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 2805,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 4,
+    "all_hazard_gated": false,
+    "any": false,
+    "sites": [
+     {
+      "L": 815,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 826,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 841,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 2818,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "cueoff_port::scene20_diagonal_oblique.py": {
+  "defaults": {
+   "hazard_stairs": true,
+   "cue_railing": true,
+   "cue_tactile": false,
+   "cue_material_break": true,
+   "cue_nosing": false,
+   "cue_sign": false,
+   "cue_scene_dressing": true
+  },
+  "hazard_keys": [
+   "hazard_stairs"
+  ],
+  "cue": {
+   "cue_railing": {
+    "n": 5,
+    "all_hazard_gated": false,
+    "any": true,
+    "sites": [
+     {
+      "L": 529,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 965,
+      "fn": "build_diagonal",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 1146,
+      "fn": "build_litter",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 1268,
+      "fn": "plaza_selfcheck",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1296,
+      "fn": "plaza_selfcheck",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_tactile": {
+    "n": 3,
+    "all_hazard_gated": false,
+    "any": true,
+    "sites": [
+     {
+      "L": 959,
+      "fn": "build_diagonal",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 976,
+      "fn": "build_diagonal",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 1175,
+      "fn": "build_dressing",
+      "lex_hz": false,
+      "fn_gated": false
+     }
+    ]
+   },
+   "cue_nosing": null,
+   "cue_material_break": {
+    "n": 2,
+    "all_hazard_gated": false,
+    "any": true,
+    "sites": [
+     {
+      "L": 530,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 951,
+      "fn": "build_diagonal",
+      "lex_hz": false,
+      "fn_gated": true
+     }
+    ]
+   },
+   "cue_sign": null,
+   "cue_scene_dressing": {
+    "n": 8,
+    "all_hazard_gated": false,
+    "any": true,
+    "sites": [
+     {
+      "L": 505,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 516,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 531,
+      "fn": "<module>",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 739,
+      "fn": "build_upper",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 969,
+      "fn": "build_diagonal",
+      "lex_hz": false,
+      "fn_gated": true
+     },
+     {
+      "L": 1463,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1468,
+      "fn": "main",
+      "lex_hz": false,
+      "fn_gated": false
+     },
+     {
+      "L": 1471,
+      "fn": "main",
+      "lex_hz": true,
+      "fn_gated": false
+     }
+    ]
+   }
+  }
+ },
+ "__meta__": {
+  "doc": "hazgate",
+  "mode": "full",
+  "scan": "모든 표현식 문맥 (삼항식·cfg.get·불린·인자 포함)",
+  "authority": "W1B_REPORT §8.1 · DECISIONS D75 ③",
+  "note": "W1-B2 수리본 — hazgate.json과 나란히 두고 감사한다"
+ }
+}

@@ -76,15 +76,31 @@ LABDIR = os.path.join(REPO, "experiments/mainrun_0819/code/labeling")
 sys.path.insert(0, LABDIR)
 import fuse_heightmap as FH                                     # noqa: E402
 
-B = "260826_v3w1_lib_B"
+# --- W1-B2 보충 웨이브 스위치 (DECISIONS D75 ③ · W1B_REPORT §8.1) ----------
+# `W1B_ARM=B`  (기본)  → 착지한 `260826_v3w1_lib_B*` · 산출 `w1b_*`  (W1-B 재현 그대로)
+# `W1B_ARM=B2`         → T레버 보충본 `260826_v3w1_lib_B2*` · **12씬만** · 산출 `w1b2_*`
+# 어느 쪽이든 코퍼스 A팔·D팔·구off 참조와 게이트 술어는 **한 글자도 다르지 않다**.
+ARM = os.environ.get("W1B_ARM", "B")
+if ARM not in ("B", "B2"):
+    raise SystemExit(f"W1B_ARM must be B or B2, got {ARM!r}")
+TAG = "w1b" if ARM == "B" else "w1b2"
+B2_SCENES = set("scene02 scene08 scene09 scene12 scene16 scene17 scene20 "
+                "scene21 sceneC1 sceneC4 sceneD1 sceneD3".split())
+
+
+def _sel(ss):
+    """B2 웨이브는 T레버를 보충한 12씬만 다시 찍었다."""
+    return [s for s in ss if ARM == "B" or s in B2_SCENES]
+
+B = f"260826_v3w1_lib_{ARM}"
 # 밴드 -> (B 라운드, 그 밴드의 씬)
 BANDS = {
-    "base": (B, "scene01 scene02 scene06 scene08 scene09 scene12 scene16 scene17 "
-                "scene20 scene21 sceneC1 sceneC4 sceneD1 sceneD2 sceneD3".split()),
-    "h":    (f"{B}_h", "scene09 scene17".split()),
-    "e":    (f"{B}_e", "scene08 scene09 scene12 scene17 scene20 sceneC1 "
-                       "sceneC4".split()),
-    "e2":   (f"{B}_e2", "scene12 scene20 sceneC4".split()),
+    "base": (B, _sel("scene01 scene02 scene06 scene08 scene09 scene12 scene16 scene17 "
+                     "scene20 scene21 sceneC1 sceneC4 sceneD1 sceneD2 sceneD3".split())),
+    "h":    (f"{B}_h", _sel("scene09 scene17".split())),
+    "e":    (f"{B}_e", _sel("scene08 scene09 scene12 scene17 scene20 sceneC1 "
+                            "sceneC4".split())),
+    "e2":   (f"{B}_e2", _sel("scene12 scene20 sceneC4".split())),
 }
 # 코퍼스 A팔 라운드 (계기 권위). g7fixM 트리는 융합 사이드카를 얹은 심링크본이라
 # 그 씬에서는 M이 이긴다 (G7_RELABEL 정본 = 변형 B).
@@ -290,7 +306,7 @@ def main(write):
                 row["action"] = "keep aabb"
             rows.append(row)
 
-    out = dict(doc="w1b_fuse_audit", version="1.0",
+    out = dict(doc=f"{TAG}_fuse_audit", version="1.0", arm=ARM, b_round=B,
                rule="코퍼스 **A팔**이 융합을 쓰는 (밴드,씬)에만 B팔 융합 사이드카를 쓴다 "
                     "— B는 on팔이고 중심 게이트가 A/B 동일성이므로 계기 짝이 A다. "
                     "그리고 **재융합하지 않는다**: 융합은 시점 의존이라 단서(=가림막) "
@@ -305,7 +321,7 @@ def main(write):
                                     "on=aabb · off=fused."),
                agree_band_m=AGREE_BAND_M, flag_p90_m=FLAG_P90_M,
                wrote=wrote, flagged=flagged, problems=problems, rows=rows)
-    op = os.path.join(V3, "w1b_fuse_audit.json")
+    op = os.path.join(V3, f"{TAG}_fuse_audit.json")
     json.dump(out, open(op, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 
     hdr = (f"{'band':5s} {'scene':9s} {'A팔융합':8s} {'D감사off':9s} {'med|Δ|':>8s} "

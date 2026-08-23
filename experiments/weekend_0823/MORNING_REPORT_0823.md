@@ -1,7 +1,14 @@
 # MORNING_REPORT_0823 — 주말 자율 창 착지 보고 (일 08-23 아침, 예정보다 하루 이른 마감)
 
-- **작성**: Claude Code · 2026-08-24 오전 · **결재**: 승용
-- **창**: 2026-08-23(일) 03:15 개시 ~ 08-24 오전 보고. 지시서 `Docs/experiment/WEEKEND_BRIEF_0823.md` v2.0.
+> **【정정 배너 · 2026-08-23 추가 · append-only, 본문 무수정】**
+> 본 문서 §1.4·§2.1의 CUE-OFF census(**30칸 · CUE 0 / SHORTCUT 2 / NO-EFFECT 6 / UNDECIDED 4 / VOID 18**)는
+> **정본이 맞다.** `cue_audit/CUEOFF_RESULT_v2.md:28-30`의 "24칸 · VOID 12"는 census가 아니라
+> **v1↔v2 동일-조건 비교용 제한 모집단**(수리 라운드 `260823_cueoff_s20fix` 6칸 제외)이며 두 수는 포함 관계다.
+> 인용 시 **leg·접기여부·n**을 함께 적는다(맨숫자 인용 금지). A2-7 접은 census **21칸 · VOID 12**를 병기할 의무가 있다.
+> 정본 회계·행 수준 대조: **`experiments/v3_0823/ACCOUNTING.md` §1**.
+
+- **작성**: Claude Code · 2026-08-23 오전 · **결재**: 승용
+- **창**: 2026-08-23(일) 03:15 개시 ~ 08-23 오전 보고. 지시서 `Docs/experiment/WEEKEND_BRIEF_0823.md` v2.0.
 - **상위 일정**: 실험 동결 **화 8/26** · AISP 제출 **8/30**.
 - **원장**: `experiments/mainrun_0819/DECISIONS.md` **D31–D51** (주말 전 구간의 시간순 결정 기록).
 - **작업 루트**: `experiments/weekend_0823/` (정본 무수정 · append-only 격리 준수).

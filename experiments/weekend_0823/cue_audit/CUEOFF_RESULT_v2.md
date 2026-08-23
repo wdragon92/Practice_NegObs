@@ -1,5 +1,13 @@
 # CUEOFF_RESULT_v2 — CUE-OFF, re-adjudicated under PREREG amendment A2
 
+> **【정정 배너 · 2026-08-23 추가 · append-only, 본문 무수정】**
+> 아래 §0 첫 콜아웃(`:28-30`)의 "**the same 24 primary cells … 12 VOID**"는 **census가 아니라**
+> v1↔v2 동일-조건 비교용 제한 모집단이다(수리 라운드 `260823_cueoff_s20fix` 6칸 제외 — v1 판독 시점엔 미렌더).
+> **정본 census는 §0 표 1행 `primary, all blocks` = 30칸 · CUE 0 / SHORTCUT 2 / NO-EFFECT 6 / UNDECIDED 4 / VOID 18**이며,
+> A2-7 접은 **21칸 · VOID 12**(표 2행)를 병기한다. 본 문서 안에서 "n=24"는 두 곳(`:28-30` 제한 모집단, `:67` secondary leg),
+> "VOID 12"도 두 곳(`:28-30`, `:64`)에 서로 다른 뜻으로 나오니 인용 시 모집단 이름을 반드시 붙일 것.
+> 정본 회계·행 수준 대조: **`experiments/v3_0823/ACCOUNTING.md` §1**.
+
 **2026-08-23 · post-hoc corrected re-analysis · supersedes `CUEOFF_RESULT.md` (v1, preserved with a banner)**
 
 Instrument: `readout_cueoff.py` (A2), `gates_cueoff.py` (A2), `render_mass.py` (new),

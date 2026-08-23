@@ -1,0 +1,423 @@
+{
+  "tag": "gz_drop1_cap",
+  "generated": "2026-08-23T06:39:28",
+  "note": "Gazebo Classic 11.10.2 capture; poses are exact (static camera models), so infer_photo.py --height/--pitch/--hfov are MEASURED, not assumed.",
+  "frames": [
+    {
+      "file": "gz_drop1_cap_preset_h0.3_d10_000.png",
+      "view": "preset_h0.3_d10",
+      "topic": "/gzcam/h03_d10/cam/image_raw",
+      "kind": "rgb",
+      "w": 1920,
+      "h": 1080,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_preset_h0.9_d2_000.png",
+      "view": "preset_h0.9_d2",
+      "topic": "/gzcam/h09_d2/cam/image_raw",
+      "kind": "rgb",
+      "w": 1920,
+      "h": 1080,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_preset_h0.9_d5_000.png",
+      "view": "preset_h0.9_d5",
+      "topic": "/gzcam/h09_d5/cam/image_raw",
+      "kind": "rgb",
+      "w": 1920,
+      "h": 1080,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_preset_h0.9_d10_000.png",
+      "view": "preset_h0.9_d10",
+      "topic": "/gzcam/h09_d10/cam/image_raw",
+      "kind": "rgb",
+      "w": 1920,
+      "h": 1080,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_extra_h0.3_d1.2_000.png",
+      "view": "extra_h0.3_d1.2",
+      "topic": "/gzcam/h03_d12/cam/image_raw",
+      "kind": "rgb",
+      "w": 1920,
+      "h": 1080,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_rs_h0.125_d2_000.png",
+      "view": "rs_h0.125_d2",
+      "topic": "/gzcam/rs_d2/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_rs_h0.125_d5_000.png",
+      "view": "rs_h0.125_d5",
+      "topic": "/gzcam/rs_d5/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_preset_h0.3_d5_000.png",
+      "view": "preset_h0.3_d5",
+      "topic": "/gzcam/h03_d5/cam/image_raw",
+      "kind": "rgb",
+      "w": 1920,
+      "h": 1080,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_preset_h0.3_d10_001.png",
+      "view": "preset_h0.3_d10",
+      "topic": "/gzcam/h03_d10/cam/image_raw",
+      "kind": "rgb",
+      "w": 1920,
+      "h": 1080,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_preset_h0.9_d2_001.png",
+      "view": "preset_h0.9_d2",
+      "topic": "/gzcam/h09_d2/cam/image_raw",
+      "kind": "rgb",
+      "w": 1920,
+      "h": 1080,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_preset_h0.9_d5_001.png",
+      "view": "preset_h0.9_d5",
+      "topic": "/gzcam/h09_d5/cam/image_raw",
+      "kind": "rgb",
+      "w": 1920,
+      "h": 1080,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_preset_h0.9_d10_001.png",
+      "view": "preset_h0.9_d10",
+      "topic": "/gzcam/h09_d10/cam/image_raw",
+      "kind": "rgb",
+      "w": 1920,
+      "h": 1080,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_extra_h0.3_d1.2_001.png",
+      "view": "extra_h0.3_d1.2",
+      "topic": "/gzcam/h03_d12/cam/image_raw",
+      "kind": "rgb",
+      "w": 1920,
+      "h": 1080,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_rs_h0.125_d2_001.png",
+      "view": "rs_h0.125_d2",
+      "topic": "/gzcam/rs_d2/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_rs_h0.125_d5_001.png",
+      "view": "rs_h0.125_d5",
+      "topic": "/gzcam/rs_d5/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_preset_h0.3_d2_000.png",
+      "view": "preset_h0.3_d2",
+      "topic": "/gzcam/h03_d2/cam/image_raw",
+      "kind": "rgb",
+      "w": 1920,
+      "h": 1080,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_preset_h0.3_d5_001.png",
+      "view": "preset_h0.3_d5",
+      "topic": "/gzcam/h03_d5/cam/image_raw",
+      "kind": "rgb",
+      "w": 1920,
+      "h": 1080,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_preset_h0.3_d10_002.png",
+      "view": "preset_h0.3_d10",
+      "topic": "/gzcam/h03_d10/cam/image_raw",
+      "kind": "rgb",
+      "w": 1920,
+      "h": 1080,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_preset_h0.9_d2_002.png",
+      "view": "preset_h0.9_d2",
+      "topic": "/gzcam/h09_d2/cam/image_raw",
+      "kind": "rgb",
+      "w": 1920,
+      "h": 1080,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_preset_h0.9_d5_002.png",
+      "view": "preset_h0.9_d5",
+      "topic": "/gzcam/h09_d5/cam/image_raw",
+      "kind": "rgb",
+      "w": 1920,
+      "h": 1080,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_preset_h0.9_d10_002.png",
+      "view": "preset_h0.9_d10",
+      "topic": "/gzcam/h09_d10/cam/image_raw",
+      "kind": "rgb",
+      "w": 1920,
+      "h": 1080,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_extra_h0.3_d1.2_002.png",
+      "view": "extra_h0.3_d1.2",
+      "topic": "/gzcam/h03_d12/cam/image_raw",
+      "kind": "rgb",
+      "w": 1920,
+      "h": 1080,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_rs_h0.125_d2_002.png",
+      "view": "rs_h0.125_d2",
+      "topic": "/gzcam/rs_d2/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_preset_h0.3_d5_002.png",
+      "view": "preset_h0.3_d5",
+      "topic": "/gzcam/h03_d5/cam/image_raw",
+      "kind": "rgb",
+      "w": 1920,
+      "h": 1080,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_rs_h0.125_d5_002.png",
+      "view": "rs_h0.125_d5",
+      "topic": "/gzcam/rs_d5/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_preset_h0.3_d2_001.png",
+      "view": "preset_h0.3_d2",
+      "topic": "/gzcam/h03_d2/cam/image_raw",
+      "kind": "rgb",
+      "w": 1920,
+      "h": 1080,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "gz_drop1_cap_preset_h0.3_d2_002.png",
+      "view": "preset_h0.3_d2",
+      "topic": "/gzcam/h03_d2/cam/image_raw",
+      "kind": "rgb",
+      "w": 1920,
+      "h": 1080,
+      "encoding": "rgb8"
+    }
+  ],
+  "cameras": {
+    "preset_h0.3_d2": {
+      "eye": [
+        10.0,
+        0.0,
+        0.3
+      ],
+      "pitch_deg": -10.0,
+      "hfov_deg": 60.0,
+      "res": [
+        1920,
+        1080
+      ],
+      "infer_photo_args": [
+        "--height 0.3",
+        "--pitch -10.0",
+        "--hfov 60.0",
+        "--fit squash"
+      ]
+    },
+    "preset_h0.3_d5": {
+      "eye": [
+        7.0,
+        0.0,
+        0.3
+      ],
+      "pitch_deg": -10.0,
+      "hfov_deg": 60.0,
+      "res": [
+        1920,
+        1080
+      ],
+      "infer_photo_args": [
+        "--height 0.3",
+        "--pitch -10.0",
+        "--hfov 60.0",
+        "--fit squash"
+      ]
+    },
+    "preset_h0.3_d10": {
+      "eye": [
+        2.0,
+        0.0,
+        0.3
+      ],
+      "pitch_deg": -10.0,
+      "hfov_deg": 60.0,
+      "res": [
+        1920,
+        1080
+      ],
+      "infer_photo_args": [
+        "--height 0.3",
+        "--pitch -10.0",
+        "--hfov 60.0",
+        "--fit squash"
+      ]
+    },
+    "preset_h0.9_d2": {
+      "eye": [
+        10.0,
+        0.0,
+        0.9
+      ],
+      "pitch_deg": -10.0,
+      "hfov_deg": 60.0,
+      "res": [
+        1920,
+        1080
+      ],
+      "infer_photo_args": [
+        "--height 0.9",
+        "--pitch -10.0",
+        "--hfov 60.0",
+        "--fit squash"
+      ]
+    },
+    "preset_h0.9_d5": {
+      "eye": [
+        7.0,
+        0.0,
+        0.9
+      ],
+      "pitch_deg": -10.0,
+      "hfov_deg": 60.0,
+      "res": [
+        1920,
+        1080
+      ],
+      "infer_photo_args": [
+        "--height 0.9",
+        "--pitch -10.0",
+        "--hfov 60.0",
+        "--fit squash"
+      ]
+    },
+    "preset_h0.9_d10": {
+      "eye": [
+        2.0,
+        0.0,
+        0.9
+      ],
+      "pitch_deg": -10.0,
+      "hfov_deg": 60.0,
+      "res": [
+        1920,
+        1080
+      ],
+      "infer_photo_args": [
+        "--height 0.9",
+        "--pitch -10.0",
+        "--hfov 60.0",
+        "--fit squash"
+      ]
+    },
+    "extra_h0.3_d1.2": {
+      "eye": [
+        10.8,
+        0.0,
+        0.3
+      ],
+      "pitch_deg": -10.0,
+      "hfov_deg": 60.0,
+      "res": [
+        1920,
+        1080
+      ],
+      "infer_photo_args": [
+        "--height 0.3",
+        "--pitch -10.0",
+        "--hfov 60.0",
+        "--fit squash"
+      ]
+    },
+    "rs_h0.125_d2": {
+      "eye": [
+        10.0,
+        0.0,
+        0.125
+      ],
+      "pitch_deg": -14.954,
+      "hfov_deg": 69.001,
+      "res": [
+        1280,
+        720
+      ],
+      "infer_photo_args": [
+        "--height 0.125",
+        "--pitch -14.954",
+        "--hfov 69.001",
+        "--fit squash"
+      ]
+    },
+    "rs_h0.125_d5": {
+      "eye": [
+        7.0,
+        0.0,
+        0.125
+      ],
+      "pitch_deg": -14.954,
+      "hfov_deg": 69.001,
+      "res": [
+        1280,
+        720
+      ],
+      "infer_photo_args": [
+        "--height 0.125",
+        "--pitch -14.954",
+        "--hfov 69.001",
+        "--fit squash"
+      ]
+    }
+  }
+}

@@ -1,4 +1,5 @@
 # NegObs 프로젝트 상태·온보딩 문서 — 2026-08-23
+> **【대체 배너 · 2026-08-23 추가 · append-only】 본 문서는 `PROJECT_STATE_0823_v2.md`로 대체됨** (DZ §12-8). 분모·모집단은 `experiments/v3_0823/ACCOUNTING.md` 단일 참조.
 (새 세션 온보딩 정본. 이 문서만 읽으면 현재 맥락에서 대화를 이어갈 수 있다.
 대상: 프로젝트를 처음 보는 Claude AI / Claude Code / 사람. 권장 위치: `Docs/experiment/Status/`)
 

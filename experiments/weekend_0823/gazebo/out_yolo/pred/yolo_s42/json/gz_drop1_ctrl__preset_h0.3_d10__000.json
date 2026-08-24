@@ -1,0 +1,31 @@
+{
+ "frame": "experiments/weekend_0823/gazebo/frames/gz_drop1_ctrl/gz_drop1_ctrl_cap_preset_h0.3_d10_000.png",
+ "world": "gz_drop1_ctrl",
+ "view": "preset_h0.3_d10",
+ "idx": "000",
+ "img_w": 1920,
+ "img_h": 1080,
+ "seed": 42,
+ "imgsz": 512,
+ "pred_conf_floor": 0.05,
+ "tau_op": 0.25,
+ "class_names": {
+  "0": "hazard_opening"
+ },
+ "n_boxes_floor": 1,
+ "n_boxes_tau": 0,
+ "boxes": [
+  {
+   "cls": 0,
+   "cx": 0.4927981197834015,
+   "cy": 0.2792486548423767,
+   "w": 0.37665289640426636,
+   "h": 0.5584973096847534,
+   "conf": 0.21264925599098206,
+   "x0": 584.5855712890625,
+   "y0": 0.0,
+   "x1": 1307.7591552734375,
+   "y1": 603.1770629882812
+  }
+ ]
+}

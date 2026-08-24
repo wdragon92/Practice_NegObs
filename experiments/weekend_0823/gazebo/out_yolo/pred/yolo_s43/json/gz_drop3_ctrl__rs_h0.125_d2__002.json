@@ -1,0 +1,18 @@
+{
+ "frame": "experiments/weekend_0823/gazebo/frames/gz_drop3_ctrl/gz_drop3_ctrl_cap_rs_h0.125_d2_002.png",
+ "world": "gz_drop3_ctrl",
+ "view": "rs_h0.125_d2",
+ "idx": "002",
+ "img_w": 1280,
+ "img_h": 720,
+ "seed": 43,
+ "imgsz": 512,
+ "pred_conf_floor": 0.05,
+ "tau_op": 0.25,
+ "class_names": {
+  "0": "hazard_opening"
+ },
+ "n_boxes_floor": 0,
+ "n_boxes_tau": 0,
+ "boxes": []
+}

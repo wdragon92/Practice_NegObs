@@ -1,0 +1,19 @@
+{
+ "seed": 42,
+ "weights": "experiments/dayrun_0820/runs/yolo_s42/weights/best.pt",
+ "weights_sha256_16": "58ffa5cb34fc3092",
+ "n_frames": 216,
+ "device": "cpu",
+ "imgsz": 512,
+ "pred_conf_floor": 0.05,
+ "tau_op": 0.25,
+ "max_det": 300,
+ "ultralytics": "8.4.123",
+ "torch": "2.13.0+cu130",
+ "python": "3.10.12",
+ "wall_s": 5.5,
+ "created": "2026-08-24T12:51:53",
+ "n_boxes_floor": 69,
+ "n_boxes_tau": 6,
+ "n_frames_with_box_tau": 6
+}

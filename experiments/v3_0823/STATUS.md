@@ -118,3 +118,7 @@
 - 산출: `dataset_manifest_v3.json`·`split_v3.json`·`corpus_v3_quarantine.json`·`corpus_v3_census.json`
   · `code/{build_corpus_v3,corpus_v3_measure}.py` · `cue_extent_audit.py` 등록부 3건 갱신.
 - **훈련 착수 게이트 2/5 미달** — VG-09(`OPEN-3`) · k 봉인(`OPEN-1`). 둘 다 렌더 ≤0.3 GPU-h.
+
+## 월 밤 — 창 종료 (D95)
+- MORNING_REPORT_V3 착지·커밋. 판정 예비 미달(악화 0)·결재란 19건 대기. 모든 트랙 정지,
+  GPU 유휴. 다음 개시는 승용 결재 후.

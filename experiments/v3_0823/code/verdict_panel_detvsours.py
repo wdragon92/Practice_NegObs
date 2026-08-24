@@ -11,7 +11,8 @@
 
   (1) 입력 + 정답(GT)      — 원본 컷 + GT-양성 칸의 지면 쐐기(초록 파선) + 층(V/H/E) 배지
   (2) 검출기의 눈 (YOLO)   — 같은 컷 + **동결 예측 상자** (τ_conf 0.25) 그대로.
-                             상자가 없으면 아무것도 그리지 않고 「검출 0건」 칩만 찍는다.
+                             상자가 없으면 아무것도 그리지 않고, 3열과 같은 문법의
+                             좌상단 「검출 0건 · 상자 없음」 칩 + 좌하단 주석만 남긴다.
   (3) 본 접근의 눈 (칸 확률) — 같은 컷 + 20칸 확률 히트 (inferno 램프),
                              발화 칸(p ≥ 0.5) 흰 실선, GT 칸 초록 파선.
 
@@ -399,13 +400,14 @@ def col_yolo(ax, r, fr, cam, img):
         _chip(ax, .014, .972, f"검출 {len(r['boxes'])}건  ·  정답칸 정합 "
                               f"{len(r['yolo_hit_cells'])}칸", BOXCOL, fs=10.0)
     else:
-        ax.text(.5, .50, "검출 0건", transform=ax.transAxes, ha="center", va="center",
-                fontsize=25, color="white", fontweight="bold", zorder=9,
-                bbox=dict(fc="#000000", ec=BOXCOL, lw=2.6, pad=11, alpha=.80))
-        ax.text(.5, .335, "동결 예측 파일 없음  ·  τ_conf 0.25 이상 상자 0개",
-                transform=ax.transAxes, ha="center", va="center", fontsize=8.8,
+        # 08-24 절제 수정: 화면 한복판의 대형 「검출 0건」 낙관(stamp)을 걷어내고,
+        # 3열이 쓰는 것과 **같은 문법**(좌상단 상태 칩 + 좌하단 작은 주석)으로 바꾼다.
+        # 사실은 하나도 안 줄었다 — 크기만 줄었다.
+        _chip(ax, .014, .972, "검출 0건  ·  상자 없음", BOXCOL, fs=10.0)
+        ax.text(.014, .030, "동결 예측 파일 없음  ·  τ_conf 0.25 이상 상자 0개",
+                transform=ax.transAxes, ha="left", va="bottom", fontsize=8.0,
                 color="white", zorder=9,
-                bbox=dict(fc="#000000", ec="none", pad=3.2, alpha=.62))
+                bbox=dict(fc="#000000", ec="none", pad=2.6, alpha=.62))
     ax.text(.986, .030, "yolo_s42 · pred_test 동결 · τ_conf 0.25",
             transform=ax.transAxes, ha="right", va="bottom", fontsize=7.2,
             color="white", zorder=9,
@@ -600,6 +602,7 @@ def selfcheck(fig, tiles, cax):
     있어야 한다.  하나라도 어기면 저장하지 않고 죽는다.
     """
     from matplotlib.image import AxesImage
+    from matplotlib.text import Text
     if len(tiles) != 12:
         raise SystemExit(f"[fatal] 타일 {len(tiles)}개 != 12")
     if len(fig.axes) != 13:                 # 12 타일 + 램프 1
@@ -626,6 +629,19 @@ def selfcheck(fig, tiles, cax):
             raise SystemExit(f"[fatal] 타일({k},{j}) 오버레이 부족 {got} < {need}")
         if j == 1 and not r["boxes"] and nrect:
             raise SystemExit(f"[fatal] 타일({k},{j}) 상자 0개여야 하는데 {nrect}개 그렸다")
+        # 상자 0건 타일은 **비어 보이면 안 된다** — 좌상단 상태 칩 + 좌하단 주석이
+        # 반드시 있어야 하고(옛 대형 낙관을 대신한다), 대형 낙관은 되살아나면 안 된다.
+        if j == 1 and not r["boxes"]:
+            txts = [a for a in ax.get_children()
+                    if isinstance(a, Text) and a.get_text().strip()]
+            s = [a.get_text() for a in txts]
+            if not any(t.startswith("검출 0건") for t in s):
+                raise SystemExit(f"[fatal] 타일({k},{j}) 「검출 0건」 상태 칩이 없다")
+            if not any(t.startswith("동결 예측 파일 없음") for t in s):
+                raise SystemExit(f"[fatal] 타일({k},{j}) 상자 0건 주석 줄이 없다")
+            big = [(a.get_text(), a.get_fontsize()) for a in txts if a.get_fontsize() > 12]
+            if big:
+                raise SystemExit(f"[fatal] 타일({k},{j}) 대형 낙관이 되살아났다: {big}")
     print(f"[gate] 자기점검 통과 — 12/12 타일에 실사 이미지 + 열별 오버레이 존재 "
           f"(축 {len(fig.axes)}개 = 타일 12 + 램프 1)")
 

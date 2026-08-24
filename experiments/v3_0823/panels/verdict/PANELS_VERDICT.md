@@ -94,3 +94,28 @@
 | C·D팔 GT = 사양 상수 전 칸 음성 | (a)(b)(c) 타일 캡션과 4개 푸터 전부에 명시 |
 | PNG ≤ 2 MB | panel_a_fourarm.png 1507 KB · panel_b_dash1_exemplars.png 1833 KB · panel_c_ncue_trap.png 632 KB · panel_d_before_after.png 606 KB |
 
+
+---
+
+## 6. `panel_e_family_strata.png` — 계기판② FA 5가족 층화 (**V-3 이행 · 08-24 추가**)
+
+- **생성기** `experiments/v3_0823/code/verdict_panel_family.py` (원장 = `verdict_fa_family.json`)
+  ```bash
+  PYTHONNOUSERSITE=1 CUDA_VISIBLE_DEVICES= \
+    python3 experiments/v3_0823/code/verdict_panel_family.py
+  ```
+- **크기** 2228×1618 px · 407 KB (≤ 2 MB 규율 준수)
+- **본문** `VERDICT_V3.md §15` · **의무 출처** `PREREG_V3.md §2.2` 「층화」행 · **P-12**
+
+| 칸 | 무엇을 보이나 | 축 · 규약 |
+|---|---|---|
+| 상단 3칸 | 팔 **B · C · D 각각**의 5가족 before(v2)/after(v3-A) | 세로축 = **노출 정규화 발화율** `FA(가족) / (그 가족의 위험노출 칸 × 런)` — 가족마다 분모가 다르므로 물량 막대가 아니다. 오차막대 = **σ(ddof=1, 3시드)**. 막대 위 숫자 = Δ (초록 = 감소) |
+| 하단 좌·중 | C팔·D팔 「칸/FA프레임」 Δ 의 **shift-share** 분해 | **규모항**(FA 프레임 수 변화) + **조성항**(그 가족의 칸 수 변화) = Δ · 항등 검산 통과. 가족명 아래 = 절대 칸 수 v2 → v3-A (시드 합산 · 배타 귀속) |
+| 하단 우 | C팔 밴드 반경 법칙 (log-log) | `FA_CENSUS §3.3` 의 test-core `R^1.98` 이 미학습 무대에서 재현되는가 — v2 **+2.07** / v3-A **+1.62** |
+
+- **층을 절대 합치지 않는다** — B·C·D 는 분모도 의미도 다르다. A팔은 **참고행**이라 패널에 넣지 않았다.
+- **세대 비교는 rgb 대 rgb (3런 대 3런)** — v2 9런 풀링은 `§15.8` 에 별도 블록으로만 있다.
+- **σ 초과 가족 0/15** 을 부제에 못박았다 — 층화는 **인쇄 의무이지 판정 축이 아니다** (`§6-1`).
+- **장식형의 계측기가 test-core 와 다르다**(`[수동]` → `[기계]`, `.idseg.npz` + VG-09 귀속기).
+  푸터에 그대로 적었고, 두 무대의 장식형 수치를 잇는 문장은 본문·패널 어디에도 없다.
+- **D팔 장식형은 "0" 이 아니라 "노출 0 (정의상 산출 불가)"** 로 칠했다 — D팔은 단서 프림 화소가 실측 0 이다.

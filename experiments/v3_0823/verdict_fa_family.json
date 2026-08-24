@@ -1,0 +1,4716 @@
+{
+ "doc": "계기판② FA 5가족 층화 (V-3 이행) — test-ext 4팔 · v2 9런 / v3-A 3런",
+ "obligation": "PREREG_V3 §2.2 「층화」행 · P-12 · VERDICT_V3 §13 V-3",
+ "stage": "test-ext (평가 전용 4팔) · 576+576 컷 · 학습 미노출",
+ "unit": "1 FA 사건 = (세대, 런, 팔, 프레임, 칸) · score ≥ τ_op 0.5 ∧ GT == 0",
+ "strata": "팔 = 층. B·C·D 절대 합산 금지. A 는 참고행(판정 미산입).",
+ "generations_comparable": "rgb 대 rgb (3런 대 3런). v2 9런 풀링은 별도 블록.",
+ "date": "2026-08-24",
+ "params": {
+  "LINE_P90": 0.1406,
+  "LINE_P75": 0.0664,
+  "LINE_P95": 0.2327,
+  "LIGHT_RATIO": 0.6,
+  "LIGHT_SENS": [
+   0.5,
+   0.7
+  ],
+  "DECO_PX": 20,
+  "DECO_SENS": [
+   5,
+   80
+  ],
+  "SAT_RATE": 0.8,
+  "tau_op": 0.5,
+  "outer_band": "3b",
+  "edge_sectors": [
+   "A",
+   "E"
+  ],
+  "priority": [
+   "장식형",
+   "대리선형",
+   "조명형",
+   "지형통계형",
+   "경계칸형"
+  ]
+ },
+ "recon": {
+  "v2|rgb_s42|AC": {
+   "tau_op": 0.5,
+   "arm_off": "C",
+   "arm_on": "A",
+   "off_frames": 288,
+   "off_fired_frames": 213,
+   "off_fired_cells": 1029,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 685,
+   "recount_frame_fa_off": 0.7395833333333334,
+   "recount_cell_fpr_off": 0.17864583333333334,
+   "recount_cell_fpr_on_neg": 0.15021929824561403,
+   "pub_frame_fa_off": 0.7395833333333334,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.17864583333333334,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.15021929824561403,
+   "match_cell_fpr_on_neg": true
+  },
+  "v2|rgb_s42|BD": {
+   "tau_op": 0.5,
+   "arm_off": "D",
+   "arm_on": "B",
+   "off_frames": 288,
+   "off_fired_frames": 15,
+   "off_fired_cells": 33,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 96,
+   "recount_frame_fa_off": 0.052083333333333336,
+   "recount_cell_fpr_off": 0.005729166666666666,
+   "recount_cell_fpr_on_neg": 0.021052631578947368,
+   "pub_frame_fa_off": 0.052083333333333336,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.005729166666666666,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.021052631578947368,
+   "match_cell_fpr_on_neg": true
+  },
+  "v2|rgb_s43|AC": {
+   "tau_op": 0.5,
+   "arm_off": "C",
+   "arm_on": "A",
+   "off_frames": 288,
+   "off_fired_frames": 216,
+   "off_fired_cells": 748,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 361,
+   "recount_frame_fa_off": 0.75,
+   "recount_cell_fpr_off": 0.12986111111111112,
+   "recount_cell_fpr_on_neg": 0.07916666666666666,
+   "pub_frame_fa_off": 0.75,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.12986111111111112,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.07916666666666666,
+   "match_cell_fpr_on_neg": true
+  },
+  "v2|rgb_s43|BD": {
+   "tau_op": 0.5,
+   "arm_off": "D",
+   "arm_on": "B",
+   "off_frames": 288,
+   "off_fired_frames": 65,
+   "off_fired_cells": 417,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 150,
+   "recount_frame_fa_off": 0.22569444444444445,
+   "recount_cell_fpr_off": 0.07239583333333334,
+   "recount_cell_fpr_on_neg": 0.03289473684210526,
+   "pub_frame_fa_off": 0.22569444444444445,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.07239583333333334,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.03289473684210526,
+   "match_cell_fpr_on_neg": true
+  },
+  "v2|rgb_s44|AC": {
+   "tau_op": 0.5,
+   "arm_off": "C",
+   "arm_on": "A",
+   "off_frames": 288,
+   "off_fired_frames": 132,
+   "off_fired_cells": 311,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 229,
+   "recount_frame_fa_off": 0.4583333333333333,
+   "recount_cell_fpr_off": 0.05399305555555556,
+   "recount_cell_fpr_on_neg": 0.05021929824561404,
+   "pub_frame_fa_off": 0.4583333333333333,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.05399305555555556,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.05021929824561404,
+   "match_cell_fpr_on_neg": true
+  },
+  "v2|rgb_s44|BD": {
+   "tau_op": 0.5,
+   "arm_off": "D",
+   "arm_on": "B",
+   "off_frames": 288,
+   "off_fired_frames": 4,
+   "off_fired_cells": 14,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 40,
+   "recount_frame_fa_off": 0.013888888888888888,
+   "recount_cell_fpr_off": 0.0024305555555555556,
+   "recount_cell_fpr_on_neg": 0.008771929824561403,
+   "pub_frame_fa_off": 0.013888888888888888,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.0024305555555555556,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.008771929824561403,
+   "match_cell_fpr_on_neg": true
+  },
+  "v2|depth_s42|AC": {
+   "tau_op": 0.5,
+   "arm_off": "C",
+   "arm_on": "A",
+   "off_frames": 288,
+   "off_fired_frames": 84,
+   "off_fired_cells": 816,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 459,
+   "recount_frame_fa_off": 0.2916666666666667,
+   "recount_cell_fpr_off": 0.14166666666666666,
+   "recount_cell_fpr_on_neg": 0.1006578947368421,
+   "pub_frame_fa_off": 0.2916666666666667,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.14166666666666666,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.1006578947368421,
+   "match_cell_fpr_on_neg": true
+  },
+  "v2|depth_s42|BD": {
+   "tau_op": 0.5,
+   "arm_off": "D",
+   "arm_on": "B",
+   "off_frames": 288,
+   "off_fired_frames": 48,
+   "off_fired_cells": 642,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 423,
+   "recount_frame_fa_off": 0.16666666666666666,
+   "recount_cell_fpr_off": 0.11145833333333334,
+   "recount_cell_fpr_on_neg": 0.09276315789473684,
+   "pub_frame_fa_off": 0.16666666666666666,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.11145833333333334,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.09276315789473684,
+   "match_cell_fpr_on_neg": true
+  },
+  "v2|depth_s43|AC": {
+   "tau_op": 0.5,
+   "arm_off": "C",
+   "arm_on": "A",
+   "off_frames": 288,
+   "off_fired_frames": 75,
+   "off_fired_cells": 834,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 438,
+   "recount_frame_fa_off": 0.2604166666666667,
+   "recount_cell_fpr_off": 0.14479166666666668,
+   "recount_cell_fpr_on_neg": 0.09605263157894736,
+   "pub_frame_fa_off": 0.2604166666666667,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.14479166666666668,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.09605263157894736,
+   "match_cell_fpr_on_neg": true
+  },
+  "v2|depth_s43|BD": {
+   "tau_op": 0.5,
+   "arm_off": "D",
+   "arm_on": "B",
+   "off_frames": 288,
+   "off_fired_frames": 54,
+   "off_fired_cells": 681,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 447,
+   "recount_frame_fa_off": 0.1875,
+   "recount_cell_fpr_off": 0.11822916666666666,
+   "recount_cell_fpr_on_neg": 0.09802631578947368,
+   "pub_frame_fa_off": 0.1875,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.11822916666666666,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.09802631578947368,
+   "match_cell_fpr_on_neg": true
+  },
+  "v2|depth_s44|AC": {
+   "tau_op": 0.5,
+   "arm_off": "C",
+   "arm_on": "A",
+   "off_frames": 288,
+   "off_fired_frames": 66,
+   "off_fired_cells": 546,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 234,
+   "recount_frame_fa_off": 0.22916666666666666,
+   "recount_cell_fpr_off": 0.09479166666666666,
+   "recount_cell_fpr_on_neg": 0.05131578947368421,
+   "pub_frame_fa_off": 0.22916666666666666,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.09479166666666666,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.05131578947368421,
+   "match_cell_fpr_on_neg": true
+  },
+  "v2|depth_s44|BD": {
+   "tau_op": 0.5,
+   "arm_off": "D",
+   "arm_on": "B",
+   "off_frames": 288,
+   "off_fired_frames": 51,
+   "off_fired_cells": 579,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 354,
+   "recount_frame_fa_off": 0.17708333333333334,
+   "recount_cell_fpr_off": 0.10052083333333334,
+   "recount_cell_fpr_on_neg": 0.07763157894736843,
+   "pub_frame_fa_off": 0.17708333333333334,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.10052083333333334,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.07763157894736843,
+   "match_cell_fpr_on_neg": true
+  },
+  "v2|b2_s42|AC": {
+   "tau_op": 0.5,
+   "arm_off": "C",
+   "arm_on": "A",
+   "off_frames": 288,
+   "off_fired_frames": 153,
+   "off_fired_cells": 440,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 474,
+   "recount_frame_fa_off": 0.53125,
+   "recount_cell_fpr_off": 0.0763888888888889,
+   "recount_cell_fpr_on_neg": 0.10394736842105264,
+   "pub_frame_fa_off": 0.53125,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.0763888888888889,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.10394736842105264,
+   "match_cell_fpr_on_neg": true
+  },
+  "v2|b2_s42|BD": {
+   "tau_op": 0.5,
+   "arm_off": "D",
+   "arm_on": "B",
+   "off_frames": 288,
+   "off_fired_frames": 15,
+   "off_fired_cells": 62,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 90,
+   "recount_frame_fa_off": 0.052083333333333336,
+   "recount_cell_fpr_off": 0.010763888888888889,
+   "recount_cell_fpr_on_neg": 0.019736842105263157,
+   "pub_frame_fa_off": 0.052083333333333336,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.010763888888888889,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.019736842105263157,
+   "match_cell_fpr_on_neg": true
+  },
+  "v2|b2_s43|AC": {
+   "tau_op": 0.5,
+   "arm_off": "C",
+   "arm_on": "A",
+   "off_frames": 288,
+   "off_fired_frames": 255,
+   "off_fired_cells": 1588,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 1074,
+   "recount_frame_fa_off": 0.8854166666666666,
+   "recount_cell_fpr_off": 0.27569444444444446,
+   "recount_cell_fpr_on_neg": 0.2355263157894737,
+   "pub_frame_fa_off": 0.8854166666666666,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.27569444444444446,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.2355263157894737,
+   "match_cell_fpr_on_neg": true
+  },
+  "v2|b2_s43|BD": {
+   "tau_op": 0.5,
+   "arm_off": "D",
+   "arm_on": "B",
+   "off_frames": 288,
+   "off_fired_frames": 23,
+   "off_fired_cells": 61,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 24,
+   "recount_frame_fa_off": 0.0798611111111111,
+   "recount_cell_fpr_off": 0.010590277777777778,
+   "recount_cell_fpr_on_neg": 0.005263157894736842,
+   "pub_frame_fa_off": 0.0798611111111111,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.010590277777777778,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.005263157894736842,
+   "match_cell_fpr_on_neg": true
+  },
+  "v2|b2_s44|AC": {
+   "tau_op": 0.5,
+   "arm_off": "C",
+   "arm_on": "A",
+   "off_frames": 288,
+   "off_fired_frames": 135,
+   "off_fired_cells": 489,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 401,
+   "recount_frame_fa_off": 0.46875,
+   "recount_cell_fpr_off": 0.08489583333333334,
+   "recount_cell_fpr_on_neg": 0.08793859649122807,
+   "pub_frame_fa_off": 0.46875,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.08489583333333334,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.08793859649122807,
+   "match_cell_fpr_on_neg": true
+  },
+  "v2|b2_s44|BD": {
+   "tau_op": 0.5,
+   "arm_off": "D",
+   "arm_on": "B",
+   "off_frames": 288,
+   "off_fired_frames": 29,
+   "off_fired_cells": 103,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 108,
+   "recount_frame_fa_off": 0.10069444444444445,
+   "recount_cell_fpr_off": 0.017881944444444443,
+   "recount_cell_fpr_on_neg": 0.02368421052631579,
+   "pub_frame_fa_off": 0.10069444444444445,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.017881944444444443,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.02368421052631579,
+   "match_cell_fpr_on_neg": true
+  },
+  "v3a|rgb_s42|AC": {
+   "tau_op": 0.5,
+   "arm_off": "C",
+   "arm_on": "A",
+   "off_frames": 288,
+   "off_fired_frames": 172,
+   "off_fired_cells": 1067,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 820,
+   "recount_frame_fa_off": 0.5972222222222222,
+   "recount_cell_fpr_off": 0.18524305555555556,
+   "recount_cell_fpr_on_neg": 0.17982456140350878,
+   "pub_frame_fa_off": 0.5972222222222222,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.18524305555555556,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.17982456140350878,
+   "match_cell_fpr_on_neg": true
+  },
+  "v3a|rgb_s42|BD": {
+   "tau_op": 0.5,
+   "arm_off": "D",
+   "arm_on": "B",
+   "off_frames": 288,
+   "off_fired_frames": 65,
+   "off_fired_cells": 124,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 88,
+   "recount_frame_fa_off": 0.22569444444444445,
+   "recount_cell_fpr_off": 0.021527777777777778,
+   "recount_cell_fpr_on_neg": 0.01929824561403509,
+   "pub_frame_fa_off": 0.22569444444444445,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.021527777777777778,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.01929824561403509,
+   "match_cell_fpr_on_neg": true
+  },
+  "v3a|rgb_s43|AC": {
+   "tau_op": 0.5,
+   "arm_off": "C",
+   "arm_on": "A",
+   "off_frames": 288,
+   "off_fired_frames": 88,
+   "off_fired_cells": 518,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 402,
+   "recount_frame_fa_off": 0.3055555555555556,
+   "recount_cell_fpr_off": 0.08993055555555556,
+   "recount_cell_fpr_on_neg": 0.0881578947368421,
+   "pub_frame_fa_off": 0.3055555555555556,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.08993055555555556,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.0881578947368421,
+   "match_cell_fpr_on_neg": true
+  },
+  "v3a|rgb_s43|BD": {
+   "tau_op": 0.5,
+   "arm_off": "D",
+   "arm_on": "B",
+   "off_frames": 288,
+   "off_fired_frames": 8,
+   "off_fired_cells": 41,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 70,
+   "recount_frame_fa_off": 0.027777777777777776,
+   "recount_cell_fpr_off": 0.007118055555555555,
+   "recount_cell_fpr_on_neg": 0.015350877192982455,
+   "pub_frame_fa_off": 0.027777777777777776,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.007118055555555555,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.015350877192982455,
+   "match_cell_fpr_on_neg": true
+  },
+  "v3a|rgb_s44|AC": {
+   "tau_op": 0.5,
+   "arm_off": "C",
+   "arm_on": "A",
+   "off_frames": 288,
+   "off_fired_frames": 71,
+   "off_fired_cells": 404,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 197,
+   "recount_frame_fa_off": 0.2465277777777778,
+   "recount_cell_fpr_off": 0.07013888888888889,
+   "recount_cell_fpr_on_neg": 0.043201754385964915,
+   "pub_frame_fa_off": 0.2465277777777778,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.07013888888888889,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.043201754385964915,
+   "match_cell_fpr_on_neg": true
+  },
+  "v3a|rgb_s44|BD": {
+   "tau_op": 0.5,
+   "arm_off": "D",
+   "arm_on": "B",
+   "off_frames": 288,
+   "off_fired_frames": 22,
+   "off_fired_cells": 39,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 75,
+   "recount_frame_fa_off": 0.0763888888888889,
+   "recount_cell_fpr_off": 0.0067708333333333336,
+   "recount_cell_fpr_on_neg": 0.01644736842105263,
+   "pub_frame_fa_off": 0.0763888888888889,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.0067708333333333336,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.01644736842105263,
+   "match_cell_fpr_on_neg": true
+  },
+  "v3a|rgb_s42_aux|AC": {
+   "tau_op": 0.5,
+   "arm_off": "C",
+   "arm_on": "A",
+   "off_frames": 288,
+   "off_fired_frames": 156,
+   "off_fired_cells": 1094,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 578,
+   "recount_frame_fa_off": 0.5416666666666666,
+   "recount_cell_fpr_off": 0.18993055555555555,
+   "recount_cell_fpr_on_neg": 0.1267543859649123,
+   "pub_frame_fa_off": 0.5416666666666666,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.18993055555555555,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.1267543859649123,
+   "match_cell_fpr_on_neg": true
+  },
+  "v3a|rgb_s42_aux|BD": {
+   "tau_op": 0.5,
+   "arm_off": "D",
+   "arm_on": "B",
+   "off_frames": 288,
+   "off_fired_frames": 46,
+   "off_fired_cells": 174,
+   "off_cells": 5760,
+   "off_gt_nonzero": 0,
+   "on_frames": 288,
+   "on_neg_cells": 4560,
+   "on_neg_fired": 123,
+   "recount_frame_fa_off": 0.1597222222222222,
+   "recount_cell_fpr_off": 0.030208333333333334,
+   "recount_cell_fpr_on_neg": 0.026973684210526316,
+   "pub_frame_fa_off": 0.1597222222222222,
+   "match_frame_fa_off": true,
+   "pub_cell_fpr_off": 0.030208333333333334,
+   "match_cell_fpr_off": true,
+   "pub_cell_fpr_on_neg": 0.026973684210526316,
+   "match_cell_fpr_on_neg": true
+  }
+ },
+ "recon_summary": {
+  "n_dumps": 26,
+  "n_mismatch": 0,
+  "off_gt_nonzero_total": 0,
+  "n_checks": 78,
+  "n_checks_matched": 78
+ },
+ "exposure": {
+  "A": {
+   "n_cells": 4560,
+   "n_frames": 228,
+   "n_deco": 1050,
+   "n_terr": 951,
+   "n_light": 414,
+   "n_surr": 172,
+   "n_bnd": 2289,
+   "n_bnd_band": 780,
+   "n_bnd_sector": 1788,
+   "n_terr_p12": 1611,
+   "n_bnd_p12": 1788
+  },
+  "B": {
+   "n_cells": 4560,
+   "n_frames": 228,
+   "n_deco": 69,
+   "n_terr": 990,
+   "n_light": 136,
+   "n_surr": 121,
+   "n_bnd": 2289,
+   "n_bnd_band": 780,
+   "n_bnd_sector": 1788,
+   "n_terr_p12": 1650,
+   "n_bnd_p12": 1788
+  },
+  "C": {
+   "n_cells": 5760,
+   "n_frames": 288,
+   "n_deco": 1518,
+   "n_terr": 1062,
+   "n_light": 531,
+   "n_surr": 648,
+   "n_bnd": 3168,
+   "n_bnd_band": 1440,
+   "n_bnd_sector": 2304,
+   "n_terr_p12": 2274,
+   "n_bnd_p12": 2304
+  },
+  "D": {
+   "n_cells": 5760,
+   "n_frames": 288,
+   "n_deco": 0,
+   "n_terr": 1182,
+   "n_light": 131,
+   "n_surr": 143,
+   "n_bnd": 3168,
+   "n_bnd_band": 1440,
+   "n_bnd_sector": 2304,
+   "n_terr_p12": 2367,
+   "n_bnd_p12": 2304
+  }
+ },
+ "tableA": {
+  "v2_rgb": {
+   "A": {
+    "n_runs": 3,
+    "n_events": 1275,
+    "n_risk_cells": 4560,
+    "fa_rate": 0.09320175438596491,
+    "n_frames_fired": 414,
+    "unclassified": 262,
+    "multi": 428,
+    "mean_families": 1.2823529411764707,
+    "fams": {
+     "장식형": {
+      "n": 389,
+      "p_fa": 0.3050980392156863,
+      "n_risk": 1050,
+      "p_risk": 0.23026315789473684,
+      "lift": 1.324997198879552,
+      "rate": 0.12349206349206349,
+      "n_raw": 389,
+      "primary": 389
+     },
+     "지형통계형": {
+      "n": 764,
+      "p_fa": 0.5992156862745098,
+      "n_risk": 1611,
+      "p_risk": 0.35328947368421054,
+      "lift": 1.6961039909446087,
+      "rate": 0.1580798675770743,
+      "n_raw": 136,
+      "primary": 499
+     },
+     "조명형": {
+      "n": 188,
+      "p_fa": 0.14745098039215687,
+      "n_risk": 414,
+      "p_risk": 0.09078947368421053,
+      "lift": 1.6240977550440465,
+      "rate": 0.15136876006441224,
+      "n_raw": 188,
+      "primary": 49
+     },
+     "대리선형": {
+      "n": 63,
+      "p_fa": 0.04941176470588235,
+      "n_risk": 172,
+      "p_risk": 0.037719298245614034,
+      "lift": 1.309986320109439,
+      "rate": 0.12209302325581395,
+      "n_raw": 63,
+      "primary": 33
+     },
+     "경계칸형": {
+      "n": 231,
+      "p_fa": 0.1811764705882353,
+      "n_risk": 1788,
+      "p_risk": 0.39210526315789473,
+      "lift": 0.46206079747335177,
+      "rate": 0.043064876957494405,
+      "n_raw": 864,
+      "primary": 43
+     }
+    },
+    "primary_unclassified": 262,
+    "bnd_band": 714,
+    "bnd_sector": 231,
+    "surrogate_weak": 20,
+    "prior_saturated": 0,
+    "unseen": 136,
+    "sens": {
+     "light_50": 116,
+     "light_70": 240,
+     "deco_5": 393,
+     "deco_80": 352
+    }
+   },
+   "B": {
+    "n_runs": 3,
+    "n_events": 286,
+    "n_risk_cells": 4560,
+    "fa_rate": 0.020906432748538012,
+    "n_frames_fired": 106,
+    "unclassified": 133,
+    "multi": 8,
+    "mean_families": 0.5629370629370629,
+    "fams": {
+     "장식형": {
+      "n": 0,
+      "p_fa": 0.0,
+      "n_risk": 69,
+      "p_risk": 0.015131578947368421,
+      "lift": 0.0,
+      "rate": 0.0,
+      "n_raw": 0,
+      "primary": 0
+     },
+     "지형통계형": {
+      "n": 65,
+      "p_fa": 0.22727272727272727,
+      "n_risk": 1650,
+      "p_risk": 0.3618421052631579,
+      "lift": 0.6280991735537189,
+      "rate": 0.013131313131313131,
+      "n_raw": 13,
+      "primary": 65
+     },
+     "조명형": {
+      "n": 0,
+      "p_fa": 0.0,
+      "n_risk": 136,
+      "p_risk": 0.02982456140350877,
+      "lift": 0.0,
+      "rate": 0.0,
+      "n_raw": 0,
+      "primary": 0
+     },
+     "대리선형": {
+      "n": 0,
+      "p_fa": 0.0,
+      "n_risk": 121,
+      "p_risk": 0.026535087719298245,
+      "lift": 0.0,
+      "rate": 0.0,
+      "n_raw": 0,
+      "primary": 0
+     },
+     "경계칸형": {
+      "n": 96,
+      "p_fa": 0.3356643356643357,
+      "n_risk": 1788,
+      "p_risk": 0.39210526315789473,
+      "lift": 0.8560566949828695,
+      "rate": 0.017897091722595078,
+      "n_raw": 143,
+      "primary": 88
+     }
+    },
+    "primary_unclassified": 133,
+    "bnd_band": 54,
+    "bnd_sector": 96,
+    "surrogate_weak": 0,
+    "prior_saturated": 0,
+    "unseen": 13,
+    "sens": {
+     "light_50": 0,
+     "light_70": 0,
+     "deco_5": 0,
+     "deco_80": 0
+    }
+   },
+   "C": {
+    "n_runs": 3,
+    "n_events": 2088,
+    "n_risk_cells": 5760,
+    "fa_rate": 0.12083333333333333,
+    "n_frames_fired": 561,
+    "unclassified": 339,
+    "multi": 810,
+    "mean_families": 1.407088122605364,
+    "fams": {
+     "장식형": {
+      "n": 637,
+      "p_fa": 0.30507662835249044,
+      "n_risk": 1518,
+      "p_risk": 0.2635416666666667,
+      "lift": 1.1576030166734814,
+      "rate": 0.139877031181379,
+      "n_raw": 637,
+      "primary": 637
+     },
+     "지형통계형": {
+      "n": 1335,
+      "p_fa": 0.639367816091954,
+      "n_risk": 2274,
+      "p_risk": 0.39479166666666665,
+      "lift": 1.6195068692566645,
+      "rate": 0.19569041336851364,
+      "n_raw": 181,
+      "primary": 907
+     },
+     "조명형": {
+      "n": 223,
+      "p_fa": 0.1068007662835249,
+      "n_risk": 531,
+      "p_risk": 0.0921875,
+      "lift": 1.1585167868043378,
+      "rate": 0.13998744507219082,
+      "n_raw": 223,
+      "primary": 61
+     },
+     "대리선형": {
+      "n": 324,
+      "p_fa": 0.15517241379310345,
+      "n_risk": 648,
+      "p_risk": 0.1125,
+      "lift": 1.3793103448275863,
+      "rate": 0.16666666666666666,
+      "n_raw": 324,
+      "primary": 81
+     },
+     "경계칸형": {
+      "n": 419,
+      "p_fa": 0.2006704980842912,
+      "n_risk": 2304,
+      "p_risk": 0.4,
+      "lift": 0.501676245210728,
+      "rate": 0.060619212962962965,
+      "n_raw": 1494,
+      "primary": 63
+     }
+    },
+    "primary_unclassified": 339,
+    "bnd_band": 1288,
+    "bnd_sector": 419,
+    "surrogate_weak": 0,
+    "prior_saturated": 0,
+    "unseen": 181,
+    "sens": {
+     "light_50": 124,
+     "light_70": 287,
+     "deco_5": 647,
+     "deco_80": 586
+    }
+   },
+   "D": {
+    "n_runs": 3,
+    "n_events": 464,
+    "n_risk_cells": 5760,
+    "fa_rate": 0.026851851851851852,
+    "n_frames_fired": 84,
+    "unclassified": 105,
+    "multi": 123,
+    "mean_families": 1.0646551724137931,
+    "fams": {
+     "장식형": {
+      "n": 0,
+      "p_fa": 0.0,
+      "n_risk": 0,
+      "p_risk": 0.0,
+      "lift": null,
+      "rate": null,
+      "n_raw": 0,
+      "primary": 0
+     },
+     "지형통계형": {
+      "n": 281,
+      "p_fa": 0.6056034482758621,
+      "n_risk": 2367,
+      "p_risk": 0.4109375,
+      "lift": 1.4737118132948734,
+      "rate": 0.0395718912829179,
+      "n_raw": 13,
+      "primary": 260
+     },
+     "조명형": {
+      "n": 9,
+      "p_fa": 0.01939655172413793,
+      "n_risk": 131,
+      "p_risk": 0.022743055555555555,
+      "lift": 0.8528560147407213,
+      "rate": 0.022900763358778626,
+      "n_raw": 9,
+      "primary": 4
+     },
+     "대리선형": {
+      "n": 20,
+      "p_fa": 0.04310344827586207,
+      "n_risk": 143,
+      "p_risk": 0.024826388888888887,
+      "lift": 1.7361948396431157,
+      "rate": 0.046620046620046623,
+      "n_raw": 20,
+      "primary": 20
+     },
+     "경계칸형": {
+      "n": 184,
+      "p_fa": 0.39655172413793105,
+      "n_risk": 2304,
+      "p_risk": 0.4,
+      "lift": 0.9913793103448276,
+      "rate": 0.02662037037037037,
+      "n_raw": 347,
+      "primary": 75
+     }
+    },
+    "primary_unclassified": 105,
+    "bnd_band": 270,
+    "bnd_sector": 184,
+    "surrogate_weak": 0,
+    "prior_saturated": 0,
+    "unseen": 13,
+    "sens": {
+     "light_50": 4,
+     "light_70": 9,
+     "deco_5": 0,
+     "deco_80": 0
+    }
+   }
+  },
+  "v3a_rgb": {
+   "A": {
+    "n_runs": 3,
+    "n_events": 1419,
+    "n_risk_cells": 4560,
+    "fa_rate": 0.1037280701754386,
+    "n_frames_fired": 269,
+    "unclassified": 377,
+    "multi": 522,
+    "mean_families": 1.303030303030303,
+    "fams": {
+     "장식형": {
+      "n": 464,
+      "p_fa": 0.3269908386187456,
+      "n_risk": 1050,
+      "p_risk": 0.23026315789473684,
+      "lift": 1.4200744991442666,
+      "rate": 0.1473015873015873,
+      "n_raw": 464,
+      "primary": 464
+     },
+     "지형통계형": {
+      "n": 628,
+      "p_fa": 0.44256518675123324,
+      "n_risk": 1611,
+      "p_risk": 0.35328947368421054,
+      "lift": 1.2526984801897105,
+      "rate": 0.12993999586178356,
+      "n_raw": 116,
+      "primary": 366
+     },
+     "조명형": {
+      "n": 257,
+      "p_fa": 0.18111346018322763,
+      "n_risk": 414,
+      "p_risk": 0.09078947368421053,
+      "lift": 1.9948728947717824,
+      "rate": 0.2069243156199678,
+      "n_raw": 257,
+      "primary": 72
+     },
+     "대리선형": {
+      "n": 95,
+      "p_fa": 0.06694855532064835,
+      "n_risk": 172,
+      "p_risk": 0.037719298245614034,
+      "lift": 1.7749151875706772,
+      "rate": 0.18410852713178294,
+      "n_raw": 95,
+      "primary": 53
+     },
+     "경계칸형": {
+      "n": 405,
+      "p_fa": 0.2854122621564482,
+      "n_risk": 1788,
+      "p_risk": 0.39210526315789473,
+      "lift": 0.7278970444258411,
+      "rate": 0.07550335570469799,
+      "n_raw": 847,
+      "primary": 87
+     }
+    },
+    "primary_unclassified": 377,
+    "bnd_band": 573,
+    "bnd_sector": 405,
+    "surrogate_weak": 33,
+    "prior_saturated": 0,
+    "unseen": 116,
+    "sens": {
+     "light_50": 166,
+     "light_70": 337,
+     "deco_5": 472,
+     "deco_80": 419
+    }
+   },
+   "B": {
+    "n_runs": 3,
+    "n_events": 233,
+    "n_risk_cells": 4560,
+    "fa_rate": 0.017032163742690058,
+    "n_frames_fired": 84,
+    "unclassified": 96,
+    "multi": 17,
+    "mean_families": 0.6609442060085837,
+    "fams": {
+     "장식형": {
+      "n": 0,
+      "p_fa": 0.0,
+      "n_risk": 69,
+      "p_risk": 0.015131578947368421,
+      "lift": 0.0,
+      "rate": 0.0,
+      "n_raw": 0,
+      "primary": 0
+     },
+     "지형통계형": {
+      "n": 86,
+      "p_fa": 0.36909871244635195,
+      "n_risk": 1650,
+      "p_risk": 0.3618421052631579,
+      "lift": 1.0200546234880998,
+      "rate": 0.017373737373737375,
+      "n_raw": 57,
+      "primary": 83
+     },
+     "조명형": {
+      "n": 4,
+      "p_fa": 0.017167381974248927,
+      "n_risk": 136,
+      "p_risk": 0.02982456140350877,
+      "lift": 0.5756122191365817,
+      "rate": 0.00980392156862745,
+      "n_raw": 4,
+      "primary": 4
+     },
+     "대리선형": {
+      "n": 1,
+      "p_fa": 0.004291845493562232,
+      "n_risk": 121,
+      "p_risk": 0.026535087719298245,
+      "lift": 0.16174227645160147,
+      "rate": 0.0027548209366391185,
+      "n_raw": 1,
+      "primary": 1
+     },
+     "경계칸형": {
+      "n": 63,
+      "p_fa": 0.2703862660944206,
+      "n_risk": 1788,
+      "p_risk": 0.39210526315789473,
+      "lift": 0.689575712187113,
+      "rate": 0.01174496644295302,
+      "n_raw": 120,
+      "primary": 49
+     }
+    },
+    "primary_unclassified": 96,
+    "bnd_band": 60,
+    "bnd_sector": 63,
+    "surrogate_weak": 2,
+    "prior_saturated": 0,
+    "unseen": 57,
+    "sens": {
+     "light_50": 3,
+     "light_70": 6,
+     "deco_5": 0,
+     "deco_80": 0
+    }
+   },
+   "C": {
+    "n_runs": 3,
+    "n_events": 1989,
+    "n_risk_cells": 5760,
+    "fa_rate": 0.11510416666666666,
+    "n_frames_fired": 331,
+    "unclassified": 464,
+    "multi": 738,
+    "mean_families": 1.3212669683257918,
+    "fams": {
+     "장식형": {
+      "n": 580,
+      "p_fa": 0.29160382101558574,
+      "n_risk": 1518,
+      "p_risk": 0.2635416666666667,
+      "lift": 1.1064809018773214,
+      "rate": 0.12736056214317085,
+      "n_raw": 580,
+      "primary": 580
+     },
+     "지형통계형": {
+      "n": 984,
+      "p_fa": 0.4947209653092006,
+      "n_risk": 2274,
+      "p_risk": 0.39479166666666665,
+      "lift": 1.2531190678016693,
+      "rate": 0.1442392260334213,
+      "n_raw": 120,
+      "primary": 672
+     },
+     "조명형": {
+      "n": 236,
+      "p_fa": 0.11865258924082453,
+      "n_risk": 531,
+      "p_risk": 0.0921875,
+      "lift": 1.2870789341377575,
+      "rate": 0.14814814814814814,
+      "n_raw": 236,
+      "primary": 55
+     },
+     "대리선형": {
+      "n": 241,
+      "p_fa": 0.12116641528406234,
+      "n_risk": 648,
+      "p_risk": 0.1125,
+      "lift": 1.0770348025249985,
+      "rate": 0.12397119341563786,
+      "n_raw": 241,
+      "primary": 71
+     },
+     "경계칸형": {
+      "n": 587,
+      "p_fa": 0.29512317747611866,
+      "n_risk": 2304,
+      "p_risk": 0.4,
+      "lift": 0.7378079436902966,
+      "rate": 0.08492476851851852,
+      "n_raw": 1296,
+      "primary": 147
+     }
+    },
+    "primary_unclassified": 464,
+    "bnd_band": 945,
+    "bnd_sector": 587,
+    "surrogate_weak": 0,
+    "prior_saturated": 0,
+    "unseen": 120,
+    "sens": {
+     "light_50": 153,
+     "light_70": 308,
+     "deco_5": 594,
+     "deco_80": 523
+    }
+   },
+   "D": {
+    "n_runs": 3,
+    "n_events": 204,
+    "n_risk_cells": 5760,
+    "fa_rate": 0.011805555555555555,
+    "n_frames_fired": 95,
+    "unclassified": 13,
+    "multi": 46,
+    "mean_families": 1.1911764705882353,
+    "fams": {
+     "장식형": {
+      "n": 0,
+      "p_fa": 0.0,
+      "n_risk": 0,
+      "p_risk": 0.0,
+      "lift": null,
+      "rate": null,
+      "n_raw": 0,
+      "primary": 0
+     },
+     "지형통계형": {
+      "n": 187,
+      "p_fa": 0.9166666666666666,
+      "n_risk": 2367,
+      "p_risk": 0.4109375,
+      "lift": 2.2306717363751583,
+      "rate": 0.02633431910998451,
+      "n_raw": 63,
+      "primary": 173
+     },
+     "조명형": {
+      "n": 9,
+      "p_fa": 0.04411764705882353,
+      "n_risk": 131,
+      "p_risk": 0.022743055555555555,
+      "lift": 1.9398293668612485,
+      "rate": 0.022900763358778626,
+      "n_raw": 9,
+      "primary": 6
+     },
+     "대리선형": {
+      "n": 10,
+      "p_fa": 0.049019607843137254,
+      "n_risk": 143,
+      "p_risk": 0.024826388888888887,
+      "lift": 1.9744960921431511,
+      "rate": 0.023310023310023312,
+      "n_raw": 10,
+      "primary": 10
+     },
+     "경계칸형": {
+      "n": 37,
+      "p_fa": 0.18137254901960784,
+      "n_risk": 2304,
+      "p_risk": 0.4,
+      "lift": 0.45343137254901955,
+      "rate": 0.00535300925925926,
+      "n_raw": 186,
+      "primary": 2
+     }
+    },
+    "primary_unclassified": 13,
+    "bnd_band": 180,
+    "bnd_sector": 37,
+    "surrogate_weak": 0,
+    "prior_saturated": 0,
+    "unseen": 63,
+    "sens": {
+     "light_50": 5,
+     "light_70": 12,
+     "deco_5": 0,
+     "deco_80": 0
+    }
+   }
+  },
+  "v2_all9": {
+   "A": {
+    "n_runs": 9,
+    "n_events": 4355,
+    "n_risk_cells": 4560,
+    "fa_rate": 0.1061159844054581,
+    "n_frames_fired": 1110,
+    "unclassified": 837,
+    "multi": 1437,
+    "mean_families": 1.2695752009184844,
+    "fams": {
+     "장식형": {
+      "n": 1401,
+      "p_fa": 0.321699196326062,
+      "n_risk": 1050,
+      "p_risk": 0.23026315789473684,
+      "lift": 1.3970936526160407,
+      "rate": 0.14825396825396825,
+      "n_raw": 1401,
+      "primary": 1401
+     },
+     "지형통계형": {
+      "n": 2350,
+      "p_fa": 0.539609644087256,
+      "n_risk": 1611,
+      "p_risk": 0.35328947368421054,
+      "lift": 1.527386702071935,
+      "rate": 0.16208014345816954,
+      "n_raw": 943,
+      "primary": 1623
+     },
+     "조명형": {
+      "n": 586,
+      "p_fa": 0.13455797933409874,
+      "n_risk": 414,
+      "p_risk": 0.09078947368421053,
+      "lift": 1.4820878883176092,
+      "rate": 0.15727321524422974,
+      "n_raw": 586,
+      "primary": 201
+     },
+     "대리선형": {
+      "n": 195,
+      "p_fa": 0.04477611940298507,
+      "n_risk": 172,
+      "p_risk": 0.037719298245614034,
+      "lift": 1.1870878167303018,
+      "rate": 0.12596899224806202,
+      "n_raw": 195,
+      "primary": 98
+     },
+     "경계칸형": {
+      "n": 997,
+      "p_fa": 0.22893226176808265,
+      "n_risk": 1788,
+      "p_risk": 0.39210526315789473,
+      "lift": 0.5838540904152444,
+      "rate": 0.06195625155356699,
+      "n_raw": 2738,
+      "primary": 195
+     }
+    },
+    "primary_unclassified": 837,
+    "bnd_band": 2080,
+    "bnd_sector": 997,
+    "surrogate_weak": 165,
+    "prior_saturated": 243,
+    "unseen": 700,
+    "sens": {
+     "light_50": 352,
+     "light_70": 798,
+     "deco_5": 1434,
+     "deco_80": 1233
+    }
+   },
+   "B": {
+    "n_runs": 9,
+    "n_events": 1732,
+    "n_risk_cells": 4560,
+    "fa_rate": 0.04220272904483431,
+    "n_frames_fired": 359,
+    "unclassified": 694,
+    "multi": 281,
+    "mean_families": 0.7650115473441108,
+    "fams": {
+     "장식형": {
+      "n": 0,
+      "p_fa": 0.0,
+      "n_risk": 69,
+      "p_risk": 0.015131578947368421,
+      "lift": 0.0,
+      "rate": 0.0,
+      "n_raw": 0,
+      "primary": 0
+     },
+     "지형통계형": {
+      "n": 563,
+      "p_fa": 0.32505773672055427,
+      "n_risk": 1650,
+      "p_risk": 0.3618421052631579,
+      "lift": 0.8983413814822591,
+      "rate": 0.03791245791245791,
+      "n_raw": 418,
+      "primary": 536
+     },
+     "조명형": {
+      "n": 149,
+      "p_fa": 0.08602771362586605,
+      "n_risk": 136,
+      "p_risk": 0.02982456140350877,
+      "lift": 2.8844586333378617,
+      "rate": 0.12173202614379085,
+      "n_raw": 149,
+      "primary": 149
+     },
+     "대리선형": {
+      "n": 12,
+      "p_fa": 0.006928406466512702,
+      "n_risk": 121,
+      "p_risk": 0.026535087719298245,
+      "lift": 0.26110358253965227,
+      "rate": 0.011019283746556474,
+      "n_raw": 12,
+      "primary": 12
+     },
+     "경계칸형": {
+      "n": 601,
+      "p_fa": 0.34699769053117785,
+      "n_risk": 1788,
+      "p_risk": 0.39210526315789473,
+      "lift": 0.8849605530325341,
+      "rate": 0.03734775043499876,
+      "n_raw": 806,
+      "primary": 341
+     }
+    },
+    "primary_unclassified": 694,
+    "bnd_band": 292,
+    "bnd_sector": 601,
+    "surrogate_weak": 6,
+    "prior_saturated": 0,
+    "unseen": 418,
+    "sens": {
+     "light_50": 84,
+     "light_70": 196,
+     "deco_5": 0,
+     "deco_80": 0
+    }
+   },
+   "C": {
+    "n_runs": 9,
+    "n_events": 6801,
+    "n_risk_cells": 5760,
+    "fa_rate": 0.13119212962962962,
+    "n_frames_fired": 1329,
+    "unclassified": 1000,
+    "multi": 2849,
+    "mean_families": 1.4630201440964563,
+    "fams": {
+     "장식형": {
+      "n": 2230,
+      "p_fa": 0.3278929569181003,
+      "n_risk": 1518,
+      "p_risk": 0.2635416666666667,
+      "lift": 1.2441788088591947,
+      "rate": 0.16322646757429365,
+      "n_raw": 2230,
+      "primary": 2230
+     },
+     "지형통계형": {
+      "n": 4071,
+      "p_fa": 0.5985884428760476,
+      "n_risk": 2274,
+      "p_risk": 0.39479166666666665,
+      "lift": 1.5162134700818093,
+      "rate": 0.1989152741131633,
+      "n_raw": 1605,
+      "primary": 2768
+     },
+     "조명형": {
+      "n": 648,
+      "p_fa": 0.0952801058667843,
+      "n_risk": 531,
+      "p_risk": 0.0921875,
+      "lift": 1.0335469110973212,
+      "rate": 0.13559322033898305,
+      "n_raw": 648,
+      "primary": 209
+     },
+     "대리선형": {
+      "n": 1258,
+      "p_fa": 0.18497279811792383,
+      "n_risk": 648,
+      "p_risk": 0.1125,
+      "lift": 1.6442026499371007,
+      "rate": 0.21570644718792867,
+      "n_raw": 1258,
+      "primary": 298
+     },
+     "경계칸형": {
+      "n": 1743,
+      "p_fa": 0.2562858403176004,
+      "n_risk": 2304,
+      "p_risk": 0.4,
+      "lift": 0.6407146007940009,
+      "rate": 0.08405671296296297,
+      "n_raw": 4595,
+      "primary": 296
+     }
+    },
+    "primary_unclassified": 1000,
+    "bnd_band": 3726,
+    "bnd_sector": 1743,
+    "surrogate_weak": 0,
+    "prior_saturated": 817,
+    "unseen": 947,
+    "sens": {
+     "light_50": 359,
+     "light_70": 895,
+     "deco_5": 2289,
+     "deco_80": 2039
+    }
+   },
+   "D": {
+    "n_runs": 9,
+    "n_events": 2592,
+    "n_risk_cells": 5760,
+    "fa_rate": 0.05,
+    "n_frames_fired": 304,
+    "unclassified": 697,
+    "multi": 665,
+    "mean_families": 1.0050154320987654,
+    "fams": {
+     "장식형": {
+      "n": 0,
+      "p_fa": 0.0,
+      "n_risk": 0,
+      "p_risk": 0.0,
+      "lift": null,
+      "rate": null,
+      "n_raw": 0,
+      "primary": 0
+     },
+     "지형통계형": {
+      "n": 1411,
+      "p_fa": 0.5443672839506173,
+      "n_risk": 2367,
+      "p_risk": 0.4109375,
+      "lift": 1.3246960521992208,
+      "rate": 0.06623480260996104,
+      "n_raw": 828,
+      "primary": 1330
+     },
+     "조명형": {
+      "n": 164,
+      "p_fa": 0.06327160493827161,
+      "n_risk": 131,
+      "p_risk": 0.022743055555555555,
+      "lift": 2.7820186598812557,
+      "rate": 0.13910093299406276,
+      "n_raw": 164,
+      "primary": 156
+     },
+     "대리선형": {
+      "n": 65,
+      "p_fa": 0.02507716049382716,
+      "n_risk": 143,
+      "p_risk": 0.024826388888888887,
+      "lift": 1.0101010101010102,
+      "rate": 0.050505050505050504,
+      "n_raw": 65,
+      "primary": 65
+     },
+     "경계칸형": {
+      "n": 965,
+      "p_fa": 0.3722993827160494,
+      "n_risk": 2304,
+      "p_risk": 0.4,
+      "lift": 0.9307484567901234,
+      "rate": 0.046537422839506175,
+      "n_raw": 1569,
+      "primary": 344
+     }
+    },
+    "primary_unclassified": 697,
+    "bnd_band": 992,
+    "bnd_sector": 965,
+    "surrogate_weak": 0,
+    "prior_saturated": 0,
+    "unseen": 828,
+    "sens": {
+     "light_50": 92,
+     "light_70": 212,
+     "deco_5": 0,
+     "deco_80": 0
+    }
+   }
+  },
+  "v2_depth": {
+   "A": {
+    "n_runs": 3,
+    "n_events": 1131,
+    "n_risk_cells": 4560,
+    "fa_rate": 0.08267543859649122,
+    "n_frames_fired": 195,
+    "unclassified": 207,
+    "multi": 348,
+    "mean_families": 1.1688770999115827,
+    "fams": {
+     "장식형": {
+      "n": 387,
+      "p_fa": 0.3421750663129973,
+      "n_risk": 1050,
+      "p_risk": 0.23026315789473684,
+      "lift": 1.486017430845017,
+      "rate": 0.12285714285714286,
+      "n_raw": 387,
+      "primary": 387
+     },
+     "지형통계형": {
+      "n": 441,
+      "p_fa": 0.38992042440318303,
+      "n_risk": 1611,
+      "p_risk": 0.35328947368421054,
+      "lift": 1.1036853726123617,
+      "rate": 0.09124767225325885,
+      "n_raw": 336,
+      "primary": 378
+     },
+     "조명형": {
+      "n": 118,
+      "p_fa": 0.10433244916003537,
+      "n_risk": 414,
+      "p_risk": 0.09078947368421053,
+      "lift": 1.149169005240969,
+      "rate": 0.09500805152979067,
+      "n_raw": 118,
+      "primary": 66
+     },
+     "대리선형": {
+      "n": 13,
+      "p_fa": 0.011494252873563218,
+      "n_risk": 172,
+      "p_risk": 0.037719298245614034,
+      "lift": 0.30473135525260625,
+      "rate": 0.025193798449612403,
+      "n_raw": 13,
+      "primary": 8
+     },
+     "경계칸형": {
+      "n": 363,
+      "p_fa": 0.3209549071618037,
+      "n_risk": 1788,
+      "p_risk": 0.39210526315789473,
+      "lift": 0.8185427162515799,
+      "rate": 0.06767337807606263,
+      "n_raw": 570,
+      "primary": 85
+     }
+    },
+    "primary_unclassified": 207,
+    "bnd_band": 285,
+    "bnd_sector": 363,
+    "surrogate_weak": 96,
+    "prior_saturated": 0,
+    "unseen": 336,
+    "sens": {
+     "light_50": 68,
+     "light_70": 177,
+     "deco_5": 405,
+     "deco_80": 321
+    }
+   },
+   "B": {
+    "n_runs": 3,
+    "n_events": 1224,
+    "n_risk_cells": 4560,
+    "fa_rate": 0.08947368421052632,
+    "n_frames_fired": 177,
+    "unclassified": 455,
+    "multi": 249,
+    "mean_families": 0.8366013071895425,
+    "fams": {
+     "장식형": {
+      "n": 0,
+      "p_fa": 0.0,
+      "n_risk": 69,
+      "p_risk": 0.015131578947368421,
+      "lift": 0.0,
+      "rate": 0.0,
+      "n_raw": 0,
+      "primary": 0
+     },
+     "지형통계형": {
+      "n": 456,
+      "p_fa": 0.37254901960784315,
+      "n_risk": 1650,
+      "p_risk": 0.3618421052631579,
+      "lift": 1.029590017825312,
+      "rate": 0.09212121212121212,
+      "n_raw": 369,
+      "primary": 430
+     },
+     "조명형": {
+      "n": 104,
+      "p_fa": 0.08496732026143791,
+      "n_risk": 136,
+      "p_risk": 0.02982456140350877,
+      "lift": 2.848904267589389,
+      "rate": 0.2549019607843137,
+      "n_raw": 104,
+      "primary": 104
+     },
+     "대리선형": {
+      "n": 11,
+      "p_fa": 0.008986928104575163,
+      "n_risk": 121,
+      "p_risk": 0.026535087719298245,
+      "lift": 0.33868092691622104,
+      "rate": 0.030303030303030304,
+      "n_raw": 11,
+      "primary": 11
+     },
+     "경계칸형": {
+      "n": 453,
+      "p_fa": 0.3700980392156863,
+      "n_risk": 1788,
+      "p_risk": 0.39210526315789473,
+      "lift": 0.9438741939728912,
+      "rate": 0.08445190156599552,
+      "n_raw": 594,
+      "primary": 224
+     }
+    },
+    "primary_unclassified": 455,
+    "bnd_band": 219,
+    "bnd_sector": 453,
+    "surrogate_weak": 5,
+    "prior_saturated": 0,
+    "unseen": 369,
+    "sens": {
+     "light_50": 56,
+     "light_70": 134,
+     "deco_5": 0,
+     "deco_80": 0
+    }
+   },
+   "C": {
+    "n_runs": 3,
+    "n_events": 2196,
+    "n_risk_cells": 5760,
+    "fa_rate": 0.12708333333333333,
+    "n_frames_fired": 225,
+    "unclassified": 297,
+    "multi": 979,
+    "mean_families": 1.4749544626593807,
+    "fams": {
+     "장식형": {
+      "n": 753,
+      "p_fa": 0.34289617486338797,
+      "n_risk": 1518,
+      "p_risk": 0.2635416666666667,
+      "lift": 1.3011080152919068,
+      "rate": 0.16534914361001318,
+      "n_raw": 753,
+      "primary": 753
+     },
+     "지형통계형": {
+      "n": 1083,
+      "p_fa": 0.4931693989071038,
+      "n_risk": 2274,
+      "p_risk": 0.39479166666666665,
+      "lift": 1.2491889787620571,
+      "rate": 0.15875109938434476,
+      "n_raw": 912,
+      "primary": 813
+     },
+     "조명형": {
+      "n": 125,
+      "p_fa": 0.05692167577413479,
+      "n_risk": 531,
+      "p_risk": 0.0921875,
+      "lift": 0.617455466024513,
+      "rate": 0.07846829880728186,
+      "n_raw": 125,
+      "primary": 68
+     },
+     "대리선형": {
+      "n": 504,
+      "p_fa": 0.22950819672131148,
+      "n_risk": 648,
+      "p_risk": 0.1125,
+      "lift": 2.040072859744991,
+      "rate": 0.25925925925925924,
+      "n_raw": 504,
+      "primary": 99
+     },
+     "경계칸형": {
+      "n": 774,
+      "p_fa": 0.3524590163934426,
+      "n_risk": 2304,
+      "p_risk": 0.4,
+      "lift": 0.8811475409836065,
+      "rate": 0.11197916666666667,
+      "n_raw": 1320,
+      "primary": 166
+     }
+    },
+    "primary_unclassified": 297,
+    "bnd_band": 831,
+    "bnd_sector": 774,
+    "surrogate_weak": 0,
+    "prior_saturated": 573,
+    "unseen": 498,
+    "sens": {
+     "light_50": 73,
+     "light_70": 189,
+     "deco_5": 777,
+     "deco_80": 681
+    }
+   },
+   "D": {
+    "n_runs": 3,
+    "n_events": 1902,
+    "n_risk_cells": 5760,
+    "fa_rate": 0.11006944444444444,
+    "n_frames_fired": 153,
+    "unclassified": 511,
+    "multi": 498,
+    "mean_families": 1.0073606729758149,
+    "fams": {
+     "장식형": {
+      "n": 0,
+      "p_fa": 0.0,
+      "n_risk": 0,
+      "p_risk": 0.0,
+      "lift": null,
+      "rate": null,
+      "n_raw": 0,
+      "primary": 0
+     },
+     "지형통계형": {
+      "n": 1056,
+      "p_fa": 0.555205047318612,
+      "n_risk": 2367,
+      "p_risk": 0.4109375,
+      "lift": 1.3510693166688656,
+      "rate": 0.14871144909167722,
+      "n_raw": 783,
+      "primary": 1006
+     },
+     "조명형": {
+      "n": 107,
+      "p_fa": 0.05625657202944269,
+      "n_risk": 131,
+      "p_risk": 0.022743055555555555,
+      "lift": 2.4735714113709153,
+      "rate": 0.272264631043257,
+      "n_raw": 107,
+      "primary": 107
+     },
+     "대리선형": {
+      "n": 36,
+      "p_fa": 0.01892744479495268,
+      "n_risk": 143,
+      "p_risk": 0.024826388888888887,
+      "lift": 0.7623921819505416,
+      "rate": 0.08391608391608392,
+      "n_raw": 36,
+      "primary": 36
+     },
+     "경계칸형": {
+      "n": 717,
+      "p_fa": 0.37697160883280756,
+      "n_risk": 2304,
+      "p_risk": 0.4,
+      "lift": 0.9424290220820188,
+      "rate": 0.1037326388888889,
+      "n_raw": 1122,
+      "primary": 242
+     }
+    },
+    "primary_unclassified": 511,
+    "bnd_band": 669,
+    "bnd_sector": 717,
+    "surrogate_weak": 0,
+    "prior_saturated": 0,
+    "unseen": 783,
+    "sens": {
+     "light_50": 59,
+     "light_70": 137,
+     "deco_5": 0,
+     "deco_80": 0
+    }
+   }
+  },
+  "v2_b2": {
+   "A": {
+    "n_runs": 3,
+    "n_events": 1949,
+    "n_risk_cells": 4560,
+    "fa_rate": 0.14247076023391814,
+    "n_frames_fired": 501,
+    "unclassified": 368,
+    "multi": 661,
+    "mean_families": 1.3196511031298102,
+    "fams": {
+     "장식형": {
+      "n": 625,
+      "p_fa": 0.3206772703950744,
+      "n_risk": 1050,
+      "p_risk": 0.23026315789473684,
+      "lift": 1.3926555742871802,
+      "rate": 0.1984126984126984,
+      "n_raw": 625,
+      "primary": 625
+     },
+     "지형통계형": {
+      "n": 1145,
+      "p_fa": 0.5874807593637763,
+      "n_risk": 1611,
+      "p_risk": 0.35328947368421054,
+      "lift": 1.662887810489646,
+      "rate": 0.23691289054417547,
+      "n_raw": 471,
+      "primary": 746
+     },
+     "조명형": {
+      "n": 280,
+      "p_fa": 0.14366341713699332,
+      "n_risk": 414,
+      "p_risk": 0.09078947368421053,
+      "lift": 1.5823796670161583,
+      "rate": 0.22544283413848631,
+      "n_raw": 280,
+      "primary": 86
+     },
+     "대리선형": {
+      "n": 119,
+      "p_fa": 0.061056952283222166,
+      "n_risk": 172,
+      "p_risk": 0.037719298245614034,
+      "lift": 1.6187192000668202,
+      "rate": 0.23062015503875968,
+      "n_raw": 119,
+      "primary": 57
+     },
+     "경계칸형": {
+      "n": 403,
+      "p_fa": 0.20677270395074396,
+      "n_risk": 1788,
+      "p_risk": 0.39210526315789473,
+      "lift": 0.5273397818878034,
+      "rate": 0.07513049962714392,
+      "n_raw": 1304,
+      "primary": 67
+     }
+    },
+    "primary_unclassified": 368,
+    "bnd_band": 1081,
+    "bnd_sector": 403,
+    "surrogate_weak": 49,
+    "prior_saturated": 243,
+    "unseen": 228,
+    "sens": {
+     "light_50": 168,
+     "light_70": 381,
+     "deco_5": 636,
+     "deco_80": 560
+    }
+   },
+   "B": {
+    "n_runs": 3,
+    "n_events": 222,
+    "n_risk_cells": 4560,
+    "fa_rate": 0.016228070175438595,
+    "n_frames_fired": 76,
+    "unclassified": 106,
+    "multi": 24,
+    "mean_families": 0.6306306306306306,
+    "fams": {
+     "장식형": {
+      "n": 0,
+      "p_fa": 0.0,
+      "n_risk": 69,
+      "p_risk": 0.015131578947368421,
+      "lift": 0.0,
+      "rate": 0.0,
+      "n_raw": 0,
+      "primary": 0
+     },
+     "지형통계형": {
+      "n": 42,
+      "p_fa": 0.1891891891891892,
+      "n_risk": 1650,
+      "p_risk": 0.3618421052631579,
+      "lift": 0.5228501228501229,
+      "rate": 0.008484848484848486,
+      "n_raw": 36,
+      "primary": 41
+     },
+     "조명형": {
+      "n": 45,
+      "p_fa": 0.20270270270270271,
+      "n_risk": 136,
+      "p_risk": 0.02982456140350877,
+      "lift": 6.796502384737679,
+      "rate": 0.11029411764705882,
+      "n_raw": 45,
+      "primary": 45
+     },
+     "대리선형": {
+      "n": 1,
+      "p_fa": 0.0045045045045045045,
+      "n_risk": 121,
+      "p_risk": 0.026535087719298245,
+      "lift": 0.16975653339289704,
+      "rate": 0.0027548209366391185,
+      "n_raw": 1,
+      "primary": 1
+     },
+     "경계칸형": {
+      "n": 52,
+      "p_fa": 0.23423423423423423,
+      "n_risk": 1788,
+      "p_risk": 0.39210526315789473,
+      "lift": 0.5973758993893222,
+      "rate": 0.009694258016405667,
+      "n_raw": 69,
+      "primary": 29
+     }
+    },
+    "primary_unclassified": 106,
+    "bnd_band": 19,
+    "bnd_sector": 52,
+    "surrogate_weak": 1,
+    "prior_saturated": 0,
+    "unseen": 36,
+    "sens": {
+     "light_50": 28,
+     "light_70": 62,
+     "deco_5": 0,
+     "deco_80": 0
+    }
+   },
+   "C": {
+    "n_runs": 3,
+    "n_events": 2517,
+    "n_risk_cells": 5760,
+    "fa_rate": 0.14565972222222223,
+    "n_frames_fired": 543,
+    "unclassified": 364,
+    "multi": 1060,
+    "mean_families": 1.4990067540723082,
+    "fams": {
+     "장식형": {
+      "n": 840,
+      "p_fa": 0.33373063170441003,
+      "n_risk": 1518,
+      "p_risk": 0.2635416666666667,
+      "lift": 1.2663296697084332,
+      "rate": 0.1844532279314888,
+      "n_raw": 840,
+      "primary": 840
+     },
+     "지형통계형": {
+      "n": 1653,
+      "p_fa": 0.6567342073897497,
+      "n_risk": 2274,
+      "p_risk": 0.39479166666666665,
+      "lift": 1.6634956176626907,
+      "rate": 0.2423043095866315,
+      "n_raw": 512,
+      "primary": 1048
+     },
+     "조명형": {
+      "n": 300,
+      "p_fa": 0.11918951132300358,
+      "n_risk": 531,
+      "p_risk": 0.0921875,
+      "lift": 1.292903173673259,
+      "rate": 0.18832391713747645,
+      "n_raw": 300,
+      "primary": 80
+     },
+     "대리선형": {
+      "n": 430,
+      "p_fa": 0.17083829956297178,
+      "n_risk": 648,
+      "p_risk": 0.1125,
+      "lift": 1.5185626627819713,
+      "rate": 0.22119341563786007,
+      "n_raw": 430,
+      "primary": 118
+     },
+     "경계칸형": {
+      "n": 550,
+      "p_fa": 0.21851410409217323,
+      "n_risk": 2304,
+      "p_risk": 0.4,
+      "lift": 0.546285260230433,
+      "rate": 0.07957175925925926,
+      "n_raw": 1781,
+      "primary": 67
+     }
+    },
+    "primary_unclassified": 364,
+    "bnd_band": 1607,
+    "bnd_sector": 550,
+    "surrogate_weak": 0,
+    "prior_saturated": 244,
+    "unseen": 268,
+    "sens": {
+     "light_50": 162,
+     "light_70": 419,
+     "deco_5": 865,
+     "deco_80": 772
+    }
+   },
+   "D": {
+    "n_runs": 3,
+    "n_events": 226,
+    "n_risk_cells": 5760,
+    "fa_rate": 0.013078703703703703,
+    "n_frames_fired": 67,
+    "unclassified": 81,
+    "multi": 44,
+    "mean_families": 0.8628318584070797,
+    "fams": {
+     "장식형": {
+      "n": 0,
+      "p_fa": 0.0,
+      "n_risk": 0,
+      "p_risk": 0.0,
+      "lift": null,
+      "rate": null,
+      "n_raw": 0,
+      "primary": 0
+     },
+     "지형통계형": {
+      "n": 74,
+      "p_fa": 0.3274336283185841,
+      "n_risk": 2367,
+      "p_risk": 0.4109375,
+      "lift": 0.7967966620680372,
+      "rate": 0.010421067455287987,
+      "n_raw": 32,
+      "primary": 64
+     },
+     "조명형": {
+      "n": 48,
+      "p_fa": 0.21238938053097345,
+      "n_risk": 131,
+      "p_risk": 0.022743055555555555,
+      "lift": 9.338647571438223,
+      "rate": 0.12213740458015267,
+      "n_raw": 48,
+      "primary": 45
+     },
+     "대리선형": {
+      "n": 9,
+      "p_fa": 0.03982300884955752,
+      "n_risk": 143,
+      "p_risk": 0.024826388888888887,
+      "lift": 1.6040596571570023,
+      "rate": 0.02097902097902098,
+      "n_raw": 9,
+      "primary": 9
+     },
+     "경계칸형": {
+      "n": 64,
+      "p_fa": 0.2831858407079646,
+      "n_risk": 2304,
+      "p_risk": 0.4,
+      "lift": 0.7079646017699115,
+      "rate": 0.009259259259259259,
+      "n_raw": 100,
+      "primary": 27
+     }
+    },
+    "primary_unclassified": 81,
+    "bnd_band": 53,
+    "bnd_sector": 64,
+    "surrogate_weak": 0,
+    "prior_saturated": 0,
+    "unseen": 32,
+    "sens": {
+     "light_50": 29,
+     "light_70": 66,
+     "deco_5": 0,
+     "deco_80": 0
+    }
+   }
+  },
+  "v3a_aux_isolated": {
+   "A": {
+    "n_runs": 1,
+    "n_events": 578,
+    "n_risk_cells": 4560,
+    "fa_rate": 0.1267543859649123,
+    "n_frames_fired": 125,
+    "unclassified": 123,
+    "multi": 226,
+    "mean_families": 1.4273356401384083,
+    "fams": {
+     "장식형": {
+      "n": 213,
+      "p_fa": 0.3685121107266436,
+      "n_risk": 1050,
+      "p_risk": 0.23026315789473684,
+      "lift": 1.6003954522985664,
+      "rate": 0.20285714285714285,
+      "n_raw": 213,
+      "primary": 213
+     },
+     "지형통계형": {
+      "n": 280,
+      "p_fa": 0.4844290657439446,
+      "n_risk": 1611,
+      "p_risk": 0.35328947368421054,
+      "lift": 1.3711958657929157,
+      "rate": 0.17380509000620734,
+      "n_raw": 43,
+      "primary": 157
+     },
+     "조명형": {
+      "n": 96,
+      "p_fa": 0.16608996539792387,
+      "n_risk": 414,
+      "p_risk": 0.09078947368421053,
+      "lift": 1.8293967203249584,
+      "rate": 0.2318840579710145,
+      "n_raw": 96,
+      "primary": 37
+     },
+     "대리선형": {
+      "n": 61,
+      "p_fa": 0.10553633217993079,
+      "n_risk": 172,
+      "p_risk": 0.037719298245614034,
+      "lift": 2.797939969421421,
+      "rate": 0.3546511627906977,
+      "n_raw": 61,
+      "primary": 15
+     },
+     "경계칸형": {
+      "n": 175,
+      "p_fa": 0.3027681660899654,
+      "n_risk": 1788,
+      "p_risk": 0.39210526315789473,
+      "lift": 0.7721604235851466,
+      "rate": 0.09787472035794184,
+      "n_raw": 373,
+      "primary": 33
+     }
+    },
+    "primary_unclassified": 123,
+    "bnd_band": 270,
+    "bnd_sector": 175,
+    "surrogate_weak": 18,
+    "prior_saturated": 0,
+    "unseen": 43,
+    "sens": {
+     "light_50": 61,
+     "light_70": 140,
+     "deco_5": 216,
+     "deco_80": 197
+    }
+   },
+   "B": {
+    "n_runs": 1,
+    "n_events": 123,
+    "n_risk_cells": 4560,
+    "fa_rate": 0.026973684210526316,
+    "n_frames_fired": 41,
+    "unclassified": 63,
+    "multi": 20,
+    "mean_families": 0.6747967479674797,
+    "fams": {
+     "장식형": {
+      "n": 0,
+      "p_fa": 0.0,
+      "n_risk": 69,
+      "p_risk": 0.015131578947368421,
+      "lift": 0.0,
+      "rate": 0.0,
+      "n_raw": 0,
+      "primary": 0
+     },
+     "지형통계형": {
+      "n": 46,
+      "p_fa": 0.37398373983739835,
+      "n_risk": 1650,
+      "p_risk": 0.3618421052631579,
+      "lift": 1.0335550628233554,
+      "rate": 0.027878787878787878,
+      "n_raw": 29,
+      "primary": 39
+     },
+     "조명형": {
+      "n": 4,
+      "p_fa": 0.032520325203252036,
+      "n_risk": 136,
+      "p_risk": 0.02982456140350877,
+      "lift": 1.09038737446198,
+      "rate": 0.029411764705882353,
+      "n_raw": 4,
+      "primary": 4
+     },
+     "대리선형": {
+      "n": 5,
+      "p_fa": 0.04065040650406504,
+      "n_risk": 121,
+      "p_risk": 0.026535087719298245,
+      "lift": 1.5319492037895586,
+      "rate": 0.04132231404958678,
+      "n_raw": 5,
+      "primary": 5
+     },
+     "경계칸형": {
+      "n": 28,
+      "p_fa": 0.22764227642276422,
+      "n_risk": 1788,
+      "p_risk": 0.39210526315789473,
+      "lift": 0.5805641949036939,
+      "rate": 0.015659955257270694,
+      "n_raw": 49,
+      "primary": 12
+     }
+    },
+    "primary_unclassified": 63,
+    "bnd_band": 31,
+    "bnd_sector": 28,
+    "surrogate_weak": 0,
+    "prior_saturated": 0,
+    "unseen": 29,
+    "sens": {
+     "light_50": 3,
+     "light_70": 6,
+     "deco_5": 0,
+     "deco_80": 0
+    }
+   },
+   "C": {
+    "n_runs": 1,
+    "n_events": 1094,
+    "n_risk_cells": 5760,
+    "fa_rate": 0.18993055555555555,
+    "n_frames_fired": 156,
+    "unclassified": 152,
+    "multi": 542,
+    "mean_families": 1.6389396709323583,
+    "fams": {
+     "장식형": {
+      "n": 409,
+      "p_fa": 0.37385740402193784,
+      "n_risk": 1518,
+      "p_risk": 0.2635416666666667,
+      "lift": 1.4185893591346257,
+      "rate": 0.269433465085639,
+      "n_raw": 409,
+      "primary": 409
+     },
+     "지형통계형": {
+      "n": 597,
+      "p_fa": 0.5457038391224863,
+      "n_risk": 2274,
+      "p_risk": 0.39479166666666665,
+      "lift": 1.38225774553453,
+      "rate": 0.262532981530343,
+      "n_raw": 53,
+      "primary": 371
+     },
+     "조명형": {
+      "n": 134,
+      "p_fa": 0.12248628884826325,
+      "n_risk": 531,
+      "p_risk": 0.0921875,
+      "lift": 1.3286648281845503,
+      "rate": 0.2523540489642185,
+      "n_raw": 134,
+      "primary": 53
+     },
+     "대리선형": {
+      "n": 277,
+      "p_fa": 0.253199268738574,
+      "n_risk": 648,
+      "p_risk": 0.1125,
+      "lift": 2.2506601665651025,
+      "rate": 0.42746913580246915,
+      "n_raw": 277,
+      "primary": 57
+     },
+     "경계칸형": {
+      "n": 376,
+      "p_fa": 0.3436928702010969,
+      "n_risk": 2304,
+      "p_risk": 0.4,
+      "lift": 0.8592321755027422,
+      "rate": 0.16319444444444445,
+      "n_raw": 762,
+      "primary": 52
+     }
+    },
+    "primary_unclassified": 152,
+    "bnd_band": 590,
+    "bnd_sector": 376,
+    "surrogate_weak": 0,
+    "prior_saturated": 0,
+    "unseen": 53,
+    "sens": {
+     "light_50": 76,
+     "light_70": 191,
+     "deco_5": 413,
+     "deco_80": 375
+    }
+   },
+   "D": {
+    "n_runs": 1,
+    "n_events": 174,
+    "n_risk_cells": 5760,
+    "fa_rate": 0.030208333333333334,
+    "n_frames_fired": 46,
+    "unclassified": 27,
+    "multi": 52,
+    "mean_families": 1.1954022988505748,
+    "fams": {
+     "장식형": {
+      "n": 0,
+      "p_fa": 0.0,
+      "n_risk": 0,
+      "p_risk": 0.0,
+      "lift": null,
+      "rate": null,
+      "n_raw": 0,
+      "primary": 0
+     },
+     "지형통계형": {
+      "n": 143,
+      "p_fa": 0.8218390804597702,
+      "n_risk": 2367,
+      "p_risk": 0.4109375,
+      "lift": 1.9999125912329008,
+      "rate": 0.060414026193493876,
+      "n_raw": 56,
+      "primary": 126
+     },
+     "조명형": {
+      "n": 10,
+      "p_fa": 0.05747126436781609,
+      "n_risk": 131,
+      "p_risk": 0.022743055555555555,
+      "lift": 2.526980784416952,
+      "rate": 0.07633587786259542,
+      "n_raw": 10,
+      "primary": 6
+     },
+     "대리선형": {
+      "n": 13,
+      "p_fa": 0.07471264367816093,
+      "n_risk": 143,
+      "p_risk": 0.024826388888888887,
+      "lift": 3.009404388714734,
+      "rate": 0.09090909090909091,
+      "n_raw": 13,
+      "primary": 13
+     },
+     "경계칸형": {
+      "n": 42,
+      "p_fa": 0.2413793103448276,
+      "n_risk": 2304,
+      "p_risk": 0.4,
+      "lift": 0.603448275862069,
+      "rate": 0.018229166666666668,
+      "n_raw": 129,
+      "primary": 2
+     }
+    },
+    "primary_unclassified": 27,
+    "bnd_band": 120,
+    "bnd_sector": 42,
+    "surrogate_weak": 0,
+    "prior_saturated": 0,
+    "unseen": 56,
+    "sens": {
+     "light_50": 5,
+     "light_70": 12,
+     "deco_5": 0,
+     "deco_80": 0
+    }
+   }
+  }
+ },
+ "tableB_shift": {
+  "A": {
+   "fa_rate_v2": 0.09320175438596491,
+   "fa_rate_v3a": 0.1037280701754386,
+   "d_fa_rate": 0.01052631578947369,
+   "n_events_v2": 1275,
+   "n_events_v3a": 1419,
+   "fams": {
+    "장식형": {
+     "rate_v2": 0.12349206349206349,
+     "rate_v3a": 0.1473015873015873,
+     "d_rate": 0.023809523809523808,
+     "ratio": 1.19280205655527,
+     "lift_v2": 1.324997198879552,
+     "lift_v3a": 1.4200744991442666,
+     "n_v2": 389,
+     "n_v3a": 464,
+     "p_fa_v2": 0.3050980392156863,
+     "p_fa_v3a": 0.3269908386187456
+    },
+    "지형통계형": {
+     "rate_v2": 0.1580798675770743,
+     "rate_v3a": 0.12993999586178356,
+     "d_rate": -0.028139871715290726,
+     "ratio": 0.8219895287958114,
+     "lift_v2": 1.6961039909446087,
+     "lift_v3a": 1.2526984801897105,
+     "n_v2": 764,
+     "n_v3a": 628,
+     "p_fa_v2": 0.5992156862745098,
+     "p_fa_v3a": 0.44256518675123324
+    },
+    "조명형": {
+     "rate_v2": 0.15136876006441224,
+     "rate_v3a": 0.2069243156199678,
+     "d_rate": 0.05555555555555555,
+     "ratio": 1.3670212765957446,
+     "lift_v2": 1.6240977550440465,
+     "lift_v3a": 1.9948728947717824,
+     "n_v2": 188,
+     "n_v3a": 257,
+     "p_fa_v2": 0.14745098039215687,
+     "p_fa_v3a": 0.18111346018322763
+    },
+    "대리선형": {
+     "rate_v2": 0.12209302325581395,
+     "rate_v3a": 0.18410852713178294,
+     "d_rate": 0.06201550387596899,
+     "ratio": 1.507936507936508,
+     "lift_v2": 1.309986320109439,
+     "lift_v3a": 1.7749151875706772,
+     "n_v2": 63,
+     "n_v3a": 95,
+     "p_fa_v2": 0.04941176470588235,
+     "p_fa_v3a": 0.06694855532064835
+    },
+    "경계칸형": {
+     "rate_v2": 0.043064876957494405,
+     "rate_v3a": 0.07550335570469799,
+     "d_rate": 0.032438478747203583,
+     "ratio": 1.7532467532467533,
+     "lift_v2": 0.46206079747335177,
+     "lift_v3a": 0.7278970444258411,
+     "n_v2": 231,
+     "n_v3a": 405,
+     "p_fa_v2": 0.1811764705882353,
+     "p_fa_v3a": 0.2854122621564482
+    }
+   }
+  },
+  "B": {
+   "fa_rate_v2": 0.020906432748538012,
+   "fa_rate_v3a": 0.017032163742690058,
+   "d_fa_rate": -0.0038742690058479537,
+   "n_events_v2": 286,
+   "n_events_v3a": 233,
+   "fams": {
+    "장식형": {
+     "rate_v2": 0.0,
+     "rate_v3a": 0.0,
+     "d_rate": 0.0,
+     "ratio": null,
+     "lift_v2": 0.0,
+     "lift_v3a": 0.0,
+     "n_v2": 0,
+     "n_v3a": 0,
+     "p_fa_v2": 0.0,
+     "p_fa_v3a": 0.0
+    },
+    "지형통계형": {
+     "rate_v2": 0.013131313131313131,
+     "rate_v3a": 0.017373737373737375,
+     "d_rate": 0.004242424242424244,
+     "ratio": 1.3230769230769233,
+     "lift_v2": 0.6280991735537189,
+     "lift_v3a": 1.0200546234880998,
+     "n_v2": 65,
+     "n_v3a": 86,
+     "p_fa_v2": 0.22727272727272727,
+     "p_fa_v3a": 0.36909871244635195
+    },
+    "조명형": {
+     "rate_v2": 0.0,
+     "rate_v3a": 0.00980392156862745,
+     "d_rate": 0.00980392156862745,
+     "ratio": null,
+     "lift_v2": 0.0,
+     "lift_v3a": 0.5756122191365817,
+     "n_v2": 0,
+     "n_v3a": 4,
+     "p_fa_v2": 0.0,
+     "p_fa_v3a": 0.017167381974248927
+    },
+    "대리선형": {
+     "rate_v2": 0.0,
+     "rate_v3a": 0.0027548209366391185,
+     "d_rate": 0.0027548209366391185,
+     "ratio": null,
+     "lift_v2": 0.0,
+     "lift_v3a": 0.16174227645160147,
+     "n_v2": 0,
+     "n_v3a": 1,
+     "p_fa_v2": 0.0,
+     "p_fa_v3a": 0.004291845493562232
+    },
+    "경계칸형": {
+     "rate_v2": 0.017897091722595078,
+     "rate_v3a": 0.01174496644295302,
+     "d_rate": -0.006152125279642057,
+     "ratio": 0.65625,
+     "lift_v2": 0.8560566949828695,
+     "lift_v3a": 0.689575712187113,
+     "n_v2": 96,
+     "n_v3a": 63,
+     "p_fa_v2": 0.3356643356643357,
+     "p_fa_v3a": 0.2703862660944206
+    }
+   }
+  },
+  "C": {
+   "fa_rate_v2": 0.12083333333333333,
+   "fa_rate_v3a": 0.11510416666666666,
+   "d_fa_rate": -0.005729166666666674,
+   "n_events_v2": 2088,
+   "n_events_v3a": 1989,
+   "fams": {
+    "장식형": {
+     "rate_v2": 0.139877031181379,
+     "rate_v3a": 0.12736056214317085,
+     "d_rate": -0.012516469038208161,
+     "ratio": 0.9105180533751963,
+     "lift_v2": 1.1576030166734814,
+     "lift_v3a": 1.1064809018773214,
+     "n_v2": 637,
+     "n_v3a": 580,
+     "p_fa_v2": 0.30507662835249044,
+     "p_fa_v3a": 0.29160382101558574
+    },
+    "지형통계형": {
+     "rate_v2": 0.19569041336851364,
+     "rate_v3a": 0.1442392260334213,
+     "d_rate": -0.05145118733509235,
+     "ratio": 0.7370786516853932,
+     "lift_v2": 1.6195068692566645,
+     "lift_v3a": 1.2531190678016693,
+     "n_v2": 1335,
+     "n_v3a": 984,
+     "p_fa_v2": 0.639367816091954,
+     "p_fa_v3a": 0.4947209653092006
+    },
+    "조명형": {
+     "rate_v2": 0.13998744507219082,
+     "rate_v3a": 0.14814814814814814,
+     "d_rate": 0.008160703075957315,
+     "ratio": 1.0582959641255605,
+     "lift_v2": 1.1585167868043378,
+     "lift_v3a": 1.2870789341377575,
+     "n_v2": 223,
+     "n_v3a": 236,
+     "p_fa_v2": 0.1068007662835249,
+     "p_fa_v3a": 0.11865258924082453
+    },
+    "대리선형": {
+     "rate_v2": 0.16666666666666666,
+     "rate_v3a": 0.12397119341563786,
+     "d_rate": -0.04269547325102879,
+     "ratio": 0.7438271604938272,
+     "lift_v2": 1.3793103448275863,
+     "lift_v3a": 1.0770348025249985,
+     "n_v2": 324,
+     "n_v3a": 241,
+     "p_fa_v2": 0.15517241379310345,
+     "p_fa_v3a": 0.12116641528406234
+    },
+    "경계칸형": {
+     "rate_v2": 0.060619212962962965,
+     "rate_v3a": 0.08492476851851852,
+     "d_rate": 0.024305555555555552,
+     "ratio": 1.4009546539379474,
+     "lift_v2": 0.501676245210728,
+     "lift_v3a": 0.7378079436902966,
+     "n_v2": 419,
+     "n_v3a": 587,
+     "p_fa_v2": 0.2006704980842912,
+     "p_fa_v3a": 0.29512317747611866
+    }
+   }
+  },
+  "D": {
+   "fa_rate_v2": 0.026851851851851852,
+   "fa_rate_v3a": 0.011805555555555555,
+   "d_fa_rate": -0.015046296296296297,
+   "n_events_v2": 464,
+   "n_events_v3a": 204,
+   "fams": {
+    "장식형": {
+     "rate_v2": null,
+     "rate_v3a": null,
+     "d_rate": null,
+     "ratio": null,
+     "lift_v2": null,
+     "lift_v3a": null,
+     "n_v2": 0,
+     "n_v3a": 0,
+     "p_fa_v2": 0.0,
+     "p_fa_v3a": 0.0
+    },
+    "지형통계형": {
+     "rate_v2": 0.0395718912829179,
+     "rate_v3a": 0.02633431910998451,
+     "d_rate": -0.013237572172933393,
+     "ratio": 0.6654804270462633,
+     "lift_v2": 1.4737118132948734,
+     "lift_v3a": 2.2306717363751583,
+     "n_v2": 281,
+     "n_v3a": 187,
+     "p_fa_v2": 0.6056034482758621,
+     "p_fa_v3a": 0.9166666666666666
+    },
+    "조명형": {
+     "rate_v2": 0.022900763358778626,
+     "rate_v3a": 0.022900763358778626,
+     "d_rate": 0.0,
+     "ratio": 1.0,
+     "lift_v2": 0.8528560147407213,
+     "lift_v3a": 1.9398293668612485,
+     "n_v2": 9,
+     "n_v3a": 9,
+     "p_fa_v2": 0.01939655172413793,
+     "p_fa_v3a": 0.04411764705882353
+    },
+    "대리선형": {
+     "rate_v2": 0.046620046620046623,
+     "rate_v3a": 0.023310023310023312,
+     "d_rate": -0.023310023310023312,
+     "ratio": 0.5,
+     "lift_v2": 1.7361948396431157,
+     "lift_v3a": 1.9744960921431511,
+     "n_v2": 20,
+     "n_v3a": 10,
+     "p_fa_v2": 0.04310344827586207,
+     "p_fa_v3a": 0.049019607843137254
+    },
+    "경계칸형": {
+     "rate_v2": 0.02662037037037037,
+     "rate_v3a": 0.00535300925925926,
+     "d_rate": -0.021267361111111112,
+     "ratio": 0.20108695652173914,
+     "lift_v2": 0.9913793103448276,
+     "lift_v3a": 0.45343137254901955,
+     "n_v2": 184,
+     "n_v3a": 37,
+     "p_fa_v2": 0.39655172413793105,
+     "p_fa_v3a": 0.18137254901960784
+    }
+   }
+  }
+ },
+ "tableB_seed": {
+  "A": {
+   "장식형": {
+    "mean_v2": 0.1234920634920635,
+    "sd_v2": 0.05529006859792375,
+    "mean_v3a": 0.1473015873015873,
+    "sd_v3a": 0.09222536398768301,
+    "per_seed_v2": [
+     0.185714,
+     0.104762,
+     0.08
+    ],
+    "per_seed_v3a": [
+     0.245714,
+     0.133333,
+     0.062857
+    ],
+    "delta": 0.023809523809523794,
+    "sigma_max": 0.09222536398768301,
+    "exceeds_sigma": false
+   },
+   "지형통계형": {
+    "mean_v2": 0.1580798675770743,
+    "sd_v2": 0.07478302111387797,
+    "mean_v3a": 0.12993999586178356,
+    "sd_v3a": 0.07834355230614982,
+    "per_seed_v2": [
+     0.237741,
+     0.147114,
+     0.089385
+    ],
+    "per_seed_v3a": [
+     0.196151,
+     0.150217,
+     0.043451
+    ],
+    "delta": -0.028139871715290726,
+    "sigma_max": 0.07834355230614982,
+    "exceeds_sigma": false
+   },
+   "조명형": {
+    "mean_v2": 0.15136876006441222,
+    "sd_v2": 0.07166766122857864,
+    "mean_v3a": 0.2069243156199678,
+    "sd_v3a": 0.07267815843089698,
+    "per_seed_v2": [
+     0.227053,
+     0.142512,
+     0.084541
+    ],
+    "per_seed_v3a": [
+     0.282609,
+     0.200483,
+     0.137681
+    ],
+    "delta": 0.05555555555555558,
+    "sigma_max": 0.07267815843089698,
+    "exceeds_sigma": false
+   },
+   "대리선형": {
+    "mean_v2": 0.12209302325581396,
+    "sd_v2": 0.10335109787576266,
+    "mean_v3a": 0.18410852713178297,
+    "sd_v3a": 0.1353956470907641,
+    "per_seed_v2": [
+     0.238372,
+     0.087209,
+     0.040698
+    ],
+    "per_seed_v3a": [
+     0.27907,
+     0.244186,
+     0.02907
+    ],
+    "delta": 0.062015503875969005,
+    "sigma_max": 0.1353956470907641,
+    "exceeds_sigma": false
+   },
+   "경계칸형": {
+    "mean_v2": 0.04306487695749441,
+    "sd_v2": 0.023748180923447586,
+    "mean_v3a": 0.07550335570469799,
+    "sd_v3a": 0.04753914988814317,
+    "per_seed_v2": [
+     0.07047,
+     0.030201,
+     0.028523
+    ],
+    "per_seed_v3a": [
+     0.123043,
+     0.075503,
+     0.027964
+    ],
+    "delta": 0.03243847874720358,
+    "sigma_max": 0.04753914988814317,
+    "exceeds_sigma": false
+   }
+  },
+  "B": {
+   "장식형": {
+    "mean_v2": 0.0,
+    "sd_v2": 0.0,
+    "mean_v3a": 0.0,
+    "sd_v3a": 0.0,
+    "per_seed_v2": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "per_seed_v3a": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "delta": 0.0,
+    "sigma_max": 0.0,
+    "exceeds_sigma": false
+   },
+   "지형통계형": {
+    "mean_v2": 0.013131313131313131,
+    "sd_v2": 0.009257728676678465,
+    "mean_v3a": 0.01737373737373737,
+    "sd_v3a": 0.01569139170030819,
+    "per_seed_v2": [
+     0.021212,
+     0.015152,
+     0.00303
+    ],
+    "per_seed_v3a": [
+     0.035152,
+     0.011515,
+     0.005455
+    ],
+    "delta": 0.00424242424242424,
+    "sigma_max": 0.01569139170030819,
+    "exceeds_sigma": false
+   },
+   "조명형": {
+    "mean_v2": 0.0,
+    "sd_v2": 0.0,
+    "mean_v3a": 0.00980392156862745,
+    "sd_v3a": 0.01698089027028311,
+    "per_seed_v2": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "per_seed_v3a": [
+     0.029412,
+     0.0,
+     0.0
+    ],
+    "delta": 0.00980392156862745,
+    "sigma_max": 0.01698089027028311,
+    "exceeds_sigma": false
+   },
+   "대리선형": {
+    "mean_v2": 0.0,
+    "sd_v2": 0.0,
+    "mean_v3a": 0.0027548209366391185,
+    "sd_v3a": 0.004771489828013437,
+    "per_seed_v2": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "per_seed_v3a": [
+     0.008264,
+     0.0,
+     0.0
+    ],
+    "delta": 0.0027548209366391185,
+    "sigma_max": 0.004771489828013437,
+    "exceeds_sigma": false
+   },
+   "경계칸형": {
+    "mean_v2": 0.01789709172259508,
+    "sd_v2": 0.012137882781997041,
+    "mean_v3a": 0.011744966442953019,
+    "sd_v3a": 0.004843542526758605,
+    "per_seed_v2": [
+     0.011745,
+     0.031879,
+     0.010067
+    ],
+    "per_seed_v3a": [
+     0.006152,
+     0.014541,
+     0.014541
+    ],
+    "delta": -0.006152125279642063,
+    "sigma_max": 0.012137882781997041,
+    "exceeds_sigma": false
+   }
+  },
+  "C": {
+   "장식형": {
+    "mean_v2": 0.139877031181379,
+    "sd_v2": 0.07046079966442699,
+    "mean_v3a": 0.12736056214317085,
+    "sd_v3a": 0.06175984481773192,
+    "per_seed_v2": [
+     0.216074,
+     0.126482,
+     0.077075
+    ],
+    "per_seed_v3a": [
+     0.197628,
+     0.102767,
+     0.081686
+    ],
+    "delta": -0.012516469038208161,
+    "sigma_max": 0.07046079966442699,
+    "exceeds_sigma": false
+   },
+   "지형통계형": {
+    "mean_v2": 0.19569041336851364,
+    "sd_v2": 0.08570235128899971,
+    "mean_v3a": 0.1442392260334213,
+    "sd_v3a": 0.06334285868084728,
+    "per_seed_v2": [
+     0.246702,
+     0.243624,
+     0.096746
+    ],
+    "per_seed_v3a": [
+     0.206684,
+     0.145998,
+     0.080035
+    ],
+    "delta": -0.05145118733509235,
+    "sigma_max": 0.08570235128899971,
+    "exceeds_sigma": false
+   },
+   "조명형": {
+    "mean_v2": 0.13998744507219082,
+    "sd_v2": 0.08931664236952874,
+    "mean_v3a": 0.14814814814814814,
+    "sd_v3a": 0.06770063654028521,
+    "per_seed_v2": [
+     0.235405,
+     0.126177,
+     0.05838
+    ],
+    "per_seed_v3a": [
+     0.224105,
+     0.126177,
+     0.094162
+    ],
+    "delta": 0.008160703075957315,
+    "sigma_max": 0.08931664236952874,
+    "exceeds_sigma": false
+   },
+   "대리선형": {
+    "mean_v2": 0.16666666666666666,
+    "sd_v2": 0.09491681675729494,
+    "mean_v3a": 0.12397119341563785,
+    "sd_v3a": 0.023623379636224354,
+    "per_seed_v2": [
+     0.260802,
+     0.16821,
+     0.070988
+    ],
+    "per_seed_v3a": [
+     0.151235,
+     0.111111,
+     0.109568
+    ],
+    "delta": -0.042695473251028807,
+    "sigma_max": 0.09491681675729494,
+    "exceeds_sigma": false
+   },
+   "경계칸형": {
+    "mean_v2": 0.06061921296296296,
+    "sd_v2": 0.026187141894901664,
+    "mean_v3a": 0.0849247685185185,
+    "sd_v3a": 0.03906812588088136,
+    "per_seed_v2": [
+     0.075521,
+     0.075955,
+     0.030382
+    ],
+    "per_seed_v3a": [
+     0.128472,
+     0.073351,
+     0.052951
+    ],
+    "delta": 0.024305555555555546,
+    "sigma_max": 0.03906812588088136,
+    "exceeds_sigma": false
+   }
+  },
+  "D": {
+   "장식형": {
+    "mean_v2": 0.0,
+    "sd_v2": 0.0,
+    "mean_v3a": 0.0,
+    "sd_v3a": 0.0,
+    "per_seed_v2": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "per_seed_v3a": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "delta": 0.0,
+    "sigma_max": 0.0,
+    "exceeds_sigma": false
+   },
+   "지형통계형": {
+    "mean_v2": 0.0395718912829179,
+    "sd_v2": 0.057264292611823316,
+    "mean_v3a": 0.026334319109984513,
+    "sd_v3a": 0.018556897800342635,
+    "per_seed_v2": [
+     0.009294,
+     0.105619,
+     0.003802
+    ],
+    "per_seed_v3a": [
+     0.04774,
+     0.014787,
+     0.016477
+    ],
+    "delta": -0.01323757217293339,
+    "sigma_max": 0.057264292611823316,
+    "exceeds_sigma": false
+   },
+   "조명형": {
+    "mean_v2": 0.022900763358778626,
+    "sd_v2": 0.022900763358778626,
+    "mean_v3a": 0.022900763358778626,
+    "sd_v3a": 0.020196574893622827,
+    "per_seed_v2": [
+     0.022901,
+     0.045802,
+     0.0
+    ],
+    "per_seed_v3a": [
+     0.030534,
+     0.0,
+     0.038168
+    ],
+    "delta": 0.0,
+    "sigma_max": 0.022900763358778626,
+    "exceeds_sigma": false
+   },
+   "대리선형": {
+    "mean_v2": 0.046620046620046623,
+    "sd_v2": 0.053409973134683444,
+    "mean_v3a": 0.023310023310023312,
+    "sd_v3a": 0.017598681667297784,
+    "per_seed_v2": [
+     0.034965,
+     0.104895,
+     0.0
+    ],
+    "per_seed_v3a": [
+     0.006993,
+     0.020979,
+     0.041958
+    ],
+    "delta": -0.023310023310023312,
+    "sigma_max": 0.053409973134683444,
+    "exceeds_sigma": false
+   },
+   "경계칸형": {
+    "mean_v2": 0.026620370370370374,
+    "sd_v2": 0.04348155466661198,
+    "mean_v3a": 0.005353009259259259,
+    "sd_v3a": 0.0009035008678238423,
+    "per_seed_v2": [
+     0.000868,
+     0.076823,
+     0.00217
+    ],
+    "per_seed_v3a": [
+     0.006076,
+     0.005642,
+     0.00434
+    ],
+    "delta": -0.021267361111111115,
+    "sigma_max": 0.04348155466661198,
+    "exceeds_sigma": false
+   }
+  }
+ },
+ "tableC_paint": {
+  "A": {
+   "v2": {
+    "n_fa_frames": 414,
+    "n_cells": 1275,
+    "cells_per_alarm": 3.079710144927536,
+    "per_family_cells": {
+     "장식형": 389,
+     "지형통계형": 499,
+     "조명형": 49,
+     "대리선형": 33,
+     "경계칸형": 43,
+     "미분류": 262
+    },
+    "per_family_share": {
+     "장식형": 0.3050980392156863,
+     "지형통계형": 0.39137254901960783,
+     "조명형": 0.038431372549019606,
+     "대리선형": 0.02588235294117647,
+     "경계칸형": 0.03372549019607843,
+     "미분류": 0.2054901960784314
+    },
+    "per_family_cells_per_alarm": {
+     "장식형": 0.9396135265700483,
+     "지형통계형": 1.2053140096618358,
+     "조명형": 0.11835748792270531,
+     "대리선형": 0.07971014492753623,
+     "경계칸형": 0.10386473429951691,
+     "미분류": 0.6328502415458938
+    }
+   },
+   "v3a": {
+    "n_fa_frames": 269,
+    "n_cells": 1419,
+    "cells_per_alarm": 5.275092936802974,
+    "per_family_cells": {
+     "장식형": 464,
+     "지형통계형": 366,
+     "조명형": 72,
+     "대리선형": 53,
+     "경계칸형": 87,
+     "미분류": 377
+    },
+    "per_family_share": {
+     "장식형": 0.3269908386187456,
+     "지형통계형": 0.25792811839323465,
+     "조명형": 0.0507399577167019,
+     "대리선형": 0.037350246652572236,
+     "경계칸형": 0.0613107822410148,
+     "미분류": 0.2656800563777308
+    },
+    "per_family_cells_per_alarm": {
+     "장식형": 1.724907063197026,
+     "지형통계형": 1.3605947955390334,
+     "조명형": 0.26765799256505574,
+     "대리선형": 0.1970260223048327,
+     "경계칸형": 0.32342007434944237,
+     "미분류": 1.4014869888475836
+    }
+   },
+   "delta_per_family": {
+    "장식형": 0.7852935366269778,
+    "지형통계형": 0.15528078587719762,
+    "조명형": 0.14930050464235042,
+    "대리선형": 0.11731587737729648,
+    "경계칸형": 0.21955534004992544,
+    "미분류": 0.7686367473016898
+   },
+   "delta_scale_term": {
+    "장식형": 0.5064831277050446,
+    "지형통계형": 0.649704577698759,
+    "조명형": 0.06379864590629096,
+    "대리선형": 0.042966434998114325,
+    "경계칸형": 0.055986566815724725,
+    "미분류": 0.3411274536213925
+   },
+   "delta_composition_term": {
+    "장식형": 0.2788104089219331,
+    "지형통계형": -0.4944237918215613,
+    "조명형": 0.08550185873605948,
+    "대리선형": 0.07434944237918216,
+    "경계칸형": 0.16356877323420074,
+    "미분류": 0.4275092936802974
+   },
+   "delta_share_pp": {
+    "장식형": 0.021892799403059326,
+    "지형통계형": -0.13344443062637318,
+    "조명형": 0.012308585167682295,
+    "대리선형": 0.011467893711395765,
+    "경계칸형": 0.02758529204493637,
+    "미분류": 0.0601898602992994
+   },
+   "delta_total": 2.1953827918754376,
+   "delta_total_scale": 1.6600668067453257,
+   "delta_total_composition": 0.5353159851301116,
+   "share_of_delta": {
+    "장식형": 0.35770232851107,
+    "지형통계형": 0.07073061994102028,
+    "조명형": 0.06800659328973253,
+    "대리선형": 0.053437549848460685,
+    "경계칸형": 0.10000777124720336,
+    "미분류": 0.35011513716251313
+   },
+   "identity_check": true
+  },
+  "B": {
+   "v2": {
+    "n_fa_frames": 106,
+    "n_cells": 286,
+    "cells_per_alarm": 2.69811320754717,
+    "per_family_cells": {
+     "장식형": 0,
+     "지형통계형": 65,
+     "조명형": 0,
+     "대리선형": 0,
+     "경계칸형": 88,
+     "미분류": 133
+    },
+    "per_family_share": {
+     "장식형": 0.0,
+     "지형통계형": 0.22727272727272727,
+     "조명형": 0.0,
+     "대리선형": 0.0,
+     "경계칸형": 0.3076923076923077,
+     "미분류": 0.46503496503496505
+    },
+    "per_family_cells_per_alarm": {
+     "장식형": 0.0,
+     "지형통계형": 0.6132075471698113,
+     "조명형": 0.0,
+     "대리선형": 0.0,
+     "경계칸형": 0.8301886792452831,
+     "미분류": 1.2547169811320755
+    }
+   },
+   "v3a": {
+    "n_fa_frames": 84,
+    "n_cells": 233,
+    "cells_per_alarm": 2.7738095238095237,
+    "per_family_cells": {
+     "장식형": 0,
+     "지형통계형": 83,
+     "조명형": 4,
+     "대리선형": 1,
+     "경계칸형": 49,
+     "미분류": 96
+    },
+    "per_family_share": {
+     "장식형": 0.0,
+     "지형통계형": 0.3562231759656652,
+     "조명형": 0.017167381974248927,
+     "대리선형": 0.004291845493562232,
+     "경계칸형": 0.21030042918454936,
+     "미분류": 0.41201716738197425
+    },
+    "per_family_cells_per_alarm": {
+     "장식형": 0.0,
+     "지형통계형": 0.9880952380952381,
+     "조명형": 0.047619047619047616,
+     "대리선형": 0.011904761904761904,
+     "경계칸형": 0.5833333333333334,
+     "미분류": 1.1428571428571428
+    }
+   },
+   "delta_per_family": {
+    "장식형": 0.0,
+    "지형통계형": 0.37488769092542684,
+    "조명형": 0.047619047619047616,
+    "대리선형": 0.011904761904761904,
+    "경계칸형": -0.2468553459119497,
+    "미분류": -0.11185983827493273
+   },
+   "delta_scale_term": {
+    "장식형": 0.0,
+    "지형통계형": 0.16060197663971246,
+    "조명형": 0.0,
+    "대리선형": 0.0,
+    "경계칸형": 0.21743036837376456,
+    "미분류": 0.32861635220125784
+   },
+   "delta_composition_term": {
+    "장식형": 0.0,
+    "지형통계형": 0.21428571428571427,
+    "조명형": 0.047619047619047616,
+    "대리선형": 0.011904761904761904,
+    "경계칸형": -0.4642857142857143,
+    "미분류": -0.44047619047619047
+   },
+   "delta_share_pp": {
+    "장식형": 0.0,
+    "지형통계형": 0.12895044869293795,
+    "조명형": 0.017167381974248927,
+    "대리선형": 0.004291845493562232,
+    "경계칸형": -0.09739187850775835,
+    "미분류": -0.053017797652990806
+   },
+   "delta_total": 0.07569631626235385,
+   "delta_total_scale": 0.7066486972147349,
+   "delta_total_composition": -0.6309523809523809,
+   "share_of_delta": {
+    "장식형": 0.0,
+    "지형통계형": 4.952522255192889,
+    "조명형": 0.6290801186943632,
+    "대리선형": 0.1572700296735908,
+    "경계칸형": -3.2611275964391755,
+    "미분류": -1.4777448071216663
+   },
+   "identity_check": true
+  },
+  "C": {
+   "v2": {
+    "n_fa_frames": 561,
+    "n_cells": 2088,
+    "cells_per_alarm": 3.72192513368984,
+    "per_family_cells": {
+     "장식형": 637,
+     "지형통계형": 907,
+     "조명형": 61,
+     "대리선형": 81,
+     "경계칸형": 63,
+     "미분류": 339
+    },
+    "per_family_share": {
+     "장식형": 0.30507662835249044,
+     "지형통계형": 0.43438697318007663,
+     "조명형": 0.02921455938697318,
+     "대리선형": 0.03879310344827586,
+     "경계칸형": 0.03017241379310345,
+     "미분류": 0.16235632183908047
+    },
+    "per_family_cells_per_alarm": {
+     "장식형": 1.1354723707664884,
+     "지형통계형": 1.6167557932263814,
+     "조명형": 0.10873440285204991,
+     "대리선형": 0.1443850267379679,
+     "경계칸형": 0.11229946524064172,
+     "미분류": 0.6042780748663101
+    }
+   },
+   "v3a": {
+    "n_fa_frames": 331,
+    "n_cells": 1989,
+    "cells_per_alarm": 6.009063444108762,
+    "per_family_cells": {
+     "장식형": 580,
+     "지형통계형": 672,
+     "조명형": 55,
+     "대리선형": 71,
+     "경계칸형": 147,
+     "미분류": 464
+    },
+    "per_family_share": {
+     "장식형": 0.29160382101558574,
+     "지형통계형": 0.3378582202111614,
+     "조명형": 0.027652086475615886,
+     "대리선형": 0.03569632981397687,
+     "경계칸형": 0.07390648567119155,
+     "미분류": 0.23328305681246858
+    },
+    "per_family_cells_per_alarm": {
+     "장식형": 1.7522658610271904,
+     "지형통계형": 2.0302114803625377,
+     "조명형": 0.1661631419939577,
+     "대리선형": 0.21450151057401812,
+     "경계칸형": 0.44410876132930516,
+     "미분류": 1.4018126888217524
+    }
+   },
+   "delta_per_family": {
+    "장식형": 0.616793490260702,
+    "지형통계형": 0.4134556871361563,
+    "조명형": 0.0574287391419078,
+    "대리선형": 0.07011648383605021,
+    "경계칸형": 0.33180929608866344,
+    "미분류": 0.7975346139554422
+   },
+   "delta_scale_term": {
+    "장식형": 0.7889989283271672,
+    "지형통계형": 1.1234254756557938,
+    "조명형": 0.07555562735943046,
+    "대리선형": 0.10032796419858798,
+    "경계칸형": 0.07803286104334621,
+    "미분류": 0.4198911094237201
+   },
+   "delta_composition_term": {
+    "장식형": -0.17220543806646527,
+    "지형통계형": -0.7099697885196374,
+    "조명형": -0.01812688821752266,
+    "대리선형": -0.030211480362537766,
+    "경계칸형": 0.2537764350453172,
+    "미분류": 0.3776435045317221
+   },
+   "delta_share_pp": {
+    "장식형": -0.013472807336904702,
+    "지형통계형": -0.09652875296891522,
+    "조명형": -0.001562472911357294,
+    "대리선형": -0.0030967736342989924,
+    "경계칸형": 0.0437340718780881,
+    "미분류": 0.07092673497338811
+   },
+   "delta_total": 2.287138310418922,
+   "delta_total_scale": 2.5862319660080457,
+   "delta_total_composition": -0.29909365558912376,
+   "share_of_delta": {
+    "장식형": 0.26967913897071116,
+    "지형통계형": 0.18077423881742685,
+    "조명형": 0.025109429928349594,
+    "대리선형": 0.030656862121822174,
+    "경계칸형": 0.14507618300875205,
+    "미분류": 0.34870414715293824
+   },
+   "identity_check": true
+  },
+  "D": {
+   "v2": {
+    "n_fa_frames": 84,
+    "n_cells": 464,
+    "cells_per_alarm": 5.523809523809524,
+    "per_family_cells": {
+     "장식형": 0,
+     "지형통계형": 260,
+     "조명형": 4,
+     "대리선형": 20,
+     "경계칸형": 75,
+     "미분류": 105
+    },
+    "per_family_share": {
+     "장식형": 0.0,
+     "지형통계형": 0.5603448275862069,
+     "조명형": 0.008620689655172414,
+     "대리선형": 0.04310344827586207,
+     "경계칸형": 0.16163793103448276,
+     "미분류": 0.22629310344827586
+    },
+    "per_family_cells_per_alarm": {
+     "장식형": 0.0,
+     "지형통계형": 3.0952380952380953,
+     "조명형": 0.047619047619047616,
+     "대리선형": 0.23809523809523808,
+     "경계칸형": 0.8928571428571429,
+     "미분류": 1.25
+    }
+   },
+   "v3a": {
+    "n_fa_frames": 95,
+    "n_cells": 204,
+    "cells_per_alarm": 2.1473684210526316,
+    "per_family_cells": {
+     "장식형": 0,
+     "지형통계형": 173,
+     "조명형": 6,
+     "대리선형": 10,
+     "경계칸형": 2,
+     "미분류": 13
+    },
+    "per_family_share": {
+     "장식형": 0.0,
+     "지형통계형": 0.8480392156862745,
+     "조명형": 0.029411764705882353,
+     "대리선형": 0.049019607843137254,
+     "경계칸형": 0.00980392156862745,
+     "미분류": 0.06372549019607843
+    },
+    "per_family_cells_per_alarm": {
+     "장식형": 0.0,
+     "지형통계형": 1.8210526315789475,
+     "조명형": 0.06315789473684211,
+     "대리선형": 0.10526315789473684,
+     "경계칸형": 0.021052631578947368,
+     "미분류": 0.1368421052631579
+    }
+   },
+   "delta_per_family": {
+    "장식형": 0.0,
+    "지형통계형": -1.2741854636591479,
+    "조명형": 0.015538847117794491,
+    "대리선형": -0.13283208020050125,
+    "경계칸형": -0.8718045112781956,
+    "미분류": -1.1131578947368421
+   },
+   "delta_scale_term": {
+    "장식형": -0.0,
+    "지형통계형": -0.3583959899749372,
+    "조명형": -0.0055137844611528805,
+    "대리선형": -0.027568922305764403,
+    "경계칸형": -0.10338345864661651,
+    "미분류": -0.1447368421052631
+   },
+   "delta_composition_term": {
+    "장식형": 0.0,
+    "지형통계형": -0.9157894736842105,
+    "조명형": 0.021052631578947368,
+    "대리선형": -0.10526315789473684,
+    "경계칸형": -0.7684210526315789,
+    "미분류": -0.968421052631579
+   },
+   "delta_share_pp": {
+    "장식형": 0.0,
+    "지형통계형": 0.28769438810006764,
+    "조명형": 0.02079107505070994,
+    "대리선형": 0.005916159567275182,
+    "경계칸형": -0.15183400946585532,
+    "미분류": -0.16256761325219743
+   },
+   "delta_total": -3.376441102756892,
+   "delta_total_scale": -0.6395989974937342,
+   "delta_total_composition": -2.736842105263158,
+   "share_of_delta": {
+    "장식형": -0.0,
+    "지형통계형": 0.377375296912114,
+    "조명형": -0.004602137767220904,
+    "대리선형": 0.03934085510688836,
+    "경계칸형": 0.25820219714964376,
+    "미분류": 0.32968378859857483
+   },
+   "identity_check": true
+  }
+ },
+ "tableC2_unclassified": {
+  "B": {
+   "v2": {
+    "n": 133,
+    "band": {
+     "3a": 78,
+     "2": 52,
+     "1": 3
+    },
+    "sector": {
+     "D": 48,
+     "C": 44,
+     "B": 41
+    },
+    "cell": {
+     "C3a": 27,
+     "B3a": 26,
+     "D3a": 25,
+     "D2": 22,
+     "C2": 16,
+     "B2": 14
+    },
+    "scene": {
+     "sceneH2": 74,
+     "sceneL1": 45,
+     "sceneH3": 14
+    }
+   },
+   "v3a": {
+    "n": 96,
+    "band": {
+     "2": 66,
+     "3a": 27,
+     "1": 3
+    },
+    "sector": {
+     "B": 42,
+     "D": 30,
+     "C": 24
+    },
+    "cell": {
+     "B2": 26,
+     "D2": 24,
+     "C2": 16,
+     "B3a": 15,
+     "C3a": 7,
+     "D3a": 5
+    },
+    "scene": {
+     "sceneH2": 88,
+     "sceneH3": 7,
+     "sceneL1": 1
+    }
+   }
+  },
+  "C": {
+   "v2": {
+    "n": 339,
+    "band": {
+     "3a": 250,
+     "2": 80,
+     "1": 9
+    },
+    "sector": {
+     "C": 130,
+     "B": 126,
+     "D": 83
+    },
+    "cell": {
+     "C3a": 101,
+     "B3a": 93,
+     "D3a": 56,
+     "B2": 30,
+     "C2": 26,
+     "D2": 24
+    },
+    "scene": {
+     "sceneN11": 88,
+     "sceneH3": 81,
+     "sceneH1": 66,
+     "sceneH2": 50,
+     "sceneN9": 50,
+     "sceneL1": 4
+    }
+   },
+   "v3a": {
+    "n": 464,
+    "band": {
+     "3a": 306,
+     "2": 158
+    },
+    "sector": {
+     "C": 170,
+     "B": 151,
+     "D": 143
+    },
+    "cell": {
+     "C3a": 117,
+     "D3a": 96,
+     "B3a": 93,
+     "B2": 58,
+     "C2": 53,
+     "D2": 47
+    },
+    "scene": {
+     "sceneN11": 148,
+     "sceneN9": 144,
+     "sceneH1": 110,
+     "sceneH3": 32,
+     "sceneH2": 30
+    }
+   }
+  },
+  "D": {
+   "v2": {
+    "n": 105,
+    "band": {
+     "3a": 74,
+     "2": 31
+    },
+    "sector": {
+     "D": 38,
+     "C": 37,
+     "B": 30
+    },
+    "cell": {
+     "C3a": 28,
+     "D3a": 25,
+     "B3a": 21,
+     "D2": 13,
+     "C2": 9,
+     "B2": 9
+    },
+    "scene": {
+     "sceneH2": 91,
+     "sceneH3": 14
+    }
+   },
+   "v3a": {
+    "n": 13,
+    "band": {
+     "3a": 11,
+     "2": 2
+    },
+    "sector": {
+     "B": 6,
+     "C": 4,
+     "D": 3
+    },
+    "cell": {
+     "C3a": 4,
+     "B3a": 4,
+     "D3a": 3,
+     "B2": 2
+    },
+    "scene": {
+     "sceneH3": 7,
+     "sceneH2": 6
+    }
+   }
+  }
+ },
+ "tableD_scene": {
+  "B": {
+   "sceneH1": {
+    "n_risk": 516,
+    "v2": {
+     "n": 1,
+     "rate": 0.0006459948320413437,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 0,
+      "조명형": 0,
+      "대리선형": 0,
+      "경계칸형": 1,
+      "미분류": 0
+     }
+    },
+    "v3a": {
+     "n": 3,
+     "rate": 0.001937984496124031,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 3,
+      "조명형": 0,
+      "대리선형": 0,
+      "경계칸형": 0,
+      "미분류": 0
+     }
+    },
+    "d_rate": 0.0012919896640826872
+   },
+   "sceneH2": {
+    "n_risk": 426,
+    "v2": {
+     "n": 141,
+     "rate": 0.11032863849765258,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 2,
+      "조명형": 0,
+      "대리선형": 0,
+      "경계칸형": 65,
+      "미분류": 74
+     }
+    },
+    "v3a": {
+     "n": 155,
+     "rate": 0.12128325508607199,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 19,
+      "조명형": 0,
+      "대리선형": 0,
+      "경계칸형": 48,
+      "미분류": 88
+     }
+    },
+    "d_rate": 0.01095461658841941
+   },
+   "sceneH3": {
+    "n_risk": 921,
+    "v2": {
+     "n": 31,
+     "rate": 0.011219688744118711,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 16,
+      "조명형": 0,
+      "대리선형": 0,
+      "경계칸형": 1,
+      "미분류": 14
+     }
+    },
+    "v3a": {
+     "n": 67,
+     "rate": 0.024249004705030764,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 54,
+      "조명형": 4,
+      "대리선형": 1,
+      "경계칸형": 1,
+      "미분류": 7
+     }
+    },
+    "d_rate": 0.013029315960912053
+   },
+   "sceneL1": {
+    "n_risk": 777,
+    "v2": {
+     "n": 110,
+     "rate": 0.04719004719004719,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 44,
+      "조명형": 0,
+      "대리선형": 0,
+      "경계칸형": 21,
+      "미분류": 45
+     }
+    },
+    "v3a": {
+     "n": 4,
+     "rate": 0.001716001716001716,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 3,
+      "조명형": 0,
+      "대리선형": 0,
+      "경계칸형": 0,
+      "미분류": 1
+     }
+    },
+    "d_rate": -0.045474045474045474
+   },
+   "sceneN11": {
+    "n_risk": 960,
+    "v2": {
+     "n": 2,
+     "rate": 0.0006944444444444445,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 2,
+      "조명형": 0,
+      "대리선형": 0,
+      "경계칸형": 0,
+      "미분류": 0
+     }
+    },
+    "v3a": {
+     "n": 0,
+     "rate": 0.0,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 0,
+      "조명형": 0,
+      "대리선형": 0,
+      "경계칸형": 0,
+      "미분류": 0
+     }
+    },
+    "d_rate": -0.0006944444444444445
+   },
+   "sceneN9": {
+    "n_risk": 960,
+    "v2": {
+     "n": 1,
+     "rate": 0.00034722222222222224,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 1,
+      "조명형": 0,
+      "대리선형": 0,
+      "경계칸형": 0,
+      "미분류": 0
+     }
+    },
+    "v3a": {
+     "n": 4,
+     "rate": 0.001388888888888889,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 4,
+      "조명형": 0,
+      "대리선형": 0,
+      "경계칸형": 0,
+      "미분류": 0
+     }
+    },
+    "d_rate": 0.0010416666666666667
+   }
+  },
+  "C": {
+   "sceneH1": {
+    "n_risk": 960,
+    "v2": {
+     "n": 356,
+     "rate": 0.12361111111111112,
+     "fams": {
+      "장식형": 99,
+      "지형통계형": 154,
+      "조명형": 0,
+      "대리선형": 27,
+      "경계칸형": 10,
+      "미분류": 66
+     }
+    },
+    "v3a": {
+     "n": 524,
+     "rate": 0.18194444444444444,
+     "fams": {
+      "장식형": 136,
+      "지형통계형": 201,
+      "조명형": 0,
+      "대리선형": 11,
+      "경계칸형": 66,
+      "미분류": 110
+     }
+    },
+    "d_rate": 0.05833333333333332
+   },
+   "sceneH2": {
+    "n_risk": 960,
+    "v2": {
+     "n": 599,
+     "rate": 0.20798611111111112,
+     "fams": {
+      "장식형": 229,
+      "지형통계형": 261,
+      "조명형": 19,
+      "대리선형": 17,
+      "경계칸형": 23,
+      "미분류": 50
+     }
+    },
+    "v3a": {
+     "n": 294,
+     "rate": 0.10208333333333333,
+     "fams": {
+      "장식형": 111,
+      "지형통계형": 121,
+      "조명형": 16,
+      "대리선형": 10,
+      "경계칸형": 6,
+      "미분류": 30
+     }
+    },
+    "d_rate": -0.10590277777777779
+   },
+   "sceneH3": {
+    "n_risk": 960,
+    "v2": {
+     "n": 426,
+     "rate": 0.14791666666666667,
+     "fams": {
+      "장식형": 124,
+      "지형통계형": 171,
+      "조명형": 31,
+      "대리선형": 2,
+      "경계칸형": 17,
+      "미분류": 81
+     }
+    },
+    "v3a": {
+     "n": 236,
+     "rate": 0.08194444444444444,
+     "fams": {
+      "장식형": 57,
+      "지형통계형": 119,
+      "조명형": 17,
+      "대리선형": 0,
+      "경계칸형": 11,
+      "미분류": 32
+     }
+    },
+    "d_rate": -0.06597222222222222
+   },
+   "sceneL1": {
+    "n_risk": 960,
+    "v2": {
+     "n": 188,
+     "rate": 0.06527777777777778,
+     "fams": {
+      "장식형": 44,
+      "지형통계형": 132,
+      "조명형": 1,
+      "대리선형": 2,
+      "경계칸형": 5,
+      "미분류": 4
+     }
+    },
+    "v3a": {
+     "n": 22,
+     "rate": 0.007638888888888889,
+     "fams": {
+      "장식형": 10,
+      "지형통계형": 12,
+      "조명형": 0,
+      "대리선형": 0,
+      "경계칸형": 0,
+      "미분류": 0
+     }
+    },
+    "d_rate": -0.05763888888888889
+   },
+   "sceneN11": {
+    "n_risk": 960,
+    "v2": {
+     "n": 217,
+     "rate": 0.07534722222222222,
+     "fams": {
+      "장식형": 16,
+      "지형통계형": 96,
+      "조명형": 7,
+      "대리선형": 4,
+      "경계칸형": 6,
+      "미분류": 88
+     }
+    },
+    "v3a": {
+     "n": 383,
+     "rate": 0.1329861111111111,
+     "fams": {
+      "장식형": 32,
+      "지형통계형": 134,
+      "조명형": 16,
+      "대리선형": 18,
+      "경계칸형": 35,
+      "미분류": 148
+     }
+    },
+    "d_rate": 0.05763888888888889
+   },
+   "sceneN9": {
+    "n_risk": 960,
+    "v2": {
+     "n": 302,
+     "rate": 0.10486111111111111,
+     "fams": {
+      "장식형": 125,
+      "지형통계형": 93,
+      "조명형": 3,
+      "대리선형": 29,
+      "경계칸형": 2,
+      "미분류": 50
+     }
+    },
+    "v3a": {
+     "n": 530,
+     "rate": 0.1840277777777778,
+     "fams": {
+      "장식형": 234,
+      "지형통계형": 85,
+      "조명형": 6,
+      "대리선형": 32,
+      "경계칸형": 29,
+      "미분류": 144
+     }
+    },
+    "d_rate": 0.07916666666666668
+   }
+  },
+  "D": {
+   "sceneH1": {
+    "n_risk": 960,
+    "v2": {
+     "n": 2,
+     "rate": 0.0006944444444444445,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 2,
+      "조명형": 0,
+      "대리선형": 0,
+      "경계칸형": 0,
+      "미분류": 0
+     }
+    },
+    "v3a": {
+     "n": 28,
+     "rate": 0.009722222222222222,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 27,
+      "조명형": 0,
+      "대리선형": 0,
+      "경계칸형": 1,
+      "미분류": 0
+     }
+    },
+    "d_rate": 0.009027777777777779
+   },
+   "sceneH2": {
+    "n_risk": 960,
+    "v2": {
+     "n": 412,
+     "rate": 0.14305555555555555,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 229,
+      "조명형": 4,
+      "대리선형": 15,
+      "경계칸형": 73,
+      "미분류": 91
+     }
+    },
+    "v3a": {
+     "n": 89,
+     "rate": 0.03090277777777778,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 72,
+      "조명형": 2,
+      "대리선형": 9,
+      "경계칸형": 0,
+      "미분류": 6
+     }
+    },
+    "d_rate": -0.11215277777777777
+   },
+   "sceneH3": {
+    "n_risk": 960,
+    "v2": {
+     "n": 31,
+     "rate": 0.010763888888888889,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 16,
+      "조명형": 0,
+      "대리선형": 0,
+      "경계칸형": 1,
+      "미분류": 14
+     }
+    },
+    "v3a": {
+     "n": 81,
+     "rate": 0.028125,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 68,
+      "조명형": 4,
+      "대리선형": 1,
+      "경계칸형": 1,
+      "미분류": 7
+     }
+    },
+    "d_rate": 0.017361111111111112
+   },
+   "sceneL1": {
+    "n_risk": 960,
+    "v2": {
+     "n": 0,
+     "rate": 0.0,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 0,
+      "조명형": 0,
+      "대리선형": 0,
+      "경계칸형": 0,
+      "미분류": 0
+     }
+    },
+    "v3a": {
+     "n": 2,
+     "rate": 0.0006944444444444445,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 2,
+      "조명형": 0,
+      "대리선형": 0,
+      "경계칸형": 0,
+      "미분류": 0
+     }
+    },
+    "d_rate": 0.0006944444444444445
+   },
+   "sceneN11": {
+    "n_risk": 960,
+    "v2": {
+     "n": 17,
+     "rate": 0.005902777777777778,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 12,
+      "조명형": 0,
+      "대리선형": 4,
+      "경계칸형": 1,
+      "미분류": 0
+     }
+    },
+    "v3a": {
+     "n": 1,
+     "rate": 0.00034722222222222224,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 1,
+      "조명형": 0,
+      "대리선형": 0,
+      "경계칸형": 0,
+      "미분류": 0
+     }
+    },
+    "d_rate": -0.005555555555555556
+   },
+   "sceneN9": {
+    "n_risk": 960,
+    "v2": {
+     "n": 2,
+     "rate": 0.0006944444444444445,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 1,
+      "조명형": 0,
+      "대리선형": 1,
+      "경계칸형": 0,
+      "미분류": 0
+     }
+    },
+    "v3a": {
+     "n": 3,
+     "rate": 0.0010416666666666667,
+     "fams": {
+      "장식형": 0,
+      "지형통계형": 3,
+      "조명형": 0,
+      "대리선형": 0,
+      "경계칸형": 0,
+      "미분류": 0
+     }
+    },
+    "d_rate": 0.0003472222222222222
+   }
+  }
+ },
+ "tableE_radial": {
+  "B": {
+   "1": {
+    "n_risk": 1413,
+    "v2": {
+     "n": 9,
+     "rate": 0.0021231422505307855
+    },
+    "v3a": {
+     "n": 25,
+     "rate": 0.005897617362585515
+    }
+   },
+   "2": {
+    "n_risk": 1308,
+    "v2": {
+     "n": 86,
+     "rate": 0.021916411824668705
+    },
+    "v3a": {
+     "n": 93,
+     "rate": 0.023700305810397553
+    }
+   },
+   "3a": {
+    "n_risk": 1059,
+    "v2": {
+     "n": 137,
+     "rate": 0.04312244255587032
+    },
+    "v3a": {
+     "n": 55,
+     "rate": 0.017311929493232608
+    }
+   },
+   "3b": {
+    "n_risk": 780,
+    "v2": {
+     "n": 54,
+     "rate": 0.023076923076923078
+    },
+    "v3a": {
+     "n": 60,
+     "rate": 0.02564102564102564
+    }
+   },
+   "loglog_slope_v2": 1.1836651533955262,
+   "loglog_slope_v3a": 0.5976778970493223
+  },
+  "C": {
+   "1": {
+    "n_risk": 1440,
+    "v2": {
+     "n": 11,
+     "rate": 0.0025462962962962965
+    },
+    "v3a": {
+     "n": 24,
+     "rate": 0.005555555555555556
+    }
+   },
+   "2": {
+    "n_risk": 1440,
+    "v2": {
+     "n": 224,
+     "rate": 0.05185185185185185
+    },
+    "v3a": {
+     "n": 366,
+     "rate": 0.08472222222222223
+    }
+   },
+   "3a": {
+    "n_risk": 1440,
+    "v2": {
+     "n": 565,
+     "rate": 0.13078703703703703
+    },
+    "v3a": {
+     "n": 654,
+     "rate": 0.15138888888888888
+    }
+   },
+   "3b": {
+    "n_risk": 1440,
+    "v2": {
+     "n": 1288,
+     "rate": 0.29814814814814816
+    },
+    "v3a": {
+     "n": 945,
+     "rate": 0.21875
+    }
+   },
+   "loglog_slope_v2": 2.0654021114530745,
+   "loglog_slope_v3a": 1.6247119899031237
+  },
+  "D": {
+   "1": {
+    "n_risk": 1440,
+    "v2": {
+     "n": 0,
+     "rate": 0.0
+    },
+    "v3a": {
+     "n": 0,
+     "rate": 0.0
+    }
+   },
+   "2": {
+    "n_risk": 1440,
+    "v2": {
+     "n": 59,
+     "rate": 0.013657407407407408
+    },
+    "v3a": {
+     "n": 3,
+     "rate": 0.0006944444444444445
+    }
+   },
+   "3a": {
+    "n_risk": 1440,
+    "v2": {
+     "n": 135,
+     "rate": 0.03125
+    },
+    "v3a": {
+     "n": 21,
+     "rate": 0.004861111111111111
+    }
+   },
+   "3b": {
+    "n_risk": 1440,
+    "v2": {
+     "n": 270,
+     "rate": 0.0625
+    },
+    "v3a": {
+     "n": 180,
+     "rate": 0.041666666666666664
+    }
+   },
+   "loglog_slope_v2": 1.4409250677993193,
+   "loglog_slope_v3a": 3.8472671766039377
+  }
+ },
+ "tableF_cooccurrence": {
+  "B": {
+   "v2": {
+    "n": 286,
+    "pairs": {
+     "장식형×지형통계형": 0,
+     "장식형×조명형": 0,
+     "장식형×대리선형": 0,
+     "장식형×경계칸형": 0,
+     "지형통계형×조명형": 0,
+     "지형통계형×대리선형": 0,
+     "지형통계형×경계칸형": 8,
+     "조명형×대리선형": 0,
+     "조명형×경계칸형": 0,
+     "대리선형×경계칸형": 0
+    }
+   },
+   "v3a": {
+    "n": 233,
+    "pairs": {
+     "장식형×지형통계형": 0,
+     "장식형×조명형": 0,
+     "장식형×대리선형": 0,
+     "장식형×경계칸형": 0,
+     "지형통계형×조명형": 2,
+     "지형통계형×대리선형": 1,
+     "지형통계형×경계칸형": 14,
+     "조명형×대리선형": 0,
+     "조명형×경계칸형": 0,
+     "대리선형×경계칸형": 0
+    }
+   }
+  },
+  "C": {
+   "v2": {
+    "n": 2088,
+    "pairs": {
+     "장식형×지형통계형": 346,
+     "장식형×조명형": 151,
+     "장식형×대리선형": 243,
+     "장식형×경계칸형": 193,
+     "지형통계형×조명형": 121,
+     "지형통계형×대리선형": 172,
+     "지형통계형×경계칸형": 234,
+     "조명형×대리선형": 38,
+     "조명형×경계칸형": 69,
+     "대리선형×경계칸형": 97
+    }
+   },
+   "v3a": {
+    "n": 1989,
+    "pairs": {
+     "장식형×지형통계형": 248,
+     "장식형×조명형": 170,
+     "장식형×대리선형": 170,
+     "장식형×경계칸형": 259,
+     "지형통계형×조명형": 125,
+     "지형통계형×대리선형": 90,
+     "지형통계형×경계칸형": 254,
+     "조명형×대리선형": 55,
+     "조명형×경계칸형": 112,
+     "대리선형×경계칸형": 97
+    }
+   }
+  },
+  "D": {
+   "v2": {
+    "n": 464,
+    "pairs": {
+     "장식형×지형통계형": 0,
+     "장식형×조명형": 0,
+     "장식형×대리선형": 0,
+     "장식형×경계칸형": 0,
+     "지형통계형×조명형": 9,
+     "지형통계형×대리선형": 17,
+     "지형통계형×경계칸형": 107,
+     "조명형×대리선형": 5,
+     "조명형×경계칸형": 2,
+     "대리선형×경계칸형": 7
+    }
+   },
+   "v3a": {
+    "n": 204,
+    "pairs": {
+     "장식형×지형통계형": 0,
+     "장식형×조명형": 0,
+     "장식형×대리선형": 0,
+     "장식형×경계칸형": 0,
+     "지형통계형×조명형": 7,
+     "지형통계형×대리선형": 10,
+     "지형통계형×경계칸형": 35,
+     "조명형×대리선형": 3,
+     "조명형×경계칸형": 1,
+     "대리선형×경계칸형": 2
+    }
+   }
+  }
+ },
+ "tableG_cue_px": {
+  "A|sceneH1": {
+   "R": 292269,
+   "Jt": 273345,
+   "Ta": 74208,
+   "V": 34398,
+   "Sg": 1959
+  },
+  "A|sceneH2": {
+   "Ta": 129921,
+   "R": 60333,
+   "Jt": 20211,
+   "N": 11499,
+   "Sg": 1722,
+   "Sh": 1362,
+   "V": 405
+  },
+  "A|sceneH3": {
+   "Dr": 53982,
+   "Sg": 42822,
+   "V": 40074,
+   "Bo": 27270,
+   "Mh": 21240,
+   "Cm": 16677,
+   "N": 12888,
+   "Ta": 7227,
+   "Jt": 4257,
+   "Sh": 2772,
+   "Ux": 240,
+   "R": 210
+  },
+  "A|sceneL1": {
+   "Ta": 300447,
+   "R": 158097,
+   "Sh": 49197,
+   "N": 42363,
+   "Jt": 10815,
+   "Dr": 3009
+  },
+  "A|sceneN11": {
+   "V": 109878,
+   "Rm": 86589,
+   "Dr": 74691,
+   "Sh": 54012,
+   "Jt": 17760,
+   "Mh": 12171,
+   "Tg": 3537
+  },
+  "A|sceneN9": {
+   "V": 629556,
+   "Sh": 121908,
+   "Tg": 18732,
+   "Ta": 18102,
+   "Sg": 16083,
+   "Mh": 15753,
+   "Dr": 7173,
+   "Jt": 5067,
+   "R": 3345,
+   "Rm": 846
+  },
+  "B|sceneH3": {
+   "Ux": 141
+  },
+  "B|sceneN11": {
+   "V": 43731
+  },
+  "C|sceneH1": {
+   "R": 292269,
+   "Jt": 273345,
+   "Ta": 74208,
+   "V": 34398,
+   "Sg": 1959
+  },
+  "C|sceneH2": {
+   "Ta": 129921,
+   "R": 60333,
+   "Jt": 20211,
+   "N": 11499,
+   "Sg": 1722,
+   "Sh": 1362,
+   "V": 405
+  },
+  "C|sceneH3": {
+   "Dr": 53982,
+   "Sg": 42822,
+   "V": 40074,
+   "Bo": 27270,
+   "Mh": 21240,
+   "Cm": 16677,
+   "N": 12888,
+   "Ta": 7227,
+   "Jt": 4257,
+   "Sh": 2772,
+   "Ux": 240,
+   "R": 210
+  },
+  "C|sceneL1": {
+   "Ta": 300447,
+   "R": 158097,
+   "Sh": 49197,
+   "N": 42363,
+   "Jt": 10815,
+   "Dr": 3009
+  },
+  "C|sceneN11": {
+   "V": 115695,
+   "Rm": 86589,
+   "Dr": 74691,
+   "Sh": 53862,
+   "Jt": 17760,
+   "Mh": 12171,
+   "Tg": 3537
+  },
+  "C|sceneN9": {
+   "V": 629556,
+   "Sh": 121908,
+   "Tg": 18732,
+   "Ta": 18102,
+   "Sg": 16083,
+   "Mh": 15753,
+   "Dr": 7173,
+   "Jt": 5067,
+   "R": 3345,
+   "Rm": 3144
+  },
+  "D|sceneH3": {
+   "Ux": 141
+  }
+ },
+ "outliers": [
+  {
+   "kind": "cue_residual_in_off_arm",
+   "arm": "B",
+   "scene": "sceneH3",
+   "px": 141,
+   "keys": {
+    "Ux": 141
+   },
+   "ref_C_px": 229659,
+   "frac_of_C": 0.000613953731401774
+  },
+  {
+   "kind": "cue_residual_in_off_arm",
+   "arm": "B",
+   "scene": "sceneN11",
+   "px": 43731,
+   "keys": {
+    "V": 43731
+   },
+   "ref_C_px": 364305,
+   "frac_of_C": 0.12003952731914193
+  },
+  {
+   "kind": "cue_residual_in_off_arm",
+   "arm": "D",
+   "scene": "sceneH3",
+   "px": 141,
+   "keys": {
+    "Ux": 141
+   },
+   "ref_C_px": 229659,
+   "frac_of_C": 0.000613953731401774
+  },
+  {
+   "kind": "AC_cue_px_mismatch",
+   "scene": "sceneN11",
+   "key": "V",
+   "A_px": 109878,
+   "C_px": 115695,
+   "rel": 0.052940534046851964
+  },
+  {
+   "kind": "AC_cue_px_mismatch",
+   "scene": "sceneN9",
+   "key": "Rm",
+   "A_px": 846,
+   "C_px": 3144,
+   "rel": 2.7163120567375887
+  },
+  {
+   "kind": "scene_rate_up",
+   "arm": "B",
+   "scene": "sceneH2",
+   "rate_v2": 0.11032863849765258,
+   "rate_v3a": 0.12128325508607199,
+   "d": 0.01095461658841941,
+   "top_family_v3a": "미분류"
+  },
+  {
+   "kind": "scene_rate_up",
+   "arm": "B",
+   "scene": "sceneH3",
+   "rate_v2": 0.011219688744118711,
+   "rate_v3a": 0.024249004705030764,
+   "d": 0.013029315960912053,
+   "top_family_v3a": "지형통계형"
+  },
+  {
+   "kind": "scene_rate_up",
+   "arm": "C",
+   "scene": "sceneH1",
+   "rate_v2": 0.12361111111111112,
+   "rate_v3a": 0.18194444444444444,
+   "d": 0.05833333333333332,
+   "top_family_v3a": "지형통계형"
+  },
+  {
+   "kind": "scene_rate_up",
+   "arm": "C",
+   "scene": "sceneN11",
+   "rate_v2": 0.07534722222222222,
+   "rate_v3a": 0.1329861111111111,
+   "d": 0.05763888888888889,
+   "top_family_v3a": "미분류"
+  },
+  {
+   "kind": "scene_rate_up",
+   "arm": "C",
+   "scene": "sceneN9",
+   "rate_v2": 0.10486111111111111,
+   "rate_v3a": 0.1840277777777778,
+   "d": 0.07916666666666668,
+   "top_family_v3a": "장식형"
+  },
+  {
+   "kind": "scene_rate_up",
+   "arm": "D",
+   "scene": "sceneH1",
+   "rate_v2": 0.0006944444444444445,
+   "rate_v3a": 0.009722222222222222,
+   "d": 0.009027777777777779,
+   "top_family_v3a": "지형통계형"
+  },
+  {
+   "kind": "scene_rate_up",
+   "arm": "D",
+   "scene": "sceneH3",
+   "rate_v2": 0.010763888888888889,
+   "rate_v3a": 0.028125,
+   "d": 0.017361111111111112,
+   "top_family_v3a": "지형통계형"
+  }
+ ],
+ "sigma_summary": {
+  "rule": "Δ(가족 발화율) 의 |Δ| > max(σ_v2, σ_v3) · σ = ddof=1 · 3시드",
+  "note": "본 절은 PREREG §2.2 「층화」 = **인쇄 의무**이지 판정 축이 아니다. σ 초과 여부는 서술의 강도를 규율하기 위해 함께 인쇄한다.",
+  "exceed": [],
+  "n_tested": 15
+ }
+}

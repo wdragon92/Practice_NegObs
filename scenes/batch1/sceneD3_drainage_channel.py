@@ -391,6 +391,40 @@ if _sc_ov:
 
 
 # ===========================================================================
+# [B'] keep_dressing - the v3 arm C control, resolved ONCE at module scope
+# ===========================================================================
+#   Ported verbatim from `sceneC2_leaf_stairs.py:496-520` (the canonical
+#   implementation) per RENDER_PLAN_V3 §1.3. Every use below reads this one
+#   constant, so `grep KEEP_DRESSING` is the whole audit surface. False (the
+#   default, and the value in both existing arms) makes every guarded
+#   expression collapse to exactly what it was before the patch.
+#   Arm C = `{"hazard_stairs": false, "keep_dressing": true}` with every `cue_*`
+#   at its A-arm default: the open channel is filled, the roadside stays.
+#   The two contradictions below are FATAL rather than silently resolved: an arm
+#   whose config does not say what it means must not render 24 cuts and be
+#   discovered later in a metrics table.
+KEEP_DRESSING = bool(SCENE_CONFIG.get("keep_dressing", False))
+if KEEP_DRESSING:
+    if SCENE_CONFIG.get("hazard_stairs", True):
+        raise SystemExit(
+            "[FATAL sceneD3] keep_dressing=True requires hazard_stairs=False - "
+            "with the hazard ON there is nothing to keep and the arm would be "
+            "an unlabelled duplicate of arm A. Fix the render config.")
+    if not SCENE_CONFIG.get("cue_scene_dressing", True):
+        raise SystemExit(
+            "[FATAL sceneD3] keep_dressing=True contradicts "
+            "cue_scene_dressing=False - the dressing IS what this arm exists to "
+            "preserve.")
+    print("[keep_dressing] sceneD3 ON - hazard geometry only (trapezoidal "
+          "channel · bed leaves · culvert mouth -> the opening line filled to "
+          "z=0); the grass overhang keeps its ON transform, the concrete lip "
+          "(`cue_material_break`) and the fence/houses/trees dressing are "
+          "already hazard-free, and **the cover slab is rebuilt** - it spans "
+          "x -22..0 only, i.e. the approach, never the drop, and its top "
+          "(0.004) is the camera datum the plain OFF arm silently loses.")
+
+
+# ===========================================================================
 # [C] path constants + required texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -838,6 +872,10 @@ def main():
         # buried stretch past the culvert - the only +X plate that covers the opening band (lid + main body).
         # with hazard_stairs=False (the flat control) FlatFill fills the whole opening line, so
         # building it here would make the top faces coplanar (Z-fighting) -> hazard geometry only.
+        # [v3 arm C] The keep_dressing arm ALSO calls `build_flat_fill`, so the coplanarity this
+        # guard avoids is exactly as real there. Writing `or KEEP_DRESSING` here would author the
+        # Z-fighting the line above forbids. Deliberately left as a bare `hazard_stairs` test, which
+        # the module guard already forces False on that arm.
         if cfg["hazard_stairs"]:
             plate("BeyondLid", by["y0"], by["y1"], by["top"], by["lid_t"],
                   M["grass"], xa=by["lid_x0"], xb=by["lid_x1"])
@@ -1173,6 +1211,47 @@ def main():
         if cfg["grass_overhang"]:
             build_overhang(M)
         build_culvert(M)
+        build_cues(M)
+    elif KEEP_DRESSING:
+        # [v3 arm C] hazard-only removal - and this scene is the one where
+        #   "hazard-only" is NOT the same as the plain OFF branch.
+        #
+        #   (1) `build_cover` is rebuilt. The cover slab spans x -22..0 — the
+        #       APPROACH — and stops at the drop-start edge; it never bridges
+        #       the channel, so it is not hazard geometry, it is the surface the
+        #       walker is standing on. The OFF branch drops it only because the
+        #       hazard split is coarse, and the cost is a **4 mm camera-datum
+        #       shift**: the ON arm's first downward hit over x<0, |y| <= 0.65
+        #       is CoverSlab at z=0.004, the OFF arm's is FlatFill at z=0.000.
+        #       The sampler draws |y| <= 0.90 about gy=0.0, so most of the strip
+        #       lands in that band and `cam.ground_z` moves for it — exactly the
+        #       failure that cost v2 183/792 (A,C) pairs. Rebuilding the slab
+        #       makes arm C's datum bit-identical to arm A's. It also puts the
+        #       `cover` ground_kit plan (authored at z=`cover.top`=0.004, and
+        #       applied in every arm) back onto real geometry instead of leaving
+        #       it 4 mm in the air. Arm D legitimately keeps the old datum —
+        #       that difference is the intervention, and the pose gate declares
+        #       it rather than hiding it.
+        #   (2) `build_flat_fill` still runs: it is what removes the drop. Its
+        #       top (0.000) sits 4 mm under the cover slab, inside this scene's
+        #       own 0.001..0.004 anti-coplanarity convention, so the two read as
+        #       slab-on-fill and no face is coplanar with another visible face.
+        #   (3) The grass overhang is dressing, not hazard: `build_hedge` strips
+        #       at `base_z=-0.04` on the verge plane, x >= 0.4 (outside the
+        #       camera column entirely). It is this scene's `vegetation_edge`
+        #       cue, so arm C keeps it at its ON transform.
+        #   (4) `build_cues` is wired for the same reason as everywhere else —
+        #       both keys default OFF here (being unguarded is the identity), so
+        #       under the canonical arm C recipe it authors nothing, but the
+        #       railing is a flat line at z 0..0.90 and the tactile plate is
+        #       laid at `cover.top`, so with the slab back both land correctly.
+        #   NOT rebuilt: the channel walls/invert, the bed leaf litter (its
+        #   whole meaning is "caught inside the channel"), and the culvert mouth
+        #   — the hazard and its interior.
+        build_cover(M)
+        build_flat_fill(M)
+        if cfg["grass_overhang"]:
+            build_overhang(M)
         build_cues(M)
     else:
         build_flat_fill(M)

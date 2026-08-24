@@ -335,6 +335,47 @@ if _sc_ov:
 
 
 # ===========================================================================
+# [B'] keep_dressing — the v3 arm C control, resolved ONCE at module scope
+# ===========================================================================
+#   Arm C = "hazard geometry removed, cue and dressing objects KEPT in their ON
+#   transforms" (RENDER_PLAN_V3 §1.2). The pattern is ported from the sibling
+#   `sceneC2_leaf_stairs.py:496-520`, verbatim in structure and in reasoning.
+#   Every use below reads this one constant, so `grep KEEP_DRESSING` is the whole
+#   audit surface, and False — the default, and the value both existing arms
+#   carry — makes every guarded expression collapse to exactly the pre-patch code
+#   path.
+#   The contradictions are FATAL rather than silently resolved: an arm whose
+#   config does not say what it means must not render 24 cuts and be discovered
+#   later in a metrics table (sceneC2:503-507, same reasoning).
+#   `snow_cover` is deliberately NOT constrained: it is this scene's signature
+#   toggle, not its cue set, and `build_flat_fill` already carries the snow
+#   through to the hazard-off arms as one flat plate.
+KEEP_DRESSING = bool(SCENE_CONFIG.get("keep_dressing", False))
+if KEEP_DRESSING:
+    if SCENE_CONFIG.get("hazard_stairs", True):
+        raise SystemExit(
+            "[FATAL sceneC1] keep_dressing=True requires hazard_stairs=False — "
+            "with the hazard ON there is nothing to keep and the arm would be "
+            "an unlabelled duplicate of arm A. Fix the render config.")
+    if not SCENE_CONFIG.get("cue_scene_dressing", True):
+        raise SystemExit(
+            "[FATAL sceneC1] keep_dressing=True contradicts "
+            "cue_scene_dressing=False — the dressing IS what this arm exists to "
+            "preserve.")
+    print("[keep_dressing] sceneC1 ON — stair·side banks·stringers·lower ground "
+          "collapse into the off arm's flat plate (top z=0) with its flat snow "
+          "plate on top; the +Y pipe railing is rebuilt LEVEL on it (same y "
+          "1.60, same x span, same 0.90 m height) with its snow strip, the "
+          "stair-head tactile band rides through `build_ground_kit` (already "
+          "outside the hazard test), and piles·pole·buildings·benches·lamps·"
+          "hedges·houses keep their ON transforms — their lower datum already "
+          "collapses to 0 via `LOWER_TOP if cfg[\"hazard_stairs\"] else 0.0`. "
+          "Step nosing is NOT rebuilt (declared limit, see `build_cues`). "
+          "Camera datum (x<0, |y|<=0.90): snow top +0.050 in EVERY arm — "
+          "`Snow/PlateTop` in arm A, `Snow/FlatPlate` here.")
+
+
+# ===========================================================================
 # [C] path constants + required texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -1101,8 +1142,14 @@ def main():
         BOX(f"{ROOT}/Snow/RailStripFlat",
             ((rl["x_start"] + hx1) / 2.0, rl["y"], z_top - 0.002 - th / 2.0),
             (hx1 - rl["x_start"], w, th), M["snow"])
+        # [v3 arm C] the strip lies ON the rail, so it takes the rail's drop: in
+        #   arm C `build_cues` builds the rail level (drop 0), and a strip still
+        #   descending 2.04 m would leave it and bury itself in the flat plate.
+        #   `z_top` is derived from LIFT + rail_h above, which is unchanged.
+        #   Flag off ⇒ `DROP`, unchanged.
         sc.build_slope(stage, f"{ROOT}/Snow/RailStripSlope", 0.0, z_top,
-                       RUN, DROP, rl["y"] - w / 2.0, rl["y"] + w / 2.0,
+                       RUN, (0.0 if KEEP_DRESSING else DROP),
+                       rl["y"] - w / 2.0, rl["y"] + w / 2.0,
                        th, M["snow"], margin=0.0, collider=False)
 
     # -------------------------------------------------------------------
@@ -1110,7 +1157,16 @@ def main():
     # -------------------------------------------------------------------
     def build_cues(M):
         st = PARAMS["stairs"]
-        if cfg["cue_nosing"]:
+        # [v3 arm C · DECLARED LIMIT] the nosing is one anti-slip band per TREAD,
+        #   authored from `z_top` downwards at −0.17·i. In this arm the run is
+        #   filled by a 2.60 m thick plate topped at 0.000, so every band below the
+        #   first is inside that solid and renders 0 px. A nosing marks a step edge
+        #   and this arm has no step edges, so it is skipped rather than authored
+        #   invisible. The scene's other HZ-bound cue, the railing, IS kept (level,
+        #   below), and `cue_tactile` was never hazard-bound — `ground_plans()`
+        #   emits the stair-head band from `build_ground_kit`, which every arm
+        #   calls. Flag off ⇒ the branch runs as before.
+        if cfg["cue_nosing"] and not KEEP_DRESSING:
             ns = PARAMS["nosing"]
             sc.build_nosing(
                 stage, f"{ROOT}/Nosing", st["x0"],
@@ -1126,13 +1182,28 @@ def main():
 
             def bank_ground(x):
                 """Bank top face (the landing surface for the railing posts)."""
+                if KEEP_DRESSING:
+                    # [v3 arm C] the fill IS the ground here and it is level, so
+                    #   the landing surface is the snow top LIFT everywhere —
+                    #   which is exactly what this function already returns for
+                    #   x <= 0 (sceneC2:941 `terrain_z`, the identical construct).
+                    return LIFT
                 if x <= 0.0:
                     return LIFT
                 return LIFT - SLOPE_K * min(x, RUN)
 
+            # [v3 arm C] `DROP` is what tilts the rail: `build_railing_line` lays
+            #   the top/mid tubes from `run`/`drop` and uses `ground_fn` only for
+            #   the post and picket feet (scene_common:2471-2489). Flattening the
+            #   ground alone would leave the tube diving into the plate while its
+            #   posts stood on it, so the two switches are one change: no drop, no
+            #   slope. The rail keeps y 1.60, x_start −1.20, its 0.90 m height
+            #   over the walking surface and its statutory picket pitch, so the
+            #   (A,C) cue mask keeps its pixels.
             sc.build_railing_line(
                 stage, f"{ROOT}/StairRail_P", rl["y"], rl["x_start"],
-                st["x0"], RUN, DROP, bank_ground, M["rail"],
+                st["x0"], RUN, (0.0 if KEEP_DRESSING else DROP), bank_ground,
+                M["rail"],
                 rail_h=rl["rail_h"], post_r=rl["post_r"],
                 spacing=rl["spacing"], rail_r=rl["rail_r"],
                 rail_mid_r=rl["rail_mid_r"],
@@ -1207,6 +1278,12 @@ def main():
                     (po["r"] * 2.0, po["r"] * 2.0), po["cap_t"]):
                 BOX(f"{ROOT}/Snow/PoleCap{_sfx}", _c, _s, M["snow"])
         # Distant buildings - C(+X) is plinthed on the lower ground, D(-X) at terrace level
+        # [v3 arm C] this line is ALREADY the `Z_LOW` datum switch (sceneC2:666) and
+        #   it keys on the right thing: arm C renders with `hazard_stairs=False`, so
+        #   it yields 0.0 = the top of `build_flat_fill`'s plate, and building C sits
+        #   on the fill instead of 2.042 m under it. No `KEEP_DRESSING` term is
+        #   needed or wanted here — adding one could only make the two hazard-off
+        #   arms disagree about where the ground is.
         low_base = LOWER_TOP if cfg["hazard_stairs"] else 0.0
         for key, bd in PARAMS["buildings"].items():
             b = dict(bd)
@@ -1224,6 +1301,11 @@ def main():
     #   The snow caps follow the snow_cover toggle -> geometry stays consistent in the twin (bare stairs) too.
     # -------------------------------------------------------------------
     def build_context(M):
+        # [v3 arm C] same reading as `low_base` in `build_dressing`: already the
+        #   `Z_LOW` switch, already correct for arm C (hazard_stairs=False ⇒
+        #   0.0 + LIFT = the flat snow plate's top), so the benches, lamps, hedges
+        #   and low-rise houses on the "lower" side ride the fill and none of them
+        #   is a lower-anchor risk. Left untouched.
         low_top = (LOWER_TOP if cfg["hazard_stairs"] else 0.0) + LIFT
 
         def base_of(kind):
@@ -1383,6 +1465,23 @@ def main():
         build_cues(M)
         if cfg["snow_cover"]:
             build_snow(M)
+    elif KEEP_DRESSING:
+        # [v3 arm C] hazard-ONLY removal. Terrace, lower ground, the two side
+        #   banks, the flank stringers and the stair itself are the drop and its
+        #   supporting ground, so `build_flat_fill` replaces all five with the same
+        #   single plate the plain off arm lays — including its `Snow/FlatPlate`
+        #   when `snow_cover` is on, which is why the camera datum stays at the
+        #   +0.050 snow top that `Snow/PlateTop` gives arm A.
+        #   `build_cues` is then called exactly as the hazard branch calls it: the
+        #   railing comes back level with its snow strip (two switches inside),
+        #   the nosing is declared lost there. `build_snow` is NOT called — every
+        #   solid it emits is a per-tread bed/cap/chamfer or the approach plate's
+        #   drop-edge nose, i.e. the snow's copy of the stair.
+        #   Untouched by either arm and therefore still present: the material
+        #   break (`stair_mtl`, chosen above), the stair-head tactile band and the
+        #   whole paving/snow-trace kit (`build_ground_kit`), and the dressing.
+        build_flat_fill(M)
+        build_cues(M)
     else:
         build_flat_fill(M)
     if cfg["cue_scene_dressing"]:

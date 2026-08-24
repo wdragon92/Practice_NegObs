@@ -380,6 +380,43 @@ if _sc_ov:
 
 
 # ===========================================================================
+# [B'] keep_dressing - the v3 arm C control, resolved ONCE at module scope
+# ===========================================================================
+#   Ported verbatim from `sceneC2_leaf_stairs.py:496-520` (the canonical
+#   implementation) per RENDER_PLAN_V3 §1.3. Every use below reads this one
+#   constant, so `grep KEEP_DRESSING` is the whole audit surface. False (the
+#   default, and the value in both existing arms) makes every guarded
+#   expression collapse to exactly what it was before the patch.
+#   Arm C = `{"hazard_stairs": false, "keep_dressing": true}` with every `cue_*`
+#   at its A-arm default: the opening is slabbed over, everything a cue key can
+#   still switch stays switchable.
+#   The two contradictions below are FATAL rather than silently resolved: an arm
+#   whose config does not say what it means must not render 24 cuts and be
+#   discovered later in a metrics table.
+KEEP_DRESSING = bool(SCENE_CONFIG.get("keep_dressing", False))
+if KEEP_DRESSING:
+    if SCENE_CONFIG.get("hazard_stairs", True):
+        raise SystemExit(
+            "[FATAL sceneD2] keep_dressing=True requires hazard_stairs=False - "
+            "with the hazard ON there is nothing to keep and the arm would be "
+            "an unlabelled duplicate of arm A. Fix the render config.")
+    if not SCENE_CONFIG.get("cue_scene_dressing", True):
+        raise SystemExit(
+            "[FATAL sceneD2] keep_dressing=True contradicts "
+            "cue_scene_dressing=False - the dressing IS what this arm exists to "
+            "preserve.")
+    print("[keep_dressing] sceneD2 ON - hazard geometry only (formwork skirt · "
+          "basement floor and walls · rebar stubs -> the opening filled with "
+          "slab at z=0); the 4-way slab · the debris rim · the formwork panels "
+          "and site dressing keep their ON transforms, and `build_cues` is now "
+          "reachable so the opening paint (`cue_nosing`) and the temporary "
+          "railing (`cue_railing`) can be switched on this arm too - both are "
+          "anchored to the slab datum z=0, so they ride the fill exactly. "
+          "Camera datum untouched: the opening is at x 0.00..2.00 and the "
+          "sampler stands at x<0, where both arms carry the same Slab_W.")
+
+
+# ===========================================================================
 # [C] path constants + required texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -1152,6 +1189,29 @@ def main():
         build_skirt(M)
         build_lower(M)
         build_rebar(M)
+        n_debris = build_debris(M)
+        build_cues(M)
+    elif KEEP_DRESSING:
+        # [v3 arm C] hazard-only removal. This scene's OFF branch is not a bare
+        #   flat fill - it keeps the real 4-way slab and only plugs the opening
+        #   with `Slab_Fill` (same `deck.z_top`, same `deck.thick`, same
+        #   `skin_exclude` registration) - so mirroring it is already the
+        #   datum-preserving move: over the camera strip (x<0) both arms carry
+        #   the identical `Slab_W`, and the one prim that differs lives at
+        #   x 0.00..2.00, |y| <= 0.75, ahead of every sample. `build_debris` is
+        #   a pure function of its own seed and rejects the opening footprint in
+        #   both arms, so the debris rim is prim-for-prim identical.
+        #   What is added over the OFF branch is `build_cues`: the opening
+        #   warning paint (`cue_nosing`) and the temporary railing
+        #   (`cue_railing`). Both default OFF - being unguarded is this scene's
+        #   identity - so under the canonical arm C recipe this call authors
+        #   nothing; it exists so the keys are not trapped inside the hazard
+        #   branch (CUE_COVERAGE §4-4 (3)) and both are slab-anchored, so when
+        #   switched on they land on the fill with no transform change.
+        #   NOT rebuilt: skirt · basement · rebar stubs, all of which are the
+        #   hazard's own walls and its reinforcement, i.e. what arm C removes.
+        build_slab(M)
+        build_flat_fill(M)
         n_debris = build_debris(M)
         build_cues(M)
     else:

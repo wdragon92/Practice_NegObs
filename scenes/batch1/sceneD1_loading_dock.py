@@ -292,6 +292,42 @@ if _sc_ov:
 
 
 # ===========================================================================
+# [B'] keep_dressing - the v3 arm C control, resolved ONCE at module scope
+# ===========================================================================
+#   Ported verbatim from `sceneC2_leaf_stairs.py:496-520` (the canonical
+#   implementation) per RENDER_PLAN_V3 §1.3. Every use below reads this one
+#   constant, so `grep KEEP_DRESSING` is the whole audit surface. False (the
+#   default, and the value in both existing arms) makes every guarded
+#   expression collapse to exactly what it was before the patch.
+#   Arm C = `{"hazard_stairs": false, "keep_dressing": true}` with every `cue_*`
+#   at its A-arm default: the bay and the dock edge are filled in, the warning
+#   paint band stays.
+#   The two contradictions below are FATAL rather than silently resolved: an arm
+#   whose config does not say what it means must not render 24 cuts and be
+#   discovered later in a metrics table.
+KEEP_DRESSING = bool(SCENE_CONFIG.get("keep_dressing", False))
+if KEEP_DRESSING:
+    if SCENE_CONFIG.get("hazard_stairs", True):
+        raise SystemExit(
+            "[FATAL sceneD1] keep_dressing=True requires hazard_stairs=False - "
+            "with the hazard ON there is nothing to keep and the arm would be "
+            "an unlabelled duplicate of arm A. Fix the render config.")
+    if not SCENE_CONFIG.get("cue_scene_dressing", True):
+        raise SystemExit(
+            "[FATAL sceneD1] keep_dressing=True contradicts "
+            "cue_scene_dressing=False - the dressing IS what this arm exists to "
+            "preserve.")
+    print("[keep_dressing] sceneD1 ON - hazard geometry only (bay recess · "
+          "dock-edge wall · truck apron -> one flat deck at z=0); the yellow/"
+          "black warning band (`cue_nosing`, this scene's core cue) and the "
+          "bay railing (`cue_railing`) keep their ON transforms, both of which "
+          "are anchored to the deck datum z=0 and therefore ride the fill "
+          "exactly. Bumpers · end parapets are dropped with the wall they are "
+          "bolted to. The yard ground_kit plan stays out (it lives at z=-1.2, "
+          "under the fill) - same reason the plain OFF arm leaves it out.")
+
+
+# ===========================================================================
 # [C] Path constants + required texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -1092,6 +1128,27 @@ def main():
         if cfg["cue_railing"]:
             build_railing(M)
         build_parapets(M)
+    elif KEEP_DRESSING:
+        # [v3 arm C] hazard-only removal. The flat control's `FlatDeck` is
+        #   reused verbatim: its top face is `deck.z_top` = 0.000, the same z
+        #   the ON arm's Deck_W/S/N carry, and the camera corridor (gy=-4.0,
+        #   |y-gy| <= 0.90 -> y in [-4.90, -3.10]) never enters the bay mouth
+        #   (y +-3.00), so the ON arm's first downward hit over the whole strip
+        #   is Deck_S at 0.000 and this arm's is FlatDeck at 0.000. The datum is
+        #   identical by construction, not by luck.
+        #   What comes back with it are the two cue builders the plain OFF arm
+        #   drops. Both are anchored to the deck datum (band base proud
+        #   +0.0015, stripes +0.0035, rail posts from z=-0.10), never to the
+        #   apron, so they ride the fill with no transform change at all.
+        #   NOT rebuilt: bumpers (bolted to the dock-edge wall face, z -0.90..
+        #   -0.30 -> under the fill) and the end parapets (they exist to close
+        #   the unguarded platform ends, i.e. they are hazard furniture, and
+        #   they stand at |y| > 13.7 where no camera sample reaches).
+        build_flat_fill(M)
+        if cfg["cue_nosing"]:
+            n_stripe = build_band(M)
+        if cfg["cue_railing"]:
+            build_railing(M)
     else:
         build_flat_fill(M)
     yard_cnt = None
@@ -1101,6 +1158,13 @@ def main():
     #  [W2] Ground elements - after the dressing (scatter convention). **The deck plan runs in the
     #  control arm too** (the twins' only difference must be the drop geometry). The yard plan is at
     #  z=−1.2, so in the flat control (FlatDeck top face z=0) it would be buried and is left out.
+    #  [v3 arm C] The same physics holds for `keep_dressing`: arm C's ground IS this same FlatDeck,
+    #  so a z=−1.2 plan is under it there too (FlatDeck spans z −1.00..0.00 and the yard sits 0.2 m
+    #  below its underside). `yard=True` would author ~30 permanently invisible prims for a
+    #  footprint gate to explain later. The yard plan is also not a `cue_*` builder — no cue key
+    #  guards it — so CUE_COVERAGE §4-4 (3) does not ask for it. Leaving the expression untouched
+    #  keeps arm C's ground-kit set identical to arm D's and to the *deck* half of arm A's, which is
+    #  the half the gy=−4.0 camera corridor actually stands on. No KEEP_DRESSING term is added here.
     build_ground_kit(M, yard=bool(cfg["hazard_stairs"]))
 
     apply_dome_rot = sc.setup_lighting(stage, PARAMS["light"],

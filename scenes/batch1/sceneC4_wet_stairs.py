@@ -390,6 +390,41 @@ if _sc_ov:
 
 
 # ===========================================================================
+# [B'] keep_dressing — the v3 arm C control, resolved ONCE at module scope
+# ===========================================================================
+#   Ported verbatim from `sceneC2_leaf_stairs.py:496-520` (the canonical
+#   implementation) per RENDER_PLAN_V3 §1.3. Every use below reads this one
+#   constant, so `grep KEEP_DRESSING` is the whole audit surface. False (the
+#   default, and the value in both existing arms) makes every guarded
+#   expression collapse to exactly what it was before the patch.
+#   Arm C = `{"hazard_stairs": false, "keep_dressing": true}` with every `cue_*`
+#   at its A-arm default: the descent is removed, the cue objects stay.
+#   The two contradictions below are FATAL rather than silently resolved: an arm
+#   whose config does not say what it means must not render 24 cuts and be
+#   discovered later in a metrics table.
+KEEP_DRESSING = bool(SCENE_CONFIG.get("keep_dressing", False))
+if KEEP_DRESSING:
+    if SCENE_CONFIG.get("hazard_stairs", True):
+        raise SystemExit(
+            "[FATAL sceneC4] keep_dressing=True requires hazard_stairs=False — "
+            "with the hazard ON there is nothing to keep and the arm would be "
+            "an unlabelled duplicate of arm A. Fix the render config.")
+    if not SCENE_CONFIG.get("cue_scene_dressing", True):
+        raise SystemExit(
+            "[FATAL sceneC4] keep_dressing=True contradicts "
+            "cue_scene_dressing=False — the dressing IS what this arm exists to "
+            "preserve.")
+    print("[keep_dressing] sceneC4 ON — hazard geometry only (stair·cheek "
+          "band·grass bank·lower plaza -> flat z=0); the stair railing keeps "
+          "its ON transform (descending line), tactile paving · bollards · "
+          "civic dressing · buildings are already hazard-free and unchanged. "
+          "Tread water films · rain marks are dropped with the treads they "
+          "are plated onto (`wet_surface` is a material feature, not a cue). "
+          "Camera datum untouched: FlatFill's top is `upper.z_top` = the very "
+          "z the ON arm's UpperPlaza carries over the whole x<0 strip.")
+
+
+# ===========================================================================
 # [C] Path constants + required texture roles
 # ===========================================================================
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -1101,6 +1136,12 @@ def main():
                                  M["tactile"], front_dir=bo["front"],
                                  radius=bo["radius"], height=bo["height"],
                                  tactile=False)
+        # [v3 arm C · datum] This IS the sceneC2 `Z_LOW` switch and it is
+        #   already correct for `keep_dressing`: the module guard makes
+        #   `hazard_stairs` False whenever KEEP_DRESSING is True, so the
+        #   lower-anchored building plinths already read 0.0 = the FlatFill
+        #   top and ride the fill. Writing `or KEEP_DRESSING` here would be a
+        #   no-op. Left untouched on purpose.
         low_base = LOWER_TOP if cfg["hazard_stairs"] else 0.0
         for key, bd in PARAMS["buildings"].items():
             b = dict(bd)
@@ -1122,6 +1163,10 @@ def main():
     # -------------------------------------------------------------------
     def build_civic(M):
         wet = cfg["wet_surface"]
+        # [v3 arm C · datum] Same `Z_LOW` switch as `build_dressing`, same
+        #   verdict: KEEP_DRESSING implies hazard_stairs=False, so the
+        #   sculpture · colonnade · lower planters already sit on 0.0 = the
+        #   FlatFill top. No KEEP_DRESSING term is needed or added.
         low = LOWER_TOP if cfg["hazard_stairs"] else 0.0
 
         def base_of(kind):
@@ -1257,6 +1302,22 @@ def main():
         if cfg["wet_surface"]:
             build_water(M)
             build_rain_marks(M)
+    elif KEEP_DRESSING:
+        # [v3 arm C] hazard-only removal. The flat control's ground is reused
+        #   verbatim — unlike scene12's, this scene's `FlatFill` IS the ON
+        #   arm's UpperPlaza slab extended east (same y span, same top
+        #   `upper.z_top`, same `upper.thick`, same `skin_exclude`), so over the
+        #   whole camera strip (x<0) it is the identical surface at the
+        #   identical z and the camera datum cannot move. What the plain OFF
+        #   arm additionally loses, and this arm gets back, is `build_cues` —
+        #   the stair railing (`cue_railing`, ON by default), which is the cue
+        #   this arm exists to ask about. Not rebuilt, and deliberately: the
+        #   tread water films / rain streaks are plated onto the step and cheek
+        #   faces, and `wet_surface` is a material feature, not a `cue_*` key
+        #   (CUE_COVERAGE §2.3 `Sp`). Tactile paving is NOT here either — it is
+        #   laid by `build_ground_kit`, which runs in every arm already.
+        build_flat_fill(M)
+        build_cues(M)               # the descending railing line, ON transform
     else:
         build_flat_fill(M)
     if cfg["cue_scene_dressing"]:

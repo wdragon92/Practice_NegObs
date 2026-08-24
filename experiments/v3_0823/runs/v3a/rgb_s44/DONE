@@ -1,0 +1,10 @@
+{
+  "run": "rgb_s44",
+  "best_epoch": 11,
+  "S": 0.3798644659151906,
+  "stop_reason": "early_stop@26",
+  "wall_sec": 1161.9,
+  "steps": 8424,
+  "vgconst_pass": true,
+  "vg1ep_flag": false
+}

@@ -1,0 +1,243 @@
+{
+  "manifest": "/home/vislab/Desktop/work_sy/Practice_NegObs/experiments/v3_0823/dataset_manifest_v3_seg3.json",
+  "split": "/home/vislab/Desktop/work_sy/Practice_NegObs/experiments/v3_0823/split_v3_seg3.json",
+  "input": "rgb",
+  "seed": 42,
+  "out": "/home/vislab/Desktop/work_sy/Practice_NegObs/experiments/v3_0823/runs/v3a/rgb_s42",
+  "max_epochs": 150,
+  "patience": 15,
+  "batch": 8,
+  "lr": 0.0003,
+  "weight_decay": 0.0,
+  "lr_schedule": "linear",
+  "workers": 4,
+  "aug": false,
+  "aug_config": null,
+  "hflip": true,
+  "oversample_h": 4.0,
+  "bias_init": "prior",
+  "tau": 0.5,
+  "smoke": 0,
+  "img_size": 512,
+  "grid": "gridspec_v1.json",
+  "device": "cuda",
+  "n_train": 2598,
+  "n_val": 1056,
+  "n_cells": 20,
+  "grid_version": "PROVISIONAL-GRID-V1",
+  "grid_path": "/home/vislab/Desktop/work_sy/Practice_NegObs/experiments/mainrun_0819/code/labeling/gridspec_v1.json",
+  "cell_ids": [
+    "A1",
+    "B1",
+    "C1",
+    "D1",
+    "E1",
+    "A2",
+    "B2",
+    "C2",
+    "D2",
+    "E2",
+    "A3a",
+    "B3a",
+    "C3a",
+    "D3a",
+    "E3a",
+    "A3b",
+    "B3b",
+    "C3b",
+    "D3b",
+    "E3b"
+  ],
+  "encoder": "resnet34-unet-aux",
+  "params_m": 24.447,
+  "dropped_no_depth": 0,
+  "recipe": "v2",
+  "oversampled": true,
+  "train_positive_rate": [
+    0.025404,
+    0.027714,
+    0.027714,
+    0.025404,
+    0.025404,
+    0.088915,
+    0.094688,
+    0.084296,
+    0.080831,
+    0.066975,
+    0.142032,
+    0.193995,
+    0.206697,
+    0.176674,
+    0.138568,
+    0.235566,
+    0.296767,
+    0.355658,
+    0.329099,
+    0.258661
+  ],
+  "bias_init_module": "Linear",
+  "bias_init_values": [
+    -3.6471100412376414,
+    -3.5577261838943812,
+    -3.5577261838943812,
+    -3.6471100412376414,
+    -3.6471100412376414,
+    -2.3269608989921906,
+    -2.2576897730861547,
+    -2.3853637804864567,
+    -2.431103943795024,
+    -2.634119047974676,
+    -1.7985116893453417,
+    -1.4242551233591134,
+    -1.3449484863815944,
+    -1.5390434990218604,
+    -1.8272338574217148,
+    -1.1771455620927918,
+    -0.8627421828146773,
+    -0.5942591794077365,
+    -0.7122615765832606,
+    -1.0529422518349212
+  ],
+  "n_val_strict_h": 186,
+  "selection_metric": "S = (1-b)*val_cell_F1 + b*(h+1)/(n_H+2) - 1*val_cell_FPR,  b = n_H/(n_H+30),  gate VG-const: val-all max-prob spread >= 0.01  (tie -> earliest epoch)",
+  "v3_registered": {
+    "arm": "v3-A",
+    "prereg_sha256": "05f41322e52b8e085b4d678c57dba4ee984deff3bfcea960123ae586e9fcf56a",
+    "isolated_from_ab": false,
+    "R1_corpus": {
+      "manifest": "/home/vislab/Desktop/work_sy/Practice_NegObs/experiments/v3_0823/dataset_manifest_v3_seg3.json",
+      "split": "/home/vislab/Desktop/work_sy/Practice_NegObs/experiments/v3_0823/split_v3_seg3.json",
+      "n_train": 2598,
+      "n_val": 1056
+    },
+    "R2_supervision": {
+      "ignore_spec": "v3_ignore/PREREG§5.2+§5.3 · k=7000 · b_arm_h→pos, bare_h→pos, lever_n→frame, gt_void→cell",
+      "k_cue_px": 7000,
+      "k_seal": "k = 7,000 px on cue.px_canonical6 — D91 §9.2 봉인 (Youden J 0.9451 최대 ∧ D팔 거짓 존재 0의 최소 k ∧ 로그 중점 7,066의 보수 하한). PREREG §6-1: 본 봉인 이후 k 변경 = 동결 위반.",
+      "mask_scope": {
+        "b_arm_h": "gt_positive_cells",
+        "bare_h_by_k": "gt_positive_cells",
+        "lever_n_zero_info_c": "all_cells",
+        "gt_void": "void_cells"
+      },
+      "loss": "sum(BCE*valid)/sum(valid)",
+      "train_census": {
+        "channels": {
+          "b_arm_h": 93,
+          "bare_h_by_k": 24,
+          "lever_n_zero_info_c": 4,
+          "gt_void": 717
+        },
+        "by_arm": {
+          "b_arm_h": {
+            "B": 93
+          },
+          "bare_h_by_k": {
+            "B": 24
+          },
+          "lever_n_zero_info_c": {
+            "C": 4
+          },
+          "gt_void": {
+            "A": 282,
+            "B": 90,
+            "C": 177,
+            "D": 168
+          }
+        },
+        "n_frames_any_mask": 780,
+        "n_cells_masked": 4598,
+        "n_void_cells": 3969,
+        "k_cue_px": 7000,
+        "spec_id": "v3_ignore/PREREG§5.2+§5.3 · k=7000 · b_arm_h→pos, bare_h→pos, lever_n→frame, gt_void→cell"
+      },
+      "val_census": {
+        "channels": {
+          "b_arm_h": 93,
+          "bare_h_by_k": 90,
+          "lever_n_zero_info_c": 27,
+          "gt_void": 48
+        },
+        "by_arm": {
+          "b_arm_h": {
+            "B": 93
+          },
+          "bare_h_by_k": {
+            "B": 87,
+            "A": 3
+          },
+          "lever_n_zero_info_c": {
+            "C": 27
+          },
+          "gt_void": {
+            "D": 48
+          }
+        },
+        "n_frames_any_mask": 171,
+        "n_cells_masked": 1266,
+        "n_void_cells": 258,
+        "k_cue_px": 7000,
+        "spec_id": "v3_ignore/PREREG§5.2+§5.3 · k=7000 · b_arm_h→pos, bare_h→pos, lever_n→frame, gt_void→cell"
+      }
+    },
+    "R3_selection": {
+      "formula": "S = (1-b)*val_cell_F1 + b*(h+1)/(n_H+2) - 1*val_cell_FPR,  b = n_H/(n_H+30),  gate VG-const: val-all max-prob spread >= 0.01  (tie -> earliest epoch)",
+      "h_def": "hazard_H_v3:  tier=='H' and any(polar_gt)",
+      "lam": 1.0,
+      "a": 1.0,
+      "n0": 30.0,
+      "selection_fa_population": "v3_D_arm_cells",
+      "n_val_H_defB_raw": 186,
+      "n_val_H_effective": 90,
+      "beta_effective": 0.75,
+      "n_fa_cells_effective": 5022,
+      "vgconst_spread_min": 0.01,
+      "vgconst_stage": "val_all_frames",
+      "mask_applied_to_selection": true
+    },
+    "R4_logging": [
+      "val_spread",
+      "val_frame_fa_all",
+      "val_frame_fa_d",
+      "sel_f1",
+      "sel_fa",
+      "sel_h_hits",
+      "sel_n_H",
+      "sel_beta",
+      "sel_H_hat",
+      "vgconst_pass",
+      "val_loss_masked"
+    ],
+    "R5_gate_disposition": "no VG-const pass epoch -> TRAINING_FAILED, no best.pt (§6-16)",
+    "R6_best_init": "-inf (v2: -1.0) — 신 선택식이 음수 S 를 낼 수 있어서",
+    "frozen_recipe": "resnet34-unet / lr 3e-4 / AdamW / wd 0 / batch 8 / 512^2 / max 150ep / patience 15 / linear LR / no AMP / hflip on / oversample-h 4.0 / bias prior / tau 0.5",
+    "selected": {
+      "epoch": 24,
+      "S": 0.5635648067895495,
+      "components": {
+        "S_ungated": 0.5635648067895495,
+        "f1": 0.3146067415730337,
+        "fa": 0.02867383512544803,
+        "h_hits": 62,
+        "n_H": 90,
+        "beta": 0.75,
+        "H_hat": 0.6847826086956522,
+        "spread": 0.9999927282333374,
+        "vgconst_pass": true,
+        "n_valid_cells": 19854,
+        "n_fa_cells": 5022,
+        "fa_population": "v3_D_arm_cells",
+        "ignore_applied": true
+      },
+      "vg1ep_flag": false
+    }
+  },
+  "best_sel_score": 0.5635648067895495,
+  "best_epoch": 24,
+  "stop_reason": "early_stop@39",
+  "steps": 12636,
+  "wall_sec": 1749.9,
+  "best_val_f1": 0.3146067415730337,
+  "best_val_h_recall": 0.6888888888888889,
+  "selection_fallback_to_f1": false
+}

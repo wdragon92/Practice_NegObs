@@ -1,0 +1,339 @@
+{
+  "guard_v2_reproduction": {
+    "n_runs": 15,
+    "n_match": 15,
+    "all_match": true,
+    "n_h": 6,
+    "fa_population": "v2_all_val_cells",
+    "gate": "VG-const-p (소급 대리 게이트 — 에폭별 확률 덤프 부재)",
+    "formula": "S = (1-b)*val_cell_F1 + b*(h+1)/(n_H+2) - 1*val_cell_FPR,  b = n_H/(n_H+30),  gate VG-const: val-all max-prob spread >= 0.01  (tie -> earliest epoch)",
+    "rows": [
+      {
+        "run": "rgb_s42",
+        "expected_epoch": 10,
+        "got_epoch": 10,
+        "expected_score": 0.4186681666666667,
+        "got_score": 0.4186681666666667,
+        "old_epoch": 9,
+        "match": true
+      },
+      {
+        "run": "rgb_s43",
+        "expected_epoch": 23,
+        "got_epoch": 23,
+        "expected_score": 0.31580600000000003,
+        "got_score": 0.31580600000000003,
+        "old_epoch": 23,
+        "match": true
+      },
+      {
+        "run": "rgb_s44",
+        "expected_epoch": 25,
+        "got_epoch": 25,
+        "expected_score": 0.4409530000000001,
+        "got_score": 0.4409530000000001,
+        "old_epoch": 25,
+        "match": true
+      },
+      {
+        "run": "depth_s42",
+        "expected_epoch": 15,
+        "got_epoch": 15,
+        "expected_score": 0.6162179999999999,
+        "got_score": 0.6162179999999999,
+        "old_epoch": 15,
+        "match": true
+      },
+      {
+        "run": "depth_s43",
+        "expected_epoch": 30,
+        "got_epoch": 30,
+        "expected_score": 0.5827956666666665,
+        "got_score": 0.5827956666666665,
+        "old_epoch": 30,
+        "match": true
+      },
+      {
+        "run": "depth_s44",
+        "expected_epoch": 3,
+        "got_epoch": 3,
+        "expected_score": 0.6181059999999999,
+        "got_score": 0.6181059999999999,
+        "old_epoch": 3,
+        "match": true
+      },
+      {
+        "run": "b2_s42",
+        "expected_epoch": 1,
+        "got_epoch": 1,
+        "expected_score": 0.4536198333333334,
+        "got_score": 0.4536198333333334,
+        "old_epoch": 8,
+        "match": true
+      },
+      {
+        "run": "b2_s43",
+        "expected_epoch": 1,
+        "got_epoch": 1,
+        "expected_score": 0.396598,
+        "got_score": 0.396598,
+        "old_epoch": 1,
+        "match": true
+      },
+      {
+        "run": "b2_s44",
+        "expected_epoch": 13,
+        "got_epoch": 13,
+        "expected_score": 0.4946366666666666,
+        "got_score": 0.4946366666666666,
+        "old_epoch": 8,
+        "match": true
+      },
+      {
+        "run": "resnet50_s42",
+        "expected_epoch": 14,
+        "got_epoch": 14,
+        "expected_score": 0.4473993333333333,
+        "got_score": 0.4473993333333333,
+        "old_epoch": 30,
+        "match": true
+      },
+      {
+        "run": "resnet50_s43",
+        "expected_epoch": 8,
+        "got_epoch": 8,
+        "expected_score": 0.5251126666666667,
+        "got_score": 0.5251126666666667,
+        "old_epoch": 8,
+        "match": true
+      },
+      {
+        "run": "resnet50_s44",
+        "expected_epoch": 22,
+        "got_epoch": 22,
+        "expected_score": 0.48358733333333337,
+        "got_score": 0.48358733333333337,
+        "old_epoch": 8,
+        "match": true
+      },
+      {
+        "run": "tu-convnext_tiny_s42",
+        "expected_epoch": 19,
+        "got_epoch": 19,
+        "expected_score": 0.23820733333333333,
+        "got_score": 0.23820733333333333,
+        "old_epoch": 19,
+        "match": true
+      },
+      {
+        "run": "tu-convnext_tiny_s43",
+        "expected_epoch": 4,
+        "got_epoch": 4,
+        "expected_score": 0.26944049999999997,
+        "got_score": 0.26944049999999997,
+        "old_epoch": 1,
+        "match": true
+      },
+      {
+        "run": "tu-convnext_tiny_s44",
+        "expected_epoch": 23,
+        "got_epoch": 23,
+        "expected_score": 0.32659316666666666,
+        "got_score": 0.32659316666666666,
+        "old_epoch": 17,
+        "match": true
+      }
+    ]
+  },
+  "v3a": {
+    "rgb_s42": {
+      "run": "rgb_s42",
+      "status": "DONE",
+      "n_epochs": 39,
+      "stop_reason": "early_stop@39",
+      "wall_sec": 1749.9,
+      "steps": 12636,
+      "epoch_sec_median": 44.67,
+      "vgconst": {
+        "threshold": 0.01,
+        "stage": "val_all_frames",
+        "n_pass": 39,
+        "n_epochs": 39,
+        "verdict": "PASS",
+        "spread_min": 0.8437055,
+        "spread_max": 0.9999927,
+        "spread_at_selected": 0.9999927
+      },
+      "selected": {
+        "epoch": 24,
+        "S": 0.5635647065217392,
+        "components": {
+          "f1": 0.314607,
+          "H_hat": 0.684783,
+          "fa": 0.028674,
+          "h_hits": 62,
+          "n_H": 90,
+          "beta": 0.75,
+          "term_f1": 0.07865175,
+          "term_H": 0.51358725,
+          "term_FA": -0.028674
+        },
+        "val_unmasked": {
+          "val_f1": 0.289934,
+          "val_fpr": 0.166832,
+          "val_h_recall": 0.387097,
+          "val_frame_fa_d": 0.261364
+        }
+      },
+      "online_selected_epoch": 24,
+      "online_matches_recompute": true,
+      "max_score_repro_err": 8.369565217269948e-07,
+      "vg1ep_flag": false,
+      "n_val_H_effective": 90,
+      "beta_effective": 0.75,
+      "fa_population": "v3_D_arm_cells"
+    },
+    "rgb_s43": {
+      "run": "rgb_s43",
+      "status": "DONE",
+      "n_epochs": 17,
+      "stop_reason": "early_stop@17",
+      "wall_sec": 759.4,
+      "steps": 5508,
+      "epoch_sec_median": 44.53,
+      "vgconst": {
+        "threshold": 0.01,
+        "stage": "val_all_frames",
+        "n_pass": 17,
+        "n_epochs": 17,
+        "verdict": "PASS",
+        "spread_min": 0.8883433,
+        "spread_max": 0.9998931,
+        "spread_at_selected": 0.9825495
+      },
+      "selected": {
+        "epoch": 2,
+        "S": 0.35434316304347824,
+        "components": {
+          "f1": 0.432133,
+          "H_hat": 0.369565,
+          "fa": 0.030864,
+          "h_hits": 33,
+          "n_H": 90,
+          "beta": 0.75,
+          "term_f1": 0.10803325,
+          "term_H": 0.27717375,
+          "term_FA": -0.030864
+        },
+        "val_unmasked": {
+          "val_f1": 0.388026,
+          "val_fpr": 0.109883,
+          "val_h_recall": 0.231183,
+          "val_frame_fa_d": 0.083333
+        }
+      },
+      "online_selected_epoch": 2,
+      "online_matches_recompute": true,
+      "max_score_repro_err": 5.326086956469744e-07,
+      "vg1ep_flag": false,
+      "n_val_H_effective": 90,
+      "beta_effective": 0.75,
+      "fa_population": "v3_D_arm_cells"
+    },
+    "rgb_s44": {
+      "run": "rgb_s44",
+      "status": "DONE",
+      "n_epochs": 26,
+      "stop_reason": "early_stop@26",
+      "wall_sec": 1161.9,
+      "steps": 8424,
+      "epoch_sec_median": 44.56,
+      "vgconst": {
+        "threshold": 0.01,
+        "stage": "val_all_frames",
+        "n_pass": 26,
+        "n_epochs": 26,
+        "verdict": "PASS",
+        "spread_min": 0.953274,
+        "spread_max": 0.999971,
+        "spread_at_selected": 0.998822
+      },
+      "selected": {
+        "epoch": 11,
+        "S": 0.3798642608695652,
+        "components": {
+          "f1": 0.394928,
+          "H_hat": 0.391304,
+          "fa": 0.012346,
+          "h_hits": 35,
+          "n_H": 90,
+          "beta": 0.75,
+          "term_f1": 0.098732,
+          "term_H": 0.293478,
+          "term_FA": -0.012346
+        },
+        "val_unmasked": {
+          "val_f1": 0.352824,
+          "val_fpr": 0.065908,
+          "val_h_recall": 0.231183,
+          "val_frame_fa_d": 0.07197
+        }
+      },
+      "online_selected_epoch": 11,
+      "online_matches_recompute": true,
+      "max_score_repro_err": 8.586956521672295e-07,
+      "vg1ep_flag": false,
+      "n_val_H_effective": 90,
+      "beta_effective": 0.75,
+      "fa_population": "v3_D_arm_cells"
+    },
+    "rgb_s42_aux": {
+      "run": "rgb_s42_aux",
+      "status": "DONE",
+      "n_epochs": 23,
+      "stop_reason": "early_stop@23",
+      "wall_sec": 1045.7,
+      "steps": 7452,
+      "epoch_sec_median": 45.35,
+      "vgconst": {
+        "threshold": 0.01,
+        "stage": "val_all_frames",
+        "n_pass": 23,
+        "n_epochs": 23,
+        "verdict": "PASS",
+        "spread_min": 0.9525023,
+        "spread_max": 0.9999741,
+        "spread_at_selected": 0.9992914
+      },
+      "selected": {
+        "epoch": 8,
+        "S": 0.33508173913043476,
+        "components": {
+          "f1": 0.379732,
+          "H_hat": 0.358696,
+          "fa": 0.028873,
+          "h_hits": 32,
+          "n_H": 90,
+          "beta": 0.75,
+          "term_f1": 0.094933,
+          "term_H": 0.269022,
+          "term_FA": -0.028873
+        },
+        "val_unmasked": {
+          "val_f1": 0.361436,
+          "val_fpr": 0.181453,
+          "val_h_recall": 0.268817,
+          "val_frame_fa_d": 0.140152
+        }
+      },
+      "online_selected_epoch": 8,
+      "online_matches_recompute": true,
+      "max_score_repro_err": 9.78260869574643e-07,
+      "vg1ep_flag": false,
+      "n_val_H_effective": 90,
+      "beta_effective": 0.75,
+      "fa_population": "v3_D_arm_cells"
+    }
+  },
+  "note": "PREREG §3.3 — [A]와 [B]는 서로 다른 판정선이다. 교차 인용은 §6-10 위반."
+}

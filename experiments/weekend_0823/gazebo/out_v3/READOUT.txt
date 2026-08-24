@@ -1,0 +1,82 @@
+[collect] /home/vislab/Desktop/work_sy/Practice_NegObs/experiments/weekend_0823/gazebo/out_v3/gazebo_zeroshot.csv  (216 rows x 35 cols)
+
+### HEADLINE -- pooled over the 4 hazard worlds x 7 negobs presets (28 frames/arm)
+model     HAZ fire  CTL fire  HAZ maxp  CTL maxp  twin delta  in-sim twin d (v2)
+rgb_s42      0.464     0.429     0.453     0.403      +0.050               0.314
+rgb_s43      0.250     0.286     0.347     0.348      -0.001               0.314
+rgb_s44      0.429     0.357     0.424     0.389      +0.035               0.314
+
+### firing rate at tau=0.5 and frame max-prob -- 7 negobs presets (h0.3 / h0.9), rs_* excluded (7 views/world)
+world      tier  model     HAZ fire  CTL fire     HAZ maxp mean[min-max]  CTL maxp mean  twin d mean   d>0
+gz_drop1   V     rgb_s42  2/7       2/7              0.241 [0.003-0.861]          0.187       +0.054 7/7
+gz_drop1   V     rgb_s43  1/7       1/7              0.238 [0.049-0.860]          0.210       +0.028 7/7
+gz_drop1   V     rgb_s44  2/7       1/7              0.302 [0.014-0.671]          0.227       +0.075 4/7
+gz_drop2   V     rgb_s42  5/7       5/7              0.739 [0.407-0.936]          0.679       +0.060 3/7
+gz_drop2   V     rgb_s43  1/7       2/7              0.293 [0.070-0.643]          0.342       -0.049 0/7
+gz_drop2   V     rgb_s44  5/7       4/7              0.635 [0.081-0.941]          0.615       +0.019 4/7
+gz_drop3   H     rgb_s42  4/7       4/7              0.560 [0.008-0.998]          0.575       -0.015 1/7
+gz_drop3   H     rgb_s43  4/7       4/7              0.631 [0.059-0.998]          0.629       +0.002 5/7
+gz_drop3   H     rgb_s44  3/7       3/7              0.467 [0.029-0.997]          0.467       +0.000 5/7
+gz_drop4   V/E   rgb_s42  2/7       1/7              0.273 [0.003-0.625]          0.173       +0.100 3/7
+gz_drop4   V/E   rgb_s43  1/7       1/7              0.226 [0.060-0.863]          0.210       +0.016 7/7
+gz_drop4   V/E   rgb_s44  2/7       2/7              0.293 [0.064-0.713]          0.249       +0.044 5/7
+
+### 1st read-out (qualitative): does the top cell land in the band the lip falls in?
+world      model     HAZ band-hit  CTL band-hit  top bands (hazard, per view)
+gz_drop1   rgb_s42  1/7           1/7            3a 3b 3b 3a 1 1 3b
+gz_drop1   rgb_s43  2/7           2/7            3b 3b 3b 3b 3b 3b 3b
+gz_drop1   rgb_s44  3/7           3/7            3b 3b 3a 3b 1 3b 3b
+gz_drop2   rgb_s42  1/7           1/7            3b 3b 3b 3a 3a 3b 3b
+gz_drop2   rgb_s43  2/7           2/7            3a 3b 3b 3b 3b 3b 3b
+gz_drop2   rgb_s44  3/7           1/7            3a 3b 3a 3b 3a 3b 3b
+gz_drop3   rgb_s42  1/7           1/7            3a 3a 3b 2 3a 3b 3b
+gz_drop3   rgb_s43  2/7           2/7            3b 3b 3b 3b 3b 3b 3b
+gz_drop3   rgb_s44  2/7           2/7            3a 3b 3b 3b 3b 3b 3b
+gz_drop4   rgb_s42  1/7           1/7            3a 3a 3b 2 3b 3b 3b
+gz_drop4   rgb_s43  2/7           2/7            3b 3b 3b 3b 3b 3b 3b
+gz_drop4   rgb_s44  3/7           4/7            3a 3a 3a 3b 1 3b 3b
+
+### 4th read-out (tier ladder): mean frame max-prob, hazard arm, same cameras
+    pre-registered expectation  p(drop2) >= p(drop1) > p(drop4) > p(drop3)
+model      gz_drop1   gz_drop2   gz_drop3   gz_drop4   order holds?
+rgb_s42       0.241      0.739      0.560      0.273   NO
+rgb_s43       0.238      0.293      0.631      0.226   NO
+rgb_s44       0.302      0.635      0.467      0.293   NO
+
+### gz_drop3 -- CUE-ONLY firing (hazard fully occluded; both arms are cue-only probes)
+    compare: CUE-OFF arm C false-alarm rate, rgb 1.000 / b2 1.000 / depth 0.333 (24 frames)
+model     HAZ fired  CTL fired  pooled FA  mean maxp  mean #cells fired
+rgb_s42  4/7        4/7             0.571      0.568               5.50
+rgb_s43  4/7        4/7             0.571      0.630               4.29
+rgb_s44  3/7        3/7             0.429      0.467               4.36
+
+### gz_drop4 E cuts -- RAW, 2 presets only, no statistics (worlds/README §8.5)
+view               model     HAZ maxp  HAZ top  CTL maxp  CTL top   twin d
+preset_h0.3_d10    rgb_s42      0.625       C2     0.661      E3a   -0.036
+preset_h0.3_d10    rgb_s43      0.060      C3b     0.059      C3b   +0.002
+preset_h0.3_d10    rgb_s44      0.713      D3b     0.692      D3b   +0.021
+preset_h0.9_d10    rgb_s42      0.281      B3b     0.391      B3b   -0.110
+preset_h0.9_d10    rgb_s43      0.340      C3b     0.333      C3b   +0.007
+preset_h0.9_d10    rgb_s44      0.117      D3b     0.119      D3b   -0.002
+
+### 3rd read-out (asymmetry): gz_drop2 has a railing on +Y (image RIGHT) only.
+    sector A = image-left ... E = image-right.  mean prob per sector, hazard arm.
+model           A        B        C        D        E    argmax sector
+rgb_s42     0.286    0.288    0.242    0.237    0.214    B
+rgb_s43     0.089    0.127    0.152    0.119    0.122    C
+rgb_s44     0.278    0.291    0.290    0.391    0.410    E
+
+### firing rate at tau=0.5 and frame max-prob -- rs_h0.125 (robot RealSense height) -- NOT in the headline (2 views/world)
+world      tier  model     HAZ fire  CTL fire     HAZ maxp mean[min-max]  CTL maxp mean  twin d mean   d>0
+gz_drop1   V     rgb_s42  0/2       0/2              0.153 [0.037-0.269]          0.174       -0.021 0/2
+gz_drop1   V     rgb_s43  0/2       0/2              0.024 [0.021-0.027]          0.023       +0.001 2/2
+gz_drop1   V     rgb_s44  0/2       0/2              0.111 [0.100-0.121]          0.113       -0.002 1/2
+gz_drop2   V     rgb_s42  1/2       1/2              0.392 [0.211-0.574]          0.488       -0.096 0/2
+gz_drop2   V     rgb_s43  0/2       0/2              0.026 [0.023-0.029]          0.024       +0.002 1/2
+gz_drop2   V     rgb_s44  0/2       0/2              0.116 [0.081-0.151]          0.136       -0.020 0/2
+gz_drop3   H     rgb_s42  0/2       0/2              0.076 [0.015-0.136]          0.074       +0.002 1/2
+gz_drop3   H     rgb_s43  1/2       1/2              0.443 [0.058-0.828]          0.443       +0.000 2/2
+gz_drop3   H     rgb_s44  0/2       0/2              0.281 [0.197-0.365]          0.282       -0.001 0/2
+gz_drop4   V/E   rgb_s42  0/2       0/2              0.157 [0.020-0.293]          0.149       +0.008 2/2
+gz_drop4   V/E   rgb_s43  0/2       0/2              0.025 [0.022-0.027]          0.024       +0.000 2/2
+gz_drop4   V/E   rgb_s44  0/2       0/2              0.106 [0.089-0.124]          0.125       -0.018 0/2

@@ -5,6 +5,14 @@ infer_photo already writes `cell_ids` + `probs` per frame, so nothing was added 
 tool -- this only collects.  Read-out rules were fixed in capture_plan.md §4 before capture.
 
     python3 tools/collect_csv.py            # writes out/gazebo_zeroshot.csv, prints tables
+
+[0824 v3 re-run, ADDITIVE] two env overrides, both defaulting to the 0823 behaviour byte for
+byte, so the frozen §4 read-out rules below (TAU, EXPECT_BAND, TIER, NEG_VIEWS, every table)
+are REUSED UNCHANGED rather than re-implemented:
+    GZ_OUT=out_v3                                    # which tree to read/write
+    GZ_MODELS=rgb_s42,rgb_s43,rgb_s44                # which checkpoints exist in it
+Unset -> out/ and the six v2 models, i.e. `python3 tools/collect_csv.py` still reproduces
+GAZEBO_TRACK.md §4 exactly (verified 0824: v2 tables re-derive identically).
 """
 import csv
 import glob
@@ -13,10 +21,12 @@ import os
 import statistics as st
 
 GZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-JSONDIR = os.path.join(GZ, "out", "json")
-CSVOUT = os.path.join(GZ, "out", "gazebo_zeroshot.csv")
+OUTDIR = os.environ.get("GZ_OUT", "out")
+JSONDIR = os.path.join(GZ, OUTDIR, "json")
+CSVOUT = os.path.join(GZ, OUTDIR, "gazebo_zeroshot.csv")
 
-MODELS = ["rgb_s42", "rgb_s43", "rgb_s44", "b2_s42", "b2_s43", "b2_s44"]
+MODELS = [m for m in os.environ.get(
+    "GZ_MODELS", "rgb_s42,rgb_s43,rgb_s44,b2_s42,b2_s43,b2_s44").split(",") if m.strip()]
 PAIRS = [("gz_drop1", "V"), ("gz_drop2", "V"), ("gz_drop3", "H"), ("gz_drop4", "V/E")]
 NEG_VIEWS = ["extra_h0.3_d1.2", "preset_h0.3_d2", "preset_h0.3_d5", "preset_h0.3_d10",
              "preset_h0.9_d2", "preset_h0.9_d5", "preset_h0.9_d10"]

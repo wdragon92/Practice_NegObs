@@ -1,1 +1,0 @@
-../briefs/multi_scene_brief_v3.md

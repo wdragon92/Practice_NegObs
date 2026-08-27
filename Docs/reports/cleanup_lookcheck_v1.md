@@ -426,15 +426,22 @@ Note that `scenes/main/look_check` and `scenes/batch1/look_check` are symlinks t
 A repo-wide `find . -xtype l` (run to verify E3) turned up two dangling symlinks that
 **predate this mission** (both stamped 2026-07-27 17:06, both tracked in git) `[measured]`:
 
-| symlink | was | now |
-|---|---|---|
-| `Docs/legacy/multi_scene_brief_v3.md` | `briefs/multi_scene_brief_v3.md` (dangling) | `../briefs/multi_scene_brief_v3.md` |
-| `Docs/legacy/realism_rubric_v1.md` | `reports/realism_rubric_v1.md` (dangling) | `../reports/realism_rubric_v1.md` |
+당시 두 심링크는 `Docs/` 바로 아래 `legacy/` 폴더에 있었다(그 폴더는 08-27에 폐지됐다 — 아래 추기):
 
-Both were missing the `../` hop out of `Docs/legacy/`; the real files were always present
+| 심링크 (당시 `legacy/` 폴더 안) | was | now |
+|---|---|---|
+| `multi_scene_brief_v3.md` | `briefs/multi_scene_brief_v3.md` (dangling) | `../briefs/multi_scene_brief_v3.md` |
+| `realism_rubric_v1.md` | `reports/realism_rubric_v1.md` (dangling) | `../reports/realism_rubric_v1.md` |
+
+Both were missing the `../` hop out of that folder; the real files were always present
 at `Docs/briefs/` and `Docs/reports/`. Fixed with `ln -sfn`; both now resolve
 (71 and 262 lines). **`find . -xtype l` over the whole repo now returns 0** — the two
 symlinks created in E3 are the only ones added by this mission and both resolve.
+
+> **2026-08-27 추기 (S5 재편).** 위 두 심링크는 **삭제됐다.** `legacy/` 폴더가 통째로
+> `Docs/archive/legacy/` 로 접히면서(실파일 5건 이동), '현행 문서를 가리키는 legacy 심링크'
+> 라는 모순이 사라졌기 때문이다. 실제 파일은 `Docs/briefs/multi_scene_brief_v3.md` ·
+> `Docs/reports/realism_rubric_v1.md` 로 그대로 있다. 이동 원장: `Docs/reorg_0827/docs_moves.tsv`.
 
 ### E9. Note on git state
 
@@ -445,7 +452,7 @@ this pass leaves them as unstaged modifications. **This mission made no commit**
 instructed. Remaining unstaged/untracked, for the supervisor:
 
 - ` M look_check/README.md`, ` M look_check/INDEX.md` — this pass's rewrites
-- ` M Docs/legacy/{multi_scene_brief_v3,realism_rubric_v1}.md` — the symlink fixes (E8)
+- ` M Docs/archive/legacy/{multi_scene_brief_v3,realism_rubric_v1}.md` — the symlink fixes (E8)
 - ` M Docs/reports/cleanup_lookcheck_v1.md` — this extension
 - `?? Docs/reports/w2d_edit_g{1,2,3,b}.md`, `?? Docs/reports/w2d_translation.md` — another
   session's W2-D reports, untouched

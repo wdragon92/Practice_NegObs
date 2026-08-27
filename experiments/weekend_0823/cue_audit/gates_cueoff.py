@@ -37,6 +37,11 @@ import re
 import sys
 
 REPO = "/home/vislab/Desktop/work_sy/Practice_NegObs"
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat, rounds_matching   # noqa: E402
 AUDIT = os.path.join(REPO, "experiments/weekend_0823/cue_audit")
 LABELS = os.path.join(AUDIT, "labels")
 PREREG = os.path.join(AUDIT, "PREREG_CUEOFF.md")
@@ -93,7 +98,7 @@ def sha256(path, cap=None):
 def round_dirs(prefix):
     """{(stem, arm): {scene: dir}} for every rendered CUE-OFF round on disk."""
     out = {}
-    for d in sorted(glob.glob(os.path.join(REPO, "dataset", prefix + "*"))):
+    for d in sorted(rounds_matching(prefix)):
         base = os.path.basename(d)
         if "_" not in base:
             continue
@@ -264,7 +269,7 @@ def g0_lineage(R):
             if not ref_round:
                 note(f"G0: no lineage mapping for {stem}/{sc} -- skipped")
                 continue
-            ref = glob.glob(os.path.join(REPO, "dataset", ref_round, "*", sc,
+            ref = glob.glob(os.path.join(round_dir_or_flat(ref_round), "*", sc,
                                          "variation.json"))
             if not ref:
                 note(f"G0: lineage round {ref_round}/{sc} absent -- skipped")

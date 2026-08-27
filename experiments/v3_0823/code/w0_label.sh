@@ -10,9 +10,13 @@
 # 그리드는 v2 코퍼스와 같은 20칸 `gridspec_v1.json` (D19 세분).
 set -u
 REPO=/home/vislab/Desktop/work_sy/Practice_NegObs
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>). A round is
+# found by NAME: negobs_round (strict) / negobs_round_or_flat (tolerant).
+source "$REPO/scripts/lib/negobs_paths.sh"
 LAB="$REPO/experiments/mainrun_0819/code/labeling/labeler.py"
 GRID="$REPO/experiments/mainrun_0819/code/labeling/gridspec_v1.json"
-OFF="$REPO/dataset/260819_main_off"
+OFF="$REPO/dataset/v2_corpus/260819_main_off"
 OUT="$REPO/experiments/v3_0823/annotations"
 LOG="$REPO/experiments/v3_0823/logs/w0_label.log"
 mkdir -p "$OUT"
@@ -30,7 +34,7 @@ declare -A SC=(
 for arm in A Brail Bnose Btact Bmatl Bdress; do
   out="$OUT/w0_${arm}.json"
   want=$(printf '%s' "${SC[$arm]}" | tr ',' '\n' | grep -c .)
-  have=$(ls -d "$REPO/dataset/260825_v3w0_cuecls_${arm}"/*/*/ 2>/dev/null | wc -l)
+  have=$(ls -d "$(negobs_round_or_flat "260825_v3w0_cuecls_${arm}")"/*/*/ 2>/dev/null | wc -l)
   # 부분 렌더를 라벨링해 캐시로 굳히지 않는다 — 그 파일이 나중에 skip되면
   # 판정이 조용히 표본 부족 위에 서게 된다.
   if [ "$have" != "$want" ]; then
@@ -40,7 +44,7 @@ for arm in A Brail Bnose Btact Bmatl Bdress; do
     echo "[skip] $arm — $out exists"; continue
   fi
   echo "=== labeling $arm ($want 씬: ${SC[$arm]})"
-  python3 "$LAB" --on-round "$REPO/dataset/260825_v3w0_cuecls_${arm}" \
+  python3 "$LAB" --on-round "$(negobs_round "260825_v3w0_cuecls_${arm}")" \
       --off-round "$OFF" --grid "$GRID" --out "$out" \
       --scenes "${SC[$arm]}" --workers 8 2>&1 | tee -a "$LOG"
 done

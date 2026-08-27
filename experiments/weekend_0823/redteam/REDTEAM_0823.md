@@ -317,4 +317,4 @@ $PY fig_f7_panels.py          # 패널 6 + 컨택트 시트
 입력: `experiments/dayrun_0820/runs/v2/*/eval_test/per_frame.csv` ·
 `runs/v2/*/twin/twin_pairs.csv` · `runs/yolo_s*/pred_test/labels/` ·
 `annotations/amodal/bboxes.json` · `dataset_manifest_v2_full.json` · `split_v2_full.json` ·
-`dataset/260819_main_{on,off}/` · `dataset/260820_ctrloff/`.
+`dataset/v2_corpus/260819_main_{on,off}/` · `dataset/v2_probes/260820_ctrloff/`.

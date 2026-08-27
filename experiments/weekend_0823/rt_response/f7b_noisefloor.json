@@ -135,8 +135,8 @@
   }
  },
  "provenance": {
-  "noise_floor": "dataset/260819_main_on/sceneN3 vs dataset/260820_ctrloff/sceneN3 (keep_dressing; heightmap max|\u0394| = 0.000000 m per ctrl_dressing/CTRL_TABLE.md)",
-  "hazard_only": "dataset/260819_main_on/sceneC2 vs dataset/260820_ctrloff/sceneC2 (keep_dressing)",
-  "full_toggle": "dataset/260819_main_on/<scene> vs dataset/260819_main_off/<scene> (the ordinary corpus twin: hazard geometry AND everything else inside the scene builder's hazard_stairs branch)"
+  "noise_floor": "dataset/v2_corpus/260819_main_on/sceneN3 vs dataset/v2_probes/260820_ctrloff/sceneN3 (keep_dressing; heightmap max|\u0394| = 0.000000 m per ctrl_dressing/CTRL_TABLE.md)",
+  "hazard_only": "dataset/v2_corpus/260819_main_on/sceneC2 vs dataset/v2_probes/260820_ctrloff/sceneC2 (keep_dressing)",
+  "full_toggle": "dataset/v2_corpus/260819_main_on/<scene> vs dataset/v2_corpus/260819_main_off/<scene> (the ordinary corpus twin: hazard geometry AND everything else inside the scene builder's hazard_stairs branch)"
  }
 }

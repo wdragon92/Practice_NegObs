@@ -1,0 +1,67 @@
+file	kind	sites_converted	helper_wiring	breakdown	test_result
+experiments/nightrun_0820/ctrl_dressing/hash_gate.py	py	5	import block + sys.path	auto 4 · hand 1 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/build_corpus_v3.py	py	6	import block + sys.path	auto 6 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/cue_extent_audit.py	py	23	import block + sys.path	auto 21 (1 of them corrected by hand: `pat` is a GLOB PATTERN, not a round) · hand 2 (registry-scan fnmatch globs -> rounds_matching) · rewrap 0 · isdir->has_round 0	import OK; smoke 'cue_extent_audit registry patterns' 10/71/5 hits
+experiments/v3_0823/code/g7_gate_degenerate.py	py	2	import block + sys.path	auto 2 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/g7_make_shadow.py	py	2	import block + sys.path	auto 2 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/g7_pairing_audit.py	py	2	import block + sys.path	auto 2 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/g7_scan_all_boost.py	py	2	import block + sys.path	auto 2 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/g7_variantB.py	py	3	import block + sys.path	auto 3 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/h12_gates.py	py	1	import block + sys.path	auto 0 · hand 1 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/w0_classify.py	py	3	import block + sys.path	auto 3 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/w1b2_repro_control.py	py	4	import block + sys.path	auto 4 · hand 0 · rewrap 0 · isdir->has_round 2	import OK (import_check.py 36/36)
+experiments/v3_0823/code/w1b2_segfill.py	py	1	import block + sys.path	auto 1 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/w1b_fuse.py	py	1	import block + sys.path	auto 1 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/w1b_label.py	py	1	import block + sys.path	auto 1 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/w1b_rimpact.py	py	2	import block + sys.path	auto 2 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/w1b_verify.py	py	2	import block + sys.path	auto 2 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/w1c_datum.py	py	1	import block + sys.path	auto 1 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/w1c_hashgate.py	py	1	import block + sys.path	auto 1 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/w1c_labeler_boundary.py	py	1	import block + sys.path	auto 1 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/w1c_verify.py	py	1	import block + sys.path	auto 1 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/w1d_fuse.py	py	1	import block + sys.path	auto 1 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/w1d_readjudicate.py	py	1	import block + sys.path	auto 1 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/w1d_verify.py	py	2	import block + sys.path	auto 2 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/w2_gpu_account.py	py	2	import block + sys.path	auto 1 · hand 0 · rewrap 1 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/w3_gpu_account.py	py	2	import block + sys.path	auto 1 · hand 0 · rewrap 1 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/w3_manifest.py	py	2	import block + sys.path	auto 2 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/v3_0823/code/w3_verify.py	py	1	import block + sys.path	auto 1 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/weekend_0823/c2_rootcause/c2_audit.py	py	1	import block + sys.path	auto 0 · hand 1 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/weekend_0823/cue_audit/g2_adjudicate.py	py	2	import block + sys.path	auto 2 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/weekend_0823/cue_audit/gates_cueoff.py	py	2	import block + sys.path	auto 1 · hand 1 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/weekend_0823/cue_audit/pixel_mass.py	py	1	import block + sys.path	auto 1 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/weekend_0823/cue_audit/render_mass.py	py	5	import block + sys.path	auto 4 · hand 0 · rewrap 1 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/weekend_0823/cue_audit/smoke_summarize.py	py	1	import block + sys.path	auto 1 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/weekend_0823/redteam/r4_pixdiff.py	py	4	import block + sys.path	auto 0 · hand 4 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/weekend_0823/rt_response/code/f7b_noisefloor.py	py	2	import block + sys.path	auto 2 · hand 0 · rewrap 0 · isdir->has_round 0	import OK (import_check.py 36/36)
+experiments/nightrun_0820/ctrl_dressing/run_ctrl_dressing.sh	sh	3	source negobs_paths.sh	-	bash -n OK
+experiments/probe_holes_0820/run_probe.sh	sh	8	source negobs_paths.sh	-	bash -n OK
+experiments/v3_0823/code/p5_seg_smoke.sh	sh	1	source negobs_paths.sh	-	bash -n OK
+experiments/v3_0823/code/run_h12_label.sh	sh	4	source negobs_paths.sh	-	bash -n OK
+experiments/v3_0823/code/run_h12_probe.sh	sh	2	source negobs_paths.sh	-	bash -n OK
+experiments/v3_0823/code/run_h3l1_label.sh	sh	4	source negobs_paths.sh	-	bash -n OK
+experiments/v3_0823/code/run_h3l1_probe.sh	sh	2	source negobs_paths.sh	-	bash -n OK
+experiments/v3_0823/code/run_h67_probe.sh	sh	2	source negobs_paths.sh	-	bash -n OK
+experiments/v3_0823/code/run_n911_label.sh	sh	1	source negobs_paths.sh	-	bash -n OK
+experiments/v3_0823/code/run_n911_probe.sh	sh	2	source negobs_paths.sh	-	bash -n OK
+experiments/v3_0823/code/run_w2_h67.sh	sh	3	source negobs_paths.sh	-	bash -n OK
+experiments/v3_0823/code/run_w2_label.sh	sh	2	source negobs_paths.sh	-	bash -n OK
+experiments/v3_0823/code/run_w3_label.sh	sh	2	source negobs_paths.sh	-	bash -n OK
+experiments/v3_0823/code/run_w3_text.sh	sh	3	source negobs_paths.sh	-	bash -n OK
+experiments/v3_0823/code/run_w3_text2.sh	sh	3	source negobs_paths.sh	-	bash -n OK
+experiments/v3_0823/code/w0_label.sh	sh	2	source negobs_paths.sh	-	bash -n OK
+experiments/v3_0823/code/w1d_label.sh	sh	5	source negobs_paths.sh	-	bash -n OK
+experiments/weekend_0823/cue_audit/eval_cueoff.sh	sh	2	source negobs_paths.sh	-	bash -n OK
+experiments/weekend_0823/cue_audit/run_cueoff.sh	sh	1	source negobs_paths.sh	-	bash -n OK
+experiments/weekend_0823/v2s/code/relabel_v2s.sh	sh	5	source negobs_paths.sh	-	bash -n OK
+scripts/rounds/run_260730_data_mini.sh	sh	2	source negobs_paths.sh	-	bash -n OK
+scripts/rounds/run_260819_main.sh	sh	3	source negobs_paths.sh	-	bash -n OK
+scripts/rounds/run_260820_boost.sh	sh	3	source negobs_paths.sh	-	bash -n OK
+scripts/rounds/run_260825_v3w0_cuecls.sh	sh	2	source negobs_paths.sh	-	bash -n OK
+scripts/rounds/run_260826_v3a_segfill.sh	sh	3	source negobs_paths.sh	-	bash -n OK
+scripts/rounds/run_260826_v3w1_lib_b.sh	sh	3	source negobs_paths.sh	-	bash -n OK
+scripts/rounds/run_260826_v3w1_lib_b2.sh	sh	3	source negobs_paths.sh	-	bash -n OK
+scripts/rounds/run_260826_v3w1_lib_d.sh	sh	3	source negobs_paths.sh	-	bash -n OK
+scripts/rounds/run_260827_v3w1_lib_b3.sh	sh	3	source negobs_paths.sh	-	bash -n OK
+scripts/rounds/run_260827_v3w1_lib_c.sh	sh	2	source negobs_paths.sh	-	bash -n OK
+scripts/rounds/run_260827_v3w1c_hashgate.sh	sh	1	source negobs_paths.sh	-	bash -n OK

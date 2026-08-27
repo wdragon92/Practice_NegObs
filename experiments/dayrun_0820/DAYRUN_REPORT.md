@@ -1,6 +1,6 @@
 # DAYRUN_REPORT — 2026-08-20 (dayrun_0820)
 
-지시서: `Docs/experiment/DAYRUN_BRIEF_0820.md` · 작업방 `experiments/dayrun_0820/`
+지시서: `Docs/campaign/DAYRUN_BRIEF_0820.md` · 작업방 `experiments/dayrun_0820/`
 격자 `PROVISIONAL-GRID-V1` (5섹터 × 4밴드 = 20칸) · 판단 기록 `experiments/mainrun_0819/DECISIONS.md` D19–D24
 
 > **한 줄 요약.** 데이터(2832프레임)·격자(20칸)·분리(v2)·재훈련(9런)까지 척추는 전부 섰고,

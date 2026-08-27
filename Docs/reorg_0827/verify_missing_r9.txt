@@ -1,0 +1,33 @@
+# S2 (2026-08-27): dataset paths cited in text that do not exist on disk and
+# never did -- reference_inventory.md 6.3 R9 ('cited rounds that are not on
+# disk; log them as unmapped, left as-is'). None of these round names is in
+# dataset/ROUNDS.json, so the reorg neither created nor moved them.
+# Found by an all-extension os.walk scan (json+log+md+py+sh), 85,640 path
+# strings; the 8 entries of verify_baseline_missing.txt are excluded here.
+experiments/dayrun_0820/logs/boost_render.log	dataset/260820_boost_e2
+experiments/mainrun_0819/PIPELINE_NOTES.md	dataset/260819_dataall_on
+experiments/mainrun_0819/PIPELINE_NOTES.md	dataset/260819_dataall_on/train
+experiments/mainrun_0819/PIPELINE_NOTES.md	dataset/260819_dataall_on_aug/train
+experiments/v3_0823/code/view_overlay.py	dataset/misc/260824_handson/train/scene01/L0__s20260824__0000.png
+experiments/v3_0823/logs/segfill_render.log	dataset/260826_v3a_segfill_smoke
+experiments/v3_0823/logs/segfill_render.log	dataset/260826_v3a_segfill_smoke/test/scene06
+experiments/v3_0823/logs/segfill_render.log	dataset/260826_v3a_segfill_smoke/test/scene10
+experiments/v3_0823/logs/segfill_render.log	dataset/260826_v3a_segfill_smoke/test/scene12
+experiments/v3_0823/logs/segfill_render.log	dataset/260826_v3a_segfill_smoke/train/scene03
+experiments/v3_0823/logs/segfill_render.log	dataset/260826_v3a_segfill_smoke/train/scene04
+experiments/v3_0823/logs/segfill_render.log	dataset/260826_v3a_segfill_smoke/train/scene08
+experiments/v3_0823/logs/segfill_render.log	dataset/260826_v3a_segfill_smoke/train/scene09
+experiments/v3_0823/logs/segfill_render.log	dataset/260826_v3a_segfill_smoke/train/scene16
+experiments/v3_0823/logs/segfill_render.log	dataset/260826_v3a_segfill_smoke/train/scene17
+experiments/v3_0823/logs/segfill_render.log	dataset/260826_v3a_segfill_smoke/train/scene20
+experiments/v3_0823/logs/segfill_render.log	dataset/260826_v3a_segfill_smoke/train/scene21
+experiments/v3_0823/logs/segfill_render.log	dataset/260826_v3a_segfill_smoke/train/sceneC1
+experiments/v3_0823/logs/segfill_render.log	dataset/260826_v3a_segfill_smoke/train/sceneC4
+experiments/v3_0823/logs/segfill_render.log	dataset/260826_v3a_segfill_smoke/train/sceneD2
+experiments/v3_0823/logs/segfill_render.log	dataset/260826_v3a_segfill_smoke/train/sceneD3
+experiments/v3_0823/logs/segfill_render.log	dataset/260826_v3a_segfill_smoke/val/scene01
+experiments/v3_0823/logs/segfill_render.log	dataset/260826_v3a_segfill_smoke/val/scene02
+experiments/v3_0823/logs/segfill_render.log	dataset/260826_v3a_segfill_smoke/val/sceneD1
+scripts/reorg/handfix_dataset_paths.py	dataset/260819_dataall_on
+scripts/reorg/handfix_dataset_paths.py	dataset/260820_boost_e2
+scripts/reorg/handfix_dataset_paths.py	dataset/260826_v3a_segfill_smoke

@@ -19,7 +19,7 @@ Two modes in one file so the in-process half cannot drift from the driver half:
     (default)              drive: one subprocess per scene
     --scene-proc ...       the in-process half (invoked by the driver)
 
-Output goes to `dataset/<run>/<split>/<scene>/` — a tree `regression_check.py`
+Output goes to `dataset/<group>/<run>/<split>/<scene>/` — a tree `regression_check.py`
 cannot reach, because it is only ever pointed at `--scenes 'look_check/scene*'`
 (spec D1/B2). Nothing is ever written into a `look_check/<scene>/` directory.
 
@@ -27,6 +27,11 @@ usage:
   python3 scripts/run_data_render.py --plan --scenes sceneN1,scene02 \\
       --conds L0,L7,L5 --cams 8
   bash  scripts/rounds/run_260730_data_mini.sh          # the validated wrapper
+
+Path convention (0827 reorg): rounds live one purpose group below `dataset/`
+(`dataset/<group>/<round>`).  Never spell the group — resolve a round by NAME with
+`dataset/ROUNDS.json`, `variation_kit.round_dir(name)`, or shell `negobs_round`.
+A freshly rendered round has no group yet and lands flat at `dataset/<run>/`.
 """
 from __future__ import annotations
 

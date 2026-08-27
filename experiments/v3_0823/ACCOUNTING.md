@@ -2,7 +2,7 @@
 
 - **작성**: Claude Code · 2026-08-23 · **과업**: v3 창 P-1
 - **지위**: v3 창의 **모든 분모·모집단·집계 단위의 단일 참조**. 다른 문서가 분모를 말하면 본
-  문서를 가리키고, 본 문서와 충돌하면 **본 문서가 이긴다**. 근거: `Docs/experiment/V3_DESIGN_0823.md:354`
+  문서를 가리키고, 본 문서와 충돌하면 **본 문서가 이긴다**. 근거: `Docs/campaign/V3_DESIGN_0823.md:354`
   ("분모는 ACCOUNTING 단일 참조") · 동 `:374` (§12 전 항목 본 문서 등재 의무).
 - **갱신 규칙**: **append-only**. 라운드가 착지할 때마다 §3에 행을 덧붙인다. 기존 행은 고치지 않고,
   정정이 필요하면 정정 행을 아래에 추가하고 구행에 취소선 대신 "→ (정정: N행)" 주석을 단다.
@@ -150,7 +150,7 @@ scene17·scene20은 두 label set에서 tier·점수가 동일해 `twin` 블록�
 
 # §2 등록된 정밀 정의 9선 — 규칙 · 운영 귀결 · 준수 대상
 
-출처: `Docs/experiment/V3_DESIGN_0823.md:374-410` (§12). 본 절이 DZ §4~§8과 충돌하면 **본 절 우선**.
+출처: `Docs/campaign/V3_DESIGN_0823.md:374-410` (§12). 본 절이 DZ §4~§8과 충돌하면 **본 절 우선**.
 
 ## §2-1 G7 재라벨과 A/B 공정성
 
@@ -246,7 +246,7 @@ scene17·scene20은 두 label set에서 tier·점수가 동일해 `twin` 블록�
 - **부칙 3건**:
   1. `sceneC2` 재설계판은 **진단·대조 전용**으로 유지 (훈련 미편입).
   2. **레시피 v2의 정본은 문서 서술이 아니라 `runs/*/config.json` + 코드다.**
-  3. 구판 `Docs/experiment/Status/PROJECT_STATE_0823.md` 상단에 대체 배너 1줄 append —
+  3. 구판 `Docs/archive/campaign_status/PROJECT_STATE_0823.md` 상단에 대체 배너 1줄 append —
      **본 P-1에서 이행 완료** (해당 파일 2행).
 - **준수 대상**: 계기판③ · v2 재채점 파이프라인 · 레시피를 인용하는 모든 서술.
 
@@ -538,3 +538,37 @@ RT-A(`redteam/RT_LEDGER_A.md`) 차단급 판정 4건과 처분:
 (미래 날짜)을 실행에 그대로 쓰는 것을 금지한다 — 계획 식별은 라운드명의 웨이브 토큰
 (`v3w1` 등)이 담당한다. **경위·전수 대응표**: `ROUND_LEDGER.md` — 260825/26/27 접두사
 라운드는 전부 08-23~24 실렌더(기능 무손상·개명 안 함, 원장이 날짜 의미 복원).
+
+## 4.13 【추가 · 08-27】 dataset/ 재편에 따른 경로 재작성
+
+**무엇을 했나.** `dataset/` 밑 196개 라운드를 목적별 9개 폴더로 옮겼다
+(`dataset/<라운드>` → `dataset/<그룹>/<라운드>`). **라운드 이름은 하나도 바꾸지 않았다.**
+따라서 텍스트에 박혀 있던 경로 문자열은 `dataset/` 바로 뒤에 그룹 이름 한 칸만 끼워 넣는
+기계적 치환으로 고쳤다 — 288개 파일에 85,486건, 그리고 자동 치환기가 볼 수 없는
+중괄호·와일드카드 표기 22개 파일 35건은 손으로 같은 규칙을 적용했다.
+
+**봉인 원장 중 실제로 바뀐 것.** 아래 4개뿐이다. 나머지 봉인 원장
+(`split_v3.json`·`split_v3_seg3.json`·`split_v3_textext{,_bd}.json`·
+`corpus_v3_quarantine{,_seg3}.json`·`corpus_v3_census{,_seg3}.json`·
+`cue_extent_audit.json`)은 `dataset/` 경로를 한 건도 담고 있지 않아 **바이트 무변경**이다.
+
+| 원장 | 치환 | old sha256 → new sha256 |
+|---|---:|---|
+| `dataset_manifest_v3.json` | 10,602 | `4dacdf7c001745527d8e425d8eaa8338c00d7c9c77b8f86f9462339edb527814` → `b364291c76e52808475e146bb468e63d34a4124071929b00c11dba5d7539412c` |
+| `dataset_manifest_v3_seg3.json` (훈련 정본) | 10,746 | `2f3886d2c16b8f6cb1002b5915383ef9c130a83137a4a7bb7dfde363eb36b5fb` → `452854cdcb0ca0fb476bbb5364eb1e4ac58e7c711342f3bd477e7e2eec3de28f` |
+| `dataset_manifest_v3_textext.json` | 1,152 | `c05306414a2da170a2d43ba75839d28c8ad832377891b69f873d2ef93dae5715` → `6103e327ff5c3b30af897cefa67faf0783a90a3abbff77bb948b6b36f0df38b9` |
+| `dataset_manifest_v3_textext_bd.json` | 1,152 | `e00679800949cc40abf15406cdb65694fedf0319311da1a272e85924e7edbf51` → `7d3d1af8f328067bd43916c89d28001b7f93b22dd0cfed74ec884eeb8dbe1850` |
+
+같은 이동으로 함께 재작성된 v2 원장(봉인 대상은 아니나 기록해 둔다):
+`dataset_manifest_v2corr.json` `3bddf2c0…da81` → `eba27d78…2eb2`,
+`dataset_manifest_v2corr_roundown.json` `b785841a…dabc` → `222835496c44…3cc676`
+(각 5,665건 = 자동 5,663 + 손 2).
+
+**바뀐 것이 경로뿐이라는 증명 (한 문장).** 재작성된 파일 전체(자동 288개 + 손 22개)에
+역변환(`dataset/<그룹>/` → `dataset/`)을 적용한 결과가 이동 전 백업과 **바이트 단위로
+완전히 동일**했다 — 즉 경로 접두사 말고는 한 바이트도 달라지지 않았다.
+검증 전문은 `Docs/reorg_0827/S2_verification.md`(§6.4 10개 항목 전부 PASS),
+이동 대장은 `Docs/reorg_0827/dataset_moves.tsv`, 재현 도구는
+`scripts/reorg/rewrite_dataset_paths.py --inverse-check`.
+`PREREG_V3.md`(`05f41322…f56a`)와 `PREREG_CUEOFF.md`(`9c4733bb…56b1`)의 sha256은
+**동결 그대로**이며, 재작성 도구가 두 파일을 명시적으로 제외한다.

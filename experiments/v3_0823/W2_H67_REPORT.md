@@ -287,7 +287,7 @@ sceneH6 은 sceneH1(둔덕형)과 같은 `hm_tol_offprint` · 영정보 0 (base�
 
 | 종류 | 경로 |
 |---|---|
-| 렌더 | `dataset/260824_v3w2_h67{base,h,h2}_{A,B,C,D}/val/{sceneH6,sceneH7}/` · `…_h67smoke_A/` |
+| 렌더 | `dataset/v3_library/260824_v3w2_h67{base,h,h2}_{A,B,C,D}/val/{sceneH6,sceneH7}/` · `…_h67smoke_A/` |
 | 라벨 (12) | `annotations/w2_{base,h,h2}_{ac,bd,ca,db}_labels.json` |
 | 게이트 | `w2_gates_{base,h,h2}.json` |
 | 회계 | **`w2_val_yield.json`** · `w2_zeroinfo_crosstab.json` · `w2_gpu_account.json` |

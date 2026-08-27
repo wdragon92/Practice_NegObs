@@ -120,7 +120,7 @@
 
 | # | 없는 것 | 왜 필요한가 | 로컬에 있는 것 / 왜 못 쓰나 | 처분 |
 |---|---|---|---|---|
-| G-1 | **CUE-OFF 팔별 비교 스트립** | V3_BRIEF §6-1 필수 패널 목록의 "CUE-OFF 팔별". `§개입실험` 절에 쓸 그림이 **하나도 없다** (`INDEX.md` §4가 이미 기록) | `experiments/weekend_0823/cue_audit/smoke/scene{12,17,20}/` 에 **원본 렌더 1장씩 3장뿐** — 팔(A/B1/B2/C/P) 대조 합성물이 아님. `cue_audit/` 전체에 정성 패널 0장 | **재생성**: `dataset/260823_cueoff*_{A,B1,B2,C,P}/` 렌더는 로컬에 존재하므로, 팔별 스트립은 **기존 렌더만으로 합성 가능** (신규 렌더 불요) |
+| G-1 | **CUE-OFF 팔별 비교 스트립** | V3_BRIEF §6-1 필수 패널 목록의 "CUE-OFF 팔별". `§개입실험` 절에 쓸 그림이 **하나도 없다** (`INDEX.md` §4가 이미 기록) | `experiments/weekend_0823/cue_audit/smoke/scene{12,17,20}/` 에 **원본 렌더 1장씩 3장뿐** — 팔(A/B1/B2/C/P) 대조 합성물이 아님. `cue_audit/` 전체에 정성 패널 0장 | **재생성**: `dataset/cueoff/260823_cueoff*_{A,B1,B2,C,P}/` 렌더는 로컬에 존재하므로, 팔별 스트립은 **기존 렌더만으로 합성 가능** (신규 렌더 불요) |
 | G-2 | **YOLO 검출기 행의 test-core 정성 예시** | `§5.2 row 4` (F01 어댑터 스코프)의 육안 근거 | `experiments/dayrun_0820/runs/yolo_s{42,43,44}/` 57장은 **전부 학습 곡선·혼동행렬·`val_batch*` 모자이크** — test-core hit/miss 패널이 **애초에 생성된 적 없음**. 게다가 `.gitignore:18 **/runs/**/*.jpg` 로 차단 | **재생성**: `pred_test/labels/` + `eval_test/per_frame.csv` 로 CPU 합성 가능 |
 | G-3 | **aux 아모달 마스크 패널 (H 프레임)** | V3_BRIEF §6-1 필수 목록 · GPU-5 (b) | 마스크 전수 추출이 아직 안 됨 (GPU 작업) | **GPU 대기** |
 | G-4 | **v3-B 어트리뷰션 패널** | V3_BRIEF §6-1 필수 목록 | v3-B 런 자체가 미착수 | **v3 학습 후** |

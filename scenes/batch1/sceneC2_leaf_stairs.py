@@ -3,8 +3,8 @@
 sceneC2_leaf_stairs.py — NegObs synthetic scene 27: leaf-buried stone stair (Isaac Sim 4.5)
 
 Type    : C2 condition variant (geometry invariant · cue buried under an environment layer)
-Spec    : Docs/nanobanana_batch1_geometry_map.md §B sceneC2_leaf_stairs
-          Docs/multi_scene_brief_v3.md §A regression-prevention checklist
+Spec    : Docs/archive/legacy/nanobanana_batch1_geometry_map.md §B sceneC2_leaf_stairs
+          Docs/briefs/multi_scene_brief_v3.md §A regression-prevention checklist
 Shared  : scene_common.py · skeleton convention scene16_canopy_shadow.py
 Look ref: look_refs/c2_leaf_stairs.jpg (the generated image is a view from below — **the
           implementation follows the prompt intent: upper approach viewpoint, top 3 steps buried**)

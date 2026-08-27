@@ -60,6 +60,10 @@
 set -u
 
 REPO=/home/vislab/Desktop/work_sy/Practice_NegObs
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>). A round is
+# found by NAME: negobs_round (strict) / negobs_round_or_flat (tolerant).
+source "$REPO/scripts/lib/negobs_paths.sh"
 LOGDIR="$REPO/experiments/v3_0823/logs"
 LOG="$LOGDIR/w3_text_render.log"
 MARK="$REPO/experiments/v3_0823/logs/w3_markers"
@@ -153,7 +157,7 @@ say() { printf '[%s] %s\n' "$(date '+%F %T')" "$*" | tee -a "$LOG"; }
 #    (4)는 D85 ⑦ 이 노출한 "첫 컷 마스크 복제" 를 라운드 밖에서 다시 잡는 그물이다.
 verify_out() {   # verify_out <run> <scene> <want>
   local run="$1" scene="$2" want="$3"
-  local d="$REPO/dataset/$run/$SPLIT/$scene"
+  local d; d="$(negobs_round_or_flat "$run")/$SPLIT/$scene"
   python3 - "$d" "$want" <<'PYEOF'
 import glob, hashlib, json, os, sys, zipfile
 d, want = sys.argv[1], int(sys.argv[2])
@@ -255,7 +259,7 @@ case "$MODE" in
       while IFS= read -r spec; do
         pre="${spec%%:*}"
         for arm in A B C D; do
-          d="$REPO/dataset/${pre}_${arm}/$SPLIT/$s"
+          d="$(negobs_round_or_flat "${pre}_${arm}")/$SPLIT/$s"
           [ -d "$d" ] || { say "  [none] $s ${pre}_${arm}"; FAILS=$((FAILS+1)); continue; }
           v=$(verify_out "${pre}_${arm}" "$s" $(( CAMS * 3 )))
           [ $? = 0 ] && say "  [ok]   $s ${pre}_${arm} · $v" \
@@ -272,7 +276,7 @@ say "----------------------------------------------------------------"
 TOT=0
 for pre in "$STAMP_BASE" "$STAMP_H" "$STAMP_LAT" "$STAMP_B2"; do
   for arm in A B C D; do
-    d="$REPO/dataset/${pre}_${arm}"
+    d="$(negobs_round_or_flat "${pre}_${arm}")"
     [ -d "$d" ] || continue
     n=$(find "$d" -name '*.png' | wc -l)
     TOT=$((TOT+n))

@@ -39,16 +39,16 @@ python "$LAB/synth_test.py" | tail -4
 
 echo "=== [1/5] relabel both arms on $(basename "$GRID") ==="
 python "$LAB/labeler.py" \
-  --on-round  "$REPO/dataset/260819_main_on" \
-  --off-round "$REPO/dataset/260819_main_off" \
+  --on-round  "$REPO/dataset/v2_corpus/260819_main_on" \
+  --off-round "$REPO/dataset/v2_corpus/260819_main_off" \
   --grid "$GRID" --workers 8 \
   --out "$OUT/annotations/labels_$SLUG.json"
 
 echo "=== [2/5] manifest ==="
 python "$LAB/build_manifest.py" \
   --labels "$OUT/annotations/labels_$SLUG.json" \
-  --on-round  "$REPO/dataset/260819_main_on" \
-  --off-round "$REPO/dataset/260819_main_off" \
+  --on-round  "$REPO/dataset/v2_corpus/260819_main_on" \
+  --off-round "$REPO/dataset/v2_corpus/260819_main_off" \
   --out "$OUT/dataset_manifest_v2.json"
 
 echo "=== [3/5] INVARIANT GATE (mandatory -- stops the run on any mismatch) ==="

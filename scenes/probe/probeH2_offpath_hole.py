@@ -4,7 +4,7 @@ probeH2_offpath_hole.py — hole-type zero-shot probe, scene 2 of 3 (Isaac Sim 4
 
 Type   : HOLE, off the walked line — a 0.80 x 0.80 m open service pit set to ONE
          side of the corridor, with the corridor itself left completely walkable.
-Spec   : Docs/experiment/OVERNIGHT_BRIEF_0820_v1.md §4 C1 composition (2)
+Spec   : Docs/campaign/OVERNIGHT_BRIEF_0820_v1.md §4 C1 composition (2)
          "중거리 hole — 경로 한쪽에 치우쳐 인접 섹터가 비도록 배치(통로 보존 구도):
           정답 섹터 발화와 함께 **인접 빈 섹터의 오발화율**을 별도 보고"
 Shared : probe_common.py (twin contract + builders) · scene_common.py

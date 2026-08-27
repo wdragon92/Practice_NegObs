@@ -3,7 +3,7 @@
 sceneN4_downhill_ramp.py - NegObs synthetic scene 24: downhill gentle ramp (Isaac Sim 4.5)
 
 Type    : N4 hard negative - a walkable gentle slope (5%) · **GT = "no drop" on every pixel**
-Spec    : Docs/nanobanana_batch1_geometry_map.md §A sceneN4_downhill_ramp
+Spec    : Docs/archive/legacy/nanobanana_batch1_geometry_map.md §A sceneN4_downhill_ramp
 Look ref: look_refs/n4_ramp.jpg (a 4 m wide straight road between concrete retaining walls)
 Shared  : scene_common.py (build_slope / add_box / dressing and lighting harness)
 

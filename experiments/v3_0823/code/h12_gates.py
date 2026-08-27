@@ -44,6 +44,12 @@ import zipfile
 
 import numpy as np
 
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__))))))                              # noqa: E402
+from variation_kit import round_dir_or_flat   # noqa: E402
+
 ARMS = ("A", "B", "C", "D")
 
 # 씬별 프림 경로 접두어 — **루트 앵커 매칭**을 쓴다.
@@ -255,7 +261,10 @@ WHITE_SKY_CUT = 3          # 하늘 배제용 상단 1/3 컷 — regression_chec
 # 입출력 헬퍼
 # --------------------------------------------------------------------------- #
 def arm_dir(root, stamp, arm, split, scene):
-    return os.path.join(root, f"{stamp}_{arm}", split, scene)
+    # 0827: `root` is the dataset ROOT, which did not move; the round
+    # inside it may be flat or grouped, so it is resolved by NAME.
+    return os.path.join(round_dir_or_flat(f"{stamp}_{arm}", root),
+                        split, scene)
 
 
 def load_variation(d):

@@ -1,6 +1,6 @@
 # 씬 브리프 v5 — 범용 무대 재설계 (2026-07-27 사용자 채택)
 
-원칙: `Docs/scene_redesign_v5_proposal.md`(처분표·설계 개요) + 브리프 v3 §A 회귀 방지
+원칙: `Docs/archive/legacy/scene_redesign_v5_proposal.md`(처분표·설계 개요) + 브리프 v3 §A 회귀 방지
 체크리스트 + 감사 v4 교훈(보행 연속성·접지·sRGB 암색 0.02~0.06·개구 4박스·씬별 태양·
 그리드 카메라 vs 기하 충돌 검산). **위험 = 규정 미달의 현실**(난간 훼손·마모·가림·젖음).
 전 씬: SCENE_CONFIG 7키, grid_views(로봇 h0.3 판정 1순위), 미장센 4컷+, GT 낙차 불변 원칙.

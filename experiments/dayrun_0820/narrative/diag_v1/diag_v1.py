@@ -217,7 +217,7 @@ def diag2():
 # DIAG (3) -- sceneC2
 # --------------------------------------------------------------------------- #
 def load_hm(arm):
-    d = os.path.join(REPO, f"dataset/260819_main_{arm}/val/sceneC2")
+    d = os.path.join(REPO, f"dataset/v2_corpus/260819_main_{arm}/val/sceneC2")
     z = np.load(os.path.join(d, "heightmap.npy"))
     m = json.load(open(os.path.join(d, "heightmap_meta.json")))
     return z, m
@@ -253,7 +253,7 @@ def local_drop(z, step, win_m=1.0):
 
 def diag3():
     var = {a: json.load(open(os.path.join(
-        REPO, f"dataset/260819_main_{a}/val/sceneC2/variation.json"))) for a in ("on", "off")}
+        REPO, f"dataset/v2_corpus/260819_main_{a}/val/sceneC2/variation.json"))) for a in ("on", "off")}
     cuts = {a: {c["file"]: c for c in var[a]["cuts"]} for a in ("on", "off")}
 
     off_rows = {k: v for k, v in PF["rgb"].items() if v["scene_id"] == "sceneC2"

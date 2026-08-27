@@ -49,6 +49,11 @@ import sys
 import numpy as np
 
 REPO = "/home/vislab/Desktop/work_sy/Practice_NegObs"
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat   # noqa: E402
 V3 = os.path.join(REPO, "experiments", "v3_0823")
 ANN = os.path.join(V3, "annotations")
 LOGS = os.path.join(V3, "logs")
@@ -265,7 +270,7 @@ def build_void_index(units, grid):
     ncell = LB.n_cells(grid)
     out = {}
     for rnd, scene in sorted(units):
-        hits = glob.glob(os.path.join(DATA, rnd, "*", scene, "variation.json"))
+        hits = glob.glob(os.path.join(round_dir_or_flat(rnd), "*", scene, "variation.json"))
         if not hits:
             continue
         sdir = os.path.dirname(hits[0])
@@ -425,14 +430,14 @@ def main(argv=None):
         rd = rounds.get(u["band"])
         if not rd:
             continue
-        for stem in collide_stems(os.path.join(DATA, rd), u["scene"]):
+        for stem in collide_stems(round_dir_or_flat(rd), u["scene"]):
             seg_bad.add(("B", u["scene"], u["band"], stem))
     vg01_units = {(u["scene"], u["band"]) for u in QUNIT
                   if u["scope"] == "train_exclude_unit"}
     # D팔 stale 152컷 (idseg_fetch == "t0" · W1D §2.2) — 세그만 격리
     n_dstale = 0
     for band, rnd in D_ROUNDS.items():
-        for vf in glob.glob(os.path.join(DATA, rnd, "*", "*", "variation.json")):
+        for vf in glob.glob(os.path.join(round_dir_or_flat(rnd), "*", "*", "variation.json")):
             var = json.load(open(vf, encoding="utf-8"))
             sc = var.get("scene")
             cuts = var["cuts"]
@@ -449,7 +454,7 @@ def main(argv=None):
     # A팔 백필 미설치 유닛 (W1B2 §2.4 · 5유닛 120컷)
     bf_units = set()
     for band, rnd in A_ROUNDS.items():
-        for lf in glob.glob(os.path.join(DATA, rnd, "*", "*", "idseg_backfill.json")):
+        for lf in glob.glob(os.path.join(round_dir_or_flat(rnd), "*", "*", "idseg_backfill.json")):
             d = json.load(open(lf, encoding="utf-8"))
             bf_units.add((d.get("scene"), band))
 
@@ -461,7 +466,7 @@ def main(argv=None):
         return os.path.basename(os.path.dirname(p))
 
     def pngs(round_dir, scene=None):
-        pat = os.path.join(DATA, round_dir, "*", scene or "*", "*.png")
+        pat = os.path.join(round_dir_or_flat(round_dir), "*", scene or "*", "*.png")
         return sorted(p for p in glob.glob(pat) if not p.endswith(".depth.png"))
 
     # variation.json 캐시 (cam·cond)
@@ -470,7 +475,7 @@ def main(argv=None):
     def cutinfo(round_dir, scene, stem):
         key = (round_dir, scene)
         if key not in varcache:
-            hits = glob.glob(os.path.join(DATA, round_dir, "*", scene, "variation.json"))
+            hits = glob.glob(os.path.join(round_dir_or_flat(round_dir), "*", scene, "variation.json"))
             m = {}
             if hits:
                 var = json.load(open(hits[0], encoding="utf-8"))

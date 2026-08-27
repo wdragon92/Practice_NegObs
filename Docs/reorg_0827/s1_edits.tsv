@@ -1,0 +1,13 @@
+stage	action	path	detail	backup
+S1	edit	.gitignore	line 15 '**/runs/**/*.pt' -> '*.pt' + '*.pth' (comment and all other rules kept); 3985 -> 3980 bytes	Docs/reorg_0827/gitignore.bak
+S1	edit	variation_kit.py	added DATASET_ROOT, ROUNDS_INDEX, _subdirs, rounds_index, round_candidates, round_dir; data_root made group-aware (signature unchanged); 1155 -> 1271 lines	Docs/reorg_0827/variation_kit.py.bak
+S1	create	scripts/lib/negobs_paths.sh	shell helper negobs_round <name> (wraps variation_kit.round_dir)	-
+S1	create	scripts/tests/test_round_dir.py	11 asserts over temp-dir layouts + the live tree	-
+S1	create	scripts/reorg/build_rounds_map.py	writes dataset/ROUNDS.json + Docs/reorg_0827/dataset_moves.tsv	-
+S1	create	scripts/reorg/rewrite_dataset_paths.py	--dry-run/--apply/--verify/--inverse-check rewriter (reference_inventory 6.2)	-
+S1	create	dataset/ROUNDS.json	196 entries {round: new parent}; gitignored (dataset/ is ignored)	-
+S1	create	Docs/reorg_0827/dataset_moves.tsv	196 rows: round, old_path, new_path, action, size_bytes	-
+S1	create	Docs/reorg_0827/rewrite_dryrun.tsv	288 rows: file, tracked, n_abs, n_rel, delta_bytes	-
+S1	create	Docs/reorg_0827/verify_baseline_missing.txt	6 pre-existing dangling dataset citations (8 occurrences)	-
+S1	create	Docs/reorg_0827/deletions.tsv	36 deletions, 11515945058 bytes	-
+S1	create	Docs/reorg_0827/snapshot_before/	7 before-state snapshots	-

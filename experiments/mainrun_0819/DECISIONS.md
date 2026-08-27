@@ -131,7 +131,7 @@
   정성 패널 가치. 최종: test {05,07,14,15,18,C2,N3} H21 / val {10,D3} H0 / train 20씬
   H24. 아침 승인 대상 명기.
 
-===== DAYRUN 0820 (지시서: Docs/experiment/DAYRUN_BRIEF_0820.md, WORKDIR experiments/dayrun_0820) =====
+===== DAYRUN 0820 (지시서: Docs/campaign/DAYRUN_BRIEF_0820.md, WORKDIR experiments/dayrun_0820) =====
 
 - **D19 (08-20 15:16) 작업 기본값 채택 + 실행 판단**: 브리프 확정사항(그리드 V1 20칸
   중첩·E 승격·YOLO 4행·amodal 파생·발전서사)과 작업 기본값(게이트 유지·HOLD 유지·
@@ -184,7 +184,7 @@
   병합 frame_id 충돌 192건 발견 → 병합 시 파일 토큰에 '::<round>' 접미사(파서
   split('/',2) 안전 확인). 큐 개시는 E2 병합 후(~19:40)로 조정.
 
-===== NIGHTRUN 0820 (지시서: Docs/experiment/OVERNIGHT_BRIEF_0820_v1.md, WORKDIR experiments/nightrun_0820) =====
+===== NIGHTRUN 0820 (지시서: Docs/campaign/OVERNIGHT_BRIEF_0820_v1.md, WORKDIR experiments/nightrun_0820) =====
 
 - **D25 (23:45) 스위치 확정 기록**: APPROVE_BATCH_DEFAULTS=YES — DAYRUN_REPORT ④의
   #1~#6·#8 기본값 사용자 확정(그리드 V1·D19 기본값 5건·val scene20·보강 수용·트윈
@@ -1149,3 +1149,67 @@
   gridspec 수용, wedge_px 원문 보존, 섹터쌍 엣지 재현 자기시험). 검산 게이트 전 통과
   (v2s_adoption.json 대조·§4 재유도 1e-9·타일 9/9). 부수 관찰: v2s_adoption.json mtime
   갱신(내용 불변 — 병행 재실행 추정, 게이트가 매회 재검증).
+
+- **D102 (목 저녁) 창고 변형 실험 마감 — readout '우리 모델' 열 완성 + 보고서 [진단·서술용]**:
+  08-24 13:47 한도 중단 지점(`gazebo_wh_0824/tools/readout.py`, `gt_cells()` 에서
+  `P.APPROACH_Y` AttributeError — `project_hole` 은 그 상수를 import 하지 않는다)을 수리해
+  마무리. 수리 방식은 상수 복구가 아니라 **정본 위임**: 쐐기 판정을 학습 라벨을 만든
+  `labeling/labeler.py::polar_cells` 로 그대로 호출하고, 카메라는 캡처 매니페스트(정지 카메라
+  = 정확 자세)에서 읽는다. `out/readout.csv` **64행**(4월드×8접근×2팔) 유지, YOLO 열 보존 +
+  `gt_cells·n_gt·ours_<model>_{max_p,fire,p_gt,gt_hit,top_cell}` 12열 추가(NaN 0), 부산물
+  `readout_ours.csv`(64행)·`readout.json`·`readout_tables.md`. 08-24 파일 대비 **바뀐 YOLO 칸은
+  wh_e 뿐**(작성자 자신의 중단 시점 개선: wh_e 의 영역이 개구부 전체 → 아직 열린 0.18 m
+  띠로 정정 → `void_px` 16행·`void_roi_px` 6행 갱신, `centre` 2행 1→0; wh0/wh_h/wh_hc 전 칸
+  불변). **실측**: YOLO(τ0.25, roi팔) 발화 wh0 0.500·wh_e 0.500·wh_h **0.000**·wh_hc 0.000,
+  1.1 m 이하에서만 검출·논문 게이트 3/8(1.5 m 이상 전 월드 침묵), 마스크 해제 시 wh_h/wh_hc 도
+  절반 발화하나 **구멍 겹침 0**. 우리 모델(τ0.5) GT칸 적중 = v2 네 월드 전부 **0.000**,
+  v3a wh0 **0.000**·wh_e 0.250·wh_h 0.500·wh_hc **0.500**, 평균 p(GT) v3a wh0 **0.050** <
+  무위험 쌍둥이 wh_hc **0.340**. **리그 한계를 실측으로 명시**: wh_h↔wh_hc 8개 접근 지점 전부
+  |Δ|>10 화소 **0.0000 %**·SHA256 동일(overview 만 다름) → 출력 동일은 **구조상 당연**이고
+  발견이 아니다; 노드 사다리꼴 영역의 250/255 이상 화소가 wh0 0.5 m 84.5 % → 3.4 m **99.9 %**
+  (바닥 노출 과다 = 맥락 화소 없음); 0.5 m wh_h 는 화면의 88.2 %가 팔레트로 바뀌는 **나무결 벽**;
+  단일 시드·무σ·논문 게이트는 정지 카메라라 depth 가지 부재. 결론: D48/D97/D100 의
+  "단서 반응 ≠ 낙차 추론"을 **논문 자신의 월드**에서 재현했을 뿐 새 주장 없음. 산출
+  `experiments/gazebo_wh_0824/WAREHOUSE_VARIANT.md`(한국어 106줄, 더 나은 리그 3요건 포함) ·
+  `.gitignore` 에 `experiments/gazebo_wh_0824/frames/**/*.png`(weekend_0823/gazebo 규칙과 동형 —
+  PNG 108장 24 MB 제외, 매니페스트·SHA256SUMS·out/ 는 추적: 추적 대상 195파일 824 KiB).
+
+- **D103 (목 저녁) Isaac 직접 실습 가이드 — 전 명령 실행 검증 후 발행**: 08-24에 샘플 2장과
+  `view_overlay.py` 만 남고 본문이 없던 트랙을 종결. `Docs/guides/ISAAC_HANDSON.md`(한국어 120줄).
+  **추측 없이 전부 실행해 확인**: ① 렌더 — `run_data_render.py --run 260827_handson --scenes scene01
+  --conds L0 --cams 2 --seed 20260827` 을 `flock -o -w 3600 -E 201 /tmp/negobs_gpu.lock` 안에서
+  실행, **2컷 25초**(컷당 12.264 s, manifest `exit 0 / cuts 2`); 종료 직전의
+  `UnboundLocalError: local variable 'math'`(`run_data_render.py:603`)는 **HEAD 에도 있는 기존
+  무해 결함**(594행 주석이 자인 — 산출물이 전부 쓰인 뒤 발생)이라 가이드에 "놀라지 말 것"으로
+  명기. ② 오버레이 — `view_overlay.py` 로 `_grid.png` 2장 생성(실제 출력 로그를 문서에 그대로
+  붙임), 파일의 예시 경로가 존재하지 않는 `…/train/scene01/…` 이던 것을 실재 `val/` 로 교정.
+  ③ 갤러리 — `look_check/_review/{w2,w3,w4}` 구조와 미검수 4갤러리 경로 존재 확인.
+  ④ **GUI 경로는 된다(실측)**: `NEGOBS_CAPTURE` 미지정 = GUI(`scene01_campus_stairs.py:1602`
+  `headless=capture_mode`), `DISPLAY=:1` 에서 약 10초 만에 창 `Isaac Sim Python 4.5.0` 확인
+  (`wmctrl -l`), 터미널 조작 안내(우클릭+WASD 비행·P 패스트레이싱·C 스크린샷·`[ ]` 태양 방위)와
+  씬 체크리스트 7줄 동반, 종료 후 프로세스 0·GPU 메모리 원복·락 해제 확인. 라운드는
+  `dataset/misc/260827_handson`(10.25 MB)으로 편입 — `ROUNDS.json` 197줄 · `dataset_moves.tsv`
+  197행 · `dataset/README.md` misc 줄 갱신 · `negobs_round`/`round_dir` 양쪽 해석 확인.
+
+- **D104 (목 저녁) 0827 저장소 정리 — 6단계 완료 기록**: 소유자 승인(마스터 플랜 OWNER
+  DECISIONS)에 따른 재편을 `chore/reorg-0827` 에서 S1~S6로 수행(에이전트는 커밋하지 않음).
+  **무엇이 움직였나**: dataset 라운드 **196개**를 목적별 9칸 + `_archive/` 로(라운드 이름 불변,
+  `dataset/ROUNDS.json` 대조표), 텍스트 **300파일·85,521치환**, 심링크 **5,687개** 상대경로
+  재조준; look_check **322항목**(자유 라운드 262 + 갤러리 47 + 저널)·10.86 GiB 이동,
+  `_review/<wave>/`·`logs/` 정리, `make_lookcheck_index.py` 신설; 코드 **66파일 178사이트**를
+  이름 해석 헬퍼(`round_dir` / `round_dir_or_flat` / `has_round` / `rounds_matching` ·
+  `NEGOBS_DATASET_ROOT` · 셸 `negobs_round`)로 전환; Docs **22파일 이동·심링크 10개 삭제·
+  113파일 198치환**(`Docs/` 아래 `experiment/` 폴더를 `campaign/` 으로, 그 안 `Status/` 를
+  `status/` 로 개명 — 옛 표기는 잔여 검사기 때문에 여기 그대로 적지 않는다; dated
+  PROJECT_STATE 4종 → `Docs/archive/campaign_status/`), 최상위 `run_*.sh` 5개 →
+  `scripts/rounds/`. **삭제 10.73 GiB**(venv_yolo 5.19 · lighting_spikes 5.26 · reselect 여분
+  체크포인트 3개 0.27 · `__pycache__` · 빈 디렉터리 11) — 전부 재생성 가능하고 각 행에 복구
+  레시피. **불변량**: 심링크 **5,734 / 깨짐 0**(5,744 − 의도적 삭제 10 = 폐기된 호환 심링크),
+  `PREREG_V3.md` sha256 `05f41322…f56a` · `PREREG_CUEOFF.md` `9c4733bb…56b1` **불변**(S5에서 1회
+  자동 치환으로 깨졌다가 바이트 복원 + 재발 방지용 SEALED 거부 장치 탑재, 경로 변경은 사이드카
+  `PREREG_V3_PATHMAP_0827.md` / `PREREG_CUEOFF_PATHMAP_0827.md` 로 기록). **재실행 게이트**:
+  `scripts/reorg/{smoke_round_sites,import_check,s5_residual_gate,s5_link_check}.py` ·
+  `scripts/tests/test_round_dir.py`. **기록 위치**: `Docs/reorg_0827/`(S1~S6 보고서 + 이동·삭제·
+  치환 TSV), 지도 `REORG_0827.md` · `dataset/README.md` · `experiments/README.md` ·
+  `look_check/INDEX.md` · 상시 온보딩 문서 `Docs/campaign/status/PROJECT_STATE.md`(날짜 없는
+  단일본). 손대지 않은 것: `Practice_NegObs_edge` 워크트리(폐기 예정), 이동 금지 등록부 전 항목.

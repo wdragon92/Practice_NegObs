@@ -2,7 +2,7 @@
 """
 scene12_cliff_plankwalk.py — NegObs 인공씬 12호: 절벽 잔도 (Isaac Sim 4.5)
 
-사양서 : Docs/multi_scene_brief_v3.md §A(회귀 체크리스트)·§D(scene12)·§B(빌더)
+사양서 : Docs/briefs/multi_scene_brief_v3.md §A(회귀 체크리스트)·§D(scene12)·§B(빌더)
 공통 라이브러리 : scene_common.py / 골격 관례 : scene03_riverbank.py
 
 유형 (T17 절벽 잔도): **편측 무한낙차 — missing ground band 극단**.

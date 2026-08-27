@@ -1,6 +1,6 @@
 # NegObs 씬 라이브러리 v3 — 16씬 확장 브리프 (총 21씬)
 
-작성 2026-07-25 · 감독 Fable · 근거: `Docs/stair_typology_survey_v2.md` (T9~T21, 명소 실측치)
+작성 2026-07-25 · 감독 Fable · 근거: `Docs/surveys/stair_typology_survey_v2.md` (T9~T21, 명소 실측치)
 기존: scene01~05 (T1/T3/T5/T4/T6). 신규: scene06~21. 관례·토글·캡처 파이프라인은 v2 브리프와 동일.
 
 ## A. 회귀 방지 체크리스트 [전 씬 필수 — 룩 루프에서 확정된 표준]

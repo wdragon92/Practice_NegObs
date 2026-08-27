@@ -34,6 +34,10 @@
 set -u
 
 REPO=/home/vislab/Desktop/work_sy/Practice_NegObs
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>). A round is
+# found by NAME: negobs_round (strict) / negobs_round_or_flat (tolerant).
+source "$REPO/scripts/lib/negobs_paths.sh"
 AUDIT="$REPO/experiments/weekend_0823/cue_audit"
 CODE="$REPO/experiments/mainrun_0819/code"
 LAB="$CODE/labeling"
@@ -81,15 +85,15 @@ say() { printf '[%s] %s\n' "$(date '+%F %T')" "$*" | tee -a "$LOG"; }
 # stem -> the canonical hazard-OFF round that supplies z_off for the `lineage` set
 off_round() {
   case "$1" in
-    260823_cueoff)  echo "$REPO/dataset/260820_boost_e_off" ;;   # s12 band e
-    260823_cueoff2) echo "$REPO/dataset/260820_boost_e2_off" ;;  # s12 band e2, s20
-    260823_cueoff3) echo "$REPO/dataset/260819_main_off" ;;
-    260823_cueoff_s20fix) echo "$REPO/dataset/260820_boost_e2_off" ;;  # A2/D49 s20 repair
+    260823_cueoff)  echo "$REPO/dataset/v2_corpus/260820_boost_e_off" ;;   # s12 band e
+    260823_cueoff2) echo "$REPO/dataset/v2_corpus/260820_boost_e2_off" ;;  # s12 band e2, s20
+    260823_cueoff3) echo "$REPO/dataset/v2_corpus/260819_main_off" ;;
+    260823_cueoff_s20fix) echo "$REPO/dataset/v2_corpus/260820_boost_e2_off" ;;  # A2/D49 s20 repair
     *) echo "" ;;
   esac
 }
 # scene17 draws its z_off from the boost_h off round, which only that stem needs
-off_round_s17() { echo "$REPO/dataset/260820_boost_h_off"; }
+off_round_s17() { echo "$REPO/dataset/v2_corpus/260820_boost_h_off"; }
 
 scenes_of_stem() {
   case "$1" in
@@ -107,7 +111,7 @@ note_fail() { NFAIL=$((NFAIL+1)); FAILS="${FAILS}\n  $*"; say "  [FAIL] $*"; }
 # ---------------------------------------------------------------- phase 1
 label_one() {   # label_one <set> <stem> <arm> <scene> <off_dir>
   local set="$1" stem="$2" arm="$3" scene="$4" offdir="$5"
-  local on="$REPO/dataset/${stem}_${arm}"
+  local on; on="$(negobs_round_or_flat "${stem}_${arm}")"
   [ -d "$on" ] || { say "  [skip] $on absent"; return; }
   [ -d "$offdir" ] || { note_fail "$set $stem $arm $scene: off round $offdir absent"; return; }
   local lab="$AUDIT/labels/${set}__${stem}_${arm}__${scene}.json"
@@ -135,7 +139,7 @@ if case " $PHASES " in *" 1 "*) true ;; *) false ;; esac; then
             fi
           else
             # `twin`: arm C of the SAME stem is the exact-pose hazard-off twin
-            offdir="$REPO/dataset/${stem}_C"
+            offdir="$(negobs_round_or_flat "${stem}_C")"
           fi
           say "  label $set $stem $arm $scene  (z_off <- ${offdir#$REPO/})"
           label_one "$set" "$stem" "$arm" "$scene" "$offdir"

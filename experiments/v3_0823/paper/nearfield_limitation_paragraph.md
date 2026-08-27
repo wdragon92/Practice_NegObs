@@ -4,8 +4,8 @@
 - **Written**: Claude Code (CPU-6) · 2026-08-23 · target: v3-frame main paper (English).
 - **Where it goes**: §Limitations (primary). A 2-sentence variant is also needed early — in the
   Introduction's scope statement — so the paper never promises near-field and then withdraws it.
-- **Sources**: `DZ` = `Docs/experiment/V3_DESIGN_0823.md` §1 `:48-51`, §3 `:213-218` ·
-  `PS v2` = `Docs/experiment/Status/PROJECT_STATE_0823_v2.md` §1-5 `:35-38`, 결재 7 `:70` ·
+- **Sources**: `DZ` = `Docs/campaign/V3_DESIGN_0823.md` §1 `:48-51`, §3 `:213-218` ·
+  `PS v2` = `Docs/archive/campaign_status/PROJECT_STATE_0823_v2.md` §1-5 `:35-38`, 결재 7 `:70` ·
   `ST` = `experiments/dayrun_0820/runs/v2/SEED_TABLE.md` §1 (band1 columns) ·
   `ACC` = `experiments/v3_0823/ACCOUNTING.md` §4.8 row 4 `:483`.
 

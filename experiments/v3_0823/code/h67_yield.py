@@ -14,7 +14,7 @@
                    --out $E/annotations/h67_probe_labels.json --workers 4
     python3 experiments/v3_0823/code/h67_yield.py \
             --labels experiments/v3_0823/annotations/h67_probe_labels.json \
-            --on dataset/260823_v3p5_h67probe_A --off dataset/260823_v3p5_h67probe_C
+            --on dataset/_archive/v3_scene_build/260823_v3p5_h67probe_A --off dataset/_archive/v3_scene_build/260823_v3p5_h67probe_C
 """
 from __future__ import annotations
 

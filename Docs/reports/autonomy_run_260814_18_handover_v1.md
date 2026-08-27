@@ -98,7 +98,7 @@ s16 대공사 3차(sign_underpass 제거 포함) · s11 난간 일체화(크롭 
 
 - 33씬 132컷, 씬당 36~228 s(PT-fast). regr **FAIL 1**(s07 선언 귀속)·잔여 WARN 전량
   선언 귀속(`Docs/reports/regr_260816_w4_final33.json`).
-- 갤러리: `look_check/_review/260816_w4_final33`(33씬 132썸네일).
+- 갤러리: `look_check/_review/w4/260816_w4_final33`(33씬 132썸네일).
 - 육안 성립: GT-126 12항(s04 버치·s06 펄 소멸·N4 분절·N5 섬프 암선·D3 건초화 등) ·
   GT-121 2차 s15(clipHi 32.9 잔여 = ⓐ 귀속) · GT-124 2차 s10(올리브 휴면 잔디).
 - **육안 잔여 3건**(신규 행 없이 기록만): D3 노견 그레이징 골판 판독 · s07 원경 암면
@@ -106,6 +106,6 @@ s16 대공사 3차(sign_underpass 제거 포함) · s11 난간 일체화(크롭 
 
 ## 8. 검수 대기 갤러리 (누적)
 
-`_review/260814_w4_r1r2pilot`(5씬) · `_review/260815_w4_r4batch`(17씬 68컷) ·
-`_review/260815_w4_hzbatch`(13씬 52컷) · `_review/260816_w4_final33`(33씬 132컷) ·
+`_review/w4/260814_w4_r1r2pilot`(5씬) · `_review/w4/260815_w4_r4batch`(17씬 68컷) ·
+`_review/w4/260815_w4_hzbatch`(13씬 52컷) · `_review/w4/260816_w4_final33`(33씬 132컷) ·
 (구) 08-11/08-13 배치 목록은 STATUS 참조.

@@ -24,7 +24,7 @@ Geirhos et al. (Nature MI 2020): 상관이 존재하면 망은 반드시 그것�
 사용
 ----
     python3 scripts/shortcut_audit.py --round 260806_w3_allview5          # (1)(2)
-    python3 scripts/shortcut_audit.py --data dataset/260730_data_mini    # (3)
+    python3 scripts/shortcut_audit.py --data dataset/_archive/scene_dev_2607/260730_data_mini    # (3)
     python3 scripts/shortcut_audit.py --round R --json out.json          # 기계 판독
 """
 import argparse

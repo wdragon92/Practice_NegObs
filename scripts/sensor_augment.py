@@ -20,8 +20,14 @@ Carlson et al., ECCV-W 2018 (arXiv:1803.07721): 물리 기반 센서 효과(색�
 
 사용
 ----
-    python3 scripts/sensor_augment.py --in dataset/<run>/train --out dataset/<run>_aug/train
+    python3 scripts/sensor_augment.py --in dataset/<group>/<run>/train \
+                                      --out dataset/<run>_aug/train
     python3 scripts/sensor_augment.py --in <dir> --out <dir> --seed 7 --strength 1.0
+
+경로 규약(0827 재편): 라운드는 목적별 그룹 한 칸 아래에 산다 — `dataset/<group>/<round>`.
+그룹 이름을 외울 필요는 없다. `dataset/ROUNDS.json` 또는
+`variation_kit.round_dir("<라운드이름>")`(셸은 `negobs_round`)가 실제 경로를 돌려준다.
+새로 렌더한 라운드는 아직 그룹이 없으므로 `dataset/<round>` 에 평평하게 떨어진다.
 """
 import argparse
 import glob

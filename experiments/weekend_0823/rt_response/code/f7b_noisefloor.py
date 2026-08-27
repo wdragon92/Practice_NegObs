@@ -23,6 +23,12 @@ import numpy as np
 from PIL import Image
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+import sys
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat   # noqa: E402
 OUT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 DS = os.path.join(REPO, "dataset")
 MANIFEST = os.path.join(REPO, "experiments/dayrun_0820/dataset_manifest_v2_full.json")
@@ -31,7 +37,7 @@ THRESH_HI = [8, 32]
 
 M = json.load(open(MANIFEST))
 by_id = {f["frame_id"]: f for f in M["frames"]}
-ctrl = json.load(open(os.path.join(DS, "260820_ctrloff", "manifest.json")))
+ctrl = json.load(open(os.path.join(round_dir_or_flat("260820_ctrloff"), "manifest.json")))
 
 
 def diff_stats(pa, pb):
@@ -69,16 +75,16 @@ for fr in ctrl.get("frames", ctrl if isinstance(ctrl, list) else []):
         sc = fr.get("scene_id") or os.path.basename(os.path.dirname(p))
         ctrl_path[(sc, os.path.basename(p))] = p
 if not ctrl_path:                      # fall back to a directory walk
-    for root, _d, files in os.walk(os.path.join(DS, "260820_ctrloff")):
+    for root, _d, files in os.walk(round_dir_or_flat("260820_ctrloff")):
         for fn in files:
             if fn.endswith(".png"):
                 ctrl_path[(os.path.basename(root), fn)] = os.path.join(root, fn)
 
 res = {"threshold_255": THRESH, "groups": {}, "provenance": {
-    "noise_floor": "dataset/260819_main_on/sceneN3 vs dataset/260820_ctrloff/sceneN3 "
+    "noise_floor": "dataset/v2_corpus/260819_main_on/sceneN3 vs dataset/v2_probes/260820_ctrloff/sceneN3 "
                    "(keep_dressing; heightmap max|Δ| = 0.000000 m per ctrl_dressing/CTRL_TABLE.md)",
-    "hazard_only": "dataset/260819_main_on/sceneC2 vs dataset/260820_ctrloff/sceneC2 (keep_dressing)",
-    "full_toggle": "dataset/260819_main_on/<scene> vs dataset/260819_main_off/<scene> "
+    "hazard_only": "dataset/v2_corpus/260819_main_on/sceneC2 vs dataset/v2_probes/260820_ctrloff/sceneC2 (keep_dressing)",
+    "full_toggle": "dataset/v2_corpus/260819_main_on/<scene> vs dataset/v2_corpus/260819_main_off/<scene> "
                    "(the ordinary corpus twin: hazard geometry AND everything else inside "
                    "the scene builder's hazard_stairs branch)",
 }}

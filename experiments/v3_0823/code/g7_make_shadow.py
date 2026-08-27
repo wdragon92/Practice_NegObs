@@ -11,7 +11,7 @@ splinter footprint.
 `labeler.load_heightmap` reads it from there, so repairing the boost rounds
 without touching the frozen corpus needs a parallel tree.  This builds one:
 
-    dataset/260820_boost_<band>_<arm>_g7fix/<split>/<scene>/
+    dataset/v2_corpus/260820_boost_<band>_<arm>_g7fix/<split>/<scene>/
 
 Every entry of the original scene directory becomes a SYMLINK (pixels, depth
 sidecars, variation.json, heightmap.npy, heightmap_meta.json, .negobs_env.json).
@@ -21,13 +21,18 @@ sidecars written in step 2 are the only real files in the shadow tree.
 import os, sys, json
 
 REPO = "/home/vislab/Desktop/work_sy/Practice_NegObs"
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat   # noqa: E402
 DS = os.path.join(REPO, "dataset")
 SUFFIX = "_g7fix"
 
 
 def build(round_name):
-    src = os.path.join(DS, round_name)
-    dst = os.path.join(DS, round_name + SUFFIX)
+    src = round_dir_or_flat(round_name)
+    dst = round_dir_or_flat(round_name + SUFFIX)
     if not os.path.isdir(src):
         sys.exit(f"[shadow] FATAL missing round {src}")
     n_dir = n_link = 0

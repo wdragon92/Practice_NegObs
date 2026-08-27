@@ -16,16 +16,33 @@ on the render machine. Regenerate it whenever rounds are added, moved or removed
 ```
 look_check/
   <scene>/<round>/            judgement grids, corpus members, anchors, baselines-of-record
+  _archive/<wave>/<scene>/<round>/   past-wave evidence rounds (w2 · w2d · w3 · w3fix)
   _experiments/
     t0_spike/<round>/         T0 spike tree (incl. its conc* throughput arms)
     spike_p1/<dir>/           P1 realism spikes + the sample-count / time-budget probe
     diag/<dir>/               dead-pixel and per-scene diagnostics
     gates/<scene>/<round>/    gate probes and zoom crops
     twins/<scene>/<round>/    A/B twin arms
+  _review/<wave>/<round>/     review galleries (w2 · w3 · w4)
+  logs/                       render journals — *.log, *_times.tsv, spike_results.json
   _t0_spike   -> _experiments/t0_spike               (symlink, load-bearing)
   spike_probe -> _experiments/spike_p1/spike_probe   (symlink, spec-cited)
-  logs/, *.log, spike_results.json                   render journals, left at root
 ```
+
+**`_archive/<wave>/`** (added 2026-08-27). A round leaves the scene root when it is
+*only* past evidence — nothing in `scripts/valset.py`, in the §4 baseline chain, in a
+`round_stamp.json` `baseline_of_record`, or in a published anchor names it. It keeps its
+name and its scene, and gains a wave directory: `look_check/scene01/260731_w3_full`
+became `look_check/_archive/w3/scene01/260731_w3_full`. The wave directories are
+`w2` · `w2d` · `w3` · `w3fix`; the current wave never goes in. A leading underscore keeps
+the tree invisible to every `look_check/scene*` glob (`valset.py::_scenes()`,
+`regression_check.py --scenes`, `shortcut_audit.py`, `check_data_run.py`) — which is the
+point, and also means **an archived round no longer participates in any check**. The
+old → new map for every archived round is `INDEX.md` §6; no back-compat symlink is left
+behind, for the reason in "Symlink policy" below.
+
+**`logs/`** now holds the render journals that used to sit loose at the `look_check/`
+root (11 `*.log` + `spike_results.json`). `scripts/spike_realism.py` writes there.
 
 **The rule that decides where a round goes.** A round sits at the **scene root** if and
 only if it is one of:

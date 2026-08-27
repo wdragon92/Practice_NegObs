@@ -5,7 +5,7 @@ unset PYTHONPATH VIRTUAL_ENV
 source ~/miniconda3/etc/profile.d/conda.sh
 conda activate env_isaaclab
 export PYTHONNOUSERSITE=1 PYTHONUNBUFFERED=1
-LOG=look_check/v7_pt13.log
+LOG=look_check/logs/v7_pt13.log
 : > $LOG
 LIST="scene01_campus_stairs scene02_underpass scene03_riverbank scene04_parktrail \
 scene08_sunken_plaza scene13_apartment_parking_entry scene14_grandstair_illusion \

@@ -5,7 +5,7 @@ harvest_refs.py — reference-photo harvester for the W3 archetype panels.
 
 WHY THIS EXISTS
 ---------------
-`Docs/surveys/real_reference_expansion.md` §7 records that the original Commons
+`Docs/reports/real_reference_expansion.md` §7 records that the original Commons
 harvest was run in a scratchpad and never committed, so the n=54 `expanded/` set
 could not be reproduced or extended.  `w3_intake_policy.md` §7.5 makes rebuilding
 it a blocking dependency for the 통람 v3 panels (T-1).  This is that rebuild.

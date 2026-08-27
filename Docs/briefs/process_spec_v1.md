@@ -66,7 +66,7 @@ python3 scripts/placement_lint.py --scenes <touched> --rules Docs/briefs/placeme
 - `meta.json`은 정직하게(X2): 대체 view를 쓰면 그 사실을 기재. 숨기면 gallery가 거짓말을 한다.
 - 통람류 판정은 **사진(컷) 이름을 명시**(X3) — 사진 없는 판정은 판정이 아니다.
 - gallery는 `make_review_gallery.py --round R --out look_check/_review/R`
-  (**`--out` 필수** — 기본값이 `_review_w2`를 덮는다).
+  (**`--out` 필수** — 기본값이 `_review/w2`를 덮는다).
 - **R7 gate**: 씬 상태를 바꾸는 round는 gallery 사용자 검수 통과 시 ledger 행 CLOSED.
 - 참고 계기(advisory, gate 아님): `ori_axis`(실측 0.252±0.074, p95 0.371 — 초과 시 "덜 꾸며짐"
   신호이지 재회전 사유 아님) · `sat_mu`/`sat_sd`/`chroma_sd`(분리력 없음 실측).

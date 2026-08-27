@@ -43,6 +43,10 @@
 set -u
 
 REPO=/home/vislab/Desktop/work_sy/Practice_NegObs
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>). A round is
+# found by NAME: negobs_round (strict) / negobs_round_or_flat (tolerant).
+source "$REPO/scripts/lib/negobs_paths.sh"
 LOGDIR="$REPO/experiments/v3_0823/logs"
 LOG="$LOGDIR/w2_h67_render.log"
 MARK="$LOGDIR/w2_markers"
@@ -112,7 +116,7 @@ say() { printf '[%s] %s\n' "$(date '+%F %T')" "$*" | tee -a "$LOG"; }
 #   want = 컷 수 · poses = 서로 다른 카메라 포즈 수 (= CAMS). 세그 고유 해시는
 #   포즈 수와 같아야 한다 (W3_REPORT §10-1 · h12_gates.gate_vg08 과 같은 기준).
 verify_out() {   # verify_out <run> <scene> <want> <poses>
-  python3 - "$REPO/dataset/$1/$SPLIT/$2" "$3" "$4" <<'PYEOF'
+  python3 - "$(negobs_round_or_flat "$1")/$SPLIT/$2" "$3" "$4" <<'PYEOF'
 import glob, hashlib, json, os, sys, zipfile
 d, want, poses = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
 png = glob.glob(os.path.join(d, "*.png"))
@@ -224,7 +228,7 @@ case "$MODE" in
         [ -z "$spec" ] && continue
         pre="${spec%%:*}"
         for arm in A B C D; do
-          [ -d "$REPO/dataset/${pre}_${arm}/$SPLIT/$s" ] \
+          [ -d "$(negobs_round_or_flat "${pre}_${arm}")/$SPLIT/$s" ] \
             || { say "  [none] $s ${pre}_${arm}"; FAILS=$((FAILS+1)); continue; }
           v=$(verify_out "${pre}_${arm}" "$s" "$WANT" "$CAMS") \
             && say "  [ok]   $s ${pre}_${arm} · $v" \
@@ -241,7 +245,7 @@ say "----------------------------------------------------------------"
 TOT=0
 for pre in "$STAMP_BASE" "$STAMP_H" "$STAMP_H2"; do
   for arm in A B C D; do
-    d="$REPO/dataset/${pre}_${arm}"
+    d="$(negobs_round_or_flat "${pre}_${arm}")"
     [ -d "$d" ] || continue
     n=$(find "$d" -name '*.png' | wc -l); TOT=$((TOT+n))
     say "  dataset/${pre}_${arm}: $n png · $(find "$d" -name '*.depth.npy' | wc -l) depth · $(find "$d" -name '*.idseg.npz' | wc -l) idseg · $(find "$d" -name '*.idseg.STALE' | wc -l) STALE · $(find "$d" -name 'heightmap.npy' | wc -l) hm"

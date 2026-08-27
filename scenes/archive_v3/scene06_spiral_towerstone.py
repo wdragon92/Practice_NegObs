@@ -3,7 +3,7 @@
 scene06_spiral_towerstone.py — NegObs 인공씬 6호: T9 성탑/전망대 나선 석계단 하강
 (Isaac Sim 4.5)
 
-사양서 : Docs/multi_scene_brief_v3.md §D scene06_spiral_towerstone (유일 사양)
+사양서 : Docs/briefs/multi_scene_brief_v3.md §D scene06_spiral_towerstone (유일 사양)
 공통 라이브러리 : scene_common.py (§A) — boot·make_pbr·build_helix_steps·build_arc_steps·조명·캡처
 모티프 참조 : scene05_amphitheater.py (main 골격·원형 개구 4박스 분할·cue 토글)
 

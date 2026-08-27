@@ -145,7 +145,7 @@ record is not `LANDED`.
 | GT-15 | S3 | CB-S3-07 | `ee4af00` (+ `5e134f1`, `c3cebc3`) | *(rides GT-14's round — same commands)* | 30 야면석 boulders, 15 per flank, **0.423–0.864 m** across standing **0.203–0.306 m** proud, sink 0.035 ≤ the F2 no-sink-ring limit; nearest inner edge **\|y\| 0.816 m** against the §6.5 floor of `foot_half + 0.10 = 0.32`; outer edge **\|y\| 1.680 ≤ 1.70**, so **no boulder overhangs the south drop** (H8) — the spec's fixed `y ±1.55` line was replaced by an edge anchor for exactly that reason and the deviation is stated in the file. Discontinuity: max gap 3.65 / 3.63 m per flank. **Two findings the pilot forced**: (1) scene07 is the first scene in the tree to load an urban asset and `assets/urban/nv_core/materials/SimPBR.mdl` **fails to compile** (`could not find module .::baking_annotations`) — every boulder rendered **flat bright red**; cured in-lane by `instanceable=False` + an ancestor `strongerThanDescendants` bind (an ancestor binding cannot reach inside an instance prototype), the MDL search-path defect itself belongs to whoever owns `assets/urban`; (2) the two framing trunks are **not shipped** — an A/B isolates them as the entire DARK/OCCL delta (`side_slope` 87.9 → 10.1 mean, 24.4 → 93.9 % dark) | 2026-07-31 |
 | GT-16 | S3 | CB-S3-07 | `bbf085d` | *(rides GT-14's round — same commands)* | 24 `StoneKnob_*` prims deleted (`collider=False`, built below the stone top by construction) — geom prim census **1090 → 1066, exactly −24**. Jitter caps landed in the same commit: `cy` ±0.35 → **0** (measured max \|cy\| 0.0000) and yaw ±4.0° → **±3.0°**. **The SMOKE rise/gap/entry/exit table is bit-identical across this commit** (rise 0.111–0.232 mean 0.174, gaps 0.050–0.276, entry +0.002, exit +0.201) because the seeded stream still draws the abolished `u` — the walked surface provably did not move, which is what the row claimed. `LINT-10`'s `jitter=` token adjudicated and renamed `tint_jit` (material tint, §12-15), −1 WARN | 2026-07-31 |
 | GT-17 | S3 | CB-S3-07 | `120c353` (+ `c3cebc3` albedo lift) | *(rides GT-14's round — same commands)* | `leaf_ground`-bound plates and slopes **5 → 0** (`PathCorridor` · `SouthTerraceA/B/C` · `Approach` → `dirt_park` summer forest floor). Margin lobes retained and re-sited: 6 corridor lobes to \|cy\| ≥ 1.20 (§4.1-5 floor 1.0), each sized to land **inside one tread**, walk line never crossed; feather cover 0.06 → 0.035 on the corridor ring; `sct_debris_leaves_dry_*` **0 placements** (H10). Moss is now zone-driven, achieved vs §4.1-3 target: walked centre **0.037** (0.00–0.10) · tread outer **0.411** (0.35–0.55) · riser **0.848** (0.60–0.85) · joints **1.000** · boulder tops **0.767** (0.70–0.90) — all IN band, printed not gated (research §B4b: no Korean document quantifies tread moss). Riser moss is delivered by a cap/body slab split, **not** by a proud strip along the nosing, which H2 / RF-5 forbid. `TEX["moss"]` gets its first consumer in the tree, `nor` dropped per the K4 GL/EXR caution and the raw scan confined to the flat 속채움 bed after it read as a green camouflage patchwork on curved and slab-sized surfaces. **Render-gate item as declared**: the terrace albedo change is visible and its net effect on the judged h0.3 band is nil (see GT-14's `near_ground_stats` row) | 2026-07-31 |
-| GT-18 | S3 | CB-S3-10 | `c2b6841` | `flock -w 7200 /tmp/negobs_gpu.lock` → `NEGOBS_CAPTURE=1 NEGOBS_CAPTURE_MODE=pt NEGOBS_CAPTURE_DIR=look_check/scene10/260731_w3_s10 NEGOBS_PT_FAST=1 NEGOBS_LOOK_V1=1 NEGOBS_DETAIL_SCALE=2 NEGOBS_DETAIL_ROUGH_GAIN=0 NEGOBS_VIEWS=<9 preset prefix + reversal,through_treads,broken_rail,leaf_edge,from_below> python scenes/main/scene10_park_deck_switchback.py` · `python3 scripts/stamp_round.py look_check/scene10/260731_w3_s10 260731_w3_s10 scene10` · `python3 scripts/regression_check.py --before look_check/scene10/260731_w3_pre10 --after look_check/scene10/260731_w3_s10 --only <5 preset cuts> --json Docs/reports/regr_260731_w3_s10.json` · `python3 scripts/near_ground_stats.py 'look_check/scene10/260731_w3_s10/pt_noon_preset_h0.3_*.png' --gate` · floor per commit: `python3 -m py_compile` · `NEGOBS_SMOKE=1 python3 scenes/main/scene10_park_deck_switchback.py` · `python3 scripts/geom_invariance_check.py --scenes scene10` · `python3 scripts/placement_lint.py --scenes scene10 --rules Docs/briefs/placement_rules_v1.yaml` · **[S10c 종결 07-31]** **R-2, the invocation this row recorded as owed**, run at `a8e8343` (the fixed code): `flock -w 7200 /tmp/negobs_gpu.lock` → `python3 scripts/run_data_render.py --run 260731_data_s10 --scenes scene10` then `python3 scripts/check_data_run.py 260731_data_s10` (defaults `--conds L0 --cams 8 --seed 20260730`, the arm `260731_s07_recache` used). **R-3 re-run** on the leaf-off fix: `flock -w 7200 /tmp/negobs_gpu.lock` → `NEGOBS_CAPTURE=1 NEGOBS_CAPTURE_MODE=pt NEGOBS_CAPTURE_DIR=look_check/scene10/260731_w3_s10c NEGOBS_PT_FAST=1 NEGOBS_LOOK_V1=1 NEGOBS_DETAIL_SCALE=2 NEGOBS_DETAIL_ROUGH_GAIN=0 NEGOBS_VIEWS=<the same 14: 9 preset prefix + reversal,through_treads,broken_rail,leaf_edge,from_below> python scenes/main/scene10_park_deck_switchback.py` · `python3 scripts/stamp_round.py look_check/scene10/260731_w3_s10c 260731_w3_s10c scene10` · `python3 scripts/regression_check.py --before look_check/scene10/260731_w3_s10 --after look_check/scene10/260731_w3_s10c --json Docs/reports/regr_260731_w3_s10c.json` · `python3 scripts/near_ground_stats.py 'look_check/scene10/260731_w3_s10c/pt_noon_preset_h0.3_*.png' --gate`. The pre-fix attribution round `260731_w3_pre10c` was rendered at the same HEAD with the same arm. Floor at `a8e8343`: `python3 -m py_compile scenes/main/scene10_park_deck_switchback.py` · `NEGOBS_SMOKE=1 python scenes/main/scene10_park_deck_switchback.py` · `python3 scripts/geom_invariance_check.py` (**unscoped**) · `python3 scripts/placement_lint.py --scenes scene10 --rules Docs/briefs/placement_rules_v1.yaml` | **Comparison baseline named per §6-W4: `260731_w3_pre10`**, this scene's own clean intermediate round at HEAD `1346b70` — *not* `260730_w2d_fix`, which has 13 cuts and predates CB-2's scene10 edit (`11d1e56`), so a diff against it would have carried CB-2's leaf-lobe delta entangled with the rebuild (spec §6.4 traps 1 and 2). `260731_w3_pre10` vs `260730_w2d_fix` on the 5 shared cuts: **FAIL 0** (1 WARN `[UNCHANGED]` on `h0.3_d2` — mean difference 0.24 LSB, pixels over 4 LSB 0.063 % — 2 INFO, 2 PASS), which **verifies CB-2's scene10 F3 work as null on the judged cuts** rather than leaving it open. `260731_w3_s10` is stamped `baseline_of_record: true`. **GATE-1 P10 result**: FRAME FAIL on all 5 preset cuts — **the declared expected result** (§6.4: both rebuilds intend to move every pixel of the stair). The gates that still mean something: **DARK improved on all five** (dark% 3.0-13.2 → 0.7-3.3), **BLOWN/WHITE 0 flags**, **OCCL one flag** (`h0.9_d2`, new dark 2.1 %, largest blob 1.0 % — the +150 railing prims and the bare-tree canopies shadowing what was open lawn), PHOTO luminance-up on 3 cuts with intent confirmed. `near_ground_stats` B45/B30: **`flat_gnd` cleared on all three h0.3 cuts** (3.5 → 0.4 · 0.1 → 0.0 · 0.7 → 0.0) and `sd` on h0.3_d2 crosses its 32 threshold (24.8 → 36.7); **two new WARNs on h0.3_d2** (mean 181 > 170, wht% 7.6 ≥ 2) declared and not tuned away — at 2 m the near band is the deck, not ground, and the deck is at its measured 2-5 yr patina albedo 0.230 under a 49.8° noon sun. **R-1 done** — `deck_module_selfcheck` re-derives and prints the whole ladder: `44 × 0.150 = 6.600` exactly · `8+7+8+7+7+7 = 44` · `2R+T = 0.610 ∈ [0.600, 0.650]` · clear width 1.500 ± 0.010 · every landing ≥1.500 deep in travel · max rise between level surfaces 1.200 ≤ 2.000 · leaf band re-derived onto treads 1·2 at tops −0.145/−0.295 · last-landing proud +0.020 ∈ (0, 0.05]. **R-3 done** — `260731_w3_s10` stamped as the new baseline-of-record; `Docs/reports/regr_260731_w3_s10.json`. **R-2 OWED** — the mini data render is the data owner's invocation (`scripts/run_data_render.py --run <id> --scenes scene10` + `check_data_run.py`); per §0-3 it is recorded as owed rather than guessed, so this row is **not closed**. Floor per commit: py_compile 0 · SMOKE clean · geom_invariance R-4 1/1 · R-6 1/1 (prims 1266, 3-arm hash `21828c8c`) · placement_lint **delta 0** **[S10c 종결 07-31 — 이 행을 `LANDED` 로 닫는다]** **R-2 DONE**: `dataset/260731_data_s10/test/scene10/`, **8 cuts · 2.34 s/cut**, manifest `git_head a8e8343`. `check_data_run`: **[2] azimuth ledger · [3] camera placement · [4] file/manifest · [5] throughput — ALL PASS** ([3] `ground_below == h_rel` worst \|err\| **0.0000 m**, nearest solid to any eye **0.175 m ≥ 0.15**, every sampler truncation respected; [4] 8 files / 8 records, all content-unique, all 1920×1080, **nothing written under `look_check/`**; [5] 2.34 vs SP-3's 2.87). **[1] carries 2 FAILs and they are recorded, not cured**, exactly as GT-14's did: `sun-bearing: ground darkens with net EV, per scene (0 pairs >= 0.3 EV apart)` and `sunless: less deep shadow than the L0 reference (0 scene-pairs)` — both **zero-sample cross-condition** checks that need `--conds` > 1; an artefact of the mini scope, silent about geometry, and not a reason to hold this row open. **R-3 RE-DONE** on the new baseline-of-record **`260731_w3_s10c`** (14 cuts, arm byte-identical to `260731_w3_s10`): **FAIL 1 · WARN 7 · INFO 3 · PASS 3**, and **every FAIL and WARN is a `FRAME` code** — the FAIL is `from_below` (block shift 56 %), the cut framed on the near-field birch whose canopy this fix removes. Channels that still mean something, all 14 cuts: **DARK falls on every one** (3.41→1.57 · 2.39→1.11 · 7.30→4.99 …), **255-clipping 0.000 %**, **WHITE max 0.96 %**, **OCCL max new-dark 0.028 % / blob 0.005 %** against this round's predecessor flag of 2.1 % / 1.0 %. `near_ground_stats` h0.3 triple flat (sd 36.7→36.7 · 28.7→28.5 · 23.0→22.9, `flat_gnd` unchanged) with **GT-18's two declared `h0.3_d2` WARNs still present and still not tuned away** (mean 181 > 170, wht % 7.6→7.8 ≥ 2). **Attribution, measured not asserted**: the pre-fix intermediate `260731_w3_pre10c` at the same HEAD scores **FAIL 0 · WARN 0 · INFO 7 · PASS 7** against `260731_w3_s10`, so the whole Lane-1 kit window (K4 a–d · K5 · K1 micro · T4) is **null on this scene's judged cuts**; re-running the comparison against `260731_w3_pre10c` instead returns the **identical verdict set**. Floor at `a8e8343`: py_compile 0 · SMOKE rc 0, `deck_module_selfcheck` all-OK · geom_invariance **unscoped 33/33** R-4 + R-6 — scene10 prims **2777 unchanged**, hash `606edef7` (at `e3619df`) → `ae8b49ff` (kit window, no scene10 edit) → **`f8e2670e`** (this fix) · placement_lint **delta 0** (ERROR 0 · WARN 9 · BLOCK 1; the only text delta is the species census spelling `Gray_Birch` → `Gray_Birch_bare`, K4-F5 arriving in a scene). Report: `Docs/reports/w3_s10_close_v1.md`. | 2026-07-31 |
+| GT-18 | S3 | CB-S3-10 | `c2b6841` | `flock -w 7200 /tmp/negobs_gpu.lock` → `NEGOBS_CAPTURE=1 NEGOBS_CAPTURE_MODE=pt NEGOBS_CAPTURE_DIR=look_check/scene10/260731_w3_s10 NEGOBS_PT_FAST=1 NEGOBS_LOOK_V1=1 NEGOBS_DETAIL_SCALE=2 NEGOBS_DETAIL_ROUGH_GAIN=0 NEGOBS_VIEWS=<9 preset prefix + reversal,through_treads,broken_rail,leaf_edge,from_below> python scenes/main/scene10_park_deck_switchback.py` · `python3 scripts/stamp_round.py look_check/scene10/260731_w3_s10 260731_w3_s10 scene10` · `python3 scripts/regression_check.py --before look_check/scene10/260731_w3_pre10 --after look_check/scene10/260731_w3_s10 --only <5 preset cuts> --json Docs/reports/regr_260731_w3_s10.json` · `python3 scripts/near_ground_stats.py 'look_check/scene10/260731_w3_s10/pt_noon_preset_h0.3_*.png' --gate` · floor per commit: `python3 -m py_compile` · `NEGOBS_SMOKE=1 python3 scenes/main/scene10_park_deck_switchback.py` · `python3 scripts/geom_invariance_check.py --scenes scene10` · `python3 scripts/placement_lint.py --scenes scene10 --rules Docs/briefs/placement_rules_v1.yaml` · **[S10c 종결 07-31]** **R-2, the invocation this row recorded as owed**, run at `a8e8343` (the fixed code): `flock -w 7200 /tmp/negobs_gpu.lock` → `python3 scripts/run_data_render.py --run 260731_data_s10 --scenes scene10` then `python3 scripts/check_data_run.py 260731_data_s10` (defaults `--conds L0 --cams 8 --seed 20260730`, the arm `260731_s07_recache` used). **R-3 re-run** on the leaf-off fix: `flock -w 7200 /tmp/negobs_gpu.lock` → `NEGOBS_CAPTURE=1 NEGOBS_CAPTURE_MODE=pt NEGOBS_CAPTURE_DIR=look_check/scene10/260731_w3_s10c NEGOBS_PT_FAST=1 NEGOBS_LOOK_V1=1 NEGOBS_DETAIL_SCALE=2 NEGOBS_DETAIL_ROUGH_GAIN=0 NEGOBS_VIEWS=<the same 14: 9 preset prefix + reversal,through_treads,broken_rail,leaf_edge,from_below> python scenes/main/scene10_park_deck_switchback.py` · `python3 scripts/stamp_round.py look_check/scene10/260731_w3_s10c 260731_w3_s10c scene10` · `python3 scripts/regression_check.py --before look_check/scene10/260731_w3_s10 --after look_check/scene10/260731_w3_s10c --json Docs/reports/regr_260731_w3_s10c.json` · `python3 scripts/near_ground_stats.py 'look_check/scene10/260731_w3_s10c/pt_noon_preset_h0.3_*.png' --gate`. The pre-fix attribution round `260731_w3_pre10c` was rendered at the same HEAD with the same arm. Floor at `a8e8343`: `python3 -m py_compile scenes/main/scene10_park_deck_switchback.py` · `NEGOBS_SMOKE=1 python scenes/main/scene10_park_deck_switchback.py` · `python3 scripts/geom_invariance_check.py` (**unscoped**) · `python3 scripts/placement_lint.py --scenes scene10 --rules Docs/briefs/placement_rules_v1.yaml` | **Comparison baseline named per §6-W4: `260731_w3_pre10`**, this scene's own clean intermediate round at HEAD `1346b70` — *not* `260730_w2d_fix`, which has 13 cuts and predates CB-2's scene10 edit (`11d1e56`), so a diff against it would have carried CB-2's leaf-lobe delta entangled with the rebuild (spec §6.4 traps 1 and 2). `260731_w3_pre10` vs `260730_w2d_fix` on the 5 shared cuts: **FAIL 0** (1 WARN `[UNCHANGED]` on `h0.3_d2` — mean difference 0.24 LSB, pixels over 4 LSB 0.063 % — 2 INFO, 2 PASS), which **verifies CB-2's scene10 F3 work as null on the judged cuts** rather than leaving it open. `260731_w3_s10` is stamped `baseline_of_record: true`. **GATE-1 P10 result**: FRAME FAIL on all 5 preset cuts — **the declared expected result** (§6.4: both rebuilds intend to move every pixel of the stair). The gates that still mean something: **DARK improved on all five** (dark% 3.0-13.2 → 0.7-3.3), **BLOWN/WHITE 0 flags**, **OCCL one flag** (`h0.9_d2`, new dark 2.1 %, largest blob 1.0 % — the +150 railing prims and the bare-tree canopies shadowing what was open lawn), PHOTO luminance-up on 3 cuts with intent confirmed. `near_ground_stats` B45/B30: **`flat_gnd` cleared on all three h0.3 cuts** (3.5 → 0.4 · 0.1 → 0.0 · 0.7 → 0.0) and `sd` on h0.3_d2 crosses its 32 threshold (24.8 → 36.7); **two new WARNs on h0.3_d2** (mean 181 > 170, wht% 7.6 ≥ 2) declared and not tuned away — at 2 m the near band is the deck, not ground, and the deck is at its measured 2-5 yr patina albedo 0.230 under a 49.8° noon sun. **R-1 done** — `deck_module_selfcheck` re-derives and prints the whole ladder: `44 × 0.150 = 6.600` exactly · `8+7+8+7+7+7 = 44` · `2R+T = 0.610 ∈ [0.600, 0.650]` · clear width 1.500 ± 0.010 · every landing ≥1.500 deep in travel · max rise between level surfaces 1.200 ≤ 2.000 · leaf band re-derived onto treads 1·2 at tops −0.145/−0.295 · last-landing proud +0.020 ∈ (0, 0.05]. **R-3 done** — `260731_w3_s10` stamped as the new baseline-of-record; `Docs/reports/regr_260731_w3_s10.json`. **R-2 OWED** — the mini data render is the data owner's invocation (`scripts/run_data_render.py --run <id> --scenes scene10` + `check_data_run.py`); per §0-3 it is recorded as owed rather than guessed, so this row is **not closed**. Floor per commit: py_compile 0 · SMOKE clean · geom_invariance R-4 1/1 · R-6 1/1 (prims 1266, 3-arm hash `21828c8c`) · placement_lint **delta 0** **[S10c 종결 07-31 — 이 행을 `LANDED` 로 닫는다]** **R-2 DONE**: `dataset/_archive/scene_dev_2607/260731_data_s10/test/scene10/`, **8 cuts · 2.34 s/cut**, manifest `git_head a8e8343`. `check_data_run`: **[2] azimuth ledger · [3] camera placement · [4] file/manifest · [5] throughput — ALL PASS** ([3] `ground_below == h_rel` worst \|err\| **0.0000 m**, nearest solid to any eye **0.175 m ≥ 0.15**, every sampler truncation respected; [4] 8 files / 8 records, all content-unique, all 1920×1080, **nothing written under `look_check/`**; [5] 2.34 vs SP-3's 2.87). **[1] carries 2 FAILs and they are recorded, not cured**, exactly as GT-14's did: `sun-bearing: ground darkens with net EV, per scene (0 pairs >= 0.3 EV apart)` and `sunless: less deep shadow than the L0 reference (0 scene-pairs)` — both **zero-sample cross-condition** checks that need `--conds` > 1; an artefact of the mini scope, silent about geometry, and not a reason to hold this row open. **R-3 RE-DONE** on the new baseline-of-record **`260731_w3_s10c`** (14 cuts, arm byte-identical to `260731_w3_s10`): **FAIL 1 · WARN 7 · INFO 3 · PASS 3**, and **every FAIL and WARN is a `FRAME` code** — the FAIL is `from_below` (block shift 56 %), the cut framed on the near-field birch whose canopy this fix removes. Channels that still mean something, all 14 cuts: **DARK falls on every one** (3.41→1.57 · 2.39→1.11 · 7.30→4.99 …), **255-clipping 0.000 %**, **WHITE max 0.96 %**, **OCCL max new-dark 0.028 % / blob 0.005 %** against this round's predecessor flag of 2.1 % / 1.0 %. `near_ground_stats` h0.3 triple flat (sd 36.7→36.7 · 28.7→28.5 · 23.0→22.9, `flat_gnd` unchanged) with **GT-18's two declared `h0.3_d2` WARNs still present and still not tuned away** (mean 181 > 170, wht % 7.6→7.8 ≥ 2). **Attribution, measured not asserted**: the pre-fix intermediate `260731_w3_pre10c` at the same HEAD scores **FAIL 0 · WARN 0 · INFO 7 · PASS 7** against `260731_w3_s10`, so the whole Lane-1 kit window (K4 a–d · K5 · K1 micro · T4) is **null on this scene's judged cuts**; re-running the comparison against `260731_w3_pre10c` instead returns the **identical verdict set**. Floor at `a8e8343`: py_compile 0 · SMOKE rc 0, `deck_module_selfcheck` all-OK · geom_invariance **unscoped 33/33** R-4 + R-6 — scene10 prims **2777 unchanged**, hash `606edef7` (at `e3619df`) → `ae8b49ff` (kit window, no scene10 edit) → **`f8e2670e`** (this fix) · placement_lint **delta 0** (ERROR 0 · WARN 9 · BLOCK 1; the only text delta is the species census spelling `Gray_Birch` → `Gray_Birch_bare`, K4-F5 arriving in a scene). Report: `Docs/reports/w3_s10_close_v1.md`. | 2026-07-31 |
 | GT-19 | S3 | CB-S3-10 | `5ce512e` (+ `e3619df`, corridor slab thickness fix) | *(rides GT-18's round — same command)* · **[S10c 종결 07-31]** *(rides GT-18's re-run round and its R-2 — same commands)* | Ground field re-derived and **asserted**: flight↔flight plan overlap **0.000000 m²**, flight↔landing overlap **0.000000 m²**, air gap under the deck 0.020-0.600 m all positive, **stair foot 0.250 m ≤ 0.300 m** (KFS-TRAIL 12-3 마), 0 masonry plates over the deck run, head wall exposure 6.62 → **0.255 m**, corridor mean grade 25.8 % / steepest 48.4 %. Plan x[−1.19, 5.79] → **[−1.50, 24.14]**, y ±1.60 → **[−1.60, 3.10]**; the divergence from §4.2-4A's *roughly* x[−1.5, 12] is arithmetic and is written into the §3 row. **Defect found by the pilot and fixed in a follow-up commit**: the corridor slab at 1.60 m thickness left a **4.8 m see-through band** between its underside at the head (−1.855) and the lower park top (−6.62) — measured on the first `260731_w3_s10` render, `from_below`; thickness → 7.00 and the pilot re-rendered. Floor: py_compile 0 · SMOKE clean · geom_invariance R-4 1/1 · R-6 1/1 (prims 1219, hash `93a5d718`) · placement_lint **delta 0** **[S10c 종결 07-31]** Nothing in this row was touched by the S10c fix: the de-stacking, the corridor slope, the air gap and the head wall are geometry, and the isolated-arm inventory shows **12 differing rows out of 2777, all of them a tree's reference string** — 0 rows differ in path, type, xformOp or shape attribute. The numbers in the record above were re-derived by `deck_module_selfcheck` at `a8e8343` and print unchanged. Closed as `LANDED` on GT-18's R-2, which was the only thing this row was ever waiting for. | 2026-07-31 |
 | GT-20 | S3 | CB-S3-10 | `ed928e5` | *(rides GT-18's round — same command)* · **[S10c 종결 07-31]** *(rides GT-18's re-run round and its R-2 — same commands)* | **R-1 done** — the railing block of `deck_module_selfcheck` asserts every member section against the stocked 방부목 set, **round railing members = 0**, rail height 1.10 to the top face, baluster clear gap on every run (worst **0.1094**, target 0.110 ± 0.010), balusters plumb, **the broken bay is exactly `LandRail_0_Out`** with rails and balusters gone and posts and newels remaining, ~~20 newels deduplicated from 28 run endpoints~~ **28 newels deduplicated from 40 run endpoints** `[supervisor amendment 07-31 · ledger batch §9-4]` — 20/28 was a **pre-de-stacking snapshot** written from commit-time state and not re-derived at batch end (`redteam_s0710_rebuild.md` **F4**); re-derived live this session, `NEGOBS_SMOKE=1 python3 scenes/main/scene10_park_deck_switchback.py` prints *"엄지기둥 28개 (런 끝점 40개에서 중복 제거) · 갓 0.120x0.120x0.045 · 난간 위 돌출 0.150 m"*. **No geometry moved with this correction** — GT-19's six-flight de-stacking created the extra run endpoints and is already landed; the prim counts and hashes in this record stand, one lattice bay on `EntryRail_P`. **R-3 done** via GT-18's re-stamped round. Both rail-height authorities are on the §3 row (KNPS median 1.10, n = 1,227 / 조경설계기준 16.20.2(2) ≥1.2 m). Weathering was aimed at the measured CIELAB band and **hit it on the existing map** — clipped fraction 0.02 % — so §8.R OQ-8's G5 procurement attempt was **not** triggered and the row stays open and unspent. Floor: py_compile 0 · SMOKE clean · geom_invariance R-4 1/1 · R-6 1/1 (prims 1038, hash `e0133ccd`) · placement_lint **delta 0** **[S10c 종결 07-31]** The railing is untouched by the S10c fix (no railing prim is among the 12 differing inventory rows) and the R-1 railing block of `deck_module_selfcheck` re-prints identically at `a8e8343`, including the amended **28 newels from 40 run endpoints**. R-3 rides the new baseline-of-record `260731_w3_s10c`. Closed as `LANDED` on GT-18's R-2. | 2026-07-31 |
 | GT-21 | S3 | CB-S3-10 | `1962f76` | *(rides GT-18's round — same command)* · **[S10c 종결 07-31]** *(rides GT-18's re-run round and its R-2)* — plus the fix commit `a8e8343` and, as the pixel evidence the closure rests on, the pre/post montages `Docs/reports/_w3_s10c_crops/*.png` cut from `260731_w3_pre10c` and `260731_w3_s10c` | Census closed: **12/12 trail trees leaf-off**, **12/12 far belt pinned to `Chinese_Juniper`**, **13/13 shrub clumps** real autumn-legal USDs, **780** litter instances seated by `ground_fn` on the 25.8 % slope, **4** outcrop rocks at `z_mode='base'` sink 0, **3** windowless silhouettes at d_true ≥ **81.4 m**. The 4 CB-2 carpet-mask lobes are **kept** (H4). **The single largest verification movement in the lane**: `placement_lint` **LINT-4b 9 ERROR → 0** — the retired species (`White_Pine` ×5 with an uncorrected zmin −0.351, `Yellow_Pine` ×4) were coordinate-hash draws from `build_tree`, and pinning the species removed them; trees are still placed at `<prefix>/Veg` so the linter's tree rule still sees all 24 (inventory `tree=24`). **Two corrections recorded rather than silently applied**: (a) §4.2-5's literal grass tint (0.62, 0.60, 0.42) is a *multiplier* on a map whose mean linear is (0.0621, 0.1115, 0.0232), so it yields R/G 0.58 — still green-dominant; the shipped tint is derived to a straw target (3.40, 1.55, 3.30) → #7F734E, Y 0.174, L* 48.8, R/G 1.22, clipping 0.02 %. (b) the T2 rock scans bind `assets/urban/nv_core/materials/SimPBR.mdl`, which **fails to compile in this runtime** (`C120 could not find module '.::baking_annotations'`) and rendered the boulders as a flat saturated red fallback; an ancestor `strongerThanDescendants` bind does **not** reach inside a prototype (re-measured), so the fix is `instanceable=False` + a per-mesh bind, mirroring `urban_kit._bind_far_override`. Floor: py_compile 0 · SMOKE clean · geom_invariance R-4 1/1 · R-6 1/1 (prims 2777, hash `606edef7`) · placement_lint **ERROR 9 → 0**, WARN 9 · BLOCK 1 unchanged **[S10c 종결 07-31 — the leaf-off arm, actually delivered]** **This row's leaf-off arm did not exist in a rendered frame until `a8e8343`.** The mechanism it relied on (`sc.BARE_SUBPRIMS` applied by a stage-side `SetActive(False)` under an instanceable prim) is **composition-inert** — USD discards opinions on descendants of an instance regardless of authoring order — so `260731_w3_s10` printed `잎-off 12/12` and rendered **twelve trees in full green leaf** (`redteam_s0710_rebuild.md` **F1**, found by eyes on `from_below` and `h1.8_d10`). `_bare_tree` now references the additive wrapper layers `assets/veg_bare/*_bare.usda` through `sc.veg_wrapper_rel` (K4(0) `e4fc4cf`, scene04 precedent `024a985`), which composes the strip **inside** the prototype. **Verified in pixels, which is what this row was reopened for**: green-pixel share on `from_below` **8.18 % → 0.00 %**, `h1.8_d10` 1.55 % → 0.00 %, and the near-field birch reads as a bare white armature in the committed montage. **Control**: `Chinese_Juniper` keeps its needles beside two now-bare deciduous trees — the far-belt evergreen re-assignment this row made is intact and was not collateral damage; `through_treads` holds 5.06 → 5.02 % green for the same reason. `native_h` was deliberately **not** re-sourced from `sc.BARE_NATIVE`, so `target_h / native` is bit-identical across the fix and **no trunk moved**; the census, tints, litter, outcrop and silhouettes of this row are unchanged and re-print identically. **Owed, and deliberately not taken by this task**: the §3 row above still reads *"registered in `sc.BARE_SUBPRIMS` by the K4 micro-commit `1346b70`, which reported success, so the §8.R contingency did not fire"* — that clause **is** the F1 defect in one sentence and needs a supervisor amendment line on the GT-6 precedent (strikethrough, no deletion). This task owns landing records only and has not edited the §3 text. | 2026-07-31 |
@@ -173,7 +173,7 @@ GT-26 → **S6** owns `main/scene18_wavy_artstair.py` (spec §4.3).
 ---
 | GT-31 | S03 | — | `e4862aa` (rows declared first at `892f9b3`, §0-1) | **R-1** `NEGOBS_SELFCHECK=1 python3 scenes/main/scene03_riverbank.py` — the scene's own `river_view_selfcheck` (v6, occluder instrument corrected this round) **+ `river_width_selfcheck` (new)**; boot-free, GPU-free. **R-3** `python3 scripts/regression_check.py --before look_check/_experiments/twins/scene03/260731_w3_s03_pre --after look_check/scene03/260731_w3_s03 --json Docs/reports/regr_260731_w3_s03.json`. Floor, in an **isolated `git archive` arm** (8 lanes share this worktree; the live tree cannot answer — `scene11: KeyError: 'z_top'` from another lane's in-flight file): `python3 -m py_compile scenes/main/scene03_riverbank.py` · `python3 scripts/geom_invariance_check.py --scenes scene03` · `python3 scripts/placement_lint.py --scenes scene03`. Pilot: `look_check/scene03/260731_w3_s03` (16 cuts, PT_FAST, `LOOK_V1=1·DETAIL_SCALE=2·DETAIL_ROUGH_GAIN=0`) | **R-1 green — the hazard registry did not move, as the row asserted.** `geom_invariance_check` prims **1728 → 1901**, hash `92c4f255 → 2bc75d66`, **identical across all three arms** (MTL0/MTL1/V1) so R-4 and R-6 both PASS; `placement_lint` exit 0 with the severity profile **unchanged** (13 WARN · 1 BLOCKED · 0 ERROR before and after) and only numeric diffs. Width self-check: effective water **15.8 → 33.8 m**, amplitude **14.81 → 24.79 m**, |yaw|max **35.64°**, and water **screen-area +31.8…+48.2 % on all 9 judge presets** (+39.1 % `levee_walk`). Meander legibility rose on the same instrument: bow `meander_air` 14.09 → **20.41 %**, `bank_oblique` 14.15 → **28.16 %** (gate ≥5 %). **R-3 re-stamped**: 16 cuts, FAIL 14 · WARN 2 · EXPECTED_FP 0. **All 14 FAILs are FRAME**, which detects *"the composition changed"* — the round's purpose — and carries no defect information here. Adjudicated: **GRAZE `preset_h0.3_d2` = NON-DEFECT** (drop-row step 81.1 → 80.2, **ratio 0.99**; max-change row y211 vs drop row y249, 38 rows apart, so the change is a *different object* — the widened water and the deleted patch — which is exactly why the tool's own persistence test could not auto-quiet it; the shoulder line is unbroken in both arms on the mandated y170–312/540 crop). **WHITE `bank_oblique` 8.4 → 22.1 pp** attributed at pixel level to the **longer bridge deck** (15.1 of 16.0 pp in the bottom third, mean RGB 208/208/209, `BLOWN` silent, clip 0.0 %) meeting a frozen camera — handed on, `w3_s03_v1.md` §7-2. OCCL on 5 cuts, max **3.9 % new-dark / 1.8 % blob**, ~10× under C02-P1's 32.8 %/19.7 %; the three h0.3 judge cuts are 0.3/0.1/0.1 %. **Instrument defect found and fixed in the same round** (`w3_s03_v1.md` §4.1): the bridge occluder was one AABB counting the open space under the deck *and* ±10.43 m of empty skew corner as solid, which alone drove `meander_air` to 44.3 % against a 35 % gate; corrected to a rotated-frame deck + per-pier boxes, and **it moves the v6 arm too** (`bank_oblique` 26 → 15 of 121), which is what makes it a fix and not a tuned gate. **New baseline-of-record `260731_w3_s03`**; the A/B control is a HEAD-arm twin rendered this session (`260731_w3_s03_pre`) because the INDEX baseline `260730_w2d_fix` predates K4(b) species `e4d9cf9` and would have charged four kit landings to this scene | 2026-07-30 |
 | GT-32 | S03 | — | `e4862aa` | *(rides GT-31's single re-cache — same commands)*. The two items that needed R-1 to **prove** a registry move: `placement_lint` reads the bollard relocation directly as `gaps 4.400 → 2.400`, and the same inventory line shows **`patch=8` present before and absent after**. Assembly log: `[03-D] 사면 관목 18/18주 (place_shrubs · 1 bed · role hedge_evergreen · h 0.85 m)` · `[ground_kit] scene03 P13(natural) · prims 17 + edge_break 1 · delta_max 0.1198` | **Landed as declared, with one consequence measured that the row did not anticipate and did not hide.** All three rectangles are gone and the h0.3 d2 crop shows it plainly. **But the patch at (−1.10, 0.15) sat 0.90 m in front of the h0.3 d2 judged eye and was carrying the near window's entire tonal budget**: on deletion `near_ground_stats` B30 read `wht%` **6.8 → 39.3**, `σ_LF` **4.34 → 1.02**, `>224%` **0.87 → 5.18** (over its ≤5 gate). Recovery attempted **inside the ban** with the vocabulary §3(ii) explicitly keeps, and **only half of it landed** `[amended at `9b96ea9`, after the render]`. ~~`("weed", 8)` + `scatter` gravel 0.08/130 (under the `trail_soil` 0.10/150 and `courtyard_dg` 0.09/200 precedents): `σ_LF` back to **3.35**, `>224%` back under gate at **4.23**, `sd` **24.2 > HEAD's 23.8**, and `preset_h0.3_d5` `σ_LF` **4.14 → 5.66 = the only fully clean h0.3 cut in either arm**~~ — **those figures are real and the `scatter` row that produced them was REVERTED on the render anyway.** `apply_ground` scatters over the whole plan region (−12…0, ±3), which on this crest is **mostly mown grass**, so d5/d10 filled with pale 0.1–0.2 m stones strewn across a lawn; a levee crest carries stone on its gravel track and none on its verge. **Trading a blank floor for boulders on a lawn is a worse frame, so the statistics lost** — the parameters are left in the source comment so the attempt is not repeated blind, and a **region-restricted scatter** is the ask filed with the kit lane. What LANDED is `("weed", 8)` alone (P13's own row prescribes 6; G3 shows weeds in every revetment joint), correctly seeded on the gravel/grass margin and therefore **outside the d2 near cone**, which is why it buys almost nothing statistically: final `preset_h0.3_d2` **`σ_LF` 0.94 · `wht%` 39.1 · `mean` 194 · `>224%` 5.06**. The residual is the crest gravel's own albedo at 2 m, which the patch had merely been covering — an albedo question no decal can answer, handed to the T1/ground lane (`w3_s03_v1.md` §7-3), and already violating at HEAD (6.8 against <2). Final prim count **1901**, hash `2bc75d66`, three-arm identical; `scatter` contributed 0 to the geometry hash (it is instanced), so the revert leaves R-4/R-6 untouched. GRAZE on `preset_h0.3_d2` re-reads at the pre-scatter values and is graded **FAIL** (`gz_spec 21.50 > 20.0`): the adjudication in GT-31's record is unchanged and rests on `gz_step_ratio` **0.991**, `gz_step_off` **38 > 4** and `gz_step_dom` **3.39 < 3.5**. **03-B deviations declared, not smoothed**: post interval 2.400 m against 별표2's "1.5 m 안팎" (LINT PE-6 WARN, left visible), and the pair now enters the d5/d10 frames it used to fall outside — geometric occupancy 0 → **2.2 % of the d5 frame**, photometric cost **0.1 % new-dark**. **03-C/K4-F4 discharged for 03**: `belt=True` (not a hard-coded `species=`, which would fork the species table), near bank poplar / far bank Black_Oak. **03-D**: one `place_shrubs` call = one bed, because six per-bed calls could stand two species on one continuous 25 m slope; `target_h` 0.850 is set by the instrument — G3's ~1.5 m mass would top **0.514 m above the h0.3 judged eye** and eat the water band that is this type's only drop evidence, 0.850 m tops **0.136 m below** it | 2026-07-30 |
-| GT-34 | S01 | CB-2 · CB-5 · GATE-1 pilot **01** | `ac7a50c` → `7fb925a` → `45a76af` → **`f6bb772`** (+ report `9ec1cba`) | **R-1** `NEGOBS_SMOKE=1 python3 scenes/main/scene01_campus_stairs.py` — the scene's **new** `plaza_selfcheck`, boot-free and GPU-free; scene01 had **no** smoke path before this lane (`w3_mb_patch_v1.md` had to record the §6.1 item as having no subject here). **R-2** `flock -w 7200 /tmp/negobs_gpu.lock` → `python3 scripts/run_data_render.py --run 260731_data_s01 --scenes scene01` then `python3 scripts/check_data_run.py 260731_data_s01`. **R-3** `flock -w 7200 /tmp/negobs_gpu.lock` → 13-cut PT round in an **isolated `git archive f6bb772` arm** (`NEGOBS_CAPTURE_MODE=pt · NEGOBS_PT_FAST=1 · NEGOBS_LOOK_V1=1 · NEGOBS_DETAIL_SCALE=2 · NEGOBS_DETAIL_ROUGH_GAIN=0`, `NEGOBS_VIEWS` **unset** = full order prefix) → `scripts/stamp_round.py` → `python3 scripts/regression_check.py --before look_check/scene01/260731_w3_mb24 --after look_check/scene01/260731_w3_s01 --json Docs/reports/regr_260731_w3_s01.json` → `python3 scripts/near_ground_stats.py 'look_check/scene01/260731_w3_s01/pt_noon_preset_h0.3_*.png' 'look_check/scene01/260731_w3_mb24/pt_noon_preset_h0.3_*.png' --gate`. **Attribution arm** rendered in the same channel from `git archive 1234a51` (= `ac7a50c^`, scene01 file unedited) as `260731_w3_s01_pre`. **Floor** per commit, in isolated arms: `python3 -m py_compile` · SMOKE · `python3 scripts/geom_invariance_check.py --scenes scene01` · `python3 scripts/placement_lint.py --scenes scene01` | **Baseline named per §6-W4: `260731_w3_mb24`** (scene01's baseline of record from the MB patch batch, `e1150d6`); **`260731_w3_s01` is stamped `baseline_of_record: true` and supersedes it**, and `260731_w3_mb24` carries `baseline_of_record: false` + `superseded_by` (the S10c convention, closing the MD-F5 class for this scene). **R-1** — registry re-derived from `PARAMS`: **drop 7 · up_step 3 · walkable 7 · seat_tier 3**. Total stair drop asserts at **0.600000 m** (the approved flight does not move); riser 0.150 ≤ 0.180; kerb top **+0 mm** against the walk (S06-B's flush … +20 mm); kerb exposure 0.150 inside [0.100, 0.250]; lawn top = plaza − exposure to 1e-9; the lower-plaza frontage **+0.450 asserted as an UP-STEP, not a drop**; kerb block bottom −0.700 = the plaza slab's own underside (no void behind the face); every new drop < 0.600; every walkable step ≤ 0.200 (max 0.160); bench yaw jitter **0**; worst judged-eye ↔ planter distance **2.63 m** ≥ 2.5 (the `w3_md_reverts_v1.md` §5 census row for this scene is cleared by deletion, not mitigated); `plaza_granite` `surface` = `('crack', 'stain')`, **no `patch` row** (GT-24). **R-2 PASS on what it measures** — `dataset/260731_data_s01`, 8 cuts, **1.78 s/cut** vs SP-3's 2.87; `check_data_run` **[2] azimuth · [3] camera placement · [4] file/manifest · [5] throughput ALL PASS** (every sampler truncation respected, 8 files / 8 records, all content-unique, all 1920×1080, **nothing written under `look_check/`**). **[1] carries 2 FAILs, recorded not cured**: `sun-bearing (0 pairs ≥ 0.3 EV apart)` and `sunless (0 scene-pairs)` — zero-sample cross-condition checks that need `--conds` > 1, the identical pair GT-14 and GT-18 recorded, silent about geometry. **R-3** — **5 GATE-1 cuts vs the baseline: FAIL 2 · WARN 3, every code `FRAME`** plus one `GRAZE` on `h0.3_d10`; block shift 14–48 %, which is the **declared** result of rebuilding the flanks and the backdrop. **The attribution arm makes that readable**: `260731_w3_s01_pre` vs the same baseline scores **FAIL 0 · WARN 3**, all three `[UNCHANGED]` (mean diff 0.10–0.13 LSB, pixels over 4 LSB **0.003–0.006 %**) — i.e. the entire Lane-1 kit window and every other lane's landing in between is **null on this scene's judged cuts**, so every finding is this lane's. Channels that still mean something, all 13 cuts: **DARK improves everywhere** (`lower_lookback` dark % **32.4 → 5.8**, mean 102.8 → 156.9 — flagged `[PHOTO] 휘도 급상승 · 의도 확인`, and the intent is the deletion of a 9 m brick mass at 42 m); **BLOWN 0**; **WHITE 2 flags, both sky** (`beauty_overview` 34.1 → 50.5 %, `h1.8_d10` 21.3 → 36.4 % — deleting the two buildings that filled the upper half of those frames *is* the directive, and the ground band did not blow: `>224 %` 1.40–2.49); **OCCL 1 cut** (`amphi_view` new-dark 2.5 %, blob 0.1 %, near-field 0.0 % — the fountain and the second tree row), **new-dark ≤ 0.3 % and blob ≤ 0.1 % on every judged cut**. **`near_ground_stats` h0.3: `flat_gnd` CLEARS on all three cuts** (d2 0.7→0.4 · d5 **9.6→0.0** · d10 **3.6→0.0**) and `flat %` on d5 collapses 14.54 → 0.00. Two movements are stated rather than chased and share one cause — the 0.65 m albedo-0.10 manhole lid that filled the d5 near window is gone under the G-4 derivation: **`sd` d5 41.7 → 13.1** and **`mean` d5 185 → 204**. `mean > 170` and `wht % ≥ 2` were already WARNing in the baseline. **GRAZE adjudicated by crop** (`Docs/reports/_w3_s01_crops/s01_graze_band_h0.3_d10.png`, the tool declares it cannot auto-confirm): the stronger cross-screen line in the d10 edge band is **not the stair** — the flight is byte-unchanged — it is the **new east lawn retaining face at x = 14**, 24 m from the eye and 14 m past the drop, which replaced the raw turf-against-granite boundary that occupied the same rows. Handed on as **S01-F7** because it takes a full-width cross line in the band `GT-E2` caps at one. Also handed on: **S01-F1** — `building_kit` emits parapet + penthouse **+2.90 m above** `base_z + h`, so backdrop policy (2)'s `z_ceil` does not bound the ridge; the first two pilots printed “sky above roof 6/6” while the render cut the top edge of `h0.3_d10`, and the check now compares the ridge (predicted 7.97 = emitted 7.97). **Floor at `f6bb772`**: py_compile OK · SMOKE rc 0 (`SMOKE_OK rows=20`, 13/13) · geom_invariance **R-4 1/1 · R-6 1/1**, **431 prims / hash `a9d6c2ba`** identical on all three arms (was 353 / `108cad2f`) · placement_lint **ERROR 0 · WARN 12 → 6 · BLOCK 1 unchanged** (the six cleared WARNs are LINT-7's per-bench yaw findings = 01-D / CB-5). Full write-up: `Docs/reports/w3_s01_v1.md` | 2026-07-30 |
+| GT-34 | S01 | CB-2 · CB-5 · GATE-1 pilot **01** | `ac7a50c` → `7fb925a` → `45a76af` → **`f6bb772`** (+ report `9ec1cba`) | **R-1** `NEGOBS_SMOKE=1 python3 scenes/main/scene01_campus_stairs.py` — the scene's **new** `plaza_selfcheck`, boot-free and GPU-free; scene01 had **no** smoke path before this lane (`w3_mb_patch_v1.md` had to record the §6.1 item as having no subject here). **R-2** `flock -w 7200 /tmp/negobs_gpu.lock` → `python3 scripts/run_data_render.py --run 260731_data_s01 --scenes scene01` then `python3 scripts/check_data_run.py 260731_data_s01`. **R-3** `flock -w 7200 /tmp/negobs_gpu.lock` → 13-cut PT round in an **isolated `git archive f6bb772` arm** (`NEGOBS_CAPTURE_MODE=pt · NEGOBS_PT_FAST=1 · NEGOBS_LOOK_V1=1 · NEGOBS_DETAIL_SCALE=2 · NEGOBS_DETAIL_ROUGH_GAIN=0`, `NEGOBS_VIEWS` **unset** = full order prefix) → `scripts/stamp_round.py` → `python3 scripts/regression_check.py --before look_check/scene01/260731_w3_mb24 --after look_check/scene01/260731_w3_s01 --json Docs/reports/regr_260731_w3_s01.json` → `python3 scripts/near_ground_stats.py 'look_check/scene01/260731_w3_s01/pt_noon_preset_h0.3_*.png' 'look_check/scene01/260731_w3_mb24/pt_noon_preset_h0.3_*.png' --gate`. **Attribution arm** rendered in the same channel from `git archive 1234a51` (= `ac7a50c^`, scene01 file unedited) as `260731_w3_s01_pre`. **Floor** per commit, in isolated arms: `python3 -m py_compile` · SMOKE · `python3 scripts/geom_invariance_check.py --scenes scene01` · `python3 scripts/placement_lint.py --scenes scene01` | **Baseline named per §6-W4: `260731_w3_mb24`** (scene01's baseline of record from the MB patch batch, `e1150d6`); **`260731_w3_s01` is stamped `baseline_of_record: true` and supersedes it**, and `260731_w3_mb24` carries `baseline_of_record: false` + `superseded_by` (the S10c convention, closing the MD-F5 class for this scene). **R-1** — registry re-derived from `PARAMS`: **drop 7 · up_step 3 · walkable 7 · seat_tier 3**. Total stair drop asserts at **0.600000 m** (the approved flight does not move); riser 0.150 ≤ 0.180; kerb top **+0 mm** against the walk (S06-B's flush … +20 mm); kerb exposure 0.150 inside [0.100, 0.250]; lawn top = plaza − exposure to 1e-9; the lower-plaza frontage **+0.450 asserted as an UP-STEP, not a drop**; kerb block bottom −0.700 = the plaza slab's own underside (no void behind the face); every new drop < 0.600; every walkable step ≤ 0.200 (max 0.160); bench yaw jitter **0**; worst judged-eye ↔ planter distance **2.63 m** ≥ 2.5 (the `w3_md_reverts_v1.md` §5 census row for this scene is cleared by deletion, not mitigated); `plaza_granite` `surface` = `('crack', 'stain')`, **no `patch` row** (GT-24). **R-2 PASS on what it measures** — `dataset/_archive/scene_dev_2607/260731_data_s01`, 8 cuts, **1.78 s/cut** vs SP-3's 2.87; `check_data_run` **[2] azimuth · [3] camera placement · [4] file/manifest · [5] throughput ALL PASS** (every sampler truncation respected, 8 files / 8 records, all content-unique, all 1920×1080, **nothing written under `look_check/`**). **[1] carries 2 FAILs, recorded not cured**: `sun-bearing (0 pairs ≥ 0.3 EV apart)` and `sunless (0 scene-pairs)` — zero-sample cross-condition checks that need `--conds` > 1, the identical pair GT-14 and GT-18 recorded, silent about geometry. **R-3** — **5 GATE-1 cuts vs the baseline: FAIL 2 · WARN 3, every code `FRAME`** plus one `GRAZE` on `h0.3_d10`; block shift 14–48 %, which is the **declared** result of rebuilding the flanks and the backdrop. **The attribution arm makes that readable**: `260731_w3_s01_pre` vs the same baseline scores **FAIL 0 · WARN 3**, all three `[UNCHANGED]` (mean diff 0.10–0.13 LSB, pixels over 4 LSB **0.003–0.006 %**) — i.e. the entire Lane-1 kit window and every other lane's landing in between is **null on this scene's judged cuts**, so every finding is this lane's. Channels that still mean something, all 13 cuts: **DARK improves everywhere** (`lower_lookback` dark % **32.4 → 5.8**, mean 102.8 → 156.9 — flagged `[PHOTO] 휘도 급상승 · 의도 확인`, and the intent is the deletion of a 9 m brick mass at 42 m); **BLOWN 0**; **WHITE 2 flags, both sky** (`beauty_overview` 34.1 → 50.5 %, `h1.8_d10` 21.3 → 36.4 % — deleting the two buildings that filled the upper half of those frames *is* the directive, and the ground band did not blow: `>224 %` 1.40–2.49); **OCCL 1 cut** (`amphi_view` new-dark 2.5 %, blob 0.1 %, near-field 0.0 % — the fountain and the second tree row), **new-dark ≤ 0.3 % and blob ≤ 0.1 % on every judged cut**. **`near_ground_stats` h0.3: `flat_gnd` CLEARS on all three cuts** (d2 0.7→0.4 · d5 **9.6→0.0** · d10 **3.6→0.0**) and `flat %` on d5 collapses 14.54 → 0.00. Two movements are stated rather than chased and share one cause — the 0.65 m albedo-0.10 manhole lid that filled the d5 near window is gone under the G-4 derivation: **`sd` d5 41.7 → 13.1** and **`mean` d5 185 → 204**. `mean > 170` and `wht % ≥ 2` were already WARNing in the baseline. **GRAZE adjudicated by crop** (`Docs/reports/_w3_s01_crops/s01_graze_band_h0.3_d10.png`, the tool declares it cannot auto-confirm): the stronger cross-screen line in the d10 edge band is **not the stair** — the flight is byte-unchanged — it is the **new east lawn retaining face at x = 14**, 24 m from the eye and 14 m past the drop, which replaced the raw turf-against-granite boundary that occupied the same rows. Handed on as **S01-F7** because it takes a full-width cross line in the band `GT-E2` caps at one. Also handed on: **S01-F1** — `building_kit` emits parapet + penthouse **+2.90 m above** `base_z + h`, so backdrop policy (2)'s `z_ceil` does not bound the ridge; the first two pilots printed “sky above roof 6/6” while the render cut the top edge of `h0.3_d10`, and the check now compares the ridge (predicted 7.97 = emitted 7.97). **Floor at `f6bb772`**: py_compile OK · SMOKE rc 0 (`SMOKE_OK rows=20`, 13/13) · geom_invariance **R-4 1/1 · R-6 1/1**, **431 prims / hash `a9d6c2ba`** identical on all three arms (was 353 / `108cad2f`) · placement_lint **ERROR 0 · WARN 12 → 6 · BLOCK 1 unchanged** (the six cleared WARNs are LINT-7's per-bench yaw findings = 01-D / CB-5). Full write-up: `Docs/reports/w3_s01_v1.md` | 2026-07-30 |
 | GT-29 | S06 | CB-9 | `94dc38d` (geometry) · `c48e6e9` · `69c6f9f` | **R-1** `NEGOBS_SMOKE=1 python scenes/main/scene06_overpass_spiral.py` — the scene re-derives and prints its own registry from the changed geometry: continuity **OK** with **26 identical 0.192 risers** and landing→deck **Δ+0.000** (was a 0.190 short riser plus a 2 mm lip), hazard arc [180, 270] open edge **4.909…3.411 m, mean 4.160**, corridor dressing intrusion **0**, camera collision **0 / 15 views × 40 AABBs**, h0.3 concealment unchanged (ground re-emerges y −46.4 / −96.4 / −179.8 at d2/d5/d10). **Split proof** (GPU 0, two isolated `git archive` arms, `assets/` symlinked so the arms are asset-equal): `python3 gt_probe.py <arm> <out.json>` ×2 → `python3 gt_diff.py gt_head.json gt_post.json` — walked-top-face sampling over 9 radii × 1969 azimuths. **R-3** round **`260731_w3_s06`** (15 cuts, PT, 61 s, `flock -w 7200 /tmp/negobs_gpu.lock`, arm byte-identical to the baseline stamp: `NEGOBS_CAPTURE_MODE=pt · NEGOBS_PT_FAST=1 · NEGOBS_LOOK_V1=1 · NEGOBS_DETAIL_SCALE=2 · NEGOBS_DETAIL_ROUGH_GAIN=0`), then `python3 scripts/regression_check.py --before look_check/scene06/260730_w2d_fix --after look_check/scene06/260731_w3_s06 --json Docs/reports/regr_260731_w3_s06.json`. **R-2 not owed** (declared class: no drop edge created or destroyed, hazard registry unchanged, +2 mm below `GT_DELTA = 0.020`). | **Split proof: of 17,721 samples the walked surface moves in 5,986, and all 5,986 fall in four strata, every one of them a term GT-6 enumerates** — `landing → landing` **+2.000 mm exactly ×3956** (the row's own +2 mm), `tread → tread` **−192.000 mm exactly ×1584** (the box overshot its design rays by a mean **6.55°**, so the previous higher tread won the top face; true sectors hand over correctly — **no tread's own z moves, the ladder is bit-identical**), `fascia → tread` ×310 (the ribbon stood **165.640 mm** proud of the tread it trimmed; the intake's 154 mm is superseded), `landing → tread` ×168 (the landing's `a0` ray overshot **≤ 4.25°** — chord 234 mm at r 3.15 — a phantom 5.000 slab 3.07 m above the tread outside its design range). **`new-void 0 · new-solid 0`.** Everything else that moved is guard-height (rails / coping / glass caps), which is the row's declared R-3, not a GT change. Landing/deck interpenetration **9.186 → 4.156 m² (−54.8 %)**; the residual is declared, not hidden — closing it needs `_grid_shift` decoupled from `deck["y0"]` first (finding S06-F3), which is camera-adjacent and was not taken unilaterally. **Unscoped invariance**, isolated arms, asset-equal: scene05 `3ac9076a…` n=1234 · scene13 `b0afe7a8…` n=495 · scene19 `4ac6372a…` n=284 — **byte-identical before and after**. **Floor**: py_compile ✔ · SMOKE **rc 0**, 35 OK gates · `geom_invariance_check --scenes scene06` **R-4 1/1 · R-6 1/1** (prims 2025, hash `a51b354c`, identical across MTL=0 / MTL=1 / V1=1) · `placement_lint --scenes scene06` **ERROR 6 · WARN 15 · BLOCK 1**, identical to the asset-equal HEAD arm. **Baseline**: `260730_w2d_fix` named per `look_check/README.md`; **`260731_w3_s06` is scene06's baseline-of-record from here** (stamped, `baseline_of_record` marker set). Regression **FAIL 8 · WARN 5 · PASS 2 · EXPECTED_FP 0**, adjudicated per cut in `Docs/reports/w3_s06_v1.md` §8.1: FRAME (13) is the declared rebuild; OCCL's *"camera swallowed"* hint is **rejected** on blob **2.2–3.7 %** against a smoke camera-collision count of **0**; GRAZE **abstained** (INFO, no edge band) and is **not** recorded as a pass. | 2026-07-31 |
 | GT-30 | S06 | CB-9 | `94dc38d` | *(rides GT-29's single re-cache — same R-1 / R-3 commands, same round `260731_w3_s06`)* | `build_curb_line` returns **`gt_drop = 0.168`** (0.150 exposure + 0.018 gutter cross-fall) on both carriageway edges, **`is_gt_hazard = True`, `warnings = []`**, printed live by the scene. **94 prims/side at 0.671 prims/m** (against 141 at the full 1 m rate) via `lod_span` over the judged window x ∈ [−26, +26] with `far_unit = 8.0`. Arris asserted live: `ik.check_arris_role(sc)` → **`LOOK_CLASS['curb'].bevel = 10.0 mm`, OK**. **Owed, recorded rather than substituted**: S06-B item 3's **`curb_granite_light` texture role does not exist** in `scene_common.TEX`; a scene-local `CurbGraniteLight` (granite maps + lightening tint) stands in, and `granite_dark` is not reused. The new 168 mm edge lies on the carriageway line, outside every judged grid corridor and outside the r ≤ 4.2 near frame, so the scene's hazard registry is unchanged — the spiral's missing-rail arc remains its sole declared hazard. | 2026-07-31 |
 
@@ -885,7 +885,7 @@ R-2 는 W5 생산 전 일괄 유예. R-3 = 라운드 `260805_w3_doctrine`(6씬: 
   FRAME 계열(06/10/12 broken_rail·edge_void 등)은 본 행이 선언한 의도 변화 — 육안 확인: 06 연속 bronze 2단, 10 참0 연속 guard, 12 연속 picket run 착지. scene12 edge_void OCCL 4.9 %는 신규 picket 근접 음영.
   scene05 UNCHANGED 4컷 = `260731_w3_full` render 당시 scene05가 dirty(wall_conc 기반영) — baseline에 이미 포함, WHITE 41.8→17.3 % 유지 확인. scene14 side_reveal FRAME 38 % = 온색 다크닝 적용 확인(beauty WHITE 18.2→17.2 %).
 - 새 baseline = `260805_w3_doctrine` (01·05·06·10·12·14) · 나머지 27씬 baseline은 `260731_w3_full` 유지.
-- gallery: `look_check/_review/260805_w3_doctrine/` (사용자 검수 대기 — 검수 통과 시 본 행 CLOSED).
+- gallery: `look_check/_review/w3/260805_w3_doctrine/` (사용자 검수 대기 — 검수 통과 시 본 행 CLOSED).
 
 ## 14. GT-58 — 08-05 S13 갤러리 답변: 남측 난간 개구 수리 + U-5 전장 캐노피 (선신고)
 
@@ -934,8 +934,8 @@ spec §6-④ 에 따라 h0.3 프리셋 컷 육안 확인 필수.
   (flight1 음영대). GRAZE `preset_h0.3_d5` 는 촉지 등록부 EXPECTED_FP 자동 해소.
 - spec §6-④ h0.3 육안 확인: 기하 은닉 유지 — d5/d10 에서 램프 노면 평면 압축 재확인. 소핏
   점등이 개구 상부에 보여 "덮인 진입로" 맥락단서가 성립(연구 취지 부합).
-- gallery: `look_check/_review/260805_w3_s13fix/` (씬 1 · 4컷). **사고 기록**: `make_review_gallery`
-  를 `--out` 없이 1회 실행 → `_review_w2` meta·scene13 썸네일 클로버(spec §의 기지 footgun) →
+- gallery: `look_check/_review/w3/260805_w3_s13fix/` (씬 1 · 4컷). **사고 기록**: `make_review_gallery`
+  를 `--out` 없이 1회 실행 → `_review/w2` meta·scene13 썸네일 클로버(spec §의 기지 footgun) →
   `w2_fixbatch_v1.md:367` 의 원 명령으로 **전체 재생성 복구 완료**(33씬·132썸네일 검증).
 
 *(08-05 2차 주석 — GT-59)*: 본 행의 ~~차단기 암 선회면 근거(캐노피 x0)~~·~~prim 704~~·collider
@@ -982,7 +982,7 @@ scene_common 문제로 보이니 검토·수정" — **차도류 프로파일 �
   PASS 10 — stair_head FRAME/OCCL/PHOTO = 계단 캐노피 신설(선언 변화), WARN FRAME 4컷 =
   차단기·전주 소거 + A101 이동. 육안: 두 캐노피가 L자 지붕으로 읽히고, 정면축 개방(동측
   하늘) · 도로 클린(맨홀·잡초 0) 확인.
-- gallery: `look_check/_review/260805_w3_s13fix2/` (사용자 검수 대기).
+- gallery: `look_check/_review/w3/260805_w3_s13fix2/` (사용자 검수 대기).
 
 **Status: OPEN** (사용자 검수 통과 시 CLOSED).
 
@@ -1018,7 +1018,7 @@ scene_common 문제로 보이니 검토·수정" — **차도류 프로파일 �
   전 컷 감소(280000 소핏 + 유리 반사), stair_head dark% 24.7→8.5(계단 소핏 착지),
   ramp_graze BLOWN = 프레임 내 소핏 배튼 국부 하이라이트(조명기구 — 선언 요소).
 - 육안: 파라펫·유리 커튼월·엔드월로 건물형 성립, 엔드월이 Ground_E 녹색 노출면 차폐 확인.
-- gallery: `look_check/_review/260805_w3_s13fix3/` (사용자 검수 대기).
+- gallery: `look_check/_review/w3/260805_w3_s13fix3/` (사용자 검수 대기).
 
 **Status: OPEN** (사용자 검수 통과 시 CLOSED — GT-58/59 와 같은 사이클).
 
@@ -1034,7 +1034,7 @@ A101 을 동서 판상형 슬래브(x 0…36 · y −22…−13 · 북향 파사
 `stair_canopy.side_mode` 신설("rail"/"glass") + `stair_rail_runs`. GT drop·보행면 불변 →
 **R-3 전용**. §4: floor 4종 OK · round `260805_w3_s13fix4` 15컷 · regression vs `_s13fix3`
 FAIL 11·WARN 2 = 전부 선언 변화(A101/A103 재배치 FRAME + 유리 연장) 귀속 · 육안: 진입로
-그림자 소거·평행 슬래브·계단부 rail 모드 확인. gallery `look_check/_review/260805_w3_s13fix4/`.
+그림자 소거·평행 슬래브·계단부 rail 모드 확인. gallery `look_check/_review/w3/260805_w3_s13fix4/`.
 
 **Status: OPEN** (사용자 검수 통과 시 CLOSED — GT-58~60 과 같은 사이클).
 
@@ -1094,7 +1094,7 @@ SMOKE 는 스테이지 빌드 전 단락되므로 dressing 신설 코드는 렌�
 - 육안: 헤지 A/B 크롭 — fix4 광택 매끈 구체 4련(당구공 읽힘) → fix5 엽면 질감·불규칙
   실루엣의 연속 전정 밴드, "bush" 읽힘 성립. 캐노피-마우스 접속·행어 높이바·계단부 유리
   랩 + 하행 레일(중간참 U-리턴 포함) 확인.
-- gallery: `look_check/_review/260805_w3_s13fix5/` (사용자 검수 대기).
+- gallery: `look_check/_review/w3/260805_w3_s13fix5/` (사용자 검수 대기).
 
 **08-06 검수(사용자, Isaac Sim 대화형 검수)**: 수정 요청 — 계단박스 개폐(중앙 벽 철거·출입문·측면 낙차 폐합)·아파트 정남향 그리드·교차로·수목/보도 정렬 → **GT-64 사이클로 이관**.
 
@@ -1147,7 +1147,7 @@ ERROR 0(WARN = PLACEMENT 데이텀 부재 nodata 기존 소견군 + LINT-9 gated
   무텍스처·플랫(rough 1.0·spec 0) 처리 — "광택 블롭" 실패군 아님. `backdrop_instances()`
   단일원천이 자체 검산(lobe 중첩 check 7)과 결합·가드 기능 겸직 → 본 행 범위 외.
   실자산 전환을 원하면 별도 행(아크 배치 place_shrubs) 후보.
-- gallery: `look_check/_review/260805_w3_hedgeswap/` (사용자 검수 대기).
+- gallery: `look_check/_review/w3/260805_w3_hedgeswap/` (사용자 검수 대기).
 
 **08-06 검수(사용자)**: 방향 승인("a bit more natural") · **밀도 과밀 지적**("still pretty dense") → GT-71 파일럿(scene16 A/B) 선신고. 확산 여부는 파일럿 검수 후.
 
@@ -1198,7 +1198,7 @@ Round `260806_w3_s13fix6`(15컷, baseline `260805_w3_s13fix5`).
   교차로 전경) · bollard_walk(보도→횡단→보도 정렬·정면축 개방 §0-2). 유리문은 무투과
   재질 스택이라 렌더에서 불투명 판으로 읽힘(라이브러리 전역 제약 — scene08 §전례) — "유리
   너머 낙차 가시" 취지는 렌더상 성립하지 않음을 기록.
-- gallery: `look_check/_review/260806_w3_s13fix6/` (사용자 검수 대기).
+- gallery: `look_check/_review/w3/260806_w3_s13fix6/` (사용자 검수 대기).
 
 **Status: OPEN (사용자 검수 대기 — GT-62 와 같은 사이클)**
 
@@ -1215,7 +1215,7 @@ Round `260806_w3_s13fix6`(15컷, baseline `260805_w3_s13fix5`).
 - regression (`Docs/reports/regr_260806_w3_fixqueue.json`, baseline 01/06/10/12 =
   `260805_w3_doctrine` · 05/14/16 = `260805_w3_hedgeswap`): 계 FAIL 10 · WARN 30 ·
   INFO 7 · PASS 50 — 씬별 귀속은 각 행 참조.
-- gallery: `look_check/_review/260806_w3_fixqueue/` (사용자 검수 대기).
+- gallery: `look_check/_review/w3/260806_w3_fixqueue/` (사용자 검수 대기).
 - 본 씬 귀속: FAIL 1 = leaf_edge FRAME 42 %(모서리·뉴얼 접합 재작업 + 진입 데크 전연
   EntryRail_Out 신설 — 9 그리드 아이 낙엽 단서 가림 0 검산) · WARN 4(FRAME) 동일 귀속.
   육안: 접합부 단일 제품군 읽힘·부유 단부 0. 낙차 6.60·P-2 보존 항목(널 틈·돌구덩이·
@@ -1236,7 +1236,7 @@ Round `260806_w3_s13fix6`(15컷, baseline `260805_w3_s13fix5`).
 - regression (`Docs/reports/regr_260806_w3_fixqueue.json`, baseline 01/06/10/12 =
   `260805_w3_doctrine` · 05/14/16 = `260805_w3_hedgeswap`): 계 FAIL 10 · WARN 30 ·
   INFO 7 · PASS 50 — 씬별 귀속은 각 행 참조.
-- gallery: `look_check/_review/260806_w3_fixqueue/` (사용자 검수 대기).
+- gallery: `look_check/_review/w3/260806_w3_fixqueue/` (사용자 검수 대기).
 - 본 씬 귀속: FAIL 2 = edge_void 54 %·under_deck 22 % FRAME(픽켓 소거 — 근접 컷에서
   세로 살대 소실) · WARN 2 동일. 육안: GT-43 단면(Ø120 기둥 + 상·중 통나무 2단) 복원,
   연속 런·에지 부식 밴드 유지. **레일 높이 1.10 유지 판단 기록**: GT-43 사료값은 1.05였으나
@@ -1262,7 +1262,7 @@ Round `260806_w3_s13fix6`(15컷, baseline `260805_w3_s13fix5`).
 - regression (`Docs/reports/regr_260806_w3_fixqueue.json`, baseline 01/06/10/12 =
   `260805_w3_doctrine` · 05/14/16 = `260805_w3_hedgeswap`): 계 FAIL 10 · WARN 30 ·
   INFO 7 · PASS 50 — 씬별 귀속은 각 행 참조.
-- gallery: `look_check/_review/260806_w3_fixqueue/` (사용자 검수 대기).
+- gallery: `look_check/_review/w3/260806_w3_fixqueue/` (사용자 검수 대기).
 - 본 씬 귀속: FAIL 2 = amphi_view FRAME 17 %(amphi 삭제 — collider 제거 선언 일치) ·
   lower_lookback FRAME 35 %/OCCL 5.0 %(광장 복원 — 건물·게시판·거치대·벤치 재도입, OCCL
   선언 귀속). WARN 9(주로 preset FRAME) = railing 살대 성김 + 광장 요소.
@@ -1286,7 +1286,7 @@ Round `260806_w3_s13fix6`(15컷, baseline `260805_w3_s13fix5`).
 - regression (`Docs/reports/regr_260806_w3_fixqueue.json`, baseline 01/06/10/12 =
   `260805_w3_doctrine` · 05/14/16 = `260805_w3_hedgeswap`): 계 FAIL 10 · WARN 30 ·
   INFO 7 · PASS 50 — 씬별 귀속은 각 행 참조.
-- gallery: `look_check/_review/260806_w3_fixqueue/` (사용자 검수 대기).
+- gallery: `look_check/_review/w3/260806_w3_fixqueue/` (사용자 검수 대기).
 - 본 씬 귀속: FAIL 3 = spiral_up FRAME 90 %/OCCL(근거리대 41 %)·broken_rail 83 %·
   preset_h1.8_d2 80 % + PHOTO 휘도 하락 — 전부 나선 가드의 tube 2단 → 유리+bronze cap
   (DeckGlass 계열) 통일 귀속. 육안 확정: overview 에서 본교량-나선이 단일 제품군, 곡면은
@@ -1309,7 +1309,7 @@ Round `260806_w3_s13fix6`(15컷, baseline `260805_w3_s13fix5`).
 - regression (`Docs/reports/regr_260806_w3_fixqueue.json`, baseline 01/06/10/12 =
   `260805_w3_doctrine` · 05/14/16 = `260805_w3_hedgeswap`): 계 FAIL 10 · WARN 30 ·
   INFO 7 · PASS 50 — 씬별 귀속은 각 행 참조.
-- gallery: `look_check/_review/260806_w3_fixqueue/` (사용자 검수 대기).
+- gallery: `look_check/_review/w3/260806_w3_fixqueue/` (사용자 검수 대기).
 - 본 씬 귀속: FAIL 2 = stage_lookup FRAME 67 %(벤치·수목·소품 관계 재배치 — scene04 문법) ·
   preset_h0.3_d10 GRAZE[의심 드러남] — y124~177 대역 육안: 신설 플랜터 연석/좌석 라인이
   에지 검출기에 걸린 것, 낙차 노출·은닉 전제 훼손 무 → 선언 귀속. WARN 3 동일.
@@ -1331,7 +1331,7 @@ Round `260806_w3_s13fix6`(15컷, baseline `260805_w3_s13fix5`).
 - regression (`Docs/reports/regr_260806_w3_fixqueue.json`, baseline 01/06/10/12 =
   `260805_w3_doctrine` · 05/14/16 = `260805_w3_hedgeswap`): 계 FAIL 10 · WARN 30 ·
   INFO 7 · PASS 50 — 씬별 귀속은 각 행 참조.
-- gallery: `look_check/_review/260806_w3_fixqueue/` (사용자 검수 대기).
+- gallery: `look_check/_review/w3/260806_w3_fixqueue/` (사용자 검수 대기).
 - 본 씬 귀속: WARN 3(FAIL 0) — beauty_overview·preset FRAME = 화강석→단순 콘크리트 팔레트
   (플라이트 선형 휘도 0.4128→0.2487, −40 % **선언 의도**) + 측벽 상부 handrail 신설(벽 겸
   handrail 읽힘, h 0.85~0.95 독트린). preset_h0.3_d5 UNCHANGED = 변경분 프레임 밖.
@@ -1354,7 +1354,7 @@ scene16 A/B 사용자 검수 후 별도 행으로 확산.
 - regression (`Docs/reports/regr_260806_w3_fixqueue.json`, baseline 01/06/10/12 =
   `260805_w3_doctrine` · 05/14/16 = `260805_w3_hedgeswap`): 계 FAIL 10 · WARN 30 ·
   INFO 7 · PASS 50 — 씬별 귀속은 각 행 참조.
-- gallery: `look_check/_review/260806_w3_fixqueue/` (사용자 검수 대기).
+- gallery: `look_check/_review/w3/260806_w3_fixqueue/` (사용자 검수 대기).
 - 본 씬 귀속: WARN 3 = 전부 UNCHANGED(헤지 비노출 컷 — 본 파일럿은 헤지 단독 변경이므로
   정상). census `[GT-71]` 로그: 설계 11→9주(실배치 9·폴백 0) · pitch_frac 0.53→0.62 ·
   지터 0.06/0.04→0.10/0.06 · 공칭 중첩 46 %/39 %(최악 +0.13 m) — **융합 유지**(§4-1).
@@ -1371,7 +1371,7 @@ scene16 A/B 사용자 검수 후 별도 행으로 확산.
 보류 선언.
 **Scope**: `scenes/main/scene13_apartment_parking_entry.py`. 보행면·낙차·레지스트리 불변.
 **GT 판정**: R-3 전용. Round `260806_w3_s13fix7`, baseline `260806_w3_s13fix6`.
-**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/w3/260806_w3_s13fix7` · `_review/w3/260806_w3_fixqueue2` (검수 대기).
 - 계단박스: 외짝문 **개방 95°**(스테이·힌지·핸들 실부재) + 잔여 스팬 고정유리 재구획(개구 0.95 m)
   · 중앙 가드 Top/Mid **전 종단 포스트 결속**(자유단 6→0, 프림 23→34) · 답면 플레이트 착지
   (post_below 철거) · 남측 슬롯 StairSkirt 12 + 중앙 웰 StairWellFill 12(개방 웰 유지, 바닥 부여)
@@ -1386,7 +1386,7 @@ scene16 A/B 사용자 검수 후 별도 행으로 확산.
 **Scope**: `scene_common.py` 신규 `make_glass`(OmniPBR opacity 또는 OmniGlass, PT 전제)
 + scene13 유리 프림(캐노피 커튼월·계단박스·문) 우선 적용. 타 씬 확산은 검수 후 별도 행.
 **GT 판정**: R-2(재질 전용 — 기하 불변). Round `260806_w3_s13fix7` 동승.
-**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/w3/260806_w3_s13fix7` · `_review/w3/260806_w3_fixqueue2` (검수 대기).
 - `scene_common.make_glass` 신설(OmniPBR enable_opacity·opacity 0.35 기본 / `NEGOBS_GLASS_MDL=glass`
   → OmniGlass / `NEGOBS_GLASS_V1=0` → 불투명 폴백 — 신규 재질에만 스코프, 기존 재질 무간섭).
   scene13 유리 31프림 적용. 육안: entry_approach에서 유리 홀이 반투명 판독(너머 수목·내부 가시),
@@ -1415,7 +1415,7 @@ round `260811_w3_s13frost_a`(현행)/`_b`(frosted) 15컷×2 PT_FAST · regr A/B
 (`regr_260811_w3_s13frost.json`) FAIL13/WARN1 — 전량 FRAME/PHOTO/DARK/GRAZE, 유리 재질
 전환 귀속. 육안(entry_approach·bollard_walk·stair_head): 차폐 프로스트 젖빛 — 유리 너머
 경계·배경 뭉개짐 성립 · 무관 8 클리어 실유리 판독 · 파이어플라이/순흑 병리 0. gallery
-`_review/260811_w3_s13frost_a`·`_b` (검수 대기).
+`_review/w3/260811_w3_s13frost_a`·`_b` (검수 대기).
 **08-11(2) frosted 자연화 선신고** (사용자 "frost되면서 너무 어두워지는 것 같지 않아..?" →
 "둘다 해보고 현실과 비슷한 자연스러운 방향으로 개선해줘"): 실측 — frost A/B 평균 밝기 커튼월
 169→119(−30 %)·안내부스 210→70(−67 %). 원인 = OmniGlass 는 확산 로브가 없어 `glass_color`
@@ -1433,7 +1433,7 @@ SMOKE 4씬+frost 팔 rc0 · geom_invariance R-4/R-6 33/33 PASS · placement_lint
 3쌍 **FAIL 0 · WARN 18** — 전량 유리 유백화 + GT-107 데칼 정온 귀속. **판정: c(0.35 · 유백
 0.90) 채택 = frost 팔 기본값**(d/e 는 검수 대체안으로 보존). 육안(X3, entry_approach):
 젖빛 밝음 회복·배경 뭉개짐 유지·클리어 8 실유리 판독·병리 0. gallery
-`_review/260811_w3_s13frost_c`·`_d`·`_e` (구 `_a`/`_b` 는 참고 보존).
+`_review/w3/260811_w3_s13frost_c`·`_d`·`_e` (구 `_a`/`_b` 는 참고 보존).
 **08-14 사용자 검수(원문)**: "c가 이쁘긴 하네 좋아. 다른 씬 확산하면 어디어디 하게 되지?
 여기선 괜찮긴 한데, 다른 씬은 상황별로 다를 거라 확인 좀 해봐야할 것 같네" → **c안(rough
 0.35 · 유백 0.90) 승인 — frost 팔 기본값 확정**(코드 기본값 = c 이미 일치, 추가 변경 0).
@@ -1452,7 +1452,7 @@ midair" — 계단 결속 재지시.
 **Scope**: `scenes/main/scene01_campus_stairs.py` + `scene_common.py` `build_railing_line`
 영역 한정(겹침 버그 원인일 경우). collider/OCCL 변동 본 행 귀속.
 **GT 판정**: R-3 + OCCL 선언. Round `260806_w3_fixqueue2`, baseline `260806_w3_fixqueue`.
-**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/w3/260806_w3_s13fix7` · `_review/w3/260806_w3_fixqueue2` (검수 대기).
 - 1차(Opus): 이중 중간레일 근원 수정(merged 경로 RailMid 억제 — 3본→2본) · 살대 접지
   (PICKET_EMBED 12 mm, 18본 부유 소거) · 구근 캡/스타일 마감 · 8동 배치.
 - **2차(오케스트레이터, 08-06 사용자 3차 지시)**: "기본이 최고" — merge/그립 전면 철거
@@ -1470,7 +1470,7 @@ midair" — 계단 결속 재지시.
 **Scope**: `scenes/main/scene05_amphitheater.py`. P-16(무대 재설계)은 계속 범위 외 —
 계단 접속·마감 한정.
 **GT 판정**: R-3 전용. Round `260806_w3_fixqueue2`.
-**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/w3/260806_w3_s13fix7` · `_review/w3/260806_w3_fixqueue2` (검수 대기).
 - side_arc 돌출체 = backdrop_shrub 로브가 cut_wall 방위각 대역과 간섭(검산기 사각) → 로브
   방위 재배치 + selfcheck에 방위 간섭 검사 신설. 무대 계단 접속 정리(단 리듬 연속·재질 톤
   통일, P-16 범위 밖 유지). regr 본 씬 FAIL 0.
@@ -1482,7 +1482,7 @@ midair" — 계단 결속 재지시.
 again. It's sloppy" · 에지 마감 · 반대측 상행 계단 동일 처리 — **단일 육교 제품군 읽힘**.
 **Scope**: `scenes/main/scene06_overpass_spiral.py`. 5.005 m 웰·보행면·낙차 불변.
 **GT 판정**: R-3 전용. Round `260806_w3_fixqueue2`.
-**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/w3/260806_w3_s13fix7` · `_review/w3/260806_w3_fixqueue2` (검수 대기).
 - 1차(Opus): 나선·북측 계단 정밀 재구축 — 업스탠드+슈+판+캡 1계열, 등각 분절, 노출 킥
   상수화(0.120), 데크 캡 단일부재화, 랜딩 뉴얼 공유(중간 베이 교차 소거).
 - **2차(오케스트레이터)**: 랜딩 메시 UV 부재로 타일 평균색 혀가 데크면 침입 →
@@ -1495,7 +1495,7 @@ again. It's sloppy" · 에지 마감 · 반대측 상행 계단 동일 처리 �
 **Authority**: 08-06 사용자 — "the path the deck connects to flows naturally".
 **Scope**: `scenes/main/scene10_park_deck_switchback.py`. 낙차 6.60·P-2 보존 유지.
 **GT 판정**: R-3 전용. Round `260806_w3_fixqueue2`.
-**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/w3/260806_w3_s13fix7` · `_review/w3/260806_w3_fixqueue2` (검수 대기).
 - 데크 양단 접속 경로 신설·접지 전이(§0-2 씬 끝까지) — 08-06 감사 "무맥락 매트" 해소.
   P-2 보존 항목 불변. regr FAIL1(h0.9_d10 FRAME) 귀속.
 **Status: OPEN (사용자 검수 대기)**
@@ -1506,7 +1506,7 @@ again. It's sloppy" · 에지 마감 · 반대측 상행 계단 동일 처리 �
 GT-70 의 측벽 상부 handrail 항을 사용자 지시로 롤백(재질 단순화는 유지).
 **Scope**: `scenes/main/scene14_grandstair_illusion.py`.
 **GT 판정**: R-3 전용. Round `260806_w3_fixqueue2`.
-**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/w3/260806_w3_s13fix7` · `_review/w3/260806_w3_fixqueue2` (검수 대기).
 - GT-70 측벽 handrail 전면 철거(사용자 지시 — 재질 단순화는 유지). regr FAIL 0.
 **Status: OPEN (사용자 검수 대기)**
 
@@ -1518,7 +1518,7 @@ crosses the road, like an underpass". T20(캐노피 그림자 계단) 정체성 
 **Scope**: `scenes/main/scene16_canopy_shadow.py`. 계단·하부 통로·그림자 밴드 단서(씬
 정체성 T20)·GT 불변 — 상부 도로·연석·접속 보도가 신설 dressing.
 **GT 판정**: R-3 + FRAME/OCCL 대변동 선언. Round `260806_w3_fixqueue2`.
-**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/w3/260806_w3_s13fix7` · `_review/w3/260806_w3_fixqueue2` (검수 대기).
 - 상부 **횡단 차도 신설**(연석·차선·§0-2 접속 보도) — "도로 밑을 지나는 지하보도" 정체성 성립
   (육안: beauty_overview). T20 그림자 밴드·계단·통로 기하 불변. **GT 재캐시 선언**: 신설 연석
   낙차 2열(x 7.80/13.80) + 트렌치 대역 x 7.55–14.05 지붕화 → R-1/R-3 재캐시 다음 데이터
@@ -1535,7 +1535,7 @@ naturally." (S11-H 법령: "한국 육교는 H형이야").
 **Scope**: `scenes/main/scene11_footbridge_stairs.py` — H-plan 4지 계단 접속 완결(막다른
 데크 금지), 접합 마감. 낙차·그레이팅 축 불변.
 **GT 판정**: R-3 + FRAME 선언. Round `260806_w3_fixqueue2`, baseline `260731_w3_full`.
-**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/w3/260806_w3_s13fix7` · `_review/w3/260806_w3_fixqueue2` (검수 대기).
 - 1차(Opus): H 완성 — 4지 계단(서측 직선 2련·동측 되돌음 2련), 데크 말단 막다름 해소,
   connuous 가드 폴리라인(코너 공유 포스트·너클 캡·중간 가로대), +1,790프림(§4-14 예산 근거).
 - **2차(오케스트레이터, 사용자 "접속을 왜 저렇게밖에" 직접 재작업)**: 1.95 m 펜스 → 1.10 m
@@ -1550,7 +1550,7 @@ the distance and trim it neatly."
 **Scope**: `scenes/main/scene17_ramp_pair_hangang.py`. 램프 쌍 기하(씬 정체성)·무난간
 관행(§4-2) 불변 — 본선 이설·완충 정리.
 **GT 판정**: R-3 + FRAME 선언. Round `260806_w3_fixqueue2`, baseline `260731_w3_full`.
-**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/w3/260806_w3_s13fix7` · `_review/w3/260806_w3_fixqueue2` (검수 대기).
 - 본선-램프 이격 확장 + 램프 상·하단 접속(제방로/강변로) + 보도 연속화(§0-2) — "고립 슬래브"
   해소. §4-2 무난간·P-13 무연석 유지. regr FAIL5(프리셋 FRAME) 귀속.
 **Status: OPEN (사용자 검수 대기)**
@@ -1561,7 +1561,7 @@ the distance and trim it neatly."
 제거 · 계단부 과암 개선 · 출입구 협소 확대.
 **Scope**: `scenes/main/scene19_fan_winder.py`. 부채꼴 계단 기하(T7)·낙차 불변.
 **GT 판정**: R-3 + OCCL/DARK 개선 선언. Round `260806_w3_fixqueue2`, baseline `260731_w3_full`.
-**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/w3/260806_w3_s13fix7` · `_review/w3/260806_w3_fixqueue2` (검수 대기).
 - 잉여 배경 건물 제거(brick_red 소비자 소멸) · 순흑 무텍스처면 재질 바인딩(L19-F1 레버 실행 —
   사용자 지적 = HIGH 미결 승인에 해당) · 부유 조명판 마운트 · 출입 폭 확대. 부채꼴 기하 불변.
   regr FAIL8(전 계열 FRAME — 대변동 선언) 귀속.
@@ -1573,7 +1573,7 @@ the distance and trim it neatly."
 move it to the side"(육교 문법).
 **Scope**: `scenes/main/scene03_riverbank.py`. 제방·수면·낙차 불변 — 교량 이설.
 **GT 판정**: R-3 + FRAME 선언. Round `260806_w3_fixqueue2`, baseline `260731_w3_full`.
-**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/w3/260806_w3_s13fix7` · `_review/w3/260806_w3_fixqueue2` (검수 대기).
 - **3패스 계보**: 1차 상향+측방 이설(u/half 0.85–0.92 이탈) → 2차 시공성(교대 12부재 해체·
   원측 23 m 접속교·거더 분절 9부재 단면) → **3차 근측 접속(08-06 사용자 "어떻게든" 룰링)**:
   좌 90° **곡선 남향 고가 42.40 m**(17현·마이터 겹침 29이음·종곡선 8 m 후 2.0 %·전현 동일
@@ -1591,7 +1591,7 @@ move it to the side"(육교 문법).
 **Scope**: `scenes/main/scene07_temple_stone_path.py` — cue_sign 기본 OFF(어블레이션 경로
 보존, v5.2 전례).
 **GT 판정**: R-3 전용. Round `260806_w3_fixqueue2`, baseline `260731_w3_full`.
-**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/w3/260806_w3_s13fix7` · `_review/w3/260806_w3_fixqueue2` (검수 대기).
 - sign_info 기본 OFF(어블레이션 경로 보존, v5.2 전례) + 자가검증 표 갱신. regr FAIL1
   (h0.3_d5 FRAME = 표지 소거) 귀속.
 **Status: OPEN (사용자 검수 대기)**
@@ -1603,7 +1603,7 @@ move it to the side"(육교 문법).
 **Scope**: `scenes/main/scene08_sunken_plaza.py` — 기둥·가로대 결속 체계 수리. P-3(파라펫
 개구 폐합)은 별도 gate 유지.
 **GT 판정**: R-3 전용. Round `260806_w3_fixqueue2`, baseline `260731_w3_full`.
-**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/w3/260806_w3_s13fix7` · `_review/w3/260806_w3_fixqueue2` (검수 대기).
 - 원인 = 킷 가로대가 '세그 중점 1점 지반 수평 실린더'인데 호출부가 4.5 m 하강 런을 2점
   폴리라인으로 전달(파손 독트린 무관한 순수 버그) → 림 가드 재시공(기둥-가로대 결속·등간격·
   종단 마감). P-3 개구 폐합은 계속 파크. regr FAIL 0.
@@ -1616,7 +1616,7 @@ move it to the side"(육교 문법).
 GT-63 의 원경 매스 존치 판정을 본 씬에 한해 사용자 지시로 개정.
 **Scope**: `scenes/main/scene09_ghat_riverfront.py` — 대안 매스 재표현(접지·실루엣·질감).
 **GT 판정**: R-3 전용. Round `260806_w3_fixqueue2`, baseline `260731_w3_full`.
-**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/w3/260806_w3_s13fix7` · `_review/w3/260806_w3_fixqueue2` (검수 대기).
 - far_hills/far_hedge 접지(밑면 절단 부유 소거)·실루엣 불규칙화·지평 폐쇄 기능 유지
   (B-09-2 인피니티 풀 회귀 방지 — horizon_selfcheck PASS). regr FAIL1(g9_oblique FRAME) 귀속.
 **Status: OPEN (사용자 검수 대기)**
@@ -1628,7 +1628,7 @@ stairs..? Even a wall.. It looks way too dangerous..?" (08-05 독트린: 난간=
 **Scope**: `scenes/main/scene20_diagonal_oblique.py` — 사선 계단 양측 난간 또는 측벽.
 계단 기하·낙차 불변, §4-9(전주 금지) 유지.
 **GT 판정**: R-3 + OCCL 선언. Round `260806_w3_fixqueue2`, baseline `260805_w3_hedgeswap`.
-**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/w3/260806_w3_s13fix7` · `_review/w3/260806_w3_fixqueue2` (검수 대기).
 - 실체 = 계단 좌우가 아니라 **사선 메사 연단 전장 무방호**(감사 '경미' 미승계 건) → 연단
   방호 신설(08-05 독트린: 난간=낙차 표지), 계단 기하 불변. regr FAIL1(along_diagonal FRAME)
   귀속.
@@ -1641,7 +1641,7 @@ no need to occlude the pad … Put a bit more effort into expressing the water."
 **Scope**: `scenes/batch1/sceneC4_wet_stairs.py` — 수막 플레이트 투명화(opacity/글래스 경로,
 GT-73 과 동일 기법 계열)·미러 과장 완화·트레드 가시성 회복. 젖음 단서(씬 정체성) 유지.
 **GT 판정**: R-2/R-3(재질 중심). Round `260806_w3_fixqueue2`, baseline `260731_w3_full`.
-**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/260806_w3_s13fix7` · `_review/260806_w3_fixqueue2` (검수 대기).
+**§4 착지기록** (2026-08-06/07): 구현 = Opus 14기 + s03 전담 3패스 + **오케스트레이터 직접 패스**(s01·s06·s11 — 08-06 사용자 "Fable5 max로 직접" 지시). 통합 floor — py_compile 17파일 OK · SMOKE 게이트 씬 8/8 OK · geom_invariance R-4/R-6 33/33 PASS(패스마다 재실행) · placement_lint 신규 ERROR/WARN 0(HEAD stash A/B) · building_kit OK · HEAD 기하 해시 격리 = 정확히 16씬만 변경. round: `260806_w3_s13fix7`(15컷, regr FAIL11/WARN2 — 유리 투명화·계단박스 재마감 귀속, 육안 합격) · `260806_w3_fixqueue2`(15씬 210컷, regr FAIL44/WARN66/INFO27/PASS78 — 전량 FRAME 계열 선언 변화, GRAZE/DARK 신규 0; 씬별 귀속 각 행). gallery: `_review/w3/260806_w3_s13fix7` · `_review/w3/260806_w3_fixqueue2` (검수 대기).
 - 수막 투명화(로컬 opacity 재질 — GT-73 계열)·미러 과장 완화·트레드 가시성 회복(젖음 단서
   유지: 스침각 반사 잔존 — grazing_mirror 육안 확인). **캡처 안정화 레이스 기록**: 3컷이
   '[캡처] FAIL' 로그를 남겼으나 파일 완전성 검증(1920×1080·정상 평균) — scene_common 대기
@@ -1774,7 +1774,7 @@ WARN 0 · INFO 1(ground_graze GRAZE, 정보성) · PASS 14, "회귀 없음"**. �
 변화), 원경 파사드 침입 없음(하늘). **은닉축**: SMOKE h0.3 검산 3거리 전부 "전 구간 은닉
 OK" — 원통 실루엣 축 유지. **R-1**: 셀프체크 재유도 출력 FAIL 0(s=0 낙차 에지·웰 불변,
 개구 확대는 동측 — 판정축 밖, 위 SMOKE 로그 명기). gallery:
-`_review/260810_w3_s06collar`(regr JSON 연동). R-2(mini data run)는 W4 재판정 라운드와 동승
+`_review/w3/260810_w3_s06collar`(regr JSON 연동). R-2(mini data run)는 W4 재판정 라운드와 동승
 예정 — 본 행 R-1/R-3 완료 상태로 검수 대기.
 **08-10 사용자 검수(6차)**: "1안이 맞다고 생각했으면, 그래도 뭔가 어색한 느낌이라서, 1/4
 섹터도 제거하고, 계단을 통로 끝부분에 바로 연결하면 안 되나? … 지금도 보면 계단으로의
@@ -1830,7 +1830,7 @@ FAIL 10 · WARN 2 · INFO 1 · PASS 2, **전량 FRAME/OCCL/PHOTO 선언 변화 �
 유지 · `pt_noon_ground_approach` — 데크 하부 개구 아케이드 + 계단 하부 어귀 성립(소핏
 스캘럽 가독) · `pt_noon_preset_h0.3_d2` — 연단 은닉 전제 유지(백색 문턱 → 배경 연속 판독).
 **R-1**: SMOKE 재유도 FAIL 0 — s=0 낙차 에지(x 3.5~5 동반)·5.005 m 웰·원통 실루엣 축 불변,
-진입 개구 회전(서면→북면 데크 하부)은 선언 변화. gallery: `_review/260810_w3_s06direct`.
+진입 개구 회전(서면→북면 데크 하부)은 선언 변화. gallery: `_review/w3/260810_w3_s06direct`.
 **08-10 사용자 검수(7차)**: "그런식으로 억지로 잇지 말고, 통로 남쪽 끝이 어짜피 뚫려있잖아.
 거길 바로 연결할 수 있도록 계단부를 통째로 동쪽으로 이동해서 연결할 순 없냐는 말이었어.
 다시 작업해" — 접선 유입(베벨) 기각, **단부 정면 접속 + 타워 동측 이동** 재지시 → GT-97
@@ -1877,7 +1877,7 @@ GRAZE/DARK 신규 축 기준 재스탬프). **육안(X3)**: `pt_noon_overview` �
 단부 정면에 보이는 head-on 접속 성립**(연결성 막힘 해소 — 7차 지적의 표적) ·
 `pt_noon_preset_h0.3_d2`(신규 축 2.6) — 단부 뒤 배경 연속 판독, 5.005 m 낙차 은닉 성립 ·
 백색 밴드 = GKit well_edge 에지 처리 + 헤드 슬래브 판독(의도 귀속). gallery:
-`_review/260810_w3_s06endstair`.
+`_review/w3/260810_w3_s06endstair`.
 **Status: OPEN (착지 — 사용자 검수 대기)**
 **08-11 사용자 검수(8차)**: "좋아. 일단 S06 계단으로 넘어가는 부분에서 너비가 안 맞잖아.
 계단 전반적으로 수정할 수 있도록 하고, 원형 기둥이 무쓸모한 느낌인데, 계단 지지대 역할을
@@ -1915,7 +1915,7 @@ FAIL 11·WARN 2·INFO 1·PASS 1, **전량 FRAME 계열 선언 변화 귀속**(�
 너비를 그대로 받음**(8차 지적 '너비가 안 맞잖아' 해소), 연속 리본 가드 · 
 `pt_noon_ground_approach` — **리브 10본이 기둥→소핏을 규칙적으로 결속, 마스트가 나선을
 받치는 구조로 판독**(8차 지적 '무쓸모 기둥' 해소) · `pt_noon_preset_h0.3_d2`(축 3.5) —
-계단 하강형 은닉 성립(연단 뒤 디딤 소실). gallery: `_review/260811_w3_s06wide`.
+계단 하강형 은닉 성립(연단 뒤 디딤 소실). gallery: `_review/w3/260811_w3_s06wide`.
 **Status: OPEN (착지 — 사용자 검수 대기)**
 **08-11 사용자 검수(9차)**: "확장은 잘 했는데, 연결부 오른쪽 난간에 빈공간이 생겼네. 마감
 깔끔하게 해줄 수 있도록 하고, 지지 리브가 아래쪽으로 좀 날카롭게 튀어나온 것처럼 보이는데
@@ -1939,7 +1939,7 @@ py_compile OK · SMOKE rc0 · geom_invariance R-4/R-6 3암 일치 · placement_l
 building_kit rc0. round `260811_w3_s06trim`(15컷). **R-3**: regr vs `260811_w3_s06wide` —
 **FAIL 0 · WARN 0 · INFO 2 · PASS 13, "회귀 없음"**. 육안(X3): `pt_noon_deck_entry` 확대 —
 베이 상단 개구 띠 폐합(배경 투과 소멸, 판 상단이 캡 그늘 안으로) · `pt_noon_ground_approach`
-확대 — 코벨 프로파일 정착(날 선 블레이드 소멸). gallery: `_review/260811_w3_s06trim`.
+확대 — 코벨 프로파일 정착(날 선 블레이드 소멸). gallery: `_review/w3/260811_w3_s06trim`.
 **Status: OPEN (착지 — 사용자 검수 대기)**
 
 ## 56. GT-100 — scene06 서측 접합 완화: 외측 가드 수평 시작 베이 (선신고)
@@ -1960,7 +1960,7 @@ rc0. round `260811_w3_s06weld`(15컷). R-3: regr vs s06trim — FAIL 1·WARN 1·
 접합부 국소 FRAME 귀속. 육안: overview 크롭 — 서측 캡이 수평으로 이어진 뒤 포스트에서
 0.192 너클 후 레이크(북측 계단 참 디테일과 동일 문법), 노치 판독 소멸. 전 접합 연속성:
 SMOKE 캡 라인 3자 6.100 Δ0·정면 접속 OK·대칭 뉴얼 합류 OK. gallery:
-`_review/260811_w3_s06weld`.
+`_review/w3/260811_w3_s06weld`.
 **Status: OPEN (착지 — 사용자 검수 대기)**
 
 ## 57. GT-101 — scene06 이음 곡선화·리브 전수 상향·타워 남측 3 m 이동 (선신고)
@@ -1991,7 +1991,7 @@ rc0. rounds: `260811_w3_s06ease`(이즈 1차 — 12차 검수로 증보) → **`
 (최종 15컷). R-3: regr(glass vs ease) **FAIL 0**·WARN 3·PASS 10 — 접합 국소 귀속; (ease
 vs weld) FAIL 5 전량 타워 −3 이동 FRAME 귀속. 육안(X3): overview 확대 — 이즈 구간 판
 상단 개구 소멸(캡-판 동일 폴리라인)·캡 손흐름 연속·스커트로 슬래브 하부선이 파시아
-저선에 연속. gallery: `_review/260811_w3_s06glass`.
+저선에 연속. gallery: `_review/w3/260811_w3_s06glass`.
 **08-11 사용자(13~14차)**: 13차 "모서리가 튀어나온 부분이 없어야지 … 코벨 철회가 아니라
 코벨 자체를 조금씩 올리라는 말이었어. 이해 다시 해서 작업 다시해" → 3판(블렌드 캡·
 스무스스텝·outer_r 4.46·코벨 복원, commit 9aa79f2, round `260811_w3_s06sweep`) 시공 →
@@ -2022,7 +2022,7 @@ UI(AskUserQuestion) 사용 금지** 룰링 기록.
 (r=deck_posts.r 0.40). floor: py_compile OK·SMOKE rc0·3암 일치·lint 신규 0(4610→4430,
 −180 = 슬림 기둥 일습)·building_kit rc0. round `260811_w3_s11piers`(15컷). R-3: regr vs
 s11flip **FAIL 0·WARN 0·PASS 15**. 육안(X3): overview 확대 — 데크 피어·헤드·미드 랜딩이
-r0.40 원기둥 단일 어휘, 4본 클러스터 소멸. gallery: `_review/260811_w3_s11piers`.
+r0.40 원기둥 단일 어휘, 4본 클러스터 소멸. gallery: `_review/w3/260811_w3_s11piers`.
 **Status: OPEN (착지 — 사용자 검수 대기)**
 
 ## 59. GT-103 — scene16 대공사: 왕복 6차로 확폭·중앙분리대·지하통로 전면 재유도 (선신고)
@@ -2067,7 +2067,7 @@ py_compile OK · SMOKE OK(GT-89 게이트) · geom_invariance R-4/R-6 33/33 PASS
 OCCL 3) 선언 변화 귀속, 신규 DARK 0. 육안(beauty_overview·approach·h0.3_d5·under_canopy):
 6차로+중분대 '큰길' 판독 · 동측 계단 도로 건너 36.6 상승 판독 · h0.3 낙차 은닉 전제 유지 ·
 그림자 밴드·노징 저대비 시그니처 유지 · 파이어플라이/순흑 병리 0. gallery
-`_review/260811_w3_s16road6` (검수 대기). R-2(mini data run)는 다음 데이터 라운드에서.
+`_review/w3/260811_w3_s16road6` (검수 대기). R-2(mini data run)는 다음 데이터 라운드에서.
 **Status: OPEN (사용자 검수 대기)**
 
 ## 52. GT-96 — scene11 울타리 전면 정돈: G11 단일 리본 팬스 통일 (선신고)
@@ -2113,7 +2113,7 @@ geom_invariance R-4/R-6 3암 일치 · placement_lint **HEAD-stash A/B 판정 �
 FRAME 계열 선언 변화 귀속**(팬스 −0.70 m 전 컷 상부 개방 + 동측 매스 소거; GRAZE/DARK 신규
 0). **육안(X3)**: `pt_noon_overview` — 단일 높이 리본이 데크→계단→랜딩을 한 줄로 감고,
 동측이 실물 육교 문법의 단일 스위치백으로 읽힘(다이아 소거), 테이퍼·빌보드 소멸. gallery:
-`_review/260811_w3_s11ribbon`.
+`_review/w3/260811_w3_s11ribbon`.
 **Status: OPEN (착지 — 사용자 검수 대기)**
 **08-11 사용자 정정(10차)**: "다이아몬드 깨라고 했던건 버스정류장이 있어서 반대껄
 살렸으면 좋았을 것 같아" — 존치 레그 스왑 재지시: east_S(남측, 버스정류장 발치 간섭)
@@ -2126,7 +2126,7 @@ midlanding/stair_head 뷰 미러 재조준(`_local_to_world` 가 존치 레그 �
 2판 floor: SMOKE rc0(개정 3각·발 착지 3/3) · 3암 일치 · lint 신규 0(4610프림) · round
 `260811_w3_s11flip`(15컷) regr vs s11ribbon FAIL 3·WARN 7·PASS 5 — 전량 레그 미러 FRAME
 귀속. 육안: overview — 동측이 북향 단일 스위치백, 버스정류장 발치 개방 확인. gallery:
-`_review/260811_w3_s11flip`.
+`_review/w3/260811_w3_s11flip`.
 
 ## 60. GT-104 — scene06 데크 난간 재모듈화: 판폭 원모듈 회복 (선신고)
 
@@ -2153,7 +2153,7 @@ yj = **−11.821**(= cy −16 + √(4.44² − 1.5²) — GT-98 outer_r 4.44 기
 −11.821 베이 경계 [2] OK. floor: 배치 공통(위 GT-73 기록). round `260811_w3_s06bay14`(15컷).
 R-3: regr vs `260811_w3_s06glass` — **FAIL 0 · WARN 3(UNCHANGED — 데크 레일 비가시 컷) ·
 INFO 1 · PASS 11**. 육안(X3): `pt_noon_overview` — 전 런 단일 모듈 판독, 남단 통판(4.18 m)
-소멸, 브론즈 캡 연속. 이음/코벨 동결 무접촉 유지. gallery `_review/260811_w3_s06bay14`.
+소멸, 브론즈 캡 연속. 이음/코벨 동결 무접촉 유지. gallery `_review/w3/260811_w3_s06bay14`.
 **Status: OPEN (착지 — 사용자 검수 대기)**
 
 ## 61. GT-105 — scene11 하강 가드 중간 가로대 소거: 리본 단일 언어 (선신고)
@@ -2182,7 +2182,7 @@ GT-107 파일럿 동승(regr 귀속 분리 선언).
 전벽) 노출 증가 + 패드 재질 정온뿐 — 신규 낙차 에지 노출 0, '바닥 연속' 은닉 담체(살대 안목
 0.100 통과 시선) 불변 → GT-105/107 귀속. 육안(X3): `stair_head`·`midlanding` — 하강 가드가
 픽켓+단일 상부 레일 리본 언어로 통일, 패널 횡단 가로대 소멸. gallery
-`_review/260811_w3_s11clean`.
+`_review/w3/260811_w3_s11clean`.
 **Status: OPEN (착지 — 사용자 검수 대기)**
 
 **08-14 사용자 검수 회신(원문)**: "난간 다시한번 확인해줄래? **철창살이 왜 아직 있지...?**
@@ -2232,7 +2232,7 @@ GT-107 동승.
 통로 점등·헤드월·데크 연장의 선언 재구성) **· WARN 7**(FRAME) **· PASS 3**, 신규 DARK 0.
 육안(X3): `approach` — 통로 내부 순흑 해소(조명 판독)·'지하보도' 표지 성립 · `under_canopy` —
 계단 T20 그림자 밴드 유지 + 점등 통로 가독 · `preset_h0.3_d5` — h0.3 은닉 전제 유지·헤드월
-정면 판독. gallery `_review/260811_w3_s16under`.
+정면 판독. gallery `_review/w3/260811_w3_s16under`.
 **Status: OPEN (착지 — 사용자 검수 대기)**
 
 **08-14 사용자 검수 회신(원문)**: "지하보도가 도로랑 너무 가깝다니까.. **차도 옆에 인도 공간은
@@ -2357,7 +2357,7 @@ granite_dark·아치 출입(4.80, 2단 내접)·코니스 0.60·명패 2·간판
 2+트랜섬 1 ×2동, +6프림 — 동결선 77→83 재실측 이동), 1차 분할이 하부만 갈라 상부 3.1 m
 통판 잔존 → 문설주 전고 연장(2차). floor 배치 공통 + 재렌더 2회. regr vs fixqueue2:
 **FAIL 2(amphi_view·h1.8_d2)·WARN 4** — 전량 K5′ 재건 FRAME 귀속(육안 X3: amphi_view —
-석재 셸+기단+분할 로비 그리드 판독, 대판 소멸 확인). gallery `_review/260813_w4_s01k5`.
+석재 셸+기단+분할 로비 그리드 판독, 대판 소멸 확인). gallery `_review/w4/260813_w4_s01k5`.
 **Status: OPEN (착지 — 사용자 검수 대기)**
 **08-14 사용자 검수 회신(원문 그대로)**: "s01 건물 저게 최선이야..? **통유리는 좋았는데**, 좀 더
 이쁘게 만들어줄래? 자꾸 1층 라인이랑 상부라인 연결 흐름이 부자연스러워지는 경향이 있어. 물론
@@ -2388,7 +2388,7 @@ granite_dark·아치 출입(4.80, 2단 내접)·코니스 0.60·명패 2·간판
 전항 OK)·`_geometry_report` 문구 정밀화·BANNER 10행. floor 배치 공통 + GEOCHECK rc0 ·
 lint 653 판정 동일(E0/W10/B1). regr vs 260731_w3_full: **PASS 12·WARN 1**(beauty_overview
 FRAME — 1층 띠 신설 귀속, 육안 X3: 상가 개구 연속+차양 성립·바닥 착시 무접촉). gallery
-`_review/260813_w4_n3wall`. **Status: OPEN (착지 — 사용자 검수 대기)**
+`_review/w4/260813_w4_n3wall`. **Status: OPEN (착지 — 사용자 검수 대기)**
 **08-14 사용자 검수 회신(원문)**: "상가 거리 느낌은 나는데 **문이 왜 없니..?** 그리고 너무
 천막도 캐노피처럼 설치해둔 느낌..? 의도한게 아니라면 좀 더 조사해서 생각해서 그려줘" →
 재작업 지시: ① 상가 출입문 부재 해소(개구·유리만 있고 문짝 없음) ② 어닝이 강체 캐노피처럼
@@ -2417,7 +2417,7 @@ K7 옥상 난간 3동 69프림(h 1.00~1.08 살대 — 파사드 안쪽 0.10 후�
 SELFCHECK rc0 · lint E0/W1(기존) — prims 743. regr vs allview5: **INFO 9·PASS 1·WARN 3**
 (top_compress FRAME + d10 DARK 2 — 전량 신설 매스 프레임/그림자 귀속, 육안 X3:
 beauty_overview — B동 매스가 우측 근경 진입[예측대로], 골목 협곡·낙차 은닉 불변 판독 ·
-측벽 무창 대비가 달동네 스톡 대비 성립). gallery `_review/260813_w4_s15villa`.
+측벽 무창 대비가 달동네 스톡 대비 성립). gallery `_review/w4/260813_w4_s15villa`.
 **Status: OPEN (착지 — 사용자 검수 대기)**
 **08-14 사용자 검수 회신(원문)**: "얘는 **골목 시점에선 굳이 건드릴 필요가 크게 없었을 것
 같은데..?**" — 헤지 판정(철회 지시 아님): 판정 컷 관점에서 신설 K2 의 기여가 작다는 소견.
@@ -2441,7 +2441,7 @@ beauty_overview — B동 매스가 우측 근경 진입[예측대로], 골목 �
 기록). ridge 여유 +0.58/+0.66/+0.58 **베이스라인 동일 수치**·plaza_selfcheck 23 PASS(신설
 9행). floor 배치 공통 · lint E0/W7/B1 판정 동일. regr vs allview5: **INFO 9·PASS 4** — 매치
 4컷 전부 PASS(원경 41~57 m 입면 변화가 판정 역치 이하, 육안 X3: facade_front — 열주+2층
-분절+석재 청사 판독 성립, 지붕선 위 하늘 유지). gallery `_review/260813_w4_s21civic`.
+분절+석재 청사 판독 성립, 지붕선 위 하늘 유지). gallery `_review/w4/260813_w4_s21civic`.
 **Status: OPEN (착지 — 사용자 검수 대기)**
 **08-14 사용자 검수 회신(원문)**: "씬 자체가 **기념관 느낌**이 아니었나..? 왜 관공서 판독을
 하라고 하지..? **씬 정체성 파악해서 다시 작업**해야 할 것 같은데?" → 제안서 §3.8 의 K6 관공서
@@ -2555,7 +2555,7 @@ sceneC4 ④의 볼라드 tactile OFF 는 §4-6(볼라드 아래 패드 금지) �
 · geom 33/33 · lint 17→16). 검증 렌더 `260815_w4_r4batch`(17씬, PT-fast 전 컷) —
 regr **FAIL 1**(s10 through_treads FRAME = 바위 재배치·핸드레일 신설 선언 귀속) ·
 WARN 7(FRAME/DARK 전량 선언 귀속, `regr_260815_w4_r4batch.json`), gallery
-`_review/260815_w4_r4batch`(68컷). 육안 X3: s09 across_river — 갈대 분홍 소멸·오리배
+`_review/w4/260815_w4_r4batch`(68컷). 육안 X3: s09 across_river — 갈대 분홍 소멸·오리배
 콕핏·정자 기와 성립 / s10 reversal — 관통 0·라운드 손잡이·리턴 종단 성립 / sC4
 lower_lookback — 검은 상자 0·수막 유지 / s18 wave_raking — 수평선 폐합·스와시 밴드
 성립. **잔여 소견 3건**(차기 처리 후보): s10 사면 카키 상수면(휴면 잔디 텍스처 —
@@ -2657,7 +2657,7 @@ GPU 중단 1회 → hzbatch2 재개 완주). 육안: ① stair_down — 관통 �
 사용자 판정 이월) ④ edge_graze — 돌기 실루엣 성립(PointInstancer r 0.017/h 0.005/
 50 mm 격자) ⑤ 좌판 판열·판별 틴트 성립 ⑥ levee_walk — 빗살 소멸·솔리드 사면.
 regr: FAIL 16/WARN 다수 전량 선언 귀속(s03 8건은 08-07 구기준선 대비 누적분,
-`regr_260815_w4_hzbatch.json`) · gallery `_review/260815_w4_hzbatch`(52컷).
+`regr_260815_w4_hzbatch.json`) · gallery `_review/w4/260815_w4_hzbatch`(52컷).
 **Status: OPEN (착지 — 검수 대기)**
 
 ## 76. GT-120 — R3 위치규칙 데칼 파일럿(s16): 앵커 발행 어휘 신설 (선신고)
@@ -2825,7 +2825,7 @@ bare Band 정확핀(paint)이 화강 밴드 포획(s20+⑫ 4씬 in-file 정정),
 12/12 · SMOKE 전 건 · geom 33/33 · lint A/B Δ0(17 — N5 행번호 이동뿐). 육안 검증은
 최종 allview 라운드로. **§4 최종 라운드 실측** (2026-08-16, `260816_w4_final33_on` 33씬 132컷): regr
 **FAIL 1**(s07 — 뺨돌·배경 재단 선언 귀속)·잔여 WARN 전량 선언 귀속, gallery
-`_review/260816_w4_final33`. 코퍼스 r_pb **dark 0.098·deep 0.089**(<0.1 진입). 순백
+`_review/w4/260816_w4_final33`. 코퍼스 r_pb **dark 0.098·deep 0.089**(<0.1 진입). 순백
 꼬리 실측: s05 61.6→**39.5** · s09 56.8→**41.5** · s18 45.6→**18.8** · s14 80.2→
 **62.6** · s20 38.5→56.3(낙엽 카펫 소산이 밝은 포장을 노출 — 선언 귀속) · N5 61.3→
 61.1 — **알베도 하향의 한계 실측 = 발견 ⓐ(클립선 0.21~0.27 < 천장 0.34) 확정**, 잔여
@@ -3031,7 +3031,7 @@ h1.8_d5 1.32→**0.00** · h1.8_d10 0.53→**0.00** · h0.9_d5 0.06→**0.00**.
 - **s05 FAIL 0 · WARN 0** — 매몰 기하만 움직였다는 선언과 정확히 일치.
 - 이월 DARK 3컷(s15×2·s06×1) = 이전 라운드에도 있던 절대 상태, 회귀 아님.
 **gallery**: `make_review_gallery.py --round 260817_w4_regfix --out
-look_check/_review/260817_w4_regfix` — 썸네일 20장·5씬. **사용자 검수 대기.**
+look_check/_review/w4/260817_w4_regfix` — 썸네일 20장·5씬. **사용자 검수 대기.**
 **미해결 잔여(정직 기록)**: ⓐ s03 `FarBank` 등 **다른 밴드 끝의 톱니는 존치**
 (진폭 7.58 m, 같은 피벗 기전 — 뱅크 실루엣을 바꾸므로 별도 결재 필요) ⓑ s03 수면
 캡의 볼록 코너 1개(4.8 px) ⓒ s05 포디움이 **여전히 십각형**으로 렌더(전 감사 미지적·

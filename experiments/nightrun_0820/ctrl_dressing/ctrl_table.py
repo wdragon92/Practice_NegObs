@@ -137,10 +137,10 @@ def main():
     L = ["# CTRL_TABLE — dressing-preserving OFF arm vs the original OFF arm", "",
          f"tau = {a.tau} · seeds {', '.join(seeds)} · grid PROVISIONAL-GRID-V1 (20 cells) · "
          "RGB recipe v2 checkpoints", "",
-         "**old off** = `dataset/260819_main_off` (the toggle also deleted the leaf mound, the "
-         "railing and, in N3, the mural) · **new off** = `dataset/260820_ctrloff` "
+         "**old off** = `dataset/v2_corpus/260819_main_off` (the toggle also deleted the leaf mound, the "
+         "railing and, in N3, the mural) · **new off** = `dataset/v2_probes/260820_ctrloff` "
          "(`keep_dressing`: hazard geometry only). Both are paired against the SAME on arm, "
-         "`dataset/260819_main_on`. Every off frame carries an all-zero GT, so `FA_frame` is a "
+         "`dataset/v2_corpus/260819_main_on`. Every off frame carries an all-zero GT, so `FA_frame` is a "
          "pure false-alarm rate.", "",
          "## 1. Off-arm response (per seed, then mean ±half-range)", "",
          "| scene | arm | seed | frames | FA_frame | cells/frame | mean max p |",

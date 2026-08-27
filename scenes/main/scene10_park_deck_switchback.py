@@ -3,7 +3,7 @@
 scene10_park_deck_switchback.py — NegObs synthetic scene 10 (v5 R5): park slope deck switchback
 
 Type   : R5 (v5 redesign) — timber deck zigzag stair (inherits the open-riser see-through cue)
-Spec   : Docs/briefs/multi_scene_brief_v5.md §R5 + Docs/scene_redesign_v5_proposal.md
+Spec   : Docs/briefs/multi_scene_brief_v5.md §R5 + Docs/archive/legacy/scene_redesign_v5_proposal.md
 Shared : scene_common.py (unmodified) / skeleton convention : scenes/main/scene04_parktrail.py
 Legacy : scenes/archive_v3/scene10_switchback_cliff.py
          (rot_group 180° reversal + the **parallel switchback Y band** convention · open_riser builder)

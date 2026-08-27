@@ -15,6 +15,10 @@
 # =============================================================================
 set -u
 REPO=/home/vislab/Desktop/work_sy/Practice_NegObs
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>). A round is
+# found by NAME: negobs_round (strict) / negobs_round_or_flat (tolerant).
+source "$REPO/scripts/lib/negobs_paths.sh"
 LOGDIR="$REPO/experiments/v3_0823/logs"
 LOG="$LOGDIR/w1c_hashgate.log"
 MARKDIR="$LOGDIR/w1c_hashgate_markers"
@@ -51,7 +55,7 @@ say "=== hash-gate 렌더 (기본 설정 · 씬당 1컷) ==="
 for s in $SCENES; do
   split=$(split_of "$s")
   mark="$MARKDIR/${s}.done"
-  outdir="$REPO/dataset/${STAMP}/${split}/${s}"
+  outdir="$(negobs_round_or_flat "${STAMP}")/${split}/${s}"
   cond=$(cond_of "$s")
   if [ -f "$mark" ]; then say "  [skip] $s"; NSKIP=$((NSKIP+1)); continue; fi
   if [ "$DRY" = "1" ]; then say "  [dry] $s split=$split cond=$cond -> $outdir"; continue; fi

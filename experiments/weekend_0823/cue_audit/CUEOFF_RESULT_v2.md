@@ -15,7 +15,7 @@ Instrument: `readout_cueoff.py` (A2), `gates_cueoff.py` (A2), `render_mass.py` (
 `RENDER_MASS_SUMMARY.csv`, `RENDER_MASS.csv`, `G2_ADJUDICATION.csv`,
 `VERDICT_CENSUS_v2.csv`, `PREREG_HASHES.json`.
 Amendment: `PREREG_CUEOFF.md § AMENDMENT A2` (+ A2-12, A2-13).
-New round: `dataset/260823_cueoff_s20fix_{A,B1,B2,P,C}` — 240 cuts, 0 failures,
+New round: `dataset/cueoff/260823_cueoff_s20fix_{A,B1,B2,P,C}` — 240 cuts, 0 failures,
 90 frozen-model evaluations, retraining 0 (G6: 9 checkpoints unchanged since 04:05:27).
 
 > ## Read this before any number below

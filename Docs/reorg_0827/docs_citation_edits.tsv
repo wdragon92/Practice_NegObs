@@ -1,0 +1,159 @@
+file	old_string	new_string	n
+Docs/surveys/scene_composition_audit.md	Docs/legacy/	Docs/archive/legacy/	1	S5-1 legacy->archive/legacy
+Docs/reports/cleanup_lookcheck_v1.md	Docs/legacy/	Docs/archive/legacy/	4	S5-1 legacy->archive/legacy
+Docs/reports/critique_intent_map_v1.md	Docs/legacy/	Docs/archive/legacy/	4	S5-1 legacy->archive/legacy
+scene_common.py	Docs/multi_scene_brief_v2.md	Docs/briefs/multi_scene_brief_v2.md	1	S5-2 compat symlink -> real path
+scene_common.py	Docs/stair_typology_survey_v2.md	Docs/surveys/stair_typology_survey_v2.md	1	S5-2 compat symlink -> real path
+experiments/weekend_0823/cue_audit/scenes_cueoff/scene20_diagonal_oblique.py	Docs/multi_scene_brief_v3.md	Docs/briefs/multi_scene_brief_v3.md	1	S5-2 compat symlink -> real path
+experiments/weekend_0823/cue_audit/scenes_cueoff/scene12_riverside_deck.py	Docs/scene_redesign_v5_proposal.md	Docs/archive/legacy/scene_redesign_v5_proposal.md	1	S5-2 compat symlink -> real path
+assets/scene01/download_scene01_assets.py	Docs/multi_scene_brief_v2.md	Docs/briefs/multi_scene_brief_v2.md	2	S5-2 compat symlink -> real path
+assets/scene01/download_scene01_assets.py	Docs/multi_scene_brief_v3.md	Docs/briefs/multi_scene_brief_v3.md	1	S5-2 compat symlink -> real path
+assets/scene01/download_scene01_assets.py	Docs/nanobanana_batch1_geometry_map.md	Docs/archive/legacy/nanobanana_batch1_geometry_map.md	1	S5-2 compat symlink -> real path
+assets/scene01/download_scene01_assets.py	Docs/scene01_design_brief.md	Docs/briefs/scene01_design_brief.md	1	S5-2 compat symlink -> real path
+scenes/batch1/sceneN3_trompe_loeil.py	Docs/nanobanana_batch1_geometry_map.md	Docs/archive/legacy/nanobanana_batch1_geometry_map.md	1	S5-2 compat symlink -> real path
+scenes/batch1/sceneN5_flush_grating.py	Docs/nanobanana_batch1_geometry_map.md	Docs/archive/legacy/nanobanana_batch1_geometry_map.md	1	S5-2 compat symlink -> real path
+scenes/batch1/sceneC4_wet_stairs.py	Docs/nanobanana_batch1_geometry_map.md	Docs/archive/legacy/nanobanana_batch1_geometry_map.md	1	S5-2 compat symlink -> real path
+scenes/batch1/sceneC1_snow_stairs.py	Docs/nanobanana_batch1_geometry_map.md	Docs/archive/legacy/nanobanana_batch1_geometry_map.md	1	S5-2 compat symlink -> real path
+scenes/batch1/sceneD4_subway_platform.py	Docs/nanobanana_batch1_geometry_map.md	Docs/archive/legacy/nanobanana_batch1_geometry_map.md	1	S5-2 compat symlink -> real path
+scenes/batch1/sceneN1_shadow_band.py	Docs/nanobanana_batch1_geometry_map.md	Docs/archive/legacy/nanobanana_batch1_geometry_map.md	1	S5-2 compat symlink -> real path
+scenes/batch1/sceneD1_loading_dock.py	Docs/nanobanana_batch1_geometry_map.md	Docs/archive/legacy/nanobanana_batch1_geometry_map.md	1	S5-2 compat symlink -> real path
+scenes/batch1/sceneC2_leaf_stairs.py	Docs/multi_scene_brief_v3.md	Docs/briefs/multi_scene_brief_v3.md	1	S5-2 compat symlink -> real path
+scenes/batch1/sceneC2_leaf_stairs.py	Docs/nanobanana_batch1_geometry_map.md	Docs/archive/legacy/nanobanana_batch1_geometry_map.md	1	S5-2 compat symlink -> real path
+scenes/batch1/sceneN2_asphalt_patch.py	Docs/nanobanana_batch1_geometry_map.md	Docs/archive/legacy/nanobanana_batch1_geometry_map.md	1	S5-2 compat symlink -> real path
+scenes/batch1/sceneD3_drainage_channel.py	Docs/multi_scene_brief_v3.md	Docs/briefs/multi_scene_brief_v3.md	1	S5-2 compat symlink -> real path
+scenes/batch1/sceneD3_drainage_channel.py	Docs/nanobanana_batch1_geometry_map.md	Docs/archive/legacy/nanobanana_batch1_geometry_map.md	1	S5-2 compat symlink -> real path
+scenes/batch1/sceneN4_downhill_ramp.py	Docs/nanobanana_batch1_geometry_map.md	Docs/archive/legacy/nanobanana_batch1_geometry_map.md	1	S5-2 compat symlink -> real path
+scenes/batch1/sceneD2_floor_opening.py	Docs/nanobanana_batch1_geometry_map.md	Docs/archive/legacy/nanobanana_batch1_geometry_map.md	1	S5-2 compat symlink -> real path
+scenes/archive_v3/scene10_switchback_cliff.py	Docs/multi_scene_brief_v3.md	Docs/briefs/multi_scene_brief_v3.md	1	S5-2 compat symlink -> real path
+scenes/archive_v3/scene06_spiral_towerstone.py	Docs/multi_scene_brief_v3.md	Docs/briefs/multi_scene_brief_v3.md	1	S5-2 compat symlink -> real path
+scenes/archive_v3/scene11_grating_fireescape.py	Docs/multi_scene_brief_v3.md	Docs/briefs/multi_scene_brief_v3.md	1	S5-2 compat symlink -> real path
+scenes/archive_v3/scene12_cliff_plankwalk.py	Docs/multi_scene_brief_v3.md	Docs/briefs/multi_scene_brief_v3.md	1	S5-2 compat symlink -> real path
+scenes/archive_v3/scene13_helical_parkingramp.py	Docs/multi_scene_brief_v3.md	Docs/briefs/multi_scene_brief_v3.md	1	S5-2 compat symlink -> real path
+scenes/archive_v3/scene07_wornstone_temple.py	Docs/multi_scene_brief_v3.md	Docs/briefs/multi_scene_brief_v3.md	1	S5-2 compat symlink -> real path
+scenes/archive_v3/scene08_stepwell_lattice.py	Docs/multi_scene_brief_v3.md	Docs/briefs/multi_scene_brief_v3.md	1	S5-2 compat symlink -> real path
+scenes/main/scene20_diagonal_oblique.py	Docs/multi_scene_brief_v3.md	Docs/briefs/multi_scene_brief_v3.md	1	S5-2 compat symlink -> real path
+scenes/main/scene14_grandstair_illusion.py	Docs/multi_scene_brief_v3.md	Docs/briefs/multi_scene_brief_v3.md	1	S5-2 compat symlink -> real path
+scenes/main/scene10_park_deck_switchback.py	Docs/scene_redesign_v5_proposal.md	Docs/archive/legacy/scene_redesign_v5_proposal.md	1	S5-2 compat symlink -> real path
+scenes/main/scene03_riverbank.py	Docs/multi_scene_brief_v2.md	Docs/briefs/multi_scene_brief_v2.md	1	S5-2 compat symlink -> real path
+scenes/main/scene02_underpass.py	Docs/multi_scene_brief_v2.md	Docs/briefs/multi_scene_brief_v2.md	1	S5-2 compat symlink -> real path
+scenes/main/scene21_monumental_selfocclude.py	Docs/multi_scene_brief_v3.md	Docs/briefs/multi_scene_brief_v3.md	1	S5-2 compat symlink -> real path
+scenes/main/scene19_fan_winder.py	Docs/multi_scene_brief_v3.md	Docs/briefs/multi_scene_brief_v3.md	1	S5-2 compat symlink -> real path
+scenes/main/scene04_parktrail.py	Docs/multi_scene_brief_v2.md	Docs/briefs/multi_scene_brief_v2.md	1	S5-2 compat symlink -> real path
+scenes/main/scene07_temple_stone_path.py	Docs/scene_redesign_v5_proposal.md	Docs/archive/legacy/scene_redesign_v5_proposal.md	1	S5-2 compat symlink -> real path
+scenes/main/scene16_canopy_shadow.py	Docs/multi_scene_brief_v3.md	Docs/briefs/multi_scene_brief_v3.md	1	S5-2 compat symlink -> real path
+scenes/main/scene15_alley_labyrinth.py	Docs/multi_scene_brief_v3.md	Docs/briefs/multi_scene_brief_v3.md	1	S5-2 compat symlink -> real path
+scenes/main/scene12_riverside_deck.py	Docs/scene_redesign_v5_proposal.md	Docs/archive/legacy/scene_redesign_v5_proposal.md	1	S5-2 compat symlink -> real path
+scenes/main/scene01_campus_stairs.py	Docs/scene01_design_brief.md	Docs/briefs/scene01_design_brief.md	1	S5-2 compat symlink -> real path
+scripts/harvest_refs.py	Docs/surveys/real_reference_expansion.md	Docs/reports/real_reference_expansion.md	1	S5-2 compat symlink -> real path
+Docs/archive/surveys/stair_typology_survey.md	Docs/scene01_design_brief.md	Docs/briefs/scene01_design_brief.md	1	S5-2 compat symlink -> real path
+Docs/archive/audit_v4/fixlog_N3.md	Docs/scene_redesign_v5_proposal.md	Docs/archive/legacy/scene_redesign_v5_proposal.md	1	S5-2 compat symlink -> real path
+Docs/archive/reports/multi_scene_completion_report.md	Docs/multi_scene_brief_v2.md	Docs/briefs/multi_scene_brief_v2.md	1	S5-2 compat symlink -> real path
+Docs/briefs/multi_scene_brief_v5.md	Docs/scene_redesign_v5_proposal.md	Docs/archive/legacy/scene_redesign_v5_proposal.md	1	S5-2 compat symlink -> real path
+Docs/briefs/multi_scene_brief_v3.md	Docs/stair_typology_survey_v2.md	Docs/surveys/stair_typology_survey_v2.md	1	S5-2 compat symlink -> real path
+Docs/audit_v4/fixlog_N4.md	Docs/scene_redesign_v5_proposal.md	Docs/archive/legacy/scene_redesign_v5_proposal.md	1	S5-2 compat symlink -> real path
+Docs/audit_v4/fixlog_N1.md	Docs/scene_redesign_v5_proposal.md	Docs/archive/legacy/scene_redesign_v5_proposal.md	1	S5-2 compat symlink -> real path
+Docs/audit_v4/fixlog_N2.md	Docs/scene_redesign_v5_proposal.md	Docs/archive/legacy/scene_redesign_v5_proposal.md	1	S5-2 compat symlink -> real path
+Docs/reports/scene01_completion_report.md	Docs/scene01_design_brief.md	Docs/briefs/scene01_design_brief.md	2	S5-2 compat symlink -> real path
+README.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/mainrun_0819/DECISIONS.md	Docs/experiment/	Docs/campaign/	2	S5-3 Docs/experiment -> Docs/campaign
+experiments/mainrun_0819/RESULTS_DRAFT.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/mainrun_0819/realworld/PROTOCOL_SHOOT.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/mainrun_0819/realworld/REALWORLD_GRID_PROTOCOL.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/weekend_0823/MORNING_REPORT_0823.md	Docs/experiment/	Docs/campaign/	2	S5-3 Docs/experiment -> Docs/campaign
+experiments/weekend_0823/redteam/R6_line_edits.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/weekend_0823/redteam/R6_line_edits.md	Docs/experiment/Status/	Docs/campaign/status/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/weekend_0823/redteam/R2_method.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/weekend_0823/redteam/R2_method.md	Docs/experiment/Status/	Docs/campaign/status/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/weekend_0823/redteam/R3_repro.md	Docs/experiment/Status/	Docs/campaign/status/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/weekend_0823/a3_viewpoint/3A_VIEWPOINT_AUDIT.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/weekend_0823/c2_rootcause/c2_audit.py	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/weekend_0823/c2_rootcause/C2_ROOTCAUSE.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/weekend_0823/pilot_package/README_PILOT.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/weekend_0823/fusion/FUSION_ROW.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/weekend_0823/fusion/FUSION_ROW.md	Docs/experiment/Status/	Docs/campaign/status/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/weekend_0823/photometric/PHOTOMETRIC_STRESS.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/ACCOUNTING.md	Docs/experiment/	Docs/campaign/	2	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/ACCOUNTING.md	Docs/experiment/Status/	Docs/campaign/status/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/PREREG_V3.md	Docs/experiment/	(REVERTED - file is sha256-sealed; see PREREG_V3_PATHMAP_0827.md)	0	S5-3 rewrite applied then undone; sha256 05f41322..f56a restored
+experiments/v3_0823/render_plan_v3.json	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/MILESTONE_P1P5.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/P4_SELECTION.md	Docs/experiment/	Docs/campaign/	2	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/FA_CENSUS.md	Docs/experiment/	Docs/campaign/	2	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/PREREG_V3_FINAL_DRAFT.md	Docs/experiment/	Docs/campaign/	2	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/ASSUMPTION_LEDGER.md	Docs/experiment/	Docs/campaign/	5	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/ASSUMPTION_LEDGER.md	Docs/experiment/Status/	Docs/campaign/status/	3	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/RENDER_PLAN_V3.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/PREREG_V3_DRAFT.md	Docs/experiment/	Docs/campaign/	2	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/FA_REALITY.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/MORNING_REPORT_V3.md	Docs/experiment/	Docs/campaign/	2	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/MORNING_REPORT_V3.md	Docs/experiment/Status/	Docs/campaign/status/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/code/build_render_plan.py	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/panels/PANELS_V3.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/paper/version_journey_skeleton.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/paper/version_journey_skeleton.md	Docs/experiment/Status/	Docs/campaign/status/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/paper/MATERIALS_INDEX.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/paper/MATERIALS_INDEX.md	Docs/experiment/Status/	Docs/campaign/status/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/paper/nearfield_limitation_paragraph.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/paper/nearfield_limitation_paragraph.md	Docs/experiment/Status/	Docs/campaign/status/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/paper/intro_4layer_skeleton.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/v3_0823/paper/intro_4layer_skeleton.md	Docs/experiment/Status/	Docs/campaign/status/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/nightrun_0820/MORNING_REPORT_0821.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+experiments/dayrun_0820/DAYRUN_REPORT.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+submission_0830/INDEX.md	Docs/experiment/	Docs/campaign/	2	S5-3 Docs/experiment -> Docs/campaign
+submission_0830/INDEX.md	Docs/experiment/Status/	Docs/campaign/status/	2	S5-3 Docs/experiment -> Docs/campaign
+scenes/probe/probeH1_near_hole.py	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+scenes/probe/probeH2_offpath_hole.py	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+scenes/probe/probeH3_hidden_hole.py	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+Docs/campaign/WEEKEND_BRIEF_0823.md	Docs/experiment/Status/	Docs/campaign/status/	1	S5-3 Docs/experiment -> Docs/campaign
+Docs/campaign/V3_BRIEF_0823.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+Docs/campaign/V3_BRIEF_0823.md	Docs/experiment/Status/	Docs/campaign/status/	1	S5-3 Docs/experiment -> Docs/campaign
+Docs/campaign/status/PROJECT_STATE_0826.md	Docs/experiment/	Docs/campaign/	4	S5-3 Docs/experiment -> Docs/campaign
+Docs/campaign/status/PROJECT_STATE_0826.md	Docs/experiment/Status/	Docs/campaign/status/	3	S5-3 Docs/experiment -> Docs/campaign
+Docs/campaign/status/PROJECT_STATE_0823_v3.md	Docs/experiment/	Docs/campaign/	4	S5-3 Docs/experiment -> Docs/campaign
+Docs/campaign/status/PROJECT_STATE_0823.md	Docs/experiment/	Docs/campaign/	1	S5-3 Docs/experiment -> Docs/campaign
+Docs/campaign/status/PROJECT_STATE_0823.md	Docs/experiment/Status/	Docs/campaign/status/	1	S5-3 Docs/experiment -> Docs/campaign
+Docs/campaign/status/PROJECT_STATE_0823_v2.md	Docs/experiment/	Docs/campaign/	2	S5-3 Docs/experiment -> Docs/campaign
+experiments/weekend_0823/redteam/R6_line_edits.md	Docs/campaign/status/PROJECT_STATE_0823.md	Docs/archive/campaign_status/PROJECT_STATE_0823.md	1	S5-4 PROJECT_STATE consolidation
+experiments/weekend_0823/redteam/R2_method.md	Docs/campaign/status/PROJECT_STATE_0823.md	Docs/archive/campaign_status/PROJECT_STATE_0823.md	1	S5-4 PROJECT_STATE consolidation
+experiments/weekend_0823/redteam/R3_repro.md	Docs/campaign/status/PROJECT_STATE_0823.md	Docs/archive/campaign_status/PROJECT_STATE_0823.md	1	S5-4 PROJECT_STATE consolidation
+experiments/weekend_0823/fusion/FUSION_ROW.md	Docs/campaign/status/PROJECT_STATE_0823.md	Docs/archive/campaign_status/PROJECT_STATE_0823.md	1	S5-4 PROJECT_STATE consolidation
+experiments/v3_0823/ACCOUNTING.md	Docs/campaign/status/PROJECT_STATE_0823.md	Docs/archive/campaign_status/PROJECT_STATE_0823.md	1	S5-4 PROJECT_STATE consolidation
+experiments/v3_0823/ASSUMPTION_LEDGER.md	Docs/campaign/status/PROJECT_STATE_0823.md	Docs/archive/campaign_status/PROJECT_STATE_0823.md	1	S5-4 PROJECT_STATE consolidation
+experiments/v3_0823/ASSUMPTION_LEDGER.md	Docs/campaign/status/PROJECT_STATE_0823_v2.md	Docs/archive/campaign_status/PROJECT_STATE_0823_v2.md	2	S5-4 PROJECT_STATE consolidation
+experiments/v3_0823/MORNING_REPORT_V3.md	Docs/campaign/status/PROJECT_STATE_0823_v2.md	Docs/archive/campaign_status/PROJECT_STATE_0823_v2.md	1	S5-4 PROJECT_STATE consolidation
+experiments/v3_0823/paper/version_journey_skeleton.md	Docs/campaign/status/PROJECT_STATE_0823_v2.md	Docs/archive/campaign_status/PROJECT_STATE_0823_v2.md	1	S5-4 PROJECT_STATE consolidation
+experiments/v3_0823/paper/MATERIALS_INDEX.md	Docs/campaign/status/PROJECT_STATE_0823_v2.md	Docs/archive/campaign_status/PROJECT_STATE_0823_v2.md	1	S5-4 PROJECT_STATE consolidation
+experiments/v3_0823/paper/nearfield_limitation_paragraph.md	Docs/campaign/status/PROJECT_STATE_0823_v2.md	Docs/archive/campaign_status/PROJECT_STATE_0823_v2.md	1	S5-4 PROJECT_STATE consolidation
+experiments/v3_0823/paper/intro_4layer_skeleton.md	Docs/campaign/status/PROJECT_STATE_0823_v2.md	Docs/archive/campaign_status/PROJECT_STATE_0823_v2.md	1	S5-4 PROJECT_STATE consolidation
+submission_0830/INDEX.md	Docs/campaign/status/PROJECT_STATE_0823_v2.md	Docs/archive/campaign_status/PROJECT_STATE_0823_v2.md	2	S5-4 PROJECT_STATE consolidation
+Docs/campaign/WEEKEND_BRIEF_0823.md	Docs/campaign/status/PROJECT_STATE_0823.md	Docs/archive/campaign_status/PROJECT_STATE_0823.md	1	S5-4 PROJECT_STATE consolidation
+Docs/campaign/V3_BRIEF_0823.md	Docs/campaign/status/PROJECT_STATE_0823_v2.md	Docs/archive/campaign_status/PROJECT_STATE_0823_v2.md	1	S5-4 PROJECT_STATE consolidation
+Docs/campaign/status/PROJECT_STATE.md	Docs/campaign/status/PROJECT_STATE_0823_v3.md	Docs/archive/campaign_status/PROJECT_STATE_0823_v3.md	3	S5-4 PROJECT_STATE consolidation
+README.md	run_p2_all33.sh	scripts/rounds/run_p2_all33.sh	1	S5-6 run_p2_all33.sh -> scripts/rounds/
+experiments/mainrun_0819/PIPELINE_NOTES.md	run_p2_all33.sh	scripts/rounds/run_p2_all33.sh	1	S5-6 run_p2_all33.sh -> scripts/rounds/
+experiments/mainrun_0819/SPEC_CONFLICTS.md	run_p2_all33.sh	scripts/rounds/run_p2_all33.sh	2	S5-6 run_p2_all33.sh -> scripts/rounds/
+experiments/mainrun_0819/SPEC_EXTRACTED.md	run_p2_all33.sh	scripts/rounds/run_p2_all33.sh	2	S5-6 run_p2_all33.sh -> scripts/rounds/
+scripts/rounds/run_260805_w3_hedgeswap.sh	run_p2_all33.sh	scripts/rounds/run_p2_all33.sh	1	S5-6 run_p2_all33.sh -> scripts/rounds/
+scripts/rounds/run_p2_all33.sh	run_p2_all33.sh	scripts/rounds/run_p2_all33.sh	3	S5-6 run_p2_all33.sh -> scripts/rounds/
+scripts/rounds/run_260816_w4_final33.sh	run_p2_all33.sh	scripts/rounds/run_p2_all33.sh	1	S5-6 run_p2_all33.sh -> scripts/rounds/
+Docs/INDEX.md	run_p2_all33.sh	scripts/rounds/run_p2_all33.sh	1	S5-6 run_p2_all33.sh -> scripts/rounds/
+Docs/reports/s04_quality_gap_survey_v1.md	run_p2_all33.sh	scripts/rounds/run_p2_all33.sh	1	S5-6 run_p2_all33.sh -> scripts/rounds/
+Docs/reports/w2_gate_preflight.md	run_p2_all33.sh	scripts/rounds/run_p2_all33.sh	1	S5-6 run_p2_all33.sh -> scripts/rounds/
+Docs/reports/repo_reorg_v1.md	run_p2_all33.sh	scripts/rounds/run_p2_all33.sh	1	S5-6 run_p2_all33.sh -> scripts/rounds/
+scripts/sensor_augment.py	python3 scripts/sensor_augment.py --in dataset/<run>/train --out dataset/<run>_aug/train	python3 scripts/sensor_augment.py --in dataset/<group>/<run>/train (+ 4-line note pointing at ROUNDS.json / round_dir)	1	S5-9 dataset/<run> placeholder -> dataset/<group>/<run>
+scripts/run_data_render.py	Output goes to `dataset/<run>/<split>/<scene>/` — a tree `regression_c	Output goes to `dataset/<group>/<run>/<split>/<scene>/` — a tree `regr	1	S5-9 dataset/<run> placeholder -> dataset/<group>/<run>
+scripts/run_data_render.py	bash  scripts/rounds/run_260730_data_mini.sh          # the validated 	bash  scripts/rounds/run_260730_data_mini.sh          # the validated 	1	S5-9 dataset/<run> placeholder -> dataset/<group>/<run>
+experiments/probe_holes_0820/probe_driver.py	`dataset/<run>/probe/<scene>/`, visibly apart from `train/ val/ test/`	`dataset/<group>/<run>/probe/<scene>/`, visibly apart from `train/ val	1	S5-9 dataset/<run> placeholder -> dataset/<group>/<run>
+experiments/weekend_0823/cue_audit/build_h_cue_table.py	poses    dataset/<round>/<split>/<scene>/variation.json            (fu	poses    dataset/<group>/<round>/<split>/<scene>/variation.json    (fu	1	S5-9 dataset/<run> placeholder -> dataset/<group>/<run>
+experiments/v3_0823/code/verdict_panels.py	dataset/<round>/test/<scene>/variation.json	dataset/<group>/<round>/test/<scene>/variation.json	1	S5-9 dataset/<run> placeholder -> dataset/<group>/<run>
+experiments/v3_0823/code/w1b2_segfill.py	dataset/<정본 A 라운드>/<split>/<scene>/{<PNG stem>.idseg.npz, idseg_backfill.json}	dataset/<group>/<정본 A 라운드>/... (+ 2-line note pointing at ROUNDS.json / round_dir)	1	S5-9 dataset/<run> placeholder -> dataset/<group>/<run>
+experiments/v3_0823/code/w1b2_segfill.py	install_path="dataset/<정본 A 라운드>/<split>/<scene>/"	install_path="dataset/<group>/<정본 A 라운드>/<split>/<scene>/"	1	S5-9 dataset/<run> placeholder -> dataset/<group>/<run>
+experiments/v3_0823/code/view_overlay.py	f"  (룩체크 캡처에는 카메라 사이드카가 없다. dataset/<run>/<split>/<scene>/ "	f"  (룩체크 캡처에는 카메라 사이드카가 없다. dataset/<group>/<run>/<split>/<scene>/ "	1	S5-9 dataset/<run> placeholder -> dataset/<group>/<run>
+experiments/v3_0823/code/view_overlay.py	ap.add_argument("png", help="dataset/<run>/<split>/<scene>/*.png")	ap.add_argument("png", help="dataset/<group>/<run>/<split>/<scene>/*.p	1	S5-9 dataset/<run> placeholder -> dataset/<group>/<run>
+Docs/reports/repo_reorg_v1.md	§1.1 table: symlink column `Docs/<name>.md` -> bare filename + 0827 note	hand edit: the 08-14 record of the symlinks stays truthful after they were deleted	1	S5-HAND record kept truthful
+Docs/reports/repo_reorg_v1.md	§2 anchor 3 "루트 run_p2_all33.sh 이동 금지"	hand edit: anchor released; new path + why the line-number citations survive	1	S5-HAND record kept truthful
+Docs/reports/cleanup_lookcheck_v1.md	§E8 table (the two legacy symlinks it fixed on 08-05)	hand edit: 0827 addendum saying both symlinks were deleted	1	S5-HAND record kept truthful
+Docs/archive/README.md	(end of file)	hand edit: new "3차 이동 (2026-08-27)" section, one line per archived legacy file	1	S5-1 archive README
+Docs/INDEX.md	(whole file)	hand edit: 5 map links, campaign/ section, archive/{legacy,campaign_status}, scripts/, compat-symlink trailer	1	S5-8 INDEX
+README.md	(top + 3 sections)	hand edit: Korean "어디서부터 보나" + top-level folder map; reading order de-staled; 구조 block updated	1	S5-7 root README
+Docs/campaign/status/PROJECT_STATE.md	(head + 3 places)	hand edit: 최종 갱신 line, §0 2026-08-27 재편 후 현황, status column on the 끊긴 세 갈래 table, 3 stale claims corrected	1	S5-4 living onboarding doc

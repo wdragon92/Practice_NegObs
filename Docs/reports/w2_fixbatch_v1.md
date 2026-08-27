@@ -317,7 +317,7 @@ not from restoring the artifacts.**
 | what | where | count |
 |---|---|---|
 | fix round | `look_check/<scene>/260730_w2d_fix/` | 33 dirs · **452 PNG** + `manifest.json` + `round_stamp.json` |
-| review gallery (**rebuilt from the fix round**) | `look_check/_review_w2/*.jpg` + `meta.json` | **132 JPEG** (600 px, q80) · 33 scene records with the fix-round gate status |
+| review gallery (**rebuilt from the fix round**) | `look_check/_review/w2/*.jpg` + `meta.json` | **132 JPEG** (600 px, q80) · 33 scene records with the fix-round gate status |
 | crops (**fix round**, judge crops preserved) | `look_check/_experiments/gates/w2d_fix_crops/` + `index.json` | **23 PNG**, same 23 questions as the judge round |
 | HQ sheets | `Docs/audit_v4/library_main21_260730_w2d_fix.png` (3840×3798) · `library_batch1_260730_w2d_fix.png` (3840×1974) | 2 |
 | machine gates | `Docs/reports/regr_260730_w2d_fix.json` | 452 cut records |
@@ -364,7 +364,7 @@ python3 scripts/near_ground_stats.py \
 python3 scripts/make_hq_sheet.py --round 260730_w2d_fix --set main21
 python3 scripts/make_hq_sheet.py --round 260730_w2d_fix --set batch1
 python3 scripts/make_review_gallery.py --round 260730_w2d_fix \
-  --out look_check/_review_w2 --status-json Docs/reports/regr_260730_w2d_fix.json
+  --out look_check/_review/w2 --status-json Docs/reports/regr_260730_w2d_fix.json
 python3 scripts/rounds/crops_260730_w2d.py --round 260730_w2d_fix \
   --out look_check/_experiments/gates/w2d_fix_crops
 ```

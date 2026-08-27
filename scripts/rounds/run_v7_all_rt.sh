@@ -1,13 +1,13 @@
 #!/bin/bash
 # v7 전 씬 라운드 (v5/v5.1 반영 + 나무 v2 일괄): SMOKE(지원 씬) → RT
-#   출력 look_check/sceneNN/v7_rt · 로그 look_check/v7_all_rt.log
+#   출력 look_check/sceneNN/v7_rt · 로그 look_check/logs/v7_all_rt.log
 #   ※ 신규 파일명 기준 (구 helical/towerstone 등은 archive_v3)
 cd /home/vislab/Desktop/work_sy/Practice_NegObs || exit 9
 unset PYTHONPATH VIRTUAL_ENV
 source ~/miniconda3/etc/profile.d/conda.sh
 conda activate env_isaaclab
 export PYTHONNOUSERSITE=1 PYTHONUNBUFFERED=1
-LOG=look_check/v7_all_rt.log
+LOG=look_check/logs/v7_all_rt.log
 : > $LOG
 
 ALL="scene01_campus_stairs scene02_underpass scene03_riverbank scene04_parktrail \

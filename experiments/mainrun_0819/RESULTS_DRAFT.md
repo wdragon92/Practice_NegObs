@@ -174,7 +174,7 @@ fire at p ≈ 0.98 across 5–8 cells, i.e. the RGB FA rate is concentrated, not
 
 ## Night 0820→0821 update
 
-*Appended 2026-08-21 by the NIGHTRUN 0820 cycle (`Docs/experiment/OVERNIGHT_BRIEF_0820_v1.md`, D1).
+*Appended 2026-08-21 by the NIGHTRUN 0820 cycle (`Docs/campaign/OVERNIGHT_BRIEF_0820_v1.md`, D1).
 **Nothing above this line was modified.** Everything here is CPU re-analysis of the frozen recipe-v2
 artefacts under `experiments/dayrun_0820/runs/v2/` (grid `PROVISIONAL-GRID-V1`, 20 cells,
 τ_op = 0.5, seeds 42/43/44); the GPU tracks (YOLO s43/44, aux, the C2 control round, the hole probe)

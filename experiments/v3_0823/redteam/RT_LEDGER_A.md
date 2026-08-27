@@ -35,7 +35,7 @@
 |---|---|
 | `dataset_manifest_v2corr.json` (2,832행, 정본 교정 GT) | 티어 census 재집계 · 분모 검산 · 컷별 `hfov` 분포 · `polar_gt_pregate` 대조 |
 | `annotations/labels_v1_full_g7fix.json` | `tier_matrix`(τ 9조합) · `void_stats` · `cell_mean_drop` · `footprint` 통계 |
-| `dataset/260819_main_{on,off}/**/heightmap*.npy` (실재 확인, 510파일) | **hazard_depth 스윕 재라벨**(0.20–0.50 m, test-core 7씬 × 24컷 × 2팔) |
+| `dataset/v2_corpus/260819_main_{on,off}/**/heightmap*.npy` (실재 확인, 510파일) | **hazard_depth 스윕 재라벨**(0.20–0.50 m, test-core 7씬 × 24컷 × 2팔) |
 | `fa_events.csv` (6,925행) | 오경보 프레임당 발화 칸 분포 |
 | `split_v2_full.json` | 분할별 재집계 |
 | 코드 `labeler.py` `gates.py` `fuse_heightmap.py` `train_polar.py` `polar_dataset.py` `make_split.py` `eval_polar.py` `gridspec.py` `model_factory.py` `infer_photo.py` | 암묵 상수·묵시 규약 전수 대조 |

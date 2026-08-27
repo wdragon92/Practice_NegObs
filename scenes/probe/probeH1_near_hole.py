@@ -5,7 +5,7 @@ probeH1_near_hole.py — hole-type zero-shot probe, scene 1 of 3 (Isaac Sim 4.5)
 Type   : HOLE — an open service pit in flat paving, surrounded by ground on all
          four sides. Not a stair, not an edge: the drop has no run of nosings
          and no linear lip to follow.
-Spec   : Docs/experiment/OVERNIGHT_BRIEF_0820_v1.md §4 C1 composition (1)
+Spec   : Docs/campaign/OVERNIGHT_BRIEF_0820_v1.md §4 C1 composition (1)
          "근거리 노출 hole (V/E — band1이 최약 밴드이므로 근거리 1구도 필수)"
 Shared : probe_common.py (twin contract + builders) · scene_common.py
 Family : sceneD2_floor_opening.py is the nearest corpus relative (a floor

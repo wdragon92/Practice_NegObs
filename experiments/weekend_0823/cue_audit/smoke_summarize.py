@@ -27,6 +27,11 @@ import os
 import sys
 
 REPO = "/home/vislab/Desktop/work_sy/Practice_NegObs"
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat   # noqa: E402
 AUDIT = os.path.join(REPO, "experiments/weekend_0823/cue_audit")
 SMOKE = os.path.join(AUDIT, "smoke")
 OUT = os.path.join(AUDIT, "SMOKE_CUEOFF.json")
@@ -38,7 +43,7 @@ LINEAGE_ON = {"scene12": "260820_boost_e_on",
 
 
 def canonical_cut0(scene):
-    p = glob.glob(os.path.join(REPO, "dataset", LINEAGE_ON[scene], "*", scene,
+    p = glob.glob(os.path.join(round_dir_or_flat(LINEAGE_ON[scene]), "*", scene,
                                "variation.json"))
     if not p:
         return None

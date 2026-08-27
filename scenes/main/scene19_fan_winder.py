@@ -3,7 +3,7 @@
 scene19_fan_winder.py — NegObs synthetic scene 19: T7 fan corner stairs (winder)
 (Isaac Sim 4.5)
 
-Spec : Docs/multi_scene_brief_v3.md §D scene19_fan_winder (the only spec)
+Spec : Docs/briefs/multi_scene_brief_v3.md §D scene19_fan_winder (the only spec)
 Shared library : scene_common.py (§A) — boot · make_pbr · build_arc_steps · lighting · capture
 Motif reference : scene05_amphitheater.py (main skeleton · arc step tiers · cue toggles)
 

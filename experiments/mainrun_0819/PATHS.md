@@ -12,10 +12,10 @@
 ## DATA_CANDIDATES 후보 전수 (dataset/ + look_check/)
 | 후보 | 내용 | 판정 |
 |---|---|---|
-| `dataset/260816_dataall` | **비어 있음** (4KB) — 커밋 36037ea "dataall 미렌더 정정", 8c814db 큐에 "dataall 재렌더" | 사용 불가 |
-| `dataset/260815_datapilot` | 5씬(s04,s16,N1,N2,N3) × L0/L2/L7 × 8캠 = 120컷, **RGB만**(depth/GT 없음), variation.json에 컷별 카메라 포즈 완비 | 파일럿 — 형식 참조용 |
-| `dataset/260815_datapilot_aug` | datapilot의 sensor_augment 파생 | 참조용 |
-| `dataset/2607xx_*` (11개) | 07-30/31 구세대 미니 라운드 — W4~W6 수리 이전 룩 | 스테일, 사용 안 함 |
+| `dataset/_archive/pilots/260816_dataall` | **비어 있음** (4KB) — 커밋 36037ea "dataall 미렌더 정정", 8c814db 큐에 "dataall 재렌더" | 사용 불가 |
+| `dataset/_archive/pilots/260815_datapilot` | 5씬(s04,s16,N1,N2,N3) × L0/L2/L7 × 8캠 = 120컷, **RGB만**(depth/GT 없음), variation.json에 컷별 카메라 포즈 완비 | 파일럿 — 형식 참조용 |
+| `dataset/_archive/pilots/260815_datapilot_aug` | datapilot의 sensor_augment 파생 | 참조용 |
+| `dataset/_archive/scene_dev_2607/2607xx_*` (11개) | 07-30/31 구세대 미니 라운드 — W4~W6 수리 이전 룩 | 스테일, 사용 안 함 |
 | `look_check/…260816_w4_final33_on` | 33씬 132컷 판정(judge) 라운드 — 검증용 4컷/씬 | 학습용 아님 (검증 룩 기준) |
 
 ## 선택과 근거

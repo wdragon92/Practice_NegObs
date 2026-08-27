@@ -3,7 +3,7 @@
 sceneC4_wet_stairs.py — NegObs synthetic scene 28: wet stone stairs right after rain (Isaac Sim 4.5)
 
 Type    : C4 condition variant — wide granite stair geometry + a wetness (material) layer
-Spec    : Docs/nanobanana_batch1_geometry_map.md §B sceneC4_wet_stairs
+Spec    : Docs/archive/legacy/nanobanana_batch1_geometry_map.md §B sceneC4_wet_stairs
 Look ref: look_refs/c4_wet_stairs.jpg
 Shared  : scene_common.py · scene16_canopy_shadow.py (standard template) ·
           scene01_campus_stairs.py (straight-stair reference)

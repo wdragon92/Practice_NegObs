@@ -48,6 +48,11 @@ import sys
 import numpy as np
 
 REPO = "/home/vislab/Desktop/work_sy/Practice_NegObs"
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat   # noqa: E402
 V3 = os.path.join(REPO, "experiments/v3_0823")
 LABDIR = os.path.join(REPO, "experiments/mainrun_0819/code/labeling")
 sys.path.insert(0, LABDIR)
@@ -81,7 +86,7 @@ FLAG_P90_M = 0.30            # = gridspec hazard_depth. 중앙값이 숨기는 �
 
 
 def sdir(run, scene):
-    g = glob.glob(os.path.join(REPO, "dataset", run, "*", scene, "variation.json"))
+    g = glob.glob(os.path.join(round_dir_or_flat(run), "*", scene, "variation.json"))
     return os.path.dirname(g[0]) if g else None
 
 

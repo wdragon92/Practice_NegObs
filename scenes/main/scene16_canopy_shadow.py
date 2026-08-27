@@ -3,7 +3,7 @@
 scene16_canopy_shadow.py — NegObs synthetic scene 16: canopy shadow stair (Isaac Sim 4.5)
 
 Type    : T20 canopy stair (the inverse of T3 — the upper shadow band is the danger signal)
-Spec    : Docs/multi_scene_brief_v3.md §D scene16_canopy_shadow
+Spec    : Docs/briefs/multi_scene_brief_v3.md §D scene16_canopy_shadow
 Shared  : scene_common.py (verified API helpers) · scene02_underpass.py (urban skeleton)
 
 Hazard   : a descending stair (14 steps) sits in the middle of a bright sidewalk, with a solid

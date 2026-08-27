@@ -30,6 +30,12 @@ import json
 import os
 
 REPO = "/home/vislab/Desktop/work_sy/Practice_NegObs"
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+import sys
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import has_round, round_dir_or_flat   # noqa: E402
 V3 = os.path.join(REPO, "experiments/v3_0823")
 POSE_KEYS = ("d", "h_rel", "yaw", "pitch", "roll", "hfov", "ground_z")
 
@@ -43,13 +49,13 @@ def sha(p):
 
 
 def sdir(run, sc):
-    g = glob.glob(os.path.join(REPO, "dataset", run, "*", sc, "variation.json"))
+    g = glob.glob(os.path.join(round_dir_or_flat(run), "*", sc, "variation.json"))
     return os.path.dirname(g[0]) if g else None
 
 
 def scenes_of(run):
     return sorted({os.path.basename(os.path.dirname(p)) for p in
-                   glob.glob(os.path.join(REPO, "dataset", run, "*", "*",
+                   glob.glob(os.path.join(round_dir_or_flat(run), "*", "*",
                                           "variation.json"))})
 
 
@@ -139,11 +145,11 @@ def compare(tag, ref_run, new_run, scs):
 def main():
     out = []
     w0 = "260825_v3w0_cuecls_A"
-    if os.path.isdir(os.path.join(REPO, "dataset", w0)):
+    if has_round(w0):
         out.append(compare("대조1 · A팔 재현성 (세그 변경 없음)",
                            "260819_main_on", w0, scenes_of(w0)))
     bs = "260826_v3w1_lib_B_smoke"
-    if os.path.isdir(os.path.join(REPO, "dataset", bs)):
+    if has_round(bs):
         out.append(compare("대조2 · 같은 웨이브 (세그 설정까지 동일)",
                            "260826_v3w1_lib_B", bs, scenes_of(bs)))
 

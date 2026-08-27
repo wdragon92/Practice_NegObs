@@ -14,10 +14,12 @@
 #   sceneN1 allows 0. The 8 cuts are given to L1 cumulus instead, declared
 #   explicitly here rather than substituted silently inside the driver.
 #
-#   Output: dataset/260730_data_mini/<split>/<scene>/ — never look_check/.
+#   Output: dataset/_archive/scene_dev_2607/260730_data_mini/<split>/<scene>/ — never look_check/.
 #   GPU exclusive, sequential, single instance.
 # =============================================================================
 cd /home/vislab/Desktop/work_sy/Practice_NegObs || exit 9
+# 0827 reorg: a round is found by NAME (dataset/<group>/<round>).
+source scripts/lib/negobs_paths.sh
 unset PYTHONPATH VIRTUAL_ENV
 source ~/miniconda3/etc/profile.d/conda.sh
 conda activate env_isaaclab
@@ -37,5 +39,5 @@ python3 scripts/run_data_render.py --run $RUN \
     --scenes sceneN1 --conds L1 --cams 8 \
     --seed 20260730 2>&1 | tee -a $LOG
 
-python3 scripts/stamp_round.py dataset/${RUN} $RUN mini 2>&1 | tee -a $LOG
+python3 scripts/stamp_round.py "$(negobs_round_or_flat "$RUN")" $RUN mini 2>&1 | tee -a $LOG
 echo "[$RUN] done" | tee -a $LOG

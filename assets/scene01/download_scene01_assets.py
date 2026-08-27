@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Scene01 캠퍼스 광장 하행계단 — CC0 텍스처 에셋 파이프라인.
 
-설계 브리프 `Docs/scene01_design_brief.md` §3(재질)·§4(점자블록) 구현.
+설계 브리프 `Docs/briefs/scene01_design_brief.md` §3(재질)·§4(점자블록) 구현.
 
 동작 요약
   1. ambientCG (Tiles038 / PavingStones127 / PavingStones111):
@@ -16,7 +16,7 @@
      4k jpg diff/nor_dx/rough 다운로드.
        granite_tile   -> granite_dark_{diff,nor_dx,rough}.jpg
        brick_wall_001 -> brick_red_{diff,nor_dx,rough}.jpg
-  2b. PolyHaven v2 (Docs/multi_scene_brief_v2.md §B — 신규 7세트):
+  2b. PolyHaven v2 (Docs/briefs/multi_scene_brief_v2.md §B — 신규 7세트):
      동일 패턴 확장. diff 키가 'diffuse' 소문자일 수 있어 후보에 포함,
      rough 직접 키가 없고 ARM 만 있는 에셋은 ARM G채널(Roughness) 추출로 생성.
        concrete_wall_008   -> concrete_wall_{diff,nor_dx,rough}.jpg
@@ -169,7 +169,7 @@ POLYHAVEN = {
     "granite_tile": "granite_dark",
     "brick_wall_001": "brick_red",
 }
-# v2 다중 씬 텍스처 (Docs/multi_scene_brief_v2.md §B) — 신규 7세트.
+# v2 다중 씬 텍스처 (Docs/briefs/multi_scene_brief_v2.md §B) — 신규 7세트.
 # 기존 PolyHaven 패턴 그대로: 4k jpg diff/nor_dx/rough 를 canonical 이름으로 배치.
 POLYHAVEN_V2 = {
     "concrete_wall_008": "concrete_wall",   # 지하도 옹벽·터널
@@ -180,7 +180,7 @@ POLYHAVEN_V2 = {
     "stone_tiles_02": "stone_flag",         # 자연석 판석
     "rock_wall_08": "rock_wall",            # 석축/사석
 }
-# v3 다중 씬 텍스처 (Docs/multi_scene_brief_v3.md §C — 신규 6역할).
+# v3 다중 씬 텍스처 (Docs/briefs/multi_scene_brief_v3.md §C — 신규 6역할).
 # PolyHaven API 후보를 썸네일 밝기·색조 PIL 측정으로 역할 적합성 검증 후 선정.
 # 전 슬러그 Diffuse/nor_dx/Rough 4k jpg 직접 보유 확인(ARM 폴백 불요).
 #   slug                    -> canonical   측정치(썸네일 300px, L=luma)      대안 슬러그
@@ -198,7 +198,7 @@ POLYHAVEN_V3 = {
     "painted_plaster_wall": "plaster",       # 주택 회벽(파스텔 틴트 베이스)
     "rock_surface": "rock_face",             # 절벽 암반(대형 스케일)
 }
-# 배치1 나노바나나 씬(scene22~33) 텍스처 — Docs/nanobanana_batch1_geometry_map.md.
+# 배치1 나노바나나 씬(scene22~33) 텍스처 — Docs/archive/legacy/nanobanana_batch1_geometry_map.md.
 # forest_leaves_03: Diffuse/Rough/nor_dx 4k 직접 보유 확인(API 200, 07-27).
 POLYHAVEN_V4 = {
     "forest_leaves_03": "leaf_ground",       # 낙엽 지면(C2 낙엽 계단 마운드)

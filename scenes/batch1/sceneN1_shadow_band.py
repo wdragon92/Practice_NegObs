@@ -3,7 +3,7 @@
 sceneN1_shadow_band.py - NegObs synthetic scene 22: building shadow band (Isaac Sim 4.5)
 
 Type    : N1 Hard Negative - a dark band crossing a flat plaza (GT = no drop in any pixel)
-Spec    : Docs/nanobanana_batch1_geometry_map.md §A sceneN1_shadow_band
+Spec    : Docs/archive/legacy/nanobanana_batch1_geometry_map.md §A sceneN1_shadow_band
 Look ref: look_refs/n1_shadow.jpg
 Shared  : scene_common.py (verified API helpers) · scene16_canopy_shadow.py (skeleton)
 

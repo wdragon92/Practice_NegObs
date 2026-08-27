@@ -3,7 +3,7 @@
 scene11_grating_fireescape.py — NegObs 인공씬 11호: 건물 외벽 비상계단 (Isaac Sim 4.5)
 
 유형    : T19 그레이팅 비상계단 (개방 라이저 × 격자 그림자)
-사양서  : Docs/multi_scene_brief_v3.md §D scene11_grating_fireescape
+사양서  : Docs/briefs/multi_scene_brief_v3.md §D scene11_grating_fireescape
 공통    : scene_common.py (검증된 API 헬퍼) · scene02_underpass.py (도시계 골격)
 
 위험 본질: 벽돌 건물 측벽에 매달린 2플라이트 스위치백 비상계단. 라이저(수직판)가

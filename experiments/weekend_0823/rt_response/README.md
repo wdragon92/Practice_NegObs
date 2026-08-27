@@ -67,7 +67,7 @@ wedges and the amodal silhouette using the canonical `labeling/labeler.py` camer
 `experiments/dayrun_0820/annotations/amodal/{bboxes.json,*.png}` ·
 `experiments/dayrun_0820/{dataset_manifest_v2_full.json,split_v2_full.json}` ·
 `experiments/mainrun_0819/code/labeling/{labeler.py,gridspec_v1.json}` ·
-`dataset/260819_main_{on,off}/` · `dataset/260820_ctrloff/`.
+`dataset/v2_corpus/260819_main_{on,off}/` · `dataset/v2_probes/260820_ctrloff/`.
 
 Figure colours are slots 1–3 of the dataviz reference palette (blue `#2a78d6` / orange `#eb6834` /
 aqua `#1baf7a`), used unchanged — the documented all-pairs-validated subset in both modes — plus

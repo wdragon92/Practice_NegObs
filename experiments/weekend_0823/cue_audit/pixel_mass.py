@@ -43,6 +43,11 @@ import sys
 import numpy as np
 
 REPO = "/home/vislab/Desktop/work_sy/Practice_NegObs"
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat   # noqa: E402
 AUDIT = os.path.join(REPO, "experiments/weekend_0823/cue_audit")
 W_IMG, H_IMG = 1920, 1080
 
@@ -337,7 +342,7 @@ def main():
         G = GROUPS[sc]()
         for rnd in LINEAGE[sc]:
             import glob
-            vp = glob.glob(os.path.join(REPO, "dataset", rnd, "*", sc, "variation.json"))
+            vp = glob.glob(os.path.join(round_dir_or_flat(rnd), "*", sc, "variation.json"))
             if not vp:
                 print(f"[skip] {sc} {rnd}: no variation.json")
                 continue

@@ -4,11 +4,11 @@
 합쳐 본 표 형식의 추가 행을 만들고, "V는 YOLO가, E/H는 U-Net이 담당한다"는 상보성 가설이
 실제로 얼마나 이득을 주는지 정직하게 정량화한다.
 
-- 작성: Claude Code · 2026-08-23 · 지시서 `Docs/experiment/WEEKEND_BRIEF_0823.md` §6.4 (큐 GPU-3)
+- 작성: Claude Code · 2026-08-23 · 지시서 `Docs/campaign/WEEKEND_BRIEF_0823.md` §6.4 (큐 GPU-3)
 - 계보: MR21 §④ 결재 #3 — `[승용: "실험 할 수 있는 건 다 실험해보면서 비교할 수 있는 형태로 뽑아둬"]`
 - **재훈련 0 · GPU 0.** 입력이 전부 저장된 `per_frame.csv`라 모델을 한 번도 돌리지 않는다.
 - 독자 주의: 이 문서의 용어는 지시서 §1 표기 규약을 따른다. `본 문서 §N` = 이 파일의 절,
-  `지시서 §N` = WEEKEND_BRIEF_0823, `PS §N` = `Docs/experiment/Status/PROJECT_STATE_0823.md`.
+  `지시서 §N` = WEEKEND_BRIEF_0823, `PS §N` = `Docs/archive/campaign_status/PROJECT_STATE_0823.md`.
 
 ---
 

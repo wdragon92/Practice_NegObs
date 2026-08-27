@@ -3,7 +3,7 @@
 scene15_alley_labyrinth.py — NegObs synthetic scene 15: Gamcheon/Alfama-type alley stair (Isaac Sim 4.5)
 
 Type    : T15 alley labyrinth (wall-compressed perspective × drop hidden by a narrow field of view)
-Spec    : Docs/multi_scene_brief_v3.md §D scene15_alley_labyrinth
+Spec    : Docs/briefs/multi_scene_brief_v3.md §D scene15_alley_labyrinth
 Shared  : scene_common.py (verified API helpers) · scene02_underpass.py (urban skeleton)
 
 Hazard  : a 1.2 m wide concrete stair descends between pastel houses on both flanks. The walls

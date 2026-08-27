@@ -13,7 +13,7 @@
 
 사용:
     python3 scripts/make_review_gallery.py --round 260730_w2d_judge \
-        --out look_check/_review_w2 --status-json Docs/reports/regr_260730_w2d.json
+        --out look_check/_review/w2 --status-json Docs/reports/regr_260730_w2d.json
 GPU 0 · PIL 만 필요 · 출력은 `--out` 아래에만 쓴다.
 """
 from __future__ import annotations
@@ -113,7 +113,7 @@ def status_from(regr, scene):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--round", required=True)
-    ap.add_argument("--out", default=os.path.join(BASE, "_review_w2"))
+    ap.add_argument("--out", default=os.path.join(BASE, "_review", "w2"))
     ap.add_argument("--status-json", default="",
                     help="regression_check --json 결과 (씬별 한 줄 상태에 쓴다)")
     ap.add_argument("--width", type=int, default=WIDTH)

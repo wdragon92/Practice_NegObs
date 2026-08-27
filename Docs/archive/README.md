@@ -52,3 +52,21 @@
 
 **잔류 유보(큐 접촉)**: fixlog_N1(s06/11)·W3(s13)·W6(s01/09/14)·X2(s06/07/10)·X3(s11/17),
 w3_cb4_v1(건물 킷 — 레버4 진행 중), props_audit_w1/C4(s21 재작업 대기). 해당 큐 종료 후 재판정.
+
+## 3차 이동 (2026-08-27, 재편 S5) — `Docs/` 아래 `legacy/` 폴더 폐지
+
+그 폴더(`Docs/` 바로 아래 `legacy/`)는 규칙이 없는 두 번째 보관함이었고, 그 안에 **현행 문서를 가리키는 심링크 2개**
+(`multi_scene_brief_v3.md` · `realism_rubric_v1.md`)가 들어 있었다 — "이력 보존" 폴더가 현행을
+가리키는 모순. 심링크 2개는 삭제하고, 실파일 5건은 `archive/legacy/` 로 옮겨 보관함을 하나로 합쳤다.
+파일명 불변, 내용 무수정. 원장: `Docs/reorg_0827/docs_moves.tsv`.
+
+- `legacy/nanobanana_batch1_geometry_map.md` — 배치1 12씬의 기하 역추정·빌더 매핑 원본(07-27).
+  N/C/D 시리즈 원 스펙의 출처라 `critique_intent_map_v1.md` 가 다수 인용한다
+- `legacy/scene_redesign_v5_proposal.md` — 본편 21씬을 "범용 무대 × 기하 변형 × 위험"으로
+  갈아엎은 v5 재설계 제안(07-27). 현행 21씬 구성의 근거
+- `legacy/scene_library_v3_status.md` — v5 이전 v3 라이브러리 21씬 상태 보고(07-25). 이력
+- `legacy/STATUS_pre_p4.md` — P4 이전 STATUS 스냅샷(07-28). 이력
+- `legacy/STATUS_pre_reorg_260814.md` — 08-14 문서 재편 직전 STATUS 원문 보존본. 이력
+
+옛 인용(`Docs/` + `legacy/<파일>`)은 전부 `Docs/archive/legacy/<파일>` 로 갱신했다 —
+저장소 전체에 남은 옛 표기는 0이다(`os.walk` 실측, 08-27).

@@ -247,7 +247,7 @@ So every cut in the dataset gets the same effective sample count and the noise l
 cannot *buy* less noise by raising spp.
 
 *Consequence to accept, not fix.* The judge round raises dark scenes to
-`NEGOBS_PT_TOTAL_SPP=256` (`run_p2_all33.sh:11-13`: `sceneD4` required, `scene02`/`scene13`
+`NEGOBS_PT_TOTAL_SPP=256` (`scripts/rounds/run_p2_all33.sh:11-13`: `sceneD4` required, `scene02`/`scene13`
 recommended). **The data channel has no equivalent path**, and per the defect it would not help
 anyway. Expect `sceneD4`, `scene02`, `scene13` to be the noisiest/darkest cuts in the set and
 the most likely to trip acceptance check 1 (§5). Minimal safe workaround if they do fail: raise
@@ -291,7 +291,7 @@ a directory is.
 | Source | Scope | Wall | Derived |
 |---|---|---|---|
 | `look_check/logs/sp2_azsweep_times.tsv` (33 rows, 21 cuts each) | **33 scenes × 21 cuts = 693 cuts** | **2651 s = 44.2 min** | 3.83 s/cut incl. boot; per scene **60.4 s (scene04) … 98.2 s (scene16)**, median **81.4 s** |
-| `dataset/260815_datapilot/manifest.json` | 5 scenes × 3 conds × 8 cams = 120 cuts | 437.1 s = 7.3 min | per-scene s/cut incl. boot **2.811 / 6.273 / 2.94 / 2.89 / 3.30** |
+| `dataset/_archive/pilots/260815_datapilot/manifest.json` | 5 scenes × 3 conds × 8 cams = 120 cuts | 437.1 s = 7.3 min | per-scene s/cut incl. boot **2.811 / 6.273 / 2.94 / 2.89 / 3.30** |
 | the same run's `variation.json` files (in-process only) | 24 cuts/scene | — | in-process s/cut **2.027 (s04) · 4.951 (s16) · 2.246 (N1) · 2.265 (N2) · 2.288 (N3)** |
 | `variation_kit.py:693-697` (constants of record) | — | — | `T_CUT_DATA 2.87 · T_BOOT 34.3 · T_SWAP 1.4 · R_REJECT 0.020` |
 | `autonomy_run_260814_18_handover_v1.md:99` (judge round `260816_w4_final33_on`) | 33 scenes, 132 cuts | per scene **36–228 s** | scene assembly, not per-cut, dominates the tail |
@@ -437,7 +437,7 @@ Exit 0 = `DATA RUN CHECK PASS`, exit 1 lists the failing tags (`:318-322`).
   python3 scripts/sensor_augment.py --in dataset/260819_dataall_on/train \
                                     --out dataset/260819_dataall_on_aug/train
   ```
-  `dataset/260815_datapilot_aug/` is the existing example of the output shape.
+  `dataset/_archive/pilots/260815_datapilot_aug/` is the existing example of the output shape.
 * **`scripts/stamp_round.py`** — see §2.2. Run `--capture-env` inside the render shell, then
   stamp each arm.
 * **Do not run `scripts/regression_check.py` on the dataset.** It is a judge-channel tool and is

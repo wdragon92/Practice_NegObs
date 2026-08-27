@@ -30,6 +30,11 @@ import sys
 import numpy as np
 
 REPO = "/home/vislab/Desktop/work_sy/Practice_NegObs"
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat   # noqa: E402
 DS = os.path.join(REPO, "dataset")
 AUDIT = os.path.join(REPO, "experiments/weekend_0823/cue_audit")
 LABELS = os.path.join(AUDIT, "labels")
@@ -51,7 +56,7 @@ STRIP_X = {"scene12": (-12.0, -4.0), "scene17": (-12.0, -6.0),
 
 
 def hm(stem, arm, scene, split):
-    d = os.path.join(DS, f"{stem}_{arm}", split, scene)
+    d = os.path.join(round_dir_or_flat(f"{stem}_{arm}"), split, scene)
     p, m = os.path.join(d, "heightmap.npy"), os.path.join(d, "heightmap_meta.json")
     if not (os.path.isfile(p) and os.path.isfile(m)):
         return None, None
@@ -59,7 +64,7 @@ def hm(stem, arm, scene, split):
 
 
 def hm_lineage(rnd, scene):
-    for d in glob.glob(os.path.join(DS, rnd, "*", scene)):
+    for d in glob.glob(os.path.join(round_dir_or_flat(rnd), "*", scene)):
         p, m = os.path.join(d, "heightmap.npy"), os.path.join(d, "heightmap_meta.json")
         if os.path.isfile(p) and os.path.isfile(m):
             return np.load(p), json.load(open(m))

@@ -30,7 +30,7 @@ GPU 는 PT 배치(`run_v8_pt7.sh`)와 공유이므로 **스모크 부팅을 새�
 
 ## 1. ① 바인딩 실측 — 이미 결백이 찍혀 있었다 (신규 부팅 0회)
 
-`look_check/v8_fix8_rt.log:2071-2074` (v8 라운드 scene09 스모크):
+`look_check/logs/v8_fix8_rt.log:2071-2074` (v8 라운드 scene09 스모크):
 
 ```
 scene09 [v7] 지붕/절병통 재질 바인딩 · 법선 저작 확인

@@ -46,11 +46,16 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat, rounds_matching   # noqa: E402
+
 # --------------------------------------------------------------------------- #
 # what may not move
 # --------------------------------------------------------------------------- #
 PROTECTED = ["260819_main_on", "260819_main_off"] + sorted(
-    os.path.basename(p) for p in glob.glob(os.path.join(REPO, "dataset", "260820_boost_*")))
+    os.path.basename(p) for p in rounds_matching("260820_boost_"))
 """Both arms of the frozen main corpus and every boost round.  The brief's rule 2
 freezes `_v2_full`; the off arm is in it too, and this track re-reads the old off
 arm's per-frame CSVs for the side-by-side table, so its immutability matters as
@@ -313,7 +318,7 @@ def _sha(path, chunk=1 << 20):
 
 
 def _round_files(round_name):
-    root = os.path.join(REPO, "dataset", round_name)
+    root = round_dir_or_flat(round_name)
     out = []
     for dirpath, _dirnames, names in os.walk(root):
         for n in sorted(names):
@@ -335,7 +340,7 @@ def _sample(rel_files):
 def do_snapshot(a):
     snap = dict(repo=REPO, rounds={}, note="hash_gate.py snapshot of the frozen rounds")
     for r in PROTECTED:
-        root = os.path.join(REPO, "dataset", r)
+        root = round_dir_or_flat(r)
         if not os.path.isdir(root):
             print(f"  [skip] {r}: not present")
             continue
@@ -361,7 +366,7 @@ def check_immutability(a, rep):
                                                  "run `hash_gate.py snapshot` BEFORE the render")
     snap = json.load(open(a.baseline))
     for r, rec in sorted(snap["rounds"].items()):
-        root = os.path.join(REPO, "dataset", r)
+        root = round_dir_or_flat(r)
         now = _round_files(r) if os.path.isdir(root) else []
         added = sorted(set(now) - set(rec["files"]))
         removed = sorted(set(rec["files"]) - set(now))
@@ -392,7 +397,7 @@ def check_immutability(a, rep):
 # --------------------------------------------------------------------------- #
 def scene_dir(round_name, scene):
     """Same convention as labeler.scene_dirs: <round>/<split>/<scene>, split ignored."""
-    root = os.path.join(REPO, "dataset", round_name)
+    root = round_dir_or_flat(round_name)
     for split in sorted(os.listdir(root)) if os.path.isdir(root) else []:
         d = os.path.join(root, split, scene)
         if os.path.isfile(os.path.join(d, "variation.json")):

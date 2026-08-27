@@ -22,6 +22,11 @@ import sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__)))))
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat   # noqa: E402
 BOOT = 21.2      # 계획 §4.1: 부팅 6.7 + 어셈블리·사이드카 = 21.2 s/프로세스 (74회 평균)
 
 STAMPS = ["260824_v3w3_extsmoke_A"] + [
@@ -38,7 +43,7 @@ def main(argv=None):
     rows, n_cuts, sec_sum, n_proc = [], 0, 0.0, 0
     for st in STAMPS:
         for vp in sorted(glob.glob(os.path.join(
-                REPO, "dataset", st, "*", "*", "variation.json"))):
+                round_dir_or_flat(st), "*", "*", "variation.json"))):
             v = json.load(open(vp, encoding="utf-8"))
             n = int(v.get("n_ok") or v.get("n") or 0)
             s = float(v.get("sec") or 0.0)

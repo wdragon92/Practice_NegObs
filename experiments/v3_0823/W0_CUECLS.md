@@ -401,7 +401,7 @@ V의 P1 분할표: a/b/c/d = **1704 / 624 / 1368 / 1368**. B팔의 73 %가 드�
 | `experiments/v3_0823/code/w0_rimpact.py` | §7 키별 r 3정책 재계산 |
 | `experiments/v3_0823/logs/w0_cuecls_render.log` | 렌더 로그 |
 | `experiments/v3_0823/logs/w0_markers/` | 유닛 DONE 마커 58개 |
-| `dataset/260825_v3w0_cuecls_*` | 렌더물 1.9 GB (gitignored) |
+| `dataset/v3_aux/260825_v3w0_cuecls_*` | 렌더물 1.9 GB (gitignored) |
 
 ### 재현
 

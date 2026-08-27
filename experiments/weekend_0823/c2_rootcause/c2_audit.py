@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """WEEKEND 0823 / CPU-3 -- systematic difference audit of `sceneC2` against the other test scenes.
 
-Brief: `Docs/experiment/WEEKEND_BRIEF_0823.md` sec 6.3.  Question: why is `sceneC2` the outlier
+Brief: `Docs/campaign/WEEKEND_BRIEF_0823.md` sec 6.3.  Question: why is `sceneC2` the outlier
 scene -- 76.1 % of the Depth arm's off-arm cell fires (DIAG_V2 sec 3.1), the "16 mm read as a
 2.24 m drop" hallucination (DIAG_V1 sec 3.2), and FA 0.681 under the dressing-preserving OFF arm
 (CTRL_TABLE sec 1)?
@@ -26,6 +26,11 @@ sys.dont_write_bytecode = True
 import numpy as np
 
 REPO = "/home/vislab/Desktop/work_sy/Practice_NegObs"
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat   # noqa: E402
 DR = os.path.join(REPO, "experiments/dayrun_0820")
 RUNS = os.path.join(DR, "runs/v2")
 OUT = os.path.dirname(os.path.abspath(__file__))
@@ -254,7 +259,8 @@ for p in glob.glob(os.path.join(REPO, "scenes/*/scene*.py")):
 def heightmap_meta():
     out = {}
     for arm in ("260819_main_on", "260819_main_off", "260820_ctrloff"):
-        for p in glob.glob(os.path.join(REPO, f"dataset/{arm}/*/*/heightmap_meta.json")):
+        for p in glob.glob(os.path.join(round_dir_or_flat(arm),
+                                        "*", "*", "heightmap_meta.json")):
             m = json.load(open(p))
             out.setdefault(m["scene"], {})[arm] = dict(
                 n_prims=m.get("n_prims"), z_min=m.get("z_min"), z_max=m.get("z_max"),

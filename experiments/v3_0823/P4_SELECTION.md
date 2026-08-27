@@ -1,6 +1,6 @@
 # P4_SELECTION — 체크포인트 선택식 수리 + v2 재현 검증
 
-*P-4. 측정일 2026-08-23. 헌장: `Docs/experiment/V3_DESIGN_0823.md` §3 원인 C · §4.3-3.
+*P-4. 측정일 2026-08-23. 헌장: `Docs/campaign/V3_DESIGN_0823.md` §3 원인 C · §4.3-3.
 합격 규약: `experiments/v3_0823/ACCOUNTING.md` §2-7. 수리 대상: `ASSUMPTION_LEDGER.md`
 `MOD-07` · 결함 ③ `N-3`(= ACCOUNTING §4.3 항목 3) — 단 **RT-B가 `N-3`을 강등하고 겨냥을
 "무시 마스크 프레임의 발화로 선택되는 v3판 재발"로 옮겼으므로**(`ACCOUNTING §4.9` 말미 ·
@@ -48,7 +48,7 @@
 
 | 역할 | 경로 |
 |---|---|
-| 헌장 | `Docs/experiment/V3_DESIGN_0823.md` §3 원인 C(`:207-208`) · §4.3-3(`:252-254`) |
+| 헌장 | `Docs/campaign/V3_DESIGN_0823.md` §3 원인 C(`:207-208`) · §4.3-3(`:252-254`) |
 | 합격 규약 | `experiments/v3_0823/ACCOUNTING.md` §2-7 · §4.3 항목 3 |
 | 수리 대상 진단 | `experiments/v3_0823/ASSUMPTION_LEDGER.md` `MOD-07`(`:169`) · `N-3`(`:235`) · `DATA-05`(`:148`) |
 | 구식 구현 | `experiments/mainrun_0819/code/train_polar.py` `:158-161` · `:235-244` · `:268-272` · `:358` · `:413` · `:435` |

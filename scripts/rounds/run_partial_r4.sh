@@ -12,7 +12,7 @@ unset PYTHONPATH VIRTUAL_ENV
 source ~/miniconda3/etc/profile.d/conda.sh
 conda activate env_isaaclab
 export PYTHONNOUSERSITE=1
-LOG=look_check/partial_r4.log
+LOG=look_check/logs/partial_r4.log
 : > $LOG
 
 echo "== [1/2] scene19 접근성 v2 RT 확인 렌더 ==" | tee -a $LOG

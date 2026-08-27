@@ -475,7 +475,7 @@ RGB ≈ (0.85, 0.79, 0.14) 이라 **정의상 항상 걸린다**. "순백"의 �
 **(b) 러너에 `export NEGOBS_SEG_STRICT=1` 을 넣어도 낫지 않았다** — 재실행에서도
 `idseg 1` 이었고 STALE 마커의 mtime 이 **첫 시도 시각 그대로**였다(마커 안의
 `"strict": null`). 즉 **산출물 디렉터리가 이미 있으면 세그 경로가 재생성되지 않는다.**
-**해결**: ⓐ `dataset/260823_v3p5_h67reg_{A,C}` 를 **지우고** ⓑ `h67_probe.py` 의
+**해결**: ⓐ `dataset/_archive/v3_scene_build/260823_v3p5_h67reg_{A,C}` 를 **지우고** ⓑ `h67_probe.py` 의
 **프로세스 로컬 `--seg-strict`**(SCENE_H67_BUILD §7.5 에서 8/8 신선 마스크로 검증된
 경로)로 재렌더 ⇒ **`idseg 8/8` 즉시 회복**. 러너의 `reg` 모드에 `--seg-strict` 를 고정했다.
 

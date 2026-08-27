@@ -2,7 +2,7 @@
 
 # 3A_VIEWPOINT_AUDIT — is the H-tier band-3a twin Δ ≈ 0 uniform, or viewpoint-concentrated?
 
-**Queue item.** CPU-2 of `Docs/experiment/WEEKEND_BRIEF_0823.md` §6.5 (material for 결재 #4).
+**Queue item.** CPU-2 of `Docs/campaign/WEEKEND_BRIEF_0823.md` §6.5 (material for 결재 #4).
 **Author.** Claude Code, 2026-08-23. **Reader.** someone (or some AI) seeing this project for the
 first time — everything needed to read this file is defined in it or in the ledger it names.
 **Compute.** CPU only, `env_seg`, `PYTHONNOUSERSITE=1`. No re-training, no re-rendering, no GPU.

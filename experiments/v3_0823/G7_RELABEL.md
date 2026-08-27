@@ -66,7 +66,7 @@ $PY labeler.py --on-round ... --off-round ... --grid gridspec_v1.json --out ...
 
 라벨 파일이 이를 자백한다 — `experiments/dayrun_0820/annotations/labels_boost_{h,e,e2}.json`의
 `scene_footprint[].hm_source`가 **44개 씬-팔 전부 `aabb`**다. 융합 출력이 놓였어야 할 자리는
-`dataset/260820_boost_<band>_<arm>/<split>/<scene>/heightmap_fused.npy`이고, **부재**다(stale이 아니라 미생성).
+`dataset/v2_corpus/260820_boost_<band>_<arm>/<split>/<scene>/heightmap_fused.npy`이고, **부재**다(stale이 아니라 미생성).
 
 ### 1.2 결함 범위 — 26개 (밴드, 씬) 쌍 전수 스캔
 
@@ -112,8 +112,8 @@ AABB 높이맵은 카메라 독립(`variation_kit.AabbPrefilter.ground_z`)이라
 동결 코퍼스를 건드리지 않으려면 **평행 트리**가 필요하다. 규약:
 
 ```
-dataset/260820_boost_<band>_<arm>_g7fix/<split>/<scene>/    # 변형 A (라운드 자기 융합)
-dataset/260820_boost_<band>_<arm>_g7fixM/<split>/<scene>/   # 변형 B (본 라운드 융합 참조)
+dataset/v2_corpus/260820_boost_<band>_<arm>_g7fix/<split>/<scene>/    # 변형 A (라운드 자기 융합)
+dataset/v2_corpus/260820_boost_<band>_<arm>_g7fixM/<split>/<scene>/   # 변형 B (본 라운드 융합 참조)
 ```
 
 * 원본 씬 디렉터리의 **모든 항목**(png · `.depth.npy` · `variation.json` · `heightmap.npy` ·
@@ -124,13 +124,13 @@ dataset/260820_boost_<band>_<arm>_g7fixM/<split>/<scene>/   # 변형 B (본 라�
 * `dataset/`는 `.gitignore:85`로 통째 무시되므로 리포에 들어가지 않는다.
 * 생성기: `experiments/v3_0823/code/g7_make_shadow.py` · `code/g7_variantB.py`.
 
-동결 트리 재확인: `find dataset/260820_boost_*_{on,off} -name 'heightmap_fused*' | wc -l` → **0**.
+동결 트리 재확인: `find dataset/v2_corpus/260820_boost_*_{on,off} -name 'heightmap_fused*' | wc -l` → **0**.
 
 ### 2.2 변형 A — boost 라운드 자기 depth로 융합
 
 ```
 PYTHONNOUSERSITE=1 $PY fuse_heightmap.py \
-  --on-round  dataset/260820_boost_e_on_g7fix  --off-round dataset/260820_boost_e_off_g7fix \
+  --on-round  dataset/v2_corpus/260820_boost_e_on_g7fix  --off-round dataset/v2_corpus/260820_boost_e_off_g7fix \
   --scenes scene07,scene08,scene12 --grid gridspec_v1.json --workers 6
 # e2: --scenes scene07,scene12
 ```
@@ -185,8 +185,8 @@ on 팔은 0.001–0.006(scene12·e2만 0.15), off 팔은 0.6–2.25 — **본 �
 ### 3.1 실행
 
 ```
-PYTHONNOUSERSITE=1 $PY labeler.py --on-round dataset/260820_boost_<band>_on_g7fix{,M} \
-   --off-round dataset/260820_boost_<band>_off_g7fix{,M} \
+PYTHONNOUSERSITE=1 $PY labeler.py --on-round dataset/v2_corpus/260820_boost_<band>_on_g7fix{,M} \
+   --off-round dataset/v2_corpus/260820_boost_<band>_off_g7fix{,M} \
    --grid gridspec_v1.json --workers 8 --out experiments/v3_0823/annotations/labels_boost_<band>_g7fix{,M}.json
 ```
 그리드 · 게이트 정책은 08-20과 **동일**(`PROVISIONAL-GRID-V1`, 20칸, `train-on-gated; pregate preserved per D14`).
@@ -504,13 +504,13 @@ R=/home/vislab/Desktop/work_sy/Practice_NegObs
 cd $R/experiments/mainrun_0819/code/labeling
 
 $PY $R/experiments/v3_0823/code/g7_make_shadow.py        # 1. 섀도 렌더 트리(심링크)
-$PY fuse_heightmap.py --on-round $R/dataset/260820_boost_e_on_g7fix \
-    --off-round $R/dataset/260820_boost_e_off_g7fix \
+$PY fuse_heightmap.py --on-round $R/dataset/v2_corpus/260820_boost_e_on_g7fix \
+    --off-round $R/dataset/v2_corpus/260820_boost_e_off_g7fix \
     --scenes scene07,scene08,scene12 --grid gridspec_v1.json --workers 6
-$PY fuse_heightmap.py --on-round $R/dataset/260820_boost_e2_on_g7fix \
-    --off-round $R/dataset/260820_boost_e2_off_g7fix \
+$PY fuse_heightmap.py --on-round $R/dataset/v2_corpus/260820_boost_e2_on_g7fix \
+    --off-round $R/dataset/v2_corpus/260820_boost_e2_off_g7fix \
     --scenes scene07,scene12 --grid gridspec_v1.json --workers 4
-rm $R/dataset/260820_boost_e_on_g7fix/train/scene08/heightmap_fused*   # aabb ON / fused OFF
+rm $R/dataset/v2_corpus/260820_boost_e_on_g7fix/train/scene08/heightmap_fused*   # aabb ON / fused OFF
 $PY $R/experiments/v3_0823/code/g7_pairing_audit.py      # 2. 팔별 채택 감사
 $PY $R/experiments/v3_0823/code/g7_variantB.py           # 3. 변형 B 트리
 $PY labeler.py --on-round ... --off-round ... --grid gridspec_v1.json --workers 8 --out ...

@@ -30,6 +30,10 @@
 set -u
 
 REPO=/home/vislab/Desktop/work_sy/Practice_NegObs
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>). A round is
+# found by NAME: negobs_round (strict) / negobs_round_or_flat (tolerant).
+source "$REPO/scripts/lib/negobs_paths.sh"
 LOGDIR="$REPO/experiments/v3_0823/logs"
 LOG="$LOGDIR/h67_probe.log"
 LOCK=/tmp/negobs_gpu.lock
@@ -70,7 +74,7 @@ python3 experiments/v3_0823/code/h67_probe.py \
   # rc 만으로 판정하지 않는다. Isaac 의 `fastShutdown` 경로는 씬이 예외로 죽어도
   #   프로세스 종료코드를 0 으로 돌려주는 일이 있다(설계 시 실측: sceneH6 의
   #   ground_kit U2 게이트 위반이 rc=0 으로 보고됐다). **산출물이 판정한다.**
-  local d="$REPO/dataset/$run/val/$scene"
+  local d; d="$(negobs_round_or_flat "$run")/val/$scene"
   local n_png n_dep n_seg n_hm
   n_png=$(find "$d" -name '*.png' 2>/dev/null | wc -l)
   n_dep=$(find "$d" -name '*.depth.npy' 2>/dev/null | wc -l)
@@ -168,7 +172,7 @@ for r in 260823_v3p5_h67smoke_A 260823_v3p5_h67probe_A 260823_v3p5_h67probe_C \
          260823_v3p5_h67regsmoke_A \
          260823_v3p5_h67reg_A 260823_v3p5_h67reg_C \
          260823_v3p5_h67reg2_A 260823_v3p5_h67reg2_C; do
-  d="$REPO/dataset/$r"
+  d="$(negobs_round_or_flat "$r")"
   [ -d "$d" ] || continue
   say "  dataset/$r: $(find "$d" -name '*.png' | wc -l) png · $(find "$d" -name '*.depth.npy' | wc -l) depth · $(find "$d" -name '*.idseg.npz' | wc -l) idseg · $(find "$d" -name 'heightmap.npy' | wc -l) heightmap"
 done

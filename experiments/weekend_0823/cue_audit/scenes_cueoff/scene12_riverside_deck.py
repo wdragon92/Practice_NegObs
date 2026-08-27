@@ -6,7 +6,7 @@ waterfront cantilever deck walk (Isaac Sim 4.5)
 Type    : cantilever axis (inherits the geometry axis of the old T17 cliff
           catwalk) - only the stage is swapped for a 'Han River / stream
           waterfront timber deck promenade'. Spec: Docs/briefs/multi_scene_brief_v5.md
-          §R7 (source: Docs/scene_redesign_v5_proposal.md disposition table 12=replace)
+          §R7 (source: Docs/archive/legacy/scene_redesign_v5_proposal.md disposition table 12=replace)
 Shared  : scene_common.py · **world shared with scene17_ramp_pair_hangang.py**
           (water / apartment backdrop / bridge / silver grass / streetlight
           parameters and material patterns reused)

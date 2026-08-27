@@ -30,6 +30,7 @@ scope, so `python3 variation_kit.py` runs the self-check on a bare interpreter
 """
 from __future__ import annotations
 
+import fnmatch
 import json
 import math
 import os
@@ -104,6 +105,114 @@ def assert_role_gate():
     return role
 
 
+# ===========================================================================
+# dataset root and round lookup — added by the 0827 reorg (Docs/reorg_0827/)
+# ===========================================================================
+# `dataset/` was flat (196 round dirs side by side) until the 0827 tidy-up
+# grouped it as `dataset/<group>/<round>`. Round NAMES never change, so a round
+# is still addressed by name; this helper is the single place that knows where
+# to look, and it accepts BOTH layouts so it could be landed before the move.
+#
+# Rule: never return a path that does not exist, and never return "nothing".
+# A miss RAISES. Before this helper ~24 call sites globbed a flat round path;
+# after a move those return `[]` / False, which reads downstream as "0 frames"
+# or "gate PASS on an empty set" instead of a failure.
+DATASET_ROOT = (os.environ.get("NEGOBS_DATASET_ROOT")
+                or os.path.join(REPO, "dataset"))
+
+ROUNDS_INDEX = "ROUNDS.json"      # {round name: relative path of its parent}
+
+_ROUNDS_CACHE = {}                # {index path: ((path, mtime_ns, size), dict)}
+
+
+def _subdirs(path):
+    """Sorted names of the real subdirectories of `path` ([] if unreadable)."""
+    try:
+        return sorted(e.name for e in os.scandir(path) if e.is_dir())
+    except OSError:
+        return []
+
+
+def rounds_index(dataset_root=None):
+    """`{round: group_relpath}` read from `<DATASET_ROOT>/ROUNDS.json`.
+
+    Returns `{}` when the file is absent or unreadable — the index is an
+    accelerator and a record of intent, never the only way to find a round.
+    """
+    root = dataset_root or DATASET_ROOT
+    p = os.path.join(root, ROUNDS_INDEX)
+    try:
+        st = os.stat(p)
+    except OSError:
+        return {}
+    key = (p, st.st_mtime_ns, st.st_size)
+    cached = _ROUNDS_CACHE.get(p)
+    if cached is not None and cached[0] == key:
+        return cached[1]
+    try:
+        with open(p, encoding="utf-8") as fh:
+            idx = json.load(fh)
+    except (OSError, ValueError):
+        return {}
+    if not isinstance(idx, dict):
+        return {}
+    idx = {k: v for k, v in idx.items() if isinstance(v, str)}
+    _ROUNDS_CACHE[p] = (key, idx)
+    return idx
+
+
+def round_candidates(name, dataset_root=None):
+    """Every EXISTING directory that could be round `name`, in search order.
+
+    Order: (a) flat `<root>/<name>`, (b) the `ROUNDS.json` index, (c) one level
+    of groups `<root>/*/<name>` and the archive tier `<root>/_archive/*/<name>`.
+    Duplicates (the same directory reached two ways, or through a symlink) are
+    collapsed by `realpath`, so a normal grouped round yields exactly one hit.
+    """
+    root = dataset_root or DATASET_ROOT
+    cands = [os.path.join(root, name)]
+    group = rounds_index(root).get(name)
+    if group:
+        cands.append(os.path.join(root, group, name))
+    for entry in _subdirs(root):
+        cands.append(os.path.join(root, entry, name))
+        if entry == "_archive":
+            for sub in _subdirs(os.path.join(root, entry)):
+                cands.append(os.path.join(root, entry, sub, name))
+    hits, seen = [], set()
+    for c in cands:
+        if not os.path.isdir(c):
+            continue
+        real = os.path.realpath(c)
+        if real in seen:
+            continue
+        seen.add(real)
+        hits.append(c)
+    return hits
+
+
+def round_dir(name, dataset_root=None):
+    """Absolute directory of round `name`, flat or grouped. Never silent.
+
+    Raises `FileNotFoundError` when the round is nowhere (the name and the
+    roots searched are in the message) and `RuntimeError` when the same name
+    exists in two places — which happens only mid-move, and is exactly the
+    moment a confident answer would be the wrong one.
+    """
+    root = dataset_root or DATASET_ROOT
+    hits = round_candidates(name, root)
+    if len(hits) == 1:
+        return hits[0]
+    if not hits:
+        raise FileNotFoundError(
+            "[negobs] round {!r} not found. Searched: {}/{}, the {} index, "
+            "{}/*/{}, {}/_archive/*/{}".format(
+                name, root, name, ROUNDS_INDEX, root, name, root, name))
+    raise RuntimeError(
+        "[negobs] round {!r} is ambiguous — {} directories: {}".format(
+            name, len(hits), ", ".join(hits)))
+
+
 def data_root(run_stamp):
     """Output root for a data run — a tree `regression_check` cannot reach.
 
@@ -111,8 +220,94 @@ def data_root(run_stamp):
     so `dataset/` is structurally invisible to it (spec D1/§2.5, B2). The run
     stamp follows the `look_check/README.md` §2 round convention
     `<yymmdd>_<wave>_<purpose>` so a data run is as traceable as a judge round.
+
+    0827: an EXISTING stamp is returned wherever it now lives (flat or grouped);
+    a NEW stamp keeps the old behaviour and is created flat at
+    `<DATASET_ROOT>/<stamp>`, which the reorg's move script groups afterwards.
+    An ambiguous stamp raises rather than picking one.
     """
-    return os.path.join(REPO, "dataset", run_stamp)
+    return round_dir_or_flat(run_stamp)
+
+
+def round_dir_or_flat(name, dataset_root=None):
+    """`round_dir(name)` when the round exists, else the flat `<root>/<name>`.
+
+    The conversion used at the call sites that ALREADY have an explicit
+    "this round is absent" branch — a `MISSING` verdict row, a
+    `note("... absent -- skipped")`, a `[skip] not present`. Those sites keep
+    their own report (the loud part is already theirs); what this fixes is the
+    other half of the 0827 problem, an EXISTING round that a flat path can no
+    longer see. Use `round_dir()` instead wherever a missing round is a bug.
+
+    An ambiguous name still raises — mid-move is never the time to guess.
+    """
+    try:
+        return round_dir(name, dataset_root)
+    except FileNotFoundError:
+        return os.path.join(dataset_root or DATASET_ROOT, name)
+
+
+def has_round(name, dataset_root=None):
+    """True when round `name` exists somewhere under the dataset root.
+
+    The group-aware replacement for `os.path.isdir(REPO/"dataset"/name)` used as
+    a *feature switch* (e.g. `w1b2_repro_control.py`: "was the W0 control round
+    rendered?"). `round_dir()` is the right call when the answer must be a path
+    and a miss is an error; this one is for the questions where "no" is a legal
+    answer. An ambiguous name counts as present.
+    """
+    return bool(round_candidates(name, dataset_root))
+
+
+def rounds_matching(pattern, dataset_root=None):
+    """Existing round dirs whose NAME matches `pattern`, across all groups.
+
+    The group-aware replacement for `glob(<root>/<pattern>)`, which is the one
+    idiom the 0827 regrouping breaks *silently*: a flat glob over a grouped tree
+    returns `[]` and the caller reports "0 rounds" instead of failing. Returns
+    absolute directories sorted by round name; the caller usually wants
+    `os.path.basename`.
+
+    `pattern` is matched against the round NAME only — never against the group
+    directory, which is the whole point: a caller asking for `*_v3p5_*` means
+    "these rounds", not "these rounds if they happen to still be one level
+    down". A pattern containing any of `* ? [` is an `fnmatch` pattern;
+    anything else is treated as a plain prefix. So
+
+        glob(".../dataset/260820_boost_*")  ->  rounds_matching("260820_boost_")
+        glob(".../dataset/*reg_[ABCD]")     ->  rounds_matching("*reg_[ABCD]")
+
+    Search space = the same three positions `round_candidates()` knows:
+    `<root>/<name>` (flat), `<root>/<group>/<name>`, `<root>/_archive/<g>/<name>`.
+    Group names come from `ROUNDS.json`, so a depth-1 directory that is a GROUP
+    is never mistaken for a round; when the index is absent (the pre-move flat
+    tree) there are no groups and every depth-1 directory is a round, which is
+    exactly right for that layout. Each name found is resolved through
+    `round_dir()`, so the result never contains a path that does not exist and
+    an ambiguous name raises rather than being returned twice.
+    """
+    root = dataset_root or DATASET_ROOT
+    if any(c in pattern for c in "*?["):
+        match = lambda n: fnmatch.fnmatchcase(n, pattern)      # noqa: E731
+    else:
+        match = lambda n: n.startswith(pattern)                # noqa: E731
+    groups = {g.split("/", 1)[0] for g in rounds_index(root).values() if g}
+    groups.add("_archive")
+    names = set()
+    for entry in _subdirs(root):
+        if entry not in groups:
+            if match(entry):
+                names.add(entry)
+            continue
+        for sub in _subdirs(os.path.join(root, entry)):
+            if entry == "_archive":
+                # `_archive/<group>/<round>`: `sub` is a GROUP name, never a round.
+                for leaf in _subdirs(os.path.join(root, entry, sub)):
+                    if match(leaf):
+                        names.add(leaf)
+            elif match(sub):
+                names.add(sub)
+    return [round_dir(n, root) for n in sorted(names)]
 
 
 # ===========================================================================

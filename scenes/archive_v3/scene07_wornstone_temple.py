@@ -2,7 +2,7 @@
 """
 scene07_wornstone_temple.py — NegObs 인공씬 7호: 사찰 진입 마모 석단 (Isaac Sim 4.5)
 
-사양서 : Docs/multi_scene_brief_v3.md §A(회귀 체크리스트)·§D(scene07)·§B(빌더)
+사양서 : Docs/briefs/multi_scene_brief_v3.md §A(회귀 체크리스트)·§D(scene07)·§B(빌더)
 공통 라이브러리 : scene_common.py / 골격 관례 : scene03_riverbank.py
 
 유형 (T16 마모 석단): **비직선 단코 × 소실점 규칙 붕괴**.

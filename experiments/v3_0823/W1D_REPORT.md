@@ -564,7 +564,7 @@ V의 분할표(P1) `a/b/c/d` = **1584 / 744 / 1368 / 1368** (W0: 1704/624/1368/1
 | `experiments/v3_0823/code/w0_rimpact.py` | **확장**(`--cls`) — 인자 없이 실행하면 W0 §7 재현 |
 | `scripts/run_data_render.py` | **`NEGOBS_SEG_STRICT` opt-in 1개 추가** (기본 off · 정본 동작 불변) |
 | `experiments/v3_0823/logs/w1d_render.log` · `w1d_label.log` · `w1d_markers/` (60개) | 로그·마커 |
-| `dataset/260826_v3w1_lib_D{,_h,_e,_e2,_smoke}` | 렌더물 7.50 GB (gitignored) |
+| `dataset/v3_library/260826_v3w1_lib_D{,_h,_e,_e2,_smoke}` | 렌더물 7.50 GB (gitignored) |
 
 ### 재현
 

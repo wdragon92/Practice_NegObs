@@ -2,7 +2,7 @@
 
 작성 2026-08-23 · red-team wave 2, R6 · **읽기 전용 감사 — 어떤 파일도 편집하지 않았다.**
 근거: `experiments/mainrun_0819/{RESULTS_DRAFT.md, METRICS.md}` 전문 · `experiments/dayrun_0820/runs/v2/SEED_TABLE.md` ·
-`Docs/experiment/Status/PROJECT_STATE_0823.md` §5–§6 (사용자 저작 — **편집 대상 아님, 대조용으로만 읽음**) ·
+`Docs/archive/campaign_status/PROJECT_STATE_0823.md` §5–§6 (사용자 저작 — **편집 대상 아님, 대조용으로만 읽음**) ·
 `DECISIONS.md` D41–D48 · `weekend_0823/{rt_response, redteam, v2s, cue_audit}/`.
 
 각 항목: **파일 · 줄 · 현재 문장 · 교체 문장**. 문서 언어를 따른다(EN 문서는 EN, KR 문서는 KR).
@@ -374,6 +374,6 @@
 
 ## 8. 감사 범위 및 제외
 
-- **읽고 편집 대상에서 제외**: `Docs/experiment/**` (사용자 저작 — PS `PROJECT_STATE_0823.md` §5.1의 `RGB .688 / YOLO 구성적 상한`, §5.2의 `9/9 CI 0 배제`, §6-4의 H recall 해석은 위와 **같은 스테일 계열**이나, 본 목록은 손대지 않는다. 승용 결재란에 "PS §5.1·§5.2·§6-4 동반 정정" 1건으로 올릴 것을 권고).
+- **읽고 편집 대상에서 제외**: `Docs/campaign/**` (사용자 저작 — PS `PROJECT_STATE_0823.md` §5.1의 `RGB .688 / YOLO 구성적 상한`, §5.2의 `9/9 CI 0 배제`, §6-4의 H recall 해석은 위와 **같은 스테일 계열**이나, 본 목록은 손대지 않는다. 승용 결재란에 "PS §5.1·§5.2·§6-4 동반 정정" 1건으로 올릴 것을 권고).
 - **이미 정본인 문장은 교체 대상이 아니다**: `RESULTS_DRAFT` RT-A~RT-F(L446–502), `METRICS` RT.1–RT.8(L968–1219), `SEED_TABLE` L151–154 부기, `rt_response/APPEND_*.md`. 단 RT 본문 안에서도 **"fully occluded"라는 단어 자체**는 F7이 폐기한 용어이므로 §2 L1059·L1181, `F7_HPAIR_PIXDIFF.md` L49에서 표현만 교체한다.
 - **append-only 규율**: 위 교체는 전부 "해당 줄을 고친다"로 적었으나, 동결 규율상 원문 보존이 필요하면 **각 파일 말미에 `## R6 정오표` 절을 append하고 줄 번호로 지시**하는 형태가 대안이다. 어느 쪽을 택할지는 결재 사항.

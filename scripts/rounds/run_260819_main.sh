@@ -70,7 +70,7 @@
 # Hence one config file per (scene, arm) under
 # experiments/mainrun_0819/render_configs/, generated from a per-file grep.
 #
-# Output trees: dataset/260819_main_on/ and dataset/260819_main_off/. They MUST
+# Output trees: dataset/v2_corpus/260819_main_on/ and dataset/v2_corpus/260819_main_off/. They MUST
 # differ — the split/scene/filename path is identical in both arms
 # (run_data_render.py:171,430) and a shared --run stamp would overwrite.
 #
@@ -111,6 +111,10 @@
 set -u
 
 REPO=/home/vislab/Desktop/work_sy/Practice_NegObs
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>). A round is
+# found by NAME: negobs_round (strict) / negobs_round_or_flat (tolerant).
+source "$REPO/scripts/lib/negobs_paths.sh"
 CFG="$REPO/experiments/mainrun_0819/render_configs"
 LOGDIR="$REPO/experiments/mainrun_0819/logs"
 LOG="$LOGDIR/render.log"
@@ -184,7 +188,7 @@ split_of() { echo "$SPLITMAP" | awk -v s="$1" '$1==s{print $2}'; }
 # Checked: exit 0, at least one cut, and every requested condition landed in
 # `done_conds` (which is what scene-level resume reads back).
 scene_ok() {                     # scene_ok <run> <scene> <conds>
-  python3 - "$REPO/dataset/$1/manifest.json" "$2" "$3" <<'PY'
+  python3 - "$(negobs_round_or_flat "$1")/manifest.json" "$2" "$3" <<'PY'
 import json, sys
 mf_path, scene, conds = sys.argv[1], sys.argv[2], sys.argv[3].split(",")
 try:
@@ -214,7 +218,8 @@ render() {                       # render <scene> <arm> <conds> <label>
   local run="260819_main_${arm}"
   local cfgfile="$CFG/${scene}_${arm}.json"
   local split; split=$(split_of "$scene")
-  local outdir="$REPO/dataset/${run}/${split}/${scene}"
+  local outdir
+  outdir="$(negobs_round_or_flat "${run}")/${split}/${scene}"
 
   if [ ! -f "$cfgfile" ]; then
     say "  [FAIL] $scene $arm: missing config $cfgfile"
@@ -282,7 +287,8 @@ T1=$(date +%s)
 say "================================================================"
 say "run_260819_main.sh done in $(( (T1-T0)/60 )) min"
 for arm in $ARMS; do
-  say "  dataset/260819_main_${arm}: $(find "$REPO/dataset/260819_main_${arm}" -name '*.png' 2>/dev/null | wc -l) png · $(find "$REPO/dataset/260819_main_${arm}" -name '*.depth.npy' 2>/dev/null | wc -l) depth · $(find "$REPO/dataset/260819_main_${arm}" -name 'heightmap.npy' 2>/dev/null | wc -l) heightmap"
+  d="$(negobs_round_or_flat "260819_main_${arm}")"
+  say "  dataset/260819_main_${arm}: $(find "$d" -name '*.png' 2>/dev/null | wc -l) png · $(find "$d" -name '*.depth.npy' 2>/dev/null | wc -l) depth · $(find "$d" -name 'heightmap.npy' 2>/dev/null | wc -l) heightmap"
 done
 if [ "$NFAIL" = "0" ]; then
   say "FAIL SUMMARY: none — every invocation exited 0"

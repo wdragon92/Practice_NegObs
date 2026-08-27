@@ -3,7 +3,7 @@
 sceneC1_snow_stairs.py - NegObs synthetic scene 26: snow-covered stairs (Isaac Sim 4.5)
 
 Type    : C1 condition variant - existing straight-stair geometry + a snow environment layer (core batch1 scene)
-Spec    : Docs/nanobanana_batch1_geometry_map.md §B sceneC1_snow_stairs
+Spec    : Docs/archive/legacy/nanobanana_batch1_geometry_map.md §B sceneC1_snow_stairs
 Look ref: look_refs/c1_snow_stairs.jpg
 Shared  : scene_common.py · scene16_canopy_shadow.py (standard template) ·
           scene01_campus_stairs.py (straight-stair reference form)

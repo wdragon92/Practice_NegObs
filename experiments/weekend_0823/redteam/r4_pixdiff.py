@@ -16,7 +16,13 @@ import sys
 import numpy as np
 from PIL import Image
 
-DS = "/home/vislab/Desktop/work_sy/Practice_NegObs/dataset"
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__))))))                              # noqa: E402
+from variation_kit import DATASET_ROOT, round_dir_or_flat   # noqa: E402
+
+DS = DATASET_ROOT                 # 0827: no hardcoded absolute root
 N = int(sys.argv[1]) if len(sys.argv) > 1 else 8
 # (씬, cueoff 라운드 안의 split 폴더, 계보 밴드 라운드)
 #   밴드는 PREREG_CUEOFF §2.1 그대로: s12=boost_e · s17=boost_h · s20=boost_e2.
@@ -49,7 +55,7 @@ def diff_stats(dir_a, dir_b, n=N):
 def main():
     print(f"threshold levels: >=2 / >=8 / >=32 (F7 정본) · n<= {N} 컷/쌍\n")
     for sc, sub, band in SCENES:
-        base_a = f"{DS}/260823_cueoff_A/{sub}/{sc}"
+        base_a = os.path.join(round_dir_or_flat("260823_cueoff_A"), sub, sc)
         if not os.path.isdir(base_a):
             continue
         print(f"== {sc}")
@@ -63,9 +69,9 @@ def main():
                   f">=8 {r[2]:9.0f}  >=32 {r[3]:9.0f} ({r[4]:5.2f}% of frame)")
         # 계보 대조 — 잡음 바닥(A vs 정본 on)과 C vs 정본 off
         for nm, a_dir, b_dir in (
-            ("A  vs lineage_on ", base_a, f"{DS}/{band}_on"),
+            ("A  vs lineage_on ", base_a, round_dir_or_flat(f"{band}_on")),
             ("C  vs lineage_off", base_a.replace("cueoff_A", "cueoff_C"),
-             f"{DS}/{band}_off"),
+             round_dir_or_flat(f"{band}_off")),
         ):
             hit = [d for d in glob.glob(f"{b_dir}/*/{sc}") if os.path.isdir(d)]
             if not hit:

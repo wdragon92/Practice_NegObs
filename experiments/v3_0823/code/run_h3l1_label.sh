@@ -22,6 +22,10 @@
 # =============================================================================
 set -u
 REPO=/home/vislab/Desktop/work_sy/Practice_NegObs
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>). A round is
+# found by NAME: negobs_round (strict) / negobs_round_or_flat (tolerant).
+source "$REPO/scripts/lib/negobs_paths.sh"
 PY=/home/vislab/miniconda3/envs/env_seg/bin/python
 LAB="$REPO/experiments/mainrun_0819/code/labeling"
 ANN="$REPO/experiments/v3_0823/annotations"
@@ -37,7 +41,10 @@ export PYTHONNOUSERSITE=1
 unset PYTHONPATH VIRTUAL_ENV
 
 label() {  # label <on-round> <off-round> <out>
-  ( cd "$LAB" && $PY labeler.py --on-round "$D/$1" --off-round "$D/$2" \
+  local _on _off                      # 0827: rounds are grouped
+  _on="$(negobs_round "$1")"  || return 1
+  _off="$(negobs_round "$2")" || return 1
+  ( cd "$LAB" && $PY labeler.py --on-round "$_on" --off-round "$_off" \
         --grid gridspec_v1.json --scenes "$SCENES" --out "$3" --workers 4 )
 }
 
@@ -45,7 +52,7 @@ echo "=== (A,C) 라벨 · $S ==========================================="
 label "${S}_A" "${S}_C" "$ANN/h3l1_${TAG}_ac_labels.json"
 echo "=== (B,D) 라벨 · $S ==========================================="
 label "${S}_B" "${S}_D" "$ANN/h3l1_${TAG}_bd_labels.json"
-if [ -d "$D/${N}_A" ]; then
+if [ -d "$(negobs_round_or_flat "${N}_A")" ]; then
   echo "=== near (A,C) 라벨 · $N ======================================"
   label "${N}_A" "${N}_C" "$ANN/h3l1_${TAG}_near_labels.json"
 fi
@@ -56,13 +63,13 @@ echo "=== strict-H 수율 (test-ext 모형 0.50) ========================"
 echo "    ※ sceneL1(측방)의 판정문은 무시한다 — 아래 섹터 게이트가 판정층이다."
 $PY experiments/v3_0823/code/h67_yield.py \
     --labels "$ANN/h3l1_${TAG}_ac_labels.json" \
-    --on "dataset/${S}_A" --off "dataset/${S}_C" --band H --split ext
+    --on "$(negobs_round "${S}_A")" --off "$(negobs_round "${S}_C")" --band H --split ext
 if [ -f "$ANN/h3l1_${TAG}_near_labels.json" ]; then
   echo
   echo "=== 근거리 대조 (비-H 가 실제로 나오는가) ====================="
   $PY experiments/v3_0823/code/h67_yield.py \
       --labels "$ANN/h3l1_${TAG}_near_labels.json" \
-      --on "dataset/${N}_A" --off "dataset/${N}_C" --band base --split ext
+      --on "$(negobs_round "${N}_A")" --off "$(negobs_round "${N}_C")" --band base --split ext
 fi
 echo
 echo "=== 4팔 게이트 (VG-01/02/06/07 · paired-H · 섹터 분포) ========"

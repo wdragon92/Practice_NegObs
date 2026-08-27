@@ -20,6 +20,10 @@
 set -euo pipefail
 
 REPO=/home/vislab/Desktop/work_sy/Practice_NegObs
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>). A round is
+# found by NAME: negobs_round (strict) / negobs_round_or_flat (tolerant).
+source "$REPO/scripts/lib/negobs_paths.sh"
 LAB=$REPO/experiments/mainrun_0819/code/labeling
 V2S=$REPO/experiments/weekend_0823/v2s
 GRID=$LAB/gridspec_v2s.json
@@ -38,17 +42,20 @@ python "$LAB/synth_test.py" | tail -5
 
 label_pair () {           # label_pair <tag> <on-round> <off-round>
   local tag="$1" on="$2" off="$3"
+  local on_dir off_dir                # 0827: rounds are grouped
+  on_dir="$(negobs_round "$on")"
+  off_dir="$(negobs_round "$off")"
   echo "=== [1/3] relabel $tag on gridspec_v2s ==="
   python "$LAB/labeler.py" \
-    --on-round  "$REPO/dataset/$on" \
-    --off-round "$REPO/dataset/$off" \
+    --on-round  "$on_dir" \
+    --off-round "$off_dir" \
     --grid "$GRID" --workers "$WORKERS" \
     --out "$V2S/annotations/labels_v2s_$tag.json"
   echo "=== [2/3] manifest $tag ==="
   python "$LAB/build_manifest.py" \
     --labels "$V2S/annotations/labels_v2s_$tag.json" \
-    --on-round  "$REPO/dataset/$on" \
-    --off-round "$REPO/dataset/$off" \
+    --on-round  "$on_dir" \
+    --off-round "$off_dir" \
     --out "$V2S/manifest_v2s_$tag.json"
 }
 

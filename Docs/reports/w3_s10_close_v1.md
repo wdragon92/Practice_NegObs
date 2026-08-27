@@ -216,7 +216,7 @@ flock -w 7200 /tmp/negobs_gpu.lock →
 
 Defaults (`--conds L0 --cams 8 --seed 20260730`) — the same arm scene07's `260731_s07_recache`
 used, so the two re-caches are comparable. Run at `a8e8343`, i.e. **at the fixed code**, which
-is the point of a re-cache. **8 cuts · 2.34 s/cut · `dataset/260731_data_s10/test/scene10/`**
+is the point of a re-cache. **8 cuts · 2.34 s/cut · `dataset/_archive/scene_dev_2607/260731_data_s10/test/scene10/`**
 (scene10 is a `test`-split scene; scene07 was `train` — `variation_kit`'s assignment, not a
 choice made here).
 

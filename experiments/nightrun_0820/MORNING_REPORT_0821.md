@@ -1,6 +1,6 @@
 # MORNING_REPORT_0821 — 야간 사이클(NIGHTRUN 0820) 아침 보고
 
-작성 2026-08-21 새벽 · 지시서 `Docs/experiment/OVERNIGHT_BRIEF_0820_v1.md` P3-D2
+작성 2026-08-21 새벽 · 지시서 `Docs/campaign/OVERNIGHT_BRIEF_0820_v1.md` P3-D2
 작업방 `experiments/nightrun_0820/` · 결정 기록 `experiments/mainrun_0819/DECISIONS.md` **D25–D30**
 
 > **한 줄 요약(야간분).** GPU를 사용자 로봇 baseline이 밤새 잡고 있어서(23:55 개시 → 04:03까지 폴링 내내 점유)

@@ -59,7 +59,7 @@
 | `experiments/v3_0823/logs/h12_probe.log` | — | 렌더 로그 |
 
 데이터 라운드(코퍼스 아님 — **증거로만 보존**):
-`dataset/260823_v3p5_h12smoke_A` (2컷) · `…_h12probe_{A,B,C,D}` (R0 · 16컷씩) ·
+`dataset/_archive/_delete_candidates/260823_v3p5_h12smoke_A` (2컷) · `…_h12probe_{A,B,C,D}` (R0 · 16컷씩) ·
 **`…_h12rev_{A,B,C,D}` (확정 · 32컷씩)** · `…_h12near_{A,C}` (8컷씩).
 **확정 수치는 전부 `h12rev_*` 에서 나온다** — `h12probe_*` 는 개정을 발동시킨 R0 증거다.
 
@@ -691,7 +691,7 @@ bash experiments/v3_0823/code/run_h12_label.sh 260823_v3p5_h12rev 260823_v3p5_h1
 | `experiments/v3_0823/logs/h3l1_probe.log` | — | 렌더 로그 |
 
 데이터 라운드(코퍼스 아님 — **증거로만 보존**):
-`dataset/260823_v3p5_h3l1smoke_A`(2컷) · `…_h3l1probe_{A,B,C,D}`(R0 · 씬당 16컷) ·
+`dataset/_archive/_delete_candidates/260823_v3p5_h3l1smoke_A`(2컷) · `…_h3l1probe_{A,B,C,D}`(R0 · 씬당 16컷) ·
 **`…_h3l1rev_{A,B,C,D}`(확정 · 씬당 16컷)** · `…_h3l1near_{A,C}`(씬당 4컷).
 **확정 수치는 전부 `h3l1rev_*` 에서 나온다** — `h3l1probe_*` 는 개정을 발동시킨 R0 증거다.
 

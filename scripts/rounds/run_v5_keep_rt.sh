@@ -1,12 +1,12 @@
 #!/bin/bash
 # 감사 v4 구현(5팀) 반영 후 유지 씬 15종 SMOKE + RT 확인 렌더
-#   출력: look_check/sceneNN/v5_rt  ·  로그: look_check/v5_keep_rt.log
+#   출력: look_check/sceneNN/v5_rt  ·  로그: look_check/logs/v5_keep_rt.log
 cd /home/vislab/Desktop/work_sy/Practice_NegObs || exit 9
 unset PYTHONPATH VIRTUAL_ENV
 source ~/miniconda3/etc/profile.d/conda.sh
 conda activate env_isaaclab
 export PYTHONNOUSERSITE=1 PYTHONUNBUFFERED=1
-LOG=look_check/v5_keep_rt.log
+LOG=look_check/logs/v5_keep_rt.log
 : > $LOG
 
 KEEP="scene01_campus_stairs scene02_underpass scene03_riverbank scene04_parktrail \

@@ -1,0 +1,3 @@
+
+=== false-positive control (5 series): 156 GRAZE cuts · FAIL 0 · WARN 0 · deferred 10
+  [ok] fp: FAIL 0 · WARN 0 — matches EXPECTED

@@ -23,6 +23,6 @@ echo "=== [physpilot] done ==="
 # --- hard-negative data extension (same run id => r_pb over drop+nondrop) ---
 python scripts/run_data_render.py --run 260815_datapilot --scenes sceneN1,sceneN2,sceneN3 \
   --conds L0,L2,L7 --cams 8 --seed 20260815 2>&1 | tail -8
-python3 scripts/sensor_augment.py --in dataset/260815_datapilot --out dataset/260815_datapilot_aug --seed 3 2>&1 | tail -2
-python3 scripts/shortcut_audit.py --data dataset/260815_datapilot 2>&1 | tail -8
+python3 scripts/sensor_augment.py --in dataset/_archive/pilots/260815_datapilot --out dataset/_archive/pilots/260815_datapilot_aug --seed 3 2>&1 | tail -2
+python3 scripts/shortcut_audit.py --data dataset/_archive/pilots/260815_datapilot 2>&1 | tail -8
 echo "=== [physpilot+dataext] done ==="

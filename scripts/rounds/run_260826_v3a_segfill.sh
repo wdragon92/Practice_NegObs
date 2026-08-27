@@ -59,6 +59,10 @@
 set -u
 
 REPO=/home/vislab/Desktop/work_sy/Practice_NegObs
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>). A round is
+# found by NAME: negobs_round (strict) / negobs_round_or_flat (tolerant).
+source "$REPO/scripts/lib/negobs_paths.sh"
 CFG="$REPO/experiments/mainrun_0819/render_configs"
 LOGDIR="$REPO/experiments/v3_0823/logs"
 LOG="$LOGDIR/segfill_render.log"
@@ -150,7 +154,9 @@ repo, run, scene, nexp, cfgp = sys.argv[1], sys.argv[2], sys.argv[3], int(sys.ar
 CUES = ("cue_railing", "cue_tactile", "cue_nosing", "cue_material_break",
         "cue_sign", "cue_scene_dressing")
 want = json.load(open(cfgp, encoding="utf-8"))
-mf = os.path.join(repo, "dataset", run, "manifest.json")
+sys.path.insert(0, repo)                     # 0827: grouped dataset/
+from variation_kit import round_dir_or_flat
+mf = os.path.join(round_dir_or_flat(run), "manifest.json")
 try:
     rec = json.load(open(mf, encoding="utf-8"))["scenes"][scene]
 except Exception as e:
@@ -248,7 +254,8 @@ render_unit() {                  # render_unit <band> <scene> <mode: smoke|batch
   cfgfile="$CFG/${scene}_on.json"
   split=$(split_of "$scene")
   local mark="$MARKDIR/${run}__${scene}.done"
-  local outdir="$REPO/dataset/${run}/${split}/${scene}"
+  local outdir
+  outdir="$(negobs_round_or_flat "${run}")/${split}/${scene}"
   local cams conds sub nexp
   if [ "$mode" = "smoke" ]; then
     cams=1; conds=$(cond_smoke "$scene"); sub=""; nexp=1
@@ -371,7 +378,7 @@ say "================================================================"
 say "run_260826_v3a_segfill.sh done — ok=$NOK skip=$NSKIP fail=$NFAIL cuts=$NCUTS · wall $((DT/60))m $((DT%60))s"
 say "  (예산 816컷 · 정본 A 트리는 한 바이트도 건드리지 않는다)"
 for r in "$STAMP" "${STAMP}_h" "${STAMP}_e" "${STAMP}_e2" "${STAMP}_smoke"; do
-  d="$REPO/dataset/$r"
+  d="$(negobs_round_or_flat "$r")"
   [ -d "$d" ] || continue
   say "  dataset/$r: $(find "$d" -name '*.png' | wc -l) png · $(find "$d" -name '*.depth.npy' | wc -l) depth · $(find "$d" -name '*.idseg.npz' | wc -l) idseg · $(find "$d" -name 'heightmap.npy' | wc -l) heightmap"
 done

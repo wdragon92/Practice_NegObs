@@ -3,7 +3,7 @@
 판정 2026-07-27 · v6 RT 렌더(`look_check/sceneNN/v6_rt/`) 기준 · 비교 구렌더 `v5_pt/`
 근거 사양: `Docs/audit_v4/user_feedback_v5_1.md` §1~9(v5.2 §6~9 포함)
 반영 픽스로그: `fixlog_VA.md`(03/04/15) · `fixlog_VB.md`(17) · `fixlog_VC.md`(05/18) · `fixlog_N4.md` · `fixlog_VD.md`
-렌더 로그: `look_check/v6_all_rt.log` — 6씬 전부 `SMOKE_OK RT_EXIT=0 FILES=14~15`(캡처 누락 0)
+렌더 로그: `look_check/logs/v6_all_rt.log` — 6씬 전부 `SMOKE_OK RT_EXIT=0 FILES=14~15`(캡처 누락 0)
 
 ---
 

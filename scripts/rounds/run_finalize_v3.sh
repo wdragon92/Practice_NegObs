@@ -10,7 +10,7 @@ unset PYTHONPATH VIRTUAL_ENV
 source ~/miniconda3/etc/profile.d/conda.sh
 conda activate env_isaaclab
 export PYTHONNOUSERSITE=1
-LOG=look_check/finalize_v3.log
+LOG=look_check/logs/finalize_v3.log
 : > $LOG
 
 echo "== [1/2] scene14/17 r3 확인 렌더 ==" | tee -a $LOG

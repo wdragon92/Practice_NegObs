@@ -556,7 +556,7 @@ def panel_a(V2A, V3A, MAN, key, n_twin, margin):
                bbox_to_anchor=(.995, Y(1.72)), fontsize=9.0, frameon=False, ncol=1)
     footer(fig,
            "원장  " + LEDGER_PF + "\n"
-           "이미지·cam  " + LEDGER_MAN + " → frames[].rgb / dataset/<round>/test/<scene>/variation.json  ·  " + GRIDSTR + "\n"
+           "이미지·cam  " + LEDGER_MAN + " → frames[].rgb / dataset/<group>/<round>/test/<scene>/variation.json  ·  " + GRIDSTR + "\n"
            + SEEDSET + "  ·  운용점 τ_op = 0.5 (PREREG §2.1 참고 병기 전용)  ·  "
            f"분모 = 이 컷 1장 × 20칸 (팔마다)  ·  {CD_GT}  ·  " + DATE, y=.010)
     return save(fig, "panel_a_fourarm.png", dpi=112), fig

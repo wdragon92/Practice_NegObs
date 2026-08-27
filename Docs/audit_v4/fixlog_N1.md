@@ -3,7 +3,7 @@
 작성 2026-07-27 · 팀 N-1(Opus 5) · 단독 소유 파일
 `scenes/main/scene06_overpass_spiral.py` · `scenes/main/scene11_footbridge_stairs.py`
 근거: `Docs/briefs/multi_scene_brief_v5.md` §R1 / §R6 + 공통 레이어 절 ·
-`Docs/scene_redesign_v5_proposal.md` · `Docs/briefs/multi_scene_brief_v3.md` §A
+`Docs/archive/legacy/scene_redesign_v5_proposal.md` · `Docs/briefs/multi_scene_brief_v3.md` §A
 참고(구 씬, 미수정): `scenes/archive_v3/scene06_spiral_towerstone.py`(helix 사용례) ·
 `scenes/archive_v3/scene11_grating_fireescape.py`(그레이팅·metal_rust 사용례)
 

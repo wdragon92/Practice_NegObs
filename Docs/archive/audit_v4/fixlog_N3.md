@@ -5,7 +5,7 @@
 작성 2026-07-27 · 팀 N-3(Opus 5) · **단독 소유 신규 파일**
   `scenes/main/scene08_sunken_plaza.py` (v5 R3, 1183 L)
   `scenes/main/scene12_riverside_deck.py` (v5 R7, 1076 L)
-근거: `Docs/briefs/multi_scene_brief_v5.md` §R3·§R7 · `Docs/scene_redesign_v5_proposal.md`
+근거: `Docs/briefs/multi_scene_brief_v5.md` §R3·§R7 · `Docs/archive/legacy/scene_redesign_v5_proposal.md`
       (처분표 08·12 = 교체) · `Docs/briefs/multi_scene_brief_v3.md` §A 회귀 방지
 참조 구현: `scenes/archive_v3/scene08_stepwell_lattice.py`(개구 4박스·사광 60° 사용례) ·
       `scenes/main/scene17_ramp_pair_hangang.py`(수면·아파트 원경·교량·억새 규약 — R7이 세계관 공유)

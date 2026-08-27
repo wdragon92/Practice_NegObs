@@ -105,8 +105,8 @@ def build(variant, tag, out_manifest, out_labels):
         g7_affected_frames=n_corr,
         g7_label_sets=[f"experiments/v3_0823/annotations/labels_boost_e_g7fix{variant}.json",
                        f"experiments/v3_0823/annotations/labels_boost_e2_g7fix{variant}.json"],
-        g7_shadow_render_trees=[f"dataset/260820_boost_e_{{on,off}}_g7fix{variant}",
-                                f"dataset/260820_boost_e2_{{on,off}}_g7fix{variant}"],
+        g7_shadow_render_trees=[f"dataset/v2_corpus/260820_boost_e_{{on,off}}_g7fix{variant}",
+                                f"dataset/v2_corpus/260820_boost_e2_{{on,off}}_g7fix{variant}"],
         note=meta.get("note", "") + " | G7-corrected labels for 5 (band, scene) pairs")
     json.dump(dict(meta=meta, frames=frames), open(out_manifest, "w"))
     lab["meta"] = dict(lab.get("meta", {})); lab["meta"].update(

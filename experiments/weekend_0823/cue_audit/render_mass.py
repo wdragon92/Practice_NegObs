@@ -33,6 +33,11 @@ import numpy as np
 from PIL import Image
 
 REPO = "/home/vislab/Desktop/work_sy/Practice_NegObs"
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat   # noqa: E402
 DS = os.path.join(REPO, "dataset")
 AUDIT = os.path.join(REPO, "experiments/weekend_0823/cue_audit")
 
@@ -89,20 +94,20 @@ def main():
     units = list(UNITS)
     for extra in [s for s in a.extra_round.split(",") if s]:
         # discover scene/split from the arm-A round on disk
-        for d in sorted(glob.glob(os.path.join(DS, f"{extra}_A", "*", "scene*"))):
+        for d in sorted(glob.glob(os.path.join(round_dir_or_flat(f"{extra}_A"), "*", "scene*"))):
             sc = os.path.basename(d)
             sub = os.path.basename(os.path.dirname(d))
             units.append((sc, sub, extra, ""))
 
     rows, summ = [], []
     for scene, sub, stem, lineage in units:
-        base_a = os.path.join(DS, f"{stem}_A", sub, scene)
+        base_a = os.path.join(round_dir_or_flat(f"{stem}_A"), sub, scene)
         if not os.path.isdir(base_a):
             print(f"[skip] {stem} {scene}: no arm A")
             continue
         tA = tiers(stem, "A", scene)
         for arm in ARMS:
-            dir_b = os.path.join(DS, f"{stem}_{arm}", sub, scene)
+            dir_b = os.path.join(round_dir_or_flat(f"{stem}_{arm}"), sub, scene)
             if not os.path.isdir(dir_b):
                 continue
             pf, npx = per_frame_diff(base_a, dir_b)
@@ -134,7 +139,8 @@ def main():
                                  pct_ge32=round(100.0 * m32 / npx, 4)))
         # ---- G0 noise floor: arm A vs the canonical lineage `on` round
         if lineage:
-            hit = [d for d in glob.glob(os.path.join(DS, lineage + "_on", "*", scene))
+            hit = [d for d in glob.glob(os.path.join(
+                round_dir_or_flat(lineage + "_on"), "*", scene))
                    if os.path.isdir(d)]
             if hit:
                 pf, npx = per_frame_diff(base_a, hit[0])

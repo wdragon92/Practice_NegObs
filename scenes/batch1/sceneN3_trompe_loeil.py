@@ -3,7 +3,7 @@
 sceneN3_trompe_loeil.py — NegObs synthetic scene 23: painted floor stairs (Isaac Sim 4.5)
 
 Type    : N3 hard negative — anamorphic trompe-l'oeil · **GT = "no drop" in every pixel**
-Spec    : Docs/nanobanana_batch1_geometry_map.md §A sceneN3_trompe_loeil
+Spec    : Docs/archive/legacy/nanobanana_batch1_geometry_map.md §A sceneN3_trompe_loeil
 Look ref: look_refs/n3_trompe_loeil.jpg (pedestrian mall + anamorphic painting of a descending stair)
 Shared  : scene_common.py (add_box / dressing·lighting harness) · scene14 illusion-scene precedent
 

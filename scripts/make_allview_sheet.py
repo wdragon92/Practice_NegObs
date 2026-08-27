@@ -7,7 +7,7 @@
 
 사용:
     python3 scripts/make_allview_sheet.py --round 260806_w3_allview4 \
-        --out look_check/_review/260806_w3_allview4
+        --out look_check/_review/w3/260806_w3_allview4
 """
 import argparse
 import os

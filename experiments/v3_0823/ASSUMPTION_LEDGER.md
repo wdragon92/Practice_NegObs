@@ -8,9 +8,9 @@
 
 
 - **작성**: Claude Code · 2026-08-23 · **지위**: 초안, **승용 미결재**. 이 문서 자체는 정본이 아니라 **레드팀 과녁**이다.
-- **큐**: `Docs/experiment/V3_BRIEF_0823.md` §4.3 CPU-4 — "그리드/티어/채널/U-Net/손실/τ/분할/씬 등 전 설계 선택을 행으로:
+- **큐**: `Docs/campaign/V3_BRIEF_0823.md` §4.3 CPU-4 — "그리드/티어/채널/U-Net/손실/τ/분할/씬 등 전 설계 선택을 행으로:
   원 근거·주말 증거의 지지/훼손·대안·결정 주체. **레드팀 2세션을 여기에 투입**."
-- **상위 문서**: `Docs/experiment/V3_DESIGN_0823.md`(DZ) → `Docs/experiment/Status/PROJECT_STATE_0823_v2.md`(PS v2) →
+- **상위 문서**: `Docs/campaign/V3_DESIGN_0823.md`(DZ) → `Docs/archive/campaign_status/PROJECT_STATE_0823_v2.md`(PS v2) →
   `experiments/weekend_0823/MORNING_REPORT_0823.md`(MR23) → `experiments/mainrun_0819/DECISIONS.md`(D1–D52).
 - **보고 표준 준수 상태**(V3_BRIEF §6): 승용 요약 §0 ✅ · 체감 카드 §6 ✅ ·
   **정성 패널 ❌ — 이 트랙은 렌더·추론 산출물이 없는 문서 트랙이라 패널을 만들 원재료가 없다.** 면제를 주장하지 않고 미이행으로 기록한다.
@@ -310,11 +310,11 @@ CPU-4는 "레드팀 2세션을 여기에 투입"이 큐 문면이다. 겹치지 
 
 | 약칭 | 경로 |
 |---|---|
-| PS v2 | `Docs/experiment/Status/PROJECT_STATE_0823_v2.md` |
-| PS(구판) | `Docs/experiment/Status/PROJECT_STATE_0823.md` — **§5.1·§5.2·§6-4는 폐기**, §12(그리드 설계 기록)만 유효 |
-| DZ | `Docs/experiment/V3_DESIGN_0823.md` |
-| V3_BRIEF | `Docs/experiment/V3_BRIEF_0823.md` |
-| DAYRUN_BRIEF | `Docs/experiment/DAYRUN_BRIEF_0820.md` |
+| PS v2 | `Docs/archive/campaign_status/PROJECT_STATE_0823_v2.md` |
+| PS(구판) | `Docs/archive/campaign_status/PROJECT_STATE_0823.md` — **§5.1·§5.2·§6-4는 폐기**, §12(그리드 설계 기록)만 유효 |
+| DZ | `Docs/campaign/V3_DESIGN_0823.md` |
+| V3_BRIEF | `Docs/campaign/V3_BRIEF_0823.md` |
+| DAYRUN_BRIEF | `Docs/campaign/DAYRUN_BRIEF_0820.md` |
 | MR23 | `experiments/weekend_0823/MORNING_REPORT_0823.md` |
 | D1–D52 | `experiments/mainrun_0819/DECISIONS.md` |
 | METRICS | `experiments/mainrun_0819/METRICS.md` (§RT.1–RT.8 = 레드팀 대응 정본) |

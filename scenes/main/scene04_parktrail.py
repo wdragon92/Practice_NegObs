@@ -2,7 +2,7 @@
 """
 scene04_parktrail.py — NegObs synthetic scene 4: park sleeper stair (T4, Isaac Sim 4.5)
 
-Spec : Docs/multi_scene_brief_v2.md §C `scene04_parktrail` (sole spec)
+Spec : Docs/briefs/multi_scene_brief_v2.md §C `scene04_parktrail` (sole spec)
 Shared library : scene_common.py (verified API - ported·generalised from scene01)
 
 Hazard (T4): an **irregular-riser sleeper stair** descending a gently sloped park bank.

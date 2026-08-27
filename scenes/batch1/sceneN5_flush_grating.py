@@ -3,7 +3,7 @@
 sceneN5_flush_grating.py - NegObs synthetic scene 25: flush grating and manholes (Isaac Sim 4.5)
 
 Type     : N5 Hard Negative - flush drainage grating + cast iron manholes (GT = no drop on any pixel)
-Spec     : Docs/nanobanana_batch1_geometry_map.md §A sceneN5_flush_grating
+Spec     : Docs/archive/legacy/nanobanana_batch1_geometry_map.md §A sceneN5_flush_grating
 Look ref : look_refs/n5_grating.jpg
 Shared   : scene_common.py (verified API helpers) · scene16_canopy_shadow.py (skeleton)
            scene11_grating_fireescape.py (grating bar pattern · dark metal material)

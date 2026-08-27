@@ -831,10 +831,10 @@ aux effects are precision and false alarms only. (ii) n = 1 seed, against a base
 ### R.3 Dressing-preserving off-arm control, sceneC2 + sceneN3 (C2)
 
 Source `experiments/nightrun_0820/ctrl_dressing/CTRL_TABLE.md` (+ `ctrl_numbers.json`).
-τ = 0.5, RGB recipe-v2 checkpoints, seeds 42/43/44. **old off** = `dataset/260819_main_off` (toggle
+τ = 0.5, RGB recipe-v2 checkpoints, seeds 42/43/44. **old off** = `dataset/v2_corpus/260819_main_off` (toggle
 also deleted the leaf mound, the railing, and in N3 the mural) · **new off** =
-`dataset/260820_ctrloff` (`keep_dressing`: hazard geometry only). Both pair against the **same** on
-arm `dataset/260819_main_on`. Every off frame carries all-zero GT, so `FA_frame` is a pure
+`dataset/v2_probes/260820_ctrloff` (`keep_dressing`: hazard geometry only). Both pair against the **same** on
+arm `dataset/v2_corpus/260819_main_on`. Every off frame carries all-zero GT, so `FA_frame` is a pure
 false-alarm rate. 24 frames per scene-arm; pairs kept 24/24 in every cell of the table.
 
 **Twin Δ_frame (pose-matched, tol 0.15 m):**

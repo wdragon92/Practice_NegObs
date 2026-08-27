@@ -1,12 +1,12 @@
 #!/bin/bash
 # 유지 씬 15종 PT 파이널 (판정 반영 수정 후) — 512spp/8바운스
-#   출력: look_check/sceneNN/v5_pt  ·  로그: look_check/v5_keep_pt.log
+#   출력: look_check/sceneNN/v5_pt  ·  로그: look_check/logs/v5_keep_pt.log
 cd /home/vislab/Desktop/work_sy/Practice_NegObs || exit 9
 unset PYTHONPATH VIRTUAL_ENV
 source ~/miniconda3/etc/profile.d/conda.sh
 conda activate env_isaaclab
 export PYTHONNOUSERSITE=1 PYTHONUNBUFFERED=1
-LOG=look_check/v5_keep_pt.log
+LOG=look_check/logs/v5_keep_pt.log
 : > $LOG
 
 KEEP="scene01_campus_stairs scene02_underpass scene03_riverbank scene04_parktrail \

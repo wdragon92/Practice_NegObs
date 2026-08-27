@@ -17,6 +17,11 @@ import json, os, sys
 import numpy as np
 
 REPO = "/home/vislab/Desktop/work_sy/Practice_NegObs"
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat   # noqa: E402
 DS = os.path.join(REPO, "dataset")
 HZ = 0.3
 MAIN_RULE = {"scene02": "fused/fused", "scene07": "fused/fused",
@@ -25,8 +30,8 @@ MAIN_RULE = {"scene02": "fused/fused", "scene07": "fused/fused",
 
 
 def sdir(round_name, scene):
-    for split in sorted(os.listdir(os.path.join(DS, round_name))):
-        d = os.path.join(DS, round_name, split, scene)
+    for split in sorted(os.listdir(round_dir_or_flat(round_name))):
+        d = os.path.join(round_dir_or_flat(round_name), split, scene)
         if os.path.isfile(os.path.join(d, "variation.json")):
             return d
     return None

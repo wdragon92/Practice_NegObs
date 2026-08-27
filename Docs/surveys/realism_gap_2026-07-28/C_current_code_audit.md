@@ -22,7 +22,7 @@
 | # | 원인 | 근거 한 줄 |
 |---|---|---|
 | ① | **표현 원자 = USD 임플리싯 프림 3종** (Cube/Cylinder/Sphere). 외부 메시 임포트 0건, 베벨 0건, 변위·세분 0건 | `grep AddReference\|AddPayload\|\.gltf\|\.fbx` → **0건**. `scene_common.py:216/233/254`. `mesh.CreateSubdivisionSchemeAttr("none")`(`scene09:1137`, `sceneN3:361`) |
-| ② | **33씬 전체의 지오메트리가 23,058 프림**(씬당 평균 700, 최소 170 · 최대 1,996). 그중 **약 19 %가 건물 창문 사각형**이다 | 전 씬 `main()` 정적 실행 실측(§6-1). Isaac 로그와 교차검증 — scene18 1600 / scene19 170 **정확 일치**(`look_check/v7_all_rt.log:10028`, `:10947`) |
+| ② | **33씬 전체의 지오메트리가 23,058 프림**(씬당 평균 700, 최소 170 · 최대 1,996). 그중 **약 19 %가 건물 창문 사각형**이다 | 전 씬 `main()` 정적 실행 실측(§6-1). Isaac 로그와 교차검증 — scene18 1600 / scene19 170 **정확 일치**(`look_check/logs/v7_all_rt.log:10028`, `:10947`) |
 | ③ | **재질의 64.7 %가 텍스처 없는 상수색**, 나머지도 1개 텍스처를 월드투영으로 무한 반복한 완전 평탄면. AO·오염·데칼·마스크 블렌딩 0건 | 재질 생성 호출 **677곳 중 상수색 438(64.7 %)**. `make_pbr`은 diff/nor/rough 3맵만 지원(`scene_common.py:329-336`). 지면은 두께 0.5 m 박스 1장(`scene04:598-603`) |
 | ④ | **조건이 사실상 1개** — 정오·청천·태양고도 49.79°·동일 HDRI가 본편 21씬 **전부** | `grep -l 'noon_sun_elev=49.79' scenes/main/*.py` → **21/21**, `dome_intensity=1000.0` → **21/21** |
 
@@ -585,7 +585,7 @@ def grid_views(gy, heights=(0.3, 0.9, 1.8), dists=(2, 5, 10), pitch=-10):
 `pxr`/`omni`/`carb`/`isaacsim` 를 스텁 처리해 각 씬 `main()` 을 실행하고
 `UsdGeom.{Cube,Cylinder,Sphere,Mesh}.Define()` 호출을 집계했다(기본 `SCENE_CONFIG`).
 Isaac 실제 로그와 교차검증 — **scene18 = 1600, scene19 = 170 정확 일치**
-(`look_check/v7_all_rt.log:10028`, `:10947`).
+(`look_check/logs/v7_all_rt.log:10028`, `:10947`).
 
 **main 21씬 = 16,821 프림 (평균 801)**
 

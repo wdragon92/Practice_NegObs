@@ -1,0 +1,59 @@
+{
+ "frame": "frames/wh_h/wh_h_cap_rs_d0.7_001.png",
+ "world": "wh_h",
+ "view": "rs_d0.7",
+ "idx": "001",
+ "img_w": 1280,
+ "img_h": 720,
+ "imgsz": 640,
+ "pred_conf_floor": 0.05,
+ "tau_op": 0.25,
+ "gate_conf": 0.65,
+ "class_names": {
+  "0": "negative_obstacle"
+ },
+ "roi_poly": [
+  [
+   512,
+   216
+  ],
+  [
+   768,
+   216
+  ],
+  [
+   1152,
+   720
+  ],
+  [
+   128,
+   720
+  ]
+ ],
+ "arms": {
+  "roi": {
+   "n_floor": 0,
+   "n_tau": 0,
+   "n_node_gate": 0,
+   "boxes": []
+  },
+  "full": {
+   "n_floor": 1,
+   "n_tau": 0,
+   "n_node_gate": 0,
+   "boxes": [
+    {
+     "cls": 0,
+     "conf": 0.11071988940238953,
+     "x0": 5.0362548828125,
+     "y0": 0.0,
+     "x1": 758.3472900390625,
+     "y1": 50.751548767089844,
+     "cx": 381.6917724609375,
+     "cy": 25.375774383544922,
+     "in_roi": false
+    }
+   ]
+  }
+ }
+}

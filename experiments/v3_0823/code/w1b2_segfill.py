@@ -49,8 +49,11 @@ W0의 "sha256 재현성 19/19"를 들었다. 그런데 **W0가 잰 19/19는 `hei
 
 설치 경로 규약
 --------------
-    dataset/<정본 A 라운드>/<split>/<scene>/<PNG stem>.idseg.npz     ← 마스크
-    dataset/<정본 A 라운드>/<split>/<scene>/idseg_backfill.json      ← 계보 원장
+    dataset/<group>/<정본 A 라운드>/<split>/<scene>/<PNG stem>.idseg.npz  ← 마스크
+    dataset/<group>/<정본 A 라운드>/<split>/<scene>/idseg_backfill.json   ← 계보 원장
+
+(0827 재편: 라운드는 목적별 그룹 한 칸 아래에 있다. `<group>` 을 직접 적지 말고
+ `dataset/ROUNDS.json` 이나 `variation_kit.round_dir("<라운드이름>")` 으로 찾는다.)
 
 정본 `variation.json`은 **건드리지 않는다**(D72 ⑤ "A팔 바이트 불변"의 전제를
 지킨다). 컷별 `idseg` / `idseg_fetch` / `idseg_n_ids`와 출처 라운드·sha256은
@@ -87,6 +90,11 @@ import shutil
 import sys
 
 REPO = "/home/vislab/Desktop/work_sy/Practice_NegObs"
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat   # noqa: E402
 V3 = os.path.join(REPO, "experiments/v3_0823")
 S = "260826_v3a_segfill"
 
@@ -122,7 +130,7 @@ def sha256(p):
 
 
 def sdir(run, scene):
-    g = glob.glob(os.path.join(REPO, "dataset", run, "*", scene, "variation.json"))
+    g = glob.glob(os.path.join(round_dir_or_flat(run), "*", scene, "variation.json"))
     return os.path.dirname(g[0]) if g else None
 
 
@@ -444,7 +452,7 @@ def main(install, only):
                procedure="A팔 재렌더(SEG_SIDECAR+SEG_STRICT) → 전 컷 PNG sha256 "
                          "바이트 동일 검증 → 동일한 씬에만 .idseg.npz 설치 "
                          "(PNG·depth 폐기) · 불일치는 격리(무단 대체 금지)",
-               install_path="dataset/<정본 A 라운드>/<split>/<scene>/"
+               install_path="dataset/<group>/<정본 A 라운드>/<split>/<scene>/"
                             "<stem>.idseg.npz  (+ idseg_backfill.json 원장; "
                             "정본 variation.json은 건드리지 않는다. g7fixM 오버레이 "
                             "트리에는 같은 이름의 심링크를 건다)",

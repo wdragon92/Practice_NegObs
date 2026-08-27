@@ -1,0 +1,20 @@
+# Dataset paths cited in text that ALREADY do not exist on disk, measured on
+# 2026-08-27 BEFORE any move (rewrite_dataset_paths.py --verify, pre-move run).
+# --verify compares against this list so a pre-existing dangling citation is
+# not mistaken for damage the reorg caused. Paths are written in the FLAT
+# (pre-move) spelling; --verify normalises both sides before comparing.
+#
+# 1-2: a brace expansion inside a JSON documentation field
+#      ("g7_shadow_render_trees": ["dataset/260820_boost_e_{on,off}_g7fixM", ...]).
+#      A name-keyed rewriter cannot fix these; reference_inventory §6.3 R2 lists
+#      them as hand-rewrite cases. Files: experiments/v3_0823/dataset_manifest_v2corr.json
+#      and dataset_manifest_v2corr_roundown.json.
+dataset/260820_boost_e_
+dataset/260820_boost_e2_
+# 3-6: a prose provenance field naming two scenes that were never rendered in
+#      those rounds. File: experiments/weekend_0823/rt_response/f7b_noisefloor.json.
+#      The ROUND part of each path is real and is rewritten normally.
+dataset/260819_main_on/sceneN3
+dataset/260820_ctrloff/sceneN3
+dataset/260819_main_on/sceneC2
+dataset/260820_ctrloff/sceneC2

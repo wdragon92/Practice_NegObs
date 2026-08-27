@@ -173,7 +173,7 @@ quote "unmoved" without the census qualifier.
 ## 6. CB-7 (`6edce66` · `b7abe89` · `535926e`)
 
 * **One commit, one re-cache**: `scenes/main/scene02_underpass.py` is touched by exactly one
-  commit in `836ed7f..HEAD`. R-2 data run `dataset/260731_cb7_recache` exists and re-checks
+  commit in `836ed7f..HEAD`. R-2 data run `dataset/_archive/scene_dev_2607/260731_cb7_recache` exists and re-checks
   **PASS**; R-3 = `260731_w3_cb7` (+ the `_pre` attribution arm). Regression re-run
   `cb7_pre → cb7`: **FAIL 11 · WARN 2**, byte-equal verdict set with the committed JSON, every
   FAIL a `FRAME` code (the declared composition change), OCCL at WARN. ✔

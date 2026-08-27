@@ -1,7 +1,7 @@
 # R3_repro — 레드팀 3파 (재현성·회계 감사)
 
 작성 2026-08-23 · 감사자 RED TEAM R3 (Opus, 독립 재계산) · 작업방 `experiments/weekend_0823/redteam/`
-읽은 것: `Docs/experiment/Status/PROJECT_STATE_0823.md` §1–3·§8·§12 · `experiments/mainrun_0819/METRICS.md`
+읽은 것: `Docs/archive/campaign_status/PROJECT_STATE_0823.md` §1–3·§8·§12 · `experiments/mainrun_0819/METRICS.md`
 (정의·Night·Resume 절) · `experiments/mainrun_0819/code/labeling/labeler.py` CONSTANTS ·
 `experiments/dayrun_0820/code/merge_corpus.py` · `experiments/dayrun_0820/SPLIT_PROPOSAL_v2_full.md` +
 `split_v2_full.json` · `experiments/nightrun_0820/MORNING_REPORT_0821.md` · `DECISIONS.md` D1–D32 ·

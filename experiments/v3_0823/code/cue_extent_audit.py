@@ -76,6 +76,11 @@ import time
 import numpy as np
 
 REPO = "/home/vislab/Desktop/work_sy/Practice_NegObs"
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat, rounds_matching   # noqa: E402
 V3 = os.path.join(REPO, "experiments/v3_0823")
 CODE = os.path.join(V3, "code")
 LOGS = os.path.join(V3, "logs")
@@ -416,11 +421,11 @@ def d_arm_survivors(workers=12):
     from concurrent.futures import ProcessPoolExecutor
     jobs = collections.defaultdict(list)
     for rnd, _b in D_ROUNDS:
-        for f in glob.glob(os.path.join(DATA, rnd, "*", "*", "*.idseg.npz")):
+        for f in glob.glob(os.path.join(round_dir_or_flat(rnd), "*", "*", "*.idseg.npz")):
             jobs[os.path.basename(os.path.dirname(f))].append(f)
     for sp in PROBE_PRIMARY + PROBE_SECONDARY:
         for sc in sp["scenes"]:
-            for f in glob.glob(os.path.join(DATA, f"{sp['stamp']}_D", "*", sc,
+            for f in glob.glob(os.path.join(round_dir_or_flat(f"{sp['stamp']}_D"), "*", sc,
                                             "*.idseg.npz")):
                 jobs[sc].append(f)
     flat, owner = [], []
@@ -466,11 +471,11 @@ def _armdiff_one(pair):
 def _pair_index():
     A, B = {}, {}
     for rnd, band in A_ROUNDS:
-        for f in glob.glob(os.path.join(DATA, rnd, "*", "*", "*.idseg.npz")):
+        for f in glob.glob(os.path.join(round_dir_or_flat(rnd), "*", "*", "*.idseg.npz")):
             A[(os.path.basename(os.path.dirname(f)), band, os.path.basename(f))] = f
     for rounds, tg in ((B_ROUNDS, "B"), (B2_ROUNDS, "B2"), (B3_ROUNDS, "B3")):
         for rnd, band in rounds:
-            for f in glob.glob(os.path.join(DATA, rnd, "*", "*", "*.idseg.npz")):
+            for f in glob.glob(os.path.join(round_dir_or_flat(rnd), "*", "*", "*.idseg.npz")):
                 sc = os.path.basename(os.path.dirname(f))
                 if b_tree_of(sc) != tg:
                     continue
@@ -478,10 +483,10 @@ def _pair_index():
     # 신규 씬 프로브: A팔 vs B팔 (전 cue OFF) — 전 단서 집합이 그대로 나온다
     for sp in PROBE_PRIMARY:
         for sc in sp["scenes"]:
-            for f in glob.glob(os.path.join(DATA, f"{sp['stamp']}_A", "*", sc,
+            for f in glob.glob(os.path.join(round_dir_or_flat(f"{sp['stamp']}_A"), "*", sc,
                                             "*.idseg.npz")):
                 A[(sc, sp["group"], os.path.basename(f))] = f
-            for f in glob.glob(os.path.join(DATA, f"{sp['stamp']}_B", "*", sc,
+            for f in glob.glob(os.path.join(round_dir_or_flat(f"{sp['stamp']}_B"), "*", sc,
                                             "*.idseg.npz")):
                 B[(sc, sp["group"], os.path.basename(f))] = f
     return A, B
@@ -526,14 +531,14 @@ def b_arm_survivors(workers=12):
     jobs = collections.defaultdict(list)
     for rounds, tg in ((B_ROUNDS, "B"), (B2_ROUNDS, "B2"), (B3_ROUNDS, "B3")):
         for rnd, _b in rounds:
-            for f in glob.glob(os.path.join(DATA, rnd, "*", "*", "*.idseg.npz")):
+            for f in glob.glob(os.path.join(round_dir_or_flat(rnd), "*", "*", "*.idseg.npz")):
                 sc = os.path.basename(os.path.dirname(f))
                 if b_tree_of(sc) != tg:
                     continue
                 jobs[sc].append(f)
     for sp in PROBE_PRIMARY:
         for sc in sp["scenes"]:
-            jobs[sc] += glob.glob(os.path.join(DATA, f"{sp['stamp']}_B", "*", sc,
+            jobs[sc] += glob.glob(os.path.join(round_dir_or_flat(f"{sp['stamp']}_B"), "*", sc,
                                                "*.idseg.npz"))
     flat, owner = [], []
     for sc, fs in sorted(jobs.items()):
@@ -889,7 +894,7 @@ def _stale_map_w1d():
     """W1-D stale 152컷: `variation.json` 의 `idseg_fetch == 't0'` 로 기계 판정."""
     stale = set()
     for rnd, _band in D_ROUNDS:
-        for vf in glob.glob(os.path.join(DATA, rnd, "*", "*", "variation.json")):
+        for vf in glob.glob(os.path.join(round_dir_or_flat(rnd), "*", "*", "variation.json")):
             try:
                 d = json.load(open(vf, encoding="utf-8"))
             except Exception:
@@ -906,7 +911,7 @@ def _backfill_ok():
     ok = set()
     ledger = []
     for rnd, _b in A_ROUNDS:
-        for lf in glob.glob(os.path.join(DATA, rnd, "*", "*", "idseg_backfill.json")):
+        for lf in glob.glob(os.path.join(round_dir_or_flat(rnd), "*", "*", "idseg_backfill.json")):
             try:
                 d = json.load(open(lf, encoding="utf-8"))
             except Exception:
@@ -924,7 +929,7 @@ def _probe_strict_map(stamps):
     """프로브 라운드: `variation.json` 이 `idseg_fetch=='orch'` 인 컷만."""
     ok, bad = set(), 0
     for st in stamps:
-        for vf in glob.glob(os.path.join(DATA, st, "*", "*", "variation.json")):
+        for vf in glob.glob(os.path.join(round_dir_or_flat(st), "*", "*", "variation.json")):
             try:
                 d = json.load(open(vf, encoding="utf-8"))
             except Exception:
@@ -1019,7 +1024,7 @@ def build_label_index():
     # 여기서는 hazard=0 만 필요하므로 디스크의 컷 목록에서 직접 색인을 만든다.
     nC = 0
     for rnd, band in C_ROUNDS:
-        for vf in glob.glob(os.path.join(DATA, rnd, "*", "*", "variation.json")):
+        for vf in glob.glob(os.path.join(round_dir_or_flat(rnd), "*", "*", "variation.json")):
             try:
                 d = json.load(open(vf, encoding="utf-8"))
             except Exception:
@@ -1106,7 +1111,7 @@ def collect_jobs():
 
     # A팔
     for rnd, band in A_ROUNDS:
-        for f in sorted(glob.glob(os.path.join(DATA, rnd, "*", "*", "*.idseg.npz"))):
+        for f in sorted(glob.glob(os.path.join(round_dir_or_flat(rnd), "*", "*", "*.idseg.npz"))):
             sc = os.path.basename(os.path.dirname(f))
             stem = os.path.basename(f)[: -len(".idseg.npz")]
             if (rnd, sc, stem) not in bf_ok:
@@ -1117,7 +1122,7 @@ def collect_jobs():
     # B팔 (B2 우선 · W1B2 §7)
     for rounds, tag in ((B3_ROUNDS, "B3"), (B2_ROUNDS, "B2"), (B_ROUNDS, "B")):
         for rnd, band in rounds:
-            for f in sorted(glob.glob(os.path.join(DATA, rnd, "*", "*", "*.idseg.npz"))):
+            for f in sorted(glob.glob(os.path.join(round_dir_or_flat(rnd), "*", "*", "*.idseg.npz"))):
                 sc = os.path.basename(os.path.dirname(f))
                 if b_tree_of(sc) != tag:
                     acct[f"{tag}_skip_not_canonical"] += 1
@@ -1126,13 +1131,13 @@ def collect_jobs():
                 acct["B"] += 1
     # C팔 (W1-C · 전 컷 fetch=orch)
     for rnd, band in C_ROUNDS:
-        for f in sorted(glob.glob(os.path.join(DATA, rnd, "*", "*", "*.idseg.npz"))):
+        for f in sorted(glob.glob(os.path.join(round_dir_or_flat(rnd), "*", "*", "*.idseg.npz"))):
             sc = os.path.basename(os.path.dirname(f))
             add(f, sc, "C", band, rnd)
             acct["C"] += 1
     # D팔 (stale 제외)
     for rnd, band in D_ROUNDS:
-        for f in sorted(glob.glob(os.path.join(DATA, rnd, "*", "*", "*.idseg.npz"))):
+        for f in sorted(glob.glob(os.path.join(round_dir_or_flat(rnd), "*", "*", "*.idseg.npz"))):
             sc = os.path.basename(os.path.dirname(f))
             stem = os.path.basename(f)[: -len(".idseg.npz")]
             if (rnd, sc, stem) in stale:
@@ -1144,7 +1149,7 @@ def collect_jobs():
     for stamp, band in W2_ROUNDS:
         for arm in "ABCD":
             rnd = f"{stamp}_{arm}"
-            for f in sorted(glob.glob(os.path.join(DATA, rnd, "*", "*", "*.idseg.npz"))):
+            for f in sorted(glob.glob(os.path.join(round_dir_or_flat(rnd), "*", "*", "*.idseg.npz"))):
                 sc = os.path.basename(os.path.dirname(f))
                 if sc not in W2_SCENES:
                     continue
@@ -1169,7 +1174,7 @@ def collect_probe_jobs(specs):
         for a in arms:
             rnd = f"{sp['stamp']}_{a}"
             for sc in sp["scenes"]:
-                for f in sorted(glob.glob(os.path.join(DATA, rnd, "*", sc, "*.idseg.npz"))):
+                for f in sorted(glob.glob(os.path.join(round_dir_or_flat(rnd), "*", sc, "*.idseg.npz"))):
                     stem = os.path.basename(f)[: -len(".idseg.npz")]
                     if (rnd, sc, stem) not in ok:
                         continue
@@ -1824,13 +1829,13 @@ def validate_attrib(attrib, args):
     att = Attributor(lex_only)
     A = {}
     for rnd, band in A_ROUNDS:
-        for f in glob.glob(os.path.join(DATA, rnd, "*", "*", "*.idseg.npz")):
+        for f in glob.glob(os.path.join(round_dir_or_flat(rnd), "*", "*", "*.idseg.npz")):
             sc = os.path.basename(os.path.dirname(f))
             A[(sc, band, os.path.basename(f))] = f
     B = {}
     for rounds, tg in ((B_ROUNDS, "B"), (B2_ROUNDS, "B2"), (B3_ROUNDS, "B3")):
         for rnd, band in rounds:
-            for f in glob.glob(os.path.join(DATA, rnd, "*", "*", "*.idseg.npz")):
+            for f in glob.glob(os.path.join(round_dir_or_flat(rnd), "*", "*", "*.idseg.npz")):
                 sc = os.path.basename(os.path.dirname(f))
                 if b_tree_of(sc) != tg:
                     continue
@@ -2010,15 +2015,15 @@ def main():
 
         # C 웨이브 (W1C_REPORT: 트리 `260827_v3w1_lib_C*`)
         for pat in ("*_v3w1_lib_C*", "*_v3w1c_*", "*cwave*"):
-            for d in sorted(glob.glob(os.path.join(DATA, pat))):
+            for d in rounds_matching(pat):
                 note(d, "C 웨이브 후보")
         # 규정 감사 재렌더 (REG_AUDIT: `*reg_{A,B,C,D}`)
-        for d in sorted(glob.glob(os.path.join(DATA, "*reg_[ABCD]"))):
+        for d in rounds_matching("*reg_[ABCD]"):
             note(d, "규정 감사 확정 라운드 — P2 를 여기로 갈아타야 한다")
         # 그 밖의 미등록 프로브 라운드
         known = {s["stamp"] for s in PROBE_PRIMARY + PROBE_SECONDARY} | \
                 {s["stamp"] for s in PROBE_H67}
-        for d in sorted(glob.glob(os.path.join(DATA, "*_v3p5_*"))):
+        for d in rounds_matching("*_v3p5_*"):
             stamp = re.sub(r"_[ABCD]$", "", os.path.basename(d))
             if stamp in known or stamp.endswith(("smoke", "near")):
                 continue

@@ -90,8 +90,8 @@
    "band": "base",
    "round": "260819_main_on",
    "off_round": "260826_v3w1_lib_D",
-   "sdir": "dataset/260819_main_on/val/scene01",
-   "off_dir": "dataset/260826_v3w1_lib_D/val/scene01"
+   "sdir": "dataset/v2_corpus/260819_main_on/val/scene01",
+   "off_dir": "dataset/v3_library/260826_v3w1_lib_D/val/scene01"
   },
   {
    "scene": "scene09",
@@ -120,8 +120,8 @@
    "band": "base",
    "round": "260819_main_on",
    "off_round": "260826_v3w1_lib_D",
-   "sdir": "dataset/260819_main_on/train/scene09",
-   "off_dir": "dataset/260826_v3w1_lib_D/train/scene09"
+   "sdir": "dataset/v2_corpus/260819_main_on/train/scene09",
+   "off_dir": "dataset/v3_library/260826_v3w1_lib_D/train/scene09"
   },
   {
    "scene": "scene21",
@@ -150,8 +150,8 @@
    "band": "base",
    "round": "260819_main_on",
    "off_round": "260826_v3w1_lib_D",
-   "sdir": "dataset/260819_main_on/train/scene21",
-   "off_dir": "dataset/260826_v3w1_lib_D/train/scene21"
+   "sdir": "dataset/v2_corpus/260819_main_on/train/scene21",
+   "off_dir": "dataset/v3_library/260826_v3w1_lib_D/train/scene21"
   },
   {
    "scene": "sceneC1",
@@ -180,8 +180,8 @@
    "band": "base",
    "round": "260819_main_on",
    "off_round": "260826_v3w1_lib_D",
-   "sdir": "dataset/260819_main_on/train/sceneC1",
-   "off_dir": "dataset/260826_v3w1_lib_D/train/sceneC1"
+   "sdir": "dataset/v2_corpus/260819_main_on/train/sceneC1",
+   "off_dir": "dataset/v3_library/260826_v3w1_lib_D/train/sceneC1"
   },
   {
    "scene": "sceneC4",
@@ -210,8 +210,8 @@
    "band": "base",
    "round": "260819_main_on",
    "off_round": "260826_v3w1_lib_D",
-   "sdir": "dataset/260819_main_on/train/sceneC4",
-   "off_dir": "dataset/260826_v3w1_lib_D/train/sceneC4"
+   "sdir": "dataset/v2_corpus/260819_main_on/train/sceneC4",
+   "off_dir": "dataset/v3_library/260826_v3w1_lib_D/train/sceneC4"
   },
   {
    "scene": "scene09",
@@ -240,8 +240,8 @@
    "band": "h",
    "round": "260820_boost_h_on",
    "off_round": "260826_v3w1_lib_D_h",
-   "sdir": "dataset/260820_boost_h_on/train/scene09",
-   "off_dir": "dataset/260826_v3w1_lib_D_h/train/scene09"
+   "sdir": "dataset/v2_corpus/260820_boost_h_on/train/scene09",
+   "off_dir": "dataset/v3_library/260826_v3w1_lib_D_h/train/scene09"
   },
   {
    "scene": "scene09",
@@ -270,8 +270,8 @@
    "band": "e",
    "round": "260820_boost_e_on",
    "off_round": "260826_v3w1_lib_D_e",
-   "sdir": "dataset/260820_boost_e_on/train/scene09",
-   "off_dir": "dataset/260826_v3w1_lib_D_e/train/scene09"
+   "sdir": "dataset/v2_corpus/260820_boost_e_on/train/scene09",
+   "off_dir": "dataset/v3_library/260826_v3w1_lib_D_e/train/scene09"
   },
   {
    "scene": "sceneC1",
@@ -300,8 +300,8 @@
    "band": "e",
    "round": "260820_boost_e_on",
    "off_round": "260826_v3w1_lib_D_e",
-   "sdir": "dataset/260820_boost_e_on/train/sceneC1",
-   "off_dir": "dataset/260826_v3w1_lib_D_e/train/sceneC1"
+   "sdir": "dataset/v2_corpus/260820_boost_e_on/train/sceneC1",
+   "off_dir": "dataset/v3_library/260826_v3w1_lib_D_e/train/sceneC1"
   },
   {
    "scene": "sceneC4",
@@ -330,8 +330,8 @@
    "band": "e",
    "round": "260820_boost_e_on",
    "off_round": "260826_v3w1_lib_D_e",
-   "sdir": "dataset/260820_boost_e_on/train/sceneC4",
-   "off_dir": "dataset/260826_v3w1_lib_D_e/train/sceneC4"
+   "sdir": "dataset/v2_corpus/260820_boost_e_on/train/sceneC4",
+   "off_dir": "dataset/v3_library/260826_v3w1_lib_D_e/train/sceneC4"
   },
   {
    "scene": "sceneC4",
@@ -360,8 +360,8 @@
    "band": "e2",
    "round": "260820_boost_e2_on",
    "off_round": "260826_v3w1_lib_D_e2",
-   "sdir": "dataset/260820_boost_e2_on/train/sceneC4",
-   "off_dir": "dataset/260826_v3w1_lib_D_e2/train/sceneC4"
+   "sdir": "dataset/v2_corpus/260820_boost_e2_on/train/sceneC4",
+   "off_dir": "dataset/v3_library/260826_v3w1_lib_D_e2/train/sceneC4"
   }
  ],
  "scene_footprint": [
@@ -392,8 +392,8 @@
    "band": "base",
    "round": "260819_main_on",
    "off_round": "260826_v3w1_lib_D",
-   "sdir": "dataset/260819_main_on/val/scene01",
-   "off_dir": "dataset/260826_v3w1_lib_D/val/scene01"
+   "sdir": "dataset/v2_corpus/260819_main_on/val/scene01",
+   "off_dir": "dataset/v3_library/260826_v3w1_lib_D/val/scene01"
   },
   {
    "scene": "scene09",
@@ -422,8 +422,8 @@
    "band": "base",
    "round": "260819_main_on",
    "off_round": "260826_v3w1_lib_D",
-   "sdir": "dataset/260819_main_on/train/scene09",
-   "off_dir": "dataset/260826_v3w1_lib_D/train/scene09"
+   "sdir": "dataset/v2_corpus/260819_main_on/train/scene09",
+   "off_dir": "dataset/v3_library/260826_v3w1_lib_D/train/scene09"
   },
   {
    "scene": "scene21",
@@ -452,8 +452,8 @@
    "band": "base",
    "round": "260819_main_on",
    "off_round": "260826_v3w1_lib_D",
-   "sdir": "dataset/260819_main_on/train/scene21",
-   "off_dir": "dataset/260826_v3w1_lib_D/train/scene21"
+   "sdir": "dataset/v2_corpus/260819_main_on/train/scene21",
+   "off_dir": "dataset/v3_library/260826_v3w1_lib_D/train/scene21"
   },
   {
    "scene": "sceneC1",
@@ -482,8 +482,8 @@
    "band": "base",
    "round": "260819_main_on",
    "off_round": "260826_v3w1_lib_D",
-   "sdir": "dataset/260819_main_on/train/sceneC1",
-   "off_dir": "dataset/260826_v3w1_lib_D/train/sceneC1"
+   "sdir": "dataset/v2_corpus/260819_main_on/train/sceneC1",
+   "off_dir": "dataset/v3_library/260826_v3w1_lib_D/train/sceneC1"
   },
   {
    "scene": "sceneC4",
@@ -512,8 +512,8 @@
    "band": "base",
    "round": "260819_main_on",
    "off_round": "260826_v3w1_lib_D",
-   "sdir": "dataset/260819_main_on/train/sceneC4",
-   "off_dir": "dataset/260826_v3w1_lib_D/train/sceneC4"
+   "sdir": "dataset/v2_corpus/260819_main_on/train/sceneC4",
+   "off_dir": "dataset/v3_library/260826_v3w1_lib_D/train/sceneC4"
   },
   {
    "scene": "scene09",
@@ -542,8 +542,8 @@
    "band": "h",
    "round": "260820_boost_h_on",
    "off_round": "260826_v3w1_lib_D_h",
-   "sdir": "dataset/260820_boost_h_on/train/scene09",
-   "off_dir": "dataset/260826_v3w1_lib_D_h/train/scene09"
+   "sdir": "dataset/v2_corpus/260820_boost_h_on/train/scene09",
+   "off_dir": "dataset/v3_library/260826_v3w1_lib_D_h/train/scene09"
   },
   {
    "scene": "scene09",
@@ -572,8 +572,8 @@
    "band": "e",
    "round": "260820_boost_e_on",
    "off_round": "260826_v3w1_lib_D_e",
-   "sdir": "dataset/260820_boost_e_on/train/scene09",
-   "off_dir": "dataset/260826_v3w1_lib_D_e/train/scene09"
+   "sdir": "dataset/v2_corpus/260820_boost_e_on/train/scene09",
+   "off_dir": "dataset/v3_library/260826_v3w1_lib_D_e/train/scene09"
   },
   {
    "scene": "sceneC1",
@@ -602,8 +602,8 @@
    "band": "e",
    "round": "260820_boost_e_on",
    "off_round": "260826_v3w1_lib_D_e",
-   "sdir": "dataset/260820_boost_e_on/train/sceneC1",
-   "off_dir": "dataset/260826_v3w1_lib_D_e/train/sceneC1"
+   "sdir": "dataset/v2_corpus/260820_boost_e_on/train/sceneC1",
+   "off_dir": "dataset/v3_library/260826_v3w1_lib_D_e/train/sceneC1"
   },
   {
    "scene": "sceneC4",
@@ -632,8 +632,8 @@
    "band": "e",
    "round": "260820_boost_e_on",
    "off_round": "260826_v3w1_lib_D_e",
-   "sdir": "dataset/260820_boost_e_on/train/sceneC4",
-   "off_dir": "dataset/260826_v3w1_lib_D_e/train/sceneC4"
+   "sdir": "dataset/v2_corpus/260820_boost_e_on/train/sceneC4",
+   "off_dir": "dataset/v3_library/260826_v3w1_lib_D_e/train/sceneC4"
   },
   {
    "scene": "sceneC4",
@@ -662,8 +662,8 @@
    "band": "e2",
    "round": "260820_boost_e2_on",
    "off_round": "260826_v3w1_lib_D_e2",
-   "sdir": "dataset/260820_boost_e2_on/train/sceneC4",
-   "off_dir": "dataset/260826_v3w1_lib_D_e2/train/sceneC4"
+   "sdir": "dataset/v2_corpus/260820_boost_e2_on/train/sceneC4",
+   "off_dir": "dataset/v3_library/260826_v3w1_lib_D_e2/train/sceneC4"
   }
  ],
  "warnings": [],

@@ -71,6 +71,11 @@ import os
 import sys
 
 REPO = "/home/vislab/Desktop/work_sy/Practice_NegObs"
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat   # noqa: E402
 V3 = os.path.join(REPO, "experiments/v3_0823")
 SHORT = {"cue_railing": "R", "cue_nosing": "N", "cue_tactile": "Ta",
          "cue_material_break": "T", "cue_sign": "Sg", "cue_scene_dressing": "V"}
@@ -194,7 +199,7 @@ ARM_OF_CUE = {"cue_railing": "rail", "cue_nosing": "nose", "cue_tactile": "tact"
 
 
 def _sdir(rnd, scene):
-    g = glob.glob(os.path.join(REPO, "dataset", rnd, "*", scene, "variation.json"))
+    g = glob.glob(os.path.join(round_dir_or_flat(rnd), "*", scene, "variation.json"))
     return os.path.dirname(g[0]) if g else None
 
 

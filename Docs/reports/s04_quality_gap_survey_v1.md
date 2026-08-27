@@ -687,7 +687,7 @@ F1b(씬 로컬 지면층) → F5(실자산, 차폐 재측정) → 건물(레버4
    s16·s18·s20 등에 "헥스"를 처방했는데 `grep -c "hex" scene_common.py` = **0** `[measured]`.
    레버1 항목으로 옮길 때 **설정 조정이 아니라 신규 구현**임을 전제해야 한다.
 9. **`place_shrubs`/`place_hedge_row` 는 `LOOK_GEO` 의존**: 꺼져 있으면 실자산이 아니라 블롭 박스로
-   폴백한다(`scene_common.py:3818`, `:3995`). 프로덕션 라운드는 `run_p2_all33.sh:36` 에서 켜므로
+   폴백한다(`scene_common.py:3818`, `:3995`). 프로덕션 라운드는 `scripts/rounds/run_p2_all33.sh:36` 에서 켜므로
    본 조사의 컷은 실자산 상태다. **다만 s01 `west_hedge` 는 무조건 블롭 박스**(`scene01:1988`) —
    F5 처방 대상.
 10. **s13 이 접점 처리의 참조 사례**: 4씬 중 유일하게 `build_curb_line` 4런 + 램프 연석 +

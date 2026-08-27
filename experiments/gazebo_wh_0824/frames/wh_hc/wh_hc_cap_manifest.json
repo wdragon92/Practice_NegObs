@@ -1,0 +1,477 @@
+{
+  "tag": "wh_hc_cap",
+  "generated": "2026-08-24T13:43:08",
+  "note": "Gazebo Classic 11.10.2 capture; poses are exact (static camera models), so infer_photo.py --height/--pitch/--hfov are MEASURED, not assumed.",
+  "frames": [
+    {
+      "file": "wh_hc_cap_rs_d0.5_000.png",
+      "view": "rs_d0.5",
+      "topic": "/gzcam/d05/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d0.7_000.png",
+      "view": "rs_d0.7",
+      "topic": "/gzcam/d07/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d0.9_000.png",
+      "view": "rs_d0.9",
+      "topic": "/gzcam/d09/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d1.1_000.png",
+      "view": "rs_d1.1",
+      "topic": "/gzcam/d11/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d1.5_000.png",
+      "view": "rs_d1.5",
+      "topic": "/gzcam/d15/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d2_000.png",
+      "view": "rs_d2",
+      "topic": "/gzcam/d2/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d2.6_000.png",
+      "view": "rs_d2.6",
+      "topic": "/gzcam/d26/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d3.4_000.png",
+      "view": "rs_d3.4",
+      "topic": "/gzcam/d34/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_overview_000.png",
+      "view": "overview",
+      "topic": "/gzcam/ov/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d0.5_001.png",
+      "view": "rs_d0.5",
+      "topic": "/gzcam/d05/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d0.7_001.png",
+      "view": "rs_d0.7",
+      "topic": "/gzcam/d07/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d0.9_001.png",
+      "view": "rs_d0.9",
+      "topic": "/gzcam/d09/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d1.1_001.png",
+      "view": "rs_d1.1",
+      "topic": "/gzcam/d11/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d1.5_001.png",
+      "view": "rs_d1.5",
+      "topic": "/gzcam/d15/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d2_001.png",
+      "view": "rs_d2",
+      "topic": "/gzcam/d2/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d2.6_001.png",
+      "view": "rs_d2.6",
+      "topic": "/gzcam/d26/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d3.4_001.png",
+      "view": "rs_d3.4",
+      "topic": "/gzcam/d34/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_overview_001.png",
+      "view": "overview",
+      "topic": "/gzcam/ov/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d0.5_002.png",
+      "view": "rs_d0.5",
+      "topic": "/gzcam/d05/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d0.7_002.png",
+      "view": "rs_d0.7",
+      "topic": "/gzcam/d07/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d0.9_002.png",
+      "view": "rs_d0.9",
+      "topic": "/gzcam/d09/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d1.1_002.png",
+      "view": "rs_d1.1",
+      "topic": "/gzcam/d11/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d1.5_002.png",
+      "view": "rs_d1.5",
+      "topic": "/gzcam/d15/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d2_002.png",
+      "view": "rs_d2",
+      "topic": "/gzcam/d2/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d2.6_002.png",
+      "view": "rs_d2.6",
+      "topic": "/gzcam/d26/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_rs_d3.4_002.png",
+      "view": "rs_d3.4",
+      "topic": "/gzcam/d34/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    },
+    {
+      "file": "wh_hc_cap_overview_002.png",
+      "view": "overview",
+      "topic": "/gzcam/ov/cam/image_raw",
+      "kind": "rgb",
+      "w": 1280,
+      "h": 720,
+      "encoding": "rgb8"
+    }
+  ],
+  "cameras": {
+    "rs_d0.5": {
+      "eye": [
+        -2.98,
+        -0.97,
+        0.2493
+      ],
+      "yaw_rad": 3.141592653589793,
+      "pitch_rad": 0.261,
+      "height_agl": 0.125,
+      "standoff": 0.5,
+      "family": "approach",
+      "pitch_deg": -14.954,
+      "hfov_deg": 69.001,
+      "hfov_rad": 1.2043,
+      "res": [
+        1280,
+        720
+      ],
+      "infer_photo_args": [
+        "--height 0.125",
+        "--pitch -14.954",
+        "--hfov 69.001",
+        "--fit squash"
+      ]
+    },
+    "rs_d0.7": {
+      "eye": [
+        -2.7800000000000002,
+        -0.97,
+        0.2493
+      ],
+      "yaw_rad": 3.141592653589793,
+      "pitch_rad": 0.261,
+      "height_agl": 0.125,
+      "standoff": 0.7,
+      "family": "approach",
+      "pitch_deg": -14.954,
+      "hfov_deg": 69.001,
+      "hfov_rad": 1.2043,
+      "res": [
+        1280,
+        720
+      ],
+      "infer_photo_args": [
+        "--height 0.125",
+        "--pitch -14.954",
+        "--hfov 69.001",
+        "--fit squash"
+      ]
+    },
+    "rs_d0.9": {
+      "eye": [
+        -2.58,
+        -0.97,
+        0.2493
+      ],
+      "yaw_rad": 3.141592653589793,
+      "pitch_rad": 0.261,
+      "height_agl": 0.125,
+      "standoff": 0.9,
+      "family": "approach",
+      "pitch_deg": -14.954,
+      "hfov_deg": 69.001,
+      "hfov_rad": 1.2043,
+      "res": [
+        1280,
+        720
+      ],
+      "infer_photo_args": [
+        "--height 0.125",
+        "--pitch -14.954",
+        "--hfov 69.001",
+        "--fit squash"
+      ]
+    },
+    "rs_d1.1": {
+      "eye": [
+        -2.38,
+        -0.97,
+        0.2493
+      ],
+      "yaw_rad": 3.141592653589793,
+      "pitch_rad": 0.261,
+      "height_agl": 0.125,
+      "standoff": 1.1,
+      "family": "approach",
+      "pitch_deg": -14.954,
+      "hfov_deg": 69.001,
+      "hfov_rad": 1.2043,
+      "res": [
+        1280,
+        720
+      ],
+      "infer_photo_args": [
+        "--height 0.125",
+        "--pitch -14.954",
+        "--hfov 69.001",
+        "--fit squash"
+      ]
+    },
+    "rs_d1.5": {
+      "eye": [
+        -1.98,
+        -0.97,
+        0.2493
+      ],
+      "yaw_rad": 3.141592653589793,
+      "pitch_rad": 0.261,
+      "height_agl": 0.125,
+      "standoff": 1.5,
+      "family": "approach",
+      "pitch_deg": -14.954,
+      "hfov_deg": 69.001,
+      "hfov_rad": 1.2043,
+      "res": [
+        1280,
+        720
+      ],
+      "infer_photo_args": [
+        "--height 0.125",
+        "--pitch -14.954",
+        "--hfov 69.001",
+        "--fit squash"
+      ]
+    },
+    "rs_d2": {
+      "eye": [
+        -1.48,
+        -0.97,
+        0.2493
+      ],
+      "yaw_rad": 3.141592653589793,
+      "pitch_rad": 0.261,
+      "height_agl": 0.125,
+      "standoff": 2.0,
+      "family": "approach",
+      "pitch_deg": -14.954,
+      "hfov_deg": 69.001,
+      "hfov_rad": 1.2043,
+      "res": [
+        1280,
+        720
+      ],
+      "infer_photo_args": [
+        "--height 0.125",
+        "--pitch -14.954",
+        "--hfov 69.001",
+        "--fit squash"
+      ]
+    },
+    "rs_d2.6": {
+      "eye": [
+        -0.8799999999999999,
+        -0.97,
+        0.2493
+      ],
+      "yaw_rad": 3.141592653589793,
+      "pitch_rad": 0.261,
+      "height_agl": 0.125,
+      "standoff": 2.6,
+      "family": "approach",
+      "pitch_deg": -14.954,
+      "hfov_deg": 69.001,
+      "hfov_rad": 1.2043,
+      "res": [
+        1280,
+        720
+      ],
+      "infer_photo_args": [
+        "--height 0.125",
+        "--pitch -14.954",
+        "--hfov 69.001",
+        "--fit squash"
+      ]
+    },
+    "rs_d3.4": {
+      "eye": [
+        -0.08000000000000007,
+        -0.97,
+        0.2493
+      ],
+      "yaw_rad": 3.141592653589793,
+      "pitch_rad": 0.261,
+      "height_agl": 0.125,
+      "standoff": 3.4,
+      "family": "approach",
+      "pitch_deg": -14.954,
+      "hfov_deg": 69.001,
+      "hfov_rad": 1.2043,
+      "res": [
+        1280,
+        720
+      ],
+      "infer_photo_args": [
+        "--height 0.125",
+        "--pitch -14.954",
+        "--hfov 69.001",
+        "--fit squash"
+      ]
+    },
+    "overview": {
+      "eye": [
+        -2.0,
+        -0.97,
+        7.0
+      ],
+      "yaw_rad": 3.141592653589793,
+      "pitch_rad": 1.4,
+      "height_agl": 6.8757,
+      "standoff": null,
+      "family": "overview",
+      "pitch_deg": -80.214,
+      "hfov_deg": 108.862,
+      "hfov_rad": 1.9,
+      "res": [
+        1280,
+        720
+      ],
+      "infer_photo_args": [
+        "--height 6.8757",
+        "--pitch -80.214",
+        "--hfov 108.862",
+        "--fit squash"
+      ]
+    }
+  }
+}

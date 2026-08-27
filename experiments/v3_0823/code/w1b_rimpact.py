@@ -58,6 +58,11 @@ import os
 import sys
 
 REPO = "/home/vislab/Desktop/work_sy/Practice_NegObs"
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat   # noqa: E402
 V3 = os.path.join(REPO, "experiments/v3_0823")
 KEYS = ("R", "Ta", "N", "T", "Sg", "V")
 CUE2KEY = {"cue_railing": "R", "cue_tactile": "Ta", "cue_nosing": "N",
@@ -104,7 +109,7 @@ EXISTING = {s["scene"] for s in plan["scenes"] if s.get("origin") == "existing"}
 landed = collections.Counter()
 landed_band = collections.defaultdict(set)
 for r in B_ROUNDS:
-    for p in glob.glob(os.path.join(REPO, "dataset", r, "*", "*", "*.png")):
+    for p in glob.glob(os.path.join(round_dir_or_flat(r), "*", "*", "*.png")):
         sc = os.path.basename(os.path.dirname(p))
         landed[sc] += 1
         landed_band[sc].add(BAND_OF_ROUND[r])
@@ -113,7 +118,7 @@ for r in B_ROUNDS:
 if B2:
     b2_landed, b2_band = collections.Counter(), collections.defaultdict(set)
     for r, band in B2_ROUNDS.items():
-        for p in glob.glob(os.path.join(REPO, "dataset", r, "*", "*", "*.png")):
+        for p in glob.glob(os.path.join(round_dir_or_flat(r), "*", "*", "*.png")):
             sc = os.path.basename(os.path.dirname(p))
             b2_landed[sc] += 1
             b2_band[sc].add(band)

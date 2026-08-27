@@ -5,6 +5,11 @@ whole defect, or is there a sixth?"  Nothing is written to disk."""
 import json, os, sys
 import numpy as np
 REPO = "/home/vislab/Desktop/work_sy/Practice_NegObs"
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat   # noqa: E402
 sys.path.insert(0, os.path.join(REPO, "experiments/mainrun_0819/code/labeling"))
 from labeler import scene_dirs, load_heightmap
 from fuse_heightmap import fuse_scene_arm
@@ -22,8 +27,8 @@ print(f"{'band':5s} {'scene':8s} {'aabb/aabb':>10s} {'fused/fused':>11s} {'aabbO
       f"{'cov f_on':>8s} {'cov f_off':>9s} {'missing depth':>13s}  verdict")
 flags = []
 for band in ("h", "e", "e2"):
-    on = scene_dirs(os.path.join(REPO, "dataset", f"260820_boost_{band}_on"))
-    off = scene_dirs(os.path.join(REPO, "dataset", f"260820_boost_{band}_off"))
+    on = scene_dirs(round_dir_or_flat(f"260820_boost_{band}_on"))
+    off = scene_dirs(round_dir_or_flat(f"260820_boost_{band}_off"))
     for sc in sorted(on):
         a_on = load_heightmap(on[sc])[0]
         a_off = load_heightmap(off[sc])[0]

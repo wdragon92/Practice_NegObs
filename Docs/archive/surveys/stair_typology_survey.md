@@ -132,4 +132,4 @@ scene01(T1)이 하나의 코너(광폭·저단차·동일재질·설비혼재)�
 
 **내부 문서**
 - `Project_NegObs/Docs/negobs_context_scenario_survey_v1.md` (§3 단서 4계열, S4 도시 단차형)
-- `Practice_NegObs/Docs/scene01_design_brief.md` (T1 기구현 사양)
+- `Practice_NegObs/Docs/briefs/scene01_design_brief.md` (T1 기구현 사양)

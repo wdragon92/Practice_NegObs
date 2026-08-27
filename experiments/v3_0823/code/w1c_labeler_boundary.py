@@ -59,6 +59,11 @@ import sys
 import numpy as np
 
 REPO = "/home/vislab/Desktop/work_sy/Practice_NegObs"
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat   # noqa: E402
 V3 = os.path.join(REPO, "experiments/v3_0823")
 LABDIR = os.path.join(REPO, "experiments/mainrun_0819/code/labeling")
 sys.path.insert(0, LABDIR)
@@ -277,7 +282,7 @@ def selftest(verbose=True):
 # 2. v2 코퍼스 소급 불변 검증 (--verify-v2)
 # =========================================================================== #
 def sdir_of(round_name, scene):
-    g = glob.glob(os.path.join(REPO, "dataset", round_name, "*", scene, "variation.json"))
+    g = glob.glob(os.path.join(round_dir_or_flat(round_name), "*", scene, "variation.json"))
     return os.path.dirname(g[0]) if g else None
 
 

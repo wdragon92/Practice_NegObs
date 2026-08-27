@@ -1,0 +1,6 @@
+
+=== history ladder (v6->v7 + v7->v8): 94 GRAZE cuts · FAIL 1 · WARN 2 · deferred 23
+  FAIL scene18:v6_rt->v7_rt            preset_h0.3_d2        spec=67.64821757452862 agree=0.890625 step 11.11->14.75 ratio=1.328
+  WARN scene17:v6_rt->v7_rt            preset_h0.3_d2        spec=10.18026923088325 agree=0.89375 step 38.36->41.52 ratio=1.083
+  WARN scene19:v6_rt->v7_rt            preset_h0.3_d5        spec=11.09846973113279 agree=0.734375 step 0.58->0.56 ratio=0.957
+  [ok] history: FAIL 1 · WARN 2 — matches EXPECTED

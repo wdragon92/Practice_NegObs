@@ -12,6 +12,10 @@
 # =============================================================================
 set -u
 REPO=/home/vislab/Desktop/work_sy/Practice_NegObs
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>). A round is
+# found by NAME: negobs_round (strict) / negobs_round_or_flat (tolerant).
+source "$REPO/scripts/lib/negobs_paths.sh"
 LOCK=/tmp/negobs_gpu.lock
 RUN=260823_v3p5_segsmoke_A
 SCENE=scene01
@@ -40,7 +44,7 @@ bash -c "$PRE
 python3 - <<'PY' 2>&1 | tee -a '$OUT'
 import glob, json, os
 import numpy as np
-d = '$REPO/dataset/$RUN'
+d = '$(negobs_round_or_flat "$RUN")'
 npz = sorted(glob.glob(os.path.join(d, '*', '*', '*.idseg.npz')))
 png = sorted(glob.glob(os.path.join(d, '*', '*', '*.png')))
 print('=== P5 SEG SMOKE VERDICT ===')

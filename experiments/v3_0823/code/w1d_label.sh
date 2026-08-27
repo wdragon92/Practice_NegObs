@@ -25,6 +25,10 @@
 #     추가 GPU 0 · CPU 수 초 (D72 ②).
 set -u
 REPO=/home/vislab/Desktop/work_sy/Practice_NegObs
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>). A round is
+# found by NAME: negobs_round (strict) / negobs_round_or_flat (tolerant).
+source "$REPO/scripts/lib/negobs_paths.sh"
 LAB="$REPO/experiments/mainrun_0819/code/labeling/labeler.py"
 GRID="$REPO/experiments/mainrun_0819/code/labeling/gridspec_v1.json"
 OUT="$REPO/experiments/v3_0823/annotations"
@@ -43,7 +47,7 @@ label_band() {                     # label_band <band> <D run> <off run> <scenes
   local out="$OUT/w1d_${band}.json"
   local want have
   want=$(printf '%s' "$sc" | tr ',' '\n' | grep -c .)
-  have=$(ls -d "$REPO/dataset/${on}"/*/*/ 2>/dev/null | wc -l)
+  have=$(ls -d "$(negobs_round_or_flat "${on}")"/*/*/ 2>/dev/null | wc -l)
   if [ "$have" != "$want" ]; then
     echo "[hold] band $band — 렌더 $have/$want 씬만 존재, 라벨링 보류"; return
   fi
@@ -51,7 +55,7 @@ label_band() {                     # label_band <band> <D run> <off run> <scenes
     echo "[skip] band $band — $out exists"; return
   fi
   echo "=== labeling band $band  on=$on  off=$off  ($want 씬)"
-  python3 "$LAB" --on-round "$REPO/dataset/$on" --off-round "$REPO/dataset/$off" \
+  python3 "$LAB" --on-round "$(negobs_round "$on")" --off-round "$(negobs_round "$off")" \
       --grid "$GRID" --out "$out" --scenes "$sc" --workers 8 2>&1 | tee -a "$LOG"
 }
 
@@ -68,7 +72,7 @@ declare -A SC=(
   [Bmatl]="scene06,sceneN1,sceneN2,sceneN5"
   [Bdress]="$A_SCENES"
 )
-NDBASE=$(ls -d "$REPO/dataset/${D_BASE}"/*/*/ 2>/dev/null | wc -l)
+NDBASE=$(ls -d "$(negobs_round_or_flat "${D_BASE}")"/*/*/ 2>/dev/null | wc -l)
 if [ "$NDBASE" != "22" ]; then
   echo "[hold] 재판정 — D팔 base 라운드가 $NDBASE/22 씬만 존재. 부분 렌더 위에서 판정하지 않는다."
   echo "W1D_LABEL_PARTIAL"; exit 0
@@ -76,7 +80,7 @@ fi
 for arm in A Brail Bnose Btact Bmatl Bdress; do
   out="$OUT/w1d_zoffD_${arm}.json"
   want=$(printf '%s' "${SC[$arm]}" | tr ',' '\n' | grep -c .)
-  have=$(ls -d "$REPO/dataset/260825_v3w0_cuecls_${arm}"/*/*/ 2>/dev/null | wc -l)
+  have=$(ls -d "$(negobs_round_or_flat "260825_v3w0_cuecls_${arm}")"/*/*/ 2>/dev/null | wc -l)
   if [ "$have" != "$want" ]; then
     echo "[hold] $arm — W0 렌더 $have/$want 씬만 존재, 라벨링 보류"; continue
   fi
@@ -84,8 +88,8 @@ for arm in A Brail Bnose Btact Bmatl Bdress; do
     echo "[skip] $arm — $out exists"; continue
   fi
   echo "=== relabelling W0 $arm with z_off = $D_BASE ($want 씬)"
-  python3 "$LAB" --on-round "$REPO/dataset/260825_v3w0_cuecls_${arm}" \
-      --off-round "$REPO/dataset/${D_BASE}" --grid "$GRID" --out "$out" \
+  python3 "$LAB" --on-round "$(negobs_round "260825_v3w0_cuecls_${arm}")" \
+      --off-round "$(negobs_round "${D_BASE}")" --grid "$GRID" --out "$out" \
       --scenes "${SC[$arm]}" --workers 8 2>&1 | tee -a "$LOG"
 done
 echo "W1D_LABEL_DONE"

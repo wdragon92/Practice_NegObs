@@ -37,6 +37,11 @@ sys.path.insert(0, HERE)
 import h12_gates as G                                        # noqa: E402
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat   # noqa: E402
 MARK = os.path.join(REPO, "experiments", "v3_0823", "logs", "w3_markers")
 
 SCENES = ["sceneH1", "sceneH2", "sceneH3", "sceneL1", "sceneN9", "sceneN11"]
@@ -50,7 +55,7 @@ SPLIT = "test"
 
 
 def check(run, scene, want):
-    d = os.path.join(REPO, "dataset", run, SPLIT, scene)
+    d = os.path.join(round_dir_or_flat(run), SPLIT, scene)
     if not os.path.isdir(d):
         return dict(ok=False, note="디렉터리 없음")
     var = G.load_variation(d)

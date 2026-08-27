@@ -8,8 +8,8 @@
 
 
 - **작성**: Claude Code (조립) · 2026-08-24 · **결재**: 승용
-- **창**: 2026-08-23(일) 오후 개시 ~ 08-24 착지. 지시서 `Docs/experiment/V3_BRIEF_0823.md`
-  (상위 문서 `Docs/experiment/V3_DESIGN_0823.md` = DZ · 온보딩 `Docs/experiment/Status/PROJECT_STATE_0823_v2.md`).
+- **창**: 2026-08-23(일) 오후 개시 ~ 08-24 착지. 지시서 `Docs/campaign/V3_BRIEF_0823.md`
+  (상위 문서 `Docs/campaign/V3_DESIGN_0823.md` = DZ · 온보딩 `Docs/archive/campaign_status/PROJECT_STATE_0823_v2.md`).
 - **본 문서의 근거**: `experiments/mainrun_0819/DECISIONS.md` **D52–D94** (V3 창 전 구간의 시간순 결정 기록, 43행).
 - **작업 루트**: `experiments/v3_0823/` · **성격**: **조립·인용 보고서**.
   **본 문서는 수치를 새로 만들지 않았다** — 모든 값은 착지한 원장에서 전사했고, 전사 지점마다 경로를 붙였다.

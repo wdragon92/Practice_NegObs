@@ -1,0 +1,45 @@
+old_path	new_path	kind	bytes	note
+Docs/legacy/nanobanana_batch1_geometry_map.md	Docs/archive/legacy/nanobanana_batch1_geometry_map.md	file	18419	D5 step1: legacy real file -> archive/legacy
+Docs/legacy/scene_redesign_v5_proposal.md	Docs/archive/legacy/scene_redesign_v5_proposal.md	file	9498	D5 step1: legacy real file -> archive/legacy
+Docs/legacy/scene_library_v3_status.md	Docs/archive/legacy/scene_library_v3_status.md	file	5113	D5 step1: legacy real file -> archive/legacy
+Docs/legacy/STATUS_pre_p4.md	Docs/archive/legacy/STATUS_pre_p4.md	file	2300	D5 step1: legacy real file -> archive/legacy
+Docs/legacy/STATUS_pre_reorg_260814.md	Docs/archive/legacy/STATUS_pre_reorg_260814.md	file	9691	D5 step1: legacy real file -> archive/legacy
+Docs/legacy/multi_scene_brief_v3.md	(deleted)	symlink->../briefs/multi_scene_brief_v3.md	0	D5 step1: legacy symlink pointing at a CURRENT doc
+Docs/legacy/realism_rubric_v1.md	(deleted)	symlink->../reports/realism_rubric_v1.md	0	D5 step1: legacy symlink pointing at a CURRENT doc
+Docs/multi_scene_brief_v2.md	(deleted)	compat symlink->briefs/multi_scene_brief_v2.md	0	S5-2: 7 root compat symlinks retired after citation rewrite
+Docs/multi_scene_brief_v3.md	(deleted)	compat symlink->briefs/multi_scene_brief_v3.md	0	S5-2: 7 root compat symlinks retired after citation rewrite
+Docs/nanobanana_batch1_geometry_map.md	(deleted)	compat symlink->legacy/... (S5 step1 retargeted it to archive/legacy/ before deletion)	0	S5-2: 7 root compat symlinks retired after citation rewrite
+Docs/realism_rubric_v1.md	(deleted)	compat symlink->reports/realism_rubric_v1.md	0	S5-2: 7 root compat symlinks retired after citation rewrite
+Docs/scene01_design_brief.md	(deleted)	compat symlink->briefs/scene01_design_brief.md	0	S5-2: 7 root compat symlinks retired after citation rewrite
+Docs/scene_redesign_v5_proposal.md	(deleted)	compat symlink->legacy/... (S5 step1 retargeted it to archive/legacy/ before deletion)	0	S5-2: 7 root compat symlinks retired after citation rewrite
+Docs/stair_typology_survey_v2.md	(deleted)	compat symlink->surveys/stair_typology_survey_v2.md	0	S5-2: 7 root compat symlinks retired after citation rewrite
+Docs/surveys/real_reference_expansion.md	(deleted)	symlink->../reports/real_reference_expansion.md	0	S5-2: resolved to Docs/reports/real_reference_expansion.md
+Docs/experiment/DAYRUN_BRIEF_0820.md	Docs/campaign/DAYRUN_BRIEF_0820.md	file	7842	S5-3: Docs/experiment -> Docs/campaign (D5, owner approved)
+Docs/experiment/NEGOBS_STUDY_0823.md	Docs/campaign/NEGOBS_STUDY_0823.md	file	13051	S5-3: Docs/experiment -> Docs/campaign (D5, owner approved)
+Docs/experiment/OVERNIGHT_BRIEF_0819_v3.md	Docs/campaign/OVERNIGHT_BRIEF_0819_v3.md	file	16052	S5-3: Docs/experiment -> Docs/campaign (D5, owner approved)
+Docs/experiment/OVERNIGHT_BRIEF_0820_v1.md	Docs/campaign/OVERNIGHT_BRIEF_0820_v1.md	file	12204	S5-3: Docs/experiment -> Docs/campaign (D5, owner approved)
+Docs/experiment/V3_BRIEF_0823.md	Docs/campaign/V3_BRIEF_0823.md	file	10808	S5-3: Docs/experiment -> Docs/campaign (D5, owner approved)
+Docs/experiment/V3_DESIGN_0823.md	Docs/campaign/V3_DESIGN_0823.md	file	39902	S5-3: Docs/experiment -> Docs/campaign (D5, owner approved)
+Docs/experiment/WEEKEND_BRIEF_0823.md	Docs/campaign/WEEKEND_BRIEF_0823.md	file	21018	S5-3: Docs/experiment -> Docs/campaign (D5, owner approved)
+Docs/experiment/Status/PROJECT_STATE_0820.md	Docs/campaign/status/PROJECT_STATE_0820.md	file	7103	S5-3: Status -> status
+Docs/experiment/Status/PROJECT_STATE_0823.md	Docs/campaign/status/PROJECT_STATE_0823.md	file	33457	S5-3: Status -> status
+Docs/experiment/Status/PROJECT_STATE_0823_v2.md	Docs/campaign/status/PROJECT_STATE_0823_v2.md	file	8301	S5-3: Status -> status
+Docs/experiment/Status/PROJECT_STATE_0823_v3.md	Docs/campaign/status/PROJECT_STATE_0823_v3.md	file	11080	S5-3: Status -> status
+Docs/experiment/Status/PROJECT_STATE_0826.md	Docs/campaign/status/PROJECT_STATE_0826.md	file	36302	S5-3: Status -> status
+Docs/experiment/Status/	Docs/campaign/status/	dir	0	S5-3
+Docs/experiment/	Docs/campaign/	dir	0	S5-3
+(new file)	experiments/v3_0823/PREREG_V3_PATHMAP_0827.md	file	974	S5-3: sealed PREREG_V3 keeps the old Docs/experiment/ spelling; this note is the map
+Docs/campaign/status/PROJECT_STATE_0820.md	Docs/archive/campaign_status/PROJECT_STATE_0820.md	file	7103	S5-4: dated PROJECT_STATE superseded by the single living PROJECT_STATE.md
+Docs/campaign/status/PROJECT_STATE_0823.md	Docs/archive/campaign_status/PROJECT_STATE_0823.md	file	33453	S5-4: dated PROJECT_STATE superseded by the single living PROJECT_STATE.md
+Docs/campaign/status/PROJECT_STATE_0823_v2.md	Docs/archive/campaign_status/PROJECT_STATE_0823_v2.md	file	8297	S5-4: dated PROJECT_STATE superseded by the single living PROJECT_STATE.md
+Docs/campaign/status/PROJECT_STATE_0823_v3.md	Docs/archive/campaign_status/PROJECT_STATE_0823_v3.md	file	11072	S5-4: dated PROJECT_STATE superseded by the single living PROJECT_STATE.md
+Docs/campaign/status/PROJECT_STATE_0826.md	Docs/campaign/status/PROJECT_STATE.md	file (untracked)	36288	S5-4: the one living onboarding doc, undated
+run_p2_all33.sh	scripts/rounds/run_p2_all33.sh	file	4175	S5-6 (D6): root render driver -> scripts/rounds/
+run_260814_w4_d4iter.sh	scripts/rounds/run_260814_w4_d4iter.sh	file	653	S5-6 (D6): root render driver -> scripts/rounds/
+run_260814_w4_r0probe.sh	scripts/rounds/run_260814_w4_r0probe.sh	file	2049	S5-6 (D6): root render driver -> scripts/rounds/
+run_260814_w4_r1r2pilot.sh	scripts/rounds/run_260814_w4_r1r2pilot.sh	file	1348	S5-6 (D6): root render driver -> scripts/rounds/
+run_260815_w4_r4batch.sh	scripts/rounds/run_260815_w4_r4batch.sh	file	1679	S5-6 (D6): root render driver -> scripts/rounds/
+(new file)	experiments/README.md	file	4476	S5-5 (D4): cycle map, previously missing
+(new file)	REORG_0827.md	file	5416	S5-8 (D7): Korean reorg map at repo root
+(new file)	scripts/reorg/s5_residual_gate.py	file	4860	S5-10: re-runnable residual gate for S6
+(new file)	scripts/reorg/s5_link_check.py	file	2559	S5-10: re-runnable Docs/ link-resolution gate for S6

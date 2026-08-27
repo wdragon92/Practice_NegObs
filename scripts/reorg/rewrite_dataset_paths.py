@@ -1,0 +1,411 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Rewrite `dataset/<round>` -> `dataset/<group>/<round>` across the repo.
+
+Implements reference_inventory.md §6.2 (the 0827 reorg). The map comes from
+`dataset/ROUNDS.json` (written by scripts/reorg/build_rounds_map.py).
+
+    python3 scripts/reorg/rewrite_dataset_paths.py --dry-run [--out FILE]
+    python3 scripts/reorg/rewrite_dataset_paths.py --apply
+    python3 scripts/reorg/rewrite_dataset_paths.py --verify
+    python3 scripts/reorg/rewrite_dataset_paths.py --inverse-check
+
+Why it is built the way it is
+-----------------------------
+* **os.walk, never grep.** This shell's `grep` is ugrep with `--ignore-files`,
+  so `grep -r` silently skips `dataset/`, `look_check/*`, `*.log`, `yolo_ds/`
+  and `annotations/amodal/` — 13,167 of the references live exactly there. Any
+  "did we get them all?" check written with grep returns a false green.
+* **Bytes, not text.** Files are read and written as bytes and never
+  `json.load`ed: a JSON round-trip would renormalise 9.3 MB of manifest
+  formatting and destroy the only proof we have that nothing but paths moved.
+* **One compiled alternation, one pass.** Round names sorted longest-first
+  with a right boundary `(?![A-Za-z0-9_])`, so `260820_boost_e` can never eat
+  `260820_boost_e2_off_g7fixM` (24 of the 196 names are prefixes of others).
+  One pass also stops a rewritten path being rewritten a second time.
+* **Both path styles at once.** The absolute form
+  `/home/.../Practice_NegObs/dataset/<round>` and the literal-relative form
+  `dataset/<round>` need the *same* edit — insert `<group>/` after `dataset/`.
+  So one pattern handles both; the two are only counted apart, for the report.
+* **Bare round names are never touched.** 47,650 occurrences of a round name
+  with no `dataset/` in front (`"round": "260819_main_on"`, ROUND_LEDGER rows,
+  CLI stamps) stay exactly as they are — the reorg does not rename rounds.
+
+Never touched
+-------------
+`experiments/v3_0823/PREREG_V3.md` and
+`experiments/weekend_0823/cue_audit/PREREG_CUEOFF.md` are sealed by sha256;
+their bytes must not change (PREREG_CUEOFF gets a sibling path-map note
+instead). `Docs/reorg_0827/` is this reorg's own audit trail and must keep
+recording the OLD paths, so it is excluded too.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import subprocess
+import sys
+
+REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ABS_PREFIX = REPO + "/"
+ROUNDS_JSON = os.path.join(REPO, "dataset", "ROUNDS.json")
+OUTDIR = os.path.join(REPO, "Docs", "reorg_0827")
+
+# Text kinds the rewriter is allowed to open. Everything else (png, npy, pt,
+# ...) is a binary and is skipped by extension, which is cheaper and safer
+# than sniffing.
+TEXT_EXT = {"md", "py", "sh", "json", "csv", "txt", "yaml", "yml", "toml",
+            "cfg", "ini", "log", "html", "tsv"}
+
+SKIP_DIRS = {".git", "__pycache__", ".venv", "venv", "venv_yolo", "node_modules"}
+# Sealed by sha256 / this reorg's own record of the before-state.
+SKIP_PATHS = {
+    "experiments/v3_0823/PREREG_V3.md",
+    "experiments/weekend_0823/cue_audit/PREREG_CUEOFF.md",
+}
+SKIP_TREES = ("Docs/reorg_0827/",)
+
+# The backup suffix is deliberately NOT a plain ".bak": two stale backups from
+# 2026-08-24 (experiments/v3_0823/logs/cue_extent_{frames,attrib}.json.bak)
+# already sit in the tree, and --inverse-check comparing against those would be
+# comparing against the wrong baseline.
+BAK_SUFFIX = ".pre0827.bak"
+APPLY_REPORT = os.path.join(OUTDIR, "rewrite_apply.tsv")
+# Paths that already do not exist BEFORE the move — pre-existing dangling
+# citations, recorded so --verify can tell them apart from damage it caused.
+BASELINE_MISSING = os.path.join(OUTDIR, "verify_baseline_missing.txt")
+
+
+# ---------------------------------------------------------------------------
+def load_map(path=ROUNDS_JSON):
+    with open(path, encoding="utf-8") as fh:
+        idx = json.load(fh)
+    if not isinstance(idx, dict) or not idx:
+        raise SystemExit("[rewrite] %s is not a non-empty {round: group} map" % path)
+    return idx
+
+
+def build_pattern(names):
+    """One alternation, longest name first, right boundary, left boundary."""
+    alt = b"|".join(re.escape(n.encode()) for n in
+                    sorted(names, key=lambda s: (-len(s), s)))
+    return re.compile(rb"(?<![A-Za-z0-9_])dataset/(" + alt + rb")(?![A-Za-z0-9_])")
+
+
+def build_inverse_pattern(index):
+    """`dataset/<group>/...` -> `dataset/...` — the exact inverse of the forward
+    transform, which only ever *inserts* `<group>/` after `dataset/`.
+
+    Keyed on the 15 group paths, not on `<group>/<round>` pairs, so that it also
+    undoes the hand pass (`scripts/reorg/handfix_dataset_paths.py`), which
+    inserts the same `<group>/` in front of brace expansions and globs that a
+    name-keyed matcher cannot see (`dataset/260819_main_{on,off}`). Measured
+    before the hand pass: **0** of the 288 `.pre0827.bak` files contain
+    `dataset/<group>/` anywhere, so nothing pre-existing can be stripped by
+    accident — every occurrence in the tree was put there by this reorg.
+    """
+    alts = sorted(set(index.values()), key=lambda s: (-len(s), s))
+    alt = b"|".join(re.escape(a.encode()) for a in alts)
+    return re.compile(rb"(?<![A-Za-z0-9_])dataset/(" + alt + rb")/")
+
+
+def classify(blob, start):
+    """Which spelling produced this match — for reporting only."""
+    head = blob[:start]
+    if head.endswith(ABS_PREFIX.encode()):
+        return "abs"
+    if head.endswith(b"Practice_NegObs/"):
+        return "xrepo"
+    if head.endswith(b"/"):
+        return "other_abs"
+    return "rel"
+
+
+def walk_files():
+    """Every candidate text file, symlinks skipped, in a stable order."""
+    for root, dirs, files in os.walk(REPO):
+        dirs[:] = sorted(d for d in dirs
+                         if d not in SKIP_DIRS and not os.path.islink(
+                             os.path.join(root, d)))
+        for f in sorted(files):
+            p = os.path.join(root, f)
+            if os.path.islink(p):
+                continue
+            ext = f.rsplit(".", 1)[-1].lower() if "." in f else ""
+            if ext not in TEXT_EXT:
+                continue
+            rel = os.path.relpath(p, REPO)
+            if rel in SKIP_PATHS or rel.startswith(SKIP_TREES):
+                continue
+            yield rel, p
+
+
+def tracked_set():
+    try:
+        out = subprocess.run(["git", "-C", REPO, "ls-files", "-z"],
+                             capture_output=True, check=True).stdout
+        return set(x.decode() for x in out.split(b"\0") if x)
+    except Exception:
+        snap = os.path.join(OUTDIR, "snapshot_before", "git_ls_files.txt")
+        if os.path.exists(snap):
+            return set(l.rstrip("\n") for l in open(snap, encoding="utf-8"))
+        return set()
+
+
+def rewrite_blob(blob, pat, index):
+    """Return (new_blob, counts, expected_delta). Single pass, byte-exact."""
+    counts = {"abs": 0, "rel": 0, "xrepo": 0, "other_abs": 0}
+    delta = 0
+    out, last = [], 0
+    for m in pat.finditer(blob):
+        name = m.group(1).decode()
+        group = index[name]
+        counts[classify(blob, m.start())] += 1
+        delta += 1 + len(group)                      # the inserted "<group>/"
+        out.append(blob[last:m.start()])
+        out.append(b"dataset/" + group.encode() + b"/" + m.group(1))
+        last = m.end()
+    out.append(blob[last:])
+    return b"".join(out), counts, delta
+
+
+# ---------------------------------------------------------------------------
+def cmd_scan(args, apply_changes):
+    index = load_map()
+    pat = build_pattern(index)
+    tracked = tracked_set()
+    rows, tot = [], {"abs": 0, "rel": 0, "xrepo": 0, "other_abs": 0,
+                     "files": 0, "hit_files": 0, "delta": 0}
+    for rel, p in walk_files():
+        try:
+            blob = open(p, "rb").read()
+        except OSError as exc:
+            print("[skip] %s: %s" % (rel, exc), file=sys.stderr)
+            continue
+        tot["files"] += 1
+        if b"dataset/" not in blob:
+            continue
+        new, counts, delta = rewrite_blob(blob, pat, index)
+        n = sum(counts.values())
+        if not n:
+            continue
+        assert len(new) - len(blob) == delta, (rel, len(new) - len(blob), delta)
+        tot["hit_files"] += 1
+        tot["delta"] += delta
+        for k in counts:
+            tot[k] += counts[k]
+        rows.append((rel, "yes" if rel in tracked else "no",
+                     counts["abs"] + counts["xrepo"] + counts["other_abs"],
+                     counts["rel"], delta))
+        if apply_changes:
+            bak = p + BAK_SUFFIX
+            if not os.path.exists(bak):
+                with open(bak, "wb") as fh:
+                    fh.write(blob)
+            tmp = p + ".rewrite.tmp"
+            with open(tmp, "wb") as fh:
+                fh.write(new)
+            os.replace(tmp, p)
+
+    out = args.out or os.path.join(
+        OUTDIR, "rewrite_apply.tsv" if apply_changes else "rewrite_dryrun.tsv")
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    tmp = out + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as fh:
+        fh.write("file\ttracked\tn_abs\tn_rel\tdelta_bytes\n")
+        for r in sorted(rows, key=lambda x: -(x[2] + x[3])):
+            fh.write("%s\t%s\t%d\t%d\t%d\n" % r)
+    os.replace(tmp, out)
+
+    print("mode        : %s" % ("APPLY" if apply_changes else "DRY-RUN"))
+    print("files read  : %d text files (allow-list %s)"
+          % (tot["files"], ",".join(sorted(TEXT_EXT))))
+    print("files hit   : %d" % tot["hit_files"])
+    print("absolute    : %d   (repo prefix)" % tot["abs"])
+    print("xrepo rel   : %d   (../../../Practice_NegObs/dataset/)" % tot["xrepo"])
+    print("other abs   : %d   (a '/' prefix that is not this repo)" % tot["other_abs"])
+    print("literal rel : %d   (bare dataset/<round>)" % tot["rel"])
+    print("TOTAL subs  : %d" % (tot["abs"] + tot["rel"] + tot["xrepo"] + tot["other_abs"]))
+    print("delta bytes : +%d" % tot["delta"])
+    print("report      : %s" % out)
+    unmatched(index)
+    return 0
+
+
+def unmatched(index, limit=40):
+    """`dataset/<token>` strings a name-keyed rewriter cannot fix (§6.3 R2)."""
+    known = set(index)
+    tok = re.compile(rb"(?<![A-Za-z0-9_])dataset/([^\s\"',;:)\]}\\]{0,80})")
+    forms = {}
+    for rel, p in walk_files():
+        try:
+            blob = open(p, "rb").read()
+        except OSError:
+            continue
+        if b"dataset/" not in blob:
+            continue
+        for m in tok.finditer(blob):
+            t = m.group(1).decode("utf-8", "replace")
+            head = t.split("/")[0]
+            if head in known:
+                continue
+            forms.setdefault(head, [0, rel])
+            forms[head][0] += 1
+    if not forms:
+        return
+    tot = sum(v[0] for v in forms.values())
+    print("\nunmatched dataset/<token> forms: %d distinct, %d occurrences"
+          % (len(forms), tot))
+    for head, (n, where) in sorted(forms.items(), key=lambda kv: -kv[1][0])[:limit]:
+        print("   %6d  dataset/%-42s  e.g. %s" % (n, head[:42], where))
+
+
+def flatten(path_str, index, _cache={}):
+    """`dataset/<group>/<round>/...` -> `dataset/<round>/...`, so a path can be
+    compared across the move. Anything else is returned unchanged."""
+    inv = _cache.get("inv")
+    if inv is None:
+        inv = _cache["inv"] = build_inverse_pattern(index)
+    return inv.sub(b"dataset/", path_str.encode()).decode()
+
+
+def load_baseline_missing(index):
+    if not os.path.exists(BASELINE_MISSING):
+        return set()
+    out = set()
+    with open(BASELINE_MISSING, encoding="utf-8") as fh:
+        for line in fh:
+            line = line.split("#", 1)[0].strip()
+            if line:
+                out.add(flatten(line, index))
+    return out
+
+
+# ---------------------------------------------------------------------------
+def cmd_verify(args):
+    """§6.4 items 4 and 3: residual scan, then exhaustive path existence."""
+    index = load_map()
+    pat = build_pattern(index)              # old form: dataset/<round> directly
+    bad_files, residual = [], 0
+    for rel, p in walk_files():
+        try:
+            blob = open(p, "rb").read()
+        except OSError:
+            continue
+        if b"dataset/" not in blob:
+            continue
+        n = len(pat.findall(blob))
+        if n:
+            residual += n
+            bad_files.append((rel, n))
+    print("[verify 1/2] residual old-form occurrences: %d in %d files"
+          % (residual, len(bad_files)))
+    for rel, n in sorted(bad_files, key=lambda x: -x[1])[:20]:
+        print("    %6d  %s" % (n, rel))
+
+    # exhaustive existence check over every path-looking string
+    pathpat = re.compile(rb"(?<![A-Za-z0-9_])dataset/[A-Za-z0-9_./\-]+")
+    checked = missing = 0
+    missing_all = []
+    for rel, p in walk_files():
+        top = rel.split(os.sep)[0]
+        if top not in ("experiments", "dataset"):
+            continue
+        if rel.rsplit(".", 1)[-1].lower() not in ("json", "csv", "txt", "yaml", "yml"):
+            continue
+        try:
+            blob = open(p, "rb").read()
+        except OSError:
+            continue
+        for m in pathpat.finditer(blob):
+            s = m.group(0).decode().rstrip("./")
+            checked += 1
+            if not os.path.exists(os.path.join(REPO, s)):
+                missing += 1
+                missing_all.append((rel, s))
+    print("[verify 2/2] dataset paths checked: %d   missing: %d" % (checked, missing))
+    known = load_baseline_missing(index)
+    unknown = [(rel, s) for rel, s in missing_all if flatten(s, index) not in known]
+    print("[verify 2/2] of those, known-dangling before the move: %d   NEW: %d"
+          % (missing - len(unknown), len(unknown)))
+    for rel, s in unknown[:20]:
+        print("    NEW MISSING %s   (in %s)" % (s, rel))
+    ok = (residual == 0 and not unknown)
+    print("VERIFY " + ("PASS" if ok else "FAIL"))
+    return 0 if ok else 1
+
+
+def cmd_inverse_check(args):
+    """Apply the inverse map to each rewritten file; must equal its backup.
+
+    Driven by the --apply report, never by globbing for `*.bak`: the tree
+    already contained two unrelated backups before this reorg started.
+    """
+    index = load_map()
+    inv = build_inverse_pattern(index)
+    report = args.out or APPLY_REPORT
+    if not os.path.exists(report):
+        print("[inverse] no apply report at %s — nothing has been applied yet."
+              % report)
+        print("INVERSE-CHECK SKIP")
+        return 0
+    files = []
+    with open(report, encoding="utf-8") as fh:
+        next(fh, None)
+        for line in fh:
+            f = line.split("\t")[0].strip()
+            if f:
+                files.append(f)
+    n_ok = n_bad = n_nobak = 0
+    bad = []
+    for rel in files:
+        p = os.path.join(REPO, rel)
+        bak = p + BAK_SUFFIX
+        if not os.path.exists(bak):
+            n_nobak += 1
+            bad.append("NO BACKUP " + rel)
+            continue
+        new = open(p, "rb").read()
+        old = open(bak, "rb").read()
+        back = inv.sub(b"dataset/", new)
+        if back == old:
+            n_ok += 1
+        else:
+            n_bad += 1
+            if len(bad) < 20:
+                bad.append("MISMATCH  " + rel)
+    print("[inverse] files in report      : %d" % len(files))
+    print("[inverse] byte-identical after inverse transform: %d" % n_ok)
+    print("[inverse] mismatched           : %d" % n_bad)
+    print("[inverse] missing backup       : %d" % n_nobak)
+    for b in bad[:20]:
+        print("    " + b)
+    ok = (n_bad == 0 and n_nobak == 0 and n_ok == len(files))
+    print("INVERSE-CHECK " + ("PASS" if ok else "FAIL"))
+    return 0 if ok else 1
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    g = ap.add_mutually_exclusive_group(required=True)
+    g.add_argument("--dry-run", action="store_true", help="count, write nothing")
+    g.add_argument("--apply", action="store_true", help="rewrite, keeping .bak")
+    g.add_argument("--verify", action="store_true", help="residual + existence scan")
+    g.add_argument("--inverse-check", action="store_true",
+                   help="inverse transform must reproduce every .bak")
+    ap.add_argument("--out", default=None, help="report TSV path")
+    a = ap.parse_args()
+    if a.dry_run:
+        return cmd_scan(a, False)
+    if a.apply:
+        return cmd_scan(a, True)
+    if a.verify:
+        return cmd_verify(a)
+    return cmd_inverse_check(a)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -2,7 +2,7 @@
 """
 scene01_campus_stairs.py - NegObs synthetic scene 1: campus plaza descending stair (Isaac Sim 4.5)
 
-Spec    : Docs/scene01_design_brief.md (the only spec)
+Spec    : Docs/briefs/scene01_design_brief.md (the only spec)
 Cookbook: negobs_look_check_v1.py (verified API patterns ported over)
 
 Hazard  : upper and lower levels are the same granite family, so the stair level

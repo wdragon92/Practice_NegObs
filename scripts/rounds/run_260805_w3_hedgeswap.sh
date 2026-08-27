@@ -4,7 +4,7 @@
 #   근거: 08-05 사용자 지시(GT-62 방식 확산) — ledger GT-63 선신고 참조
 #   재질 팔: 260805_w3_doctrine 과 동일 (LOOK_V1=1 · DETAIL_SCALE=2 · ROUGH_GAIN=0)
 #   사용법: bash run_260805_w3_hedgeswap.sh [scene02 sceneN1 ...]  (무인자 = 8씬 전부)
-#   scene02 는 지하도 암부로 total_spp 256 (run_p2_all33.sh 규약)
+#   scene02 는 지하도 암부로 total_spp 256 (scripts/rounds/run_p2_all33.sh 규약)
 # =============================================================================
 cd /home/vislab/Desktop/work_sy/Practice_NegObs || exit 9
 unset PYTHONPATH VIRTUAL_ENV

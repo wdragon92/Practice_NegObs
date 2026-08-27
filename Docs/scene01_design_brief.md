@@ -1,1 +1,0 @@
-briefs/scene01_design_brief.md

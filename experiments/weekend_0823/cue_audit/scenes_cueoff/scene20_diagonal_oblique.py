@@ -3,7 +3,7 @@
 scene20_diagonal_oblique.py - NegObs synthetic scene 20: diagonal oblique stair (Isaac Sim 4.5)
 
 Type    : T8 diagonal oblique (alignment assumption breaks down)
-Spec    : Docs/multi_scene_brief_v3.md §D scene20_diagonal_oblique
+Spec    : Docs/briefs/multi_scene_brief_v3.md §D scene20_diagonal_oblique
 Shared  : scene_common.py (verified API helpers) · scene01/scene02 (urban skeleton)
 
 Hazard  : a straight stair rotated 30 deg relative to the plaza walk axis (+X). In the

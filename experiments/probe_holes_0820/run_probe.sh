@@ -10,7 +10,7 @@
 #
 # That runs, in order:
 #   render   3 probe scenes x 2 arms x conds L0,L5,L7 x 8 cams
-#            -> dataset/260821_probe_on/  and  dataset/260821_probe_off/
+#            -> dataset/v2_probes/260821_probe_on/  and  dataset/v2_probes/260821_probe_off/
 #            = 72 cuts per arm, 144 frames, sidecars ON (depth + heightmap)
 #   label    labeler.py on the round PAIR with gridspec_v1 (5 sectors x 4 bands)
 #            -> annotations/labels_probe.json, then build_manifest.py
@@ -33,7 +33,7 @@
 #
 # ISOLATION — the guarantees this script is written to keep
 # ---------------------------------------------------------
-#  * writes only `dataset/260821_probe_{on,off}/` and this experiment directory;
+#  * writes only `dataset/v2_probes/260821_probe_{on,off}/` and this experiment directory;
 #    `guard_run_name` refuses any other run stamp, and `PROBE_ONLY` refuses any
 #    scene whose name does not start with `probe`;
 #  * the corpus AZ-ledger split is proven unchanged by `probe_driver.install()`'s
@@ -69,6 +69,10 @@
 set -u
 
 REPO=/home/vislab/Desktop/work_sy/Practice_NegObs
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>). A round is
+# found by NAME: negobs_round (strict) / negobs_round_or_flat (tolerant).
+source "$REPO/scripts/lib/negobs_paths.sh"
 W="$REPO/experiments/probe_holes_0820"
 CFG="$W/render_configs"
 LOGDIR="$W/logs"
@@ -110,7 +114,7 @@ guard_run_name() {
   case "$1" in
     260821_probe_on|260821_probe_off) return 0 ;;
     *) echo "[fatal] refusing run stamp '$1' — this script only ever writes" >&2
-       echo "        dataset/260821_probe_{on,off}." >&2; exit 4 ;;
+       echo "        dataset/v2_probes/260821_probe_{on,off}." >&2; exit 4 ;;
   esac
 }
 PROBE_ONLY() {
@@ -146,7 +150,8 @@ render_one() {                      # render_one <scene> <arm>
   local run; [ "$arm" = "on" ] && run="$RUN_ON" || run="$RUN_OFF"
   guard_run_name "$run"
   local cfgfile="$CFG/${scene}_${arm}.json"
-  local outdir="$REPO/dataset/${run}/probe/${scene}"
+  local outdir
+  outdir="$(negobs_round_or_flat "${run}")/probe/${scene}"
 
   if [ ! -f "$cfgfile" ]; then
     say "  [FAIL] $scene $arm: missing $cfgfile"; fail "$scene $arm: missing config"; return
@@ -180,7 +185,7 @@ exit \$rc" >> "$LOG" 2>&1
 }
 
 scene_ok() {                        # scene_ok <run> <scene> <conds>
-  python3 - "$REPO/dataset/$1/manifest.json" "$2" "$3" <<'PY'
+  python3 - "$(negobs_round_or_flat "$1")/manifest.json" "$2" "$3" <<'PY'
 import json, sys
 mf_path, scene, conds = sys.argv[1], sys.argv[2], sys.argv[3].split(",")
 try:
@@ -210,7 +215,7 @@ python3 '$W/probe_driver.py' --plan --run '$RUN_ON' --scenes '$(echo $SCENES | t
   done
   [ "$DRY" = "1" ] && return 0
   for run in "$RUN_ON" "$RUN_OFF"; do
-    d="$REPO/dataset/$run"
+    d="$(negobs_round_or_flat "$run")"
     say "  dataset/$run: $(find "$d" -name '*.png' 2>/dev/null | wc -l) png · \
 $(find "$d" -name '*.depth.npy' 2>/dev/null | wc -l) depth · \
 $(find "$d" -name 'heightmap.npy' 2>/dev/null | wc -l) heightmap"
@@ -231,11 +236,14 @@ phase_label() {
   local M="$W/dataset_manifest_probe.json"
   local S="$W/split_probe.json"
   local LAB="$REPO/experiments/mainrun_0819/code/labeling"
+  local ON_DIR OFF_DIR                # 0827: rounds are grouped
+  ON_DIR="$(negobs_round_or_flat "$RUN_ON")"
+  OFF_DIR="$(negobs_round_or_flat "$RUN_OFF")"
   say "--- PHASE label: gridspec_v1 on the round pair"
-  local c1="cd '$LAB' && $PY labeler.py --on-round '$REPO/dataset/$RUN_ON' \
---off-round '$REPO/dataset/$RUN_OFF' --grid $GRID --out '$L' --workers 6"
+  local c1="cd '$LAB' && $PY labeler.py --on-round '$ON_DIR' \
+--off-round '$OFF_DIR' --grid $GRID --out '$L' --workers 6"
   local c2="cd '$LAB' && $PY build_manifest.py --labels '$L' \
---on-round '$REPO/dataset/$RUN_ON' --off-round '$REPO/dataset/$RUN_OFF' --out '$M'"
+--on-round '$ON_DIR' --off-round '$OFF_DIR' --out '$M'"
   local c3="$PY '$W/eval_probe.py' --step split --manifest '$M' --split '$S'"
   if [ "$DRY" = "1" ]; then
     say "  [dry] $c1"; say "  [dry] $c2"; say "  [dry] $c3"; return 0

@@ -1,7 +1,7 @@
 # 사실화 v1 — Phase 1 "검증의 날" 보고
 
 - 브랜치 `feat/realism-v1` · 지시서 `Docs/briefs/realism_brief_v1.md` Phase 1
-- 산출물: `look_check/spike_e{1,2,3,4,5,9}/` · `look_check/spike_budget/` · `look_check/spike_results.json`
+- 산출물: `look_check/spike_e{1,2,3,4,5,9}/` · `look_check/spike_budget/` · `look_check/logs/spike_results.json`
 - 랩 코드 `scripts/spike_realism.py` · 실행 `run_p1_spike.sh` · PT 검증 `run_p1_ptfast_validate.sh`
 - 기준선: `Docs/reports/realism_baseline.md`
 

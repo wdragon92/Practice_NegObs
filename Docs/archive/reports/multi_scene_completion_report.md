@@ -1,7 +1,7 @@
 # NegObs 인공씬 세트 v2 — 완료 보고 (계단 유형 다양화)
 
 작성 2026-07-24 · 감독 Claude Fable 5(유형 선정·적대 리뷰·룩 판정) · 구현 Claude Opus 에이전트 (조사 1 + 에셋 2 + 공통 라이브러리 1 + 씬 4)
-사양: `Docs/multi_scene_brief_v2.md` · 유형 근거: `Docs/stair_typology_survey.md` (T1~T8 매트릭스, WebSearch 기반)
+사양: `Docs/briefs/multi_scene_brief_v2.md` · 유형 근거: `Docs/stair_typology_survey.md` (T1~T8 매트릭스, WebSearch 기반)
 
 ## 1. 무엇이 만들어졌나 — 씬 5종 세트 (scene01 포함)
 

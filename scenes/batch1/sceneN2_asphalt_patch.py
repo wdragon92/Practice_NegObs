@@ -3,7 +3,7 @@
 sceneN2_asphalt_patch.py - NegObs synthetic scene 32: black asphalt patch (Isaac Sim 4.5)
 
 Type    : N2 Hard Negative - a new asphalt patch on flat pavement (GT = no drop in any pixel)
-Spec    : Docs/nanobanana_batch1_geometry_map.md §D sceneN2_asphalt_patch
+Spec    : Docs/archive/legacy/nanobanana_batch1_geometry_map.md §D sceneN2_asphalt_patch
 Look ref: look_refs/n2_asphalt_patch.jpg (v2 regeneration)
 Shared  : scene_common.py (verified API helpers) · scene16_canopy_shadow.py (skeleton)
 

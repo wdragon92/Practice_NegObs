@@ -3,7 +3,7 @@
 scene14_grandstair_illusion.py - NegObs synthetic scene 14: illusory monumental stair (Isaac Sim 4.5)
 
 Type    : T14 Potemkin-style illusory grand stair (40 steps, 3 landings, tapered widening)
-Spec    : Docs/multi_scene_brief_v3.md §D scene14_grandstair_illusion + director addendum
+Spec    : Docs/briefs/multi_scene_brief_v3.md §D scene14_grandstair_illusion + director addendum
 Shared  : scene_common.py (build_straight_stairs width_pairs) · scene02 skeleton
 
 Hazard  : Walking forward from the small upper viewing plaza, only the landings of the 40-step

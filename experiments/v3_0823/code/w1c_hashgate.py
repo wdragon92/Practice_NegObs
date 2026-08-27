@@ -49,6 +49,11 @@ import sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__)))))
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat   # noqa: E402
 OUT = os.path.join(REPO, "experiments", "v3_0823", "w1c_hashgate.json")
 
 PORTED = ["scene02", "scene03", "scene06", "scene08", "scene10", "scene12",
@@ -75,7 +80,7 @@ def sha(p):
 
 
 def unit_dir(run, scene):
-    mf = os.path.join(REPO, "dataset", run, "manifest.json")
+    mf = os.path.join(round_dir_or_flat(run), "manifest.json")
     try:
         rec = json.load(open(mf, encoding="utf-8"))["scenes"][scene]
     except Exception:

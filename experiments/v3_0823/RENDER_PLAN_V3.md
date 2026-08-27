@@ -185,7 +185,7 @@ D58 ③: *"신규 씬 품질 원칙: 사실화 파이프라인 표준 전부 승
 
 | 표준 | 내용 | 정본 |
 |---|---|---|
-| **생활권 유형** | 보도 · 캠퍼스 경로 · 제방·수변(뚝방) · 농로 — 신규 18씬은 전부 이 넷 중 하나에 소속 | `Docs/experiment/OVERNIGHT_BRIEF_0819_v3.md:110` |
+| **생활권 유형** | 보도 · 캠퍼스 경로 · 제방·수변(뚝방) · 농로 — 신규 18씬은 전부 이 넷 중 하나에 소속 | `Docs/campaign/OVERNIGHT_BRIEF_0819_v3.md:110` |
 | **씬 조립 공식** | 씬 = ① 경로(보행로) + ② 위험(낙차) + ③ **토글형 맥락 단서** + ④ 은닉 기제(grazing angle) | `Docs/briefs/NegObs_인공씬1호_계단_구현지시서.md:20-22` · `OVERNIGHT_BRIEF_0819_v3.md:125` |
 | | *"주변 환경은 장식이 아니라 단서 ③ 그 자체다 — 계단만 덩그러니 만들면 이 씬은 실패다"* | 동 `:26` |
 | **법1–법8** | 법1 손상·노후 표현 금지 · 법2 임의 경고판 금지 · 법4 기능 필수성("비움이 기본값") · 법5 차량·계절소품 금지 · 법6 재질 동결 · **법7 `cue_*`는 기하 불변** · 법8 근거 태그 | `Docs/surveys/cue_expansion_survey_v1.md:22` (기원 GT-57 `Docs/audit_v4/gt_changes_w3.md:861-864`) |
@@ -469,7 +469,7 @@ second arm silently overwrite the first"* (`run_260820_boost.sh:20-22`).
 
 | Wave | 라운드 스탬프 | 출력 |
 |---|---|---|
-| W0 | `260825_v3w0_cuecls_{A,Bx}` | `dataset/260825_v3w0_cuecls_A/…` |
+| W0 | `260825_v3w0_cuecls_{A,Bx}` | `dataset/v3_aux/260825_v3w0_cuecls_A/…` |
 | W1 | `260826_v3w1_lib_{B,C,D}` | 팔별 별도 트리 |
 | W2 | `260828_v3w2_new_{A,B,C,D}` | |
 | W3 | `260830_v3w3_ext_{A,B,C,D}` | |
@@ -739,7 +739,7 @@ python3 scripts/run_data_render.py --run 260823_v3p5_segsmoke_A --scenes scene01
 | **cue 프림 매칭** | Rail/Nosing/Tactile/Sign 접두어에 **39개 프림 경로 적중** |
 
 증거: `experiments/v3_0823/logs/p5_seg_smoke.log` · 산출물
-`dataset/260823_v3p5_segsmoke_A/val/scene01/` (1프레임, 코퍼스 아님 — 증거로 보존).
+`dataset/_archive/_delete_candidates/260823_v3p5_segsmoke_A/val/scene01/` (1프레임, 코퍼스 아님 — 증거로 보존).
 재실행: `bash experiments/v3_0823/code/p5_seg_smoke.sh`.
 
 ⇒ **§12-5의 k 판정과 VG-06 모서리 소속은 둘 다 구현 가능하다.**
@@ -952,4 +952,4 @@ python3 experiments/v3_0823/code/audit_cue.py  &&  python3 experiments/v3_0823/c
 | `experiments/v3_0823/code/p5_seg_smoke.sh` | 세그 사이드카 실증 스모크 |
 | `experiments/v3_0823/logs/p5_seg_smoke.log` | 스모크 원본 로그 (PASS 증거) |
 | `scripts/run_data_render.py` | **수정** — `NEGOBS_SEG_SIDECAR=1` opt-in 절 신설 (기본 동작 불변, §6.3) |
-| `dataset/260823_v3p5_segsmoke_A/` | 스모크 산출 1프레임 (코퍼스 아님 — 증거로 보존) |
+| `dataset/_archive/_delete_candidates/260823_v3p5_segsmoke_A/` | 스모크 산출 1프레임 (코퍼스 아님 — 증거로 보존) |

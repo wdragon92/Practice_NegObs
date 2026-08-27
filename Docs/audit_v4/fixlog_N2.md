@@ -1,7 +1,7 @@
 # v5 신규 씬 구현 로그 — N-2 팀 (R2 scene07 / R5 scene10)
 
 작성 2026-07-27 · 근거 `Docs/briefs/multi_scene_brief_v5.md` §R2·§R5 +
-`Docs/scene_redesign_v5_proposal.md` + `Docs/briefs/multi_scene_brief_v3.md` §A
+`Docs/archive/legacy/scene_redesign_v5_proposal.md` + `Docs/briefs/multi_scene_brief_v3.md` §A
 검증 = `python3 -m py_compile` 통과 + `NEGOBS_SMOKE=1`(부팅 없는 기하 자기검증) 전량 OK
 + AST 감사(`sc.*` stage-first 위반 0). **렌더·Isaac 미실행. `scene_common.py` 무수정.**
 골격 관례 = `scenes/main/scene04_parktrail.py`(드레싱·관목 타원체) /

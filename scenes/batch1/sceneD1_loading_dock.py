@@ -3,7 +3,7 @@
 sceneD1_loading_dock.py — NegObs synthetic scene 33: loading dock U-shaped platform edge (Isaac Sim 4.5)
 
 Type    : D1 non-stair drop - logistics loading platform dock edge (drop 1.2 m)
-Spec    : Docs/nanobanana_batch1_geometry_map.md §D sceneD1_loading_dock
+Spec    : Docs/archive/legacy/nanobanana_batch1_geometry_map.md §D sceneD1_loading_dock
 Look ref: look_refs/d1_loading_dock.jpg (v3, on-platform viewpoint - main composition)
           look_refs/d1_loading_dock_v2_overview.jpg (exterior high angle - dimension reference)
 Shared  : scene_common.py (verified API helpers) · scene16_canopy_shadow.py (standard template)

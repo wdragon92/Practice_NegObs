@@ -3,7 +3,7 @@
 Author: eyes agent. 2026-07-30.
 Method: reused `scene_wholeness_audit_v1.md`'s whole-frame method — for each of the 33 scenes the
 three `pt_noon_preset_h0.3_d{2,5,10}` cuts were viewed FIRST (scene19: d2/d3.5/d5 per its preset
-grid, substitution as recorded in `_review_w2/meta.json`), then `h0.9_d5` and the scene's beauty
+grid, substitution as recorded in `_review/w2/meta.json`), then `h0.9_d5` and the scene's beauty
 cut. 165 full frames + all 23 captioned crops in `look_check/_experiments/gates/w2d_crops/` + 4
 extra mise-en-scène/twin cuts (scene19 `entry_gate`/`upper_approach`, scene21 `crown_graze`,
 GKIT=0 twins for scene16 d10 / sceneC4 d5). Bar: **"reads as a real Korean place at the robot

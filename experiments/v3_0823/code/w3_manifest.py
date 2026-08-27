@@ -29,6 +29,11 @@ import sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__)))))
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat   # noqa: E402
 V3 = os.path.join(REPO, "experiments", "v3_0823")
 ANN = os.path.join(V3, "annotations")
 LAB = os.path.join(REPO, "experiments", "mainrun_0819", "code", "labeling")
@@ -57,8 +62,8 @@ def main(argv=None):
             continue
         tmp = os.path.join(ANN, f"_w3_{tag}_{a.pair}_manifest.json")
         cmd = [PY, "build_manifest.py", "--labels", lab,
-               "--on-round", os.path.join(REPO, "dataset", f"{stamp}_{on_arm}"),
-               "--off-round", os.path.join(REPO, "dataset", f"{stamp}_{off_arm}"),
+               "--on-round", round_dir_or_flat(f"{stamp}_{on_arm}"),
+               "--off-round", round_dir_or_flat(f"{stamp}_{off_arm}"),
                "--out", tmp]
         r = subprocess.run(cmd, cwd=LAB, capture_output=True, text=True,
                            env={**os.environ, "PYTHONNOUSERSITE": "1"})

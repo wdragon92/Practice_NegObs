@@ -1,0 +1,96 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# Logs / outputs
+logs/
+outputs/
+# runs/: keep text artifacts public (D35/R3); exclude binaries below
+**/runs/**/*.pt
+**/runs/**/weights/
+**/runs/**/*.png
+**/runs/**/*.jpg
+**/runs/**/pred_*/
+**/runs/**/events.out*
+**/runs/**/*.npy
+**/runs/**/per_frame*.csv.bak
+wandb/
+*.log
+
+# Render outputs (regenerated per run; 실측 33GB @2026-08-14 — _experiments 8.4GB 단독 최대,
+# 정리 여부는 사용자 판정 사항: repo_reorg_v1.md §5).
+# The two index documents ARE tracked: look_check/ is the only place the round
+# inventory exists, so INDEX.md is its sole committed record (cleanup_lookcheck_v1.md).
+# NOTE: a trailing-slash `look_check/` would stop git descending into the directory
+# at all and the negations below would never be seen — the `/*` form is required.
+look_check/*
+!look_check/README.md
+!look_check/INDEX.md
+
+# Heavy binary assets (~800MB) — 재현 방법:
+#   python assets/download_assets.py                  # qwantani HDRI + 룩데브 v1 텍스처
+#   python assets/scene01/download_scene01_assets.py  # 본편/배치1 전 텍스처 + overcast HDRI + 점자블록
+# (noon HDRI의 _lookfix 파생본은 scene_common.ensure_noon_lookfix 가 첫 실행 시 자동 생성)
+assets/*.exr
+assets/*.jpg
+assets/scene01/*
+!assets/scene01/download_scene01_assets.py
+# assets/signs/*.png 은 92KB로 작아 추적 유지(생성기: assets/signs/gen_signs.py)
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+
+# NVIDIA Omniverse 식생 USD (~128MB) — **재배포 금지 라이선스**.
+# 렌더 이미지 공개는 가능하나 USD 자체는 배포 불가(ZZ_synthesis §9.2).
+# 재현: python assets/download_vegetation.py
+assets/vegetation/
+
+# NVIDIA Omniverse 도시 USD (dsready/simready, ~600MB) — 위와 **동일 판정**:
+# 렌더·데이터셋 공개 ✅ / USD 재배포 ❌ (ZZ §9.2 · §10.6, license_audit_v1.md).
+# 이 줄은 assets/download_urban.py 와 **같은 커밋에 들어가야 한다** — 첫 조달이
+# 중간에 끊기면 추적되지 않은 NVIDIA USD 가 트리에 남는다(redteam_w3r §1.5-1).
+# 재현: python assets/download_urban.py   (원장: assets/urban_manifest_w3.json)
+assets/urban/
+
+# Poly Haven 모델 (CC0 1.0). 라이선스상 재배포 가능하나 1k 번들만도 ~340MB 라
+# 용량 사유로 제외한다 — assets/*.exr / *.jpg 와 같은 이유, 같은 처분.
+# 재현: python assets/download_urban.py --only polyhaven_cc0
+assets/urban_cc0/
+
+# --- 실사 레퍼런스 라이선스 격리 (license_audit_v1.md) -------------------
+# 라이선스 근거가 없는 제3자 사진. 취득 경로 확인 전까지 배포하지 않는다.
+# (이미 과거 커밋에 포함돼 있으므로 히스토리 정리 여부는 별도 결정 사항.)
+Docs/reference_photos/quarantine/
+
+# Wikimedia 확대 표본 54장(50MB) — LICENSES.csv 와 재수집 스크립트로 재현.
+# 36장이 CC BY-SA(share-alike)라 프로젝트 원칙(CC0/MIT-0/CC-BY) 밖이며,
+# 공개 배포 시에는 CC0/BY/KOGL 18장만 사용한다.
+Docs/reference_photos/expanded/*
+!Docs/reference_photos/expanded/LICENSES.csv
+
+# Data-render outputs (role=data). Separate tree from look_check/ by design:
+# `regression_check.py` is only ever pointed at `look_check/scene*`, so a data
+# run is structurally invisible to it (lighting_camera_variation_spec_v1.md D1).
+# The manifests ARE the record — they are small, but the PNGs are not, so the
+# whole tree is ignored and `dataset/<run>/manifest.json` is reproducible from
+# `scripts/run_data_render.py` + the run stamp.
+dataset/
+
+# dayrun/nightrun heavy artifacts (regenerable; kept out of the public repo)
+experiments/dayrun_0820/venv_yolo/
+experiments/dayrun_0820/yolo_ds/
+experiments/dayrun_0820/annotations/amodal/
+experiments/*/audit_samples*/
+
+# public-repo fix (D35/R3): keep small result artifacts visible on GitHub
+experiments/dayrun_0820/yolo26n.pt
+**/cue_audit/smoke/
+experiments/weekend_0823/gazebo/frames/**/*.png

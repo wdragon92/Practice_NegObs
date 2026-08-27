@@ -42,7 +42,7 @@
 | `Docs/briefs/placement_rules_v1.yaml` | +6행 | C-9 볼라드 보유 씬 레지스트리에 sceneH6·H7 추가 (§5-4) |
 
 데이터 라운드(코퍼스 아님 — **증거로만 보존**):
-`dataset/260823_v3p5_h67smoke_A` (2컷) · `…_h67probe_A` (16컷) · `…_h67probe_C` (16컷) ·
+`dataset/_archive/_delete_candidates/260823_v3p5_h67smoke_A` (2컷) · `…_h67probe_A` (16컷) · `…_h67probe_C` (16컷) ·
 `…_h67rev_A` (16컷, 세그 검증).
 
 ---
@@ -510,13 +510,13 @@ bash experiments/v3_0823/code/run_h67_probe.sh segstrict     # §7 검증
 # 라벨 + 수율 측정
 PY=/home/vislab/miniconda3/envs/env_seg/bin/python
 cd experiments/mainrun_0819/code/labeling
-$PY labeler.py --on-round  $PWD/../../../../dataset/260823_v3p5_h67probe_A \
-               --off-round $PWD/../../../../dataset/260823_v3p5_h67probe_C \
+$PY labeler.py --on-round  $PWD/../../../../dataset/_archive/v3_scene_build/260823_v3p5_h67probe_A \
+               --off-round $PWD/../../../../dataset/_archive/v3_scene_build/260823_v3p5_h67probe_C \
                --grid gridspec_v1.json \
                --out ../../../v3_0823/annotations/h67_probe_labels.json --workers 4
 cd - && python3 experiments/v3_0823/code/h67_yield.py \
         --labels experiments/v3_0823/annotations/h67_probe_labels.json \
-        --on dataset/260823_v3p5_h67probe_A --off dataset/260823_v3p5_h67probe_C --band H
+        --on dataset/_archive/v3_scene_build/260823_v3p5_h67probe_A --off dataset/_archive/v3_scene_build/260823_v3p5_h67probe_C --band H
 ```
 
 ## 부록 B — val strict-H 회계 갱신 (계획 §3.5 대비)

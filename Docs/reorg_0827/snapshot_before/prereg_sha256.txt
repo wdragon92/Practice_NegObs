@@ -1,0 +1,2 @@
+05f41322e52b8e085b4d678c57dba4ee984deff3bfcea960123ae586e9fcf56a  experiments/v3_0823/PREREG_V3.md
+9c4733bb4baeabdf119a56e01b1e41439b96993ab1b73056892b262a1d2756b1  experiments/weekend_0823/cue_audit/PREREG_CUEOFF.md

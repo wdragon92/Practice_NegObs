@@ -3,7 +3,7 @@
 sceneD2_floor_opening.py - NegObs synthetic scene 29: construction-site floor opening (Isaac Sim 4.5)
 
 Type     : D2 non-stair drop - an unguarded opening in a frame-stage floor slab (drop 3.0 m)
-Spec     : Docs/nanobanana_batch1_geometry_map.md §C sceneD2_floor_opening
+Spec     : Docs/archive/legacy/nanobanana_batch1_geometry_map.md §C sceneD2_floor_opening
 Look ref : look_refs/d2_floor_opening.jpg
 Shared   : scene_common.py (verified API helpers) · scene16_canopy_shadow.py (standard template)
 

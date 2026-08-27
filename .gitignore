@@ -12,7 +12,8 @@ venv/
 logs/
 outputs/
 # runs/: keep text artifacts public (D35/R3); exclude binaries below
-**/runs/**/*.pt
+*.pt
+*.pth
 **/runs/**/weights/
 **/runs/**/*.png
 **/runs/**/*.jpg
@@ -94,3 +95,10 @@ experiments/*/audit_samples*/
 experiments/dayrun_0820/yolo26n.pt
 **/cue_audit/smoke/
 experiments/weekend_0823/gazebo/frames/**/*.png
+
+# S6 (2026-08-27) warehouse variant: same rule as weekend_0823/gazebo above —
+# the 108 capture PNGs (24 MB) stay out, the record stays in. Kept: the per-world
+# `*_cap_manifest.json` (exact camera poses), `frames/SHA256SUMS.txt` (the frames
+# are reproducible from worlds/*.world + capture_run.sh and checkable against it),
+# and everything under out/ (JSON + CSV, < 1 MB).
+experiments/gazebo_wh_0824/frames/**/*.png

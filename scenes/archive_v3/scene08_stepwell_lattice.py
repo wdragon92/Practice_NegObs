@@ -3,7 +3,7 @@
 scene08_stepwell_lattice.py — NegObs 인공씬 8호: 스텝웰(계단우물) (Isaac Sim 4.5)
 
 유형    : T11 스텝웰 미니어처 (사각 우물 12×12, 깊이 3.6·3층)
-사양서  : Docs/multi_scene_brief_v3.md §D scene08_stepwell_lattice + 감독 보충
+사양서  : Docs/briefs/multi_scene_brief_v3.md §D scene08_stepwell_lattice + 감독 보충
 공통    : scene_common.py (검증 API 헬퍼) · scene02_underpass.py (개구 4박스 골격)
 
 위험 본질: 상부 사암 테라스에 뚫린 12×12 사각 낙차(깊이 3.6). 격자 반복(대각

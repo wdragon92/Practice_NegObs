@@ -7,7 +7,7 @@
 > **지위**: `PROJECT_STATE_0823.md` §12.3 6항목의 명문화본. 레드팀 R2
 > (`experiments/weekend_0823/redteam/R2_method.md` §0.1·§2)의 **6개 판정을 개정 기본값으로 채택**
 > 했고(원장 `experiments/mainrun_0819/DECISIONS.md` D35), 이 문서가 그 채택본이다.
-> **작성**: 2026-08-23 · Claude(CPU-4+CPU-6) · `Docs/experiment/WEEKEND_BRIEF_0823.md` §4.2·§6.8 지시.
+> **작성**: 2026-08-23 · Claude(CPU-4+CPU-6) · `Docs/campaign/WEEKEND_BRIEF_0823.md` §4.2·§6.8 지시.
 > **독자**: 이 프로젝트를 처음 보는 사람 또는 AI. 선행 지식 없이 **이 문서 하나로** 실사진을
 > 채점할 수 있어야 한다(문서 표준 = WEEKEND_BRIEF §9.2).
 > **짝 문서 2개**

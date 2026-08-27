@@ -52,7 +52,9 @@ not equally dangerous.
     hit means the 33 corpus scenes keep byte-identical splits, and the probe
     rows are then written into that cached dict with the split `"probe"` — a
     fourth value that no corpus tool asks for and that keeps probe frames in
-    `dataset/<run>/probe/<scene>/`, visibly apart from `train/ val/ test/`.
+    `dataset/<group>/<run>/probe/<scene>/`, visibly apart from `train/ val/ test/`
+    (0827 reorg: rounds sit one purpose group below `dataset/`; resolve a round by
+    NAME via `dataset/ROUNDS.json` or `variation_kit.round_dir(name)`, never by path).
     `SPLIT_GUARD` below re-verifies the 33 after the injection and aborts if any
     moved.
 

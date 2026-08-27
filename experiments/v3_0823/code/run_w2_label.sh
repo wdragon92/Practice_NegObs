@@ -21,6 +21,10 @@
 # =============================================================================
 set -u
 REPO=/home/vislab/Desktop/work_sy/Practice_NegObs
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>). A round is
+# found by NAME: negobs_round (strict) / negobs_round_or_flat (tolerant).
+source "$REPO/scripts/lib/negobs_paths.sh"
 PY=/home/vislab/miniconda3/envs/env_seg/bin/python
 LAB="$REPO/experiments/mainrun_0819/code/labeling"
 ANN="$REPO/experiments/v3_0823/annotations"
@@ -37,7 +41,10 @@ say() { printf '[%s] %s\n' "$(date '+%F %T')" "$*" | tee -a "$LOG"; }
 
 label() {  # label <on-round> <off-round> <scenes> <out>
   if [ -s "$4" ]; then say "  [skip] $(basename "$4") — 존재"; return 0; fi
-  ( cd "$LAB" && $PY labeler.py --on-round "$D/$1" --off-round "$D/$2" \
+  local _on _off                      # 0827: rounds are grouped
+  _on="$(negobs_round "$1")"  || return 1
+  _off="$(negobs_round "$2")" || return 1
+  ( cd "$LAB" && $PY labeler.py --on-round "$_on" --off-round "$_off" \
         --grid gridspec_v1.json --scenes "$3" --out "$4" --workers 4 ) \
     >> "$LOG" 2>&1 \
     && say "  [ok] $(basename "$4")" || { say "  [FAIL] $(basename "$4")"; return 1; }
@@ -66,7 +73,7 @@ round() {
   say "──── strict-H 수율 ($tag · 밴드 $band · val 모형 H 0.60/base 0.20) ────"
   ( cd "$REPO" && $PY experiments/v3_0823/code/h67_yield.py \
       --labels "$ANN/w2_${tag}_ac_labels.json" \
-      --on "dataset/${stamp}_A" --off "dataset/${stamp}_C" \
+      --on "$(negobs_round "${stamp}_A")" --off "$(negobs_round "${stamp}_C")" \
       --band "$band" --split val ) 2>&1 | tee -a "$LOG"
 }
 

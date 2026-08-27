@@ -1,7 +1,7 @@
 # Scene01 캠퍼스 광장 하행계단 — 완료 보고 (지시서 §13 형식)
 
 작성 2026-07-24 · 감독 Claude Fable 5(적대 검증·룩 판정) · 구현 Claude Opus 에이전트 ×2
-사양: `Docs/scene01_design_brief.md` (지시서 편향 교정본) · 원 지시서: `Docs/NegObs_인공씬1호_계단_구현지시서.md`
+사양: `Docs/briefs/scene01_design_brief.md` (지시서 편향 교정본) · 원 지시서: `Docs/NegObs_인공씬1호_계단_구현지시서.md`
 
 ---
 
@@ -63,7 +63,7 @@ python scene01_campus_stairs.py          # GUI 룩 체크 (키: P=PT토글, C=�
 
 - `scene01_campus_stairs.py` — 단일 실행 파일 (SCENE_CONFIG 토글 6종 + PARAMS 전치수 + 캡처 파이프라인)
 - `assets/scene01/` — 텍스처 17파일(186MB, `download_scene01_assets.py`로 재현 가능) — 주의: band_dark_*(PavingStones127)는 룩 판정에서 교체되어 현재 미사용(보관)
-- `Docs/scene01_design_brief.md` — 설계 사양(편향 교정 기록 포함)
+- `Docs/briefs/scene01_design_brief.md` — 설계 사양(편향 교정 기록 포함)
 
 ## 8. 다음 단계 제안 (착수 금지 — 승용 검수 후)
 

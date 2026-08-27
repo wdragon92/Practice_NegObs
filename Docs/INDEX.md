@@ -1,8 +1,21 @@
-# Docs 색인 (2026-08-14 재편판)
+# Docs 색인 (2026-08-27 재편판)
 
-> **신규 합류는 `STATUS.md` 부터.** 현재 상태·읽는 순서·인수인계 큐가 요약돼 있다.
+> **신규 합류는 `campaign/status/PROJECT_STATE.md` 부터.** 캠페인 전체가 지금 어디에
+> 멈춰 있는지가 그 한 문서에 있다(날짜 없는 파일 하나 — 갱신은 그 파일을 고친다).
+> 씬 라이브러리만의 상태판은 `STATUS.md`.
 
-읽는 순서: `STATUS.md` → `briefs/process_spec_v1.md`(상설 규칙) →
+## 지도 다섯 장 (Docs 밖)
+
+| 문서 | 무엇 |
+|---|---|
+| **`campaign/status/PROJECT_STATE.md`** | 캠페인 현황 — 하나뿐인 살아 있는 현황 문서 |
+| `../dataset/README.md` | 렌더 데이터 9칸 지도 + 라운드를 **이름으로** 찾는 법 |
+| `../experiments/README.md` | 실험 사이클 7개 지도(날짜·목적·대표 문서·크기) |
+| `../look_check/INDEX.md` | 룩체크 라운드 전수 색인 — **생성물이다.** 손으로 고치지 말고 `python3 scripts/make_lookcheck_index.py` 로 다시 만든다 (look_check 아래를 더하거나 옮긴 직후 재실행이 웨이브 마감 체크리스트) |
+| `../submission_0830/INDEX.md` | 08-30 제출 묶음 |
+| `../REORG_0827.md` | 2026-08-27 정리 — 무엇이 어디로 갔나 |
+
+읽는 순서(씬 라이브러리 쪽): `STATUS.md` → `briefs/process_spec_v1.md`(상설 규칙) →
 `reports/scene_audit_realism_survey_v1.md`(08-14 전수 감사) → `audit_v4/gt_changes_w3.md`(GT ledger)
 → `reports/critique_intent_map_v1.md`(**수정 전 필독** — 지적 요소의 원설계 의도) → 이 색인
 
@@ -10,8 +23,23 @@
 이후 정정됐다. 반드시 `reports/realism_v1_final.md` §3(정정 목록)을 먼저 볼 것.
 
 ## 루트
-- **`STATUS.md`** — 현재 상태판. 라운드마다 여기부터 갱신한다 (직전 판 스냅샷은 `legacy/`)
+- **`STATUS.md`** — 씬 라이브러리 상태판. 라운드마다 여기부터 갱신한다
+  (직전 판 스냅샷은 `archive/legacy/STATUS_pre_reorg_260814.md`)
 - `CREDITS.md` — 외부 에셋 출처·라이선스 (CC-BY 크레딧 포함)
+
+## guides/ (직접 해 보는 법) — 08-27 신설
+- **`guides/ISAAC_HANDSON.md`** — 씬 하나를 직접 렌더 → 20칸 격자 오버레이 → 검수 갤러리 열기 →
+  **Isaac Sim GUI 로 씬 열기**. 문서에 적힌 명령은 전부 08-27에 실제로 실행해 확인한 것이다(D103).
+
+## campaign/ (캠페인 지시서 + 현황) — 08-27에 `experiment/` 에서 이름 바꿈
+- **`status/PROJECT_STATE.md`** — **살아 있는 현황 문서 하나.** 날짜를 파일명에 붙이지 않는다;
+  맨 위 "최종 갱신" 줄만 고친다. 옛 날짜판 4건은 `../archive/campaign_status/`
+- 사이클 지시서: `NEGOBS_STUDY_0823.md`(쉬운 말 정본) · `V3_DESIGN_0823.md` · `V3_BRIEF_0823.md` ·
+  `WEEKEND_BRIEF_0823.md` · `DAYRUN_BRIEF_0820.md` · `OVERNIGHT_BRIEF_0819_v3.md` ·
+  `OVERNIGHT_BRIEF_0820_v1.md`
+- 이름을 바꾼 이유: 루트 `experiments/`(실행 산출물)와 한 글자 차이라 계속 헷갈렸다.
+  봉인 문서 `experiments/v3_0823/PREREG_V3.md` 만 옛 표기를 그대로 두었다(해시 불변) —
+  대조표는 그 옆 `PREREG_V3_PATHMAP_0827.md`
 
 ## briefs/ (설계 지시·사양)
 - **`process_spec_v1.md`** — **상설 운영 규칙 (08-05 결재 R1~R7).** 검증 floor · ledger 법 ·
@@ -97,15 +125,14 @@
 - ※ 일회성 진단·감사·종결 w2/w3 일부 → `../archive/reports/` (`archive/README.md` 참조)
 - ※ 룩체크 v1(자연 도랑) 보고서·지시서는 `../../Practice_TerrainGen/Docs/` 로 분리(07-27)
 
-## archive/ (종결 기록 보관)
+## archive/ (종결 기록 보관 — 보관함은 여기 하나뿐이다)
 - 규칙: 원경로 `Docs/<하위>/<파일>` → `archive/<하위>/<파일>` (파일명 불변).
-  1차 56건(08-05) + **2차 9건(08-14, 인용 0 실측분만 — 큐 접촉분 유보)**. 목록·근거는
-  **`archive/README.md`**
-
-## legacy/ (이력 보존 — 현행 아님)
-- `scene_redesign_v5_proposal.md` · `nanobanana_batch1_geometry_map.md` ·
-  `scene_library_v3_status.md` · `STATUS_pre_p4.md` · `STATUS_pre_reorg_260814.md`
-- 심링크: `multi_scene_brief_v3.md` · `realism_rubric_v1.md`
+  1차 56건(08-05) + 2차 9건(08-14) + **3차(08-27)**. 목록·근거는 **`archive/README.md`**
+- `archive/legacy/` — 폐지된 `Docs/` 아래 `legacy/` 폴더의 실파일 5건. `scene_redesign_v5_proposal.md` ·
+  `nanobanana_batch1_geometry_map.md` · `scene_library_v3_status.md` · `STATUS_pre_p4.md` ·
+  `STATUS_pre_reorg_260814.md`. (현행 문서를 가리키던 심링크 2개는 08-27에 삭제)
+- `archive/campaign_status/` — 날짜판 PROJECT_STATE 4건(0820 · 0823 · 0823_v2 · 0823_v3).
+  현행은 `campaign/status/PROJECT_STATE.md` 하나
 
 ## reference_photos/
 - `Generated Image - SceneNN.jpg` 12장 — **씬별 충실도 표준(법)** (NN ∈ 01~04,06~11,13,18)
@@ -124,11 +151,14 @@
   `near_ground_stats.py` · `const_color_audit.py` · `measure_sky.py` · `skyline.py` ·
   `norm_spec.py` · `valset.py` · `harvest_refs.py` · `spike_realism.py` · `rtx_probe.py`
 - `check_data_run.py` · `run_data_render.py` — 데이터 렌더 검증·생성
-- `rounds/` — 완료된 렌더 체인 보관(08-14: 구식 명명 17건 + reorg 1건 합류, v6=v7 중복 1건 제거)
-- 루트 `run_p2_all33.sh` — **상설 드라이버(이동 금지** — 문서가 `:36` 줄 번호 인용)
+- `rounds/` — 완료된 렌더 드라이버 보관(08-14: 17건 + reorg 1건 · **08-27: 루트 5건 합류**)
+- `scripts/rounds/run_p2_all33.sh` — 상설 드라이버. 08-27에 루트에서 이곳으로 옮겼다.
+  **내용은 한 줄도 안 바뀌었으므로 문서의 줄 번호 인용(`:36` 등)은 그대로 유효**하다
+- `lib/negobs_paths.sh`(셸 `negobs_round`) · `reorg/`(08-27 정리 도구) · `tests/` ·
+  `make_lookcheck_index.py`(look_check/INDEX.md 생성기)
 
 ---
-호환 심링크(Docs/ 최상위 — 코드의 구경로 인용 보호용, 08-14 실제 생성):
-`multi_scene_brief_v3.md` `multi_scene_brief_v2.md` `scene01_design_brief.md`
-`nanobanana_batch1_geometry_map.md` `scene_redesign_v5_proposal.md` `stair_typology_survey_v2.md`
-`realism_rubric_v1.md` → 각 실경로 / `surveys/real_reference_expansion.md` → `reports/`
+**08-27: `Docs/` 최상위 호환 심링크 7개 + `surveys/real_reference_expansion.md` 심링크를 삭제했다.**
+08-14에 만든 것으로, 현행 코드가 옛 경로로 현행 문서를 가리키게 두는 장치였다. 인용 47파일 62곳을
+실경로로 고치고 링크를 없앴다 — 문서 하나에 경로 하나. 경위는 `reports/repo_reorg_v1.md` §1.1 추기,
+치환 원장은 `reorg_0827/docs_citation_edits.tsv`.

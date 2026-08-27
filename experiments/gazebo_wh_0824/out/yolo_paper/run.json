@@ -1,0 +1,35 @@
+{
+ "weights": "/home/vislab/Desktop/work_sy/Baseline_NegObs/src/negativeobstacleavoidandance/bot_camera/model/best.pt",
+ "weights_sha256_16": "f95126cee2b348ac",
+ "weights_license": "AGPL-3.0 (ultralytics) -- run in place, never copied",
+ "names": {
+  "0": "negative_obstacle"
+ },
+ "n_frames": 108,
+ "device": "cpu",
+ "imgsz": 640,
+ "pred_conf_floor": 0.05,
+ "tau_op": 0.25,
+ "gate_conf": 0.65,
+ "max_det": 300,
+ "roi": {
+  "top_w": 0.2,
+  "bottom_w": 0.8,
+  "height": 0.7
+ },
+ "ultralytics": "8.0.196",
+ "torch": "2.5.1+cu124",
+ "python": "3.10.12",
+ "wall_s": 12.9,
+ "created": "2026-08-24T13:43:58",
+ "stats": {
+  "roi": {
+   "nbox": 24,
+   "nframe": 24
+  },
+  "full": {
+   "nbox": 255,
+   "nframe": 84
+  }
+ }
+}

@@ -4,8 +4,8 @@ sceneD3_drainage_channel.py - NegObs synthetic scene 30: urban concrete roadside
                               channel (Isaac Sim 4.5)
 
 Type     : D3 non-stair drop (class extension - a roadside longitudinal open channel)
-Spec     : Docs/nanobanana_batch1_geometry_map.md §C sceneD3_drainage_channel
-           Docs/multi_scene_brief_v3.md §A regression-prevention checklist
+Spec     : Docs/archive/legacy/nanobanana_batch1_geometry_map.md §C sceneD3_drainage_channel
+           Docs/briefs/multi_scene_brief_v3.md §A regression-prevention checklist
 Shared   : scene_common.py · skeleton convention scene16_canopy_shadow.py
            asphalt constant-colour pattern scene17_ramp_pair_hangang.py
 Look ref : look_refs/d3_drainage_channel.jpg

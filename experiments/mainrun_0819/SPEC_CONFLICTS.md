@@ -34,7 +34,7 @@ Stance: **code is truth.** Each bullet states the spec assumption, the code fact
   the real band.
 
 * **`260816_w4_final33_on` is not a hazard-on round.** `_on` is the realism **look layer**:
-  `scripts/rounds/run_260816_w4_final33.sh:5` → `run_p2_all33.sh:29-30`
+  `scripts/rounds/run_260816_w4_final33.sh:5` → `scripts/rounds/run_p2_all33.sh:29-30`
   `LOOKV=$([ "$LOOK" = "on" ] && echo 1 || echo 0)` → `:39 NEGOBS_LOOK_V1="${LOOKV}"`,
   `:41 NEGOBS_CAPTURE_DIR=".../${TAG}_${LOOK}"`. **No hazard-off render exists on disk anywhere.**
   The hazard-off twin is listed as approved-and-not-done at
@@ -123,7 +123,7 @@ Stance: **code is truth.** Each bullet states the spec assumption, the code fact
   5 refused pairs' substitutions.
 
 * **The data channel has no per-scene spp raise, and the raise would not work if it had one.**
-  `run_p2_all33.sh:11-13` raises dark scenes to `NEGOBS_PT_TOTAL_SPP=256` (`sceneD4` required,
+  `scripts/rounds/run_p2_all33.sh:11-13` raises dark scenes to `NEGOBS_PT_TOTAL_SPP=256` (`sceneD4` required,
   `scene02`/`scene13` recommended). `run_data_render.py:382-384` hard-codes
   `sc.PT_FAST` (`scene_common.py:183` `spp=16, total_spp=64, subframes=8, warmup=8`) and never
   reads that env var — and per `Docs/reports/dn_curve_260816.md` §3 the knob does not reach the

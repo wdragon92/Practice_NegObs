@@ -633,11 +633,11 @@ base 밴드도 19/24.
 
 **데이터셋 (16 라운드 트리)**
 ```
-dataset/260824_v3w3_extsmoke_A/            6씬 × 1컷      (스모크)
-dataset/260824_v3w3_extbase_{A,B,C,D}/     6씬 × 24컷 × 4팔 = 576
-dataset/260824_v3w3_exth_{A,B,C,D}/        3씬 × 24컷 × 4팔 = 288
-dataset/260824_v3w3_extlat_{A,B,C,D}/      1씬 × 24컷 × 4팔 =  96
-dataset/260824_v3w3_extb2_{A,B,C,D}/       2씬 × 24컷 × 4팔 = 192
+dataset/_archive/_delete_candidates/260824_v3w3_extsmoke_A/            6씬 × 1컷      (스모크)
+dataset/v3_test_ext/260824_v3w3_extbase_{A,B,C,D}/     6씬 × 24컷 × 4팔 = 576
+dataset/v3_test_ext/260824_v3w3_exth_{A,B,C,D}/        3씬 × 24컷 × 4팔 = 288
+dataset/v3_test_ext/260824_v3w3_extlat_{A,B,C,D}/      1씬 × 24컷 × 4팔 =  96
+dataset/v3_test_ext/260824_v3w3_extb2_{A,B,C,D}/       2씬 × 24컷 × 4팔 = 192
 ```
 
 **라벨 (16개)** — `experiments/v3_0823/annotations/w3_{base,h,lat,b2}_{ac,bd,ca,db}_labels.json`

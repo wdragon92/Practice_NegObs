@@ -5,11 +5,11 @@
 > **대상**: PS §12.3 6항목 · PS §12.6 V2S 채택/롤백 기준 · 시드 산포 ± 보고와 per-run 부트스트랩 ·
 > WEEKEND §6.1 cued-H vs bare-H 층화 설계
 > **입력(전부 읽기 전용, 정본 무수정)**:
-> `Docs/experiment/Status/PROJECT_STATE_0823.md` §1·§5·§12 ·
+> `Docs/archive/campaign_status/PROJECT_STATE_0823.md` §1·§5·§12 ·
 > `experiments/dayrun_0820/runs/v2/SEED_TABLE.md` ·
 > `experiments/nightrun_0820/{TWIN_STRATIFICATION,STRADDLE_REPORT}.md` ·
 > `experiments/nightrun_0820/tau_curves/TAU_CURVES.md` ·
-> `Docs/experiment/WEEKEND_BRIEF_0823.md` §6 ·
+> `Docs/campaign/WEEKEND_BRIEF_0823.md` §6 ·
 > `experiments/dayrun_0820/annotations/labels_v1_full.json` · `split_v2_full.json` ·
 > `dataset_manifest_v2_full.json` · `runs/v2/*/eval_test/per_frame.csv` · `runs/v2/*/twin/twin_pairs.csv` ·
 > `experiments/mainrun_0819/code/{bootstrap.py,polar_dataset.py,infer_photo.py,labeling/labeler.py}` ·

@@ -487,7 +487,7 @@ render-failure detector.
 | `assets/download_sky.py` | `--ladder` / `--only-ladder` for the L3/L4/L5 skies |
 | `Docs/reports/regr_260730_lcfreeze.json` | the freeze regression output |
 | `look_check/{scene02,scene04,sceneN1,sceneN4}/260730_lcfreeze_{pre,post}/` | 2 × 52 judge cuts (gitignored) |
-| `dataset/260730_data_mini/` | 72 data cuts + manifests (gitignored) |
+| `dataset/_archive/scene_dev_2607/260730_data_mini/` | 72 data cuts + manifests (gitignored) |
 
 Reproduction:
 

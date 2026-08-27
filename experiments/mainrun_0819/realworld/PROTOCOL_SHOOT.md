@@ -11,7 +11,7 @@
 > 개정 이력에 새 행을 추가한다.
 >
 > **R2 개정의 출처**: 레드팀 R2 `experiments/weekend_0823/redteam/R2_method.md` §0.1·§2 판정 →
-> `experiments/mainrun_0819/DECISIONS.md` **D35** 수용 → `Docs/experiment/WEEKEND_BRIEF_0823.md`
+> `experiments/mainrun_0819/DECISIONS.md` **D35** 수용 → `Docs/campaign/WEEKEND_BRIEF_0823.md`
 > §4.2·§6.8 지시로 명문화.
 >
 > **⚠ 구판(15칸)으로 이미 찍은 사진이 있다면 재주석이 필요하다.** 2026-08-23 기준 실촬영분 0장 —

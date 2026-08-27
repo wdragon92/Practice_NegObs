@@ -132,7 +132,7 @@ only) so the new table has something to land against:
 
 | file | role |
 |---|---|
-| `run_ctrl_dressing.sh` | the round: preflight (patch present · config valid · `NEGOBS_SMOKE` parse gate) → flocked render of 48 cuts into `dataset/260820_ctrloff/` → hash gate |
+| `run_ctrl_dressing.sh` | the round: preflight (patch present · config valid · `NEGOBS_SMOKE` parse gate) → flocked render of 48 cuts into `dataset/v2_probes/260820_ctrloff/` → hash gate |
 | `hash_gate.py` | `snapshot` / `verify`; renders nothing; exit 0 = evaluation may proceed |
 | `run_ctrl_eval.sh` | gate → label → manifest → 3-seed eval → twin → table |
 | `sync_on_arm.py` | freezes the ON-arm labels in the control manifest, reporting any drift |

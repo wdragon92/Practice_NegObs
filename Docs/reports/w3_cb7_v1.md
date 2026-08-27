@@ -6,7 +6,7 @@
 > `Docs/reports/regr_260731_w3_cb7.json` · `Docs/reports/regr_260731_w3_cb7_pre.json` ·
 > `Docs/reports/_w3_cb7_crops/*.png` · `Docs/audit_v4/gt_changes_w3.md` (§3 status + §4
 > landing records for GT-1/GT-2/GT-3 **only**) · `look_check/scene02/260731_w3_cb7{,_pre}/`
-> (gitignored) · `dataset/260731_cb7_recache/` (gitignored)
+> (gitignored) · `dataset/_archive/scene_dev_2607/260731_cb7_recache/` (gitignored)
 > **Not touched, by instruction**: `scenes/main/scene18*`, `assets/coastal` (S18 lane is live) ·
 > every kit (`infra_kit` / `props_kit` / `building_kit` / `facade_kit` / `stair_kit` /
 > `scene_common` / `ground_kit` are **consumed**, not edited) · every other scene.

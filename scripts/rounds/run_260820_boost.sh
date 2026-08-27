@@ -18,12 +18,12 @@
 #
 # ADDITIVE — READ THIS BEFORE EDITING
 # -----------------------------------
-# The output trees are dataset/260820_boost_{h,e}_{on,off}/ — the arm MUST be in the
+# The output trees are dataset/v2_corpus/260820_boost_{h,e}_{on,off}/ — the arm MUST be in the
 # run name: both arms share seed-identical camera filenames, so a shared dir would
 # have the second arm silently overwrite the first (bug found 08-20 16:45, D23).
 # The collided first attempt (260820_boost_h / _e, off-arm survivors) is left on
 # disk untouched and superseded by these four rounds.
-# NOTHING here writes into `dataset/260819_main_on|off/`. Last night's corpus is
+# NOTHING here writes into `dataset/v2_corpus/260819_main_on|off/`. Last night's corpus is
 # frozen evidence (it is the "before" half of the v1 -> v2 development story,
 # Phase 3 of the brief) and a boost cut landing in it would be indistinguishable
 # from a main cut afterwards. `guard_run_name` below refuses any run stamp that
@@ -63,7 +63,7 @@
 # -----------------------------------------------------------
 # The driver files frames under `vk.split_of(scene)` (the legacy AZ-ledger
 # split) — that is where 260819_main put them too, e.g. scene14 sits in
-# `dataset/260819_main_on/train/scene14` even though `split_v1.json` forces
+# `dataset/v2_corpus/260819_main_on/train/scene14` even though `split_v1.json` forces
 # scene14 into **test**. The analysis split is `split_v1.json` and nothing
 # else. Boost frames inherit their scene's split automatically because they
 # inherit their scene; do not "fix" the directory.
@@ -99,6 +99,10 @@
 set -u
 
 REPO=/home/vislab/Desktop/work_sy/Practice_NegObs
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>). A round is
+# found by NAME: negobs_round (strict) / negobs_round_or_flat (tolerant).
+source "$REPO/scripts/lib/negobs_paths.sh"
 # Arm configs are REUSED from last night rather than copied: they are a
 # per-file grep of each scene's real hazard key (30x hazard_stairs, N1
 # hazard_shadow_band, N2 hazard_asphalt_patch, N5 hazard_flush_grating) and a
@@ -177,7 +181,7 @@ guard_run_name() {
   case "$1" in
     260820_boost_h_on|260820_boost_h_off|260820_boost_e_on|260820_boost_e_off|260820_boost_e2_on|260820_boost_e2_off) return 0 ;;
     *) echo "[fatal] refusing run stamp '$1' — this script only ever writes" >&2
-       echo "        dataset/260820_boost_h and dataset/260820_boost_e." >&2
+       echo "        dataset/_archive/v2_probes/260820_boost_h and dataset/_archive/v2_probes/260820_boost_e." >&2
        exit 4 ;;
   esac
 }
@@ -232,7 +236,7 @@ split_of() { echo "$SPLITMAP" | awk -v s="$1" '$1==s{print $2}'; }
 
 # --- did the SCENE SUBPROCESS succeed? (run_260819_main.sh:186-206) ---------
 scene_ok() {                     # scene_ok <run> <scene> <conds>
-  python3 - "$REPO/dataset/$1/manifest.json" "$2" "$3" <<'PY'
+  python3 - "$(negobs_round_or_flat "$1")/manifest.json" "$2" "$3" <<'PY'
 import json, sys
 mf_path, scene, conds = sys.argv[1], sys.argv[2], sys.argv[3].split(",")
 try:
@@ -265,7 +269,8 @@ render() {                       # render <boost> <scene> <arm> <conds> <label>
   local cfgfile="$CFG_OVR/${scene}_${arm}.json"
   [ -f "$cfgfile" ] || cfgfile="$CFG/${scene}_${arm}.json"
   local split; split=$(split_of "$scene")
-  local outdir="$REPO/dataset/${run}/${split}/${scene}"
+  local outdir
+  outdir="$(negobs_round_or_flat "${run}")/${split}/${scene}"
 
   if [ ! -f "$cfgfile" ]; then
     say "  [FAIL] $scene $arm: missing config ${scene}_${arm}.json in $CFG_OVR or $CFG"
@@ -364,7 +369,7 @@ T1=$(date +%s)
 say "================================================================"
 say "run_260820_boost.sh done in $(( (T1-T0)/60 )) min"
 for boost in $BOOSTS; do
-  d="$REPO/dataset/260820_boost_${boost}"
+  d="$(negobs_round_or_flat "260820_boost_${boost}")"
   say "  dataset/260820_boost_${boost}: $(find "$d" -name '*.png' 2>/dev/null | wc -l) png · $(find "$d" -name '*.depth.npy' 2>/dev/null | wc -l) depth · $(find "$d" -name 'heightmap.npy' 2>/dev/null | wc -l) heightmap"
 done
 # Surface every scene where the CAM-2 ceiling beat the requested band, so a

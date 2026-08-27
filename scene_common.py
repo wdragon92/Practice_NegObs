@@ -3,7 +3,7 @@
 scene_common.py - NegObs synthetic scene common library (Isaac Sim 4.5)
 
 The verified blocks of scene01_campus_stairs.py, turned into general functions.
-Brief: Docs/multi_scene_brief_v2.md §A (API), §B (new textures), §C (scenes using it).
+Brief: Docs/briefs/multi_scene_brief_v2.md §A (API), §B (new textures), §C (scenes using it).
 
 Import safety rule (important):
   This module must be safe to import **before** SimulationApp has booted.
@@ -2779,7 +2779,7 @@ def build_slope(stage, path, x0, z0, run, drop, y0, y1, thick, mtl,
 
 # ===========================================================================
 # [5c] New stair builders v3 (helical, worn stone, rotation group, open riser, canopy)
-#      Mathematical definitions: Docs/stair_typology_survey_v2.md §3 / brief v3 §B
+#      Mathematical definitions: Docs/surveys/stair_typology_survey_v2.md §3 / brief v3 §B
 # ===========================================================================
 def build_helix_steps(stage, prefix, cx, cy, r_in, r_out, a0_deg, step_deg, n,
                       riser, z0, mtl, ccw=True, collider=True, base_drop=0.5,

@@ -12,16 +12,22 @@
 과거 문서 이동 때 코드 인용을 안 고쳐 **이미 깨져 있던 경로들**을 심링크로 복구.
 INDEX 구판이 "심링크가 있다"고 주장했으나 실제로는 없었다 — 주장을 사실로 만드는 방향.
 
-| 심링크 | 실경로 | 깨져 있던 인용처 |
+| 심링크 (`Docs/` 아래 파일명) | 실경로 | 깨져 있던 인용처 |
 |---|---|---|
-| `Docs/multi_scene_brief_v3.md` | `briefs/` | archive_v3 7씬 + 8씬 = 15파일 |
-| `Docs/multi_scene_brief_v2.md` | `briefs/` | scene_common(+심링크 2)·scene02/03/04·다운로더 |
-| `Docs/nanobanana_batch1_geometry_map.md` | `legacy/` | **batch1 12씬 전부** + 다운로더 |
-| `Docs/scene01_design_brief.md` | `briefs/` | scene01("the only spec")·다운로더 |
-| `Docs/stair_typology_survey_v2.md` | `surveys/` | scene_common:2514(+심링크 2) |
-| `Docs/scene_redesign_v5_proposal.md` | `legacy/` | scene07/10/12 + fixlog N1~N4 |
-| `Docs/realism_rubric_v1.md` | `reports/` | (INDEX 주장 정합화) |
-| `Docs/surveys/real_reference_expansion.md` | `../reports/` | `scripts/harvest_refs.py:8` |
+| `multi_scene_brief_v3.md` | `briefs/` | archive_v3 7씬 + 8씬 = 15파일 |
+| `multi_scene_brief_v2.md` | `briefs/` | scene_common(+심링크 2)·scene02/03/04·다운로더 |
+| `nanobanana_batch1_geometry_map.md` | `legacy/` | **batch1 12씬 전부** + 다운로더 |
+| `scene01_design_brief.md` | `briefs/` | scene01("the only spec")·다운로더 |
+| `stair_typology_survey_v2.md` | `surveys/` | scene_common:2514(+심링크 2) |
+| `scene_redesign_v5_proposal.md` | `legacy/` | scene07/10/12 + fixlog N1~N4 |
+| `realism_rubric_v1.md` | `reports/` | (INDEX 주장 정합화) |
+| `surveys/real_reference_expansion.md` | `../reports/` | `scripts/harvest_refs.py:8` |
+
+> **2026-08-27 추기 (S5 재편).** 위 8개 심링크는 **전부 삭제됐다.** 08-14에는 "코드를 안 고치고
+> 깨진 인용을 살린다"가 옳았지만, 그 결과 현행 코드가 옛 경로로 현행 문서를 가리키는 상태가
+> 1년치 문서에 굳었다. 08-27 재편에서는 반대로 **인용 47파일 62곳을 실경로로 고치고 심링크를
+> 없앴다** — 경로 하나에 답 하나. `legacy/` 는 `archive/legacy/` 로 접혔으므로 위 표의
+> `legacy/` 행 2건은 지금 `archive/legacy/` 다. 원장: `Docs/reorg_0827/docs_citation_edits.tsv`.
 
 ### 1.2 scripts/ 정돈
 - 완료 체인 **17건 → `scripts/rounds/`**: run_finalize_v3 · run_partial_r4 · run_scene19_r5 ·
@@ -58,8 +64,12 @@ INDEX 구판이 "심링크가 있다"고 주장했으나 실제로는 없었다 
 1. `briefs/placement_rules_v1.yaml` — `placement_lint.py` 가 실행 경로로 읽음(검증 floor 입력).
 2. `audit_v4/gt_changes_w3.md` 와 그것이 인용하는 48경로(regr json 26·보고서 17·크롭·사양) —
    append-only 원장의 재현성 증거.
-3. 루트 `run_p2_all33.sh` — `s04_quality_gap_survey_v1.md:690` 이 **`:36` 줄 번호**로 인용하는
-   상설 드라이버. 앞에 줄을 추가하는 수정도 금지.
+3. 상설 렌더 드라이버 `scripts/rounds/run_p2_all33.sh` — 08-14 당시에는 **저장소 루트**에 있었다.
+   `s04_quality_gap_survey_v1.md:690` 이 **`:36` 줄 번호**로 인용하므로 앞에 줄을 추가하는 수정도 금지.
+   > **2026-08-27 추기.** 이 앵커는 **해제됐다.** 파일은 `scripts/rounds/run_p2_all33.sh` 로 옮겼다.
+   > 금지 사유였던 줄 번호 인용(`:36` 등)은 **파일 내용을 한 줄도 늘리지 않았으므로 그대로 유효**하다
+   > (87줄, 사용법 주석의 경로 표기 3곳만 새 경로로 고침). 이 드라이버를 실행하던
+   > `scripts/rounds/run_260816_w4_final33.sh:5` 도 같은 줄에서 새 경로를 부르도록 고쳤다.
 4. `briefs/w3_execution_spec_v1.md`(RETIRED) — 코드 9곳 + 원장이 조문 인용. 위치 불변.
 5. `surveys/_dimension_index.md` — 킷 4종(+심링크)이 인용.
 6. look_check(33GB)·dataset(846MB) 미추적 생성물 — **삭제 없음**(§5 판정 대기).

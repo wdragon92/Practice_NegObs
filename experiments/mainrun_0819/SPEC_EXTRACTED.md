@@ -149,7 +149,7 @@ rows = vk.look_at_rows(eye, s["yaw"], s["pitch"], s["roll"])
   matrix (SP-7: roll error ≤ 0.005°, hFOV error ≤ 0.047°).
 * **`cam.d` means: metres of standoff behind the drop-start edge `x = 0`, measured along the
   travel axis.** It is *not* range-to-hazard and *not* range-to-anything-visible. Confirmed on
-  disk: `dataset/260815_datapilot/train/scene04/variation.json` cut 0 has
+  disk: `dataset/_archive/pilots/260815_datapilot/train/scene04/variation.json` cut 0 has
   `"d": 4.4596` and `"eye": [-4.4596, -0.0534, 0.8916]`.
 * Lateral centre `gy` is learned per scene by monkey-patching `grid_views`
   (`run_data_render.py:328-330`) — it differs per scene (docstring `:293`: scene01 −2.75,
@@ -189,8 +189,8 @@ Enforced again as an acceptance gate: `scripts/check_data_run.py:238-244` re-ass
 ### **[FOUND]** — mechanism exists per scene, but the `_on` in `260816_w4_final33_on` is NOT it.
 
 **`_on` means the look layer, not the hazard.**
-`scripts/rounds/run_260816_w4_final33.sh:5` calls `bash run_p2_all33.sh 260816_w4_final33 on`,
-and `run_p2_all33.sh:29-30`:
+`scripts/rounds/run_260816_w4_final33.sh:5` calls `bash scripts/rounds/run_p2_all33.sh 260816_w4_final33 on`,
+and `scripts/rounds/run_p2_all33.sh:29-30`:
 
 ```
 LOOK="${2:-on}";  LOOKV=$([ "$LOOK" = "on" ] && echo 1 || echo 0)

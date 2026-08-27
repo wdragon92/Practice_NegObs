@@ -2,7 +2,7 @@
 """
 scene10_switchback_cliff.py — NegObs 인공씬 10호: 산릉 갈지자 (Isaac Sim 4.5)
 
-사양서 : Docs/multi_scene_brief_v3.md §A(회귀 체크리스트)·§D(scene10)·§B(빌더)
+사양서 : Docs/briefs/multi_scene_brief_v3.md §A(회귀 체크리스트)·§D(scene10)·§B(빌더)
 공통 라이브러리 : scene_common.py / 골격 관례 : scene03_riverbank.py
 
 유형 (T13 갈지자): **방향 반전 + 투과 디딤판 아래 계곡**.

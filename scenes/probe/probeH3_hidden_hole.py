@@ -6,7 +6,7 @@ Type   : HOLE behind a low occluder — the H-tier composition. A 1.00 x 1.10 m
          open service pit sits immediately behind a 0.80 m raised planter wall,
          so BOTH the pit interior AND its rim are out of sight from every camera
          the frozen sampler draws.
-Spec   : Docs/experiment/OVERNIGHT_BRIEF_0820_v1.md §4 C1 composition (3)
+Spec   : Docs/campaign/OVERNIGHT_BRIEF_0820_v1.md §4 C1 composition (3)
          "**가림막 뒤 hole (H 성립 구도) >= 1**", depth >= 0.5 m
 Shared : probe_common.py (twin contract + builders) · scene_common.py
 

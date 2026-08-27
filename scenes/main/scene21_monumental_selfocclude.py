@@ -3,7 +3,7 @@
 scene21_monumental_selfocclude.py — NegObs synthetic scene 21: government office grand stair (Isaac Sim 4.5)
 
 Type    : T2 monumental entrance grand stair (multi-step self-occlusion)
-Spec    : Docs/multi_scene_brief_v3.md §D scene21_monumental_selfocclude + director's addendum
+Spec    : Docs/briefs/multi_scene_brief_v3.md §D scene21_monumental_selfocclude + director's addendum
 Shared  : scene_common.py (build_railing_line/build_nosing) · scene02 skeleton
 
 Hazard  : Walking forward from the upper terrace (in front of the office facade), the lower 12

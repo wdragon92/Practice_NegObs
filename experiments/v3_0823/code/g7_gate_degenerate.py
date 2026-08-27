@@ -26,6 +26,11 @@ import json, os, sys, collections
 import numpy as np
 
 REPO = "/home/vislab/Desktop/work_sy/Practice_NegObs"
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat   # noqa: E402
 LAB = os.path.join(REPO, "experiments/mainrun_0819/code/labeling")
 sys.path.insert(0, LAB)
 from labeler import load_heightmap, scene_dirs                       # noqa: E402
@@ -54,8 +59,8 @@ def main():
     for rnd, sc in need:
         arm = "on" if rnd.endswith("_on") else "off"
         off_round = rnd[:-3] + "_off" if arm == "on" else rnd
-        don = scene_dirs(os.path.join(REPO, "dataset", rnd))[sc]
-        dof = scene_dirs(os.path.join(REPO, "dataset", off_round))[sc]
+        don = scene_dirs(round_dir_or_flat(rnd))[sc]
+        dof = scene_dirs(round_dir_or_flat(off_round))[sc]
         hm_on, _, src_on = load_heightmap(don)
         hm_off, _, src_off = load_heightmap(dof)
         used = fp_cells(hm_on, hm_off)

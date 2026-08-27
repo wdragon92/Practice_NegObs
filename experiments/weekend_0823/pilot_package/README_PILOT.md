@@ -3,7 +3,7 @@
 > **목적(한 줄)**: 파일럿 20장을 **찍고 → 추론하고 → 사전등록 기준에 대입해 판독하고 →
 > 본촬영 규모를 추천**하기까지의 전 과정을, 이 문서 하나만 보고 실행할 수 있게 만든다.
 >
-> **작성**: 2026-08-23 · Claude(CPU-6) · `Docs/experiment/WEEKEND_BRIEF_0823.md` §6.8 지시.
+> **작성**: 2026-08-23 · Claude(CPU-6) · `Docs/campaign/WEEKEND_BRIEF_0823.md` §6.8 지시.
 > **독자**: 이 프로젝트를 처음 보는 사람 또는 AI(문서 표준 = WEEKEND_BRIEF §9.2).
 > **촬영 자체는 승용 몫이다.** 이 문서는 촬영 전 준비물(명령·체크리스트·판독 틀)만 제공한다.
 >
@@ -68,7 +68,7 @@ CPU="env CUDA_VISIBLE_DEVICES= PYTHONNOUSERSITE=1 PYTHONUNBUFFERED=1 OMP_NUM_THR
 OUT=experiments/mainrun_0819/realworld/pilot_out
 mkdir -p $OUT
 $CPU experiments/mainrun_0819/code/infer_photo.py \
-  --image dataset/260819_main_off/val/scene01/L0__s20260819__0000.png \
+  --image dataset/v2_corpus/260819_main_off/val/scene01/L0__s20260819__0000.png \
   --ckpt  experiments/dayrun_0820/runs/v2/rgb_s42/best.pt \
   --grid  gridspec_v1.json \
   --fit   squash \
@@ -84,7 +84,7 @@ $CPU experiments/mainrun_0819/code/infer_photo.py \
 
 ```
 [infer_photo] PROVISIONAL-GRID-V1: 4 bands x 5 sectors = 20 cells · edges [0.0, 2.0, 5.0, 8.0, 12.0] · A1..E3b
-[infer_photo] image dataset/260819_main_off/val/scene01/L0__s20260819__0000.png 1920x1080 · fit=squash · hfov=62.20deg (cli) · h=1.65m · pitch=-8.00deg
+[infer_photo] image dataset/v2_corpus/260819_main_off/val/scene01/L0__s20260819__0000.png 1920x1080 · fit=squash · hfov=62.20deg (cli) · h=1.65m · pitch=-8.00deg
 [infer_photo] ckpt experiments/dayrun_0820/runs/v2/rgb_s42/best.pt (trained n_cells=20, input=rgb)
 [infer_photo] top cells: C3b=0.006, B2=0.004, B3b=0.003, D2=0.003, C2=0.002
 [infer_photo] fired (p>=0.5): none

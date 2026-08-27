@@ -64,6 +64,10 @@
 set -u
 
 REPO=/home/vislab/Desktop/work_sy/Practice_NegObs
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>). A round is
+# found by NAME: negobs_round (strict) / negobs_round_or_flat (tolerant).
+source "$REPO/scripts/lib/negobs_paths.sh"
 AUDIT="$REPO/experiments/weekend_0823/cue_audit"
 SCN="$AUDIT/scenes_cueoff"
 CFG="$AUDIT/render_configs"
@@ -142,7 +146,7 @@ guard_run_name() {
     260823_cueoff_s20fix_P|260823_cueoff_s20fix_C)
       return 0 ;;
     *) echo "[fatal] refusing run stamp '$1' — this script only ever writes" >&2
-       echo "        dataset/260823_cueoff{,2,3,_s20fix}_{A,B1,B2,P,C}." >&2
+       echo "        dataset/cueoff/260823_cueoff{,2,3,_s20fix}_{A,B1,B2,P,C}." >&2
        exit 4 ;;
   esac
 }
@@ -324,7 +328,7 @@ if [ "$SMOKE" != "1" ]; then
       run="${stem}_${arm}"
       guard_run_name "$run"
       render "$stem" "$scene" "$band" "$seed" "$arm" "$CAMS" "$CONDS" \
-             "$REPO/dataset/$run/$split/$scene"
+             "$(negobs_round_or_flat "$run")/$split/$scene"
     done
   done
 fi

@@ -10,7 +10,7 @@ cams   1 · seed 20260823
           render 0.0 min + boot 0.6 min + sky 0.00 min = 0.6 min (0.01 h), overhead 92 %
 [assets] L0:qwantani_noon_puresky_4k_lookfix_cap0.6.exr
 
-[render] scene01 (main) -> /home/vislab/Desktop/work_sy/Practice_NegObs/dataset/260823_v3p5_segsmoke_A/val/scene01
+[render] scene01 (main) -> /home/vislab/Desktop/work_sy/Practice_NegObs/dataset/_archive/_delete_candidates/260823_v3p5_segsmoke_A/val/scene01
          conds ['L0']
 [SCENE_CONFIG] override 적용: {"hazard_stairs": true}
 [Warning] [simulation_app.simulation_app] Modules: ['omni.kit_app'] were loaded before SimulationApp was started and might not be loaded correctly.

@@ -2,7 +2,7 @@
 
 - 작성: 2026-07-28 · 담당: 씬 구성 재설계(top-down)
 - 입력: `README.md` · `Docs/audit_v4/user_feedback_v5_1.md`(v5.1 §1~5 + v5.2 §6~9) ·
-  `Docs/legacy/scene_redesign_v5_proposal.md` · `Docs/reports/realism_v1_final.md` ·
+  `Docs/archive/legacy/scene_redesign_v5_proposal.md` · `Docs/reports/realism_v1_final.md` ·
   씬 소스 33개 전수 · **최신 렌더 `look_check/<씬>/r2_on/` 전 33씬 육안 판정**
 - **재질·텍스처·MDL·셰이더는 이 문서의 대상이 아니다.** 다루는 것은
   공간 구성 · 지형 · 배치 · 있어야 할 물건 · 스케일 · 시야 구성뿐이다.

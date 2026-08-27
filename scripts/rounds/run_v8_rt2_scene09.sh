@@ -2,7 +2,7 @@
 # [v8 Y1] scene09 단독 RT 재렌더 — 지붕 셰이딩 수정 검증 (look_check/scene09/v8_rt2)
 # PT 배치와 GPU 를 공유하므로 `python scenes` 프로세스가 사라질 때까지 대기 후 실행.
 cd /home/vislab/Desktop/work_sy/Practice_NegObs || exit 9
-LOG=look_check/v8_rt2_scene09.log
+LOG=look_check/logs/v8_rt2_scene09.log
 : > $LOG
 echo "[대기] PT 배치 종료 대기 중 ..." | tee -a $LOG
 for i in $(seq 1 720); do            # 최대 2시간 (10s × 720)

@@ -10,7 +10,9 @@ Inputs (read-only, all canonical files untouched):
   manifest experiments/dayrun_0820/dataset_manifest_v2_full.json     (camera, round, cond)
   split    experiments/dayrun_0820/split_v2_full.json
   cues     Docs/reports/raw_260816/cue_matrix_result.json            (13 cues x 9 presets)
-  poses    dataset/<round>/<split>/<scene>/variation.json            (full eye incl. y)
+  poses    dataset/<group>/<round>/<split>/<scene>/variation.json    (full eye incl. y)
+           (0827 reorg: a round sits one purpose group below `dataset/`.  Resolve it by
+            NAME — `dataset/ROUNDS.json` / `variation_kit.round_dir(name)` — not by path.)
 
 Output: h_cue_table.csv in this directory.
 

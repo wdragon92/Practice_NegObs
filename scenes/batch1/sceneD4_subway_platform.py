@@ -4,7 +4,7 @@ sceneD4_subway_platform.py — NegObs synthetic scene 31: D4 subway platform edg
 (Isaac Sim 4.5) — **the library's first fully indoor scene**
 
 Type    : D4 non-stair drop (platform edge → track bed, drop 1.15 m)
-Spec    : Docs/nanobanana_batch1_geometry_map.md §C sceneD4_subway_platform
+Spec    : Docs/archive/legacy/nanobanana_batch1_geometry_map.md §C sceneD4_subway_platform
 Look ref: look_refs/d4_subway_platform.jpg
 Shared  : scene_common.py (check API) · scene16_canopy_shadow.py (standard skeleton)
           · scene02_underpass.py (semi-indoor concrete) · scene06_spiral_towerstone.py

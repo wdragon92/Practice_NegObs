@@ -204,7 +204,7 @@ Two practical notes. (1) `build_transform` always expects a `mask=` kwarg — pa
 cheaper than forking the function. (2) The render pipeline already emits a per-scene
 `variation.json` whose `cuts[]` records carry `file`, `cond`, `seed`, `idx`, and a full `cam` block
 (`eye`, `ground_z`, `d`, `h_rel`, …) — e.g.
-`Practice_NegObs/dataset/260815_datapilot/train/scene04/variation.json`, with a run-level
+`Practice_NegObs/dataset/_archive/pilots/260815_datapilot/train/scene04/variation.json`, with a run-level
 `dataset/<round>/manifest.json` listing `scenes → {split, out, cuts, done_conds}`. Build tonight's
 manifest by walking those two files rather than the filesystem: split, condition and camera pose come
 for free and are exactly what you will want for per-condition breakdowns later.

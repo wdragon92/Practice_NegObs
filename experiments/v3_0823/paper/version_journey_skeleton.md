@@ -8,7 +8,7 @@
 - **Rule of this file**: every number has a ledger path. **No number appears in the paper without one.**
   Pending items marked `[미결: …]`.
 
-**Abbrevs**: DZ = `Docs/experiment/V3_DESIGN_0823.md` · PS v2 = `Docs/experiment/Status/PROJECT_STATE_0823_v2.md` ·
+**Abbrevs**: DZ = `Docs/campaign/V3_DESIGN_0823.md` · PS v2 = `Docs/archive/campaign_status/PROJECT_STATE_0823_v2.md` ·
 ACC = `experiments/v3_0823/ACCOUNTING.md` · DEC = `experiments/mainrun_0819/DECISIONS.md` ·
 ST = `experiments/dayrun_0820/runs/v2/SEED_TABLE.md` · F1 = `experiments/weekend_0823/rt_response/F1_FA_MATCHED.md` ·
 F2 = `experiments/weekend_0823/rt_response/F2_TWIN_CONDITIONAL.md` ·

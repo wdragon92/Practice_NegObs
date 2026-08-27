@@ -64,7 +64,7 @@ base 판은 스크래치패드에 `scene_common.py`(HEAD 사본) + 나머지 키
 씬 스크립트를 복사해 실행했다(파이썬은 `sys.path[0]` 을 **realpath 로 해석**하므로 씬 스크립트는
 심링크가 아니라 복사여야 한다 `[실측]`). **저장소 추적 파일은 읽기(`git show`)만 했다.**
 
-렌더 설정은 `run_p2_all33.sh` 의 `r*_on` 과 완전 동일(`NEGOBS_LOOK_V1=1` · `NEGOBS_PT_FAST=1` ·
+렌더 설정은 `scripts/rounds/run_p2_all33.sh` 의 `r*_on` 과 완전 동일(`NEGOBS_LOOK_V1=1` · `NEGOBS_PT_FAST=1` ·
 scene02 만 `NEGOBS_PT_TOTAL_SPP=256` · `NEGOBS_PARAMS_OVERRIDE` 동일 · `pt` 모드).
 
 ### 1.3 재현 명령

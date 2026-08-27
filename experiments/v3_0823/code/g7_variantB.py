@@ -13,13 +13,18 @@ thinner than the main round's -- scene12 ON is 27.7 % covered in `e2` against
 complete reference available inside this corpus, and variant A (the primary,
 each round fused from its own depth) asks it self-containedly.
 
-Tree:  dataset/260820_boost_<band>_<arm>_g7fixM/<split>/<scene>/  -- affected
+Tree:  dataset/v2_corpus/260820_boost_<band>_<arm>_g7fixM/<split>/<scene>/  -- affected
 scenes only, every entry a symlink, the fused sidecar pointing at the MAIN
 round's file.  Nothing is copied and nothing frozen is written.
 """
 import os, sys, json
 
 REPO = "/home/vislab/Desktop/work_sy/Practice_NegObs"
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>) and a round is
+# found by NAME, never by a flat path. See Docs/reorg_0827/S3_report.md.
+sys.path.insert(0, REPO)                              # noqa: E402
+from variation_kit import round_dir_or_flat   # noqa: E402
 DS = os.path.join(REPO, "dataset")
 # per-arm pairing, identical to the main round (fuse_heightmap.py docstring)
 PAIRING = {"scene07": ("fused", "fused"),
@@ -29,8 +34,8 @@ AFFECTED = {"e": ["scene07", "scene08", "scene12"], "e2": ["scene07", "scene12"]
 
 
 def sdir(round_name, scene):
-    for split in sorted(os.listdir(os.path.join(DS, round_name))):
-        d = os.path.join(DS, round_name, split, scene)
+    for split in sorted(os.listdir(round_dir_or_flat(round_name))):
+        d = os.path.join(round_dir_or_flat(round_name), split, scene)
         if os.path.isfile(os.path.join(d, "variation.json")):
             return d, split
     return None, None
@@ -43,7 +48,7 @@ def build(band):
         main_round = f"260819_main_{arm}"
         for sc in AFFECTED[band]:
             s, split = sdir(src_round, sc)
-            out = os.path.join(DS, dst_round, split, sc)
+            out = os.path.join(round_dir_or_flat(dst_round), split, sc)
             os.makedirs(out, exist_ok=True)
             for f in sorted(os.listdir(s)):
                 q = os.path.join(out, f)

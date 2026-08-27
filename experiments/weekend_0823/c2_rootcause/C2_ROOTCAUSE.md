@@ -1,6 +1,6 @@
 # C2_ROOTCAUSE — why `sceneC2` behaves unlike every other test scene
 
-**Queue item.** CPU-3 of `Docs/experiment/WEEKEND_BRIEF_0823.md` §6.3 (ruling #7 follow-up).
+**Queue item.** CPU-3 of `Docs/campaign/WEEKEND_BRIEF_0823.md` §6.3 (ruling #7 follow-up).
 **Author.** Claude Code, 2026-08-23. **Reader.** someone (or some AI) seeing this project for the
 first time. **Compute.** CPU only, `env_seg`, `PYTHONNOUSERSITE=1`. **No scene file was edited, no
 render was produced, nothing outside this directory was written.**
@@ -19,7 +19,7 @@ result decides it**.
 
 | term | meaning |
 |---|---|
-| **구off / 신off** | the two generations of the hazard-OFF twin arm. 구off (`dataset/260819_main_off`) removes hazard **and** dressing; 신off (`dataset/260820_ctrloff`, `keep_dressing:true`) removes the hazard geometry only. Ledger: `experiments/nightrun_0820/ctrl_dressing/CTRL_TABLE.md`. |
+| **구off / 신off** | the two generations of the hazard-OFF twin arm. 구off (`dataset/v2_corpus/260819_main_off`) removes hazard **and** dressing; 신off (`dataset/v2_probes/260820_ctrloff`, `keep_dressing:true`) removes the hazard geometry only. Ledger: `experiments/nightrun_0820/ctrl_dressing/CTRL_TABLE.md`. |
 | **FA_frame** | fraction of hazard-OFF frames on which at least one of the 20 grid cells crosses τ = 0.5. Every OFF frame carries an all-zero label, so this is a pure false-alarm rate. |
 | **twin Δ (`d_frame`)** | max cell probability on the ON frame − max on its pose-matched OFF twin. |
 | **camera pose** | one sampled camera `(round, d, h_rel, yaw, pitch)`. Each pose is rendered under 3 light conditions. |
@@ -29,7 +29,7 @@ result decides it**.
 
 Frozen, read-only: `experiments/dayrun_0820/runs/v2/{rgb,depth,b2}_s{42,43,44}/eval_test/` ·
 `…/dataset_manifest_v2_full.json` · `…/split_v2_full.json` · depth sidecars under
-`dataset/260819_main_{on,off}/` and `dataset/260820_ctrloff/` · `heightmap_meta.json` per scene/arm ·
+`dataset/v2_corpus/260819_main_{on,off}/` and `dataset/v2_probes/260820_ctrloff/` · `heightmap_meta.json` per scene/arm ·
 scene sources `scenes/batch1/sceneC2_leaf_stairs.py` etc. · `variation_kit.py` (camera and light
 samplers) · `experiments/nightrun_0820/ctrl_dressing/eval_*` (the GPU-1 outputs, see §5) ·
 prior ledgers `DIAG_V1.md` §3, `DIAG_V2.md` §3, `CTRL_TABLE.md`.

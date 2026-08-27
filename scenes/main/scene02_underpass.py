@@ -3,7 +3,7 @@
 scene02_underpass.py — NegObs synthetic scene 2: underpass / subway entrance (Isaac Sim 4.5)
 
 Type    : T3 underpass (fully equipped × dark lower level)
-Spec    : Docs/multi_scene_brief_v2.md §C scene02_underpass (sole spec)
+Spec    : Docs/briefs/multi_scene_brief_v2.md §C scene02_underpass (sole spec)
 Shared  : scene_common.py (verified API helpers) · scene01_campus_stairs.py (skeleton)
 
 Hazard  : a descending pit cut into the ground-level sidewalk. From a low viewpoint

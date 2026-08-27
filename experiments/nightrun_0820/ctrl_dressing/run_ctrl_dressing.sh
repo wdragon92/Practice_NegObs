@@ -4,7 +4,7 @@
 #
 #   The appearance-preserving OFF arm of sceneC2 and sceneN3, and nothing else.
 #   2 scenes x 3 lighting conditions x 8 cameras x ONE arm = 48 cuts, into the
-#   NEW round `dataset/260820_ctrloff/`. No existing round is written to.
+#   NEW round `dataset/v2_probes/260820_ctrloff/`. No existing round is written to.
 #
 # WHY THE SEED IS 20260819 AND MUST STAY THERE
 #   Every derived stream comes from `var_seed(scene, stream, idx, base)`
@@ -12,7 +12,7 @@
 #   SAME d/h_rel/y/yaw/pitch/roll/hfov as the 260819 main round. Together with
 #   the scene patch (which leaves the ground under the camera untouched — see
 #   README §"the datum argument") that makes every cut of this round the exact
-#   twin of the SAME FILENAME in `dataset/260819_main_on/`. A different seed
+#   twin of the SAME FILENAME in `dataset/v2_corpus/260819_main_on/`. A different seed
 #   would produce a valid render that pairs with nothing.
 #
 # CONDITIONS — inherited verbatim from scripts/rounds/run_260819_main.sh:21-60,
@@ -50,6 +50,10 @@
 set -u
 
 REPO=/home/vislab/Desktop/work_sy/Practice_NegObs
+
+# 0827 reorg: dataset/ is grouped (dataset/<group>/<round>). A round is
+# found by NAME: negobs_round (strict) / negobs_round_or_flat (tolerant).
+source "$REPO/scripts/lib/negobs_paths.sh"
 HERE="$REPO/experiments/nightrun_0820/ctrl_dressing"
 CFG="$HERE/render_configs"
 LOGDIR="$HERE/logs"
@@ -128,7 +132,7 @@ NEGOBS_SMOKE=1 NEGOBS_SCENE_CONFIG=\$(cat '$cfgfile') python3 $(basename "$f") 2
 
 # --- did the SCENE SUBPROCESS succeed? (run_260819_main.sh:186-206) ----------
 scene_ok() {
-  python3 - "$REPO/dataset/$1/manifest.json" "$2" "$3" <<'PY'
+  python3 - "$(negobs_round_or_flat "$1")/manifest.json" "$2" "$3" <<'PY'
 import json, sys
 mf_path, scene, conds = sys.argv[1], sys.argv[2], sys.argv[3].split(",")
 try:
@@ -164,7 +168,8 @@ render() {                       # render <scene> <conds> <label>
   local scene="$1" conds="$2" label="$3"
   local cfgfile="$CFG/${scene}_ctrloff.json"
   local split; split=$(split_of "$scene")
-  local outdir="$REPO/dataset/${RUN}/${split}/${scene}"
+  local outdir
+  outdir="$(negobs_round_or_flat "${RUN}")/${split}/${scene}"
 
   if [ "$DRY" = "1" ]; then
     say "  [dry] $scene $label conds=$conds cfg=$(cat "$cfgfile") -> dataset/${RUN}/${split}/${scene}"
@@ -233,7 +238,8 @@ done
 T1=$(date +%s)
 say "================================================================"
 say "run_ctrl_dressing.sh render done in $(( (T1-T0)/60 )) min"
-say "  dataset/${RUN}: $(find "$REPO/dataset/${RUN}" -name '*.png' 2>/dev/null | wc -l) png · $(find "$REPO/dataset/${RUN}" -name '*.depth.npy' 2>/dev/null | wc -l) depth · $(find "$REPO/dataset/${RUN}" -name 'heightmap.npy' 2>/dev/null | wc -l) heightmap"
+RUN_DIR="$(negobs_round_or_flat "${RUN}")"
+say "  dataset/${RUN}: $(find "$RUN_DIR" -name '*.png' 2>/dev/null | wc -l) png · $(find "$RUN_DIR" -name '*.depth.npy' 2>/dev/null | wc -l) depth · $(find "$RUN_DIR" -name 'heightmap.npy' 2>/dev/null | wc -l) heightmap"
 
 GRC=0
 if [ "$DRY" = "0" ] && [ "$GATE" = "1" ] && [ "$NFAIL" = "0" ]; then

@@ -273,7 +273,7 @@ other spec text touched.
 |---|---|---|
 | judgement grids | `look_check/<scene>/260730_w2d_judge/` | 33 dirs · **452 PNG** + `manifest.json` + `round_stamp.json` |
 | GKIT-off twins | `look_check/_experiments/twins/<scene>/260730_w2d_goff/` | 6 dirs · 21 PNG |
-| review gallery | `look_check/_review_w2/<scene>_{h03d5,h09d5,h18d10,beauty}.jpg` + `meta.json` | **132 JPEG** (600 px, q80) · 33 scene records with id / name / profile / one-line gate status / flags / substitution notes |
+| review gallery | `look_check/_review/w2/<scene>_{h03d5,h09d5,h18d10,beauty}.jpg` + `meta.json` | **132 JPEG** (600 px, q80) · 33 scene records with id / name / profile / one-line gate status / flags / substitution notes |
 | eyes-agent crops | `look_check/_experiments/gates/w2d_crops/` + `index.json` | **23 PNG**, each captioned with the single question it answers |
 | library sheets | `Docs/audit_v4/library_main21_260730_w2d_judge.png` (3840×3798) · `library_batch1_260730_w2d_judge.png` (3840×1974) | 2 |
 | machine gate output | `Docs/reports/regr_260730_w2d.json` | 452 cut records |
@@ -354,6 +354,6 @@ python3 scripts/near_ground_stats.py \
 python3 scripts/make_hq_sheet.py --round 260730_w2d_judge --set main21
 python3 scripts/make_hq_sheet.py --round 260730_w2d_judge --set batch1
 python3 scripts/make_review_gallery.py --round 260730_w2d_judge \
-  --out look_check/_review_w2 --status-json Docs/reports/regr_260730_w2d.json
+  --out look_check/_review/w2 --status-json Docs/reports/regr_260730_w2d.json
 python3 scripts/rounds/crops_260730_w2d.py
 ```

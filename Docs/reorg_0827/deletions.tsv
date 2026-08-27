@@ -1,0 +1,37 @@
+path	kind	size_bytes	n_files	status	note
+experiments/dayrun_0820/venv_yolo	dir	5567247435	29499	DELETED	python 3.10.12; rebuild from tracked code/yolo/requirements_yolo.txt
+look_check/_experiments/gates/lighting_spikes	dir	5647638745	1649	DELETED	cold since 2026-07-30; harness spike
+experiments/v3_0823/reselect/rgb_s42_repro/ep9.pt	file	97949074	1	DELETED	keep best.pt/metrics.csv/config.json/REPRO_CHECK.json
+experiments/v3_0823/reselect/rgb_s42_repro/ep10.pt	file	97949358	1	DELETED	keep best.pt/metrics.csv/config.json/REPRO_CHECK.json
+experiments/v3_0823/reselect/rgb_s42_repro/last.pt	file	97949358	1	DELETED	keep best.pt/metrics.csv/config.json/REPRO_CHECK.json
+__pycache__	dir	732400	9	DELETED	pycache
+experiments/dayrun_0820/code/__pycache__	dir	12259	1	DELETED	pycache
+experiments/dayrun_0820/code/yolo/__pycache__	dir	29060	2	DELETED	pycache
+experiments/gazebo_wh_0824/__pycache__	dir	12922	1	DELETED	pycache
+experiments/gazebo_wh_0824/tools/__pycache__	dir	14742	2	DELETED	pycache
+experiments/mainrun_0819/b2_polar/__pycache__	dir	22810	4	DELETED	pycache
+experiments/mainrun_0819/code/__pycache__	dir	159426	14	DELETED	pycache
+experiments/mainrun_0819/code/labeling/__pycache__	dir	123499	5	DELETED	pycache
+experiments/probe_holes_0820/__pycache__	dir	34484	2	DELETED	pycache
+experiments/v3_0823/code/__pycache__	dir	630650	29	DELETED	pycache
+experiments/v3_0823/redteam/__pycache__	dir	6958	1	DELETED	pycache
+experiments/weekend_0823/cue_audit/__pycache__	dir	17710	1	DELETED	pycache
+experiments/weekend_0823/cue_audit/scenes_cueoff/__pycache__	dir	865624	10	DELETED	pycache
+experiments/weekend_0823/fusion/code/__pycache__	dir	6594	1	DELETED	pycache
+experiments/weekend_0823/gazebo/__pycache__	dir	22300	1	DELETED	pycache
+experiments/weekend_0823/gazebo/tools/__pycache__	dir	42609	2	DELETED	pycache
+scenes/batch1/__pycache__	dir	1019415	18	DELETED	pycache
+scenes/main/__pycache__	dir	2811961	35	DELETED	pycache
+scenes/probe/__pycache__	dir	519508	7	DELETED	pycache
+scripts/__pycache__	dir	126157	9	DELETED	pycache
+look_check/probeH1	emptydir	0	0	DELETED	verified 0 entries
+look_check/probeH2	emptydir	0	0	DELETED	verified 0 entries
+look_check/probeH3	emptydir	0	0	DELETED	verified 0 entries
+look_check/sceneH1	emptydir	0	0	DELETED	verified 0 entries
+look_check/sceneH2	emptydir	0	0	DELETED	verified 0 entries
+look_check/sceneH3	emptydir	0	0	DELETED	verified 0 entries
+look_check/sceneH6	emptydir	0	0	DELETED	verified 0 entries
+look_check/sceneH7	emptydir	0	0	DELETED	verified 0 entries
+look_check/sceneL1	emptydir	0	0	DELETED	verified 0 entries
+look_check/sceneN9	emptydir	0	0	DELETED	verified 0 entries
+look_check/sceneN11	emptydir	0	0	DELETED	verified 0 entries

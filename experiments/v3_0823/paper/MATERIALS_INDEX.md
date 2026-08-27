@@ -70,8 +70,8 @@ versions of the same text never come into existence.)
 
 | Alias | Path |
 |---|---|
-| DZ | `Docs/experiment/V3_DESIGN_0823.md` |
-| PS v2 | `Docs/experiment/Status/PROJECT_STATE_0823_v2.md` |
+| DZ | `Docs/campaign/V3_DESIGN_0823.md` |
+| PS v2 | `Docs/archive/campaign_status/PROJECT_STATE_0823_v2.md` |
 | ACC | `experiments/v3_0823/ACCOUNTING.md` |
 | FAR | `experiments/v3_0823/FA_REALITY.md` |
 | FAC | `experiments/v3_0823/FA_CENSUS.md` |

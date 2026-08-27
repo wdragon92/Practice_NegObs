@@ -4,7 +4,7 @@
 - **Written**: Claude Code (CPU-6) · 2026-08-23 · target: v3-frame main paper (English).
 - **Rule of this file**: every claim carries a source anchor. A bullet with no anchor is a *drafting
   instruction*, not a claim. Pending decisions are marked `[미결: …]` in Korean.
-- **Sources**: `Docs/experiment/V3_DESIGN_0823.md` (=DZ) §1 §2 · `Docs/experiment/Status/PROJECT_STATE_0823_v2.md`
+- **Sources**: `Docs/campaign/V3_DESIGN_0823.md` (=DZ) §1 §2 · `Docs/archive/campaign_status/PROJECT_STATE_0823_v2.md`
   (=PS v2) · `experiments/v3_0823/FA_REALITY.md` (=FAR) §1.5 §1.6 §5 · `experiments/v3_0823/FA_CENSUS.md`
   (=FAC) §3.3 §3.6 · `experiments/mainrun_0819/DECISIONS.md` (=DEC) D54.
 

@@ -3,7 +3,7 @@
 담당(단독 소유): `scenes/main/scene05_amphitheater.py` · `scene09_ghat_riverfront.py`
 · `scene18_wavy_artstair.py` 개조 + 공통 레이어를 `scene01/02/13/14/16/20/21` 에 적용.
 근거: `Docs/briefs/multi_scene_brief_v5.md`(재해석 절·공통 레이어 절),
-`Docs/scene_redesign_v5_proposal.md`.
+`Docs/archive/legacy/scene_redesign_v5_proposal.md`.
 
 제약 준수: 위험 기하 GT(riser·tread·낙차·계단 트랜스폼) 불변 / 렌더·Isaac 실행 없음 /
 `scene_common.py` **미수정**(읽기만) / 전 파일 `py_compile` 통과 / 변경부 `[v5 채택]`

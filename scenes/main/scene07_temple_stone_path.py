@@ -3,7 +3,7 @@
 scene07_temple_stone_path.py — NegObs synthetic scene 7 (v5 R2): sparse natural stone stair at a mountain temple
 
 Type    : R2 (v5 redesign) — **discrete natural stepping stones** (large slabs set sparsely)
-Spec    : Docs/briefs/multi_scene_brief_v5.md §R2 + Docs/scene_redesign_v5_proposal.md
+Spec    : Docs/briefs/multi_scene_brief_v5.md §R2 + Docs/archive/legacy/scene_redesign_v5_proposal.md
 Shared  : scene_common.py (unmodified) / skeleton convention : scenes/main/scene04_parktrail.py
 Inherit : scenes/archive_v3/scene07_wornstone_temple.py (worn_stone·mountain-temple dressing vocabulary)
 

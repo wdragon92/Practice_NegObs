@@ -228,7 +228,7 @@ whole band-3 row fires together in most of them. The four `viz/fa_off_*` panels 
 
 **Hypothesis test — is this 0.30 m severity confusion, or hallucination?**
 The brief's hypothesis: a sub-0.30 m step / curb / leaf mound in the off arm reads as a drop.
-Cross-checked against the **off-arm height map** (`dataset/260819_main_off/val/sceneC2/heightmap.npy`,
+Cross-checked against the **off-arm height map** (`dataset/v2_corpus/260819_main_off/val/sceneC2/heightmap.npy`,
 5 cm grid), restricted to the union of the wedges the model actually fired on (58 240 grid cells,
 each frame's fired cells projected with the labeler's own `polar_cells` geometry and camera eye):
 

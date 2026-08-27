@@ -593,7 +593,9 @@ if BENCH:
                 reps=[round(s, 2) for s in secs])
             print(f"[예산] {bname:<18} {min(secs):6.2f} s/컷 (warmup={warm})")
 
-rp = os.path.join(OUT_ROOT, "spike_results.json")
+# [reorg 0827] the render journals moved out of the look_check root into look_check/logs/.
+rp = os.path.join(OUT_ROOT, "logs", "spike_results.json")
+os.makedirs(os.path.dirname(rp), exist_ok=True)
 prev = {}
 if os.path.isfile(rp):
     try:

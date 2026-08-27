@@ -52,8 +52,8 @@ scenes/probe/
   <symlinks>            the same set scenes/batch1/ uses (assets, scene_common, kits)
 ```
 
-Outputs land in `dataset/260821_probe_on/probe/<scene>/` and
-`dataset/260821_probe_off/probe/<scene>/`. **`probe` is a fourth split name** —
+Outputs land in `dataset/v2_probes/260821_probe_on/probe/<scene>/` and
+`dataset/v2_probes/260821_probe_off/probe/<scene>/`. **`probe` is a fourth split name** —
 see §4 — so a probe frame can never be mistaken for corpus train/val/test.
 
 ---

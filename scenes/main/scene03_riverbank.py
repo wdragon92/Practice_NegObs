@@ -2,7 +2,7 @@
 """
 scene03_riverbank.py — NegObs synthetic scene 3: river levee descending stair (Isaac Sim 4.5)
 
-Spec   : Docs/multi_scene_brief_v2.md §C(scene03_riverbank) — sole spec
+Spec   : Docs/briefs/multi_scene_brief_v2.md §C(scene03_riverbank) — sole spec
 Shared library : scene_common.py (§A) / skeleton convention : scene01_campus_stairs.py
 
 Type (T5 river levee): **no railing × water-surface anchor**.

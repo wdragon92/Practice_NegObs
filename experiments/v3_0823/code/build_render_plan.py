@@ -500,7 +500,7 @@ def main():
     plan = dict(
         doc="render_plan_v3", version="1.0", date="2026-08-23", task="v3 P-5",
         governing=["experiments/mainrun_0819/DECISIONS.md D58",
-                   "Docs/experiment/V3_DESIGN_0823.md §4, §12",
+                   "Docs/campaign/V3_DESIGN_0823.md §4, §12",
                    "experiments/v3_0823/ACCOUNTING.md §2, §4",
                    "experiments/v3_0823/CUE_COVERAGE.md",
                    "experiments/v3_0823/FA_REALITY.md §3"],

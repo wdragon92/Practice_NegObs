@@ -108,3 +108,4 @@ experiments/e1_0827/overlays/**/*.png
 experiments/e1_0827/annotations/**/*.png
 experiments/e1_0827/vth/frames/**
 experiments/e1_0827/vth/runs/**
+experiments/e1_0827/overlays/**/*.jpg

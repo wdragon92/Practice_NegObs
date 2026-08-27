@@ -125,3 +125,116 @@
 | ❓-S2 | `승용 이관` 13건의 수집 착수 순서 — 내 제안: §4 표의 우선 열 순서 | 승용 |
 | ❓-S3 | 미실시 1홉(B-1·A-4 앞 방향) 착수 승인 (브리프 ❓-2 범위) | 승용 |
 | ❓-S4 | 검색 수단에 **Semantic Scholar Graph API**를 정식 수단으로 등재할지 — 출판사 벽 우회에 3회 결정적이었다 | 승용 |
+
+---
+---
+
+# 【2차 패스】 조사 기록 (2026-08-28 · 승용 결재 반영판)
+
+- 승용 결재(2026-08-28)로 **정독 상한 철회 · 1홉 고정 완화 · 절차 항목 자율 처리**가 정해진 뒤의 기록이다.
+- 기록 원칙은 1차와 같다: **성공도 실패도 지우지 않는다.**
+
+## 2-0. 2차 승용 요약 (4문장)
+
+1. 검색 질의 **2건**(WebSearch) · GitHub API **3건** · Semantic Scholar Graph API **4건**(❓-S4 결재로 **정식 수단 등재**) · 문서/코드 열기 **21건**.
+2. **인용 홉 3회를 새로 돌았다** — Hesch 앞 **54편**, Rankin 앞 **31편**, Wang&Tian 2014 앞 **100편**. 1차의 "미실시" 항목(❓-S3)이 전부 해소됐다.
+3. **전문 정독 4편 신규**(Singhani · Murarka 2008 · Tekin · L-CNN) + **저자 코드 2계열 확인**(StairNet 저자 저장소 · BSDS500 `correspondPixels` 원본).
+4. 실패는 **3종**: Berkeley 사본 타임아웃 1건, S2 초록 `null` 다수(제목만 남음), ugrep 정규식 오류 1건(도구 문제, 우회).
+
+---
+
+## 2-1. 검색 질의 (수단: WebSearch)
+
+| # | 날짜 | 수단 | 질의 | 성과 |
+|---|---|---|---|---|
+| Q14 | 2026-08-28 | WebSearch | `StairNet stair detection Wang Pei Qiu Tang github code repository "Ultra-Fast Stair Detection" dataset` | **저장소 링크가 검색 결과에 없었다** → 수단 전환(GitHub API 직접 조회)으로 해결. 검색만 믿었으면 "코드 비공개"로 잘못 결론 낼 뻔한 지점이라 남긴다 |
+| Q15 | 2026-08-28 | WebSearch | `"sTetro-D" deep learning autonomous descending-stair cleaning robot abstract RGB-D detection SSD MobileNet` | **2차 자료 요약만 확보**. 원문·초록을 열지 못했으므로 **기억-작성 금지 규칙에 따라 표 A-17의 내용 열을 비웠다**(요약에서 본 수치를 옮기지 않았다) |
+
+## 2-2. GitHub API (수단: `api.github.com`)
+
+| # | 대상 | 질의 | 결과 |
+|---|---|---|---|
+| G1 | StairNet 저자 코드 유무 | `/search/repositories?q=stairnet+stair+detection` | **2건 발견** — `MrChenWang/StairNet-DepthOut`, `MrChenWang/StairNet-DepthIn` (MrChenWang = 제1저자 Chen Wang). **❓-C2/T2의 전제(“코드가 공개인가”)가 참으로 확인됨** |
+| G2 | 두 저장소 파일 트리 | `/repos/{r}/git/trees/main?recursive=1` | 각 28·30개 파일. 평가 스크립트가 **없다**(train/detect/loss/utils/label_transfer만) |
+| G3 | BSDS500 벤치마크 원본 | `/repos/BIDS/BSDS500/git/trees/master?recursive=1` | `bench/source/correspondPixels.cc`·`match.cc`, `bench/benchmarks/correspondPixels.m` 경로 확보 |
+
+## 2-3. Semantic Scholar Graph API (❓-S4 결재로 **정식 수단 등재**)
+
+- **속도 제한 준수**: 호출을 연속으로 몰지 않고 사이에 다른 작업을 끼워 분산했다. **2차에서는 429가 한 번도 나지 않았다**(1차 F6과 대비).
+
+| # | 시드 | 방향 | 결과 |
+|---|---|---|---|
+| **H5** | Hesch 2010 (DOI 10.1109/IROS.2010.5649411) | **앞(citing) 1홉** — ❓-G1 결재 실시 | **54편 전수 열거.** 내리막 전용 후속 분류: RGB-D 박스(sTetro IROS 2022 / sTetro-D EAAI 2023) · 이미지 수준 분류(Utaminingrum 2021) · ToF·저전력 센서(2014·2015) · 단안 언급(2015 monoscopic, 초록 null). **단안 RGB × 선 출력 × 정량 평가 후속은 0편** |
+| **H6** | Rankin 2007 — 제목 검색으로 paperId `cdb2a598…` 확정 후 | **앞(citing) 1홉** — ❓-S3 결재 실시 | **31편 열거.** 새 수확 2건: **Dodge & Yilmaz 2023 T-IV**(비전 기반 낙차 — 그러나 수직 베이스라인 **스테레오**) · **Hu 2011 ICDIP "Negative obstacle detection from image sequences"**(초록 null → 승용 이관). Murarka 2008/2009도 여기서 재확인 |
+| **H7** | Wang & Tian 2014 (DOI 10.1016/j.jvcir.2013.11.005) | **앞(citing) 1홉** — 축 D | **100편 열거.** 후속이 **횡단보도 검출기**와 **계단 검출기** 두 무리로 갈라져 있고 서로 안 섞인다. **depth 없이 둘을 가른 후속은 제목 수준에서 미확인**(초록을 다 열지는 않았으므로 '없다'가 아니다). 신규 시드 2건: **Vu 2020 PRL**(단안 선 그룹) · **단일 카메라 모션 스테레오 계단 2019** |
+| H8 | sTetro-D (DOI 10.1016/j.engappai.2023.105844) | 단건 조회 | `abstract: null`, `openAccessPdf: 없음` → **미개봉 확정** |
+
+## 2-4. 문서·코드 열기 — 성공
+
+| # | 대상 | 수단 | 결과 |
+|---|---|---|---|
+| S20 | **arXiv 1902.00842 (Singhani) 전문** | `curl` → `pdftotext -layout` (424줄) | **정독.** 구조·평가·데이터 확인 + **전문 grep으로 stair/drop-off 출현 위치를 전수 확인**(방법·데이터·평가 절 0회). ❓-G2 결재 실시 |
+| S21 | **UT Austin `Murarka-iros-08.pdf` 전문** | `curl` → `pdftotext -layout` (438줄) | **정독.** 모션 단서 원리·safety map 채점·오탐 7건·FP 계산 불가 진술 확보 |
+| S22 | UT Austin `Murarka-iros-09.pdf` | `curl` → `pdftotext` (491줄) | **내려받았으나 읽지 않았다.** 표에 내용 열을 채우지 않았다 — 정직 표기 |
+| S23 | **arXiv 1711.08848 (Tekin CVPR 2018) 전문** | `curl` → `pdftotext -layout` (656줄) | **정독.** `c(x)` 정의 + **"distance threshold to 30 pixels"** 확보 → ❓-C2/T2의 원전 대조 |
+| S24 | **arXiv 1905.03246 (L-CNN ICCV 2019)** | `curl` → `pdftotext -layout` (586줄) | **평가절 정독.** sAP 정의·ϑ=5/10/15·1:1 매칭·APH 비판 문장 확보 → 축 C 후보 2 신설 |
+| S25 | **StairNet 저자 코드** (`StairNet-DepthOut` 7파일 + `DepthIn` utils.py) | raw.githubusercontent 원문 | `dis2conf`·`calculate_cross_line`·`label_transfer`의 정규화 좌표·`config.py`(64×32, stride 8×16) 확인. **두 저장소의 utils.py는 완전히 동일**(diff 무차이) |
+| S26 | **BSDS500 `correspondPixels.m` / `.cc` / `match.cc`** | raw.githubusercontent 원문 | **❓-C3 종결** — `.m` 헤더의 *"as a fraction of the image diagonal"* 와 `.cc`의 `maxDist*idiag` 확인 |
+| S27 | 로컬 `Docs/briefs/edge_relabel_brief_v6.md` | `grep` | **1차의 출처 오기 발견·정정** — 베이스라인 수치의 실제 출처가 이 문서 §1.2·§7임을 확인(relwork_survey_brief_v4에는 §7이 없다) |
+| S28 | S2 초록 (본문 아님) | Graph API 응답의 `abstract` 필드 | **초록 확보 4건**: sTetro IROS 2022 · Utaminingrum 2021 · Dodge & Yilmaz 2023 · Vu 2020 |
+
+## 2-5. 문서 열기 — **실패** (전건)
+
+| # | 대상 | 수단 | 실패 내용(그대로) | 우회 | 처분 |
+|---|---|---|---|---|---|
+| F8 | Arbeláez 외 PAMI 2011 (Berkeley TR `EECS-2010-83.pdf` · `amfm_pami2011.pdf`) | `curl` | **배치 명령이 2분 타임아웃 → HTTP 000, 파일 미생성** | — | **승용 이관 유지. 단 우선순위 하락** — ❓-C3이 저자 코드로 이미 해결돼 이 논문이 더는 필수가 아니다 |
+| F9 | sTetro-D (EAAI 2023) 초록 | S2 API + WebSearch | **`abstract: null` · OA PDF 없음**. 검색은 2차 자료 요약만 반환 | ✗ | **승용 이관** — 표 A-17 내용 열 공란 유지 |
+| F10 | S2 `abstract: null` 다발 | S2 API | Hu 2011(image sequences) · 단일카메라 모션스테레오 2019 · Murarka 2008/2009 · monoscopic 2015 · low-power sensors 2014 등 **제목만 반환** | 일부는 OA PDF로 우회(Murarka) | 나머지 **승용 이관** |
+| F11 | (도구) `grep -E` 정규식 | 셸 | **`ugrep: error: error at position 56 ... mismatched ( )`** — 이 환경의 `grep`이 ugrep이라 `\b`·유니코드가 섞인 ERE에서 실패 | ✅ 패턴 단순화로 재시도 성공 | 해소. **다음 사람 주의**: 복잡한 ERE는 ugrep에서 깨진다(1차 S18의 `--ignore-files` 문제와 같은 뿌리) |
+
+---
+
+## 2-6. `승용 이관` 우선순위 — **2차 갱신판** (❓-C6/S2 자율 처리 결과)
+
+**정렬 기준**: 갭 진술을 뒤집을 수 있는 힘 > 축 C 채점 근거 > 계보 보강.
+
+| 우선 | 대상 | 왜 필요한가 | 벽 |
+|---|---|---|---|
+| **1** | **Hu 외 — Negative obstacle detection from image sequences (ICDIP 2011)** [B-16] | **제목이 곧 반례 조건**(영상 시퀀스만으로 낙차). 갭 진술을 직접 위협할 수 있는 유일한 미개봉 | 유료 · S2 초록 null |
+| **2** | **Stairway Detection Based on Single Camera by Motion Stereo (2019)** | **단일 카메라** 명시 + 계단. 위와 같은 이유 | Springer · S2 초록 null |
+| **3** | 베이스라인 원문 (Esuga-Mopah 2026) [B-5] | 표 B-5 수치 열. ※ ❓-G3 결재로 **브리프 경유 인용은 이미 채웠다** — 이 건은 검증용 | Springer 로그인 (**승용 PDF 보유**) |
+| **4** | **Vu 외 2020 (PRL) 전문** [A-15] | **단안 × 선 그룹**의 채점 허용오차 — 축 A(최근접 선례)와 축 C(관례) 양쪽에 걸린다 | Elsevier 유료 |
+| 5 | sTetro-D (EAAI 2023) [A-17] | 내리막 딥러닝 계열의 최신 실체 확인 | Elsevier 유료 |
+| 6 | Wang & Tian 2012 · 2014 [D-1·D-2] | 축 D 직계 선행 | 출판사 초록 비공개 |
+| 7 | Heckman 2007 전문 [B-3] | occlusion labeling의 조작적 정의 | SSL 오류(F5) / IEEE |
+| 8 | Arbeláez 외 PAMI 2011 | ~~`maxDist` 정의~~ **해결됨** → 참고용으로만 | IEEE (F8) |
+| 9 | Murarka 2008 후속 IROS 2009 | 내려받았으나 미독(S22) — 필요 시 내가 읽으면 된다 | **벽 없음** |
+| 10 | 나머지(A-9~A-14, B-9~B-13, D-4 등) | 계보 보강 | 유료/미시도 |
+
+---
+
+## 2-7. **자율 처리한 절차 항목과 그 이유** (승용 결재 2026-08-28: "절차 항목은 네가 정하고 이유를 로그에 남겨라")
+
+| 번호 | 내 결정 | 이유 |
+|---|---|---|
+| **❓-C2 / ❓-T2** (StairNet `dth` 단위) | **단위 미상 유지 · `dth=1`을 수치로 인용하지 않는다** | 결재가 준 경로("저자 코드 공개면 확인, 아니면 단위 미상")를 끝까지 따라갔다. 코드는 **공개였다**(G1). 그러나 `dth=1`이 나오는 `calculate_cross_line`이 **두 저장소 어디서도 호출되지 않는 死코드**라 좌표계가 결정되지 않는다. 추가로 **코드 식이 논문 식과 다름**(코드는 0~1 정규화)을 발견해 함께 인쇄했다. 원전(Tekin)은 **30 px**로 픽셀 명시지만, StairNet이 그 단위를 계승했는지는 **원문·코드 어느 쪽으로도 증명되지 않는다** → P1(임의로 정하지 않는다)에 따라 인용 포기 |
+| **❓-C3** (BSDS 대각선 비율의 서술 출처) | **`correspondPixels.m` 헤더 + `.cc` 구현을 정본 출처로 확정 · 종결** | 2차 자료를 인용할 필요가 없어졌다. 저자(David Martin) 주석에 문구가 그대로 있고, `.cc`가 `maxDist*idiag`로 실제 곱한다 — **문서와 구현이 일치**하므로 인용 안전 |
+| **❓-C4 / ❓-C5** | **소멸 처리** | 정독 상한 철회·홉 완화로 질문 자체가 사라졌다 |
+| **❓-C6 / ❓-S2** (수집 순서) | **위 §2-6으로 재정렬** | 1차 제안(B-4 → B-5 → D-1/D-2 → A-11)은 B-4가 해소돼 무효가 됐다. 새 기준은 "갭을 뒤집을 힘" |
+| **❓-S1** (판본 인용) | **게재본 서지로 인용하고, 접근에 쓴 arXiv id를 함께 표기** | 결재 지시 그대로 적용. 표의 출처 열에 `DOI ... · arXiv ...` 병기 형식을 유지 |
+| **❓-S3** (미실시 1홉) | **실시 완료** — H5(Hesch 앞)·H6(Rankin 앞) | 결재 지시 |
+| **❓-S4** (S2 API 등재) | **정식 수단으로 등재** · 속도 제한은 호출 분산으로 준수 | 2차에서 429 발생 0회. 출판사 벽 우회에 3회 결정적이었다 |
+| **❓-T3 / ❓-T4 / ❓-T5** | **T4는 조사 실시 후 후보 2로 승격(종결). T3·T5는 "제안"으로만 표기하고 채택은 승용 몫임을 문서에 명기** | 결재가 "계산·인쇄 제안은 좋다, 채택은 승용"이라 정했다 |
+| **❓-G3** (베이스라인 수치) | **브리프 경유 인용 + 출처 오기 정정** | 결재 지시대로 브리프를 인용하되, 그 브리프가 `relwork_survey_brief_v4`가 아니라 **`edge_relabel_brief_v6` §1.2·§7**임을 확인해 정정했다(v4에 §7이 없다) |
+| **(신설) 1차 계수 오류** | **표 행 수를 실계수로 정정**(28 → 44, 1차분만 37) | 1차 요약의 "총 28행"이 1차 표 자체(37행)와 맞지 않았다. 파일을 다시 세어 고쳤다 — **침묵 수리 금지 원칙에 따라 오류가 있었다는 사실을 남긴다** |
+| **(신설) 2차 자료 취급** | **검색 요약에서 본 수치를 표에 옮기지 않았다**(A-17 sTetro-D) | 기억-작성 금지의 취지는 "직접 열지 않은 내용을 채우지 말라"이며, 검색 엔진 요약은 원문이 아니다 |
+
+---
+
+## 2-8. 2차가 **하지 않은 것** (정지 조건)
+
+- **축 D의 100편 초록을 다 열지 않았다** — 제목 수준 판정에 그쳤고, 문서에 "**제목 수준에서 미확인**"으로 명시했다(‘없다’로 쓰지 않았다).
+- **Murarka 2009(S22)를 내려받고도 읽지 않았다** — 표에 내용 열을 채우지 않았다.
+- **음성 세트 설계로 넘어가지 않았다** — 브리프 §2-D 준수, 문헌만 적재.
+- **승용 문헌 지도를 기다리지 않았다** — 결재 지시(❓-3: 대기 금지). 도착 후 대조가 필요하다.
+- **2홉 이상으로 확장하지 않았다** — 결재의 "필요 기반"에 따라 필요한 곳(Hesch·Rankin·Wang&Tian 앞 1홉, StairNet→Tekin 뒤 1홉)만 갔다.

@@ -102,3 +102,9 @@ experiments/weekend_0823/gazebo/frames/**/*.png
 # are reproducible from worlds/*.world + capture_run.sh and checkable against it),
 # and everything under out/ (JSON + CSV, < 1 MB).
 experiments/gazebo_wh_0824/frames/**/*.png
+
+# E1 (edge relabel) review artefacts — regenerable PNGs stay out of git; manifests/reports are tracked
+experiments/e1_0827/overlays/**/*.png
+experiments/e1_0827/annotations/**/*.png
+experiments/e1_0827/vth/frames/**
+experiments/e1_0827/vth/runs/**

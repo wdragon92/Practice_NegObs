@@ -1,0 +1,8 @@
+{
+  "doc": "prim path -> occluder class table for brief v6 §2 rule 3.",
+  "status": "EMPTY BY DESIGN -- 결재 대기 (❓B-4)",
+  "why_empty": "Classifying a USD prim path as ground/stair/hazard geometry (self-occlusion = E) or as an external occluder (H) is a judgement about the scene, not a measurement. Until 승용 approves a table, every blocking prim resolves to 'unknown', occluder.flag stays null and the frame is listed in reports/*/unresolved_occluders.txt. e1_run.py --prim-census prints the real prim paths that actually blocked something, which is the raw material for that decision.",
+  "approved_by": "",
+  "class_values": ["self", "external"],
+  "rules": []
+}

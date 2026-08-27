@@ -1,0 +1,3 @@
+/World/Scene01/UpperPlaza
+/World/Scene03/Bollard_0
+/World/Scene03/Bollard_1

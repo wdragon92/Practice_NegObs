@@ -1,10 +1,22 @@
-최종 갱신 2026-08-27
+최종 갱신 2026-08-28
 
 # PROJECT_STATE — NegObs 현황 (살아 있는 문서 하나)
 
 > **이 파일 하나가 현황 문서다.** 날짜를 파일명에 붙이지 않는다 — 갱신할 때는 맨 윗줄
 > "최종 갱신" 날짜와 아래 §0 을 고친다. 옛 날짜판 4건(0820·0823·0823_v2·0823_v3)은
 > `Docs/archive/campaign_status/` 에 있다.
+
+## 2026-08-28 연구 재시작 — E1 브리프
+
+08-26까지의 캠페인(폴라그리드·구 티어·트윈 전제)은 **승용 결정으로 종료**됐다. 아래 §0(08-27 재편)·§1~§5(08-26 재고 조사)는 그 시점의 기록으로 보존한다.
+- 새 정본 브리프: `Docs/briefs/edge_relabel_brief_v6.md` — 북극성 = "E 상황에서 낙차 edge 정밀 인식 + 존재 판정". v1~v5를 대체한다.
+- 작업 디렉터리: `experiments/e1_0827/` (code·annotations·overlays·reports·logs·vth) · 상수 대장 `experiments/e1_0827/CONST_LEDGER.md`
+- Phase 0 종합 보고 + G0 상신: `experiments/e1_0827/reports/PHASE0_REPORT.md`
+- 관련연구 1차 패스: `Docs/relwork_e1/` (RELWORK_TABLE · GAP_DRAFT · TOL_CANDIDATES · SEARCH_LOG)
+- **게이트 G0 ❓ 결재 대기** — Phase 0 통과 조건 충족(P2 침해 없음 · 상수 44개 미기재 0건 · 센서스 13,515프레임 · 자기 검산 7/7 · 파일럿 후보 4+2).
+  **G0 전에는 파일럿·전량 라벨링·학습·재렌더 금지**(브리프 §3-P3).
+
+---
 
 ## 0. 2026-08-27 재편 후 현황
 

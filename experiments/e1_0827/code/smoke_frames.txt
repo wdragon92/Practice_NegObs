@@ -1,0 +1,9 @@
+# Phase 0 smoke -- 3 frames, chosen for what they let us MEASURE, not for looks.
+# scene01 campus_stairs : a real descending stair, has depth + heightmap + idseg
+260819_main_on:scene01:L0__s20260819__0000.png
+# scene02 underpass     : the brief's suggested scene. Kept on purpose: its
+#   heightmap z_min is -0.0136 m, i.e. the AABB envelope spans the pit opening
+#   and route (a) is blind to the hazard. That is a finding, not a skip.
+260819_main_on:scene02:L0__s20260819__0000.png
+# scene03 riverbank     : levee with a 3.2 m drop, depth + heightmap + idseg
+260819_main_on:scene03:L0__s20260819__0000.png

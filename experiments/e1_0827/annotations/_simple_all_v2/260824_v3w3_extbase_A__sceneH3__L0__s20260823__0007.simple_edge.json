@@ -1,0 +1,353 @@
+{
+  "edge_len_px": 0.0,
+  "edges": [
+    {
+      "edge_type": "계단형",
+      "enclosed": false,
+      "hidden_len_px": 94.0412,
+      "occluder_prims": [
+        "/World/SceneH3/BendWall/Along"
+      ],
+      "profile": {
+        "cum_descent_m": 0.72,
+        "first_step_m": 0.18,
+        "n_cells_profiled": 53,
+        "n_steps": 4.0
+      },
+      "px": [
+        [
+          1104.5985,
+          511.1537
+        ],
+        [
+          1103.2604,
+          511.8155
+        ],
+        [
+          1101.913,
+          512.4819
+        ],
+        [
+          1100.5564,
+          513.1529
+        ],
+        [
+          1099.1905,
+          513.8285
+        ],
+        [
+          1097.815,
+          514.5089
+        ],
+        [
+          1096.43,
+          515.1939
+        ],
+        [
+          1095.0353,
+          515.8837
+        ],
+        [
+          1093.6308,
+          516.5784
+        ],
+        [
+          1092.2164,
+          517.278
+        ],
+        [
+          1090.792,
+          517.9825
+        ],
+        [
+          1089.3576,
+          518.692
+        ],
+        [
+          1087.9129,
+          519.4065
+        ],
+        [
+          1086.4579,
+          520.1262
+        ],
+        [
+          1084.9925,
+          520.851
+        ],
+        [
+          1083.5166,
+          521.581
+        ],
+        [
+          1082.03,
+          522.3162
+        ],
+        [
+          1080.5327,
+          523.0568
+        ],
+        [
+          1079.0245,
+          523.8028
+        ],
+        [
+          1077.5052,
+          524.5542
+        ],
+        [
+          1075.9749,
+          525.3112
+        ],
+        [
+          1074.4333,
+          526.0736
+        ],
+        [
+          1072.8804,
+          526.8417
+        ],
+        [
+          1071.3159,
+          527.6155
+        ],
+        [
+          1069.7398,
+          528.3951
+        ],
+        [
+          1068.152,
+          529.1804
+        ],
+        [
+          1066.5523,
+          529.9716
+        ],
+        [
+          1064.9406,
+          530.7688
+        ],
+        [
+          1063.3167,
+          531.572
+        ],
+        [
+          1061.6806,
+          532.3813
+        ],
+        [
+          1060.0319,
+          533.1967
+        ],
+        [
+          1058.3708,
+          534.0183
+        ],
+        [
+          1056.6969,
+          534.8462
+        ],
+        [
+          1055.0101,
+          535.6805
+        ],
+        [
+          1053.3103,
+          536.5212
+        ],
+        [
+          1051.5974,
+          537.3685
+        ],
+        [
+          1049.8711,
+          538.2223
+        ],
+        [
+          1048.1314,
+          539.0828
+        ],
+        [
+          1046.378,
+          539.95
+        ],
+        [
+          1044.6109,
+          540.8241
+        ],
+        [
+          1042.8298,
+          541.705
+        ],
+        [
+          1041.0345,
+          542.593
+        ],
+        [
+          1039.225,
+          543.488
+        ],
+        [
+          1037.401,
+          544.3901
+        ],
+        [
+          1035.5624,
+          545.2995
+        ],
+        [
+          1033.7089,
+          546.2163
+        ],
+        [
+          1031.8405,
+          547.1404
+        ],
+        [
+          1029.9568,
+          548.0721
+        ],
+        [
+          1028.0579,
+          549.0113
+        ],
+        [
+          1026.1433,
+          549.9583
+        ],
+        [
+          1024.213,
+          550.913
+        ],
+        [
+          1022.2668,
+          551.8756
+        ],
+        [
+          1020.3045,
+          552.8462
+        ]
+      ],
+      "undecided_len_px": 0.0,
+      "visible": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "visible_len_px": 0.0
+    }
+  ],
+  "frame": "260824_v3w3_extbase_A__sceneH3__L0__s20260823__0007",
+  "h_hint": true,
+  "hidden_len_px": 94.0412,
+  "mask_area_px": 0,
+  "mask_version": "v2_surfaces",
+  "meta": {
+    "cam_ground_z_m": 0.3,
+    "chain_len_px_sorted": [
+      94.0412
+    ],
+    "const_fingerprint": "2e6d7b4ed0bce9d1",
+    "depth_path": "dataset/v3_test_ext/260824_v3w3_extbase_A/test/sceneH3/L0__s20260823__0007.depth.npy",
+    "descent": {
+      "below_cells_total": 5050,
+      "below_px_not_painted": 0,
+      "first_landing_z_m": -1.8,
+      "footprint_area_m2": 12.625,
+      "footprint_cells": 5050,
+      "landing_cells_in_footprint": 1946,
+      "lowest_landing_z_m": -1.8,
+      "mask_face_only_px": 0,
+      "mask_face_px": 0,
+      "mask_footprint_px": 0,
+      "seed_cells": 713,
+      "stopped_second_descent_cells": 0,
+      "stopped_wall_cells": 311
+    },
+    "drop_line_z_m": -0.3,
+    "edge_bridge_px": null,
+    "edge_to_below_gap_px": null,
+    "file": "L0__s20260823__0007.png",
+    "foot_on_grid": false,
+    "foot_region_dist_m": 9.4681,
+    "foot_region_z_m": 0.0,
+    "ground_z_m": 0.0,
+    "ground_z_mismatch_m": 0.3,
+    "ground_z_unmatched": false,
+    "hm_min_nonzero_dz_m": 0.002,
+    "hm_step_m": 0.05,
+    "idseg": "dataset/v3_test_ext/260824_v3w3_extbase_A/test/sceneH3/L0__s20260823__0007.idseg.npz",
+    "n_below_px_total": 0,
+    "n_chains": 1,
+    "occlusion_margin_m": 0.0007,
+    "occlusion_margin_measured_on": "my_surface",
+    "occlusion_margin_n_px": 47689,
+    "occlusion_margin_pctl": 99,
+    "occlusion_tol_m": 0.1865,
+    "rdp_tol_px_display_only": 2.0,
+    "region_cells": 6752,
+    "rgb_path": "dataset/v3_test_ext/260824_v3w3_extbase_A/test/sceneH3/L0__s20260823__0007.png",
+    "rim_cells": 53,
+    "rim_pts_offscreen": 0,
+    "rim_pts_undecided": 0,
+    "round": "260824_v3w3_extbase_A",
+    "scene": "sceneH3",
+    "split": "test",
+    "surface_area_px": 47689,
+    "walk_cells": 98527,
+    "walk_regions": 19
+  },
+  "min_edge_dist_m": 11.2062,
+  "tier_hint": "H",
+  "undecided_len_px": 0.0
+}

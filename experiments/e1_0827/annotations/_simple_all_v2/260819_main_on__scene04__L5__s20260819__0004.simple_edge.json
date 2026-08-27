@@ -1,0 +1,295 @@
+{
+  "edge_len_px": 925.3733,
+  "edges": [
+    {
+      "edge_type": "구멍·참호형",
+      "enclosed": true,
+      "hidden_len_px": 0.0,
+      "occluder_prims": [],
+      "profile": {
+        "cum_descent_m": 0.481,
+        "first_step_m": 0.141,
+        "n_cells_profiled": 31,
+        "n_steps": 3.0
+      },
+      "px": [
+        [
+          46.6181,
+          847.755
+        ],
+        [
+          74.3949,
+          844.4693
+        ],
+        [
+          101.9374,
+          841.2113
+        ],
+        [
+          129.2487,
+          837.9807
+        ],
+        [
+          156.3317,
+          834.7771
+        ],
+        [
+          183.1893,
+          831.6001
+        ],
+        [
+          209.8241,
+          828.4495
+        ],
+        [
+          236.239,
+          825.3249
+        ],
+        [
+          262.4368,
+          822.226
+        ],
+        [
+          288.4199,
+          819.1524
+        ],
+        [
+          314.1912,
+          816.104
+        ],
+        [
+          339.7532,
+          813.0803
+        ],
+        [
+          365.1083,
+          810.081
+        ],
+        [
+          390.2592,
+          807.1059
+        ],
+        [
+          415.2083,
+          804.1547
+        ],
+        [
+          439.9579,
+          801.2271
+        ],
+        [
+          464.5105,
+          798.3228
+        ],
+        [
+          488.8684,
+          795.4415
+        ],
+        [
+          513.034,
+          792.583
+        ],
+        [
+          537.0094,
+          789.7469
+        ],
+        [
+          560.7969,
+          786.9331
+        ],
+        [
+          584.3988,
+          784.1413
+        ],
+        [
+          607.8172,
+          781.3711
+        ],
+        [
+          631.0542,
+          778.6224
+        ],
+        [
+          654.1119,
+          775.8949
+        ],
+        [
+          676.9924,
+          773.1884
+        ],
+        [
+          699.6978,
+          770.5026
+        ],
+        [
+          722.2299,
+          767.8373
+        ],
+        [
+          744.5909,
+          765.1922
+        ],
+        [
+          766.7826,
+          762.5672
+        ],
+        [
+          788.8069,
+          759.962
+        ]
+      ],
+      "undecided_len_px": 0.0,
+      "visible": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "visible_len_px": 747.3632
+    },
+    {
+      "edge_type": "구멍·참호형",
+      "enclosed": true,
+      "hidden_len_px": 0.0,
+      "occluder_prims": [],
+      "profile": {
+        "cum_descent_m": 0.306,
+        "first_step_m": 0.005,
+        "n_cells_profiled": 7,
+        "n_steps": 3.0
+      },
+      "px": [
+        [
+          12.9555,
+          892.1441
+        ],
+        [
+          43.069,
+          888.3975
+        ],
+        [
+          72.9088,
+          884.6849
+        ],
+        [
+          102.4785,
+          881.006
+        ],
+        [
+          131.7818,
+          877.3602
+        ],
+        [
+          160.8224,
+          873.747
+        ],
+        [
+          189.6037,
+          870.1662
+        ]
+      ],
+      "undecided_len_px": 0.0,
+      "visible": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "visible_len_px": 178.0101
+    }
+  ],
+  "frame": "260819_main_on__scene04__L5__s20260819__0004",
+  "h_hint": false,
+  "hidden_len_px": 0.0,
+  "mask_area_px": 334514,
+  "mask_version": "v2_surfaces",
+  "meta": {
+    "cam_ground_z_m": 0.0016,
+    "chain_len_px_sorted": [
+      178.0101,
+      747.3632
+    ],
+    "const_fingerprint": "2e6d7b4ed0bce9d1",
+    "depth_path": "dataset/v2_corpus/260819_main_on/train/scene04/L5__s20260819__0004.depth.npy",
+    "descent": {
+      "below_cells_total": 53331,
+      "below_px_not_painted": 389780,
+      "first_landing_z_m": -1.0665,
+      "footprint_area_m2": 133.3275,
+      "footprint_cells": 53331,
+      "landing_cells_in_footprint": 42985,
+      "lowest_landing_z_m": -1.45,
+      "mask_face_only_px": 46506,
+      "mask_face_px": 96061,
+      "mask_footprint_px": 288008,
+      "seed_cells": 451,
+      "stopped_second_descent_cells": 0,
+      "stopped_wall_cells": 824
+    },
+    "drop_line_z_m": -0.2978,
+    "edge_bridge_px": null,
+    "edge_to_below_gap_px": 0.0,
+    "file": "L5__s20260819__0004.png",
+    "foot_on_grid": false,
+    "foot_region_dist_m": 1.0701,
+    "foot_region_z_m": 0.0022,
+    "ground_z_m": 0.0022,
+    "ground_z_mismatch_m": 0.0006,
+    "ground_z_unmatched": false,
+    "hm_min_nonzero_dz_m": 0.0,
+    "hm_step_m": 0.05,
+    "idseg": "dataset/v2_corpus/260819_main_on/train/scene04/L5__s20260819__0004.idseg.npz",
+    "n_below_px_total": 690121,
+    "n_chains": 2,
+    "occlusion_margin_m": 0.0053,
+    "occlusion_margin_measured_on": "my_surface",
+    "occlusion_margin_n_px": 418155,
+    "occlusion_margin_pctl": 99,
+    "occlusion_tol_m": 0.0897,
+    "rdp_tol_px_display_only": 2.0,
+    "region_cells": 7196,
+    "rgb_path": "dataset/v2_corpus/260819_main_on/train/scene04/L5__s20260819__0004.png",
+    "rim_cells": 38,
+    "rim_pts_offscreen": 0,
+    "rim_pts_undecided": 0,
+    "round": "260819_main_on",
+    "scene": "scene04",
+    "split": "train",
+    "surface_area_px": 418155,
+    "walk_cells": 93907,
+    "walk_regions": 52
+  },
+  "min_edge_dist_m": 3.2763,
+  "tier_hint": "V",
+  "undecided_len_px": 0.0
+}

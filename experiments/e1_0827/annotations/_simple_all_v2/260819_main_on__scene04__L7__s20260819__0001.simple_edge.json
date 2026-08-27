@@ -1,0 +1,295 @@
+{
+  "edge_len_px": 1189.4567,
+  "edges": [
+    {
+      "edge_type": "구멍·참호형",
+      "enclosed": true,
+      "hidden_len_px": 0.0,
+      "occluder_prims": [],
+      "profile": {
+        "cum_descent_m": 0.481,
+        "first_step_m": 0.141,
+        "n_cells_profiled": 31,
+        "n_steps": 3.0
+      },
+      "px": [
+        [
+          502.9855,
+          970.402
+        ],
+        [
+          535.4296,
+          969.9991
+        ],
+        [
+          567.8712,
+          969.5963
+        ],
+        [
+          600.3103,
+          969.1935
+        ],
+        [
+          632.7468,
+          968.7907
+        ],
+        [
+          665.1807,
+          968.3879
+        ],
+        [
+          697.6121,
+          967.9852
+        ],
+        [
+          730.0409,
+          967.5825
+        ],
+        [
+          762.4672,
+          967.1798
+        ],
+        [
+          794.8909,
+          966.7772
+        ],
+        [
+          827.312,
+          966.3746
+        ],
+        [
+          859.7306,
+          965.972
+        ],
+        [
+          892.1467,
+          965.5695
+        ],
+        [
+          924.5602,
+          965.167
+        ],
+        [
+          956.9711,
+          964.7645
+        ],
+        [
+          989.3795,
+          964.3621
+        ],
+        [
+          1021.7853,
+          963.9596
+        ],
+        [
+          1054.1886,
+          963.5573
+        ],
+        [
+          1086.5893,
+          963.1549
+        ],
+        [
+          1118.9875,
+          962.7526
+        ],
+        [
+          1151.3831,
+          962.3503
+        ],
+        [
+          1183.7761,
+          961.9481
+        ],
+        [
+          1216.1667,
+          961.5458
+        ],
+        [
+          1248.5546,
+          961.1436
+        ],
+        [
+          1280.94,
+          960.7415
+        ],
+        [
+          1313.3229,
+          960.3394
+        ],
+        [
+          1345.7032,
+          959.9373
+        ],
+        [
+          1378.081,
+          959.5352
+        ],
+        [
+          1410.4562,
+          959.1332
+        ],
+        [
+          1442.8288,
+          958.7312
+        ],
+        [
+          1475.1989,
+          958.3292
+        ]
+      ],
+      "undecided_len_px": 0.0,
+      "visible": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "visible_len_px": 972.2884
+    },
+    {
+      "edge_type": "구멍·참호형",
+      "enclosed": true,
+      "hidden_len_px": 0.0,
+      "occluder_prims": [],
+      "profile": {
+        "cum_descent_m": 0.306,
+        "first_step_m": 0.005,
+        "n_cells_profiled": 7,
+        "n_steps": 3.0
+      },
+      "px": [
+        [
+          450.7907,
+          1049.0348
+        ],
+        [
+          486.9906,
+          1048.5818
+        ],
+        [
+          523.1872,
+          1048.1289
+        ],
+        [
+          559.3807,
+          1047.676
+        ],
+        [
+          595.571,
+          1047.2232
+        ],
+        [
+          631.7581,
+          1046.7704
+        ],
+        [
+          667.942,
+          1046.3176
+        ]
+      ],
+      "undecided_len_px": 0.0,
+      "visible": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "visible_len_px": 217.1683
+    }
+  ],
+  "frame": "260819_main_on__scene04__L7__s20260819__0001",
+  "h_hint": false,
+  "hidden_len_px": 0.0,
+  "mask_area_px": 602247,
+  "mask_version": "v2_surfaces",
+  "meta": {
+    "cam_ground_z_m": 0.0022,
+    "chain_len_px_sorted": [
+      217.1683,
+      972.2884
+    ],
+    "const_fingerprint": "2e6d7b4ed0bce9d1",
+    "depth_path": "dataset/v2_corpus/260819_main_on/train/scene04/L7__s20260819__0001.depth.npy",
+    "descent": {
+      "below_cells_total": 53331,
+      "below_px_not_painted": 427178,
+      "first_landing_z_m": -1.0665,
+      "footprint_area_m2": 133.3275,
+      "footprint_cells": 53331,
+      "landing_cells_in_footprint": 42985,
+      "lowest_landing_z_m": -1.45,
+      "mask_face_only_px": 142543,
+      "mask_face_px": 235306,
+      "mask_footprint_px": 459704,
+      "seed_cells": 451,
+      "stopped_second_descent_cells": 0,
+      "stopped_wall_cells": 824
+    },
+    "drop_line_z_m": -0.2978,
+    "edge_bridge_px": null,
+    "edge_to_below_gap_px": 0.0,
+    "file": "L7__s20260819__0001.png",
+    "foot_on_grid": true,
+    "foot_region_dist_m": 0.0,
+    "foot_region_z_m": 0.0022,
+    "ground_z_m": 0.0022,
+    "ground_z_mismatch_m": 0.0,
+    "ground_z_unmatched": false,
+    "hm_min_nonzero_dz_m": 0.0,
+    "hm_step_m": 0.05,
+    "idseg": "dataset/v2_corpus/260819_main_on/train/scene04/L7__s20260819__0001.idseg.npz",
+    "n_below_px_total": 936782,
+    "n_chains": 2,
+    "occlusion_margin_m": 0.0054,
+    "occlusion_margin_measured_on": "my_surface",
+    "occlusion_margin_n_px": 101559,
+    "occlusion_margin_pctl": 99,
+    "occlusion_tol_m": 0.0676,
+    "rdp_tol_px_display_only": 2.0,
+    "region_cells": 7196,
+    "rgb_path": "dataset/v2_corpus/260819_main_on/train/scene04/L7__s20260819__0001.png",
+    "rim_cells": 38,
+    "rim_pts_offscreen": 0,
+    "rim_pts_undecided": 0,
+    "round": "260819_main_on",
+    "scene": "scene04",
+    "split": "train",
+    "surface_area_px": 101559,
+    "walk_cells": 93907,
+    "walk_regions": 52
+  },
+  "min_edge_dist_m": 2.0177,
+  "tier_hint": "V",
+  "undecided_len_px": 0.0
+}

@@ -1,0 +1,354 @@
+{
+  "edge_len_px": 0.0,
+  "edges": [
+    {
+      "edge_type": "계단형",
+      "enclosed": false,
+      "hidden_len_px": 39.397,
+      "occluder_prims": [
+        "/World/SceneH3/BendWall/Along",
+        "/World/SceneH3/BendWall/Flank"
+      ],
+      "profile": {
+        "cum_descent_m": 0.72,
+        "first_step_m": 0.18,
+        "n_cells_profiled": 53,
+        "n_steps": 4.0
+      },
+      "px": [
+        [
+          40.5981,
+          358.4144
+        ],
+        [
+          36.6009,
+          359.6104
+        ],
+        [
+          32.5565,
+          360.8205
+        ],
+        [
+          28.4642,
+          362.0449
+        ],
+        [
+          24.3232,
+          363.284
+        ],
+        [
+          20.1324,
+          364.5379
+        ],
+        [
+          15.8911,
+          365.8069
+        ],
+        [
+          11.5983,
+          367.0914
+        ],
+        [
+          7.2531,
+          368.3915
+        ],
+        [
+          2.8544,
+          369.7077
+        ],
+        [
+          -1.5986,
+          371.04
+        ],
+        [
+          -6.1071,
+          372.389
+        ],
+        [
+          -10.6719,
+          373.7549
+        ],
+        [
+          -15.2943,
+          375.1379
+        ],
+        [
+          -19.9754,
+          376.5385
+        ],
+        [
+          -24.7161,
+          377.957
+        ],
+        [
+          -29.5177,
+          379.3937
+        ],
+        [
+          -34.3814,
+          380.849
+        ],
+        [
+          -39.3083,
+          382.3232
+        ],
+        [
+          -44.2998,
+          383.8167
+        ],
+        [
+          -49.3571,
+          385.3298
+        ],
+        [
+          -54.4814,
+          386.8631
+        ],
+        [
+          -59.6742,
+          388.4168
+        ],
+        [
+          -64.9368,
+          389.9915
+        ],
+        [
+          -70.2707,
+          391.5874
+        ],
+        [
+          -75.6773,
+          393.2051
+        ],
+        [
+          -81.158,
+          394.845
+        ],
+        [
+          -86.7145,
+          396.5076
+        ],
+        [
+          -92.3483,
+          398.1932
+        ],
+        [
+          -98.0611,
+          399.9026
+        ],
+        [
+          -103.8544,
+          401.636
+        ],
+        [
+          -109.7301,
+          403.394
+        ],
+        [
+          -115.6899,
+          405.1773
+        ],
+        [
+          -121.7356,
+          406.9862
+        ],
+        [
+          -127.8691,
+          408.8214
+        ],
+        [
+          -134.0922,
+          410.6834
+        ],
+        [
+          -140.4071,
+          412.5729
+        ],
+        [
+          -146.8157,
+          414.4904
+        ],
+        [
+          -153.3202,
+          416.4366
+        ],
+        [
+          -159.9226,
+          418.4121
+        ],
+        [
+          -166.6253,
+          420.4176
+        ],
+        [
+          -173.4305,
+          422.4538
+        ],
+        [
+          -180.3407,
+          424.5214
+        ],
+        [
+          -187.3582,
+          426.6211
+        ],
+        [
+          -194.4855,
+          428.7537
+        ],
+        [
+          -201.7253,
+          430.9199
+        ],
+        [
+          -209.0803,
+          433.1206
+        ],
+        [
+          -216.5532,
+          435.3566
+        ],
+        [
+          -224.1469,
+          437.6287
+        ],
+        [
+          -231.8643,
+          439.9378
+        ],
+        [
+          -239.7086,
+          442.2849
+        ],
+        [
+          -247.6827,
+          444.6708
+        ],
+        [
+          -255.7901,
+          447.0966
+        ]
+      ],
+      "undecided_len_px": 0.0,
+      "visible": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2
+      ],
+      "visible_len_px": 0.0
+    }
+  ],
+  "frame": "260824_v3w3_extbase_A__sceneH3__L5__s20260823__0003",
+  "h_hint": true,
+  "hidden_len_px": 39.397,
+  "mask_area_px": 0,
+  "mask_version": "v2_surfaces",
+  "meta": {
+    "cam_ground_z_m": 0.0,
+    "chain_len_px_sorted": [
+      39.397
+    ],
+    "const_fingerprint": "2e6d7b4ed0bce9d1",
+    "depth_path": "dataset/v3_test_ext/260824_v3w3_extbase_A/test/sceneH3/L5__s20260823__0003.depth.npy",
+    "descent": {
+      "below_cells_total": 5050,
+      "below_px_not_painted": 0,
+      "first_landing_z_m": -1.8,
+      "footprint_area_m2": 12.625,
+      "footprint_cells": 5050,
+      "landing_cells_in_footprint": 1946,
+      "lowest_landing_z_m": -1.8,
+      "mask_face_only_px": 0,
+      "mask_face_px": 0,
+      "mask_footprint_px": 0,
+      "seed_cells": 713,
+      "stopped_second_descent_cells": 0,
+      "stopped_wall_cells": 311
+    },
+    "drop_line_z_m": -0.3,
+    "edge_bridge_px": null,
+    "edge_to_below_gap_px": null,
+    "file": "L5__s20260823__0003.png",
+    "foot_on_grid": false,
+    "foot_region_dist_m": 4.9542,
+    "foot_region_z_m": 0.0,
+    "ground_z_m": 0.0,
+    "ground_z_mismatch_m": 0.0,
+    "ground_z_unmatched": false,
+    "hm_min_nonzero_dz_m": 0.002,
+    "hm_step_m": 0.05,
+    "idseg": "dataset/v3_test_ext/260824_v3w3_extbase_A/test/sceneH3/L5__s20260823__0003.idseg.npz",
+    "n_below_px_total": 0,
+    "n_chains": 1,
+    "occlusion_margin_m": 0.0004,
+    "occlusion_margin_measured_on": "my_surface",
+    "occlusion_margin_n_px": 124626,
+    "occlusion_margin_pctl": 99,
+    "occlusion_tol_m": 0.216,
+    "rdp_tol_px_display_only": 2.0,
+    "region_cells": 6752,
+    "rgb_path": "dataset/v3_test_ext/260824_v3w3_extbase_A/test/sceneH3/L5__s20260823__0003.png",
+    "rim_cells": 53,
+    "rim_pts_offscreen": 43,
+    "rim_pts_undecided": 0,
+    "round": "260824_v3w3_extbase_A",
+    "scene": "sceneH3",
+    "split": "test",
+    "surface_area_px": 124626,
+    "walk_cells": 98527,
+    "walk_regions": 19
+  },
+  "min_edge_dist_m": 7.2247,
+  "tier_hint": "H",
+  "undecided_len_px": 0.0
+}

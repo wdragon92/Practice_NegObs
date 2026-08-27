@@ -1,0 +1,351 @@
+{
+  "edge_len_px": 0.0,
+  "edges": [
+    {
+      "edge_type": "계단형",
+      "enclosed": false,
+      "hidden_len_px": 0.0,
+      "occluder_prims": [],
+      "profile": {
+        "cum_descent_m": 0.72,
+        "first_step_m": 0.18,
+        "n_cells_profiled": 53,
+        "n_steps": 4.0
+      },
+      "px": [
+        [
+          -719.7949,
+          645.9162
+        ],
+        [
+          -738.7486,
+          651.8434
+        ],
+        [
+          -758.2005,
+          657.9264
+        ],
+        [
+          -778.1704,
+          664.1714
+        ],
+        [
+          -798.6793,
+          670.5849
+        ],
+        [
+          -819.7492,
+          677.1739
+        ],
+        [
+          -841.4037,
+          683.9457
+        ],
+        [
+          -863.6672,
+          690.908
+        ],
+        [
+          -886.5659,
+          698.0688
+        ],
+        [
+          -910.1274,
+          705.437
+        ],
+        [
+          -934.3808,
+          713.0215
+        ],
+        [
+          -959.3571,
+          720.8321
+        ],
+        [
+          -985.0892,
+          728.879
+        ],
+        [
+          -1011.6117,
+          737.1731
+        ],
+        [
+          -1038.9617,
+          745.726
+        ],
+        [
+          -1067.1786,
+          754.55
+        ],
+        [
+          -1096.3043,
+          763.6582
+        ],
+        [
+          -1126.3833,
+          773.0645
+        ],
+        [
+          -1157.4632,
+          782.7838
+        ],
+        [
+          -1189.5949,
+          792.832
+        ],
+        [
+          -1222.8326,
+          803.2261
+        ],
+        [
+          -1257.2345,
+          813.9842
+        ],
+        [
+          -1292.8628,
+          825.1259
+        ],
+        [
+          -1329.7843,
+          836.672
+        ],
+        [
+          -1368.0707,
+          848.6449
+        ],
+        [
+          -1407.7991,
+          861.0688
+        ],
+        [
+          -1449.0525,
+          873.9695
+        ],
+        [
+          -1491.9205,
+          887.3752
+        ],
+        [
+          -1536.4997,
+          901.316
+        ],
+        [
+          -1582.8948,
+          915.8247
+        ],
+        [
+          -1631.2189,
+          930.9366
+        ],
+        [
+          -1681.5949,
+          946.6902
+        ],
+        [
+          -1734.1563,
+          963.1272
+        ],
+        [
+          -1789.0486,
+          980.2931
+        ],
+        [
+          -1846.4302,
+          998.2374
+        ],
+        [
+          -1906.4744,
+          1017.0144
+        ],
+        [
+          -1969.371,
+          1036.6834
+        ],
+        [
+          -2035.3281,
+          1057.3095
+        ],
+        [
+          -2104.5747,
+          1078.9643
+        ],
+        [
+          -2177.3632,
+          1101.7267
+        ],
+        [
+          -2253.9725,
+          1125.684
+        ],
+        [
+          -2334.7115,
+          1150.9327
+        ],
+        [
+          -2419.9234,
+          1177.5801
+        ],
+        [
+          -2509.9904,
+          1205.7459
+        ],
+        [
+          -2605.3397,
+          1235.5635
+        ],
+        [
+          -2706.4501,
+          1267.1827
+        ],
+        [
+          -2813.8598,
+          1300.7719
+        ],
+        [
+          -2928.1766,
+          1336.521
+        ],
+        [
+          -3050.0888,
+          1374.6453
+        ],
+        [
+          -3180.3794,
+          1415.3898
+        ],
+        [
+          -3319.9429,
+          1459.0341
+        ],
+        [
+          -3469.8056,
+          1505.8991
+        ],
+        [
+          -3631.1514,
+          1556.3552
+        ]
+      ],
+      "undecided_len_px": 0.0,
+      "visible": [
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2
+      ],
+      "visible_len_px": 0.0
+    }
+  ],
+  "frame": "260824_v3w3_extbase_A__sceneH3__L0__s20260823__0006",
+  "h_hint": false,
+  "hidden_len_px": 0.0,
+  "mask_area_px": 0,
+  "mask_version": "v2_surfaces",
+  "meta": {
+    "cam_ground_z_m": 0.0,
+    "chain_len_px_sorted": [
+      0.0
+    ],
+    "const_fingerprint": "2e6d7b4ed0bce9d1",
+    "depth_path": "dataset/v3_test_ext/260824_v3w3_extbase_A/test/sceneH3/L0__s20260823__0006.depth.npy",
+    "descent": {
+      "below_cells_total": 5050,
+      "below_px_not_painted": 0,
+      "first_landing_z_m": -1.8,
+      "footprint_area_m2": 12.625,
+      "footprint_cells": 5050,
+      "landing_cells_in_footprint": 1946,
+      "lowest_landing_z_m": -1.8,
+      "mask_face_only_px": 0,
+      "mask_face_px": 0,
+      "mask_footprint_px": 0,
+      "seed_cells": 713,
+      "stopped_second_descent_cells": 0,
+      "stopped_wall_cells": 311
+    },
+    "drop_line_z_m": -0.3,
+    "edge_bridge_px": null,
+    "edge_to_below_gap_px": null,
+    "file": "L0__s20260823__0006.png",
+    "foot_on_grid": false,
+    "foot_region_dist_m": 0.2275,
+    "foot_region_z_m": 0.0,
+    "ground_z_m": 0.0,
+    "ground_z_mismatch_m": 0.0,
+    "ground_z_unmatched": false,
+    "hm_min_nonzero_dz_m": 0.002,
+    "hm_step_m": 0.05,
+    "idseg": "dataset/v3_test_ext/260824_v3w3_extbase_A/test/sceneH3/L0__s20260823__0006.idseg.npz",
+    "n_below_px_total": 0,
+    "n_chains": 1,
+    "occlusion_margin_m": 0.0005,
+    "occlusion_margin_measured_on": "my_surface",
+    "occlusion_margin_n_px": 751319,
+    "occlusion_margin_pctl": 99,
+    "occlusion_tol_m": "정할 수 없음",
+    "rdp_tol_px_display_only": 2.0,
+    "region_cells": 6752,
+    "rgb_path": "dataset/v3_test_ext/260824_v3w3_extbase_A/test/sceneH3/L0__s20260823__0006.png",
+    "rim_cells": 53,
+    "rim_pts_offscreen": 53,
+    "rim_pts_undecided": 0,
+    "round": "260824_v3w3_extbase_A",
+    "scene": "sceneH3",
+    "split": "test",
+    "surface_area_px": 751319,
+    "walk_cells": 98527,
+    "walk_regions": 19
+  },
+  "min_edge_dist_m": 3.7441,
+  "tier_hint": "정할 수 없음",
+  "undecided_len_px": 0.0
+}

@@ -150,8 +150,8 @@ CONSTANTS = {
                                 "point at all). True = only instances with at least "
                                 "one in-frame projected point may own pixels. "
                                 "결재 (❓B-5).", (False, True)),
-    "RDP_TOL_PX": (2.0, "[방법]",
-                   "Douglas-Peucker tolerance when a visible run of projected edge "
+    "RDP_TOL_PX": (2.0, "[방법·표시전용]",
+                   "DRAWING ONLY in the simple labeler: the stored polyline is the pixel-exact rim and this tolerance is applied only when the line is stroked, so no measured number depends on it. In route (a): Douglas-Peucker tolerance when a visible run of projected edge "
                    "points is reduced to polyline_px. Storage compaction only; the "
                    "measured numbers (dist_m, src_disagree_px) use the unsimplified "
                    "points.", (1.0, 2.0, 4.0)),
@@ -239,10 +239,6 @@ CONSTANTS = {
                     "60 m probe top already used to build the heightmap "
                     "(variation_kit.AabbPrefilter.ground_z(top=60.0)).",
                     (30.0, 60.0, 120.0)),
-    "MIN_EDGE_PX": (30, "[방법]",
-                    "a traced danger-edge polyline shorter than this many pixels of "
-                    "chain length is speckle and is dropped. Image-space sibling of "
-                    "MIN_INSTANCE_LEN_M.", (15, 30, 60)),
     "EDGE_BRIDGE_PX": (5, "[방법]",
                        "the danger edge is dilated by this many 3x3 steps (Chebyshev "
                        "radius, px) before asking which below-the-drop components "
@@ -257,28 +253,138 @@ CONSTANTS = {
                         "scale a DROP_MIN_M riser actually subtends in this corpus "
                         "(32-80 px, measured). Report-only: the shipped labels always "
                         "use EDGE_BRIDGE_PX.", None),
-    "SIMPLE_SEED_STRIP_FRAC": (0.08, "[방법]",
-                               "height of the bottom strip, as a fraction of the "
-                               "frame, searched for the pixels the camera is standing "
-                               "on.", (0.04, 0.08, 0.15)),
-    "SIMPLE_SEED_HALF_W_FRAC": (0.15, "[방법]",
-                                "half-width of the bottom-centre seed patch, as a "
-                                "fraction of the frame width.",
-                                (0.08, 0.15, 0.30)),
-    "SIMPLE_EDGE_RGB": ([255, 120, 0], "[방법]",
-                        "the ONE colour of the danger edge on the simple overlay, "
-                        "8-bit RGB. Orange, as requested. Cosmetic.", None),
-    "SIMPLE_MASK_RGB": ([220, 30, 30], "[방법]",
-                        "drop-mask fill colour on the simple overlay. Cosmetic.",
+    "MASK_VERSION_DEFAULT": ("v2_surfaces", "[방법]",
+                             "which drop-mask definition simple_edge.py writes when "
+                             "--mask is not given. 'v1_below' = every visible pixel "
+                             "below ground_z - DROP_MIN_M whose image component "
+                             "touches the dilated edge (the REJECTED definition: on "
+                             "scene18 it painted the beach AND the sea to the "
+                             "horizon). 'v2_surfaces' = the surfaces you would land "
+                             "on -- the heightmap descent footprint plus the steep "
+                             "faces attached to it. v1 stays reachable behind the "
+                             "flag so the two can be regenerated side by side.",
+                             ("v1_below", "v2_surfaces")),
+    "RAMP_MAX_SLOPE": (1.0 / 12.0, "[문헌]",
+                       "the steepest gradient a pedestrian surface may have and "
+                       "still be a walking surface rather than a face you fall "
+                       "against. VERIFIED SOURCE: 장애인·노인·임산부 등의 편의증진 "
+                       "보장에 관한 법률 시행규칙 [별표 1] 제12호 나목 (1) -- "
+                       "'경사로의 기울기는 12분의 1 이하로 하여야 한다' "
+                       "(보건복지부령 제1166호, 시행 2026-07-02; text read from the "
+                       "법제처 국가법령정보 Open API and cross-checked against the "
+                       "official 별표1 PDF on law.go.kr). Same 별표 나목 (2) allows "
+                       "1/8 only when THREE conditions all hold (existing "
+                       "non-new-build, height <= 1 m AND structurally infeasible at "
+                       "1/12, permanent staff assistance) -- an exception for "
+                       "retrofits, so the labeler uses the 1/12 ceiling. Repo copy: "
+                       "Docs/surveys/cue_arrangement_survey.md:144,148. This is the "
+                       "ONLY slope number the simple labeler uses -- 'walkable "
+                       "level' is at or under it and a 'steep face' is anything "
+                       "over it, so there is no second, invented threshold. It "
+                       "replaces the labeler's earlier use of WALK_FLAT_TOL_M, an "
+                       "invented 0.10 m height tolerance that admitted the top "
+                       "0.10 m of a vertical wall and put the sceneD2 danger line "
+                       "10 cm down the trench face.", None),
+    "LANDING_MIN_M": (1.20, "[문헌]",
+                      "the shortest level plateau that counts as a LANDING rather "
+                      "than a tread, and so ends a descent. VERIFIED SOURCE: "
+                      "건축물의 피난·방화구조 등의 기준에 관한 규칙 제15조 제1항 "
+                      "제1호 -- '높이가 3미터를 넘는 계단에는 높이 3미터이내마다 "
+                      "유효너비 120센티미터 이상의 계단참을 설치할 것' "
+                      "(국토교통부령 제1531호, 2025-10-31). PRECISION THE LEDGER "
+                      "MUST CARRY: the statute's word is 유효너비, not 깊이; that "
+                      "120 cm is the dimension ALONG THE DIRECTION OF TRAVEL is "
+                      "법제처 법령해석 안건번호 24-0424 (2024-07-09), "
+                      "'계단참의 유효너비란 계단의 진행방향으로서의 길이를 말하는 "
+                      "것으로 전제함' -- an official interpretation adopted for that "
+                      "case, not statutory wording. Repo copies: "
+                      "Docs/surveys/korean_pedestrian_geometry.md:160,169 and "
+                      "Docs/surveys/_dimension_index.md:18 (whose '주택단지 2 m' is "
+                      "mis-attributed to the same 규칙; it is 주택건설기준 등에 관한 "
+                      "규정 제16조 제2항 제1호, triggered at 높이 2 m). Context, not "
+                      "the criterion: 편의증진법 시행규칙 별표1 제8호 다목 puts "
+                      "디딤판 >= 0.28 m and 챌면 <= 0.18 m, so a tread can never "
+                      "reach 1.20 m and a flight can never be mistaken for a "
+                      "landing.", None),
+    "OCCL_MARGIN_PCTL": (99, "[실측]",
+                         "the occlusion test needs to know how far the rendered "
+                         "depth may legitimately differ from the geometry before a "
+                         "difference means 'something is standing in front'. That "
+                         "number is NOT invented and NOT fixed: it is MEASURED per "
+                         "frame as this percentile of |rendered depth - depth of "
+                         "the plane z = ground_z| over the pixels of my_surface, "
+                         "whose geometry is known exactly. The measured metres are "
+                         "printed and stored per frame in meta.occlusion_margin_m; "
+                         "only the percentile is fixed here, so one frame's sensor "
+                         "noise cannot leak into another frame's decision. A frame "
+                         "with no my_surface to measure on records 정할 수 없음 and "
+                         "leaves its rim points undecided rather than guessing.",
+                         None),
+    "FOOTPRINT_CONN": (4, "[방법]",
+                       "connectivity of the descent flood fill on the heightmap. 4 "
+                       "(edge-adjacent) rather than 8: a fill that may cross at a "
+                       "corner leaks through single-cell diagonal gaps in a rim, and "
+                       "the footprint is meant to be where poured water would go.",
+                       (4, 8)),
+    "SHEET_V2_LABEL_PX": (34, "[방법]",
+                          "scene-name text size on the v2 contact sheet. 22 px "
+                          "(SHEET_LABEL_PX) is 3.4% of a 640 px tile and was not "
+                          "readable at review distance. Cosmetic.", None),
+    "SHEET_V2_MAX_MB": (1.0, "[방법]",
+                        "size budget for sheet_v2.jpg; the achieved size is printed "
+                        "and checked against it.", None),
+    "CROP_ZOOM_PX": (480, "[방법]",
+                     "side of the 1:1 (unscaled) crop used to show a rim corner at "
+                     "full resolution on the v1-vs-v2 comparison sheet. Evidence "
+                     "only; no label depends on it.", None),
+    "RISER_MAX_M": (0.20, "[문헌]",
+                    "the tallest single step that may still be a STAIR rather than "
+                    "a cliff, used only to type an edge. VERIFIED SOURCE: 주택건설 "
+                    "기준 등에 관한 규정 제16조 제1항 -- 건축물의 옥외계단 단높이 "
+                    "20센티미터 이하 (공동으로 사용하는 계단은 18 이하). Repo copy, "
+                    "checked verbatim against law.go.kr: "
+                    "Docs/surveys/korean_pedestrian_geometry.md:186-191 and "
+                    "Docs/surveys/_dimension_index.md:19. The OUTDOOR maximum is "
+                    "used because this corpus is outdoor and it is the more "
+                    "permissive of the two -- a legal outdoor flight must not be "
+                    "typed as a cliff.", None),
+    "EDGE_RGB_STAIR": ([255, 220, 0], "[방법·표시전용]",
+                       "계단형 edge colour, 8-bit RGB (yellow).", None),
+    "EDGE_RGB_DROPOFF": ([0, 255, 255], "[방법·표시전용]",
+                         "절벽·단차형 edge colour, 8-bit RGB (cyan).", None),
+    "EDGE_RGB_HOLE": ([255, 120, 0], "[방법·표시전용]",
+                      "구멍·참호형 edge colour, 8-bit RGB (orange).", None),
+    "EDGE_RGB_UNKNOWN": ([255, 255, 255], "[방법·표시전용]",
+                         "colour of an edge whose type the ground profile does not "
+                         "determine (white). Nothing is forced into a class.",
+                         None),
+    "SIMPLE_EDGE_HALO_RGB": ([0, 0, 0], "[방법·표시전용]",
+                             "colour of the halo stroked under the rim line so cyan "
+                             "reads on pale pavement as well as on dark water.",
+                             None),
+    "SIMPLE_EDGE_HALO_PX": (1, "[방법·표시전용]",
+                            "how many pixels the halo extends beyond the rim line "
+                            "on each side.", None),
+    "SIMPLE_HIDDEN_LINE_PX": (2, "[방법·표시전용]",
+                              "stroke width of the HIDDEN (occluded) rim, thinner "
+                              "than the visible rim so the two never read alike.",
+                              None),
+    "SIMPLE_HIDDEN_DASH_PX": (6, "[방법·표시전용]",
+                              "dash length of the hidden-rim dotted line.", None),
+    "SIMPLE_HIDDEN_GAP_PX": (6, "[방법·표시전용]",
+                             "gap length of the hidden-rim dotted line.", None),
+    "SIMPLE_MASK_RGB": ([255, 0, 200], "[방법·표시전용]",
+                        "drop-mask fill colour on the simple overlay. MAGENTA, far "
+                        "enough from the cyan rim line to be separable at a glance.",
                         None),
-    "SIMPLE_MASK_OUTLINE_RGB": ([110, 0, 0], "[방법]",
-                                "thin dark-red outline drawn on the drop mask so its "
-                                "extent is readable over red-brick pavement. "
-                                "Cosmetic.", None),
-    "SIMPLE_MASK_ALPHA": (0.35, "[방법]",
+    "SIMPLE_MASK_OUTLINE_RGB": ([110, 0, 90], "[방법·표시전용]",
+                                "thin dark-magenta outline drawn on the drop mask so "
+                                "its extent is readable over pale sand and pale "
+                                "pavement alike.", None),
+    "SIMPLE_MASK_ALPHA": (0.35, "[방법·표시전용]",
                           "opacity of the drop-mask fill, so the pavement texture "
                           "under it stays visible for judging. Cosmetic.", None),
-    "SIMPLE_CAPTION_PX": (26, "[방법]",
+    "SIMPLE_CAPTION_PX": (26, "[방법·표시전용]",
                           "caption text size on the simple overlay. The 18 px of "
                           "OVERLAY_FONT_PX was unreadable in the rejected smoke "
                           "overlay once scaled to a contact sheet. Cosmetic.", None),
@@ -407,12 +513,26 @@ CENSUS_TOP_N = value("CENSUS_TOP_N")
 SHA_PREFIX_LEN = value("SHA_PREFIX_LEN")
 SENS_FRAME_COL = value("SENS_FRAME_COL")
 DEPTH_MAX_M = value("DEPTH_MAX_M")
-MIN_EDGE_PX = value("MIN_EDGE_PX")
 EDGE_BRIDGE_PX = value("EDGE_BRIDGE_PX")
 BRIDGE_SWEEP_PX = value("BRIDGE_SWEEP_PX")
-SIMPLE_SEED_STRIP_FRAC = value("SIMPLE_SEED_STRIP_FRAC")
-SIMPLE_SEED_HALF_W_FRAC = value("SIMPLE_SEED_HALF_W_FRAC")
-SIMPLE_EDGE_RGB = value("SIMPLE_EDGE_RGB")
+MASK_VERSION_DEFAULT = value("MASK_VERSION_DEFAULT")
+FOOTPRINT_CONN = value("FOOTPRINT_CONN")
+OCCL_MARGIN_PCTL = value("OCCL_MARGIN_PCTL")
+RAMP_MAX_SLOPE = value("RAMP_MAX_SLOPE")
+LANDING_MIN_M = value("LANDING_MIN_M")
+SIMPLE_EDGE_HALO_RGB = value("SIMPLE_EDGE_HALO_RGB")
+SIMPLE_EDGE_HALO_PX = value("SIMPLE_EDGE_HALO_PX")
+SIMPLE_HIDDEN_LINE_PX = value("SIMPLE_HIDDEN_LINE_PX")
+SIMPLE_HIDDEN_DASH_PX = value("SIMPLE_HIDDEN_DASH_PX")
+SIMPLE_HIDDEN_GAP_PX = value("SIMPLE_HIDDEN_GAP_PX")
+SHEET_V2_LABEL_PX = value("SHEET_V2_LABEL_PX")
+SHEET_V2_MAX_MB = value("SHEET_V2_MAX_MB")
+CROP_ZOOM_PX = value("CROP_ZOOM_PX")
+RISER_MAX_M = value("RISER_MAX_M")
+EDGE_RGB_STAIR = value("EDGE_RGB_STAIR")
+EDGE_RGB_DROPOFF = value("EDGE_RGB_DROPOFF")
+EDGE_RGB_HOLE = value("EDGE_RGB_HOLE")
+EDGE_RGB_UNKNOWN = value("EDGE_RGB_UNKNOWN")
 SIMPLE_MASK_RGB = value("SIMPLE_MASK_RGB")
 SIMPLE_MASK_OUTLINE_RGB = value("SIMPLE_MASK_OUTLINE_RGB")
 SIMPLE_MASK_ALPHA = value("SIMPLE_MASK_ALPHA")

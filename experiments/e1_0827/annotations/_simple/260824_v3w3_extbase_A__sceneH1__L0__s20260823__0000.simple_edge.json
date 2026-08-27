@@ -1,0 +1,32 @@
+{
+  "edge_len_px": 0.0,
+  "edges": [],
+  "frame": "260824_v3w3_extbase_A__sceneH1__L0__s20260823__0000",
+  "mask_area_px": 0,
+  "meta": {
+    "boundary_px": 4353,
+    "boundary_px_no_direction": 2326,
+    "const_fingerprint": "da937f4a3f98f688",
+    "depth_path": "dataset/v3_test_ext/260824_v3w3_extbase_A/test/sceneH1/L0__s20260823__0000.depth.npy",
+    "drop_line_z_m": 0.6975,
+    "edge_bridge_px": 5,
+    "edge_px_kept": 0,
+    "edge_to_below_gap_px": null,
+    "file": "L0__s20260823__0000.png",
+    "ground_z_m": 0.9975,
+    "hm_step_m": 0.05,
+    "n_below_px_total": 145631,
+    "n_flat_components": 14,
+    "n_polylines": 0,
+    "polylines_dropped_short": 0,
+    "rgb_path": "dataset/v3_test_ext/260824_v3w3_extbase_A/test/sceneH1/L0__s20260823__0000.png",
+    "round": "260824_v3w3_extbase_A",
+    "scene": "sceneH1",
+    "seed_centre_area_px": 393673,
+    "split": "test",
+    "surface_area_px": 393673,
+    "surface_seed_branch": "bottom_strip"
+  },
+  "min_edge_dist_m": null,
+  "tier_hint": "NEG"
+}

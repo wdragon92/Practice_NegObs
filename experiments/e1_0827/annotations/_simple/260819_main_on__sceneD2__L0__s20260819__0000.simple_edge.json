@@ -1,0 +1,115 @@
+{
+  "edge_len_px": 2201.1851,
+  "edges": [
+    [
+      [
+        177,
+        1079
+      ],
+      [
+        533,
+        657
+      ],
+      [
+        540,
+        650
+      ],
+      [
+        547,
+        649
+      ],
+      [
+        1211,
+        638
+      ],
+      [
+        1445,
+        1001
+      ]
+    ],
+    [
+      [
+        1495,
+        1079
+      ],
+      [
+        1461,
+        1026
+      ],
+      [
+        1467,
+        933
+      ]
+    ],
+    [
+      [
+        42,
+        1079
+      ],
+      [
+        21,
+        946
+      ],
+      [
+        21,
+        939
+      ],
+      [
+        25,
+        936
+      ]
+    ],
+    [
+      [
+        1586,
+        965
+      ],
+      [
+        1468,
+        906
+      ],
+      [
+        1458,
+        904
+      ]
+    ],
+    [
+      [
+        1525,
+        755
+      ],
+      [
+        1531,
+        664
+      ]
+    ]
+  ],
+  "frame": "260819_main_on__sceneD2__L0__s20260819__0000",
+  "mask_area_px": 0,
+  "meta": {
+    "boundary_px": 9334,
+    "boundary_px_no_direction": 1871,
+    "const_fingerprint": "da937f4a3f98f688",
+    "depth_path": "dataset/v2_corpus/260819_main_on/train/sceneD2/L0__s20260819__0000.depth.npy",
+    "drop_line_z_m": -0.3,
+    "edge_bridge_px": 5,
+    "edge_px_kept": 2901,
+    "edge_to_below_gap_px": 44.1022,
+    "file": "L0__s20260819__0000.png",
+    "ground_z_m": 0.0,
+    "hm_step_m": 0.05,
+    "n_below_px_total": 307820,
+    "n_flat_components": 3,
+    "n_polylines": 5,
+    "polylines_dropped_short": 51,
+    "rgb_path": "dataset/v2_corpus/260819_main_on/train/sceneD2/L0__s20260819__0000.png",
+    "round": "260819_main_on",
+    "scene": "sceneD2",
+    "seed_centre_area_px": 5045,
+    "split": "train",
+    "surface_area_px": 960320,
+    "surface_seed_branch": "bottom_strip"
+  },
+  "min_edge_dist_m": 1.6899,
+  "tier_hint": "E"
+}

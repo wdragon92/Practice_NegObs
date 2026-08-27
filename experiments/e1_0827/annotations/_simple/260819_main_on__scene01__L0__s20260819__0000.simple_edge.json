@@ -1,0 +1,71 @@
+{
+  "edge_len_px": 2129.534,
+  "edges": [
+    [
+      [
+        1919,
+        520
+      ],
+      [
+        74,
+        430
+      ],
+      [
+        69,
+        427
+      ],
+      [
+        66,
+        355
+      ],
+      [
+        51,
+        356
+      ],
+      [
+        54,
+        428
+      ],
+      [
+        13,
+        427
+      ],
+      [
+        4,
+        425
+      ],
+      [
+        0,
+        358
+      ]
+    ]
+  ],
+  "frame": "260819_main_on__scene01__L0__s20260819__0000",
+  "mask_area_px": 165258,
+  "meta": {
+    "boundary_px": 5435,
+    "boundary_px_no_direction": 3198,
+    "const_fingerprint": "da937f4a3f98f688",
+    "depth_path": "dataset/v2_corpus/260819_main_on/val/scene01/L0__s20260819__0000.depth.npy",
+    "drop_line_z_m": -0.3,
+    "edge_bridge_px": 5,
+    "edge_px_kept": 2237,
+    "edge_to_below_gap_px": 1.0,
+    "file": "L0__s20260819__0000.png",
+    "ground_z_m": -0.0,
+    "hm_step_m": 0.05,
+    "n_below_px_total": 165668,
+    "n_flat_components": 257,
+    "n_polylines": 1,
+    "polylines_dropped_short": 0,
+    "rgb_path": "dataset/v2_corpus/260819_main_on/val/scene01/L0__s20260819__0000.png",
+    "round": "260819_main_on",
+    "scene": "scene01",
+    "seed_centre_area_px": 1167163,
+    "split": "val",
+    "surface_area_px": 1167163,
+    "surface_seed_branch": "bottom_strip"
+  },
+  "min_edge_dist_m": 3.2504,
+  "tier_hint": "V"
+}

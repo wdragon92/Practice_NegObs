@@ -228,6 +228,82 @@ CONSTANTS = {
                          "frame is routed to the unresolved list. Populating it is "
                          "결재 (❓B-4).", None),
 
+    # ---- simple_edge.py: the SIMPLE labeler ------------------------------ #
+    # Reuses DROP_MIN_M (0.30 [문헌·기존 확정]), R_RUN_M (1.0 [기존값]),
+    # WALK_FLAT_TOL_M (0.10 [임시-결재대기], the spec's FLAT_TOL_M) and
+    # RDP_TOL_PX (2.0 [방법]). Only what the simple labeler adds is below.
+    "DEPTH_MAX_M": (60.0, "[방법]",
+                    "depth pixels farther than this are dropped before the flat / "
+                    "below tests, so the surface component cannot run to the horizon "
+                    "and a 0.10 m flatness tolerance stays meaningful. Matches the "
+                    "60 m probe top already used to build the heightmap "
+                    "(variation_kit.AabbPrefilter.ground_z(top=60.0)).",
+                    (30.0, 60.0, 120.0)),
+    "MIN_EDGE_PX": (30, "[방법]",
+                    "a traced danger-edge polyline shorter than this many pixels of "
+                    "chain length is speckle and is dropped. Image-space sibling of "
+                    "MIN_INSTANCE_LEN_M.", (15, 30, 60)),
+    "EDGE_BRIDGE_PX": (5, "[방법]",
+                       "the danger edge is dilated by this many 3x3 steps (Chebyshev "
+                       "radius, px) before asking which below-the-drop components "
+                       "touch it. The dilation exists to bridge the RISER, which "
+                       "belongs to neither the standing surface nor the drop floor.",
+                       (2, 5, 10)),
+    "BRIDGE_SWEEP_PX": ([2, 5, 10, 20, 40, 80], "[방법]",
+                        "EDGE_BRIDGE_PX values that --bridge-sweep re-runs the six "
+                        "review frames at, so the effect of the running value on "
+                        "mask_area_px is MEASURED and printed instead of argued. "
+                        "Spans the ledger alternatives (2 / 5 / 10) and the pixel "
+                        "scale a DROP_MIN_M riser actually subtends in this corpus "
+                        "(32-80 px, measured). Report-only: the shipped labels always "
+                        "use EDGE_BRIDGE_PX.", None),
+    "SIMPLE_SEED_STRIP_FRAC": (0.08, "[방법]",
+                               "height of the bottom strip, as a fraction of the "
+                               "frame, searched for the pixels the camera is standing "
+                               "on.", (0.04, 0.08, 0.15)),
+    "SIMPLE_SEED_HALF_W_FRAC": (0.15, "[방법]",
+                                "half-width of the bottom-centre seed patch, as a "
+                                "fraction of the frame width.",
+                                (0.08, 0.15, 0.30)),
+    "SIMPLE_EDGE_RGB": ([255, 120, 0], "[방법]",
+                        "the ONE colour of the danger edge on the simple overlay, "
+                        "8-bit RGB. Orange, as requested. Cosmetic.", None),
+    "SIMPLE_MASK_RGB": ([220, 30, 30], "[방법]",
+                        "drop-mask fill colour on the simple overlay. Cosmetic.",
+                        None),
+    "SIMPLE_MASK_OUTLINE_RGB": ([110, 0, 0], "[방법]",
+                                "thin dark-red outline drawn on the drop mask so its "
+                                "extent is readable over red-brick pavement. "
+                                "Cosmetic.", None),
+    "SIMPLE_MASK_ALPHA": (0.35, "[방법]",
+                          "opacity of the drop-mask fill, so the pavement texture "
+                          "under it stays visible for judging. Cosmetic.", None),
+    "SIMPLE_CAPTION_PX": (26, "[방법]",
+                          "caption text size on the simple overlay. The 18 px of "
+                          "OVERLAY_FONT_PX was unreadable in the rejected smoke "
+                          "overlay once scaled to a contact sheet. Cosmetic.", None),
+    "SIMPLE_FONT_PATH": ("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+                         "[도구기본값]",
+                         "the system Noto CJK face used for the overlay caption and "
+                         "the contact-sheet labels; PIL's bitmap default is unreadable "
+                         "at 1920 px. Falls back to load_default() if absent.", None),
+    "SHEET_TILE_W_PX": (640, "[방법]",
+                        "width of one contact-sheet tile in pixels; 3 x 640 = 1920 px "
+                        "wide, which is one screen.", None),
+    "SHEET_JPEG_QUALITY": (85, "[방법]",
+                           "JPEG quality of the contact sheet. Cosmetic.", None),
+    "SHEET_LABEL_PX": (22, "[방법]",
+                       "scene-name text size printed above each contact-sheet tile. "
+                       "Cosmetic.", None),
+    "SHEET_BG_RGB": ([18, 18, 18], "[방법]",
+                     "contact-sheet background, dark so the bright plaza tiles read "
+                     "as separate panels. Cosmetic.", None),
+    "SHEET_MAX_MB": (1.5, "[방법]",
+                     "size budget for contact_sheet.jpg; the achieved size is "
+                     "printed and checked against it.", None),
+    "BYTES_PER_MB": (1048576, "[도구기본값]",
+                     "1 MiB, the unit the printed file sizes use.", None),
+
     # ---- cosmetics / plumbing (no effect on any measured number) ---------- #
     "OVERLAY_LINE_PX": (3, "[방법]", "overlay stroke width. Cosmetic.", None),
     "OVERLAY_FONT_PX": (18, "[방법]", "overlay annotation text size. Cosmetic.", None),
@@ -330,6 +406,24 @@ PRINT_DP_SHORT = value("PRINT_DP_SHORT")
 CENSUS_TOP_N = value("CENSUS_TOP_N")
 SHA_PREFIX_LEN = value("SHA_PREFIX_LEN")
 SENS_FRAME_COL = value("SENS_FRAME_COL")
+DEPTH_MAX_M = value("DEPTH_MAX_M")
+MIN_EDGE_PX = value("MIN_EDGE_PX")
+EDGE_BRIDGE_PX = value("EDGE_BRIDGE_PX")
+BRIDGE_SWEEP_PX = value("BRIDGE_SWEEP_PX")
+SIMPLE_SEED_STRIP_FRAC = value("SIMPLE_SEED_STRIP_FRAC")
+SIMPLE_SEED_HALF_W_FRAC = value("SIMPLE_SEED_HALF_W_FRAC")
+SIMPLE_EDGE_RGB = value("SIMPLE_EDGE_RGB")
+SIMPLE_MASK_RGB = value("SIMPLE_MASK_RGB")
+SIMPLE_MASK_OUTLINE_RGB = value("SIMPLE_MASK_OUTLINE_RGB")
+SIMPLE_MASK_ALPHA = value("SIMPLE_MASK_ALPHA")
+SIMPLE_CAPTION_PX = value("SIMPLE_CAPTION_PX")
+SIMPLE_FONT_PATH = value("SIMPLE_FONT_PATH")
+SHEET_TILE_W_PX = value("SHEET_TILE_W_PX")
+SHEET_JPEG_QUALITY = value("SHEET_JPEG_QUALITY")
+SHEET_LABEL_PX = value("SHEET_LABEL_PX")
+SHEET_BG_RGB = value("SHEET_BG_RGB")
+SHEET_MAX_MB = value("SHEET_MAX_MB")
+BYTES_PER_MB = value("BYTES_PER_MB")
 
 HM_SOURCE_NOTE = (
     "heightmap.npy = variation_kit.AabbPrefilter.ground_z(top=60.0): the first "
